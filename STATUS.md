@@ -1,5 +1,5 @@
 # 项目状态 (Project Status)
-> 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。
+> 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。 本轮交付分支 `codex/cockpit-ui-ux-ship` 基于公开仓库 `origin/main` / `106717e6`，仅移植驾驶舱候选，不带入旧私有历史；原 `codex/cockpit-ui-ux` 工作树保留。包含可恢复删除、标题精简、整个面板移动/缩放、全屏与静态 HTML 选区编辑；已完成复审修复及合成验证；按用户选择补充真实模型选区评估，通过后创建 PR。尚未推送、合并或切换现役，真实模型及用户文件 UAT 未验收，产品仍 PARTIAL。详见[本轮记录](docs/hackathon/COCKPIT-UI-UX-2026-09-20.md)。
 
 ## 当前快照（2026-09-20，图谱接入）
 
@@ -7,7 +7,7 @@
 |---|---|
 | 本地 Git 基线 | **96ba94a（新公开仓库 #11）**，来源旧仓库 `7c20bc4f`（#217）；旧历史保留本地。 |
 | 本轮交付 | CRM 指标 #11 已合入 `96ba94a`，CI 与合成 HTTP/宿主验收通过；依赖升级联合候选及 TypeScript 7 阻断见[收尾记录](docs/maintenance/dependency-closeout-2026-09-20.md)，尚未切现役。 |
-| VERSION / 产品 | **0.12.0.0**，独立 CRM 指标、知识与原生对话登录候选；产品仍 **PARTIAL**，原全量 Goal **PAUSED**。loopback，不上公网。 |
+| VERSION / 产品 | **0.13.0.0**，驾驶舱交互与静态 HTML 选区编辑候选；产品仍 **PARTIAL**，原全量 Goal **PAUSED**。loopback，不上公网。 |
 | DSH 基座 | **0.1.6-alpha.2（ddefc45f）**，不改上游。 |
 | 现役 | 6677已接CRM登录与GSV，真实模型GSV及文档检索已通过；首次图谱接入仅更新CRM preset，MiniMax实际调用通过。切主仓、保留历史的重启及清理按本机部署回执分别验收。 |
 | 原始数据 | 约131GB归档DuckDB不进Git，不复制、改写或全表扫描；本轮新测试使用合成夹具，真实图谱仅查询已部署教材。 |
