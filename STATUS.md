@@ -1,12 +1,12 @@
 # 项目状态 (Project Status)
-> 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。 本轮交付分支 `codex/cockpit-ui-ux-ship` 基于公开仓库 `origin/main` / `481f2f0`，仅移植驾驶舱候选，不带入旧私有历史；原 `codex/cockpit-ui-ux` 工作树保留。包含可恢复删除、标题精简、整个面板移动/缩放、全屏与静态 HTML 选区编辑；已完成复审修复及合成验证；原生 MiniMax-M3 五项合成选区评估通过，主线集成检查已通过，最终 B0 复验已通过，正常推送后创建 PR。尚未推送、合并或切换现役，完整宿主与用户文件 UAT 未验收，产品仍 PARTIAL。详见[本轮记录](docs/hackathon/COCKPIT-UI-UX-2026-09-20.md)。
+> 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。 本轮交付分支 `codex/cockpit-ui-ux-ship` 基于公开仓库 `origin/main` / `481f2f0`，仅移植驾驶舱候选，不带入旧私有历史；原 `codex/cockpit-ui-ux` 工作树保留。包含可恢复删除、标题精简、整个面板移动/缩放、全屏与静态 HTML 选区编辑；已完成复审修复及合成验证；原生 MiniMax-M3 五项合成选区评估通过，主线集成检查已通过，最终 B0 复验与本公开工作树正常 pre-push 已通过，代码 `7836547` 已推送，待创建 PR。尚未合并或切换本轮候选至现役，完整宿主与用户文件 UAT 未验收，产品仍 PARTIAL。详见[本轮记录](docs/hackathon/COCKPIT-UI-UX-2026-09-20.md)。
 
 ## 当前快照（2026-09-21，CRM 分析持久化）
 
 | 项 | 状态 |
 |---|---|
 | 本地 Git 基线 | **481f2f0（新公开仓库 #35；代码 #34）**；驾驶舱候选分支 `codex/cockpit-ui-ux-ship`，旧历史及原候选保留。 |
-| 本轮交付 | #34 已合入可信 CRM 快照、保存分析与驾驶舱引用，见[交付记录](docs/crm-calibration/crm-assets-release-2026-09-21.md)。本分支叠加驾驶舱 UI / UX 与原生模型选区评估，后端 2834 passed / 77 skipped、完整 B0 通过；最终提示文案 B0 复验通过，正常推送后交 PR。 |
+| 本轮交付 | #34 已合入可信 CRM 快照、保存分析与驾驶舱引用，见[交付记录](docs/crm-calibration/crm-assets-release-2026-09-21.md)。本分支叠加驾驶舱 UI / UX 与原生模型选区评估，后端 2834 passed / 77 skipped、完整 B0 通过；最终提示文案 B0 复验与正常 pre-push 通过，`7836547` 已推送、待 PR；#34 的运行验收不代替本轮驾驶舱验收。 |
 | VERSION / 产品 | **0.13.0.0**，驾驶舱交互与静态 HTML 选区编辑候选；产品仍 **PARTIAL**，原全量 Goal **PAUSED**。loopback，不上公网。 |
 | DSH 基座 | **0.1.6-alpha.2（ddefc45f）**，不改上游。 |
 | 现役 | 6677已加载 #34 同树候选，CRM 指向独立 18093，原8000保留；旧版实际回退及再次切入通过，68个既有运行文件和文档版本/回执保留。真实账号/模型查询、保存/引用和刷新重开通过。 |

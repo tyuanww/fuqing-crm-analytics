@@ -1,6 +1,6 @@
 # 驾驶舱 UI / UX · 0.13.0.0 发布候选（2026-09-21）
 
-当前候选位于公开仓库 `fuqing-crm-analytics` 的隔离工作树，本轮审计起点为 `origin/main` / `106717e6`，分支为 `codex/cockpit-ui-ux-ship`。已通过正常 merge 同步到 `73ee74c6`，保留主线 CRM 入口与本轮全屏动作。仅移植旧 `codex/cockpit-ui-ux` 的本任务补丁，没有合并旧仓库历史；旧工作树与证据保留。用户已选择版本 **0.13.0.0**，要求先补真实模型评估再创建 PR。真实 MiniMax-M3 的最终五项评估已通过，人工复核两项拒绝答复不再虚构操作入口；删除全异步链焦点修复及定向回归完成，合并后完整检查通过（后端 2834 passed / 77 skipped，B0 593 项 Python 与核心 Node / DOM 605 项及构建）；最终提示文案增量 B0 冻结复验通过，推送保留正常门禁。未创建本轮 PR、合并或切换现役 6677。产品仍 PARTIAL。
+当前候选位于公开仓库 `fuqing-crm-analytics` 的 `cockpit-ui-ux-public` 隔离工作树，分支为 `codex/cockpit-ui-ux-ship`；最终 diff 基线为 `origin/main` / `481f2f0`（#35 文档，代码基线为 #34 / `73ee74c6`）。保留主线 CRM 入口与本轮全屏动作。仅移植旧 `codex/cockpit-ui-ux` 的本任务补丁，没有合并旧仓库历史；旧工作树与证据保留。用户已选择版本 **0.13.0.0**，要求先补真实模型评估再创建 PR。真实 MiniMax-M3 的最终五项评估已通过，人工复核两项拒绝答复不再虚构操作入口；删除全异步链焦点修复及定向回归完成，合并后完整检查通过（后端 2834 passed / 77 skipped，B0 593 项 Python 与核心 Node / DOM 605 项及构建）；最终提示文案增量 B0 冻结复验通过，公开工作树正常 pre-push 完整通过，代码 `7836547` 已正常推送。尚未创建本轮 PR、合并或切换候选至现役 6677；主线 CRM #34 的 CI、运行切换及真实账号验收不代替本轮驾驶舱 / HTML 验收。产品仍 PARTIAL。
 
 固定 DSH 上游源码与业务架构保持不变；验证使用合成数据和隔离小库。下面的“当前公开候选”记录与后面的“旧工作树历史”分开，旧 SHA、旧测试计数和旧 `.context` 路径不作为当前候选的通过证据。
 
@@ -27,7 +27,7 @@
 | 删除/恢复与排序键盘焦点丢失 | 打开删除弹窗前记录触发按钮，取消后恢复；删除或回收站恢复使按钮移除时回退到产物标题抓手。排序保存期间用 `aria-disabled` 和事件门控保留手柄焦点；最新恢复焦点修复后已有 2 项针对性回归通过 |
 | 长标题换行和全屏/窄屏 CSS 覆盖 | 标题容器允许收缩，单行省略，版本徽标不收缩，保留完整标题提示。移除 3 处不必要的新增 `!important`；窄屏覆盖浮动内联坐标及高度的 2 处规则保留并说明原因 |
 
-独立外审原文保留于 `.context/checks/cockpit-ship/outside-structured.md`；主审按实际源码核验，不把外审建议直接计为缺陷：
+当前 reviewable 文件 **37/37 已审查、0 skip**，另 9 个工具排除项已人工审计；转树后全部 reviewable 指纹匹配。结构外审完成一次，对抗外审调用不可用，不能计为通过。独立结构外审原文保留于下述来源工作树的 `.context/checks/cockpit-ship/outside-structured.md`；主审按实际源码核验，不把外审建议直接计为缺陷：
 
 - “已完成 AI 任务永久锁死新选区”是误报：客户端 `accept()` 将 SAVED / CANCELLED 从 `jobs` 移除，服务端 `list()` 也用 `status NOT IN ('SAVED','CANCELLED')` 过滤；完成说明保留在 `active` 不等于仍占用未完成任务列表。
 - “恢复产物后焦点丢失”已修复；最新删除全链定向回归为 5 项通过，合并后整套回归已通过。
@@ -38,19 +38,19 @@
 
 ## 当前公开候选：实际验证快照
 
-以下结果均来自本工作树 `.context/checks/cockpit-ship/`，各测试层有重叠，不相加为总用例数。
+浏览器、模型及审查原始证据保留在来源工作树 `/Users/hutou/.codex/worktrees/cockpit-ui-ux-ship/fuqing-crm-analytics/.context/checks/cockpit-ship/`；下表未标明“当前树”的文件名均相对此目录。该树继承 `no-push://private-history-use-public-snapshot`，因此从独立公开克隆导入确切公开祖先的本轮提交建立当前树，未修改保护配置。当前树 `.context/checks/cockpit-ship/public-transfer-evidence.json` 记录 37 项审查与 6 项模型源码哈希全部匹配，#35 仅改 Markdown。各测试层有重叠，不相加为总用例数。
 
 | 层级 | 已取得结果及限制 | 证据 |
 |---|---|---|
-| B0 pipeline | 合并后完整 PASS：593 项 Python、核心 Node / 编译后 DOM 605 项，以及合同、类型、Ruff、Cordis 装配和干净重建；其他 Node 分组与核心有重叠，不相加 | `integrated-final.log`；最后提示文案增量冻结复验 PASS：`b0-release.log` |
-| 共享后端矩阵 | 277 个目标、12 组退出 0；JUnit 汇总 **2834 passed / 77 skipped，零失败、零错误**，另有 71 deselected。Ruff 和 Agent 入口通过；skip 不计通过 | `integrated-final.log`；`.context/checks/20260920T181922096671Z/summary.json` 与 12 份 JUnit |
+| B0 pipeline | 合并后完整 PASS：593 项 Python、核心 Node / 编译后 DOM 605 项，以及合同、类型、Ruff、Cordis 装配和干净重建；其他 Node 分组与核心有重叠，不相加 | 当前树 `.context/checks/cockpit-ship/prepush.log`；来源树 `integrated-final.log` / `b0-release.log` 保留 |
+| 共享后端矩阵 | 277 个目标、12 组退出 0；JUnit 汇总 **2834 passed / 77 skipped，零失败、零错误**，另有 71 deselected。Ruff 和 Agent 入口通过；skip 不计通过 | 当前树 `.context/checks/20260920T184020184667Z/summary.json` 与 12 份 `group*.xml`；正常 pre-push 退出 0 |
 | Chromium + FastAPI / SQLite | 合并后 15 项 PASS、无未处理异常；覆盖拖动/缩放/停靠/回收站/全屏/390px/HTML 编辑与选区保护。原生会话打开仍为夹具，真实模型证据独立 | `browser-release/results.json` 与截图 |
 | 删除异步链及选区回归 | 5 项定向 DOM PASS，含 Office 关闭及偏好写入慢请求、失败/重试、正反 Tab、重复激活阻断和恢复焦点；已纳入完整 pipeline | `library-workspace.test.mjs`；`integrated-final.log` |
 | 评估器与工具范围 | 11 项 Python oracle 回归 PASS；5 项 Node guard PASS（包括固定上游实际 scope registry），均为合成测试 | 后端矩阵；`eval-guard-final.log` |
-| 真实模型评估 | **最终 5/5 PASS**：MiniMax-M3，3 项修改双轮 present → collect → confirm → 独立连接读回版本 2；2 项越界拒绝，无候选并保留版本 1。最终六项源码指纹全部匹配 | `model-eval-final.json`；人工复核拒绝答复无虚构入口 |
+| 真实模型评估 | **最终 5/5 PASS**：`minimax-cn/MiniMax-M3`，3 项修改双轮 present → collect → confirm → 独立连接读回版本 2；2 项越界拒绝，无候选并保留版本 1。最终六项源码指纹全部匹配 | `model-eval-final.json`；人工复核拒绝答复无虚构入口 |
 | 未执行验收 | 完整 DSH 宿主浏览器、真实用户 HTML UAT、Office / PDF 兼容扩展、远端 CI、现役部署切换与状态降级验证 | 当前 `full_dsh_shell` 为 `NOT_RUN`；产品仍 PARTIAL |
 
-早期 `b0-final.log`、`backend-final.log` 因并行修改标为 STALE，保留通过事实但不作最终内容绑定。合并后首次完整运行因为本次命令 PATH 漏掉 `/usr/sbin/lsof` 而在临时备份夹具失败；确认 fail-closed 原因、恢复正常系统 PATH 后，完整矩阵通过。`integrated-path-failure.log` 与原失败报告保留。综合通过运行期间另修一行 SAVED 刷新失败提示，包装器同样标 STALE；后端源码未变，最后 B0 冻结验证已通过，正常 pre-push 仍保留完整内容门禁。此前浏览器/模型失败和外审原文均保留，不覆盖为成功。
+早期 `b0-final.log`、`backend-final.log` 因并行修改标为 STALE，保留通过事实但不作最终内容绑定。合并后首次完整运行因为本次命令 PATH 漏掉 `/usr/sbin/lsof` 而在临时备份夹具失败；确认 fail-closed 原因、恢复正常系统 PATH 后，完整矩阵通过。`integrated-path-failure.log` 与原失败报告保留。综合通过运行期间另修一行 SAVED 刷新失败提示，包装器同样标 STALE；后端源码未变，最后 B0 冻结验证已通过，当前公开工作树随后在冻结代码上正常 pre-push 完整通过并推送，日志保留完整门禁结果。此前浏览器/模型失败和外审原文均保留，不覆盖为成功。
 
 `model-eval-refined.json` 记录合计 **164420 tokens**：输入 37848、输出 6776、缓存读取 119796；供应商计费金额未知，不按 token 数推算费用。该次未重启现役服务、未改模型设置，临时 preset 已移除。工具边界由原生会话 scope guard 执行，记录中包含被拒绝的额外工具尝试，不能将其误记为实际执行了业务查询或 shell。
 
