@@ -1,6 +1,6 @@
 # 伸美 AI 增长董事会
 
-当前代码交付与运行边界见 [STATUS](./STATUS.md)，下一步见 [M1 核心交付](./docs/hackathon/TODOS.md#m1-核心交付)。本次核验的 origin/main 为 **`db582173`**（[#215](https://github.com/weiweity/fuqing-crm-analytics/pull/215)）。VERSION **0.12.0.0**（本分支候选）；`codex/crm-knowledge-login` 已推送功能 `3318d7f0` 与版本 `9b110efe`，PR 待创建，DSH **0.1.6-alpha.2**（`ddefc45f`）。loopback，不上公网。产品仍 PARTIAL；Git 合入不等于正式 release、6677 reload 或本人 UAT 通过。侧栏底是登录/主题；比赛看板在登录菜单里新标签打开 `15173`，看板仍独立。驾驶舱「人群行动」已合 [#166](https://github.com/weiweity/fuqing-crm-analytics/pull/166)。说明板仍 v15、原板仍 v9。
+当前代码交付与运行边界见 [STATUS](./STATUS.md)，下一步见 [M1 核心交付](./docs/hackathon/TODOS.md#m1-核心交付)。本轮 CRM 持久化已合入新公开仓库 **`73ee74c`**（[#34](https://github.com/tyuanww/fuqing-crm-analytics/pull/34)），VERSION **0.12.0.0**，DSH **0.1.6-alpha.2**（`ddefc45f`）。loopback，不上公网，产品仍 PARTIAL。代码、运行切换和真实账号验收分别记在[本轮交付记录](./docs/crm-calibration/crm-assets-release-2026-09-21.md)。侧栏底是登录/主题；比赛看板仍在新标签打开 `15173`。旧仓库人群行动 #166 和历史板版本按各轮证据保留。
 
 下方9月5–10日的决策、端口和候选追加保留为历史记录，不作为当前服务或Git HEAD。
 
@@ -33,7 +33,7 @@
 
 ## 快速开始
 
-本轮独立 CRM 候选提供原生对话登录、现看板 GSV 兼容查询，以及仅接受合成源的销售/回购/派样查询和离线知识解释。使用与复验见 [CRM 插件说明](./dsh-plugins/crm-knowledge/README.md)，公开范围见 [交付说明](./docs/crm-calibration/public-release.md)，知识包与导入边界见 [知识包](./knowledge/crm/README.md)。尚未挂载现役；真实模型、完整真实源映射、保存分析引用与图服务仍待验收。
+独立 CRM 插件提供原生对话登录、看板 GSV、正额购买口径的 AOV/AUS，以及服务端可信快照、账号私有保存分析和驾驶舱固定引用。销售/回购/派样的 `crm-metrics/v1` 工具仍只接受合成源。使用与复验见 [CRM 插件说明](./dsh-plugins/crm-knowledge/README.md)，当前运行及验收见[本轮交付记录](./docs/crm-calibration/crm-assets-release-2026-09-21.md)；旧交付范围见[历史说明](./docs/crm-calibration/public-release.md)。真实 GSV、文档检索和教材图谱已有局部模型证据，完整真实源映射、多人文档 ACL、全图语义与本人 UAT 仍开放。
 
 新 DSH 开发入口见 [dsh-dev 使用说明](./scripts/dsh-dev/README.md)（日常改插件用 remainder `--plugin-path` / `reload`，不要 `--fresh`，不要官方 `reload` 编原仓插件）。侧栏驾驶舱是独立二级页产物柜，V2 已随 #214 合入。已合 #215 的 0.11.0.0 交付汇总历史会话产物，支持手动添加 HTML、Word、XLSX/CSV、PDF；Office/PDF 使用本机 Docker ONLYOFFICE 编辑，原件与版本独立保存。操作与配置见 [本地文档服务](./docs/operating/cockpit-office-local.md)。点击「用 AI 改」进入唯一 DSH 原生 Loop 的版本副本任务，再收取候选、只读预览并显式确认，见 [AI 修改步骤](./docs/operating/cockpit-ai-edit.md)。真实模型因 `MISSING_CREDENTIAL` 未验收，P13、真实历史/业务及用户 UAT 仍开放；[Ship 记录](./docs/hackathon/COCKPIT-SHIP-2026-09-20.md) 区分本轮检查与前轮浏览器证据。BoardSpec 生成见 [插件 README](./dsh-plugins/analytics-workbench/README.md)。现役插槽见 [DSH-PLUGIN-UI-COMPAT](./docs/hackathon/DSH-PLUGIN-UI-COMPAT.md)。登录菜单里的「比赛看板」只在新标签页打开旧 CRM 前端（默认 `http://127.0.0.1:15173`），看板仍独立，DSH 不内嵌也不代理。比赛 HTTP 见 [competition-http](./docs/operating/competition-http.md)，验证按 [当前验证入口](./docs/operating/verification.md) 选择范围。以下是**既有演示/私有分析的历史入口**，不作为新工作台的默认启动或验证命令；不要继承私人数据库配置。
 

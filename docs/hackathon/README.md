@@ -2,7 +2,7 @@
 
 > 当前 Git、施工与边界以根 [STATUS.md](../../STATUS.md) 为准，接续任务见 [TODOS 的 M1 核心交付](TODOS.md#m1-核心交付)。VERSION 0.12.0.0，产品 PARTIAL，loopback，不上公网。以下旧轮的“当前／最新”、端口、SHA 和授权是历史快照；失败证据保留。
 
-2026-09-21 候选基于新公开仓库 `106717e6`，沿用已合 #11 的 AOV/AUS 正额购买口径，增加可信查询快照、账号私有保存分析和驾驶舱固定引用。验证及交付进度见 [本轮记录](../crm-calibration/crm-assets-release-2026-09-21.md)。旧仓库 #215–#217 的历史证据继续保留；它们不代表本轮运行验收。
+2026-09-21 CRM 持久化已随新公开仓库 #34 合入 `73ee74c`，沿用已合 #11 的 AOV/AUS 正额购买口径，增加可信查询快照、账号私有保存分析和驾驶舱固定引用。本地完整门禁、合成 QA、PR/main CI、现役切换和旧版实际回退通过；真实账号/模型的查询→快照→保存→引用→重开也已通过，分层证据见[本轮记录](../crm-calibration/crm-assets-release-2026-09-21.md)。旧仓库 #215–#217 的历史证据继续保留；它们不代表本轮运行验收。
 
 历史多格式文件及 AI 修改见 [Ship 记录](COCKPIT-SHIP-2026-09-20.md)、[本地文档服务](../operating/cockpit-office-local.md)和[使用说明](../operating/cockpit-ai-edit.md)。P13、逐格式真实模型、复杂 Office/PDF 和本人 UAT 仍开放。
 

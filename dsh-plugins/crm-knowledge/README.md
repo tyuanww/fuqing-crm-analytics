@@ -9,7 +9,7 @@
 | 工具 | 作用 |
 |---|---|
 | `query_crm_dashboard_gsv` | 用户认可的现看板 GSV 总额、日趋势；绑定账号后只读调用原指标服务；与合成净额候选分开 |
-| `query_crm_dashboard_purchases` | 候选：看板GSV分子下的AOV/AUS及订单/买家覆盖，需新版聚合接口和Host；真实验收待完成 |
+| `query_crm_dashboard_purchases` | 看板GSV分子下的AOV/AUS及正额订单/对应买家覆盖，需新版聚合接口和Host；一组真实窗口已独立只读核对并通过现役真实账号/模型验收，范围见交付记录 |
 | `query_crm_dashboard_snapshot` | 服务端查询并保存可信的不可变销售快照，供用户确认保存分析及加入驾驶舱 |
 | `query_crm_metrics_v1` | 销售表现、老客回购、派样后复购；全部经过只读适配 → 计算器 |
 | `crm_knowledge_explain` | 知识包定义、证据、冲突和离线依赖关系；说明合成验证状态 |
@@ -45,7 +45,7 @@
 
 `query_crm_dashboard_purchases` 使用同样的业务参数和对话登录，先校验 `/auth/me`，再调用 `/api/v1/metrics/dashboard-purchases`。金额、正额有效订单、对应买家及缺口来自同次聚合；零元订单和仅零元买家单列。未知标识、空/负金额使对应均值为空并返回原因。不会读取旧 `avg_order_value`，也不把新老客人数相加当买家总数。
 
-上线此候选需要同时更新CRM后端与CRM插件Host，并保留既有runtime受控重启；只替换preset不能给旧Host增加 `queryPurchases` 能力。重启后需用户在页面重新连接CRM，再对账。接口不存在时明确不可用，不降级查合成数据。当前尚未部署或完成真实AOV/AUS验收。
+上线此候选需要同时更新CRM后端与CRM插件Host，并保留既有runtime受控重启；只替换preset不能给旧Host增加 `queryPurchases` 能力。重启后需用户在页面重新连接CRM，再对账。接口不存在时明确不可用，不降级查合成数据。部署状态及真实账号/模型验收以[本轮交付记录](../../docs/crm-calibration/crm-assets-release-2026-09-21.md)为准。
 
 ## 保存分析与驾驶舱引用
 
