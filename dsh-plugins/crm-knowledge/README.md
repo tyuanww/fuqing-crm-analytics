@@ -9,6 +9,7 @@
 | 工具 | 作用 |
 |---|---|
 | `query_crm_dashboard_gsv` | 用户认可的现看板 GSV 总额、日趋势；绑定账号后只读调用原指标服务；与合成净额候选分开 |
+| `query_crm_dashboard_purchases` | 候选：看板GSV分子下的AOV/AUS及订单/买家覆盖，需新版聚合接口和Host；真实验收待完成 |
 | `query_crm_metrics_v1` | 销售表现、老客回购、派样后复购；全部经过只读适配 → 计算器 |
 | `crm_knowledge_explain` | 知识包定义、证据、冲突和离线依赖关系；说明合成验证状态 |
 | `crm_metrics_capabilities` | 可执行查询与未接入的真实资料能力 |
@@ -38,6 +39,12 @@
 - 登录限制：15秒、8KiB响应/请求、每次最多2个并行登录、20个有效连接；上游错误正文不转发。
 
 概览与趋势以整数分核对，不一致就返回 `UNAVAILABLE`；未返回日期保留在 `dates_not_returned`，不补0。数据水位、退款截止日均为 `null`，`backend_version_verified=false`；`dashboard-gsv/observed-v1` 是审计口径标识，现 API 未提供可校验的运行版本。两次请求不是事务快照，不承诺快照一致性。401/403、忙碌、警告、超时、取消、重定向和错误内容均停止查询，不读取归档、不自动重试，不返回原始响应或凭据。
+
+## AOV/AUS 候选接口
+
+`query_crm_dashboard_purchases` 使用同样的业务参数和对话登录，先校验 `/auth/me`，再调用 `/api/v1/metrics/dashboard-purchases`。金额、正额有效订单、对应买家及缺口来自同次聚合；零元订单和仅零元买家单列。未知标识、空/负金额使对应均值为空并返回原因。不会读取旧 `avg_order_value`，也不把新老客人数相加当买家总数。
+
+上线此候选需要同时更新CRM后端与CRM插件Host，并保留既有runtime受控重启；只替换preset不能给旧Host增加 `queryPurchases` 能力。重启后需用户在页面重新连接CRM，再对账。接口不存在时明确不可用，不降级查合成数据。当前尚未部署或完成真实AOV/AUS验收。
 
 ## 本地复验
 

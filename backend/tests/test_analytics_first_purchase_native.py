@@ -540,7 +540,9 @@ def test_native_success_save_cockpit_roundtrip_and_negatives(tmp_path):
             "session_id": SESSION, "request_id": "save", "call_id": "call-save",
             "request": EXPECTED["request"],
         }, headers=runtime_headers())
-        assert executed.status_code == 200, executed.text
+        evidence = [{key: record[key] for key in ("state", "exit_code", "error_code", "metrics_json")}
+                    for record in app.state.store.worker_records(active_only=False)]
+        assert executed.status_code == 200, {"response": executed.text, "worker_evidence": evidence}
         assert executed.json()["result"]["query_id"] == "first_purchase_product_path"
         saved = client.post(
             PREFIX + "/analyses",

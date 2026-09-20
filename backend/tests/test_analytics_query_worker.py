@@ -308,7 +308,11 @@ def test_sql_active_specific_stop_outranks_retryable_observation_lock(tmp_path, 
     os.close(fd)
 
 
-def test_worker_state_read_failure_stops_owned_child_without_raw_driver_error(tmp_path, monkeypatch):
+@pytest.mark.parametrize("failure", [
+    sqlite3.OperationalError("private SQL and database path must not escape"),
+    IndexError("private missing record details"),
+])
+def test_worker_state_read_failure_stops_owned_child_without_raw_driver_error(tmp_path, monkeypatch, failure):
     store, _, intent, step, fixture = setup_query_worker(tmp_path)
     fail_read = threading.Event()
     worker_records = store.worker_records
@@ -316,7 +320,7 @@ def test_worker_state_read_failure_stops_owned_child_without_raw_driver_error(tm
     def interrupted_read(**kwargs):
         if kwargs.get("execution_id") and fail_read.is_set():
             fail_read.clear()
-            raise sqlite3.OperationalError("database is locked")
+            raise failure
         return worker_records(**kwargs)
 
     monkeypatch.setattr(store, "worker_records", interrupted_read)
@@ -327,8 +331,8 @@ def test_worker_state_read_failure_stops_owned_child_without_raw_driver_error(tm
         )
         assert launch.receive()["event"] == "CLOSED_FRAME_NOT_EXIT"
         assert launch.child.poll() is None and not future.done()
-        # Inject the exact failed driver boundary from CI; SQL calculation,
-        # child process, lease, stop and exit persistence remain real.
+        # Exercise observation uncertainty without claiming the unknown CI
+        # trigger was a driver error. Child, lease and persistence remain real.
         fail_read.set()
         with pytest.raises(AnalyticsError) as failed:
             future.result(timeout=8)
@@ -337,6 +341,12 @@ def test_worker_state_read_failure_stops_owned_child_without_raw_driver_error(tm
     record = worker_records(active_only=False)[0]
     assert record["state"] == "EXITED" and record["active_slot"] is None
     assert record["error_code"] == "EXECUTION_UNKNOWN"
+    metrics = json.loads(record["metrics_json"])
+    assert metrics["observation_failure"] == {
+        "stage": "state_read",
+        "category": "database" if isinstance(failure, sqlite3.DatabaseError) else "missing_record",
+    }
+    assert "private" not in record["metrics_json"]
     with sqlite_connection(store.path) as con:
         assert con.execute("SELECT result_json FROM steps WHERE step_id=?", (step.step_id,)).fetchone()[0] is None
 

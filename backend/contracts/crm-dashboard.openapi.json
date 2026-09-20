@@ -1,0 +1,373 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "CRM dashboard purchase aggregates",
+    "version": "1"
+  },
+  "paths": {
+    "/api/v1/metrics/dashboard-purchases": {
+      "get": {
+        "tags": [
+          "指标"
+        ],
+        "summary": "Get Dashboard Purchases",
+        "description": "看板同范围购买分母及AOV/AUS；日期含首尾，最多90天。",
+        "operationId": "get_dashboard_purchases_api_v1_metrics_dashboard_purchases_get",
+        "parameters": [
+          {
+            "name": "start_date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "Start Date"
+            }
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "End Date"
+            }
+          },
+          {
+            "name": "channel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "全店",
+                "纯派样",
+                "货架",
+                "达播",
+                "直播",
+                "淘客",
+                "微博",
+                "U先派样",
+                "百补派样",
+                "赠品&0.01",
+                "其他"
+              ],
+              "type": "string",
+              "default": "全店",
+              "title": "Channel"
+            }
+          },
+          {
+            "name": "exclude_low_price",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Exclude Low Price"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardPurchases"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DashboardAverage": {
+        "properties": {
+          "amount_fen": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount Fen"
+          },
+          "denominator": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Denominator"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "NO_PURCHASES",
+                  "UNKNOWN_ORDER",
+                  "UNKNOWN_BUYER",
+                  "INVALID_AMOUNT"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "amount_fen",
+          "denominator",
+          "reason"
+        ],
+        "title": "DashboardAverage"
+      },
+      "DashboardCoverage": {
+        "properties": {
+          "rows": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Rows"
+          },
+          "orders": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Orders"
+          },
+          "buyers": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Buyers"
+          },
+          "unknown_order_rows": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Unknown Order Rows"
+          },
+          "unknown_buyer_rows": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Unknown Buyer Rows"
+          },
+          "unknown_order_amount_fen": {
+            "type": "integer",
+            "title": "Unknown Order Amount Fen"
+          },
+          "unknown_buyer_amount_fen": {
+            "type": "integer",
+            "title": "Unknown Buyer Amount Fen"
+          },
+          "null_amount_rows": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Null Amount Rows"
+          },
+          "negative_amount_rows": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Negative Amount Rows"
+          },
+          "zero_amount_orders": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Zero Amount Orders"
+          },
+          "zero_only_buyers": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Zero Only Buyers"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "rows",
+          "orders",
+          "buyers",
+          "unknown_order_rows",
+          "unknown_buyer_rows",
+          "unknown_order_amount_fen",
+          "unknown_buyer_amount_fen",
+          "null_amount_rows",
+          "negative_amount_rows",
+          "zero_amount_orders",
+          "zero_only_buyers"
+        ],
+        "title": "DashboardCoverage"
+      },
+      "DashboardFilters": {
+        "properties": {
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "title": "End Date"
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "全店",
+              "纯派样",
+              "货架",
+              "达播",
+              "直播",
+              "淘客",
+              "微博",
+              "U先派样",
+              "百补派样",
+              "赠品&0.01",
+              "其他"
+            ],
+            "title": "Channel",
+            "default": "全店"
+          },
+          "exclude_low_price": {
+            "type": "boolean",
+            "title": "Exclude Low Price",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "start_date",
+          "end_date"
+        ],
+        "title": "DashboardFilters"
+      },
+      "DashboardPurchases": {
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "const": "crm-dashboard-purchases/v1",
+            "title": "Schema Version",
+            "default": "crm-dashboard-purchases/v1"
+          },
+          "metric_version": {
+            "type": "string",
+            "const": "dashboard-gsv-purchases/v1",
+            "title": "Metric Version",
+            "default": "dashboard-gsv-purchases/v1"
+          },
+          "filters": {
+            "$ref": "#/components/schemas/DashboardFilters"
+          },
+          "gsv_amount_fen": {
+            "type": "integer",
+            "title": "Gsv Amount Fen"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/DashboardCoverage"
+          },
+          "aov": {
+            "$ref": "#/components/schemas/DashboardAverage"
+          },
+          "aus": {
+            "$ref": "#/components/schemas/DashboardAverage"
+          },
+          "data_through": {
+            "type": "null",
+            "title": "Data Through"
+          },
+          "refund_as_of": {
+            "type": "null",
+            "title": "Refund As Of"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Limitations"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "filters",
+          "gsv_amount_fen",
+          "coverage",
+          "aov",
+          "aus",
+          "limitations"
+        ],
+        "title": "DashboardPurchases"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

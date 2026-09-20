@@ -1,5 +1,5 @@
 /** CRM credentials stay in this host closure, never env, disk, RPC or tool output. */
-import { dashboardOrigin, queryDashboardGsv, dashboardCapabilities } from './dashboard.mjs';
+import { dashboardOrigin, queryDashboardGsv, queryDashboardPurchases, dashboardCapabilities } from './dashboard.mjs';
 
 export const CRM_UI_PATH = '/api/crm-knowledge/connection';
 const TTL = 8 * 60 * 60 * 1000;
@@ -56,21 +56,23 @@ export function createDashboardAccess({ baseUrl = 'http://127.0.0.1:8000', brows
       : { connected: false, username: null, expires_at: null };
   }
   const cleanup = setInterval(prune, 60000); cleanup.unref();
-  const unavailable = () => ({ status: 'UNAVAILABLE', schema_version: 'crm-dashboard-read/v1',
-    metric_version: dashboardCapabilities().metric_version,
+  const unavailable = (purchases = false) => ({ status: 'UNAVAILABLE', schema_version: purchases ? 'crm-dashboard-purchases/v1' : 'crm-dashboard-read/v1',
+    metric_version: purchases ? 'dashboard-gsv-purchases/v1' : dashboardCapabilities().metric_version,
     reason: { code: 'NOT_CONNECTED', message: '当前对话尚未连接 CRM，请点击“连接 CRM”。' } });
-  const service = Object.freeze({
-    capabilities(sessionId) { return dashboardCapabilities(status(sessionId).connected ? 'LOGIN_BOUND' : 'NOT_CONNECTED'); },
-    async query(sessionId, input, signal) {
+  async function query(sessionId, input, signal, purchases = false) {
       prune(); const record = records.get(sessionId);
-      if (disposed || !record || !hasSession(sessionId)) return unavailable();
+      if (disposed || !record || !hasSession(sessionId)) return unavailable(purchases);
       const combined = signal ? AbortSignal.any([signal, record.controller.signal]) : record.controller.signal;
-      const result = await queryDashboardGsv(input, { sessionId, binding: record.binding, signal: combined });
-      if (records.get(sessionId) !== record) return unavailable();
-      if (record.expiresAt <= now() || !hasSession(sessionId)) { forget(sessionId); return unavailable(); }
+      const result = await (purchases ? queryDashboardPurchases : queryDashboardGsv)(input, { sessionId, binding: record.binding, signal: combined });
+      if (records.get(sessionId) !== record) return unavailable(purchases);
+      if (record.expiresAt <= now() || !hasSession(sessionId)) { forget(sessionId); return unavailable(purchases); }
       if (['AUTH_EXPIRED', 'ACCOUNT_MISMATCH'].includes(result.reason?.code)) forget(sessionId);
       return result;
-    },
+  }
+  const service = Object.freeze({
+    capabilities(sessionId) { return dashboardCapabilities(status(sessionId).connected ? 'LOGIN_BOUND' : 'NOT_CONNECTED'); },
+    query: (sessionId, input, signal) => query(sessionId, input, signal),
+    queryPurchases: (sessionId, input, signal) => query(sessionId, input, signal, true),
   });
 
   async function browser(request) {

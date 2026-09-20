@@ -1,5 +1,8 @@
 ## [Unreleased]
 
+- CRM 隔离候选增加看板口径 AOV/AUS 聚合接口与登录会话工具，附未知订单/买家和异常金额覆盖；同步合同类型。未切换现役，真实业务验收待完成。
+- 为 worker 观测不确定性补充安全诊断，保留原停止条件；此前 CI 偶发失败根因仍开放。
+
 ## Public repository bootstrap (2026-09-20)
 
 - Publish an independent code snapshot without private Git history or real-database benchmark results.

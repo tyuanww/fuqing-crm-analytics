@@ -11,3 +11,12 @@ export function provenance(result: components['schemas']['MetricResult']) {
   const complete: boolean | null | undefined = result.history_complete;
   return { ref, scope, complete };
 }
+
+
+import type { components as DashboardComponents } from '../src/dashboard-contract.generated.js';
+export function purchaseCoverage(result: DashboardComponents['schemas']['DashboardPurchases']) {
+  const aov: number | null = result.aov.amount_fen;
+  const aus: number | null = result.aus.amount_fen;
+  const unknown: number = result.coverage.unknown_buyer_rows;
+  return { aov, aus, unknown };
+}
