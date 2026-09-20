@@ -1,6 +1,6 @@
 # 驾驶舱 UI / UX · 0.13.0.0 发布候选（2026-09-21）
 
-当前候选位于公开仓库 `fuqing-crm-analytics` 的隔离工作树，本轮审计起点为 `origin/main` / `106717e6`，分支为 `codex/cockpit-ui-ux-ship`。主任务计划同步到 `73ee74c6`，本文不将该计划记为已完成。仅移植旧 `codex/cockpit-ui-ux` 的本任务补丁，没有合并旧仓库历史；旧工作树与证据保留。用户已选择版本 **0.13.0.0**，要求先补真实模型评估再创建 PR。真实 MiniMax-M3 已取得 **5/5 中间评估通过**；其后又补充任务说明、评估判据和删除焦点修复，最终模型评估及 pipeline 尚待执行。未创建本轮 PR、合并或切换现役 6677。产品仍 PARTIAL。
+当前候选位于公开仓库 `fuqing-crm-analytics` 的隔离工作树，本轮审计起点为 `origin/main` / `106717e6`，分支为 `codex/cockpit-ui-ux-ship`。已通过正常 merge 同步到 `73ee74c6`，保留主线 CRM 入口与本轮全屏动作。仅移植旧 `codex/cockpit-ui-ux` 的本任务补丁，没有合并旧仓库历史；旧工作树与证据保留。用户已选择版本 **0.13.0.0**，要求先补真实模型评估再创建 PR。真实 MiniMax-M3 的最终五项评估已通过，人工复核两项拒绝答复不再虚构操作入口；删除全异步链焦点修复及定向回归完成，合并后完整检查通过（后端 2834 passed / 77 skipped，B0 593 项 Python 与核心 Node / DOM 605 项及构建）；最终提示文案增量 B0 冻结复验通过，推送保留正常门禁。未创建本轮 PR、合并或切换现役 6677。产品仍 PARTIAL。
 
 固定 DSH 上游源码与业务架构保持不变；验证使用合成数据和隔离小库。下面的“当前公开候选”记录与后面的“旧工作树历史”分开，旧 SHA、旧测试计数和旧 `.context` 路径不作为当前候选的通过证据。
 
@@ -30,9 +30,11 @@
 独立外审原文保留于 `.context/checks/cockpit-ship/outside-structured.md`；主审按实际源码核验，不把外审建议直接计为缺陷：
 
 - “已完成 AI 任务永久锁死新选区”是误报：客户端 `accept()` 将 SAVED / CANCELLED 从 `jobs` 移除，服务端 `list()` 也用 `status NOT IN ('SAVED','CANCELLED')` 过滤；完成说明保留在 `active` 不等于仍占用未完成任务列表。
-- “恢复产物后焦点丢失”已修复；最新 `restore-focus.log` 为 2 项通过，最终整套回归仍待补。
+- “恢复产物后焦点丢失”已修复；最新删除全链定向回归为 5 项通过，合并后整套回归已通过。
 - 父→iframe 的 `postMessage('*')` 用于无 `allow-same-origin` 的 opaque-origin 沙箱；接收端严格核验窗口、opaque origin、通道、页面、版本、字段及唯一已知节点，消息本身不授权写入，服务端继续核验选区。未按该建议改宽沙箱或改造通信协议。
 - 按住方向键逐次 PATCH 是低优先级性能建议；当前请求串行落库，后续可评估合并持久化，不将其列为已修复的数据正确性问题。
+
+最后 Claude Code 设计外审原文见 `outside-design.md`：恢复列表 AI/版本副行与用户“仅标题”要求冲突，未采纳；方向键移动浮出符合当前交互；旧色彩令牌更名不扩入本轮。确认的 SAVED + 刷新失败错误回退文案已修复，并独立复核状态路径。外部调用返回内容，但缺少校验器要求的结尾 Recommendation 标记，工具状态按 `unavailable` 保留，不把格式缺口记作 clean。
 
 ## 当前公开候选：实际验证快照
 
@@ -40,22 +42,23 @@
 
 | 层级 | 已取得结果及限制 | 证据 |
 |---|---|---|
-| B0 pipeline | 该次运行 PASS：593 项 Python、核心 Node / 编译后 DOM 603 项，以及类型、合同、Ruff、插件构建与干净重建；早于最新恢复焦点修复，不能当作最终候选已全量通过 | `b0-final.log` |
-| 共享后端矩阵 | 275 个目标、11 组全部退出 0；JUnit 汇总 **2808 passed / 77 skipped，零失败、零错误**，另有 71 deselected；Ruff 和 Agent 入口检查通过。skip / deselected 不计通过 | `backend-final.log`；原始 `summary.json` 与 11 份 JUnit 位于 `.context/checks/20260920T172126749667Z/` |
-| Chromium + FastAPI / SQLite 合成探针 | 15 项 PASS，包含“浏览器无未处理异常”一项；含可执行链接只读、HTML 手动保存、选区任务落盘及既有 UI 回归。原生会话入口仍是夹具，未调用模型；不覆盖其后最新恢复焦点修改 | `browser-final/results.json`、`browser-final.log` 与同目录截图 |
-| 源码/bridge 针对性回归 | 12 项 PASS，含深度上限与 opaque-origin 消息校验；首帧选择与重挂载组合另有 3 项 PASS | `source-targeted.log`、`selection-race.log` |
-| 最新恢复焦点修复 | 2 项 PASS；只证明该次针对性回归，最终 pipeline 待跑 | `restore-focus.log` |
-| 非 live 源码选区确认 | G1 新增 3 项针对性测试 PASS，覆盖本地源码范围确认分支；最新完整 pipeline 待跑 | 当前候选的非 live store 定向回归 |
-| 真实模型评估 | **中间 5/5 PASS**：现役原生 `minimax-cn / MiniMax-M3`、独立合成目录、临时专用 preset；3 项修改经过双轮对话、present、真实 collect/confirm 和独立版本重开，2 项越界需求拒绝且保留版本 1。其后修复尚未包含在此结果内 | `model-eval-refined.json`；浏览器探针自身的 `real_model: NOT_RUN` 仍如实保留 |
+| B0 pipeline | 合并后完整 PASS：593 项 Python、核心 Node / 编译后 DOM 605 项，以及合同、类型、Ruff、Cordis 装配和干净重建；其他 Node 分组与核心有重叠，不相加 | `integrated-final.log`；最后提示文案增量冻结复验 PASS：`b0-release.log` |
+| 共享后端矩阵 | 277 个目标、12 组退出 0；JUnit 汇总 **2834 passed / 77 skipped，零失败、零错误**，另有 71 deselected。Ruff 和 Agent 入口通过；skip 不计通过 | `integrated-final.log`；`.context/checks/20260920T181922096671Z/summary.json` 与 12 份 JUnit |
+| Chromium + FastAPI / SQLite | 合并后 15 项 PASS、无未处理异常；覆盖拖动/缩放/停靠/回收站/全屏/390px/HTML 编辑与选区保护。原生会话打开仍为夹具，真实模型证据独立 | `browser-release/results.json` 与截图 |
+| 删除异步链及选区回归 | 5 项定向 DOM PASS，含 Office 关闭及偏好写入慢请求、失败/重试、正反 Tab、重复激活阻断和恢复焦点；已纳入完整 pipeline | `library-workspace.test.mjs`；`integrated-final.log` |
+| 评估器与工具范围 | 11 项 Python oracle 回归 PASS；5 项 Node guard PASS（包括固定上游实际 scope registry），均为合成测试 | 后端矩阵；`eval-guard-final.log` |
+| 真实模型评估 | **最终 5/5 PASS**：MiniMax-M3，3 项修改双轮 present → collect → confirm → 独立连接读回版本 2；2 项越界拒绝，无候选并保留版本 1。最终六项源码指纹全部匹配 | `model-eval-final.json`；人工复核拒绝答复无虚构入口 |
 | 未执行验收 | 完整 DSH 宿主浏览器、真实用户 HTML UAT、Office / PDF 兼容扩展、远端 CI、现役部署切换与状态降级验证 | 当前 `full_dsh_shell` 为 `NOT_RUN`；产品仍 PARTIAL |
 
-`b0-final.log` 和 `backend-final.log` 的证据包装器均提示运行期间工作树发生变化，未记录完整内容指纹、评级为 STALE。原始运行通过事实保留，但不能冒充冻结后的最终差异已验证；最终 pipeline、最终真实模型评估及其证据待主任务完成后补记。此前失败的 `b0.log`、`backend.log`、浏览器初次/中间日志、真实模型 `model-eval-first.json` / `model-eval-guarded.json` / `model-eval-recovery.json` 与外审原文保留，不覆盖失败结果。
+早期 `b0-final.log`、`backend-final.log` 因并行修改标为 STALE，保留通过事实但不作最终内容绑定。合并后首次完整运行因为本次命令 PATH 漏掉 `/usr/sbin/lsof` 而在临时备份夹具失败；确认 fail-closed 原因、恢复正常系统 PATH 后，完整矩阵通过。`integrated-path-failure.log` 与原失败报告保留。综合通过运行期间另修一行 SAVED 刷新失败提示，包装器同样标 STALE；后端源码未变，最后 B0 冻结验证已通过，正常 pre-push 仍保留完整内容门禁。此前浏览器/模型失败和外审原文均保留，不覆盖为成功。
 
 `model-eval-refined.json` 记录合计 **164420 tokens**：输入 37848、输出 6776、缓存读取 119796；供应商计费金额未知，不按 token 数推算费用。该次未重启现役服务、未改模型设置，临时 preset 已移除。工具边界由原生会话 scope guard 执行，记录中包含被拒绝的额外工具尝试，不能将其误记为实际执行了业务查询或 shell。
 
-人工复核随后发现拒绝文案虚构了 CSS 选区入口，已在任务说明中明确本入口不提供 CSS/JS/资源选区或扩权操作；重复 HTML 属性的评估判据拒绝回归仍在补齐。删除确认 pending 状态的焦点修复及 DOM 回归也在进行。因此上述模型 PASS 是有限五个合成案例的中间证据，不能提前证明最终提示词、判据或 UI 已验证。
+人工复核随后发现拒绝文案虚构了 CSS 选区入口，已在任务说明中明确本入口不提供 CSS/JS/资源选区或扩权操作；评估判据已拒绝重复 HTML 属性，11 项评估器回归通过。删除确认的同步门控覆盖编辑器关闭、偏好写入和收尾，按钮保持可聚焦；两条延迟/失败回归连同相关重挂载和选区测试合计 5 项通过。上述 refined 结果仍保留为中间证据。
 
-本轮 Step 7 的 **AI 评估覆盖为 27/30 条关键路径（90%）**，不是仪器行覆盖。G1 已由 3 项定向测试补齐，G5 已有有限五案例真实模型证据；剩余 G2（浮动栏取消/边界）、G3（全屏失败恢复）、G4（删除 dirty / 慢请求 / 失败恢复完整流程）仍开放。G4 的焦点和 pending 修复只计部分覆盖，不提前关闭全部 dirty 路径。
+最终 `model-eval-final.json`：**5/5 PASS**，使用修复后的真实 TASK.md、原生初始提示和评估器。三项修改经 present、收取、确认保存为版本 2，并独立读回；两项拒绝无候选且保持版本 1。合计 **164723 tokens**（输入 27472、输出 5504、缓存读取 131747），费用未知；临时 preset 已移除，无服务重启或默认模型设置变更。`model-eval-release.json` 的自动判定也曾通过，但人工读答复发现虚构 CSS 选区建议，因此没有把该次结果作为最终交付证据；修正提示后重新运行并人工核对最终答复。
+
+本轮 Step 7 的 **AI 评估覆盖为 27/30 条关键路径（90%）**，不是仪器行覆盖。G1 已由非 live 源码确认的新增 DOM 回归补齐，G5 已有有限五案例真实模型证据；剩余 G2（浮动栏取消/边界）、G3（全屏失败恢复）、G4（删除 dirty / 慢请求 / 失败恢复完整流程）仍开放。G4 的焦点和 pending 修复只计部分覆盖，不提前关闭全部 dirty 路径。
 
 复现入口仍为固定工具链下的 `scripts/dsh-b0/pipeline.mjs --check --python /absolute/python3.14`、共享路径检查器 `scripts/ci/run_checks.py` 和 `dsh-plugins/analytics-workbench/test/cockpit-ui-ux-browser-probe.mjs`。运行参数按对应日志及当前验证矩阵；不因文档说明自动启动服务、迁移现役状态或调用模型。
 
