@@ -105,6 +105,8 @@ class CockpitFileStore:
         self.path = root / "files.sqlite3"
         with self.connect() as con:
             con.executescript("""
+                CREATE TABLE IF NOT EXISTS cockpit_preferences (
+                  owner TEXT PRIMARY KEY, value TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS files (
                   id TEXT PRIMARY KEY, owner TEXT NOT NULL, filename TEXT NOT NULL,
                   kind TEXT NOT NULL, head INTEGER NOT NULL, created_ms INTEGER NOT NULL,
@@ -141,6 +143,44 @@ class CockpitFileStore:
         needed = "dashboard:update" if write else "dashboard:read"
         if needed not in actor.capabilities:
             fault(403, "FORBIDDEN", "当前身份无权操作产物库。")
+
+    def preferences(self, actor, change=None):
+        """Per-user cabinet organization; never deletes source files or revisions."""
+        self.access(actor, change is not None)
+        with self.connect() as con:
+            if change is not None:
+                con.execute("BEGIN IMMEDIATE")
+            row = con.execute("SELECT value FROM cockpit_preferences WHERE owner=?", (actor.actor_id,)).fetchone()
+            value = json.loads(row[0]) if row else {"removed": [], "order": [], "rail_width": 248, "rail_layout": None}
+            if change is None:
+                return value
+            if not isinstance(change, dict) or len(change) != 1:
+                fault(422, "INVALID_PREFERENCE", "每次只调整一个产物设置。")
+            key, data = next(iter(change.items()))
+            def identity(item):
+                return (isinstance(item, str) and 1 < len(item) <= 4608
+                        and item.split(":", 1)[0] in {"file", "page", "board", "cabinet"}
+                        and ":" in item and not any(c in item for c in "\0\r\n"))
+            if key in {"remove", "restore"} and identity(data):
+                value["removed"] = [item for item in value["removed"] if item != data]
+                if key == "remove":
+                    if len(value["removed"]) >= 5000:
+                        fault(422, "PREFERENCE_LIMIT", "回收站已达上限，请先恢复部分产物。")
+                    value["removed"].append(data)
+            elif key == "order" and isinstance(data, list) and len(data) <= 5000 and all(identity(item) for item in data) and len(set(data)) == len(data):
+                value["order"] = data
+            elif key == "rail_width" and type(data) is int and 180 <= data <= 480:
+                value["rail_width"] = data
+            elif key == "rail_layout" and (data is None or isinstance(data, dict) and set(data) == {"x", "y", "width", "height"}
+                    and all(type(v) is int for v in data.values())
+                    and 0 <= data["x"] <= 20000 and 0 <= data["y"] <= 20000
+                    and 180 <= data["width"] <= 480 and 240 <= data["height"] <= 1000):
+                value["rail_layout"] = data
+            else:
+                fault(422, "INVALID_PREFERENCE", "产物设置无效。")
+            con.execute("INSERT INTO cockpit_preferences VALUES(?,?) ON CONFLICT(owner) DO UPDATE SET value=excluded.value",
+                        (actor.actor_id, json.dumps(value)))
+            return value
 
     def row(self, con, actor, file_id):
         row = con.execute("SELECT * FROM files WHERE id=? AND owner=?", (file_id, actor.actor_id)).fetchone()

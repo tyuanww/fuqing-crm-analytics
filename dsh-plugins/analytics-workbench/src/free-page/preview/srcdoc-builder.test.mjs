@@ -46,3 +46,11 @@ test('srcdoc keeps complex source, injects CSP and bridge bootstrap, and does no
   assert.match(scriptBreak, /<\\\/script/);
   assert.equal((scriptBreak.match(/<\/script>/gi) || []).length, 2);
 });
+
+test('header/footer and similarly named tags retain real closing tags inside the trusted wrapper', () => {
+  const html = '<header><h1>Title</h1></header><main>Body</main><footer>End</footer><heading>x</heading><bodyguard>y</bodyguard><head-note>z</head-note>';
+  const src = buildSrcdoc({ html, css: '', js: 'window.header = "</header>"' });
+  assert.ok(src.includes(html));
+  assert.doesNotMatch(src, /&lt;\/header|&lt;\/heading|&lt;\/bodyguard/);
+  assert.match(src, /window.header = "<\/header>"/);
+});

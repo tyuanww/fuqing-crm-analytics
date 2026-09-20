@@ -15,6 +15,7 @@ from pydantic import ValidationError
 
 from backend.contracts.page_documents import PagePackage, PageSavePreview
 from backend.services.analytics.access import AnalyticsError
+from backend.services.analytics.cockpit_html_selection import validate_selection, protect_selection
 from backend.services.analytics.cockpit_files import MAX_FILE_BYTES, fault, stamp, validate_file
 
 
@@ -73,6 +74,7 @@ class CockpitAIStore:
             "session_id": "session-cockpit-ai-" + row["id"][3:], "workspace": str(self.root / row["id"]),
             "source_name": "source." + row["filename"].rsplit(".", 1)[-1],
             "bound": bool(json.loads(row["context"]).get("binding_manifest", {}).get("result_refs")),
+            "selection": json.loads(row["context"]).get("selection"),
             "title": json.loads(row["context"]).get("title", row["filename"]),
             "output_name": "candidate." + row["filename"].rsplit(".", 1)[-1],
         }
@@ -85,6 +87,15 @@ class CockpitAIStore:
                               else "此页面未绑定业务结果，可以按用户要求修改页面源码。"))
         else:
             format_rule = "保持原文件格式，使用已有成熟文档库；保留排版、公式、图片和未要求修改的内容。缺少工具应说明，不自动安装、不生成损坏或仅改扩展名的文件。PDF 须检查正文和页面效果，扫描件不能假装完成 OCR。"
+        if job.get("selection"):
+            scope = job["selection"]
+            format_rule += (f"\n用户已点选静态 HTML 范围：Unicode 字符偏移 [{scope['start']}, {scope['end']})。"
+                            "只修改 source.json 的 html 字符串中该范围；范围外字节、css/js/resources/node_map 必须保持不变。"
+                            "偏移定位的是原始 HTML 中的完整选中元素；替换片段可以变长或变短，不要求等长。"
+                            "仅实施用户明确指定的文字、元素和样式修改：例如要求给 section 设置背景色时，只改 section 的 style，不给内部 p 或其他子元素追加样式。"
+                            "保留选中元素根标签；p/span/标题等文本容器及其祖先内不得新增块级标签，不得嵌套 a/button 或改变列表/表格上下文，仅使用已核验的静态 HTML 子集。可修改文字、静态子元素和内联 style；禁止新增 script/style 标签、事件处理、可执行链接或动态资源。"
+                            "不要扩大为整页修改。若需求需要改共享样式或脚本，先说明限制，不能越界交付。"
+                            "本入口不提供 CSS/JS/资源选区或扩权入口。遇到越界需求，答复只包含不超过两句的限制说明与‘本次未生成候选’，然后停止；不提供重新点选、扩权或后续操作建议。")
         return (f"# 驾驶舱产物修改\n\n源文件：{job['source_name']}\n候选交付文件：{job['output_name']}\n"
                 f"基于版本：{row['base_version']}\n\n"
                 "先读取源文件，确认内容并询问用户要怎样修改。等用户在原生对话提出要求后再动手。\n"
@@ -119,7 +130,7 @@ class CockpitAIStore:
                 items.append(self.view(dict(row)))
             return {"items": items, "next_offset": offset + 100 if len(rows) > 100 else None}
 
-    def begin(self, actor, target_kind, target_id, base_version, job_id):
+    def begin(self, actor, target_kind, target_id, base_version, job_id, selection=None):
         self.files.access(actor, True)
         if not isinstance(job_id, str) or not re.fullmatch(r"ai_[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}", job_id):
             fault(422, "INVALID_AI_REQUEST", "AI 修改请求标识无效。")
@@ -131,6 +142,8 @@ class CockpitAIStore:
             if prior:
                 if (prior["owner"], prior["target_kind"], prior["target_id"], prior["base_version"]) != (actor.actor_id, target_kind, target_id, base_version):
                     fault(409, "AI_REQUEST_CONFLICT", "请求标识已用于其他产物。")
+                if json.loads(prior["context"]).get("selection") != selection:
+                    fault(409, "AI_REQUEST_CONFLICT", "请求标识已用于其他选区。")
                 row = self.row(con, actor, job_id)
             else:
                 context = {}
@@ -148,6 +161,10 @@ class CockpitAIStore:
                     fault(422, "INVALID_AI_TARGET", "请先将会话文件保存到产物库。")
                 if version != base_version:
                     fault(409, "AI_BASE_CHANGED", "产物已有新版本，请刷新后重新发起。")
+                if selection is not None:
+                    if target_kind != "page":
+                        fault(422, "AI_SELECTION_INVALID", "请先保存为可编辑页面后选择板块。")
+                    context["selection"] = validate_selection(spec["package"], selection, spec["binding_manifest"])
                 con.execute("INSERT INTO ai_edits VALUES(?,?,?,?,?,?,?,?, 'WAITING',NULL,NULL,NULL,NULL,?)",
                             (job_id, actor.actor_id, target_kind, target_id, base_version, filename, source, json.dumps(context), stamp()))
                 row = self.row(con, actor, job_id)
@@ -214,6 +231,7 @@ class CockpitAIStore:
                     fault(422, "INVALID_AI_PAGE", "AI 交付的页面源码包不符合合同。")
                 context = json.loads(row["context"])
                 self.protect_bindings(json.loads(row["source"]), package.model_dump(mode="json"), context["binding_manifest"])
+                protect_selection(json.loads(row["source"]), package.model_dump(mode="json"), context.get("selection"))
                 preview = self.pages.save(actor, row["target_id"], PageSavePreview(
                     base_version=row["base_version"], title=context["title"], package=package,
                     binding_manifest=context["binding_manifest"]))

@@ -5,6 +5,8 @@ import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { join, resolve } from 'node:path';
 import { createLibraryBoardClient } from './library-board-client.mjs';
+import { createCockpitFileClient } from './cockpit-file-client.mjs';
+import { editablePageNodes } from './html-selection-bridge.mjs';
 import { COMPONENT_CATALOG } from '../board-spec/component-catalog.mjs';
 import { librarySnapshot, libraryPreview, ok, failed, listOf } from '../../test/helpers/library-board-fixtures.mjs';
 import { createFreeHtmlLibraryStore } from './free-html-library/store.mjs';
@@ -1004,7 +1006,7 @@ test('saved page_id products open FreeHtmlLibraryApp on the canvas', async t => 
   await act(async () => { await new Promise(resolve => setTimeout(resolve, 0)); });
   assert.ok(ui.doc.querySelector('[data-testid="library-html-preview"]'));
   await ui.click('[data-testid="cockpit-edit-btn"]');
-  assert.match(ui.doc.querySelector('[data-testid="cockpit-sidebar"]').textContent, /编辑文字/);
+  assert.match(ui.doc.querySelector('[data-testid="cockpit-sidebar"]').textContent, /编辑选区/);
 });
 
 test('html fragments wrap into a document and PDF files appear in their group', async t => {
@@ -1221,6 +1223,225 @@ test('host reentry reads the selected raw HTML again using its original session 
   await ui.render(null); await ui.render(React.createElement(LibraryCockpitPanel, props));
   assert.ok(ui.doc.querySelector('[data-testid="library-html-preview"]'));
   assert.deepEqual(reads, [['source', 'report.html'], ['source', 'report.html']]);
+});
+
+for (const initialSurface of ['pages', 'board']) test(`trashed current board stays hidden on ${initialSurface} reentry until restored`, async t => {
+  const ui = await domFixture(t), saved = librarySnapshot();
+  const id = 'board:' + saved.spec.board_id;
+  const library = createLibraryBoardClient(async (_channel, operation) => {
+    if (operation === 'list') return ok(listOf(saved));
+    if (operation === 'get') return ok(saved);
+    throw new Error(operation);
+  });
+  let preferences = { removed: [], order: [], rail_width: 248 };
+  const fileClient = createCockpitFileClient({ base: 'http://fixture', async fetchImpl(url, init) {
+    if (!url.endsWith('/preferences')) return Response.json({ items: [], next_offset: null });
+    if (init.method === 'PATCH') {
+      const change = JSON.parse(init.body);
+      preferences = { ...preferences, removed: change.remove ? [change.remove] : [] };
+    }
+    return Response.json(preferences);
+  } });
+  const pageStore = createFreeHtmlLibraryStore();
+  t.after(() => { library.dispose(); fileClient.dispose(); pageStore.dispose(); });
+  await library.openBoard(saved.spec.board_id);
+  const component = () => React.createElement(LibraryCockpitPanel, { library, fileClient, pageStore, initialSurface,
+    themeSource: { subscribe: () => () => {}, getSnapshot: () => 'light' }, goConversation() {} });
+  await ui.render(component());
+  assert.ok(ui.doc.querySelector('[data-testid="library-board-view"]'));
+  const removeButton = ui.doc.querySelector(`[data-product-id="${id}"] .cockpit-product-delete`);
+  removeButton.focus();
+  await ui.click(`[data-product-id="${id}"] .cockpit-product-delete`);
+  assert.equal(ui.doc.activeElement.textContent, '取消');
+  await ui.key('[role="alertdialog"]', 'Escape');
+  assert.equal(ui.doc.activeElement, removeButton, 'Escape restores the trigger, not the unmounted modal button');
+  await ui.click(`[data-product-id="${id}"] .cockpit-product-delete`);
+  await ui.click('[role="alertdialog"] .cockpit-primary');
+  assert.equal(ui.doc.activeElement, ui.doc.querySelector('.cockpit-rail-grab'), 'successful removal returns focus to the remaining rail');
+  assert.deepEqual(fileClient.getSnapshot().preferences.removed, [id]);
+  assert.equal(ui.doc.querySelector('[data-testid="library-board-view"]'), null);
+  assert.equal(pageStore.getSnapshot().cockpitSelectionId, null);
+  assert.equal(library.getSnapshot().saved.spec.board_id, saved.spec.board_id, 'saved history is retained');
+  await ui.render(null); await ui.render(component());
+  assert.equal(ui.doc.querySelector('[data-testid="library-board-view"]'), null);
+  assert.equal(ui.doc.querySelector(`[data-product-id="${id}"]`), null);
+  assert.equal(pageStore.getSnapshot().cockpitSelectionId, null);
+  await ui.click('.cockpit-rail-footer button');
+  assert.equal(ui.doc.querySelector(`[data-product-id="${id}"] .cockpit-product`).disabled, true);
+  ui.doc.querySelector(`[data-product-id="${id}"] .cockpit-product-delete`).focus();
+  await ui.click(`[data-product-id="${id}"] .cockpit-product-delete`);
+  assert.equal(ui.doc.activeElement, ui.doc.querySelector('.cockpit-rail-grab'), 'restoring removes the row but retains a useful keyboard focus');
+  await ui.click('.cockpit-rail-footer button');
+  await ui.click(`[data-product-id="${id}"] .cockpit-product`);
+  assert.ok(ui.doc.querySelector('[data-testid="library-board-view"]'));
+  assert.equal(library.getSnapshot().saved.spec.version, saved.spec.version);
+});
+
+test('pending removal keeps keyboard focus trapped and rejects repeated actions through a failed request', async t => {
+  const ui = await domFixture(t), saved = librarySnapshot();
+  const id = 'board:' + saved.spec.board_id;
+  const library = createLibraryBoardClient(async (_channel, operation) => operation === 'list' ? ok(listOf(saved)) : ok(saved));
+  let settle, writes = 0;
+  const fileClient = createCockpitFileClient({ base: 'http://fixture', async fetchImpl(url, init) {
+    if (!url.endsWith('/preferences')) return Response.json({ items: [], next_offset: null });
+    if (init.method === 'PATCH') { writes++; return new Promise(resolve => { settle = resolve; }); }
+    return Response.json({ removed: [], order: [], rail_width: 248 });
+  } });
+  t.after(() => { library.dispose(); fileClient.dispose(); });
+  await ui.render(React.createElement(LibraryCockpitPanel, { library, fileClient,
+    themeSource: { subscribe: () => () => {}, getSnapshot: () => 'light' }, goConversation() {} }));
+  const trigger = ui.doc.querySelector(`[data-product-id="${id}"] .cockpit-product-delete`);
+  trigger.focus(); await ui.click(`[data-product-id="${id}"] .cockpit-product-delete`);
+  const dialog = ui.doc.querySelector('[role="alertdialog"]');
+  const cancel = dialog.querySelector('button'), confirm = dialog.querySelector('.cockpit-primary');
+  confirm.focus(); await ui.click('[role="alertdialog"] .cockpit-primary');
+  assert.equal(fileClient.getSnapshot().organizing, true);
+  assert.equal(writes, 1);
+  for (const button of [cancel, confirm]) {
+    assert.equal(button.disabled, false, 'pending buttons remain focusable in Chromium');
+    assert.equal(button.getAttribute('aria-disabled'), 'true');
+  }
+  assert.equal(ui.doc.activeElement, confirm);
+  await ui.key('[role="alertdialog"] .cockpit-primary', 'Tab');
+  assert.equal(ui.doc.activeElement, cancel, 'Tab wraps inside the pending dialog');
+  await ui.key('[role="alertdialog"] button', 'Tab', true);
+  assert.equal(ui.doc.activeElement, confirm, 'Shift+Tab wraps inside the pending dialog');
+  await ui.click('[role="alertdialog"] .cockpit-primary');
+  await ui.click('[role="alertdialog"] button');
+  await ui.key('[role="alertdialog"] .cockpit-primary', 'Escape');
+  assert.equal(writes, 1, 'pending activation cannot queue a duplicate deletion');
+  assert.equal(ui.doc.querySelector('[role="alertdialog"]'), dialog, 'cancel and Escape cannot dismiss a pending deletion');
+  await act(async () => settle(Response.json({ error: { message: '隔离删除失败，请重试' } }, { status: 503 })));
+  assert.equal(fileClient.getSnapshot().organizing, false);
+  assert.equal(ui.doc.activeElement, confirm, 'failed removal retains the retry action focus');
+  assert.match(dialog.textContent, /隔离删除失败/);
+  assert.equal(confirm.getAttribute('aria-disabled'), 'false');
+  await ui.key('[role="alertdialog"] .cockpit-primary', 'Tab');
+  assert.equal(ui.doc.activeElement, cancel, 'the failed dialog still traps keyboard focus');
+  await ui.click('[role="alertdialog"] button');
+  assert.equal(ui.doc.querySelector('[role="alertdialog"]'), null);
+  assert.equal(ui.doc.activeElement, trigger);
+  assert.deepEqual(fileClient.getSnapshot().preferences.removed, []);
+});
+
+test('pending Office close locks removal through close failure, retry and the preferences request', async t => {
+  const ui = await domFixture(t);
+  const library = createLibraryBoardClient(async () => ok({ items: [] }));
+  const item = { file_id: 'office-1', filename: '报告.docx', kind: 'document', version: 1, origin: { kind: 'upload' } };
+  const id = 'cabinet:' + item.file_id;
+  let settleClose, settleRemoval, closes = 0, writes = 0;
+  const preferences = { removed: [], order: [], rail_width: 248 };
+  const fileClient = createCockpitFileClient({ base: 'http://fixture', async fetchImpl(url, init) {
+    if (url.endsWith('/edit')) return Response.json({ edit_key: 'office-edit', script_url: 'http://fixture/office.js', config: {} });
+    if (url.endsWith('/cancel')) { closes++; return new Promise(resolve => { settleClose = resolve; }); }
+    if (url.endsWith('/preferences')) {
+      if (init.method === 'PATCH') { writes++; return new Promise(resolve => { settleRemoval = resolve; }); }
+      return Response.json(preferences);
+    }
+    return Response.json({ items: [item], next_offset: null });
+  } });
+  t.after(() => { library.dispose(); fileClient.dispose(); });
+  await fileClient.refresh(); await fileClient.openEditor(item.file_id);
+  await ui.render(React.createElement(LibraryCockpitPanel, { library, fileClient, initialSurface: 'pages',
+    themeSource: { subscribe: () => () => {}, getSnapshot: () => 'light' }, goConversation() {} }));
+  assert.ok(ui.doc.querySelector('[data-testid="cockpit-office-editor"]'));
+  await ui.click(`[data-product-id="${id}"] .cockpit-product-delete`);
+  const dialog = ui.doc.querySelector('[role="alertdialog"]');
+  const cancel = dialog.querySelector('button'), confirm = dialog.querySelector('.cockpit-primary');
+  confirm.focus();
+  await act(async () => {
+    confirm.click(); confirm.click(); cancel.click();
+    confirm.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+  });
+  assert.equal(closes, 1, 'same-frame confirmation cannot start another editor close');
+  assert.equal(writes, 0);
+  assert.equal(fileClient.getSnapshot().organizing, false, 'the deletion lock starts before preferences are patched');
+  assert.equal(ui.doc.querySelector('[role="alertdialog"]'), dialog);
+  for (const button of [cancel, confirm]) { assert.equal(button.disabled, false); assert.equal(button.getAttribute('aria-disabled'), 'true'); }
+  await ui.key('[role="alertdialog"] .cockpit-primary', 'Tab');
+  assert.equal(ui.doc.activeElement, cancel);
+  await ui.key('[role="alertdialog"] button', 'Tab', true);
+  assert.equal(ui.doc.activeElement, confirm);
+  await ui.click('[role="alertdialog"] button');
+  await ui.key('[role="alertdialog"] .cockpit-primary', 'Escape');
+  assert.equal(ui.doc.querySelector('[role="alertdialog"]'), dialog);
+  await act(async () => settleClose(Response.json({ error: { message: '隔离编辑器关闭失败' } }, { status: 503 })));
+  assert.equal(writes, 0, 'failed editor close cannot delete the product');
+  assert.equal(confirm.getAttribute('aria-disabled'), 'false', 'the whole-chain lock releases after close failure');
+  assert.equal(ui.doc.activeElement, confirm);
+  assert.match(dialog.textContent, /隔离编辑器关闭失败/);
+  await ui.click('[role="alertdialog"] .cockpit-primary');
+  assert.equal(closes, 2, 'failed close can be retried');
+  await act(async () => settleClose(Response.json({ ok: true })));
+  assert.equal(fileClient.getSnapshot().organizing, true);
+  assert.equal(writes, 1);
+  await ui.click('[role="alertdialog"] .cockpit-primary');
+  await ui.click('[role="alertdialog"] button');
+  await ui.key('[role="alertdialog"] .cockpit-primary', 'Escape');
+  assert.equal(closes, 2);
+  assert.equal(writes, 1);
+  assert.equal(ui.doc.querySelector('[role="alertdialog"]'), dialog, 'the lock remains active when editor close hands off to deletion');
+  await act(async () => settleRemoval(Response.json({ ...preferences, removed: [id] })));
+  assert.equal(ui.doc.querySelector('[role="alertdialog"]'), null);
+  assert.equal(ui.doc.activeElement, ui.doc.querySelector('.cockpit-rail-grab'));
+  assert.deepEqual(fileClient.getSnapshot().preferences.removed, [id]);
+});
+
+test('runtime targets followed immediately by selection accept the first click and preserve local source edits', async t => {
+  const ui = await domFixture(t);
+  const library = createLibraryBoardClient(async () => ok({ items: [] }));
+  const pageStore = createFreeHtmlLibraryStore();
+  t.after(() => { library.dispose(); pageStore.dispose(); });
+  pageStore.setPrompt('即时选区'); await pageStore.generate(); pageStore.enterEdit();
+  pageStore.selectCockpitAsset('page:' + pageStore.getSnapshot().current.page_id);
+  await ui.render(React.createElement(LibraryCockpitPanel, { library, pageStore,
+    themeSource: { subscribe: () => () => {}, getSnapshot: () => 'light' }, goConversation() {} }));
+  const selectImmediately = async () => {
+    const current = pageStore.getSnapshot().current;
+    const node = editablePageNodes(current.package, current.binding_manifest).find(node => node.source && node.tag === 'p');
+    assert.ok(node);
+    const frame = ui.doc.querySelector('[data-testid="library-html-preview"]');
+    const start = frame.srcdoc.lastIndexOf(')({"channel":') + 2;
+    const config = JSON.parse(frame.srcdoc.slice(start, frame.srcdoc.indexOf(');</script>', start)));
+    const envelope = { channel: config.channel, pageId: config.pageId, version: config.version };
+    await act(async () => {
+      // Both messages can arrive before React has rendered the available-target list.
+      window.dispatchEvent(new window.MessageEvent('message', { source: frame.contentWindow, origin: 'null',
+        data: { ...envelope, type: 'cockpit.targets', nodeIds: [node.node_id] } }));
+      window.dispatchEvent(new window.MessageEvent('message', { source: frame.contentWindow, origin: 'null',
+        data: { ...envelope, type: 'cockpit.selection', nodeId: node.node_id } }));
+    });
+    assert.equal(pageStore.getSnapshot().selection?.node_id, node.node_id);
+    return node;
+  };
+  const node = await selectImmediately(), version = pageStore.getSnapshot().current.version;
+  await act(async () => { pageStore.setReplacementText('本地源码改字', node.text); await pageStore.previewPatch('本地源码改字'); await pageStore.confirmPatch(); });
+  assert.equal(pageStore.getSnapshot().current.version, version + 1);
+  assert.match(pageStore.getSnapshot().current.package.html, /<p>本地源码改字<\/p>/);
+  await selectImmediately();
+});
+
+test('delayed preferences never render a cached trashed selection and clear its shared intent', async t => {
+  const ui = await domFixture(t), saved = librarySnapshot();
+  const id = 'board:' + saved.spec.board_id;
+  const library = createLibraryBoardClient(async (_channel, operation) => operation === 'list' ? ok(listOf(saved)) : ok(saved));
+  await library.openBoard(saved.spec.board_id);
+  let release;
+  const loaded = new Promise(resolve => { release = resolve; });
+  const fileClient = createCockpitFileClient({ base: 'http://fixture', async fetchImpl(url) {
+    if (url.endsWith('/preferences')) { await loaded; return Response.json({ removed: [id], order: [], rail_width: 248 }); }
+    return Response.json({ items: [], next_offset: null });
+  } });
+  const pageStore = createFreeHtmlLibraryStore(); pageStore.selectCockpitAsset(id);
+  t.after(() => { library.dispose(); fileClient.dispose(); pageStore.dispose(); });
+  await ui.render(React.createElement(LibraryCockpitPanel, { library, fileClient, pageStore, initialSurface: 'board',
+    themeSource: { subscribe: () => () => {}, getSnapshot: () => 'light' }, goConversation() {} }));
+  assert.equal(fileClient.getSnapshot().preferencesReady, false);
+  assert.equal(ui.doc.querySelector('[data-testid="library-board-view"]'), null, 'wait for saved visibility before rendering');
+  await act(async () => { release(); await loaded; });
+  assert.equal(fileClient.getSnapshot().preferencesReady, true);
+  assert.equal(ui.doc.querySelector('[data-testid="library-board-view"]'), null);
+  assert.equal(pageStore.getSnapshot().cockpitSelectionId, null);
 });
 
 test('a native unsaved board preview replaces the previous HTML selection on reentry and remains visible after save', async t => {

@@ -2,14 +2,17 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createCockpitAIClient, nativeArtifactPrompt } from '../src/client/cockpit-ai-client.mjs';
 
-function setup({ failSave = false, saveStatus = 200, badReceipt = false, onSaved } = {}) {
+function setup({ failSave = false, saveStatus = 200, badReceipt = false, failRepeatBegin = false, onSaved } = {}) {
   const requests = [], native = [];
   let job = null, fail = failSave;
   const client = createCockpitAIClient({ base: 'http://fixture', token: 'test', async fetchImpl(url, init) {
     const path = new URL(url).pathname.replace('/api/v1/analytics/cockpit-ai', '');
     const body = init.body ? JSON.parse(init.body) : null;
     requests.push({ path, body, method: init.method });
-    if (!path && init.method === 'POST') { job = { ...body, status: 'WAITING', candidate_hash: null, filename: 'file.csv', session_id: 'session-' + body.id, workspace: '/isolated/task', source_name: 'source.csv', output_name: 'candidate.csv' }; return Response.json(job); }
+    if (!path && init.method === 'POST') {
+      if (job && failRepeatBegin) { failRepeatBegin = false; return Response.json({ error: { message: '新请求失败' } }, { status: 503 }); }
+      job = { ...body, status: 'WAITING', candidate_hash: null, filename: 'file.csv', session_id: 'session-' + body.id, workspace: '/isolated/task', source_name: 'source.csv', output_name: 'candidate.csv' }; return Response.json(job);
+    }
     if (!path) return Response.json({ items: job && !['SAVED','CANCELLED'].includes(job.status) ? [job] : [] });
     if (path.endsWith('/collect')) return Response.json(job = { ...job, status: 'READY', candidate_hash: 'candidate-sha' });
     if (path.endsWith('/comparison')) return Response.json({ text_diff: '-before\n+after', note: 'preview', source_size: 1, candidate_size: 2 });
@@ -86,6 +89,23 @@ test('refresh failure after save does not turn verified persistence into uncerta
   assert.equal((await client.confirm()).ok, true);
   assert.equal(client.getSnapshot().confirmationUncertain, false);
   assert.match(client.getSnapshot().message, /新版本已保存/);
+  assert.equal(client.getSnapshot().messageError, true);
+});
+
+test('fresh begin failures remain distinguishable from a completed job and clear on retry', async () => {
+  for (const finalStatus of ['SAVED', 'CANCELLED']) {
+    const { client } = setup({ failRepeatBegin: true });
+    await client.begin('file', 'file-1', 1);
+    if (finalStatus === 'SAVED') { await client.collect(); await client.confirm(); } else await client.cancel();
+    assert.equal(client.getSnapshot().messageError, false);
+    assert.equal(await client.begin('file', 'file-1', 2), false);
+    assert.equal(client.getSnapshot().active.status, finalStatus);
+    assert.equal(client.getSnapshot().message, '新请求失败');
+    assert.equal(client.getSnapshot().messageError, true);
+    assert.equal(await client.begin('file', 'file-1', 2), true);
+    assert.equal(client.getSnapshot().messageError, false);
+    assert.equal(client.getSnapshot().message, '');
+  }
 });
 
 test('refresh loads every pending task page and rejects a looping cursor', async () => {
@@ -101,4 +121,50 @@ test('refresh loads every pending task page and rejects a looping cursor', async
     fetchImpl: async () => Response.json({ items: [], next_offset: 0 }) });
   await broken.refresh();
   assert.match(broken.getSnapshot().message, /列表无效/);
+});
+
+test('selection jobs reopen only the same scope and reject whole-page or different-scope reuse', async t => {
+  const { client, requests, native } = setup(); t.after(() => client.dispose());
+  const selection = { start: 0, end: 18, html_hash: 'a'.repeat(64) };
+  assert.equal(await client.begin('page', 'page-1', 1, selection), true);
+  const original = client.getSnapshot().active;
+  assert.deepEqual(requests[0].body.selection, selection);
+  assert.match(nativeArtifactPrompt(original), /仅修改我在画布点选的板块/);
+  assert.equal(await client.begin('page', 'page-1', 1, { ...selection }), true);
+  assert.equal(native.at(-1)[1], false);
+  assert.equal(client.getSnapshot().active.id, original.id);
+  for (const scope of [null, { ...selection, end: 19 }]) {
+    assert.equal(await client.begin('page', 'page-1', 1, scope), false);
+    assert.equal(client.getSnapshot().active.id, original.id);
+    assert.equal(client.getSnapshot().messageError, true);
+    assert.match(client.getSnapshot().message, /已有其他范围/);
+  }
+  assert.equal(requests.filter(row => row.method === 'POST' && !row.path).length, 1);
+  assert.equal(native.length, 2, 'rejected scope changes must not open a native conversation');
+  assert.equal(await client.begin('page', 'page-1', 1, selection), true);
+  assert.equal(client.getSnapshot().messageError, false);
+});
+
+test('lost selection begin receipts retry one identity and changed scopes receive a new identity', async t => {
+  const requests = [], native = [];
+  let fail = true;
+  const client = createCockpitAIClient({ base: 'http://fixture', async fetchImpl(_url, init) {
+    const body = JSON.parse(init.body); requests.push(body);
+    if (fail) { fail = false; throw new Error('begin response lost'); }
+    return Response.json({ ...body, status: 'WAITING', filename: 'page-package.json' });
+  } }, { openNative: async (...args) => native.push(args) });
+  t.after(() => client.dispose());
+  const selection = { start: 2, end: 28, html_hash: 'b'.repeat(64) };
+  assert.equal(await client.begin('page', 'page-1', 1, selection), false);
+  assert.equal(native.length, 0);
+  assert.equal(client.getSnapshot().active, null);
+  assert.equal(await client.begin('page', 'page-1', 1, { ...selection }), true);
+  assert.deepEqual(requests[1], requests[0]);
+  assert.equal(native.length, 1);
+  assert.equal(client.getSnapshot().messageError, false);
+  fail = true;
+  assert.equal(await client.begin('page', 'page-2', 1, selection), false);
+  assert.equal(await client.begin('page', 'page-2', 1, { ...selection, start: 3 }), true);
+  assert.notEqual(requests[3].id, requests[2].id);
+  assert.equal(requests[3].selection.start, 3);
 });

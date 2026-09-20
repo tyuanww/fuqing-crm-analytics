@@ -7,6 +7,7 @@ function setup(save) {
   const client = createCockpitFileClient({ base: 'http://fixture', token: 'synthetic', async fetchImpl(url, init) {
     const path = new URL(url).pathname;
     requests.push({ path, ...init });
+    if (path.endsWith('/preferences')) return Response.json({ removed: [], order: [], rail_width: 248 });
     if (path.endsWith('/edit')) return Response.json({ edit_key: 'edit-1', script_url: 'http://fixture/api.js', config: {} });
     if (path.endsWith('/save')) {
       const body = JSON.parse(init.body), response = await save(body);
@@ -120,4 +121,88 @@ test('a verified conflict receipt preserves edits and permits deliberate discard
   assert.equal(client.getSnapshot().confirmationUncertain, false);
   assert.match(client.getSnapshot().message, /下载保留修改/);
   assert.equal((await client.discardForLeave()).ok, true);
+});
+
+
+test('failed organization retains the visible list; a stale refresh cannot resurrect a removed row', async () => {
+  let prefs = { removed: [], order: [], rail_width: 248 }, fail = false, release;
+  const client = createCockpitFileClient({ base: 'http://fixture', async fetchImpl(url, init) {
+    if (url.endsWith('/preferences')) {
+      if (init.method === 'PATCH') {
+        if (fail) return Response.json({ error: { message: '保存失败' } }, { status: 503 });
+        prefs = { ...prefs, removed: [JSON.parse(init.body).remove] };
+      }
+      return Response.json(prefs);
+    }
+    if (release === null) await new Promise(resolve => { release = resolve; });
+    return Response.json({ items: [], next_offset: null });
+  } });
+  await client.refresh();
+  fail = true; assert.equal(await client.organize({ remove: 'page:a' }), false);
+  assert.deepEqual(client.getSnapshot().preferences.removed, []);
+  fail = false; release = null; const refreshing = client.refresh();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(await client.organize({ remove: 'page:a' }), true);
+  release(); await refreshing;
+  assert.deepEqual(client.getSnapshot().preferences.removed, ['page:a']);
+  client.dispose();
+});
+
+test('organization requests serialize and a failed request does not drop the queued preference', async t => {
+  let preferences = { removed: [], order: [], rail_width: 248, rail_layout: null }, release;
+  const gate = new Promise(resolve => { release = resolve; }), patches = [];
+  const client = createCockpitFileClient({ base: 'http://fixture', async fetchImpl(url, init) {
+    if (!url.endsWith('/preferences')) return Response.json({ items: [], next_offset: null });
+    if (init.method !== 'PATCH') return Response.json(preferences);
+    const change = JSON.parse(init.body); patches.push(change);
+    if (patches.length === 1) { await gate; return Response.json({ error: { message: 'first patch failed' } }, { status: 503 }); }
+    preferences = { ...preferences, ...change };
+    return Response.json(preferences);
+  } });
+  t.after(() => client.dispose());
+  assert.equal(await client.organize({ rail_width: 300 }), false, 'unknown preferences must not be overwritten');
+  await client.refresh();
+  const first = client.organize({ remove: 'page:a' });
+  const second = client.organize({ rail_width: 320 });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(patches, [{ remove: 'page:a' }]);
+  assert.equal(client.getSnapshot().organizing, true);
+  await client.refresh();
+  assert.equal(client.getSnapshot().organizing, true);
+  release();
+  assert.equal(await first, false);
+  assert.equal(await second, true);
+  assert.deepEqual(patches, [{ remove: 'page:a' }, { rail_width: 320 }]);
+  assert.deepEqual(client.getSnapshot().preferences, preferences);
+  assert.deepEqual(preferences.removed, []);
+  assert.equal(preferences.rail_width, 320);
+  assert.equal(client.getSnapshot().organizing, false);
+});
+
+test('malformed preference receipts preserve the last valid state and permit recovery', async t => {
+  const valid = { removed: ['page:keep'], order: ['page:keep'], rail_width: 248, rail_layout: null };
+  let reply = valid;
+  const client = createCockpitFileClient({ base: 'http://fixture', async fetchImpl(url) {
+    return Response.json(url.endsWith('/preferences') ? reply : { items: [], next_offset: null });
+  } });
+  t.after(() => client.dispose());
+  await client.refresh();
+  const invalid = [null, { ...valid, removed: null }, { ...valid, order: [9] }, { ...valid, rail_width: true },
+    { ...valid, rail_width: 481 }, { ...valid, rail_layout: {} },
+    { ...valid, rail_layout: { x: -1, y: 0, width: 320, height: 400 } },
+    { ...valid, rail_layout: { x: 0, y: 0, width: 320, height: 1001 } }];
+  for (const value of invalid) {
+    reply = value;
+    assert.equal(await client.organize({ rail_width: 320 }), false);
+    assert.deepEqual(client.getSnapshot().preferences, valid);
+    assert.match(client.getSnapshot().message, /设置回执无效/);
+    assert.equal(client.getSnapshot().organizing, false);
+  }
+  await client.refresh();
+  assert.equal(client.getSnapshot().status, 'error');
+  assert.deepEqual(client.getSnapshot().preferences, valid);
+  reply = { ...valid, rail_width: 320 };
+  assert.equal(await client.organize({ rail_width: 320 }), true);
+  assert.deepEqual(client.getSnapshot().preferences, reply);
+  assert.equal(client.getSnapshot().message, '');
 });

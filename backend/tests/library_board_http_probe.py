@@ -18,7 +18,7 @@ from backend.tests.test_competition_computed_results import snapshot
 
 def run():
     assert sys.version_info >= (3, 14)
-    assert sys.argv[1:] in ([], ["--known-money-unit"], ["--waterfall-scenario"], ["--funnel-scenario"], ["--cockpit-v2"])
+    assert sys.argv[1:] in ([], ["--known-money-unit"], ["--waterfall-scenario"], ["--funnel-scenario"], ["--cockpit-v2"], ["--cockpit-ui-ux"])
     with TemporaryDirectory(prefix="library-board-http-") as directory:
         root = Path(directory)
         for name in ("source", "diagnosis", "boards", "pages"):
@@ -38,7 +38,10 @@ def run():
             frozenset({"analysis:read", "analysis:save", "dashboard:read", "dashboard:update"}), frozenset({DATA_SCOPE})))
         app = create_competition_app(identities=registry, diagnosis_source=source,
             diagnosis_state_dir=root / "diagnosis", board_state_dir=root / "boards",
-            page_state_dir=root / "pages" if sys.argv[1:] == ["--cockpit-v2"] else None)
+            page_state_dir=root / "pages" if sys.argv[1:] in (["--cockpit-v2"], ["--cockpit-ui-ux"]) else None)
+        if sys.argv[1:] == ["--cockpit-ui-ux"]:
+            from backend.services.analytics.page_documents_routes import create_page_app
+            app.include_router(create_page_app(identities=registry, page_state_dir=root / "pages").router)
         with socket.socket() as listener:
             listener.bind(("127.0.0.1", 0))
             server = uvicorn.Server(uvicorn.Config(app, log_level="error", access_log=False,

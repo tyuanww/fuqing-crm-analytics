@@ -16,6 +16,8 @@ import { cockpitCss } from './cockpit-workspace-style.ts';
 import type { CockpitFileClient, FileClientState } from './cockpit-file-client.mjs';
 import { CockpitAIPanel, CockpitAIPreview } from './cockpit-ai-panel.tsx';
 import type { CockpitAIClient, AIState } from './cockpit-ai-client.mjs';
+import { useFloatingRail } from './cockpit-floating-rail.tsx';
+import { RailResize } from './cockpit-rail-controls.tsx';
 import { CockpitOfficeEditor } from './cockpit-office-editor.tsx';
 
 const noopSubscribe = () => () => {};
@@ -57,25 +59,81 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
   const [mobileInspector, setMobileInspector] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({ html: true, board: true, spreadsheet: true, document: true, pdf: true });
   const [search, setSearch] = useState('');
-  const [selectedId, setSelectedId] = useState<string | null>(() => page.cockpitSelectionId ?? (pageStore?.hasUnsavedChanges() && page.current
+  const [trash, setTrash] = useState(false), [removing, setRemoving] = useState<CockpitProduct | null>(null);
+  const [removePending, setRemovePending] = useState(false);
+  const removeInFlight = useRef(false);
+  const removalBlocked = () => removeInFlight.current || Boolean(fileClient?.getSnapshot().organizing);
+  const removeFocus = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!removing && !cabinet.organizing && removeFocus.current) {
+      const target = removeFocus.current.isConnected ? removeFocus.current : root.current?.querySelector<HTMLElement>('.cockpit-rail-grab');
+      target?.focus(); removeFocus.current = null;
+    }
+  }, [Boolean(removing), cabinet.organizing]);
+  const [presenting, setPresenting] = useState(false);
+  const dragged = useRef<string | null>(null);
+  const [dragOver, setDragOver] = useState<string | null>(null);
+  const preferences = cabinet.preferences ?? { removed: [], order: [], rail_width: 248 };
+  const preferencesReady = !fileClient || Boolean(cabinet.preferencesReady);
+  const canOpenProduct = (id: string | null | undefined): id is string => Boolean(id && preferencesReady && !preferences.removed.includes(id));
+  const [railWidth, setRailWidth] = useState(248);
+  useEffect(() => { setRailWidth(preferences.rail_width); }, [preferences.rail_width]);
+  const organize = async (change: Parameters<CockpitFileClient['organize']>[0]) => {
+    const ok = await fileClient?.organize(change);
+    if (!ok) setNotice(fileClient?.getSnapshot().message || '产物设置未保存，请重试。');
+    return ok;
+  };
+  const floating = useFloatingRail({ saved: cabinet.preferences?.rail_layout, dockWidth: railWidth, onCommit: value => { if (fileClient) void organize({ rail_layout: value }); } });
+  const reorder = (id: string, target: string) => {
+    const all = products.map(item => item.id);
+    const order = all.filter(item => item !== id);
+    const index = all.indexOf(target); if (index < 0 || id === target) return;
+    order.splice(index, 0, id); void organize({ order });
+  };
+  useEffect(() => {
+    const change = () => setPresenting(document.fullscreenElement === root.current);
+    document.addEventListener('fullscreenchange', change);
+    return () => document.removeEventListener('fullscreenchange', change);
+  }, []);
+  const fullscreen = async () => {
+    try {
+      if (document.fullscreenElement === root.current) await document.exitFullscreen();
+      else if (root.current?.requestFullscreen) await root.current.requestFullscreen();
+      else setNotice('当前浏览器不支持全屏，请在桌面浏览器打开驾驶舱。');
+    } catch { setNotice('无法进入全屏，请检查浏览器的全屏权限后重试。'); }
+  };
+  const [selectionId, setSelectedId] = useState<string | null>(() => page.cockpitSelectionId ?? (pageStore?.hasUnsavedChanges() && page.current
     ? 'page:' + page.current.page_id : state.saved ? 'board:' + state.saved.spec.board_id : null));
+  const selectedId = canOpenProduct(selectionId) ? selectionId : null;
   const [legacyFiles, setLegacyFiles] = useState<Array<Record<string, unknown>>>([]);
   const [file, setFile] = useState({ text: '', loading: false, error: '' });
   const [notice, setNotice] = useState('');
   const heading = useRef<HTMLHeadingElement>(null);
   const readSeq = useRef(0), autoOpened = useRef(false);
   const readFileId = useRef<string | null>(null);
+  useEffect(() => {
+    if (!preferencesReady || !selectionId || !preferences.removed.includes(selectionId)) return;
+    // The shared board/page stores outlive this panel. Drop a trashed display
+    // intent without discarding their saved versions or any unsaved work.
+    readSeq.current++; readFileId.current = null;
+    setSelectedId(null); pageStore?.selectCockpitAsset(null);
+    setFile({ text: '', loading: false, error: '' });
+  }, [selectionId, preferencesReady, preferences.removed, pageStore]);
   const lastPage = useRef(page.current?.page_id);
   const shown = state.preview?.snapshot ?? state.layoutDraft ?? state.saved;
   const files = useMemo(() => [...(delivery ? deliveryState.files : legacyFiles), ...cabinet.files.map(item => ({
     ...item, id: 'cabinet:' + item.file_id, title: item.filename, path: item.filename,
     source: 'file-library', subtitle: 'v' + item.version, sessionTitle: item.origin.session_title,
   }))], [delivery, deliveryState.files, legacyFiles, cabinet.files]);
-  const products = mergeCockpitProducts({ files, pages: page.pages, boards: state.boards });
-  const visibleProducts = products.filter(item => [item.title, item.path, item.sessionTitle].some(value => value?.toLowerCase().includes(search.trim().toLowerCase())));
-  const selected = products.find(item => item.id === selectedId) ?? null;
-  const previewBoardId = state.preview && !pageStore?.hasUnsavedChanges() ? state.preview.snapshot.spec.board_id : null;
-  const boardVisible = Boolean(previewBoardId) || selectedId?.startsWith('board:') || (!selectedId && initialSurface === 'board' && Boolean(shown));
+  const products = mergeCockpitProducts({ files, pages: page.pages, boards: state.boards }).sort((a, b) => {
+    const rank = (id: string) => { const i = preferences.order.indexOf(id); return i < 0 ? Number.MAX_SAFE_INTEGER : i; };
+    return rank(a.id) - rank(b.id);
+  });
+  const visibleProducts = products.filter(item => preferences.removed.includes(item.id) === trash).filter(item => [item.title, item.path, item.sessionTitle].some(value => value?.toLowerCase().includes(search.trim().toLowerCase())));
+  const availableProducts = products.filter(item => canOpenProduct(item.id));
+  const selected = availableProducts.find(item => item.id === selectedId) ?? null;
+  const previewBoardId = state.preview && !pageStore?.hasUnsavedChanges() && canOpenProduct('board:' + state.preview.snapshot.spec.board_id) ? state.preview.snapshot.spec.board_id : null;
+  const boardVisible = Boolean(previewBoardId) || selectedId?.startsWith('board:') || (!selectedId && initialSurface === 'board' && shown && canOpenProduct('board:' + shown.spec.board_id));
   const savedHtml = Boolean(page.current && selectedId === 'page:' + page.current.page_id);
   const officeEditing = Boolean(selected?.file_id && cabinet.editor?.file_id === selected.file_id);
   const editing = boardVisible ? boardEdit : officeEditing || savedHtml && page.mode === 'edit';
@@ -108,14 +166,14 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
   const back = () => { if (busy) return; if (leaveCoordinator) goConversation(); else guard(goConversation); };
   useEffect(() => {
     const escape = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape' || event.defaultPrevented || coordinator.getSnapshot().status !== 'idle' || state.preview || state.layoutDraft || page.preview) return;
+      if (presenting || removing || event.key !== 'Escape' || event.defaultPrevented || coordinator.getSnapshot().status !== 'idle' || state.preview || state.layoutDraft || page.preview) return;
       if (page.contextPanel) pageStore?.closeContext();
       else if (boardEdit) guard(() => setBoardEdit(false));
       else if (page.mode === 'edit') guard(() => pageStore?.exitEdit());
     };
     window.addEventListener('keydown', escape);
     return () => window.removeEventListener('keydown', escape);
-  }, [coordinator, boardEdit, page.contextPanel, page.mode, state.preview, state.layoutDraft, page.preview, busy]);
+  }, [coordinator, boardEdit, page.contextPanel, page.mode, state.preview, state.layoutDraft, page.preview, busy, presenting, removing]);
   const isDirty = dirty();
   useEffect(() => {
     if (!isDirty || leaveCoordinator) return;
@@ -149,9 +207,10 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
   useEffect(() => { if (width < 760 && (ai.active || ai.html || ai.viewer)) setRail(false); }, [width, ai.active?.id, ai.html, ai.viewer]);
   useEffect(() => { if (state.preview || state.layoutDraft || page.preview) setMobileInspector(false); }, [state.preview, state.layoutDraft, page.preview]);
   useEffect(() => {
-    if (page.current?.page_id && page.current.page_id !== lastPage.current) { setSelectedId('page:' + page.current.page_id); pageStore?.selectCockpitAsset('page:' + page.current.page_id); }
+    if (!preferencesReady) return;
+    if (page.current?.page_id && page.current.page_id !== lastPage.current && canOpenProduct('page:' + page.current.page_id)) { setSelectedId('page:' + page.current.page_id); pageStore?.selectCockpitAsset('page:' + page.current.page_id); }
     lastPage.current = page.current?.page_id;
-  }, [page.current?.page_id]);
+  }, [page.current?.page_id, preferencesReady, preferences.removed]);
   useEffect(() => {
     // Native tool cards can open a new, unsaved board while the panel is unmounted.
     // Its preview is the display intent, even if the last selection was HTML.
@@ -171,6 +230,7 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
 
   const fileReadIdentity = (item: CockpitProduct) => item.id + ':' + (cabinet.files.find(row => row.file_id === item.file_id)?.version ?? 0);
   const open = async (item: CockpitProduct) => {
+    if (!canOpenProduct(item.id)) return;
     if (cabinet.editor && cabinet.editor.file_id !== item.file_id && !await fileClient?.closeEditor()) return;
     fileClient?.clearMessage();
     const seq = ++readSeq.current; setNotice(''); setBoardEdit(false);
@@ -200,10 +260,11 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
   };
   useEffect(() => {
     if (selectedId || autoOpened.current || busy || state.preview || dirty()) return;
-    const pending = ai.jobs.map(job => products.find(item => job.target_kind === 'page' ? item.page_id === job.target_id : item.file_id === job.target_id)).find(Boolean);
-    const first = pending ?? (initialSurface === 'board' ? products.find(item => item.kind === 'board') ?? products[0] : products.find(item => item.kind === 'html') ?? products[0]);
+    if (!preferencesReady) return;
+    const pending = ai.jobs.map(job => availableProducts.find(item => job.target_kind === 'page' ? item.page_id === job.target_id : item.file_id === job.target_id)).find(Boolean);
+    const first = pending ?? (initialSurface === 'board' ? availableProducts.find(item => item.kind === 'board') ?? availableProducts[0] : availableProducts.find(item => item.kind === 'html') ?? availableProducts[0]);
     if (first) { autoOpened.current = true; void open(first); }
-  }, [selectedId, files, page.pages, state.boards, ai.jobs, busy]);
+  }, [selectedId, files, page.pages, state.boards, ai.jobs, busy, preferencesReady, preferences.removed]);
   useEffect(() => {
     // The shared store keeps selection across host panel switches, but the file
     // body is local. Re-read the exact session/path once when that row returns.
@@ -265,15 +326,32 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
     }
     if (item) await aiClient.begin('file', item.file_id, item.version);
   };
+  const confirmRemoval = async () => {
+    if (!removing || removalBlocked()) return;
+    removeInFlight.current = true; setRemovePending(true); setNotice('');
+    try {
+      if (removing.id === selectedId && cabinet.editor && !await fileClient?.closeEditor()) {
+        setNotice(fileClient?.getSnapshot().message || '文档编辑器未能关闭，请重试。'); return;
+      }
+      if (!await organize({ remove: removing.id })) return;
+      if (removing.id === selectedId) { readSeq.current++; setSelectedId(null); pageStore?.selectCockpitAsset(null); setFile({ text: '', loading: false, error: '' }); autoOpened.current = true; }
+      setRemoving(null); setNotice('已移入回收站，可在产物列表下方恢复。');
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : '删除未完成，请重试。');
+    } finally {
+      removeInFlight.current = false; setRemovePending(false);
+    }
+  };
   const title = boardVisible ? shown?.spec.title ?? '数据看板' : selected?.title ?? '产物预览';
   const message = notice || (boardVisible ? state.message : savedHtml || page.importCandidate ? page.message : cabinet.message);
   const version = boardVisible ? state.saved?.spec.version : savedHtml ? page.current?.version : cabinet.files.find(item => item.file_id === selected?.file_id)?.version;
   return <ThemeProvider colorScheme={colorScheme} className="sm-library-theme"><style>{cockpitCss}</style>
-    <main ref={root} className="sm-library-workspace" data-testid="library-workspace" aria-busy={busy} data-mobile-inspector={mobileInspector}>
+    <main ref={root} className="sm-library-workspace" data-testid="library-workspace" aria-busy={busy} data-mobile-inspector={mobileInspector} data-presenting={presenting}>
+      {presenting ? <button className="cockpit-exit-fullscreen" onClick={() => void fullscreen()}>退出全屏 · Esc</button> : null}
       <header className="sm-library-pagehead" data-testid="sm-library-pagehead">
         <div className="cockpit-heading"><button data-testid="sm-cockpit-back" aria-label="返回对话" onClick={back}>← <span className="cockpit-back-label">返回对话</span></button>
           <div><h1 ref={heading} tabIndex={-1}>项目驾驶舱</h1><small>历史交付 · 文件 · 预览与编辑</small></div></div>
-        <div className="cockpit-head-actions">{extension}<button aria-expanded={rail} onClick={() => setRail(!rail)}>{rail ? '收起产物' : '产物列表'}</button>
+        <div className="cockpit-head-actions">{extension}<button data-testid="cockpit-fullscreen" onClick={() => void fullscreen()}>全屏展示</button><button aria-expanded={rail} onClick={() => setRail(!rail)}>{rail ? '收起产物' : '产物列表'}</button>
           {fileClient ? <><input ref={picker} type="file" hidden multiple accept=".html,.htm,.docx,.doc,.odt,.rtf,.xlsx,.xls,.ods,.csv,.pdf" data-testid="cockpit-file-picker"
             onChange={event => { void addFiles(event.target.files); event.target.value = ''; }} />
             <button disabled={busy || uncertain} onClick={() => picker.current?.click()}>添加产物</button></> : null}
@@ -292,10 +370,13 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
         </div>
       </header>
       <div className="cockpit-shell-body">
+        <div ref={floating.ref} className="cockpit-rail-container" hidden={!rail} data-floating={Boolean(floating.layout)} style={floating.style}>
         <aside className="sm-library-rail" hidden={!rail} aria-label="产物列表">
-          <div className="cockpit-rail-heading"><h2>产物</h2><button disabled={busy || dirty()} onClick={() => void refresh()} aria-label="刷新产物">刷新</button></div>
+          <div className="cockpit-rail-heading"><h2><button className="cockpit-rail-grab" aria-label="拖动产物面板" title="拖动整个面板，或用方向键移动" {...floating.move}
+            onKeyDown={event => { if (event.key.startsWith('Arrow') && width >= 760) { event.preventDefault(); floating.nudge(event.key, event.shiftKey); } }}><span aria-hidden="true">⠿ </span>{trash ? '回收站' : '产物'}</button></h2>
+            {floating.layout ? <button onClick={floating.dock} aria-label="将产物面板停靠左侧" title="停靠左侧">停靠</button> : null}<button disabled={busy || dirty()} onClick={() => void refresh()} aria-label="刷新产物">刷新</button></div>
           <label className="cockpit-field"><span>查找产物</span><input type="search" placeholder="名称或来源对话" value={search} onChange={event => setSearch(event.target.value)} /></label>
-          <p className="cockpit-muted">已保存内容 · 历史对话交付</p>
+
           {delivery && deliveryState.status === 'loading' ? <p role="status" className="cockpit-muted">正在查找历史产物…</p> : null}
           {deliveryState.history?.error ? <div className="cockpit-rail-status" role="alert"><p className="cockpit-muted">{deliveryState.history.error}</p><button disabled={busy || dirty()} onClick={() => void refresh()}>重试历史汇总</button></div> : null}
           {Boolean(deliveryState.history?.failures?.length) ? <p role="status" className="cockpit-muted">{deliveryState.history!.failures!.length} 个历史会话暂不可读取，可刷新重试。</p> : null}
@@ -312,19 +393,37 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
               if (!rows.length) return null;
               return <div key={group.key}><button className="cockpit-group" aria-expanded={expanded[group.key]} data-testid={'library-panel-' + (group.key === 'html' ? 'pages' : group.key)}
                 onClick={() => setExpanded(current => ({ ...current, [group.key]: !current[group.key] }))}><span>{expanded[group.key] ? '⌄' : '›'}　{group.name}</span><span>{rows.length}</span></button>
-                <ul hidden={!expanded[group.key]}>{rows.map(item => <li key={item.id} data-kind={item.kind} data-selected={selectedId === item.id ? '1' : '0'}>
-                  <button className="cockpit-product" data-testid="library-product-open" aria-current={selectedId === item.id} disabled={busy || uncertain}
+                <ul hidden={!expanded[group.key]}>{rows.map(item => <li key={item.id} data-kind={item.kind} data-product-id={item.id}
+                  data-selected={selectedId === item.id ? '1' : '0'} data-drag-over={dragOver === item.id}
+                  onDragOver={event => { if (!dragged.current || trash || cabinet.organizing || products.find(row => row.id === dragged.current)?.kind !== item.kind) return; event.preventDefault(); setDragOver(item.id); }}
+                  onDrop={event => { event.preventDefault(); const id = dragged.current; dragged.current = null; setDragOver(null); if (id && !trash && !cabinet.organizing && products.find(row => row.id === id)?.kind === item.kind) reorder(id, item.id); }}>
+                  {!trash ? <button className="cockpit-drag" aria-label={'拖动排序：' + item.title} title="拖动排序，或按上下方向键移动"
+                    draggable={Boolean(fileClient && cabinet.preferencesReady && !cabinet.organizing)} disabled={!fileClient || !cabinet.preferencesReady} aria-disabled={Boolean(cabinet.organizing)}
+                    onDragStart={event => { dragged.current = item.id; event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', item.id); }}
+                    onDragEnd={() => { dragged.current = null; setDragOver(null); }}
+                    onKeyDown={event => { if (cabinet.organizing) { if (event.key.startsWith('Arrow')) event.preventDefault(); return; } const i = rows.indexOf(item), next = rows[i + (event.key === 'ArrowUp' ? -1 : event.key === 'ArrowDown' ? 1 : 0)];
+                      if (next && next !== item) { event.preventDefault(); reorder(item.id, next.id); } }}>⠿</button> : null}
+                  <button className="cockpit-product" data-testid="library-product-open" aria-current={selectedId === item.id} disabled={busy || uncertain || trash}
+                    title={[item.title, item.path, item.sessionTitle && '来自：' + item.sessionTitle, item.subtitle].filter(Boolean).join('\n')}
                     onClick={() => guard(() => open(item))}><span className="cockpit-file-icon" aria-hidden="true">{group.icon}</span>
-                    <span className="cockpit-product-copy"><strong>{item.title}</strong><small title={item.path}>{item.page_id ? '已保存页面' : item.board_id ? '已保存看板' : item.file_id ? '已添加文件' : item.path} {item.subtitle}</small>{ai.jobs.some(job => job.target_kind === 'page' ? job.target_id === item.page_id : job.target_id === item.file_id) ? <small>有 AI 修改任务</small> : null}{item.sessionTitle ? <small title={item.sessionTitle}>来自：{item.sessionTitle}</small> : null}</span></button>
+                    <span className="cockpit-product-copy"><strong>{item.title}</strong></span></button>
+                  <button className="cockpit-product-delete" aria-label={(trash ? '恢复产物：' : '删除产物：') + item.title}
+                    disabled={busy || uncertain || !fileClient || !cabinet.preferencesReady || cabinet.organizing}
+                    onClick={event => { const trigger = event.currentTarget; if (trash) { removeFocus.current = trigger; void organize({ restore: item.id }); } else guard(() => { removeFocus.current = trigger; setNotice(''); setRemoving(item); }); }}>{trash ? '恢复' : '×'}</button>
                 </li>)}</ul></div>;
             })}
-            {!visibleProducts.length && deliveryState.status !== 'loading' ? <p className="cockpit-muted" data-testid="library-products-empty">{search ? '没有匹配的产物。' : '暂无产物。历史交付的 HTML、表格、Word 和 PDF 会出现在这里。'}</p> : null}
+            {!visibleProducts.length && deliveryState.status !== 'loading' ? <p className="cockpit-muted" data-testid="library-products-empty">{search ? '没有匹配的产物。' : trash ? '回收站为空。' : '暂无产物。历史交付的 HTML、表格、Word 和 PDF 会出现在这里。'}</p> : null}
             {deliveryState.history?.nextCursor ? <button disabled={busy || dirty() || deliveryState.status === 'loading'} onClick={() => void delivery?.loadMore()}>加载更多历史产物</button> : null}
           </div>
-          <div className="cockpit-rail-footer"><p className="cockpit-muted">{deliveryState.history ? `已检查 ${deliveryState.history.examined ?? 0} / ${deliveryState.history.totalSessions ?? '—'} 个历史会话。` : '生成新内容请回到原生对话。'}<br />刷新可获取最新交付记录。</p></div>
+          <div className="cockpit-rail-footer">{fileClient ? <button aria-pressed={trash} onClick={() => setTrash(!trash)}>{trash ? '返回产物' : '回收站'}</button> : null}<p className="cockpit-muted">{deliveryState.history ? `已检查 ${deliveryState.history.examined ?? 0} / ${deliveryState.history.totalSessions ?? '—'} 个历史会话。` : '生成新内容请回到原生对话。'}<br />刷新可获取最新交付记录。</p></div>
         </aside>
+        {rail && width >= 760 ? <RailResize width={floating.width} max={Math.max(180, Math.min(480, width - 360))}
+          onCommit={value => { if (floating.layout) floating.resizeWidth(value); else { setRailWidth(value); if (fileClient) void organize({ rail_width: value }); } }} /> : null}
+        {floating.layout && width >= 760 ? <button className="cockpit-rail-corner" aria-label="缩放产物面板" title="拖动缩放，或用方向键调整" {...floating.resize}
+          onKeyDown={event => { if (event.key.startsWith('Arrow')) { event.preventDefault(); floating.nudge(event.key, event.shiftKey, true); } }}>↘</button> : null}
+        </div>
         <section className="sm-library-canvas" aria-label="产物工作区">
-          <div className="sm-library-pathbar" data-testid="library-pathbar"><div><p className="cockpit-eyebrow">{boardVisible ? '数据看板' : savedHtml ? '已保存页面' : selected?.file_id ? '已添加文件' : selected ? '会话交付' : '工作区'}</p><h2>{title}</h2></div>
+          <div className="sm-library-pathbar" data-testid="library-pathbar"><div><h2 title={title}>{title}</h2></div>
             <span className={'cockpit-badge' + (dirty() ? ' pending' : '')}>{uncertain ? '保存待核对' : dirty() ? '有未保存修改' : version ? '版本 ' + version + (officeEditing ? ' · 编辑中' : '') : selected ? '只读预览' : '请选择产物'}</span></div>
           {message ? <p className="cockpit-live" role="status" data-testid="library-message">{message}</p> : null}
           {aiClient && !boardVisible ? <CockpitAIPanel client={aiClient} state={ai} blocked={Boolean(library.hasUnsavedChanges() || pageStore?.hasUnsavedChanges() || fileClient?.hasUnsavedChanges())} /> : null}
@@ -356,7 +455,7 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
                 {state.history.map(row => <div className="cockpit-history-row" key={row.version}><span>版本 {row.version}</span><button disabled={busy || row.version === state.saved?.spec.version} onClick={() => void library.rollback(row.version)}>预览回退</button></div>)}
               </div> : null}
             </CockpitSidebar></div>
-            : savedHtml && pageStore ? <CockpitPageEditor store={pageStore} onInspect={() => setMobileInspector(true)} />
+            : savedHtml && pageStore ? <CockpitPageEditor store={pageStore} onInspect={() => setMobileInspector(true)} onAI={aiClient ? scope => guard(async () => { await aiClient.begin('page', page.current!.page_id, page.current!.version, scope); }) : undefined} />
             : page.importCandidate ? <><div className="cockpit-notice" data-testid="html-import-preview"><div><strong>保存为可编辑副本</strong><p>{uncertain ? '保存结果待核对。请用同一请求重试确认。' : '先检查页面。确认后进入页库，原工作区文件保持不变。'}</p></div>
               <button disabled={busy || uncertain} onClick={() => void pageStore?.cancelPreview()}>取消入库</button><button className="cockpit-primary" disabled={busy} onClick={() => void pageStore?.confirmImport()}>{uncertain ? '重试确认' : '确认保存副本'}</button></div>
               <div className="cockpit-frame-wrap"><HtmlPreview pkg={page.importCandidate.package} title={selected?.title ?? '副本预览'} /></div></>
@@ -370,6 +469,17 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
           </div>
         </section>
       </div>
+      {removing ? <div className="cockpit-modal-backdrop"><div className="cockpit-modal" role="alertdialog" aria-modal="true" aria-labelledby="cockpit-remove-title"
+        onKeyDown={event => {
+          if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); if (!removalBlocked()) setRemoving(null); }
+          if (event.key === 'Tab') { const buttons = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('button:not(:disabled)'));
+            const edge = event.shiftKey ? buttons[0] : buttons.at(-1); if (document.activeElement === edge) { event.preventDefault(); (event.shiftKey ? buttons.at(-1) : buttons[0])?.focus(); } }
+        }}>
+        <h2 id="cockpit-remove-title">删除「{removing.title}」？</h2><p>将从你的产物列表移入回收站，可随时恢复。历史原文件和已保存版本会保留。</p>
+        {ai.jobs.some(job => job.target_id === (removing.page_id ?? removing.file_id)) ? <p>此产物还有 AI 修改任务，删除不会停止原生对话。</p> : null}
+        {notice ? <p role="status">{notice}</p> : null}<div className="cockpit-modal-actions"><button autoFocus aria-disabled={removePending || cabinet.organizing} onClick={() => { if (!removalBlocked()) setRemoving(null); }}>取消</button>
+          <button className="cockpit-primary" aria-disabled={removePending || cabinet.organizing} onClick={() => void confirmRemoval()}>移入回收站</button></div>
+      </div></div> : null}
       {!leaveCoordinator ? <LeavePrompt coordinator={coordinator} pageName={title} /> : null}
     </main>
   </ThemeProvider>;

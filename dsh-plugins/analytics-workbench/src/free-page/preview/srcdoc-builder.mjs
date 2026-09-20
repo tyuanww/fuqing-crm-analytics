@@ -4,7 +4,7 @@ import { bytesToBase64 } from '../resource/bytes.mjs';
 
 function neutralizeWrapperBreakout(html) {
   return String(html)
-    .replace(/<\/(?=html|head|body)\b/gi, '&lt;/')
+    .replace(/<\/(?=(?:html|head|body)(?:\s|>))/gi, '&lt;/')
     .replace(/<meta\b/gi, '&lt;meta');
 }
 
@@ -15,7 +15,7 @@ function neutralizeStyle(css) {
 function neutralizeScript(js) {
   return String(js ?? '')
     .replace(/<\/script/gi, '<\\/script')
-    .replace(/<\/(?=html|head|body)\b/gi, '<\\/')
+    .replace(/<\/(?=(?:html|head|body)(?:\s|>))/gi, '<\\/')
     .replace(/<meta\b/gi, '\\u003cmeta');
 }
 
