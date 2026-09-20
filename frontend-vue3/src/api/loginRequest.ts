@@ -1,0 +1,159 @@
+/**
+ * L4.85 申请+同意 模式 API 客户端 (create/pending/approve/reject/status/claim)
+ *
+ * 业务模式 (跟 L4.42 立项实证 SOP 1:1 stable 配套, user 7/10 拍板):
+ * - A 已登录 (active)
+ * - B 尝试登录 admin → 看到 "账号正在被使用" 提示
+ * - B 提交申请 (loginRequest) → 收到 request_id + 独占 claim token
+ * - A 收到申请 (getPendingLoginRequests polling 5s) → 看到 "B 申请登录"
+ * - A 点 "同意" (approveLoginRequest) → A 登出, B 用 claim token 领取会话
+ * - A 点 "拒绝" (rejectLoginRequest) → A 不受影响, B 看到 "申请被拒绝"
+ * - 5 分钟超时 → 自动 expired
+ *
+ * 跟 L4.84 自动踢 (admin 二次登录踢第一次) 互补不冲突 (跟 L4.42 + L4.85 1:1 stable 永久规则链配套)
+ */
+import client from './index'
+
+export interface LoginRequestResponse {
+  request_id: string
+  claim_token: string
+  status: 'pending' | 'approved' | 'rejected' | 'expired'
+  message: string
+}
+
+export interface PendingLoginRequest {
+  request_id: string
+  requester_ip: string
+  created_at: number
+  status: 'pending' | 'approved' | 'rejected' | 'expired'
+  estimated_wait_seconds: number
+}
+
+export interface PendingLoginRequestsResponse {
+  pending: PendingLoginRequest[]
+}
+
+export interface ApproveLoginRequestResponse {
+  success: boolean
+  username: string
+}
+
+export interface RejectLoginRequestResponse {
+  success: boolean
+}
+
+export interface LoginRequestStatusResponse {
+  request_id: string
+  status: 'pending' | 'approved' | 'rejected' | 'expired'
+  username?: string
+}
+
+export interface ClaimLoginRequestResponse {
+  token: string
+  username: string
+  /** Sprint 205+ Admin Upload: 申请登录成功后告知 B 端 A 是否 admin (跟后端 ClaimRequestOut.is_admin 1:1 stable) */
+  is_admin: boolean
+}
+
+/**
+ * L4.85 治本: B 申请登录 admin (admin 当前 active)
+ *
+ * 跟 L4.42 立项实证 SOP 1:1 stable 配套, 跟后端 POST /api/v1/auth/login-request 1:1 stable 配套.
+ * 返回 200 + {request_id, claim_token, status: "pending", message}; claim_token 只留在 B 端.
+ * 返回 409 (账号当前未激活, 请直接走 /api/v1/auth/login).
+ * 返回 401 (账号或密码错误).
+ */
+export async function loginRequest(
+  username: string,
+  password: string,
+  signal?: AbortSignal,
+): Promise<LoginRequestResponse> {
+  const res = await client.post<LoginRequestResponse>('/v1/auth/login-request', {
+    username,
+    password,
+  }, { signal }) as unknown as LoginRequestResponse
+  return res
+}
+
+/**
+ * L4.85 治本: A 查待处理申请 (A 必须是 active 用户)
+ *
+ * 跟后端 GET /api/v1/auth/login-requests/pending 1:1 stable 配套.
+ * A 端 polling 5s 调一次, 看到 B 申请时显示 "同意/拒绝" 弹窗.
+ */
+export async function getPendingLoginRequests(): Promise<PendingLoginRequestsResponse> {
+  const res = await client.get<PendingLoginRequestsResponse>(
+    '/v1/auth/login-requests/pending'
+  ) as unknown as PendingLoginRequestsResponse
+  return res
+}
+
+/**
+ * L4.85 治本: A 同意 B 的申请 → A 登出, B 随后独立领取会话
+ *
+ * 跟后端 POST /api/v1/auth/login-request/{request_id}/approve 1:1 stable 配套.
+ * 返回 {success: true, username}; A 的响应绝不包含 B 的 bearer token.
+ */
+export async function approveLoginRequest(
+  requestId: string
+): Promise<ApproveLoginRequestResponse> {
+  const res = await client.post<ApproveLoginRequestResponse>(
+    `/v1/auth/login-request/${requestId}/approve`
+  ) as unknown as ApproveLoginRequestResponse
+  return res
+}
+
+/**
+ * L4.85 治本: A 拒绝 B 的申请 (A 不受影响)
+ *
+ * 跟后端 POST /api/v1/auth/login-request/{request_id}/reject 1:1 stable 配套.
+ */
+export async function rejectLoginRequest(
+  requestId: string
+): Promise<RejectLoginRequestResponse> {
+  const res = await client.post<RejectLoginRequestResponse>(
+    `/v1/auth/login-request/${requestId}/reject`
+  ) as unknown as RejectLoginRequestResponse
+  return res
+}
+
+/**
+ * L4.85.1 治本: B 端 polling 检测自己申请状态 (跟 NavBar.vue 强制弹窗 + 强制退出 1:1 stable 永久规则化沿用)
+ *
+ * 跟后端 GET /api/v1/auth/login-request/{request_id}/status 1:1 stable 配套.
+ * - status="pending" → B 端继续等待
+ * - status="approved" → B 调 POST /claim 原子领取 token
+ * - status="rejected" / "expired" → B 端显示提示
+ */
+export async function getLoginRequestStatus(
+  requestId: string,
+  claimToken: string,
+  signal?: AbortSignal,
+): Promise<LoginRequestStatusResponse> {
+  const res = await client.get<LoginRequestStatusResponse>(
+    `/v1/auth/login-request/${requestId}/status`,
+    {
+      headers: { 'X-Login-Claim': claimToken },
+      signal,
+    },
+  ) as unknown as LoginRequestStatusResponse
+  return res
+}
+
+
+/** B 用独占 claim token 领取会话；重复 POST 返回同一 bearer token。 */
+export async function claimLoginRequest(
+  requestId: string,
+  claimToken: string,
+  signal?: AbortSignal,
+): Promise<ClaimLoginRequestResponse> {
+  const res = await client.post<ClaimLoginRequestResponse>(
+    `/v1/auth/login-request/${requestId}/claim`,
+    undefined,
+    {
+      headers: { 'X-Login-Claim': claimToken },
+      signal,
+    },
+  ) as unknown as ClaimLoginRequestResponse
+  return res
+}

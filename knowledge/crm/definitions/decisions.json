@@ -1,0 +1,409 @@
+{
+  "pack_version": "crm-knowledge-offline/v1",
+  "metric_version": "crm-metrics/v1",
+  "source_sha256": "4ebbcc3a3495232cac48b674d789e7cafdd45077a67ba8370cd9dcc4086c825f",
+  "items": [
+    {
+      "id": "D001",
+      "topic": "客单价与每单金额",
+      "status": "confirmed",
+      "answer": "客单价按购买人数（AUS），每单金额（AOV）单列。",
+      "scope": "命名与分母原则",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "有效购买、身份去重、金额和时间范围"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D002",
+      "topic": "会员溢价比较对象",
+      "status": "confirmed",
+      "answer": "会员人均消费额 ÷ 非会员人均消费额。",
+      "scope": "AUS 比较对象",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "会员历史映射、可比范围、显示单位"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D003",
+      "topic": "GSV 部分退款",
+      "status": "confirmed",
+      "answer": "计入扣实际退款后的余额：100 元退30元计70元，全退计0元。",
+      "scope": "金额原则",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "源金额是否已净额",
+        "退款事件、日期和商品关联"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D004",
+      "topic": "新老客分界",
+      "status": "confirmed",
+      "answer": "默认按所选窗口起点划分，月报按月初。",
+      "scope": "分类截点",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "全店首购历史完整度和有效购买版本"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D005",
+      "topic": "跨期退款",
+      "status": "confirmed",
+      "answer": "同时保留原订单期净额与退款发生期视图；运营默认回算原订单月份，并显示退款截止日。",
+      "scope": "报告视图和运营默认",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "带日期成功退款事件和数据截止"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D006",
+      "topic": "GSV 有效人数与订单",
+      "status": "confirmed",
+      "answer": "部分退款仍算有效购买，全退订单排除；用户若还有其他有效订单仍算购买人数。",
+      "scope": "有效购买计数",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "订单完整净额、去重身份和其他排除规则"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D007",
+      "topic": "购买频次与件数",
+      "status": "confirmed",
+      "answer": "频次按去重有效订单，同一订单多行只算一次；人均件数除人数、每单件数IPT除订单数；没有退件数量不猜净件数。",
+      "scope": "频次粒度与件数名称",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "有效件数与退件字段映射；不能由退款金额推断退件数量"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D008",
+      "topic": "商品招新、连带、回购",
+      "status": "confirmed",
+      "answer": "商品招新人数占比和新客金额占比分列；人数连带与订单连带分列；商品回购分子限定历史买过该商品者再次购买。",
+      "scope": "商品指标名称、分母与历史集合约束",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "SKU/SPU/品类层级、相同筛选范围"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D009",
+      "topic": "派样观察起点",
+      "status": "confirmed",
+      "answer": "支付后开始跟踪观察。",
+      "scope": "派样主观察起点",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "样品与派样订单识别规则的真实源映射",
+        "支付事件时间精度"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D010",
+      "topic": "观察窗口和成熟度",
+      "status": "confirmed",
+      "answer": "按自然日，起点当天算第1天，第N天结束后比较；未满观察期单列，不计入最终复购率，同一订单不算再次购买。",
+      "scope": "派样及新客N日窗口和成熟度",
+      "implementation_status": "not_implemented",
+      "window_spec": "业务时区；第1天为起点日期，第N天为起点日期+N-1；窗口结束为第N天次日00:00（不含）。仅纳入起点事件之后的其他有效订单。",
+      "remaining_dependencies": [
+        "起点时间精度、同时间戳事件顺序、业务时区与数据完整截止时刻"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D011",
+      "topic": "派样 ROI 名称",
+      "status": "confirmed",
+      "answer": "保留名称“派样 ROI”，显著注明当前只是复购收入表现；不当作已算出的利润回报或因果增量。",
+      "scope": "名称与解释边界",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "展示显著说明和导出一致；利润ROI/ROAS另需成本/利润/归因合同"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D012",
+      "topic": "LTV/cohort 后续收入",
+      "status": "confirmed",
+      "answer": "默认新客首次有效支付起N日累计净消费，包含首单、统计全店后续购买、区分成熟度；旧指定日期购买者次日起收入单独命名。",
+      "scope": "LTV目标定义与旧指标区分",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "首购历史和退款截止"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D013",
+      "topic": "商品退款分配",
+      "status": "confirmed",
+      "answer": "优先真实退款明细；缺失时只报整单净额，受影响商品净额暂不可用，不做比例估算。",
+      "scope": "退款无法定位商品时的能力边界",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "真实退款行关联和完整性"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D014",
+      "topic": "会员消费归组时点",
+      "status": "confirmed",
+      "answer": "按每笔成交当时身份，入会前后分别归组；历史身份缺失单列未知。",
+      "scope": "会员/非会员消费比较",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "交易时点会员事件映射",
+        "新/老会员存量与转化仍须首次入会数据"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D015",
+      "topic": "UV 与入会率",
+      "status": "confirmed",
+      "answer": "保留并明确标日UV累计口径；周期去重转化另列，数据不具备时说明。",
+      "scope": "访客入会率名称与分母边界",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "访问身份或原生周期 UV，入会/绑卡事件"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D016",
+      "topic": "同比日历与 RFM 阈值",
+      "status": "confirmed",
+      "answer": "同比按去年同日；2月29日对应去年2月28日，显示实际区间；活动可另选对比期；RFM保留现有阈值版本并标实际天数，不直接换教材阈值。",
+      "scope": "同比日历与RFM阈值保留原则",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "时间区间实现与闰日样例、阈值版本登记和后续品类适配验证"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D017",
+      "topic": "数值单位",
+      "status": "confirmed",
+      "answer": "占比0.25显示25%，占比变化0.05显示5个百分点，会员溢价显示倍数；在合同中明确单位并核对调用方。",
+      "scope": "比例、百分点和倍数展示",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "旧服务/合同/调用方逐字段适配"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D018",
+      "topic": "未知状态与分解",
+      "status": "confirmed",
+      "answer": "未知身份单列；无法计算显示—和原因，不填0；新客+老客+未知与同口径总额闭合。",
+      "scope": "空值、未知与总额分解",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "真实数据缺失率、覆盖阈值和显示验证"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D019",
+      "topic": "真实源字段、金额、渠道与过滤",
+      "status": "awaiting_source_verification",
+      "proposal": "登记粒度、原金额是否已扣退款、货币、税运费/优惠、赠品/购物金/关闭订单、渠道展开与键；TTL去重重算。",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "实际目标与锁兼容确认后，只读schema及有界数据核验"
+      ],
+      "note": "不是请用户猜字段；尚未连接真实源。不得用 OCR 或模型猜测关闭。",
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": null,
+      "layer": "awaiting_source_verification",
+      "contains_real_data": false
+    },
+    {
+      "id": "D020",
+      "topic": "默认首购历史范围",
+      "status": "confirmed",
+      "answer": "默认全店新老客，渠道新客和商品新客另列；历史不足注明可见历史首次购买。",
+      "scope": "业务分类范围",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "店铺/平台身份命名空间和全店历史覆盖；全退重算遵循D021"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D021",
+      "topic": "全额退款后首购身份",
+      "status": "confirmed",
+      "answer": "按报告退款截止日重算首次有效购买，历史报告保留当时版本。",
+      "scope": "全额退款对首购身份的影响",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "全历史退款事件和截止时点"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D022",
+      "topic": "重复派样cohort归属",
+      "status": "confirmed",
+      "answer": "按人取统计期内第一笔派样，归属该笔渠道，避免重复计人。",
+      "scope": "重复派样的默认起点与渠道归属",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "真实派样渠道与商品识别",
+        "同时间戳的确定性排序及歧义处理",
+        "cohort先归属再按渠道筛选的合同验证"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    }
+  ]
+}

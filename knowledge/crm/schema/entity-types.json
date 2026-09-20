@@ -1,0 +1,76 @@
+{
+  "schema_id": "crm-knowledge-offline-schema/v1",
+  "pack_version": "crm-knowledge-offline/v1",
+  "metric_version": "crm-metrics/v1",
+  "note": "逻辑模型类型。不是 WeKnora 原生 schema，也不是 Neo4j 约束。",
+  "layers": [
+    "textbook",
+    "code_snapshot",
+    "target_definition",
+    "verified_implementation"
+  ],
+  "entity_types": [
+    "BusinessConcept",
+    "MetricDefinition",
+    "CohortDefinition",
+    "DataRequirement",
+    "SourceField",
+    "Capability",
+    "Strategy",
+    "DocumentVersion",
+    "Evidence",
+    "Decision",
+    "Conflict",
+    "Case"
+  ],
+  "relation_types": [
+    "HAS_DEFINITION",
+    "HAS_NUMERATOR",
+    "HAS_DENOMINATOR",
+    "REQUIRES_DATA",
+    "MAPPED_TO",
+    "COMPUTED_BY",
+    "APPLIES_TO",
+    "SUPPORTED_BY",
+    "RESOLVED_BY",
+    "SUPERSEDES",
+    "RELATED_TO",
+    "HAS_CONFLICT_SIDE",
+    "USES_COHORT",
+    "DECLARED_BY"
+  ],
+  "definition_review_statuses": [
+    "textbook_ocr_uncorrected",
+    "textbook_internal_ambiguity",
+    "principles_confirmed_mapping_pending",
+    "awaiting_source_verification",
+    "code_snapshot_only",
+    "not_reviewed"
+  ],
+  "implementation_statuses": [
+    "not_implemented",
+    "code_snapshot",
+    "planned",
+    "source_unverified",
+    "synthetic_verified",
+    "real_reconciled"
+  ],
+  "forbidden_implementation_claims_until_a_sync": [
+    "implemented",
+    "fixed",
+    "production_ready",
+    "real_reconciled"
+  ],
+  "extract_methods": [
+    "human_curated_from_confirmed_decisions",
+    "human_curated_from_textbook_ocr",
+    "human_curated_from_source_snapshot",
+    "human_curated_from_design_docs"
+  ],
+  "graph_runtime_defaults": {
+    "neo4j_started": false,
+    "weknora_graph_enabled": false,
+    "dsh_using_graph": false,
+    "generative_extraction_used": false
+  }
+}

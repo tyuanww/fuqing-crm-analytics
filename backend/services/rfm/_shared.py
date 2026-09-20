@@ -1,0 +1,239 @@
+"""
+Sample CRM - RFM 专项服务（共享模块）
+
+常量、口径定义、日期解析工具、查询结果缓存。
+"""
+
+import json
+import hashlib
+import logging
+from typing import Optional, Dict, List, Any
+from datetime import date, datetime
+from backend.semantic.time import PeriodBuilder, analysis_cutoff
+from backend.semantic.filters import VALID_ORDER_BASE, VALID_ORDER_BASE_PREFIXED
+from backend.db import connection as bdc
+from backend.config import DATA_DIR
+
+logger = logging.getLogger(__name__)
+
+# ── 缓存目录 ──
+FLOW_CACHE_DIR = DATA_DIR / "cache" / "rfm_flow"
+FLOW_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
+
+# Sprint 14.5 P1.4 (Codex audit): W5 flow cache 之前只用 data_version 失效,
+# 不含算法 version. 改 ratio/契约/service 算法时, 24h 内 cache 命中返旧值
+# (Sprint 14.5 真实踩坑: ttl_gsv 越界 2.87 在 cache 里直到 invalidate).
+# 修法: cache 写时附 ALGO_VERSION, 读时校验. 算法改动 → 手动 bump 这个常量.
+# 不依赖文件 mtime (etcd/deploy 容器 mtime 不稳).
+#
+# Sprint 18 #123 bump: 加了 check_manifest_version_and_invalidate() 启动 hook,
+# 跨进程持久化 last_seen_manifest_version. 行为变化 → bump v0.4.14.35 → v0.4.14.47.
+FLOW_ALGO_VERSION = "v0.4.14.48-c0-f-order"
+
+# 语义层统一口径（向后兼容别名）
+_VALID_BASE = VALID_ORDER_BASE
+_VALID_BASE_T = VALID_ORDER_BASE_PREFIXED
+
+
+def _resolve_date_ranges(
+    period: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    compare_start_date: Optional[str] = None,
+    compare_end_date: Optional[str] = None,
+):
+    """
+    解析当前期 / 对比期 / 前年期 的日期范围。
+    与 calculate_audience_summary 保持一致。
+
+    当传入 compare_start_date/compare_end_date 时，对比期使用自定义日期
+    而不是自动计算的去年同期（支持环比 / 自定义对比）。
+    """
+    today = date.today()
+    current_year_label = str(today.year)
+    comp_year_label = str(today.year - 1)
+    prev2_year_label = str(today.year - 2)
+
+    if period:
+        try:
+            pb_func = getattr(PeriodBuilder, period.lower())
+            ranges = pb_func(today=today)
+            cur_range = ranges["current"]
+            comp_range = ranges["comparison"]
+            prev2_range = ranges["prev2"]
+            cur_start_dt = f"{cur_range.start} 00:00:00"
+            cur_end_dt = f"{cur_range.end} 23:59:59"
+            ly_start_dt = f"{comp_range.start} 00:00:00"
+            ly_end_dt = f"{comp_range.end} 23:59:59"
+            y2_start_dt = f"{prev2_range.start} 00:00:00"
+            y2_end_dt = f"{prev2_range.end} 23:59:59"
+            cutoff = cur_range.cutoff
+            ly_cutoff_str = comp_range.cutoff
+            y2_cutoff_str = prev2_range.cutoff
+            return {
+                "current": (cur_start_dt, cur_end_dt, cutoff),
+                "comp": (ly_start_dt, ly_end_dt, ly_cutoff_str),
+                "prev2": (y2_start_dt, y2_end_dt, y2_cutoff_str),
+                "labels": (current_year_label, comp_year_label, prev2_year_label),
+            }
+        except (AttributeError, KeyError):
+            period = None
+
+    if start_date and end_date:
+        if start_date > end_date:
+            raise ValueError("period start_date must be <= end_date")
+        ranges = PeriodBuilder.free(start_date, end_date)
+        cur_range = ranges["current"]
+        prev2_range = ranges["prev2"]
+        cur_start_dt = cur_range.start_dt
+        cur_end_dt = cur_range.end_dt
+        cutoff = cur_range.cutoff
+        current_year_label = start_date[:4]
+        prev2_year_label = prev2_range.start[:4]
+
+        if compare_start_date and compare_end_date:
+            if compare_start_date > compare_end_date:
+                raise ValueError("compare period start_date must be <= end_date")
+            ly_start_dt = f"{compare_start_date} 00:00:00"
+            ly_end_dt = f"{compare_end_date} 23:59:59"
+            ly_cutoff_str = analysis_cutoff(compare_start_date).strftime("%Y-%m-%d")
+            comp_year_label = compare_start_date[:4]
+        else:
+            comp_range = ranges["comparison"]
+            ly_start_dt = comp_range.start_dt
+            ly_end_dt = comp_range.end_dt
+            ly_cutoff_str = comp_range.cutoff
+            comp_year_label = comp_range.start[:4]
+
+        return {
+            "current": (cur_start_dt, cur_end_dt, cutoff),
+            "comp": (ly_start_dt, ly_end_dt, ly_cutoff_str),
+            "prev2": (prev2_range.start_dt, prev2_range.end_dt, prev2_range.cutoff),
+            "labels": (current_year_label, comp_year_label, prev2_year_label),
+        }
+
+    # 默认 MTD 也复用语义层；月初时 current 是截至昨天的完整上月，避免
+    # 3 月 1 日生成“3 月 1 日到 3 月 29 日”的未来窗口。
+    mtd_ranges = PeriodBuilder.mtd(today=today)
+    current = mtd_ranges["current"]
+    comparison = mtd_ranges["comparison"]
+    prev2 = mtd_ranges["prev2"]
+
+    return {
+        "current": (current.start_dt, current.end_dt, current.cutoff),
+        "comp": (comparison.start_dt, comparison.end_dt, comparison.cutoff),
+        "prev2": (prev2.start_dt, prev2.end_dt, prev2.cutoff),
+        "labels": (current.start[:4], comparison.start[:4], prev2.start[:4]),
+    }
+
+
+# ═══════════════════════════════════════════════════════════════
+# 查询结果缓存（减少 RFM flow 端点的 SQL 重复执行）
+# 缓存策略：
+#   - 缓存键 = 端点名 + 日期范围 + 渠道 + 指标 + 数据版本
+#   - 数据版本 = orders.max_pay_time（ETL 刷新后自动失效）
+#   - 命中 → JSON 文件读取（<10ms）
+#   - 未命中 → 实时 SQL + 存盘
+# ═══════════════════════════════════════════════════════════════
+
+def _fetch_data_version() -> str:
+    """获取数据版本（orders.max_pay_time）。"""
+    conn = bdc.get_connection()
+    try:
+        row = conn.execute("SELECT MAX(pay_time)::TEXT FROM orders").fetchone()
+        return row[0] or "no_data"
+    finally:
+        pass
+
+
+# Sprint 16.5 P2.7: cache_key 改用 MD5 full (32 char) 替代拼接 + 截断 hash.
+# 旧版 2 个真坑:
+#   1) start_date 加减 1 天 → 直接拼进 key, 看似不冲突, 但跨 prefix 时仍可能误命中
+#      (例: 旧 cache "r_flow_v123_2026-01-01_2026-01-31_GSV.json" vs 新查询
+#       "r_flow_v123_2026-01-02_2026-02-01_GSV.json" — 文件名相似, 排查极难)
+#   2) exclude_channels 用 MD5[:8] 截断 (8 hex = 32 bit) → 生日悖论: 32-bit
+#      空间 2^16 = 65K 列表就有 50% 碰撞率, 真实场景大 exclude list 极可能误命中
+# 修法: 8 维参数全部进 MD5 (无截断), 拼 namespace prefix 防 W5 DuckDB-KV key 串扰.
+def _flow_cache_key(
+    flow_type: str,
+    start_date: str,
+    end_date: str,
+    channel: Optional[str],
+    metric_type: str,
+    exclude_channels: Optional[List[str]],
+    compare_start_date: Optional[str],
+    compare_end_date: Optional[str],
+    data_version: str,
+    sample_mode: Optional[str] = None,
+    sample_channel_ids: Optional[List[str]] = None,
+    as_of: Optional[str] = None,
+    history_channels: Optional[List[str]] = None,
+    history_product_ids: Optional[List[str]] = None,
+) -> str:
+    """生成缓存文件名 (MD5 full 32 char + namespace prefix `flow_`).
+
+    Sprint 16.5 P2.7 (Codex audit): 含 FLOW_ALGO_VERSION, 算法改动 → key 变 → miss.
+    含 namespace prefix `flow_` 防跟 W5 DuckDB-KV cache (prefix `w5kv_`) 串扰.
+    """
+    # 8 维参数全部进 MD5, 顺序固定 (sorted_exclude) 保证幂等
+    exclude_part = (
+        ",".join(sorted(exclude_channels)) if exclude_channels else ""
+    )
+    sample_part = ",".join(sorted(sample_channel_ids or []))
+    payload = (
+        f"{flow_type}|{start_date}|{end_date}|{channel or ''}|"
+        f"{metric_type}|{exclude_part}|{compare_start_date or ''}|"
+        f"{compare_end_date or ''}|{data_version}|{FLOW_ALGO_VERSION}|"
+        f"{sample_mode or 'INCLUDE'}|{sample_part}|{as_of or ''}"
+    )
+    payload += "|" + json.dumps([sorted(history_channels or []), sorted(history_product_ids or [])], ensure_ascii=False)
+    digest = hashlib.md5(payload.encode("utf-8")).hexdigest()  # full 32 char
+    return f"flow_{digest}.json"
+
+
+def _get_cached_flow(
+    cache_key: str,
+    data_version: str,
+) -> Optional[Dict[str, Any]]:
+    """读取缓存的 flow 结果。数据/算法版本不匹配返回 None。
+
+    Sprint 14.5 P1.4: 校验 FLOW_ALGO_VERSION, 防止算法改动后 cache 返旧值.
+    旧 cache 没 algo_version 字段 → 视为失效, 触发重算.
+    """
+    cache_file = FLOW_CACHE_DIR / cache_key
+    if not cache_file.exists():
+        return None
+    try:
+        with open(cache_file, "r", encoding="utf-8") as f:
+            cached = json.load(f)
+        if cached.get("data_version") != data_version:
+            return None
+        if cached.get("algo_version") != FLOW_ALGO_VERSION:
+            logger.info(
+                f"Cache STALE (algo_version mismatch {cached.get('algo_version')} → {FLOW_ALGO_VERSION}): {cache_key}"
+            )
+            return None
+        logger.info(f"Cache HIT: {cache_key}")
+        return cached.get("result")
+    except (json.JSONDecodeError, KeyError):
+        cache_file.unlink(missing_ok=True)
+        return None
+
+
+def _set_cached_flow(
+    cache_key: str,
+    data_version: str,
+    result: Dict[str, Any],
+) -> None:
+    """写入 flow 结果缓存 (附 algo_version 供读时校验)."""
+    cache_file = FLOW_CACHE_DIR / cache_key
+    cache_data = {
+        "data_version": data_version,
+        "algo_version": FLOW_ALGO_VERSION,
+        "timestamp": datetime.now().isoformat(),
+        "result": result,
+    }
+    with open(cache_file, "w", encoding="utf-8") as f:
+        json.dump(cache_data, f, ensure_ascii=False, default=str)
+    logger.info(f"Cache SET: {cache_key}")

@@ -1,0 +1,32 @@
+{
+  "kind": "crm-knowledge-offline-validation",
+  "pack_version": "crm-knowledge-offline/v1",
+  "metric_version": "crm-metrics/v1",
+  "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+  "result": "passed",
+  "error_count": 0,
+  "warning_count": 2,
+  "errors": [],
+  "warnings": [
+    "query q.aus.people_or_orders mentions 代码已修复",
+    "query q.premium.1_2 mentions 代码已修复"
+  ],
+  "counts": {
+    "nodes": 216,
+    "edges": 356,
+    "evidence": 66,
+    "conflicts": 12,
+    "queries": 10,
+    "target_metrics": 30,
+    "textbook_core": 20,
+    "confirmed_decisions": 21
+  },
+  "not_run": [
+    "neo4j",
+    "weknora_upload",
+    "generative_extraction",
+    "real_database",
+    "dsh_reload",
+    "git_commit_push_merge"
+  ]
+}

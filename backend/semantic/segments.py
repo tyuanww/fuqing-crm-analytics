@@ -1,0 +1,313 @@
+"""
+Sample CRM - 人群分层定义 (Segments Registry)
+
+统一管理所有人群分层规则：
+- RFM 8象限（经典分割，>=4 vs <4）
+- RFM 评分阈值
+- R/F/M 区间排序
+- R 区间定义（含天数范围）
+- 新老客定义
+- 流失风险定义
+
+所有人群相关的 CASE WHEN SQL 必须通过本模块生成，禁止在 Service 中手写。
+"""
+
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Tuple
+
+
+# ============================================================
+# RFM 固定阈值（单一数据源）
+# ============================================================
+RFM_THRESHOLDS = {
+    "r": [30, 90, 180, 365],
+    "f": [1, 2, 3, 4],
+    "m": [100, 300, 500, 1000],
+}
+
+LIFECYCLE_THRESHOLDS = {
+    "new_max_days": 30,
+    "active_max_days": 30,
+    "dormant_max_days": 180,
+}
+
+VALUE_THRESHOLDS = {
+    "high_gsv": 5000,
+    "high_frequency": 10,
+    "medium_gsv": 1000,
+}
+
+POTENTIAL_THRESHOLDS = {
+    "active_recent_days": 30,
+    "gsv_growth_threshold": 0.0,
+}
+
+
+def lifecycle_case_sql(reference_date_sql: str = "CURRENT_DATE") -> str:
+    """生成 lifecycle_stage CASE WHEN SQL 片段."""
+    return f"""
+        CASE
+            WHEN DATEDIFF('day', first_active, {reference_date_sql}) < {LIFECYCLE_THRESHOLDS['new_max_days']}
+                THEN '新客'
+            WHEN DATEDIFF('day', last_active, {reference_date_sql}) < {LIFECYCLE_THRESHOLDS['active_max_days']}
+                AND DATEDIFF('day', first_active, {reference_date_sql}) >= {LIFECYCLE_THRESHOLDS['new_max_days']}
+                THEN '活跃客'
+            WHEN DATEDIFF('day', last_active, {reference_date_sql}) BETWEEN {LIFECYCLE_THRESHOLDS['active_max_days']} AND {LIFECYCLE_THRESHOLDS['dormant_max_days']}
+                THEN '沉睡客'
+            ELSE '流失客'
+        END
+    """
+
+
+def value_tier_case_sql() -> str:
+    """生成 value_tier CASE WHEN SQL 片段."""
+    return f"""
+        CASE
+            WHEN COALESCE(gsv_sum, 0) >= {VALUE_THRESHOLDS['high_gsv']}
+                OR COALESCE(order_count, 0) >= {VALUE_THRESHOLDS['high_frequency']}
+                THEN '高价值'
+            WHEN COALESCE(gsv_sum, 0) >= {VALUE_THRESHOLDS['medium_gsv']}
+                THEN '中价值'
+            ELSE '低价值'
+        END
+    """
+
+
+def potential_tier_case_sql(reference_date_sql: str = "CURRENT_DATE") -> str:
+    """生成 potential_tier CASE WHEN SQL 片段."""
+    return f"""
+        CASE
+            WHEN DATEDIFF('day', last_active, {reference_date_sql}) < {POTENTIAL_THRESHOLDS['active_recent_days']}
+                AND COALESCE(gsv_growth, 0) > {POTENTIAL_THRESHOLDS['gsv_growth_threshold']}
+                THEN '高潜力'
+            WHEN DATEDIFF('day', last_active, {reference_date_sql}) < {POTENTIAL_THRESHOLDS['active_recent_days']}
+                THEN '中潜力'
+            ELSE '低潜力'
+        END
+    """
+
+
+# ============================================================
+# R/F/M 区间排序（flow 看板、拆解服务统一使用）
+# ============================================================
+R_SEGMENT_ORDER: List[str] = [
+    "近1个月已购客",
+    "近2-3个月已购客",
+    "近4-6月已购客",
+    "近7-12个月已购客",
+    "近13个月-近24个月已购客",
+    "2年外已购客",
+    "已购客TTL",
+]
+
+F_SEGMENT_ORDER: List[str] = [
+    "1次购买",
+    "2次购买",
+    "3次购买",
+    "4次购买",
+    "5次及以上",
+    "已购客TTL",
+]
+
+M_SEGMENT_ORDER: List[str] = [
+    "0-100元",
+    "100-300元",
+    "300-500元",
+    "500-1000元",
+    "1000元以上",
+    "已购客TTL",
+]
+
+
+# ============================================================
+# R 区间定义（拆解服务用，含天数范围）
+# cutoff = 活动开始日 - 1天
+# 名称与 R_SEGMENT_ORDER 一致（不含 TTL）
+# ============================================================
+R_INTERVALS: List[Tuple[str, int, int]] = [
+    ("近1个月已购客",         0,     30),
+    ("近2-3个月已购客",       31,    90),
+    ("近4-6月已购客",         91,   180),
+    ("近7-12个月已购客",      181,  365),
+    ("近13个月-近24个月已购客", 366, 730),
+    ("2年外已购客",           731, 99999),
+]
+
+
+# ============================================================
+# 8象限定义（经典 RFM，分割线 >=4 vs <4）
+# ============================================================
+@dataclass
+class SegmentDefinition:
+    segment_id: int
+    name_cn: str
+    name_en: str
+    r_high: bool
+    f_high: bool
+    m_high: bool
+    description: str
+    color: str
+    priority: int = 99
+
+
+SEGMENTS: List[SegmentDefinition] = [
+    SegmentDefinition(
+        segment_id=1, name_cn="重要价值客户", name_en="Champions",
+        r_high=True, f_high=True, m_high=True,
+        description="最近购买、购买频繁且消费高，最有价值客户",
+        color="#FF6B6B", priority=1,
+    ),
+    SegmentDefinition(
+        segment_id=2, name_cn="重要保持客户", name_en="Loyal Customers",
+        r_high=False, f_high=True, m_high=True,
+        description="购买频繁且消费高，但最近未购买，需唤回",
+        color="#4ECDC4", priority=2,
+    ),
+    SegmentDefinition(
+        segment_id=3, name_cn="重要发展客户", name_en="Potential Loyalists",
+        r_high=True, f_high=False, m_high=True,
+        description="最近购买且消费高，但频次低，需提升复购",
+        color="#45B7D1", priority=3,
+    ),
+    SegmentDefinition(
+        segment_id=4, name_cn="重要挽留客户", name_en="At Risk",
+        r_high=False, f_high=False, m_high=True,
+        description="消费高但最近未购买且频次低，流失风险高",
+        color="#96CEB4", priority=4,
+    ),
+    SegmentDefinition(
+        segment_id=5, name_cn="一般价值客户", name_en="New Customers",
+        r_high=True, f_high=True, m_high=False,
+        description="最近购买且频次高，但消费低，可引导升单",
+        color="#DDA0DD", priority=5,
+    ),
+    SegmentDefinition(
+        segment_id=6, name_cn="一般保持客户", name_en="Promising",
+        r_high=False, f_high=True, m_high=False,
+        description="频次高但最近未购买且消费低，需激活",
+        color="#98D8C8", priority=6,
+    ),
+    SegmentDefinition(
+        segment_id=7, name_cn="一般发展客户", name_en="Need Attention",
+        r_high=True, f_high=False, m_high=False,
+        description="最近购买但频次和消费都低，需关注",
+        color="#F7DC6F", priority=7,
+    ),
+    SegmentDefinition(
+        segment_id=8, name_cn="一般挽留客户", name_en="About to Sleep",
+        r_high=False, f_high=False, m_high=False,
+        description="最近未购买、频次低、消费低，濒临流失",
+        color="#BDC3C7", priority=8,
+    ),
+    SegmentDefinition(
+        segment_id=9, name_cn="其他用户", name_en="Others",
+        r_high=False, f_high=False, m_high=False,
+        description="未命中任何象限的用户",
+        color="#BDC3C7", priority=99,
+    ),
+]
+
+
+class SegmentRegistry:
+    """人群分层注册表"""
+
+    def __init__(self):
+        self._segments: Dict[int, SegmentDefinition] = {s.segment_id: s for s in SEGMENTS}
+
+    def get(self, segment_id: int) -> Optional[SegmentDefinition]:
+        return self._segments.get(segment_id)
+
+    def list_all(self) -> List[SegmentDefinition]:
+        return list(self._segments.values())
+
+    def get_name_cn(self, segment_id: int) -> str:
+        s = self._segments.get(segment_id)
+        return s.name_cn if s else "其他"
+
+    def get_name_en(self, segment_id: int) -> str:
+        s = self._segments.get(segment_id)
+        return s.name_en if s else "Others"
+
+    def get_color(self, segment_id: int) -> str:
+        s = self._segments.get(segment_id)
+        return s.color if s else "#BDC3C7"
+
+    @staticmethod
+    def build_r_score_sql(thresholds: List[int] = None) -> str:
+        """生成 R 评分 CASE WHEN SQL"""
+        t = thresholds or RFM_THRESHOLDS["r"]
+        return f"""CASE
+            WHEN recency_days < {t[0]} THEN 5
+            WHEN recency_days < {t[1]} THEN 4
+            WHEN recency_days < {t[2]} THEN 3
+            WHEN recency_days < {t[3]} THEN 2
+            ELSE 1
+        END"""
+
+    @staticmethod
+    def build_f_score_sql(thresholds: List[int] = None) -> str:
+        """生成 F 评分 CASE WHEN SQL"""
+        t = thresholds or RFM_THRESHOLDS["f"]
+        return f"""CASE
+            WHEN frequency >= {t[3] + 1} THEN 5
+            WHEN frequency >= {t[2] + 1} THEN 4
+            WHEN frequency = {t[2]} THEN 3
+            WHEN frequency = {t[1]} THEN 2
+            ELSE 1
+        END"""
+
+    @staticmethod
+    def build_m_score_sql(thresholds: List[int] = None) -> str:
+        """生成 M 评分 CASE WHEN SQL"""
+        t = thresholds or RFM_THRESHOLDS["m"]
+        return f"""CASE
+            WHEN monetary >= {t[3]} THEN 5
+            WHEN monetary >= {t[2]} THEN 4
+            WHEN monetary >= {t[1]} THEN 3
+            WHEN monetary >= {t[0]} THEN 2
+            ELSE 1
+        END"""
+
+    def build_segment_case_when_sql(self) -> str:
+        """生成 8象限 segment_id 的 CASE WHEN SQL（经典分割：>=4 vs <4）"""
+        parts = []
+        for seg in SEGMENTS:
+            if seg.segment_id == 9:
+                continue
+            r_op = ">= 4" if seg.r_high else "< 4"
+            f_op = ">= 4" if seg.f_high else "< 4"
+            m_op = ">= 4" if seg.m_high else "< 4"
+            parts.append(
+                f"WHEN r_score {r_op} AND f_score {f_op} AND m_score {m_op} THEN {seg.segment_id}"
+            )
+        parts.append("ELSE 9")
+        return f"CASE {' '.join(parts)} END"
+
+    def build_segment_name_case_when_sql(self, lang: str = "cn") -> str:
+        """生成 segment_name 的 CASE WHEN SQL"""
+        parts = []
+        for seg in SEGMENTS:
+            name = seg.name_cn if lang == "cn" else seg.name_en
+            parts.append(f"WHEN {seg.segment_id} THEN '{name}'")
+        return f"CASE segment_id {' '.join(parts)} END"
+
+
+# 全局单例
+_registry = SegmentRegistry()
+
+
+def get_registry() -> SegmentRegistry:
+    return _registry
+
+
+def segment_meta(seg_id: int) -> dict:
+    """从 registry 获取象限元数据，避免硬编码"""
+    registry = get_registry()
+    seg = registry.get(seg_id)
+    if seg:
+        return {"name": seg.name_cn, "en": seg.name_en, "color": seg.color}
+    return {"name": "其他", "en": "Others", "color": "#BDC3C7"}
+
+
+# 向后兼容别名
+_segment_meta = segment_meta

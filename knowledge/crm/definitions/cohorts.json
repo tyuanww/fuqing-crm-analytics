@@ -1,0 +1,262 @@
+{
+  "pack_version": "crm-knowledge-offline/v1",
+  "items": [
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.valid_buyers:target-v1",
+      "name": "去重有效购买人数",
+      "identity_scope": "STOREWIDE",
+      "decision_ids": [
+        "D006",
+        "D018"
+      ],
+      "requires_data": [
+        "data.buyer_identity",
+        "data.order_amount",
+        "data.refund_events"
+      ],
+      "note": "空买家 ID 单列质量状态，不能算成一个共同买家。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.valid_orders:target-v1",
+      "name": "去重有效订单",
+      "identity_scope": "STOREWIDE",
+      "decision_ids": [
+        "D006"
+      ],
+      "requires_data": [
+        "data.order_id",
+        "data.refund_events"
+      ],
+      "note": "净额>0；部分退保留，全退排除。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.opening_storewide_old:target-v1",
+      "name": "期初全店老客存量",
+      "identity_scope": "STOREWIDE",
+      "decision_ids": [
+        "D004",
+        "D020",
+        "D021"
+      ],
+      "requires_data": [
+        "data.first_valid_purchase"
+      ],
+      "note": "首购早于窗口起点 S。渠道/商品新客另列。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.window_storewide_new:target-v1",
+      "name": "窗口内全店新客",
+      "identity_scope": "STOREWIDE",
+      "decision_ids": [
+        "D004",
+        "D020",
+        "D021"
+      ],
+      "requires_data": [
+        "data.first_valid_purchase"
+      ],
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.unknown_history:target-v1",
+      "name": "首购历史未知",
+      "identity_scope": "STOREWIDE",
+      "decision_ids": [
+        "D018",
+        "D020"
+      ],
+      "requires_data": [
+        "data.first_valid_purchase"
+      ],
+      "note": "不能推成老客。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.member_at_purchase:target-v1",
+      "name": "成交时会员",
+      "identity_scope": "STOREWIDE",
+      "decision_ids": [
+        "D014"
+      ],
+      "requires_data": [
+        "data.membership_at_purchase"
+      ],
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.non_member_at_purchase:target-v1",
+      "name": "成交时非会员",
+      "identity_scope": "STOREWIDE",
+      "decision_ids": [
+        "D014"
+      ],
+      "requires_data": [
+        "data.membership_at_purchase"
+      ],
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.unknown_membership:target-v1",
+      "name": "成交时会员身份未知",
+      "identity_scope": "STOREWIDE",
+      "decision_ids": [
+        "D014",
+        "D018"
+      ],
+      "requires_data": [
+        "data.membership_at_purchase"
+      ],
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.first_sample_in_period:target-v1",
+      "name": "统计期内第一笔派样人群",
+      "identity_scope": "STOREWIDE",
+      "decision_ids": [
+        "D009",
+        "D022"
+      ],
+      "requires_data": [
+        "data.sample_identification",
+        "data.pay_time"
+      ],
+      "note": "先归属再按渠道筛选；同时间戳无序则标歧义。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.mature_sample:target-v1",
+      "name": "成熟派样观察人群",
+      "identity_scope": "STOREWIDE",
+      "decision_ids": [
+        "D010"
+      ],
+      "requires_data": [
+        "data.pay_time",
+        "data.data_through"
+      ],
+      "note": "数据完整覆盖第 N 天结束才成熟。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.immature_sample:target-v1",
+      "name": "未成熟派样观察人群",
+      "identity_scope": "STOREWIDE",
+      "decision_ids": [
+        "D010"
+      ],
+      "requires_data": [
+        "data.pay_time",
+        "data.data_through"
+      ],
+      "note": "单列，不计入最终复购率。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.historical_buyers_of_product:target-v1",
+      "name": "历史买过指定商品者",
+      "identity_scope": "PRODUCT",
+      "decision_ids": [
+        "D008"
+      ],
+      "requires_data": [
+        "data.product_hierarchy"
+      ],
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.first_join_in_window:target-v1",
+      "name": "窗口内首次入会",
+      "identity_scope": "STOREWIDE",
+      "decision_ids": [
+        "D014",
+        "D015"
+      ],
+      "requires_data": [
+        "data.first_join_event"
+      ],
+      "availability": "missing_until_join_events",
+      "implementation_status": "not_implemented"
+    }
+  ]
+}

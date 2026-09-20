@@ -1,0 +1,210 @@
+{
+  "pack_version": "crm-knowledge-offline/v1",
+  "metric_version": "crm-metrics/v1",
+  "map": {
+    "rule": "已有基础 = 源码能力快照；拟实现 = A 合同 query；缺失数据 = 无事件/无核验。均非已完成功能。",
+    "existing_code_foundations": [
+      {
+        "capability_id": "capability.legacy_overview",
+        "covers_textbook": [
+          1,
+          2,
+          3,
+          15,
+          16
+        ],
+        "gap": "行均冒充 AUS；会员溢价比较对象错误；未知历史处理不一致"
+      },
+      {
+        "capability_id": "capability.legacy_sampling_roi",
+        "covers_textbook": [],
+        "gap": "名称超出能力；成熟度不完整"
+      },
+      {
+        "capability_id": "capability.legacy_competition_synthetic",
+        "covers_textbook": [],
+        "gap": "仅合成，真实 CRM 不得复用"
+      },
+      {
+        "metric_id": "metric.aus:code-category-users",
+        "covers_textbook": [
+          3
+        ],
+        "gap": "人数分母基础，未成为 v1 合同实现"
+      },
+      {
+        "metric_id": "metric.product_repurchase:code-standard-hist-join",
+        "covers_textbook": [
+          13
+        ],
+        "gap": "历史集合限制已有，仍待 v1 验收"
+      },
+      {
+        "metric_id": "metric.basket:code-order-support",
+        "covers_textbook": [
+          9
+        ],
+        "gap": "订单级而非人数连带"
+      },
+      {
+        "metric_id": "metric.uv:code-sum-daily-visitors",
+        "covers_textbook": [
+          17
+        ],
+        "gap": "日UV累计不是周期去重"
+      },
+      {
+        "metric_id": "metric.ltv:code-specified-day-next-day",
+        "covers_textbook": [],
+        "gap": "不是默认新客 LTV"
+      },
+      {
+        "metric_id": "metric.rfm:code-thresholds-v1",
+        "covers_textbook": [],
+        "gap": "阈值版本保留，不换教材示例"
+      }
+    ],
+    "planned_from_a_contract": [
+      {
+        "capability_id": "capability.sales_window_summary",
+        "a_status": "wire_and_semantic_files_present_c_not_verified"
+      },
+      {
+        "capability_id": "capability.existing_customer_repurchase",
+        "a_status": "wire_and_semantic_files_present_c_not_verified"
+      },
+      {
+        "capability_id": "capability.sample_followup",
+        "a_status": "wire_and_semantic_files_present_c_not_verified"
+      },
+      {
+        "capability_id": "capability.crm_knowledge_explain",
+        "a_status": "candidate_name_only"
+      }
+    ],
+    "missing_data_or_unavailable": [
+      {
+        "capability_id": "capability.member_conversion",
+        "missing": [
+          "data.first_join_event"
+        ],
+        "textbook": [
+          14,
+          18,
+          19,
+          20
+        ]
+      },
+      {
+        "capability_id": "capability.profit_roi",
+        "missing": [
+          "data.cost_profit"
+        ],
+        "textbook": []
+      },
+      {
+        "data": "data.refund_lines",
+        "blocks": [
+          "商品净额均值"
+        ],
+        "decision": "D013"
+      },
+      {
+        "data": "data.visit_identity",
+        "blocks": [
+          "周期去重入会率"
+        ],
+        "decision": "D015"
+      },
+      {
+        "data": "D019",
+        "blocks": [
+          "任何真实出数"
+        ],
+        "decision": "D019"
+      }
+    ],
+    "textbook_20_coverage": [
+      {
+        "ordinal": 1,
+        "status": "target_defined_not_implemented"
+      },
+      {
+        "ordinal": 2,
+        "status": "target_defined_not_implemented"
+      },
+      {
+        "ordinal": 3,
+        "status": "target_defined_not_implemented_conflict_with_legacy"
+      },
+      {
+        "ordinal": 4,
+        "status": "split_into_two_targets_textbook_ambiguity_kept"
+      },
+      {
+        "ordinal": 5,
+        "status": "target_defined_quantity_unverified"
+      },
+      {
+        "ordinal": 6,
+        "status": "target_defined_not_implemented"
+      },
+      {
+        "ordinal": 7,
+        "status": "target_defined_not_implemented"
+      },
+      {
+        "ordinal": 8,
+        "status": "in_window_target_defined_n_day_variant_not_implemented"
+      },
+      {
+        "ordinal": 9,
+        "status": "split_people_vs_order_not_implemented"
+      },
+      {
+        "ordinal": 10,
+        "status": "split_people_vs_amount_not_implemented"
+      },
+      {
+        "ordinal": 11,
+        "status": "target_defined_not_implemented"
+      },
+      {
+        "ordinal": 12,
+        "status": "target_defined_not_implemented"
+      },
+      {
+        "ordinal": 13,
+        "status": "target_defined_legacy_join_exists"
+      },
+      {
+        "ordinal": 14,
+        "status": "unavailable_missing_join_events"
+      },
+      {
+        "ordinal": 15,
+        "status": "target_defined_not_implemented"
+      },
+      {
+        "ordinal": 16,
+        "status": "target_defined_not_implemented_conflict_with_legacy"
+      },
+      {
+        "ordinal": 17,
+        "status": "daily_uv_named_period_unique_unavailable"
+      },
+      {
+        "ordinal": 18,
+        "status": "unavailable_missing_join_events"
+      },
+      {
+        "ordinal": 19,
+        "status": "unavailable_missing_join_and_opening_member_stock"
+      },
+      {
+        "ordinal": 20,
+        "status": "unavailable_missing_join_events"
+      }
+    ]
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "pack_version": "crm-knowledge-offline/v1",
+  "execution_authorized": false,
+  "items": [
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Strategy",
+      "id": "strategy.old_customer_rfm_planning",
+      "name": "存量老客 RFM 回购预估",
+      "applies_to": [
+        "concept.rfm",
+        "concept.retention",
+        "concept.aus"
+      ],
+      "textbook_refs": [
+        "tb.rfm.plan"
+      ],
+      "note": "教材规划方法。不构成触达授权，也不能把关联写成因果。",
+      "execution_authorized": false,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Strategy",
+      "id": "strategy.member_golden_quadrant",
+      "name": "会员黄金四象限生意拆解",
+      "applies_to": [
+        "concept.member_share",
+        "concept.new_old",
+        "concept.membership_at_purchase"
+      ],
+      "textbook_refs": [
+        "tb.quadrant.gmv"
+      ],
+      "execution_authorized": false,
+      "note": "购买新老与会员新老是不同维度，不合并成互斥三人群。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Strategy",
+      "id": "strategy.sample_acquisition",
+      "name": "派样拉新与复购跟踪",
+      "applies_to": [
+        "concept.sample_window",
+        "concept.new_repeat"
+      ],
+      "decision_ids": [
+        "D009",
+        "D010",
+        "D011",
+        "D022"
+      ],
+      "execution_authorized": false,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Strategy",
+      "id": "strategy.product_bundle",
+      "name": "商品连带套组",
+      "applies_to": [
+        "concept.basket"
+      ],
+      "decision_ids": [
+        "D008"
+      ],
+      "execution_authorized": false,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Strategy",
+      "id": "strategy.old_customer_recall",
+      "name": "老客召回",
+      "applies_to": [
+        "concept.retention",
+        "concept.product_repurchase"
+      ],
+      "decision_ids": [
+        "D008"
+      ],
+      "execution_authorized": false,
+      "implementation_status": "not_implemented"
+    }
+  ]
+}

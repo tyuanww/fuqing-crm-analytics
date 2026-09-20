@@ -1,0 +1,701 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "CRM metrics v1 candidate",
+    "version": "crm-metrics/v1"
+  },
+  "paths": {
+    "/api/v1/crm-metrics/capabilities": {
+      "get": {
+        "summary": "Capabilities",
+        "operationId": "capabilities_api_v1_crm_metrics_capabilities_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/crm-metrics/query": {
+      "post": {
+        "summary": "Query",
+        "operationId": "query_api_v1_crm_metrics_query_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MetricRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/crm-metrics/explain": {
+      "post": {
+        "summary": "Explain",
+        "operationId": "explain_api_v1_crm_metrics_explain_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExplainRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ExplainRequest": {
+        "properties": {
+          "topic": {
+            "type": "string",
+            "title": "Topic"
+          },
+          "metric_version": {
+            "type": "string",
+            "const": "crm-metrics/v1",
+            "title": "Metric Version",
+            "default": "crm-metrics/v1"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "topic"
+        ],
+        "title": "ExplainRequest"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Limitation": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "related_fact": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Related Fact"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "Limitation"
+      },
+      "MetricRequest": {
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "title": "Source Id"
+          },
+          "contains_real_data": {
+            "type": "boolean",
+            "title": "Contains Real Data"
+          },
+          "metric_version": {
+            "type": "string",
+            "const": "crm-metrics/v1",
+            "title": "Metric Version"
+          },
+          "query_id": {
+            "type": "string",
+            "enum": [
+              "sales_window_summary",
+              "existing_customer_repurchase",
+              "sample_followup"
+            ],
+            "title": "Query Id"
+          },
+          "period_start": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "title": "Period Start"
+          },
+          "period_end_exclusive": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "title": "Period End Exclusive"
+          },
+          "refund_view": {
+            "type": "string",
+            "enum": [
+              "ORDER_COHORT_AS_OF",
+              "REFUND_FLOW"
+            ],
+            "title": "Refund View"
+          },
+          "refund_as_of": {
+            "type": "string",
+            "title": "Refund As Of"
+          },
+          "data_through": {
+            "type": "string",
+            "title": "Data Through"
+          },
+          "timezone": {
+            "type": "string",
+            "const": "Asia/Shanghai",
+            "title": "Timezone",
+            "default": "Asia/Shanghai"
+          },
+          "channel_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Channel Ids"
+          },
+          "product_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Ids"
+          },
+          "identity_scope": {
+            "type": "string",
+            "const": "STOREWIDE",
+            "title": "Identity Scope",
+            "default": "STOREWIDE"
+          },
+          "observation_days": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 365.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observation Days"
+          },
+          "amount_already_net": {
+            "type": "boolean",
+            "title": "Amount Already Net",
+            "default": false
+          },
+          "cohort_period_start": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cohort Period Start"
+          },
+          "cohort_period_end_exclusive": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cohort Period End Exclusive"
+          },
+          "actor_scope": {
+            "type": "string",
+            "title": "Actor Scope",
+            "default": "server_filled"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "source_id",
+          "contains_real_data",
+          "metric_version",
+          "query_id",
+          "period_start",
+          "period_end_exclusive",
+          "refund_view",
+          "refund_as_of",
+          "data_through"
+        ],
+        "title": "MetricRequest"
+      },
+      "MetricResult": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "OK",
+              "UNAVAILABLE"
+            ],
+            "title": "Status"
+          },
+          "schema_version": {
+            "type": "string",
+            "const": "crm-metrics-wire/v1",
+            "title": "Schema Version",
+            "default": "crm-metrics-wire/v1"
+          },
+          "query_version": {
+            "type": "string",
+            "const": "crm-metrics-query/v1",
+            "title": "Query Version",
+            "default": "crm-metrics-query/v1"
+          },
+          "source_id": {
+            "type": "string",
+            "title": "Source Id"
+          },
+          "contains_real_data": {
+            "type": "boolean",
+            "title": "Contains Real Data"
+          },
+          "synthetic": {
+            "type": "boolean",
+            "title": "Synthetic"
+          },
+          "metric_version": {
+            "type": "string",
+            "const": "crm-metrics/v1",
+            "title": "Metric Version"
+          },
+          "query_id": {
+            "type": "string",
+            "title": "Query Id"
+          },
+          "metric_id": {
+            "type": "string",
+            "title": "Metric Id"
+          },
+          "data_version": {
+            "type": "string",
+            "title": "Data Version"
+          },
+          "mapping_version": {
+            "type": "string",
+            "title": "Mapping Version"
+          },
+          "data_through": {
+            "type": "string",
+            "title": "Data Through"
+          },
+          "resolved_filters": {
+            "$ref": "#/components/schemas/ResolvedFilters"
+          },
+          "facts": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Facts"
+          },
+          "limitations": {
+            "items": {
+              "$ref": "#/components/schemas/Limitation"
+            },
+            "type": "array",
+            "title": "Limitations"
+          },
+          "query_ref": {
+            "type": "string",
+            "title": "Query Ref"
+          },
+          "decision_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Decision Ids"
+          },
+          "implementation_status": {
+            "type": "string",
+            "enum": [
+              "synthetic_verified",
+              "not_implemented",
+              "source_unverified"
+            ],
+            "title": "Implementation Status"
+          },
+          "publication_status": {
+            "type": "string",
+            "const": "local_isolated_candidate",
+            "title": "Publication Status",
+            "default": "local_isolated_candidate"
+          },
+          "real_business_acceptance": {
+            "type": "boolean",
+            "title": "Real Business Acceptance",
+            "default": false
+          },
+          "production_release": {
+            "type": "boolean",
+            "title": "Production Release",
+            "default": false
+          },
+          "adapter_query_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Adapter Query Ref"
+          },
+          "adapter_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Adapter Version"
+          },
+          "permission_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Permission Version"
+          },
+          "actor_scope": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor Scope"
+          },
+          "source_data_through": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Data Through"
+          },
+          "coverage_start": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coverage Start"
+          },
+          "history_complete": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "History Complete"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status",
+          "source_id",
+          "contains_real_data",
+          "synthetic",
+          "metric_version",
+          "query_id",
+          "metric_id",
+          "data_version",
+          "mapping_version",
+          "data_through",
+          "resolved_filters",
+          "facts",
+          "limitations",
+          "query_ref",
+          "decision_ids",
+          "implementation_status"
+        ],
+        "title": "MetricResult"
+      },
+      "ResolvedFilters": {
+        "properties": {
+          "period_start": {
+            "type": "string",
+            "title": "Period Start"
+          },
+          "period_end_exclusive": {
+            "type": "string",
+            "title": "Period End Exclusive"
+          },
+          "refund_view": {
+            "type": "string",
+            "title": "Refund View"
+          },
+          "refund_as_of": {
+            "type": "string",
+            "title": "Refund As Of"
+          },
+          "data_through": {
+            "type": "string",
+            "title": "Data Through"
+          },
+          "timezone": {
+            "type": "string",
+            "title": "Timezone"
+          },
+          "channel_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Channel Ids"
+          },
+          "product_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Ids"
+          },
+          "identity_scope": {
+            "type": "string",
+            "title": "Identity Scope"
+          },
+          "observation_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observation Days"
+          },
+          "amount_already_net": {
+            "type": "boolean",
+            "title": "Amount Already Net"
+          },
+          "cohort_period_start": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cohort Period Start"
+          },
+          "cohort_period_end_exclusive": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cohort Period End Exclusive"
+          },
+          "yoy_period_start": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Yoy Period Start"
+          },
+          "yoy_period_end_exclusive": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Yoy Period End Exclusive"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "period_start",
+          "period_end_exclusive",
+          "refund_view",
+          "refund_as_of",
+          "data_through",
+          "timezone",
+          "channel_ids",
+          "product_ids",
+          "identity_scope",
+          "amount_already_net"
+        ],
+        "title": "ResolvedFilters"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

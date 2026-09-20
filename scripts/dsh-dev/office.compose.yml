@@ -1,0 +1,18 @@
+# Explicit local document service. The ordinary DSH/B0 startup never runs Compose.
+services:
+  documents:
+    image: onlyoffice/documentserver@sha256:e3da62a847b9a5d51a11f73cfea1d9c13c3be3809614490d4edddcf01dcf919b
+    restart: "no"
+    ports:
+      - "127.0.0.1:${COCKPIT_OFFICE_PORT:-18110}:80"
+    env_file:
+      - ${COCKPIT_OFFICE_ENV_FILE:?Specify an absolute private office.env path}
+    mem_limit: 4g
+    cpus: 2
+    labels:
+      com.shinemage.owner: cockpit-office
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost/healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 30

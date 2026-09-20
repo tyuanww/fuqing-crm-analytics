@@ -1,0 +1,4640 @@
+{
+  "pack_version": "crm-knowledge-offline/v1",
+  "kind": "offline_logical_graph_nodes",
+  "neo4j": false,
+  "items": [
+    {
+      "id": "concept.aus",
+      "name": "客单价 / 人均消费金额",
+      "aliases": [
+        "AUS",
+        "客单价",
+        "人均消费金额"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.aov",
+      "name": "每单金额",
+      "aliases": [
+        "AOV",
+        "平均订单金额"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.valid_purchase",
+      "name": "有效购买",
+      "aliases": [
+        "有效订单",
+        "有效人数"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.gsv",
+      "name": "GSV 净销售",
+      "aliases": [
+        "GSV"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.gmv",
+      "name": "GMV 成交总额",
+      "aliases": [
+        "GMV"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.member_premium",
+      "name": "会员溢价",
+      "aliases": [
+        "会员溢价率",
+        "Member premium"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.new_old",
+      "name": "新老客",
+      "aliases": [
+        "NTF",
+        "Existing Customer"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.frequency",
+      "name": "人均购买次数",
+      "aliases": [
+        "Frequency"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.ipt",
+      "name": "客单件 / 件数",
+      "aliases": [
+        "IPT",
+        "人均购买件数",
+        "每单件数"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.aup",
+      "name": "件单价",
+      "aliases": [
+        "AUP"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.retention",
+      "name": "老客回购",
+      "aliases": [
+        "Retention rate"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.new_repeat",
+      "name": "新客复购",
+      "aliases": [
+        "New Repeat rate"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.basket",
+      "name": "商品连带",
+      "aliases": [
+        "商品连带率"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.product_acquisition",
+      "name": "商品招新",
+      "aliases": [
+        "商品招新率"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.product_penetration",
+      "name": "商品渗透",
+      "aliases": [
+        "新客渗透率",
+        "老客渗透率"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.product_repurchase",
+      "name": "商品回购",
+      "aliases": [
+        "Commodity Repurchase Rate"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.member_recruitment",
+      "name": "新会员招募",
+      "aliases": [
+        "新会员招募数"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.member_share",
+      "name": "会员成交占比",
+      "aliases": [
+        "会员渗透"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.binding_rate",
+      "name": "绑卡率 / 入会率",
+      "aliases": [
+        "Binding Rate"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.new_member_conversion",
+      "name": "新会员转化",
+      "aliases": [
+        "New member Conversion Rate"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.old_member_retention",
+      "name": "老会员回购",
+      "aliases": [
+        "老会员回购率"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.old_customer_join",
+      "name": "老客入会",
+      "aliases": [
+        "老客入会率"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.sample_window",
+      "name": "派样观察窗口",
+      "aliases": [
+        "派样 ROI",
+        "派样复购"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.ltv",
+      "name": "LTV / 新客累计净消费",
+      "aliases": [
+        "LTV",
+        "cohort 后续收入"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.uv",
+      "name": "访客与入会率分母",
+      "aliases": [
+        "UV",
+        "日UV累计"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.yoy",
+      "name": "同比日历",
+      "aliases": [
+        "YOY"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.rfm",
+      "name": "RFM 分层",
+      "aliases": [
+        "RFM"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.refund_view",
+      "name": "退款视图",
+      "aliases": [
+        "原订单期净额",
+        "退款发生期"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.membership_at_purchase",
+      "name": "成交时会员身份",
+      "aliases": [
+        "MEMBER",
+        "NON_MEMBER",
+        "UNKNOWN"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.aus:target-v1",
+      "concept_id": "concept.aus",
+      "layer": "target_definition",
+      "name": "客单价 AUS",
+      "formula": "same_scope_net_amount / distinct_valid_buyers",
+      "unit": "money_per_person",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D001",
+        "D003",
+        "D006",
+        "D018"
+      ],
+      "textbook_refs": [
+        "tb.03.aus"
+      ],
+      "findings": [
+        "M01"
+      ],
+      "numerator": "metric.gsv_net:target-v1",
+      "denominator": "cohort.valid_buyers:target-v1",
+      "requires_data": [
+        "data.order_amount",
+        "data.buyer_identity",
+        "data.refund_events"
+      ],
+      "planned_capabilities": [
+        "capability.sales_window_summary"
+      ],
+      "note": "分母为零时不能写成平均消费为0。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.aov:target-v1",
+      "concept_id": "concept.aov",
+      "layer": "target_definition",
+      "name": "每单金额 AOV",
+      "formula": "same_scope_net_amount / distinct_valid_orders",
+      "unit": "money_per_order",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D001",
+        "D003",
+        "D006"
+      ],
+      "textbook_refs": [
+        "tb.03.aus"
+      ],
+      "findings": [
+        "M01"
+      ],
+      "numerator": "metric.gsv_net:target-v1",
+      "denominator": "cohort.valid_orders:target-v1",
+      "requires_data": [
+        "data.order_amount",
+        "data.order_id",
+        "data.refund_events"
+      ],
+      "planned_capabilities": [
+        "capability.sales_window_summary"
+      ],
+      "note": "与 AUS 单列，不得静默改写旧 avg_order_value 字段含义。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.gsv_net:target-v1",
+      "concept_id": "concept.gsv",
+      "layer": "target_definition",
+      "name": "GSV 净额",
+      "formula": "gross_paid - succeeded_refunds_as_of_A; if amount_already_net then do_not_subtract_again",
+      "unit": "money",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D003",
+        "D005",
+        "D006",
+        "D013"
+      ],
+      "textbook_refs": [],
+      "findings": [
+        "M03",
+        "M04",
+        "M05",
+        "M29"
+      ],
+      "requires_data": [
+        "data.order_amount",
+        "data.refund_events"
+      ],
+      "planned_capabilities": [
+        "capability.sales_window_summary"
+      ],
+      "note": "100退30计70。原金额已净额时禁止再扣。D019 未核验前不得宣称真实出数。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.member_premium:target-v1",
+      "concept_id": "concept.member_premium",
+      "layer": "target_definition",
+      "name": "会员溢价倍数",
+      "formula": "member_aus / non_member_aus",
+      "unit": "multiple",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D001",
+        "D002",
+        "D014",
+        "D017",
+        "D018"
+      ],
+      "textbook_refs": [
+        "tb.16.premium"
+      ],
+      "findings": [
+        "M02"
+      ],
+      "numerator": "metric.member_aus:target-v1",
+      "denominator": "metric.non_member_aus:target-v1",
+      "requires_data": [
+        "data.membership_at_purchase",
+        "data.order_amount",
+        "data.buyer_identity"
+      ],
+      "planned_capabilities": [
+        "capability.sales_window_summary"
+      ],
+      "note": "1.2 表示 1.2 倍，不是高 120%。高 20% 是 (1.2-1)×100%，不得装入同一无单位字段。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.member_aus:target-v1",
+      "concept_id": "concept.aus",
+      "layer": "target_definition",
+      "name": "会员 AUS",
+      "formula": "member_net_amount / distinct_member_buyers_at_purchase",
+      "unit": "money_per_person",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D001",
+        "D002",
+        "D014",
+        "D018"
+      ],
+      "textbook_refs": [
+        "tb.16.premium"
+      ],
+      "findings": [
+        "M02",
+        "M22"
+      ],
+      "requires_data": [
+        "data.membership_at_purchase"
+      ],
+      "planned_capabilities": [
+        "capability.sales_window_summary"
+      ],
+      "note": "期内入会者可先后属于会员与非会员两组，两组人数不能直接相加当全店去重人数。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.non_member_aus:target-v1",
+      "concept_id": "concept.aus",
+      "layer": "target_definition",
+      "name": "非会员 AUS",
+      "formula": "non_member_net_amount / distinct_non_member_buyers_at_purchase",
+      "unit": "money_per_person",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D001",
+        "D002",
+        "D014",
+        "D018"
+      ],
+      "textbook_refs": [
+        "tb.16.premium"
+      ],
+      "findings": [
+        "M02",
+        "M22"
+      ],
+      "requires_data": [
+        "data.membership_at_purchase"
+      ],
+      "planned_capabilities": [
+        "capability.sales_window_summary"
+      ],
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.new_buyer_share:target-v1",
+      "concept_id": "concept.new_old",
+      "layer": "target_definition",
+      "name": "新客购买人数占比",
+      "formula": "new_buyers / all_identified_buyers_same_scope",
+      "unit": "raw_ratio_0_1",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D004",
+        "D017",
+        "D018",
+        "D020",
+        "D021"
+      ],
+      "textbook_refs": [
+        "tb.01.new_share"
+      ],
+      "findings": [
+        "M06",
+        "M07",
+        "M08",
+        "M09",
+        "M30"
+      ],
+      "requires_data": [
+        "data.first_valid_purchase",
+        "data.refund_events"
+      ],
+      "planned_capabilities": [
+        "capability.sales_window_summary"
+      ],
+      "note": "人数占比与金额占比分列。未知历史单列，不能填老客。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.new_amount_share:target-v1",
+      "concept_id": "concept.new_old",
+      "layer": "target_definition",
+      "name": "新客金额占比",
+      "formula": "new_net_amount / identified_net_amount_same_scope",
+      "unit": "raw_ratio_0_1",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D004",
+        "D017",
+        "D018",
+        "D020"
+      ],
+      "textbook_refs": [
+        "tb.01.new_share"
+      ],
+      "findings": [
+        "M09"
+      ],
+      "requires_data": [
+        "data.first_valid_purchase"
+      ],
+      "planned_capabilities": [
+        "capability.sales_window_summary"
+      ],
+      "note": "新+老+未知必须与同口径总额闭合。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.old_buyer_share:target-v1",
+      "concept_id": "concept.new_old",
+      "layer": "target_definition",
+      "name": "老客购买人数占比",
+      "formula": "old_buyers / all_identified_buyers_same_scope",
+      "unit": "raw_ratio_0_1",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D004",
+        "D018",
+        "D020",
+        "D021"
+      ],
+      "textbook_refs": [
+        "tb.02.old_share"
+      ],
+      "findings": [
+        "M06",
+        "M08"
+      ],
+      "requires_data": [
+        "data.first_valid_purchase"
+      ],
+      "planned_capabilities": [
+        "capability.sales_window_summary"
+      ],
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.old_repurchase_rate:target-v1",
+      "concept_id": "concept.retention",
+      "layer": "target_definition",
+      "name": "期初老客回购率",
+      "formula": "buyers_from_opening_old_stock_in_window / opening_old_stock",
+      "unit": "raw_ratio_0_1",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D004",
+        "D006",
+        "D010",
+        "D018",
+        "D020"
+      ],
+      "textbook_refs": [
+        "tb.07.retention"
+      ],
+      "findings": [
+        "M06",
+        "M17",
+        "M30"
+      ],
+      "uses_cohorts": [
+        "cohort.opening_storewide_old:target-v1"
+      ],
+      "requires_data": [
+        "data.first_valid_purchase"
+      ],
+      "planned_capabilities": [
+        "capability.existing_customer_repurchase"
+      ],
+      "note": "分母是期初存量，不是当期购买老客。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.frequency:target-v1",
+      "concept_id": "concept.frequency",
+      "layer": "target_definition",
+      "name": "人均购买次数",
+      "formula": "distinct_valid_orders / distinct_valid_buyers",
+      "unit": "orders_per_person",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D007"
+      ],
+      "textbook_refs": [
+        "tb.06.frequency"
+      ],
+      "findings": [
+        "M13"
+      ],
+      "requires_data": [
+        "data.order_id",
+        "data.buyer_identity"
+      ],
+      "planned_capabilities": [
+        "capability.sales_window_summary"
+      ],
+      "note": "同一订单多行只算一次。购买日次数另命名。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.items_per_buyer:target-v1",
+      "concept_id": "concept.ipt",
+      "layer": "target_definition",
+      "name": "人均件数",
+      "formula": "in_scope_item_quantity / distinct_valid_buyers",
+      "unit": "items_per_person",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D007"
+      ],
+      "textbook_refs": [
+        "tb.04.ipt"
+      ],
+      "findings": [
+        "M14"
+      ],
+      "requires_data": [
+        "data.quantity"
+      ],
+      "planned_capabilities": [],
+      "note": "与每单件数分列。无退件数量时不猜净件数。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.ipt:target-v1",
+      "concept_id": "concept.ipt",
+      "layer": "target_definition",
+      "name": "每单件数 IPT",
+      "formula": "in_scope_item_quantity / distinct_valid_orders",
+      "unit": "items_per_order",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D007"
+      ],
+      "textbook_refs": [
+        "tb.04.ipt"
+      ],
+      "findings": [
+        "M14"
+      ],
+      "requires_data": [
+        "data.quantity"
+      ],
+      "planned_capabilities": [],
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.aup:target-v1",
+      "concept_id": "concept.aup",
+      "layer": "target_definition",
+      "name": "件单价 AUP",
+      "formula": "same_scope_net_amount / in_scope_item_quantity",
+      "unit": "money_per_item",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D007",
+        "D003"
+      ],
+      "textbook_refs": [
+        "tb.05.aup"
+      ],
+      "findings": [
+        "M14",
+        "M29"
+      ],
+      "requires_data": [
+        "data.quantity",
+        "data.order_amount"
+      ],
+      "planned_capabilities": [],
+      "note": "部分退款不等同退件。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.basket_people:target-v1",
+      "concept_id": "concept.basket",
+      "layer": "target_definition",
+      "name": "人数连带率",
+      "formula": "people_buying_A_and_other_sku_in_same_order / people_buying_A",
+      "unit": "raw_ratio_0_1",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D008"
+      ],
+      "textbook_refs": [
+        "tb.09.basket"
+      ],
+      "findings": [
+        "M15"
+      ],
+      "requires_data": [
+        "data.product_hierarchy"
+      ],
+      "planned_capabilities": [],
+      "note": "与订单连带、购物篮 confidence 分名。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.basket_orders:target-v1",
+      "concept_id": "concept.basket",
+      "layer": "target_definition",
+      "name": "订单连带率",
+      "formula": "orders_with_A_and_other_sku / orders_with_A",
+      "unit": "raw_ratio_0_1",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D008"
+      ],
+      "textbook_refs": [
+        "tb.09.basket"
+      ],
+      "findings": [
+        "M15"
+      ],
+      "requires_data": [
+        "data.product_hierarchy"
+      ],
+      "planned_capabilities": [],
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.product_new_people_share:target-v1",
+      "concept_id": "concept.product_acquisition",
+      "layer": "target_definition",
+      "name": "商品招新人数占比",
+      "formula": "new_buyers_of_A / buyers_of_A",
+      "unit": "raw_ratio_0_1",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D008",
+        "D020"
+      ],
+      "textbook_refs": [
+        "tb.10.product_acq"
+      ],
+      "findings": [
+        "M16"
+      ],
+      "requires_data": [
+        "data.first_valid_purchase",
+        "data.product_hierarchy"
+      ],
+      "planned_capabilities": [],
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.product_new_amount_share:target-v1",
+      "concept_id": "concept.product_acquisition",
+      "layer": "target_definition",
+      "name": "商品新客金额占比",
+      "formula": "new_net_amount_of_A / net_amount_of_A",
+      "unit": "raw_ratio_0_1",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D008",
+        "D013",
+        "D020"
+      ],
+      "textbook_refs": [
+        "tb.10.product_acq"
+      ],
+      "findings": [
+        "M16",
+        "M10"
+      ],
+      "requires_data": [
+        "data.refund_lines"
+      ],
+      "planned_capabilities": [],
+      "note": "无退款明细时受影响商品净额不可用。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.product_new_penetration:target-v1",
+      "concept_id": "concept.product_penetration",
+      "layer": "target_definition",
+      "name": "商品新客渗透率",
+      "formula": "new_buyers_of_A / storewide_new_buyers_same_definition",
+      "unit": "raw_ratio_0_1",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D008",
+        "D020"
+      ],
+      "textbook_refs": [
+        "tb.11.new_pen"
+      ],
+      "findings": [
+        "M16",
+        "M27"
+      ],
+      "requires_data": [
+        "data.first_valid_purchase"
+      ],
+      "planned_capabilities": [],
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.product_old_penetration:target-v1",
+      "concept_id": "concept.product_penetration",
+      "layer": "target_definition",
+      "name": "商品老客渗透率",
+      "formula": "old_buyers_of_A / storewide_old_buyers_same_definition",
+      "unit": "raw_ratio_0_1",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D008",
+        "D020"
+      ],
+      "textbook_refs": [
+        "tb.12.old_pen"
+      ],
+      "findings": [
+        "M16",
+        "M27"
+      ],
+      "requires_data": [
+        "data.first_valid_purchase"
+      ],
+      "planned_capabilities": [],
+      "note": "多品类比例不能相加当 100%。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.member_people_share:target-v1",
+      "concept_id": "concept.member_share",
+      "layer": "target_definition",
+      "name": "会员购买人数占比",
+      "formula": "member_buyers_at_purchase / all_identified_buyers_same_scope",
+      "unit": "raw_ratio_0_1",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D014",
+        "D017",
+        "D018"
+      ],
+      "textbook_refs": [
+        "tb.15.member_share"
+      ],
+      "findings": [
+        "M02",
+        "M22"
+      ],
+      "requires_data": [
+        "data.membership_at_purchase"
+      ],
+      "planned_capabilities": [
+        "capability.sales_window_summary"
+      ],
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.member_amount_share:target-v1",
+      "concept_id": "concept.member_share",
+      "layer": "target_definition",
+      "name": "会员金额占比",
+      "formula": "member_net_amount / same_scope_total",
+      "unit": "raw_ratio_0_1",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D014",
+        "D017",
+        "D018"
+      ],
+      "textbook_refs": [
+        "tb.15.member_share"
+      ],
+      "findings": [
+        "M02",
+        "M09"
+      ],
+      "requires_data": [
+        "data.membership_at_purchase"
+      ],
+      "planned_capabilities": [
+        "capability.sales_window_summary"
+      ],
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.new_repeat_in_window:target-v1",
+      "concept_id": "concept.new_repeat",
+      "layer": "target_definition",
+      "name": "当期新客期内复购率",
+      "formula": "window_new_buyers_with_2plus_valid_orders / window_new_buyers",
+      "unit": "raw_ratio_0_1",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D004",
+        "D006",
+        "D007",
+        "D010"
+      ],
+      "textbook_refs": [
+        "tb.08.new_repeat"
+      ],
+      "findings": [
+        "M19"
+      ],
+      "requires_data": [
+        "data.first_valid_purchase",
+        "data.order_id"
+      ],
+      "planned_capabilities": [],
+      "note": "与“首购后 N 日复购”分别定义；后者尚未单列合同，保持未知/未实现。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.old_amount_share:target-v1",
+      "concept_id": "concept.new_old",
+      "layer": "target_definition",
+      "name": "老客金额占比",
+      "formula": "old_net_amount / same_scope_total",
+      "unit": "raw_ratio_0_1",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D004",
+        "D017",
+        "D018",
+        "D020"
+      ],
+      "textbook_refs": [
+        "tb.02.old_share"
+      ],
+      "findings": [
+        "M09"
+      ],
+      "requires_data": [
+        "data.first_valid_purchase"
+      ],
+      "planned_capabilities": [
+        "capability.sales_window_summary"
+      ],
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.product_repurchase:target-v1",
+      "concept_id": "concept.product_repurchase",
+      "layer": "target_definition",
+      "name": "商品历史集合回购率",
+      "formula": "historical_buyers_of_A_who_buy_A_again / historical_buyers_of_A",
+      "unit": "raw_ratio_0_1",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D008"
+      ],
+      "textbook_refs": [
+        "tb.13.product_repurchase"
+      ],
+      "findings": [
+        "M17"
+      ],
+      "uses_cohorts": [
+        "cohort.historical_buyers_of_product:target-v1"
+      ],
+      "requires_data": [
+        "data.product_hierarchy",
+        "data.first_valid_purchase"
+      ],
+      "planned_capabilities": [],
+      "note": "分子必须是历史集合子集。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.sample_repeat_revenue:target-v1",
+      "concept_id": "concept.sample_window",
+      "layer": "target_definition",
+      "name": "派样后复购收入表现（对外仍称派样 ROI）",
+      "formula": "mature_sample_cohort_followup_net_amount; name retained as 派样 ROI with explicit non-profit caveat",
+      "unit": "money",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D009",
+        "D010",
+        "D011",
+        "D022"
+      ],
+      "textbook_refs": [],
+      "findings": [
+        "M18",
+        "M19",
+        "M20",
+        "M21"
+      ],
+      "uses_cohorts": [
+        "cohort.first_sample_in_period:target-v1",
+        "cohort.mature_sample:target-v1"
+      ],
+      "requires_data": [
+        "data.sample_identification",
+        "data.pay_time"
+      ],
+      "planned_capabilities": [
+        "capability.sample_followup"
+      ],
+      "note": "当前只是复购收入表现，不是利润 ROI 或因果增量。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.ltv_new_customer_n_day:target-v1",
+      "concept_id": "concept.ltv",
+      "layer": "target_definition",
+      "name": "全店新客 N 日累计净消费",
+      "formula": "net_spend_from_first_valid_pay_including_first_order_over_N_natural_days_storewide",
+      "unit": "money_per_person",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D012",
+        "D010",
+        "D021"
+      ],
+      "textbook_refs": [],
+      "findings": [
+        "M24"
+      ],
+      "requires_data": [
+        "data.first_valid_purchase",
+        "data.refund_events"
+      ],
+      "planned_capabilities": [],
+      "note": "含首单、全店后续购买、区分成熟度。旧指定日次日起收入单列。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.yoy_calendar:target-v1",
+      "concept_id": "concept.yoy",
+      "layer": "target_definition",
+      "name": "去年同日同比区间",
+      "formula": "same_calendar_date_last_year; Feb29->Feb28; display actual range",
+      "unit": "date_range",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D016"
+      ],
+      "textbook_refs": [],
+      "findings": [
+        "M25"
+      ],
+      "requires_data": [],
+      "planned_capabilities": [
+        "capability.sales_window_summary"
+      ],
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.daily_uv_sum:target-v1",
+      "concept_id": "concept.uv",
+      "layer": "target_definition",
+      "name": "日 UV 累计口径",
+      "formula": "sum(daily_visitors); not period-unique UV",
+      "unit": "count",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D015"
+      ],
+      "textbook_refs": [
+        "tb.17.binding"
+      ],
+      "findings": [
+        "M23"
+      ],
+      "requires_data": [
+        "data.daily_visitors"
+      ],
+      "planned_capabilities": [],
+      "note": "周期去重转化另列；数据不具备时说明。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.rfm_thresholds:target-v1",
+      "concept_id": "concept.rfm",
+      "layer": "target_definition",
+      "name": "RFM 现有阈值版本",
+      "formula": "keep current project thresholds with actual-day labels; do not swap in textbook example cuts",
+      "unit": "threshold_table",
+      "definition_review_status": "principles_confirmed_mapping_pending",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D016"
+      ],
+      "textbook_refs": [
+        "tb.rfm.plan"
+      ],
+      "findings": [
+        "M26"
+      ],
+      "requires_data": [],
+      "planned_capabilities": [],
+      "rfm_threshold_version": "crm-rfm-thresholds/v1",
+      "note": "R 桶“近1个月”实际为 30 天，名称须标实际天数。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.aus:code-overview-line-avg",
+      "concept_id": "concept.aus",
+      "layer": "code_snapshot",
+      "name": "旧概览 avg_order_value 明细行均",
+      "formula": "AVG(actual_amount) over order lines",
+      "unit": "money_per_line",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D001"
+      ],
+      "textbook_refs": [
+        "tb.03.aus"
+      ],
+      "findings": [
+        "M01"
+      ],
+      "code_path": "backend/services/metrics/overview.py",
+      "code_sha256": "91d370461b89e7ab47c8e7b33200b035a5b4ffb2e3f513827495f82f0699cc59",
+      "anchors": [
+        "_query_period",
+        "AVG(actual_amount) as avg_order_value"
+      ],
+      "lines": [
+        "40",
+        "194"
+      ],
+      "note": "不得称为已修复的客单价。保留为技术诊断值。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.aus:code-category-users",
+      "concept_id": "concept.aus",
+      "layer": "code_snapshot",
+      "name": "品类概览按人数的均额基础",
+      "formula": "total_gsv / COUNT(DISTINCT user_id)",
+      "unit": "money_per_person",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D001"
+      ],
+      "findings": [
+        "M01"
+      ],
+      "code_path": "backend/services/category_service/overview.py",
+      "code_sha256": "6205625fc25e15f914b26917d5f12031e7971b1b67f7ba8aff6f87c1fe1d9345",
+      "anchors": [
+        "COUNT(DISTINCT user_id) AS total_users"
+      ],
+      "lines": [
+        "290"
+      ],
+      "note": "人数分母基础存在，不等于目标 AUS 合同已落地或真实数据已对账。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.member_premium:code-overview-member-aov-over-store-line-avg",
+      "concept_id": "concept.member_premium",
+      "layer": "code_snapshot",
+      "name": "旧概览会员每单 / 全店行均",
+      "formula": "(member_amount / member_order_count) / avg_order_value",
+      "unit": "unspecified_ratio",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D002"
+      ],
+      "textbook_refs": [
+        "tb.16.premium"
+      ],
+      "findings": [
+        "M02"
+      ],
+      "code_path": "backend/services/metrics/overview.py",
+      "code_sha256": "91d370461b89e7ab47c8e7b33200b035a5b4ffb2e3f513827495f82f0699cc59",
+      "anchors": [
+        "member_premium = member_avg_order_value / current['avg_order_value']"
+      ],
+      "lines": [
+        "285",
+        "287"
+      ],
+      "note": "注释称 AUS，比较对象与粒度均与 D002 不同。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.gsv:code-calculations-exclude-is-refund",
+      "concept_id": "concept.gsv",
+      "layer": "code_snapshot",
+      "name": "semantic GSV 谓词排除全部 is_refund",
+      "formula": "is_goujinjin = FALSE AND order_status != '交易关闭' AND is_refund = FALSE",
+      "unit": "predicate",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D003"
+      ],
+      "findings": [
+        "M03"
+      ],
+      "code_path": "backend/semantic/calculations.py",
+      "code_sha256": "066156eccd03d584c644f0a777b94190502c773e102cf5d67c92a041a6d7b6e9",
+      "anchors": [
+        "GSV_PREDICATE"
+      ],
+      "lines": [
+        "39"
+      ],
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.gsv:code-competition-refunds-as-of",
+      "concept_id": "concept.gsv",
+      "layer": "code_snapshot",
+      "name": "competition 带日期退款扣额",
+      "formula": "refunds_as_of + iter_effective_orders; fallback to flag filter when no dated table",
+      "unit": "money",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D003",
+        "D006"
+      ],
+      "findings": [
+        "M03",
+        "M04",
+        "M10"
+      ],
+      "code_path": "backend/services/metrics/competition_compute.py",
+      "code_sha256": "ad085b5725e5f23e6f360b7bae147be066cb782dddc94e8648136347cda66cd5",
+      "anchors": [
+        "refunds_as_of",
+        "iter_effective_orders"
+      ],
+      "lines": [
+        "117",
+        "134"
+      ],
+      "note": "有日期退款时扣金额；无日期表时回退标志过滤。不能静默回退冒充按实际退款净额。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.sample_roi:code-sampling-service",
+      "concept_id": "concept.sample_window",
+      "layer": "code_snapshot",
+      "name": "旧派样 ROI 复购人数/金额",
+      "formula": "get_sampling_roi repurchase users/amount; denominator all sample users in window",
+      "unit": "mixed",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D009",
+        "D010",
+        "D011"
+      ],
+      "findings": [
+        "M18",
+        "M19",
+        "M20",
+        "M21"
+      ],
+      "code_path": "backend/services/sampling_service.py",
+      "code_sha256": "39e43a595f942ce473a680a2165029f4a712b114299e2621b5f9a5cafc3d09df",
+      "anchors": [
+        "get_sampling_roi",
+        "first_sample_received_at",
+        "first_sample_time=MIN(pay_time)"
+      ],
+      "lines": [
+        "237",
+        "289"
+      ],
+      "note": "不含投入/毛利/对照。窗口含次日 00:00 边界。未按数据截止排除未成熟。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.ltv:code-specified-day-next-day",
+      "concept_id": "concept.ltv",
+      "layer": "code_snapshot",
+      "name": "旧 LTV：指定日购买者次日起累计",
+      "formula": "cohort = buyers on specified date; accumulate GSV from next day for 90/180/365",
+      "unit": "money",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D012"
+      ],
+      "findings": [
+        "M24",
+        "M12"
+      ],
+      "code_path": "backend/services/lifetime_value_service.py",
+      "code_sha256": "e7f737ed008dae93d94dd70948c42c8cc31318ebfc14c0505d32dde58e7d79aa",
+      "anchors": [
+        "_cohort_user_ids",
+        "_pct_change",
+        "get_lifetime_value_summary"
+      ],
+      "lines": [
+        "63",
+        "80",
+        "121"
+      ],
+      "note": "不是默认新客终身利润。channel 只筛 cohort。previous=0 时 _pct_change 返回 0。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.uv:code-sum-daily-visitors",
+      "concept_id": "concept.uv",
+      "layer": "code_snapshot",
+      "name": "visitor_service SUM(visitors)",
+      "formula": "SUM(visitors) and SUM(new_members) across days",
+      "unit": "count",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D015"
+      ],
+      "findings": [
+        "M23"
+      ],
+      "code_path": "backend/services/visitor_service.py",
+      "code_sha256": "f2f8fe96903a759ea67dcd73887930aaa133a36065737aa461cbd3905e6cc936",
+      "anchors": [
+        "SUM(visitors)",
+        "get_visitor_summary"
+      ],
+      "lines": [
+        "24",
+        "55"
+      ],
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.basket:code-order-support",
+      "concept_id": "concept.basket",
+      "layer": "code_snapshot",
+      "name": "购物篮订单级 support/confidence/lift",
+      "formula": "distinct order_id associations",
+      "unit": "raw_ratio_0_1",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D008"
+      ],
+      "findings": [
+        "M15"
+      ],
+      "code_path": "backend/services/category_service/basket.py",
+      "code_sha256": "b3213780f29df1b67f5782fe75f35d4f3cb7a01d838464b4b252c018a9382a14",
+      "anchors": [
+        "_compute_market_basket"
+      ],
+      "lines": [
+        "54"
+      ],
+      "note": "不能直接冒充教材人数连带率。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.product_repurchase:code-standard-hist-join",
+      "concept_id": "concept.product_repurchase",
+      "layer": "code_snapshot",
+      "name": "品类 standard 回购历史集合 JOIN",
+      "formula": "historical cohort LEFT JOIN repurchase buyers",
+      "unit": "raw_ratio_0_1",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D008"
+      ],
+      "findings": [
+        "M17"
+      ],
+      "code_path": "backend/services/category_service/repurchase/standard.py",
+      "code_sha256": "952eca2c73063fd5ec0249b9154649609c6fedbd1c2f655769e2c305312c8bf4",
+      "anchors": [
+        "_run_category_repurchase_period"
+      ],
+      "lines": [
+        "30"
+      ],
+      "note": "已有历史集合限制，不能误报所有代码都错。仍不是已验证的 crm-metrics/v1 能力。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.yoy:code-or-zero",
+      "concept_id": "concept.yoy",
+      "layer": "code_snapshot",
+      "name": "同比 None 被 or 0",
+      "formula": "yoy_absolute returns None when denominator invalid; overview uses or 0",
+      "unit": "raw_ratio_or_zero",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D018",
+        "D017"
+      ],
+      "findings": [
+        "M11",
+        "M12"
+      ],
+      "code_path": "backend/services/metrics/overview.py",
+      "code_sha256": "91d370461b89e7ab47c8e7b33200b035a5b4ffb2e3f513827495f82f0699cc59",
+      "anchors": [
+        "yoy_absolute(...) or 0"
+      ],
+      "lines": [
+        "301",
+        "316"
+      ],
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.rfm:code-thresholds-v1",
+      "concept_id": "concept.rfm",
+      "layer": "code_snapshot",
+      "name": "segments.py 固定 RFM 阈值",
+      "formula": "R=[30,90,180,365] days; F=[1,2,3,4]; M=[100,300,500,1000]",
+      "unit": "threshold_table",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D016"
+      ],
+      "findings": [
+        "M26"
+      ],
+      "code_path": "backend/semantic/segments.py",
+      "code_sha256": "25570eb641232299b71837001b1d9a1bb0bbfd831f0f508847fbfc1f9aed658a",
+      "anchors": [
+        "RFM_THRESHOLDS"
+      ],
+      "lines": [
+        "22"
+      ],
+      "rfm_threshold_version": "crm-rfm-thresholds/v1",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.contract.member_premium-field",
+      "concept_id": "concept.member_premium",
+      "layer": "code_snapshot",
+      "name": "旧合同 member_premium 字段说明",
+      "formula": "OverviewMetrics.member_premium description: 会员溢价 %（会员AUS/全店AUS）",
+      "unit": "percent_in_description_but_service_emits_ratio",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D002",
+        "D017"
+      ],
+      "findings": [
+        "M02",
+        "M12"
+      ],
+      "code_path": "backend/contracts/metrics.py",
+      "code_sha256": "8c49dbda46d9e6d8b0a9e09b11e4daaa279933d35556a086f40edfb778f696a8",
+      "anchors": [
+        "member_premium"
+      ],
+      "lines": [
+        "34"
+      ],
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.valid_buyers:target-v1",
+      "name": "去重有效购买人数",
+      "identity_scope": "STOREWIDE",
+      "decision_ids": [
+        "D006",
+        "D018"
+      ],
+      "requires_data": [
+        "data.buyer_identity",
+        "data.order_amount",
+        "data.refund_events"
+      ],
+      "note": "空买家 ID 单列质量状态，不能算成一个共同买家。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.valid_orders:target-v1",
+      "name": "去重有效订单",
+      "identity_scope": "STOREWIDE",
+      "decision_ids": [
+        "D006"
+      ],
+      "requires_data": [
+        "data.order_id",
+        "data.refund_events"
+      ],
+      "note": "净额>0；部分退保留，全退排除。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.opening_storewide_old:target-v1",
+      "name": "期初全店老客存量",
+      "identity_scope": "STOREWIDE",
+      "decision_ids": [
+        "D004",
+        "D020",
+        "D021"
+      ],
+      "requires_data": [
+        "data.first_valid_purchase"
+      ],
+      "note": "首购早于窗口起点 S。渠道/商品新客另列。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.window_storewide_new:target-v1",
+      "name": "窗口内全店新客",
+      "identity_scope": "STOREWIDE",
+      "decision_ids": [
+        "D004",
+        "D020",
+        "D021"
+      ],
+      "requires_data": [
+        "data.first_valid_purchase"
+      ],
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.unknown_history:target-v1",
+      "name": "首购历史未知",
+      "identity_scope": "STOREWIDE",
+      "decision_ids": [
+        "D018",
+        "D020"
+      ],
+      "requires_data": [
+        "data.first_valid_purchase"
+      ],
+      "note": "不能推成老客。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.member_at_purchase:target-v1",
+      "name": "成交时会员",
+      "identity_scope": "STOREWIDE",
+      "decision_ids": [
+        "D014"
+      ],
+      "requires_data": [
+        "data.membership_at_purchase"
+      ],
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.non_member_at_purchase:target-v1",
+      "name": "成交时非会员",
+      "identity_scope": "STOREWIDE",
+      "decision_ids": [
+        "D014"
+      ],
+      "requires_data": [
+        "data.membership_at_purchase"
+      ],
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.unknown_membership:target-v1",
+      "name": "成交时会员身份未知",
+      "identity_scope": "STOREWIDE",
+      "decision_ids": [
+        "D014",
+        "D018"
+      ],
+      "requires_data": [
+        "data.membership_at_purchase"
+      ],
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.first_sample_in_period:target-v1",
+      "name": "统计期内第一笔派样人群",
+      "identity_scope": "STOREWIDE",
+      "decision_ids": [
+        "D009",
+        "D022"
+      ],
+      "requires_data": [
+        "data.sample_identification",
+        "data.pay_time"
+      ],
+      "note": "先归属再按渠道筛选；同时间戳无序则标歧义。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.mature_sample:target-v1",
+      "name": "成熟派样观察人群",
+      "identity_scope": "STOREWIDE",
+      "decision_ids": [
+        "D010"
+      ],
+      "requires_data": [
+        "data.pay_time",
+        "data.data_through"
+      ],
+      "note": "数据完整覆盖第 N 天结束才成熟。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.immature_sample:target-v1",
+      "name": "未成熟派样观察人群",
+      "identity_scope": "STOREWIDE",
+      "decision_ids": [
+        "D010"
+      ],
+      "requires_data": [
+        "data.pay_time",
+        "data.data_through"
+      ],
+      "note": "单列，不计入最终复购率。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.historical_buyers_of_product:target-v1",
+      "name": "历史买过指定商品者",
+      "identity_scope": "PRODUCT",
+      "decision_ids": [
+        "D008"
+      ],
+      "requires_data": [
+        "data.product_hierarchy"
+      ],
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "CohortDefinition",
+      "id": "cohort.first_join_in_window:target-v1",
+      "name": "窗口内首次入会",
+      "identity_scope": "STOREWIDE",
+      "decision_ids": [
+        "D014",
+        "D015"
+      ],
+      "requires_data": [
+        "data.first_join_event"
+      ],
+      "availability": "missing_until_join_events",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "DataRequirement",
+      "id": "data.order_amount",
+      "name": "订单实付金额与是否已净额",
+      "grain": "order_or_line",
+      "time_semantics": "paid_at",
+      "completeness": "required_for_money_metrics",
+      "mapping_status": "declared_not_verified",
+      "d019": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "DataRequirement",
+      "id": "data.order_id",
+      "name": "订单去重键",
+      "grain": "order",
+      "mapping_status": "declared_not_verified",
+      "d019": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "DataRequirement",
+      "id": "data.buyer_identity",
+      "name": "买家身份命名空间",
+      "grain": "user",
+      "mapping_status": "declared_not_verified",
+      "d019": true,
+      "note": "跨店/平台稳定性未验。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "DataRequirement",
+      "id": "data.refund_events",
+      "name": "带日期成功退款事件",
+      "grain": "refund_event",
+      "time_semantics": "refunded_at",
+      "mapping_status": "declared_not_verified",
+      "d019": true,
+      "note": "成功与申请中分开；累计/增量未核。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "DataRequirement",
+      "id": "data.refund_lines",
+      "name": "退款行与商品关联",
+      "grain": "refund_line",
+      "mapping_status": "declared_not_verified",
+      "d019": true,
+      "note": "缺失时商品净额不可用，不估算。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "DataRequirement",
+      "id": "data.first_valid_purchase",
+      "name": "全店首次有效购买历史",
+      "grain": "user",
+      "time_semantics": "first_valid_paid_at as_of refund cutoff",
+      "mapping_status": "declared_not_verified",
+      "d019": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "DataRequirement",
+      "id": "data.membership_at_purchase",
+      "name": "成交时会员三态",
+      "grain": "order",
+      "mapping_status": "declared_not_verified",
+      "d019": true,
+      "note": "订单 is_member 不能替代首次入会事件。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "DataRequirement",
+      "id": "data.first_join_event",
+      "name": "首次有效入会事件",
+      "grain": "user_event",
+      "mapping_status": "missing_unknown",
+      "d019": true,
+      "availability": "unknown",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "DataRequirement",
+      "id": "data.visit_identity",
+      "name": "可识别访问身份或原生周期 UV",
+      "grain": "visitor",
+      "mapping_status": "missing_unknown",
+      "d019": true,
+      "availability": "unknown",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "DataRequirement",
+      "id": "data.daily_visitors",
+      "name": "日 UV 汇总",
+      "grain": "day",
+      "mapping_status": "declared_not_verified",
+      "note": "SUM 日UV 不是周期去重。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "DataRequirement",
+      "id": "data.sample_identification",
+      "name": "派样订单/样品识别",
+      "grain": "order",
+      "mapping_status": "declared_not_verified",
+      "d019": true,
+      "note": "零价/赠品/取消资格未核。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "DataRequirement",
+      "id": "data.pay_time",
+      "name": "支付时间",
+      "grain": "order",
+      "time_semantics": "paid_at",
+      "mapping_status": "declared_not_verified",
+      "d019": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "DataRequirement",
+      "id": "data.quantity",
+      "name": "有效件数与退件",
+      "grain": "line",
+      "mapping_status": "declared_not_verified",
+      "d019": true,
+      "note": "不能由退款金额推断退件数量。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "DataRequirement",
+      "id": "data.product_hierarchy",
+      "name": "SKU/SPU/品类层级",
+      "grain": "product",
+      "mapping_status": "declared_not_verified",
+      "d019": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "DataRequirement",
+      "id": "data.channel",
+      "name": "渠道展开与键",
+      "grain": "order",
+      "mapping_status": "declared_not_verified",
+      "d019": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "DataRequirement",
+      "id": "data.cost_profit",
+      "name": "样品/券/媒体成本与毛利",
+      "grain": "campaign",
+      "mapping_status": "missing_unknown",
+      "availability": "unknown",
+      "note": "缺失时不输出利润 ROI。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "DataRequirement",
+      "id": "data.data_through",
+      "name": "数据完整截止时刻",
+      "grain": "source",
+      "mapping_status": "declared_not_verified",
+      "d019": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "DataRequirement",
+      "id": "data.currency",
+      "name": "币种与最小货币单位",
+      "grain": "source",
+      "mapping_status": "declared_not_verified",
+      "d019": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "SourceField",
+      "id": "field.orders.actual_amount",
+      "name": "orders.actual_amount",
+      "source_id": "code_declared",
+      "schema_version": "source_declaration_not_live_schema",
+      "path": "orders.actual_amount",
+      "verification_status": "declared_not_verified",
+      "mapped_from": [
+        "data.order_amount"
+      ],
+      "note": "是否已净额未知。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "SourceField",
+      "id": "field.orders.is_refund",
+      "name": "orders.is_refund",
+      "source_id": "code_declared",
+      "verification_status": "declared_not_verified",
+      "mapped_from": [
+        "data.refund_events"
+      ],
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "SourceField",
+      "id": "field.orders.is_member",
+      "name": "orders.is_member",
+      "source_id": "code_declared",
+      "verification_status": "declared_not_verified",
+      "mapped_from": [
+        "data.membership_at_purchase"
+      ],
+      "note": "不是首次入会事件。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "SourceField",
+      "id": "field.orders.pay_time",
+      "name": "orders.pay_time",
+      "source_id": "code_declared",
+      "verification_status": "declared_not_verified",
+      "mapped_from": [
+        "data.pay_time"
+      ],
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "SourceField",
+      "id": "field.orders.sample_received_at",
+      "name": "orders.sample_received_at ETL 声明",
+      "source_id": "code_declared",
+      "verification_status": "declared_not_verified",
+      "mapped_from": [
+        "data.sample_identification"
+      ],
+      "note": "ETL load.py 声明 sample_received_at；backend/db/init.py 旧建表没有。字段文档是源码声明，不是实际库 schema。",
+      "evidence": [],
+      "implementation_status": "not_implemented",
+      "code_paths": [
+        "scripts/etl/load.py",
+        "backend/db/init.py"
+      ],
+      "code_sha256": {
+        "scripts/etl/load.py": "787cdd320a2b94c7d04f2e621e71d280139716a2b046b26ab4e4df29dfd6d366",
+        "backend/db/init.py": "ba43c132e78409f43f9abf2323e46c4f5e5c749ac2b4c876e9715af1ba240ae4"
+      }
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "SourceField",
+      "id": "field.user_first_purchase",
+      "name": "user_first_purchase.first_pay_date",
+      "source_id": "code_declared",
+      "verification_status": "declared_not_verified",
+      "mapped_from": [
+        "data.first_valid_purchase"
+      ],
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "SourceField",
+      "id": "field.daily_visitors.visitors",
+      "name": "daily_visitors.visitors",
+      "source_id": "code_declared",
+      "verification_status": "declared_not_verified",
+      "mapped_from": [
+        "data.daily_visitors"
+      ],
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Capability",
+      "id": "capability.legacy_overview",
+      "name": "旧全店概览查询",
+      "status": "code_snapshot",
+      "data_mode": "legacy_archive_path_unverified",
+      "applies_metric_version": null,
+      "note": "已有基础，不能据此认定现役 DSH 已接真实数据或口径已对齐。",
+      "code_path": "backend/services/metrics/overview.py",
+      "query_ids": [],
+      "layer": "code_snapshot",
+      "implementation_status": "code_snapshot"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Capability",
+      "id": "capability.legacy_sampling_roi",
+      "name": "旧派样 ROI 查询",
+      "status": "code_snapshot",
+      "data_mode": "legacy_archive_path_unverified",
+      "code_path": "backend/services/sampling_service.py",
+      "layer": "code_snapshot",
+      "implementation_status": "code_snapshot"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Capability",
+      "id": "capability.legacy_competition_synthetic",
+      "name": "competition 合成诊断",
+      "status": "code_snapshot",
+      "data_mode": "synthetic_only",
+      "note": "SCOPE=COMPETITION_SYNTHETIC_ONLY。不把真实数据塞进 competition。",
+      "code_path": "dsh-plugins/analytics-workbench/src/competition-agent/family.mjs",
+      "layer": "code_snapshot",
+      "implementation_status": "code_snapshot"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Capability",
+      "id": "capability.sales_window_summary",
+      "name": "销售窗口汇总（拟）",
+      "status": "planned",
+      "data_mode": "not_connected",
+      "query_id": "sales_window_summary",
+      "query_version": "crm-metrics-query/v1",
+      "layer": "target_definition",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D001",
+        "D003",
+        "D004",
+        "D005",
+        "D006",
+        "D014",
+        "D018"
+      ],
+      "note": "A 线合同已列出 query_id，semantic 模块文件已出现；C 未运行 A 测试，不宣称计算已验收。"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Capability",
+      "id": "capability.existing_customer_repurchase",
+      "name": "期初老客回购（拟）",
+      "status": "planned",
+      "data_mode": "not_connected",
+      "query_id": "existing_customer_repurchase",
+      "query_version": "crm-metrics-query/v1",
+      "layer": "target_definition",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D004",
+        "D006",
+        "D020",
+        "D021"
+      ]
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Capability",
+      "id": "capability.sample_followup",
+      "name": "派样后跟踪（拟）",
+      "status": "planned",
+      "data_mode": "not_connected",
+      "query_id": "sample_followup",
+      "query_version": "crm-metrics-query/v1",
+      "layer": "target_definition",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D009",
+        "D010",
+        "D011",
+        "D022"
+      ]
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Capability",
+      "id": "capability.crm_knowledge_explain",
+      "name": "只读知识解释（拟）",
+      "status": "planned",
+      "data_mode": "offline_pack_only",
+      "layer": "target_definition",
+      "implementation_status": "not_implemented",
+      "note": "候选工具名，不是已存在 DSH 工具。离线图谱结构完成不等于图服务已上线。"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Capability",
+      "id": "capability.member_conversion",
+      "name": "新会员转化 / 老客入会",
+      "status": "unavailable_missing_data",
+      "data_mode": "missing_join_events",
+      "layer": "target_definition",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D014",
+        "D015"
+      ],
+      "missing_data": [
+        "data.first_join_event",
+        "data.visit_identity"
+      ],
+      "note": "不能从订单会员数替代。"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Capability",
+      "id": "capability.profit_roi",
+      "name": "利润 ROI / 因果增量",
+      "status": "unavailable_missing_data",
+      "data_mode": "missing_cost_and_experiment",
+      "layer": "target_definition",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D011"
+      ],
+      "missing_data": [
+        "data.cost_profit"
+      ]
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Strategy",
+      "id": "strategy.old_customer_rfm_planning",
+      "name": "存量老客 RFM 回购预估",
+      "applies_to": [
+        "concept.rfm",
+        "concept.retention",
+        "concept.aus"
+      ],
+      "textbook_refs": [
+        "tb.rfm.plan"
+      ],
+      "note": "教材规划方法。不构成触达授权，也不能把关联写成因果。",
+      "execution_authorized": false,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Strategy",
+      "id": "strategy.member_golden_quadrant",
+      "name": "会员黄金四象限生意拆解",
+      "applies_to": [
+        "concept.member_share",
+        "concept.new_old",
+        "concept.membership_at_purchase"
+      ],
+      "textbook_refs": [
+        "tb.quadrant.gmv"
+      ],
+      "execution_authorized": false,
+      "note": "购买新老与会员新老是不同维度，不合并成互斥三人群。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Strategy",
+      "id": "strategy.sample_acquisition",
+      "name": "派样拉新与复购跟踪",
+      "applies_to": [
+        "concept.sample_window",
+        "concept.new_repeat"
+      ],
+      "decision_ids": [
+        "D009",
+        "D010",
+        "D011",
+        "D022"
+      ],
+      "execution_authorized": false,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Strategy",
+      "id": "strategy.product_bundle",
+      "name": "商品连带套组",
+      "applies_to": [
+        "concept.basket"
+      ],
+      "decision_ids": [
+        "D008"
+      ],
+      "execution_authorized": false,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Strategy",
+      "id": "strategy.old_customer_recall",
+      "name": "老客召回",
+      "applies_to": [
+        "concept.retention",
+        "concept.product_repurchase"
+      ],
+      "decision_ids": [
+        "D008"
+      ],
+      "execution_authorized": false,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "id": "D001",
+      "topic": "客单价与每单金额",
+      "status": "confirmed",
+      "answer": "客单价按购买人数（AUS），每单金额（AOV）单列。",
+      "scope": "命名与分母原则",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "有效购买、身份去重、金额和时间范围"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D002",
+      "topic": "会员溢价比较对象",
+      "status": "confirmed",
+      "answer": "会员人均消费额 ÷ 非会员人均消费额。",
+      "scope": "AUS 比较对象",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "会员历史映射、可比范围、显示单位"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D003",
+      "topic": "GSV 部分退款",
+      "status": "confirmed",
+      "answer": "计入扣实际退款后的余额：100 元退30元计70元，全退计0元。",
+      "scope": "金额原则",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "源金额是否已净额",
+        "退款事件、日期和商品关联"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D004",
+      "topic": "新老客分界",
+      "status": "confirmed",
+      "answer": "默认按所选窗口起点划分，月报按月初。",
+      "scope": "分类截点",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "全店首购历史完整度和有效购买版本"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D005",
+      "topic": "跨期退款",
+      "status": "confirmed",
+      "answer": "同时保留原订单期净额与退款发生期视图；运营默认回算原订单月份，并显示退款截止日。",
+      "scope": "报告视图和运营默认",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "带日期成功退款事件和数据截止"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D006",
+      "topic": "GSV 有效人数与订单",
+      "status": "confirmed",
+      "answer": "部分退款仍算有效购买，全退订单排除；用户若还有其他有效订单仍算购买人数。",
+      "scope": "有效购买计数",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "订单完整净额、去重身份和其他排除规则"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D007",
+      "topic": "购买频次与件数",
+      "status": "confirmed",
+      "answer": "频次按去重有效订单，同一订单多行只算一次；人均件数除人数、每单件数IPT除订单数；没有退件数量不猜净件数。",
+      "scope": "频次粒度与件数名称",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "有效件数与退件字段映射；不能由退款金额推断退件数量"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D008",
+      "topic": "商品招新、连带、回购",
+      "status": "confirmed",
+      "answer": "商品招新人数占比和新客金额占比分列；人数连带与订单连带分列；商品回购分子限定历史买过该商品者再次购买。",
+      "scope": "商品指标名称、分母与历史集合约束",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "SKU/SPU/品类层级、相同筛选范围"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D009",
+      "topic": "派样观察起点",
+      "status": "confirmed",
+      "answer": "支付后开始跟踪观察。",
+      "scope": "派样主观察起点",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "样品与派样订单识别规则的真实源映射",
+        "支付事件时间精度"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D010",
+      "topic": "观察窗口和成熟度",
+      "status": "confirmed",
+      "answer": "按自然日，起点当天算第1天，第N天结束后比较；未满观察期单列，不计入最终复购率，同一订单不算再次购买。",
+      "scope": "派样及新客N日窗口和成熟度",
+      "implementation_status": "not_implemented",
+      "window_spec": "业务时区；第1天为起点日期，第N天为起点日期+N-1；窗口结束为第N天次日00:00（不含）。仅纳入起点事件之后的其他有效订单。",
+      "remaining_dependencies": [
+        "起点时间精度、同时间戳事件顺序、业务时区与数据完整截止时刻"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D011",
+      "topic": "派样 ROI 名称",
+      "status": "confirmed",
+      "answer": "保留名称“派样 ROI”，显著注明当前只是复购收入表现；不当作已算出的利润回报或因果增量。",
+      "scope": "名称与解释边界",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "展示显著说明和导出一致；利润ROI/ROAS另需成本/利润/归因合同"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D012",
+      "topic": "LTV/cohort 后续收入",
+      "status": "confirmed",
+      "answer": "默认新客首次有效支付起N日累计净消费，包含首单、统计全店后续购买、区分成熟度；旧指定日期购买者次日起收入单独命名。",
+      "scope": "LTV目标定义与旧指标区分",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "首购历史和退款截止"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D013",
+      "topic": "商品退款分配",
+      "status": "confirmed",
+      "answer": "优先真实退款明细；缺失时只报整单净额，受影响商品净额暂不可用，不做比例估算。",
+      "scope": "退款无法定位商品时的能力边界",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "真实退款行关联和完整性"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D014",
+      "topic": "会员消费归组时点",
+      "status": "confirmed",
+      "answer": "按每笔成交当时身份，入会前后分别归组；历史身份缺失单列未知。",
+      "scope": "会员/非会员消费比较",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "交易时点会员事件映射",
+        "新/老会员存量与转化仍须首次入会数据"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D015",
+      "topic": "UV 与入会率",
+      "status": "confirmed",
+      "answer": "保留并明确标日UV累计口径；周期去重转化另列，数据不具备时说明。",
+      "scope": "访客入会率名称与分母边界",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "访问身份或原生周期 UV，入会/绑卡事件"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D016",
+      "topic": "同比日历与 RFM 阈值",
+      "status": "confirmed",
+      "answer": "同比按去年同日；2月29日对应去年2月28日，显示实际区间；活动可另选对比期；RFM保留现有阈值版本并标实际天数，不直接换教材阈值。",
+      "scope": "同比日历与RFM阈值保留原则",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "时间区间实现与闰日样例、阈值版本登记和后续品类适配验证"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D017",
+      "topic": "数值单位",
+      "status": "confirmed",
+      "answer": "占比0.25显示25%，占比变化0.05显示5个百分点，会员溢价显示倍数；在合同中明确单位并核对调用方。",
+      "scope": "比例、百分点和倍数展示",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "旧服务/合同/调用方逐字段适配"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D018",
+      "topic": "未知状态与分解",
+      "status": "confirmed",
+      "answer": "未知身份单列；无法计算显示—和原因，不填0；新客+老客+未知与同口径总额闭合。",
+      "scope": "空值、未知与总额分解",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "真实数据缺失率、覆盖阈值和显示验证"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D019",
+      "topic": "真实源字段、金额、渠道与过滤",
+      "status": "awaiting_source_verification",
+      "proposal": "登记粒度、原金额是否已扣退款、货币、税运费/优惠、赠品/购物金/关闭订单、渠道展开与键；TTL去重重算。",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "实际目标与锁兼容确认后，只读schema及有界数据核验"
+      ],
+      "note": "不是请用户猜字段；尚未连接真实源。不得用 OCR 或模型猜测关闭。",
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": null,
+      "layer": "awaiting_source_verification",
+      "contains_real_data": false
+    },
+    {
+      "id": "D020",
+      "topic": "默认首购历史范围",
+      "status": "confirmed",
+      "answer": "默认全店新老客，渠道新客和商品新客另列；历史不足注明可见历史首次购买。",
+      "scope": "业务分类范围",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "店铺/平台身份命名空间和全店历史覆盖；全退重算遵循D021"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D021",
+      "topic": "全额退款后首购身份",
+      "status": "confirmed",
+      "answer": "按报告退款截止日重算首次有效购买，历史报告保留当时版本。",
+      "scope": "全额退款对首购身份的影响",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "全历史退款事件和截止时点"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "id": "D022",
+      "topic": "重复派样cohort归属",
+      "status": "confirmed",
+      "answer": "按人取统计期内第一笔派样，归属该笔渠道，避免重复计人。",
+      "scope": "重复派样的默认起点与渠道归属",
+      "implementation_status": "not_implemented",
+      "remaining_dependencies": [
+        "真实派样渠道与商品识别",
+        "同时间戳的确定性排序及歧义处理",
+        "cohort先归属再按渠道筛选的合同验证"
+      ],
+      "type": "Decision",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "confirmed_by": "user",
+      "layer": "target_definition",
+      "contains_real_data": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Conflict",
+      "id": "conflict.aus.granularity",
+      "name": "客单价同名不同粒度",
+      "sides": [
+        "metric.aus:target-v1",
+        "metric.aus:code-overview-line-avg"
+      ],
+      "conflict_type": "same_name_different_grain",
+      "findings": [
+        "M01"
+      ],
+      "resolution_status": "principles_confirmed_code_unfixed",
+      "resolved_by": [
+        "D001"
+      ],
+      "remaining": "旧 avg_order_value 未改；不得宣称代码已修复。",
+      "do_not_guess": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Conflict",
+      "id": "conflict.member_premium.object",
+      "name": "会员溢价比较对象与粒度",
+      "sides": [
+        "metric.member_premium:target-v1",
+        "metric.member_premium:code-overview-member-aov-over-store-line-avg"
+      ],
+      "conflict_type": "comparison_object_and_grain",
+      "findings": [
+        "M02"
+      ],
+      "resolution_status": "principles_confirmed_code_unfixed",
+      "resolved_by": [
+        "D002",
+        "D014"
+      ],
+      "remaining": "成交时身份数据与显示单位未核验。",
+      "do_not_guess": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Conflict",
+      "id": "conflict.ipt.textbook_internal",
+      "name": "教材 IPT 名词按交易、公式按人数",
+      "sides": [
+        "tb.04.ipt"
+      ],
+      "conflict_type": "textbook_internal_ambiguity",
+      "findings": [
+        "M14"
+      ],
+      "resolution_status": "unresolved_textbook_internal",
+      "resolved_by": [
+        "D007"
+      ],
+      "remaining": "D007 把人均件数和每单件数分列，但不改写教材原文，也不用 OCR 猜教材本意只留一个。",
+      "do_not_guess": true,
+      "note": "决议提供分名目标，教材原文冲突仍保留。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Conflict",
+      "id": "conflict.product_acq.people_vs_amount",
+      "name": "教材招新率未锁定人数或金额",
+      "sides": [
+        "tb.10.product_acq"
+      ],
+      "conflict_type": "textbook_internal_ambiguity",
+      "findings": [
+        "M16"
+      ],
+      "resolution_status": "split_by_decision_textbook_kept",
+      "resolved_by": [
+        "D008"
+      ],
+      "remaining": "教材原文仍含糊；目标定义为两个指标。",
+      "do_not_guess": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Conflict",
+      "id": "conflict.product_repurchase.intersection",
+      "name": "教材商品回购简写缺历史交集",
+      "sides": [
+        "tb.13.product_repurchase",
+        "metric.product_repurchase:target-v1",
+        "metric.product_repurchase:code-standard-hist-join"
+      ],
+      "conflict_type": "formula_missing_set_constraint",
+      "findings": [
+        "M17"
+      ],
+      "resolution_status": "target_confirms_intersection_textbook_kept",
+      "resolved_by": [
+        "D008"
+      ],
+      "remaining": "不误改已有历史 JOIN；教材原文不覆盖。",
+      "do_not_guess": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Conflict",
+      "id": "conflict.gsv.refund_predicate",
+      "name": "排除全部退款标志 vs 按实际退款净额",
+      "sides": [
+        "metric.gsv_net:target-v1",
+        "metric.gsv:code-calculations-exclude-is-refund",
+        "metric.gsv:code-competition-refunds-as-of"
+      ],
+      "conflict_type": "refund_semantics",
+      "findings": [
+        "M03"
+      ],
+      "resolution_status": "principles_confirmed_mapping_pending",
+      "resolved_by": [
+        "D003"
+      ],
+      "remaining": "真实源金额是否已净额属 D019。",
+      "do_not_guess": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Conflict",
+      "id": "conflict.sample_roi.name_vs_ability",
+      "name": "派样 ROI 名称超出当前能力",
+      "sides": [
+        "metric.sample_repeat_revenue:target-v1",
+        "metric.sample_roi:code-sampling-service",
+        "capability.profit_roi"
+      ],
+      "conflict_type": "name_exceeds_capability",
+      "findings": [
+        "M21"
+      ],
+      "resolution_status": "name_retained_with_caveat",
+      "resolved_by": [
+        "D011"
+      ],
+      "remaining": "成本/利润/实验对照不具备。",
+      "do_not_guess": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Conflict",
+      "id": "conflict.ltv.default_vs_legacy",
+      "name": "默认新客 N 日含首单 vs 指定日次日起",
+      "sides": [
+        "metric.ltv_new_customer_n_day:target-v1",
+        "metric.ltv:code-specified-day-next-day"
+      ],
+      "conflict_type": "definition_split",
+      "findings": [
+        "M24"
+      ],
+      "resolution_status": "split_named_metrics",
+      "resolved_by": [
+        "D012"
+      ],
+      "remaining": "旧定义单列，未替换现役代码。",
+      "do_not_guess": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Conflict",
+      "id": "conflict.new_old.null_as_old",
+      "name": "品类首购 NULL 落入老客",
+      "sides": [
+        "cohort.unknown_history:target-v1",
+        "capability.legacy_overview"
+      ],
+      "conflict_type": "unknown_coerced_to_old",
+      "findings": [
+        "M08"
+      ],
+      "resolution_status": "principles_confirmed_code_unfixed",
+      "resolved_by": [
+        "D018"
+      ],
+      "remaining": "代码未改。",
+      "do_not_guess": true,
+      "evidence_note": "category_service/overview.py CASE first_pay_date NULL -> ELSE 0 老客。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Conflict",
+      "id": "conflict.gmv_gsv.mix",
+      "name": "总额含退款、新老金额排除退款",
+      "sides": [
+        "metric.new_amount_share:target-v1"
+      ],
+      "conflict_type": "inconsistent_amount_scope",
+      "findings": [
+        "M09"
+      ],
+      "resolution_status": "principles_confirmed_code_unfixed",
+      "resolved_by": [
+        "D018"
+      ],
+      "remaining": "待修复过滤。",
+      "do_not_guess": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Conflict",
+      "id": "conflict.schema.sample_received_at",
+      "name": "ETL 声明签收字段 vs init 建表",
+      "sides": [
+        "field.orders.sample_received_at"
+      ],
+      "conflict_type": "source_declaration_vs_init_ddl",
+      "findings": [
+        "M28"
+      ],
+      "resolution_status": "unverified_live_schema",
+      "resolved_by": [],
+      "remaining": "D019。不得用初始化脚本补写归档大库，本项没有实际缺列结论。",
+      "do_not_guess": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Conflict",
+      "id": "conflict.d019.source",
+      "name": "真实源字段与金额语义未核验",
+      "sides": [
+        "D019"
+      ],
+      "conflict_type": "awaiting_source_verification",
+      "findings": [
+        "M29",
+        "M27",
+        "M28",
+        "M30"
+      ],
+      "resolution_status": "open",
+      "resolved_by": [],
+      "remaining": "不得用 OCR 或模型猜测关闭。",
+      "do_not_guess": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Case",
+      "id": "case.E01",
+      "name": "三种均额",
+      "synthetic": true,
+      "input": "一人两单：第一单 100+100 两行，第二单 100",
+      "expected": "AUS=300；AOV=150；行均=100",
+      "decision_ids": [
+        "D001"
+      ],
+      "evidence_refs": [
+        "ev.recon.E01"
+      ],
+      "not_runtime_proof": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Case",
+      "id": "case.E02",
+      "name": "会员比较",
+      "synthetic": true,
+      "input": "会员 2 人 400；非会员 4 人 400",
+      "expected": "200/100=2 倍；会员 AUS / 全店 AUS = 200/(800/6)=1.5 是另一指标",
+      "decision_ids": [
+        "D002"
+      ],
+      "evidence_refs": [
+        "ev.recon.E02"
+      ],
+      "not_runtime_proof": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Case",
+      "id": "case.E03",
+      "name": "部分退款",
+      "synthetic": true,
+      "input": "实付 100，成功退 30",
+      "expected": "GSV=70；仍 1 单 1 人",
+      "decision_ids": [
+        "D003",
+        "D006"
+      ],
+      "evidence_refs": [
+        "ev.recon.E03"
+      ],
+      "not_runtime_proof": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Case",
+      "id": "case.E09",
+      "name": "观察期未满",
+      "synthetic": true,
+      "input": "9/1 与 9/18 首购，数据截至 9/20，观察 14 天",
+      "expected": "仅 9/1 成熟",
+      "decision_ids": [
+        "D010"
+      ],
+      "evidence_refs": [
+        "ev.recon.E09"
+      ],
+      "not_runtime_proof": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Case",
+      "id": "case.E10",
+      "name": "商品回购集合",
+      "synthetic": true,
+      "input": "历史买 A 10 人；本期回购 3 人，另 20 新买家",
+      "expected": "3/10 不是 23/10",
+      "decision_ids": [
+        "D008"
+      ],
+      "evidence_refs": [
+        "ev.recon.E10"
+      ],
+      "not_runtime_proof": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Case",
+      "id": "case.E12",
+      "name": "部分退款和件数",
+      "synthetic": true,
+      "input": "2 件 100 元退 30 无退件事件",
+      "expected": "净额 70，净件数未知",
+      "decision_ids": [
+        "D007"
+      ],
+      "evidence_refs": [
+        "ev.recon.E12"
+      ],
+      "not_runtime_proof": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "id": "tb.01.new_share",
+      "slide": 160,
+      "ordinal": 1,
+      "name": "新客成交占比",
+      "ocr_excerpt": null,
+      "concept_id": "concept.new_old",
+      "ambiguity": null,
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "TextbookExcerpt",
+      "layer": "textbook",
+      "document_id": "doc.textbook.cst-ocr-2026-09-20",
+      "original_document_id": "doc.textbook.cst-pptx",
+      "ocr_status": "machine_ocr_uncorrected",
+      "definition_review_status": "textbook_ocr_uncorrected",
+      "implementation_status": "not_implemented",
+      "content_omitted": true,
+      "note": "私有教材索引，原文未公开分发。不是正式定义，也不是代码已修复声明。"
+    },
+    {
+      "id": "tb.02.old_share",
+      "slide": 160,
+      "ordinal": 2,
+      "name": "老客成交占比",
+      "ocr_excerpt": null,
+      "concept_id": "concept.new_old",
+      "ambiguity": null,
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "TextbookExcerpt",
+      "layer": "textbook",
+      "document_id": "doc.textbook.cst-ocr-2026-09-20",
+      "original_document_id": "doc.textbook.cst-pptx",
+      "ocr_status": "machine_ocr_uncorrected",
+      "definition_review_status": "textbook_ocr_uncorrected",
+      "implementation_status": "not_implemented",
+      "content_omitted": true,
+      "note": "私有教材索引，原文未公开分发。不是正式定义，也不是代码已修复声明。"
+    },
+    {
+      "id": "tb.03.aus",
+      "slide": 160,
+      "ordinal": 3,
+      "name": "客单价|人均消费金额",
+      "ocr_excerpt": null,
+      "concept_id": "concept.aus",
+      "ambiguity": null,
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "TextbookExcerpt",
+      "layer": "textbook",
+      "document_id": "doc.textbook.cst-ocr-2026-09-20",
+      "original_document_id": "doc.textbook.cst-pptx",
+      "ocr_status": "machine_ocr_uncorrected",
+      "definition_review_status": "textbook_ocr_uncorrected",
+      "implementation_status": "not_implemented",
+      "content_omitted": true,
+      "note": "私有教材索引，原文未公开分发。不是正式定义，也不是代码已修复声明。"
+    },
+    {
+      "id": "tb.04.ipt",
+      "slide": 160,
+      "ordinal": 4,
+      "name": "客单件|人均购买件数",
+      "ocr_excerpt": null,
+      "concept_id": "concept.ipt",
+      "ambiguity": "名词解释按交易/订单，公式分母是购买人数。不根据 OCR 猜测统一。",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "TextbookExcerpt",
+      "layer": "textbook",
+      "document_id": "doc.textbook.cst-ocr-2026-09-20",
+      "original_document_id": "doc.textbook.cst-pptx",
+      "ocr_status": "machine_ocr_uncorrected",
+      "definition_review_status": "textbook_internal_ambiguity",
+      "implementation_status": "not_implemented",
+      "content_omitted": true,
+      "note": "私有教材索引，原文未公开分发。不是正式定义，也不是代码已修复声明。"
+    },
+    {
+      "id": "tb.05.aup",
+      "slide": 160,
+      "ordinal": 5,
+      "name": "件单价",
+      "ocr_excerpt": null,
+      "concept_id": "concept.aup",
+      "ambiguity": null,
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "TextbookExcerpt",
+      "layer": "textbook",
+      "document_id": "doc.textbook.cst-ocr-2026-09-20",
+      "original_document_id": "doc.textbook.cst-pptx",
+      "ocr_status": "machine_ocr_uncorrected",
+      "definition_review_status": "textbook_ocr_uncorrected",
+      "implementation_status": "not_implemented",
+      "content_omitted": true,
+      "note": "私有教材索引，原文未公开分发。不是正式定义，也不是代码已修复声明。"
+    },
+    {
+      "id": "tb.06.frequency",
+      "slide": 160,
+      "ordinal": 6,
+      "name": "人均购买次数",
+      "ocr_excerpt": null,
+      "concept_id": "concept.frequency",
+      "ambiguity": "购买总次数是否去重订单未在教材页写明。",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "TextbookExcerpt",
+      "layer": "textbook",
+      "document_id": "doc.textbook.cst-ocr-2026-09-20",
+      "original_document_id": "doc.textbook.cst-pptx",
+      "ocr_status": "machine_ocr_uncorrected",
+      "definition_review_status": "textbook_internal_ambiguity",
+      "implementation_status": "not_implemented",
+      "content_omitted": true,
+      "note": "私有教材索引，原文未公开分发。不是正式定义，也不是代码已修复声明。"
+    },
+    {
+      "id": "tb.07.retention",
+      "slide": 160,
+      "ordinal": 7,
+      "name": "老客回购率",
+      "ocr_excerpt": null,
+      "concept_id": "concept.retention",
+      "ambiguity": null,
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "TextbookExcerpt",
+      "layer": "textbook",
+      "document_id": "doc.textbook.cst-ocr-2026-09-20",
+      "original_document_id": "doc.textbook.cst-pptx",
+      "ocr_status": "machine_ocr_uncorrected",
+      "definition_review_status": "textbook_ocr_uncorrected",
+      "implementation_status": "not_implemented",
+      "content_omitted": true,
+      "note": "私有教材索引，原文未公开分发。不是正式定义，也不是代码已修复声明。"
+    },
+    {
+      "id": "tb.08.new_repeat",
+      "slide": 160,
+      "ordinal": 8,
+      "name": "新客复购率",
+      "ocr_excerpt": null,
+      "concept_id": "concept.new_repeat",
+      "ambiguity": "“当期新客期内复购”与“首购后 N 日复购”教材未分列。",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "TextbookExcerpt",
+      "layer": "textbook",
+      "document_id": "doc.textbook.cst-ocr-2026-09-20",
+      "original_document_id": "doc.textbook.cst-pptx",
+      "ocr_status": "machine_ocr_uncorrected",
+      "definition_review_status": "textbook_internal_ambiguity",
+      "implementation_status": "not_implemented",
+      "content_omitted": true,
+      "note": "私有教材索引，原文未公开分发。不是正式定义，也不是代码已修复声明。"
+    },
+    {
+      "id": "tb.09.basket",
+      "slide": 160,
+      "ordinal": 9,
+      "name": "商品连带率",
+      "ocr_excerpt": null,
+      "concept_id": "concept.basket",
+      "ambiguity": "描述同单，公式按人数。",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "TextbookExcerpt",
+      "layer": "textbook",
+      "document_id": "doc.textbook.cst-ocr-2026-09-20",
+      "original_document_id": "doc.textbook.cst-pptx",
+      "ocr_status": "machine_ocr_uncorrected",
+      "definition_review_status": "textbook_internal_ambiguity",
+      "implementation_status": "not_implemented",
+      "content_omitted": true,
+      "note": "私有教材索引，原文未公开分发。不是正式定义，也不是代码已修复声明。"
+    },
+    {
+      "id": "tb.10.product_acq",
+      "slide": 160,
+      "ordinal": 10,
+      "name": "商品招新率",
+      "ocr_excerpt": null,
+      "concept_id": "concept.product_acquisition",
+      "ambiguity": "“销售占比”未锁定人数或金额。",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "TextbookExcerpt",
+      "layer": "textbook",
+      "document_id": "doc.textbook.cst-ocr-2026-09-20",
+      "original_document_id": "doc.textbook.cst-pptx",
+      "ocr_status": "machine_ocr_uncorrected",
+      "definition_review_status": "textbook_internal_ambiguity",
+      "implementation_status": "not_implemented",
+      "content_omitted": true,
+      "note": "私有教材索引，原文未公开分发。不是正式定义，也不是代码已修复声明。"
+    },
+    {
+      "id": "tb.11.new_pen",
+      "slide": 161,
+      "ordinal": 11,
+      "name": "商品新客渗透率",
+      "ocr_excerpt": null,
+      "concept_id": "concept.product_penetration",
+      "ambiguity": null,
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "TextbookExcerpt",
+      "layer": "textbook",
+      "document_id": "doc.textbook.cst-ocr-2026-09-20",
+      "original_document_id": "doc.textbook.cst-pptx",
+      "ocr_status": "machine_ocr_uncorrected",
+      "definition_review_status": "textbook_ocr_uncorrected",
+      "implementation_status": "not_implemented",
+      "content_omitted": true,
+      "note": "私有教材索引，原文未公开分发。不是正式定义，也不是代码已修复声明。"
+    },
+    {
+      "id": "tb.12.old_pen",
+      "slide": 161,
+      "ordinal": 12,
+      "name": "商品老客渗透率",
+      "ocr_excerpt": null,
+      "concept_id": "concept.product_penetration",
+      "ambiguity": null,
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "TextbookExcerpt",
+      "layer": "textbook",
+      "document_id": "doc.textbook.cst-ocr-2026-09-20",
+      "original_document_id": "doc.textbook.cst-pptx",
+      "ocr_status": "machine_ocr_uncorrected",
+      "definition_review_status": "textbook_ocr_uncorrected",
+      "implementation_status": "not_implemented",
+      "content_omitted": true,
+      "note": "私有教材索引，原文未公开分发。不是正式定义，也不是代码已修复声明。"
+    },
+    {
+      "id": "tb.13.product_repurchase",
+      "slide": 161,
+      "ordinal": 13,
+      "name": "商品回购率",
+      "ocr_excerpt": null,
+      "concept_id": "concept.product_repurchase",
+      "ambiguity": "简写缺少历史集合交集，分子可能计入历史未买过 A 的人。",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "TextbookExcerpt",
+      "layer": "textbook",
+      "document_id": "doc.textbook.cst-ocr-2026-09-20",
+      "original_document_id": "doc.textbook.cst-pptx",
+      "ocr_status": "machine_ocr_uncorrected",
+      "definition_review_status": "textbook_internal_ambiguity",
+      "implementation_status": "not_implemented",
+      "content_omitted": true,
+      "note": "私有教材索引，原文未公开分发。不是正式定义，也不是代码已修复声明。"
+    },
+    {
+      "id": "tb.14.recruit",
+      "slide": 161,
+      "ordinal": 14,
+      "name": "新会员招募数",
+      "ocr_excerpt": null,
+      "concept_id": "concept.member_recruitment",
+      "ambiguity": null,
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "TextbookExcerpt",
+      "layer": "textbook",
+      "document_id": "doc.textbook.cst-ocr-2026-09-20",
+      "original_document_id": "doc.textbook.cst-pptx",
+      "ocr_status": "machine_ocr_uncorrected",
+      "definition_review_status": "textbook_ocr_uncorrected",
+      "implementation_status": "not_implemented",
+      "content_omitted": true,
+      "note": "私有教材索引，原文未公开分发。不是正式定义，也不是代码已修复声明。"
+    },
+    {
+      "id": "tb.15.member_share",
+      "slide": 161,
+      "ordinal": 15,
+      "name": "会员成交占比/会员成交渗透",
+      "ocr_excerpt": null,
+      "concept_id": "concept.member_share",
+      "ambiguity": null,
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "TextbookExcerpt",
+      "layer": "textbook",
+      "document_id": "doc.textbook.cst-ocr-2026-09-20",
+      "original_document_id": "doc.textbook.cst-pptx",
+      "ocr_status": "machine_ocr_uncorrected",
+      "definition_review_status": "textbook_ocr_uncorrected",
+      "implementation_status": "not_implemented",
+      "content_omitted": true,
+      "note": "私有教材索引，原文未公开分发。不是正式定义，也不是代码已修复声明。"
+    },
+    {
+      "id": "tb.16.premium",
+      "slide": 161,
+      "ordinal": 16,
+      "name": "会员溢价率",
+      "ocr_excerpt": null,
+      "concept_id": "concept.member_premium",
+      "ambiguity": null,
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "TextbookExcerpt",
+      "layer": "textbook",
+      "document_id": "doc.textbook.cst-ocr-2026-09-20",
+      "original_document_id": "doc.textbook.cst-pptx",
+      "ocr_status": "machine_ocr_uncorrected",
+      "definition_review_status": "textbook_ocr_uncorrected",
+      "implementation_status": "not_implemented",
+      "content_omitted": true,
+      "note": "私有教材索引，原文未公开分发。不是正式定义，也不是代码已修复声明。"
+    },
+    {
+      "id": "tb.17.binding",
+      "slide": 161,
+      "ordinal": 17,
+      "name": "会员绑卡率",
+      "ocr_excerpt": null,
+      "concept_id": "concept.binding_rate",
+      "ambiguity": "绑卡与入会、访问去重粒度未在该页展开。",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "TextbookExcerpt",
+      "layer": "textbook",
+      "document_id": "doc.textbook.cst-ocr-2026-09-20",
+      "original_document_id": "doc.textbook.cst-pptx",
+      "ocr_status": "machine_ocr_uncorrected",
+      "definition_review_status": "textbook_internal_ambiguity",
+      "implementation_status": "not_implemented",
+      "content_omitted": true,
+      "note": "私有教材索引，原文未公开分发。不是正式定义，也不是代码已修复声明。"
+    },
+    {
+      "id": "tb.18.new_member_conv",
+      "slide": 161,
+      "ordinal": 18,
+      "name": "新会员转化率",
+      "ocr_excerpt": null,
+      "concept_id": "concept.new_member_conversion",
+      "ambiguity": "观察期/成熟度未写。",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "TextbookExcerpt",
+      "layer": "textbook",
+      "document_id": "doc.textbook.cst-ocr-2026-09-20",
+      "original_document_id": "doc.textbook.cst-pptx",
+      "ocr_status": "machine_ocr_uncorrected",
+      "definition_review_status": "textbook_internal_ambiguity",
+      "implementation_status": "not_implemented",
+      "content_omitted": true,
+      "note": "私有教材索引，原文未公开分发。不是正式定义，也不是代码已修复声明。"
+    },
+    {
+      "id": "tb.19.old_member_ret",
+      "slide": 161,
+      "ordinal": 19,
+      "name": "老会员回购率",
+      "ocr_excerpt": null,
+      "concept_id": "concept.old_member_retention",
+      "ambiguity": "存量是否含未购会员未写清。",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "TextbookExcerpt",
+      "layer": "textbook",
+      "document_id": "doc.textbook.cst-ocr-2026-09-20",
+      "original_document_id": "doc.textbook.cst-pptx",
+      "ocr_status": "machine_ocr_uncorrected",
+      "definition_review_status": "textbook_internal_ambiguity",
+      "implementation_status": "not_implemented",
+      "content_omitted": true,
+      "note": "私有教材索引，原文未公开分发。不是正式定义，也不是代码已修复声明。"
+    },
+    {
+      "id": "tb.20.old_join",
+      "slide": 161,
+      "ordinal": 20,
+      "name": "老客入会率",
+      "ocr_excerpt": null,
+      "concept_id": "concept.old_customer_join",
+      "ambiguity": null,
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "TextbookExcerpt",
+      "layer": "textbook",
+      "document_id": "doc.textbook.cst-ocr-2026-09-20",
+      "original_document_id": "doc.textbook.cst-pptx",
+      "ocr_status": "machine_ocr_uncorrected",
+      "definition_review_status": "textbook_ocr_uncorrected",
+      "implementation_status": "not_implemented",
+      "content_omitted": true,
+      "note": "私有教材索引，原文未公开分发。不是正式定义，也不是代码已修复声明。"
+    },
+    {
+      "id": "tb.rfm.plan",
+      "slide": 25,
+      "ordinal": null,
+      "name": "老客 RFM 预估",
+      "ocr_excerpt": null,
+      "concept_id": "concept.rfm",
+      "ambiguity": "教材运营预估式，不是已验证计算合同。",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "TextbookExcerpt",
+      "layer": "textbook",
+      "document_id": "doc.textbook.cst-ocr-2026-09-20",
+      "original_document_id": "doc.textbook.cst-pptx",
+      "ocr_status": "machine_ocr_uncorrected",
+      "definition_review_status": "textbook_internal_ambiguity",
+      "implementation_status": "not_implemented",
+      "content_omitted": true,
+      "note": "私有教材索引，原文未公开分发。不是正式定义，也不是代码已修复声明。"
+    },
+    {
+      "id": "tb.quadrant.gmv",
+      "slide": 34,
+      "ordinal": null,
+      "name": "会员黄金四象限拆解",
+      "ocr_excerpt": null,
+      "concept_id": "concept.member_share",
+      "ambiguity": "OCR 数字和人群上标可能识别错误；不据此改决议。",
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "TextbookExcerpt",
+      "layer": "textbook",
+      "document_id": "doc.textbook.cst-ocr-2026-09-20",
+      "original_document_id": "doc.textbook.cst-pptx",
+      "ocr_status": "machine_ocr_uncorrected",
+      "definition_review_status": "textbook_internal_ambiguity",
+      "implementation_status": "not_implemented",
+      "content_omitted": true,
+      "note": "私有教材索引，原文未公开分发。不是正式定义，也不是代码已修复声明。"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.textbook.cst-pptx",
+      "type": "DocumentVersion",
+      "title": "私有 CRM 教材（仅引用索引）",
+      "nature": "textbook_original",
+      "sha256": "1bd779a9ea526f3405138d00e2b745a2ba955ad7e882a345ab958748f0611631",
+      "slides": 168,
+      "permission_scope": "local_review_only",
+      "not_live_weknora": true
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.textbook.cst-ocr-2026-09-20",
+      "type": "DocumentVersion",
+      "title": "同一 PPT 的本机 OCR 表现",
+      "nature": "textbook_ocr",
+      "sha256": "dea6261ba17ea82fa6e6e781ebb33c17a5448d1e02c753634e672c6870b0b10e",
+      "ocr_status": "machine_ocr_uncorrected",
+      "same_source_as": "doc.textbook.cst-pptx",
+      "note": "OCR 与原件是同一来源的不同表现，不算两份独立证据。不根据 OCR 猜测解决冲突。",
+      "not_live_weknora": true
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.decisions.json",
+      "type": "DocumentVersion",
+      "title": "口径决议",
+      "nature": "confirmed_decisions",
+      "sha256": "4ebbcc3a3495232cac48b674d789e7cafdd45077a67ba8370cd9dcc4086c825f",
+      "path": "docs/crm-calibration/decisions.json"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.metric-reconciliation",
+      "type": "DocumentVersion",
+      "title": "指标核对表",
+      "nature": "reconciliation",
+      "sha256": "b3ed3aa6968cc8d507318c21cc271688b762d30962f84d09d9fa2ccb5ae8ddea",
+      "path": "docs/crm-calibration/metric-reconciliation.md"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.knowledge-graph-design",
+      "type": "DocumentVersion",
+      "title": "CRM 知识图谱设计",
+      "nature": "design",
+      "sha256": "906cf0a8706a8037cd636df1091786dbbd182bf5a4bbf55d05e0af9275980d8f",
+      "path": "docs/crm-calibration/knowledge-graph-design.md"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.a-contract.crm-metrics-v1",
+      "type": "DocumentVersion",
+      "title": "A 线合同 crm-metrics/v1（只读引用）",
+      "nature": "wire_contract",
+      "sha256": "8fc60d5e935ec43bbe5cf8ae02349f95f6bcd90cb34dd4222031c17034eccf6a",
+      "path": "backend/contracts/crm_metrics_v1.py",
+      "implementation_status": "not_implemented",
+      "note": "C 不复制或改写合同公式。文件存在不等于验收通过。"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.a-semantic.crm-metrics-v1",
+      "type": "DocumentVersion",
+      "title": "A 线 semantic 计算模块指纹",
+      "nature": "a_candidate_engine",
+      "sha256": "7d52b6f5311629502ddf280810e1755bddc387e38bdf6b876f446e7068266131",
+      "path": "backend/semantic/crm_metrics_v1.py",
+      "implementation_status": "not_implemented",
+      "c_verification": "not_run",
+      "note": "只记录 SHA。C 未运行 A 测试，不宣称 synthetic_verified 或真实对账。"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.code.overview",
+      "type": "DocumentVersion",
+      "title": "源码快照 backend/services/metrics/overview.py",
+      "nature": "code_snapshot",
+      "path": "backend/services/metrics/overview.py",
+      "sha256": "91d370461b89e7ab47c8e7b33200b035a5b4ffb2e3f513827495f82f0699cc59"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.code.category_overview",
+      "type": "DocumentVersion",
+      "title": "源码快照 backend/services/category_service/overview.py",
+      "nature": "code_snapshot",
+      "path": "backend/services/category_service/overview.py",
+      "sha256": "6205625fc25e15f914b26917d5f12031e7971b1b67f7ba8aff6f87c1fe1d9345"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.code.competition_compute",
+      "type": "DocumentVersion",
+      "title": "源码快照 backend/services/metrics/competition_compute.py",
+      "nature": "code_snapshot",
+      "path": "backend/services/metrics/competition_compute.py",
+      "sha256": "ad085b5725e5f23e6f360b7bae147be066cb782dddc94e8648136347cda66cd5"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.code.basket",
+      "type": "DocumentVersion",
+      "title": "源码快照 backend/services/category_service/basket.py",
+      "nature": "code_snapshot",
+      "path": "backend/services/category_service/basket.py",
+      "sha256": "b3213780f29df1b67f5782fe75f35d4f3cb7a01d838464b4b252c018a9382a14"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.code.category_repurchase",
+      "type": "DocumentVersion",
+      "title": "源码快照 backend/services/category_service/repurchase/standard.py",
+      "nature": "code_snapshot",
+      "path": "backend/services/category_service/repurchase/standard.py",
+      "sha256": "952eca2c73063fd5ec0249b9154649609c6fedbd1c2f655769e2c305312c8bf4"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.code.sampling",
+      "type": "DocumentVersion",
+      "title": "源码快照 backend/services/sampling_service.py",
+      "nature": "code_snapshot",
+      "path": "backend/services/sampling_service.py",
+      "sha256": "39e43a595f942ce473a680a2165029f4a712b114299e2621b5f9a5cafc3d09df"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.code.ltv",
+      "type": "DocumentVersion",
+      "title": "源码快照 backend/services/lifetime_value_service.py",
+      "nature": "code_snapshot",
+      "path": "backend/services/lifetime_value_service.py",
+      "sha256": "e7f737ed008dae93d94dd70948c42c8cc31318ebfc14c0505d32dde58e7d79aa"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.code.visitor",
+      "type": "DocumentVersion",
+      "title": "源码快照 backend/services/visitor_service.py",
+      "nature": "code_snapshot",
+      "path": "backend/services/visitor_service.py",
+      "sha256": "f2f8fe96903a759ea67dcd73887930aaa133a36065737aa461cbd3905e6cc936"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.code.calculations",
+      "type": "DocumentVersion",
+      "title": "源码快照 backend/semantic/calculations.py",
+      "nature": "code_snapshot",
+      "path": "backend/semantic/calculations.py",
+      "sha256": "066156eccd03d584c644f0a777b94190502c773e102cf5d67c92a041a6d7b6e9"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.code.segments",
+      "type": "DocumentVersion",
+      "title": "源码快照 backend/semantic/segments.py",
+      "nature": "code_snapshot",
+      "path": "backend/semantic/segments.py",
+      "sha256": "25570eb641232299b71837001b1d9a1bb0bbfd831f0f508847fbfc1f9aed658a"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.code.backend_semantic_metrics_py",
+      "type": "DocumentVersion",
+      "title": "源码快照 backend/semantic/metrics.py",
+      "nature": "code_snapshot",
+      "path": "backend/semantic/metrics.py",
+      "sha256": "22f650c543e7e1e0d5018ed0dedc8f333399512cc650ec7a0db61514d5d3d0cb"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.code.backend_semantic_lifetime_value_py",
+      "type": "DocumentVersion",
+      "title": "源码快照 backend/semantic/lifetime_value.py",
+      "nature": "code_snapshot",
+      "path": "backend/semantic/lifetime_value.py",
+      "sha256": "98df05cd317b5c6d2ab7a4d4be00d0bb4fa7c937546c7943689a4d32cfc07342"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.code.contract_metrics",
+      "type": "DocumentVersion",
+      "title": "源码快照 backend/contracts/metrics.py",
+      "nature": "code_snapshot",
+      "path": "backend/contracts/metrics.py",
+      "sha256": "8c49dbda46d9e6d8b0a9e09b11e4daaa279933d35556a086f40edfb778f696a8"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.code.backend_contracts_types_py",
+      "type": "DocumentVersion",
+      "title": "源码快照 backend/contracts/types.py",
+      "nature": "code_snapshot",
+      "path": "backend/contracts/types.py",
+      "sha256": "fc1558c9f522e2fa8bd330584f01822752d8075f524da7efd529c97a4732b6dd"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.code.backend_contracts_sampling_py",
+      "type": "DocumentVersion",
+      "title": "源码快照 backend/contracts/sampling.py",
+      "nature": "code_snapshot",
+      "path": "backend/contracts/sampling.py",
+      "sha256": "05f78128f87ba74728779d34b51abcd251440c74b0fa8917f6d21f8eb9e53c08"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.code.rfm_cache",
+      "type": "DocumentVersion",
+      "title": "源码快照 backend/services/rfm/cache.py",
+      "nature": "code_snapshot",
+      "path": "backend/services/rfm/cache.py",
+      "sha256": "36c50fd2515aca52768f124a76a1ee66103a467f5ae5b0e5e47bd3b90812c8a4"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.code.backend_services_rfm_extended_py",
+      "type": "DocumentVersion",
+      "title": "源码快照 backend/services/rfm/extended.py",
+      "nature": "code_snapshot",
+      "path": "backend/services/rfm/extended.py",
+      "sha256": "3a9df8f2dd0cc9b1e74ccd3801370a1edcd896cf7f85fbf3713e6ad3e4d9cd75"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.code.backend_services_rfm_f_flow_py",
+      "type": "DocumentVersion",
+      "title": "源码快照 backend/services/rfm/f_flow.py",
+      "nature": "code_snapshot",
+      "path": "backend/services/rfm/f_flow.py",
+      "sha256": "ef7f2ecc8d45c0ba1c101cc6f06a0c338a4ad07bdd9b9bc59fd49969dbc19ea5"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.code.etl_load",
+      "type": "DocumentVersion",
+      "title": "源码快照 scripts/etl/load.py",
+      "nature": "code_snapshot",
+      "path": "scripts/etl/load.py",
+      "sha256": "787cdd320a2b94c7d04f2e621e71d280139716a2b046b26ab4e4df29dfd6d366"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.code.db_init",
+      "type": "DocumentVersion",
+      "title": "源码快照 backend/db/init.py",
+      "nature": "code_snapshot",
+      "path": "backend/db/init.py",
+      "sha256": "ba43c132e78409f43f9abf2323e46c4f5e5c749ac2b4c876e9715af1ba240ae4"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.code.backend_services_analytics_queries_py",
+      "type": "DocumentVersion",
+      "title": "源码快照 backend/services/analytics/queries.py",
+      "nature": "code_snapshot",
+      "path": "backend/services/analytics/queries.py",
+      "sha256": "9f41498a7ac06d7577a6d41173e892c540b5a8c07da0b3073c7c32c1b6f94711"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.code.dsh-plugins_analytics-workbench_src_competition-agent_family_mjs",
+      "type": "DocumentVersion",
+      "title": "源码快照 dsh-plugins/analytics-workbench/src/competition-agent/family.mjs",
+      "nature": "code_snapshot",
+      "path": "dsh-plugins/analytics-workbench/src/competition-agent/family.mjs",
+      "sha256": "9e7b32dd184e84400b0769413ac939334f89fe2bec37ad46a9f35d3cb6f2af90"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "id": "doc.code.dsh-plugins_analytics-workbench_src_competition-agent_boundary_mjs",
+      "type": "DocumentVersion",
+      "title": "源码快照 dsh-plugins/analytics-workbench/src/competition-agent/boundary.mjs",
+      "nature": "code_snapshot",
+      "path": "dsh-plugins/analytics-workbench/src/competition-agent/boundary.mjs",
+      "sha256": "c82ff0265110dc50b11a58e3d18ecaff3fe6661992c7c159313c7cb70414377c"
+    }
+  ]
+}

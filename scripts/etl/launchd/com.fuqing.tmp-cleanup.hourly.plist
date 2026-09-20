@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+PR3 (ops-temp-safety): Mac launchd plist for 芙清临时文件安全清理 (Layer 6)
+
+安全边界 (禁止扫全局 /tmp 任意文件):
+  - 仅删 TrackerDB 登记过期文件, 或项目专属 0700 临时目录顶层过期文件
+  - resolve 后必须在允许根内; 跳过目录/symlink/非本 UID/硬链接异常
+  - lsof 缺失/超时 fail-closed 跳过
+  - 正式删除需 --execute (默认 CLI 为 dry-run; 本 plist 显式开启)
+
+安装:
+  cp com.fuqing.tmp-cleanup.hourly.plist ~/Library/LaunchAgents/
+  launchctl load ~/Library/LaunchAgents/com.fuqing.tmp-cleanup.hourly.plist
+
+卸载:
+  launchctl unload ~/Library/LaunchAgents/com.fuqing.tmp-cleanup.hourly.plist
+  rm ~/Library/LaunchAgents/com.fuqing.tmp-cleanup.hourly.plist
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.fuqing.tmp-cleanup.hourly</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/hutou/homebrew/bin/python3</string>
+        <string>/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/scripts/etl/cleanup_subagent.py</string>
+        <string>--execute</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PYTHONPATH</key>
+        <string>/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics</string>
+    </dict>
+
+    <key>StartInterval</key>
+    <integer>3600</integer>
+
+    <key>StandardOutPath</key>
+    <string>/Users/hutou/Library/Logs/fuqing-subagent-cleanup.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/hutou/Library/Logs/fuqing-subagent-cleanup.log</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+</dict>
+</plist>

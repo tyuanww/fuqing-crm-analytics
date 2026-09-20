@@ -1,0 +1,484 @@
+{
+  "pack_version": "crm-knowledge-offline/v1",
+  "items": [
+    {
+      "id": "concept.aus",
+      "name": "客单价 / 人均消费金额",
+      "aliases": [
+        "AUS",
+        "客单价",
+        "人均消费金额"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.aov",
+      "name": "每单金额",
+      "aliases": [
+        "AOV",
+        "平均订单金额"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.valid_purchase",
+      "name": "有效购买",
+      "aliases": [
+        "有效订单",
+        "有效人数"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.gsv",
+      "name": "GSV 净销售",
+      "aliases": [
+        "GSV"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.gmv",
+      "name": "GMV 成交总额",
+      "aliases": [
+        "GMV"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.member_premium",
+      "name": "会员溢价",
+      "aliases": [
+        "会员溢价率",
+        "Member premium"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.new_old",
+      "name": "新老客",
+      "aliases": [
+        "NTF",
+        "Existing Customer"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.frequency",
+      "name": "人均购买次数",
+      "aliases": [
+        "Frequency"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.ipt",
+      "name": "客单件 / 件数",
+      "aliases": [
+        "IPT",
+        "人均购买件数",
+        "每单件数"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.aup",
+      "name": "件单价",
+      "aliases": [
+        "AUP"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.retention",
+      "name": "老客回购",
+      "aliases": [
+        "Retention rate"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.new_repeat",
+      "name": "新客复购",
+      "aliases": [
+        "New Repeat rate"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.basket",
+      "name": "商品连带",
+      "aliases": [
+        "商品连带率"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.product_acquisition",
+      "name": "商品招新",
+      "aliases": [
+        "商品招新率"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.product_penetration",
+      "name": "商品渗透",
+      "aliases": [
+        "新客渗透率",
+        "老客渗透率"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.product_repurchase",
+      "name": "商品回购",
+      "aliases": [
+        "Commodity Repurchase Rate"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.member_recruitment",
+      "name": "新会员招募",
+      "aliases": [
+        "新会员招募数"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.member_share",
+      "name": "会员成交占比",
+      "aliases": [
+        "会员渗透"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.binding_rate",
+      "name": "绑卡率 / 入会率",
+      "aliases": [
+        "Binding Rate"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.new_member_conversion",
+      "name": "新会员转化",
+      "aliases": [
+        "New member Conversion Rate"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.old_member_retention",
+      "name": "老会员回购",
+      "aliases": [
+        "老会员回购率"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.old_customer_join",
+      "name": "老客入会",
+      "aliases": [
+        "老客入会率"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.sample_window",
+      "name": "派样观察窗口",
+      "aliases": [
+        "派样 ROI",
+        "派样复购"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.ltv",
+      "name": "LTV / 新客累计净消费",
+      "aliases": [
+        "LTV",
+        "cohort 后续收入"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.uv",
+      "name": "访客与入会率分母",
+      "aliases": [
+        "UV",
+        "日UV累计"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.yoy",
+      "name": "同比日历",
+      "aliases": [
+        "YOY"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.rfm",
+      "name": "RFM 分层",
+      "aliases": [
+        "RFM"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.refund_view",
+      "name": "退款视图",
+      "aliases": [
+        "原订单期净额",
+        "退款发生期"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    },
+    {
+      "id": "concept.membership_at_purchase",
+      "name": "成交时会员身份",
+      "aliases": [
+        "MEMBER",
+        "NON_MEMBER",
+        "UNKNOWN"
+      ],
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "BusinessConcept",
+      "domain": "crm",
+      "formula": null,
+      "note": "概念不直接存唯一公式。"
+    }
+  ]
+}

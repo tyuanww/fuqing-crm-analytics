@@ -1,0 +1,134 @@
+{
+  "pack_version": "crm-knowledge-offline/v1",
+  "synthetic": true,
+  "contains_real_data": false,
+  "items": [
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Case",
+      "id": "case.E01",
+      "name": "三种均额",
+      "synthetic": true,
+      "input": "一人两单：第一单 100+100 两行，第二单 100",
+      "expected": "AUS=300；AOV=150；行均=100",
+      "decision_ids": [
+        "D001"
+      ],
+      "evidence_refs": [
+        "ev.recon.E01"
+      ],
+      "not_runtime_proof": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Case",
+      "id": "case.E02",
+      "name": "会员比较",
+      "synthetic": true,
+      "input": "会员 2 人 400；非会员 4 人 400",
+      "expected": "200/100=2 倍；会员 AUS / 全店 AUS = 200/(800/6)=1.5 是另一指标",
+      "decision_ids": [
+        "D002"
+      ],
+      "evidence_refs": [
+        "ev.recon.E02"
+      ],
+      "not_runtime_proof": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Case",
+      "id": "case.E03",
+      "name": "部分退款",
+      "synthetic": true,
+      "input": "实付 100，成功退 30",
+      "expected": "GSV=70；仍 1 单 1 人",
+      "decision_ids": [
+        "D003",
+        "D006"
+      ],
+      "evidence_refs": [
+        "ev.recon.E03"
+      ],
+      "not_runtime_proof": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Case",
+      "id": "case.E09",
+      "name": "观察期未满",
+      "synthetic": true,
+      "input": "9/1 与 9/18 首购，数据截至 9/20，观察 14 天",
+      "expected": "仅 9/1 成熟",
+      "decision_ids": [
+        "D010"
+      ],
+      "evidence_refs": [
+        "ev.recon.E09"
+      ],
+      "not_runtime_proof": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Case",
+      "id": "case.E10",
+      "name": "商品回购集合",
+      "synthetic": true,
+      "input": "历史买 A 10 人；本期回购 3 人，另 20 新买家",
+      "expected": "3/10 不是 23/10",
+      "decision_ids": [
+        "D008"
+      ],
+      "evidence_refs": [
+        "ev.recon.E10"
+      ],
+      "not_runtime_proof": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Case",
+      "id": "case.E12",
+      "name": "部分退款和件数",
+      "synthetic": true,
+      "input": "2 件 100 元退 30 无退件事件",
+      "expected": "净额 70，净件数未知",
+      "decision_ids": [
+        "D007"
+      ],
+      "evidence_refs": [
+        "ev.recon.E12"
+      ],
+      "not_runtime_proof": true,
+      "implementation_status": "not_implemented"
+    }
+  ]
+}

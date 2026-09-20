@@ -1,0 +1,132 @@
+{
+  "pack_version": "crm-knowledge-offline/v1",
+  "mapping_status": "declared_not_verified",
+  "items": [
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "SourceField",
+      "id": "field.orders.actual_amount",
+      "name": "orders.actual_amount",
+      "source_id": "code_declared",
+      "schema_version": "source_declaration_not_live_schema",
+      "path": "orders.actual_amount",
+      "verification_status": "declared_not_verified",
+      "mapped_from": [
+        "data.order_amount"
+      ],
+      "note": "是否已净额未知。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "SourceField",
+      "id": "field.orders.is_refund",
+      "name": "orders.is_refund",
+      "source_id": "code_declared",
+      "verification_status": "declared_not_verified",
+      "mapped_from": [
+        "data.refund_events"
+      ],
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "SourceField",
+      "id": "field.orders.is_member",
+      "name": "orders.is_member",
+      "source_id": "code_declared",
+      "verification_status": "declared_not_verified",
+      "mapped_from": [
+        "data.membership_at_purchase"
+      ],
+      "note": "不是首次入会事件。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "SourceField",
+      "id": "field.orders.pay_time",
+      "name": "orders.pay_time",
+      "source_id": "code_declared",
+      "verification_status": "declared_not_verified",
+      "mapped_from": [
+        "data.pay_time"
+      ],
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "SourceField",
+      "id": "field.orders.sample_received_at",
+      "name": "orders.sample_received_at ETL 声明",
+      "source_id": "code_declared",
+      "verification_status": "declared_not_verified",
+      "mapped_from": [
+        "data.sample_identification"
+      ],
+      "note": "ETL load.py 声明 sample_received_at；backend/db/init.py 旧建表没有。字段文档是源码声明，不是实际库 schema。",
+      "evidence": [],
+      "implementation_status": "not_implemented",
+      "code_paths": [
+        "scripts/etl/load.py",
+        "backend/db/init.py"
+      ],
+      "code_sha256": {
+        "scripts/etl/load.py": "787cdd320a2b94c7d04f2e621e71d280139716a2b046b26ab4e4df29dfd6d366",
+        "backend/db/init.py": "ba43c132e78409f43f9abf2323e46c4f5e5c749ac2b4c876e9715af1ba240ae4"
+      }
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "SourceField",
+      "id": "field.user_first_purchase",
+      "name": "user_first_purchase.first_pay_date",
+      "source_id": "code_declared",
+      "verification_status": "declared_not_verified",
+      "mapped_from": [
+        "data.first_valid_purchase"
+      ],
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "SourceField",
+      "id": "field.daily_visitors.visitors",
+      "name": "daily_visitors.visitors",
+      "source_id": "code_declared",
+      "verification_status": "declared_not_verified",
+      "mapped_from": [
+        "data.daily_visitors"
+      ],
+      "implementation_status": "not_implemented"
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+LEGACY TEMPLATE — DO NOT INSTALL OR START.
+2026-07-26 audit: the former shutil.copy2 hot-copy lacked a verified
+consistency/restore contract and could create a database-sized disk spike.
+The executable path is now removed; backup_duckdb.py defaults to exit 2 and
+only supports --verify-only. See docs/maintenance/duckdb-backup-upgrade-checklist.md.
+
+Sprint 4 P0-2 (2026-06-07): Mac launchd plist for 芙清 DuckDB 每日备份
+Sprint 10 B3 (2026-06-08): 失败 loud-fail (脚本内置 osascript + mail)
+                              改 BJ 日期命名 (跟用户日历日期一致, 之前 UTC 错叫)
+
+复用 com.fuqing.backup-cleanup.weekly.plist 模式 (Sprint 1 治理留下)
+
+如果部署机历史上装过该 label，应在独立运维窗口 bootout 并移走已安装副本；
+不要从本注释复制安装命令。仓库保留本文件仅用于历史追溯，Disabled=true 是额外
+防误启动提示，不替代卸载。
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.fuqing.duckdb-backup.daily</string>
+
+    <key>Disabled</key>
+    <true/>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/hutou/homebrew/bin/python3</string>
+        <string>/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/scripts/etl/backup_duckdb.py</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics</string>
+
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>3</integer>
+        <key>Minute</key>
+        <integer>30</integer>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/hutou/Library/Logs/fuqing-duckdb-backup.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/hutou/Library/Logs/fuqing-duckdb-backup.log</string>
+
+    <key>RunAtLoad</key>
+    <false/>
+</dict>
+</plist>

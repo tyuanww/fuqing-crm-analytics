@@ -1,0 +1,226 @@
+{
+  "metric_version": "crm-metrics/v1",
+  "query_version": "crm-metrics-query/v1",
+  "schema_version": "crm-metrics-wire/v1",
+  "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+  "timezone": "Asia/Shanghai",
+  "currency": "CNY",
+  "amount": {
+    "unit": "minor",
+    "scale": 2,
+    "integer": true
+  },
+  "units": {
+    "ratio": "raw_ratio_0_1",
+    "ppt": "raw_ratio_diff",
+    "multiple": "multiple",
+    "count": "integer",
+    "days": "integer"
+  },
+  "rfm_threshold_version": "crm-rfm-thresholds/v1",
+  "rfm_thresholds": {
+    "r_days": [
+      30,
+      90,
+      180,
+      365
+    ],
+    "f_orders": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "m_amount_yuan_declared": [
+      100,
+      300,
+      500,
+      1000
+    ],
+    "note": "保留现役阈值版本；R 桶名称须标实际天数。金额档仍待 D019 核验元/分。"
+  },
+  "confirmed_decisions": [
+    "D001",
+    "D002",
+    "D003",
+    "D004",
+    "D005",
+    "D006",
+    "D007",
+    "D008",
+    "D009",
+    "D010",
+    "D011",
+    "D012",
+    "D013",
+    "D014",
+    "D015",
+    "D016",
+    "D017",
+    "D018",
+    "D020",
+    "D021",
+    "D022"
+  ],
+  "source_unverified": [
+    "D019"
+  ],
+  "empty_reasons": [
+    "ZERO_DENOMINATOR",
+    "INCOMPARABLE_BASE",
+    "UNKNOWN_IDENTITY",
+    "IMMATURE",
+    "EMPTY_MATURE_COHORT",
+    "MISSING_REFUND_LINES",
+    "INSUFFICIENT_HISTORY",
+    "PRODUCT_NET_UNAVAILABLE",
+    "AMOUNT_ALREADY_NET_CONFLICT",
+    "UNIDENTIFIED_BUYERS_IN_SCOPE",
+    "OVER_REFUND",
+    "CAPABILITY_UNAVAILABLE",
+    "D019_SOURCE_UNVERIFIED",
+    "CHANNEL_NET_UNAVAILABLE"
+  ],
+  "input_grain": {
+    "order_line": [
+      "order_id",
+      "line_id",
+      "user_id",
+      "paid_at",
+      "gross_paid_minor",
+      "quantity",
+      "product_id",
+      "channel",
+      "membership_at_purchase",
+      "is_sample",
+      "status",
+      "event_seq"
+    ],
+    "refund_event": [
+      "refund_id",
+      "order_id",
+      "refunded_at",
+      "amount_minor",
+      "product_id",
+      "line_id",
+      "status",
+      "event_seq"
+    ],
+    "membership_at_purchase": [
+      "MEMBER",
+      "NON_MEMBER",
+      "UNKNOWN"
+    ],
+    "status_order": [
+      "PAID",
+      "CANCELLED"
+    ],
+    "status_refund": [
+      "SUCCEEDED"
+    ],
+    "amount_already_net": "true 时禁止再减成功退款"
+  },
+  "request_fields": [
+    "source_id",
+    "contains_real_data",
+    "metric_version",
+    "query_id",
+    "period_start",
+    "period_end_exclusive",
+    "refund_view",
+    "refund_as_of",
+    "data_through",
+    "timezone",
+    "channel_ids",
+    "product_ids",
+    "identity_scope",
+    "observation_days",
+    "amount_already_net",
+    "actor_scope",
+    "cohort_period_start",
+    "cohort_period_end_exclusive"
+  ],
+  "refund_views": [
+    "ORDER_COHORT_AS_OF",
+    "REFUND_FLOW"
+  ],
+  "identity_scope": [
+    "STOREWIDE"
+  ],
+  "queries": {
+    "sales_window_summary": {
+      "metric_id": "sales_window_summary",
+      "decisions": [
+        "D001",
+        "D002",
+        "D003",
+        "D004",
+        "D005",
+        "D006",
+        "D014",
+        "D017",
+        "D018",
+        "D020",
+        "D021"
+      ]
+    },
+    "existing_customer_repurchase": {
+      "metric_id": "existing_customer_repurchase",
+      "decisions": [
+        "D004",
+        "D006",
+        "D008",
+        "D018",
+        "D020",
+        "D021"
+      ]
+    },
+    "sample_followup": {
+      "metric_id": "sample_followup",
+      "decisions": [
+        "D009",
+        "D010",
+        "D011",
+        "D022"
+      ],
+      "sampling_roi_disclaimer": "当前只是复购收入表现，不是利润回报或因果增量"
+    }
+  },
+  "window_spec": {
+    "period": "period_start 00:00 含，period_end_exclusive 00:00 不含，业务时区",
+    "natural_days": "起点日期为第1天，第N天=起点日期+(N-1)，结束为第N天次日 00:00 不含；data_through >= 该结束点才成熟",
+    "first_purchase": "按 refund_as_of 重算净额>0 的最早有效订单；早于 period_start 为老客；窗口内首次有效为新客；历史不足为 UNKNOWN",
+    "sample_attribution": "统计期内每人第一笔派样（paid_at, event_seq, order_id）；先归属再按渠道筛选"
+  },
+  "output_required": [
+    "status",
+    "source_id",
+    "contains_real_data",
+    "metric_version",
+    "query_id",
+    "data_version",
+    "data_through",
+    "resolved_filters",
+    "facts",
+    "limitations",
+    "query_ref",
+    "synthetic"
+  ],
+  "capabilities_not_in_phase1_queries": [
+    "cycle_unique_uv",
+    "first_join_event",
+    "profit_roi",
+    "causal_increment",
+    "net_quantity_without_return_qty",
+    "real_archive_source"
+  ],
+  "unsupported_filters": {
+    "sample_followup": [
+      "product_ids",
+      "refund_view=REFUND_FLOW"
+    ],
+    "existing_customer_repurchase": [
+      "refund_view=REFUND_FLOW"
+    ]
+  }
+}

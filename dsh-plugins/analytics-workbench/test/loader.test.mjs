@@ -1,0 +1,158 @@
+/** Real pinned Cordis Loader, synthetic service facades. Not a native-run test. */
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile, writeFile, mkdtemp } from 'node:fs/promises';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { randomBytes } from 'node:crypto';
+import { createServer } from 'node:net';
+
+const portBase = process.env.B0_PORT_BASE ?? '4325';
+assert.ok(['4325', '4335'].includes(portBase), 'Loader tests require a separate synthetic port block');
+process.env.B0_PORT_BASE = portBase;
+const bridgePort = Number(portBase) + 1;
+
+const plugin = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream'));
+const load = path => import(pathToFileURL(join(upstream, path)).href);
+const { Context } = await load('vendor/cordis/lib/index.js');
+const { default: Loader } = await load('vendor/loader/lib/index.js');
+const { default: Include } = await load('vendor/include/lib/index.js');
+
+test('one package entry registers competition tools only for explicitly connected native UI', async () => {
+  const additions = { DSH_ANALYTICS_UI_ONLY: '1', COMPETITION_HTTP_BASE: 'http://127.0.0.1:18083',
+    COMPETITION_HTTP_TOKEN: 'synthetic-loader-token' };
+  const prior = Object.fromEntries(Object.keys(additions).map(key => [key, process.env[key]]));
+  try {
+    Object.assign(process.env, additions);
+    for (const connected of [false, true]) {
+      process.env.COMPETITION_HTTP_BASE = connected ? additions.COMPETITION_HTTP_BASE : '';
+      const ctx = new Context();
+      const tools = [], skills = [];
+      const channels = [];
+      ctx.provide('agents', {});
+      ctx.provide('sessions', {});
+      ctx.provide('sessionController', {});
+      ctx.provide('connection', { fetch: { register: (route) => { channels.push(route.path); } } });
+      ctx.provide('webServer', {});
+      ctx.provide('tools', { register: tool => tools.push(tool.name), guard: () => {} });
+      ctx.provide('skills', { register: skill => skills.push(skill) });
+      try {
+        await ctx.plugin(await import(pathToFileURL(join(plugin, 'lib/index.js')).href));
+        await new Promise(resolve => setTimeout(resolve, 0));
+        assert.deepEqual(channels, ['/api/shine-mage-board']);
+        assert.deepEqual(tools, connected ? ['competition_growth_skill_resource', 'competition_growth_capabilities',
+          'competition_growth_step', 'competition_growth_patch', 'competition_board_catalog', 'competition_board_generate',
+          'competition_board_edit_context', 'competition_board_edit', 'free_html_page_generate'] : []);
+        assert.equal(skills.length, connected ? 1 : 0);
+      } finally { await ctx.fiber.dispose(); }
+    }
+  } finally {
+    for (const [key, value] of Object.entries(prior)) {
+      if (value === undefined) delete process.env[key]; else process.env[key] = value;
+    }
+  }
+});
+
+test('built package root and per-agent tool load through real Cordis include and dispose', async () => {
+  // The fixed B0 private bridge port is part of the runtime contract. Never
+  // probe somebody else's server with this test's ephemeral capability.
+  const portProbe = createServer();
+  await new Promise((ready, reject) => {
+    portProbe.once('error', () => reject(new Error('Loader test requires its isolated bridge port free; no listener was stopped.')));
+    portProbe.listen(bridgePort, '127.0.0.1', ready);
+  });
+  await new Promise((ready, reject) => portProbe.close(error => error ? reject(error) : ready()));
+  const fixture = await mkdtemp(join(plugin, 'lib/loader-fixture-'));
+  const token = randomBytes(32).toString('base64url');
+  process.env.B0_RUNTIME_TOKEN = token;
+  process.env.B0_SESSION_ID = 'session-b0-synthetic-primary';
+  try {
+    for (const face of ['index', 'tool']) {
+      const config = join(fixture, `${face}.yml`);
+      await writeFile(config, JSON.stringify([{ id: `b0-${face}`, name: pathToFileURL(join(plugin, `lib/${face}.js`)).href }]), { mode: 0o600 });
+      const ctx = new Context();
+      const registered = [];
+      ctx.provide('agents', { get: () => undefined });
+      ctx.provide('sessions', { flush: async () => { assert.fail('loader-only test executed a session'); } });
+      ctx.provide('sessionController', { prompt: async () => { assert.fail('loader-only test sent a prompt'); } });
+      ctx.provide('tools', { register: tool => { registered.push(tool); } });
+      try {
+        ctx.baseUrl = pathToFileURL(fixture).href + '/';
+        await ctx.plugin(Loader);
+        ctx.loader.builtins.include = Include;
+        // Import actual built modules, without Node source hooks or aliasing
+        // their exports. Cordis owns include, injection, entry start and stop.
+        ctx.loader.internal = { version: 'v2', import: specifier => import(specifier) };
+        await ctx.loader.create({ name: 'cordis:include', config: { path: pathToFileURL(config).href } });
+        await ctx.loader.await();
+        if (face === 'tool') assert.deepEqual(registered.map(tool => tool.name), ['analytics_b0_query']);
+        else {
+          const response = await fetch(`http://127.0.0.1:${bridgePort}/health`, {
+            method: 'POST', headers: { authorization: `Bearer ${token}` }, body: '{}',
+            signal: AbortSignal.timeout(3000), redirect: 'error',
+          });
+          assert.equal(response.status, 200);
+          assert.deepEqual(await response.json(), { ready: false });
+        }
+      } finally { await ctx.fiber.dispose(); }
+    }
+    const manifest = JSON.parse(await readFile(join(plugin, 'package.json'), 'utf8'));
+    assert.equal(manifest.dsh.client.platform, 'web');
+  } finally { delete process.env.B0_RUNTIME_TOKEN; delete process.env.B0_SESSION_ID; }
+});
+
+test('query-family Cordis loader registers query tool and two-session health', async () => {
+  const portProbe = createServer();
+  await new Promise((ready, reject) => {
+    portProbe.once('error', () => reject(new Error('Loader test requires its isolated bridge port free; no listener was stopped.')));
+    portProbe.listen(bridgePort, '127.0.0.1', ready);
+  });
+  await new Promise((ready, reject) => portProbe.close(error => error ? reject(error) : ready()));
+  const fixture = await mkdtemp(join(plugin, 'lib/loader-fixture-'));
+  const token = randomBytes(32).toString('base64url');
+  const previous = {
+    token: process.env.B0_RUNTIME_TOKEN,
+    session: process.env.B0_SESSION_ID,
+    sessions: process.env.B0_SESSION_IDS,
+    family: process.env.B0_RUNTIME_FAMILY,
+  };
+  process.env.B0_RUNTIME_TOKEN = token;
+  process.env.B0_RUNTIME_FAMILY = 'channel_followup';
+  process.env.B0_SESSION_IDS = 'session-query-a,session-query-b';
+  delete process.env.B0_SESSION_ID;
+  try {
+    for (const face of ['index', 'tool']) {
+      const config = join(fixture, `query-${face}.yml`);
+      await writeFile(config, JSON.stringify([{ id: `query-${face}`, name: pathToFileURL(join(plugin, `lib/${face}.js`)).href }]), { mode: 0o600 });
+      const ctx = new Context();
+      const registered = [];
+      ctx.provide('agents', { get: () => undefined });
+      ctx.provide('sessions', { flush: async () => { assert.fail('loader-only test executed a session'); } });
+      ctx.provide('sessionController', { prompt: async () => { assert.fail('loader-only test sent a prompt'); } });
+      ctx.provide('tools', { register: tool => { registered.push(tool); } });
+      try {
+        ctx.baseUrl = pathToFileURL(fixture).href + '/';
+        await ctx.plugin(Loader);
+        ctx.loader.builtins.include = Include;
+        ctx.loader.internal = { version: 'v2', import: specifier => import(specifier) };
+        await ctx.loader.create({ name: 'cordis:include', config: { path: pathToFileURL(config).href } });
+        await ctx.loader.await();
+        if (face === 'tool') assert.deepEqual(registered.map(tool => tool.name), ['analytics_channel_followup_query']);
+        else {
+          const response = await fetch(`http://127.0.0.1:${bridgePort}/health`, {
+            method: 'POST', headers: { authorization: `Bearer ${token}` }, body: '{}',
+            signal: AbortSignal.timeout(3000), redirect: 'error',
+          });
+          assert.equal(response.status, 200);
+          assert.deepEqual(await response.json(), { ready: false });
+        }
+      } finally { await ctx.fiber.dispose(); }
+    }
+  } finally {
+    if (previous.token === undefined) delete process.env.B0_RUNTIME_TOKEN; else process.env.B0_RUNTIME_TOKEN = previous.token;
+    if (previous.session === undefined) delete process.env.B0_SESSION_ID; else process.env.B0_SESSION_ID = previous.session;
+    if (previous.sessions === undefined) delete process.env.B0_SESSION_IDS; else process.env.B0_SESSION_IDS = previous.sessions;
+    if (previous.family === undefined) delete process.env.B0_RUNTIME_FAMILY; else process.env.B0_RUNTIME_FAMILY = previous.family;
+  }
+});

@@ -1,0 +1,144 @@
+# Docs 索引
+
+> 按 lifecycle 分层，新人约 5 分钟找到入口。  
+> **最后更新**: 2026-09-20。VERSION **0.12.0.0**（CRM 隔离候选），非正式 release。origin/main 基线 **`db582173`**（[#215](https://github.com/weiweity/fuqing-crm-analytics/pull/215)）。DSH **0.1.6-alpha.2**（`ddefc45f`）。0.8.0.0 基线仍是 #129 `a729ff6`。最新 Git HEAD 与施工边界以根目录 [STATUS.md](../STATUS.md) 为准。产品仍 PARTIAL。Mission 主链文档仍有效。
+
+## 黑客松当前实现
+
+| 文档 | 用途 |
+|---|---|
+| [`crm-calibration/public-release.md`](./crm-calibration/public-release.md) | CRM 指标、原生登录与离线知识的公开交付及验收边界 |
+| [`../dsh-plugins/crm-knowledge/README.md`](../dsh-plugins/crm-knowledge/README.md) | CRM 工具、登录边界、隔离启动与复验 |
+| [`../knowledge/crm/README.md`](../knowledge/crm/README.md) | 公开离线定义、依赖关系与导入限制 |
+| [`hackathon/README.md`](./hackathon/README.md) | CEO 价值、演示主链和数据边界（证据链；当前 SHA 看 STATUS） |
+| [`hackathon/PRODUCT-READINESS-2026-09-10.md`](./hackathon/PRODUCT-READINESS-2026-09-10.md) | 七阶段验收账本 |
+| [`hackathon/TODOS.md`](./hackathon/TODOS.md) | 验收缺口与延期项（不是执行授权） |
+| [`hackathon/S3-ACCEPTANCE-2026-09-15.md`](./hackathon/S3-ACCEPTANCE-2026-09-15.md) | 9-15 指定 Figma 矩阵与正式壳 B3 代表路径（PARTIAL，不升版本） |
+| [`hackathon/S3-CROSS-MATRIX-2026-09-15.md`](./hackathon/S3-CROSS-MATRIX-2026-09-15.md) | 9-15 正式壳核心分支双视口交叉；v14 账本，v15 为 SETUP_FAILED |
+| [`hackathon/MISSION-API.md`](./hackathon/MISSION-API.md) | Mission、问数、审批与 `DRAFT_EXPORT` 契约 |
+| [`hackathon/ARCHITECTURE-AND-RELEASE-AUDIT.md`](./hackathon/ARCHITECTURE-AND-RELEASE-AUDIT.md) | 架构边界、质量证据、远端状态和剩余任务 |
+| [`hackathon/DSH-PLUGIN-UI-COMPAT.md`](./hackathon/DSH-PLUGIN-UI-COMPAT.md) | 现役插件插槽表（登录/主题/composer.dock）；9-09 候选见文末附录 |
+| [`hackathon/FEATURE-PACKAGES.md`](./hackathon/FEATURE-PACKAGES.md) | 伸美 Cordis 包装卸边界 |
+| [`../DESIGN.md`](../DESIGN.md) | 伸美 VI、Liquid Glass 令牌与页面组件边界 |
+
+## 一图流
+
+```
+fuqing-crm-analytics/docs/
+├── README.md                          ← 你在这里
+├── TECH-DEBT.md                       开放债短表（唯一）
+├── DISASTER-RECOVERY.md               DuckDB 备份恢复
+├── WINDOWS-DEPLOY-KNOWN-ISSUES.md     Windows / L4.64
+├── user-prompt-template-ad-hoc-query.md
+│
+├── hackathon/                         AI 增长董事会实现
+│   ├── README.md                     CEO 价值、主链与边界
+│   ├── TODOS.md / PRODUCT-READINESS-…  当前缺口与七阶段账本
+│   ├── S3-ACCEPTANCE-2026-09-15.md    9-15 原型／正式壳续验
+│   ├── S3-CROSS-MATRIX-2026-09-15.md  9-15 核心分支交叉补验
+│   ├── MISSION-API.md                 API、幂等与状态流
+│   ├── DSH-PLUGIN-UI-COMPAT.md        现役 DSH 插槽
+│   ├── FEATURE-PACKAGES.md            伸美包装卸
+│   └── ARCHITECTURE-AND-RELEASE-AUDIT.md  架构审计与提交清单
+│
+├── architecture/                      为什么这样设计
+│   ├── AI_SAFETY_NET.md
+│   ├── DATA_PIPELINE.md
+│   ├── TEST_INFRASTRUCTURE.md
+│   ├── clickhouse-poc-decision-memo.md
+│   ├── l4.74-duckdb-postgresql16-decision-memo.md
+│   └── l4_91_excel_export_ssot.md
+│
+├── business/                          业务口径 SSOT
+│   └── RFM_DEFINITIONS.md
+│
+├── data/                              data/ 布局
+│   └── data-layout.md
+│
+├── operating/                         怎么运维 / 协作
+│   ├── team-workflow-v1.md            可合并定义 · 角色
+│   ├── supply-chain.md                依赖 SSOT / audit（PR5）
+│   ├── docker-ports-and-images.md     端口 / healthcheck / 镜像 pin
+│   ├── github-governance-checklist.md 分支保护等人工清单
+│   ├── project-hygiene.md             根目录 / 文档整洁
+│   ├── ship.md · linting.md · hooks-* · launchd-uvicorn.md
+│   └── ci-*.md
+│
+├── development/                       怎么改代码
+│   ├── testing.md · services.md · ratio-convention.md
+│   └── LESSONS_LEARNED.md · AUDIT-WORDING.md
+│
+├── rules/                             L4 细则全文
+│   └── L4-permanent-rules.md
+│
+├── history/                           长编年归档
+│   ├── STATUS-HISTORY.md
+│   ├── TECH-DEBT-HISTORY.md
+│   ├── CHANGELOG_HISTORY.md
+│   └── SPRINT_INDEX.md
+│
+├── maintenance/
+│   ├── BOOTSTRAP.md
+│   └── duckdb-backup-upgrade-checklist.md  备份/1.5.5 升级（仅清单）
+│
+└── sprints/                           仅进行中 + archive
+    ├── README.md
+    ├── _sprint-close-index.md
+    └── archive/                       已 ship handoff（80+）
+```
+
+## 仓库根（docs 之外）
+
+| 文件 | 职责 |
+|---|---|
+| `README.md` | 人读项目简介 |
+| `DESIGN.md` | 品牌、设计令牌、交互原则与组件边界 |
+| `STATUS.md` | **短状态表**（勿再堆编年） |
+| `VERSION` / `CHANGELOG.md` | 版本与近窗变更 |
+| `AGENTS.md` | 唯一 AI 行为正文；CLAUDE 仅导入，L4 是按需技术历史 |
+| `HANDOVER.md` | 交接（gitignore 敏感信息） |
+| 工作区父目录 | `../README.md`（`fuqin-date` 地图） |
+
+## 何时用哪个
+
+| 你想… | 看 |
+|---|---|
+| 演示 AI 增长董事会 / 调用 Mission API | `hackathon/README.md` + `hackathon/MISSION-API.md` |
+| 看驾驶舱产物柜、BoardSpec 生成 / 刷新 | [`../dsh-plugins/analytics-workbench/README.md`](../dsh-plugins/analytics-workbench/README.md) + 根 `STATUS.md` |
+| 看插件占了哪些 DSH 槽 | `hackathon/DSH-PLUGIN-UI-COMPAT.md` |
+| 起 6677 / 插拔伸美包 | [`../scripts/dsh-dev/README.md`](../scripts/dsh-dev/README.md) |
+| 项目能不能用 / 债指针 | 根 `STATUS.md` + `TECH-DEBT.md` |
+| 团队怎么合 PR | 根 `AGENTS.md`；`operating/team-workflow-v1.md` 仅作历史参考 |
+| 根目录该不该堆文件 | `operating/project-hygiene.md` |
+| 加 service / 写 SQL | `development/services.md` + `architecture/AI_SAFETY_NET.md` |
+| 写测试 | `development/testing.md` |
+| RFM 口径 | `business/RFM_DEFINITIONS.md` |
+| Excel 导出 | `architecture/l4_91_excel_export_ssot.md` |
+| ClickHouse / PG 留尾 | architecture 两份 decision-memo + TECH-DEBT（0 默认重开） |
+| 即席查询 | `/ad-hoc-query` skill · 18 tool |
+| 历史 sprint | `history/SPRINT_INDEX.md` + `sprints/archive/` |
+| 新 clone | `maintenance/BOOTSTRAP.md` |
+| Windows 部署 | `WINDOWS-DEPLOY-KNOWN-ISSUES.md` |
+| DuckDB 炸了 | `DISASTER-RECOVERY.md` |
+
+## 文档维护（Sprint 收口）
+
+1. `CHANGELOG.md` 加 entry（老条目进 `history/CHANGELOG_HISTORY.md`）
+2. `TECH-DEBT.md` 只改**开放行**
+3. `STATUS.md` 只改短表
+4. 已 ship 的 `docs/sprints/HANDOFF-*` → `sprints/archive/`
+5. 根目录不新增长期 `HANDOFF-TO-CODEX-*`（ignore + 放 archive）
+
+## 2026-07-19 整理摘要
+
+| 动作 | 结果 |
+|---|---|
+| STATUS / TECH-DEBT 短表 | 编年在 `history/` |
+| **CLAUDE L4 sink** | 全文 `rules/L4-permanent-rules.md`；CLAUDE ~19KB 硬门禁 |
+| CHANGELOG | 近窗保留；旧 entry → `history/CHANGELOG_HISTORY.md` |
+| sprints | 仅索引 + archive（Admin/L474 中间过程删） |
+| 开放债 | C7 · e2e 严跑 · scripts-ops · preflight-env（**文档债 0**） |
+
+---
+
+**协作契约**: lint + test 必绿；e2e 默认不挡合（`team-workflow-v1`）。本仓库默认冷存、不是本地即生产；改 data 路径先问人。归档 DuckDB 不复制到演示。

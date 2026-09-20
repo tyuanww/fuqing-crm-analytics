@@ -1,0 +1,453 @@
+{
+  "pack_version": "crm-knowledge-offline/v1",
+  "layer": "code_snapshot",
+  "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+  "items": [
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.aus:code-overview-line-avg",
+      "concept_id": "concept.aus",
+      "layer": "code_snapshot",
+      "name": "旧概览 avg_order_value 明细行均",
+      "formula": "AVG(actual_amount) over order lines",
+      "unit": "money_per_line",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D001"
+      ],
+      "textbook_refs": [
+        "tb.03.aus"
+      ],
+      "findings": [
+        "M01"
+      ],
+      "code_path": "backend/services/metrics/overview.py",
+      "code_sha256": "91d370461b89e7ab47c8e7b33200b035a5b4ffb2e3f513827495f82f0699cc59",
+      "anchors": [
+        "_query_period",
+        "AVG(actual_amount) as avg_order_value"
+      ],
+      "lines": [
+        "40",
+        "194"
+      ],
+      "note": "不得称为已修复的客单价。保留为技术诊断值。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.aus:code-category-users",
+      "concept_id": "concept.aus",
+      "layer": "code_snapshot",
+      "name": "品类概览按人数的均额基础",
+      "formula": "total_gsv / COUNT(DISTINCT user_id)",
+      "unit": "money_per_person",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D001"
+      ],
+      "findings": [
+        "M01"
+      ],
+      "code_path": "backend/services/category_service/overview.py",
+      "code_sha256": "6205625fc25e15f914b26917d5f12031e7971b1b67f7ba8aff6f87c1fe1d9345",
+      "anchors": [
+        "COUNT(DISTINCT user_id) AS total_users"
+      ],
+      "lines": [
+        "290"
+      ],
+      "note": "人数分母基础存在，不等于目标 AUS 合同已落地或真实数据已对账。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.member_premium:code-overview-member-aov-over-store-line-avg",
+      "concept_id": "concept.member_premium",
+      "layer": "code_snapshot",
+      "name": "旧概览会员每单 / 全店行均",
+      "formula": "(member_amount / member_order_count) / avg_order_value",
+      "unit": "unspecified_ratio",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D002"
+      ],
+      "textbook_refs": [
+        "tb.16.premium"
+      ],
+      "findings": [
+        "M02"
+      ],
+      "code_path": "backend/services/metrics/overview.py",
+      "code_sha256": "91d370461b89e7ab47c8e7b33200b035a5b4ffb2e3f513827495f82f0699cc59",
+      "anchors": [
+        "member_premium = member_avg_order_value / current['avg_order_value']"
+      ],
+      "lines": [
+        "285",
+        "287"
+      ],
+      "note": "注释称 AUS，比较对象与粒度均与 D002 不同。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.gsv:code-calculations-exclude-is-refund",
+      "concept_id": "concept.gsv",
+      "layer": "code_snapshot",
+      "name": "semantic GSV 谓词排除全部 is_refund",
+      "formula": "is_goujinjin = FALSE AND order_status != '交易关闭' AND is_refund = FALSE",
+      "unit": "predicate",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D003"
+      ],
+      "findings": [
+        "M03"
+      ],
+      "code_path": "backend/semantic/calculations.py",
+      "code_sha256": "066156eccd03d584c644f0a777b94190502c773e102cf5d67c92a041a6d7b6e9",
+      "anchors": [
+        "GSV_PREDICATE"
+      ],
+      "lines": [
+        "39"
+      ],
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.gsv:code-competition-refunds-as-of",
+      "concept_id": "concept.gsv",
+      "layer": "code_snapshot",
+      "name": "competition 带日期退款扣额",
+      "formula": "refunds_as_of + iter_effective_orders; fallback to flag filter when no dated table",
+      "unit": "money",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D003",
+        "D006"
+      ],
+      "findings": [
+        "M03",
+        "M04",
+        "M10"
+      ],
+      "code_path": "backend/services/metrics/competition_compute.py",
+      "code_sha256": "ad085b5725e5f23e6f360b7bae147be066cb782dddc94e8648136347cda66cd5",
+      "anchors": [
+        "refunds_as_of",
+        "iter_effective_orders"
+      ],
+      "lines": [
+        "117",
+        "134"
+      ],
+      "note": "有日期退款时扣金额；无日期表时回退标志过滤。不能静默回退冒充按实际退款净额。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.sample_roi:code-sampling-service",
+      "concept_id": "concept.sample_window",
+      "layer": "code_snapshot",
+      "name": "旧派样 ROI 复购人数/金额",
+      "formula": "get_sampling_roi repurchase users/amount; denominator all sample users in window",
+      "unit": "mixed",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D009",
+        "D010",
+        "D011"
+      ],
+      "findings": [
+        "M18",
+        "M19",
+        "M20",
+        "M21"
+      ],
+      "code_path": "backend/services/sampling_service.py",
+      "code_sha256": "39e43a595f942ce473a680a2165029f4a712b114299e2621b5f9a5cafc3d09df",
+      "anchors": [
+        "get_sampling_roi",
+        "first_sample_received_at",
+        "first_sample_time=MIN(pay_time)"
+      ],
+      "lines": [
+        "237",
+        "289"
+      ],
+      "note": "不含投入/毛利/对照。窗口含次日 00:00 边界。未按数据截止排除未成熟。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.ltv:code-specified-day-next-day",
+      "concept_id": "concept.ltv",
+      "layer": "code_snapshot",
+      "name": "旧 LTV：指定日购买者次日起累计",
+      "formula": "cohort = buyers on specified date; accumulate GSV from next day for 90/180/365",
+      "unit": "money",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D012"
+      ],
+      "findings": [
+        "M24",
+        "M12"
+      ],
+      "code_path": "backend/services/lifetime_value_service.py",
+      "code_sha256": "e7f737ed008dae93d94dd70948c42c8cc31318ebfc14c0505d32dde58e7d79aa",
+      "anchors": [
+        "_cohort_user_ids",
+        "_pct_change",
+        "get_lifetime_value_summary"
+      ],
+      "lines": [
+        "63",
+        "80",
+        "121"
+      ],
+      "note": "不是默认新客终身利润。channel 只筛 cohort。previous=0 时 _pct_change 返回 0。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.uv:code-sum-daily-visitors",
+      "concept_id": "concept.uv",
+      "layer": "code_snapshot",
+      "name": "visitor_service SUM(visitors)",
+      "formula": "SUM(visitors) and SUM(new_members) across days",
+      "unit": "count",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D015"
+      ],
+      "findings": [
+        "M23"
+      ],
+      "code_path": "backend/services/visitor_service.py",
+      "code_sha256": "f2f8fe96903a759ea67dcd73887930aaa133a36065737aa461cbd3905e6cc936",
+      "anchors": [
+        "SUM(visitors)",
+        "get_visitor_summary"
+      ],
+      "lines": [
+        "24",
+        "55"
+      ],
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.basket:code-order-support",
+      "concept_id": "concept.basket",
+      "layer": "code_snapshot",
+      "name": "购物篮订单级 support/confidence/lift",
+      "formula": "distinct order_id associations",
+      "unit": "raw_ratio_0_1",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D008"
+      ],
+      "findings": [
+        "M15"
+      ],
+      "code_path": "backend/services/category_service/basket.py",
+      "code_sha256": "b3213780f29df1b67f5782fe75f35d4f3cb7a01d838464b4b252c018a9382a14",
+      "anchors": [
+        "_compute_market_basket"
+      ],
+      "lines": [
+        "54"
+      ],
+      "note": "不能直接冒充教材人数连带率。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.product_repurchase:code-standard-hist-join",
+      "concept_id": "concept.product_repurchase",
+      "layer": "code_snapshot",
+      "name": "品类 standard 回购历史集合 JOIN",
+      "formula": "historical cohort LEFT JOIN repurchase buyers",
+      "unit": "raw_ratio_0_1",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D008"
+      ],
+      "findings": [
+        "M17"
+      ],
+      "code_path": "backend/services/category_service/repurchase/standard.py",
+      "code_sha256": "952eca2c73063fd5ec0249b9154649609c6fedbd1c2f655769e2c305312c8bf4",
+      "anchors": [
+        "_run_category_repurchase_period"
+      ],
+      "lines": [
+        "30"
+      ],
+      "note": "已有历史集合限制，不能误报所有代码都错。仍不是已验证的 crm-metrics/v1 能力。",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.yoy:code-or-zero",
+      "concept_id": "concept.yoy",
+      "layer": "code_snapshot",
+      "name": "同比 None 被 or 0",
+      "formula": "yoy_absolute returns None when denominator invalid; overview uses or 0",
+      "unit": "raw_ratio_or_zero",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D018",
+        "D017"
+      ],
+      "findings": [
+        "M11",
+        "M12"
+      ],
+      "code_path": "backend/services/metrics/overview.py",
+      "code_sha256": "91d370461b89e7ab47c8e7b33200b035a5b4ffb2e3f513827495f82f0699cc59",
+      "anchors": [
+        "yoy_absolute(...) or 0"
+      ],
+      "lines": [
+        "301",
+        "316"
+      ],
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.rfm:code-thresholds-v1",
+      "concept_id": "concept.rfm",
+      "layer": "code_snapshot",
+      "name": "segments.py 固定 RFM 阈值",
+      "formula": "R=[30,90,180,365] days; F=[1,2,3,4]; M=[100,300,500,1000]",
+      "unit": "threshold_table",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D016"
+      ],
+      "findings": [
+        "M26"
+      ],
+      "code_path": "backend/semantic/segments.py",
+      "code_sha256": "25570eb641232299b71837001b1d9a1bb0bbfd831f0f508847fbfc1f9aed658a",
+      "anchors": [
+        "RFM_THRESHOLDS"
+      ],
+      "lines": [
+        "22"
+      ],
+      "rfm_threshold_version": "crm-rfm-thresholds/v1",
+      "verified_implementation": false
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "MetricDefinition",
+      "id": "metric.contract.member_premium-field",
+      "concept_id": "concept.member_premium",
+      "layer": "code_snapshot",
+      "name": "旧合同 member_premium 字段说明",
+      "formula": "OverviewMetrics.member_premium description: 会员溢价 %（会员AUS/全店AUS）",
+      "unit": "percent_in_description_but_service_emits_ratio",
+      "definition_review_status": "code_snapshot_only",
+      "implementation_status": "code_snapshot",
+      "decision_ids": [
+        "D002",
+        "D017"
+      ],
+      "findings": [
+        "M02",
+        "M12"
+      ],
+      "code_path": "backend/contracts/metrics.py",
+      "code_sha256": "8c49dbda46d9e6d8b0a9e09b11e4daaa279933d35556a086f40edfb778f696a8",
+      "anchors": [
+        "member_premium"
+      ],
+      "lines": [
+        "34"
+      ],
+      "verified_implementation": false
+    }
+  ]
+}

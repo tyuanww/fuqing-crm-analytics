@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fuqing-crm-analytics"
+version = "2.0.0"
+description = "芙清 CRM 客户分析系统"
+requires-python = ">=3.13"
+# 运行时依赖 SSOT 仍以 requirements.txt + requirements-lock.txt 为准（PR5）。
+# 全量迁移 dependencies → uv.lock 为后续工作，避免本 PR 大爆炸改动。
+
+[tool.uv]
+python-preference = "only-managed"
+
+[tool.ruff]
+# 2026-06-02 scraper/ 代码治理完成：从 DMP_test_package 物理合并过来的 19 个 pre-existing
+# lint 错误（E402/F401/F541/F811/F841）已全部修复（fix/scraper-lint-cleanup 分支）。
+# scraper/ 重新纳入顶层 ruff check，pyproject.toml 不再需要单独 exclude。
+exclude = ["scripts/archive/*"]
+
+[tool.ruff.lint]
+# ruff 0.16 defaulted to 413 rules (was 59). Keep the 0.15 set so bumping
+# the pin does not rewrite backend/.
+select = ["E4", "E7", "E9", "F"]
+
+[tool.ruff.lint.per-file-ignores]
+# health.py: intentional import-after-logger for fail-fast API key check
+"backend/routers/health.py" = ["E402"]
+# config.py: datetime import below default-date utility section
+"backend/config.py" = ["E402"]
+# main.py: CORS config imports and router registration imports
+"backend/main.py" = ["E402"]
+# ETL scripts: sys.path.insert must come before project imports
+"scripts/etl/*.py" = ["E402"]
+# Test files: sys.path.insert must come before project imports
+"tests/*.py" = ["E402"]
+"backend/tests/*.py" = ["E402"]
+
+# ── pytest 配置 ───────────────────────────────────────────────
+# Sprint 8 P1 + P3 折中: testpaths = ["backend/tests"] 强制本地默认对齐 CI,
+# ./tests/ 16 legacy 不再默认扫 (跟 Sprint 3 P1-2 一致), 避免本地 ./tests/
+# 撞生产 DuckDB 锁。显式 `pytest ./tests/` 仍可用。
+[tool.pytest.ini_options]
+testpaths = ["backend/tests"]
+addopts = ["-ra", "--strict-markers", "--disable-warnings"]
+markers = [
+    "slow: marks tests as slow (DuckDB integration, >10s per test). Use '-m not slow' to skip.",
+]

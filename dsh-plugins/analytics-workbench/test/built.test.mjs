@@ -1,0 +1,135 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import { readFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { dirname, resolve, join } from 'node:path';
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? resolve(root, '../../.context/dsh-b0/upstream'));
+
+test('built Host root requires isolated capabilities; tool fails closed without native context', async () => {
+  const ui = await import(pathToFileURL(join(root, 'lib/index.js')).href);
+  assert.throws(() => ui.apply({}), /explicit isolated capabilities/);
+  assert.deepEqual(ui.inject, ['agents', 'sessions', 'sessionController']);
+  const host = await import(pathToFileURL(join(root, 'lib/tool.js')).href);
+  const registered = [];
+  host.apply({ tools: { register: tool => { registered.push(tool); } } });
+  assert.equal(registered.length, 1);
+  const [tool] = registered;
+  assert.equal(tool.name, 'analytics_b0_query');
+  const args = { query: 'channel_repeat_rate' };
+  await assert.rejects(tool.execute(args, { signal: new AbortController().signal }), /no bound execution context/);
+  await assert.rejects(tool.execute({ query: 'sql' }, { signal: new AbortController().signal }));
+});
+
+test('built browser factory requires only platform modules and registers shared-root entries', async () => {
+  const webRequire = createRequire(join(upstream, 'apps/web/package.json'));
+  const stores = await import(pathToFileURL(join(upstream, 'packages/client/store/lib/index.js')).href);
+  const seed = new Map([
+    ['react', webRequire('react')],
+    ['react-dom', webRequire('react-dom')],
+    ['react/jsx-runtime', webRequire('react/jsx-runtime')],
+    ['@deepseek-ai/dsh-client-store', stores],
+  ]);
+  let factoryRow;
+  const browser = {
+    localStorage: { getItem: () => null },
+    __ModuleLoader__: { load: row => { factoryRow = row; } },
+  };
+  const code = await readFile(join(root, 'lib/client.js'), 'utf8');
+  vm.runInNewContext(code, { AbortController, window: browser, __SHINE_QUERY__: true, __SHINE_BOARD__: true }, { filename: 'analytics-b0-client.js', timeout: 1000 });
+  assert.equal(factoryRow.id, '@shine-mage/dsh-analytics-workbench-b0');
+  const client = factoryRow.factory(spec => {
+    assert.ok(seed.has(spec), `unexpected browser require: ${spec}`);
+    return seed.get(spec);
+  });
+  const entries = [];
+  const effects = [], opened = [], selected = [];
+  const primary = 'session-b0-synthetic-primary';
+  let snapshot = { phase: 'pending', ids: [primary], byId: { [primary]: { id: primary, retainedBy: {} } } };
+  const listeners = new Set();
+  const notify = () => { for (const listener of [...listeners]) listener(); };
+  let held;
+  client.apply({
+    effect: factory => { effects.push(factory()); },
+    theme: { overrideTokens: () => () => {} },
+    layout: { selectPanel: id => { selected.push(id); } },
+    sessions: {
+      list: { getSnapshot: () => snapshot, subscribe: listener => { listeners.add(listener); return () => listeners.delete(listener); } },
+      retain(id) {
+        opened.push(id);
+        snapshot = { ...snapshot, byId: { ...snapshot.byId, [id]: { id, retainedBy: { mainView: 1 } } } };
+        held = { sessionId: id, release() {
+          snapshot = { ...snapshot, byId: { ...snapshot.byId, [id]: { id, retainedBy: {} } } };
+        } };
+        return held;
+      },
+      create: () => assert.fail('compiled client attempted session/create'),
+    },
+    slots: {
+    inject: (_name, callback) => callback(),
+    register: (options, component) => { entries.push({ options, component }); return () => {}; },
+  } });
+  assert.deepEqual(opened, []);
+  snapshot = { ...snapshot, phase: 'ready' };
+  notify();
+  notify();
+  assert.deepEqual(opened, [primary]);
+  const names = entries.map(row => row.options.name);
+  assert.ok(names.includes('conversation.hero.brand.mark'));
+  assert.ok(names.includes('sidebar.panellist'));
+  assert.equal(entries.some(row => row.options.name === 'conversation.view'), false);
+  const login = entries.find(row => row.options.id === 'shine-mage.account.login');
+  const overlay = entries.find(row => row.options.id === 'shine-mage.analytics-b0.overlay');
+  const dock = entries.find(row => row.options.id === 'shine-mage.analytics-b0.generate-cockpit');
+  const panel = entries.find(row => row.options.name === 'sidebar.panellist');
+  const main = entries.find(row => row.options.name === 'main');
+  assert.equal(entries[0].options.priority, -10);
+  assert.equal(entries[1].options.priority, -10);
+  const selection = overlay.options.inject();
+  selection.detachSelection();
+  selection.restoreSelection();
+  assert.equal(snapshot.byId[primary].retainedBy.mainView, 1);
+  assert.ok(login.options.store);
+  assert.equal(dock.options.store, undefined);
+  assert.ok(dock.options.inject().board);
+  const seeded = dock.options.inject().board.getSnapshot();
+  assert.equal(seeded.boardSpec.board_id, 'board_demo_channel_gsv_2026_08');
+  assert.equal(seeded.boardFacts.demo_live.current_gsv, 180);
+  assert.equal(seeded.boardError, '');
+  assert.equal(panel.options.id, 'cockpit');
+  assert.equal(main.options.key, 'cockpit');
+  assert.equal(dock.options.inject().openCockpit(), true);
+  assert.deepEqual(selected, ['cockpit']);
+  const state = overlay.options.store.create();
+  assert.equal(state.getSnapshot().open, false);
+  state.actions.open();
+  assert.equal(state.getSnapshot().open, true);
+  assert.equal(state.getSnapshot().intent, 'view');
+  state.actions.close();
+  state.actions.openGenerate();
+  assert.equal(state.getSnapshot().open, true);
+  assert.equal(state.getSnapshot().intent, 'generate');
+  state.actions.close();
+  state.actions.open();
+  state.actions.edit('编译产物标题');
+  state.actions.preview();
+  state.actions.requestClose();
+  assert.equal(state.getSnapshot().confirmClose, true);
+  assert.equal(state.getSnapshot().open, true);
+  state.actions.keepEditing();
+  assert.equal(state.getSnapshot().confirmClose, false);
+  state.actions.commit('仅 UI 测试');
+  assert.equal(state.getSnapshot().editor.title, '编译产物标题');
+  state.actions.close();
+  assert.equal(state.getSnapshot().open, false);
+  state.actions.open();
+  state.actions.edit('不应保存');
+  state.actions.discardAndClose();
+  assert.equal(state.getSnapshot().editor.draft, '编译产物标题');
+  assert.equal(state.getSnapshot().open, false);
+  for (const dispose of effects) dispose();
+  assert.equal(listeners.size, 0);
+});

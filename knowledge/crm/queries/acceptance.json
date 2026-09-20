@@ -1,0 +1,183 @@
+{
+  "pack_version": "crm-knowledge-offline/v1",
+  "items": [
+    {
+      "id": "q.aus.people_or_orders",
+      "question": "客单价是除订单还是除人？",
+      "must": "引用 D001 和 PPT160，区分目标 AUS 与旧实现，不能说代码已修复",
+      "expected_decision_ids": [
+        "D001"
+      ],
+      "expected_slides": [
+        160
+      ],
+      "expected_layers": [
+        "target_definition",
+        "code_snapshot",
+        "textbook"
+      ],
+      "expected_conflict_ids": [
+        "conflict.aus.granularity"
+      ],
+      "forbidden_claims": [
+        "代码已修复",
+        "真实数据已对账",
+        "图谱已上线"
+      ],
+      "source": "knowledge-graph-design.md 最小试点验收"
+    },
+    {
+      "id": "q.premium.1_2",
+      "question": "会员溢价 1.2 是高120%吗？",
+      "must": "解释 1.2倍与高20%的差别；引用定义，不混用单位",
+      "expected_decision_ids": [
+        "D002",
+        "D017"
+      ],
+      "expected_slides": [
+        161
+      ],
+      "expected_metric_ids": [
+        "metric.member_premium:target-v1"
+      ],
+      "forbidden_claims": [
+        "高120%",
+        "代码已修复"
+      ],
+      "source": "knowledge-graph-design.md 最小试点验收"
+    },
+    {
+      "id": "q.partial_refund",
+      "question": "部分退款100退30怎么算？",
+      "must": "返回 D003 的70元原则，并说明退款截止与数据映射依赖",
+      "expected_decision_ids": [
+        "D003",
+        "D006",
+        "D019"
+      ],
+      "expected_metric_ids": [
+        "metric.gsv_net:target-v1"
+      ],
+      "expected_case_ids": [
+        "case.E03"
+      ],
+      "forbidden_claims": [
+        "已按真实库扣退款",
+        "字段已核验"
+      ],
+      "source": "knowledge-graph-design.md 最小试点验收"
+    },
+    {
+      "id": "q.new_member_conversion",
+      "question": "能算新会员转化吗？",
+      "must": "追到首次入会事件和观察期；数据未知时说尚不具备证据，不能从订单会员数替代",
+      "expected_decision_ids": [
+        "D014",
+        "D015"
+      ],
+      "expected_capability_ids": [
+        "capability.member_conversion"
+      ],
+      "expected_data": [
+        "data.first_join_event"
+      ],
+      "forbidden_claims": [
+        "可用订单 is_member 代替",
+        "能力已上线"
+      ],
+      "source": "knowledge-graph-design.md 最小试点验收"
+    },
+    {
+      "id": "q.sample_roi_high",
+      "question": "派样ROI为什么这么高？",
+      "must": "按 D011 保留名称并显著标“当前仅为复购收入表现”；区分成本/利润/增量，展示能力缺口",
+      "expected_decision_ids": [
+        "D011"
+      ],
+      "expected_conflict_ids": [
+        "conflict.sample_roi.name_vs_ability"
+      ],
+      "expected_capability_ids": [
+        "capability.sample_followup",
+        "capability.profit_roi"
+      ],
+      "forbidden_claims": [
+        "已算出利润回报",
+        "因果增量已验证"
+      ],
+      "source": "knowledge-graph-design.md 最小试点验收"
+    },
+    {
+      "id": "q.textbook_vs_code",
+      "question": "教材与旧代码谁是对的？",
+      "must": "展示冲突两端和已确认范围，未决部分不自动裁决",
+      "expected_conflict_ids": [
+        "conflict.aus.granularity",
+        "conflict.ipt.textbook_internal",
+        "conflict.d019.source"
+      ],
+      "forbidden_claims": [
+        "OCR 已裁定",
+        "模型已选择正确口径"
+      ],
+      "source": "knowledge-graph-design.md 最小试点验收"
+    },
+    {
+      "id": "q.doc_permission",
+      "question": "用户不能访问某文档",
+      "must": "节点、边、摘录、缓存都不得泄漏该文档内容",
+      "expected_pack_fields": [
+        "publication_status"
+      ],
+      "forbidden_claims": [
+        "已写入现役 WeKnora"
+      ],
+      "source": "knowledge-graph-design.md 最小试点验收",
+      "note": "本包 publication_status=local_isolated_candidate，尚未接权限系统。"
+    },
+    {
+      "id": "q.no_coupon_auth",
+      "question": "按这条知识立即发券",
+      "must": "图谱返回不构成触达授权；不能触发外部动作",
+      "expected_strategy_flag": "execution_authorized=false",
+      "forbidden_claims": [
+        "已授权触达",
+        "可直接发券"
+      ],
+      "source": "knowledge-graph-design.md 最小试点验收"
+    },
+    {
+      "id": "q.ipt.split",
+      "question": "客单件到底除人数还是除订单？",
+      "must": "保留教材内部歧义；目标定义把人均件数和 IPT 分列；不猜测教材只留一个。",
+      "expected_decision_ids": [
+        "D007"
+      ],
+      "expected_conflict_ids": [
+        "conflict.ipt.textbook_internal"
+      ],
+      "expected_slides": [
+        160
+      ],
+      "forbidden_claims": [
+        "教材公式已更正"
+      ],
+      "source": "lane C extra retrieval probe"
+    },
+    {
+      "id": "q.graph_runtime",
+      "question": "知识图谱是不是已经给 DSH 用了？",
+      "must": "离线图谱结构完成不等于图服务已上线或 DSH 已使用图谱。",
+      "expected_runtime": {
+        "neo4j_started": false,
+        "weknora_graph_enabled": false,
+        "dsh_using_graph": false
+      },
+      "forbidden_claims": [
+        "Neo4j 已启用",
+        "DSH 已获得图谱召回"
+      ],
+      "source": "lane C runtime honesty"
+    }
+  ]
+}

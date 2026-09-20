@@ -1,0 +1,820 @@
+"""
+Sample CRM 客户分析系统 - FastAPI 后端
+
+本文件仅负责：
+- app 初始化
+- CORS 配置
+- 全局中间件（访问日志、认证）
+- 全局异常处理器
+- 路由注册
+
+所有业务 API 端点已拆分到 backend/routers/ 下的独立模块。
+"""
+
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, Response
+from starlette.middleware.trustedhost import TrustedHostMiddleware
+from contextlib import asynccontextmanager
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Optional
+import os
+import time
+import logging
+
+from backend.services.exceptions import ServiceError, ValidationError, NotFoundError
+from fastapi.exceptions import RequestValidationError
+from fastapi.exception_handlers import request_validation_exception_handler
+
+from backend.middleware.query_router import (
+    QueryRouterMiddleware,
+    competition_error_response,
+    new_request_id,
+    overlay_live_capabilities,
+)
+from backend.services.query_metrics import render_prometheus
+from backend.config import DUCKDB_PATH  # Sprint 203 R3: db_size endpoint
+
+logger = logging.getLogger(__name__)
+
+# PR3: 启动路径 umask 077 — 新建文件默认仅属主可读写
+try:
+    os.umask(0o077)
+except Exception:  # noqa: BLE001
+    pass
+
+
+def _asgi_path(request: Request) -> str:
+    """安全判断用 path：取 ASGI scope['path']，禁止用 request.url.path。
+
+    Starlette <1.0.1 存在 request.url.path 与路由 path 不一致时可被绕过的问题；
+    认证/限流白名单必须以 scope path 为准（Host 校验不能替代该修复）。
+    """
+    path = request.scope.get("path")
+    if isinstance(path, str):
+        return path
+    return ""
+
+
+def _c0_error_path(path: str) -> bool:
+    return (
+        path.startswith("/api/v1/audience")
+        or path.startswith("/api/v1/analytics/competition")
+        or path == "/api/v1/analytics/catalog"
+    )
+
+
+def validate_startup_db() -> None:
+    """Sprint 61 P2 治本: 启动时校验 DuckDB 数据可用性 (fail-fast).
+
+    根因: uvicorn PID 29564 接错 798KB 空 schema DB, 健康检查绿 + 200 OK + 全 0 数据
+    ("静默失真" 模式, 跟 Sprint 60+ 4 个 500 error 同类).
+
+    校验项:
+    - DB 文件存在
+    - orders 表存在
+    - orders 行数 > 0
+    - max(pay_time) 新鲜度 (默认 30 天)
+
+    模式 (FQ_DB_MODE):
+    - production (默认): 任一校验失败 → raise RuntimeError 拒绝启动
+    - schema_test: 跳过数据量检查, 只 WARN log (CI e2e / schema_test 用)
+    - 其他值: 默认 production 行为
+    """
+    from backend.config import DUCKDB_PATH, DB_MODE, DB_FRESHNESS_DAYS
+    import duckdb
+
+    db_realpath = Path(DUCKDB_PATH).resolve()
+    db_size_bytes = db_realpath.stat().st_size if db_realpath.exists() else 0
+    db_size_gb = db_size_bytes / (1024 ** 3)
+
+    logger.info(
+        "[Sprint 61 startup-check] DB realpath=%s size=%.3f GB (%d bytes) mode=%s freshness_days=%d",
+        db_realpath, db_size_gb, db_size_bytes, DB_MODE, DB_FRESHNESS_DAYS,
+    )
+
+    # 文件不存在 → 直接拒绝 (任何模式都拒绝, 跟读不到表同根因)
+    if not db_realpath.exists():
+        msg = f"Startup validation failed: DuckDB file not found at {db_realpath}"
+        logger.error("[Sprint 61 startup-check] %s", msg)
+        raise RuntimeError(msg)
+
+    # 用临时 read_only 连接校验 (避免污染全局单例的 memory_limit/config)
+    try:
+        conn = duckdb.connect(str(db_realpath), read_only=True)
+        archive = os.environ.get("FQ_ARCHIVE_DUCKDB", "").strip()
+        if archive:
+            from backend.services.dual_conn import quote_duckdb_literal
+
+            conn.execute(
+                f"ATTACH IF NOT EXISTS '{quote_duckdb_literal(archive)}' AS src (READ_ONLY)"
+            )
+    except Exception as e:  # noqa: BLE001
+        msg = f"Startup validation failed: cannot open DuckDB at {db_realpath}: {e}"
+        logger.error("[Sprint 61 startup-check] %s", msg)
+        raise RuntimeError(msg) from e
+
+    try:
+        # orders 表存在性
+        try:
+            orders_count = conn.execute("SELECT COUNT(*) FROM orders").fetchone()[0]
+        except duckdb.CatalogException as e:
+            orders_count = 0
+            logger.warning("[Sprint 61 startup-check] orders 表不存在: %s", e)
+
+        # max(pay_time) 新鲜度 (pay_time 字段缺失时容错)
+        max_pay_time = None
+        try:
+            row = conn.execute("SELECT MAX(pay_time) FROM orders").fetchone()
+            if row and row[0] is not None:
+                max_pay_time = row[0]
+        except duckdb.Error as e:
+            logger.warning("[Sprint 61 startup-check] pay_time 字段查询失败: %s", e)
+
+        logger.info(
+            "[Sprint 61 startup-check] orders.count=%s max_pay_time=%s",
+            orders_count, max_pay_time,
+        )
+
+        # schema_test 模式: 跳过数据量 + 新鲜度校验, 只 WARN
+        if DB_MODE == "schema_test":
+            logger.warning(
+                "[Sprint 61 startup-check] schema_test mode → 跳过数据量/新鲜度校验 "
+                "(orders.count=%s max_pay_time=%s)",
+                orders_count, max_pay_time,
+            )
+            return
+
+        # production 模式 (含未知 mode 默认): fail-fast
+        if orders_count == 0:
+            msg = (
+                f"Startup validation failed: orders 表为空 (count=0) at {db_realpath}. "
+                f"可能是 DUCKDB_PATH 接错空 schema DB. Set FQ_DB_MODE=schema_test for CI e2e."
+            )
+            logger.error("[Sprint 61 startup-check] %s", msg)
+            raise RuntimeError(msg)
+
+        if max_pay_time is None:
+            msg = (
+                f"Startup validation failed: orders.max(pay_time) 为 NULL at {db_realpath}. "
+                f"可能是 DUCKDB_PATH 接错空 schema DB. Set FQ_DB_MODE=schema_test for CI e2e."
+            )
+            logger.error("[Sprint 61 startup-check] %s", msg)
+            raise RuntimeError(msg)
+
+        # 新鲜度: max(pay_time) 距今超过 DB_FRESHNESS_DAYS 天 → 拒绝启动
+        now = datetime.now()
+        # max_pay_time 可能是 datetime / date / str, 统一转 datetime 比较
+        if isinstance(max_pay_time, datetime):
+            mpt = max_pay_time
+        elif hasattr(max_pay_time, "to_pydatetime"):  # pandas Timestamp
+            mpt = max_pay_time.to_pydatetime()
+        elif hasattr(max_pay_time, "year"):  # date
+            mpt = datetime(max_pay_time.year, max_pay_time.month, max_pay_time.day)
+        else:
+            logger.warning("[Sprint 61 startup-check] max_pay_time 类型未知: %s, 跳过新鲜度校验", type(max_pay_time))
+            return
+
+        age = now - mpt
+        if age > timedelta(days=DB_FRESHNESS_DAYS):
+            msg = (
+                f"Startup validation failed: orders.max(pay_time)={mpt} 距今 {age.days} 天 "
+                f"> {DB_FRESHNESS_DAYS} 天阈值. 可能是 DUCKDB_PATH 接错过期 DB. "
+                f"Set FQ_DB_MODE=schema_test for CI e2e."
+            )
+            logger.error("[Sprint 61 startup-check] %s", msg)
+            raise RuntimeError(msg)
+    finally:
+        try:
+            conn.close()
+        except Exception:  # noqa: BLE001
+            pass
+
+    # L4.65.1 永久规则化 (Sprint 205+ PC2 启动 1.3GB 内存罪魁治本):
+    # 删除 L4.65 配套的 bdc.get_connection() 主动创建写单例 (line 151-159 删 9 行)
+    # 真根因: 启动时主动 duckdb.connect(122GB 业务库) 加载 1.3GB 缓存元数据
+    # 治本后: 启动 1.3GB → 147MB (-89%, PC2 验证)
+    # 配套永久规则链:
+    # - L4.65 HTTP 上下文 read_only (治 RFM 500 错误, commit 4285a40)
+    # - L4.66 dual_conn config 严格一致 (治 RFM 500 真根因, commit f08aebb)
+    # - L4.67 业务库 + cache 库分离 (cache.py 走 get_cache_connection 单例, commit d608c4e)
+    # L4.65 这 5 行 (实际 9 行含注释 + import) 是"预防性创建单例", L4.66 + L4.67
+    # 治根后不再需要, 删了 0 副作用 (cache.py 已走 cache 库单例, 跟 _WRITE_CONN 0 关联)
+
+
+# ─────────────────────────────────────────────────────────────
+# 应用生命周期
+# ─────────────────────────────────────────────────────────────
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    if os.environ.get("FQ_LOCAL_DEMO_NO_LOGIN") == "1":
+        from backend.services.mission_service import MissionService
+        # Fail closed on missing/invalid synthetic data. No legacy DuckDB,
+        # cache warmup, auth sessions or production workers are needed here.
+        MissionService.from_environment()
+        logger.info("Local synthetic Mission demo ready; legacy CRM startup skipped")
+        yield
+        return
+    # Sprint 61 P2 治本: 启动校验 (fail-fast, 阻断 DUCKDB_PATH 接错空/过期 DB)
+    validate_startup_db()
+    # 启动时启动内存监控守护线程
+    from backend.db.memory_monitor import start_memory_watchdog, check_memory
+    start_memory_watchdog(interval=5)
+    check_memory(label="应用启动")
+    # W5 v0.4.13: 初始化 RFM cache 表 + 同步 manifest version
+    # (后续每次 cache.get() 内部 _ManifestTracker 还会做变化检测)
+    try:
+        from backend.services.rfm.cache import RfmQueryCache
+        RfmQueryCache().ensure_table()
+        logger.info("W5 RFM cache 表已就绪")
+    except Exception as e:  # noqa: BLE001
+        logger.warning("W5 RFM cache 启动失败 (不阻塞服务): %s", e)
+    # Sprint 18 #123: 启动 hook — 跨进程 manifest version 对齐
+    # 改 ratio/契约后, 重启 uvicorn 自动 invalidate W5 cache, 不再需要手动
+    try:
+        from backend.services.rfm.cache import check_manifest_version_and_invalidate
+        check_manifest_version_and_invalidate()
+    except Exception as e:  # noqa: BLE001
+        logger.warning("W5 startup hook 启动失败 (不阻塞服务): %s", e)
+    try:
+        from backend.db.connection import close_connection
+        close_connection()
+        logger.info("Sprint 201 R1: startup DuckDB write lock released before serving read traffic")
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Sprint 201 R1: startup DuckDB 连接释放失败 (不阻塞服务): %s", e)
+    # L4.85.6 方案 D: 启动 auth token evictor background task (跟 L4.72 RFM cache precompute 1:1 stable 模式)
+    # 治本 Bug #2: A Cmd+Q 退出浏览器 → backend ACTIVE_TOKENS 仍有 A token → B login 409
+    import asyncio
+    from backend.services.auth_token_evictor import evict_idle_tokens_periodically
+    auth_evictor_stop = asyncio.Event()
+    # 每个 lifespan 实例必须只 await 自己所在 event loop 创建的 task。
+    # 并发 TestClient 会在同一个 FastAPI app 上启动多个 loop；写入 application.state
+    # 会让后启动的实例覆盖前一个 task，进而在关闭时跨 loop await 并报 RuntimeError。
+    auth_evictor_task = asyncio.create_task(
+        evict_idle_tokens_periodically(auth_evictor_stop)
+    )
+    logger.info("L4.85.6 auth token evictor background task 已启动")
+    try:
+        from backend.services.health.rfm_analysis.prewarm import maybe_start_prewarm_thread
+        maybe_start_prewarm_thread()
+    except Exception as e:  # noqa: BLE001
+        logger.warning("RFM prewarm thread failed to start (不阻塞服务): %s", e)
+    yield
+    # 关闭时停止内存监控 + background task + 释放全局 DuckDB 连接
+    from backend.db.memory_monitor import stop_memory_watchdog
+    from backend.db.connection import close_connection
+    auth_evictor_stop.set()
+    try:
+        await asyncio.wait_for(auth_evictor_task, timeout=5.0)
+    except asyncio.TimeoutError:
+        auth_evictor_task.cancel()
+    stop_memory_watchdog()
+    close_connection()
+
+
+# ─────────────────────────────────────────────────────────────
+# App 初始化
+# ─────────────────────────────────────────────────────────────
+app = FastAPI(
+    title="Sample CRM 客户分析系统 API",
+    description="提供核心指标、RFM、人群流转等数据 API",
+    version="1.0.0",
+    lifespan=lifespan,
+)
+
+# ─────────────────────────────────────────────────────────────
+# CORS 配置
+# ─────────────────────────────────────────────────────────────
+import os
+_DEFAULT_ORIGINS = "http://localhost:5173"
+_CORS_ORIGINS = os.environ.get("CORS_ORIGINS", _DEFAULT_ORIGINS).split(",")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[o.strip() for o in _CORS_ORIGINS if o.strip()],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "X-Login-Claim"],
+)
+app.add_middleware(QueryRouterMiddleware)
+
+# 严格 Host 校验（与 Starlette 升级互补，不能替代 scope path 修复）
+# ALLOWED_HOSTS: 逗号分隔；默认本机 + TestClient("testserver")。
+# 设为 * 可关闭（仅应急/兼容，不推荐）。
+_ALLOWED_HOSTS_RAW = os.environ.get(
+    "ALLOWED_HOSTS",
+    "localhost,127.0.0.1,testserver,[::1]",
+).strip()
+if _ALLOWED_HOSTS_RAW and _ALLOWED_HOSTS_RAW != "*":
+    _allowed_hosts = [h.strip() for h in _ALLOWED_HOSTS_RAW.split(",") if h.strip()]
+    if _allowed_hosts:
+        app.add_middleware(TrustedHostMiddleware, allowed_hosts=_allowed_hosts)
+
+# ─────────────────────────────────────────────────────────────
+# 安全响应头中间件
+# ─────────────────────────────────────────────────────────────
+# CSP 已强制。内联脚本已清除（ECharts tooltip 无 onclick）。
+# object-src none; base-uri self; frame-ancestors none 为硬要求。
+# style-src 含 'unsafe-inline'（Naive UI / Vue 内联样式）；script-src 仅 'self'。
+_CONTENT_SECURITY_POLICY = (
+    "default-src 'self'; "
+    "script-src 'self'; "
+    "style-src 'self' 'unsafe-inline'; "
+    "img-src 'self' data: blob:; "
+    "font-src 'self' data:; "
+    "connect-src 'self'; "
+    "object-src 'none'; "
+    "base-uri 'self'; "
+    "frame-ancestors 'none'; "
+    "form-action 'self'"
+)
+
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    # 强制 CSP（样式仍允许 'unsafe-inline' 以兼容 Naive UI / 图表内联 style）
+    response.headers["Content-Security-Policy"] = _CONTENT_SECURITY_POLICY
+    return response
+
+
+# ─────────────────────────────────────────────────────────────
+# Rate Limit 中间件 (Sprint 200 R1 v2.1, 跟 L4.36 友好错误 1:1)
+#
+# 真因: 业务组持续取数 → uvicorn 一直处于下线状态 (Sprint 184 L4.38 DuckDB flock 锁死)
+# 治本: 每用户每分钟 60 req 限流, 超限返 429 + Retry-After 头. 跟 L4.36 graceful retry 3 次配套.
+# 配套: Codex consult 6 补强 (AST allowlist + DuckDB 安全配置 + query worker) 后续 sprint 实施.
+# Sprint 201 R1+ R2 (L4.50 candidate): 改成 per-request 读 env, 允许 conftest.py 跨 sprint stable
+# 跨 test 改 RATE_LIMIT_PER_MINUTE (跟 test_rate_limit_sprint200.py module-scope setdefault 1:1).
+# ─────────────────────────────────────────────────────────────
+import os as _rl_os  # 别名避免跟外层 os 冲突
+_RATE_LIMIT_DEFAULT = 60  # production default
+# module-scope 读 1 次 (跟之前 sprint stable 1:1), 但 middleware 内 per-request 重读
+_RATE_LIMIT_PER_MINUTE = int(_rl_os.environ.get("RATE_LIMIT_PER_MINUTE", str(_RATE_LIMIT_DEFAULT)))
+_RATE_LIMIT_WINDOW = 60  # seconds
+_rate_limit_buckets: dict[str, list[float]] = {}  # {user_id: [timestamp, ...]}
+
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    # 只 bypass 登录接口 (防止登录失败重试触发 429), 其他 auth/me / auth/refresh / auth/logout 都要限流
+    # P0: 安全白名单必须用 ASGI scope path，禁止 request.url.path
+    path = _asgi_path(request)
+    if (
+        path == "/api/v1/health"
+        or path == "/api/v1/auth/login"
+        or path == "/api/v1/auth/refresh"
+        or path.startswith("/docs")
+        or path.startswith("/redoc")
+        or path == "/openapi.json"
+    ):
+        return await call_next(request)
+    if request.method == "OPTIONS":
+        return await call_next(request)
+
+    # 提取 user_id (从 Authorization bearer token 推, 简化为 client_ip fallback)
+    user_id = _extract_user_id_from_request(request)
+    if user_id is None:
+        user_id = f"ip:{request.client.host if request.client else 'unknown'}"
+
+    # 滑动窗口 rate limit
+    now = time.time()
+    # Sprint 201 R1+ R2 (L4.50 candidate): per-request 重读 env, 跟 test_rate_limit_sprint200.py setdefault 1:1
+    rate_limit_per_minute = int(_rl_os.environ.get("RATE_LIMIT_PER_MINUTE", str(_RATE_LIMIT_DEFAULT)))
+    bucket = _rate_limit_buckets.setdefault(user_id, [])
+    # 清除窗口外的请求
+    bucket[:] = [t for t in bucket if now - t < _RATE_LIMIT_WINDOW]
+
+    if len(bucket) >= rate_limit_per_minute:
+        # L4.36 友好错误: 返 429 + Retry-After 头
+        if _c0_error_path(path):
+            response = competition_error_response(
+                http_status=429,
+                code="RATE_LIMITED",
+                message=(
+                    f"Rate limit exceeded ({rate_limit_per_minute} req/min). "
+                    "Retry in 60s. (L4.36 graceful retry, Sprint 200 R1 v2.1)"
+                ),
+                request_id=new_request_id(),
+                retryable=True,
+                retry_after=_RATE_LIMIT_WINDOW,
+                doc_ref="docs/hackathon/COMPETITION-TEST-PLAN-2026-09-09.md#T08",
+            )
+        else:
+            response = JSONResponse(
+                status_code=429,
+                content={
+                    "detail": f"Rate limit exceeded ({rate_limit_per_minute} req/min). "
+                              "Retry in 60s. (L4.36 graceful retry, Sprint 200 R1 v2.1)",
+                    "retry_after_seconds": _RATE_LIMIT_WINDOW,
+                    "user_id": user_id,
+                },
+            )
+        response.headers["Retry-After"] = str(_RATE_LIMIT_WINDOW)
+        response.headers["X-RateLimit-Limit"] = str(rate_limit_per_minute)
+        response.headers["X-RateLimit-Remaining"] = "0"
+        _access_logger.warning(
+            "Rate limit triggered",
+            extra={
+                "user_id": user_id,
+                "path": path,
+                "method": request.method,
+                "current_count": len(bucket),
+                "limit": rate_limit_per_minute,
+            },
+        )
+        return response
+
+    bucket.append(now)
+    response = await call_next(request)
+    response.headers["X-RateLimit-Limit"] = str(rate_limit_per_minute)
+    response.headers["X-RateLimit-Remaining"] = str(rate_limit_per_minute - len(bucket))
+    return response
+
+
+def _extract_user_id_from_request(request: Request) -> Optional[str]:
+    """
+    从 Authorization Bearer token 提取 user_id (跟 auth_middleware._verify_token 1:1 stable).
+    有效随机 Bearer token → 对应已认证 username
+    失败返 None (rate limit fallback to client_ip)
+
+    跟 auth_middleware 1:1: 用 _verify_token 校验 token 有效性, 有效再解析 user_id.
+    """
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
+        return None
+    token = auth[7:]
+    # 延迟导入避免循环依赖 (跟 auth_middleware 1:1)
+    from backend.routers.auth import _verify_token
+    user_info = _verify_token(token)
+    if user_info is None:
+        return None
+    # user_info 是 dict {"username": ..., "role": ...} 或 str (跟 Sprint 195 R1 兼容)
+    if isinstance(user_info, dict):
+        return user_info.get("username", "unknown")
+    if isinstance(user_info, tuple):
+        return user_info[0] if user_info else "unknown"
+    return str(user_info)
+
+# ─────────────────────────────────────────────────────────────
+# 结构化访问日志中间件
+# ─────────────────────────────────────────────────────────────
+_access_logger = logging.getLogger("access")
+
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    duration_ms = (time.time() - start_time) * 1000
+    # P0: 访问日志 path 与认证/限流同源 (scope path)，避免安全审计路径漂移
+    _access_logger.info(
+        "API request",
+        extra={
+            "method": request.method,
+            "path": _asgi_path(request),
+            "status_code": response.status_code,
+            "duration_ms": round(duration_ms, 2),
+            "client_ip": request.client.host if request.client else "unknown",
+        }
+    )
+    return response
+
+
+# ─────────────────────────────────────────────────────────────
+# 全局认证中间件（除认证路由和健康检查外，所有 API 需 Bearer token）
+# ─────────────────────────────────────────────────────────────
+# Starlette 后注册的 HTTP middleware 位于外层。先注册资源锁，再注册
+# auth，确保未认证请求在触碰任何 L4.75 租约状态前就被拒绝。
+from backend.middleware.single_user_mode import single_user_mode_middleware as _single_user_mode_middleware
+
+app.middleware("http")(_single_user_mode_middleware)
+
+
+@app.middleware("http")
+async def auth_middleware(request: Request, call_next):
+    # P0: 认证白名单必须用 ASGI scope path，禁止 request.url.path（防路径混淆绕过）
+    path = _asgi_path(request)
+    from backend.services.local_demo_access import ACCESS_PATH, allows_local_demo
+    # No username/admin/token is injected: the exception is Mission-scoped.
+    if (path == ACCESS_PATH and request.method == "GET") or allows_local_demo(request):
+        return await call_next(request)
+    # e2e 根治 (2026-07-19): FQ_CRM_TEST_MODE=1 时放行 /api/v1/_test/*，
+    # 否则 test_helpers.reset 被 401 挡住 → L4.85 ACTIVE_TOKENS 无法清空 → 二次 login 409 → e2e 全红。
+    _test_mode = os.environ.get("FQ_CRM_TEST_MODE") == "1"
+    if (
+        path.startswith("/api/v1/auth/")
+        or path == "/api/v1/health"
+        or path.startswith("/docs")
+        or path.startswith("/redoc")
+        or path == "/openapi.json"
+        or (_test_mode and path.startswith("/api/v1/_test/"))
+    ):
+        return await call_next(request)
+    if request.method == "OPTIONS":
+        return await call_next(request)
+
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
+        if _c0_error_path(path):
+            return competition_error_response(
+                http_status=401, code="UNAUTHENTICATED", message="需要本次有效身份。",
+                request_id=new_request_id(), retryable=False, param="Authorization",
+                doc_ref="docs/hackathon/COMPETITION-TEST-PLAN-2026-09-09.md#T06",
+            )
+        return JSONResponse(status_code=401, content={"detail": "未提供认证令牌"})
+
+    token = auth[7:]
+    # 延迟导入避免循环依赖
+    from backend.routers.auth import _verify_token
+    username = _verify_token(token)
+    if username is None:
+        if _c0_error_path(path):
+            return competition_error_response(
+                http_status=401, code="UNAUTHENTICATED", message="登录已过期，请重新登录",
+                request_id=new_request_id(), retryable=False, param="Authorization",
+                doc_ref="docs/hackathon/COMPETITION-TEST-PLAN-2026-09-09.md#T06",
+            )
+        return JSONResponse(status_code=401, content={"detail": "登录已过期，请重新登录"})
+
+    # Sprint 205+ Admin Upload: 把已验证的 username 写到 request.state,
+    # 让下游 admin router / require_admin dependency 通过 getattr 安全读取,
+    # 避免每个 endpoint 重复解析 token (跟 L4.50 + L4.84 + L4.85 1:1 stable
+    # 永久规则链配套, 跟 /api/v1/auth/* 白名单 1:1 stable 永久规则化沿用).
+    request.state.username = username
+
+    return await call_next(request)
+
+
+# ─────────────────────────────────────────────────────────────
+# 全局异常处理器
+# ─────────────────────────────────────────────────────────────
+def _future_date_warning_for_request(request: Request) -> str | None:
+    """
+    检查请求中的日期参数，如果存在未来日期则返回警告消息（ASCII安全）。
+
+    用于在 service 抛异常时，仍能告知调用方日期参数有问题。
+    AI-开发者友好：未来日期静默全0 会对运营决策造成误导。
+    """
+    try:
+        from datetime import date as _date
+        from datetime import datetime as _dt
+        _date_params = ["analysis_date", "start_date", "end_date", "compare_start_date", "compare_end_date"]
+        for _param in _date_params:
+            _val = request.query_params.get(_param)
+            if not _val:
+                continue
+            try:
+                _input_date = _dt.strptime(_val, "%Y-%m-%d").date()
+                if _input_date > _date.today():
+                    # 返回 URL 编码的英文消息（HTTP header 只支持 latin-1/ASCII）
+                    from urllib.parse import quote
+                    return quote(
+                        f"date {_val} is in the future, data will be all-zero. "
+                        "Use a date <= today for analysis."
+                    )
+            except ValueError:
+                pass
+        return None
+    except Exception:
+        return None
+
+
+def _add_future_date_warning(request: Request, json_response: JSONResponse) -> JSONResponse:
+    if warning := _future_date_warning_for_request(request):
+        json_response.headers["X-Data-Warning"] = warning
+    return json_response
+
+
+@app.exception_handler(RequestValidationError)
+async def request_validation_error_handler(request: Request, exc: RequestValidationError):
+    path = _asgi_path(request)
+    if not _c0_error_path(path):
+        return await request_validation_exception_handler(request, exc)
+    loc = ""
+    if exc.errors():
+        loc = str(exc.errors()[0].get("loc", ("body",))[-1])
+    return competition_error_response(
+        http_status=422, code="INVALID_REQUEST", message="请求与当前合同不匹配。",
+        request_id=new_request_id(), retryable=False, param=loc or None,
+        doc_ref="docs/hackathon/COMPETITION-TEST-PLAN-2026-09-09.md#T03",
+    )
+
+
+@app.get("/api/v1/analytics/catalog")
+def analytics_catalog(request: Request):
+    return {
+        "schema_version": "competition-capabilities/v1",
+        "capabilities": overlay_live_capabilities(None),
+    }
+
+
+@app.exception_handler(ServiceError)
+async def service_error_handler(request: Request, exc: ServiceError):
+    resp = JSONResponse(status_code=exc.status_code, content=exc.detail)
+    return _add_future_date_warning(request, resp)
+
+
+@app.exception_handler(ValidationError)
+async def validation_error_handler(request: Request, exc: ValidationError):
+    resp = JSONResponse(status_code=exc.status_code, content=exc.detail)
+    return _add_future_date_warning(request, resp)
+
+
+@app.exception_handler(NotFoundError)
+async def not_found_error_handler(request: Request, exc: NotFoundError):
+    resp = JSONResponse(status_code=exc.status_code, content=exc.detail)
+    return _add_future_date_warning(request, resp)
+
+
+@app.exception_handler(Exception)
+async def general_error_handler(request: Request, exc: Exception):
+    """未捕获的异常返回 500，避免堆栈信息暴露"""
+    import traceback
+    print(f"[500 ERROR] {request.method} {_asgi_path(request)}: {type(exc).__name__}: {exc}")
+    traceback.print_exc()
+    resp = JSONResponse(
+        status_code=500,
+        content={"error": "INTERNAL_ERROR", "message": "服务器内部错误，请稍后重试"}
+    )
+    return _add_future_date_warning(request, resp)
+
+
+# ─────────────────────────────────────────────────────────────
+# 健康检查（保留在 main.py，避免循环依赖）
+# ─────────────────────────────────────────────────────────────
+@app.get("/api/v1/health")
+def health_check():
+    """系统健康检查"""
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+    }
+
+
+# Sprint 203 R3 OpsView STUB TODO 接入: 3 件 0 业务代码改动 health 端点
+# 运维详情统一要求 admin Bearer；只有 /api/v1/health 保持匿名探活。
+@app.get("/api/v1/health/db_size")
+def health_db_size(request: Request):
+    """DuckDB 文件大小 (GB) + 距离 ClickHouse POC 启动 trigger (200GB) 的距离.
+
+    Sprint 203 R3: 跟 clickhouse-poc-monitor.py 1:1 stable 同一 trigger 阈值.
+    """
+    from backend.routers.auth import require_admin
+
+    require_admin(request)
+    try:
+        size_bytes = Path(DUCKDB_PATH).stat().st_size
+        size_gb = round(size_bytes / (1024 ** 3), 2)
+        trigger_gb = 200
+        return {
+            "status": "ok",
+            "size_gb": size_gb,
+            "trigger_gb": trigger_gb,
+            "remaining_gb": round(trigger_gb - size_gb, 2),
+            "trigger_hit": size_gb > trigger_gb,
+            "timestamp": datetime.now().isoformat(),
+        }
+    except FileNotFoundError:
+        return {"status": "missing", "size_gb": 0.0, "trigger_gb": 200, "remaining_gb": 200, "trigger_hit": False, "timestamp": datetime.now().isoformat()}
+    except Exception:  # noqa: BLE001
+        return {"status": "error", "timestamp": datetime.now().isoformat()}
+
+
+@app.get("/api/v1/health/manifest")
+def health_manifest(request: Request):
+    """W5 manifest version (跟 backend/services/rfm/cache.py:_ManifestTracker 1:1 stable).
+
+    返回当前 DuckDB 数据的 manifest version (int). manifest 不存在返回 None.
+    """
+    from backend.routers.auth import require_admin
+
+    require_admin(request)
+    try:
+        from backend.services.rfm.cache import _manifest_tracker_singleton
+        version = _manifest_tracker_singleton.current_version()
+        return {
+            "status": "ok",
+            "version": version,
+            "timestamp": datetime.now().isoformat(),
+        }
+    except Exception:  # noqa: BLE001
+        return {"status": "error", "version": None, "timestamp": datetime.now().isoformat()}
+
+
+@app.get("/api/v1/health/pool")
+def health_pool(request: Request):
+    """Read pool 利用率 (跟 dual_conn.py Semaphore + pool 1:1 stable).
+
+    L4.85.4 将并发硬上限收紧到 READ_POOL_SIZE，防止 16GB Mac 上多条
+    重查询把总内存推到 30GB+；这里暴露真实 active-query 上限。
+    """
+    from backend.routers.auth import require_admin
+
+    require_admin(request)
+    try:
+        from backend.services import dual_conn
+        pool_size = len(dual_conn._read_pool)
+        semaphore_max = dual_conn.ACTIVE_READ_LIMIT
+        # threading.Semaphore._value 是内部 counter (acquire 减, release 加)
+        semaphore_available = dual_conn._read_semaphore._value
+        semaphore_in_use = semaphore_max - semaphore_available
+        return {
+            "status": "ok",
+            "pool_size": pool_size,
+            "semaphore_max": semaphore_max,
+            "semaphore_in_use": semaphore_in_use,
+            "utilization_pct": round(100 * semaphore_in_use / semaphore_max, 1) if semaphore_max > 0 else 0.0,
+            "read_pool_size_limit": dual_conn.READ_POOL_SIZE,
+            "timestamp": datetime.now().isoformat(),
+        }
+    except Exception:  # noqa: BLE001
+        return {"status": "error", "timestamp": datetime.now().isoformat()}
+
+
+@app.get("/api/v1/health/metrics", include_in_schema=False)
+def health_metrics(request: Request):
+    """管理员运维页读取 Prometheus 指标的同源、Bearer 保护入口。"""
+    from backend.routers.auth import require_admin
+
+    require_admin(request)
+    return Response(render_prometheus(), media_type="text/plain; version=0.0.4")
+
+
+@app.get("/metrics", include_in_schema=False)
+def prometheus_metrics(request: Request):
+    """兼容 Prometheus 的管理员 Bearer 保护入口。"""
+    from backend.routers.auth import require_admin
+
+    require_admin(request)
+    return Response(render_prometheus(), media_type="text/plain; version=0.0.4")
+
+
+# ─────────────────────────────────────────────────────────────
+# 路由注册
+# ─────────────────────────────────────────────────────────────
+from backend.routers import (
+    auth_router,
+    health_router,
+    metrics_router,
+    flow_router,
+    asset_router,
+    category_router,
+    audience_router,
+    rfm_router,
+    sampling_router,
+    lifetime_value_router,
+    market_focus_router,
+    visitor_router,
+    export_router,
+    report_router,
+    ad_hoc_query_router,  # Sprint 188: 即席查询 HTTP API 入口
+    session_router,
+    notifications_router,  # L4.75.3 通知对方 endpoints
+    login_request_router,  # L4.85 申请+同意 模式
+    missions_router,
+)
+
+app.include_router(auth_router)
+app.include_router(health_router)
+app.include_router(metrics_router)
+app.include_router(flow_router)
+app.include_router(asset_router)
+# Sprint 203 R9: geo_router/cohort_retention_router 删除 (前端 4 板块解耦, geo_service 保留供 report/export 用)
+app.include_router(category_router)
+app.include_router(audience_router)
+app.include_router(rfm_router)
+app.include_router(sampling_router)
+app.include_router(lifetime_value_router)
+app.include_router(market_focus_router)
+app.include_router(visitor_router)
+app.include_router(export_router)
+app.include_router(report_router)
+app.include_router(ad_hoc_query_router)  # Sprint 188
+app.include_router(session_router)
+app.include_router(notifications_router)  # L4.75.3
+app.include_router(login_request_router)  # L4.85 申请+同意 模式
+app.include_router(missions_router)
+
+# L4.91.2 治本 L4.85.6 Playwright e2e 测试环境隔离 (仅 FQ_CRM_TEST_MODE=1 开启)
+try:
+    from backend.routers.test_helpers import router as test_helpers_router
+    app.include_router(test_helpers_router)
+except Exception:
+    pass  # test_helpers router 非必要组件, 不影响生产服务
+
+if __name__ == "__main__":
+    import uvicorn
+    from pathlib import Path
+    uvicorn.run(
+        "backend.main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True,
+        reload_dirs=[str(Path(__file__).parent)],
+    )

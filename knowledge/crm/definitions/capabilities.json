@@ -1,0 +1,182 @@
+{
+  "pack_version": "crm-knowledge-offline/v1",
+  "items": [
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Capability",
+      "id": "capability.legacy_overview",
+      "name": "旧全店概览查询",
+      "status": "code_snapshot",
+      "data_mode": "legacy_archive_path_unverified",
+      "applies_metric_version": null,
+      "note": "已有基础，不能据此认定现役 DSH 已接真实数据或口径已对齐。",
+      "code_path": "backend/services/metrics/overview.py",
+      "query_ids": [],
+      "layer": "code_snapshot",
+      "implementation_status": "code_snapshot"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Capability",
+      "id": "capability.legacy_sampling_roi",
+      "name": "旧派样 ROI 查询",
+      "status": "code_snapshot",
+      "data_mode": "legacy_archive_path_unverified",
+      "code_path": "backend/services/sampling_service.py",
+      "layer": "code_snapshot",
+      "implementation_status": "code_snapshot"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Capability",
+      "id": "capability.legacy_competition_synthetic",
+      "name": "competition 合成诊断",
+      "status": "code_snapshot",
+      "data_mode": "synthetic_only",
+      "note": "SCOPE=COMPETITION_SYNTHETIC_ONLY。不把真实数据塞进 competition。",
+      "code_path": "dsh-plugins/analytics-workbench/src/competition-agent/family.mjs",
+      "layer": "code_snapshot",
+      "implementation_status": "code_snapshot"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Capability",
+      "id": "capability.sales_window_summary",
+      "name": "销售窗口汇总（拟）",
+      "status": "planned",
+      "data_mode": "not_connected",
+      "query_id": "sales_window_summary",
+      "query_version": "crm-metrics-query/v1",
+      "layer": "target_definition",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D001",
+        "D003",
+        "D004",
+        "D005",
+        "D006",
+        "D014",
+        "D018"
+      ],
+      "note": "A 线合同已列出 query_id，semantic 模块文件已出现；C 未运行 A 测试，不宣称计算已验收。"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Capability",
+      "id": "capability.existing_customer_repurchase",
+      "name": "期初老客回购（拟）",
+      "status": "planned",
+      "data_mode": "not_connected",
+      "query_id": "existing_customer_repurchase",
+      "query_version": "crm-metrics-query/v1",
+      "layer": "target_definition",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D004",
+        "D006",
+        "D020",
+        "D021"
+      ]
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Capability",
+      "id": "capability.sample_followup",
+      "name": "派样后跟踪（拟）",
+      "status": "planned",
+      "data_mode": "not_connected",
+      "query_id": "sample_followup",
+      "query_version": "crm-metrics-query/v1",
+      "layer": "target_definition",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D009",
+        "D010",
+        "D011",
+        "D022"
+      ]
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Capability",
+      "id": "capability.crm_knowledge_explain",
+      "name": "只读知识解释（拟）",
+      "status": "planned",
+      "data_mode": "offline_pack_only",
+      "layer": "target_definition",
+      "implementation_status": "not_implemented",
+      "note": "候选工具名，不是已存在 DSH 工具。离线图谱结构完成不等于图服务已上线。"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Capability",
+      "id": "capability.member_conversion",
+      "name": "新会员转化 / 老客入会",
+      "status": "unavailable_missing_data",
+      "data_mode": "missing_join_events",
+      "layer": "target_definition",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D014",
+        "D015"
+      ],
+      "missing_data": [
+        "data.first_join_event",
+        "data.visit_identity"
+      ],
+      "note": "不能从订单会员数替代。"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Capability",
+      "id": "capability.profit_roi",
+      "name": "利润 ROI / 因果增量",
+      "status": "unavailable_missing_data",
+      "data_mode": "missing_cost_and_experiment",
+      "layer": "target_definition",
+      "implementation_status": "not_implemented",
+      "decision_ids": [
+        "D011"
+      ],
+      "missing_data": [
+        "data.cost_profit"
+      ]
+    }
+  ]
+}

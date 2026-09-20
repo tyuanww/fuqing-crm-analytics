@@ -1,0 +1,113 @@
+name: E2E Smoke (optional)
+
+# 旧 CRM 登录壳层仅按需手动验证；当前 DSH 主链由 CI 的 B0 检查覆盖。
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  e2e-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DUCKDB_PATH: /tmp/e2e_duckdb.duckdb
+      HEALTH_API_KEY: ci-fake-health-api-key
+      FQ_CRM_ADMINS: admin
+      ETL_MIN_DISK_GB: '0'
+      FQ_DB_MODE: schema_test
+      FQ_CRM_TEST_MODE: '1'
+      FQ_SINGLE_USER_V2: '0'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: frontend-vue3/package-lock.json
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
+          cache: 'pip'
+          cache-dependency-path: requirements-e2e.txt
+
+      - name: Generate ephemeral test credentials (masked)
+        # 必须早于 backend 启动与 Playwright 登录；每次 run 随机生成并 mask。
+        run: |
+          set -euo pipefail
+          ADMIN_PASS=$(python3 -c 'import secrets; print(secrets.token_urlsafe(18))')
+          FQSW_PASS=$(python3 -c 'import secrets; print(secrets.token_urlsafe(18))')
+          TESTUSER_PASS=$(python3 -c 'import secrets; print(secrets.token_urlsafe(18))')
+          CREDS="admin:${ADMIN_PASS},fqsw:${FQSW_PASS},testuser:${TESTUSER_PASS}"
+          echo "::add-mask::${ADMIN_PASS}"
+          echo "::add-mask::${FQSW_PASS}"
+          echo "::add-mask::${TESTUSER_PASS}"
+          echo "::add-mask::${CREDS}"
+          {
+            echo "FQ_CRM_PASSWORDS=${CREDS}"
+            echo "E2E_ADMIN_USER=admin"
+            echo "E2E_ADMIN_PASSWORD=${ADMIN_PASS}"
+          } >> "$GITHUB_ENV"
+
+      - name: Install Python deps (minimal e2e set, no ML lock)
+        run: pip install -r requirements-e2e.txt
+
+      - name: Install Node deps
+        run: |
+          cd frontend-vue3
+          npm ci
+
+      - name: Cache Playwright Chromium
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('frontend-vue3/package-lock.json') }}
+
+      - name: Install Playwright browsers
+        run: |
+          cd frontend-vue3
+          npx playwright install --with-deps chromium
+
+      - name: Setup e2e DuckDB schema + seed
+        run: python3 scripts/ci/seed_e2e_duckdb.py /tmp/e2e_duckdb.duckdb
+
+      - name: Build (Vite) + Start preview + uvicorn
+        run: |
+          set -euo pipefail
+          cd frontend-vue3
+          npm run build
+          npx vite preview --port 5173 --host 0.0.0.0 &
+          for i in {1..30}; do
+            if curl -s -o /dev/null -w "%{http_code}" http://localhost:5173 | grep -q 200; then
+              echo "Preview server ready"
+              break
+            fi
+            sleep 1
+          done
+          cd ..
+          python3 -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 &
+          UVICORN_READY=false
+          for i in {1..60}; do
+            if curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/api/v1/health 2>/dev/null | grep -q 200; then
+              echo "Uvicorn backend ready"
+              UVICORN_READY=true
+              break
+            fi
+            sleep 1
+          done
+          if [ "$UVICORN_READY" != "true" ]; then
+            echo "Uvicorn backend failed to start in 60s"
+            exit 1
+          fi
+
+      - name: Run shell smoke (login only)
+        working-directory: frontend-vue3
+        run: |
+          export NODE_EXTRA_CA_CERTS="$(python3 -c 'import certifi; print(certifi.where())')"
+          # 仅壳层: login 路由 smoke。全量业务 spec 留本地/生产验收，不进默认 CI 门禁。
+          npx playwright test e2e/login.spec.ts --reporter=list

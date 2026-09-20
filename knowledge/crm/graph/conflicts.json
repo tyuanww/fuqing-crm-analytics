@@ -1,0 +1,306 @@
+{
+  "pack_version": "crm-knowledge-offline/v1",
+  "do_not_resolve_by_ocr_or_model": true,
+  "items": [
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Conflict",
+      "id": "conflict.aus.granularity",
+      "name": "客单价同名不同粒度",
+      "sides": [
+        "metric.aus:target-v1",
+        "metric.aus:code-overview-line-avg"
+      ],
+      "conflict_type": "same_name_different_grain",
+      "findings": [
+        "M01"
+      ],
+      "resolution_status": "principles_confirmed_code_unfixed",
+      "resolved_by": [
+        "D001"
+      ],
+      "remaining": "旧 avg_order_value 未改；不得宣称代码已修复。",
+      "do_not_guess": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Conflict",
+      "id": "conflict.member_premium.object",
+      "name": "会员溢价比较对象与粒度",
+      "sides": [
+        "metric.member_premium:target-v1",
+        "metric.member_premium:code-overview-member-aov-over-store-line-avg"
+      ],
+      "conflict_type": "comparison_object_and_grain",
+      "findings": [
+        "M02"
+      ],
+      "resolution_status": "principles_confirmed_code_unfixed",
+      "resolved_by": [
+        "D002",
+        "D014"
+      ],
+      "remaining": "成交时身份数据与显示单位未核验。",
+      "do_not_guess": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Conflict",
+      "id": "conflict.ipt.textbook_internal",
+      "name": "教材 IPT 名词按交易、公式按人数",
+      "sides": [
+        "tb.04.ipt"
+      ],
+      "conflict_type": "textbook_internal_ambiguity",
+      "findings": [
+        "M14"
+      ],
+      "resolution_status": "unresolved_textbook_internal",
+      "resolved_by": [
+        "D007"
+      ],
+      "remaining": "D007 把人均件数和每单件数分列，但不改写教材原文，也不用 OCR 猜教材本意只留一个。",
+      "do_not_guess": true,
+      "note": "决议提供分名目标，教材原文冲突仍保留。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Conflict",
+      "id": "conflict.product_acq.people_vs_amount",
+      "name": "教材招新率未锁定人数或金额",
+      "sides": [
+        "tb.10.product_acq"
+      ],
+      "conflict_type": "textbook_internal_ambiguity",
+      "findings": [
+        "M16"
+      ],
+      "resolution_status": "split_by_decision_textbook_kept",
+      "resolved_by": [
+        "D008"
+      ],
+      "remaining": "教材原文仍含糊；目标定义为两个指标。",
+      "do_not_guess": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Conflict",
+      "id": "conflict.product_repurchase.intersection",
+      "name": "教材商品回购简写缺历史交集",
+      "sides": [
+        "tb.13.product_repurchase",
+        "metric.product_repurchase:target-v1",
+        "metric.product_repurchase:code-standard-hist-join"
+      ],
+      "conflict_type": "formula_missing_set_constraint",
+      "findings": [
+        "M17"
+      ],
+      "resolution_status": "target_confirms_intersection_textbook_kept",
+      "resolved_by": [
+        "D008"
+      ],
+      "remaining": "不误改已有历史 JOIN；教材原文不覆盖。",
+      "do_not_guess": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Conflict",
+      "id": "conflict.gsv.refund_predicate",
+      "name": "排除全部退款标志 vs 按实际退款净额",
+      "sides": [
+        "metric.gsv_net:target-v1",
+        "metric.gsv:code-calculations-exclude-is-refund",
+        "metric.gsv:code-competition-refunds-as-of"
+      ],
+      "conflict_type": "refund_semantics",
+      "findings": [
+        "M03"
+      ],
+      "resolution_status": "principles_confirmed_mapping_pending",
+      "resolved_by": [
+        "D003"
+      ],
+      "remaining": "真实源金额是否已净额属 D019。",
+      "do_not_guess": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Conflict",
+      "id": "conflict.sample_roi.name_vs_ability",
+      "name": "派样 ROI 名称超出当前能力",
+      "sides": [
+        "metric.sample_repeat_revenue:target-v1",
+        "metric.sample_roi:code-sampling-service",
+        "capability.profit_roi"
+      ],
+      "conflict_type": "name_exceeds_capability",
+      "findings": [
+        "M21"
+      ],
+      "resolution_status": "name_retained_with_caveat",
+      "resolved_by": [
+        "D011"
+      ],
+      "remaining": "成本/利润/实验对照不具备。",
+      "do_not_guess": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Conflict",
+      "id": "conflict.ltv.default_vs_legacy",
+      "name": "默认新客 N 日含首单 vs 指定日次日起",
+      "sides": [
+        "metric.ltv_new_customer_n_day:target-v1",
+        "metric.ltv:code-specified-day-next-day"
+      ],
+      "conflict_type": "definition_split",
+      "findings": [
+        "M24"
+      ],
+      "resolution_status": "split_named_metrics",
+      "resolved_by": [
+        "D012"
+      ],
+      "remaining": "旧定义单列，未替换现役代码。",
+      "do_not_guess": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Conflict",
+      "id": "conflict.new_old.null_as_old",
+      "name": "品类首购 NULL 落入老客",
+      "sides": [
+        "cohort.unknown_history:target-v1",
+        "capability.legacy_overview"
+      ],
+      "conflict_type": "unknown_coerced_to_old",
+      "findings": [
+        "M08"
+      ],
+      "resolution_status": "principles_confirmed_code_unfixed",
+      "resolved_by": [
+        "D018"
+      ],
+      "remaining": "代码未改。",
+      "do_not_guess": true,
+      "evidence_note": "category_service/overview.py CASE first_pay_date NULL -> ELSE 0 老客。",
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Conflict",
+      "id": "conflict.gmv_gsv.mix",
+      "name": "总额含退款、新老金额排除退款",
+      "sides": [
+        "metric.new_amount_share:target-v1"
+      ],
+      "conflict_type": "inconsistent_amount_scope",
+      "findings": [
+        "M09"
+      ],
+      "resolution_status": "principles_confirmed_code_unfixed",
+      "resolved_by": [
+        "D018"
+      ],
+      "remaining": "待修复过滤。",
+      "do_not_guess": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Conflict",
+      "id": "conflict.schema.sample_received_at",
+      "name": "ETL 声明签收字段 vs init 建表",
+      "sides": [
+        "field.orders.sample_received_at"
+      ],
+      "conflict_type": "source_declaration_vs_init_ddl",
+      "findings": [
+        "M28"
+      ],
+      "resolution_status": "unverified_live_schema",
+      "resolved_by": [],
+      "remaining": "D019。不得用初始化脚本补写归档大库，本项没有实际缺列结论。",
+      "do_not_guess": true,
+      "implementation_status": "not_implemented"
+    },
+    {
+      "pack_version": "crm-knowledge-offline/v1",
+      "metric_version": "crm-metrics/v1",
+      "code_baseline": "f9070431c3264e8e3d7c36524c87a7e232640789",
+      "publication_status": "local_isolated_candidate",
+      "contains_real_data": false,
+      "type": "Conflict",
+      "id": "conflict.d019.source",
+      "name": "真实源字段与金额语义未核验",
+      "sides": [
+        "D019"
+      ],
+      "conflict_type": "awaiting_source_verification",
+      "findings": [
+        "M29",
+        "M27",
+        "M28",
+        "M30"
+      ],
+      "resolution_status": "open",
+      "resolved_by": [],
+      "remaining": "不得用 OCR 或模型猜测关闭。",
+      "do_not_guess": true,
+      "implementation_status": "not_implemented"
+    }
+  ]
+}

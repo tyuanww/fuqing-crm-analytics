@@ -1,0 +1,84 @@
+import { createRouter, createWebHistory } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
+const routes: RouteRecordRaw[] = [
+  { path: '/', redirect: '/audience' },
+  {
+    path: '/login',
+    component: () => import('@/views/LoginView.vue'),
+    meta: { title: '登录' },
+  },
+  {
+    path: '/growth-board',
+    component: () => import('@/views/GrowthBoardView.vue'),
+    meta: { title: 'AI 增长董事会', requiresAuth: true, immersive: true },
+  },
+  {
+    path: '/audience',
+    component: () => import('@/views/AudienceView.vue'),
+    meta: { title: '人群看板', requiresAuth: true },
+  },
+  {
+    path: '/category',
+    component: () => import('@/views/CategoryView.vue'),
+    meta: { title: '品类看板', requiresAuth: true },
+  },
+  {
+    path: '/category-detail/:categoryId',
+    component: () => import('@/views/CategoryDetailView.vue'),
+    meta: { title: '品类详情', requiresAuth: true },
+  },
+  {
+    path: '/customer-health',
+    component: () => import('@/views/CustomerHealthView.vue'),
+    meta: { title: '老客分析', requiresAuth: true },
+  },
+  {
+    path: '/market-focus',
+    component: () => import('@/views/MarketFocusView.vue'),
+    meta: { title: '市场对焦', requiresAuth: true },
+  },
+  {
+    path: '/sampling',
+    name: 'SamplingConversion',
+    component: () => import('@/views/SamplingView.vue'),
+    meta: { title: '派样看板', requiresAuth: true },
+  },
+  {
+    path: '/ops',
+    component: () => import('@/views/OpsView.vue'),
+    meta: { title: '系统运维看板', requiresAuth: true, requiresAdmin: true },
+  },
+]
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes,
+})
+
+// 导航守卫：未登录 → 登录页；non-admin 访问 admin 路由 → 看板首页；已登录访问登录页 → 看板首页
+router.beforeEach((to, _from, next) => {
+  const authStore = useAuthStore()
+
+  if (authStore.localDemoNoLogin && (to.path === '/login' || to.meta.requiresAuth)) {
+    // Local demo exposes only synthetic Mission UI, never legacy CRM views.
+    if (to.path === '/growth-board') next()
+    else next('/growth-board')
+  } else if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    next({ path: '/login', query: { redirect: to.fullPath } })
+  } else if (to.meta.requiresAdmin && !authStore.isAdmin) {
+    next('/audience')
+  } else if (to.path === '/login' && authStore.isAuthenticated) {
+    const redirect = to.query.redirect as string
+    next(redirect || '/audience')
+  } else {
+    next()
+  }
+})
+
+router.afterEach((to) => {
+  document.title = `${(to.meta.title as string) || '经营分析'} · SHINE MAGE`
+})
+
+export default router

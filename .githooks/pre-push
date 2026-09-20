@@ -1,0 +1,115 @@
+#!/bin/bash
+# Validate the shared path matrix, then pass the original ref protocol to LFS.
+# New branches compare the merge-base with origin/main (not only the last commit).
+# Full backend uses run_backend_tests_bounded.py + pytest_c_class_deselects.txt.
+# User-owned exceptions: FQ_PRE_PUSH_SKIP skips validation only; MODE overrides
+# only the backend axis. Neither disables LFS or implies permission to push.
+
+set -o pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT" || exit 1
+
+ZERO="0000000000000000000000000000000000000000"
+
+# Retain the pre-push protocol for both validation and Git LFS. The default
+# .git/hooks/pre-push is not called when core.hooksPath points here.
+PUSH_REFS="$(cat)"
+REMOTE_ARGS=("$@")
+
+_finish_push() {
+    if [ "$SAW_UPDATE" -eq 1 ]; then
+        printf '%s\n' "$PUSH_REFS" | git lfs pre-push "${REMOTE_ARGS[@]}"
+    fi
+}
+
+# Collect changed files from stdin push refs (git pre-push protocol)
+# local_sha == 0 means branch delete on remote — must NOT fall through to full pytest
+CHANGED_FILES=""
+SAW_UPDATE=0
+SAW_DELETE=0
+while read -r local_ref local_sha remote_ref remote_sha; do
+    [ -z "$local_ref" ] && continue
+    # branch delete → no tests for this ref
+    if [ "$local_sha" = "$ZERO" ]; then
+        SAW_DELETE=1
+        continue
+    fi
+    SAW_UPDATE=1
+    if [ "$remote_sha" = "$ZERO" ]; then
+        # new branch: diff vs merge-base with main/origin/main
+        base=""
+        if git rev-parse --verify origin/main >/dev/null 2>&1; then
+            base="$(git merge-base origin/main "$local_sha" 2>/dev/null || true)"
+        fi
+        if [ -z "$base" ] && git rev-parse --verify main >/dev/null 2>&1; then
+            base="$(git merge-base main "$local_sha" 2>/dev/null || true)"
+        fi
+        if [ -n "$base" ]; then
+            CHANGED_FILES="${CHANGED_FILES}
+$(git diff --name-only --no-renames "$base" "$local_sha" 2>/dev/null || echo backend/main.py)"
+        else
+            # fallback: force full
+            CHANGED_FILES="${CHANGED_FILES}
+backend/main.py"
+        fi
+    else
+        CHANGED_FILES="${CHANGED_FILES}
+$(git diff --name-only --no-renames "$remote_sha" "$local_sha" 2>/dev/null || echo backend/main.py)"
+    fi
+done < <(printf '%s\n' "$PUSH_REFS")
+
+# Pure branch delete (or tags delete): never run full suite
+# Bug fix 2026-07-19: empty CHANGED_FILES after delete-only used to fall back to
+# origin/main...HEAD → classifier empty→full → 10+ min pytest on `git push --delete`
+if [ "$SAW_UPDATE" -eq 0 ]; then
+    if [ "$SAW_DELETE" -eq 1 ]; then
+        echo "pre-push smart path mode: skip"
+        echo "✅ Branch delete only — skip pytest/ruff."
+        exit 0
+    fi
+    # stdin empty (manual hook run): fall back to origin/main...HEAD or @{u}
+    if git rev-parse --verify origin/main >/dev/null 2>&1; then
+        CHANGED_FILES="$(git diff --name-only --no-renames origin/main...HEAD 2>/dev/null || true)"
+    elif git rev-parse --verify @{u} >/dev/null 2>&1; then
+        CHANGED_FILES="$(git diff --name-only --no-renames @{u}...HEAD 2>/dev/null || true)"
+    else
+        CHANGED_FILES="backend/main.py"
+    fi
+fi
+
+# Fail before expensive checks if the required LFS executable is missing.
+if [ "$SAW_UPDATE" -eq 1 ] && ! git lfs version >/dev/null 2>&1; then
+    echo "ERROR: Git LFS is required by this repository; validation was not started." >&2
+    exit 1
+fi
+
+# This user-owned exception only skips validation, never required LFS upload.
+if [ "${FQ_PRE_PUSH_SKIP:-0}" = "1" ]; then
+    echo "pre-push: FQ_PRE_PUSH_SKIP=1 → skip validation (LFS still required)"
+    _finish_push
+    exit $?
+fi
+
+# Clear Git's repository-local variables only in the validation child. The
+# parent still needs its original environment for the LFS pre-push protocol.
+_run_pytest_isolated() (
+    while IFS= read -r git_var; do
+        [ -n "$git_var" ] && unset "$git_var"
+    done < <(git rev-parse --local-env-vars)
+    unset GIT_CONFIG_PARAMETERS GIT_CONFIG_COUNT
+    OVERRIDE=()
+    if [ -n "${FQ_PRE_PUSH_MODE:-}" ]; then
+        OVERRIDE=(--backend-mode "$FQ_PRE_PUSH_MODE")
+    fi
+    PYTHONPATH="$REPO_ROOT" python3 scripts/ci/run_checks.py --files-from - "${OVERRIDE[@]}"
+)
+
+printf '%s\n' "$CHANGED_FILES" | _run_pytest_isolated
+CHECK_STATUS=$?
+if [ "$CHECK_STATUS" -ne 0 ]; then
+    echo "Validation failed; LFS and the push were not started." >&2
+    exit "$CHECK_STATUS"
+fi
+_finish_push
+exit $?

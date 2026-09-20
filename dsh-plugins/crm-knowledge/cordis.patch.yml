@@ -1,0 +1,5 @@
+# Isolated candidate. Do not add this bundle to the live workbench toolchain.
+- insert:
+    - id: crm-knowledge-login-host
+      name: '@shine-mage/dsh-crm-knowledge/host'
+# Agent tools are selected by the isolated preset, not registered in Host scope.

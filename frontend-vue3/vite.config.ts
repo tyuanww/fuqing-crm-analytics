@@ -1,0 +1,92 @@
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import { resolve } from 'path'
+
+const buildContentSecurityPolicy = (connectSources: string, extra: string[] = []) => [
+  "default-src 'self'",
+  "script-src 'self' 'wasm-unsafe-eval'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "font-src 'self' data:",
+  `connect-src ${connectSources}`,
+  "object-src 'none'",
+  "base-uri 'self'",
+  "frame-ancestors 'none'",
+  "form-action 'self'",
+  ...extra,
+].join('; ')
+
+// Vite HMR reconnects with a blob: Worker. script-src does not allow blob eval,
+// so worker-src must be explicit in dev. Preview/prod stay without blob workers.
+export const DEV_CONTENT_SECURITY_POLICY = buildContentSecurityPolicy("'self' ws: wss:", [
+  "worker-src 'self' blob:",
+])
+export const PREVIEW_CONTENT_SECURITY_POLICY = buildContentSecurityPolicy("'self'")
+
+const securityHeaders = (contentSecurityPolicy: string) => ({
+  'Content-Security-Policy': contentSecurityPolicy,
+  'X-Frame-Options': 'DENY',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+})
+
+// Sprint 11: 修用户报 Cmd+Shift+R 刷不了前端缓存.
+// vite 默认 Cache-Control: no-cache 允许 "先 revalidate 再用",
+// 但浏览器内存里的旧 module 仍可能 HMR 不更新.
+// 改用显式 no-store 头 + HMR full-reload fallback:
+//   - no-store: 强制每次都从 server 拉, 不允许 revalidate
+//   - handleHotUpdate: 每次文件改动触发 server.ws.send({type:'full-reload'})
+//     强制浏览器整页 reload, 跳过内存 HMR cache
+export default defineConfig({
+  plugins: [
+    vue(),
+    {
+      name: 'sprint11-force-reload-on-hmr',
+      handleHotUpdate({ server }) {
+        server.ws.send({ type: 'full-reload' })
+        return []
+      },
+    },
+  ],
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
+    },
+  },
+  server: {
+    port: 5173,
+    host: true,
+    proxy: {
+      '/api': {
+        // Keep the proxy hop on a uvicorn-trusted loopback address and append
+        // X-Forwarded-For so the backend can distinguish LAN clients.
+        // VITE_API_PROXY: local e2e 可指到隔离端口 (e.g. http://127.0.0.1:8010)
+        target: process.env.VITE_API_PROXY || 'http://127.0.0.1:8000',
+        changeOrigin: true,
+        xfwd: true,
+      },
+    },
+    // 显式 no-store: 比 no-cache 更强, 强制每次从 server 拉新
+    headers: {
+      ...securityHeaders(DEV_CONTENT_SECURITY_POLICY),
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    },
+  },
+  // Sprint 142+143 (2026-06-28): vite preview 不读 server.proxy, 需显式配置 preview.proxy
+  // 否则 frontend fetch('/api/v1/...') 直接被 vite preview 当 static file 404 (跟 5173 proxy 修复一致)
+  preview: {
+    port: 5173,
+    host: true,
+    proxy: {
+      '/api': {
+        target: process.env.VITE_API_PROXY || 'http://127.0.0.1:8000',
+        changeOrigin: true,
+        xfwd: true,
+      },
+    },
+    headers: securityHeaders(PREVIEW_CONTENT_SECURITY_POLICY),
+  },
+})

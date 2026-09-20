@@ -1,0 +1,61 @@
+name: Weekly Backend Health Check
+
+# 冷存仓库每周回归；保留手动入口与原 weekly-report 的摘要/报告。
+# 文件名保留 nightly.yml，沿用现有工作流入口与历史。
+on:
+  schedule:
+    # 周一 UTC 01:00 = 北京时间 09:00
+    - cron: '0 1 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FQ_CRM_ADMINS: admin
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0  # ground-truth 检查需要提交历史
+
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+          cache: 'pip'
+          cache-dependency-path: requirements-lock.txt
+      - name: Install locked dependencies
+        run: pip install -r requirements-lock.txt
+
+      - name: B2 import completeness check (根因预防复检)
+        run: python3 .githooks/check_imports.py
+
+      - name: Ground truth lint (committed history)
+        run: |
+          python3 .githooks/check_review_ground_truth.py --committed --files \
+            "docs/validation-reports/*.md" \
+            "docs/飞书版架构文档/*.md" || echo "::warning::ground truth lint warning (weekly)"
+
+      - name: Run ruff
+        run: ruff check backend/
+
+      - name: Run synthetic backend profile (shared bounded runner)
+        run: python3 scripts/run_backend_tests_bounded.py --report-dir .context/checks/backend-ci
+
+      - name: Upload bounded test evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: backend-check-evidence
+          path: .context/checks/backend-ci/
+          retention-days: 90
+
+      - name: Write actual suite totals
+        if: always()
+        run: python3 scripts/ci/summarize_checks.py .context/checks/backend-ci >> "$GITHUB_STEP_SUMMARY"
