@@ -278,3 +278,95 @@ def test_forcesave_retry_cannot_acknowledge_an_old_autosave_draft(tmp_path, acto
         store.commit_office(actor, edit['key'], 'a.csv', b'x,3', 'new-save')
         assert store.save_receipt(actor, edit['key'], 'new-save')['version'] == 3
         assert store.content(actor, item['file_id'])[1] == b'x,3'
+
+
+def test_cabinet_preferences_are_durable_private_and_reversible(store, actor):
+    saved = store.upload(actor, 'keep.html', b'<h1>Keep</h1>', 'pref-upload-key')
+    identity = 'cabinet:' + saved['file_id']
+    assert store.preferences(actor)['removed'] == []
+    store.preferences(actor, {'remove': identity})
+    store.preferences(actor, {'order': ['page:one', identity]})
+    store.preferences(actor, {'rail_width': 320})
+    reopened = CockpitFileStore(store.path.parent)
+    assert reopened.preferences(actor) == {'removed': [identity], 'order': ['page:one', identity], 'rail_width': 320, 'rail_layout': None}
+    assert reopened.content(actor, saved['file_id'])[1] == b'<h1>Keep</h1>'
+    other = AnalyticsPrincipal('bob', actor.capabilities, actor.data_scopes)
+    assert reopened.preferences(other)['removed'] == []
+    reopened.preferences(actor, {'restore': identity})
+    assert store.preferences(actor)['removed'] == []
+    placement = {'x': 500, 'y': 100, 'width': 320, 'height': 540}
+    store.preferences(actor, {'rail_layout': placement})
+    assert reopened.preferences(actor)['rail_layout'] == placement
+    store.preferences(actor, {'rail_layout': None})
+    assert reopened.preferences(actor)['rail_layout'] is None
+    reader = AnalyticsPrincipal(actor.actor_id, frozenset({'dashboard:read'}), frozenset())
+    with pytest.raises(AnalyticsError):
+        store.preferences(reader, {'remove': identity})
+    for change in [{'rail_width': True}, {'rail_width': 900}, {'order': ['page:a', 'page:a']}, {'remove': 'bad'}, {'other': 1}]:
+        with pytest.raises(AnalyticsError):
+            store.preferences(actor, change)
+
+
+def test_preference_boundaries_reject_invalid_changes_without_overwriting_saved_values(store, actor):
+    placement = {'x': 20000, 'y': 20000, 'width': 480, 'height': 1000}
+    store.preferences(actor, {'rail_layout': placement})
+    baseline = store.preferences(actor)
+    invalid = [{}, {'remove': 'page:a', 'rail_width': 300}, {'remove': 'page:a\n'},
+               {'restore': 'file:' + 'a' * 4608}, {'order': ['page:a'] * 5001},
+               {'rail_width': 179}, {'rail_width': 481}, {'rail_width': 248.0},
+               {'rail_layout': {**placement, 'x': 20001}}, {'rail_layout': {**placement, 'y': -1}},
+               {'rail_layout': {**placement, 'x': True}}, {'rail_layout': {**placement, 'width': 179}},
+               {'rail_layout': {**placement, 'height': 239}}, {'rail_layout': {**placement, 'height': 1001}},
+               {'rail_layout': {**placement, 'extra': 0}}, {'rail_layout': {'x': 0}}, {'rail_layout': []}]
+    for change in invalid:
+        with pytest.raises(AnalyticsError) as error:
+            store.preferences(actor, change)
+        assert error.value.code == 'INVALID_PREFERENCE'
+        assert CockpitFileStore(store.path.parent).preferences(actor) == baseline
+    for width in (180, 480):
+        assert store.preferences(actor, {'rail_width': width})['rail_width'] == width
+    minimum = {'x': 0, 'y': 0, 'width': 180, 'height': 240}
+    assert store.preferences(actor, {'rail_layout': minimum})['rail_layout'] == minimum
+
+
+def test_preference_recycle_limit_allows_idempotent_removal_and_recovers_after_restore(store, actor):
+    import json
+    removed = [f'page:item-{index}' for index in range(5000)]
+    baseline = {'removed': removed, 'order': [], 'rail_width': 248, 'rail_layout': None}
+    with store.connect() as con:
+        con.execute('INSERT INTO cockpit_preferences VALUES(?,?)', (actor.actor_id, json.dumps(baseline)))
+    assert len(store.preferences(actor, {'remove': removed[-1]})['removed']) == 5000
+    with pytest.raises(AnalyticsError) as error:
+        store.preferences(actor, {'remove': 'page:overflow'})
+    assert error.value.code == 'PREFERENCE_LIMIT'
+    assert CockpitFileStore(store.path.parent).preferences(actor) == baseline
+    store.preferences(actor, {'restore': removed[0]})
+    saved = store.preferences(actor, {'remove': 'page:overflow'})
+    assert len(saved['removed']) == 5000
+    assert removed[0] not in saved['removed']
+    assert saved['removed'][-1] == 'page:overflow'
+
+
+def test_preference_http_routes_enforce_identity_permissions_and_object_contract(tmp_path, actor):
+    registry = B0IdentityRegistry()
+    writer_token, reader_token, other_token, denied_token = (f'isolated-preference-{role}-' * 3 for role in ('writer', 'reader', 'other', 'denied'))
+    registry.grant(writer_token, actor)
+    registry.grant(reader_token, AnalyticsPrincipal(actor.actor_id, frozenset({'dashboard:read'}), frozenset()))
+    registry.grant(other_token, AnalyticsPrincipal('other-owner', actor.capabilities, actor.data_scopes))
+    registry.grant(denied_token, AnalyticsPrincipal('denied-owner', frozenset(), frozenset()))
+    app = create_page_app(registry, page_state_dir=tmp_path)
+    prefix = '/api/v1/analytics/cockpit-files/preferences'
+    headers = {'authorization': 'Bearer ' + writer_token}
+    with TestClient(app) as client:
+        assert client.get(prefix).status_code == 401
+        assert client.patch(prefix, json={'remove': 'page:a'}).status_code == 401
+        assert client.get(prefix, headers={'authorization': 'Bearer ' + denied_token}).status_code == 403
+        assert client.patch(prefix, json={'remove': 'page:a'}, headers={'authorization': 'Bearer ' + reader_token}).status_code == 403
+        assert client.patch(prefix, json={'remove': 'page:a'}, headers=headers).status_code == 200
+        assert client.get(prefix, headers={'authorization': 'Bearer ' + reader_token}).json()['removed'] == ['page:a']
+        assert client.get(prefix, headers={'authorization': 'Bearer ' + other_token}).json()['removed'] == []
+        for body in ([], None, {}, {'remove': 'page:b', 'rail_width': 300}, {'rail_width': False}):
+            assert client.patch(prefix, json=body, headers=headers).status_code == 422
+        assert client.patch(prefix, content='not-json', headers={**headers, 'content-type': 'application/json'}).status_code == 422
+        assert client.get(prefix, headers=headers).json()['removed'] == ['page:a']
+        assert client.patch(prefix, json={'restore': 'page:a'}, headers=headers).json()['removed'] == []

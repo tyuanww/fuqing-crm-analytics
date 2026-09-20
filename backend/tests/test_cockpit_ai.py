@@ -288,3 +288,189 @@ def test_http_preview_is_readonly_signed_and_cannot_confirm_other_hash(tmp_path)
     assert verify_token(config['token'], settings.secret)['document'] == config['document']
     assert client.post(prefix + '/' + job['id'] + '/confirm', json={'candidate_hash': '0' * 64}).status_code == 409
     assert client.post(prefix + '/' + job['id'] + '/confirm', json={'candidate_hash': ready['candidate_hash']}).json()['status'] == 'SAVED'
+
+
+def test_static_selection_rejects_outside_edits_and_persists_only_selected_region(setup):
+    import hashlib
+    actor, files, pages, ai = setup
+    html = '<header><h1>你好 🌟</h1></header><section><p>Keep</p></section>'
+    draft = PageDraft(title='Plain HTML', session_id='selection-session', package={'html': html, 'css': '', 'js': '', 'resources': [], 'node_map': []}, binding_manifest={'bindings': [], 'result_refs': []})
+    candidate = pages.generate(actor, draft)
+    page = pages.confirm(actor, candidate['preview_id'], 'selection-seed')['spec']
+    scope = {'start': 0, 'end': html.index('</header>') + len('</header>'), 'html_hash': hashlib.sha256(html.encode()).hexdigest()}
+    job = ai.begin(actor, 'page', page['page_id'], 1, 'ai_' + str(uuid.uuid4()), scope)
+    assert job['selection'] == scope
+    assert 'Unicode' in (Path(job['workspace']) / 'TASK.md').read_text()
+    before = json.loads(ai.content(actor, job['id'], 'source')[1])
+    for changed in [{**before, 'html': html.replace('Keep', 'Wrong')}, {**before, 'css': 'body{color:red}'},
+                    {**before, 'html': html.replace('<h1>', '<h1 onclick="run()">')}]:
+        output(job, json.dumps(changed).encode())
+        with pytest.raises(AnalyticsError) as error:
+            ai.collect(actor, job['id'])
+        assert error.value.code == 'AI_OUTSIDE_SELECTION'
+        assert pages.get(actor, page['page_id'])['spec']['version'] == 1
+    after = {**before, 'html': html.replace('<h1>你好 🌟</h1>', '<h1 style="color:orange">新标题</h1>')}
+    output(job, json.dumps(after).encode())
+    ready = ai.collect(actor, job['id'])
+    assert ai.confirm(actor, job['id'], ready['candidate_hash'])['saved_version'] == 2
+    reopened = PageDocumentStore(pages.path.parent)
+    assert reopened.get(actor, page['page_id'])['spec']['package']['html'] == after['html']
+    with pytest.raises(AnalyticsError):
+        ai.begin(actor, 'page', page['page_id'], 1, job['id'], {**scope, 'end': 1})
+
+
+def test_source_scope_checks_unicode_version_and_static_boundaries():
+    import hashlib
+    from backend.services.analytics.cockpit_html_selection import validate_selection
+    html = '<p>🌟 前言</p><section><h1>标题</h1></section>'
+    package = {'html': html}
+    scope = {'start': html.index('<section>'), 'end': len(html), 'html_hash': hashlib.sha256(html.encode()).hexdigest()}
+    assert validate_selection(package, scope, {}) == scope
+    for invalid in [{**scope, 'html_hash': '0' * 64}, {**scope, 'start': scope['start'] + 1}, {**scope, 'start': True}]:
+        with pytest.raises(AnalyticsError):
+            validate_selection(package, invalid, {})
+    with pytest.raises(AnalyticsError):
+        validate_selection(package, scope, {'bindings': [{'node_id': 'protected'}]})
+
+
+@pytest.mark.parametrize('graphic', ['<svg><path d="M0 0"/><use href="#icon" /></svg>', '<svg/>', '<math><mi>x</mi><mspace width="1em" /></math>'])
+def test_static_scope_survives_readonly_foreign_content(graphic):
+    import hashlib
+    from backend.services.analytics.cockpit_html_selection import protect_selection, validate_selection
+    html = '<section><h1>Before</h1>' + graphic + '<p>After</p></section>'
+    scope = {'start': len('<section>'), 'end': len('<section><h1>Before</h1>'), 'html_hash': hashlib.sha256(html.encode()).hexdigest()}
+    assert validate_selection({'html': html}, scope, {}) == scope
+    protect_selection({'html': html}, {'html': html.replace('Before', 'Edited')}, scope)
+    foreign_scope = {**scope, 'start': scope['end'], 'end': scope['end'] + len(graphic)}
+    with pytest.raises(AnalyticsError):
+        validate_selection({'html': html}, foreign_scope, {})
+    after_scope = {**scope, 'start': html.index('<p>'), 'end': html.index('</section>')}
+    assert validate_selection({'html': html}, after_scope, {}) == after_scope
+
+
+def test_ordinary_html_self_closing_tag_still_invalidates_scope():
+    import hashlib
+    from backend.services.analytics.cockpit_html_selection import validate_selection
+    html = '<h1>Before</h1><div/><p>After</p>'
+    scope = {'start': 0, 'end': len('<h1>Before</h1>'), 'html_hash': hashlib.sha256(html.encode()).hexdigest()}
+    with pytest.raises(AnalyticsError):
+        validate_selection({'html': html}, scope, {})
+
+
+def test_selection_rejects_executable_url_attributes_on_begin_and_collect_but_keeps_static_links(setup):
+    import hashlib
+    from backend.services.analytics.cockpit_html_selection import protect_selection
+    actor, _, pages, ai = setup
+
+    def save_page(html):
+        draft = PageDraft(title='Static link selection', session_id='selection-links',
+                          package={'html': html, 'css': '', 'js': '', 'resources': [], 'node_map': []},
+                          binding_manifest={'bindings': [], 'result_refs': []})
+        generated = pages.generate(actor, draft)
+        return pages.confirm(actor, generated['preview_id'], 'link-seed-' + str(uuid.uuid4()))['spec']
+
+    def scope_for(html):
+        return {'start': 0, 'end': len(html), 'html_hash': hashlib.sha256(html.encode()).hexdigest()}
+
+    source = '<div><a href="#safe">Original link</a></div>'
+    page = save_page(source)
+    scope = scope_for(source)
+    job = ai.begin(actor, 'page', page['page_id'], 1, 'ai_' + str(uuid.uuid4()), scope)
+    before = json.loads(ai.content(actor, job['id'], 'source')[1])
+    elements = ['<a href="javascript:void(0)">link</a>', '<a href="java&#115;cript:void(0)">link</a>',
+                '<a href=" \tJaVa&#x0a;ScRiPt:void(0)">link</a>', '<img src="java&#x09;script:void(0)"/>',
+                '<form action="javascript:void(0)">form</form>', '<button formaction="javascript:void(0)">button</button>',
+                '<a xlink:href="javascript:void(0)">link</a>', '<a href="data:text/html,static">link</a>',
+                '<a href="blob:https://example.invalid/document">link</a>']
+    for element in elements:
+        html = '<div>' + element + '</div>'
+        invalid_page = save_page(html)
+        with pytest.raises(AnalyticsError) as error:
+            ai.begin(actor, 'page', invalid_page['page_id'], 1, 'ai_' + str(uuid.uuid4()), scope_for(html))
+        assert error.value.code == 'AI_SELECTION_INVALID'
+        output(job, json.dumps({**before, 'html': html}).encode())
+        with pytest.raises(AnalyticsError) as error:
+            ai.collect(actor, job['id'])
+        assert error.value.code == 'AI_OUTSIDE_SELECTION'
+        assert ai.get(actor, job['id'])['status'] == 'WAITING'
+        assert pages.get(actor, page['page_id'])['spec']['version'] == 1
+    for href in ('https://example.invalid/path', 'http://example.invalid/', '../relative', '#anchor'):
+        proposed = {**before, 'html': f'<div><a href="{href}">Changed link</a></div>'}
+        protect_selection(before, proposed, scope)
+    output(job, json.dumps(proposed).encode())
+    ready = ai.collect(actor, job['id'])
+    assert ai.confirm(actor, job['id'], ready['candidate_hash'])['saved_version'] == 2
+    assert PageDocumentStore(pages.path.parent).get(actor, page['page_id'])['spec']['package']['html'] == proposed['html']
+    for src in ('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aN1kAAAAASUVORK5CYII=',
+                'blob:https://example.invalid/static-image'):
+        html = f'<div><img src="{src}"/><p>Before</p></div>'
+        image_page = save_page(html)
+        image_job = ai.begin(actor, 'page', image_page['page_id'], 1, 'ai_' + str(uuid.uuid4()), scope_for(html))
+        image_package = json.loads(ai.content(actor, image_job['id'], 'source')[1])
+        output(image_job, json.dumps({**image_package, 'html': html.replace('Before', 'After')}).encode())
+        ready = ai.collect(actor, image_job['id'])
+        assert ai.confirm(actor, image_job['id'], ready['candidate_hash'])['saved_version'] == 2
+
+
+def test_selection_preserves_root_and_parent_content_model_without_browser_reparenting(setup):
+    import hashlib
+    from backend.services.analytics.cockpit_html_selection import protect_selection, validate_selection
+    actor, _, pages, ai = setup
+    html = '<p id="parent">before <span>inside</span> after <b id="outside">outside</b></p>'
+    selected = '<span>inside</span>'
+    scope = {'start': html.index(selected), 'end': html.index(selected) + len(selected),
+             'html_hash': hashlib.sha256(html.encode()).hexdigest()}
+    draft = PageDraft(title='Context selection', session_id='selection-context',
+                      package={'html': html, 'css': '', 'js': '', 'resources': [], 'node_map': []},
+                      binding_manifest={'bindings': [], 'result_refs': []})
+    generated = pages.generate(actor, draft)
+    page = pages.confirm(actor, generated['preview_id'], 'context-seed')['spec']
+    job = ai.begin(actor, 'page', page['page_id'], 1, 'ai_' + str(uuid.uuid4()), scope)
+    before = json.loads(ai.content(actor, job['id'], 'source')[1])
+    for fragment in ('<div>changed</div>', '<span><div>changed</div></span>', '<span><h2>changed</h2></span>'):
+        output(job, json.dumps({**before, 'html': html.replace(selected, fragment)}).encode())
+        with pytest.raises(AnalyticsError) as error:
+            ai.collect(actor, job['id'])
+        assert error.value.code == 'AI_OUTSIDE_SELECTION'
+        assert pages.get(actor, page['page_id'])['spec']['package']['html'] == html
+    for original, target, replacement in [
+        ('<a href="#ok"><span>inside</span></a>', selected, '<span><a href="#other">changed</a></span>'),
+        ('<button><span>inside</span></button>', selected, '<span><button>changed</button></span>'),
+        ('<ul><li>inside</li></ul>', '<li>inside</li>', '<li>changed<li>outside</li></li>'),
+    ]:
+        start = original.index(target)
+        nested_scope = {'start': start, 'end': start + len(target), 'html_hash': hashlib.sha256(original.encode()).hexdigest()}
+        assert validate_selection({'html': original}, nested_scope, {}) == nested_scope
+        with pytest.raises(AnalyticsError) as error:
+            protect_selection({'html': original}, {'html': original.replace(target, replacement)}, nested_scope)
+        assert error.value.code == 'AI_OUTSIDE_SELECTION'
+    after = {**before, 'html': html.replace(selected, '<span><strong>changed</strong></span>')}
+    output(job, json.dumps(after).encode())
+    ready = ai.collect(actor, job['id'])
+    assert ai.confirm(actor, job['id'], ready['candidate_hash'])['saved_version'] == 2
+    assert pages.get(actor, page['page_id'])['spec']['package']['html'] == after['html']
+
+
+def test_selection_parser_caps_depth_and_stops_before_processing_the_remaining_megabyte():
+    import hashlib
+    from backend.services.analytics.cockpit_html_selection import MAX_SELECTION_DEPTH, SourceTree, validate_selection
+    html = '<div>' * MAX_SELECTION_DEPTH + 'static' + '</div>' * MAX_SELECTION_DEPTH
+    scope = {'start': 0, 'end': len(html), 'html_hash': hashlib.sha256(html.encode()).hexdigest()}
+    assert validate_selection({'html': html}, scope, {}) == scope
+    too_deep = '<div>' + html + '</div>'
+    with pytest.raises(AnalyticsError) as error:
+        validate_selection({'html': too_deep}, {'start': 0, 'end': len(too_deep), 'html_hash': hashlib.sha256(too_deep.encode()).hexdigest()}, {})
+    assert error.value.code == 'AI_SELECTION_INVALID'
+    assert SourceTree('<div>' * MAX_SELECTION_DEPTH + '<svg/>' + '</div>' * MAX_SELECTION_DEPTH).invalid is False
+
+    class CountingTree(SourceTree):
+        visited = 0
+
+        def handle_starttag(self, tag, attrs):
+            self.visited += 1
+            super().handle_starttag(tag, attrs)
+
+    tree = CountingTree('<div>' * 90000 + '</div>' * 90000)
+    assert tree.invalid is True
+    assert tree.visited == MAX_SELECTION_DEPTH + 1
+    assert len(tree.stack) == MAX_SELECTION_DEPTH

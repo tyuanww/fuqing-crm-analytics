@@ -8,12 +8,20 @@ from fastapi import APIRouter, Request, Response
 
 from backend.services.analytics.cockpit_files import KINDS, fault, sign_token, verify_token
 
+class AISelection(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    start: int = Field(strict=True, ge=0)
+    end: int = Field(strict=True, gt=0)
+    html_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
 class AIBegin(BaseModel):
     model_config = ConfigDict(extra="forbid")
     id: str = Field(pattern=r"^ai_[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
     target_kind: Literal["file", "page"]
     target_id: str = Field(min_length=1, max_length=160)
     base_version: int = Field(strict=True, ge=1)
+    selection: AISelection | None = None
 
 
 class AIConfirm(BaseModel):
@@ -33,7 +41,7 @@ def cockpit_ai_router(store, principal, office=None, office_principal=None):
 
     @router.post("", status_code=201)
     def begin(body: AIBegin, request: Request):
-        return store.begin(principal(request), body.target_kind, body.target_id, body.base_version, body.id)
+        return store.begin(principal(request), body.target_kind, body.target_id, body.base_version, body.id, body.selection.model_dump() if body.selection else None)
 
     @router.get("/office-content")
     def office_content(ticket: str):

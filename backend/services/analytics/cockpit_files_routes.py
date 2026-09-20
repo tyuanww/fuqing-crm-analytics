@@ -52,6 +52,14 @@ def cockpit_files_router(store, principal, office=None, office_principal=None):
     def listing(request: Request, offset: int = 0):
         return store.list(principal(request), offset)
 
+    @router.get("/preferences")
+    def preferences(request: Request):
+        return store.preferences(principal(request))
+
+    @router.patch("/preferences")
+    async def organize(request: Request):
+        return store.preferences(principal(request), await object_body(request))
+
     @router.get("/status")
     def status(request: Request):
         principal(request)
