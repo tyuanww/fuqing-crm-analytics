@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+- worker 读取 SQLite 状态遇到短暂 BUSY/LOCKED 时最多重试两次，避免误判执行失联；持续不可读或其他错误仍停止子进程，不重复执行查询。
+
+- 后续依赖候选：联合升级 jsdom 30、Vitest/UI 5 与 anyio、urllib3、click；Vitest 配套分组，pydantic-core 2.49 因与当前 Pydantic 精确依赖冲突暂缓。
+
 ## 2026-09-20 — 依赖 PR 联合收尾候选
 
 - 联合校验 VueUse 15、PyArrow 25 及七项配套依赖升级；DuckDB 新锁仅用于隔离环境，真实归档服务升级须另行完成备份恢复验收。

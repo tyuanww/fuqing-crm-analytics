@@ -11,6 +11,10 @@ updates:
     ignore:
       - dependency-name: "duckdb"
         update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      # Current Pydantic 2.13.5 requires exactly core 2.46.5.
+      # Revisit 2.49.0 when a compatible parent release is available.
+      - dependency-name: "pydantic-core"
+        versions: ["2.49.0"]
   - package-ecosystem: "npm"
     directory: "/frontend-vue3"
     schedule:
@@ -18,6 +22,9 @@ updates:
       day: "monday"
     open-pull-requests-limit: 5
     labels: ["dependencies", "javascript"]
+    groups:
+      vitest:
+        patterns: ["vitest", "@vitest/*"]
     # vue-tsc 3.3.11 requires the JavaScript compiler API removed in TypeScript 7.
     # Revisit after upstream Vue SFC type checking supports the native compiler.
     ignore:

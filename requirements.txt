@@ -39,9 +39,9 @@ psutil>=5.9.0           # 内存监控（scripts/etl/benchmark_memory.py）
 packaging>=24.0         # 版本比较（backend/tests Version 解析）
 pyyaml>=6.0.3           # Pydantic v2 间接 import（lock PyYAML, B2 import check）
 # 安全相关传递依赖下限（uvicorn/httpx/requests 树）
-click>=8.3.3
+click>=8.5.0
 idna>=3.19
-urllib3>=2.7.0
+urllib3>=2.8.0
 
 # 开发工具
 pytest>=9.1.1           # 测试框架
