@@ -2,8 +2,10 @@
 
 import json
 import os
+import sqlite3
 import subprocess
 import sys
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict
@@ -20,7 +22,7 @@ from backend.services.analytics.jobs import RunStore
 from backend.services.analytics.worker import WorkerManager
 from backend.tests.analytics_run_support import (
     REPO_ROOT, accept, actor, child_environment, fixture_result, make_store, observation, profile,
-    receive, start_probe, stop_owned, synthetic_fixture,
+    receive, start_probe, stop_owned, synthetic_fixture, sqlite_connection,
 )
 from backend.tests.analytics_worker_probe import ProbeLauncher
 
@@ -433,3 +435,70 @@ def test_foreign_worker_result_binding_never_commits(tmp_path):
             WorkerManager(store, lambda _: actor(), fixture, launch=launch).execute(actor(), intent, step)
     with pytest.raises(AnalyticsError):
         store.step_result(actor(), intent.run_id, intent.attempt_id, step.step_id)
+
+
+@pytest.mark.parametrize("release_on_retry", [True, False])
+def test_worker_state_read_lock_is_bounded_and_does_not_duplicate_execution(tmp_path, release_on_retry):
+    store, _, intent, step, fixture = setup_worker(tmp_path)
+    retry_seen, stop_seen = threading.Event(), threading.Event()
+
+    def hook(point, _payload):
+        if point == "worker:state-read-retry":
+            retry_seen.set()
+        elif point == "worker:stop-requested":
+            stop_seen.set()
+
+    with ProbeLauncher("sql_hold") as launch, ThreadPoolExecutor(1) as pool:
+        manager = WorkerManager(store, lambda _: actor(), fixture, launch=launch, fault_hook=hook)
+        running = pool.submit(manager.execute, actor(), intent, step)
+        launch.receive()  # Real child is executing SQL and retains its lease.
+        try:
+            with sqlite_connection(store.path) as writer:
+                writer.execute("PRAGMA locking_mode=EXCLUSIVE")
+                writer.execute("BEGIN EXCLUSIVE")
+                assert retry_seen.wait(5), "worker did not observe the real SQLite read lock"
+                if release_on_retry:
+                    assert not running.done()
+                else:
+                    assert stop_seen.wait(5), "persistent state loss did not stop the owned child"
+        finally:
+            launch.release()
+        if release_on_retry:
+            assert running.result(timeout=10) == fixture_result()
+        else:
+            with pytest.raises(AnalyticsError, match="EXECUTION_UNKNOWN"):
+                running.result(timeout=10)
+        assert launch.child.poll() is not None
+    records = store.worker_records(active_only=False)
+    assert len(records) == 1 and records[0]["state"] == "EXITED"
+    assert records[0]["active_slot"] is None
+    metrics = json.loads(records[0]["metrics_json"])
+    assert 1 <= metrics["state_read_retries"] <= 2
+    if release_on_retry:
+        assert records[0]["error_code"] is None
+    else:
+        assert records[0]["error_code"] == "EXECUTION_UNKNOWN"
+        assert metrics["state_read_retries"] == 2
+        assert metrics["observation_failure"] == {"stage": "state_read", "category": "database"}
+
+
+@pytest.mark.parametrize("error_kind", ["database", "operational_no_code", "io_error"])
+def test_worker_state_read_does_not_retry_other_database_errors(tmp_path, monkeypatch, error_kind):
+    store, _, _intent, _step, fixture = setup_worker(tmp_path)
+    manager = WorkerManager(store, lambda _: actor(), fixture)
+    calls = []
+
+    def broken_records(**_kwargs):
+        calls.append(1)
+        if error_kind == "database":
+            raise sqlite3.DatabaseError("controlled unreadable state")
+        failure = sqlite3.OperationalError("controlled unreadable state")
+        if error_kind == "io_error":
+            failure.sqlite_errorcode = sqlite3.SQLITE_IOERR
+        raise failure
+
+    monkeypatch.setattr(store, "worker_records", broken_records)
+    metrics = {}
+    with pytest.raises(sqlite3.DatabaseError):
+        manager._worker_record("exec_" + "a" * 32, metrics)
+    assert len(calls) == 1 and metrics == {}

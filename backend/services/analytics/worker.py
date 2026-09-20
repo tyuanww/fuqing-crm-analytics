@@ -108,6 +108,23 @@ class WorkerManager:
                 # is not a release signal and does not authorize PID killing.
                 continue
 
+    def _worker_record(self, execution_id, metrics):
+        # A short SQLite WAL/checkpoint lock is not proof of an unknown
+        # execution. Retry only BUSY/LOCKED reads, with at most three existing
+        # 100 ms connection waits; all other failures still stop the worker.
+        for attempt in range(3):
+            try:
+                return self.store.worker_records(execution_id=execution_id)[0]
+            except sqlite3.OperationalError as failure:
+                code = getattr(failure, "sqlite_errorcode", None)
+                if (not isinstance(code, int)
+                        or code & 0xFF not in {sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED}
+                        or attempt == 2):
+                    raise
+                metrics["state_read_retries"] = metrics.get("state_read_retries", 0) + 1
+                self._hook("worker:state-read-retry", {"execution_id": execution_id})
+                time.sleep(0.01)
+
     def _stop_reason(self, record):
         principal = self.resolve_actor(record["owner"])
         try:
@@ -194,7 +211,7 @@ class WorkerManager:
                     if child.poll() is None:
                         stage = "state_read"
                         try:
-                            record = self.store.worker_records(execution_id=execution_id)[0]
+                            record = self._worker_record(execution_id, metrics)
                             stage = "stop_reason"
                             reason = None if error else self._stop_reason(record)
                             error = error or reason
@@ -291,7 +308,7 @@ class WorkerManager:
             child.wait(timeout=3)
             metrics["temp_peak_bytes"] = max(metrics["temp_peak_bytes"], temp_bytes(temporary))
             metrics["elapsed_ms"] = round((time.monotonic() - started) * 1000)
-            record = self.store.worker_records(execution_id=execution_id)[0]
+            record = self._worker_record(execution_id, metrics)
             persisted = self._stop_reason(record)
             if persisted and persisted != "EXECUTION_UNKNOWN" and error in {None, "EXECUTION_UNKNOWN"}:
                 error = persisted
