@@ -5,7 +5,13 @@ import { loadEditor } from './cockpit-office-editor.tsx';
 
 export function CockpitAIPanel({ client, state, blocked = false }: { client: CockpitAIClient; state: AIState; blocked?: boolean }) {
   const job = state.active;
-  if (!job) return state.message ? <p role="status">{state.message}</p> : null;
+  if (!job) return state.message ? <p role={state.messageError ? 'alert' : 'status'}>{state.message}</p> : null;
+  if (['SAVED', 'CANCELLED'].includes(job.status) && !state.confirmationUncertain) return <>
+    {state.messageError && state.message ? <p className="cockpit-live" role="alert">{state.message}</p> : null}
+    <details className="cockpit-ai-panel cockpit-ai-complete" data-testid="cockpit-ai-panel">
+    <summary>{job.status === 'SAVED' ? `AI 修改已保存 · 版本 ${job.saved_version}` : '本次修改已放弃'}</summary>
+    <p>{!state.messageError && state.message || `基于版本 ${job.base_version}，保留原版本。`}</p>
+  </details></>;
   return <section className="cockpit-ai-panel" aria-label="AI 修改" data-testid="cockpit-ai-panel">
     <div className="cockpit-notice"><div><strong>{job.status === 'READY' ? '检查 AI 修改' : job.status === 'SAVED' ? 'AI 修改已保存' : job.status === 'CANCELLED' ? '本次修改已放弃' : '在对话中描述修改要求'}</strong>
       <p>{state.confirmationUncertain ? '保存结果待核对，请用同一请求重试。' : job.status === 'WAITING' ? 'AI 完成后收取候选，预览确认后才保存。任务会保留，可稍后回来。' : `基于版本 ${job.base_version}，保留原版本。`}</p></div>
@@ -19,7 +25,7 @@ export function CockpitAIPanel({ client, state, blocked = false }: { client: Coc
         <button disabled={blocked || state.busy || state.confirmationUncertain} onClick={() => void client.cancel()}>放弃本次修改</button>
       </> : null}
     </div>
-    {state.message ? <p className="cockpit-live" role="status">{state.message}</p> : null}
+    {state.message ? <p className="cockpit-live" role={state.messageError ? 'alert' : 'status'}>{state.message}</p> : null}
     {state.previewVariant ? <p className="cockpit-muted" role="status">正在查看：{state.previewVariant === 'source' ? '原版本' : 'AI 修改后（尚未保存）'}</p> : null}
     {state.comparison ? <details className="cockpit-ai-diff"><summary>查看文本差异 · {state.comparison.source_size} → {state.comparison.candidate_size} 字节</summary>
       <p>{state.comparison.note}{state.comparison.truncated ? ' 当前差异已截断。' : ''}</p>

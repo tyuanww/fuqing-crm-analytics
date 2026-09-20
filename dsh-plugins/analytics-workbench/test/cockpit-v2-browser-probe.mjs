@@ -117,7 +117,7 @@ try {
   await page.getByTestId('library-preview-banner').waitFor(); await idle();
   assert.equal(await page.getByTestId('library-html-preview').count(), 0);
   await click('library-cancel');
-  await page.locator('[data-kind="html"] button').filter({ hasText: '已保存页面' }).click(); await idle();
+  await page.locator('[data-product-id^="page:"] .cockpit-product').click(); await idle();
   check('原生新看板预览覆盖旧 HTML 选择，可显示并取消');
   await click('cockpit-edit-btn');
   const frame = page.frameLocator('[data-testid="library-html-preview"]');
@@ -160,7 +160,7 @@ try {
   assert.equal(stored.version, 2); assert.match(stored.package.html, /section_one[^>]*>本周观察/); assert.match(stored.package.html, /section_two[^>]*>下一阶段行动/);
   check('HTML 精确替换、确认、独立连接重读落盘');
   await page.reload(); await idle();
-  await page.locator('[data-kind="html"] button').filter({ hasText: '已保存页面' }).click(); await idle();
+  await page.locator('[data-product-id^="page:"] .cockpit-product').click(); await idle();
   assert.equal(await page.evaluate(() => window.cockpitFixture.pageStore.getSnapshot().current.version), 2);
   await page.getByRole('button', { name: '版本历史', exact: true }).click(); await idle();
   await page.locator('.cockpit-history-row').filter({ hasText: '版本 1' }).getByRole('button').click(); await idle();
@@ -175,7 +175,7 @@ try {
   await page.evaluate(() => { window.cockpitFixture.controls.loseConfirm = true; });
   await click('html-confirm');
   assert.equal(await page.evaluate(() => window.cockpitFixture.pageStore.getSnapshot().confirmationUncertain), true);
-  assert.equal(await page.locator('[data-kind="board"] button').isDisabled(), true);
+  assert.equal(await page.locator('[data-kind="board"] .cockpit-product').isDisabled(), true);
   assert.equal(await page.getByRole('button', { name: '取消预览', exact: true }).isDisabled(), true);
   await shot('04-uncertain-receipt');
   await click('html-confirm');
@@ -190,7 +190,7 @@ try {
   await click('sm-cockpit-back'); await click('leave-discard');
   assert.equal(await page.locator('body').getAttribute('data-left'), 'true');
   check('文本未保存离开保护：留下保留输入，放弃只丢本次修改');
-  await page.locator('[data-kind="board"] button').click(); await idle();
+  await page.locator('[data-kind="board"] .cockpit-product').click(); await idle();
   await click('cockpit-edit-btn');
   await page.getByRole('button', { name: '选择组件 本周经营观察', exact: true }).click(); await idle();
   assert.equal(await page.evaluate(() => window.cockpitFixture.nativeMessages()), 0);
@@ -255,7 +255,7 @@ try {
   await page.waitForFunction(() => window.cockpitFixture.delivery.getSnapshot().status === 'ready');
   assert.equal(await page.locator('[data-kind="html"] button').filter({ hasText: 'weekly-review.html 工作区' }).count(), 0);
   check('列表失败可恢复，切会话不保留旧会话文件');
-  await page.locator('[data-kind="html"] button').filter({ hasText: '已保存页面' }).click(); await idle();
+  await page.locator('[data-product-id^="page:"] .cockpit-product').click(); await idle();
   await click('cockpit-edit-btn');
   await frame.locator('[data-shine-node="report_title"]').click();
   await page.getByTestId('html-replacement').fill('冲突时保留输入');
@@ -268,7 +268,7 @@ try {
   assert.ok(await page.getByTestId('library-message').innerText());
   await shot('08-html-conflict');
   await click('sm-cockpit-back'); await click('leave-discard');
-  await page.locator('[data-kind="html"] button').filter({ hasText: '已保存页面' }).click(); await idle();
+  await page.locator('[data-product-id^="page:"] .cockpit-product').click(); await idle();
   assert.equal(await page.evaluate(() => window.cockpitFixture.pageStore.getSnapshot().current.version), beforeConflict.version + 1);
   check('真实 CAS 冲突保留输入，放弃后重新打开最新版本');
   await page.evaluate(() => { window.cockpitFixture.controls.eof = false; });

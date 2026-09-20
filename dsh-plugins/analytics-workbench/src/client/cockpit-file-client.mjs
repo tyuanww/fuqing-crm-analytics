@@ -1,11 +1,21 @@
 /** Durable file copies and Office save receipts. Secrets stay in the existing local HTTP adapter. */
 const PREFIX = '/api/v1/analytics/cockpit-files';
 export const MAX_COCKPIT_FILE_BYTES = 20 * 1024 * 1024;
+function checkedPreferences(value) {
+  if (!value || !Array.isArray(value.removed) || !Array.isArray(value.order)
+    || ![...value.removed, ...value.order].every(id => typeof id === 'string')
+    || !Number.isInteger(value.rail_width) || value.rail_width < 180 || value.rail_width > 480) throw new Error('产物设置回执无效，请刷新后重试。');
+  const layout = value.rail_layout;
+  if (layout != null && (!['x', 'y', 'width', 'height'].every(key => Number.isInteger(layout[key]))
+    || layout.x < 0 || layout.y < 0 || layout.width < 180 || layout.width > 480 || layout.height < 240 || layout.height > 1000)) throw new Error('浮动面板设置回执无效，请刷新后重试。');
+  return value;
+}
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 export function createCockpitFileClient(http) {
   const listeners = new Set();
-  let state = { files: [], status: 'idle', message: '', busy: false, editor: null, dirty: false, confirmationUncertain: false };
+  let state = { preferences: { removed: [], order: [], rail_width: 248 }, preferencesReady: false, organizing: false, files: [], status: 'idle', message: '', busy: false, editor: null, dirty: false, confirmationUncertain: false };
+  let preferenceEpoch = 0, organizationCount = 0, organization = Promise.resolve();
   let generation = 0, saveId = null, saveGeneration = null, disposed = false, editorSynced = true;
   const update = patch => { state = { ...state, ...patch }; for (const listener of listeners) listener(); };
   async function request(path, { method = 'GET', body, raw, headers = {} } = {}) {
@@ -27,16 +37,31 @@ export function createCockpitFileClient(http) {
     subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); },
     hasUnsavedChanges: () => state.dirty || state.confirmationUncertain || Boolean(saveId),
     async refresh() {
+      if (state.organizing) return;
+      const epoch = preferenceEpoch;
       update({ status: 'loading' });
       try {
+        const preferences = checkedPreferences(await json('/preferences'));
         const files = []; let offset = 0;
         do {
           const page = await json('?offset=' + offset);
           if (!Array.isArray(page.items) || (page.next_offset !== null && (!Number.isSafeInteger(page.next_offset) || page.next_offset <= offset))) throw new Error('文件列表分页无效，请重试。');
           files.push(...page.items); offset = page.next_offset;
         } while (offset !== null && !disposed);
-        if (!disposed) update({ files, status: 'ready' });
+        if (!disposed) update({ files, ...(epoch === preferenceEpoch ? { preferences, preferencesReady: true } : {}), status: 'ready' });
       } catch (error) { if (!disposed) update({ status: 'error', message: error.message }); }
+    },
+    async organize(change) {
+      if (!state.preferencesReady) return false;
+      preferenceEpoch++; organizationCount++;
+      update({ organizing: true, message: '' });
+      const next = organization.then(async () => {
+        try { update({ preferences: checkedPreferences(await json('/preferences', { method: 'PATCH', body: change })) }); return true; }
+        catch (error) { update({ message: error.message }); return false; }
+        finally { organizationCount--; update({ organizing: organizationCount > 0 }); }
+      });
+      organization = next;
+      return next;
     },
     async upload(file, origin = { kind: 'upload' }) {
       if (state.busy) return null;

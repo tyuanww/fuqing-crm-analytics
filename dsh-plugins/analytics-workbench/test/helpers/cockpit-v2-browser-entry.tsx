@@ -1,4 +1,6 @@
 /** Disposable browser fixture: production components and clients, synthetic workspace only. */
+import { createCockpitFileClient } from '../../src/client/cockpit-file-client.mjs';
+import { createCockpitAIClient } from '../../src/client/cockpit-ai-client.mjs';
 import { createRoot } from 'react-dom/client';
 import { LibraryCockpitPanel } from '../../src/client/cockpit-workspace.tsx';
 import { createLibraryBoardClient } from '../../src/client/library-board-client.mjs';
@@ -30,6 +32,13 @@ const files = {
   },
   'other_session': { 'other.html': '<h1 data-shine-node="other">另一会话的交付</h1>' },
 };
+const ux = new URLSearchParams(location.search).has('ux');
+if (ux) {
+  files.native_session['weekly-review.html'] = '<!doctype html><html><head><style>body{font:16px sans-serif;margin:40px}header{border-bottom:1px solid #eee;padding:24px}section{padding:24px}</style></head><body><header><h1>经营回顾 🌟</h1><p>本周观察</p></header><section><h2>保持不变</h2><p>合成浏览器验收</p></section></body></html>';
+  Object.assign(files.native_session, { 'second.html': '<h1>第二份产物</h1>' });
+}
+const fileClient = ux ? createCockpitFileClient({ base: location.origin }) : undefined;
+const aiClient = ux ? createCockpitAIClient({ base: location.origin }, { openNative: async (job) => { document.body.dataset.aiSelection = JSON.stringify(job.selection); } }) : undefined;
 const controls = { failList: false, eof: true, readDelay: 0, loseConfirm: false, cancelFails: false };
 const calls: Array<{ operation: string; payload: unknown }> = [];
 let nativeMessages = 0;
@@ -68,10 +77,10 @@ delivery.captureSource({ ids: ['older_session', 'native_session'], byId: {
   older_session: { id: 'older_session', retainedBy: {} },
   native_session: { id: 'native_session', retainedBy: { mainView: 1 } },
 } });
-Object.assign(window, { cockpitFixture: { library, pageStore, delivery, controls, calls,
+Object.assign(window, { cockpitFixture: { library, pageStore, delivery, fileClient, aiClient, controls, calls,
   nativeMessages: () => nativeMessages, setMounted } });
 const root = createRoot(document.getElementById('root')!);
 function setMounted(mounted: boolean) { root.render(mounted ? <LibraryCockpitPanel library={library} pageStore={pageStore}
-  delivery={delivery} themeSource={themeSource} initialSurface="pages" goConversation={() => { document.body.dataset.left = 'true'; }}
+  delivery={delivery} fileClient={fileClient} aiClient={aiClient} themeSource={themeSource} initialSurface="pages" goConversation={() => { document.body.dataset.left = 'true'; }}
   openWorkspaceFile={product => { document.body.dataset.openedFile = String(product.path); }} /> : null); }
 setMounted(true);

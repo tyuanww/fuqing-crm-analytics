@@ -46,7 +46,7 @@ test('compiled overlay measures official slot wrappers, preserves draft/identity
     assert.equal(doc.querySelector('[data-composition-mode]').dataset.compositionMode, 'split');
     assert.equal(native.style.getPropertyValue('--sm-cockpit-chat-width'), '440px');
     assert.equal(doc.querySelector('textarea'), input);
-    const separator = doc.querySelector('[role=separator]'); separator.focus();
+    const separator = doc.querySelector('[role=separator][aria-label="调整原生对话宽度"]'); separator.focus();
     await act(async () => separator.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'ArrowLeft', shiftKey: true, bubbles: true })));
     assert.equal(native.style.getPropertyValue('--sm-cockpit-chat-width'), '504px');
     const pointer = async (type, x, buttons = 1) => act(async () => {

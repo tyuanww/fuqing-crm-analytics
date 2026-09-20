@@ -1,12 +1,12 @@
 /** Native DSH does the AI work; this client only manages durable candidates. */
 const PREFIX = '/api/v1/analytics/cockpit-ai';
 export function nativeArtifactPrompt(job) {
-  return `请帮我修改驾驶舱产物 ${JSON.stringify(job.title ?? job.filename)}（版本 ${job.base_version}）。先读取当前目录的 TASK.md 和源文件，确认内容并询问我想怎样修改。等我提出要求后再动手，完成后交付候选，由我回驾驶舱预览并确认保存。`;
+  return `请帮我修改驾驶舱产物 ${JSON.stringify(job.title ?? job.filename)}（版本 ${job.base_version}）。${job.selection ? '本次仅修改我在画布点选的板块，严格遵守 TASK.md 的选区范围。' : ''}先读取当前目录的 TASK.md 和源文件，确认内容并询问我想怎样修改。等我提出要求后再动手，完成后交付候选，由我回驾驶舱预览并确认保存。`;
 }
 
 export function createCockpitAIClient(http, { openNative, onSaved = async () => {} } = {}) {
   const listeners = new Set();
-  let state = { jobs: [], active: null, busy: false, confirmationUncertain: false, message: '', comparison: null, viewer: null, html: null, previewVariant: null };
+  let state = { jobs: [], active: null, busy: false, confirmationUncertain: false, message: '', messageError: false, comparison: null, viewer: null, html: null, previewVariant: null };
   let pendingBegin = null, disposed = false;
   const update = patch => { if (disposed) return; state = { ...state, ...patch }; for (const listener of listeners) listener(); };
   async function request(path, { method = 'GET', body } = {}) {
@@ -29,8 +29,8 @@ export function createCockpitAIClient(http, { openNative, onSaved = async () => 
   };
   async function perform(fn) {
     if (state.busy) return false;
-    update({ busy: true, message: '' });
-    try { await fn(); return true; } catch (error) { update({ message: error.message }); return false; }
+    update({ busy: true, message: '', messageError: false });
+    try { await fn(); return true; } catch (error) { update({ message: error.message, messageError: true }); return false; }
     finally { update({ busy: false }); }
   }
   const api = {
@@ -54,16 +54,16 @@ export function createCockpitAIClient(http, { openNative, onSaved = async () => 
       if (state.busy || state.confirmationUncertain) return;
       const active = state.jobs.find(row => row.target_kind === targetKind && row.target_id === targetId)
         ?? (state.active?.target_kind === targetKind && state.active?.target_id === targetId ? state.active : null);
-      if (active?.id !== state.active?.id) update({ active, viewer: null, html: null, comparison: null, previewVariant: null, message: '' });
+      if (active?.id !== state.active?.id) update({ active, viewer: null, html: null, comparison: null, previewVariant: null, message: '', messageError: false });
     },
-    async begin(target_kind, target_id, base_version) {
+    async begin(target_kind, target_id, base_version, selection = null) {
       if (state.confirmationUncertain) return false;
       return perform(async () => {
         if (typeof openNative !== 'function') throw new Error('原生 AI 对话尚未连接。');
         const prior = state.jobs.find(job => job.target_kind === target_kind && job.target_id === target_id);
-        if (prior) { accept(prior); await openNative(prior, false); return; }
-        if (!pendingBegin || pendingBegin.target_id !== target_id || pendingBegin.base_version !== base_version || pendingBegin.target_kind !== target_kind) {
-          pendingBegin = { id: 'ai_' + crypto.randomUUID(), target_kind, target_id, base_version };
+        if (prior) { if (JSON.stringify(prior.selection ?? null) !== JSON.stringify(selection)) throw new Error('此产物已有其他范围的 AI 修改任务，请先完成或放弃，再重新选择。'); accept(prior); await openNative(prior, false); return; }
+        if (!pendingBegin || pendingBegin.target_id !== target_id || pendingBegin.base_version !== base_version || pendingBegin.target_kind !== target_kind || JSON.stringify(pendingBegin.selection ?? null) !== JSON.stringify(selection)) {
+          pendingBegin = { id: 'ai_' + crypto.randomUUID(), target_kind, target_id, base_version, ...(selection ? { selection } : {}) };
         }
         const job = await json('', { method: 'POST', body: pendingBegin });
         accept(job); pendingBegin = null;
@@ -115,7 +115,7 @@ export function createCockpitAIClient(http, { openNative, onSaved = async () => 
         }
       });
       // Refresh failures cannot undo a verified receipt or cause another confirmation.
-      if (saved) { try { await onSaved(savedJob); } catch { update({ message: '新版本已保存，产物列表刷新失败，请手动刷新。' }); } }
+      if (saved) { try { await onSaved(savedJob); } catch { update({ message: '新版本已保存，产物列表刷新失败，请手动刷新。', messageError: true }); } }
       return { ok: saved };
     },
     persistForLeave() { return api.confirm(); },

@@ -1,3 +1,4 @@
+import { sourceTargets, sourceTextPreview } from '../html-source-selection.mjs';
 /** Free-HTML library state. Dirty ≠ active edit context. Leave three-choice is host-owned. */
 import { createHtmlImporter } from './html-import.mjs';
 import { SAMPLE_PROMPTS } from './generate-context.mjs';
@@ -416,7 +417,8 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
     selectLocatable(request) {
       if (state.mode !== 'edit' || state.busy || state.confirmationUncertain || state.preview) return;
       if (state.textDraft?.changed) { emit({ message: '请先预览或放弃当前文本修改' }); return; }
-      const located = bound.edit.locate(state.current?.package, request);
+      const source = request.source && sourceTargets(state.current?.package, state.current?.binding_manifest).find(node => node.node_id === request.node_id && node.mapping_token === request.mapping_token);
+      const located = request.source ? (source ? { ...source, ok: true, scope: 'source_range', label: source.tag } : { ok: false, error: { code: 'MAPPING_STALE', message: '选区已变化，请重新选择' } }) : bound.edit.locate(state.current?.package, request);
       if (!located.ok) {
         emit({ selection: { ok: false, stale: true, requireReselect: true, label: located.error.message, code: located.error.code }, overlay: 'selection', liveStatus: located.error.message });
         return;
@@ -433,7 +435,10 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
         const located = state.selection?.ok ? state.selection : null;
         if (!located) throw Object.assign(new Error('请先选择有效范围'), { code: 'MAPPING_STALE' });
         try {
-          const preview = bound.edit.previewPatch({ pkg: state.current.package, selection: { ...located, ...extras }, replacementText, instruction: isLive(bound) ? undefined : replacementText,
+          const preview = located.source ? {
+            sourceRange: true, preview_id: bound.nextId('preview'), idempotency_key: bound.nextId('patch'), operation: 'PATCH',
+            snapshot: sourceTextPreview(state.current.package, located, replacementText, state.current.binding_manifest),
+          } : bound.edit.previewPatch({ pkg: state.current.package, selection: { ...located, ...extras }, replacementText, instruction: isLive(bound) ? undefined : replacementText,
             page_id: state.current.page_id, session_id: state.current.session_id, base_version: state.current.version,
             binding_manifest: state.current.binding_manifest, affectsShared: extras.affectsShared });
           if (isLive(bound) && bound.documents?.patchPreview) {
@@ -485,7 +490,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
             acceptSpec(spec);
             return;
           }
-          const applied = bound.edit.confirmPatch(preview.preview_id, { idempotency_key: state.lastIdempotencyKey });
+          const applied = preview.sourceRange ? { snapshot: preview.snapshot } : bound.edit.confirmPatch(preview.preview_id, { idempotency_key: state.lastIdempotencyKey });
           const nextVersion = state.current.version + 1;
           const snapshot = clone(applied.snapshot);
           const page = {
