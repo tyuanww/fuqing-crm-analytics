@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict
 from pathlib import Path
 
+import duckdb
 import pytest
 
 from backend.analytics_fixture import SyntheticFixture
@@ -48,7 +49,11 @@ def test_readonly_worker_computes_fixture_and_records_independent_exit(tmp_path)
     assert metrics["settings"]["threads"] == "2"
     assert metrics["settings"]["enable_external_access"] == "false"
     assert metrics["settings"]["lock_configuration"] == "true"
-    assert metrics["engine"]["version"] == "1.5.3"
+    # Backend and B0 have separate pinned environments; the child must report
+    # the exact engine loaded by its parent, including its source revision.
+    assert metrics["engine"] == {
+        "version": duckdb.__version__, "source_revision": duckdb.__git_revision__,
+    }
     fresh = RunStore(store.directory, profile())
     assert fresh.step_result(actor(), intent.run_id, intent.attempt_id, step.step_id) == fixture_result()
     done = fresh.observe(actor(), observation(intent, "SUCCEEDED", primary=step.step_id))

@@ -14,6 +14,7 @@ from dataclasses import asdict
 from pathlib import Path
 from types import SimpleNamespace
 
+import duckdb
 import pytest
 
 from backend.analytics_query_fixture import ChannelFollowupFixture, create_channel_followup_fixture
@@ -115,7 +116,11 @@ def test_real_worker_matches_hand_golden_and_reopen_stays_query_type(tmp_path, d
     assert metrics["settings"]["enable_external_access"] == "false"
     assert metrics["settings"]["lock_configuration"] == "true"
     assert metrics["settings"]["threads"] == "2"
-    assert metrics["engine"]["version"] == "1.5.3"
+    # Backend and B0 have separate pinned environments; the child must report
+    # the exact engine loaded by its parent, including its source revision.
+    assert metrics["engine"] == {
+        "version": duckdb.__version__, "source_revision": duckdb.__git_revision__,
+    }
     fresh = RunStore(store.directory, profile(), family="channel_followup")
     stored = fresh.step_result(query_actor(), intent.run_id, intent.attempt_id, step.step_id)
     assert stored == result

@@ -5,8 +5,8 @@
 
 | 项 | 状态 |
 |---|---|
-| 本地 Git 基线 | **3dedfa0（新公开快照）**，来源旧仓库 `7c20bc4f`（#217）；旧历史保留本地。 |
-| 本轮交付 | 从 `codex/crm-graph-closeout` 交付图谱查询、profile生成及验证状态修正；Git合入与本机切换分别验收。清理前必须确认preset已指向主仓构建产物，具体运行路径以本机部署回执为准。 |
+| 本地 Git 基线 | **96ba94a（新公开仓库 #11）**，来源旧仓库 `7c20bc4f`（#217）；旧历史保留本地。 |
+| 本轮交付 | CRM 指标 #11 已合入 `96ba94a`，CI 与合成 HTTP/宿主验收通过；依赖升级联合候选及 TypeScript 7 阻断见[收尾记录](docs/maintenance/dependency-closeout-2026-09-20.md)，尚未切现役。 |
 | VERSION / 产品 | **0.12.0.0**，独立 CRM 指标、知识与原生对话登录候选；产品仍 **PARTIAL**，原全量 Goal **PAUSED**。loopback，不上公网。 |
 | DSH 基座 | **0.1.6-alpha.2（ddefc45f）**，不改上游。 |
 | 现役 | 6677已接CRM登录与GSV，真实模型GSV及文档检索已通过；首次图谱接入仅更新CRM preset，MiniMax实际调用通过。切主仓、保留历史的重启及清理按本机部署回执分别验收。 |

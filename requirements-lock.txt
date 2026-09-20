@@ -4,9 +4,9 @@
 #   再剔除非 CRM 路径包（见 docs/operating/supply-chain.md）。
 # 2026-07-25 PR5: 移除 Torch/OCR/爬虫/视觉等无生产 import 冗余；
 #   安全 pin: starlette 1.3.1 / click 8.3.3 / idna 3.15 / urllib3 2.7.0
-# 禁止: 本 PR 不升级生产 DuckDB 主版本；锁内 duckdb 保持现网兼容 pin。
+# 此锁用于新安装与隔离验证；归档服务仍使用其原环境，切换 DuckDB 前须完成备份恢复验收。
 annotated-doc==0.0.5
-annotated-types==0.7.0
+annotated-types==0.8.0
 anyio==4.14.2
 bcrypt==5.0.0
 certifi==2026.2.25
@@ -14,7 +14,7 @@ cffi==2.0.0
 chardet==7.4.3
 charset-normalizer==3.5.1
 click==8.3.3
-duckdb==1.5.3
+duckdb==1.5.5
 et_xmlfile==2.0.0
 fastapi==0.136.1
 h11==0.16.0
@@ -27,14 +27,14 @@ MarkupSafe==3.0.3
 numpy==2.4.4
 openpyxl==3.1.5
 packaging==26.1
-pandas==3.0.2
+pandas==3.0.5
 pluggy==1.6.0
 psutil==7.2.2
-pyarrow==24.0.0
+pyarrow==25.0.1
 pycparser==3.0
 pydantic==2.13.5
 pydantic_core==2.46.5
-pytest==9.0.3
+pytest==9.1.1
 python-dateutil==2.9.0.post0
 python-docx==1.2.0
 python-dotenv==1.2.3

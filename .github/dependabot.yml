@@ -18,6 +18,11 @@ updates:
       day: "monday"
     open-pull-requests-limit: 5
     labels: ["dependencies", "javascript"]
+    # vue-tsc 3.3.11 requires the JavaScript compiler API removed in TypeScript 7.
+    # Revisit after upstream Vue SFC type checking supports the native compiler.
+    ignore:
+      - dependency-name: "typescript"
+        versions: [">=7.0.0 <8.0.0"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
