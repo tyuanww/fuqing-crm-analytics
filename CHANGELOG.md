@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- 继续接收依赖队列：Rive 2.42.2 及匹配的同源 WASM、PostCSS、Vue Test Utils、chardet、wheel、typing-inspection；提高 pytest-xdist 声明下限。阻止与 Pydantic 2.13.5 不匹配的 core 2.47–2.49 独立升级。
+
 - worker 读取 SQLite 状态遇到短暂 BUSY/LOCKED 时最多重试两次，避免误判执行失联；持续不可读或其他错误仍停止子进程，不重复执行查询。
 
 - 后续依赖候选：联合升级 jsdom 30、Vitest/UI 5 与 anyio、urllib3、click；Vitest 配套分组，pydantic-core 2.49 因与当前 Pydantic 精确依赖冲突暂缓。
