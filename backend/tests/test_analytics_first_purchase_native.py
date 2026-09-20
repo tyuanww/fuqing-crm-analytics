@@ -129,6 +129,17 @@ def settled_native_step(client, payload):
         sleep(0.05)
 
 
+def retry_state_busy(request):
+    """Retry only the documented transient state error, preserving the request."""
+    for attempt in range(3):
+        response = request()
+        error = response.json().get("error", {})
+        if not (response.status_code == 503 and error.get("code") == "STATE_UNAVAILABLE"
+                and error.get("retryable") is True) or attempt == 2:
+            return response
+        sleep(0.02)
+
+
 def test_prompt_binds_real_run_before_execute_and_survives_reopen(tmp_path):
     store = make_store(tmp_path / "state")
     conv, accepted, _fixture = bind_native(store)
@@ -391,7 +402,10 @@ def test_http_state_busy_keeps_original_call_and_recovers_without_duplicate_work
 
 @pytest.mark.parametrize("stale_cancel_version", [False, True])
 @pytest.mark.parametrize("initial_contention", [False, True])
-def test_http_in_flight_worker_cancel_requires_exit(tmp_path, stale_cancel_version, initial_contention):
+@pytest.mark.parametrize("cancel_contention", [False, True])
+def test_http_in_flight_worker_cancel_requires_exit(
+    tmp_path, stale_cancel_version, initial_contention, cancel_contention,
+):
     app = native_app(tmp_path)
     entered, release = threading.Event(), threading.Event()
 
@@ -438,32 +452,52 @@ def test_http_in_flight_worker_cancel_requires_exit(tmp_path, stale_cancel_versi
                     (running.result().status_code, running.result().text)
                     if running.done() else "native step did not reach the worker hook"
                 )
-                retry = client.post("/internal/native/first-purchase", json={
+                retry = retry_state_busy(lambda: client.post("/internal/native/first-purchase", json={
                     "session_id": SESSION, "request_id": "hold", "call_id": "call-hold",
                     "request": EXPECTED["request"],
-                }, headers=runtime_headers())
+                }, headers=runtime_headers()))
                 assert retry.status_code == 202, retry.text
                 assert retry.json()["disposition"] == "IN_FLIGHT"
                 assert retry.json()["run_id"] == run_id
-                snap = client.get(f"{PREFIX}/runs/{run_id}", headers=auth()).json()
-                version = snap["version"] - int(stale_cancel_version)
+                snapshot = retry_state_busy(lambda: client.get(f"{PREFIX}/runs/{run_id}", headers=auth()))
+                assert snapshot.status_code == 200, snapshot.text
+                version = snapshot.json()["version"] - int(stale_cancel_version)
                 conflicts = 0
+                cancel_attempts = []
+
+                def cancel_request():
+                    headers = {**auth(), "idempotency-key": "cancel-hold", "if-match": str(version)}
+                    response = client.post(
+                        f"{PREFIX}/runs/{run_id}/cancel", json={"reason": "USER_REQUEST"}, headers=headers,
+                    )
+                    cancel_attempts.append((response.status_code, headers["idempotency-key"], headers["if-match"]))
+                    if cancel_contention and response.status_code == 503:
+                        # Release a real exclusive lock only after observing the
+                        # HTTP rejection. The next request keeps its original CAS.
+                        writer.rollback()
+                    return response
+
+                if cancel_contention:
+                    writer.execute("BEGIN EXCLUSIVE")
                 # The live dispatcher may acknowledge the run between GET and
                 # cancel. Keep CAS fencing: re-read only a confirmed conflict,
                 # with a fixed bound; never treat a rejected cancel as success.
                 for _attempt in range(3):
-                    cancelled = client.post(
-                        f"{PREFIX}/runs/{run_id}/cancel", json={"reason": "USER_REQUEST"},
-                        headers={**auth(), "idempotency-key": "cancel-hold", "if-match": str(version)},
-                    )
+                    cancelled = retry_state_busy(cancel_request)
                     if cancelled.status_code != 409:
                         break
                     assert cancelled.json()["error"]["code"] == "CONFLICT", cancelled.text
-                    refreshed = client.get(f"{PREFIX}/runs/{run_id}", headers=auth())
+                    refreshed = retry_state_busy(lambda: client.get(f"{PREFIX}/runs/{run_id}", headers=auth()))
                     assert refreshed.status_code == 200, refreshed.text
                     assert refreshed.json()["version"] > version
                     version = refreshed.json()["version"]
                     conflicts += 1
+                if cancel_contention:
+                    assert cancel_attempts[0][0] == 503, cancel_attempts
+                for previous, current in zip(cancel_attempts, cancel_attempts[1:]):
+                    assert previous[1] == current[1] == "cancel-hold"
+                    if previous[0] == 503:
+                        assert previous[2] == current[2], "a transient error must not change CAS"
                 if stale_cancel_version:
                     assert conflicts >= 1
                 assert cancelled.status_code == 200, cancelled.text
@@ -474,13 +508,17 @@ def test_http_in_flight_worker_cancel_requires_exit(tmp_path, stale_cancel_versi
                 release.set()
             result = running.result(timeout=10)
         assert result.status_code in {200, 409}
-        final = client.get(f"{PREFIX}/runs/{run_id}", headers=auth()).json()
+        final_response = retry_state_busy(lambda: client.get(f"{PREFIX}/runs/{run_id}", headers=auth()))
+        assert final_response.status_code == 200, final_response.text
+        final = final_response.json()
         if result.status_code == 409:
             assert result.json()["error"]["code"] in {"RUN_CANCELLED", "TOOL_FAILED", "WORKER_ACTIVE", "CONFLICT"}
             assert final["status"] in {"CANCELLED", "CANCELLING", "FAILED"}
         records = app.state.store.worker_records(active_only=False)
         assert len(records) == 1
         assert records[0]["run_id"] == run_id
+        assert records[0]["state"] == "EXITED"
+        assert records[0]["active_slot"] is None
 
 
 def test_native_missing_role_rejected_without_facts(tmp_path):
