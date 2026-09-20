@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- 接收后续 Ruff 0.16.8、Vue Query / Query Core 5.103.1、Axios 1.20.0 依赖提案，同步验证入口中的 Ruff 版本说明。
+
 - 继续接收依赖队列：Rive 2.42.2 及匹配的同源 WASM、PostCSS、Vue Test Utils、chardet、wheel、typing-inspection；提高 pytest-xdist 声明下限。阻止与 Pydantic 2.13.5 不匹配的 core 2.47–2.49 独立升级。
 
 - worker 读取 SQLite 状态遇到短暂 BUSY/LOCKED 时最多重试两次，避免误判执行失联；持续不可读或其他错误仍停止子进程，不重复执行查询。
