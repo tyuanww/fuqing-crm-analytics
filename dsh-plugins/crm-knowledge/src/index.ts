@@ -2,7 +2,7 @@ import type { Context } from '@deepseek-ai/cordis';
 import { defineTool } from '@deepseek-ai/dsh-tools';
 import { schemas } from './contract.generated.js';
 import { runCrmCliAsync } from './run.mjs';
-import { CHANNELS, dashboardCapabilities, dashboardKnowledgeContext, queryDashboardGsv } from './dashboard.mjs';
+import { CHANNELS, dashboardCapabilities, dashboardKnowledgeContext, queryDashboardGsv, queryDashboardPurchases } from './dashboard.mjs';
 import type {} from './dashboard-service.js';
 
 export const name = 'crm-knowledge-candidate';
@@ -28,6 +28,23 @@ export function apply(ctx: Context, config: { python?: string } = {}): void {
     },
   }));
   ctx.tools.register(defineTool({
+    name: 'query_crm_dashboard_purchases',
+    description: '查询看板口径的每单金额AOV、客单价AUS及订单/买家覆盖情况。金额分子沿用看板GSV；空值必须连同原因解释，不得用旧明细行均值、新老客人数或净额候选替代。需要新版CRM聚合接口和当前对话登录，日期最多90天。',
+    parameters: {
+      start_date: { type: 'string', required: true, description: '开始日期 YYYY-MM-DD（Asia/Shanghai）' },
+      end_date: { type: 'string', required: true, description: '结束日期 YYYY-MM-DD，包含当天' },
+      channel: { type: 'string', enum: [...CHANNELS], description: '看板渠道，默认全店' },
+      exclude_low_price: { type: 'boolean', description: '看板的剔除低价开关，默认 false' },
+    },
+    output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
+    timeoutMs: 30000, isConcurrencySafe: () => false,
+    execute: async (args, exec) => {
+      const access = ctx.get('crmDashboard');
+      return access ? access.queryPurchases(exec.agent?.session.id, args, exec.signal)
+        : queryDashboardPurchases(args, { sessionId: exec.agent?.session.id, signal: exec.signal });
+    },
+  }));
+  ctx.tools.register(defineTool({
     name: 'query_crm_metrics_v1',
     description: '查询 CRM 合成候选资料的销售表现、老客回购和派样后复购。金额为 CNY 分；保留未知和不可用原因，不能当作真实业务结果。',
     parameters: { request: { ...schemas.request, required: true } },
@@ -47,7 +64,7 @@ export function apply(ctx: Context, config: { python?: string } = {}): void {
         target.preferred_operational_definition = {
           decision: '用户2026-09-20确认：真实AUS、AOV沿用当前看板GSV，扣退款净额版单列。',
           aus: '当前看板GSV / 同范围去重有效购买人数', aov: '当前看板GSV / 同范围去重有效订单数',
-          buyer_count_status: 'pending_complete_buyer_count_and_unknowns',
+          buyer_count_status: 'query_crm_dashboard_purchases_returns_coverage_requires_backend_deployment',
           warning: '不能用旧avg_order_value明细行均值当作AOV，也不能用缺少未知身份的新客+老客人数替代完整购买人数。',
           real_business_acceptance: false,
           target_candidate_note: '本结果其余definition/formula为单列的crm-metrics/v1净额候选，不替换此运营默认。',

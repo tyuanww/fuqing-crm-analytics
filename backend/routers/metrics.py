@@ -4,7 +4,11 @@
 前缀: /api/v1/metrics/*
 """
 
-from fastapi import APIRouter, Query, Response
+from datetime import date
+from fastapi import APIRouter, HTTPException, Query, Response
+from backend.contracts.crm_dashboard import DashboardChannel, DashboardFilters, DashboardPurchases
+from backend.db.connection import get_connection
+from backend.services.metrics.dashboard_purchases import query_dashboard_purchases
 from typing import Optional, List
 
 from backend.config import _default_start_date, _default_end_date
@@ -62,3 +66,20 @@ def get_metrics_trend(
         start_date, end_date, metric_type, channel, exclude_channels,
         compare_start_date, compare_end_date
     )
+
+
+@router.get("/dashboard-purchases", response_model=DashboardPurchases)
+def get_dashboard_purchases(
+    response: Response,
+    start_date: date,
+    end_date: date,
+    channel: DashboardChannel = '全店',
+    exclude_low_price: bool = False,
+):
+    """看板同范围购买分母及AOV/AUS；日期含首尾，最多90天。"""
+    if end_date < start_date or (end_date - start_date).days >= 90:
+        raise HTTPException(status_code=422, detail='日期范围无效：包含首尾，最多90天。')
+    if warning := check_future_date(start_date.isoformat()) or check_future_date(end_date.isoformat()):
+        response.headers['X-Data-Warning'] = warning
+    return query_dashboard_purchases(get_connection(), DashboardFilters(
+        start_date=start_date, end_date=end_date, channel=channel, exclude_low_price=exclude_low_price))

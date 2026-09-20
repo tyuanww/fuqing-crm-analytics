@@ -192,17 +192,34 @@ class WorkerManager:
                 selector.register(child.stderr, selectors.EVENT_READ, "stderr")
                 while child.poll() is None or selector.get_map():
                     if child.poll() is None:
+                        stage = "state_read"
                         try:
                             record = self.store.worker_records(execution_id=execution_id)[0]
-                            error = error or self._stop_reason(record)
+                            stage = "stop_reason"
+                            reason = None if error else self._stop_reason(record)
+                            error = error or reason
+                            if reason == "EXECUTION_UNKNOWN":
+                                metrics.setdefault("observation_failure", {
+                                    "stage": stage, "category": "run_not_running",
+                                })
+                            stage = "rss_read"
                             metrics["rss_peak_bytes"] = max(metrics["rss_peak_bytes"], process.memory_info().rss)
+                            stage = "temp_scan"
                             metrics["temp_peak_bytes"] = max(metrics["temp_peak_bytes"], temp_bytes(temporary))
                             if (metrics["rss_peak_bytes"] > self.store.profile.worker_rss_observation_mib * MIB
                                     or metrics["temp_peak_bytes"] > self.store.profile.worker_temp_mib * MIB):
                                 error = "RESOURCE_EXCEEDED"
                         except psutil.NoSuchProcess:
                             pass
-                        except (OSError, sqlite3.DatabaseError, ValueError, AnalyticsError, IndexError, psutil.Error):
+                        except (OSError, sqlite3.DatabaseError, ValueError, AnalyticsError, IndexError, psutil.Error) as failure:
+                            # Bounded, private evidence only: never exception text,
+                            # paths, SQL, identity or arbitrary exception class names.
+                            category = next(name for kind, name in (
+                                (sqlite3.DatabaseError, "database"), (AnalyticsError, "analytics"),
+                                (psutil.Error, "process"), (OSError, "os"),
+                                (IndexError, "missing_record"), (ValueError, "invalid_value"),
+                            ) if isinstance(failure, kind))
+                            metrics.setdefault("observation_failure", {"stage": stage, "category": category})
                             error = error or "EXECUTION_UNKNOWN"
                         if error and stop_started is None:
                             try:

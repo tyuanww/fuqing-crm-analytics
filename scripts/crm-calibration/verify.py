@@ -14,6 +14,7 @@ from tempfile import TemporaryDirectory
 
 ROOT = Path(__file__).resolve().parents[2]
 TESTS = [
+    "test_crm_dashboard_purchases.py", "test_analytics_query_worker.py", "test_analytics_first_purchase_native.py",
     "test_crm_review_boundaries.py",
     "test_crm_calibration_regressions.py", "test_crm_calibration_integration.py", "test_crm_metrics_v1.py",
     "test_crm_readonly.py", "test_crm_readonly_contract_match.py", "test_crm_readonly_cache.py",
@@ -32,6 +33,11 @@ def source_hashes():
     # The dashboard adapter consumes these existing contracts/filters; keep its
     # verification tied to the inspected source, without modifying legacy code.
     for rel in ["frontend-vue3/src/constants/channels.ts", "backend/contracts/metrics.py", "backend/contracts/common.py", "backend/routers/metrics.py", "backend/semantic/calculations.py", "backend/services/metrics/overview.py"]:
+        files.add(ROOT / rel)
+    for rel in ["backend/contracts/crm_dashboard.py", "backend/contracts/crm-dashboard.openapi.json",
+                "backend/semantic/dashboard_purchases.py", "backend/services/metrics/dashboard_purchases.py",
+                "backend/services/analytics/worker.py", "frontend-vue3/src/api/types.ts",
+                "frontend-vue3/src/api/types.generated.ts"]:
         files.add(ROOT / rel)
     return {str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest() for path in sorted(files)}
 

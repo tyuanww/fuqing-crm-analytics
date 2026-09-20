@@ -576,6 +576,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/metrics/dashboard-purchases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Dashboard Purchases
+         * @description 看板同范围购买分母及AOV/AUS；日期含首尾，最多90天。
+         */
+        get: operations["get_dashboard_purchases_api_v1_metrics_dashboard_purchases_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/flow/matrix": {
         parameters: {
             query?: never;
@@ -881,7 +901,7 @@ export interface paths {
         };
         /**
          * Get Category Churn Api
-         * @description 品类流失分析：返回各品类的流失用户数、流失率及特征
+         * @description 品类流失预警：返回各品类平均流失风险、高风险用户及迁移去向证据。
          */
         get: operations["get_category_churn_api_api_v1_category_churn_get"];
         put?: never;
@@ -3404,6 +3424,91 @@ export interface components {
              * @description 结束日期 YYYY-MM-DD
              */
             end_date: string;
+        };
+        /** DashboardAverage */
+        DashboardAverage: {
+            /** Amount Fen */
+            amount_fen: number | null;
+            /** Denominator */
+            denominator: number;
+            /** Reason */
+            reason: ("NO_PURCHASES" | "UNKNOWN_ORDER" | "UNKNOWN_BUYER" | "INVALID_AMOUNT") | null;
+        };
+        /** DashboardCoverage */
+        DashboardCoverage: {
+            /** Rows */
+            rows: number;
+            /** Orders */
+            orders: number;
+            /** Buyers */
+            buyers: number;
+            /** Unknown Order Rows */
+            unknown_order_rows: number;
+            /** Unknown Buyer Rows */
+            unknown_buyer_rows: number;
+            /** Unknown Order Amount Fen */
+            unknown_order_amount_fen: number;
+            /** Unknown Buyer Amount Fen */
+            unknown_buyer_amount_fen: number;
+            /** Null Amount Rows */
+            null_amount_rows: number;
+            /** Negative Amount Rows */
+            negative_amount_rows: number;
+            /** Zero Amount Orders */
+            zero_amount_orders: number;
+            /** Zero Only Buyers */
+            zero_only_buyers: number;
+        };
+        /** DashboardFilters */
+        DashboardFilters: {
+            /**
+             * Start Date
+             * Format: date
+             */
+            start_date: string;
+            /**
+             * End Date
+             * Format: date
+             */
+            end_date: string;
+            /**
+             * Channel
+             * @default 全店
+             * @enum {string}
+             */
+            channel: "全店" | "纯派样" | "货架" | "达播" | "直播" | "淘客" | "微博" | "U先派样" | "百补派样" | "赠品&0.01" | "其他";
+            /**
+             * Exclude Low Price
+             * @default false
+             */
+            exclude_low_price: boolean;
+        };
+        /** DashboardPurchases */
+        DashboardPurchases: {
+            /**
+             * Schema Version
+             * @default crm-dashboard-purchases/v1
+             * @constant
+             */
+            schema_version: "crm-dashboard-purchases/v1";
+            /**
+             * Metric Version
+             * @default dashboard-gsv-purchases/v1
+             * @constant
+             */
+            metric_version: "dashboard-gsv-purchases/v1";
+            filters: components["schemas"]["DashboardFilters"];
+            /** Gsv Amount Fen */
+            gsv_amount_fen: number;
+            coverage: components["schemas"]["DashboardCoverage"];
+            aov: components["schemas"]["DashboardAverage"];
+            aus: components["schemas"]["DashboardAverage"];
+            /** Data Through */
+            data_through?: null;
+            /** Refund As Of */
+            refund_as_of?: null;
+            /** Limitations */
+            limitations: string[];
         };
         /** DateRangeResponse */
         DateRangeResponse: {
@@ -7990,6 +8095,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TrendData"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_dashboard_purchases_api_v1_metrics_dashboard_purchases_get: {
+        parameters: {
+            query: {
+                start_date: string;
+                end_date: string;
+                channel?: "全店" | "纯派样" | "货架" | "达播" | "直播" | "淘客" | "微博" | "U先派样" | "百补派样" | "赠品&0.01" | "其他";
+                exclude_low_price?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DashboardPurchases"];
                 };
             };
             /** @description Validation Error */

@@ -122,7 +122,7 @@ test('browser login reaches the pinned tools without exposing credentials', asyn
       assert.equal(JSON.stringify(body).includes(fixture.binding.token), false);
       assert.equal(JSON.stringify(body).includes(SYNTHETIC_PASSWORD), false);
       assert.equal((await execute('crm_login', { username: 'fixture-user', password: SYNTHETIC_PASSWORD })).isError, true);
-      assert.deepEqual(Object.keys(host.ctx.crmDashboard).sort(), ['capabilities', 'query']);
+      assert.deepEqual(Object.keys(host.ctx.crmDashboard).sort(), ['capabilities', 'query', 'queryPurchases']);
     });
     await t.test('preserves API amount and filters, without legacy extra metrics', async () => {
       const outcome = await execute('query_crm_dashboard_gsv', { ...dashboardRequest, channel: '淘客', exclude_low_price: true });
@@ -176,4 +176,32 @@ test('browser login reaches the pinned tools without exposing credentials', asyn
       await host.removeTools();
       assert.equal((await execute('query_crm_dashboard_gsv', dashboardRequest)).isError, true);
     });
+});
+
+
+test('purchase tool uses native login scope and clears access on disconnect', async t => {
+  const fixture = await serveDashboard(t, (url, _req, res) => {
+    if (!url.pathname.endsWith('/dashboard-purchases')) return false;
+    res.end(JSON.stringify({
+      schema_version: 'crm-dashboard-purchases/v1', metric_version: 'dashboard-gsv-purchases/v1',
+      filters: { ...dashboardRequest, channel: '全店', exclude_low_price: false }, gsv_amount_fen: 6000,
+      coverage: { rows: 3, orders: 2, buyers: 1, unknown_order_rows: 0, unknown_buyer_rows: 0,
+        unknown_order_amount_fen: 0, unknown_buyer_amount_fen: 0, null_amount_rows: 0,
+        negative_amount_rows: 0, zero_amount_orders: 0, zero_only_buyers: 0 },
+      aov: { amount_fen: 3000, denominator: 2, reason: null },
+      aus: { amount_fen: 6000, denominator: 1, reason: null }, data_through: null, refund_as_of: null,
+    })); return true;
+  });
+  const host = await mountLoginHost(t, fixture.binding.baseUrl);
+  const login = await host.call('login', { username: 'fixture-user', password: SYNTHETIC_PASSWORD });
+  assert.equal(login.status, 200); await login.arrayBuffer();
+  const result = await host.execute('query_crm_dashboard_purchases', dashboardRequest);
+  assert.equal(result.isError, false, JSON.stringify(result));
+  assert.equal(result.value.aov.amount_fen, 3000); assert.equal(result.value.aus.amount_fen, 6000);
+  assert.equal(result.value.synthetic, true);
+  const count = fixture.calls.length;
+  assert.equal((await host.execute('query_crm_dashboard_purchases', dashboardRequest, 'another-session')).value.reason.code, 'NOT_CONNECTED');
+  const disconnect = await host.call('disconnect'); await disconnect.arrayBuffer();
+  assert.equal((await host.execute('query_crm_dashboard_purchases', dashboardRequest)).value.reason.code, 'NOT_CONNECTED');
+  assert.equal(fixture.calls.length, count);
 });

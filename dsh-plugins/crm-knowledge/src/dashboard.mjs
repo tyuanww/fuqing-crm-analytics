@@ -43,7 +43,7 @@ export function dashboardCapabilities(connectionState = 'NOT_CONNECTED') {
     tool: 'query_crm_dashboard_gsv', metric_version: VERSION,
     connection_state: connectionState,
     authentication_checked_on_each_query: true, max_days: 90,
-    fields: ['gsv_amount', 'daily_gsv'], channels: [...CHANNELS],
+    fields: ['gsv_amount', 'daily_gsv'], purchases_tool: 'query_crm_dashboard_purchases', purchases_requires_backend: 'crm-dashboard-purchases/v1', channels: [...CHANNELS],
     definition: dashboardKnowledgeContext(),
     note: '仅在登录页面连接当前对话；请求时重新验证 CRM 登录。现有 CRM 账号权限适用，尚无按渠道授权能力。',
   };
@@ -157,7 +157,7 @@ async function getJson(base, path, params, binding, signal) {
 }
 
 /** Trusted options are supplied by the host, not included in the tool parameter schema. */
-export async function queryDashboardGsv(input, options = {}) {
+async function queryDashboard(input, options, purchases = false) {
   const { sessionId, signal, binding = null, timeoutMs = 25000 } = options;
   const timeout = AbortSignal.timeout(timeoutMs);
   const combined = signal ? AbortSignal.any([signal, timeout]) : timeout;
@@ -167,6 +167,12 @@ export async function queryDashboardGsv(input, options = {}) {
     const base = validateBinding(binding, sessionId);
     const me = await getJson(base, '/api/v1/auth/me', new URLSearchParams(), binding, combined);
     if (me?.username !== binding.username) fail('ACCOUNT_MISMATCH');
+    if (purchases) {
+      const params = new URLSearchParams({ ...filters, exclude_low_price: String(filters.exclude_low_price) });
+      const aggregate = await getJson(base, '/api/v1/metrics/dashboard-purchases', params, binding, combined);
+      combined.throwIfAborted();
+      return normalizePurchases(aggregate, filters, binding.dataKind);
+    }
     const params = new URLSearchParams({ start_date: filters.start_date, end_date: filters.end_date, metric_type: 'GSV' });
     if (filters.channel !== '全店') params.set('channel', filters.channel);
     if (filters.exclude_low_price) for (const channel of LOW_PRICE_CHANNELS) params.append('exclude_channels', channel);
@@ -176,6 +182,61 @@ export async function queryDashboardGsv(input, options = {}) {
     return normalizeDashboard(overview, trend, filters, binding.dataKind);
   } catch (error) {
     const code = signal?.aborted ? 'CANCELLED' : timeout.aborted ? 'TIMEOUT' : error instanceof DashboardError ? error.code : 'UPSTREAM_ERROR';
-    return { status: 'UNAVAILABLE', schema_version: 'crm-dashboard-read/v1', metric_version: VERSION, reason: { code, message: MESSAGES[code] } };
+    return { status: 'UNAVAILABLE', schema_version: purchases ? 'crm-dashboard-purchases/v1' : 'crm-dashboard-read/v1', metric_version: purchases ? 'dashboard-gsv-purchases/v1' : VERSION, reason: { code, message: MESSAGES[code] } };
   }
+}
+
+
+export const queryDashboardGsv = (input, options = {}) => queryDashboard(input, options);
+export const queryDashboardPurchases = (input, options = {}) => queryDashboard(input, options, true);
+
+/** Validate and project aggregates; never forward arbitrary server metadata. */
+export function normalizePurchases(value, filters, dataKind) {
+  if (value?.schema_version !== 'crm-dashboard-purchases/v1' || value.metric_version !== 'dashboard-gsv-purchases/v1' ||
+      !Number.isSafeInteger(value.gsv_amount_fen) || value.data_through !== null || value.refund_as_of !== null ||
+      Object.keys(filters).some(key => value.filters?.[key] !== filters[key])) fail('INVALID_RESPONSE');
+  /** @type {Record<string, number>} */
+  const coverage = {};
+  for (const key of ['rows', 'orders', 'buyers', 'unknown_order_rows', 'unknown_buyer_rows',
+    'unknown_order_amount_fen', 'unknown_buyer_amount_fen', 'null_amount_rows', 'negative_amount_rows',
+    'zero_amount_orders', 'zero_only_buyers']) {
+    const item = value.coverage?.[key];
+    if (!Number.isSafeInteger(item) || (!key.endsWith('_amount_fen') && item < 0)) fail('INVALID_RESPONSE');
+    coverage[key] = item;
+  }
+  for (const key of ['orders', 'buyers', 'unknown_order_rows', 'unknown_buyer_rows', 'null_amount_rows', 'negative_amount_rows']) {
+    if (coverage[key] > coverage.rows) fail('INVALID_RESPONSE');
+  }
+  if (coverage.zero_amount_orders + coverage.orders > coverage.rows || coverage.zero_only_buyers + coverage.buyers > coverage.rows) fail('INVALID_RESPONSE');
+  /** @type {Record<string, {amount_fen: number | null, amount_yuan: string | null, denominator: number, reason: string | null, currency: string}>} */
+  const averages = {};
+  for (const [name, key, unknownKey, unknownReason] of [
+    ['aov', 'orders', 'unknown_order_rows', 'UNKNOWN_ORDER'],
+    ['aus', 'buyers', 'unknown_buyer_rows', 'UNKNOWN_BUYER'],
+  ]) {
+    const item = value[name];
+    const expectedReason = coverage.null_amount_rows || coverage.negative_amount_rows ? 'INVALID_AMOUNT'
+      : coverage[unknownKey] ? unknownReason : name === 'aus' && coverage.unknown_order_rows ? 'UNKNOWN_ORDER'
+      : coverage[key] === 0 ? 'NO_PURCHASES' : null;
+    if (!item || item.denominator !== coverage[key] || item.reason !== expectedReason) fail('INVALID_RESPONSE');
+    if (expectedReason) {
+      if (item.amount_fen !== null) fail('INVALID_RESPONSE');
+      averages[name] = { amount_fen: null, amount_yuan: null, currency: 'CNY', denominator: item.denominator, reason: expectedReason };
+    } else {
+      const numerator = BigInt(value.gsv_amount_fen), denominator = BigInt(item.denominator);
+      if (numerator < 0n || !Number.isSafeInteger(item.amount_fen) ||
+          BigInt(item.amount_fen) !== (2n * numerator + denominator) / (2n * denominator)) fail('INCONSISTENT_RESULT');
+      averages[name] = { ...money(item.amount_fen), denominator: item.denominator, reason: null };
+    }
+  }
+  return {
+    status: 'OK', schema_version: value.schema_version, metric_version: value.metric_version,
+    source: 'authenticated_crm_metrics_service', contains_real_data: dataKind === 'real', synthetic: dataKind === 'synthetic',
+    filters: { ...filters, timezone: 'Asia/Shanghai', end_inclusive: true },
+    gsv: money(value.gsv_amount_fen), coverage, ...averages,
+    data_through: null, refund_as_of: null,
+    limitations: ['AOV为每单金额，AUS为按购买人数计算的客单价；分子沿用看板GSV，净额版单列。',
+      '未知标识或异常金额会阻断对应均值；零元订单和仅零元买家另列，不计购买分母。',
+      '同次聚合按源订单和买家标识去重，尚不证明跨系统身份完整；数据水位和退款截止日未知。'],
+  };
 }
