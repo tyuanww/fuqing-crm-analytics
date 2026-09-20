@@ -16,7 +16,7 @@
     "lint:spec": "bash e2e/lint/spec-lint-l2.sh e2e"
   },
   "dependencies": {
-    "@rive-app/canvas": "^2.37.5",
+    "@rive-app/canvas": "^2.42.2",
     "@tanstack/vue-query": "^5.99.0",
     "@vicons/ionicons5": "^0.13.0",
     "@vueuse/core": "^15.0.0",
