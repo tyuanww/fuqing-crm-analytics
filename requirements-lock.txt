@@ -14,7 +14,7 @@ cffi==2.0.0
 chardet==7.4.3
 charset-normalizer==3.5.1
 click==8.3.3
-duckdb==1.5.3
+duckdb==1.5.5
 et_xmlfile==2.0.0
 fastapi==0.136.1
 h11==0.16.0

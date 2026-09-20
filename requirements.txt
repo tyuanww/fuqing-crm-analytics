@@ -6,7 +6,7 @@
 # Starlette 经 fastapi 传递，显式下限对齐 CVE 修复（与 PR1 可重叠）。
 
 # 数据处理 (核心)
-duckdb>=0.10.0          # 本地分析型数据库（生产升级 1.5.5 见 docs/maintenance/duckdb-backup-upgrade-checklist.md，本文件不抬生产版本）
+duckdb>=1.5.5          # 本地分析型数据库（生产升级 1.5.5 见 docs/maintenance/duckdb-backup-upgrade-checklist.md，本文件不抬生产版本）
 pandas>=2.0.0           # 兼容性支持
 numpy>=1.24.0           # 数值计算
 
