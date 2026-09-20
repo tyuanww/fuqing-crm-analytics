@@ -11,6 +11,25 @@ export const inject = ['tools'];
 export function apply(ctx: Context, config: { python?: string } = {}): void {
   const run = (payload: unknown, signal?: AbortSignal) => runCrmCliAsync(payload, signal, config.python);
   ctx.tools.register(defineTool({
+    name: 'query_crm_dashboard_snapshot',
+    description: '查询看板 GSV、AOV、AUS 及覆盖，并由 CRM 服务保存不可变的结果快照，供用户稍后保存分析、加入驾驶舱。仅接受日期/渠道/剔除低价；不接受模型提供的数字。需要当前对话 CRM 登录和独立快照存储；失败不回退合成资料。保存分析和驾驶舱引用由用户在 CRM 分析窗口确认。',
+    parameters: {
+      start_date: { type: 'string', required: true, description: '开始日期 YYYY-MM-DD（Asia/Shanghai）' },
+      end_date: { type: 'string', required: true, description: '结束日期，含首尾、最多90天' },
+      channel: { type: 'string', enum: [...CHANNELS], description: '看板渠道，默认全店' },
+      exclude_low_price: { type: 'boolean', description: '是否剔除低价，默认false' },
+    },
+    output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
+    timeoutMs: 30000, isConcurrencySafe: () => false,
+    execute: async (args, exec) => {
+      const access = ctx.get('crmDashboard');
+      const result = typeof access?.querySnapshot === 'function' ? await access.querySnapshot(exec.agent?.session.id, args, exec.signal)
+        : { ok: false, code: 'HOST_UPGRADE_REQUIRED', message: '当前宿主尚未加载 CRM 快照能力，请在维护窗口更新后重试。' };
+      return { ok: result.ok, snapshot: 'value' in result ? result.value ?? null : null,
+        code: 'code' in result ? result.code ?? null : null, message: 'message' in result ? result.message ?? null : null };
+    },
+  }));
+  ctx.tools.register(defineTool({
     name: 'query_crm_dashboard_gsv',
     description: '查询用户认可的现有人群看板 GSV 总额和日趋势，复用 CRM 登录及指标接口。真实 GSV 优先使用此工具；不能改用合成查询或再扣退款。日期含首尾、最多90天；同看板渠道及剔除低价条件。登录须由宿主绑定当前会话，失败不回退其他资料源。',
     parameters: {

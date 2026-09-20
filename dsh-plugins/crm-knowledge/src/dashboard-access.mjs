@@ -1,7 +1,10 @@
 /** CRM credentials stay in this host closure, never env, disk, RPC or tool output. */
 import { dashboardOrigin, queryDashboardGsv, queryDashboardPurchases, dashboardCapabilities } from './dashboard.mjs';
 
+import { crmAssetRequest, captureRequest, ASSET_MESSAGES } from './crm-assets.mjs';
+
 export const CRM_UI_PATH = '/api/crm-knowledge/connection';
+export const CRM_ASSETS_UI_PATH = '/api/crm-knowledge/assets';
 const TTL = 8 * 60 * 60 * 1000;
 const MAX_BODY = 8192;
 const ERRORS = {
@@ -69,9 +72,21 @@ export function createDashboardAccess({ baseUrl = 'http://127.0.0.1:8000', brows
       if (['AUTH_EXPIRED', 'ACCOUNT_MISMATCH'].includes(result.reason?.code)) forget(sessionId);
       return result;
   }
+  async function asset(sessionId, input, signal) {
+    prune(); const record = records.get(sessionId);
+    const missing = () => ({ ok: false, code: 'NOT_CONNECTED', message: ASSET_MESSAGES.NOT_CONNECTED });
+    if (disposed || !record || !hasSession(sessionId)) return missing();
+    const combined = signal ? AbortSignal.any([signal, record.controller.signal]) : record.controller.signal;
+    const result = await crmAssetRequest(input, { sessionId, binding: record.binding, signal: combined });
+    if (records.get(sessionId) !== record) return missing();
+    if (record.expiresAt <= now() || !hasSession(sessionId)) { forget(sessionId); return missing(); }
+    if (['AUTH_EXPIRED', 'ACCOUNT_MISMATCH'].includes(result.code)) forget(sessionId);
+    return result;
+  }
   const service = Object.freeze({
     capabilities(sessionId) { return dashboardCapabilities(status(sessionId).connected ? 'LOGIN_BOUND' : 'NOT_CONNECTED'); },
     query: (sessionId, input, signal) => query(sessionId, input, signal),
+    querySnapshot: (sessionId, input, signal) => asset(sessionId, captureRequest(input), signal),
     queryPurchases: (sessionId, input, signal) => query(sessionId, input, signal, true),
   });
 
@@ -88,6 +103,13 @@ export function createDashboardAccess({ baseUrl = 'http://127.0.0.1:8000', brows
     try { input = await readBoundedJson(request.body, MAX_BODY); } catch { return error('INVALID_REQUEST'); }
     if (!input || Array.isArray(input) || typeof input !== 'object' || !validSession(input.session_id)) return error('INVALID_REQUEST');
     const { operation, session_id: sessionId } = input;
+    if (url.pathname === CRM_ASSETS_UI_PATH) {
+      if (disposed || !hasSession(sessionId)) return error('SESSION_UNAVAILABLE', 409);
+      if (!['library', 'save', 'pin'].includes(operation)) return error('INVALID_REQUEST');
+      const { session_id: _session, ...payload } = input;
+      const result = await asset(sessionId, payload, request.signal);
+      return response(result.ok ? 200 : 409, result);
+    }
     const keys = operation === 'login' ? ['operation', 'session_id', 'username', 'password'] : ['operation', 'session_id'];
     if (Object.keys(input).length !== keys.length || Object.keys(input).some(key => !keys.includes(key)) ||
         !['status', 'login', 'disconnect'].includes(operation)) return error('INVALID_REQUEST');

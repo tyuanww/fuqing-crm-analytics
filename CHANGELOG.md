@@ -1,5 +1,8 @@
 ## [Unreleased]
 
+- CRM 查询可生成服务端固定快照，用户在“CRM 分析”确认保存并加入驾驶舱；按当前 CRM 账号隔离，重开保留原结果，沿用正额购买订单及买家的 AOV/AUS 口径。
+- 修复 macOS 隔离浏览器验证触发默认钥匙串提示，以及 P12 页面重复导航导致的加载超时。
+
 - 接收后续 Ruff 0.16.8、Vue Query / Query Core 5.103.1、Axios 1.20.0 依赖提案，同步验证入口中的 Ruff 版本说明。
 
 - 继续接收依赖队列：Rive 2.42.2 及匹配的同源 WASM、PostCSS、Vue Test Utils、chardet、wheel、typing-inspection；提高 pytest-xdist 声明下限。阻止与 Pydantic 2.13.5 不匹配的 core 2.47–2.49 独立升级。

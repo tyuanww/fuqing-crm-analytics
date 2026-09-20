@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots';
+import type { PropsRuntime, PropsRenderSlots } from '@deepseek-ai/dsh-client-ui-slots';
+import type { CrmCockpitSlot } from './cockpit-extension';
+declare module '@deepseek-ai/dsh-client-ui-slots' {
+  interface SlotMap { 'cockpit.crm': CrmCockpitSlot }
+}
 import { ThemeProvider } from './competition-shell/index.ts';
 import { type CompetitionColorScheme } from './competition-shell/tokens.ts';
 import { BoardSpecCanvas } from './board-spec-canvas.tsx';
@@ -30,7 +34,7 @@ export type BoardLive = {
   };
 };
 
-export type CockpitMainPanelProps = PropsRuntime<'main'> & {
+export type CockpitMainPanelProps = PropsRuntime<'main'> & Partial<PropsRenderSlots<'cockpit.crm'>> & {
   library?: LibraryBoardClient;
   leaveCoordinator?: import('./leave/leave-coordinator.mjs').LeaveCoordinator;
   delivery?: ReturnType<typeof import('./cockpit-delivery.mjs').createCockpitDelivery>;
@@ -96,7 +100,8 @@ export function CockpitPanelIcon({ size, active }: PropsRuntime<'sidebar.panelli
 
 export function CockpitMainPanel(props: CockpitMainPanelProps) {
   if (props.library) return <LibraryCockpitPanel library={props.library} goConversation={props.goConversation} themeSource={props.themeSource} initialSurface="pages" pageStore={props.pageStore} delivery={props.delivery} leaveCoordinator={props.leaveCoordinator} fileClient={props.fileClient} aiClient={props.aiClient}
-    listWorkspaceFiles={props.listWorkspaceFiles} openWorkspaceFile={props.openWorkspaceFile} readWorkspaceFile={props.readWorkspaceFile} />;
+    listWorkspaceFiles={props.listWorkspaceFiles} openWorkspaceFile={props.openWorkspaceFile} readWorkspaceFile={props.readWorkspaceFile}
+    extension={props.renderSlot?.('cockpit.crm', {})} />;
   return <LegacyCockpitMainPanel {...props} />;
 }
 

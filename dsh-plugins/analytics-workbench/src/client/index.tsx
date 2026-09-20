@@ -779,6 +779,7 @@ export function apply(ctx: Context): void {
   }, CockpitPanelIcon));
   ctx.slots.inject('main', () => ctx.slots.register({
     name: 'main', key: COCKPIT_PANEL_ID,
+    children: { 'cockpit.crm': { kind: 'single', scope: 'root' } },
     inject: () => {
       const http = competitionHttpOptions();
       return {

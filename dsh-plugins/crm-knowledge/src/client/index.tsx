@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type { FormEvent } from 'react';
 import type { Context } from '@deepseek-ai/cordis';
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client';
@@ -8,6 +8,12 @@ import type {} from '@deepseek-ai/dsh-api-workspace-controller/remote';
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots';
 import { Alert, Button, ConfigProvider, Input, Modal, Space, Typography, theme } from 'antd';
 import { antdSeedToken } from '../../../analytics-workbench/src/client/competition-shell/tokens';
+import { CrmLibraryButton } from './crm-library';
+import type { CrmCockpitSlot } from '../../../analytics-workbench/src/client/cockpit-extension';
+declare module '@deepseek-ai/dsh-client-ui-slots' {
+  interface SlotMap { 'cockpit.crm': CrmCockpitSlot }
+}
+export { CrmLibraryButton, CrmSnapshotFacts } from './crm-library';
 
 const ENDPOINT = '/api/crm-knowledge/connection';
 const FAILURES: Record<string, string> = {
@@ -46,7 +52,9 @@ export function CrmConnectionDock({ sessionId }: Pick<PropsRuntime<'conversation
       if (!res.ok || !body.ok) throw new Error(FAILURES[body.code] ?? FAILURES.SERVICE_UNAVAILABLE);
       if (typeof body.connected !== 'boolean' || (body.connected && (typeof body.username !== 'string' || !/^[A-Za-z0-9_.@-]{1,64}$/.test(body.username)))) throw new Error(FAILURES.SERVICE_UNAVAILABLE);
       setState({ connected: body.connected, username: body.username, expires_at: body.expires_at });
-      if (operation === 'login' || operation === 'disconnect') setOpen(false);
+      if (operation === 'login' || operation === 'disconnect') {
+        setOpen(false); window.dispatchEvent(new Event('crm-connection-changed'));
+      }
     } catch (error) {
       if (!controller.signal.aborted) setMessage(error instanceof Error && Object.values(FAILURES).includes(error.message) ? error.message : FAILURES.SERVICE_UNAVAILABLE);
     } finally {
@@ -70,7 +78,8 @@ export function CrmConnectionDock({ sessionId }: Pick<PropsRuntime<'conversation
       <Button size="small" onClick={() => { setOpen(true); void call('status'); }}>
         {state.connected ? 'CRM 已连接' : '连接 CRM'}
       </Button>
-      <Typography.Text type="secondary">{state.connected ? '本对话可查询看板 GSV' : '连接后可查询你的看板 GSV'}</Typography.Text>
+      <Typography.Text type="secondary">{state.connected ? '本对话可查询看板 GSV、AOV、AUS' : '连接后可查询你的看板销售指标'}</Typography.Text>
+      <CrmLibraryButton sessionId={sessionId} />
       {!open && message && <Typography.Text type="danger" role="alert">{message}</Typography.Text>}
     </Space>
     <Modal title={state.connected ? '当前对话的 CRM 连接' : '连接 CRM 看板'} open={open} footer={null}
@@ -96,9 +105,17 @@ export function CrmConnectionDock({ sessionId }: Pick<PropsRuntime<'conversation
 }
 
 export const name = 'crm-knowledge-login-ui';
-export const inject = ['slots'];
+export const inject = ['slots', 'sessions'];
+function CrmCockpitEntry({ source }: { source: Context['sessions']['list'] }) {
+  const list = useSyncExternalStore(source.subscribe, source.getSnapshot);
+  const sessionId = list.ids.find(id => (list.byId[id]?.retainedBy?.mainView ?? 0) > 0);
+  return <CrmLibraryButton key={sessionId ?? 'none'} sessionId={sessionId} cockpit />;
+}
 export function apply(ctx: Context) {
   ctx.slots.inject('conversation.input.dock', () => ctx.slots.register({
     name: 'conversation.input.dock', id: 'crm-knowledge.connection', order: 30,
   }, CrmConnectionDock));
+  ctx.slots.inject('cockpit.crm', () => ctx.slots.register({
+    name: 'cockpit.crm', inject: () => ({ source: ctx.sessions.list }),
+  }, CrmCockpitEntry));
 }

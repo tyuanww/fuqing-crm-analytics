@@ -3,7 +3,7 @@
   "version": "0.0.0-candidate",
   "private": true,
   "type": "module",
-  "description": "Isolated CRM metrics/knowledge candidate tools. Not registered into analytics-workbench or competition.",
+  "description": "Independent CRM metrics, knowledge and private analysis assets with an optional cockpit UI slot.",
   "engines": {
     "node": "24.x"
   },
@@ -31,7 +31,7 @@
   "dsh": {
     "client": {
       "platform": "web",
-      "inject": ["@deepseek-ai/dsh-client-ui-conversation", "@deepseek-ai/dsh-client-ui-renderer"]
+      "inject": ["@deepseek-ai/dsh-client-ui-conversation", "@deepseek-ai/dsh-client-ui-renderer", "@deepseek-ai/dsh-api-session-controller"]
     },
     "bundle": {
       "patch": "./cordis.patch.yml"

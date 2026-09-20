@@ -101,6 +101,7 @@ test('built browser factory requires only platform modules and registers shared-
   assert.equal(seeded.boardError, '');
   assert.equal(panel.options.id, 'cockpit');
   assert.equal(main.options.key, 'cockpit');
+  assert.deepEqual(JSON.parse(JSON.stringify(main.options.children)), { 'cockpit.crm': { kind: 'single', scope: 'root' } });
   assert.equal(dock.options.inject().openCockpit(), true);
   assert.deepEqual(selected, ['cockpit']);
   const state = overlay.options.store.create();
