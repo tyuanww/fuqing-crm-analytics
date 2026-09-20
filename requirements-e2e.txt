@@ -15,7 +15,7 @@ typing_extensions==4.16.0
 typing-inspection==0.4.2
 anyio==4.14.2
 h11==0.16.0
-click==8.3.3
+click==8.5.0
 idna==3.19
 
 # auth / env
