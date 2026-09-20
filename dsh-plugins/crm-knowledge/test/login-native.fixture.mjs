@@ -4,7 +4,7 @@ import { createServer } from 'node:http';
 import { once } from 'node:events';
 import { resolve, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { CRM_UI_PATH } from '../src/dashboard-access.mjs';
+import { CRM_UI_PATH, CRM_ASSETS_UI_PATH } from '../src/dashboard-access.mjs';
 
 export async function mountLoginHost(t, baseUrl) {
   const upstream = process.env.B0_BUILD_UPSTREAM;
@@ -47,7 +47,7 @@ export async function mountLoginHost(t, baseUrl) {
   const origin = `http://127.0.0.1:${server.address().port}`;
   const exchange = await fetch(ctx.connection.authenticatedUrl(origin), { redirect: 'manual' });
   const cookie = exchange.headers.get('set-cookie')?.split(';', 1)[0]; await exchange.arrayBuffer(); assert.ok(cookie);
-  const call = (operation, payload = {}, headers = {}) => fetch(origin + CRM_UI_PATH, { method: 'POST',
+  const call = (operation, payload = {}, headers = {}, path = CRM_UI_PATH) => fetch(origin + path, { method: 'POST',
     headers: { cookie, origin, 'content-type': 'application/json', 'x-crm-ui': '1', ...headers },
     body: JSON.stringify({ operation, session_id: 'fixture-session', ...payload }),
   });
@@ -55,5 +55,6 @@ export async function mountLoginHost(t, baseUrl) {
   const execute = (name, args, sessionId = 'fixture-session') => ctx.tools.execute({
     name, arguments: args, agent: { session: ctx.sessions.get(sessionId) }, callId: `login_${++counter}`, signal: new AbortController().signal,
   });
-  return { ctx, origin, cookie, call, execute, removeHost: () => host.dispose(), removeTools: () => tool.dispose() };
+  return { ctx, origin, cookie, call, assetCall: (operation, payload = {}, headers = {}) => call(operation, payload, headers, CRM_ASSETS_UI_PATH),
+    execute, removeHost: () => host.dispose(), removeTools: () => tool.dispose() };
 }

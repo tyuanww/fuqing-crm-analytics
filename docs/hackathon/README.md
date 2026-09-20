@@ -1,8 +1,10 @@
 # AI 增长董事会
 
-> **当前 Git／施工边界以仓库根 [STATUS.md](../../STATUS.md) 为准，接续任务见 [TODOS 的 M1 核心交付](TODOS.md#m1-核心交付)**。VERSION **0.11.0.0** 历史产物与多格式编辑候选，loopback，不上公网，产品 PARTIAL。以下9月10日各轮的“当前／最新”、端口、SHA和授权是历史快照，不是现在的HEAD或新的操作授权；原失败证据保留。
+> 当前 Git、施工与边界以根 [STATUS.md](../../STATUS.md) 为准，接续任务见 [TODOS 的 M1 核心交付](TODOS.md#m1-核心交付)。VERSION 0.12.0.0，产品 PARTIAL，loopback，不上公网。以下旧轮的“当前／最新”、端口、SHA 和授权是历史快照；失败证据保留。
 
-本轮（2026-09-20）基于 #214 `f9070431`，功能 `e90af23a` 与版本/验收 `5df9c315` 已推送至 `codex/cockpit-history-import`，PR 待创建。历史会话汇总、手动 HTML/Word/XLSX/CSV/PDF、本机 ONLYOFFICE 与原生 AI 副本候选确认见 [Ship 记录](COCKPIT-SHIP-2026-09-20.md)；使用见 [本地文档服务](../operating/cockpit-office-local.md) 和 [AI 修改](../operating/cockpit-ai-edit.md)。合成后端为2678 passed/77 skipped/71 deselected，B0另为567项Python及所选Node/DOM/类型/契约/构建；两层不相加。真实模型因 `MISSING_CREDENTIAL` 未验收，P13、真实历史/业务、用户 UAT 与现役切换仍开放。
+2026-09-21 候选基于新公开仓库 `106717e6`，沿用已合 #11 的 AOV/AUS 正额购买口径，增加可信查询快照、账号私有保存分析和驾驶舱固定引用。验证及交付进度见 [本轮记录](../crm-calibration/crm-assets-release-2026-09-21.md)。旧仓库 #215–#217 的历史证据继续保留；它们不代表本轮运行验收。
+
+历史多格式文件及 AI 修改见 [Ship 记录](COCKPIT-SHIP-2026-09-20.md)、[本地文档服务](../operating/cockpit-office-local.md)和[使用说明](../operating/cockpit-ai-edit.md)。P13、逐格式真实模型、复杂 Office/PDF 和本人 UAT 仍开放。
 
 9 月 10 日独立增量（历史）：[看板直达、多板切换与条件证据](PRODUCT-UAT-NAVIGATION-2026-09-10.md)已进入 4325，方法修正 `6202e89` CI SUCCESS，已进入 4325；真实等价问法数值与标识引用回归通过，完整产品仍 PARTIAL。
 

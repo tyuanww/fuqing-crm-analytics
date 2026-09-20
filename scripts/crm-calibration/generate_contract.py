@@ -37,7 +37,8 @@ def dashboard_openapi():
     app.include_router(router)
     schema = app.openapi()
     path = "/api/v1/metrics/dashboard-purchases"
-    schema["paths"] = {path: schema["paths"][path]}
+    schema["paths"] = {key: value for key, value in schema["paths"].items()
+                       if key == path or key.startswith(("/api/v1/metrics/dashboard-snapshots", "/api/v1/metrics/crm-"))}
     used = set()
 
     def visit(node):

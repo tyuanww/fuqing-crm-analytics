@@ -5,6 +5,330 @@
     "version": "1"
   },
   "paths": {
+    "/api/v1/metrics/dashboard-snapshots": {
+      "post": {
+        "tags": [
+          "指标"
+        ],
+        "summary": "Capture Dashboard Snapshot",
+        "operationId": "capture_dashboard_snapshot_api_v1_metrics_dashboard_snapshots_post",
+        "parameters": [
+          {
+            "name": "idempotency-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmSnapshotRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmSnapshot"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/metrics/crm-library": {
+      "get": {
+        "tags": [
+          "指标"
+        ],
+        "summary": "Read Crm Library",
+        "operationId": "read_crm_library_api_v1_metrics_crm_library_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmLibrary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/metrics/dashboard-snapshots/{asset_id}": {
+      "get": {
+        "tags": [
+          "指标"
+        ],
+        "summary": "Read Crm Snapshot",
+        "operationId": "read_crm_snapshot_api_v1_metrics_dashboard_snapshots__asset_id__get",
+        "parameters": [
+          {
+            "name": "asset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Asset Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmSnapshot"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/metrics/crm-analyses": {
+      "post": {
+        "tags": [
+          "指标"
+        ],
+        "summary": "Save Crm Analysis",
+        "operationId": "save_crm_analysis_api_v1_metrics_crm_analyses_post",
+        "parameters": [
+          {
+            "name": "idempotency-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmSaveAnalysis"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmAnalysis"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/metrics/crm-analyses/{asset_id}": {
+      "get": {
+        "tags": [
+          "指标"
+        ],
+        "summary": "Read Crm Analysis",
+        "operationId": "read_crm_analysis_api_v1_metrics_crm_analyses__asset_id__get",
+        "parameters": [
+          {
+            "name": "asset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Asset Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmAnalysis"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/metrics/crm-cockpit-references": {
+      "post": {
+        "tags": [
+          "指标"
+        ],
+        "summary": "Add Crm Reference",
+        "operationId": "add_crm_reference_api_v1_metrics_crm_cockpit_references_post",
+        "parameters": [
+          {
+            "name": "idempotency-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmAddReference"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCockpitReference"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/metrics/crm-cockpit-references/{asset_id}": {
+      "get": {
+        "tags": [
+          "指标"
+        ],
+        "summary": "Read Crm Reference",
+        "operationId": "read_crm_reference_api_v1_metrics_crm_cockpit_references__asset_id__get",
+        "parameters": [
+          {
+            "name": "asset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Asset Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmCockpitReference"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/metrics/dashboard-purchases": {
       "get": {
         "tags": [
@@ -95,6 +419,263 @@
   },
   "components": {
     "schemas": {
+      "CrmAddReference": {
+        "properties": {
+          "analysis_id": {
+            "type": "string",
+            "pattern": "^crm_[sar]_[0-9a-f]{32}$",
+            "title": "Analysis Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "analysis_id"
+        ],
+        "title": "CrmAddReference"
+      },
+      "CrmAnalysis": {
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "const": "crm-saved-analysis/v1",
+            "title": "Schema Version",
+            "default": "crm-saved-analysis/v1"
+          },
+          "analysis_id": {
+            "type": "string",
+            "pattern": "^crm_[sar]_[0-9a-f]{32}$",
+            "title": "Analysis Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "saved_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Saved At"
+          },
+          "snapshot": {
+            "$ref": "#/components/schemas/CrmSnapshot"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "analysis_id",
+          "title",
+          "saved_at",
+          "snapshot"
+        ],
+        "title": "CrmAnalysis"
+      },
+      "CrmCockpitReference": {
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "const": "crm-cockpit-reference/v1",
+            "title": "Schema Version",
+            "default": "crm-cockpit-reference/v1"
+          },
+          "reference_id": {
+            "type": "string",
+            "pattern": "^crm_[sar]_[0-9a-f]{32}$",
+            "title": "Reference Id"
+          },
+          "added_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Added At"
+          },
+          "analysis": {
+            "$ref": "#/components/schemas/CrmAnalysis"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "reference_id",
+          "added_at",
+          "analysis"
+        ],
+        "title": "CrmCockpitReference"
+      },
+      "CrmLibrary": {
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "const": "crm-library/v1",
+            "title": "Schema Version",
+            "default": "crm-library/v1"
+          },
+          "data_kind": {
+            "type": "string",
+            "enum": [
+              "real",
+              "synthetic"
+            ],
+            "title": "Data Kind"
+          },
+          "snapshots": {
+            "items": {
+              "$ref": "#/components/schemas/CrmSnapshot"
+            },
+            "type": "array",
+            "title": "Snapshots"
+          },
+          "analyses": {
+            "items": {
+              "$ref": "#/components/schemas/CrmAnalysis"
+            },
+            "type": "array",
+            "title": "Analyses"
+          },
+          "references": {
+            "items": {
+              "$ref": "#/components/schemas/CrmCockpitReference"
+            },
+            "type": "array",
+            "title": "References"
+          },
+          "snapshots_truncated": {
+            "type": "boolean",
+            "title": "Snapshots Truncated"
+          },
+          "analyses_truncated": {
+            "type": "boolean",
+            "title": "Analyses Truncated"
+          },
+          "references_truncated": {
+            "type": "boolean",
+            "title": "References Truncated"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "data_kind",
+          "snapshots",
+          "analyses",
+          "references",
+          "snapshots_truncated",
+          "analyses_truncated",
+          "references_truncated"
+        ],
+        "title": "CrmLibrary"
+      },
+      "CrmSaveAnalysis": {
+        "properties": {
+          "snapshot_id": {
+            "type": "string",
+            "pattern": "^crm_[sar]_[0-9a-f]{32}$",
+            "title": "Snapshot Id"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Title"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "snapshot_id",
+          "title"
+        ],
+        "title": "CrmSaveAnalysis"
+      },
+      "CrmSnapshot": {
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "const": "crm-result-snapshot/v1",
+            "title": "Schema Version",
+            "default": "crm-result-snapshot/v1"
+          },
+          "snapshot_id": {
+            "type": "string",
+            "pattern": "^crm_[sar]_[0-9a-f]{32}$",
+            "title": "Snapshot Id"
+          },
+          "captured_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Captured At"
+          },
+          "data_kind": {
+            "type": "string",
+            "enum": [
+              "real",
+              "synthetic"
+            ],
+            "title": "Data Kind"
+          },
+          "result": {
+            "$ref": "#/components/schemas/DashboardPurchases"
+          },
+          "result_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Result Sha256"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "snapshot_id",
+          "captured_at",
+          "data_kind",
+          "result",
+          "result_sha256"
+        ],
+        "title": "CrmSnapshot"
+      },
+      "CrmSnapshotRequest": {
+        "properties": {
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "title": "End Date"
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "全店",
+              "纯派样",
+              "货架",
+              "达播",
+              "直播",
+              "淘客",
+              "微博",
+              "U先派样",
+              "百补派样",
+              "赠品&0.01",
+              "其他"
+            ],
+            "title": "Channel",
+            "default": "全店"
+          },
+          "exclude_low_price": {
+            "type": "boolean",
+            "title": "Exclude Low Price",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "start_date",
+          "end_date"
+        ],
+        "title": "CrmSnapshotRequest"
+      },
       "DashboardAverage": {
         "properties": {
           "amount_fen": {

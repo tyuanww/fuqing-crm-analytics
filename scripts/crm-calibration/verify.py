@@ -14,6 +14,7 @@ from tempfile import TemporaryDirectory
 
 ROOT = Path(__file__).resolve().parents[2]
 TESTS = [
+    "test_crm_analysis.py",
     "test_crm_dashboard_purchases.py", "test_analytics_query_worker.py", "test_analytics_first_purchase_native.py",
     "test_crm_review_boundaries.py",
     "test_crm_calibration_regressions.py", "test_crm_calibration_integration.py", "test_crm_metrics_v1.py",
@@ -29,10 +30,13 @@ def source_hashes():
     for rel in ["backend/semantic/crm_metrics_v1.py", "backend/semantic/crm_metrics_compose.py", "backend/contracts/crm_metrics_v1.py", "backend/crm_metrics_app.py", "backend/services/crm_knowledge.py", "dsh-plugins/crm-knowledge/build.mjs", "dsh-plugins/crm-knowledge/package.json", "backend/contracts/crm-metrics.openapi.json", "dsh-plugins/crm-knowledge/cordis.patch.yml", "dsh-plugins/analytics-workbench/src/client/competition-shell/tokens.ts"]:
         files.add(ROOT / rel)
     files.update(ROOT / "backend/tests" / item for item in TESTS)
+    files.update(ROOT / rel for rel in ["backend/contracts/crm_analysis.py", "backend/services/crm_analysis.py", "backend/middleware/query_router.py",
+        "dsh-plugins/analytics-workbench/src/client/cockpit-extension.ts", "dsh-plugins/analytics-workbench/src/client/cockpit-main-panel.tsx",
+        "dsh-plugins/analytics-workbench/src/client/cockpit-workspace.tsx", "dsh-plugins/analytics-workbench/src/client/index.tsx"])
     files.update(ROOT / rel for rel in ["knowledge/crm/pack.json", "docs/crm-calibration/contracts/crm-metrics-v1.json"])
     # The dashboard adapter consumes these existing contracts/filters; keep its
     # verification tied to the inspected source, without modifying legacy code.
-    for rel in ["frontend-vue3/src/constants/channels.ts", "backend/contracts/metrics.py", "backend/contracts/common.py", "backend/routers/metrics.py", "backend/semantic/calculations.py", "backend/services/metrics/overview.py"]:
+    for rel in ["frontend-vue3/src/constants/channels.ts", "backend/contracts/metrics.py", "backend/contracts/common.py", "backend/routers/metrics.py", "backend/routers/crm_dashboard.py", "backend/semantic/calculations.py", "backend/services/metrics/overview.py", "backend/contracts/crm_dashboard.py", "backend/contracts/crm-dashboard.openapi.json"]:
         files.add(ROOT / rel)
     for rel in ["backend/contracts/crm_dashboard.py", "backend/contracts/crm-dashboard.openapi.json",
                 "backend/semantic/dashboard_purchases.py", "backend/services/metrics/dashboard_purchases.py",
@@ -58,8 +62,9 @@ def main():
         home.mkdir(mode=0o700)
         env = dict(PATH=os.pathsep.join([str(args.node.resolve().parent), str(Path(sys.executable).parent), "/usr/bin", "/bin", "/usr/sbin", "/sbin"]), HOME=str(home), TMPDIR=temp, LANG="en_US.UTF-8", PYTHONPATH=str(ROOT), PYTHON_DOTENV_DISABLED="1", PYTHONDONTWRITEBYTECODE="1", B0_BUILD_UPSTREAM=str(args.upstream.resolve()), CRM_METRICS_PYTHON=sys.executable)
         commands = [
+            ("crm-assets-ruff", [sys.executable, "-m", "ruff", "check", "backend/contracts/crm_analysis.py", "backend/services/crm_analysis.py", "backend/middleware/query_router.py"]),
             ("backend", [sys.executable, "scripts/run_backend_tests_bounded.py", *["backend/tests/" + item for item in TESTS], "--report-dir", str(report / "backend")]),
-            ("ruff", [sys.executable, "-m", "ruff", "check", "backend/semantic/crm_metrics_v1.py", "backend/semantic/crm_metrics_compose.py", "backend/contracts/crm_metrics_v1.py", "backend/crm_metrics_app.py", "backend/services/crm_readonly", "backend/services/crm_knowledge.py", "scripts/crm-calibration", *["backend/tests/" + item for item in TESTS]]),
+            ("ruff", [sys.executable, "-m", "ruff", "check", "backend/semantic/crm_metrics_v1.py", "backend/semantic/crm_metrics_compose.py", "backend/contracts/crm_metrics_v1.py", "backend/crm_metrics_app.py", "backend/services/crm_readonly", "backend/services/crm_knowledge.py", "backend/contracts/crm_dashboard.py", "backend/routers/crm_dashboard.py", "backend/routers/metrics.py", "dsh-plugins/crm-knowledge/test/crm-assets.fixture.py", "scripts/crm-calibration", *["backend/tests/" + item for item in TESTS]]),
             ("wire-contract", [sys.executable, "scripts/crm-calibration/generate_contract.py", "--check"]),
             ("http-types", [str(args.node), "scripts/crm-calibration/generate_types.mjs", str(args.build_tools), "--check"]),
             ("build", [str(args.node), "dsh-plugins/crm-knowledge/build.mjs", str(args.upstream), str(args.build_tools)]),

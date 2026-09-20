@@ -177,7 +177,9 @@ test('headed Chrome: generate-preview-bind-select-D6-D9-reopen-rollback-leave on
     const port = await listen(server);
     assert.notEqual(port, 6677);
     originHolder.origin = `http://127.0.0.1:${port}`;
-    chrome = await launchChrome({ userDataDir, url: `${originHolder.origin}/harness` });
+    // Attach CDP before the single navigation; launching on the harness and
+    // immediately navigating again races the first document's module loading.
+    chrome = await launchChrome({ userDataDir });
     await chrome.session.send('Page.navigate', { url: `${originHolder.origin}/harness` });
     await evaluate(chrome.session, `new Promise((resolve, reject) => {
       const t = setTimeout(() => reject(new Error('harness timeout')), 15000);

@@ -15,8 +15,10 @@ from backend.config import _default_start_date, _default_end_date
 from backend.contracts.schemas import OverviewMetrics, TrendData
 from backend.services.metrics_service import get_overview_metrics, get_daily_trend
 from backend.services import check_future_date
+from backend.routers.crm_dashboard import router as dashboard_router
 
 router = APIRouter(prefix="/api/v1/metrics", tags=["指标"])
+router.include_router(dashboard_router)
 
 
 @router.get("/cutoff")
