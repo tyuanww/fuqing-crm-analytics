@@ -10,7 +10,7 @@ export function CockpitAIPanel({ client, state, blocked = false }: { client: Coc
     {state.messageError && state.message ? <p className="cockpit-live" role="alert">{state.message}</p> : null}
     <details className="cockpit-ai-panel cockpit-ai-complete" data-testid="cockpit-ai-panel">
     <summary>{job.status === 'SAVED' ? `AI 修改已保存 · 版本 ${job.saved_version}` : '本次修改已放弃'}</summary>
-    <p>{!state.messageError && state.message || `基于版本 ${job.base_version}，保留原版本。`}</p>
+    <p>{!state.messageError && state.message || (job.status === 'SAVED' ? `已保存为版本 ${job.saved_version}，历史版本仍可查看。` : `基于版本 ${job.base_version}，保留原版本。`)}</p>
   </details></>;
   return <section className="cockpit-ai-panel" aria-label="AI 修改" data-testid="cockpit-ai-panel">
     <div className="cockpit-notice"><div><strong>{job.status === 'READY' ? '检查 AI 修改' : job.status === 'SAVED' ? 'AI 修改已保存' : job.status === 'CANCELLED' ? '本次修改已放弃' : '在对话中描述修改要求'}</strong>
