@@ -390,7 +390,8 @@ def test_http_state_busy_keeps_original_call_and_recovers_without_duplicate_work
 
 
 @pytest.mark.parametrize("stale_cancel_version", [False, True])
-def test_http_in_flight_worker_cancel_requires_exit(tmp_path, stale_cancel_version):
+@pytest.mark.parametrize("initial_contention", [False, True])
+def test_http_in_flight_worker_cancel_requires_exit(tmp_path, stale_cancel_version, initial_contention):
     app = native_app(tmp_path)
     entered, release = threading.Event(), threading.Event()
 
@@ -408,17 +409,35 @@ def test_http_in_flight_worker_cancel_requires_exit(tmp_path, stale_cancel_versi
         app.state.dispatcher.tick()
         if app.state.store.get(fp_actor(), run_id).status == "QUEUED":
             app.state.store.claim_next(lambda owner: fp_actor() if owner == "synthetic-demo" else None)
-        with ThreadPoolExecutor(1) as pool:
+        busy_seen = threading.Event()
+
+        def observed_post(*args, **kwargs):
+            response = client.post(*args, **kwargs)
+            if (response.status_code == 503
+                    and response.json().get("error", {}).get("code") == "STATE_UNAVAILABLE"):
+                busy_seen.set()
+            return response
+
+        with sqlite_connection(app.state.store.path) as writer, ThreadPoolExecutor(1) as pool:
+            if initial_contention:
+                writer.execute("BEGIN EXCLUSIVE")
+            # Admission can return documented 202/503 while the live
+            # dispatcher is reconciling the same SQLite state. Await the same
+            # call, without changing its identity or accepting terminal errors.
             running = pool.submit(
-                client.post, "/internal/native/first-purchase",
-                json={
+                settled_native_step, SimpleNamespace(post=observed_post), {
                     "session_id": SESSION, "request_id": "hold", "call_id": "call-hold",
                     "request": EXPECTED["request"],
                 },
-                headers=runtime_headers(),
             )
             try:
-                assert entered.wait(5)
+                if initial_contention:
+                    assert busy_seen.wait(5), "expected the real SQLite lock to reject admission"
+                    writer.rollback()
+                assert entered.wait(5), (
+                    (running.result().status_code, running.result().text)
+                    if running.done() else "native step did not reach the worker hook"
+                )
                 retry = client.post("/internal/native/first-purchase", json={
                     "session_id": SESSION, "request_id": "hold", "call_id": "call-hold",
                     "request": EXPECTED["request"],
@@ -451,6 +470,7 @@ def test_http_in_flight_worker_cancel_requires_exit(tmp_path, stale_cancel_versi
                 assert cancelled.json()["status"] in {"CANCELLING", "CANCELLED"}
                 assert cancelled.json()["status"] != "SUCCEEDED" or cancelled.json()["diagnostics"]["execution_active"]
             finally:
+                writer.rollback()
                 release.set()
             result = running.result(timeout=10)
         assert result.status_code in {200, 409}
@@ -459,8 +479,8 @@ def test_http_in_flight_worker_cancel_requires_exit(tmp_path, stale_cancel_versi
             assert result.json()["error"]["code"] in {"RUN_CANCELLED", "TOOL_FAILED", "WORKER_ACTIVE", "CONFLICT"}
             assert final["status"] in {"CANCELLED", "CANCELLING", "FAILED"}
         records = app.state.store.worker_records(active_only=False)
-        if records:
-            assert records[0]["run_id"] == run_id
+        assert len(records) == 1
+        assert records[0]["run_id"] == run_id
 
 
 def test_native_missing_role_rejected_without_facts(tmp_path):
