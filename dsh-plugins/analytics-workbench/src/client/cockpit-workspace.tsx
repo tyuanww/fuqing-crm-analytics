@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import type { ReactNode } from 'react';
 import { ThemeProvider } from './competition-shell/index.ts';
 import type { CompetitionColorScheme } from './competition-shell/tokens.ts';
 import type { LibraryBoardClient } from './library-board-client.mjs';
@@ -33,7 +34,8 @@ function workspacePackage(text: string) {
   return { html: [...parsed.head.children].map(node => node.outerHTML).join('') + parsed.body.innerHTML, css: '', js: '', resources: [] };
 }
 export function LibraryCockpitPanel({ library, goConversation, themeSource, initialSurface = 'board', pageStore, delivery, leaveCoordinator,
-  listWorkspaceFiles, openWorkspaceFile, readWorkspaceFile, fileClient, aiClient }: {
+  listWorkspaceFiles, openWorkspaceFile, readWorkspaceFile, fileClient, aiClient, extension }: {
+  extension?: ReactNode;
   library: LibraryBoardClient; goConversation(): void; leaveCoordinator?: LeaveCoordinator;
   themeSource: { subscribe(listener: () => void): () => void; getSnapshot(): CompetitionColorScheme };
   initialSurface?: 'pages' | 'board'; pageStore?: FreeHtmlLibraryStore;
@@ -271,7 +273,7 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
       <header className="sm-library-pagehead" data-testid="sm-library-pagehead">
         <div className="cockpit-heading"><button data-testid="sm-cockpit-back" aria-label="返回对话" onClick={back}>← <span className="cockpit-back-label">返回对话</span></button>
           <div><h1 ref={heading} tabIndex={-1}>项目驾驶舱</h1><small>历史交付 · 文件 · 预览与编辑</small></div></div>
-        <div className="cockpit-head-actions"><button aria-expanded={rail} onClick={() => setRail(!rail)}>{rail ? '收起产物' : '产物列表'}</button>
+        <div className="cockpit-head-actions">{extension}<button aria-expanded={rail} onClick={() => setRail(!rail)}>{rail ? '收起产物' : '产物列表'}</button>
           {fileClient ? <><input ref={picker} type="file" hidden multiple accept=".html,.htm,.docx,.doc,.odt,.rtf,.xlsx,.xls,.ods,.csv,.pdf" data-testid="cockpit-file-picker"
             onChange={event => { void addFiles(event.target.files); event.target.value = ''; }} />
             <button disabled={busy || uncertain} onClick={() => picker.current?.click()}>添加产物</button></> : null}

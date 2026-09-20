@@ -1,6 +1,6 @@
 # CRM 知识与指标候选插件
 
-固定 SDK：DSH 0.1.6-alpha.2，Node 24，Python 3.14+。独立插件，包含合成资料源及默认未连接的看板 GSV HTTP 适配，不修改 analytics-workbench/competition 或 DSH 上游。构建依赖只读复用已准备好的固定 checkout，不下载或自动安装。
+固定 SDK：DSH 0.1.6-alpha.2，Node 24，Python 3.14+。独立插件，包含合成资料源及默认未连接的看板 GSV HTTP 适配，通过 analytics-workbench 的可选 `cockpit.crm` 插槽展示引用，不修改 DSH 上游或比赛事实合同。构建依赖只读复用已准备好的固定 checkout，不下载或自动安装。
 
 本包依赖当前工作区中的 `backend/`、`scripts/crm-calibration/` 和 `knowledge/crm/`，当前不支持脱离仓库单独发布。
 
@@ -10,6 +10,7 @@
 |---|---|
 | `query_crm_dashboard_gsv` | 用户认可的现看板 GSV 总额、日趋势；绑定账号后只读调用原指标服务；与合成净额候选分开 |
 | `query_crm_dashboard_purchases` | 候选：看板GSV分子下的AOV/AUS及订单/买家覆盖，需新版聚合接口和Host；真实验收待完成 |
+| `query_crm_dashboard_snapshot` | 服务端查询并保存可信的不可变销售快照，供用户确认保存分析及加入驾驶舱 |
 | `query_crm_metrics_v1` | 销售表现、老客回购、派样后复购；全部经过只读适配 → 计算器 |
 | `crm_knowledge_explain` | 知识包定义、证据、冲突和离线依赖关系；说明合成验证状态 |
 | `crm_metrics_capabilities` | 可执行查询与未接入的真实资料能力 |
@@ -45,6 +46,20 @@
 `query_crm_dashboard_purchases` 使用同样的业务参数和对话登录，先校验 `/auth/me`，再调用 `/api/v1/metrics/dashboard-purchases`。金额、正额有效订单、对应买家及缺口来自同次聚合；零元订单和仅零元买家单列。未知标识、空/负金额使对应均值为空并返回原因。不会读取旧 `avg_order_value`，也不把新老客人数相加当买家总数。
 
 上线此候选需要同时更新CRM后端与CRM插件Host，并保留既有runtime受控重启；只替换preset不能给旧Host增加 `queryPurchases` 能力。重启后需用户在页面重新连接CRM，再对账。接口不存在时明确不可用，不降级查合成数据。当前尚未部署或完成真实AOV/AUS验收。
+
+## 保存分析与驾驶舱引用
+
+1. 当前对话连接 CRM 后，请求“查询销售指标并生成快照”，明确日期、渠道和剔除低价条件。
+2. 打开 **CRM 分析 → 查询快照**，核对过滤、GSV、AOV/AUS、覆盖缺口与查询时间，再选择“保存分析”并确认标题。
+3. 在“已保存分析”选择“加入驾驶舱”并确认；重开“驾驶舱引用”仍显示原结果。重新查数产生新快照，不覆盖已有分析。
+
+后端须显式配置 `FQ_CRM_ANALYSIS_STATE_DIR=/absolute/private/directory`（目录预先存在、当前进程所有、权限 0700）与 `FQ_CRM_ANALYSIS_DATA_KIND=real|synthetic`。SQLite 文件权限 0600；已有来源标签不可改成另一种资料。部署必须与 Host 的 `dataKind` 一致。未配置返回 `STATE_NOT_CONFIGURED`，不创建默认存储。
+
+新增 `/api/v1/metrics/dashboard-snapshots`、`crm-analyses`、`crm-cockpit-references` 的 POST 和按 ID GET，以及 `crm-library` GET。所有请求沿用认证账号；写入必须带稳定 `Idempotency-Key`。保存和引用只传来源 ID，由服务端取事实；浏览器与模型均不能提交数字或覆盖 owner。模型仅能生成快照，保存/引用由浏览器确认。
+
+确认响应丢失时按原请求重试；若关掉弹窗，先刷新核对。同一快照只能保存一个标题，同一分析只能固定一次；不同标题返回冲突。每账号快照/分析/引用上限为 2000/1000/500，回执上限 10000；列表只显示最近 20 项并提示截断。完整检索、删除、编辑和共享尚未接入。
+
+当前依赖固定结果，不承诺数据库事务快照或已校验水位。多用户仅有 CRM 账号隔离，不代表文档 ACL 已完成。现役与真实验收以[交付记录](../../docs/crm-calibration/crm-assets-release-2026-09-21.md)为准。
 
 ## 本地复验
 

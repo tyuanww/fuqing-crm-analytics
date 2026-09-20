@@ -43,6 +43,8 @@ export function dashboardCapabilities(connectionState = 'NOT_CONNECTED') {
     tool: 'query_crm_dashboard_gsv', metric_version: VERSION,
     connection_state: connectionState,
     authentication_checked_on_each_query: true, max_days: 90,
+    saved_analysis: { capture_tool: 'query_crm_dashboard_snapshot', schema_version: 'crm-result-snapshot/v1',
+      scope: 'private_crm_account', saves_require_user_confirmation: true, store_configuration_required: true },
     fields: ['gsv_amount', 'daily_gsv'], purchases_tool: 'query_crm_dashboard_purchases', purchases_requires_backend: 'crm-dashboard-purchases/v1', channels: [...CHANNELS],
     definition: dashboardKnowledgeContext(),
     note: '仅在登录页面连接当前对话；请求时重新验证 CRM 登录。现有 CRM 账号权限适用，尚无按渠道授权能力。',
@@ -56,7 +58,7 @@ function parseDate(value, code) {
   return result;
 }
 
-function validateRequest(input) {
+export function validateRequest(input) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) fail('INVALID_REQUEST');
   const keys = ['start_date', 'end_date', 'channel', 'exclude_low_price'];
   if (Object.keys(input).some(key => !keys.includes(key))) fail('INVALID_REQUEST');
@@ -69,7 +71,7 @@ function validateRequest(input) {
   return { start_date: input.start_date, end_date: input.end_date, channel, exclude_low_price: excludeLowPrice };
 }
 
-function validateBinding(binding, sessionId) {
+export function validateBinding(binding, sessionId) {
   if (!binding) fail('NOT_CONNECTED');
   if (!sessionId || binding.sessionId !== sessionId) fail('SESSION_NOT_BOUND');
   if (typeof binding.token !== 'string' || !binding.token || binding.token.length > 8192 || /\s/.test(binding.token) ||

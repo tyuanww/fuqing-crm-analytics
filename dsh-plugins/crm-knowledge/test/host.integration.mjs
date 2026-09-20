@@ -7,6 +7,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { serveDashboard, request as dashboardRequest, SYNTHETIC_PASSWORD } from './dashboard.fixture.mjs';
 import { mountLoginHost } from './login-native.fixture.mjs';
+import { serveAssets, snapshot, analysis, reference } from './crm-assets.fixture.mjs';
 import { graphFixture } from './graph.fixture.mjs';
 
 const plugin = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -17,6 +18,30 @@ const { Context } = await load('vendor/cordis');
 const { mountAgentLoopTestDependencies } = await load('packages/test-support/agent-loop-testkit');
 const built = await import(pathToFileURL(join(plugin, 'lib/index.js')).href);
 const graphTools = await import(pathToFileURL(join(plugin, 'lib/graph-tools.js')).href);
+test('native tool captures trusted CRM snapshot; browser confirms saved analysis and cockpit reference', async t => {
+  const fixture = await serveAssets(t);
+  const host = await mountLoginHost(t, fixture.binding.baseUrl);
+  for (const headers of [{ cookie: '' }, { origin: 'https://evil.invalid' }]) {
+    const response = await host.assetCall('library', {}, headers);
+    assert.ok([401, 403].includes(response.status)); await response.arrayBuffer();
+  }
+  assert.equal((await host.execute('query_crm_dashboard_snapshot', snapshot.result.filters)).value.code, 'NOT_CONNECTED');
+  await (await host.call('login', { username: 'fixture-user', password: SYNTHETIC_PASSWORD })).arrayBuffer();
+  const outcome = await host.execute('query_crm_dashboard_snapshot', snapshot.result.filters);
+  assert.equal(outcome.isError, false, JSON.stringify(outcome));
+  assert.deepEqual(outcome.value.snapshot, snapshot);
+  assert.equal(outcome.value.ok, true);
+  const saved = await host.assetCall('save', { snapshot_id: snapshot.snapshot_id, title: analysis.title, key: 'save-native' });
+  assert.deepEqual((await saved.json()).value, analysis);
+  const pinned = await host.assetCall('pin', { analysis_id: analysis.analysis_id, key: 'pin-native' });
+  assert.deepEqual((await pinned.json()).value, reference);
+  assert.equal((await host.execute('save_crm_analysis', { snapshot_id: snapshot.snapshot_id })).isError, true);
+  await (await host.call('disconnect')).arrayBuffer();
+  const hidden = await host.assetCall('library');
+  assert.equal((await hidden.json()).code, 'NOT_CONNECTED');
+  assert.equal(fixture.writes.length, 3);
+});
+
 const base = {
   source_id: 'synthetic-crm-metrics', contains_real_data: false, metric_version: 'crm-metrics/v1',
   period_start: '2026-09-01', period_end_exclusive: '2026-10-01', refund_view: 'ORDER_COHORT_AS_OF',
@@ -122,7 +147,7 @@ test('browser login reaches the pinned tools without exposing credentials', asyn
       assert.equal(JSON.stringify(body).includes(fixture.binding.token), false);
       assert.equal(JSON.stringify(body).includes(SYNTHETIC_PASSWORD), false);
       assert.equal((await execute('crm_login', { username: 'fixture-user', password: SYNTHETIC_PASSWORD })).isError, true);
-      assert.deepEqual(Object.keys(host.ctx.crmDashboard).sort(), ['capabilities', 'query', 'queryPurchases']);
+      assert.deepEqual(Object.keys(host.ctx.crmDashboard).sort(), ['capabilities', 'query', 'queryPurchases', 'querySnapshot']);
     });
     await t.test('preserves API amount and filters, without legacy extra metrics', async () => {
       const outcome = await execute('query_crm_dashboard_gsv', { ...dashboardRequest, channel: '淘客', exclude_low_price: true });

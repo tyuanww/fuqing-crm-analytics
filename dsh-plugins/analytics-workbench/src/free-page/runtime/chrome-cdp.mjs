@@ -101,6 +101,9 @@ export async function launchChrome({ userDataDir, proxyPort, url }) {
     '--window-size=1280,800',
     `--lang=zh-CN`,
   ];
+  // Only this disposable probe browser uses a mock keychain. A temporary HOME
+  // has no macOS login keychain; probing must not prompt or touch the user's.
+  if (process.platform === 'darwin') args.push('--use-mock-keychain');
   if (proxyPort) {
     args.push(`--proxy-server=http://127.0.0.1:${proxyPort}`);
     args.push('--proxy-bypass-list=127.0.0.1,localhost,<-loopback>');

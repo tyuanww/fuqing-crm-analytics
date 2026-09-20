@@ -203,6 +203,9 @@ class QueryRouterMiddleware:
     }
     # API-04: only these POSTs may borrow the read pool. Do not treat every POST as read.
     READ_ONLY_POST_ENDPOINTS = {
+        # Only its archive aggregate uses the read pool; CRM receipts go to a
+        # separate, explicitly configured SQLite state store.
+        "/api/v1/metrics/dashboard-snapshots",
         "/api/v1/audience/summary",
         "/api/v1/two-year-overview",
         "/api/v1/new-old-customer",
@@ -239,6 +242,9 @@ class QueryRouterMiddleware:
     }
     CONTROL_PREFIXES = (
         "/api/v1/auth/",
+        # Reading saved aggregates never needs to reopen the archived DuckDB.
+        "/api/v1/metrics/crm-",
+        "/api/v1/metrics/dashboard-snapshots/",
         # Mission owns its synthetic reader and SQLite state; borrowing a
         # legacy CRM connection here couples the demo to archived assets.
         "/api/v1/missions/",
