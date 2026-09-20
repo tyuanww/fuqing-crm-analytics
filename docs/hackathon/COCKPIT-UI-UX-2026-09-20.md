@@ -1,8 +1,8 @@
-# 驾驶舱 UI / UX · 0.13.0.0 发布候选（2026-09-21）
+# 驾驶舱 UI / UX · 0.13.0.0 交付记录（2026-09-21）
 
-当前候选位于公开仓库 `fuqing-crm-analytics` 的 `cockpit-ui-ux-public` 隔离工作树，分支为 `codex/cockpit-ui-ux-ship`；最终 diff 基线为 `origin/main` / `481f2f0`（#35 文档，代码基线为 #34 / `73ee74c6`）。保留主线 CRM 入口与本轮全屏动作。仅移植旧 `codex/cockpit-ui-ux` 的本任务补丁，没有合并旧仓库历史；旧工作树与证据保留。用户已选择版本 **0.13.0.0**，要求先补真实模型评估再创建 PR。真实 MiniMax-M3 的最终五项评估已通过，人工复核两项拒绝答复不再虚构操作入口；删除全异步链焦点修复及定向回归完成，合并后完整检查通过（后端 2834 passed / 77 skipped，B0 593 项 Python 与核心 Node / DOM 605 项及构建）；最终提示文案增量 B0 冻结复验通过，公开工作树正常 pre-push 完整通过，代码 `7836547` 已正常推送。尚未创建本轮 PR、合并或切换候选至现役 6677；主线 CRM #34 的 CI、运行切换及真实账号验收不代替本轮驾驶舱 / HTML 验收。产品仍 PARTIAL。
+驾驶舱 0.13.0.0 已由公开仓库 [PR #36](https://github.com/tyuanww/fuqing-crm-analytics/pull/36) squash 合入 `7575d073ed46ba3bce2dc3bb0be9811c7e48ee92`，PR 最终 HEAD 为 `f017d6d10463681dc897fe0b0add35cb33837a61`，两者内容树一致。发布 diff 基线为 #35 / `481f2f0`（代码基线 #34 / `73ee74c6`），只移植旧 `codex/cockpit-ui-ux` 的本任务补丁，未合入旧私有历史。PR 与该 main CI 均通过；2026-09-21 已按用户要求受控 reload 6677 / 18091 至本次代码。原生 MiniMax-M3 最终五项合成选区评估、后端 2834 passed / 77 skipped、完整 B0 及正常 pre-push 均通过；reload 后真实 Chromium 驾驶舱入口检查通过。完整编辑旅程、真实用户文件 UAT 和状态降级未验收，产品仍 PARTIAL。
 
-固定 DSH 上游源码与业务架构保持不变；验证使用合成数据和隔离小库。下面的“当前公开候选”记录与后面的“旧工作树历史”分开，旧 SHA、旧测试计数和旧 `.context` 路径不作为当前候选的通过证据。
+固定 DSH 上游源码与业务架构保持不变；发布验证使用合成数据和隔离小库。下面的“本轮已合代码”记录与后面的“旧工作树历史”分开，旧 SHA、旧测试计数和旧 `.context` 路径不作为本轮通过证据。已移除 3 个干净且已交付的工作树，2177 个证据/缓存文件先校验归档；旧 dirty 工作树、运行及验证依赖保留，分支未删除。
 
 ## 行为变化
 
@@ -15,7 +15,7 @@
 
 使用方式和 HTTP 合同见[产物修改说明](../operating/cockpit-ai-edit.md)。原始 HTML 要先保存为可编辑副本。动态区域、业务绑定内容或不可靠结构保持只读；外链、module / defer 等既有导入限制保留。
 
-## 当前公开候选：修复与审查处理
+## 本轮已合代码：修复与审查处理
 
 | 问题 | 当前实现与证据边界 |
 |---|---|
@@ -27,7 +27,7 @@
 | 删除/恢复与排序键盘焦点丢失 | 打开删除弹窗前记录触发按钮，取消后恢复；删除或回收站恢复使按钮移除时回退到产物标题抓手。排序保存期间用 `aria-disabled` 和事件门控保留手柄焦点；最新恢复焦点修复后已有 2 项针对性回归通过 |
 | 长标题换行和全屏/窄屏 CSS 覆盖 | 标题容器允许收缩，单行省略，版本徽标不收缩，保留完整标题提示。移除 3 处不必要的新增 `!important`；窄屏覆盖浮动内联坐标及高度的 2 处规则保留并说明原因 |
 
-代码候选审查时 reviewable 文件 **37/37 已审查、0 skip**，当时另 9 个工具排除项已人工审计；转树后全部 reviewable 指纹匹配。本次文档同步的 7 份 Markdown 已另行审查，最终整批为 50 个文件：37 个 reviewable、13 个工具排除项，全部排除项均已人工核对。结构外审完成一次，对抗外审调用不可用，不能计为通过。独立结构外审原文保留于下述来源工作树的 `.context/checks/cockpit-ship/outside-structured.md`；主审按实际源码核验，不把外审建议直接计为缺陷：
+代码候选审查时 reviewable 文件 **37/37 已审查、0 skip**，当时另 9 个工具排除项已人工审计；转树后全部 reviewable 指纹匹配。发布前文档同步的 7 份 Markdown 已另行审查，最终整批为 50 个文件：37 个 reviewable、13 个工具排除项，全部排除项均已人工核对。结构外审完成一次，对抗外审调用不可用，不能计为通过。独立结构外审原文保留于下述来源树归档的 `.context/checks/cockpit-ship/outside-structured.md`；主审按实际源码核验，不把外审建议直接计为缺陷：
 
 - “已完成 AI 任务永久锁死新选区”是误报：客户端 `accept()` 将 SAVED / CANCELLED 从 `jobs` 移除，服务端 `list()` 也用 `status NOT IN ('SAVED','CANCELLED')` 过滤；完成说明保留在 `active` 不等于仍占用未完成任务列表。
 - “恢复产物后焦点丢失”已修复；最新删除全链定向回归为 5 项通过，合并后整套回归已通过。
@@ -36,21 +36,24 @@
 
 最后 Claude Code 设计外审原文见 `outside-design.md`：恢复列表 AI/版本副行与用户“仅标题”要求冲突，未采纳；方向键移动浮出符合当前交互；旧色彩令牌更名不扩入本轮。确认的 SAVED + 刷新失败错误回退文案已修复，并独立复核状态路径。外部调用返回内容，但缺少校验器要求的结尾 Recommendation 标记，工具状态按 `unavailable` 保留，不把格式缺口记作 clean。
 
-## 当前公开候选：实际验证快照
+## 本轮已合代码：实际验证快照
 
-浏览器、模型及审查原始证据保留在来源工作树 `/Users/hutou/.codex/worktrees/cockpit-ui-ux-ship/fuqing-crm-analytics/.context/checks/cockpit-ship/`；下表未标明“当前树”的文件名均相对此目录。该树继承 `no-push://private-history-use-public-snapshot`，因此从独立公开克隆导入确切公开祖先的本轮提交建立当前树，未修改保护配置。当前树 `.context/checks/cockpit-ship/public-transfer-evidence.json` 记录 37 项审查与 6 项模型源码哈希全部匹配，#35 仅改 Markdown。各测试层有重叠，不相加为总用例数。
+浏览器、模型及审查证据已归档至**原仓** `.context/worktree-retained-20260921/`（私有，不进 Git），各子目录 `manifest.json` 记录原路径、分支和提交。下文“来源树归档”为 `cockpit-ui-ux-ship/`，“公开树归档”为 `cockpit-ui-ux-public/`；裸文件名相对于来源树归档的 `.context/checks/cockpit-ship/`。原来源树的 `no-push://private-history-use-public-snapshot` 保护未变；公开克隆导入确切公开祖先的本轮提交。公开树归档 `.context/checks/cockpit-ship/public-transfer-evidence.json` 记录 37 项审查与 6 项模型源码哈希全部匹配，#35 仅改 Markdown。reload / 清理回执单列于原仓 `.context/reload-6677-20260921/final-receipt.json`。各测试层有重叠，不相加为总用例数。
 
 | 层级 | 已取得结果及限制 | 证据 |
 |---|---|---|
-| B0 pipeline | 合并后完整 PASS：593 项 Python、核心 Node / 编译后 DOM 605 项，以及合同、类型、Ruff、Cordis 装配和干净重建；其他 Node 分组与核心有重叠，不相加 | 当前树 `.context/checks/cockpit-ship/prepush.log`；来源树 `integrated-final.log` / `b0-release.log` 保留 |
-| 共享后端矩阵 | 277 个目标、12 组退出 0；JUnit 汇总 **2834 passed / 77 skipped，零失败、零错误**，另有 71 deselected。Ruff 和 Agent 入口通过；skip 不计通过 | 当前树 `.context/checks/20260920T184020184667Z/summary.json` 与 12 份 `group*.xml`；正常 pre-push 退出 0 |
-| Chromium + FastAPI / SQLite | 合并后 15 项 PASS、无未处理异常；覆盖拖动/缩放/停靠/回收站/全屏/390px/HTML 编辑与选区保护。原生会话打开仍为夹具，真实模型证据独立 | `browser-release/results.json` 与截图 |
+| B0 pipeline | 主线集成后完整 PASS：593 项 Python、核心 Node / 编译后 DOM 605 项，以及合同、类型、Ruff、Cordis 装配和干净重建；其他 Node 分组与核心有重叠，不相加 | 公开树归档 `.context/checks/cockpit-ship/prepush.log`；来源树归档 `integrated-final.log` / `b0-release.log` 保留 |
+| 共享后端矩阵 | 277 个目标、12 组退出 0；JUnit 汇总 **2834 passed / 77 skipped，零失败、零错误**，另有 71 deselected。Ruff 和 Agent 入口通过；skip 不计通过 | 公开树归档 `.context/checks/20260920T184020184667Z/summary.json` 与 12 份 `group*.xml`；正常 pre-push 退出 0 |
+| Chromium + FastAPI / SQLite | 主线集成后 15 项 PASS、无未处理异常；覆盖拖动/缩放/停靠/回收站/全屏/390px/HTML 编辑与选区保护。原生会话打开仍为夹具，真实模型证据独立 | `browser-release/results.json` 与截图 |
 | 删除异步链及选区回归 | 5 项定向 DOM PASS，含 Office 关闭及偏好写入慢请求、失败/重试、正反 Tab、重复激活阻断和恢复焦点；已纳入完整 pipeline | `library-workspace.test.mjs`；`integrated-final.log` |
 | 评估器与工具范围 | 11 项 Python oracle 回归 PASS；5 项 Node guard PASS（包括固定上游实际 scope registry），均为合成测试 | 后端矩阵；`eval-guard-final.log` |
 | 真实模型评估 | **最终 5/5 PASS**：`minimax-cn/MiniMax-M3`，3 项修改双轮 present → collect → confirm → 独立连接读回版本 2；2 项越界拒绝，无候选并保留版本 1。最终六项源码指纹全部匹配 | `model-eval-final.json`；人工复核拒绝答复无虚构入口 |
-| 未执行验收 | 完整 DSH 宿主浏览器、真实用户 HTML UAT、Office / PDF 兼容扩展、远端 CI、现役部署切换与状态降级验证 | 当前 `full_dsh_shell` 为 `NOT_RUN`；产品仍 PARTIAL |
+| 远端 CI | #36 最终 HEAD 的 PR CI 与合入 `7575d07` 后的 main CI 均成功；路径计划排除的 job 为 skip，不计通过 | [PR CI 35530714555](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/35530714555)、[main CI 35544038060](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/35544038060) |
+| 6677 reload / 原生入口检查 | 6677 与 18091 使用已合代码；认证 401/303/200 通过，真实 Chromium 可进入驾驶舱，看到全屏、浮动面板抓手、回收站及 CRM 入口，0 个未处理页面异常；未编辑用户产物、未再次调用模型 | 原仓 `.context/reload-6677-20260921/`：`native-probe.json`、`browser-check.json`、`post-cleanup-probe.json` |
+| 工作树清理 | 移除 `crm-assets-closeout`、`cockpit-ui-ux-public`、`cockpit-ui-ux-ship`；2177 个证据/缓存文件先逐项校验归档，分支保留；有未提交成果、现役服务或独立验证环境的工作树保留 | 原仓 `.context/worktree-retained-20260921/` 各子目录 `manifest.json` 与 `result.json` |
+| 未执行验收 | 完整 DSH 宿主编辑旅程、真实用户 HTML UAT、Office / PDF 兼容扩展与状态降级验证 | 合成浏览器报告原有 `full_dsh_shell=NOT_RUN` 保留；新增原生入口检查不替代完整旅程，产品仍 PARTIAL |
 
-早期 `b0-final.log`、`backend-final.log` 因并行修改标为 STALE，保留通过事实但不作最终内容绑定。合并后首次完整运行因为本次命令 PATH 漏掉 `/usr/sbin/lsof` 而在临时备份夹具失败；确认 fail-closed 原因、恢复正常系统 PATH 后，完整矩阵通过。`integrated-path-failure.log` 与原失败报告保留。综合通过运行期间另修一行 SAVED 刷新失败提示，包装器同样标 STALE；后端源码未变，最后 B0 冻结验证已通过，当前公开工作树随后在冻结代码上正常 pre-push 完整通过并推送，日志保留完整门禁结果。此前浏览器/模型失败和外审原文均保留，不覆盖为成功。
+早期 `b0-final.log`、`backend-final.log` 因并行修改标为 STALE，保留通过事实但不作最终内容绑定。主线集成后首次完整运行因为当时命令 PATH 漏掉 `/usr/sbin/lsof` 而在临时备份夹具失败；确认 fail-closed 原因、恢复正常系统 PATH 后，完整矩阵通过。`integrated-path-failure.log` 与原失败报告保留。综合通过运行期间另修一行 SAVED 刷新失败提示，包装器同样标 STALE；后端源码未变，最后 B0 冻结验证已通过，发布前公开工作树随后在冻结代码上正常 pre-push 完整通过并推送，日志保留完整门禁结果。此前浏览器/模型失败和外审原文均保留，不覆盖为成功。
 
 `model-eval-refined.json` 记录合计 **164420 tokens**：输入 37848、输出 6776、缓存读取 119796；供应商计费金额未知，不按 token 数推算费用。该次未重启现役服务、未改模型设置，临时 preset 已移除。工具边界由原生会话 scope guard 执行，记录中包含被拒绝的额外工具尝试，不能将其误记为实际执行了业务查询或 shell。
 
@@ -110,4 +113,8 @@
 
 ## 存储与兼容
 
-产物组织设置是现有小型文件 SQLite 中新增的 `cockpit_preferences` 表，按 owner 隔离，不改文件/版本记录。删除仅影响驾驶舱可见列表，恢复不复制或丢失原版本；旧代码忽略新增表即可读取原产物。AI 选区写入现有任务 context JSON，不改变业务绑定合同。尚未对现役状态运行迁移或验证降级。
+产物组织设置是现有小型文件 SQLite 中新增的 `cockpit_preferences` 表，按 owner 隔离，不改文件/版本记录。删除仅影响驾驶舱可见列表，恢复不复制或丢失原版本；旧代码忽略新增表即可读取原产物。AI 选区写入现有任务 context JSON，不改变业务绑定合同。2026-09-21 reload 已在现役文件库创建该空表；本轮没有演练状态降级，前述兼容性描述不等于降级验收通过。
+
+reload 保留原 supervisor 控制登记、runtime、会话、模型设置及 Office 配置，代码根改为保留的 `crm-public-release` 工作树；CRM 18093 仍依赖 `crm-assets-public`，原 8000 未切换。`status` / `stop` 由原仓拥有者入口控制；原仓默认 `reload` 会重编旧源码，不适用于当前部署。本次私有 `reload.mjs` 带旧 PID 前置条件，是一次性操作记录，不是通用重载命令。
+
+既有 173 个运行文件全部保留、172 个字节一致；`page-documents/files/files.sqlite3` 因新增空偏好表而变化，SQLite 完整性检查通过。页面数据库与在线备份的原有行比对一致；次级文件库没有切换前的逻辑行快照，只确认不可变文件载荷一致，不能宣称其所有旧行已独立比对。模型设置与凭据仅核对文件元数据，未读取内容。初次物理哈希失败保留于 `retention-initial-physical-hash.json`，限定后的结果为 `PASS_WITH_EXPECTED_SCHEMA_CHANGE`（`retention-after.json`），均位于原仓 `.context/reload-6677-20260921/`。

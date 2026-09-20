@@ -1,20 +1,20 @@
 # 项目状态 (Project Status)
-> 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。 本轮交付分支 `codex/cockpit-ui-ux-ship` 基于公开仓库 `origin/main` / `481f2f0`，仅移植驾驶舱候选，不带入旧私有历史；原 `codex/cockpit-ui-ux` 工作树保留。包含可恢复删除、标题精简、整个面板移动/缩放、全屏与静态 HTML 选区编辑；已完成复审修复及合成验证；原生 MiniMax-M3 五项合成选区评估通过，主线集成检查已通过，最终 B0 复验与本公开工作树正常 pre-push 已通过，代码 `7836547` 已推送，待创建 PR。尚未合并或切换本轮候选至现役，完整宿主与用户文件 UAT 未验收，产品仍 PARTIAL。详见[本轮记录](docs/hackathon/COCKPIT-UI-UX-2026-09-20.md)。
+> 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。驾驶舱 0.13.0.0 已由公开仓库 [#36](https://github.com/tyuanww/fuqing-crm-analytics/pull/36) 合入 `7575d07`，PR 与该 main CI 均通过，6677 已受控 reload。可恢复删除、标题精简、整个面板移动/缩放、全屏与静态 HTML 选区编辑已交付；原生 MiniMax-M3 五项合成选区评估通过。reload 后真实宿主入口检查通过，完整编辑旅程、用户文件 UAT 与状态降级仍未验收，产品仍 PARTIAL。3 个已交付工作树移除前已校验归档证据；原 dirty 工作树、运行及验证依赖保留。详见[本轮记录](docs/hackathon/COCKPIT-UI-UX-2026-09-20.md)。
 
-## 当前快照（2026-09-21，CRM 分析持久化）
+## 当前快照（2026-09-21，驾驶舱 0.13.0.0）
 
 | 项 | 状态 |
 |---|---|
-| 本地 Git 基线 | **481f2f0（新公开仓库 #35；代码 #34）**；驾驶舱候选分支 `codex/cockpit-ui-ux-ship`，旧历史及原候选保留。 |
-| 本轮交付 | #34 已合入可信 CRM 快照、保存分析与驾驶舱引用，见[交付记录](docs/crm-calibration/crm-assets-release-2026-09-21.md)。本分支叠加驾驶舱 UI / UX 与原生模型选区评估，后端 2834 passed / 77 skipped、完整 B0 通过；最终提示文案 B0 复验与正常 pre-push 通过，`7836547` 已推送、待 PR；#34 的运行验收不代替本轮驾驶舱验收。 |
-| VERSION / 产品 | **0.13.0.0**，驾驶舱交互与静态 HTML 选区编辑候选；产品仍 **PARTIAL**，原全量 Goal **PAUSED**。loopback，不上公网。 |
+| 已合代码基线 | **7575d07（公开仓库 #36）**，前序 #35 文档 / #34 CRM；保留的 `crm-public-release` main 已快进到该提交，旧私有历史未合入。 |
+| 本轮交付 | #36 驾驶舱 UI / UX 与原生模型选区评估；后端 2834 passed / 77 skipped、完整 B0、正常 pre-push 通过。PR CI 及 [main CI 35544038060](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/35544038060) 成功，skip 不计通过；#34 CRM 证据见[交付记录](docs/crm-calibration/crm-assets-release-2026-09-21.md)。 |
+| VERSION / 产品 | **0.13.0.0**，驾驶舱交互与静态 HTML 选区编辑已合入并加载；产品仍 **PARTIAL**，原全量 Goal **PAUSED**。loopback，不上公网。 |
 | DSH 基座 | **0.1.6-alpha.2（ddefc45f）**，不改上游。 |
-| 现役 | 6677已加载 #34 同树候选，CRM 指向独立 18093，原8000保留；旧版实际回退及再次切入通过，68个既有运行文件和文档版本/回执保留。真实账号/模型查询、保存/引用和刷新重开通过。 |
+| 现役 | 6677 与 18091 页面服务加载 #36；代码在 `crm-public-release`，控制登记及原 runtime 留在原仓，CRM 18093 / 原 8000 未切换。认证 401/303/200 与真实浏览器入口检查通过；173 个既有文件全部保留、172 个字节一致，文件 SQLite 因新增空偏好表变化，保留核验限制见[本轮记录](docs/hackathon/COCKPIT-UI-UX-2026-09-20.md#存储与兼容)。 |
 | 原始数据 | 约131GB归档DuckDB不进Git，不复制、改写或全表扫描；本轮新测试使用合成夹具，真实图谱仅查询已部署教材。 |
 
 ## 本轮施工计划
 
-### 当前三步：验证 → 真实闭合 → 交付切换
+### 已完成三步：CRM 验证 → 真实闭合 → 交付切换（#34）
 - 当前候选以新公开仓库 main 为基线，保留其依赖和 worker 修复，不另增重复的销售合同。零元订单及仅零元买家单列，不计 AOV/AUS 分母。
 - 已修复一次性测试浏览器的 macOS 钥匙串提示和 P12 重复导航；新主线候选完整 B0 已通过。
 - CRM 专项后端、83 项 Node、21 项原生 Host、合同/类型/构建通过。可信快照 → 账号私有分析 → 驾驶舱引用已覆盖落盘、新进程读取、认证及幂等重试。
