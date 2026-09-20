@@ -96,6 +96,18 @@ Excel SSOT 的提交入口使用 `--staged`：从 Git index 读取变更 view �
 
 ## DSH 基座兼容的独立验证
 
+驾驶舱 HTML 选区提示词、源码范围验证器、原生初始提示或评估器发生变化时，合并前另跑真实模型评估（需要用户授权模型调用）：
+
+```sh
+node scripts/dsh-dev/cockpit-ai-eval.mjs \
+  --runtime /absolute/already-running-dsh-runtime \
+  --upstream /absolute/pinned-dsh \
+  --python /absolute/python3.14 \
+  --output /absolute/new-private-eval-report.json
+```
+
+入口复用所指实例当前模型，不读取或复制模型密钥，不启动、重启或切换服务。它创建临时合成目录和唯一原生 preset，限制文件工具与路径；分别跑三项修改和两项越界拒绝，使用真实 `TASK.md`、原生双轮提示、`present`、产品收取/确认及独立连接读回。失败立即停止后续场景，只取消自己创建的会话；临时 preset 结束时清理，失败与候选证据保留在报告所指目录。当前费用未知时记 `null`，有用量则记录实际 token，不伪造费用。这个门禁不自动加入 CI，也不替代完整宿主浏览器或用户真实文件 UAT。纯合成的评估器回归为 `backend/tests/test_cockpit_ai_eval.py` 和 `scripts/dsh-dev/cockpit-ai-eval-guard.test.mjs`，不调用模型。
+
 `DSH_DEV_UPSTREAM=/absolute/pinned/upstream node --test scripts/dsh-dev/*.test.mjs` 检查开发入口及 supervisor 失败清理，需 4325/4327 空闲；不停止现有监听。原生 UI-only 开关使用 `scripts/dsh-dev/cli.mjs start --plugin on|off`，与 B0 pipeline 分层。
 
 B0 `serve.mjs --python /absolute/python3.14 --port-base 4335 --native-first-purchase` 使用 4335–4339；gateway 与 rpc 从同工作树 `current.json` 读取端口，三者均在隔离 worktree 执行。`B0_BUILD_UPSTREAM` 可只读复用固定 checkout。Loader 测试默认使用独立 4326，支持 `B0_PORT_BASE=4335` 选择 4336；端口忙直接失败，不停止用户演示。完整基座 Settings 的插件清单为只读，启停在启动配置层验证。
