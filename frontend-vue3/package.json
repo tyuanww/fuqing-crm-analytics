@@ -19,7 +19,7 @@
     "@rive-app/canvas": "^2.37.5",
     "@tanstack/vue-query": "^5.99.0",
     "@vicons/ionicons5": "^0.13.0",
-    "@vueuse/core": "^14.2.1",
+    "@vueuse/core": "^15.0.0",
     "axios": "1.18.1",
     "echarts": "6.1.0",
     "naive-ui": "^2.45.3",
