@@ -36,9 +36,14 @@ def dashboard_openapi():
     app = FastAPI(title="CRM dashboard purchase aggregates", version="1")
     app.include_router(router)
     schema = app.openapi()
-    path = "/api/v1/metrics/dashboard-purchases"
+    allowed = {
+        "/api/v1/metrics/dashboard-purchases",
+        "/api/v1/metrics/dashboard-readiness",
+        "/api/v1/metrics/dashboard-membership",
+        "/api/v1/metrics/dashboard-net-gsv",
+    }
     schema["paths"] = {key: value for key, value in schema["paths"].items()
-                       if key == path or key.startswith(("/api/v1/metrics/dashboard-snapshots", "/api/v1/metrics/crm-"))}
+                       if key in allowed or key.startswith(("/api/v1/metrics/dashboard-snapshots", "/api/v1/metrics/crm-"))}
     used = set()
 
     def visit(node):
