@@ -26,7 +26,7 @@ python-pptx>=0.6.0      # PPT 生成
 # altair>=5.0.0         # 声明式可视化 - 已废弃
 
 # AI 能力
-openai>=1.0.0           # OpenAI API（ad-hoc / 可选脚本；非核心 request 路径）
+openai>=3.16.0           # OpenAI API（ad-hoc / 可选脚本；非核心 request 路径）
 
 # 工具
 python-dotenv>=1.2.3    # 环境变量管理
