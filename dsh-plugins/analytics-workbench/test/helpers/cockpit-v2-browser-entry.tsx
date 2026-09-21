@@ -7,6 +7,10 @@ import { createLibraryBoardClient } from '../../src/client/library-board-client.
 import { createFreeHtmlLibraryStore } from '../../src/client/free-html-library/store.mjs';
 import { createLivePageAdapters } from '../../src/client/free-html-library/live-adapters.mjs';
 import { createCockpitDelivery } from '../../src/client/cockpit-delivery.mjs';
+import { CockpitArtifact, cockpitArtifactAddress } from '../../src/client/cockpit-artifact.tsx';
+import { createCockpitArtifactClients } from '../../src/client/cockpit-ai-client.mjs';
+import type { AIJob } from '../../src/client/cockpit-ai-client.mjs';
+import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots';
 
 const themeSource = { subscribe: () => () => {}, getSnapshot: () => 'light' as const };
 const files = {
@@ -38,7 +42,10 @@ if (ux) {
   Object.assign(files.native_session, { 'second.html': '<h1>第二份产物</h1>' });
 }
 const fileClient = ux ? createCockpitFileClient({ base: location.origin }) : undefined;
-const aiClient = ux ? createCockpitAIClient({ base: location.origin }, { openNative: async (job) => { document.body.dataset.aiSelection = JSON.stringify(job.selection); } }) : undefined;
+const aiClient = ux ? createCockpitAIClient({ base: location.origin }, { openNative: async (job) => {
+  document.body.dataset.aiSelection = JSON.stringify(job.selection);
+  if (new URLSearchParams(location.search).has('presentation')) openArtifact(job);
+} }) : undefined;
 const controls = { failList: false, eof: true, readDelay: 0, loseConfirm: false, cancelFails: false };
 const calls: Array<{ operation: string; payload: unknown }> = [];
 let nativeMessages = 0;
@@ -78,9 +85,20 @@ delivery.captureSource({ ids: ['older_session', 'native_session'], byId: {
   native_session: { id: 'native_session', retainedBy: { mainView: 1 } },
 } });
 Object.assign(window, { cockpitFixture: { library, pageStore, delivery, fileClient, aiClient, controls, calls,
-  nativeMessages: () => nativeMessages, setMounted } });
+  nativeMessages: () => nativeMessages, setMounted, openArtifact } });
 const root = createRoot(document.getElementById('root')!);
+const artifactClients = createCockpitArtifactClients(() => createCockpitAIClient({ base: location.origin }, { openNative: async () => {} }));
 function setMounted(mounted: boolean) { root.render(mounted ? <LibraryCockpitPanel library={library} pageStore={pageStore}
   delivery={delivery} fileClient={fileClient} aiClient={aiClient} themeSource={themeSource} initialSurface="pages" goConversation={() => { document.body.dataset.left = 'true'; }}
   openWorkspaceFile={product => { document.body.dataset.openedFile = String(product.path); }} /> : null); }
 setMounted(true);
+
+// Only the native chat/session host is stubbed; the right tab, HTTP clients,
+// preview, confirmation, SQLite and page workspace are production components.
+function openArtifact(job: AIJob) {
+  const useTabInfo = (() => ({ tab: { contentId: cockpitArtifactAddress(job.id) } })) as PropsRuntime<'sidebar.right.pane.tab'>['useTabInfo'];
+  root.render(<div style={{ display: 'flex', height: '100%' }}>
+    <main data-testid="fixture-native-chat" style={{ width: '35%', padding: 24 }}>主对话宿主桩：{job.instruction}</main>
+    <aside aria-label="右侧产物" style={{ width: '65%', minWidth: 0 }}><CockpitArtifact useTabInfo={useTabInfo} createClient={artifactClients.get} /></aside>
+  </div>);
+}

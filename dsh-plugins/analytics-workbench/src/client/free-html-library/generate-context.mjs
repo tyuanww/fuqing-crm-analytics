@@ -6,6 +6,9 @@ export const SHINE_INVARIANTS = Object.freeze([
   '自由 HTML/CSS/JavaScript 是页面资产，不是 BoardSpec 或组件白名单',
   '宿主状态脊的示例/绑定/过期/待保存不能被页面 CSS/JS 删除或改写',
   '数据桥只读授权结果；页面不能持有凭据或执行 SQL',
+  '每个逻辑板块必须有稳定 data-page-block；重复卡片使用业务键，不能使用数组下标',
+  '可修改文案的叶子元素带 data-page-field；重渲染必须保留相同业务身份，计算/绑定值带 data-page-readonly',
+  '块身份与文案字段共同构成编辑合同；不依赖位置、随机重建 ID 或重复文本定位',
   'DESIGN.md 与 skill 只影响表达方向；未读到不得声称已遵循',
 ]);
 

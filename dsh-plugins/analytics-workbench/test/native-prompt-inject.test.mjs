@@ -77,6 +77,8 @@ async function boot(t, {
   hideRemoteBehindIsolate = false,
   hostLikeRemote = true,
   accept = true,
+  createSession,
+  adoptionDelay = 0,
   saved = {
     spec: {
       schema_version: 'board-spec/v1',
@@ -138,7 +140,7 @@ async function boot(t, {
       snapshot.byId = { ...snapshot.byId, [id]: { id, retainedBy: { mainView: 1 } } };
       return { sessionId: id, release() {} };
     },
-    create() { throw new Error('native prompt inject test must not create a session'); },
+    create(options) { if (createSession) return createSession(options); throw new Error('native prompt inject test must not create a session'); },
   });
   ctx.provide('theme', {
     overrideTokens: () => () => {},
@@ -146,7 +148,13 @@ async function boot(t, {
   });
   ctx.provide('uiWorkspace', { openSession(id) { snapshot.byId = Object.fromEntries(snapshot.ids.map(key => [key, { id: key, retainedBy: { mainView: key === id ? 1 : 0 } }])); } });
   ctx.provide('layout', { selectPanel() {} });
-  ctx.provide('sidebarRight', { openResource: address => openedResources.push(address) });
+  let adoptionReads = 0;
+  ctx.provide('sidebarRight', {
+    openResource: address => openedResources.push(address),
+    tabsIn: () => ++adoptionReads > adoptionDelay ? [{ id: 'guide' }] : [],
+    openResourceIn: (sessionId, address) => openedResources.push({ sessionId, address }),
+  });
+  ctx.provide('sidebarRightTabs', { register: () => () => {} });
   await ctx.plugin({ name: 'remote.workspaceFiles', apply: c => { new RemoteWorkspaceLike(c, workspaceCalls); } }).await();
   if (hostLikeRemote) {
     if (hideRemoteBehindIsolate) {
@@ -372,4 +380,26 @@ test('missing nested workspace injection reproduces the original empty cabinet w
   assert.equal(result.status, 'error');
   assert.equal(result.error, 'list-failed');
   assert.deepEqual(workspaceCalls, []);
+});
+
+test('inline HTML request uses native prompt and opens only its adopted session artifact, even while the old seat remains', async t => {
+  const previous = process.env.PAGE_DOCUMENTS_HTTP_BASE;
+  process.env.PAGE_DOCUMENTS_HTTP_BASE = 'http://127.0.0.1:18888';
+  t.after(() => { if (previous === undefined) delete process.env.PAGE_DOCUMENTS_HTTP_BASE; else process.env.PAGE_DOCUMENTS_HTTP_BASE = previous; });
+  let job, created;
+  t.mock.method(globalThis, 'fetch', async (url, init) => {
+    assert.equal(url, 'http://127.0.0.1:18888/api/v1/analytics/cockpit-ai');
+    const body = JSON.parse(init.body);
+    job = { ...body, status: 'WAITING', workspace: '/synthetic/owned', session_id: 'session-cockpit-ai-test', title: 'standalone.html', filename: 'standalone.json' };
+    return new Response(JSON.stringify(job));
+  });
+  const { entries, prompts, openedResources } = await boot(t, { adoptionDelay: 2, createSession: async options => { created = options; return options.sessionId; } });
+  const { aiClient } = entries.find(row => row.options.name === 'main' && row.options.key === 'cockpit').options.inject();
+  const selection = { start: 0, end: 25, html_hash: 'a'.repeat(64) };
+  assert.equal(await aiClient.begin('page', 'page_test', 3, selection, '卡片标题改成季度收入'), true);
+  assert.deepEqual(created, { cwd: '/synthetic/owned', sessionId: job.session_id });
+  assert.equal(prompts.length, 1);
+  assert.equal(prompts[0].requestId, 'artifact-' + job.id);
+  assert.match(prompts[0].content[0].text, /卡片标题改成季度收入/);
+  assert.deepEqual(openedResources, [{ sessionId: job.session_id, address: 'dsh-resource://cockpit-ai/' + job.id }]);
 });

@@ -1,13 +1,37 @@
 /** Native DSH does the AI work; this client only manages durable candidates. */
 const PREFIX = '/api/v1/analytics/cockpit-ai';
 export function nativeArtifactPrompt(job) {
-  return `请帮我修改驾驶舱产物 ${JSON.stringify(job.title ?? job.filename)}（版本 ${job.base_version}）。${job.selection ? '本次仅修改我在画布点选的板块，严格遵守 TASK.md 的选区范围。' : ''}先读取当前目录的 TASK.md 和源文件，确认内容并询问我想怎样修改。等我提出要求后再动手，完成后交付候选，由我回驾驶舱预览并确认保存。`;
+  if (job.instruction?.trim()) return `请修改驾驶舱产物 ${JSON.stringify(job.title ?? job.filename)}（版本 ${job.base_version}）。${job.selection ? '只调整我在页面选中的板块。' : ''}先读取 TASK.md、源文件及存在的 SELECTED.json，再执行以下已确认的修改要求：\n${job.instruction}\n保持其他内容和交互，完成后交付候选，右侧产物栏会从候选包统一渲染，让我检查；尚未确认前不要保存到产物库。`;
+  return `请帮我修改驾驶舱产物 ${JSON.stringify(job.title ?? job.filename)}（版本 ${job.base_version}）。${job.selection ? '本次仅修改我在画布点选的板块，严格遵守 TASK.md 的选区范围。' : ''}先读取当前目录的 TASK.md 和源文件，确认内容并询问我想怎样修改。等我提出要求后再动手，完成后交付候选，由我在产物栏预览并确认保存。`;
+}
+
+/** The plugin owns requests; closing/recreating a native tab must not forget a lost receipt. */
+export function createCockpitArtifactClients(createClient) {
+  const clients = new Map(), listeners = new Set();
+  const notify = () => { for (const listener of listeners) listener(); };
+  return {
+    get(id) {
+      if (!clients.has(id)) {
+        const client = createClient(); client.subscribe(notify); clients.set(id, client);
+      }
+      return clients.get(id);
+    },
+    subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); },
+    hasUnsavedChanges: () => [...clients.values()].some(client => client.hasUnsavedChanges()),
+    async persistForLeave() {
+      for (const client of clients.values()) {
+        if (client.hasUnsavedChanges() && !(await client.persistForLeave()).ok) return { ok: false };
+      }
+      return { ok: true };
+    },
+    dispose() { for (const client of clients.values()) client.dispose(); clients.clear(); listeners.clear(); },
+  };
 }
 
 export function createCockpitAIClient(http, { openNative, onSaved = async () => {} } = {}) {
   const listeners = new Set();
   let state = { jobs: [], active: null, busy: false, confirmationUncertain: false, message: '', messageError: false, comparison: null, viewer: null, html: null, previewVariant: null };
-  let pendingBegin = null, disposed = false;
+  let pendingBegin = null, pendingLoad = null, disposed = false;
   const update = patch => { if (disposed) return; state = { ...state, ...patch }; for (const listener of listeners) listener(); };
   async function request(path, { method = 'GET', body } = {}) {
     if (!http?.base) throw new Error('AI 产物服务尚未配置。');
@@ -37,6 +61,19 @@ export function createCockpitAIClient(http, { openNative, onSaved = async () => 
     getSnapshot: () => state,
     subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); },
     hasUnsavedChanges: () => state.confirmationUncertain,
+    async load(jobId) {
+      if (pendingLoad?.id === jobId) return pendingLoad.promise;
+      if (state.confirmationUncertain) return false;
+      if (state.active?.id === jobId && !state.busy) return true;
+      if (state.busy) return false;
+      const promise = perform(async () => {
+        const job = await json('/' + encodeURIComponent(jobId));
+        if (job.id !== jobId) throw new Error('修改任务回执不匹配');
+        accept(job);
+      });
+      pendingLoad = { id: jobId, promise };
+      try { return await promise; } finally { pendingLoad = null; }
+    },
     async refresh() {
       if (state.busy || state.confirmationUncertain) return;
       await perform(async () => {
@@ -56,14 +93,16 @@ export function createCockpitAIClient(http, { openNative, onSaved = async () => 
         ?? (state.active?.target_kind === targetKind && state.active?.target_id === targetId ? state.active : null);
       if (active?.id !== state.active?.id) update({ active, viewer: null, html: null, comparison: null, previewVariant: null, message: '', messageError: false });
     },
-    async begin(target_kind, target_id, base_version, selection = null) {
+    async begin(target_kind, target_id, base_version, selection = null, instruction = '') {
       if (state.confirmationUncertain) return false;
       return perform(async () => {
         if (typeof openNative !== 'function') throw new Error('原生 AI 对话尚未连接。');
+        instruction = instruction.trim();
+        if (instruction.length > 4000) throw new Error('修改要求不能超过 4000 字。');
         const prior = state.jobs.find(job => job.target_kind === target_kind && job.target_id === target_id);
-        if (prior) { if (JSON.stringify(prior.selection ?? null) !== JSON.stringify(selection)) throw new Error('此产物已有其他范围的 AI 修改任务，请先完成或放弃，再重新选择。'); accept(prior); await openNative(prior, false); return; }
-        if (!pendingBegin || pendingBegin.target_id !== target_id || pendingBegin.base_version !== base_version || pendingBegin.target_kind !== target_kind || JSON.stringify(pendingBegin.selection ?? null) !== JSON.stringify(selection)) {
-          pendingBegin = { id: 'ai_' + crypto.randomUUID(), target_kind, target_id, base_version, ...(selection ? { selection } : {}) };
+        if (prior) { if (JSON.stringify(prior.selection ?? null) !== JSON.stringify(selection) || (prior.instruction ?? '') !== instruction || prior.base_version !== base_version) throw new Error('此产物已有其他范围或要求的 AI 修改任务，请先完成或放弃，再重新选择。'); accept(prior); await openNative(prior, false); return; }
+        if (!pendingBegin || pendingBegin.target_id !== target_id || pendingBegin.base_version !== base_version || pendingBegin.target_kind !== target_kind || JSON.stringify(pendingBegin.selection ?? null) !== JSON.stringify(selection) || (pendingBegin.instruction ?? '') !== instruction) {
+          pendingBegin = { id: 'ai_' + crypto.randomUUID(), target_kind, target_id, base_version, ...(selection ? { selection } : {}), ...(instruction ? { instruction } : {}) };
         }
         const job = await json('', { method: 'POST', body: pendingBegin });
         accept(job); pendingBegin = null;
@@ -80,7 +119,9 @@ export function createCockpitAIClient(http, { openNative, onSaved = async () => 
       return perform(async () => {
         accept(await json('/' + state.active.id + '/collect', { method: 'POST' }));
         if (state.active.status === 'READY') {
-          update({ comparison: await json('/' + state.active.id + '/comparison'), message: 'AI 候选已收取，尚未保存。请检查修改前后内容。' });
+          const comparison = await json('/' + state.active.id + '/comparison');
+          const html = state.active.target_kind === 'page' ? await (await request('/' + state.active.id + '/content?variant=candidate')).json() : null;
+          update({ comparison, ...(html ? { html, previewVariant: 'candidate' } : {}), message: 'AI 候选已收取，尚未保存。请检查修改前后内容。' });
         }
       });
     },
@@ -88,7 +129,7 @@ export function createCockpitAIClient(http, { openNative, onSaved = async () => 
       if (!state.active || state.confirmationUncertain) return false;
       return perform(async () => {
         const job = state.active;
-        const comparison = await json('/' + job.id + '/comparison');
+        const comparison = job.candidate_hash ? await json('/' + job.id + '/comparison') : null;
         if (job.target_kind === 'page' || /\.html?$/i.test(job.filename)) {
           const text = await (await request('/' + job.id + '/content?variant=' + variant)).text();
           update({ comparison, previewVariant: variant, viewer: null, html: job.target_kind === 'page' ? JSON.parse(text) : { html: text, css: '', js: '', resources: [] } });

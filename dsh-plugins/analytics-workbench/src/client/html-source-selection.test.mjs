@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { sourceTargets, sourceTextPreview, selectionForAI, instrumentSourceTargets } from './html-source-selection.mjs';
+import { sourceHash } from '../free-page/presentation/model.mjs';
 import { createFreeHtmlLibraryStore } from './free-html-library/store.mjs';
 import { createLivePageAdapters } from './free-html-library/live-adapters.mjs';
 import { createIsolatedFetch } from './free-html-library/p12-http-fakes.mjs';
@@ -14,6 +15,18 @@ test('ordinary HTML gets source selections without changing or inventing persist
   assert.match(instrumentSourceTargets(pkg, nodes).html, /data-cockpit-source/);
   assert.equal(selectionForAI(pkg, paragraph).start, [...pkg.html.slice(0, paragraph.source.start)].length);
   assert.throws(() => sourceTextPreview({ ...pkg, html: pkg.html + 'changed' }, title, 'x'));
+});
+test('source edits and instrumentation rebind presentation to the new source hash', () => {
+  const source = { ...pkg, html: '<header id="hero"><h1>你好 🌟</h1></header><section><p>Keep</p></section>' };
+  const heading = sourceTargets(source).find(node => node.tag === 'h1');
+  const withCopy = { ...source, presentation: { version: 1, source_hash: sourceHash(source),
+    edits: [{ target: { anchor: { attribute: 'id', value: 'hero' }, path: [{ tag: 'h1' }] }, text: 'x' }] } };
+  const edited = sourceTextPreview(withCopy, heading, '新标题');
+  assert.equal(edited.presentation.source_hash, sourceHash(edited));
+  assert.notEqual(edited.presentation.source_hash, withCopy.presentation.source_hash);
+  const marked = instrumentSourceTargets(withCopy, sourceTargets(withCopy));
+  assert.equal(marked.presentation.source_hash, sourceHash(marked));
+  assert.notEqual(marked.presentation.source_hash, withCopy.presentation.source_hash);
 });
 test('ambiguous markup, bindings and active regions remain unavailable', () => {
   for (const html of ['<p><b>broken</p></b>', '<section data-shine-region="chart"><p>Dynamic</p></section>', '<div onclick="run()"><p>Active</p></div>', '<template><p>Hidden</p></template>']) {

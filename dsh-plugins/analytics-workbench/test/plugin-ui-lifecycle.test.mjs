@@ -107,6 +107,8 @@ function loadClient(hostWindow) {
     Node: view.Node,
     ResizeObserver: view.ResizeObserver,
     FormData: view.FormData,
+    fetch: view.fetch,
+    __PAGE_DOCUMENTS_HTTP_BASE__: view.pageBase,
     __SHINE_QUERY__: true,
     __SHINE_BOARD__: true,
     __SHINE_CROWD_ACTION__: true,
@@ -120,8 +122,10 @@ function loadClient(hostWindow) {
 function mount(client, extra = {}) {
   const entries = [];
   const effects = [];
+  const tabs = [];
   client.apply({
     effect: factory => { effects.push(factory()); },
+    sidebarRightTabs: { register: tab => { tabs.push(tab); return () => tabs.splice(tabs.indexOf(tab), 1); } },
     theme: { overrideTokens: () => () => {} },
     sessions: {
       list: { getSnapshot: () => ({ phase: 'ready', ids: [], byId: {} }), subscribe: () => () => {} },
@@ -140,13 +144,14 @@ function mount(client, extra = {}) {
     },
     ...extra,
   });
-  return { entries, effects };
+  return { entries, effects, tabs };
 }
 
 test('apply registers business slots; dispose removes them without touching native keys', () => {
   const client = loadClient();
-  const { entries, effects } = mount(client);
+  const { entries, effects, tabs } = mount(client);
   assert.deepEqual(entries.map(row => row.options.name), [
+    'sidebar.right.pane.tab',
     'sidebar.brand.mark', 'conversation.hero.brand.mark',
     'sidebar.footer.action', 'sidebar.footer.action', 'shell.overlay', 'shell.overlay',
     'tool.call.toolview', 'tool.call.toolview', 'tool.call.toolview', 'tool.call.toolview', 'tool.call.toolview', 'tool.call.toolview',
@@ -154,6 +159,10 @@ test('apply registers business slots; dispose removes them without touching nati
     'sidebar.panellist', 'main',
     'sidebar.panellist', 'main',
   ]);
+  assert.equal(tabs.length, 1);
+  assert.equal(tabs[0].canOpen('dsh-resource://cockpit-ai/ai_1234abcd'), true);
+  assert.equal(tabs[0].canOpen('dsh-resource://file/current.html'), false);
+  assert.equal(entries[0].options.key, tabs[0].id);
   const panels = entries.filter(row => row.options.name === 'sidebar.panellist');
   const mains = entries.filter(row => row.options.name === 'main');
   assert.deepEqual(panels.map(row => row.options.id), ['cockpit', 'staff']);
@@ -170,6 +179,44 @@ test('apply registers business slots; dispose removes them without touching nati
   ]);
   for (const dispose of effects) if (typeof dispose === 'function') dispose();
   assert.equal(entries.length, 0);
+  assert.equal(tabs.length, 0);
+});
+
+test('artifact confirmation uncertainty survives tab recreation and arms browser leave protection', async () => {
+  const view = fakePluginWindow(memoryStorage());
+  view.pageBase = 'http://synthetic.invalid';
+  const ready = { id: 'ai_test', target_kind: 'page', target_id: 'page_test', base_version: 1,
+    status: 'READY', candidate_hash: 'candidate', filename: 'page-package.json' };
+  const writes = []; let fail = true;
+  view.fetch = async (url, init) => {
+    if (url.endsWith('/confirm')) {
+      writes.push(init.body);
+      if (fail) { fail = false; throw new Error('lost receipt'); }
+      return Response.json({ ...ready, status: 'SAVED', saved_version: 2 });
+    }
+    if (url.endsWith('/ai_test')) return Response.json(ready);
+    return Response.json({ items: [] });
+  };
+  const { entries, effects } = mount(loadClient(view));
+  try {
+    const createClient = entries.find(row => row.options.name === 'sidebar.right.pane.tab').options.inject().createClient;
+    const client = createClient(ready.id);
+    assert.equal(await client.load(ready.id), true);
+    assert.equal((await client.confirm()).ok, false);
+    let prevented = false;
+    view.dispatchEvent({ type: 'beforeunload', preventDefault() { prevented = true; } });
+    assert.equal(prevented, true, 'right tab must participate in host leave protection');
+    const reopened = createClient(ready.id);
+    assert.equal(reopened, client, 'a recreated tab must retain the uncertain request');
+    assert.equal(reopened.getSnapshot().confirmationUncertain, true);
+    assert.equal((await reopened.confirm()).ok, true);
+    assert.deepEqual(writes, [writes[0], writes[0]]);
+    prevented = false;
+    view.dispatchEvent({ type: 'beforeunload', preventDefault() { prevented = true; } });
+    assert.equal(prevented, false);
+  } finally {
+    for (const dispose of effects) if (typeof dispose === 'function') dispose();
+  }
 });
 
 test('generate dock openCockpit selects sidebar.panellist id cockpit on the main slot', () => {
@@ -332,6 +379,7 @@ test('a second apply on the same fake ctx duplicates registrations; Host must no
   const entries = [];
   const ctx = {
     effect: factory => factory(),
+    sidebarRightTabs: { register: () => () => {} },
     theme: { overrideTokens: () => () => {} },
     sessions: {
       list: { getSnapshot: () => ({ phase: 'ready', ids: [], byId: {} }), subscribe: () => () => {} },

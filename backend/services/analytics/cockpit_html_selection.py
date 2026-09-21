@@ -1,7 +1,10 @@
 """Validate static HTML source selections and keep AI candidates inside their scope."""
 import hashlib
+import json
 import re
 from html.parser import HTMLParser
+from pydantic import ValidationError
+from backend.contracts.page_documents import PageElementTarget
 
 from backend.services.analytics.cockpit_files import fault
 
@@ -56,7 +59,7 @@ class UnsafeSelectionTree(Exception):
 class SourceTree(HTMLParser):
     def __init__(self, text, *, context=(), static=False):
         super().__init__(convert_charrefs=False)
-        self.text, self.stack, self.nodes, self.invalid = text, [], [], False
+        self.text, self.stack, self.nodes, self.all_nodes, self.invalid = text, [], [], [], False
         self.context, self.static = tuple(context), static
         self.lines = [0]
         for index, char in enumerate(text):
@@ -88,7 +91,7 @@ class SourceTree(HTMLParser):
             if len(ancestors) >= MAX_SELECTION_DEPTH:
                 raise UnsafeSelectionTree()
             readonly = blocked or bool(self.stack and self.stack[-1]['readonly'])
-            self.stack.append({'tag': tag, 'foreign': foreign, 'start': self.source_offset(), 'ancestors': ancestors,
+            self.stack.append({'tag': tag, 'attrs': dict(attrs), 'foreign': foreign, 'start': self.source_offset(), 'ancestors': ancestors,
                                'readonly': readonly, 'blocked': readonly})
 
     def handle_startendtag(self, tag, attrs):
@@ -112,12 +115,13 @@ class SourceTree(HTMLParser):
             return
         node = self.stack.pop()
         node['end'] = self.text.find('>', self.source_offset()) + 1
+        self.all_nodes.append(node)
         if tag in SELECTABLE and not node['blocked']:
             self.nodes.append(node)
 
 
 def validate_selection(package, selection, manifest):
-    if not isinstance(selection, dict) or set(selection) != {'start', 'end', 'html_hash'}:
+    if not isinstance(selection, dict) or set(selection) not in ({'start', 'end', 'html_hash'}, {'start', 'end', 'html_hash', 'rendered'}):
         fault(422, 'AI_SELECTION_INVALID', '选区格式无效，请重新点选。')
     html = package['html']
     start, end = selection['start'], selection['end']
@@ -127,6 +131,24 @@ def validate_selection(package, selection, manifest):
     if manifest.get('bindings') or manifest.get('result_refs'):
         fault(422, 'AI_BOUND_CONTENT', '业务绑定页面不支持普通选区修改。')
     tree = SourceTree(html)
+    if 'rendered' in selection:
+        view = selection['rendered']
+        if (not isinstance(view, dict) or set(view) != {'anchor', 'path', 'package_hash', 'html'}
+                or not isinstance(view['html'], str) or not 0 < len(view['html']) <= 60000):
+            fault(422, 'AI_SELECTION_INVALID', '板块定位信息无效，请重新选择。')
+        try:
+            PageElementTarget.model_validate({'anchor': view['anchor'], 'path': view['path']})
+        except ValidationError:
+            fault(422, 'AI_SELECTION_INVALID', '板块缺少稳定身份，不能按位置猜测。')
+        package_hash = hashlib.sha256(json.dumps([package['html'], package.get('css', ''), package.get('js', ''), package.get('presentation')], ensure_ascii=False, separators=(',', ':')).encode()).hexdigest()
+        if package_hash != view['package_hash']:
+            fault(409, 'AI_SELECTION_STALE', '页面源码或文案版本已变化，请重新选择板块。')
+        anchor = view['anchor']
+        matching = [node for node in tree.all_nodes if node['attrs'].get(anchor['attribute']) == anchor['value']]
+        if (tree.invalid or len(matching) != 1 or matching[0]['start'] != start or matching[0]['end'] != end
+                or matching[0]['readonly'] or matching[0]['tag'] not in SELECTABLE):
+            fault(422, 'AI_SELECTION_INVALID', '此板块无法可靠对应原页面，请重新选择。')
+        return dict(selection)
     node = next((node for node in tree.nodes if node['start'] == start and node['end'] == end), None)
     scoped = SourceTree(html[start:end], context=node['ancestors'], static=True) if node else None
     if tree.invalid or scoped is None or scoped.invalid:
@@ -140,10 +162,26 @@ def protect_selection(before, after, selection):
     start, end = selection['start'], selection['end']
     html, proposed = before['html'], after['html']
     prefix, suffix = html[:start], html[end:]
+    if selection.get('rendered'):
+        if any(before.get(key) != after.get(key) for key in ('html', 'css', 'js', 'resources', 'node_map')):
+            fault(422, 'AI_OUTSIDE_SELECTION', '块级修改只能调整选中块的内容与样式，不能改共享源码。')
+        scope = selection['rendered']
+        def clean(target):
+            return PageElementTarget.model_validate(target).model_dump(exclude_none=True)
+        parent = clean({'anchor': scope['anchor'], 'path': scope['path']})
+        def owned(target):
+            return (target['anchor'] == parent['anchor'] and target['path'][:len(parent['path'])] == parent['path'])
+        def outside(package):
+            return {json.dumps(clean(edit['target']), sort_keys=True): edit
+                    for edit in (package.get('presentation') or {}).get('edits', []) if not owned(clean(edit['target']))}
+        if outside(before) != outside(after):
+            fault(422, 'AI_OUTSIDE_SELECTION', '候选修改了其他板块的已保存内容，未收取。')
+        return
     if (any(before.get(key) != after.get(key) for key in ('css', 'js', 'resources', 'node_map'))
+            or (before.get('presentation') or {}).get('edits', []) != (after.get('presentation') or {}).get('edits', [])
             or len(proposed) < len(prefix) + len(suffix)
             or not proposed.startswith(prefix) or not proposed.endswith(suffix)):
-        fault(422, 'AI_OUTSIDE_SELECTION', '候选修改超出了选区，未保存；请让 AI 只调整指定板块。')
+        fault(422, 'AI_OUTSIDE_SELECTION', '候选修改超出了选区，未保存。')
     fragment = proposed[len(prefix):len(proposed) - len(suffix) if suffix else len(proposed)]
     original = SourceTree(html)
     selected = next((node for node in original.nodes if node['start'] == start and node['end'] == end), None)

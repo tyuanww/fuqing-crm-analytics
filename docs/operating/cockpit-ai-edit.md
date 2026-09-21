@@ -1,5 +1,7 @@
 # 用原生 AI 修改产物
 
+> **2026-09-21 本地候选补充**：`codex/cockpit-inline-edit` 已增加脚本卡片文案、页内 AI 要求和原生右栏统一预览，尚未加载现役。新流程、稳定身份与旧标签兼容限制见[实现说明](../hackathon/COCKPIT-PRESENTATION-2026-09-21.md)。下文“动态区域只读”和“模型完成后回驾驶舱”描述 0.13.0.0 现役流程；不代表本地候选的新行为。
+
 本功能 **0.13.0.0 已由 [#36](https://github.com/tyuanww/fuqing-crm-analytics/pull/36) 合入 `7575d07` 并加载现役 6677**，PR 与该 main CI 均通过；验收边界见[当前 UI / UX 报告](../hackathon/COCKPIT-UI-UX-2026-09-20.md)，早期 AI 接线证据见[历史报告](../hackathon/COCKPIT-AI-EDIT-2026-09-20.md)。沿用[本地文档服务](cockpit-office-local.md)与原生模型设置，不另接 provider 或复制凭据。
 
 1. 在驾驶舱选择产物，先保存或放弃手动编辑，点击“用 AI 改”。历史会话文件先保存独立副本。

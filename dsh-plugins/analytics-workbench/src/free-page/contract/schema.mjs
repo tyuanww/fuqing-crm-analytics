@@ -1,3 +1,4 @@
+import { validatePresentation } from '../presentation/model.mjs';
 /** Free-page/v1 package, manifest and bridge validators. Not a BoardSpec catalogue. */
 
 const IDENTITY = /^[A-Za-z0-9_.:-]{1,128}$/;
@@ -58,7 +59,7 @@ function opaque(value, label) {
  */
 export function parsePagePackage(raw) {
   if (!isPlainObject(raw)) return fail('INVALID_PAGE', '源码包必须是对象');
-  const unknown = extraKeys(raw, new Set(['html', 'css', 'js', 'resources', 'node_map']));
+  const unknown = extraKeys(raw, new Set(['html', 'css', 'js', 'resources', 'node_map', 'presentation']));
   if (unknown.length) return fail('INVALID_PAGE', `源码包含未知字段: ${unknown.join(',')}`);
   if (typeof raw.html !== 'string' || !raw.html.trim() || raw.html.length > HTML_MAX) {
     return fail('INVALID_PAGE', 'html 必须是非空源码');
@@ -100,8 +101,10 @@ export function parsePagePackage(raw) {
     if (!NODE_KINDS.has(item.kind)) return fail('INVALID_PAGE', 'node kind 非法');
     if (typeof item.selector !== 'string' || !item.selector.trim()) return fail('INVALID_PAGE', 'selector 非法');
   }
+  if (!validatePresentation(raw.presentation, raw)) return fail('INVALID_PAGE', '可编辑内容与源码不匹配');
+  bytes += utf8Bytes(JSON.stringify(raw.presentation ?? null));
   if (bytes > PACKAGE_MAX) return fail('PACKAGE_TOO_LARGE', '页面源码包超过大小上限');
-  return ok({ html: raw.html, css, js, resources, node_map: nodeMap });
+  return ok({ html: raw.html, css, js, resources, node_map: nodeMap, ...(raw.presentation ? { presentation: raw.presentation } : {}) });
 }
 
 /**

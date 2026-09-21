@@ -14,6 +14,7 @@ import { join, resolve } from 'node:path';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { handleBoardBrowserCall } from '../src/board-spec/browser-api.mjs';
 import { checkSelectionRegressions } from './helpers/cockpit-selection-regressions.mjs';
+import { checkPresentationFlow } from './helpers/cockpit-presentation-flow.mjs';
 
 const root = fileURLToPath(new URL('../../..', import.meta.url));
 const plugin = join(root, 'dsh-plugins/analytics-workbench');
@@ -81,12 +82,15 @@ try {
   server.listen(0, '127.0.0.1'); await once(server, 'listening');
   const origin = 'http://127.0.0.1:' + server.address().port;
   const { chromium } = createRequire(import.meta.url)(process.env.COCKPIT_PLAYWRIGHT);
-  browser = await chromium.launch({ executablePath: process.env.COCKPIT_CHROMIUM, headless: true });
+  browser = await chromium.launch({ executablePath: process.env.COCKPIT_CHROMIUM, headless: true, args: ['--use-mock-keychain'] });
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   page.on('pageerror', error => errors.push(error.message));
   const idle = () => page.waitForFunction(() => document.querySelector('main')?.getAttribute('aria-busy') === 'false' && !window.cockpitFixture.fileClient.getSnapshot().organizing);
   const click = async name => { await page.getByRole('button', { name, exact: true }).click(); await idle(); };
   const shot = async name => { const path = join(evidence, name + '.png'); await page.screenshot({ path, fullPage: true }); screenshots.push(path); };
+  if (process.argv.includes('--presentation')) {
+    await checkPresentationFlow({ page, origin, backend, check, shot });
+  } else {
   await page.goto(origin + '/?ux=1'); await page.getByTestId('library-html-preview').waitFor(); await idle();
   assert.equal(await page.locator('.cockpit-product-copy small').count(), 0);
   assert.equal(await page.frameLocator('iframe').locator('header').innerText(), '经营回顾 🌟\n\n本周观察');
@@ -147,6 +151,8 @@ try {
   await frame.locator('h1[data-cockpit-target]').click();
   await page.getByLabel('选择上级板块').selectOption({ label: 'header · 修改后的经营回顾  本周观察' });
   await click('用 AI 修改此选区');
+  await page.getByTestId('html-ai-composer').getByRole('textbox').fill('仅把这个板块背景改为浅灰');
+  await click('发送并进入对话');
   const selection = JSON.parse(await page.locator('body').getAttribute('data-ai-selection'));
   assert.ok(selection.end > selection.start && selection.html_hash.length === 64);
   const job = await page.evaluate(() => window.cockpitFixture.aiClient.getSnapshot().active);
@@ -167,10 +173,12 @@ try {
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
   check('390px 窄屏无横向溢出');
   await checkSelectionRegressions({ page, idle, click, check, shot });
+  }
   assert.deepEqual(errors, []); check('浏览器无未处理异常');
 } catch (error) {
   results.push({ name: 'probe', status: 'FAIL', detail: error.stack });
   process.stderr.write(error.stack + '\n');
+  if (browser) { const page = browser.contexts()[0]?.pages()[0]; if (page) await writeFile(join(evidence, 'failure-state.json'), JSON.stringify(await page.evaluate(() => ({ selection: window.cockpitFixture?.pageStore.getSnapshot().selection, message: window.cockpitFixture?.pageStore.getSnapshot().message, events: window.selectionEvents })), null, 2)); }
   if (browser) { const page = browser.contexts()[0]?.pages()[0]; if (page) { await page.screenshot({ path: join(evidence, 'failure.png'), fullPage: true }); await writeFile(join(evidence, 'failure.txt'), await page.locator('body').innerText()); } }
   process.exitCode = 1;
 } finally {

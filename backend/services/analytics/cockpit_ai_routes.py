@@ -13,6 +13,7 @@ class AISelection(BaseModel):
     start: int = Field(strict=True, ge=0)
     end: int = Field(strict=True, gt=0)
     html_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
+    rendered: dict | None = None
 
 
 class AIBegin(BaseModel):
@@ -22,6 +23,7 @@ class AIBegin(BaseModel):
     target_id: str = Field(min_length=1, max_length=160)
     base_version: int = Field(strict=True, ge=1)
     selection: AISelection | None = None
+    instruction: str = Field(default="", max_length=4000)
 
 
 class AIConfirm(BaseModel):
@@ -41,7 +43,7 @@ def cockpit_ai_router(store, principal, office=None, office_principal=None):
 
     @router.post("", status_code=201)
     def begin(body: AIBegin, request: Request):
-        return store.begin(principal(request), body.target_kind, body.target_id, body.base_version, body.id, body.selection.model_dump() if body.selection else None)
+        return store.begin(principal(request), body.target_kind, body.target_id, body.base_version, body.id, body.selection.model_dump(exclude_none=True) if body.selection else None, body.instruction)
 
     @router.get("/office-content")
     def office_content(ticket: str):

@@ -8,6 +8,7 @@ import {
   parsePageDocument, parsePagePackage, parseBridgeMessage, parseBindingManifest,
   FORBIDDEN_BRIDGE_OPS, PAGE_OPERATIONS, BINDING_STATE_VALUES,
 } from './schema.mjs';
+import { sourceHash } from '../presentation/model.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const frozen = JSON.parse(readFileSync(join(here,
@@ -84,4 +85,16 @@ test('parseBridgeMessage covers unknown op, nonce, expiry and budget', () => {
   for (const op of FORBIDDEN_BRIDGE_OPS) {
     assert.equal(parseBridgeMessage({ ...read, op }, session).error.code, 'BRIDGE_UNKNOWN_OP');
   }
+});
+
+test('parsePagePackage accepts omitted presentation defaults and rejects a stale source hash', () => {
+  const pkg = { html: '<section id="cards">x</section>', css: '', js: '', resources: [], node_map: [] };
+  const presentation = { source_hash: sourceHash(pkg), edits: [
+    { target: { anchor: { attribute: 'id', value: 'cards' }, path: [] }, text: 'y' },
+  ] };
+  const got = parsePagePackage({ ...pkg, presentation });
+  assert.equal(got.ok, true);
+  assert.equal(got.value.presentation.edits[0].text, 'y');
+  assert.equal(parsePagePackage({ ...pkg, presentation: { ...presentation, source_hash: '0'.repeat(64) } }).error.code, 'INVALID_PAGE');
+  assert.equal(parsePagePackage({ ...pkg, presentation: { ...presentation, edits: [{ ...presentation.edits[0], style: { color: 'url(x)' } }] } }).ok, false);
 });

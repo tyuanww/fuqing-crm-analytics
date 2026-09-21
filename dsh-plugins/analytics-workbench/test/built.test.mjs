@@ -53,6 +53,7 @@ test('built browser factory requires only platform modules and registers shared-
   const notify = () => { for (const listener of [...listeners]) listener(); };
   let held;
   client.apply({
+    sidebarRightTabs: { register: () => () => {} },
     effect: factory => { effects.push(factory()); },
     theme: { overrideTokens: () => () => {} },
     layout: { selectPanel: id => { selected.push(id); } },
@@ -86,8 +87,8 @@ test('built browser factory requires only platform modules and registers shared-
   const dock = entries.find(row => row.options.id === 'shine-mage.analytics-b0.generate-cockpit');
   const panel = entries.find(row => row.options.name === 'sidebar.panellist');
   const main = entries.find(row => row.options.name === 'main');
-  assert.equal(entries[0].options.priority, -10);
-  assert.equal(entries[1].options.priority, -10);
+  assert.equal(entries.find(row => row.options.name === 'sidebar.brand.mark').options.priority, -10);
+  assert.equal(entries.find(row => row.options.name === 'conversation.hero.brand.mark').options.priority, -10);
   const selection = overlay.options.inject();
   selection.detachSelection();
   selection.restoreSelection();

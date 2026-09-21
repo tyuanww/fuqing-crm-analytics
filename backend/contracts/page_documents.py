@@ -6,6 +6,9 @@ there is no component catalogue and no INVALID_BOARD.
 from __future__ import annotations
 
 from typing import Annotated, Literal, Union
+import hashlib
+import json
+import re
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -86,12 +89,77 @@ class PageNodeMapEntry(PageModel):
     selector: Annotated[str, Field(min_length=1, max_length=512, pattern=r"\S")]
 
 
+class PageElementKey(PageModel):
+    attribute: Literal['id', 'data-node', 'data-page-block', 'data-page-field', 'class', 'text']
+    value: Annotated[str, Field(min_length=1, max_length=2000)]
+
+    @model_validator(mode='after')
+    def identity_value(self):
+        if self.attribute == 'text':
+            if not self.value.strip():
+                raise ValueError('empty text identity')
+        elif not re.fullmatch(r'[A-Za-z][A-Za-z0-9_.:-]{0,159}', self.value):
+            raise ValueError('invalid element identity')
+        return self
+
+
+class PageElementStep(PageModel):
+    tag: Annotated[str, Field(min_length=1, max_length=80, pattern=r'^[a-z][a-z0-9-]*$')]
+    key: PageElementKey | None = None
+
+
+class PageElementTarget(PageModel):
+    anchor: PageElementKey
+    path: Annotated[list[PageElementStep], Field(max_length=64)]
+
+    @model_validator(mode='after')
+    def keyed_root(self):
+        if self.anchor.attribute in {'class', 'text'}:
+            raise ValueError('root requires an explicit identity')
+        return self
+
+
+PRESENTATION_STYLES = frozenset(('color background-color font-size font-weight font-style font-family line-height letter-spacing text-align text-decoration white-space border border-color border-width border-style border-radius padding padding-top padding-right padding-bottom padding-left margin margin-top margin-right margin-bottom margin-left display gap row-gap column-gap grid-template-columns flex-direction flex-wrap align-items justify-content order max-width min-width width').split())
+
+
+class PagePresentationEdit(PageModel):
+    target: PageElementTarget
+    text: Annotated[str, Field(max_length=20000)] | None = None
+    style: dict[str, str] = Field(default_factory=dict)
+
+    @model_validator(mode='after')
+    def declarative_only(self):
+        if self.text is None and not self.style:
+            raise ValueError('empty presentation edit')
+        if len(self.style) > 32 or any(k not in PRESENTATION_STYLES or not 0 < len(v) <= 160
+                or not re.fullmatch(r'[A-Za-z0-9#.,%() /+\-]+', v)
+                or re.search(r'url|expression|var\s*\(|!important', v, re.I) for k, v in self.style.items()):
+            raise ValueError('unsupported presentation style')
+        return self
+
+
+class PagePresentation(PageModel):
+    version: Literal[1] = 1
+    source_hash: Annotated[str, Field(pattern=r'^[0-9a-f]{64}$')]
+    edits: Annotated[list[PagePresentationEdit], Field(max_length=2000)] = Field(default_factory=list)
+
+    @model_validator(mode='after')
+    def unique_targets(self):
+        unique([json.dumps(e.target.model_dump(exclude_none=True), sort_keys=True) for e in self.edits])
+        return self
+
+
+def page_source_hash(html, css='', js=''):
+    return hashlib.sha256(json.dumps([html, css, js], ensure_ascii=False, separators=(',', ':')).encode()).hexdigest()
+
+
 class PagePackage(PageModel):
     html: Annotated[str, Field(min_length=1, max_length=HTML_MAX_CHARS)]
     css: Annotated[str, Field(max_length=STYLE_MAX_CHARS)] = ""
     js: Annotated[str, Field(max_length=STYLE_MAX_CHARS)] = ""
     resources: Annotated[list[PageResource], Field(max_length=32)] = Field(default_factory=list)
     node_map: Annotated[list[PageNodeMapEntry], Field(max_length=2000)] = Field(default_factory=list)
+    presentation: PagePresentation | None = None
 
     @model_validator(mode="after")
     def distinct_and_sized(self):
@@ -101,6 +169,10 @@ class PagePackage(PageModel):
         unique([item.node_id for item in self.node_map])
         encoded = len(self.html.encode()) + len(self.css.encode()) + len(self.js.encode())
         encoded += sum(item.byte_length for item in self.resources)
+        if self.presentation is not None:
+            if self.presentation.source_hash != page_source_hash(self.html, self.css, self.js):
+                raise ValueError('presentation source changed; explicitly rebind edits before saving')
+            encoded += len(self.presentation.model_dump_json().encode())
         if encoded > PACKAGE_MAX_BYTES:
             raise ValueError("页面源码包超过大小上限。")
         return self
@@ -162,6 +234,8 @@ class PageDraft(PageModel):
             raise ValueError("页面必须有来源会话或手动添加的文件")
         if self.session_id is None and self.binding_manifest.result_refs:
             raise ValueError("手动添加的页面不能声明已验证结果绑定")
+        if self.binding_manifest.result_refs and self.package.presentation and self.package.presentation.edits:
+            raise ValueError("业务绑定页面不能覆盖显示数据或局部样式")
         return self
 
     @field_validator("origin_path")
@@ -362,6 +436,9 @@ def page_documents_openapi() -> dict:
         schema = model.model_json_schema(ref_template="#/components/schemas/{model}")
         schemas.update(schema.pop("$defs", {}))
         schemas[model.__name__] = schema
+    # These additive fields remain optional for existing free-page/v1 callers.
+    for model, field in [('PagePackage', 'presentation'), ('PageElementStep', 'key'), ('PagePresentationEdit', 'text')]:
+        schemas[model]['properties'][field].pop('default', None)
     _optional_omit_null(schemas["PagePatchPreview"], "title", "package", "binding_manifest")
     _optional_omit_null(schemas["PageDraft"], "origin_path", "origin_file_id")
     _optional_omit_null(schemas["PageDocument"], "origin_path", "origin_file_id")

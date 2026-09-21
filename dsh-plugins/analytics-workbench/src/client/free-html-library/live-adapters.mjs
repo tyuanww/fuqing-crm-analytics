@@ -81,6 +81,7 @@ export function createLivePageAdapters({
         css: pkg?.css ?? '',
         js: pkg?.js ?? '',
         resources: pkg?.resources ?? [],
+        presentation: pkg?.presentation ?? null,
         instanceId: 'inst_preview',
         pageId: 'page_preview',
         version: 1,

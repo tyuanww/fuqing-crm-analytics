@@ -14,7 +14,7 @@ export type FreeHtmlLibraryState = {
   pages: ReturnType<PageAdapters['assets']['list']>;
   current: FreeHtmlPage | null;
   mode: 'browse' | 'edit';
-  selection: (LocateResult & { stale?: boolean; ok?: boolean }) | null;
+  selection: (LocateResult & { runtime?: import('../html-rendered-text.mjs').RenderedLocator; stale?: boolean; ok?: boolean }) | null;
   contextPanel: 'ai' | 'source' | 'history' | null;
   overlay: 'selection' | 'patch' | null;
   preview: PreviewRecord | null;

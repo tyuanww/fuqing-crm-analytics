@@ -1,5 +1,7 @@
+import type {} from '@deepseek-ai/dsh-client-ui-sidebar-right/client';
+import { CockpitArtifact, COCKPIT_ARTIFACT_TAB, cockpitArtifactAddress } from './cockpit-artifact.tsx';
 import type {} from '@deepseek-ai/dsh-client-ui-workspace/client';
-import { createCockpitAIClient, nativeArtifactPrompt } from './cockpit-ai-client.mjs';
+import { createCockpitAIClient, createCockpitArtifactClients, nativeArtifactPrompt } from './cockpit-ai-client.mjs';
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type { Context } from '@deepseek-ai/cordis';
 import { defineStore, type PropsStore } from '@deepseek-ai/dsh-client-store';
@@ -403,7 +405,7 @@ function PagePackageToolCard(props: ToolCallViewProps & { pagePackageWaiter?: Pa
 }
 
 export const name = 'analytics-workbench-b0-client';
-export const inject = ['slots', 'sessions', 'theme', 'layout', 'remote', 'remote.session', 'remote.workspaceFiles', 'sidebarRight', 'uiWorkspace'];
+export const inject = ['slots', 'sessions', 'theme', 'layout', 'remote', 'remote.session', 'remote.workspaceFiles', 'sidebarRight', 'sidebarRightTabs', 'uiWorkspace'];
 
 export function apply(ctx: Context): void {
   ctx.effect(() => bindInitialSession(ctx.sessions, () => {
@@ -464,7 +466,7 @@ export function apply(ctx: Context): void {
           clientTimeZone: 'Asia/Shanghai',
           content: [{
             type: 'text',
-            text: `请生成自由 HTML 页面。先用文本给出说明，然后必须调用 ${PAGE_GENERATE_TOOL_NAME} 工具交付页面源码包（字段 html、css、js、resources、node_map），并把这个标识逐字填入 request_id：${requestId}。不要使用 BoardSpec，不要回退到示例页面。提示：${prompt}`,
+            text: `请生成自由 HTML 页面。先用文本给出说明，然后必须调用 ${PAGE_GENERATE_TOOL_NAME} 工具交付页面源码包（字段 html、css、js、resources、node_map），并把这个标识逐字填入 request_id：${requestId}。不要使用 BoardSpec，不要回退到示例页面。每个逻辑板块使用稳定 data-page-block，每段可编辑叶子文字使用 data-page-field，重复卡片使用业务键，重渲染保留标识；计算或绑定数字标 data-page-readonly。提示：${prompt}`,
           }],
         });
       },
@@ -483,6 +485,18 @@ export function apply(ctx: Context): void {
         content: [{ type: 'text', text: nativeArtifactPrompt(job) }],
       });
       if (!reply.ok || !reply.value.accepted) throw new Error('原生 AI 未接受请求。请在该对话选择并配置可用模型，再回驾驶舱重试打开；修改任务已保留。');
+      ctx.layout.selectPanel(null);
+      ctx.uiWorkspace.openSession(sessionId);
+      const preview = job.preview_name ?? (job.target_kind === 'page' ? 'current.html' : job.source_name);
+      const address = job.target_kind === 'page' ? cockpitArtifactAddress(job.id) : fileResourceAddress(sessionId, preview);
+      if (address && job.target_kind === 'page') {
+        // Navigation renders asynchronously. Target the adopted session, never
+        // whichever old conversation still owns the visible seat this instant.
+        const deadline = Date.now() + 5000;
+        while (!ctx.sidebarRight.tabsIn(sessionId).length && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 25));
+        if (!ctx.sidebarRight.tabsIn(sessionId).length) throw new Error('对话已打开，右侧产物栏尚未就绪。任务已保留，请重试打开。');
+        ctx.sidebarRight.openResourceIn(sessionId, address);
+      } else if (address) ctx.sidebarRight.openResource(address);
     },
     async onSaved(job) {
       await fileClient.refresh();
@@ -491,6 +505,24 @@ export function apply(ctx: Context): void {
     },
   });
   ctx.effect(() => () => aiClient.dispose(), 'analytics-board: native AI exchange lifetime');
+  ctx.effect(() => ctx.sidebarRightTabs.register({
+    id: COCKPIT_ARTIFACT_TAB, kind: 'cockpit-artifact', patterns: ['dsh-resource://cockpit-ai/**'],
+    canOpen: address => /^dsh-resource:\/\/cockpit-ai\/ai_[0-9a-f-]+$/.test(address),
+    title: () => 'HTML 产物',
+  }), 'analytics-board: immutable artifact tab');
+  const artifactClients = createCockpitArtifactClients(() => createCockpitAIClient(pageDocumentsHttpOptions(), {
+    openNative: async job => { ctx.uiWorkspace.openSession(job.session_id as never); },
+    onSaved: async job => {
+      await aiClient.refresh(); await fileClient.refresh(); await pageStore?.refreshPages();
+      if (job.target_kind === 'page' && pageStore?.getSnapshot().cockpitSelectionId === 'page:' + job.target_id) await pageStore.openPage(job.target_id);
+    },
+  }));
+  ctx.effect(() => () => artifactClients.dispose(), 'analytics-board: artifact request lifetime');
+  ctx.effect(() => ctx.slots.inject('sidebar.right.pane.tab', () => ctx.slots.register({
+    name: 'sidebar.right.pane.tab', key: COCKPIT_ARTIFACT_TAB,
+    inject: () => ({ createClient: artifactClients.get }),
+  }, CockpitArtifact)), 'analytics-board: artifact body');
+
 
   /**
    * One leave transaction for every plugin-owned entry (D44/T25). The
@@ -501,10 +533,11 @@ export function apply(ctx: Context): void {
    * chat does not open a second three-choice prompt.
    */
   const leaveCoordinator = library ? createLeaveCoordinator({
-    snapshot: () => ({ ...library.getSnapshot(), htmlUnsaved: Boolean(pageStore?.hasUnsavedChanges() || fileClient.hasUnsavedChanges() || aiClient.hasUnsavedChanges()),
-      confirmationUncertain: library.getSnapshot().confirmationUncertain || Boolean(pageStore?.getSnapshot().confirmationUncertain) || fileClient.getSnapshot().confirmationUncertain || aiClient.getSnapshot().confirmationUncertain }),
+    snapshot: () => ({ ...library.getSnapshot(), htmlUnsaved: Boolean(pageStore?.hasUnsavedChanges() || fileClient.hasUnsavedChanges() || aiClient.hasUnsavedChanges() || artifactClients.hasUnsavedChanges()),
+      confirmationUncertain: library.getSnapshot().confirmationUncertain || Boolean(pageStore?.getSnapshot().confirmationUncertain) || fileClient.getSnapshot().confirmationUncertain || aiClient.getSnapshot().confirmationUncertain || artifactClients.hasUnsavedChanges() }),
     beginEpoch: kind => library.beginNavigation(kind),
     save: async () => {
+      if (!(await artifactClients.persistForLeave()).ok) return { ok: false };
       if (aiClient.hasUnsavedChanges()) { const result = await aiClient.persistForLeave(); if (!result.ok) return result; }
       if (fileClient.hasUnsavedChanges()) { const result = await fileClient.persistForLeave(); if (!result.ok) return result; }
       if (pageStore?.hasUnsavedChanges()) {
@@ -514,7 +547,7 @@ export function apply(ctx: Context): void {
       return library.saveForLeave();
     },
     discard: async () => {
-      if (aiClient.hasUnsavedChanges()) return { ok: false, reason: 'confirmation_uncertain' };
+      if (aiClient.hasUnsavedChanges() || artifactClients.hasUnsavedChanges()) return { ok: false, reason: 'confirmation_uncertain' };
       if (fileClient.hasUnsavedChanges()) { const result = await fileClient.discardForLeave(); if (!result.ok) return result; }
       if (pageStore?.hasUnsavedChanges()) {
         const html = await pageStore.discardForLeave();
@@ -538,13 +571,13 @@ export function apply(ctx: Context): void {
     let armed = false;
     const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ''; };
     const update = () => {
-      const next = Boolean(library?.hasUnsavedChanges() || pageStore?.hasUnsavedChanges() || fileClient.hasUnsavedChanges() || aiClient.hasUnsavedChanges());
+      const next = Boolean(library?.hasUnsavedChanges() || pageStore?.hasUnsavedChanges() || fileClient.hasUnsavedChanges() || aiClient.hasUnsavedChanges() || artifactClients.hasUnsavedChanges());
       if (next === armed) return;
       armed = next;
       if (armed) window.addEventListener('beforeunload', warn); else window.removeEventListener('beforeunload', warn);
     };
-    const unboard = library?.subscribe(update), unpage = pageStore?.subscribe(update), unfile = fileClient.subscribe(update), unai = aiClient.subscribe(update); update();
-    return () => { unboard?.(); unpage?.(); unfile(); unai(); if (armed) window.removeEventListener('beforeunload', warn); };
+    const unboard = library?.subscribe(update), unpage = pageStore?.subscribe(update), unfile = fileClient.subscribe(update), unai = aiClient.subscribe(update), unartifact = artifactClients.subscribe(update); update();
+    return () => { unboard?.(); unpage?.(); unfile(); unai(); unartifact(); if (armed) window.removeEventListener('beforeunload', warn); };
   }, 'analytics-board: dirty browser protection survives native panel switches');
 
   ctx.effect(() => ctx.theme.overrideTokens('shine-mage.brand', nativeBrandTokens), 'competition-native-theme');

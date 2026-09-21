@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { createMockPageAdapters, escapeHtml } from './mock-adapters.mjs';
 import { createFreeHtmlLibraryStore } from './store.mjs';
 import { bindingLabel } from './host-visual.mjs';
+import { renderedPackageHash } from '../html-rendered-text.mjs';
 
 test('empty library can generate without data; failure keeps the prompt', async () => {
   const ok = createFreeHtmlLibraryStore();
@@ -139,4 +140,22 @@ test('save-and-leave with a pending PATCH confirms D6 once, not a second D9', as
   assert.equal(store.getSnapshot().view, 'home');
   assert.equal(store.getSnapshot().pages[0].version, version + 1);
   assert.equal(store.hasUnsavedChanges(), false);
+});
+
+test('runtime card copy previews through presentation without rewriting source', async () => {
+  const store = createFreeHtmlLibraryStore();
+  store.setPrompt('卡片页');
+  await store.generate();
+  const pkg = { html: '<section id="cards"></section>', css: '', js: 'cards.innerHTML="<article data-node=a><span>收入文案</span></article>";', resources: [], node_map: [] };
+  store.markLocalDraft(pkg);
+  store.enterEdit();
+  const runtime = { anchor: { attribute: 'id', value: 'cards' }, path: [{ tag: 'article', key: { attribute: 'data-node', value: 'a' } }, { tag: 'span' }],
+    package_hash: renderedPackageHash(pkg), html: '<span>收入文案</span>' };
+  store.selectLocatable({ node_id: 'runtime_card', tag: 'span', text: '收入文案', editableText: true, runtime });
+  assert.equal(store.getSnapshot().selection.ok, true);
+  await store.previewPatch('新的收入文案');
+  const snapshot = store.getSnapshot().preview.snapshot;
+  assert.equal(snapshot.html, pkg.html);
+  assert.equal(snapshot.js, pkg.js);
+  assert.equal(snapshot.presentation.edits[0].text, '新的收入文案');
 });
