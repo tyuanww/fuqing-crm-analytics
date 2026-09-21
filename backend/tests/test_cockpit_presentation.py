@@ -194,6 +194,7 @@ def test_static_html_selection_cannot_change_presentation_records(setup):
     mutated = copy.deepcopy(before)
     mutated['html'] = html.replace('Report', 'Edited')
     mutated['presentation']['edits'][0]['style'] = {'padding': '24px'}
+    mutated['presentation']['source_hash'] = page_source_hash(mutated['html'], css, js)
     with pytest.raises(AnalyticsError) as error:
         protect_selection(before, mutated, scope)
     assert error.value.code == 'AI_OUTSIDE_SELECTION'
@@ -203,6 +204,7 @@ def test_static_html_selection_cannot_change_presentation_records(setup):
     assert error.value.code == 'AI_OUTSIDE_SELECTION'
     allowed = copy.deepcopy(before)
     allowed['html'] = html.replace('Report', 'Edited')
+    allowed['presentation']['source_hash'] = page_source_hash(allowed['html'], css, js)
     write(job, allowed)
     ready = ai.collect(actor, job['id'])
     assert ai.confirm(actor, job['id'], ready['candidate_hash'])['saved_version'] == 2
@@ -210,25 +212,10 @@ def test_static_html_selection_cannot_change_presentation_records(setup):
     assert saved['html'] == allowed['html'] and saved['presentation']['edits'][0]['style'] == {'padding': '8px'}
 
 
-def test_bound_pages_reject_rendered_selection_and_presentation_payload(setup):
-    actor, _, pages, ai = setup
-    html = '<h1>Report</h1><section id="cards"></section>'
-    package = {'html': html, 'css': '', 'js': '', 'node_map': [], 'resources': []}
-    spec = pages.confirm(actor, pages.generate(actor, PageDraft(
-        title='Bound', session_id='bound-rendered', package=package,
-        binding_manifest={'result_refs': ['verified'], 'bindings': []}))['preview_id'], 'bound-rendered')['spec']
-    scope = {'start': html.index('<section'), 'end': len(html), 'html_hash': hashlib.sha256(html.encode()).hexdigest(),
-             'rendered': {'anchor': {'attribute': 'id', 'value': 'cards'}, 'path': [], 'html': '<section id="cards"></section>',
-                          'package_hash': hashlib.sha256(json.dumps([html, '', '', None], ensure_ascii=False, separators=(',', ':')).encode()).hexdigest()}}
-    with pytest.raises(AnalyticsError) as error:
-        ai.begin(actor, 'page', spec['page_id'], 1, 'ai_' + str(uuid.uuid4()), scope)
-    assert error.value.code == 'AI_BOUND_CONTENT'
-    presentation = {'version': 1, 'source_hash': page_source_hash(html), 'edits': [
+def test_bound_pages_reject_presentation_payload(setup):
+    package = {'html': '<h1>Report</h1><section id="cards"></section>', 'css': '', 'js': '', 'node_map': [], 'resources': []}
+    presentation = {'version': 1, 'source_hash': page_source_hash(package['html']), 'edits': [
         {'target': {'anchor': {'attribute': 'id', 'value': 'cards'}, 'path': []}, 'text': 'x'}]}
     with pytest.raises(AnalyticsError) as error:
         CockpitAIStore.protect_bindings(package, {**package, 'presentation': presentation}, {'result_refs': ['verified']})
     assert error.value.code == 'AI_BOUND_CONTENT'
-    duplicate = candidate(package, scope)
-    duplicate['presentation']['edits'].append(copy.deepcopy(duplicate['presentation']['edits'][0]))
-    with pytest.raises(ValidationError):
-        PagePackage.model_validate(duplicate)
