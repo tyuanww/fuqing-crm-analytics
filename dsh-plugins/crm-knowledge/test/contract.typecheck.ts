@@ -20,3 +20,21 @@ export function purchaseCoverage(result: DashboardComponents['schemas']['Dashboa
   const unknown: number = result.coverage.unknown_buyer_rows;
   return { aov, aus, unknown };
 }
+
+export function readinessClass(result: DashboardComponents['schemas']['DashboardReadiness']) {
+  const klass: 'A' | 'B' | 'C' = result.metrics[0].acceptance_class;
+  const present: boolean = result.metrics[0].source_present;
+  return { klass, present };
+}
+
+export function membershipStatus(result: DashboardComponents['schemas']['DashboardMembership']) {
+  const status: 'OK' | 'UNAVAILABLE' = result.status;
+  const premium: number | null | undefined = result.premium?.value;
+  return { status, premium };
+}
+
+export function netStatus(result: DashboardComponents['schemas']['DashboardNetGsv']) {
+  const status: 'OK' | 'UNAVAILABLE' = result.status;
+  const net: number | null = result.net_gsv_amount_fen;
+  return { status, net };
+}

@@ -46,8 +46,10 @@ export function dashboardCapabilities(connectionState = 'NOT_CONNECTED') {
     saved_analysis: { capture_tool: 'query_crm_dashboard_snapshot', schema_version: 'crm-result-snapshot/v1',
       scope: 'private_crm_account', saves_require_user_confirmation: true, store_configuration_required: true },
     fields: ['gsv_amount', 'daily_gsv'], purchases_tool: 'query_crm_dashboard_purchases', purchases_requires_backend: 'crm-dashboard-purchases/v1', channels: [...CHANNELS],
+    readiness_tool: 'query_crm_dashboard_readiness', membership_tool: 'query_crm_dashboard_membership',
+    net_gsv_tool: 'query_crm_dashboard_net_gsv',
     definition: dashboardKnowledgeContext(),
-    note: '仅在登录页面连接当前对话；请求时重新验证 CRM 登录。现有 CRM 账号权限适用，尚无按渠道授权能力。',
+    note: '仅在登录页面连接当前对话；请求时重新验证 CRM 登录。会员溢价与净额GSV缺来源时返回不可用，不使用当前 is_member 或行上退款标记代替。',
   };
 }
 
@@ -56,19 +58,6 @@ function parseDate(value, code) {
   const result = Date.parse(`${value}T00:00:00Z`);
   if (!Number.isFinite(result) || new Date(result).toISOString().slice(0, 10) !== value) fail(code);
   return result;
-}
-
-export function validateRequest(input) {
-  if (!input || typeof input !== 'object' || Array.isArray(input)) fail('INVALID_REQUEST');
-  const keys = ['start_date', 'end_date', 'channel', 'exclude_low_price'];
-  if (Object.keys(input).some(key => !keys.includes(key))) fail('INVALID_REQUEST');
-  const start = parseDate(input.start_date, 'INVALID_REQUEST');
-  const end = parseDate(input.end_date, 'INVALID_REQUEST');
-  if (end < start || (end - start) / DAY >= 90) fail('INVALID_REQUEST');
-  const channel = input.channel === undefined ? '全店' : input.channel;
-  const excludeLowPrice = input.exclude_low_price === undefined ? false : input.exclude_low_price;
-  if (!CHANNELS.includes(channel) || typeof excludeLowPrice !== 'boolean') fail('INVALID_REQUEST');
-  return { start_date: input.start_date, end_date: input.end_date, channel, exclude_low_price: excludeLowPrice };
 }
 
 export function validateBinding(binding, sessionId) {
@@ -98,6 +87,15 @@ function cents(value) {
 function money(amount) {
   const absolute = BigInt(amount) < 0n ? -BigInt(amount) : BigInt(amount);
   return { amount_fen: amount, amount_yuan: `${amount < 0 ? '-' : ''}${absolute / 100n}.${String(absolute % 100n).padStart(2, '0')}`, currency: 'CNY' };
+}
+function projectAverage(item) {
+  if (!item || typeof item !== 'object' || !Number.isSafeInteger(item.denominator) || item.denominator < 0) fail('INVALID_RESPONSE');
+  if (item.reason) {
+    if (item.amount_fen !== null) fail('INVALID_RESPONSE');
+    return { amount_fen: null, amount_yuan: null, currency: 'CNY', denominator: item.denominator, reason: item.reason };
+  }
+  if (!Number.isSafeInteger(item.amount_fen) || item.denominator === 0) fail('INVALID_RESPONSE');
+  return { ...money(item.amount_fen), denominator: item.denominator, reason: null };
 }
 
 /** Never forwards arbitrary upstream fields, error bodies, headers, or credentials. */
@@ -183,7 +181,10 @@ async function queryDashboard(input, options, purchases = false) {
     combined.throwIfAborted();
     return normalizeDashboard(overview, trend, filters, binding.dataKind);
   } catch (error) {
-    const code = signal?.aborted ? 'CANCELLED' : timeout.aborted ? 'TIMEOUT' : error instanceof DashboardError ? error.code : 'UPSTREAM_ERROR';
+    let code = 'UPSTREAM_ERROR';
+    if (signal?.aborted) code = 'CANCELLED';
+    else if (timeout.aborted) code = 'TIMEOUT';
+    else if (error instanceof DashboardError) code = error.code;
     return { status: 'UNAVAILABLE', schema_version: purchases ? 'crm-dashboard-purchases/v1' : 'crm-dashboard-read/v1', metric_version: purchases ? 'dashboard-gsv-purchases/v1' : VERSION, reason: { code, message: MESSAGES[code] } };
   }
 }
@@ -191,6 +192,60 @@ async function queryDashboard(input, options, purchases = false) {
 
 export const queryDashboardGsv = (input, options = {}) => queryDashboard(input, options);
 export const queryDashboardPurchases = (input, options = {}) => queryDashboard(input, options, true);
+
+const NAMED = Object.freeze({
+  '/api/v1/metrics/dashboard-readiness': ['crm-dashboard-readiness/v1', 'dashboard-readiness/v1'],
+  '/api/v1/metrics/dashboard-membership': ['crm-dashboard-membership/v1', 'dashboard-member-premium/v1'],
+  '/api/v1/metrics/dashboard-net-gsv': ['crm-dashboard-net-gsv/v1', 'dashboard-net-gsv/v1'],
+});
+
+async function queryNamed(input, options, path, extraKeys, normalize) {
+  const { sessionId, signal, binding = null, timeoutMs = 25000 } = options;
+  const timeout = AbortSignal.timeout(timeoutMs);
+  const combined = signal ? AbortSignal.any([signal, timeout]) : timeout;
+  const [schema, version] = NAMED[path];
+  try {
+    combined.throwIfAborted();
+    const base = validateBinding(binding, sessionId);
+    const me = await getJson(base, '/api/v1/auth/me', new URLSearchParams(), binding, combined);
+    if (me?.username !== binding.username) fail('ACCOUNT_MISMATCH');
+    let filters = null;
+    const params = new URLSearchParams();
+    if (path.includes('readiness')) {
+      if (input && typeof input === 'object' && Object.keys(input).length) fail('INVALID_REQUEST');
+    } else {
+      filters = validateRequest(input, extraKeys);
+      if (extraKeys.includes('refund_as_of')) {
+        if (typeof input?.refund_as_of !== 'string') fail('INVALID_REQUEST');
+        parseDate(input.refund_as_of, 'INVALID_REQUEST');
+        filters = { ...filters, refund_as_of: input.refund_as_of };
+      }
+      for (const [key, value] of Object.entries(filters)) params.set(key, String(value));
+    }
+    const aggregate = await getJson(base, path, params, binding, combined);
+    combined.throwIfAborted();
+    return normalize(aggregate, filters, binding.dataKind);
+  } catch (error) {
+    let code = 'UPSTREAM_ERROR';
+    if (signal?.aborted) code = 'CANCELLED';
+    else if (timeout.aborted) code = 'TIMEOUT';
+    else if (error instanceof DashboardError) code = error.code;
+    return { status: 'UNAVAILABLE', schema_version: schema, metric_version: version, reason: { code, message: MESSAGES[code] } };
+  }
+}
+
+export function validateRequest(input, extraKeys = []) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) fail('INVALID_REQUEST');
+  const keys = ['start_date', 'end_date', 'channel', 'exclude_low_price', ...extraKeys];
+  if (Object.keys(input).some(key => !keys.includes(key))) fail('INVALID_REQUEST');
+  const start = parseDate(input.start_date, 'INVALID_REQUEST');
+  const end = parseDate(input.end_date, 'INVALID_REQUEST');
+  if (end < start || (end - start) / DAY >= 90) fail('INVALID_REQUEST');
+  const channel = input.channel === undefined ? '全店' : input.channel;
+  const excludeLowPrice = input.exclude_low_price === undefined ? false : input.exclude_low_price;
+  if (!CHANNELS.includes(channel) || typeof excludeLowPrice !== 'boolean') fail('INVALID_REQUEST');
+  return { start_date: input.start_date, end_date: input.end_date, channel, exclude_low_price: excludeLowPrice };
+}
 
 /** Validate and project aggregates; never forward arbitrary server metadata. */
 export function normalizePurchases(value, filters, dataKind) {
@@ -217,9 +272,11 @@ export function normalizePurchases(value, filters, dataKind) {
     ['aus', 'buyers', 'unknown_buyer_rows', 'UNKNOWN_BUYER'],
   ]) {
     const item = value[name];
-    const expectedReason = coverage.null_amount_rows || coverage.negative_amount_rows ? 'INVALID_AMOUNT'
-      : coverage[unknownKey] ? unknownReason : name === 'aus' && coverage.unknown_order_rows ? 'UNKNOWN_ORDER'
-      : coverage[key] === 0 ? 'NO_PURCHASES' : null;
+    let expectedReason = null;
+    if (coverage.null_amount_rows || coverage.negative_amount_rows) expectedReason = 'INVALID_AMOUNT';
+    else if (coverage[unknownKey]) expectedReason = unknownReason;
+    else if (name === 'aus' && coverage.unknown_order_rows) expectedReason = 'UNKNOWN_ORDER';
+    else if (coverage[key] === 0) expectedReason = 'NO_PURCHASES';
     if (!item || item.denominator !== coverage[key] || item.reason !== expectedReason) fail('INVALID_RESPONSE');
     if (expectedReason) {
       if (item.amount_fen !== null) fail('INVALID_RESPONSE');
@@ -240,5 +297,84 @@ export function normalizePurchases(value, filters, dataKind) {
     limitations: ['AOV为每单金额，AUS为按购买人数计算的客单价；分子沿用看板GSV，净额版单列。',
       '未知标识或异常金额会阻断对应均值；零元订单和仅零元买家另列，不计购买分母。',
       '同次聚合按源订单和买家标识去重，尚不证明跨系统身份完整；数据水位和退款截止日未知。'],
+  };
+}
+
+export const queryDashboardReadiness = (input, options = {}) =>
+  queryNamed(input, options, '/api/v1/metrics/dashboard-readiness', [], normalizeReadiness);
+export const queryDashboardMembership = (input, options = {}) =>
+  queryNamed(input, options, '/api/v1/metrics/dashboard-membership', [], normalizeMembership);
+export const queryDashboardNetGsv = (input, options = {}) =>
+  queryNamed(input, options, '/api/v1/metrics/dashboard-net-gsv', ['refund_as_of'], normalizeNetGsv);
+
+export function normalizeReadiness(value, _filters, dataKind) {
+  if (value?.schema_version !== 'crm-dashboard-readiness/v1' || value.metric_version !== 'dashboard-readiness/v1'
+      || !Array.isArray(value.metrics) || value.metrics.length > 20) fail('INVALID_RESPONSE');
+  const metrics = value.metrics.map(item => {
+    if (!item || !['A', 'B', 'C'].includes(item.acceptance_class) || typeof item.metric_id !== 'string'
+        || typeof item.source_present !== 'boolean') fail('INVALID_RESPONSE');
+    return {
+      metric_id: item.metric_id, name: item.name, acceptance_class: item.acceptance_class,
+      formula: item.formula, source: item.source, gap: item.gap, required_fields: item.required_fields,
+      source_system: item.source_system, unlock: item.unlock, source_present: item.source_present,
+    };
+  });
+  return {
+    status: 'OK', schema_version: value.schema_version, metric_version: value.metric_version,
+    source: 'authenticated_crm_metrics_service', contains_real_data: dataKind === 'real',
+    synthetic: dataKind === 'synthetic', metrics,
+    rejected_substitutes: value.inventory?.rejected_substitutes ?? [],
+    limitations: value.limitations ?? [],
+  };
+}
+
+export function normalizeMembership(value, filters, dataKind) {
+  if (value?.schema_version !== 'crm-dashboard-membership/v1' || value.metric_version !== 'dashboard-member-premium/v1') fail('INVALID_RESPONSE');
+  if (value.status === 'UNAVAILABLE') {
+    if (value.reason !== 'MEMBERSHIP_AT_PURCHASE_UNAVAILABLE' || (value.premium?.value !== null && value.premium?.value !== undefined)) fail('INVALID_RESPONSE');
+    return {
+      status: 'UNAVAILABLE', schema_version: value.schema_version, metric_version: value.metric_version,
+      source: 'authenticated_crm_metrics_service', contains_real_data: dataKind === 'real',
+      synthetic: dataKind === 'synthetic', reason: value.reason, required_fields: value.required_fields,
+      unlock: value.unlock, limitations: value.limitations ?? [],
+    };
+  }
+  if (value.status !== 'OK' || Object.keys(filters).some(key => value.filters?.[key] !== filters[key])) fail('INVALID_RESPONSE');
+  return {
+    status: 'OK', schema_version: value.schema_version, metric_version: value.metric_version,
+    source: 'authenticated_crm_metrics_service', contains_real_data: dataKind === 'real',
+    synthetic: dataKind === 'synthetic', filters,
+    member_gsv: money(value.member_gsv_amount_fen), non_member_gsv: money(value.non_member_gsv_amount_fen),
+    unknown_member_gsv: money(value.unknown_member_gsv_amount_fen),
+    member_aus: projectAverage(value.member_aus), non_member_aus: projectAverage(value.non_member_aus),
+    premium: value.premium,
+    coverage: value.coverage, limitations: value.limitations ?? [],
+  };
+}
+
+export function normalizeNetGsv(value, filters, dataKind) {
+  if (value?.schema_version !== 'crm-dashboard-net-gsv/v1' || value.metric_version !== 'dashboard-net-gsv/v1') fail('INVALID_RESPONSE');
+  if (value.status === 'UNAVAILABLE') {
+    if (!['MISSING_REFUND_EVENTS', 'AMOUNT_ALREADY_NET_CONFLICT'].includes(value.reason)
+        || (value.net_gsv_amount_fen !== null && value.net_gsv_amount_fen !== undefined)) fail('INVALID_RESPONSE');
+    return {
+      status: 'UNAVAILABLE', schema_version: value.schema_version, metric_version: value.metric_version,
+      source: 'authenticated_crm_metrics_service', contains_real_data: dataKind === 'real',
+      synthetic: dataKind === 'synthetic', reason: value.reason, required_fields: value.required_fields,
+      unlock: value.unlock, limitations: value.limitations ?? [],
+    };
+  }
+  const expected = { start_date: filters.start_date, end_date: filters.end_date, channel: filters.channel,
+    exclude_low_price: filters.exclude_low_price };
+  if (value.status !== 'OK' || Object.keys(expected).some(key => value.filters?.[key] !== expected[key])) fail('INVALID_RESPONSE');
+  if (!Number.isSafeInteger(value.net_gsv_amount_fen) || !Number.isSafeInteger(value.gross_paid_fen)
+      || value.net_gsv_amount_fen !== value.gross_paid_fen - value.succeeded_refund_fen) fail('INCONSISTENT_RESULT');
+  return {
+    status: 'OK', schema_version: value.schema_version, metric_version: value.metric_version,
+    source: 'authenticated_crm_metrics_service', contains_real_data: dataKind === 'real',
+    synthetic: dataKind === 'synthetic', filters, refund_as_of: value.refund_as_of,
+    gross_paid: money(value.gross_paid_fen), succeeded_refund: money(value.succeeded_refund_fen),
+    net_gsv: money(value.net_gsv_amount_fen), parent_child_attributed: value.parent_child_attributed === true,
+    limitations: ['净额GSV与看板GSV分列，不能对看板结果再扣退款。', ...(value.limitations ?? [])],
   };
 }

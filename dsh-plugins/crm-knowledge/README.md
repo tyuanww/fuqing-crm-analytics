@@ -10,13 +10,18 @@
 |---|---|
 | `query_crm_dashboard_gsv` | 用户认可的现看板 GSV 总额、日趋势；绑定账号后只读调用原指标服务；与合成净额候选分开 |
 | `query_crm_dashboard_purchases` | 看板GSV分子下的AOV/AUS及正额订单/对应买家覆盖，需新版聚合接口和Host；一组真实窗口已独立只读核对并通过现役真实账号/模型验收，范围见交付记录 |
+| `query_crm_dashboard_readiness` | 当前连接下各指标来源具备程度与 A/B/C 分类；只读元数据，不返回明细 |
+| `query_crm_dashboard_membership` | 成交时会员溢价；缺快照/事件时不可用，不使用当前 is_member |
+| `query_crm_dashboard_net_gsv` | 扣实际成功退款的净额GSV，与看板GSV分列；必须带退款截止日，缺事件时不可用 |
 | `query_crm_dashboard_snapshot` | 服务端查询并保存可信的不可变销售快照，供用户确认保存分析及加入驾驶舱 |
 | `query_crm_metrics_v1` | 销售表现、老客回购、派样后复购；全部经过只读适配 → 计算器 |
 | `crm_knowledge_explain` | 知识包定义、证据、冲突和离线依赖关系；说明合成验证状态 |
 | `crm_metrics_capabilities` | 可执行查询与未接入的真实资料能力 |
-| `query_crm_knowledge_graph`（可选 graph-tools 模块） | 受限教材 Neo4j 一跳关系、当前来源分块、人工核对及误连隔离 |
+| `query_crm_knowledge_graph`（可选 graph-tools 模块） | 当前 CRM 账号被授权教材的 Neo4j 一跳关系、分块/页码、文档版本和审核状态 |
+| `query_crm_knowledge_sources` | 在授权教材中检索原文分块；须已连接 CRM |
+| `expand_crm_knowledge_citation` | 按分块 ID 展开引用；每次重查账号权限和文档版本 |
 
-工具参数没有 SQL、数据库路径或凭据。合成工具的 `source_id` 仍仅允许 `synthetic-crm-metrics`，拒绝真实库；金额为分。看板工具返回元的十进制字符串和整数分，不扣退款、不返回尚未校准的旧客单价/会员溢价。未知、不可用和权限来源均保留。知识仅来自本工作区的公开合成包，尚未接私有文档 ACL，不可据此导入受限真实资料。
+工具参数没有 SQL、数据库路径或凭据。合成工具的 `source_id` 仍仅允许 `synthetic-crm-metrics`，拒绝真实库；金额为分。看板工具返回元的十进制字符串和整数分，不扣退款、不返回尚未校准的旧客单价/会员溢价。未知、不可用和权限来源均保留。教材检索/图查询按 CRM 登录用户名映射到私有 grants，不把共享 retrieve key 当账号隔离。候选 preset 隔离 `weknora_search`；现役 preset 未改。
 
 `crm_metrics_capabilities` 分为 `synthetic_candidate` 与 `dashboard` 两部分；`LOGIN_BOUND` 表示当前对话已有内存授权，每次查询仍须向 CRM 验证登录。解释 GSV/退款/实收时，`crm_knowledge_explain` 返回 `preferred_real_gsv` 与 `target_candidate`。解释 AUS/AOV 时补充 `preferred_operational_definition`：真实运营默认以当前看板GSV为金额分子，净额候选仍单列；分母覆盖及真实验收未完成时不冒称可取真实数。
 
@@ -47,19 +52,24 @@
 
 上线此候选需要同时更新CRM后端与CRM插件Host，并保留既有runtime受控重启；只替换preset不能给旧Host增加 `queryPurchases` 能力。重启后需用户在页面重新连接CRM，再对账。接口不存在时明确不可用，不降级查合成数据。部署状态及真实账号/模型验收以[本轮交付记录](../../docs/crm-calibration/crm-assets-release-2026-09-21.md)为准。
 
-## 保存分析与驾驶舱引用
+## 保存分析、检索、分享与组板
 
 1. 当前对话连接 CRM 后，请求“查询销售指标并生成快照”，明确日期、渠道和剔除低价条件。
 2. 打开 **CRM 分析 → 查询快照**，核对过滤、GSV、AOV/AUS、覆盖缺口与查询时间，再选择“保存分析”并确认标题。
-3. 在“已保存分析”选择“加入驾驶舱”并确认；重开“驾驶舱引用”仍显示原结果。重新查数产生新快照，不覆盖已有分析。
+3. 在“已保存分析”按标题、说明或编号查找，超过最近 20 条用“更早的记录”续页；打开后可改标题/说明，金额、分母、口径和原始快照不可改。重新查数产生新快照。
+4. 分享只填写对方 CRM 账号（`FQ_CRM_PASSWORDS` 中已有的用户名），可撤销；对方在「已保存分析」中只读查看。撤权后该账号现有登录也不能再读。不生成公开链接。
+5. 在“指标组板”选择已保存分析中的 GSV/AOV/AUS/订单/买家，安排布局和展示属性；保存、取消、版本冲突后刷新重开。每个组件绑定快照、指标和筛选条件，浏览器与模型都不能提交业务金额。
+6. 在“已保存分析”选择“加入驾驶舱”并确认；重开“驾驶舱引用”仍显示原结果。
 
 后端须显式配置 `FQ_CRM_ANALYSIS_STATE_DIR=/absolute/private/directory`（目录预先存在、当前进程所有、权限 0700）与 `FQ_CRM_ANALYSIS_DATA_KIND=real|synthetic`。SQLite 文件权限 0600；已有来源标签不可改成另一种资料。部署必须与 Host 的 `dataKind` 一致。未配置返回 `STATE_NOT_CONFIGURED`，不创建默认存储。
 
-新增 `/api/v1/metrics/dashboard-snapshots`、`crm-analyses`、`crm-cockpit-references` 的 POST 和按 ID GET，以及 `crm-library` GET。所有请求沿用认证账号；写入必须带稳定 `Idempotency-Key`。保存和引用只传来源 ID，由服务端取事实；浏览器与模型均不能提交数字或覆盖 owner。模型仅能生成快照，保存/引用由浏览器确认。
+接口：`/api/v1/metrics/dashboard-snapshots`、`crm-analyses`（含搜索、PATCH、shares、knowledge-citations）、`crm-boards`、`crm-cockpit-references`、`crm-library`。所有请求沿用认证账号；写入必须带稳定 `Idempotency-Key`。保存、分享和组板只传来源 ID、标题/说明、布局和展示属性，由服务端取事实。模型仅能生成快照。浏览器不能提交金额、owner 或知识来源 ID。
 
-确认响应丢失时按原请求重试；若关掉弹窗，先刷新核对。同一快照只能保存一个标题，同一分析只能固定一次；不同标题返回冲突。每账号快照/分析/引用上限为 2000/1000/500，回执上限 10000；列表只显示最近 20 项并提示截断。完整检索、删除、编辑和共享尚未接入。
+含知识引用的分析：引用只能来自当前对话已连接 CRM 后的图谱/检索/展开工具结果。Host 按会话账本绑定；保存请求中的伪造来源字段被拒绝。分享、读取、列表、驾驶舱加入和组板每次按当前账号重查文档 grants。分享者能读不等于接收者能读。文档撤权后，旧 token、缓存和幂等回执不能恢复访问。纯销售指标分析没有知识引用时不检查教材权限。
 
-当前依赖固定结果，不承诺数据库事务快照或已校验水位。多用户仅有 CRM 账号隔离，不代表文档 ACL 已完成。现役与真实验收以[交付记录](../../docs/crm-calibration/crm-assets-release-2026-09-21.md)为准。
+确认响应丢失时按原请求重试；并发编辑返回 `VERSION_CONFLICT`，刷新后基于最新版本继续。同一快照只能保存一个标题，同一分析只能固定一次。每账号快照/分析/引用/组板上限为 2000/1000/500/200，回执上限 10000；分析搜索每页最多 20 条并可续页。分享对象必须是现有 CRM 账号，每条分析最多 20 个授权。
+
+当前依赖固定结果，不承诺数据库事务快照或已校验水位。分析分享仍是账号级授权；若分析绑定了教材引用，接收者还须具备对应文档 grants。不覆盖 Word/HTML 多人权限。现役与真实验收以[整合记录](../../docs/crm-calibration/crm-integration-2026-09-21.md)为准。
 
 ## 本地复验
 

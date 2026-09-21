@@ -8,7 +8,7 @@ import { tmpdir } from 'node:os';
 import { serveDashboard, request as dashboardRequest, SYNTHETIC_PASSWORD } from './dashboard.fixture.mjs';
 import { mountLoginHost } from './login-native.fixture.mjs';
 import { serveAssets, snapshot, analysis, reference } from './crm-assets.fixture.mjs';
-import { graphFixture } from './graph.fixture.mjs';
+import { graphFixture, CHUNK } from './graph.fixture.mjs';
 
 const plugin = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const upstream = process.env.B0_BUILD_UPSTREAM;
@@ -16,6 +16,7 @@ assert.ok(upstream, 'B0_BUILD_UPSTREAM must point to the verified pinned checkou
 const load = path => import(pathToFileURL(join(upstream, path, 'lib/index.js')).href);
 const { Context } = await load('vendor/cordis');
 const { mountAgentLoopTestDependencies } = await load('packages/test-support/agent-loop-testkit');
+const { defineTool } = await load('packages/core/tools');
 const built = await import(pathToFileURL(join(plugin, 'lib/index.js')).href);
 const graphTools = await import(pathToFileURL(join(plugin, 'lib/graph-tools.js')).href);
 test('native tool captures trusted CRM snapshot; browser confirms saved analysis and cockpit reference', async t => {
@@ -111,22 +112,57 @@ test('registered tools execute all queries through B/A and retrieve C evidence',
   }
 });
 
-test('built graph tool runs through native ToolRuntime with scoped evidence and unload', async t => {
+test('built graph tool requires CRM login and uses that account for ACL', async t => {
   const fixture = await graphFixture(t);
-  const ctx = new Context();
-  try {
-    await mountAgentLoopTestDependencies(ctx);
-    const instance = await ctx.plugin(graphTools, { settingsFile: fixture.settingsFile });
-    const execute = args => ctx.tools.execute({ name: 'query_crm_knowledge_graph', arguments: args,
-      agent: { session: { id: 'graph-native-test' } }, callId: 'graph_native', signal: new AbortController().signal });
-    const result = await execute({ topic: '会员溢价' });
-    assert.equal(result.isError, false); assert.equal(result.value.status, 'OK');
-    assert.equal(result.value.relations[0].target, '非会员的AUS');
-    assert.equal(result.value.sources[0].page_refs[0], 161);
-    fixture.state.denied = true;
-    assert.equal((await execute({ topic: '会员溢价' })).value.reason.code, 'SOURCE_UNAVAILABLE');
-    await instance.dispose(); assert.equal((await execute({ topic: '会员溢价' })).isError, true);
-  } finally { await ctx.fiber.dispose(); }
+  const dash = await serveDashboard(t);
+  const host = await mountLoginHost(t, dash.binding.baseUrl);
+  await host.ctx.plugin(graphTools, { settingsFile: fixture.settingsFile });
+  const denied = await host.execute('query_crm_knowledge_graph', { topic: '会员溢价' });
+  assert.equal(denied.value.reason.code, 'NOT_CONNECTED');
+  await (await host.call('login', { username: 'fixture-user', password: SYNTHETIC_PASSWORD })).arrayBuffer();
+  const result = await host.execute('query_crm_knowledge_graph', { topic: '会员溢价' });
+  assert.equal(result.isError, false, JSON.stringify(result));
+  assert.equal(result.value.status, 'OK');
+  assert.equal(result.value.relations[0].target, '非会员的AUS');
+  assert.equal(result.value.sources[0].page_refs[0], 161);
+  const other = await host.execute('query_crm_knowledge_graph', { topic: '会员溢价' }, 'another-session');
+  assert.equal(other.value.reason.code, 'NOT_CONNECTED');
+  const sources = await host.execute('query_crm_knowledge_sources', { query: '会员溢价' });
+  assert.equal(sources.value.status, 'OK');
+  const expanded = await host.execute('expand_crm_knowledge_citation', { chunk_id: CHUNK });
+  assert.equal(expanded.value.status, 'OK');
+  fixture.state.denied = true;
+  assert.equal((await host.execute('query_crm_knowledge_graph', { topic: '会员溢价' })).value.reason.code, 'SOURCE_UNAVAILABLE');
+  await (await host.call('disconnect')).arrayBuffer();
+  assert.equal((await host.execute('query_crm_knowledge_graph', { topic: '会员溢价' })).value.reason.code, 'NOT_CONNECTED');
+});
+
+test('built graph tools unload from native ToolRuntime and isolate shared retrieve', async t => {
+  const fixture = await graphFixture(t);
+  const dash = await serveDashboard(t);
+  const host = await mountLoginHost(t, dash.binding.baseUrl);
+  host.ctx.tools.register(defineTool({
+    name: 'weknora_search',
+    description: 'shared retrieve',
+    parameters: { query: { type: 'string', required: true } },
+    output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
+    execute: async () => ({ leaked: true, secret: 'TENANT_KEY' }),
+  }));
+  const instance = await host.ctx.plugin(graphTools, { settingsFile: fixture.settingsFile });
+  const blocked = await host.execute('weknora_search', { query: '会员溢价' });
+  const blockedText = JSON.stringify(blocked);
+  assert.equal(blocked.isError, true);
+  assert.equal(blockedText.includes('TENANT_KEY'), false);
+  assert.equal(blockedText.includes('leaked'), false);
+  await (await host.call('login', { username: 'fixture-user', password: SYNTHETIC_PASSWORD })).arrayBuffer();
+  const result = await host.execute('query_crm_knowledge_graph', { topic: '会员溢价' });
+  assert.equal(result.isError, false, JSON.stringify(result));
+  assert.equal(result.value.status, 'OK');
+  await instance.dispose();
+  assert.equal((await host.execute('query_crm_knowledge_graph', { topic: '会员溢价' })).isError, true);
+  const restored = await host.execute('weknora_search', { query: '会员溢价' });
+  assert.equal(restored.isError, false, JSON.stringify(restored));
+  assert.equal(restored.value.leaked, true);
 });
 
 test('browser login reaches the pinned tools without exposing credentials', async t => {
@@ -147,7 +183,11 @@ test('browser login reaches the pinned tools without exposing credentials', asyn
       assert.equal(JSON.stringify(body).includes(fixture.binding.token), false);
       assert.equal(JSON.stringify(body).includes(SYNTHETIC_PASSWORD), false);
       assert.equal((await execute('crm_login', { username: 'fixture-user', password: SYNTHETIC_PASSWORD })).isError, true);
-      assert.deepEqual(Object.keys(host.ctx.crmDashboard).sort(), ['capabilities', 'query', 'queryPurchases', 'querySnapshot']);
+      assert.deepEqual(Object.keys(host.ctx.crmDashboard).sort(), [
+        'capabilities', 'principal', 'query', 'queryMembership', 'queryNetGsv', 'queryPurchases',
+        'queryReadiness', 'querySnapshot', 'rememberCitations', 'takeSessionCitations',
+      ]);
+      assert.deepEqual(host.ctx.crmDashboard.principal('fixture-session'), { username: 'fixture-user' });
     });
     await t.test('preserves API amount and filters, without legacy extra metrics', async () => {
       const outcome = await execute('query_crm_dashboard_gsv', { ...dashboardRequest, channel: '淘客', exclude_low_price: true });

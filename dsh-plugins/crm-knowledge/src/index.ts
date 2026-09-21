@@ -2,7 +2,8 @@ import type { Context } from '@deepseek-ai/cordis';
 import { defineTool } from '@deepseek-ai/dsh-tools';
 import { schemas } from './contract.generated.js';
 import { runCrmCliAsync } from './run.mjs';
-import { CHANNELS, dashboardCapabilities, dashboardKnowledgeContext, queryDashboardGsv, queryDashboardPurchases } from './dashboard.mjs';
+import { CHANNELS, dashboardCapabilities, dashboardKnowledgeContext, queryDashboardGsv, queryDashboardPurchases,
+  queryDashboardReadiness, queryDashboardMembership, queryDashboardNetGsv } from './dashboard.mjs';
 import type {} from './dashboard-service.js';
 
 export const name = 'crm-knowledge-candidate';
@@ -89,9 +90,68 @@ export function apply(ctx: Context, config: { python?: string } = {}): void {
           target_candidate_note: '本结果其余definition/formula为单列的crm-metrics/v1净额候选，不替换此运营默认。',
         };
       }
+      if (/会员溢价|member.?premium/i.test(args.topic)) {
+        target.preferred_operational_definition = {
+          formula: '成交时会员AUS / 非会员AUS', tool: 'query_crm_dashboard_membership',
+          warning: '不能用当前 is_member 倒推历史；缺成交时快照或入会/退会事件时返回不可用。',
+        };
+      }
+      if (/净额|net.?gsv|实际退款/i.test(args.topic)) {
+        target.preferred_operational_definition = {
+          formula: '有效实付 − 截止日前成功退款', tool: 'query_crm_dashboard_net_gsv',
+          warning: '与看板GSV分列；不能对看板结果再扣退款。缺退款事件时不可用。',
+        };
+      }
       if (!/gsv|退款|实收|实付|净额/i.test(args.topic)) return target;
       return { preferred_real_gsv: dashboardKnowledgeContext(), target_candidate: target,
         instruction: '真实看板 GSV 采用 preferred_real_gsv；target_candidate 是单列净额候选，不能静默替换。' };
+    },
+  }));
+  ctx.tools.register(defineTool({
+    name: 'query_crm_dashboard_readiness',
+    description: '查询当前 CRM 连接下各指标的来源具备程度与 A/B/C 验收分类。只读元数据，不返回业务明细或 SQL。缺字段时保持不可用。',
+    parameters: {},
+    output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
+    timeoutMs: 30000, isConcurrencySafe: () => false,
+    execute: async (args, exec) => {
+      const access = ctx.get('crmDashboard');
+      return access ? access.queryReadiness(exec.agent?.session.id, args, exec.signal)
+        : queryDashboardReadiness(args, { sessionId: exec.agent?.session.id, signal: exec.signal });
+    },
+  }));
+  ctx.tools.register(defineTool({
+    name: 'query_crm_dashboard_membership',
+    description: '查询成交时会员溢价（会员AUS/非会员AUS）。需要成交时身份快照；不能用当前会员身份倒推。缺来源时返回不可用原因。日期含首尾、最多90天。',
+    parameters: {
+      start_date: { type: 'string', required: true, description: '开始日期 YYYY-MM-DD（Asia/Shanghai）' },
+      end_date: { type: 'string', required: true, description: '结束日期 YYYY-MM-DD，包含当天' },
+      channel: { type: 'string', enum: [...CHANNELS], description: '看板渠道，默认全店' },
+      exclude_low_price: { type: 'boolean', description: '看板的剔除低价开关，默认 false' },
+    },
+    output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
+    timeoutMs: 30000, isConcurrencySafe: () => false,
+    execute: async (args, exec) => {
+      const access = ctx.get('crmDashboard');
+      return access ? access.queryMembership(exec.agent?.session.id, args, exec.signal)
+        : queryDashboardMembership(args, { sessionId: exec.agent?.session.id, signal: exec.signal });
+    },
+  }));
+  ctx.tools.register(defineTool({
+    name: 'query_crm_dashboard_net_gsv',
+    description: '查询扣实际成功退款的净额GSV，与看板GSV分列。必须提供退款截止日；缺退款事件时不可用，不能用 is_refund 代替。',
+    parameters: {
+      start_date: { type: 'string', required: true, description: '开始日期 YYYY-MM-DD（Asia/Shanghai）' },
+      end_date: { type: 'string', required: true, description: '结束日期 YYYY-MM-DD，包含当天' },
+      refund_as_of: { type: 'string', required: true, description: '退款截止日 YYYY-MM-DD，含当天' },
+      channel: { type: 'string', enum: [...CHANNELS], description: '看板渠道，默认全店' },
+      exclude_low_price: { type: 'boolean', description: '看板的剔除低价开关，默认 false' },
+    },
+    output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
+    timeoutMs: 30000, isConcurrencySafe: () => false,
+    execute: async (args, exec) => {
+      const access = ctx.get('crmDashboard');
+      return access ? access.queryNetGsv(exec.agent?.session.id, args, exec.signal)
+        : queryDashboardNetGsv(args, { sessionId: exec.agent?.session.id, signal: exec.signal });
     },
   }));
   ctx.tools.register(defineTool({
