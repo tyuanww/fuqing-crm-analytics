@@ -1,10 +1,10 @@
 # AI 增长董事会
 
-> 当前 Git、施工与边界以根 [STATUS.md](../../STATUS.md) 为准，接续任务见 [TODOS 的 M1 核心交付](TODOS.md#m1-核心交付)。VERSION 0.13.0.0（驾驶舱候选已推送、待 PR），产品 PARTIAL，loopback，不上公网。以下旧轮的“当前／最新”、端口、SHA 和授权是历史快照；失败证据保留。
+> 当前 Git、施工与边界以根 [STATUS.md](../../STATUS.md) 为准，接续任务见 [TODOS 的 M1 核心交付](TODOS.md#m1-核心交付)。VERSION 0.13.0.0（驾驶舱已合 #36 / `7575d07` 并加载 6677），产品 PARTIAL，loopback，不上公网。以下旧轮的“当前／最新”、端口、SHA 和授权是历史快照；失败证据保留。
 
 2026-09-21 CRM 持久化已随新公开仓库 #34 合入 `73ee74c`，沿用已合 #11 的 AOV/AUS 正额购买口径，增加可信查询快照、账号私有保存分析和驾驶舱固定引用。本地完整门禁、合成 QA、PR/main CI、现役切换和旧版实际回退通过；真实账号/模型的查询→快照→保存→引用→重开也已通过，分层证据见[本轮记录](../crm-calibration/crm-assets-release-2026-09-21.md)。旧仓库 #215–#217 的历史证据继续保留；它们不代表本轮运行验收。
 
-本轮驾驶舱候选基于公开 main `481f2f0`，代码 `7836547` 已推送；回收站、整个面板移动/缩放/停靠、全屏和静态 HTML 选区编辑的实现及分层验收见 [UI / UX 报告](COCKPIT-UI-UX-2026-09-20.md)。原生 MiniMax-M3 五项合成评估通过，完整宿主与用户文件 UAT 仍未验收，本轮未部署；上述 CRM #34 的验收不代替本轮结果。
+本轮驾驶舱已由 [#36](https://github.com/tyuanww/fuqing-crm-analytics/pull/36) 合入 `7575d07`，PR 与该 main CI 均通过；6677 已 reload，真实浏览器可见全屏、浮动面板、回收站及 CRM 入口，无未处理页面异常。原生 MiniMax-M3 五项合成评估通过，完整编辑旅程与用户文件 UAT 仍未验收；实现、分层验收和 3 个工作树的证据归档见 [UI / UX 报告](COCKPIT-UI-UX-2026-09-20.md)。上述 CRM #34 的验收不代替本轮结果。
 
 历史多格式文件及 AI 修改见 [Ship 记录](COCKPIT-SHIP-2026-09-20.md)、[本地文档服务](../operating/cockpit-office-local.md)和[使用说明](../operating/cockpit-ai-edit.md)。P13、逐格式真实模型、复杂 Office/PDF 和本人 UAT 仍开放。
 
