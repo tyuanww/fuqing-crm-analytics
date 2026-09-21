@@ -234,7 +234,7 @@ test('waiting preview skips comparison; load and preview stay off while a save i
   const waitingJob = createCockpitAIClient({ base: 'http://fixture', token: 't', async fetchImpl(url) {
     const parsed = new URL(url);
     paths.push({ path: parsed.pathname, variant: parsed.searchParams.get('variant') });
-    if (parsed.pathname.endsWith('/content')) return new Response('<h1>source</h1>');
+    if (parsed.pathname.endsWith('/content')) return new Response(JSON.stringify({ html: '<h1>source</h1>', css: '', js: '', resources: [], node_map: [] }));
     return Response.json({ id: 'ai_wait', status: 'WAITING', candidate_hash: null, filename: 'page.html', target_kind: 'page' });
   } });
   t.after(() => waitingJob.dispose());
