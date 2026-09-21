@@ -8,7 +8,7 @@
 # 数据处理 (核心)
 duckdb>=1.5.5          # 本地分析型数据库（生产升级 1.5.5 见 docs/maintenance/duckdb-backup-upgrade-checklist.md，更新此文件不会自动升级现役环境）
 pandas>=3.0.5           # 兼容性支持
-numpy>=1.24.0           # 数值计算
+numpy>=2.5.3           # 数值计算
 
 # Web 框架
 fastapi>=0.110.0,<0.136.3  # 现代异步 Web 框架（<0.136.3 避免 MAL-2026-4750 供应链攻击）
