@@ -1,4 +1,4 @@
-/** Generated free-page contract; do not edit. OpenAPI SHA-256: aa019970c4c6fbd2732de63e2a65e37728e1c84e55870074c5bcf159f4244cb3 */
+/** Generated free-page contract; do not edit. OpenAPI SHA-256: ddac1298483a47badb358a449d0cd3667dbb8ce130f64f72f136bc9db0bee68f */
 export interface paths {
     "/api/v1/analytics/page-documents/pages": {
         parameters: {
@@ -454,6 +454,28 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** PageElementKey */
+        PageElementKey: {
+            /**
+             * Attribute
+             * @enum {string}
+             */
+            attribute: "id" | "data-node" | "data-page-block" | "data-page-field" | "class" | "text";
+            /** Value */
+            value: string;
+        };
+        /** PageElementStep */
+        PageElementStep: {
+            key?: components["schemas"]["PageElementKey"] | null;
+            /** Tag */
+            tag: string;
+        };
+        /** PageElementTarget */
+        PageElementTarget: {
+            anchor: components["schemas"]["PageElementKey"];
+            /** Path */
+            path: components["schemas"]["PageElementStep"][];
+        };
         /** PageList */
         PageList: {
             /** Items */
@@ -507,6 +529,7 @@ export interface components {
             js: string;
             /** Node Map */
             node_map?: components["schemas"]["PageNodeMapEntry"][];
+            presentation?: components["schemas"]["PagePresentation"] | null;
             /** Resources */
             resources?: components["schemas"]["PageResource"][];
         };
@@ -521,6 +544,29 @@ export interface components {
             package?: components["schemas"]["PagePackage"];
             /** Title */
             title?: string;
+        };
+        /** PagePresentation */
+        PagePresentation: {
+            /** Edits */
+            edits?: components["schemas"]["PagePresentationEdit"][];
+            /** Source Hash */
+            source_hash: string;
+            /**
+             * Version
+             * @default 1
+             * @constant
+             */
+            version: 1;
+        };
+        /** PagePresentationEdit */
+        PagePresentationEdit: {
+            /** Style */
+            style?: {
+                [key: string]: string;
+            };
+            target: components["schemas"]["PageElementTarget"];
+            /** Text */
+            text?: string | null;
         };
         /** PagePreview */
         PagePreview: {

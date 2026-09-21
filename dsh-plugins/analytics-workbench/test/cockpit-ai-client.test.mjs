@@ -1,6 +1,21 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createCockpitAIClient, nativeArtifactPrompt } from '../src/client/cockpit-ai-client.mjs';
+import { createCockpitAIClient, createCockpitArtifactClients, nativeArtifactPrompt } from '../src/client/cockpit-ai-client.mjs';
+
+test('a remounted artifact joins its in-flight load instead of losing the initial preview handoff', async t => {
+  let complete, requests = 0;
+  const client = createCockpitAIClient({ base: 'http://fixture', fetchImpl: () => {
+    requests++; return new Promise(resolve => { complete = resolve; });
+  } });
+  t.after(() => client.dispose());
+  const first = client.load('ai_test'), remount = client.load('ai_test');
+  complete(Response.json({ id: 'ai_test', status: 'WAITING' }));
+  assert.deepEqual(await Promise.all([first, remount]), [true, true]);
+  assert.equal(requests, 1);
+  assert.equal(client.getSnapshot().active.id, 'ai_test');
+  assert.equal(await client.load('ai_test'), true);
+  assert.equal(requests, 1);
+});
 
 function setup({ failSave = false, saveStatus = 200, badReceipt = false, failRepeatBegin = false, onSaved } = {}) {
   const requests = [], native = [];
@@ -167,4 +182,84 @@ test('lost selection begin receipts retry one identity and changed scopes receiv
   assert.equal(await client.begin('page', 'page-2', 1, { ...selection, start: 3 }), true);
   assert.notEqual(requests[3].id, requests[2].id);
   assert.equal(requests[3].selection.start, 3);
+});
+
+test('instruction prompts include SELECTED.json; empty instruction keeps the ask-first prompt', () => {
+  const job = { title: 'standalone.html', base_version: 2, selection: { rendered: {} }, instruction: '把标题改成季度收入' };
+  assert.match(nativeArtifactPrompt(job), /SELECTED\.json/);
+  assert.match(nativeArtifactPrompt(job), /把标题改成季度收入/);
+  assert.match(nativeArtifactPrompt(job), /只调整我在页面选中的板块/);
+  assert.doesNotMatch(nativeArtifactPrompt({ ...job, instruction: '  ' }), /SELECTED\.json/);
+  assert.match(nativeArtifactPrompt({ ...job, instruction: '' }), /等我提出要求后再动手/);
+});
+
+test('artifact clients reuse the same request across remounts', () => {
+  const clients = createCockpitArtifactClients(() => createCockpitAIClient({ base: 'http://fixture', fetchImpl: async () => Response.json({ items: [] }) }));
+  const first = clients.get('ai_one');
+  assert.equal(clients.get('ai_one'), first);
+  assert.notEqual(clients.get('ai_two'), first);
+  clients.dispose();
+});
+
+test('waiting preview skips comparison; load and preview stay off while a save is still busy', async t => {
+  const candidate = { html: '<section id="cards"></section>', css: '', js: '', resources: [], node_map: [] };
+  let releaseConfirm, confirmStarted;
+  const waiting = new Promise(resolve => { confirmStarted = resolve; });
+  const paths = [];
+  const client = createCockpitAIClient({ base: 'http://fixture', token: 't', async fetchImpl(url, init) {
+    const parsed = new URL(url);
+    const path = parsed.pathname.replace('/api/v1/analytics/cockpit-ai', '');
+    paths.push({ path, method: init?.method ?? 'GET', variant: parsed.searchParams.get('variant') });
+    if (!path && init?.method === 'POST') {
+      const body = JSON.parse(init.body);
+      return Response.json({ ...body, status: 'WAITING', candidate_hash: null, filename: 'page-package.json',
+        session_id: 's', workspace: '/w', source_name: 'source.json', output_name: 'candidate.json' });
+    }
+    if (path.endsWith('/collect')) {
+      const job = client.getSnapshot().active;
+      return Response.json({ ...job, status: 'READY', candidate_hash: 'c'.repeat(64) });
+    }
+    if (path.endsWith('/comparison')) return Response.json({ text_diff: '', note: '', source_size: 1, candidate_size: 2 });
+    if (path.includes('/content')) return new Response(JSON.stringify(candidate));
+    if (path.endsWith('/confirm')) {
+      confirmStarted();
+      await new Promise(resolve => { releaseConfirm = resolve; });
+      const job = client.getSnapshot().active;
+      return Response.json({ ...job, status: 'SAVED', saved_version: job.base_version + 1 });
+    }
+    if (path.startsWith('/')) return Response.json({ id: path.slice(1), status: 'WAITING', candidate_hash: null, filename: 'page-package.json' });
+    throw new Error('unexpected ' + path);
+  } }, { openNative: async () => {} });
+  t.after(() => client.dispose());
+  const waitingJob = createCockpitAIClient({ base: 'http://fixture', token: 't', async fetchImpl(url) {
+    const parsed = new URL(url);
+    paths.push({ path: parsed.pathname, variant: parsed.searchParams.get('variant') });
+    if (parsed.pathname.endsWith('/content')) return new Response(JSON.stringify({ html: '<h1>source</h1>', css: '', js: '', resources: [], node_map: [] }));
+    return Response.json({ id: 'ai_wait', status: 'WAITING', candidate_hash: null, filename: 'page.html', target_kind: 'page' });
+  } });
+  t.after(() => waitingJob.dispose());
+  assert.equal(await waitingJob.load('ai_wait'), true);
+  assert.equal(await waitingJob.preview('source'), true);
+  assert.equal(paths.some(row => String(row.path).endsWith('/comparison')), false);
+  assert.equal(await client.begin('page', 'page-1', 1, { start: 0, end: 8, html_hash: 'b'.repeat(64) }, '改文案'), true);
+  assert.equal(await client.collect(), true);
+  assert.equal(client.getSnapshot().previewVariant, 'candidate');
+  assert.deepEqual(client.getSnapshot().html, candidate);
+  let loadDuringSave, previewDuringSave;
+  const unsub = client.subscribe(() => {
+    const snap = client.getSnapshot();
+    if (snap.active?.status === 'SAVED' && snap.busy && loadDuringSave === undefined) {
+      loadDuringSave = client.load(snap.active.id);
+      previewDuringSave = client.preview('candidate');
+    }
+  });
+  const saving = client.confirm();
+  await waiting;
+  releaseConfirm();
+  assert.equal((await saving).ok, true);
+  unsub();
+  assert.equal(await loadDuringSave, false);
+  assert.equal(await previewDuringSave, false);
+  assert.equal(await client.preview('candidate'), true);
+  assert.equal(client.getSnapshot().busy, false);
 });

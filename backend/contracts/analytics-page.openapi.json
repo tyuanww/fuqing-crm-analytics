@@ -440,6 +440,145 @@
         "title": "PageNodeMapEntry",
         "type": "object"
       },
+      "PageElementKey": {
+        "additionalProperties": false,
+        "properties": {
+          "attribute": {
+            "enum": [
+              "id",
+              "data-node",
+              "data-page-block",
+              "data-page-field",
+              "class",
+              "text"
+            ],
+            "title": "Attribute",
+            "type": "string"
+          },
+          "value": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "attribute",
+          "value"
+        ],
+        "title": "PageElementKey",
+        "type": "object"
+      },
+      "PageElementStep": {
+        "additionalProperties": false,
+        "properties": {
+          "tag": {
+            "maxLength": 80,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9-]*$",
+            "title": "Tag",
+            "type": "string"
+          },
+          "key": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PageElementKey"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "tag"
+        ],
+        "title": "PageElementStep",
+        "type": "object"
+      },
+      "PageElementTarget": {
+        "additionalProperties": false,
+        "properties": {
+          "anchor": {
+            "$ref": "#/components/schemas/PageElementKey"
+          },
+          "path": {
+            "items": {
+              "$ref": "#/components/schemas/PageElementStep"
+            },
+            "maxItems": 64,
+            "title": "Path",
+            "type": "array"
+          }
+        },
+        "required": [
+          "anchor",
+          "path"
+        ],
+        "title": "PageElementTarget",
+        "type": "object"
+      },
+      "PagePresentation": {
+        "additionalProperties": false,
+        "properties": {
+          "version": {
+            "const": 1,
+            "default": 1,
+            "title": "Version",
+            "type": "integer"
+          },
+          "source_hash": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Source Hash",
+            "type": "string"
+          },
+          "edits": {
+            "items": {
+              "$ref": "#/components/schemas/PagePresentationEdit"
+            },
+            "maxItems": 2000,
+            "title": "Edits",
+            "type": "array"
+          }
+        },
+        "required": [
+          "source_hash"
+        ],
+        "title": "PagePresentation",
+        "type": "object"
+      },
+      "PagePresentationEdit": {
+        "additionalProperties": false,
+        "properties": {
+          "target": {
+            "$ref": "#/components/schemas/PageElementTarget"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "maxLength": 20000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "style": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Style",
+            "type": "object"
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "title": "PagePresentationEdit",
+        "type": "object"
+      },
       "PagePackage": {
         "additionalProperties": false,
         "properties": {
@@ -476,6 +615,16 @@
             "maxItems": 2000,
             "title": "Node Map",
             "type": "array"
+          },
+          "presentation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PagePresentation"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -1520,5 +1669,5 @@
       }
     }
   },
-  "x-schema-sha256": "aa019970c4c6fbd2732de63e2a65e37728e1c84e55870074c5bcf159f4244cb3"
+  "x-schema-sha256": "ddac1298483a47badb358a449d0cd3667dbb8ce130f64f72f136bc9db0bee68f"
 }

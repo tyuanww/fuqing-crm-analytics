@@ -1,32 +1,33 @@
 # 项目状态 (Project Status)
-> 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。公开仓库 main 为 **64eb6e0（#37）**。本轮工作树 `codex/crm-analysis-board` 整合分析组板、指标收尾与图谱 ACL，VERSION **0.14.0.0**。不沿用旧仓 main，不并入 `codex/cockpit-inline-edit`。产品仍 PARTIAL。详见[整合记录](docs/crm-calibration/crm-integration-2026-09-21.md)。
+> 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。公开仓库 main 为 **d521051c（#38）**，VERSION **0.14.0.0**。现役 6677 已加载该版本。本工作树 `codex/cockpit-inline-edit` 候选 **0.15.0.0**：HTML 卡片文案/块级 AI。产品仍 PARTIAL。详见[驾驶舱记录](docs/hackathon/COCKPIT-PRESENTATION-2026-09-21.md)与[整合记录](docs/crm-calibration/crm-integration-2026-09-21.md)。
 
-## 当前快照（2026-09-21，三候选本地整合）
+## 当前快照（2026-09-21，驾驶舱 presentation 0.15.0.0）
 
 | 项 | 状态 |
 |---|---|
-| 已合代码基线 | **64eb6e0（公开仓库 #37）**，前序 #36 驾驶舱 / #35 文档 / #34 CRM。旧私有历史未合入。 |
-| 本轮交付 | 工作树 `codex/crm-analysis-board`：分析检索/编辑/分享/组板，readiness/membership/net-gsv，图谱 ACL，含引用分析的文档权限接线。6677 未切换。 |
-| VERSION / 产品 | 候选 **0.14.0.0**。产品 **PARTIAL**，原全量 Goal **PAUSED**。loopback，不上公网。 |
+| 已合代码基线 | **d521051c（公开仓库 #38）**，前序 #37 文档 / #36 驾驶舱 / #34 CRM。旧私有历史未合入。 |
+| 本轮交付 | 工作树 `codex/cockpit-inline-edit`：脚本生成卡片的文案与块级 AI、OCR 4 项修复。未把本候选加载 6677。 |
+| VERSION / 产品 | 候选 **0.15.0.0**；公开 main **0.14.0.0**。产品 **PARTIAL**，原全量 Goal **PAUSED**。loopback，不上公网。 |
 | DSH 基座 | **0.1.6-alpha.2（ddefc45f）**，不改上游。 |
-| 现役 | 6677 仍加载公开 #36/`7575d07` 之后的 0.13.0.0；CRM 18093 / WeKnora 18092 / Neo4j 17474 / 原 8000 未切换到本工作树。 |
-| 原始数据 | 约131GB归档DuckDB不进Git；本轮测试使用合成夹具、独立私有 SQLite，以及既有短窗口只读复算记录（不新读归档）。 |
+| 现役 | 6677 / 18091 加载公开 0.14.0.0（`crm-public-release`）；控制登记与 runtime 留在原仓。CRM 18093 仍为 `crm-assets-public` 的 archive_dashboard。 |
+| 原始数据 | 约131GB归档DuckDB不进Git；本轮测试使用合成夹具与独立私有 SQLite。 |
 
 ## 本轮施工计划
 
-### 三候选整合（本工作树，未合入）
-- 分析：历史检索分页、标题/说明 PATCH、账号分享/撤销、独立 `crm-board/v1`，服务端填金额。
-- 指标：dashboard-readiness / membership / net-gsv；缺会员时点或退款事件返回不可用。GSV/AOV/AUS 10 组真实只读复算记录保留。
-- 图谱：关系质量账本、文档版本/分块哈希、CRM 账号文档 grants；查询/检索/引用展开每次重查。账本分母 1163=已核实43+已拒绝7+待核对1113。
-- 接线：仅当分析含可信查询链路的知识引用时检查文档 grants；分享者能读不等于接收者能读。纯销售指标分析不绑教材。候选 preset 隔离共享 `weknora_search`；现役 preset 未改。
-- Git 发布走 `/ship`；6677 现役未切换。验证命令与分层证据见整合记录。
+### HTML 卡片文案与块级 AI（本工作树）
+- PagePackage 增加 presentation overlay：身份目标、显示文字、受限样式；筛选后按身份重应用。
+- OCR 46/46 复核后 4 处已修。变基后接触面 Node 45 passed、Python 17 passed；源码选区 7 passed。
+- 合成 backend 2873 passed / 77 skipped / 71 deselected；B0 pipeline PASS。
+- 真实 MiniMax-M3 五项合成选区评估 PASS（3 改字 + 2 越界拒绝）；6677 未重启。证据 `.context/checks/cockpit-native-eval/`。
+- 本人 UAT 与把本候选加载 6677 另授权。
 
-### 已合公开主线（#34–#37）
-- #34 可信快照→私有分析→驾驶舱引用，单个已确认短窗口真实账号/模型通过，不代签本人 UAT。
-- #36/#37 驾驶舱交互与文档；完整 HTML 编辑旅程与用户文件 UAT 仍开放。
+### 已合公开主线（#34–#38）
+- #38 分析检索/编辑/分享/独立组板，readiness/membership/net-gsv，图谱 ACL。6677 已加载代码；18093 仍为旧 archive 实例。
+- 图谱账本分母 1163=已核实43+已拒绝7+待核对1113。纯销售指标分析不绑教材。
+- #34 单个已确认短窗口真实账号/模型通过，不代签本人 UAT。#36/#37 完整 HTML 编辑旅程与用户文件 UAT 仍开放。
 
 ### 仍开放且不由本轮代签
-- 合入 main、6677 加载本候选、本人 UAT、真实模型重测。
+- 本候选合入后的 6677 加载、本人 UAT。
 - 成交时会员身份、成功退款流水、可按退款截止日重算的全店首购、派样资格；利润 ROI 另需成本。
 - 图谱 1113 条待核对关系；抽取时未保存的原文哈希与同版本证明。
 - P13、逐格式真实模型编辑、扫描 PDF OCR、复杂 Office 及 PDF 浮动菜单。

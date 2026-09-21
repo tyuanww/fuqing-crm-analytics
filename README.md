@@ -1,6 +1,6 @@
 # 伸美 AI 增长董事会
 
-当前代码交付与运行边界见 [STATUS](./STATUS.md)，下一步见 [M1 核心交付](./docs/hackathon/TODOS.md#m1-核心交付)。CRM 持久化已合入新公开仓库 **`73ee74c`**（[#34](https://github.com/tyuanww/fuqing-crm-analytics/pull/34)）；驾驶舱已由 [#36](https://github.com/tyuanww/fuqing-crm-analytics/pull/36) 合入 **`7575d07`**，PR 与该 main CI 通过。本分支 VERSION **0.14.0.0** 为分析检索/分享/组板、看板就绪度/会员溢价/净额 GSV 与教材 ACL 候选，未合入 main，未加载 6677；现役 6677 仍为 **0.13.0.0**，见[驾驶舱记录](./docs/hackathon/COCKPIT-UI-UX-2026-09-20.md)与[整合记录](./docs/crm-calibration/crm-integration-2026-09-21.md)。DSH **0.1.6-alpha.2**（`ddefc45f`）。loopback，不上公网，产品仍 PARTIAL。已合入的快照/保存见[持久化记录](./docs/crm-calibration/crm-assets-release-2026-09-21.md)。侧栏底是登录/主题；比赛看板仍在新标签打开 `15173`。旧仓库人群行动 #166 和历史板版本按各轮证据保留。
+当前代码交付与运行边界见 [STATUS](./STATUS.md)，下一步见 [M1 核心交付](./docs/hackathon/TODOS.md#m1-核心交付)。公开 main **`d521051c`**（[#38](https://github.com/tyuanww/fuqing-crm-analytics/pull/38)）VERSION **0.14.0.0**，现役 6677 已加载该版本。本分支候选 VERSION **0.15.0.0** 为驾驶舱脚本卡片文案与块级 AI，见[施工记录](./docs/hackathon/COCKPIT-PRESENTATION-2026-09-21.md)。DSH **0.1.6-alpha.2**（`ddefc45f`）。loopback，不上公网，产品仍 PARTIAL。侧栏底是登录/主题；比赛看板仍在新标签打开 `15173`。
 
 下方9月5–10日的决策、端口和候选追加保留为历史记录，不作为当前服务或Git HEAD。
 

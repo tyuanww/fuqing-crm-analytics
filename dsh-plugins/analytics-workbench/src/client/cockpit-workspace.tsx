@@ -57,6 +57,7 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
   const root = useRef<HTMLElement>(null);
   const [width, setWidth] = useState(1440), [rail, setRail] = useState(true), [boardEdit, setBoardEdit] = useState(Boolean(state.fieldDraft || state.editContext));
   const [mobileInspector, setMobileInspector] = useState(false);
+  const [htmlAIMode, setHtmlAIMode] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({ html: true, board: true, spreadsheet: true, document: true, pdf: true });
   const [search, setSearch] = useState('');
   const [trash, setTrash] = useState(false), [removing, setRemoving] = useState<CockpitProduct | null>(null);
@@ -355,7 +356,7 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
           {fileClient ? <><input ref={picker} type="file" hidden multiple accept=".html,.htm,.docx,.doc,.odt,.rtf,.xlsx,.xls,.ods,.csv,.pdf" data-testid="cockpit-file-picker"
             onChange={event => { void addFiles(event.target.files); event.target.value = ''; }} />
             <button disabled={busy || uncertain} onClick={() => picker.current?.click()}>添加产物</button></> : null}
-          {aiClient && selected && !boardVisible ? <button disabled={busy || uncertain} onClick={() => guard(beginAI)}>用 AI 改</button> : null}
+          {aiClient && selected && !boardVisible ? <button disabled={busy || uncertain} onClick={() => guard(async () => { if (savedHtml && pageStore && !page.current?.binding_manifest?.result_refs?.length) { setHtmlAIMode(true); pageStore.enterEdit(); setMobileInspector(true); } else await beginAI(); })}>用 AI 改</button> : null}
           {!boardVisible && selected?.kind === 'html' && !selected.page_id ? <button className="cockpit-primary" data-testid="html-import-start"
             disabled={busy || ai.active?.status === 'READY' || !file.text || Boolean(page.importCandidate) || uncertain || !pageStore}
             onClick={() => guard(createImport)}>保存为可编辑副本</button>
@@ -365,7 +366,7 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
               disabled={busy || uncertain || ai.active?.status === 'READY' || Boolean(page.preview) || (!savedHtml && !(boardVisible && state.saved))}
               onClick={() => {
                 if (editing) guard(() => { if (boardVisible) setBoardEdit(false); else pageStore?.exitEdit(); });
-                else { if (boardVisible) setBoardEdit(true); else pageStore?.enterEdit(); if (width < 1180) setRail(false); }
+                else { if (boardVisible) setBoardEdit(true); else { setHtmlAIMode(false); pageStore?.enterEdit(); } if (width < 1180) setRail(false); }
               }}>{editing ? '完成编辑' : '编辑'}</button>}
         </div>
       </header>
@@ -455,7 +456,7 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
                 {state.history.map(row => <div className="cockpit-history-row" key={row.version}><span>版本 {row.version}</span><button disabled={busy || row.version === state.saved?.spec.version} onClick={() => void library.rollback(row.version)}>预览回退</button></div>)}
               </div> : null}
             </CockpitSidebar></div>
-            : savedHtml && pageStore ? <CockpitPageEditor store={pageStore} onInspect={() => setMobileInspector(true)} onAI={aiClient ? scope => guard(async () => { await aiClient.begin('page', page.current!.page_id, page.current!.version, scope); }) : undefined} />
+            : savedHtml && pageStore ? <CockpitPageEditor store={pageStore} aiMode={htmlAIMode} onInspect={() => setMobileInspector(true)} onWholeAI={aiClient ? () => void guard(beginAI) : undefined} onAI={aiClient ? (scope, instruction) => aiClient.begin('page', page.current!.page_id, page.current!.version, scope, instruction) : undefined} />
             : page.importCandidate ? <><div className="cockpit-notice" data-testid="html-import-preview"><div><strong>保存为可编辑副本</strong><p>{uncertain ? '保存结果待核对。请用同一请求重试确认。' : '先检查页面。确认后进入页库，原工作区文件保持不变。'}</p></div>
               <button disabled={busy || uncertain} onClick={() => void pageStore?.cancelPreview()}>取消入库</button><button className="cockpit-primary" disabled={busy} onClick={() => void pageStore?.confirmImport()}>{uncertain ? '重试确认' : '确认保存副本'}</button></div>
               <div className="cockpit-frame-wrap"><HtmlPreview pkg={page.importCandidate.package} title={selected?.title ?? '副本预览'} /></div></>

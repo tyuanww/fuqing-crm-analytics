@@ -2,15 +2,24 @@
 import { sourceTargets, instrumentSourceTargets } from './html-source-selection.mjs';
 import { buildSrcdoc } from '../free-page/preview/srcdoc-builder.mjs';
 import { buildSourceIndex } from '../free-page/source-index/index.mjs';
+import { renderedPackageHash, validRenderedLocator } from './html-rendered-text.mjs';
 
 export function editablePageNodes(pkg, manifest) {
   const inferred = sourceTargets(pkg, manifest);
   const index = buildSourceIndex(pkg), mapped = editableTextNodes(pkg, manifest);
   const starts = new Set(mapped.map(node => index.nodes[node.node_id].html_range.start));
   const dynamic = Object.values(index.nodes).filter(node => node.js_ranges.length || node.kind === 'dynamic_region');
-  return [...mapped.map(node => ({ ...node, aiSource: inferred.find(item => item.source.start === index.nodes[node.node_id].html_range.start)?.source })),
+  const result = [...mapped.map(node => ({ ...node, aiSource: inferred.find(item => item.source.start === index.nodes[node.node_id].html_range.start)?.source })),
     ...inferred.filter(node => !starts.has(node.source.start) && !dynamic.some(other =>
       node.source.start < other.html_range.end && node.source.end > other.html_range.start))];
+  if (!manifest?.bindings?.length && !manifest?.result_refs?.length) {
+    for (const node of sourceTargets(pkg, manifest, { rendered: true })) {
+      const existing = result.find(item => item.source?.start === node.source.start || item.aiSource?.start === node.source.start);
+      if (existing) { existing.anchor = node.anchor; existing.packageHash = renderedPackageHash(pkg); }
+      else result.push({ ...node, node_id: 'rendered_root_' + node.source.start, runtimeOnly: true, packageHash: renderedPackageHash(pkg) });
+    }
+  }
+  return result;
 }
 
 export function editableTextNodes(pkg, manifest) {
@@ -31,7 +40,8 @@ function selectionRuntime(config) {
   const install = () => {
     const allowed = new Set(config.ids);
     let eligible = new Map(), published = '', selected = config.selected;
-    const identity = node => node.getAttribute('data-cockpit-source') || node.getAttribute('data-shine-node');
+    const runtimeIds = new WeakMap();
+    const identity = node => runtimeIds.get(node) || node.getAttribute('data-cockpit-source') || node.getAttribute('data-shine-node');
     const staticAttributes = node => {
       const elements = [node, ...node.querySelectorAll('*')];
       for (let parent = node.parentElement; parent; parent = parent.parentElement) elements.push(parent);
@@ -63,8 +73,11 @@ function selectionRuntime(config) {
     };
     // Both host controls and canvas clicks use this same runtime-verified set.
     // Observe later script changes too; bridge annotations must not retrigger it.
+    let closed = false;
     const observer = new MutationObserver(() => sync());
+    window.addEventListener('pagehide', () => { closed = true; observer.disconnect(); }, { once: true });
     const sync = (force = false) => {
+      if (closed || typeof document === 'undefined' || !document.documentElement) return;
       observer.disconnect();
       const candidates = new Map(), duplicates = new Set();
       for (const node of document.querySelectorAll('[data-shine-node],[data-cockpit-source]')) {
@@ -73,8 +86,63 @@ function selectionRuntime(config) {
         if (candidates.has(id)) duplicates.add(id);
         candidates.set(id, node);
       }
-      const next = new Map([...candidates].filter(([id, node]) => !duplicates.has(id)
+      const next = new Map([...candidates].filter(([id, node]) => !duplicates.has(id) && !config.runtimeOnly.includes(id)
         && node.namespaceURI === 'http://www.w3.org/1999/xhtml' && staticAttributes(node) && unchanged(node)));
+      const runtimeNodes = [], seen = new Set(); let runtimeBytes = 0;
+      const roots = config.roots.map(root => ({ root, elements: [...document.querySelectorAll('[' + root.anchor.attribute + ']')].filter(node => node.getAttribute(root.anchor.attribute) === root.anchor.value) }))
+        .filter(row => row.elements.length === 1).reverse();
+      for (const { root, elements: [element] } of roots) {
+        const descendants = [element, ...element.querySelectorAll('*')].slice(0, 2000);
+        for (const node of descendants) {
+          if (seen.has(node) || next.size >= 2000 || node.namespaceURI !== 'http://www.w3.org/1999/xhtml'
+            || node.closest('script,style,template,iframe,object,embed,textarea,input,select,[data-shine-region],[data-sp-bindable="database"],[data-page-readonly]') || !staticAttributes(node)) continue;
+          const directTexts = [...node.childNodes].filter(n => n.nodeType === 3);
+          const visibleTexts = directTexts.filter(n => n.nodeValue.trim());
+          const ownText = visibleTexts.length === 1 ? visibleTexts[0] : directTexts.length === 1 ? directTexts[0] : null;
+          const savedText = window.__cockpitPresentationIdentity?.has(node);
+          const editableText = node.children.length === 0 || Boolean(ownText && (ownText.nodeValue.trim() || savedText));
+          const text = editableText && node.children.length ? ownText.nodeValue : node.textContent ?? '';
+          const block = /^(section|article|header|footer|aside|li)$/.test(node.localName) || (node.hasAttribute('data-node') || node.hasAttribute('data-page-block')) && node.children.length > 0;
+          if ((!text.trim() && !savedText || text.length > 20000) || (!editableText && !block)) continue;
+          const path = []; let child = node, reliable = true;
+          while (child !== element && path.length < 64) {
+            const parentNode = child.parentElement; if (!parentNode) break;
+            const peers = [...parentNode.children].filter(n => n.localName === child.localName);
+            let key;
+            for (const attribute of ['data-page-field','data-page-block','data-node','id']) {
+              const value = child.getAttribute(attribute);
+              if (value && /^[A-Za-z][A-Za-z0-9_.:-]{0,159}$/.test(value) && peers.filter(n => n.getAttribute(attribute) === value).length === 1) { key = { attribute, value }; break; }
+            }
+            if (!key && peers.length > 1) {
+              const value = [...child.classList].find(c => !/^(is-|has-|active|selected|hover|focus)/.test(c) && /^[A-Za-z][A-Za-z0-9_.:-]{0,159}$/.test(c) && peers.filter(n => n.classList.contains(c)).length === 1);
+              if (value) key = { attribute: 'class', value };
+              else {
+                const label = node => window.__cockpitPresentationIdentity?.get(node) ?? node.textContent;
+                const text = label(child);
+                if (!child.children.length && text.trim() && text.length <= 2000 && !/^[\s\d.,%+−\-]+$/.test(text)
+                  && peers.filter(n => !n.children.length && label(n) === text).length === 1) key = { attribute: 'text', value: text };
+                else { reliable = false; break; }
+              }
+            }
+            path.unshift({ tag: child.localName, ...(key ? { key } : {}) }); child = parentNode;
+          }
+          if (!reliable || child !== element) continue;
+          const id = 'runtime_' + root.node_id + '_' + JSON.stringify(path);
+          for (const [oldId, oldNode] of next) if (oldNode === node) next.delete(oldId);
+          // Strip our own annotations before giving the model a read-only view of the selected block.
+          const clone = node.cloneNode(true);
+          for (const item of [clone, ...clone.querySelectorAll('*')]) {
+            for (const attr of [...item.attributes]) if (attr.name.startsWith('data-cockpit-')) item.removeAttribute(attr.name);
+            if (item.hasAttribute('tabindex') && item !== node && !item.hasAttribute('data-shine-node')) item.removeAttribute('tabindex');
+          }
+          const renderedHTML = clone.outerHTML;
+          if (renderedHTML.length > 60000 || runtimeBytes + renderedHTML.length + text.length > 524288) continue;
+          runtimeBytes += renderedHTML.length + text.length;
+          runtimeIds.set(node, id); seen.add(node); next.set(id, node);
+          runtimeNodes.push({ node_id: id, root_id: root.node_id, tag: node.localName, text, editableText, block,
+            runtime: { anchor: root.anchor, path, package_hash: root.packageHash, html: renderedHTML } });
+        }
+      }
       for (const [id, node] of eligible) if (next.get(id) !== node) unmark(node);
       for (const [id, node] of next) {
         if (!node.hasAttribute('data-cockpit-target')) {
@@ -84,11 +152,11 @@ function selectionRuntime(config) {
         node.toggleAttribute('data-cockpit-selected', id === selected);
       }
       eligible = next;
-      const ids = [...eligible.keys()], signature = JSON.stringify(ids);
+      const ids = [...eligible.keys()].filter(id => !id.startsWith('runtime_')), signature = JSON.stringify([ids, runtimeNodes]);
       if (force || signature !== published) {
         published = signature;
         parent.postMessage({ type: 'cockpit.targets', channel: config.channel, pageId: config.pageId,
-          version: config.version, nodeIds: ids }, '*');
+          version: config.version, nodeIds: ids, runtimeNodes }, '*');
       }
       observer.observe(document.documentElement, { subtree: true, childList: true, characterData: true, attributes: true });
     };
@@ -104,7 +172,12 @@ function selectionRuntime(config) {
       // Publish eligibility before the click even if the mount handshake was
       // missed. The host validates these messages synchronously, before React renders.
       sync(true);
-      const node = event.target.closest?.('[data-cockpit-target]');
+      let node = event.target.closest?.('[data-cockpit-target]');
+      if (config.selectBlocks) {
+        for (let parent = node; parent; parent = parent.parentElement) {
+          if (eligible.get(identity(parent)) === parent && (/^(section|article|li)$/.test(parent.localName) || (parent.hasAttribute('data-node') || parent.hasAttribute('data-page-block')) && parent.children.length)) { node = parent; break; }
+        }
+      }
       if (node && eligible.get(identity(node)) === node) send(identity(node));
     }, true);
     document.addEventListener('submit', event => { event.preventDefault(); event.stopImmediatePropagation(); }, true);
@@ -120,10 +193,17 @@ function selectionRuntime(config) {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once: true });
   else install();
 }
-export function selectionSrcdoc(pkg, { channel, pageId, version, nodes = [], selected = null, editing = false }) {
-  const src = buildSrcdoc({ ...(editing ? instrumentSourceTargets(pkg, nodes) : pkg), instanceId: channel, pageId, version, nonce: channel });
+export function selectionSrcdoc(pkg, { channel, pageId, version, nodes = [], selected = null, editing = false, selectBlocks = false }) {
+  let src = buildSrcdoc({ ...(editing ? instrumentSourceTargets(pkg, nodes) : pkg), instanceId: channel, pageId, version, nonce: channel });
+  const statusConfig = JSON.stringify({ channel, pageId, version }).replace(/</g, '\\u003c');
+  src = src.replace('</body>', '<script>(' + (function (config) {
+    const report = () => parent.postMessage({ type: 'cockpit.presentation', ...config, unresolved: window.__cockpitPresentationStatus?.unresolved?.length ?? 0 }, '*');
+    window.addEventListener('cockpit-presentation-status', report);
+    document.addEventListener('DOMContentLoaded', report, { once: true }); report();
+  }).toString() + ')(' + statusConfig + ');</script></body>');
   if (!editing) return src;
-  const config = JSON.stringify({ channel, pageId, version, ids: nodes.map(row => row.node_id), source: Object.fromEntries(nodes.map(row => [row.node_id, row.text])), selected }).replace(/</g, '\\u003c');
+  const config = JSON.stringify({ channel, pageId, version, ids: nodes.map(row => row.node_id), source: Object.fromEntries(nodes.map(row => [row.node_id, row.text])), selected,
+    runtimeOnly: nodes.filter(row => row.runtimeOnly).map(row => row.node_id), roots: nodes.filter(row => row.anchor && row.packageHash).map(({ node_id, anchor, packageHash }) => ({ node_id, anchor, packageHash })), selectBlocks }).replace(/</g, '\\u003c');
   return src.replace('</body>', '<script>(' + selectionRuntime.toString() + ')(' + config + ');</script></body>');
 }
 export function acceptSelection(event, { source, channel, pageId, version, nodes }) {
@@ -139,9 +219,25 @@ export function acceptTargets(event, { source, channel, pageId, version, nodes }
   if (!source || event.source !== source || event.origin !== 'null') return undefined;
   const data = event.data;
   if (!data || data.type !== 'cockpit.targets' || data.channel !== channel || data.pageId !== pageId || data.version !== version
-    || Object.keys(data).some(key => !['type','channel','pageId','version','nodeIds'].includes(key))) return undefined;
+    || Object.keys(data).some(key => !['type','channel','pageId','version','nodeIds','runtimeNodes'].includes(key))) return undefined;
   if (!Array.isArray(data.nodeIds) || data.nodeIds.length > nodes.length || new Set(data.nodeIds).size !== data.nodeIds.length) return undefined;
   const accepted = data.nodeIds.map(id => nodes.filter(node => node.node_id === id));
   if (accepted.some(matches => matches.length !== 1)) return undefined;
-  return accepted.map(matches => matches[0]);
+  const runtime = data.runtimeNodes ?? [];
+  if (!Array.isArray(runtime) || runtime.length > 2000 || runtime.length + data.nodeIds.length > 2000) return undefined;
+  const extra = []; let runtimeBytes = 0;
+  for (const item of runtime) {
+    if (!item || typeof item !== 'object') return undefined;
+    const root = nodes.find(node => node.node_id === item.root_id && node.anchor && node.packageHash);
+    if (!root || !validRenderedLocator(item.runtime) || JSON.stringify(item.runtime.anchor) !== JSON.stringify(root.anchor)
+      || item.runtime.package_hash !== root.packageHash || typeof item.node_id !== 'string' || !item.node_id.startsWith('runtime_')
+      || typeof item.text !== 'string' || item.text.length > 20000 || typeof item.runtime.html !== 'string' || item.runtime.html.length > 60000
+      || !/^[a-z][a-z0-9-]*$/.test(item.tag) || typeof item.editableText !== 'boolean' || typeof item.block !== 'boolean') return undefined;
+    runtimeBytes += item.text.length + item.runtime.html.length;
+    if (runtimeBytes > 524288) return undefined;
+    extra.push({ ...item, kind: 'rendered_element', mapping: 'valid', mapping_token: root.packageHash, version_hash: root.packageHash,
+      aiSource: root.source ?? root.aiSource });
+  }
+  const result = [...accepted.map(matches => matches[0]), ...extra];
+  return new Set(result.map(node => node.node_id)).size === result.length ? result : undefined;
 }

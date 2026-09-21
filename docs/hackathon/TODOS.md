@@ -6,29 +6,42 @@
 
 2026-09-13 用户确认“核心版本优先交付、扩库完善后置”。目标是问数后 AI 优先使用定制组件自由组板，板内按选定范围修改；首批六类不是最终上限。M1／产品仍 PARTIAL；原全量 App Goal 保持 PAUSED。本节承接原本地施工记录，不把旧冻结实现反推成最终需求。
 
-### 2026-09-21 三候选本地整合（已推送分支，未合入 main）
+### 2026-09-21 HTML 卡片文案与块级 AI（本地候选）
 
-工作树 `codex/crm-analysis-board`，基线公开 main `64eb6e0`（#37）。只读来源：`crm-metrics-closeout`、`crm-graph-acl`。[整合记录](../crm-calibration/crm-integration-2026-09-21.md)。代码已提交为 v0.14.0.0 并推送；6677 未切换。
+工作树 `codex/cockpit-inline-edit`，基线公开 main `d521051c`（#38 / 0.14.0.0），候选 VERSION 0.15.0.0。[施工记录](./COCKPIT-PRESENTATION-2026-09-21.md)。
+
+- [x] presentation 记录、手动卡片文案、页内 AI 要求与右栏统一预览。
+- [x] OCR 46/46、4 处确认问题已修。
+- [x] 相对公开 main `d521051c` 快进；#38 路径与本候选无重叠。
+- [x] 变基后接触面复测：Node 45 passed、Python 17 passed。
+- [x] 合成 backend 2873 passed / 77 skipped；B0 pipeline PASS。
+- [x] 真实 MiniMax-M3 五项合成选区评估 PASS。**Completed:** v0.15.0.0（2026-09-21，代码交付）
+- [ ] 本人 UAT。
+- [ ] 合入后把本候选加载 6677。
+
+### 2026-09-21 三候选整合（已合 #38）
+
+工作树 `codex/crm-analysis-board` 成果已由 [#38](https://github.com/tyuanww/fuqing-crm-analytics/pull/38) 合入 `d521051c`，VERSION 0.14.0.0；6677 已加载该版本。CRM 18093 仍为 archive 实例。[整合记录](../crm-calibration/crm-integration-2026-09-21.md)。
 
 - [x] 并入分析检索/分页/编辑、账号分享撤销、独立组板，保留登录/取消/逐次鉴权与组板布局修复。
 - [x] 并入 dashboard-readiness / membership / net-gsv 合同、插件工具与合成测试；缺来源仍不可用。
 - [x] 并入图谱账本、文档版本/分块哈希、账号 grants，以及原生 Host 卸载与候选 `weknora_search` 隔离。
 - [x] 含知识引用的分析在保存/分享/读取/列表/组板/驾驶舱加入时重查当前文档权限；纯指标分析不绑教材。
 - [x] 本地代码与专项测试已收口为 v0.14.0.0 候选。**Completed:** v0.14.0.0（2026-09-21，代码交付）
-- [ ] Git 合入与 6677 运行切换。
+- [x] Git 合入与 6677 运行切换（代码 0.14.0.0；18093 仍为 archive_dashboard）。**Completed:** v0.14.0.0（2026-09-21）
 - [ ] 成交时会员身份、成功退款流水、可重算首购、派样资格与成本；图谱其余 1113 条核对与抽取哈希。
 - [ ] P13、逐格式真实模型编辑、真实历史/业务文件和本人 UAT；扫描 PDF OCR、复杂 Office 兼容及 PDF 浮动菜单异常。
 
 ### 2026-09-21 CRM 分析管理与可编辑组板
 
-基于新公开仓库 main `64eb6e0`（#37），工作树 `codex/crm-analysis-board`；不沿用旧仓 main。HTML 动态卡片编辑工作树未并入。[本轮记录](../crm-calibration/crm-analysis-board-2026-09-21.md)。
+基于新公开仓库 main，已由 #38 合入 `d521051c`。HTML 动态卡片编辑仍在独立工作树 `codex/cockpit-inline-edit`。[本轮记录](../crm-calibration/crm-analysis-board-2026-09-21.md)。
 
 - [x] 历史分析搜索与分页，超过最近 20 条可续页定位。
 - [x] 编辑标题/说明；金额、分母、口径和原始快照不可变；重查生成新快照。
 - [x] 受控分享给 `FQ_CRM_PASSWORDS` 中的明确账号，支持撤销；跨账号拒绝，撤权后旧会话不可读。不生成公开链接。
 - [x] 独立 CRM 组板：选择指标、布局和展示属性；保存/取消/版本冲突/刷新重开。组件绑定快照、指标和筛选，模型不能提交金额。
 - [x] 合成后端、CRM 专项 verify、编译后 React、原生 Host 与 Chrome 旅程已在本工作树跑过。**Completed:** v0.14.0.0（2026-09-21，代码交付）
-- [ ] Git 合入与 6677 运行切换。
+- [x] Git 合入与 6677 运行切换（代码 0.14.0.0；18093 仍为 archive_dashboard）。**Completed:** v0.14.0.0（2026-09-21）
 - [ ] 多人文档 ACL 已在整合候选接线；图谱全图语义审核与原文同版本、会员/退款/复购/LTV/派样来源仍开放。
 - [ ] P13、逐格式真实模型编辑、真实历史/业务文件和本人 UAT；扫描 PDF OCR、复杂 Office 兼容及 PDF 浮动菜单异常。
 

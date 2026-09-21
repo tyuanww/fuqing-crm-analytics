@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { buildSrcdoc } from './srcdoc-builder.mjs';
+import { sourceHash } from '../presentation/model.mjs';
 import { FREE_PAGE_CSP, FREE_PAGE_SANDBOX } from '../runtime/isolation-policy.mjs';
 import { BRIDGE_PROTOCOL } from '../resource/frozen-contract.mjs';
 import { SAVED_COMPLEX_PACKAGE } from '../runtime/fixtures.mjs';
@@ -53,4 +54,18 @@ test('header/footer and similarly named tags retain real closing tags inside the
   assert.ok(src.includes(html));
   assert.doesNotMatch(src, /&lt;\/header|&lt;\/heading|&lt;\/bodyguard/);
   assert.match(src, /window.header = "<\/header>"/);
+});
+
+test('presentation runtime is injected as data and mismatched hashes fail closed', () => {
+  const html = '<section id="cards">x</section>', css = '', js = '';
+  const presentation = { source_hash: sourceHash({ html, css, js }), edits: [
+    { target: { anchor: { attribute: 'id', value: 'cards' }, path: [] }, text: 'a < b', style: { padding: '8px' } },
+  ] };
+  const src = buildSrcdoc({ html, css, js, presentation, instanceId: 'i', pageId: 'p', version: 1, nonce: 'n' });
+  assert.match(src, /presentationRuntime|__cockpitPresentationStatus/);
+  assert.match(src, /\\u003c/);
+  assert.doesNotMatch(src, /"a < b"/);
+  assert.throws(() => buildSrcdoc({ html, css, js, presentation: { ...presentation, source_hash: '0'.repeat(64) } }), /文案修改与页面来源不匹配/);
+  const empty = buildSrcdoc({ html, css, js, presentation: { source_hash: sourceHash({ html, css, js }) }, instanceId: 'i', pageId: 'p', version: 1, nonce: 'n' });
+  assert.doesNotMatch(empty, /__cockpitPresentationStatus/);
 });

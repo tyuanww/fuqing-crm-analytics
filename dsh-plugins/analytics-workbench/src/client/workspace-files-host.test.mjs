@@ -36,6 +36,7 @@ function mount(extra = {}) {
   const entries = [];
   const effects = [];
   apply({
+    sidebarRightTabs: { register: () => () => {} },
     effect: factory => { effects.push(factory()); },
     get() { return undefined; },
     theme: {

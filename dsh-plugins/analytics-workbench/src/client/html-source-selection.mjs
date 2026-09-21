@@ -1,9 +1,10 @@
+import { sourceHash } from '../free-page/presentation/model.mjs';
 /** Source offsets for ordinary static HTML. Ambiguous/malformed trees fail closed. */
 import { sha256Hex } from '../free-page/hash.mjs';
 const VOID = new Set('area base br col embed hr img input link meta param source track wbr'.split(' '));
 const SELECTABLE = new Set('header footer main section article aside div h1 h2 h3 h4 h5 h6 p span strong em b i small label button a li ul ol blockquote figcaption figure td th caption'.split(' '));
 const BLOCK = new Set('header footer main section article aside div ul ol figure blockquote'.split(' '));
-export function sourceTargets(pkg, manifest) {
+export function sourceTargets(pkg, manifest, { rendered = false } = {}) {
   if (!pkg?.html || manifest?.bindings?.length || manifest?.result_refs?.length) return [];
   const html = pkg.html, stack = [], rows = [];
   // Temporary identities share the bridge with persisted markers. Reserve even
@@ -26,7 +27,7 @@ export function sourceTargets(pkg, manifest) {
       const entry = stack.pop();
       if (!entry || entry.tag !== tag) { invalid = true; break; }
       const inner = html.slice(entry.inner_start, match.index);
-      if (!entry.blocked && SELECTABLE.has(tag) && !/<(?:script|style|iframe|object|embed)\b|\bdata-shine-region\s*=/i.test(inner)) {
+      if ((rendered ? !entry.readonly && entry.anchor : !entry.blocked) && SELECTABLE.has(tag) && !/<(?:script|style|iframe|object|embed)\b|\bdata-shine-region\s*=/i.test(inner)) {
         rows.push({ ...entry, inner_end: match.index, end: tags.lastIndex, text: inner,
           block: BLOCK.has(tag) && /<[a-z]/i.test(inner), editableText: !/<[a-z!/]/i.test(inner) });
       }
@@ -47,7 +48,9 @@ export function sourceTargets(pkg, manifest) {
     if (!foreign && VOID.has(tag)) continue;
     if (stack.length >= 256) return [];
     const readonly = Boolean(blocked || stack.at(-1)?.readonly);
-    stack.push({ tag, foreign, start: match.index, inner_start: tags.lastIndex, readonly, blocked: readonly });
+    const attr = /\s(id|data-node|data-page-block)\s*=\s*(["'])([A-Za-z][A-Za-z0-9_.:-]{0,159})\2/i.exec(text);
+    const anchor = attr ? { attribute: attr[1].toLowerCase(), value: attr[3] } : undefined;
+    stack.push({ tag, foreign, anchor, start: match.index, inner_start: tags.lastIndex, readonly, blocked: readonly });
   }
   if (invalid || stack.length) return [];
   const html_hash = sha256Hex(html);
@@ -57,6 +60,7 @@ export function sourceTargets(pkg, manifest) {
     const node_id = 'source_' + serial++;
     return { node_id, kind: 'static_element', mapping: 'valid', mapping_token: html_hash,
     version_hash: html_hash, tag: row.tag, text: row.text, editableText: row.editableText, block: row.block,
+    anchor: row.anchor,
     source: { start: row.start, end: row.end, inner_start: row.inner_start, inner_end: row.inner_end, html_hash },
     };
   });
@@ -64,13 +68,16 @@ export function sourceTargets(pkg, manifest) {
 export function selectionForAI(pkg, node) {
   const source = node?.source ?? node?.aiSource;
   if (!source || source.html_hash !== sha256Hex(pkg.html)) return null;
-  return { start: [...pkg.html.slice(0, source.start)].length, end: [...pkg.html.slice(0, source.end)].length, html_hash: source.html_hash };
+  return { start: [...pkg.html.slice(0, source.start)].length, end: [...pkg.html.slice(0, source.end)].length, html_hash: source.html_hash,
+    ...(node.runtime ? { rendered: node.runtime } : {}) };
 }
 export function sourceTextPreview(pkg, node, replacementText, manifest) {
   const current = sourceTargets(pkg, manifest).find(item => item.node_id === node?.node_id && item.mapping_token === node.mapping_token);
   if (!current?.editableText) throw new Error('选区已变化或不支持直接改字，请重新选择。');
   const escaped = String(replacementText).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
-  return { ...pkg, html: pkg.html.slice(0, current.source.inner_start) + escaped + pkg.html.slice(current.source.inner_end) };
+  const next = { ...pkg, html: pkg.html.slice(0, current.source.inner_start) + escaped + pkg.html.slice(current.source.inner_end) };
+  if (next.presentation) next.presentation = { ...next.presentation, source_hash: sourceHash(next) };
+  return next;
 }
 export function instrumentSourceTargets(pkg, nodes) {
   let html = pkg.html;
@@ -78,5 +85,7 @@ export function instrumentSourceTargets(pkg, nodes) {
     const at = node.source.start + 1 + node.tag.length;
     html = html.slice(0, at) + ` data-cockpit-source="${node.node_id}"` + html.slice(at);
   }
-  return { ...pkg, html };
+  const next = { ...pkg, html };
+  if (next.presentation) next.presentation = { ...next.presentation, source_hash: sourceHash(next) };
+  return next;
 }

@@ -36,12 +36,15 @@ export function CockpitAIPanel({ client, state, blocked = false }: { client: Coc
 export function CockpitAIPreview({ state }: { state: AIState }) {
   const pkg = useMemo(() => {
     if (!state.html) return null;
+    // Versioned page packages must reach the shared renderer byte-for-byte.
+    // Only raw workspace HTML files need document-wrapper normalization here.
+    if (state.active?.target_kind === 'page') return state.html;
     // Normalize complete HTML documents into the existing trusted sandbox wrapper.
     // DOMParser does not execute scripts; untrusted meta/base cannot replace CSP.
     const parsed = new DOMParser().parseFromString(state.html.html, 'text/html');
     parsed.querySelectorAll('meta,base').forEach(node => node.remove());
     return { ...state.html, html: [...parsed.head.children].map(node => node.outerHTML).join('') + parsed.body.innerHTML };
-  }, [state.html]);
+  }, [state.html, state.active?.target_kind]);
   if (pkg) return <div className="cockpit-frame-wrap" data-testid="ai-html-preview"><HtmlPreview pkg={pkg} title="AI 修改预览" /></div>;
   if (state.viewer) return <CandidateViewer viewer={state.viewer} />;
   return null;

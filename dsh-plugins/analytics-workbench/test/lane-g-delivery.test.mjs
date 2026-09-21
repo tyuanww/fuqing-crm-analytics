@@ -150,6 +150,7 @@ test('tool card registration wires the delivery intake (compiled client)', {
   let notify;
   let snapshot = { phase: 'ready', ids: ['session_page'], byId: { session_page: { id: 'session_page', retainedBy: {} } } };
   client.apply({
+    sidebarRightTabs: { register: () => () => {} },
     effect: factory => { effects.push(factory()); },
     theme: { overrideTokens: () => () => {} },
     layout: { selectPanel: () => {} },

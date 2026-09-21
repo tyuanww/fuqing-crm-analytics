@@ -114,6 +114,7 @@ print('B0 exact Python closure verified')
     'backend/tests/test_page_documents.py',
     'backend/tests/test_cockpit_files.py',
     'backend/tests/test_cockpit_ai.py',
+    'backend/tests/test_cockpit_presentation.py',
     'backend/tests/test_page_result_access.py',
     'backend/tests/test_page_result_access_http.py',
     'backend/tests/test_p12_page_mount.py');

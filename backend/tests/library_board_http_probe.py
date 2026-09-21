@@ -41,7 +41,11 @@ def run():
             page_state_dir=root / "pages" if sys.argv[1:] in (["--cockpit-v2"], ["--cockpit-ui-ux"]) else None)
         if sys.argv[1:] == ["--cockpit-ui-ux"]:
             from backend.services.analytics.page_documents_routes import create_page_app
-            app.include_router(create_page_app(identities=registry, page_state_dir=root / "pages").router)
+            # Exercise the real page body's 2 MB limit; the outer competition
+            # app's 64 KB query limit is not the deployed page service boundary.
+            page_app = create_page_app(identities=registry, page_state_dir=root / "pages")
+            page_app.include_router(app.router)
+            app = page_app
         with socket.socket() as listener:
             listener.bind(("127.0.0.1", 0))
             server = uvicorn.Server(uvicorn.Config(app, log_level="error", access_log=False,
