@@ -343,9 +343,6 @@ def main() -> int:
     }
     out = PACK_ROOT / "tests" / "validation-result.json"
     out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    deliveries = REPO_ROOT / "docs" / "crm-calibration" / "deliveries" / "C"
-    deliveries.mkdir(parents=True, exist_ok=True)
-    (deliveries / "validation-result.json").write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     if errors:
         print("FAILED")

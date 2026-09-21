@@ -6,14 +6,19 @@ from backend.semantic.filters import FilterBuilder, MetricType
 LOW_PRICE_CHANNELS = ['U先派样', '百补派样', '赠品&0.01', '其他']
 
 
-def query_dashboard_purchases(conn, filters: DashboardFilters) -> DashboardPurchases:
-    fb = FilterBuilder().with_metric_type(MetricType.GSV).with_time_range(
+def dashboard_where(filters: DashboardFilters, metric_type: MetricType = MetricType.GSV):
+    """Shared parameterized dashboard window; GSV excludes is_refund, GMV does not."""
+    fb = FilterBuilder().with_metric_type(metric_type).with_time_range(
         filters.start_date.isoformat(), filters.end_date.isoformat())
     if filters.channel != '全店':
         fb.with_channels([filters.channel])
     if filters.exclude_low_price:
         fb.with_exclude_channels(LOW_PRICE_CHANNELS)
-    where, params = fb.build()
+    return fb.build()
+
+
+def query_dashboard_purchases(conn, filters: DashboardFilters) -> DashboardPurchases:
+    where, params = dashboard_where(filters)
     row = conn.execute(f'''
         WITH base AS (
             SELECT order_id, user_id, actual_amount,

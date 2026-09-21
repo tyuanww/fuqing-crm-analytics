@@ -1,5 +1,6 @@
 /** CRM credentials stay in this host closure, never env, disk, RPC or tool output. */
-import { dashboardOrigin, queryDashboardGsv, queryDashboardPurchases, dashboardCapabilities } from './dashboard.mjs';
+import { dashboardOrigin, queryDashboardGsv, queryDashboardPurchases, queryDashboardReadiness,
+  queryDashboardMembership, queryDashboardNetGsv, dashboardCapabilities } from './dashboard.mjs';
 
 import { crmAssetRequest, captureRequest, ASSET_MESSAGES } from './crm-assets.mjs';
 
@@ -7,6 +8,7 @@ export const CRM_UI_PATH = '/api/crm-knowledge/connection';
 export const CRM_ASSETS_UI_PATH = '/api/crm-knowledge/assets';
 const TTL = 8 * 60 * 60 * 1000;
 const MAX_BODY = 8192;
+const ASSET_MAX_BODY = 65536;
 const ERRORS = {
   INVALID_REQUEST: '请求无效，请重新打开连接窗口。',
   SESSION_UNAVAILABLE: '当前对话已不可用，请重新选择对话。',
@@ -43,11 +45,12 @@ export function createDashboardAccess({ baseUrl = 'http://127.0.0.1:8000', brows
   const origin = dashboardOrigin(baseUrl);
   const trustedBrowserOrigin = dashboardOrigin(browserOrigin);
   if (!['real', 'synthetic'].includes(dataKind) || typeof hasSession !== 'function' || !Number.isSafeInteger(ttlMs) || ttlMs <= 0 || ttlMs > TTL) throw new Error('Invalid CRM host configuration');
-  const records = new Map(); const pending = new Map();
+  const records = new Map(); const pending = new Map(); const citationLedger = new Map();
   let disposed = false;
   function forget(sessionId) {
     records.get(sessionId)?.controller.abort(); records.delete(sessionId);
     pending.get(sessionId)?.abort(); pending.delete(sessionId);
+    citationLedger.delete(sessionId);
   }
   function prune() {
     for (const [id, record] of records) if (record.expiresAt <= now() || !hasSession(id)) forget(id);
@@ -77,17 +80,67 @@ export function createDashboardAccess({ baseUrl = 'http://127.0.0.1:8000', brows
     const missing = () => ({ ok: false, code: 'NOT_CONNECTED', message: ASSET_MESSAGES.NOT_CONNECTED });
     if (disposed || !record || !hasSession(sessionId)) return missing();
     const combined = signal ? AbortSignal.any([signal, record.controller.signal]) : record.controller.signal;
-    const result = await crmAssetRequest(input, { sessionId, binding: record.binding, signal: combined });
+    const forged = input && typeof input === 'object' && ['knowledge_citations', 'citation_ids', 'citations', 'knowledge_ids', 'owner', 'amount_fen', 'gsv'].some(key => Object.hasOwn(input, key));
+    if (forged) return { ok: false, code: 'INVALID_REQUEST', message: ASSET_MESSAGES.INVALID_REQUEST };
+    const bind = input?.bind_session_citations;
+    const payload = { ...input };
+    delete payload.bind_session_citations;
+    let hostCitations;
+    if (bind === true) {
+      hostCitations = [...(citationLedger.get(sessionId)?.values() ?? [])];
+      if (!hostCitations.length) return { ok: false, code: 'INVALID_REQUEST', message: ASSET_MESSAGES.INVALID_REQUEST };
+    } else if (bind !== undefined && bind !== false) {
+      return { ok: false, code: 'INVALID_REQUEST', message: ASSET_MESSAGES.INVALID_REQUEST };
+    }
+    const result = await crmAssetRequest(payload, { sessionId, binding: record.binding, signal: combined, hostCitations });
     if (records.get(sessionId) !== record) return missing();
     if (record.expiresAt <= now() || !hasSession(sessionId)) { forget(sessionId); return missing(); }
     if (['AUTH_EXPIRED', 'ACCOUNT_MISMATCH'].includes(result.code)) forget(sessionId);
     return result;
   }
+  async function named(sessionId, input, signal, fn, schema, version) {
+    prune(); const record = records.get(sessionId);
+    if (disposed || !record || !hasSession(sessionId)) {
+      return { status: 'UNAVAILABLE', schema_version: schema, metric_version: version,
+        reason: { code: 'NOT_CONNECTED', message: '当前对话尚未连接 CRM，请点击“连接 CRM”。' } };
+    }
+    const combined = signal ? AbortSignal.any([signal, record.controller.signal]) : record.controller.signal;
+    const result = await fn(input, { sessionId, binding: record.binding, signal: combined });
+    if (records.get(sessionId) !== record) {
+      return { status: 'UNAVAILABLE', schema_version: schema, metric_version: version,
+        reason: { code: 'NOT_CONNECTED', message: '当前对话尚未连接 CRM，请点击“连接 CRM”。' } };
+    }
+    if (record.expiresAt <= now() || !hasSession(sessionId)) { forget(sessionId); return { status: 'UNAVAILABLE', schema_version: schema, metric_version: version,
+      reason: { code: 'NOT_CONNECTED', message: '当前对话尚未连接 CRM，请点击“连接 CRM”。' } }; }
+    if (['AUTH_EXPIRED', 'ACCOUNT_MISMATCH'].includes(result.reason?.code)) forget(sessionId);
+    return result;
+  }
   const service = Object.freeze({
     capabilities(sessionId) { return dashboardCapabilities(status(sessionId).connected ? 'LOGIN_BOUND' : 'NOT_CONNECTED'); },
+    principal(sessionId) {
+      prune();
+      const record = records.get(sessionId);
+      return record && hasSession(sessionId) ? { username: record.binding.username } : null;
+    },
     query: (sessionId, input, signal) => query(sessionId, input, signal),
     querySnapshot: (sessionId, input, signal) => asset(sessionId, captureRequest(input), signal),
     queryPurchases: (sessionId, input, signal) => query(sessionId, input, signal, true),
+    queryReadiness: (sessionId, input, signal) => named(sessionId, input, signal, queryDashboardReadiness, 'crm-dashboard-readiness/v1', 'dashboard-readiness/v1'),
+    queryMembership: (sessionId, input, signal) => named(sessionId, input, signal, queryDashboardMembership, 'crm-dashboard-membership/v1', 'dashboard-member-premium/v1'),
+    queryNetGsv: (sessionId, input, signal) => named(sessionId, input, signal, queryDashboardNetGsv, 'crm-dashboard-net-gsv/v1', 'dashboard-net-gsv/v1'),
+    rememberCitations(sessionId, citations) {
+      prune();
+      if (!validSession(sessionId) || !records.has(sessionId) || !Array.isArray(citations)) return;
+      let bucket = citationLedger.get(sessionId);
+      if (!bucket) { bucket = new Map(); citationLedger.set(sessionId, bucket); }
+      for (const item of citations) {
+        if (item && typeof item.chunk_id === 'string') bucket.set(item.chunk_id, item);
+      }
+    },
+    takeSessionCitations(sessionId) {
+      prune();
+      return [...(citationLedger.get(sessionId)?.values() ?? [])];
+    },
   });
 
   async function browser(request) {
@@ -100,12 +153,13 @@ export function createDashboardAccess({ baseUrl = 'http://127.0.0.1:8000', brows
         request.headers.get('sec-fetch-site') === 'cross-site') return error('HOST_AUTH_REQUIRED', 403);
     if (request.method !== 'POST' || !/^application\/json(?:\s*;|$)/i.test(request.headers.get('content-type') ?? '')) return error('INVALID_REQUEST');
     let input;
-    try { input = await readBoundedJson(request.body, MAX_BODY); } catch { return error('INVALID_REQUEST'); }
+    try { input = await readBoundedJson(request.body, url.pathname === CRM_ASSETS_UI_PATH ? ASSET_MAX_BODY : MAX_BODY); } catch { return error('INVALID_REQUEST'); }
     if (!input || Array.isArray(input) || typeof input !== 'object' || !validSession(input.session_id)) return error('INVALID_REQUEST');
     const { operation, session_id: sessionId } = input;
     if (url.pathname === CRM_ASSETS_UI_PATH) {
       if (disposed || !hasSession(sessionId)) return error('SESSION_UNAVAILABLE', 409);
-      if (!['library', 'save', 'pin'].includes(operation)) return error('INVALID_REQUEST');
+      if (!['library', 'save', 'pin', 'search', 'get', 'patch', 'shares', 'share', 'unshare',
+            'boards', 'get_board', 'save_board', 'patch_board'].includes(operation)) return error('INVALID_REQUEST');
       const { session_id: _session, ...payload } = input;
       const result = await asset(sessionId, payload, request.signal);
       return response(result.ok ? 200 : 409, result);

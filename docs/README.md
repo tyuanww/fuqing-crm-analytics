@@ -1,13 +1,17 @@
 # Docs 索引
 
 > 按 lifecycle 分层，新人约 5 分钟找到入口。  
-> **最后更新**: 2026-09-21。VERSION **0.13.0.0**（驾驶舱已合入 #36 / **`7575d07`**，PR/main CI 通过，6677 已 reload），非公网正式 release。DSH **0.1.6-alpha.2**（`ddefc45f`）。0.8.0.0 基线仍是 #129 `a729ff6`。最新 Git HEAD 与施工边界以根目录 [STATUS.md](../STATUS.md) 为准。产品仍 PARTIAL。Mission 主链文档仍有效。
+> **最后更新**: 2026-09-21。本分支 VERSION **0.14.0.0**（分析组板/指标收尾/图谱 ACL 候选，未合入 main）；现役 6677 仍为 **0.13.0.0**（#36 / **`7575d07`**），非公网正式 release。DSH **0.1.6-alpha.2**（`ddefc45f`）。0.8.0.0 基线仍是 #129 `a729ff6`。最新 Git HEAD 与施工边界以根目录 [STATUS.md](../STATUS.md) 为准。产品仍 PARTIAL。Mission 主链文档仍有效。
 
 ## 黑客松当前实现
 
 | 文档 | 用途 |
 |---|---|
-| [`crm-calibration/public-release.md`](./crm-calibration/public-release.md) | CRM 指标、原生登录与离线知识的公开交付及验收边界 |
+| [`crm-calibration/public-release.md`](./crm-calibration/public-release.md) | CRM 指标、原生登录与离线知识的公开交付及验收边界（0.12 当时边界） |
+| [`crm-calibration/crm-integration-2026-09-21.md`](./crm-calibration/crm-integration-2026-09-21.md) | 0.14 三候选本地整合：组板、指标收尾、图谱 ACL |
+| [`crm-calibration/crm-analysis-board-2026-09-21.md`](./crm-calibration/crm-analysis-board-2026-09-21.md) | 分析检索/编辑/分享与独立组板 |
+| [`crm-calibration/metric-matrix.md`](./crm-calibration/metric-matrix.md) | 指标公式、来源、缺口与 A/B/C 验收 |
+| [`crm-calibration/graph-deployment.md`](./crm-calibration/graph-deployment.md) | 教材图谱查询、账本与账号文档权限 |
 | [`../dsh-plugins/crm-knowledge/README.md`](../dsh-plugins/crm-knowledge/README.md) | CRM 工具、登录边界、隔离启动与复验 |
 | [`../knowledge/crm/README.md`](../knowledge/crm/README.md) | 公开离线定义、依赖关系与导入限制 |
 | [`hackathon/README.md`](./hackathon/README.md) | CEO 价值、演示主链和数据边界（证据链；当前 SHA 看 STATUS） |
@@ -42,6 +46,13 @@ fuqing-crm-analytics/docs/
 │   ├── DSH-PLUGIN-UI-COMPAT.md        现役 DSH 插槽
 │   ├── FEATURE-PACKAGES.md            伸美包装卸
 │   └── ARCHITECTURE-AND-RELEASE-AUDIT.md  架构审计与提交清单
+│
+├── crm-calibration/                   CRM 插件、指标与图谱
+│   ├── public-release.md             0.12 公开交付边界
+│   ├── crm-integration-2026-09-21.md 0.14 三候选整合
+│   ├── crm-analysis-board-2026-09-21.md 检索/分享/组板
+│   ├── metric-matrix.md / metric-readiness.md
+│   └── graph-deployment.md           图谱账本与文档 ACL
 │
 ├── architecture/                      为什么这样设计
 │   ├── AI_SAFETY_NET.md
@@ -106,6 +117,7 @@ fuqing-crm-analytics/docs/
 | 你想… | 看 |
 |---|---|
 | 演示 AI 增长董事会 / 调用 Mission API | `hackathon/README.md` + `hackathon/MISSION-API.md` |
+| 看 CRM 分析检索/分享/组板或教材 ACL | [`crm-calibration/crm-integration-2026-09-21.md`](./crm-calibration/crm-integration-2026-09-21.md) + 插件 README |
 | 看驾驶舱产物柜、BoardSpec 生成 / 刷新 | [`../dsh-plugins/analytics-workbench/README.md`](../dsh-plugins/analytics-workbench/README.md) + 根 `STATUS.md` |
 | 看插件占了哪些 DSH 槽 | `hackathon/DSH-PLUGIN-UI-COMPAT.md` |
 | 起 6677 / 插拔伸美包 | [`../scripts/dsh-dev/README.md`](../scripts/dsh-dev/README.md) |

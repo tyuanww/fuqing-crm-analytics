@@ -6,9 +6,14 @@
 
 from datetime import date
 from fastapi import APIRouter, HTTPException, Query, Response
-from backend.contracts.crm_dashboard import DashboardChannel, DashboardFilters, DashboardPurchases
+from backend.contracts.crm_dashboard import (
+    DashboardChannel, DashboardFilters, DashboardMembership, DashboardNetGsv,
+    DashboardPurchases, DashboardReadiness)
 from backend.db.connection import get_connection
+from backend.services.metrics.dashboard_membership import query_dashboard_membership
+from backend.services.metrics.dashboard_net_gsv import query_dashboard_net_gsv
 from backend.services.metrics.dashboard_purchases import query_dashboard_purchases
+from backend.services.metrics.dashboard_source import query_dashboard_readiness
 from typing import Optional, List
 
 from backend.config import _default_start_date, _default_end_date
@@ -79,9 +84,53 @@ def get_dashboard_purchases(
     exclude_low_price: bool = False,
 ):
     """看板同范围购买分母及AOV/AUS；日期含首尾，最多90天。"""
-    if end_date < start_date or (end_date - start_date).days >= 90:
-        raise HTTPException(status_code=422, detail='日期范围无效：包含首尾，最多90天。')
+    filters = _purchase_filters(start_date, end_date, channel, exclude_low_price)
     if warning := check_future_date(start_date.isoformat()) or check_future_date(end_date.isoformat()):
         response.headers['X-Data-Warning'] = warning
-    return query_dashboard_purchases(get_connection(), DashboardFilters(
-        start_date=start_date, end_date=end_date, channel=channel, exclude_low_price=exclude_low_price))
+    return query_dashboard_purchases(get_connection(), filters)
+
+
+def _purchase_filters(start_date, end_date, channel, exclude_low_price):
+    if end_date < start_date or (end_date - start_date).days >= 90:
+        raise HTTPException(status_code=422, detail='日期范围无效：包含首尾，最多90天。')
+    return DashboardFilters(
+        start_date=start_date, end_date=end_date, channel=channel, exclude_low_price=exclude_low_price)
+
+
+@router.get("/dashboard-readiness", response_model=DashboardReadiness)
+def get_dashboard_readiness():
+    """当前连接的指标来源具备程度；只读元数据，不扫描明细。"""
+    return query_dashboard_readiness(get_connection())
+
+
+@router.get("/dashboard-membership", response_model=DashboardMembership)
+def get_dashboard_membership(
+    response: Response,
+    start_date: date,
+    end_date: date,
+    channel: DashboardChannel = '全店',
+    exclude_low_price: bool = False,
+):
+    """成交时会员溢价；缺快照或事件时不可用，不使用当前 is_member。"""
+    filters = _purchase_filters(start_date, end_date, channel, exclude_low_price)
+    if warning := check_future_date(start_date.isoformat()) or check_future_date(end_date.isoformat()):
+        response.headers['X-Data-Warning'] = warning
+    return query_dashboard_membership(get_connection(), filters)
+
+
+@router.get("/dashboard-net-gsv", response_model=DashboardNetGsv)
+def get_dashboard_net_gsv(
+    response: Response,
+    start_date: date,
+    end_date: date,
+    refund_as_of: date,
+    channel: DashboardChannel = '全店',
+    exclude_low_price: bool = False,
+):
+    """扣实际成功退款的净额 GSV，与看板 GSV 分列。缺退款事件时不可用。"""
+    filters = _purchase_filters(start_date, end_date, channel, exclude_low_price)
+    if warning := check_future_date(start_date.isoformat()) or check_future_date(end_date.isoformat()):
+        response.headers['X-Data-Warning'] = warning
+    if check_future_date(refund_as_of.isoformat()):
+        raise HTTPException(status_code=422, detail='退款截止日无效。')
+    return query_dashboard_net_gsv(get_connection(), filters, refund_as_of)

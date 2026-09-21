@@ -2,7 +2,7 @@
 
 版本：0.12.0.0。此变更交付隔离候选代码，没有挂载现役 profile、部署图服务或迁移真实数据库。使用与复验见 [插件说明](../../dsh-plugins/crm-knowledge/README.md)，定义和导入限制见 [知识包](../../knowledge/crm/README.md)。
 
-> 上文及下列“本轮”记录 #216 的交付时点。其后本机已部署 WeKnora/Neo4j，并完成真实模型 GSV、文档检索和教材图谱查询的局部验收；当前接入方式、图谱限制见[图谱部署](graph-deployment.md)，其他指标见[真实指标接入清单](metric-readiness.md)。合成源仍未切换成归档源，整个产品仍 PARTIAL。
+> 上文及下列“本轮”记录 #216 的交付时点。其后本机已部署 WeKnora/Neo4j，并完成真实模型 GSV、文档检索和教材图谱查询的局部验收；当前接入方式、图谱限制见[图谱部署](graph-deployment.md)，其他指标见[真实指标接入清单](metric-readiness.md)。其后 #34 已合入快照/保存/驾驶舱引用；0.14 候选另含检索/分享/组板、readiness/membership/net-gsv 与文档 ACL，见[整合记录](crm-integration-2026-09-21.md)。合成源仍未切换成归档源，整个产品仍 PARTIAL。本页表格保留 0.12 当时边界。
 
 ## 可执行能力
 
