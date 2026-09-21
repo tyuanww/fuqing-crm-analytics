@@ -1,8 +1,8 @@
 # AI 增长董事会
 
-> 当前 Git、施工与边界以根 [STATUS.md](../../STATUS.md) 为准，接续任务见 [TODOS 的 M1 核心交付](TODOS.md#m1-核心交付)。VERSION 0.13.0.0（驾驶舱已合 #36 / `7575d07` 并加载 6677），产品 PARTIAL，loopback，不上公网。以下旧轮的“当前／最新”、端口、SHA 和授权是历史快照；失败证据保留。
+> 当前 Git、施工与边界以根 [STATUS.md](../../STATUS.md) 为准，接续任务见 [TODOS 的 M1 核心交付](TODOS.md#m1-核心交付)。VERSION 0.13.0.0（驾驶舱已合 #36 / `7575d07` 并加载 6677），产品 PARTIAL，loopback，不上公网。公开 main 为 `64eb6e0`（#37）。以下旧轮的“当前／最新”、端口、SHA 和授权是历史快照；失败证据保留。
 
-2026-09-21 CRM 持久化已随新公开仓库 #34 合入 `73ee74c`，沿用已合 #11 的 AOV/AUS 正额购买口径，增加可信查询快照、账号私有保存分析和驾驶舱固定引用。本地完整门禁、合成 QA、PR/main CI、现役切换和旧版实际回退通过；真实账号/模型的查询→快照→保存→引用→重开也已通过，分层证据见[本轮记录](../crm-calibration/crm-assets-release-2026-09-21.md)。旧仓库 #215–#217 的历史证据继续保留；它们不代表本轮运行验收。
+2026-09-21 在工作树 `codex/crm-analysis-board`（基线 `64eb6e0`）本地整合分析组板、指标收尾与图谱 ACL，并接线含引用分析的文档权限；未提交、未切 6677。见[整合记录](../crm-calibration/crm-integration-2026-09-21.md)。分析组板实现见[分析组板记录](../crm-calibration/crm-analysis-board-2026-09-21.md)。此前 CRM 持久化已随 #34 合入 `73ee74c`，真实短窗口查询→快照→保存→引用见[持久化记录](../crm-calibration/crm-assets-release-2026-09-21.md)。
 
 本轮驾驶舱已由 [#36](https://github.com/tyuanww/fuqing-crm-analytics/pull/36) 合入 `7575d07`，PR 与该 main CI 均通过；6677 已 reload，真实浏览器可见全屏、浮动面板、回收站及 CRM 入口，无未处理页面异常。原生 MiniMax-M3 五项合成评估通过，完整编辑旅程与用户文件 UAT 仍未验收；实现、分层验收和 3 个工作树的证据归档见 [UI / UX 报告](COCKPIT-UI-UX-2026-09-20.md)。上述 CRM #34 的验收不代替本轮结果。
 
