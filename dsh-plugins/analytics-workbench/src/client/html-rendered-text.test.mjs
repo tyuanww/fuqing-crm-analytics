@@ -196,7 +196,7 @@ test('presentation contract rejects executable styles, positional identity and m
 
 test('characterData plus detach in one mutation batch does not throw or reuse a stale identity', async t => {
   const source = { ...pkg, js: `cards.innerHTML='<article data-node="metric"><span>峰值日</span></article>';` };
-  const ui = await mount(t, source), target = ui.targets().find(n => n.runtime && n.text === '峰值日');
+  const ui = await mount(t, source), target = ui.targets().find(n => n.runtime && n.editableText && n.text === '峰值日');
   const out = await mount(t, renderedTextPreview(source, target, '保存的名称', {}), { editing: false });
   const label = out.dom.window.document.querySelector('span'), parent = label.parentElement;
   label.firstChild.nodeValue = '另一项指标';
@@ -210,10 +210,10 @@ test('characterData plus detach in one mutation batch does not throw or reuse a 
 });
 
 test('readonly computed fields stay unresolved and unique class identity stays stable', async t => {
-  const readonly = { ...pkg, js: `cards.innerHTML='<article data-node="metric"><strong data-page-readonly>'+count+'</strong><span class="kpi-label">收入文案</span><span class="kpi-note">备注</span></article>';` };
+  const readonly = { ...pkg, js: `let count=42; cards.innerHTML='<article data-node="metric"><strong data-page-readonly>'+count+'</strong><span class="kpi-label">收入文案</span><span class="kpi-note">备注</span></article>';` };
   const ui = await mount(t, readonly);
   assert.equal(ui.targets().find(n => n.tag === 'strong'), undefined);
-  const label = ui.targets().find(n => n.text === '收入文案' && n.runtime);
+  const label = ui.targets().find(n => n.editableText && n.text === '收入文案' && n.runtime);
   assert.equal(label.runtime.path.at(-1).key.attribute, 'class');
   const forced = renderedTextPreview(readonly, label, '新文案', {});
   forced.presentation.edits.push({ target: { anchor: label.runtime.anchor, path: [{ tag: 'article', key: { attribute: 'data-node', value: 'metric' } }, { tag: 'strong' }] }, text: 'hack' });
