@@ -1,6 +1,6 @@
 # 指标—公式—来源—缺口—验收矩阵
 
-工作树 `codex/crm-metrics-closeout`，公开主线 `64eb6e06` / v0.13.0.0。不重做已上线 AOV/AUS 公式。真实归档只读元数据探针（DuckDB 1.5.3，512MB，未改写 131GB 文件）见本文件来源列。金额不入库。
+工作树现为 `codex/crm-analysis-board`（由 `codex/crm-metrics-closeout` 并入），公开主线 `64eb6e06` / v0.13.0.0，本分支候选 v0.14.0.0。不重做已上线 AOV/AUS 公式。真实归档只读元数据探针（DuckDB 1.5.3，512MB，未改写 131GB 文件）见本文件来源列。金额不入库。
 
 验收分类：
 

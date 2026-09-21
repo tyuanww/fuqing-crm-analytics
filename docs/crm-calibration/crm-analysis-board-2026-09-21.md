@@ -1,6 +1,6 @@
 # CRM 分析管理与可编辑组板（2026-09-21）
 
-基线为新公开仓库 main `64eb6e0`（#37）。工作树 `/Users/hutou/.codex/worktrees/crm-analysis-board/fuqing-crm-analytics`，分支 `codex/crm-analysis-board`。不沿用旧仓 `7c20bc4f`。未并入 `codex/cockpit-inline-edit`。产品仍 PARTIAL。未授权提交、push、PR、merge 或 6677 reload。
+基线为新公开仓库 main `64eb6e0`（#37）。工作树 `/Users/hutou/.codex/worktrees/crm-analysis-board/fuqing-crm-analytics`，分支 `codex/crm-analysis-board`。不沿用旧仓 `7c20bc4f`。未并入 `codex/cockpit-inline-edit`。产品仍 PARTIAL。事后：代码已随 v0.14.0.0 提交并推送；未合入 main、无 PR、6677 未 reload。
 
 ## 账号模型
 

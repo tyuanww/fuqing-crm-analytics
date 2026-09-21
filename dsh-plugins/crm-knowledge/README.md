@@ -61,7 +61,7 @@
 5. 在“指标组板”选择已保存分析中的 GSV/AOV/AUS/订单/买家，安排布局和展示属性；保存、取消、版本冲突后刷新重开。每个组件绑定快照、指标和筛选条件，浏览器与模型都不能提交业务金额。
 6. 在“已保存分析”选择“加入驾驶舱”并确认；重开“驾驶舱引用”仍显示原结果。
 
-后端须显式配置 `FQ_CRM_ANALYSIS_STATE_DIR=/absolute/private/directory`（目录预先存在、当前进程所有、权限 0700）与 `FQ_CRM_ANALYSIS_DATA_KIND=real|synthetic`。SQLite 文件权限 0600；已有来源标签不可改成另一种资料。部署必须与 Host 的 `dataKind` 一致。未配置返回 `STATE_NOT_CONFIGURED`，不创建默认存储。
+后端须显式配置 `FQ_CRM_ANALYSIS_STATE_DIR=/absolute/private/directory`（目录预先存在、当前进程所有、权限 0700）与 `FQ_CRM_ANALYSIS_DATA_KIND=real|synthetic`。SQLite 文件权限 0600；已有来源标签不可改成另一种资料。部署必须与 Host 的 `dataKind` 一致。未配置返回 `STATE_NOT_CONFIGURED`，不创建默认存储。含知识引用的分析另需 `FQ_CRM_GRAPH_ACL_FILE=/absolute/private/graph-acl.json`（文件权限 0600，格式见[图谱部署](../../docs/crm-calibration/graph-deployment.md)）；无引用的纯销售分析不读该文件。
 
 接口：`/api/v1/metrics/dashboard-snapshots`、`crm-analyses`（含搜索、PATCH、shares、knowledge-citations）、`crm-boards`、`crm-cockpit-references`、`crm-library`。所有请求沿用认证账号；写入必须带稳定 `Idempotency-Key`。保存、分享和组板只传来源 ID、标题/说明、布局和展示属性，由服务端取事实。模型仅能生成快照。浏览器不能提交金额、owner 或知识来源 ID。
 

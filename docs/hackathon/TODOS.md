@@ -6,9 +6,9 @@
 
 2026-09-13 用户确认“核心版本优先交付、扩库完善后置”。目标是问数后 AI 优先使用定制组件自由组板，板内按选定范围修改；首批六类不是最终上限。M1／产品仍 PARTIAL；原全量 App Goal 保持 PAUSED。本节承接原本地施工记录，不把旧冻结实现反推成最终需求。
 
-### 2026-09-21 三候选本地整合（未合入）
+### 2026-09-21 三候选本地整合（已推送分支，未合入 main）
 
-工作树 `codex/crm-analysis-board`，基线公开 main `64eb6e0`（#37）。只读来源：`crm-metrics-closeout`、`crm-graph-acl`。[整合记录](../crm-calibration/crm-integration-2026-09-21.md)。
+工作树 `codex/crm-analysis-board`，基线公开 main `64eb6e0`（#37）。只读来源：`crm-metrics-closeout`、`crm-graph-acl`。[整合记录](../crm-calibration/crm-integration-2026-09-21.md)。代码已提交为 v0.14.0.0 并推送；6677 未切换。
 
 - [x] 并入分析检索/分页/编辑、账号分享撤销、独立组板，保留登录/取消/逐次鉴权与组板布局修复。
 - [x] 并入 dashboard-readiness / membership / net-gsv 合同、插件工具与合成测试；缺来源仍不可用。

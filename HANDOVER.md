@@ -1,6 +1,6 @@
 # 交接说明（短表）
 
-> **最后更新**: 2026-09-16。VERSION **0.9.0.0** 本机正式候选，loopback，不上公网。见 [LOCAL-RELEASE-2026-09-16](docs/hackathon/LOCAL-RELEASE-2026-09-16.md)。
+> **最后更新**: 2026-09-21。本分支候选 VERSION **0.14.0.0**（`codex/crm-analysis-board`，未合入 main）；现役 6677 仍为 0.13.0.0。loopback，不上公网。见 [STATUS.md](STATUS.md)。历史本机候选见 [LOCAL-RELEASE-2026-09-16](docs/hackathon/LOCAL-RELEASE-2026-09-16.md)。
 > 细节以代码与下列 SSOT 为准，**不要**在本文件堆 sprint 日记。
 
 ## 立刻要看

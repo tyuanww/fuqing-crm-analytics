@@ -1,6 +1,6 @@
 # CRM 三候选本地整合（2026-09-21）
 
-基线公开仓库 main `64eb6e06`（#37 / v0.13.0.0）。整合工作树 `/Users/hutou/.codex/worktrees/crm-analysis-board/fuqing-crm-analytics`，分支 `codex/crm-analysis-board`。只读来源：`crm-metrics-closeout`、`crm-graph-acl`。产品仍 PARTIAL。未授权提交、push、PR、merge、VERSION 升级或 6677 reload。
+基线公开仓库 main `64eb6e06`（#37 / v0.13.0.0）。整合工作树 `/Users/hutou/.codex/worktrees/crm-analysis-board/fuqing-crm-analytics`，分支 `codex/crm-analysis-board`。只读来源：`crm-metrics-closeout`、`crm-graph-acl`。产品仍 PARTIAL。事后：代码已提交并推送到该分支为 v0.14.0.0；未合入 main、无 PR、6677 未 reload。
 
 开始前三树 HEAD 均为 `64eb6e06`。未跟踪 `docs/crm-calibration/deliveries/C/validation-result.json` 与已跟踪 `knowledge/crm/tests/validation-result.json` 字节相同（SHA256 `463f49c18411d91b4b89aea5420d95ac87959c6afa8f15a73a5d08e0179873ba`），属 C 线离线知识包校验产物，不是分析组板交付。已移存 `.context/checks/crm-integration-20260921T-integration/moved/`。专项测试会经 `knowledge/crm/tests/validate_pack.py` 再次写出该 docs 路径；已改为只写知识包内 `tests/validation-result.json`，`test_crm_knowledge_pack.py` 6 passed，docs/deliveries 不再出现。
 
@@ -115,11 +115,13 @@ Chrome 旅程（隔离临时端口、合成数据）：查询→保存→编辑�
 
 ## 可提交结论
 
-**工作树代码收尾可提交。** 产品仍 PARTIAL。未授权前保持 uncommitted。`git diff --check` 已干净。STATUS 42 行。
+**工作树代码已提交为 v0.14.0.0 并推送到 `codex/crm-analysis-board`。** 产品仍 PARTIAL。未合入 main，6677 未切换。`git diff --check` 当时已干净。STATUS 现为短表。
 
-发布仍待：授权提交、push/PR/merge、6677 reload、真实来源、1113 条图谱审核、本人 UAT。
+发布仍待：合入 main、6677 reload、真实来源、1113 条图谱审核、本人 UAT。
 
 ### 提交时暂存清单（勿 `git add -A`）
+
+事后：下列路径已纳入 v0.14.0.0 提交；本节保留当时清单。
 
 已跟踪修改：
 
