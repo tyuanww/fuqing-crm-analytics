@@ -512,7 +512,7 @@ export function apply(ctx: Context): void {
           (error as Error & { code?: string }).code = 'NATIVE_GENERATE_UNAVAILABLE';
           throw error;
         }
-        return ctx.remote.session.prompt({
+        const reply = await ctx.remote.session.prompt({
           sessionId: sessionId as never,
           requestId: requestId as never,
           mode: 'queue',
@@ -522,6 +522,10 @@ export function apply(ctx: Context): void {
             text: `请生成自由 HTML 页面。先用文本给出说明，然后必须调用 ${PAGE_GENERATE_TOOL_NAME} 工具交付页面源码包（字段 html、css、js、resources、node_map），并把这个标识逐字填入 request_id：${requestId}。不要使用 BoardSpec，不要回退到示例页面。每个逻辑板块使用稳定 data-page-block，每段可编辑叶子文字使用 data-page-field，重复卡片使用业务键，重渲染保留标识；计算或绑定数字标 data-page-readonly。提示：${prompt}`,
           }],
         });
+        if (!reply?.ok || reply.value?.accepted !== true) {
+          throw new Error('原生对话未接受页面生成请求；请在该对话选择可用模型后重试。');
+        }
+        return reply;
       },
     }),
   }) : undefined;
