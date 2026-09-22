@@ -10,7 +10,7 @@ export function GenerateChipIcon() {
   </svg>;
 }
 
-export function LibraryGenerateDock({ sessionId, generate }: { sessionId: string; generate(sessionId: string): Promise<void> }) {
+export function LibraryGenerateDock({ sessionId, generate, successMessage = '已写入驾驶舱产物并打开。' }: { sessionId: string; generate(sessionId: string): Promise<void>; successMessage?: string }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const generation = useRef(0);
@@ -23,7 +23,7 @@ export function LibraryGenerateDock({ sessionId, generate }: { sessionId: string
       setBusy(true); setMessage('');
       const requestGeneration = ++generation.current;
       void generate(sessionId).then(() => {
-        if (generation.current === requestGeneration) setMessage('已交给当前原生对话生成，结果会出现在工具卡。');
+        if (generation.current === requestGeneration) setMessage(successMessage);
       }).catch(() => {
         if (generation.current === requestGeneration) setMessage('未能提交生成请求；请在当前原生对话输入“生成驾驶舱”。');
       }).finally(() => { if (generation.current === requestGeneration) setBusy(false); });

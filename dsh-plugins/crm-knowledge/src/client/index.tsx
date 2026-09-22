@@ -27,7 +27,9 @@ type ConnectionState = { connected: boolean; username: string | null; expires_at
 const EMPTY: ConnectionState = { connected: false, username: null, expires_at: null };
 const CRM_UI_TOKENS = competitionThemeFor('light');
 const CRM_UI_THEME = CRM_UI_TOKENS.antd;
-const CRM_UI_CSS = `.sm-crm-connection-dock{padding:8px 0;color:${CRM_UI_TOKENS.color.ink};font-size:13px}.sm-crm-connection-dock .ant-typography-secondary{color:${CRM_UI_TOKENS.color.copy}}.sm-crm-connected-button{color:${CRM_UI_TOKENS.color.brandSecondary};border-color:${CRM_UI_TOKENS.material.lineStrong};background:${CRM_UI_TOKENS.color.background}}.sm-crm-analysis-icon{display:block}`;
+const CRM_UI_CSS = `.sm-crm-connection-dock{box-sizing:border-box;width:min(100% - 2 * var(--dsh-composer-side-clearance, 16px), var(--dsh-composer-card-max-width, 100%));margin-inline:auto;padding:0;color:#111 !important;font-size:14px;font-weight:600}.sm-crm-connection-dock .ant-typography,.sm-crm-connection-dock .ant-btn{color:#111 !important}.sm-crm-connection-dock .ant-btn{border-color:#111 !important;background:#fff !important;font-weight:600 !important;box-shadow:none !important}.sm-crm-analysis-icon{display:block}`;
+const dockControl = { color: '#111111', fontWeight: 600 } as const;
+const dockButton = { ...dockControl, borderColor: '#111111', background: '#ffffff' };
 
 function CrmAnalysisIcon() {
   return <svg className="sm-crm-analysis-icon" data-testid="crm-analysis-icon" width="15" height="15" viewBox="0 0 16 16" aria-hidden="true">
@@ -85,11 +87,11 @@ export function CrmConnectionDock({ sessionId }: Pick<PropsRuntime<'conversation
   return <ConfigProvider theme={CRM_UI_THEME}>
     <div className="sm-crm-connection-dock" style={{ fontFamily: competitionFont.body }}>
     <Space wrap>
-      <Button size="small" className={state.connected ? 'sm-crm-connected-button' : undefined} icon={state.connected ? <CrmAnalysisIcon /> : undefined}
+      <Button size="small" style={dockButton} className={state.connected ? 'sm-crm-connected-button' : undefined} icon={state.connected ? <CrmAnalysisIcon /> : undefined}
         aria-label={state.connected ? 'CRM分析（已连接）' : '连接 CRM'} onClick={() => { setOpen(true); void call('status'); }}>
         {state.connected ? 'CRM分析' : '连接 CRM'}
       </Button>
-      <Typography.Text type="secondary">{state.connected ? '本对话可查询看板 GSV、AOV、AUS' : '连接后可查询你的看板销售指标'}</Typography.Text>
+      <Typography.Text style={dockControl}>{state.connected ? '本对话可查询看板 GSV、AOV、AUS' : '连接后可查询你的看板销售指标'}</Typography.Text>
       <CrmLibraryButton sessionId={sessionId} />
       {!open && message && <Typography.Text type="danger" role="alert">{message}</Typography.Text>}
     </Space>

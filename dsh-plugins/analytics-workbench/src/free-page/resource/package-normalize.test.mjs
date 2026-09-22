@@ -76,6 +76,17 @@ test('does not use BoardSpec kinds as a generation whitelist', async () => {
   assert.equal(got.value.node_map.some((row) => row.node_id === 'n_free'), true);
 });
 
+test('a data-svg icon keeps the greater-than signs inside its address and the following text', async () => {
+  const icon = '<link rel="icon" href="data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 32 32\'><rect width=\'32\' height=\'32\'/></svg>">';
+  const got = await normalizePagePackage({
+    html: `<!doctype html><html><head>${icon}</head><body><p id="title">用户运营看板</p></body></html>`,
+    css: '', js: '', resources: [], node_map: [],
+  });
+  assert.equal(got.ok, true, JSON.stringify(got.error));
+  assert.match(got.value.html, /用户运营看板/);
+  assert.match(got.value.html, /data:image\/svg\+xml/);
+});
+
 test('full document head link and script src are rejected, resource: links are kept', async () => {
   const linked = await normalizePagePackage({
     html: '<!doctype html><html><head><link rel="stylesheet" href="https://css.example/a.css"></head><body><p>ok</p></body></html>',

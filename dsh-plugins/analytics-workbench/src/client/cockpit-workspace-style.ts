@@ -64,7 +64,7 @@ li[data-selected="1"] .cockpit-file-icon { color:#d65625; background:#fff0e9; }
 .cockpit-document-tools { display:flex; flex-wrap:wrap; align-items:center; gap:8px; min-height:48px; padding:10px 20px; border-bottom:1px solid #eee; }
 .cockpit-document-tools button { font-size:12px; min-height:28px; padding:3px 8px; border-color:transparent; background:transparent; color:#626262; }
 .cockpit-tool-actions { margin-left:auto; display:flex; gap:6px; flex-wrap:wrap; }
-.cockpit-frame-wrap { flex:1; min-height:360px; display:flex; min-width:0; background:#f7f7f7; }
+.cockpit-frame-wrap { flex:1; min-height:360px; display:flex; flex-direction:column; min-width:0; background:#f7f7f7; }
 .cockpit-html-frame { display:block; border:0; width:100%; height:100%; min-height:440px; flex:1; background:white; }
 .cockpit-sidebar { width:308px; flex:0 0 308px; background:#fafafa; border-left:1px solid #e7e7e7; display:flex; flex-direction:column; min-height:0; }
 .cockpit-sidebar-header { display:flex; justify-content:space-between; align-items:center; padding:16px 18px; border-bottom:1px solid #e7e7e7; }

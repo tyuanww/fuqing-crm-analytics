@@ -3,6 +3,7 @@ import { sourceTargets, instrumentSourceTargets } from './html-source-selection.
 import { buildSrcdoc } from '../free-page/preview/srcdoc-builder.mjs';
 import { buildSourceIndex } from '../free-page/source-index/index.mjs';
 import { renderedPackageHash, validRenderedLocator } from './html-rendered-text.mjs';
+import { insertBeforeBodyEnd } from './insert-before-body-end.mjs';
 
 export function editablePageNodes(pkg, manifest) {
   const inferred = sourceTargets(pkg, manifest);
@@ -53,9 +54,64 @@ function selectionRuntime(config) {
         return !['href', 'action', 'formaction', 'xlink:href'].includes(name) || !/^(?:data|blob):/i.test(value);
       }));
     };
+    const originals = new WeakMap();
+    const drafted = new Set();
+    let liveDraft = null;
+    const safeId = id => typeof id === 'string' && /^[A-Za-z][A-Za-z0-9_.:-]{0,159}$/.test(id);
+    const findDraftNode = id => {
+      if (typeof id !== 'string' || !id) return null;
+      for (const [nodeId, node] of eligible) if (nodeId === id) return node;
+      if (!safeId(id)) return null;
+      return document.querySelector(`[data-cockpit-source="${id}"],[data-shine-node="${id}"]`);
+    };
+    const restoreDraft = node => {
+      const saved = originals.get(node);
+      if (!saved) return;
+      node.innerHTML = saved.html;
+      if (saved.style == null) node.removeAttribute('style'); else node.setAttribute('style', saved.style);
+      node.removeAttribute('data-cockpit-drafting');
+      originals.delete(node);
+      drafted.delete(node);
+    };
+    const paintDraft = () => {
+      if (!liveDraft?.nodeId) return;
+      const node = findDraftNode(liveDraft.nodeId);
+      if (!node) return;
+      if (!liveDraft.active && !liveDraft.style) { restoreDraft(node); return; }
+      if (!originals.has(node)) originals.set(node, { html: node.innerHTML, style: node.getAttribute('style') });
+      drafted.add(node);
+      node.setAttribute('data-cockpit-drafting', '');
+      if (liveDraft.active) {
+        const next = String(liveDraft.text ?? '');
+        const inlineName = name => ['a', 'b', 'em', 'i', 'small', 'span', 'strong', 'sub', 'sup', 'code'].includes(name);
+        const parts = [...node.childNodes].filter(part => part.nodeType === 1 || (part.nodeType === 3 && part.nodeValue));
+        const sentence = parts.length > 0 && parts.every(part => part.nodeType !== 1 || inlineName(part.localName))
+          && parts.some(part => part.nodeType === 1) && parts.filter(part => part.nodeType === 1).every(part => next.includes(part.textContent));
+        if (!sentence) node.textContent = next;
+        else {
+          let cursor = 0;
+          for (const part of parts) {
+            if (part.nodeType === 3) {
+              const later = parts.slice(parts.indexOf(part) + 1).find(item => item.nodeType === 1);
+              const end = later ? next.indexOf(later.textContent, cursor) : next.length;
+              const value = next.slice(cursor, end < 0 ? next.length : end);
+              if (part.nodeValue !== value) part.nodeValue = value;
+              cursor = end < 0 ? next.length : end;
+            } else cursor += part.textContent.length;
+          }
+        }
+      }
+      if (liveDraft.style && typeof liveDraft.style === 'object') {
+        for (const [key, value] of Object.entries(liveDraft.style)) {
+          if (typeof key === 'string' && typeof value === 'string' && !/url\s*\(|expression\s*\(/i.test(key + value)) node.style.setProperty(key, value);
+        }
+      }
+    };
     const unchanged = node => {
       const expected = config.source[identity(node)]; if (expected === undefined) return false;
-      const clone = node.cloneNode(true); clone.querySelectorAll('[data-cockpit-source]').forEach(child => child.removeAttribute('data-cockpit-source'));
+      const clone = node.cloneNode(true);
+      if (originals.has(node)) clone.innerHTML = originals.get(node).html;
+      clone.querySelectorAll('[data-cockpit-source]').forEach(child => child.removeAttribute('data-cockpit-source'));
       clone.querySelectorAll('[data-cockpit-target]').forEach(child => { child.removeAttribute('data-cockpit-target'); child.removeAttribute('data-cockpit-selected'); if (child.hasAttribute('data-cockpit-tabindex')) { const original = child.getAttribute('data-cockpit-tabindex'); if (original === '') child.removeAttribute('tabindex'); else child.setAttribute('tabindex', original); child.removeAttribute('data-cockpit-tabindex'); } });
       const template = document.createElement('template'); template.innerHTML = expected;
       return clone.innerHTML === template.innerHTML;
@@ -117,11 +173,14 @@ function selectionRuntime(config) {
           const visibleTexts = directTexts.filter(n => n.nodeValue.trim());
           const ownText = visibleTexts.length === 1 ? visibleTexts[0] : directTexts.length === 1 ? directTexts[0] : null;
           const savedText = window.__cockpitPresentationIdentity?.has(node);
-          const editableText = node.children.length === 0 || Boolean(ownText && (ownText.nodeValue.trim() || savedText));
-          const text = editableText && node.children.length ? ownText.nodeValue : node.textContent ?? '';
+          const inlineChild = name => ['a', 'b', 'em', 'i', 'small', 'span', 'strong', 'sub', 'sup', 'code'].includes(name);
+          const sentence = node.children.length > 0 && [...node.children].every(child => inlineChild(child.localName))
+            && visibleTexts.length > 1;
+          const editableText = sentence || node.children.length === 0 || Boolean(ownText && (ownText.nodeValue.trim() || savedText));
+          const text = sentence ? (node.textContent ?? '') : editableText && node.children.length ? ownText.nodeValue : node.textContent ?? '';
           const block = /^(section|article|header|footer|aside|li)$/.test(node.localName) || (node.hasAttribute('data-node') || node.hasAttribute('data-page-block')) && node.children.length > 0;
           if ((!text.trim() && !savedText || text.length > 20000) || (!editableText && !block)) continue;
-          const path = []; let child = node, reliable = true;
+          const path = []; let child = node;
           while (child !== element && path.length < 64) {
             const parentNode = child.parentElement; if (!parentNode) break;
             const peers = [...parentNode.children].filter(n => n.localName === child.localName);
@@ -130,20 +189,21 @@ function selectionRuntime(config) {
               const value = child.getAttribute(attribute);
               if (value && /^[A-Za-z][A-Za-z0-9_.:-]{0,159}$/.test(value) && peers.filter(n => n.getAttribute(attribute) === value).length === 1) { key = { attribute, value }; break; }
             }
-            if (!key && peers.length > 1) {
+            if (!key) {
               const value = [...child.classList].find(c => !/^(is-|has-|active|selected|hover|focus)/.test(c) && /^[A-Za-z][A-Za-z0-9_.:-]{0,159}$/.test(c) && peers.filter(n => n.classList.contains(c)).length === 1);
               if (value) key = { attribute: 'class', value };
-              else {
-                const label = node => window.__cockpitPresentationIdentity?.get(node) ?? node.textContent;
-                const text = label(child);
-                if (!child.children.length && text.trim() && text.length <= 2000 && !/^[\s\d.,%+−\-]+$/.test(text)
-                  && peers.filter(n => !n.children.length && label(n) === text).length === 1) key = { attribute: 'text', value: text };
-                else { reliable = false; break; }
-              }
+            }
+            if (!key && peers.length > 1) {
+              const label = item => window.__cockpitPresentationIdentity?.get(item) ?? item.textContent;
+              const text = label(child);
+              const numericLeaf = !child.children.length && /^[\s\d.,%+−\-]+$/.test(text);
+              if (!numericLeaf && text.trim() && text.length <= 2000
+                && peers.filter(item => label(item) === text).length === 1) key = { attribute: 'text', value: text };
+              else key = { attribute: 'nth', value: String(peers.indexOf(child)) };
             }
             path.unshift({ tag: child.localName, ...(key ? { key } : {}) }); child = parentNode;
           }
-          if (!reliable || child !== element) continue;
+          if (child !== element) continue;
           const id = 'runtime_' + root.node_id + '_' + JSON.stringify(path);
           for (const [oldId, oldNode] of next) if (oldNode === node) next.delete(oldId);
           // Strip our own annotations before giving the model a read-only view of the selected block.
@@ -156,6 +216,7 @@ function selectionRuntime(config) {
           if (renderedHTML.length > 60000 || runtimeBytes + renderedHTML.length + text.length > 524288) continue;
           runtimeBytes += renderedHTML.length + text.length;
           runtimeIds.set(node, id); seen.add(node); next.set(id, node);
+          if (sentence) for (const item of node.querySelectorAll('*')) seen.add(item);
           runtimeNodes.push({ node_id: id, root_id: root.node_id, tag: node.localName, text, editableText, block,
             runtime: { anchor: root.anchor, path, package_hash: root.packageHash, html: renderedHTML } });
         }
@@ -178,6 +239,7 @@ function selectionRuntime(config) {
         parent.postMessage({ type: 'cockpit.targets', channel: config.channel, pageId: config.pageId,
           version: config.version, nodeIds: ids, runtimeNodes }, '*');
       }
+      paintDraft();
       observer.observe(document.documentElement, { subtree: true, childList: true, characterData: true, attributes: true });
     };
     window.addEventListener('message', event => {
@@ -186,6 +248,21 @@ function selectionRuntime(config) {
         || data.pageId !== config.pageId || data.version !== config.version) return;
       if (data.type === 'cockpit.targets.request') sync(true);
       if (data.type === 'cockpit.highlight') { selected = data.nodeId; sync(); }
+      if (data.type === 'cockpit.draft') {
+        observer.disconnect();
+        if (data.reset) {
+          for (const node of [...drafted]) restoreDraft(node);
+          liveDraft = null;
+        } else {
+          liveDraft = { nodeId: data.nodeId, text: data.text, active: Boolean(data.active), style: data.style && typeof data.style === 'object' ? data.style : null };
+          if (!liveDraft.active && !liveDraft.style) {
+            const node = findDraftNode(liveDraft.nodeId);
+            if (node) restoreDraft(node);
+            liveDraft = null;
+          }
+        }
+        sync();
+      }
     });
     document.addEventListener('click', event => {
       event.preventDefault(); event.stopImmediatePropagation();
@@ -216,15 +293,15 @@ function selectionRuntime(config) {
 export function selectionSrcdoc(pkg, { channel, pageId, version, nodes = [], selected = null, editing = false, selectBlocks = false }) {
   let src = buildSrcdoc({ ...(editing ? instrumentSourceTargets(pkg, nodes) : pkg), instanceId: channel, pageId, version, nonce: channel });
   const statusConfig = JSON.stringify({ channel, pageId, version }).replace(/</g, '\\u003c');
-  src = src.replace('</body>', '<script>(' + (function (config) {
+  src = insertBeforeBodyEnd(src, '<script>(' + (function (config) {
     const report = () => parent.postMessage({ type: 'cockpit.presentation', ...config, unresolved: window.__cockpitPresentationStatus?.unresolved?.length ?? 0 }, '*');
     window.addEventListener('cockpit-presentation-status', report);
     document.addEventListener('DOMContentLoaded', report, { once: true }); report();
-  }).toString() + ')(' + statusConfig + ');</script></body>');
+  }).toString() + ')(' + statusConfig + ');</script>');
   if (!editing) return src;
   const config = JSON.stringify({ channel, pageId, version, ids: nodes.map(row => row.node_id), source: Object.fromEntries(nodes.map(row => [row.node_id, row.text])), selected,
     runtimeOnly: nodes.filter(row => row.runtimeOnly).map(row => row.node_id), roots: nodes.filter(row => row.anchor && row.packageHash).map(({ node_id, anchor, packageHash }) => ({ node_id, anchor, packageHash })), selectBlocks }).replace(/</g, '\\u003c');
-  return src.replace('</body>', '<script>(' + selectionRuntime.toString() + ')(' + config + ');</script></body>');
+  return insertBeforeBodyEnd(src, '<script>(' + selectionRuntime.toString() + ')(' + config + ');</script>');
 }
 export function acceptSelection(event, { source, channel, pageId, version, nodes }) {
   if (!source || event.source !== source || event.origin !== 'null') return undefined;
@@ -249,15 +326,28 @@ export function acceptTargets(event, { source, channel, pageId, version, nodes }
   for (const item of runtime) {
     if (!item || typeof item !== 'object') return undefined;
     const root = nodes.find(node => node.node_id === item.root_id && node.anchor && node.packageHash);
-    if (!root || !validRenderedLocator(item.runtime) || JSON.stringify(item.runtime.anchor) !== JSON.stringify(root.anchor)
-      || item.runtime.package_hash !== root.packageHash || typeof item.node_id !== 'string' || !item.node_id.startsWith('runtime_')
-      || typeof item.text !== 'string' || item.text.length > 20000 || typeof item.runtime.html !== 'string' || item.runtime.html.length > 60000
-      || !/^[a-z][a-z0-9-]*$/.test(item.tag) || typeof item.editableText !== 'boolean' || typeof item.block !== 'boolean') return undefined;
-    runtimeBytes += item.text.length + item.runtime.html.length;
-    if (runtimeBytes > 524288) return undefined;
+    const runtimeNode = item.runtime;
+    const located = root && runtimeNode && validRenderedLocator(runtimeNode)
+      && JSON.stringify(runtimeNode.anchor) === JSON.stringify(root.anchor)
+      && runtimeNode.package_hash === root.packageHash
+      && typeof item.node_id === 'string' && item.node_id.startsWith('runtime_')
+      && typeof item.text === 'string' && item.text.length <= 20000
+      && typeof runtimeNode.html === 'string' && runtimeNode.html.length <= 60000
+      && /^[a-z][a-z0-9-]*$/.test(item.tag)
+      && typeof item.editableText === 'boolean' && typeof item.block === 'boolean';
+    if (!located) continue;
+    const weight = item.text.length + runtimeNode.html.length;
+    if (runtimeBytes + weight > 524288) continue;
+    runtimeBytes += weight;
     extra.push({ ...item, kind: 'rendered_element', mapping: 'valid', mapping_token: root.packageHash, version_hash: root.packageHash,
       aiSource: root.source ?? root.aiSource });
   }
-  const result = [...accepted.map(matches => matches[0]), ...extra];
-  return new Set(result.map(node => node.node_id)).size === result.length ? result : undefined;
+  const result = [];
+  const seen = new Set();
+  for (const node of [...accepted.map(matches => matches[0]), ...extra]) {
+    if (seen.has(node.node_id)) continue;
+    seen.add(node.node_id);
+    result.push(node);
+  }
+  return result;
 }

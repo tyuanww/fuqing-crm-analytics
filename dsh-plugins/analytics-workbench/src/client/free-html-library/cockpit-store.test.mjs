@@ -54,7 +54,8 @@ test('typed text is dirty before preview; selection/close cannot lose it; leave 
   store.setReplacementText('新标题', '标题'); assert.equal(store.hasUnsavedChanges(), true);
   store.clearSelection(); assert.ok(store.getSnapshot().selection);
   store.selectLocatable(editableTextNodes(store.getSnapshot().current.package)[1]);
-  assert.equal(store.getSnapshot().selection.node_id, 'title');
+  assert.equal(store.getSnapshot().selection.node_id, 'body');
+  assert.equal(store.getSnapshot().textDrafts.title, '新标题');
   const result = await store.persistForLeave();
   assert.equal(result.ok, true); assert.equal(store.getSnapshot().current.version, 2);
   assert.match(store.getSnapshot().current.package.html, /新标题/);

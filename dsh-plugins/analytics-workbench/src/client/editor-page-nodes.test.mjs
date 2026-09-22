@@ -17,7 +17,8 @@ test('the cockpit catalog follows the sidecar flag and does not splice on previe
   assert.match(editor, /editorPageCatalog\(/);
   assert.match(editor, /previewDirectText\(/);
   assert.match(editor, /previewNodeEdit\(/);
-  assert.equal(editor.includes('previewPatch(value)'), true);
+  assert.equal(editor.includes('cockpit.draft'), true);
+  assert.equal(editor.includes('预览修改'), false);
   const pagePackage = historicalPackage();
   const closed = editorPageCatalog(pagePackage, null, { pageId: PAGE_ID, flag: 'off' });
   assert.equal(closed.source, 'source-index');

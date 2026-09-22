@@ -53,12 +53,12 @@ def build_app(*, state_dir: Path, token: str):
         office=office,
         office_principal=lambda: registry.resolve("Bearer " + token),
     )
-    # The browser page is served from 127.0.0.1:6677 (or another dev port);
-    # this listener is a different origin, so browsers preflight and need an
-    # explicit allow. Loopback-only bind keeps the surface local.
+    # The page is opened from the local dev UI or from https://app.tyuan.chat.
+    # Those are different origins from this API, so browsers preflight.
+    # Credentials stay off: the page script sends the bearer itself.
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://127.0.0.1", "http://localhost"],
+        allow_origins=["http://127.0.0.1", "http://localhost", "https://app.tyuan.chat"],
         allow_origin_regex=r"^https?://(127\.0\.0\.1|localhost)(:\d+)?$",
         allow_credentials=False,
         allow_methods=["GET", "POST", "PATCH", "PUT", "HEAD", "OPTIONS"],

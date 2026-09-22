@@ -5,7 +5,7 @@ import { buildRichTextTemplate, restoreRichText } from './free-html-library/rich
 const VOID = new Set('area base br col embed hr img input link meta param source track wbr'.split(' '));
 const SELECTABLE = new Set('header footer main section article aside div h1 h2 h3 h4 h5 h6 p span strong em b i small label button a li ul ol blockquote figcaption figure td th caption'.split(' '));
 const BLOCK = new Set('header footer main section article aside div ul ol figure blockquote'.split(' '));
-const SENTENCE = new Set('p h1 h2 h3 h4 h5 h6 li figcaption caption label td th button blockquote'.split(' '));
+const SENTENCE = new Set('p h1 h2 h3 h4 h5 h6 li figcaption caption label td th button blockquote div'.split(' '));
 const BLOCK_CHILD = /<\/?(?:div|section|article|aside|header|footer|main|nav|table|ul|ol|li|p|h[1-6]|blockquote|figure|script|style|iframe|canvas)\b/i;
 
 function sentenceTemplate(tag, inner) {
@@ -35,7 +35,10 @@ export function sourceTargets(pkg, manifest, { rendered = false } = {}) {
       const entry = stack.pop();
       if (!entry || entry.tag !== tag) { invalid = true; break; }
       const inner = html.slice(entry.inner_start, match.index);
-      if ((rendered ? !entry.readonly && entry.anchor : !entry.blocked) && SELECTABLE.has(tag) && !/<(?:script|style|iframe|object|embed)\b|\bdata-shine-region\s*=/i.test(inner)) {
+      const embedded = /<(?:script|style|iframe|object|embed)\b|\bdata-shine-region\s*=/i.test(inner);
+      const renderedRoot = rendered && !entry.readonly && entry.anchor && !/\bdata-shine-region\s*=/i.test(inner);
+      const staticTarget = !rendered && !entry.blocked && !embedded;
+      if ((renderedRoot || staticTarget) && SELECTABLE.has(tag)) {
         rows.push({ ...entry, inner_end: match.index, end: tags.lastIndex, text: inner,
           block: BLOCK.has(tag) && /<[a-z]/i.test(inner), editableText: !/<[a-z!/]/i.test(inner) });
       }

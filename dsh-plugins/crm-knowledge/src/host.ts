@@ -11,7 +11,7 @@ export const inject = ['connection', 'sessions', 'webServer'];
 /** Public configuration contains an origin only, no credentials. */
 export function apply(ctx: Context, config: { baseUrl?: string; dataKind?: 'real' | 'synthetic' } = {}): void {
   const access = createDashboardAccess({
-    ...config, browserOrigin: `http://127.0.0.1:${ctx.webServer.port}`,
+    ...config, browserOrigin: [`http://127.0.0.1:${ctx.webServer.port}`, 'https://app.tyuan.chat'],
     hasSession: (id: string) => ctx.sessions.get(id as never) !== undefined,
   });
   ctx.provide('crmDashboard', access.service);

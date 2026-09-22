@@ -13,16 +13,17 @@ function takeDocumentParts(html) {
   }
   const styles = [...raw.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)].map((m) => m[1]).join('\n');
   const scripts = [...raw.matchAll(/<script\b(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)].map((m) => m[1]).join('\n');
+  const quotedTag = String.raw`(?:[^>"']|"[^"]*"|'[^']*')*`;
   const kept = [
-    ...[...raw.matchAll(/<link\b[^>]*>/gi)].map((m) => m[0]),
-    ...[...raw.matchAll(/<script\b[^>]*\bsrc=(['"])(.*?)\1[^>]*>\s*<\/script>/gi)].map((m) => m[0]),
+    ...[...raw.matchAll(new RegExp(`<link\\b${quotedTag}>`, 'gi'))].map((m) => m[0]),
+    ...[...raw.matchAll(new RegExp(`<script\\b${quotedTag}\\bsrc=(['"])(.*?)\\1${quotedTag}>\\s*<\\/script>`, 'gi'))].map((m) => m[0]),
   ];
   const body = raw.match(/<body\b[^>]*>([\s\S]*?)<\/body>/i);
   const inner = body ? body[1] : raw;
   const stripped = inner
     .replace(/<script\b[\s\S]*?<\/script>/gi, '')
     .replace(/<style\b[\s\S]*?<\/style>/gi, '')
-    .replace(/<link\b[^>]*>/gi, '');
+    .replace(new RegExp(`<link\\b${quotedTag}>`, 'gi'), '');
   return { html: `${kept.join('')}${stripped}`, extraCss: styles, extraJs: scripts };
 }
 

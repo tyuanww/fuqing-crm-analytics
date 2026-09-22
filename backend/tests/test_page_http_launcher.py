@@ -102,6 +102,18 @@ def test_cors_allows_the_live_web_origin_for_cross_origin_bridge(tmp_path):
         },
     )
     assert foreign.headers.get("access-control-allow-origin") is None
+    public = client.options(
+        PAGE_PREFIX + "/pages",
+        headers={
+            "Origin": "https://app.tyuan.chat",
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "authorization",
+        },
+    )
+    assert public.status_code == 200
+    assert public.headers["access-control-allow-origin"] == "https://app.tyuan.chat"
+    assert public.headers.get("access-control-allow-credentials") != "true"
+    assert preflight.headers.get("access-control-allow-credentials") != "true"
 
 
 def test_result_bridge_read_and_forbidden_sql_op(tmp_path):

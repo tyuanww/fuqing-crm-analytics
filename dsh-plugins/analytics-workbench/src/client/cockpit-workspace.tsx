@@ -162,7 +162,11 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
   }), [leaveCoordinator, library, pageStore, fileClient, aiClient]);
   useEffect(() => () => { if (!leaveCoordinator) coordinator.dispose(); }, [coordinator, leaveCoordinator]);
   const guard = (action: () => void | Promise<void>) => {
-    if (!busy) void coordinator.request({ kind: 'asset', performLocal: action });
+    if (busy) return;
+    void coordinator.request({ kind: 'asset', performLocal: action }).then(result => {
+      if (result === 'busy') setNotice('上一步还在处理，请稍候再试。');
+      if (result === 'prompt') setNotice('有未保存修改。请先保存或放弃，再继续。');
+    });
   };
   const back = () => { if (busy) return; if (leaveCoordinator) goConversation(); else guard(goConversation); };
   useEffect(() => {
@@ -274,7 +278,9 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
   }, [selectedId, files, busy, previewBoardId]);
 
   const createImport = async () => {
-    if (!selected?.path || (!selected.sessionId && !selected.file_id) || !pageStore || !file.text) return;
+    if (!pageStore) { setNotice('页库还没连上，暂时不能保存副本。'); return; }
+    if (!file.text) { setNotice('页面内容还没读完，请稍候再点。'); return; }
+    if (!selected?.path || (!selected.sessionId && !selected.file_id)) { setNotice('这份文件缺少来源路径，不能保存成可编辑副本。'); return; }
     const item = selected;
     await pageStore.previewImport({ html: file.text, path: item.path!, sessionId: item.sessionId, artifactId: item.file_id, title: item.title,
       readResource: async path => {
@@ -344,7 +350,8 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
     }
   };
   const title = boardVisible ? shown?.spec.title ?? '数据看板' : selected?.title ?? '产物预览';
-  const message = notice || (boardVisible ? state.message : savedHtml || page.importCandidate ? page.message : cabinet.message);
+  const message = notice || (boardVisible ? state.message : page.message || cabinet.message);
+  const pageDirty = Boolean(!boardVisible && savedHtml && pageStore?.hasUnsavedChanges());
   const version = boardVisible ? state.saved?.spec.version : savedHtml ? page.current?.version : cabinet.files.find(item => item.file_id === selected?.file_id)?.version;
   return <ThemeProvider colorScheme={colorScheme} className="sm-library-theme"><style>{cockpitCss}</style>
     <main ref={root} className="sm-library-workspace" data-testid="library-workspace" aria-busy={busy} data-mobile-inspector={mobileInspector} data-presenting={presenting}>
@@ -362,12 +369,13 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
             onClick={() => guard(createImport)}>保存为可编辑副本</button>
             : !boardVisible && selected && !selected.page_id && fileClient ? <button className="cockpit-primary" disabled={busy || uncertain || ai.active?.status === 'READY'}
               onClick={() => guard(officeEditing ? async () => { await fileClient.closeEditor(); } : editDocument)}>{officeEditing ? '完成编辑' : selected.file_id ? '编辑文件' : '保存副本并编辑'}</button>
-            : <button data-testid="cockpit-edit-btn" className={editing ? '' : 'cockpit-primary'} aria-pressed={editing}
+            : <button data-testid="cockpit-edit-btn" className={editing && !pageDirty ? '' : 'cockpit-primary'} aria-pressed={editing}
               disabled={busy || uncertain || ai.active?.status === 'READY' || Boolean(page.preview) || (!savedHtml && !(boardVisible && state.saved))}
               onClick={() => {
+                if (editing && pageDirty && pageStore) { void pageStore.commitTextDrafts().then(ok => { if (ok) pageStore.exitEdit(); }); return; }
                 if (editing) guard(() => { if (boardVisible) setBoardEdit(false); else pageStore?.exitEdit(); });
                 else { if (boardVisible) setBoardEdit(true); else { setHtmlAIMode(false); pageStore?.enterEdit(); } if (width < 1180) setRail(false); }
-              }}>{editing ? '完成编辑' : '编辑'}</button>}
+              }}>{editing ? (pageDirty ? '保存' : '完成编辑') : '编辑'}</button>}
         </div>
       </header>
       <div className="cockpit-shell-body">
@@ -457,7 +465,8 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
               </div> : null}
             </CockpitSidebar></div>
             : savedHtml && pageStore ? <CockpitPageEditor store={pageStore} aiMode={htmlAIMode} onInspect={() => setMobileInspector(true)} onWholeAI={aiClient ? () => void guard(beginAI) : undefined} onAI={aiClient ? (scope, instruction) => aiClient.begin('page', page.current!.page_id, page.current!.version, scope, instruction) : undefined} />
-            : page.importCandidate ? <><div className="cockpit-notice" data-testid="html-import-preview"><div><strong>保存为可编辑副本</strong><p>{uncertain ? '保存结果待核对。请用同一请求重试确认。' : '先检查页面。确认后进入页库，原工作区文件保持不变。'}</p></div>
+            : page.importCandidate ? <><div className="cockpit-notice" data-testid="html-import-preview"><div><strong>保存为可编辑副本</strong><p>{uncertain ? '保存结果待核对。请用同一请求重试确认。' : '先检查页面。确认后进入页库，原工作区文件保持不变。'}</p>
+              {page.importCandidate.quarantined?.length ? <p>已停用页面里的外联地址，副本可以继续编辑。这些地址不会再被打开：{page.importCandidate.quarantined.slice(0, 4).join('、')}{page.importCandidate.quarantined.length > 4 ? '…' : ''}</p> : null}</div>
               <button disabled={busy || uncertain} onClick={() => void pageStore?.cancelPreview()}>取消入库</button><button className="cockpit-primary" disabled={busy} onClick={() => void pageStore?.confirmImport()}>{uncertain ? '重试确认' : '确认保存副本'}</button></div>
               <div className="cockpit-frame-wrap"><HtmlPreview pkg={page.importCandidate.package} title={selected?.title ?? '副本预览'} /></div></>
             : selected?.kind === 'html' && rawPackage ? <><div className="cockpit-document-tools"><span className="cockpit-badge">{selected.file_id ? '已添加文件' : '会话文件'}</span><span className="cockpit-muted">保存副本后可编辑映射文字；外部资源受限。</span></div>

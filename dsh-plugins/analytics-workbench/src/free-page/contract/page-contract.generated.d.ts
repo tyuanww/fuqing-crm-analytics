@@ -1,4 +1,4 @@
-/** Generated free-page contract; do not edit. OpenAPI SHA-256: ddfaa111be4a73fe2d7f51bbf6cd77ece90a93dd3f4c1d429ea41916b11616ca */
+/** Generated free-page contract; do not edit. OpenAPI SHA-256: bcb2ffcb36648c5f4873eb84ee63d452d5b744a3d44bb5c7ca4da1f34e162d75 */
 export interface paths {
     "/api/v1/analytics/page-documents/pages": {
         parameters: {
@@ -577,7 +577,7 @@ export interface components {
              * Attribute
              * @enum {string}
              */
-            attribute: "id" | "data-node" | "data-page-block" | "data-page-field" | "class" | "text";
+            attribute: "id" | "data-node" | "data-page-block" | "data-page-field" | "class" | "text" | "nth";
             /** Value */
             value: string;
         };

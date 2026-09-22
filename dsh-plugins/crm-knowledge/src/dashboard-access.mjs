@@ -41,9 +41,14 @@ async function readBoundedJson(stream, max) {
 }
 
 /** @param {{baseUrl?: string, browserOrigin: string, dataKind?: 'real'|'synthetic', hasSession: (id: string) => boolean, now?: () => number, ttlMs?: number}} options */
+const PUBLIC_DEMO_ORIGIN = 'https://app.tyuan.chat';
+function trustedBrowserOrigins(browserOrigin) {
+  const configured = Array.isArray(browserOrigin) ? browserOrigin : [browserOrigin];
+  return new Set(configured.map((item) => item === PUBLIC_DEMO_ORIGIN ? item : dashboardOrigin(item)));
+}
 export function createDashboardAccess({ baseUrl = 'http://127.0.0.1:8000', browserOrigin, dataKind = 'real', hasSession, now = Date.now, ttlMs = TTL }) {
   const origin = dashboardOrigin(baseUrl);
-  const trustedBrowserOrigin = dashboardOrigin(browserOrigin);
+  const trustedBrowserOrigin = trustedBrowserOrigins(browserOrigin);
   if (!['real', 'synthetic'].includes(dataKind) || typeof hasSession !== 'function' || !Number.isSafeInteger(ttlMs) || ttlMs <= 0 || ttlMs > TTL) throw new Error('Invalid CRM host configuration');
   const records = new Map(); const pending = new Map(); const citationLedger = new Map();
   let disposed = false;
@@ -149,7 +154,7 @@ export function createDashboardAccess({ baseUrl = 'http://127.0.0.1:8000', brows
     const url = new URL(request.url);
     // The pinned carrier rewrites Request.url's authority to dsh.internal.
     // Compare against the actual trusted listener, never that internal URL.
-    if (request.headers.get('origin') !== trustedBrowserOrigin || request.headers.get('x-crm-ui') !== '1' || url.search ||
+    if (!trustedBrowserOrigin.has(request.headers.get('origin')) || request.headers.get('x-crm-ui') !== '1' || url.search ||
         request.headers.get('sec-fetch-site') === 'cross-site') return error('HOST_AUTH_REQUIRED', 403);
     if (request.method !== 'POST' || !/^application\/json(?:\s*;|$)/i.test(request.headers.get('content-type') ?? '')) return error('INVALID_REQUEST');
     let input;

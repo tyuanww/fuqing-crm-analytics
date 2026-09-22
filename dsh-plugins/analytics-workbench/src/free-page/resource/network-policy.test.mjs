@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { assertNoActiveOutbound, extractCandidateUrls, isBlockedNetworkUrl } from './network-policy.mjs';
+import { assertNoActiveOutbound, extractCandidateUrls, isBlockedNetworkUrl, quarantineActiveOutbound } from './network-policy.mjs';
 import { DYNAMIC_LEAK_PACKAGE } from '../runtime/fixtures.mjs';
 
 test('blocks http(s), websocket, beacon and protocol-relative URLs', () => {
@@ -35,6 +35,20 @@ test('extracts img/script/link/css/js network exits, not only fetch', () => {
     '',
   );
   assert.equal(blocked.ok, false);
+});
+
+test('quarantine removes scanned outbound addresses and leaves the policy itself strict', () => {
+  const source = '<p>看板</p><script>new EventSource("/api/stream");</script>';
+  assert.equal(assertNoActiveOutbound(source, '', '').ok, true);
+  const parts = source.match(/<script\b[^>]*>([\s\S]*?)<\/script>/i);
+  assert.equal(assertNoActiveOutbound('<p>看板</p>', '', parts[1]).ok, false);
+  const stored = quarantineActiveOutbound(source, '', '');
+  assert.ok(stored.removed.includes('/api/stream'));
+  const storedScript = stored.html.match(/<script\b[^>]*>([\s\S]*?)<\/script>/i)[1];
+  assert.equal(assertNoActiveOutbound('', '', storedScript).ok, true);
+  assert.doesNotMatch(storedScript, /\/api\/stream/);
+  assert.equal(assertNoActiveOutbound('<img src="https://img.example/a.png">', '', '').ok, false);
+  assert.equal(quarantineActiveOutbound('<img src="data:image/png;base64,xx">', '', '').removed.length, 0);
 });
 
 test('concatenated URLs can evade the static scan and must be covered by runtime CSP', () => {

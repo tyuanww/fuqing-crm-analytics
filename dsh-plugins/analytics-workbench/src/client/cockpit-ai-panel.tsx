@@ -5,7 +5,7 @@ import { loadEditor } from './cockpit-office-editor.tsx';
 
 export function CockpitAIPanel({ client, state, blocked = false }: { client: CockpitAIClient; state: AIState; blocked?: boolean }) {
   const job = state.active;
-  if (!job) return state.message ? <p role={state.messageError ? 'alert' : 'status'}>{state.message}</p> : null;
+  if (!job) return state.message ? <section className="cockpit-ai-panel" aria-label="AI 修改状态"><p className="cockpit-error" role={state.messageError ? 'alert' : 'status'}>{state.message}</p><button disabled={blocked || state.busy} onClick={() => void client.refresh()}>重试读取 AI 任务</button></section> : null;
   if (['SAVED', 'CANCELLED'].includes(job.status) && !state.confirmationUncertain) return <>
     {state.messageError && state.message ? <p className="cockpit-live" role="alert">{state.message}</p> : null}
     <details className="cockpit-ai-panel cockpit-ai-complete" data-testid="cockpit-ai-panel">

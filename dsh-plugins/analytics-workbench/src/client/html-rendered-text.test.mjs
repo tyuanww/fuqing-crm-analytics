@@ -24,6 +24,40 @@ async function mount(t, source, { editing = true, selectBlocks = false } = {}) {
   return { dom, messages, nodes, targets, context };
 }
 
+test('a generated finding sentence can change the words and keeps the metric tags', async t => {
+  const page = { html: '<section id="cards" data-node="findings"></section>', css: '', resources: [], node_map: [],
+    js: `document.querySelector('[data-node="findings"]').innerHTML='<ul><li><span class="tag">时段</span><div>全周 <b>44%</b> 收入，客单价 <b>142.6 元</b>。</div></li><li><span class="tag">对照</span><div>日间 <b>20%</b> 收入。</div></li></ul>';` };
+  const ui = await mount(t, page);
+  const line = ui.targets().find(node => node.runtime && node.tag === 'div' && node.text.includes('全周') && node.text.includes('44%'));
+  assert.ok(line?.editableText, JSON.stringify(ui.targets()?.map(node => [node.tag, node.text?.slice?.(0, 40)])));
+  ui.dom.window.document.querySelector('div').click();
+  const selected = acceptSelection({ source: ui.dom.window, origin: 'null', data: ui.messages.findLast(item => item.type === 'cockpit.selection') }, { ...ui.context, nodes: ui.targets() });
+  assert.equal(selected?.node_id, line.node_id);
+  const changed = renderedTextPreview(page, line, line.text.replace('全周', '晚市'), {});
+  const reopened = await mount(t, changed, { editing: false });
+  const edited = reopened.dom.window.document.querySelector('div');
+  assert.equal(edited.textContent.includes('晚市'), true);
+  assert.equal(edited.querySelector('b').textContent, '44%');
+  assert.equal(reopened.dom.window.document.querySelectorAll('b')[1].textContent, '142.6 元');
+});
+
+test('a script nested in its own container still exposes the rendered copy', async t => {
+  const nested = { html: '<section id="cards"><script>document.getElementById("cards").insertAdjacentHTML("beforeend","<span class=\\"label\\">收入文案</span>")</script></section>', css: '', resources: [], node_map: [], js: '' };
+  const ui = await mount(t, nested);
+  const text = ui.targets()?.find(node => node.runtime && node.text === '收入文案');
+  assert.ok(text?.editableText, JSON.stringify(ui.targets()?.map(node => [node.tag, node.text?.slice?.(0, 40)])));
+});
+
+test('one invalid runtime locator does not hide the other editable copy', async t => {
+  const ui = await mount(t, pkg);
+  const data = structuredClone(ui.messages.findLast(message => message.type === 'cockpit.targets'));
+  data.runtimeNodes.push({ node_id: 'runtime_bad', root_id: 'missing', tag: 'span', text: '坏节点', editableText: true, block: false,
+    runtime: { anchor: { attribute: 'id', value: 'nope' }, path: [], package_hash: 'nope', html: '<span>坏节点</span>' } });
+  const accepted = acceptTargets({ source: ui.dom.window, origin: 'null', data }, ui.context);
+  assert.ok(accepted?.some(node => node.text === '收入文案'));
+  assert.equal(accepted.some(node => node.node_id === 'runtime_bad'), false);
+});
+
 test('script-rendered cards expose copy and whole-block targets; direct edit keeps renderer and interaction', async t => {
   const ui = await mount(t, pkg);
   const text = ui.targets().find(node => node.runtime && node.text === '收入文案');
@@ -67,7 +101,7 @@ test('literal replacement remains data and stale or bound edits are refused', as
 
 const tick = () => new Promise(resolve => setTimeout(resolve, 15));
 
-test('identity survives reorder/insertion of equal-looking cards; unkeyed duplicates are not editable', async t => {
+test('identity survives reorder/insertion of equal-looking cards', async t => {
   const input = { ...pkg, js: `window.order=['a','b']; window.render=()=>{cards.innerHTML=order.map(id=>'<article data-node="'+id+'"><span>相同</span></article>').join('')};render();` };
   const ui = await mount(t, input);
   const target = ui.targets().find(n => n.runtime?.path.some(p => p.key?.value === 'b') && n.tag === 'span');
@@ -77,8 +111,26 @@ test('identity survives reorder/insertion of equal-looking cards; unkeyed duplic
   assert.equal(out.dom.window.document.querySelector('[data-node="b"] span').textContent, '只改 B');
   assert.equal(out.dom.window.document.querySelector('[data-node="a"] span').textContent, '相同');
   assert.equal(out.dom.window.document.querySelector('[data-node="new"] span').textContent, '相同');
-  const ambiguous = await mount(t, { ...pkg, js: `cards.innerHTML='<article><span>相同</span></article><article><span>相同</span></article>';` });
-  assert.equal(ambiguous.targets().filter(n => n.runtime && n.tag === 'span').length, 0);
+});
+
+test('identical sibling text can be selected by position, typed live, and saved on that sibling', async t => {
+  const source = { ...pkg, js: `cards.innerHTML='<article><span>相同</span></article><article><span>相同</span></article>';` };
+  const ui = await mount(t, source);
+  const spans = ui.targets().filter(n => n.runtime && n.tag === 'span');
+  assert.equal(spans.length, 2);
+  assert.equal(spans[1].runtime.path.some(part => part.key?.attribute === 'nth' && part.key.value === '1'), true);
+  ui.dom.window.dispatchEvent(new ui.dom.window.MessageEvent('message', {
+    source: ui.dom.window, origin: 'null',
+    data: { type: 'cockpit.draft', channel: 'test', pageId: 'page', version: 1, nodeId: spans[1].node_id, text: '正在改第二个', active: true },
+  }));
+  await tick();
+  const live = [...ui.dom.window.document.querySelectorAll('#cards span')];
+  assert.equal(live[0].textContent, '相同');
+  assert.equal(live[1].textContent, '正在改第二个');
+  const saved = await mount(t, renderedTextPreview(source, spans[1], '只改第二个', {}), { editing: false });
+  const shown = [...saved.dom.window.document.querySelectorAll('#cards span')];
+  assert.equal(shown[0].textContent, '相同');
+  assert.equal(shown[1].textContent, '只改第二个');
 });
 
 test('display override survives value refresh without changing original calculation state', async t => {
@@ -207,6 +259,35 @@ test('characterData plus detach in one mutation batch does not throw or reuse a 
   parent.append(label);
   await tick();
   assert.equal(label.textContent, '保存的名称');
+});
+
+test('a typed draft stays on a script-rendered node when a saved edit reapplies', async t => {
+  const ui = await mount(t, pkg);
+  const label = ui.targets().find(node => node.runtime && node.text === '收入文案');
+  assert.ok(label);
+  const saved = await mount(t, renderedTextPreview(pkg, label, '已保存文案', {}));
+  const current = saved.targets().find(node => node.runtime && node.text === '已保存文案');
+  assert.ok(current);
+  saved.dom.window.dispatchEvent(new saved.dom.window.MessageEvent('message', {
+    source: saved.dom.window, origin: 'null',
+    data: { type: 'cockpit.draft', channel: 'test', pageId: 'page', version: 1, nodeId: current.node_id, text: '正在输入', active: true },
+  }));
+  await new Promise(resolve => setTimeout(resolve, 30));
+  assert.equal(saved.dom.window.document.querySelector('.label').textContent, '正在输入');
+  saved.dom.window.document.querySelector('#switch').click();
+  await new Promise(resolve => setTimeout(resolve, 30));
+  assert.equal(saved.dom.window.document.querySelector('.label').textContent, '正在输入');
+});
+
+test('a sole sibling keeps its unique class token as the path key', async t => {
+  const source = { ...pkg, js: `document.getElementById('cards').innerHTML='<section id="verdict"><span class="verdict__title-wrap">标题</span></section>';` };
+  const ui = await mount(t, source);
+  const title = ui.targets().find(node => node.runtime && node.tag === 'span' && node.text === '标题');
+  assert.equal(title.runtime.path.at(-1).key.attribute, 'class');
+  assert.equal(title.runtime.path.at(-1).key.value, 'verdict__title-wrap');
+  const shown = await mount(t, renderedTextPreview(source, title, '新标题', {}), { editing: false });
+  assert.equal(shown.dom.window.document.querySelector('.verdict__title-wrap').textContent, '新标题');
+  assert.equal(shown.dom.window.__cockpitPresentationStatus.unresolved.length, 0);
 });
 
 test('readonly computed fields stay unresolved and unique class identity stays stable', async t => {

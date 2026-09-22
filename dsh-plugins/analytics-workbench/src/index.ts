@@ -2,6 +2,7 @@
 import type { Context } from '@deepseek-ai/cordis';
 import { apply as applyBridge } from './bridge.ts';
 import * as competition from './competition-agent/apply.ts';
+import { registerFreeHtmlPageTool } from './competition-agent/apply.ts';
 import * as boardBrowserApi from './board-browser-api.ts';
 import * as cockpitHistoryApi from './cockpit-history-api.ts';
 
@@ -11,6 +12,7 @@ export { inject } from './bridge.ts';
 
 export function apply(ctx: Context): void {
   applyBridge(ctx);
+  registerFreeHtmlPageTool(ctx);
   ctx.inject(['connection', 'webServer'], (scoped) => { scoped.plugin(boardBrowserApi); });
   ctx.inject(['connection', 'webServer', 'sessionQuery'], (scoped) => { scoped.plugin(cockpitHistoryApi); });
   if (process.env.DSH_ANALYTICS_UI_ONLY === '1'

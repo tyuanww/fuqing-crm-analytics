@@ -15,6 +15,20 @@ export const markCss = `
 }
 `;
 
+export const returnDockCss = `
+.analytics-b0-return-dock {
+  display:flex; align-items:center; justify-content:space-between; gap:12px; box-sizing:border-box;
+  width:calc(100% - 2 * var(--dsh-composer-side-clearance,16px) - 4 * var(--dsh-composer-dock-inset,8px));
+  max-width:calc(var(--dsh-composer-card-max-width,780px) - 4 * var(--dsh-composer-dock-inset,8px));
+  margin:8px auto 0; color:#111; font:13px/18px var(--dsw-font-family,inherit);
+}
+.analytics-b0-return-dock button {
+  flex:none; height:28px; padding:0 12px; border:0; border-radius:16px;
+  background:#111; color:#fff; font:inherit; cursor:pointer;
+}
+.analytics-b0-return-dock button:focus-visible { outline:2px solid #111; outline-offset:2px; }
+`;
+
 export const css = `
 .analytics-b0-logo, .analytics-b0-mark { display:block; background:currentColor; mask-repeat:no-repeat; mask-size:contain; mask-position:center; }
 .analytics-b0-logo { width:177px; aspect-ratio:249 / 45; margin:8px 0; mask-image:url('/b0/brand/logo.png'); }

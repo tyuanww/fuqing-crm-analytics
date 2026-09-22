@@ -48,6 +48,10 @@ function emptyState(viewportWidth, adapters) {
     presentation_overlay: null,
     importCandidate: null,
     textDraft: null,
+    textDrafts: {},
+    textDraftNodes: {},
+    draftReset: 0,
+    silentCommit: false,
     historyItems: [],
     confirmationUncertain: false,
     lastIdempotencyKey: null,
@@ -99,8 +103,43 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
     return state;
   }
 
+  function applyTextDraft(pkg, node, text) {
+    const manifest = state.current.binding_manifest;
+    if (node?.runtime) return renderedTextPreview(pkg, node, text, manifest);
+    if (node?.source && node.mapping_token) {
+      const current = sourceTargets(pkg, manifest).find(item => item.node_id === node.node_id && item.mapping_token === node.mapping_token)
+        || sourceTargets(pkg, manifest).find(item => item.mapping_token === node.mapping_token);
+      if (!current) throw new Error('有一段修改对不上当前页面，请重新选择后再保存。');
+      return sourceTextPreview(pkg, current, text, manifest);
+    }
+    const preview = bound.edit.previewPatch({
+      pkg, selection: node, replacementText: text, instruction: isLive(bound) ? undefined : text,
+      page_id: state.current.page_id, session_id: state.current.session_id, base_version: state.current.version, binding_manifest: manifest,
+    });
+    if (!preview?.snapshot) throw new Error('修改未能写回页面');
+    return preview.snapshot;
+  }
+
+  function compiledTextPackage() {
+    const drafts = { ...(state.textDrafts ?? {}) };
+    const nodes = { ...(state.textDraftNodes ?? {}) };
+    if (state.textDraft?.changed && state.selection?.node_id) {
+      drafts[state.selection.node_id] = state.textDraft.value;
+      nodes[state.selection.node_id] = state.selection;
+    }
+    const planned = Object.entries(drafts).map(([nodeId, text]) => {
+      const node = nodes[nodeId];
+      if (!node) return null;
+      return { node, text, start: node.source?.start ?? node.source_range?.start ?? 0 };
+    }).filter(Boolean).sort((left, right) => right.start - left.start);
+    if (!state.current || !planned.length) return null;
+    let pkg = state.current.package;
+    for (const item of planned) pkg = applyTextDraft(pkg, item.node, item.text);
+    return pkg;
+  }
+
   function hasUnsavedChanges() {
-    if (state.confirmationUncertain || state.importCandidate || state.textDraft?.changed) return true;
+    if (state.confirmationUncertain || state.importCandidate || state.textDraft?.changed || Object.keys(state.textDrafts ?? {}).length > 0) return true;
     if (state.preview?.status === 'PENDING') return true;
     if (state.current?.dirty) return true;
     return false;
@@ -141,6 +180,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
         { version: spec.version, title: spec.title, at: now(), package: clone(spec.package) }] };
     bound.assets.put(page); refreshList();
     emit({ current: page, view: 'workspace', preview: null, importCandidate: null, textDraft: null,
+      textDrafts: {}, textDraftNodes: {},
       selection: null, overlay: null, confirmationUncertain: false, historyItems: [],
       liveStatus: `已保存 · v${page.version}` });
   }
@@ -326,10 +366,17 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
       });
     },
     setReplacementText(value, original = state.textDraft?.original ?? '') {
-      if (state.busy || state.preview || state.confirmationUncertain || !state.selection?.ok) return;
-      emit({ textDraft: { value, original, changed: value !== original } });
+      if (state.busy || state.preview || state.confirmationUncertain || !state.selection?.ok || !state.selection.node_id) return;
+      const changed = value !== original;
+      const textDrafts = { ...(state.textDrafts ?? {}) };
+      const textDraftNodes = { ...(state.textDraftNodes ?? {}) };
+      if (changed) { textDrafts[state.selection.node_id] = value; textDraftNodes[state.selection.node_id] = state.selection; }
+      else { delete textDrafts[state.selection.node_id]; delete textDraftNodes[state.selection.node_id]; }
+      emit({ textDraft: { value, original, changed }, textDrafts, textDraftNodes });
     },
-    discardTextDraft() { if (!state.busy && !state.confirmationUncertain) emit({ textDraft: null }); },
+    discardTextDraft() {
+      if (!state.busy && !state.confirmationUncertain) emit({ textDraft: null, textDrafts: {}, textDraftNodes: {}, draftReset: (state.draftReset ?? 0) + 1 });
+    },
     async loadHistory() {
       await perform(async () => {
         if (!state.current) return;
@@ -374,7 +421,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
         return { ok: false, reason: 'confirmation_uncertain' };
       }
       if (state.importCandidate) await this.confirmImport();
-      else if (state.textDraft?.changed && !state.preview) { await this.previewPatch(state.textDraft.value); if (state.preview) await this.confirmPatch(); }
+      else if ((state.textDraft?.changed || Object.keys(state.textDrafts ?? {}).length > 0) && !state.preview) { await this.commitTextDrafts(); }
       else if (state.preview?.status === 'PENDING') await this.confirmPatch();
       else if (state.current?.dirty) await this.saveDraft();
       if (hasUnsavedChanges()) return { ok: false, reason: 'save_failed' };
@@ -420,7 +467,13 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
     },
     selectLocatable(request) {
       if (state.mode !== 'edit' || state.busy || state.confirmationUncertain || state.preview) return;
-      if (state.textDraft?.changed) { emit({ message: '请先预览或放弃当前文本修改' }); return; }
+      const textDrafts = { ...(state.textDrafts ?? {}) };
+      const textDraftNodes = { ...(state.textDraftNodes ?? {}) };
+      if (state.textDraft?.changed && state.selection?.node_id) {
+        textDrafts[state.selection.node_id] = state.textDraft.value;
+        textDraftNodes[state.selection.node_id] = state.selection;
+      }
+      const keepDrafts = () => ({ textDrafts, textDraftNodes });
       const range = request?.source_range;
       if (request?.catalog === 'node-graph' && request.mapping === 'valid' && request.node_id
         && range && Number.isInteger(range.start) && Number.isInteger(range.end)) {
@@ -435,6 +488,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
             source_range: { start: range.start, end: range.end },
           },
           textDraft: null,
+          ...keepDrafts(),
           overlay: 'selection',
           liveStatus: `当前范围：${request.node_id}`,
         });
@@ -450,7 +504,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
         emit({ selection: { ok: false, stale: true, requireReselect: true, label: located.error.message, code: located.error.code }, overlay: 'selection', liveStatus: located.error.message });
         return;
       }
-      emit({ selection: located, textDraft: null, overlay: 'selection', liveStatus: `当前范围：${located.label}` });
+      emit({ selection: located, textDraft: null, ...keepDrafts(), overlay: 'selection', liveStatus: `当前范围：${located.label}` });
     },
     selectWholePage() { this.selectLocatable({ kind: 'whole_page', user_switched: true }); },
     clearSelection() { if (state.busy || hasUnsavedChanges()) return; emit({ selection: null, overlay: state.mode === 'edit' ? 'selection' : null, liveStatus: '已取消选区' }); },
@@ -500,6 +554,52 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
         liveStatus: '文字预览待确认，源码字节未改',
       });
       return true;
+    },
+    async commitTextDrafts() {
+      if (state.busy || state.confirmationUncertain || state.preview) return false;
+      let pkg;
+      try { pkg = compiledTextPackage(); }
+      catch (error) {
+        emit({ message: error instanceof Error ? error.message : '修改未能写回页面', silentCommit: false });
+        return false;
+      }
+      if (!pkg) return !hasUnsavedChanges();
+      emit({ silentCommit: true });
+      try {
+        await this.previewCompiled(pkg);
+        if (state.preview) await this.confirmPatch();
+      } finally {
+        if (state.silentCommit) emit({ silentCommit: false });
+      }
+      if (!state.preview && !state.confirmationUncertain) {
+        emit({ textDraft: null, textDrafts: {}, textDraftNodes: {} });
+        return !hasUnsavedChanges();
+      }
+      return false;
+    },
+    async previewCompiled(snapshot) {
+      await perform(async () => {
+        assertEditable();
+        const preview = {
+          sourceRange: true, preview_id: bound.nextId('preview'), idempotency_key: bound.nextId('patch'), operation: 'PATCH', snapshot,
+        };
+        if (isLive(bound) && bound.documents?.patchPreview) {
+          const remote = await bound.documents.patchPreview({
+            page_id: state.current.page_id, base_version: state.current.version, package: snapshot,
+          });
+          if (!remote.ok) {
+            const error = new Error('页面保存库尚未配置隔离 HTTP');
+            error.code = remote.reason || 'http_not_configured';
+            throw error;
+          }
+          emit({
+            preview: { ...preview, preview_id: remote.body.preview_id, base_package: state.current.package },
+            overlay: 'patch', lastIdempotencyKey: preview.idempotency_key, liveStatus: '正在保存文字',
+          });
+          return;
+        }
+        emit({ preview, overlay: 'patch', lastIdempotencyKey: preview.idempotency_key, liveStatus: '正在保存文字' });
+      });
     },
     async previewPatch(replacementText, extras = {}) {
       await perform(async () => {

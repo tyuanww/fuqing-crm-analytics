@@ -229,10 +229,50 @@ async function boot(t, {
   return { client, ctx, entries, prompts, fiber, saved, disposeSlots, workspaceCalls, openedResources, currentEdit: () => currentEdit };
 }
 
-function generateNative(entries) {
+function generateDirect(entries) {
   const dock = entries.find(row => row.options.id === 'shine-mage.analytics-b0.generate-cockpit');
   assert.ok(dock, 'generate dock was not registered');
-  return dock.options.inject().generateNative;
+  const generate = dock.options.inject().generateDirect;
+  assert.equal(typeof generate, 'function');
+  return generate;
+}
+
+function pagePackageWaiter(entries) {
+  const card = entries.find(row => row.options.key === 'free_html_page_generate');
+  assert.ok(card, 'free_html_page_generate card was not registered');
+  return card.options.inject().pagePackageWaiter;
+}
+
+async function submitGenerate(entries, prompts) {
+  const before = prompts.length;
+  const pending = generateDirect(entries)(SESSION_ID);
+  const settled = pending.then(
+    value => ({ status: 'resolved', value }),
+    error => ({ status: 'rejected', error }),
+  );
+  const prompted = new Promise(resolve => {
+    const timer = setInterval(() => {
+      if (prompts.length > before) {
+        clearInterval(timer);
+        resolve({ status: 'prompt' });
+      }
+    }, 5);
+    setTimeout(() => {
+      clearInterval(timer);
+      resolve({ status: 'timeout' });
+    }, 2000);
+  });
+  const outcome = await Promise.race([settled, prompted]);
+  if (outcome.status === 'rejected') throw outcome.error;
+  if (outcome.status !== 'prompt') throw new Error('generateDirect neither prompted nor rejected');
+  const text = prompts.at(-1).content[0].text;
+  const requestId = text.match(/page-gen-[0-9a-f-]{36}/)?.[0];
+  assert.ok(requestId, text);
+  pagePackageWaiter(entries).deliver(requestId, {
+    html: '<main><p data-page-field="body">交付</p></main>',
+    css: '', js: '', resources: [], node_map: [],
+  });
+  await assert.rejects(pending, /页面未能写入驾驶舱/);
 }
 
 function libraryOf(entries) {
@@ -256,7 +296,7 @@ test('undeclared remote is rejected by the real Cordis loader even when provided
     hostLikeRemote: false,
   });
   await assert.rejects(
-    generateNative(entries)(SESSION_ID),
+    generateDirect(entries)(SESSION_ID),
     /cannot get property "remote" without inject/,
   );
 });
@@ -267,16 +307,17 @@ test('plain remote object does not enforce nested session inject (R1 miss)', asy
     hostLikeRemote: false,
     provideRemote: true,
   });
-  await generateNative(entries)(SESSION_ID);
+  await submitGenerate(entries, prompts);
   assert.equal(prompts.length, 1);
   assert.equal(prompts[0].mode, 'queue');
+  assert.match(prompts[0].content[0].text, /free_html_page_generate/);
 });
 
 test('R1 inject fails remote.session under host-like Service registration', async t => {
   const { entries, prompts, saved } = await boot(t, { inject: R1_INJECT, hostLikeRemote: true });
   assert.equal(loadClient().inject.includes('remote'), true);
   await assert.rejects(
-    generateNative(entries)(SESSION_ID),
+    generateDirect(entries)(SESSION_ID),
     /cannot get property "remote.session" without inject/,
   );
   assert.equal(prompts.length, 0);
@@ -290,25 +331,22 @@ test('R1 inject fails remote.session under host-like Service registration', asyn
   assert.equal(prompts.length, 0);
 });
 
-test('declared remote and remote.session let generateNative and editNative submit one queued prompt on the same session', async t => {
+test('declared remote and remote.session let generateDirect and editNative submit one queued prompt on the same session', async t => {
   const { client, ctx, entries, prompts, saved } = await boot(t);
   assert.ok(client.inject.includes('remote'));
   assert.ok(client.inject.includes('remote.session'));
   assert.equal(client.inject.includes('slots'), true);
   assert.ok(ctx.reflect.props.remote);
   assert.ok(ctx.reflect.props['remote.session']);
-  const generate = generateNative(entries);
-  await generate(SESSION_ID);
+  await submitGenerate(entries, prompts);
   assert.equal(prompts.length, 1);
   assert.equal(prompts[0].sessionId, SESSION_ID);
   assert.equal(prompts[0].mode, 'queue');
   assert.equal(prompts[0].content[0].type, 'text');
-  assert.match(prompts[0].content[0].text, /competition_board_generate/);
-  assert.match(prompts[0].content[0].text, /不重复查数/);
-  assert.match(prompts[0].content[0].text, /saved_boards/);
-  assert.match(prompts[0].content[0].text, /不是草稿/);
-  assert.match(prompts[0].content[0].text, /另一份待确认新板/);
-  assert.equal(/自动保存|自行保存/.test(prompts[0].content[0].text), false);
+  assert.match(prompts[0].content[0].text, /free_html_page_generate/);
+  assert.match(prompts[0].content[0].text, /page-gen-[0-9a-f-]{36}/);
+  assert.match(prompts[0].content[0].text, /不要使用 BoardSpec/);
+  assert.equal(/competition_board_generate/.test(prompts[0].content[0].text), false);
 
   const library = libraryOf(entries);
   assert.ok(library);
@@ -328,7 +366,7 @@ test('declared remote and remote.session let generateNative and editNative submi
 
 test('rejected native prompt is visible and does not mutate the saved board or drop the edit context', async t => {
   const { entries, prompts, saved } = await boot(t, { accept: false });
-  await assert.rejects(generateNative(entries)(SESSION_ID), /未接受|not accepted/);
+  await assert.rejects(generateDirect(entries)(SESSION_ID), /未接受|not accepted/);
   assert.equal(prompts.length, 1);
   const library = libraryOf(entries);
   await library.openBoard(saved.spec.board_id);
@@ -349,7 +387,7 @@ test('dispose and reload do not leave a second generate dock or cross-session pr
   assert.equal(first.entries.filter(row => row.options.id === 'shine-mage.analytics-b0.generate-cockpit').length, 0);
   const second = await boot(t);
   assert.equal(second.entries.filter(row => row.options.id === 'shine-mage.analytics-b0.generate-cockpit').length, 1);
-  await generateNative(second.entries)(SESSION_ID);
+  await submitGenerate(second.entries, second.prompts);
   assert.deepEqual(second.prompts.map(row => row.sessionId), [SESSION_ID]);
   second.saved.spec.session_id = 'other-session';
   const library = libraryOf(second.entries);

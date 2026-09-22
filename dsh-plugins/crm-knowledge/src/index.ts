@@ -2,8 +2,10 @@ import type { Context } from '@deepseek-ai/cordis';
 import { defineTool } from '@deepseek-ai/dsh-tools';
 import { schemas } from './contract.generated.js';
 import { runCrmCliAsync } from './run.mjs';
-import { CHANNELS, dashboardCapabilities, dashboardKnowledgeContext, queryDashboardGsv, queryDashboardPurchases,
+import { CHANNELS, CHANNEL_QUERY_DESCRIPTION, dashboardCapabilities, dashboardKnowledgeContext, queryDashboardGsv, queryDashboardPurchases,
   queryDashboardReadiness, queryDashboardMembership, queryDashboardNetGsv } from './dashboard.mjs';
+import { executePageTool, PAGE_TOOL_PARAMETERS } from '../../analytics-workbench/src/competition-agent/page-tools.mjs';
+import { PAGE_GENERATE_TOOL_NAME } from '../../analytics-workbench/src/competition-agent/page-family.mjs';
 import type {} from './dashboard-service.js';
 
 export const name = 'crm-knowledge-candidate';
@@ -17,7 +19,7 @@ export function apply(ctx: Context, config: { python?: string } = {}): void {
     parameters: {
       start_date: { type: 'string', required: true, description: '开始日期 YYYY-MM-DD（Asia/Shanghai）' },
       end_date: { type: 'string', required: true, description: '结束日期，含首尾、最多90天' },
-      channel: { type: 'string', enum: [...CHANNELS], description: '看板渠道，默认全店' },
+      channel: { type: 'string', enum: [...CHANNELS], description: CHANNEL_QUERY_DESCRIPTION },
       exclude_low_price: { type: 'boolean', description: '是否剔除低价，默认false' },
     },
     output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
@@ -32,11 +34,11 @@ export function apply(ctx: Context, config: { python?: string } = {}): void {
   }));
   ctx.tools.register(defineTool({
     name: 'query_crm_dashboard_gsv',
-    description: '查询用户认可的现有人群看板 GSV 总额和日趋势，复用 CRM 登录及指标接口。真实 GSV 优先使用此工具；不能改用合成查询或再扣退款。日期含首尾、最多90天；同看板渠道及剔除低价条件。登录须由宿主绑定当前会话，失败不回退其他资料源。',
+    description: '查询用户认可的现有人群看板 GSV、日趋势，以及概览里已算出的新客和老客。真实 GSV 优先使用此工具；不能改用合成查询或再扣退款。audience 来自首购日，不是会员身份。会员溢价用 query_crm_dashboard_membership，净额用 query_crm_dashboard_net_gsv，指标缺口用 query_crm_dashboard_readiness。warehouse_cutoff 是仓库最后支付日。日期含首尾、最多90天。登录须由宿主绑定当前会话，失败不回退其他资料源。',
     parameters: {
       start_date: { type: 'string', required: true, description: '开始日期 YYYY-MM-DD（Asia/Shanghai）' },
       end_date: { type: 'string', required: true, description: '结束日期 YYYY-MM-DD，包含当天' },
-      channel: { type: 'string', enum: [...CHANNELS], description: '看板渠道，默认全店' },
+      channel: { type: 'string', enum: [...CHANNELS], description: CHANNEL_QUERY_DESCRIPTION },
       exclude_low_price: { type: 'boolean', description: '看板的剔除低价开关，默认 false' },
     },
     output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
@@ -53,7 +55,7 @@ export function apply(ctx: Context, config: { python?: string } = {}): void {
     parameters: {
       start_date: { type: 'string', required: true, description: '开始日期 YYYY-MM-DD（Asia/Shanghai）' },
       end_date: { type: 'string', required: true, description: '结束日期 YYYY-MM-DD，包含当天' },
-      channel: { type: 'string', enum: [...CHANNELS], description: '看板渠道，默认全店' },
+      channel: { type: 'string', enum: [...CHANNELS], description: CHANNEL_QUERY_DESCRIPTION },
       exclude_low_price: { type: 'boolean', description: '看板的剔除低价开关，默认 false' },
     },
     output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
@@ -125,7 +127,7 @@ export function apply(ctx: Context, config: { python?: string } = {}): void {
     parameters: {
       start_date: { type: 'string', required: true, description: '开始日期 YYYY-MM-DD（Asia/Shanghai）' },
       end_date: { type: 'string', required: true, description: '结束日期 YYYY-MM-DD，包含当天' },
-      channel: { type: 'string', enum: [...CHANNELS], description: '看板渠道，默认全店' },
+      channel: { type: 'string', enum: [...CHANNELS], description: CHANNEL_QUERY_DESCRIPTION },
       exclude_low_price: { type: 'boolean', description: '看板的剔除低价开关，默认 false' },
     },
     output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
@@ -143,7 +145,7 @@ export function apply(ctx: Context, config: { python?: string } = {}): void {
       start_date: { type: 'string', required: true, description: '开始日期 YYYY-MM-DD（Asia/Shanghai）' },
       end_date: { type: 'string', required: true, description: '结束日期 YYYY-MM-DD，包含当天' },
       refund_as_of: { type: 'string', required: true, description: '退款截止日 YYYY-MM-DD，含当天' },
-      channel: { type: 'string', enum: [...CHANNELS], description: '看板渠道，默认全店' },
+      channel: { type: 'string', enum: [...CHANNELS], description: CHANNEL_QUERY_DESCRIPTION },
       exclude_low_price: { type: 'boolean', description: '看板的剔除低价开关，默认 false' },
     },
     output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
@@ -156,12 +158,39 @@ export function apply(ctx: Context, config: { python?: string } = {}): void {
   }));
   ctx.tools.register(defineTool({
     name: 'crm_metrics_capabilities',
-    description: '列出此隔离候选可执行的 CRM 查询及未接入的真实资料能力。',
+    description: '列出当前可执行的 CRM 查询。purchases_backend_contract 只是合同名，不是故障。未调用的工具状态是 unknown，不能写成后端不可用。',
     parameters: {},
     output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
     execute: async (_args, exec) => ({
       synthetic_candidate: await run({ action: 'capabilities' }, exec.signal),
       dashboard: ctx.get('crmDashboard')?.capabilities(exec.agent?.session.id) ?? dashboardCapabilities(),
     }),
+  }));
+  ctx.tools.register(defineTool({
+    name: 'crm_service_health',
+    description: '查看当前对话是否已连接 CRM，以及 Purchases、快照、知识库、驾驶舱工具各自的真实状态。没有调用结果时保持 unknown。知识库在 18092，不提供 GSV 或驾驶舱接口。',
+    parameters: {},
+    output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
+    execute: async (_args, exec) => {
+      const dashboard = ctx.get('crmDashboard')?.capabilities(exec.agent?.session.id) ?? dashboardCapabilities();
+      const boardConfigured = Boolean(process.env.COMPETITION_HTTP_BASE && process.env.COMPETITION_HTTP_TOKEN);
+      return {
+        crm_login: typeof dashboard.connection_state === 'string' ? dashboard.connection_state : 'NOT_CONNECTED',
+        gsv: 'unknown_until_query_crm_dashboard_gsv_is_called',
+        purchases: 'unknown_until_query_crm_dashboard_purchases_is_called',
+        snapshot: 'unknown_until_query_crm_dashboard_snapshot_is_called',
+        knowledge_base: 'weknora_http_18092',
+        board_tools: boardConfigured ? 'competition_board_tools_can_register' : 'not_configured',
+        absent_names: ['copyright'],
+      };
+    },
+  }));
+  ctx.tools.register(defineTool({
+    name: PAGE_GENERATE_TOOL_NAME,
+    description: '用户要生成 HTML 或驾驶舱时，把你在本回复里写好的自由 HTML 页面交出来。request_id 必须逐字复制用户消息中的 page-gen 标识；消息里没有时，填写一个 page-gen- 开头的新标识。不要写本地文件，不要改成 BoardSpec。本工具只交付源码包，保存由工作台完成。',
+    parameters: PAGE_TOOL_PARAMETERS[PAGE_GENERATE_TOOL_NAME] as never,
+    output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }], presentationMeta: (_args, value) => value },
+    timeoutMs: 6000, isConcurrencySafe: () => false,
+    execute: async (args, exec) => executePageTool(PAGE_GENERATE_TOOL_NAME, args as Record<string, unknown>, exec) as never,
   }));
 }

@@ -369,7 +369,7 @@ export async function bootHost(prepared, { signal, timeoutMs = 45000 } = {}) {
   const origin = originOf(prepared.host, prepared.webPort);
   const args = [prepared.cli, '--profile', 'web'];
   for (const patch of prepared.patches) args.push('--patch', patch);
-  args.push('--host', prepared.host, '--port', String(prepared.webPort), '--no-open');
+  args.push('--host', prepared.host, '--port', String(prepared.webPort), '--trusted-host', 'app.tyuan.chat', '--no-open');
   const child = spawn(process.execPath, args, {
     cwd: prepared.workspace,
     env: runtimeEnv(prepared),

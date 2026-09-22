@@ -31,6 +31,7 @@ test('browse retains normal interactions; editing adds only the selection bridge
   const edit = selectionSrcdoc(pkg, { ...config, editing: true });
   assert.doesNotMatch(browse, /cockpit\.selection/);
   assert.match(edit, /cockpit\.selection/);
+  assert.match(edit, /cockpit\.draft/);
   assert.match(edit, /Content-Security-Policy/);
   assert.doesNotMatch(edit, /allow-same-origin/);
   assert.match(edit, /data-cockpit-target.*data-cockpit-selected/);

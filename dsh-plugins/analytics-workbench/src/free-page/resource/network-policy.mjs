@@ -61,6 +61,32 @@ export function extractCandidateUrls(html = '', css = '', js = '') {
   return urls;
 }
 
+const URL_PATTERNS = [ATTR, PING, CSS_URL, CSS_IMPORT, JS_HTTP, JS_CTOR, BEACON, ASSIGN];
+
+function scrubOutbound(source, removed) {
+  let next = String(source ?? '');
+  for (const pattern of URL_PATTERNS) {
+    next = next.replace(new RegExp(pattern.source, pattern.flags), (full, _quote, url) => {
+      const trimmed = String(url ?? '').trim();
+      if (!trimmed || !isBlockedNetworkUrl(trimmed)) return full;
+      removed.push(trimmed);
+      return full.replace(url, 'about:blank');
+    });
+  }
+  return next;
+}
+
+/** Importer-only. The stored package still has to pass assertNoActiveOutbound. */
+export function quarantineActiveOutbound(html = '', css = '', js = '') {
+  const removed = [];
+  return {
+    html: scrubOutbound(html, removed),
+    css: scrubOutbound(css, removed),
+    js: scrubOutbound(js, removed),
+    removed,
+  };
+}
+
 export function assertNoActiveOutbound(html, css, js, allowedResourceIds = new Set()) {
   const blocked = [];
   for (const url of extractCandidateUrls(html, css, js)) {

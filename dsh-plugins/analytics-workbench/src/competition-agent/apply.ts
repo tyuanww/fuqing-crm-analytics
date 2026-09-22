@@ -107,14 +107,17 @@ export function apply(ctx: Context, packInput: { manifest: object; contents: Rec
       execute: async (args, execution) => executeBoardTool(toolName, args as Record<string, unknown>, execution) as never,
     }));
   }
+}
+
+/** Native HTML delivery. The model authors the page; the browser workbench saves it into the cockpit. */
+export function registerFreeHtmlPageTool(ctx: Context) {
   ctx.tools.register(defineTool({
     name: PAGE_GENERATE_TOOL_NAME,
-    description: 'Deliver one free-HTML page source package authored in this reply to the user workbench. Copy the page-gen request id from the user message verbatim. Free HTML/CSS/JS; never a BoardSpec. This tool does not save, publish, query, or fetch anything.',
+    description: '用户要生成 HTML 或驾驶舱时，把你在本回复里写好的自由 HTML 页面交出来。request_id 必须逐字复制用户消息中的 page-gen 标识；消息里没有时，填写一个 page-gen- 开头的新标识。不要写本地文件，不要改成 BoardSpec。本工具只交付源码包，保存由工作台完成。',
     parameters: PAGE_TOOL_PARAMETERS[PAGE_GENERATE_TOOL_NAME] as never,
     output: {
       schema: { type: 'object', additionalProperties: true },
       render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }],
-      // The browser workbench intake reads the canonical receipt from the tool card.
       presentationMeta: (_args, value) => value,
     },
     timeoutMs: 6000,

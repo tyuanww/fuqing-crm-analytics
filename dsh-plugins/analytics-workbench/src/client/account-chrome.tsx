@@ -12,7 +12,7 @@ import {
 
 export { clearAccountIdentity, readAccountIdentity, writeAccountIdentity } from './account-identity.mjs';
 
-const LEGACY_BOARD_URL = 'http://127.0.0.1:15173/';
+const LEGACY_BOARD_URL = 'https://board.tyuan.chat/';
 const THEME_OPTIONS = [
   { id: 'light', label: '日间' },
   { id: 'dark', label: '夜晚' },

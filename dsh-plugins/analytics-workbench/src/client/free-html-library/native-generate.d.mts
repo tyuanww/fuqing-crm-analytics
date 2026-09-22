@@ -9,6 +9,7 @@ export type PageGenerateExtras = {
   designGuide?: unknown;
   skill?: unknown;
   requestId?: string;
+  sessionId?: string;
   signal?: AbortSignal;
   timeoutMs?: number;
   package?: unknown;

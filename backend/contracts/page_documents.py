@@ -97,7 +97,7 @@ class PageNodeMapEntry(PageModel):
 
 
 class PageElementKey(PageModel):
-    attribute: Literal['id', 'data-node', 'data-page-block', 'data-page-field', 'class', 'text']
+    attribute: Literal['id', 'data-node', 'data-page-block', 'data-page-field', 'class', 'text', 'nth']
     value: Annotated[str, Field(min_length=1, max_length=2000)]
 
     @model_validator(mode='after')
@@ -105,6 +105,9 @@ class PageElementKey(PageModel):
         if self.attribute == 'text':
             if not self.value.strip():
                 raise ValueError('empty text identity')
+        elif self.attribute == 'nth':
+            if not re.fullmatch(r'\d{1,4}', self.value):
+                raise ValueError('invalid element position')
         elif not re.fullmatch(r'[A-Za-z][A-Za-z0-9_.:-]{0,159}', self.value):
             raise ValueError('invalid element identity')
         return self
@@ -121,7 +124,7 @@ class PageElementTarget(PageModel):
 
     @model_validator(mode='after')
     def keyed_root(self):
-        if self.anchor.attribute in {'class', 'text'}:
+        if self.anchor.attribute in {'class', 'text', 'nth'}:
             raise ValueError('root requires an explicit identity')
         return self
 
