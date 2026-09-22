@@ -16,7 +16,11 @@ const READ_LIMIT_MAX = 50;
 const BUDGET_BYTES = 65536;
 const BUDGET_ROWS = 2000;
 const READ_MODES = new Set(['summary', 'page', 'range']);
-const utf8 = new TextEncoder();
+let utf8Encoder;
+function utf8Bytes(text) {
+  utf8Encoder ??= new TextEncoder();
+  return utf8Encoder.encode(text).byteLength;
+}
 const BRIDGE_KEYS = {
   'data.read': new Set(['protocol', 'instance_id', 'request_id', 'nonce', 'seq', 'op', 'result_ref', 'mode', 'cursor', 'limit']),
   'data.cancel': new Set(['protocol', 'instance_id', 'request_id', 'nonce', 'seq', 'op']),
@@ -25,10 +29,6 @@ const BRIDGE_KEYS = {
   'data.error': new Set(['protocol', 'instance_id', 'request_id', 'nonce', 'seq', 'op', 'code', 'message']),
   'binding.state': new Set(['protocol', 'instance_id', 'request_id', 'nonce', 'seq', 'op', 'binding_state']),
 };
-
-function utf8Bytes(text) {
-  return utf8.encode(text).byteLength;
-}
 
 function fail(code, message) {
   return { ok: false, error: { code, message } };
