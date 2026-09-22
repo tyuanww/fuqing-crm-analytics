@@ -2,6 +2,10 @@
 
 固定上游：`deepseek-ai/deepseek-harness@ddefc45fbc7f8e46dd73185e68295696d1297887`（sdk `0.1.6-alpha.2`，见 `toolchain.json`）。私有本地验证包，不发布 npm，不包含模型密钥或真实数据。2026-09-06 已接独立 FastAPI B0 任务内核、固定方法包与当前权限接缝；完整 B0 仍为 PARTIAL，见[当前收口报告](../../docs/hackathon/B0-LOCAL-CLOSEOUT-2026-09-06.md)。
 
+## 整段说明编辑
+
+带行内标签的段落，例如「本周收入 **1,245,100 元**」，在编辑框里显示完整句子和原来的数字。可以改周围的文字；数字会留在原来的标签里。删掉或改写这些数字会被拒绝。点击句子里的数字，选中的是整段。不含行内标签的文字仍按原来的方式整段替换。
+
 ## 历史产物与多格式编辑（0.11.0.0 候选）
 
 本轮功能 `e90af23a`、版本/验收 `5df9c315` 已推送至 `codex/cockpit-history-import`，PR待创建；基线为 #214 `f9070431`。当前状态见 [STATUS](../../STATUS.md)，本轮检查见 [Ship记录](../../docs/hackathon/COCKPIT-SHIP-2026-09-20.md)。

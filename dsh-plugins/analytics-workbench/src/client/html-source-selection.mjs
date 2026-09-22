@@ -1,9 +1,17 @@
 import { sourceHash } from '../free-page/presentation/model.mjs';
 /** Source offsets for ordinary static HTML. Ambiguous/malformed trees fail closed. */
 import { sha256Hex } from '../free-page/hash.mjs';
+import { buildRichTextTemplate, restoreRichText } from './free-html-library/rich-text.mjs';
 const VOID = new Set('area base br col embed hr img input link meta param source track wbr'.split(' '));
 const SELECTABLE = new Set('header footer main section article aside div h1 h2 h3 h4 h5 h6 p span strong em b i small label button a li ul ol blockquote figcaption figure td th caption'.split(' '));
 const BLOCK = new Set('header footer main section article aside div ul ol figure blockquote'.split(' '));
+const SENTENCE = new Set('p h1 h2 h3 h4 h5 h6 li figcaption caption label td th button blockquote'.split(' '));
+const BLOCK_CHILD = /<\/?(?:div|section|article|aside|header|footer|main|nav|table|ul|ol|li|p|h[1-6]|blockquote|figure|script|style|iframe|canvas)\b/i;
+
+function sentenceTemplate(tag, inner) {
+  if (!SENTENCE.has(tag) || BLOCK_CHILD.test(inner)) return null;
+  return buildRichTextTemplate(inner);
+}
 export function sourceTargets(pkg, manifest, { rendered = false } = {}) {
   if (!pkg?.html || manifest?.bindings?.length || manifest?.result_refs?.length) return [];
   const html = pkg.html, stack = [], rows = [];
@@ -58,8 +66,10 @@ export function sourceTargets(pkg, manifest, { rendered = false } = {}) {
   return rows.sort((a, b) => a.start - b.start).slice(0, 2000).map(row => {
     while (reserved.has('source_' + serial)) serial++;
     const node_id = 'source_' + serial++;
+    const sentence = sentenceTemplate(row.tag, row.text);
     return { node_id, kind: 'static_element', mapping: 'valid', mapping_token: html_hash,
-    version_hash: html_hash, tag: row.tag, text: row.text, editableText: row.editableText, block: row.block,
+    version_hash: html_hash, tag: row.tag, text: row.text, editorText: sentence?.value, richText: Boolean(sentence),
+    editableText: row.editableText || Boolean(sentence), block: row.block,
     anchor: row.anchor,
     source: { start: row.start, end: row.end, inner_start: row.inner_start, inner_end: row.inner_end, html_hash },
     };
@@ -74,8 +84,17 @@ export function selectionForAI(pkg, node) {
 export function sourceTextPreview(pkg, node, replacementText, manifest) {
   const current = sourceTargets(pkg, manifest).find(item => item.node_id === node?.node_id && item.mapping_token === node.mapping_token);
   if (!current?.editableText) throw new Error('选区已变化或不支持直接改字，请重新选择。');
-  const escaped = String(replacementText).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
-  const next = { ...pkg, html: pkg.html.slice(0, current.source.inner_start) + escaped + pkg.html.slice(current.source.inner_end) };
+  const inner = pkg.html.slice(current.source.inner_start, current.source.inner_end);
+  const sentence = sentenceTemplate(current.tag, inner);
+  let replacement;
+  if (sentence) {
+    const restored = restoreRichText(replacementText, sentence.tokens);
+    if (!restored.ok) throw new Error(restored.message);
+    replacement = restored.html;
+  } else {
+    replacement = String(replacementText).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+  }
+  const next = { ...pkg, html: pkg.html.slice(0, current.source.inner_start) + replacement + pkg.html.slice(current.source.inner_end) };
   if (next.presentation) next.presentation = { ...next.presentation, source_hash: sourceHash(next) };
   return next;
 }

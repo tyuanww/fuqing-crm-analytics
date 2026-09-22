@@ -88,13 +88,30 @@ function selectionRuntime(config) {
       }
       const next = new Map([...candidates].filter(([id, node]) => !duplicates.has(id) && !config.runtimeOnly.includes(id)
         && node.namespaceURI === 'http://www.w3.org/1999/xhtml' && staticAttributes(node) && unchanged(node)));
+      const inlineName = name => ['a', 'b', 'em', 'i', 'small', 'span', 'strong', 'sub', 'sup'].includes(name);
+      const sentenceNode = node => {
+        if (!node || !['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'figcaption', 'caption', 'label', 'td', 'th', 'button', 'blockquote'].includes(node.localName)) return false;
+        const kids = [...node.children];
+        return kids.length > 0 && kids.every(child => inlineName(child.localName))
+          && [...node.childNodes].some(child => child.nodeType === 3 && child.nodeValue.trim());
+      };
+      const insideSentence = node => {
+        let parent = node?.parentElement;
+        while (parent) {
+          const parentId = identity(parent);
+          if (parentId && next.get(parentId) === parent && sentenceNode(parent)) return true;
+          parent = parent.parentElement;
+        }
+        return false;
+      };
+      for (const [id, node] of [...next]) if (insideSentence(node)) next.delete(id);
       const runtimeNodes = [], seen = new Set(); let runtimeBytes = 0;
       const roots = config.roots.map(root => ({ root, elements: [...document.querySelectorAll('[' + root.anchor.attribute + ']')].filter(node => node.getAttribute(root.anchor.attribute) === root.anchor.value) }))
         .filter(row => row.elements.length === 1).reverse();
       for (const { root, elements: [element] } of roots) {
         const descendants = [element, ...element.querySelectorAll('*')].slice(0, 2000);
         for (const node of descendants) {
-          if (seen.has(node) || next.size >= 2000 || node.namespaceURI !== 'http://www.w3.org/1999/xhtml'
+          if (seen.has(node) || insideSentence(node) || next.size >= 2000 || node.namespaceURI !== 'http://www.w3.org/1999/xhtml'
             || node.closest('script,style,template,iframe,object,embed,textarea,input,select,[data-shine-region],[data-sp-bindable="database"],[data-page-readonly]') || !staticAttributes(node)) continue;
           const directTexts = [...node.childNodes].filter(n => n.nodeType === 3);
           const visibleTexts = directTexts.filter(n => n.nodeValue.trim());
@@ -144,6 +161,9 @@ function selectionRuntime(config) {
         }
       }
       for (const [id, node] of eligible) if (next.get(id) !== node) unmark(node);
+      for (const node of document.querySelectorAll('[data-cockpit-target]')) {
+        if (![...next.values()].includes(node)) unmark(node);
+      }
       for (const [id, node] of next) {
         if (!node.hasAttribute('data-cockpit-target')) {
           node.setAttribute('data-cockpit-tabindex', node.getAttribute('tabindex') ?? '');
