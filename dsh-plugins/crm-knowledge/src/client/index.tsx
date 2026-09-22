@@ -6,8 +6,8 @@ import type {} from '@deepseek-ai/dsh-client-ui-renderer/client';
 import type {} from '@deepseek-ai/dsh-api-session-controller/remote';
 import type {} from '@deepseek-ai/dsh-api-workspace-controller/remote';
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots';
-import { Alert, Button, ConfigProvider, Input, Modal, Space, Typography, theme } from 'antd';
-import { antdSeedToken } from '../../../analytics-workbench/src/client/competition-shell/tokens';
+import { Alert, Button, ConfigProvider, Input, Modal, Space, Typography } from 'antd';
+import { competitionFont, competitionThemeFor } from '../../../analytics-workbench/src/client/competition-shell/tokens';
 import { CrmLibraryButton } from './crm-library';
 import type { CrmCockpitSlot } from '../../../analytics-workbench/src/client/cockpit-extension';
 declare module '@deepseek-ai/dsh-client-ui-slots' {
@@ -25,6 +25,15 @@ const FAILURES: Record<string, string> = {
 };
 type ConnectionState = { connected: boolean; username: string | null; expires_at: string | null };
 const EMPTY: ConnectionState = { connected: false, username: null, expires_at: null };
+const CRM_UI_TOKENS = competitionThemeFor('light');
+const CRM_UI_THEME = CRM_UI_TOKENS.antd;
+const CRM_UI_CSS = `.sm-crm-connection-dock{padding:8px 0;color:${CRM_UI_TOKENS.color.ink};font-size:13px}.sm-crm-connection-dock .ant-typography-secondary{color:${CRM_UI_TOKENS.color.copy}}.sm-crm-connected-button{color:${CRM_UI_TOKENS.color.brandSecondary};border-color:${CRM_UI_TOKENS.material.lineStrong};background:${CRM_UI_TOKENS.color.background}}.sm-crm-analysis-icon{display:block}`;
+
+function CrmAnalysisIcon() {
+  return <svg className="sm-crm-analysis-icon" data-testid="crm-analysis-icon" width="15" height="15" viewBox="0 0 16 16" aria-hidden="true">
+    <path d="M2 12.5V3.5h2v9H2Zm5 0V6h2v6.5H7Zm5 0V1.5h2v11H12Z" fill="currentColor" />
+  </svg>;
+}
 
 /** Session-scoped native slot. Password lives in the form/request, never a host store. */
 export function CrmConnectionDock({ sessionId }: Pick<PropsRuntime<'conversation.input.dock'>, 'sessionId'>) {
@@ -73,10 +82,12 @@ export function CrmConnectionDock({ sessionId }: Pick<PropsRuntime<'conversation
     if (password instanceof HTMLInputElement) password.value = '';
     void call('login', credentials);
   }
-  return <ConfigProvider theme={{ algorithm: theme.darkAlgorithm, token: antdSeedToken }}>
-    <Space wrap style={{ padding: '8px 0' }}>
-      <Button size="small" onClick={() => { setOpen(true); void call('status'); }}>
-        {state.connected ? 'CRM 已连接' : '连接 CRM'}
+  return <ConfigProvider theme={CRM_UI_THEME}>
+    <div className="sm-crm-connection-dock" style={{ fontFamily: competitionFont.body }}>
+    <Space wrap>
+      <Button size="small" className={state.connected ? 'sm-crm-connected-button' : undefined} icon={state.connected ? <CrmAnalysisIcon /> : undefined}
+        aria-label={state.connected ? 'CRM分析（已连接）' : '连接 CRM'} onClick={() => { setOpen(true); void call('status'); }}>
+        {state.connected ? 'CRM分析' : '连接 CRM'}
       </Button>
       <Typography.Text type="secondary">{state.connected ? '本对话可查询看板 GSV、AOV、AUS' : '连接后可查询你的看板销售指标'}</Typography.Text>
       <CrmLibraryButton sessionId={sessionId} />
@@ -101,6 +112,8 @@ export function CrmConnectionDock({ sessionId }: Pick<PropsRuntime<'conversation
         </form>}
       </Space>
     </Modal>
+    <style>{CRM_UI_CSS}</style>
+    </div>
   </ConfigProvider>;
 }
 
