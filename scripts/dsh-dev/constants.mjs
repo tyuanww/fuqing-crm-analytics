@@ -1,6 +1,6 @@
 /** Full DSH base local-dev constants. Not the B0 synthetic verification runner. */
 
-export const PINNED_SHA = 'ddefc45fbc7f8e46dd73185e68295696d1297887';
+export const PINNED_SHA = '00102833dfaee1da9f48a3a8eae9d34005a75218';
 export const NODE_MAJOR = 24;
 export const HOST = '127.0.0.1';
 

@@ -13,7 +13,7 @@
     "test:host": "node --test test/host.integration.mjs"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh-tools": "0.1.6-alpha.2",
+    "@deepseek-ai/dsh-tools": "0.1.7-alpha.2",
     "@deepseek-ai/cordis": "4.0.2"
   },
   "exports": {
