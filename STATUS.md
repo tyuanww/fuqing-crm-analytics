@@ -1,11 +1,11 @@
 # 项目状态 (Project Status)
-> 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。公开仓库 main 为 **3bc2841（#50）**，VERSION **0.16.0.2**。现役 6677 已加载该插件构建。产品仍 PARTIAL。
+> 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。公开仓库 main 为 **f77c310（#51）**，VERSION **0.16.0.2**。目录和端口见 [维护地图](docs/operating/maintainer-map.md)。现役 6677 已加载该插件构建。产品仍 PARTIAL。
 
 ## 当前快照（2026-09-22，驾驶舱原生 HTML 0.16.0.2）
 
 | 项 | 状态 |
 |---|---|
-| 已合代码基线 | **3bc2841（公开仓库 #50）**，前序 #49 / 0.16.0.1。旧私有历史未合入。 |
+| 已合代码基线 | **f77c310（公开仓库 #51）**，产品提交是 #50 / 0.16.0.2，前序 #49。旧私有历史未合入。 |
 | 本轮交付 | 对话用 `free_html_page_generate` 交 HTML。工作台放入可编辑驾驶舱，并在对话右侧产物栏打开。步骤见 [操作说明](docs/operating/cockpit-native-html.md)。选区压缩后可点选。GSV 带首购新老客和仓库最后支付日。 |
 | VERSION / 产品 | 公开 main **0.16.0.2**。产品 **PARTIAL**，原全量 Goal **PAUSED**。 |
 | DSH 基座 | **0.1.6-alpha.2（ddefc45f）**，不改上游。 |
