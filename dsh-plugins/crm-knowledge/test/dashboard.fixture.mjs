@@ -3,7 +3,7 @@ import { createServer } from 'node:http';
 import { once } from 'node:events';
 
 export const request = { start_date: '2026-01-01', end_date: '2026-01-02' };
-export const overview = { metric_type: 'GSV', date_range: { start: request.start_date, end: request.end_date, cutoff: null }, amount: 100.31, avg_order_value: 999, member_premium: 888 };
+export const overview = { metric_type: 'GSV', date_range: { start: request.start_date, end: request.end_date, cutoff: null }, amount: 100.31, avg_order_value: 999, member_premium: 888, new_users: 3, old_users: 7, new_user_amount: 20.1, old_user_amount: 80.21, new_user_ratio: 0.2004, old_user_ratio: 0.7996 };
 export const trend = { metric_type: 'GSV', dates: ['2026-01-01', '2026-01-02'], amounts: [30.1, 70.21] };
 export const SYNTHETIC_TOKEN = 'fixture-only-token-000000000000';
 export const SYNTHETIC_PASSWORD = 'fixture-password';
@@ -26,6 +26,7 @@ export async function serveDashboard(t, custom) {
     if (url.pathname === '/api/v1/auth/me') res.end(JSON.stringify({ username: 'fixture-user', is_admin: false }));
     else if (url.pathname === '/api/v1/metrics/overview') res.end(JSON.stringify(overview));
     else if (url.pathname === '/api/v1/metrics/trend') res.end(JSON.stringify(trend));
+    else if (url.pathname === '/api/v1/metrics/cutoff') res.end(JSON.stringify({ cutoff_date: '2026-07-10' }));
     else { res.statusCode = 404; res.end('{}'); }
   });
   server.listen(0, '127.0.0.1'); await once(server, 'listening');

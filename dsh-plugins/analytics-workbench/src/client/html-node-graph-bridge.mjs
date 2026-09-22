@@ -6,6 +6,7 @@
  * Runtime nodes stay inspectable and are not direct writes.
  */
 import { buildSrcdoc } from '../free-page/preview/srcdoc-builder.mjs';
+import { insertBeforeBodyEnd } from './insert-before-body-end.mjs';
 import { buildSourceIndex } from '../free-page/source-index/index.mjs';
 import { acceptOperation } from './html-edit-operations.mjs';
 
@@ -327,7 +328,7 @@ export function selectionSrcdoc(pkg, { channel, pageId, version, nodes = [], sel
     channel, pageId, version, ids: nodes.map(row => row.node_id), nodes: nodes.map(slimNode),
     selected, allowRuntime, blocks: BLOCK_TAGS,
   }).replace(/</g, '\\u003c');
-  return src.replace('</body>', `<script>(${selectionRuntime.toString()})(${config});</script></body>`);
+  return insertBeforeBodyEnd(src, `<script>(${selectionRuntime.toString()})(${config});</script>`);
 }
 
 function sanitizeCrumb(row) {

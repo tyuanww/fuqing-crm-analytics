@@ -35,7 +35,10 @@ export function sourceTargets(pkg, manifest, { rendered = false } = {}) {
       const entry = stack.pop();
       if (!entry || entry.tag !== tag) { invalid = true; break; }
       const inner = html.slice(entry.inner_start, match.index);
-      if ((rendered ? !entry.readonly && entry.anchor : !entry.blocked) && SELECTABLE.has(tag) && !/<(?:script|style|iframe|object|embed)\b|\bdata-shine-region\s*=/i.test(inner)) {
+      const embedded = /<(?:script|style|iframe|object|embed)\b|\bdata-shine-region\s*=/i.test(inner);
+      const renderedRoot = rendered && !entry.readonly && entry.anchor && !/\bdata-shine-region\s*=/i.test(inner);
+      const staticTarget = !rendered && !entry.blocked && !embedded;
+      if ((renderedRoot || staticTarget) && SELECTABLE.has(tag)) {
         rows.push({ ...entry, inner_end: match.index, end: tags.lastIndex, text: inner,
           block: BLOCK.has(tag) && /<[a-z]/i.test(inner), editableText: !/<[a-z!/]/i.test(inner) });
       }

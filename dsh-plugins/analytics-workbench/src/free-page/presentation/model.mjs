@@ -1,7 +1,7 @@
 /** Declarative edits: identity and presentation data, never user-authored executable code. */
 import { sha256Hex } from '../hash.mjs';
 export const STYLE_PROPERTIES = new Set(('color background-color font-size font-weight font-style font-family line-height letter-spacing text-align text-decoration white-space border border-color border-width border-style border-radius padding padding-top padding-right padding-bottom padding-left margin margin-top margin-right margin-bottom margin-left display gap row-gap column-gap grid-template-columns flex-direction flex-wrap align-items justify-content order max-width min-width width').split(' '));
-const KEYS = new Set(['id', 'data-node', 'data-page-block', 'data-page-field', 'class', 'text']);
+const KEYS = new Set(['id', 'data-node', 'data-page-block', 'data-page-field', 'class', 'text', 'nth']);
 export function sourceHash(pkg) { return sha256Hex(JSON.stringify([pkg.html, pkg.css ?? '', pkg.js ?? ''])); }
 export function targetId(target) {
   const key = value => value ? [value.attribute, value.value] : null;
@@ -9,8 +9,8 @@ export function targetId(target) {
 }
 export function validTarget(target) {
   const key = k => k && Object.keys(k).length === 2 && KEYS.has(k.attribute) && typeof k.value === 'string'
-    && (k.attribute === 'text' ? k.value.length <= 2000 && k.value.trim() : /^[A-Za-z][A-Za-z0-9_.:-]{0,159}$/.test(k.value));
-  return Boolean(target && key(target.anchor) && !['class', 'text'].includes(target.anchor.attribute) && Array.isArray(target.path) && target.path.length <= 64
+    && (k.attribute === 'nth' ? /^\d{1,4}$/.test(k.value) : k.attribute === 'text' ? k.value.length <= 2000 && k.value.trim() : /^[A-Za-z][A-Za-z0-9_.:-]{0,159}$/.test(k.value));
+  return Boolean(target && key(target.anchor) && !['class', 'text', 'nth'].includes(target.anchor.attribute) && Array.isArray(target.path) && target.path.length <= 64
     && target.path.every(p => p && Object.keys(p).every(k => ['tag', 'key'].includes(k)) && typeof p.tag === 'string' && p.tag.length <= 80
       && /^[a-z][a-z0-9-]*$/.test(p.tag) && (p.key == null || key(p.key))));
 }

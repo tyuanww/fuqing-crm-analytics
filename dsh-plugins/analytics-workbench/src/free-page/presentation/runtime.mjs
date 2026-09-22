@@ -44,7 +44,13 @@ export function presentationRuntime(edits) {
     if (roots.length !== 1) return null;
     let node = roots[0];
     for (const part of target.path) {
-      const children = [...node.children].filter(n => n.localName === part.tag && (!part.key || matches(n, part.key)));
+      const sameTag = [...node.children].filter(n => n.localName === part.tag);
+      if (part.key?.attribute === 'nth') {
+        node = sameTag[Number(part.key.value)] ?? null;
+        if (!node) return null;
+        continue;
+      }
+      const children = sameTag.filter(n => !part.key || matches(n, part.key));
       if (children.length !== 1) return null;
       node = children[0];
       if (part.key?.attribute === 'text') identities.set(node, part.key.value);
@@ -61,6 +67,7 @@ export function presentationRuntime(edits) {
       const edit = edits[i], node = resolve(edit.target);
       if (!node || node.namespaceURI !== 'http://www.w3.org/1999/xhtml' || node.closest('script,style,template,iframe,object,embed,textarea,input,select,[data-sp-bindable="database"],[data-page-readonly]')
         ) { unresolved.push(i); continue; }
+      if (node.hasAttribute('data-cockpit-drafting')) continue;
       if (edit.text != null) {
         if (!identities.has(node)) identities.set(node, node.textContent);
         const texts = [...node.childNodes].filter(n => n.nodeType === 3);

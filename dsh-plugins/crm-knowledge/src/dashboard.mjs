@@ -1,6 +1,25 @@
 /** Read the accepted dashboard through its authenticated API. No DB/SQL fallback. */
-export const CHANNELS = Object.freeze(['全店', '纯派样', '货架', '达播', '直播', '淘客', '微博', 'U先派样', '百补派样', '赠品&0.01', '其他']);
+export const LEAF_CHANNELS = Object.freeze(['货架', '达播', '直播', '淘客', '微博', 'U先派样', '百补派样', '赠品&0.01', '其他']);
+export const CHANNELS = Object.freeze(['全店', '纯派样', ...LEAF_CHANNELS]);
 export const LOW_PRICE_CHANNELS = Object.freeze(['U先派样', '百补派样', '赠品&0.01', '其他']);
+export const CHANNEL_QUERY_DESCRIPTION = '看板渠道，默认全店。全店是九个叶子渠道之和；纯派样是 U先派样 + 百补派样，已经包含在这九个叶子里。禁止把全店或纯派样和叶子渠道相加，也禁止把纯派样和它的两个子渠道相加。';
+
+export function channelRole(channel) {
+  if (channel === '全店') return { role: 'store_total', add_with_leaves: false, equals: 'leaf_partition' };
+  if (channel === '纯派样') return { role: 'aggregate', add_with_leaves: false, equals: ['U先派样', '百补派样'] };
+  return { role: 'leaf', add_with_leaves: true, equals: channel };
+}
+
+export function channelHierarchy() {
+  return {
+    leaf_partition: [...LEAF_CHANNELS],
+    aggregates: [
+      { channel: '全店', role: 'store_total', equals: 'sum of leaf_partition' },
+      { channel: '纯派样', role: 'aggregate', equals: ['U先派样', '百补派样'] },
+    ],
+    sum_rule: 'Only leaf_partition sums to 全店. 纯派样 is already inside that sum. A total that includes both 纯派样 and U先派样 or 百补派样 is double counting.',
+  };
+}
 const VERSION = 'dashboard-gsv/observed-v1';
 const MAX_BYTES = 256 * 1024;
 const DAY = 86400000;
@@ -45,7 +64,10 @@ export function dashboardCapabilities(connectionState = 'NOT_CONNECTED') {
     authentication_checked_on_each_query: true, max_days: 90,
     saved_analysis: { capture_tool: 'query_crm_dashboard_snapshot', schema_version: 'crm-result-snapshot/v1',
       scope: 'private_crm_account', saves_require_user_confirmation: true, store_configuration_required: true },
-    fields: ['gsv_amount', 'daily_gsv'], purchases_tool: 'query_crm_dashboard_purchases', purchases_requires_backend: 'crm-dashboard-purchases/v1', channels: [...CHANNELS],
+    fields: ['gsv_amount', 'daily_gsv'], purchases_tool: 'query_crm_dashboard_purchases',
+    purchases_backend_contract: 'crm-dashboard-purchases/v1',
+    purchases_runtime_status: 'unknown_until_query_crm_dashboard_purchases_is_called',
+    channels: [...CHANNELS], channel_hierarchy: channelHierarchy(),
     readiness_tool: 'query_crm_dashboard_readiness', membership_tool: 'query_crm_dashboard_membership',
     net_gsv_tool: 'query_crm_dashboard_net_gsv',
     definition: dashboardKnowledgeContext(),
@@ -88,6 +110,30 @@ function money(amount) {
   const absolute = BigInt(amount) < 0n ? -BigInt(amount) : BigInt(amount);
   return { amount_fen: amount, amount_yuan: `${amount < 0 ? '-' : ''}${absolute / 100n}.${String(absolute % 100n).padStart(2, '0')}`, currency: 'CNY' };
 }
+function count(value) {
+  return Number.isSafeInteger(value) && value >= 0 ? value : null;
+}
+function finite(value) {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+/** First-purchase audience already returned by the overview. Not membership. */
+export function projectAudience(overview) {
+  const newUsers = count(overview?.new_users);
+  const oldUsers = count(overview?.old_users);
+  if (newUsers === null || oldUsers === null) return null;
+  return {
+    source: 'user_first_purchase',
+    definition: '新客是首购日晚于窗口开始前一天的买家；老客是首购日不晚于该日的买家。',
+    new_users: newUsers,
+    old_users: oldUsers,
+    new_user_amount_yuan: finite(overview.new_user_amount),
+    old_user_amount_yuan: finite(overview.old_user_amount),
+    new_user_ratio: finite(overview.new_user_ratio),
+    old_user_ratio: finite(overview.old_user_ratio),
+  };
+}
+
 function projectAverage(item) {
   if (!item || typeof item !== 'object' || !Number.isSafeInteger(item.denominator) || item.denominator < 0) fail('INVALID_RESPONSE');
   if (item.reason) {
@@ -116,7 +162,9 @@ export function normalizeDashboard(overview, trend, filters, dataKind) {
   if (sum !== BigInt(amount)) fail('INCONSISTENT_RESULT');
   const dates = new Set(trend.dates);
   const missing = [];
+  let calendarDayCount = 0;
   for (let date = parseDate(filters.start_date, 'INVALID_REQUEST'); date <= parseDate(filters.end_date, 'INVALID_REQUEST'); date += DAY) {
+    calendarDayCount += 1;
     const text = new Date(date).toISOString().slice(0, 10);
     if (!dates.has(text)) missing.push(text);
   }
@@ -124,9 +172,11 @@ export function normalizeDashboard(overview, trend, filters, dataKind) {
     status: 'OK', schema_version: 'crm-dashboard-read/v1', metric_version: VERSION,
     source: 'authenticated_crm_metrics_service', contains_real_data: dataKind === 'real', synthetic: dataKind === 'synthetic',
     filters: { ...filters, metric_type: 'GSV', timezone: 'Asia/Shanghai', end_inclusive: true, exclude_channels: filters.exclude_low_price ? [...LOW_PRICE_CHANNELS] : [] },
-    gsv: money(amount), daily, reconciliation: { daily_sum_matches: true, dates_not_returned: missing },
-    data_through: null, refund_as_of: null, backend_version_verified: false,
-    limitations: ['仅接入现看板 GSV；没有输出或校准客单价、会员溢价及同比。', '接口没有返回可确认的数据水位或退款截止日。', '日趋势未返回的日期不补0；不能区分无成交与资料缺失。', '概览与趋势为两次请求，并非数据库快照；一致性校验仅覆盖金额。'],
+    gsv: money(amount), daily, returned_day_count: daily.length, calendar_day_count: calendarDayCount, channel_role: channelRole(filters.channel),
+    audience: projectAudience(overview),
+    reconciliation: { daily_sum_matches: true, dates_not_returned: missing },
+    data_through: null, warehouse_cutoff: null, refund_as_of: null, backend_version_verified: false,
+    limitations: ['客单价和会员溢价不从概览转发；会员溢价用 query_crm_dashboard_membership，净额用 query_crm_dashboard_net_gsv。', 'data_through 仍为空；warehouse_cutoff 是仓库最后支付日，不是每条指标的截止时刻。', '日趋势未返回的日期不补0；不能区分无成交与资料缺失。', 'returned_day_count 是趋势实际返回的天数，calendar_day_count 是请求区间的日历天数。缺日不补 0，日均不要用返回点数代替整段日历。', '概览与趋势为两次请求，并非数据库快照；一致性校验仅覆盖金额。'],
     definition: dashboardKnowledgeContext(),
   };
 }
@@ -179,7 +229,12 @@ async function queryDashboard(input, options, purchases = false) {
     const overview = await getJson(base, '/api/v1/metrics/overview', params, binding, combined);
     const trend = await getJson(base, '/api/v1/metrics/trend', params, binding, combined);
     combined.throwIfAborted();
-    return normalizeDashboard(overview, trend, filters, binding.dataKind);
+    const result = normalizeDashboard(overview, trend, filters, binding.dataKind);
+    try {
+      const cutoff = await getJson(base, '/api/v1/metrics/cutoff', new URLSearchParams(), binding, combined);
+      if (typeof cutoff?.cutoff_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(cutoff.cutoff_date)) result.warehouse_cutoff = cutoff.cutoff_date;
+    } catch { /* a missing cutoff must not hide a valid GSV */ }
+    return result;
   } catch (error) {
     let code = 'UPSTREAM_ERROR';
     if (signal?.aborted) code = 'CANCELLED';
@@ -292,7 +347,7 @@ export function normalizePurchases(value, filters, dataKind) {
     status: 'OK', schema_version: value.schema_version, metric_version: value.metric_version,
     source: 'authenticated_crm_metrics_service', contains_real_data: dataKind === 'real', synthetic: dataKind === 'synthetic',
     filters: { ...filters, timezone: 'Asia/Shanghai', end_inclusive: true },
-    gsv: money(value.gsv_amount_fen), coverage, ...averages,
+    gsv: money(value.gsv_amount_fen), coverage, ...averages, channel_role: channelRole(filters.channel),
     data_through: null, refund_as_of: null,
     limitations: ['AOV为每单金额，AUS为按购买人数计算的客单价；分子沿用看板GSV，净额版单列。',
       '未知标识或异常金额会阻断对应均值；零元订单和仅零元买家另列，不计购买分母。',
@@ -343,7 +398,7 @@ export function normalizeMembership(value, filters, dataKind) {
   return {
     status: 'OK', schema_version: value.schema_version, metric_version: value.metric_version,
     source: 'authenticated_crm_metrics_service', contains_real_data: dataKind === 'real',
-    synthetic: dataKind === 'synthetic', filters,
+    synthetic: dataKind === 'synthetic', filters, channel_role: channelRole(filters.channel),
     member_gsv: money(value.member_gsv_amount_fen), non_member_gsv: money(value.non_member_gsv_amount_fen),
     unknown_member_gsv: money(value.unknown_member_gsv_amount_fen),
     member_aus: projectAverage(value.member_aus), non_member_aus: projectAverage(value.non_member_aus),
@@ -372,7 +427,7 @@ export function normalizeNetGsv(value, filters, dataKind) {
   return {
     status: 'OK', schema_version: value.schema_version, metric_version: value.metric_version,
     source: 'authenticated_crm_metrics_service', contains_real_data: dataKind === 'real',
-    synthetic: dataKind === 'synthetic', filters, refund_as_of: value.refund_as_of,
+    synthetic: dataKind === 'synthetic', filters, channel_role: channelRole(filters.channel), refund_as_of: value.refund_as_of,
     gross_paid: money(value.gross_paid_fen), succeeded_refund: money(value.succeeded_refund_fen),
     net_gsv: money(value.net_gsv_amount_fen), parent_child_attributed: value.parent_child_attributed === true,
     limitations: ['净额GSV与看板GSV分列，不能对看板结果再扣退款。', ...(value.limitations ?? [])],

@@ -21,6 +21,11 @@ test('ordinary native chat has no synthetic run status; registered B0 still has 
   try {
     const native = renderToStaticMarkup(React.createElement(component, { session: { sessionId: 'native-session-uuid' } }));
     assert.equal(native, '');
+    const back = entries.find(row => row.options.id === 'shine-mage.analytics-b0.return-cockpit');
+    const returned = renderToStaticMarkup(React.createElement(back.component, {
+      session: { sessionId: 'native-session-uuid' }, openCockpit() { return true; },
+    }));
+    assert.match(returned, /返回驾驶舱/);
     const registered = renderToStaticMarkup(React.createElement(component, { session: { sessionId: 'session-b0-synthetic-primary' } }));
     assert.match(registered, /B0 任务内核状态/);
     const generate = entries.find(row => row.options.id === 'shine-mage.analytics-b0.generate-cockpit');
@@ -151,17 +156,19 @@ test('apply registers business slots; dispose removes them without touching nati
   const client = loadClient();
   const { entries, effects, tabs } = mount(client);
   assert.deepEqual(entries.map(row => row.options.name), [
-    'sidebar.right.pane.tab',
+    'sidebar.right.pane.tab', 'sidebar.right.pane.tab',
     'sidebar.brand.mark', 'conversation.hero.brand.mark',
     'sidebar.footer.action', 'sidebar.footer.action', 'shell.overlay', 'shell.overlay',
     'tool.call.toolview', 'tool.call.toolview', 'tool.call.toolview', 'tool.call.toolview', 'tool.call.toolview', 'tool.call.toolview',
-    'conversation.input.dock', 'conversation.composer.dock',
+    'conversation.input.dock', 'conversation.input.dock', 'conversation.composer.dock',
     'sidebar.panellist', 'main',
     'sidebar.panellist', 'main',
   ]);
-  assert.equal(tabs.length, 1);
+  assert.equal(tabs.length, 2);
   assert.equal(tabs[0].canOpen('dsh-resource://cockpit-ai/ai_1234abcd'), true);
   assert.equal(tabs[0].canOpen('dsh-resource://file/current.html'), false);
+  assert.equal(tabs[1].canOpen('dsh-resource://cockpit-page/page_abc123'), true);
+  assert.equal(tabs[1].canOpen('dsh-resource://cockpit-ai/ai_1234abcd'), false);
   assert.equal(entries[0].options.key, tabs[0].id);
   const panels = entries.filter(row => row.options.name === 'sidebar.panellist');
   const mains = entries.filter(row => row.options.name === 'main');
@@ -247,7 +254,7 @@ test('account menu lists the competition board as a new-tab link', () => {
     }));
     assert.match(html, /比赛看板/);
     assert.match(html, /data-testid="legacy-board-open"/);
-    assert.match(html, /href="http:\/\/127\.0\.0\.1:15173\/"/);
+    assert.match(html, /href="https:\/\/board\.tyuan\.chat\/"/);
     assert.match(html, /target="_blank"/);
     assert.match(html, /rel="noopener noreferrer"/);
     assert.match(html, />设置</);

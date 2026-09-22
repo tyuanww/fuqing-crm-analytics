@@ -1,6 +1,6 @@
 /** Convert a workspace HTML file into a page-documents candidate. Does not confirm, write workspace files, or invent shine nodes. */
 
-import { extractCandidateUrls } from '../../free-page/resource/network-policy.mjs';
+import { extractCandidateUrls, quarantineActiveOutbound } from '../../free-page/resource/network-policy.mjs';
 import { normalizePagePackage } from '../../free-page/resource/package-normalize.mjs';
 import { bytesToBase64, utf8Bytes } from '../../free-page/resource/bytes.mjs';
 import { workspaceRelFromEventPath } from '../cockpit-products.mjs';
@@ -257,21 +257,27 @@ export async function convertWorkspaceHtml({
     for (const [url, next] of cssRewrites.get(rel) ?? []) css = replaceCssUrl(css, url, next);
     extraCss.push(css);
   }
+  const hardUnsupported = unsupported.filter(row => row.reason !== 'network-forbidden');
   if (missing.length) {
     return fail('RESOURCE_MISSING', '相对资源缺失，未联网抓取', { missing, unsupported });
   }
-  if (unsupported.length) {
-    return fail('RESOURCE_UNSUPPORTED', '存在禁止或无法入库的资源', { missing, unsupported });
+  if (hardUnsupported.length) {
+    return fail('RESOURCE_UNSUPPORTED', '存在禁止或无法入库的资源', { missing, unsupported: hardUnsupported });
   }
+  const quarantined = quarantineActiveOutbound(rewritten, extraCss.join('\n'), '');
+  const removed = [...new Set([
+    ...unsupported.filter(row => row.reason === 'network-forbidden').map(row => row.url),
+    ...quarantined.removed,
+  ].filter(Boolean))];
   const normalized = await normalizePagePackage({
-    html: rewritten,
-    css: extraCss.join('\n'),
-    js: '',
+    html: quarantined.html,
+    css: quarantined.css,
+    js: quarantined.js,
     resources: [],
     node_map: [],
   });
   if (!normalized.ok) {
-    return { ok: false, error: normalized.error, missing, unsupported };
+    return { ok: false, error: normalized.error, missing, unsupported, quarantined: removed };
   }
   return {
     ok: true,
@@ -280,7 +286,8 @@ export async function convertWorkspaceHtml({
     binding_manifest: { bindings: [], result_refs: [] },
     binding_state: 'UNBOUND_SAMPLE',
     missing,
-    unsupported,
+    unsupported: removed.map(url => ({ url, reason: 'network-forbidden' })),
+    quarantined: removed,
   };
 }
 
@@ -336,6 +343,7 @@ export function createHtmlImporter({ documents } = {}) {
           snapshot: made.body.snapshot ?? null,
           missing: converted.missing,
           unsupported: converted.unsupported,
+          quarantined: converted.quarantined ?? [],
         };
       } catch (error) {
         return httpError(error);

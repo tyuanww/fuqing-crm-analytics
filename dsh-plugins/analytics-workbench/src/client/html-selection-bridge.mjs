@@ -3,6 +3,7 @@ import { sourceTargets, instrumentSourceTargets } from './html-source-selection.
 import { buildSrcdoc } from '../free-page/preview/srcdoc-builder.mjs';
 import { buildSourceIndex } from '../free-page/source-index/index.mjs';
 import { renderedPackageHash, validRenderedLocator } from './html-rendered-text.mjs';
+import { insertBeforeBodyEnd } from './insert-before-body-end.mjs';
 
 export function editablePageNodes(pkg, manifest) {
   const inferred = sourceTargets(pkg, manifest);
@@ -68,6 +69,7 @@ function selectionRuntime(config) {
       if (!saved) return;
       node.innerHTML = saved.html;
       if (saved.style == null) node.removeAttribute('style'); else node.setAttribute('style', saved.style);
+      node.removeAttribute('data-cockpit-drafting');
       originals.delete(node);
       drafted.delete(node);
     };
@@ -78,6 +80,7 @@ function selectionRuntime(config) {
       if (!liveDraft.active && !liveDraft.style) { restoreDraft(node); return; }
       if (!originals.has(node)) originals.set(node, { html: node.innerHTML, style: node.getAttribute('style') });
       drafted.add(node);
+      node.setAttribute('data-cockpit-drafting', '');
       if (liveDraft.active) {
         const next = String(liveDraft.text ?? '');
         const inlineName = name => ['a', 'b', 'em', 'i', 'small', 'span', 'strong', 'sub', 'sup', 'code'].includes(name);
@@ -177,7 +180,7 @@ function selectionRuntime(config) {
           const text = sentence ? (node.textContent ?? '') : editableText && node.children.length ? ownText.nodeValue : node.textContent ?? '';
           const block = /^(section|article|header|footer|aside|li)$/.test(node.localName) || (node.hasAttribute('data-node') || node.hasAttribute('data-page-block')) && node.children.length > 0;
           if ((!text.trim() && !savedText || text.length > 20000) || (!editableText && !block)) continue;
-          const path = []; let child = node, reliable = true;
+          const path = []; let child = node;
           while (child !== element && path.length < 64) {
             const parentNode = child.parentElement; if (!parentNode) break;
             const peers = [...parentNode.children].filter(n => n.localName === child.localName);
@@ -196,11 +199,11 @@ function selectionRuntime(config) {
               const numericLeaf = !child.children.length && /^[\s\d.,%+−\-]+$/.test(text);
               if (!numericLeaf && text.trim() && text.length <= 2000
                 && peers.filter(item => label(item) === text).length === 1) key = { attribute: 'text', value: text };
-              else { reliable = false; break; }
+              else key = { attribute: 'nth', value: String(peers.indexOf(child)) };
             }
             path.unshift({ tag: child.localName, ...(key ? { key } : {}) }); child = parentNode;
           }
-          if (!reliable || child !== element) continue;
+          if (child !== element) continue;
           const id = 'runtime_' + root.node_id + '_' + JSON.stringify(path);
           for (const [oldId, oldNode] of next) if (oldNode === node) next.delete(oldId);
           // Strip our own annotations before giving the model a read-only view of the selected block.
@@ -290,15 +293,15 @@ function selectionRuntime(config) {
 export function selectionSrcdoc(pkg, { channel, pageId, version, nodes = [], selected = null, editing = false, selectBlocks = false }) {
   let src = buildSrcdoc({ ...(editing ? instrumentSourceTargets(pkg, nodes) : pkg), instanceId: channel, pageId, version, nonce: channel });
   const statusConfig = JSON.stringify({ channel, pageId, version }).replace(/</g, '\\u003c');
-  src = src.replace('</body>', '<script>(' + (function (config) {
+  src = insertBeforeBodyEnd(src, '<script>(' + (function (config) {
     const report = () => parent.postMessage({ type: 'cockpit.presentation', ...config, unresolved: window.__cockpitPresentationStatus?.unresolved?.length ?? 0 }, '*');
     window.addEventListener('cockpit-presentation-status', report);
     document.addEventListener('DOMContentLoaded', report, { once: true }); report();
-  }).toString() + ')(' + statusConfig + ');</script></body>');
+  }).toString() + ')(' + statusConfig + ');</script>');
   if (!editing) return src;
   const config = JSON.stringify({ channel, pageId, version, ids: nodes.map(row => row.node_id), source: Object.fromEntries(nodes.map(row => [row.node_id, row.text])), selected,
     runtimeOnly: nodes.filter(row => row.runtimeOnly).map(row => row.node_id), roots: nodes.filter(row => row.anchor && row.packageHash).map(({ node_id, anchor, packageHash }) => ({ node_id, anchor, packageHash })), selectBlocks }).replace(/</g, '\\u003c');
-  return src.replace('</body>', '<script>(' + selectionRuntime.toString() + ')(' + config + ');</script></body>');
+  return insertBeforeBodyEnd(src, '<script>(' + selectionRuntime.toString() + ')(' + config + ');</script>');
 }
 export function acceptSelection(event, { source, channel, pageId, version, nodes }) {
   if (!source || event.source !== source || event.origin !== 'null') return undefined;
@@ -323,15 +326,28 @@ export function acceptTargets(event, { source, channel, pageId, version, nodes }
   for (const item of runtime) {
     if (!item || typeof item !== 'object') return undefined;
     const root = nodes.find(node => node.node_id === item.root_id && node.anchor && node.packageHash);
-    if (!root || !validRenderedLocator(item.runtime) || JSON.stringify(item.runtime.anchor) !== JSON.stringify(root.anchor)
-      || item.runtime.package_hash !== root.packageHash || typeof item.node_id !== 'string' || !item.node_id.startsWith('runtime_')
-      || typeof item.text !== 'string' || item.text.length > 20000 || typeof item.runtime.html !== 'string' || item.runtime.html.length > 60000
-      || !/^[a-z][a-z0-9-]*$/.test(item.tag) || typeof item.editableText !== 'boolean' || typeof item.block !== 'boolean') return undefined;
-    runtimeBytes += item.text.length + item.runtime.html.length;
-    if (runtimeBytes > 524288) return undefined;
+    const runtimeNode = item.runtime;
+    const located = root && runtimeNode && validRenderedLocator(runtimeNode)
+      && JSON.stringify(runtimeNode.anchor) === JSON.stringify(root.anchor)
+      && runtimeNode.package_hash === root.packageHash
+      && typeof item.node_id === 'string' && item.node_id.startsWith('runtime_')
+      && typeof item.text === 'string' && item.text.length <= 20000
+      && typeof runtimeNode.html === 'string' && runtimeNode.html.length <= 60000
+      && /^[a-z][a-z0-9-]*$/.test(item.tag)
+      && typeof item.editableText === 'boolean' && typeof item.block === 'boolean';
+    if (!located) continue;
+    const weight = item.text.length + runtimeNode.html.length;
+    if (runtimeBytes + weight > 524288) continue;
+    runtimeBytes += weight;
     extra.push({ ...item, kind: 'rendered_element', mapping: 'valid', mapping_token: root.packageHash, version_hash: root.packageHash,
       aiSource: root.source ?? root.aiSource });
   }
-  const result = [...accepted.map(matches => matches[0]), ...extra];
-  return new Set(result.map(node => node.node_id)).size === result.length ? result : undefined;
+  const result = [];
+  const seen = new Set();
+  for (const node of [...accepted.map(matches => matches[0]), ...extra]) {
+    if (seen.has(node.node_id)) continue;
+    seen.add(node.node_id);
+    result.push(node);
+  }
+  return result;
 }

@@ -10,6 +10,7 @@ import { visualEditorCss } from './html-visual-editor-chrome.mjs';
 import { FREE_PAGE_REFERRER_POLICY, FREE_PAGE_SANDBOX } from '../free-page/runtime/isolation-policy.mjs';
 import { selectionForAI, type AISourceSelection } from './html-source-selection.mjs';
 import { CockpitSidebar } from './CockpitSidebar.tsx';
+import { editorSelectionReady, visibleEditorNodes } from './editor-selection.mjs';
 import type { components } from '../free-page/contract/page-contract.generated.d.ts';
 
 const NO_NODES: TextNode[] = [];
@@ -67,7 +68,6 @@ export function HtmlPreview({ pkg, overlays = null, overlayNodes = [], pageId = 
   useEffect(() => {
     if (!editing) return;
     let eligible: TextNode[] = [];
-    targetsCallback.current?.([]);
     const receive = (event: MessageEvent) => {
       const context = { source: frame.current?.contentWindow ?? null, channel, pageId, version, nodes };
       const targets = acceptTargets(event, context);
@@ -114,7 +114,10 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, aiMode = 
   const editing = state.mode === 'edit' && !locked && state.previewAlive;
   const session = useMemo(() => ({}), [pkg, current.page_id, current.version, editing]);
   const [availability, setAvailability] = useState<{ session: object; nodes: TextNode[] } | null>(null);
-  const nodes = editing && availability?.session === session ? availability.nodes : NO_NODES;
+  const verified = editing && availability?.session === session ? availability.nodes : null;
+  const listed = useMemo(() => candidates.filter(node => node.editableText !== false && !node.runtimeOnly), [candidates]);
+  const nodes = visibleEditorNodes(listed, verified);
+  const targetsPending = editing && verified === null;
   const [aiOpen, setAiOpen] = useState(false), [instruction, setInstruction] = useState(''), [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState('');
   const [previewNote, setPreviewNote] = useState('');
@@ -127,7 +130,7 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, aiMode = 
   const sendLock = useRef(false);
   const selected = state.selection?.runtime ? state.selection as unknown as TextNode : candidates.find(row => row.node_id === state.selection?.node_id);
   const formalNode: PageNode | null = catalog.pageNodes.find(row => row.node_id === (state.selection?.node_id ?? selected?.node_id)) ?? null;
-  const selectionAvailable = Boolean(selected && nodes.some(node => node.node_id === selected.node_id));
+  const selectionAvailable = Boolean(selected) && editorSelectionReady(state.selection);
   const selectedRange = selected?.source ?? selected?.aiSource;
   const original = selected ? selected.richText && selected.editorText ? selected.editorText : selected.runtime ? selected.text : selected.editableText !== false ? decodeText(selected.text) : decodeText(selected.text.replace(/<[^>]*>/g, ' ')).trim() : '';
   const drafted = selected ? state.textDrafts?.[selected.node_id] : undefined;
@@ -291,8 +294,17 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, aiMode = 
           {state.textDraft?.changed && !state.preview ? <button disabled={state.busy} onClick={() => store.discardTextDraft()}>放弃文本修改</button> : null}
         </> : <>
           <div className="cockpit-selection-hint" aria-hidden="true">↖</div>
-          <h3>{nodes.length ? '选择文字或板块' : '此页暂无可直接修改的文字'}</h3>
-          <p className="cockpit-muted">{nodes.length ? '悬停查看可编辑范围，点击后在这里修改。也可以从下方选择。' : '此处缺少唯一的内容身份。可先用整页 AI 编辑为重复卡片建立稳定标识，再进行块级编辑。'}</p>
+          {nodes.length ? <>
+            <h3>选择文字或板块</h3>
+            <p className="cockpit-muted">悬停查看可编辑范围，点击后在这里修改。也可以从下方选择。</p>
+          </> : targetsPending ? <>
+            <h3>正在读取页面上的文字</h3>
+            <p className="cockpit-muted">脚本生成的文案会在读取完成后出现在这里。</p>
+          </> : <>
+            <h3>此页暂无可直接修改的文字</h3>
+            <p className="cockpit-muted">重复的卡片没有唯一标识，点选会改错对象。可以先用整页 AI 给这些卡片加上稳定标识，再回来改某一块。</p>
+            {onWholeAI ? <button type="button" disabled={locked || store.hasUnsavedChanges()} onClick={onWholeAI}>用 AI 调整整页</button> : null}
+          </>}
         </>}
         {nodes.length ? <label className="cockpit-field">选择内容<select disabled={locked || Boolean(state.textDraft?.changed)}
           value={selectionAvailable ? selected?.node_id : ''} onChange={event => choose(nodes.find(row => row.node_id === event.target.value) ?? null)}>

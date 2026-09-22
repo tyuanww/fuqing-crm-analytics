@@ -18,7 +18,7 @@ export type FreeHtmlLibraryState = {
   contextPanel: 'ai' | 'source' | 'history' | null;
   overlay: 'selection' | 'patch' | null;
   preview: PreviewRecord | null;
-  importCandidate: { preview_id: string; package: FreeHtmlPage['package']; origin: { session_id: string | null; path: string; file_id?: string } } | null;
+  importCandidate: { preview_id: string; package: FreeHtmlPage['package']; origin: { session_id: string | null; path: string; file_id?: string }; quarantined?: string[] } | null;
   textDraft: { value: string; original: string; changed: boolean } | null;
   textDrafts: Record<string, string>;
   draftReset: number;

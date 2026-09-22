@@ -477,7 +477,8 @@
               "data-page-block",
               "data-page-field",
               "class",
-              "text"
+              "text",
+              "nth"
             ],
             "title": "Attribute",
             "type": "string"

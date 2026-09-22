@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { ACTIVE_CHANNELS, LOW_PRICE_CHANNELS as FRONTEND_LOW } from '../../../frontend-vue3/src/constants/channels.ts';
-import { CHANNELS, LOW_PRICE_CHANNELS, queryDashboardGsv, normalizeDashboard, dashboardCapabilities, dashboardKnowledgeContext } from '../src/dashboard.mjs';
+import { CHANNELS, LEAF_CHANNELS, LOW_PRICE_CHANNELS, channelRole, queryDashboardGsv, normalizeDashboard, dashboardCapabilities, dashboardKnowledgeContext } from '../src/dashboard.mjs';
 import { serveDashboard, request, overview, trend } from './dashboard.fixture.mjs';
 
 const query = (input, binding, extra = {}) => queryDashboardGsv(input, { sessionId: 'fixture-session', binding, ...extra });
@@ -14,7 +14,17 @@ function unavailable(result, code) {
 
 test('channel names and low-price selection track the actual frontend source', () => {
   assert.deepEqual(CHANNELS, ['全店', '纯派样', ...ACTIVE_CHANNELS]);
+  assert.deepEqual(LEAF_CHANNELS, [...ACTIVE_CHANNELS]);
   assert.deepEqual(LOW_PRICE_CHANNELS, FRONTEND_LOW);
+  const caps = dashboardCapabilities();
+  assert.equal('purchases_requires_backend' in caps, false);
+  assert.equal(caps.purchases_runtime_status, 'unknown_until_query_crm_dashboard_purchases_is_called');
+  assert.deepEqual(caps.channel_hierarchy.leaf_partition, [...LEAF_CHANNELS]);
+  assert.deepEqual(caps.channel_hierarchy.aggregates.find(row => row.channel === '纯派样').equals, ['U先派样', '百补派样']);
+  assert.equal(channelRole('纯派样').add_with_leaves, false);
+  assert.equal(channelRole('货架').add_with_leaves, true);
+  const leaves = new Set(caps.channel_hierarchy.leaf_partition);
+  assert.equal(leaves.has('纯派样') || leaves.has('全店'), false);
 });
 
 test('authenticated API result preserves accepted amount, exact cents and filters', async t => {
@@ -23,13 +33,18 @@ test('authenticated API result preserves accepted amount, exact cents and filter
   assert.equal(result.status, 'OK', JSON.stringify(result));
   assert.deepEqual(result.gsv, { amount_fen: 10031, amount_yuan: '100.31', currency: 'CNY' });
   assert.deepEqual(result.daily.map(row => row.amount_fen), [3010, 7021]);
+  assert.equal(result.returned_day_count, 2);
+  assert.equal(result.calendar_day_count, 2);
+  assert.equal('day_count' in result, false);
   assert.equal(result.contains_real_data, false);
   assert.equal(result.synthetic, true);
   assert.equal(result.data_through, null);
+  assert.equal(result.warehouse_cutoff, '2026-07-10');
   assert.equal(result.refund_as_of, null);
   assert.equal('avg_order_value' in result, false);
   assert.equal('member_premium' in result, false);
-  assert.deepEqual(calls.map(call => call.path), ['/api/v1/auth/me', '/api/v1/metrics/overview', '/api/v1/metrics/trend']);
+  assert.deepEqual(result.audience, { source: 'user_first_purchase', definition: '新客是首购日晚于窗口开始前一天的买家；老客是首购日不晚于该日的买家。', new_users: 3, old_users: 7, new_user_amount_yuan: 20.1, old_user_amount_yuan: 80.21, new_user_ratio: 0.2004, old_user_ratio: 0.7996 });
+  assert.deepEqual(calls.map(call => call.path), ['/api/v1/auth/me', '/api/v1/metrics/overview', '/api/v1/metrics/trend', '/api/v1/metrics/cutoff']);
   assert.ok(calls.every(call => call.authenticated && call.method === 'GET'));
   assert.deepEqual(calls[1].params, { ...request, metric_type: 'GSV' });
   assert.deepEqual(calls[1].params, calls[2].params);
@@ -140,9 +155,13 @@ test('valid missing dates remain explicit, including genuinely empty returned da
   const sparse = normalizeDashboard({ ...overview, amount: 30.1 }, { ...trend, dates: ['2026-01-01'], amounts: [30.1] }, filters, 'synthetic');
   assert.deepEqual(sparse.reconciliation.dates_not_returned, ['2026-01-02']);
   assert.equal(sparse.daily.length, 1);
+  assert.equal(sparse.returned_day_count, 1);
+  assert.equal(sparse.calendar_day_count, 2);
   const empty = normalizeDashboard({ ...overview, amount: 0 }, { ...trend, dates: [], amounts: [] }, filters, 'synthetic');
   assert.equal(empty.gsv.amount_fen, 0);
   assert.equal(empty.daily.length, 0);
+  assert.equal(empty.returned_day_count, 0);
+  assert.equal(empty.calendar_day_count, 2);
   assert.equal(empty.reconciliation.dates_not_returned.length, 2);
 });
 

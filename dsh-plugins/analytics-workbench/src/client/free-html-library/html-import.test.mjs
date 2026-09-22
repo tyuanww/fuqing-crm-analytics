@@ -124,7 +124,7 @@ test('convert inlines linked css and its relative url() without fetching the net
   assert.doesNotMatch(got.package.css, /bg\.png/);
 });
 
-test('convert reports missing, oversize, and network resources without fetching', async () => {
+test('convert reports missing and oversize resources, and disables network addresses', async () => {
   const missing = await convertWorkspaceHtml({
     html: '<img src="gone.png" alt="">',
     path: 'a.html',
@@ -135,12 +135,13 @@ test('convert reports missing, oversize, and network resources without fetching'
   assert.equal(missing.error.code, 'RESOURCE_MISSING');
 
   const net = await convertWorkspaceHtml({
-    html: '<img src="https://cdn.example/a.png" alt="">',
+    html: '<img src="https://cdn.example/a.png" alt=""><p>正文</p>',
     path: 'a.html',
     sessionId: 'sess',
   });
-  assert.equal(net.ok, false);
-  assert.equal(net.error.code, 'RESOURCE_UNSUPPORTED');
+  assert.equal(net.ok, true, JSON.stringify(net.error));
+  assert.doesNotMatch(net.package.html, /cdn\.example/);
+  assert.ok(net.quarantined.includes('https://cdn.example/a.png'));
 
   const huge = await convertWorkspaceHtml({
     html: '<img src="big.png" alt="">',
@@ -151,6 +152,18 @@ test('convert reports missing, oversize, and network resources without fetching'
   });
   assert.equal(huge.ok, false);
   assert.equal(huge.error.code, 'RESOURCE_UNSUPPORTED');
+});
+
+test('an offline snapshot with EventSource can be saved after the address is disabled', async () => {
+  const got = await convertWorkspaceHtml({
+    html: '<!DOCTYPE html><html><body><p id="title">看板</p><script>new EventSource("/api/stream");fetch("/api/live");</script></body></html>',
+    path: 'snapshot.html',
+    sessionId: 'sess',
+  });
+  assert.equal(got.ok, true, JSON.stringify(got.error));
+  assert.doesNotMatch(`${got.package.html}\n${got.package.js}`, /\/api\/stream/);
+  assert.match(got.package.html, /看板/);
+  assert.ok(got.quarantined.includes('/api/stream'));
 });
 
 test('importer creates a candidate, cancel does not persist, confirm is idempotent and reopenable', async () => {
