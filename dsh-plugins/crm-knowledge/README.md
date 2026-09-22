@@ -1,6 +1,6 @@
 # CRM 知识与指标候选插件
 
-固定 SDK：DSH 0.1.6-alpha.2，Node 24，Python 3.14+。独立插件，包含合成资料源及默认未连接的看板 GSV HTTP 适配，通过 analytics-workbench 的可选 `cockpit.crm` 插槽展示引用，不修改 DSH 上游或比赛事实合同。构建依赖只读复用已准备好的固定 checkout，不下载或自动安装。
+固定 SDK：DSH 0.1.7-alpha.2（见 analytics-workbench `toolchain.json`），Node 24，Python 3.14+。现役 6677 在重载前仍跑上一钉。独立插件，包含合成资料源及默认未连接的看板 GSV HTTP 适配，通过 analytics-workbench 的可选 `cockpit.crm` 插槽展示引用，不修改 DSH 上游或比赛事实合同。构建依赖只读复用已准备好的固定 checkout，不下载或自动安装。
 
 本包依赖当前工作区中的 `backend/`、`scripts/crm-calibration/` 和 `knowledge/crm/`，当前不支持脱离仓库单独发布。
 

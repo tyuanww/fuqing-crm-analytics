@@ -1,6 +1,7 @@
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar-right/client';
 import { CockpitArtifact, COCKPIT_ARTIFACT_TAB, cockpitArtifactAddress } from './cockpit-artifact.tsx';
 import { CockpitPageTab, COCKPIT_PAGE_TAB, cockpitPageAddress } from './cockpit-page-tab.tsx';
+import { normalizeWorkspaceReadBytes, workspaceReadBytesRequest } from './workspace-read-bytes.mjs';
 import type {} from '@deepseek-ai/dsh-client-ui-workspace/client';
 import { createCockpitAIClient, createCockpitArtifactClients, nativeArtifactPrompt } from './cockpit-ai-client.mjs';
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
@@ -729,7 +730,7 @@ export function apply(ctx: Context): void {
         workspaceFiles?: {
           list?: (sessionId: string, path: string, signal?: AbortSignal) => Promise<unknown>;
           read?: (sessionId: string, path: string, range?: { offset?: number; limit?: number }, signal?: AbortSignal) => Promise<unknown>;
-          readBytes?: (sessionId: string, path: string, range: { offset: number; length: number }, signal?: AbortSignal) => Promise<unknown>;
+          readBytes?: (sessionId: string, path: string, options: { range?: { offset?: number; length?: number } }, signal?: AbortSignal) => Promise<unknown>;
         };
       }).workspaceFiles;
     } catch {
@@ -759,7 +760,8 @@ export function apply(ctx: Context): void {
     readBytes: async (sessionId, path, range, signal) => {
       const api = remoteWorkspaceFiles();
       if (!api?.readBytes) throw new Error('文件字节读取服务尚未连接');
-      return api.readBytes(sessionId, path, range, signal);
+      const raw = await api.readBytes(sessionId, path, workspaceReadBytesRequest(range), signal);
+      return normalizeWorkspaceReadBytes(raw);
     },
   });
   const captureVisibleDeliverySource = () => {

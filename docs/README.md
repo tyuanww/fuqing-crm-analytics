@@ -1,7 +1,7 @@
 # Docs 索引
 
 > 按 lifecycle 分层，新人约 5 分钟找到入口。  
-> **最后更新**: 2026-09-22。当前提交只看根目录 [STATUS.md](../STATUS.md)。目录、端口和检索看 [维护地图](./operating/maintainer-map.md)。DSH **0.1.6-alpha.2**（`ddefc45f`）。产品仍 PARTIAL。下面的黑客松与校准记录是档案，不是默认入口。
+> **最后更新**: 2026-09-22。当前提交只看根目录 [STATUS.md](../STATUS.md)。目录、端口和检索看 [维护地图](./operating/maintainer-map.md)。DSH 钉 **0.1.7-alpha.2**（`00102833`）。现役进程仍是 0.1.6-alpha.2，重载前以 STATUS 为准。产品仍 PARTIAL。下面的黑客松与校准记录是档案，不是默认入口。
 
 ## 黑客松当前实现
 

@@ -114,9 +114,9 @@ test('native skill loading and real compaction preserve fresh backend authority 
       { id: 'resource-read-1', name: 'analytics_b0_skill_resource', args: { resource: 'references/evidence-policy.md' } });
     agent.followup(createUserMessage({ content: [{ type: 'text', text: 'Run the B0 method. '.repeat(80) }], source: { kind: 'user', rpcId: 'request-before' } }));
     await agent.whenIdle();
-    const results = agent.session.snapshotEvents().filter(e => e.type === 'tool/result').flatMap(e => e.data.message.content);
-    assert.equal(results.length, 2);
-    assert.ok(results.every(b => b.isError === false), JSON.stringify(results));
+    const resultEvents = agent.session.snapshotEvents().filter(e => e.type === 'tool/result');
+    assert.equal(resultEvents.length, 2);
+    assert.ok(resultEvents.every(event => event.data.message.isError === false), JSON.stringify(resultEvents.map(event => event.data.message)));
     assert.deepEqual(calls.filter(c => c.resource).map(c => c.resource), ['SKILL.md', 'references/evidence-policy.md']);
     assert.ok(calls.every(c => c.package_digest === built.methodPackageDigest));
     assert.ok(adapter.requests.every(ms => textOf(ms).includes('analytics-b0-state')));
@@ -135,7 +135,7 @@ test('native skill loading and real compaction preserve fresh backend authority 
     assert.match(textOf([fresh]), /NOT_AVAILABLE_IN_B0/);
     assert.doesNotMatch(textOf([fresh]), /OLD_MEMORY|0\.99|APPROVED/);
     assert.ok(calls.some(c => c.request_id === 'request-after' && c.resource === 'SKILL.md'));
-    const lastResult = agent.session.snapshotEvents().filter(e => e.type === 'tool/result').at(-1).data.message.content[0];
+    const lastResult = agent.session.snapshotEvents().filter(e => e.type === 'tool/result').at(-1).data.message;
     assert.equal(lastResult.isError, true, 'a stale loaded skill does not bypass a current denied read');
   } finally {
     await ctx.fiber.dispose();

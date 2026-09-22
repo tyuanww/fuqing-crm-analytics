@@ -13,6 +13,10 @@ test('fixture namespaces only request-scoped tool identity, keeping arguments an
   assert.notEqual(one.choices[0].delta.tool_calls[0].id, two.choices[0].delta.tool_calls[0].id);
   one.choices[0].delta.tool_calls[0].id = 'mock-call-1';
   assert.deepEqual(one, JSON.parse(original.slice(5)));
+  const messages = 'data: {"type":"content_block_start","content_block":{"type":"tool_use","id":"mock-call-1","name":"any_tool","input":{}}}';
+  const block = JSON.parse(namespaceToolCallLine(messages, 3).slice(5));
+  assert.equal(block.content_block.id, 'b0-request-3:mock-call-1');
+  assert.equal(block.content_block.name, 'any_tool');
   for (const line of ['', 'event: message', 'data: [DONE]', 'data: {"choices":[{"delta":{"content":"合成文本"}}]}']) {
     assert.equal(namespaceToolCallLine(line, 1), line);
   }
@@ -21,8 +25,8 @@ test('fixture namespaces only request-scoped tool identity, keeping arguments an
 test('official mock wire uses distinct native IDs and observes actual client closure', async () => {
   const mock = await startB0MockProvider(startMockLlmServer, { port: 0, apiKey: 'test-stub-only',
     sequence: ['tool_call_success', 'tool_call_success', 'slow_success'], successText: '合成流', chunkSize: 1, chunkDelayMs: 500 });
-  const request = signal => fetch(`${mock.baseURL}/v1/chat/completions`, { method: 'POST',
-    headers: { 'content-type': 'application/json', authorization: 'Bearer test-stub-only' }, body: '{}', signal });
+  const request = signal => fetch(`${mock.baseURL}/v1/messages`, { method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-api-key': 'test-stub-only' }, body: '{}', signal });
   try {
     const first = await (await request()).text();
     const second = await (await request()).text();
@@ -46,8 +50,8 @@ test('finite multi-tool script configures official producers and refuses exhaust
       { toolName: 'analytics_b0_query', toolArguments: '{"query":"channel_repeat_rate"}' },
       { toolName: 'skill', toolArguments: '{"name":"growth-analysis-b0"}' },
     ] });
-  const request = () => fetch(`${mock.baseURL}/v1/chat/completions`, { method: 'POST',
-    headers: { 'content-type': 'application/json', authorization: 'Bearer test-stub-only' }, body: '{}' });
+  const request = () => fetch(`${mock.baseURL}/v1/messages`, { method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-api-key': 'test-stub-only' }, body: '{}' });
   try {
     const first = await (await request()).text();
     const second = await (await request()).text();
