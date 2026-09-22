@@ -6,6 +6,17 @@ import { createFreeHtmlLibraryStore } from './free-html-library/store.mjs';
 import { createLivePageAdapters } from './free-html-library/live-adapters.mjs';
 import { createIsolatedFetch } from './free-html-library/p12-http-fakes.mjs';
 const pkg = { html: '<header><h1>你好 🌟</h1><p title="a > b">Plain &amp; safe</p></header><section><p>Keep</p></section>', css: '', js: '', node_map: [], resources: [] };
+test('a metric sentence stays one edit and keeps the original inline tags', () => {
+  const html = '<p id="verdictLine">本周收入 <b>1,245,100 元</b>，环比上周 增长 <b>+183,200 元（+17.3%）</b>。</p>';
+  const page = { ...pkg, html };
+  const line = sourceTargets(page).find(node => node.tag === 'p');
+  assert.equal(line.richText, true);
+  assert.equal(line.editorText, '本周收入 1,245,100 元，环比上周 增长 +183,200 元（+17.3%）。');
+  const edited = sourceTextPreview(page, line, line.editorText.replace('本周收入', '本月收入'));
+  assert.match(edited.html, /本月收入 <b>1,245,100 元<\/b>，环比上周 增长 <b>\+183,200 元（\+17\.3%）<\/b>/);
+  assert.equal(edited.html.includes('本周收入'), false);
+  assert.throws(() => sourceTextPreview(page, line, '只留说明'), /1,245,100 元/);
+});
 test('ordinary HTML gets source selections without changing or inventing persisted mappings', () => {
   const nodes = sourceTargets(pkg), title = nodes.find(node => node.tag === 'h1'), paragraph = nodes.find(node => node.text.startsWith('Plain'));
   assert.ok(title.editableText); assert.ok(nodes.find(node => node.tag === 'header').block);

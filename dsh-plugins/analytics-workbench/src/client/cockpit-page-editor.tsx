@@ -112,7 +112,7 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, aiMode = 
   const formalNode: PageNode | null = catalog.pageNodes.find(row => row.node_id === (state.selection?.node_id ?? selected?.node_id)) ?? null;
   const selectionAvailable = Boolean(selected && nodes.some(node => node.node_id === selected.node_id));
   const selectedRange = selected?.source ?? selected?.aiSource;
-  const original = selected ? selected.runtime ? selected.text : selected.editableText !== false ? decodeText(selected.text) : decodeText(selected.text.replace(/<[^>]*>/g, ' ')).trim() : '';
+  const original = selected ? selected.richText && selected.editorText ? selected.editorText : selected.runtime ? selected.text : selected.editableText !== false ? decodeText(selected.text) : decodeText(selected.text.replace(/<[^>]*>/g, ' ')).trim() : '';
   const value = state.textDraft?.value ?? original;
   const editableFormal = formalNode?.mapping === 'valid' && !formalNode.capabilities?.bound ? formalNode : null;
   const styles = parseStyleDeclaration(styleDraft);
@@ -240,7 +240,7 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, aiMode = 
             <button disabled={sending} onClick={() => setAiOpen(false)}>取消</button>
           </div> : selected.editableText !== false ? <><label className="cockpit-field">替换文本<textarea data-testid="html-replacement" disabled={locked || !selectionAvailable} value={value}
             rows={6} onChange={event => store.setReplacementText(event.target.value, original)} /></label>
-          <p className="cockpit-muted">{selected.runtime ? '只替换显示文案，保留筛选和图表交互，不改计算数据。' : '只替换这段文字。确认前可检查修改效果。'}</p>
+          <p className="cockpit-muted">{selected.richText ? '整段说明都可以改。句子里的指标原文会留在原标签中，请不要删掉或改写这些数字。' : selected.runtime ? '只替换显示文案，保留筛选和图表交互，不改计算数据。' : '只替换这段文字。确认前可检查修改效果。'}</p>
           <button className="cockpit-primary" data-testid="html-preview-patch" disabled={locked || !selectionAvailable || value === original}
             onClick={() => void store.previewPatch(value)}>预览修改</button>
           </> : <p className="cockpit-muted">已选中 {selected.tag} 板块，可交给 AI 调整板块内容和局部样式。</p>}

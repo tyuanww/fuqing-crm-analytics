@@ -91,10 +91,11 @@ test('compiled UI reports failure, allows retry, connects and disconnects', asyn
   await ui.submit('wrong');
   assert.ok(ui.w.document.body.textContent.includes('CRM 账号或密码不正确'));
   await ui.submit('fixture-password');
-  assert.ok(ui.w.document.body.textContent.includes('CRM 已连接'));
-  await ui.click('CRM 已连接');
+  assert.ok(ui.w.document.body.textContent.includes('CRM分析'));
+  assert.ok(ui.w.document.querySelector('[data-testid="crm-analysis-icon"]'));
+  await ui.click('CRM分析');
   await ui.click('断开当前连接');
-  assert.equal(ui.w.document.body.textContent.includes('CRM 已连接'), false);
+  assert.equal(ui.w.document.body.textContent.includes('CRM分析'), false);
   assert.deepEqual(calls, ['status', 'status', 'login', 'login', 'status', 'disconnect']);
 });
 
@@ -110,7 +111,7 @@ test('session switch ignores a late login reply and leaves the new UI usable', a
   await ui.render('second');
   assert.equal(oldSignal.aborted, true);
   await React.act(async () => finish(reply(connected)));
-  assert.equal(ui.w.document.body.textContent.includes('CRM 已连接'), false);
+  assert.equal(ui.w.document.body.textContent.includes('CRM分析'), false);
   await ui.click('连接 CRM');
   assert.equal(ui.w.document.querySelector('input[name="password"]').disabled, false);
 });
