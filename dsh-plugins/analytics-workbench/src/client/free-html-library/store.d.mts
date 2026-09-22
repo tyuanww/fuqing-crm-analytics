@@ -20,6 +20,7 @@ export type FreeHtmlLibraryState = {
   preview: PreviewRecord | null;
   importCandidate: { preview_id: string; package: FreeHtmlPage['package']; origin: { session_id: string | null; path: string; file_id?: string } } | null;
   textDraft: { value: string; original: string; changed: boolean } | null;
+  presentation_overlay: Record<string, { text?: string; style?: Record<string, string>; attributes?: Record<string, string> }> | null;
   historyItems: { version: number; operation?: string; title?: string }[];
   confirmationUncertain: boolean;
   lastIdempotencyKey: string | null;
@@ -75,6 +76,8 @@ export type FreeHtmlLibraryStore = {
   openContext(panel: 'ai' | 'source' | 'history'): void;
   closeContext(): void;
   previewPatch(replacementText: string, extras?: Record<string, unknown>): Promise<void>;
+  previewPresentationOverlay(nodeId: string, overlay: { text?: string; style?: Record<string, string>; attributes?: Record<string, string> }, meta?: { kind?: string; idempotencyKey?: string }): boolean;
+  previewSourcePackage(snapshot: FreeHtmlPage['package'], meta?: { nodeId?: string; kind?: string; idempotencyKey?: string; structure?: string }): boolean;
   confirmExpandedPatch(): void;
   confirmPatch(): Promise<void>;
   cancelPreview(): Promise<void>;

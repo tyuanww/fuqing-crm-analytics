@@ -8,3 +8,15 @@ export function applyRegionOuter(pagePackage: object, located: object, outerHtml
 export function applyCss(pagePackage: object, css: string): object;
 export function createPatchPreview(input: object): object;
 export function rebuildAfterApply(pagePackage: object): object;
+export const HTML_MAX_CHARS: number;
+export const STYLE_MAX_CHARS: number;
+export const PACKAGE_MAX_BYTES: number;
+export const T1_SEAM: { module: string; symbols: readonly string[]; ready: boolean };
+export function selectionBinding(pagePackage: object, selector: { kind: string; node_id: string }): object;
+export function previewStructuredPatch(input: object): object;
+export function commitWorkingCopy(pagePackage: object, preview: object): object;
+export function createStructuredPatchSession(): {
+  execute(input: object): object;
+  acknowledge(key: string): object;
+  recover(key: string): object;
+};

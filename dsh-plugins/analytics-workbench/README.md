@@ -246,6 +246,12 @@ FQ_B0_PYTHON=/Users/hutou/homebrew/opt/python@3.14/bin/python3.14 node dsh-plugi
 - 驾驶舱 overlay 脱离选择时不能卸掉官方 `mainView` retain；关闭只恢复仍存在的原选择，不创建/删除/取消会话。未应用草稿退出需确认，Tab 双向保持在弹层、关闭后归还固定入口焦点。原始品牌静态路径与完整条件往返标本由固定网关服务；后者不是实际同条件 BI，不加载旧 Vue/Pinia。
 - 工具卡只读取 `block.meta` 的精确版本化结果；处理中/失败/未知格式分开，不从模型文本猜成功。默认不开放保存、导出或审批。`--native-query-assets` 下可将 SUCCEEDED 查询保存为 SNAPSHOT 并加入驾驶舱；仍无导出/审批。“停止查询”取消当前卡片所属会话，不取页面第一个 `data-session-id`。
 
+## 历史 HTML 校验
+
+节点图来自 `source-index/node-graph.mjs`，运行时身份来自 `runtime/node-identity.mjs`，补丁来自 `free-page/patch/engine.mjs`。这些测试不改历史 HTML 字节，也不把图写进 PagePackage。脚本、iframe、canvas 和绑定节点不能直接写入。
+
+本地冒烟是合成夹具，不是 cockpit E2E。性能预算打在生产 Node Graph 上。真实模型缺少凭据时记 MISSING_CREDENTIAL；Playwright 未安装时记 MISSING_DEPENDENCY。说明见 [发布说明](../../docs/operating/free-page-validation-rollout.md)。这条校验不启动驾驶舱，也不连接公网。
+
 ## 固定构建与验证
 
 从工作树根运行，使用 Node 24 与显式 Python 3.14+ 路径。版本闭包在 `toolchain.json`、`build-tools/pnpm-lock.yaml` 和 `scripts/dsh-b0/requirements.lock` 冻结。下面的 `--check` 不安装依赖，不启动 CRM 或模型；真实 Loader 测试默认短暂监听私有 4326，supervisor 测试选择空闲 4328/4329 并自行关闭。端口冲突直接失败，不终止别人。

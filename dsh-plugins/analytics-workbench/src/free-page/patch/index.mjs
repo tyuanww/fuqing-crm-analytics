@@ -10,6 +10,16 @@ import { replaceRange } from '../source-index/parse.mjs';
 export { ERRORS, fail, isIdentity } from './codes.mjs';
 export { analyzeImpact } from './impact.mjs';
 export { createMemoryPageStore } from './store.mjs';
+export {
+  HTML_MAX_CHARS,
+  PACKAGE_MAX_BYTES,
+  STYLE_MAX_CHARS,
+  T1_SEAM,
+  commitWorkingCopy,
+  createStructuredPatchSession,
+  previewStructuredPatch,
+  selectionBinding,
+} from './engine.mjs';
 
 const DEFAULT_TTL_MS = 15 * 60 * 1000;
 

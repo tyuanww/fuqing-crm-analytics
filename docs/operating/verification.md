@@ -88,6 +88,19 @@ Excel SSOT 的提交入口使用 `--staged`：从 Git index 读取变更 view �
 
 全局 Claude 配置、主仓旧版 hooks、历史运维文件没有随成果工作树补丁自动更新。本表列出当前生效关系，不以历史文件存在推断其已安装运行。
 
+## 历史 HTML sidecar 本地校验
+
+不启动 6677，不连接公网，不读取模型凭据。Node 24 与只读 `B0_BUILD_UPSTREAM` 下执行：
+
+```bash
+node --test --test-concurrency=1 \
+  dsh-plugins/analytics-workbench/test/validation-rollout-browser-smoke.test.mjs \
+  dsh-plugins/analytics-workbench/test/validation-rollout-performance.test.mjs \
+  dsh-plugins/analytics-workbench/test/validation-rollout-eval.test.mjs
+```
+
+开关、指标、回滚和兼容性见 [free-page-validation-rollout.md](free-page-validation-rollout.md)。通过这三项不表示真实模型、Playwright 完整主链或现役挂载已完成；缺凭据时评估报告保持 `MISSING_CREDENTIAL`。产品仍 PARTIAL。
+
 ## 证据与交付
 
 每次 backend runner 创建新的 `.context/checks/<time>/`，记录解释器、HEAD、Python 检查源码摘要、完整目标与命令、每组退出码/耗时/峰值 RSS、JUnit 与最终结果；失败也保留。摘要是可审查证据，不是绕过检查的授权或自动缓存键。`summarize_checks.py` 汇总 JUnit 子 suite，避免过去从空根属性得到 None。

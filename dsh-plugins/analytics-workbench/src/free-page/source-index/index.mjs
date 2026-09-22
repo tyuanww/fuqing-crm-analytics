@@ -217,3 +217,22 @@ export function locateSelection(index, selection) {
     }),
   });
 }
+
+// Node Graph is an optional sidecar layer; keeping these exports here lets
+// consumers adopt it without changing the existing source-index contract.
+export {
+  NODE_GRAPH_SCHEMA_VERSION,
+  NODE_GRAPH_BUDGETS,
+  NODE_REF_KINDS,
+  MARKER_IS_CREDENTIAL,
+  buildNodeGraph,
+  createNodeGraph,
+  rebuildNodeGraph,
+  serializeNodeGraph,
+  hydrateNodeGraph,
+  createSourceNodeRef,
+  createTemplateInstanceRef,
+  createDynamicInstanceRef,
+  createTemporaryNodeRef,
+  toEditNodeRef,
+} from './node-graph.mjs';

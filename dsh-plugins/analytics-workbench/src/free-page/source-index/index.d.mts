@@ -43,3 +43,61 @@ export function buildSourceIndex(pagePackage: object): SourceIndex;
 export function rebuildSourceIndex(pagePackage: object): SourceIndex;
 export function locateSelection(index: SourceIndex, selection: Selection): object;
 export function isSelectorUniqueToNode(selector: string, node_id: string): boolean;
+
+export const NODE_GRAPH_SCHEMA_VERSION: 'free-page-node-graph/v1';
+export const MARKER_IS_CREDENTIAL: false;
+export const NODE_GRAPH_BUDGETS: {
+  readonly nodes2k: 2000;
+  readonly nodes10k: 10000;
+  readonly build2kMs: number;
+  readonly build10kMs: number;
+  readonly batchMs: number;
+  readonly maxNodes: number;
+  readonly maxBatchRecords: number;
+  readonly maxFanout: number;
+};
+/** Sidecar identity. Not the T1 edit contract. */
+export type NodeRef = {
+  schema_version: string;
+  identity: string;
+  node_ref: string;
+  kind: 'source' | 'template_instance' | 'dynamic_instance' | 'temporary';
+  source_hash?: string;
+  region_hash?: string;
+  marker_is_credential?: false;
+  [key: string]: unknown;
+};
+/**
+ * Projection of a sidecar record onto the T1 edit NodeRef.
+ * Channel is not a NodeRef field.
+ */
+export type EditNodeRef = {
+  page_id: string;
+  node_id: string;
+  kind: 'static_element' | 'dynamic_region' | 'whole_page';
+  selector: string | null;
+  source_range: { start: number; end: number } | null;
+  mapping_token: string;
+  source_hash: string;
+  region_hash: string;
+};
+export type ChannelPolicy = {
+  presentation: boolean;
+  source: boolean;
+  logic: boolean;
+  reason: string;
+};
+export function createSourceNodeRef(options?: object): NodeRef;
+export function createTemplateInstanceRef(options?: object): NodeRef;
+export function createDynamicInstanceRef(options?: object): NodeRef;
+export function createTemporaryNodeRef(options?: object): NodeRef;
+export function channelPolicy(node: object): ChannelPolicy;
+export function packageSourceHash(pagePackage: object): string;
+export function byteRegionHash(text: string): string;
+export function toEditNodeRef(node: object, options?: { channel?: 'presentation' | 'source' | 'logic' }):
+  | { ok: true; projection: 'node_map' | 'synthetic'; channel_policy: ChannelPolicy; reselect: false; value: EditNodeRef }
+  | { ok: false; code: string; reselect?: boolean; channel_policy?: ChannelPolicy };
+export function buildNodeGraph(pagePackage: object, options?: object): object;
+export function rebuildNodeGraph(pagePackage: object, options?: object): object;
+export function serializeNodeGraph(graph: object): object;
+export function hydrateNodeGraph(pagePackage: object, sidecar: object, options?: object): object;

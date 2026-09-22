@@ -49,6 +49,7 @@ export type FreeHtmlPage = {
   page_id: string; session_id: string | null; origin_path?: string; origin_file_id?: string | null; title: string; version: number; base_version?: number;
   binding_state: string; binding_manifest: { bindings: unknown[]; result_refs: string[] };
   package: typeof SAMPLE_PACKAGE; savedPackage: typeof SAMPLE_PACKAGE; dirty: boolean;
+  presentation_overlays?: Record<string, { text?: string; style?: Record<string, string>; attributes?: Record<string, string> }>;
   updated_at: number; history: { version: number; title: string; at: number; package: typeof SAMPLE_PACKAGE }[];
 };
 export function createMockPageAdapters(opts?: {

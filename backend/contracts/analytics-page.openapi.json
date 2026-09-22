@@ -44,8 +44,35 @@
     "BRIDGE_UNKNOWN_OP": 400,
     "BRIDGE_NONCE": 409,
     "BRIDGE_EXPIRED_INSTANCE": 409,
-    "BINDING_CORRUPT": 409
+    "BINDING_CORRUPT": 409,
+    "INVALID_EDIT": 422,
+    "INVALID_CAS": 422,
+    "INVALID_EDIT_CONTEXT": 422,
+    "CAS_CONFLICT": 409,
+    "EDIT_EXPIRED": 409,
+    "CAPABILITY_DENIED": 403,
+    "SCOPE_VIOLATION": 422
   },
+  "x-edit-schema": "free-page-edit/v1",
+  "x-edit-context-schema": "free-page-edit-context/v1",
+  "x-edit-channels": [
+    "presentation",
+    "source",
+    "logic"
+  ],
+  "x-edit-actions": [
+    "insert",
+    "update",
+    "delete",
+    "move",
+    "replace"
+  ],
+  "x-edit-encodings": [
+    "overlay",
+    "bytes"
+  ],
+  "x-edit-presentation": "overlay",
+  "x-edit-source-logic": "hashed-byte-splice",
   "x-bridge-budget": {
     "max_response_bytes": 65536,
     "max_cumulative_rows": 2000
@@ -1154,6 +1181,473 @@
         "title": "PageCancelResult",
         "type": "object"
       },
+      "SourceRange": {
+        "additionalProperties": false,
+        "properties": {
+          "start": {
+            "maximum": 2000000,
+            "minimum": 0,
+            "title": "Start",
+            "type": "integer"
+          },
+          "end": {
+            "maximum": 2000000,
+            "minimum": 0,
+            "title": "End",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "start",
+          "end"
+        ],
+        "title": "SourceRange",
+        "type": "object"
+      },
+      "SelectedScope": {
+        "additionalProperties": false,
+        "properties": {
+          "page_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]{1,128}$",
+            "title": "Page Id",
+            "type": "string"
+          },
+          "node_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]{1,128}$",
+            "title": "Node Id",
+            "type": "string"
+          },
+          "source_range": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRange"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "page_id",
+          "node_id"
+        ],
+        "title": "SelectedScope",
+        "type": "object"
+      },
+      "PresentationOverlay": {
+        "additionalProperties": false,
+        "description": "Presentation writes style, text, and attributes. They do not splice source bytes.",
+        "properties": {
+          "text": {
+            "anyOf": [
+              {
+                "maxLength": 8000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Text"
+          },
+          "attributes": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "maxLength": 512,
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Attributes"
+          },
+          "style": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "maxLength": 512,
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Style"
+          }
+        },
+        "title": "PresentationOverlay",
+        "type": "object"
+      },
+      "NodeRef": {
+        "additionalProperties": false,
+        "properties": {
+          "page_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]{1,128}$",
+            "title": "Page Id",
+            "type": "string"
+          },
+          "node_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]{1,128}$",
+            "title": "Node Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "static_element",
+              "dynamic_region",
+              "whole_page"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "selector": {
+            "anyOf": [
+              {
+                "maxLength": 512,
+                "minLength": 1,
+                "pattern": "\\S",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Selector"
+          },
+          "source_range": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRange"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "mapping_token": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]{1,128}$",
+            "title": "Mapping Token",
+            "type": "string"
+          },
+          "source_hash": {
+            "maxLength": 64,
+            "minLength": 64,
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Source Hash",
+            "type": "string"
+          },
+          "region_hash": {
+            "maxLength": 64,
+            "minLength": 64,
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Region Hash",
+            "type": "string"
+          }
+        },
+        "required": [
+          "page_id",
+          "node_id",
+          "kind",
+          "mapping_token",
+          "source_hash",
+          "region_hash"
+        ],
+        "title": "NodeRef",
+        "type": "object"
+      },
+      "CAS": {
+        "additionalProperties": false,
+        "description": "Compare-and-swap precondition. Hashes bind an edit to its exact region.",
+        "properties": {
+          "base_version": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "title": "Base Version",
+            "type": "integer"
+          },
+          "source_hash": {
+            "maxLength": 64,
+            "minLength": 64,
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Source Hash",
+            "type": "string"
+          },
+          "region_hash": {
+            "maxLength": 64,
+            "minLength": 64,
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Region Hash",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Idempotency Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "base_version",
+          "source_hash",
+          "region_hash",
+          "idempotency_key"
+        ],
+        "title": "CAS",
+        "type": "object"
+      },
+      "EditOperation": {
+        "additionalProperties": false,
+        "properties": {
+          "schema_version": {
+            "const": "free-page-edit/v1",
+            "default": "free-page-edit/v1",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "operation_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]{1,128}$",
+            "title": "Operation Id",
+            "type": "string"
+          },
+          "channel": {
+            "enum": [
+              "presentation",
+              "source",
+              "logic"
+            ],
+            "title": "Channel",
+            "type": "string"
+          },
+          "action": {
+            "enum": [
+              "insert",
+              "update",
+              "delete",
+              "move",
+              "replace"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "selected_scope": {
+            "$ref": "#/components/schemas/SelectedScope"
+          },
+          "capabilities": {
+            "items": {
+              "maxLength": 64,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_.:-]{1,128}$",
+              "type": "string"
+            },
+            "maxItems": 16,
+            "minItems": 1,
+            "title": "Capabilities",
+            "type": "array"
+          },
+          "node": {
+            "$ref": "#/components/schemas/NodeRef"
+          },
+          "cas": {
+            "$ref": "#/components/schemas/CAS"
+          },
+          "encoding": {
+            "enum": [
+              "overlay",
+              "bytes"
+            ],
+            "title": "Encoding",
+            "type": "string"
+          },
+          "payload": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/PresentationOverlay"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Payload"
+          },
+          "byte_length": {
+            "default": 0,
+            "maximum": 2000000,
+            "minimum": 0,
+            "title": "Byte Length",
+            "type": "integer"
+          },
+          "splice": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRange"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "destination": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRange"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "expected_region_hash": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 64,
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Expected Region Hash"
+          }
+        },
+        "required": [
+          "operation_id",
+          "channel",
+          "action",
+          "selected_scope",
+          "capabilities",
+          "node",
+          "cas",
+          "encoding"
+        ],
+        "title": "EditOperation",
+        "type": "object"
+      },
+      "EditContext": {
+        "additionalProperties": false,
+        "properties": {
+          "schema_version": {
+            "const": "free-page-edit-context/v1",
+            "default": "free-page-edit-context/v1",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "edit_context_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]{1,128}$",
+            "title": "Edit Context Id",
+            "type": "string"
+          },
+          "user_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]{1,128}$",
+            "title": "User Id",
+            "type": "string"
+          },
+          "tenant_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]{1,128}$",
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "page_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]{1,128}$",
+            "title": "Page Id",
+            "type": "string"
+          },
+          "version": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          },
+          "selected_node": {
+            "$ref": "#/components/schemas/NodeRef"
+          },
+          "capabilities": {
+            "items": {
+              "maxLength": 64,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_.:-]{1,128}$",
+              "type": "string"
+            },
+            "maxItems": 16,
+            "minItems": 0,
+            "title": "Capabilities",
+            "type": "array"
+          },
+          "created_at": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "title": "Created At",
+            "type": "integer"
+          },
+          "expires_at": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "title": "Expires At",
+            "type": "integer"
+          },
+          "ttl_ms": {
+            "maximum": 86400000,
+            "minimum": 1,
+            "title": "Ttl Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "edit_context_id",
+          "user_id",
+          "tenant_id",
+          "page_id",
+          "version",
+          "selected_node",
+          "capabilities",
+          "created_at",
+          "expires_at",
+          "ttl_ms"
+        ],
+        "title": "EditContext",
+        "type": "object"
+      },
       "PageBridgeHandshake": {
         "additionalProperties": false,
         "properties": {
@@ -1669,5 +2163,5 @@
       }
     }
   },
-  "x-schema-sha256": "ddac1298483a47badb358a449d0cd3667dbb8ce130f64f72f136bc9db0bee68f"
+  "x-schema-sha256": "ddfaa111be4a73fe2d7f51bbf6cd77ece90a93dd3f4c1d429ea41916b11616ca"
 }

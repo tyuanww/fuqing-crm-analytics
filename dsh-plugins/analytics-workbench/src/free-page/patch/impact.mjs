@@ -16,8 +16,9 @@ function nodeMapFromIndex(index) {
 function htmlChangedNodes(index, proposedIndex) {
   const changed = [];
   for (const id of Object.keys(index.nodes)) {
-    const before = index.nodes[id].html_range.outer_text;
-    const after = proposedIndex.nodes[id]?.html_range.outer_text;
+    const before = index.nodes[id]?.html_range?.outer_text;
+    if (before == null) continue;
+    const after = proposedIndex.nodes[id]?.html_range?.outer_text;
     if (before !== after) changed.push(id);
   }
   return changed;

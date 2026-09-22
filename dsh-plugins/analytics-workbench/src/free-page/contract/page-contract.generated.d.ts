@@ -1,4 +1,4 @@
-/** Generated free-page contract; do not edit. OpenAPI SHA-256: ddac1298483a47badb358a449d0cd3667dbb8ce130f64f72f136bc9db0bee68f */
+/** Generated free-page contract; do not edit. OpenAPI SHA-256: ddfaa111be4a73fe2d7f51bbf6cd77ece90a93dd3f4c1d429ea41916b11616ca */
 export interface paths {
     "/api/v1/analytics/page-documents/pages": {
         parameters: {
@@ -164,6 +164,123 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * CAS
+         * @description Compare-and-swap precondition. Hashes bind an edit to its exact region.
+         */
+        CAS: {
+            /** Base Version */
+            base_version: number;
+            /** Idempotency Key */
+            idempotency_key: string;
+            /** Region Hash */
+            region_hash: string;
+            /** Source Hash */
+            source_hash: string;
+        };
+        /** EditContext */
+        EditContext: {
+            /** Capabilities */
+            capabilities: string[];
+            /** Created At */
+            created_at: number;
+            /** Edit Context Id */
+            edit_context_id: string;
+            /** Expires At */
+            expires_at: number;
+            /** Page Id */
+            page_id: string;
+            /**
+             * Schema Version
+             * @default free-page-edit-context/v1
+             * @constant
+             */
+            schema_version: "free-page-edit-context/v1";
+            selected_node: components["schemas"]["NodeRef"];
+            /** Tenant Id */
+            tenant_id: string;
+            /** Ttl Ms */
+            ttl_ms: number;
+            /** User Id */
+            user_id: string;
+            /** Version */
+            version: number;
+        };
+        /** EditOperation */
+        EditOperation: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "insert" | "update" | "delete" | "move" | "replace";
+            /**
+             * Byte Length
+             * @default 0
+             */
+            byte_length: number;
+            /** Capabilities */
+            capabilities: string[];
+            cas: components["schemas"]["CAS"];
+            /**
+             * Channel
+             * @enum {string}
+             */
+            channel: "presentation" | "source" | "logic";
+            /** @default null */
+            destination: components["schemas"]["SourceRange"] | null;
+            /**
+             * Encoding
+             * @enum {string}
+             */
+            encoding: "overlay" | "bytes";
+            /**
+             * Expected Region Hash
+             * @default null
+             */
+            expected_region_hash: string | null;
+            node: components["schemas"]["NodeRef"];
+            /** Operation Id */
+            operation_id: string;
+            /**
+             * Payload
+             * @default null
+             */
+            payload: string | components["schemas"]["PresentationOverlay"] | null;
+            /**
+             * Schema Version
+             * @default free-page-edit/v1
+             * @constant
+             */
+            schema_version: "free-page-edit/v1";
+            selected_scope: components["schemas"]["SelectedScope"];
+            /** @default null */
+            splice: components["schemas"]["SourceRange"] | null;
+        };
+        /** NodeRef */
+        NodeRef: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "static_element" | "dynamic_region" | "whole_page";
+            /** Mapping Token */
+            mapping_token: string;
+            /** Node Id */
+            node_id: string;
+            /** Page Id */
+            page_id: string;
+            /** Region Hash */
+            region_hash: string;
+            /**
+             * Selector
+             * @default null
+             */
+            selector: string | null;
+            /** Source Hash */
+            source_hash: string;
+            /** @default null */
+            source_range: components["schemas"]["SourceRange"] | null;
+        };
         /** PageBinding */
         PageBinding: {
             /** Binding Id */
@@ -633,6 +750,47 @@ export interface components {
         /** PageSnapshot */
         PageSnapshot: {
             spec: components["schemas"]["PageDocument"];
+        };
+        /**
+         * PresentationOverlay
+         * @description Presentation writes style, text, and attributes. They do not splice source bytes.
+         */
+        PresentationOverlay: {
+            /**
+             * Attributes
+             * @default null
+             */
+            attributes: {
+                [key: string]: string;
+            } | null;
+            /**
+             * Style
+             * @default null
+             */
+            style: {
+                [key: string]: string;
+            } | null;
+            /**
+             * Text
+             * @default null
+             */
+            text: string | null;
+        };
+        /** SelectedScope */
+        SelectedScope: {
+            /** Node Id */
+            node_id: string;
+            /** Page Id */
+            page_id: string;
+            /** @default null */
+            source_range: components["schemas"]["SourceRange"] | null;
+        };
+        /** SourceRange */
+        SourceRange: {
+            /** End */
+            end: number;
+            /** Start */
+            start: number;
         };
     };
     responses: never;

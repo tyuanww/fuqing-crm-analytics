@@ -282,6 +282,17 @@ class PageDocumentStore:
         return self._preview(actor, validated(PageDocument, stamp_binding_state(spec)), "PATCH",
                              request.base_version, retained_scopes=retain)
 
+    def preview_identical(self, actor, page_id, base_version):
+        """Mint the next version without changing package bytes.
+
+        Presentation overlays are stored beside the page document. The source
+        package in this revision stays byte-for-byte identical to the base.
+        """
+        snapshot, scopes = self._base(actor, page_id, base_version)
+        spec = deepcopy(snapshot["spec"])
+        spec["version"] = base_version + 1
+        return self._preview(actor, validated(PageDocument, spec), "PATCH", base_version, retained_scopes=scopes)
+
     def save(self, actor, page_id, request: PageSavePreview):
         snapshot, _scopes = self._base(actor, page_id, request.base_version)
         spec = deepcopy(snapshot["spec"])

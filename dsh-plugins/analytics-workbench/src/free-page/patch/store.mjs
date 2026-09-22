@@ -9,6 +9,16 @@ export function createMemoryPageStore({ now = () => Date.now() } = {}) {
   const pages = new Map();
   const previews = new Map();
   const receipts = new Map();
+  const revisions = new Map();
+
+  function appendRevision(page, operation) {
+    const list = revisions.get(page.page_id) ?? [];
+    if (list.some(row => row.version === page.version)) {
+      throw new Error('revision versions are append-only');
+    }
+    list.push({ version: page.version, operation, package: clone(page.package) });
+    revisions.set(page.page_id, list);
+  }
 
   return {
     now,
@@ -24,7 +34,11 @@ export function createMemoryPageStore({ now = () => Date.now() } = {}) {
         binding_manifest: clone(input.binding_manifest ?? { bindings: [], result_refs: [] }),
       };
       pages.set(page.page_id, page);
+      revisions.set(page.page_id, [{ version: page.version, operation: 'GENERATE', package: clone(page.package) }]);
       return clone(page);
+    },
+    history(page_id) {
+      return clone(revisions.get(page_id) ?? []);
     },
     getPage(page_id) {
       const page = pages.get(page_id);
@@ -70,6 +84,7 @@ export function createMemoryPageStore({ now = () => Date.now() } = {}) {
       page.version += 1;
       page.package = clone(preview.proposed_package);
       if (preview.binding_manifest) page.binding_manifest = clone(preview.binding_manifest);
+      appendRevision(page, 'PATCH');
       preview.status = 'APPLIED';
       receipts.set(idempotency_key, {
         operation: 'PATCH',
@@ -91,6 +106,7 @@ export function createMemoryPageStore({ now = () => Date.now() } = {}) {
       page.version += 1;
       page.package = clone(pagePackage);
       if (binding_manifest) page.binding_manifest = clone(binding_manifest);
+      appendRevision(page, 'SAVE');
       receipts.set(idempotency_key, { operation: 'SAVE', page_id, version: page.version });
       return { ok: true, page: clone(page), operation: 'SAVE', idempotent: false };
     },
