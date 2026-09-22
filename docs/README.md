@@ -1,7 +1,7 @@
 # Docs 索引
 
 > 按 lifecycle 分层，新人约 5 分钟找到入口。  
-> **最后更新**: 2026-09-21。本分支 VERSION **0.14.0.0**（分析组板/指标收尾/图谱 ACL 候选，未合入 main）；现役 6677 仍为 **0.13.0.0**（#36 / **`7575d07`**），非公网正式 release。DSH **0.1.6-alpha.2**（`ddefc45f`）。0.8.0.0 基线仍是 #129 `a729ff6`。最新 Git HEAD 与施工边界以根目录 [STATUS.md](../STATUS.md) 为准。产品仍 PARTIAL。Mission 主链文档仍有效。
+> **最后更新**: 2026-09-22。公开 main VERSION **0.16.0.2**（#50 / **`3bc2841`**）。现役 6677 已加载该插件构建。DSH **0.1.6-alpha.2**（`ddefc45f`）。最新 Git HEAD 与施工边界以根目录 [STATUS.md](../STATUS.md) 为准。产品仍 PARTIAL。Mission 主链文档仍有效。
 
 ## 黑客松当前实现
 
@@ -18,6 +18,7 @@
 | [`hackathon/PRODUCT-READINESS-2026-09-10.md`](./hackathon/PRODUCT-READINESS-2026-09-10.md) | 七阶段验收账本 |
 | [`hackathon/TODOS.md`](./hackathon/TODOS.md) | 验收缺口与延期项（不是执行授权） |
 | [`hackathon/COCKPIT-UI-UX-2026-09-20.md`](./hackathon/COCKPIT-UI-UX-2026-09-20.md) | 0.13.0.0 驾驶舱合并、6677 reload、证据归档与未验收项 |
+| [`operating/cockpit-native-html.md`](./operating/cockpit-native-html.md) | 从对话点「生成驾驶舱」或说生成 HTML，到可编辑驾驶舱和右侧产物 |
 | [`operating/cockpit-ai-edit.md`](./operating/cockpit-ai-edit.md) | 产物组织、全屏、静态 HTML 手动 / AI 选区编辑与 HTTP 合同 |
 | [`hackathon/S3-ACCEPTANCE-2026-09-15.md`](./hackathon/S3-ACCEPTANCE-2026-09-15.md) | 9-15 指定 Figma 矩阵与正式壳 B3 代表路径（PARTIAL，不升版本） |
 | [`hackathon/S3-CROSS-MATRIX-2026-09-15.md`](./hackathon/S3-CROSS-MATRIX-2026-09-15.md) | 9-15 正式壳核心分支双视口交叉；v14 账本，v15 为 SETUP_FAILED |

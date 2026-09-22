@@ -1,16 +1,18 @@
 # 项目状态 (Project Status)
-> 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。公开仓库 main 为 **d521051c（#38）**，VERSION **0.14.0.0**。现役 6677 已加载该版本。本工作树 `codex/cockpit-inline-edit` 候选 **0.15.0.0**：HTML 卡片文案/块级 AI。产品仍 PARTIAL。详见[驾驶舱记录](docs/hackathon/COCKPIT-PRESENTATION-2026-09-21.md)与[整合记录](docs/crm-calibration/crm-integration-2026-09-21.md)。
+> 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。公开仓库 main 为 **3bc2841（#50）**，VERSION **0.16.0.2**。现役 6677 已加载该插件构建。产品仍 PARTIAL。
 
-## 当前快照（2026-09-21，驾驶舱 presentation 0.15.0.0）
+## 当前快照（2026-09-22，驾驶舱原生 HTML 0.16.0.2）
 
 | 项 | 状态 |
 |---|---|
-| 已合代码基线 | **d521051c（公开仓库 #38）**，前序 #37 文档 / #36 驾驶舱 / #34 CRM。旧私有历史未合入。 |
-| 本轮交付 | 工作树 `codex/cockpit-inline-edit`：脚本生成卡片的文案与块级 AI、OCR 4 项修复。未把本候选加载 6677。 |
-| VERSION / 产品 | 候选 **0.15.0.0**；公开 main **0.14.0.0**。产品 **PARTIAL**，原全量 Goal **PAUSED**。loopback，不上公网。 |
+| 已合代码基线 | **3bc2841（公开仓库 #50）**，前序 #49 / 0.16.0.1。旧私有历史未合入。 |
+| 本轮交付 | 对话用 `free_html_page_generate` 交 HTML。工作台放入可编辑驾驶舱，并在对话右侧产物栏打开。步骤见 [操作说明](docs/operating/cockpit-native-html.md)。选区压缩后可点选。GSV 带首购新老客和仓库最后支付日。 |
+| VERSION / 产品 | 公开 main **0.16.0.2**。产品 **PARTIAL**，原全量 Goal **PAUSED**。 |
 | DSH 基座 | **0.1.6-alpha.2（ddefc45f）**，不改上游。 |
-| 现役 | 6677 / 18091 加载公开 0.14.0.0（`crm-public-release`）；控制登记与 runtime 留在原仓。CRM 18093 仍为 `crm-assets-public` 的 archive_dashboard。 |
-| 原始数据 | 约131GB归档DuckDB不进Git；本轮测试使用合成夹具与独立私有 SQLite。 |
+| 现役 | 6677 加载 `crm-public-release` 的 0.16.0.2 插件；控制登记与 runtime 留在原仓。CRM 18093 仍为 `crm-assets-public` 的 archive_dashboard，本轮未重启。 |
+| 原始数据 | 约131GB归档DuckDB不进Git；测试使用合成夹具与独立私有 SQLite。 |
+
+以下 2026-09-21 记录是 0.15 施工留档，不是 0.16.0.2 的当前计划。
 
 ## 本轮施工计划
 
