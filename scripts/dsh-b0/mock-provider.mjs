@@ -1,11 +1,17 @@
 /** Test-provider adapter, not a business/runtime adapter. The pinned official
  * mock repeats one tool-call ID for every request. Namespace wire IDs per HTTP
  * request so consecutive native turns obey the session-wide identity contract.
- * No result, argument, prompt, outcome, retry, or DSH source is rewritten.
+ * 0.1.7 speaks Messages (`content_block` tool_use). Older chat-completion
+ * deltas stay namespaced too. No result, argument, prompt, outcome, retry,
+ * or DSH source is rewritten.
  */
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { once } from 'node:events';
+
+function namespacedId(requestNumber, id) {
+  return `b0-request-${requestNumber}:${id}`;
+}
 
 export function namespaceToolCallLine(line, requestNumber) {
   if (!line.startsWith('data:') || line.slice(5).trim() === '[DONE]') return line;
@@ -14,12 +20,31 @@ export function namespaceToolCallLine(line, requestNumber) {
   for (const choice of value.choices ?? []) {
     for (const tool of choice.delta?.tool_calls ?? []) {
       if (typeof tool.id === 'string' && tool.id.length) {
-        tool.id = `b0-request-${requestNumber}:${tool.id}`;
+        tool.id = namespacedId(requestNumber, tool.id);
         changed = true;
       }
     }
   }
+  const block = value.content_block;
+  if (value.type === 'content_block_start' && block?.type === 'tool_use'
+    && typeof block.id === 'string' && block.id.length) {
+    block.id = namespacedId(requestNumber, block.id);
+    changed = true;
+  }
   return changed ? `data: ${JSON.stringify(value)}` : line;
+}
+
+function acceptedMockPath(url) {
+  const path = new URL(url ?? '/', 'http://127.0.0.1').pathname;
+  return path === '/v1/chat/completions' || path === '/chat/completions' || path.endsWith('/v1/messages');
+}
+
+function forwardedHeaders(req) {
+  const headers = { 'content-type': 'application/json' };
+  if (req.headers.authorization) headers.authorization = req.headers.authorization;
+  if (req.headers['x-api-key']) headers['x-api-key'] = req.headers['x-api-key'];
+  if (req.headers['anthropic-version']) headers['anthropic-version'] = req.headers['anthropic-version'];
+  return headers;
 }
 
 export async function startB0MockProvider(startOfficial, options) {
@@ -40,7 +65,7 @@ export async function startB0MockProvider(startOfficial, options) {
     inflight.add(abort);
     res.once('close', () => { if (!res.writableFinished) abort.abort(); });
     void (async () => {
-      if (req.method !== 'POST' || !['/v1/chat/completions', '/chat/completions'].includes(req.url)) {
+      if (req.method !== 'POST' || !acceptedMockPath(req.url)) {
         res.writeHead(404).end(); return;
       }
       const requestId = ++requestNumber;
@@ -57,7 +82,7 @@ export async function startB0MockProvider(startOfficial, options) {
         chunks.push(chunk);
       }
       const response = await fetch(`${official.baseURL}${req.url}`, {
-        method: 'POST', headers: { 'content-type': 'application/json', authorization: req.headers.authorization ?? '' },
+        method: 'POST', headers: forwardedHeaders(req),
         body: Buffer.concat(chunks), signal: abort.signal, redirect: 'error',
       });
       const type = response.headers.get('content-type') ?? 'application/octet-stream';
