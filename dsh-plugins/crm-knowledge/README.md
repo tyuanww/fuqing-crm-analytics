@@ -8,7 +8,8 @@
 
 | 工具 | 作用 |
 |---|---|
-| `query_crm_dashboard_gsv` | 用户认可的现看板 GSV 总额、日趋势；绑定账号后只读调用原指标服务；与合成净额候选分开 |
+| `query_crm_dashboard_gsv` | 用户认可的现看板 GSV 总额、日趋势、首购口径的新客/老客，以及仓库最后支付日；绑定账号后只读调用原指标服务；与合成净额候选分开 |
+| `free_html_page_generate` | 对话写好 HTML 后交出源码包。保存由工作台完成，本工具不写文件、不查数 |
 | `query_crm_dashboard_purchases` | 看板GSV分子下的AOV/AUS及正额订单/对应买家覆盖，需新版聚合接口和Host；一组真实窗口已独立只读核对并通过现役真实账号/模型验收，范围见交付记录 |
 | `query_crm_dashboard_readiness` | 当前连接下各指标来源具备程度与 A/B/C 分类；只读元数据，不返回明细 |
 | `query_crm_dashboard_membership` | 成交时会员溢价；缺快照/事件时不可用，不使用当前 is_member |

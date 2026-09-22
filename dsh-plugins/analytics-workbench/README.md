@@ -224,12 +224,12 @@ FQ_B0_PYTHON=/Users/hutou/homebrew/opt/python@3.14/bin/python3.14 node dsh-plugi
 
 ### 侧栏登录与比赛看板入口
 
-侧栏底 `sidebar.footer.action` 现为登录（id=`shine-mage.account.login`）与主题（id=`shine-mage.account.theme`）。比赛看板在登录菜单里用锚点打开旧 CRM 前端 `http://127.0.0.1:15173/`，即 `scripts/ops/start-stack.sh` 的默认 `FQ_FRONTEND_PORT`（dsh-dev 预留的比赛轨 Vite，不用通用 5173）。不再占用第二个 footer 按钮。
+侧栏底 `sidebar.footer.action` 现为登录（id=`shine-mage.account.login`）与主题（id=`shine-mage.account.theme`）。比赛看板在登录菜单里用锚点打开 `https://board.tyuan.chat/`。不再占用第二个 footer 按钮。
 
 - 未登录显示「未登录」。登录菜单可填显示名称，写入 `localStorage` 后页脚显示名字；来源为 feishu 时副标题为「飞书」。这不是飞书 OAuth。同页刷新靠 `shine-account-change`。
 - 收起侧栏后登录只留 icon，主题钮叠在 rail。选择器是 `[class*="footerActions"]:has(.sm-login[data-wide="0"])`，不用 `collapsed` 子串。
 - 比赛看板用 `target="_blank"` + `rel="noopener noreferrer"`，不用 `window.open`。`test/plugin-ui-lifecycle.test.mjs` 覆盖菜单链接；调用 `window.open` 会失败。
-- 看板仍是独立应用、独立进程与独立登录：DSH 不内嵌、不代理，也不放松旧前端的 `frame-ancestors 'none'`。地址按 `FQ_FRONTEND_PORT=15173` 写死；改该变量后此入口不跟随。裸 `npm run dev` 仍可能听 5173。
+- 看板仍是独立应用、独立进程与独立登录：DSH 不内嵌、不代理。菜单地址是 `https://board.tyuan.chat/`。`start-stack` 的本地前端仍听 `FQ_FRONTEND_PORT`（默认 15173）。裸 `npm run dev` 仍可能听 5173。
 
 ## v0.8 实际能力与边界（历史基线）
 

@@ -1,7 +1,7 @@
 # Docs 索引
 
 > 按 lifecycle 分层，新人约 5 分钟找到入口。  
-> **最后更新**: 2026-09-21。本分支 VERSION **0.14.0.0**（分析组板/指标收尾/图谱 ACL 候选，未合入 main）；现役 6677 仍为 **0.13.0.0**（#36 / **`7575d07`**），非公网正式 release。DSH **0.1.6-alpha.2**（`ddefc45f`）。0.8.0.0 基线仍是 #129 `a729ff6`。最新 Git HEAD 与施工边界以根目录 [STATUS.md](../STATUS.md) 为准。产品仍 PARTIAL。Mission 主链文档仍有效。
+> **最后更新**: 2026-09-22。公开 main VERSION **0.16.0.2**（#50 / **`3bc2841`**）。现役 6677 已加载该插件构建。DSH **0.1.6-alpha.2**（`ddefc45f`）。最新 Git HEAD 与施工边界以根目录 [STATUS.md](../STATUS.md) 为准。产品仍 PARTIAL。Mission 主链文档仍有效。
 
 ## 黑客松当前实现
 
