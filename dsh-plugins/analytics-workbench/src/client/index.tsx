@@ -478,15 +478,19 @@ export function apply(ctx: Context): void {
   const aiClient = createCockpitAIClient(pageDocumentsHttpOptions(), {
     async openNative(job) {
       const sessionId = await ctx.sessions.create({ cwd: job.workspace, sessionId: job.session_id as never });
-      ctx.uiWorkspace.openSession(sessionId);
+      const showConversation = () => {
+        ctx.uiWorkspace.openSession(sessionId);
+        try { ctx.layout.selectPanel(null); } catch { /* stay if the host refuses the panel switch */ }
+        try { ctx.layout.openRightbar(true, false); } catch { /* the conversation is already open */ }
+      };
+      showConversation();
       // Stable request identity: reopening can safely recover a lost enqueue receipt.
       const reply = await ctx.remote.session.prompt({
         sessionId, requestId: ('artifact-' + job.id) as never, mode: 'queue', clientTimeZone: 'Asia/Shanghai',
         content: [{ type: 'text', text: nativeArtifactPrompt(job) }],
       });
       if (!reply.ok || !reply.value.accepted) throw new Error('原生 AI 未接受请求。请在该对话选择并配置可用模型，再回驾驶舱重试打开；修改任务已保留。');
-      ctx.layout.selectPanel(null);
-      ctx.uiWorkspace.openSession(sessionId);
+      showConversation();
       const preview = job.preview_name ?? (job.target_kind === 'page' ? 'current.html' : job.source_name);
       const address = job.target_kind === 'page' ? cockpitArtifactAddress(job.id) : fileResourceAddress(sessionId, preview);
       if (address && job.target_kind === 'page') {

@@ -20,6 +20,9 @@ export type FreeHtmlLibraryState = {
   preview: PreviewRecord | null;
   importCandidate: { preview_id: string; package: FreeHtmlPage['package']; origin: { session_id: string | null; path: string; file_id?: string } } | null;
   textDraft: { value: string; original: string; changed: boolean } | null;
+  textDrafts: Record<string, string>;
+  draftReset: number;
+  silentCommit: boolean;
   presentation_overlay: Record<string, { text?: string; style?: Record<string, string>; attributes?: Record<string, string> }> | null;
   historyItems: { version: number; operation?: string; title?: string }[];
   confirmationUncertain: boolean;
@@ -60,6 +63,7 @@ export type FreeHtmlLibraryStore = {
   confirmImport(): Promise<string | undefined>;
   setReplacementText(value: string, original?: string): void;
   discardTextDraft(): void;
+  commitTextDrafts(): Promise<boolean>;
   loadHistory(): Promise<void>;
   previewRollback(version: number): Promise<void>;
   requestLeave(intent: string): { blocked: boolean; hasUnsavedChanges: boolean; hasActiveEditContext: boolean };

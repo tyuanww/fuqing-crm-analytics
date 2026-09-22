@@ -226,6 +226,17 @@ test('characterData plus detach in one mutation batch does not throw or reuse a 
   assert.equal(label.textContent, '保存的名称');
 });
 
+test('a sole sibling keeps its unique class token as the path key', async t => {
+  const source = { ...pkg, js: `document.getElementById('cards').innerHTML='<section id="verdict"><span class="verdict__title-wrap">标题</span></section>';` };
+  const ui = await mount(t, source);
+  const title = ui.targets().find(node => node.runtime && node.tag === 'span' && node.text === '标题');
+  assert.equal(title.runtime.path.at(-1).key.attribute, 'class');
+  assert.equal(title.runtime.path.at(-1).key.value, 'verdict__title-wrap');
+  const shown = await mount(t, renderedTextPreview(source, title, '新标题', {}), { editing: false });
+  assert.equal(shown.dom.window.document.querySelector('.verdict__title-wrap').textContent, '新标题');
+  assert.equal(shown.dom.window.__cockpitPresentationStatus.unresolved.length, 0);
+});
+
 test('readonly computed fields stay unresolved and unique class identity stays stable', async t => {
   const readonly = { ...pkg, js: `let count=42; cards.innerHTML='<article data-node="metric"><strong data-page-readonly>'+count+'</strong><span class="kpi-label">收入文案</span><span class="kpi-note">备注</span></article>';` };
   const ui = await mount(t, readonly);

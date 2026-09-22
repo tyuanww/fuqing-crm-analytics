@@ -34,16 +34,20 @@ function completePagePackage<T extends { html: string; css: string; js: string; 
   };
 }
 
-export function HtmlPreview({ pkg, overlays = null, overlayNodes = [], pageId = 'workspace', version = 0, editing = false, selectBlocks = false, nodes = NO_NODES, selected, onSelect, onTargets, title }: {
+export function HtmlPreview({ pkg, overlays = null, overlayNodes = [], pageId = 'workspace', version = 0, editing = false, selectBlocks = false, nodes = NO_NODES, selected, draft = null, onUnresolved, onSelect, onTargets, title }: {
   pkg: { html: string; css?: string; js?: string; resources?: unknown[]; presentation?: components['schemas']['PagePresentation'] | null }; pageId?: string; version?: number;
   overlays?: Record<string, { text?: string; style?: Record<string, string>; attributes?: Record<string, string> }> | null;
   overlayNodes?: Array<{ node_id?: string; source_range?: { start: number; end: number } | null }>;
-  editing?: boolean; selectBlocks?: boolean; nodes?: TextNode[]; selected?: string; onSelect?(node: TextNode | null): void; onTargets?(nodes: TextNode[]): void; title: string;
+  editing?: boolean; selectBlocks?: boolean; nodes?: TextNode[]; selected?: string;
+  draft?: { nodeId: string; text: string; active: boolean; reset: number; style?: Record<string, string> | null } | null;
+  onUnresolved?(count: number): void;
+  onSelect?(node: TextNode | null): void; onTargets?(nodes: TextNode[]): void; title: string;
 }) {
   const frame = useRef<HTMLIFrameElement>(null);
-  const [unresolved, setUnresolved] = useState(0);
   const callback = useRef(onSelect); callback.current = onSelect;
   const targetsCallback = useRef(onTargets); targetsCallback.current = onTargets;
+  const unresolvedCallback = useRef(onUnresolved); unresolvedCallback.current = onUnresolved;
+  const draftStyleKey = draft?.style ? Object.entries(draft.style).map(([key, value]) => key + ':' + value).join(';') : '';
   const channel = useMemo(() => crypto.randomUUID(), [pkg, pageId, version, editing, selectBlocks]);
   const framed = useMemo(() => {
     if (!overlays || !Object.keys(overlays).length) return pkg;
@@ -51,12 +55,12 @@ export function HtmlPreview({ pkg, overlays = null, overlayNodes = [], pageId = 
   }, [pkg, overlays, overlayNodes]);
   const srcdoc = useMemo(() => selectionSrcdoc(framed, { channel, pageId, version, nodes, editing, selectBlocks }), [framed, channel, pageId, version, nodes, editing, selectBlocks]);
   useEffect(() => {
-    setUnresolved(0);
+    unresolvedCallback.current?.(0);
     const receive = (event: MessageEvent) => {
       const data = event.data;
       if (event.source === frame.current?.contentWindow && event.origin === 'null' && data?.type === 'cockpit.presentation'
         && data.channel === channel && data.pageId === pageId && data.version === version && Number.isSafeInteger(data.unresolved)
-        && data.unresolved >= 0 && data.unresolved <= (pkg.presentation?.edits?.length ?? 0)) setUnresolved(data.unresolved);
+        && data.unresolved >= 0 && data.unresolved <= (pkg.presentation?.edits?.length ?? 0)) unresolvedCallback.current?.(data.unresolved);
     };
     window.addEventListener('message', receive); return () => window.removeEventListener('message', receive);
   }, [channel, pageId, version, pkg]);
@@ -81,8 +85,20 @@ export function HtmlPreview({ pkg, overlays = null, overlayNodes = [], pageId = 
     send(); const node = frame.current; node?.addEventListener('load', send);
     return () => node?.removeEventListener('load', send);
   }, [selected, channel, pageId, version]);
-  return <>{unresolved > 0 ? <p role="status" className="cockpit-notice">{unresolved} 处已保存修改暂未匹配当前内容。可能被筛选隐藏或页面结构已变化；原修改仍保留。</p> : null}<iframe ref={frame} title={title} data-testid="library-html-preview" className="cockpit-html-frame"
-    srcDoc={srcdoc} sandbox={FREE_PAGE_SANDBOX} referrerPolicy={FREE_PAGE_REFERRER_POLICY} /></>;
+  useEffect(() => {
+    const send = () => frame.current?.contentWindow?.postMessage({
+      type: 'cockpit.draft', channel, pageId, version, nodeId: draft?.nodeId ?? null, text: draft?.text ?? '',
+      active: Boolean(draft?.active), style: draft?.style ?? null, reset: false,
+    }, '*');
+    send(); const node = frame.current; node?.addEventListener('load', send);
+    return () => node?.removeEventListener('load', send);
+  }, [draft?.nodeId, draft?.text, draft?.active, draft?.reset, channel, pageId, version, draftStyleKey]);
+  useEffect(() => {
+    if (!draft?.reset) return;
+    frame.current?.contentWindow?.postMessage({ type: 'cockpit.draft', channel, pageId, version, reset: true }, '*');
+  }, [draft?.reset, channel, pageId, version]);
+  return <iframe ref={frame} title={title} data-testid="library-html-preview" className="cockpit-html-frame"
+    srcDoc={srcdoc} sandbox={FREE_PAGE_SANDBOX} referrerPolicy={FREE_PAGE_REFERRER_POLICY} />;
 }
 function decodeText(text: string) {
   const node = document.createElement('textarea'); node.innerHTML = text; return node.value;
@@ -107,13 +123,15 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, aiMode = 
   const [attrName, setAttrName] = useState('title');
   const [attrValue, setAttrValue] = useState('');
   const [structureDraft, setStructureDraft] = useState('');
+  const [unresolvedEdits, setUnresolvedEdits] = useState(0);
   const sendLock = useRef(false);
   const selected = state.selection?.runtime ? state.selection as unknown as TextNode : candidates.find(row => row.node_id === state.selection?.node_id);
   const formalNode: PageNode | null = catalog.pageNodes.find(row => row.node_id === (state.selection?.node_id ?? selected?.node_id)) ?? null;
   const selectionAvailable = Boolean(selected && nodes.some(node => node.node_id === selected.node_id));
   const selectedRange = selected?.source ?? selected?.aiSource;
   const original = selected ? selected.richText && selected.editorText ? selected.editorText : selected.runtime ? selected.text : selected.editableText !== false ? decodeText(selected.text) : decodeText(selected.text.replace(/<[^>]*>/g, ' ')).trim() : '';
-  const value = state.textDraft?.value ?? original;
+  const drafted = selected ? state.textDrafts?.[selected.node_id] : undefined;
+  const value = state.textDraft && state.textDraft.original === original ? state.textDraft.value : drafted ?? original;
   const editableFormal = formalNode?.mapping === 'valid' && !formalNode.capabilities?.bound ? formalNode : null;
   const styles = parseStyleDeclaration(styleDraft);
   const attributes = attrName && !/javascript:/i.test(attrValue) ? { [attrName]: attrValue } : {};
@@ -200,7 +218,7 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, aiMode = 
           <button onClick={() => state.previewAlive ? store.stopPreview() : store.restartPreview()}>{state.previewAlive ? '暂停预览' : '恢复预览'}</button>
         </div>
       </div>
-      {state.preview ? <div className="cockpit-notice" data-testid="html-patch-preview">
+      {state.preview && !state.silentCommit ? <div className="cockpit-notice" data-testid="html-patch-preview">
         <div><strong>{state.preview.operation === 'ROLLBACK' ? '回退预览' : '修改预览'}</strong><p>{state.confirmationUncertain ? '保存结果待核对，请重试本次确认。' : '检查画布变化，确认后才会保存新版本。'}</p>
           {state.textDraft ? <p className="cockpit-change"><del>{state.textDraft.original}</del> → <strong>{state.textDraft.value || '（空文本）'}</strong></p> : null}</div>
         <button disabled={state.busy || state.confirmationUncertain} onClick={() => void store.cancelPreview()}>取消预览</button>
@@ -208,7 +226,10 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, aiMode = 
       </div> : null}
       <div className="cockpit-frame-wrap">{state.previewAlive
         ? <HtmlPreview pkg={pkg} overlays={state.presentation_overlay ?? current.presentation_overlays ?? null} overlayNodes={catalog.pageNodes} pageId={current.page_id} version={current.version} title={current.title}
-          editing={editing && !sending} selectBlocks={aiMode} nodes={candidates} selected={state.selection?.node_id} onSelect={commitSelection}
+          editing={editing && !sending} selectBlocks={aiMode} nodes={candidates} selected={state.selection?.node_id}
+          draft={selected ? { nodeId: selected.node_id, text: value, active: value !== original, reset: state.draftReset ?? 0, style: styleFocus === 'style' && Object.keys(styles).length ? styles : null } : null}
+          onUnresolved={setUnresolvedEdits}
+          onSelect={commitSelection}
           onTargets={verified => setAvailability({ session, nodes: verified })} />
         : <div className="cockpit-empty"><h2>预览已暂停</h2><p>已保存的页面和当前修改均保留。</p><button onClick={() => store.restartPreview()}>恢复预览</button></div>}
       </div>
@@ -228,6 +249,7 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, aiMode = 
         {!state.historyItems.length ? <p>暂无可读取的版本记录。</p> : null}
       </> : <>
         <p className="cockpit-eyebrow">当前选区</p>
+        {unresolvedEdits > 0 ? <p role="status" className="cockpit-muted" data-testid="html-unresolved-edits">有 {unresolvedEdits} 处已保存修改还没对上当前画面。原修改仍保留，可以继续改字或保存。</p> : null}
         {selected ? <>
           <h3>{original.trim().slice(0, 60) || '空文本'}</h3>
           {!locked && !selectionAvailable ? <p role="status" className="cockpit-muted">当前选区尚未就绪或已被脚本改写，暂不能修改。已有草稿保留。</p> : null}
@@ -240,9 +262,7 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, aiMode = 
             <button disabled={sending} onClick={() => setAiOpen(false)}>取消</button>
           </div> : selected.editableText !== false ? <><label className="cockpit-field">替换文本<textarea data-testid="html-replacement" disabled={locked || !selectionAvailable} value={value}
             rows={6} onChange={event => store.setReplacementText(event.target.value, original)} /></label>
-          <p className="cockpit-muted">{selected.richText ? '整段说明都可以改。句子里的指标原文会留在原标签中，请不要删掉或改写这些数字。' : selected.runtime ? '只替换显示文案，保留筛选和图表交互，不改计算数据。' : '只替换这段文字。确认前可检查修改效果。'}</p>
-          <button className="cockpit-primary" data-testid="html-preview-patch" disabled={locked || !selectionAvailable || value === original}
-            onClick={() => void store.previewPatch(value)}>预览修改</button>
+          <p className="cockpit-muted">{selected.richText ? '整段说明都可以改。左边会立刻显示。句子里的指标原文会留在原标签中，请不要删掉或改写这些数字。保存用右上角。' : selected.runtime ? '输入时左边立刻显示。只替换显示文案，保留筛选和图表交互，不改计算数据。保存用右上角。' : '输入时左边立刻显示。保存用右上角。'}</p>
           </> : <p className="cockpit-muted">已选中 {selected.tag} 板块，可交给 AI 调整板块内容和局部样式。</p>}
           {!aiOpen && onAI && selectionForAI(current.package, selected) ? <button disabled={locked || !selectionAvailable || store.hasUnsavedChanges()} onClick={() => { setAiOpen(true); setSendError(''); }}>用 AI 修改此选区</button> : null}
           {editableFormal && !aiOpen ? <div data-testid="html-node-identity">
@@ -254,9 +274,10 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, aiMode = 
               onChange={event => { setStyleFocus('attribute'); setAttrName(event.target.value.replace(/[^a-zA-Z_:-]/g, '').replace(/^on/i, '')); }} /></label>
             <label className="cockpit-field">属性值<input data-testid="html-attr-value" disabled={locked} value={attrValue}
               onChange={event => { if (/javascript:/i.test(event.target.value)) return; setStyleFocus('attribute'); setAttrValue(event.target.value); }} /></label>
-            <p className="cockpit-muted">样式和属性先在画布上预览。确认前不改页面源码。</p>
+            <p className="cockpit-muted">样式会立刻出现在页面上。取消只收回这次预览，保存后才写入版本。</p>
+            <button type="button" disabled={locked || !styleProposed} onClick={() => { setStyleDraft(''); setAttrValue(''); }}>取消样式</button>
             <button className="cockpit-primary" data-testid="html-preview-style" disabled={locked || (styleFocus === 'style' ? !styleProposed : !attrName)}
-              onClick={() => applyMapped(styleFocus === 'attribute' ? 'set_attribute' : 'set_style', { styles, attributes }, 'presentation')}>预览样式或属性</button>
+              onClick={() => applyMapped(styleFocus === 'attribute' ? 'set_attribute' : 'set_style', { styles, attributes }, 'presentation')}>保存样式</button>
             {editableFormal.capabilities?.structure ? <>
               <label className="cockpit-field">替换这一段 HTML<textarea data-testid="html-structure" disabled={locked} value={structureDraft} rows={4}
                 onChange={event => setStructureDraft(event.target.value)} placeholder={'<p id="lead">新结构</p>'} /></label>

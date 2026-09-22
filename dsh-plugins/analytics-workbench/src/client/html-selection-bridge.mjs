@@ -53,9 +53,62 @@ function selectionRuntime(config) {
         return !['href', 'action', 'formaction', 'xlink:href'].includes(name) || !/^(?:data|blob):/i.test(value);
       }));
     };
+    const originals = new WeakMap();
+    const drafted = new Set();
+    let liveDraft = null;
+    const safeId = id => typeof id === 'string' && /^[A-Za-z][A-Za-z0-9_.:-]{0,159}$/.test(id);
+    const findDraftNode = id => {
+      if (typeof id !== 'string' || !id) return null;
+      for (const [nodeId, node] of eligible) if (nodeId === id) return node;
+      if (!safeId(id)) return null;
+      return document.querySelector(`[data-cockpit-source="${id}"],[data-shine-node="${id}"]`);
+    };
+    const restoreDraft = node => {
+      const saved = originals.get(node);
+      if (!saved) return;
+      node.innerHTML = saved.html;
+      if (saved.style == null) node.removeAttribute('style'); else node.setAttribute('style', saved.style);
+      originals.delete(node);
+      drafted.delete(node);
+    };
+    const paintDraft = () => {
+      if (!liveDraft?.nodeId) return;
+      const node = findDraftNode(liveDraft.nodeId);
+      if (!node) return;
+      if (!liveDraft.active && !liveDraft.style) { restoreDraft(node); return; }
+      if (!originals.has(node)) originals.set(node, { html: node.innerHTML, style: node.getAttribute('style') });
+      drafted.add(node);
+      if (liveDraft.active) {
+        const next = String(liveDraft.text ?? '');
+        const inlineName = name => ['a', 'b', 'em', 'i', 'small', 'span', 'strong', 'sub', 'sup', 'code'].includes(name);
+        const parts = [...node.childNodes].filter(part => part.nodeType === 1 || (part.nodeType === 3 && part.nodeValue));
+        const sentence = parts.length > 0 && parts.every(part => part.nodeType !== 1 || inlineName(part.localName))
+          && parts.some(part => part.nodeType === 1) && parts.filter(part => part.nodeType === 1).every(part => next.includes(part.textContent));
+        if (!sentence) node.textContent = next;
+        else {
+          let cursor = 0;
+          for (const part of parts) {
+            if (part.nodeType === 3) {
+              const later = parts.slice(parts.indexOf(part) + 1).find(item => item.nodeType === 1);
+              const end = later ? next.indexOf(later.textContent, cursor) : next.length;
+              const value = next.slice(cursor, end < 0 ? next.length : end);
+              if (part.nodeValue !== value) part.nodeValue = value;
+              cursor = end < 0 ? next.length : end;
+            } else cursor += part.textContent.length;
+          }
+        }
+      }
+      if (liveDraft.style && typeof liveDraft.style === 'object') {
+        for (const [key, value] of Object.entries(liveDraft.style)) {
+          if (typeof key === 'string' && typeof value === 'string' && !/url\s*\(|expression\s*\(/i.test(key + value)) node.style.setProperty(key, value);
+        }
+      }
+    };
     const unchanged = node => {
       const expected = config.source[identity(node)]; if (expected === undefined) return false;
-      const clone = node.cloneNode(true); clone.querySelectorAll('[data-cockpit-source]').forEach(child => child.removeAttribute('data-cockpit-source'));
+      const clone = node.cloneNode(true);
+      if (originals.has(node)) clone.innerHTML = originals.get(node).html;
+      clone.querySelectorAll('[data-cockpit-source]').forEach(child => child.removeAttribute('data-cockpit-source'));
       clone.querySelectorAll('[data-cockpit-target]').forEach(child => { child.removeAttribute('data-cockpit-target'); child.removeAttribute('data-cockpit-selected'); if (child.hasAttribute('data-cockpit-tabindex')) { const original = child.getAttribute('data-cockpit-tabindex'); if (original === '') child.removeAttribute('tabindex'); else child.setAttribute('tabindex', original); child.removeAttribute('data-cockpit-tabindex'); } });
       const template = document.createElement('template'); template.innerHTML = expected;
       return clone.innerHTML === template.innerHTML;
@@ -133,17 +186,17 @@ function selectionRuntime(config) {
               const value = child.getAttribute(attribute);
               if (value && /^[A-Za-z][A-Za-z0-9_.:-]{0,159}$/.test(value) && peers.filter(n => n.getAttribute(attribute) === value).length === 1) { key = { attribute, value }; break; }
             }
-            if (!key && peers.length > 1) {
+            if (!key) {
               const value = [...child.classList].find(c => !/^(is-|has-|active|selected|hover|focus)/.test(c) && /^[A-Za-z][A-Za-z0-9_.:-]{0,159}$/.test(c) && peers.filter(n => n.classList.contains(c)).length === 1);
               if (value) key = { attribute: 'class', value };
-              else {
-                const label = item => window.__cockpitPresentationIdentity?.get(item) ?? item.textContent;
-                const text = label(child);
-                const numericLeaf = !child.children.length && /^[\s\d.,%+−\-]+$/.test(text);
-                if (!numericLeaf && text.trim() && text.length <= 2000
-                  && peers.filter(item => label(item) === text).length === 1) key = { attribute: 'text', value: text };
-                else { reliable = false; break; }
-              }
+            }
+            if (!key && peers.length > 1) {
+              const label = item => window.__cockpitPresentationIdentity?.get(item) ?? item.textContent;
+              const text = label(child);
+              const numericLeaf = !child.children.length && /^[\s\d.,%+−\-]+$/.test(text);
+              if (!numericLeaf && text.trim() && text.length <= 2000
+                && peers.filter(item => label(item) === text).length === 1) key = { attribute: 'text', value: text };
+              else { reliable = false; break; }
             }
             path.unshift({ tag: child.localName, ...(key ? { key } : {}) }); child = parentNode;
           }
@@ -183,6 +236,7 @@ function selectionRuntime(config) {
         parent.postMessage({ type: 'cockpit.targets', channel: config.channel, pageId: config.pageId,
           version: config.version, nodeIds: ids, runtimeNodes }, '*');
       }
+      paintDraft();
       observer.observe(document.documentElement, { subtree: true, childList: true, characterData: true, attributes: true });
     };
     window.addEventListener('message', event => {
@@ -191,6 +245,21 @@ function selectionRuntime(config) {
         || data.pageId !== config.pageId || data.version !== config.version) return;
       if (data.type === 'cockpit.targets.request') sync(true);
       if (data.type === 'cockpit.highlight') { selected = data.nodeId; sync(); }
+      if (data.type === 'cockpit.draft') {
+        observer.disconnect();
+        if (data.reset) {
+          for (const node of [...drafted]) restoreDraft(node);
+          liveDraft = null;
+        } else {
+          liveDraft = { nodeId: data.nodeId, text: data.text, active: Boolean(data.active), style: data.style && typeof data.style === 'object' ? data.style : null };
+          if (!liveDraft.active && !liveDraft.style) {
+            const node = findDraftNode(liveDraft.nodeId);
+            if (node) restoreDraft(node);
+            liveDraft = null;
+          }
+        }
+        sync();
+      }
     });
     document.addEventListener('click', event => {
       event.preventDefault(); event.stopImmediatePropagation();
