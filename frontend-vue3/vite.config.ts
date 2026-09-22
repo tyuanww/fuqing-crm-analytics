@@ -57,6 +57,7 @@ export default defineConfig({
   server: {
     port: 5173,
     host: true,
+    allowedHosts: ['board.tyuan.chat'],
     proxy: {
       '/api': {
         // Keep the proxy hop on a uvicorn-trusted loopback address and append
