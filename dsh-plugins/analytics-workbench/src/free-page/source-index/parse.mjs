@@ -9,6 +9,14 @@ function escapeRe(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+export function isVoidHtmlTag(tag) {
+  return VOID.has(String(tag || '').toLowerCase());
+}
+
+export function closeTagRange(html, tag, from) {
+  return closeRange(html, String(tag || ''), from);
+}
+
 function closeRange(html, tag, from) {
   const open = new RegExp(`<${escapeRe(tag)}\\b`, 'gi');
   const close = new RegExp(`<\\/${escapeRe(tag)}\\s*>`, 'gi');
@@ -82,6 +90,62 @@ export function scanShineMarkers(html) {
     }
   }
   return found;
+}
+
+/**
+ * Return element ranges for an unannotated HTML document. This is a small,
+ * source-first scanner rather than a browser DOM parser: ranges point into the
+ * original bytes and therefore can be kept in a sidecar without serialising a
+ * mutated DOM back into the page package. It intentionally skips malformed or
+ * unclosed elements and is safe to use as a best-effort historical-page index.
+ */
+export function scanHtmlElements(html) {
+  if (typeof html !== 'string' || !html) return [];
+  const starts = [];
+  START_TAG.lastIndex = 0;
+  let match;
+  while ((match = START_TAG.exec(html))) {
+    const tag = match[1].toLowerCase();
+    const selfClosing = match[3] === '/' || VOID.has(tag);
+    const innerStart = match.index + match[0].length;
+    let innerEnd = innerStart;
+    let end = innerStart;
+    if (!selfClosing) {
+      const closed = closeRange(html, tag, innerStart);
+      if (!closed) continue;
+      innerEnd = closed.inner_end;
+      end = closed.end;
+    }
+    starts.push({
+      tag,
+      start: match.index,
+      inner_start: innerStart,
+      inner_end: innerEnd,
+      end,
+    });
+    // Script and style bodies are text. Jumping past them keeps a chart
+    // snippet such as `"<span>"` from becoming a phantom node.
+    if ((tag === 'script' || tag === 'style') && end > innerStart) START_TAG.lastIndex = end;
+  }
+
+  const sorted = starts.sort((a, b) => a.start - b.start || a.end - b.end);
+  const completed = [];
+  const siblingCounts = new Map();
+  const stack = [];
+  for (const item of sorted) {
+    while (stack.length > 0 && stack[stack.length - 1].end <= item.start) stack.pop();
+    const top = stack[stack.length - 1];
+    const parent = top && top.start < item.start && top.end >= item.end ? top : null;
+    const parentPath = parent?.path || '';
+    const countKey = `${parentPath}>${item.tag}`;
+    const sibling = siblingCounts.get(countKey) ?? 0;
+    siblingCounts.set(countKey, sibling + 1);
+    const path = `${parentPath ? `${parentPath}>` : ''}${item.tag}[${sibling}]`;
+    const entry = Object.freeze({ ...item, depth: parent ? parent.depth + 1 : 0, path });
+    completed.push(entry);
+    stack.push(entry);
+  }
+  return completed;
 }
 
 export function parseCssRules(css) {

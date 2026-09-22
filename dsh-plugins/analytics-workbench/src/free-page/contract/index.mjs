@@ -6,5 +6,18 @@ export {
   PAGE_OPERATIONS,
   BINDING_STATE_VALUES,
   FORBIDDEN_BRIDGE_OPS,
+  parseNodeRef,
+  parseSourceRange,
+  parseSelectedScope,
+  parseCAS,
+  parseEditOperation,
+  parseEditContext,
+  evaluateCAS,
+  admitEdit,
+  casFingerprint,
+  EDIT_CHANNEL_VALUES,
+  EDIT_ACTION_VALUES,
+  EDIT_ENCODING_VALUES,
+  EDIT_ERROR_CODES,
 } from './schema.mjs';
 export { default as contractFixture } from './fixture.json' with { type: 'json' };

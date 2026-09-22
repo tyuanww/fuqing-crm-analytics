@@ -10,7 +10,7 @@ import hashlib
 import json
 import re
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 
 SCHEMA_VERSION = "free-page/v1"
 BRIDGE_PROTOCOL = "free-page-bridge/v1"
@@ -48,6 +48,13 @@ PAGE_ERRORS = {
     "BRIDGE_NONCE": 409,
     "BRIDGE_EXPIRED_INSTANCE": 409,
     "BINDING_CORRUPT": 409,
+    "INVALID_EDIT": 422,
+    "INVALID_CAS": 422,
+    "INVALID_EDIT_CONTEXT": 422,
+    "CAS_CONFLICT": 409,
+    "EDIT_EXPIRED": 409,
+    "CAPABILITY_DENIED": 403,
+    "SCOPE_VIOLATION": 422,
 }
 
 
@@ -313,6 +320,369 @@ class PageRevision(PageModel):
     created_at_ms: int
 
 
+# free-page-edit/v1 is additive. PagePackage and PageDocument stay free-page/v1.
+EDIT_SCHEMA = "free-page-edit/v1"
+EDIT_CONTEXT_SCHEMA = "free-page-edit-context/v1"
+EDIT_CHANNELS = ("presentation", "source", "logic")
+EDIT_ACTIONS = ("insert", "update", "delete", "move", "replace")
+EDIT_ENCODINGS = ("overlay", "bytes")
+EDIT_ERROR_CODES = (
+    "INVALID_EDIT", "INVALID_CAS", "INVALID_EDIT_CONTEXT", "CAS_CONFLICT", "VERSION_CONFLICT",
+    "EDIT_EXPIRED", "CAPABILITY_DENIED", "SCOPE_VIOLATION", "IDEMPOTENCY_CONFLICT", "FORBIDDEN",
+    "MAPPING_STALE",
+)
+EditChannel = Literal["presentation", "source", "logic"]
+EditAction = Literal["insert", "update", "delete", "move", "replace"]
+EditEncoding = Literal["overlay", "bytes"]
+SHA256 = Annotated[str, Field(min_length=64, max_length=64, pattern=r"^[0-9a-f]{64}$")]
+Capability = Annotated[str, Field(min_length=1, max_length=64, pattern=IDENTITY)]
+SAFE_MAX = 9007199254740991
+
+
+def _require(condition: bool, message: str) -> None:
+    if not condition:
+        raise ValueError(message)
+
+
+def _contains(outer: "SourceRange", inner: "SourceRange") -> bool:
+    return inner.start >= outer.start and inner.end <= outer.end
+
+
+def _overlaps(left: "SourceRange", right: "SourceRange") -> bool:
+    return left.start < right.end and right.start < left.end
+
+
+def _sha256(value: object) -> bool:
+    return isinstance(value, str) and len(value) == 64 and all(char in "0123456789abcdef" for char in value)
+
+
+def _string_map(value: dict[str, str] | None, label: str) -> None:
+    if value is None:
+        return
+    _require(1 <= len(value) <= 32, f"INVALID_EDIT: {label} 为空或过多")
+    for key, item in value.items():
+        _require(
+            isinstance(key, str) and key.strip() and len(key) <= 64 and isinstance(item, str) and len(item) <= 512,
+            f"INVALID_EDIT: {label} 项非法",
+        )
+
+
+class SourceRange(PageModel):
+    start: Annotated[int, Field(ge=0, le=PACKAGE_MAX_BYTES)]
+    end: Annotated[int, Field(ge=0, le=PACKAGE_MAX_BYTES)]
+
+    @model_validator(mode="after")
+    def ordered(self):
+        _require(self.end >= self.start, "INVALID_EDIT: source range end is before start")
+        return self
+
+
+class PresentationOverlay(PageModel):
+    """Presentation writes style, text, and attributes. They do not splice source bytes."""
+    text: Annotated[str, Field(max_length=8000)] | None = None
+    attributes: dict[str, Annotated[str, Field(max_length=512)]] | None = None
+    style: dict[str, Annotated[str, Field(max_length=512)]] | None = None
+
+    @model_validator(mode="after")
+    def nonempty_overlay(self):
+        _string_map(self.attributes, "attributes")
+        _string_map(self.style, "style")
+        _require(self.text is not None or self.attributes is not None or self.style is not None, "INVALID_EDIT: overlay 不能为空")
+        return self
+
+
+class NodeRef(PageModel):
+    page_id: Opaque
+    node_id: Opaque
+    kind: NodeKind
+    selector: Annotated[str, Field(min_length=1, max_length=512, pattern=r"\S")] | None = None
+    source_range: SourceRange | None = None
+    mapping_token: Opaque
+    source_hash: SHA256
+    region_hash: SHA256
+
+    @model_validator(mode="after")
+    def locator_present(self):
+        _require(self.selector is not None or self.source_range is not None, "INVALID_EDIT: NodeRef 需要 selector 或 source range")
+        if self.source_range is not None:
+            _require(self.source_range.end > self.source_range.start, "INVALID_EDIT: 节点 source range 不能为空")
+        return self
+
+
+class SelectedScope(PageModel):
+    page_id: Opaque
+    node_id: Opaque
+    source_range: SourceRange | None = None
+
+    @model_validator(mode="after")
+    def scope_range_nonempty(self):
+        if self.source_range is not None:
+            _require(self.source_range.end > self.source_range.start, "INVALID_EDIT: selected scope range 不能为空")
+        return self
+
+
+class CAS(PageModel):
+    """Compare-and-swap precondition. Hashes bind an edit to its exact region."""
+    base_version: Version
+    source_hash: SHA256
+    region_hash: SHA256
+    idempotency_key: Annotated[str, Field(min_length=1, max_length=200)]
+
+    @field_validator("idempotency_key")
+    @classmethod
+    def idempotency_key_is_visible(cls, value: str) -> str:
+        _require(value == value.strip(), "INVALID_CAS: 幂等键非法")
+        return value
+
+
+class EditOperation(PageModel):
+    schema_version: Literal["free-page-edit/v1"] = EDIT_SCHEMA
+    operation_id: Opaque
+    channel: EditChannel
+    action: EditAction
+    selected_scope: SelectedScope
+    capabilities: Annotated[list[Capability], Field(min_length=1, max_length=16)]
+    node: NodeRef
+    cas: CAS
+    encoding: EditEncoding
+    payload: str | PresentationOverlay | None = None
+    byte_length: Annotated[int, Field(ge=0, le=PACKAGE_MAX_BYTES)] = 0
+    splice: SourceRange | None = None
+    destination: SourceRange | None = None
+    expected_region_hash: SHA256 | None = None
+
+    @model_validator(mode="after")
+    def channel_rules(self):
+        unique(self.capabilities)
+        _require(f"edit:{self.channel}" in self.capabilities, "CAPABILITY_DENIED: 缺少通道能力")
+        _require(self.selected_scope.page_id == self.node.page_id, "SCOPE_VIOLATION: scope 与节点 page_id 不一致")
+        _require(self.selected_scope.node_id == self.node.node_id, "SCOPE_VIOLATION: scope 与节点 node_id 不一致")
+        _require(
+            self.cas.source_hash == self.node.source_hash and self.cas.region_hash == self.node.region_hash,
+            "CAS_CONFLICT: CAS hash 与节点不一致",
+        )
+        if self.node.source_range is not None and self.selected_scope.source_range is not None:
+            _require(
+                _contains(self.selected_scope.source_range, self.node.source_range),
+                "SCOPE_VIOLATION: 节点范围超出 selected scope",
+            )
+        if self.channel == "presentation":
+            self._presentation()
+        else:
+            self._source_or_logic()
+        return self
+
+    def _presentation(self) -> None:
+        _require(self.encoding == "overlay", "INVALID_EDIT: presentation 必须使用 overlay")
+        _require(self.byte_length == 0, "INVALID_EDIT: overlay 的 byte_length 必须为 0")
+        _require(self.splice is None and self.expected_region_hash is None, "INVALID_EDIT: presentation 不能声明字节覆盖")
+        if self.action == "delete":
+            _require(self.payload is None and self.destination is None, "INVALID_EDIT: presentation delete 不能携带 payload")
+            return
+        _require(isinstance(self.payload, PresentationOverlay), "INVALID_EDIT: overlay payload 必须是对象")
+        if self.action == "move":
+            _require(self.destination is not None, "INVALID_EDIT: move 必须声明 destination")
+            _require(
+                self.node.source_range is not None and self.selected_scope.source_range is not None,
+                "INVALID_EDIT: move 必须有 source range",
+            )
+            _require(_contains(self.node.source_range, self.destination), "SCOPE_VIOLATION: destination 超出节点范围")
+            _require(
+                _contains(self.selected_scope.source_range, self.destination),
+                "SCOPE_VIOLATION: destination 超出 selected scope",
+            )
+            return
+        _require(self.destination is None, "INVALID_EDIT: 只有 move 可以携带 destination")
+
+    def _source_or_logic(self) -> None:
+        _require(self.encoding == "bytes", "INVALID_EDIT: source/logic 必须使用 bytes，不能静默覆盖")
+        _require(
+            self.node.source_range is not None and self.selected_scope.source_range is not None,
+            "INVALID_EDIT: source/logic 必须声明 source range，不能覆盖未知字节",
+        )
+        _require(self.expected_region_hash == self.node.region_hash, "CAS_CONFLICT: expected_region_hash 与节点 region_hash 不一致")
+        _require(self.splice is not None, "INVALID_EDIT: source/logic 缺少 splice，不能覆盖未知字节")
+        _require(_contains(self.node.source_range, self.splice), "SCOPE_VIOLATION: splice 超出节点 source range")
+        if self.action == "insert":
+            _require(self.splice.start == self.splice.end and self.destination is None, "INVALID_EDIT: insert 必须是范围内的插入点")
+            self._bytes(allow_empty=False)
+            return
+        if self.action == "delete":
+            _require(
+                self.splice.end > self.splice.start and self.payload is None and self.byte_length == 0 and self.destination is None,
+                "INVALID_EDIT: delete 不得携带 payload",
+            )
+            return
+        if self.action == "move":
+            _require(self.splice.end > self.splice.start and self.destination is not None, "INVALID_EDIT: move 必须声明源区间和 destination")
+            _require(_contains(self.node.source_range, self.destination), "SCOPE_VIOLATION: destination 超出节点范围")
+            _require(not _overlaps(self.splice, self.destination), "INVALID_EDIT: move 的源区间与目标区间重叠")
+            self._bytes(allow_empty=False)
+            return
+        _require(self.destination is None and self.splice.end > self.splice.start, "INVALID_EDIT: update/replace 必须声明非空 splice")
+        if self.action == "replace":
+            _require(
+                self.splice.start == self.node.source_range.start and self.splice.end == self.node.source_range.end,
+                "INVALID_EDIT: replace 必须精确覆盖节点 source range，不能留下未声明字节",
+            )
+        self._bytes(allow_empty=True)
+
+    def _bytes(self, *, allow_empty: bool) -> None:
+        _require(isinstance(self.payload, str), "INVALID_EDIT: bytes payload 与 byte_length 不一致")
+        _require(len(self.payload.encode("utf-8")) == self.byte_length, "INVALID_EDIT: bytes payload 与 byte_length 不一致")
+        if not allow_empty:
+            _require(self.byte_length > 0, "INVALID_EDIT: 字节操作不能为空")
+
+
+class EditContext(PageModel):
+    schema_version: Literal["free-page-edit-context/v1"] = EDIT_CONTEXT_SCHEMA
+    edit_context_id: Opaque
+    user_id: Opaque
+    tenant_id: Opaque
+    page_id: Opaque
+    version: Version
+    selected_node: NodeRef
+    capabilities: Annotated[list[Capability], Field(min_length=0, max_length=16)]
+    created_at: Annotated[int, Field(ge=0, le=SAFE_MAX)]
+    expires_at: Annotated[int, Field(ge=0, le=SAFE_MAX)]
+    ttl_ms: Annotated[int, Field(ge=1, le=86_400_000)]
+
+    @model_validator(mode="after")
+    def ttl_matches_selected_node(self):
+        unique(self.capabilities)
+        _require(self.selected_node.page_id == self.page_id, "INVALID_EDIT_CONTEXT: selected node 与 page_id 不一致")
+        _require(self.expires_at == self.created_at + self.ttl_ms, "INVALID_EDIT_CONTEXT: expires_at 必须等于 created_at + ttl_ms")
+        return self
+
+
+def _fail(code: str, message: str) -> dict:
+    return {"ok": False, "error": {"code": code, "message": message}}
+
+
+def _validation_decision(exc: ValidationError, fallback: str) -> dict:
+    for item in exc.errors():
+        loc = item.get("loc", ())
+        if item.get("type") == "literal_error" and loc and loc[-1] == "action":
+            return _fail("INVALID_EDIT", "未知 operation")
+        if item.get("type") == "literal_error" and loc and loc[-1] == "channel":
+            return _fail("INVALID_EDIT", "未知 channel")
+    blob = " ".join(str(item.get("msg", "")) for item in exc.errors())
+    for code in EDIT_ERROR_CODES:
+        if code in blob:
+            return _fail(code, blob)
+    if any(item.get("type") == "extra_forbidden" for item in exc.errors()):
+        return _fail(fallback, "含未知字段")
+    return _fail(fallback, blob or "字段非法")
+
+
+def parse_node_ref(raw: object) -> dict:
+    try:
+        return {"ok": True, "value": NodeRef.model_validate(raw)}
+    except ValidationError as exc:
+        return _validation_decision(exc, "INVALID_EDIT")
+
+
+def parse_edit_operation(raw: object) -> dict:
+    if not isinstance(raw, dict):
+        return _fail("INVALID_EDIT", "EditOperation 必须是对象")
+    data = dict(raw)
+    payload = data.get("payload")
+    if data.get("encoding") == "overlay" and isinstance(payload, dict):
+        try:
+            data["payload"] = PresentationOverlay.model_validate(payload)
+        except ValidationError as exc:
+            return _validation_decision(exc, "INVALID_EDIT")
+    try:
+        return {"ok": True, "value": EditOperation.model_validate(data)}
+    except ValidationError as exc:
+        return _validation_decision(exc, "INVALID_EDIT")
+
+
+def parse_edit_context(raw: object) -> dict:
+    try:
+        return {"ok": True, "value": EditContext.model_validate(raw)}
+    except ValidationError as exc:
+        return _validation_decision(exc, "INVALID_EDIT_CONTEXT")
+
+
+def cas_fingerprint(cas: CAS) -> str:
+    return f"{cas.base_version}\0{cas.source_hash}\0{cas.region_hash}\0{cas.idempotency_key}"
+
+
+def evaluate_cas(cas: CAS, *, version: object, source_hash: object, region_hash: object, prior: dict | None = None) -> dict:
+    if not isinstance(cas, CAS):
+        return _fail("INVALID_CAS", "CAS 必须是对象")
+    if prior is not None:
+        if not isinstance(prior.get("idempotency_key"), str) or not isinstance(prior.get("fingerprint"), str):
+            return _fail("INVALID_CAS", "幂等回执非法")
+        if prior["idempotency_key"] == cas.idempotency_key:
+            if prior["fingerprint"] != cas_fingerprint(cas):
+                return _fail("IDEMPOTENCY_CONFLICT", "同一幂等键对应了不同的 CAS")
+            return {"ok": True, "value": {"replay": True, "cas": cas}}
+    if isinstance(version, bool) or not isinstance(version, int) or version < 1 or not _sha256(source_hash) or not _sha256(region_hash):
+        return _fail("INVALID_CAS", "当前版本非法")
+    if version != cas.base_version:
+        return _fail("VERSION_CONFLICT", "base_version 与当前版本不一致")
+    if source_hash != cas.source_hash or region_hash != cas.region_hash:
+        return _fail("CAS_CONFLICT", "source_hash 或 region_hash 与当前区域不一致")
+    return {"ok": True, "value": {"replay": False, "cas": cas}}
+
+
+def _same_range(left: SourceRange | None, right: SourceRange | None) -> bool:
+    if left is None or right is None:
+        return left is None and right is None
+    return left.start == right.start and left.end == right.end
+
+
+def admit_edit(
+    context: EditContext,
+    operation: EditOperation,
+    *,
+    actor_user_id: object,
+    actor_tenant_id: object,
+    now_ms: object,
+    version: object,
+    source_hash: object,
+    region_hash: object,
+    prior: dict | None = None,
+) -> dict:
+    if not isinstance(context, EditContext) or not isinstance(operation, EditOperation):
+        return _fail("INVALID_EDIT", "admit 需要已校验的合同对象")
+    if isinstance(now_ms, bool) or not isinstance(now_ms, int) or now_ms < 0:
+        return _fail("INVALID_EDIT_CONTEXT", "now_ms 非法")
+    if now_ms < context.created_at:
+        return _fail("INVALID_EDIT_CONTEXT", "上下文尚未生效")
+    if now_ms >= context.expires_at:
+        return _fail("EDIT_EXPIRED", "编辑上下文已过期")
+    if actor_user_id != context.user_id or actor_tenant_id != context.tenant_id:
+        return _fail("FORBIDDEN", "编辑上下文不属于当前用户或租户")
+    if operation.node.page_id != context.page_id or operation.selected_scope.page_id != context.page_id:
+        return _fail("SCOPE_VIOLATION", "操作页面超出编辑上下文")
+    if operation.node.node_id != context.selected_node.node_id:
+        return _fail("SCOPE_VIOLATION", "操作节点超出 selected node")
+    selected = context.selected_node
+    node = operation.node
+    if (
+        selected.kind != node.kind
+        or selected.selector != node.selector
+        or selected.mapping_token != node.mapping_token
+        or not _same_range(selected.source_range, node.source_range)
+    ):
+        return _fail("MAPPING_STALE", "selected node 与操作节点映射不一致")
+    if selected.source_hash != node.source_hash or selected.region_hash != node.region_hash:
+        return _fail("CAS_CONFLICT", "上下文节点 hash 与操作不一致")
+    if any(item not in context.capabilities for item in operation.capabilities):
+        return _fail("CAPABILITY_DENIED", "上下文未授予操作所需能力")
+    if context.version != operation.cas.base_version:
+        return _fail("VERSION_CONFLICT", "上下文版本与 CAS base_version 不一致")
+    decision = evaluate_cas(
+        operation.cas, version=version, source_hash=source_hash, region_hash=region_hash, prior=prior,
+    )
+    if not decision["ok"]:
+        return decision
+    return {"ok": True, "value": {"context": context, "operation": operation, "cas": decision["value"]}}
+
+
 class PageListItem(PageModel):
     page_id: Opaque
     title: Title
@@ -430,6 +800,7 @@ def page_documents_openapi() -> dict:
         PageResource, PageNodeMapEntry, PagePackage, PageBinding, PageBindingManifest,
         PageDraft, PageDocument, PagePatchPreview, PageSavePreview, PageRollbackPreview,
         PageSnapshot, PagePreview, PageRevision, PageListItem, PageList, PageCancelResult,
+        SourceRange, SelectedScope, PresentationOverlay, NodeRef, CAS, EditOperation, EditContext,
         PageBridgeHandshake, PageDataReadRequest, PageDataCancelRequest,
         PageDataChunkEvent, PageDataEndEvent, PageDataErrorEvent, PageBindingStateEvent,
     ):
@@ -465,6 +836,13 @@ def page_documents_openapi() -> dict:
         "x-bridge-protocol": BRIDGE_PROTOCOL,
         "x-bridge-forbidden-ops": list(FORBIDDEN_BRIDGE_OPS),
         "x-page-errors": PAGE_ERRORS,
+        "x-edit-schema": EDIT_SCHEMA,
+        "x-edit-context-schema": EDIT_CONTEXT_SCHEMA,
+        "x-edit-channels": list(EDIT_CHANNELS),
+        "x-edit-actions": list(EDIT_ACTIONS),
+        "x-edit-encodings": list(EDIT_ENCODINGS),
+        "x-edit-presentation": "overlay",
+        "x-edit-source-logic": "hashed-byte-splice",
         "x-bridge-budget": {
             "max_response_bytes": BRIDGE_MAX_RESPONSE_BYTES,
             "max_cumulative_rows": BRIDGE_MAX_CUMULATIVE_ROWS,

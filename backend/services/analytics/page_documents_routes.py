@@ -25,6 +25,8 @@ from backend.services.analytics.cockpit_files import CockpitFileStore, MAX_FILE_
 from backend.services.analytics.cockpit_files_routes import cockpit_files_router
 from backend.services.analytics.cockpit_ai import CockpitAIStore
 from backend.services.analytics.cockpit_ai_routes import cockpit_ai_router
+from backend.services.analytics.page_edit_context import PageEditContextStore
+from backend.services.analytics.page_edit_context_routes import page_edit_context_router
 
 PREFIX = "/api/v1/analytics/page-documents"
 
@@ -147,6 +149,9 @@ def create_page_app(
         return registry.resolve(_single_header(request, "authorization"))
 
     app.include_router(page_documents_router(store, principal))
+    if store is not None:
+        app.include_router(page_edit_context_router(
+            PageEditContextStore(page_state_dir, store, clock=store.clock), principal))
     if page_state_dir is not None:
         files = CockpitFileStore(page_state_dir / "files")
         app.include_router(cockpit_files_router(files, principal, office, office_principal))

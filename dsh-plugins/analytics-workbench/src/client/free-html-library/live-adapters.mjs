@@ -13,6 +13,8 @@ import { SAMPLE_PACKAGE } from './mock-adapters.mjs';
 import { previewLiteralText } from './html-edit-kernel.mjs';
 import { buildGenerateContext } from './generate-context.mjs';
 import { PAGE_DOCUMENTS_PREFIX, PAGE_RESULT_PREFIX, refuseLivePort } from './page-http.mjs';
+
+const EDIT_CONTEXT_PREFIX = '/api/v1/analytics/page-edit-contexts';
 import { nativeGenerateUnavailable, normalizePagePackage } from './native-generate.mjs';
 
 function clone(value) {
@@ -120,6 +122,45 @@ export function createLivePageAdapters({
 
   async function documentsRequest(method, path, opts = {}) {
     return httpCall(documentsHttp, PAGE_DOCUMENTS_PREFIX, method, path, opts);
+  }
+
+  async function editContextRequest(method, path, opts = {}) {
+    return httpCall(documentsHttp, EDIT_CONTEXT_PREFIX, method, path, opts);
+  }
+
+  function editOperationFromContext(context, { channel = 'presentation', action = 'update', payload, idempotencyKey }) {
+    const node = context.selected_node;
+    const bytes = channel !== 'presentation';
+    const encoded = bytes ? String(payload ?? '') : '';
+    const operation = {
+      schema_version: 'free-page-edit/v1',
+      operation_id: `op_${node.node_id}`.slice(0, 128),
+      channel,
+      action,
+      selected_scope: {
+        page_id: node.page_id,
+        node_id: node.node_id,
+        ...(node.source_range ? { source_range: node.source_range } : {}),
+      },
+      capabilities: [`edit:${channel}`],
+      node,
+      cas: {
+        base_version: context.base_version ?? context.version,
+        source_hash: node.source_hash,
+        region_hash: node.region_hash,
+        idempotency_key: idempotencyKey,
+      },
+      encoding: bytes ? 'bytes' : 'overlay',
+      byte_length: bytes ? new TextEncoder().encode(encoded).byteLength : 0,
+    };
+    if (bytes) {
+      operation.payload = encoded;
+      operation.splice = node.source_range;
+      operation.expected_region_hash = node.region_hash;
+    } else if (action !== 'delete' && payload != null) {
+      operation.payload = payload;
+    }
+    return operation;
   }
 
   async function resultRequest(method, path, opts = {}) {
@@ -369,6 +410,34 @@ export function createLivePageAdapters({
         body: { base_version, to_version },
       });
     },
+    async confirmPresentation({
+      pageId, nodeId, kind = 'static_element', overlay, idempotencyKey,
+      channel = 'presentation', action = 'update', payload,
+    }) {
+      if (!documentsHttp?.fetchImpl || !documentsHttp.base) {
+        return { ok: false, reason: 'http_not_configured' };
+      }
+      const created = await editContextRequest('POST', '', {
+        body: { page_id: pageId, node_id: nodeId, kind, channel },
+      });
+      const context = created.body;
+      if (!context?.edit_context_id || !context.selected_node) {
+        return { ok: false, reason: 'INVALID_EDIT_CONTEXT' };
+      }
+      const applied = await editContextRequest('POST', `/${encodeURIComponent(context.edit_context_id)}/patches`, {
+        body: editOperationFromContext(context, {
+          channel, action, payload: payload ?? overlay, idempotencyKey,
+        }),
+        idempotencyKey,
+      });
+      const previewId = applied.body?.preview_id;
+      if (!previewId) return { ok: false, reason: 'INVALID_EDIT' };
+      return editContextRequest(
+        'POST',
+        `/${encodeURIComponent(context.edit_context_id)}/patches/${encodeURIComponent(previewId)}/confirm`,
+        { idempotencyKey: `${idempotencyKey}:confirm` },
+      );
+    },
     async generateAndConfirm(draft) {
       const made = await documents.generatePreview(draft);
       if (!made.ok) return made;
@@ -387,6 +456,7 @@ export function createLivePageAdapters({
     edit,
     assets,
     documents,
+    editContexts: Object.freeze({ confirmPresentation: documents.confirmPresentation }),
     nativeChat: Object.freeze({
       kind: 'native-dsh-session',
       prompts: nativePrompts,

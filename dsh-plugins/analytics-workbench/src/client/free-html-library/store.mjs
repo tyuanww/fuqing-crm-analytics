@@ -45,6 +45,7 @@ function emptyState(viewportWidth, adapters) {
     contextPanel: null,
     overlay: null,
     preview: null,
+    presentation_overlay: null,
     importCandidate: null,
     textDraft: null,
     historyItems: [],
@@ -286,6 +287,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
         if (!page?.package) throw new Error('页面不存在或无权限');
         emit({ view: 'workspace', current: clone(page), mode: 'browse', selection: null, overlay: null,
           contextPanel: null, preview: null, textDraft: null, historyItems: [], pendingLeaveIntent: null,
+          presentation_overlay: { ...(page.presentation_overlays ?? {}) },
           previewAlive: true, liveStatus: `已打开 ${page.title}` });
         return true;
       });
@@ -419,6 +421,25 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
     selectLocatable(request) {
       if (state.mode !== 'edit' || state.busy || state.confirmationUncertain || state.preview) return;
       if (state.textDraft?.changed) { emit({ message: '请先预览或放弃当前文本修改' }); return; }
+      const range = request?.source_range;
+      if (request?.catalog === 'node-graph' && request.mapping === 'valid' && request.node_id
+        && range && Number.isInteger(range.start) && Number.isInteger(range.end)) {
+        emit({
+          selection: {
+            ok: true,
+            node_id: request.node_id,
+            kind: request.kind,
+            label: request.node_id,
+            catalog: 'node-graph',
+            mapping: 'valid',
+            source_range: { start: range.start, end: range.end },
+          },
+          textDraft: null,
+          overlay: 'selection',
+          liveStatus: `当前范围：${request.node_id}`,
+        });
+        return;
+      }
       const source = request.source && sourceTargets(state.current?.package, state.current?.binding_manifest).find(node => node.node_id === request.node_id && node.mapping_token === request.mapping_token);
       const runtimeValid = request.runtime && validRenderedLocator(request.runtime)
         && request.runtime.package_hash === renderedPackageHash(state.current.package)
@@ -435,6 +456,51 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
     clearSelection() { if (state.busy || hasUnsavedChanges()) return; emit({ selection: null, overlay: state.mode === 'edit' ? 'selection' : null, liveStatus: '已取消选区' }); },
     openContext(panel) { emit({ contextPanel: panel }); },
     closeContext() { emit({ contextPanel: null, liveStatus: '已关闭上下文面板，未保存' }); },
+    previewSourcePackage(snapshot, meta = {}) {
+      if (!state.current || state.busy || state.confirmationUncertain || state.preview) return false;
+      if (!snapshot || typeof snapshot.html !== 'string') return false;
+      const idempotencyKey = meta.idempotencyKey || `source_${state.current.page_id}_${state.current.version}_${meta.nodeId || 'node'}`;
+      emit({
+        lastIdempotencyKey: idempotencyKey,
+        preview: {
+          operation: 'SOURCE',
+          status: 'PENDING',
+          preview_id: `preview_source_${meta.nodeId || 'node'}`,
+          node_id: meta.nodeId,
+          kind: meta.kind || 'static_element',
+          structure: meta.structure,
+          idempotency_key: idempotencyKey,
+          snapshot,
+          source_bytes_unchanged: false,
+          base_package: state.current.package,
+        },
+        liveStatus: '结构预览待确认，源码包尚未保存',
+      });
+      return true;
+    },
+    previewPresentationOverlay(nodeId, overlay, meta = {}) {
+      if (!state.current || state.busy || state.confirmationUncertain || state.preview) return false;
+      const saved = state.current.presentation_overlays ?? {};
+      const next = { ...saved, ...(state.presentation_overlay ?? {}), [nodeId]: overlay };
+      const idempotencyKey = meta.idempotencyKey || `text_${state.current.page_id}_${state.current.version}_${nodeId}`;
+      emit({
+        presentation_overlay: next,
+        lastIdempotencyKey: idempotencyKey,
+        preview: {
+          operation: 'PRESENTATION',
+          status: 'PENDING',
+          preview_id: `preview_overlay_${nodeId}`,
+          node_id: nodeId,
+          kind: meta.kind || 'static_element',
+          overlay,
+          idempotency_key: idempotencyKey,
+          source_bytes_unchanged: true,
+          base_package: state.current.package,
+        },
+        liveStatus: '文字预览待确认，源码字节未改',
+      });
+      return true;
+    },
     async previewPatch(replacementText, extras = {}) {
       await perform(async () => {
         assertEditable();
@@ -483,6 +549,152 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
       await perform(async () => {
         const preview = state.preview;
         if (!preview) throw new Error('没有待确认补丁');
+        if (preview.operation === 'SOURCE') {
+          const nextPackage = clone(preview.snapshot);
+          if (isLive(bound)) {
+            if (typeof bound.editContexts?.confirmPresentation !== 'function') {
+              throw Object.assign(new Error('结构确认需要服务端编辑上下文'), { code: 'EDIT_CONTEXT_UNAVAILABLE' });
+            }
+            const wasUncertain = state.confirmationUncertain;
+            try {
+              emit({ confirmationUncertain: true });
+              const confirmed = await bound.editContexts.confirmPresentation({
+                pageId: state.current.page_id,
+                nodeId: preview.node_id,
+                kind: preview.kind || 'static_element',
+                channel: 'source',
+                action: 'replace',
+                payload: preview.structure,
+                idempotencyKey: preview.idempotency_key || state.lastIdempotencyKey,
+              });
+              if (!confirmed?.ok) {
+                const error = new Error('结构确认尚未接到服务端');
+                error.code = confirmed?.reason || 'EDIT_CONTEXT_UNAVAILABLE';
+                error.status = 422;
+                throw error;
+              }
+              const savedVersion = confirmed.body?.saved_version;
+              if (!Number.isInteger(savedVersion) || savedVersion !== state.current.version + 1) {
+                const error = new Error('保存回执不匹配，请重试核对');
+                error.status = 409;
+                throw error;
+              }
+              const savedPackage = confirmed.body?.package?.html
+                ? { ...nextPackage, html: confirmed.body.package.html, css: confirmed.body.package.css ?? nextPackage.css, js: confirmed.body.package.js ?? nextPackage.js }
+                : nextPackage;
+              const page = {
+                ...state.current,
+                package: savedPackage,
+                savedPackage: clone(savedPackage),
+                version: savedVersion,
+                base_version: state.current.version,
+                dirty: false,
+                history: [...state.current.history, { version: savedVersion, title: state.current.title, at: now(), package: clone(savedPackage) }],
+              };
+              bound.assets.put(page);
+              refreshList();
+              emit({
+                current: page, preview: null, textDraft: null, overlay: null,
+                confirmationUncertain: false, liveStatus: `结构已确认 · v${page.version}`,
+              });
+            } catch (error) {
+              if (wasUncertain || error.status == null || error.status >= 500) {
+                emit({ confirmationUncertain: true, liveStatus: '保存结果待核对；使用同一确认请求重试' });
+              } else emit({ confirmationUncertain: false });
+              throw error;
+            }
+            return;
+          }
+          const nextVersion = state.current.version + 1;
+          const page = {
+            ...state.current,
+            package: nextPackage,
+            savedPackage: clone(nextPackage),
+            version: nextVersion,
+            base_version: state.current.version,
+            dirty: false,
+            history: [...state.current.history, { version: nextVersion, title: state.current.title, at: now(), package: clone(nextPackage) }],
+          };
+          bound.assets.put(page);
+          refreshList();
+          emit({
+            current: page, preview: null, textDraft: null, overlay: null,
+            confirmationUncertain: false, liveStatus: `结构已确认 · v${page.version}`,
+          });
+          return;
+        }
+        if (preview.operation === 'PRESENTATION') {
+          const snapshot = clone(state.current.package);
+          const overlays = { ...(state.presentation_overlay ?? {}) };
+          if (isLive(bound)) {
+            if (typeof bound.editContexts?.confirmPresentation !== 'function') {
+              throw Object.assign(new Error('文字确认需要服务端编辑上下文'), { code: 'EDIT_CONTEXT_UNAVAILABLE' });
+            }
+            const wasUncertain = state.confirmationUncertain;
+            try {
+              emit({ confirmationUncertain: true });
+              const confirmed = await bound.editContexts.confirmPresentation({
+                pageId: state.current.page_id,
+                nodeId: preview.node_id,
+                kind: preview.kind || 'static_element',
+                overlay: preview.overlay,
+                idempotencyKey: preview.idempotency_key || state.lastIdempotencyKey,
+              });
+              if (!confirmed?.ok) {
+                const error = new Error('文字确认尚未接到服务端');
+                error.code = confirmed?.reason || 'EDIT_CONTEXT_UNAVAILABLE';
+                error.status = 422;
+                throw error;
+              }
+              const savedVersion = confirmed.body?.saved_version;
+              if (!Number.isInteger(savedVersion) || savedVersion !== state.current.version + 1) {
+                const error = new Error('保存回执不匹配，请重试核对');
+                error.status = 409;
+                throw error;
+              }
+              const page = {
+                ...state.current,
+                package: snapshot,
+                savedPackage: clone(snapshot),
+                presentation_overlays: overlays,
+                version: savedVersion,
+                base_version: state.current.version,
+                dirty: false,
+                history: [...state.current.history, { version: savedVersion, title: state.current.title, at: now(), package: clone(snapshot), presentation_overlays: clone(overlays) }],
+              };
+              bound.assets.put(page);
+              refreshList();
+              emit({
+                current: page, preview: null, textDraft: null, presentation_overlay: overlays,
+                overlay: null, confirmationUncertain: false, liveStatus: `文字已确认 · v${page.version}`,
+              });
+            } catch (error) {
+              if (wasUncertain || error.status == null || error.status >= 500) {
+                emit({ confirmationUncertain: true, liveStatus: '保存结果待核对；使用同一确认请求重试' });
+              } else emit({ confirmationUncertain: false });
+              throw error;
+            }
+            return;
+          }
+          const nextVersion = state.current.version + 1;
+          const page = {
+            ...state.current,
+            package: snapshot,
+            savedPackage: clone(snapshot),
+            presentation_overlays: overlays,
+            version: nextVersion,
+            base_version: state.current.version,
+            dirty: false,
+            history: [...state.current.history, { version: nextVersion, title: state.current.title, at: now(), package: clone(snapshot), presentation_overlays: clone(overlays) }],
+          };
+          bound.assets.put(page);
+          refreshList();
+          emit({
+            current: page, preview: null, textDraft: null, presentation_overlay: overlays,
+            overlay: null, confirmationUncertain: false, liveStatus: `文字已确认 · v${page.version}`,
+          });
+          return;
+        }
         if (preview.expanded_scope === 'preview_expanded_range' && !preview.selection?.confirmExpanded) {
           throw Object.assign(new Error('共享样式影响超出选区，请确认实际范围'), { code: 'SCOPE_REQUIRES_CONFIRMATION' });
         }
@@ -527,6 +739,16 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
         if (state.importCandidate) {
           const got = await importer.cancel(state.importCandidate.preview_id);
           if (!got.ok) throw new Error(got.error.message);
+        }
+        if (state.preview?.operation === 'PRESENTATION') {
+          emit({
+            preview: null,
+            presentation_overlay: { ...(state.current?.presentation_overlays ?? {}) },
+            textDraft: null,
+            overlay: state.mode === 'edit' ? 'selection' : null,
+            liveStatus: '已取消预览，已保存版本不变',
+          });
+          return;
         }
         if (state.preview) {
           if (isLive(bound) && bound.documents?.cancelPreview) {

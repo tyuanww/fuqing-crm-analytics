@@ -1,14 +1,43 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import type { FreeHtmlLibraryStore } from './free-html-library/store.mjs';
 import { acceptSelection, acceptTargets, editablePageNodes, selectionSrcdoc, type TextNode } from './html-selection-bridge.mjs';
+import type { PageNode } from './html-node-graph-bridge.mjs';
+import { editorPageCatalog } from './editor-page-nodes.mjs';
+import { applyPresentationOverlay } from './presentation-overlay.mjs';
+import { previewDirectText, previewNodeEdit } from './presentation-preview.mjs';
+import { acceptOperation, channelForAction, createEditOperation, formatCapability, parseStyleDeclaration } from './html-edit-operations.mjs';
+import { visualEditorCss } from './html-visual-editor-chrome.mjs';
 import { FREE_PAGE_REFERRER_POLICY, FREE_PAGE_SANDBOX } from '../free-page/runtime/isolation-policy.mjs';
 import { selectionForAI, type AISourceSelection } from './html-source-selection.mjs';
 import { CockpitSidebar } from './CockpitSidebar.tsx';
 import type { components } from '../free-page/contract/page-contract.generated.d.ts';
+
 const NO_NODES: TextNode[] = [];
 
-export function HtmlPreview({ pkg, pageId = 'workspace', version = 0, editing = false, selectBlocks = false, nodes = NO_NODES, selected, onSelect, onTargets, title }: {
+function completePagePackage<T extends { html: string; css: string; js: string; resources: unknown[]; node_map: { node_id: string; kind: string; selector: string }[] }>(
+  base: T,
+  next: { html: string; css?: string; js?: string; resources?: unknown[]; node_map?: unknown[] },
+): T {
+  const rows = next.node_map;
+  const node_map = Array.isArray(rows) && rows.every((row): row is T['node_map'][number] => {
+    if (!row || typeof row !== 'object') return false;
+    const item = row as { node_id?: unknown; kind?: unknown; selector?: unknown };
+    return typeof item.node_id === 'string' && typeof item.kind === 'string' && typeof item.selector === 'string';
+  }) ? rows : base.node_map;
+  return {
+    ...base,
+    html: next.html,
+    css: next.css ?? base.css,
+    js: next.js ?? base.js,
+    resources: next.resources ?? base.resources,
+    node_map,
+  };
+}
+
+export function HtmlPreview({ pkg, overlays = null, overlayNodes = [], pageId = 'workspace', version = 0, editing = false, selectBlocks = false, nodes = NO_NODES, selected, onSelect, onTargets, title }: {
   pkg: { html: string; css?: string; js?: string; resources?: unknown[]; presentation?: components['schemas']['PagePresentation'] | null }; pageId?: string; version?: number;
+  overlays?: Record<string, { text?: string; style?: Record<string, string>; attributes?: Record<string, string> }> | null;
+  overlayNodes?: Array<{ node_id?: string; source_range?: { start: number; end: number } | null }>;
   editing?: boolean; selectBlocks?: boolean; nodes?: TextNode[]; selected?: string; onSelect?(node: TextNode | null): void; onTargets?(nodes: TextNode[]): void; title: string;
 }) {
   const frame = useRef<HTMLIFrameElement>(null);
@@ -16,7 +45,11 @@ export function HtmlPreview({ pkg, pageId = 'workspace', version = 0, editing = 
   const callback = useRef(onSelect); callback.current = onSelect;
   const targetsCallback = useRef(onTargets); targetsCallback.current = onTargets;
   const channel = useMemo(() => crypto.randomUUID(), [pkg, pageId, version, editing, selectBlocks]);
-  const srcdoc = useMemo(() => selectionSrcdoc(pkg, { channel, pageId, version, nodes, editing, selectBlocks }), [pkg, channel, pageId, version, editing, nodes, selectBlocks]);
+  const framed = useMemo(() => {
+    if (!overlays || !Object.keys(overlays).length) return pkg;
+    return { ...pkg, html: applyPresentationOverlay(pkg?.html ?? '', overlays, overlayNodes) };
+  }, [pkg, overlays, overlayNodes]);
+  const srcdoc = useMemo(() => selectionSrcdoc(framed, { channel, pageId, version, nodes, editing, selectBlocks }), [framed, channel, pageId, version, nodes, editing, selectBlocks]);
   useEffect(() => {
     setUnresolved(0);
     const receive = (event: MessageEvent) => {
@@ -60,6 +93,7 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, aiMode = 
   const current = state.current!;
   const pkg = state.preview?.snapshot ?? current.package;
   const candidates = useMemo(() => editablePageNodes(current.package, current.binding_manifest), [current.package, current.binding_manifest]);
+  const catalog = useMemo(() => editorPageCatalog(pkg, current.binding_manifest, { pageId: current.page_id }), [pkg, current.binding_manifest, current.page_id]);
   const locked = state.busy || Boolean(state.preview) || state.confirmationUncertain;
   const editing = state.mode === 'edit' && !locked && state.previewAlive;
   const session = useMemo(() => ({}), [pkg, current.page_id, current.version, editing]);
@@ -67,12 +101,26 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, aiMode = 
   const nodes = editing && availability?.session === session ? availability.nodes : NO_NODES;
   const [aiOpen, setAiOpen] = useState(false), [instruction, setInstruction] = useState(''), [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState('');
+  const [previewNote, setPreviewNote] = useState('');
+  const [styleFocus, setStyleFocus] = useState<'style' | 'attribute'>('style');
+  const [styleDraft, setStyleDraft] = useState('');
+  const [attrName, setAttrName] = useState('title');
+  const [attrValue, setAttrValue] = useState('');
+  const [structureDraft, setStructureDraft] = useState('');
   const sendLock = useRef(false);
   const selected = state.selection?.runtime ? state.selection as unknown as TextNode : candidates.find(row => row.node_id === state.selection?.node_id);
+  const formalNode: PageNode | null = catalog.pageNodes.find(row => row.node_id === (state.selection?.node_id ?? selected?.node_id)) ?? null;
   const selectionAvailable = Boolean(selected && nodes.some(node => node.node_id === selected.node_id));
   const selectedRange = selected?.source ?? selected?.aiSource;
   const original = selected ? selected.runtime ? selected.text : selected.editableText !== false ? decodeText(selected.text) : decodeText(selected.text.replace(/<[^>]*>/g, ' ')).trim() : '';
   const value = state.textDraft?.value ?? original;
+  const editableFormal = formalNode?.mapping === 'valid' && !formalNode.capabilities?.bound ? formalNode : null;
+  const styles = parseStyleDeclaration(styleDraft);
+  const attributes = attrName && !/javascript:/i.test(attrValue) ? { [attrName]: attrValue } : {};
+  const styleProposed = styleFocus === 'attribute'
+    ? (attrName && !/javascript:/i.test(attrValue) ? `${attrName}="${attrValue}"` : '')
+    : Object.entries(styles).map(([key, item]) => `${key}: ${item}`).join('; ');
+  useEffect(() => { setAiOpen(false); setInstruction(''); setSendError(''); setPreviewNote(''); setStyleDraft(''); setAttrValue(''); setStructureDraft(''); }, [current.page_id, current.version, aiMode, formalNode?.node_id]);
   const commitSelection = (node: TextNode | null) => {
     if (!node) { if (!state.textDraft?.changed) store.clearSelection(); return; }
     store.selectLocatable(node); onInspect?.();
@@ -81,7 +129,6 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, aiMode = 
   const choose = (node: TextNode | null) => {
     if (!node || nodes.some(item => item.node_id === node.node_id)) commitSelection(node);
   };
-  useEffect(() => { setAiOpen(false); setInstruction(''); setSendError(''); }, [current.page_id, current.version, aiMode]);
   const sendAI = async () => {
     if (sendLock.current || !selected || !selectionAvailable || !instruction.trim() || !onAI) return;
     const scope = selectionForAI(current.package, selected);
@@ -91,7 +138,58 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, aiMode = 
     catch (error) { setSendError(error instanceof Error ? error.message : '进入对话失败，请重试。'); }
     finally { sendLock.current = false; setSending(false); }
   };
-  return <div className="cockpit-editor-layout">
+  const applyFormalText = () => {
+    if (!editableFormal?.capabilities?.direct_text) return;
+    const op = createEditOperation({
+      pageId: current.page_id, baseVersion: current.version, node: editableFormal, channel: channelForAction('set_text'), action: 'set_text',
+      original, proposed: value, value,
+    });
+    const verdict = acceptOperation(op, { pageId: current.page_id, version: current.version, selection: editableFormal, nodes: catalog.pageNodes, apply: true });
+    if (!verdict.ok) { setPreviewNote('正式预览未通过，源码字节保持不变'); return; }
+    const preview = previewDirectText({
+      pagePackage: current.package, pageId: current.page_id, version: current.version, nodeId: editableFormal.node_id, text: value,
+      overlays: state.presentation_overlay ?? current.presentation_overlays ?? {}, binding: current.binding_manifest,
+    });
+    if (!preview.ok || !preview.node_id || typeof store.previewPresentationOverlay !== 'function') {
+      setPreviewNote('正式预览未通过，源码字节保持不变');
+      return;
+    }
+    setPreviewNote('');
+    store.previewPresentationOverlay(preview.node_id, preview.overlay ?? {}, { kind: preview.kind || editableFormal.kind, idempotencyKey: preview.idempotency_key });
+  };
+  const applyMapped = (action: 'set_style' | 'set_attribute' | 'replace_structure', payload: Record<string, unknown>, channel: 'presentation' | 'source') => {
+    if (!editableFormal) return;
+    const op = createEditOperation({
+      pageId: current.page_id, baseVersion: current.version, node: editableFormal, action, channel: channelForAction(action),
+      styles: payload.styles as Record<string, string> | undefined,
+      attributes: payload.attributes as Record<string, string> | undefined,
+      structure: typeof payload.structure === 'string' ? payload.structure : undefined,
+      proposed: typeof payload.structure === 'string' ? payload.structure : styleProposed,
+    });
+    const verdict = acceptOperation(op, { pageId: current.page_id, version: current.version, selection: editableFormal, nodes: catalog.pageNodes, apply: true });
+    if (!verdict.ok) { setPreviewNote('当前节点不能写入。运行时选区仍只可查看。'); return; }
+    const preview = previewNodeEdit({
+      pagePackage: current.package, pageId: current.page_id, version: current.version, nodeId: editableFormal.node_id,
+      overlays: state.presentation_overlay ?? current.presentation_overlays ?? {}, binding: current.binding_manifest, channel,
+      action: channel === 'source' ? 'replace' : 'update',
+      payload: channel === 'source' ? payload.structure : (action === 'set_style' ? { style: payload.styles } : { attributes: payload.attributes }),
+      keyPrefix: action,
+    });
+    if (!preview.ok || !preview.node_id) { setPreviewNote('正式预览未通过，已保存版本不变'); return; }
+    setPreviewNote('');
+    if (channel === 'source' && preview.package && typeof store.previewSourcePackage === 'function') {
+      store.previewSourcePackage(completePagePackage(current.package, preview.package), {
+        nodeId: preview.node_id, kind: preview.kind || editableFormal.kind, idempotencyKey: preview.idempotency_key,
+        structure: typeof payload.structure === 'string' ? payload.structure : undefined,
+      });
+      return;
+    }
+    if (typeof store.previewPresentationOverlay === 'function') {
+      store.previewPresentationOverlay(preview.node_id, preview.overlay ?? {}, { kind: preview.kind || editableFormal.kind, idempotencyKey: preview.idempotency_key });
+    }
+  };
+  return <div className="cockpit-editor-layout cockpit-visual-editor">
+    <style>{visualEditorCss}</style>
     <div className="cockpit-editor-canvas">
       <div className="cockpit-document-tools">
         <span className="cockpit-badge">{bindingCopy[current.binding_state] ?? current.binding_state}</span>
@@ -109,7 +207,7 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, aiMode = 
         <button className="cockpit-primary" data-testid="html-confirm" disabled={state.busy} onClick={() => void store.confirmPatch()}>{state.confirmationUncertain ? '重试确认' : '确认保存'}</button>
       </div> : null}
       <div className="cockpit-frame-wrap">{state.previewAlive
-        ? <HtmlPreview pkg={pkg} pageId={current.page_id} version={current.version} title={current.title}
+        ? <HtmlPreview pkg={pkg} overlays={state.presentation_overlay ?? current.presentation_overlays ?? null} overlayNodes={catalog.pageNodes} pageId={current.page_id} version={current.version} title={current.title}
           editing={editing && !sending} selectBlocks={aiMode} nodes={candidates} selected={state.selection?.node_id} onSelect={commitSelection}
           onTargets={verified => setAvailability({ session, nodes: verified })} />
         : <div className="cockpit-empty"><h2>预览已暂停</h2><p>已保存的页面和当前修改均保留。</p><button onClick={() => store.restartPreview()}>恢复预览</button></div>}
@@ -147,6 +245,27 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, aiMode = 
             onClick={() => void store.previewPatch(value)}>预览修改</button>
           </> : <p className="cockpit-muted">已选中 {selected.tag} 板块，可交给 AI 调整板块内容和局部样式。</p>}
           {!aiOpen && onAI && selectionForAI(current.package, selected) ? <button disabled={locked || !selectionAvailable || store.hasUnsavedChanges()} onClick={() => { setAiOpen(true); setSendError(''); }}>用 AI 修改此选区</button> : null}
+          {editableFormal && !aiOpen ? <div data-testid="html-node-identity">
+            <p className="cockpit-muted" data-testid="html-capability">{formatCapability(editableFormal)}</p>
+            {editableFormal.capabilities?.direct_text ? <button type="button" data-testid="html-preview-formal-text" disabled={locked || value === original} onClick={applyFormalText}>按正式合同预览文字</button> : null}
+            <label className="cockpit-field">样式声明<textarea data-testid="html-style-declaration" disabled={locked} value={styleDraft} rows={3}
+              onChange={event => { setStyleFocus('style'); setStyleDraft(event.target.value); }} placeholder="color: #805D9D" /></label>
+            <label className="cockpit-field">属性名<input data-testid="html-attr-name" disabled={locked} value={attrName}
+              onChange={event => { setStyleFocus('attribute'); setAttrName(event.target.value.replace(/[^a-zA-Z_:-]/g, '').replace(/^on/i, '')); }} /></label>
+            <label className="cockpit-field">属性值<input data-testid="html-attr-value" disabled={locked} value={attrValue}
+              onChange={event => { if (/javascript:/i.test(event.target.value)) return; setStyleFocus('attribute'); setAttrValue(event.target.value); }} /></label>
+            <p className="cockpit-muted">样式和属性先在画布上预览。确认前不改页面源码。</p>
+            <button className="cockpit-primary" data-testid="html-preview-style" disabled={locked || (styleFocus === 'style' ? !styleProposed : !attrName)}
+              onClick={() => applyMapped(styleFocus === 'attribute' ? 'set_attribute' : 'set_style', { styles, attributes }, 'presentation')}>预览样式或属性</button>
+            {editableFormal.capabilities?.structure ? <>
+              <label className="cockpit-field">替换这一段 HTML<textarea data-testid="html-structure" disabled={locked} value={structureDraft} rows={4}
+                onChange={event => setStructureDraft(event.target.value)} placeholder={'<p id="lead">新结构</p>'} /></label>
+              <p className="cockpit-muted">结构替换只覆盖当前节点。确认前源码包不变。运行时选区不能改结构。</p>
+              <button className="cockpit-primary" data-testid="html-preview-structure" disabled={locked || !structureDraft.trim()}
+                onClick={() => applyMapped('replace_structure', { structure: structureDraft }, 'source')}>预览结构</button>
+            </> : null}
+            {previewNote ? <p className="cockpit-muted" data-testid="html-preview-note">{previewNote}</p> : null}
+          </div> : null}
           {selectedRange ? <label className="cockpit-field">选择上级板块<select value="" disabled={locked || store.hasUnsavedChanges()} onChange={event => choose(nodes.find(node => node.node_id === event.target.value) ?? null)}><option value="">切换到上级范围</option>{nodes.filter(node => node.source && node.source.start < selectedRange.start && node.source.end >= selectedRange.end).reverse().map(node => <option key={node.node_id} value={node.node_id}>{node.tag} · {decodeText(node.text.replace(/<[^>]*>/g, ' ')).trim().slice(0, 40)}</option>)}</select></label> : null}
           {state.textDraft?.changed && !state.preview ? <button disabled={state.busy} onClick={() => store.discardTextDraft()}>放弃文本修改</button> : null}
         </> : <>

@@ -1,5 +1,8 @@
 /** Native DSH does the AI work; this client only manages durable candidates. */
 const PREFIX = '/api/v1/analytics/cockpit-ai';
+const EDIT_CONTEXT_PREFIX = '/api/v1/analytics/page-edit-contexts';
+const CONTEXT_ID = /^editctx_[A-Za-z0-9]{16,64}$/;
+
 export function nativeArtifactPrompt(job) {
   if (job.instruction?.trim()) return `请修改驾驶舱产物 ${JSON.stringify(job.title ?? job.filename)}（版本 ${job.base_version}）。${job.selection ? '只调整我在页面选中的板块。' : ''}先读取 TASK.md、源文件及存在的 SELECTED.json，再执行以下已确认的修改要求：\n${job.instruction}\n保持其他内容和交互，完成后交付候选，右侧产物栏会从候选包统一渲染，让我检查；尚未确认前不要保存到产物库。`;
   return `请帮我修改驾驶舱产物 ${JSON.stringify(job.title ?? job.filename)}（版本 ${job.base_version}）。${job.selection ? '本次仅修改我在画布点选的板块，严格遵守 TASK.md 的选区范围。' : ''}先读取当前目录的 TASK.md 和源文件，确认内容并询问我想怎样修改。等我提出要求后再动手，完成后交付候选，由我在产物栏预览并确认保存。`;
@@ -28,6 +31,11 @@ export function createCockpitArtifactClients(createClient) {
   };
 }
 
+export function nativeEditContextPrompt(contextId) {
+  if (typeof contextId !== 'string' || !CONTEXT_ID.test(contextId)) throw new Error('编辑上下文标识无效。');
+  return `请基于编辑上下文 ${contextId} 修改当前选区。完成后回传结构化补丁，由我回驾驶舱预览并确认保存。`;
+}
+
 export function createCockpitAIClient(http, { openNative, onSaved = async () => {} } = {}) {
   const listeners = new Set();
   let state = { jobs: [], active: null, busy: false, confirmationUncertain: false, message: '', messageError: false, comparison: null, viewer: null, html: null, previewVariant: null };
@@ -46,6 +54,22 @@ export function createCockpitAIClient(http, { openNative, onSaved = async () => 
     return response;
   }
   const json = async (path, options) => (await request(path, options)).json();
+  async function editContextRequest(path, { method = 'GET', body, headers = {} } = {}) {
+    if (!http?.base) throw new Error('AI 产物服务尚未配置。');
+    const response = await (http.fetchImpl ?? fetch)(http.base + EDIT_CONTEXT_PREFIX + path, {
+      method,
+      headers: { authorization: 'Bearer ' + http.token, ...headers, ...(body ? { 'content-type': 'application/json' } : {}) },
+      ...(body ? { body: JSON.stringify(body) } : {}),
+    });
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      const error = new Error(payload?.error?.message ?? `编辑上下文请求失败（${response.status}）`);
+      error.status = response.status;
+      error.code = payload?.error?.code;
+      throw error;
+    }
+    return response.json();
+  }
   const accept = job => {
     if (!job || typeof job.id !== 'string') throw new Error('AI 修改回执无效。');
     update({ active: job, jobs: ['SAVED', 'CANCELLED'].includes(job.status)
@@ -168,6 +192,34 @@ export function createCockpitAIClient(http, { openNative, onSaved = async () => 
         accept(result);
         update({ viewer: null, html: null, comparison: null, previewVariant: null, message: result.status === 'SAVED' ? '此候选已保存，请刷新查看新版本。' : '已放弃候选，原版本保留。AI 对话如仍运行，请在原生对话中停止。' });
       });
+    },
+    async openEditContext(contextId) {
+      if (state.confirmationUncertain) return false;
+      return perform(async () => {
+        if (typeof openNative !== 'function') throw new Error('原生 AI 对话尚未连接。');
+        if (typeof contextId !== 'string' || !CONTEXT_ID.test(contextId)) throw new Error('编辑上下文标识无效。');
+        update({ editContextId: contextId });
+        await openNative({ context_id: contextId }, true);
+      });
+    },
+    async submitEditPatch(contextId, operation, idempotencyKey) {
+      if (!operation || typeof operation !== 'object' || Array.isArray(operation)) throw new Error('编辑操作无效。');
+      if (!Array.isArray(operation.capabilities) || operation.capabilities.some(item => typeof item !== 'string')) {
+        throw new Error('编辑操作缺少正式 capabilities。');
+      }
+      if (typeof contextId !== 'string' || !CONTEXT_ID.test(contextId)) throw new Error('编辑上下文标识无效。');
+      if (typeof idempotencyKey !== 'string' || !idempotencyKey.trim()) throw new Error('需要稳定的幂等键。');
+      if (operation.cas?.idempotency_key !== idempotencyKey) throw new Error('幂等键不一致。');
+      try {
+        return await editContextRequest('/' + contextId + '/patches', {
+          method: 'POST',
+          body: operation,
+          headers: { 'idempotency-key': idempotencyKey },
+        });
+      } catch (error) {
+        if (error.code === 'VERSION_CONFLICT' || error.code === 'HASH_MISMATCH') update({ editContextId: null });
+        throw error;
+      }
     },
     dispose() { disposed = true; listeners.clear(); },
   };
