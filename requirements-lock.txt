@@ -52,4 +52,4 @@ urllib3==2.8.0
 uvicorn==0.47.0
 wheel==0.48.0
 xlsxwriter==3.2.9
-xxhash==3.7.0
+xxhash==4.0.1

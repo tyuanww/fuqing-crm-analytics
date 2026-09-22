@@ -33,7 +33,7 @@ python-dateutil==2.9.0.post0
 openpyxl==3.1.5
 python-pptx==1.0.2
 xlsxwriter==3.2.9
-xxhash==3.7.0
+xxhash==4.0.1
 psutil==7.2.2
 packaging==26.1
 
