@@ -12,21 +12,23 @@ export const visualEditorCss = `
   --ve-display: Outfit, "SF Pro Display", "PingFang SC", sans-serif;
   --ve-mono: "SFMono-Regular", Menlo, monospace;
 }
-.cockpit-visual-editor .cockpit-sidebar {
-  background: var(--ve-plum);
-  color: var(--ve-ink);
-  border-left: 1px solid rgba(211, 195, 232, 0.28);
+.cockpit-visual-editor .cockpit-sidebar,
+.cockpit-visual-editor .cockpit-sidebar-header,
+.cockpit-visual-editor .cockpit-sidebar-body {
+  background: #fff;
+  color: #171717;
   font-family: var(--ve-font);
 }
-.cockpit-visual-editor .cockpit-sidebar-header { border-bottom-color: rgba(211, 195, 232, 0.22); }
+.cockpit-visual-editor .cockpit-sidebar { border-left: 1px solid #e7e7e7; }
+.cockpit-visual-editor .cockpit-sidebar-header { border-bottom-color: #e7e7e7; }
 .cockpit-visual-editor .cockpit-sidebar h2,
 .cockpit-visual-editor .cockpit-sidebar h3 {
-  color: var(--ve-ink);
+  color: #171717;
   font-family: var(--ve-display);
 }
 .cockpit-visual-editor .cockpit-sidebar .cockpit-muted,
-.cockpit-visual-editor .cockpit-sidebar .cockpit-eyebrow { color: var(--ve-lilac); }
-.cockpit-visual-editor .cockpit-sidebar-header button { color: var(--ve-lilac); }
+.cockpit-visual-editor .cockpit-sidebar .cockpit-eyebrow { color: #3f3f46; }
+.cockpit-visual-editor .cockpit-sidebar-header button { color: #171717; }
 .cockpit-visual-editor .cockpit-node-card {
   display: grid;
   gap: 8px;
@@ -75,20 +77,25 @@ export const visualEditorCss = `
   border-color: var(--ve-purple);
   color: var(--ve-ink);
 }
-.cockpit-visual-editor .cockpit-sidebar .cockpit-field { color: var(--ve-lilac); }
+.cockpit-visual-editor .cockpit-sidebar .cockpit-field { color: #171717; }
 .cockpit-visual-editor .cockpit-sidebar .cockpit-field input,
 .cockpit-visual-editor .cockpit-sidebar .cockpit-field select,
 .cockpit-visual-editor .cockpit-sidebar .cockpit-field textarea {
-  border-color: rgba(211, 195, 232, 0.4);
-  background: var(--ve-ink);
-  color: var(--ve-plum);
+  border-color: #d4d4d8;
+  background: #fff;
+  color: #171717;
   font-family: var(--ve-font);
 }
 .cockpit-visual-editor .cockpit-sidebar .cockpit-source {
   font-family: var(--ve-mono);
-  color: var(--ve-lilac);
+  color: #3f3f46;
 }
-.cockpit-visual-editor .cockpit-selection-hint { color: var(--ve-lilac); }
+.cockpit-visual-editor .cockpit-selection-hint { color: #171717; }
+.cockpit-visual-editor .cockpit-sidebar button.cockpit-primary {
+  background: #171717;
+  border-color: #171717;
+  color: #fff;
+}
 @media (prefers-reduced-motion: reduce) {
   .cockpit-visual-editor * { transition: none; animation: none; }
 }

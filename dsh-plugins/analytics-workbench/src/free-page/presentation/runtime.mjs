@@ -10,8 +10,35 @@ export function presentationRuntime(edits) {
     if (original !== undefined && current !== original && current !== displayed.get(node)) identities.delete(node);
     return identities.get(node) ?? current;
   };
-  const matches = (node, key) => key.attribute === 'text' ? !node.children.length && textIdentity(node) === key.value
+  const inlineName = name => ['a', 'b', 'em', 'i', 'small', 'span', 'strong', 'sub', 'sup', 'code'].includes(name);
+  const matches = (node, key) => key.attribute === 'text' ? textIdentity(node) === key.value
     : key.attribute === 'class' ? node.classList.contains(key.value) : node.getAttribute(key.attribute) === key.value;
+  const writeSentence = (node, next) => {
+    const parts = [...node.childNodes].filter(part => part.nodeType === 1 || (part.nodeType === 3 && part.nodeValue));
+    if (!parts.length || parts.some(part => part.nodeType === 1 && !inlineName(part.localName))) {
+      if (node.textContent !== next) node.textContent = next;
+      return;
+    }
+    let cursor = 0;
+    for (const part of parts) {
+      if (part.nodeType !== 1) continue;
+      if (next.indexOf(part.textContent, cursor) < 0) {
+        if (node.textContent !== next) node.textContent = next;
+        return;
+      }
+      cursor = next.indexOf(part.textContent, cursor) + part.textContent.length;
+    }
+    cursor = 0;
+    for (const part of parts) {
+      if (part.nodeType === 3) {
+        const later = parts.slice(parts.indexOf(part) + 1).find(item => item.nodeType === 1);
+        const end = later ? next.indexOf(later.textContent, cursor) : next.length;
+        const value = next.slice(cursor, end);
+        if (part.nodeValue !== value) part.nodeValue = value;
+        cursor = end;
+      } else cursor += part.textContent.length;
+    }
+  };
   const resolve = target => {
     const roots = [...document.querySelectorAll('[' + target.anchor.attribute + ']')].filter(n => matches(n, target.anchor));
     if (roots.length !== 1) return null;
@@ -39,8 +66,10 @@ export function presentationRuntime(edits) {
         const texts = [...node.childNodes].filter(n => n.nodeType === 3);
         const visible = texts.filter(n => n.nodeValue.trim());
         const target = visible.length === 1 ? visible[0] : texts.length === 1 ? texts[0] : null;
-        if (node.children.length && !target) { unresolved.push(i); continue; }
-        if (node.children.length) { if (target.nodeValue !== edit.text) target.nodeValue = edit.text; }
+        if (node.children.length && !target) {
+          if (![...node.children].every(child => inlineName(child.localName))) { unresolved.push(i); continue; }
+          writeSentence(node, edit.text);
+        } else if (node.children.length) { if (target.nodeValue !== edit.text) target.nodeValue = edit.text; }
         else if (node.textContent !== edit.text) node.textContent = edit.text;
         displayed.set(node, node.textContent);
       }

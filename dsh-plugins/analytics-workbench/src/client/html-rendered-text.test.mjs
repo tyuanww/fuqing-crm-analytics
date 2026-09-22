@@ -24,6 +24,23 @@ async function mount(t, source, { editing = true, selectBlocks = false } = {}) {
   return { dom, messages, nodes, targets, context };
 }
 
+test('a generated finding sentence can change the words and keeps the metric tags', async t => {
+  const page = { html: '<section id="cards" data-node="findings"></section>', css: '', resources: [], node_map: [],
+    js: `document.querySelector('[data-node="findings"]').innerHTML='<ul><li><span class="tag">时段</span><div>全周 <b>44%</b> 收入，客单价 <b>142.6 元</b>。</div></li><li><span class="tag">对照</span><div>日间 <b>20%</b> 收入。</div></li></ul>';` };
+  const ui = await mount(t, page);
+  const line = ui.targets().find(node => node.runtime && node.tag === 'div' && node.text.includes('全周') && node.text.includes('44%'));
+  assert.ok(line?.editableText, JSON.stringify(ui.targets()?.map(node => [node.tag, node.text?.slice?.(0, 40)])));
+  ui.dom.window.document.querySelector('div').click();
+  const selected = acceptSelection({ source: ui.dom.window, origin: 'null', data: ui.messages.findLast(item => item.type === 'cockpit.selection') }, { ...ui.context, nodes: ui.targets() });
+  assert.equal(selected?.node_id, line.node_id);
+  const changed = renderedTextPreview(page, line, line.text.replace('全周', '晚市'), {});
+  const reopened = await mount(t, changed, { editing: false });
+  const edited = reopened.dom.window.document.querySelector('div');
+  assert.equal(edited.textContent.includes('晚市'), true);
+  assert.equal(edited.querySelector('b').textContent, '44%');
+  assert.equal(reopened.dom.window.document.querySelectorAll('b')[1].textContent, '142.6 元');
+});
+
 test('script-rendered cards expose copy and whole-block targets; direct edit keeps renderer and interaction', async t => {
   const ui = await mount(t, pkg);
   const text = ui.targets().find(node => node.runtime && node.text === '收入文案');

@@ -117,8 +117,11 @@ function selectionRuntime(config) {
           const visibleTexts = directTexts.filter(n => n.nodeValue.trim());
           const ownText = visibleTexts.length === 1 ? visibleTexts[0] : directTexts.length === 1 ? directTexts[0] : null;
           const savedText = window.__cockpitPresentationIdentity?.has(node);
-          const editableText = node.children.length === 0 || Boolean(ownText && (ownText.nodeValue.trim() || savedText));
-          const text = editableText && node.children.length ? ownText.nodeValue : node.textContent ?? '';
+          const inlineChild = name => ['a', 'b', 'em', 'i', 'small', 'span', 'strong', 'sub', 'sup', 'code'].includes(name);
+          const sentence = node.children.length > 0 && [...node.children].every(child => inlineChild(child.localName))
+            && visibleTexts.length > 1;
+          const editableText = sentence || node.children.length === 0 || Boolean(ownText && (ownText.nodeValue.trim() || savedText));
+          const text = sentence ? (node.textContent ?? '') : editableText && node.children.length ? ownText.nodeValue : node.textContent ?? '';
           const block = /^(section|article|header|footer|aside|li)$/.test(node.localName) || (node.hasAttribute('data-node') || node.hasAttribute('data-page-block')) && node.children.length > 0;
           if ((!text.trim() && !savedText || text.length > 20000) || (!editableText && !block)) continue;
           const path = []; let child = node, reliable = true;
@@ -134,10 +137,11 @@ function selectionRuntime(config) {
               const value = [...child.classList].find(c => !/^(is-|has-|active|selected|hover|focus)/.test(c) && /^[A-Za-z][A-Za-z0-9_.:-]{0,159}$/.test(c) && peers.filter(n => n.classList.contains(c)).length === 1);
               if (value) key = { attribute: 'class', value };
               else {
-                const label = node => window.__cockpitPresentationIdentity?.get(node) ?? node.textContent;
+                const label = item => window.__cockpitPresentationIdentity?.get(item) ?? item.textContent;
                 const text = label(child);
-                if (!child.children.length && text.trim() && text.length <= 2000 && !/^[\s\d.,%+−\-]+$/.test(text)
-                  && peers.filter(n => !n.children.length && label(n) === text).length === 1) key = { attribute: 'text', value: text };
+                const numericLeaf = !child.children.length && /^[\s\d.,%+−\-]+$/.test(text);
+                if (!numericLeaf && text.trim() && text.length <= 2000
+                  && peers.filter(item => label(item) === text).length === 1) key = { attribute: 'text', value: text };
                 else { reliable = false; break; }
               }
             }
@@ -156,6 +160,7 @@ function selectionRuntime(config) {
           if (renderedHTML.length > 60000 || runtimeBytes + renderedHTML.length + text.length > 524288) continue;
           runtimeBytes += renderedHTML.length + text.length;
           runtimeIds.set(node, id); seen.add(node); next.set(id, node);
+          if (sentence) for (const item of node.querySelectorAll('*')) seen.add(item);
           runtimeNodes.push({ node_id: id, root_id: root.node_id, tag: node.localName, text, editableText, block,
             runtime: { anchor: root.anchor, path, package_hash: root.packageHash, html: renderedHTML } });
         }
