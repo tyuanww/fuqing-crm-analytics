@@ -6,7 +6,7 @@
 | 项 | 状态 |
 |---|---|
 | 已合代码基线 | **3bc2841（公开仓库 #50）**，前序 #49 / 0.16.0.1。旧私有历史未合入。 |
-| 本轮交付 | 对话用 `free_html_page_generate` 交 HTML。工作台放入可编辑驾驶舱，并在对话右侧产物栏打开。选区压缩后可点选。GSV 带首购新老客和仓库最后支付日。 |
+| 本轮交付 | 对话用 `free_html_page_generate` 交 HTML。工作台放入可编辑驾驶舱，并在对话右侧产物栏打开。步骤见 [操作说明](docs/operating/cockpit-native-html.md)。选区压缩后可点选。GSV 带首购新老客和仓库最后支付日。 |
 | VERSION / 产品 | 公开 main **0.16.0.2**。产品 **PARTIAL**，原全量 Goal **PAUSED**。 |
 | DSH 基座 | **0.1.6-alpha.2（ddefc45f）**，不改上游。 |
 | 现役 | 6677 加载 `crm-public-release` 的 0.16.0.2 插件；控制登记与 runtime 留在原仓。CRM 18093 仍为 `crm-assets-public` 的 archive_dashboard，本轮未重启。 |

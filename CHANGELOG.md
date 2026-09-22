@@ -2,7 +2,7 @@
 
 ### Added
 
-- 点「生成驾驶舱」，或在对话里说生成 HTML，由对话自己写页面并通过 `free_html_page_generate` 交出来。工作台把这份页面放进驾驶舱，可编辑，并在对话右侧产物栏打开。
+- 点「生成驾驶舱」，或在对话里说生成 HTML，由对话自己写页面并通过 `free_html_page_generate` 交出来。工作台把这份页面放进驾驶舱，可编辑，并在对话右侧产物栏打开。步骤见 [操作说明](docs/operating/cockpit-native-html.md)。
 - 看板 GSV 结果带上首购口径的新客和老客，以及仓库最后支付日。
 
 ### Fixed

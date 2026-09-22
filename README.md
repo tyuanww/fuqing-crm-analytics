@@ -1,6 +1,6 @@
 # 伸美 AI 增长董事会
 
-当前代码交付与运行边界见 [STATUS](./STATUS.md)，下一步见 [M1 核心交付](./docs/hackathon/TODOS.md#m1-核心交付)。公开 main **`3bc2841`**（[#50](https://github.com/tyuanww/fuqing-crm-analytics/pull/50)）VERSION **0.16.0.2**，现役 6677 已加载该插件构建。对话生成的 HTML 经 `free_html_page_generate` 进入可编辑驾驶舱，并出现在对话右侧产物栏。DSH **0.1.6-alpha.2**（`ddefc45f`）。产品仍 PARTIAL。侧栏底是登录/主题；比赛看板在新标签打开 `https://board.tyuan.chat/`。
+当前代码交付与运行边界见 [STATUS](./STATUS.md)，下一步见 [M1 核心交付](./docs/hackathon/TODOS.md#m1-核心交付)。公开 main **`3bc2841`**（[#50](https://github.com/tyuanww/fuqing-crm-analytics/pull/50)）VERSION **0.16.0.2**，现役 6677 已加载该插件构建。对话生成的 HTML 经 `free_html_page_generate` 进入可编辑驾驶舱，并出现在对话右侧产物栏，操作见 [从对话生成 HTML 驾驶舱](./docs/operating/cockpit-native-html.md)。DSH **0.1.6-alpha.2**（`ddefc45f`）。产品仍 PARTIAL。侧栏底是登录/主题；比赛看板在新标签打开 `https://board.tyuan.chat/`。
 
 下方9月5–10日的决策、端口和候选追加保留为历史记录，不作为当前服务或Git HEAD。
 
