@@ -20,6 +20,7 @@ const { JSDOM } = createRequire(join(upstream, 'node_modules/jsdom/package.json'
 const panelSource = await readFile(join(here, 'cockpit-main-panel.tsx'), 'utf8');
 const indexSource = await readFile(join(here, 'index.tsx'), 'utf8');
 const workspaceSource = await readFile(join(here, 'cockpit-workspace.tsx'), 'utf8');
+const pageEditorSource = await readFile(join(here, 'cockpit-page-editor.tsx'), 'utf8');
 
 test('cockpit main source mounts BoardSpecCanvas and keeps 返回对话', () => {
   assert.match(panelSource, /from '\.\/board-spec-canvas\.tsx'/);
@@ -95,6 +96,10 @@ test('cockpit main source mounts BoardSpecCanvas and keeps 返回对话', () => 
   assert.match(workspaceSource, /artifact-inbox-time/);
   assert.match(workspaceSource, /在 DSH 中查看/);
   assert.match(workspaceSource, /确认保存/);
+  assert.match(pageEditorSource, /html-structured-styles/);
+  assert.match(pageEditorSource, /STRUCTURED_STYLE_FIELDS/);
+  assert.match(pageEditorSource, /background-color/);
+  assert.match(pageEditorSource, /局部样式补丁/);
   assert.match(panelSource, /listWorkspaceFiles=\{props\.listWorkspaceFiles\}/);
   assert.match(panelSource, /readWorkspaceFile=\{props\.readWorkspaceFile\}/);
   assert.match(indexSource, /name: 'conversation.composer.dock'/);
