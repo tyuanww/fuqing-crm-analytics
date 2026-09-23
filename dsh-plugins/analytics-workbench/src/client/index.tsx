@@ -902,6 +902,9 @@ export function apply(ctx: Context): void {
         const submitted = await native.nativeChat.submitGeneratePrompt('根据本场对话已经完成的诊断和查出的数字，生成可编辑 HTML 驾驶舱。', { sessionId });
         const pkg = submitted?.package;
         if (!pkg?.html) throw new Error('原生对话没有交回页面源码包');
+        if (artifactInbox?.getSnapshot().status === 'unavailable') {
+          throw new Error('页面未能写入驾驶舱：产物收件箱服务尚未配置。');
+        }
         await pageStore.intakePackage(pkg, { sessionId, requestId: submitted.request_id });
         openCockpitPanel();
       },
