@@ -92,7 +92,7 @@ function tryAttachPresentedRefresh(host, onChange) {
   };
 }
 
-export function ingestWorkspaceEventFiles(sessionId, files, { existing = [] } = {}) {
+export function ingestWorkspaceEventFiles(sessionId, files, { existing = [], source = 'workspace-event' } = {}) {
   if (!sessionId) return [];
   const out = [];
   const seen = new Set();
@@ -113,10 +113,17 @@ export function ingestWorkspaceEventFiles(sessionId, files, { existing = [] } = 
       title: rel.split('/').pop(),
       path: rel,
       sessionId,
-      source: 'workspace-event',
+      source,
     };
     const id = cockpitProductIdentity(item);
-    if (!id || seen.has(id)) continue;
+    if (!id) continue;
+    if (seen.has(id)) {
+      const index = out.findIndex(existing => cockpitProductIdentity(existing) === id);
+      if (index >= 0 && source === 'session-presented' && out[index].source !== 'session-presented') {
+        out[index] = { ...out[index], source };
+      }
+      continue;
+    }
     seen.add(id);
     out.push(item);
   }
@@ -138,7 +145,7 @@ function emptySnapshot(epoch = 0, refreshMode = 'manual') {
 function mergeDeliveries(files) {
   const seen = new Map();
   for (const file of files) {
-    const key = file.workspaceRoot ? file.workspaceRoot.replace(/\\/g, '/') + '/' + file.path : file.id;
+    const key = cockpitProductIdentity(file) || (file.workspaceRoot ? file.workspaceRoot.replace(/\\/g, '/') + '/' + file.path : file.id);
     if (!seen.has(key)) seen.set(key, file);
   }
   return [...seen.values()];
@@ -154,6 +161,7 @@ export function createCockpitDelivery(adapters = {}) {
   const epoch = createNavigationEpoch();
   const listeners = new Set();
   let sessionId = null;
+  let eventFiles = [];
   let snapshot = emptySnapshot();
   let auto = { attached: false, unsubscribe() {} };
   let poll = null;
@@ -203,6 +211,7 @@ export function createCockpitDelivery(adapters = {}) {
       poll?.stop(); poll = null;
       if (next !== sessionId) {
         sessionId = next;
+        eventFiles = [];
         const ticket = epoch.begin('delivery-session');
         epoch.settle(ticket.epoch);
         setSnapshot({ ...emptySnapshot(ticket.epoch, snapshot.refreshMode), sessionId: next, status: next ? 'empty' : 'no-session',
@@ -223,10 +232,14 @@ export function createCockpitDelivery(adapters = {}) {
     inspectHost: inspectDeliveryHostCapabilities,
     attachHostEvents(host) {
       auto.unsubscribe();
-      const workspace = tryAttachWorkspaceChangeRefresh(host, () => { void api.refresh(); });
+      const workspace = tryAttachWorkspaceChangeRefresh(host, payload => {
+        const files = Array.isArray(payload?.files) ? payload.files : [];
+        if (files.length) api.ingestEventFiles(files, { source: 'workspace-event' });
+        void api.refresh();
+      });
       const presented = tryAttachPresentedRefresh(host, payload => {
         const files = Array.isArray(payload?.files) ? payload.files : [];
-        if (files.length) api.ingestEventFiles(files);
+        if (files.length) api.ingestEventFiles(files, { source: 'session-presented' });
         void api.refresh();
       });
       auto = {
@@ -243,14 +256,24 @@ export function createCockpitDelivery(adapters = {}) {
       const targetSession = options.sessionId ?? sessionId;
       if (!targetSession) return { started: false, stop() {} };
       let stopped = false;
+      let inFlight = false;
       const startedAt = Date.now();
+      const targetPaths = new Set((options.targetPaths ?? []).map(path => workspaceRelFromEventPath(path)).filter(Boolean));
+      const intervalMs = Number.isFinite(options.intervalMs) ? Math.max(10, options.intervalMs) : 2_000;
+      const maxMs = Number.isFinite(options.maxMs) ? Math.max(intervalMs, options.maxMs) : 20_000;
       const stop = () => { stopped = true; if (poll?.stop === stop) poll = null; if (timer) clearInterval(timer); };
       const tick = async () => {
-        if (stopped) return;
-        await api.refresh({ sessionId: targetSession });
-        if (snapshot.files.length || Date.now() - startedAt >= 20_000) stop();
+        if (stopped || inFlight) return;
+        inFlight = true;
+        try {
+          await api.refresh({ sessionId: targetSession });
+          const foundTarget = targetPaths.size > 0 && snapshot.files.some(file => targetPaths.has(file.path));
+          if (foundTarget || Date.now() - startedAt >= maxMs) stop();
+        } finally {
+          inFlight = false;
+        }
       };
-      const timer = setInterval(tick, 2_000);
+      const timer = setInterval(tick, intervalMs);
       poll = { stop };
       void tick();
       return { started: true, stop };
@@ -263,6 +286,7 @@ export function createCockpitDelivery(adapters = {}) {
         epoch.settle(ticket.epoch);
         return setSnapshot(emptySnapshot(ticket.epoch, snapshot.refreshMode));
       }
+      if (id !== sessionId) eventFiles = [];
       sessionId = id;
       setSnapshot({
         ...snapshot,
@@ -280,7 +304,11 @@ export function createCockpitDelivery(adapters = {}) {
         ]);
         if (!epoch.isCurrent(ticket.epoch)) return snapshot;
         epoch.settle(ticket.epoch);
-        const files = mergeDeliveries([...(past?.files ?? []), ...scan.files.map(file => ({ ...file, workspaceRoot: past?.currentWorkspace }))]);
+        const files = mergeDeliveries([
+          ...eventFiles,
+          ...(past?.files ?? []),
+          ...scan.files.map(file => ({ ...file, workspaceRoot: past?.currentWorkspace })),
+        ]);
         await intakeHtmlDeliveries(files, id, signal);
         const status = files.length ? 'ready' : scan.error || past?.error ? 'error' : 'empty';
         return setSnapshot({
@@ -358,7 +386,12 @@ export function createCockpitDelivery(adapters = {}) {
     ingestEventFiles(files, options = {}) {
       const id = options.sessionId ?? sessionId;
       if (!id) return [];
-      return ingestWorkspaceEventFiles(id, files, { existing: options.existing ?? snapshot.files });
+      const next = ingestWorkspaceEventFiles(id, files, { existing: eventFiles, source: options.source ?? 'workspace-event' });
+      eventFiles = next.filter(file => file.sessionId === id);
+      if (id === sessionId) {
+        setSnapshot({ ...snapshot, status: eventFiles.length ? 'ready' : snapshot.status, sessionId: id, files: mergeDeliveries([...eventFiles, ...snapshot.files]) });
+      }
+      return eventFiles;
     },
     dispose() {
       poll?.stop(); poll = null;

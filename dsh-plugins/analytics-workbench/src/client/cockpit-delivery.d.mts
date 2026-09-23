@@ -45,7 +45,7 @@ export function tryAttachWorkspaceChangeRefresh(
 export function ingestWorkspaceEventFiles(
   sessionId: string,
   files: Array<string | { path?: string }> | null | undefined,
-  options?: { existing?: CockpitProduct[] },
+  options?: { existing?: CockpitProduct[]; source?: string },
 ): CockpitProduct[];
 
 export function createCockpitDelivery(adapters?: {
@@ -64,12 +64,12 @@ export function createCockpitDelivery(adapters?: {
   subscribe(listener: (snapshot: DeliverySnapshot) => void): () => void;
   inspectHost(host: unknown): DeliveryHostCapabilities;
   attachHostEvents(host: unknown): { attached: boolean; reason: string | null };
-  startPolling(options?: { sessionId?: string }): { started: boolean; stop(): void };
+  startPolling(options?: { sessionId?: string; targetPaths?: string[]; intervalMs?: number; maxMs?: number }): { started: boolean; stop(): void };
   refresh(options?: { sessionId?: string; signal?: AbortSignal }): Promise<DeliverySnapshot>;
   loadMore(): Promise<DeliverySnapshot>;
   readFile(path: string, options?: { sessionId?: string; signal?: AbortSignal }): Promise<WorkspaceReadResult>;
   readBytes(path: string, options?: { sessionId?: string; signal?: AbortSignal }): Promise<Uint8Array<ArrayBuffer>>;
-  ingestEventFiles(files: Array<string | { path?: string }>, options?: { sessionId?: string; existing?: CockpitProduct[] }): CockpitProduct[];
+  ingestEventFiles(files: Array<string | { path?: string }>, options?: { sessionId?: string; existing?: CockpitProduct[]; source?: string }): CockpitProduct[];
   dispose(): void;
 };
 
