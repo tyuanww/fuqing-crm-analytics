@@ -212,6 +212,7 @@ class PageBindingManifest(PageModel):
 
 
 OriginPath = Annotated[str, Field(min_length=1, max_length=512)]
+OriginContentHash = Annotated[str, Field(min_length=64, max_length=64, pattern=r"^[0-9a-f]{64}$")]
 
 
 def workspace_origin_path(value: str | None) -> str | None:
@@ -237,6 +238,7 @@ class PageDraft(PageModel):
     binding_manifest: PageBindingManifest = Field(default_factory=PageBindingManifest)
     origin_path: OriginPath | None = None
     origin_file_id: Opaque | None = None
+    origin_content_hash: OriginContentHash | None = None
 
     @model_validator(mode="after")
     def source_is_explicit(self):

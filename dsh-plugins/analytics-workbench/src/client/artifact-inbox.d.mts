@@ -1,0 +1,31 @@
+export type ArtifactStatus = 'RECEIVED' | 'PREVIEWABLE' | 'SAVED' | 'DISMISSED';
+export type ArtifactReceipt = {
+  artifact_id: string;
+  source: 'page_package' | 'native_present' | 'workspace_file';
+  session_id: string;
+  request_id?: string | null;
+  call_id?: string | null;
+  title: string;
+  path?: string | null;
+  package?: Record<string, unknown> | null;
+  content_hash: string;
+  status: ArtifactStatus;
+  page_id?: string | null;
+  created_at?: number;
+  updated_at?: number;
+  created_at_ms?: number;
+  updated_at_ms?: number;
+};
+export type ArtifactInboxState = { items: ArtifactReceipt[]; status: string; message: string; busy: boolean; updatedAt: number };
+export type ArtifactInboxClient = {
+  getSnapshot(): ArtifactInboxState;
+  subscribe(listener: () => void): () => void;
+  refresh(): Promise<ArtifactInboxState>;
+  intake(input: Record<string, unknown>): Promise<ArtifactReceipt | null | undefined>;
+  get(artifactId: string): Promise<ArtifactReceipt | null>;
+  confirm(artifactId: string, pageId: string): Promise<ArtifactReceipt>;
+  dismiss(artifactId: string): Promise<ArtifactReceipt>;
+  dispose(): void;
+};
+export function createArtifactInboxClient(http: Record<string, unknown> | null | undefined, options?: { now?: () => number }): ArtifactInboxClient;
+export function digestBytes(bytes: ArrayBuffer | ArrayBufferView): Promise<string>;
