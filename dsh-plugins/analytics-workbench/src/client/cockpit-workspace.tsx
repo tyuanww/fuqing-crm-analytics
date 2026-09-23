@@ -27,6 +27,7 @@ const EMPTY_PAGE = { pages: [], current: null, mode: 'browse', busy: false, prev
 const EMPTY_DELIVERY: DeliverySnapshot = { status: 'no-session', sessionId: null, files: [], truncated: false, error: null, epoch: 0, refreshMode: 'manual' };
 const EMPTY_FILES: FileClientState = { files: [], status: 'idle', message: '', busy: false, editor: null, dirty: false, confirmationUncertain: false };
 const EMPTY_AI: AIState = { jobs: [], active: null, busy: false, confirmationUncertain: false, message: '', comparison: null, viewer: null, html: null };
+const EMPTY_INBOX = { items: [], status: 'unavailable', message: '', busy: false, updatedAt: 0 } as const;
 const groups = [{ key: 'html', name: 'HTML 页面', icon: '</>' }, { key: 'board', name: '数据看板', icon: '▦' },
   { key: 'spreadsheet', name: '表格与 CSV', icon: '▤' }, { key: 'document', name: 'Word 文档', icon: 'W' }, { key: 'pdf', name: 'PDF 文档', icon: 'PDF' }];
 
@@ -50,7 +51,7 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
 }) {
   const state = useSyncExternalStore(library.subscribe, library.getSnapshot);
   const page = useSyncExternalStore(pageStore?.subscribe ?? noopSubscribe, pageStore?.getSnapshot ?? (() => EMPTY_PAGE));
-  const inbox = useSyncExternalStore(artifactInbox?.subscribe ?? noopSubscribe, artifactInbox?.getSnapshot ?? (() => ({ items: [], status: 'unavailable', message: '', busy: false, updatedAt: 0 })));
+  const inbox = useSyncExternalStore(artifactInbox?.subscribe ?? noopSubscribe, artifactInbox?.getSnapshot ?? (() => EMPTY_INBOX));
   const deliveryState = useSyncExternalStore(delivery?.subscribe ?? noopSubscribe, delivery?.getSnapshot ?? (() => EMPTY_DELIVERY));
   const cabinet = useSyncExternalStore(fileClient?.subscribe ?? noopSubscribe, fileClient?.getSnapshot ?? (() => EMPTY_FILES));
   const ai = useSyncExternalStore(aiClient?.subscribe ?? noopSubscribe, aiClient?.getSnapshot ?? (() => EMPTY_AI));
