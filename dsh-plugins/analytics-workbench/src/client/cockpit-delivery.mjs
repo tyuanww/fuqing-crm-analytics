@@ -11,6 +11,15 @@ import {
 import { createNavigationEpoch, isSupersededRead } from './navigation/navigation-epoch.mjs';
 import { digestBytes } from './artifact-inbox.mjs';
 
+function safeHostValue(host, name) {
+  try { return host?.[name]; } catch { return undefined; }
+}
+
+function safeHostMethod(host, name) {
+  const method = safeHostValue(host, name);
+  return typeof method === 'function' ? method : null;
+}
+
 export function captureDeliverySessionSource(list, compositionSessionId) {
   const sessionId = resolvePageGenerateSession(list, compositionSessionId);
   if (typeof sessionId !== 'string' || !sessionId || sessionId.startsWith('session-cockpit-ai-')) {
@@ -26,16 +35,17 @@ export function inspectDeliveryHostCapabilities(host) {
   try { remote = host?.remote; } catch { remote = undefined; }
   try { workspaceChanges = host?.workspaceChanges; } catch { workspaceChanges = undefined; }
   try { uiConversation = host?.uiConversation; } catch { uiConversation = undefined; }
-  const workspaceFiles = remote?.workspaceFiles;
-  const canSubscribeWorkspaceChanges = typeof host?.subscribeWorkspaceChanges === 'function';
-  const canSubscribePresented = typeof host?.subscribePresented === 'function';
+  const workspaceFiles = safeHostValue(remote, 'workspaceFiles');
+  const uiEvents = safeHostValue(uiConversation, 'events');
+  const canSubscribeWorkspaceChanges = Boolean(safeHostMethod(host, 'subscribeWorkspaceChanges'));
+  const canSubscribePresented = Boolean(safeHostMethod(host, 'subscribePresented'));
   return {
-    canListWorkspace: typeof workspaceFiles?.list === 'function',
-    canReadWorkspace: typeof workspaceFiles?.read === 'function',
+    canListWorkspace: Boolean(safeHostMethod(workspaceFiles, 'list')),
+    canReadWorkspace: Boolean(safeHostMethod(workspaceFiles, 'read')),
     canSubscribeWorkspaceChanges,
     canSubscribePresented,
-    hasWorkspaceChangesService: typeof workspaceChanges?.summary === 'function',
-    hasUiConversation: typeof uiConversation?.events?.register === 'function',
+    hasWorkspaceChangesService: Boolean(safeHostMethod(workspaceChanges, 'summary')),
+    hasUiConversation: Boolean(safeHostMethod(uiEvents, 'register')),
     refreshMode: canSubscribeWorkspaceChanges || canSubscribePresented ? 'event+manual' : 'manual',
     workspaceChangesReason: canSubscribeWorkspaceChanges
       ? null
@@ -48,11 +58,12 @@ export function inspectDeliveryHostCapabilities(host) {
 
 export function tryAttachWorkspaceChangeRefresh(host, onChange) {
   const cap = inspectDeliveryHostCapabilities(host);
-  if (typeof host?.subscribeWorkspaceChanges !== 'function') {
+  const subscribe = safeHostMethod(host, 'subscribeWorkspaceChanges');
+  if (!subscribe) {
     return { attached: false, reason: cap.workspaceChangesReason, unsubscribe() {} };
   }
   let alive = true;
-  const returned = host.subscribeWorkspaceChanges((payload) => {
+  const returned = subscribe.call(host, (payload) => {
     if (alive && typeof onChange === 'function') onChange(payload);
   });
   return {
@@ -66,11 +77,12 @@ export function tryAttachWorkspaceChangeRefresh(host, onChange) {
 }
 
 function tryAttachPresentedRefresh(host, onChange) {
-  if (typeof host?.subscribePresented !== 'function') {
+  const subscribe = safeHostMethod(host, 'subscribePresented');
+  if (!subscribe) {
     return { attached: false, reason: '宿主没有提供 present 交付事件；可通过扫描或手动刷新发现 HTML。', unsubscribe() {} };
   }
   let alive = true;
-  const returned = host.subscribePresented((payload) => {
+  const returned = subscribe.call(host, (payload) => {
     if (alive && typeof onChange === 'function') onChange(payload);
   });
   return {

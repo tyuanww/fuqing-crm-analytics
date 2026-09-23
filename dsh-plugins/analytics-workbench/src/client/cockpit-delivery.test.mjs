@@ -98,6 +98,12 @@ test('host capability inspect stays manual unless a real subscribe function exis
   assert.equal(missing.canSubscribeWorkspaceChanges, false);
   assert.equal(missing.refreshMode, 'manual');
   assert.match(missing.workspaceChangesReason, /ui-deliverables/);
+  const cordisLike = new Proxy({}, { get() { throw new Error('without inject'); } });
+  const safeMissing = inspectDeliveryHostCapabilities(cordisLike);
+  assert.equal(safeMissing.canListWorkspace, false);
+  assert.equal(safeMissing.canSubscribeWorkspaceChanges, false);
+  assert.equal(safeMissing.canSubscribePresented, false);
+  assert.equal(safeMissing.refreshMode, 'manual');
   let calls = 0;
   const attached = tryAttachWorkspaceChangeRefresh({
     subscribeWorkspaceChanges(listener) {
