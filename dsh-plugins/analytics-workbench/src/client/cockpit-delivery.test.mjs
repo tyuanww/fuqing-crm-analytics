@@ -124,3 +124,24 @@ test('readFile uses the captured session and does not invent a fallback', async 
   assert.equal((await delivery.readFile('a.html')).text, '<p>a.html</p>');
   delivery.dispose();
 });
+
+test('HTML workspace scan registers safe files in the shared artifact inbox', async () => {
+  const received = [];
+  const delivery = createCockpitDelivery({
+    artifactInbox: { async intake(input) { received.push(input); return { artifact_id: `a${received.length}`, ...input, status: 'PREVIEWABLE' }; } },
+    listDir: async () => ({ path: '', entries: [{ name: 'dashboard.html', type: 'file' }, { name: '../escape.html', type: 'file' }] }),
+    readBytes: async (_sessionId, _path, range) => {
+      assert.equal(range.offset, 0);
+      const encoded = btoa('<h1>dashboard</h1>');
+      return { ok: true, value: { offset: 0, data: encoded, bytes: 18, eof: true, version: 'v1' } };
+    },
+  });
+  const snapshot = await delivery.refresh({ sessionId: 'session-safe' });
+  assert.equal(snapshot.files.length, 1);
+  assert.equal(received.length, 1);
+  assert.equal(received[0].source, 'workspace_file');
+  assert.equal(received[0].path, 'dashboard.html');
+  assert.equal(received[0].session_id, 'session-safe');
+  assert.match(received[0].content_hash, /^[a-f0-9]{64}$/);
+  delivery.dispose();
+});

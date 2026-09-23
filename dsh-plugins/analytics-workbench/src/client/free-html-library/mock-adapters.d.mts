@@ -19,6 +19,11 @@ export type PreviewRecord = {
 };
 export type PageAdapters = {
   kind: string;
+  artifactInbox?: {
+    intake(input: Record<string, unknown>): Promise<Record<string, unknown> | null | undefined>;
+    confirm(artifactId: string, pageId: string): Promise<Record<string, unknown>>;
+    dismiss(artifactId: string): Promise<Record<string, unknown>>;
+  } | null;
   documents?: Record<string, (...args: any[]) => Promise<any>>;
   preview: { kind: string; note: string; srcdoc(pkg: { html?: string; css?: string; js?: string } | null): string; pointerEvents(mode: string): 'none' | 'auto' };
   bridge: {

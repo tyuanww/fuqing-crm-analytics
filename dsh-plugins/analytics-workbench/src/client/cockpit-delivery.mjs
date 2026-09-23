@@ -9,6 +9,7 @@ import {
   workspaceRelFromEventPath,
 } from './cockpit-products.mjs';
 import { createNavigationEpoch, isSupersededRead } from './navigation/navigation-epoch.mjs';
+import { digestBytes } from './artifact-inbox.mjs';
 
 export function captureDeliverySessionSource(list, compositionSessionId) {
   const sessionId = resolvePageGenerateSession(list, compositionSessionId);
@@ -35,7 +36,7 @@ export function inspectDeliveryHostCapabilities(host) {
     canSubscribePresented,
     hasWorkspaceChangesService: typeof workspaceChanges?.summary === 'function',
     hasUiConversation: typeof uiConversation?.events?.register === 'function',
-    refreshMode: canSubscribeWorkspaceChanges ? 'event+manual' : 'manual',
+    refreshMode: canSubscribeWorkspaceChanges || canSubscribePresented ? 'event+manual' : 'manual',
     workspaceChangesReason: canSubscribeWorkspaceChanges
       ? null
       : 'client inject is slots/sessions/theme/layout/remote/remote.session; workspace/changes is a Session event served by Host workspaceChanges.summary and consumed by ui-deliverables',
@@ -61,6 +62,21 @@ export function tryAttachWorkspaceChangeRefresh(host, onChange) {
       alive = false;
       if (typeof returned === 'function') returned();
     },
+  };
+}
+
+function tryAttachPresentedRefresh(host, onChange) {
+  if (typeof host?.subscribePresented !== 'function') {
+    return { attached: false, reason: '宿主没有提供 present 交付事件；可通过扫描或手动刷新发现 HTML。', unsubscribe() {} };
+  }
+  let alive = true;
+  const returned = host.subscribePresented((payload) => {
+    if (alive && typeof onChange === 'function') onChange(payload);
+  });
+  return {
+    attached: true,
+    reason: null,
+    unsubscribe() { alive = false; if (typeof returned === 'function') returned(); },
   };
 }
 
@@ -122,11 +138,13 @@ export function createCockpitDelivery(adapters = {}) {
   const history = adapters.history;
   const max = adapters.max;
   const dirDepth = adapters.dirDepth;
+  const artifactInbox = adapters.artifactInbox;
   const epoch = createNavigationEpoch();
   const listeners = new Set();
   let sessionId = null;
   let snapshot = emptySnapshot();
   let auto = { attached: false, unsubscribe() {} };
+  let poll = null;
 
   const emit = () => {
     for (const listener of listeners) listener(snapshot);
@@ -137,6 +155,31 @@ export function createCockpitDelivery(adapters = {}) {
     return snapshot;
   };
 
+  async function intakeHtmlDeliveries(files, fallbackSessionId, signal) {
+    if (!artifactInbox?.intake || typeof adapters.readBytes !== 'function') return;
+    for (const file of files ?? []) {
+      signal?.throwIfAborted();
+      if (file?.kind !== 'html' || !file?.path) continue;
+      const relative = workspaceRelFromEventPath(file.path);
+      const sourceSession = file.sessionId || fallbackSessionId;
+      if (!relative || !sourceSession) continue;
+      try {
+        const bytes = await api.readBytes(relative, { sessionId: sourceSession, signal });
+        const contentHash = await digestBytes(bytes);
+        await artifactInbox.intake({
+          source: file.source === 'session-presented' ? 'native_present' : 'workspace_file',
+          session_id: sourceSession,
+          path: relative,
+          title: file.title || relative.split('/').pop() || 'HTML 产物',
+          content_hash: contentHash,
+        });
+      } catch {
+        // A file can still remain visible in the cabinet when the optional
+        // inbox read/hash bridge is unavailable or the session has expired.
+      }
+    }
+  }
+
   const api = {
     captureSource(list, compositionSessionId) {
       const captured = captureDeliverySessionSource(list, compositionSessionId);
@@ -145,6 +188,7 @@ export function createCockpitDelivery(adapters = {}) {
     },
     setSessionId(id) {
       const next = typeof id === 'string' && id ? id : null;
+      poll?.stop(); poll = null;
       if (next !== sessionId) {
         sessionId = next;
         const ticket = epoch.begin('delivery-session');
@@ -167,10 +211,37 @@ export function createCockpitDelivery(adapters = {}) {
     inspectHost: inspectDeliveryHostCapabilities,
     attachHostEvents(host) {
       auto.unsubscribe();
-      auto = tryAttachWorkspaceChangeRefresh(host, () => { void api.refresh(); });
+      const workspace = tryAttachWorkspaceChangeRefresh(host, () => { void api.refresh(); });
+      const presented = tryAttachPresentedRefresh(host, payload => {
+        const files = Array.isArray(payload?.files) ? payload.files : [];
+        if (files.length) api.ingestEventFiles(files);
+        void api.refresh();
+      });
+      auto = {
+        attached: workspace.attached || presented.attached,
+        reason: workspace.attached ? null : presented.reason || workspace.reason,
+        unsubscribe() { workspace.unsubscribe(); presented.unsubscribe(); },
+      };
       snapshot = { ...snapshot, refreshMode: auto.attached ? 'event+manual' : 'manual' };
       emit();
       return { attached: auto.attached, reason: auto.reason };
+    },
+    startPolling(options = {}) {
+      poll?.stop();
+      const targetSession = options.sessionId ?? sessionId;
+      if (!targetSession) return { started: false, stop() {} };
+      let stopped = false;
+      const startedAt = Date.now();
+      const stop = () => { stopped = true; if (poll?.stop === stop) poll = null; if (timer) clearInterval(timer); };
+      const tick = async () => {
+        if (stopped) return;
+        await api.refresh({ sessionId: targetSession });
+        if (snapshot.files.length || Date.now() - startedAt >= 20_000) stop();
+      };
+      const timer = setInterval(tick, 2_000);
+      poll = { stop };
+      void tick();
+      return { started: true, stop };
     },
     async refresh(options = {}) {
       const id = options.sessionId ?? sessionId;
@@ -198,6 +269,7 @@ export function createCockpitDelivery(adapters = {}) {
         if (!epoch.isCurrent(ticket.epoch)) return snapshot;
         epoch.settle(ticket.epoch);
         const files = mergeDeliveries([...(past?.files ?? []), ...scan.files.map(file => ({ ...file, workspaceRoot: past?.currentWorkspace }))]);
+        await intakeHtmlDeliveries(files, id, signal);
         const status = files.length ? 'ready' : scan.error || past?.error ? 'error' : 'empty';
         return setSnapshot({
           status,
@@ -234,6 +306,7 @@ export function createCockpitDelivery(adapters = {}) {
         if (!epoch.isCurrent(ticket.epoch)) return snapshot;
         epoch.settle(ticket.epoch);
         const files = mergeDeliveries([...previous.files, ...past.files]);
+        await intakeHtmlDeliveries(past.files, sessionId, ticket.signal);
         return setSnapshot({ ...previous, files, status: files.length ? 'ready' : 'empty', epoch: ticket.epoch,
           history: { ...past, files: undefined, examined: (previous.history.examined ?? 0) + past.examined,
             failures: [...(previous.history.failures ?? []), ...(past.failures ?? [])],
@@ -276,6 +349,7 @@ export function createCockpitDelivery(adapters = {}) {
       return ingestWorkspaceEventFiles(id, files, { existing: options.existing ?? snapshot.files });
     },
     dispose() {
+      poll?.stop(); poll = null;
       auto.unsubscribe();
       epoch.dispose();
       listeners.clear();

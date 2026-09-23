@@ -64,6 +64,7 @@ export function createLivePageAdapters({
   documentsHttp = null,
   resultHttp = null,
   nativeGenerate = null,
+  artifactInbox = null,
 } = {}) {
   const pages = new Map();
   const store = createMemoryPageStore({ now });
@@ -457,15 +458,25 @@ export function createLivePageAdapters({
     assets,
     documents,
     editContexts: Object.freeze({ confirmPresentation: documents.confirmPresentation }),
+    artifactInbox,
     nativeChat: Object.freeze({
       kind: 'native-dsh-session',
       prompts: nativePrompts,
       async submitGeneratePrompt(prompt, extras = {}) {
         nativePrompts.push({ prompt, context: buildGenerateContext({ prompt, ...extras }), at: now() });
         if (typeof nativeGenerate !== 'function') throw nativeGenerateUnavailable();
-        const pkg = normalizePagePackage(await nativeGenerate(prompt, extras));
+        const raw = await nativeGenerate(prompt, extras);
+        const pkg = normalizePagePackage(raw);
         if (!pkg) throw nativeGenerateUnavailable();
-        return { accepted: true, runtime: 'dsh-native-agent-only', package: pkg };
+        return {
+          accepted: true,
+          runtime: 'dsh-native-agent-only',
+          package: pkg,
+          ...(typeof raw?.__session_id === 'string' ? { session_id: raw.__session_id } : {}),
+          ...(typeof raw?.__request_id === 'string' ? { request_id: raw.__request_id } : {}),
+          ...(typeof extras?.sessionId === 'string' ? { session_id: extras.sessionId } : {}),
+          ...(typeof extras?.requestId === 'string' ? { request_id: extras.requestId } : {}),
+        };
       },
       open() { return { reachable: true }; },
     }),

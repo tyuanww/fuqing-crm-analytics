@@ -51,6 +51,7 @@ import { hasUnsavedChanges } from './leave/dirty-predicate.mjs';
 import { LeavePromptOverlay } from './leave/leave-prompt.tsx';
 import { createHostPageStore } from './free-html-library/create-host-page-store.mjs';
 import { createNativePageGenerate, createPagePackageWaiter, extractPagePackage } from './free-html-library/native-generate.mjs';
+import { createArtifactInboxClient } from './artifact-inbox.mjs';
 import { GenerateChipIcon, LibraryGenerateDock, LibraryPreviewToolCard } from './library-workspace.tsx';
 import { BOARD_GENERATE_TOOL_NAME, BOARD_EDIT_TOOL_NAME } from '../competition-agent/family.mjs';
 import { PAGE_GENERATE_TOOL_NAME, PAGE_REQUEST_ID_PATTERN, PAGE_TOOL_RESULT_SCHEMA } from '../competition-agent/page-family.mjs';
@@ -408,7 +409,7 @@ function AnalyticsToolCard({ block }: ToolCallViewProps) {
  * the waiting generate continues into the isolated documents HTTP. It never
  * persists the page and never renders the raw source.
  */
-function PagePackageToolCard(props: ToolCallViewProps & { pagePackageWaiter?: PagePackageWaiter; onNativePackage?: (pkg: { html: string; css?: string; js?: string; resources?: unknown[]; node_map?: unknown[] }, sessionId: string) => Promise<void> }) {
+function PagePackageToolCard(props: ToolCallViewProps & { pagePackageWaiter?: PagePackageWaiter; openCockpit?: () => void; openDsh?: () => void; onNativePackage?: (pkg: { html: string; css?: string; js?: string; resources?: unknown[]; node_map?: unknown[] }, meta: { sessionId: string; requestId?: string; callId?: string }) => Promise<void> }) {
   const { block, pagePackageWaiter } = props;
   const delivered = useRef<string | null>(null);
   useEffect(() => {
@@ -429,9 +430,9 @@ function PagePackageToolCard(props: ToolCallViewProps & { pagePackageWaiter?: Pa
         pagePackageWaiter.deliver(requestId, new Error('页面交付回执缺少有效源码包'));
         return;
       }
-      const accepted = pagePackageWaiter.deliver(requestId, pkg);
       const sessionId = typeof meta.session_id === 'string' ? meta.session_id : '';
-      if (!accepted && sessionId) void Promise.resolve(props.onNativePackage?.(pkg, sessionId)).catch(() => { /* the tool card stays; the page was not saved */ });
+      const accepted = pagePackageWaiter.deliver(requestId, pkg);
+      if (!accepted && sessionId) void Promise.resolve(props.onNativePackage?.(pkg, { sessionId, requestId, callId: typeof block.callId === 'string' ? block.callId : undefined })).catch(() => { /* candidate status remains visible */ });
       return;
     }
     const error = meta?.error as { code?: unknown } | undefined;
@@ -453,7 +454,8 @@ function PagePackageToolCard(props: ToolCallViewProps & { pagePackageWaiter?: Pa
   }
   return <div className="analytics-b0-card" data-testid="analytics-b0-page-card">
     <strong>自由页面源码包已交付工作台</strong>
-    <p>request_id {String(meta.request_id)} · 请到工作台检查并保存；本工具不保存页面。</p>
+    <p>request_id {String(meta.request_id)} · 已登记到驾驶舱产物收件箱，请检查后确认保存；本工具不保存正式页面。</p>
+    <div className="analytics-b0-card-actions"><button type="button" onClick={() => props.openCockpit?.()}>打开驾驶舱</button><button type="button" onClick={() => props.openDsh?.()}>在 DSH 中查看</button></div>
   </div>;
 }
 
@@ -499,7 +501,10 @@ export function apply(ctx: Context): void {
   // waiting generate through this waiter; disposal cancels everything pending.
   const pagePackageWaiter = createPagePackageWaiter();
   ctx.effect(() => () => pagePackageWaiter.cancelAll(), 'analytics-board: free-html page waiter');
+  const artifactInbox = boardPackEnabled() ? createArtifactInboxClient(pageDocumentsHttpOptions()) : undefined;
+  ctx.effect(() => () => artifactInbox?.dispose(), 'analytics-board: artifact inbox client');
   const pageStore = boardPackEnabled() ? createHostPageStore({
+    artifactInbox,
     nativeGenerate: createNativePageGenerate({
       waiter: pagePackageWaiter,
       submitPrompt: async (prompt, extras) => {
@@ -738,6 +743,7 @@ export function apply(ctx: Context): void {
     }
   };
   const delivery = createCockpitDelivery({
+    artifactInbox,
     ...(connection?.rpc?.call ? { history: async (cursor: string | null, signal?: AbortSignal) => {
       const result = await connection.rpc.call('/api', 'shine-mage-deliveries', { ...(cursor ? { cursor } : {}),
         ...(delivery.getSessionId() ? { sessionId: delivery.getSessionId() } : {}) }, signal) as {
@@ -777,6 +783,10 @@ export function apply(ctx: Context): void {
     return ctx.sessions.list.subscribe(captureVisibleDeliverySource);
   }, 'analytics-board: observe visible delivery source');
   ctx.effect(() => () => delivery.dispose(), 'analytics-board: delivery lifetime');
+  ctx.effect(() => {
+    delivery.attachHostEvents(ctx as unknown as { subscribeWorkspaceChanges?: (listener: (payload: unknown) => void) => (() => void) | void; subscribePresented?: (listener: (payload: unknown) => void) => (() => void) | void });
+    return () => delivery.attachHostEvents({});
+  }, 'analytics-board: observe native delivery events');
   const listWorkspaceFiles = async () => (await delivery.refresh()).files;
   const openWorkspaceFile = (product: { sessionId?: string; path?: string }) => {
     const openResource = (ctx as unknown as { sidebarRight?: { openResource?(address: string): void } }).sidebarRight?.openResource;
@@ -868,20 +878,8 @@ export function apply(ctx: Context): void {
     }, LibraryPreviewToolCard));
     ctx.slots.inject('tool.call.toolview', () => ctx.slots.register({
       name: 'tool.call.toolview', key: PAGE_GENERATE_TOOL_NAME,
-      inject: () => ({ pagePackageWaiter, onNativePackage: async (pkg: { html: string; css?: string; js?: string; resources?: unknown[]; node_map?: unknown[] }, sessionId: string) => {
-        const documents = (pageStore as { adapters?: { documents?: { generateAndConfirm?: (draft: object) => Promise<{ ok?: boolean; page?: { page_id?: string } }> } } } | undefined)?.adapters?.documents;
-        if (!sessionId || !documents?.generateAndConfirm) return;
-        const saved = await documents.generateAndConfirm({
-          title: '本场对话驾驶舱', session_id: sessionId,
-          package: { html: pkg.html, css: pkg.css ?? '', js: pkg.js ?? '', resources: pkg.resources ?? [], node_map: pkg.node_map ?? [] },
-          binding_manifest: { bindings: [], result_refs: [] }, idempotency_key: crypto.randomUUID(),
-        });
-        const pageId = saved?.page?.page_id;
-        if (!saved?.ok || !pageId) return;
-        pageStore?.selectCockpitAsset('page:' + pageId);
-        await pageStore?.refreshPages();
-        await pageStore?.openPage(pageId);
-        revealGeneratedPage(sessionId, pageId);
+      inject: () => ({ pagePackageWaiter, openCockpit: openCockpitPanel, openDsh: () => { try { ctx.layout.openRightbar(true, false); } catch { /* host without rightbar */ } }, onNativePackage: async (pkg: { html: string; css?: string; js?: string; resources?: unknown[]; node_map?: unknown[] }, meta: { sessionId: string; requestId?: string; callId?: string }) => {
+        await pageStore?.intakePackage(pkg, { sessionId: meta.sessionId, requestId: meta.requestId, callId: meta.callId });
       } }),
     }, PagePackageToolCard));
   }
@@ -899,24 +897,13 @@ export function apply(ctx: Context): void {
       board: boardLive,
       library,
       async generateDirect(sessionId: string) {
-        const native = (pageStore as { adapters?: { nativeChat?: { submitGeneratePrompt?: (prompt: string, extras?: { sessionId?: string }) => Promise<{ package?: { html: string; css?: string; js?: string; resources?: unknown[]; node_map?: unknown[] } }> }; documents?: { generateAndConfirm?: (draft: object) => Promise<{ ok?: boolean; page?: { page_id?: string } }> } } } | undefined)?.adapters;
-        if (!native?.nativeChat?.submitGeneratePrompt || !native.documents?.generateAndConfirm) throw new Error('原生 HTML 交付尚未连接');
+        const native = (pageStore as { adapters?: { nativeChat?: { submitGeneratePrompt?: (prompt: string, extras?: { sessionId?: string; requestId?: string }) => Promise<{ package?: { html: string; css?: string; js?: string; resources?: unknown[]; node_map?: unknown[] }; request_id?: string; session_id?: string }> } } } | undefined)?.adapters;
+        if (!native?.nativeChat?.submitGeneratePrompt || !pageStore?.intakePackage) throw new Error('原生 HTML 交付尚未连接');
         const submitted = await native.nativeChat.submitGeneratePrompt('根据本场对话已经完成的诊断和查出的数字，生成可编辑 HTML 驾驶舱。', { sessionId });
         const pkg = submitted?.package;
         if (!pkg?.html) throw new Error('原生对话没有交回页面源码包');
-        const saved = await native.documents.generateAndConfirm({
-          title: '本场对话驾驶舱',
-          session_id: sessionId,
-          package: { html: pkg.html, css: pkg.css ?? '', js: pkg.js ?? '', resources: pkg.resources ?? [], node_map: pkg.node_map ?? [] },
-          binding_manifest: { bindings: [], result_refs: [] },
-          idempotency_key: crypto.randomUUID(),
-        });
-        const pageId = saved?.page?.page_id;
-        if (!saved?.ok || !pageId) throw new Error('页面未能写入驾驶舱');
-        pageStore?.selectCockpitAsset('page:' + pageId);
-        await pageStore?.refreshPages();
-        await pageStore?.openPage(pageId);
-        revealGeneratedPage(sessionId, pageId);
+        await pageStore.intakePackage(pkg, { sessionId, requestId: submitted.request_id });
+        openCockpitPanel();
       },
       async fetchResults() {
         const http = competitionHttpOptions();
@@ -946,6 +933,7 @@ export function apply(ctx: Context): void {
         board: boardLive,
         library,
         pageStore,
+        artifactInbox,
         delivery,
         fileClient,
         aiClient,

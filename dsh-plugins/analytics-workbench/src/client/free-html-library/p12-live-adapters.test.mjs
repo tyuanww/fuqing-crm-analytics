@@ -137,6 +137,47 @@ test('live generate uses native Agent package and never SAMPLE_PACKAGE', async (
   assert.equal(store.getSnapshot().current.version, 1);
 });
 
+test('live generate registers a candidate before formal save and confirms it once', async () => {
+  const receipts = [];
+  let confirmed = 0;
+  const artifactInbox = {
+    async intake(input) {
+      const item = { artifact_id: 'artifact_candidate_1', ...input, status: 'PREVIEWABLE' };
+      receipts.push(item);
+      return item;
+    },
+    async confirm(id, pageId) { confirmed += 1; return { artifact_id: id, page_id: pageId, status: 'SAVED' }; },
+    async dismiss(id) { return { artifact_id: id, status: 'DISMISSED' }; },
+  };
+  const { store, adapters } = liveStore({ artifactInbox });
+  store.setPrompt('候选页面');
+  await store.generate();
+  assert.equal(receipts.length, 1);
+  assert.equal(store.getSnapshot().current, null);
+  assert.equal(store.getSnapshot().importCandidate.artifact_id, 'artifact_candidate_1');
+  assert.equal(adapters.assets.list().length, 0);
+  await store.confirmImport();
+  assert.equal(confirmed, 1);
+  assert.equal(store.getSnapshot().importCandidate, null);
+  assert.equal(store.getSnapshot().current.version, 1);
+  assert.equal(adapters.assets.list().length, 1);
+});
+
+test('candidate dismissal leaves the formal page library unchanged', async () => {
+  const artifactInbox = {
+    async intake(input) { return { artifact_id: 'artifact_candidate_2', ...input, status: 'PREVIEWABLE' }; },
+    async confirm() { throw new Error('should not confirm'); },
+    async dismiss(id) { return { artifact_id: id, status: 'DISMISSED' }; },
+  };
+  const { store, adapters } = liveStore({ artifactInbox });
+  store.setPrompt('丢弃候选');
+  await store.generate();
+  await store.cancelPreview();
+  assert.equal(store.getSnapshot().importCandidate, null);
+  assert.equal(store.getSnapshot().current, null);
+  assert.equal(adapters.assets.list().length, 0);
+});
+
 test('live generate without nativeGenerate keeps the prompt', async () => {
   const store = createFreeHtmlLibraryStore({ adapters: createLivePageAdapters(), viewportWidth: 1440 });
   store.setPrompt('保留我');

@@ -16,6 +16,7 @@ import { cockpitCss } from './cockpit-workspace-style.ts';
 import type { CockpitFileClient, FileClientState } from './cockpit-file-client.mjs';
 import { CockpitAIPanel, CockpitAIPreview } from './cockpit-ai-panel.tsx';
 import type { CockpitAIClient, AIState } from './cockpit-ai-client.mjs';
+import type { ArtifactInboxClient, ArtifactReceipt } from './artifact-inbox.mjs';
 import { useFloatingRail } from './cockpit-floating-rail.tsx';
 import { RailResize } from './cockpit-rail-controls.tsx';
 import { CockpitOfficeEditor } from './cockpit-office-editor.tsx';
@@ -35,12 +36,12 @@ function workspacePackage(text: string) {
   parsed.querySelectorAll('meta,base').forEach(node => node.remove());
   return { html: [...parsed.head.children].map(node => node.outerHTML).join('') + parsed.body.innerHTML, css: '', js: '', resources: [] };
 }
-export function LibraryCockpitPanel({ library, goConversation, themeSource, initialSurface = 'board', pageStore, delivery, leaveCoordinator,
+export function LibraryCockpitPanel({ library, goConversation, themeSource, initialSurface = 'board', pageStore, artifactInbox, delivery, leaveCoordinator,
   listWorkspaceFiles, openWorkspaceFile, readWorkspaceFile, fileClient, aiClient, extension }: {
   extension?: ReactNode;
   library: LibraryBoardClient; goConversation(): void; leaveCoordinator?: LeaveCoordinator;
   themeSource: { subscribe(listener: () => void): () => void; getSnapshot(): CompetitionColorScheme };
-  initialSurface?: 'pages' | 'board'; pageStore?: FreeHtmlLibraryStore;
+  initialSurface?: 'pages' | 'board'; pageStore?: FreeHtmlLibraryStore; artifactInbox?: ArtifactInboxClient;
   delivery?: ReturnType<typeof createCockpitDelivery>;
   fileClient?: CockpitFileClient; aiClient?: CockpitAIClient;
   listWorkspaceFiles?: () => Promise<Array<Record<string, unknown>>>;
@@ -49,6 +50,7 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
 }) {
   const state = useSyncExternalStore(library.subscribe, library.getSnapshot);
   const page = useSyncExternalStore(pageStore?.subscribe ?? noopSubscribe, pageStore?.getSnapshot ?? (() => EMPTY_PAGE));
+  const inbox = useSyncExternalStore(artifactInbox?.subscribe ?? noopSubscribe, artifactInbox?.getSnapshot ?? (() => ({ items: [], status: 'unavailable', message: '', busy: false, updatedAt: 0 })));
   const deliveryState = useSyncExternalStore(delivery?.subscribe ?? noopSubscribe, delivery?.getSnapshot ?? (() => EMPTY_DELIVERY));
   const cabinet = useSyncExternalStore(fileClient?.subscribe ?? noopSubscribe, fileClient?.getSnapshot ?? (() => EMPTY_FILES));
   const ai = useSyncExternalStore(aiClient?.subscribe ?? noopSubscribe, aiClient?.getSnapshot ?? (() => EMPTY_AI));
@@ -200,9 +202,14 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
   }, [uncertain, busy]);
   const refresh = async () => {
     setNotice('');
-    await Promise.all([aiClient?.refresh(), library.refresh(), pageStore?.refreshPages(), fileClient?.refresh(), delivery ? delivery.refresh() : listWorkspaceFiles?.().then(value => { if (!Array.isArray(value)) throw new Error('文件列表格式错误'); setLegacyFiles(value); }).catch(() => setNotice('工作区文件读取失败，请重试。'))]);
+    await Promise.all([aiClient?.refresh(), library.refresh(), pageStore?.refreshPages(), artifactInbox?.refresh(), fileClient?.refresh(), delivery ? delivery.refresh() : listWorkspaceFiles?.().then(value => { if (!Array.isArray(value)) throw new Error('文件列表格式错误'); setLegacyFiles(value); }).catch(() => setNotice('工作区文件读取失败，请重试。'))]);
   };
-  useEffect(() => { void refresh(); return () => { readSeq.current++; }; }, [library, pageStore, delivery, listWorkspaceFiles]);
+  useEffect(() => { void refresh(); return () => { readSeq.current++; }; }, [library, pageStore, artifactInbox, delivery, listWorkspaceFiles]);
+  useEffect(() => {
+    if (!delivery || deliveryState.refreshMode !== 'manual' || !deliveryState.sessionId) return undefined;
+    const polling = delivery.startPolling({ sessionId: deliveryState.sessionId });
+    return () => polling.stop();
+  }, [delivery, deliveryState.refreshMode, deliveryState.sessionId]);
   useEffect(() => {
     if (!root.current || typeof ResizeObserver === 'undefined') return;
     const observer = new ResizeObserver(entries => setWidth(entries[0].contentRect.width));
@@ -289,6 +296,23 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
         return { bytes };
       } });
   };
+  const pendingArtifacts = inbox.items.filter(item => item.status === 'RECEIVED' || item.status === 'PREVIEWABLE');
+  const previewInboxArtifact = async (item: ArtifactReceipt) => {
+    if (!pageStore || !artifactInbox) return;
+    const full = item.package ? item : await artifactInbox.get(item.artifact_id);
+    if (!full?.package) { setNotice('这份候选没有可预览的页面源码，请刷新后重试。'); return; }
+    await pageStore.intakePackage(full.package, {
+      sessionId: full.session_id,
+      requestId: full.request_id ?? undefined,
+      callId: full.call_id ?? undefined,
+      title: full.title,
+    });
+  };
+  const dismissInboxArtifact = async (item: ArtifactReceipt) => {
+    if (!artifactInbox) return;
+    const result = await artifactInbox.dismiss(item.artifact_id);
+    if (result.status !== 'DISMISSED') throw new Error('产物丢弃回执不完整，请重试。');
+  };
   const addFiles = async (input: FileList | null) => {
     if (!input || !fileClient) return;
     const chosen = Array.from(input);
@@ -358,7 +382,7 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
       {presenting ? <button className="cockpit-exit-fullscreen" onClick={() => void fullscreen()}>退出全屏 · Esc</button> : null}
       <header className="sm-library-pagehead" data-testid="sm-library-pagehead">
         <div className="cockpit-heading"><button data-testid="sm-cockpit-back" aria-label="返回对话" onClick={back}>← <span className="cockpit-back-label">返回对话</span></button>
-          <div><h1 ref={heading} tabIndex={-1}>项目驾驶舱</h1><small>历史交付 · 文件 · 预览与编辑</small></div></div>
+          <div><h1 ref={heading} tabIndex={-1}>项目驾驶舱</h1><small>历史交付 · 文件 · 预览与编辑</small><span className="cockpit-inbox-status" data-testid="artifact-inbox-status">产物收件箱 · 待处理 {inbox.items.filter(item => item.status === 'RECEIVED' || item.status === 'PREVIEWABLE').length}</span></div></div>
         <div className="cockpit-head-actions">{extension}<button data-testid="cockpit-fullscreen" onClick={() => void fullscreen()}>全屏展示</button><button aria-expanded={rail} onClick={() => setRail(!rail)}>{rail ? '收起产物' : '产物列表'}</button>
           {fileClient ? <><input ref={picker} type="file" hidden multiple accept=".html,.htm,.docx,.doc,.odt,.rtf,.xlsx,.xls,.ods,.csv,.pdf" data-testid="cockpit-file-picker"
             onChange={event => { void addFiles(event.target.files); event.target.value = ''; }} />
@@ -387,6 +411,7 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
           <label className="cockpit-field"><span>查找产物</span><input type="search" placeholder="名称或来源对话" value={search} onChange={event => setSearch(event.target.value)} /></label>
 
           {delivery && deliveryState.status === 'loading' ? <p role="status" className="cockpit-muted">正在查找历史产物…</p> : null}
+          {delivery && deliveryState.refreshMode === 'manual' ? <p role="status" className="cockpit-muted">实时事件不可用，已启用刷新扫描；点击刷新可立即查找新产物。</p> : null}
           {deliveryState.history?.error ? <div className="cockpit-rail-status" role="alert"><p className="cockpit-muted">{deliveryState.history.error}</p><button disabled={busy || dirty()} onClick={() => void refresh()}>重试历史汇总</button></div> : null}
           {Boolean(deliveryState.history?.failures?.length) ? <p role="status" className="cockpit-muted">{deliveryState.history!.failures!.length} 个历史会话暂不可读取，可刷新重试。</p> : null}
           {Boolean(deliveryState.history?.unsupportedPaths) ? <p role="status" className="cockpit-muted">部分交付位于会话工作区外，尚未收录，可手动添加。</p> : null}
@@ -396,6 +421,13 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
           </div> : null}
           {deliveryState.truncated ? <p role="status" className="cockpit-muted">文件较多，当前显示有界扫描结果，列表未包含全部文件。</p> : null}
           {cabinet.status === 'error' ? <p role="alert" className="cockpit-muted">已添加文件的列表暂不可读取，可刷新重试。</p> : null}
+          {pendingArtifacts.length ? <section className="cockpit-inbox" data-testid="artifact-inbox-list" aria-label="产物收件箱">
+            <div className="cockpit-group"><span>产物收件箱</span><span>{pendingArtifacts.length}</span></div>
+            <ul>{pendingArtifacts.map(item => <li key={item.artifact_id} className="cockpit-inbox-row">
+              <div><strong>{item.title}</strong><small>{item.source} · {item.session_id} · {item.status}</small></div>
+              <div className="cockpit-inbox-actions"><button disabled={busy || uncertain || !pageStore} onClick={() => guard(() => previewInboxArtifact(item))}>预览</button><button disabled={busy || uncertain} onClick={() => guard(() => dismissInboxArtifact(item))}>丢弃</button></div>
+            </li>)}</ul>
+          </section> : null}
           <div className="sm-library-products" data-testid="library-products">
             {groups.map(group => {
               const rows = visibleProducts.filter(item => item.kind === group.key);
@@ -465,9 +497,9 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
               </div> : null}
             </CockpitSidebar></div>
             : savedHtml && pageStore ? <CockpitPageEditor store={pageStore} aiMode={htmlAIMode} onInspect={() => setMobileInspector(true)} onWholeAI={aiClient ? () => void guard(beginAI) : undefined} onAI={aiClient ? (scope, instruction) => aiClient.begin('page', page.current!.page_id, page.current!.version, scope, instruction) : undefined} />
-            : page.importCandidate ? <><div className="cockpit-notice" data-testid="html-import-preview"><div><strong>保存为可编辑副本</strong><p>{uncertain ? '保存结果待核对。请用同一请求重试确认。' : '先检查页面。确认后进入页库，原工作区文件保持不变。'}</p>
+            : page.importCandidate ? <><div className="cockpit-notice" data-testid="html-import-preview"><div><strong>{page.importCandidate.artifact_id ? '页面已生成，待确认' : '保存为可编辑副本'}</strong><p>{uncertain ? '保存结果待核对。请用同一请求重试确认。' : page.importCandidate.artifact_id ? '产物已登记到收件箱；确认后才进入正式页面库。' : '先检查页面。确认后进入页库，原工作区文件保持不变。'}</p>
               {page.importCandidate.quarantined?.length ? <p>已停用页面里的外联地址，副本可以继续编辑。这些地址不会再被打开：{page.importCandidate.quarantined.slice(0, 4).join('、')}{page.importCandidate.quarantined.length > 4 ? '…' : ''}</p> : null}</div>
-              <button disabled={busy || uncertain} onClick={() => void pageStore?.cancelPreview()}>取消入库</button><button className="cockpit-primary" disabled={busy} onClick={() => void pageStore?.confirmImport()}>{uncertain ? '重试确认' : '确认保存副本'}</button></div>
+              <button disabled={busy || uncertain} onClick={() => void pageStore?.cancelPreview()}>{page.importCandidate.artifact_id ? '丢弃候选' : '取消入库'}</button><button className="cockpit-primary" disabled={busy} onClick={() => void pageStore?.confirmImport()}>{uncertain ? '重试确认' : page.importCandidate.artifact_id ? '确认保存页面' : '确认保存副本'}</button></div>
               <div className="cockpit-frame-wrap"><HtmlPreview pkg={page.importCandidate.package} title={selected?.title ?? '副本预览'} /></div></>
             : selected?.kind === 'html' && rawPackage ? <><div className="cockpit-document-tools"><span className="cockpit-badge">{selected.file_id ? '已添加文件' : '会话文件'}</span><span className="cockpit-muted">保存副本后可编辑映射文字；外部资源受限。</span></div>
               <div className="cockpit-frame-wrap"><HtmlPreview pkg={rawPackage} title={selected.title} /></div></>

@@ -14,6 +14,7 @@ export function createHostPageStore(options = {}) {
       documentsHttp: options.documentsHttp === undefined ? pageDocumentsHttpOptions() : options.documentsHttp,
       resultHttp: options.resultHttp === undefined ? pageResultHttpOptions() : options.resultHttp,
       nativeGenerate: options.nativeGenerate ?? null,
+      artifactInbox: options.artifactInbox ?? null,
     }),
     now: options.now,
     viewportWidth: options.viewportWidth,

@@ -1,6 +1,7 @@
 import type { FreeHtmlLibraryStore } from './store.d.mts';
 import type { PageHttpOptions } from './page-http.d.mts';
 import type { PagePackage } from './native-generate.d.mts';
+import type { ArtifactInboxClient } from '../artifact-inbox.mjs';
 
 export function createHostPageStore(options?: {
   now?: () => number;
@@ -9,4 +10,5 @@ export function createHostPageStore(options?: {
   documentsHttp?: PageHttpOptions | null;
   resultHttp?: PageHttpOptions | null;
   nativeGenerate?: (prompt: string, extras?: object) => Promise<PagePackage> | PagePackage;
+  artifactInbox?: ArtifactInboxClient | null;
 }): FreeHtmlLibraryStore;
