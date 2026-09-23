@@ -145,10 +145,15 @@ function emptySnapshot(epoch = 0, refreshMode = 'manual') {
 function mergeDeliveries(files) {
   const seen = new Map();
   for (const file of files) {
-    const key = cockpitProductIdentity(file) || (file.workspaceRoot ? file.workspaceRoot.replace(/\\/g, '/') + '/' + file.path : file.id);
-    if (!seen.has(key)) seen.set(key, file);
+    const identity = cockpitProductIdentity(file);
+    const workspaceKey = file.workspaceRoot && file.path
+      ? file.workspaceRoot.replace(/\\/g, '/') + '/' + file.path
+      : '';
+    const keys = [identity, workspaceKey, file.id].filter(Boolean);
+    if (keys.some(key => seen.has(key))) continue;
+    for (const key of keys) seen.set(key, file);
   }
-  return [...seen.values()];
+  return [...new Set(seen.values())];
 }
 
 export function createCockpitDelivery(adapters = {}) {
