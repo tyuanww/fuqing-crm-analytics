@@ -1,4 +1,4 @@
-/** Generated free-page contract; do not edit. OpenAPI SHA-256: bcb2ffcb36648c5f4873eb84ee63d452d5b744a3d44bb5c7ca4da1f34e162d75 */
+/** Generated free-page contract; do not edit. OpenAPI SHA-256: e7c56ec25ab0b80e71b31ba3b9f582ee162d8d0b00f64a1719d5e2737967f695 */
 export interface paths {
     "/api/v1/analytics/page-documents/pages": {
         parameters: {
@@ -538,6 +538,11 @@ export interface components {
              * @enum {string}
              */
             binding_state: "UNBOUND_SAMPLE" | "BOUND_VERIFIED" | "BOUND_STALE";
+            /**
+             * Origin Content Hash
+             * @default null
+             */
+            origin_content_hash: string | null;
             /** Origin File Id */
             origin_file_id?: string;
             /** Origin Path */
@@ -561,6 +566,11 @@ export interface components {
         /** PageDraft */
         PageDraft: {
             binding_manifest?: components["schemas"]["PageBindingManifest"];
+            /**
+             * Origin Content Hash
+             * @default null
+             */
+            origin_content_hash: string | null;
             /** Origin File Id */
             origin_file_id?: string;
             /** Origin Path */

@@ -22,6 +22,7 @@ export const sample: Doc = {
   title: '未绑定经营复盘夹具',
   version: 1,
   binding_state: 'UNBOUND_SAMPLE',
+  origin_content_hash: null,
   package: pack,
   binding_manifest: manifest,
 };

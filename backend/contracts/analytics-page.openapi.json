@@ -794,6 +794,21 @@
             "pattern": "^[A-Za-z0-9_.:-]{1,128}$",
             "type": "string",
             "title": "Origin File Id"
+          },
+          "origin_content_hash": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 64,
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Origin Content Hash"
           }
         },
         "required": [
@@ -846,6 +861,21 @@
             "pattern": "^[A-Za-z0-9_.:-]{1,128}$",
             "type": "string",
             "title": "Origin File Id"
+          },
+          "origin_content_hash": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 64,
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Origin Content Hash"
           },
           "schema_version": {
             "const": "free-page/v1",
@@ -2164,5 +2194,5 @@
       }
     }
   },
-  "x-schema-sha256": "bcb2ffcb36648c5f4873eb84ee63d452d5b744a3d44bb5c7ca4da1f34e162d75"
+  "x-schema-sha256": "e7c56ec25ab0b80e71b31ba3b9f582ee162d8d0b00f64a1719d5e2737967f695"
 }
