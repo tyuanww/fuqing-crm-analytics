@@ -19,6 +19,7 @@ const { JSDOM } = createRequire(join(upstream, 'node_modules/jsdom/package.json'
 
 const panelSource = await readFile(join(here, 'cockpit-main-panel.tsx'), 'utf8');
 const indexSource = await readFile(join(here, 'index.tsx'), 'utf8');
+const workspaceSource = await readFile(join(here, 'cockpit-workspace.tsx'), 'utf8');
 
 test('cockpit main source mounts BoardSpecCanvas and keeps 返回对话', () => {
   assert.match(panelSource, /from '\.\/board-spec-canvas\.tsx'/);
@@ -85,9 +86,15 @@ test('cockpit main source mounts BoardSpecCanvas and keeps 返回对话', () => 
   assert.match(indexSource, /readWorkspaceFile/);
   assert.match(indexSource, /captureVisibleDeliverySource/);
   assert.match(indexSource, /delivery\.readFile/);
+  assert.match(indexSource, /delivery\.startPolling\(\{ sessionId: meta\.sessionId \}\)/);
   assert.match(indexSource, /isSafeWorkspaceRelPath/);
   assert.match(indexSource, /sidebarRight\?\.openResource/);
   assert.match(indexSource, /fileResourceAddress\(product\.sessionId, product\.path\)/);
+  assert.match(workspaceSource, /convertWorkspaceHtml/);
+  assert.match(workspaceSource, /previewArtifactPackage/);
+  assert.match(workspaceSource, /artifact-inbox-time/);
+  assert.match(workspaceSource, /在 DSH 中查看/);
+  assert.match(workspaceSource, /确认保存/);
   assert.match(panelSource, /listWorkspaceFiles=\{props\.listWorkspaceFiles\}/);
   assert.match(panelSource, /readWorkspaceFile=\{props\.readWorkspaceFile\}/);
   assert.match(indexSource, /name: 'conversation.composer.dock'/);

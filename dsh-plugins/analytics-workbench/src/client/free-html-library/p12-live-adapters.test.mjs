@@ -178,6 +178,34 @@ test('candidate dismissal leaves the formal page library unchanged', async () =>
   assert.equal(adapters.assets.list().length, 0);
 });
 
+test('native workspace receipt adopts a converted package without creating a second inbox receipt', async () => {
+  let confirmed = 0;
+  const artifactInbox = {
+    async confirm(id, pageId) { confirmed += 1; return { artifact_id: id, page_id: pageId, status: 'SAVED' }; },
+    async dismiss() { return { status: 'DISMISSED' }; },
+  };
+  const { store, adapters } = liveStore({ artifactInbox });
+  const receipt = {
+    artifact_id: 'artifact_native_1', source: 'workspace_file', session_id: 'source_session',
+    path: 'deliverables/page.html', title: '原生页面', content_hash: 'a'.repeat(64), status: 'RECEIVED',
+  };
+  await store.previewArtifactPackage({ html: '<h1 data-shine-node="n_title">原生页面</h1>', css: '', js: '', resources: [], node_map: [{ node_id: 'n_title', kind: 'static_element', selector: "[data-shine-node='n_title']" }] }, receipt);
+  assert.equal(store.getSnapshot().current, null);
+  assert.equal(store.getSnapshot().importCandidate.artifact_id, receipt.artifact_id);
+  await store.confirmImport();
+  assert.equal(confirmed, 1);
+  assert.equal(store.getSnapshot().current.origin_path, receipt.path);
+  assert.equal(store.getSnapshot().current.origin_content_hash, receipt.content_hash);
+  assert.equal(store.getSnapshot().importCandidate, null);
+  assert.equal(adapters.assets.list().length, 1);
+  store.enterEdit();
+  store.selectLocatable({ kind: 'static_element', node_id: 'n_title' });
+  await store.previewPatch('局部修改');
+  await store.confirmPatch();
+  assert.equal(store.getSnapshot().current.version, 2);
+  assert.match(store.getSnapshot().current.package.html, /局部修改/);
+});
+
 test('live generate without nativeGenerate keeps the prompt', async () => {
   const store = createFreeHtmlLibraryStore({ adapters: createLivePageAdapters(), viewportWidth: 1440 });
   store.setPrompt('保留我');

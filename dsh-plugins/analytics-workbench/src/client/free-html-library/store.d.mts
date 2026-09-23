@@ -18,7 +18,7 @@ export type FreeHtmlLibraryState = {
   contextPanel: 'ai' | 'source' | 'history' | null;
   overlay: 'selection' | 'patch' | null;
   preview: PreviewRecord | null;
-  importCandidate: { preview_id: string; artifact_id?: string; source?: string; title?: string; page_id?: string | null; package: FreeHtmlPage['package']; origin: { session_id: string | null; path: string; file_id?: string }; quarantined?: string[] } | null;
+  importCandidate: { preview_id: string; artifact_id?: string; artifact_receipt_id?: string; source?: string; title?: string; page_id?: string | null; content_hash?: string; package: FreeHtmlPage['package']; origin: { session_id: string | null; path: string; file_id?: string }; quarantined?: string[] } | null;
   textDraft: { value: string; original: string; changed: boolean } | null;
   textDrafts: Record<string, string>;
   draftReset: number;
@@ -58,9 +58,10 @@ export type FreeHtmlLibraryStore = {
   applyExample(text: string): void;
   generate(): Promise<void>;
   intakePackage(pkg: unknown, meta?: { sessionId?: string; session_id?: string; title?: string; requestId?: string; request_id?: string; callId?: string; call_id?: string }): Promise<unknown>;
+  previewArtifactPackage(pkg: unknown, receipt: Record<string, unknown>): Promise<boolean | undefined>;
   openPage(pageId: string): Promise<boolean | undefined>;
   refreshPages(): Promise<void>;
-  previewImport(input: Parameters<typeof import('./html-import.mjs').convertWorkspaceHtml>[0] & { title?: string }): Promise<boolean | undefined>;
+  previewImport(input: Parameters<typeof import('./html-import.mjs').convertWorkspaceHtml>[0] & { title?: string; artifactReceiptId?: string; originContentHash?: string }): Promise<boolean | undefined>;
   confirmImport(): Promise<string | undefined>;
   setReplacementText(value: string, original?: string): void;
   discardTextDraft(): void;

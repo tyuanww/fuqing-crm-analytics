@@ -48,6 +48,7 @@ function hydrateSpec(spec, prev, now) {
     binding_manifest: spec.binding_manifest ?? { bindings: [], result_refs: [] },
     origin_path: spec.origin_path ?? prev?.origin_path,
     origin_file_id: spec.origin_file_id ?? prev?.origin_file_id,
+    origin_content_hash: spec.origin_content_hash ?? prev?.origin_content_hash,
     package: pkg,
     savedPackage: clone(pkg),
     dirty: false,
@@ -382,6 +383,7 @@ export function createLivePageAdapters({
         binding_manifest: draft.binding_manifest ?? { bindings: [], result_refs: [] },
       };
       if (typeof draft.origin_path === 'string' && draft.origin_path) body.origin_path = draft.origin_path;
+      if (typeof draft.origin_content_hash === 'string' && draft.origin_content_hash) body.origin_content_hash = draft.origin_content_hash;
       if (typeof draft.origin_file_id === 'string' && draft.origin_file_id) body.origin_file_id = draft.origin_file_id;
       return documentsRequest('POST', '/previews', { body });
     },

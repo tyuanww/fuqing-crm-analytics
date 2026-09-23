@@ -17,6 +17,7 @@ import type { CockpitFileClient, FileClientState } from './cockpit-file-client.m
 import { CockpitAIPanel, CockpitAIPreview } from './cockpit-ai-panel.tsx';
 import type { CockpitAIClient, AIState } from './cockpit-ai-client.mjs';
 import type { ArtifactInboxClient, ArtifactInboxState, ArtifactReceipt } from './artifact-inbox.mjs';
+import { convertWorkspaceHtml } from './free-html-library/html-import.mjs';
 import { useFloatingRail } from './cockpit-floating-rail.tsx';
 import { RailResize } from './cockpit-rail-controls.tsx';
 import { CockpitOfficeEditor } from './cockpit-office-editor.tsx';
@@ -36,6 +37,13 @@ function workspacePackage(text: string) {
   // Build a fragment under the trusted wrapper; untrusted meta/base cannot replace its CSP.
   parsed.querySelectorAll('meta,base').forEach(node => node.remove());
   return { html: [...parsed.head.children].map(node => node.outerHTML).join('') + parsed.body.innerHTML, css: '', js: '', resources: [] };
+}
+
+function formatArtifactTime(item: ArtifactReceipt) {
+  const raw = item.created_at_ms ?? item.created_at;
+  if (!Number.isFinite(raw)) return '时间未知';
+  const date = new Date(Number(raw) < 1_000_000_000_000 ? Number(raw) * 1000 : Number(raw));
+  return Number.isNaN(date.getTime()) ? '时间未知' : date.toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 }
 export function LibraryCockpitPanel({ library, goConversation, themeSource, initialSurface = 'board', pageStore, artifactInbox, delivery, leaveCoordinator,
   listWorkspaceFiles, openWorkspaceFile, readWorkspaceFile, fileClient, aiClient, extension }: {
@@ -301,18 +309,36 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
   const previewInboxArtifact = async (item: ArtifactReceipt) => {
     if (!pageStore || !artifactInbox) return;
     const full = item.package ? item : await artifactInbox.get(item.artifact_id);
-    if (!full?.package) { setNotice('这份候选没有可预览的页面源码，请刷新后重试。'); return; }
-    await pageStore.intakePackage(full.package, {
+    if (!full) { setNotice('这份候选已不存在，请刷新后重试。'); return; }
+    if (full.package) {
+      await pageStore.previewArtifactPackage(full.package, full);
+      return;
+    }
+    if (!full.path || !full.session_id || !delivery) { setNotice('这份原生产物缺少可读取的来源路径，请刷新后重试。'); return; }
+    const bytes = await delivery.readBytes(full.path, { sessionId: full.session_id });
+    const html = new TextDecoder().decode(bytes);
+    const converted = await convertWorkspaceHtml({
+      html,
+      path: full.path,
       sessionId: full.session_id,
-      requestId: full.request_id ?? undefined,
-      callId: full.call_id ?? undefined,
-      title: full.title,
+      readResource: async path => ({ bytes: await delivery.readBytes(path, { sessionId: full.session_id }) }),
     });
+    if (!converted.ok) {
+      const details = [...(converted.error.missing ?? []), ...(converted.error.unsupported ?? [])]
+        .map(row => row.path ?? row.url).filter(Boolean).slice(0, 4).join('、');
+      setNotice(`${converted.error.message}${details ? `：${details}` : ''}`);
+      return;
+    }
+    await pageStore.previewArtifactPackage(converted.package, full);
   };
   const dismissInboxArtifact = async (item: ArtifactReceipt) => {
     if (!artifactInbox) return;
     const result = await artifactInbox.dismiss(item.artifact_id);
     if (result.status !== 'DISMISSED') throw new Error('产物丢弃回执不完整，请重试。');
+  };
+  const openInboxArtifact = (item: ArtifactReceipt) => {
+    if (!openWorkspaceFile || !item.session_id || !item.path) { setNotice('这份产物没有可打开的 DSH 来源。'); return; }
+    openWorkspaceFile({ sessionId: item.session_id, path: item.path, title: item.title });
   };
   const addFiles = async (input: FileList | null) => {
     if (!input || !fileClient) return;
@@ -425,8 +451,13 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
           {pendingArtifacts.length ? <section className="cockpit-inbox" data-testid="artifact-inbox-list" aria-label="产物收件箱">
             <div className="cockpit-group"><span>产物收件箱</span><span>{pendingArtifacts.length}</span></div>
             <ul>{pendingArtifacts.map(item => <li key={item.artifact_id} className="cockpit-inbox-row">
-              <div><strong>{item.title}</strong><small>{item.source} · {item.session_id} · {item.status}</small></div>
-              <div className="cockpit-inbox-actions"><button disabled={busy || uncertain || !pageStore} onClick={() => guard(() => previewInboxArtifact(item))}>预览</button><button disabled={busy || uncertain} onClick={() => guard(() => dismissInboxArtifact(item))}>丢弃</button></div>
+              <div><strong>{item.title}</strong><small>{item.source} · {item.session_id} · {item.status} · <time data-testid="artifact-inbox-time">{formatArtifactTime(item)}</time></small></div>
+              <div className="cockpit-inbox-actions">
+                {page.importCandidate?.artifact_id === item.artifact_id ? <button className="cockpit-primary" disabled={busy || uncertain || !pageStore} onClick={() => guard(() => { void pageStore?.confirmImport(); })}>确认保存</button>
+                  : <button disabled={busy || uncertain || !pageStore} onClick={() => guard(() => previewInboxArtifact(item))}>预览</button>}
+                {item.path && item.session_id ? <button disabled={busy || uncertain || !openWorkspaceFile} onClick={() => guard(() => openInboxArtifact(item))}>在 DSH 中查看</button> : null}
+                <button disabled={busy || uncertain} onClick={() => guard(() => dismissInboxArtifact(item))}>丢弃</button>
+              </div>
             </li>)}</ul>
           </section> : null}
           <div className="sm-library-products" data-testid="library-products">

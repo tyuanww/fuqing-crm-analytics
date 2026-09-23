@@ -880,6 +880,10 @@ export function apply(ctx: Context): void {
       name: 'tool.call.toolview', key: PAGE_GENERATE_TOOL_NAME,
       inject: () => ({ pagePackageWaiter, openCockpit: openCockpitPanel, openDsh: () => { try { ctx.layout.openRightbar(true, false); } catch { /* host without rightbar */ } }, onNativePackage: async (pkg: { html: string; css?: string; js?: string; resources?: unknown[]; node_map?: unknown[] }, meta: { sessionId: string; requestId?: string; callId?: string }) => {
         await pageStore?.intakePackage(pkg, { sessionId: meta.sessionId, requestId: meta.requestId, callId: meta.callId });
+        // A package receipt is also a generation-complete signal. In hosts
+        // without delivery events, give the native workspace scan one bounded
+        // opportunity immediately instead of waiting for cockpit mount.
+        delivery.startPolling({ sessionId: meta.sessionId });
       } }),
     }, PagePackageToolCard));
   }
