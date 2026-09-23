@@ -16,7 +16,7 @@ import { cockpitCss } from './cockpit-workspace-style.ts';
 import type { CockpitFileClient, FileClientState } from './cockpit-file-client.mjs';
 import { CockpitAIPanel, CockpitAIPreview } from './cockpit-ai-panel.tsx';
 import type { CockpitAIClient, AIState } from './cockpit-ai-client.mjs';
-import type { ArtifactInboxClient, ArtifactReceipt } from './artifact-inbox.mjs';
+import type { ArtifactInboxClient, ArtifactInboxState, ArtifactReceipt } from './artifact-inbox.mjs';
 import { useFloatingRail } from './cockpit-floating-rail.tsx';
 import { RailResize } from './cockpit-rail-controls.tsx';
 import { CockpitOfficeEditor } from './cockpit-office-editor.tsx';
@@ -27,7 +27,7 @@ const EMPTY_PAGE = { pages: [], current: null, mode: 'browse', busy: false, prev
 const EMPTY_DELIVERY: DeliverySnapshot = { status: 'no-session', sessionId: null, files: [], truncated: false, error: null, epoch: 0, refreshMode: 'manual' };
 const EMPTY_FILES: FileClientState = { files: [], status: 'idle', message: '', busy: false, editor: null, dirty: false, confirmationUncertain: false };
 const EMPTY_AI: AIState = { jobs: [], active: null, busy: false, confirmationUncertain: false, message: '', comparison: null, viewer: null, html: null };
-const EMPTY_INBOX = { items: [], status: 'unavailable', message: '', busy: false, updatedAt: 0 } as const;
+const EMPTY_INBOX: ArtifactInboxState = { items: [], status: 'unavailable', message: '', busy: false, updatedAt: 0 };
 const groups = [{ key: 'html', name: 'HTML 页面', icon: '</>' }, { key: 'board', name: '数据看板', icon: '▦' },
   { key: 'spreadsheet', name: '表格与 CSV', icon: '▤' }, { key: 'document', name: 'Word 文档', icon: 'W' }, { key: 'pdf', name: 'PDF 文档', icon: 'PDF' }];
 
