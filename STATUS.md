@@ -1,13 +1,13 @@
 # 项目状态 (Project Status)
-> 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。公开 main 基线 **39f7b5e**。本分支 VERSION **0.16.1.0**。目录和端口见 [维护地图](docs/operating/maintainer-map.md)。现役 6677 仍是 0.16.0.2，重载前不换钉。产品仍 PARTIAL。
+> 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。公开 main 基线 **bcc0ced9**。本分支 VERSION **0.17.0.0**。目录和端口见 [维护地图](docs/operating/maintainer-map.md)。现役 6677 仍是 0.16.0.2，重载前不换钉。产品仍 PARTIAL。
 
-## 当前快照（2026-09-23，DSH 钉 0.1.7-alpha.2 / 0.16.1.0）
+## 当前快照（2026-09-23，DSH 钉 0.1.7-alpha.2 / 0.17.0.0）
 
 | 项 | 状态 |
 |---|---|
-| 已合代码基线 | **f77c310（公开仓库 #51）**，产品提交是 #50 / 0.16.0.2，前序 #49。旧私有历史未合入。 |
-| 本轮交付 | 对话用 `free_html_page_generate` 交 HTML。工作台放入可编辑驾驶舱，并在对话右侧产物栏打开。步骤见 [操作说明](docs/operating/cockpit-native-html.md)。选区压缩后可点选。GSV 带首购新老客和仓库最后支付日。 |
-| VERSION / 产品 | 本分支 **0.16.1.0**。合入前公开 main 仍是 **0.16.0.2**。产品 **PARTIAL**，原全量 Goal **PAUSED**。 |
+| 已合代码基线 | **bcc0ced9（公开仓库 #53）**，产品提交是 #50 / 0.16.0.2，前序 #49。旧私有历史未合入。 |
+| 本轮交付 | 驾驶舱新增「产物收件箱」：生成的 HTML、原生呈现和工作区文件先登记为候选产物，用户确认后才关联正式页面；按 request/session/path 加内容哈希去重。收件箱界面入口与 `index.tsx` 接线未包含在本轮。 |
+| VERSION / 产品 | 本分支 **0.17.0.0**。合入前公开 main 仍是 **0.16.1.0**。产品 **PARTIAL**，原全量 Goal **PAUSED**。 |
 | DSH 基座 | 钉已改为 **0.1.7-alpha.2（00102833）**，现役 6677 仍在 **0.1.6-alpha.2（ddefc45f）**。不改上游源码。 |
 | 现役 | 6677 加载 `crm-public-release` 的 0.16.0.2 插件；控制登记与 runtime 留在原仓。CRM 18093 仍为 `crm-assets-public` 的 archive_dashboard，本轮未重启。 |
 | 原始数据 | 约131GB归档DuckDB不进Git；测试使用合成夹具与独立私有 SQLite。 |

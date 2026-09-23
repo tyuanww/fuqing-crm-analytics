@@ -1,3 +1,21 @@
+## [0.17.0.0] - 2026-09-23
+
+### Added
+
+- 驾驶舱新增「产物收件箱」：生成的 HTML、原生呈现和工作区文件都先作为候选产物登记，用户确认后才关联为正式页面。按 request/session/path 加内容哈希去重，重放同一条回执不会产生第二份候选。
+- 工作区 HTML 产物按字节哈希登记；缺少哈希的登记会被拒绝，不用路径退回哈希。
+
+### Changed
+
+- `PageDraft` 恢复 `origin_content_hash`。产物关联正式页面时用它校验来源内容仍未变化，内容已变的页面会被拒绝关联。
+- 页面包的 `presentation` 字段随包一并回传，元数据列表仍只返回摘要。
+
+### Scope
+
+- 不改 DSH 上游源码。
+- 单元素局部编辑的强制沿用既有的 `PageEditContextStore` 路径（`static_element` / `dynamic_region`、`BOUND_NODE`、`selected_scope` 一致性），未新增第二套 scope 守卫。
+- 收件箱界面入口与 `index.tsx` 的登记接线尚未包含在本次变更内。
+
 ## [0.16.1.0] - 2026-09-23
 
 ### Changed
