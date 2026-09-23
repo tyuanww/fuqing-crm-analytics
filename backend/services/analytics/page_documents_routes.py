@@ -27,6 +27,8 @@ from backend.services.analytics.cockpit_ai import CockpitAIStore
 from backend.services.analytics.cockpit_ai_routes import cockpit_ai_router
 from backend.services.analytics.page_edit_context import PageEditContextStore
 from backend.services.analytics.page_edit_context_routes import page_edit_context_router
+from backend.services.analytics.artifact_inbox import ArtifactInboxStore
+from backend.services.analytics.artifact_inbox_routes import artifact_inbox_router
 
 PREFIX = "/api/v1/analytics/page-documents"
 
@@ -152,6 +154,8 @@ def create_page_app(
     if store is not None:
         app.include_router(page_edit_context_router(
             PageEditContextStore(page_state_dir, store, clock=store.clock), principal))
+        app.include_router(artifact_inbox_router(
+            ArtifactInboxStore(page_state_dir / "artifacts"), principal, page_store=store))
     if page_state_dir is not None:
         files = CockpitFileStore(page_state_dir / "files")
         app.include_router(cockpit_files_router(files, principal, office, office_principal))
@@ -168,6 +172,8 @@ def create_page_app(
         rid = getattr(request.state, "analytics_request_id", uuid4().hex)
         if request.url.path.startswith("/api/v1/analytics/cockpit-ai"):
             return _error(AnalyticsError(422, "INVALID_AI_REQUEST", "AI 修改请求不符合接口合同。"), rid)
+        if request.url.path.startswith("/api/v1/analytics/cockpit-artifacts"):
+            return _error(AnalyticsError(422, "INVALID_ARTIFACT", "产物回执不符合接口合同。"), rid)
         if is_package_too_large(error):
             return _error(AnalyticsError(413, "PACKAGE_TOO_LARGE", "页面源码包超过大小上限。"), rid)
         return _error(AnalyticsError(422, "INVALID_PAGE", "页面源码包、绑定或字段不符合合同。"), rid)

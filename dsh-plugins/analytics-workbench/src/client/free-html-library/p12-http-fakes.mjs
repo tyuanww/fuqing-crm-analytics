@@ -49,6 +49,7 @@ function listItem(spec) {
     binding_state: spec.binding_state,
   };
   if (spec.origin_path) item.origin_path = spec.origin_path;
+  if (spec.origin_content_hash) item.origin_content_hash = spec.origin_content_hash;
   return item;
 }
 
@@ -68,6 +69,7 @@ export function dispatchDocuments(state, { method, path, body, idempotencyKey, a
       package: clone(body.package),
       binding_manifest: clone(body.binding_manifest || { bindings: [], result_refs: [] }),
       ...(body.origin_path ? { origin_path: body.origin_path } : {}),
+      ...(body.origin_content_hash ? { origin_content_hash: body.origin_content_hash } : {}),
     };
     state.previews.set(previewId, {
       preview_id: previewId, operation: 'GENERATE', status: 'PENDING', page_id: pageId,

@@ -153,6 +153,45 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
     emit({ pages: bound.assets.list() });
   }
 
+  function candidateFromReceipt(receipt, pkg, { sessionId, title, requestId, callId } = {}) {
+    if (!receipt?.artifact_id) throw new Error('产物收件箱没有返回有效候选');
+    return {
+      artifact_id: receipt.artifact_id,
+      preview_id: `artifact:${receipt.artifact_id}`,
+      source: receipt.source || 'page_package',
+      title: title || receipt.title || '未命名页面',
+      package: clone(pkg),
+      content_hash: receipt.content_hash || undefined,
+      receipt,
+      request_id: requestId || receipt.request_id || null,
+      call_id: callId || receipt.call_id || null,
+      origin: { session_id: sessionId || receipt.session_id || 'native_session_fixture', path: receipt.path || 'generated.html' },
+      page_id: null,
+    };
+  }
+
+  function setArtifactCandidate(pkg, receipt, { sessionId, title, requestId, callId } = {}) {
+    const candidate = candidateFromReceipt(receipt, pkg, { sessionId, title, requestId, callId });
+    emit({ view: 'workspace', importCandidate: candidate, lastIdempotencyKey: bound.nextId('artifact-confirm'), mode: 'browse', selection: null, overlay: null,
+      contextPanel: null, preview: null, liveStatus: '页面已登记到产物收件箱，确认后才保存',
+      message: '页面已生成；尚未写入正式页面库' });
+    return candidate;
+  }
+
+  async function intakeGeneratedPackage(pkg, { sessionId, title, requestId, callId } = {}) {
+    if (!bound.artifactInbox?.intake) throw new Error('产物收件箱尚未连接');
+    const receipt = await bound.artifactInbox.intake({
+      source: 'page_package',
+      session_id: sessionId || 'native_session_fixture',
+      ...(requestId ? { request_id: requestId } : {}),
+      ...(callId ? { call_id: callId } : {}),
+      title: title || '未命名页面',
+      package: clone(pkg),
+    });
+    setArtifactCandidate(pkg, receipt, { sessionId, title, requestId, callId });
+    return receipt;
+  }
+
   async function perform(work) {
     if (state.busy || lifetime.signal.aborted) return;
     emit({ busy: true, message: '' });
@@ -238,7 +277,9 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
         let submitted;
         try {
           submitted = await Promise.resolve(
-            bound.nativeChat.submitGeneratePrompt(prompt, { designGuide: state.designGuide, skill: state.skill }),
+            bound.nativeChat.submitGeneratePrompt(prompt, {
+              designGuide: state.designGuide, skill: state.skill, requestId: `page-gen-${crypto.randomUUID()}`,
+            }),
           );
         } catch (error) {
           emit({ prompt, liveStatus: '生成失败，已保留输入', message: error.message });
@@ -252,6 +293,14 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
             error.code = 'NATIVE_GENERATE_UNAVAILABLE';
             emit({ prompt, liveStatus: '生成失败，已保留输入', message: error.message });
             throw error;
+          }
+          if (bound.artifactInbox?.intake) {
+            await intakeGeneratedPackage(pkg, {
+              sessionId: submitted?.session_id || 'native_session_fixture',
+              requestId: submitted?.request_id,
+              title,
+            });
+            return;
           }
           if (typeof bound.documents?.generateAndConfirm !== 'function') {
             const error = new Error('页面保存库尚未配置隔离 HTTP');
@@ -305,6 +354,18 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
         });
       });
     },
+    async intakePackage(pkg, meta = {}) {
+      return perform(async () => {
+        const normalized = asAgentPackage(pkg);
+        if (!normalized) throw new Error('原生 Agent 未返回有效页面源码包');
+        return intakeGeneratedPackage(normalized, {
+          sessionId: meta.sessionId || meta.session_id || 'native_session_fixture',
+          title: meta.title || '本场对话驾驶舱',
+          requestId: meta.requestId || meta.request_id,
+          callId: meta.callId || meta.call_id,
+        });
+      });
+    },
     async refreshPages() {
       await perform(async () => {
         if (bound.documents?.pullList) {
@@ -343,7 +404,24 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
             .map(row => row.path ?? row.url).filter(Boolean).slice(0, 4).join('、');
           throw new Error(`${got.error.message}${details ? `：${details}` : ''}`);
         }
-        emit({ importCandidate: got, lastIdempotencyKey: bound.nextId('import'), liveStatus: '副本待确认，尚未保存' });
+        const candidate = input.artifactReceiptId ? { ...got, artifact_receipt_id: input.artifactReceiptId, content_hash: input.originContentHash || undefined } : got;
+        emit({ importCandidate: candidate, lastIdempotencyKey: bound.nextId('import'), liveStatus: '副本待确认，尚未保存' });
+        return true;
+      });
+    },
+    async previewArtifactPackage(pkg, receipt) {
+      return perform(async () => {
+        assertEditable();
+        if (!bound.artifactInbox?.confirm || !receipt?.artifact_id) throw new Error('产物收件箱候选无效');
+        if (hasUnsavedChanges()) throw new Error('请先处理当前预览');
+        const normalized = asAgentPackage(pkg);
+        if (!normalized) throw new Error('页面源码包无效，无法预览');
+        setArtifactCandidate(normalized, receipt, {
+          sessionId: receipt.session_id,
+          title: receipt.title,
+          requestId: receipt.request_id,
+          callId: receipt.call_id,
+        });
         return true;
       });
     },
@@ -352,6 +430,32 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
         if (!state.importCandidate) return;
         const wasUncertain = state.confirmationUncertain;
         emit({ confirmationUncertain: true });
+        if (state.importCandidate.artifact_id) {
+          const candidate = state.importCandidate;
+          let pageId = candidate.page_id || null;
+          let saved = null;
+          if (!pageId) {
+            if (typeof bound.documents?.generateAndConfirm !== 'function') throw new Error('页面保存库尚未配置隔离 HTTP');
+            saved = await bound.documents.generateAndConfirm({
+              title: candidate.title || '未命名页面',
+              session_id: candidate.origin.session_id,
+              package: clone(candidate.package),
+              binding_manifest: { bindings: [], result_refs: [] },
+              ...(candidate.origin.path && candidate.origin.path !== 'generated.html' ? { origin_path: candidate.origin.path } : {}),
+              ...(candidate.content_hash ? { origin_content_hash: candidate.content_hash } : {}),
+              idempotency_key: state.lastIdempotencyKey || bound.nextId('artifact-confirm'),
+            });
+            pageId = saved?.page?.page_id || saved?.spec?.page_id || null;
+            if (!saved?.ok || !pageId) throw new Error('页面未能写入保存库');
+            emit({ importCandidate: { ...candidate, page_id: pageId }, confirmationUncertain: true });
+          }
+          const receipt = await bound.artifactInbox.confirm(candidate.artifact_id, pageId);
+          if (!receipt || receipt.status !== 'SAVED') throw new Error('产物确认回执不完整，请重试核对');
+          const spec = saved?.spec || saved?.page || bound.assets.get(pageId);
+          if (!spec?.page_id) throw new Error('页面保存回执不完整，请重试核对');
+          acceptSpec(spec);
+          return pageId;
+        }
         const got = await importer.confirm(state.importCandidate.preview_id, state.lastIdempotencyKey);
         if (!got.ok) {
           emit({ confirmationUncertain: wasUncertain || got.error.recoverable !== false && (!got.error.status || got.error.status >= 500) });
@@ -361,6 +465,10 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
         if (got.spec.session_id !== state.importCandidate.origin.session_id || got.spec.origin_path !== state.importCandidate.origin.path
           || (got.spec.origin_file_id ?? null) !== (state.importCandidate.origin.file_id ?? null)
           || got.spec.version !== 1 || (expected && got.spec.page_id !== expected.page_id)) throw new Error('入库回执不匹配，请用同一请求重试核对');
+        if (state.importCandidate.artifact_receipt_id) {
+          const receipt = await bound.artifactInbox?.confirm(state.importCandidate.artifact_receipt_id, got.page_id);
+          if (!receipt || receipt.status !== 'SAVED') throw new Error('产物确认回执不完整，请重试核对');
+        }
         acceptSpec(got.spec);
         return got.page_id;
       });
@@ -837,8 +945,17 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
       await perform(async () => {
         if (state.confirmationUncertain) throw new Error('保存结果待核对，暂不能取消或切换');
         if (state.importCandidate) {
-          const got = await importer.cancel(state.importCandidate.preview_id);
-          if (!got.ok) throw new Error(got.error.message);
+          if (state.importCandidate.artifact_id) {
+            const got = await bound.artifactInbox?.dismiss(state.importCandidate.artifact_id);
+            if (!got || got.status !== 'DISMISSED') throw new Error('产物丢弃回执不完整，请重试');
+          } else {
+            const got = await importer.cancel(state.importCandidate.preview_id);
+            if (!got.ok) throw new Error(got.error.message);
+            if (state.importCandidate.artifact_receipt_id) {
+              const receipt = await bound.artifactInbox?.dismiss(state.importCandidate.artifact_receipt_id);
+              if (!receipt || receipt.status !== 'DISMISSED') throw new Error('产物丢弃回执不完整，请重试');
+            }
+          }
         }
         if (state.preview?.operation === 'PRESENTATION') {
           emit({

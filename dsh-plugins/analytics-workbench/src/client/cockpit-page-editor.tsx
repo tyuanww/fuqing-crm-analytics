@@ -15,6 +15,22 @@ import type { components } from '../free-page/contract/page-contract.generated.d
 
 const NO_NODES: TextNode[] = [];
 
+const STRUCTURED_STYLE_FIELDS = [
+  { key: 'color', label: '文字颜色', placeholder: '#805D9D' },
+  { key: 'font-size', label: '字号', placeholder: '16px' },
+  { key: 'margin', label: '外边距', placeholder: '8px 0' },
+  { key: 'padding', label: '内边距', placeholder: '12px' },
+  { key: 'border', label: '边框', placeholder: '1px solid #D3C3E8' },
+  { key: 'background-color', label: '背景色', placeholder: '#09050D' },
+] as const;
+
+function updateStructuredStyle(styleDraft: string, key: string, value: string) {
+  const next = parseStyleDeclaration(styleDraft);
+  if (value.trim()) next[key] = value.trim();
+  else delete next[key];
+  return Object.entries(next).map(([name, item]) => `${name}: ${item}`).join('; ');
+}
+
 function completePagePackage<T extends { html: string; css: string; js: string; resources: unknown[]; node_map: { node_id: string; kind: string; selector: string }[] }>(
   base: T,
   next: { html: string; css?: string; js?: string; resources?: unknown[]; node_map?: unknown[] },
@@ -271,6 +287,15 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, aiMode = 
           {editableFormal && !aiOpen ? <div data-testid="html-node-identity">
             <p className="cockpit-muted" data-testid="html-capability">{formatCapability(editableFormal)}</p>
             {editableFormal.capabilities?.direct_text ? <button type="button" data-testid="html-preview-formal-text" disabled={locked || value === original} onClick={applyFormalText}>按正式合同预览文字</button> : null}
+            {editableFormal.capabilities?.style ? <div className="cockpit-structured-styles" data-testid="html-structured-styles">
+              <p className="cockpit-muted">结构化样式</p>
+              {STRUCTURED_STYLE_FIELDS.map(field => <label className="cockpit-field" key={field.key}>{field.label}
+                <input data-testid={`html-style-${field.key}`} disabled={locked}
+                  value={styles[field.key] ?? ''} placeholder={field.placeholder}
+                  onChange={event => { setStyleFocus('style'); setStyleDraft(updateStructuredStyle(styleDraft, field.key, event.target.value)); }} />
+              </label>)}
+              <p className="cockpit-muted">这些控件只生成当前稳定节点的局部样式补丁；动态、绑定和无稳定映射区域保持只读。</p>
+            </div> : null}
             <label className="cockpit-field">样式声明<textarea data-testid="html-style-declaration" disabled={locked} value={styleDraft} rows={3}
               onChange={event => { setStyleFocus('style'); setStyleDraft(event.target.value); }} placeholder="color: #805D9D" /></label>
             <label className="cockpit-field">属性名<input data-testid="html-attr-name" disabled={locked} value={attrName}

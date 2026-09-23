@@ -41,6 +41,7 @@ export type CockpitMainPanelProps = PropsRuntime<'main'> & Partial<PropsRenderSl
   aiClient?: import('./cockpit-ai-client.mjs').CockpitAIClient;
   fileClient?: import('./cockpit-file-client.mjs').CockpitFileClient;
   pageStore?: ReturnType<typeof import('./free-html-library/store.mjs').createFreeHtmlLibraryStore>;
+  artifactInbox?: import('./artifact-inbox.mjs').ArtifactInboxClient;
   listWorkspaceFiles?: () => Promise<Array<Record<string, unknown>>>;
   openWorkspaceFile?: (product: Record<string, unknown>) => void;
   readWorkspaceFile?: (product: Record<string, unknown>) => Promise<string | null>;
@@ -99,7 +100,7 @@ export function CockpitPanelIcon({ size, active }: PropsRuntime<'sidebar.panelli
 }
 
 export function CockpitMainPanel(props: CockpitMainPanelProps) {
-  if (props.library) return <LibraryCockpitPanel library={props.library} goConversation={props.goConversation} themeSource={props.themeSource} initialSurface="pages" pageStore={props.pageStore} delivery={props.delivery} leaveCoordinator={props.leaveCoordinator} fileClient={props.fileClient} aiClient={props.aiClient}
+  if (props.library) return <LibraryCockpitPanel library={props.library} goConversation={props.goConversation} themeSource={props.themeSource} initialSurface="pages" pageStore={props.pageStore} artifactInbox={props.artifactInbox} delivery={props.delivery} leaveCoordinator={props.leaveCoordinator} fileClient={props.fileClient} aiClient={props.aiClient}
     listWorkspaceFiles={props.listWorkspaceFiles} openWorkspaceFile={props.openWorkspaceFile} readWorkspaceFile={props.readWorkspaceFile}
     extension={props.renderSlot?.('cockpit.crm', {})} />;
   return <LegacyCockpitMainPanel {...props} />;

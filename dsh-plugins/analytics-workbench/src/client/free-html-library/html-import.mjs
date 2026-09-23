@@ -329,6 +329,7 @@ export function createHtmlImporter({ documents } = {}) {
           package: converted.package,
           binding_manifest: converted.binding_manifest,
           origin_path: input.path,
+          ...(input.originContentHash ? { origin_content_hash: input.originContentHash } : {}),
           ...(input.artifactId ? { origin_file_id: input.artifactId } : {}),
         });
         if (!made.ok) return fail(made.reason || 'http_not_configured', '无法创建入库候选');

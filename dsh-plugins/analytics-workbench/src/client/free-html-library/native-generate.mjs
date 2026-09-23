@@ -103,24 +103,30 @@ export function createPagePackageWaiter() {
  * then awaits the delivery-tool result. No fallback to sample packages.
  */
 export function createNativePageGenerate({ submitPrompt, waiter } = {}) {
+  const withReceiptMeta = (pkg, extras = {}, requestId = extras?.requestId) => ({
+    ...pkg,
+    ...(typeof extras?.sessionId === 'string' && extras.sessionId ? { __session_id: extras.sessionId } : {}),
+    ...(typeof requestId === 'string' && requestId ? { __request_id: requestId } : {}),
+  });
   return async function nativeGenerate(prompt, extras = {}) {
     const injected = extractPagePackage(extras?.package);
     if (injected) {
       if (typeof submitPrompt === 'function') await submitPrompt(prompt, extras);
-      return injected;
+      return withReceiptMeta(injected, extras);
     }
     if (waiter) {
-      const requestId = `page-gen-${crypto.randomUUID()}`;
+      const requestId = typeof extras?.requestId === 'string' && extras.requestId
+        ? extras.requestId : `page-gen-${crypto.randomUUID()}`;
       if (typeof submitPrompt !== 'function') throw nativeGenerateUnavailable();
       await submitPrompt(prompt, { ...extras, requestId });
       const delivered = await waiter.wait(requestId, extras?.signal, extras?.timeoutMs);
       if (!delivered) throw nativeGenerateUnavailable();
-      return delivered;
+      return withReceiptMeta(delivered, extras, requestId);
     }
     if (typeof submitPrompt !== 'function') throw nativeGenerateUnavailable();
     const reply = await submitPrompt(prompt, extras);
     const pkg = extractPagePackage(reply);
     if (!pkg) throw nativeGenerateUnavailable();
-    return pkg;
+    return withReceiptMeta(pkg, extras);
   };
 }

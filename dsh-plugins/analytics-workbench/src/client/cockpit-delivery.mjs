@@ -9,6 +9,16 @@ import {
   workspaceRelFromEventPath,
 } from './cockpit-products.mjs';
 import { createNavigationEpoch, isSupersededRead } from './navigation/navigation-epoch.mjs';
+import { digestBytes } from './artifact-inbox.mjs';
+
+function safeHostValue(host, name) {
+  try { return host?.[name]; } catch { return undefined; }
+}
+
+function safeHostMethod(host, name) {
+  const method = safeHostValue(host, name);
+  return typeof method === 'function' ? method : null;
+}
 
 export function captureDeliverySessionSource(list, compositionSessionId) {
   const sessionId = resolvePageGenerateSession(list, compositionSessionId);
@@ -25,17 +35,18 @@ export function inspectDeliveryHostCapabilities(host) {
   try { remote = host?.remote; } catch { remote = undefined; }
   try { workspaceChanges = host?.workspaceChanges; } catch { workspaceChanges = undefined; }
   try { uiConversation = host?.uiConversation; } catch { uiConversation = undefined; }
-  const workspaceFiles = remote?.workspaceFiles;
-  const canSubscribeWorkspaceChanges = typeof host?.subscribeWorkspaceChanges === 'function';
-  const canSubscribePresented = typeof host?.subscribePresented === 'function';
+  const workspaceFiles = safeHostValue(remote, 'workspaceFiles');
+  const uiEvents = safeHostValue(uiConversation, 'events');
+  const canSubscribeWorkspaceChanges = Boolean(safeHostMethod(host, 'subscribeWorkspaceChanges'));
+  const canSubscribePresented = Boolean(safeHostMethod(host, 'subscribePresented'));
   return {
-    canListWorkspace: typeof workspaceFiles?.list === 'function',
-    canReadWorkspace: typeof workspaceFiles?.read === 'function',
+    canListWorkspace: Boolean(safeHostMethod(workspaceFiles, 'list')),
+    canReadWorkspace: Boolean(safeHostMethod(workspaceFiles, 'read')),
     canSubscribeWorkspaceChanges,
     canSubscribePresented,
-    hasWorkspaceChangesService: typeof workspaceChanges?.summary === 'function',
-    hasUiConversation: typeof uiConversation?.events?.register === 'function',
-    refreshMode: canSubscribeWorkspaceChanges ? 'event+manual' : 'manual',
+    hasWorkspaceChangesService: Boolean(safeHostMethod(workspaceChanges, 'summary')),
+    hasUiConversation: Boolean(safeHostMethod(uiEvents, 'register')),
+    refreshMode: canSubscribeWorkspaceChanges || canSubscribePresented ? 'event+manual' : 'manual',
     workspaceChangesReason: canSubscribeWorkspaceChanges
       ? null
       : 'client inject is slots/sessions/theme/layout/remote/remote.session; workspace/changes is a Session event served by Host workspaceChanges.summary and consumed by ui-deliverables',
@@ -47,11 +58,12 @@ export function inspectDeliveryHostCapabilities(host) {
 
 export function tryAttachWorkspaceChangeRefresh(host, onChange) {
   const cap = inspectDeliveryHostCapabilities(host);
-  if (typeof host?.subscribeWorkspaceChanges !== 'function') {
+  const subscribe = safeHostMethod(host, 'subscribeWorkspaceChanges');
+  if (!subscribe) {
     return { attached: false, reason: cap.workspaceChangesReason, unsubscribe() {} };
   }
   let alive = true;
-  const returned = host.subscribeWorkspaceChanges((payload) => {
+  const returned = subscribe.call(host, (payload) => {
     if (alive && typeof onChange === 'function') onChange(payload);
   });
   return {
@@ -64,7 +76,23 @@ export function tryAttachWorkspaceChangeRefresh(host, onChange) {
   };
 }
 
-export function ingestWorkspaceEventFiles(sessionId, files, { existing = [] } = {}) {
+function tryAttachPresentedRefresh(host, onChange) {
+  const subscribe = safeHostMethod(host, 'subscribePresented');
+  if (!subscribe) {
+    return { attached: false, reason: '宿主没有提供 present 交付事件；可通过扫描或手动刷新发现 HTML。', unsubscribe() {} };
+  }
+  let alive = true;
+  const returned = subscribe.call(host, (payload) => {
+    if (alive && typeof onChange === 'function') onChange(payload);
+  });
+  return {
+    attached: true,
+    reason: null,
+    unsubscribe() { alive = false; if (typeof returned === 'function') returned(); },
+  };
+}
+
+export function ingestWorkspaceEventFiles(sessionId, files, { existing = [], source = 'workspace-event' } = {}) {
   if (!sessionId) return [];
   const out = [];
   const seen = new Set();
@@ -85,10 +113,17 @@ export function ingestWorkspaceEventFiles(sessionId, files, { existing = [] } = 
       title: rel.split('/').pop(),
       path: rel,
       sessionId,
-      source: 'workspace-event',
+      source,
     };
     const id = cockpitProductIdentity(item);
-    if (!id || seen.has(id)) continue;
+    if (!id) continue;
+    if (seen.has(id)) {
+      const index = out.findIndex(existing => cockpitProductIdentity(existing) === id);
+      if (index >= 0 && source === 'session-presented' && out[index].source !== 'session-presented') {
+        out[index] = { ...out[index], source };
+      }
+      continue;
+    }
     seen.add(id);
     out.push(item);
   }
@@ -110,10 +145,15 @@ function emptySnapshot(epoch = 0, refreshMode = 'manual') {
 function mergeDeliveries(files) {
   const seen = new Map();
   for (const file of files) {
-    const key = file.workspaceRoot ? file.workspaceRoot.replace(/\\/g, '/') + '/' + file.path : file.id;
-    if (!seen.has(key)) seen.set(key, file);
+    const identity = cockpitProductIdentity(file);
+    const workspaceKey = file.workspaceRoot && file.path
+      ? file.workspaceRoot.replace(/\\/g, '/') + '/' + file.path
+      : '';
+    const keys = [identity, workspaceKey, file.id].filter(Boolean);
+    if (keys.some(key => seen.has(key))) continue;
+    for (const key of keys) seen.set(key, file);
   }
-  return [...seen.values()];
+  return [...new Set(seen.values())];
 }
 
 export function createCockpitDelivery(adapters = {}) {
@@ -122,11 +162,14 @@ export function createCockpitDelivery(adapters = {}) {
   const history = adapters.history;
   const max = adapters.max;
   const dirDepth = adapters.dirDepth;
+  const artifactInbox = adapters.artifactInbox;
   const epoch = createNavigationEpoch();
   const listeners = new Set();
   let sessionId = null;
+  let eventFiles = [];
   let snapshot = emptySnapshot();
   let auto = { attached: false, unsubscribe() {} };
+  let poll = null;
 
   const emit = () => {
     for (const listener of listeners) listener(snapshot);
@@ -137,6 +180,31 @@ export function createCockpitDelivery(adapters = {}) {
     return snapshot;
   };
 
+  async function intakeHtmlDeliveries(files, fallbackSessionId, signal) {
+    if (!artifactInbox?.intake || typeof adapters.readBytes !== 'function') return;
+    for (const file of files ?? []) {
+      signal?.throwIfAborted();
+      if (file?.kind !== 'html' || !file?.path) continue;
+      const relative = workspaceRelFromEventPath(file.path);
+      const sourceSession = file.sessionId || fallbackSessionId;
+      if (!relative || !sourceSession) continue;
+      try {
+        const bytes = await api.readBytes(relative, { sessionId: sourceSession, signal });
+        const contentHash = await digestBytes(bytes);
+        await artifactInbox.intake({
+          source: file.source === 'session-presented' ? 'native_present' : 'workspace_file',
+          session_id: sourceSession,
+          path: relative,
+          title: file.title || relative.split('/').pop() || 'HTML 产物',
+          content_hash: contentHash,
+        });
+      } catch {
+        // A file can still remain visible in the cabinet when the optional
+        // inbox read/hash bridge is unavailable or the session has expired.
+      }
+    }
+  }
+
   const api = {
     captureSource(list, compositionSessionId) {
       const captured = captureDeliverySessionSource(list, compositionSessionId);
@@ -145,8 +213,10 @@ export function createCockpitDelivery(adapters = {}) {
     },
     setSessionId(id) {
       const next = typeof id === 'string' && id ? id : null;
+      poll?.stop(); poll = null;
       if (next !== sessionId) {
         sessionId = next;
+        eventFiles = [];
         const ticket = epoch.begin('delivery-session');
         epoch.settle(ticket.epoch);
         setSnapshot({ ...emptySnapshot(ticket.epoch, snapshot.refreshMode), sessionId: next, status: next ? 'empty' : 'no-session',
@@ -167,10 +237,51 @@ export function createCockpitDelivery(adapters = {}) {
     inspectHost: inspectDeliveryHostCapabilities,
     attachHostEvents(host) {
       auto.unsubscribe();
-      auto = tryAttachWorkspaceChangeRefresh(host, () => { void api.refresh(); });
+      const workspace = tryAttachWorkspaceChangeRefresh(host, payload => {
+        const files = Array.isArray(payload?.files) ? payload.files : [];
+        if (files.length) api.ingestEventFiles(files, { source: 'workspace-event' });
+        void api.refresh();
+      });
+      const presented = tryAttachPresentedRefresh(host, payload => {
+        const files = Array.isArray(payload?.files) ? payload.files : [];
+        if (files.length) api.ingestEventFiles(files, { source: 'session-presented' });
+        void api.refresh();
+      });
+      auto = {
+        attached: workspace.attached || presented.attached,
+        reason: workspace.attached ? null : presented.reason || workspace.reason,
+        unsubscribe() { workspace.unsubscribe(); presented.unsubscribe(); },
+      };
       snapshot = { ...snapshot, refreshMode: auto.attached ? 'event+manual' : 'manual' };
       emit();
       return { attached: auto.attached, reason: auto.reason };
+    },
+    startPolling(options = {}) {
+      poll?.stop();
+      const targetSession = options.sessionId ?? sessionId;
+      if (!targetSession) return { started: false, stop() {} };
+      let stopped = false;
+      let inFlight = false;
+      const startedAt = Date.now();
+      const targetPaths = new Set((options.targetPaths ?? []).map(path => workspaceRelFromEventPath(path)).filter(Boolean));
+      const intervalMs = Number.isFinite(options.intervalMs) ? Math.max(10, options.intervalMs) : 2_000;
+      const maxMs = Number.isFinite(options.maxMs) ? Math.max(intervalMs, options.maxMs) : 20_000;
+      const stop = () => { stopped = true; if (poll?.stop === stop) poll = null; if (timer) clearInterval(timer); };
+      const tick = async () => {
+        if (stopped || inFlight) return;
+        inFlight = true;
+        try {
+          await api.refresh({ sessionId: targetSession });
+          const foundTarget = targetPaths.size > 0 && snapshot.files.some(file => targetPaths.has(file.path));
+          if (foundTarget || Date.now() - startedAt >= maxMs) stop();
+        } finally {
+          inFlight = false;
+        }
+      };
+      const timer = setInterval(tick, intervalMs);
+      poll = { stop };
+      void tick();
+      return { started: true, stop };
     },
     async refresh(options = {}) {
       const id = options.sessionId ?? sessionId;
@@ -180,6 +291,7 @@ export function createCockpitDelivery(adapters = {}) {
         epoch.settle(ticket.epoch);
         return setSnapshot(emptySnapshot(ticket.epoch, snapshot.refreshMode));
       }
+      if (id !== sessionId) eventFiles = [];
       sessionId = id;
       setSnapshot({
         ...snapshot,
@@ -197,7 +309,12 @@ export function createCockpitDelivery(adapters = {}) {
         ]);
         if (!epoch.isCurrent(ticket.epoch)) return snapshot;
         epoch.settle(ticket.epoch);
-        const files = mergeDeliveries([...(past?.files ?? []), ...scan.files.map(file => ({ ...file, workspaceRoot: past?.currentWorkspace }))]);
+        const files = mergeDeliveries([
+          ...eventFiles,
+          ...(past?.files ?? []),
+          ...scan.files.map(file => ({ ...file, workspaceRoot: past?.currentWorkspace })),
+        ]);
+        await intakeHtmlDeliveries(files, id, signal);
         const status = files.length ? 'ready' : scan.error || past?.error ? 'error' : 'empty';
         return setSnapshot({
           status,
@@ -234,6 +351,7 @@ export function createCockpitDelivery(adapters = {}) {
         if (!epoch.isCurrent(ticket.epoch)) return snapshot;
         epoch.settle(ticket.epoch);
         const files = mergeDeliveries([...previous.files, ...past.files]);
+        await intakeHtmlDeliveries(past.files, sessionId, ticket.signal);
         return setSnapshot({ ...previous, files, status: files.length ? 'ready' : 'empty', epoch: ticket.epoch,
           history: { ...past, files: undefined, examined: (previous.history.examined ?? 0) + past.examined,
             failures: [...(previous.history.failures ?? []), ...(past.failures ?? [])],
@@ -273,9 +391,15 @@ export function createCockpitDelivery(adapters = {}) {
     ingestEventFiles(files, options = {}) {
       const id = options.sessionId ?? sessionId;
       if (!id) return [];
-      return ingestWorkspaceEventFiles(id, files, { existing: options.existing ?? snapshot.files });
+      const next = ingestWorkspaceEventFiles(id, files, { existing: eventFiles, source: options.source ?? 'workspace-event' });
+      eventFiles = next.filter(file => file.sessionId === id);
+      if (id === sessionId) {
+        setSnapshot({ ...snapshot, status: eventFiles.length ? 'ready' : snapshot.status, sessionId: id, files: mergeDeliveries([...eventFiles, ...snapshot.files]) });
+      }
+      return eventFiles;
     },
     dispose() {
+      poll?.stop(); poll = null;
       auto.unsubscribe();
       epoch.dispose();
       listeners.clear();

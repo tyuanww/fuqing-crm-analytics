@@ -19,6 +19,11 @@ export type PreviewRecord = {
 };
 export type PageAdapters = {
   kind: string;
+  artifactInbox?: {
+    intake(input: Record<string, unknown>): Promise<Record<string, unknown> | null | undefined>;
+    confirm(artifactId: string, pageId: string): Promise<Record<string, unknown>>;
+    dismiss(artifactId: string): Promise<Record<string, unknown>>;
+  } | null;
   documents?: Record<string, (...args: any[]) => Promise<any>>;
   preview: { kind: string; note: string; srcdoc(pkg: { html?: string; css?: string; js?: string } | null): string; pointerEvents(mode: string): 'none' | 'auto' };
   bridge: {
@@ -46,7 +51,7 @@ export type PageAdapters = {
   nextId(prefix: string): string;
 };
 export type FreeHtmlPage = {
-  page_id: string; session_id: string | null; origin_path?: string; origin_file_id?: string | null; title: string; version: number; base_version?: number;
+  page_id: string; session_id: string | null; origin_path?: string; origin_file_id?: string | null; origin_content_hash?: string | null; title: string; version: number; base_version?: number;
   binding_state: string; binding_manifest: { bindings: unknown[]; result_refs: string[] };
   package: typeof SAMPLE_PACKAGE; savedPackage: typeof SAMPLE_PACKAGE; dirty: boolean;
   presentation_overlays?: Record<string, { text?: string; style?: Record<string, string>; attributes?: Record<string, string> }>;
