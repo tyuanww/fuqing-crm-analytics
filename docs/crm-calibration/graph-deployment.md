@@ -18,7 +18,7 @@ Neo4j 连接仅限 HTTP 回环地址。当前社区版部署使用本机既有�
 
 只返回关系名称和两个实体共有的分块，不返回模型自行补写的实体属性。`evidence_refs` 是共享来源，不是关系正确性的证明。来源存在不等于关系正确。业务公式优先对照 `crm_knowledge_explain` 的已确认定义。
 
-每条关系有审核状态：`verified`、`rejected`、`pending`、`version_stale`、`missing_source`。可配置私有 `reviewFile`：以精确三元组、分块 ID、当前文本 SHA256 记录 `verified` 或 `rejected` 及原因。拒绝优先，拒绝项从 `relations` 移入 `review_notes`；原数据库不删除。分块哈希变化后旧审阅标为 `version_stale` 并失效。
+每条关系有审核状态：`verified`、`rejected`、`pending`、`version_stale`。没有可定位来源的关系不会进入 `relations`，而是以 `missing_source` 写入 `review_notes`；它不是人工审核状态。可配置私有 `reviewFile`：以精确三元组、分块 ID、当前文本 SHA256 记录 `verified` 或 `rejected` 及原因。拒绝优先，拒绝项从 `relations` 移入 `review_notes`；原数据库不删除。分块哈希变化后旧审阅标为 `version_stale` 并失效。
 
 查询结果附带当前文档 `updated_at`/`processed_at`、分块内容哈希和审核记录。可选 `syncFile` 只记录观察时的文档时间；抽取未保存哈希时 `extraction_content_hashes_saved` 保持 false，不得事后补齐。`graph_sync=observed` 只表示时间戳与观察记录一致，不是抽取同版本证明。文档变更、重新解析、删除或图尚未同步时，旧引用与审核失效或标过期。重建、重新抽取及付费模型调用须另授权。
 
@@ -26,7 +26,7 @@ Neo4j 连接仅限 HTTP 回环地址。当前社区版部署使用本机既有�
 
 ## 配置与复现
 
-使用现有固定 Node 24、Python 3.14+，以及 analytics-workbench `toolchain.json` 钉住的 DSH 0.1.7-alpha.2。现役 6677 在重载前仍跑上一钉。先按[插件说明](../../dsh-plugins/crm-knowledge/README.md)构建和验证，再准备私有配置。以下是结构示例，ID和路径须使用实际部署值；不把凭据写入工具参数或公开仓库：
+使用现有固定 Node 24、Python 3.14+，以及 analytics-workbench `toolchain.json` 钉住的 DSH 0.1.7-rc.1。现役 6677 已加载 RC1；旧 alpha2 checkout 仅用于回退。先按[插件说明](../../dsh-plugins/crm-knowledge/README.md)构建和验证，再准备私有配置。以下是结构示例，ID和路径须使用实际部署值；不把凭据写入工具参数或公开仓库：
 
 ```json
 {
@@ -36,6 +36,7 @@ Neo4j 连接仅限 HTTP 回环地址。当前社区版部署使用本机既有�
   "username": "neo4j",
   "knowledgeBaseId": "11111111-1111-1111-1111-111111111111",
   "knowledgeId": "22222222-2222-2222-2222-222222222222",
+  "additionalKnowledgeIds": [],
   "weknoraKeyFile": "/private/weknora-retrieve.key",
   "neo4jPasswordFile": "/private/neo4j-password",
   "reviewFile": "/private/graph-review.json",

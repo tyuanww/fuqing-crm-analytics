@@ -33,10 +33,10 @@
 
 ## 快速开始
 
-1. 克隆本仓库，停在 `main`。当前提交看 [STATUS](./STATUS.md)。
-2. 在仓库根执行 `codegraph init`。之后用 `codegraph query <名字>` 查符号。
+1. 克隆本仓库并创建 feature 分支。当前提交、版本和现役状态看 [STATUS](./STATUS.md)。
+2. 先确认 Node 24 和 Python 3.14+，再运行 `node scripts/dsh-dev/cli.mjs diagnose` 做只读环境检查；本仓库没有 `.codegraph/` 时不需要初始化 CodeGraph。
 3. 端口、目录和哪份历史不要搜，见 [维护地图](./docs/operating/maintainer-map.md)。
-4. 驾驶舱怎么生成 HTML，见 [操作说明](./docs/operating/cockpit-native-html.md)。验证范围见 [当前验证入口](./docs/operating/verification.md)。Node 用 24。
+4. 驾驶舱怎么生成 HTML，见 [操作说明](./docs/operating/cockpit-native-html.md)。验证范围见 [当前验证入口](./docs/operating/verification.md)。完整 B0 检查命令是 `node scripts/dsh-b0/pipeline.mjs --check --python /absolute/python3.14`。
 
 插件说明、选区编辑和比赛看板的细节留在各自文档里，不放在这一节。
 

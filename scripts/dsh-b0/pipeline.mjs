@@ -9,7 +9,7 @@ import { createHash } from 'node:crypto';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { packageManagerEnv } from './package-manager-env.mjs';
-import { copyTreeBounded, createCleanRoot, removeCleanRoot } from './clean-build.mjs';
+import { copyTreeBounded, createCleanRoot, reapStaleCleanRoots, removeCleanRoot } from './clean-build.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const plugin = join(root, 'dsh-plugins/analytics-workbench');
@@ -21,9 +21,15 @@ const shineBoard = join(root, 'dsh-plugins/shine-board');
 const shineFunnel = join(root, 'dsh-plugins/shine-funnel');
 const b0 = join(root, '.context/dsh-b0');
 const buildTools = join(plugin, 'build-tools');
-const [mode, pythonFlag, python, ...extra] = process.argv.slice(2);
+const USAGE = 'Usage: node scripts/dsh-b0/pipeline.mjs --prepare|--check --python /absolute/python3.14';
+const argv = process.argv.slice(2);
+if (argv.length === 0 || argv[0] === '--help' || argv[0] === '-h') {
+  console.log(USAGE);
+  process.exit(0);
+}
+const [mode, pythonFlag, python, ...extra] = argv;
 assert.ok(['--prepare', '--check'].includes(mode) && pythonFlag === '--python' && isAbsolute(python ?? '') && !extra.length,
-  'Usage: node scripts/dsh-b0/pipeline.mjs --prepare|--check --python /absolute/python3.14');
+  USAGE);
 assert.ok(!process.env.B0_BUILD_UPSTREAM || mode === '--check',
   'B0_BUILD_UPSTREAM is a read-only --check override; --prepare must use the local pinned checkout');
 const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(b0, 'upstream'));
@@ -177,9 +183,12 @@ print('B0 exact Python closure verified')
   }
   run(process.execPath, ['--test', ...competitionTests], root, { B0_BUILD_UPSTREAM: upstream });
 
-  const { root: cleanOwner, cleanRoot } = await createCleanRoot(b0);
+  const cleanOwner = b0;
+  await reapStaleCleanRoots(cleanOwner);
+  const { cleanRoot } = await createCleanRoot(cleanOwner);
   const clean = join(cleanRoot, 'analytics-workbench');
   let cleanRemoved = false;
+  let report;
   try {
     // No source symlinks or existing output/node_modules in the clean copy.
     // shine-waterfall sits next to workbench so `../../../shine-waterfall` resolves.
@@ -203,20 +212,21 @@ print('B0 exact Python closure verified')
       assert.ok(!/file:\/\/\/|\/Users\/|\/home\/runner\//.test(rebuilt.toString()), `Machine path in artifact: ${item}`);
       hashes[item] = createHash('sha256').update(rebuilt).digest('hex');
     }
-    const report = { schema_version: 'dsh-b0-build-evidence/v1', at: new Date().toISOString(),
+    report = { schema_version: 'dsh-b0-build-evidence/v1', at: new Date().toISOString(),
       upstream_sha: pin.upstream_sha, upstream_lock_sha256: pin.upstream_lock_sha256,
       node: process.version, python: output(python, ['--version']), clean_plugin: clean,
       // The evidence is written only after the clean build and its output
       // comparisons have completed. The owning finally block removes the
       // directory before the pipeline returns, so this is an asserted result.
-      clean_removed: true, clean_source_files: budget.files, clean_source_bytes: budget.bytes,
+      clean_removed: false, clean_source_files: budget.files, clean_source_bytes: budget.bytes,
       stages: ['contract', 'python-unit', 'ruff', 'node-unit', 'host-types', 'client-types', 'build', 'real-cordis-loader-synthetic-services', 'clean-rebuild'],
       artifact_sha256: hashes, remote_ci_executed: false, native_dsh_profile_e2e: 'separate evidence required' };
-    await writeFile(join(b0, 'build-evidence.json'), JSON.stringify(report, null, 2) + '\n', { mode: 0o600 });
     console.log(`B0 clean rebuild passed; source files=${budget.files}, source bytes=${budget.bytes}`);
   } finally {
     await removeCleanRoot(cleanOwner, cleanRoot);
     cleanRemoved = true;
   }
   assert.equal(cleanRemoved, true, 'Clean build directory was not removed');
+  report.clean_removed = true;
+  await writeFile(join(b0, 'build-evidence.json'), JSON.stringify(report, null, 2) + '\n', { mode: 0o600 });
 }

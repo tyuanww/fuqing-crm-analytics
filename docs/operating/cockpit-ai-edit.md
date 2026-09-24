@@ -1,8 +1,8 @@
 # 用原生 AI 修改产物
 
-> **2026-09-21 本地候选补充**：`codex/cockpit-inline-edit` 已增加脚本卡片文案、页内 AI 要求和原生右栏统一预览，尚未加载现役。新流程、稳定身份与旧标签兼容限制见[实现说明](../hackathon/COCKPIT-PRESENTATION-2026-09-21.md)。下文“动态区域只读”和“模型完成后回驾驶舱”描述 0.13.0.0 现役流程；不代表本地候选的新行为。
+> **当前候选边界（2026-09-24）**：现役 6677 已加载 0.18.0.0 候选插件和 DSH 0.1.7-rc.1。下文的历史版本号用于追溯合同；实际操作以本页的收件、预览、确认流程和当前 UI/UX 报告为准。
 
-本功能 **0.13.0.0 已由 [#36](https://github.com/tyuanww/fuqing-crm-analytics/pull/36) 合入 `7575d07` 并加载现役 6677**，PR 与该 main CI 均通过；验收边界见[当前 UI / UX 报告](../hackathon/COCKPIT-UI-UX-2026-09-20.md)，早期 AI 接线证据见[历史报告](../hackathon/COCKPIT-AI-EDIT-2026-09-20.md)。沿用[本地文档服务](cockpit-office-local.md)与原生模型设置，不另接 provider 或复制凭据。
+本功能的 0.13.0.0 基线已由 [#36](https://github.com/tyuanww/fuqing-crm-analytics/pull/36) 合入 `7575d07`；当前候选把页面收取、选区 patch 和版本确认接到同一条服务链。验收边界见[当前 UI / UX 报告](../hackathon/COCKPIT-UI-UX-2026-09-20.md)，早期 AI 接线证据见[历史报告](../hackathon/COCKPIT-AI-EDIT-2026-09-20.md)。沿用[本地文档服务](cockpit-office-local.md)与原生模型设置，不另接 provider 或复制凭据。
 
 1. 在驾驶舱选择产物，先保存或放弃手动编辑，点击“用 AI 改”。历史会话文件先保存独立副本。
 2. 原生对话会打开本次产物修改任务。描述需要修改的内容；模型完成后回驾驶舱。
@@ -42,7 +42,7 @@
 | 方法/路径 | 内容 |
 |---|---|
 | GET `/?offset=0` | 当前用户仍有权访问的未完成任务；每页100条，按`next_offset`继续，null表示结束 |
-| POST `/` | `{id: ai_UUIDv4, target_kind: file或page, target_id, base_version, selection?}`；selection 为 `{start,end,html_hash}`，仅 page 支持；稳定id重试返回同一任务 |
+| POST `/` | `{id: ai_UUIDv4, target_kind: file或page, target_id, base_version, selection?, instruction?}`；`instruction` 最多 4000 字；selection 为 `{start,end,html_hash, rendered?}`，仅 page 支持；稳定id重试返回同一任务 |
 | GET `/{id}` | 任务状态、基线、原生会话身份及专用目录；不是正式保存回执 |
 | POST `/{id}/collect` | 固化固定候选路径；不接收任意路径或URL |
 | GET `/{id}/comparison` | 有界文本差异与原件/候选大小、hash |
@@ -54,3 +54,7 @@
 状态为 WAITING → READY → SAVED，或 CANCELLED。目录位于显式page_state_dir的 `files/ai-workspaces/ai_UUID`，只含任务说明、输入副本和模型工作文件；不保存HTTP令牌。文件服务与DSH须运行在同一本机，才可直接打开这个目录。
 
 文档预览使用 ONLYOFFICE 官方 [`mode: view`](https://api.onlyoffice.com/docs/docs-api/get-started/how-it-works/viewing/) 和 [`permissions.edit: false`](https://api.onlyoffice.com/docs/docs-api/usage-api/config/document/permissions/)，不把编辑器的AI菜单当成原生AI接线。
+
+## 单卡片编辑接口
+
+插件服务前缀为 `/api/v1/analytics/page-edit-contexts`。`GET /overlay` 读取当前页面版本的展示 overlay；`POST /` 创建编辑上下文；`POST /{context_id}/native` 交给原生 DSH 对话；`POST /{context_id}/patches` 提交候选局部 patch；`POST /{context_id}/patches/{preview_id}/confirm` 确认新版本；同一路径的 `GET/POST .../receipt` 用于确认响应丢失后的查询和回执。服务端按页面版本、源哈希、选区边界和稳定节点身份校验，无法证明只影响选中区域时拒绝保存。

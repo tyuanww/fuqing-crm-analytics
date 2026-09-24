@@ -9,6 +9,7 @@
 2026-09-24 现役归属：6677 / 18091 使用 `dsh-017-rc1` 工作树代码和 RC1 上游；supervisor 控制登记与 durable runtime 仍在原仓。CRM 18093 未重启。下列 `status` / `stop` / `probe` 在拥有 `current.json` 的工作树执行；默认 `reload` 会重编其所在仓库源码，不能用旧仓源码覆盖当前现役。旧 alpha2 checkout 保留用于回退。
 
 ```bash
+node scripts/dsh-dev/cli.mjs --help
 # 只读诊断：启动就绪 / 认证说明 / 陈旧构建 / 端口归属。不绑定端口、不向任何 PID 发信号。
 node scripts/dsh-dev/cli.mjs diagnose --upstream /absolute/pinned/dsh
 
