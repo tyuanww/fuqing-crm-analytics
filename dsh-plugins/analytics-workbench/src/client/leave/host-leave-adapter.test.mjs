@@ -2,7 +2,7 @@
  * T22 / T27 (D41, D46) — the real host leave seam.
  *
  * This drives the **actual** `LayoutController` from the pinned DSH
- * 0.1.7-alpha.2 checkout (`00102833`), not a hand-written fake, so the seam
+ * 0.1.7-rc.1 checkout (`46a7f68b`), not a hand-written fake, so the seam
  * claims in the lane report are checkable rather than asserted:
  *
  *   - `selectPanel(id)` is a synchronous setter with no pre-navigation approval

@@ -1,6 +1,6 @@
 # CRM 知识与指标候选插件
 
-固定 SDK：DSH 0.1.7-alpha.2（见 analytics-workbench `toolchain.json`），Node 24，Python 3.14+。现役 6677 在重载前仍跑上一钉。独立插件，包含合成资料源及默认未连接的看板 GSV HTTP 适配，通过 analytics-workbench 的可选 `cockpit.crm` 插槽展示引用，不修改 DSH 上游或比赛事实合同。构建依赖只读复用已准备好的固定 checkout，不下载或自动安装。
+固定 SDK：DSH 0.1.7-rc.1（见 analytics-workbench `toolchain.json`），Node 24，Python 3.14+。现役 6677 已加载 RC1 与本候选插件；旧 alpha2 checkout 仅用于回退。独立插件，包含合成资料源及默认未连接的看板 GSV HTTP 适配，通过 analytics-workbench 的可选 `cockpit.crm` 插槽展示引用，不修改 DSH 上游或比赛事实合同。构建依赖只读复用已准备好的固定 checkout，不下载或自动安装。
 
 本包依赖当前工作区中的 `backend/`、`scripts/crm-calibration/` 和 `knowledge/crm/`，当前不支持脱离仓库单独发布。
 
@@ -18,6 +18,7 @@
 | `query_crm_metrics_v1` | 销售表现、老客回购、派样后复购；全部经过只读适配 → 计算器 |
 | `crm_knowledge_explain` | 知识包定义、证据、冲突和离线依赖关系；说明合成验证状态 |
 | `crm_metrics_capabilities` | 可执行查询与未接入的真实资料能力 |
+| `crm_service_health` | 查看当前对话连接及 Purchases、快照、知识库、驾驶舱工具的真实状态；未知状态保持 `unknown` |
 | `query_crm_knowledge_graph`（可选 graph-tools 模块） | 当前 CRM 账号被授权教材的 Neo4j 一跳关系、分块/页码、文档版本和审核状态 |
 | `query_crm_knowledge_sources` | 在授权教材中检索原文分块；须已连接 CRM |
 | `expand_crm_knowledge_citation` | 按分块 ID 展开引用；每次重查账号权限和文档版本 |

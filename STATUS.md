@@ -1,35 +1,35 @@
 # 项目状态 (Project Status)
-> 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。公开 main 基线 **bcc0ced9**。本分支 VERSION **0.18.0.0**。目录和端口见 [维护地图](docs/operating/maintainer-map.md)。现役 6677 仍是 0.16.0.2，重载前不换钉。产品仍 PARTIAL。
+> 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。公开 main 基线 **bcc0ced9**。本分支 VERSION **0.18.0.0**。目录和端口见 [维护地图](docs/operating/maintainer-map.md)。现役 6677 已切换到 DSH 0.1.7-rc.1 与本候选插件，产品仍 PARTIAL。
 
-## 当前快照（2026-09-23，DSH 钉 0.1.7-alpha.2 / 0.18.0.0）
+## 当前快照（2026-09-24，DSH 钉 0.1.7-rc.1 / 0.18.0.0）
 
 | 项 | 状态 |
 |---|---|
 | 已合代码基线 | **bcc0ced9（公开仓库 #53）**，产品提交是 #50 / 0.16.0.2，前序 #49。旧私有历史未合入。 |
 | 本轮交付 | 驾驶舱新增「产物收件箱」：自由 HTML 生成、原生呈现和工作区文件先登记为候选产物，驾驶舱显示待处理数量，用户确认后才关联正式页面；按 request/session/path 加内容哈希去重。 |
-| VERSION / 产品 | 本分支 **0.18.0.0**。合入前公开 main 仍是 **0.16.1.0**。产品 **PARTIAL**，原全量 Goal **PAUSED**。 |
-| DSH 基座 | 钉已改为 **0.1.7-alpha.2（00102833）**，现役 6677 仍在 **0.1.6-alpha.2（ddefc45f）**。不改上游源码。 |
-| 现役 | 6677 加载 `crm-public-release` 的 0.16.0.2 插件；控制登记与 runtime 留在原仓。CRM 18093 仍为 `crm-assets-public` 的 archive_dashboard，本轮未重启。 |
+| VERSION / 产品 | 本分支 **0.18.0.0**；公开 main 基线 `bcc0ced9` 对应 **0.16.1.0**。产品 **PARTIAL**，原全量 Goal **PAUSED**。 |
+| DSH 基座 | 已切换到 **0.1.7-rc.1（46a7f68b）**，上游源码保持只读；旧 alpha2 checkout 保留用于回退。 |
+| 现役 | 6677 加载 `dsh-017-rc1` 的插件与 RC1 上游；控制登记和持久 runtime 仍在原仓 runtime。页面文档 HTTP 为 18091；CRM 18093 未重启。 |
 | 原始数据 | 约131GB归档DuckDB不进Git；测试使用合成夹具与独立私有 SQLite。 |
 
-以下 2026-09-21 记录是 0.15 施工留档，不是 0.16.0.2 的当前计划。
+以下 2026-09-21 记录是历史施工留档，不是 0.18.0.0 的当前计划。
 
 ## 本轮施工计划
 
-### HTML 卡片文案与块级 AI（本工作树）
+### HTML 卡片文案与块级 AI（历史施工记录）
 - PagePackage 增加 presentation overlay：身份目标、显示文字、受限样式；筛选后按身份重应用。
 - OCR 46/46 复核后 4 处已修。变基后接触面 Node 45 passed、Python 17 passed；源码选区 7 passed。
 - 合成 backend 2873 passed / 77 skipped / 71 deselected；B0 pipeline PASS。
-- 真实 MiniMax-M3 五项合成选区评估 PASS（3 改字 + 2 越界拒绝）；6677 未重启。证据 `.context/checks/cockpit-native-eval/`。
-- 本人 UAT 与把本候选加载 6677 另授权。
+- 真实 MiniMax-M3 五项合成选区评估 PASS（3 改字 + 2 越界拒绝）；现役 6677 已加载 RC1 候选。证据 `.context/checks/cockpit-native-eval/`。
+- 本人 UAT、真实浏览器级收件箱→局部编辑旅程仍开放。
 
-### 已合公开主线（#34–#38）
+### 已合公开主线（#34–#38，历史记录）
 - #38 分析检索/编辑/分享/独立组板，readiness/membership/net-gsv，图谱 ACL。6677 已加载代码；18093 仍为旧 archive 实例。
 - 图谱账本分母 1163=已核实43+已拒绝7+待核对1113。纯销售指标分析不绑教材。
 - #34 单个已确认短窗口真实账号/模型通过，不代签本人 UAT。#36/#37 完整 HTML 编辑旅程与用户文件 UAT 仍开放。
 
 ### 仍开放且不由本轮代签
-- 本候选合入后的 6677 加载、本人 UAT。
+- 本人 UAT 与真实浏览器级收件箱→局部编辑旅程。
 - 成交时会员身份、成功退款流水、可按退款截止日重算的全店首购、派样资格；利润 ROI 另需成本。
 - 图谱 1113 条待核对关系；抽取时未保存的原文哈希与同版本证明。
 - P13、逐格式真实模型编辑、扫描 PDF OCR、复杂 Office 及 PDF 浮动菜单。

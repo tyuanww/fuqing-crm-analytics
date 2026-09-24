@@ -1,6 +1,6 @@
 # DSH Analytics Workbench · B0 only
 
-固定上游：`deepseek-ai/deepseek-harness@00102833dfaee1da9f48a3a8eae9d34005a75218`（sdk `0.1.7-alpha.2`，见 `toolchain.json`）。现役 6677 在重载前仍跑上一钉。私有本地验证包，不发布 npm，不包含模型密钥或真实数据。2026-09-06 已接独立 FastAPI B0 任务内核、固定方法包与当前权限接缝；完整 B0 仍为 PARTIAL，见[当前收口报告](../../docs/hackathon/B0-LOCAL-CLOSEOUT-2026-09-06.md)。
+固定上游：`deepseek-ai/deepseek-harness@46a7f68b0922371ce7144b668b90e377d8e799f4`（sdk `0.1.7-rc.1`，见 `toolchain.json`）。现役 6677 已加载该钉和本候选插件；旧 alpha2 checkout 保留用于回退。私有本地验证包，不发布 npm，不包含模型密钥或真实数据。2026-09-06 已接独立 FastAPI B0 任务内核、固定方法包与当前权限接缝；完整 B0 仍为 PARTIAL，见[当前收口报告](../../docs/hackathon/B0-LOCAL-CLOSEOUT-2026-09-06.md)。
 
 ## 整段说明编辑
 
@@ -237,7 +237,7 @@ FQ_B0_PYTHON=/Users/hutou/homebrew/opt/python@3.14/bin/python3.14 node dsh-plugi
 - 独立 `lib/tool.js` 默认登记 `analytics_b0_query`，参数只有 `{"query":"channel_repeat_rate"}`。从可信原生 call/turn 查找原 requestId，在 FastAPI 预留步骤后取得固定 `STUB / SYNTHETIC_FIXTURE`：100 位合成客户、25 位复购、25%，日期 2026-09-01。调用私有 loopback 接口；无 SQL、真实文件查询、任意网络或本地备用结果路径。`B0_RUNTIME_FAMILY=channel_followup` 时改为登记 `analytics_channel_followup_query`（完整 G2 请求，固定 `/internal/native/channel-followup`，输出 typed receipt）。B0 fixture 工具卡仍保留；渠道后续购买查询卡见 G4b，资产保存见 `--native-query-assets`。
 - 独立 `lib/skills.js` 默认注册固定 `growth-analysis-b0` 及精确资源工具；整包包含 `SKILL.md`、证据引用与无数字示例，`skill-package.lock.json` 冻结全部字节。query-mode 另有不可变 `channel-followup-query` 包与 `query-skill-package.lock.json`。构建拒绝越界、软/硬链接、额外文件/脚本、超限和引用漂移；运行时读取不可变快照。每步与方法读取都回查后端权限、版本和预算，不新增通用文件工具或 Agent loop。
 - 客户端登记品牌 `sidebar.brand.mark/name`、`sidebar.footer.action` 登录/主题、`shell.overlay` 账户菜单、`tool.call.toolview`、`conversation.input.dock` 任务状态、`conversation.composer.dock` 生成驾驶舱；品牌单槽使用 `priority:-10` 先于上游默认贡献，不修改上游代码。等待 owner 声明后登记。任务状态栏只读 FastAPI 投影，展示最近三个 run 的状态、阶段和步数；断线明确标记旧快照，刷新不重新提交。
-- UI-B01 最小适配：Host `ids/byId` 就绪且指定 `session-b0-synthetic-primary` 存在时，`retain({ source: 'mainView' })` 钉住主会话。alpha.2 没有 `ISessions.open` / `clear` / `SessionListState.current`。不会调用 `create`、操作 DOM、选任意其他会话；目标缺失继续等待。这是 B0 固定主会话接缝，不是业务 run 自动受理实现。
+- UI-B01 最小适配：Host `ids/byId` 就绪且指定 `session-b0-synthetic-primary` 存在时，`retain({ source: 'mainView' })` 钉住主会话。RC1 仍没有 `ISessions.open` / `clear` / `SessionListState.current`。不会调用 `create`、操作 DOM、选任意其他会话；目标缺失继续等待。这是 B0 固定主会话接缝，不是业务 run 自动受理实现。
 - 默认“我的驾驶舱 · B0”打开源码内置 finite mock：一个板块的手工标题预览、应用、撤销未应用草稿与页面刷新恢复；不依赖活动会话/模型。不是 AI 局部编辑，也不是完整可组装驾驶舱。
 - 仅当 `serve.mjs --native-query-assets` 且 GET `/b0/assets` 返回 `http_api=CONNECTED` 时，同一入口改走 HTTP overlay：列出已保存 SNAPSHOT，对唯一私人驾驶舱 add/copy/remove/layout/preview/undo。浏览器不带 backend bearer；GET 列表不自动建板。无板时加入会先 `POST /b0/dashboards` 再建预览；预览/保存 409 后重读，不保留过期 pending。kernel 不可用时 `/b0/assets` 为 `UNAVAILABLE`，不报 CONNECTED，入口回退 mock。`test/asset-overlay.test.mjs` 用 mock transport 覆盖上述编译后 DOM，不是浏览器 E2E。
 - mock 路径的 localStorage 仅存 `analytics-b0-ui/v1 + title` 两字段，不缓存授权、身份、结果或业务资产。HTTP overlay 的权威资产在独立 SQLite（`analyses/` 与 `cockpit/`）；分析库读取与驾驶舱写入是先后事务，不是跨库原子。

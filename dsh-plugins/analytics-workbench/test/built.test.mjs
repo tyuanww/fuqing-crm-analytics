@@ -12,7 +12,7 @@ const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? resolve(root, '../../.
 test('built Host root requires isolated capabilities; tool fails closed without native context', async () => {
   const ui = await import(pathToFileURL(join(root, 'lib/index.js')).href);
   assert.throws(() => ui.apply({}), /explicit isolated capabilities/);
-  assert.deepEqual(ui.inject, ['agents', 'sessions', 'sessionController']);
+  assert.deepEqual(ui.inject, ['agents', 'sessions', 'sessionController', 'tools']);
   const host = await import(pathToFileURL(join(root, 'lib/tool.js')).href);
   const registered = [];
   host.apply({ tools: { register: tool => { registered.push(tool); } } });

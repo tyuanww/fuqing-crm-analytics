@@ -23,7 +23,7 @@ presentation overlay 存在页面版本旁路表。取消预览不写这张表�
 
 ## 兼容性
 
-- `parsePagePackage` 只接受 `html`、`css`、`js`、`resources`、`node_map`。sidecar 不是源码包字段。
+- `parsePagePackage` 接受 `html`、`css`、`js`、`resources`、`node_map` 及可选的 `presentation` 展示元数据；`presentation` 只描述版本化 overlay，不是可执行源码，也不能替代源码字段。sidecar 不是源码包字段。
 - 打开历史 standalone HTML 只读原字符串。
 - 重复锚点、已删除节点和动态重渲染后的失效身份要求重新选择，不扩大成 `whole_page`。
 - 脚本、iframe、canvas 和绑定节点不能直接写入。

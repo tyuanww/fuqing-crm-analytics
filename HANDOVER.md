@@ -1,6 +1,6 @@
 # 交接说明（短表）
 
-> **最后更新**: 2026-09-21。本分支候选 VERSION **0.14.0.0**（`codex/crm-analysis-board`，未合入 main）；现役 6677 仍为 0.13.0.0。loopback，不上公网。见 [STATUS.md](STATUS.md)。历史本机候选见 [LOCAL-RELEASE-2026-09-16](docs/hackathon/LOCAL-RELEASE-2026-09-16.md)。
+> **最后更新**: 2026-09-24。本分支候选 VERSION **0.18.0.0**（`codex/dsh-017-rc1`，尚未合入 main）；现役 6677 已加载 DSH 0.1.7-rc.1 与本候选插件，页面文档 HTTP 为 18091。loopback，不上公网。见 [STATUS.md](STATUS.md)。历史本机候选见 [LOCAL-RELEASE-2026-09-16](docs/hackathon/LOCAL-RELEASE-2026-09-16.md)。
 > 细节以代码与下列 SSOT 为准，**不要**在本文件堆 sprint 日记。
 
 ## 立刻要看

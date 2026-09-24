@@ -10,7 +10,7 @@ export function GenerateChipIcon() {
   </svg>;
 }
 
-export function LibraryGenerateDock({ sessionId, generate, successMessage = '已写入驾驶舱产物并打开。' }: { sessionId: string; generate(sessionId: string): Promise<void>; successMessage?: string }) {
+export function LibraryGenerateDock({ sessionId, generate, successMessage = '页面已生成，已登记到驾驶舱产物收件箱；确认后才保存正式页面。' }: { sessionId: string; generate(sessionId: string): Promise<void>; successMessage?: string }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const generation = useRef(0);

@@ -50,8 +50,11 @@ Independent DSH: --web-port ${COMPETITION_WEB_PORT}. Vite ${COMPETITION_VITE_POR
 Launch tokens are never printed. Unauthenticated GET / must stay 401.`;
 
 function parseArgv(argv) {
+  if (argv.length === 0 || argv[0] === '--help' || argv[0] === '-h') return { command: 'help' };
   const [command, ...rest] = argv;
-  assert.ok(['check', 'dump-config', 'start', 'stop', 'status', 'diagnose', 'reload'].includes(command), USAGE);
+  if (!['check', 'dump-config', 'start', 'stop', 'status', 'diagnose', 'reload'].includes(command)) {
+    return { command: 'invalid', options: { message: `Unknown command: ${command}` } };
+  }
   if (command === 'reload') {
     const flags = rest.filter(flag => flag !== '--fresh' && flag !== '--detach');
     const options = parseServeArgs(flags.includes('--plugin') ? flags : ['--plugin', 'on', '--web-port', String(DEV_WEB_PORT), ...flags]);
@@ -327,7 +330,13 @@ function isCliEntry() {
 
 if (isCliEntry()) {
   const { command, options } = parseArgv(process.argv.slice(2));
-  if (command === 'diagnose') printDiagnose(await diagnose(options ?? {}));
+  if (command === 'help') console.log(USAGE);
+  else if (command === 'invalid') {
+    console.error(options?.message ?? 'Invalid command');
+    console.error(USAGE);
+    process.exitCode = 2;
+  }
+  else if (command === 'diagnose') printDiagnose(await diagnose(options ?? {}));
   else if (command === 'check' || command === 'dump-config') await runCheck(options);
   else if (command === 'start') {
     if (options.detach) {

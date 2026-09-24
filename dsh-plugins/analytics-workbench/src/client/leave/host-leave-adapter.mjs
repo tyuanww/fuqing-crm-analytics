@@ -1,7 +1,7 @@
 /**
  * Host leave adapter (D41/T22, D44/T25).
  *
- * Verified seam facts against the pinned DSH 0.1.7-alpha.2 (`00102833`):
+ * Verified seam facts against the pinned DSH 0.1.7-rc.1 (`46a7f68b`):
  *
  *   1. `ctx.layout.selectPanel(id)` is a synchronous setter. It checks the live
  *      `main` registry and then writes `panelInfo.activePanelId`; there is no
@@ -107,4 +107,3 @@ export function createHostLeaveAdapter({ coordinator, layout, onPanelChange, rea
     dispose() { disposed = true; unsubscribe?.(); },
   });
 }
-

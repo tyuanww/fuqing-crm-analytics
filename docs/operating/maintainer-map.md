@@ -4,7 +4,7 @@
 
 ## 先搜哪里
 
-1. 符号和调用关系：在仓库根执行 `codegraph init`，再用 `codegraph query <名字>`。索引在 `.codegraph/`，不提交。新克隆的机器要自己建一次。
+1. 符号和调用关系：若仓库已有 `.codegraph/`，在仓库根用 `codegraph explore "<名字>"`；没有索引时按 [AGENTS.md](../../AGENTS.md) 用限定范围的 `rg` 和源码阅读，不要自行初始化或提交索引。
 2. 现在什么在跑：只看 [STATUS.md](../../STATUS.md)。
 3. 怎么生成驾驶舱 HTML：[从对话生成 HTML 驾驶舱](cockpit-native-html.md)。
 4. `docs/hackathon/` 和 `docs/history/` 是档案。里面的旧提交号不属于这个公开仓库的 `main`。
