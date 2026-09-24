@@ -2,11 +2,11 @@
 
 本地完整 DSH web 基座入口。不是 B0 合成笼，不管理 8000/5173/15173/4315–4319。
 
-固定上游：`deepseek-ai/deepseek-harness@00102833dfaee1da9f48a3a8eae9d34005a75218`（0.1.7-alpha.2）。Node 24。现役 6677 在重载前仍使用上一钉的本地 checkout。后续再升版本仍改 `dsh-plugins/analytics-workbench/toolchain.json` 与本入口 `PINNED_SHA`，不要直接改上游源码。
+固定上游：`deepseek-ai/deepseek-harness@46a7f68b0922371ce7144b668b90e377d8e799f4`（0.1.7-rc.1）。Node 24。现役 6677 已使用该钉；旧 alpha2 checkout 保留作回退。后续再升版本仍改 `dsh-plugins/analytics-workbench/toolchain.json` 与本入口 `PINNED_SHA`，不要直接改上游源码。
 
 ## 命令
 
-2026-09-21 现役归属：6677 / 18091 使用公开仓库保留的 `crm-public-release` 工作树代码（#36 / `7575d07`）；supervisor 控制登记与 durable runtime 仍在原仓，CRM 18093 仍依赖 `crm-assets-public`。下列 `status` / `stop` / `probe` 在拥有 `current.json` 的原仓执行；默认 `reload` 会重编其所在仓库源码，不能用原仓旧源码覆盖当前现役。当前切换与证据归档见[本轮记录](../../docs/hackathon/COCKPIT-UI-UX-2026-09-20.md)。
+2026-09-24 现役归属：6677 / 18091 使用 `dsh-017-rc1` 工作树代码和 RC1 上游；supervisor 控制登记与 durable runtime 仍在原仓。CRM 18093 未重启。下列 `status` / `stop` / `probe` 在拥有 `current.json` 的工作树执行；默认 `reload` 会重编其所在仓库源码，不能用旧仓源码覆盖当前现役。旧 alpha2 checkout 保留用于回退。
 
 ```bash
 # 只读诊断：启动就绪 / 认证说明 / 陈旧构建 / 端口归属。不绑定端口、不向任何 PID 发信号。

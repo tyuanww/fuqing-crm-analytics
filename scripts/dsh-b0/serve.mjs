@@ -49,7 +49,7 @@ assert.ok(pythonFlag === '--python' && python && isAbsolute(python) && !extra.le
 assert.equal(process.platform, 'darwin', 'The native verification runner requires the macOS Seatbelt profile');
 assert.equal(Number(process.versions.node.split('.')[0]), 24, 'Use Node 24');
 const plugin = await realpath(pluginArg ?? join(root, 'dsh-plugins/analytics-workbench'));
-const pinned = '00102833dfaee1da9f48a3a8eae9d34005a75218';
+const pinned = '46a7f68b0922371ce7144b668b90e377d8e799f4';
 const webPort = ports.web;
 const mockPort = ports.mock;
 const binary = process.execPath;

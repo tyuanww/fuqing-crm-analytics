@@ -4,11 +4,12 @@
  */
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { readFile, writeFile, mkdir, mkdtemp, cp, lstat, readdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, lstat, readdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { packageManagerEnv } from './package-manager-env.mjs';
+import { copyTreeBounded, createCleanRoot, removeCleanRoot } from './clean-build.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const plugin = join(root, 'dsh-plugins/analytics-workbench');
@@ -139,6 +140,7 @@ print('B0 exact Python closure verified')
     'scripts/dsh-b0/gateway-policy.test.mjs', 'scripts/dsh-b0/transport-safety.test.mjs', 'scripts/dsh-b0/mock-provider.test.mjs',
     'scripts/dsh-b0/lifecycle-observer.test.mjs', 'scripts/dsh-b0/permission-fence.test.mjs', 'scripts/dsh-b0/ui-seams.test.mjs',
     'scripts/dsh-b0/package-manager-env.test.mjs', 'scripts/dsh-b0/diagnostic-sink.test.mjs',
+    'scripts/dsh-b0/clean-build.test.mjs',
     'scripts/dsh-b0/native-state-smoke.test.mjs', 'scripts/dsh-b0/native-query-smoke.test.mjs',
     'scripts/dsh-b0/native-query-fault-smoke.test.mjs', 'scripts/dsh-b0/native-query-assets-smoke.test.mjs',
     'scripts/dsh-b0/asset-routes.test.mjs']);
@@ -175,34 +177,46 @@ print('B0 exact Python closure verified')
   }
   run(process.execPath, ['--test', ...competitionTests], root, { B0_BUILD_UPSTREAM: upstream });
 
-  const cleanRoot = await mkdtemp(join(b0, 'clean-build-'));
+  const { root: cleanOwner, cleanRoot } = await createCleanRoot(b0);
   const clean = join(cleanRoot, 'analytics-workbench');
-  // No source symlinks or existing output/node_modules in the clean copy.
-  // shine-waterfall sits next to workbench so `../../../shine-waterfall` resolves.
-  for (const item of ['package.json', 'toolchain.json', 'toolchain.mjs', 'build.mjs', 'pack-skills.mjs', 'skill-package.lock.json', 'query-skill-package.lock.json', 'first-purchase-query-skill-package.lock.json', 'skills', 'src', 'test']) {
-    await cp(join(plugin, item), join(clean, item), { recursive: true, errorOnExist: true, force: false, dereference: true });
+  let cleanRemoved = false;
+  try {
+    // No source symlinks or existing output/node_modules in the clean copy.
+    // shine-waterfall sits next to workbench so `../../../shine-waterfall` resolves.
+    const budget = { bytes: 0, files: 0 };
+    for (const item of ['package.json', 'toolchain.json', 'toolchain.mjs', 'build.mjs', 'pack-skills.mjs', 'skill-package.lock.json', 'query-skill-package.lock.json', 'first-purchase-query-skill-package.lock.json', 'skills', 'src', 'test']) {
+      await copyTreeBounded(join(plugin, item), join(clean, item), { destinationRoot: cleanRoot, budget });
+    }
+    await copyTreeBounded(join(shineWaterfall, 'src'), join(cleanRoot, 'shine-waterfall', 'src'), { destinationRoot: cleanRoot, budget });
+    await copyTreeBounded(join(shineFunnel, 'src'), join(cleanRoot, 'shine-funnel', 'src'), { destinationRoot: cleanRoot, budget });
+    await mkdir(join(clean, 'build-tools'));
+    for (const item of ['package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml', 'patches']) {
+      await copyTreeBounded(join(buildTools, item), join(clean, 'build-tools', item), { destinationRoot: cleanRoot, budget });
+    }
+    run(process.execPath, [join(clean, 'build.mjs'), upstream, buildTools]);
+    run(process.execPath, ['--test', ...builtTests.map(file => join(clean, 'test', file))], clean, { B0_BUILD_UPSTREAM: upstream });
+    const hashes = {};
+    for (const item of ['index.js', 'tool.js', 'skills.js', 'client.js', 'views/saved-analysis-view.js', 'views/cockpit-view.js']) {
+      const original = await readFile(join(plugin, 'lib', item));
+      const rebuilt = await readFile(join(clean, 'lib', item));
+      assert.deepEqual(original, rebuilt, `Clean build output mismatch: ${item}`);
+      assert.ok(!/file:\/\/\/|\/Users\/|\/home\/runner\//.test(rebuilt.toString()), `Machine path in artifact: ${item}`);
+      hashes[item] = createHash('sha256').update(rebuilt).digest('hex');
+    }
+    const report = { schema_version: 'dsh-b0-build-evidence/v1', at: new Date().toISOString(),
+      upstream_sha: pin.upstream_sha, upstream_lock_sha256: pin.upstream_lock_sha256,
+      node: process.version, python: output(python, ['--version']), clean_plugin: clean,
+      // The evidence is written only after the clean build and its output
+      // comparisons have completed. The owning finally block removes the
+      // directory before the pipeline returns, so this is an asserted result.
+      clean_removed: true, clean_source_files: budget.files, clean_source_bytes: budget.bytes,
+      stages: ['contract', 'python-unit', 'ruff', 'node-unit', 'host-types', 'client-types', 'build', 'real-cordis-loader-synthetic-services', 'clean-rebuild'],
+      artifact_sha256: hashes, remote_ci_executed: false, native_dsh_profile_e2e: 'separate evidence required' };
+    await writeFile(join(b0, 'build-evidence.json'), JSON.stringify(report, null, 2) + '\n', { mode: 0o600 });
+    console.log(`B0 clean rebuild passed; source files=${budget.files}, source bytes=${budget.bytes}`);
+  } finally {
+    await removeCleanRoot(cleanOwner, cleanRoot);
+    cleanRemoved = true;
   }
-  await cp(join(shineWaterfall, 'src'), join(cleanRoot, 'shine-waterfall', 'src'), { recursive: true, errorOnExist: true, force: false, dereference: true });
-  await cp(join(shineFunnel, 'src'), join(cleanRoot, 'shine-funnel', 'src'), { recursive: true, errorOnExist: true, force: false, dereference: true });
-  await mkdir(join(clean, 'build-tools'));
-  for (const item of ['package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml', 'patches']) {
-    await cp(join(buildTools, item), join(clean, 'build-tools', item), { recursive: true });
-  }
-  run(process.execPath, [join(clean, 'build.mjs'), upstream, buildTools]);
-  run(process.execPath, ['--test', ...builtTests.map(file => join(clean, 'test', file))], clean, { B0_BUILD_UPSTREAM: upstream });
-  const hashes = {};
-  for (const item of ['index.js', 'tool.js', 'skills.js', 'client.js', 'views/saved-analysis-view.js', 'views/cockpit-view.js']) {
-    const original = await readFile(join(plugin, 'lib', item));
-    const rebuilt = await readFile(join(clean, 'lib', item));
-    assert.deepEqual(original, rebuilt, `Clean build output mismatch: ${item}`);
-    assert.ok(!/file:\/\/\/|\/Users\/|\/home\/runner\//.test(rebuilt.toString()), `Machine path in artifact: ${item}`);
-    hashes[item] = createHash('sha256').update(rebuilt).digest('hex');
-  }
-  const report = { schema_version: 'dsh-b0-build-evidence/v1', at: new Date().toISOString(),
-    upstream_sha: pin.upstream_sha, upstream_lock_sha256: pin.upstream_lock_sha256,
-    node: process.version, python: output(python, ['--version']), clean_plugin: clean,
-    stages: ['contract', 'python-unit', 'ruff', 'node-unit', 'host-types', 'client-types', 'build', 'real-cordis-loader-synthetic-services', 'clean-rebuild'],
-    artifact_sha256: hashes, remote_ci_executed: false, native_dsh_profile_e2e: 'separate evidence required' };
-  await writeFile(join(b0, 'build-evidence.json'), JSON.stringify(report, null, 2) + '\n', { mode: 0o600 });
-  console.log(`B0 pipeline passed; clean plugin: ${clean}`);
+  assert.equal(cleanRemoved, true, 'Clean build directory was not removed');
 }

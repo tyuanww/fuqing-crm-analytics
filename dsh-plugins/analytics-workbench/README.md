@@ -1,6 +1,6 @@
 # DSH Analytics Workbench · B0 only
 
-固定上游：`deepseek-ai/deepseek-harness@00102833dfaee1da9f48a3a8eae9d34005a75218`（sdk `0.1.7-alpha.2`，见 `toolchain.json`）。现役 6677 在重载前仍跑上一钉。私有本地验证包，不发布 npm，不包含模型密钥或真实数据。2026-09-06 已接独立 FastAPI B0 任务内核、固定方法包与当前权限接缝；完整 B0 仍为 PARTIAL，见[当前收口报告](../../docs/hackathon/B0-LOCAL-CLOSEOUT-2026-09-06.md)。
+固定上游：`deepseek-ai/deepseek-harness@46a7f68b0922371ce7144b668b90e377d8e799f4`（sdk `0.1.7-rc.1`，见 `toolchain.json`）。现役 6677 已加载该钉和本候选插件；旧 alpha2 checkout 保留用于回退。私有本地验证包，不发布 npm，不包含模型密钥或真实数据。2026-09-06 已接独立 FastAPI B0 任务内核、固定方法包与当前权限接缝；完整 B0 仍为 PARTIAL，见[当前收口报告](../../docs/hackathon/B0-LOCAL-CLOSEOUT-2026-09-06.md)。
 
 ## 整段说明编辑
 

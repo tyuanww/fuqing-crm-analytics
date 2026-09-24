@@ -1,6 +1,6 @@
 /** Full DSH base local-dev constants. Not the B0 synthetic verification runner. */
 
-export const PINNED_SHA = '00102833dfaee1da9f48a3a8eae9d34005a75218';
+export const PINNED_SHA = '46a7f68b0922371ce7144b668b90e377d8e799f4';
 export const NODE_MAJOR = 24;
 export const HOST = '127.0.0.1';
 
@@ -73,7 +73,7 @@ export const NATIVE_WEB_IDS = Object.freeze([
   'session-controller',
   'settings-controller',
   'workspace-controller',
-  'agent-presets',
+  'ui-agent-preset',
   'settings',
   'credentials',
   'llm-deepseek',

@@ -1,15 +1,15 @@
 # 项目状态 (Project Status)
-> 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。公开 main 基线 **bcc0ced9**。本分支 VERSION **0.18.0.0**。目录和端口见 [维护地图](docs/operating/maintainer-map.md)。现役 6677 仍是 0.16.0.2，重载前不换钉。产品仍 PARTIAL。
+> 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。公开 main 基线 **bcc0ced9**。本分支 VERSION **0.18.0.0**。目录和端口见 [维护地图](docs/operating/maintainer-map.md)。现役 6677 已切换到 DSH 0.1.7-rc.1 与本候选插件，产品仍 PARTIAL。
 
-## 当前快照（2026-09-23，DSH 钉 0.1.7-alpha.2 / 0.18.0.0）
+## 当前快照（2026-09-24，DSH 钉 0.1.7-rc.1 / 0.18.0.0）
 
 | 项 | 状态 |
 |---|---|
 | 已合代码基线 | **bcc0ced9（公开仓库 #53）**，产品提交是 #50 / 0.16.0.2，前序 #49。旧私有历史未合入。 |
 | 本轮交付 | 驾驶舱新增「产物收件箱」：自由 HTML 生成、原生呈现和工作区文件先登记为候选产物，驾驶舱显示待处理数量，用户确认后才关联正式页面；按 request/session/path 加内容哈希去重。 |
 | VERSION / 产品 | 本分支 **0.18.0.0**。合入前公开 main 仍是 **0.16.1.0**。产品 **PARTIAL**，原全量 Goal **PAUSED**。 |
-| DSH 基座 | 钉已改为 **0.1.7-alpha.2（00102833）**，现役 6677 仍在 **0.1.6-alpha.2（ddefc45f）**。不改上游源码。 |
-| 现役 | 6677 加载 `crm-public-release` 的 0.16.0.2 插件；控制登记与 runtime 留在原仓。CRM 18093 仍为 `crm-assets-public` 的 archive_dashboard，本轮未重启。 |
+| DSH 基座 | 已切换到 **0.1.7-rc.1（46a7f68b）**，上游源码保持只读；旧 alpha2 checkout 保留用于回退。 |
+| 现役 | 6677 加载 `dsh-017-rc1` 的插件与 RC1 上游；控制登记和持久 runtime 仍在原仓 runtime。页面文档 HTTP 为 18091；CRM 18093 未重启。 |
 | 原始数据 | 约131GB归档DuckDB不进Git；测试使用合成夹具与独立私有 SQLite。 |
 
 以下 2026-09-21 记录是 0.15 施工留档，不是 0.16.0.2 的当前计划。

@@ -43,7 +43,7 @@ const counts = tests => ({ passed: tests.filter(t => t.status === 'PASS').length
 const report = {
   schema_version: 'dsh-b0-evidence/v1', collected_at: new Date().toISOString(),
   verdict: 'PARTIAL_NOT_INTEGRATION_READY', synthetic_only: true, paid_model_calls: 0,
-  upstream_sha: '00102833dfaee1da9f48a3a8eae9d34005a75218',
+  upstream_sha: '46a7f68b0922371ce7144b668b90e377d8e799f4',
   raw_payloads_or_credentials_copied: false,
   sandbox: { passed: sandbox.results.filter(r => r.passed).length, total: sandbox.results.length },
   native_dependencies: { passed: nativeDependencies.results.filter(r => r.passed).length, total: nativeDependencies.results.length },
