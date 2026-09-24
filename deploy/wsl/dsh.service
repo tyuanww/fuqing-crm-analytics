@@ -1,0 +1,22 @@
+[Unit]
+Description=ShineMage DSH web runtime
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=REPLACE_WITH_LINUX_USER
+Group=REPLACE_WITH_LINUX_GROUP
+EnvironmentFile=/etc/shinemage/dsh.env
+WorkingDirectory=/srv/shinemage/src/fuqing-crm-analytics
+UMask=0077
+ExecStart=/usr/bin/env bash -lc 'exec "$DSH_NODE" "$DSH_REPO/scripts/dsh-dev/cli.mjs" start --plugin on --plugin-path "$DSH_REPO/dsh-plugins/analytics-workbench" --upstream "$DSH_UPSTREAM" --runtime "$DSH_RUNTIME" --host 127.0.0.1 --web-port 6677 --page-http on --page-http-port 18091'
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+KillMode=mixed
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

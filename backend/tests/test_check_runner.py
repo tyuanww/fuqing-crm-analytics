@@ -187,6 +187,13 @@ def test_dependency_ecosystems_are_independent_and_union_on_mixed_changes(paths,
     assert plan['dependencies'] == any(expected)
 
 
+def test_wsl_deployment_manifests_select_deployment_checks_without_backend_tests():
+    plan = verification_plan(['deploy/wsl/compose.production.yml'])
+    assert plan['deployment'] is True
+    assert plan['backend'] == 'none'
+    assert not plan['frontend']
+
+
 @pytest.mark.parametrize('path,frontend,ground_truth', [
     ('.github/workflows/nightly.yml', False, True),
     ('.github/workflows/e2e-smoke.yml', True, False),

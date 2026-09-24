@@ -1,0 +1,17 @@
+# Copy to /etc/cloudflared/config.yml after replacing the tunnel id and
+# credential path. Keep the credential file outside Git with mode 0600.
+#
+# The page endpoint is intentionally a separate hostname because the browser
+# bundle sends a bearer token to it. Do not expose WeKnora or Neo4j here.
+
+tunnel: REPLACE_WITH_TUNNEL_ID
+credentials-file: /etc/cloudflared/REPLACE_WITH_TUNNEL_ID.json
+
+ingress:
+  - hostname: www.tyuan.chat
+    service: http://127.0.0.1:18094
+  - hostname: app.tyuan.chat
+    service: http://127.0.0.1:6677
+  - hostname: page.tyuan.chat
+    service: http://127.0.0.1:18091
+  - service: http_status:404
