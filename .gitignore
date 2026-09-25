@@ -83,14 +83,9 @@ designs/
 
 # Agent 工具本地状态不入仓；根 AGENTS.md 是需版本控制的唯一行为正文。
 .agents/
-# 仅共享仓库交付技能；逐级放行父目录，再默认忽略其余内容。
+# Agent 工具目录不入仓；交付动作按根 AGENTS.md 与 GitHub PR 门禁执行。
 !/.agents/
 /.agents/*
-!/.agents/skills/
-/.agents/skills/*
-!/.agents/skills/ship-pr/
-/.agents/skills/ship-pr/*
-!/.agents/skills/ship-pr/SKILL.md
 .codex/
 !/AGENTS.md
 # Sprint 184 实战发现: HANDOFF-TO-CODEX-Sprint{N}.md 是 Stage 1 临时输出,
@@ -102,7 +97,7 @@ HANDOFF-TO-CODEX-*.md
 SPRINT*-CODEX-HANDOFF-PROMPT.md
 
 # Sprint 22.5+ claude-automation-recommender 落地 (跟 data/processed/etl_perf/ precedent 一致):
-# .claude/ 例外化让 settings.json (3 hooks) + skills/ (regen-types, ship-pr) 入仓, 团队共享.
+# .claude/ 仅保留 settings.json 与 regen-types 技能入口，交付流程不再复制仓库技能。
 # 父目录链必须逐级例外化（不要写 !.claude/，会把 .claude/ 全部重新包含进来）
 !.claude/settings.json
 !.claude/skills/

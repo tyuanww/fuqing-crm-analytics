@@ -30,6 +30,19 @@ CI 的 `lint` job 只安装从 `requirements-lock.txt` 读取的唯一 Ruff 精�
 
 可选工作流按消费者收窄，仍验证其实际后端/Vue 依赖，不把所有 workflow 改动当成纯文档。主 CI、共享计划、未知 workflow 和 `pre_push_path_class.py` / `run_checks.py` 保守扩大到完整矩阵；修改这些公共入口时不能用周检的缩小范围代替完整选择。B0/后端重叠测试、main push 检查及固定上游的干净构建仍保留。
 
+## Mac 开发与杭州生产的 Git 预检
+
+活动仓库只允许公共远端 `tyuanww/fuqing-crm-analytics`。Mac 上创建 feature 分支、跑本地检查并通过 PR；杭州只拉取已合入 `main` 的批准 SHA，不在服务器编辑或直接跟踪浮动分支。
+
+```bash
+git remote get-url origin
+git remote get-url --push origin
+git status --short --branch
+git branch --show-current
+```
+
+两条 remote URL 都应指向 `tyuanww/fuqing-crm-analytics`；发现旧账号、脏工作树或未批准的服务器分支时先停在预检。生产切换前，另核对杭州 checkout 的 SHA、容器配置和健康检查，不能把 `git push` 当成部署完成。
+
 ## 本地命令
 
 在目标仓库根目录执行。命令不安装依赖、不提交、不推送：

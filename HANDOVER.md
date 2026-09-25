@@ -12,7 +12,7 @@
 | 还欠什么？（M1 任务卡） | [`docs/hackathon/TODOS.md`](docs/hackathon/TODOS.md#m1-核心交付) |
 | 还欠什么？（运维债） | [`docs/TECH-DEBT.md`](docs/TECH-DEBT.md) |
 | 文档地图 | [`docs/README.md`](docs/README.md) |
-| 怎么合 PR | [`.agents/skills/ship-pr/SKILL.md`](.agents/skills/ship-pr/SKILL.md) |
+| 怎么合 PR | [Mac 开发到杭州生产链路](docs/operating/mac-hangzhou-git-workflow.md)；具体门禁以 GitHub PR checks 为准 |
 | 整洁规范 | [`docs/operating/project-hygiene.md`](docs/operating/project-hygiene.md) |
 
 ## 技术栈（摘要）
@@ -24,7 +24,7 @@
 ## 启动（开发机）
 
 ```bash
-cd "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics"
+cd "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics-public"
 git checkout main && git pull origin main --ff-only
 # 后端 / 前端按 README.md；hooks: bash scripts/setup-hooks.sh
 ```

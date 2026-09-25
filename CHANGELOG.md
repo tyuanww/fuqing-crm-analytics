@@ -66,6 +66,9 @@
 
 ## [Unreleased]
 
+- Mac 开发与杭州 WSL 生产部署统一使用 `tyuanww/fuqing-crm-analytics` 公共仓库；新增批准 SHA、回退和脏工作树预检说明。
+- 移除仓库内重复的 `ship-pr` 技能文件，交付入口改由根 `AGENTS.md`、GitHub PR 门禁和实际授权共同约束。
+
 - 接收后续 Ruff 0.16.8、Vue Query / Query Core 5.103.1、Axios 1.20.0 依赖提案，同步验证入口中的 Ruff 版本说明。
 
 - 继续接收依赖队列：Rive 2.42.2 及匹配的同源 WASM、PostCSS、Vue Test Utils、chardet、wheel、typing-inspection；提高 pytest-xdist 声明下限。阻止与 Pydantic 2.13.5 不匹配的 core 2.47–2.49 独立升级。

@@ -2,7 +2,7 @@
 
 > **当前入口（2026-09-06）**：行为规则只有 [AGENTS.md](../../AGENTS.md)。项目配置保留 PreToolUse 模式拦截和 PostToolUse 单文件 lint/契约提醒；已移除自动清理分支、SessionStart/Stop 全局检查及关键词触发扫描。模式拦截不是完整沙箱或动作授权，Claude hooks 也不等于 Codex hooks。
 >
-> `regen-types` 已区分 B0 离线契约和旧 CRM；`ship-pr` 只执行相应已授权 Git 动作。下文是变更前的历史实现与 MCP 记录，不再指示自动起服务、安装工具或走 12 步。最新盘查见 [规则统一报告](../hackathon/AGENT-RULES-AUDIT-2026-09-06.md)。
+> `regen-types` 已区分 B0 离线契约和旧 CRM；仓库内的 `ship-pr` 技能已移除，交付按根 `AGENTS.md`、GitHub PR 门禁和外部 gstack 技能执行。下文是变更前的历史实现与 MCP 记录，不再指示自动起服务、安装工具或走 12 步。最新盘查见 [规则统一报告](../hackathon/AGENT-RULES-AUDIT-2026-09-06.md)。
 
 > Sprint 22.5+ 用 `claude-automation-recommender` 扫 crm-analytics 项目后
 > 落地的 Claude Code 自动化配置. 详细推荐: 见 `CHANGELOG.md` v0.4.14.72 (Sprint 22.5+ ship 收口).
@@ -30,7 +30,7 @@
 **4 步**: 1) 启 uvicorn 临时 :8001  2) curl /openapi.json  3) `npx openapi-typescript` 生 types  4) `vue-tsc -b` 验 0 错.  
 **详**: `.claude/skills/regen-types/SKILL.md`.
 
-### ship-pr (P1-2)
+### ship-pr（历史记录，已移除）
 **触发**: 任何代码改动 ship 到 main.  
 **6 步**: 1) feat/fix branch  2) commit  3) push  4) `gh pr create`  5) CI 绿  6) `gh pr merge --squash`.  
 **替**: P3 session 直接 `git merge --no-ff main` 跳过 PR 流程.  
@@ -59,7 +59,7 @@ claude mcp add context7 -- npx -y @upstash/context7-mcp
 | ⑥ commit | (shell, pre-commit hook 兜底) |
 | ⑦ push | (shell) |
 | ⑧ qa | (qa skill, 当前 session) |
-| ⑨ merge | **ship-pr skill 推荐** (PR 模式) |
+| ⑨ merge | GitHub PR 门禁与实际授权（历史上曾由 ship-pr skill 编排） |
 | ⑩ push main | (PR 合并自动) |
 | ⑪ pull | (shell) |
 | ⑫ restart uvicorn | (shell) |
@@ -72,7 +72,7 @@ claude mcp add context7 -- npx -y @upstash/context7-mcp
 | 🔴 P0-2 | PostToolUse regen 提醒 | 10 min | ✅ ship |
 | 🔴 P0-3 | PostToolUse ruff | 5 min | ✅ ship |
 | 🟠 P1-1 | regen-types skill | 30 min | ✅ ship |
-| 🟠 P1-2 | ship-pr skill | 1h | ✅ ship |
+| 🟠 P1-2 | ship-pr skill（仓库内技能已移除） | 1h | ↗ 由 GitHub PR / 外部 gstack 接管 |
 | 🟡 P2-1 | MCP context7 | 1 min | ⏸ **待用户授权** |
 | 🟡 P2-2 | Subagent duckdb-optimizer | 1h | ⏸ Sprint 23+ |
 | 🟢 P3-1 | Skill duckdb-stress | 1h | ⏸ Sprint 23+ |

@@ -1,6 +1,6 @@
 # 维护地图
 
-给后来改这个仓库的人。当前提交和版本只看根目录 [STATUS.md](../../STATUS.md)。这里只写目录、端口和检索，不重复施工编年。
+给后来改这个仓库的人。当前提交和版本只看根目录 [STATUS.md](../../STATUS.md)。这里只写目录、端口、检索和开发/生产边界，不重复施工编年。
 
 ## 先搜哪里
 
@@ -13,9 +13,12 @@
 
 | 角色 | 放什么 | 不放什么 |
 |---|---|---|
-| 本仓库 `main` | 要改的产品代码和这份说明 | 131GB 归档库、运行时令牌、旧账号的整段历史 |
-| 本机原仓 | 驾驶舱运行时、归档 DuckDB、8000 与比赛前端进程的家 | 不要把这里的未提交草稿整仓推到公开 `main` |
-| `crm-assets-public` | 18093 的启动目录。进程的 `PYTHONPATH` 指向本仓库 | 不要把这个分支合并进 `main` |
+| Mac 公共开发 checkout | `git@github.com:tyuanww/fuqing-crm-analytics.git` 的 `main` 与 feature 分支 | 不放 131GB 归档库、运行时令牌或生产数据 |
+| Mac 归档 checkout | 旧 `weiweity` 历史，仅供取证和回溯 | 不配置活动 push，不从这里建新功能分支 |
+| 杭州 WSL 生产 checkout | `/srv/shinemage/src/fuqing-crm-analytics`，只检出已通过 CI 的明确 SHA | 不在服务器直接开发，不把未审查分支当生产 |
+| CRM 运行目录 | 杭州的生产数据与容器挂载 | 不把生产数据复制回公共 Git 或演示工作树 |
+
+开发和生产的完整步骤见 [Mac 开发到杭州生产链路](mac-hangzhou-git-workflow.md)。
 
 旧账号仓库和本仓库没有共同祖先。历史留在本机原仓。要进公开仓的功能，从当前 `main` 另起分支移植。
 

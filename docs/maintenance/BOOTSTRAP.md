@@ -6,8 +6,11 @@
 
 ```bash
 # 1. 拉 main
-git clone git@github.com:weiweity/fuqing-crm-analytics.git
+git clone git@github.com:tyuanww/fuqing-crm-analytics.git
 cd fuqing-crm-analytics
+
+# Mac 只做开发和验证；杭州生产只部署已合入 public main 的 SHA。
+# 具体 fetch、PR、批准 SHA 和回滚边界见 ../operating/mac-hangzhou-git-workflow.md。
 
 # 2. .claude/settings.json 已 commit (Sprint 68 修 .gitignore 例外化, line 94),
 #    但 per-dev local hook 可能被 .gitignore 覆盖, 验证一下:
