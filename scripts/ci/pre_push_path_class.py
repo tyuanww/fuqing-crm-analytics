@@ -226,6 +226,10 @@ def verification_plan(paths: list[str]) -> dict:
         elif p in {'Dockerfile', 'docker-compose.yml', '.dockerignore'}:
             plan['deployment'] = True
             plan['backend'] = 'full'
+        elif p.startswith('deploy/'):
+            # Deployment manifests and runbooks need the deployment axis even
+            # when they do not touch the application image itself.
+            plan['deployment'] = True
         elif p.startswith(('docs/operating/', 'docs/maintenance/')):
             plan['tooling'] = True
         elif p.startswith(GROUND_TRUTH_PREFIXES):

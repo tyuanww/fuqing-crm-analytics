@@ -2,9 +2,10 @@
 
  When the supervisor starts the isolated page-documents/result-access HTTP,
  it exports PAGE_DOCUMENTS_HTTP_BASE / PAGE_DOCUMENTS_HTTP_TOKEN and the
- PAGE_RESULT_* pair into the 6677 host process env. This row renders those
- values into index.html as `globalThis` rows, which is the only supported
- channel for the browser bundle (`page-http.mjs` falls back to
+ PAGE_RESULT_* pair into the 6677 host process env. This row renders the
+ browser-safe base (PAGE_*_BROWSER_BASE when configured, otherwise the local
+ base) and the bearer values into index.html as `globalThis` rows. This is the
+ only supported channel for the browser bundle (`page-http.mjs` falls back to
  `globalThis.__PAGE_*__`; build-time `process.env` is deliberately blanked).
  Without the env the row pushes nothing and the client keeps failing with
  `http_not_configured` — it never defaults to 6677.
@@ -21,15 +22,32 @@ function readPageEnv(env = process.env) {
   if (!base) return null;
   assert.ok(token.length >= 32, 'PAGE_DOCUMENTS_HTTP_TOKEN must be at least 32 chars when a base is set');
   assertNotLivePort(base);
+  const browserBase = String(env.PAGE_DOCUMENTS_BROWSER_BASE ?? '').replace(/\/$/, '') || base;
+  assertBrowserBase(browserBase, 'PAGE_DOCUMENTS_BROWSER_BASE');
   const resultBase = String(env.PAGE_RESULT_HTTP_BASE ?? '').replace(/\/$/, '') || base;
   assertNotLivePort(resultBase);
   const resultToken = String(env.PAGE_RESULT_HTTP_TOKEN ?? '') || token;
+  const browserResultBase = String(env.PAGE_RESULT_BROWSER_BASE ?? '').replace(/\/$/, '')
+    || (env.PAGE_RESULT_HTTP_BASE ? resultBase : browserBase);
+  assertBrowserBase(browserResultBase, 'PAGE_RESULT_BROWSER_BASE');
   return {
-    __PAGE_DOCUMENTS_HTTP_BASE__: base,
+    __PAGE_DOCUMENTS_HTTP_BASE__: browserBase,
     __PAGE_DOCUMENTS_HTTP_TOKEN__: token,
-    __PAGE_RESULT_HTTP_BASE__: resultBase,
+    __PAGE_RESULT_HTTP_BASE__: browserResultBase,
     __PAGE_RESULT_HTTP_TOKEN__: resultToken,
   };
+}
+
+function assertBrowserBase(value, name) {
+  assert.ok(value && !/[?#]/.test(value), `${name} must not contain query or fragment`);
+  assert.ok(!/@/.test(value), `${name} must not contain userinfo`);
+  const parsed = new URL(value);
+  assert.ok(parsed.pathname === '/' && !parsed.search && !parsed.hash,
+    `${name} must be an origin without a path`);
+  const loopback = parsed.hostname === '127.0.0.1' || parsed.hostname === 'localhost' || parsed.hostname === '::1';
+  assert.ok(parsed.protocol === 'https:' || (parsed.protocol === 'http:' && loopback),
+    `${name} must use HTTPS or a loopback HTTP origin`);
+  assertNotLivePort(value);
 }
 
 export function pageGlobalRows(env = process.env) {
