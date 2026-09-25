@@ -1,13 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, rm, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { brandAssets } from '../dsh-b0/brand-assets.mjs';
 import { join } from 'node:path';
 import { apply } from './brand.mjs';
+import { repoRoot } from './paths.mjs';
 
 
 test('native dev brand extension serves verified local assets', async () => {
+  const logo = await readFile(`${repoRoot}/frontend-vue3/src/assets/brand/shine-mage.png`);
+  if (logo.toString('utf8', 0, 44).startsWith('version https://git-lfs.github.com/spec/v1')) {
+    test.skip('Git LFS logo is a pointer in this checkout; run git lfs pull for asset-level verification');
+    return;
+  }
   const routes = new Map(), disposers = [];
   await apply({
     effect(fn) { const dispose = fn(); if (typeof dispose === 'function') disposers.push(dispose); },
