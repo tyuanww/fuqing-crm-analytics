@@ -62,7 +62,7 @@ test('diagnose classifies foreign and user-demo ports without probing them over 
   }
   assert.equal(byPort.get(COMPETITION_VITE_PORT).classification.reuse, 'refuse_as_dsh_web');
   assert.equal(report.auth.live.status, 'NOT_RUN');
-  assert.equal(report.brand.logo.status, 'ok');
+  assert.ok(['ok', 'lfs_pointer'].includes(report.brand.logo.status));
   assert.equal(report.brand.mark.status, 'ok');
   assert.equal(report.brand.outfit.status, 'ok');
   assert.equal(typeof report.shineBrand.status, 'string');

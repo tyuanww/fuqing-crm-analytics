@@ -33,8 +33,14 @@
 
 ## 快速开始
 
-1. 克隆本仓库并创建 feature 分支。当前提交、版本和现役状态看 [STATUS](./STATUS.md)。
-2. 先确认 Node 24 和 Python 3.14+，再运行 `node scripts/dsh-dev/cli.mjs diagnose` 做只读环境检查；本仓库没有 `.codegraph/` 时不需要初始化 CodeGraph。
+1. 从公共仓库克隆并创建 feature 分支。Mac 开发、杭州生产和回滚边界见 [Mac 开发到杭州生产链路](./docs/operating/mac-hangzhou-git-workflow.md)；当前提交、版本和现役状态看 [STATUS](./STATUS.md)。
+   ```bash
+   git clone https://github.com/tyuanww/fuqing-crm-analytics.git
+   cd fuqing-crm-analytics
+   git switch -c codex/<topic>
+   ```
+   GitHub CLI 用户可以先运行 `gh auth setup-git`，让 Git 使用当前 `tyuanww` 登录态。
+2. Node 24.19.0 已写入 `.nvmrc`。进入仓库后可运行 `nvm use`；没有 nvm 时直接用 `./scripts/dsh-dev/run.sh diagnose`，它会选择已安装的 Node 24。Python 仍要求 3.14+。本仓库没有 `.codegraph/` 时不需要初始化 CodeGraph。
 3. 端口、目录和哪份历史不要搜，见 [维护地图](./docs/operating/maintainer-map.md)。
 4. 驾驶舱怎么生成 HTML，见 [操作说明](./docs/operating/cockpit-native-html.md)。验证范围见 [当前验证入口](./docs/operating/verification.md)。完整 B0 检查命令是 `node scripts/dsh-b0/pipeline.mjs --check --python /absolute/python3.14`。
 
@@ -99,7 +105,7 @@ cd frontend-vue3 && npx playwright test                   # E2E
 | **文档总索引** | [`docs/README.md`](./docs/README.md) |
 | **版本变更** | [`CHANGELOG.md`](./CHANGELOG.md) · 老条目 `docs/history/CHANGELOG_HISTORY.md` |
 | **AI 行为规则** | [`AGENTS.md`](./AGENTS.md)（唯一正文；CLAUDE 仅导入）；旧 CRM L4 细则按主题查阅 |
-| **当前交付 / 整洁** | [`ship-pr`](./.agents/skills/ship-pr/SKILL.md)；历史协作参考 [`team-workflow-v1.md`](./docs/operating/team-workflow-v1.md) · [`project-hygiene.md`](./docs/operating/project-hygiene.md) |
+| **当前交付 / 整洁** | [Mac 开发到杭州生产链路](./docs/operating/mac-hangzhou-git-workflow.md)；历史协作参考 [`team-workflow-v1.md`](./docs/operating/team-workflow-v1.md) · [`project-hygiene.md`](./docs/operating/project-hygiene.md) |
 | **AI 增长董事会** | [`docs/hackathon/README.md`](./docs/hackathon/README.md) · [`MISSION-API.md`](./docs/hackathon/MISSION-API.md) |
 | **视觉与交互基线** | [`DESIGN.md`](./DESIGN.md) |
 

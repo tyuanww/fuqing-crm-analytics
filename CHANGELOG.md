@@ -13,6 +13,8 @@
 - 页面包的 `presentation` 字段随包一并回传，元数据列表仍只返回摘要。
 - DSH 固定到官方 `0.1.7-rc.1`（`46a7f68b`），插件随 RC1 适配；不修改 DSH 上游源码。
 - 干净重建改为源码白名单复制，限制 256 MiB、5 万文件和 32 层目录，拒绝符号链接/依赖树，使用标记目录、启动回收和 `finally` 清理，避免构建残留再次无界增长。
+- 开发入口新增 `.nvmrc` 和 `scripts/dsh-dev/run.sh`，自动选择 Node 24.19.0；README、引导和 Mac→杭州流程改用公共 HTTPS 仓库，并明确 `gh auth setup-git`，避免旧 SSH 身份导致新开发者推送失败。
+- `run.sh` 增加 `probe` 和 `open` 快捷入口：分别复核当前工作树的 401→cookie→200 认证链路，或打开当前工作树的已登记启动 URL，不会误连其他实例。
 
 ### Scope
 
@@ -65,6 +67,9 @@
 - 不改 DSH 上游。对话上方的工作区名和预设名仍由宿主绘制。AI 修改仍先进入原生对话，说明要求后再预览确认。
 
 ## [Unreleased]
+
+- Mac 开发与杭州 WSL 生产部署统一使用 `tyuanww/fuqing-crm-analytics` 公共仓库；新增批准 SHA、回退和脏工作树预检说明。
+- 移除仓库内重复的 `ship-pr` 技能文件，交付入口改由根 `AGENTS.md`、GitHub PR 门禁和实际授权共同约束。
 
 - 接收后续 Ruff 0.16.8、Vue Query / Query Core 5.103.1、Axios 1.20.0 依赖提案，同步验证入口中的 Ruff 版本说明。
 

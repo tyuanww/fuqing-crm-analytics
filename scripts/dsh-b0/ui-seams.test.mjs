@@ -8,6 +8,11 @@ import { BOARD_SAMPLE, BOARD_SAMPLE_PATH, resolveBoardSample, boardSampleHtml } 
 const root = fileURLToPath(new URL('../..', import.meta.url));
 
 test('original logo and cropped favicon match the approved bytes', async () => {
+  const sourceLogo = await readFile(resolve(root, 'frontend-vue3/src/assets/brand/shine-mage.png'));
+  if (sourceLogo.toString('utf8', 0, 44).startsWith('version https://git-lfs.github.com/spec/v1')) {
+    test.skip('Git LFS logo is a pointer in this checkout; run git lfs pull for asset-level verification');
+    return;
+  }
   const assets = await brandAssets(root);
   assert.deepEqual([...assets.keys()], ['/b0/brand/logo.png', '/favicon.svg']);
   const logo = assets.get('/b0/brand/logo.png').bytes;

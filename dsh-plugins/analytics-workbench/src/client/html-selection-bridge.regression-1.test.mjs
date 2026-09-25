@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import { insertBeforeBodyEnd } from './insert-before-body-end.mjs';
@@ -63,7 +63,7 @@ test('minified selection script still parses after injection', { skip: loadEsbui
   const dir = mkdtempSync(join(tmpdir(), 'qa-selection-'));
   const outfile = join(dir, 'bridge.mjs');
   await esbuild.build({
-    absWorkingDir: new URL('.', import.meta.url).pathname,
+    absWorkingDir: fileURLToPath(new URL('.', import.meta.url)),
     entryPoints: ['html-selection-bridge.mjs'],
     bundle: true,
     format: 'esm',

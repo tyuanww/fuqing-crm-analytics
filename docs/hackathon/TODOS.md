@@ -101,7 +101,7 @@
 
 - [x] P1/#131：owned 启动器可靠性已合入。
 - [x] P2/#132：13 文件计算事实包及 R4 数值接受规则已合入；不要重新提交原树中的旧 P2 快照。
-- [x] #133：仓库专属 [ship-pr](../../.agents/skills/ship-pr/SKILL.md) 已纳管。
+- [x] #133：仓库专属 `ship-pr` 曾纳管；现已移除，交付按根 `AGENTS.md`、GitHub PR 门禁和实际授权执行。
 - [x] P3/P4 + AI-1/#134：107文件组合包已合入 `12a21de`，PR及该main CI均通过；含已复核的S1-A解释器便携性补丁，不重复发返修卡。不是M1／S2完成。
 - [x] P5文档整理：按 document-release 更新当前入口、变更记录、未完成项，由独立文档PR交付；PR合并状态以实际Git回执为准。
 - [x] S2-C1/#136：同会话 `saved_boards` 已合入 `b7dbc7b`。PR CI 通过；该 main CI 首次 `b0-contract-build` 失败后重跑通过，失败记录保留。有界合成措辞复验已做；本人 UAT 与合入后运行验收仍 NOT_RUN。不是 M1／S2 完成。

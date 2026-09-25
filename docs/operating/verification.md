@@ -30,6 +30,19 @@ CI 的 `lint` job 只安装从 `requirements-lock.txt` 读取的唯一 Ruff 精�
 
 可选工作流按消费者收窄，仍验证其实际后端/Vue 依赖，不把所有 workflow 改动当成纯文档。主 CI、共享计划、未知 workflow 和 `pre_push_path_class.py` / `run_checks.py` 保守扩大到完整矩阵；修改这些公共入口时不能用周检的缩小范围代替完整选择。B0/后端重叠测试、main push 检查及固定上游的干净构建仍保留。
 
+## Mac 开发与杭州生产的 Git 预检
+
+活动仓库只允许公共远端 `tyuanww/fuqing-crm-analytics`。Mac 上创建 feature 分支、跑本地检查并通过 PR；杭州只拉取已合入 `main` 的批准 SHA，不在服务器编辑或直接跟踪浮动分支。
+
+```bash
+git remote get-url origin
+git remote get-url --push origin
+git status --short --branch
+git branch --show-current
+```
+
+两条 remote URL 都应指向 `tyuanww/fuqing-crm-analytics`；发现旧账号、脏工作树或未批准的服务器分支时先停在预检。生产切换前，另核对杭州 checkout 的 SHA、容器配置和健康检查，不能把 `git push` 当成部署完成。
+
 ## 本地命令
 
 在目标仓库根目录执行。命令不安装依赖、不提交、不推送：
@@ -46,6 +59,8 @@ python3 scripts/run_backend_tests_bounded.py backend/tests/test_local_demo_acces
 ```
 
 包含 B0/Vue 的检查会先核对 Node 24，再运行耗时步骤；手工入口可用 `--node /absolute/node` 选择已有解释器。Git hook 继承调用 shell 的 PATH，需要在该次操作中选用已有 Node 24，不自动安装或修改全局版本。ruff 锁 `0.16.8`，`pyproject.toml` 的 `lint.select` 为 `E4/E7/E9/F`（0.15 默认集）；不要用无 select 的 `ruff check .` 去套 0.16 的 413 条默认规则。
+
+DSH 本地开发可直接用 `./scripts/dsh-dev/run.sh diagnose`、`check` 和 `probe`；包装器读取 `.nvmrc` 约定并自动选择 Node 24.19.0，不修改系统 Node。没有标准 Homebrew 路径时设置 `DSH_DEV_NODE=/absolute/node24`。
 
 B0 独立入口：`node scripts/dsh-b0/pipeline.mjs --check --python /absolute/python3.14`；不带参数或传 `--help` 会打印用法，不启动任何服务。`--prepare` 会下载固定上游和安装构建依赖，属于另一个明确动作。插件 `package.json` 的 `test` 是部分源测试便捷入口，`test:built` 也只有一个子集，均不能作为完整 B0 通过声明。原生查询资产需显式 `node scripts/dsh-b0/serve.mjs --python /absolute/python3.14 --native-query-assets`，不替代默认 `--native-query`。离线分析/驾驶舱合同用 `scripts/dsh-b0/analysis-contract.mjs` 与 `cockpit-contract.mjs`，不启动旧 CRM。旧 Vue 的依赖由 `frontend-vue3/package-lock.json` 管理，B0 的固定版本由 toolchain/自身锁管理，旧后端由 requirements-lock 管理；此轮未升级依赖。
 

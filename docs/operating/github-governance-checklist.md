@@ -4,7 +4,7 @@
 > 代码侧无法可靠用 API 断言「已启用 branch protection / secret scanning」等组织级设置。  
 > **不要**在文档或 CI 中假装这些开关已经打开；合并本 PR 后由仓库管理员按下列项逐项在 GitHub UI 确认。
 
-仓库：`weiweity/fuqing-crm-analytics`（以实际 remote 为准）
+仓库：`tyuanww/fuqing-crm-analytics`（公共仓库；以实际 remote 为准）
 
 ## 1. 分支保护（`main`）
 
@@ -78,10 +78,10 @@ persist-credentials: false
 
 ```bash
 # 查看 branch protection（需 admin + gh auth）
-gh api repos/weiweity/fuqing-crm-analytics/branches/main/protection || echo "未启用或无权限"
+gh api repos/tyuanww/fuqing-crm-analytics/branches/main/protection || echo "未启用或无权限"
 
 # 查看 vulnerability alerts（需权限）
-gh api repos/weiweity/fuqing-crm-analytics/vulnerability-alerts -i || true
+gh api repos/tyuanww/fuqing-crm-analytics/vulnerability-alerts -i || true
 ```
 
 若 API 返回 404/403：**记录为「未确认」**，不要在文档写「已启用」。
