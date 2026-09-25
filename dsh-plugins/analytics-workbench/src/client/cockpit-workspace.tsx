@@ -464,7 +464,7 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
             <ul>{pendingArtifacts.map(item => <li key={item.artifact_id} className="cockpit-inbox-row">
               <div><strong>{item.title}</strong><small>{item.source} · {item.session_id} · {item.status} · <time data-testid="artifact-inbox-time">{formatArtifactTime(item)}</time></small></div>
               <div className="cockpit-inbox-actions">
-                {page.importCandidate?.artifact_id === item.artifact_id ? <button className="cockpit-primary" disabled={busy || uncertain || !pageStore} onClick={() => runInboxAction(() => pageStore?.confirmImport())}>确认保存</button>
+                {page.importCandidate?.artifact_id === item.artifact_id ? <button className="cockpit-primary" disabled={busy || uncertain || !pageStore} onClick={() => runInboxAction(async () => { await pageStore?.confirmImport(); })}>确认保存</button>
                   : <button disabled={busy || uncertain || !pageStore} onClick={() => runInboxAction(() => previewInboxArtifact(item))}>预览</button>}
                 {item.path && item.session_id ? <button disabled={busy || uncertain || !openWorkspaceFile} onClick={() => guard(() => openInboxArtifact(item))}>在 DSH 中查看</button> : null}
                 <button disabled={busy || uncertain} onClick={() => runInboxAction(() => dismissInboxArtifact(item))}>丢弃</button>
