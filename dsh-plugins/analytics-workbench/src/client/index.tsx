@@ -790,11 +790,19 @@ export function apply(ctx: Context): void {
   const listWorkspaceFiles = async () => (await delivery.refresh()).files;
   const openWorkspaceFile = (product: { sessionId?: string; path?: string }) => {
     const openResource = (ctx as unknown as { sidebarRight?: { openResource?(address: string): void } }).sidebarRight?.openResource;
-    if (!product?.sessionId || !product?.path || typeof openResource !== 'function') return;
-    if (!isSafeWorkspaceRelPath(product.path)) return;
+    if (!product?.sessionId || !product?.path || typeof openResource !== 'function') return false;
+    if (!isSafeWorkspaceRelPath(product.path)) return false;
     const address = fileResourceAddress(product.sessionId, product.path);
-    if (!address) return;
-    openResource(address);
+    if (!address) return false;
+    try {
+      openResource(address);
+      return true;
+    } catch {
+      // The host throws when the sidebar-right seat is not currently mounted
+      // or claimed. Keep this host quirk inside the adapter so the cockpit can
+      // offer its own preview instead of exposing a raw `require` error.
+      return false;
+    }
   };
   const readWorkspaceFile = async (product: { sessionId?: string; path?: string }) => {
     if (!product.sessionId || !product.path) return null;

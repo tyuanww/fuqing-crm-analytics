@@ -97,6 +97,23 @@ test('the prompt is absent until a leave intent needs it', async t => {
   assert.equal(ui.doc.querySelector('[data-testid=leave-prompt]'), null);
 });
 
+test('a clean navigation failure does not become a false unsaved-change prompt', async t => {
+  const ui = await domFixture(t);
+  const coordinator = createLeaveCoordinator({
+    snapshot: () => ({ preview: null }),
+    beginEpoch: kind => ({ epoch: 1, kind, signal: new AbortController().signal, abort() {} }),
+    save: async () => ({ ok: true }),
+    discard: async () => ({ ok: true }),
+    navigate: async () => { throw new Error('宿主导航不可用'); },
+  });
+  await ui.render(React.createElement(LeavePrompt, { coordinator }));
+  await ui.trigger(() => { void coordinator.request({ kind: 'asset' }); });
+  assert.equal(ui.doc.querySelector('[data-testid=leave-prompt]'), null,
+    'a clean navigation error must not render the dirty-page prompt');
+  assert.equal(coordinator.getSnapshot().status, 'idle');
+  assert.equal(coordinator.getSnapshot().message, '宿主导航不可用');
+});
+
 test('a dirty page shows all three choices, the page name and the reasons', async t => {
   const ui = await domFixture(t);
   const saved = snap();

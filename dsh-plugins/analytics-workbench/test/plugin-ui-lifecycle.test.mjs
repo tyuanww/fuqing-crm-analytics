@@ -255,6 +255,9 @@ test('account menu lists the competition board as a new-tab link', () => {
     assert.match(html, /比赛看板/);
     assert.match(html, /data-testid="legacy-board-open"/);
     assert.match(html, /href="https:\/\/board\.tyuan\.chat\/"/);
+    assert.match(html, /知识库/);
+    assert.match(html, /data-testid="knowledge-base-open"/);
+    assert.match(html, /href="https:\/\/learn\.tyuan\.chat\/"/);
     assert.match(html, /target="_blank"/);
     assert.match(html, /rel="noopener noreferrer"/);
     assert.match(html, />设置</);

@@ -54,7 +54,7 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
   delivery?: ReturnType<typeof createCockpitDelivery>;
   fileClient?: CockpitFileClient; aiClient?: CockpitAIClient;
   listWorkspaceFiles?: () => Promise<Array<Record<string, unknown>>>;
-  openWorkspaceFile?: (product: Record<string, unknown>) => void;
+  openWorkspaceFile?: (product: Record<string, unknown>) => boolean | void;
   readWorkspaceFile?: (product: Record<string, unknown>) => Promise<string | null>;
 }) {
   const state = useSyncExternalStore(library.subscribe, library.getSnapshot);
@@ -177,6 +177,16 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
     void coordinator.request({ kind: 'asset', performLocal: action }).then(result => {
       if (result === 'busy') setNotice('上一步还在处理，请稍候再试。');
       if (result === 'prompt') setNotice('有未保存修改。请先保存或放弃，再继续。');
+      if (result === 'stayed' && coordinator.getSnapshot().message) setNotice(coordinator.getSnapshot().message);
+    });
+  };
+  // Inbox actions mutate the candidate state inside the cockpit. They are not
+  // navigation and must not enter the leave coordinator; a pending candidate
+  // is itself reported as dirty by the coordinator for real navigation only.
+  const runInboxAction = (action: () => void | Promise<void>) => {
+    if (busy || uncertain) return;
+    void Promise.resolve(action()).catch(error => {
+      setNotice(error instanceof Error ? error.message : '产物操作失败，请重试。');
     });
   };
   const back = () => { if (busy) return; if (leaveCoordinator) goConversation(); else guard(goConversation); };
@@ -338,7 +348,8 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
   };
   const openInboxArtifact = (item: ArtifactReceipt) => {
     if (!openWorkspaceFile || !item.session_id || !item.path) { setNotice('这份产物没有可打开的 DSH 来源。'); return; }
-    openWorkspaceFile({ sessionId: item.session_id, path: item.path, title: item.title });
+    const opened = openWorkspaceFile({ sessionId: item.session_id, path: item.path, title: item.title });
+    if (opened === false) throw new Error('此产物的 DSH 会话尚未挂载，暂不能在侧栏打开；可直接在驾驶舱预览。');
   };
   const addFiles = async (input: FileList | null) => {
     if (!input || !fileClient) return;
@@ -453,10 +464,10 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
             <ul>{pendingArtifacts.map(item => <li key={item.artifact_id} className="cockpit-inbox-row">
               <div><strong>{item.title}</strong><small>{item.source} · {item.session_id} · {item.status} · <time data-testid="artifact-inbox-time">{formatArtifactTime(item)}</time></small></div>
               <div className="cockpit-inbox-actions">
-                {page.importCandidate?.artifact_id === item.artifact_id ? <button className="cockpit-primary" disabled={busy || uncertain || !pageStore} onClick={() => guard(() => { void pageStore?.confirmImport(); })}>确认保存</button>
-                  : <button disabled={busy || uncertain || !pageStore} onClick={() => guard(() => previewInboxArtifact(item))}>预览</button>}
+                {page.importCandidate?.artifact_id === item.artifact_id ? <button className="cockpit-primary" disabled={busy || uncertain || !pageStore} onClick={() => runInboxAction(async () => { await pageStore?.confirmImport(); })}>确认保存</button>
+                  : <button disabled={busy || uncertain || !pageStore} onClick={() => runInboxAction(() => previewInboxArtifact(item))}>预览</button>}
                 {item.path && item.session_id ? <button disabled={busy || uncertain || !openWorkspaceFile} onClick={() => guard(() => openInboxArtifact(item))}>在 DSH 中查看</button> : null}
-                <button disabled={busy || uncertain} onClick={() => guard(() => dismissInboxArtifact(item))}>丢弃</button>
+                <button disabled={busy || uncertain} onClick={() => runInboxAction(() => dismissInboxArtifact(item))}>丢弃</button>
               </div>
             </li>)}</ul>
           </section> : null}
