@@ -16,9 +16,12 @@
 ## Mac 开发流程
 
 ```bash
-git clone git@github.com:tyuanww/fuqing-crm-analytics.git
+git clone https://github.com/tyuanww/fuqing-crm-analytics.git
 cd fuqing-crm-analytics
 git switch -c codex/<topic>
+
+# 只需首次执行；使用当前 tyuanww GitHub 登录态
+gh auth setup-git
 
 # 修改后先检查工作树，再按受影响范围运行验证入口
 git status --short --branch
@@ -29,6 +32,16 @@ git commit -m "<具体变更>"
 git push -u origin codex/<topic>
 gh pr create --base main --head codex/<topic>
 ```
+
+DSH 本地入口固定 Node 24.19.0。优先运行 `nvm use`；没有 nvm 时直接使用仓库包装器，它不会修改全局 Node：
+
+```bash
+./scripts/dsh-dev/run.sh diagnose
+./scripts/dsh-dev/run.sh check --plugin off --upstream /absolute/pinned/dsh
+./scripts/dsh-dev/run.sh open
+```
+
+如果 Node 24 不在标准 Homebrew 路径，可设置 `DSH_DEV_NODE=/absolute/path/to/node24`。`diagnose` 只读；`check`、`start` 和 `reload` 仍遵守本文件的端口与服务边界。
 
 PR 的 CI、代码审查和人工验收通过后才合入 `main`。`git push` 只发布分支，不会自动更新杭州生产。
 

@@ -6,8 +6,11 @@
 
 ```bash
 # 1. 拉 main
-git clone git@github.com:tyuanww/fuqing-crm-analytics.git
+git clone https://github.com/tyuanww/fuqing-crm-analytics.git
 cd fuqing-crm-analytics
+
+# 使用当前 tyuanww GitHub 登录态，避免旧 SSH key 指向已停用账号
+gh auth setup-git
 
 # Mac 只做开发和验证；杭州生产只部署已合入 public main 的 SHA。
 # 具体 fetch、PR、批准 SHA 和回滚边界见 ../operating/mac-hangzhou-git-workflow.md。
@@ -20,6 +23,9 @@ cat .claude/settings.json | python3 -c "import json, sys; d=json.load(sys.stdin)
 # 3. 跑留尾 SSOT 治理 hook 测试 (3/3 应 PASS)
 python3 -m pytest backend/tests/test_check_remaining_tasks.py -v
 # 期望: 3 passed in 0.3s
+
+# DSH 开发入口自动选择 Node 24；无需把系统 Node 切到 24
+./scripts/dsh-dev/run.sh diagnose
 ```
 
 ## 2. L4.12 留尾 SSOT 治理 (Sprint 67 收口)

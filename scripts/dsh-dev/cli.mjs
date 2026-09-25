@@ -15,7 +15,7 @@ import { randomBytes } from 'node:crypto';
 import { bootHost, dumpConfig, installProfilePlugin, isolatedEnv, parseServeArgs, prepareRuntime, readCurrent, runOwnedSupervisor, stopOwned, watchOwnedStart } from './serve.mjs';
 import { diagnose, printDiagnose } from './diagnose.mjs';
 
-const USAGE = `Usage: node scripts/dsh-dev/cli.mjs <check|dump-config|start|stop|status|diagnose|reload>
+const USAGE = `Usage: node scripts/dsh-dev/cli.mjs <check|dump-config|start|stop|status|diagnose|reload|open>
   --upstream /absolute/pinned/dsh
   --plugin on|off
   --plugin-path /absolute/workbench
@@ -52,7 +52,7 @@ Launch tokens are never printed. Unauthenticated GET / must stay 401.`;
 function parseArgv(argv) {
   if (argv.length === 0 || argv[0] === '--help' || argv[0] === '-h') return { command: 'help' };
   const [command, ...rest] = argv;
-  if (!['check', 'dump-config', 'start', 'stop', 'status', 'diagnose', 'reload'].includes(command)) {
+  if (!['check', 'dump-config', 'start', 'stop', 'status', 'diagnose', 'reload', 'open'].includes(command)) {
     return { command: 'invalid', options: { message: `Unknown command: ${command}` } };
   }
   if (command === 'reload') {
@@ -63,7 +63,7 @@ function parseArgv(argv) {
     options.runtime = options.runtime ?? defaultRuntimeRoot();
     return { command, options };
   }
-  if (command === 'stop' || command === 'status' || command === 'diagnose') {
+  if (command === 'stop' || command === 'status' || command === 'diagnose' || command === 'open') {
     if (command === 'diagnose') {
       const upstreamFlag = rest.indexOf('--upstream');
       const options = {};
@@ -220,6 +220,12 @@ async function openLaunchUrl(runtime) {
   console.log(`DSH_DEV_OPEN ${priv.launchOrigin}/ (launch token not printed)`);
 }
 
+async function runOpen() {
+  const current = await readCurrent();
+  assert.ok(current?.runtime, 'no owned DSH runtime; start or reload this worktree first');
+  await openLaunchUrl(current.runtime);
+}
+
 function buildLocalPlugin(dir) {
   const built = spawnSync(process.execPath, [join(dir, 'build.mjs')], {
     cwd: dir, stdio: 'inherit', env: process.env, timeout: 180000,
@@ -355,4 +361,5 @@ if (isCliEntry()) {
     const result = await stopOwned();
     console.log(result.stopped ? 'DSH_DEV_STOPPED acknowledged by owned supervisor' : 'DSH_DEV_STATUS stopped');
   } else if (command === 'status') await runStatus();
+  else if (command === 'open') await runOpen();
 }

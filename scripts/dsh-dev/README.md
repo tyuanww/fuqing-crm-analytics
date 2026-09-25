@@ -6,6 +6,18 @@
 
 ## 命令
 
+所有命令都可以通过 `run.sh` 自动选择 Node 24，不需要先改全局 Node：
+
+```bash
+./scripts/dsh-dev/run.sh diagnose
+./scripts/dsh-dev/run.sh check --plugin off --upstream /absolute/pinned/dsh
+./scripts/dsh-dev/run.sh probe
+./scripts/dsh-dev/run.sh open
+```
+
+`run.sh probe` 只检查当前工作树自己登记的实例：未认证请求应返回 401，启动 URL 兑换一次 cookie 后页面应返回 200。它不会打印 token，也不会探测杭州或其他工作树的端口。
+`run.sh open` 只打开当前工作树自己保存的启动 URL；没有当前实例时会明确报错，不会猜测或打开 6677。
+
 2026-09-24 现役归属：6677 / 18091 使用 `dsh-017-rc1` 工作树代码和 RC1 上游；supervisor 控制登记与 durable runtime 仍在原仓。CRM 18093 未重启。下列 `status` / `stop` / `probe` 在拥有 `current.json` 的工作树执行；默认 `reload` 会重编其所在仓库源码，不能用旧仓源码覆盖当前现役。旧 alpha2 checkout 保留用于回退。
 
 ```bash
