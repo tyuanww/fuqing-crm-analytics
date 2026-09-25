@@ -11,7 +11,7 @@
 | 杭州 WSL `/srv/shinemage/src/fuqing-crm-analytics` | 生产 checkout | 只检出批准 SHA；不在服务器改代码 |
 | 杭州 `/srv/shinemage/data`、`/srv/shinemage/dsh`、`/srv/shinemage/weknora` | 运行数据和持久 runtime | 不进 Git，不从服务器反向提交 |
 
-旧 `weiweity` checkout 仅作为本机归档取证，不是开发入口，也不配置活动 push。
+旧账号 checkout 仅作为本机归档取证，不是开发入口，也不配置活动 push。
 
 ## Mac 开发流程
 

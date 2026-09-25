@@ -14,7 +14,7 @@
 | 角色 | 放什么 | 不放什么 |
 |---|---|---|
 | Mac 公共开发 checkout | `git@github.com:tyuanww/fuqing-crm-analytics.git` 的 `main` 与 feature 分支 | 不放 131GB 归档库、运行时令牌或生产数据 |
-| Mac 归档 checkout | 旧 `weiweity` 历史，仅供取证和回溯 | 不配置活动 push，不从这里建新功能分支 |
+| Mac 归档 checkout | 旧账号历史，仅供取证和回溯 | 不配置活动 push，不从这里建新功能分支 |
 | 杭州 WSL 生产 checkout | `/srv/shinemage/src/fuqing-crm-analytics`，只检出已通过 CI 的明确 SHA | 不在服务器直接开发，不把未审查分支当生产 |
 | CRM 运行目录 | 杭州的生产数据与容器挂载 | 不把生产数据复制回公共 Git 或演示工作树 |
 
