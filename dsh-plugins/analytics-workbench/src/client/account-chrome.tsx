@@ -13,6 +13,7 @@ import {
 export { clearAccountIdentity, readAccountIdentity, writeAccountIdentity } from './account-identity.mjs';
 
 const LEGACY_BOARD_URL = 'https://board.tyuan.chat/';
+const KNOWLEDGE_BASE_URL = 'https://learn.tyuan.chat/';
 const THEME_OPTIONS = [
   { id: 'light', label: '日间' },
   { id: 'dark', label: '夜晚' },
@@ -262,6 +263,13 @@ function BoardIcon() {
   </svg>;
 }
 
+function KnowledgeIcon() {
+  return <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <path d="M3 3.2c1.9-.7 3.4-.3 5 1v8.6c-1.6-1.3-3.1-1.7-5-1V3.2Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+    <path d="M13 3.2c-1.9-.7-3.4-.3-5 1v8.6c1.6-1.3 3.1-1.7 5-1V3.2Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+  </svg>;
+}
+
 function GearIcon() {
   return <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
     <circle cx="8" cy="8" r="2.2" stroke="currentColor" strokeWidth="1.4" />
@@ -377,6 +385,9 @@ export function AccountMenu(props: MenuProps) {
       <a className="sm-account-row" href={LEGACY_BOARD_URL} target="_blank" rel="noopener noreferrer"
         data-testid="legacy-board-open" onClick={() => props.actions.closeMenu()}>
         <BoardIcon />比赛看板</a>
+      <a className="sm-account-row" href={KNOWLEDGE_BASE_URL} target="_blank" rel="noopener noreferrer"
+        data-testid="knowledge-base-open" onClick={() => props.actions.closeMenu()}>
+        <KnowledgeIcon />知识库</a>
       <button type="button" className="sm-account-row" data-testid="shine-account-settings" onClick={openSettings}>
         <GearIcon />设置</button>
     </div> : null}

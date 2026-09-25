@@ -31,6 +31,7 @@
 | `https://app.tyuan.chat` | `127.0.0.1:6677` | 驾驶舱 |
 | `https://page.tyuan.chat` | `127.0.0.1:18091` | 页面接口。根路径 404 是预期 |
 | `https://board.tyuan.chat` | `127.0.0.1:15173` | 比赛看板 |
+| `https://learn.tyuan.chat` | `127.0.0.1:18090` | WeKnora 知识库；仍由 WeKnora 自身登录保护 |
 
 | 只在本机 | 作用 |
 |---|---|
