@@ -96,6 +96,10 @@ test('cockpit main source mounts BoardSpecCanvas and keeps 返回对话', () => 
   assert.match(workspaceSource, /artifact-inbox-time/);
   assert.match(workspaceSource, /在 DSH 中查看/);
   assert.match(workspaceSource, /确认保存/);
+  assert.match(workspaceSource, /const runInboxAction =/);
+  assert.doesNotMatch(workspaceSource, /onClick=\{\(\) => guard\(\(\) => previewInboxArtifact/);
+  assert.doesNotMatch(workspaceSource, /onClick=\{\(\) => guard\(\(\) => dismissInboxArtifact/);
+  assert.match(indexSource, /try \{\s*openResource\(address\);\s*return true;/s);
   assert.match(pageEditorSource, /html-structured-styles/);
   assert.match(pageEditorSource, /STRUCTURED_STYLE_FIELDS/);
   assert.match(pageEditorSource, /background-color/);

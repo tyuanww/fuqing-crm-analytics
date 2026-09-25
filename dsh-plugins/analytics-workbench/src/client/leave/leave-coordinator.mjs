@@ -56,7 +56,12 @@ export function createLeaveCoordinator({ snapshot, beginEpoch, save, discard, na
     try {
       await navigate(intent, { epoch: intent.epoch });
     } catch (error) {
-      update({ status: 'prompting', message: error instanceof Error ? error.message : '导航未完成，已留在当前页。' });
+      // A host navigation failure is not an unsaved-change prompt. Keeping the
+      // coordinator in `prompting` made the leave dialog claim that there was
+      // dirty work even for a clean page (and left the failed intent locked).
+      // Preserve the message for the caller to surface as a normal notice,
+      // while returning the coordinator to a retryable idle state.
+      update({ status: 'idle', intent: null, reasons: [], message: error instanceof Error ? error.message : '导航未完成，已留在当前页。' });
       return 'stayed';
     }
     intent.performed = true;
