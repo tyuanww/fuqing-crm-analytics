@@ -1,0 +1,30 @@
+# Production override for the single Hangzhou WSL host.
+#
+# This file deliberately contains CRM only. DSH and WeKnora have different
+# lifecycles and are managed by dsh.service and their own private service
+# definitions. Never point this file at /srv/shinemage/incoming.
+
+services:
+  backend:
+    ports: !override
+      - "127.0.0.1:${CRM_API_PORT:-18093}:8001"
+    volumes: !override
+      - "${CRM_DATA_ROOT:?CRM_DATA_ROOT must point at the finalized data directory}:/app/data"
+      - "${SHOP_DATA_SOURCE:?SHOP_DATA_SOURCE is required}:/data/sources/shop:ro"
+      - "${MEMBER_DATA_SOURCE:?MEMBER_DATA_SOURCE is required}:/data/sources/member:ro"
+    env_file: !override
+      - "${CRM_ENV_FILE:?CRM_ENV_FILE must point at a private env file}"
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  frontend:
+    ports: !override
+      - "127.0.0.1:${CRM_WEB_PORT:-18094}:8080"
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "5"
