@@ -82,6 +82,8 @@ test('isolatedEnv forwards PAGE_* only when configured and never a 6677 base', (
     PAGE_DOCUMENTS_HTTP_TOKEN: 'forwarded-isolated-page-token-32ch',
     PAGE_RESULT_HTTP_BASE: 'http://127.0.0.1:18091',
     PAGE_RESULT_HTTP_TOKEN: 'forwarded-result-page-token-32ch',
+    PAGE_DOCUMENTS_BROWSER_BASE: 'https://page.tyuan.chat',
+    PAGE_RESULT_BROWSER_BASE: 'https://page.tyuan.chat',
   };
   const prior = Object.fromEntries(Object.keys(additions).map(key => [key, process.env[key]]));
   try {
@@ -93,6 +95,8 @@ test('isolatedEnv forwards PAGE_* only when configured and never a 6677 base', (
     assert.equal(forwarded.PAGE_DOCUMENTS_HTTP_TOKEN, 'forwarded-isolated-page-token-32ch');
     assert.equal(forwarded.PAGE_RESULT_HTTP_BASE, 'http://127.0.0.1:18091');
     assert.equal(forwarded.PAGE_RESULT_HTTP_TOKEN, 'forwarded-result-page-token-32ch');
+    assert.equal(forwarded.PAGE_DOCUMENTS_BROWSER_BASE, 'https://page.tyuan.chat');
+    assert.equal(forwarded.PAGE_RESULT_BROWSER_BASE, 'https://page.tyuan.chat');
     process.env.PAGE_DOCUMENTS_HTTP_BASE = 'http://127.0.0.1:6677';
     assert.throws(() => isolatedEnv('/tmp/runtime', '/tmp/runtime/harness'), /must not target the live web port 6677/);
     process.env.PAGE_DOCUMENTS_HTTP_BASE = 'http://127.0.0.1:18091';
@@ -109,6 +113,7 @@ test('page globals rows mirror the env and refuse 6677; absent env injects nothi
   const additions = {
     PAGE_DOCUMENTS_HTTP_BASE: 'http://127.0.0.1:18091',
     PAGE_DOCUMENTS_HTTP_TOKEN: 'globals-page-documents-token-32ch',
+    PAGE_DOCUMENTS_BROWSER_BASE: 'https://page.tyuan.chat',
   };
   const prior = Object.fromEntries(Object.keys(additions).map(key => [key, process.env[key]]));
   try {
@@ -120,8 +125,8 @@ test('page globals rows mirror the env and refuse 6677; absent env injects nothi
       '__PAGE_DOCUMENTS_HTTP_BASE__', '__PAGE_DOCUMENTS_HTTP_TOKEN__',
       '__PAGE_RESULT_HTTP_BASE__', '__PAGE_RESULT_HTTP_TOKEN__',
     ]);
-    assert.equal(rows[0].value, 'http://127.0.0.1:18091');
-    assert.equal(rows[2].value, 'http://127.0.0.1:18091'); // result falls back to documents base
+    assert.equal(rows[0].value, 'https://page.tyuan.chat');
+    assert.equal(rows[2].value, 'https://page.tyuan.chat'); // result falls back to browser documents base
     assert.equal(rows[3].value, 'globals-page-documents-token-32ch');
     process.env.PAGE_DOCUMENTS_HTTP_BASE = 'http://127.0.0.1:6677';
     assert.throws(() => pageGlobalRows(), error => error.code === 'REFUSED_LIVE_PORT');
@@ -133,6 +138,17 @@ test('page globals rows mirror the env and refuse 6677; absent env injects nothi
       if (value === undefined) delete process.env[key]; else process.env[key] = value;
     }
   }
+});
+
+test('page globals reject unsafe browser origins and keep the local host private', () => {
+  const input = {
+    PAGE_DOCUMENTS_HTTP_BASE: 'http://127.0.0.1:18091',
+    PAGE_DOCUMENTS_HTTP_TOKEN: 'globals-page-documents-token-32ch',
+  };
+  assert.equal(pageGlobalRows(input)[0].value, 'http://127.0.0.1:18091');
+  assert.throws(() => pageGlobalRows({ ...input, PAGE_DOCUMENTS_BROWSER_BASE: 'https://page.tyuan.chat/path' }), /origin without a path/);
+  assert.throws(() => pageGlobalRows({ ...input, PAGE_DOCUMENTS_BROWSER_BASE: 'http://example.com' }), /HTTPS or a loopback/);
+  assert.throws(() => pageGlobalRows({ ...input, PAGE_DOCUMENTS_BROWSER_BASE: 'https://user:pass@example.com' }), /userinfo/);
 });
 
 test('page globals respect an explicit result base override', () => {

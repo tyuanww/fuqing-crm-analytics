@@ -33,7 +33,7 @@ git push -u origin codex/<topic>
 gh pr create --base main --head codex/<topic>
 ```
 
-DSH 本地入口固定 Node 24.19.0。优先运行 `nvm use`；没有 nvm 时直接使用仓库包装器，它不会修改全局 Node：
+DSH 本地入口固定 Node 24 工具链。优先运行 `nvm use`；没有 nvm 时直接使用仓库包装器，它不会修改全局 Node：
 
 ```bash
 ./scripts/dsh-dev/run.sh diagnose

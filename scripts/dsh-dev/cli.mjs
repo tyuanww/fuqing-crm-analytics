@@ -196,6 +196,12 @@ async function runStart(options) {
           await writePageHttpState(prepared.runtime, pageHttp);
           process.env.PAGE_DOCUMENTS_HTTP_BASE = pageHttp.base;
           process.env.PAGE_DOCUMENTS_HTTP_TOKEN = pageHttp.token;
+          if (process.env.PAGE_DOCUMENTS_BROWSER_BASE) {
+            // Keep the supervisor's local listener private while publishing
+            // the configured public origin to the browser bundle.
+            assert.equal(process.env.PAGE_DOCUMENTS_BROWSER_BASE.endsWith('/'), false,
+              'PAGE_DOCUMENTS_BROWSER_BASE must not end with a slash');
+          }
           delete process.env.PAGE_RESULT_HTTP_BASE;
           delete process.env.PAGE_RESULT_HTTP_TOKEN;
           console.log(`DSH_DEV_PAGE_HTTP ${pageHttp.base} (documents+result on one listener; token not printed)`);

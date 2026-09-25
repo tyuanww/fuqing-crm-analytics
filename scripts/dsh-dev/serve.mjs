@@ -198,6 +198,9 @@ export function isolatedEnv(runtime, home, extra = {}) {
       'PAGE_DOCUMENTS_HTTP_TOKEN must be at least 32 chars when PAGE_DOCUMENTS_HTTP_BASE is set');
     competition.PAGE_DOCUMENTS_HTTP_BASE = pageBase;
     competition.PAGE_DOCUMENTS_HTTP_TOKEN = pageToken;
+    if (process.env.PAGE_DOCUMENTS_BROWSER_BASE) {
+      competition.PAGE_DOCUMENTS_BROWSER_BASE = process.env.PAGE_DOCUMENTS_BROWSER_BASE;
+    }
     const resultBase = process.env.PAGE_RESULT_HTTP_BASE;
     if (resultBase) {
       if (resultBase.includes(':6677')) {
@@ -205,6 +208,9 @@ export function isolatedEnv(runtime, home, extra = {}) {
       }
       competition.PAGE_RESULT_HTTP_BASE = resultBase;
       competition.PAGE_RESULT_HTTP_TOKEN = process.env.PAGE_RESULT_HTTP_TOKEN ?? pageToken;
+      if (process.env.PAGE_RESULT_BROWSER_BASE) {
+        competition.PAGE_RESULT_BROWSER_BASE = process.env.PAGE_RESULT_BROWSER_BASE;
+      }
     }
   }
   return {
