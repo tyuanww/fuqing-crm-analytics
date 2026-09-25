@@ -165,12 +165,12 @@ test('the original navigation is performed at most once even if resolution runs 
   assert.equal(h.log.filter(entry => entry === 'navigate:library').length, 1);
 });
 
-test('a host that refuses the navigation stays, with the draft still on the page', async () => {
+test('a host that refuses navigation returns to idle without a false dirty prompt', async () => {
   const h = harness({ navigate: () => { throw new Error('宿主拒绝了这次导航。'); } });
   h.set({ preview: draft() });
   await h.coordinator.request({ kind: 'close' });
   assert.equal(await h.coordinator.choose('discard'), 'stayed');
-  assert.equal(h.coordinator.getSnapshot().status, 'prompting');
+  assert.equal(h.coordinator.getSnapshot().status, 'idle');
   assert.match(h.coordinator.getSnapshot().message, /宿主拒绝/);
   assert.equal(h.log.includes('navigate:close'), true, 'the navigation was attempted once and failed');
 });
@@ -181,8 +181,8 @@ test('a refused navigation is retryable, and never reports a leave that did not 
   h.set({ preview: draft() });
   await h.coordinator.request({ kind: 'close' });
   assert.equal(await h.coordinator.choose('save_and_leave'), 'stayed', 'the first attempt failed');
-  assert.equal(h.coordinator.getSnapshot().status, 'prompting', 'the user is still on the page and can retry');
-  assert.equal(await h.coordinator.choose('save_and_leave'), 'navigated', 'the retry succeeds');
+  assert.equal(h.coordinator.getSnapshot().status, 'idle', 'the failed host navigation must not reopen a dirty prompt');
+  assert.equal(await h.coordinator.request({ kind: 'close' }), 'navigated', 'a fresh leave intent retries the navigation');
   assert.equal(attempts, 2);
   assert.equal(h.coordinator.getSnapshot().status, 'idle');
 });
