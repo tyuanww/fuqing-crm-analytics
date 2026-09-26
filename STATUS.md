@@ -18,7 +18,7 @@
 
 - rc2 候选验证账本见 [verification-20260927](docs/release/dsh-rc2-candidate/verification.md)；T2–T12 gate 见 `docs/release/dsh-rc2-candidate/`；固定上游 checkout、dsh-dev 与 B0 clean rebuild 已在隔离环境通过，真实模型、131GB DuckDB、GitHub Release、杭州重启/route、15 分钟 SLI 与真实 HTTP backpressure 均 `NOT_RUN`。
 - 本机候选 worktree 不含 DuckDB/WAL 文件；这里只使用 synthetic fixture 和隔离小库，杭州生产数据状态不由本地文件推断。
-- 当前内部 artifact 证据使用固定 tag `dsh-0.18.0.1-goal-t3t12-review2-final`；source SHA、tarball SHA-256 与 entries 以 `.context/release-evidence/dsh-0.18.0.1-goal-t3t12-review2-final/release-manifest.v1.json` 为唯一来源；接收目录为一次性 synthetic 临时目录，未创建 draft/tag/release。
+- 当前内部 artifact 证据使用固定 tag `dsh-0.18.0.1-goal-t3t12-review4-final`；source SHA、tarball SHA-256 与 entries 以 `.context/release-evidence/dsh-0.18.0.1-goal-t3t12-review4-final/release-manifest.v1.json` 为唯一来源；接收目录为一次性 synthetic 临时目录，未创建 draft/tag/release。
 
 - Artifact Inbox 数据层、自由 HTML 候选保存、原生 `write/edit/present` 接收、轮询和单卡片局部 patch 已合入并在杭州运行。
 - PR、CI、杭州 CRM/DSH/WeKnora 切换、Cloudflare 入口和安全收尾已完成；本地与生产均不改 DSH 上游。
