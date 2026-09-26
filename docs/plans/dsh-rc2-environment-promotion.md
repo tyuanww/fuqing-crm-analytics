@@ -632,11 +632,11 @@ Synthesized from CEO、DX、Design 与 Eng 审查的已接受发现。以下任�
   - Surfaced by: CEO/Eng — dirty archive 与 public main 无 merge-base，生产不能直接消费 archive
   - Files: `STATUS.md`, `docs/plans/`, `deploy/wsl/`, release evidence templates
   - Verify: clean checkout migration map；逐项记录 source commit、upstream SHA、VERSION、owner 与对应验证证据
-- [x] **T2 (P0, DONE — public receive gate; current aggregate 44/44 isolated tests)** — Artifact receive — 实现安全解包、allowlist/schema fail-closed、大小/条目/权限限制和最终 tarball 内容扫描
+- [x] **T2 (P0, DONE — public receive gate; current aggregate 48/48 isolated tests)** — Artifact receive — 实现安全解包、allowlist/schema fail-closed、大小/条目/权限限制和最终 tarball 内容扫描
   - Surfaced by: Eng — 拒绝绝对路径、`..`、symlink/hardlink/device、tarbomb、超大归档与恶意权限
   - Files: `scripts/release/`, `scripts/release/schemas/`, `deploy/wsl/`
   - Verify: path traversal、duplicate、size mismatch、secret/denylist、symlink/权限和 scan failure fixtures 全部阻断；`pnpm dsh receive` 对 1663-entry synthetic artifact 实际接收通过；证据见 `docs/release/dsh-rc2-candidate/t2-receive-gate-20260926.md`
-- [ ] **T3 (P0, PARTIAL — hardened contract; browser/host NOT_RUN)** — Auth boundary — 完成一次性 token 的原子消费、TTL/限流、host-only Cookie、POST→303、CSRF/Origin 与日志脱敏
+- [ ] **T3 (P0, PARTIAL — loopback HTTP adapter synthetic PASS; browser/host NOT_RUN)** — Auth boundary — 完成一次性 token 的原子消费、TTL/限流、host-only Cookie、POST→303、CSRF/Origin 与日志脱敏
   - Surfaced by: Eng — CORS 不是授权；并发兑换、重放、Referer/history/access-log 泄露必须 fail-closed
   - Files: `deploy/wsl/`, page auth/token endpoint、auth tests、runbooks
   - Verify: valid/expired/replayed/concurrent/foreign-origin/non-browser matrix；loopback 与 HTTPS 的 Cookie 行为均有证据
@@ -644,11 +644,11 @@ Synthesized from CEO、DX、Design 与 Eng 审查的已接受发现。以下任�
   - Surfaced by: CEO/Eng — SHA 只证明字节完整性，不证明构建来源
   - Files: `.github/workflows/`, release schemas/generator、release runbook
   - Verify: force-push、未保护 tag、release state 与 provenance 未运行的负测；杭州拒绝 `RELEASED_UNVERIFIED`
-- [ ] **T5 (P1, PARTIAL — journal/reconcile/crash synthetic PASS; remote CI NOT_RUN)** — Release state machine — 引入 durable state/journal、锁、`idempotency_key`、远端 reconcile、resume 与 crash recovery
+- [ ] **T5 (P1, PARTIAL — journal/reconcile/crash/stale-lock synthetic PASS; remote CI NOT_RUN)** — Release state machine — 引入 durable state/journal、锁、`idempotency_key`、远端 reconcile、resume 与 crash recovery
   - Surfaced by: Eng — 上传、publication、receipt 中断或并发调用不能留下重复 draft/asset
   - Files: `scripts/release/dsh-manifest.mjs`, state store、schemas、CI tests
   - Verify: 每个 phase 可恢复；重复 tag/asset、429、进程杀死和并发执行都保持幂等且可审计
-- [ ] **T6 (P1, PARTIAL — owner/readiness synthetic PASS; service/host NOT_RUN)** — Promotion/rollback — side-by-side release、fsync 后原子 symlink/env 激活与服务 ownership/restart dependency
+- [ ] **T6 (P1, PARTIAL — owner-bound scripts/readiness synthetic PASS; service/host NOT_RUN)** — Promotion/rollback — side-by-side release、fsync 后原子 symlink/env 激活与服务 ownership/restart dependency
   - Surfaced by: Eng — 代码、env、systemd、page、插件和 receipt 不得半切换或混用版本
   - Files: `deploy/wsl/`, systemd units、promotion/rollback scripts、receipt schema
   - Verify: 切换前后 version/source endpoint 一致；每个故障点均可恢复旧 release 并完成健康检查

@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, writeFile, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawn } from 'node:child_process';
 import test from 'node:test';
-import { idempotent, readState, reconcileState, recordEvent, resume, transition } from './state.mjs';
+import { clearStaleLock, idempotent, readState, reconcileState, recordEvent, resume, transition } from './state.mjs';
 import { reconcileRemote } from './reconcile.mjs';
 
 const fixture = () => mkdtemp(join(tmpdir(), 'dsh-state-'));
@@ -70,6 +70,7 @@ test('a killed idempotent worker leaves a resumable unknown operation', async ()
     'await idempotent(process.env.STATE_PATH, "crash-operation", async () => await new Promise(() => {}), { fingerprint: "' + sha('crash') + '" });',
   ].join('\n');
   const child = spawn(process.execPath, ['--input-type=module', '-e', script], { env: { ...process.env, STATE_PATH: path }, stdio: ['ignore', 'ignore', 'pipe'] });
+  const childExit = new Promise(resolve => child.once('close', resolve));
   let ready = false;
   for (let attempt = 0; attempt < 100; attempt += 1) {
     try {
@@ -79,10 +80,25 @@ test('a killed idempotent worker leaves a resumable unknown operation', async ()
     await new Promise(resolve => setTimeout(resolve, 10));
   }
   assert.equal(ready, true);
-  const childExit = new Promise(resolve => child.once('close', resolve));
   child.kill('SIGKILL');
   await childExit;
   const resumed = await resume(path);
   assert.equal(resumed.action_required, true);
   assert.equal(resumed.unknown_operations[0].idempotency_key, 'crash-operation');
+  await assert.rejects(() => transition(path, 'BUILD'), /RELEASE_LOCKED/);
+  await assert.rejects(() => clearStaleLock(path), /RELEASE_LOCK_CLEAR_REQUIRES_CONFIRMATION/);
+  assert.equal((await clearStaleLock(path, { confirm: true })).dead_pid, child.pid);
+  await transition(path, 'BUILD', { release_tag: 'dsh-crash-recovery' });
+  assert.equal((await resume(path)).unknown_operations[0].status, 'IN_PROGRESS');
+});
+
+test('stale-lock recovery refuses a live or unreadable owner', async () => {
+  const root = await fixture(); const path = join(root, 'state.json');
+  await writeFile(`${path}.lock`, JSON.stringify({ pid: process.pid, acquired_at: new Date().toISOString(), nonce: 'a'.repeat(32) }) + '\n');
+  await assert.rejects(() => clearStaleLock(path, { confirm: true }), /RELEASE_LOCK_OWNER_ACTIVE/);
+  await writeFile(`${path}.lock`, 'not-json');
+  await assert.rejects(() => clearStaleLock(path, { confirm: true }), /RELEASE_LOCK_OWNER_UNKNOWN/);
+  const linkPath = join(root, 'symlink-state.json');
+  await symlink(`${path}.lock`, `${linkPath}.lock`);
+  await assert.rejects(() => clearStaleLock(linkPath, { confirm: true }), /RELEASE_LOCK_INVALID/);
 });

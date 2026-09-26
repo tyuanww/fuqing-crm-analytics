@@ -97,10 +97,13 @@ RELEASE_ARTIFACT=/srv/shinemage/incoming/shinemage-dsh-<version>-<sha>.tar.zst \
 RELEASE_MANIFEST=/srv/shinemage/incoming/release-manifest.v1.json \
 RELEASE_TAG=dsh-<version> \
 RELEASE_ROOT=/srv/shinemage/dsh \
+RELEASE_OWNER=shinemage-dsh \
+RELEASE_RESTART_DEPENDENCY=shinemage-dsh.service \
   deploy/wsl/install-release.sh
 
 RELEASE_ROOT=/srv/shinemage/dsh RELEASE_TAG=dsh-<version> \
-RELEASE_SOURCE_SHA=<reviewed-source-sha> deploy/wsl/activate-release.sh
+RELEASE_SOURCE_SHA=<reviewed-source-sha> RELEASE_OWNER=shinemage-dsh \
+  deploy/wsl/activate-release.sh
 ```
 
 `activate-release.sh` 只切换 `current` symlink，不重启服务；重启自有 DSH service、hostname 验证和 Cloudflare route 变更分别需要现场授权。失败按 `rollback-release.sh` 使用已记录的旧 target 回退，稳定窗口结束前不删除旧目录。

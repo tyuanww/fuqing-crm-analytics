@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { mkdir, readFile, rename, rm, open, lstat } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { reconcileJournal } from './reconcile.mjs';
@@ -78,12 +78,21 @@ async function withLock(path, fn) {
   const lock = `${path}.lock`;
   await mkdir(dirname(path), { recursive: true, mode: 0o700 });
   let handle;
+  const nonce = randomBytes(16).toString('hex');
   try {
     handle = await open(lock, 'wx', 0o600);
-    await handle.writeFile(`${JSON.stringify({ pid: process.pid, acquired_at: now() })}\n`);
+    await handle.writeFile(`${JSON.stringify({ pid: process.pid, acquired_at: now(), nonce })}\n`);
     await handle.sync();
   } catch (error) { if (error.code === 'EEXIST') throw new Error('RELEASE_LOCKED'); throw error; } finally { await handle?.close(); }
-  try { return await fn(); } finally { await rm(lock, { force: true }); }
+  try { return await fn(); } finally {
+    // A recovery operator may have removed a stale file only after this
+    // process died. Never delete a replacement lock owned by another worker.
+    try {
+      const current = JSON.parse(await readFile(lock, 'utf8'));
+      if (current.nonce !== nonce) throw new Error('RELEASE_LOCK_OWNERSHIP_LOST');
+      await rm(lock);
+    } catch (error) { if (error.code !== 'ENOENT') throw error; }
+  }
 }
 
 function appendJournal(state, value) {
@@ -204,8 +213,24 @@ export async function resume(path) {
   };
 }
 
-/** Explicit operator action for a stale lock; never auto-delete locks. */
+/** Explicit operator action for a proven dead owner; never auto-delete locks. */
 export async function clearStaleLock(path, { confirm = false } = {}) {
   if (confirm !== true) throw new Error('RELEASE_LOCK_CLEAR_REQUIRES_CONFIRMATION');
-  const lock = `${path}.lock`; await lstat(lock); await rm(lock); return { cleared: true, path: lock };
+  const lock = `${path}.lock`;
+  const before = await lstat(lock);
+  if (!before.isFile() || before.isSymbolicLink()) throw new Error('RELEASE_LOCK_INVALID');
+  let owner;
+  try { owner = JSON.parse(await readFile(lock, 'utf8')); } catch { throw new Error('RELEASE_LOCK_OWNER_UNKNOWN'); }
+  if (!Number.isSafeInteger(owner.pid) || owner.pid <= 0 || typeof owner.nonce !== 'string' || !/^[0-9a-f]{32}$/.test(owner.nonce)) throw new Error('RELEASE_LOCK_OWNER_UNKNOWN');
+  try {
+    process.kill(owner.pid, 0);
+    throw new Error('RELEASE_LOCK_OWNER_ACTIVE');
+  } catch (error) {
+    if (error.code === 'EPERM') throw new Error('RELEASE_LOCK_OWNER_UNVERIFIABLE');
+    if (error.code !== 'ESRCH') throw error;
+  }
+  const after = await lstat(lock);
+  if (before.dev !== after.dev || before.ino !== after.ino || before.mtimeMs !== after.mtimeMs || before.size !== after.size) throw new Error('RELEASE_LOCK_CHANGED');
+  await rm(lock);
+  return { cleared: true, path: lock, dead_pid: owner.pid };
 }

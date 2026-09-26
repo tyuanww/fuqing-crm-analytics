@@ -4,11 +4,11 @@
 
 | 检查 | 命令 | 结果 | 证据/限制 |
 |---|---|---|---|
-| Release security contracts | `PATH=.../node@24/bin:$PATH pnpm dsh test` | PASS 44/44 | 隔离 synthetic tar/文件夹；覆盖 digest、payload、bounded unpack、traversal/duplicate/permission/link/secret fail-closed、trust、token、side-by-side、compat/action/operator/CLI/evidence/UAT contracts |
-| T3 auth contract | node@24 pnpm dsh test | PASS（auth 7 tests；aggregate 44/44） | token/session/CSRF/Cookie/redaction synthetic evidence；browser/host NOT_RUN |
+| Release security contracts | `PATH=.../node@24/bin:$PATH pnpm dsh test` | PASS 48/48 | 隔离 synthetic tar/文件夹；覆盖 digest、payload、bounded unpack、traversal/duplicate/permission/link/secret fail-closed、trust、token、HTTP auth adapter、side-by-side、compat/action/operator/CLI/evidence/UAT contracts |
+| T3 auth contract | node@24 pnpm dsh test | PASS（auth 7 + HTTP adapter 2；aggregate 48/48） | token/session/CSRF/Cookie/redaction and loopback HTTP synthetic evidence；browser/host NOT_RUN |
 | T4 trust contract | node@24 pnpm dsh test + workflow YAML parse | PASS | protected tag/publication binding and negative states；GitHub protected settings/OIDC NOT_RUN |
-| T5 state/reconcile | node@24 pnpm dsh test + pnpm dsh reconcile synthetic fixture | PASS | crash/resume and durable RECONCILE journal；remote CI/杭州 resume NOT_RUN |
-| T6 promotion contract | node@24 pnpm dsh test | PASS | owner/restart-dependency binding and mismatch guard；systemd/readiness/host NOT_RUN |
+| T5 state/reconcile | node@24 pnpm dsh test + pnpm dsh reconcile synthetic fixture | PASS | crash/resume, durable RECONCILE journal and stale-lock owner checks；remote CI/杭州 resume NOT_RUN |
+| T6 promotion contract | node@24 pnpm dsh test + `bash -n deploy/wsl/*.sh` | PASS | owner/restart-dependency binding, mismatch guard and wrapper syntax；systemd/readiness/host NOT_RUN |
 | T7 compatibility contract | node@24 pnpm dsh test | PASS | synthetic runtime/session/WAL-like fixture；real WAL/WSL2/ABI NOT_RUN |
 | T8 action contract | node@24 pnpm dsh test | PASS | action_id/terminal receipt/conflict/unknown synthetic matrix；server/browser wiring NOT_RUN |
 | T9 operator/capacity contract | node@24 pnpm dsh test | PASS | owned ephemeral probe, negative SHA and 10x scheduler fixture；route/15m/real backpressure NOT_RUN |
