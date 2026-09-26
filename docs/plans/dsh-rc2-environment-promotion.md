@@ -632,10 +632,10 @@ Synthesized from CEO、DX、Design 与 Eng 审查的已接受发现。以下任�
   - Surfaced by: CEO/Eng — dirty archive 与 public main 无 merge-base，生产不能直接消费 archive
   - Files: `STATUS.md`, `docs/plans/`, `deploy/wsl/`, release evidence templates
   - Verify: clean checkout migration map；逐项记录 source commit、upstream SHA、VERSION、owner 与对应验证证据
-- [ ] **T2 (P0, PARTIAL — bounded receiver + isolated digest tests 8/8; public receive gate NOT_RUN)** — Artifact receive — 实现安全解包、allowlist/schema fail-closed、大小/条目/权限限制和最终 tarball 内容扫描
+- [x] **T2 (P0, DONE — public receive gate + 22/22 isolated tests)** — Artifact receive — 实现安全解包、allowlist/schema fail-closed、大小/条目/权限限制和最终 tarball 内容扫描
   - Surfaced by: Eng — 拒绝绝对路径、`..`、symlink/hardlink/device、tarbomb、超大归档与恶意权限
   - Files: `scripts/release/`, `scripts/release/schemas/`, `deploy/wsl/`
-  - Verify: path traversal、tarbomb、duplicate、size mismatch、secret/denylist 和 scan failure fixtures 全部阻断并留下稳定错误码
+  - Verify: path traversal、duplicate、size mismatch、secret/denylist、symlink/权限和 scan failure fixtures 全部阻断；`pnpm dsh receive` 对 1663-entry synthetic artifact 实际接收通过；证据见 `docs/release/dsh-rc2-candidate/t2-receive-gate-20260926.md`
 - [ ] **T3 (P0, PARTIAL — contract done, browser/host NOT_RUN)** — Auth boundary — 完成一次性 token 的原子消费、TTL/限流、host-only Cookie、POST→303、CSRF/Origin 与日志脱敏
   - Surfaced by: Eng — CORS 不是授权；并发兑换、重放、Referer/history/access-log 泄露必须 fail-closed
   - Files: `deploy/wsl/`, page auth/token endpoint、auth tests、runbooks
@@ -721,12 +721,12 @@ Eng 的 native 与 outside 两路均完成，6/6 维度（artifact trust、auth/
 - Code Quality Review: 11 项发布/认证/状态/归档安全问题，已转入 T2–T8、T11；本候选已落地 synthetic contract，现场/远端 gate 仍未完成。
 - Test Review: 已产出单元→集成→系统→浏览器→operator→chaos 分层矩阵，至少 13 个实施任务；真实模型、完整业务、131GB 归档、移动端均保持 `NOT_RUN/PARTIAL`。
 - Developer experience: Quickstart、doctor、统一 dsh CLI、offline/status/resume/why-blocked 已落地；Node24 冷环境与 TTHW 仍 `NOT_RUN/NOT_MEASURED`。
-- Plan state: `IMPLEMENTATION_PARTIAL / RELEASE_BLOCKED`。T1/T13 文档与基线已完成；T2/T5/T6/T8 仍为 PARTIAL，T3/T7/T9/T10/T11/T12 为 PARTIAL，T4 未完成；证据见 `scripts/release/release.test.mjs` 与 `docs/release/dsh-rc2-candidate/`。
-- Current execution: 已建立 public-main rc2 候选并完成 T1；P0/P1 synthetic contract、WSL artifact 脚本、Quickstart 和 evidence 模板已落地。GitHub push/tag/release、杭州重启/切换、Cloudflare route 和旧版本删除仍未执行。
+- Plan state: `IMPLEMENTATION_PARTIAL / RELEASE_BLOCKED`。T1/T2/T13 文档、基线与本地 artifact receive gate 已完成；T3/T5/T6/T8/T9/T10/T11/T12 仍为 PARTIAL，T4/T7 未完成；证据见 `scripts/release/release.test.mjs` 与 `docs/release/dsh-rc2-candidate/`。
+- Current execution: 已建立 public-main rc2 候选并完成 T1、T2、T13；P0/P1 synthetic contract、WSL artifact 脚本、Quickstart 和 evidence 模板已落地。GitHub push/tag/release、杭州重启/切换、Cloudflare route 和旧版本删除仍未执行。
 
 ### Verdict
 
-**REVISE — 计划可以进入实现排期，不能据此宣布 rc2 已发布或杭州已部署。** 当前候选已完成 T1；artifact/auth/state/promotion/action 仍保留 PARTIAL，安全审查发现实现未达到 release gate；下一步是固定 Node24 环境运行完整入口、接 CI provenance/受保护 tag、做 WSL2 冷验证、operator gate 和七组 UAT；只有 release 进入 `PUBLISHED_VERIFIED`、杭州 receive receipt 完整、兼容性和回退演练通过，才讨论现有 hostname 的正式切换。没有 OIDC/provenance/signature 或没有真实 operator 隔离时，最高状态保持 `internal-only-partial`/operator pilot。
+**REVISE — 计划可以进入实现排期，不能据此宣布 rc2 已发布或杭州已部署。** 当前候选已完成 T1、T2、T13；auth/state/promotion/action 仍保留 PARTIAL，安全审查与现场门禁尚未闭合；下一步是固定 Node24 环境运行完整入口、接 CI provenance/受保护 tag、做 WSL2 冷验证、operator gate 和七组 UAT；只有 release 进入 `PUBLISHED_VERIFIED`、杭州 receive receipt 完整、兼容性和回退演练通过，才讨论现有 hostname 的正式切换。没有 OIDC/provenance/signature 或没有真实 operator 隔离时，最高状态保持 `internal-only-partial`/operator pilot。
 
 **UNRESOLVED DECISIONS:**
 
