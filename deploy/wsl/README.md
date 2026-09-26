@@ -8,15 +8,17 @@
 /srv/shinemage/incoming/       # 迁移暂存区，只读验收
 /srv/shinemage/src/             # Git checkout
 /srv/shinemage/data/            # CRM 正式数据
-/srv/shinemage/dsh/runtime/    # DSH durable runtime
-/srv/shinemage/dsh/upstream/   # 固定 DSH 上游 checkout
+/srv/shinemage/dsh/runtime/    # DSH durable runtime（rc1/rc2 共用，保持不迁移）
+/srv/shinemage/dsh/upstream-0.1.7-rc.2/ # 固定 rc2 上游 checkout
+/srv/shinemage/dsh/releases/<tag>/ # side-by-side 不可变候选
+/srv/shinemage/dsh/current -> releases/<tag>/ # 原子激活 symlink
 /srv/shinemage/weknora/         # WeKnora / Neo4j 数据
 /srv/shinemage/backups/        # 不与 data 共盘的备份目标
 /etc/shinemage/                # 600 权限的 env 文件
 /etc/cloudflared/              # Tunnel 凭据与配置
 ```
 
-`incoming` 不是生产数据目录。只有在文件数量、大小、SHA-256 和 WAL 状态全部核对后，才可复制到正式目录。141GB DuckDB 不能在服务写入时复制；备份或替换数据库前必须先停写服务并确认没有 `.wal` 文件。
+`incoming` 不是生产数据目录。只有在文件数量、大小、SHA-256 和 WAL 状态全部核对后，才可复制到正式目录。131GB DuckDB 不能在服务写入时复制；备份或替换数据库前必须先停写服务并确认没有 `.wal` 文件。
 
 ## 第一次部署
 
@@ -48,7 +50,7 @@
    deploy/wsl/healthcheck.sh --crm
    ```
 
-8. 安装 `dsh.service` 前，把 `dsh.service` 中的用户、仓库、上游和 runtime 路径替换成真实路径；`/etc/shinemage/dsh.env` 权限必须是 `600`。DSH 固定使用 `0.1.7-rc.1` 对应的上游 SHA，不使用 `--fresh`。
+8. 安装 `dsh.service` 前，把 `dsh.service` 中的用户、仓库、上游和 runtime 路径替换成真实路径；`/etc/shinemage/dsh.env` 权限必须是 `600`。DSH 固定使用 `0.1.7-rc.2` 和 `477b4f420553e8a52c2fbccc464d7561b239c443`，不使用 `--fresh`；品牌覆盖显式 `--shine-brand off`。
 9. WeKnora 和 Neo4j 按 `WeKnora-*.tar.gz` 自带的 compose/README 恢复。没有核对镜像、数据目录和端口前，不凭文件名猜启动命令。
 10. CRM、DSH、WeKnora 都通过 Tailscale 完成内部验收后，才安装 Cloudflare Tunnel。`cloudflared-config.yml.example` 暴露网站、DSH、页面、看板和知识库五个入口；知识库只转发到 loopback 的 WeKnora 前端，登录和权限仍由 WeKnora 负责，Neo4j 管理口保持内部访问。
 
@@ -72,8 +74,8 @@ CI 通过的 commit
   → CRM 内部健康检查
   → DSH 登录与 HTML 收件箱验收
   → WeKnora 检索验收
-  → Tunnel canary hostname
-  → www/app/page 正式入口
+  → operator gate 正/负探针（无隔离时不称 canary）
+  → 明确授权后现有 hostname cutover
 ```
 
 每次发布保留上一份代码 checkout、镜像和配置。先在内部检查通过，再切入口；切换失败时恢复上一版本并重新运行 `healthcheck.sh --all`。数据库格式变化必须另做备份和回退演练，代码回退本身不等于数据库回退。
@@ -85,3 +87,20 @@ CI 通过的 commit
 - 构建临时目录统一放在可清理目录，并设置单次构建容量上限。
 - 备份目标必须和 `/srv/shinemage/data` 分离；同一块磁盘上的副本只能算临时副本。
 - 只允许一个 ETL/数据库写入者，Web 使用单 worker。
+
+## rc2 artifact promotion
+
+杭州只接收已校验的 `release-publication.v1.json`、`release-manifest.v1.json`、`SHA256SUMS`、CI evidence index 和两个 tarball。先在新目录执行：
+
+```bash
+RELEASE_ARTIFACT=/srv/shinemage/incoming/shinemage-dsh-<version>-<sha>.tar.zst \
+RELEASE_MANIFEST=/srv/shinemage/incoming/release-manifest.v1.json \
+RELEASE_TAG=dsh-<version> \
+RELEASE_ROOT=/srv/shinemage/dsh \
+  deploy/wsl/install-release.sh
+
+RELEASE_ROOT=/srv/shinemage/dsh RELEASE_TAG=dsh-<version> \
+RELEASE_SOURCE_SHA=<reviewed-source-sha> deploy/wsl/activate-release.sh
+```
+
+`activate-release.sh` 只切换 `current` symlink，不重启服务；重启自有 DSH service、hostname 验证和 Cloudflare route 变更分别需要现场授权。失败按 `rollback-release.sh` 使用已记录的旧 target 回退，稳定窗口结束前不删除旧目录。

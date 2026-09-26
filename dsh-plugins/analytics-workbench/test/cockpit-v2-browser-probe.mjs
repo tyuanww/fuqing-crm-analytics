@@ -18,7 +18,7 @@ const root = fileURLToPath(new URL('../../..', import.meta.url));
 const plugin = join(root, 'dsh-plugins/analytics-workbench');
 const evidence = resolve(process.env.COCKPIT_EVIDENCE_DIR ?? join(root, '.context/checks/cockpit-v2-codex/browser'));
 await mkdir(evidence, { recursive: true });
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(root, '.context/dsh-b0/upstream'));
+const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(root, '.context/dsh-b0/upstream-0.1.7-rc.2'));
 const web = createRequire(join(upstream, 'apps/web/package.json'));
 const esbuild = createRequire(web.resolve('vite/package.json'))('esbuild');
 await esbuild.build({ absWorkingDir: plugin, entryPoints: ['test/helpers/cockpit-v2-browser-entry.tsx'],

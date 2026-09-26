@@ -40,7 +40,7 @@ test('registered diagnosis → generate → native confirmation → layout/rollb
   process.env.COMPETITION_HTTP_BASE = `http://127.0.0.1:${ready.port}`;
   process.env.COMPETITION_HTTP_TOKEN = 'isolated-native-board-integration-token';
   process.env.B0_RUNTIME_FAMILY = 'competition_growth';
-  const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(root, '.context/dsh-b0/upstream'));
+  const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(root, '.context/dsh-b0/upstream-0.1.7-rc.2'));
   const load = path => import(pathToFileURL(join(upstream, path, 'lib/index.js')).href);
   const { Context } = await load('vendor/cordis');
   const { mountAgentLoopTestDependencies } = await load('packages/test-support/agent-loop-testkit');

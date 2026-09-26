@@ -1,3 +1,14 @@
+## [0.18.0.1-rc2-candidate] - 2026-09-26
+
+### Changed
+
+- 从 public main 固定候选基线，DSH 上游升级到 `0.1.7-rc.2`（`477b4f42`），默认保持 native-first 与 `--shine-brand off`。
+- 增加 artifact 接收、摘要绑定、受限解包、side-by-side promotion 与 release evidence 的候选实现；当前仍 `RELEASE_BLOCKED`，未发布 GitHub Release 或执行杭州切换。
+
+### Verification
+
+- 首轮代码审查后，隔离 release security tests 18/18 通过，dsh-dev tests 84/84（1 skip）；B0 因 Python `duckdb` lock 漂移失败，详见候选验证账本。
+
 ## [0.18.0.0] - 2026-09-24
 
 ### Added

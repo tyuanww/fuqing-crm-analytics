@@ -9,7 +9,7 @@ import { packageManagerEnv } from './package-manager-env.mjs';
 
 test('nested upstream pnpm resolves through project-local Corepack with sanitized PATH', async () => {
   const root = fileURLToPath(new URL('../..', import.meta.url));
-  const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(root, '.context/dsh-b0/upstream'));
+  const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(root, '.context/dsh-b0/upstream-0.1.7-rc.2'));
   const pin = JSON.parse(await readFile(join(root, 'dsh-plugins/analytics-workbench/toolchain.json')));
   const scratch = await mkdtemp(join(tmpdir(), 'b0-pnpm-test-'));
   try {

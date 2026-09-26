@@ -10,7 +10,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const runtime = resolve(process.argv[2] ?? join(root, '.context/dsh-b0/runtime-xlXpXV'));
 assert.equal(runtime, join(root, '.context/dsh-b0/runtime-xlXpXV'), 'This smoke is authorized only for the named B0 runtime');
-const upstream = join(root, '.context/dsh-b0/upstream');
+const upstream = join(root, '.context/dsh-b0/upstream-0.1.7-rc.2');
 const { scanZstdFrames } = await import(pathToFileURL(join(upstream, 'packages/session/session-persistence-jsonl/lib/types/zstd.js')).href);
 const { decodeFixture } = await import(pathToFileURL(join(root, 'dsh-plugins/analytics-workbench/src/model.mjs')).href);
 const gatewayRequire = createRequire(join(upstream, 'packages/api/gateway/package.json'));

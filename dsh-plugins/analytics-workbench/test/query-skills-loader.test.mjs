@@ -5,7 +5,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const plugin = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream'));
+const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
 const load = path => import(pathToFileURL(join(upstream, path, 'lib/index.js')).href);
 const { Context } = await load('vendor/cordis');
 const { mountAgentLoopTestDependencies } = await load('packages/test-support/agent-loop-testkit');

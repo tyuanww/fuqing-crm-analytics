@@ -27,7 +27,7 @@ assert.ok(runtime.startsWith(join(root, '.context/dsh-b0/runtime-')));
 const config = JSON.parse(await readFile(join(runtime, 'kernel-private.json'), 'utf8'));
 const refs = JSON.parse(await readFile(join(runtime, 'refs.json'), 'utf8'));
 assert.equal(refs.sessionId, 'session-b0-synthetic-primary');
-const upstream = join(root, '.context/dsh-b0/upstream');
+const upstream = join(root, '.context/dsh-b0/upstream-0.1.7-rc.2');
 const { flockSync } = createRequire(join(upstream, 'packages/session/session-persistence-jsonl/package.json'))('fs-ext');
 const { scanZstdFrames } = await import(pathToFileURL(join(upstream, 'packages/session/session-persistence-jsonl/lib/types/zstd.js')).href);
 const db = new DatabaseSync(join(runtime, 'kernel/runs.sqlite3'), { readOnly: true });

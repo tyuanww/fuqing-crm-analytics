@@ -8,7 +8,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { resolve, join } from 'node:path';
 
 const plugin = fileURLToPath(new URL('..', import.meta.url));
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream'));
+const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
 const pin = JSON.parse(await readFile(join(plugin, 'toolchain.json'), 'utf8'));
 assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], { cwd: upstream, encoding: 'utf8' }).trim(), pin.upstream_sha);
 const { PAGE_GENERATE_TOOL_NAME, PAGE_REQUEST_ID_PATTERN, PAGE_TOOL_RESULT_SCHEMA } = await import(pathToFileURL(join(plugin, 'src/competition-agent/page-family.mjs')));

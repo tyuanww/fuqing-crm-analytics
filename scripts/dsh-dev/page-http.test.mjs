@@ -162,6 +162,14 @@ test('page globals respect an explicit result base override', () => {
   assert.equal(rows[3].value, 'globals-result-override-token-32');
 });
 
+test('brand override is an explicit page global and absent by default', () => {
+  assert.deepEqual(pageGlobalRows({}), []);
+  assert.deepEqual(pageGlobalRows({ SHINE_BRAND_OVERRIDE: 'off' }), []);
+  assert.deepEqual(pageGlobalRows({ SHINE_BRAND_OVERRIDE: 'on' }), [
+    { kind: 'global', name: '__SHINE_BRAND_OVERRIDE__', value: true },
+  ]);
+});
+
 test('serve args accept page-http flags and reject the live port as a page port', () => {
   const options = parseServeArgs(['--page-http', 'on', '--page-http-port', '18092']);
   assert.equal(options.pageHttp, 'on');

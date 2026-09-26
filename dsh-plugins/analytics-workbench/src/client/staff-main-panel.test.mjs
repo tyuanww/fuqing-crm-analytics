@@ -8,7 +8,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const plugin = resolve(here, '../..');
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream'));
+const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
 const webReq = createRequire(join(upstream, 'apps/web/package.json'));
 const vite = createRequire(webReq.resolve('vite/package.json'));
 const esbuild = vite('esbuild');

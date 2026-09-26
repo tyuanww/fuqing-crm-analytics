@@ -9,12 +9,13 @@ import { join } from 'node:path';
 const root = fileURLToPath(new URL('..', import.meta.url));
 const source = await readFile(join(root, 'lib/client.js'), 'utf8');
 
-function loadClient() {
+function loadClient(override = true) {
   let factoryRow;
   vm.runInNewContext(source, {
     window: {
       __ModuleLoader__: { load: row => { factoryRow = row; } },
     },
+    ...(override ? { __SHINE_BRAND_OVERRIDE__: true } : {}),
   }, { timeout: 1000 });
   return factoryRow.factory(spec => {
     throw new Error(`unexpected browser require: ${spec}`);
@@ -47,6 +48,13 @@ test('apply registers sidebar.brand.name; dispose removes it', () => {
   assert.equal(entries[0].options.priority, -10);
   for (const dispose of effects) if (typeof dispose === 'function') dispose();
   assert.equal(entries.length, 0);
+});
+
+test('native default does not register a competing sidebar brand slot', () => {
+  const client = loadClient(false);
+  const { entries, effects } = mount(client);
+  assert.deepEqual(entries, []);
+  for (const dispose of effects) if (typeof dispose === 'function') dispose();
 });
 
 test('client exports inject slots so Cordis does not throw on ctx.slots', () => {

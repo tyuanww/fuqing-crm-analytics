@@ -9,7 +9,7 @@ import {
 } from './html-hover-layer.mjs';
 
 const plugin = fileURLToPath(new URL('../..', import.meta.url));
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream'));
+const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
 const { JSDOM } = createRequire(join(upstream, 'node_modules/jsdom/package.json'))('jsdom');
 
 test('hover style targets shine-nodes without a contentDocument class toggle', () => {

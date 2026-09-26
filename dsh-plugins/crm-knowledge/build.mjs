@@ -7,7 +7,7 @@ import { execFileSync } from 'node:child_process';
 import { dirname, resolve, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const root = dirname(fileURLToPath(import.meta.url));
-const upstream = resolve(process.argv[2] ?? process.env.B0_BUILD_UPSTREAM ?? join(root, '../../.context/dsh-b0/upstream'));
+const upstream = resolve(process.argv[2] ?? process.env.B0_BUILD_UPSTREAM ?? join(root, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
 const pin = JSON.parse(await readFile(join(root, '../analytics-workbench/toolchain.json')));
 assert.equal(Number(process.versions.node.split('.')[0]), pin.node_major);
 assert.equal(execFileSync('git', ['-C', upstream, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), pin.upstream_sha);

@@ -21,7 +21,8 @@ function writeJson(path, value) {
 export function parseServeArgs(argv) {
   const options = {
     plugin: 'off',
-    shineBrand: 'on',
+    // Native DSH branding is the default. Opt into the business brand explicitly.
+    shineBrand: 'off',
     shineWaterfall: 'on',
     shineCrowdAction: 'on',
     shineQuery: 'on',
@@ -120,7 +121,7 @@ export function parseServeArgs(argv) {
 /** Repo shine-brand path, or null when `--shine-brand off`. Never dirname(--plugin-path). */
 export function resolveShineBrandPath(options) {
   if (!pluginEnabled(options.plugin)) return null;
-  if (!pluginEnabled(options.shineBrand ?? 'on')) return null;
+  if (!pluginEnabled(options.shineBrand ?? 'off')) return null;
   return options.shineBrandPath ?? defaultShineBrandPath();
 }
 
@@ -320,6 +321,7 @@ function pluginInstallEnv(runtime, home) {
 function runtimeEnv(prepared) {
   return isolatedEnv(prepared.runtime, prepared.home, {
     SHINE_WATERFALL: prepared.shineWaterfallPath ? 'on' : 'off',
+    SHINE_BRAND_OVERRIDE: prepared.shineBrandPath ? 'on' : 'off',
     SHINE_CROWD_ACTION: prepared.shineCrowdActionPath ? 'on' : 'off',
     SHINE_QUERY: prepared.shineQueryPath ? 'on' : 'off',
     SHINE_BOARD: prepared.shineBoardPath ? 'on' : 'off',

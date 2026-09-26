@@ -1,6 +1,6 @@
 /** UI composition only. The native session/composer/Agent remain owned by DSH. */
 import { mainViewSessionId, retainMainView } from '../initial-session.mjs';
-export const COMPOSITION_PIN = '46a7f68b0922371ce7144b668b90e377d8e799f4';
+export const COMPOSITION_PIN = '477b4f420553e8a52c2fbccc464d7561b239c443';
 export const CHAT_MIN = 400;
 export const CANVAS_MIN = 560;
 export const SPLIT_GAP = 8;

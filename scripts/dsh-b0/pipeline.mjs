@@ -32,7 +32,7 @@ assert.ok(['--prepare', '--check'].includes(mode) && pythonFlag === '--python' &
   USAGE);
 assert.ok(!process.env.B0_BUILD_UPSTREAM || mode === '--check',
   'B0_BUILD_UPSTREAM is a read-only --check override; --prepare must use the local pinned checkout');
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(b0, 'upstream'));
+const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(b0, 'upstream-0.1.7-rc.2'));
 const pin = JSON.parse(await readFile(join(plugin, 'toolchain.json'), 'utf8'));
 assert.equal(Number(process.versions.node.split('.')[0]), pin.node_major);
 let env = {
@@ -95,7 +95,10 @@ assert sys.version_info >= (3, 14), 'Use explicit Python 3.14+'
 for line in pathlib.Path('scripts/dsh-b0/requirements.lock').read_text().splitlines():
     if not line or line.startswith('#'): continue
     name, version = line.split('==')
-    assert metadata.version(name) == version, f'B0 dependency drift: {name}'
+    actual = metadata.version(name)
+    if actual != version:
+        print(f'B0 dependency drift: {name} expected={version} installed={actual}', file=sys.stderr)
+        raise AssertionError(f'B0 dependency drift: {name}')
 print('B0 exact Python closure verified')
 `]);
   console.log('DSH dev supervisor unit checks (separate from native compatibility acceptance)');

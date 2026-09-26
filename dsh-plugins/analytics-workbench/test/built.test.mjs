@@ -7,7 +7,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, resolve, join } from 'node:path';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? resolve(root, '../../.context/dsh-b0/upstream'));
+const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? resolve(root, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
 
 test('built Host root requires isolated capabilities; tool fails closed without native context', async () => {
   const ui = await import(pathToFileURL(join(root, 'lib/index.js')).href);

@@ -2,16 +2,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { join, resolve } from 'node:path';
 import { readFileSync } from 'node:fs';
 import { COMPOSITION_PIN, compositionGeometry, createCockpitComposition, nativeCompositionTarget, leaseNativeComposition, leaseCompactNavigation } from './cockpit-composition.mjs';
 const plugin = fileURLToPath(new URL('../..', import.meta.url));
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream'));
+const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
 const { JSDOM } = createRequire(join(upstream, 'node_modules/jsdom/package.json'))('jsdom');
 
 test('composition is pinned and sizes continuous split, collapsed and narrow views without squeezing either minimum', () => {
   assert.equal(COMPOSITION_PIN, JSON.parse(readFileSync(join(plugin, 'toolchain.json'))).upstream_sha);
+  assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], { cwd: upstream, encoding: 'utf8' }).trim(), COMPOSITION_PIN,
+    'composition tests must run against the exact pinned checkout');
   assert.deepEqual(compositionGeometry(1160), { mode: 'split', canvas: 712, chat: 440 });
   assert.deepEqual(compositionGeometry(968, 900), { mode: 'split', canvas: 560, chat: 400 });
   assert.deepEqual(compositionGeometry(334), { mode: 'canvas', canvas: 334, chat: 0 });
@@ -23,6 +26,17 @@ test('composition is pinned and sizes continuous split, collapsed and narrow vie
     const g = compositionGeometry(width, wanted);
     assert.equal(g.canvas + g.chat + 8, width); assert.ok(g.canvas >= 560 && g.chat >= 400);
   }
+});
+
+test('the pinned rc2 source still exposes the native composition seam this adapter leases', () => {
+  const renderer = readFileSync(join(upstream, 'packages/client/ui-renderer/src/client/scoped-slots.tsx'), 'utf8');
+  const conversation = readFileSync(join(upstream, 'packages/client/ui-conversation/src/client/apply.ts'), 'utf8');
+  const content = readFileSync(join(upstream, 'packages/client/ui-conversation/src/client/skeleton/ConversationContent.tsx'), 'utf8');
+  const root = readFileSync(join(upstream, 'packages/client/ui-conversation/src/client/skeleton/ConversationMainPanel.tsx'), 'utf8');
+  assert.match(renderer, /display:\s*'contents'[\s\S]*data-slot=\{slotKey\}/);
+  assert.match(conversation, /name:\s*'main'[\s\S]*children:\s*\{\s*'main\.conversation':\s*\{\s*kind:\s*'single'/);
+  assert.match(root, /data-phase=\{phase\}/);
+  assert.match(content, /data-composer-seat=""[\s\S]*data-conversation-scroll=""/);
 });
 
 function sessionRow(id, main = 0) {

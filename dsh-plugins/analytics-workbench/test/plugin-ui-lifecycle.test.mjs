@@ -8,7 +8,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { resolve, join } from 'node:path';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(root, '../../.context/dsh-b0/upstream'));
+const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(root, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
 const webRequire = createRequire(join(upstream, 'apps/web/package.json'));
 const stores = await import(pathToFileURL(join(upstream, 'packages/client/store/lib/index.js')).href);
 const source = await readFile(join(root, 'lib/client.js'), 'utf8');
@@ -117,6 +117,7 @@ function loadClient(hostWindow) {
     __SHINE_QUERY__: true,
     __SHINE_BOARD__: true,
     __SHINE_CROWD_ACTION__: true,
+    __SHINE_BRAND_OVERRIDE__: true,
   }, { timeout: 1000 });
   return factoryRow.factory(spec => {
     assert.ok(seed.has(spec), `unexpected browser require: ${spec}`);

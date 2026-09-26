@@ -11,7 +11,7 @@ export function resolveUpstream(explicit) {
   const candidates = [
     explicit,
     process.env.DSH_DEV_UPSTREAM,
-    join(repoRoot, '.context/dsh-b0/upstream'),
+    join(repoRoot, '.context/dsh-b0/upstream-0.1.7-rc.2'),
   ].filter(value => typeof value === 'string' && value.length > 0);
   for (const candidate of candidates) {
     const upstream = resolve(candidate);

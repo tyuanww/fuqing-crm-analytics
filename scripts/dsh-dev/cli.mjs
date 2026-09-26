@@ -268,7 +268,7 @@ async function runReload(options) {
   assert.equal(Number(process.versions.node.split('.')[0]), NODE_MAJOR, `Use Node ${NODE_MAJOR}`);
   const runtime = await ensurePersistentRuntime({ dest: options.runtime ?? defaultRuntimeRoot() });
   buildLocalPlugin(options.pluginPath ?? defaultPluginPath());
-  if (pluginEnabled(options.plugin || 'on') && pluginEnabled(options.shineBrand ?? 'on')) {
+  if (pluginEnabled(options.plugin || 'on') && pluginEnabled(options.shineBrand ?? 'off')) {
     buildLocalPlugin(options.shineBrandPath ?? defaultShineBrandPath());
   }
   if (pluginEnabled(options.plugin || 'on') && pluginEnabled(options.shineWaterfall ?? 'on')) {

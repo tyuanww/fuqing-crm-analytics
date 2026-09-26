@@ -673,11 +673,14 @@ export function apply(ctx: Context): void {
     return () => { unboard?.(); unpage?.(); unfile(); unai(); unartifact(); if (armed) window.removeEventListener('beforeunload', warn); };
   }, 'analytics-board: dirty browser protection survives native panel switches');
 
-  ctx.effect(() => ctx.theme.overrideTokens('shine-mage.brand', nativeBrandTokens), 'competition-native-theme');
-  ctx.slots.inject('sidebar.brand.mark', () => ctx.slots.register({ name: 'sidebar.brand.mark', priority: -10 }, BrandMark));
-  ctx.slots.inject('conversation.hero.brand.mark', () => ctx.slots.register({
-    name: 'conversation.hero.brand.mark', priority: -10,
-  }, BrandMark));
+  const brandOverride = (globalThis as { __SHINE_BRAND_OVERRIDE__?: boolean }).__SHINE_BRAND_OVERRIDE__ === true;
+  if (brandOverride) {
+    ctx.effect(() => ctx.theme.overrideTokens('shine-mage.brand', nativeBrandTokens), 'competition-native-theme');
+    ctx.slots.inject('sidebar.brand.mark', () => ctx.slots.register({ name: 'sidebar.brand.mark', priority: -10 }, BrandMark));
+    ctx.slots.inject('conversation.hero.brand.mark', () => ctx.slots.register({
+      name: 'conversation.hero.brand.mark', priority: -10,
+    }, BrandMark));
+  }
   const revealGeneratedPage = (sessionId: string, pageId: string) => {
     const address = cockpitPageAddress(pageId);
     try { ctx.layout.openRightbar(true, false); } catch { /* the conversation sidebar may already be open */ }

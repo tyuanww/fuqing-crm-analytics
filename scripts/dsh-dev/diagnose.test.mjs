@@ -18,7 +18,7 @@ test('diagnose source never signals PIDs or binds a listen socket', async () => 
   assert.match(source, /Never binds, never signals PIDs/);
 });
 
-test('inspectListener reports a bound owned-range port without killing it', async () => {
+test('inspectListener reports a bound owned-range port without killing it', { concurrency: false }, async () => {
   let probePort;
   const server = createServer();
   await new Promise((ok, fail) => {
@@ -27,7 +27,12 @@ test('inspectListener reports a bound owned-range port without killing it', asyn
   });
   try {
     probePort = server.address().port;
-    const snapshot = await inspectListener(probePort);
+    let snapshot;
+    for (let attempt = 0; attempt < 20; attempt += 1) {
+      snapshot = await inspectListener(probePort);
+      if (snapshot.state === 'listening') break;
+      await new Promise(resolve => setTimeout(resolve, 25));
+    }
     assert.equal(snapshot.state, 'listening');
     assert.equal(snapshot.listeners[0].pid, process.pid);
   } finally {
