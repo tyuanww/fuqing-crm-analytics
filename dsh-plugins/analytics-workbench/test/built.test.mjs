@@ -39,7 +39,15 @@ test('built browser factory requires only platform modules and registers shared-
     __ModuleLoader__: { load: row => { factoryRow = row; } },
   };
   const code = await readFile(join(root, 'lib/client.js'), 'utf8');
-  vm.runInNewContext(code, { AbortController, window: browser, __SHINE_QUERY__: true, __SHINE_BOARD__: true }, { filename: 'analytics-b0-client.js', timeout: 1000 });
+  vm.runInNewContext(code, {
+    AbortController,
+    window: browser,
+    __SHINE_QUERY__: true,
+    __SHINE_BOARD__: true,
+    // This test exercises the explicit opt-in branding path. The default
+    // runtime keeps native DSH branding when this flag is absent.
+    __SHINE_BRAND_OVERRIDE__: true,
+  }, { filename: 'analytics-b0-client.js', timeout: 1000 });
   assert.equal(factoryRow.id, '@shine-mage/dsh-analytics-workbench-b0');
   const client = factoryRow.factory(spec => {
     assert.ok(seed.has(spec), `unexpected browser require: ${spec}`);
