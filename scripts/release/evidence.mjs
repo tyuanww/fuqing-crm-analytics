@@ -26,4 +26,16 @@ export async function writeEvidence(path, value) {
     return { sha256: digest, replay: true };
   }
 }
+export async function verifyEvidence(path, { expectedSha256, schemaPath } = {}) {
+  const raw = await readFile(path, 'utf8');
+  let value;
+  try { value = JSON.parse(raw); } catch { throw new Error('EVIDENCE_JSON_INVALID'); }
+  const canonical = JSON.stringify(value, null, 2) + '\n';
+  if (raw !== canonical) throw new Error('EVIDENCE_NOT_CANONICAL');
+  if (canonical !== JSON.stringify(redact(value), null, 2) + '\n') throw new Error('EVIDENCE_UNREDACTED');
+  const digest = createHash('sha256').update(raw).digest('hex');
+  if (expectedSha256 && expectedSha256 !== digest) throw new Error('EVIDENCE_DIGEST_MISMATCH');
+  if (schemaPath) await assertSchema(value, schemaPath);
+  return { status: 'PASS', sha256: digest, path };
+}
 export async function makeCiIndex({ releaseTag, entries, schemaPath }) { const value = { schema_version: 'ci-evidence-index/v1', release_tag: releaseTag, entries: entries.map(item => redact(item)) }; if (schemaPath) await assertSchema(value, schemaPath); return value; }

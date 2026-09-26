@@ -13,7 +13,19 @@ import { verifyOperatorGate, evaluateSli } from './release/operator-gate.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const releaseEvidence = join(root, '.context/release-evidence');
-function usage() { console.log('Usage: pnpm dsh <dev|test|release|receive|reconcile|verify|rollback|doctor|status|why-blocked|retry|resume> [options]'); }
+const COMMANDS = ['dev', 'test', 'release', 'receive', 'reconcile', 'verify', 'rollback', 'doctor', 'status', 'why-blocked', 'retry', 'resume'];
+function usage() {
+  console.log(`Usage: pnpm dsh <command> [options]
+
+Commands: ${COMMANDS.join(', ')}
+Global options: --help, --version
+Release preparation is offline by default only with --offline/--dry-run; remote publish is a separate authorized action.
+Exit codes: 0=success, 2=usage/error/release-gate-blocked.`);
+}
+async function printVersion() {
+  const version = (await readFile(join(root, 'VERSION'), 'utf8')).trim();
+  console.log(`DSH_VERSION ${version} upstream=477b4f420553e8a52c2fbccc464d7561b239c443`);
+}
 function git(args) { try { return execFileSync('git', ['-C', root, ...args], { encoding: 'utf8' }).trim(); } catch { return null; } }
 async function doctor() {
   const version = (await readFile(join(root, 'VERSION'), 'utf8')).trim(); const pin = '477b4f420553e8a52c2fbccc464d7561b239c443';
@@ -28,9 +40,30 @@ async function doctor() {
   return checks.every(([, ok]) => ok);
 }
 async function release(args) {
+  if (args.includes('--help') || args.includes('-h')) {
+    console.log('Usage: pnpm dsh release [--offline|--dry-run] [--tag TAG] [--config PATH]');
+    console.log('Precedence: --tag > DSH_RELEASE_TAG > config.release_tag > VERSION default; config path: --config > DSH_CONFIG_FILE > .dshrc.json');
+    return;
+  }
   const tagIndex = args.indexOf('--tag');
   if (tagIndex >= 0 && !args[tagIndex + 1]) throw new Error('RELEASE_TAG_REQUIRED');
-  const tag = tagIndex >= 0 ? args[tagIndex + 1] : `dsh-${(await readFile(join(root, 'VERSION'), 'utf8')).trim()}-candidate`;
+  const configIndex = args.indexOf('--config');
+  if (configIndex >= 0 && !args[configIndex + 1]) throw new Error('RELEASE_CONFIG_REQUIRED');
+  const configPath = configIndex >= 0 ? args[configIndex + 1] : (process.env.DSH_CONFIG_FILE || join(root, '.dshrc.json'));
+  let config = {};
+  if (await access(configPath).then(() => true, () => false)) {
+    try { config = JSON.parse(await readFile(configPath, 'utf8')); } catch { throw new Error('DSH_CONFIG_INVALID'); }
+    if (!config || typeof config !== 'object' || Array.isArray(config) || (config.release_tag !== undefined && typeof config.release_tag !== 'string')) throw new Error('DSH_CONFIG_INVALID');
+  }
+  const configuredTag = config.release_tag || `dsh-${(await readFile(join(root, 'VERSION'), 'utf8')).trim()}-candidate`;
+  const tag = tagIndex >= 0 ? args[tagIndex + 1] : (process.env.DSH_RELEASE_TAG || configuredTag);
+  const allowed = new Set(['--offline', '--dry-run', '--tag', '--config']);
+  for (let index = 0; index < args.length; index += 1) {
+    const item = args[index];
+    if (!item.startsWith('--')) continue;
+    if (!allowed.has(item)) throw new Error(`RELEASE_OPTION_UNKNOWN ${item}`);
+    if (item === '--tag' || item === '--config') index += 1;
+  }
   const offline = args.includes('--offline') || args.includes('--dry-run');
   if (!offline) throw new Error('RELEASE_NETWORK_AUTH_REQUIRED use --offline for local preparation; GitHub publish is a separate authorized step');
   const status = git(['status', '--porcelain', '--untracked-files=all']);
@@ -99,7 +132,10 @@ async function verify() {
   process.exitCode = 2;
 }
 async function main() {
-  const [command, ...args] = process.argv.slice(2); if (!command) return usage();
+  const [command, ...args] = process.argv.slice(2);
+  if (!command || command === '--help' || command === '-h') { usage(); if (!command) process.exitCode = 2; return; }
+  if (command === '--version' || command === '-V') return printVersion();
+  if (!COMMANDS.includes(command)) throw new Error(`DSH_COMMAND_UNKNOWN ${command}`);
   if (command === 'doctor') return doctor();
   if (command === 'release') return release(args);
   if (command === 'receive') return receive(args);
