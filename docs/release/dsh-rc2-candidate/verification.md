@@ -1,4 +1,4 @@
-# rc2 候选验证记录（2026-09-26）
+# rc2 候选验证记录（2026-09-27）
 
 此文件取代早期候选的过时记录；旧 candidate7 资产保留但不再作为通过证据。
 
@@ -18,9 +18,9 @@
 | DSH dev contracts | `DSH_DEV_UPSTREAM=... node@24 --test scripts/dsh-dev/*.test.mjs` | PASS 84，1 skip | skip 为 built-upstream native registry integration；未启动生产服务 |
 | Shell | `bash -n deploy/wsl/*.sh`、`shellcheck deploy/wsl/*.sh` | PASS（此前实跑） | 不启动服务 |
 | Python lint | `python3.14 -m ruff check`（受影响模块） | PASS | 未修改真实数据 |
-| Diff/syntax | `git diff --check`、Node24 `--check`、JSON parse | PASS | T2 implementation commit `81f8cf3a` clean；本次文档证据更新随当前提交收口 |
+| Diff/syntax | `git diff --check`、Node24 `--check`、JSON parse | PASS | candidate HEAD `1912a382` clean；auth HTTP adapter、stale-lock hardening 与证据文档已提交 |
 | Artifact build/receive | 旧 `dsh-0.12.0.0-candidate7` | REJECTED / SUPERSEDED | 旧包不含当前安全修复，且不代表 reviewed clean commit；不得接收 |
-| Final offline artifact | `pnpm dsh release --offline --tag dsh-0.18.0.1-final` + `pnpm dsh receive` | PASS | 从最终干净 HEAD 生成；source SHA、payload 计数与 tarball SHA 以 `.context/release-evidence/dsh-0.18.0.1-final/release-manifest.v1.json` 为唯一来源；internal-only，未创建 draft/tag/release |
+| Current offline artifact | `pnpm dsh release --offline --tag dsh-0.18.0.1-goal-1912a382` + `pnpm dsh receive` | PASS | source SHA `1912a38282cb1be9dc829ddbf2b18e0b386f723b`；1684 entries；tarball SHA `d1b838d234511e9f2ae375f46e376c74f3f71ec745340a24a3d9ddd2490217f7`；manifest 位于 `.context/release-evidence/dsh-0.18.0.1-goal-1912a382/`；internal-only，未创建 draft/tag/release |
 | Doctor/verify | `node@24 scripts/dsh.mjs doctor|verify` | doctor PASS；verify 的 compat/SLI/backpressure 为 NOT_RUN | 未伪造 rc1/rc2 WAL、15 分钟 HTTP 或 10x 线上证据 |
 | B0 | `B0_BUILD_UPSTREAM=... node@24 scripts/dsh-b0/pipeline.mjs --check --python ...` | FAIL | `duckdb` 与 requirements.lock 版本漂移；未安装依赖、未读取真实 DuckDB |
 | WSL2/operator/UAT | 现场入口 | NOT_RUN/PARTIAL | 需要杭州事实、route/operator gate 和授权 |
