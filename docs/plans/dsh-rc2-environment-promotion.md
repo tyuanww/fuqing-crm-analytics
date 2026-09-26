@@ -636,15 +636,15 @@ Synthesized from CEO、DX、Design 与 Eng 审查的已接受发现。以下任�
   - Surfaced by: Eng — 拒绝绝对路径、`..`、symlink/hardlink/device、tarbomb、超大归档与恶意权限
   - Files: `scripts/release/`, `scripts/release/schemas/`, `deploy/wsl/`
   - Verify: path traversal、duplicate、size mismatch、secret/denylist、symlink/权限和 scan failure fixtures 全部阻断；`pnpm dsh receive` 对 1663-entry synthetic artifact 实际接收通过；证据见 `docs/release/dsh-rc2-candidate/t2-receive-gate-20260926.md`
-- [ ] **T3 (P0, PARTIAL — contract done, browser/host NOT_RUN)** — Auth boundary — 完成一次性 token 的原子消费、TTL/限流、host-only Cookie、POST→303、CSRF/Origin 与日志脱敏
+- [ ] **T3 (P0, PARTIAL — hardened contract; browser/host NOT_RUN)** — Auth boundary — 完成一次性 token 的原子消费、TTL/限流、host-only Cookie、POST→303、CSRF/Origin 与日志脱敏
   - Surfaced by: Eng — CORS 不是授权；并发兑换、重放、Referer/history/access-log 泄露必须 fail-closed
   - Files: `deploy/wsl/`, page auth/token endpoint、auth tests、runbooks
   - Verify: valid/expired/replayed/concurrent/foreign-origin/non-browser matrix；loopback 与 HTTPS 的 Cookie 行为均有证据
-- [ ] **T4 (P0, human: ~6h / CC+gstack: ~30min)** — Release trust — 保护 branch/tag、绑定 reviewed commit 与人工批准；补 OIDC provenance/签名，否则固定为 internal-only/operator pilot
+- [ ] **T4 (P0, PARTIAL — protected-ref/publication contract; GitHub/OIDC NOT_RUN)** — Release trust — 保护 branch/tag、绑定 reviewed commit 与人工批准；补 OIDC provenance/签名，否则固定为 internal-only/operator pilot
   - Surfaced by: CEO/Eng — SHA 只证明字节完整性，不证明构建来源
   - Files: `.github/workflows/`, release schemas/generator、release runbook
   - Verify: force-push、未保护 tag、release state 与 provenance 未运行的负测；杭州拒绝 `RELEASED_UNVERIFIED`
-- [ ] **T5 (P1, PARTIAL — local journal exists; crash/reconcile semantics NOT_RUN)** — Release state machine — 引入 durable state/journal、锁、`idempotency_key`、远端 reconcile、resume 与 crash recovery
+- [ ] **T5 (P1, PARTIAL — journal/reconcile/crash synthetic PASS; remote CI NOT_RUN)** — Release state machine — 引入 durable state/journal、锁、`idempotency_key`、远端 reconcile、resume 与 crash recovery
   - Surfaced by: Eng — 上传、publication、receipt 中断或并发调用不能留下重复 draft/asset
   - Files: `scripts/release/dsh-manifest.mjs`, state store、schemas、CI tests
   - Verify: 每个 phase 可恢复；重复 tag/asset、429、进程杀死和并发执行都保持幂等且可审计

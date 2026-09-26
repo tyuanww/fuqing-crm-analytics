@@ -5,6 +5,9 @@
 | 检查 | 命令 | 结果 | 证据/限制 |
 |---|---|---|---|
 | Release security contracts | `node@24 --test scripts/release/*.test.mjs` | PASS 22/22 | 隔离 synthetic tar/文件夹；覆盖 digest、payload、bounded unpack、traversal/duplicate/permission/link/secret fail-closed、trust、token、side-by-side |
+| T3 auth contract | node@24 pnpm dsh test | PASS（auth 7 tests；aggregate 32/32） | token/session/CSRF/Cookie/redaction synthetic evidence；browser/host NOT_RUN |
+| T4 trust contract | node@24 pnpm dsh test + workflow YAML parse | PASS | protected tag/publication binding and negative states；GitHub protected settings/OIDC NOT_RUN |
+| T5 state/reconcile | node@24 pnpm dsh test + pnpm dsh reconcile synthetic fixture | PASS | crash/resume and durable RECONCILE journal；remote CI/杭州 resume NOT_RUN |
 | DSH dev contracts | `DSH_DEV_UPSTREAM=... node@24 --test scripts/dsh-dev/*.test.mjs` | PASS 84，1 skip | skip 为 built-upstream native registry integration；未启动生产服务 |
 | Shell | `bash -n deploy/wsl/*.sh`、`shellcheck deploy/wsl/*.sh` | PASS（此前实跑） | 不启动服务 |
 | Python lint | `python3.14 -m ruff check`（受影响模块） | PASS | 未修改真实数据 |

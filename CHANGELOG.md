@@ -5,10 +5,11 @@
 - 从 public main 固定候选基线，DSH 上游升级到 `0.1.7-rc.2`（`477b4f42`），默认保持 native-first 与 `--shine-brand off`。
 - 增加 artifact 接收、摘要绑定、受限解包、side-by-side promotion 与 release evidence 的候选实现；当前仍 `RELEASE_BLOCKED`，未发布 GitHub Release 或执行杭州切换。
 - 增加统一 `pnpm dsh receive` 接收入口；receiver 对 traversal、duplicate、权限、大小、symlink、deny-name 和最终 secret scan fail-closed。
+- 补齐 T3 的 token/session/CSRF/Cookie/redaction 合同，T4 的 protected tag/publication 校验，以及 T5 的 durable reconcile/resume/crash 入口；现场与 GitHub trust 仍保持 NOT_RUN。
 
 ### Verification
 
-- 首轮代码审查后，隔离 release security tests 22/22 通过，dsh-dev tests 84/84（1 skip）；clean commit 的 offline artifact 生成与 `pnpm dsh receive` 隔离接收通过；B0 因 Python `duckdb` lock 漂移失败，详见候选验证账本和 T2 gate 证据。
+- 首轮代码审查后，隔离 release tests 32/32 通过，dsh-dev tests 84/84（1 skip）；T2 clean artifact receive、T3 auth、T4 trust contract、T5 crash/reconcile synthetic gate 均有证据；B0 因 Python `duckdb` lock 漂移失败，详见候选验证账本和 T2–T5 证据。
 
 ## [0.18.0.0] - 2026-09-24
 
