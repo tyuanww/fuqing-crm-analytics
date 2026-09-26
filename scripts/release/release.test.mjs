@@ -20,15 +20,40 @@ function sha(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function tar(path, name='VERSION', data='0.18.0.1\n') { execFileSync('python3', ['-c', `import tarfile,sys,io
 x=tarfile.TarInfo(sys.argv[2]); b=sys.argv[3].encode(); x.size=len(b); x.mode=0o600
 with tarfile.open(sys.argv[1],'w:gz') as t: t.addfile(x,io.BytesIO(b))`, path, name, data]); }
-async function manifest(root, archive, tag='dsh-test') {
-  const bytes=Buffer.from(await readFile(archive)); const data=Buffer.from('0.18.0.1\n');
-  const m={schema_version:'release-manifest/v1',release_tag:tag,product_version:'0.18.0.1',source_sha:'a'.repeat(40),dsh_upstream_sha:'4'.repeat(40),archive_allowlist:['VERSION'],denylist_version:'release-denylist/v1',artifact_bytes:bytes.length,artifact_sha256:sha(bytes),payload:[{path:'VERSION',role:'runtime-source',bytes:data.length,sha256:sha(data)}]};
+function archiveWithEntries(path, entries, format='w:gz') { execFileSync('python3', ['-c', `import io,json,sys,tarfile
+entries=json.loads(sys.argv[3])
+with tarfile.open(sys.argv[1],sys.argv[2]) as t:
+ for entry in entries:
+  info=tarfile.TarInfo(entry['name']); info.mode=entry.get('mode',0o600)
+  if entry.get('type') == 'symlink': info.type=tarfile.SYMTYPE; info.linkname=entry.get('linkname','target'); t.addfile(info); continue
+  data=entry.get('data','').encode(); info.size=len(data); t.addfile(info,io.BytesIO(data))`, path, format, JSON.stringify(entries)]); }
+async function manifest(root, archive, tag='dsh-test', payloadData={'VERSION':'0.18.0.1\n'}) {
+  const bytes=Buffer.from(await readFile(archive));
+  const payload=Object.entries(payloadData).map(([path, value]) => { const data=Buffer.from(value); return {path,role:'runtime-source',bytes:data.length,sha256:sha(data)}; });
+  const m={schema_version:'release-manifest/v1',release_tag:tag,product_version:'0.18.0.1',source_sha:'a'.repeat(40),dsh_upstream_sha:'4'.repeat(40),archive_allowlist:Object.keys(payloadData),denylist_version:'release-denylist/v1',artifact_bytes:bytes.length,artifact_sha256:sha(bytes),payload};
   const path=join(root,'manifest.json'); await writeFile(path,JSON.stringify(m)); return path;
 }
 
 test('receiver binds archive digest and extracted payload exactly', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); const out=join(root,'out'); const got=await receiveArtifact({artifact:archive,manifestPath:m,destination:out}); assert.equal(got.entries,1); });
 test('receiver fails closed on archive digest mismatch and traversal', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); await writeFile(archive,Buffer.from('corrupt')); await assert.rejects(()=>receiveArtifact({artifact:archive,manifestPath:m,destination:join(root,'out')}), /ARTIFACT_DIGEST_MISMATCH/); });
 test('receiver rejects non-canonical manifest paths before unpacking', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); const value=JSON.parse(await readFile(m,'utf8')); value.archive_allowlist=['VERSION/.']; await writeFile(m,JSON.stringify(value)); await assert.rejects(()=>receiveArtifact({artifact:archive,manifestPath:m,destination:join(root,'out')}), /ALLOWLIST_PATH_INVALID/); });
+test('receiver rejects traversal, duplicate and unsafe mode members', async () => {
+  for (const [entries, expected] of [
+    [[{name:'../escape',data:'x'}], /ARCHIVE_PATH_INVALID/],
+    [[{name:'VERSION',data:'0.18.0.1\n'},{name:'VERSION',data:'0.18.0.1\n'}], /ARCHIVE_DUPLICATE_PATH/],
+    [[{name:'VERSION',data:'0.18.0.1\n',mode:0o622}], /ARCHIVE_PERMISSION_TOO_WIDE/],
+  ]) {
+    const root=await fixture(), archive=join(root,'unsafe.tar.gz'); archiveWithEntries(archive,entries); const m=await manifest(root,archive); await assert.rejects(()=>receiveArtifact({artifact:archive,manifestPath:m,destination:join(root,'out')}), expected);
+  }
+});
+test('receiver enforces expanded archive size and rejects links', async () => {
+  const root=await fixture(), archive=join(root,'large.tar.gz'); archiveWithEntries(archive,[{name:'VERSION',data:'x'.repeat(2048)}]); const m=await manifest(root,archive); await assert.rejects(()=>receiveArtifact({artifact:archive,manifestPath:m,destination:join(root,'out'),maxBytes:512}), /ARCHIVE_SIZE_LIMIT/);
+  const linkArchive=join(root,'link.tar.gz'); archiveWithEntries(linkArchive,[{name:'VERSION',data:'0.18.0.1\n'},{name:'link',type:'symlink',linkname:'VERSION'}]); const linkManifest=await manifest(root,linkArchive,'dsh-link',{'VERSION':'0.18.0.1\n','link':'0.18.0.1\n'}); await assert.rejects(()=>receiveArtifact({artifact:linkArchive,manifestPath:linkManifest,destination:join(root,'link-out')}), /ARCHIVE_LINK_OR_DEVICE/);
+});
+test('receiver scans final extracted content and deny names', async () => {
+  const root=await fixture(), secretArchive=join(root,'secret.tar.gz'); const secret="TOKEN = 'live-token-value-1234567890'"; archiveWithEntries(secretArchive,[{name:'VERSION',data:'0.18.0.1\n'},{name:'config.txt',data:secret}]); const secretManifest=await manifest(root,secretArchive,'dsh-secret',{'VERSION':'0.18.0.1\n','config.txt':secret}); await assert.rejects(()=>receiveArtifact({artifact:secretArchive,manifestPath:secretManifest,destination:join(root,'secret-out')}), /SECRET_SCAN_FAILED/);
+  const denyArchive=join(root,'deny.tar.gz'); archiveWithEntries(denyArchive,[{name:'VERSION',data:'0.18.0.1\n'},{name:'.env',data:'synthetic'}]); const denyManifest=await manifest(root,denyArchive,'dsh-deny',{'VERSION':'0.18.0.1\n','.env':'synthetic'}); await assert.rejects(()=>receiveArtifact({artifact:denyArchive,manifestPath:denyManifest,destination:join(root,'deny-out')}), /SECRET_SCAN_FAILED/);
+});
 test('secret scan distinguishes explicit synthetic fixtures from real assignments', () => { const live = ['live', 'token-value-1234567890'].join('-'); assert.deepEqual(scanText("TOKEN = 'test-only-synthetic-token'", 'fixture'), []); assert.deepEqual(scanText(`TOKEN = '${live}'`, 'fixture'), ['SECRET_PATTERN fixture']); });
 test('zstd receiver enforces the bounded stream path', async () => { const root=await fixture(), raw=join(root,'a.tar'), archive=join(root,'a.tar.zst'); execFileSync('python3',['-c',`import tarfile,sys,io
 x=tarfile.TarInfo('VERSION'); b=bytes([48,46,49,56,46,48,46,49,10]); x.size=len(b); x.mode=0o600

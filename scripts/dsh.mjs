@@ -4,7 +4,7 @@ import { readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildPreManifest, packArtifact, sha256 } from './release/artifact.mjs';
+import { buildPreManifest, packArtifact, receiveArtifact, sha256 } from './release/artifact.mjs';
 import { assertSchema } from './release/schema.mjs';
 import { verifyPayload } from './release/artifact.mjs';
 import { readState, resume } from './release/state.mjs';
@@ -13,7 +13,7 @@ import { verifyOperatorGate, evaluateSli } from './release/operator-gate.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const releaseEvidence = join(root, '.context/release-evidence');
-function usage() { console.log('Usage: pnpm dsh <dev|test|release|verify|rollback|doctor|status|why-blocked|retry|resume> [--dry-run|--offline]'); }
+function usage() { console.log('Usage: pnpm dsh <dev|test|release|receive|verify|rollback|doctor|status|why-blocked|retry|resume> [options]'); }
 function git(args) { try { return execFileSync('git', ['-C', root, ...args], { encoding: 'utf8' }).trim(); } catch { return null; } }
 async function doctor() {
   const version = (await readFile(join(root, 'VERSION'), 'utf8')).trim(); const pin = '477b4f420553e8a52c2fbccc464d7561b239c443';
@@ -62,6 +62,31 @@ async function release(args) {
     throw error;
   }
 }
+function requiredOption(args, name) {
+  const index = args.indexOf(name);
+  if (index < 0 || !args[index + 1] || args[index + 1].startsWith('--')) throw new Error(`${name.slice(2).toUpperCase()}_REQUIRED`);
+  return args[index + 1];
+}
+function positiveOption(args, name, fallback) {
+  const value = args.includes(name) ? requiredOption(args, name) : fallback;
+  if (!/^\d+$/.test(String(value)) || Number(value) <= 0) throw new Error(`${name.slice(2).toUpperCase()}_INVALID`);
+  return Number(value);
+}
+async function receive(args) {
+  const artifact = requiredOption(args, '--artifact');
+  const manifestPath = requiredOption(args, '--manifest');
+  const destination = requiredOption(args, '--destination');
+  const maxEntries = positiveOption(args, '--max-entries', 10000);
+  const maxBytes = positiveOption(args, '--max-bytes', 512 * 1024 * 1024);
+  const allowed = new Set(['--artifact', '--manifest', '--destination', '--max-entries', '--max-bytes']);
+  for (let index = 0; index < args.length; index += 1) {
+    if (!args[index].startsWith('--')) continue;
+    if (!allowed.has(args[index])) throw new Error(`RECEIVE_OPTION_UNKNOWN ${args[index]}`);
+    index += 1;
+  }
+  const result = await receiveArtifact({ artifact, manifestPath, destination, maxEntries, maxBytes });
+  console.log(`DSH_RECEIVE_PASS tag=${result.manifest.release_tag} entries=${result.entries} artifact_sha256=${result.sha256} destination=${destination}`);
+}
 async function test() { const tests = readdirSync(join(root, 'scripts/release')).filter(name => name.endsWith('.test.mjs')).map(name => join('scripts/release', name)); return execFileSync(process.execPath, ['--test', ...tests], { cwd: root, encoding: 'utf8', stdio: 'inherit' }); }
 async function verify() {
   await doctor();
@@ -77,6 +102,7 @@ async function main() {
   const [command, ...args] = process.argv.slice(2); if (!command) return usage();
   if (command === 'doctor') return doctor();
   if (command === 'release') return release(args);
+  if (command === 'receive') return receive(args);
   if (command === 'test') return test();
   if (command === 'verify') return verify();
   if (command === 'status' || command === 'resume') { const path = args[0] || join(releaseEvidence, 'state.json'); console.log(JSON.stringify(await (command === 'resume' ? resume(path) : readState(path)), null, 2)); return; }

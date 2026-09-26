@@ -32,6 +32,8 @@ def main() -> None:
     ap.add_argument("--max-entries", type=int, default=10000)
     ap.add_argument("--max-bytes", type=int, default=512 * 1024 * 1024)
     args = ap.parse_args()
+    if args.max_entries <= 0 or args.max_bytes <= 0:
+        fail("RECEIVE_LIMIT_INVALID")
     dest = pathlib.Path(args.destination).absolute()
     if dest.exists():
         fail("DESTINATION_MUST_NOT_EXIST", str(dest))
@@ -57,23 +59,29 @@ def main() -> None:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
             )
-            source = proc.stdout
-            with tar_path.open("wb") as out:
-                while True:
-                    chunk = source.read(1024 * 1024)
-                    if not chunk:
-                        break
-                    total += len(chunk)
-                    if total > args.max_bytes:
-                        proc.kill()
-                        fail("ARCHIVE_SIZE_LIMIT", str(total))
-                    out.write(chunk)
-                out.flush()
-                os.fsync(out.fileno())
-            err = proc.stderr.read().decode(errors="replace").strip()
-            code = proc.wait()
-            if code != 0:
-                fail("ARCHIVE_DECOMPRESS_FAILED", err)
+            try:
+                source = proc.stdout
+                with tar_path.open("wb") as out:
+                    while True:
+                        chunk = source.read(1024 * 1024)
+                        if not chunk:
+                            break
+                        total += len(chunk)
+                        if total > args.max_bytes:
+                            fail("ARCHIVE_SIZE_LIMIT", str(total))
+                        out.write(chunk)
+                    out.flush()
+                    os.fsync(out.fileno())
+                err = proc.stderr.read().decode(errors="replace").strip()
+                code = proc.wait()
+                if code != 0:
+                    fail("ARCHIVE_DECOMPRESS_FAILED", err)
+            finally:
+                if proc.poll() is None:
+                    proc.kill()
+                proc.wait()
+                proc.stdout.close()
+                proc.stderr.close()
             tar_mode = "r:"
         else:
             with open(args.archive, "rb") as source, tar_path.open("wb") as out:
