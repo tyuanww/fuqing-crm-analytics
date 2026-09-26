@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { access, mkdir, readFile, stat, writeFile } from 'node:fs/promises';
+import { access, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
@@ -37,8 +37,14 @@ async function release(args) {
   if (status) throw new Error('RELEASE_BLOCKED_DIRTY_WORKTREE reviewed commit must be clean; use a clean CI checkout to build the immutable artifact');
   const sourceSha = git(['rev-parse', 'HEAD']); const version = (await readFile(join(root, 'VERSION'), 'utf8')).trim();
   const dir = join(releaseEvidence, tag);
-  if (await access(dir).then(() => true, () => false)) throw new Error('RELEASE_EVIDENCE_EXISTS evidence is immutable; choose a new tag or reconcile the existing record');
-  await mkdir(dir, { recursive: true });
+  await mkdir(releaseEvidence, { recursive: true });
+  if (await access(dir).then(() => true, () => false)) {
+    const entries = await readdir(dir);
+    if (entries.length > 0) throw new Error('RELEASE_EVIDENCE_EXISTS evidence is immutable; choose a new tag or reconcile the existing record');
+    await rm(dir, { recursive: true });
+  }
+  await mkdir(dir, { recursive: false });
+  try {
   const pre = await buildPreManifest({ releaseTag: tag, productVersion: version, sourceSha, dshUpstreamSha: '477b4f420553e8a52c2fbccc464d7561b239c443', output: join(dir, 'pre-manifest.v1.json') });
   const prePath = join(dir, 'pre-manifest.v1.json'); const preSha = await sha256(prePath);
   const bundle = await packArtifact({ rootDir: root, allowlist: pre.archive_allowlist, output: join(dir, `${tag}.tar.zst`) });
@@ -50,6 +56,11 @@ async function release(args) {
   await writeFile(join(dir, 'ci-evidence-index.v1.json'), JSON.stringify({ schema_version: 'ci-evidence-index/v1', release_tag: tag, entries: [{ name: 'local-doctor', status: 'PARTIAL', ref: 'pnpm dsh doctor', sha256: preSha }, { name: 'wsl2-cold', status: 'NOT_RUN', ref: 'docs/release/dsh-rc2-candidate/host-preflight.md' }] }, null, 2) + '\n', { mode: 0o600 });
   await verifyPayload(manifestPath, root);
   console.log(`DSH_RELEASE_PREPARED tag=${tag} pre_manifest=${prePath} manifest=${manifestPath}`); console.log('DSH_RELEASE_STATUS INTERNAL_ONLY_PARTIAL');
+  } catch (error) {
+    const entries = await readdir(dir).catch(() => []);
+    if (entries.length === 0) await rm(dir, { recursive: true, force: true });
+    throw error;
+  }
 }
 async function test() { const tests = readdirSync(join(root, 'scripts/release')).filter(name => name.endsWith('.test.mjs')).map(name => join('scripts/release', name)); return execFileSync(process.execPath, ['--test', ...tests], { cwd: root, encoding: 'utf8', stdio: 'inherit' }); }
 async function verify() {
