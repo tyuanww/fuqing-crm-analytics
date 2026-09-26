@@ -48,7 +48,10 @@ export function reconcileRemote({ local, remote }) {
   const remotePhase = phaseIndex(remote.phase);
   if (remotePhase > localPhase) return { status: 'REMOTE_AHEAD', remote_phase: remote.phase, local_phase: local.phase ?? null, action: 'ADOPT_REMOTE_AFTER_DIGEST_CHECK' };
   if (remotePhase < localPhase) return { status: 'REMOTE_BEHIND', remote_phase: remote.phase ?? null, local_phase: local.phase, action: 'RESUME_MISSING_REMOTE_PHASE' };
-  const localStatus = local.status ?? local.phase_status;
+  // phase_status=COMMITTED describes the local journal transition, while
+  // remote status describes the publication/release state. Comparing them
+  // would reject a valid same-phase DRAFT receipt.
+  const localStatus = local.status;
   const remoteStatus = remote.status;
   if (localStatus && remoteStatus && localStatus !== remoteStatus && remoteStatus !== 'PUBLISHED_VERIFIED') {
     return conflict('status', localStatus, remoteStatus);

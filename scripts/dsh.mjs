@@ -7,13 +7,13 @@ import { fileURLToPath } from 'node:url';
 import { buildPreManifest, packArtifact, receiveArtifact, sha256 } from './release/artifact.mjs';
 import { assertSchema } from './release/schema.mjs';
 import { verifyPayload } from './release/artifact.mjs';
-import { readState, resume } from './release/state.mjs';
+import { readState, reconcileState, resume } from './release/state.mjs';
 import { runCompatibilityMatrix } from './release/compat-check.mjs';
 import { verifyOperatorGate, evaluateSli } from './release/operator-gate.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const releaseEvidence = join(root, '.context/release-evidence');
-function usage() { console.log('Usage: pnpm dsh <dev|test|release|receive|verify|rollback|doctor|status|why-blocked|retry|resume> [options]'); }
+function usage() { console.log('Usage: pnpm dsh <dev|test|release|receive|reconcile|verify|rollback|doctor|status|why-blocked|retry|resume> [options]'); }
 function git(args) { try { return execFileSync('git', ['-C', root, ...args], { encoding: 'utf8' }).trim(); } catch { return null; } }
 async function doctor() {
   const version = (await readFile(join(root, 'VERSION'), 'utf8')).trim(); const pin = '477b4f420553e8a52c2fbccc464d7561b239c443';
@@ -105,6 +105,16 @@ async function main() {
   if (command === 'receive') return receive(args);
   if (command === 'test') return test();
   if (command === 'verify') return verify();
+  if (command === 'reconcile') {
+    const statePath = args[0] || join(releaseEvidence, 'state.json');
+    const remotePath = args[1];
+    if (!remotePath) throw new Error('REMOTE_RECEIPT_REQUIRED');
+    const remote = JSON.parse(await readFile(remotePath, 'utf8'));
+    const result = await reconcileState(statePath, remote);
+    console.log(JSON.stringify(result, null, 2));
+    if (['CONFLICT', 'UNKNOWN'].includes(result.status)) process.exitCode = 2;
+    return;
+  }
   if (command === 'status' || command === 'resume') { const path = args[0] || join(releaseEvidence, 'state.json'); console.log(JSON.stringify(await (command === 'resume' ? resume(path) : readState(path)), null, 2)); return; }
   if (command === 'why-blocked') { console.log('DSH_BLOCKED GitHub push/tag/release、杭州重启/route/切换需要单独授权；真实模型、131GB DuckDB、WSL2 冷验证为 NOT_RUN/PARTIAL'); return; }
   if (command === 'retry') { console.log('DSH_RETRY requires a durable state path and idempotency key; no remote side effect was attempted'); return; }

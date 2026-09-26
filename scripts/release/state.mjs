@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, rename, rm, open, lstat } from 'node:fs/promises';
 import { dirname } from 'node:path';
+import { reconcileJournal } from './reconcile.mjs';
 
 /** Durable release state and journal. */
 export const PHASES = [
@@ -25,13 +26,14 @@ function digest(value) { return createHash('sha256').update(JSON.stringify(value
 function phaseIndex(phase) { return phase === null ? -1 : PHASES.indexOf(phase); }
 
 function emptyState() {
-  return { schema_version: STATE_SCHEMA, phase: null, phase_status: 'IDLE', journal: [], idempotency: {}, updated_at: null };
+  return { schema_version: STATE_SCHEMA, phase: null, phase_status: 'IDLE', release_tag: null, journal: [], idempotency: {}, updated_at: null };
 }
 
 function validateState(state) {
   if (!state || typeof state !== 'object' || Array.isArray(state)) throw new Error('RELEASE_STATE_INVALID');
   if (state.schema_version !== STATE_SCHEMA) throw new Error('RELEASE_STATE_SCHEMA_UNSUPPORTED');
   if (state.phase !== null && !PHASES.includes(state.phase)) throw new Error('RELEASE_STATE_PHASE_INVALID');
+  if (state.release_tag !== null && (typeof state.release_tag !== 'string' || !/^dsh-[A-Za-z0-9._-]+$/.test(state.release_tag))) throw new Error('RELEASE_STATE_TAG_INVALID');
   if (!Array.isArray(state.journal) || typeof state.idempotency !== 'object' || state.idempotency === null || Array.isArray(state.idempotency)) throw new Error('RELEASE_STATE_SHAPE_INVALID');
   let previous = 'GENESIS';
   for (let index = 0; index < state.journal.length; index += 1) {
@@ -101,6 +103,11 @@ export async function transition(path, phase, data = {}) {
     if (next < current) throw new Error(`PHASE_REGRESSION ${state.phase}->${phase}`);
     if (next > current + 1) throw new Error(`PHASE_SKIP ${state.phase ?? 'NONE'}->${phase}`);
     if (TERMINAL.has(state.phase) && phase !== state.phase) throw new Error(`PHASE_TERMINAL ${state.phase}`);
+    if (data.release_tag !== undefined) {
+      if (typeof data.release_tag !== 'string' || !/^dsh-[A-Za-z0-9._-]+$/.test(data.release_tag)) throw new Error('RELEASE_STATE_TAG_INVALID');
+      if (state.release_tag !== null && state.release_tag !== data.release_tag) throw new Error('RELEASE_STATE_TAG_CONFLICT');
+      state.release_tag = data.release_tag;
+    }
     const entry = appendJournal(state, { phase, event: 'PHASE', status: 'COMMITTED', ...data });
     state.phase = phase; state.phase_status = 'COMMITTED'; await save(path, state); return entry;
   });
@@ -109,7 +116,34 @@ export async function transition(path, phase, data = {}) {
 /** Append a receipt/observation while preserving the current phase. */
 export async function recordEvent(path, data = {}) {
   if (!data || typeof data !== 'object' || Array.isArray(data) || ['phase', 'event'].some(key => own(data, key))) throw new Error('RELEASE_EVENT_INVALID');
-  return withLock(path, async () => { const state = await load(path); const entry = appendJournal(state, { phase: state.phase, event: 'OBSERVATION', ...data }); await save(path, state); return entry; });
+  return withLock(path, async () => {
+    const state = await load(path);
+    if (data.release_tag !== undefined) {
+      if (typeof data.release_tag !== 'string' || !/^dsh-[A-Za-z0-9._-]+$/.test(data.release_tag)) throw new Error('RELEASE_STATE_TAG_INVALID');
+      if (state.release_tag !== null && state.release_tag !== data.release_tag) throw new Error('RELEASE_STATE_TAG_CONFLICT');
+      state.release_tag = data.release_tag;
+    }
+    const entry = appendJournal(state, { phase: state.phase, event: 'OBSERVATION', ...data }); await save(path, state); return entry;
+  });
+}
+
+/** Reconcile a remote receipt and persist the decision without adopting remote state. */
+export async function reconcileState(path, remote) {
+  return withLock(path, async () => {
+    const state = await load(path);
+    const result = reconcileJournal({ state, remote });
+    appendJournal(state, {
+      phase: state.phase,
+      event: 'RECONCILE',
+      status: result.status,
+      action: result.action ?? null,
+      reason: result.reason ?? null,
+      remote_phase: remote?.phase ?? null,
+      remote_status: remote?.status ?? null,
+    });
+    await save(path, state);
+    return result;
+  });
 }
 
 /**
@@ -159,6 +193,7 @@ export async function resume(path) {
   const current = phaseIndex(state.phase);
   return {
     schema_version: state.schema_version,
+    release_tag: state.release_tag,
     phase: state.phase,
     phase_status: state.phase_status,
     next: state.phase === null ? PHASES[0] : (TERMINAL.has(state.phase) ? null : PHASES[current + 1] ?? null),
