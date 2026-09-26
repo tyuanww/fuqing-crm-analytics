@@ -9,6 +9,9 @@ on:
       reviewed_sha:
         required: true
         type: string
+      approval_ref:
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -22,6 +25,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+          ref: ${{ inputs.release_tag }}
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: '24.19.0'
@@ -29,10 +33,18 @@ jobs:
       - name: Refuse unreviewed or dirty source
         env:
           REVIEWED_SHA: ${{ inputs.reviewed_sha }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          APPROVAL_REF: ${{ inputs.approval_ref }}
         run: |
           set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^dsh-[A-Za-z0-9._-]+$ ]]
+          [[ "$REVIEWED_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test -n "$APPROVAL_REF"
+          git show-ref --verify --quiet "refs/tags/$RELEASE_TAG"
+          test "$(git rev-parse "$RELEASE_TAG^{commit}")" = "$REVIEWED_SHA"
+          test "$(git rev-list -n1 "$RELEASE_TAG")" = "$REVIEWED_SHA"
           test "$(git rev-parse HEAD)" = "$REVIEWED_SHA"
-          test -z "$(git status --porcelain)"
+          test -z "$(git status --porcelain --untracked-files=all)"
       - name: Build synthetic release evidence only
         env:
           RELEASE_TAG: ${{ inputs.release_tag }}
