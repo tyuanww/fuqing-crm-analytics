@@ -5,7 +5,9 @@ set -euo pipefail
 # credential. The credential is read over the existing Tailscale SSH path and
 # handed directly to macOS open(1), matching the upstream DSH contract.
 
-ssh_key="${SHINEMAGE_SSH_KEY:-${HOME}/.ssh/id_ed25519_github}"
+# Keep the Hangzhou transport key separate from GitHub credentials. The
+# previous default was a retired legacy GitHub key.
+ssh_key="${SHINEMAGE_SSH_KEY:-${HOME}/.ssh/id_ed25519_pc2}"
 ssh_target="${SHINEMAGE_SSH_TARGET:-root@100.93.46.46}"
 runtime_file="${SHINEMAGE_DSH_RUNTIME:-/srv/shinemage/dsh/runtime/browser-private.json}"
 public_origin="${SHINEMAGE_DSH_ORIGIN:-https://app.tyuan.chat}"

@@ -2,11 +2,13 @@
 
 当前提交、版本和现役见 [STATUS](./STATUS.md)。目录、端口和检索见 [维护地图](./docs/operating/maintainer-map.md)。对话生成 HTML 的步骤见 [从对话生成 HTML 驾驶舱](./docs/operating/cockpit-native-html.md)。产品仍 PARTIAL。
 
+> 当前运行（2026-09-26）：公共 `main @ 47f49616`、VERSION `0.18.0.0` 已合入；Mac 是开发/测试端，杭州 Windows + WSL 是批准 SHA 的生产端。DSH 0.1.7-rc.1、CRM、WeKnora 和 `www/app/page/board/learn.tyuan.chat` 已按 [STATUS](./STATUS.md) 验证；完整生产浏览器旅程与本人 UAT 仍开放。
+
 下方9月5–10日的决策、端口和候选追加保留为历史记录，不作为当前服务或Git HEAD。
 
 > AI 黑客松作品 · 多渠道客户资产诊断 · 受控自由问数与人群决策
 
-> **价值定稿（2026-09-05）**：已确认让老板拍板一个有边界的天猫内部跨渠道客户增长试点，主线是“渠道 × 首购商品 × 后续购买”。见 [CEO 价值与首版决策方案](./docs/hackathon/CEO-VALUE-PLAN.md)（用户已批准定稿，APPROVED）。统一分析工作台方向保留；用户已确认保留 DSH 原生 UI，详见 [DSH 交互设计](./docs/hackathon/DSH-UI-INTERACTION-SPEC.md)。原生 UI 的集成、运行时与模型仍待验证，公网部署继续暂缓。
+> **历史价值定稿（2026-09-05）**：已确认让老板拍板一个有边界的天猫内部跨渠道客户增长试点，主线是“渠道 × 首购商品 × 后续购买”。见 [CEO 价值与首版决策方案](./docs/hackathon/CEO-VALUE-PLAN.md)。本段保留当时决策语境；当前运行和公网事实以 STATUS/HANDOVER 为准。
 
 > **当前交付（2026-09-10）**：competition 集成 #112 和 7 项审查修复 #114 已合入 main `788b5b1`；PR 与合并后的主线 CI 均通过。独立合成浏览器已验证连续成板、失败重试、保存布局重开及行动草稿 v2，见 [修复 QA](./docs/hackathon/COMPETITION-REPAIR-QA-2026-09-10.md)。当前按 [产品验收与发布准备账本](./docs/hackathon/PRODUCT-READINESS-2026-09-10.md) 推进；[单位来源修复](./docs/hackathon/COMPUTED-UNITS-DELIVERY-2026-09-10.md)已完成本地验证、五库恢复、候选切换和局部真实复测。T13 已有真实 DeepSeek 有界实测，T15 待本人验收，T16 仅合成单用户基线，T17 PARTIAL，整产品仍 PARTIAL。约千万行、10 人使用仍是规划输入，公网尚未部署。
 

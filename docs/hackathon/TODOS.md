@@ -6,16 +6,18 @@
 
 2026-09-13 用户确认“核心版本优先交付、扩库完善后置”。目标是问数后 AI 优先使用定制组件自由组板，板内按选定范围修改；首批六类不是最终上限。M1／产品仍 PARTIAL；原全量 App Goal 保持 PAUSED。本节承接原本地施工记录，不把旧冻结实现反推成最终需求。
 
-### 2026-09-24 DSH RC1 与产物收件箱候选
+### 2026-09-26 DSH RC1、产物收件箱与杭州发布
 
-工作树 `codex/dsh-017-rc1`，VERSION `0.18.0.0`，固定 DSH `0.1.7-rc.1`；候选插件不修改 DSH 上游。收件箱、原生 HTML 接入、确认保存和单卡片局部 patch 已完成代码与隔离门禁；产品仍 PARTIAL。
+公共 `main @ 47f49616`、VERSION `0.18.0.0`、固定 DSH `0.1.7-rc.1` 已合入并部署杭州；候选插件不修改 DSH 上游。产品仍 PARTIAL。
 
 - [x] Artifact Inbox 持久化、幂等去重、候选确认/丢弃及正式页面隔离。
 - [x] 自由 HTML、原生 `write/edit/present`、事件/轮询统一登记到收件箱。
 - [x] 收件箱 UI、候选预览/确认、结构化样式与局部 patch 守卫。
 - [x] B0 完整 pipeline、构建、类型检查和插件测试通过；清理目录有界且自动回收。
-- [ ] 真实浏览器级收件箱→预览→局部编辑→保存旅程；当前缺 Playwright headless 二进制。
-- [ ] 本人 UAT、远端 CI、合并和正式发布。
+- [x] PR #59、main CI、杭州 CRM/DSH/WeKnora 切换、Cloudflare 入口和生产 DuckDB 备份已完成。
+- [x] 隔离合成环境的 Playwright headed 旅程（页面生成/预览、数据绑定、局部编辑、保存新版本、回滚、脏数据离开保护）已通过；fixture 的生成步骤走 live adapter fallback，证据不是 Artifact Inbox 浏览器链路、生产 DSH shell 或真实业务数据。
+- [ ] 完整 DSH shell/生产收件箱→预览→局部编辑→保存旅程及本人 UAT；尚未执行，不是因为缺 Chromium，而是生产壳和真实业务闭环仍需本人验收。
+- [ ] 本人完整 UAT；真实模型逐格式编辑、P13、扫描 PDF OCR、复杂 Office、图谱剩余语义核对继续开放。
 
 ### 2026-09-21 HTML 卡片文案与块级 AI（本地候选）
 

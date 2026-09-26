@@ -2,7 +2,8 @@
 # credential path. Keep the credential file outside Git with mode 0600.
 #
 # The page endpoint is intentionally a separate hostname because the browser
-# bundle sends a bearer token to it. Do not expose WeKnora or Neo4j here.
+# bundle sends a bearer token to it. WeKnora keeps its own login and the
+# knowledge-base hostname is loopback-only at the origin. Never expose Neo4j.
 
 tunnel: REPLACE_WITH_TUNNEL_ID
 credentials-file: /etc/cloudflared/REPLACE_WITH_TUNNEL_ID.json
@@ -16,4 +17,6 @@ ingress:
     service: http://127.0.0.1:18091
   - hostname: board.tyuan.chat
     service: http://127.0.0.1:18094
+  - hostname: learn.tyuan.chat
+    service: http://127.0.0.1:18090
   - service: http_status:404

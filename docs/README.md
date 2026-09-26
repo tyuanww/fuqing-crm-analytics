@@ -1,7 +1,7 @@
 # Docs 索引
 
 > 按 lifecycle 分层，新人约 5 分钟找到入口。  
-> **最后更新**: 2026-09-24。当前提交只看根目录 [STATUS.md](../STATUS.md)。目录、端口和检索看 [维护地图](./operating/maintainer-map.md)。DSH 钉 **0.1.7-rc.1**（`46a7f68b`）。现役 6677 已加载 RC1 与本候选插件，页面文档 HTTP 为 18091。产品仍 PARTIAL。下面的黑客松与校准记录是档案，不是默认入口。
+> **最后更新**: 2026-09-26。当前提交只看根目录 [STATUS.md](../STATUS.md) 和 [HANDOVER.md](../HANDOVER.md)。Mac 负责开发/测试，杭州 Windows + WSL 负责批准 SHA 的生产运行。DSH 钉 **0.1.7-rc.1**（`46a7f68b`），6677、CRM、WeKnora 及五个公开入口的现役事实见 STATUS。下面的黑客松与校准记录是档案，不是默认入口。
 
 ## 黑客松当前实现
 
