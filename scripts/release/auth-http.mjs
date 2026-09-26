@@ -12,6 +12,17 @@ function send(response, result) {
   response.end(result.body ?? '');
 }
 
+async function requestBody(request, limit = 1024 * 1024) {
+  let bytes = 0;
+  const chunks = [];
+  for await (const chunk of request) {
+    bytes += chunk.length;
+    if (bytes > limit) throw new Error('AUTH_BODY_TOO_LARGE');
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks);
+}
+
 async function exchangeToken(request) {
   if (request.method !== 'POST') return null;
   if (!/^application\/x-www-form-urlencoded(?:;|$)/i.test(String(request.headers['content-type'] ?? ''))) return null;
@@ -28,8 +39,14 @@ async function exchangeToken(request) {
 }
 
 /** Minimal host adapter for the auth contract; callers own the listener. */
-function createAuthServer({ statePath, allowedOrigins = [], secure = true } = {}) {
+function createAuthServer({ statePath, allowedOrigins = [], secure = true, upstreamBase = null, upstreamToken = null } = {}) {
   if (typeof statePath !== 'string' || !statePath) throw new Error('AUTH_STATE_PATH_REQUIRED');
+  let upstream = null;
+  if (upstreamBase !== null) {
+    if (typeof upstreamBase !== 'string' || !upstreamBase || typeof upstreamToken !== 'string' || !upstreamToken) throw new Error('AUTH_UPSTREAM_CONFIG_INVALID');
+    upstream = new URL(upstreamBase);
+    if (!['http:', 'https:'].includes(upstream.protocol) || upstream.username || upstream.password || upstream.pathname !== '/' || upstream.search || upstream.hash) throw new Error('AUTH_UPSTREAM_URL_INVALID');
+  }
   return createServer(async (request, response) => {
     const origin = typeof request.headers.origin === 'string' ? request.headers.origin : '';
     const url = new URL(request.url ?? '/', 'http://127.0.0.1');
@@ -56,6 +73,26 @@ function createAuthServer({ statePath, allowedOrigins = [], secure = true } = {}
       return;
     }
     const guard = pageGuard({ origin, method: request.method, authenticated: false });
+    if (upstream && url.pathname.startsWith('/api/')) {
+      if (request.method === 'OPTIONS') { send(response, { status: 204, headers: corsHeaders(origin) }); return; }
+      const session = cookies(request.headers.cookie).dsh_session;
+      const csrf = request.headers['x-csrf-token'];
+      try { await authenticateSession(statePath, session, { origin, allowedOrigins, method: request.method, csrf }); }
+      catch { send(response, { status: 403, headers: { ...corsHeaders(origin), 'cache-control': 'no-store' }, body: 'Forbidden' }); return; }
+      let body;
+      try { body = ['GET', 'HEAD'].includes(request.method) ? undefined : await requestBody(request); }
+      catch { send(response, { status: 413, headers: { ...corsHeaders(origin), 'cache-control': 'no-store' }, body: 'Payload Too Large' }); return; }
+      try {
+        const target = new URL(`${url.pathname}${url.search}`, upstream);
+        const headers = { authorization: `Bearer ${upstreamToken}` };
+        if (request.headers['content-type']) headers['content-type'] = request.headers['content-type'];
+        const forwarded = await fetch(target, { method: request.method, headers, body, redirect: 'manual', signal: AbortSignal.timeout(10_000) });
+        const forwardedBody = Buffer.from(await forwarded.arrayBuffer());
+        const responseHeaders = { ...corsHeaders(origin), 'cache-control': 'no-store', 'content-type': forwarded.headers.get('content-type') ?? 'application/json' };
+        send(response, { status: forwarded.status, headers: responseHeaders, body: forwardedBody });
+      } catch { send(response, { status: 502, headers: { ...corsHeaders(origin), 'cache-control': 'no-store' }, body: 'Bad Gateway' }); }
+      return;
+    }
     if (url.pathname === '/api/mutate' && request.method === 'POST') {
       const session = cookies(request.headers.cookie).dsh_session;
       const csrf = request.headers['x-csrf-token'];

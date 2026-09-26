@@ -77,6 +77,21 @@ test('promotion binds service owner and cannot activate for another owner', asyn
   assert.equal(activated.status,'ACTIVE');
 });
 
+test('promotion records the previous target and rollback restores it atomically', async () => {
+  const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const releaseRoot=join(root,'release-root');
+  const oldManifest=await manifest(root,archive,'dsh-old');
+  const oldManifestCopy=join(root,'old-manifest.json'); await writeFile(oldManifestCopy,await readFile(oldManifest));
+  const newManifest=await manifest(root,archive,'dsh-new');
+  await installRelease({artifact:archive,manifestPath:oldManifestCopy,releaseRoot,tag:'dsh-old'});
+  const oldActive=await activateRelease({releaseRoot,tag:'dsh-old',sourceSha:'a'.repeat(40)});
+  await installRelease({artifact:archive,manifestPath:newManifest,releaseRoot,tag:'dsh-new'});
+  const newActive=await activateRelease({releaseRoot,tag:'dsh-new',sourceSha:'a'.repeat(40)});
+  assert.equal(newActive.previous,oldActive.current);
+  const rolledBack=await rollbackRelease({releaseRoot});
+  assert.equal(rolledBack.status,'ROLLED_BACK');
+  assert.equal(rolledBack.target,oldActive.current);
+});
+
 test('evidence creation is immutable and replay-safe', async () => {
   const root = await fixture(); const path = join(root, 'evidence.json');
   const first = await writeEvidence(path, { release_tag: 'dsh-test', authorization: 'secret-value' });
