@@ -15,10 +15,10 @@
 | T10 CLI/workflow contract | node@24 pnpm dsh test + `dsh --help|--version` | PASS | stable command/exit contract and config precedence synthetic evidence；cold checkout/TTHW/CI/Hangzhou NOT_RUN |
 | T11 evidence/HTML policy contract | node@24 pnpm dsh test | PASS | canonical/redaction/schema/digest verifier and CSP/sandbox fail-closed matrix；public response/browser/retention NOT_RUN |
 | T12 UAT/operations contract | node@24 pnpm dsh test | PASS | seven explicit groups, RACI, metrics ledger and cleanup receipt validator；现场 UAT/owner assignment/stable window NOT_RUN |
-| DSH dev contracts | `DSH_DEV_UPSTREAM=... node@24 --test scripts/dsh-dev/*.test.mjs` | PASS 84，1 skip | skip 为 built-upstream native registry integration；未启动生产服务 |
+| DSH dev contracts | `DSH_DEV_UPSTREAM=... node@24 --test scripts/dsh-dev/*.test.mjs` | NOT_RUN | 当前候选 worktree 不含 `.context/dsh-b0/upstream`，未伪造 upstream 路径；历史结果保留在 `verification-20260926.md`，不作为本轮通过证据 |
 | Shell | `bash -n deploy/wsl/*.sh`、`shellcheck deploy/wsl/*.sh` | PASS（此前实跑） | 不启动服务 |
 | Python lint | `python3.14 -m ruff check`（受影响模块） | PASS | 未修改真实数据 |
-| Diff/syntax | `git diff --check`、Node24 `--check`、JSON parse | PASS | candidate HEAD `1912a382` clean；auth HTTP adapter、stale-lock hardening 与证据文档已提交 |
+| Diff/syntax | `git diff --check`、Node24 `--check`、JSON parse | PASS | 当前 candidate HEAD 的 clean 状态与 SHA 以 `STATUS.md` 和最终 artifact manifest 为准；auth HTTP adapter、stale-lock hardening 与证据文档已提交 |
 | Artifact build/receive | 旧 `dsh-0.12.0.0-candidate7` | REJECTED / SUPERSEDED | 旧包不含当前安全修复，且不代表 reviewed clean commit；不得接收 |
 | Current offline artifact | `pnpm dsh release --offline --tag dsh-0.18.0.1-goal-final` + `pnpm dsh receive` | PASS | source SHA、entries 与 tarball SHA 以 `.context/release-evidence/dsh-0.18.0.1-goal-final/release-manifest.v1.json` 为唯一来源；internal-only，未创建 draft/tag/release |
 | Doctor/verify | `node@24 scripts/dsh.mjs doctor|verify` | doctor PASS；verify 的 compat/SLI/backpressure 为 NOT_RUN | 未伪造 rc1/rc2 WAL、15 分钟 HTTP 或 10x 线上证据 |
