@@ -14,7 +14,10 @@ const SYNTHETIC_MARKER = /(?:synthetic|test[-_]?only|\btest\b|isolated|not[-_]?a
 export function scanText(text, name = '<input>') {
   const findings = SECRET_PATTERNS.some(pattern => pattern.test(text)) ? [`SECRET_PATTERN ${name}`] : [];
   for (const match of text.matchAll(ASSIGNMENT)) {
-    if (!SYNTHETIC_MARKER.test(match[1])) findings.push(`SECRET_PATTERN ${name}`);
+    // Synthetic values are exempt only inside explicitly named fixtures/tests;
+    // a production/config file containing the same marker must still fail closed.
+    const syntheticFixture = /(?:fixture|test|spec)/i.test(name) && SYNTHETIC_MARKER.test(match[1]);
+    if (!syntheticFixture) findings.push(`SECRET_PATTERN ${name}`);
   }
   return [...new Set(findings)];
 }

@@ -12,4 +12,4 @@
 - token、Bearer、session、CSRF、Cookie 和授权字段脱敏。
 - loopback adapter 可把已通过 Cookie/CSRF/Origin 的浏览器请求转发到隔离 page backend，并只在服务端注入 backend bearer；backend token 不回到浏览器。
 
-验证：Node24 执行 pnpm dsh test，当前 aggregate 52/52 PASS，其中 auth 专项 7 个测试和 loopback HTTP adapter 3 个测试通过。浏览器真实 DSH/page HTTP、HTTPS 真实 Cookie、杭州 host/route 和 access-log 现场验证仍为 NOT_RUN；T3 保持 PARTIAL。
+验证：Node24 执行 pnpm dsh test，当前 aggregate 53/53 PASS，其中 auth 专项 7 个测试和 loopback HTTP adapter 3 个测试通过。浏览器真实 DSH/page HTTP、HTTPS 真实 Cookie、杭州 host/route 和 access-log 现场验证仍为 NOT_RUN；T3 保持 PARTIAL。

@@ -2,12 +2,12 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { createHash } from 'node:crypto';
 import test from 'node:test';
 import { receiveArtifact } from './artifact.mjs';
 import { issueToken, consumeToken, tokenExchangeResponse } from './auth-contract.mjs';
-import { assertPublicationAssets, installRelease, activateRelease, rollbackRelease } from './promotion.mjs';
+import { assertPublicationAssets, assertReleaseInputs, installRelease, activateRelease, rollbackRelease } from './promotion.mjs';
 import { beginAction, finishAction, receipt } from './action-contract.mjs';
 import { verifyReviewedCommit } from './trust.mjs';
 import { writeEvidence } from './evidence.mjs';
@@ -54,7 +54,7 @@ test('receiver scans final extracted content and deny names', async () => {
   const root=await fixture(), secretArchive=join(root,'secret.tar.gz'); const secretValue=['live','token-value-1234567890'].join('-'); const secret=`TOKEN = '${secretValue}'`; archiveWithEntries(secretArchive,[{name:'VERSION',data:'0.18.0.1\n'},{name:'config.txt',data:secret}]); const secretManifest=await manifest(root,secretArchive,'dsh-secret',{'VERSION':'0.18.0.1\n','config.txt':secret}); await assert.rejects(()=>receiveArtifact({artifact:secretArchive,manifestPath:secretManifest,destination:join(root,'secret-out')}), /SECRET_SCAN_FAILED/);
   const denyArchive=join(root,'deny.tar.gz'); archiveWithEntries(denyArchive,[{name:'VERSION',data:'0.18.0.1\n'},{name:'.env',data:'synthetic'}]); const denyManifest=await manifest(root,denyArchive,'dsh-deny',{'VERSION':'0.18.0.1\n','.env':'synthetic'}); await assert.rejects(()=>receiveArtifact({artifact:denyArchive,manifestPath:denyManifest,destination:join(root,'deny-out')}), /SECRET_SCAN_FAILED/);
 });
-test('secret scan distinguishes explicit synthetic fixtures from real assignments', () => { const live = ['live', 'token-value-1234567890'].join('-'); assert.deepEqual(scanText("TOKEN = 'test-only-synthetic-token'", 'fixture'), []); assert.deepEqual(scanText(`TOKEN = '${live}'`, 'fixture'), ['SECRET_PATTERN fixture']); });
+test('secret scan distinguishes explicit synthetic fixtures from real assignments', () => { const live = ['live', 'token-value-1234567890'].join('-'); assert.deepEqual(scanText("TOKEN = 'test-only-synthetic-token'", 'fixture.test.mjs'), []); assert.deepEqual(scanText("TOKEN = 'test-only-synthetic-token'", 'config/runtime.env'), ['SECRET_PATTERN config/runtime.env']); assert.deepEqual(scanText(`TOKEN = '${live}'`, 'fixture.test.mjs'), ['SECRET_PATTERN fixture.test.mjs']); });
 test('zstd receiver enforces the bounded stream path', async () => { const root=await fixture(), raw=join(root,'a.tar'), archive=join(root,'a.tar.zst'); execFileSync('python3',['-c',`import tarfile,sys,io
 x=tarfile.TarInfo('VERSION'); b=bytes([48,46,49,56,46,48,46,49,10]); x.size=len(b); x.mode=0o600
 with tarfile.open(sys.argv[1],'w:') as t: t.addfile(x,io.BytesIO(b))`,raw]); execFileSync('/Users/hutou/homebrew/bin/zstd',['-q',raw,'-o',archive]); const m=await manifest(root,archive); const got=await receiveArtifact({artifact:archive,manifestPath:m,destination:join(root,'out')}); assert.equal(got.entries,1); });
@@ -66,6 +66,16 @@ test('promotion binds publication asset digests to local files', () => {
   assert.throws(() => assertPublicationAssets(publication, [['candidate.tar.zst', 'b'.repeat(64)]]), /TRUST_ASSET_DIGEST_MISMATCH/);
   assert.throws(() => assertPublicationAssets(publication, [['release-manifest.v1.json', digest]]), /TRUST_ASSET_MISSING/);
 });
+test('promotion binds checksum entries and evidence index to the release tag', async () => {
+  const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); const sums=join(root,'SHA256SUMS'); const evidence=join(root,'ci-evidence.json');
+  const manifestDigest=sha(await readFile(m)); const artifactDigest=sha(await readFile(archive));
+  await writeFile(sums, `${artifactDigest}  ${basename(archive)}\n${manifestDigest}  ${basename(m)}\n`);
+  await writeFile(evidence, JSON.stringify({ schema_version:'ci-evidence-index/v1', release_tag:'dsh-test', entries:[{name:'fixture',status:'PARTIAL',ref:'synthetic://fixture'}] }));
+  const releaseManifest=JSON.parse(await readFile(m));
+  assert.equal(await assertReleaseInputs({artifact:archive,manifestPath:m,sumsPath:sums,evidenceIndexPath:evidence,tag:'dsh-test',manifest:releaseManifest}),true);
+  await writeFile(sums, `${'b'.repeat(64)}  ${basename(archive)}\n${manifestDigest}  ${basename(m)}\n`);
+  await assert.rejects(()=>assertReleaseInputs({artifact:archive,manifestPath:m,sumsPath:sums,evidenceIndexPath:evidence,tag:'dsh-test',manifest:releaseManifest}),/RELEASE_CHECKSUM_BINDING_MISMATCH/);
+});
 test('token is one-time, origin-bound, rate-limited and session-backed', async () => { const root=await fixture(), db=join(root,'tokens.json'), token=await issueToken(db,{now:1000}); await assert.rejects(()=>consumeToken(db,token,{now:1001}),/AUTH_ORIGIN_REJECTED/); assert.equal((await consumeToken(db,token,{origin:'https://app.tyuan.chat',allowedOrigins:['https://app.tyuan.chat'],now:1001})).authenticated,true); await assert.rejects(()=>consumeToken(db,token,{origin:'https://app.tyuan.chat',allowedOrigins:['https://app.tyuan.chat'],now:1002}),/AUTH_TOKEN_REPLAY/); const fresh=await issueToken(db,{now:2000}); const response=await tokenExchangeResponse(db,fresh,{method:'POST',origin:'https://app.tyuan.chat',allowedOrigins:['https://app.tyuan.chat'],now:2001}); assert.equal(response.status,303); assert.match(response.headers['set-cookie'][0],/HttpOnly/); });
 test('side-by-side install, activation and duplicate protection retain source identity', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); const releaseRoot=join(root,'releases-root'); const installed=await installRelease({artifact:archive,manifestPath:m,releaseRoot,tag:'dsh-test'}); assert.equal(installed.status,'PREPARED'); const active=await activateRelease({releaseRoot,tag:'dsh-test',sourceSha:'a'.repeat(40)}); assert.equal(active.status,'ACTIVE'); await assert.rejects(()=>installRelease({artifact:archive,manifestPath:m,releaseRoot,tag:'dsh-test'}),/RELEASE_EXISTS/); });
 
@@ -73,7 +83,8 @@ test('promotion binds service owner and cannot activate for another owner', asyn
   const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); const releaseRoot=join(root,'release-root');
   await installRelease({artifact:archive,manifestPath:m,releaseRoot,tag:'dsh-test',owner:'service-a',restartDependency:'service-a.service'});
   await assert.rejects(()=>activateRelease({releaseRoot,tag:'dsh-test',sourceSha:'a'.repeat(40),expectedOwner:'service-b'}),/RELEASE_OWNER_MISMATCH/);
-  const activated=await activateRelease({releaseRoot,tag:'dsh-test',sourceSha:'a'.repeat(40),expectedOwner:'service-a'});
+  await assert.rejects(()=>activateRelease({releaseRoot,tag:'dsh-test',sourceSha:'a'.repeat(40),expectedOwner:'service-a',expectedRestartDependency:'service-b.service'}),/RELEASE_RESTART_DEPENDENCY_MISMATCH/);
+  const activated=await activateRelease({releaseRoot,tag:'dsh-test',sourceSha:'a'.repeat(40),expectedOwner:'service-a',expectedRestartDependency:'service-a.service'});
   assert.equal(activated.status,'ACTIVE');
 });
 
@@ -87,7 +98,8 @@ test('promotion records the previous target and rollback restores it atomically'
   await installRelease({artifact:archive,manifestPath:newManifest,releaseRoot,tag:'dsh-new'});
   const newActive=await activateRelease({releaseRoot,tag:'dsh-new',sourceSha:'a'.repeat(40)});
   assert.equal(newActive.previous,oldActive.current);
-  const rolledBack=await rollbackRelease({releaseRoot});
+  await assert.rejects(()=>rollbackRelease({releaseRoot,expectedOwner:'other-service',expectedRestartDependency:'shinemage-dsh.service'}),/RELEASE_OWNER_MISMATCH/);
+  const rolledBack=await rollbackRelease({releaseRoot,expectedOwner:'shinemage-dsh',expectedRestartDependency:'shinemage-dsh.service'});
   assert.equal(rolledBack.status,'ROLLED_BACK');
   assert.equal(rolledBack.target,oldActive.current);
 });

@@ -109,7 +109,17 @@ RELEASE_SOURCE_REF=refs/tags/dsh-<version> \
 
 RELEASE_ROOT=/srv/shinemage/dsh RELEASE_TAG=dsh-<version> \
 RELEASE_SOURCE_SHA=<reviewed-source-sha> RELEASE_OWNER=shinemage-dsh \
+RELEASE_RESTART_DEPENDENCY=shinemage-dsh.service \
   deploy/wsl/activate-release.sh
 ```
 
 `activate-release.sh` 只切换 `current` symlink，不重启服务；重启自有 DSH service、hostname 验证和 Cloudflare route 变更分别需要现场授权。失败按 `rollback-release.sh` 使用已记录的旧 target 回退，稳定窗口结束前不删除旧目录。
+
+回退同样必须绑定 owner 和 restart dependency：
+
+```bash
+RELEASE_ROOT=/srv/shinemage/dsh \
+RELEASE_OWNER=shinemage-dsh \
+RELEASE_RESTART_DEPENDENCY=shinemage-dsh.service \
+  deploy/wsl/rollback-release.sh
+```

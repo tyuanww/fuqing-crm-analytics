@@ -8,8 +8,6 @@ import { buildPreManifest, packArtifact, receiveArtifact, sha256 } from './relea
 import { assertSchema } from './release/schema.mjs';
 import { verifyPayload } from './release/artifact.mjs';
 import { readState, reconcileState, resume } from './release/state.mjs';
-import { runCompatibilityMatrix } from './release/compat-check.mjs';
-import { verifyOperatorGate, evaluateSli } from './release/operator-gate.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const releaseEvidence = join(root, '.context/release-evidence');

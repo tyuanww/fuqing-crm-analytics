@@ -1,11 +1,14 @@
 import { access, mkdir, open, readFile, rename, rm, symlink, lstat, readlink } from 'node:fs/promises';
-import { basename, dirname, join, relative, resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import { receiveArtifact, sha256 } from './artifact.mjs';
 import { recordEvent } from './state.mjs';
+import { assertSchema } from './schema.mjs';
 import { assertDeploymentTrust, verifyAttestationBundle, verifyPublicationRecord } from './trust.mjs';
+import { fileURLToPath } from 'node:url';
 
 const TAG = /^dsh-[A-Za-z0-9._-]+$/;
 const OWNER = /^[A-Za-z0-9._:-]{3,128}$/;
+const EVIDENCE_SCHEMA = fileURLToPath(new URL('./schemas/ci-evidence-index.v1.schema.json', import.meta.url));
 function assertTag(tag) { if (!TAG.test(tag) || tag.includes('..')) throw new Error('RELEASE_TAG_INVALID'); }
 function releasePath(root, tag) {
   assertTag(tag); const base = resolve(root, 'releases'); const target = resolve(base, tag);
@@ -28,6 +31,23 @@ export function assertPublicationAssets(publication, expectedAssets) {
   return true;
 }
 
+export async function assertReleaseInputs({ artifact, manifestPath, sumsPath, evidenceIndexPath, tag, manifest }) {
+  const sums = await readFile(sumsPath, 'utf8');
+  const entries = new Map();
+  for (const line of sums.split(/\r?\n/).filter(Boolean)) {
+    const match = /^(?<digest>[0-9a-f]{64})\s+(?<name>[^\s]+)$/.exec(line);
+    if (!match || entries.has(match.groups.name)) throw new Error('RELEASE_CHECKSUM_FORMAT_INVALID');
+    entries.set(match.groups.name, match.groups.digest);
+  }
+  const expected = [[basename(artifact), manifest.artifact_sha256], [basename(manifestPath), await sha256(manifestPath)]];
+  for (const [name, digest] of expected) if (entries.get(name) !== digest) throw new Error(`RELEASE_CHECKSUM_BINDING_MISMATCH ${name}`);
+  let evidence;
+  try { evidence = JSON.parse(await readFile(evidenceIndexPath, 'utf8')); } catch { throw new Error('RELEASE_EVIDENCE_INVALID'); }
+  await assertSchema(evidence, EVIDENCE_SCHEMA);
+  if (evidence.release_tag !== tag) throw new Error('RELEASE_EVIDENCE_TAG_MISMATCH');
+  return true;
+}
+
 export async function installRelease({ artifact, manifestPath, releaseRoot, tag, statePath, owner = 'shinemage-dsh', restartDependency = 'shinemage-dsh.service', publicationPath = null, sumsPath = null, evidenceIndexPath = null, attestationBundlePath = null, repository = null, sourceRef = null, signerWorkflow = null, gh = 'gh' }) {
   assertTag(tag); const root = resolve(releaseRoot); const releases = join(root, 'releases'); const target = releasePath(root, tag);
   if (!OWNER.test(owner) || !OWNER.test(restartDependency)) throw new Error('RELEASE_OWNER_INVALID');
@@ -38,6 +58,7 @@ export async function installRelease({ artifact, manifestPath, releaseRoot, tag,
   if (publicationPath !== null) {
     if (![sumsPath, evidenceIndexPath, attestationBundlePath, repository, sourceRef].every(value => typeof value === 'string' && value)) throw new Error('RELEASE_TRUST_INPUTS_REQUIRED');
     const [manifestSha256, sha256sumsSha256, evidenceIndexSha256] = await Promise.all([sha256(manifestPath), sha256(sumsPath), sha256(evidenceIndexPath)]);
+    await assertReleaseInputs({ artifact, manifestPath, sumsPath, evidenceIndexPath, tag, manifest });
     const publication = await readJson(publicationPath);
     trust = await verifyPublicationRecord(publicationPath, {
       releaseTag: tag,
@@ -70,12 +91,13 @@ export async function installRelease({ artifact, manifestPath, releaseRoot, tag,
   } catch (error) { await rm(staging, { recursive: true, force: true }); throw error; }
 }
 
-export async function activateRelease({ releaseRoot, tag, sourceSha, statePath, expectedOwner = null }) {
+export async function activateRelease({ releaseRoot, tag, sourceSha, statePath, expectedOwner = null, expectedRestartDependency = null }) {
   assertTag(tag); if (!/^[0-9a-f]{40}$/.test(sourceSha)) throw new Error('SOURCE_SHA_INVALID');
   const root = resolve(releaseRoot); const target = releasePath(root, tag); const marker = await readJson(join(target, 'release-marker.json'));
   if (marker.tag !== tag || marker.source_sha !== sourceSha) throw new Error('RELEASE_MARKER_MISMATCH');
   if (!OWNER.test(marker.owner ?? '') || !OWNER.test(marker.restart_dependency ?? '')) throw new Error('RELEASE_OWNER_MISSING');
   if (expectedOwner !== null && marker.owner !== expectedOwner) throw new Error('RELEASE_OWNER_MISMATCH');
+  if (expectedRestartDependency !== null && marker.restart_dependency !== expectedRestartDependency) throw new Error('RELEASE_RESTART_DEPENDENCY_MISMATCH');
   const current = join(root, 'current'); let previous = null;
   try {
     const currentStat = await lstat(current);
@@ -109,14 +131,18 @@ export async function activateRelease({ releaseRoot, tag, sourceSha, statePath, 
   return { status: 'ACTIVE', tag, previous, current: target };
 }
 
-export async function rollbackRelease({ releaseRoot, statePath }) {
+export async function rollbackRelease({ releaseRoot, statePath, expectedOwner = null, expectedRestartDependency = null }) {
   const root = resolve(releaseRoot); const rollbackRecord = await readJson(join(root, 'rollback-target.json'));
   if (!rollbackRecord || typeof rollbackRecord.target !== 'string') throw new Error('ROLLBACK_TARGET_MISSING');
   const previous = rollbackRecord.target;
   const releases = resolve(root, 'releases'); const target = resolve(previous);
   if (!target.startsWith(`${releases}/`) || target === releases) throw new Error('ROLLBACK_TARGET_INVALID');
   const targetStat = await lstat(target); if (!targetStat.isDirectory()) throw new Error('ROLLBACK_TARGET_INVALID');
-  const marker = await readJson(join(target, 'release-marker.json')); if (!/^[0-9a-f]{40}$/.test(marker.source_sha)) throw new Error('ROLLBACK_SOURCE_INVALID');
+  const marker = await readJson(join(target, 'release-marker.json'));
+  if (!/^[0-9a-f]{40}$/.test(marker.source_sha)) throw new Error('ROLLBACK_SOURCE_INVALID');
+  if (!OWNER.test(marker.owner ?? '') || !OWNER.test(marker.restart_dependency ?? '')) throw new Error('RELEASE_OWNER_MISSING');
+  if (expectedOwner !== null && marker.owner !== expectedOwner) throw new Error('RELEASE_OWNER_MISMATCH');
+  if (expectedRestartDependency !== null && marker.restart_dependency !== expectedRestartDependency) throw new Error('RELEASE_RESTART_DEPENDENCY_MISMATCH');
   await replaceSymlink(join(root, 'current'), target); await writeFileAtomic(join(root, 'current-target'), `${target}\n`);
   const completedAt = new Date().toISOString();
   await writeReceipt(root, { schema_version: 'promotion-receipt/v1', release_tag: marker.tag, status: 'ROLLED_BACK', source_sha: marker.source_sha, started_at: completedAt, completed_at: completedAt });

@@ -7,10 +7,11 @@
 - 增加统一 `pnpm dsh receive` 接收入口；receiver 对 traversal、duplicate、权限、大小、symlink、deny-name 和最终 secret scan fail-closed。
 - 补齐 T3 的 token/session/CSRF/Cookie/redaction 合同，T4 的 protected tag/publication 校验，以及 T5 的 durable reconcile/resume/crash 入口；现场与 GitHub trust 仍保持 NOT_RUN。
 - T8 terminal receipt 绑定 action actor/idempotency/type；T9 增加 100 请求/10 并发 scheduler backpressure synthetic PASS，同时将真实 HTTP backpressure 保持为 NOT_RUN。
+- 第二轮 OCR delegate review 修复 promotion/rollback 的 owner 与 restart dependency 复核、SHA256SUMS/evidence index 绑定、fixture-only secret scan 豁免，以及 release workflow 的 timeout/concurrency；当前 release tests 53/53。
 
 ### Verification
 
-- 首轮代码审查后，当前候选隔离 release tests 52/52 通过；dsh-dev 当前因 worktree 不含固定 upstream checkout 保持 NOT_RUN。本轮 `auth-http` loopback adapter、stale-lock owner hardening、publication/provenance fail-closed gate、action receipt/capacity synthetic gate 已复验；T2 clean artifact receive、T3 auth/HTTP adapter、T4 trust、T5 crash/reconcile/stale-lock、T6 promotion、T7 compatibility、T8 action、T9 operator、T10 CLI、T11 evidence/HTML、T12 UAT/RACI/metrics/cleanup synthetic gate 均有当前证据；B0 因 Python `duckdb` lock 漂移失败，详见候选验证账本和 T2–T12 证据。
+- 首轮代码审查后，当前候选隔离 release tests 53/53 通过；dsh-dev 当前因 worktree 不含固定 upstream checkout 保持 NOT_RUN。本轮 `auth-http` loopback adapter、stale-lock owner hardening、publication/provenance fail-closed gate、action receipt/capacity synthetic gate 已复验；T2 clean artifact receive、T3 auth/HTTP adapter、T4 trust、T5 crash/reconcile/stale-lock、T6 promotion、T7 compatibility、T8 action、T9 operator、T10 CLI、T11 evidence/HTML、T12 UAT/RACI/metrics/cleanup synthetic gate 均有当前证据；B0 因 Python `duckdb` lock 漂移失败，详见候选验证账本和 T2–T12 证据。
 
 ## [0.18.0.0] - 2026-09-24
 
