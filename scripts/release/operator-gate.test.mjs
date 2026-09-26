@@ -26,7 +26,12 @@ test('operator gate needs matching identity and a real forbidden response', asyn
 test('operator none stays PARTIAL, SLI needs 15 minutes and scheduler is not HTTP evidence', async () => {
   assert.equal((await verifyOperatorGate({ method: 'none' })).status, 'PARTIAL');
   assert.equal(evaluateSli([{ observed_at: 0, latency_ms: 1 }]).status, 'NOT_RUN');
-  const result = await runBackpressure({ requests: 100, concurrency: 10, task: async () => ({ status: 200 }) });
+  const result = await runBackpressure({ requests: 100, concurrency: 10, synthetic: true, task: async () => ({ status: 200 }) });
+  assert.equal(result.status, 'PASS');
+  assert.equal(result.evidence_scope, 'synthetic-scheduler');
   assert.equal(result.peak, 10);
-  assert.equal(result.status, 'NOT_RUN');
+  assert.equal(result.results.length, 100);
+  const live = await runBackpressure({ requests: 10, concurrency: 2, task: async () => ({ status: 200 }) });
+  assert.equal(live.status, 'NOT_RUN');
+  assert.equal(live.evidence_scope, 'real-http-required');
 });

@@ -10,8 +10,8 @@
 | T5 state/reconcile | node@24 pnpm dsh test + pnpm dsh reconcile synthetic fixture | PASS | crash/resume, durable RECONCILE journal and stale-lock owner checks；remote CI/杭州 resume NOT_RUN |
 | T6 promotion contract | node@24 pnpm dsh test + `bash -n deploy/wsl/*.sh` | PASS | owner/restart-dependency binding, mismatch guard and wrapper syntax；systemd/readiness/host NOT_RUN |
 | T7 compatibility contract | node@24 pnpm dsh test | PASS | synthetic runtime/session/WAL-like fixture；real WAL/WSL2/ABI NOT_RUN |
-| T8 action contract | node@24 pnpm dsh test | PASS | action_id/terminal receipt/conflict/unknown synthetic matrix；server/browser wiring NOT_RUN |
-| T9 operator/capacity contract | node@24 pnpm dsh test | PASS | owned ephemeral probe, negative SHA and 10x scheduler fixture；route/15m/real backpressure NOT_RUN |
+| T8 action contract | node@24 pnpm dsh test | PASS | action_id/actor/idempotency/type-bound terminal receipt/conflict/unknown synthetic matrix；server/browser wiring NOT_RUN |
+| T9 operator/capacity contract | node@24 pnpm dsh test | PASS | owned ephemeral probe, negative SHA and 100-request/10-concurrency scheduler fixture；route/15m/real HTTP backpressure NOT_RUN |
 | T10 CLI/workflow contract | node@24 pnpm dsh test + `dsh --help|--version` | PASS | stable command/exit contract and config precedence synthetic evidence；cold checkout/TTHW/CI/Hangzhou NOT_RUN |
 | T11 evidence/HTML policy contract | node@24 pnpm dsh test | PASS | canonical/redaction/schema/digest verifier and CSP/sandbox fail-closed matrix；public response/browser/retention NOT_RUN |
 | T12 UAT/operations contract | node@24 pnpm dsh test | PASS | seven explicit groups, RACI, metrics ledger and cleanup receipt validator；现场 UAT/owner assignment/stable window NOT_RUN |

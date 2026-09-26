@@ -660,7 +660,7 @@ Synthesized from CEO、DX、Design 与 Eng 审查的已接受发现。以下任�
   - Surfaced by: Eng/Design — 客户端超时不能推断成功，未接通保存/导出/发送必须显示 `NOT_AVAILABLE`
   - Files: action API、native/plugin adapters、browser UAT、capability docs
   - Verify: 双击、断网、杀进程、权限撤销、两种完成顺序和刷新重开均保留草稿及可恢复状态
-- [ ] **T9 (P1, PARTIAL — ephemeral probe/scheduler PASS; route/15m/10x NOT_RUN)** — Operator gate and capacity — 实现正负身份探针、route SHA、SLI 阈值、15 分钟最小场景数与 10x backpressure 测试
+- [ ] **T9 (P1, PARTIAL — ephemeral probe/synthetic scheduler PASS; route/15m/real HTTP 10x NOT_RUN)** — Operator gate and capacity — 实现正负身份探针、route SHA、SLI 阈值、15 分钟最小场景数与 10x backpressure 测试
   - Surfaced by: CEO/DX/Eng — hostname/tunnel 不是隔离；timeout 不能算负探针通过
   - Files: `deploy/wsl/operator-gate`, health/metrics scripts、synthetic release orchestrator
   - Verify: `operator-gate verify --method ...` 写入证据；p95/5xx/auth/plugin/page 阈值、慢客户端、断线和资源上限可复现

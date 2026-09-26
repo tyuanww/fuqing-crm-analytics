@@ -40,7 +40,7 @@ export async function finishAction(path, actionId, { status, detail = null } = {
       if (action.status !== status) throw new Error('ACTION_TERMINAL_CONFLICT');
       if (action.receipt) return action;
     }
-    action.status = status; action.receipt = { action_id: actionId, status, detail, at: new Date().toISOString() }; await save(path, state); return action;
+    action.status = status; action.receipt = { schema_version: 'action-receipt/v1', action_id: actionId, actor: action.actor, idempotency_key: action.idempotency_key, type: action.type, status, detail, at: new Date().toISOString() }; await save(path, state); return action;
   });
 }
 export async function receipt(path, actionId) { const state = await load(path); return state.actions[actionId]?.receipt ?? { action_id: actionId, status: 'UNKNOWN', receipt: null }; }
