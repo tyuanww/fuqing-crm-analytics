@@ -11,7 +11,7 @@ scripts/ops/open-hangzhou-dsh.sh
 脚本通过现有 Tailscale SSH 读取 WSL runtime 的启动链接，只把重写后的 HTTPS 地址交给 macOS 默认浏览器，不打印认证参数。可用环境变量覆盖 SSH 密钥和目标：
 
 ```bash
-SHINEMAGE_SSH_KEY=~/.ssh/id_ed25519_github \
+SHINEMAGE_SSH_KEY=~/.ssh/id_ed25519_pc2 \
 SHINEMAGE_SSH_TARGET=root@100.93.46.46 \
 scripts/ops/open-hangzhou-dsh.sh
 ```
