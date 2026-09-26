@@ -5,7 +5,7 @@
 
 | 项 | 状态 |
 |---|---|
-| Git 基线 | 候选分支 `codex/dsh-rc2-candidate` 从 public main `ba2f887b1ec55f26d7cb3849d327072140abbd95` 建立；T1/T2/T13 与首轮审查修复 commits `324ed66a`、`63ad843a`、`530873ed`、`e8c9d089`、`2c629d08`、`19906b07`、`81f8cf3a`、`c6334edb`、`474cf177`、`fb126a61`、`3df2a263`、`f56c85f2`、`77350599` 已完成，未 push。 |
+| Git 基线 | 候选分支 `codex/dsh-rc2-candidate` 从 public main `ba2f887b1ec55f26d7cb3849d327072140abbd95` 建立；T1/T2/T13 与首轮审查修复 commits `324ed66a`、`63ad843a`、`530873ed`、`e8c9d089`、`2c629d08`、`19906b07`、`81f8cf3a`、`c6334edb`、`474cf177`、`fb126a61`、`3df2a263`、`f56c85f2`、`77350599` 已完成，T12 contract 正在验证，未 push。 |
 | 产品 | **PARTIAL / RELEASE_BLOCKED**；T2 已完成，T3–T11 的本地合同与 synthetic 验证已完成，但浏览器/host、GitHub/OIDC、WSL2 冷验证、route/backpressure、public HTML 和现场 UAT 未完成。既有 HTML 收件箱能力保持，完整浏览器 UAT 仍开放。 |
 | DSH | 官方上游固定为 `477b4f42`（0.1.7-rc.2），不修改上游源码；杭州切换未执行。 |
 | CRM | 杭州 backend `127.0.0.1:18093`、frontend `127.0.0.1:18094` 健康；生产 checkout 固定在 `47f49616`。 |

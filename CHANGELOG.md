@@ -9,7 +9,7 @@
 
 ### Verification
 
-- 首轮代码审查后，隔离 release tests 42/42 通过，dsh-dev tests 84/84（1 skip）；T2 clean artifact receive、T3 auth、T4 trust、T5 crash/reconcile、T6 promotion、T7 compatibility、T8 action、T9 operator、T10 CLI、T11 evidence/HTML synthetic gate 均有证据；B0 因 Python `duckdb` lock 漂移失败，详见候选验证账本和 T2–T11 证据。
+- 首轮代码审查后，隔离 release tests 44/44 通过，dsh-dev tests 84/84（1 skip）；T2 clean artifact receive、T3 auth、T4 trust、T5 crash/reconcile、T6 promotion、T7 compatibility、T8 action、T9 operator、T10 CLI、T11 evidence/HTML、T12 UAT/RACI/metrics/cleanup synthetic gate 均有证据；B0 因 Python `duckdb` lock 漂移失败，详见候选验证账本和 T2–T12 证据。
 
 ## [0.18.0.0] - 2026-09-24
 
