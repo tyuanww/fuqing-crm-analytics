@@ -664,11 +664,11 @@ Synthesized from CEO、DX、Design 与 Eng 审查的已接受发现。以下任�
   - Surfaced by: CEO/DX/Eng — hostname/tunnel 不是隔离；timeout 不能算负探针通过
   - Files: `deploy/wsl/operator-gate`, health/metrics scripts、synthetic release orchestrator
   - Verify: `operator-gate verify --method ...` 写入证据；p95/5xx/auth/plugin/page 阈值、慢客户端、断线和资源上限可复现
-- [ ] **T10 (P1, PARTIAL — Node24 host gate)** — Developer workflow — 提供 Quickstart、`doctor`、`pnpm dsh <dev|test|release|verify|rollback>`、dry-run/offline/status/why-blocked/retry/resume 与稳定退出码
+- [ ] **T10 (P1, PARTIAL — CLI/config synthetic PASS; cold host/TTHW NOT_RUN)** — Developer workflow — 提供 Quickstart、`doctor`、`pnpm dsh <dev|test|release|verify|rollback>`、dry-run/offline/status/why-blocked/retry/resume 与稳定退出码
   - Surfaced by: DX — 当前 TTHW 未测量，开发/CI/WSL 需要同一命令契约和配置优先级
   - Files: `package.json`, `scripts/dsh-dev/`, `scripts/release/`, `docs/operating/`
   - Verify: clean checkout 从 hello world 到 synthetic release；CLI/env/file/default precedence 与错误 runbook 均可复制
-- [ ] **T11 (P1, PARTIAL — evidence contract done; public HTML gate NOT_RUN)** — Evidence and content safety — 生成不可变、脱敏、可长期读取的 CI/publication/promotion/rollback evidence；无 CSP/sandbox/净化的 HTML 插件公网关闭
+- [ ] **T11 (P1, PARTIAL — evidence/HTML synthetic PASS; public/browser gate NOT_RUN)** — Evidence and content safety — 生成不可变、脱敏、可长期读取的 CI/publication/promotion/rollback evidence；无 CSP/sandbox/净化的 HTML 插件公网关闭
   - Surfaced by: CEO/Design/Eng — hash 不保证证据可读取，自由 HTML 可能成为 XSS 入口
   - Files: `.context/release-evidence/`, schemas、plugin loader/page HTTP policy、retention docs
   - Verify: evidence index 可取、SHA 对齐、敏感字段扫描 fail-closed；插件降级为 `disabled/NOT_AVAILABLE` 时 native loop 仍可用
@@ -722,7 +722,7 @@ Eng 的 native 与 outside 两路均完成，6/6 维度（artifact trust、auth/
 - Test Review: 已产出单元→集成→系统→浏览器→operator→chaos 分层矩阵，至少 13 个实施任务；真实模型、完整业务、131GB 归档、移动端均保持 `NOT_RUN/PARTIAL`。
 - Developer experience: Quickstart、doctor、统一 dsh CLI、offline/status/resume/why-blocked 已落地；Node24 冷环境与 TTHW 仍 `NOT_RUN/NOT_MEASURED`。
 - Plan state: `IMPLEMENTATION_PARTIAL / RELEASE_BLOCKED`。T1/T2/T13 文档、基线与本地 artifact receive gate 已完成；T3–T9 的本地合同/synthetic gate 已完成但仍为 PARTIAL，T10–T12 仍为 PARTIAL；证据见 `scripts/release/release.test.mjs` 与 `docs/release/dsh-rc2-candidate/`。
-- Current execution: 已建立 public-main rc2 候选并完成 T1、T2、T13；P0/P1 synthetic contract、WSL artifact 脚本、Quickstart 和 evidence 模板已落地。GitHub push/tag/release、杭州重启/切换、Cloudflare route 和旧版本删除仍未执行。
+- Current execution: 已建立 public-main rc2 候选并完成 T1、T2、T13；T3–T11 的本地 contract/synthetic gate、WSL artifact 脚本、Quickstart 和 evidence verifier 已落地。GitHub push/tag/release、杭州重启/切换、Cloudflare route 和旧版本删除仍未执行。
 
 ### Verdict
 
