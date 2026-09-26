@@ -6,6 +6,7 @@
 - 增加 artifact 接收、摘要绑定、受限解包、side-by-side promotion 与 release evidence 的候选实现；当前仍 `RELEASE_BLOCKED`，未发布 GitHub Release 或执行杭州切换。
 - 增加统一 `pnpm dsh receive` 接收入口；receiver 对 traversal、duplicate、权限、大小、symlink、deny-name 和最终 secret scan fail-closed。
 - 补齐 T3 的 token/session/CSRF/Cookie/redaction 合同，T4 的 protected tag/publication 校验，以及 T5 的 durable reconcile/resume/crash 入口；现场与 GitHub trust 仍保持 NOT_RUN。
+- T8 terminal receipt 绑定 action actor/idempotency/type；T9 增加 100 请求/10 并发 scheduler backpressure synthetic PASS，同时将真实 HTTP backpressure 保持为 NOT_RUN。
 
 ### Verification
 
