@@ -1,6 +1,6 @@
 # T4 release trust contract evidence（2026-09-26）
 
-实现提交：fb126a61。
+实现提交：fb126a61、2804dc21。
 
 本地合同现在要求：
 

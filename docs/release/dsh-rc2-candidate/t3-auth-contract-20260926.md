@@ -1,6 +1,6 @@
 # T3 auth contract evidence（2026-09-26）
 
-实现提交：474cf177 及候选工作树本轮的 `scripts/release/auth-http.mjs` loopback adapter。当前实现仍是可复用的 release/auth contract，未改 DSH upstream，也未把 synthetic contract 测试冒充浏览器或杭州 host 验收。
+实现提交：474cf177、628fdd7e。当前实现仍是可复用的 release/auth contract，未改 DSH upstream，也未把 synthetic contract 测试冒充浏览器或杭州 host 验收。
 
 本轮覆盖并通过：
 

@@ -1,6 +1,6 @@
 # T8 action contract evidence（2026-09-26）
 
-实现提交：f56c85f2。
+实现提交：f56c85f2、45d1a796。
 
 synthetic action contract 覆盖 save/export/send 的 NOT_AVAILABLE capability matrix、cancel、双击幂等、unknown receipt、首次 NOT_AVAILABLE terminal receipt、状态损坏和终态冲突。已有 terminal receipt 不会被后续成功/失败覆盖，客户端不能从未知结果推断成功。
 

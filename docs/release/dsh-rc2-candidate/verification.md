@@ -20,7 +20,7 @@
 | Python lint | `python3.14 -m ruff check`（受影响模块） | PASS | 未修改真实数据 |
 | Diff/syntax | `git diff --check`、Node24 `--check`、JSON parse | PASS | 当前 candidate HEAD 的 clean 状态与 SHA 以 `STATUS.md` 和最终 artifact manifest 为准；auth HTTP adapter、stale-lock hardening 与证据文档已提交 |
 | Artifact build/receive | 旧 `dsh-0.12.0.0-candidate7` | REJECTED / SUPERSEDED | 旧包不含当前安全修复，且不代表 reviewed clean commit；不得接收 |
-| Current offline artifact | `pnpm dsh release --offline --tag dsh-0.18.0.1-goal-final` + `pnpm dsh receive` | PASS | source SHA、entries 与 tarball SHA 以 `.context/release-evidence/dsh-0.18.0.1-goal-final/release-manifest.v1.json` 为唯一来源；internal-only，未创建 draft/tag/release |
+| Current offline artifact | `pnpm dsh release --offline --tag dsh-0.18.0.1-goal-t3t12-final` + `pnpm dsh receive` | PASS | 最终 clean HEAD 上生成并接收；source SHA、entries 与 tarball SHA 以 `.context/release-evidence/dsh-0.18.0.1-goal-t3t12-final/release-manifest.v1.json` 为唯一来源；internal-only，未创建 draft/tag/release |
 | Doctor/verify | `node@24 scripts/dsh.mjs doctor|verify` | doctor PASS；verify 的 compat/SLI/backpressure 为 NOT_RUN | 未伪造 rc1/rc2 WAL、15 分钟 HTTP 或 10x 线上证据 |
 | B0 | `B0_BUILD_UPSTREAM=... node@24 scripts/dsh-b0/pipeline.mjs --check --python ...` | FAIL | `duckdb` 与 requirements.lock 版本漂移；未安装依赖、未读取真实 DuckDB |
 | WSL2/operator/UAT | 现场入口 | NOT_RUN/PARTIAL | 需要杭州事实、route/operator gate 和授权 |
