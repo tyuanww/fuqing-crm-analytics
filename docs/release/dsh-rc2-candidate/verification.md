@@ -4,7 +4,7 @@
 
 | 检查 | 命令 | 结果 | 证据/限制 |
 |---|---|---|---|
-| Release security contracts | `node@24 --test scripts/release/*.test.mjs` | PASS 22/22 | 隔离 synthetic tar/文件夹；覆盖 digest、payload、bounded unpack、traversal/duplicate/permission/link/secret fail-closed、trust、token、side-by-side |
+| Release security contracts | `node@24 --test scripts/release/*.test.mjs` | PASS 32/32 | 隔离 synthetic tar/文件夹；覆盖 digest、payload、bounded unpack、traversal/duplicate/permission/link/secret fail-closed、trust、token、side-by-side |
 | T3 auth contract | node@24 pnpm dsh test | PASS（auth 7 tests；aggregate 32/32） | token/session/CSRF/Cookie/redaction synthetic evidence；browser/host NOT_RUN |
 | T4 trust contract | node@24 pnpm dsh test + workflow YAML parse | PASS | protected tag/publication binding and negative states；GitHub protected settings/OIDC NOT_RUN |
 | T5 state/reconcile | node@24 pnpm dsh test + pnpm dsh reconcile synthetic fixture | PASS | crash/resume and durable RECONCILE journal；remote CI/杭州 resume NOT_RUN |
