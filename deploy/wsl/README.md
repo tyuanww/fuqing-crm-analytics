@@ -50,7 +50,7 @@
 
 8. 安装 `dsh.service` 前，把 `dsh.service` 中的用户、仓库、上游和 runtime 路径替换成真实路径；`/etc/shinemage/dsh.env` 权限必须是 `600`。DSH 固定使用 `0.1.7-rc.1` 对应的上游 SHA，不使用 `--fresh`。
 9. WeKnora 和 Neo4j 按 `WeKnora-*.tar.gz` 自带的 compose/README 恢复。没有核对镜像、数据目录和端口前，不凭文件名猜启动命令。
-10. CRM、DSH、WeKnora 都通过 Tailscale 完成内部验收后，才安装 Cloudflare Tunnel。`cloudflared-config.yml.example` 只暴露网站、DSH、页面和看板四个入口；知识库和图数据库保持内部访问。
+10. CRM、DSH、WeKnora 都通过 Tailscale 完成内部验收后，才安装 Cloudflare Tunnel。`cloudflared-config.yml.example` 暴露网站、DSH、页面、看板和知识库五个入口；知识库只转发到 loopback 的 WeKnora 前端，登录和权限仍由 WeKnora 负责，Neo4j 管理口保持内部访问。
 
 ## DuckDB 备份
 

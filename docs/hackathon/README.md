@@ -1,6 +1,6 @@
 # AI 增长董事会
 
-> 当前 Git、施工与边界以根 [STATUS.md](../../STATUS.md) 为准，接续任务见 [TODOS 的 M1 核心交付](TODOS.md#m1-核心交付)。本分支 VERSION 0.18.0.0，现役 6677 已加载 DSH 0.1.7-rc.1 与候选插件，公开 main 基线为 `bcc0ced9`（#53）。产品仍 PARTIAL，loopback，不上公网。以下旧轮的“当前／最新”、端口、SHA 和授权是历史快照；失败证据保留。
+> 当前 Git、施工与边界以根 [STATUS.md](../../STATUS.md) 和 [HANDOVER.md](../../HANDOVER.md) 为准，接续任务见 [TODOS 的 M1 核心交付](TODOS.md#m1-核心交付)。公共 `main @ 47f49616`、VERSION 0.18.0.0、DSH 0.1.7-rc.1 与杭州生产/公网入口已完成切换；产品仍 PARTIAL，完整生产浏览器旅程与本人 UAT 仍开放。以下旧轮的“当前／最新”、端口、SHA 和授权是历史快照；失败证据保留。
 
 2026-09-21 的历史快照：工作树 `codex/crm-analysis-board`（基线 `64eb6e0`）本地整合分析组板、指标收尾与图谱 ACL，并接线含引用分析的文档权限；当时版本为 v0.14.0.0，未合入 main，未切 6677。见[整合记录](../crm-calibration/crm-integration-2026-09-21.md)。分析组板实现见[分析组板记录](../crm-calibration/crm-analysis-board-2026-09-21.md)。此前 CRM 持久化已随 #34 合入 `73ee74c`，真实短窗口查询→快照→保存→引用见[持久化记录](../crm-calibration/crm-assets-release-2026-09-21.md)。
 
