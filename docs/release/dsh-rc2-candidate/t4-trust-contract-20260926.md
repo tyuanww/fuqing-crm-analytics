@@ -11,4 +11,4 @@
 - asset 名称必须唯一，required asset 缺失或重复时拒收；
 - CI evidence workflow checkout 明确 release tag，并校验 tag 指向 reviewed SHA 和干净工作树。
 
-验证：trust tests、publication schema 和 workflow YAML 均通过；aggregate release tests 42/42 PASS。OIDC/Sigstore 签名验证、GitHub protected tag/branch 仓库设置、真实 GitHub Release 和人工批准记录未执行，仍为 NOT_AVAILABLE/NOT_RUN；T4 保持 PARTIAL。
+验证：trust tests、publication schema 和 workflow YAML 均通过；aggregate release tests 44/44 PASS。OIDC/Sigstore 签名验证、GitHub protected tag/branch 仓库设置、真实 GitHub Release 和人工批准记录未执行，仍为 NOT_AVAILABLE/NOT_RUN；T4 保持 PARTIAL。

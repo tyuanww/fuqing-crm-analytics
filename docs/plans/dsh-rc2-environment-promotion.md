@@ -722,7 +722,7 @@ Eng 的 native 与 outside 两路均完成，6/6 维度（artifact trust、auth/
 - Test Review: 已产出单元→集成→系统→浏览器→operator→chaos 分层矩阵，至少 13 个实施任务；真实模型、完整业务、131GB 归档、移动端均保持 `NOT_RUN/PARTIAL`。
 - Developer experience: Quickstart、doctor、统一 dsh CLI、offline/status/resume/why-blocked 已落地；Node24 冷环境与 TTHW 仍 `NOT_RUN/NOT_MEASURED`。
 - Plan state: `IMPLEMENTATION_PARTIAL / RELEASE_BLOCKED`。T1/T2/T13 文档、基线与本地 artifact receive gate 已完成；T3–T12 的本地合同/synthetic gate 已完成但仍为 PARTIAL，现场 UAT/host/远端 gate 未运行；证据见 `scripts/release/` 与 `docs/release/dsh-rc2-candidate/`。
-- Current execution: 已建立 public-main rc2 候选并完成 T1、T2、T13；T3–T11 的本地 contract/synthetic gate、WSL artifact 脚本、Quickstart 和 evidence verifier 已落地。GitHub push/tag/release、杭州重启/切换、Cloudflare route 和旧版本删除仍未执行。
+- Current execution: 已建立 public-main rc2 候选并完成 T1、T2、T13；T3–T12 的本地 contract/synthetic gate、WSL artifact 脚本、Quickstart、evidence verifier 和 operations ledger 已落地。GitHub push/tag/release、杭州重启/切换、Cloudflare route 和旧版本删除仍未执行。
 
 ### Verdict
 

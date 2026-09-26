@@ -11,4 +11,4 @@
 - host-only HttpOnly session Cookie、独立 CSRF Cookie、HTTPS Secure 语义与 loopback synthetic 例外；
 - token、Bearer、session、CSRF、Cookie 和授权字段脱敏。
 
-验证：Node24 执行 pnpm dsh test，当前 aggregate 42/42 PASS，其中 auth 专项 7 个测试通过。浏览器真实 DSH/page HTTP、HTTPS 真实 Cookie、杭州 host/route 和 access-log 现场验证仍为 NOT_RUN；T3 保持 PARTIAL。
+验证：Node24 执行 pnpm dsh test，当前 aggregate 44/44 PASS，其中 auth 专项 7 个测试通过。浏览器真实 DSH/page HTTP、HTTPS 真实 Cookie、杭州 host/route 和 access-log 现场验证仍为 NOT_RUN；T3 保持 PARTIAL。
