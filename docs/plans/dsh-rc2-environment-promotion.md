@@ -632,7 +632,7 @@ Synthesized from CEO、DX、Design 与 Eng 审查的已接受发现。以下任�
   - Surfaced by: CEO/Eng — dirty archive 与 public main 无 merge-base，生产不能直接消费 archive
   - Files: `STATUS.md`, `docs/plans/`, `deploy/wsl/`, release evidence templates
   - Verify: clean checkout migration map；逐项记录 source commit、upstream SHA、VERSION、owner 与对应验证证据
-- [x] **T2 (P0, DONE — public receive gate + 22/22 isolated tests)** — Artifact receive — 实现安全解包、allowlist/schema fail-closed、大小/条目/权限限制和最终 tarball 内容扫描
+- [x] **T2 (P0, DONE — public receive gate; current aggregate 44/44 isolated tests)** — Artifact receive — 实现安全解包、allowlist/schema fail-closed、大小/条目/权限限制和最终 tarball 内容扫描
   - Surfaced by: Eng — 拒绝绝对路径、`..`、symlink/hardlink/device、tarbomb、超大归档与恶意权限
   - Files: `scripts/release/`, `scripts/release/schemas/`, `deploy/wsl/`
   - Verify: path traversal、duplicate、size mismatch、secret/denylist、symlink/权限和 scan failure fixtures 全部阻断；`pnpm dsh receive` 对 1663-entry synthetic artifact 实际接收通过；证据见 `docs/release/dsh-rc2-candidate/t2-receive-gate-20260926.md`
@@ -701,7 +701,7 @@ Execution order: launch Lane A and Lane B after T1; launch Lane C once artifact 
 | CEO / spec | 用户要求从开发、测试到杭州生产建立完整工作流 | 需要先锁定边界、原生优先和用户结果 | Native completed；outside attempted but unavailable（认证/模型诊断） | REVISE | 12 项战略/边界问题；已接受候选基线、operator pilot、SLI、RACI、无隔离不得称 canary 等约束 |
 | Design | 认证、原生对话、插件、page、保存/恢复均属于用户可见状态 | 需要避免插件覆盖原生和不可用动作伪装成功 | Native completed；outside Claude Code completed（未读取磁盘快照，不作完整证据） | REVISE | 12 项交互/可访问性问题；已锁定 native shell、层级、证据、禁用文案、长耗时/取消/冲突/恢复状态 |
 | DX | 计划包含本地构建、CI、Release、杭州接收与回退命令 | 开发者、发布者、运维和 QA 必须有同一命令合同 | Native completed；outside Claude Code completed | REVISE | 共同暴露 Quickstart、doctor、稳定退出码、dry-run/offline、错误 runbook、配置优先级、synthetic orchestrator 和 operator-gate verify 缺口 |
-| Engineering | 计划涉及 artifact、认证、状态机、WSL、systemd、回退和容量 | 这些边界若不落地会造成安全绕过或半发布状态 | Native completed: 20 issues；outside Claude Code completed: 23 issues | ISSUES OPEN | 两路在 6/6 工程维度重合；P0/P1 已收纳为 T2–T11，正式生产仍被安全解包、token/CSRF、来源信任、持久状态机、原子激活、兼容性和 SLI/operator gate 阻断 |
+| Engineering | 计划涉及 artifact、认证、状态机、WSL、systemd、回退和容量 | 这些边界若不落地会造成安全绕过或半发布状态 | Native completed: 20 issues；outside Claude Code completed: 23 issues | ISSUES OPEN | 两路在 6/6 工程维度重合；P0/P1 已收纳为 T2–T12，正式生产仍被安全解包、token/CSRF、来源信任、持久状态机、原子激活、兼容性和 SLI/operator gate 阻断 |
 
 ### Outside Coverage
 
@@ -718,7 +718,7 @@ Eng 的 native 与 outside 两路均完成，6/6 维度（artifact trust、auth/
 
 - Step 0: Scope Challenge — scope accepted as selective expansion；保持 DSH 单一 Agent Loop、native-first 与固定 rc2，不扩第二运行时、真实大库迁移或自动 SSH 切流。
 - Architecture Review: 12 项战略/边界问题，已转入候选基线、artifact、杭州接收和回退门禁。
-- Code Quality Review: 11 项发布/认证/状态/归档安全问题，已转入 T2–T8、T11；本候选已落地 synthetic contract，现场/远端 gate 仍未完成。
+- Code Quality Review: 11 项发布/认证/状态/归档安全问题，已转入 T2–T8、T11–T12；本候选已落地 synthetic contract，现场/远端 gate 仍未完成。
 - Test Review: 已产出单元→集成→系统→浏览器→operator→chaos 分层矩阵，至少 13 个实施任务；真实模型、完整业务、131GB 归档、移动端均保持 `NOT_RUN/PARTIAL`。
 - Developer experience: Quickstart、doctor、统一 dsh CLI、offline/status/resume/why-blocked 已落地；Node24 冷环境与 TTHW 仍 `NOT_RUN/NOT_MEASURED`。
 - Plan state: `IMPLEMENTATION_PARTIAL / RELEASE_BLOCKED`。T1/T2/T13 文档、基线与本地 artifact receive gate 已完成；T3–T12 的本地合同/synthetic gate 已完成但仍为 PARTIAL，现场 UAT/host/远端 gate 未运行；证据见 `scripts/release/` 与 `docs/release/dsh-rc2-candidate/`。
@@ -726,7 +726,7 @@ Eng 的 native 与 outside 两路均完成，6/6 维度（artifact trust、auth/
 
 ### Verdict
 
-**REVISE — 计划可以进入实现排期，不能据此宣布 rc2 已发布或杭州已部署。** 当前候选已完成 T1、T2、T13；auth/trust/state/promotion/compatibility/action/operator 仍保留 PARTIAL，安全审查与现场门禁尚未闭合；下一步是固定 Node24 环境运行完整入口、接 CI provenance/受保护 tag、做 WSL2 冷验证、operator gate 和七组 UAT；只有 release 进入 `PUBLISHED_VERIFIED`、杭州 receive receipt 完整、兼容性和回退演练通过，才讨论现有 hostname 的正式切换。没有 OIDC/provenance/signature 或没有真实 operator 隔离时，最高状态保持 `internal-only-partial`/operator pilot。
+**REVISE — 计划可以进入实现排期，不能据此宣布 rc2 已发布或杭州已部署。** 当前候选已完成 T1、T2、T13，并完成 T3–T12 的本地 contract/synthetic gate；auth/trust/state/promotion/compatibility/action/operator/UAT operations 仍保留 PARTIAL，安全审查与现场门禁尚未闭合；下一步是固定 Node24 冷 checkout、接 CI provenance/受保护 tag、做 WSL2 冷验证、operator gate 和七组 UAT；只有 release 进入 `PUBLISHED_VERIFIED`、杭州 receive receipt 完整、兼容性和回退演练通过，才讨论现有 hostname 的正式切换。没有 OIDC/provenance/signature 或没有真实 operator 隔离时，最高状态保持 `internal-only-partial`/operator pilot。
 
 **UNRESOLVED DECISIONS:**
 
