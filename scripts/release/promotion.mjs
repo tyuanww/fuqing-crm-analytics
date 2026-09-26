@@ -1,7 +1,8 @@
 import { access, mkdir, open, readFile, rename, rm, symlink, lstat, readlink } from 'node:fs/promises';
-import { dirname, join, relative, resolve } from 'node:path';
-import { receiveArtifact } from './artifact.mjs';
+import { basename, dirname, join, relative, resolve } from 'node:path';
+import { receiveArtifact, sha256 } from './artifact.mjs';
 import { recordEvent } from './state.mjs';
+import { assertDeploymentTrust, verifyAttestationBundle, verifyPublicationRecord } from './trust.mjs';
 
 const TAG = /^dsh-[A-Za-z0-9._-]+$/;
 const OWNER = /^[A-Za-z0-9._:-]{3,128}$/;
@@ -17,17 +18,50 @@ async function writeFileAtomic(path, value) { const temp = `${path}.tmp-${proces
 async function writeMarker(dir, value) { const path = join(dir, 'release-marker.json'); const handle = await open(path, 'wx', 0o600); try { await handle.writeFile(JSON.stringify(value, null, 2) + '\n'); await handle.sync(); } finally { await handle.close(); } }
 async function readJson(path) { return JSON.parse(await readFile(path, 'utf8')); }
 
-export async function installRelease({ artifact, manifestPath, releaseRoot, tag, statePath, owner = 'shinemage-dsh', restartDependency = 'shinemage-dsh.service' }) {
+export function assertPublicationAssets(publication, expectedAssets) {
+  const byName = new Map((publication?.assets ?? []).map(asset => [asset.name, asset]));
+  for (const [name, digest] of expectedAssets) {
+    const asset = byName.get(name);
+    if (!asset) throw new Error(`TRUST_ASSET_MISSING ${name}`);
+    if (asset.sha256 !== digest) throw new Error(`TRUST_ASSET_DIGEST_MISMATCH ${name}`);
+  }
+  return true;
+}
+
+export async function installRelease({ artifact, manifestPath, releaseRoot, tag, statePath, owner = 'shinemage-dsh', restartDependency = 'shinemage-dsh.service', publicationPath = null, sumsPath = null, evidenceIndexPath = null, attestationBundlePath = null, repository = null, sourceRef = null, signerWorkflow = null, gh = 'gh' }) {
   assertTag(tag); const root = resolve(releaseRoot); const releases = join(root, 'releases'); const target = releasePath(root, tag);
   if (!OWNER.test(owner) || !OWNER.test(restartDependency)) throw new Error('RELEASE_OWNER_INVALID');
   await mkdir(releases, { recursive: true, mode: 0o700 });
   const manifest = await readJson(manifestPath);
   if (manifest.release_tag !== tag) throw new Error('RELEASE_TAG_MANIFEST_MISMATCH');
+  let trust = null;
+  if (publicationPath !== null) {
+    if (![sumsPath, evidenceIndexPath, attestationBundlePath, repository, sourceRef].every(value => typeof value === 'string' && value)) throw new Error('RELEASE_TRUST_INPUTS_REQUIRED');
+    const [manifestSha256, sha256sumsSha256, evidenceIndexSha256] = await Promise.all([sha256(manifestPath), sha256(sumsPath), sha256(evidenceIndexPath)]);
+    const publication = await readJson(publicationPath);
+    trust = await verifyPublicationRecord(publicationPath, {
+      releaseTag: tag,
+      sourceSha: manifest.source_sha,
+      manifestSha256,
+      sha256sumsSha256,
+      evidenceIndexSha256,
+      requiredAssets: [basename(artifact), basename(manifestPath), basename(sumsPath), basename(evidenceIndexPath)],
+    });
+    assertPublicationAssets(publication, [
+      [basename(artifact), manifest.artifact_sha256],
+      [basename(manifestPath), manifestSha256],
+      [basename(sumsPath), sha256sumsSha256],
+      [basename(evidenceIndexPath), evidenceIndexSha256],
+    ]);
+    const attestation = await verifyAttestationBundle({ artifactPath: artifact, bundlePath: attestationBundlePath, repository, sourceRef, signerWorkflow, gh });
+    if (attestation.status !== 'VERIFIED' || trust.provenance_status !== 'VERIFIED') throw new Error('RELEASE_PROVENANCE_NOT_VERIFIED');
+    assertDeploymentTrust(trust);
+  }
   if (await access(target).then(() => true, () => false)) throw new Error('RELEASE_EXISTS');
   const staging = join(releases, `.incoming-${tag}-${process.pid}-${Date.now()}`);
   try {
     const received = await receiveArtifact({ artifact, manifestPath, destination: staging });
-    await writeMarker(staging, { tag, source_sha: manifest.source_sha, artifact_sha256: received.sha256, owner, restart_dependency: restartDependency, state: 'PREPARED', prepared_at: new Date().toISOString() });
+    await writeMarker(staging, { tag, source_sha: manifest.source_sha, artifact_sha256: received.sha256, owner, restart_dependency: restartDependency, publication_status: trust?.status ?? 'NOT_CHECKED', provenance_status: trust?.provenance_status ?? 'NOT_AVAILABLE', state: 'PREPARED', prepared_at: new Date().toISOString() });
     await fsyncDir(staging);
     // Rename is exclusive: never remove or replace an existing release.
     await rename(staging, target); await fsyncDir(releases);

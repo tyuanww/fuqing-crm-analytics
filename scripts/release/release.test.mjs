@@ -7,7 +7,7 @@ import { createHash } from 'node:crypto';
 import test from 'node:test';
 import { receiveArtifact } from './artifact.mjs';
 import { issueToken, consumeToken, tokenExchangeResponse } from './auth-contract.mjs';
-import { installRelease, activateRelease, rollbackRelease } from './promotion.mjs';
+import { assertPublicationAssets, installRelease, activateRelease, rollbackRelease } from './promotion.mjs';
 import { beginAction, finishAction, receipt } from './action-contract.mjs';
 import { verifyReviewedCommit } from './trust.mjs';
 import { writeEvidence } from './evidence.mjs';
@@ -60,6 +60,12 @@ x=tarfile.TarInfo('VERSION'); b=bytes([48,46,49,56,46,48,46,49,10]); x.size=len(
 with tarfile.open(sys.argv[1],'w:') as t: t.addfile(x,io.BytesIO(b))`,raw]); execFileSync('/Users/hutou/homebrew/bin/zstd',['-q',raw,'-o',archive]); const m=await manifest(root,archive); const got=await receiveArtifact({artifact:archive,manifestPath:m,destination:join(root,'out')}); assert.equal(got.entries,1); });
 test('runtime manifest rejects a source-only bundle without its entrypoints', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); const value=JSON.parse(await readFile(m,'utf8')); value.toolchain={node:'24'}; await writeFile(m,JSON.stringify(value)); await assert.rejects(()=>receiveArtifact({artifact:archive,manifestPath:m,destination:join(root,'out')}),/RUNTIME_ENTRYPOINT_MISSING/); });
 test('trust never treats an arbitrary text file as a signature', async () => { const root=await fixture(), p=join(root,'p'), s=join(root,'s'); await writeFile(p,JSON.stringify({subject_sha:'a'.repeat(40)})); await writeFile(s,'synthetic-signature'); assert.equal((await verifyReviewedCommit({sourceSha:'a'.repeat(40),reviewedSha:'a'.repeat(40),provenancePath:p,signaturePath:s})).status,'NOT_AVAILABLE'); });
+test('promotion binds publication asset digests to local files', () => {
+  const digest = 'a'.repeat(64); const publication = { assets: [{ name: 'candidate.tar.zst', sha256: digest }] };
+  assert.equal(assertPublicationAssets(publication, [['candidate.tar.zst', digest]]), true);
+  assert.throws(() => assertPublicationAssets(publication, [['candidate.tar.zst', 'b'.repeat(64)]]), /TRUST_ASSET_DIGEST_MISMATCH/);
+  assert.throws(() => assertPublicationAssets(publication, [['release-manifest.v1.json', digest]]), /TRUST_ASSET_MISSING/);
+});
 test('token is one-time, origin-bound, rate-limited and session-backed', async () => { const root=await fixture(), db=join(root,'tokens.json'), token=await issueToken(db,{now:1000}); await assert.rejects(()=>consumeToken(db,token,{now:1001}),/AUTH_ORIGIN_REJECTED/); assert.equal((await consumeToken(db,token,{origin:'https://app.tyuan.chat',allowedOrigins:['https://app.tyuan.chat'],now:1001})).authenticated,true); await assert.rejects(()=>consumeToken(db,token,{origin:'https://app.tyuan.chat',allowedOrigins:['https://app.tyuan.chat'],now:1002}),/AUTH_TOKEN_REPLAY/); const fresh=await issueToken(db,{now:2000}); const response=await tokenExchangeResponse(db,fresh,{method:'POST',origin:'https://app.tyuan.chat',allowedOrigins:['https://app.tyuan.chat'],now:2001}); assert.equal(response.status,303); assert.match(response.headers['set-cookie'][0],/HttpOnly/); });
 test('side-by-side install, activation and duplicate protection retain source identity', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); const releaseRoot=join(root,'releases-root'); const installed=await installRelease({artifact:archive,manifestPath:m,releaseRoot,tag:'dsh-test'}); assert.equal(installed.status,'PREPARED'); const active=await activateRelease({releaseRoot,tag:'dsh-test',sourceSha:'a'.repeat(40)}); assert.equal(active.status,'ACTIVE'); await assert.rejects(()=>installRelease({artifact:archive,manifestPath:m,releaseRoot,tag:'dsh-test'}),/RELEASE_EXISTS/); });
 

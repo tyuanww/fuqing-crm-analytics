@@ -9,7 +9,7 @@
 
 ### Verification
 
-- 首轮代码审查后，隔离 release tests 48/48 通过，dsh-dev tests 84/84（1 skip）；本轮 `auth-http` loopback adapter、stale-lock owner hardening 和固定 tag `dsh-0.18.0.1-goal-final` 的候选 artifact 已复验，接收细节以 `.context/release-evidence/dsh-0.18.0.1-goal-final/release-manifest.v1.json` 为准；T2 clean artifact receive、T3 auth/HTTP adapter、T4 trust、T5 crash/reconcile/stale-lock、T6 promotion、T7 compatibility、T8 action、T9 operator、T10 CLI、T11 evidence/HTML、T12 UAT/RACI/metrics/cleanup synthetic gate 均有证据；B0 因 Python `duckdb` lock 漂移失败，详见候选验证账本和 T2–T12 证据。
+- 首轮代码审查后，隔离 release tests 49/49 通过，dsh-dev tests 84/84（1 skip）；本轮 `auth-http` loopback adapter、stale-lock owner hardening、publication/provenance fail-closed gate 和固定 tag `dsh-0.18.0.1-goal-final` 的候选 artifact 已复验，接收细节以 `.context/release-evidence/dsh-0.18.0.1-goal-final/release-manifest.v1.json` 为准；T2 clean artifact receive、T3 auth/HTTP adapter、T4 trust、T5 crash/reconcile/stale-lock、T6 promotion、T7 compatibility、T8 action、T9 operator、T10 CLI、T11 evidence/HTML、T12 UAT/RACI/metrics/cleanup synthetic gate 均有证据；B0 因 Python `duckdb` lock 漂移失败，详见候选验证账本和 T2–T12 证据。
 
 ## [0.18.0.0] - 2026-09-24
 

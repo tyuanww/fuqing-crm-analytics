@@ -1,9 +1,12 @@
 import { readFile } from 'node:fs/promises';
+import { execFile as execFileCallback } from 'node:child_process';
+import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import { assertSchema } from './schema.mjs';
 
 const TAG = /^dsh-[A-Za-z0-9._-]+$/;
 const SHA40 = /^[0-9a-f]{40}$/;
+const execFile = promisify(execFileCallback);
 
 /** Public trust verification is intentionally fail-closed until a pinned Sigstore verifier is configured. */
 export async function verifyReviewedCommit({ sourceSha, reviewedSha, provenancePath = null, signaturePath = null }) {
@@ -14,6 +17,30 @@ export async function verifyReviewedCommit({ sourceSha, reviewedSha, provenanceP
   if (provenance.subject_sha !== sourceSha || !signature.length) throw new Error('TRUST_PROVENANCE_MISMATCH');
   // A non-empty text file is not a signature. Never promote this path to PASS.
   return { status: 'NOT_AVAILABLE', reason: 'signature verification is not implemented; refusing unsigned/unchecked trust', source_sha: sourceSha };
+}
+
+/** Verify a GitHub artifact-attestation bundle without trusting sidecar text. */
+export async function verifyAttestationBundle({ artifactPath, bundlePath, repository, sourceRef, signerWorkflow = null, gh = 'gh' } = {}) {
+  if (typeof artifactPath !== 'string' || !artifactPath || typeof bundlePath !== 'string' || !bundlePath || typeof repository !== 'string' || !/^[^/\s]+\/[^/\s]+$/.test(repository)) return { status: 'NOT_AVAILABLE', reason: 'artifact, bundle and repository are required' };
+  if (typeof sourceRef !== 'string' || !sourceRef) return { status: 'NOT_AVAILABLE', reason: 'source_ref is required' };
+  const args = ['attestation', 'verify', artifactPath, '--bundle', bundlePath, '--repo', repository, '--source-ref', sourceRef, '--format', 'json'];
+  if (signerWorkflow !== null) {
+    if (typeof signerWorkflow !== 'string' || !signerWorkflow) return { status: 'NOT_AVAILABLE', reason: 'signer_workflow is invalid' };
+    args.push('--signer-workflow', signerWorkflow);
+  }
+  try {
+    const { stdout } = await execFile(gh, args, { maxBuffer: 4 * 1024 * 1024, windowsHide: true });
+    const result = JSON.parse(stdout);
+    if (!Array.isArray(result) || result.length === 0) return { status: 'NOT_AVAILABLE', reason: 'attestation verification returned no records' };
+    return { status: 'VERIFIED', repository, source_ref: sourceRef, signer_workflow: signerWorkflow, attestation_count: result.length };
+  } catch (error) {
+    return { status: 'NOT_AVAILABLE', reason: 'attestation verification failed', detail: String(error?.message ?? error).slice(0, 240) };
+  }
+}
+
+export function assertDeploymentTrust(result) {
+  if (!result || result.status !== 'PUBLICATION_RECORD_VALID' || result.provenance_status !== 'VERIFIED') throw new Error('RELEASE_PROVENANCE_NOT_VERIFIED');
+  return result;
 }
 
 export function verifyProtectedTag({ releaseTag, protectedRef, sourceSha, reviewedSha, refTargetSha, approvalRef }) {
@@ -43,5 +70,7 @@ export async function verifyPublicationRecord(path, { releaseTag, sourceSha, man
     names.add(asset.name);
   }
   for (const required of requiredAssets) if (!names.has(required)) throw new Error('TRUST_ASSET_MISSING ' + required);
-  return { status: 'PUBLICATION_VERIFIED', release_tag: publication.release_tag, source_sha: publication.source_sha, assets: publication.assets.length, provenance_status: 'NOT_AVAILABLE' };
+  // This file is supplied by the release operator. Its schema and digests
+  // can be checked locally, but its claims are not proof of a signed build.
+  return { status: 'PUBLICATION_RECORD_VALID', release_tag: publication.release_tag, source_sha: publication.source_sha, assets: publication.assets.length, provenance_status: publication.provenance_status ?? 'NOT_AVAILABLE' };
 }

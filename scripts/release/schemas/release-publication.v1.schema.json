@@ -31,6 +31,7 @@
     "manifest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "sha256sums_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "evidence_index_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "provenance_status": {"type": "string", "enum": ["VERIFIED", "NOT_AVAILABLE"]},
     "release_url": {"type": "string", "minLength": 1},
     "assets": {
       "type": "array",

@@ -90,7 +90,7 @@ CI 通过的 commit
 
 ## rc2 artifact promotion
 
-杭州只接收已校验的 `release-publication.v1.json`、`release-manifest.v1.json`、`SHA256SUMS`、CI evidence index 和两个 tarball。先在新目录执行：
+杭州只接收已校验的 `release-publication.v1.json`、`release-manifest.v1.json`、`SHA256SUMS`、CI evidence index、两个 tarball 和 GitHub attestation bundle。`install-release.sh` 会把 publication 摘要绑定到本地文件，并在 provenance 未验证时拒绝解包。先在新目录执行：
 
 ```bash
 RELEASE_ARTIFACT=/srv/shinemage/incoming/shinemage-dsh-<version>-<sha>.tar.zst \
@@ -99,6 +99,12 @@ RELEASE_TAG=dsh-<version> \
 RELEASE_ROOT=/srv/shinemage/dsh \
 RELEASE_OWNER=shinemage-dsh \
 RELEASE_RESTART_DEPENDENCY=shinemage-dsh.service \
+RELEASE_PUBLICATION=/srv/shinemage/incoming/release-publication.v1.json \
+RELEASE_SHA256SUMS=/srv/shinemage/incoming/SHA256SUMS \
+RELEASE_EVIDENCE_INDEX=/srv/shinemage/incoming/ci-evidence-index.v1.json \
+RELEASE_ATTESTATION_BUNDLE=/srv/shinemage/incoming/attestation.jsonl \
+RELEASE_GITHUB_REPO=tyuanww/fuqing-crm-analytics \
+RELEASE_SOURCE_REF=refs/tags/dsh-<version> \
   deploy/wsl/install-release.sh
 
 RELEASE_ROOT=/srv/shinemage/dsh RELEASE_TAG=dsh-<version> \

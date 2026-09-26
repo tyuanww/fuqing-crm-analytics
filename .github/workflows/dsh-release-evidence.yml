@@ -16,6 +16,8 @@ on:
 permissions:
   contents: read
   id-token: write
+  attestations: write
+  artifact-metadata: write
 
 jobs:
   evidence:
@@ -49,6 +51,12 @@ jobs:
         env:
           RELEASE_TAG: ${{ inputs.release_tag }}
         run: node scripts/dsh.mjs release --offline --tag "$RELEASE_TAG"
+      - name: Verify isolated release contracts
+        run: node scripts/dsh.mjs test
+      - name: Attest the exact candidate artifact
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
+        with:
+          subject-path: .context/release-evidence/${{ inputs.release_tag }}/${{ inputs.release_tag }}.tar.zst
       - name: Upload evidence (never publish)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
