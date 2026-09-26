@@ -5,7 +5,7 @@
 
 | 项 | 状态 |
 |---|---|
-| Git 基线 | 候选分支 `codex/dsh-rc2-candidate` 从 public main `ba2f887b1ec55f26d7cb3849d327072140abbd95` 建立；本轮首轮审查修复已完成，待本地 commit，未 push。 |
+| Git 基线 | 候选分支 `codex/dsh-rc2-candidate` 从 public main `ba2f887b1ec55f26d7cb3849d327072140abbd95` 建立；首轮审查修复与本地 commits `324ed66a`、`63ad843a`、`530873ed`、`e8c9d089`、`2c629d08` 已完成，未 push。 |
 | 产品 | **PARTIAL / RELEASE_BLOCKED**；rc2 候选安全接收、trust、WSL2 冷验证与现场 UAT 未完成。既有 HTML 收件箱能力保持，完整浏览器 UAT 仍开放。 |
 | DSH | 官方上游固定为 `477b4f42`（0.1.7-rc.2），不修改上游源码；杭州切换未执行。 |
 | CRM | 杭州 backend `127.0.0.1:18093`、frontend `127.0.0.1:18094` 健康；生产 checkout 固定在 `47f49616`。 |

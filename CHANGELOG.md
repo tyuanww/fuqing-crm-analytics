@@ -7,7 +7,7 @@
 
 ### Verification
 
-- 首轮代码审查后，隔离 release security tests 18/18 通过，dsh-dev tests 84/84（1 skip）；B0 因 Python `duckdb` lock 漂移失败，详见候选验证账本。
+- 首轮代码审查后，隔离 release security tests 19/19 通过，dsh-dev tests 84/84（1 skip）；clean commit 的 offline artifact 生成与隔离接收通过；B0 因 Python `duckdb` lock 漂移失败，详见候选验证账本。
 
 ## [0.18.0.0] - 2026-09-24
 

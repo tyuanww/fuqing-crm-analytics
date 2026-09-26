@@ -4,12 +4,13 @@
 
 | 检查 | 命令 | 结果 | 证据/限制 |
 |---|---|---|---|
-| Release security contracts | `node@24 --test scripts/release/*.test.mjs` | PASS 18/18 | 隔离 synthetic tar/文件夹；覆盖 digest、payload、解包、trust fail-closed、token、side-by-side |
+| Release security contracts | `node@24 --test scripts/release/*.test.mjs` | PASS 19/19 | 隔离 synthetic tar/文件夹；覆盖 digest、payload、解包、trust fail-closed、token、side-by-side |
 | DSH dev contracts | `DSH_DEV_UPSTREAM=... node@24 --test scripts/dsh-dev/*.test.mjs` | PASS 84，1 skip | skip 为 built-upstream native registry integration；未启动生产服务 |
 | Shell | `bash -n deploy/wsl/*.sh`、`shellcheck deploy/wsl/*.sh` | PASS（此前实跑） | 不启动服务 |
 | Python lint | `python3.14 -m ruff check`（受影响模块） | PASS | 未修改真实数据 |
 | Diff/syntax | `git diff --check`、Node24 `--check`、JSON parse | PASS | 候选仍 dirty，尚未提交 |
 | Artifact build/receive | 旧 `dsh-0.12.0.0-candidate7` | REJECTED / SUPERSEDED | 旧包不含当前安全修复，且不代表 reviewed clean commit；不得接收 |
+| Current offline artifact | `pnpm dsh release --offline --tag dsh-0.18.0.1-candidate` + isolated `receiveArtifact` | PASS | clean commit `2c629d08`；1663 entries；tarball SHA `620ca0b1e1b535b461f97262208a80357803be9f5e7bea2ffe0c103b9018eb9f`；只作内部证据 |
 | Doctor/verify | `node@24 scripts/dsh.mjs doctor|verify` | doctor PASS；verify 的 compat/SLI/backpressure 为 NOT_RUN | 未伪造 rc1/rc2 WAL、15 分钟 HTTP 或 10x 线上证据 |
 | B0 | `B0_BUILD_UPSTREAM=... node@24 scripts/dsh-b0/pipeline.mjs --check --python ...` | FAIL | `duckdb` 与 requirements.lock 版本漂移；未安装依赖、未读取真实 DuckDB |
 | WSL2/operator/UAT | 现场入口 | NOT_RUN/PARTIAL | 需要杭州事实、route/operator gate 和授权 |

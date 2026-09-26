@@ -26,6 +26,7 @@
 - GitHub protected tag/OIDC-Sigstore 信任根仍为 `NOT_AVAILABLE`，本轮没有伪造通过。
 - rc1→rc2 runtime/session/WAL、WSL2 冷验证、真实 HTTP SLI/backpressure、杭州现场 UAT 尚未运行。
 - 本地候选 worktree 没有 DuckDB/WAL 文件；B0 失败仅为 Python `duckdb` 包锁漂移。
+- clean commit 的 offline artifact 生成与隔离接收已通过（1663 entries）；GitHub/OIDC/WSL2/杭州仍未发布或切换。
 
 ## 已审文件
 
