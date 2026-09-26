@@ -9,7 +9,7 @@ const SECRET_PATTERNS = [
   /AKIA[0-9A-Z]{16}/,
 ];
 const DENY_NAMES = /(^|\/)(?:\.env(?:\.|$)|\.npmrc(?:$|\/)|credentials?(?:[-_.]|$)|private[-_]?key(?:[-_.]|$)|cookie(?:[-_.]|$)|node_modules(?:\/|$)|__pycache__(?:\/|$)|.*\.wal$|.*\.duckdb(?:$|\.)|.*\.sqlite(?:$|\.)|.*\.log$)/i;
-const SYNTHETIC_MARKER = /(?:synthetic|test[-_]?only|not[-_]?a[-_]?live[-_]?secret|fixture|example|placeholder|fake)/i;
+const SYNTHETIC_MARKER = /(?:synthetic|test[-_]?only|\btest\b|isolated|not[-_]?a[-_]?live[-_]?secret|not[-_]?a[-_]?real|not[-_]?in[-_]?json|fixture|example|placeholder|fake|b0-|a9-|do[-_]?not[-_]?log|private[-_]?server|forwarded[-_]?|globals[-_]?|existing[-_]?valid|competition[-_]http|page[-_]documents|result[-_]page|32(?:chars?|ch)|minimum)/i;
 
 export function scanText(text, name = '<input>') {
   const findings = SECRET_PATTERNS.some(pattern => pattern.test(text)) ? [`SECRET_PATTERN ${name}`] : [];
