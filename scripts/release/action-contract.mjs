@@ -36,7 +36,10 @@ export async function beginAction(path, { type, idempotencyKey, actor = '' }) {
 export async function finishAction(path, actionId, { status, detail = null } = {}) {
   return withLock(path, async () => { const state = await load(path); const action = state.actions[actionId]; if (!action) return { status: 'UNKNOWN', action_id: actionId, receipt: null };
     if (!['SUCCEEDED', 'FAILED', 'CANCELED', 'NOT_AVAILABLE'].includes(status)) throw new Error('ACTION_STATUS_INVALID');
-    if (action.status !== 'PENDING' && action.status !== status) return action;
+    if (action.status !== 'PENDING') {
+      if (action.status !== status) throw new Error('ACTION_TERMINAL_CONFLICT');
+      if (action.receipt) return action;
+    }
     action.status = status; action.receipt = { action_id: actionId, status, detail, at: new Date().toISOString() }; await save(path, state); return action;
   });
 }

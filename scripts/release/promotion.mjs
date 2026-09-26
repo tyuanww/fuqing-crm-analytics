@@ -4,6 +4,7 @@ import { receiveArtifact } from './artifact.mjs';
 import { recordEvent } from './state.mjs';
 
 const TAG = /^dsh-[A-Za-z0-9._-]+$/;
+const OWNER = /^[A-Za-z0-9._:-]{3,128}$/;
 function assertTag(tag) { if (!TAG.test(tag) || tag.includes('..')) throw new Error('RELEASE_TAG_INVALID'); }
 function releasePath(root, tag) {
   assertTag(tag); const base = resolve(root, 'releases'); const target = resolve(base, tag);
@@ -16,8 +17,9 @@ async function writeFileAtomic(path, value) { const temp = `${path}.tmp-${proces
 async function writeMarker(dir, value) { const path = join(dir, 'release-marker.json'); const handle = await open(path, 'wx', 0o600); try { await handle.writeFile(JSON.stringify(value, null, 2) + '\n'); await handle.sync(); } finally { await handle.close(); } }
 async function readJson(path) { return JSON.parse(await readFile(path, 'utf8')); }
 
-export async function installRelease({ artifact, manifestPath, releaseRoot, tag, statePath }) {
+export async function installRelease({ artifact, manifestPath, releaseRoot, tag, statePath, owner = 'shinemage-dsh', restartDependency = 'shinemage-dsh.service' }) {
   assertTag(tag); const root = resolve(releaseRoot); const releases = join(root, 'releases'); const target = releasePath(root, tag);
+  if (!OWNER.test(owner) || !OWNER.test(restartDependency)) throw new Error('RELEASE_OWNER_INVALID');
   await mkdir(releases, { recursive: true, mode: 0o700 });
   const manifest = await readJson(manifestPath);
   if (manifest.release_tag !== tag) throw new Error('RELEASE_TAG_MANIFEST_MISMATCH');
@@ -25,7 +27,7 @@ export async function installRelease({ artifact, manifestPath, releaseRoot, tag,
   const staging = join(releases, `.incoming-${tag}-${process.pid}-${Date.now()}`);
   try {
     const received = await receiveArtifact({ artifact, manifestPath, destination: staging });
-    await writeMarker(staging, { tag, source_sha: manifest.source_sha, artifact_sha256: received.sha256, state: 'PREPARED', prepared_at: new Date().toISOString() });
+    await writeMarker(staging, { tag, source_sha: manifest.source_sha, artifact_sha256: received.sha256, owner, restart_dependency: restartDependency, state: 'PREPARED', prepared_at: new Date().toISOString() });
     await fsyncDir(staging);
     // Rename is exclusive: never remove or replace an existing release.
     await rename(staging, target); await fsyncDir(releases);
@@ -34,10 +36,12 @@ export async function installRelease({ artifact, manifestPath, releaseRoot, tag,
   } catch (error) { await rm(staging, { recursive: true, force: true }); throw error; }
 }
 
-export async function activateRelease({ releaseRoot, tag, sourceSha, statePath }) {
+export async function activateRelease({ releaseRoot, tag, sourceSha, statePath, expectedOwner = null }) {
   assertTag(tag); if (!/^[0-9a-f]{40}$/.test(sourceSha)) throw new Error('SOURCE_SHA_INVALID');
   const root = resolve(releaseRoot); const target = releasePath(root, tag); const marker = await readJson(join(target, 'release-marker.json'));
   if (marker.tag !== tag || marker.source_sha !== sourceSha) throw new Error('RELEASE_MARKER_MISMATCH');
+  if (!OWNER.test(marker.owner ?? '') || !OWNER.test(marker.restart_dependency ?? '')) throw new Error('RELEASE_OWNER_MISSING');
+  if (expectedOwner !== null && marker.owner !== expectedOwner) throw new Error('RELEASE_OWNER_MISMATCH');
   const current = join(root, 'current'); let previous = null;
   try {
     const currentStat = await lstat(current);

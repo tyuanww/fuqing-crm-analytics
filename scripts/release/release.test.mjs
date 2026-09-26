@@ -63,6 +63,14 @@ test('trust never treats an arbitrary text file as a signature', async () => { c
 test('token is one-time, origin-bound, rate-limited and session-backed', async () => { const root=await fixture(), db=join(root,'tokens.json'), token=await issueToken(db,{now:1000}); await assert.rejects(()=>consumeToken(db,token,{now:1001}),/AUTH_ORIGIN_REJECTED/); assert.equal((await consumeToken(db,token,{origin:'https://app.tyuan.chat',allowedOrigins:['https://app.tyuan.chat'],now:1001})).authenticated,true); await assert.rejects(()=>consumeToken(db,token,{origin:'https://app.tyuan.chat',allowedOrigins:['https://app.tyuan.chat'],now:1002}),/AUTH_TOKEN_REPLAY/); const fresh=await issueToken(db,{now:2000}); const response=await tokenExchangeResponse(db,fresh,{method:'POST',origin:'https://app.tyuan.chat',allowedOrigins:['https://app.tyuan.chat'],now:2001}); assert.equal(response.status,303); assert.match(response.headers['set-cookie'][0],/HttpOnly/); });
 test('side-by-side install, activation and duplicate protection retain source identity', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); const releaseRoot=join(root,'releases-root'); const installed=await installRelease({artifact:archive,manifestPath:m,releaseRoot,tag:'dsh-test'}); assert.equal(installed.status,'PREPARED'); const active=await activateRelease({releaseRoot,tag:'dsh-test',sourceSha:'a'.repeat(40)}); assert.equal(active.status,'ACTIVE'); await assert.rejects(()=>installRelease({artifact:archive,manifestPath:m,releaseRoot,tag:'dsh-test'}),/RELEASE_EXISTS/); });
 
+test('promotion binds service owner and cannot activate for another owner', async () => {
+  const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); const releaseRoot=join(root,'release-root');
+  await installRelease({artifact:archive,manifestPath:m,releaseRoot,tag:'dsh-test',owner:'service-a',restartDependency:'service-a.service'});
+  await assert.rejects(()=>activateRelease({releaseRoot,tag:'dsh-test',sourceSha:'a'.repeat(40),expectedOwner:'service-b'}),/RELEASE_OWNER_MISMATCH/);
+  const activated=await activateRelease({releaseRoot,tag:'dsh-test',sourceSha:'a'.repeat(40),expectedOwner:'service-a'});
+  assert.equal(activated.status,'ACTIVE');
+});
+
 test('evidence creation is immutable and replay-safe', async () => {
   const root = await fixture(); const path = join(root, 'evidence.json');
   const first = await writeEvidence(path, { release_tag: 'dsh-test', authorization: 'secret-value' });
@@ -87,5 +95,17 @@ test('action idempotency key cannot switch capability type', async () => {
 });
 
 test('action receipts bind actor, idempotency and unavailable capabilities', async () => { const root=await fixture(), path=join(root,'actions.json'); const first=await beginAction(path,{type:'save',idempotencyKey:'stable-action',actor:'operator-a'}); const replay=await beginAction(path,{type:'save',idempotencyKey:'stable-action',actor:'operator-a'}); assert.equal(replay.action_id,first.action_id); assert.equal(first.status,'NOT_AVAILABLE'); assert.match(first.reason,/未接通/); await finishAction(path,first.action_id,{status:'NOT_AVAILABLE',detail:'not connected'}); assert.equal((await receipt(path,first.action_id)).status,'NOT_AVAILABLE'); const other=await beginAction(path,{type:'save',idempotencyKey:'stable-action',actor:'operator-b'}); assert.notEqual(other.action_id, first.action_id); });
+
+test('mutable action keeps one terminal receipt and refuses conflicting completion', async () => {
+  const root=await fixture(), path=join(root,'actions.json');
+  const action=await beginAction(path,{type:'cancel',idempotencyKey:'cancel-once',actor:'operator-a'});
+  assert.equal(action.status,'PENDING');
+  const done=await finishAction(path,action.action_id,{status:'CANCELED',detail:'synthetic cancel'});
+  assert.equal(done.receipt.status,'CANCELED');
+  const replay=await finishAction(path,action.action_id,{status:'CANCELED',detail:'synthetic replay'});
+  assert.deepEqual(replay.receipt,done.receipt);
+  await assert.rejects(()=>finishAction(path,action.action_id,{status:'SUCCEEDED'}),/ACTION_TERMINAL_CONFLICT/);
+  assert.equal((await receipt(path,'missing-action')).status,'UNKNOWN');
+});
 
 test('page policy rejects cross-origin, unsupported methods and missing CSRF', () => { assert.equal(pageGuard({origin:'https://evil.example',method:'GET',authenticated:true}).status,403); assert.equal(pageGuard({origin:'https://app.tyuan.chat',method:'DELETE',authenticated:true}).status,405); assert.equal(pageGuard({origin:'https://app.tyuan.chat',method:'POST',authenticated:true}).status,403); assert.equal(pageGuard({origin:'https://app.tyuan.chat',method:'POST',authenticated:true,csrfValid:true}).status,200); });
