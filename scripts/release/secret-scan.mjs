@@ -9,10 +9,13 @@ const SECRET_PATTERNS = [
   /AKIA[0-9A-Z]{16}/,
 ];
 const DENY_NAMES = /(^|\/)(?:\.env(?:\.|$)|\.npmrc(?:$|\/)|credentials?(?:[-_.]|$)|private[-_]?key(?:[-_.]|$)|cookie(?:[-_.]|$)|node_modules(?:\/|$)|__pycache__(?:\/|$)|.*\.wal$|.*\.duckdb(?:$|\.)|.*\.sqlite(?:$|\.)|.*\.log$)/i;
+const SYNTHETIC_MARKER = /(?:synthetic|test[-_]?only|not[-_]?a[-_]?live[-_]?secret|fixture|example|placeholder|fake)/i;
 
 export function scanText(text, name = '<input>') {
   const findings = SECRET_PATTERNS.some(pattern => pattern.test(text)) ? [`SECRET_PATTERN ${name}`] : [];
-  for (const match of text.matchAll(ASSIGNMENT)) findings.push(`SECRET_PATTERN ${name}`);
+  for (const match of text.matchAll(ASSIGNMENT)) {
+    if (!SYNTHETIC_MARKER.test(match[1])) findings.push(`SECRET_PATTERN ${name}`);
+  }
   return [...new Set(findings)];
 }
 

@@ -13,6 +13,7 @@ import { verifyReviewedCommit } from './trust.mjs';
 import { writeEvidence } from './evidence.mjs';
 import { evaluateSli } from './operator-gate.mjs';
 import { pageGuard } from './page-policy.mjs';
+import { scanText } from './secret-scan.mjs';
 
 const fixture = () => mkdtemp(join(tmpdir(), 'dsh-release-'));
 function sha(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
@@ -28,6 +29,7 @@ async function manifest(root, archive, tag='dsh-test') {
 test('receiver binds archive digest and extracted payload exactly', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); const out=join(root,'out'); const got=await receiveArtifact({artifact:archive,manifestPath:m,destination:out}); assert.equal(got.entries,1); });
 test('receiver fails closed on archive digest mismatch and traversal', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); await writeFile(archive,Buffer.from('corrupt')); await assert.rejects(()=>receiveArtifact({artifact:archive,manifestPath:m,destination:join(root,'out')}), /ARTIFACT_DIGEST_MISMATCH/); });
 test('receiver rejects non-canonical manifest paths before unpacking', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); const value=JSON.parse(await readFile(m,'utf8')); value.archive_allowlist=['VERSION/.']; await writeFile(m,JSON.stringify(value)); await assert.rejects(()=>receiveArtifact({artifact:archive,manifestPath:m,destination:join(root,'out')}), /ALLOWLIST_PATH_INVALID/); });
+test('secret scan distinguishes explicit synthetic fixtures from real assignments', () => { assert.deepEqual(scanText("TOKEN = 'test-only-synthetic-token'", 'fixture'), []); assert.deepEqual(scanText("TOKEN = 'live-token-value-1234567890'", 'fixture'), ['SECRET_PATTERN fixture']); });
 test('zstd receiver enforces the bounded stream path', async () => { const root=await fixture(), raw=join(root,'a.tar'), archive=join(root,'a.tar.zst'); execFileSync('python3',['-c',`import tarfile,sys,io
 x=tarfile.TarInfo('VERSION'); b=bytes([48,46,49,56,46,48,46,49,10]); x.size=len(b); x.mode=0o600
 with tarfile.open(sys.argv[1],'w:') as t: t.addfile(x,io.BytesIO(b))`,raw]); execFileSync('/Users/hutou/homebrew/bin/zstd',['-q',raw,'-o',archive]); const m=await manifest(root,archive); const got=await receiveArtifact({artifact:archive,manifestPath:m,destination:join(root,'out')}); assert.equal(got.entries,1); });
