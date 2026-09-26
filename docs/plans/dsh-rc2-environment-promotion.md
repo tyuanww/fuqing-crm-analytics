@@ -648,19 +648,19 @@ Synthesized from CEO、DX、Design 与 Eng 审查的已接受发现。以下任�
   - Surfaced by: Eng — 上传、publication、receipt 中断或并发调用不能留下重复 draft/asset
   - Files: `scripts/release/dsh-manifest.mjs`, state store、schemas、CI tests
   - Verify: 每个 phase 可恢复；重复 tag/asset、429、进程杀死和并发执行都保持幂等且可审计
-- [ ] **T6 (P1, PARTIAL — side-by-side guard implemented; service/readiness NOT_RUN)** — Promotion/rollback — side-by-side release、fsync 后原子 symlink/env 激活与服务 ownership/restart dependency
+- [ ] **T6 (P1, PARTIAL — owner/readiness synthetic PASS; service/host NOT_RUN)** — Promotion/rollback — side-by-side release、fsync 后原子 symlink/env 激活与服务 ownership/restart dependency
   - Surfaced by: Eng — 代码、env、systemd、page、插件和 receipt 不得半切换或混用版本
   - Files: `deploy/wsl/`, systemd units、promotion/rollback scripts、receipt schema
   - Verify: 切换前后 version/source endpoint 一致；每个故障点均可恢复旧 release 并完成健康检查
-- [ ] **T7 (P1, PARTIAL — synthetic only; WSL2 NOT_RUN)** — Compatibility/host gate — 在目标 WSL2 + Docker + systemd 冷环境验证 Node/Python ABI、rc1→rc2 session/runtime/WAL 读写与回退
+- [ ] **T7 (P1, PARTIAL — synthetic fixture PASS; WSL2/ABI NOT_RUN)** — Compatibility/host gate — 在目标 WSL2 + Docker + systemd 冷环境验证 Node/Python ABI、rc1→rc2 session/runtime/WAL 读写与回退
   - Surfaced by: CEO/Eng — 无 schema migration 不等于 durable runtime 可回退
   - Files: `scripts/release/compat/`, `deploy/wsl/`, synthetic fixtures、CI matrix
   - Verify: old→new、新→旧、冷启动、锁、重启、磁盘不足与损坏恢复；失败阻断 promotion，真实 131GB 库保持 `NOT_RUN`
-- [ ] **T8 (P1, PARTIAL — contract scaffold only; server wiring NOT_RUN)** — User action contract — 为 save/cancel/conflict/unknown 定义服务端 `action_id`、幂等键、终态 receipt、重试/放弃与 capability matrix
+- [ ] **T8 (P1, PARTIAL — terminal receipt synthetic PASS; server/browser NOT_RUN)** — User action contract — 为 save/cancel/conflict/unknown 定义服务端 `action_id`、幂等键、终态 receipt、重试/放弃与 capability matrix
   - Surfaced by: Eng/Design — 客户端超时不能推断成功，未接通保存/导出/发送必须显示 `NOT_AVAILABLE`
   - Files: action API、native/plugin adapters、browser UAT、capability docs
   - Verify: 双击、断网、杀进程、权限撤销、两种完成顺序和刷新重开均保留草稿及可恢复状态
-- [ ] **T9 (P1, PARTIAL — SLI/contract done; route NOT_RUN)** — Operator gate and capacity — 实现正负身份探针、route SHA、SLI 阈值、15 分钟最小场景数与 10x backpressure 测试
+- [ ] **T9 (P1, PARTIAL — ephemeral probe/scheduler PASS; route/15m/10x NOT_RUN)** — Operator gate and capacity — 实现正负身份探针、route SHA、SLI 阈值、15 分钟最小场景数与 10x backpressure 测试
   - Surfaced by: CEO/DX/Eng — hostname/tunnel 不是隔离；timeout 不能算负探针通过
   - Files: `deploy/wsl/operator-gate`, health/metrics scripts、synthetic release orchestrator
   - Verify: `operator-gate verify --method ...` 写入证据；p95/5xx/auth/plugin/page 阈值、慢客户端、断线和资源上限可复现
@@ -721,12 +721,12 @@ Eng 的 native 与 outside 两路均完成，6/6 维度（artifact trust、auth/
 - Code Quality Review: 11 项发布/认证/状态/归档安全问题，已转入 T2–T8、T11；本候选已落地 synthetic contract，现场/远端 gate 仍未完成。
 - Test Review: 已产出单元→集成→系统→浏览器→operator→chaos 分层矩阵，至少 13 个实施任务；真实模型、完整业务、131GB 归档、移动端均保持 `NOT_RUN/PARTIAL`。
 - Developer experience: Quickstart、doctor、统一 dsh CLI、offline/status/resume/why-blocked 已落地；Node24 冷环境与 TTHW 仍 `NOT_RUN/NOT_MEASURED`。
-- Plan state: `IMPLEMENTATION_PARTIAL / RELEASE_BLOCKED`。T1/T2/T13 文档、基线与本地 artifact receive gate 已完成；T3/T5/T6/T8/T9/T10/T11/T12 仍为 PARTIAL，T4/T7 未完成；证据见 `scripts/release/release.test.mjs` 与 `docs/release/dsh-rc2-candidate/`。
+- Plan state: `IMPLEMENTATION_PARTIAL / RELEASE_BLOCKED`。T1/T2/T13 文档、基线与本地 artifact receive gate 已完成；T3–T9 的本地合同/synthetic gate 已完成但仍为 PARTIAL，T10–T12 仍为 PARTIAL；证据见 `scripts/release/release.test.mjs` 与 `docs/release/dsh-rc2-candidate/`。
 - Current execution: 已建立 public-main rc2 候选并完成 T1、T2、T13；P0/P1 synthetic contract、WSL artifact 脚本、Quickstart 和 evidence 模板已落地。GitHub push/tag/release、杭州重启/切换、Cloudflare route 和旧版本删除仍未执行。
 
 ### Verdict
 
-**REVISE — 计划可以进入实现排期，不能据此宣布 rc2 已发布或杭州已部署。** 当前候选已完成 T1、T2、T13；auth/state/promotion/action 仍保留 PARTIAL，安全审查与现场门禁尚未闭合；下一步是固定 Node24 环境运行完整入口、接 CI provenance/受保护 tag、做 WSL2 冷验证、operator gate 和七组 UAT；只有 release 进入 `PUBLISHED_VERIFIED`、杭州 receive receipt 完整、兼容性和回退演练通过，才讨论现有 hostname 的正式切换。没有 OIDC/provenance/signature 或没有真实 operator 隔离时，最高状态保持 `internal-only-partial`/operator pilot。
+**REVISE — 计划可以进入实现排期，不能据此宣布 rc2 已发布或杭州已部署。** 当前候选已完成 T1、T2、T13；auth/trust/state/promotion/compatibility/action/operator 仍保留 PARTIAL，安全审查与现场门禁尚未闭合；下一步是固定 Node24 环境运行完整入口、接 CI provenance/受保护 tag、做 WSL2 冷验证、operator gate 和七组 UAT；只有 release 进入 `PUBLISHED_VERIFIED`、杭州 receive receipt 完整、兼容性和回退演练通过，才讨论现有 hostname 的正式切换。没有 OIDC/provenance/signature 或没有真实 operator 隔离时，最高状态保持 `internal-only-partial`/operator pilot。
 
 **UNRESOLVED DECISIONS:**
 
