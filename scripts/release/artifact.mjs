@@ -37,7 +37,10 @@ export async function collectAllowlist(rootDir, { allowlist = DEFAULT_ALLOWLIST,
         if (allowlist.some(prefix => prefix.endsWith('/') ? (prefix.startsWith(dirPrefix) || dirPrefix.startsWith(prefix)) : prefix.startsWith(dirPrefix))) await walk(path);
         continue;
       }
-      if (!entry.isFile() || !allowed(rel, allowlist)) continue;
+      // Source maps are development metadata, not runtime entrypoints. They
+      // can expose local source paths and exceed the bounded secret-scan file
+      // limit, so a release artifact must omit them explicitly.
+      if (!entry.isFile() || rel.endsWith('.map') || !allowed(rel, allowlist)) continue;
       result.push(rel);
       if (result.length > maxFiles) throw new Error(`ALLOWLIST_FILE_LIMIT ${maxFiles}`);
     }

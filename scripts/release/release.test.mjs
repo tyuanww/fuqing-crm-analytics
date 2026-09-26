@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import { createHash } from 'node:crypto';
 import test from 'node:test';
-import { receiveArtifact } from './artifact.mjs';
+import { collectAllowlist, receiveArtifact } from './artifact.mjs';
 import { issueToken, consumeToken, tokenExchangeResponse } from './auth-contract.mjs';
 import { assertPublicationAssets, assertReleaseInputs, installRelease, activateRelease, rollbackRelease } from './promotion.mjs';
 import { beginAction, finishAction, receipt } from './action-contract.mjs';
@@ -35,6 +35,14 @@ async function manifest(root, archive, tag='dsh-test', payloadData={'VERSION':'0
 }
 
 test('receiver binds archive digest and extracted payload exactly', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); const out=join(root,'out'); const got=await receiveArtifact({artifact:archive,manifestPath:m,destination:out}); assert.equal(got.entries,1); });
+test('artifact allowlist omits source maps from runtime payloads', async () => {
+  const root = await fixture();
+  await writeFile(join(root, 'VERSION'), '0.18.0.1\n');
+  await writeFile(join(root, 'runtime.js'), 'export {};\n');
+  await writeFile(join(root, 'runtime.js.map'), '{}\n');
+  const allowlist = await collectAllowlist(root, { allowlist: ['VERSION', 'runtime.js', 'runtime.js.map'] });
+  assert.deepEqual(allowlist, ['VERSION', 'runtime.js']);
+});
 test('receiver fails closed on archive digest mismatch and traversal', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); await writeFile(archive,Buffer.from('corrupt')); await assert.rejects(()=>receiveArtifact({artifact:archive,manifestPath:m,destination:join(root,'out')}), /ARTIFACT_DIGEST_MISMATCH/); });
 test('receiver rejects non-canonical manifest paths before unpacking', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); const value=JSON.parse(await readFile(m,'utf8')); value.archive_allowlist=['VERSION/.']; await writeFile(m,JSON.stringify(value)); await assert.rejects(()=>receiveArtifact({artifact:archive,manifestPath:m,destination:join(root,'out')}), /ALLOWLIST_PATH_INVALID/); });
 test('receiver rejects traversal, duplicate and unsafe mode members', async () => {
