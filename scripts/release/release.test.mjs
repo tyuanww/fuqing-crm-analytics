@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import { createHash } from 'node:crypto';
@@ -40,7 +40,9 @@ test('artifact allowlist omits source maps from runtime payloads', async () => {
   await writeFile(join(root, 'VERSION'), '0.18.0.1\n');
   await writeFile(join(root, 'runtime.js'), 'export {};\n');
   await writeFile(join(root, 'runtime.js.map'), '{}\n');
-  const allowlist = await collectAllowlist(root, { allowlist: ['VERSION', 'runtime.js', 'runtime.js.map'] });
+  await mkdir(join(root, 'dsh-plugins/analytics-workbench/lib'), { recursive: true });
+  await writeFile(join(root, 'dsh-plugins/analytics-workbench/lib/test-fixture.mjs'), 'test;\n');
+  const allowlist = await collectAllowlist(root, { allowlist: ['VERSION', 'runtime.js', 'runtime.js.map', 'dsh-plugins/'] });
   assert.deepEqual(allowlist, ['VERSION', 'runtime.js']);
 });
 test('receiver fails closed on archive digest mismatch and traversal', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); await writeFile(archive,Buffer.from('corrupt')); await assert.rejects(()=>receiveArtifact({artifact:archive,manifestPath:m,destination:join(root,'out')}), /ARTIFACT_DIGEST_MISMATCH/); });
