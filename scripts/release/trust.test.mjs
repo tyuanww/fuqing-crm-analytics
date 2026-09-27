@@ -3,7 +3,7 @@ import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
-import { assertDeploymentTrust, verifyAttestationBundle, verifyReviewedCommit, verifyProtectedTag, verifyPublicationRecord } from './trust.mjs';
+import { assertDeploymentTrust, verifyAttestationBundle, verifyGitHubRelease, verifyReviewedCommit, verifyProtectedTag, verifyPublicationRecord } from './trust.mjs';
 test('trust blocks mismatched reviewed commit and marks missing provenance unavailable', async () => {
   const sha = 'a'.repeat(40); await assert.rejects(() => verifyReviewedCommit({ sourceSha: sha, reviewedSha: 'b'.repeat(40) }), /TRUST_REVIEWED_SHA_MISMATCH/);
   assert.equal((await verifyReviewedCommit({ sourceSha: sha, reviewedSha: sha })).status, 'NOT_AVAILABLE');
@@ -17,6 +17,10 @@ test('deployment trust never promotes an unverified publication sidecar', async 
   assert.throws(() => assertDeploymentTrust({ status: 'PUBLICATION_RECORD_VALID', provenance_status: 'NOT_AVAILABLE' }), /RELEASE_PROVENANCE_NOT_VERIFIED/);
   const missing = await verifyAttestationBundle({ artifactPath: '/tmp/a', bundlePath: '/tmp/b', repository: 'tyuanww/fuqing-crm-analytics', sourceRef: 'refs/tags/dsh-test', gh: '/path/that/does/not/exist' });
   assert.equal(missing.status, 'NOT_AVAILABLE');
+  const missingSigner = await verifyAttestationBundle({ artifactPath: '/tmp/a', bundlePath: '/tmp/b', repository: 'tyuanww/fuqing-crm-analytics', sourceRef: 'refs/tags/dsh-test' });
+  assert.equal(missingSigner.status, 'NOT_AVAILABLE');
+  const missingRelease = await verifyGitHubRelease({ repository: 'tyuanww/fuqing-crm-analytics', releaseTag: 'dsh-test', sourceSha: 'a'.repeat(40), gh: '/path/that/does/not/exist' });
+  assert.equal(missingRelease.status, 'NOT_AVAILABLE');
 });
 
 test('protected tag binds reviewed commit and approval reference', () => {

@@ -1,6 +1,6 @@
 # DSH rc2 发布与回退 Runbook
 
-发布 owner 只接收 `PUBLISHED_VERIFIED` 的 publication sidecar，核对 tag、reviewed source SHA、rc2 upstream SHA、manifest schema、两个 tarball、CI evidence index 和 `SHA256SUMS`。服务器禁止 `git pull`、浮动 main 和现场编译。
+发布 owner 只接收 `PUBLISHED_VERIFIED` 的 publication sidecar，核对 tag、reviewed source SHA、rc2 upstream SHA、manifest schema、两个 tarball、CI evidence index 和 `SHA256SUMS`。当前候选仍是 internal-only，离线准备只生成一个 source tarball；在第二个固定 upstream tarball、真实 GitHub Release、环境审批和 live attestation 都未齐全前，禁止执行 `install-release.sh`。服务器禁止 `git pull`、浮动 main 和现场编译。
 
 ## 现场顺序
 

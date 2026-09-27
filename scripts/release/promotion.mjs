@@ -1,9 +1,10 @@
-import { access, mkdir, open, readFile, rename, rm, symlink, lstat, readlink } from 'node:fs/promises';
+import { access, mkdir, open, readFile, rename, rm, symlink, lstat, readlink, stat } from 'node:fs/promises';
+import { randomBytes } from 'node:crypto';
 import { basename, dirname, join, resolve } from 'node:path';
 import { receiveArtifact, sha256 } from './artifact.mjs';
 import { recordEvent } from './state.mjs';
 import { assertSchema } from './schema.mjs';
-import { assertDeploymentTrust, verifyAttestationBundle, verifyPublicationRecord } from './trust.mjs';
+import { assertDeploymentTrust, verifyAttestationBundle, verifyGitHubRelease, verifyPublicationRecord } from './trust.mjs';
 import { fileURLToPath } from 'node:url';
 
 const TAG = /^dsh-[A-Za-z0-9._-]+$/;
@@ -20,6 +21,27 @@ async function replaceSymlink(link, target) { const temp = `${link}.next-${proce
 async function writeFileAtomic(path, value) { const temp = `${path}.tmp-${process.pid}`; const handle = await open(temp, 'wx', 0o600); try { await handle.writeFile(value); await handle.sync(); } finally { await handle.close(); } await rename(temp, path); await fsyncDir(dirname(path)); }
 async function writeMarker(dir, value) { const path = join(dir, 'release-marker.json'); const handle = await open(path, 'wx', 0o600); try { await handle.writeFile(JSON.stringify(value, null, 2) + '\n'); await handle.sync(); } finally { await handle.close(); } }
 async function readJson(path) { return JSON.parse(await readFile(path, 'utf8')); }
+
+async function withPromotionLock(root, fn) {
+  await mkdir(root, { recursive: true, mode: 0o700 });
+  const lock = join(root, '.promotion.lock');
+  let handle;
+  const nonce = randomBytes(16).toString('hex');
+  try {
+    handle = await open(lock, 'wx', 0o600);
+    await handle.writeFile(JSON.stringify({ pid: process.pid, nonce }) + '\n');
+    await handle.sync();
+  } catch (error) {
+    if (error.code === 'EEXIST') throw new Error('PROMOTION_LOCKED');
+    throw error;
+  } finally { await handle?.close(); }
+  try { return await fn(); } finally {
+    try {
+      const owner = JSON.parse(await readFile(lock, 'utf8'));
+      if (owner.nonce === nonce) await rm(lock);
+    } catch (error) { if (error.code !== 'ENOENT') throw error; }
+  }
+}
 
 export function assertPublicationAssets(publication, expectedAssets) {
   const byName = new Map((publication?.assets ?? []).map(asset => [asset.name, asset]));
@@ -75,7 +97,16 @@ export async function installRelease({ artifact, manifestPath, releaseRoot, tag,
       [basename(evidenceIndexPath), evidenceIndexSha256],
     ]);
     const attestation = await verifyAttestationBundle({ artifactPath: artifact, bundlePath: attestationBundlePath, repository, sourceRef, signerWorkflow, gh });
-    if (attestation.status !== 'VERIFIED' || trust.provenance_status !== 'VERIFIED') throw new Error('RELEASE_PROVENANCE_NOT_VERIFIED');
+    if (sourceRef !== `refs/tags/${tag}`) throw new Error('RELEASE_SOURCE_REF_MISMATCH');
+    const liveAssets = [
+      { name: basename(artifact), sha256: manifest.artifact_sha256, size: (await stat(artifact)).size },
+      { name: basename(manifestPath), sha256: manifestSha256, size: (await stat(manifestPath)).size },
+      { name: basename(sumsPath), sha256: sha256sumsSha256, size: (await stat(sumsPath)).size },
+      { name: basename(evidenceIndexPath), sha256: evidenceIndexSha256, size: (await stat(evidenceIndexPath)).size },
+    ];
+    const liveRelease = await verifyGitHubRelease({ repository, releaseTag: tag, sourceSha: manifest.source_sha, expectedAssets: liveAssets, gh });
+    if (attestation.status !== 'VERIFIED' || liveRelease.status !== 'VERIFIED') throw new Error('RELEASE_PROVENANCE_NOT_VERIFIED');
+    trust = { ...trust, provenance_status: 'VERIFIED', live_release_status: liveRelease.status };
     assertDeploymentTrust(trust);
   }
   if (await access(target).then(() => true, () => false)) throw new Error('RELEASE_EXISTS');
@@ -93,7 +124,9 @@ export async function installRelease({ artifact, manifestPath, releaseRoot, tag,
 
 export async function activateRelease({ releaseRoot, tag, sourceSha, statePath, expectedOwner = null, expectedRestartDependency = null }) {
   assertTag(tag); if (!/^[0-9a-f]{40}$/.test(sourceSha)) throw new Error('SOURCE_SHA_INVALID');
-  const root = resolve(releaseRoot); const target = releasePath(root, tag); const marker = await readJson(join(target, 'release-marker.json'));
+  const root = resolve(releaseRoot);
+  return withPromotionLock(root, async () => {
+  const target = releasePath(root, tag); const marker = await readJson(join(target, 'release-marker.json'));
   if (marker.tag !== tag || marker.source_sha !== sourceSha) throw new Error('RELEASE_MARKER_MISMATCH');
   if (!OWNER.test(marker.owner ?? '') || !OWNER.test(marker.restart_dependency ?? '')) throw new Error('RELEASE_OWNER_MISSING');
   if (expectedOwner !== null && marker.owner !== expectedOwner) throw new Error('RELEASE_OWNER_MISMATCH');
@@ -111,11 +144,6 @@ export async function activateRelease({ releaseRoot, tag, sourceSha, statePath, 
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
   }
-  if (previous) {
-    const releases = resolve(root, 'releases'); const prevResolved = resolve(previous);
-    if (!prevResolved.startsWith(`${releases}/`)) throw new Error('ROLLBACK_TARGET_INVALID');
-    await writeFileAtomic(join(root, 'rollback-target.json'), JSON.stringify({ target: prevResolved, recorded_at: new Date().toISOString() }, null, 2) + '\n');
-  }
   try {
     const currentStat = await lstat(current);
     if (currentStat.isSymbolicLink()) {
@@ -123,34 +151,59 @@ export async function activateRelease({ releaseRoot, tag, sourceSha, statePath, 
       if (linked === target) return { status: 'ACTIVE', tag, previous, current: target, idempotent: true };
     }
   } catch (error) { if (error.code !== 'ENOENT') throw error; }
+  if (previous) {
+    const releases = resolve(root, 'releases'); const prevResolved = resolve(previous);
+    if (!prevResolved.startsWith(`${releases}/`)) throw new Error('ROLLBACK_TARGET_INVALID');
+    await writeFileAtomic(join(root, 'rollback-target.json'), JSON.stringify({ target: prevResolved, recorded_at: new Date().toISOString() }, null, 2) + '\n');
+  }
   await replaceSymlink(current, target); await writeFileAtomic(join(root, 'current-target'), `${target}\n`);
   const completedAt = new Date().toISOString();
   await writeFileAtomic(join(target, 'active.json'), JSON.stringify({ tag, source_sha: sourceSha, activated_at: completedAt }, null, 2) + '\n');
   await writeReceipt(root, { schema_version: 'promotion-receipt/v1', release_tag: tag, status: 'ACTIVE', source_sha: sourceSha, started_at: completedAt, completed_at: completedAt });
   if (statePath) await recordEvent(statePath, { release_tag: tag, status: 'ACTIVE', previous, source_sha: sourceSha });
   return { status: 'ACTIVE', tag, previous, current: target };
+  });
 }
 
 export async function rollbackRelease({ releaseRoot, statePath, expectedOwner = null, expectedRestartDependency = null }) {
-  const root = resolve(releaseRoot); const rollbackRecord = await readJson(join(root, 'rollback-target.json'));
+  const root = resolve(releaseRoot);
+  return withPromotionLock(root, async () => {
+  const current = join(root, 'current');
+  let currentTarget = null;
+  try {
+    const currentStat = await lstat(current);
+    if (!currentStat.isSymbolicLink()) throw new Error('CURRENT_TARGET_INVALID');
+    currentTarget = resolve(await readlink(current));
+    const recorded = resolve((await readFile(join(root, 'current-target'), 'utf8')).trim());
+    if (recorded !== currentTarget) throw new Error('CURRENT_TARGET_DRIFT');
+  } catch (error) { if (error.code !== 'ENOENT') throw error; }
+  const rollbackRecord = await readJson(join(root, 'rollback-target.json'));
   if (!rollbackRecord || typeof rollbackRecord.target !== 'string') throw new Error('ROLLBACK_TARGET_MISSING');
   const previous = rollbackRecord.target;
   const releases = resolve(root, 'releases'); const target = resolve(previous);
   if (!target.startsWith(`${releases}/`) || target === releases) throw new Error('ROLLBACK_TARGET_INVALID');
+  if (currentTarget === target) {
+    const marker = await readJson(join(target, 'release-marker.json'));
+    return { status: 'ROLLED_BACK', target, idempotent: true, releaseTag: marker.tag };
+  }
   const targetStat = await lstat(target); if (!targetStat.isDirectory()) throw new Error('ROLLBACK_TARGET_INVALID');
   const marker = await readJson(join(target, 'release-marker.json'));
   if (!/^[0-9a-f]{40}$/.test(marker.source_sha)) throw new Error('ROLLBACK_SOURCE_INVALID');
   if (!OWNER.test(marker.owner ?? '') || !OWNER.test(marker.restart_dependency ?? '')) throw new Error('RELEASE_OWNER_MISSING');
   if (expectedOwner !== null && marker.owner !== expectedOwner) throw new Error('RELEASE_OWNER_MISMATCH');
   if (expectedRestartDependency !== null && marker.restart_dependency !== expectedRestartDependency) throw new Error('RELEASE_RESTART_DEPENDENCY_MISMATCH');
-  await replaceSymlink(join(root, 'current'), target); await writeFileAtomic(join(root, 'current-target'), `${target}\n`);
+  await replaceSymlink(current, target); await writeFileAtomic(join(root, 'current-target'), `${target}\n`);
   const completedAt = new Date().toISOString();
   await writeReceipt(root, { schema_version: 'promotion-receipt/v1', release_tag: marker.tag, status: 'ROLLED_BACK', source_sha: marker.source_sha, started_at: completedAt, completed_at: completedAt });
   if (statePath) await recordEvent(statePath, { status: 'ROLLED_BACK', target, source_sha: marker.source_sha });
   return { status: 'ROLLED_BACK', target };
+  });
 }
 async function writeReceipt(root, value) {
-  const path = join(root, 'evidence', value.release_tag, `promotion-${value.status.toLowerCase()}.v1.json`); const content = JSON.stringify(value, null, 2) + '\n';
-  try { if (await readFile(path, 'utf8') !== content) throw new Error('EVIDENCE_IMMUTABLE'); return; } catch (error) { if (error.code !== 'ENOENT') throw error; }
-  await mkdir(dirname(path), { recursive: true, mode: 0o700 }); await writeFileAtomic(path, content);
+  const dir = join(root, 'evidence', value.release_tag); const content = JSON.stringify(value, null, 2) + '\n';
+  await mkdir(dir, { recursive: true, mode: 0o700 });
+  const path = join(dir, `promotion-${value.status.toLowerCase()}-${value.completed_at.replace(/[^0-9TZ-]/g, '')}-${randomBytes(6).toString('hex')}.v1.json`);
+  const handle = await open(path, 'wx', 0o600);
+  try { await handle.writeFile(content); await handle.sync(); } finally { await handle.close(); }
+  await fsyncDir(dir);
 }

@@ -3,6 +3,8 @@ import { mkdir, open, readFile, rename, rm } from 'node:fs/promises';
 import { dirname } from 'node:path';
 
 const SENSITIVE = /token|secret|password|cookie|authorization|api[_-]?key|session|csrf/i;
+const MAX_TOKEN_RECORDS = 10_000;
+const MAX_RATE_BUCKETS = 1_024;
 function hash(value) { return createHash('sha256').update(value).digest('hex'); }
 async function locked(path, fn) {
   const lock = `${path}.lock`;
@@ -26,7 +28,13 @@ async function save(path, data) {
 export async function issueToken(path, { ttlSeconds = 300, now = Date.now() } = {}) {
   if (!Number.isInteger(ttlSeconds) || ttlSeconds < 1 || ttlSeconds > 3600) throw new Error('TOKEN_TTL_INVALID');
   const raw = randomBytes(32).toString('base64url');
-  await locked(path, async () => { const db = await load(path); db.tokens[hash(raw)] = { expires_at: now + ttlSeconds * 1000, consumed: false }; await save(path, db); });
+  await locked(path, async () => {
+    const db = await load(path);
+    db.tokens ??= {};
+    for (const [key, record] of Object.entries(db.tokens ?? {})) if (record.expires_at <= now || (record.consumed && now - (record.consumed_at ?? now) > 3_600_000)) delete db.tokens[key];
+    if (Object.keys(db.tokens).length >= MAX_TOKEN_RECORDS) throw new Error('AUTH_STATE_LIMIT');
+    db.tokens[hash(raw)] = { expires_at: now + ttlSeconds * 1000, consumed: false }; await save(path, db);
+  });
   return raw;
 }
 
@@ -36,6 +44,13 @@ export async function consumeToken(path, raw, { origin, allowedOrigins = [], rat
   if (!Number.isInteger(maxAttempts) || maxAttempts < 1 || !Number.isInteger(windowMs) || windowMs < 1) throw new Error('AUTH_RATE_CONFIG_INVALID');
   return locked(path, async () => {
     const db = await load(path);
+    db.rate_limits ??= {};
+    for (const [key, bucket] of Object.entries(db.rate_limits ?? {})) if (!bucket || now - Number(bucket.started_at) >= windowMs) delete db.rate_limits[key];
+    const buckets = Object.entries(db.rate_limits);
+    if (buckets.length >= MAX_RATE_BUCKETS) {
+      buckets.sort(([, left], [, right]) => Number(left?.started_at ?? 0) - Number(right?.started_at ?? 0));
+      for (const [key] of buckets.slice(0, buckets.length - MAX_RATE_BUCKETS + 1)) delete db.rate_limits[key];
+    }
     // Never make rate limiting opt-in. The origin is the safe fallback key;
     // an HTTP adapter should also supply a bounded client identity as rateKey.
     const bucketKey = hash(String(rateKey ?? origin ?? 'anonymous'));

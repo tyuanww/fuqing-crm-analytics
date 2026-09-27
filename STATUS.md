@@ -6,7 +6,7 @@
 | 项 | 状态 |
 |---|---|
 | Git 基线 | 候选分支 `codex/dsh-rc2-candidate` 从 public main `ba2f887b1ec55f26d7cb3849d327072140abbd95` 建立；当前 immutable runtime artifact/reviewed source SHA 为 `57977b347cb079523429da2ea6bde27b8c14f40b`，证据文档更新已推送到 PR [#61](https://github.com/tyuanww/fuqing-crm-analytics/pull/61)，远端 CI 必需检查通过；仍未合并。 |
-| 产品 | **PARTIAL / RELEASE_BLOCKED**；T2 已完成，T3–T12 的本地合同与 synthetic 验证已完成（当前 57/57），但浏览器/host、GitHub/OIDC、WSL2 冷验证、route/15 分钟 SLI/杭州 HTTP backpressure、public HTML、现场 owner 和 UAT 未完成。既有 HTML 收件箱能力保持，完整浏览器 UAT 仍开放。 |
+| 产品 | **PARTIAL / RELEASE_BLOCKED**；T2 已完成，T3–T12 的本地合同与 synthetic 验证已完成（当前 62/62），但浏览器/host、GitHub/OIDC、WSL2 冷验证、route/15 分钟 SLI/杭州 HTTP backpressure、public HTML、现场 owner 和 UAT 未完成。既有 HTML 收件箱能力保持，完整浏览器 UAT 仍开放。 |
 | DSH | 官方上游固定为 `477b4f42`（0.1.7-rc.2），不修改上游源码；杭州切换未执行。 |
 | CRM | 杭州 backend `127.0.0.1:18093`、frontend `127.0.0.1:18094` 健康；生产 checkout 固定在 `47f49616`。 |
 | WeKnora | 页面 `127.0.0.1:18090`、API `127.0.0.1:18092` 健康；数据卷与登录由 WeKnora 自身管理。 |

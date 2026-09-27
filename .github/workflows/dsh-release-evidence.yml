@@ -26,6 +26,7 @@ concurrency:
 jobs:
   evidence:
     runs-on: ubuntu-24.04
+    environment: dsh-release-evidence
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -37,6 +38,11 @@ jobs:
         with:
           node-version: '24.19.0'
           package-manager-cache: false
+      - name: Check zstd release dependency
+        run: |
+          set -euo pipefail
+          command -v zstd
+          zstd --version
       - name: Refuse unreviewed or dirty source
         env:
           REVIEWED_SHA: ${{ inputs.reviewed_sha }}
@@ -51,6 +57,7 @@ jobs:
           test "$(git rev-parse "$RELEASE_TAG^{commit}")" = "$REVIEWED_SHA"
           test "$(git rev-list -n1 "$RELEASE_TAG")" = "$REVIEWED_SHA"
           test "$(git rev-parse HEAD)" = "$REVIEWED_SHA"
+          git merge-base --is-ancestor "$REVIEWED_SHA" origin/main
           test -z "$(git status --porcelain --untracked-files=all)"
       - name: Build synthetic release evidence only
         env:

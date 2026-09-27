@@ -23,11 +23,9 @@ export async function verifyReviewedCommit({ sourceSha, reviewedSha, provenanceP
 export async function verifyAttestationBundle({ artifactPath, bundlePath, repository, sourceRef, signerWorkflow = null, gh = 'gh' } = {}) {
   if (typeof artifactPath !== 'string' || !artifactPath || typeof bundlePath !== 'string' || !bundlePath || typeof repository !== 'string' || !/^[^/\s]+\/[^/\s]+$/.test(repository)) return { status: 'NOT_AVAILABLE', reason: 'artifact, bundle and repository are required' };
   if (typeof sourceRef !== 'string' || !sourceRef) return { status: 'NOT_AVAILABLE', reason: 'source_ref is required' };
+  if (typeof signerWorkflow !== 'string' || !signerWorkflow) return { status: 'NOT_AVAILABLE', reason: 'signer_workflow is required' };
   const args = ['attestation', 'verify', artifactPath, '--bundle', bundlePath, '--repo', repository, '--source-ref', sourceRef, '--format', 'json'];
-  if (signerWorkflow !== null) {
-    if (typeof signerWorkflow !== 'string' || !signerWorkflow) return { status: 'NOT_AVAILABLE', reason: 'signer_workflow is invalid' };
-    args.push('--signer-workflow', signerWorkflow);
-  }
+  args.push('--signer-workflow', signerWorkflow);
   try {
     const { stdout } = await execFile(gh, args, { maxBuffer: 4 * 1024 * 1024, windowsHide: true });
     const result = JSON.parse(stdout);
@@ -35,6 +33,36 @@ export async function verifyAttestationBundle({ artifactPath, bundlePath, reposi
     return { status: 'VERIFIED', repository, source_ref: sourceRef, signer_workflow: signerWorkflow, attestation_count: result.length };
   } catch (error) {
     return { status: 'NOT_AVAILABLE', reason: 'attestation verification failed', detail: String(error?.message ?? error).slice(0, 240) };
+  }
+}
+
+async function ghJson(gh, args) {
+  const { stdout } = await execFile(gh, ['api', ...args], { maxBuffer: 4 * 1024 * 1024, windowsHide: true });
+  return JSON.parse(stdout);
+}
+
+/** Verify that the live GitHub Release and tag agree with the local sidecars. */
+export async function verifyGitHubRelease({ repository, releaseTag, sourceSha, expectedAssets = [], gh = 'gh' } = {}) {
+  if (typeof repository !== 'string' || !/^[^/\s]+\/[^/\s]+$/.test(repository) || !TAG.test(releaseTag) || !SHA40.test(sourceSha)) return { status: 'NOT_AVAILABLE', reason: 'repository, release_tag and source_sha are required' };
+  try {
+    const release = await ghJson(gh, [`repos/${repository}/releases/tags/${releaseTag}`, '--header', 'Accept: application/vnd.github+json']);
+    if (release.tag_name !== releaseTag || release.draft !== false || release.immutable !== true) return { status: 'NOT_AVAILABLE', reason: 'live release is not a published immutable release' };
+    const ref = await ghJson(gh, [`repos/${repository}/git/ref/tags/${releaseTag}`, '--header', 'Accept: application/vnd.github+json']);
+    let refSha = ref?.object?.sha;
+    if (ref?.object?.type === 'tag') {
+      const annotated = await ghJson(gh, [`repos/${repository}/git/tags/${refSha}`, '--header', 'Accept: application/vnd.github+json']);
+      refSha = annotated?.object?.sha;
+    }
+    if (refSha !== sourceSha) return { status: 'NOT_AVAILABLE', reason: 'live tag target does not match source_sha' };
+    const liveAssets = new Map((release.assets ?? []).map(asset => [asset.name, asset]));
+    for (const expected of expectedAssets) {
+      const asset = liveAssets.get(expected.name);
+      const digest = typeof asset?.digest === 'string' ? asset.digest.replace(/^sha256:/, '') : null;
+      if (!asset || digest !== expected.sha256 || (Number.isInteger(expected.size) && asset.size !== expected.size)) return { status: 'NOT_AVAILABLE', reason: `live release asset mismatch: ${expected.name}` };
+    }
+    return { status: 'VERIFIED', release_tag: releaseTag, source_sha: sourceSha, asset_count: expectedAssets.length };
+  } catch (error) {
+    return { status: 'NOT_AVAILABLE', reason: 'live GitHub release verification failed', detail: String(error?.message ?? error).slice(0, 240) };
   }
 }
 

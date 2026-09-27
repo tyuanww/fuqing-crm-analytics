@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile } from 'node:fs/promises';
+import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -77,4 +77,17 @@ test('foreign-origin attempts are rate-limited before origin rejection', async (
   await assert.rejects(() => consumeToken(path, token, options), /AUTH_ORIGIN_REJECTED/);
   await assert.rejects(() => consumeToken(path, token, options), /AUTH_ORIGIN_REJECTED/);
   await assert.rejects(() => consumeToken(path, token, options), /AUTH_RATE_LIMIT/);
+});
+
+test('auth state prunes expired tokens and bounds origin rate buckets', async () => {
+  const dir = await fixture(); const path = join(dir, 'tokens.json');
+  const tokens = {}; const rate_limits = {};
+  for (let index = 0; index < 1100; index += 1) rate_limits[String(index).padStart(64, '0')] = { started_at: index, count: 1 };
+  tokens.dead = { expires_at: 1, consumed: false };
+  await writeFile(path, JSON.stringify({ schema_version: 'one-time-token/v1', tokens, rate_limits }));
+  const token = await issueToken(path, { now: 10_000 });
+  await consumeToken(path, token, { origin: web, allowedOrigins: [web], now: 10_000 });
+  const state = JSON.parse(await readFile(path, 'utf8'));
+  assert.equal(state.tokens.dead, undefined);
+  assert.ok(Object.keys(state.rate_limits).length <= 1024);
 });

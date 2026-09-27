@@ -25,7 +25,10 @@ async function printVersion() {
   const version = (await readFile(join(root, 'VERSION'), 'utf8')).trim();
   console.log(`DSH_VERSION ${version} upstream=477b4f420553e8a52c2fbccc464d7561b239c443`);
 }
-function git(args) { try { return execFileSync('git', ['-C', root, ...args], { encoding: 'utf8' }).trim(); } catch { return null; } }
+function git(args) {
+  try { return execFileSync('git', ['-C', root, ...args], { encoding: 'utf8' }).trim(); }
+  catch (error) { throw new Error(`RELEASE_GIT_UNAVAILABLE ${String(error?.message ?? error).split('\n')[0]}`); }
+}
 async function doctor() {
   const version = (await readFile(join(root, 'VERSION'), 'utf8')).trim(); const pin = '477b4f420553e8a52c2fbccc464d7561b239c443';
   const checks = [

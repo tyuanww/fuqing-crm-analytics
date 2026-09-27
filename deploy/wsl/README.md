@@ -90,7 +90,7 @@ CI 通过的 commit
 
 ## rc2 artifact promotion
 
-杭州只接收已校验的 `release-publication.v1.json`、`release-manifest.v1.json`、`SHA256SUMS`、CI evidence index、两个 tarball 和 GitHub attestation bundle。`install-release.sh` 会把 publication 摘要绑定到本地文件，并在 provenance 未验证时拒绝解包。先在新目录执行：
+杭州只接收已校验的 `release-publication.v1.json`、`release-manifest.v1.json`、`SHA256SUMS`、CI evidence index、两个 tarball 和 GitHub attestation bundle。当前 internal-only 候选只生成一个 source tarball，不能按本节命令安装；必须先完成第二个固定 upstream tarball、真实 GitHub Release、环境审批和 live release/attestation 校验。`install-release.sh` 会把 publication 摘要绑定到本地文件，并在 provenance 未验证时拒绝解包。先在新目录执行：
 
 ```bash
 RELEASE_ARTIFACT=/srv/shinemage/incoming/shinemage-dsh-<version>-<sha>.tar.zst \
