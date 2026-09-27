@@ -4,8 +4,8 @@
 
 | 检查 | 命令 | 结果 | 证据/限制 |
 |---|---|---|---|
-| Release security contracts | `PATH=.../node@24/bin:$PATH pnpm dsh test` | PASS 53/53 | 隔离 synthetic tar/文件夹；覆盖 digest、payload、bounded unpack、traversal/duplicate/permission/link/secret fail-closed、trust/provenance gate、token、HTTP auth→backend adapter、side-by-side、compat/action/operator/CLI/evidence/UAT contracts |
-| T3 auth contract | node@24 pnpm dsh test | PASS（auth 7 + HTTP adapter 3；aggregate 53/53） | token/session/CSRF/Cookie/redaction、隔离 backend bearer proxy 和 loopback HTTP synthetic evidence；browser/host NOT_RUN |
+| Release security contracts | `PATH=.../node@24/bin:$PATH pnpm dsh test` | PASS 54/54 | 隔离 synthetic tar/文件夹；覆盖 digest、payload、bounded unpack、traversal/duplicate/permission/link/secret fail-closed、trust/provenance gate、token、HTTP auth→backend adapter、side-by-side、compat/action/operator/CLI/evidence/UAT contracts |
+| T3 auth contract | node@24 pnpm dsh test | PASS（auth 7 + HTTP adapter 3；aggregate 54/54） | token/session/CSRF/Cookie/redaction、隔离 backend bearer proxy 和 loopback HTTP synthetic evidence；browser/host NOT_RUN |
 | T4 trust contract | node@24 pnpm dsh test + workflow YAML parse | PASS | protected tag/publication binding and negative states；GitHub protected settings/OIDC NOT_RUN |
 | T5 state/reconcile | node@24 pnpm dsh test + pnpm dsh reconcile synthetic fixture | PASS | crash/resume, durable RECONCILE journal and stale-lock owner checks；remote CI/杭州 resume NOT_RUN |
 | T6 promotion contract | node@24 pnpm dsh test + `bash -n deploy/wsl/*.sh` | PASS | owner/restart-dependency binding, mismatch guard, checksum/evidence input binding and wrapper syntax；systemd/readiness/host NOT_RUN |

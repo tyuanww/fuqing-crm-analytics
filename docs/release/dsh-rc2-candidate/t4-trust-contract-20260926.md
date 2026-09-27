@@ -13,4 +13,4 @@
 - WSL install wrapper 现在必须接收 publication、SHA256SUMS、CI evidence 和 GitHub attestation bundle；本地 sidecar 结构有效但 provenance 为 `NOT_AVAILABLE` 时明确拒绝部署，`PUBLICATION_RECORD_VALID` 不再冒充 `PUBLISHED_VERIFIED`。
 - 安装前还会解析并绑定 SHA256SUMS 中的 artifact/manifest 摘要，并校验 CI evidence index schema 与 release tag，避免只绑定文件本身摘要而不验证其内容。
 
-验证：trust tests、publication schema 和 workflow YAML 均通过；aggregate release tests 53/53 PASS。GitHub Actions 已声明 OIDC/attestation 权限并对精确 tarball 生成 provenance，但远端 workflow、Sigstore 结果、GitHub protected tag/branch 仓库设置、真实 GitHub Release 和人工批准记录未执行，仍为 NOT_AVAILABLE/NOT_RUN；T4 保持 PARTIAL。
+验证：trust tests、publication schema 和 workflow YAML 均通过；aggregate release tests 54/54 PASS。GitHub Actions 已声明 OIDC/attestation 权限并对精确 tarball 生成 provenance，但远端 workflow、Sigstore 结果、GitHub protected tag/branch 仓库设置、真实 GitHub Release 和人工批准记录未执行，仍为 NOT_AVAILABLE/NOT_RUN；T4 保持 PARTIAL。
