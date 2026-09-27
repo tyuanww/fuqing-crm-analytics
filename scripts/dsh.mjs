@@ -123,7 +123,7 @@ async function test() { const tests = readdirSync(join(root, 'scripts/release'))
 async function verify() {
   await doctor();
   const local = await runLocalVerification();
-  console.log(`DSH_VERIFY_COMPAT ${local.compatibility.status} scope=${local.compatibility.scope} real_wal=${local.compatibility.wsl2}`);
+  console.log(`DSH_VERIFY_COMPAT ${local.compatibility.status} scope=${local.compatibility.scope} wsl2=${local.compatibility.wsl2} real_duckdb=${local.compatibility.real_duckdb}`);
   console.log('DSH_VERIFY_SLI NOT_RUN reason=no 15-minute HTTP probe evidence');
   console.log(`DSH_VERIFY_BACKPRESSURE ${local.backpressure.status} scope=${local.backpressure.evidence_scope} real_http=NOT_RUN`);
   console.log('DSH_VERIFY_STATUS RELEASE_BLOCKED reason=15-minute SLI, WSL2 cold runtime/WAL, and host HTTP evidence remain NOT_RUN');
