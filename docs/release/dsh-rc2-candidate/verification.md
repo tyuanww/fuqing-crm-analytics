@@ -4,14 +4,14 @@
 
 | 检查 | 命令 | 结果 | 证据/限制 |
 |---|---|---|---|
-| Release security contracts | `PATH=.../node@24/bin:$PATH pnpm dsh test` | PASS 54/54 | 隔离 synthetic tar/文件夹；覆盖 digest、payload、bounded unpack、traversal/duplicate/permission/link/secret fail-closed、trust/provenance gate、token、HTTP auth→backend adapter、side-by-side、compat/action/operator/CLI/evidence/UAT contracts |
-| T3 auth contract | node@24 pnpm dsh test | PASS（auth 7 + HTTP adapter 3；aggregate 54/54） | token/session/CSRF/Cookie/redaction、隔离 backend bearer proxy 和 loopback HTTP synthetic evidence；browser/host NOT_RUN |
+| Release security contracts | `PATH=.../node@24/bin:$PATH pnpm dsh test` | PASS 55/55 | 隔离 synthetic tar/文件夹；覆盖 digest、payload、bounded unpack、traversal/duplicate/permission/link/secret fail-closed、trust/provenance gate、token、HTTP auth→backend adapter、side-by-side、compat/action/operator/CLI/evidence/UAT contracts |
+| T3 auth contract | node@24 pnpm dsh test | PASS（auth 7 + HTTP adapter 3；aggregate 55/55） | token/session/CSRF/Cookie/redaction、隔离 backend bearer proxy 和 loopback HTTP synthetic evidence；browser/host NOT_RUN |
 | T4 trust contract | node@24 pnpm dsh test + workflow YAML parse | PASS | protected tag/publication binding and negative states；GitHub protected settings/OIDC NOT_RUN |
 | T5 state/reconcile | node@24 pnpm dsh test + pnpm dsh reconcile synthetic fixture | PASS | crash/resume, durable RECONCILE journal and stale-lock owner checks；remote CI/杭州 resume NOT_RUN |
 | T6 promotion contract | node@24 pnpm dsh test + `bash -n deploy/wsl/*.sh` | PASS | owner/restart-dependency binding, mismatch guard, checksum/evidence input binding and wrapper syntax；systemd/readiness/host NOT_RUN |
 | T7 compatibility contract | node@24 pnpm dsh test | PASS | synthetic runtime/session/WAL-like fixture；real WAL/WSL2/ABI NOT_RUN |
 | T8 action contract | node@24 pnpm dsh test | PASS | action_id/actor/idempotency/type-bound terminal receipt/conflict/unknown synthetic matrix；server/browser wiring NOT_RUN |
-| T9 operator/capacity contract | node@24 pnpm dsh test | PASS | owned ephemeral probe, negative SHA and 100-request/10-concurrency scheduler fixture；route/15m/real HTTP backpressure NOT_RUN |
+| T9 operator/capacity contract | node@24 pnpm dsh test | PASS | owned ephemeral probe, negative SHA and 100-request/10-concurrency loopback HTTP fixture PASS；route/15m/杭州 real HTTP backpressure NOT_RUN |
 | T10 CLI/workflow contract | node@24 pnpm dsh test + `dsh --help|--version` | PASS | stable command/exit contract and config precedence synthetic evidence；cold checkout/TTHW/CI/Hangzhou NOT_RUN |
 | T11 evidence/HTML policy contract | node@24 pnpm dsh test | PASS | canonical/redaction/schema/digest verifier and CSP/sandbox fail-closed matrix；public response/browser/retention NOT_RUN |
 | T12 UAT/operations contract | node@24 pnpm dsh test | PASS | seven explicit groups, RACI, metrics ledger and cleanup receipt validator；现场 UAT/owner assignment/stable window NOT_RUN |

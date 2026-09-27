@@ -1,4 +1,4 @@
-export async function runBackpressure({ requests = 100, concurrency = 10, task = async () => ({ status: 200 }), synthetic = false } = {}) {
+export async function runBackpressure({ requests = 100, concurrency = 10, task = async () => ({ status: 200 }), synthetic = false, evidenceScope = null } = {}) {
   if (!Number.isInteger(requests) || requests < 1 || !Number.isInteger(concurrency) || concurrency < 1) throw new Error('BACKPRESSURE_ARGUMENTS_INVALID');
   let cursor = 0; let active = 0; let peak = 0; const results = [];
   await new Promise((resolve, reject) => {
@@ -11,5 +11,6 @@ export async function runBackpressure({ requests = 100, concurrency = 10, task =
     };
     pump();
   });
-  return { status: synthetic ? 'PASS' : 'NOT_RUN', evidence_scope: synthetic ? 'synthetic-scheduler' : 'real-http-required', ...(synthetic ? {} : { reason: 'scheduler-only synthetic; real HTTP service evidence is required' }), requests, concurrency, peak, results };
+  const scope = evidenceScope ?? (synthetic ? 'synthetic-scheduler' : 'real-http-required');
+  return { status: synthetic ? 'PASS' : 'NOT_RUN', evidence_scope: scope, ...(synthetic ? {} : { reason: 'scheduler-only synthetic; real HTTP service evidence is required' }), requests, concurrency, peak, results };
 }

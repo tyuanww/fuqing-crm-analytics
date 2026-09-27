@@ -35,3 +35,23 @@ test('operator none stays PARTIAL, SLI needs 15 minutes and scheduler is not HTT
   assert.equal(live.status, 'NOT_RUN');
   assert.equal(live.evidence_scope, 'real-http-required');
 });
+
+test('backpressure can exercise an owned loopback HTTP service', async () => {
+  const server = createServer((req, res) => { res.writeHead(200, { 'content-type': 'text/plain' }); res.end('ok'); });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const url = `http://127.0.0.1:${server.address().port}/health`;
+  try {
+    const result = await runBackpressure({
+      requests: 100,
+      concurrency: 10,
+      synthetic: true,
+      evidenceScope: 'synthetic-loopback-http',
+      task: async () => ({ status: (await fetch(url)).status }),
+    });
+    assert.equal(result.status, 'PASS');
+    assert.equal(result.evidence_scope, 'synthetic-loopback-http');
+    assert.equal(result.peak, 10);
+    assert.equal(result.results.length, 100);
+    assert.ok(result.results.every(item => item.status === 200));
+  } finally { await new Promise(resolve => server.close(resolve)); }
+});
