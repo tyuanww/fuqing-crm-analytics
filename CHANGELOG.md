@@ -9,7 +9,7 @@
 - T8 terminal receipt 绑定 action actor/idempotency/type；T9 增加 100 请求/10 并发 scheduler backpressure synthetic PASS，同时将真实 HTTP backpressure 保持为 NOT_RUN。
 - 第二轮 OCR delegate review 修复 promotion/rollback 的 owner 与 restart dependency 复核、SHA256SUMS/evidence index 绑定、fixture-only secret scan 豁免，以及 release workflow 的 timeout/concurrency；当前 release tests 56/56。
 - 固定上游 `477b4f42…` 后用隔离 Python 3.14 venv（`duckdb==1.5.3`）完成 dsh-dev 85/85、B0 Python 609、runtime 295、插件 710（709 PASS/1 SKIP）与 clean rebuild；此前宿主 `duckdb==1.5.5` 漂移仅记录为环境失败，不再作为当前证据。
-- 重新生成并接收 clean HEAD artifact `dsh-0.18.0.1-goal-t3t12-review6-final`；source map 与测试构建残留按 allowlist 明确排除，manifest 固定 source SHA、entries 和 tarball digest。
+- 重新生成并接收 clean HEAD artifact `dsh-0.18.0.1-goal-t3t12-review7-final`；source map 与测试构建残留按 allowlist 明确排除，manifest 固定 source SHA、entries 和 tarball digest。
 
 ### Verification
 
