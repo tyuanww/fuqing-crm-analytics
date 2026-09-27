@@ -12,7 +12,7 @@
 | T7 compatibility contract | node@24 pnpm dsh test | PASS | synthetic runtime/session/WAL-like fixture；real WAL/WSL2/ABI NOT_RUN |
 | T8 action contract | node@24 pnpm dsh test | PASS | action_id/actor/idempotency/type-bound terminal receipt/conflict/unknown synthetic matrix；server/browser wiring NOT_RUN |
 | T9 operator/capacity contract | node@24 pnpm dsh test | PASS | owned ephemeral probe, negative SHA and 100-request/10-concurrency loopback HTTP fixture PASS；route/15m/杭州 real HTTP backpressure NOT_RUN |
-| T10 CLI/workflow contract | node@24 pnpm dsh test + `dsh --help|--version|verify` | PASS | stable command/exit contract、synthetic verify scope and config precedence evidence；cold checkout/TTHW/CI/Hangzhou NOT_RUN |
+| T10 CLI/workflow contract | node@24 pnpm dsh test + `dsh --help|--version|verify` | PASS | stable command/exit contract、synthetic verify scope and config precedence evidence；clean git-archive checkout CLI doctor/version/verify PASS（230ms，verify exit 2 为门禁预期）；full TTHW/CI/Hangzhou NOT_RUN |
 | T11 evidence/HTML policy contract | node@24 pnpm dsh test | PASS | canonical/redaction/schema/digest verifier and CSP/sandbox fail-closed matrix；public response/browser/retention NOT_RUN |
 | T12 UAT/operations contract | node@24 pnpm dsh test | PASS | seven explicit groups, RACI, metrics ledger and cleanup receipt validator；现场 UAT/owner assignment/stable window NOT_RUN |
 | DSH dev contracts | pinned upstream `477b4f42…` + `node@24 --test scripts/dsh-dev/*.test.mjs` | PASS（85/85） | `.context/dsh-b0/upstream-0.1.7-rc.2` 由 `pipeline --prepare` 建立并校验；未启动常驻服务 |
