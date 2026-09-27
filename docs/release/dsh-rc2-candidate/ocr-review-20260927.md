@@ -22,6 +22,6 @@
 
 ## 当前审查结论
 
-上述发现已在当前工作树修复；定向 promotion/auth/operator 测试通过，完整 `pnpm dsh test` 当前为 55/55。未发现仍需阻断本地候选的 Critical/High 代码问题。
+上述发现已在当前工作树修复；定向 promotion/auth/operator 测试通过，完整 `pnpm dsh test` 当前为 56/56。未发现仍需阻断本地候选的 Critical/High 代码问题。
 
 外部门禁仍不属于本轮本地审查可替代的证据：GitHub protected tag/OIDC attestation、WSL2 冷验证、真实 HTTP SLI/backpressure、浏览器 UAT 与杭州 service/route 切换继续保持 `NOT_RUN/PARTIAL`。

@@ -8,6 +8,7 @@ import { buildPreManifest, packArtifact, receiveArtifact, sha256 } from './relea
 import { assertSchema } from './release/schema.mjs';
 import { verifyPayload } from './release/artifact.mjs';
 import { readState, reconcileState, resume } from './release/state.mjs';
+import { runLocalVerification } from './release/local-verify.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const releaseEvidence = join(root, '.context/release-evidence');
@@ -121,12 +122,13 @@ async function receive(args) {
 async function test() { const tests = readdirSync(join(root, 'scripts/release')).filter(name => name.endsWith('.test.mjs')).map(name => join('scripts/release', name)); return execFileSync(process.execPath, ['--test', ...tests], { cwd: root, encoding: 'utf8', stdio: 'inherit' }); }
 async function verify() {
   await doctor();
-  console.log('DSH_VERIFY_COMPAT NOT_RUN reason=rc1/rc2 runtime and WAL fixtures are not connected');
+  const local = await runLocalVerification();
+  console.log(`DSH_VERIFY_COMPAT ${local.compatibility.status} scope=${local.compatibility.scope} real_wal=${local.compatibility.wsl2}`);
   console.log('DSH_VERIFY_SLI NOT_RUN reason=no 15-minute HTTP probe evidence');
-  console.log('DSH_VERIFY_BACKPRESSURE NOT_RUN reason=no real HTTP service under test');
-  console.log('DSH_VERIFY_STATUS RELEASE_BLOCKED reason=one or more required verification layers are NOT_RUN');
-  // `verify` is a release gate: a healthy local doctor is not evidence that
-  // runtime/WAL, HTTP SLI, or backpressure checks passed.
+  console.log(`DSH_VERIFY_BACKPRESSURE ${local.backpressure.status} scope=${local.backpressure.evidence_scope} real_http=NOT_RUN`);
+  console.log('DSH_VERIFY_STATUS RELEASE_BLOCKED reason=15-minute SLI, WSL2 cold runtime/WAL, and host HTTP evidence remain NOT_RUN');
+  // `verify` is a release gate: synthetic local evidence does not substitute
+  // for the target WSL2 runtime/WAL, 15-minute SLI, or host HTTP evidence.
   process.exitCode = 2;
 }
 async function main() {
