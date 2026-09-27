@@ -11,7 +11,7 @@ import { QUERY_TOOL_NAME } from '../src/query-model.mjs';
 import { QUERY_CANCEL_COPY } from '../src/query-cancel.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(root, '../../.context/dsh-b0/upstream'));
+const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(root, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
 const webReq = createRequire(join(upstream, 'apps/web/package.json'));
 const React = webReq('react');
 const { createRoot } = webReq('react-dom/client');

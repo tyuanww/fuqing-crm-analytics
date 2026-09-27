@@ -27,8 +27,11 @@ function hidePreviewBadge(root) {
   }
 }
 
-export function applyCompetitionBrandSurface(doc = globalThis.document) {
+export function applyCompetitionBrandSurface(doc = globalThis.document, { override = false } = {}) {
   if (!doc || !doc.documentElement) return { title: '', greeting: false };
+  if (!override) {
+    return { title: doc.title || '', greeting: false };
+  }
   doc.title = PRODUCT_NAME;
   const icon = doc.querySelector('link[rel="icon"], link[rel="shortcut icon"]');
   if (icon) icon.setAttribute('href', '/b0/brand/mark.svg');
@@ -46,10 +49,11 @@ export function applyCompetitionBrandSurface(doc = globalThis.document) {
   };
 }
 
-export function watchCompetitionBrandSurface(doc = globalThis.document) {
-  applyCompetitionBrandSurface(doc);
+export function watchCompetitionBrandSurface(doc = globalThis.document, options = {}) {
+  applyCompetitionBrandSurface(doc, options);
+  if (options.override !== true) return () => {};
   if (typeof MutationObserver !== 'function' || !doc?.body) return () => {};
-  const observer = new MutationObserver(() => applyCompetitionBrandSurface(doc));
+  const observer = new MutationObserver(() => applyCompetitionBrandSurface(doc, options));
   observer.observe(doc.body, { subtree: true, childList: true, characterData: true });
   return () => observer.disconnect();
 }

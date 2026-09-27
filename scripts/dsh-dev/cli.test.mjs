@@ -203,10 +203,10 @@ test('serve args pin loopback and refuse foreign ports', () => {
   assert.equal(options.host, '127.0.0.1');
   assert.equal(parseServeArgs(['--plugin', 'off', '--web-port', '14327']).webPort, COMPETITION_WEB_PORT);
   assert.equal(parseServeArgs(['--plugin', 'on', '--web-port', '6677']).webPort, DEV_WEB_PORT);
-  assert.equal(parseServeArgs(['--plugin', 'on', '--web-port', '6677']).shineBrand, 'on');
+  assert.equal(parseServeArgs(['--plugin', 'on', '--web-port', '6677']).shineBrand, 'off');
   assert.equal(parseServeArgs(['--plugin', 'on', '--shine-brand', 'off', '--web-port', '6677']).shineBrand, 'off');
   assert.equal(
-    parseServeArgs(['--plugin', 'on', '--shine-brand-path', '/abs/shine-brand', '--web-port', '6677']).shineBrandPath,
+    parseServeArgs(['--plugin', 'on', '--shine-brand', 'on', '--shine-brand-path', '/abs/shine-brand', '--web-port', '6677']).shineBrandPath,
     '/abs/shine-brand',
   );
   assert.throws(() => parseServeArgs(['--plugin', 'on', '--shine-brand', 'off', '--shine-brand-path', '/abs/shine-brand']));
@@ -239,7 +239,7 @@ test('launch URL helper requires a tokenized loopback URL and redacts it', () =>
 });
 
 test('pinned SHA matches toolchain contract constant', () => {
-  assert.equal(PINNED_SHA, '46a7f68b0922371ce7144b668b90e377d8e799f4');
+  assert.equal(PINNED_SHA, '477b4f420553e8a52c2fbccc464d7561b239c443');
 });
 
 

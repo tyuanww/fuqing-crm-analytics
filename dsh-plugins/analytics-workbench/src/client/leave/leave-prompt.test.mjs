@@ -15,7 +15,7 @@ import { createLeaveCoordinator } from './leave-coordinator.mjs';
 import { librarySnapshot as snap, libraryPreview as draft } from '../../../test/helpers/library-board-fixtures.mjs';
 
 const plugin = fileURLToPath(new URL('../../..', import.meta.url));
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream'));
+const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
 const web = createRequire(join(upstream, 'apps/web/package.json'));
 const React = web('react'), { createRoot } = web('react-dom/client');
 const act = React.act ?? web('react-dom/test-utils').act;

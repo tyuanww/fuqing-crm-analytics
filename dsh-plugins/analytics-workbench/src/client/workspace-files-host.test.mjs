@@ -6,7 +6,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { join, resolve } from 'node:path';
 
 const plugin = fileURLToPath(new URL('../..', import.meta.url));
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream'));
+const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
 const web = createRequire(join(upstream, 'apps/web/package.json'));
 const outfile = join(plugin, 'lib/test-workspace-files-host.mjs');
 await createRequire(web.resolve('vite/package.json'))('esbuild').build({

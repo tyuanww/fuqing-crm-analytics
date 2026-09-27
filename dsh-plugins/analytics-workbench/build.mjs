@@ -6,7 +6,7 @@ import { bindToolchain, checkTypes } from './toolchain.mjs';
 import { packSkills } from './pack-skills.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
-const upstream = resolve(process.argv[2] ?? join(root, '../../.context/dsh-b0/upstream'));
+const upstream = resolve(process.argv[2] ?? join(root, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
 const manifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
 const { build, compiler } = await bindToolchain(root, upstream, process.argv[3] && resolve(process.argv[3]));
 const skillPackage = await packSkills(root);

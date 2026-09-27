@@ -162,8 +162,8 @@ async function inspectUpstream(explicit) {
   const candidates = [
     explicit,
     process.env.DSH_DEV_UPSTREAM,
-    join(repoRoot, '.context/dsh-b0/upstream'),
-    resolve(repoRoot, '../../fuqing-crm-analytics/.context/dsh-b0/upstream'),
+    join(repoRoot, '.context/dsh-b0/upstream-0.1.7-rc.2'),
+    resolve(repoRoot, '../../fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2'),
   ].filter(value => typeof value === 'string' && value.length > 0);
   const tried = [];
   for (const candidate of candidates) {

@@ -8,7 +8,7 @@ import { createCockpitComposition } from './cockpit-composition.mjs';
 import { createLibraryBoardClient } from './library-board-client.mjs';
 import { librarySnapshot, ok, listOf } from '../../test/helpers/library-board-fixtures.mjs';
 const plugin = fileURLToPath(new URL('../..', import.meta.url));
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream'));
+const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
 const web = createRequire(join(upstream, 'apps/web/package.json'));
 const React = web('react'), { createRoot } = web('react-dom/client'), { act } = React;
 const { JSDOM } = createRequire(join(upstream, 'node_modules/jsdom/package.json'))('jsdom');

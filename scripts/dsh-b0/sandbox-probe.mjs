@@ -199,7 +199,7 @@ async function parentProbe() {
   const fixture = { root: fs.realpathSync(fixtureRoot) };
   const native = process.argv.includes('--native');
   const preserveHome = process.argv.includes('--preserve-home');
-  if (native) fixture.upstream = fs.realpathSync(path.join(b0Root, 'upstream'));
+  if (native) fixture.upstream = fs.realpathSync(path.join(b0Root, 'upstream-0.1.7-rc.2'));
   for (const key of ['state', 'workspace', 'tmp', 'readonly', 'config', 'denied']) {
     fixture[key] = path.join(fixture.root, key);
     fs.mkdirSync(fixture[key], { mode: 0o700 });

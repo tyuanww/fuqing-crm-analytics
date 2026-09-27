@@ -25,7 +25,7 @@ test('brand surface sets DESIGN title and replaces upstream greeting', () => {
       return node;
     },
   };
-  const out = applyCompetitionBrandSurface(doc);
+  const out = applyCompetitionBrandSurface(doc, { override: true });
   assert.equal(out.title, PRODUCT_NAME);
   assert.equal(doc.title, PRODUCT_NAME);
   assert.equal(h1.textContent, PRODUCT_HEADLINE);
@@ -56,11 +56,18 @@ test('brand surface hides 预览版 and does not rewrite nested headline hosts',
       return { rel: '', href: '', setAttribute() {} };
     },
   };
-  const out = applyCompetitionBrandSurface(doc);
+  const out = applyCompetitionBrandSurface(doc, { override: true });
   assert.equal(nested.textContent, 'Into the Unknown');
   assert.equal(leaf.textContent, PRODUCT_HEADLINE);
   assert.equal(badge.hidden, '');
   assert.equal(badge.style.display, 'none');
   assert.equal(out.greeting, true);
   assert.equal(icon.href, '/b0/brand/mark.svg');
+});
+
+test('brand surface preserves native chrome unless explicitly enabled', () => {
+  const doc = { documentElement: {}, title: 'Native DSH' };
+  const out = applyCompetitionBrandSurface(doc);
+  assert.equal(out.title, 'Native DSH');
+  assert.equal(doc.title, 'Native DSH');
 });

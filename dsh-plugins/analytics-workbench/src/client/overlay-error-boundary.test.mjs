@@ -7,7 +7,7 @@ import { OverlayErrorBoundary } from './overlay-error-boundary.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const plugin = resolve(here, '../..');
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream'));
+const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
 const webReq = createRequire(join(upstream, 'apps/web/package.json'));
 const React = webReq('react');
 const { createRoot } = webReq('react-dom/client');

@@ -9,7 +9,7 @@ import { resolve, join } from 'node:path';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const repo = resolve(root, '../..');
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(repo, '.context/dsh-b0/upstream'));
+const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(repo, '.context/dsh-b0/upstream-0.1.7-rc.2'));
 const webRequire = createRequire(join(upstream, 'apps/web/package.json'));
 const source = await readFile(join(root, 'lib/client.js'), 'utf8');
 

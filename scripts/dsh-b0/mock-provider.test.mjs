@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { namespaceToolCallLine, startB0MockProvider } from './mock-provider.mjs';
 import { resolve, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? fileURLToPath(new URL('../../.context/dsh-b0/upstream', import.meta.url)));
+const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? fileURLToPath(new URL('../../.context/dsh-b0/upstream-0.1.7-rc.2', import.meta.url)));
 const { startMockLlmServer } = await import(pathToFileURL(join(upstream, 'packages/test-support/llm-mock-server/lib/index.js')).href);
 
 test('fixture namespaces only request-scoped tool identity, keeping arguments and facts unchanged', () => {

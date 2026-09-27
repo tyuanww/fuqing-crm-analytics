@@ -8,7 +8,7 @@ import { SavedAnalysisView } from '../lib/views/saved-analysis-view.js';
 import { CockpitView } from '../lib/views/cockpit-view.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(root, '../../.context/dsh-b0/upstream'));
+const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(root, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
 const require = createRequire(join(upstream, 'apps/web/package.json'));
 const React = require('react');
 const { renderToStaticMarkup } = require('react-dom/server');

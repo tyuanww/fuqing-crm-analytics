@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "release_tag", "status", "source_sha", "started_at", "completed_at"],
+  "properties": {
+    "schema_version": {"type": "string", "enum": ["promotion-receipt/v1"]},
+    "release_tag": {"type": "string"},
+    "status": {"type": "string", "enum": ["PREPARED", "ACTIVE", "ROLLED_BACK", "FAILED"]},
+    "source_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "started_at": {"type": "string"},
+    "completed_at": {"type": "string"}
+  }
+}

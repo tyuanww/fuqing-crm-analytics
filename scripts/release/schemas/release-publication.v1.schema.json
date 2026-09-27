@@ -1,0 +1,52 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "release_tag",
+    "status",
+    "assets",
+    "draft",
+    "immutable",
+    "source_sha",
+    "reviewed_sha",
+    "protected_ref",
+    "ref_target_sha",
+    "approval_ref",
+    "manifest_sha256",
+    "sha256sums_sha256",
+    "evidence_index_sha256"
+  ],
+  "properties": {
+    "schema_version": {"type": "string", "enum": ["release-publication/v1"]},
+    "release_tag": {"type": "string", "pattern": "^dsh-[A-Za-z0-9._-]+$"},
+    "status": {"type": "string", "enum": ["DRAFT", "PUBLISHED_VERIFIED", "RELEASED_UNVERIFIED"]},
+    "draft": {"type": "boolean"},
+    "immutable": {"type": "boolean"},
+    "source_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "reviewed_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "protected_ref": {"type": "string", "pattern": "^refs/tags/dsh-[A-Za-z0-9._-]+$"},
+    "ref_target_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "approval_ref": {"type": "string", "pattern": "^run:[0-9]+$"},
+    "manifest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "sha256sums_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "evidence_index_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "provenance_status": {"type": "string", "enum": ["VERIFIED", "NOT_AVAILABLE"]},
+    "release_url": {"type": "string", "minLength": 1},
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "sha256"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "id": {"type": ["string", "number"]},
+          "url": {"type": "string"},
+          "size": {"type": "integer", "minimum": 1},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    }
+  }
+}

@@ -50,7 +50,7 @@ async function main() {
   const sequence = JSON.parse(await readFile(join(probeDir, 'sequence.json'), 'utf8'));
   assert.deepEqual(sequence, [...QUERY_FAULT_PROBE_SEQUENCE]);
   assert.ok(!sequence.includes('illegal_facts'));
-  const upstream = join(root, '.context/dsh-b0/upstream');
+  const upstream = join(root, '.context/dsh-b0/upstream-0.1.7-rc.2');
   const { flockSync } = createRequire(join(upstream, 'packages/session/session-persistence-jsonl/package.json'))('fs-ext');
   const { scanZstdFrames } = await import(pathToFileURL(join(upstream, 'packages/session/session-persistence-jsonl/lib/types/zstd.js')).href);
   const db = new DatabaseSync(join(runtime, 'kernel/runs.sqlite3'), { readOnly: true });

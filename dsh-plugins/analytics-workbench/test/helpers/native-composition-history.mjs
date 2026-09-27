@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { relative, resolve, join } from 'node:path';
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? fileURLToPath(new URL('../../../../.context/dsh-b0/upstream', import.meta.url)));
+const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? fileURLToPath(new URL('../../../../.context/dsh-b0/upstream-0.1.7-rc.2', import.meta.url)));
 const { createUserMessage } = await import(pathToFileURL(join(upstream, 'packages/llm/llm/lib/index.js')).href);
 
 export const name = 'composition-fixture-history';

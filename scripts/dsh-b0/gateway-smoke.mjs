@@ -25,7 +25,7 @@ const { launchUrl } = JSON.parse(await readFile(join(runtime, 'gateway-private.j
 assert.equal(new URL(launchUrl).origin, 'http://127.0.0.1:4318', 'Business credential must target the gateway only');
 const origin = 'http://127.0.0.1:4318';
 const nativeOrigin = 'http://127.0.0.1:4317';
-const gatewayRequire = createRequire(join(b0, 'upstream/packages/api/gateway/package.json'));
+const gatewayRequire = createRequire(join(b0, 'upstream-0.1.7-rc.2/packages/api/gateway/package.json'));
 const { WebSocket } = gatewayRequire('ws');
 const reportPath = join(runtime, `gateway-smoke-report-${Date.now()}.json`);
 const sentinel = 'B0_SYNTHETIC_SECRET_MUST_NOT_ECHO';

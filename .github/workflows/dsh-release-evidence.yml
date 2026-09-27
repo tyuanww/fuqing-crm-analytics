@@ -1,0 +1,76 @@
+name: DSH rc2 release evidence
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        required: true
+        type: string
+      reviewed_sha:
+        required: true
+        type: string
+      approval_ref:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+  artifact-metadata: write
+
+concurrency:
+  group: dsh-release-evidence-${{ github.ref }}-${{ inputs.release_tag }}
+  cancel-in-progress: false
+
+jobs:
+  evidence:
+    runs-on: ubuntu-24.04
+    environment: dsh-release-evidence
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ inputs.release_tag }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '24.19.0'
+          package-manager-cache: false
+      - name: Check zstd release dependency
+        run: |
+          set -euo pipefail
+          command -v zstd
+          zstd --version
+      - name: Refuse unreviewed or dirty source
+        env:
+          REVIEWED_SHA: ${{ inputs.reviewed_sha }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          APPROVAL_REF: ${{ inputs.approval_ref }}
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^dsh-[A-Za-z0-9._-]+$ ]]
+          [[ "$REVIEWED_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$APPROVAL_REF" =~ ^run:[0-9]+$ ]]
+          git show-ref --verify --quiet "refs/tags/$RELEASE_TAG"
+          test "$(git rev-parse "$RELEASE_TAG^{commit}")" = "$REVIEWED_SHA"
+          test "$(git rev-list -n1 "$RELEASE_TAG")" = "$REVIEWED_SHA"
+          test "$(git rev-parse HEAD)" = "$REVIEWED_SHA"
+          git merge-base --is-ancestor origin/main "$REVIEWED_SHA"
+          test -z "$(git status --porcelain --untracked-files=all)"
+      - name: Build synthetic release evidence only
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: node scripts/dsh.mjs release --offline --tag "$RELEASE_TAG"
+      - name: Verify isolated release contracts
+        run: node scripts/dsh.mjs test
+      - name: Attest the exact candidate artifact
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
+        with:
+          subject-path: .context/release-evidence/${{ inputs.release_tag }}/${{ inputs.release_tag }}.tar.zst
+      - name: Upload evidence (never publish)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: dsh-rc2-evidence-${{ inputs.release_tag }}
+          path: .context/release-evidence/${{ inputs.release_tag }}/

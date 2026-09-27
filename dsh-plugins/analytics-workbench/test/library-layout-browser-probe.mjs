@@ -36,7 +36,7 @@ try {
   faultProxy = failures ? await mountBoardFaultProxy(serviceOrigin) : null;
   process.env.COMPETITION_HTTP_BASE = faultProxy?.origin ?? serviceOrigin;
   process.env.COMPETITION_HTTP_TOKEN = 'isolated-native-board-integration-token';
-  const web = createRequire(join(root, '.context/dsh-b0/upstream/apps/web/package.json'));
+  const web = createRequire(join(root, '.context/dsh-b0/upstream-0.1.7-rc.2/apps/web/package.json'));
   const esbuild = createRequire(web.resolve('vite/package.json'))('esbuild');
   const output = await esbuild.build({ absWorkingDir: plugin, entryPoints: ['test/helpers/library-browser-entry.tsx'],
     bundle: true, write: false, format: 'esm', platform: 'browser', target: 'es2022', jsx: 'automatic',

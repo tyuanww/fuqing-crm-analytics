@@ -12,9 +12,12 @@ function BrandName() {
 }
 
 export function apply(ctx: Context): void {
-  ctx.effect(() => watchCompetitionBrandSurface(), 'shine-brand-surface');
-  ctx.slots.inject('sidebar.brand.name', () => ctx.slots.register(
-    { name: 'sidebar.brand.name', priority: -10 },
-    BrandName,
-  ));
+  const override = (globalThis as { __SHINE_BRAND_OVERRIDE__?: boolean }).__SHINE_BRAND_OVERRIDE__ === true;
+  ctx.effect(() => watchCompetitionBrandSurface(globalThis.document, { override }), 'shine-brand-surface');
+  if (override) {
+    ctx.slots.inject('sidebar.brand.name', () => ctx.slots.register(
+      { name: 'sidebar.brand.name', priority: -10 },
+      BrandName,
+    ));
+  }
 }

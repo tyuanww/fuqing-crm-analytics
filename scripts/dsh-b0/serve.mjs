@@ -24,7 +24,7 @@ import { firstPurchaseMockScript } from './first-purchase-scenario.mjs';
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const b0 = join(root, '.context/dsh-b0');
-const upstream = process.env.B0_BUILD_UPSTREAM ?? join(b0, 'upstream');
+const upstream = process.env.B0_BUILD_UPSTREAM ?? join(b0, 'upstream-0.1.7-rc.2');
 const args = process.argv.slice(2);
 const portIndex = args.indexOf('--port-base');
 const portBase = portIndex < 0 ? 4315 : Number(args.splice(portIndex, 2)[1]);
@@ -49,7 +49,7 @@ assert.ok(pythonFlag === '--python' && python && isAbsolute(python) && !extra.le
 assert.equal(process.platform, 'darwin', 'The native verification runner requires the macOS Seatbelt profile');
 assert.equal(Number(process.versions.node.split('.')[0]), 24, 'Use Node 24');
 const plugin = await realpath(pluginArg ?? join(root, 'dsh-plugins/analytics-workbench'));
-const pinned = '46a7f68b0922371ce7144b668b90e377d8e799f4';
+const pinned = '477b4f420553e8a52c2fbccc464d7561b239c443';
 const webPort = ports.web;
 const mockPort = ports.mock;
 const binary = process.execPath;

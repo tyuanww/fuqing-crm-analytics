@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { resolve, join } from 'node:path';
 import { seedCompositionHistory, apply } from './helpers/native-composition-history.mjs';
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? fileURLToPath(new URL('../../../.context/dsh-b0/upstream', import.meta.url)));
+const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? fileURLToPath(new URL('../../../.context/dsh-b0/upstream-0.1.7-rc.2', import.meta.url)));
 const { Session, SessionId, SESSION_FORMAT_VERSION } = await import(pathToFileURL(join(upstream, 'packages/core/session/lib/index.js')).href);
 
 const cwd = fileURLToPath(new URL('../../../.context/checks/ai-cockpit-goal/native-composition-runtime-test/workspace', import.meta.url));

@@ -7,10 +7,15 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { resolve, join } from 'node:path';
 
 const plugin = fileURLToPath(new URL('..', import.meta.url));
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream'));
+const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
 const pin = JSON.parse(await readFile(join(plugin, 'toolchain.json'), 'utf8'));
-assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], { cwd: upstream, encoding: 'utf8' }).trim(), pin.upstream_sha);
+const upstreamSha = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: upstream, encoding: 'utf8' }).trim();
 const { SlotCore } = await import(pathToFileURL(join(upstream, 'packages/client/ui-slots/lib/index.js')).href);
+
+function requireMaterializedUpstream() {
+  assert.equal(upstreamSha, pin.upstream_sha, `local checkout must be materialized at ${pin.upstream_sha}`);
+  return true;
+}
 
 function fixture() {
   const core = new SlotCore();
@@ -28,6 +33,7 @@ function fixture() {
 }
 
 test('pinned core refuses a cockpit declaring the already-owned native conversation child', () => {
+  requireMaterializedUpstream();
   const core = fixture();
   const nativeEntries = core.entries('main.conversation');
   assert.throws(() => core.register({ name: 'main', key: 'cockpit', children: {
@@ -38,6 +44,7 @@ test('pinned core refuses a cockpit declaring the already-owned native conversat
 });
 
 test('rightbar is a single occupied seat: priority override shadows rather than appends native content', () => {
+  requireMaterializedUpstream();
   const core = fixture();
   const native = core.entriesOfSlot('rightbar')[0];
   assert.throws(() => core.register({ name: 'rightbar' }, () => null), /already has/);
@@ -49,6 +56,7 @@ test('rightbar is a single occupied seat: priority override shadows rather than 
 });
 
 test('additive business overlay can unload without removing the native main or rightbar', () => {
+  requireMaterializedUpstream();
   const core = fixture();
   const native = core.entriesOfSlot('main')[0];
   const right = core.entriesOfSlot('rightbar')[0];

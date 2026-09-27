@@ -24,7 +24,7 @@ const { sessionId } = JSON.parse(await readFile(join(runtime, 'refs.json'), 'utf
 const exchange = await fetch(launchUrl, { redirect: 'manual', signal: AbortSignal.timeout(3000) });
 const cookie = exchange.headers.getSetCookie().map(value => value.split(';')[0]).join('; ');
 assert.ok(cookie);
-const { WebSocket } = createRequire(join(root, '.context/dsh-b0/upstream/packages/api/gateway/package.json'))('ws');
+const { WebSocket } = createRequire(join(root, '.context/dsh-b0/upstream-0.1.7-rc.2/packages/api/gateway/package.json'))('ws');
 const report = { schema_version: 'b0-current-permission-probe/v1', started_at: new Date().toISOString(),
   tests: [], valid_prompts_sent: 0, restored_kernel: false, status: 'RUNNING' };
 let socket, paused = false;
