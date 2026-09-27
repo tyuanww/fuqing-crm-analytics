@@ -57,7 +57,7 @@ jobs:
           test "$(git rev-parse "$RELEASE_TAG^{commit}")" = "$REVIEWED_SHA"
           test "$(git rev-list -n1 "$RELEASE_TAG")" = "$REVIEWED_SHA"
           test "$(git rev-parse HEAD)" = "$REVIEWED_SHA"
-          git merge-base --is-ancestor "$REVIEWED_SHA" origin/main
+          git merge-base --is-ancestor origin/main "$REVIEWED_SHA"
           test -z "$(git status --porcelain --untracked-files=all)"
       - name: Build synthetic release evidence only
         env:
