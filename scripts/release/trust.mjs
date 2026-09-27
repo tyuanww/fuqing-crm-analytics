@@ -76,8 +76,24 @@ export async function verifyGitHubEnvironmentApproval({ repository, approvalRef,
     if (String(run.id) !== runId || run.path !== '.github/workflows/dsh-release-evidence.yml' || run.event !== 'workflow_dispatch' || run.head_sha !== sourceSha || run.head_branch !== releaseTag || run.status !== 'completed' || run.conclusion !== 'success') return { status: 'NOT_AVAILABLE', reason: 'approval run is not the successful protected-tag evidence run' };
     const jobs = await ghJson(gh, [`repos/${repository}/actions/runs/${runId}/jobs?per_page=100`, '--header', 'Accept: application/vnd.github+json']);
     const evidence = (jobs.jobs ?? []).find(job => job.name === 'evidence');
-    if (!evidence || evidence.conclusion !== 'success' || evidence.environment?.name !== 'dsh-release-evidence') return { status: 'NOT_AVAILABLE', reason: 'approval run did not complete in dsh-release-evidence environment' };
-    return { status: 'VERIFIED', approval_ref: approvalRef, release_tag: releaseTag, source_sha: sourceSha, environment: evidence.environment.name };
+    if (!evidence || evidence.conclusion !== 'success') return { status: 'NOT_AVAILABLE', reason: 'approval run evidence job did not succeed' };
+
+    // The Actions jobs API does not consistently include the environment
+    // object for a completed job. The deployment record is the authoritative
+    // fallback: it is created by the protected environment gate and binds the
+    // environment, tag ref, source SHA, and final success status together.
+    if (evidence.environment?.name === 'dsh-release-evidence') {
+      return { status: 'VERIFIED', approval_ref: approvalRef, release_tag: releaseTag, source_sha: sourceSha, environment: evidence.environment.name, environment_source: 'job' };
+    }
+    const deployments = await ghJson(gh, [`repos/${repository}/deployments?sha=${sourceSha}&environment=dsh-release-evidence&per_page=100`, '--header', 'Accept: application/vnd.github+json']);
+    for (const deployment of deployments ?? []) {
+      if (deployment.environment !== 'dsh-release-evidence' || deployment.ref !== releaseTag || deployment.sha !== sourceSha) continue;
+      const statuses = await ghJson(gh, [`repos/${repository}/deployments/${deployment.id}/statuses?per_page=100`, '--header', 'Accept: application/vnd.github+json']);
+      if ((statuses ?? []).some(status => status.environment === 'dsh-release-evidence' && status.state === 'success')) {
+        return { status: 'VERIFIED', approval_ref: approvalRef, release_tag: releaseTag, source_sha: sourceSha, environment: 'dsh-release-evidence', environment_source: 'deployment' };
+      }
+    }
+    return { status: 'NOT_AVAILABLE', reason: 'approval run did not complete in dsh-release-evidence environment' };
   } catch (error) {
     return { status: 'NOT_AVAILABLE', reason: 'GitHub approval verification failed', detail: String(error?.message ?? error).slice(0, 240) };
   }
