@@ -14,4 +14,4 @@
 - 安装前还会解析并绑定 SHA256SUMS 中的 artifact/manifest 摘要，并校验 CI evidence index schema 与 release tag，避免只绑定文件本身摘要而不验证其内容。
 - 部署路径还会用 `gh api` 实时核对非 draft、immutable GitHub Release、tag target SHA 和每个本地 asset digest，并强制 `gh attestation verify --signer-workflow`；workflow 使用 `dsh-release-evidence` environment 和 main ancestor 校验，未配置审批或未执行 live 查询时保持阻断。
 
-验证：trust tests、publication schema 和 workflow YAML 均通过；aggregate release tests 57/57 PASS。GitHub Actions 已声明 OIDC/attestation 权限并对精确 tarball 生成 provenance，但远端 workflow、Sigstore 结果、GitHub protected tag/branch 仓库设置、真实 GitHub Release 和人工批准记录未执行，仍为 NOT_AVAILABLE/NOT_RUN；T4 保持 PARTIAL。
+验证：trust tests、publication schema 和 workflow YAML 均通过；aggregate release tests 62/62 PASS。GitHub Actions 已声明 OIDC/attestation 权限并对精确 tarball 生成 provenance，但远端 workflow、Sigstore 结果、GitHub protected tag/branch 仓库设置、真实 GitHub Release 和人工批准记录未执行，仍为 NOT_AVAILABLE/NOT_RUN；T4 保持 PARTIAL。
