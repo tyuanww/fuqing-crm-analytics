@@ -9,7 +9,7 @@ import { assertClean, scanTree } from './secret-scan.mjs';
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const scripts = join(root, 'scripts/release');
 const schemaDir = join(scripts, 'schemas');
-export const DEFAULT_ALLOWLIST = ['VERSION', 'package.json', 'pnpm-lock.yaml', 'scripts/dsh.mjs', 'README.md', 'CHANGELOG.md', 'AGENTS.md', 'DESIGN.md', 'Dockerfile', 'backend/', 'frontend-vue3/', 'config/', 'knowledge/', 'mcp_servers/', 'dsh-plugins/', 'scripts/dsh-b0/', 'scripts/dsh-dev/', 'scripts/release/', 'deploy/wsl/', 'docs/release/', 'docs/operating/'];
+export const DEFAULT_ALLOWLIST = ['VERSION', 'package.json', 'pnpm-lock.yaml', 'scripts/dsh.mjs', 'README.md', 'CHANGELOG.md', 'AGENTS.md', 'DESIGN.md', 'Dockerfile', '.github/workflows/dsh-release-evidence.yml', 'backend/', 'frontend-vue3/', 'config/', 'knowledge/', 'mcp_servers/', 'dsh-plugins/', 'scripts/dsh-b0/', 'scripts/dsh-dev/', 'scripts/release/', 'deploy/wsl/', 'docs/release/', 'docs/operating/'];
 export const DENYLIST_VERSION = 'release-denylist/v1';
 const DENY = /(^|\/)(?:\.env(?:\.|$)|\.npmrc(?:$|\/)|credentials?(?:[-_.]|$)|private[-_]?key(?:[-_.]|$)|cookie(?:[-_.]|$)|node_modules(?:\/|$)|__pycache__(?:\/|$)|\.pytest_cache(?:\/|$)|\.ruff_cache(?:\/|$)|\.git(?:\/|$)|.*\.duckdb(?:\.wal)?$|.*\.sqlite(?:-wal|-shm)?$|.*\.log$)/i;
 

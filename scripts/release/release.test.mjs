@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import { createHash } from 'node:crypto';
 import test from 'node:test';
-import { collectAllowlist, receiveArtifact } from './artifact.mjs';
+import { collectAllowlist, packArtifact, receiveArtifact } from './artifact.mjs';
 import { issueToken, consumeToken, tokenExchangeResponse } from './auth-contract.mjs';
 import { assertPublicationAssets, assertReleaseInputs, installRelease, activateRelease, rollbackRelease } from './promotion.mjs';
 import { beginAction, finishAction, receipt } from './action-contract.mjs';
@@ -90,6 +90,27 @@ test('token is one-time, origin-bound, rate-limited and session-backed', async (
 test('side-by-side install, activation and duplicate protection retain source identity', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); const releaseRoot=join(root,'releases-root'); const installed=await installRelease({artifact:archive,manifestPath:m,releaseRoot,tag:'dsh-test',offline:true}); assert.equal(installed.status,'PREPARED'); const active=await activateRelease({releaseRoot,tag:'dsh-test',sourceSha:'a'.repeat(40)}); assert.equal(active.status,'ACTIVE'); await assert.rejects(()=>installRelease({artifact:archive,manifestPath:m,releaseRoot,tag:'dsh-test',offline:true}),/RELEASE_EXISTS/); });
 test('install rejects the unverified default path', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); await assert.rejects(() => installRelease({artifact:archive,manifestPath:m,releaseRoot:join(root,'release-root'),tag:'dsh-test'}), /RELEASE_TRUST_INPUTS_REQUIRED/); });
 test('release evidence workflow accepts a candidate descendant of main', async () => { const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-evidence.yml'), 'utf8'); assert.match(workflow, /git merge-base --is-ancestor origin\/main "\$REVIEWED_SHA"/); });
+test('runtime artifact allowlist carries the release evidence workflow', async () => {
+  const allowlist = await collectAllowlist(process.cwd());
+  assert.ok(allowlist.includes('.github/workflows/dsh-release-evidence.yml'));
+});
+test('packed runtime artifact contains the release evidence workflow', async () => {
+  const root = await fixture();
+  const workflow = join(root, '.github/workflows/dsh-release-evidence.yml');
+  await mkdir(join(root, '.github/workflows'), { recursive: true });
+  await writeFile(join(root, 'VERSION'), '0.18.0.2\n');
+  await writeFile(workflow, 'name: evidence\n');
+  await writeFile(join(root, '.github/workflows/other.yml'), 'name: other\n');
+  const allowlist = await collectAllowlist(root);
+  const archive = join(root, 'runtime.tar.zst');
+  await packArtifact({ rootDir: root, allowlist, output: archive });
+  const names = execFileSync('python3', ['-c', `import io,subprocess,sys,tarfile
+raw=subprocess.run(['zstd','-q','-d','-c',sys.argv[1]],check=True,capture_output=True).stdout
+print('\\n'.join(member.name for member in tarfile.open(fileobj=io.BytesIO(raw),mode='r:')))
+`, archive], { encoding: 'utf8' }).trim().split('\n');
+  assert.ok(names.includes('.github/workflows/dsh-release-evidence.yml'));
+  assert.ok(!names.includes('.github/workflows/other.yml'));
+});
 
 test('promotion binds service owner and cannot activate for another owner', async () => {
   const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); const releaseRoot=join(root,'release-root');

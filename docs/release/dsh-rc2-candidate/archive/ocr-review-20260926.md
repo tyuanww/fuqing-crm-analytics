@@ -123,7 +123,7 @@
 - `deploy/wsl/activate-release.sh` (added)
 - `deploy/wsl/install-release.sh` (added)
 - `deploy/wsl/rollback-release.sh` (added)
-- `docs/release/dsh-rc2-candidate/baseline.v1.json` (added)
+- `docs/release/dsh-rc2-candidate/archive/baseline.v1.json` (archived)
 - `package.json` (added)
 - `pnpm-lock.yaml` (added)
 - `scripts/dsh.mjs` (added)

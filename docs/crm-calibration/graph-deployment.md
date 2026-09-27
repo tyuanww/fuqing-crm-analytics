@@ -26,7 +26,7 @@ Neo4j 连接仅限 HTTP 回环地址。当前社区版部署使用本机既有�
 
 ## 配置与复现
 
-使用现有固定 Node 24、Python 3.14+，以及 analytics-workbench `toolchain.json` 钉住的 DSH 0.1.7-rc.1。现役 6677 已加载 RC1；旧 alpha2 checkout 仅用于回退。先按[插件说明](../../dsh-plugins/crm-knowledge/README.md)构建和验证，再准备私有配置。以下是结构示例，ID和路径须使用实际部署值；不把凭据写入工具参数或公开仓库：
+使用现有固定 Node 24、Python 3.14+，以及 analytics-workbench `toolchain.json` 钉住的候选 DSH 0.1.7-rc.2。杭州现役 6677 仍加载 RC1；候选切换未执行，旧 alpha2 checkout 仅用于回退。先按[插件说明](../../dsh-plugins/crm-knowledge/README.md)构建和验证，再准备私有配置。以下是结构示例，ID和路径须使用实际部署值；不把凭据写入工具参数或公开仓库：
 
 ```json
 {

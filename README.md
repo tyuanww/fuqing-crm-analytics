@@ -2,7 +2,7 @@
 
 当前提交、版本和现役见 [STATUS](./STATUS.md)。目录、端口和检索见 [维护地图](./docs/operating/maintainer-map.md)。对话生成 HTML 的步骤见 [从对话生成 HTML 驾驶舱](./docs/operating/cockpit-native-html.md)。产品仍 PARTIAL。
 
-> 当前运行（2026-09-26）：公共 `main @ 47f49616`、VERSION `0.18.0.0` 已合入；Mac 是开发/测试端，杭州 Windows + WSL 是批准 SHA 的生产端。DSH 0.1.7-rc.1、CRM、WeKnora 和 `www/app/page/board/learn.tyuan.chat` 已按 [STATUS](./STATUS.md) 验证；完整生产浏览器旅程与本人 UAT 仍开放。
+> 当前候选（2026-09-27）：release 分支产品 VERSION `0.18.0.2`，DSH `0.1.7-rc.2`，固定 upstream `477b4f42`；PR #63 尚未合并。Mac 是开发/测试端，杭州 Windows + WSL 仍运行未切换的 RC1 checkout，候选 artifact 尚未安装。当前运行事实以 [STATUS](./STATUS.md) 为准；完整生产浏览器旅程与本人 UAT 仍开放。
 
 下方9月5–10日的决策、端口和候选追加保留为历史记录，不作为当前服务或Git HEAD。
 
@@ -79,7 +79,7 @@ PYTHONPATH="$(pwd)" /Users/yourname/homebrew/bin/python3 scripts/run_etl.py --up
 #### 3. 即席查询 CLI（`/ad-hoc-query` skill, Sprint 171 v2.0）
 
 ```bash
-# 9 个子命令: daily-gsv / yoy-battle / channel-slice /
+# 10 个子命令: daily-gsv / yoy-battle / channel-slice /
 #   two-year-overview / new-old-customer / rfm-repurchase /
 #   top-n / export-excel / dq-report / ask NL 路由
 PYTHONPATH="$(pwd)" python3 scripts/ad_hoc_query.py <cmd> [args]
@@ -121,6 +121,9 @@ cd frontend-vue3 && npx playwright test                   # E2E
 |---|---|
 | [`AGENTS.md`](./AGENTS.md) | **AI 行为规则 / 授权 / 架构 / 分级验证** |
 | [`docs/operating/ship.md`](./docs/operating/ship.md) | 历史交付记录；当前 Git 动作按 AGENTS.md |
+| [`docs/operating/dsh-rc2-quickstart.md`](./docs/operating/dsh-rc2-quickstart.md) | rc2 artifact 准备教程 |
+| [`docs/reference/dsh-rc2-release-artifact.md`](./docs/reference/dsh-rc2-release-artifact.md) | dsh release/receive/verify 命令与 artifact 合同 |
+| [`docs/architecture/dsh-release-trust.md`](./docs/architecture/dsh-release-trust.md) | immutable artifact、allowlist 和回退设计说明 |
 | [`docs/operating/automation.md`](./docs/operating/automation.md) | 当前本地 hooks/Skills 边界与历史自动化记录 |
 | [`docs/operating/ci-defense-playbook.md`](./docs/operating/ci-defense-playbook.md) | CI 失败排查决策树 |
 | [`docs/architecture/AI_SAFETY_NET.md`](./docs/architecture/AI_SAFETY_NET.md) | L1 lint + L2 AST + L3 FilterBuilder 3 层防线 |

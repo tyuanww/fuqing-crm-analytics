@@ -1,7 +1,7 @@
 # Docs 索引
 
 > 按 lifecycle 分层，新人约 5 分钟找到入口。  
-> **最后更新**: 2026-09-26。当前提交只看根目录 [STATUS.md](../STATUS.md) 和 [HANDOVER.md](../HANDOVER.md)。Mac 负责开发/测试，杭州 Windows + WSL 负责批准 SHA 的生产运行。DSH 钉 **0.1.7-rc.1**（`46a7f68b`），6677、CRM、WeKnora 及五个公开入口的现役事实见 STATUS。下面的黑客松与校准记录是档案，不是默认入口。
+> **最后更新**: 2026-09-27。当前提交只看根目录 [STATUS.md](../STATUS.md) 和 [HANDOVER.md](../HANDOVER.md)。Mac 负责开发/测试，杭州 Windows + WSL 只运行批准 SHA。候选 DSH 钉 **0.1.7-rc.2**（`477b4f42`），杭州 6677 仍是未切换的 RC1 现役；端口和公开入口事实见 STATUS。黑客松与校准记录是档案，不是默认入口。
 
 ## 黑客松当前实现
 
@@ -22,6 +22,9 @@
 | [`operating/mac-hangzhou-git-workflow.md`](./operating/mac-hangzhou-git-workflow.md) | Mac 开发、GitHub PR、杭州 WSL 生产部署的唯一链路 |
 | [`operating/cockpit-native-html.md`](./operating/cockpit-native-html.md) | 从对话点「生成驾驶舱」或说生成 HTML，到可编辑驾驶舱和右侧产物 |
 | [`operating/cockpit-ai-edit.md`](./operating/cockpit-ai-edit.md) | 产物组织、全屏、静态 HTML 手动 / AI 选区编辑与 HTTP 合同 |
+| [`operating/dsh-rc2-quickstart.md`](./operating/dsh-rc2-quickstart.md) | rc2 artifact 准备教程 |
+| [`./reference/dsh-rc2-release-artifact.md`](./reference/dsh-rc2-release-artifact.md) | release/receive/verify 命令与 artifact 合同 |
+| [`architecture/dsh-release-trust.md`](./architecture/dsh-release-trust.md) | immutable artifact、allowlist 和回退设计说明 |
 | [`hackathon/S3-ACCEPTANCE-2026-09-15.md`](./hackathon/S3-ACCEPTANCE-2026-09-15.md) | 9-15 指定 Figma 矩阵与正式壳 B3 代表路径（PARTIAL，不升版本） |
 | [`hackathon/S3-CROSS-MATRIX-2026-09-15.md`](./hackathon/S3-CROSS-MATRIX-2026-09-15.md) | 9-15 正式壳核心分支双视口交叉；v14 账本，v15 为 SETUP_FAILED |
 | [`hackathon/MISSION-API.md`](./hackathon/MISSION-API.md) | Mission、问数、审批与 `DRAFT_EXPORT` 契约 |
@@ -64,6 +67,9 @@ fuqing-crm-analytics/docs/
 │   ├── clickhouse-poc-decision-memo.md
 │   ├── l4.74-duckdb-postgresql16-decision-memo.md
 │   └── l4_91_excel_export_ssot.md
+│
+├── reference/                          命令与接口参考
+│   └── dsh-rc2-release-artifact.md
 │
 ├── business/                          业务口径 SSOT
 │   └── RFM_DEFINITIONS.md
