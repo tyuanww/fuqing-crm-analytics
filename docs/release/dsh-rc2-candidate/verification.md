@@ -20,7 +20,7 @@
 | Python lint | `python3.14 -m ruff check`（受影响模块） | PASS | 未修改真实数据 |
 | Diff/syntax | `git diff --check`、Node24 `--check`、JSON parse | PASS | 当前 candidate HEAD 的 clean 状态与 SHA 以 `STATUS.md` 和最终 artifact manifest 为准；auth HTTP adapter、stale-lock hardening 与证据文档已提交 |
 | Artifact build/receive | 旧 `dsh-0.12.0.0-candidate7` | REJECTED / SUPERSEDED | 旧包不含当前安全修复，且不代表 reviewed clean commit；不得接收 |
-| Current offline artifact | `pnpm dsh release --offline --tag dsh-0.18.0.1-goal-t3t12-review9-final` + `pnpm dsh receive` | PASS | clean HEAD、entries、tarball SHA-256 以 `.context/release-evidence/dsh-0.18.0.1-goal-t3t12-review9-final/release-manifest.v1.json` 为唯一来源；source maps/test-build leftovers excluded；receive 目录为一次性 synthetic 临时目录；internal-only，未创建 draft/tag/release |
+| Current offline artifact | `pnpm dsh release --offline --tag dsh-0.18.0.1-goal-t3t12-review10-final` + `pnpm dsh receive` | PASS | clean HEAD、entries、tarball SHA-256 以 `.context/release-evidence/dsh-0.18.0.1-goal-t3t12-review10-final/release-manifest.v1.json` 为唯一来源；source maps/test-build leftovers excluded；receive 目录为一次性 synthetic 临时目录；internal-only，未创建 draft/tag/release |
 | Doctor/verify | `node@24 scripts/dsh.mjs doctor|verify` | doctor PASS；verify compat/backpressure synthetic PASS，SLI NOT_RUN，整体 RELEASE_BLOCKED | synthetic 结果明确标记 scope；未伪造 rc1/rc2 WAL、15 分钟 HTTP 或杭州真实 HTTP 证据 |
 | B0 | `node@24 scripts/dsh-b0/pipeline.mjs --check --python .context/dsh-b0/venv/bin/python` | PASS（609 Python；295 runtime；710 plugin，709 PASS/1 SKIP；clean rebuild） | 隔离 venv 固定 `duckdb==1.5.3`；未读取真实 DuckDB；SKIP 仅为独立 native registry integration 缺少现场运行条件 |
 | WSL2/operator/UAT | 现场入口 | NOT_RUN/PARTIAL | 需要杭州事实、route/operator gate 和授权 |
