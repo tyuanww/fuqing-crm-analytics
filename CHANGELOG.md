@@ -2,7 +2,7 @@
 
 ### Fixed
 
-- Release bundles now carry the release-evidence workflow, so the receive-side trust check can run from the same immutable artifact used for verification and deployment.
+- Release bundles now retain the release-evidence workflow alongside the reviewed source used to build and verify the immutable artifact.
 - Added a packed-artifact regression check that confirms the workflow is included while unrelated workflow files remain excluded.
 
 ## [0.18.0.1-rc2-candidate] - 2026-09-26

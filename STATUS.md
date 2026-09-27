@@ -1,7 +1,7 @@
 # 项目状态 (Project Status)
 > 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。本页是当前运行与交付边界的 SSOT。
 
-## 当前快照（2026-09-27，DSH 0.1.7-rc.2 / VERSION 0.18.0.1，main 合并后）
+## 当前快照（2026-09-27，DSH 0.1.7-rc.2 / VERSION 0.18.0.2，release artifact allowlist 修复分支）
 
 | 项 | 状态 |
 |---|---|
@@ -18,7 +18,7 @@
 
 - rc2 候选验证账本见 [verification-20260927](docs/release/dsh-rc2-candidate/verification.md)；T2–T12 gate 见 `docs/release/dsh-rc2-candidate/`；固定上游 checkout、dsh-dev、B0 clean rebuild、PR #61 CI 和合并后的 main CI（run `36300591922`）均通过，main/tag protection 与 evidence environment 已配置，杭州现役旧 checkout 的 loopback SLI 已有 60/60 证据；真实模型、131GB DuckDB、独立 reviewer/OIDC attestation、GitHub Release、rc2 冷验证、杭州 route/重启和真实 HTTP backpressure 仍 `NOT_RUN`。
 - 本机候选 worktree 不含 DuckDB/WAL 文件；这里只使用 synthetic fixture 和隔离小库，杭州生产数据状态不由本地文件推断。杭州 artifact 临时 receive 因主机缺少 `zstd` 阻断，未安装依赖或写入现役目录。
-- 当前 merged-main internal artifact 证据使用 provisional tag `dsh-0.18.0.1-main-00823ff5`；source SHA `00823ff533b4cc32861cc70e3f8bda5d374f3b14`、app tarball SHA-256 `b11c4b43436eb06f1821c1891121b690e5488effa0c75d421f285e051c8fbf35`、manifest SHA-256 `4642f4614d81b6f2f8777485793b20f2c140eb3523efa46475831fe4398d36d7`、entries `1676`；pinned upstream `477b4f42` git-archive tarball SHA-256 `ddc0cb7b74c938e097f918f44e88e67a83bdde555db18f49cb7a3c9740744e32` 已在隔离 `/tmp` 生成，尚未上传或绑定 publication sidecar；manifest 以 `.context/release-evidence/dsh-0.18.0.1-main-00823ff5/release-manifest.v1.json` 为唯一来源；接收目录为一次性 synthetic 临时目录，未创建 draft/tag/release。
+- 基线 merged-main internal artifact 证据仍使用 provisional tag `dsh-0.18.0.1-main-00823ff5`；source SHA `00823ff533b4cc32861cc70e3f8bda5d374f3b14`、app tarball SHA-256 `b11c4b43436eb06f1821c1891121b690e5488effa0c75d421f285e051c8fbf35`、manifest SHA-256 `4642f4614d81b6f2f8777485793b20f2c140eb3523efa46475831fe4398d36d7`、entries `1676`；pinned upstream `477b4f42` git-archive tarball SHA-256 `ddc0cb7b74c938e097f918f44e88e67a83bdde555db18f49cb7a3c9740744e32` 已在隔离 `/tmp` 生成，尚未上传或绑定 publication sidecar；manifest 以 `.context/release-evidence/dsh-0.18.0.1-main-00823ff5/release-manifest.v1.json` 为唯一来源；接收目录为一次性 synthetic 临时目录，未创建 draft/tag/release。`0.18.0.2` 仅表示本分支的 allowlist 修复版本，尚未生成新的发布 artifact。
 
 - Artifact Inbox 数据层、自由 HTML 候选保存、原生 `write/edit/present` 接收、轮询和单卡片局部 patch 已合入并在杭州运行。
 - PR #61 与合并后 main CI 已完成；Tailscale SSH host preflight 与 CRM+DSH/page loopback healthcheck 已通过；杭州 CRM/DSH/WeKnora 切换、Cloudflare 入口和安全收尾仍未执行；本地与生产均不改 DSH 上游。
