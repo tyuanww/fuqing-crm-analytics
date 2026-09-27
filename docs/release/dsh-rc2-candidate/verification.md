@@ -4,8 +4,8 @@
 
 | 检查 | 命令 | 结果 | 证据/限制 |
 |---|---|---|---|
-| Release security contracts | `PATH=.../node@24/bin:$PATH pnpm dsh test` | PASS 62/62 | 隔离 synthetic tar/文件夹；覆盖 digest、payload、bounded unpack、traversal/duplicate/permission/link/secret fail-closed、trust/provenance/live-release gate、token、HTTP auth→backend adapter、side-by-side/retry/rollback/concurrency、compat/action/operator/CLI/evidence/UAT contracts |
-| T3 auth contract | node@24 pnpm dsh test | PASS（auth 7 + HTTP adapter 3；aggregate 62/62） | token/session/CSRF/Cookie/redaction、隔离 backend bearer proxy 和 loopback HTTP synthetic evidence；browser/host NOT_RUN |
+| Release security contracts | `PATH=.../node@24/bin:$PATH pnpm dsh test` | PASS 65/65 | 隔离 synthetic tar/文件夹；覆盖 digest、payload、bounded unpack、traversal/duplicate/permission/link/secret fail-closed、trust/provenance/live-release gate、token、HTTP auth→backend adapter、side-by-side/retry/rollback/concurrency、compat/action/operator/CLI/evidence/UAT contracts |
+| T3 auth contract | node@24 pnpm dsh test | PASS（auth 7 + HTTP adapter 3；aggregate 65/65） | token/session/CSRF/Cookie/redaction、隔离 backend bearer proxy 和 loopback HTTP synthetic evidence；browser/host NOT_RUN |
 | T4 trust contract | node@24 pnpm dsh test + workflow YAML parse + PR #61 CI | PASS（本地合同与远端 CI） | protected tag/publication binding、live GitHub Release/asset/ref verifier and signer-workflow requirement；GitHub protected branch/tag API 返回 404，OIDC attestation、人工批准、真实 GitHub Release NOT_RUN |
 | T5 state/reconcile | node@24 pnpm dsh test + pnpm dsh reconcile synthetic fixture | PASS | crash/resume, durable RECONCILE journal and stale-lock owner checks；remote CI/杭州 resume NOT_RUN |
 | T6 promotion contract | node@24 pnpm dsh test + `bash -n deploy/wsl/*.sh` | PASS | owner/restart-dependency binding, mismatch guard, checksum/evidence input binding, retry/rollback receipts, promotion lock and wrapper syntax；systemd/readiness/host NOT_RUN |

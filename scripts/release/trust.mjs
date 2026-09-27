@@ -6,6 +6,7 @@ import { assertSchema } from './schema.mjs';
 
 const TAG = /^dsh-[A-Za-z0-9._-]+$/;
 const SHA40 = /^[0-9a-f]{40}$/;
+const APPROVAL_REF = /^run:(\d+)$/;
 const execFile = promisify(execFileCallback);
 
 /** Public trust verification is intentionally fail-closed until a pinned Sigstore verifier is configured. */
@@ -16,7 +17,7 @@ export async function verifyReviewedCommit({ sourceSha, reviewedSha, provenanceP
   const signature = await readFile(signaturePath, 'utf8');
   if (provenance.subject_sha !== sourceSha || !signature.length) throw new Error('TRUST_PROVENANCE_MISMATCH');
   // A non-empty text file is not a signature. Never promote this path to PASS.
-  return { status: 'NOT_AVAILABLE', reason: 'signature verification is not implemented; refusing unsigned/unchecked trust', source_sha: sourceSha };
+  return { status: 'NOT_AVAILABLE', reason: 'signature verifier is unavailable; refusing unsigned/unchecked trust', source_sha: sourceSha };
 }
 
 /** Verify a GitHub artifact-attestation bundle without trusting sidecar text. */
@@ -66,15 +67,32 @@ export async function verifyGitHubRelease({ repository, releaseTag, sourceSha, e
   }
 }
 
+/** Verify that approval_ref names a successful protected environment run for this exact tag SHA. */
+export async function verifyGitHubEnvironmentApproval({ repository, approvalRef, releaseTag, sourceSha, gh = 'gh' } = {}) {
+  if (typeof repository !== 'string' || !/^[^/\s]+\/[^/\s]+$/.test(repository) || !APPROVAL_REF.test(approvalRef) || !TAG.test(releaseTag) || !SHA40.test(sourceSha)) return { status: 'NOT_AVAILABLE', reason: 'repository, run approval_ref, release_tag and source_sha are required' };
+  const runId = approvalRef.slice(4);
+  try {
+    const run = await ghJson(gh, [`repos/${repository}/actions/runs/${runId}`, '--header', 'Accept: application/vnd.github+json']);
+    if (String(run.id) !== runId || run.path !== '.github/workflows/dsh-release-evidence.yml' || run.event !== 'workflow_dispatch' || run.head_sha !== sourceSha || run.head_branch !== releaseTag || run.status !== 'completed' || run.conclusion !== 'success') return { status: 'NOT_AVAILABLE', reason: 'approval run is not the successful protected-tag evidence run' };
+    const jobs = await ghJson(gh, [`repos/${repository}/actions/runs/${runId}/jobs?per_page=100`, '--header', 'Accept: application/vnd.github+json']);
+    const evidence = (jobs.jobs ?? []).find(job => job.name === 'evidence');
+    if (!evidence || evidence.conclusion !== 'success' || evidence.environment?.name !== 'dsh-release-evidence') return { status: 'NOT_AVAILABLE', reason: 'approval run did not complete in dsh-release-evidence environment' };
+    return { status: 'VERIFIED', approval_ref: approvalRef, release_tag: releaseTag, source_sha: sourceSha, environment: evidence.environment.name };
+  } catch (error) {
+    return { status: 'NOT_AVAILABLE', reason: 'GitHub approval verification failed', detail: String(error?.message ?? error).slice(0, 240) };
+  }
+}
+
 export function assertDeploymentTrust(result) {
   if (!result || result.status !== 'PUBLICATION_RECORD_VALID' || result.provenance_status !== 'VERIFIED') throw new Error('RELEASE_PROVENANCE_NOT_VERIFIED');
+  if (result.approval_status !== 'VERIFIED') throw new Error('RELEASE_APPROVAL_NOT_VERIFIED');
   return result;
 }
 
 export function verifyProtectedTag({ releaseTag, protectedRef, sourceSha, reviewedSha, refTargetSha, approvalRef }) {
   if (!TAG.test(releaseTag) || protectedRef !== 'refs/tags/' + releaseTag) throw new Error('TRUST_PROTECTED_REF_INVALID');
   if (![sourceSha, reviewedSha, refTargetSha].every(value => SHA40.test(value)) || sourceSha !== reviewedSha || sourceSha !== refTargetSha) throw new Error('TRUST_REVIEWED_SHA_MISMATCH');
-  if (typeof approvalRef !== 'string' || approvalRef.trim() === '') throw new Error('TRUST_APPROVAL_REQUIRED');
+  if (typeof approvalRef !== 'string' || !APPROVAL_REF.test(approvalRef)) throw new Error('TRUST_APPROVAL_REQUIRED');
   return { status: 'PROTECTED_TAG_REVIEWED', release_tag: releaseTag, protected_ref: protectedRef, source_sha: sourceSha, approval_ref: approvalRef };
 }
 

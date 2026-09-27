@@ -4,6 +4,7 @@ import { dirname } from 'node:path';
 
 const SENSITIVE = /token|secret|password|cookie|authorization|api[_-]?key|session|csrf/i;
 const MAX_TOKEN_RECORDS = 10_000;
+const MAX_SESSION_RECORDS = 10_000;
 const MAX_RATE_BUCKETS = 1_024;
 function hash(value) { return createHash('sha256').update(value).digest('hex'); }
 async function locked(path, fn) {
@@ -71,6 +72,8 @@ export async function consumeToken(path, raw, { origin, allowedOrigins = [], rat
     const session = randomBytes(32).toString('base64url');
     const csrf = randomBytes(32).toString('base64url');
     db.sessions ??= {};
+    for (const [key, record] of Object.entries(db.sessions)) if (!record || Number(record.expires_at) <= now) delete db.sessions[key];
+    if (Object.keys(db.sessions).length >= MAX_SESSION_RECORDS) throw new Error('AUTH_STATE_LIMIT');
     db.sessions[hash(session)] = { created_at: now, expires_at: now + 8 * 60 * 60_000, origin, csrf_hash: hash(csrf) };
     await save(path, db);
     return { authenticated: true, cookie: cookieHeader(session, { secure }), csrf };

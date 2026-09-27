@@ -52,7 +52,7 @@ jobs:
           set -euo pipefail
           [[ "$RELEASE_TAG" =~ ^dsh-[A-Za-z0-9._-]+$ ]]
           [[ "$REVIEWED_SHA" =~ ^[0-9a-f]{40}$ ]]
-          test -n "$APPROVAL_REF"
+          [[ "$APPROVAL_REF" =~ ^run:[0-9]+$ ]]
           git show-ref --verify --quiet "refs/tags/$RELEASE_TAG"
           test "$(git rev-parse "$RELEASE_TAG^{commit}")" = "$REVIEWED_SHA"
           test "$(git rev-list -n1 "$RELEASE_TAG")" = "$REVIEWED_SHA"

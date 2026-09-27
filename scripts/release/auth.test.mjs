@@ -91,3 +91,14 @@ test('auth state prunes expired tokens and bounds origin rate buckets', async ()
   assert.equal(state.tokens.dead, undefined);
   assert.ok(Object.keys(state.rate_limits).length <= 1024);
 });
+
+test('auth state prunes expired sessions before enforcing the session cap', async () => {
+  const dir = await fixture(); const path = join(dir, 'tokens.json');
+  await writeFile(path, JSON.stringify({ schema_version: 'one-time-token/v1', tokens: {}, rate_limits: {}, sessions: { expired: { expires_at: 1 } } }));
+  const token = await issueToken(path, { now: 10_000 });
+  const result = await consumeToken(path, token, { origin: web, allowedOrigins: [web], now: 10_000 });
+  assert.equal(result.authenticated, true);
+  const state = JSON.parse(await readFile(path, 'utf8'));
+  assert.equal(state.sessions.expired, undefined);
+  assert.equal(Object.keys(state.sessions).length, 1);
+});

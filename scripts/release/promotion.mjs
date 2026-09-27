@@ -4,7 +4,7 @@ import { basename, dirname, join, resolve } from 'node:path';
 import { receiveArtifact, sha256 } from './artifact.mjs';
 import { recordEvent } from './state.mjs';
 import { assertSchema } from './schema.mjs';
-import { assertDeploymentTrust, verifyAttestationBundle, verifyGitHubRelease, verifyPublicationRecord } from './trust.mjs';
+import { assertDeploymentTrust, verifyAttestationBundle, verifyGitHubEnvironmentApproval, verifyGitHubRelease, verifyPublicationRecord } from './trust.mjs';
 import { fileURLToPath } from 'node:url';
 
 const TAG = /^dsh-[A-Za-z0-9._-]+$/;
@@ -22,6 +22,10 @@ async function writeFileAtomic(path, value) { const temp = `${path}.tmp-${proces
 async function writeMarker(dir, value) { const path = join(dir, 'release-marker.json'); const handle = await open(path, 'wx', 0o600); try { await handle.writeFile(JSON.stringify(value, null, 2) + '\n'); await handle.sync(); } finally { await handle.close(); } }
 async function readJson(path) { return JSON.parse(await readFile(path, 'utf8')); }
 
+function processIsAlive(pid) {
+  if (!Number.isInteger(pid) || pid <= 0) return false;
+  try { process.kill(pid, 0); return true; } catch (error) { return error.code === 'EPERM'; }
+}
 async function withPromotionLock(root, fn) {
   await mkdir(root, { recursive: true, mode: 0o700 });
   const lock = join(root, '.promotion.lock');
@@ -32,8 +36,18 @@ async function withPromotionLock(root, fn) {
     await handle.writeFile(JSON.stringify({ pid: process.pid, nonce }) + '\n');
     await handle.sync();
   } catch (error) {
-    if (error.code === 'EEXIST') throw new Error('PROMOTION_LOCKED');
-    throw error;
+    if (error.code !== 'EEXIST') throw error;
+    try {
+      const owner = JSON.parse(await readFile(lock, 'utf8'));
+      if (processIsAlive(owner.pid)) throw new Error('PROMOTION_LOCKED');
+      await rm(lock);
+      handle = await open(lock, 'wx', 0o600);
+      await handle.writeFile(JSON.stringify({ pid: process.pid, nonce }) + '\n');
+      await handle.sync();
+    } catch (retryError) {
+      if (retryError.message === 'PROMOTION_LOCKED') throw retryError;
+      throw new Error('PROMOTION_LOCKED');
+    }
   } finally { await handle?.close(); }
   try { return await fn(); } finally {
     try {
@@ -70,12 +84,13 @@ export async function assertReleaseInputs({ artifact, manifestPath, sumsPath, ev
   return true;
 }
 
-export async function installRelease({ artifact, manifestPath, releaseRoot, tag, statePath, owner = 'shinemage-dsh', restartDependency = 'shinemage-dsh.service', publicationPath = null, sumsPath = null, evidenceIndexPath = null, attestationBundlePath = null, repository = null, sourceRef = null, signerWorkflow = null, gh = 'gh' }) {
+export async function installRelease({ artifact, manifestPath, releaseRoot, tag, statePath, owner = 'shinemage-dsh', restartDependency = 'shinemage-dsh.service', publicationPath = null, sumsPath = null, evidenceIndexPath = null, attestationBundlePath = null, repository = null, sourceRef = null, signerWorkflow = null, gh = 'gh', offline = false }) {
   assertTag(tag); const root = resolve(releaseRoot); const releases = join(root, 'releases'); const target = releasePath(root, tag);
   if (!OWNER.test(owner) || !OWNER.test(restartDependency)) throw new Error('RELEASE_OWNER_INVALID');
   await mkdir(releases, { recursive: true, mode: 0o700 });
   const manifest = await readJson(manifestPath);
   if (manifest.release_tag !== tag) throw new Error('RELEASE_TAG_MANIFEST_MISMATCH');
+  if (publicationPath === null && offline !== true) throw new Error('RELEASE_TRUST_INPUTS_REQUIRED');
   let trust = null;
   if (publicationPath !== null) {
     if (![sumsPath, evidenceIndexPath, attestationBundlePath, repository, sourceRef].every(value => typeof value === 'string' && value)) throw new Error('RELEASE_TRUST_INPUTS_REQUIRED');
@@ -96,6 +111,8 @@ export async function installRelease({ artifact, manifestPath, releaseRoot, tag,
       [basename(sumsPath), sha256sumsSha256],
       [basename(evidenceIndexPath), evidenceIndexSha256],
     ]);
+    const approval = await verifyGitHubEnvironmentApproval({ repository, approvalRef: publication.approval_ref, releaseTag: tag, sourceSha: manifest.source_sha, gh });
+    if (approval.status !== 'VERIFIED') throw new Error('RELEASE_APPROVAL_NOT_VERIFIED');
     const attestation = await verifyAttestationBundle({ artifactPath: artifact, bundlePath: attestationBundlePath, repository, sourceRef, signerWorkflow, gh });
     if (sourceRef !== `refs/tags/${tag}`) throw new Error('RELEASE_SOURCE_REF_MISMATCH');
     const liveAssets = [
@@ -106,7 +123,7 @@ export async function installRelease({ artifact, manifestPath, releaseRoot, tag,
     ];
     const liveRelease = await verifyGitHubRelease({ repository, releaseTag: tag, sourceSha: manifest.source_sha, expectedAssets: liveAssets, gh });
     if (attestation.status !== 'VERIFIED' || liveRelease.status !== 'VERIFIED') throw new Error('RELEASE_PROVENANCE_NOT_VERIFIED');
-    trust = { ...trust, provenance_status: 'VERIFIED', live_release_status: liveRelease.status };
+    trust = { ...trust, approval_status: approval.status, provenance_status: 'VERIFIED', live_release_status: liveRelease.status };
     assertDeploymentTrust(trust);
   }
   if (await access(target).then(() => true, () => false)) throw new Error('RELEASE_EXISTS');

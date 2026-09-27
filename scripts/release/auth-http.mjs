@@ -66,6 +66,7 @@ function createAuthServer({ statePath, allowedOrigins = [], secure = true, upstr
         method: request.method,
         origin,
         allowedOrigins,
+        rateKey: request.socket.remoteAddress ?? 'unknown-client',
         secure,
       });
       const headers = { ...result.headers, ...corsHeaders(origin), vary: 'Origin' };

@@ -27,7 +27,7 @@
     "reviewed_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
     "protected_ref": {"type": "string", "pattern": "^refs/tags/dsh-[A-Za-z0-9._-]+$"},
     "ref_target_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
-    "approval_ref": {"type": "string", "minLength": 1},
+    "approval_ref": {"type": "string", "pattern": "^run:[0-9]+$"},
     "manifest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "sha256sums_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "evidence_index_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},

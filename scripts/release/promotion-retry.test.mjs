@@ -80,3 +80,10 @@ test('simultaneous activation and rollback cannot corrupt current pointers', asy
   assert.ok([join(root, 'releases/dsh-a'), join(root, 'releases/dsh-b')].includes(target));
   assert.equal(execFileSync('readlink', [join(root, 'current')], { encoding: 'utf8' }).trim(), target);
 });
+
+test('dead promotion lock is recovered conservatively', async () => {
+  const root = await fixture();
+  await writeFile(join(root, '.promotion.lock'), JSON.stringify({ pid: 999999999, nonce: 'dead' }));
+  const result = await activate(root, 'dsh-a', shaA);
+  assert.equal(result.status, 'ACTIVE');
+});
