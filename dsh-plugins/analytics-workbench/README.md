@@ -1,8 +1,8 @@
 # DSH Analytics Workbench · B0 only
 
-固定上游：`deepseek-ai/deepseek-harness@46a7f68b0922371ce7144b668b90e377d8e799f4`（sdk `0.1.7-rc.1`，见 `toolchain.json`）。现役 6677 已加载该钉和本候选插件；旧 alpha2 checkout 保留用于回退。私有本地验证包，不发布 npm，不包含模型密钥或真实数据。2026-09-06 已接独立 FastAPI B0 任务内核、固定方法包与当前权限接缝；完整 B0 仍为 PARTIAL，见[当前收口报告](../../docs/hackathon/B0-LOCAL-CLOSEOUT-2026-09-06.md)。
+固定上游：`deepseek-ai/deepseek-harness@477b4f420553e8a52c2fbccc464d7561b239c443`（sdk `0.1.7-rc.2`，见 `toolchain.json`）。本候选插件按 rc2 构建；杭州现役 6677 仍加载旧 RC1 checkout，切换未执行，旧 alpha2 checkout 保留用于回退。私有本地验证包，不发布 npm，不包含模型密钥或真实数据。2026-09-06 已接独立 FastAPI B0 任务内核、固定方法包与当前权限接缝；完整 B0 仍为 PARTIAL，见[当前收口报告](../../docs/hackathon/B0-LOCAL-CLOSEOUT-2026-09-06.md)。
 
-> 当前交付（2026-09-26）：Artifact Inbox、原生 HTML 接收、候选预览/确认保存、局部 patch 已随公共 `main @ 47f49616` 合入，并在杭州生产 DSH RC1 上运行。Mac 负责开发与测试，杭州负责生产；合成浏览器旅程已通过，生产 DSH shell 旅程与本人 UAT 仍需单独验收。下方标注“候选／PR待创建”的段落属于历史记录，不代表当前 Git 状态。
+> 当前交付（2026-09-26）：Artifact Inbox、原生 HTML 接收、候选预览/确认保存、局部 patch 已随公共 main 合入；杭州现役 checkout 仍为 `47f49616`，公共 main 当前合并 commit 为 `00823ff5`，两者分别表示运行 checkout 与合并后的源代码。杭州生产仍运行 DSH RC1，rc2 候选尚未切换。Mac 负责开发与测试，合成浏览器旅程已通过，生产 DSH shell 旅程与本人 UAT 仍需单独验收。下方标注“候选／PR待创建”的段落属于历史记录，不代表当前 Git 状态。
 
 ## 整段说明编辑
 

@@ -632,10 +632,10 @@ Synthesized from CEO、DX、Design 与 Eng 审查的已接受发现。以下任�
   - Surfaced by: CEO/Eng — dirty archive 与 public main 无 merge-base，生产不能直接消费 archive
   - Files: `STATUS.md`, `docs/plans/`, `deploy/wsl/`, release evidence templates
   - Verify: clean checkout migration map；逐项记录 source commit、upstream SHA、VERSION、owner 与对应验证证据
-- [x] **T2 (P0, DONE — public receive gate; current aggregate 66/66 isolated tests)** — Artifact receive — 实现安全解包、allowlist/schema fail-closed、大小/条目/权限限制和最终 tarball 内容扫描
+- [x] **T2 (P0, DONE — public receive gate; current aggregate 68/68 isolated tests)** — Artifact receive — 实现安全解包、allowlist/schema fail-closed、大小/条目/权限限制和最终 tarball 内容扫描
   - Surfaced by: Eng — 拒绝绝对路径、`..`、symlink/hardlink/device、tarbomb、超大归档与恶意权限
   - Files: `scripts/release/`, `scripts/release/schemas/`, `deploy/wsl/`
-  - Verify: path traversal、duplicate、size mismatch、secret/denylist、symlink/权限和 scan failure fixtures 全部阻断；`pnpm dsh receive` 对 1663-entry synthetic artifact 实际接收通过；证据见 `docs/release/dsh-rc2-candidate/t2-receive-gate-20260926.md`
+  - Verify: path traversal、duplicate、size mismatch、secret/denylist、symlink/权限和 scan failure fixtures 全部阻断；`pnpm dsh receive` 对 synthetic artifact 的历史接收证据保留；当前 allowlist packed-artifact regression 已补入 release tests；历史证据见 `docs/release/dsh-rc2-candidate/archive/t2-receive-gate-20260926.md`
 - [ ] **T3 (P0, PARTIAL — loopback HTTP adapter synthetic PASS; browser/host NOT_RUN)** — Auth boundary — 完成一次性 token 的原子消费、TTL/限流、host-only Cookie、POST→303、CSRF/Origin 与日志脱敏
   - Surfaced by: Eng — CORS 不是授权；并发兑换、重放、Referer/history/access-log 泄露必须 fail-closed
   - Files: `deploy/wsl/`, page auth/token endpoint、auth tests、runbooks
@@ -722,7 +722,7 @@ Eng 的 native 与 outside 两路均完成，6/6 维度（artifact trust、auth/
 - Test Review: 已产出单元→集成→系统→浏览器→operator→chaos 分层矩阵，至少 13 个实施任务；真实模型、完整业务、131GB 归档、移动端均保持 `NOT_RUN/PARTIAL`。
 - Developer experience: Quickstart、doctor、统一 dsh CLI、offline/status/resume/why-blocked 已落地；Node24 冷环境与 TTHW 仍 `NOT_RUN/NOT_MEASURED`。
 - Plan state: `IMPLEMENTATION_PARTIAL / RELEASE_BLOCKED`。T1/T2/T13 文档、基线与本地 artifact receive gate 已完成；T3–T12 的本地合同/synthetic gate 已完成但仍为 PARTIAL，现场 UAT/host/远端 gate 未运行；证据见 `scripts/release/` 与 `docs/release/dsh-rc2-candidate/`。
-- Current execution: 已建立 public-main rc2 候选并完成 T1、T2、T13；T3–T12 的本地 contract/synthetic gate、WSL artifact 脚本、Quickstart、evidence verifier 和 operations ledger 已落地。GitHub push/tag/release、杭州重启/切换、Cloudflare route 和旧版本删除仍未执行。
+- Current execution: 已建立 public-main rc2 候选并完成 T1、T2、T13；当前 release 分支为 `codex/release-artifact-allowlist`，产品版本为 `0.18.0.2`，PR #63 等待审查；T3–T12 的本地 contract/synthetic gate、WSL artifact 脚本、Quickstart、evidence verifier 和 operations ledger 已落地。GitHub push/tag/release、杭州重启/切换、Cloudflare route 和旧版本删除仍未执行。
 
 ### Verdict
 
@@ -731,7 +731,7 @@ Eng 的 native 与 outside 两路均完成，6/6 维度（artifact trust、auth/
 **UNRESOLVED DECISIONS:**
 
 - 产品负责人是否在正式生产前纳入 OIDC provenance、签名、SBOM/CVE 与受保护 tag；未决定前默认只允许 internal-only/operator pilot。
-- 候选 public-main commit 已固定为 `ba2f887b1ec55f26d7cb3849d327072140abbd95`，产品 VERSION 已固定为 `0.18.0.1`（承接 public main `0.18.0.0` 的候选 patch）；发布 owner 和 reviewed commit 仍待 T4。
+- 候选 public-main merge commit 为 `00823ff533b4cc32861cc70e3f8bda5d374f3b14`，allowlist hotfix 产品 VERSION 为 `0.18.0.2`；PR #63 的 reviewed commit 和发布 owner 仍待 T4。
 - 杭州现场可用的 operator gate 是 Cloudflare Access、Tailscale、mTLS/IP allowlist 还是 `none`；`none` 时是否接受一次有明确授权的 unisolated cutover。
 - 杭州目标机的真实 WSL2、Docker、systemd、Node、Python、路径、权限和 Cloudflare route 事实；需由 T7/T9 的冷验证与负探针给出证据。
 - 一个 CRM operator pilot 的最小场景数、p95/5xx/auth/plugin/page 阈值及产品 owner 的真实业务 UAT 结论。

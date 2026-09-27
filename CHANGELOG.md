@@ -4,6 +4,7 @@
 
 - Release bundles now retain the release-evidence workflow alongside the reviewed source used to build and verify the immutable artifact.
 - Added a packed-artifact regression check that confirms the workflow is included while unrelated workflow files remain excluded.
+- This branch records the allowlist fix only; the `0.18.0.2` artifact is not yet generated or published.
 
 ## [0.18.0.1-rc2-candidate] - 2026-09-26
 

@@ -1,6 +1,6 @@
 # 交接说明（短表）
 
-> **最后更新**: 2026-09-26。公共 `main @ 47f49616`、VERSION **0.18.0.0**、PR #59 已合入，最新 main CI 通过；杭州现役已加载 DSH 0.1.7-rc.1、插件、CRM 和 WeKnora。见 [STATUS.md](STATUS.md)。
+> **最后更新**: 2026-09-27。公共 main 已合并到 `00823ff5`；当前 release 分支 VERSION **0.18.0.2**、PR #63 等待审查，allowlist hotfix 尚未生成 `.2` artifact。杭州现役仍是 DSH 0.1.7-rc.1 的旧 checkout，候选未切换。见 [STATUS.md](STATUS.md)。
 > 细节以代码与下列 SSOT 为准，**不要**在本文件堆 sprint 日记。
 
 ## 现役入口
@@ -18,7 +18,7 @@
 ## 代码与运行归属
 
 - Mac 公共 checkout：`/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics-public`，负责开发、测试、feature 分支、PR。
-- 杭州 Windows + WSL：`/srv/shinemage/src/fuqing-crm-analytics`，只检出批准 SHA 并运行生产服务；当前 CRM 固定 `47f49616`，DSH 上游固定 `46a7f68b`。
+- 杭州 Windows + WSL：`/srv/shinemage/src/fuqing-crm-analytics`，只检出批准 SHA 并运行生产服务；当前杭州 CRM checkout 固定 `47f49616`，现役 DSH 仍是 RC1；候选 DSH upstream 固定 `477b4f42`，未执行切换。
 - Mac 归档 checkout：`archive/tyuanww-main` 仅保留历史证据，不作为开发入口。
 - 常规 DSH 登录入口可使用 [`scripts/ops/open-hangzhou-dsh.sh`](scripts/ops/open-hangzhou-dsh.sh)；不要在仓库或聊天中打印 token，不使用 `--fresh` 覆盖生产会话。
 
