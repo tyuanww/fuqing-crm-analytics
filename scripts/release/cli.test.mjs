@@ -21,3 +21,12 @@ test('dsh rejects unknown commands with exit code 2', () => {
   assert.equal(result.status, 2);
   assert.match(result.stderr, /DSH_ERROR DSH_COMMAND_UNKNOWN unknown-command/);
 });
+
+test('dsh verify reports synthetic PASS scopes while retaining the release block', () => {
+  const result = spawnSync(process.execPath, [cli, 'verify'], { encoding: 'utf8', timeout: 30_000 });
+  assert.equal(result.status, 2);
+  assert.match(result.stdout, /DSH_VERIFY_COMPAT PASS scope=synthetic-json-only/);
+  assert.match(result.stdout, /DSH_VERIFY_BACKPRESSURE PASS scope=synthetic-loopback-http/);
+  assert.match(result.stdout, /DSH_VERIFY_SLI NOT_RUN/);
+  assert.match(result.stdout, /DSH_VERIFY_STATUS RELEASE_BLOCKED/);
+});

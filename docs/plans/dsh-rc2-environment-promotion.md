@@ -632,7 +632,7 @@ Synthesized from CEO、DX、Design 与 Eng 审查的已接受发现。以下任�
   - Surfaced by: CEO/Eng — dirty archive 与 public main 无 merge-base，生产不能直接消费 archive
   - Files: `STATUS.md`, `docs/plans/`, `deploy/wsl/`, release evidence templates
   - Verify: clean checkout migration map；逐项记录 source commit、upstream SHA、VERSION、owner 与对应验证证据
-- [x] **T2 (P0, DONE — public receive gate; current aggregate 56/56 isolated tests)** — Artifact receive — 实现安全解包、allowlist/schema fail-closed、大小/条目/权限限制和最终 tarball 内容扫描
+- [x] **T2 (P0, DONE — public receive gate; current aggregate 57/57 isolated tests)** — Artifact receive — 实现安全解包、allowlist/schema fail-closed、大小/条目/权限限制和最终 tarball 内容扫描
   - Surfaced by: Eng — 拒绝绝对路径、`..`、symlink/hardlink/device、tarbomb、超大归档与恶意权限
   - Files: `scripts/release/`, `scripts/release/schemas/`, `deploy/wsl/`
   - Verify: path traversal、duplicate、size mismatch、secret/denylist、symlink/权限和 scan failure fixtures 全部阻断；`pnpm dsh receive` 对 1663-entry synthetic artifact 实际接收通过；证据见 `docs/release/dsh-rc2-candidate/t2-receive-gate-20260926.md`
