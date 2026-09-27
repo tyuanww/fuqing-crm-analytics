@@ -5,7 +5,7 @@
 
 | 项 | 状态 |
 |---|---|
-| Git 基线 | 候选分支 `codex/dsh-rc2-candidate` 从 public main `ba2f887b1ec55f26d7cb3849d327072140abbd95` 建立；当前 immutable runtime artifact/reviewed source SHA 为 `a7f8a7f493bd448910899aed5d547e82bff00a78`，PR [#61](https://github.com/tyuanww/fuqing-crm-analytics/pull/61) 已合并到 `main`，merge commit 为 `00823ff533b4cc32861cc70e3f8bda5d374f3b14`，合并后的 main CI 已通过。 |
+| Git 基线 | 候选分支 `codex/dsh-rc2-candidate` 从 public main `ba2f887b1ec55f26d7cb3849d327072140abbd95` 建立；PR [#61](https://github.com/tyuanww/fuqing-crm-analytics/pull/61) 已合并到 `main`，merge commit 为 `00823ff533b4cc32861cc70e3f8bda5d374f3b14`，合并后的 main CI 已通过；当前 merged-main internal artifact 的 source SHA 为该 merge commit。 |
 | 产品 | **PARTIAL / RELEASE_BLOCKED**；T2 已完成，T3–T12 的本地合同与 synthetic 验证已完成（当前 66/66），GitHub main/tag protection 和 evidence environment 已配置，但独立 reviewer/OIDC、浏览器/host、WSL2 冷验证、route/15 分钟 SLI/杭州 HTTP backpressure、public HTML、现场 owner 和 UAT 未完成。既有 HTML 收件箱能力保持，完整浏览器 UAT 仍开放。 |
 | DSH | 官方上游固定为 `477b4f42`（0.1.7-rc.2），不修改上游源码；杭州切换未执行。 |
 | CRM | 杭州 backend `127.0.0.1:18093`、frontend `127.0.0.1:18094` 健康；生产 checkout 固定在 `47f49616`。 |
