@@ -27,7 +27,7 @@ jobs:
   evidence:
     runs-on: ubuntu-24.04
     environment: dsh-release-evidence
-    timeout-minutes: 15
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -38,6 +38,10 @@ jobs:
         with:
           node-version: '24.19.0'
           package-manager-cache: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        id: python
+        with:
+          python-version: '3.14'
       - name: Check zstd release dependency
         run: |
           set -euo pipefail
@@ -59,16 +63,47 @@ jobs:
           test "$(git rev-parse HEAD)" = "$REVIEWED_SHA"
           git merge-base --is-ancestor origin/main "$REVIEWED_SHA"
           test -z "$(git status --porcelain --untracked-files=all)"
-      - name: Build synthetic release evidence only
+      - name: Prepare the exact pinned upstream build closure
+        env:
+          B0_PYTHON: ${{ steps.python.outputs.python-path }}
+        run: node scripts/dsh-b0/pipeline.mjs --prepare --python "$B0_PYTHON"
+      - name: Build every production plugin bundle from the pinned upstream
+        env:
+          UPSTREAM: ${{ github.workspace }}/.context/dsh-b0/upstream-0.1.7-rc.2
+        run: |
+          set -euo pipefail
+          for plugin in \
+            dsh-plugins/analytics-workbench \
+            dsh-plugins/shine-brand \
+            dsh-plugins/shine-waterfall \
+            dsh-plugins/shine-crowd-action \
+            dsh-plugins/shine-query \
+            dsh-plugins/shine-board \
+            dsh-plugins/shine-funnel; do
+            node "$plugin/build.mjs" "$UPSTREAM"
+          done
+      - name: Build the immutable upstream production runtime bundle
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/.context/release-runtime"
+          node scripts/release/runtime-bundle.mjs \
+            --upstream "$GITHUB_WORKSPACE/.context/dsh-b0/upstream-0.1.7-rc.2" \
+            --output "$GITHUB_WORKSPACE/.context/release-runtime/upstream-runtime.tar.zst"
+      - name: Build release evidence from the exact runtime bundle
         env:
           RELEASE_TAG: ${{ inputs.release_tag }}
+          DSH_UPSTREAM_RUNTIME_BUNDLE: ${{ github.workspace }}/.context/release-runtime/upstream-runtime.tar.zst
         run: node scripts/dsh.mjs release --offline --tag "$RELEASE_TAG"
       - name: Verify isolated release contracts
         run: node scripts/dsh.mjs test
-      - name: Attest the exact candidate artifact
+      - name: Attest the exact candidate source artifact
         uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
           subject-path: .context/release-evidence/${{ inputs.release_tag }}/${{ inputs.release_tag }}.tar.zst
+      - name: Attest the exact pinned upstream runtime artifact
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
+        with:
+          subject-path: .context/release-evidence/${{ inputs.release_tag }}/shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst
       - name: Upload evidence (never publish)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { access, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
+import { access, copyFile, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
@@ -71,6 +71,12 @@ async function release(args) {
   const status = git(['status', '--porcelain', '--untracked-files=all']);
   if (status) throw new Error('RELEASE_BLOCKED_DIRTY_WORKTREE reviewed commit must be clean; use a clean CI checkout to build the immutable artifact');
   const sourceSha = git(['rev-parse', 'HEAD']); const version = (await readFile(join(root, 'VERSION'), 'utf8')).trim();
+  const upstreamSha = '477b4f420553e8a52c2fbccc464d7561b239c443';
+  const runtimeInput = process.env.DSH_UPSTREAM_RUNTIME_BUNDLE;
+  if (!runtimeInput) throw new Error('RELEASE_UPSTREAM_RUNTIME_REQUIRED');
+  const runtimeInfo = await stat(runtimeInput).catch(() => null);
+  if (!runtimeInfo?.isFile() || runtimeInfo.size < 1) throw new Error('RELEASE_UPSTREAM_RUNTIME_INVALID');
+  const runtimeName = `shinemage-dsh-upstream-runtime-${upstreamSha}.tar.zst`;
   const dir = join(releaseEvidence, tag);
   await mkdir(releaseEvidence, { recursive: true });
   if (await access(dir).then(() => true, () => false)) {
@@ -80,15 +86,20 @@ async function release(args) {
   }
   await mkdir(dir, { recursive: false });
   try {
-  const pre = await buildPreManifest({ releaseTag: tag, productVersion: version, sourceSha, dshUpstreamSha: '477b4f420553e8a52c2fbccc464d7561b239c443', output: join(dir, 'pre-manifest.v1.json') });
+  const runtimeOutput = join(dir, runtimeName);
+  const runtimeInputResolved = resolve(runtimeInput);
+  if (runtimeInputResolved !== resolve(runtimeOutput)) await copyFile(runtimeInputResolved, runtimeOutput);
+  const runtimeBytes = (await stat(runtimeOutput)).size;
+  const runtimeSha256 = await sha256(runtimeOutput);
+  const pre = await buildPreManifest({ releaseTag: tag, productVersion: version, sourceSha, dshUpstreamSha: upstreamSha, artifacts: [{ name: `${tag}.tar.zst`, role: 'source-bundle', path: `${tag}.tar.zst` }, { name: runtimeName, role: 'upstream-runtime-bundle', path: runtimeName }], output: join(dir, 'pre-manifest.v1.json') });
   const prePath = join(dir, 'pre-manifest.v1.json'); const preSha = await sha256(prePath);
   const bundle = await packArtifact({ rootDir: root, allowlist: pre.archive_allowlist, output: join(dir, `${tag}.tar.zst`) });
-  const manifest = { schema_version: 'release-manifest/v1', release_tag: tag, product_version: version, source_sha: sourceSha, dsh_upstream_sha: '477b4f420553e8a52c2fbccc464d7561b239c443', pre_manifest_sha256: preSha, archive_allowlist: pre.archive_allowlist, denylist_version: 'release-denylist/v1', build_time: new Date().toISOString(), retention_until: 'NOT_SET_UNTIL_PUBLISHED', toolchain: { node: process.versions.node, pnpm: '11.7.0' }, artifact_bytes: bundle.bytes, artifact_sha256: bundle.sha256,
+  const manifest = { schema_version: 'release-manifest/v1', release_tag: tag, product_version: version, source_sha: sourceSha, dsh_upstream_sha: upstreamSha, pre_manifest_sha256: preSha, archive_allowlist: pre.archive_allowlist, denylist_version: 'release-denylist/v1', build_time: new Date().toISOString(), retention_until: 'NOT_SET_UNTIL_PUBLISHED', toolchain: { node: process.versions.node, pnpm: '11.7.0' }, artifact_bytes: bundle.bytes, artifact_sha256: bundle.sha256, upstream_runtime: { name: runtimeName, role: 'upstream-runtime-bundle', upstream_sha: upstreamSha, bytes: runtimeBytes, sha256: runtimeSha256 },
     payload: await Promise.all(pre.archive_allowlist.map(async path => ({ path, role: 'runtime-source', bytes: (await stat(join(root, path))).size, sha256: await sha256(join(root, path)) }))) };
   await assertSchema(manifest, join(root, 'scripts/release/schemas/release-manifest.v1.schema.json'));
   const manifestPath = join(dir, 'release-manifest.v1.json'); await writeFile(manifestPath, JSON.stringify(manifest, null, 2) + '\n', { mode: 0o600 });
-  const sums = `${bundle.sha256}  ${tag}.tar.zst\n${await sha256(manifestPath)}  release-manifest.v1.json\n`; await writeFile(join(dir, 'SHA256SUMS'), sums, { mode: 0o600 });
-  await writeFile(join(dir, 'ci-evidence-index.v1.json'), JSON.stringify({ schema_version: 'ci-evidence-index/v1', release_tag: tag, entries: [{ name: 'local-doctor', status: 'PARTIAL', ref: 'pnpm dsh doctor', sha256: preSha }, { name: 'wsl2-cold', status: 'NOT_RUN', ref: 'docs/release/dsh-rc2-candidate/host-preflight.md' }] }, null, 2) + '\n', { mode: 0o600 });
+  const sums = `${bundle.sha256}  ${tag}.tar.zst\n${runtimeSha256}  ${runtimeName}\n${await sha256(manifestPath)}  release-manifest.v1.json\n`; await writeFile(join(dir, 'SHA256SUMS'), sums, { mode: 0o600 });
+  await writeFile(join(dir, 'ci-evidence-index.v1.json'), JSON.stringify({ schema_version: 'ci-evidence-index/v1', release_tag: tag, entries: [{ name: 'local-doctor', status: 'PARTIAL', ref: 'pnpm dsh doctor', sha256: preSha }, { name: 'upstream-runtime-bundle', status: 'PASS', ref: runtimeName, sha256: runtimeSha256 }, { name: 'wsl2-cold', status: 'NOT_RUN', ref: 'docs/release/dsh-rc2-candidate/host-preflight.md' }] }, null, 2) + '\n', { mode: 0o600 });
   await verifyPayload(manifestPath, root);
   console.log(`DSH_RELEASE_PREPARED tag=${tag} pre_manifest=${prePath} manifest=${manifestPath}`); console.log('DSH_RELEASE_STATUS INTERNAL_ONLY_PARTIAL');
   } catch (error) {

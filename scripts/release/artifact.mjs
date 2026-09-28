@@ -53,12 +53,12 @@ export async function collectAllowlist(rootDir, { allowlist = DEFAULT_ALLOWLIST,
   return result;
 }
 
-export async function buildPreManifest({ rootDir = root, releaseTag, productVersion, sourceSha, dshUpstreamSha, output }) {
+export async function buildPreManifest({ rootDir = root, releaseTag, productVersion, sourceSha, dshUpstreamSha, artifacts = null, output }) {
   if (!/^dsh-[A-Za-z0-9._-]+$/.test(releaseTag)) throw new Error('RELEASE_TAG_INVALID');
   const allowlist = await collectAllowlist(rootDir);
   const findings = await scanTree(rootDir, { maxBytes: 128 * 1024 * 1024, include: rel => allowlist.includes(rel) || allowlist.some(file => file.startsWith(`${rel}/`)) });
   assertClean(findings);
-  const manifest = { schema_version: 'pre-manifest/v1', release_tag: releaseTag, product_version: productVersion, source_sha: sourceSha, dsh_upstream_sha: dshUpstreamSha, artifacts: [{ name: `${releaseTag}.tar.zst`, role: 'source-bundle', path: `${releaseTag}.tar.zst` }], archive_allowlist: allowlist, denylist_version: DENYLIST_VERSION };
+  const manifest = { schema_version: 'pre-manifest/v1', release_tag: releaseTag, product_version: productVersion, source_sha: sourceSha, dsh_upstream_sha: dshUpstreamSha, artifacts: artifacts ?? [{ name: `${releaseTag}.tar.zst`, role: 'source-bundle', path: `${releaseTag}.tar.zst` }], archive_allowlist: allowlist, denylist_version: DENYLIST_VERSION };
   const schema = await readSchema(join(schemaDir, 'pre-manifest.v1.schema.json'));
   const schemaError = validateSchema(manifest, schema);
   if (schemaError) throw new Error(`SCHEMA_INVALID ${schemaError}`);

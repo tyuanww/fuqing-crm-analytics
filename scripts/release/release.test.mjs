@@ -26,6 +26,7 @@ with tarfile.open(sys.argv[1],sys.argv[2]) as t:
  for entry in entries:
   info=tarfile.TarInfo(entry['name']); info.mode=entry.get('mode',0o600)
   if entry.get('type') == 'symlink': info.type=tarfile.SYMTYPE; info.linkname=entry.get('linkname','target'); t.addfile(info); continue
+  if entry.get('type') == 'hardlink': info.type=tarfile.LNKTYPE; info.linkname=entry['linkname']; t.addfile(info); continue
   data=entry.get('data','').encode(); info.size=len(data); t.addfile(info,io.BytesIO(data))`, path, format, JSON.stringify(entries)]); }
 async function manifest(root, archive, tag='dsh-test', payloadData={'VERSION':'0.18.0.1\n'}) {
   const bytes=Buffer.from(await readFile(archive));
@@ -88,6 +89,37 @@ test('promotion binds checksum entries and evidence index to the release tag', a
 });
 test('token is one-time, origin-bound, rate-limited and session-backed', async () => { const root=await fixture(), db=join(root,'tokens.json'), token=await issueToken(db,{now:1000}); await assert.rejects(()=>consumeToken(db,token,{now:1001}),/AUTH_ORIGIN_REJECTED/); assert.equal((await consumeToken(db,token,{origin:'https://app.tyuan.chat',allowedOrigins:['https://app.tyuan.chat'],now:1001})).authenticated,true); await assert.rejects(()=>consumeToken(db,token,{origin:'https://app.tyuan.chat',allowedOrigins:['https://app.tyuan.chat'],now:1002}),/AUTH_TOKEN_REPLAY/); const fresh=await issueToken(db,{now:2000}); const response=await tokenExchangeResponse(db,fresh,{method:'POST',origin:'https://app.tyuan.chat',allowedOrigins:['https://app.tyuan.chat'],now:2001}); assert.equal(response.status,303); assert.match(response.headers['set-cookie'][0],/HttpOnly/); });
 test('side-by-side install, activation and duplicate protection retain source identity', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); const releaseRoot=join(root,'releases-root'); const installed=await installRelease({artifact:archive,manifestPath:m,releaseRoot,tag:'dsh-test',offline:true}); assert.equal(installed.status,'PREPARED'); const active=await activateRelease({releaseRoot,tag:'dsh-test',sourceSha:'a'.repeat(40)}); assert.equal(active.status,'ACTIVE'); await assert.rejects(()=>installRelease({artifact:archive,manifestPath:m,releaseRoot,tag:'dsh-test',offline:true}),/RELEASE_EXISTS/); });
+test('promotion receives and records the pinned upstream runtime bundle', async () => {
+  const root = await fixture();
+  const archive = join(root, 'source.tar.gz');
+  tar(archive);
+  const manifestPath = await manifest(root, archive);
+  const runtimeTar = join(root, 'runtime.tar');
+  const runtimeArchive = join(root, 'runtime.tar.zst');
+  archiveWithEntries(runtimeTar, [
+    { name: 'lib/bin.js', data: 'runtime-entry\n' },
+    { name: 'node_modules/@deepseek-ai/dsh-base/lib/index.js', data: 'base\n' },
+    { name: 'node_modules/@deepseek-ai/dsh-web-app/lib/index.js', data: 'web\n' },
+    { name: 'node_modules/.pnpm/marker', data: 'closure\n' },
+    { name: 'node_modules/dsh-entry', type: 'symlink', linkname: '../lib/bin.js' },
+    { name: 'lib/alias.js', type: 'hardlink', linkname: 'lib/bin.js' },
+  ], 'w:');
+  execFileSync('zstd', ['-q', runtimeTar, '-o', runtimeArchive]);
+  const runtimeBytes = (await import('node:fs/promises')).stat(runtimeArchive);
+  const runtimeInfo = await runtimeBytes;
+  const value = JSON.parse(await readFile(manifestPath, 'utf8'));
+  value.upstream_runtime = { name: 'runtime.tar.zst', role: 'upstream-runtime-bundle', upstream_sha: value.dsh_upstream_sha, bytes: runtimeInfo.size, sha256: sha(await readFile(runtimeArchive)) };
+  await writeFile(manifestPath, JSON.stringify(value));
+  const releaseRoot = join(root, 'release-root');
+  const installed = await installRelease({ artifact: archive, upstreamRuntimeArtifact: runtimeArchive, manifestPath, releaseRoot, tag: 'dsh-test', offline: true });
+  assert.equal(installed.status, 'PREPARED');
+  assert.equal(await readFile(join(installed.path, 'upstream/lib/bin.js'), 'utf8'), 'runtime-entry\n');
+  assert.equal(await readFile(join(installed.path, 'upstream/node_modules/dsh-entry'), 'utf8'), 'runtime-entry\n');
+  assert.equal(await readFile(join(installed.path, 'upstream/lib/alias.js'), 'utf8'), 'runtime-entry\n');
+  const marker = JSON.parse(await readFile(join(installed.path, 'release-marker.json'), 'utf8'));
+  assert.equal(marker.upstream_runtime.sha256, value.upstream_runtime.sha256);
+  await assert.rejects(() => installRelease({ artifact: archive, manifestPath, releaseRoot: join(root, 'missing-runtime-root'), tag: 'dsh-test', offline: true }), /RELEASE_UPSTREAM_RUNTIME_REQUIRED/);
+});
 test('install rejects the unverified default path', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); await assert.rejects(() => installRelease({artifact:archive,manifestPath:m,releaseRoot:join(root,'release-root'),tag:'dsh-test'}), /RELEASE_TRUST_INPUTS_REQUIRED/); });
 test('release evidence workflow accepts a candidate descendant of main', async () => { const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-evidence.yml'), 'utf8'); assert.match(workflow, /git merge-base --is-ancestor origin\/main "\$REVIEWED_SHA"/); });
 test('runtime artifact allowlist carries the release evidence workflow', async () => {

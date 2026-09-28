@@ -6,10 +6,14 @@ import { recordEvent } from './state.mjs';
 import { assertSchema } from './schema.mjs';
 import { assertDeploymentTrust, verifyAttestationBundle, verifyGitHubEnvironmentApproval, verifyGitHubRelease, verifyPublicationRecord } from './trust.mjs';
 import { fileURLToPath } from 'node:url';
+import { execFile as execFileCallback } from 'node:child_process';
+import { promisify } from 'node:util';
 
 const TAG = /^dsh-[A-Za-z0-9._-]+$/;
 const OWNER = /^[A-Za-z0-9._:-]{3,128}$/;
 const EVIDENCE_SCHEMA = fileURLToPath(new URL('./schemas/ci-evidence-index.v1.schema.json', import.meta.url));
+const RUNTIME_RECEIVER = fileURLToPath(new URL('./secure-runtime-unpack.py', import.meta.url));
+const execFile = promisify(execFileCallback);
 function assertTag(tag) { if (!TAG.test(tag) || tag.includes('..')) throw new Error('RELEASE_TAG_INVALID'); }
 function releasePath(root, tag) {
   assertTag(tag); const base = resolve(root, 'releases'); const target = resolve(base, tag);
@@ -67,7 +71,7 @@ export function assertPublicationAssets(publication, expectedAssets) {
   return true;
 }
 
-export async function assertReleaseInputs({ artifact, manifestPath, sumsPath, evidenceIndexPath, tag, manifest }) {
+export async function assertReleaseInputs({ artifact, upstreamRuntimeArtifact = null, manifestPath, sumsPath, evidenceIndexPath, tag, manifest }) {
   const sums = await readFile(sumsPath, 'utf8');
   const entries = new Map();
   for (const line of sums.split(/\r?\n/).filter(Boolean)) {
@@ -76,44 +80,68 @@ export async function assertReleaseInputs({ artifact, manifestPath, sumsPath, ev
     entries.set(match.groups.name, match.groups.digest);
   }
   const expected = [[basename(artifact), manifest.artifact_sha256], [basename(manifestPath), await sha256(manifestPath)]];
+  if (manifest.upstream_runtime) {
+    const runtime = manifest.upstream_runtime;
+    if (runtime.name !== basename(runtime.name) || runtime.name.includes('\\')) throw new Error('RELEASE_UPSTREAM_RUNTIME_NAME_INVALID');
+    if (!upstreamRuntimeArtifact) throw new Error('RELEASE_UPSTREAM_RUNTIME_REQUIRED');
+    const info = await stat(upstreamRuntimeArtifact);
+    if (info.size !== runtime.bytes || await sha256(upstreamRuntimeArtifact) !== runtime.sha256) throw new Error('RELEASE_UPSTREAM_RUNTIME_DIGEST_MISMATCH');
+    expected.push([runtime.name, runtime.sha256]);
+  }
   for (const [name, digest] of expected) if (entries.get(name) !== digest) throw new Error(`RELEASE_CHECKSUM_BINDING_MISMATCH ${name}`);
   let evidence;
   try { evidence = JSON.parse(await readFile(evidenceIndexPath, 'utf8')); } catch { throw new Error('RELEASE_EVIDENCE_INVALID'); }
   await assertSchema(evidence, EVIDENCE_SCHEMA);
   if (evidence.release_tag !== tag) throw new Error('RELEASE_EVIDENCE_TAG_MISMATCH');
+  if (manifest.upstream_runtime) {
+    const entry = evidence.entries.find(item => item.name === 'upstream-runtime-bundle' || item.ref === manifest.upstream_runtime.name);
+    if (!entry || entry.status !== 'PASS' || entry.sha256 !== manifest.upstream_runtime.sha256) throw new Error('RELEASE_EVIDENCE_RUNTIME_MISMATCH');
+  }
   return true;
 }
 
-export async function installRelease({ artifact, manifestPath, releaseRoot, tag, statePath, owner = 'shinemage-dsh', restartDependency = 'shinemage-dsh.service', publicationPath = null, sumsPath = null, evidenceIndexPath = null, attestationBundlePath = null, repository = null, sourceRef = null, signerWorkflow = null, gh = 'gh', offline = false }) {
+async function receiveRuntimeArtifact({ artifact, destination }) {
+  const python = process.env.DSH_PYTHON || 'python3';
+  const { stdout } = await execFile(python, [RUNTIME_RECEIVER, artifact, destination], { maxBuffer: 4 * 1024 * 1024, windowsHide: true });
+  return stdout.trim();
+}
+
+export async function installRelease({ artifact, upstreamRuntimeArtifact = null, manifestPath, releaseRoot, tag, statePath, owner = 'shinemage-dsh', restartDependency = 'shinemage-dsh.service', publicationPath = null, sumsPath = null, evidenceIndexPath = null, attestationBundlePath = null, runtimeAttestationBundlePath = null, repository = null, sourceRef = null, signerWorkflow = null, gh = 'gh', offline = false }) {
   assertTag(tag); const root = resolve(releaseRoot); const releases = join(root, 'releases'); const target = releasePath(root, tag);
   if (!OWNER.test(owner) || !OWNER.test(restartDependency)) throw new Error('RELEASE_OWNER_INVALID');
   await mkdir(releases, { recursive: true, mode: 0o700 });
   const manifest = await readJson(manifestPath);
   if (manifest.release_tag !== tag) throw new Error('RELEASE_TAG_MANIFEST_MISMATCH');
+  if (manifest.upstream_runtime && manifest.upstream_runtime.upstream_sha !== manifest.dsh_upstream_sha) throw new Error('RELEASE_UPSTREAM_RUNTIME_SHA_MISMATCH');
+  if (manifest.upstream_runtime && !upstreamRuntimeArtifact) throw new Error('RELEASE_UPSTREAM_RUNTIME_REQUIRED');
   if (publicationPath === null && offline !== true) throw new Error('RELEASE_TRUST_INPUTS_REQUIRED');
   let trust = null;
   if (publicationPath !== null) {
     if (![sumsPath, evidenceIndexPath, attestationBundlePath, repository, sourceRef].every(value => typeof value === 'string' && value)) throw new Error('RELEASE_TRUST_INPUTS_REQUIRED');
+    if (manifest.upstream_runtime && (typeof runtimeAttestationBundlePath !== 'string' || !runtimeAttestationBundlePath)) throw new Error('RELEASE_UPSTREAM_RUNTIME_ATTESTATION_REQUIRED');
     const [manifestSha256, sha256sumsSha256, evidenceIndexSha256] = await Promise.all([sha256(manifestPath), sha256(sumsPath), sha256(evidenceIndexPath)]);
-    await assertReleaseInputs({ artifact, manifestPath, sumsPath, evidenceIndexPath, tag, manifest });
+    await assertReleaseInputs({ artifact, upstreamRuntimeArtifact, manifestPath, sumsPath, evidenceIndexPath, tag, manifest });
     const publication = await readJson(publicationPath);
+    const requiredAssetDigests = [
+      [basename(artifact), manifest.artifact_sha256],
+      [basename(manifestPath), manifestSha256],
+      [basename(sumsPath), sha256sumsSha256],
+      [basename(evidenceIndexPath), evidenceIndexSha256],
+    ];
+    if (manifest.upstream_runtime) requiredAssetDigests.push([manifest.upstream_runtime.name, manifest.upstream_runtime.sha256]);
     trust = await verifyPublicationRecord(publicationPath, {
       releaseTag: tag,
       sourceSha: manifest.source_sha,
       manifestSha256,
       sha256sumsSha256,
       evidenceIndexSha256,
-      requiredAssets: [basename(artifact), basename(manifestPath), basename(sumsPath), basename(evidenceIndexPath)],
+      requiredAssets: requiredAssetDigests.map(([name]) => name),
     });
-    assertPublicationAssets(publication, [
-      [basename(artifact), manifest.artifact_sha256],
-      [basename(manifestPath), manifestSha256],
-      [basename(sumsPath), sha256sumsSha256],
-      [basename(evidenceIndexPath), evidenceIndexSha256],
-    ]);
+    assertPublicationAssets(publication, requiredAssetDigests);
     const approval = await verifyGitHubEnvironmentApproval({ repository, approvalRef: publication.approval_ref, releaseTag: tag, sourceSha: manifest.source_sha, gh });
     if (approval.status !== 'VERIFIED') throw new Error('RELEASE_APPROVAL_NOT_VERIFIED');
     const attestation = await verifyAttestationBundle({ artifactPath: artifact, bundlePath: attestationBundlePath, repository, sourceRef, signerWorkflow, gh });
+    const runtimeAttestation = manifest.upstream_runtime ? await verifyAttestationBundle({ artifactPath: upstreamRuntimeArtifact, bundlePath: runtimeAttestationBundlePath, repository, sourceRef, signerWorkflow, gh }) : null;
     if (sourceRef !== `refs/tags/${tag}`) throw new Error('RELEASE_SOURCE_REF_MISMATCH');
     const liveAssets = [
       { name: basename(artifact), sha256: manifest.artifact_sha256, size: (await stat(artifact)).size },
@@ -121,20 +149,23 @@ export async function installRelease({ artifact, manifestPath, releaseRoot, tag,
       { name: basename(sumsPath), sha256: sha256sumsSha256, size: (await stat(sumsPath)).size },
       { name: basename(evidenceIndexPath), sha256: evidenceIndexSha256, size: (await stat(evidenceIndexPath)).size },
     ];
+    if (manifest.upstream_runtime) liveAssets.push({ name: manifest.upstream_runtime.name, sha256: manifest.upstream_runtime.sha256, size: (await stat(upstreamRuntimeArtifact)).size });
     const liveRelease = await verifyGitHubRelease({ repository, releaseTag: tag, sourceSha: manifest.source_sha, expectedAssets: liveAssets, gh });
-    if (attestation.status !== 'VERIFIED' || liveRelease.status !== 'VERIFIED') throw new Error('RELEASE_PROVENANCE_NOT_VERIFIED');
-    trust = { ...trust, approval_status: approval.status, provenance_status: 'VERIFIED', live_release_status: liveRelease.status };
+    if (attestation.status !== 'VERIFIED' || runtimeAttestation?.status === 'NOT_AVAILABLE' || liveRelease.status !== 'VERIFIED') throw new Error('RELEASE_PROVENANCE_NOT_VERIFIED');
+    trust = { ...trust, approval_status: approval.status, provenance_status: 'VERIFIED', runtime_provenance_status: runtimeAttestation?.status ?? 'NOT_REQUIRED', live_release_status: liveRelease.status };
     assertDeploymentTrust(trust);
   }
   if (await access(target).then(() => true, () => false)) throw new Error('RELEASE_EXISTS');
   const staging = join(releases, `.incoming-${tag}-${process.pid}-${Date.now()}`);
   try {
     const received = await receiveArtifact({ artifact, manifestPath, destination: staging });
-    await writeMarker(staging, { tag, source_sha: manifest.source_sha, artifact_sha256: received.sha256, owner, restart_dependency: restartDependency, publication_status: trust?.status ?? 'NOT_CHECKED', provenance_status: trust?.provenance_status ?? 'NOT_AVAILABLE', state: 'PREPARED', prepared_at: new Date().toISOString() });
+    let runtimeReceipt = null;
+    if (manifest.upstream_runtime) runtimeReceipt = await receiveRuntimeArtifact({ artifact: upstreamRuntimeArtifact, destination: join(staging, 'upstream') });
+    await writeMarker(staging, { tag, source_sha: manifest.source_sha, artifact_sha256: received.sha256, upstream_runtime: manifest.upstream_runtime ?? null, upstream_path: manifest.upstream_runtime ? 'upstream' : null, runtime_unpack: runtimeReceipt, owner, restart_dependency: restartDependency, publication_status: trust?.status ?? 'NOT_CHECKED', provenance_status: trust?.provenance_status ?? 'NOT_AVAILABLE', state: 'PREPARED', prepared_at: new Date().toISOString() });
     await fsyncDir(staging);
     // Rename is exclusive: never remove or replace an existing release.
     await rename(staging, target); await fsyncDir(releases);
-    if (statePath) await recordEvent(statePath, { release_tag: tag, status: 'PREPARED', path: target, source_sha: manifest.source_sha });
+    if (statePath) await recordEvent(statePath, { release_tag: tag, status: 'PREPARED', path: target, source_sha: manifest.source_sha, upstream_runtime_sha256: manifest.upstream_runtime?.sha256 ?? null });
     return { status: 'PREPARED', tag, path: target, sourceSha: manifest.source_sha };
   } catch (error) { await rm(staging, { recursive: true, force: true }); throw error; }
 }
