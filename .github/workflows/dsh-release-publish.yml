@@ -1,0 +1,110 @@
+name: Publish DSH rc2 release assets
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        required: true
+        type: string
+      release_id:
+        required: true
+        type: string
+      evidence_run_id:
+        required: true
+        type: string
+      reviewed_sha:
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: dsh-release-publish-${{ inputs.release_tag }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Download the exact evidence artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          EVIDENCE_RUN_ID: ${{ inputs.evidence_run_id }}
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^dsh-[A-Za-z0-9._-]+$ ]]
+          [[ "$EVIDENCE_RUN_ID" =~ ^[0-9]+$ ]]
+          mkdir -p "$RUNNER_TEMP/dsh-evidence"
+          gh run download "$EVIDENCE_RUN_ID" \
+            --repo "$GITHUB_REPOSITORY" \
+            --name "dsh-rc2-evidence-$RELEASE_TAG" \
+            --dir "$RUNNER_TEMP/dsh-evidence"
+
+      - name: Verify release identity and artifact digests
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          RELEASE_ID: ${{ inputs.release_id }}
+          REVIEWED_SHA: ${{ inputs.reviewed_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_ID" =~ ^[0-9]+$ ]]
+          [[ "$REVIEWED_SHA" =~ ^[0-9a-f]{40}$ ]]
+          python3 - "$RUNNER_TEMP/dsh-evidence/release-manifest.v1.json" "$RELEASE_TAG" "$REVIEWED_SHA" <<'PY'
+          import json, pathlib, sys
+          manifest = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          assert manifest['release_tag'] == sys.argv[2]
+          assert manifest['source_sha'] == sys.argv[3]
+          assert manifest['upstream_runtime']['role'] == 'upstream-runtime-bundle'
+          assert manifest['upstream_runtime']['upstream_sha'] == manifest['dsh_upstream_sha']
+          PY
+          release_json=$(gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID")
+          python3 - "$RELEASE_TAG" "$release_json" <<'PY'
+          import json, sys
+          release = json.loads(sys.argv[2])
+          assert release['tag_name'] == sys.argv[1]
+          assert release['draft'] is True
+          assert release.get('immutable') is not True
+          PY
+          (cd "$RUNNER_TEMP/dsh-evidence" && sha256sum -c SHA256SUMS)
+
+      - name: Upload the complete immutable release asset set
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          gh release upload "$RELEASE_TAG" \
+            "$RUNNER_TEMP/dsh-evidence/$RELEASE_TAG.tar.zst" \
+            "$RUNNER_TEMP/dsh-evidence/shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst" \
+            "$RUNNER_TEMP/dsh-evidence/pre-manifest.v1.json" \
+            "$RUNNER_TEMP/dsh-evidence/release-manifest.v1.json" \
+            "$RUNNER_TEMP/dsh-evidence/SHA256SUMS" \
+            "$RUNNER_TEMP/dsh-evidence/ci-evidence-index.v1.json" \
+            --repo "$GITHUB_REPOSITORY"
+
+      - name: Publish only after every asset is present
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          RELEASE_ID: ${{ inputs.release_id }}
+        run: |
+          set -euo pipefail
+          assets=$(gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?per_page=100")
+          python3 - "$RELEASE_TAG" "$assets" <<'PY'
+          import json, sys
+          required = {
+              f'{sys.argv[1]}.tar.zst',
+              'shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst',
+              'pre-manifest.v1.json', 'release-manifest.v1.json', 'SHA256SUMS', 'ci-evidence-index.v1.json',
+          }
+          actual = {item['name'] for item in json.loads(sys.argv[2])}
+          assert required <= actual, sorted(required - actual)
+          PY
+          gh api --method PATCH "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID" \
+            -f draft=false \
+            -f tag_name="$RELEASE_TAG"
