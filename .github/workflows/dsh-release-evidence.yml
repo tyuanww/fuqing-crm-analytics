@@ -88,7 +88,8 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE/.context/release-runtime"
           node scripts/release/runtime-bundle.mjs \
             --upstream "$GITHUB_WORKSPACE/.context/dsh-b0/upstream-0.1.7-rc.2" \
-            --output "$GITHUB_WORKSPACE/.context/release-runtime/upstream-runtime.tar.zst"
+            --output "$GITHUB_WORKSPACE/.context/release-runtime/upstream-runtime.tar.zst" \
+            --online
       - name: Build release evidence from the exact runtime bundle
         env:
           RELEASE_TAG: ${{ inputs.release_tag }}
