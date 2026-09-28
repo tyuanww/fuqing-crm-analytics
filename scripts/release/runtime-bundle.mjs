@@ -2,7 +2,7 @@
 
 /** Build the immutable, production-only DSH runtime closure from a pinned checkout. */
 import assert from 'node:assert/strict';
-import { access, cp, lstat, mkdir, mkdtemp, readdir, readlink, rm, stat, symlink } from 'node:fs/promises';
+import { access, cp, lstat, mkdir, mkdtemp, readdir, readFile, readlink, rm, stat, symlink } from 'node:fs/promises';
 import { execFile as execFileCallback } from 'node:child_process';
 import { promisify } from 'node:util';
 import { dirname, join, relative, resolve } from 'node:path';
@@ -23,6 +23,26 @@ async function materializeExternalSymlinks(deployed, upstream, pinnedSha) {
   const externalRoot = join(deployedRoot, '.runtime-external');
   const copied = new Map();
   const verifiedRoots = new Map();
+  async function mergeMissing(source, destination) {
+    for (const entry of await readdir(source, { withFileTypes: true })) {
+      const sourcePath = join(source, entry.name);
+      const destinationPath = join(destination, entry.name);
+      const existing = await lstat(destinationPath).catch(error => {
+        if (error.code === 'ENOENT') return null;
+        throw error;
+      });
+      if (!existing) {
+        await cp(sourcePath, destinationPath, { recursive: true, dereference: false, force: false, errorOnExist: true });
+      } else if (entry.isDirectory() && existing.isDirectory() && !entry.isSymbolicLink() && !existing.isSymbolicLink()) {
+        await mergeMissing(sourcePath, destinationPath);
+      } else if (existing.isFile() && !entry.isDirectory() && !entry.isSymbolicLink()) {
+        const [sourceBytes, destinationBytes] = await Promise.all([readFile(sourcePath), readFile(destinationPath)]);
+        if (!sourceBytes.equals(destinationBytes)) throw new Error(`RUNTIME_EXTERNAL_COLLISION ${destinationPath}`);
+      } else {
+        throw new Error(`RUNTIME_EXTERNAL_COLLISION ${destinationPath}`);
+      }
+    }
+  }
   async function findPinnedRoot(target) {
     let current = target;
     while (true) {
@@ -94,16 +114,30 @@ async function materializeExternalSymlinks(deployed, upstream, pinnedSha) {
       }
     }
   }
-  const peerSource = join(upstreamRoot, 'node_modules/.pnpm/node_modules/@deepseek-ai/cordis-plugin-group');
-  const peerDestination = join(deployedRoot, 'node_modules/@deepseek-ai/cordis-plugin-group');
-  if (!await access(peerSource).then(() => true, () => false)) throw new Error('RUNTIME_REQUIRED_PEER_MISSING @deepseek-ai/cordis-plugin-group');
-  if (!await lstat(peerDestination).then(() => true, () => false)) {
-    await mkdir(dirname(peerDestination), { recursive: true });
+  // `pnpm deploy --prod` does not copy workspace packages that are declared
+  // only as peerDependencies. DSH's built-in plugin graph intentionally uses
+  // that shape, so a production deploy can be syntactically complete while
+  // failing at boot with ERR_MODULE_NOT_FOUND for core peer packages. Seed the
+  // complete pinned peer alias directory before materializing external links.
+  // This keeps the bundle self-contained without copying the upstream checkout
+  // itself; materializeExternalSymlinks still applies the allowlist and secret
+  // denylist to every resolved target.
+  const peerSourceRoot = join(upstreamRoot, 'node_modules/.pnpm/node_modules/@deepseek-ai');
+  assert.equal(await access(peerSourceRoot).then(() => true, () => false), true, 'RUNTIME_PEER_ALIAS_ROOT_MISSING');
+  const peerDestinationRoot = join(deployedRoot, 'node_modules/.pnpm/node_modules/@deepseek-ai');
+  await mkdir(peerDestinationRoot, { recursive: true });
+  let seededPeers = 0;
+  for (const entry of await readdir(peerSourceRoot, { withFileTypes: true })) {
+    if (!entry.name.startsWith('dsh-') && !entry.name.startsWith('cordis-plugin-')) continue;
+    const peerSource = join(peerSourceRoot, entry.name);
+    const peerDestination = join(peerDestinationRoot, entry.name);
+    if (await lstat(peerDestination).then(() => true, () => false)) continue;
     await cp(peerSource, peerDestination, { recursive: true, dereference: false, force: false, errorOnExist: true });
+    seededPeers += 1;
   }
   await walk(deployedRoot);
   if (await access(externalRoot).then(() => true, () => false)) await walk(externalRoot);
-  return { external_targets: copied.size };
+  return { external_targets: copied.size, seeded_peer_aliases: seededPeers };
 }
 
 function option(name) {
