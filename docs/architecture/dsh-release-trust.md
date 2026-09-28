@@ -11,7 +11,7 @@ reviewed clean commit
 pre-manifest + exact allowlist + secret scan
         |
         v
-source tar.zst + release-manifest + SHA256SUMS + CI evidence
+source tar.zst + fixed rc2 runtime tar.zst + release-manifest + SHA256SUMS + CI evidence
         |
         v
 secure receive -> new side-by-side release directory
@@ -29,7 +29,7 @@ healthcheck + release UAT -> authorized cutover or rollback
 
 - **allowlist** 先定义允许进入包的路径，denylist 和 secret scan 再排除凭据、缓存、日志、数据库、WAL 和构建残留。
 - **schema** 固定 manifest 的字段、路径和类型。未知、重复或不安全路径在解包前失败。
-- **secure unpack** 先写入新的 staging 目录，限制条目和展开后大小，拒绝 traversal、链接和设备文件；成功后才允许接收方继续校验。
+- **secure unpack** 先写入新的 staging 目录，限制条目和展开后大小；source 包拒绝 traversal、链接和设备文件，runtime 包只允许 stage 内的相对 symlink/hardlink；成功后才允许接收方继续校验。
 - **payload digest** 同时核对 archive、manifest 和每个 payload 文件。只验证 archive 外层 SHA 不能证明解包内容没有被替换。
 - **publication trust** 将 GitHub Release、protected tag、reviewed SHA、CI evidence、`SHA256SUMS` 和 attestation 绑定在一起。缺少其中任一项时，安装保持 `NOT_AVAILABLE` 或 `RELEASE_BLOCKED`。
 - **side-by-side activation** 新版本先独立落盘，`current` 只在 owner 和 restart dependency 匹配后原子切换。旧版本在稳定窗口结束前保留，回退使用已记录 receipt。
