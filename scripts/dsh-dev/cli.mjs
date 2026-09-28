@@ -3,6 +3,7 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { writeFile, mkdir, readFile } from 'node:fs/promises';
+import { realpathSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -337,7 +338,7 @@ function isCliEntry() {
   const entry = process.argv[1];
   if (!entry) return false;
   const self = fileURLToPath(import.meta.url);
-  return self === entry || self === resolve(entry);
+  return self === entry || self === resolve(entry) || realpathSync(self) === realpathSync(resolve(entry));
 }
 
 if (isCliEntry()) {
