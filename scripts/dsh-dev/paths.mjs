@@ -16,7 +16,9 @@ export function resolveUpstream(explicit) {
   for (const candidate of candidates) {
     const upstream = resolve(candidate);
     assert.ok(isAbsolute(upstream), 'upstream path must be absolute');
-    if (existsSync(join(upstream, 'apps/cli/lib/bin.js'))) return upstream;
+    // Development uses the pinned checkout layout. Production release artifacts
+    // use the self-contained pnpm deploy layout, whose CLI is at lib/bin.js.
+    if (existsSync(join(upstream, 'apps/cli/lib/bin.js')) || existsSync(join(upstream, 'lib/bin.js'))) return upstream;
     if (explicit && upstream === resolve(explicit)) {
       throw new Error(`--upstream is not a built pinned DSH checkout: ${upstream}`);
     }
@@ -70,7 +72,9 @@ export async function ensureDir(path) {
 }
 
 export async function assertCli(upstream) {
-  const cli = join(upstream, 'apps/cli/lib/bin.js');
+  const cli = existsSync(join(upstream, 'apps/cli/lib/bin.js'))
+    ? join(upstream, 'apps/cli/lib/bin.js')
+    : join(upstream, 'lib/bin.js');
   await access(cli);
   return cli;
 }

@@ -21,6 +21,31 @@ function git(upstream, args) {
 
 export async function verifyUpstream(upstream, pin) {
   assert.equal(Number(process.versions.node.split('.')[0]), NODE_MAJOR, `Use Node ${NODE_MAJOR}`);
+  // A production runtime is the immutable pnpm deploy output shipped beside
+  // release-marker.json. It has no .git checkout or pnpm lockfile, so bind it
+  // to the release marker (or an explicit operator-provided SHA) and verify
+  // the package identity/version before using its CLI.
+  if (!await access(join(upstream, 'apps/cli/lib/bin.js')).then(() => true, () => false)) {
+    await access(join(upstream, 'lib/bin.js'));
+    const packageJson = JSON.parse(await readFile(join(upstream, 'package.json'), 'utf8'));
+    assert.equal(packageJson.name, '@deepseek-ai/dsh', 'Runtime bundle package mismatch');
+    assert.equal(packageJson.version, pin.sdk_version, 'Runtime bundle version mismatch');
+    let declaredSha = process.env.DSH_UPSTREAM_SHA ?? null;
+    try {
+      const marker = JSON.parse(await readFile(join(upstream, '..', 'release-marker.json'), 'utf8'));
+      declaredSha = marker.upstream_runtime?.upstream_sha ?? declaredSha;
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+    }
+    assert.equal(declaredSha, pin.upstream_sha, 'Runtime bundle upstream SHA is not bound to the pinned release');
+    return {
+      upstream_sha: pin.upstream_sha,
+      upstream_lock_sha256: pin.upstream_lock_sha256,
+      pnpm: pin.pnpm,
+      node: process.version,
+      runtime_bundle: true,
+    };
+  }
   await access(join(upstream, 'apps/cli/lib/bin.js'));
   await access(join(upstream, 'pnpm-lock.yaml'));
   assert.equal(git(upstream, ['rev-parse', 'HEAD']), pin.upstream_sha, 'Pinned upstream SHA mismatch');
