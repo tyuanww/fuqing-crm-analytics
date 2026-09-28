@@ -122,6 +122,7 @@ test('promotion receives and records the pinned upstream runtime bundle', async 
 });
 test('install rejects the unverified default path', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); await assert.rejects(() => installRelease({artifact:archive,manifestPath:m,releaseRoot:join(root,'release-root'),tag:'dsh-test'}), /RELEASE_TRUST_INPUTS_REQUIRED/); });
 test('release evidence workflow accepts a candidate descendant of main', async () => { const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-evidence.yml'), 'utf8'); assert.match(workflow, /git merge-base --is-ancestor origin\/main "\$REVIEWED_SHA"/); });
+test('release evidence workflow permits the pinned runtime dependency fetch', async () => { const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-evidence.yml'), 'utf8'); assert.match(workflow, /runtime-bundle\.mjs[\s\S]*--online/); });
 test('runtime artifact allowlist carries the release evidence workflow', async () => {
   const allowlist = await collectAllowlist(process.cwd());
   assert.ok(allowlist.includes('.github/workflows/dsh-release-evidence.yml'));

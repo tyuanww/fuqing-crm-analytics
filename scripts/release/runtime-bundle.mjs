@@ -60,11 +60,12 @@ async function materializeExternalSymlinks(deployed, upstream, pinnedSha) {
         const target = await resolvedTarget(path);
         const inside = target === deployedRoot || target.startsWith(`${deployedRoot}/`);
         if (inside) continue;
+        const targetInfo = await lstat(target);
         const allowedRoot = target === upstreamRoot || target.startsWith(`${upstreamRoot}/`) ? upstreamRoot : await findPinnedRoot(target);
         if (!allowedRoot) throw new Error(`RUNTIME_EXTERNAL_LINK_FORBIDDEN ${path}`);
         const targetRelative = relative(allowedRoot, target).split('/').join('/');
         if (!targetRelative || targetRelative === '.git' || targetRelative.startsWith('.git/')) throw new Error(`RUNTIME_EXTERNAL_TARGET_FORBIDDEN ${targetRelative}`);
-        if (/(^|\/)(?:\.env(?:\.|$)|\.npmrc(?:$|\/)|credentials?(?:[-_.]|$)|private[-_]?key(?:[-_.]|$)|cookie(?:[-_.]|$)|.*\.duckdb(?:\.wal)?$|.*\.sqlite(?:-wal|-shm)?$|.*\.log$)/i.test(targetRelative)) throw new Error(`RUNTIME_EXTERNAL_DENYLIST ${targetRelative}`);
+        if (!targetInfo.isDirectory() && /(^|\/)(?:\.env(?:\.|$)|\.npmrc(?:$|\/)|credentials?(?:[-_.]|$)|private[-_]?key(?:[-_.]|$)|cookie(?:[-_.]|$)|.*\.duckdb(?:\.wal)?$|.*\.sqlite(?:-wal|-shm)?$|.*\.log$)/i.test(targetRelative)) throw new Error(`RUNTIME_EXTERNAL_DENYLIST ${targetRelative}`);
         let replacement = copied.get(targetRelative);
         let created = false;
         if (!replacement) {
@@ -113,7 +114,8 @@ function option(name) {
 
 const upstream = option('--upstream');
 const output = option('--output');
-assert.equal(process.argv.filter(arg => arg.startsWith('--')).length, 2, 'RUNTIME_BUNDLE_OPTION_UNKNOWN');
+const online = process.argv.includes('--online');
+assert.equal(process.argv.filter(arg => arg.startsWith('--')).length, online ? 3 : 2, 'RUNTIME_BUNDLE_OPTION_UNKNOWN');
 assert.equal(await access(join(upstream, '.git')).then(() => true, () => false), true, 'UPSTREAM_CHECKOUT_REQUIRED');
 const upstreamSha = (await execFile('git', ['-C', upstream, 'rev-parse', 'HEAD'])).stdout.trim();
 assert.equal(upstreamSha, PIN, 'UPSTREAM_SHA_MISMATCH');
@@ -127,7 +129,10 @@ await mkdir(resolve(output, '..'), { recursive: true });
 const work = await mkdtemp(join(tmpdir(), 'dsh-runtime-bundle-'));
 const deployed = join(work, 'dsh');
 try {
-  await execFile('corepack', ['pnpm', 'deploy', '--legacy', '--offline', '--filter', '@deepseek-ai/dsh', '--prod', deployed], {
+  const deployArgs = ['pnpm', 'deploy', '--legacy'];
+  if (!online) deployArgs.push('--offline');
+  deployArgs.push('--filter', '@deepseek-ai/dsh', '--prod', deployed);
+  await execFile('corepack', deployArgs, {
     cwd: upstream,
     env: { ...process.env, COREPACK_ENABLE_DOWNLOAD_PROMPT: '0', CI: '1' },
     maxBuffer: 4 * 1024 * 1024,
@@ -137,7 +142,7 @@ try {
   await execFile('tar', ['--zstd', '--no-xattrs', '--no-acls', '-cf', output, '-C', deployed, '.'], { maxBuffer: 4 * 1024 * 1024 });
   const info = await stat(output);
   assert.ok(info.size > 0, 'RUNTIME_BUNDLE_EMPTY');
-  console.log(JSON.stringify({ status: 'BUILT', upstream_sha: upstreamSha, path: output, bytes: info.size, ...materialized }));
+  console.log(JSON.stringify({ status: 'BUILT', upstream_sha: upstreamSha, network_mode: online ? 'online' : 'offline', path: output, bytes: info.size, ...materialized }));
 } finally {
   await rm(work, { recursive: true, force: true });
 }
