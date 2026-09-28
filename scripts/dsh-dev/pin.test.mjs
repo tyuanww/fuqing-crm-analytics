@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:net';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { readToolchain, verifyUpstream } from './pin.mjs';
 import { assertFree } from './ports.mjs';
-import { repoRoot, resolveUpstream } from './paths.mjs';
+import { assertCli, repoRoot, resolveUpstream } from './paths.mjs';
 import { PINNED_SHA } from './constants.mjs';
 import { DSH_B0_SOURCE_SHA } from '../dsh-b0/gateway-policy.mjs';
 import { buildPluginOverlay } from './overlay.mjs';
@@ -59,6 +59,28 @@ test('verifyUpstream matches the pinned SHA when the checkout is present', async
   assert.equal(pin.upstream_sha, PINNED_SHA);
   const verified = await verifyUpstream(upstream, pin);
   assert.equal(verified.upstream_sha, PINNED_SHA);
+});
+
+test('verifyUpstream accepts the immutable production runtime bundle only when release-bound', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'dsh-dev-runtime-bundle-'));
+  const previousSha = process.env.DSH_UPSTREAM_SHA;
+  try {
+    await mkdir(join(dir, 'lib'), { recursive: true });
+    await writeFile(join(dir, 'lib/bin.js'), '#!/usr/bin/env node\n');
+    await writeFile(join(dir, 'package.json'), JSON.stringify({ name: '@deepseek-ai/dsh', version: '0.1.7-rc.2' }));
+    const pin = await readToolchain(repoRoot);
+    process.env.DSH_UPSTREAM_SHA = PINNED_SHA;
+    const upstream = resolveUpstream(dir);
+    const verified = await verifyUpstream(upstream, pin);
+    assert.equal(await assertCli(upstream), join(dir, 'lib/bin.js'));
+    assert.equal(verified.runtime_bundle, true);
+    process.env.DSH_UPSTREAM_SHA = '0'.repeat(40);
+    await assert.rejects(() => verifyUpstream(upstream, pin), /Runtime bundle upstream SHA/);
+  } finally {
+    if (previousSha === undefined) delete process.env.DSH_UPSTREAM_SHA;
+    else process.env.DSH_UPSTREAM_SHA = previousSha;
+    await rm(dir, { recursive: true, force: true });
+  }
 });
 
 test('cli check refuses a foreign --web-port without starting anything', () => {
