@@ -1,6 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
+import { mkdtemp, rm, symlink } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { promisify } from 'node:util';
+import { execFile } from 'node:child_process';
 import {
   B0_DEMO_DISABLE_IDS, COMPETITION_VITE_PORT, COMPETITION_WEB_PORT, DEV_WEB_PORT, FOREIGN_PORTS,
   PINNED_SHA, PLUGIN_UI_ID, PORT_RANGE, PORTS, SHINE_BRAND_UI_ID, SHINE_WATERFALL_UI_ID, SHINE_CROWD_ACTION_UI_ID, SHINE_QUERY_UI_ID, SHINE_BOARD_UI_ID, SHINE_FUNNEL_UI_ID,
@@ -10,6 +16,20 @@ import { assertNoB0Disables, buildPluginDisable, buildPluginOverlay, buildShineB
 import { defaultShineBrandPath, defaultShineWaterfallPath, defaultShineCrowdActionPath, defaultShineQueryPath, defaultShineBoardPath, defaultShineFunnelPath } from './paths.mjs';
 import { assertOwnedHost, assertOwnedPort } from './ports.mjs';
 import { isolatedEnv, parseServeArgs, profileInstallPaths, profilePluginAddArgs, resolveShineBrandPath, resolveShineWaterfallPath, resolveShineCrowdActionPath, resolveShineQueryPath, resolveShineBoardPath, resolveShineFunnelPath } from './serve.mjs';
+
+const execFileAsync = promisify(execFile);
+
+test('CLI invoked through an active-release directory symlink runs its command', async () => {
+  const repo = join(dirname(fileURLToPath(import.meta.url)), '../..');
+  const temp = await mkdtemp(join(tmpdir(), 'dsh-cli-release-link-'));
+  try {
+    await symlink(repo, join(temp, 'current'), 'dir');
+    const { stdout } = await execFileAsync(process.execPath, [join(temp, 'current/scripts/dsh-dev/cli.mjs'), '--help']);
+    assert.match(stdout, /^Usage: node scripts\/dsh-dev\/cli\.mjs /);
+  } finally {
+    await rm(temp, { recursive: true, force: true });
+  }
+});
 
 test('isolated launch accepts an explicit public CA bundle without forwarding keys or TLS bypass', () => {
   const additions = {
