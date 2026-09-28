@@ -32,6 +32,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
+          lfs: true
           persist-credentials: false
           ref: ${{ inputs.release_tag }}
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
@@ -47,6 +48,11 @@ jobs:
           set -euo pipefail
           command -v zstd
           zstd --version
+      - name: Verify release LFS assets are hydrated
+        run: |
+          set -euo pipefail
+          git lfs checkout
+          node --input-type=module -e "import { brandAssets } from './scripts/dsh-b0/brand-assets.mjs'; await brandAssets(process.cwd());"
       - name: Refuse unreviewed or dirty source
         env:
           REVIEWED_SHA: ${{ inputs.reviewed_sha }}
