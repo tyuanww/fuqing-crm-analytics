@@ -80,6 +80,7 @@ test('secret scan distinguishes explicit synthetic fixtures from real assignment
   assert.deepEqual(scanText("SECRET = 'AWS_SECRET_ACCESS_KEY'", 'credential-provider-env/index.js'), []);
   assert.deepEqual(scanText("TOKEN = 'AWS_CONTAINER_AUTHORIZATION_TOKEN'", 'sdk/base.js'), []);
   assert.deepEqual(scanText("TOKEN = 'remove_authentication_token'", 'semantic-conventions/experimental_attributes.js'), []);
+  assert.deepEqual(scanText("TOKEN = 'set_authentication_token'", 'semantic-conventions/experimental_attributes.js'), []);
   assert.deepEqual(scanText(`API_KEY = '${realSecret}'`, 'config/runtime.env'), ['SECRET_PATTERN config/runtime.env']);
   assert.deepEqual(scanText(`API_KEY = '${realSecret}'`, 'node_modules/vendor.js'), ['SECRET_PATTERN node_modules/vendor.js']);
   assert.deepEqual(scanText(`TOKEN = '${githubPat}'`, 'node_modules/vendor.js', { scanAssignments: false }), ['SECRET_PATTERN node_modules/vendor.js']);
@@ -144,18 +145,33 @@ test('promotion receives and records the pinned upstream runtime bundle', async 
 });
 test('install rejects the unverified default path', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); await assert.rejects(() => installRelease({artifact:archive,manifestPath:m,releaseRoot:join(root,'release-root'),tag:'dsh-test'}), /RELEASE_TRUST_INPUTS_REQUIRED/); });
 test('release evidence workflow accepts a candidate descendant of main', async () => { const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-evidence.yml'), 'utf8'); assert.match(workflow, /git merge-base --is-ancestor origin\/main "\$REVIEWED_SHA"/); });
-test('release evidence workflow permits the pinned runtime dependency fetch', async () => { const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-evidence.yml'), 'utf8'); assert.match(workflow, /runtime-bundle\.mjs[\s\S]*--online/); });
+test('release preflight workflow permits the pinned runtime dependency fetch', async () => { const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-preflight.yml'), 'utf8'); const source = await readFile(join(process.cwd(), 'scripts/release/preflight.mjs'), 'utf8'); assert.match(source, /runtime-bundle\.mjs[\s\S]*--online/); assert.match(workflow, /scripts\/dsh\.mjs preflight/); });
 test('release evidence workflow hydrates and verifies LFS brand assets', async () => {
   const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-evidence.yml'), 'utf8');
   assert.match(workflow, /lfs:\s*true/);
   assert.match(workflow, /git lfs checkout/);
   assert.match(workflow, /brand-assets\.mjs/);
+  assert.match(workflow, /preflight_run_id/);
+  assert.match(workflow, /dsh-release-preflight\.yml/);
+  assert.match(workflow, /Reuse the exact preflight runtime bundle/);
+});
+test('release preflight builds the runtime before protected tag creation', async () => {
+  const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-preflight.yml'), 'utf8');
+  const source = await readFile(join(process.cwd(), 'scripts/release/preflight.mjs'), 'utf8');
+  assert.match(workflow, /reviewed_sha/);
+  assert.match(workflow, /scripts\/dsh\.mjs preflight/);
+  assert.match(workflow, /dsh-rc2-preflight-/);
+  assert.match(source, /runtime-bundle\.mjs/);
+  assert.match(source, /--online/);
+  assert.match(source, /scripts\/dsh\.mjs', 'test'/);
 });
 test('release publish workflow binds the exact evidence run and protected tag', async () => {
   const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-publish.yml'), 'utf8');
   assert.match(workflow, /actions\/runs\/\$EVIDENCE_RUN_ID/);
   assert.match(workflow, /dsh-release-evidence\.yml/);
-  assert.match(workflow, /tags\/protection/);
+  assert.match(workflow, /rulesets\?per_page=100/);
+  assert.match(workflow, /dsh-release-tags-immutable/);
+  assert.doesNotMatch(workflow, /tags\/protection/);
   assert.match(workflow, /annotated-tag\.json/);
   assert.match(workflow, /TAG_TARGET_CHANGED_AFTER_PUBLISH/);
   assert.match(workflow, /TAG_TARGET_CHANGED_FINAL/);

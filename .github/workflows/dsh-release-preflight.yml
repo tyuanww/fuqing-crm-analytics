@@ -1,0 +1,66 @@
+name: DSH rc2 release preflight
+
+on:
+  workflow_dispatch:
+    inputs:
+      reviewed_sha:
+        description: 'Exact clean candidate commit to preflight before creating a protected tag'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dsh-release-preflight-${{ inputs.reviewed_sha }}
+  cancel-in-progress: false
+
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          lfs: true
+          persist-credentials: false
+          ref: ${{ inputs.reviewed_sha }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '24.19.0'
+          package-manager-cache: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        id: python
+        with:
+          python-version: '3.14'
+      - name: Verify the reviewed source
+        env:
+          REVIEWED_SHA: ${{ inputs.reviewed_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$REVIEWED_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$REVIEWED_SHA"
+          git merge-base --is-ancestor origin/main "$REVIEWED_SHA"
+          test -z "$(git status --porcelain --untracked-files=all)"
+          git lfs checkout
+          node --input-type=module -e "import { brandAssets } from './scripts/dsh-b0/brand-assets.mjs'; await brandAssets(process.cwd());"
+      - name: Build the exact pinned runtime before tag creation
+        env:
+          B0_PYTHON: ${{ steps.python.outputs.python-path }}
+          REVIEWED_SHA: ${{ inputs.reviewed_sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/dsh-preflight"
+          node scripts/dsh.mjs preflight \
+            --python "$B0_PYTHON" \
+            --source-sha "$REVIEWED_SHA" \
+            --tag "dsh-preflight-${REVIEWED_SHA:0:12}" \
+            --runtime-output "$RUNNER_TEMP/dsh-preflight/upstream-runtime.tar.zst" \
+            --summary-output "$RUNNER_TEMP/dsh-preflight/release-preflight.json"
+      - name: Upload the preflight runtime and summary
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: dsh-rc2-preflight-${{ inputs.reviewed_sha }}
+          path: ${{ runner.temp }}/dsh-preflight/
+          if-no-files-found: error

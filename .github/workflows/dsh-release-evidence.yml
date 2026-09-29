@@ -12,8 +12,13 @@ on:
       approval_ref:
         required: true
         type: string
+      preflight_run_id:
+        description: 'Successful dsh-release-preflight run for the exact reviewed SHA'
+        required: true
+        type: string
 
 permissions:
+  actions: read
   contents: read
   id-token: write
   attestations: write
@@ -69,6 +74,39 @@ jobs:
           test "$(git rev-parse HEAD)" = "$REVIEWED_SHA"
           git merge-base --is-ancestor origin/main "$REVIEWED_SHA"
           test -z "$(git status --porcelain --untracked-files=all)"
+      - name: Require a successful exact-SHA preflight
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREFLIGHT_RUN_ID: ${{ inputs.preflight_run_id }}
+          REVIEWED_SHA: ${{ inputs.reviewed_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$PREFLIGHT_RUN_ID" =~ ^[0-9]+$ ]]
+          mkdir -p "$RUNNER_TEMP/dsh-preflight"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$PREFLIGHT_RUN_ID" > "$RUNNER_TEMP/preflight-run.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$PREFLIGHT_RUN_ID/jobs?per_page=100" > "$RUNNER_TEMP/preflight-jobs.json"
+          python3 - "$RUNNER_TEMP/preflight-run.json" "$RUNNER_TEMP/preflight-jobs.json" "$REVIEWED_SHA" <<'PY'
+          import json, pathlib, sys
+          run = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          jobs = json.loads(pathlib.Path(sys.argv[2]).read_text())
+          expected = sys.argv[3]
+          assert run.get('path') == '.github/workflows/dsh-release-preflight.yml', run.get('path')
+          assert run.get('event') == 'workflow_dispatch', run.get('event')
+          assert run.get('status') == 'completed' and run.get('conclusion') == 'success', run
+          preflight = [job for job in jobs.get('jobs', []) if job.get('name') == 'preflight']
+          assert len(preflight) == 1 and preflight[0].get('conclusion') == 'success', preflight
+          PY
+          gh run download "$PREFLIGHT_RUN_ID" --repo "$GITHUB_REPOSITORY" \
+            --name "dsh-rc2-preflight-$REVIEWED_SHA" \
+            --dir "$RUNNER_TEMP/dsh-preflight"
+          python3 - "$RUNNER_TEMP/dsh-preflight/release-preflight.json" "$REVIEWED_SHA" <<'PY'
+          import json, pathlib, sys
+          summary = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          assert summary['schema_version'] == 'release-preflight/v1'
+          assert summary['status'] == 'PASS'
+          assert summary['source_sha'] == sys.argv[2]
+          assert summary['dsh_upstream_sha'] == '477b4f420553e8a52c2fbccc464d7561b239c443'
+          PY
       - name: Prepare the exact pinned upstream build closure
         env:
           B0_PYTHON: ${{ steps.python.outputs.python-path }}
@@ -88,14 +126,12 @@ jobs:
             dsh-plugins/shine-funnel; do
             node "$plugin/build.mjs" "$UPSTREAM"
           done
-      - name: Build the immutable upstream production runtime bundle
+      - name: Reuse the exact preflight runtime bundle
         run: |
           set -euo pipefail
           mkdir -p "$GITHUB_WORKSPACE/.context/release-runtime"
-          node scripts/release/runtime-bundle.mjs \
-            --upstream "$GITHUB_WORKSPACE/.context/dsh-b0/upstream-0.1.7-rc.2" \
-            --output "$GITHUB_WORKSPACE/.context/release-runtime/upstream-runtime.tar.zst" \
-            --online
+          cp "$RUNNER_TEMP/dsh-preflight/upstream-runtime.tar.zst" \
+            "$GITHUB_WORKSPACE/.context/release-runtime/upstream-runtime.tar.zst"
       - name: Build release evidence from the exact runtime bundle
         env:
           RELEASE_TAG: ${{ inputs.release_tag }}

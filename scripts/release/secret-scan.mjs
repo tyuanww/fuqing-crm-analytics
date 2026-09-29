@@ -22,6 +22,7 @@ const BENIGN_PROTOCOL_LITERAL = new Set([
   'AWS_CONTAINER_CREDENTIALS_FULL_URI',
   'AWS_CONTAINER_CREDENTIALS_RELATIVE_URI',
   'remove_authentication_token',
+  'set_authentication_token',
 ]);
 
 export function scanText(text, name = '<input>', { scanAssignments = true } = {}) {
