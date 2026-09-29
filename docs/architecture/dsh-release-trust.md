@@ -23,7 +23,7 @@ owner/restart dependency check -> atomic current activation
 healthcheck + release UAT -> authorized cutover or rollback
 ```
 
-每一层都绑定 source SHA、产品版本、DSH upstream SHA 和 payload digest。当前 `0.18.0.2` 分支的 allowlist 还明确保留 `.github/workflows/dsh-release-evidence.yml`，因为接收后的 reviewed source 必须包含生成和验证 evidence 的 workflow；无关 workflow 不会因此被放进 artifact。
+每一层都绑定 source SHA、产品版本、DSH upstream SHA 和 payload digest。当前 `0.19.0.0` 分支的 allowlist 还明确保留 `.github/workflows/dsh-release-evidence.yml`，因为接收后的 reviewed source 必须包含生成和验证 evidence 的 workflow；无关 workflow 不会因此被放进 artifact。
 
 ## 为什么 fail-closed
 

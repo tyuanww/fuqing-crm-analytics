@@ -1,12 +1,12 @@
 # DSH rc2 release artifact reference
 
-本页是 DSH rc2 发布工具的命令和输入输出参考。当前候选分支产品版本为 `0.18.0.2`，DSH 固定为 `0.1.7-rc.2`，上游 SHA 为 `477b4f420553e8a52c2fbccc464d7561b239c443`。本页描述的是可审查的离线准备和接收合同，不代表 GitHub Release、杭州安装或生产切换已经完成。
+本页是 DSH rc2 发布工具的命令和输入输出参考。当前候选分支产品版本为 `0.19.0.0`，DSH 固定为 `0.1.7-rc.2`，上游 SHA 为 `477b4f420553e8a52c2fbccc464d7561b239c443`。本页描述的是可审查的离线准备和接收合同，不代表 GitHub Release、杭州安装或生产切换已经完成。
 
 ## 命令入口
 
 根目录 `package.json` 将 `pnpm dsh` 映射到 `node scripts/dsh.mjs`。运行时要求 Node 24.x；锁文件使用 pnpm 11.7.0。
 
-根目录 `package.json` 的 `version` 保持 npm 三段 projection（当前为 `0.18.0`），以兼容 npm 工具链；候选发布产品版本以根目录 `VERSION` 的四段值 `0.18.0.2` 为准，artifact manifest 和发布门禁均读取 `VERSION`。
+根目录 `package.json` 的 `version` 保持 npm 三段 projection（当前为 `0.19.0`），以兼容 npm 工具链；候选发布产品版本以根目录 `VERSION` 的四段值 `0.19.0.0` 为准，artifact manifest 和发布门禁均读取 `VERSION`。
 
 | 命令 | 作用 | 成功/阻断行为 |
 |---|---|---|

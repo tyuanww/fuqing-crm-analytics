@@ -1,6 +1,6 @@
 # 从对话生成可编辑 HTML 驾驶舱
 
-0.16.0.2（[#50](https://github.com/tyuanww/fuqing-crm-analytics/pull/50)）是公开 main 的功能基线；现役 6677 当前加载 0.18.0.0 候选插件和 DSH 0.1.7-rc.1。对话自己写 HTML，工作台负责收件、预览和确认保存。工作台不把查出的数字拼成页面，也不把 CRM 快照自动组进这一页。
+0.16.0.2（[#50](https://github.com/tyuanww/fuqing-crm-analytics/pull/50)）是此功能的历史基线；本分支产品候选为 0.19.0.0，现役 6677 仍加载旧 RC1 checkout，尚未切换到 rc2。对话自己写 HTML，工作台负责收件、预览和确认保存。工作台不把查出的数字拼成页面，也不把 CRM 快照自动组进这一页。
 
 已经在驾驶舱里的产物，用「用 AI 改」修改，见 [用原生 AI 修改产物](cockpit-ai-edit.md)。本文只写新生成一页。
 

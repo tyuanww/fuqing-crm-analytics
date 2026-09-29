@@ -1,11 +1,11 @@
 # 项目状态 (Project Status)
 > 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。本页是当前运行与交付边界的 SSOT。
 
-## 当前快照（2026-09-27，DSH 0.1.7-rc.2 / VERSION 0.18.0.2，release artifact allowlist 修复分支）
+## 当前快照（2026-09-29，DSH 0.1.7-rc.2 / VERSION 0.19.0.0，release artifact 与 HTML 编辑候选分支）
 
 | 项 | 状态 |
 |---|---|
-| Git 基线 | 当前 release 分支 `codex/release-artifact-allowlist` 基于已合并的 main `00823ff533b4cc32861cc70e3f8bda5d374f3b14`，PR [#63](https://github.com/tyuanww/fuqing-crm-analytics/pull/63) 的 docs commit CI 已全绿但仍等待审查；allowlist hotfix commit 为 `58ea8c1e`。合并后的 main CI 已通过；当前 `.2` artifact 尚未生成。 |
+| Git 基线 | 当前 release 分支 `codex/release-artifact-allowlist` 基于已合并的 main `e698c23e`，产品 VERSION 为 `0.19.0.0`；本分支已推送，PR/CI 状态以 GitHub 远端为准。GitHub Release、tag 和杭州切换尚未执行。 |
 | 产品 | **PARTIAL / RELEASE_BLOCKED**；T2 已完成，T3–T12 的本地合同与 synthetic 验证已完成（当前 68/68），GitHub main/tag protection 和 evidence environment 已配置；杭州现役旧 checkout 的 loopback SLI 已完成 60/60，`zstd` 已可用且 `pre-review` artifact 的隔离 receive/doctor 已通过。独立 reviewer/OIDC、Python 3.14+ 冷运行时、rc2 冷验证、operator route/正负探针、杭州 HTTP backpressure、public HTML、现场 owner 和 UAT 未完成。既有 HTML 收件箱能力保持，完整浏览器 UAT 仍开放。 |
 | DSH | 官方上游固定为 `477b4f42`（0.1.7-rc.2），不修改上游源码；杭州切换未执行。 |
 | CRM | 杭州 backend `127.0.0.1:18093`、frontend `127.0.0.1:18094` 健康；生产 checkout 固定在 `47f49616`。 |
@@ -18,10 +18,10 @@
 
 - rc2 候选验证账本见 [verification-20260927](docs/release/dsh-rc2-candidate/verification.md)；T2–T12 gate 见 `docs/release/dsh-rc2-candidate/`；当前 release artifact 的命令、allowlist 和接收边界见 [artifact reference](docs/reference/dsh-rc2-release-artifact.md)；固定上游 checkout、dsh-dev、B0 clean rebuild、PR #61 CI 和合并后的 main CI 均通过，main/tag protection 与 evidence environment 已配置，杭州现役旧 checkout 的 loopback SLI 已有 60/60 证据；真实模型、131GB DuckDB、独立 reviewer/OIDC attestation、GitHub Release、rc2 冷验证、杭州 route/重启和真实 HTTP backpressure 仍 `NOT_RUN`。
 - 本机候选 worktree 不含 DuckDB/WAL 文件；这里只使用 synthetic fixture 和隔离小库，杭州生产数据状态不由本地文件推断。杭州 `pre-review` artifact 已在 `/tmp` 隔离目录完成 receive/doctor，未安装依赖或写入现役目录；目标仍只有 Python 3.12.3，未满足项目 Python 3.14+ 冷运行时要求。
-- 基线 merged-main internal artifact 证据仍使用 provisional tag `dsh-0.18.0.1-main-00823ff5`；source SHA `00823ff533b4cc32861cc70e3f8bda5d374f3b14`、app tarball SHA-256 `b11c4b43436eb06f1821c1891121b690e5488effa0c75d421f285e051c8fbf35`、manifest SHA-256 `4642f4614d81b6f2f8777485793b20f2c140eb3523efa46475831fe4398d36d7`、entries `1676`；pinned upstream `477b4f42` git-archive tarball SHA-256 `ddc0cb7b74c938e097f918f44e88e67a83bdde555db18f49cb7a3c9740744e32` 已在隔离 `/tmp` 生成，尚未上传或绑定 publication sidecar；manifest 以 `.context/release-evidence/dsh-0.18.0.1-main-00823ff5/release-manifest.v1.json` 为唯一来源；接收目录为一次性 synthetic 临时目录，未创建 draft/tag/release。`0.18.0.2` 仅表示本分支的 allowlist 修复版本，尚未生成新的发布 artifact。
+- 基线 merged-main internal artifact 证据仍使用 provisional tag `dsh-0.18.0.1-main-00823ff5`；source SHA `00823ff533b4cc32861cc70e3f8bda5d374f3b14`、app tarball SHA-256 `b11c4b43436eb06f1821c1891121b690e5488effa0c75d421f285e051c8fbf35`、manifest SHA-256 `4642f4614d81b6f2f8777485793b20f2c140eb3523efa46475831fe4398d36d7`、entries `1676`；pinned upstream `477b4f42` git-archive tarball SHA-256 `ddc0cb7b74c938e097f918f44e88e67a83bdde555db18f49cb7a3c9740744e32` 已在隔离 `/tmp` 生成，尚未上传或绑定 publication sidecar；manifest 以 `.context/release-evidence/dsh-0.18.0.1-main-00823ff5/release-manifest.v1.json` 为唯一来源；接收目录为一次性 synthetic 临时目录，未创建 draft/tag/release。`0.18.0.2` 及其 pre-review 包只保留为历史证据；`0.19.0.0` 候选 artifact 尚未生成。
 
 - Artifact Inbox 数据层、自由 HTML 候选保存、原生 `write/edit/present` 接收、轮询和单卡片局部 patch 已合入并在杭州运行。
-- PR #61 与合并后 main CI 已完成；Tailscale SSH host preflight 与 CRM+DSH/page loopback healthcheck 已通过；杭州 CRM/DSH/WeKnora 切换、Cloudflare 入口和安全收尾仍未执行；本地与生产均不改 DSH 上游。
+- 历史 PR #61 与合并后 main CI 已完成；Tailscale SSH host preflight 与 CRM+DSH/page loopback healthcheck 已通过；本候选的 PR/CI、杭州 CRM/DSH/WeKnora 切换、Cloudflare 入口和安全收尾仍按现场门禁处理；本地与生产均不改 DSH 上游。
 - 隔离合成环境的 Playwright headed 旅程已通过（页面生成/预览、局部编辑、保存新版本、回滚和脏数据离开保护）；该 fixture 的生成步骤走 live adapter fallback，不能当作浏览器级 Artifact Inbox intake 证据。完整 DSH shell/生产收件箱旅程与本人 UAT 尚未执行，真实模型逐格式编辑、P13、扫描 PDF OCR、复杂 Office、图谱剩余语义核对仍未完成，不能记为产品全量通过。
 
 ## 当前边界

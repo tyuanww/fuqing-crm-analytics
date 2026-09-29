@@ -2,7 +2,7 @@
 
 当前提交、版本和现役见 [STATUS](./STATUS.md)。目录、端口和检索见 [维护地图](./docs/operating/maintainer-map.md)。对话生成 HTML 的步骤见 [从对话生成 HTML 驾驶舱](./docs/operating/cockpit-native-html.md)。产品仍 PARTIAL。
 
-> 当前候选（2026-09-27）：release 分支产品 VERSION `0.18.0.2`，DSH `0.1.7-rc.2`，固定 upstream `477b4f42`；PR #63 尚未合并。Mac 是开发/测试端，杭州 Windows + WSL 仍运行未切换的 RC1 checkout，候选 artifact 尚未安装。当前运行事实以 [STATUS](./STATUS.md) 为准；完整生产浏览器旅程与本人 UAT 仍开放。
+> 当前候选（2026-09-29）：release 分支产品 VERSION `0.19.0.0`，DSH `0.1.7-rc.2`，固定 upstream `477b4f42`。GitHub Release、杭州 artifact 安装与切换尚未执行。Mac 是开发/测试端，杭州 Windows + WSL 仍运行未切换的 RC1 checkout；当前运行事实以 [STATUS](./STATUS.md) 为准，完整生产浏览器旅程与本人 UAT 仍开放。
 
 下方9月5–10日的决策、端口和候选追加保留为历史记录，不作为当前服务或Git HEAD。
 

@@ -1,6 +1,6 @@
 # 交接说明（短表）
 
-> **最后更新**: 2026-09-27。公共 main 已合并到 `00823ff5`；当前 release 分支 VERSION **0.18.0.2**、PR #63 等待审查，allowlist hotfix 尚未生成 `.2` artifact。杭州现役仍是 DSH 0.1.7-rc.1 的旧 checkout，候选未切换。见 [STATUS.md](STATUS.md)。
+> **最后更新**: 2026-09-29。当前 release 分支产品 VERSION **0.19.0.0**，DSH 固定为 0.1.7-rc.2；GitHub Release、杭州 artifact 安装与切换尚未执行。杭州现役仍是 DSH 0.1.7-rc.1 的旧 checkout，候选未切换。见 [STATUS.md](STATUS.md)。
 > 细节以代码与下列 SSOT 为准，**不要**在本文件堆 sprint 日记。
 
 ## 现役入口
