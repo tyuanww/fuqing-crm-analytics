@@ -115,7 +115,7 @@ def _open_b0(config, profile, temp):
         # disabled, including during connection config application. Establish
         # the private directory first, then lock access/config before any data
         # query or injected workload. Extension autoload/install is already off.
-        # On the isolated pinned 1.5.3, connect(config=...) reports this setting but
+        # On the isolated pinned release, connect(config=...) reports this setting but
         # does not enforce the limit in an actual external sort. Reapplying it
         # after instance creation fixes the real engine quota (regression test
         # runs a bounded owned child without relying on the parent stop).

@@ -14,7 +14,7 @@
 | **#SEC-credential-rotate** | **P0** | 现用管理员口令曾出现在公开 PR 正文；当前正文已清理，但历史副本不能视为已撤销 | 轮换全部受影响口令，重启 backend，旧口令登录失败，新口令登录成功 | owner 选定口令与维护窗口；不得把新值写入 Git/PR |
 | **#OPS-backup-recovery** | **P0** | 复核时备份目录无可用恢复点；旧 `shutil.copy2 + zstd` 路径已硬停用，但尚无替代的可恢复备份 | DuckDB 原生一致性副本完成、SHA/表级抽检通过、另一目录/机器恢复演练通过、RPO/RTO 有记录 | 需要 ≥2× 数据库体积 + 20% 空间、停写窗口和备份介质；旧 launchd 不得安装 |
 | **#OPS-runtime-sync** | **P1** | 本机运行 venv 未与新 lock 同步，当前 uvicorn 仍是合并前进程 | 合并后 `git pull --ff-only`，按 lock 同步，`pip check`/health/登录/关键看板抽检通过 | 依赖代码 merge + owner 发布窗口 |
-| **#DB-duckdb-1.5.5** | **P1** | lock 仍为 1.5.3；1.5.5 已是稳定版，存在升级价值但禁止无恢复点升级 | 独立 PR 更新 pins；副本兼容、全量测试、ETL 和 24h 观察通过 | **硬依赖 #OPS-backup-recovery 完成** |
+| **#DB-duckdb-1.5.6** | **P1** | 声明、CRM/e2e/B0 lock 已统一为 1.5.6；杭州现役 runtime 尚未切换 | 备份/恢复演练、同一 release artifact 现场切换、只读业务抽检和 24h 观察通过 | **硬依赖 #OPS-backup-recovery 完成** |
 | **#OPS-release-check-retire** | **P2** | 旧 checker 仍等待已过期的 1.5.4 目标，且历史 launchd 执行曾 exit 126 | 核对宿主已安装实例并人工 unload/remove；仓库模板保持 legacy 标识 | 删除/卸载是外部状态变更，需 owner 授权 |
 | **#SUPPLY-dev-audit** | **P2** | `npm audit --omit=dev` 为 0；完整 audit 仍有 dev/build/test 链告警 | 在不破坏 Vite/OpenAPI/Vitest 的前提下升级或替换相关工具链；生产审计持续为 0 | 只按可利用路径和上游兼容性排期，不用 `--force` |
 
