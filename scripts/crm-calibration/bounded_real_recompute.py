@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bounded real GSV/AOV/AUS expansion. DuckDB 1.5.3 read-only; never copies the archive."""
+"""Bounded real GSV/AOV/AUS expansion. DuckDB 1.5.6 read-only; never copies the archive."""
 from __future__ import annotations
 
 import json
@@ -48,7 +48,7 @@ def _public(row):
 
 def main():
     import duckdb
-    if duckdb.__version__ != '1.5.3':
+    if duckdb.__version__ != '1.5.6':
         raise SystemExit(f'refuse archive engine upgrade: {duckdb.__version__}')
     if not ARCHIVE.is_file():
         raise SystemExit('archive missing')
@@ -100,7 +100,7 @@ def main():
     unchanged = (before.st_size, before.st_mtime_ns) == (after.st_size, after.st_mtime_ns)
     http = _http_readiness_and_sample()
     summary = {
-        'engine': 'duckdb-1.5.3-readonly', 'archive_unchanged': unchanged,
+        'engine': 'duckdb-1.5.6-readonly', 'archive_unchanged': unchanged,
         'elapsed_seconds': round(time.monotonic() - started, 3),
         'windows': public_rows, 'http': http,
         'readiness_classes': {item['metric_id']: item['acceptance_class'] for item in readiness['metrics']},

@@ -53,6 +53,7 @@ async function pruneDevelopmentFiles(root) {
 async function scanRuntimeTree(root) {
   let files = 0;
   let scannedBytes = 0;
+  const findings = [];
   async function walk(directory) {
     for (const entry of await readdir(directory, { withFileTypes: true })) {
       const path = join(directory, entry.name);
@@ -73,12 +74,12 @@ async function scanRuntimeTree(root) {
         // protocol identifiers observed in pinned third-party bundles; turning
         // assignment scanning off for an entire directory would let a real
         // API_KEY/PASSWORD value through the immutable runtime artifact.
-        const findings = scanText(await readFile(path, 'utf8'), rel);
-        if (findings.length) throw new Error(`RUNTIME_SECRET_SCAN_FAILED ${findings.join(';')}`);
+        findings.push(...scanText(await readFile(path, 'utf8'), rel));
       }
     }
   }
   await walk(root);
+  if (findings.length) throw new Error(`RUNTIME_SECRET_SCAN_FAILED ${[...new Set(findings)].sort().join(';')}`);
   return { files, scanned_bytes: scannedBytes };
 }
 

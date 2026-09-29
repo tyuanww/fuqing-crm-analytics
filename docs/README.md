@@ -101,7 +101,7 @@ fuqing-crm-analytics/docs/
 │
 ├── maintenance/
 │   ├── BOOTSTRAP.md
-│   └── duckdb-backup-upgrade-checklist.md  备份/1.5.5 升级（仅清单）
+│   └── duckdb-backup-upgrade-checklist.md  备份/1.5.6 升级（仅清单）
 │
 └── sprints/                           仅进行中 + archive
     ├── README.md

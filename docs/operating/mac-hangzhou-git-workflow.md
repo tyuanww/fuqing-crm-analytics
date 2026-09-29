@@ -47,17 +47,19 @@ PR 的 CI、代码审查和人工验收通过后才合入 `main`。`git push` �
 
 ## 杭州生产流程
 
-通过 Tailscale SSH 进入 WSL 后，只做只读核对和批准版本切换：
+GitHub Release/Deployments 不会自动连接杭州 Tailscale，也不会自动更新 6677。通过 Tailscale SSH 进入 WSL 后，发布 owner 只接收 GitHub Release 的完整 immutable artifact，并做只读核对和批准版本切换；生产禁止 `git pull`、浮动 `main` 和现场编译：
 
 ```bash
 ssh hangzhou-wsl
 cd /srv/shinemage/src/fuqing-crm-analytics
-git fetch origin --prune
-git checkout --detach <approved-main-sha>
-git status --short --branch
+# 先把 source/runtime/manifest/checksum/evidence/attestation 放入 /srv/shinemage/incoming
+# 按 docs/operating/dsh-rc2-runbook.md 的完整 RELEASE_* 环境变量块执行校验和安装；
+# 下面只展示必填的版本与目录变量，不能单独执行：
+RELEASE_TAG=dsh-<version> RELEASE_ROOT=/srv/shinemage/dsh \
+  deploy/wsl/install-release.sh  # 需同时提供 runbook 列出的完整 RELEASE_* 变量
 ```
 
-切换前要记录旧 SHA、服务状态、配置校验和回退点；切换后按杭州运行层的预检、Compose 校验、CRM/DSH/WeKnora 内部健康检查和真实业务验收顺序执行。生产服务使用 `/etc/shinemage`、`/srv/shinemage/data` 和独立 runtime，不从 Mac 路径读取配置。
+切换前要记录旧 SHA、服务状态、配置校验和回退点；安装只写新的 side-by-side release 目录，`activate-release.sh` 只切换 `current` symlink，不重启服务。获得现场授权后才重启自有 DSH service，再按杭州运行层的预检、Compose 校验、CRM/DSH/WeKnora 内部健康检查和真实业务验收顺序执行。生产服务使用 `/etc/shinemage`、`/srv/shinemage/data` 和独立 runtime，不从 Mac 路径读取配置。
 
 ## 回退和边界
 

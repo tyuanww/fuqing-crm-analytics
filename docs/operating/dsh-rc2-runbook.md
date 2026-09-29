@@ -1,6 +1,6 @@
 # DSH rc2 发布与回退 Runbook
 
-发布 owner 只接收 `PUBLISHED_VERIFIED` 的 publication sidecar，核对 tag、reviewed source SHA、rc2 upstream SHA、manifest schema、source tarball、固定 rc2 production runtime tarball、CI evidence index 和 `SHA256SUMS`。由于启用 immutable release 后发布资产不可再追加或修改，publication sidecar 在 draft 阶段只做合同预检，发布后由 workflow 重新生成并作为 Actions evidence artifact/杭州 evidence 文件交付；它不作为发布后再上传的 GitHub Release asset。release workflow 在固定 upstream checkout 上构建并 attests 两个 tarball；杭州必须同时提供两个文件和两份 attestation，服务器禁止 `git pull`、浮动 main 和现场编译。
+发布 owner 只接收 `PUBLISHED_VERIFIED` 的 publication sidecar，核对 tag、reviewed source SHA、rc2 upstream SHA、manifest schema、source tarball、固定 rc2 production runtime tarball、CI evidence index 和 `SHA256SUMS`。创建 `dsh-*` immutable tag 前，必须先完成同一 reviewed SHA 的 `dsh-release-preflight`；evidence workflow 会下载并复用 preflight 生成的 runtime tarball，而不是在 tag 后首次发现依赖扫描问题。由于启用 immutable release 后发布资产不可再追加或修改，publication sidecar 在 draft 阶段只做合同预检，发布后由 workflow 重新生成并作为 Actions evidence artifact/杭州 evidence 文件交付；它不作为发布后再上传的 GitHub Release asset。release workflow 在固定 upstream checkout 上构建并 attests 两个 tarball；杭州必须同时提供两个文件和两份 attestation，服务器禁止 `git pull`、浮动 main 和现场编译。GitHub tag 信任由 `dsh-release-tags-immutable` Ruleset 校验，不使用已废弃的 `/tags/protection` API。
 
 ## 现场顺序
 

@@ -176,7 +176,10 @@ async function ticks(session, timeoutMs = 2500) {
 }
 
 export async function runIsolationProbe({ evidenceDir } = {}) {
-  const outDir = evidenceDir || join(repoRoot, 'docs/hackathon/free-html-cockpit/reports/lane-b');
+  // Each ordinary verification owns its evidence; dated reports are immutable.
+  const evidenceRoot = join(repoRoot, '.context/checks');
+  await mkdir(evidenceRoot, { recursive: true });
+  const outDir = evidenceDir || await mkdtemp(join(evidenceRoot, 'html-isolation-'));
   await mkdir(outDir, { recursive: true });
   const staticServer = createStaticServer();
   const proxy = createEgressProxy();

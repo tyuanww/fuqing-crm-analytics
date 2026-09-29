@@ -12,7 +12,7 @@ import { runLocalVerification } from './release/local-verify.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const releaseEvidence = join(root, '.context/release-evidence');
-const COMMANDS = ['dev', 'test', 'release', 'receive', 'reconcile', 'verify', 'rollback', 'doctor', 'status', 'why-blocked', 'retry', 'resume'];
+const COMMANDS = ['dev', 'test', 'preflight', 'release', 'receive', 'reconcile', 'verify', 'rollback', 'doctor', 'status', 'why-blocked', 'retry', 'resume'];
 function usage() {
   console.log(`Usage: pnpm dsh <command> [options]
 
@@ -134,6 +134,7 @@ async function receive(args) {
   console.log(`DSH_RECEIVE_PASS tag=${result.manifest.release_tag} entries=${result.entries} artifact_sha256=${result.sha256} destination=${destination}`);
 }
 async function test() { const tests = readdirSync(join(root, 'scripts/release')).filter(name => name.endsWith('.test.mjs')).map(name => join('scripts/release', name)); return execFileSync(process.execPath, ['--test', ...tests], { cwd: root, encoding: 'utf8', stdio: 'inherit' }); }
+async function preflight(args) { return execFileSync(process.execPath, [join(root, 'scripts/release/preflight.mjs'), ...args], { cwd: root, encoding: 'utf8', stdio: 'inherit' }); }
 async function verify() {
   await doctor();
   const local = await runLocalVerification();
@@ -152,6 +153,7 @@ async function main() {
   if (!COMMANDS.includes(command)) throw new Error(`DSH_COMMAND_UNKNOWN ${command}`);
   if (command === 'doctor') return doctor();
   if (command === 'release') return release(args);
+  if (command === 'preflight') return preflight(args);
   if (command === 'receive') return receive(args);
   if (command === 'test') return test();
   if (command === 'verify') return verify();
