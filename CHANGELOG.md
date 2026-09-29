@@ -1,3 +1,21 @@
+## [0.19.0.0] - 2026-09-29
+
+### Added
+
+- HTML 页面现在可以在页面内直接选择嵌套元素，先预览 AI 文案、布局和受控源码修改，再确认保存为新版本，并可查看历史与回退。
+- 发布流程新增不可变 artifact 校验、runtime bundle 生成、受保护 tag 复核、发布资产幂等上传、publication sidecar 和远端恢复证据。
+
+### Changed
+
+- 绑定业务数据的页面统一进入受控 CSS-only 路径；共享 CSS、动态区域、资源和映射范围由宿主与服务端共同限制。
+- HTML 选区上下文、源码映射、一次性认证、Cookie/CSRF/Origin/CORS、日志脱敏和 release CLI 统一使用 fail-closed 合同。
+- 开发入口统一为 Node 24 固定工具链下的 `pnpm dsh`，发布包保持 DSH 原生能力优先。
+
+### Fixed
+
+- 修复页面切换草稿泄漏、嵌套映射、属性值含 `>`、CSS 字符串含 `}`、超大选区和动态 Canvas/SVG 等边界问题。
+- 修复绑定页省略编辑来源时仍可改写 HTML/JS/资源/映射、vendor 包 secret assignment 漏扫，以及 emoji 前置导致的源码范围偏移。
+
 ## [0.18.0.2] - 2026-09-27
 
 ### Fixed
