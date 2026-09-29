@@ -18,6 +18,7 @@ from uuid import uuid4
 from backend.contracts.page_documents import PagePackage, is_package_too_large
 from backend.services.analytics.access import AnalyticsError, AnalyticsPrincipal, require
 from backend.services.analytics.first_purchase.asset_state import initialize_sqlite
+from backend.services.analytics.page_documents import _annotate_package
 from backend.contracts.competition_computed import DATA_SCOPE
 
 
@@ -137,9 +138,14 @@ class ArtifactInboxStore:
             if value is not None and (not isinstance(value, str) or not value or len(value) > 256):
                 fault(422, "INVALID_ARTIFACT", f"{key} 无效。")
         package = body.get("package")
+        canonical_package = None
         if package is not None:
             try:
                 package = PagePackage.model_validate(package).model_dump(mode="json")
+                # Page documents add host-owned node mappings before the
+                # candidate becomes durable. Keep the receipt payload as
+                # submitted, but hash the same canonical package for linking.
+                canonical_package = _annotate_package(package)
             except Exception as error:
                 if is_package_too_large(error):
                     fault(413, "PACKAGE_TOO_LARGE", "页面源码包超过大小上限。")
@@ -149,7 +155,7 @@ class ArtifactInboxStore:
         supplied_digest = body.get("content_hash")
         if source in {"native_present", "workspace_file"} and not supplied_digest:
             fault(422, "CONTENT_HASH_REQUIRED", "工作区产物必须提供内容哈希。")
-        expected_digest = _digest(package) if source == "page_package" else None
+        expected_digest = _digest(canonical_package) if source == "page_package" else None
         if source == "page_package" and supplied_digest is not None and supplied_digest != expected_digest:
             fault(422, "CONTENT_HASH_MISMATCH", "页面源码包内容哈希与回执不一致。")
         digest = expected_digest or supplied_digest
