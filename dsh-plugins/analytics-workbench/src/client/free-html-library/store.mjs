@@ -645,7 +645,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
         && request.runtime.package_hash === renderedPackageHash(state.current.package)
         && !state.current.binding_manifest?.bindings?.length && !state.current.binding_manifest?.result_refs?.length;
       const located = request.runtime ? (runtimeValid ? { ...request, ok: true, scope: 'rendered_element', label: request.tag } : { ok: false, error: { code: 'MAPPING_STALE', message: '选区已变化，请重新选择' } })
-        : request.source ? (source ? { ...source, ok: true, scope: 'source_range', label: source.tag } : { ok: false, error: { code: 'MAPPING_STALE', message: '选区已变化，请重新选择' } }) : bound.edit.locate(state.current?.package, request);
+        : request.source ? (source ? { ...source, ok: true, scope: 'exact_source_range', label: source.tag } : { ok: false, error: { code: 'MAPPING_STALE', message: '选区已变化，请重新选择' } }) : bound.edit.locate(state.current?.package, request);
       if (!located.ok) {
         emit({ selection: { ok: false, stale: true, requireReselect: true, label: located.error.message, code: located.error.code }, overlay: 'selection', liveStatus: located.error.message });
         return;
