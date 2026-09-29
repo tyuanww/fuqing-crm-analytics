@@ -18,6 +18,7 @@ from backend.services.analytics.page_documents_routes import PREFIX as PAGE_PREF
 
 ROOT = Path(__file__).resolve().parents[2]
 
+
 CAPS = frozenset({"dashboard:read", "dashboard:update", "analysis:read", "analysis:save"})
 TOKEN = "library-page-isolated-test-token-32chars"
 ALICE = AnalyticsPrincipal("alice", CAPS, frozenset({DATA_SCOPE, PAGE_SCOPE, "brand-a"}))
@@ -90,7 +91,7 @@ def test_result_routes_present_when_explicit(tmp_path):
     directory = tmp_path / "pages"
     directory.mkdir(mode=0o700)
     app = create_page_app(identities=registry, page_state_dir=directory, result_access=access)
-    paths = {getattr(route, "path", "") for route in app.routes}
+    paths = app.openapi()["paths"]
     assert any(PREFIX in path for path in paths)
     client = TestClient(app)
     state = client.post(PREFIX + "/binding-state", json={"manifest": {"bindings": [], "result_refs": []}},

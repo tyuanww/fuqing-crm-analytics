@@ -38,6 +38,7 @@ def _client(state_dir: Path, token: str = _token()) -> TestClient:
     return TestClient(_server_app(directory, token))
 
 
+
 def test_server_mounts_documents_and_result_access_with_explicit_state_dir(tmp_path):
     token = _token()
     client = _client(tmp_path, token)
@@ -47,7 +48,7 @@ def test_server_mounts_documents_and_result_access_with_explicit_state_dir(tmp_p
     assert pages.json()["items"] == []
     unauth = client.get(PAGE_PREFIX + "/pages")
     assert unauth.status_code == 401
-    paths = {getattr(route, "path", "") for route in client.app.routes}
+    paths = client.app.openapi()["paths"]
     assert any(RESULT_PREFIX in path for path in paths)
     sqlite_file = tmp_path / "pages" / "page_documents.sqlite3"
     assert sqlite_file.exists()
