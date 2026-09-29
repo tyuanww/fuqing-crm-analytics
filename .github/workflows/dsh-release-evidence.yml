@@ -120,11 +120,11 @@ jobs:
           for (const name of releaseAssetNames(tag)) await copyFile(join(input, name), join(output, name));
           JS
       - name: Attest the exact candidate source artifact
-        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-path: .context/release-evidence/${{ inputs.release_tag }}/${{ inputs.release_tag }}.tar.zst
       - name: Attest the exact pinned upstream runtime artifact
-        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-path: .context/release-evidence/${{ inputs.release_tag }}/shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst
       - name: Upload evidence (never publish)
