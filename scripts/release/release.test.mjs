@@ -65,7 +65,28 @@ test('receiver scans final extracted content and deny names', async () => {
   const root=await fixture(), secretArchive=join(root,'secret.tar.gz'); const secretValue=['live','token-value-1234567890'].join('-'); const secret=`TOKEN = '${secretValue}'`; archiveWithEntries(secretArchive,[{name:'VERSION',data:'0.18.0.1\n'},{name:'config.txt',data:secret}]); const secretManifest=await manifest(root,secretArchive,'dsh-secret',{'VERSION':'0.18.0.1\n','config.txt':secret}); await assert.rejects(()=>receiveArtifact({artifact:secretArchive,manifestPath:secretManifest,destination:join(root,'secret-out')}), /SECRET_SCAN_FAILED/);
   const denyArchive=join(root,'deny.tar.gz'); archiveWithEntries(denyArchive,[{name:'VERSION',data:'0.18.0.1\n'},{name:'.env',data:'synthetic'}]); const denyManifest=await manifest(root,denyArchive,'dsh-deny',{'VERSION':'0.18.0.1\n','.env':'synthetic'}); await assert.rejects(()=>receiveArtifact({artifact:denyArchive,manifestPath:denyManifest,destination:join(root,'deny-out')}), /SECRET_SCAN_FAILED/);
 });
-test('secret scan distinguishes explicit synthetic fixtures from real assignments', () => { const live = ['live', 'token-value-1234567890'].join('-'); assert.deepEqual(scanText("TOKEN = 'test-only-synthetic-token'", 'fixture.test.mjs'), []); assert.deepEqual(scanText("TOKEN = 'test-only-synthetic-token'", 'config/runtime.env'), ['SECRET_PATTERN config/runtime.env']); assert.deepEqual(scanText(`TOKEN = '${live}'`, 'fixture.test.mjs'), ['SECRET_PATTERN fixture.test.mjs']); assert.deepEqual(scanText("token = 'x-cos-security-token'", 'sdk/base.js'), []); assert.deepEqual(scanText("TOKEN = '__DSH_CODE_ICON_INSTANCE__'", 'ui-primitives/lib/index.js'), []); assert.deepEqual(scanText("SECRET = 'AWS_SECRET_ACCESS_KEY'", 'credential-provider-env/index.js'), []); assert.deepEqual(scanText("TOKEN = 'remove_authentication_token'", 'semantic-conventions/experimental_attributes.js'), []); assert.deepEqual(scanText("API_KEY = 'MY_REAL_SECRET_TOKEN'", 'config/runtime.env'), ['SECRET_PATTERN config/runtime.env']); assert.deepEqual(scanText("API_KEY = 'MY_REAL_SECRET_TOKEN'", 'node_modules/vendor.js'), ['SECRET_PATTERN node_modules/vendor.js']); assert.deepEqual(scanText("TOKEN = 'ghp_123456789012345678901234567890'", 'node_modules/vendor.js', { scanAssignments: false }), ['SECRET_PATTERN node_modules/vendor.js']); assert.deepEqual(scanText('UAKIAU0EQCAEQQJ0ISIMA', 'generated.wasm.js'), []); assert.deepEqual(scanText("const key = 'AKIAU0EQCAEQQJ0ISIMA'", 'config/key.js'), ['SECRET_PATTERN config/key.js']); assert.deepEqual(scanText('-----BEGIN PRIVATE KEY-----', 'sdk/import.js'), []); assert.deepEqual(scanText(`-----BEGIN PRIVATE KEY-----\n${'A'.repeat(48)}\n-----END PRIVATE KEY-----`, 'config/key.pem'), ['SECRET_PATTERN config/key.pem']); });
+test('secret scan distinguishes explicit synthetic fixtures from real assignments', () => {
+  const live = ['live', 'token-value-1234567890'].join('-');
+  const githubPat = ['ghp_', '123456789012345678901234567890'].join('');
+  const accessKey = ['AKIA', '1234567890123456'].join('');
+  const realSecret = ['MY_REAL_', 'SECRET_TOKEN'].join('');
+  const privateHeader = ['-----BEGIN ', 'PRIVATE KEY-----'].join('');
+  const privateFooter = ['-----END ', 'PRIVATE KEY-----'].join('');
+  assert.deepEqual(scanText("TOKEN = 'test-only-synthetic-token'", 'fixture.test.mjs'), []);
+  assert.deepEqual(scanText("TOKEN = 'test-only-synthetic-token'", 'config/runtime.env'), ['SECRET_PATTERN config/runtime.env']);
+  assert.deepEqual(scanText(`TOKEN = '${live}'`, 'fixture.test.mjs'), ['SECRET_PATTERN fixture.test.mjs']);
+  assert.deepEqual(scanText("token = 'x-cos-security-token'", 'sdk/base.js'), []);
+  assert.deepEqual(scanText("TOKEN = '__DSH_CODE_ICON_INSTANCE__'", 'ui-primitives/lib/index.js'), []);
+  assert.deepEqual(scanText("SECRET = 'AWS_SECRET_ACCESS_KEY'", 'credential-provider-env/index.js'), []);
+  assert.deepEqual(scanText("TOKEN = 'remove_authentication_token'", 'semantic-conventions/experimental_attributes.js'), []);
+  assert.deepEqual(scanText(`API_KEY = '${realSecret}'`, 'config/runtime.env'), ['SECRET_PATTERN config/runtime.env']);
+  assert.deepEqual(scanText(`API_KEY = '${realSecret}'`, 'node_modules/vendor.js'), ['SECRET_PATTERN node_modules/vendor.js']);
+  assert.deepEqual(scanText(`TOKEN = '${githubPat}'`, 'node_modules/vendor.js', { scanAssignments: false }), ['SECRET_PATTERN node_modules/vendor.js']);
+  assert.deepEqual(scanText('UAKIAU0EQCAEQQJ0ISIMA', 'generated.wasm.js'), []);
+  assert.deepEqual(scanText(`const key = '${accessKey}'`, 'config/key.js'), ['SECRET_PATTERN config/key.js']);
+  assert.deepEqual(scanText(`${privateHeader}`, 'sdk/import.js'), []);
+  assert.deepEqual(scanText(`${privateHeader}\n${'A'.repeat(48)}\n${privateFooter}`, 'config/key.pem'), ['SECRET_PATTERN config/key.pem']);
+});
 test('zstd receiver enforces the bounded stream path', async () => { const root=await fixture(), raw=join(root,'a.tar'), archive=join(root,'a.tar.zst'); execFileSync('python3',['-c',`import tarfile,sys,io
 x=tarfile.TarInfo('VERSION'); b=bytes([48,46,49,56,46,48,46,49,10]); x.size=len(b); x.mode=0o600
 with tarfile.open(sys.argv[1],'w:') as t: t.addfile(x,io.BytesIO(b))`,raw]); execFileSync('zstd',['-q',raw,'-o',archive]); const m=await manifest(root,archive); const got=await receiveArtifact({artifact:archive,manifestPath:m,destination:join(root,'out')}); assert.equal(got.entries,1); });
