@@ -42,7 +42,7 @@ python-multipart==0.0.32
 python-pptx==1.0.2
 PyYAML==6.0.3
 requests==2.33.1
-ruff==0.16.8
+ruff==0.16.9
 setuptools==83.0.0
 six==1.17.0
 starlette==1.6.0
