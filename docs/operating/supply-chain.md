@@ -37,7 +37,7 @@ ML/OCR/爬虫工具在独立 scraper 仓维护，不进入本仓 CI 镜像。
 | click | `>=8.3.3` | CLI/uvicorn 树 |
 | idna | `>=3.15` | HTTP 客户端树 |
 | urllib3 | `>=2.7.0` | requests/httpx 树 |
-| fastapi | `<0.136.3` | 供应链事件上界 |
+| fastapi | `>=0.141.1,<0.141.2` | 已通过 lazy router compatibility regression 的固定版本 |
 
 DuckDB 1.5.6 是当前稳定版；本分支已将声明、CRM lock、e2e lock 和 B0 lock 统一到 1.5.6。杭州现役环境仍须在可恢复备份与恢复演练完成后，使用同一 release artifact 做维护窗口切换，见 [duckdb-backup-upgrade-checklist.md](../maintenance/duckdb-backup-upgrade-checklist.md)。
 
