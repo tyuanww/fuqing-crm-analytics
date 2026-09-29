@@ -38,6 +38,26 @@ def _client(state_dir: Path, token: str = _token()) -> TestClient:
     return TestClient(_server_app(directory, token))
 
 
+def _route_paths(app) -> set[str]:
+    """Return paths from both eager and lazy FastAPI router includes."""
+    paths: set[str] = set()
+    pending = list(getattr(app, "routes", []))
+    seen: set[int] = set()
+    while pending:
+        route = pending.pop()
+        identity = id(route)
+        if identity in seen:
+            continue
+        seen.add(identity)
+        path = getattr(route, "path", None)
+        if isinstance(path, str):
+            paths.add(path)
+        nested = getattr(route, "original_router", None)
+        if nested is not None:
+            pending.extend(getattr(nested, "routes", []))
+    return paths
+
+
 def test_server_mounts_documents_and_result_access_with_explicit_state_dir(tmp_path):
     token = _token()
     client = _client(tmp_path, token)
@@ -47,7 +67,7 @@ def test_server_mounts_documents_and_result_access_with_explicit_state_dir(tmp_p
     assert pages.json()["items"] == []
     unauth = client.get(PAGE_PREFIX + "/pages")
     assert unauth.status_code == 401
-    paths = {getattr(route, "path", "") for route in client.app.routes}
+    paths = _route_paths(client.app)
     assert any(RESULT_PREFIX in path for path in paths)
     sqlite_file = tmp_path / "pages" / "page_documents.sqlite3"
     assert sqlite_file.exists()
