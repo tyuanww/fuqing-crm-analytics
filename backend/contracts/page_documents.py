@@ -19,6 +19,12 @@ Opaque = Annotated[str, Field(min_length=1, max_length=128, pattern=IDENTITY)]
 Title = Annotated[str, Field(min_length=1, max_length=160, pattern=r"\S")]
 Version = Annotated[int, Field(ge=1, le=9007199254740991)]
 BindingState = Literal["UNBOUND_SAMPLE", "BOUND_VERIFIED", "BOUND_STALE"]
+EditScope = Literal["presentation", "source_range"]
+SourceFile = Literal["html", "css", "js"]
+SelectionAllowedScope = Literal[
+    "exact_source_range", "dynamic_source_range", "declared_region", "shared_scope", "readonly_bound"
+]
+SourceHash = Annotated[str, Field(min_length=64, max_length=64, pattern=r"^[0-9a-f]{64}$")]
 PageOperation = Literal["GENERATE", "PATCH", "SAVE", "ROLLBACK"]
 PreviewStatus = Literal["PENDING", "APPLIED", "CANCELLED"]
 NodeKind = Literal["static_element", "dynamic_region", "whole_page"]
@@ -55,6 +61,12 @@ PAGE_ERRORS = {
     "EDIT_EXPIRED": 409,
     "CAPABILITY_DENIED": 403,
     "SCOPE_VIOLATION": 422,
+    "AI_CONTEXT_MISSING": 422,
+    "AI_CONTEXT_SCHEMA": 422,
+    "AI_CONTEXT_MISMATCH": 409,
+    "AI_SCOPE_DIFF": 422,
+    "AI_SOURCE_CHANGED": 409,
+    "AI_BOUND_CONTENT": 403,
 }
 
 
@@ -272,23 +284,73 @@ class PageDocument(PageDraft):
         return self
 
 
+class PageSourceRange(PageModel):
+    """A bounded source range carried by the host-canonical selection."""
+    file: SourceFile
+    start: Annotated[int, Field(ge=0, le=HTML_MAX_CHARS)]
+    end: Annotated[int, Field(ge=0, le=HTML_MAX_CHARS)]
+
+    @model_validator(mode="after")
+    def ordered(self):
+        if self.end < self.start:
+            raise ValueError("source range end must be >= start")
+        return self
+
+
+class PageFocusRef(PageModel):
+    """Host-canonical selection identity carried into an AI source patch."""
+    node_id: Opaque
+    kind: Literal["static_element", "dynamic_region"]
+    allowed_scope: SelectionAllowedScope
+    allowed_ranges: Annotated[list[PageSourceRange], Field(min_length=1, max_length=32)]
+    mapping_token: Opaque | None = None
+    version_hash: SourceHash | None = None
+
+
 class PagePatchPreview(PageModel):
     """D6: patch preview of source and/or manifest. Confirm is a separate call."""
     base_version: Version
     title: Title | None = None
     package: PagePackage | None = None
     binding_manifest: PageBindingManifest | None = None
+    edit_scope: EditScope | None = None
+    edit_context_id: Opaque | None = None
+    focus_ref: PageFocusRef | None = None
+    source_hash: SourceHash | None = None
 
     @model_validator(mode="after")
     def nonempty_nonnull(self):
         fields = self.model_fields_set - {"base_version"}
         if not fields or any(getattr(self, key) is None for key in fields):
             raise ValueError("a patch must have explicit non-null changes")
+        content_fields = {"title", "package", "binding_manifest"}
+        if not (fields & content_fields):
+            raise ValueError("a patch must include an actual document change")
+        context_fields = {"edit_scope", "edit_context_id", "focus_ref", "source_hash"}
+        has_context = bool(self.model_fields_set & context_fields)
+        if has_context and self.edit_scope is None:
+            raise ValueError("edit_scope is required when edit context is supplied")
+        if self.edit_scope != "source_range" and (
+            self.edit_context_id is not None or self.focus_ref is not None or self.source_hash is not None
+        ):
+            raise ValueError("source context metadata requires edit_scope=source_range")
+        if self.edit_scope == "source_range":
+            if self.package is None or self.edit_context_id is None or self.focus_ref is None or self.source_hash is None:
+                raise ValueError("source_range patch requires package, context, focus and source hash")
+            if self.focus_ref.mapping_token is None or self.focus_ref.version_hash is None:
+                raise ValueError("source_range patch requires a canonical mapping token and version hash")
+            if self.title is not None or "title" in self.model_fields_set:
+                raise ValueError("source_range patch cannot change title")
+            if self.binding_manifest is not None or "binding_manifest" in self.model_fields_set:
+                raise ValueError("source_range patch cannot change binding manifest")
+            if self.focus_ref.allowed_scope in {"shared_scope", "readonly_bound"}:
+                raise ValueError("source_range patch is not writable for this selection scope")
         return self
 
 
 class PageSavePreview(PageModel):
     """D9: explicit save of the host in-memory draft. Exit-edit is not save."""
+    edit_origin: Literal["manual_source"] | None = None
     base_version: Version
     title: Title
     package: PagePackage
@@ -803,7 +865,7 @@ def page_documents_openapi() -> dict:
     schemas = {}
     for model in (
         PageResource, PageNodeMapEntry, PagePackage, PageBinding, PageBindingManifest,
-        PageDraft, PageDocument, PagePatchPreview, PageSavePreview, PageRollbackPreview,
+        PageDraft, PageDocument, PageSourceRange, PageFocusRef, PagePatchPreview, PageSavePreview, PageRollbackPreview,
         PageSnapshot, PagePreview, PageRevision, PageListItem, PageList, PageCancelResult,
         SourceRange, SelectedScope, PresentationOverlay, NodeRef, CAS, EditOperation, EditContext,
         PageBridgeHandshake, PageDataReadRequest, PageDataCancelRequest,
@@ -815,7 +877,9 @@ def page_documents_openapi() -> dict:
     # These additive fields remain optional for existing free-page/v1 callers.
     for model, field in [('PagePackage', 'presentation'), ('PageElementStep', 'key'), ('PagePresentationEdit', 'text')]:
         schemas[model]['properties'][field].pop('default', None)
-    _optional_omit_null(schemas["PagePatchPreview"], "title", "package", "binding_manifest")
+    _optional_omit_null(schemas["PagePatchPreview"], "title", "package", "binding_manifest",
+                         "edit_scope", "edit_context_id", "focus_ref", "source_hash")
+    _optional_omit_null(schemas["PageSavePreview"], "edit_origin")
     _optional_omit_null(schemas["PageDraft"], "origin_path", "origin_file_id")
     _optional_omit_null(schemas["PageDocument"], "origin_path", "origin_file_id")
     _optional_omit_null(schemas["PageListItem"], "origin_path", "origin_file_id")

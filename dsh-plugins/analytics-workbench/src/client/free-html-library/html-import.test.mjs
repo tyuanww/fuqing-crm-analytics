@@ -53,7 +53,7 @@ test('resolveImportResourcePath stays in the workspace and rejects parent segmen
   assert.equal(resolveImportResourcePath('ops/web/index.html', 'https://ex/a.png'), null);
 });
 
-test('convert extracts inline css/js from a full document without nested html wrappers or invented shine nodes', async () => {
+test('convert extracts inline css/js and assigns host-owned mappings to visible elements', async () => {
   const html = '<!doctype html><html><head><style>p{color:red}</style></head><body><p>Hello</p><script>window.__x=1<\/script></body></html>';
   const snapshot = html;
   const got = await convertWorkspaceHtml({ html, path: 'ops/web/index.html', sessionId: 'sess-a' });
@@ -61,16 +61,29 @@ test('convert extracts inline css/js from a full document without nested html wr
   assert.equal(html, snapshot);
   assert.doesNotMatch(got.package.html, /<html[\s>]/i);
   assert.doesNotMatch(got.package.html, /<body[\s>]/i);
-  assert.match(got.package.html, /<p>Hello<\/p>/);
+  assert.match(got.package.html, /<p data-shine-node="auto_p_0">Hello<\/p>/);
   assert.match(got.package.css, /color:red/);
   assert.match(got.package.js, /window\.__x=1/);
-  assert.equal(got.package.node_map.length, 0);
-  assert.doesNotMatch(got.package.html, /data-shine-node/);
+  assert.equal(got.package.node_map.length, 1);
+  assert.equal(got.package.node_map[0].node_id, 'auto_p_0');
   assert.equal(got.binding_state, 'UNBOUND_SAMPLE');
   assert.deepEqual(got.origin, { session_id: 'sess-a', path: 'ops/web/index.html' });
 });
 
-test('convert inlines relative images and keeps existing shine mapping only', async () => {
+test('convert maps ordinary headings, copy, controls, and visual regions for page editing', async () => {
+  const got = await convertWorkspaceHtml({
+    html: '<main><h1>标题</h1><p>正文</p><button type="button">操作</button><canvas></canvas></main>',
+    path: 'ops/web/index.html', sessionId: 'sess-a',
+  });
+  assert.equal(got.ok, true, JSON.stringify(got.error));
+  assert.equal(got.package.node_map.length, 5);
+  assert.match(got.package.html, /data-shine-node="auto_main_0"/);
+  assert.match(got.package.html, /data-shine-node="auto_h1_6"/);
+  assert.match(got.package.html, /data-shine-region="auto_canvas_/);
+  assert.equal(got.package.node_map.some(row => row.kind === 'dynamic_region'), true);
+});
+
+test('convert inlines relative images and preserves existing plus generated mappings', async () => {
   const html = '<p data-shine-node="n_title">Hi</p><img src="logo.png" alt="">';
   const got = await convertWorkspaceHtml({
     html,

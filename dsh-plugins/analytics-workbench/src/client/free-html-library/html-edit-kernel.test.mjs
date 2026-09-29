@@ -76,6 +76,14 @@ test('stale mapping and bound nodes are refused without widening', () => {
   });
   assert.equal(bound.ok, false);
   assert.equal(bound.error.code, 'BINDING_PROTECTED');
+  const pageBound = previewLiteralText({
+    pkg: SAMPLE_PACKAGE,
+    selection: { kind: 'static_element', node_id: 'n_title' },
+    replacementText: '99',
+    binding_manifest: { result_refs: ['result_1'], bindings: [] },
+  });
+  assert.equal(pageBound.ok, false);
+  assert.equal(pageBound.error.code, 'BINDING_PROTECTED');
 });
 
 test('patch-preview HTTP uses existing documents adapter; cancel does not save', async () => {
@@ -110,4 +118,23 @@ test('patch-preview HTTP uses existing documents adapter; cancel does not save',
   const page = await adapters.documents.pullPage(generated.page.page_id);
   assert.equal(page.ok, true);
   assert.match(adapters.assets.get(generated.page.page_id).package.html, /示例标题/);
+});
+
+test('patch-preview refuses readonly or malformed selection context instead of widening to page scope', async () => {
+  let calls = 0;
+  const documents = { patchPreview: async () => { calls += 1; return { ok: true, body: { preview_id: 'p' } }; } };
+  const base = { page_id: 'page_1', base_version: 1, package: SAMPLE_PACKAGE };
+  const readonly = await submitHtmlPatchPreview(documents, {
+    ...base,
+    edit_context: { context_id: 'ctx_bound', allowed_scope: 'readonly_bound', allowed_ranges: [] },
+  });
+  assert.equal(readonly.ok, false);
+  assert.equal(readonly.error.code, 'AI_BOUND_CONTENT');
+  const malformed = await submitHtmlPatchPreview(documents, {
+    ...base,
+    edit_context: { context_id: 'ctx_missing', allowed_scope: 'exact_source_range', allowed_ranges: [] },
+  });
+  assert.equal(malformed.ok, false);
+  assert.equal(malformed.error.code, 'AI_CONTEXT_SCHEMA');
+  assert.equal(calls, 0);
 });

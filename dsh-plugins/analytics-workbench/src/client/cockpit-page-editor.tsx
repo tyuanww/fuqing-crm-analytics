@@ -51,11 +51,11 @@ function completePagePackage<T extends { html: string; css: string; js: string; 
   };
 }
 
-export function HtmlPreview({ pkg, overlays = null, overlayNodes = [], pageId = 'workspace', version = 0, editing = false, selectBlocks = false, nodes = NO_NODES, selected, draft = null, onUnresolved, onSelect, onTargets, title }: {
+export function HtmlPreview({ pkg, overlays = null, overlayNodes = [], pageId = 'workspace', version = 0, editing = false, selectBlocks = false, nodes = NO_NODES, editableIds = [], selected, draft = null, onUnresolved, onSelect, onTargets, title }: {
   pkg: { html: string; css?: string; js?: string; resources?: unknown[]; presentation?: components['schemas']['PagePresentation'] | null }; pageId?: string; version?: number;
   overlays?: Record<string, { text?: string; style?: Record<string, string>; attributes?: Record<string, string> }> | null;
   overlayNodes?: Array<{ node_id?: string; source_range?: { start: number; end: number } | null }>;
-  editing?: boolean; selectBlocks?: boolean; nodes?: TextNode[]; selected?: string;
+  editing?: boolean; selectBlocks?: boolean; nodes?: TextNode[]; editableIds?: string[]; selected?: string;
   draft?: { nodeId: string; text: string; active: boolean; reset: number; style?: Record<string, string> | null } | null;
   onUnresolved?(count: number): void;
   onSelect?(node: TextNode | null): void; onTargets?(nodes: TextNode[]): void; title: string;
@@ -70,7 +70,7 @@ export function HtmlPreview({ pkg, overlays = null, overlayNodes = [], pageId = 
     if (!overlays || !Object.keys(overlays).length) return pkg;
     return { ...pkg, html: applyPresentationOverlay(pkg?.html ?? '', overlays, overlayNodes) };
   }, [pkg, overlays, overlayNodes]);
-  const srcdoc = useMemo(() => selectionSrcdoc(framed, { channel, pageId, version, nodes, editing, selectBlocks }), [framed, channel, pageId, version, nodes, editing, selectBlocks]);
+  const srcdoc = useMemo(() => selectionSrcdoc(framed, { channel, pageId, version, nodes, editableIds, editing, selectBlocks }), [framed, channel, pageId, version, nodes, editableIds, editing, selectBlocks]);
   useEffect(() => {
     unresolvedCallback.current?.(0);
     const receive = (event: MessageEvent) => {
@@ -120,9 +120,10 @@ function decodeText(text: string) {
   const node = document.createElement('textarea'); node.innerHTML = text; return node.value;
 }
 const bindingCopy: Record<string, string> = { UNBOUND_SAMPLE: '未绑定数据', BOUND_VERIFIED: '已核验数据来源', BOUND_STALE: '数据绑定待更新' };
-export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, aiMode = false }: { store: FreeHtmlLibraryStore; onInspect?(): void; onWholeAI?(): void; aiMode?: boolean; onAI?(selection: AISourceSelection, instruction: string): Promise<boolean> }) {
+export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, onSourceFallback, aiMode = false }: { store: FreeHtmlLibraryStore; onInspect?(): void; onWholeAI?(): void; onSourceFallback?(): void; aiMode?: boolean; onAI?(selection: AISourceSelection | null, instruction: string): Promise<boolean> }) {
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
   const current = state.current!;
+  const [sourceFile, setSourceFile] = useState<'html' | 'css' | 'js'>('html');
   const pkg = state.preview?.snapshot ?? current.package;
   const candidates = useMemo(() => editablePageNodes(current.package, current.binding_manifest), [current.package, current.binding_manifest]);
   const catalog = useMemo(() => editorPageCatalog(pkg, current.binding_manifest, { pageId: current.page_id }), [pkg, current.binding_manifest, current.page_id]);
@@ -157,6 +158,7 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, aiMode = 
   const styleProposed = styleFocus === 'attribute'
     ? (attrName && !/javascript:/i.test(attrValue) ? `${attrName}="${attrValue}"` : '')
     : Object.entries(styles).map(([key, item]) => `${key}: ${item}`).join('; ');
+  const sourceValue = state.sourceDraft?.package?.[sourceFile] ?? current.package[sourceFile] ?? '';
   useEffect(() => { setAiOpen(false); setInstruction(''); setSendError(''); setPreviewNote(''); setStyleDraft(''); setAttrValue(''); setStructureDraft(''); }, [current.page_id, current.version, aiMode, formalNode?.node_id]);
   const commitSelection = (node: TextNode | null) => {
     if (!node) { if (!state.textDraft?.changed) store.clearSelection(); return; }
@@ -169,7 +171,10 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, aiMode = 
   const sendAI = async () => {
     if (sendLock.current || !selected || !selectionAvailable || !instruction.trim() || !onAI) return;
     const scope = selectionForAI(current.package, selected);
-    if (!scope) { setSendError('当前选区无法对应页面源码，请重新选择。'); return; }
+    if (!scope && selected.read_only_reason) {
+      setAiOpen(false); setSendError(''); onSourceFallback?.(); return;
+    }
+    if (!scope && selected.kind !== 'dynamic_region' && !selected.inspectOnly) { setSendError('当前选区无法对应页面源码，请重新选择。'); return; }
     sendLock.current = true; setSending(true); setSendError('');
     try { if (!await onAI(scope, instruction.trim())) setSendError('暂未进入对话，修改要求已保留，请查看提示后重试。'); }
     catch (error) { setSendError(error instanceof Error ? error.message : '进入对话失败，请重试。'); }
@@ -245,7 +250,8 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, aiMode = 
       </div> : null}
       <div className="cockpit-frame-wrap">{state.previewAlive
         ? <HtmlPreview pkg={pkg} overlays={state.presentation_overlay ?? current.presentation_overlays ?? null} overlayNodes={catalog.pageNodes} pageId={current.page_id} version={current.version} title={current.title}
-          editing={editing && !sending} selectBlocks={aiMode} nodes={candidates} selected={state.selection?.node_id}
+          editing={editing && !sending} selectBlocks={aiMode} nodes={candidates}
+          editableIds={nodes.filter(node => node.editableText !== false && !node.runtimeOnly).map(node => node.node_id)} selected={state.selection?.node_id}
           draft={selected ? { nodeId: selected.node_id, text: value, active: value !== original, reset: state.draftReset ?? 0, style: styleFocus === 'style' && Object.keys(styles).length ? styles : null } : null}
           onUnresolved={setUnresolvedEdits}
           onSelect={commitSelection}
@@ -260,7 +266,17 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, aiMode = 
         <p className="cockpit-muted">{current.origin_path ? (current.origin_file_id ? '来自手动添加文件：' : '来自工作区副本：') + current.origin_path : '已保存页面'}</p>
         <p>{bindingCopy[current.binding_state] ?? current.binding_state}</p>
         {onWholeAI ? <><p className="cockpit-muted">计算、筛选或页面结构需要整页修改，范围会包含共享源码；业务绑定页仍只允许改样式。</p><button disabled={locked || store.hasUnsavedChanges()} onClick={onWholeAI}>用 AI 调整整页逻辑</button></> : null}
-        <pre className="cockpit-source">{current.package.html}</pre>
+        <label className="cockpit-field">源码文件<select value={sourceFile} onChange={event => setSourceFile(event.target.value as 'html' | 'css' | 'js')} disabled={locked}>
+          <option value="html">HTML</option><option value="css">CSS</option><option value="js">JavaScript</option>
+        </select></label>
+        <textarea className="cockpit-source" data-testid="html-source-editor" rows={14} value={sourceValue}
+          disabled={locked || (current.binding_state !== 'UNBOUND_SAMPLE' && sourceFile !== 'css')}
+          onChange={event => store.setSourceText(sourceFile, event.target.value)} />
+        {current.binding_state !== 'UNBOUND_SAMPLE' && sourceFile !== 'css' ? <p className="cockpit-muted">绑定页面的 HTML/JavaScript 受保护，只允许受控 CSS 草稿。</p> : null}
+        {state.sourceDraft?.changed ? <p className="cockpit-change">源码草稿已生成，确认前不会写入版本。</p> : null}
+        <button disabled={locked || !state.sourceDraft?.changed} onClick={() => store.discardSourceDraft()}>放弃源码草稿</button>
+        <button className="cockpit-primary" data-testid="html-source-preview" disabled={locked || !state.sourceDraft?.changed}
+          onClick={() => void store.previewSourceDraft()}>预览源码修改</button>
       </> : state.contextPanel === 'history' ? <>
         <p className="cockpit-muted">回退先预览，确认后保存为新版本。</p>
         {state.historyItems.map(row => <div className="cockpit-history-row" key={row.version}><span>版本 {row.version}{row.version === current.version ? ' · 当前' : ''}</span>
@@ -283,7 +299,7 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, aiMode = 
             rows={6} onChange={event => store.setReplacementText(event.target.value, original)} /></label>
           <p className="cockpit-muted">{selected.richText ? '整段说明都可以改。左边会立刻显示。句子里的指标原文会留在原标签中，请不要删掉或改写这些数字。保存用右上角。' : selected.runtime ? '输入时左边立刻显示。只替换显示文案，保留筛选和图表交互，不改计算数据。保存用右上角。' : '输入时左边立刻显示。保存用右上角。'}</p>
           </> : <p className="cockpit-muted">已选中 {selected.tag} 板块，可交给 AI 调整板块内容和局部样式。</p>}
-          {!aiOpen && onAI && selectionForAI(current.package, selected) ? <button disabled={locked || !selectionAvailable || store.hasUnsavedChanges()} onClick={() => { setAiOpen(true); setSendError(''); }}>用 AI 修改此选区</button> : null}
+          {!aiOpen && onAI && selectionAvailable ? <button disabled={locked || store.hasUnsavedChanges()} onClick={() => { setAiOpen(true); setSendError(''); }}>用 AI 修改此选区</button> : null}
           {editableFormal && !aiOpen ? <div data-testid="html-node-identity">
             <p className="cockpit-muted" data-testid="html-capability">{formatCapability(editableFormal)}</p>
             {editableFormal.capabilities?.direct_text ? <button type="button" data-testid="html-preview-formal-text" disabled={locked || value === original} onClick={applyFormalText}>按正式合同预览文字</button> : null}

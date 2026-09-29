@@ -1,43 +1,84 @@
 /** Source offsets for data-shine-* markers. No HTML parser dependency. */
 
-const START_TAG = /<([A-Za-z][\w:-]*)(\s[^>]*?)?(\/?)>/g;
 const NODE_ATTR = /data-shine-node\s*=\s*(["'])([^"']+)\1/i;
 const REGION_ATTR = /data-shine-region\s*=\s*(["'])([^"']+)\1/i;
 const VOID = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr']);
-
-function escapeRe(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
 
 export function isVoidHtmlTag(tag) {
   return VOID.has(String(tag || '').toLowerCase());
 }
 
 export function closeTagRange(html, tag, from) {
-  return closeRange(html, String(tag || ''), from);
+  return closeRange(html, String(tag || '').toLowerCase(), from);
+}
+
+function nextTagEnd(html, start) {
+  let quote = null;
+  for (let index = start; index < html.length; index += 1) {
+    const char = html[index];
+    if (quote) {
+      if (char === quote) quote = null;
+    } else if (char === '"' || char === "'") {
+      quote = char;
+    } else if (char === '>') {
+      return index;
+    }
+  }
+  return -1;
+}
+
+function skipRawBlock(html, start) {
+  const tagEnd = nextTagEnd(html, start + 1);
+  if (tagEnd < 0) return html.length;
+  const open = html.slice(start, tagEnd + 1).match(/^<(script|style|template|textarea|title)\b/i);
+  if (!open) return null;
+  const close = new RegExp('</' + open[1] + '\\s*>', 'i').exec(html.slice(tagEnd + 1));
+  return close ? tagEnd + 1 + close.index + close[0].length : html.length;
+}
+
+function nextTag(html, from) {
+  let cursor = from;
+  while (cursor < html.length) {
+    const start = html.indexOf('<', cursor);
+    if (start < 0) return null;
+    if (html.startsWith('<!--', start)) {
+      const commentEnd = html.indexOf('-->', start + 4);
+      cursor = commentEnd < 0 ? html.length : commentEnd + 3;
+      continue;
+    }
+    const skipped = skipRawBlock(html, start);
+    if (skipped !== null) {
+      cursor = skipped;
+      continue;
+    }
+    const tagEnd = nextTagEnd(html, start + 1);
+    if (tagEnd < 0) return null;
+    const source = html.slice(start, tagEnd + 1);
+    const match = source.match(/^<(\/?)([A-Za-z][\w:-]*)([\s\S]*?)(\/?)>$/);
+    if (!match || source.startsWith('<!') || source.startsWith('<?')) {
+      cursor = tagEnd + 1;
+      continue;
+    }
+    return {
+      start, end: tagEnd + 1, source, tag: match[2].toLowerCase(),
+      attrs: match[3] ?? '', closing: match[1] === '/',
+      selfClosing: match[4] === '/' || VOID.has(match[2].toLowerCase()),
+    };
+  }
+  return null;
 }
 
 function closeRange(html, tag, from) {
-  const open = new RegExp(`<${escapeRe(tag)}\\b`, 'gi');
-  const close = new RegExp(`<\\/${escapeRe(tag)}\\s*>`, 'gi');
   let depth = 1;
   let cursor = from;
   while (cursor < html.length) {
-    open.lastIndex = cursor;
-    close.lastIndex = cursor;
-    const nextOpen = open.exec(html);
-    const nextClose = close.exec(html);
-    if (!nextClose) return null;
-    if (nextOpen && nextOpen.index < nextClose.index) {
-      depth += 1;
-      cursor = nextOpen.index + nextOpen[0].length;
-      continue;
-    }
-    depth -= 1;
-    if (depth === 0) {
-      return { inner_end: nextClose.index, end: nextClose.index + nextClose[0].length };
-    }
-    cursor = nextClose.index + nextClose[0].length;
+    const token = nextTag(html, cursor);
+    if (!token) return null;
+    cursor = token.end;
+    if (token.tag !== tag) continue;
+    if (token.closing) depth -= 1;
+    else if (!token.selfClosing) depth += 1;
+    if (depth === 0) return { inner_end: token.start, end: token.end };
   }
   return null;
 }
@@ -45,17 +86,20 @@ function closeRange(html, tag, from) {
 export function scanShineMarkers(html) {
   if (typeof html !== 'string') return [];
   const found = [];
-  START_TAG.lastIndex = 0;
-  let match;
-  while ((match = START_TAG.exec(html))) {
-    const attrs = match[2] ?? '';
+  let cursor = 0;
+  while (cursor < html.length) {
+    const token = nextTag(html, cursor);
+    if (!token) break;
+    cursor = token.end;
+    if (token.closing) continue;
+    const attrs = token.attrs;
     const node = attrs.match(NODE_ATTR);
     const region = attrs.match(REGION_ATTR);
     if (!node && !region) continue;
-    const tag = match[1].toLowerCase();
-    const start = match.index;
-    const inner_start = match.index + match[0].length;
-    const selfClosing = match[3] === '/' || VOID.has(tag);
+    const tag = token.tag;
+    const start = token.start;
+    const inner_start = token.end;
+    const selfClosing = token.selfClosing;
     let inner_end = inner_start;
     let end = inner_start;
     if (selfClosing) {
@@ -102,12 +146,14 @@ export function scanShineMarkers(html) {
 export function scanHtmlElements(html) {
   if (typeof html !== 'string' || !html) return [];
   const starts = [];
-  START_TAG.lastIndex = 0;
-  let match;
-  while ((match = START_TAG.exec(html))) {
-    const tag = match[1].toLowerCase();
-    const selfClosing = match[3] === '/' || VOID.has(tag);
-    const innerStart = match.index + match[0].length;
+  let cursor = 0;
+  let token;
+  while ((token = nextTag(html, cursor))) {
+    cursor = token.end;
+    if (token.closing) continue;
+    const tag = token.tag;
+    const selfClosing = token.selfClosing;
+    const innerStart = token.end;
     let innerEnd = innerStart;
     let end = innerStart;
     if (!selfClosing) {
@@ -118,14 +164,11 @@ export function scanHtmlElements(html) {
     }
     starts.push({
       tag,
-      start: match.index,
+      start: token.start,
       inner_start: innerStart,
       inner_end: innerEnd,
       end,
     });
-    // Script and style bodies are text. Jumping past them keeps a chart
-    // snippet such as `"<span>"` from becoming a phantom node.
-    if ((tag === 'script' || tag === 'style') && end > innerStart) START_TAG.lastIndex = end;
   }
 
   const sorted = starts.sort((a, b) => a.start - b.start || a.end - b.end);
@@ -151,16 +194,41 @@ export function scanHtmlElements(html) {
 export function parseCssRules(css) {
   if (typeof css !== 'string' || !css) return [];
   const rules = [];
-  const re = /([^{}]+)\{([^{}]*)\}/g;
-  let match;
-  while ((match = re.exec(css))) {
-    rules.push(Object.freeze({
-      selector: match[1].trim(),
-      body: match[2],
-      start: match.index,
-      end: match.index + match[0].length,
-      text: match[0],
+  const stack = [];
+  const segmentStarts = [0];
+  let quote = null;
+  let comment = false;
+  for (let index = 0; index < css.length; index += 1) {
+    const char = css[index];
+    const next = css[index + 1];
+    if (comment) {
+      if (char === '*' && next === '/') { comment = false; index += 1; }
+      continue;
+    }
+    if (quote) {
+      if (char === '\\') index += 1;
+      else if (char === quote) quote = null;
+      continue;
+    }
+    if (char === '/' && next === '*') { comment = true; index += 1; continue; }
+    if (char === '"' || char === "'") { quote = char; continue; }
+    if (char === '{') {
+      stack.push({ start: segmentStarts[segmentStarts.length - 1], open: index });
+      segmentStarts.push(index + 1);
+      continue;
+    }
+    if (char !== '}' || !stack.length) continue;
+    const block = stack.pop();
+    segmentStarts.pop();
+    const selector = css.slice(block.start, block.open).trim();
+    if (selector) rules.push(Object.freeze({
+      selector,
+      body: css.slice(block.open + 1, index),
+      start: block.start,
+      end: index + 1,
+      text: css.slice(block.start, index + 1),
     }));
+    segmentStarts[segmentStarts.length - 1] = index + 1;
   }
   return rules;
 }

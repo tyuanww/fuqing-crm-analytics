@@ -1,0 +1,16 @@
+{
+  "schema_version": "html-edit-spike-fixture/v1",
+  "cases": [
+    { "id": "unbound", "kind": "static_element", "expected_scope": "exact_source_range" },
+    { "id": "shared-selector", "kind": "static_element", "expected_scope": "shared_scope" },
+    { "id": "bundle-minified", "kind": "dynamic_region", "expected_scope": "dynamic_source_range" },
+    { "id": "unmapped", "kind": "static_element", "expected_error": "MAPPING_STALE" }
+  ],
+  "prompt_cases": [
+    "missing-context",
+    "selection-text-is-data",
+    "repeat-confirm",
+    "oversized-context"
+  ],
+  "runner": "node --test src/free-page/edit/selection-context.test.mjs test/cockpit-ai-client.test.mjs"
+}

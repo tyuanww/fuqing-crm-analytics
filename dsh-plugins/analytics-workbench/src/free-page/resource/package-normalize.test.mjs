@@ -76,6 +76,27 @@ test('does not use BoardSpec kinds as a generation whitelist', async () => {
   assert.equal(got.value.node_map.some((row) => row.node_id === 'n_free'), true);
 });
 
+test('host mappings survive a second normalization after a text edit', async () => {
+  const first = await normalizePagePackage({ html: '<main><p>one</p><p>two</p></main>', css: '', js: '', resources: [], node_map: [] });
+  assert.equal(first.ok, true, JSON.stringify(first.error));
+  const editedHtml = first.value.html.replace('one', 'a longer title');
+  const second = await normalizePagePackage({ ...first.value, html: editedHtml });
+  assert.equal(second.ok, true, JSON.stringify(second.error));
+  assert.deepEqual(second.value.node_map.map(row => row.node_id), first.value.node_map.map(row => row.node_id));
+  assert.match(second.value.html, /data-shine-node="auto_p_6"/);
+});
+
+test('ordinary elements with quoted greater-than attributes receive complete mappings', async () => {
+  const result = await normalizePagePackage({
+    html: '<section title="a > b"><span>内容</span></section>',
+    css: '', js: '', resources: [], node_map: [],
+  });
+  assert.equal(result.ok, true, JSON.stringify(result.error));
+  assert.match(result.value.html, /<section title="a > b" data-shine-node="auto_section_0">/);
+  assert.match(result.value.html, /<span data-shine-node="auto_span_23">/);
+  assert.equal(result.value.node_map.length, 2);
+});
+
 test('a data-svg icon keeps the greater-than signs inside its address and the following text', async () => {
   const icon = '<link rel="icon" href="data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 32 32\'><rect width=\'32\' height=\'32\'/></svg>">';
   const got = await normalizePagePackage({

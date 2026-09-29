@@ -3,6 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
 from copy import deepcopy
 import json
+import hashlib
 import os
 from pathlib import Path
 import sqlite3
@@ -19,7 +20,7 @@ from backend.contracts.competition_computed import DATA_SCOPE
 from backend.contracts.page_documents import (
     FORBIDDEN_BRIDGE_OPS, PACKAGE_MAX_BYTES, PAGE_ERRORS, PageBindingManifest, PageDataReadRequest,
     PageDocument, PageDraft, PagePackage, PagePatchPreview, PageRollbackPreview, PageSavePreview,
-    SCHEMA_VERSION, is_package_too_large, page_documents_openapi,
+    SCHEMA_VERSION, is_package_too_large, page_documents_openapi, page_source_hash,
 )
 from backend.services.analytics.access import AnalyticsError, AnalyticsPrincipal, B0IdentityRegistry
 from backend.services.analytics.board_documents import BoardDocumentStore
@@ -56,6 +57,30 @@ def confirm(store, preview, key="confirm"):
     return store.confirm(ALICE, preview["preview_id"], key)
 
 
+def source_hash(package):
+    raw = f"html:{package['html']}\0css:{package.get('css', '')}\0js:{package.get('js', '')}"
+    return hashlib.sha256(raw.encode()).hexdigest()
+
+
+def source_patch(base_version, old_package, new_package, *, scope="exact_source_range", ranges=None):
+    html_start = old_package["html"].index("<h1")
+    html_end = old_package["html"].index("</h1>") + len("</h1>")
+    digest = source_hash(old_package)
+    mapping_token = hashlib.sha256(f"{digest}:n_title:{html_start}:{html_end}".encode()).hexdigest()[:32]
+    return PagePatchPreview.model_validate({
+        "base_version": base_version,
+        "package": new_package,
+        "edit_scope": "source_range",
+        "edit_context_id": "ctx_fixture",
+        "source_hash": source_hash(old_package),
+        "focus_ref": {
+            "node_id": "n_title", "kind": "static_element", "allowed_scope": scope,
+            "allowed_ranges": ranges or [{"file": "html", "start": html_start, "end": html_end}],
+            "mapping_token": mapping_token, "version_hash": digest,
+        },
+    })
+
+
 def test_frozen_fixture_is_the_lane_a_target():
     assert FROZEN["approved_plan_sha256"] == "47fa5bfe482cb9bd93f4f02a7c62c6933d0242b5204ea95f2b912edc603a6ffb"
     assert FROZEN["asset"]["schema_version"] == SCHEMA_VERSION
@@ -81,6 +106,31 @@ def test_uploaded_html_has_explicit_file_origin_without_fabricating_a_session():
         PageDraft.model_validate({**body, "origin_file_id": None})
     with pytest.raises(ValidationError):
         PageDraft.model_validate({**body, "binding_manifest": {"bindings": [], "result_refs": ["real_result"]}})
+
+
+def test_generate_adds_host_mappings_to_plain_html(tmp_path):
+    store = PageDocumentStore(private(tmp_path / "plain-html-mappings"))
+    request = PageDraft(title="Plain HTML", session_id=None, origin_file_id="file_plain",
+                        package={"html": "<main><h1>标题</h1><button>按钮</button><canvas></canvas></main>"})
+    saved = confirm(store, store.generate(ALICE, request), "plain-html-mappings")
+    package = saved["spec"]["package"]
+    assert len(package["node_map"]) == 4
+    assert 'data-shine-node="auto_main_0"' in package["html"]
+    assert 'data-shine-region="auto_canvas_' in package["html"]
+
+
+def test_source_range_mapping_handles_quoted_greater_than_attributes():
+    html = '<section data-shine-node="n_card" title="a > b"><span>内容</span></section>'
+    assert PageDocumentStore._mapped_node_range(
+        {"html": html}, "n_card", "static_element"
+    ) == (0, len(html))
+
+
+def test_css_scope_parser_handles_quoted_braces():
+    css = '[data-shine-node="n_card"]{--label:"a } b";color:red}'
+    assert PageDocumentStore._canonical_css_ranges(
+        {"css": css}, "n_card"
+    ) == [{"start": 0, "end": len(css)}]
 
 
 def test_contract_rejects_unknown_fields_board_spec_and_invalid_binding():
@@ -117,6 +167,11 @@ def test_contract_rejects_unknown_fields_board_spec_and_invalid_binding():
     assert is_package_too_large(oversized.value)
     with pytest.raises(ValidationError):
         PagePatchPreview.model_validate({"base_version": 1, "package": body["package"], "title": None})
+    with pytest.raises(ValidationError):
+        PagePatchPreview.model_validate({"base_version": 1, "edit_scope": "presentation"})
+    with pytest.raises(ValidationError):
+        PagePatchPreview.model_validate({"base_version": 1, "package": body["package"],
+                                         "edit_scope": "presentation", "edit_context_id": "ctx_forced"})
     schema = page_documents_openapi()
     assert schema["x-free-page-schema"] == SCHEMA_VERSION
     assert "INVALID_BOARD" not in schema["x-page-errors"]
@@ -232,6 +287,126 @@ def test_d6_patch_and_d9_save_are_separate_one_version_each_and_cancel_does_not_
     assert confirm(store, patched, "d6") == v2
     with pytest.raises(AnalyticsError, match="IDEMPOTENCY_CONFLICT"):
         confirm(store, saved, "d6")
+
+
+def test_ai_source_range_patch_allows_selected_html_only(tmp_path):
+    store = PageDocumentStore(private(tmp_path / "pages"))
+    v1 = confirm(store, store.generate(ALICE, draft()))
+    page_id = v1["spec"]["page_id"]
+    old = v1["spec"]["package"]
+    new = sample_package(html=old["html"].replace("示例标题", "新标题"))
+    patch = store.patch(ALICE, page_id, source_patch(1, old, new))
+    assert patch["snapshot"]["spec"]["package"]["html"].endswith("新标题</h1><canvas data-shine-region=\"r_chart\"></canvas></body></html>")
+
+    both = sample_package(html=old["html"].replace("示例标题", "新标题"), css="h1{color:purple}")
+    with pytest.raises(AnalyticsError) as error:
+        store.patch(ALICE, page_id, source_patch(1, old, both, ranges=[
+            {"file": "html", "start": old["html"].index("<h1"), "end": old["html"].index("</h1>") + 5},
+            {"file": "css", "start": 0, "end": len(old["css"])},
+        ]))
+    assert error.value.code == "AI_SCOPE_DIFF"
+
+    css_old = sample_package(css="[data-shine-node='n_title']{color:black}.other{display:none}")
+    css_page = confirm(store, store.generate(ALICE, draft(package=css_old)), "css-page")
+    css_new = sample_package(css="[data-shine-node='n_title']{color:black}.other{display:block}")
+    with pytest.raises(AnalyticsError) as error:
+        store.patch(ALICE, css_page["spec"]["page_id"], source_patch(
+            1, css_old, css_new,
+            ranges=[
+                {"file": "html", "start": css_old["html"].index("<h1"), "end": css_old["html"].index("</h1>") + 5},
+                {"file": "css", "start": 0, "end": len(css_old["css"])},
+            ],
+        ))
+    assert error.value.code == "AI_SCOPE_DIFF"
+
+    unrelated = sample_package(html=old["html"].replace("示例标题", "新标题").replace("r_chart", "other_chart"))
+    with pytest.raises(AnalyticsError) as error:
+        store.patch(ALICE, page_id, source_patch(1, old, unrelated))
+    assert error.value.code == "AI_SCOPE_DIFF" and error.value.status == 422
+
+    presentation = sample_package(html=old["html"].replace("示例标题", "新标题"), presentation={
+        "version": 1,
+        "source_hash": page_source_hash(old["html"].replace("示例标题", "新标题"), old["css"], old["js"]),
+        "edits": [{"target": {"anchor": {"attribute": "id", "value": "outside"}, "path": []}, "text": "越界"}],
+    })
+    with pytest.raises(AnalyticsError) as error:
+        store.patch(ALICE, page_id, source_patch(1, old, presentation))
+    assert error.value.code == "AI_SCOPE_DIFF"
+
+    boundary_html = '<h1 data-shine-node="n_title">Before</h1>'
+    boundary_package = {"html": boundary_html, "css": "", "js": "", "resources": [],
+                        "node_map": [{"node_id": "n_title", "kind": "static_element",
+                                      "selector": "[data-shine-node='n_title']"}]}
+    boundary_page = confirm(store, store.generate(ALICE, draft(package=boundary_package)), "boundary-page")
+    boundary_new = {**boundary_package, "html": boundary_html + "<p>outside</p>"}
+    with pytest.raises(AnalyticsError) as error:
+        store.patch(ALICE, boundary_page["spec"]["page_id"], source_patch(1, boundary_package, boundary_new))
+    assert error.value.code == "AI_SCOPE_DIFF"
+
+
+def test_ai_source_range_rejects_stale_hash_and_bound_content(tmp_path):
+    store = PageDocumentStore(private(tmp_path / "pages"))
+    v1 = confirm(store, store.generate(ALICE, draft()))
+    old = v1["spec"]["package"]
+    changed = sample_package(html=old["html"].replace("示例标题", "新标题"))
+    stale = source_patch(1, old, changed).model_dump(mode="json", exclude_unset=True)
+    stale["source_hash"] = "0" * 64
+    with pytest.raises(AnalyticsError) as error:
+        store.patch(ALICE, v1["spec"]["page_id"], PagePatchPreview.model_validate(stale))
+    assert error.value.code == "AI_SOURCE_CHANGED"
+    forged = source_patch(1, old, changed).model_dump(mode="json", exclude_unset=True)
+    forged["focus_ref"]["mapping_token"] = "f" * 32
+    with pytest.raises(AnalyticsError) as error:
+        store.patch(ALICE, v1["spec"]["page_id"], PagePatchPreview.model_validate(forged))
+    assert error.value.code == "AI_SOURCE_CHANGED"
+
+    def resolver(actor, session_id, result_id):
+        return ResolvedPageBinding("VERIFIED", frozenset({"brand-a"}))
+
+    bound_store = PageDocumentStore(private(tmp_path / "bound"), resolve_binding=resolver)
+    manifest = {"result_refs": ["result_fixture_1"],
+                "bindings": [{"binding_id": "bind_1", "result_ref": "result_fixture_1", "node_id": "n_title"}]}
+    bound = confirm(bound_store, bound_store.generate(ALICE, draft(binding_manifest=manifest)))
+    bound_old = bound["spec"]["package"]
+    bound_request = source_patch(1, bound_old,
+        sample_package(html=bound_old["html"].replace("示例标题", "新标题")))
+    with pytest.raises(AnalyticsError) as error:
+        bound_store.patch(ALICE, bound["spec"]["page_id"], bound_request)
+    assert error.value.code == "AI_BOUND_CONTENT" and error.value.status == 403
+    with pytest.raises(AnalyticsError) as error:
+        bound_store.save(ALICE, bound["spec"]["page_id"], PageSavePreview.model_validate({
+            "base_version": 1, "title": bound["spec"]["title"],
+            "package": {**bound_old, "html": bound_old["html"].replace("示例标题", "绕过")},
+            "binding_manifest": manifest,
+        }))
+    assert error.value.code == "AI_BOUND_CONTENT" and error.value.status == 403
+
+
+def test_ai_dynamic_region_can_change_one_runtime_source_file(tmp_path):
+    store = PageDocumentStore(private(tmp_path / "pages"))
+    runtime_package = sample_package(js="document.querySelector('[data-shine-region=\"r_chart\"]')?.getContext('2d')")
+    v1 = confirm(store, store.generate(ALICE, draft(package=runtime_package)))
+    page_id = v1["spec"]["page_id"]
+    old = v1["spec"]["package"]
+    html_start = old["html"].index('<canvas')
+    html_end = old["html"].index('</canvas>') + len('</canvas>')
+    digest = source_hash(old)
+    token = hashlib.sha256(f"{digest}:r_chart:{html_start}:{html_end}".encode()).hexdigest()[:32]
+    new = sample_package(js="const barColor = 'purple'; " + old["js"])
+    request = PagePatchPreview.model_validate({
+        "base_version": 1, "package": new, "edit_scope": "source_range", "edit_context_id": "ctx_chart",
+        "source_hash": digest,
+        "focus_ref": {
+            "node_id": "r_chart", "kind": "dynamic_region", "allowed_scope": "dynamic_source_range",
+            "allowed_ranges": [
+                {"file": "html", "start": html_start, "end": html_end},
+                {"file": "js", "start": 0, "end": len(old["js"])},
+            ],
+            "mapping_token": token, "version_hash": digest,
+        },
+    })
+    preview = store.patch(ALICE, page_id, request)
+    assert "barColor" in preview["snapshot"]["spec"]["package"]["js"]
 
 
 def test_process_reopen_new_connection_and_monotonic_rollback(tmp_path):

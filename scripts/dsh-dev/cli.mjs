@@ -53,6 +53,7 @@ Launch tokens are never printed. Unauthenticated GET / must stay 401.`;
 function parseArgv(argv) {
   if (argv.length === 0 || argv[0] === '--help' || argv[0] === '-h') return { command: 'help' };
   const [command, ...rest] = argv;
+  if (rest.includes('--help') || rest.includes('-h')) return { command: 'help' };
   if (!['check', 'dump-config', 'start', 'stop', 'status', 'diagnose', 'reload', 'open'].includes(command)) {
     return { command: 'invalid', options: { message: `Unknown command: ${command}` } };
   }

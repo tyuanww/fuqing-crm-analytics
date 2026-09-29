@@ -20,6 +20,7 @@ export type FreeHtmlLibraryState = {
   preview: PreviewRecord | null;
   importCandidate: { preview_id: string; artifact_id?: string; artifact_receipt_id?: string; source?: string; title?: string; page_id?: string | null; content_hash?: string; package: FreeHtmlPage['package']; origin: { session_id: string | null; path: string; file_id?: string }; quarantined?: string[] } | null;
   textDraft: { value: string; original: string; changed: boolean } | null;
+  sourceDraft: { package: FreeHtmlPage['package']; changed: boolean } | null;
   textDrafts: Record<string, string>;
   draftReset: number;
   silentCommit: boolean;
@@ -87,6 +88,9 @@ export type FreeHtmlLibraryStore = {
   confirmExpandedPatch(): void;
   confirmPatch(): Promise<void>;
   cancelPreview(): Promise<void>;
+  setSourceText(file: 'html' | 'css' | 'js', value: string): void;
+  discardSourceDraft(): void;
+  previewSourceDraft(): Promise<void>;
   saveDraft(): Promise<void>;
   markLocalDraft(pkg: FreeHtmlPage['package']): void;
   rollback(version: number): Promise<void>;

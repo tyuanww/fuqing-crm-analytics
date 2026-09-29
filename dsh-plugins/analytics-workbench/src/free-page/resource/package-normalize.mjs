@@ -27,6 +27,104 @@ function takeDocumentParts(html) {
   return { html: `${kept.join('')}${stripped}`, extraCss: styles, extraJs: scripts };
 }
 
+const AUTO_MAP_SKIP = new Set([
+  'html', 'head', 'body', 'title', 'meta', 'link', 'base', 'style', 'script',
+  'template', 'source', 'track', 'col', 'colgroup', 'option',
+]);
+
+function nextTagEnd(html, start) {
+  let quote = null;
+  for (let index = start; index < html.length; index += 1) {
+    const char = html[index];
+    if (quote) {
+      if (char === quote) quote = null;
+    } else if (char === '"' || char === "'") {
+      quote = char;
+    } else if (char === '>') {
+      return index;
+    }
+  }
+  return -1;
+}
+
+function skipRawBlock(html, start) {
+  if (html.startsWith('<!--', start)) {
+    const end = html.indexOf('-->', start + 4);
+    return end < 0 ? html.length : end + 3;
+  }
+  const tagEnd = nextTagEnd(html, start + 1);
+  if (tagEnd < 0) return html.length;
+  const open = html.slice(start, tagEnd + 1).match(/^<(script|style|template|textarea|title)\b/i);
+  if (!open) return null;
+  const close = new RegExp('</' + open[1] + '\\s*>', 'i').exec(html.slice(tagEnd + 1));
+  return close ? tagEnd + 1 + close.index + close[0].length : html.length;
+}
+
+function autoNodeId(tag, start) {
+  return `auto_${String(tag).toLowerCase()}_${start}`;
+}
+
+/**
+ * Give unmarked visible elements a host-owned identity. The source remains
+ * self-contained and the id is derived from the original source offset, so
+ * later text edits keep the mapping stable through the marker itself.
+ */
+function annotateGenericElements(html) {
+  const raw = String(html ?? '');
+  const additions = [];
+  const chunks = [];
+  let cursor = 0;
+  let index = 0;
+  while (index < raw.length) {
+    const start = raw.indexOf('<', index);
+    if (start < 0) break;
+    const skipped = skipRawBlock(raw, start);
+    if (skipped !== null) {
+      index = skipped;
+      continue;
+    }
+    const end = nextTagEnd(raw, start + 1);
+    if (end < 0) break;
+    const source = raw.slice(start, end + 1);
+    const match = source.match(/^<([A-Za-z][A-Za-z0-9:_-]*)([\s\S]*?)>$/);
+    if (!match || source.startsWith('</') || source.startsWith('<!') || source.startsWith('<?')) {
+      index = end + 1;
+      continue;
+    }
+    const tag = match[1].toLowerCase();
+    const attrs = match[2] ?? '';
+    if (AUTO_MAP_SKIP.has(tag) || /\bdata-shine-(?:node|region)\s*=\s*/i.test(attrs)) {
+      index = end + 1;
+      continue;
+    }
+    const nodeId = autoNodeId(tag, start);
+    const kind = ['canvas', 'svg', 'video', 'audio', 'iframe'].includes(tag)
+      ? 'dynamic_region' : 'static_element';
+    const marker = ` data-shine-${kind === 'dynamic_region' ? 'region' : 'node'}="${nodeId}"`;
+    const insertAt = source.endsWith('/>') ? source.length - 2 : source.length - 1;
+    chunks.push(raw.slice(cursor, start), source.slice(0, insertAt), marker, source.slice(insertAt));
+    additions.push({ node_id: nodeId, kind, selector: `[data-shine-${kind === 'dynamic_region' ? 'region' : 'node'}='${nodeId}']` });
+    cursor = end + 1;
+    index = end + 1;
+  }
+  if (!additions.length) return { html: raw, nodes: [] };
+  chunks.push(raw.slice(cursor));
+  return { html: chunks.join(''), nodes: additions };
+}
+
+/** Add stable host mappings without rewriting resources or other package fields. */
+export function annotateHostMappings(pkg) {
+  if (!pkg || typeof pkg !== 'object' || typeof pkg.html !== 'string') return pkg;
+  const annotated = annotateGenericElements(pkg.html);
+  const existing = Array.isArray(pkg.node_map) ? pkg.node_map : [];
+  const known = new Set(existing.map(row => row?.node_id).filter(Boolean));
+  return {
+    ...pkg,
+    html: annotated.html,
+    node_map: [...existing, ...annotated.nodes.filter(row => !known.has(row.node_id))],
+  };
+}
+
 function extractNodeMap(html) {
   const nodes = [];
   const seen = new Set();
@@ -159,14 +257,19 @@ export async function normalizePagePackage(raw, options = {}) {
   }
   const outboundAfter = assertNoActiveOutbound(html, css, js, ids);
   if (!outboundAfter.ok) return outboundAfter;
-  const nodes = validateNodeMap(raw.node_map, html);
+  const annotated = annotateGenericElements(html);
+  if (byteLength(annotated.html) + byteLength(css) + byteLength(js) > budgets.maxSourceBytes) {
+    return fail('PACKAGE_TOO_LARGE', '元素映射标记使源码超过页面额度');
+  }
+  const nodes = validateNodeMap(raw.node_map, annotated.html);
   if (!nodes.ok) return nodes;
-  if (nodes.value.length > budgets.maxNodeMap) return fail('PACKAGE_TOO_LARGE', '节点映射超过额度');
+  const allNodes = [...nodes.value, ...annotated.nodes.filter(row => !nodes.value.some(item => item.node_id === row.node_id))];
+  if (allNodes.length > budgets.maxNodeMap) return fail('PACKAGE_TOO_LARGE', '节点映射超过额度');
   return {
     ok: true,
     value: {
       schema_version: FROZEN_SCHEMA_VERSION,
-      html,
+      html: annotated.html,
       css,
       js,
       resources: resources.map((row) => ({
@@ -179,7 +282,7 @@ export async function normalizePagePackage(raw, options = {}) {
         actor_id: row.actor_id,
         bytes: row.bytes,
       })),
-      node_map: nodes.value,
+      node_map: allNodes,
     },
   };
 }

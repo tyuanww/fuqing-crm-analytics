@@ -3,21 +3,31 @@ import { join, relative } from 'node:path';
 
 const ASSIGNMENT = /(?:api[_-]?key|secret|password|token|cookie|authorization)\s*[:=]\s*['"]([A-Za-z0-9+/=_-]{20,})['"]/ig;
 const SECRET_PATTERNS = [
-  /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/i,
-  /(?:gh[pousr]|github_pat)_[A-Za-z0-9_]{20,}/,
-  /sk-[A-Za-z0-9]{20,}/,
-  /AKIA[0-9A-Z]{16}/,
+  /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----[\s\S]{32,}?-----END (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/i,
+  /(?:^|[^A-Za-z0-9_])(?:gh[pousr]|github_pat)_[A-Za-z0-9_]{20,}(?![A-Za-z0-9_])/,
+  /(?:^|[^A-Za-z0-9])sk-[A-Za-z0-9]{20,}(?![A-Za-z0-9])/,
+  /(?:^|[^A-Z0-9])AKIA[0-9A-Z]{16}(?![0-9A-Z])/,
 ];
 const DENY_NAMES = /(^|\/)(?:\.env(?:\.|$)|\.npmrc(?:$|\/)|credentials?(?:[-_.]|$)|private[-_]?key(?:[-_.]|$)|cookie(?:[-_.]|$)|node_modules(?:\/|$)|__pycache__(?:\/|$)|.*\.wal$|.*\.duckdb(?:$|\.)|.*\.sqlite(?:$|\.)|.*\.log$)/i;
 const SYNTHETIC_MARKER = /(?:synthetic|test[-_]?only|\btest\b|isolated|not[-_]?a[-_]?live[-_]?secret|not[-_]?a[-_]?real|not[-_]?in[-_]?json|fixture|example|placeholder|fake|b0-|a9-|do[-_]?not[-_]?log|private[-_]?server|forwarded[-_]?|globals[-_]?|existing[-_]?valid|competition[-_]http|page[-_]documents|result[-_]page|32(?:chars?|ch)|minimum)/i;
+// These are protocol identifiers observed in pinned third-party bundles, not a
+// general exemption for identifier-shaped values.  Keep the list explicit so
+// a real assignment such as API_KEY='MY_REAL_SECRET_TOKEN' still fails closed.
+const BENIGN_PROTOCOL_LITERAL = new Set([
+  'x-cos-security-token',
+  '__DSH_CODE_ICON_INSTANCE__',
+  'AWS_SECRET_ACCESS_KEY',
+  'remove_authentication_token',
+]);
 
-export function scanText(text, name = '<input>') {
+export function scanText(text, name = '<input>', { scanAssignments = true } = {}) {
   const findings = SECRET_PATTERNS.some(pattern => pattern.test(text)) ? [`SECRET_PATTERN ${name}`] : [];
+  if (!scanAssignments) return [...new Set(findings)];
   for (const match of text.matchAll(ASSIGNMENT)) {
     // Synthetic values are exempt only inside explicitly named fixtures/tests;
     // a production/config file containing the same marker must still fail closed.
     const syntheticFixture = /(?:fixture|test|spec)/i.test(name) && SYNTHETIC_MARKER.test(match[1]);
-    if (!syntheticFixture) findings.push(`SECRET_PATTERN ${name}`);
+    if (!syntheticFixture && !BENIGN_PROTOCOL_LITERAL.has(match[1])) findings.push(`SECRET_PATTERN ${name}`);
   }
   return [...new Set(findings)];
 }

@@ -7,6 +7,7 @@ import { execFile as execFileCallback } from 'node:child_process';
 import { promisify } from 'node:util';
 import { dirname, join, relative, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
+import { scanText } from './secret-scan.mjs';
 
 const execFile = promisify(execFileCallback);
 const PIN = '477b4f420553e8a52c2fbccc464d7561b239c443';
@@ -16,6 +17,70 @@ const REQUIRED = [
   'node_modules/@deepseek-ai/dsh-web-app/lib/index.js',
   'node_modules/.pnpm',
 ];
+const SENSITIVE_BASENAME = /^(?:\.env(?:\..*)?|\.npmrc|private[-_]?key(?:[-_.].*)?|cookie(?:[-_.].*)?|.*\.duckdb(?:\.wal)?|.*\.sqlite(?:-wal|-shm)?|.*\.log)$/i;
+const DEVELOPMENT_SEGMENT = /(^|\/)(?:test|tests|__tests__|stress-tests|docs|reference|benchmarks)(?:\/|$)/i;
+const DEVELOPMENT_FILE = /(?:^\._|\.map|\.test\.[cm]?[jt]sx?|\.spec\.[cm]?[jt]sx?|\.tsx?|\.mts|\.cts|\.md|\.mdx|\.toml|^tsconfig(?:\..*)?$|^vite\.config\..*)$/i;
+const TEXT_FILE = /\.(?:cjs|css|html|ini|json|js|mjs|mts|sh|txt|ts|tsx|yaml|yml)$/i;
+const MAX_TEXT_SCAN_BYTES = 16 * 1024 * 1024;
+
+function relativePath(root, path) { return relative(root, path).split('\\').join('/'); }
+
+async function pruneDevelopmentFiles(root) {
+  let removed = 0;
+  async function walk(directory) {
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      const path = join(directory, entry.name);
+      const rel = relativePath(root, path);
+      const basename = entry.name;
+      const requiredRuntimeFile = basename === 'cordis.patch.yml';
+      if (entry.isSymbolicLink() && !await access(path).then(() => true, () => false)) {
+        await rm(path, { force: true });
+        removed += 1;
+        continue;
+      }
+      if (!requiredRuntimeFile && (SENSITIVE_BASENAME.test(basename) || DEVELOPMENT_SEGMENT.test(rel) || DEVELOPMENT_FILE.test(basename))) {
+        await rm(path, { recursive: true, force: true });
+        removed += 1;
+        continue;
+      }
+      if (entry.isDirectory()) await walk(path);
+    }
+  }
+  await walk(root);
+  return removed;
+}
+
+async function scanRuntimeTree(root) {
+  let files = 0;
+  let scannedBytes = 0;
+  async function walk(directory) {
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      const path = join(directory, entry.name);
+      const rel = relativePath(root, path);
+      if (SENSITIVE_BASENAME.test(entry.name)) throw new Error(`RUNTIME_DENY_NAME ${rel}`);
+      if (entry.isSymbolicLink() && !await access(path).then(() => true, () => false)) throw new Error(`RUNTIME_LINK_BROKEN ${rel}`);
+      if (entry.isDirectory()) {
+        await walk(path);
+        continue;
+      }
+      if (!entry.isFile()) continue;
+      files += 1;
+      const info = await stat(path);
+      if (TEXT_FILE.test(entry.name)) {
+        if (info.size > MAX_TEXT_SCAN_BYTES) throw new Error(`RUNTIME_SCAN_FILE_LIMIT ${rel}`);
+        scannedBytes += info.size;
+        // Scan vendor assignments too. `scanText` has a narrow allowlist for
+        // protocol identifiers observed in pinned third-party bundles; turning
+        // assignment scanning off for an entire directory would let a real
+        // API_KEY/PASSWORD value through the immutable runtime artifact.
+        const findings = scanText(await readFile(path, 'utf8'), rel);
+        if (findings.length) throw new Error(`RUNTIME_SECRET_SCAN_FAILED ${findings.join(';')}`);
+      }
+    }
+  }
+  await walk(root);
+  return { files, scanned_bytes: scannedBytes };
+}
 
 async function materializeExternalSymlinks(deployed, upstream, pinnedSha) {
   const deployedRoot = resolve(deployed);
@@ -128,16 +193,33 @@ async function materializeExternalSymlinks(deployed, upstream, pinnedSha) {
   await mkdir(peerDestinationRoot, { recursive: true });
   let seededPeers = 0;
   for (const entry of await readdir(peerSourceRoot, { withFileTypes: true })) {
-    if (!entry.name.startsWith('dsh-') && !entry.name.startsWith('cordis-plugin-')) continue;
+    if (!entry.name.startsWith('dsh-') && !entry.name.startsWith('cordis-plugin-') && !['cordis', 'cosmokit'].includes(entry.name)) continue;
     const peerSource = join(peerSourceRoot, entry.name);
     const peerDestination = join(peerDestinationRoot, entry.name);
-    if (await lstat(peerDestination).then(() => true, () => false)) continue;
+    const existing = await lstat(peerDestination).catch(error => {
+      if (error.code === 'ENOENT') return null;
+      throw error;
+    });
+    if (existing) {
+      const sourceTarget = entry.isSymbolicLink() ? resolve(dirname(peerSource), await readlink(peerSource)) : peerSource;
+      const destinationTarget = existing.isSymbolicLink() ? resolve(dirname(peerDestination), await readlink(peerDestination)) : peerDestination;
+      const sourcePackage = join(sourceTarget, 'package.json');
+      const destinationPackage = join(destinationTarget, 'package.json');
+      const [sourceBytes, destinationBytes] = await Promise.all([
+        readFile(sourcePackage).catch(() => null),
+        readFile(destinationPackage).catch(() => null),
+      ]);
+      if (!sourceBytes || !destinationBytes || !sourceBytes.equals(destinationBytes)) throw new Error(`RUNTIME_PEER_ALIAS_COLLISION ${entry.name}`);
+      continue;
+    }
     await cp(peerSource, peerDestination, { recursive: true, dereference: false, force: false, errorOnExist: true });
     seededPeers += 1;
   }
   await walk(deployedRoot);
   if (await access(externalRoot).then(() => true, () => false)) await walk(externalRoot);
-  return { external_targets: copied.size, seeded_peer_aliases: seededPeers };
+  const pruned_files = await pruneDevelopmentFiles(deployedRoot);
+  const runtime_scan = await scanRuntimeTree(deployedRoot);
+  return { external_targets: copied.size, seeded_peer_aliases: seededPeers, pruned_files, ...runtime_scan };
 }
 
 function option(name) {
@@ -153,6 +235,8 @@ assert.equal(process.argv.filter(arg => arg.startsWith('--')).length, online ? 3
 assert.equal(await access(join(upstream, '.git')).then(() => true, () => false), true, 'UPSTREAM_CHECKOUT_REQUIRED');
 const upstreamSha = (await execFile('git', ['-C', upstream, 'rev-parse', 'HEAD'])).stdout.trim();
 assert.equal(upstreamSha, PIN, 'UPSTREAM_SHA_MISMATCH');
+const upstreamStatus = (await execFile('git', ['-C', upstream, 'status', '--porcelain', '--untracked-files=no'])).stdout.trim();
+assert.equal(upstreamStatus, '', `UPSTREAM_CHECKOUT_DIRTY ${upstreamStatus}`);
 const outputInfo = await stat(output).catch(error => {
   if (error.code === 'ENOENT') return null;
   throw error;

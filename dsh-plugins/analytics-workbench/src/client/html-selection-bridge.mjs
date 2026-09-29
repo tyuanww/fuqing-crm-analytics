@@ -20,11 +20,16 @@ export function editablePageNodes(pkg, manifest) {
       else result.push({ ...node, node_id: 'rendered_root_' + node.source.start, runtimeOnly: true, packageHash: renderedPackageHash(pkg) });
     }
   }
+  for (const node of selectableNodes(pkg, manifest)) {
+    if ((node.kind === 'dynamic_region' || node.read_only_reason) && !result.some(item => item.node_id === node.node_id)) {
+      result.push({ ...node, editableText: false, inspectOnly: true });
+    }
+  }
   return result;
 }
 
 export function editableTextNodes(pkg, manifest) {
-  if (!pkg) return [];
+  if (!pkg || manifest?.result_refs?.length) return [];
   const index = buildSourceIndex(pkg);
   const bound = new Set((manifest?.bindings ?? []).map(row => row.node_id));
   return Object.values(index.nodes).filter(node => node.kind === 'static_element' && !bound.has(node.node_id)
@@ -35,14 +40,39 @@ export function editableTextNodes(pkg, manifest) {
     }));
 }
 
+/** All source-mapped nodes, including dynamic and bound nodes for inspection. */
+export function selectableNodes(pkg, manifest) {
+  if (!pkg) return [];
+  const index = buildSourceIndex(pkg);
+  const bound = new Set((manifest?.bindings ?? []).map(row => row.node_id));
+  const pageBound = Array.isArray(manifest?.result_refs) && manifest.result_refs.length > 0;
+  return Object.values(index.nodes).map(node => ({
+    node_id: node.node_id,
+    kind: node.kind,
+    mapping: 'valid',
+    editable: !pageBound && !bound.has(node.node_id) && node.kind === 'static_element'
+      && !node.js_ranges.length && !/<[a-z!/]/i.test(node.html_range.inner_text),
+    read_only_reason: pageBound ? 'bound_page' : bound.has(node.node_id) ? 'bound_node' : null,
+    mapping_token: node.mapping_token,
+    version_hash: index.version_hash,
+    text: node.html_range.inner_text,
+    tag: node.tag,
+  }));
+}
+
 function selectionRuntime(config) {
-  const send = nodeId => parent.postMessage({ type: 'cockpit.selection', channel: config.channel,
-    pageId: config.pageId, version: config.version, nodeId }, '*');
+  const clip = (value, limit) => String(value ?? '').slice(0, limit);
+  const send = (nodeId, node = null) => parent.postMessage({ type: 'cockpit.selection', channel: config.channel,
+    pageId: config.pageId, version: config.version, nodeId,
+    selectedText: node ? clip(node.innerText ?? node.textContent, 4096) : '',
+    htmlSelection: node ? clip(node.outerHTML, 12000) : '',
+    textValue: node?.contentEditable === 'true' ? clip(node.innerText ?? node.textContent, 4096) : undefined,
+  }, '*');
   const install = () => {
     const allowed = new Set(config.ids);
     let eligible = new Map(), published = '', selected = config.selected;
     const runtimeIds = new WeakMap();
-    const identity = node => runtimeIds.get(node) || node.getAttribute('data-cockpit-source') || node.getAttribute('data-shine-node');
+    const identity = node => runtimeIds.get(node) || node.getAttribute('data-cockpit-source') || node.getAttribute('data-shine-node') || node.getAttribute('data-shine-region');
     const staticAttributes = node => {
       const elements = [node, ...node.querySelectorAll('*')];
       for (let parent = node.parentElement; parent; parent = parent.parentElement) elements.push(parent);
@@ -117,7 +147,7 @@ function selectionRuntime(config) {
       return clone.innerHTML === template.innerHTML;
     };
     const style = document.createElement('style');
-    style.textContent = '[data-cockpit-target]{cursor:text!important;outline-offset:3px} [data-cockpit-target]:hover,[data-cockpit-target]:focus-visible{outline:1px dashed #ff6b35!important} [data-cockpit-target][data-cockpit-selected]{outline:2px solid #ff6b35!important;outline-offset:3px}';
+    style.textContent = '[data-cockpit-target]{cursor:text!important;outline-offset:3px} [data-cockpit-target]:hover,[data-cockpit-target]:focus-visible{outline:1px dashed #805d9d!important} [data-cockpit-target][data-cockpit-selected]{outline:2px solid #805d9d!important;outline-offset:3px}';
     document.head.append(style);
     const unmark = node => {
       node.removeAttribute('data-cockpit-target'); node.removeAttribute('data-cockpit-selected');
@@ -136,14 +166,14 @@ function selectionRuntime(config) {
       if (closed || typeof document === 'undefined' || !document.documentElement) return;
       observer.disconnect();
       const candidates = new Map(), duplicates = new Set();
-      for (const node of document.querySelectorAll('[data-shine-node],[data-cockpit-source]')) {
+      for (const node of document.querySelectorAll('[data-shine-node],[data-shine-region],[data-cockpit-source]')) {
         const id = identity(node);
         if (!allowed.has(id)) continue;
         if (candidates.has(id)) duplicates.add(id);
         candidates.set(id, node);
       }
       const next = new Map([...candidates].filter(([id, node]) => !duplicates.has(id) && !config.runtimeOnly.includes(id)
-        && node.namespaceURI === 'http://www.w3.org/1999/xhtml' && staticAttributes(node) && unchanged(node)));
+        && (config.inspectIds.includes(id) || node.namespaceURI === 'http://www.w3.org/1999/xhtml' && staticAttributes(node) && unchanged(node))));
       const inlineName = name => ['a', 'b', 'em', 'i', 'small', 'span', 'strong', 'sub', 'sup'].includes(name);
       const sentenceNode = node => {
         if (!node || !['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'figcaption', 'caption', 'label', 'td', 'th', 'button', 'blockquote'].includes(node.localName)) return false;
@@ -160,7 +190,8 @@ function selectionRuntime(config) {
         }
         return false;
       };
-      for (const [id, node] of [...next]) if (insideSentence(node)) next.delete(id);
+      // Keep parent and child mappings independently selectable. The click
+      // target chooses the innermost element; the host offers parent selection.
       const runtimeNodes = [], seen = new Set(); let runtimeBytes = 0;
       const roots = config.roots.map(root => ({ root, elements: [...document.querySelectorAll('[' + root.anchor.attribute + ']')].filter(node => node.getAttribute(root.anchor.attribute) === root.anchor.value) }))
         .filter(row => row.elements.length === 1).reverse();
@@ -231,6 +262,10 @@ function selectionRuntime(config) {
           node.setAttribute('data-cockpit-target', ''); node.tabIndex = 0;
         }
         node.toggleAttribute('data-cockpit-selected', id === selected);
+        if (!config.inspectIds.includes(id) && node.children.length === 0
+          && (config.editableIds.includes(id) || runtimeNodes.some(item => item.node_id === id && item.editableText))) {
+          node.contentEditable = 'true';
+        }
       }
       eligible = next;
       const ids = [...eligible.keys()].filter(id => !id.startsWith('runtime_')), signature = JSON.stringify([ids, runtimeNodes]);
@@ -265,24 +300,42 @@ function selectionRuntime(config) {
       }
     });
     document.addEventListener('click', event => {
-      event.preventDefault(); event.stopImmediatePropagation();
+      event.stopImmediatePropagation();
       // Publish eligibility before the click even if the mount handshake was
       // missed. The host validates these messages synchronously, before React renders.
       sync(true);
       let node = event.target.closest?.('[data-cockpit-target]');
+      const interactive = event.target.closest?.('a,button,form,input,select,textarea,summary,label');
+      if (interactive || node?.contentEditable !== 'true') event.preventDefault();
       if (config.selectBlocks) {
         for (let parent = node; parent; parent = parent.parentElement) {
           if (eligible.get(identity(parent)) === parent && (/^(section|article|li)$/.test(parent.localName) || (parent.hasAttribute('data-node') || parent.hasAttribute('data-page-block')) && parent.children.length)) { node = parent; break; }
         }
       }
-      if (node && eligible.get(identity(node)) === node) send(identity(node));
+      if (node && eligible.get(identity(node)) === node) send(identity(node), node);
     }, true);
+    document.addEventListener('beforeinput', event => {
+      const node = event.target.closest?.('[data-cockpit-target]');
+      event.stopImmediatePropagation();
+      if (!node || eligible.get(identity(node)) !== node || node.contentEditable !== 'true'
+        || !['insertText', 'deleteContentBackward', 'deleteContentForward', 'deleteWordBackward', 'deleteWordForward', 'insertCompositionText'].includes(event.inputType)) {
+        event.preventDefault(); return;
+      }
+      if (!originals.has(node)) originals.set(node, { html: node.innerHTML, style: node.getAttribute('style') });
+      drafted.add(node);
+    }, true);
+    document.addEventListener('input', event => {
+      event.stopImmediatePropagation();
+      const node = event.target.closest?.('[data-cockpit-target]');
+      if (node?.contentEditable === 'true' && eligible.get(identity(node)) === node) send(identity(node), node);
+    }, true);
+    for (const type of ['paste', 'drop']) document.addEventListener(type, event => { event.preventDefault(); event.stopImmediatePropagation(); }, true);
     document.addEventListener('submit', event => { event.preventDefault(); event.stopImmediatePropagation(); }, true);
     document.addEventListener('keydown', event => {
       if (event.key === 'Escape') { event.preventDefault(); send(null); }
       if (event.key === 'Enter' && event.target.matches?.('[data-cockpit-target]')) {
         event.preventDefault(); event.stopImmediatePropagation(); sync(true);
-        if (eligible.get(identity(event.target)) === event.target) send(identity(event.target));
+        if (eligible.get(identity(event.target)) === event.target) send(identity(event.target), event.target);
       }
     }, true);
     sync(true);
@@ -300,6 +353,7 @@ export function selectionSrcdoc(pkg, { channel, pageId, version, nodes = [], sel
   }).toString() + ')(' + statusConfig + ');</script>');
   if (!editing) return src;
   const config = JSON.stringify({ channel, pageId, version, ids: nodes.map(row => row.node_id), source: Object.fromEntries(nodes.map(row => [row.node_id, row.text])), selected,
+    editableIds: nodes.filter(row => row.editableText !== false && !row.inspectOnly).map(row => row.node_id), inspectIds: nodes.filter(row => row.inspectOnly || row.editable === false).map(row => row.node_id),
     runtimeOnly: nodes.filter(row => row.runtimeOnly).map(row => row.node_id), roots: nodes.filter(row => row.anchor && row.packageHash).map(({ node_id, anchor, packageHash }) => ({ node_id, anchor, packageHash })), selectBlocks }).replace(/</g, '\\u003c');
   return insertBeforeBodyEnd(src, '<script>(' + selectionRuntime.toString() + ')(' + config + ');</script>');
 }
@@ -307,10 +361,18 @@ export function acceptSelection(event, { source, channel, pageId, version, nodes
   if (!source || event.source !== source || event.origin !== 'null') return undefined;
   const data = event.data;
   if (!data || data.type !== 'cockpit.selection' || data.channel !== channel || data.pageId !== pageId || data.version !== version) return undefined;
-  if (Object.keys(data).some(key => !['type','channel','pageId','version','nodeId'].includes(key))) return undefined;
+  if (Object.keys(data).some(key => !['type','channel','pageId','version','nodeId','selectedText','htmlSelection','textValue'].includes(key))) return undefined;
+  if (data.selectedText != null && (typeof data.selectedText !== 'string' || data.selectedText.length > 4096)) return undefined;
+  if (data.htmlSelection != null && (typeof data.htmlSelection !== 'string' || data.htmlSelection.length > 12000)) return undefined;
+  if (data.textValue != null && (typeof data.textValue !== 'string' || data.textValue.length > 4096)) return undefined;
   if (data.nodeId === null) return null;
   const matches = nodes.filter(node => node.node_id === data.nodeId);
-  return matches.length === 1 ? matches[0] : undefined;
+  if (matches.length !== 1) return undefined;
+  if (typeof data.selectedText !== 'string' && typeof data.htmlSelection !== 'string') return matches[0];
+  return Object.freeze({ ...matches[0], selection_hints: Object.freeze({
+    selectedText: data.selectedText ?? '', htmlSelection: data.htmlSelection ?? '',
+    ...(typeof data.textValue === 'string' ? { textValue: data.textValue } : {}),
+  }) });
 }
 export function acceptTargets(event, { source, channel, pageId, version, nodes }) {
   if (!source || event.source !== source || event.origin !== 'null') return undefined;
