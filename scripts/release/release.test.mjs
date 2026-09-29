@@ -78,6 +78,7 @@ test('secret scan distinguishes explicit synthetic fixtures from real assignment
   assert.deepEqual(scanText("token = 'x-cos-security-token'", 'sdk/base.js'), []);
   assert.deepEqual(scanText("TOKEN = '__DSH_CODE_ICON_INSTANCE__'", 'ui-primitives/lib/index.js'), []);
   assert.deepEqual(scanText("SECRET = 'AWS_SECRET_ACCESS_KEY'", 'credential-provider-env/index.js'), []);
+  assert.deepEqual(scanText("TOKEN = 'AWS_CONTAINER_AUTHORIZATION_TOKEN'", 'sdk/base.js'), []);
   assert.deepEqual(scanText("TOKEN = 'remove_authentication_token'", 'semantic-conventions/experimental_attributes.js'), []);
   assert.deepEqual(scanText(`API_KEY = '${realSecret}'`, 'config/runtime.env'), ['SECRET_PATTERN config/runtime.env']);
   assert.deepEqual(scanText(`API_KEY = '${realSecret}'`, 'node_modules/vendor.js'), ['SECRET_PATTERN node_modules/vendor.js']);
