@@ -14,6 +14,7 @@ import { writeEvidence } from './evidence.mjs';
 import { evaluateSli } from './operator-gate.mjs';
 import { pageGuard } from './page-policy.mjs';
 import { scanText } from './secret-scan.mjs';
+import { releaseAssetNames, summarizePreflight, verifyPreflight, UPSTREAM_SHA } from './preflight-bundle.mjs';
 
 const fixture = () => mkdtemp(join(tmpdir(), 'dsh-release-'));
 function sha(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
@@ -146,6 +147,18 @@ test('promotion receives and records the pinned upstream runtime bundle', async 
 test('install rejects the unverified default path', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); await assert.rejects(() => installRelease({artifact:archive,manifestPath:m,releaseRoot:join(root,'release-root'),tag:'dsh-test'}), /RELEASE_TRUST_INPUTS_REQUIRED/); });
 test('release evidence workflow accepts a candidate descendant of main', async () => { const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-evidence.yml'), 'utf8'); assert.match(workflow, /git merge-base --is-ancestor origin\/main "\$REVIEWED_SHA"/); });
 test('release preflight workflow permits the pinned runtime dependency fetch', async () => { const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-preflight.yml'), 'utf8'); const source = await readFile(join(process.cwd(), 'scripts/release/preflight.mjs'), 'utf8'); assert.match(source, /runtime-bundle\.mjs[\s\S]*--online/); assert.match(workflow, /scripts\/dsh\.mjs preflight/); });
+test('preflight bundle summary binds every release asset to the manifest', async () => {
+  const root = await fixture();
+  const tag = 'dsh-test-preflight';
+  const sourceSha = 'a'.repeat(40);
+  const manifest = { schema_version: 'release-manifest/v1', release_tag: tag, product_version: '0.18.0.1', source_sha: sourceSha,
+    dsh_upstream_sha: UPSTREAM_SHA, pre_manifest_sha256: '0'.repeat(64), archive_allowlist: ['VERSION'], denylist_version: 'release-denylist/v1',
+    artifact_bytes: 1, artifact_sha256: '1'.repeat(64), upstream_runtime: { name: `shinemage-dsh-upstream-runtime-${UPSTREAM_SHA}.tar.zst`, role: 'upstream-runtime-bundle', upstream_sha: UPSTREAM_SHA, bytes: 1, sha256: '2'.repeat(64) }, payload: [] };
+  for (const name of releaseAssetNames(tag)) await writeFile(join(root, name), name === 'release-manifest.v1.json' ? JSON.stringify(manifest) : 'x');
+  const summary = await summarizePreflight(root, { tag, sourceSha });
+  await writeFile(join(root, 'release-preflight.json'), JSON.stringify(summary));
+  await assert.rejects(() => verifyPreflight(root, { tag, sourceSha }));
+});
 test('release evidence workflow hydrates and verifies LFS brand assets', async () => {
   const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-evidence.yml'), 'utf8');
   assert.match(workflow, /lfs:\s*true/);
@@ -154,6 +167,9 @@ test('release evidence workflow hydrates and verifies LFS brand assets', async (
   assert.match(workflow, /preflight_run_id/);
   assert.match(workflow, /dsh-release-preflight\.yml/);
   assert.match(workflow, /Reuse the exact preflight runtime bundle/);
+  assert.match(workflow, /release-preflight\.json/);
+  assert.doesNotMatch(workflow, /pipeline\.mjs --prepare/);
+  assert.doesNotMatch(workflow, /Build every production plugin bundle/);
 });
 test('release preflight builds the runtime before protected tag creation', async () => {
   const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-preflight.yml'), 'utf8');

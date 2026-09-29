@@ -83,6 +83,8 @@ jobs:
           assert ruleset.get('target') == 'tag' and ruleset.get('enforcement') == 'active', ruleset
           includes = ruleset.get('conditions', {}).get('ref_name', {}).get('include', [])
           assert any(fnmatch.fnmatchcase(f'refs/tags/{tag}', pattern) for pattern in includes), (tag, includes)
+          excludes = ruleset.get('conditions', {}).get('ref_name', {}).get('exclude', [])
+          assert not any(fnmatch.fnmatchcase(f'refs/tags/{tag}', pattern) for pattern in excludes), (tag, excludes)
           rule_types = {item.get('type') for item in ruleset.get('rules', [])}
           assert {'update', 'deletion'} <= rule_types, rule_types
           PY
