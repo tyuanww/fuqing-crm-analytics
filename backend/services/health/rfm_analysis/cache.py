@@ -77,6 +77,22 @@ STANDARD_PERIODS = [
     "last180days",
     "last365days",
 ]
+# 日期键按窗口折叠时，公开的语义周期必须优先于同范围的日历标签。
+# 例如季度末 ``last90days`` 可能与 ``Q3`` 使用同一物理键；先物化语义周期，
+# 让缓存行保留 ``LAST90DAYS``，从而保持前端固定筛选项和诊断标签稳定。
+PRECOMPUTE_STANDARD_PERIODS = (
+    "yesterday",
+    "WTD",
+    "MTD",
+    "YTD",
+    "last90days",
+    "last180days",
+    "last365days",
+    "Q1",
+    "Q2",
+    "Q3",
+    "Q4",
+)
 PRECOMPUTE_CHANNELS = [None, "货架", "达播", "直播", "淘客"]
 COMPARE_MODES = ["default", "auto_mom"]
 EXPECTED_LOGICAL_PRECOMPUTE_COMBINATIONS = (
@@ -1022,7 +1038,7 @@ def precompute_rfm_cache() -> int:
         logger.info(f"  generation_id = {generation_id}")
 
         for metric_type in METRIC_TYPES:
-            for period in STANDARD_PERIODS:
+            for period in PRECOMPUTE_STANDARD_PERIODS:
                 for year in YEARS:
                     for channel in CHANNELS:  # L4.71 RFM 业务治本 Stage 1 加 channel 维度 (跟 L4.42 + L4.55 1:1 stable 永久规则化沿用)
                         for compare_mode in COMPARE_MODES:  # L4.71 RFM 业务治本 Stage 1 加 compare 维度 (跟 L4.55 1:1 stable 永久规则化沿用)
