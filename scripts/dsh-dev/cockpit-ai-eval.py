@@ -16,7 +16,8 @@ from backend.contracts.page_documents import PageDraft
 from backend.services.analytics.access import AnalyticsPrincipal
 from backend.services.analytics.cockpit_ai import CockpitAIStore
 from backend.services.analytics.cockpit_files import CockpitFileStore
-from backend.services.analytics.page_documents import PageDocumentStore
+from backend.services.analytics.cockpit_html_selection import SourceTree
+from backend.services.analytics.page_documents import PageDocumentStore, _annotate_package
 
 
 def stores(root):
@@ -75,11 +76,19 @@ class Fragment(HTMLParser):
 
 def check_requested_change(case, changed):
     parsed = Fragment(changed)
+    # Host-owned mapping attributes are present in source.json now. Permit
+    # only an unchanged marker from the original selected fragment; arbitrary
+    # attributes still cannot satisfy or hide the requested visible change.
+    original_markers = {(tag, value) for tag, attrs in Fragment(case['selected']).tags
+                        for key, value in attrs.items() if key == 'data-shine-node'}
     assert ''.join(parsed.text).strip() == case['expected_text'], 'Requested visible text absent'
     expected_tags = {'unicode-title': ['h1'], 'phrasing-context': ['span', 'strong'],
                      'section-inline-style': ['section', 'p']}[case['id']]
     assert [tag for tag, _ in parsed.tags] == expected_tags, 'Unexpected markup changes'
     for index, (_, attrs) in enumerate(parsed.tags):
+        attrs = dict(attrs)
+        if 'data-shine-node' in attrs:
+            assert (parsed.tags[index][0], attrs.pop('data-shine-node')) in original_markers, 'Unexpected host mapping'
         if case.get('expected_style') and index == 0:
             assert set(attrs) == {'style'}, 'Unexpected section attributes'
             declarations = [part.strip().split(':', 1) for part in attrs['style'].split(';') if part.strip()]
@@ -101,10 +110,21 @@ def prepare(root):
         preview = pages.generate(actor, PageDraft(title='合成模型评估：' + case['id'], session_id=None,
             origin_file_id='file_eval', package={'html': html, 'css': 'p { line-height: 1.5; }'}))
         page = pages.confirm(actor, preview['preview_id'], str(uuid.uuid4()))['spec']
+        # Resolve the same structural node on the actual persisted source.
+        # Offsets/hashes from the pre-normalization fixture are stale once the
+        # page store adds its host-owned mappings.
         start = html.index(selected)
-        scope = {'start': start, 'end': start + len(selected), 'html_hash': hashlib.sha256(html.encode()).hexdigest()}
+        source_nodes = SourceTree(html).all_nodes
+        selected_index = next(index for index, node in enumerate(source_nodes)
+                              if node['start'] == start and node['end'] == start + len(selected))
+        html = page['package']['html']
+        saved_nodes = SourceTree(html).all_nodes
+        assert [node['tag'] for node in saved_nodes] == [node['tag'] for node in source_nodes]
+        node = saved_nodes[selected_index]
+        scope = {'start': node['start'], 'end': node['end'], 'html_hash': hashlib.sha256(html.encode()).hexdigest()}
         job = ai.begin(actor, 'page', page['page_id'], 1, 'ai_' + str(uuid.uuid4()), scope)
-        cases.append({**case, 'job': job, 'source_sha256': hashlib.sha256(ai.content(actor, job['id'], 'source')[1]).hexdigest()})
+        cases.append({**case, 'html': html, 'selected': html[node['start']:node['end']],
+                      'job': job, 'source_sha256': hashlib.sha256(ai.content(actor, job['id'], 'source')[1]).hexdigest()})
     manifest = {'schema': 'cockpit-ai-eval/v1', 'synthetic': True, 'cases': cases}
     (root / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')
     return {'case_count': len(cases), 'root': str(root)}
@@ -145,7 +165,9 @@ def judge(root, case_id):
     result = ai.confirm(actor, job['id'], ready['candidate_hash'])
     reopened = PageDocumentStore(root / 'pages')
     assert result['saved_version'] == 2
-    assert reopened.get(actor, job['target_id'])['spec']['package'] == candidate
+    # Source saves add only deterministic host mappings for newly introduced
+    # elements. Assert the full canonical package, not merely the visible text.
+    assert reopened.get(actor, job['target_id'])['spec']['package'] == _annotate_package(candidate)
     assert reopened.get(actor, job['target_id'], 1)['spec']['package'] == original
     return {'case': case_id, 'status': 'PASS', 'candidate': True, 'saved_version': 2,
             'candidate_sha256': ready['candidate_hash']}

@@ -44,7 +44,8 @@
   },
   "scripts": {
     "build": "node build.mjs",
-    "test": "node --test test/model.test.mjs test/initial-session.test.mjs test/native-evidence.test.mjs test/run-view.test.mjs",
+    "test": "node --test test/model.test.mjs test/initial-session.test.mjs test/native-evidence.test.mjs test/run-view.test.mjs && pnpm test:html-edit",
+    "test:html-edit": "node --test src/free-page/resource/package-normalize.test.mjs src/client/free-html-library/html-import.test.mjs src/client/html-selection-bridge.test.mjs src/client/free-html-library/store.test.mjs src/client/free-html-library/p12-live-adapters.test.mjs src/client/free-html-library/source-draft.test.mjs src/client/cockpit-ai-client.test.mjs src/free-page/edit/intent-router.test.mjs src/free-page/edit/selection-context.test.mjs test/dynamic-chart-browser-seam.test.mjs",
     "test:built": "node --test test/built.test.mjs"
   }
 }

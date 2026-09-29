@@ -21,6 +21,7 @@ import { convertWorkspaceHtml } from './free-html-library/html-import.mjs';
 import { useFloatingRail } from './cockpit-floating-rail.tsx';
 import { RailResize } from './cockpit-rail-controls.tsx';
 import { CockpitOfficeEditor } from './cockpit-office-editor.tsx';
+import { buildSelectionContext } from '../free-page/edit/selection-context.mjs';
 
 const noopSubscribe = () => () => {};
 const EMPTY_PAGE = { pages: [], current: null, mode: 'browse', busy: false, preview: null, importCandidate: null,
@@ -380,9 +381,10 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
     aiClient?.select(selected?.page_id ? 'page' : 'file', selected?.page_id ?? selected?.file_id ?? '');
   }, [selected?.page_id, selected?.file_id, ai.jobs, ai.busy]);
   const beginAI = async () => {
-    if (!selected || !aiClient || !fileClient) return;
-    if (cabinet.editor && !await fileClient.closeEditor()) return;
+    if (!selected || !aiClient) return;
+    if (cabinet.editor && fileClient && !await fileClient.closeEditor()) return;
     if (selected.page_id && page.current) { await aiClient.begin('page', selected.page_id, page.current.version); return; }
+    if (!fileClient) return;
     let item = cabinet.files.find(row => row.file_id === selected.file_id);
     if (!item && selected.sessionId && selected.path && delivery) {
       setFile(current => ({ ...current, loading: true }));
@@ -425,7 +427,7 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
           {fileClient ? <><input ref={picker} type="file" hidden multiple accept=".html,.htm,.docx,.doc,.odt,.rtf,.xlsx,.xls,.ods,.csv,.pdf" data-testid="cockpit-file-picker"
             onChange={event => { void addFiles(event.target.files); event.target.value = ''; }} />
             <button disabled={busy || uncertain} onClick={() => picker.current?.click()}>添加产物</button></> : null}
-          {aiClient && selected && !boardVisible ? <button disabled={busy || uncertain} onClick={() => guard(async () => { if (savedHtml && pageStore && !page.current?.binding_manifest?.result_refs?.length) { setHtmlAIMode(true); pageStore.enterEdit(); setMobileInspector(true); } else await beginAI(); })}>用 AI 改</button> : null}
+          {aiClient && selected && !boardVisible && !savedHtml ? <button disabled={busy || uncertain} onClick={() => guard(beginAI)}>用 AI 改</button> : null}
           {!boardVisible && selected?.kind === 'html' && !selected.page_id ? <button className="cockpit-primary" data-testid="html-import-start"
             disabled={busy || ai.active?.status === 'READY' || !file.text || Boolean(page.importCandidate) || uncertain || !pageStore}
             onClick={() => guard(createImport)}>保存为可编辑副本</button>
@@ -539,7 +541,27 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
                 {state.history.map(row => <div className="cockpit-history-row" key={row.version}><span>版本 {row.version}</span><button disabled={busy || row.version === state.saved?.spec.version} onClick={() => void library.rollback(row.version)}>预览回退</button></div>)}
               </div> : null}
             </CockpitSidebar></div>
-            : savedHtml && pageStore ? <CockpitPageEditor store={pageStore} aiMode={htmlAIMode} onInspect={() => setMobileInspector(true)} onWholeAI={aiClient ? () => void guard(beginAI) : undefined} onAI={aiClient ? (scope, instruction) => aiClient.begin('page', page.current!.page_id, page.current!.version, scope, instruction) : undefined} />
+            : savedHtml && pageStore ? <CockpitPageEditor store={pageStore} aiMode={htmlAIMode} onInspect={() => setMobileInspector(true)}
+              onSourceFallback={() => { pageStore.openContext('source'); setMobileInspector(true); setNotice('绑定页面的 HTML/JavaScript 和数据源保持保护，只允许在源码入口调整 CSS。'); }}
+              onWholeAI={aiClient ? () => void guard(beginAI) : undefined}
+              onAI={aiClient ? async (scope, instruction) => {
+                const selection = page.selection as unknown as { ok?: boolean; located?: { node?: Record<string, unknown> }; node?: Record<string, unknown> } | null;
+                const node = selection?.ok ? (selection.located?.node ?? selection.node) : null;
+                const context = buildSelectionContext({
+                  pagePackage: page.current!.package,
+                  pageId: page.current!.page_id,
+                  sessionId: page.current?.session_id ?? 'native-session-unknown',
+                  version: page.current!.version,
+                  node: node ?? {},
+                  bindingManifest: page.current?.binding_manifest,
+                });
+                if (!node) return aiClient.begin('page', page.current!.page_id, page.current!.version, scope, instruction);
+                if (!context.ok) {
+                  setNotice('当前选区映射已失效，请重新选择元素，或从“来源与源码”入口明确发起源码修改。');
+                  return false;
+                }
+                return aiClient.begin('page', page.current!.page_id, page.current!.version, context.context, instruction);
+              } : undefined} />
             : page.importCandidate ? <><div className="cockpit-notice" data-testid="html-import-preview"><div><strong>{page.importCandidate.artifact_id ? '页面已生成，待确认' : '保存为可编辑副本'}</strong><p>{uncertain ? '保存结果待核对。请用同一请求重试确认。' : page.importCandidate.artifact_id ? '产物已登记到收件箱；确认后才进入正式页面库。' : '先检查页面。确认后进入页库，原工作区文件保持不变。'}</p>
               {page.importCandidate.quarantined?.length ? <p>已停用页面里的外联地址，副本可以继续编辑。这些地址不会再被打开：{page.importCandidate.quarantined.slice(0, 4).join('、')}{page.importCandidate.quarantined.length > 4 ? '…' : ''}</p> : null}</div>
               <button disabled={busy || uncertain} onClick={() => void pageStore?.cancelPreview()}>{page.importCandidate.artifact_id ? '丢弃候选' : '取消入库'}</button><button className="cockpit-primary" disabled={busy} onClick={() => void pageStore?.confirmImport()}>{uncertain ? '重试确认' : page.importCandidate.artifact_id ? '确认保存页面' : '确认保存副本'}</button></div>

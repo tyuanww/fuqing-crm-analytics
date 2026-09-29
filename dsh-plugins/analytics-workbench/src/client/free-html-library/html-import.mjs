@@ -1,4 +1,4 @@
-/** Convert a workspace HTML file into a page-documents candidate. Does not confirm, write workspace files, or invent shine nodes. */
+/** Convert a workspace HTML file into a page-documents candidate. Does not confirm or write workspace files. */
 
 import { extractCandidateUrls, quarantineActiveOutbound } from '../../free-page/resource/network-policy.mjs';
 import { normalizePagePackage } from '../../free-page/resource/package-normalize.mjs';

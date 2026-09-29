@@ -53,6 +53,17 @@ test('P12 live adapters: unbound generate, sandbox srcdoc, D locate, C forbids S
   );
 });
 
+test('native page intake adds host mappings to ordinary HTML before persistence', async () => {
+  const adapters = createLivePageAdapters({
+    nativeGenerate: async () => ({ html: '<main><h1>标题</h1><button>按钮</button><canvas></canvas></main>',
+      css: '', js: '', resources: [], node_map: [] }),
+  });
+  const generated = await adapters.nativeChat.submitGeneratePrompt('普通 HTML 映射');
+  assert.equal(generated.package.node_map.length, 4);
+  assert.match(generated.package.html, /data-shine-node="auto_main_0"/);
+  assert.match(generated.package.html, /data-shine-region="auto_canvas_/);
+});
+
 test('live adapters pull page list over isolated HTTP mock, never port 6677', async () => {
   const calls = [];
   const adapters = createLivePageAdapters({
@@ -240,6 +251,87 @@ test('live D6 patch, D9 save, reopen and rollback go through isolated documents 
   const history = await adapters.documents.pullHistory(pageId);
   assert.equal(history.ok, true);
   assert.ok(history.items.length >= 3);
+});
+
+test('live D6 patch carries the host source-range context into HTTP', async () => {
+  const isolated = createIsolatedFetch({ token: TOKEN });
+  const calls = [];
+  const fetchImpl = async (url, init) => {
+    if (String(url).endsWith('/patch-preview')) calls.push(JSON.parse(init.body));
+    return isolated.fetchImpl(url, init);
+  };
+  const adapters = createLivePageAdapters({
+    nativeGenerate: async () => AGENT_PACKAGE,
+    documentsHttp: { base: BASE, token: TOKEN, fetchImpl },
+    resultHttp: { base: BASE, token: TOKEN, fetchImpl },
+  });
+  const store = createFreeHtmlLibraryStore({ adapters });
+  store.setPrompt('上下文范围验证');
+  await store.generate();
+  store.enterEdit();
+  store.selectLocatable({ kind: 'static_element', node_id: 'n_action' });
+  await store.previewPatch('范围内标题');
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].edit_scope, 'source_range');
+  assert.equal(calls[0].focus_ref.node_id, 'n_action');
+  assert.equal(calls[0].focus_ref.allowed_scope, 'exact_source_range');
+  assert.equal(calls[0].focus_ref.allowed_ranges[0].file, 'html');
+  await store.cancelPreview();
+  store.dispose();
+});
+
+test('live D6 patch sends Unicode code-point ranges for emoji pages', async () => {
+  const html = '😀<h1 data-shine-node="n_action">按钮</h1>';
+  const isolated = createIsolatedFetch({ token: TOKEN });
+  const calls = [];
+  const fetchImpl = async (url, init) => {
+    if (String(url).endsWith('/patch-preview')) calls.push(JSON.parse(init.body));
+    return isolated.fetchImpl(url, init);
+  };
+  const adapters = createLivePageAdapters({
+    nativeGenerate: async () => ({ html, css: '', js: '', resources: [], node_map: [
+      { node_id: 'n_action', kind: 'static_element', selector: '[data-shine-node="n_action"]' },
+    ] }),
+    documentsHttp: { base: BASE, token: TOKEN, fetchImpl },
+    resultHttp: { base: BASE, token: TOKEN, fetchImpl },
+  });
+  const store = createFreeHtmlLibraryStore({ adapters });
+  await store.generate();
+  store.enterEdit();
+  store.selectLocatable({ kind: 'static_element', node_id: 'n_action' });
+  await store.previewPatch('范围内按钮');
+  const range = calls[0].focus_ref.allowed_ranges.find(item => item.file === 'html');
+  assert.deepEqual(range, { file: 'html', start: 1, end: [...html].length });
+  await store.cancelPreview();
+  store.dispose();
+});
+
+test('live manual source fallback saves CSS after preview and preserves versioning', async () => {
+  const { store } = liveStore();
+  store.setPrompt('源码兜底验证');
+  await store.generate();
+  const version = store.getSnapshot().current.version;
+  store.openContext('source');
+  store.setSourceText('css', `${store.getSnapshot().current.package.css}\nbody{background:#FEFCFF}`);
+  await store.previewSourceDraft();
+  assert.equal(store.getSnapshot().preview.operation, 'SAVE');
+  await store.confirmPatch();
+  assert.equal(store.getSnapshot().current.version, version + 1);
+  assert.match(store.getSnapshot().current.package.css, /background:#FEFCFF/);
+  assert.equal(store.getSnapshot().sourceDraft, null);
+  store.dispose();
+});
+
+test('live structured text route refuses dynamic regions before HTTP write', async () => {
+  const { store } = liveStore();
+  store.setPrompt('动态范围验证');
+  await store.generate();
+  store.enterEdit();
+  store.selectLocatable({ kind: 'dynamic_region', node_id: 'r_chart' });
+  await store.previewPatch('不应直接改动态区域');
+  assert.match(store.getSnapshot().message, /源码入口/);
+  assert.equal(store.getSnapshot().preview, null);
+  store.dispose();
 });
 
 test('live result bridge reads isolated HTTP and refuses 6677', async () => {

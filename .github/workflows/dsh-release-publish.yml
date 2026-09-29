@@ -18,6 +18,7 @@ on:
 
 permissions:
   actions: read
+  attestations: read
   contents: write
 
 concurrency:
@@ -27,24 +28,41 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
-      - name: Download the exact evidence artifact
+      - name: Download and authenticate the exact evidence run
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.release_tag }}
           EVIDENCE_RUN_ID: ${{ inputs.evidence_run_id }}
+          REVIEWED_SHA: ${{ inputs.reviewed_sha }}
         run: |
           set -euo pipefail
           [[ "$RELEASE_TAG" =~ ^dsh-[A-Za-z0-9._-]+$ ]]
           [[ "$EVIDENCE_RUN_ID" =~ ^[0-9]+$ ]]
+          [[ "$REVIEWED_SHA" =~ ^[0-9a-f]{40}$ ]]
           mkdir -p "$RUNNER_TEMP/dsh-evidence"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$EVIDENCE_RUN_ID" > "$RUNNER_TEMP/evidence-run.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$EVIDENCE_RUN_ID/jobs?per_page=100" > "$RUNNER_TEMP/evidence-jobs.json"
+          python3 - "$RUNNER_TEMP/evidence-run.json" "$RUNNER_TEMP/evidence-jobs.json" "$RELEASE_TAG" "$REVIEWED_SHA" <<'PY'
+          import json, pathlib, sys
+          run = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          jobs = json.loads(pathlib.Path(sys.argv[2]).read_text())
+          tag, sha = sys.argv[3:]
+          assert run.get('path') == '.github/workflows/dsh-release-evidence.yml', run.get('path')
+          assert run.get('event') == 'workflow_dispatch', run.get('event')
+          assert run.get('head_branch') == tag, (run.get('head_branch'), tag)
+          assert run.get('head_sha') == sha, (run.get('head_sha'), sha)
+          assert run.get('status') == 'completed' and run.get('conclusion') == 'success', run
+          evidence = [job for job in jobs.get('jobs', []) if job.get('name') == 'evidence']
+          assert len(evidence) == 1 and evidence[0].get('conclusion') == 'success', evidence
+          PY
           gh run download "$EVIDENCE_RUN_ID" \
             --repo "$GITHUB_REPOSITORY" \
             --name "dsh-rc2-evidence-$RELEASE_TAG" \
             --dir "$RUNNER_TEMP/dsh-evidence"
 
-      - name: Verify release identity and artifact digests
+      - name: Verify tag, manifest, pre-manifest and attested digests
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.release_tag }}
@@ -53,58 +71,333 @@ jobs:
         run: |
           set -euo pipefail
           [[ "$RELEASE_ID" =~ ^[0-9]+$ ]]
-          [[ "$REVIEWED_SHA" =~ ^[0-9a-f]{40}$ ]]
-          python3 - "$RUNNER_TEMP/dsh-evidence/release-manifest.v1.json" "$RELEASE_TAG" "$REVIEWED_SHA" <<'PY'
+          gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID" > "$RUNNER_TEMP/draft-release.json"
+          gh api "repos/$GITHUB_REPOSITORY/tags/protection" > "$RUNNER_TEMP/tag-protection.json"
+          python3 - "$RUNNER_TEMP/tag-protection.json" "$RELEASE_TAG" <<'PY'
+          import fnmatch, json, pathlib, sys
+          rules = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          tag = sys.argv[2]
+          patterns = [item.get('pattern', '') for item in rules if isinstance(item, dict)]
+          assert any(fnmatch.fnmatchcase(tag, pattern) for pattern in patterns), (tag, patterns)
+          PY
+          gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" > "$RUNNER_TEMP/tag-ref.json"
+          python3 - "$RUNNER_TEMP/tag-ref.json" "$RELEASE_TAG" "$REVIEWED_SHA" "$RUNNER_TEMP/tag-object-kind.txt" "$RUNNER_TEMP/tag-object-sha.txt" <<'PY'
           import json, pathlib, sys
-          manifest = json.loads(pathlib.Path(sys.argv[1]).read_text())
-          assert manifest['release_tag'] == sys.argv[2]
-          assert manifest['source_sha'] == sys.argv[3]
-          assert manifest['upstream_runtime']['role'] == 'upstream-runtime-bundle'
-          assert manifest['upstream_runtime']['upstream_sha'] == manifest['dsh_upstream_sha']
+          ref = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          tag, expected, kind_out, sha_out = sys.argv[2:]
+          obj = ref.get('object', {})
+          assert obj.get('type') in {'commit', 'tag'}, (tag, obj)
+          pathlib.Path(kind_out).write_text(obj['type'] + '\n')
+          pathlib.Path(sha_out).write_text(obj['sha'] + '\n')
           PY
-          release_json=$(gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID")
-          python3 - "$RELEASE_TAG" "$release_json" <<'PY'
-          import json, sys
-          release = json.loads(sys.argv[2])
-          assert release['tag_name'] == sys.argv[1]
-          assert release['draft'] is True
-          assert release.get('immutable') is not True
+          if [[ "$(cat "$RUNNER_TEMP/tag-object-kind.txt")" == tag ]]; then
+            TAG_OBJECT_SHA=$(cat "$RUNNER_TEMP/tag-object-sha.txt")
+            gh api "repos/$GITHUB_REPOSITORY/git/tags/$TAG_OBJECT_SHA" > "$RUNNER_TEMP/annotated-tag.json"
+            python3 - "$RUNNER_TEMP/annotated-tag.json" "$RELEASE_TAG" "$REVIEWED_SHA" <<'PY'
+          import json, pathlib, sys
+          tag_object = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          tag, expected = sys.argv[2:]
+          target = tag_object.get('object', {})
+          assert target.get('type') == 'commit', (tag, target)
+          assert target.get('sha') == expected, (tag, target.get('sha'), expected)
           PY
-          (cd "$RUNNER_TEMP/dsh-evidence" && sha256sum -c SHA256SUMS)
+          else
+            python3 - "$RUNNER_TEMP/tag-ref.json" "$RELEASE_TAG" "$REVIEWED_SHA" <<'PY'
+          import json, pathlib, sys
+          ref = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          tag, expected = sys.argv[2:]
+          obj = ref.get('object', {})
+          assert obj.get('type') == 'commit' and obj.get('sha') == expected, (tag, obj, expected)
+          PY
+          fi
+          python3 - "$RUNNER_TEMP/draft-release.json" "$RUNNER_TEMP/dsh-evidence" "$RELEASE_TAG" "$REVIEWED_SHA" <<'PY'
+          import hashlib, json, pathlib, sys
+          release = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          root = pathlib.Path(sys.argv[2]); tag, sha = sys.argv[3:]
+          assert release['tag_name'] == tag
+          assert (release['draft'] is True and release.get('immutable') is not True) or (release['draft'] is False and release.get('immutable') is True), release
+          def one(name):
+              matches = list(root.rglob(name))
+              assert len(matches) == 1, (name, matches)
+              return matches[0]
+          manifest_path = one('release-manifest.v1.json')
+          pre_path = one('pre-manifest.v1.json')
+          sums_path = one('SHA256SUMS')
+          evidence_path = one('ci-evidence-index.v1.json')
+          manifest = json.loads(manifest_path.read_text())
+          assert manifest['schema_version'] == 'release-manifest/v1'
+          assert manifest['release_tag'] == tag and manifest['source_sha'] == sha
+          assert manifest['dsh_upstream_sha'] == '477b4f420553e8a52c2fbccc464d7561b239c443'
+          runtime = manifest['upstream_runtime']
+          assert runtime['role'] == 'upstream-runtime-bundle'
+          assert runtime['upstream_sha'] == manifest['dsh_upstream_sha']
+          assert runtime['name'] == 'shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst'
+          assert hashlib.sha256(pre_path.read_bytes()).hexdigest() == manifest['pre_manifest_sha256']
+          sums = {}
+          for line in sums_path.read_text().splitlines():
+              digest, name = line.split(maxsplit=1)
+              assert name not in sums
+              sums[name] = digest
+          source = one(f'{tag}.tar.zst'); runtime_path = one(runtime['name'])
+          expected = {
+              source.name: manifest['artifact_sha256'],
+              runtime_path.name: runtime['sha256'],
+              manifest_path.name: hashlib.sha256(manifest_path.read_bytes()).hexdigest(),
+          }
+          assert set(sums) == set(expected), (sorted(sums), sorted(expected))
+          assert all(sums.get(name) == digest for name, digest in expected.items()), (sums, expected)
+          assert source.stat().st_size == manifest['artifact_bytes']
+          assert runtime_path.stat().st_size == runtime['bytes']
+          evidence = json.loads(evidence_path.read_text())
+          assert evidence['release_tag'] == tag
+          runtime_entry = next(item for item in evidence['entries'] if item['name'] == 'upstream-runtime-bundle')
+          assert runtime_entry['status'] == 'PASS' and runtime_entry['sha256'] == runtime['sha256']
+          PY
+          SOURCE_ARTIFACT=$(find "$RUNNER_TEMP/dsh-evidence" -type f -name "$RELEASE_TAG.tar.zst" -print -quit)
+          RUNTIME_ARTIFACT=$(find "$RUNNER_TEMP/dsh-evidence" -type f -name 'shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst' -print -quit)
+          test -n "$SOURCE_ARTIFACT" && test -n "$RUNTIME_ARTIFACT"
+          gh attestation verify "$SOURCE_ARTIFACT" --repo "$GITHUB_REPOSITORY" --source-ref "refs/tags/$RELEASE_TAG" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/dsh-release-evidence.yml" --format json
+          gh attestation verify "$RUNTIME_ARTIFACT" --repo "$GITHUB_REPOSITORY" --source-ref "refs/tags/$RELEASE_TAG" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/dsh-release-evidence.yml" --format json
 
-      - name: Upload the complete immutable release asset set
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ inputs.release_tag }}
-        run: |
-          set -euo pipefail
-          gh release upload "$RELEASE_TAG" \
-            "$RUNNER_TEMP/dsh-evidence/$RELEASE_TAG.tar.zst" \
-            "$RUNNER_TEMP/dsh-evidence/shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst" \
-            "$RUNNER_TEMP/dsh-evidence/pre-manifest.v1.json" \
-            "$RUNNER_TEMP/dsh-evidence/release-manifest.v1.json" \
-            "$RUNNER_TEMP/dsh-evidence/SHA256SUMS" \
-            "$RUNNER_TEMP/dsh-evidence/ci-evidence-index.v1.json" \
-            --repo "$GITHUB_REPOSITORY"
-
-      - name: Publish only after every asset is present
+      - name: Upload matching assets without clobbering or duplicating them
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.release_tag }}
           RELEASE_ID: ${{ inputs.release_id }}
         run: |
           set -euo pipefail
-          assets=$(gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?per_page=100")
-          python3 - "$RELEASE_TAG" "$assets" <<'PY'
-          import json, sys
-          required = {
-              f'{sys.argv[1]}.tar.zst',
-              'shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst',
-              'pre-manifest.v1.json', 'release-manifest.v1.json', 'SHA256SUMS', 'ci-evidence-index.v1.json',
-          }
-          actual = {item['name'] for item in json.loads(sys.argv[2])}
-          assert required <= actual, sorted(required - actual)
+          upload_if_needed() {
+            local path="$1" name digest size decision
+            name=$(basename "$path")
+            digest=$(sha256sum "$path" | awk '{print $1}')
+            size=$(stat -c '%s' "$path")
+            gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?per_page=100" > "$RUNNER_TEMP/release-assets.json"
+            decision=$(python3 - "$RUNNER_TEMP/release-assets.json" "$name" "$digest" "$size" <<'PY'
+          import json, pathlib, sys
+          assets = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          name, digest, size = sys.argv[2:]
+          matches = [asset for asset in assets if asset.get('name') == name]
+          if not matches:
+              print('UPLOAD')
+          elif len(matches) != 1:
+              print('CONFLICT')
+          else:
+              remote = (matches[0].get('digest') or '').removeprefix('sha256:')
+              print('SKIP' if remote == digest and str(matches[0].get('size')) == size else 'CONFLICT')
           PY
-          gh api --method PATCH "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID" \
-            -f draft=false \
-            -f tag_name="$RELEASE_TAG"
+            )
+            case "$decision" in
+              UPLOAD) gh release upload "$RELEASE_TAG" "$path" --repo "$GITHUB_REPOSITORY" ;;
+              SKIP) echo "ASSET_REUSED name=$name sha256=$digest" ;;
+              *) echo "ASSET_CONFLICT name=$name" >&2; return 1 ;;
+            esac
+          }
+          for path in \
+            "$RUNNER_TEMP/dsh-evidence/$RELEASE_TAG.tar.zst" \
+            "$RUNNER_TEMP/dsh-evidence/shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst" \
+            "$RUNNER_TEMP/dsh-evidence/pre-manifest.v1.json" \
+            "$RUNNER_TEMP/dsh-evidence/release-manifest.v1.json" \
+            "$RUNNER_TEMP/dsh-evidence/SHA256SUMS" \
+            "$RUNNER_TEMP/dsh-evidence/ci-evidence-index.v1.json"; do
+            test -f "$path"
+            upload_if_needed "$path"
+          done
+
+      - name: Re-verify protected tag immediately before publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          REVIEWED_SHA: ${{ inputs.reviewed_sha }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" > "$RUNNER_TEMP/pre-publish-tag-ref.json"
+          TAG_TYPE=$(jq -r '.object.type' "$RUNNER_TEMP/pre-publish-tag-ref.json")
+          TAG_OBJECT_SHA=$(jq -r '.object.sha' "$RUNNER_TEMP/pre-publish-tag-ref.json")
+          if [[ "$TAG_TYPE" == tag ]]; then
+            gh api "repos/$GITHUB_REPOSITORY/git/tags/$TAG_OBJECT_SHA" > "$RUNNER_TEMP/pre-publish-annotated-tag.json"
+            TAG_TARGET=$(jq -r '.object | select(.type == "commit") | .sha' "$RUNNER_TEMP/pre-publish-annotated-tag.json")
+          else
+            [[ "$TAG_TYPE" == commit ]]
+            TAG_TARGET="$TAG_OBJECT_SHA"
+          fi
+          [[ "$TAG_TARGET" == "$REVIEWED_SHA" ]] || { echo "TAG_TARGET_CHANGED expected=$REVIEWED_SHA actual=$TAG_TARGET" >&2; exit 1; }
+
+      - name: Prepare the draft publication sidecar contract
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          RELEASE_ID: ${{ inputs.release_id }}
+          EVIDENCE_RUN_ID: ${{ inputs.evidence_run_id }}
+          REVIEWED_SHA: ${{ inputs.reviewed_sha }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID" > "$RUNNER_TEMP/draft-publication-release.json"
+          gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?per_page=100" > "$RUNNER_TEMP/draft-publication-assets.json"
+          python3 - "$RUNNER_TEMP/draft-publication-release.json" "$RUNNER_TEMP/draft-publication-assets.json" "$RUNNER_TEMP/dsh-evidence" "$RELEASE_TAG" "$REVIEWED_SHA" "$EVIDENCE_RUN_ID" <<'PY'
+          import json, pathlib, sys
+          release = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          assets = json.loads(pathlib.Path(sys.argv[2]).read_text())
+          root = pathlib.Path(sys.argv[3]); tag, sha, run_id = sys.argv[4:]
+          assert release['tag_name'] == tag, release
+          is_draft = release['draft'] is True and release.get('immutable') is not True
+          is_published = release['draft'] is False and release.get('immutable') is True
+          assert is_draft or is_published, release
+          required = [f'{tag}.tar.zst', 'shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst', 'pre-manifest.v1.json', 'release-manifest.v1.json', 'SHA256SUMS', 'ci-evidence-index.v1.json']
+          by_name = {asset['name']: asset for asset in assets}
+          assert all(name in by_name for name in required), sorted(set(required) - set(by_name))
+          def digest(name):
+              value = (by_name[name].get('digest') or '').removeprefix('sha256:')
+              assert len(value) == 64, (name, by_name[name])
+              return value
+          out = root / 'release-publication.v1.json'
+          sidecar = {
+              'schema_version': 'release-publication/v1', 'release_tag': tag,
+              'status': 'PUBLISHED_VERIFIED' if is_published else 'DRAFT', 'draft': not is_published, 'immutable': is_published,
+              'source_sha': sha, 'reviewed_sha': sha,
+              'protected_ref': f'refs/tags/{tag}', 'ref_target_sha': sha,
+              'approval_ref': f'run:{run_id}',
+              'manifest_sha256': digest('release-manifest.v1.json'),
+              'sha256sums_sha256': digest('SHA256SUMS'),
+              'evidence_index_sha256': digest('ci-evidence-index.v1.json'),
+              'provenance_status': 'VERIFIED', 'release_url': release['html_url'],
+              'assets': [
+                  {'name': name, 'id': by_name[name]['id'], 'url': by_name[name]['browser_download_url'], 'size': by_name[name]['size'], 'sha256': digest(name)}
+                  for name in required
+              ],
+          }
+          out.write_text(json.dumps(sidecar, indent=2) + '\n')
+          PY
+
+      - name: Publish the verified six-asset release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          RELEASE_ID: ${{ inputs.release_id }}
+          REVIEWED_SHA: ${{ inputs.reviewed_sha }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID" > "$RUNNER_TEMP/pre-publish-release.json"
+          gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?per_page=100" > "$RUNNER_TEMP/pre-publish-assets.json"
+          python3 - "$RUNNER_TEMP/pre-publish-release.json" "$RUNNER_TEMP/pre-publish-assets.json" "$RELEASE_TAG" <<'PY'
+          import json, pathlib, sys
+          release = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          actual = {item['name'] for item in json.loads(pathlib.Path(sys.argv[2]).read_text())}
+          required = {f'{sys.argv[3]}.tar.zst', 'shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst', 'pre-manifest.v1.json', 'release-manifest.v1.json', 'SHA256SUMS', 'ci-evidence-index.v1.json'}
+          assert required <= actual, sorted(required - actual)
+          assert release['tag_name'] == sys.argv[3]
+          assert (release['draft'] is True and release.get('immutable') is not True) or (release['draft'] is False and release.get('immutable') is True), release
+          PY
+          if [[ "$(python3 - "$RUNNER_TEMP/pre-publish-release.json" <<'PY'
+          import json, pathlib, sys
+          print('true' if json.loads(pathlib.Path(sys.argv[1]).read_text())['draft'] else 'false')
+          PY
+          )" == true ]]; then
+            gh api --method PATCH "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID" -F draft=false -f tag_name="$RELEASE_TAG"
+          fi
+          gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" > "$RUNNER_TEMP/post-publish-tag-ref.json"
+          TAG_TYPE=$(jq -r '.object.type' "$RUNNER_TEMP/post-publish-tag-ref.json")
+          TAG_OBJECT_SHA=$(jq -r '.object.sha' "$RUNNER_TEMP/post-publish-tag-ref.json")
+          if [[ "$TAG_TYPE" == tag ]]; then
+            gh api "repos/$GITHUB_REPOSITORY/git/tags/$TAG_OBJECT_SHA" > "$RUNNER_TEMP/post-publish-annotated-tag.json"
+            TAG_TARGET=$(jq -r '.object | select(.type == "commit") | .sha' "$RUNNER_TEMP/post-publish-annotated-tag.json")
+          else
+            [[ "$TAG_TYPE" == commit ]]
+            TAG_TARGET="$TAG_OBJECT_SHA"
+          fi
+          [[ "$TAG_TARGET" == "$REVIEWED_SHA" ]] || { echo "TAG_TARGET_CHANGED_AFTER_PUBLISH expected=$REVIEWED_SHA actual=$TAG_TARGET" >&2; exit 1; }
+          gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID" > "$RUNNER_TEMP/published-release.json"
+          python3 - "$RUNNER_TEMP/published-release.json" "$RELEASE_TAG" <<'PY'
+          import json, pathlib, sys
+          release = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          assert release['tag_name'] == sys.argv[2]
+          assert release['draft'] is False and release.get('immutable') is True, release
+          PY
+
+      - name: Finalize the verified publication sidecar after publishing
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          RELEASE_ID: ${{ inputs.release_id }}
+          EVIDENCE_RUN_ID: ${{ inputs.evidence_run_id }}
+          REVIEWED_SHA: ${{ inputs.reviewed_sha }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID" > "$RUNNER_TEMP/published-release-with-assets.json"
+          gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?per_page=100" > "$RUNNER_TEMP/release-assets-with-assets.json"
+          python3 - "$RUNNER_TEMP/published-release-with-assets.json" "$RUNNER_TEMP/release-assets-with-assets.json" "$RUNNER_TEMP/dsh-evidence" "$RELEASE_TAG" "$REVIEWED_SHA" "$EVIDENCE_RUN_ID" <<'PY'
+          import hashlib, json, pathlib, sys
+          release = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          assets = json.loads(pathlib.Path(sys.argv[2]).read_text())
+          root = pathlib.Path(sys.argv[3]); tag, sha, run_id = sys.argv[4:]
+          assert release['tag_name'] == tag and release['draft'] is False and release.get('immutable') is True, release
+          required = [f'{tag}.tar.zst', 'shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst', 'pre-manifest.v1.json', 'release-manifest.v1.json', 'SHA256SUMS', 'ci-evidence-index.v1.json']
+          by_name = {asset['name']: asset for asset in assets}
+          assert all(name in by_name for name in required), sorted(set(required) - set(by_name))
+          def digest(name):
+              value = (by_name[name].get('digest') or '').removeprefix('sha256:')
+              assert len(value) == 64, (name, by_name[name])
+              return value
+          manifest_path = next(root.rglob('release-manifest.v1.json'))
+          manifest = json.loads(manifest_path.read_text())
+          sidecar = {
+              'schema_version': 'release-publication/v1', 'release_tag': tag,
+              'status': 'PUBLISHED_VERIFIED', 'draft': False, 'immutable': True,
+              'source_sha': sha, 'reviewed_sha': sha,
+              'protected_ref': f'refs/tags/{tag}', 'ref_target_sha': sha,
+              'approval_ref': f'run:{run_id}',
+              'manifest_sha256': digest('release-manifest.v1.json'),
+              'sha256sums_sha256': digest('SHA256SUMS'),
+              'evidence_index_sha256': digest('ci-evidence-index.v1.json'),
+              'provenance_status': 'VERIFIED', 'release_url': release['html_url'],
+              'assets': [
+                  {'name': name, 'id': by_name[name]['id'], 'url': by_name[name]['browser_download_url'], 'size': by_name[name]['size'], 'sha256': digest(name)}
+                  for name in required
+              ],
+          }
+          assert sidecar['manifest_sha256'] == hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+          assert manifest['source_sha'] == sha and manifest['release_tag'] == tag
+          out = root / 'release-publication.v1.json'
+          out.write_text(json.dumps(sidecar, indent=2) + '\n')
+          PY
+      - name: Verify the published trusted asset set and publication sidecar
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          RELEASE_ID: ${{ inputs.release_id }}
+          REVIEWED_SHA: ${{ inputs.reviewed_sha }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID" > "$RUNNER_TEMP/final-release.json"
+          gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID/assets?per_page=100" > "$RUNNER_TEMP/final-release-assets.json"
+          gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" > "$RUNNER_TEMP/final-tag-ref.json"
+          TAG_TYPE=$(jq -r '.object.type' "$RUNNER_TEMP/final-tag-ref.json")
+          TAG_OBJECT_SHA=$(jq -r '.object.sha' "$RUNNER_TEMP/final-tag-ref.json")
+          if [[ "$TAG_TYPE" == tag ]]; then
+            gh api "repos/$GITHUB_REPOSITORY/git/tags/$TAG_OBJECT_SHA" > "$RUNNER_TEMP/final-annotated-tag.json"
+            TAG_TARGET=$(jq -r '.object | select(.type == "commit") | .sha' "$RUNNER_TEMP/final-annotated-tag.json")
+          else
+            [[ "$TAG_TYPE" == commit ]]
+            TAG_TARGET="$TAG_OBJECT_SHA"
+          fi
+          [[ "$TAG_TARGET" == "$REVIEWED_SHA" ]] || { echo "TAG_TARGET_CHANGED_FINAL expected=$REVIEWED_SHA actual=$TAG_TARGET" >&2; exit 1; }
+          python3 - "$RUNNER_TEMP/final-release.json" "$RUNNER_TEMP/final-release-assets.json" "$RUNNER_TEMP/dsh-evidence/release-publication.v1.json" "$RELEASE_TAG" <<'PY'
+          import hashlib, json, pathlib, sys
+          release = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          assets = {item['name']: item for item in json.loads(pathlib.Path(sys.argv[2]).read_text())}
+          sidecar_path = pathlib.Path(sys.argv[3]); tag = sys.argv[4]
+          sidecar = json.loads(sidecar_path.read_text())
+          assert release['tag_name'] == tag and release['draft'] is False and release.get('immutable') is True, release
+          assert sidecar['status'] == 'PUBLISHED_VERIFIED' and sidecar['draft'] is False and sidecar['immutable'] is True
+          required = {f'{tag}.tar.zst', 'shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst', 'pre-manifest.v1.json', 'release-manifest.v1.json', 'SHA256SUMS', 'ci-evidence-index.v1.json'}
+          sidecar_by_name = {item['name']: item for item in sidecar['assets']}
+          assert set(sidecar_by_name) == required
+          for name in required:
+              remote = assets.get(name); item = sidecar_by_name[name]
+              assert remote and (remote.get('digest') or '').removeprefix('sha256:') == item['sha256'] and remote['size'] == item['size'] and remote['id'] == item['id'], (name, remote, item)
+          PY
+
+      - name: Preserve the publication sidecar as CI evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: dsh-rc2-publication-${{ inputs.release_tag }}
+          path: ${{ runner.temp }}/dsh-evidence/release-publication.v1.json

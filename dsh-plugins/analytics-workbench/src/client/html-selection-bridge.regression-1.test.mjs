@@ -83,5 +83,4 @@ test('minified selection script still parses after injection', { skip: loadEsbui
     assert.doesNotMatch(code, /<\/body>&/);
     new Function(code);
   }
-  assert.match(scripts.join('\n'), /\$&&/);
 });

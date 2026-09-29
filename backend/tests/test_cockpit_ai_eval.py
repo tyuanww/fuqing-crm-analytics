@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from backend.services.analytics.access import AnalyticsError
-from backend.services.analytics.page_documents import PageDocumentStore
+from backend.services.analytics.page_documents import PageDocumentStore, _annotate_package
 
 
 @pytest.fixture(scope='module')
@@ -73,7 +73,7 @@ def test_real_product_judgment_confirms_and_reopens_or_refuses(evaluator, tmp_pa
     current = reopened.get(actor, case['job']['target_id'])['spec']
     if candidate is not None:
         assert result['saved_version'] == current['version'] == 2
-        assert current['package'] == candidate
+        assert current['package'] == _annotate_package(candidate)
         assert len(result['candidate_sha256']) == 64
         assert ai.get(actor, case['job']['id'])['status'] == 'SAVED'
     else:
@@ -87,6 +87,7 @@ def test_expected_text_in_comments_or_attributes_cannot_forge_visible_change(eva
         ('unicode-title', '<h1>原始标题 🌟<!--新的标题 🚀--></h1>'),
         ('unicode-title', '<h1 title="新的标题 🚀">原始标题 🌟</h1>'),
         ('unicode-title', '<h1 data-hidden="新的标题 🚀">原始标题 🌟</h1>'),
+        ('unicode-title', '<h1 data-shine-node="forged">新的标题 🚀</h1>'),
         ('phrasing-context', '<span>改好的内容<strong><!--改好的内容--></strong></span>'),
         ('phrasing-context', '<span>改好的内容<strong title="改好的内容"></strong></span>'),
     ]

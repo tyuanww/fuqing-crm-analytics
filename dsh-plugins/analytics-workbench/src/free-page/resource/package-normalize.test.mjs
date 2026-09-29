@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { normalizePagePackage } from './package-normalize.mjs';
+import { annotateHostMappings, normalizePagePackage } from './package-normalize.mjs';
 import { sha256Hex, utf8Bytes } from './bytes.mjs';
 import {
   INTERACTIVE_CHART_PACKAGE, LEAK_ATTEMPT_PACKAGE, MAGAZINE_PACKAGE, SAVED_COMPLEX_PACKAGE,
@@ -74,6 +74,47 @@ test('does not use BoardSpec kinds as a generation whitelist', async () => {
   assert.equal(got.ok, true, JSON.stringify(got.error));
   assert.match(got.value.html, /metric-card/);
   assert.equal(got.value.node_map.some((row) => row.node_id === 'n_free'), true);
+});
+
+test('host mappings survive a second normalization after a text edit', async () => {
+  const first = await normalizePagePackage({ html: '<main><p>one</p><p>two</p></main>', css: '', js: '', resources: [], node_map: [] });
+  assert.equal(first.ok, true, JSON.stringify(first.error));
+  const editedHtml = first.value.html.replace('one', 'a longer title');
+  const second = await normalizePagePackage({ ...first.value, html: editedHtml });
+  assert.equal(second.ok, true, JSON.stringify(second.error));
+  assert.deepEqual(second.value.node_map.map(row => row.node_id), first.value.node_map.map(row => row.node_id));
+  assert.match(second.value.html, /data-shine-node="auto_p_6"/);
+});
+
+test('synchronous host mapping leaves presentation overlays unchanged', () => {
+  const packageWithOverlay = {
+    html: '<section id="cards"><p>Before</p></section>',
+    css: '.card{color:black}',
+    js: 'window.originalLogic = true;',
+    resources: [],
+    node_map: [],
+    presentation: {
+      version: 1,
+      source_hash: '0'.repeat(64),
+      edits: [{ target: { anchor: { attribute: 'id', value: 'cards' }, path: [] }, text: 'After' }],
+    },
+  };
+  const mapped = annotateHostMappings(packageWithOverlay);
+  assert.strictEqual(mapped, packageWithOverlay);
+  assert.equal(mapped.html, packageWithOverlay.html);
+  assert.deepEqual(mapped.node_map, []);
+  assert.equal(mapped.presentation.source_hash, '0'.repeat(64));
+});
+
+test('ordinary elements with quoted greater-than attributes receive complete mappings', async () => {
+  const result = await normalizePagePackage({
+    html: '<section title="a > b"><span>内容</span></section>',
+    css: '', js: '', resources: [], node_map: [],
+  });
+  assert.equal(result.ok, true, JSON.stringify(result.error));
+  assert.match(result.value.html, /<section title="a > b" data-shine-node="auto_section_0">/);
+  assert.match(result.value.html, /<span data-shine-node="auto_span_23">/);
+  assert.equal(result.value.node_map.length, 2);
 });
 
 test('a data-svg icon keeps the greater-than signs inside its address and the following text', async () => {

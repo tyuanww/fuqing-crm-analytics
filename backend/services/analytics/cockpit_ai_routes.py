@@ -24,6 +24,7 @@ class AIBegin(BaseModel):
     base_version: int = Field(strict=True, ge=1)
     selection: AISelection | None = None
     instruction: str = Field(default="", max_length=4000)
+    edit_context: dict[str, object] | None = None
 
 
 class AIConfirm(BaseModel):
@@ -43,7 +44,9 @@ def cockpit_ai_router(store, principal, office=None, office_principal=None):
 
     @router.post("", status_code=201)
     def begin(body: AIBegin, request: Request):
-        return store.begin(principal(request), body.target_kind, body.target_id, body.base_version, body.id, body.selection.model_dump(exclude_none=True) if body.selection else None, body.instruction)
+        return store.begin(principal(request), body.target_kind, body.target_id, body.base_version, body.id,
+                           body.selection.model_dump(exclude_none=True) if body.selection else None,
+                           body.instruction, body.edit_context)
 
     @router.get("/office-content")
     def office_content(ticket: str):

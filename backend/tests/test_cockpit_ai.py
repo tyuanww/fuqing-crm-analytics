@@ -1,5 +1,6 @@
 """AI candidate lifecycle on small synthetic artifacts; never calls a model."""
 import io
+import hashlib
 import json
 import uuid
 import zipfile
@@ -169,7 +170,60 @@ def test_saved_html_uses_existing_page_contract_and_confirm(setup):
     assert pages.get(actor, saved['page_id'])['spec']['version'] == 1
     assert ai.confirm(actor, job['id'], ready['candidate_hash'])['saved_version'] == 2
     assert ai.confirm(actor, job['id'], ready['candidate_hash'])['saved_version'] == 2
-    assert pages.get(actor, saved['page_id'])['spec']['package']['html'] == '<h1>After</h1>'
+    saved_html = pages.get(actor, saved['page_id'])['spec']['package']['html']
+    assert 'After' in saved_html
+    assert 'data-shine-node=' in saved_html
+
+
+def test_page_edit_context_is_validated_and_persisted(setup):
+    actor, _, pages, ai = setup
+    generated = pages.generate(actor, PageDraft(
+        title='Context page', session_id=None, origin_file_id='file_manual', package={'html': '<h1>Before</h1>'},
+    ))
+    saved = pages.confirm(actor, generated['preview_id'], 'context-page')['spec']
+    context = {
+        'context_id': 'ctx_title', 'page_id': saved['page_id'], 'version': saved['version'],
+        'node_id': 'auto_h1_0', 'kind': 'static_element', 'allowed_scope': 'exact_source_range',
+        'allowed_ranges': [{'file': 'html', 'start': 0, 'end': len(saved['package']['html'])}],
+        'mapping_token': 'mapping_token', 'version_hash': 'a' * 64,
+    }
+    job = ai.begin(actor, 'page', saved['page_id'], saved['version'], 'ai_' + str(uuid.uuid4()), edit_context=context)
+    assert ai.get(actor, job['id'])['edit_context']['context_id'] == 'ctx_title'
+
+    for invalid, code in [
+        ({**context, 'page_id': 'page_other'}, 'AI_CONTEXT_MISMATCH'),
+        ({key: value for key, value in context.items() if key != 'mapping_token'}, 'AI_CONTEXT_SCHEMA'),
+        ({**context, 'note': 'x' * 33_000}, 'AI_CONTEXT_SCHEMA'),
+    ]:
+        with pytest.raises(AnalyticsError) as error:
+            ai.begin(actor, 'page', saved['page_id'], saved['version'], 'ai_' + str(uuid.uuid4()), edit_context=invalid)
+        assert error.value.code == code
+
+
+def test_page_edit_context_candidate_uses_bounded_patch_flow(setup):
+    actor, _, pages, ai = setup
+    generated = pages.generate(actor, PageDraft(
+        title='Context candidate', session_id=None, origin_file_id='file_manual', package={'html': '<h1>Before</h1>'},
+    ))
+    saved = pages.confirm(actor, generated['preview_id'], 'context-candidate')['spec']
+    package = saved['package']
+    start = package['html'].index('<h1')
+    end = package['html'].index('</h1>') + len('</h1>')
+    source_hash = pages._source_hash(package)
+    node_id = 'auto_h1_0'
+    mapping_token = hashlib.sha256(f'{source_hash}:{node_id}:{start}:{end}'.encode()).hexdigest()[:32]
+    context = {
+        'context_id': 'ctx_title', 'page_id': saved['page_id'], 'version': saved['version'],
+        'node_id': node_id, 'kind': 'static_element', 'allowed_scope': 'exact_source_range',
+        'allowed_ranges': [{'file': 'html', 'start': start, 'end': end}],
+        'mapping_token': mapping_token, 'version_hash': source_hash,
+    }
+    job = ai.begin(actor, 'page', saved['page_id'], 1, 'ai_' + str(uuid.uuid4()), edit_context=context)
+    output(job, json.dumps({**package, 'html': package['html'].replace('Before', 'After')}).encode())
+    ready = ai.collect(actor, job['id'])
+    assert ready['status'] == 'READY'
+    assert ai.confirm(actor, job['id'], ready['candidate_hash'])['saved_version'] == 2
+    assert 'After' in pages.get(actor, saved['page_id'])['spec']['package']['html']
 
 
 def test_bound_html_rejects_data_changes():
@@ -297,24 +351,26 @@ def test_static_selection_rejects_outside_edits_and_persists_only_selected_regio
     draft = PageDraft(title='Plain HTML', session_id='selection-session', package={'html': html, 'css': '', 'js': '', 'resources': [], 'node_map': []}, binding_manifest={'bindings': [], 'result_refs': []})
     candidate = pages.generate(actor, draft)
     page = pages.confirm(actor, candidate['preview_id'], 'selection-seed')['spec']
-    scope = {'start': 0, 'end': html.index('</header>') + len('</header>'), 'html_hash': hashlib.sha256(html.encode()).hexdigest()}
+    canonical_html = page['package']['html']
+    html = canonical_html
+    scope = {'start': 0, 'end': canonical_html.index('</header>') + len('</header>'), 'html_hash': hashlib.sha256(canonical_html.encode()).hexdigest()}
     job = ai.begin(actor, 'page', page['page_id'], 1, 'ai_' + str(uuid.uuid4()), scope)
     assert job['selection'] == scope
     assert 'Unicode' in (Path(job['workspace']) / 'TASK.md').read_text()
     before = json.loads(ai.content(actor, job['id'], 'source')[1])
     for changed in [{**before, 'html': html.replace('Keep', 'Wrong')}, {**before, 'css': 'body{color:red}'},
-                    {**before, 'html': html.replace('<h1>', '<h1 onclick="run()">')}]:
+                    {**before, 'html': html.replace('<h1', '<h1 onclick="run()"')}]:
         output(job, json.dumps(changed).encode())
         with pytest.raises(AnalyticsError) as error:
             ai.collect(actor, job['id'])
         assert error.value.code == 'AI_OUTSIDE_SELECTION'
         assert pages.get(actor, page['page_id'])['spec']['version'] == 1
-    after = {**before, 'html': html.replace('<h1>你好 🌟</h1>', '<h1 style="color:orange">新标题</h1>')}
+    after = {**before, 'html': html.replace('你好 🌟', '新标题')}
     output(job, json.dumps(after).encode())
     ready = ai.collect(actor, job['id'])
     assert ai.confirm(actor, job['id'], ready['candidate_hash'])['saved_version'] == 2
     reopened = PageDocumentStore(pages.path.parent)
-    assert reopened.get(actor, page['page_id'])['spec']['package']['html'] == after['html']
+    assert '新标题' in reopened.get(actor, page['page_id'])['spec']['package']['html']
     with pytest.raises(AnalyticsError):
         ai.begin(actor, 'page', page['page_id'], 1, job['id'], {**scope, 'end': 1})
 
@@ -374,7 +430,7 @@ def test_selection_rejects_executable_url_attributes_on_begin_and_collect_but_ke
 
     source = '<div><a href="#safe">Original link</a></div>'
     page = save_page(source)
-    scope = scope_for(source)
+    scope = scope_for(page['package']['html'])
     job = ai.begin(actor, 'page', page['page_id'], 1, 'ai_' + str(uuid.uuid4()), scope)
     before = json.loads(ai.content(actor, job['id'], 'source')[1])
     elements = ['<a href="javascript:void(0)">link</a>', '<a href="java&#115;cript:void(0)">link</a>',
@@ -386,7 +442,7 @@ def test_selection_rejects_executable_url_attributes_on_begin_and_collect_but_ke
         html = '<div>' + element + '</div>'
         invalid_page = save_page(html)
         with pytest.raises(AnalyticsError) as error:
-            ai.begin(actor, 'page', invalid_page['page_id'], 1, 'ai_' + str(uuid.uuid4()), scope_for(html))
+            ai.begin(actor, 'page', invalid_page['page_id'], 1, 'ai_' + str(uuid.uuid4()), scope_for(invalid_page['package']['html']))
         assert error.value.code == 'AI_SELECTION_INVALID'
         output(job, json.dumps({**before, 'html': html}).encode())
         with pytest.raises(AnalyticsError) as error:
@@ -400,12 +456,12 @@ def test_selection_rejects_executable_url_attributes_on_begin_and_collect_but_ke
     output(job, json.dumps(proposed).encode())
     ready = ai.collect(actor, job['id'])
     assert ai.confirm(actor, job['id'], ready['candidate_hash'])['saved_version'] == 2
-    assert PageDocumentStore(pages.path.parent).get(actor, page['page_id'])['spec']['package']['html'] == proposed['html']
+    assert 'Changed link' in PageDocumentStore(pages.path.parent).get(actor, page['page_id'])['spec']['package']['html']
     for src in ('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aN1kAAAAASUVORK5CYII=',
                 'blob:https://example.invalid/static-image'):
         html = f'<div><img src="{src}"/><p>Before</p></div>'
         image_page = save_page(html)
-        image_job = ai.begin(actor, 'page', image_page['page_id'], 1, 'ai_' + str(uuid.uuid4()), scope_for(html))
+        image_job = ai.begin(actor, 'page', image_page['page_id'], 1, 'ai_' + str(uuid.uuid4()), scope_for(image_page['package']['html']))
         image_package = json.loads(ai.content(actor, image_job['id'], 'source')[1])
         output(image_job, json.dumps({**image_package, 'html': html.replace('Before', 'After')}).encode())
         ready = ai.collect(actor, image_job['id'])
@@ -417,14 +473,15 @@ def test_selection_preserves_root_and_parent_content_model_without_browser_repar
     from backend.services.analytics.cockpit_html_selection import protect_selection, validate_selection
     actor, _, pages, ai = setup
     html = '<p id="parent">before <span>inside</span> after <b id="outside">outside</b></p>'
-    selected = '<span>inside</span>'
-    scope = {'start': html.index(selected), 'end': html.index(selected) + len(selected),
-             'html_hash': hashlib.sha256(html.encode()).hexdigest()}
     draft = PageDraft(title='Context selection', session_id='selection-context',
                       package={'html': html, 'css': '', 'js': '', 'resources': [], 'node_map': []},
                       binding_manifest={'bindings': [], 'result_refs': []})
     generated = pages.generate(actor, draft)
     page = pages.confirm(actor, generated['preview_id'], 'context-seed')['spec']
+    html = page['package']['html']
+    selected = html[html.index('<span'):html.index('</span>') + len('</span>')]
+    scope = {'start': html.index(selected), 'end': html.index(selected) + len(selected),
+             'html_hash': hashlib.sha256(html.encode()).hexdigest()}
     job = ai.begin(actor, 'page', page['page_id'], 1, 'ai_' + str(uuid.uuid4()), scope)
     before = json.loads(ai.content(actor, job['id'], 'source')[1])
     for fragment in ('<div>changed</div>', '<span><div>changed</div></span>', '<span><h2>changed</h2></span>'):
@@ -434,8 +491,8 @@ def test_selection_preserves_root_and_parent_content_model_without_browser_repar
         assert error.value.code == 'AI_OUTSIDE_SELECTION'
         assert pages.get(actor, page['page_id'])['spec']['package']['html'] == html
     for original, target, replacement in [
-        ('<a href="#ok"><span>inside</span></a>', selected, '<span><a href="#other">changed</a></span>'),
-        ('<button><span>inside</span></button>', selected, '<span><button>changed</button></span>'),
+        ('<a href="#ok"><span>inside</span></a>', '<span>inside</span>', '<span><a href="#other">changed</a></span>'),
+        ('<button><span>inside</span></button>', '<span>inside</span>', '<span><button>changed</button></span>'),
         ('<ul><li>inside</li></ul>', '<li>inside</li>', '<li>changed<li>outside</li></li>'),
     ]:
         start = original.index(target)
@@ -448,7 +505,7 @@ def test_selection_preserves_root_and_parent_content_model_without_browser_repar
     output(job, json.dumps(after).encode())
     ready = ai.collect(actor, job['id'])
     assert ai.confirm(actor, job['id'], ready['candidate_hash'])['saved_version'] == 2
-    assert pages.get(actor, page['page_id'])['spec']['package']['html'] == after['html']
+    assert 'changed' in pages.get(actor, page['page_id'])['spec']['package']['html']
 
 
 def test_selection_parser_caps_depth_and_stops_before_processing_the_remaining_megabyte():

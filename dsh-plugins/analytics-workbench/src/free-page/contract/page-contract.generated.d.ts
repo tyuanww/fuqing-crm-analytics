@@ -1,4 +1,4 @@
-/** Generated free-page contract; do not edit. OpenAPI SHA-256: e7c56ec25ab0b80e71b31ba3b9f582ee162d8d0b00f64a1719d5e2737967f695 */
+/** Generated free-page contract; do not edit. OpenAPI SHA-256: c0371e9bd7e4f78a0c5f7e8e64fd0b54fef421086a389eb917940800ec893c39 */
 export interface paths {
     "/api/v1/analytics/page-documents/pages": {
         parameters: {
@@ -603,6 +603,36 @@ export interface components {
             /** Path */
             path: components["schemas"]["PageElementStep"][];
         };
+        /**
+         * PageFocusRef
+         * @description Host-canonical selection identity carried into an AI source patch.
+         */
+        PageFocusRef: {
+            /** Allowed Ranges */
+            allowed_ranges: components["schemas"]["PageSourceRange"][];
+            /**
+             * Allowed Scope
+             * @enum {string}
+             */
+            allowed_scope: "exact_source_range" | "dynamic_source_range" | "declared_region" | "shared_scope" | "readonly_bound";
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "static_element" | "dynamic_region";
+            /**
+             * Mapping Token
+             * @default null
+             */
+            mapping_token: string | null;
+            /** Node Id */
+            node_id: string;
+            /**
+             * Version Hash
+             * @default null
+             */
+            version_hash: string | null;
+        };
         /** PageList */
         PageList: {
             /** Items */
@@ -668,7 +698,17 @@ export interface components {
             /** Base Version */
             base_version: number;
             binding_manifest?: components["schemas"]["PageBindingManifest"];
+            /** Edit Context Id */
+            edit_context_id?: string;
+            /**
+             * Edit Scope
+             * @enum {string}
+             */
+            edit_scope?: "presentation" | "source_range";
+            focus_ref?: components["schemas"]["PageFocusRef"];
             package?: components["schemas"]["PagePackage"];
+            /** Source Hash */
+            source_hash?: string;
             /** Title */
             title?: string;
         };
@@ -753,6 +793,11 @@ export interface components {
             /** Base Version */
             base_version: number;
             binding_manifest: components["schemas"]["PageBindingManifest"];
+            /**
+             * Edit Origin
+             * @constant
+             */
+            edit_origin?: "manual_source";
             package: components["schemas"]["PagePackage"];
             /** Title */
             title: string;
@@ -760,6 +805,21 @@ export interface components {
         /** PageSnapshot */
         PageSnapshot: {
             spec: components["schemas"]["PageDocument"];
+        };
+        /**
+         * PageSourceRange
+         * @description A bounded source range carried by the host-canonical selection.
+         */
+        PageSourceRange: {
+            /** End */
+            end: number;
+            /**
+             * File
+             * @enum {string}
+             */
+            file: "html" | "css" | "js";
+            /** Start */
+            start: number;
         };
         /**
          * PresentationOverlay

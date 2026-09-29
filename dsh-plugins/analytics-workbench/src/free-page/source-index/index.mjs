@@ -37,6 +37,13 @@ function tokenFor(version_hash, node_id, start, end) {
   return sha256Hex(`${version_hash}:${node_id}:${start}:${end}`).slice(0, 32);
 }
 
+// The public page contract uses Unicode code-point offsets. JavaScript string
+// indices are UTF-16 code units, so convert only the identity token inputs;
+// internal html_range values remain native JS offsets for safe local slicing.
+function codePointOffset(text, utf16Offset) {
+  return [...text.slice(0, utf16Offset)].length;
+}
+
 function uniqueSelector(selector, node_id, kind) {
   const s = String(selector ?? '').trim();
   const quoted = [`[data-shine-node='${node_id}']`, `[data-shine-node="${node_id}"]`,
@@ -96,7 +103,8 @@ export function buildSourceIndex(pagePackage) {
       continue;
     }
     const marker = matches[0];
-    const mapping_token = tokenFor(version_hash, node_id, marker.start, marker.end);
+    const mapping_token = tokenFor(version_hash, node_id,
+      codePointOffset(html, marker.start), codePointOffset(html, marker.end));
     nodes[node_id] = Object.freeze({
       node_id,
       kind: row.kind,

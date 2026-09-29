@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { buildSourceIndex, locateSelection, rebuildSourceIndex } from './index.mjs';
+import { scanShineMarkers } from './parse.mjs';
 import { D48_CASES, DUPLICATE_HTML, d48Package, frozenPackage } from './page-fixture.mjs';
 
 function indexOf(pkg = d48Package()) {
@@ -105,4 +106,41 @@ test('stale mapping_token after rebuild requires reselect', () => {
   assert.equal(stale.error.code, 'MAPPING_STALE');
   const fresh = locateSelection(rebuilt, { kind: 'static_element', node_id: 'n_title' });
   assert.equal(fresh.ok, true);
+});
+
+test('quoted greater-than attributes do not truncate mapped source ranges', () => {
+  const html = '<section data-shine-node="n_card" title="a > b"><span>内容</span></section>';
+  const marker = scanShineMarkers(html);
+  assert.equal(marker.length, 1);
+  assert.equal(marker[0].start, 0);
+  assert.equal(marker[0].end, html.length);
+  const index = buildSourceIndex({
+    html, css: '', js: '', resources: [],
+    node_map: [{ node_id: 'n_card', kind: 'static_element', selector: "[data-shine-node='n_card']" }],
+  });
+  assert.equal(locateSelection(index, { kind: 'static_element', node_id: 'n_card' }).ok, true);
+});
+
+test('quoted braces in CSS do not truncate the allowed style range', () => {
+  const css = '[data-shine-node="n_card"]{--label:"a } b";color:red}';
+  const index = buildSourceIndex({
+    html: '<section data-shine-node="n_card">内容</section>',
+    css, js: '', resources: [],
+    node_map: [{ node_id: 'n_card', kind: 'static_element', selector: "[data-shine-node='n_card']" }],
+  });
+  assert.equal(index.nodes.n_card.css_rules.length, 1);
+  assert.equal(index.nodes.n_card.css_rules[0].start, 0);
+  assert.equal(index.nodes.n_card.css_rules[0].end, css.length);
+});
+
+test('nested host mappings remain independently locatable', () => {
+  const html = '<main data-shine-node="n_main"><h1 data-shine-node="n_title">标题</h1></main>';
+  const index = buildSourceIndex({
+    html, css: '', js: '', resources: [],
+    node_map: [
+      { node_id: 'n_main', kind: 'static_element', selector: "[data-shine-node='n_main']" },
+      { node_id: 'n_title', kind: 'static_element', selector: "[data-shine-node='n_title']" },
+    ],
+  });
+  assert.equal(Object.keys(index.nodes).sort().join(','), 'n_main,n_title');
 });

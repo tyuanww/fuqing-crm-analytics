@@ -1,16 +1,26 @@
 """Candidate HTML artifact inbox persistence and idempotency."""
+import hashlib
+import json
 from pathlib import Path
+import sqlite3
 
 from fastapi.testclient import TestClient
+import pytest
 
 from backend.contracts.competition_computed import DATA_SCOPE
 from backend.services.analytics.access import AnalyticsPrincipal, B0IdentityRegistry
+from backend.services.analytics.artifact_inbox import ArtifactInboxStore
 from backend.services.analytics.page_documents_routes import create_page_app
 
 
 CAPS = frozenset({"dashboard:read", "dashboard:update"})
 TOKEN = "artifact-inbox-test-token-with-more-than-32-chars"
 PACKAGE = {"html": "<h1>收入复盘</h1>", "css": "", "js": "", "resources": [], "node_map": []}
+MAPPED_PACKAGE = {
+    **PACKAGE, "html": '<h1 data-shine-node="auto_h1_0">收入复盘</h1>',
+    "node_map": [{"node_id": "auto_h1_0", "kind": "static_element", "selector": "[data-shine-node='auto_h1_0']"}],
+    "presentation": None,
+}
 
 
 def app(tmp_path: Path):
@@ -21,6 +31,23 @@ def app(tmp_path: Path):
 
 def headers():
     return {"authorization": "Bearer " + TOKEN}
+
+
+def package_digest(package):
+    return hashlib.sha256(json.dumps(package, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
+def save_page(client, package, *, session_id="session_main"):
+    draft = client.post("/api/v1/analytics/page-documents/previews", json={
+        "title": "候选页", "session_id": session_id, "package": package,
+        "binding_manifest": {"bindings": [], "result_refs": []},
+    }, headers=headers())
+    assert draft.status_code == 201, draft.text
+    preview_id = draft.json()["preview_id"]
+    saved = client.post(f"/api/v1/analytics/page-documents/previews/{preview_id}/confirm",
+                        headers={**headers(), "Idempotency-Key": preview_id})
+    assert saved.status_code == 200, saved.text
+    return saved.json()["spec"]
 
 
 def test_intake_is_durable_and_idempotent(tmp_path):
@@ -220,6 +247,124 @@ def test_page_package_hash_cannot_be_forged(tmp_path):
         }, headers=headers())
         assert receipt.status_code == 422
         assert receipt.json()["error"]["code"] == "CONTENT_HASH_MISMATCH"
+
+
+def test_page_package_keeps_input_hash_and_dedupe_identity(tmp_path):
+    source_package = {**PACKAGE, "presentation": None}
+    original_hash = package_digest(source_package)
+    with TestClient(app(tmp_path)) as client:
+        body = {"source": "page_package", "session_id": "session_main", "request_id": "original-hash",
+                "title": "候选页", "package": PACKAGE, "content_hash": original_hash}
+        receipt = client.post("/api/v1/analytics/cockpit-artifacts", json=body, headers=headers())
+        assert receipt.status_code == 201, receipt.text
+        artifact = receipt.json()
+        assert artifact["content_hash"] == original_hash
+        assert artifact["package"] == source_package
+        replay = client.post("/api/v1/analytics/cockpit-artifacts",
+                             json={key: value for key, value in body.items() if key != "content_hash"}, headers=headers())
+        assert replay.status_code == 201
+        assert replay.json()["artifact_id"] == artifact["artifact_id"]
+        assert replay.json()["idempotent"] is True
+
+        # Host annotation is a confirm-time equivalence, never an intake hash
+        # equivalence: a caller must hash the actual package it submitted.
+        wrong_hash = client.post("/api/v1/analytics/cockpit-artifacts",
+                                 json={**body, "content_hash": package_digest(MAPPED_PACKAGE)}, headers=headers())
+        assert wrong_hash.status_code == 422
+        assert wrong_hash.json()["error"]["code"] == "CONTENT_HASH_MISMATCH"
+        mapped = client.post("/api/v1/analytics/cockpit-artifacts", json={
+            **body, "package": MAPPED_PACKAGE, "content_hash": package_digest(MAPPED_PACKAGE),
+        }, headers=headers())
+        assert mapped.status_code == 201
+        assert mapped.json()["artifact_id"] != artifact["artifact_id"]
+
+        page = save_page(client, PACKAGE)
+        assert page["package"] == MAPPED_PACKAGE
+        linked = client.post(f"/api/v1/analytics/cockpit-artifacts/{artifact['artifact_id']}/confirm",
+                             json={"page_id": page["page_id"]}, headers=headers())
+        assert linked.status_code == 200, linked.text
+        assert linked.json()["content_hash"] == original_hash
+        assert linked.json()["package"] == source_package
+
+
+def test_historical_page_package_receipt_replays_and_confirms_after_reopen(tmp_path):
+    # Seed the persisted pre-annotation format without calling today's intake.
+    inbox = ArtifactInboxStore(tmp_path / "artifacts")
+    package = {**PACKAGE, "presentation": None}
+    content_hash = package_digest(package)
+    artifact_id = "artifact_historical"
+    with sqlite3.connect(inbox.path) as con:
+        con.execute("INSERT INTO artifacts VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (
+            "alice", artifact_id, "page_package", "session_main", "historical-request", None,
+            "历史候选", None, json.dumps(package, ensure_ascii=False), content_hash,
+            "PREVIEWABLE", None, 1, 1,
+        ))
+    with TestClient(app(tmp_path)) as client:
+        replay = client.post("/api/v1/analytics/cockpit-artifacts", json={
+            "source": "page_package", "session_id": "session_main", "request_id": "historical-request",
+            "title": "历史候选", "package": PACKAGE, "content_hash": content_hash,
+        }, headers=headers())
+        assert replay.status_code == 201, replay.text
+        assert replay.json()["artifact_id"] == artifact_id
+        assert replay.json()["idempotent"] is True
+        page_id = save_page(client, PACKAGE)["page_id"]
+
+    with TestClient(app(tmp_path)) as client:
+        linked = client.post(f"/api/v1/analytics/cockpit-artifacts/{artifact_id}/confirm",
+                             json={"page_id": page_id}, headers=headers())
+        assert linked.status_code == 200, linked.text
+        assert linked.json()["content_hash"] == content_hash
+        assert linked.json()["package"] == package
+        assert linked.json()["status"] == "SAVED"
+    with sqlite3.connect(inbox.path) as con:
+        stored = con.execute("SELECT package, content_hash, page_id FROM artifacts WHERE artifact_id=?", (artifact_id,)).fetchone()
+        assert json.loads(stored[0]) == package
+        assert stored[1:] == (content_hash, page_id)
+
+
+@pytest.mark.parametrize("field,value", [
+    ("html", MAPPED_PACKAGE["html"].replace("收入复盘", "未经确认的新内容")),
+    ("css", "h1 { color: red; }"),
+    ("js", "document.title = 'changed';"),
+    ("resources", [{"resource_id": "new_resource", "content_type": "image/png", "sha256": "a" * 64, "byte_length": 1}]),
+    ("node_map", [{"node_id": "auto_h1_0", "kind": "static_element", "selector": "h1"}]),
+    ("presentation", {"version": 1, "source_hash": hashlib.sha256(json.dumps(
+        [MAPPED_PACKAGE["html"], "", ""], ensure_ascii=False, separators=(",", ":")).encode()).hexdigest(), "edits": []}),
+    ("session_id", "another_session"),
+])
+def test_page_package_confirm_rejects_every_change_except_host_annotation(tmp_path, field, value):
+    with TestClient(app(tmp_path)) as client:
+        receipt = client.post("/api/v1/analytics/cockpit-artifacts", json={
+            "source": "page_package", "session_id": "session_main", "request_id": "source-mismatch",
+            "title": "候选页", "package": PACKAGE,
+        }, headers=headers())
+        assert receipt.status_code == 201
+        artifact_id = receipt.json()["artifact_id"]
+        changed_package = MAPPED_PACKAGE if field == "session_id" else {**MAPPED_PACKAGE, field: value}
+        page = save_page(client, changed_package, session_id=value if field == "session_id" else "session_main")
+        linked = client.post(f"/api/v1/analytics/cockpit-artifacts/{artifact_id}/confirm",
+                             json={"page_id": page["page_id"]}, headers=headers())
+        assert linked.status_code == 409, linked.text
+        assert linked.json()["error"]["code"] == "ARTIFACT_SOURCE_MISMATCH"
+        fetched = client.get(f"/api/v1/analytics/cockpit-artifacts/{artifact_id}", headers=headers()).json()
+        assert fetched["status"] == "PREVIEWABLE"
+        assert fetched["page_id"] is None
+
+
+def test_confirm_revalidates_stored_receipt_package(tmp_path):
+    with TestClient(app(tmp_path)) as client:
+        receipt = client.post("/api/v1/analytics/cockpit-artifacts", json={
+            "source": "page_package", "session_id": "session_main", "request_id": "invalid-stored-package",
+            "title": "候选页", "package": PACKAGE,
+        }, headers=headers()).json()
+        page_id = save_page(client, PACKAGE)["page_id"]
+        with sqlite3.connect(tmp_path / "artifacts" / "artifact_inbox.sqlite3") as con:
+            con.execute("UPDATE artifacts SET package=? WHERE artifact_id=?",
+                        ('{"html":42}', receipt["artifact_id"]))
+        linked = client.post(f"/api/v1/analytics/cockpit-artifacts/{receipt['artifact_id']}/confirm",
+                             json={"page_id": page_id}, headers=headers())
+        assert linked.status_code == 409
+        assert linked.json()["error"]["code"] == "ARTIFACT_SOURCE_MISMATCH"
 
 
 def test_candidate_to_page_confirmation_is_a_two_step_write(tmp_path):

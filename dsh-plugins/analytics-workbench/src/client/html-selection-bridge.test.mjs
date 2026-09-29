@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { editableTextNodes, editablePageNodes, acceptSelection, acceptTargets, selectionSrcdoc } from './html-selection-bridge.mjs';
+import { editableTextNodes, editablePageNodes, selectableNodes, acceptSelection, acceptTargets, selectionSrcdoc } from './html-selection-bridge.mjs';
 import { sourceTextPreview, selectionForAI } from './html-source-selection.mjs';
 import { previewLiteralText } from './free-html-library/html-edit-kernel.mjs';
 
@@ -13,12 +13,26 @@ test('only mapped static leaf text is selectable; bound values and nested markup
   const dynamic = { ...pkg, js: 'document.querySelector(\'[data-shine-node="a"]\').textContent = "dynamic";' };
   assert.equal(editableTextNodes(dynamic).some(row => row.node_id === 'a'), false);
 });
+test('selection bridge exposes dynamic regions for inspection without making them text edits', () => {
+  const nodes = selectableNodes({ ...pkg, node_map: [...pkg.node_map, { node_id: 'chart', kind: 'dynamic_region', selector: '[data-shine-region="chart"]' }], html: pkg.html + '<div data-shine-region="chart"></div>' });
+  assert.deepEqual(nodes.map(row => row.node_id), ['a', 'b', 'bound', 'nested', 'chart']);
+  assert.equal(nodes.find(row => row.node_id === 'chart').kind, 'dynamic_region');
+});
+test('page-level result refs keep every mapped element selectable but read-only', () => {
+  const manifest = { bindings: [], result_refs: ['result_fixture_1'] };
+  assert.deepEqual(editableTextNodes(pkg, manifest), []);
+  const nodes = selectableNodes(pkg, manifest);
+  assert.deepEqual(nodes.map(row => row.node_id), ['a', 'b', 'bound', 'nested']);
+  assert.equal(nodes.every(row => row.editable === false && row.read_only_reason === 'bound_page'), true);
+});
 test('opaque-origin bridge rejects wrong window, token, page, version, unknown nodes and write-shaped messages', () => {
   const source = {}, nodes = editableTextNodes(pkg);
   const context = { source, channel: 'nonce', pageId: 'page_a', version: 2, nodes };
   const data = { type: 'cockpit.selection', channel: 'nonce', pageId: 'page_a', version: 2, nodeId: 'b' };
   const event = { source, origin: 'null', data };
   assert.equal(acceptSelection(event, context).node_id, 'b');
+  const hinted = acceptSelection({ ...event, data: { ...data, selectedText: '页面文字', htmlSelection: '<h2>页面文字</h2>' } }, context);
+  assert.deepEqual(hinted.selection_hints, { selectedText: '页面文字', htmlSelection: '<h2>页面文字</h2>' });
   for (const patch of [{ source: {} }, { origin: 'https://example.invalid' },
     ...[{ channel: 'wrong' }, { pageId: 'other' }, { version: 1 }, { nodeId: 'unknown' }, { replacementText: 'write' }].map(patch => ({ data: { ...data, ...patch } }))]) {
     assert.equal(acceptSelection({ ...event, ...patch }, context), undefined);

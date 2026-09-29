@@ -15,9 +15,12 @@ import sqlite3
 import time
 from uuid import uuid4
 
+from pydantic import ValidationError
+
 from backend.contracts.page_documents import PagePackage, is_package_too_large
 from backend.services.analytics.access import AnalyticsError, AnalyticsPrincipal, require
 from backend.services.analytics.first_purchase.asset_state import initialize_sqlite
+from backend.services.analytics.page_documents import _annotate_package
 from backend.contracts.competition_computed import DATA_SCOPE
 
 
@@ -246,7 +249,16 @@ class ArtifactInboxStore:
                 if page.get("session_id") != row["session_id"]:
                     fault(409, "ARTIFACT_SOURCE_MISMATCH", "正式页面来源会话与产物不一致。")
                 if row["source"] == "page_package":
-                    if _digest(page.get("package")) != row["content_hash"]:
+                    try:
+                        receipt_package = PagePackage.model_validate_json(row["package"]).model_dump(mode="json")
+                    except (ValidationError, TypeError) as error:
+                        raise AnalyticsError(409, "ARTIFACT_SOURCE_MISMATCH", "产物回执源码包无效。") from error
+                    # Receipt hashes and dedupe identity describe the input,
+                    # including receipts stored before host mappings existed.
+                    # Only confirmation applies the page store's annotation;
+                    # every other package field must still match exactly.
+                    canonical_package = _annotate_package(receipt_package)
+                    if _digest(page.get("package")) != _digest(canonical_package):
                         fault(409, "ARTIFACT_SOURCE_MISMATCH", "正式页面源码与产物回执不一致。")
                 elif row["path"] and page.get("origin_path") != row["path"]:
                     fault(409, "ARTIFACT_SOURCE_MISMATCH", "正式页面来源路径与产物不一致。")

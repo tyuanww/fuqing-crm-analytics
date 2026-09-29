@@ -5,6 +5,8 @@ import { createHtmlImporter } from './html-import.mjs';
 import { SAMPLE_PROMPTS } from './generate-context.mjs';
 import { applyTextToShineNode, createMockPageAdapters } from './mock-adapters.mjs';
 import { bindingLabel, defaultRailCollapsed, inspectPage, panelPresentation, widthBand } from './host-visual.mjs';
+import { buildSourceIndex, isSelectorUniqueToNode, locateSelection } from '../../free-page/source-index/index.mjs';
+import { routeEditIntent } from '../../free-page/edit/intent-router.mjs';
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
@@ -24,6 +26,40 @@ function asAgentPackage(pkg) {
 
 function isLive(adapters) {
   return adapters?.kind === 'p12-live';
+}
+
+function codePointOffset(text, utf16Offset) {
+  return [...String(text ?? '').slice(0, utf16Offset)].length;
+}
+
+function codePointRange(text, range) {
+  return { start: codePointOffset(text, range.start), end: codePointOffset(text, range.end) };
+}
+
+function editContextFor(page, located) {
+  if (!page?.package || !located?.node_id || located.kind === 'whole_page') return null;
+  try {
+    const index = buildSourceIndex(page.package);
+    const canonical = located.located?.node ? located.located : locateSelection(index, {
+      kind: located.kind, node_id: located.node_id, mapping: located.mapping,
+      mapping_token: located.mapping_token, version_hash: located.version_hash,
+    });
+    const node = canonical?.node;
+    if (!canonical?.ok || !node) return null;
+    const shared = node.css_rules?.some(rule => !isSelectorUniqueToNode(rule.selector, node.node_id));
+    const ranges = [
+      { file: 'html', ...codePointRange(page.package.html, node.html_range) },
+      ...(node.css_rules ?? []).filter(rule => isSelectorUniqueToNode(rule.selector, node.node_id))
+        .map(rule => ({ file: 'css', ...codePointRange(page.package.css, rule) })),
+      ...(node.js_ranges ?? []).map(range => ({ file: 'js', ...codePointRange(page.package.js, range) })),
+    ].slice(0, 32);
+    return {
+      edit_scope: 'source_range', edit_context_id: `ctx_${node.mapping_token}`, source_hash: index.version_hash,
+      focus_ref: { node_id: node.node_id, kind: node.kind,
+        allowed_scope: shared ? 'shared_scope' : canonical.scope, allowed_ranges: ranges,
+        mapping_token: node.mapping_token, version_hash: index.version_hash },
+    };
+  } catch { return null; }
 }
 
 function emptyState(viewportWidth, adapters) {
@@ -52,6 +88,7 @@ function emptyState(viewportWidth, adapters) {
     textDraftNodes: {},
     draftReset: 0,
     silentCommit: false,
+    sourceDraft: null,
     historyItems: [],
     confirmationUncertain: false,
     lastIdempotencyKey: null,
@@ -141,7 +178,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
   function hasUnsavedChanges() {
     if (state.confirmationUncertain || state.importCandidate || state.textDraft?.changed || Object.keys(state.textDrafts ?? {}).length > 0) return true;
     if (state.preview?.status === 'PENDING') return true;
-    if (state.current?.dirty) return true;
+    if (state.sourceDraft?.changed || state.current?.dirty) return true;
     return false;
   }
 
@@ -218,7 +255,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
       updated_at: now(), history: [...history.filter(row => row.version !== spec.version),
         { version: spec.version, title: spec.title, at: now(), package: clone(spec.package) }] };
     bound.assets.put(page); refreshList();
-    emit({ current: page, view: 'workspace', preview: null, importCandidate: null, textDraft: null,
+    emit({ current: page, view: 'workspace', preview: null, importCandidate: null, textDraft: null, sourceDraft: null,
       textDrafts: {}, textDraftNodes: {},
       selection: null, overlay: null, confirmationUncertain: false, historyItems: [],
       liveStatus: `已保存 · v${page.version}` });
@@ -232,13 +269,13 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
     if (intent === 'home') {
       emit({
         view: 'home', current: null, mode: 'browse', selection: null, overlay: null,
-        contextPanel: null, preview: null, pendingLeaveIntent: null,
+        contextPanel: null, preview: null, sourceDraft: null, pendingLeaveIntent: null,
         liveStatus: '已离开到资料库',
       });
       return;
     }
     emit({
-      pendingLeaveIntent: null,
+      pendingLeaveIntent: null, sourceDraft: null,
       liveStatus: intent === 'conversation' ? '可返回原生对话' : '已处理离开',
     });
   }
@@ -387,7 +424,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
         const page = bound.assets.get(pageId);
         if (!page?.package) throw new Error('页面不存在或无权限');
         emit({ view: 'workspace', current: clone(page), mode: 'browse', selection: null, overlay: null,
-          contextPanel: null, preview: null, textDraft: null, historyItems: [], pendingLeaveIntent: null,
+          contextPanel: null, preview: null, textDraft: null, sourceDraft: null, historyItems: [], pendingLeaveIntent: null,
           presentation_overlay: { ...(page.presentation_overlays ?? {}) },
           previewAlive: true, liveStatus: `已打开 ${page.title}` });
         return true;
@@ -529,6 +566,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
         return { ok: false, reason: 'confirmation_uncertain' };
       }
       if (state.importCandidate) await this.confirmImport();
+      else if (state.sourceDraft?.changed && !state.preview) { await this.previewSourceDraft(); if (state.preview) await this.confirmPatch(); }
       else if ((state.textDraft?.changed || Object.keys(state.textDrafts ?? {}).length > 0) && !state.preview) { await this.commitTextDrafts(); }
       else if (state.preview?.status === 'PENDING') await this.confirmPatch();
       else if (state.current?.dirty) await this.saveDraft();
@@ -549,7 +587,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
       const restored = state.current ? { ...state.current,
         package: clone(state.current.savedPackage ?? state.current.package), dirty: false } : null;
       if (restored) bound.assets.put(restored);
-      emit({ current: restored, textDraft: null, overlay: null, pendingLeaveIntent: null });
+      emit({ current: restored, textDraft: null, sourceDraft: null, overlay: null, pendingLeaveIntent: null });
       return { ok: !hasUnsavedChanges() };
     },
     async saveAndLeave() {
@@ -607,7 +645,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
         && request.runtime.package_hash === renderedPackageHash(state.current.package)
         && !state.current.binding_manifest?.bindings?.length && !state.current.binding_manifest?.result_refs?.length;
       const located = request.runtime ? (runtimeValid ? { ...request, ok: true, scope: 'rendered_element', label: request.tag } : { ok: false, error: { code: 'MAPPING_STALE', message: '选区已变化，请重新选择' } })
-        : request.source ? (source ? { ...source, ok: true, scope: 'source_range', label: source.tag } : { ok: false, error: { code: 'MAPPING_STALE', message: '选区已变化，请重新选择' } }) : bound.edit.locate(state.current?.package, request);
+        : request.source ? (source ? { ...source, ok: true, scope: 'exact_source_range', label: source.tag } : { ok: false, error: { code: 'MAPPING_STALE', message: '选区已变化，请重新选择' } }) : bound.edit.locate(state.current?.package, request);
       if (!located.ok) {
         emit({ selection: { ok: false, stale: true, requireReselect: true, label: located.error.message, code: located.error.code }, overlay: 'selection', liveStatus: located.error.message });
         return;
@@ -714,6 +752,9 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
         assertEditable();
         const located = state.selection?.ok ? state.selection : null;
         if (!located) throw Object.assign(new Error('请先选择有效范围'), { code: 'MAPPING_STALE' });
+        const route = routeEditIntent({ instruction: '文字内容', allowed_scope: located.scope,
+          binding_state: state.current.binding_state });
+        if (route.intent !== 'presentation') throw Object.assign(new Error('当前选区不支持结构化文字修改，请转到源码入口'), { code: 'AI_SCOPE_DIFF' });
         try {
           const preview = located.source || located.runtime ? {
             sourceRange: true, preview_id: bound.nextId('preview'), idempotency_key: bound.nextId('patch'), operation: 'PATCH',
@@ -723,10 +764,12 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
             page_id: state.current.page_id, session_id: state.current.session_id, base_version: state.current.version,
             binding_manifest: state.current.binding_manifest, affectsShared: extras.affectsShared });
           if (isLive(bound) && bound.documents?.patchPreview) {
+            const editContext = editContextFor(state.current, located);
             const remote = await bound.documents.patchPreview({
               page_id: state.current.page_id,
               base_version: state.current.version,
               package: preview.snapshot,
+              ...(editContext ?? {}),
             });
             if (!remote.ok) {
               const error = new Error('页面保存库尚未配置隔离 HTTP');
@@ -903,6 +946,27 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
           });
           return;
         }
+        if (preview.operation === 'SAVE' && preview.edit_origin === 'manual_source') {
+          if (isLive(bound) && bound.documents?.confirmPreview) {
+            emit({ confirmationUncertain: true });
+            const confirmed = await bound.documents.confirmPreview(preview.preview_id, state.lastIdempotencyKey);
+            const spec = confirmed.body?.spec ?? confirmed.spec;
+            if (spec?.page_id !== state.current.page_id || spec?.version !== state.current.version + 1) {
+              throw new Error('保存回执不匹配，请重试核对');
+            }
+            acceptSpec(spec);
+            return;
+          }
+          const nextVersion = state.current.version + 1;
+          const snapshot = clone(preview.snapshot);
+          const page = { ...state.current, package: snapshot, savedPackage: clone(snapshot), version: nextVersion,
+            base_version: state.current.version, dirty: false,
+            history: [...state.current.history, { version: nextVersion, title: state.current.title, at: now(), package: clone(snapshot) }] };
+          bound.assets.put(page); refreshList();
+          emit({ current: page, preview: null, sourceDraft: null, textDraft: null, overlay: null,
+            confirmationUncertain: false, liveStatus: `人工源码修改已保存 · v${page.version}` });
+          return;
+        }
         if (preview.expanded_scope === 'preview_expanded_range' && !preview.selection?.confirmExpanded) {
           throw Object.assign(new Error('共享样式影响超出选区，请确认实际范围'), { code: 'SCOPE_REQUIRES_CONFIRMATION' });
         }
@@ -976,6 +1040,42 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
         }
         emit({ preview: null, importCandidate: null, textDraft: null,
           overlay: state.mode === 'edit' ? 'selection' : null, liveStatus: '已取消预览，已保存版本不变' });
+      });
+    },
+    setSourceText(file, value) {
+      if (!state.current || state.busy || state.preview || state.confirmationUncertain || state.textDraft?.changed) return;
+      if (state.current.dirty) { emit({ message: '请先处理当前页面草稿，再进入源码编辑。' }); return; }
+      if (!['html', 'css', 'js'].includes(file) || typeof value !== 'string') return;
+      if (state.current.binding_manifest?.result_refs?.length && file !== 'css') {
+        emit({ message: '绑定页面仅允许手动调整 CSS。' }); return;
+      }
+      const pkg = clone(state.sourceDraft?.package ?? state.current.package);
+      pkg[file] = value;
+      emit({ sourceDraft: { package: pkg, changed: ['html', 'css', 'js'].some(key => pkg[key] !== state.current.package[key]) },
+        contextPanel: 'source', liveStatus: '源码草稿保留中，预览后才执行候选' });
+    },
+    discardSourceDraft() {
+      if (state.busy || state.preview || state.confirmationUncertain) return;
+      emit({ sourceDraft: null, liveStatus: '已放弃源码草稿，选区保留' });
+    },
+    async previewSourceDraft() {
+      await perform(async () => {
+        assertEditable();
+        if (!state.current || !state.sourceDraft?.changed) throw new Error('源码尚无修改');
+        const pkg = state.sourceDraft.package;
+        if (isLive(bound) && bound.documents?.savePreview) {
+          const remote = await bound.documents.savePreview({ page_id: state.current.page_id,
+            base_version: state.current.version, title: state.current.title, package: pkg,
+            binding_manifest: state.current.binding_manifest, edit_origin: 'manual_source' });
+          if (!remote.ok || !remote.body?.preview_id) throw new Error('无法取得源码预览；草稿已保留');
+          emit({ preview: { preview_id: remote.body.preview_id, operation: 'SAVE', status: 'PENDING', edit_origin: 'manual_source',
+            snapshot: clone(pkg), base_package: state.current.package },
+            lastIdempotencyKey: bound.nextId('source'), liveStatus: '人工源码修改待确认，取消预览会保留草稿' });
+          return;
+        }
+        emit({ preview: { preview_id: bound.nextId('source'), operation: 'SAVE', status: 'PENDING', edit_origin: 'manual_source',
+          snapshot: clone(pkg), base_package: state.current.package },
+          lastIdempotencyKey: bound.nextId('source'), liveStatus: '人工源码修改待确认，取消预览会保留草稿' });
       });
     },
     async saveDraft() {

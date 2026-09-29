@@ -8,7 +8,7 @@ pnpm dsh doctor
 pnpm dsh test
 pnpm dsh verify
 DSH_UPSTREAM_RUNTIME_BUNDLE=/path/to/upstream-runtime.tar.zst \
-  pnpm dsh release --offline --tag dsh-0.18.0.2-candidate
+  pnpm dsh release --offline --tag dsh-0.19.0.0-candidate
 ```
 
 `pnpm dsh release --offline` 会在 `.context/release-evidence/<tag>/` 生成 pre-manifest、source tarball、固定 rc2 runtime tarball、release manifest、`SHA256SUMS` 和脱敏 CI evidence；它要求 runtime bundle 已由固定上游 checkout 构建，不创建 draft、上传 asset、打 tag 或发布 GitHub Release。发布前必须有干净 reviewed commit、CI evidence、publication sidecar 和独立授权。`pnpm dsh status <state-file>`、`resume <state-file>`、`why-blocked` 用于恢复和解释阻断；`rollback` 默认只显示现场 runbook，不猜测 systemd 命令。

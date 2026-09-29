@@ -65,7 +65,7 @@ test('receiver scans final extracted content and deny names', async () => {
   const root=await fixture(), secretArchive=join(root,'secret.tar.gz'); const secretValue=['live','token-value-1234567890'].join('-'); const secret=`TOKEN = '${secretValue}'`; archiveWithEntries(secretArchive,[{name:'VERSION',data:'0.18.0.1\n'},{name:'config.txt',data:secret}]); const secretManifest=await manifest(root,secretArchive,'dsh-secret',{'VERSION':'0.18.0.1\n','config.txt':secret}); await assert.rejects(()=>receiveArtifact({artifact:secretArchive,manifestPath:secretManifest,destination:join(root,'secret-out')}), /SECRET_SCAN_FAILED/);
   const denyArchive=join(root,'deny.tar.gz'); archiveWithEntries(denyArchive,[{name:'VERSION',data:'0.18.0.1\n'},{name:'.env',data:'synthetic'}]); const denyManifest=await manifest(root,denyArchive,'dsh-deny',{'VERSION':'0.18.0.1\n','.env':'synthetic'}); await assert.rejects(()=>receiveArtifact({artifact:denyArchive,manifestPath:denyManifest,destination:join(root,'deny-out')}), /SECRET_SCAN_FAILED/);
 });
-test('secret scan distinguishes explicit synthetic fixtures from real assignments', () => { const live = ['live', 'token-value-1234567890'].join('-'); assert.deepEqual(scanText("TOKEN = 'test-only-synthetic-token'", 'fixture.test.mjs'), []); assert.deepEqual(scanText("TOKEN = 'test-only-synthetic-token'", 'config/runtime.env'), ['SECRET_PATTERN config/runtime.env']); assert.deepEqual(scanText(`TOKEN = '${live}'`, 'fixture.test.mjs'), ['SECRET_PATTERN fixture.test.mjs']); });
+test('secret scan distinguishes explicit synthetic fixtures from real assignments', () => { const live = ['live', 'token-value-1234567890'].join('-'); assert.deepEqual(scanText("TOKEN = 'test-only-synthetic-token'", 'fixture.test.mjs'), []); assert.deepEqual(scanText("TOKEN = 'test-only-synthetic-token'", 'config/runtime.env'), ['SECRET_PATTERN config/runtime.env']); assert.deepEqual(scanText(`TOKEN = '${live}'`, 'fixture.test.mjs'), ['SECRET_PATTERN fixture.test.mjs']); assert.deepEqual(scanText("token = 'x-cos-security-token'", 'sdk/base.js'), []); assert.deepEqual(scanText("TOKEN = '__DSH_CODE_ICON_INSTANCE__'", 'ui-primitives/lib/index.js'), []); assert.deepEqual(scanText("SECRET = 'AWS_SECRET_ACCESS_KEY'", 'credential-provider-env/index.js'), []); assert.deepEqual(scanText("TOKEN = 'remove_authentication_token'", 'semantic-conventions/experimental_attributes.js'), []); assert.deepEqual(scanText("API_KEY = 'MY_REAL_SECRET_TOKEN'", 'config/runtime.env'), ['SECRET_PATTERN config/runtime.env']); assert.deepEqual(scanText("API_KEY = 'MY_REAL_SECRET_TOKEN'", 'node_modules/vendor.js'), ['SECRET_PATTERN node_modules/vendor.js']); assert.deepEqual(scanText("TOKEN = 'ghp_123456789012345678901234567890'", 'node_modules/vendor.js', { scanAssignments: false }), ['SECRET_PATTERN node_modules/vendor.js']); assert.deepEqual(scanText('UAKIAU0EQCAEQQJ0ISIMA', 'generated.wasm.js'), []); assert.deepEqual(scanText("const key = 'AKIAU0EQCAEQQJ0ISIMA'", 'config/key.js'), ['SECRET_PATTERN config/key.js']); assert.deepEqual(scanText('-----BEGIN PRIVATE KEY-----', 'sdk/import.js'), []); assert.deepEqual(scanText(`-----BEGIN PRIVATE KEY-----\n${'A'.repeat(48)}\n-----END PRIVATE KEY-----`, 'config/key.pem'), ['SECRET_PATTERN config/key.pem']); });
 test('zstd receiver enforces the bounded stream path', async () => { const root=await fixture(), raw=join(root,'a.tar'), archive=join(root,'a.tar.zst'); execFileSync('python3',['-c',`import tarfile,sys,io
 x=tarfile.TarInfo('VERSION'); b=bytes([48,46,49,56,46,48,46,49,10]); x.size=len(b); x.mode=0o600
 with tarfile.open(sys.argv[1],'w:') as t: t.addfile(x,io.BytesIO(b))`,raw]); execFileSync('zstd',['-q',raw,'-o',archive]); const m=await manifest(root,archive); const got=await receiveArtifact({artifact:archive,manifestPath:m,destination:join(root,'out')}); assert.equal(got.entries,1); });
@@ -128,6 +128,37 @@ test('release evidence workflow hydrates and verifies LFS brand assets', async (
   assert.match(workflow, /lfs:\s*true/);
   assert.match(workflow, /git lfs checkout/);
   assert.match(workflow, /brand-assets\.mjs/);
+});
+test('release publish workflow binds the exact evidence run and protected tag', async () => {
+  const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-publish.yml'), 'utf8');
+  assert.match(workflow, /actions\/runs\/\$EVIDENCE_RUN_ID/);
+  assert.match(workflow, /dsh-release-evidence\.yml/);
+  assert.match(workflow, /tags\/protection/);
+  assert.match(workflow, /annotated-tag\.json/);
+  assert.match(workflow, /TAG_TARGET_CHANGED_AFTER_PUBLISH/);
+  assert.match(workflow, /TAG_TARGET_CHANGED_FINAL/);
+  assert.match(workflow, /gh attestation verify/);
+});
+test('release publish workflow is idempotent and emits a verified publication sidecar', async () => {
+  const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-publish.yml'), 'utf8');
+  assert.match(workflow, /ASSET_REUSED/);
+  assert.match(workflow, /ASSET_CONFLICT/);
+  assert.match(workflow, /release-publication\.v1\.json/);
+  assert.match(workflow, /PUBLISHED_VERIFIED/);
+  assert.ok(workflow.indexOf('Publish the verified six-asset release') < workflow.indexOf('Finalize the verified publication sidecar after publishing'));
+  const finalize = workflow.slice(workflow.indexOf('Finalize the verified publication sidecar after publishing'));
+  assert.doesNotMatch(finalize, /gh release upload/);
+});
+test('runtime bundle enforces production pruning, secret scan and peer collision checks', async () => {
+  const source = await readFile(join(process.cwd(), 'scripts/release/runtime-bundle.mjs'), 'utf8');
+  assert.match(source, /pruneDevelopmentFiles/);
+  assert.match(source, /scanRuntimeTree/);
+  assert.match(source, /RUNTIME_SECRET_SCAN_FAILED/);
+  assert.match(source, /RUNTIME_LINK_BROKEN/);
+  assert.match(source, /MAX_TEXT_SCAN_BYTES/);
+  assert.match(source, /RUNTIME_PEER_ALIAS_COLLISION/);
+  assert.match(source, /\['cordis', 'cosmokit'\]/);
+  assert.doesNotMatch(source, /scanAssignments:\s*!\/\(\^\|\\\/\)node_modules/);
 });
 test('runtime artifact allowlist carries the release evidence workflow', async () => {
   const allowlist = await collectAllowlist(process.cwd());

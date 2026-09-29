@@ -4,7 +4,7 @@ export const cockpitCss = `
 .cockpit-ai-diff pre { white-space:pre-wrap; overflow-wrap:anywhere; max-height:220px; overflow:auto; font-size:12px; }
 
 .sm-library-theme { height:100%; min-height:0; }
-.sm-library-workspace { --sm-bg:#fff; --sm-surface:#fff; --sm-ink:#171717; --sm-muted:#737373; --sm-line:#e7e7e7; --sm-purple:#ff6b35; --sm-danger:#b42318; --lib-rail:#f7f7f7;
+.sm-library-workspace { --sm-bg:#fff; --sm-surface:#fff; --sm-ink:#171717; --sm-muted:#737373; --sm-line:#e7e7e7; --sm-purple:#805d9d; --sm-danger:#b42318; --lib-rail:#f7f7f7;
   container:cockpit / inline-size; color:#171717; background:#f7f7f7; height:100%; min-height:560px; min-width:0; display:flex; flex-direction:column;
   font:14px/1.55 var(--sm-font-body,'PingFang SC',sans-serif); position:relative; }
 .sm-library-workspace * { box-sizing:border-box; }
@@ -12,9 +12,9 @@ export const cockpitCss = `
 .sm-library-workspace button { min-height:34px; padding:6px 12px; border:1px solid #e4e4e4; border-radius:7px; background:#fff; cursor:pointer; }
 .sm-library-workspace button:hover:not(:disabled) { background:#f5f5f5; border-color:#ccc; }
 .sm-library-workspace button:disabled { opacity:.45; cursor:not-allowed; }
-.sm-library-workspace :is(button,input,select,textarea,a):focus-visible { outline:2px solid #ff6b35; outline-offset:3px; }
-.sm-library-workspace button.cockpit-primary { background:#f2642e; color:#fff; border-color:#f2642e; font-weight:500; }
-.sm-library-workspace button.cockpit-primary:hover:not(:disabled) { background:#dd5523; border-color:#dd5523; }
+.sm-library-workspace :is(button,input,select,textarea,a):focus-visible { outline:2px solid #805d9d; outline-offset:3px; }
+.sm-library-workspace button.cockpit-primary { background:#805d9d; color:#fff; border-color:#805d9d; font-weight:500; }
+.sm-library-workspace button.cockpit-primary:hover:not(:disabled) { background:#694b82; border-color:#694b82; }
 .sm-library-workspace h1,.sm-library-workspace h2,.sm-library-workspace h3,.sm-library-workspace p { margin:0; }
 .sm-library-pagehead { flex-shrink:0; min-height:68px; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:12px 24px; background:#fff; border-bottom:1px solid #e7e7e7; }
 .cockpit-heading { display:flex; align-items:center; gap:14px; min-width:0; }
@@ -73,11 +73,11 @@ li[data-selected="1"] .cockpit-file-icon { color:#d65625; background:#fff0e9; }
 .cockpit-sidebar-body { display:flex; flex-direction:column; gap:14px; padding:20px; overflow:auto; }
 .cockpit-sidebar-body h3 { font-size:15px; font-weight:500; overflow-wrap:anywhere; }
 .cockpit-sidebar-tools { display:flex; flex-direction:column; gap:8px; border-top:1px solid #e7e7e7; padding-top:18px; margin-top:10px; }
-.cockpit-selection-hint { color:#ff6b35; font-size:32px; line-height:1; padding-top:20px; }
+.cockpit-selection-hint { color:#805d9d; font-size:32px; line-height:1; padding-top:20px; }
 .cockpit-field { display:flex; flex-direction:column; align-items:stretch; gap:7px; font-size:12px; color:#626262; }
 .cockpit-field input:not([type=checkbox]),.cockpit-field select,.cockpit-field textarea { width:100%; min-width:0; border:1px solid #ddd; background:#fff; border-radius:6px; padding:8px 10px; color:#171717; font-size:13px; }
 .cockpit-field textarea { resize:vertical; min-height:62px; }
-.cockpit-field input[type=checkbox] { align-self:flex-start; accent-color:#f2642e; }
+.cockpit-field input[type=checkbox] { align-self:flex-start; accent-color:#805d9d; }
 .cockpit-board-form { display:flex; flex-direction:column; gap:14px; }
 .cockpit-board-form hr { width:100%; border:0; border-top:1px solid #e7e7e7; }
 .cockpit-notice { display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:14px 20px; background:#fff7f1; border-bottom:1px solid #f0ded2; font-size:13px; }

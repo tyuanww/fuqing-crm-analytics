@@ -51,7 +51,13 @@
     "CAS_CONFLICT": 409,
     "EDIT_EXPIRED": 409,
     "CAPABILITY_DENIED": 403,
-    "SCOPE_VIOLATION": 422
+    "SCOPE_VIOLATION": 422,
+    "AI_CONTEXT_MISSING": 422,
+    "AI_CONTEXT_SCHEMA": 422,
+    "AI_CONTEXT_MISMATCH": 409,
+    "AI_SCOPE_DIFF": 422,
+    "AI_SOURCE_CHANGED": 409,
+    "AI_BOUND_CONTENT": 403
   },
   "x-edit-schema": "free-page-edit/v1",
   "x-edit-context-schema": "free-page-edit-context/v1",
@@ -917,6 +923,119 @@
         "title": "PageDocument",
         "type": "object"
       },
+      "PageSourceRange": {
+        "additionalProperties": false,
+        "description": "A bounded source range carried by the host-canonical selection.",
+        "properties": {
+          "file": {
+            "enum": [
+              "html",
+              "css",
+              "js"
+            ],
+            "title": "File",
+            "type": "string"
+          },
+          "start": {
+            "maximum": 1048576,
+            "minimum": 0,
+            "title": "Start",
+            "type": "integer"
+          },
+          "end": {
+            "maximum": 1048576,
+            "minimum": 0,
+            "title": "End",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "file",
+          "start",
+          "end"
+        ],
+        "title": "PageSourceRange",
+        "type": "object"
+      },
+      "PageFocusRef": {
+        "additionalProperties": false,
+        "description": "Host-canonical selection identity carried into an AI source patch.",
+        "properties": {
+          "node_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]{1,128}$",
+            "title": "Node Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "static_element",
+              "dynamic_region"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "allowed_scope": {
+            "enum": [
+              "exact_source_range",
+              "dynamic_source_range",
+              "declared_region",
+              "shared_scope",
+              "readonly_bound"
+            ],
+            "title": "Allowed Scope",
+            "type": "string"
+          },
+          "allowed_ranges": {
+            "items": {
+              "$ref": "#/components/schemas/PageSourceRange"
+            },
+            "maxItems": 32,
+            "minItems": 1,
+            "title": "Allowed Ranges",
+            "type": "array"
+          },
+          "mapping_token": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "pattern": "^[A-Za-z0-9_.:-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Mapping Token"
+          },
+          "version_hash": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 64,
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Version Hash"
+          }
+        },
+        "required": [
+          "node_id",
+          "kind",
+          "allowed_scope",
+          "allowed_ranges"
+        ],
+        "title": "PageFocusRef",
+        "type": "object"
+      },
       "PagePatchPreview": {
         "additionalProperties": false,
         "description": "D6: patch preview of source and/or manifest. Confirm is a separate call.",
@@ -939,6 +1058,31 @@
           },
           "binding_manifest": {
             "$ref": "#/components/schemas/PageBindingManifest"
+          },
+          "edit_scope": {
+            "enum": [
+              "presentation",
+              "source_range"
+            ],
+            "type": "string",
+            "title": "Edit Scope"
+          },
+          "edit_context_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]{1,128}$",
+            "type": "string",
+            "title": "Edit Context Id"
+          },
+          "focus_ref": {
+            "$ref": "#/components/schemas/PageFocusRef"
+          },
+          "source_hash": {
+            "maxLength": 64,
+            "minLength": 64,
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string",
+            "title": "Source Hash"
           }
         },
         "required": [
@@ -951,6 +1095,11 @@
         "additionalProperties": false,
         "description": "D9: explicit save of the host in-memory draft. Exit-edit is not save.",
         "properties": {
+          "edit_origin": {
+            "const": "manual_source",
+            "type": "string",
+            "title": "Edit Origin"
+          },
           "base_version": {
             "maximum": 9007199254740991,
             "minimum": 1,
@@ -2194,5 +2343,5 @@
       }
     }
   },
-  "x-schema-sha256": "e7c56ec25ab0b80e71b31ba3b9f582ee162d8d0b00f64a1719d5e2737967f695"
+  "x-schema-sha256": "c0371e9bd7e4f78a0c5f7e8e64fd0b54fef421086a389eb917940800ec893c39"
 }

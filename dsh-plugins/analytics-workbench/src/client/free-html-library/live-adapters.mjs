@@ -13,6 +13,7 @@ import { SAMPLE_PACKAGE } from './mock-adapters.mjs';
 import { previewLiteralText } from './html-edit-kernel.mjs';
 import { buildGenerateContext } from './generate-context.mjs';
 import { PAGE_DOCUMENTS_PREFIX, PAGE_RESULT_PREFIX, refuseLivePort } from './page-http.mjs';
+import { annotateHostMappings } from '../../free-page/resource/package-normalize.mjs';
 
 const EDIT_CONTEXT_PREFIX = '/api/v1/analytics/page-edit-contexts';
 import { nativeGenerateUnavailable, normalizePagePackage } from './native-generate.mjs';
@@ -30,7 +31,7 @@ function unwrapSpec(body) {
 
 function hydrateSpec(spec, prev, now) {
   const pkg = spec.package
-    ? clone(spec.package)
+    ? annotateHostMappings(clone(spec.package))
     : clone(prev?.package ?? { html: '<html></html>', css: '', js: '', resources: [], node_map: [] });
   const entry = { version: spec.version, title: spec.title, at: now(), package: clone(pkg) };
   const history = [...(prev?.history ?? [])];
@@ -393,18 +394,23 @@ export function createLivePageAdapters({
     async cancelPreview(previewId) {
       return documentsRequest('POST', `/previews/${encodeURIComponent(previewId)}/cancel`);
     },
-    async patchPreview({ page_id, base_version, package: pagePackage, title }) {
+    async patchPreview({ page_id, base_version, package: pagePackage, title, edit_scope, edit_context_id, focus_ref, source_hash }) {
       const body = { base_version, package: pagePackage };
       if (title != null) body.title = title;
+      if (edit_scope != null) body.edit_scope = edit_scope;
+      if (edit_context_id != null) body.edit_context_id = edit_context_id;
+      if (focus_ref != null) body.focus_ref = focus_ref;
+      if (source_hash != null) body.source_hash = source_hash;
       return documentsRequest('POST', `/pages/${encodeURIComponent(page_id)}/patch-preview`, { body });
     },
-    async savePreview({ page_id, base_version, title, package: pagePackage, binding_manifest }) {
+    async savePreview({ page_id, base_version, title, package: pagePackage, binding_manifest, edit_origin }) {
       return documentsRequest('POST', `/pages/${encodeURIComponent(page_id)}/save-preview`, {
         body: {
           base_version,
           title,
           package: pagePackage,
           binding_manifest: binding_manifest ?? { bindings: [], result_refs: [] },
+          ...(edit_origin ? { edit_origin } : {}),
         },
       });
     },
@@ -468,7 +474,7 @@ export function createLivePageAdapters({
         nativePrompts.push({ prompt, context: buildGenerateContext({ prompt, ...extras }), at: now() });
         if (typeof nativeGenerate !== 'function') throw nativeGenerateUnavailable();
         const raw = await nativeGenerate(prompt, extras);
-        const pkg = normalizePagePackage(raw);
+        const pkg = annotateHostMappings(normalizePagePackage(raw));
         if (!pkg) throw nativeGenerateUnavailable();
         return {
           accepted: true,

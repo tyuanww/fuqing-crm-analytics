@@ -80,7 +80,8 @@ export function previewLiteralText({
     return fail('TEXT_REPLACE_UNSUPPORTED', '包含子节点或动态逻辑的区域暂不支持直接改字');
   }
   const nodeId = located.node?.node_id;
-  if (nodeId && boundNodeIds(binding_manifest).has(nodeId)) {
+  const pageBound = Array.isArray(binding_manifest?.result_refs) && binding_manifest.result_refs.length > 0;
+  if (pageBound || (nodeId && boundNodeIds(binding_manifest).has(nodeId))) {
     return fail('BINDING_PROTECTED', '绑定节点禁止普通文本替换', { node_id: nodeId });
   }
   const applied = applyInnerText(pkg, located, escapeReplacementText(literal));
@@ -117,11 +118,48 @@ export function previewLiteralText({
   };
 }
 
-export async function submitHtmlPatchPreview(documents, { page_id, base_version, package: pagePackage, title } = {}) {
+export async function submitHtmlPatchPreview(documents, {
+  page_id, base_version, package: pagePackage, title, edit_context = null, edit_scope = null,
+} = {}) {
   if (!documents?.patchPreview) return fail('http_not_configured', '没有 documents.patchPreview');
   if (!page_id || !pagePackage) return fail('INVALID_PAGE', 'patch-preview 需要 page_id 与 package');
+  if (edit_scope != null && edit_scope !== 'source_range') {
+    return fail('AI_CONTEXT_SCHEMA', '带选区上下文的 patch 必须使用 source_range');
+  }
   try {
-    const got = await documents.patchPreview({ page_id, base_version, package: pagePackage, title });
+    const body = { page_id, base_version, package: pagePackage, title };
+    if (edit_context == null) {
+      const got = await documents.patchPreview(body);
+      if (!got.ok) return fail(got.reason || 'http_not_configured', '无法创建 patch 预览');
+      return { ok: true, preview_id: got.body?.preview_id, body: got.body };
+    }
+    const writableScope = edit_context?.allowed_scope === 'exact_source_range'
+      || edit_context?.allowed_scope === 'dynamic_source_range'
+      || edit_context?.allowed_scope === 'declared_region';
+    if (!writableScope) {
+      return fail(edit_context?.allowed_scope === 'readonly_bound' ? 'AI_BOUND_CONTENT' : 'AI_SCOPE_DIFF',
+        '当前选区不能通过自动源码候选保存');
+    }
+    if (!Array.isArray(edit_context.allowed_ranges) || edit_context.allowed_ranges.length < 1
+      || typeof edit_context.context_id !== 'string' || !edit_context.context_id
+      || typeof edit_context.version_hash !== 'string' || !edit_context.version_hash
+      || typeof edit_context.mapping_token !== 'string' || !edit_context.mapping_token
+      || typeof edit_context.node_id !== 'string' || !edit_context.node_id
+      || !['static_element', 'dynamic_region'].includes(edit_context.kind)) {
+      return fail('AI_CONTEXT_SCHEMA', '选区上下文不完整，拒绝降级为整页修改');
+    }
+    body.edit_scope = 'source_range';
+    body.edit_context_id = edit_context.context_id;
+    body.source_hash = edit_context.version_hash;
+    body.focus_ref = {
+      node_id: edit_context.node_id,
+      kind: edit_context.kind,
+      allowed_scope: edit_context.allowed_scope,
+      allowed_ranges: edit_context.allowed_ranges,
+      mapping_token: edit_context.mapping_token,
+      version_hash: edit_context.version_hash,
+    };
+    const got = await documents.patchPreview(body);
     if (!got.ok) return fail(got.reason || 'http_not_configured', '无法创建 patch 预览');
     return { ok: true, preview_id: got.body?.preview_id, body: got.body };
   } catch (error) {
