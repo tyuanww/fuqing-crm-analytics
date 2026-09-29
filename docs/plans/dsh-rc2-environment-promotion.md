@@ -722,7 +722,7 @@ Eng 的 native 与 outside 两路均完成，6/6 维度（artifact trust、auth/
 - Test Review: 已产出单元→集成→系统→浏览器→operator→chaos 分层矩阵，至少 13 个实施任务；真实模型、完整业务、131GB 归档、移动端均保持 `NOT_RUN/PARTIAL`。
 - Developer experience: Quickstart、doctor、统一 dsh CLI、offline/status/resume/why-blocked 已落地；Node24 冷环境与 TTHW 仍 `NOT_RUN/NOT_MEASURED`。
 - Plan state: `IMPLEMENTATION_PARTIAL / RELEASE_BLOCKED`。T1/T2/T13 文档、基线与本地 artifact receive gate 已完成；T3–T12 的本地合同/synthetic gate 已完成但仍为 PARTIAL，现场 UAT/host/远端 gate 未运行；证据见 `scripts/release/` 与 `docs/release/dsh-rc2-candidate/`。
-- Current execution: 已建立 public-main rc2 候选并完成 T1、T2、T13；PR #83/#84 已合并到 main，产品版本为 `0.19.0.0`；T3–T12 的本地 contract/synthetic gate、WSL artifact 脚本、Quickstart、evidence verifier 和 operations ledger 已落地，最终 main artifact 已完成本地 build/receive/doctor。GitHub tag/release、杭州重启/切换、Cloudflare route 和旧版本删除仍未执行。
+- Current execution: 已建立 public-main rc2 候选并完成 T1、T2、T13；PR #83/#84/#85 已合并到 main，产品版本为 `0.19.0.0`；T3–T12 的本地 contract/synthetic gate、WSL artifact 脚本、Quickstart、evidence verifier 和 operations ledger 已落地。PR #84 后的 artifact 快照已完成本地 build/receive/doctor，但后续文档提交使其失效；最终 artifact 必须在固定 reviewed SHA 后重新生成，证据保存在仓库外。GitHub tag/release、杭州重启/切换、Cloudflare route 和旧版本删除仍未执行。
 
 ### Verdict
 
@@ -731,7 +731,7 @@ Eng 的 native 与 outside 两路均完成，6/6 维度（artifact trust、auth/
 **UNRESOLVED DECISIONS:**
 
 - 产品负责人是否在正式生产前纳入 OIDC provenance、签名、SBOM/CVE 与受保护 tag；未决定前默认只允许 internal-only/operator pilot。
-- 候选 public-main merge commit 为 `a9da916170be67f9a2bb8a79a8060163d7d8b563`，当前产品 VERSION 为 `0.19.0.0`；本候选已完成本地 reviewed artifact build/receive，发布 owner、GitHub provenance、tag/release 仍待 T4。
+- PR #84 后的历史候选 SHA 为 `a9da916170be67f9a2bb8a79a8060163d7d8b563`，当前产品 VERSION 为 `0.19.0.0`；该快照已完成本地 build/receive，但后续 main 提交使其失效。最终 reviewed SHA、发布 owner、GitHub provenance、tag/release 仍待 T4；最终 artifact digest 以仓库外不可变 manifest 为准。
 - 杭州现场可用的 operator gate 是 Cloudflare Access、Tailscale、mTLS/IP allowlist 还是 `none`；`none` 时是否接受一次有明确授权的 unisolated cutover。
 - 杭州目标机的真实 WSL2、Docker、systemd、Node、Python、路径、权限和 Cloudflare route 事实；需由 T7/T9 的冷验证与负探针给出证据。
 - 一个 CRM operator pilot 的最小场景数、p95/5xx/auth/plugin/page 阈值及产品 owner 的真实业务 UAT 结论。
