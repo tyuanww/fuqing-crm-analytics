@@ -116,6 +116,11 @@ function annotateGenericElements(html) {
 export function annotateHostMappings(pkg) {
   if (!pkg || typeof pkg !== 'object' || typeof pkg.html !== 'string') return pkg;
   const annotated = annotateGenericElements(pkg.html);
+  // This synchronous adapter cannot recalculate the presentation source hash.
+  // Keep an overlay package byte-for-byte intact until an async, hash-aware
+  // path can rebind a matching source hash; silently injecting markers would
+  // make an otherwise valid package fail contract validation.
+  if (pkg.presentation && annotated.html !== pkg.html) return pkg;
   const existing = Array.isArray(pkg.node_map) ? pkg.node_map : [];
   const known = new Set(existing.map(row => row?.node_id).filter(Boolean));
   return {

@@ -12,7 +12,7 @@ from backend.contracts.page_documents import PageDraft, PagePackage, PageRollbac
 from backend.services.analytics.access import AnalyticsError
 from backend.services.analytics.cockpit_ai import CockpitAIStore
 from backend.services.analytics.cockpit_html_selection import protect_selection, validate_selection
-from backend.services.analytics.page_documents import PageDocumentStore
+from backend.services.analytics.page_documents import PageDocumentStore, _annotate_package
 from backend.tests.test_cockpit_ai import setup as _base_setup, output
 
 setup = _base_setup
@@ -188,6 +188,7 @@ def test_static_html_selection_cannot_change_presentation_records(setup):
                                 'edits': [{'target': {'anchor': {'attribute': 'id', 'value': 'cards'}, 'path': []},
                                            'style': {'padding': '8px'}}]}}
     spec = pages.confirm(actor, pages.generate(actor, PageDraft(title='Static', session_id='static-pres', package=package))['preview_id'], 'static-pres')['spec']
+    html = spec['package']['html']
     scope = {'start': 0, 'end': html.index('</h1>') + 5, 'html_hash': hashlib.sha256(html.encode()).hexdigest()}
     job = ai.begin(actor, 'page', spec['page_id'], 1, 'ai_' + str(uuid.uuid4()), scope)
     before = json.loads(ai.content(actor, job['id'], 'source')[1])
@@ -210,6 +211,40 @@ def test_static_html_selection_cannot_change_presentation_records(setup):
     assert ai.confirm(actor, job['id'], ready['candidate_hash'])['saved_version'] == 2
     saved = pages.get(actor, spec['page_id'])['spec']['package']
     assert saved['html'] == allowed['html'] and saved['presentation']['edits'][0]['style'] == {'padding': '8px'}
+
+
+def test_host_annotation_rebinds_only_a_matching_presentation_hash():
+    package = {
+        'html': '<section id="cards"><p>Before</p></section>',
+        'css': '.card{color:black}',
+        'js': 'window.originalLogic = true;',
+        'node_map': [],
+        'resources': [],
+        'presentation': {
+            'version': 1,
+            'source_hash': page_source_hash(
+                '<section id="cards"><p>Before</p></section>',
+                '.card{color:black}',
+                'window.originalLogic = true;',
+            ),
+            'edits': [{
+                'target': {'anchor': {'attribute': 'id', 'value': 'cards'}, 'path': []},
+                'text': 'After',
+            }],
+        },
+    }
+    annotated = _annotate_package(package)
+    assert annotated['html'] != package['html']
+    assert annotated['presentation']['edits'] == package['presentation']['edits']
+    assert annotated['presentation']['source_hash'] == page_source_hash(
+        annotated['html'], package['css'], package['js'])
+
+    stale = copy.deepcopy(package)
+    stale['presentation']['source_hash'] = '0' * 64
+    stale_annotated = _annotate_package(stale)
+    assert stale_annotated['presentation']['source_hash'] == '0' * 64
+    with pytest.raises(ValidationError, match='presentation source changed'):
+        PagePackage.model_validate(stale_annotated)
 
 
 def test_bound_pages_reject_presentation_payload(setup):

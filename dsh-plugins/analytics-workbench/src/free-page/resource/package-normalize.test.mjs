@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { normalizePagePackage } from './package-normalize.mjs';
+import { annotateHostMappings, normalizePagePackage } from './package-normalize.mjs';
 import { sha256Hex, utf8Bytes } from './bytes.mjs';
 import {
   INTERACTIVE_CHART_PACKAGE, LEAK_ATTEMPT_PACKAGE, MAGAZINE_PACKAGE, SAVED_COMPLEX_PACKAGE,
@@ -84,6 +84,26 @@ test('host mappings survive a second normalization after a text edit', async () 
   assert.equal(second.ok, true, JSON.stringify(second.error));
   assert.deepEqual(second.value.node_map.map(row => row.node_id), first.value.node_map.map(row => row.node_id));
   assert.match(second.value.html, /data-shine-node="auto_p_6"/);
+});
+
+test('synchronous host mapping leaves presentation overlays unchanged', () => {
+  const packageWithOverlay = {
+    html: '<section id="cards"><p>Before</p></section>',
+    css: '.card{color:black}',
+    js: 'window.originalLogic = true;',
+    resources: [],
+    node_map: [],
+    presentation: {
+      version: 1,
+      source_hash: '0'.repeat(64),
+      edits: [{ target: { anchor: { attribute: 'id', value: 'cards' }, path: [] }, text: 'After' }],
+    },
+  };
+  const mapped = annotateHostMappings(packageWithOverlay);
+  assert.strictEqual(mapped, packageWithOverlay);
+  assert.equal(mapped.html, packageWithOverlay.html);
+  assert.deepEqual(mapped.node_map, []);
+  assert.equal(mapped.presentation.source_hash, '0'.repeat(64));
 });
 
 test('ordinary elements with quoted greater-than attributes receive complete mappings', async () => {

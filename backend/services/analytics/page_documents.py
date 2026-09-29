@@ -25,7 +25,7 @@ from backend.contracts.analytics_query import canonical_json
 from backend.contracts.competition_computed import DATA_SCOPE
 from backend.contracts.page_documents import (
     PACKAGE_MAX_BYTES, PageDocument, PageDraft, PagePatchPreview, PageRollbackPreview,
-    PageSavePreview, is_package_too_large,
+    PageSavePreview, is_package_too_large, page_source_hash,
 )
 from backend.services.analytics.access import AnalyticsError, AnalyticsPrincipal, require
 from backend.services.analytics.first_purchase.asset_state import (
@@ -119,11 +119,25 @@ def _annotate_generic_html(html: str) -> tuple[str, list[dict]]:
 def _annotate_package(package: dict) -> dict:
     if not isinstance(package, dict) or not isinstance(package.get("html"), str):
         return package
-    html, additions = _annotate_generic_html(package["html"])
+    source_html = package["html"]
+    source_css = package.get("css", "")
+    source_js = package.get("js", "")
+    html, additions = _annotate_generic_html(source_html)
     existing = package.get("node_map") if isinstance(package.get("node_map"), list) else []
     known = {row.get("node_id") for row in existing if isinstance(row, dict) and row.get("node_id")}
-    return {**package, "html": html,
-            "node_map": [*existing, *(row for row in additions if row["node_id"] not in known)]}
+    annotated = {**package, "html": html,
+                 "node_map": [*existing, *(row for row in additions if row["node_id"] not in known)]}
+    presentation = package.get("presentation")
+    if additions and isinstance(presentation, dict):
+        # A legacy snapshot may have a valid overlay hash for the source before
+        # host-owned markers were inserted. Rebind only that exact case; a
+        # stale hash must remain stale and be rejected by PagePackage.
+        if presentation.get("source_hash") == page_source_hash(source_html, source_css, source_js):
+            annotated["presentation"] = {
+                **presentation,
+                "source_hash": page_source_hash(html, source_css, source_js),
+            }
+    return annotated
 
 
 def _css_rules(css: str):
