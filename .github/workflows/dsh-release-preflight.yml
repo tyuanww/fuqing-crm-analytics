@@ -71,7 +71,13 @@ jobs:
           # The checkout is intentionally detached at the reviewed SHA, so
           # use an explicit remote/ref fetch instead of `git lfs pull`, which
           # requires a current branch and exits early in this workflow.
-          git lfs fetch origin "$REVIEWED_SHA" --include="frontend-vue3/src/assets/brand/shine-mage.png" --exclude=""
+          git lfs version
+          git config --show-origin --get-regexp '^(remote\.origin\.url|includeif\.gitdir:|http\..*\.extraheader)$' \
+            | sed -E 's/(AUTHORIZATION: basic ).*/\1REDACTED/' || true
+          if ! git lfs fetch origin "$REVIEWED_SHA" --include="frontend-vue3/src/assets/brand/shine-mage.png" --exclude=""; then
+            git lfs logs last || true
+            exit 1
+          fi
           git lfs checkout
           node --input-type=module -e "import { brandAssets } from './scripts/dsh-b0/brand-assets.mjs'; await brandAssets(process.cwd());"
       - name: Build the exact pinned runtime before tag creation

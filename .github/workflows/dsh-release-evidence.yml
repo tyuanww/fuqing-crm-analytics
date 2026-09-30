@@ -80,7 +80,13 @@ jobs:
           # config and authenticates the same GitHub LFS endpoint.
           # The verifier is detached at the reviewed commit; fetch that ref
           # explicitly instead of relying on `git lfs pull`'s current branch.
-          git lfs fetch origin "$REVIEWED_SHA" --include="frontend-vue3/src/assets/brand/shine-mage.png" --exclude=""
+          git lfs version
+          git config --show-origin --get-regexp '^(remote\.origin\.url|includeif\.gitdir:|http\..*\.extraheader)$' \
+            | sed -E 's/(AUTHORIZATION: basic ).*/\1REDACTED/' || true
+          if ! git lfs fetch origin "$REVIEWED_SHA" --include="frontend-vue3/src/assets/brand/shine-mage.png" --exclude=""; then
+            git lfs logs last || true
+            exit 1
+          fi
           git lfs checkout
           node --input-type=module -e "import { brandAssets } from './scripts/dsh-b0/brand-assets.mjs'; await brandAssets(process.cwd());"
       - name: Require a successful exact-SHA preflight
