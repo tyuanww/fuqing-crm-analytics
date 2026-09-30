@@ -91,11 +91,21 @@ async function stage(name, fn) {
   }
 }
 
-const run = (command, args, env = {}) => execFileSync(command, args, {
-  cwd: root,
-  env: { ...process.env, ...env, B0_BUILD_UPSTREAM: upstream, COREPACK_ENABLE_DOWNLOAD_PROMPT: '0', CI: '1' },
-  stdio: 'inherit',
-});
+const run = (command, args, env = {}) => {
+  const childEnv = {
+    ...process.env,
+    ...env,
+    COREPACK_ENABLE_DOWNLOAD_PROMPT: '0',
+    CI: '1',
+  };
+  // `pipeline.mjs --prepare` owns creation and verification of the pinned
+  // checkout.  B0_BUILD_UPSTREAM is intentionally a read-only --check
+  // override there, so do not leak it into the prepare child process.  All
+  // later stages use the exact prepared checkout explicitly.
+  if (env.B0_BUILD_UPSTREAM === null) delete childEnv.B0_BUILD_UPSTREAM;
+  else if (!Object.hasOwn(env, 'B0_BUILD_UPSTREAM')) childEnv.B0_BUILD_UPSTREAM = upstream;
+  return execFileSync(command, args, { cwd: root, env: childEnv, stdio: 'inherit' });
+};
 
 // Every attempt owns a unique directory. Failed evidence is retained there;
 // an interrupted attempt cannot overwrite a candidate or a prior runtime.
@@ -105,7 +115,7 @@ const runDir = await mkdtemp(join(runsRoot, `${tag}-`));
 const runtimeOutput = join(runDir, releaseAssetNames(tag).find(name => name.startsWith('shinemage-dsh-upstream-runtime-')));
 const bundleDir = join(runDir, 'bundle');
 try {
-  await stage('prepare', () => run(process.execPath, ['scripts/dsh-b0/pipeline.mjs', '--prepare', '--python', python]));
+  await stage('prepare', () => run(process.execPath, ['scripts/dsh-b0/pipeline.mjs', '--prepare', '--python', python], { B0_BUILD_UPSTREAM: null, DSH_UPSTREAM_CHECKOUT: upstream }));
   assert.equal(execFileSync('git', ['-C', upstream, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), pin, 'PREFLIGHT_UPSTREAM_SHA_MISMATCH');
   await stage('build', () => { for (const plugin of plugins) run(process.execPath, [`${plugin}/build.mjs`, upstream]); });
   await stage('runtime', () => run(process.execPath, ['scripts/release/runtime-bundle.mjs', '--upstream', upstream, '--output', runtimeOutput, '--online']));

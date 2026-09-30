@@ -208,6 +208,13 @@ test('release preflight builds the runtime before protected tag creation', async
   assert.match(source, /--online/);
   assert.match(source, /scripts\/dsh\.mjs', 'test'/);
 });
+test('release preflight does not leak the read-only upstream override into prepare', async () => {
+  const source = await readFile(join(process.cwd(), 'scripts/release/preflight.mjs'), 'utf8');
+  const pipeline = await readFile(join(process.cwd(), 'scripts/dsh-b0/pipeline.mjs'), 'utf8');
+  assert.match(source, /env\.B0_BUILD_UPSTREAM === null\) delete childEnv\.B0_BUILD_UPSTREAM/);
+  assert.match(source, /stage\('prepare'[\s\S]*B0_BUILD_UPSTREAM: null[\s\S]*DSH_UPSTREAM_CHECKOUT: upstream/);
+  assert.match(pipeline, /DSH_UPSTREAM_CHECKOUT \?\? process\.env\.B0_BUILD_UPSTREAM/);
+});
 test('release publish workflow binds the exact evidence run and protected tag', async () => {
   const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-publish.yml'), 'utf8');
   assert.match(workflow, /actions\/runs\/\$EVIDENCE_RUN_ID/);
