@@ -193,7 +193,8 @@ test('release evidence workflow hydrates and verifies the exact brand asset', as
   assert.match(workflow, /if \[\[ "\$\(sed -n '1p' "\$asset_tmp"\)" == 'version https:\/\/git-lfs\.github\.com\/spec\/v1' \]\]/);
   assert.match(workflow, /objects\/batch/);
   assert.match(workflow, /Authorization: Basic/);
-  assert.match(workflow, /test "\$\(wc -c < "\$asset_tmp" \| tr -d ' '\)" = 3662/);
+  assert.match(workflow, /asset_bytes="\$\(wc -c < "\$asset_tmp" \| tr -d ' '\)"/);
+  assert.match(workflow, /test "\$asset_bytes" = 3662/);
   assert.match(workflow, /sha256sum/);
   assert.match(workflow, /brand-assets\.mjs/);
   assert.match(workflow, /preflight_run_id/);

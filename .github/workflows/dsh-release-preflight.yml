@@ -101,8 +101,12 @@ jobs:
             test "$(sha256sum "$lfs_tmp" | awk '{print $1}')" = "$asset_oid"
             mv "$lfs_tmp" "$asset_tmp"
           fi
-          test "$(wc -c < "$asset_tmp" | tr -d ' ')" = 3662
-          test "$(sha256sum "$asset_tmp" | awk '{print $1}')" = 21b8273703b9015027b572cb830b8bb01e9fc406c39b14ec7c228fbcdcaf4000
+          asset_bytes="$(wc -c < "$asset_tmp" | tr -d ' ')"
+          asset_sha="$(sha256sum "$asset_tmp" | awk '{print $1}')"
+          printf 'release brand candidate bytes=%s sha256=%s first8=' "$asset_bytes" "$asset_sha"
+          od -An -tx1 -N8 "$asset_tmp"
+          test "$asset_bytes" = 3662
+          test "$asset_sha" = 21b8273703b9015027b572cb830b8bb01e9fc406c39b14ec7c228fbcdcaf4000
           mkdir -p "$(dirname "$asset_rel")"
           mv "$asset_tmp" "$asset_rel"
           node --input-type=module -e "import { brandAssets } from './scripts/dsh-b0/brand-assets.mjs'; await brandAssets(process.cwd());"
