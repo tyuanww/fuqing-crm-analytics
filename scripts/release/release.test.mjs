@@ -202,11 +202,13 @@ test('release preflight builds the runtime before protected tag creation', async
   const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-preflight.yml'), 'utf8');
   const source = await readFile(join(process.cwd(), 'scripts/release/preflight.mjs'), 'utf8');
   assert.match(workflow, /reviewed_sha/);
+  assert.match(workflow, /corepack install --global pnpm@11\.7\.0/);
   assert.match(workflow, /scripts\/dsh\.mjs preflight/);
   assert.match(workflow, /dsh-rc2-preflight-/);
   assert.match(source, /runtime-bundle\.mjs/);
   assert.match(source, /--online/);
   assert.match(source, /scripts\/dsh\.mjs', 'test'/);
+  assert.match(source, /requireUpstream: checkOnly/);
 });
 test('release preflight does not leak the read-only upstream override into prepare', async () => {
   const source = await readFile(join(process.cwd(), 'scripts/release/preflight.mjs'), 'utf8');

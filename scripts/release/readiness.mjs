@@ -97,6 +97,7 @@ export async function collectReleaseReadiness({
   requireClean = false,
   requireRuntime = true,
   requireOutput = false,
+  requireUpstream = true,
 } = {}) {
   const repo = resolve(root);
   const checks = [];
@@ -127,7 +128,8 @@ export async function collectReleaseReadiness({
 
   const upstream = resolve(upstreamPath || join(repo, `.context/dsh-b0/upstream-${DSH_SDK_VERSION}`));
   const upstreamSha = commandOutput('git', ['-C', upstream, 'rev-parse', 'HEAD']);
-  add(checks, 'upstream-sha', upstreamSha === DSH_UPSTREAM_SHA, upstreamSha ?? `${upstream}:missing`, 'PREFLIGHT_UPSTREAM_SHA_MISMATCH', `checkout ${DSH_UPSTREAM_SHA}`);
+  const upstreamReady = upstreamSha === DSH_UPSTREAM_SHA || (!requireUpstream && upstreamSha === null);
+  add(checks, 'upstream-sha', upstreamReady, upstreamSha ?? `${upstream}:missing`, 'PREFLIGHT_UPSTREAM_SHA_MISMATCH', `checkout ${DSH_UPSTREAM_SHA}`);
 
   const missingPlugins = [];
   for (const plugin of RELEASE_PLUGINS) {

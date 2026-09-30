@@ -56,7 +56,10 @@ if (currentSourceSha !== sourceSha) {
   process.exit(2);
 }
 
-const readiness = await collectReleaseReadiness({ root, pythonPath: python, upstreamPath: upstream, outputDir, requireClean: true, requireRuntime: checkOnly, requireOutput: true });
+// A formal preflight owns creation of the pinned upstream checkout in its
+// prepare stage.  The read-only check must still require that checkout, while
+// the build path may start on a clean runner where it does not exist yet.
+const readiness = await collectReleaseReadiness({ root, pythonPath: python, upstreamPath: upstream, outputDir, requireClean: true, requireRuntime: checkOnly, requireOutput: true, requireUpstream: checkOnly });
 const evidenceExists = await lstat(evidenceDir).then(() => true, error => { if (error.code === 'ENOENT') return false; throw error; });
 if (evidenceExists) readiness.checks.push({ name: 'tag-evidence', ok: false, value: evidenceDir, code: 'PREFLIGHT_EVIDENCE_EXISTS', remedy: 'inspect prior evidence and use a fresh tag for a new run' });
 readiness.ok = readiness.checks.every(check => check.ok);
