@@ -186,10 +186,11 @@ test('preflight bundle summary binds every release asset to the manifest', async
   await writeFile(join(root, 'release-preflight.json'), JSON.stringify(summary));
   await assert.rejects(() => verifyPreflight(root, { tag, sourceSha }));
 });
-test('release evidence workflow hydrates and verifies LFS brand assets', async () => {
+test('release evidence workflow hydrates and verifies the exact brand asset', async () => {
   const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-evidence.yml'), 'utf8');
-  assert.match(workflow, /lfs:\s*true/);
-  assert.match(workflow, /git lfs checkout/);
+  assert.match(workflow, /lfs:\s*false/);
+  assert.match(workflow, /media\.githubusercontent\.com\/media/);
+  assert.match(workflow, /sha256sum/);
   assert.match(workflow, /brand-assets\.mjs/);
   assert.match(workflow, /preflight_run_id/);
   assert.match(workflow, /dsh-release-preflight\.yml/);

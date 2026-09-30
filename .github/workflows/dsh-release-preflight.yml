@@ -55,6 +55,8 @@ jobs:
         with:
           python-version: '3.14'
       - name: Verify the reviewed source
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           [[ "$REVIEWED_SHA" =~ ^[0-9a-f]{40}$ ]]
@@ -64,21 +66,21 @@ jobs:
           fi
           git merge-base --is-ancestor origin/main "$REVIEWED_SHA"
           test -z "$(git status --porcelain --untracked-files=all)"
-          # Keep the allowlisted LFS asset deterministic on a fresh runner.
-          # actions/checkout persists its read-only GITHUB_TOKEN in local git
-          # config for this job, so LFS receives the same authenticated origin
-          # without widening credentials into an environment variable.
-          # The checkout is intentionally detached at the reviewed SHA, so
-          # use an explicit remote/ref fetch instead of `git lfs pull`, which
-          # requires a current branch and exits early in this workflow.
-          git lfs version
-          git config --show-origin --get-regexp '^(remote\.origin\.url|includeif\.gitdir:|http\..*\.extraheader)$' \
-            | sed -E 's/(AUTHORIZATION: basic ).*/\1REDACTED/' || true
-          if ! git lfs fetch origin "$REVIEWED_SHA" --include="frontend-vue3/src/assets/brand/shine-mage.png" --exclude=""; then
-            git lfs logs last || true
-            exit 1
-          fi
-          git lfs checkout
+          # Keep the allowlisted brand bytes deterministic without depending
+          # on Git LFS being installed on the hosted runner. The source tree
+          # contains a checked-in LFS pointer; resolve its exact SHA from the
+          # reviewed commit, fetch the immutable media URL, and verify bytes
+          # before replacing the pointer in this disposable checkout.
+          asset_rel='frontend-vue3/src/assets/brand/shine-mage.png'
+          asset_oid="$(git show "${REVIEWED_SHA}:${asset_rel}" | sed -n 's/^oid sha256:\([0-9a-f]\{64\}\)$/\1/p')"
+          test -n "$asset_oid"
+          asset_tmp="$RUNNER_TEMP/shine-mage.png.partial"
+          curl -fsSL --retry 3 --retry-all-errors \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            "https://media.githubusercontent.com/media/${GITHUB_REPOSITORY}/${REVIEWED_SHA}/${asset_rel}" \
+            --output "$asset_tmp"
+          test "$(sha256sum "$asset_tmp" | awk '{print $1}')" = "$asset_oid"
+          mv "$asset_tmp" "$asset_rel"
           node --input-type=module -e "import { brandAssets } from './scripts/dsh-b0/brand-assets.mjs'; await brandAssets(process.cwd());"
       - name: Build the exact pinned runtime before tag creation
         env:
