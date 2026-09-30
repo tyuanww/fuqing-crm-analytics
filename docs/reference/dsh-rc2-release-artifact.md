@@ -13,17 +13,20 @@
 | `pnpm dsh --help` | 打印命令列表和退出码 | 无命令时退出码为 2 |
 | `pnpm dsh --version` | 输出产品版本和固定 DSH upstream SHA | 只读 |
 | `pnpm dsh doctor` | 检查 Node 主版本、四段产品版本、rc2 pin 和 release schema | 任一检查失败退出 2 |
+| `pnpm dsh doctor --release` | 只读检查 Node/pnpm/Python、clean worktree、zstd、固定 upstream、runtime bundle、evidence 目录和版本 pin | 缺项给出稳定错误码并退出 2；不联网、不生成 artifact |
 | `pnpm dsh dev [args...]` | 将参数转发给 `scripts/dsh-dev/cli.mjs` | 只操作当前工作树登记的开发实例，不探测杭州 |
 | `pnpm dsh test` | 运行 `scripts/release/*.test.mjs` | 测试失败退出非零 |
 | `pnpm dsh release --offline [--dry-run] [--tag TAG] [--config PATH]` | 在干净 checkout、已构建固定 rc2 runtime bundle 的前提下生成 pre-manifest、source tarball、runtime tarball、manifest、`SHA256SUMS` 和 CI evidence index | 必须提供 `DSH_UPSTREAM_RUNTIME_BUNDLE`; 只写 `.context/release-evidence/<tag>/`，不联网、不打 tag、不创建 Release |
 | `pnpm dsh receive --artifact FILE --manifest FILE --destination DIR [--max-entries N] [--max-bytes N]` | 校验并安全解包一个 release artifact | 目标目录必须不存在；默认最多 10000 个条目、512 MiB 展开后字节数，失败时拒绝接收 |
-| `pnpm dsh verify` | 运行 doctor、synthetic compatibility/backpressure 并检查发布门禁 | 当前真实 WSL2/HTTP/15 分钟 SLI 未完成时退出 2 并打印 `RELEASE_BLOCKED` |
+| `pnpm dsh verify --scope local` | 运行本地 doctor、synthetic compatibility/backpressure | 本地合同通过返回 0；不代表生产可发布 |
+| `pnpm dsh verify [--scope release]` | 运行发布级 doctor、synthetic compatibility/backpressure 并检查发布门禁 | 当前真实 WSL2/HTTP/15 分钟 SLI 未完成时退出 2 并打印 `RELEASE_BLOCKED` |
+| `pnpm dsh preflight --check --python ABS --tag TAG` | 只读检查正式 preflight 的工具链、固定 upstream、插件入口、runtime bundle 和输出目录 | 检查失败在构建前退出 2，不联网、不生成 artifact |
 | `pnpm dsh reconcile STATE REMOTE` | 将远端 receipt 与 durable state 对账 | `CONFLICT`/`UNKNOWN` 退出 2 |
 | `pnpm dsh status [STATE]` | 打印 durable state | 只读 |
 | `pnpm dsh resume [STATE]` | 根据 durable state 计算可恢复动作 | 只读，不自动执行远端副作用 |
 | `pnpm dsh why-blocked` | 解释需要单独授权或现场证据的阻断项 | 只读 |
 | `pnpm dsh retry` | 输出需要 state path 和幂等键的重试边界 | 不执行远端副作用 |
-| `pnpm dsh rollback` | 输出现场回退入口 | 实际回退必须使用 `deploy/wsl/rollback-release.sh` 和已记录 receipt |
+| `pnpm dsh rollback` | 输出现场回退入口 | 实际回退必须使用 `deploy/wsl/rollback-release.sh`、同一 `RELEASE_STATE_PATH` 和已记录 receipt |
 
 ## release 参数和配置优先级
 
@@ -48,6 +51,8 @@
 allowlist 之外的文件不会进入包。`.map`、测试构建残留、`.env`、凭据、cookie、日志、缓存、DuckDB/WAL、SQLite 临时文件、`.git` 和符号链接会被拒绝或排除。打包后 receiver 重新枚举目录、核对 manifest payload 的路径/字节数/SHA-256，并再次执行 secret scan。
 
 本页和 `docs/architecture/` 下的说明属于仓库维护文档，当前 allowlist 不把这两个目录加入 source artifact；运行时接收以 manifest、runtime bundle 和 allowlist 为准。
+
+正式 preflight 输出目录的 `release-preflight.json` 还记录 `stage_timings`、`tthw_ms`、`retry_count` 和 `evidence_coverage`。这些字段用于从同一候选证据回放阶段耗时和 PASS/NOT_RUN 覆盖；它们不把未运行的 WSL2、host HTTP 或真实数据验证标成通过。
 
 ## 接收边界
 

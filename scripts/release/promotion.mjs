@@ -15,6 +15,10 @@ const EVIDENCE_SCHEMA = fileURLToPath(new URL('./schemas/ci-evidence-index.v1.sc
 const RUNTIME_RECEIVER = fileURLToPath(new URL('./secure-runtime-unpack.py', import.meta.url));
 const execFile = promisify(execFileCallback);
 function assertTag(tag) { if (!TAG.test(tag) || tag.includes('..')) throw new Error('RELEASE_TAG_INVALID'); }
+function requireStatePath(statePath) {
+  if (typeof statePath !== 'string' || !statePath.trim()) throw new Error('RELEASE_STATE_PATH_REQUIRED');
+  return resolve(statePath);
+}
 function releasePath(root, tag) {
   assertTag(tag); const base = resolve(root, 'releases'); const target = resolve(base, tag);
   if (target !== base && !target.startsWith(`${base}/`)) throw new Error('RELEASE_PATH_INVALID');
@@ -158,6 +162,7 @@ export async function materializePluginPeerLinks(staging) {
 }
 
 export async function installRelease({ artifact, upstreamRuntimeArtifact = null, manifestPath, releaseRoot, tag, statePath, owner = 'shinemage-dsh', restartDependency = 'shinemage-dsh.service', publicationPath = null, sumsPath = null, evidenceIndexPath = null, attestationBundlePath = null, runtimeAttestationBundlePath = null, repository = null, sourceRef = null, signerWorkflow = null, gh = 'gh', offline = false }) {
+  const journalPath = requireStatePath(statePath);
   assertTag(tag); const root = resolve(releaseRoot); const releases = join(root, 'releases'); const target = releasePath(root, tag);
   if (!OWNER.test(owner) || !OWNER.test(restartDependency)) throw new Error('RELEASE_OWNER_INVALID');
   await mkdir(releases, { recursive: true, mode: 0o700 });
@@ -217,12 +222,13 @@ export async function installRelease({ artifact, upstreamRuntimeArtifact = null,
     await fsyncDir(staging);
     // Rename is exclusive: never remove or replace an existing release.
     await rename(staging, target); await fsyncDir(releases);
-    if (statePath) await recordEvent(statePath, { release_tag: tag, status: 'PREPARED', path: target, source_sha: manifest.source_sha, upstream_runtime_sha256: manifest.upstream_runtime?.sha256 ?? null });
+    await recordEvent(journalPath, { release_tag: tag, status: 'PREPARED', path: target, source_sha: manifest.source_sha, upstream_runtime_sha256: manifest.upstream_runtime?.sha256 ?? null }, { allowTagChange: true });
     return { status: 'PREPARED', tag, path: target, sourceSha: manifest.source_sha };
   } catch (error) { await rm(staging, { recursive: true, force: true }); throw error; }
 }
 
 export async function activateRelease({ releaseRoot, tag, sourceSha, statePath, expectedOwner = null, expectedRestartDependency = null }) {
+  const journalPath = requireStatePath(statePath);
   assertTag(tag); if (!/^[0-9a-f]{40}$/.test(sourceSha)) throw new Error('SOURCE_SHA_INVALID');
   const root = resolve(releaseRoot);
   return withPromotionLock(root, async () => {
@@ -260,12 +266,13 @@ export async function activateRelease({ releaseRoot, tag, sourceSha, statePath, 
   const completedAt = new Date().toISOString();
   await writeFileAtomic(join(target, 'active.json'), JSON.stringify({ tag, source_sha: sourceSha, activated_at: completedAt }, null, 2) + '\n');
   await writeReceipt(root, { schema_version: 'promotion-receipt/v1', release_tag: tag, status: 'ACTIVE', source_sha: sourceSha, started_at: completedAt, completed_at: completedAt });
-  if (statePath) await recordEvent(statePath, { release_tag: tag, status: 'ACTIVE', previous, source_sha: sourceSha });
+  await recordEvent(journalPath, { release_tag: tag, status: 'ACTIVE', previous, source_sha: sourceSha }, { allowTagChange: true });
   return { status: 'ACTIVE', tag, previous, current: target };
   });
 }
 
 export async function rollbackRelease({ releaseRoot, statePath, expectedOwner = null, expectedRestartDependency = null }) {
+  const journalPath = requireStatePath(statePath);
   const root = resolve(releaseRoot);
   return withPromotionLock(root, async () => {
   const current = join(root, 'current');
@@ -295,7 +302,7 @@ export async function rollbackRelease({ releaseRoot, statePath, expectedOwner = 
   await replaceSymlink(current, target); await writeFileAtomic(join(root, 'current-target'), `${target}\n`);
   const completedAt = new Date().toISOString();
   await writeReceipt(root, { schema_version: 'promotion-receipt/v1', release_tag: marker.tag, status: 'ROLLED_BACK', source_sha: marker.source_sha, started_at: completedAt, completed_at: completedAt });
-  if (statePath) await recordEvent(statePath, { status: 'ROLLED_BACK', target, source_sha: marker.source_sha });
+  await recordEvent(journalPath, { release_tag: marker.tag, status: 'ROLLED_BACK', target, source_sha: marker.source_sha }, { allowTagChange: true });
   return { status: 'ROLLED_BACK', target };
   });
 }

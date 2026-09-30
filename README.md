@@ -2,7 +2,7 @@
 
 当前提交、版本和现役见 [STATUS](./STATUS.md)。目录、端口和检索见 [维护地图](./docs/operating/maintainer-map.md)。对话生成 HTML 的步骤见 [从对话生成 HTML 驾驶舱](./docs/operating/cockpit-native-html.md)。产品仍 PARTIAL。
 
-> 当前候选（2026-09-29）：release 分支产品 VERSION `0.19.0.0`，DSH `0.1.7-rc.2`，固定 upstream `477b4f42`。GitHub Release、杭州 artifact 安装与切换尚未执行。Mac 是开发/测试端，杭州 Windows + WSL 仍运行未切换的 RC1 checkout；当前运行事实以 [STATUS](./STATUS.md) 为准，完整生产浏览器旅程与本人 UAT 仍开放。
+> 当前事实（2026-09-30）：产品 VERSION `0.19.0.0`，DSH `0.1.7-rc.2`，固定 upstream `477b4f42`；不可变 Release `dsh-0.19.0.0-r3` 已发布，杭州 `current` 已指向 r3 并完成 loopback smoke。产品仍是 PARTIAL；浏览器/真实模型、WAL、operator gate、10x backpressure、真实业务 UAT 和回退演练仍按 [STATUS](./STATUS.md) 保持未关闭。后续发布必须从 clean reviewed commit 生成新的 immutable artifact，禁止 `git pull` 或现场编译。
 
 下方9月5–10日的决策、端口和候选追加保留为历史记录，不作为当前服务或Git HEAD。
 
@@ -45,6 +45,19 @@
 2. Node 24.19.0 已写入 `.nvmrc`。进入仓库后可运行 `nvm use`；没有 nvm 时直接用 `./scripts/dsh-dev/run.sh diagnose`，它会选择已安装的 Node 24。Python 仍要求 3.14+。本仓库没有 `.codegraph/` 时不需要初始化 CodeGraph。
 3. 端口、目录和哪份历史不要搜，见 [维护地图](./docs/operating/maintainer-map.md)。
 4. 驾驶舱怎么生成 HTML，见 [操作说明](./docs/operating/cockpit-native-html.md)。验证范围见 [当前验证入口](./docs/operating/verification.md)。完整 B0 检查命令是 `node scripts/dsh-b0/pipeline.mjs --check --python /absolute/python3.14`。
+
+### rc2 稳定交付入口
+
+在候选提交上先运行只读的 `doctor --release`，再区分本地合同和发布门禁；所有环境接收同一份 immutable artifact：
+
+```bash
+pnpm dsh doctor --release
+pnpm dsh verify --scope local
+DSH_UPSTREAM_RUNTIME_BUNDLE=/absolute/pinned/runtime.tar.zst \
+  pnpm dsh preflight --check --python /absolute/python3.14 --tag dsh-<version>-check
+```
+
+`verify --scope local` 的绿色结果只代表 synthetic 合同通过；默认 `verify` 或 `--scope release` 仍要求 WSL2/WAL、15 分钟 SLI 和 host HTTP 证据。正式 `preflight` 才会联网准备固定 runtime、构建插件并生成候选包；`doctor --release` 与 `preflight --check` 不启动服务、不读取真实 DuckDB、也不创建 artifact。
 
 插件说明、选区编辑和比赛看板的细节留在各自文档里，不放在这一节。
 

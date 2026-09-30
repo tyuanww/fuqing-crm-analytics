@@ -98,6 +98,7 @@ RELEASE_UPSTREAM_RUNTIME=/srv/shinemage/incoming/shinemage-dsh-upstream-runtime-
 RELEASE_MANIFEST=/srv/shinemage/incoming/release-manifest.v1.json \
 RELEASE_TAG=dsh-<version> \
 RELEASE_ROOT=/srv/shinemage/dsh \
+RELEASE_STATE_PATH=/srv/shinemage/dsh/release-state.json \
 RELEASE_OWNER=shinemage-dsh \
 RELEASE_RESTART_DEPENDENCY=shinemage-dsh.service \
 RELEASE_PUBLICATION=/srv/shinemage/incoming/release-publication.v1.json \
@@ -109,7 +110,7 @@ RELEASE_GITHUB_REPO=tyuanww/fuqing-crm-analytics \
 RELEASE_SOURCE_REF=refs/tags/dsh-<version> \
   deploy/wsl/install-release.sh
 
-RELEASE_ROOT=/srv/shinemage/dsh RELEASE_TAG=dsh-<version> \
+RELEASE_ROOT=/srv/shinemage/dsh RELEASE_STATE_PATH=/srv/shinemage/dsh/release-state.json RELEASE_TAG=dsh-<version> \
 RELEASE_SOURCE_SHA=<reviewed-source-sha> RELEASE_OWNER=shinemage-dsh \
 RELEASE_RESTART_DEPENDENCY=shinemage-dsh.service \
   deploy/wsl/activate-release.sh
@@ -121,6 +122,7 @@ RELEASE_RESTART_DEPENDENCY=shinemage-dsh.service \
 
 ```bash
 RELEASE_ROOT=/srv/shinemage/dsh \
+RELEASE_STATE_PATH=/srv/shinemage/dsh/release-state.json \
 RELEASE_OWNER=shinemage-dsh \
 RELEASE_RESTART_DEPENDENCY=shinemage-dsh.service \
   deploy/wsl/rollback-release.sh

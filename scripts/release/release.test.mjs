@@ -7,7 +7,7 @@ import { createHash } from 'node:crypto';
 import test from 'node:test';
 import { collectAllowlist, packArtifact, receiveArtifact } from './artifact.mjs';
 import { issueToken, consumeToken, tokenExchangeResponse } from './auth-contract.mjs';
-import { assertPublicationAssets, assertReleaseInputs, installRelease, activateRelease, materializePluginPeerLinks, rollbackRelease } from './promotion.mjs';
+import { assertPublicationAssets, assertReleaseInputs, installRelease as installReleaseRaw, activateRelease as activateReleaseRaw, materializePluginPeerLinks, rollbackRelease as rollbackReleaseRaw } from './promotion.mjs';
 import { beginAction, finishAction, receipt } from './action-contract.mjs';
 import { verifyReviewedCommit } from './trust.mjs';
 import { writeEvidence } from './evidence.mjs';
@@ -17,6 +17,10 @@ import { scanText } from './secret-scan.mjs';
 import { releaseAssetNames, summarizePreflight, verifyPreflight, UPSTREAM_SHA } from './preflight-bundle.mjs';
 
 const fixture = () => mkdtemp(join(tmpdir(), 'dsh-release-'));
+const testStatePath = releaseRoot => join(dirname(releaseRoot), 'release-state.json');
+const installRelease = options => installReleaseRaw({ ...options, statePath: options.statePath ?? testStatePath(options.releaseRoot) });
+const activateRelease = options => activateReleaseRaw({ ...options, statePath: options.statePath ?? testStatePath(options.releaseRoot) });
+const rollbackRelease = options => rollbackReleaseRaw({ ...options, statePath: options.statePath ?? testStatePath(options.releaseRoot) });
 function sha(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function tar(path, name='VERSION', data='0.18.0.1\n') { execFileSync('python3', ['-c', `import tarfile,sys,io
 x=tarfile.TarInfo(sys.argv[2]); b=sys.argv[3].encode(); x.size=len(b); x.mode=0o600
@@ -266,6 +270,17 @@ test('promotion binds service owner and cannot activate for another owner', asyn
   await assert.rejects(()=>activateRelease({releaseRoot,tag:'dsh-test',sourceSha:'a'.repeat(40),expectedOwner:'service-a',expectedRestartDependency:'service-b.service'}),/RELEASE_RESTART_DEPENDENCY_MISMATCH/);
   const activated=await activateRelease({releaseRoot,tag:'dsh-test',sourceSha:'a'.repeat(40),expectedOwner:'service-a',expectedRestartDependency:'service-a.service'});
   assert.equal(activated.status,'ACTIVE');
+});
+
+test('promotion mutations require one durable state path', async () => {
+  const root = await fixture();
+  const archive = join(root, 'state-required.tar.gz');
+  tar(archive);
+  const manifestPath = await manifest(root, archive);
+  const releaseRoot = join(root, 'state-required-root');
+  await assert.rejects(() => installReleaseRaw({ artifact: archive, manifestPath, releaseRoot, tag: 'dsh-test', offline: true }), /RELEASE_STATE_PATH_REQUIRED/);
+  await assert.rejects(() => activateReleaseRaw({ releaseRoot, tag: 'dsh-test', sourceSha: 'a'.repeat(40) }), /RELEASE_STATE_PATH_REQUIRED/);
+  await assert.rejects(() => rollbackReleaseRaw({ releaseRoot }), /RELEASE_STATE_PATH_REQUIRED/);
 });
 
 test('promotion records the previous target and rollback restores it atomically', async () => {
