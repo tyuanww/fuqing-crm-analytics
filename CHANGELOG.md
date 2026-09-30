@@ -1,3 +1,22 @@
+## [0.20.0.0] - 2026-09-30
+
+### Added
+
+- 发布候选现在会在同一个流程中记录 readiness、阶段耗时、artifact 摘要、接收结果和证据索引，便于从本地候选追踪到远端验收。
+- 增加固定 runtime 的 side-by-side 安装、插件 peer link 物化、原子激活与回退状态记录，保留失败尝试并支持安全重试。
+
+### Changed
+
+- `pnpm dsh preflight` 统一使用固定 Node/pnpm/Python、上游 SHA 和 runtime 合同，并在 prepare、build、runtime、release、test、receive、evidence 阶段输出可归因状态。
+- release readiness、promotion journal、远端 reconcile 和 evidence 校验共享同一发布状态边界；候选包继续以不可变 manifest、SHA256SUMS 和受保护发布证据为输入。
+- Quickstart 和 release 文档明确区分本地候选、GitHub Release 与杭州现场验收，禁止用现场编译或浮动 main 代替 immutable artifact。
+
+### Fixed
+
+- 修复 preflight 在下载证据前检查 artifact、prepare checkout 环境变量泄漏、失败输出目录复用和错误 source SHA 校验问题。
+- 修复构建工具 brace-expansion 高危依赖，保持审计结果无 high/critical 漏洞。
+- 记录 r3 杭州现役、回退和 sidecar 边界，避免把局部 smoke 或 synthetic 结果误报为完整生产 UAT。
+
 ## [0.19.0.0] - 2026-09-29
 
 ### Added
@@ -15,6 +34,8 @@
 
 - 修复页面切换草稿泄漏、嵌套映射、属性值含 `>`、CSS 字符串含 `}`、超大选区和动态 Canvas/SVG 等边界问题。
 - 修复绑定页省略编辑来源时仍可改写 HTML/JS/资源/映射、vendor 包 secret assignment 漏扫，以及 emoji 前置导致的源码范围偏移。
+- 修复发布预检查读取不同上游 checkout、错误 source SHA 可通过、runtime 任意文件误通过和失败残留阻塞重试等问题；失败尝试保留独立证据目录，不覆盖候选。
+- 统一 release/dsh-dev 入口从 `toolchain.json` 读取上游 pin、SDK 版本和 Node/pnpm 合同；artifact SHA-256 改为流式计算，promotion journal 在外部状态变更前记录 intent。
 
 ## [0.18.0.2] - 2026-09-27
 

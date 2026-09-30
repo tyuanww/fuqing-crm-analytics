@@ -254,3 +254,13 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 ## Completed
 
 - [x] 视觉与状态恢复增量进入 4325/18083；五库新备份恢复及浏览器重开通过，[快速 canary DEGRADED](PRODUCT-CANDIDATE-SWITCH-2026-09-10.md)保留既有 B0 404。**Completed:** 2026-09-10
+
+## 2026-09-30 rc2 DX triage follow-up
+
+以下任务来自 `docs/plans/dsh-rc2-environment-promotion.md` 的 DevEx TRIAGE 评审，先登记，不把未实现项写成已完成：
+
+- [x] **DX1 (P1, IMPLEMENTED — local docs PASS)** — 统一 README、`docs/README.md` 与 rc2 Quickstart 的事实和安装入口；以 STATUS/closeout 为 SSOT，明确 Node24、Python3.14、immutable artifact、禁止 `git pull`/现场编译。证据：`README.md`、`docs/README.md`、`docs/operating/dsh-rc2-quickstart.md`；`git diff --check` 通过。杭州/新 Release 仍按现场门禁，未在本项宣称完成。
+- [x] **DX2 (P1, IMPLEMENTED — readiness synthetic PASS / release BLOCKED)** — 增加只读 `pnpm dsh doctor --release` 分层检查；覆盖 Node/pnpm/Python、clean tree、zstd、固定 upstream、插件入口、runtime bundle、evidence 目录、磁盘和版本 pin。证据：`scripts/release/readiness.mjs`、`scripts/release/cli.test.mjs`；缺 runtime/dirty tree 返回稳定错误码，未联网、未读真实 DuckDB、未生成 artifact。
+- [x] **DX3 (P1, IMPLEMENTED — local PASS / release BLOCKED)** — 增加 `pnpm dsh verify --scope local|release`；local 只报告本地合同与 synthetic 证据，默认/release 继续 fail-closed 要求 WSL2/WAL、15 分钟 SLI 和 host HTTP。证据：`scripts/release/cli.test.mjs`；`verify --scope local` 返回 0，release scope 返回 2。
+- [x] **DX4 (P1, IMPLEMENTED — check PASS/blocked; formal build NOT_RUN)** — 为真实 `pnpm dsh preflight` 增加 `--check`、prepare/build/runtime/release/test/receive/evidence 阶段事件、产物路径和稳定错误码。证据：`scripts/release/preflight.mjs`、`scripts/release/readiness.mjs`、`scripts/release/cli.test.mjs`；环境错误在联网构建前暴露。正式联网构建、WSL2 和远端证据仍 `NOT_RUN`。
+- [x] **DX5 (P2, IMPLEMENTED — synthetic evidence PASS; formal run NOT_RUN)** — 在 `release-preflight.json` 中记录 TTHW、阶段耗时、阻断原因、重试次数和 PASS/PARTIAL/NOT_RUN 覆盖；阶段失败仍保留稳定错误码日志。证据：`scripts/release/preflight-bundle.mjs`、`scripts/release/preflight.mjs`；正式联网 candidate 的实际 12–25 分钟时钟和远端阻断阶段仍 `NOT_RUN`。

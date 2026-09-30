@@ -1,8 +1,8 @@
-import { access, mkdir, open, readFile, rename, rm, symlink, lstat, readlink, stat } from 'node:fs/promises';
+import { access, mkdir, open, readFile, readdir, rename, rm, symlink, lstat, readlink, stat } from 'node:fs/promises';
 import { randomBytes } from 'node:crypto';
-import { basename, dirname, join, resolve } from 'node:path';
+import { basename, dirname, join, relative, resolve } from 'node:path';
 import { receiveArtifact, sha256 } from './artifact.mjs';
-import { recordEvent } from './state.mjs';
+import { readState, recordEvent } from './state.mjs';
 import { assertSchema } from './schema.mjs';
 import { assertDeploymentTrust, verifyAttestationBundle, verifyGitHubEnvironmentApproval, verifyGitHubRelease, verifyPublicationRecord } from './trust.mjs';
 import { fileURLToPath } from 'node:url';
@@ -15,6 +15,10 @@ const EVIDENCE_SCHEMA = fileURLToPath(new URL('./schemas/ci-evidence-index.v1.sc
 const RUNTIME_RECEIVER = fileURLToPath(new URL('./secure-runtime-unpack.py', import.meta.url));
 const execFile = promisify(execFileCallback);
 function assertTag(tag) { if (!TAG.test(tag) || tag.includes('..')) throw new Error('RELEASE_TAG_INVALID'); }
+function requireStatePath(statePath) {
+  if (typeof statePath !== 'string' || !statePath.trim()) throw new Error('RELEASE_STATE_PATH_REQUIRED');
+  return resolve(statePath);
+}
 function releasePath(root, tag) {
   assertTag(tag); const base = resolve(root, 'releases'); const target = resolve(base, tag);
   if (target !== base && !target.startsWith(`${base}/`)) throw new Error('RELEASE_PATH_INVALID');
@@ -25,6 +29,10 @@ async function replaceSymlink(link, target) { const temp = `${link}.next-${proce
 async function writeFileAtomic(path, value) { const temp = `${path}.tmp-${process.pid}`; const handle = await open(temp, 'wx', 0o600); try { await handle.writeFile(value); await handle.sync(); } finally { await handle.close(); } await rename(temp, path); await fsyncDir(dirname(path)); }
 async function writeMarker(dir, value) { const path = join(dir, 'release-marker.json'); const handle = await open(path, 'wx', 0o600); try { await handle.writeFile(JSON.stringify(value, null, 2) + '\n'); await handle.sync(); } finally { await handle.close(); } }
 async function readJson(path) { return JSON.parse(await readFile(path, 'utf8')); }
+async function journalHas(path, predicate) {
+  const state = await readState(path);
+  return state.journal.some(predicate);
+}
 
 function processIsAlive(pid) {
   if (!Number.isInteger(pid) || pid <= 0) return false;
@@ -42,8 +50,11 @@ async function withPromotionLock(root, fn) {
   } catch (error) {
     if (error.code !== 'EEXIST') throw error;
     try {
+      const before = await lstat(lock);
       const owner = JSON.parse(await readFile(lock, 'utf8'));
       if (processIsAlive(owner.pid)) throw new Error('PROMOTION_LOCKED');
+      const after = await lstat(lock);
+      if (before.dev !== after.dev || before.ino !== after.ino || before.mtimeMs !== after.mtimeMs || before.size !== after.size) throw new Error('PROMOTION_LOCKED');
       await rm(lock);
       handle = await open(lock, 'wx', 0o600);
       await handle.writeFile(JSON.stringify({ pid: process.pid, nonce }) + '\n');
@@ -106,7 +117,59 @@ async function receiveRuntimeArtifact({ artifact, destination }) {
   return stdout.trim();
 }
 
+/**
+ * Bind source plugins to the peer package closure shipped in the adjacent
+ * immutable runtime. Source artifacts deliberately exclude node_modules;
+ * without this derived link a peer-only plugin cannot resolve dsh-tools on a
+ * clean host. The link is relative and stays inside the prepared release.
+ */
+export async function materializePluginPeerLinks(staging) {
+  const runtimePeers = join(staging, 'upstream/node_modules/.pnpm/node_modules/@deepseek-ai');
+  const pluginsRoot = join(staging, 'dsh-plugins');
+  const entries = await access(pluginsRoot).then(() => readdir(pluginsRoot, { withFileTypes: true }), error => {
+    if (error.code === 'ENOENT') return [];
+    throw error;
+  });
+  const linked = [];
+  let runtimeChecked = false;
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    const plugin = join(pluginsRoot, entry.name);
+    let packageJson;
+    try { packageJson = JSON.parse(await readFile(join(plugin, 'package.json'), 'utf8')); }
+    catch (error) { if (error.code === 'ENOENT') continue; throw new Error(`RELEASE_PLUGIN_PACKAGE_INVALID ${entry.name}`); }
+    if (!packageJson.peerDependencies || typeof packageJson.peerDependencies !== 'object'
+      || !Object.keys(packageJson.peerDependencies).some(name => name.startsWith('@deepseek-ai/'))) continue;
+    if (!runtimeChecked) {
+      const runtimeInfo = await lstat(runtimePeers).catch(error => {
+        if (error.code === 'ENOENT') return null;
+        throw error;
+      });
+      if (!runtimeInfo?.isDirectory()) throw new Error('RELEASE_RUNTIME_PEER_ROOT_MISSING');
+      runtimeChecked = true;
+    }
+    const nodeModules = join(plugin, 'node_modules');
+    await mkdir(nodeModules, { recursive: true, mode: 0o700 });
+    const scope = join(nodeModules, '@deepseek-ai');
+    const target = relative(dirname(scope), runtimePeers);
+    const existing = await lstat(scope).catch(error => {
+      if (error.code === 'ENOENT') return null;
+      throw error;
+    });
+    if (existing) {
+      if (!existing.isSymbolicLink() || resolve(dirname(scope), await readlink(scope)) !== resolve(runtimePeers)) {
+        throw new Error(`RELEASE_PLUGIN_PEER_LINK_COLLISION ${entry.name}`);
+      }
+    } else {
+      await symlink(target, scope, 'dir');
+    }
+    linked.push({ plugin: entry.name, target });
+  }
+  return { count: linked.length, links: linked };
+}
+
 export async function installRelease({ artifact, upstreamRuntimeArtifact = null, manifestPath, releaseRoot, tag, statePath, owner = 'shinemage-dsh', restartDependency = 'shinemage-dsh.service', publicationPath = null, sumsPath = null, evidenceIndexPath = null, attestationBundlePath = null, runtimeAttestationBundlePath = null, repository = null, sourceRef = null, signerWorkflow = null, gh = 'gh', offline = false }) {
+  const journalPath = requireStatePath(statePath);
   assertTag(tag); const root = resolve(releaseRoot); const releases = join(root, 'releases'); const target = releasePath(root, tag);
   if (!OWNER.test(owner) || !OWNER.test(restartDependency)) throw new Error('RELEASE_OWNER_INVALID');
   await mkdir(releases, { recursive: true, mode: 0o700 });
@@ -155,22 +218,35 @@ export async function installRelease({ artifact, upstreamRuntimeArtifact = null,
     trust = { ...trust, approval_status: approval.status, provenance_status: 'VERIFIED', runtime_provenance_status: runtimeAttestation?.status ?? 'NOT_REQUIRED', live_release_status: liveRelease.status };
     assertDeploymentTrust(trust);
   }
-  if (await access(target).then(() => true, () => false)) throw new Error('RELEASE_EXISTS');
+  if (await access(target).then(() => true, () => false)) {
+    const marker = await readJson(join(target, 'release-marker.json')).catch(() => null);
+    const pending = marker?.tag === tag && marker?.source_sha === manifest.source_sha
+      && await journalHas(journalPath, entry => entry.status === 'PREPARE_INTENT' && entry.release_tag === tag && entry.source_sha === manifest.source_sha)
+      && !await journalHas(journalPath, entry => entry.status === 'PREPARED' && entry.release_tag === tag && entry.source_sha === manifest.source_sha);
+    if (pending) {
+      await recordEvent(journalPath, { release_tag: tag, status: 'PREPARED', path: target, source_sha: manifest.source_sha, upstream_runtime_sha256: manifest.upstream_runtime?.sha256 ?? null, reconciled: true }, { allowTagChange: true });
+      return { status: 'PREPARED', tag, path: target, sourceSha: manifest.source_sha, idempotent: true };
+    }
+    throw new Error('RELEASE_EXISTS');
+  }
   const staging = join(releases, `.incoming-${tag}-${process.pid}-${Date.now()}`);
   try {
     const received = await receiveArtifact({ artifact, manifestPath, destination: staging });
     let runtimeReceipt = null;
     if (manifest.upstream_runtime) runtimeReceipt = await receiveRuntimeArtifact({ artifact: upstreamRuntimeArtifact, destination: join(staging, 'upstream') });
-    await writeMarker(staging, { tag, source_sha: manifest.source_sha, artifact_sha256: received.sha256, upstream_runtime: manifest.upstream_runtime ?? null, upstream_path: manifest.upstream_runtime ? 'upstream' : null, runtime_unpack: runtimeReceipt, owner, restart_dependency: restartDependency, publication_status: trust?.status ?? 'NOT_CHECKED', provenance_status: trust?.provenance_status ?? 'NOT_AVAILABLE', state: 'PREPARED', prepared_at: new Date().toISOString() });
+    const pluginPeerLinks = manifest.upstream_runtime ? await materializePluginPeerLinks(staging) : null;
+    await writeMarker(staging, { tag, source_sha: manifest.source_sha, artifact_sha256: received.sha256, upstream_runtime: manifest.upstream_runtime ?? null, upstream_path: manifest.upstream_runtime ? 'upstream' : null, runtime_unpack: runtimeReceipt, plugin_peer_links: pluginPeerLinks, owner, restart_dependency: restartDependency, publication_status: trust?.status ?? 'NOT_CHECKED', provenance_status: trust?.provenance_status ?? 'NOT_AVAILABLE', state: 'PREPARED', prepared_at: new Date().toISOString() });
     await fsyncDir(staging);
+    await recordEvent(journalPath, { release_tag: tag, status: 'PREPARE_INTENT', path: target, source_sha: manifest.source_sha, upstream_runtime_sha256: manifest.upstream_runtime?.sha256 ?? null }, { allowTagChange: true });
     // Rename is exclusive: never remove or replace an existing release.
     await rename(staging, target); await fsyncDir(releases);
-    if (statePath) await recordEvent(statePath, { release_tag: tag, status: 'PREPARED', path: target, source_sha: manifest.source_sha, upstream_runtime_sha256: manifest.upstream_runtime?.sha256 ?? null });
+    await recordEvent(journalPath, { release_tag: tag, status: 'PREPARED', path: target, source_sha: manifest.source_sha, upstream_runtime_sha256: manifest.upstream_runtime?.sha256 ?? null }, { allowTagChange: true });
     return { status: 'PREPARED', tag, path: target, sourceSha: manifest.source_sha };
   } catch (error) { await rm(staging, { recursive: true, force: true }); throw error; }
 }
 
 export async function activateRelease({ releaseRoot, tag, sourceSha, statePath, expectedOwner = null, expectedRestartDependency = null }) {
+  const journalPath = requireStatePath(statePath);
   assertTag(tag); if (!/^[0-9a-f]{40}$/.test(sourceSha)) throw new Error('SOURCE_SHA_INVALID');
   const root = resolve(releaseRoot);
   return withPromotionLock(root, async () => {
@@ -192,28 +268,39 @@ export async function activateRelease({ releaseRoot, tag, sourceSha, statePath, 
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
   }
-  try {
-    const currentStat = await lstat(current);
-    if (currentStat.isSymbolicLink()) {
-      const linked = resolve(await readlink(current));
-      if (linked === target) return { status: 'ACTIVE', tag, previous, current: target, idempotent: true };
-    }
+    try {
+      const currentStat = await lstat(current);
+      if (currentStat.isSymbolicLink()) {
+        const linked = resolve(await readlink(current));
+      if (linked === target) {
+        const committed = await journalHas(journalPath, entry => entry.status === 'ACTIVE' && entry.release_tag === tag && entry.source_sha === sourceSha);
+        const pending = !committed && await journalHas(journalPath, entry => entry.status === 'ACTIVE_INTENT' && entry.release_tag === tag && entry.source_sha === sourceSha);
+        if (pending) {
+          await recordEvent(journalPath, { release_tag: tag, status: 'ACTIVE', previous, source_sha: sourceSha, reconciled: true }, { allowTagChange: true });
+          return { status: 'ACTIVE', tag, previous, current: target, idempotent: true, reconciled: true };
+        }
+        if (committed) return { status: 'ACTIVE', tag, previous, current: target, idempotent: true };
+        throw new Error('RELEASE_ACTIVE_STATE_MISSING');
+      }
+      }
   } catch (error) { if (error.code !== 'ENOENT') throw error; }
   if (previous) {
     const releases = resolve(root, 'releases'); const prevResolved = resolve(previous);
     if (!prevResolved.startsWith(`${releases}/`)) throw new Error('ROLLBACK_TARGET_INVALID');
     await writeFileAtomic(join(root, 'rollback-target.json'), JSON.stringify({ target: prevResolved, recorded_at: new Date().toISOString() }, null, 2) + '\n');
   }
+  await recordEvent(journalPath, { release_tag: tag, status: 'ACTIVE_INTENT', previous, source_sha: sourceSha }, { allowTagChange: true });
   await replaceSymlink(current, target); await writeFileAtomic(join(root, 'current-target'), `${target}\n`);
   const completedAt = new Date().toISOString();
   await writeFileAtomic(join(target, 'active.json'), JSON.stringify({ tag, source_sha: sourceSha, activated_at: completedAt }, null, 2) + '\n');
   await writeReceipt(root, { schema_version: 'promotion-receipt/v1', release_tag: tag, status: 'ACTIVE', source_sha: sourceSha, started_at: completedAt, completed_at: completedAt });
-  if (statePath) await recordEvent(statePath, { release_tag: tag, status: 'ACTIVE', previous, source_sha: sourceSha });
+  await recordEvent(journalPath, { release_tag: tag, status: 'ACTIVE', previous, source_sha: sourceSha }, { allowTagChange: true });
   return { status: 'ACTIVE', tag, previous, current: target };
   });
 }
 
 export async function rollbackRelease({ releaseRoot, statePath, expectedOwner = null, expectedRestartDependency = null }) {
+  const journalPath = requireStatePath(statePath);
   const root = resolve(releaseRoot);
   return withPromotionLock(root, async () => {
   const current = join(root, 'current');
@@ -230,20 +317,28 @@ export async function rollbackRelease({ releaseRoot, statePath, expectedOwner = 
   const previous = rollbackRecord.target;
   const releases = resolve(root, 'releases'); const target = resolve(previous);
   if (!target.startsWith(`${releases}/`) || target === releases) throw new Error('ROLLBACK_TARGET_INVALID');
-  if (currentTarget === target) {
-    const marker = await readJson(join(target, 'release-marker.json'));
-    return { status: 'ROLLED_BACK', target, idempotent: true, releaseTag: marker.tag };
-  }
   const targetStat = await lstat(target); if (!targetStat.isDirectory()) throw new Error('ROLLBACK_TARGET_INVALID');
   const marker = await readJson(join(target, 'release-marker.json'));
+  assertTag(marker.tag);
   if (!/^[0-9a-f]{40}$/.test(marker.source_sha)) throw new Error('ROLLBACK_SOURCE_INVALID');
   if (!OWNER.test(marker.owner ?? '') || !OWNER.test(marker.restart_dependency ?? '')) throw new Error('RELEASE_OWNER_MISSING');
   if (expectedOwner !== null && marker.owner !== expectedOwner) throw new Error('RELEASE_OWNER_MISMATCH');
   if (expectedRestartDependency !== null && marker.restart_dependency !== expectedRestartDependency) throw new Error('RELEASE_RESTART_DEPENDENCY_MISMATCH');
+  if (currentTarget === target) {
+    const committed = await journalHas(journalPath, entry => entry.status === 'ROLLED_BACK' && entry.release_tag === marker.tag && entry.source_sha === marker.source_sha);
+    const pending = !committed && await journalHas(journalPath, entry => entry.status === 'ROLLBACK_INTENT' && entry.release_tag === marker.tag && entry.source_sha === marker.source_sha);
+    if (pending) {
+      await recordEvent(journalPath, { release_tag: marker.tag, status: 'ROLLED_BACK', target, source_sha: marker.source_sha, reconciled: true }, { allowTagChange: true });
+      return { status: 'ROLLED_BACK', target, idempotent: true, releaseTag: marker.tag, reconciled: true };
+    }
+    if (committed) return { status: 'ROLLED_BACK', target, idempotent: true, releaseTag: marker.tag };
+    throw new Error('RELEASE_ROLLBACK_STATE_MISSING');
+  }
+  await recordEvent(journalPath, { release_tag: marker.tag, status: 'ROLLBACK_INTENT', target, source_sha: marker.source_sha }, { allowTagChange: true });
   await replaceSymlink(current, target); await writeFileAtomic(join(root, 'current-target'), `${target}\n`);
   const completedAt = new Date().toISOString();
   await writeReceipt(root, { schema_version: 'promotion-receipt/v1', release_tag: marker.tag, status: 'ROLLED_BACK', source_sha: marker.source_sha, started_at: completedAt, completed_at: completedAt });
-  if (statePath) await recordEvent(statePath, { status: 'ROLLED_BACK', target, source_sha: marker.source_sha });
+  await recordEvent(journalPath, { release_tag: marker.tag, status: 'ROLLED_BACK', target, source_sha: marker.source_sha }, { allowTagChange: true });
   return { status: 'ROLLED_BACK', target };
   });
 }

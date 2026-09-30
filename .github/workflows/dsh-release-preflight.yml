@@ -42,6 +42,12 @@ jobs:
         with:
           node-version: '24.19.0'
           package-manager-cache: false
+      - name: Activate the pinned package manager
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack install --global pnpm@11.7.0
+          test "$(pnpm --version)" = "11.7.0"
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         id: python
         with:

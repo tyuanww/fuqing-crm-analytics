@@ -1,4 +1,12 @@
-# rc2 候选验证记录（2026-09-29，0.19.0.0 release 与 HTML 编辑候选）
+# rc2 候选验证记录（历史快照 2026-09-29，0.19.0.0 release 与 HTML 编辑候选）
+
+> 2026-09-30 更新：下方表格保留为不可回写的历史快照。当前 r3 Release、CI、杭州安装和未关闭风险见 [r3 收尾记录](closeout-20260930.md)。
+
+## 当前 2026-09-30 结论
+
+`dsh-0.19.0.0-r3` 已是 immutable GitHub Release（source `32abb00b…`，DSH upstream `477b4f42…`），preflight/protected evidence/publication workflow 均成功；杭州 `current` 指向 r3，DSH systemd active，DSH 未认证返回 401，CRM health 200，B0 page runtime 为 Python 3.14.4 + DuckDB 1.5.6。真实 131GB DuckDB 未读取。
+
+这一事实不等于 T1–T13 全部关闭：r3 的 production durable journal 仍停在旧 r1，peer-link 自动生成修复尚未进入 r3 immutable 包，CRM/Python sidecar 未作为 GitHub Release asset，浏览器 UAT、WAL、operator/10x、回退演练和真实业务仍 `PARTIAL/NOT_RUN`。完整证据见 [r3 收尾记录](closeout-20260930.md)。
 
 此文件取代早期候选的过时记录；0.18.0.2 资产与 pre-review 包只作为历史证据，不能替代本候选的 reviewed artifact。
 

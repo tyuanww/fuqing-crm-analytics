@@ -9,6 +9,8 @@ import { assertSchema } from './release/schema.mjs';
 import { verifyPayload } from './release/artifact.mjs';
 import { readState, reconcileState, resume } from './release/state.mjs';
 import { runLocalVerification } from './release/local-verify.mjs';
+import { collectReleaseReadiness, printReadiness } from './release/readiness.mjs';
+import { DSH_UPSTREAM_SHA, NODE_MAJOR, PNPM_VERSION } from './release/toolchain.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const releaseEvidence = join(root, '.context/release-evidence');
@@ -18,28 +20,42 @@ function usage() {
 
 Commands: ${COMMANDS.join(', ')}
 Global options: --help, --version
+doctor --release is a read-only release-readiness check; verify --scope local|release selects local or release evidence.
 Release preparation is offline by default only with --offline/--dry-run; remote publish is a separate authorized action.
 Exit codes: 0=success, 2=usage/error/release-gate-blocked.`);
 }
 async function printVersion() {
   const version = (await readFile(join(root, 'VERSION'), 'utf8')).trim();
-  console.log(`DSH_VERSION ${version} upstream=477b4f420553e8a52c2fbccc464d7561b239c443`);
+  console.log(`DSH_VERSION ${version} upstream=${DSH_UPSTREAM_SHA}`);
 }
 function git(args) {
   try { return execFileSync('git', ['-C', root, ...args], { encoding: 'utf8' }).trim(); }
   catch (error) { throw new Error(`RELEASE_GIT_UNAVAILABLE ${String(error?.message ?? error).split('\n')[0]}`); }
 }
-async function doctor() {
-  const version = (await readFile(join(root, 'VERSION'), 'utf8')).trim(); const pin = '477b4f420553e8a52c2fbccc464d7561b239c443';
+async function doctor(args = [], { setExitCode = true } = {}) {
+  if (args.includes('--help') || args.includes('-h')) {
+    console.log('Usage: pnpm dsh doctor [--release]');
+    console.log('Default checks are lightweight; --release adds read-only toolchain, clean-tree, runtime and output checks.');
+    return true;
+  }
+  if (args.some(arg => arg !== '--release')) throw new Error(`DOCTOR_OPTION_UNKNOWN ${args.find(arg => arg !== '--release')}`);
+  const releaseMode = args.includes('--release');
+  const version = (await readFile(join(root, 'VERSION'), 'utf8')).trim(); const pin = DSH_UPSTREAM_SHA;
   const checks = [
-    ['node24', Number(process.versions.node.split('.')[0]) === 24, process.versions.node],
+    [`node${NODE_MAJOR}`, Number(process.versions.node.split('.')[0]) === NODE_MAJOR, process.versions.node],
     ['version', /^\d+\.\d+\.\d+\.\d+$/.test(version), version],
-    ['rc2-pin', (await readFile(join(root, 'scripts/dsh-dev/constants.mjs'), 'utf8')).includes(pin), pin],
+    ['rc2-pin', /^[0-9a-f]{40}$/.test(pin), pin],
     ['release-schemas', await access(join(root, 'scripts/release/schemas/release-manifest.v1.schema.json')).then(() => true).catch(() => false), 'present'],
   ];
   for (const [name, ok, value] of checks) console.log(`DSH_DOCTOR ${ok ? 'PASS' : 'FAIL'} ${name}=${value}`);
-  if (checks.some(([, ok]) => !ok)) process.exitCode = 2;
-  return checks.every(([, ok]) => ok);
+  let ok = checks.every(([, value]) => value);
+  if (releaseMode) {
+    const readiness = await collectReleaseReadiness({ root, requireClean: true, requireRuntime: true });
+    ok = printReadiness(readiness) && ok;
+    console.log(`DSH_DOCTOR_RELEASE_STATUS ${ok ? 'PASS' : 'BLOCKED'} scope=release-readiness`);
+  }
+  if (setExitCode && !ok) process.exitCode = 2;
+  return ok;
 }
 async function release(args) {
   if (args.includes('--help') || args.includes('-h')) {
@@ -71,7 +87,7 @@ async function release(args) {
   const status = git(['status', '--porcelain', '--untracked-files=all']);
   if (status) throw new Error('RELEASE_BLOCKED_DIRTY_WORKTREE reviewed commit must be clean; use a clean CI checkout to build the immutable artifact');
   const sourceSha = git(['rev-parse', 'HEAD']); const version = (await readFile(join(root, 'VERSION'), 'utf8')).trim();
-  const upstreamSha = '477b4f420553e8a52c2fbccc464d7561b239c443';
+  const upstreamSha = DSH_UPSTREAM_SHA;
   const runtimeInput = process.env.DSH_UPSTREAM_RUNTIME_BUNDLE;
   if (!runtimeInput) throw new Error('RELEASE_UPSTREAM_RUNTIME_REQUIRED');
   const runtimeInfo = await stat(runtimeInput).catch(() => null);
@@ -94,7 +110,7 @@ async function release(args) {
   const pre = await buildPreManifest({ releaseTag: tag, productVersion: version, sourceSha, dshUpstreamSha: upstreamSha, artifacts: [{ name: `${tag}.tar.zst`, role: 'source-bundle', path: `${tag}.tar.zst` }, { name: runtimeName, role: 'upstream-runtime-bundle', path: runtimeName }], output: join(dir, 'pre-manifest.v1.json') });
   const prePath = join(dir, 'pre-manifest.v1.json'); const preSha = await sha256(prePath);
   const bundle = await packArtifact({ rootDir: root, allowlist: pre.archive_allowlist, output: join(dir, `${tag}.tar.zst`) });
-  const manifest = { schema_version: 'release-manifest/v1', release_tag: tag, product_version: version, source_sha: sourceSha, dsh_upstream_sha: upstreamSha, pre_manifest_sha256: preSha, archive_allowlist: pre.archive_allowlist, denylist_version: 'release-denylist/v1', build_time: new Date().toISOString(), retention_until: 'NOT_SET_UNTIL_PUBLISHED', toolchain: { node: process.versions.node, pnpm: '11.7.0' }, artifact_bytes: bundle.bytes, artifact_sha256: bundle.sha256, upstream_runtime: { name: runtimeName, role: 'upstream-runtime-bundle', upstream_sha: upstreamSha, bytes: runtimeBytes, sha256: runtimeSha256 },
+  const manifest = { schema_version: 'release-manifest/v1', release_tag: tag, product_version: version, source_sha: sourceSha, dsh_upstream_sha: upstreamSha, pre_manifest_sha256: preSha, archive_allowlist: pre.archive_allowlist, denylist_version: 'release-denylist/v1', build_time: new Date().toISOString(), retention_until: 'NOT_SET_UNTIL_PUBLISHED', toolchain: { node: process.versions.node, pnpm: PNPM_VERSION }, artifact_bytes: bundle.bytes, artifact_sha256: bundle.sha256, upstream_runtime: { name: runtimeName, role: 'upstream-runtime-bundle', upstream_sha: upstreamSha, bytes: runtimeBytes, sha256: runtimeSha256 },
     payload: await Promise.all(pre.archive_allowlist.map(async path => ({ path, role: 'runtime-source', bytes: (await stat(join(root, path))).size, sha256: await sha256(join(root, path)) }))) };
   await assertSchema(manifest, join(root, 'scripts/release/schemas/release-manifest.v1.schema.json'));
   const manifestPath = join(dir, 'release-manifest.v1.json'); await writeFile(manifestPath, JSON.stringify(manifest, null, 2) + '\n', { mode: 0o600 });
@@ -135,12 +151,29 @@ async function receive(args) {
 }
 async function test() { const tests = readdirSync(join(root, 'scripts/release')).filter(name => name.endsWith('.test.mjs')).map(name => join('scripts/release', name)); return execFileSync(process.execPath, ['--test', ...tests], { cwd: root, encoding: 'utf8', stdio: 'inherit' }); }
 async function preflight(args) { return execFileSync(process.execPath, [join(root, 'scripts/release/preflight.mjs'), ...args], { cwd: root, encoding: 'utf8', stdio: 'inherit' }); }
-async function verify() {
-  await doctor();
+async function verify(args = []) {
+  const scopeIndex = args.indexOf('--scope');
+  const scope = scopeIndex >= 0 ? args[scopeIndex + 1] : 'release';
+  if (scopeIndex >= 0 && (!scope || scope.startsWith('--'))) throw new Error('VERIFY_SCOPE_REQUIRED');
+  if (!['local', 'release'].includes(scope)) throw new Error(`VERIFY_SCOPE_INVALID ${scope}`);
+  const allowed = new Set(['--scope']);
+  for (let index = 0; index < args.length; index += 1) {
+    if (!args[index].startsWith('--')) continue;
+    if (!allowed.has(args[index])) throw new Error(`VERIFY_OPTION_UNKNOWN ${args[index]}`);
+    index += 1;
+  }
+  const doctorOk = await doctor(scope === 'release' ? ['--release'] : [], { setExitCode: false });
   const local = await runLocalVerification();
   console.log(`DSH_VERIFY_COMPAT ${local.compatibility.status} scope=${local.compatibility.scope} wsl2=${local.compatibility.wsl2} real_duckdb=${local.compatibility.real_duckdb}`);
-  console.log('DSH_VERIFY_SLI NOT_RUN reason=no 15-minute HTTP probe evidence');
   console.log(`DSH_VERIFY_BACKPRESSURE ${local.backpressure.status} scope=${local.backpressure.evidence_scope} real_http=NOT_RUN`);
+  if (scope === 'local') {
+    console.log('DSH_VERIFY_SLI NOT_APPLICABLE scope=local reason=release-only evidence');
+    const passed = doctorOk && local.compatibility.status === 'PASS' && local.backpressure.status === 'PASS';
+    console.log(`DSH_VERIFY_STATUS ${passed ? 'LOCAL_PASS' : 'LOCAL_BLOCKED'} scope=local`);
+    if (!passed) process.exitCode = 2;
+    return;
+  }
+  console.log('DSH_VERIFY_SLI NOT_RUN reason=no 15-minute HTTP probe evidence');
   console.log('DSH_VERIFY_STATUS RELEASE_BLOCKED reason=15-minute SLI, WSL2 cold runtime/WAL, and host HTTP evidence remain NOT_RUN');
   // `verify` is a release gate: synthetic local evidence does not substitute
   // for the target WSL2 runtime/WAL, 15-minute SLI, or host HTTP evidence.
@@ -151,12 +184,12 @@ async function main() {
   if (!command || command === '--help' || command === '-h') { usage(); if (!command) process.exitCode = 2; return; }
   if (command === '--version' || command === '-V') return printVersion();
   if (!COMMANDS.includes(command)) throw new Error(`DSH_COMMAND_UNKNOWN ${command}`);
-  if (command === 'doctor') return doctor();
+  if (command === 'doctor') return doctor(args);
   if (command === 'release') return release(args);
   if (command === 'preflight') return preflight(args);
   if (command === 'receive') return receive(args);
   if (command === 'test') return test();
-  if (command === 'verify') return verify();
+  if (command === 'verify') return verify(args);
   if (command === 'reconcile') {
     const statePath = args[0] || join(releaseEvidence, 'state.json');
     const remotePath = args[1];

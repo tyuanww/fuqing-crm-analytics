@@ -8,9 +8,9 @@ import { promisify } from 'node:util';
 import { dirname, join, relative, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { scanText } from './secret-scan.mjs';
+import { DSH_UPSTREAM_SHA as PIN } from './toolchain.mjs';
 
 const execFile = promisify(execFileCallback);
-const PIN = '477b4f420553e8a52c2fbccc464d7561b239c443';
 const REQUIRED = [
   'lib/bin.js',
   'node_modules/@deepseek-ai/dsh-base/lib/index.js',

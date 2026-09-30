@@ -122,17 +122,27 @@ export async function transition(path, phase, data = {}) {
   });
 }
 
-/** Append a receipt/observation while preserving the current phase. */
-export async function recordEvent(path, data = {}) {
+/**
+ * Append a receipt/observation while preserving the current phase.
+ *
+ * Publication state is intentionally single-tag and fails closed on a tag
+ * change.  The host promotion lifecycle is different: one durable journal
+ * must record an ordered sequence such as rc1 -> rc2 -> rollback -> rc2.
+ * Promotion is the only caller allowed to opt into that controlled change.
+ */
+export async function recordEvent(path, data = {}, { allowTagChange = false } = {}) {
   if (!data || typeof data !== 'object' || Array.isArray(data) || ['phase', 'event'].some(key => own(data, key))) throw new Error('RELEASE_EVENT_INVALID');
   return withLock(path, async () => {
     const state = await load(path);
+    const previousReleaseTag = state.release_tag;
+    const releaseTagChanged = data.release_tag !== undefined && state.release_tag !== null && state.release_tag !== data.release_tag;
     if (data.release_tag !== undefined) {
       if (typeof data.release_tag !== 'string' || !/^dsh-[A-Za-z0-9._-]+$/.test(data.release_tag)) throw new Error('RELEASE_STATE_TAG_INVALID');
-      if (state.release_tag !== null && state.release_tag !== data.release_tag) throw new Error('RELEASE_STATE_TAG_CONFLICT');
+      if (releaseTagChanged && allowTagChange !== true) throw new Error('RELEASE_STATE_TAG_CONFLICT');
       state.release_tag = data.release_tag;
     }
-    const entry = appendJournal(state, { phase: state.phase, event: 'OBSERVATION', ...data }); await save(path, state); return entry;
+    const event = releaseTagChanged ? { release_tag_previous: previousReleaseTag } : {};
+    const entry = appendJournal(state, { phase: state.phase, event: 'OBSERVATION', ...data, ...event }); await save(path, state); return entry;
   });
 }
 

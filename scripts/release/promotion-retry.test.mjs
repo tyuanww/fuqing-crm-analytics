@@ -19,7 +19,8 @@ async function fixture() {
   }
   return root;
 }
-const activate = (root, tag, sourceSha) => activateRelease({ releaseRoot: root, tag, sourceSha });
+const statePath = root => join(root, 'release-state.json');
+const activate = (root, tag, sourceSha) => activateRelease({ releaseRoot: root, tag, sourceSha, statePath: statePath(root) });
 const current = async root => readFile(join(root, 'current-target'), 'utf8').then(value => value.trim());
 async function receiptFiles(root) {
   const result = [];
@@ -38,7 +39,7 @@ test('A to B then B retry preserves rollback target A', async () => {
   assert.equal(first.previous, join(root, 'releases/dsh-a'));
   assert.equal(retry.idempotent, true);
   assert.equal(JSON.parse(await readFile(join(root, 'rollback-target.json'))).target, first.previous);
-  assert.deepEqual((await rollbackRelease({ releaseRoot: root })).target, first.previous);
+  assert.deepEqual((await rollbackRelease({ releaseRoot: root, statePath: statePath(root) })).target, first.previous);
   assert.equal(await current(root), first.previous);
 });
 
@@ -46,7 +47,7 @@ test('A to B to A to B reactivation creates immutable receipts', async () => {
   const root = await fixture();
   await activate(root, 'dsh-a', shaA);
   await activate(root, 'dsh-b', shaB);
-  await rollbackRelease({ releaseRoot: root });
+  await rollbackRelease({ releaseRoot: root, statePath: statePath(root) });
   await activate(root, 'dsh-b', shaB);
   assert.equal(await current(root), join(root, 'releases/dsh-b'));
   const receipts = await receiptFiles(root);
@@ -58,12 +59,21 @@ test('duplicate rollback is idempotent and preserves immutable receipts', async 
   const root = await fixture();
   await activate(root, 'dsh-a', shaA);
   await activate(root, 'dsh-b', shaB);
-  const first = await rollbackRelease({ releaseRoot: root });
+  const first = await rollbackRelease({ releaseRoot: root, statePath: statePath(root) });
   const count = (await receiptFiles(root)).length;
-  const replay = await rollbackRelease({ releaseRoot: root });
+  const replay = await rollbackRelease({ releaseRoot: root, statePath: statePath(root) });
   assert.equal(first.target, replay.target);
   assert.equal(replay.idempotent, true);
   assert.equal((await receiptFiles(root)).length, count);
+});
+
+test('idempotent rollback still verifies the target owner contract', async () => {
+  const root = await fixture();
+  await activate(root, 'dsh-a', shaA);
+  await activate(root, 'dsh-b', shaB);
+  await rollbackRelease({ releaseRoot: root, statePath: statePath(root), expectedOwner: 'service-a', expectedRestartDependency: 'service-a.service' });
+  await writeFile(join(root, 'releases/dsh-a/release-marker.json'), JSON.stringify({ tag: 'dsh-a', source_sha: shaA, owner: 'service-other', restart_dependency: 'service-a.service' }));
+  await assert.rejects(() => rollbackRelease({ releaseRoot: root, statePath: statePath(root), expectedOwner: 'service-a', expectedRestartDependency: 'service-a.service' }), /RELEASE_OWNER_MISMATCH/);
 });
 
 test('simultaneous activation and rollback cannot corrupt current pointers', async () => {
@@ -72,7 +82,7 @@ test('simultaneous activation and rollback cannot corrupt current pointers', asy
   await activate(root, 'dsh-b', shaB);
   const results = await Promise.allSettled([
     activate(root, 'dsh-a', shaA),
-    rollbackRelease({ releaseRoot: root }),
+    rollbackRelease({ releaseRoot: root, statePath: statePath(root) }),
   ]);
   assert.equal(results.filter(item => item.status === 'fulfilled').length, 1);
   assert.equal(results.filter(item => item.status === 'rejected' && /PROMOTION_LOCKED/.test(item.reason.message)).length, 1);

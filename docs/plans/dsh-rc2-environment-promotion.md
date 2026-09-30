@@ -264,7 +264,7 @@ PR/CI
 - 以一个 durable `state.json`/journal 记录每个 release phase 的状态、锁、`idempotency_key`、started/committed 时间；按 tag 唯一化、远端 reconcile、按内容 SHA 去重、可安全 resume，崩溃注入和并发调用测试拒绝重复 draft/asset。manifest、publication 和 receipt 的重复字段由生成器机械派生，三路不一致即拒收。
 - side-by-side 安装和原子 symlink/env 激活先写临时文件并 fsync；切换前后验证 version/source endpoint，systemd/page/DSH/插件分别声明 owner、artifact/version endpoint 和 restart dependency；任何半完成或健康失败自动恢复旧版本并先后写 receipt。
 - 明确 rc1→rc2 只验证 DSH session、B0 SQLite、runtime/WAL 等本轮会触碰的状态文件；对真实 131GB 归档标 `NOT_RUN`。在 synthetic fixture 做旧→新读写、新→旧回读、并发锁、冷启动、回退和进程崩溃测试；失败阻断 promotion，不改真实库。
-- 为 mutable action 定义服务端 `action_id`、幂等键、持久 terminal receipt、取消/中止语义、查询/重试窗口和重启恢复；客户端未知结果不推断成功，断网/杀进程/重复点击测试覆盖 save/cancel/conflict。
+- 为 mutable action 定义服务端 `action_id`、幂等键、持久 terminal receipt、取消/中止语义、查询/重试窗口和重启恢复；客户端未知结果不推断成功，断网/杀进程/重复点击测试覆盖 save/cancel/conflict。按 2026-09-30 scope decision，完整 save/export/send action 合同延期到后续候选；本轮只保留原生回退与 `disabled/NOT_AVAILABLE` 能力边界。
 - 最终 tarball 解包内容执行 secret scan，allowlist/denylist 与内容扫描独立；HTML/自由内容插件若无 CSP + sandboxed iframe + 净化，不得在公网触发，降级为 `disabled/NOT_AVAILABLE`。
 - 为 manifest schema、allowlist、URL/size/path/range、unknown fields、时间统一 UTC ISO-8601、版本兼容和 canonicalization 定义 fail-closed 校验；补 malformed/duplicate/size mismatch/asset replacement/force-push tag 负测。
 - 把负向 operator probe 的 timeout/网络丢包视为失败，不是通过；定义 p95、5xx、auth、plugin、page/CORS 的 SLI 阈值、探针频率、告警来源和回退条件，15 分钟观察还须满足最小 operator 会话/端到端场景数并记录。
@@ -632,7 +632,7 @@ Synthesized from CEO、DX、Design 与 Eng 审查的已接受发现。以下任�
   - Surfaced by: CEO/Eng — dirty archive 与 public main 无 merge-base，生产不能直接消费 archive
   - Files: `STATUS.md`, `docs/plans/`, `deploy/wsl/`, release evidence templates
   - Verify: clean checkout migration map；逐项记录 source commit、upstream SHA、VERSION、owner 与对应验证证据
-- [x] **T2 (P0, DONE — public receive gate; current aggregate 68/68 isolated tests)** — Artifact receive — 实现安全解包、allowlist/schema fail-closed、大小/条目/权限限制和最终 tarball 内容扫描
+- [x] **T2 (P0, DONE — public receive gate; current aggregate 78/78 isolated tests)** — Artifact receive — 实现安全解包、allowlist/schema fail-closed、大小/条目/权限限制和最终 tarball 内容扫描
   - Surfaced by: Eng — 拒绝绝对路径、`..`、symlink/hardlink/device、tarbomb、超大归档与恶意权限
   - Files: `scripts/release/`, `scripts/release/schemas/`, `deploy/wsl/`
   - Verify: path traversal、duplicate、size mismatch、secret/denylist、symlink/权限和 scan failure fixtures 全部阻断；`pnpm dsh receive` 对 synthetic artifact 的历史接收证据保留；当前 allowlist packed-artifact regression 已补入 release tests；历史证据见 `docs/release/dsh-rc2-candidate/archive/t2-receive-gate-20260926.md`
@@ -640,15 +640,15 @@ Synthesized from CEO、DX、Design 与 Eng 审查的已接受发现。以下任�
   - Surfaced by: Eng — CORS 不是授权；并发兑换、重放、Referer/history/access-log 泄露必须 fail-closed
   - Files: `deploy/wsl/`, page auth/token endpoint、auth tests、runbooks
   - Verify: valid/expired/replayed/concurrent/foreign-origin/non-browser matrix；loopback 与 HTTPS 的 Cookie 行为均有证据
-- [ ] **T4 (P0, PARTIAL — protected-ref/publication contract; GitHub/OIDC NOT_RUN)** — Release trust — 保护 branch/tag、绑定 reviewed commit 与人工批准；补 OIDC provenance/签名，否则固定为 internal-only/operator pilot
+- [ ] **T4 (P0, PARTIAL — protected evidence/OIDC/publication PASS; protected-ref negative tests NOT_RUN)** — Release trust — 保护 branch/tag、绑定 reviewed commit 与人工批准；保留 provenance/签名证据，否则固定为 internal-only/operator pilot
   - Surfaced by: CEO/Eng — SHA 只证明字节完整性，不证明构建来源
   - Files: `.github/workflows/`, release schemas/generator、release runbook
-  - Verify: force-push、未保护 tag、release state 与 provenance 未运行的负测；杭州拒绝 `RELEASED_UNVERIFIED`
-- [ ] **T5 (P1, PARTIAL — journal/reconcile/crash/stale-lock synthetic PASS; remote CI NOT_RUN)** — Release state machine — 引入 durable state/journal、锁、`idempotency_key`、远端 reconcile、resume 与 crash recovery
+  - Verify: force-push、未保护 tag、release state 与 provenance 的负测仍需补齐；当前 r3 的 protected evidence/OIDC/publication workflow 已成功，杭州仍必须拒绝 `RELEASED_UNVERIFIED`
+- [ ] **T5 (P1, PARTIAL — journal/reconcile/crash/stale-lock synthetic PASS; promotion statePath/tag history now covered; remote CI NOT_RUN)** — Release state machine — 引入 durable state/journal、锁、`idempotency_key`、远端 reconcile、resume 与 crash recovery
   - Surfaced by: Eng — 上传、publication、receipt 中断或并发调用不能留下重复 draft/asset
   - Files: `scripts/release/dsh-manifest.mjs`, state store、schemas、CI tests
   - Verify: 每个 phase 可恢复；重复 tag/asset、429、进程杀死和并发执行都保持幂等且可审计
-- [ ] **T6 (P1, PARTIAL — owner-bound scripts/readiness synthetic PASS; service/host NOT_RUN)** — Promotion/rollback — side-by-side release、fsync 后原子 symlink/env 激活与服务 ownership/restart dependency
+- [ ] **T6 (P1, PARTIAL — owner-bound scripts/readiness synthetic PASS; shared host-control and mandatory statePath covered; service/host NOT_RUN)** — Promotion/rollback — side-by-side release、fsync 后原子 symlink/env 激活与服务 ownership/restart dependency
   - Surfaced by: Eng — 代码、env、systemd、page、插件和 receipt 不得半切换或混用版本
   - Files: `deploy/wsl/`, systemd units、promotion/rollback scripts、receipt schema
   - Verify: 切换前后 version/source endpoint 一致；每个故障点均可恢复旧 release 并完成健康检查
@@ -656,7 +656,7 @@ Synthesized from CEO、DX、Design 与 Eng 审查的已接受发现。以下任�
   - Surfaced by: CEO/Eng — 无 schema migration 不等于 durable runtime 可回退
   - Files: `scripts/release/compat/`, `deploy/wsl/`, synthetic fixtures、CI matrix
   - Verify: old→new、新→旧、冷启动、锁、重启、磁盘不足与损坏恢复；失败阻断 promotion，真实 131GB 库保持 `NOT_RUN`
-- [ ] **T8 (P1, PARTIAL — terminal receipt synthetic PASS; server/browser NOT_RUN)** — User action contract — 为 save/cancel/conflict/unknown 定义服务端 `action_id`、幂等键、终态 receipt、重试/放弃与 capability matrix
+- [ ] **T8 (P1, DEFERRED BY D1 — keep native fallback and `disabled/NOT_AVAILABLE`; full action contract NOT_RUN)** — User action contract — 为 save/cancel/conflict/unknown 定义服务端 `action_id`、幂等键、终态 receipt、重试/放弃与 capability matrix
   - Surfaced by: Eng/Design — 客户端超时不能推断成功，未接通保存/导出/发送必须显示 `NOT_AVAILABLE`
   - Files: action API、native/plugin adapters、browser UAT、capability docs
   - Verify: 双击、断网、杀进程、权限撤销、两种完成顺序和刷新重开均保留草稿及可恢复状态
@@ -694,7 +694,7 @@ The implementation has four disjoint lanes after T1 fixes the candidate baseline
 
 Execution order: launch Lane A and Lane B after T1; launch Lane C once artifact schemas and auth boundaries are stable; merge A/B/C into the candidate; then complete Lane D, run the full synthetic release orchestrator, and perform Eng/review/CI gates. Do not parallel-edit shared schema files or the same `deploy/wsl` unit. T13 is a documentation-only repair and can land after the review record is frozen, before the final release candidate.
 
-## GSTACK REVIEW REPORT
+## Prior GSTACK REVIEW REPORT (historical)
 
 | Review | Trigger | Why | Runs | Status | Findings |
 |---|---|---|---|---|---|
@@ -721,12 +721,12 @@ Eng 的 native 与 outside 两路均完成，6/6 维度（artifact trust、auth/
 - Code Quality Review: 11 项发布/认证/状态/归档安全问题，已转入 T2–T8、T11–T12；本候选已落地 synthetic contract，现场/远端 gate 仍未完成。
 - Test Review: 已产出单元→集成→系统→浏览器→operator→chaos 分层矩阵，至少 13 个实施任务；真实模型、完整业务、131GB 归档、移动端均保持 `NOT_RUN/PARTIAL`。
 - Developer experience: Quickstart、doctor、统一 dsh CLI、offline/status/resume/why-blocked 已落地；Node24 冷环境与 TTHW 仍 `NOT_RUN/NOT_MEASURED`。
-- Plan state: `IMPLEMENTATION_PARTIAL / RELEASE_BLOCKED`。T1/T2/T13 文档、基线与本地 artifact receive gate 已完成；T3–T12 的本地合同/synthetic gate 已完成但仍为 PARTIAL，现场 UAT/host/远端 gate 未运行；证据见 `scripts/release/` 与 `docs/release/dsh-rc2-candidate/`。
-- Current execution: 已建立 public-main rc2 候选并完成 T1、T2、T13；PR #83/#84/#85 已合并到 main，产品版本为 `0.19.0.0`；T3–T12 的本地 contract/synthetic gate、WSL artifact 脚本、Quickstart、evidence verifier 和 operations ledger 已落地。PR #84 后的 artifact 快照已完成本地 build/receive/doctor，但后续文档提交使其失效；最终 artifact 必须在固定 reviewed SHA 后重新生成，证据保存在仓库外。GitHub tag/release、杭州重启/切换、Cloudflare route 和旧版本删除仍未执行。
+- Plan state: `IMPLEMENTATION_PARTIAL / RELEASE_BLOCKED`。T1/T2/T13 文档、基线与本地 artifact receive gate 已完成；T3–T12 的合同、脚本或合成夹具已部分落地，但对应现场/远端执行证据仍为 `PARTIAL/NOT_RUN`；不能把合同存在写成 gate 已通过。证据见 `scripts/release/` 与 `docs/release/dsh-rc2-candidate/`。
+- Current execution: 已建立 public-main rc2 候选并完成 T1、T2、T13；PR #83/#84/#85 已合并到 main，产品版本为 `0.19.0.0`；T3–T12 的实现骨架、WSL artifact 脚本、Quickstart、evidence verifier 和 operations ledger 已落地，但不是完整 gate 通过。PR #84 后的 artifact 快照已完成本地 build/receive/doctor，但后续文档提交使其失效；最终 artifact 必须在固定 reviewed SHA 后重新生成，证据保存在仓库外。GitHub tag/release、杭州重启/切换、Cloudflare route 和旧版本删除仍未执行。
 
 ### Verdict
 
-**REVISE — 计划可以进入实现排期，不能据此宣布 rc2 已发布或杭州已部署。** 当前候选已完成 T1、T2、T13，并完成 T3–T12 的本地 contract/synthetic gate；auth/trust/state/promotion/compatibility/action/operator/UAT operations 仍保留 PARTIAL，安全审查与现场门禁尚未闭合；下一步是固定 Node24 冷 checkout、接 CI provenance/受保护 tag、做 WSL2 冷验证、operator gate 和七组 UAT；只有 release 进入 `PUBLISHED_VERIFIED`、杭州 receive receipt 完整、兼容性和回退演练通过，才讨论现有 hostname 的正式切换。没有 OIDC/provenance/signature 或没有真实 operator 隔离时，最高状态保持 `internal-only-partial`/operator pilot。
+**REVISE — 计划可以进入实现排期，不能据此宣布 rc2 已发布或杭州已部署。** 当前候选已完成 T1、T2、T13；T3–T12 的实现骨架或合成合同部分落地，但 auth/trust/state/promotion/compatibility/action/operator/UAT operations 的执行证据仍保留 `PARTIAL/NOT_RUN`，安全审查与现场门禁尚未闭合；下一步是固定 Node24 冷 checkout、接 CI provenance/受保护 tag、做 WSL2 冷验证、operator gate 和七组 UAT；只有 release 进入 `PUBLISHED_VERIFIED`、杭州 receive receipt 完整、兼容性和回退演练通过，才讨论现有 hostname 的正式切换。没有 OIDC/provenance/signature 或没有真实 operator 隔离时，最高状态保持 `internal-only-partial`/operator pilot。
 
 **UNRESOLVED DECISIONS:**
 
@@ -737,3 +737,297 @@ Eng 的 native 与 outside 两路均完成，6/6 维度（artifact trust、auth/
 - 一个 CRM operator pilot 的最小场景数、p95/5xx/auth/plugin/page 阈值及产品 owner 的真实业务 UAT 结论。
 - T13 的 Design summary 已修正；RACI、稳定窗口和旧版本清理仍需杭州现场 owner/授权后落定。
 - 以上决定和 P0/P1 任务均关闭前，不得把 GitHub Release、杭州接收或旧版本删除描述为已完成。
+
+## 2026-09-30 当前执行覆盖（收尾）
+
+本节覆盖前文在候选尚未发布时的状态描述；前文 review、历史测试和任务复选框不回写。当前事实以 [r3 收尾记录](../release/dsh-rc2-candidate/closeout-20260930.md) 为准：
+
+- `dsh-0.19.0.0-r3` 已由 reviewed source `32abb00b…` 生成并发布为 immutable GitHub Release；preflight、protected evidence/OIDC 和 publication workflow 均通过。杭州 `current` 已原子指向 r3，DSH/CRM/B0 loopback smoke 通过。
+- T2/T13、本地 artifact contract、publication/activation 证据已具备；这不关闭产品级 T3–T12。r3 durable journal/reconcile、浏览器/真实模型 UAT、rc1↔rc2 WAL、operator gate/15 分钟 SLI、10x backpressure、真实 save/export/send 与 rollback drill 继续保持 `PARTIAL/NOT_RUN`。
+- r3 immutable source tarball 不含 `node_modules`；runtime bundle 包含固定 upstream `node_modules` closure，但插件工作树的 peer scope 链接未随 source 包提供。本次杭州安装后手工生成了 8 个 `@deepseek-ai` peer links；自动生成该链接的安装器修复在本地提交 `3fdf1efc`，未 push，因此下一次 release 需要审查、合并并从新 SHA 重建 artifact。
+- CRM backend immutable image、Python 3.14 wheel 包和 runtime-binding receipt 是杭州 sidecar，不是当前 GitHub Release 的资产。若要求“一个 Release 包含全部生产输入”，需另开修复任务，不能通过修改已发布 immutable Release 达成。
+- 生产 `release-state.json` 仍是旧 r1 journal；r3 的 active receipt 是现场事实，不能把旧 journal 自动改写成 r3 状态。rollback wrapper 只切 symlink/写 receipt，不恢复 env/runtime/image 或重启服务，本次没有执行回退演练。
+- 当前无 open PR；本地 `3fdf1efc` 提交未 push。本节不授权 push、tag、Release 修改、旧版本删除或再次生产切换。
+
+## 2026-09-30 plan-eng scope decisions
+
+- **Feature scope:** T8 完整 `action_id`/save-export-send 合同延期；本轮保留原生对话回退以及 `disabled/NOT_AVAILABLE` 能力矩阵，不宣称未接通动作可用。
+- **现场 scope:** T9 采用 Tailscale operator 正负探针、synthetic 10x backpressure 与 15 分钟内部场景；不改 Cloudflare route、不读取真实 131GB DuckDB。
+- **Operations scope:** T12 本轮执行最小 synthetic operator pilot，包含 7 组 UAT、RACI/指标、取消/unknown 恢复和 rollback 证据。
+- **Structure:** 采用较小的四个控制面模块：`release-control` 统一 artifact/state/evidence；`deploy/wsl` 统一 host activation/rollback；backend 保持 action 边界；`pnpm dsh` 与文档只作薄适配。上述结构不减少已确认的安全、测试、兼容性或回退合同。
+- **Artifact boundary:** DSH、CRM 镜像、Python wheels 与 runtime binding 保持独立 artifact，但 CRM/Python/runtime digests 必须进入同一 release manifest 和 receive gate；不把真实数据或大镜像强行打进每次 DSH 小版本包。
+- **Compatibility gate:** 接通真实 pinned rc1/rc2 runtime/session/WAL synthetic runner；矩阵失败阻断 promotion，真实 DuckDB 仍保持 `NOT_RUN`。
+- **State gate:** durable journal/state、远端 reconcile、`statePath` 传递和 env/runtime/CRM/service ownership 回退演练均为 release-blocking。
+- **Pending remedies:** T3–T12 的具体实现缺口、GitHub/OIDC provenance 是否纳入、杭州 route 是否保持 `none`，均在后续工程评审中单独解决。
+
+## 2026-09-30 plan-devex review
+
+### Developer Perspective
+
+**Product type:** CLI + release platform. The primary developer is the individual enterprise-project maintainer who builds on a Mac, prepares GitHub evidence, and operates the Hangzhou Windows/WSL host through Tailscale. Tolerance for unexplained steps is low because the same person owns code, artifact, service ownership, rollback and the release decision.
+
+**Approved clock:** from a clean worktree and known toolchain to a reviewable immutable candidate: current trajectory 12–25 minutes locally; remote host acceptance is measured separately. The local `verify --scope local` hello-world result should be a short green path, but it never substitutes for the release gate.
+
+**Empathy narrative:** The maintainer is not only writing code. They must align Node, Python, the pinned DSH runtime, plugin peer links, manifest, GitHub evidence, Tailscale, WSL and CRM ownership before an internal team can use a small feature. Today those checks are spread across scripts, documents and remote state. A local test can be green while the Release has no sidecar or Hangzhou still points at an older checkout, so the maintainer repeats build, upload and diagnosis work. The desired path is one preflight that exposes environment blockers early, one immutable artifact that every environment receives, and one receipt that makes PASS, BLOCKED or UNKNOWN obvious. A failed attempt must retain the old release and say whether the cause is artifact integrity, permission, service ownership, compatibility or rollback evidence.
+
+### Competitive DX benchmark
+
+The clock is deliberately not a warm-cache command timer. Public documentation confirms command boundaries, but does not provide equivalent human measurements; peer times below are estimates and are not claims about this repository.
+
+| Tool | Start → useful result | Time/evidence | DX choice | Source |
+|---|---|---|---|---|
+| GitHub CLI | Existing tag/assets → immutable Release | 2–5 min estimate from official command path | `gh release create` verifies tag, uploads assets and can fail on no commits | [gh release create](https://cli.github.com/manual/gh_release_create) |
+| Vercel Git/CLI | Connected project → preview URL | 2–5 min estimate from official setup path | Preview per push, hosted build and instant rollback | [Vercel deployments](https://vercel.com/docs/deployments/overview) |
+| Fly CLI | App directory → deployed instance | 5–10 min estimate from official launch/registry path | CLI creates deployment config, but host/volume/release-command semantics remain visible | [Fly registry/deploy](https://www.fly.io/docs/blueprints/using-the-fly-docker-registry/) |
+| This project | Node24/Python3.14/runtime bundle/clean tree → candidate + evidence | 12–25 min current estimate; local evidence inspected, host evidence separate | Offline artifact generation, fail-closed receive, durable receipt and explicit rollback | `docs/operating/dsh-rc2-quickstart.md` |
+
+The selected target is the current trajectory, not a promise to hide safety work behind a two-minute command. The selected magical moment is **one traceable artifact receipt**: the same SHA, manifest, sidecar digests, journal phase and remote receipt are visible from local candidate through receive/verify/reconcile, with the old release retained on failure.
+
+### Developer journey map (DX TRIAGE)
+
+| Stage | Developer does | Evidence-backed friction | Accepted disposition |
+|---|---|---|---|
+| Install | Read README, select Node24/pnpm/Python, run doctor | README still described RC1/“not released”; doctor omitted runtime, Python and dirty-tree readiness | DX1 updates the entry; DX2 adds read-only `doctor --release` |
+| Hello World | Run verify, preflight, release and receive on synthetic/isolated inputs | `verify` mixed synthetic PASS with release exit 2; preflight had one-line help and no phase visibility | DX3 separates local/release scopes; DX4 adds preflight check/events/codes |
+| Real usage | Receive exact artifact, reconcile receipt and activate under owner gate | Required host/state/rollback evidence remains an engineering release blocker | T3–T12 gates; no new DX expansion in TRIAGE |
+| Debug | Inspect stable code, journal and runbook | Existing codes are useful but statePath/remote receipt and phase context are incomplete | Engineering blockers plus DX2/DX4; verify with failure fixtures |
+| Upgrade | Compare pinned DSH/runtime and run compatibility fixture | DSH 0.2.0 and full migration guide are outside this candidate | Explicitly deferred; preserve rc1 and add later migration work |
+
+### First-time developer confusion report
+
+```text
+T+0:00  README says Release/Hangzhou install is not executed and RC1 is active; STATUS/closeout say otherwise.
+T+0:30  doctor shows four PASS lines but does not mention Python, pnpm, runtime bundle or clean tree.
+T+1:00  verify shows synthetic compatibility/backpressure PASS, then exits 2 with RELEASE_BLOCKED; the scope is unclear.
+T+2:00  preflight help is one line; the real command will run online prepare/build/runtime steps without phase markers.
+T+3:00  the maintainer must manually connect runtime path, manifest, sidecars and remote receipt to answer whether the same SHA reached Hangzhou.
+Final   Code may be healthy, but the maintainer pauses for document and state archaeology instead of shipping.
+```
+
+### Review passes and scorecard
+
+The Hall of Fame reference file was unavailable in the installed skill bundle, so these scores use the inspected repository evidence and the approved DX TRIAGE scope. Scores are current behavior → expected plan state; they are not production acceptance.
+
+| Dimension | Current | After accepted plan | Finding |
+|---|---:|---:|---|
+| Getting Started | 4/10 | 7/10 | Stale README and uncovered readiness checks block the first session |
+| API/CLI | 5/10 | 7/10 | Thin facade exists; scope and state semantics need clearer defaults |
+| Error messages | 4/10 | 7/10 | Stable codes exist, but phase/cause/recovery context is incomplete |
+| Documentation | 4/10 | 7/10 | Quickstart is useful but README and current runtime facts conflict |
+| Upgrade path | 3/10 | 3/10 | DSH 0.2.0 migration is explicitly outside rc2 |
+| Developer environment | 5/10 | 7/10 | Node24 is pinned; Python/runtime/zstd checks need one read-only gate |
+| Community | 2/10 | 2/10 | Internal personal project; no community surface is required this round |
+| DX measurement | 4/10 | 6/10 | SLI exists; TTHW and blocked phase need durable evidence fields |
+
+**Overall:** 4/10 current, 6/10 after the accepted scope. **Competitive tier:** Needs Work, with a deliberate 12–25 minute candidate clock. **Mode:** DX TRIAGE. The local hello-world path can be short after DX3, while release readiness remains evidence-bound.
+
+### What already exists
+
+- `pnpm dsh` is a discoverable facade with `doctor`, `test`, `preflight`, `release`, `receive`, `reconcile`, `verify`, `rollback`, `status`, `why-blocked`, `retry` and `resume`.
+- `docs/operating/dsh-rc2-quickstart.md`, `docs/reference/dsh-rc2-release-artifact.md`, `docs/operating/dsh-rc2-runbook.md` and `docs/operating/verification.md` already separate local, CI, host and real-data evidence.
+- Release commands reject dirty worktrees, absent runtime bundles, reused evidence directories, malformed manifests and unsafe archives with stable machine-readable codes.
+- Synthetic compatibility/backpressure and operator-gate evaluators already fail closed when real evidence is not provided.
+- The chosen work reuses these contracts and keeps DSH upstream, CRM and real DuckDB outside the default local path.
+
+### Explicitly not in scope
+
+- Full T8 save/export/send action contract: deferred by D1; native fallback and `disabled/NOT_AVAILABLE` remain required.
+- DSH `0.2.0-rc.2` migration: future upgrade work needs its own pinned runtime/session/WAL comparison and rollback proof.
+- A synthetic runtime that could be mistaken for a production candidate: rejected by D9.
+- One-command automatic Hangzhou cutover, route changes or service restart: requires separate authorization and host evidence.
+- Community, hosted playground, cross-language SDKs and full Real Usage/Debug/Upgrade DX polish: outside DX TRIAGE.
+
+### DX implementation checklist
+
+- [x] README/Quickstart gives a three-step path to `doctor --release`, local verify and immutable candidate preparation (local docs validation PASS).
+- [x] `doctor --release` is read-only and reports every release prerequisite with a stable code and recovery command (runtime not provided/dirty tree BLOCKED as expected).
+- [x] `verify --scope local` returns 0 only for local contracts; default/release remains fail-closed (local PASS, release exit 2).
+- [x] Real preflight exposes check, phase, artifact path and failure cause without secrets or business data (read-only check covered; formal build NOT_RUN).
+- [x] The selected preflight evidence carries TTHW, phase timings, retry count and evidence coverage (synthetic contract PASS; formal online run NOT_RUN).
+- [ ] StatePath, runtime/WAL runner, sidecar digest binding, streaming hash and full rollback remain release blockers until their engineering evidence is complete.
+
+### Implementation tasks from this review
+
+- [x] **DX1 (P1, IMPLEMENTED — docs PASS)** — README and docs entry — align current rc2 facts and the copy-paste install path. Files: `README.md`, `docs/README.md`, `docs/operating/dsh-rc2-quickstart.md`. Verify: fresh reader reaches `doctor --release` without RC1/“unreleased” contradictions.
+- [x] **DX2 (P1, IMPLEMENTED — readiness PASS/BLOCKED)** — doctor readiness — add read-only `doctor --release` checks and stable remediation codes. Files: `scripts/dsh.mjs`, `scripts/release/readiness.mjs`, CLI tests, Quickstart/reference. Verify: absent toolchain/runtime/clean-tree inputs fail before build and never touch real data.
+- [x] **DX3 (P1, IMPLEMENTED — local PASS/release BLOCKED)** — verify scope — add `verify --scope local|release` while preserving the default release gate. Files: `scripts/dsh.mjs`, CLI tests, Quickstart/reference. Verify: local PASS exits 0; release with host evidence not provided exits 2.
+- [x] **DX4 (P1, IMPLEMENTED — check PASS/BLOCKED; formal build NOT_RUN)** — preflight observability — add `--check`, phase events, artifact paths and interruption/partial-output codes. Files: `scripts/release/preflight.mjs`, `scripts/release/readiness.mjs`, CLI tests, Quickstart/reference. Verify: errors surface before network/build and logs are redacted.
+- [x] **DX5 (P2, IMPLEMENTED — synthetic evidence PASS; formal run NOT_RUN)** — DX measurement — persist TTHW, phase timing, retry and evidence coverage in `release-preflight.json`. Files: release evidence module and preflight runner. Verify: one evidence record can reconstruct the selected 12–25 minute candidate clock once formal preflight runs.
+
+## GSTACK REVIEW REPORT
+
+### Combined review status
+
+| Review | Trigger | Why | Runs | Status | Findings |
+|---|---|---|---:|---|---|
+| CEO Review | not requested | No product-scope review in this run | 0 | SKIPPED | User asked for engineering and DevEx plan review only |
+| Outside Review | explicit self-review preference | Independent reviewer was intentionally disabled for this task | 0 | SKIPPED | Aside unavailable; no outside completion credit |
+| Eng Review | stable `0.1.7-rc.2` delivery plan | Architecture, state, rollback, compatibility, tests and performance | 1 | REVISE | 78/78 local tests pass; host/state/WAL/rollback/sidecar evidence remains release-blocking |
+| Design Review | release-control plan | No UI redesign requested | 0 | N/A | Outside DX TRIAGE scope |
+| DX Review | CLI/release onboarding and delivery path | Remove first-run blockers without weakening fail-closed release gates | 1 | ISSUES_OPEN | 4/10 current → 6/10 after accepted plan; TTHW target remains 12–25 min for a candidate |
+
+**OUTSIDE COVERAGE:** explicitly skipped by the user; Aside was unavailable. No outside reviewer was used and no uncovered area is counted as a pass.
+
+**VERDICT:** ENG REVIEW REQUIRED. The plan is coherent but release-blocked until the engineering evidence listed below is executed. DX TRIAGE decisions D1–D9 are resolved and the five DX tasks are recorded in `docs/hackathon/TODOS.md`; implementation and host evidence remain pending.
+
+
+### Target and review context
+
+- Target: `docs/plans/dsh-rc2-environment-promotion.md` on `codex/release-evidence-download-fix`.
+- Goal: define a fast, repeatable and reversible delivery path for DSH `0.1.7-rc.2`; DSH `0.2.0-rc.2` remains a separate future candidate.
+- Evidence read: `DESIGN.md`, current release/closeout records, `scripts/release/`, `deploy/wsl/`, `scripts/dsh.mjs`, toolchain bindings, current tests and plan history.
+- Current local verification: `PATH=/Users/hutou/homebrew/opt/node@24/bin:$PATH pnpm dsh test` → **78 passed, 0 failed**; `git diff --check` → pass. This does not close host, browser, WAL, operator or rollback evidence.
+- External voice: skipped because the user previously explicitly requested self-review without an independent reviewer. Aside was unavailable; no external web result is used as acceptance evidence.
+
+### Scope decisions and disposition
+
+- D1: defer the full T8 save/export/send action contract; keep native fallback and visible `disabled/NOT_AVAILABLE` behavior.
+- D2: execute Tailscale positive/negative operator probes, synthetic 10x backpressure and a 15-minute internal scenario without Cloudflare changes or real DuckDB access.
+- D3: execute the minimum synthetic operator pilot with seven UAT groups, RACI/metrics and rollback evidence.
+- D4: use four control planes: `release-control` for artifact/state/evidence; `deploy/wsl` for host activation/rollback; backend keeps action boundaries; `pnpm dsh` and docs stay thin adapters.
+- D5: make one durable state source plus complete env/runtime/CRM/service rollback release-blocking.
+- D6: connect a real pinned rc1/rc2 runtime/session/WAL synthetic runner; compatibility failure blocks promotion.
+- D7: keep DSH, CRM image and Python wheels as separate artifacts, but bind all immutable digests in the same manifest and receive gate.
+- D8: replace whole-file digest reads with streaming hash and bounded-size tests.
+
+### Scope Challenge findings
+
+1. **[P1] (confidence: 10/10) stale completion wording could turn a contract into a passing gate.** The previous summary said “T3–T12 的本地合同/synthetic gate 已完成” while the current closeout records T3–T12 as `PARTIAL/NOT_RUN`. The summary now distinguishes implementation skeletons from executed evidence. No release decision may rely on the old wording.
+2. **[P0] (confidence: 10/10) split promotion state can bypass the journal.** `scripts/release/promotion.mjs:268` accepts `statePath` and only records at `:298` when it is provided, while `deploy/wsl/rollback-release.sh:12` invokes `rollbackRelease` without it. D5 makes state propagation, reconcile and complete rollback a release blocker.
+3. **[P1] (confidence: 10/10) compatibility acceptance is not wired to a pinned runtime reader.** `scripts/release/compat-check.mjs:5-8` returns `NOT_RUN` when `runtimeRunner` is absent, and `scripts/release/compat.test.mjs:13-25` only mutates synthetic JSON. D6 requires a real isolated pinned runner before promotion.
+4. **[P1] (confidence: 9/10) the peer closure was discovered after deployment.** `docs/release/dsh-rc2-candidate/closeout-20260930.md:30-34` records eight manually created peer links and says the installer repair `3fdf1efc` is outside r3. The next artifact must include the reviewed installer fix and prove a clean-host install without manual links.
+5. **[P1] (confidence: 9/10) sidecar drift is currently possible.** The closeout says CRM/Python/runtime-binding inputs are not Release assets (`closeout-20260930.md:10-11`). D7 retains independent lifecycles but requires sidecar digests and compatibility metadata in the same manifest/receive gate.
+6. **[P1] (confidence: 9/10) duplicate upstream pins can drift.** `dsh-plugins/analytics-workbench/toolchain.json:4-13` is the toolchain source of truth, while `scripts/dsh.mjs:33-38` independently checks a literal pin. The four-control-plane structure moves pin loading and release decisions behind one release-control contract.
+7. **[P1] (confidence: 9/10) artifact hashing has an avoidable memory spike.** `scripts/release/artifact.mjs:16-19` reads the whole file before hashing. D8 requires streaming hash with the existing receive byte limits preserved.
+
+### 1. Architecture review
+
+The approved architecture is a single release control plane with projections to host and GitHub state:
+
+```text
+clean Node24/Python3.14 checkout
+  -> release-control: build + manifest + state/journal + reconcile
+  -> immutable DSH source/runtime artifacts
+  -> sidecar digest bindings (CRM image / Python wheels / runtime receipt)
+  -> GitHub publication and evidence
+  -> deploy/wsl: secure receive -> side-by-side install -> atomic activation
+  -> systemd/page/CRM ownership checks
+  -> Tailscale operator gate -> seven-group synthetic pilot
+  -> authoritative receipt + retained rollback target
+```
+
+The state flow must have one owner:
+
+```text
+state.json/journal (authoritative)
+  -> publication projection
+  -> host activation projection
+  -> promotion/rollback receipt
+  -> status/resume/why-blocked
+```
+
+Architecture verdict: the four-control-plane arrangement is smaller and safer than the original scattered 13-task arrangement, provided the following invariants are implemented together: `statePath` is mandatory for mutating release operations; manifest, publication and host receipt are projections of the journal; sidecar digests are checked before activation; rollback restores every owner listed in the marker; and unknown remote outcomes stop rather than retrying blindly.
+
+### 2. Code quality review
+
+- Reuse decision: keep `state.mjs` as the journal primitive and `reconcile.mjs` as the side-effect-free comparison helper. Existing first-party callers are `scripts/dsh.mjs:10-11` (`readState`, `reconcileState`, `resume`) and `scripts/release/promotion.mjs:5` (`recordEvent`). The new `release-control` facade should wrap, not duplicate, these contracts.
+- Reuse decision: keep `artifact.mjs` as the single allowlist/hash/receive primitive. `scripts/dsh.mjs:7-9` and `scripts/release/promotion.mjs:4,74-100` already consume its outputs; moving hash/manifest logic elsewhere would recreate the current drift.
+- Required cleanup: remove the duplicated inline Node invocations in `deploy/wsl/activate-release.sh:12` and `rollback-release.sh:12`, replace them with a shared release-control entry that always receives `statePath`, owner and restart dependency. Expected implementation movement is roughly 8–12 shell lines removed, 40–70 facade lines added, and 80–120 contract/integration test lines added; the net code count may grow, but the number of state owners decreases.
+- Required cleanup: make `scripts/dsh.mjs` load the pinned toolchain contract instead of repeating the upstream SHA at `:33-38` and `:74`. Keep command parsing thin and move release decisions to the facade.
+- Error handling that remains mandatory: state journal conflict, unknown remote receipt, absent sidecar digest, stale lock, runtime peer-root absence, service owner mismatch, and rollback health failure must all return stable machine-readable codes and preserve the old release.
+
+### 3. Test review
+
+Detected framework: Node built-in `node:test` through `pnpm dsh test`; project B0/backend checks remain separate commands documented in `docs/operating/verification.md`.
+
+Coverage map from the reviewed code and current tests:
+
+```text
+CODE PATHS                                                USER FLOWS
+[+] scripts/dsh.mjs release/receive/verify                [+] Clean checkout -> offline build
+  ├── [★★ TESTED] option/config precedence                ├── [★★ TESTED] doctor/help/version
+  ├── [★★★ TESTED] dirty/absent-runtime rejection         ├── [GAP→E2E] exact tag receive on clean WSL
+  ├── [★★★ TESTED] schema/checksum/payload checks          ├── [GAP→E2E] peer closure + plugin import
+  └── [GAP] sidecar digest + final publication gate       └── [GAP→E2E] rollback after service failure
+[+] scripts/release/state.mjs/reconcile.mjs               [+] Release state recovery
+  ├── [★★★ TESTED] phase order and journal integrity      ├── [★★★ TESTED] crash -> UNKNOWN -> resume
+  ├── [★★★ TESTED] idempotency/conflict/remote drift      ├── [GAP→E2E] statePath through WSL scripts
+  └── [GAP] active host projection and env restore         └── [GAP→E2E] old/new runtime readback
+[+] auth-http/operator-gate/backpressure                  [+] Operator access
+  ├── [★★★ TESTED] token/Origin/CSRF/cookie negatives      ├── [★★★ TESTED] synthetic positive/negative probe
+  ├── [★★ TESTED] synthetic scheduler backpressure        ├── [GAP→E2E] real Tailscale positive/negative probe
+  └── [GAP] 15-minute real HTTP SLI samples                └── [GAP→E2E] 15-minute internal scenario
+[+] compat-check/local-verify                             [+] Compatibility
+  ├── [★ TESTED] NOT_RUN fail-closed behavior              ├── [GAP→E2E] pinned rc1 -> rc2 -> rc1 fixture
+  ├── [★ TESTED] synthetic JSON mutation                    └── [GAP→E2E] WSL2 cold ABI/runtime/WAL
+  └── [GAP→EVAL] real runtime/session/WAL readers
+
+Coverage: 15 named code/user paths; 9 have unit/synthetic evidence, 6 remain host/E2E gaps.
+Quality: ★★★:8  ★★:3  ★:2  | Gaps: 6 (all release-blocking for the affected claim).
+```
+
+Required proof to add alongside implementation:
+
+- **CRITICAL unit/integration:** make `statePath` mandatory in activation/rollback wrappers; assert journal and receipt agree after activate, failure and rollback.
+- **CRITICAL integration:** run the pinned runtime/session/WAL reader fixture in both directions, cold start and crash recovery; do not substitute JSON-only mutation.
+- **CRITICAL host E2E:** install the exact immutable source/runtime artifact on a clean WSL fixture, verify peer closure, Node/Python ABI and service ownership, then perform side-by-side activation and rollback.
+- **CRITICAL operator E2E:** Tailscale positive identity probe, unauthenticated/non-operator negative probe, 10x real HTTP backpressure and a 15-minute SLI ledger. Timeout is failure/`NOT_RUN`, never negative success.
+- **CRITICAL operations E2E:** seven rows (`auth`, `native`, `plugin`, `page`, `crm`, `weknora`, `recovery`) with owner, timestamps, evidence reference and explicit `PASS/PARTIAL/NOT_RUN/FAIL` status.
+- **Deferred:** T8 full save/export/send action contract and DSH `0.2.0-rc.2` compatibility are not part of this candidate.
+
+### 4. Performance review
+
+- D8 closes the largest avoidable release-time memory risk: stream SHA-256 reads and keep receive `max-bytes`/entry limits. Add interruption and large synthetic file tests.
+- `runBackpressure` intentionally retains per-request results in memory (`scripts/release/backpressure.mjs:3,9`). This is acceptable for the selected synthetic 10x run, but the host runner must cap retained evidence to aggregates plus a bounded sample; do not turn it into an unbounded production load tool.
+- The 15-minute SLI evaluator (`scripts/release/operator-gate.mjs:28-37`) correctly refuses short windows, but the host collector must record real observation timestamps, p95, 5xx, auth, plugin and page failures. Scheduler-only results remain synthetic evidence.
+- No real DuckDB query, copy, migration or WAL access is required for this candidate. CRM API smoke must use its owning HTTP service and synthetic/approved bounded probes.
+
+### Required execution order after this review
+
+1. Land/review the local peer-link installer fix and rebuild a fresh immutable artifact from the reviewed SHA.
+2. Introduce the four-control-plane facade; make `statePath` mandatory and extend rollback to env/runtime/CRM/service owners with idempotent receipts.
+3. Add the pinned rc1/rc2 runtime/session/WAL fixture and fail-closed promotion gate.
+4. Add sidecar digest bindings to manifest/receive checks and switch artifact hashing to streaming.
+5. Run Node24 local gates, clean-host cold install, Tailscale positive/negative probes, synthetic 10x and 15-minute internal SLI, then the seven-group operator pilot.
+6. Reconcile the authoritative journal with the active host receipt. Any conflict, unknown outcome or evidence not provided keeps the release blocked and retains the old release.
+7. Only after all release-blocking evidence is complete should a separately authorized GitHub push/tag/release or Hangzhou cutover be considered.
+
+### Review verdict
+
+**REVISE / RELEASE_BLOCKED.** The plan is now coherent and intentionally smaller, but `0.1.7-rc.2` is not yet a stable delivery candidate because state/journal integration, real compatibility runner, complete rollback, sidecar digest binding, streaming artifact verification, Tailscale/SLI evidence and the operator pilot remain to be executed. The local contract suite is green at 78/78; that is a useful gate, not a production sign-off.
+
+| Review | Trigger | Why | Runs | Status | Findings |
+|---|---|---|---|---|---|
+| Engineering | Stable `0.1.7-rc.2` delivery plan | Validate boundaries, state, rollback, compatibility and host gates | Native plan review | REVISE | StatePath, runtime runner, sidecar binding and rollback are release blockers |
+| Code quality | Four-control-plane structure | Remove duplicated pins and shell entrypoints | Native source audit | REVISE | Reuse `state.mjs`/`reconcile.mjs`; thin `pnpm dsh` facade |
+| Tests | Release, auth, operator and host paths | Separate synthetic evidence from host/E2E claims | Native test audit | REVISE | 78/78 local; WSL/Tailscale/WAL/rollback gaps remain |
+| Performance | Artifact and backpressure paths | Avoid memory spikes and false capacity claims | Native performance audit | REVISE | Stream hashing; bound retained backpressure evidence |
+
+### Completion summary
+
+- Approval readiness: **PASS** — engineering D1 through D8 were explicitly answered by the user; accepted scope, structure and release-blocking remedies are recorded above.
+- Saved test plan: `/Users/hutou/.gstack/projects/tyuanww-fuqing-crm-analytics/root-codex-release-evidence-download-fix-eng-review-test-plan-20260930-125124.md`.
+- Local evidence: `pnpm dsh test` 78/78; `git diff --check` pass.
+- Outside coverage: skipped by explicit user preference; Aside unavailable.
+- Product and real-data boundary: product remains `PARTIAL`; real DuckDB, real model, full browser UAT, WSL2 compatibility, Tailscale SLI and rollback remain `NOT_RUN` until the required execution order runs.
+- Next review action: implement the listed release-blocking work, then run `/qa` against the saved test plan before any separately authorized `/ship` or deployment action.
+
+### DevEx completion summary
+
+- Persona: individual enterprise-project maintainer owning Mac build, GitHub evidence, Tailscale/WSL receive, CRM/DSH ownership and rollback.
+- Product type/mode: CLI + release platform / DX TRIAGE.
+- Approved clock: 12–25 minutes from clean worktree and known toolchain to candidate; remote host acceptance measured separately.
+- Selected vehicle: one traceable artifact receipt spanning candidate, manifest, sidecars, journal, receive, verify and reconcile while retaining the old release on failure.
+- Accepted decisions: D6 README entry, D7 `doctor --release`, D8 `verify --scope local|release`, D9 preflight `--check` plus phase/error events; DX1–DX5 all added to `docs/hackathon/TODOS.md`.
+- Current local evidence: Node24 `pnpm dsh test` 82/82; focused promotion/state and CLI tests pass; `pnpm dsh verify --scope local` returns 0 while default/release remains exit 2 because WSL2/WAL/15-minute SLI/host HTTP evidence is not run; `git diff --check`, shell syntax and Node syntax checks pass. Formal online preflight and remote host evidence remain NOT_RUN.
+- Upgrade and community polish are explicitly deferred; no DSH upstream source, real DuckDB, production host or remote release was changed.
+
+### Self-review repair pass 2026-09-30
+
+- 自审发现并修复 readiness/preflight 的假通过边界：共享读取 `toolchain.json`，预检查与正式构建使用同一 upstream 路径，`--check --source-sha` 比对当前 HEAD，Node 遵循 `.nvmrc` 精确版本，runtime 必须是固定命名的 regular zstd bundle，失败尝试写入独立 recovery evidence。
+- preflight evidence 现在要求固定七个本地阶段全部 `PASS`、本地 coverage 全部 `PASS`、远端 WSL2/host HTTP 明确保留 `NOT_RUN/PARTIAL`；SHA-256 使用流式读取，避免大包一次性载入内存。
+- promotion/rollback 在外部目录或 symlink 改动前写入 intent，重试只在 journal intent 与目标 marker 一致时补记 committed event；回退幂等路径仍执行 owner、restart dependency、source SHA 和 marker 校验；stale lock 删除前复核 inode/mtime/size。
+- GitHub evidence workflow 先验证 reviewed tag、commit、ancestor 和 clean checkout，再执行 LFS/brand 派生脚本。新增/更新后的当前本地证据：发布套件 **85/85**、dsh-dev pin/CLI **26/26**、shell/Node syntax、`git diff --check` 全部通过；错误 source SHA、坏 runtime 和 owner 不匹配回退负测均通过。
+- 仍保持 release blocker：formal online preflight、GitHub remote CI/OIDC、WSL2 冷安装、Tailscale/15 分钟 SLI、真实 runtime/WAL compatibility、完整 env/runtime/CRM/systemd rollback 和 operator UAT 尚未执行；真实 DuckDB 继续 `NOT_RUN`。
+
+NO UNRESOLVED DECISIONS
