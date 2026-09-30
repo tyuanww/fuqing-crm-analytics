@@ -1,6 +1,6 @@
-import { access, mkdir, open, readFile, rename, rm, symlink, lstat, readlink, stat } from 'node:fs/promises';
+import { access, mkdir, open, readFile, readdir, rename, rm, symlink, lstat, readlink, stat } from 'node:fs/promises';
 import { randomBytes } from 'node:crypto';
-import { basename, dirname, join, resolve } from 'node:path';
+import { basename, dirname, join, relative, resolve } from 'node:path';
 import { receiveArtifact, sha256 } from './artifact.mjs';
 import { recordEvent } from './state.mjs';
 import { assertSchema } from './schema.mjs';
@@ -106,6 +106,57 @@ async function receiveRuntimeArtifact({ artifact, destination }) {
   return stdout.trim();
 }
 
+/**
+ * Bind source plugins to the peer package closure shipped in the adjacent
+ * immutable runtime. Source artifacts deliberately exclude node_modules;
+ * without this derived link a peer-only plugin cannot resolve dsh-tools on a
+ * clean host. The link is relative and stays inside the prepared release.
+ */
+export async function materializePluginPeerLinks(staging) {
+  const runtimePeers = join(staging, 'upstream/node_modules/.pnpm/node_modules/@deepseek-ai');
+  const pluginsRoot = join(staging, 'dsh-plugins');
+  const entries = await access(pluginsRoot).then(() => readdir(pluginsRoot, { withFileTypes: true }), error => {
+    if (error.code === 'ENOENT') return [];
+    throw error;
+  });
+  const linked = [];
+  let runtimeChecked = false;
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    const plugin = join(pluginsRoot, entry.name);
+    let packageJson;
+    try { packageJson = JSON.parse(await readFile(join(plugin, 'package.json'), 'utf8')); }
+    catch (error) { if (error.code === 'ENOENT') continue; throw new Error(`RELEASE_PLUGIN_PACKAGE_INVALID ${entry.name}`); }
+    if (!packageJson.peerDependencies || typeof packageJson.peerDependencies !== 'object'
+      || !Object.keys(packageJson.peerDependencies).some(name => name.startsWith('@deepseek-ai/'))) continue;
+    if (!runtimeChecked) {
+      const runtimeInfo = await lstat(runtimePeers).catch(error => {
+        if (error.code === 'ENOENT') return null;
+        throw error;
+      });
+      if (!runtimeInfo?.isDirectory()) throw new Error('RELEASE_RUNTIME_PEER_ROOT_MISSING');
+      runtimeChecked = true;
+    }
+    const nodeModules = join(plugin, 'node_modules');
+    await mkdir(nodeModules, { recursive: true, mode: 0o700 });
+    const scope = join(nodeModules, '@deepseek-ai');
+    const target = relative(dirname(scope), runtimePeers);
+    const existing = await lstat(scope).catch(error => {
+      if (error.code === 'ENOENT') return null;
+      throw error;
+    });
+    if (existing) {
+      if (!existing.isSymbolicLink() || resolve(dirname(scope), await readlink(scope)) !== resolve(runtimePeers)) {
+        throw new Error(`RELEASE_PLUGIN_PEER_LINK_COLLISION ${entry.name}`);
+      }
+    } else {
+      await symlink(target, scope, 'dir');
+    }
+    linked.push({ plugin: entry.name, target });
+  }
+  return { count: linked.length, links: linked };
+}
+
 export async function installRelease({ artifact, upstreamRuntimeArtifact = null, manifestPath, releaseRoot, tag, statePath, owner = 'shinemage-dsh', restartDependency = 'shinemage-dsh.service', publicationPath = null, sumsPath = null, evidenceIndexPath = null, attestationBundlePath = null, runtimeAttestationBundlePath = null, repository = null, sourceRef = null, signerWorkflow = null, gh = 'gh', offline = false }) {
   assertTag(tag); const root = resolve(releaseRoot); const releases = join(root, 'releases'); const target = releasePath(root, tag);
   if (!OWNER.test(owner) || !OWNER.test(restartDependency)) throw new Error('RELEASE_OWNER_INVALID');
@@ -161,7 +212,8 @@ export async function installRelease({ artifact, upstreamRuntimeArtifact = null,
     const received = await receiveArtifact({ artifact, manifestPath, destination: staging });
     let runtimeReceipt = null;
     if (manifest.upstream_runtime) runtimeReceipt = await receiveRuntimeArtifact({ artifact: upstreamRuntimeArtifact, destination: join(staging, 'upstream') });
-    await writeMarker(staging, { tag, source_sha: manifest.source_sha, artifact_sha256: received.sha256, upstream_runtime: manifest.upstream_runtime ?? null, upstream_path: manifest.upstream_runtime ? 'upstream' : null, runtime_unpack: runtimeReceipt, owner, restart_dependency: restartDependency, publication_status: trust?.status ?? 'NOT_CHECKED', provenance_status: trust?.provenance_status ?? 'NOT_AVAILABLE', state: 'PREPARED', prepared_at: new Date().toISOString() });
+    const pluginPeerLinks = manifest.upstream_runtime ? await materializePluginPeerLinks(staging) : null;
+    await writeMarker(staging, { tag, source_sha: manifest.source_sha, artifact_sha256: received.sha256, upstream_runtime: manifest.upstream_runtime ?? null, upstream_path: manifest.upstream_runtime ? 'upstream' : null, runtime_unpack: runtimeReceipt, plugin_peer_links: pluginPeerLinks, owner, restart_dependency: restartDependency, publication_status: trust?.status ?? 'NOT_CHECKED', provenance_status: trust?.provenance_status ?? 'NOT_AVAILABLE', state: 'PREPARED', prepared_at: new Date().toISOString() });
     await fsyncDir(staging);
     // Rename is exclusive: never remove or replace an existing release.
     await rename(staging, target); await fsyncDir(releases);

@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { basename, join } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 import test from 'node:test';
 import { collectAllowlist, packArtifact, receiveArtifact } from './artifact.mjs';
 import { issueToken, consumeToken, tokenExchangeResponse } from './auth-contract.mjs';
-import { assertPublicationAssets, assertReleaseInputs, installRelease, activateRelease, rollbackRelease } from './promotion.mjs';
+import { assertPublicationAssets, assertReleaseInputs, installRelease, activateRelease, materializePluginPeerLinks, rollbackRelease } from './promotion.mjs';
 import { beginAction, finishAction, receipt } from './action-contract.mjs';
 import { verifyReviewedCommit } from './trust.mjs';
 import { writeEvidence } from './evidence.mjs';
@@ -115,6 +115,27 @@ test('promotion binds checksum entries and evidence index to the release tag', a
 });
 test('token is one-time, origin-bound, rate-limited and session-backed', async () => { const root=await fixture(), db=join(root,'tokens.json'), token=await issueToken(db,{now:1000}); await assert.rejects(()=>consumeToken(db,token,{now:1001}),/AUTH_ORIGIN_REJECTED/); assert.equal((await consumeToken(db,token,{origin:'https://app.tyuan.chat',allowedOrigins:['https://app.tyuan.chat'],now:1001})).authenticated,true); await assert.rejects(()=>consumeToken(db,token,{origin:'https://app.tyuan.chat',allowedOrigins:['https://app.tyuan.chat'],now:1002}),/AUTH_TOKEN_REPLAY/); const fresh=await issueToken(db,{now:2000}); const response=await tokenExchangeResponse(db,fresh,{method:'POST',origin:'https://app.tyuan.chat',allowedOrigins:['https://app.tyuan.chat'],now:2001}); assert.equal(response.status,303); assert.match(response.headers['set-cookie'][0],/HttpOnly/); });
 test('side-by-side install, activation and duplicate protection retain source identity', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); const releaseRoot=join(root,'releases-root'); const installed=await installRelease({artifact:archive,manifestPath:m,releaseRoot,tag:'dsh-test',offline:true}); assert.equal(installed.status,'PREPARED'); const active=await activateRelease({releaseRoot,tag:'dsh-test',sourceSha:'a'.repeat(40)}); assert.equal(active.status,'ACTIVE'); await assert.rejects(()=>installRelease({artifact:archive,manifestPath:m,releaseRoot,tag:'dsh-test',offline:true}),/RELEASE_EXISTS/); });
+test('prepared releases materialize peer-only plugin links into the pinned runtime', async () => {
+  const root = await fixture();
+  const plugin = join(root, 'dsh-plugins/analytics-workbench');
+  const peers = join(root, 'upstream/node_modules/.pnpm/node_modules/@deepseek-ai');
+  await mkdir(plugin, { recursive: true });
+  await mkdir(peers, { recursive: true });
+  await writeFile(join(plugin, 'package.json'), JSON.stringify({ peerDependencies: { '@deepseek-ai/dsh-tools': '0.1.7-rc.2' } }));
+  const result = await materializePluginPeerLinks(root);
+  assert.equal(result.count, 1);
+  const link = join(plugin, 'node_modules/@deepseek-ai');
+  assert.equal(await readlink(link), '../../../upstream/node_modules/.pnpm/node_modules/@deepseek-ai');
+  assert.equal(resolve(dirname(link), await readlink(link)), resolve(peers));
+  assert.deepEqual(await materializePluginPeerLinks(root), result);
+});
+test('prepared releases refuse peer plugins when the runtime closure is missing', async () => {
+  const root = await fixture();
+  const plugin = join(root, 'dsh-plugins/analytics-workbench');
+  await mkdir(plugin, { recursive: true });
+  await writeFile(join(plugin, 'package.json'), JSON.stringify({ peerDependencies: { '@deepseek-ai/dsh-tools': '0.1.7-rc.2' } }));
+  await assert.rejects(() => materializePluginPeerLinks(root), /RELEASE_RUNTIME_PEER_ROOT_MISSING/);
+});
 test('promotion receives and records the pinned upstream runtime bundle', async () => {
   const root = await fixture();
   const archive = join(root, 'source.tar.gz');
