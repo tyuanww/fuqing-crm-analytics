@@ -77,6 +77,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          trap 'rc=$?; printf "release evidence failed rc=%s command=%s\\n" "$rc" "$BASH_COMMAND"; exit "$rc"' ERR
           # Read the exact reviewed brand blob before validation. Historical
           # release tags that still contain an LFS pointer use the
           # authenticated Batch API compatibility path below; current tags

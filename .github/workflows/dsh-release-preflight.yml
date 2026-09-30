@@ -59,6 +59,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          trap 'rc=$?; printf "release preflight failed rc=%s command=%s\\n" "$rc" "$BASH_COMMAND"; exit "$rc"' ERR
           [[ "$REVIEWED_SHA" =~ ^[0-9a-f]{40}$ ]]
           test "$(git rev-parse HEAD)" = "$REVIEWED_SHA"
           if [[ "$GITHUB_EVENT_NAME" == workflow_dispatch ]]; then
