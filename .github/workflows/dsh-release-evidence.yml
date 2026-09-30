@@ -78,7 +78,9 @@ jobs:
           # not hydrate the reviewed object on a fresh runner. The checkout
           # action's read-only token remains scoped to this job's local git
           # config and authenticates the same GitHub LFS endpoint.
-          git lfs pull --include="frontend-vue3/src/assets/brand/shine-mage.png" --exclude=""
+          # The verifier is detached at the reviewed commit; fetch that ref
+          # explicitly instead of relying on `git lfs pull`'s current branch.
+          git lfs fetch origin "$REVIEWED_SHA" --include="frontend-vue3/src/assets/brand/shine-mage.png" --exclude=""
           git lfs checkout
           node --input-type=module -e "import { brandAssets } from './scripts/dsh-b0/brand-assets.mjs'; await brandAssets(process.cwd());"
       - name: Require a successful exact-SHA preflight

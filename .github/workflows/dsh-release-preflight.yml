@@ -68,7 +68,10 @@ jobs:
           # actions/checkout persists its read-only GITHUB_TOKEN in local git
           # config for this job, so LFS receives the same authenticated origin
           # without widening credentials into an environment variable.
-          git lfs pull --include="frontend-vue3/src/assets/brand/shine-mage.png" --exclude=""
+          # The checkout is intentionally detached at the reviewed SHA, so
+          # use an explicit remote/ref fetch instead of `git lfs pull`, which
+          # requires a current branch and exits early in this workflow.
+          git lfs fetch origin "$REVIEWED_SHA" --include="frontend-vue3/src/assets/brand/shine-mage.png" --exclude=""
           git lfs checkout
           node --input-type=module -e "import { brandAssets } from './scripts/dsh-b0/brand-assets.mjs'; await brandAssets(process.cwd());"
       - name: Build the exact pinned runtime before tag creation
