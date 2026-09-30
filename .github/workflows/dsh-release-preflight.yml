@@ -53,6 +53,8 @@ jobs:
         with:
           python-version: '3.14'
       - name: Verify the reviewed source
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           [[ "$REVIEWED_SHA" =~ ^[0-9a-f]{40}$ ]]
@@ -66,6 +68,9 @@ jobs:
           # LFS fetch cache did not hydrate the reviewed object. Pull the
           # allowlisted brand asset explicitly, then keep the digest check
           # fail-closed below.
+          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $auth"
+          trap 'git config --local --unset-all http.https://github.com/.extraheader >/dev/null 2>&1 || true' EXIT
           git lfs pull --include="frontend-vue3/src/assets/brand/shine-mage.png" --exclude=""
           git lfs checkout
           node --input-type=module -e "import { brandAssets } from './scripts/dsh-b0/brand-assets.mjs'; await brandAssets(process.cwd());"

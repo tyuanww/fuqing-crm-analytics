@@ -71,10 +71,15 @@ jobs:
           git merge-base --is-ancestor origin/main "$REVIEWED_SHA"
           test -z "$(git status --porcelain --untracked-files=all)"
       - name: Verify release LFS assets are hydrated
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           # Keep release evidence deterministic when checkout's LFS cache did
           # not hydrate the reviewed object on a fresh runner.
+          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $auth"
+          trap 'git config --local --unset-all http.https://github.com/.extraheader >/dev/null 2>&1 || true' EXIT
           git lfs pull --include="frontend-vue3/src/assets/brand/shine-mage.png" --exclude=""
           git lfs checkout
           node --input-type=module -e "import { brandAssets } from './scripts/dsh-b0/brand-assets.mjs'; await brandAssets(process.cwd());"
