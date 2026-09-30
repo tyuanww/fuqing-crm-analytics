@@ -1,14 +1,14 @@
 # 项目状态 (Project Status)
 > 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。本页是当前运行与交付边界的 SSOT。
 
-## 当前快照（2026-09-29，DSH 0.1.7-rc.2 / VERSION 0.19.0.0）
+## 当前快照（2026-09-30，DSH 0.1.7-rc.2 / VERSION 0.19.0.0）
 
 | 项 | 状态 |
 |---|---|
-| Git 基线 | 产品 VERSION 为 `0.19.0.0`；PR #83/#84/#85 已合并，required CI 已通过。发布源码 SHA 以最终受保护 tag 和对应的 release manifest 为准；GitHub Release、tag 和杭州切换尚未执行。 |
-| 产品 | **PARTIAL / RELEASE_BLOCKED**；T2 已完成，T3–T12 的本地合同与 synthetic 验证已完成（当前 74/74），GitHub main/tag protection 和 evidence environment 已配置；杭州现役旧 checkout 的 loopback SLI 已完成 60/60，`zstd` 已可用；PR #84 合并后的候选快照已在 Mac 隔离目录完成 receive/doctor；后续文档提交使该快照不再代表最新 main，杭州尚未接收。独立 reviewer/OIDC、Python 3.14+ 冷运行时、rc2 冷验证、operator route/正负探针、杭州 HTTP backpressure、public HTML、现场 owner 和 UAT 未完成。既有 HTML 收件箱能力保持，完整浏览器 UAT 仍开放。 |
-| DSH | 官方上游固定为 `477b4f42`（0.1.7-rc.2），不修改上游源码；杭州切换未执行。 |
-| CRM | 杭州 backend `127.0.0.1:18093`、frontend `127.0.0.1:18094` 健康；生产 checkout 固定在 `47f49616`。 |
+| Git 基线 | 产品 VERSION 为 `0.19.0.0`；PR #83/#84/#85/#97 已合并，required CI 已通过。`dsh-0.19.0.0-r3` immutable Release 已发布，源 SHA 为 `32abb00b3263736a5f903321cf018b8bc0f7ef0b`；本地 peer-link 安装器修复 `3fdf1efc` 尚未推送。 |
+| 产品 | **PARTIAL**；r3 已在杭州 current 运行并完成 DSH/CRM/B0 loopback smoke，但完整浏览器、真实模型、WAL 兼容、operator gate、10x backpressure、真实业务 UAT 和回退演练仍未完成。 |
+| DSH | 官方上游固定为 `477b4f42`（0.1.7-rc.2），不修改上游源码；杭州 current 为 `/srv/shinemage/dsh/releases/dsh-0.19.0.0-r3`，激活 receipt 已保存。 |
+| CRM | 杭州 backend `127.0.0.1:18093`、frontend `127.0.0.1:18094` 健康；backend 镜像固定为 `sha256:bbcea629…`，容器内 DuckDB 为 `1.5.6`；真实库未读取。 |
 | WeKnora | 页面 `127.0.0.1:18090`、API `127.0.0.1:18092` 健康；数据卷与登录由 WeKnora 自身管理。 |
 | 公网入口 | `www.tyuan.chat`、`app.tyuan.chat`、`page.tyuan.chat`、`board.tyuan.chat`、`learn.tyuan.chat` 经 Cloudflare Tunnel；HTTP 已强制跳 HTTPS。 |
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
@@ -16,7 +16,9 @@
 
 ## 本轮施工计划
 
-- rc2 候选验证账本见 [verification-20260927](docs/release/dsh-rc2-candidate/verification.md)；T2–T12 gate 见 `docs/release/dsh-rc2-candidate/`；当前 release artifact 的命令、allowlist 和接收边界见 [artifact reference](docs/reference/dsh-rc2-release-artifact.md)；固定上游 checkout、dsh-dev、B0 clean rebuild、PR #61 CI 和合并后的 main CI 均通过，main/tag protection 与 evidence environment 已配置，杭州现役旧 checkout 的 loopback SLI 已有 60/60 证据；真实模型、131GB DuckDB、独立 reviewer/OIDC attestation、GitHub Release、rc2 冷验证、杭州 route/重启和真实 HTTP backpressure 仍 `NOT_RUN`。
+> 当前实测收尾、Release asset 清单和杭州回执见 [r3 收尾记录](docs/release/dsh-rc2-candidate/closeout-20260930.md)。下方较早段落保留历史候选与未部署时的证据语境；不要用其“尚未执行”字样覆盖 2026-09-30 的事实。
+
+- 截至 2026-09-29 的历史候选快照：rc2 候选验证账本见 [verification-20260927](docs/release/dsh-rc2-candidate/verification.md)；T2–T12 gate 见 `docs/release/dsh-rc2-candidate/`；固定上游 checkout、dsh-dev、B0 clean rebuild、PR #61 CI 和当时的 main CI 均通过；真实模型、131GB DuckDB、rc2 冷验证、杭州 route/重启和真实 HTTP backpressure 当时仍 `NOT_RUN`。当前 r3 事实见 [收尾记录](docs/release/dsh-rc2-candidate/closeout-20260930.md)。
 - 本机候选 worktree 不含 DuckDB/WAL 文件；这里只使用 synthetic fixture 和隔离小库，杭州生产数据状态不由本地文件推断。PR #84 合并提交 `a9da9161` 的 `dsh-0.19.0.0-candidate` 曾在 Mac 隔离目录完成 build/receive/doctor；该快照在后续 main 提交后仅作历史证据，正式包必须从最终 reviewed SHA 重建，未上传或写入杭州现役目录；目标仍只有 Python 3.12.3，未满足项目 Python 3.14+ 冷运行时要求。
 - 历史 merged-main internal artifact 仍使用 provisional tag `dsh-0.18.0.1-main-00823ff5`；source SHA `00823ff533b4cc32861cc70e3f8bda5d374f3b14`、app tarball SHA-256 `b11c4b43436eb06f1821c1891121b690e5488effa0c75d421f285e051c8fbf35`、manifest SHA-256 `4642f4614d81b6f2f8777485793b20f2c140eb3523efa46475831fe4398d36d7`、entries `1676`；pinned upstream `477b4f42` git-archive tarball SHA-256 `ddc0cb7b74c938e097f918f44e88e67a83bdde555db18f49cb7a3c9740744e32` 已在隔离 `/tmp` 生成，尚未上传或绑定 publication sidecar；manifest 以 `.context/release-evidence/dsh-0.18.0.1-main-00823ff5/release-manifest.v1.json` 为唯一来源；接收目录为一次性 synthetic 临时目录，未创建 draft/tag/release。`0.18.0.2` 及其 pre-review 包只保留为历史证据；`0.19.0.0` 的 `a9da9161` 候选快照已完成本地 checksum/receive，后续 main 提交使其失效；最终包以仓库外的不可变 manifest/CI evidence 为准，仍为 internal-only-partial。
 

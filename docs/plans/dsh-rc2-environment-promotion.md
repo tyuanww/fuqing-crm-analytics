@@ -737,3 +737,14 @@ Eng 的 native 与 outside 两路均完成，6/6 维度（artifact trust、auth/
 - 一个 CRM operator pilot 的最小场景数、p95/5xx/auth/plugin/page 阈值及产品 owner 的真实业务 UAT 结论。
 - T13 的 Design summary 已修正；RACI、稳定窗口和旧版本清理仍需杭州现场 owner/授权后落定。
 - 以上决定和 P0/P1 任务均关闭前，不得把 GitHub Release、杭州接收或旧版本删除描述为已完成。
+
+## 2026-09-30 当前执行覆盖（收尾）
+
+本节覆盖前文在候选尚未发布时的状态描述；前文 review、历史测试和任务复选框不回写。当前事实以 [r3 收尾记录](../release/dsh-rc2-candidate/closeout-20260930.md) 为准：
+
+- `dsh-0.19.0.0-r3` 已由 reviewed source `32abb00b…` 生成并发布为 immutable GitHub Release；preflight、protected evidence/OIDC 和 publication workflow 均通过。杭州 `current` 已原子指向 r3，DSH/CRM/B0 loopback smoke 通过。
+- T2/T13、本地 artifact contract、publication/activation 证据已具备；这不关闭产品级 T3–T12。r3 durable journal/reconcile、浏览器/真实模型 UAT、rc1↔rc2 WAL、operator gate/15 分钟 SLI、10x backpressure、真实 save/export/send 与 rollback drill 继续保持 `PARTIAL/NOT_RUN`。
+- r3 immutable source tarball 不含 `node_modules`；runtime bundle 包含固定 upstream `node_modules` closure，但插件工作树的 peer scope 链接未随 source 包提供。本次杭州安装后手工生成了 8 个 `@deepseek-ai` peer links；自动生成该链接的安装器修复在本地提交 `3fdf1efc`，未 push，因此下一次 release 需要审查、合并并从新 SHA 重建 artifact。
+- CRM backend immutable image、Python 3.14 wheel 包和 runtime-binding receipt 是杭州 sidecar，不是当前 GitHub Release 的资产。若要求“一个 Release 包含全部生产输入”，需另开修复任务，不能通过修改已发布 immutable Release 达成。
+- 生产 `release-state.json` 仍是旧 r1 journal；r3 的 active receipt 是现场事实，不能把旧 journal 自动改写成 r3 状态。rollback wrapper 只切 symlink/写 receipt，不恢复 env/runtime/image 或重启服务，本次没有执行回退演练。
+- 当前无 open PR；本地 `3fdf1efc` 提交未 push。本节不授权 push、tag、Release 修改、旧版本删除或再次生产切换。

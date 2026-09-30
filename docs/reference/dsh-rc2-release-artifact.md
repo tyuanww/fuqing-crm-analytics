@@ -1,6 +1,6 @@
 # DSH rc2 release artifact reference
 
-本页是 DSH rc2 发布工具的命令和输入输出参考。当前候选分支产品版本为 `0.19.0.0`，DSH 固定为 `0.1.7-rc.2`，上游 SHA 为 `477b4f420553e8a52c2fbccc464d7561b239c443`。本页描述的是可审查的离线准备和接收合同，不代表 GitHub Release、杭州安装或生产切换已经完成。
+本页是 DSH rc2 发布工具的命令和输入输出参考。产品版本为 `0.19.0.0`，DSH 固定为 `0.1.7-rc.2`，上游 SHA 为 `477b4f420553e8a52c2fbccc464d7561b239c443`。离线命令段描述接收合同；截至 2026-09-30，实际 r3 Release、杭州 current 和未关闭项见 [r3 收尾记录](../release/dsh-rc2-candidate/closeout-20260930.md)。
 
 ## 命令入口
 
@@ -53,7 +53,7 @@ allowlist 之外的文件不会进入包。`.map`、测试构建残留、`.env`�
 
 `receive` 在解包前校验 manifest schema、allowlist 路径、payload 路径、artifact 字节数和 SHA-256。source 使用 `secure-unpack.py`，runtime 使用 bounded zstd receiver；两者都限制条目数和展开后字节数。source 拒绝绝对路径、`..`、重复条目、链接、设备文件和不安全权限；runtime 只接受 stage 内相对 symlink/hardlink。解包使用全新的目标目录；任何失败都不会把目录当作可用 release。
 
-生产安装还需要 `release-publication.v1.json`、`SHA256SUMS`、CI evidence index、GitHub Release 和 attestation bundle。未达到 `PUBLISHED_VERIFIED` 时，杭州安装入口必须保持阻断。
+生产安装还需要 `release-publication.v1.json`、`SHA256SUMS`、CI evidence index、GitHub Release 和 attestation bundle。r3 已达到 `PUBLISHED_VERIFIED` 并在杭州安装；CRM image、Python wheel 和 runtime peer-link receipt 是本次杭州 sidecar，未作为 GitHub Release asset 上传。未达到 `PUBLISHED_VERIFIED` 时，杭州安装入口必须保持阻断。
 
 ## 相关文档
 

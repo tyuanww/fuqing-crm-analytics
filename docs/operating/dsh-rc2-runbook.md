@@ -8,8 +8,12 @@
 2. 先在新 `releases/<tag>` 目录执行 `deploy/wsl/install-release.sh`，必须显式提供 `RELEASE_UPSTREAM_RUNTIME`、`RELEASE_RUNTIME_ATTESTATION_BUNDLE`、`RELEASE_OWNER`、`RELEASE_RESTART_DEPENDENCY`、publication/checksum/evidence 路径和 source attestation bundle；脚本会绑定 reviewed ref、校验五类 release asset 摘要，并在 runtime、checksum、evidence 或 provenance 未验证时拒绝解包。
 3. 运行内部 loopback healthcheck 和七组 UAT。没有 operator 隔离时，`operator_gate_method=none`，不能把 hostname 验证写成 canary；service 重启即正式 cutover gate。
 4. 获得对应授权后再执行 `activate-release.sh`，必须再次提供匹配的 `RELEASE_OWNER` 与 `RELEASE_RESTART_DEPENDENCY`，只切换 `current` symlink；仅重启自己拥有的 DSH service。CRM、WeKnora、Cloudflare route 不因 rc2 自动重启或修改。
-5. 失败时记录 `rollback.json`，使用 `rollback-release.sh` 并再次提供匹配的 owner/restart dependency 恢复旧 target/env/runtime，再复验 `healthcheck.sh --all`。稳定窗口结束前不删除旧版本。
+5. 失败时记录 `rollback.json`，使用 `rollback-release.sh` 并再次提供匹配的 owner/restart dependency 恢复旧 target；该 wrapper 只切换 `current`/`current-target` 并写 receipt，不恢复 env、Python/runtime、CRM image，也不重启 systemd。现场必须按回执逐项恢复这些 owner-owned 依赖，再由同一 owner 重启自己的服务并复验 `healthcheck.sh --all`。稳定窗口结束前不删除旧版本。
 
 触发回退：manifest/checksum 不一致、systemd 未 active、DSH/page/CRM healthcheck 失败、认证或 CORS 失败、关键路径 5xx、控制台未处理异常或产品 owner 明确阻断。现场真实路径、用户、权限和恢复命令以 systemd unit/receipt 为准，不能照抄示例路径。
 
 真实模型、完整真实业务、移动端、131GB DuckDB 和 WSL2 冷验证在证据未运行时保持 `PARTIAL/NOT_RUN`。
+
+## 2026-09-30 r3 现场记录
+
+当前实际 release、source/upstream SHA、杭州 receipt、sidecar 和未关闭门禁见 [r3 收尾记录](../release/dsh-rc2-candidate/closeout-20260930.md)。r3 已在杭州 `current` 运行；生产 durable `release-state.json` 仍是旧 r1 journal，不能把 r3 resume/reconcile 写成已验收。r3 的 immutable source/runtime 包不含 `node_modules`，本次安装后手工补充了 8 个 peer links；自动生成链接的修复尚在本地提交，下一次 release 前必须重新构包。
