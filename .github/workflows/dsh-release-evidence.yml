@@ -73,6 +73,9 @@ jobs:
       - name: Verify release LFS assets are hydrated
         run: |
           set -euo pipefail
+          # Keep release evidence deterministic when checkout's LFS cache did
+          # not hydrate the reviewed object on a fresh runner.
+          git lfs pull --include="frontend-vue3/src/assets/brand/shine-mage.png" --exclude=""
           git lfs checkout
           node --input-type=module -e "import { brandAssets } from './scripts/dsh-b0/brand-assets.mjs'; await brandAssets(process.cwd());"
       - name: Require a successful exact-SHA preflight

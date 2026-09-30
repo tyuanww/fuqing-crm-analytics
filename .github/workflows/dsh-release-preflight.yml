@@ -62,6 +62,11 @@ jobs:
           fi
           git merge-base --is-ancestor origin/main "$REVIEWED_SHA"
           test -z "$(git status --porcelain --untracked-files=all)"
+          # checkout can leave a pointer on a clean PR ref when the runner's
+          # LFS fetch cache did not hydrate the reviewed object. Pull the
+          # allowlisted brand asset explicitly, then keep the digest check
+          # fail-closed below.
+          git lfs pull --include="frontend-vue3/src/assets/brand/shine-mage.png" --exclude=""
           git lfs checkout
           node --input-type=module -e "import { brandAssets } from './scripts/dsh-b0/brand-assets.mjs'; await brandAssets(process.cwd());"
       - name: Build the exact pinned runtime before tag creation
