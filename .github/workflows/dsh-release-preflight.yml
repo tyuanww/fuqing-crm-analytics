@@ -57,6 +57,7 @@ jobs:
       - name: Verify the reviewed source
         env:
           GH_TOKEN: ${{ github.token }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || '' }}
         run: |
           set -euo pipefail
           trap 'rc=$?; printf "release preflight failed rc=%s command=%s\\n" "$rc" "$BASH_COMMAND"; exit "$rc"' ERR
@@ -65,7 +66,12 @@ jobs:
           if [[ "$GITHUB_EVENT_NAME" == workflow_dispatch ]]; then
             test "$GITHUB_SHA" = "$REVIEWED_SHA"
           fi
-          git merge-base --is-ancestor origin/main "$REVIEWED_SHA"
+          if [[ "$GITHUB_EVENT_NAME" == pull_request ]]; then
+            [[ "$BASE_SHA" =~ ^[0-9a-f]{40}$ ]]
+            git merge-base --is-ancestor "$BASE_SHA" "$REVIEWED_SHA"
+          else
+            git merge-base --is-ancestor origin/main "$REVIEWED_SHA"
+          fi
           # actions/checkout runs with clean:true; keep this gate focused on
           # the reviewed commit identity so a runner-side LFS attribute probe
           # cannot mask the immutable source check below.
