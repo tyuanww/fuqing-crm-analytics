@@ -2,4 +2,5 @@ patchedDependencies:
   antd@5.29.3: patches/antd@5.29.3.patch
   rc-picker@4.11.3: patches/rc-picker@4.11.3.patch
 overrides:
+  'brace-expansion@2.1.4': 2.1.6
   'js-yaml@4.3.1': 4.3.2
