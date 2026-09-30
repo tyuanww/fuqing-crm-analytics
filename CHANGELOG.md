@@ -1,3 +1,22 @@
+## [0.20.0.0] - 2026-09-30
+
+### Added
+
+- 发布候选现在会在同一个流程中记录 readiness、阶段耗时、artifact 摘要、接收结果和证据索引，便于从本地候选追踪到远端验收。
+- 增加固定 runtime 的 side-by-side 安装、插件 peer link 物化、原子激活与回退状态记录，保留失败尝试并支持安全重试。
+
+### Changed
+
+- `pnpm dsh preflight` 统一使用固定 Node/pnpm/Python、上游 SHA 和 runtime 合同，并在 prepare、build、runtime、release、test、receive、evidence 阶段输出可归因状态。
+- release readiness、promotion journal、远端 reconcile 和 evidence 校验共享同一发布状态边界；候选包继续以不可变 manifest、SHA256SUMS 和受保护发布证据为输入。
+- Quickstart 和 release 文档明确区分本地候选、GitHub Release 与杭州现场验收，禁止用现场编译或浮动 main 代替 immutable artifact。
+
+### Fixed
+
+- 修复 preflight 在下载证据前检查 artifact、prepare checkout 环境变量泄漏、失败输出目录复用和错误 source SHA 校验问题。
+- 修复构建工具 brace-expansion 高危依赖，保持审计结果无 high/critical 漏洞。
+- 记录 r3 杭州现役、回退和 sidecar 边界，避免把局部 smoke 或 synthetic 结果误报为完整生产 UAT。
+
 ## [0.19.0.0] - 2026-09-29
 
 ### Added
