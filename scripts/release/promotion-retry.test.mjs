@@ -67,6 +67,15 @@ test('duplicate rollback is idempotent and preserves immutable receipts', async 
   assert.equal((await receiptFiles(root)).length, count);
 });
 
+test('idempotent rollback still verifies the target owner contract', async () => {
+  const root = await fixture();
+  await activate(root, 'dsh-a', shaA);
+  await activate(root, 'dsh-b', shaB);
+  await rollbackRelease({ releaseRoot: root, statePath: statePath(root), expectedOwner: 'service-a', expectedRestartDependency: 'service-a.service' });
+  await writeFile(join(root, 'releases/dsh-a/release-marker.json'), JSON.stringify({ tag: 'dsh-a', source_sha: shaA, owner: 'service-other', restart_dependency: 'service-a.service' }));
+  await assert.rejects(() => rollbackRelease({ releaseRoot: root, statePath: statePath(root), expectedOwner: 'service-a', expectedRestartDependency: 'service-a.service' }), /RELEASE_OWNER_MISMATCH/);
+});
+
 test('simultaneous activation and rollback cannot corrupt current pointers', async () => {
   const root = await fixture();
   await activate(root, 'dsh-a', shaA);

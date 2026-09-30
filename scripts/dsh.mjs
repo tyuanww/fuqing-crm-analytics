@@ -9,7 +9,8 @@ import { assertSchema } from './release/schema.mjs';
 import { verifyPayload } from './release/artifact.mjs';
 import { readState, reconcileState, resume } from './release/state.mjs';
 import { runLocalVerification } from './release/local-verify.mjs';
-import { collectReleaseReadiness, DSH_UPSTREAM_SHA, printReadiness } from './release/readiness.mjs';
+import { collectReleaseReadiness, printReadiness } from './release/readiness.mjs';
+import { DSH_UPSTREAM_SHA, NODE_MAJOR, PNPM_VERSION } from './release/toolchain.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const releaseEvidence = join(root, '.context/release-evidence');
@@ -25,7 +26,7 @@ Exit codes: 0=success, 2=usage/error/release-gate-blocked.`);
 }
 async function printVersion() {
   const version = (await readFile(join(root, 'VERSION'), 'utf8')).trim();
-  console.log(`DSH_VERSION ${version} upstream=477b4f420553e8a52c2fbccc464d7561b239c443`);
+  console.log(`DSH_VERSION ${version} upstream=${DSH_UPSTREAM_SHA}`);
 }
 function git(args) {
   try { return execFileSync('git', ['-C', root, ...args], { encoding: 'utf8' }).trim(); }
@@ -41,9 +42,9 @@ async function doctor(args = [], { setExitCode = true } = {}) {
   const releaseMode = args.includes('--release');
   const version = (await readFile(join(root, 'VERSION'), 'utf8')).trim(); const pin = DSH_UPSTREAM_SHA;
   const checks = [
-    ['node24', Number(process.versions.node.split('.')[0]) === 24, process.versions.node],
+    [`node${NODE_MAJOR}`, Number(process.versions.node.split('.')[0]) === NODE_MAJOR, process.versions.node],
     ['version', /^\d+\.\d+\.\d+\.\d+$/.test(version), version],
-    ['rc2-pin', (await readFile(join(root, 'scripts/dsh-dev/constants.mjs'), 'utf8')).includes(pin), pin],
+    ['rc2-pin', /^[0-9a-f]{40}$/.test(pin), pin],
     ['release-schemas', await access(join(root, 'scripts/release/schemas/release-manifest.v1.schema.json')).then(() => true).catch(() => false), 'present'],
   ];
   for (const [name, ok, value] of checks) console.log(`DSH_DOCTOR ${ok ? 'PASS' : 'FAIL'} ${name}=${value}`);
@@ -86,7 +87,7 @@ async function release(args) {
   const status = git(['status', '--porcelain', '--untracked-files=all']);
   if (status) throw new Error('RELEASE_BLOCKED_DIRTY_WORKTREE reviewed commit must be clean; use a clean CI checkout to build the immutable artifact');
   const sourceSha = git(['rev-parse', 'HEAD']); const version = (await readFile(join(root, 'VERSION'), 'utf8')).trim();
-  const upstreamSha = '477b4f420553e8a52c2fbccc464d7561b239c443';
+  const upstreamSha = DSH_UPSTREAM_SHA;
   const runtimeInput = process.env.DSH_UPSTREAM_RUNTIME_BUNDLE;
   if (!runtimeInput) throw new Error('RELEASE_UPSTREAM_RUNTIME_REQUIRED');
   const runtimeInfo = await stat(runtimeInput).catch(() => null);
@@ -109,7 +110,7 @@ async function release(args) {
   const pre = await buildPreManifest({ releaseTag: tag, productVersion: version, sourceSha, dshUpstreamSha: upstreamSha, artifacts: [{ name: `${tag}.tar.zst`, role: 'source-bundle', path: `${tag}.tar.zst` }, { name: runtimeName, role: 'upstream-runtime-bundle', path: runtimeName }], output: join(dir, 'pre-manifest.v1.json') });
   const prePath = join(dir, 'pre-manifest.v1.json'); const preSha = await sha256(prePath);
   const bundle = await packArtifact({ rootDir: root, allowlist: pre.archive_allowlist, output: join(dir, `${tag}.tar.zst`) });
-  const manifest = { schema_version: 'release-manifest/v1', release_tag: tag, product_version: version, source_sha: sourceSha, dsh_upstream_sha: upstreamSha, pre_manifest_sha256: preSha, archive_allowlist: pre.archive_allowlist, denylist_version: 'release-denylist/v1', build_time: new Date().toISOString(), retention_until: 'NOT_SET_UNTIL_PUBLISHED', toolchain: { node: process.versions.node, pnpm: '11.7.0' }, artifact_bytes: bundle.bytes, artifact_sha256: bundle.sha256, upstream_runtime: { name: runtimeName, role: 'upstream-runtime-bundle', upstream_sha: upstreamSha, bytes: runtimeBytes, sha256: runtimeSha256 },
+  const manifest = { schema_version: 'release-manifest/v1', release_tag: tag, product_version: version, source_sha: sourceSha, dsh_upstream_sha: upstreamSha, pre_manifest_sha256: preSha, archive_allowlist: pre.archive_allowlist, denylist_version: 'release-denylist/v1', build_time: new Date().toISOString(), retention_until: 'NOT_SET_UNTIL_PUBLISHED', toolchain: { node: process.versions.node, pnpm: PNPM_VERSION }, artifact_bytes: bundle.bytes, artifact_sha256: bundle.sha256, upstream_runtime: { name: runtimeName, role: 'upstream-runtime-bundle', upstream_sha: upstreamSha, bytes: runtimeBytes, sha256: runtimeSha256 },
     payload: await Promise.all(pre.archive_allowlist.map(async path => ({ path, role: 'runtime-source', bytes: (await stat(join(root, path))).size, sha256: await sha256(join(root, path)) }))) };
   await assertSchema(manifest, join(root, 'scripts/release/schemas/release-manifest.v1.schema.json'));
   const manifestPath = join(dir, 'release-manifest.v1.json'); await writeFile(manifestPath, JSON.stringify(manifest, null, 2) + '\n', { mode: 0o600 });

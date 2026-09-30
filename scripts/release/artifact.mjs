@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { createReadStream } from 'node:fs';
 import { access, mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { join, relative, resolve, sep } from 'node:path';
 import { spawn } from 'node:child_process';
@@ -15,7 +16,7 @@ const DENY = /(^|\/)(?:\.env(?:\.|$)|\.npmrc(?:$|\/)|credentials?(?:[-_.]|$)|pri
 
 export async function sha256(path) {
   const hash = createHash('sha256');
-  hash.update(await readFile(path));
+  for await (const chunk of createReadStream(path, { highWaterMark: 64 * 1024 })) hash.update(chunk);
   return hash.digest('hex');
 }
 

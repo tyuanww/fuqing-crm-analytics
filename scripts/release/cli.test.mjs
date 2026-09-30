@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -46,6 +46,22 @@ test('doctor release reports readiness blockers without writing an artifact', ()
   assert.match(result.stdout, /DSH_DOCTOR_RELEASE FAIL runtime-bundle=/);
 });
 
+test('doctor release rejects an uncompressed or misnamed runtime bundle', async () => {
+  const rootDir = await mkdtemp(join(tmpdir(), 'dsh-runtime-check-'));
+  const runtime = join(rootDir, 'shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst');
+  await writeFile(runtime, 'not-a-zstd-stream');
+  try {
+    const result = spawnSync(process.execPath, [cli, 'doctor', '--release'], {
+      encoding: 'utf8',
+      env: { ...process.env, DSH_UPSTREAM_RUNTIME_BUNDLE: runtime },
+    });
+    assert.equal(result.status, 2);
+    assert.match(result.stdout, /runtime-bundle=.*zstd-invalid/);
+  } finally {
+    await rm(rootDir, { recursive: true, force: true });
+  }
+});
+
 test('preflight check is read-only and fails before creating output on an unclean tree', async () => {
   const rootDir = await mkdtemp(join(tmpdir(), 'dsh-preflight-check-'));
   const outputDir = join(rootDir, 'candidate');
@@ -60,6 +76,21 @@ test('preflight check is read-only and fails before creating output on an unclea
     assert.match(result.stderr, /DSH_PREFLIGHT_CHECK_STATUS BLOCKED/);
     assert.match(`${result.stdout}${result.stderr}`, /RELEASE_BLOCKED_DIRTY_WORKTREE|RELEASE_UPSTREAM_RUNTIME_REQUIRED/);
     await assert.rejects(() => import('node:fs/promises').then(fs => fs.stat(outputDir)), { code: 'ENOENT' });
+  } finally {
+    await rm(rootDir, { recursive: true, force: true });
+  }
+});
+
+test('preflight check rejects a source SHA that is not the current checkout', async () => {
+  const rootDir = await mkdtemp(join(tmpdir(), 'dsh-preflight-sha-'));
+  try {
+    const python = execFileSync('sh', ['-c', 'command -v python3'], { encoding: 'utf8' }).trim();
+    const result = spawnSync(process.execPath, [join(root, 'scripts/release/preflight.mjs'), '--check', '--python', python, '--tag', 'dsh-sha-test', '--source-sha', '0'.repeat(40), '--output-dir', join(rootDir, 'candidate')], {
+      cwd: root,
+      encoding: 'utf8',
+    });
+    assert.equal(result.status, 2);
+    assert.match(result.stderr, /PREFLIGHT_SOURCE_SHA_MISMATCH/);
   } finally {
     await rm(rootDir, { recursive: true, force: true });
   }

@@ -4,9 +4,13 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sha256 } from './artifact.mjs';
 import { assertSchema } from './schema.mjs';
+import { DSH_UPSTREAM_SHA } from './toolchain.mjs';
 
-export const UPSTREAM_SHA = '477b4f420553e8a52c2fbccc464d7561b239c443';
+export const UPSTREAM_SHA = DSH_UPSTREAM_SHA;
 export const RUNTIME_NAME = `shinemage-dsh-upstream-runtime-${UPSTREAM_SHA}.tar.zst`;
+const LOCAL_STAGES = ['prepare', 'build', 'runtime', 'release', 'test', 'receive', 'evidence'];
+const COVERAGE_KEYS = ['prepare', 'build', 'runtime', 'release', 'test', 'receive', 'wsl2', 'host_http'];
+const COVERAGE_VALUES = new Set(['PASS', 'PARTIAL', 'NOT_RUN']);
 export function releaseAssetNames(tag) {
   assert.match(tag, /^dsh-[A-Za-z0-9._-]+$/);
   return [`${tag}.tar.zst`, RUNTIME_NAME, 'pre-manifest.v1.json',
@@ -49,15 +53,23 @@ export async function verifyPreflight(directory, { tag, sourceSha }) {
   assert.equal(summary.release_tag, tag, 'PREFLIGHT_TAG_MISMATCH');
   assert.equal(summary.dsh_upstream_sha, UPSTREAM_SHA);
   assert.ok(Array.isArray(summary.stage_timings), 'PREFLIGHT_STAGES_INVALID');
+  assert.deepEqual(summary.stage_timings.map(stage => stage.name), LOCAL_STAGES, 'PREFLIGHT_STAGES_INCOMPLETE');
   for (const stage of summary.stage_timings) {
     assert.match(stage.name, /^[a-z-]+$/);
-    assert.ok(['PASS', 'FAILED'].includes(stage.status), 'PREFLIGHT_STAGE_STATUS_INVALID');
+    assert.equal(stage.status, 'PASS', `PREFLIGHT_STAGE_NOT_PASS ${stage.name}`);
     assert.ok(typeof stage.started_at === 'string' && stage.started_at.length > 0, 'PREFLIGHT_STAGE_TIME_INVALID');
-    if (stage.status === 'PASS') assert.ok(Number.isSafeInteger(stage.elapsed_ms) && stage.elapsed_ms >= 0, 'PREFLIGHT_STAGE_ELAPSED_INVALID');
+    assert.ok(Number.isSafeInteger(stage.elapsed_ms) && stage.elapsed_ms >= 0, 'PREFLIGHT_STAGE_ELAPSED_INVALID');
+    assert.equal(stage.error_code, null, `PREFLIGHT_STAGE_ERROR ${stage.name}`);
   }
-  assert.ok(summary.tthw_ms === null || (Number.isSafeInteger(summary.tthw_ms) && summary.tthw_ms >= 0), 'PREFLIGHT_TTHW_INVALID');
+  assert.ok(Number.isSafeInteger(summary.tthw_ms) && summary.tthw_ms >= 0, 'PREFLIGHT_TTHW_INVALID');
   assert.ok(Number.isSafeInteger(summary.retry_count) && summary.retry_count >= 0, 'PREFLIGHT_RETRY_COUNT_INVALID');
   assert.ok(summary.evidence_coverage && typeof summary.evidence_coverage === 'object' && !Array.isArray(summary.evidence_coverage), 'PREFLIGHT_COVERAGE_INVALID');
+  assert.deepEqual(Object.keys(summary.evidence_coverage).sort(), [...COVERAGE_KEYS].sort(), 'PREFLIGHT_COVERAGE_KEYS_INVALID');
+  for (const key of COVERAGE_KEYS) {
+    const value = summary.evidence_coverage[key];
+    assert.ok(COVERAGE_VALUES.has(value), `PREFLIGHT_COVERAGE_VALUE_INVALID ${key}`);
+    if (COVERAGE_KEYS.slice(0, 6).includes(key)) assert.equal(value, 'PASS', `PREFLIGHT_COVERAGE_LOCAL_NOT_PASS ${key}`);
+  }
   assert.deepEqual((await readdir(directory)).sort(), [...releaseAssetNames(tag), 'release-preflight.json'].sort(), 'PREFLIGHT_FILES_MISMATCH');
   const actual = await summarizePreflight(directory, { tag, sourceSha });
   assert.deepEqual(summary.assets, actual.assets, 'PREFLIGHT_DIGEST_MISMATCH');

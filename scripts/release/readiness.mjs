@@ -1,8 +1,9 @@
-import { access, constants as fsConstants, readdir, stat, statfs } from 'node:fs/promises';
+import { access, constants as fsConstants, lstat, readFile, stat, statfs } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
-import { dirname, join, resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
+import { DSH_SDK_VERSION, DSH_UPSTREAM_SHA, NODE_MAJOR, PNPM_VERSION } from './toolchain.mjs';
 
-export const DSH_UPSTREAM_SHA = '477b4f420553e8a52c2fbccc464d7561b239c443';
+export { DSH_UPSTREAM_SHA };
 export const RELEASE_PLUGINS = [
   'dsh-plugins/analytics-workbench',
   'dsh-plugins/shine-brand',
@@ -14,7 +15,18 @@ export const RELEASE_PLUGINS = [
 ];
 
 function commandOutput(command, args) {
-  try { return execFileSync(command, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); }
+  try {
+    return execFileSync(command, args, {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+      env: {
+        ...process.env,
+        COREPACK_ENABLE_NETWORK: '0',
+        COREPACK_ENABLE_DOWNLOAD_PROMPT: '0',
+        npm_config_offline: 'true',
+      },
+    }).trim();
+  }
   catch { return null; }
 }
 
@@ -46,12 +58,29 @@ async function writablePath(path, { allowCreate = false } = {}) {
   }
 }
 
-async function fileReady(path) {
-  if (!path) return { ok: false, value: 'missing' };
+function commandOk(command, args) {
   try {
-    const info = await stat(resolve(path));
-    return { ok: info.isFile() && info.size > 0, value: `${resolve(path)}:${info.size}B` };
-  } catch (error) { return { ok: false, value: `${resolve(path)}:${error.code ?? 'unavailable'}` }; }
+    execFileSync(command, args, {
+      encoding: 'utf8',
+      stdio: ['ignore', 'ignore', 'ignore'],
+      env: { ...process.env, COREPACK_ENABLE_NETWORK: '0', COREPACK_ENABLE_DOWNLOAD_PROMPT: '0', npm_config_offline: 'true' },
+    });
+    return true;
+  } catch { return false; }
+}
+
+async function runtimeReady(path) {
+  if (!path) return { ok: false, value: 'missing' };
+  const target = resolve(path);
+  const expectedName = `shinemage-dsh-upstream-runtime-${DSH_UPSTREAM_SHA}.tar.zst`;
+  try {
+    const info = await lstat(target);
+    if (!info.isFile() || info.isSymbolicLink()) return { ok: false, value: `${target}:not-regular-file` };
+    if (basename(target) !== expectedName) return { ok: false, value: `${target}:name-mismatch` };
+    if (info.size < 1) return { ok: false, value: `${target}:empty` };
+    if (!commandOk('zstd', ['-q', '-t', target])) return { ok: false, value: `${target}:zstd-invalid` };
+    return { ok: true, value: `${target}:${info.size}B` };
+  } catch (error) { return { ok: false, value: `${target}:${error.code ?? 'unavailable'}` }; }
 }
 
 /**
@@ -72,10 +101,13 @@ export async function collectReleaseReadiness({
   const repo = resolve(root);
   const checks = [];
   const nodeMajor = Number(process.versions.node.split('.')[0]);
-  add(checks, 'node24', nodeMajor === 24, process.versions.node, 'NODE24_REQUIRED', 'use Node 24.x from .nvmrc');
+  let expectedNode = null;
+  try { expectedNode = (await readFile(join(repo, '.nvmrc'), 'utf8')).trim().replace(/^v/, ''); } catch {}
+  const nodeOk = nodeMajor === NODE_MAJOR && (!expectedNode || process.versions.node === expectedNode);
+  add(checks, `node${NODE_MAJOR}`, nodeOk, expectedNode ? `${process.versions.node}:expected-${expectedNode}` : process.versions.node, 'NODE_TOOLCHAIN_REQUIRED', 'use the exact Node version from .nvmrc');
 
   const pnpm = commandOutput('pnpm', ['--version']);
-  add(checks, 'pnpm11', pnpm === '11.7.0', pnpm ?? 'missing', 'PNPM_VERSION_REQUIRED', 'install/use pnpm 11.7.0');
+  add(checks, 'pnpm', pnpm === PNPM_VERSION, pnpm ?? 'missing', 'PNPM_VERSION_REQUIRED', `install/use pnpm ${PNPM_VERSION}`);
 
   const pythonCommand = pythonPath || 'python3';
   const pythonVersion = commandOutput(pythonCommand, ['--version']);
@@ -93,7 +125,7 @@ export async function collectReleaseReadiness({
   const zstd = commandOutput('zstd', ['--version']);
   add(checks, 'zstd', Boolean(zstd), zstd ?? 'missing', 'ZSTD_REQUIRED', 'install zstd before preflight');
 
-  const upstream = resolve(upstreamPath || join(repo, '.context/dsh-b0/upstream-0.1.7-rc.2'));
+  const upstream = resolve(upstreamPath || join(repo, `.context/dsh-b0/upstream-${DSH_SDK_VERSION}`));
   const upstreamSha = commandOutput('git', ['-C', upstream, 'rev-parse', 'HEAD']);
   add(checks, 'upstream-sha', upstreamSha === DSH_UPSTREAM_SHA, upstreamSha ?? `${upstream}:missing`, 'PREFLIGHT_UPSTREAM_SHA_MISMATCH', `checkout ${DSH_UPSTREAM_SHA}`);
 
@@ -105,8 +137,8 @@ export async function collectReleaseReadiness({
   add(checks, 'plugin-entrypoints', missingPlugins.length === 0, missingPlugins.length === 0 ? `${RELEASE_PLUGINS.length} build.mjs` : missingPlugins.join(','), 'PREFLIGHT_PLUGIN_ENTRYPOINT_MISSING', 'restore the pinned plugin source before preflight');
 
   if (requireRuntime) {
-    const runtime = await fileReady(runtimeBundle);
-    add(checks, 'runtime-bundle', runtime.ok, runtime.value, 'RELEASE_UPSTREAM_RUNTIME_REQUIRED', 'set DSH_UPSTREAM_RUNTIME_BUNDLE to the pinned runtime tarball');
+    const runtime = await runtimeReady(runtimeBundle);
+    add(checks, 'runtime-bundle', runtime.ok, runtime.value, 'RELEASE_UPSTREAM_RUNTIME_REQUIRED', `set DSH_UPSTREAM_RUNTIME_BUNDLE to ${`shinemage-dsh-upstream-runtime-${DSH_UPSTREAM_SHA}.tar.zst`}`);
   }
 
   const evidence = await writablePath(join(repo, '.context/release-evidence'), { allowCreate: true });
@@ -126,10 +158,11 @@ export async function collectReleaseReadiness({
   add(checks, 'disk-free', disk !== null && disk >= minBytes, disk === null ? 'unavailable' : `${disk}B`, 'PREFLIGHT_DISK_SPACE_LOW', 'free at least 128 MiB in the candidate output filesystem');
 
   if (requireOutput && outputDir) {
-    const output = await writablePath(outputDir, { allowCreate: true });
-    let empty = true;
-    try { empty = (await readdir(resolve(outputDir))).length === 0; } catch (error) { if (error.code !== 'ENOENT') empty = false; }
-    add(checks, 'output-dir', output.ok && empty, `${output.value}${empty ? '' : ':not-empty'}`, 'PREFLIGHT_OUTPUT_DIR_INVALID', 'use a new empty output directory');
+    const target = resolve(outputDir);
+    const parent = await writablePath(dirname(target), { allowCreate: true });
+    let exists = false;
+    try { await lstat(target); exists = true; } catch (error) { if (error.code !== 'ENOENT') exists = true; }
+    add(checks, 'output-dir', parent.ok && !exists, exists ? `${target}:already-exists` : `${target}:create-on-release`, 'PREFLIGHT_OUTPUT_DIR_INVALID', 'use a new output directory path');
   }
 
   return { checks, ok: checks.every(check => check.ok), upstream, runtimeBundle: runtimeBundle ? resolve(runtimeBundle) : null };

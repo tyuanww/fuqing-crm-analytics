@@ -9,6 +9,7 @@ import {
   NODE_MAJOR, PINNED_SHA, PORT_RANGE, PORTS, USER_DEMO_PORTS,
 } from './constants.mjs';
 import { defaultPluginPath, defaultShineBrandPath, defaultShineWaterfallPath, defaultShineCrowdActionPath, defaultShineQueryPath, defaultShineBoardPath, defaultShineFunnelPath, repoRoot } from './paths.mjs';
+import { DSH_SDK_VERSION } from '../release/toolchain.mjs';
 import { redactLaunchLog } from './launch-url.mjs';
 import { readCurrent } from './serve.mjs';
 
@@ -162,8 +163,8 @@ async function inspectUpstream(explicit) {
   const candidates = [
     explicit,
     process.env.DSH_DEV_UPSTREAM,
-    join(repoRoot, '.context/dsh-b0/upstream-0.1.7-rc.2'),
-    resolve(repoRoot, '../../fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2'),
+    join(repoRoot, `.context/dsh-b0/upstream-${DSH_SDK_VERSION}`),
+    resolve(repoRoot, `../../fuqing-crm-analytics/.context/dsh-b0/upstream-${DSH_SDK_VERSION}`),
   ].filter(value => typeof value === 'string' && value.length > 0);
   const tried = [];
   for (const candidate of candidates) {

@@ -1022,4 +1022,12 @@ Required proof to add alongside implementation:
 - Current local evidence: Node24 `pnpm dsh test` 82/82; focused promotion/state and CLI tests pass; `pnpm dsh verify --scope local` returns 0 while default/release remains exit 2 because WSL2/WAL/15-minute SLI/host HTTP evidence is not run; `git diff --check`, shell syntax and Node syntax checks pass. Formal online preflight and remote host evidence remain NOT_RUN.
 - Upgrade and community polish are explicitly deferred; no DSH upstream source, real DuckDB, production host or remote release was changed.
 
+### Self-review repair pass 2026-09-30
+
+- 自审发现并修复 readiness/preflight 的假通过边界：共享读取 `toolchain.json`，预检查与正式构建使用同一 upstream 路径，`--check --source-sha` 比对当前 HEAD，Node 遵循 `.nvmrc` 精确版本，runtime 必须是固定命名的 regular zstd bundle，失败尝试写入独立 recovery evidence。
+- preflight evidence 现在要求固定七个本地阶段全部 `PASS`、本地 coverage 全部 `PASS`、远端 WSL2/host HTTP 明确保留 `NOT_RUN/PARTIAL`；SHA-256 使用流式读取，避免大包一次性载入内存。
+- promotion/rollback 在外部目录或 symlink 改动前写入 intent，重试只在 journal intent 与目标 marker 一致时补记 committed event；回退幂等路径仍执行 owner、restart dependency、source SHA 和 marker 校验；stale lock 删除前复核 inode/mtime/size。
+- GitHub evidence workflow 先验证 reviewed tag、commit、ancestor 和 clean checkout，再执行 LFS/brand 派生脚本。新增/更新后的当前本地证据：发布套件 **85/85**、dsh-dev pin/CLI **26/26**、shell/Node syntax、`git diff --check` 全部通过；错误 source SHA、坏 runtime 和 owner 不匹配回退负测均通过。
+- 仍保持 release blocker：formal online preflight、GitHub remote CI/OIDC、WSL2 冷安装、Tailscale/15 分钟 SLI、真实 runtime/WAL compatibility、完整 env/runtime/CRM/systemd rollback 和 operator UAT 尚未执行；真实 DuckDB 继续 `NOT_RUN`。
+
 NO UNRESOLVED DECISIONS

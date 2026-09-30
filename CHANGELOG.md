@@ -15,6 +15,8 @@
 
 - 修复页面切换草稿泄漏、嵌套映射、属性值含 `>`、CSS 字符串含 `}`、超大选区和动态 Canvas/SVG 等边界问题。
 - 修复绑定页省略编辑来源时仍可改写 HTML/JS/资源/映射、vendor 包 secret assignment 漏扫，以及 emoji 前置导致的源码范围偏移。
+- 修复发布预检查读取不同上游 checkout、错误 source SHA 可通过、runtime 任意文件误通过和失败残留阻塞重试等问题；失败尝试保留独立证据目录，不覆盖候选。
+- 统一 release/dsh-dev 入口从 `toolchain.json` 读取上游 pin、SDK 版本和 Node/pnpm 合同；artifact SHA-256 改为流式计算，promotion journal 在外部状态变更前记录 intent。
 
 ## [0.18.0.2] - 2026-09-27
 

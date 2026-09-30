@@ -4,6 +4,7 @@ import { existsSync } from 'node:fs';
 import { access, mkdir } from 'node:fs/promises';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { DSH_SDK_VERSION } from '../release/toolchain.mjs';
 
 export const repoRoot = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 
@@ -11,7 +12,7 @@ export function resolveUpstream(explicit) {
   const candidates = [
     explicit,
     process.env.DSH_DEV_UPSTREAM,
-    join(repoRoot, '.context/dsh-b0/upstream-0.1.7-rc.2'),
+    join(repoRoot, `.context/dsh-b0/upstream-${DSH_SDK_VERSION}`),
   ].filter(value => typeof value === 'string' && value.length > 0);
   for (const candidate of candidates) {
     const upstream = resolve(candidate);

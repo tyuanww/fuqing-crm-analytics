@@ -1,7 +1,8 @@
 /** Full DSH base local-dev constants. Not the B0 synthetic verification runner. */
+import { DSH_UPSTREAM_SHA, NODE_MAJOR as TOOLCHAIN_NODE_MAJOR } from '../release/toolchain.mjs';
 
-export const PINNED_SHA = '477b4f420553e8a52c2fbccc464d7561b239c443';
-export const NODE_MAJOR = 24;
+export const PINNED_SHA = DSH_UPSTREAM_SHA;
+export const NODE_MAJOR = TOOLCHAIN_NODE_MAJOR;
 export const HOST = '127.0.0.1';
 
 export const PORTS = Object.freeze({
