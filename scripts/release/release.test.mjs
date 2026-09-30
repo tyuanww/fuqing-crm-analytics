@@ -189,8 +189,11 @@ test('preflight bundle summary binds every release asset to the manifest', async
 test('release evidence workflow hydrates and verifies the exact brand asset', async () => {
   const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-evidence.yml'), 'utf8');
   assert.match(workflow, /lfs:\s*false/);
+  assert.match(workflow, /git show "\$\{REVIEWED_SHA\}:\$\{asset_rel\}" > "\$asset_tmp"/);
+  assert.match(workflow, /if \[\[ "\$\(sed -n '1p' "\$asset_tmp"\)" == 'version https:\/\/git-lfs\.github\.com\/spec\/v1' \]\]/);
   assert.match(workflow, /objects\/batch/);
   assert.match(workflow, /Authorization: Basic/);
+  assert.match(workflow, /test "\$\(wc -c < "\$asset_tmp" \| tr -d ' '\)" = 3662/);
   assert.match(workflow, /sha256sum/);
   assert.match(workflow, /brand-assets\.mjs/);
   assert.match(workflow, /preflight_run_id/);
