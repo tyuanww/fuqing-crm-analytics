@@ -189,7 +189,8 @@ test('preflight bundle summary binds every release asset to the manifest', async
 test('release evidence workflow hydrates and verifies the exact brand asset', async () => {
   const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-evidence.yml'), 'utf8');
   assert.match(workflow, /lfs:\s*false/);
-  assert.match(workflow, /media\.githubusercontent\.com\/media/);
+  assert.match(workflow, /objects\/batch/);
+  assert.match(workflow, /Authorization: Basic/);
   assert.match(workflow, /sha256sum/);
   assert.match(workflow, /brand-assets\.mjs/);
   assert.match(workflow, /preflight_run_id/);

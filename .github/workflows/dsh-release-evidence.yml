@@ -72,18 +72,39 @@ jobs:
           git merge-base --is-ancestor origin/main "$REVIEWED_SHA"
           test -z "$(git status --porcelain --untracked-files=all)"
       - name: Verify release brand asset is hydrated
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           # Resolve the checked-in LFS pointer at the exact reviewed commit,
-          # fetch immutable media bytes, and verify the pointer digest before
-          # running brand validation. This does not require Git LFS on CI.
+          # fetch its object through GitHub's LFS Batch API, and verify the
+          # pointer digest before running brand validation. This does not
+          # require Git LFS on CI.
           asset_rel='frontend-vue3/src/assets/brand/shine-mage.png'
-          asset_oid="$(git show "${REVIEWED_SHA}:${asset_rel}" | sed -n 's/^oid sha256:\([0-9a-f]\{64\}\)$/\1/p')"
-          test -n "$asset_oid"
+          asset_pointer="$(git show "${REVIEWED_SHA}:${asset_rel}")"
+          asset_oid="$(printf '%s\n' "$asset_pointer" | sed -n 's/^oid sha256:\([0-9a-f]\{64\}\)$/\1/p')"
+          asset_size="$(printf '%s\n' "$asset_pointer" | sed -n 's/^size \([0-9][0-9]*\)$/\1/p')"
+          [[ "$asset_oid" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$asset_size" =~ ^[0-9]+$ ]]
+          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          batch_body="$(ASSET_OID="$asset_oid" ASSET_SIZE="$asset_size" node --input-type=module -e "console.log(JSON.stringify({operation:'download',transfers:['basic'],objects:[{oid:process.env.ASSET_OID,size:Number(process.env.ASSET_SIZE)}]}))")"
+          batch_file="$RUNNER_TEMP/shine-mage-lfs-batch.json"
+          curl -fsSL --retry 3 --retry-all-errors -X POST \
+            -H "Accept: application/vnd.git-lfs+json" \
+            -H "Content-Type: application/vnd.git-lfs+json" \
+            -H "Authorization: Basic $auth" \
+            --data "$batch_body" \
+            "https://github.com/${GITHUB_REPOSITORY}.git/info/lfs/objects/batch" \
+            --output "$batch_file"
+          asset_url="$(node --input-type=module -e "import { readFile } from 'node:fs/promises'; const x=JSON.parse(await readFile(process.argv[1], 'utf8')); const d=x.objects?.[0]?.actions?.download; if (!d?.href) process.exit(1); console.log(d.href);" "$batch_file")"
+          asset_header="$(node --input-type=module -e "import { readFile } from 'node:fs/promises'; const x=JSON.parse(await readFile(process.argv[1], 'utf8')); const d=x.objects?.[0]?.actions?.download; if (d?.header?.Authorization) console.log(d.header.Authorization);" "$batch_file")"
           asset_tmp="$RUNNER_TEMP/shine-mage.png.partial"
-          curl -fsSL --retry 3 --retry-all-errors \
-            "https://media.githubusercontent.com/media/${GITHUB_REPOSITORY}/${REVIEWED_SHA}/${asset_rel}" \
-            --output "$asset_tmp"
+          if [[ -n "$asset_header" ]]; then
+            curl -fsSL --retry 3 --retry-all-errors -H "$asset_header" "$asset_url" --output "$asset_tmp"
+          else
+            curl -fsSL --retry 3 --retry-all-errors "$asset_url" --output "$asset_tmp"
+          fi
+          test "$(wc -c < "$asset_tmp" | tr -d ' ')" = "$asset_size"
           test "$(sha256sum "$asset_tmp" | awk '{print $1}')" = "$asset_oid"
           mv "$asset_tmp" "$asset_rel"
           node --input-type=module -e "import { brandAssets } from './scripts/dsh-b0/brand-assets.mjs'; await brandAssets(process.cwd());"
