@@ -1,12 +1,12 @@
 # DSH rc2 release artifact reference
 
-本页是 DSH rc2 发布工具的命令和输入输出参考。产品版本为 `0.19.0.0`，DSH 固定为 `0.1.7-rc.2`，上游 SHA 为 `477b4f420553e8a52c2fbccc464d7561b239c443`。离线命令段描述接收合同；截至 2026-09-30，实际 r3 Release、杭州 current 和未关闭项见 [r3 收尾记录](../release/dsh-rc2-candidate/closeout-20260930.md)。
+本页是 DSH rc2 发布工具的命令和输入输出参考。产品版本为 `0.20.0.0`，DSH 固定为 `0.1.7-rc.2`，上游 SHA 为 `477b4f420553e8a52c2fbccc464d7561b239c443`。离线命令段描述接收合同；`dsh-0.20.0.0-r1` 是当前 immutable Release，杭州 current 仍为上一份已运行版本，现场切换以 runbook 和最新 receipt 为准。
 
 ## 命令入口
 
 根目录 `package.json` 将 `pnpm dsh` 映射到 `node scripts/dsh.mjs`。运行时要求 Node 24.x；锁文件使用 pnpm 11.7.0。
 
-根目录 `package.json` 的 `version` 保持 npm 三段 projection（当前为 `0.19.0`），以兼容 npm 工具链；候选发布产品版本以根目录 `VERSION` 的四段值 `0.19.0.0` 为准，artifact manifest 和发布门禁均读取 `VERSION`。
+根目录 `package.json` 的 `version` 保持 npm 三段 projection（当前为 `0.20.0`），以兼容 npm 工具链；候选发布产品版本以根目录 `VERSION` 的四段值 `0.20.0.0` 为准，artifact manifest 和发布门禁均读取 `VERSION`。
 
 | 命令 | 作用 | 成功/阻断行为 |
 |---|---|---|
@@ -27,6 +27,8 @@
 | `pnpm dsh why-blocked` | 解释需要单独授权或现场证据的阻断项 | 只读 |
 | `pnpm dsh retry` | 输出需要 state path 和幂等键的重试边界 | 不执行远端副作用 |
 | `pnpm dsh rollback` | 输出现场回退入口 | 实际回退必须使用 `deploy/wsl/rollback-release.sh`、同一 `RELEASE_STATE_PATH` 和已记录 receipt |
+
+杭州接收使用 `deploy/wsl/fetch-release.sh`。Tailscale 只传输小型 `release-publication.v1.json` 和两份 attestation sidecar；杭州主机直接从 GitHub Release 下载六个资产，支持断点续传、重试、临时文件和 SHA-256 校验，成功后写入 `release-fetch.v1.json`。大 runtime 包不通过 Mac/Tailscale 中转。
 
 ## release 参数和配置优先级
 
