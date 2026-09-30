@@ -65,7 +65,10 @@ jobs:
             test "$GITHUB_SHA" = "$REVIEWED_SHA"
           fi
           git merge-base --is-ancestor origin/main "$REVIEWED_SHA"
-          test -z "$(git status --porcelain --untracked-files=all)"
+          checkout_status="$(git status --porcelain --untracked-files=all)"
+          printf 'reviewed checkout status bytes=%s\n' "$(printf '%s' "$checkout_status" | wc -c | tr -d ' ')"
+          if [[ -n "$checkout_status" ]]; then printf '%s\n' "$checkout_status"; fi
+          test -z "$checkout_status"
           # Keep the allowlisted brand bytes deterministic without depending
           # on Git LFS for the current source. Read the exact reviewed blob
           # first; historical reviewed SHAs that still contain an LFS pointer
