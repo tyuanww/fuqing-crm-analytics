@@ -13,14 +13,14 @@
 | `pnpm dsh --help` | 打印命令列表和退出码 | 无命令时退出码为 2 |
 | `pnpm dsh --version` | 输出产品版本和固定 DSH upstream SHA | 只读 |
 | `pnpm dsh doctor` | 检查 Node 主版本、四段产品版本、rc2 pin 和 release schema | 任一检查失败退出 2 |
-| `pnpm dsh doctor --release` | 只读检查 Node/pnpm/Python、clean worktree、zstd、固定 upstream、runtime bundle、evidence 目录和版本 pin | 缺项给出稳定错误码并退出 2；不联网、不生成 artifact |
+| `pnpm dsh doctor --release` | 在已有固定 runtime bundle 时只读检查 Node/pnpm/Python、clean worktree、zstd、固定 upstream、runtime bundle、evidence 目录和版本 pin | 缺项给出稳定错误码并退出 2；不联网、不生成 artifact；首次候选无 runtime 时直接运行正式 `preflight` |
 | `pnpm dsh dev [args...]` | 将参数转发给 `scripts/dsh-dev/cli.mjs` | 只操作当前工作树登记的开发实例，不探测杭州 |
 | `pnpm dsh test` | 运行 `scripts/release/*.test.mjs` | 测试失败退出非零 |
 | `pnpm dsh release --offline [--dry-run] [--tag TAG] [--config PATH]` | 在干净 checkout、已构建固定 rc2 runtime bundle 的前提下生成 pre-manifest、source tarball、runtime tarball、manifest、`SHA256SUMS` 和 CI evidence index | 必须提供 `DSH_UPSTREAM_RUNTIME_BUNDLE`; 只写 `.context/release-evidence/<tag>/`，不联网、不打 tag、不创建 Release |
 | `pnpm dsh receive --artifact FILE --manifest FILE --destination DIR [--max-entries N] [--max-bytes N]` | 校验并安全解包一个 release artifact | 目标目录必须不存在；默认最多 10000 个条目、512 MiB 展开后字节数，失败时拒绝接收 |
 | `pnpm dsh verify --scope local` | 运行本地 doctor、synthetic compatibility/backpressure | 本地合同通过返回 0；不代表生产可发布 |
 | `pnpm dsh verify [--scope release]` | 运行发布级 doctor、synthetic compatibility/backpressure 并检查发布门禁 | 当前真实 WSL2/HTTP/15 分钟 SLI 未完成时退出 2 并打印 `RELEASE_BLOCKED` |
-| `pnpm dsh preflight --check --python ABS --tag TAG` | 只读检查正式 preflight 的工具链、固定 upstream、插件入口、runtime bundle 和输出目录 | 检查失败在构建前退出 2，不联网、不生成 artifact |
+| `pnpm dsh preflight --check --python ABS --tag TAG` | 在已有 runtime bundle 时只读检查正式 preflight 的工具链、固定 upstream、插件入口、runtime bundle 和输出目录 | 检查失败在构建前退出 2，不联网、不生成 artifact；正式 `preflight` 会自行生成 runtime |
 | `pnpm dsh reconcile STATE REMOTE` | 将远端 receipt 与 durable state 对账 | `CONFLICT`/`UNKNOWN` 退出 2 |
 | `pnpm dsh status [STATE]` | 打印 durable state | 只读 |
 | `pnpm dsh resume [STATE]` | 根据 durable state 计算可恢复动作 | 只读，不自动执行远端副作用 |
