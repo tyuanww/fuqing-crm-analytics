@@ -55,8 +55,6 @@ jobs:
         with:
           python-version: '3.14'
       - name: Verify the reviewed source
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           [[ "$REVIEWED_SHA" =~ ^[0-9a-f]{40}$ ]]
@@ -76,7 +74,6 @@ jobs:
           test -n "$asset_oid"
           asset_tmp="$RUNNER_TEMP/shine-mage.png.partial"
           curl -fsSL --retry 3 --retry-all-errors \
-            -H "Authorization: Bearer $GH_TOKEN" \
             "https://media.githubusercontent.com/media/${GITHUB_REPOSITORY}/${REVIEWED_SHA}/${asset_rel}" \
             --output "$asset_tmp"
           test "$(sha256sum "$asset_tmp" | awk '{print $1}')" = "$asset_oid"

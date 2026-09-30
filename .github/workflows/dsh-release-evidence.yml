@@ -72,8 +72,6 @@ jobs:
           git merge-base --is-ancestor origin/main "$REVIEWED_SHA"
           test -z "$(git status --porcelain --untracked-files=all)"
       - name: Verify release brand asset is hydrated
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           # Resolve the checked-in LFS pointer at the exact reviewed commit,
@@ -84,7 +82,6 @@ jobs:
           test -n "$asset_oid"
           asset_tmp="$RUNNER_TEMP/shine-mage.png.partial"
           curl -fsSL --retry 3 --retry-all-errors \
-            -H "Authorization: Bearer $GH_TOKEN" \
             "https://media.githubusercontent.com/media/${GITHUB_REPOSITORY}/${REVIEWED_SHA}/${asset_rel}" \
             --output "$asset_tmp"
           test "$(sha256sum "$asset_tmp" | awk '{print $1}')" = "$asset_oid"
