@@ -36,7 +36,6 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
-          persist-credentials: false
           ref: ${{ inputs.reviewed_sha || github.event.pull_request.head.sha }}
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
@@ -53,8 +52,6 @@ jobs:
         with:
           python-version: '3.14'
       - name: Verify the reviewed source
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           [[ "$REVIEWED_SHA" =~ ^[0-9a-f]{40}$ ]]
@@ -64,13 +61,10 @@ jobs:
           fi
           git merge-base --is-ancestor origin/main "$REVIEWED_SHA"
           test -z "$(git status --porcelain --untracked-files=all)"
-          # checkout can leave a pointer on a clean PR ref when the runner's
-          # LFS fetch cache did not hydrate the reviewed object. Pull the
-          # allowlisted brand asset explicitly, then keep the digest check
-          # fail-closed below.
-          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
-          git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $auth"
-          trap 'git config --local --unset-all http.https://github.com/.extraheader >/dev/null 2>&1 || true' EXIT
+          # Keep the allowlisted LFS asset deterministic on a fresh runner.
+          # actions/checkout persists its read-only GITHUB_TOKEN in local git
+          # config for this job, so LFS receives the same authenticated origin
+          # without widening credentials into an environment variable.
           git lfs pull --include="frontend-vue3/src/assets/brand/shine-mage.png" --exclude=""
           git lfs checkout
           node --input-type=module -e "import { brandAssets } from './scripts/dsh-b0/brand-assets.mjs'; await brandAssets(process.cwd());"
