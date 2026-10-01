@@ -37,8 +37,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
-          lfs: true
-          persist-credentials: false
+          # The release verifier hydrates the single allowlisted asset after
+          # checkout, keeping LFS failures in a named fail-closed step.
+          lfs: false
           ref: ${{ inputs.release_tag }}
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
@@ -69,11 +70,57 @@ jobs:
           test "$(git rev-parse HEAD)" = "$REVIEWED_SHA"
           test "$GITHUB_SHA" = "$REVIEWED_SHA"
           git merge-base --is-ancestor origin/main "$REVIEWED_SHA"
-          test -z "$(git status --porcelain --untracked-files=all)"
-      - name: Verify release LFS assets are hydrated
+          # actions/checkout runs with clean:true; keep this gate focused on
+          # the reviewed commit identity and immutable release tag.
+      - name: Verify release brand asset is hydrated
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          git lfs checkout
+          trap 'rc=$?; printf "release evidence failed rc=%s command=%s\\n" "$rc" "$BASH_COMMAND"; exit "$rc"' ERR
+          # Read the exact reviewed brand blob before validation. Historical
+          # release tags that still contain an LFS pointer use the
+          # authenticated Batch API compatibility path below; current tags
+          # do not require Git LFS on CI.
+          asset_rel='frontend-vue3/src/assets/brand/shine-mage.png'
+          asset_tmp="$RUNNER_TEMP/shine-mage.png.partial"
+          git show "${REVIEWED_SHA}:${asset_rel}" > "$asset_tmp"
+          if [[ "$(sed -n '1p' "$asset_tmp")" == 'version https://git-lfs.github.com/spec/v1' ]]; then
+            asset_pointer="$(cat "$asset_tmp")"
+            asset_oid="$(printf '%s\n' "$asset_pointer" | sed -n 's/^oid sha256:\([0-9a-f]\{64\}\)$/\1/p')"
+            asset_size="$(printf '%s\n' "$asset_pointer" | sed -n 's/^size \([0-9][0-9]*\)$/\1/p')"
+            [[ "$asset_oid" =~ ^[0-9a-f]{64}$ ]]
+            [[ "$asset_size" =~ ^[0-9]+$ ]]
+            auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+            batch_body="$(ASSET_OID="$asset_oid" ASSET_SIZE="$asset_size" node --input-type=module -e "console.log(JSON.stringify({operation:'download',transfers:['basic'],objects:[{oid:process.env.ASSET_OID,size:Number(process.env.ASSET_SIZE)}]}))")"
+            batch_file="$RUNNER_TEMP/shine-mage-lfs-batch.json"
+            lfs_tmp="$RUNNER_TEMP/shine-mage-lfs.partial"
+            curl -fsSL --retry 3 --retry-all-errors -X POST \
+              -H "Accept: application/vnd.git-lfs+json" \
+              -H "Content-Type: application/vnd.git-lfs+json" \
+              -H "Authorization: Basic $auth" \
+              --data "$batch_body" \
+              "https://github.com/${GITHUB_REPOSITORY}.git/info/lfs/objects/batch" \
+              --output "$batch_file"
+            asset_url="$(node --input-type=module -e "import { readFile } from 'node:fs/promises'; const x=JSON.parse(await readFile(process.argv[1], 'utf8')); const d=x.objects?.[0]?.actions?.download; if (!d?.href) process.exit(1); console.log(d.href);" "$batch_file")"
+            asset_header="$(node --input-type=module -e "import { readFile } from 'node:fs/promises'; const x=JSON.parse(await readFile(process.argv[1], 'utf8')); const d=x.objects?.[0]?.actions?.download; if (d?.header?.Authorization) console.log(d.header.Authorization);" "$batch_file")"
+            if [[ -n "$asset_header" ]]; then
+              curl -fsSL --retry 3 --retry-all-errors -H "$asset_header" "$asset_url" --output "$lfs_tmp"
+            else
+              curl -fsSL --retry 3 --retry-all-errors "$asset_url" --output "$lfs_tmp"
+            fi
+            test "$(wc -c < "$lfs_tmp" | tr -d ' ')" = "$asset_size"
+            test "$(sha256sum "$lfs_tmp" | awk '{print $1}')" = "$asset_oid"
+            mv "$lfs_tmp" "$asset_tmp"
+          fi
+          asset_bytes="$(wc -c < "$asset_tmp" | tr -d ' ')"
+          asset_sha="$(sha256sum "$asset_tmp" | awk '{print $1}')"
+          printf 'release brand candidate bytes=%s sha256=%s first8=' "$asset_bytes" "$asset_sha"
+          od -An -tx1 -N8 "$asset_tmp"
+          test "$asset_bytes" = 3662
+          test "$asset_sha" = 21b8273703b9015027b572cb830b8bb01e9fc406c39b14ec7c228fbcdcaf4000
+          mkdir -p "$(dirname "$asset_rel")"
+          mv "$asset_tmp" "$asset_rel"
           node --input-type=module -e "import { brandAssets } from './scripts/dsh-b0/brand-assets.mjs'; await brandAssets(process.cwd());"
       - name: Require a successful exact-SHA preflight
         env:

@@ -5,10 +5,11 @@
 ## 现场顺序
 
 1. 记录旧 checkout/source SHA、旧 rc1 upstream、env SHA-256、runtime 路径、systemd 状态、端口、磁盘、WAL 和 route config SHA 到 `host-preflight.md`。
-2. 先在新 `releases/<tag>` 目录执行 `deploy/wsl/install-release.sh`，必须显式提供 `RELEASE_STATE_PATH`、`RELEASE_UPSTREAM_RUNTIME`、`RELEASE_RUNTIME_ATTESTATION_BUNDLE`、`RELEASE_OWNER`、`RELEASE_RESTART_DEPENDENCY`、publication/checksum/evidence 路径和 source attestation bundle；脚本会绑定 reviewed ref、校验五类 release asset 摘要，并在 runtime、checksum、evidence、provenance 或 durable journal 未提供时拒绝解包。
-3. 运行内部 loopback healthcheck 和七组 UAT。没有 operator 隔离时，`operator_gate_method=none`，不能把 hostname 验证写成 canary；service 重启即正式 cutover gate。
-4. 获得对应授权后再执行 `activate-release.sh`，必须再次提供同一个 `RELEASE_STATE_PATH`、匹配的 `RELEASE_OWNER` 与 `RELEASE_RESTART_DEPENDENCY`，只切换 `current` symlink；仅重启自己拥有的 DSH service。CRM、WeKnora、Cloudflare route 不因 rc2 自动重启或修改。
-5. 失败时记录 `rollback.json`，使用 `rollback-release.sh` 并再次提供同一个 `RELEASE_STATE_PATH`、匹配的 owner/restart dependency 恢复旧 target；该 wrapper 只切换 `current`/`current-target` 并写 receipt，同时把回退事件写入 durable journal；它不恢复 env、Python/runtime、CRM image，也不重启 systemd。现场必须按回执逐项恢复这些 owner-owned 依赖，再由同一 owner 重启自己的服务并复验 `healthcheck.sh --all`。稳定窗口结束前不删除旧版本。
+2. 通过 Tailscale 只传入 `release-publication.v1.json` 和两份 attestation sidecar；随后在杭州执行 `deploy/wsl/fetch-release.sh`。该脚本让主机直连 GitHub Release，支持断点续传和重试，使用临时文件校验六个资产的大小/SHA-256，最后才原子改名并生成 `release-fetch.v1.json`。不要用 `scp`/`rsync` 中转大 runtime 包。
+3. 再在新 `releases/<tag>` 目录执行 `deploy/wsl/install-release.sh`，必须显式提供 `RELEASE_STATE_PATH`、`RELEASE_UPSTREAM_RUNTIME`、`RELEASE_RUNTIME_ATTESTATION_BUNDLE`、`RELEASE_OWNER`、`RELEASE_RESTART_DEPENDENCY`、publication/checksum/evidence 路径和 source attestation bundle；脚本会绑定 reviewed ref、校验五类 release asset 摘要，并在 runtime、checksum、evidence、provenance 或 durable journal 未提供时拒绝解包。
+4. 运行内部 loopback healthcheck 和七组 UAT。没有 operator 隔离时，`operator_gate_method=none`，不能把 hostname 验证写成 canary；service 重启即正式 cutover gate。
+5. 获得对应授权后再执行 `activate-release.sh`，必须再次提供同一个 `RELEASE_STATE_PATH`、匹配的 `RELEASE_OWNER` 与 `RELEASE_RESTART_DEPENDENCY`，只切换 `current` symlink；仅重启自己拥有的 DSH service。CRM、WeKnora、Cloudflare route 不因 rc2 自动重启或修改。
+6. 失败时记录 `rollback.json`，使用 `rollback-release.sh` 并再次提供同一个 `RELEASE_STATE_PATH`、匹配 owner/restart dependency 恢复旧 target；该 wrapper 只切换 `current`/`current-target` 并写 receipt，同时把回退事件写入 durable journal；它不恢复 env、Python/runtime、CRM image，也不重启 systemd。现场必须按回执逐项恢复这些 owner-owned 依赖，再由同一 owner 重启自己的服务并复验 `healthcheck.sh --all`。稳定窗口结束前不删除旧版本。
 
 触发回退：manifest/checksum 不一致、systemd 未 active、DSH/page/CRM healthcheck 失败、认证或 CORS 失败、关键路径 5xx、控制台未处理异常或产品 owner 明确阻断。现场真实路径、用户、权限和恢复命令以 systemd unit/receipt 为准，不能照抄示例路径。
 

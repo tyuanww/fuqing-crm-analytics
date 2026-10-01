@@ -47,15 +47,21 @@ PR 的 CI、代码审查和人工验收通过后才合入 `main`。`git push` �
 
 ## 杭州生产流程
 
-GitHub Release/Deployments 不会自动连接杭州 Tailscale，也不会自动更新 6677。通过 Tailscale SSH 进入 WSL 后，发布 owner 只接收 GitHub Release 的完整 immutable artifact，并做只读核对和批准版本切换；生产禁止 `git pull`、浮动 `main` 和现场编译：
+GitHub Release/Deployments 不会自动连接杭州 Tailscale，也不会自动更新 6677。通过 Tailscale SSH 进入 WSL 后，发布 owner 先放入 publication/attestation 等小型信任 sidecar，再让杭州主机直接从 GitHub Release 下载大文件。Tailscale 只负责控制面，生产禁止通过 Tailscale 中转大包、执行 `git pull`、跟踪浮动 `main` 或现场编译：
 
 ```bash
 ssh hangzhou-wsl
 cd /srv/shinemage/src/fuqing-crm-analytics
-# 先把 source/runtime/manifest/checksum/evidence/attestation 放入 /srv/shinemage/incoming
-# 按 docs/operating/dsh-rc2-runbook.md 的完整 RELEASE_* 环境变量块执行校验和安装；
+# 先通过 Tailscale 放入 publication 和两份 attestation sidecar
+RELEASE_TAG=dsh-<version>-r<revision> \
+RELEASE_REPO=tyuanww/fuqing-crm-analytics \
+RELEASE_PUBLICATION=/srv/shinemage/incoming/dsh-<version>-r<revision>/release-publication.v1.json \
+RELEASE_INCOMING=/srv/shinemage/incoming/dsh-<version>-r<revision> \
+  deploy/wsl/fetch-release.sh
+# fetch-release.sh 在杭州主机直连 GitHub，支持断点续传并生成 release-fetch.v1.json
+# 再按 docs/operating/dsh-rc2-runbook.md 的完整 RELEASE_* 环境变量块执行校验和安装；
 # 下面只展示必填的版本与目录变量，不能单独执行：
-RELEASE_TAG=dsh-<version> RELEASE_ROOT=/srv/shinemage/dsh \
+RELEASE_TAG=dsh-<version>-r<revision> RELEASE_ROOT=/srv/shinemage/dsh \
   deploy/wsl/install-release.sh  # 需同时提供 runbook 列出的完整 RELEASE_* 变量
 ```
 

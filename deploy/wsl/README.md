@@ -90,27 +90,40 @@ CI 通过的 commit
 
 ## rc2 artifact promotion
 
-杭州只接收已校验的 `release-publication.v1.json`、`release-manifest.v1.json`、`SHA256SUMS`、CI evidence index、source tarball、固定 rc2 production runtime tarball 和两份 GitHub attestation bundle。旧 internal-only 候选只有 source tarball，不能安装；当前 release workflow 会在固定 rc2 checkout 上构建 runtime bundle，并把它的 digest、allowlist、secret scan、GitHub Release 资产和 attestation 一起绑定。`install-release.sh` 会把 publication 摘要绑定到本地文件，在 runtime、checksum、evidence 或 provenance 任一项缺失时拒绝解包。先在新目录执行：
+杭州只接收已校验的 `release-publication.v1.json`、`release-manifest.v1.json`、`SHA256SUMS`、CI evidence index、source tarball、固定 rc2 production runtime tarball 和两份 GitHub attestation bundle。旧 internal-only 候选只有 source tarball，不能安装；当前 release workflow 会在固定 rc2 checkout 上构建 runtime bundle，并把它的 digest、allowlist、secret scan、GitHub Release 资产和 attestation 一起绑定。`install-release.sh` 会把 publication 摘要绑定到本地文件，在 runtime、checksum、evidence 或 provenance 任一项缺失时拒绝解包。
+
+Tailscale 只承载 SSH 控制面和小体积 publication/attestation sidecar；大文件由杭州主机直接从 immutable GitHub Release 下载。`fetch-release.sh` 支持断点续传、重试、临时文件和原子改名，只有全部 SHA-256 与 publication sidecar 匹配后才生成 `release-fetch.v1.json`：
 
 ```bash
-RELEASE_ARTIFACT=/srv/shinemage/incoming/shinemage-dsh-<version>-<sha>.tar.zst \
-RELEASE_UPSTREAM_RUNTIME=/srv/shinemage/incoming/shinemage-dsh-upstream-runtime-<upstream-sha>.tar.zst \
-RELEASE_MANIFEST=/srv/shinemage/incoming/release-manifest.v1.json \
-RELEASE_TAG=dsh-<version> \
+# 先通过 Tailscale SSH 传入 release-publication.v1.json、source-attestation.jsonl、upstream-runtime-attestation.jsonl
+RELEASE_TAG=dsh-<version>-r<revision> \
+RELEASE_REPO=tyuanww/fuqing-crm-analytics \
+RELEASE_PUBLICATION=/srv/shinemage/incoming/dsh-<version>-r<revision>/release-publication.v1.json \
+RELEASE_INCOMING=/srv/shinemage/incoming/dsh-<version>-r<revision> \
+  deploy/wsl/fetch-release.sh
+```
+
+接收完成后，才在新目录执行安装：
+
+```bash
+RELEASE_ARTIFACT=/srv/shinemage/incoming/dsh-<version>-r<revision>/dsh-<version>-r<revision>.tar.zst \
+RELEASE_UPSTREAM_RUNTIME=/srv/shinemage/incoming/dsh-<version>-r<revision>/shinemage-dsh-upstream-runtime-<upstream-sha>.tar.zst \
+RELEASE_MANIFEST=/srv/shinemage/incoming/dsh-<version>-r<revision>/release-manifest.v1.json \
+RELEASE_TAG=dsh-<version>-r<revision> \
 RELEASE_ROOT=/srv/shinemage/dsh \
 RELEASE_STATE_PATH=/srv/shinemage/dsh/release-state.json \
 RELEASE_OWNER=shinemage-dsh \
 RELEASE_RESTART_DEPENDENCY=shinemage-dsh.service \
-RELEASE_PUBLICATION=/srv/shinemage/incoming/release-publication.v1.json \
-RELEASE_SHA256SUMS=/srv/shinemage/incoming/SHA256SUMS \
-RELEASE_EVIDENCE_INDEX=/srv/shinemage/incoming/ci-evidence-index.v1.json \
-RELEASE_ATTESTATION_BUNDLE=/srv/shinemage/incoming/attestation.jsonl \
-RELEASE_RUNTIME_ATTESTATION_BUNDLE=/srv/shinemage/incoming/upstream-runtime-attestation.jsonl \
+RELEASE_PUBLICATION=/srv/shinemage/incoming/dsh-<version>-r<revision>/release-publication.v1.json \
+RELEASE_SHA256SUMS=/srv/shinemage/incoming/dsh-<version>-r<revision>/SHA256SUMS \
+RELEASE_EVIDENCE_INDEX=/srv/shinemage/incoming/dsh-<version>-r<revision>/ci-evidence-index.v1.json \
+RELEASE_ATTESTATION_BUNDLE=/srv/shinemage/incoming/dsh-<version>-r<revision>/source-attestation.jsonl \
+RELEASE_RUNTIME_ATTESTATION_BUNDLE=/srv/shinemage/incoming/dsh-<version>-r<revision>/upstream-runtime-attestation.jsonl \
 RELEASE_GITHUB_REPO=tyuanww/fuqing-crm-analytics \
-RELEASE_SOURCE_REF=refs/tags/dsh-<version> \
+RELEASE_SOURCE_REF=refs/tags/dsh-<version>-r<revision> \
   deploy/wsl/install-release.sh
 
-RELEASE_ROOT=/srv/shinemage/dsh RELEASE_STATE_PATH=/srv/shinemage/dsh/release-state.json RELEASE_TAG=dsh-<version> \
+RELEASE_ROOT=/srv/shinemage/dsh RELEASE_STATE_PATH=/srv/shinemage/dsh/release-state.json RELEASE_TAG=dsh-<version>-r<revision> \
 RELEASE_SOURCE_SHA=<reviewed-source-sha> RELEASE_OWNER=shinemage-dsh \
 RELEASE_RESTART_DEPENDENCY=shinemage-dsh.service \
   deploy/wsl/activate-release.sh

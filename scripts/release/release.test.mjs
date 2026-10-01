@@ -186,10 +186,16 @@ test('preflight bundle summary binds every release asset to the manifest', async
   await writeFile(join(root, 'release-preflight.json'), JSON.stringify(summary));
   await assert.rejects(() => verifyPreflight(root, { tag, sourceSha }));
 });
-test('release evidence workflow hydrates and verifies LFS brand assets', async () => {
+test('release evidence workflow hydrates and verifies the exact brand asset', async () => {
   const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-evidence.yml'), 'utf8');
-  assert.match(workflow, /lfs:\s*true/);
-  assert.match(workflow, /git lfs checkout/);
+  assert.match(workflow, /lfs:\s*false/);
+  assert.match(workflow, /git show "\$\{REVIEWED_SHA\}:\$\{asset_rel\}" > "\$asset_tmp"/);
+  assert.match(workflow, /if \[\[ "\$\(sed -n '1p' "\$asset_tmp"\)" == 'version https:\/\/git-lfs\.github\.com\/spec\/v1' \]\]/);
+  assert.match(workflow, /objects\/batch/);
+  assert.match(workflow, /Authorization: Basic/);
+  assert.match(workflow, /asset_bytes="\$\(wc -c < "\$asset_tmp" \| tr -d ' '\)"/);
+  assert.match(workflow, /test "\$asset_bytes" = 3662/);
+  assert.match(workflow, /sha256sum/);
   assert.match(workflow, /brand-assets\.mjs/);
   assert.match(workflow, /preflight_run_id/);
   assert.match(workflow, /dsh-release-preflight\.yml/);
@@ -202,6 +208,8 @@ test('release preflight builds the runtime before protected tag creation', async
   const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-preflight.yml'), 'utf8');
   const source = await readFile(join(process.cwd(), 'scripts/release/preflight.mjs'), 'utf8');
   assert.match(workflow, /reviewed_sha/);
+  assert.match(workflow, /pull_request\.base\.sha/);
+  assert.match(workflow, /git merge-base --is-ancestor "\$BASE_SHA" "\$REVIEWED_SHA"/);
   assert.match(workflow, /corepack install --global pnpm@11\.7\.0/);
   assert.match(workflow, /scripts\/dsh\.mjs preflight/);
   assert.match(workflow, /dsh-rc2-preflight-/);
