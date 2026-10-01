@@ -75,6 +75,8 @@ jobs:
       - name: Verify release brand asset is hydrated
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          REVIEWED_SHA: ${{ inputs.reviewed_sha }}
         run: |
           set -euo pipefail
           trap 'rc=$?; printf "release evidence failed rc=%s command=%s\\n" "$rc" "$BASH_COMMAND"; exit "$rc"' ERR
