@@ -87,12 +87,15 @@ async function prepareOfflineDirectTarballs(upstream, work) {
       const archive = join(staging, `${safeName}.tgz`);
       await execFile('tar', ['-czf', archive, '-C', staging, 'package']);
       const replacement = `file:${archive}`;
+      let replaced = false;
       for (const path of await listPackageJsonFiles(upstream)) {
         const bytes = await readFile(path);
         if (!bytes.includes(Buffer.from(url))) continue;
         changed.push({ path, bytes });
         await writeFile(path, bytes.toString('utf8').split(url).join(replacement));
+        replaced = true;
       }
+      if (!replaced) throw new Error(`RUNTIME_DIRECT_TARBALL_BINDING_MISSING ${url}`);
     }
   } catch (error) {
     for (const item of changed.reverse()) await writeFile(item.path, item.bytes);
