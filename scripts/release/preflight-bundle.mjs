@@ -8,8 +8,8 @@ import { DSH_UPSTREAM_SHA } from './toolchain.mjs';
 
 export const UPSTREAM_SHA = DSH_UPSTREAM_SHA;
 export const RUNTIME_NAME = `shinemage-dsh-upstream-runtime-${UPSTREAM_SHA}.tar.zst`;
-const LOCAL_STAGES = ['prepare', 'build', 'runtime', 'release', 'test', 'receive', 'evidence'];
-const COVERAGE_KEYS = ['prepare', 'build', 'runtime', 'release', 'test', 'receive', 'wsl2', 'host_http'];
+const LOCAL_STAGES = ['prepare', 'audit', 'build', 'runtime', 'release', 'test', 'receive', 'evidence'];
+const COVERAGE_KEYS = ['prepare', 'audit', 'build', 'runtime', 'release', 'test', 'receive', 'wsl2', 'host_http'];
 const COVERAGE_VALUES = new Set(['PASS', 'PARTIAL', 'NOT_RUN']);
 export function releaseAssetNames(tag) {
   assert.match(tag, /^dsh-[A-Za-z0-9._-]+$/);
@@ -36,7 +36,7 @@ export async function summarizePreflight(directory, { tag, sourceSha, stages = [
     elapsed_ms: stage.elapsed_ms ?? null,
     error_code: stage.error_code ?? null,
   }));
-  const coverage = evidenceCoverage ?? { prepare: 'PASS', build: 'PASS', runtime: 'PASS', release: 'PASS', test: 'PASS', receive: 'PASS', wsl2: 'NOT_RUN', host_http: 'NOT_RUN' };
+  const coverage = evidenceCoverage ?? { prepare: 'PASS', audit: 'PASS', build: 'PASS', runtime: 'PASS', release: 'PASS', test: 'PASS', receive: 'PASS', wsl2: 'NOT_RUN', host_http: 'NOT_RUN' };
   return { schema_version: 'release-preflight/v2', status: 'PASS', source_sha: sourceSha,
     release_tag: tag, dsh_upstream_sha: UPSTREAM_SHA, assets, stage_timings: stageTimings,
     tthw_ms: startedAt === null ? null : Math.max(0, Date.now() - startedAt), retry_count: retryCount,
