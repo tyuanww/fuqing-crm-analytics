@@ -120,6 +120,10 @@ const runtimeOutput = join(runDir, releaseAssetNames(tag).find(name => name.star
 const bundleDir = join(runDir, 'bundle');
 try {
   await stage('prepare', () => run(process.execPath, ['scripts/dsh-b0/pipeline.mjs', '--prepare', '--python', python], { B0_BUILD_UPSTREAM: null, DSH_UPSTREAM_CHECKOUT: upstream }));
+  // Advisory lookup is network-dependent and intentionally separate from
+  // preparation. If the registry is unavailable, the prepared checkout is
+  // retained and the next attempt can retry only this fail-closed stage.
+  await stage('audit', () => run(process.execPath, ['scripts/dsh-b0/pipeline.mjs', '--audit', '--python', python], { B0_BUILD_UPSTREAM: null, DSH_UPSTREAM_CHECKOUT: upstream }));
   assert.equal(execFileSync('git', ['-C', upstream, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), pin, 'PREFLIGHT_UPSTREAM_SHA_MISMATCH');
   await stage('build', () => { for (const plugin of plugins) run(process.execPath, [`${plugin}/build.mjs`, upstream]); });
   // Prepare is the only stage that may hydrate the pinned checkout. Once it

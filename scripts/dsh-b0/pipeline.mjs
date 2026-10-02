@@ -21,17 +21,17 @@ const shineBoard = join(root, 'dsh-plugins/shine-board');
 const shineFunnel = join(root, 'dsh-plugins/shine-funnel');
 const b0 = join(root, '.context/dsh-b0');
 const buildTools = join(plugin, 'build-tools');
-const USAGE = 'Usage: node scripts/dsh-b0/pipeline.mjs --prepare|--check --python /absolute/python3.14';
+const USAGE = 'Usage: node scripts/dsh-b0/pipeline.mjs --prepare|--audit|--check --python /absolute/python3.14';
 const argv = process.argv.slice(2);
 if (argv.length === 0 || argv[0] === '--help' || argv[0] === '-h') {
   console.log(USAGE);
   process.exit(0);
 }
 const [mode, pythonFlag, python, ...extra] = argv;
-assert.ok(['--prepare', '--check'].includes(mode) && pythonFlag === '--python' && isAbsolute(python ?? '') && !extra.length,
+assert.ok(['--prepare', '--audit', '--check'].includes(mode) && pythonFlag === '--python' && isAbsolute(python ?? '') && !extra.length,
   USAGE);
 assert.ok(!process.env.B0_BUILD_UPSTREAM || mode === '--check',
-  'B0_BUILD_UPSTREAM is a read-only --check override; --prepare must use the local pinned checkout');
+  'B0_BUILD_UPSTREAM is a read-only --check override; --prepare/--audit must use the local pinned checkout');
 // DSH_UPSTREAM_CHECKOUT is the explicit checkout selector used by release
 // orchestration, including --prepare.  B0_BUILD_UPSTREAM remains a read-only
 // --check override for standalone callers and is rejected for --prepare.
@@ -62,6 +62,10 @@ async function verifySource() {
   assert.equal(createHash('sha256').update(await readFile(join(upstream, 'pnpm-lock.yaml'))).digest('hex'), pin.upstream_lock_sha256);
   assert.equal(JSON.parse(await readFile(join(upstream, 'package.json'), 'utf8')).packageManager, `pnpm@${pin.pnpm}`);
 }
+async function preparePackageManager() {
+  env = await packageManagerEnv(join(b0, 'tool-bin'), env, upstream);
+  assert.equal(output('corepack', ['pnpm', '--version'], upstream), pin.pnpm);
+}
 await mkdir(b0, { recursive: true, mode: 0o700 });
 if (mode === '--prepare') {
   let exists = true;
@@ -73,20 +77,23 @@ if (mode === '--prepare') {
     run('git', ['-C', upstream, 'checkout', '--detach', pin.upstream_sha]);
   }
   await verifySource();
-  env = await packageManagerEnv(join(b0, 'tool-bin'), env, upstream);
-  assert.equal(output('corepack', ['pnpm', '--version'], upstream), pin.pnpm);
+  await preparePackageManager();
   run('corepack', ['pnpm', 'install', '--frozen-lockfile', '--ignore-scripts', '--registry=https://registry.npmjs.org'], upstream);
   // Only native dependencies needed by this fixed profile. No repository hook
   // installer, optional provider SDK lifecycle, global configuration or publish.
   run('corepack', ['pnpm', 'rebuild', 'esbuild', 'fs-ext', 'koffi', 'node-pty'], upstream);
   run('corepack', ['pnpm', 'run', 'build:official'], upstream);
   run('corepack', ['pnpm', 'install', '--frozen-lockfile', '--ignore-scripts', '--registry=https://registry.npmjs.org'], buildTools);
-  // This closure now includes the browser's AntD implementation. Audit it
-  // during explicit online preparation; offline --check still installs and
-  // fetches nothing. The archived Vue dependency job covers a different lock.
-  run('corepack', ['pnpm', 'audit', '--prod', '--audit-level=high', '--registry=https://registry.npmjs.org'], buildTools);
   await verifySource();
-  console.log('B0 pinned preparation complete; run --check next. Python packages are never installed by this script.');
+  console.log('B0 pinned preparation complete; run --audit then --check next. Python packages are never installed by this script.');
+} else if (mode === '--audit') {
+  // Keep the network-dependent advisory lookup separate from preparation. A
+  // transient registry outage must leave the prepared checkout reusable and
+  // produce a distinct, fail-closed audit stage in release evidence.
+  await verifySource();
+  await preparePackageManager();
+  run('corepack', ['pnpm', 'audit', '--prod', '--audit-level=high', '--registry=https://registry.npmjs.org'], buildTools);
+  console.log('B0 dependency audit complete; run --check next.');
 } else {
   await verifySource();
   for (const file of ['asset-ui-smoke.mjs', 'theme-ui-smoke.mjs', 'native-ui-smoke.mjs', 'native-card-smoke.mjs', 'native-state-smoke.mjs', 'native-query-smoke.mjs', 'native-query-fault-smoke.mjs', 'native-query-fault-scenario.mjs', 'query-scenario.mjs', 'tool-card-dom-smoke.mjs', 'gateway-smoke.mjs', 'control-permission-probe.mjs', 'native-query-assets-smoke.mjs', 'asset-routes.mjs']) {

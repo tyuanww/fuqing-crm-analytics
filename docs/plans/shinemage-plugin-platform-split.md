@@ -31,9 +31,9 @@
 | T22 | IMPLEMENTED / DOCS PASS | README、docs 索引、rc2 Quickstart 和插件作者 Quickstart 已统一当前事实与三步入口 | 现场 host/canary/rollback 仍不属于文档门禁 |
 | T23 | IMPLEMENTED / READINESS PASS | `doctor --release` 输出聚合阻断码、remedy 和 Quickstart 锚点；保持退出码 2 与 fail-closed | 正式 runtime、clean reviewed commit 和远端证据仍由发布门禁负责 |
 
-本轮把 `brace-expansion` 从 2.1.6 固定到 2.1.7；build-tools 的在线生产依赖审计为 0 个漏洞，并由 `scripts/release/supply-chain.test.mjs` 固定回归。代码审查修复提交为 `2dafe85f`，随后修复 runtime 阶段重复联网的提交为 `2782b854`，工作树当前 clean。正式 preflight 已从 `2782b854` 生成并验证 immutable candidate；首次失败的根因和修复证据见 `docs/hackathon/evidence/dsh-g0-followup-20261002.md`。
+本轮把 `brace-expansion` 从 2.1.6 固定到 2.1.7；build-tools 的在线生产依赖审计为 0 个漏洞，并由 `scripts/release/supply-chain.test.mjs` 固定回归。代码审查修复提交为 `2dafe85f`，随后修复 runtime 阶段重复联网的提交为 `2782b854`。本轮又把依赖审计从 `--prepare` 拆成独立的 `--audit` 阶段：registry 短暂不可用时，已准备的固定 checkout 可以保留并只重试审计，同时仍对审计失败 fail closed。正式 preflight 必须从最终 clean HEAD 重新生成 immutable candidate；此前成功的 `2782b854` 只作历史代码基线，首次失败的 runtime 根因见 `docs/hackathon/evidence/dsh-g0-followup-20261002.md`。
 
-最新 B0 `--check` 在隔离 Python 3.14.4 环境完成：618 项 pytest、314 项 B0/Node 测试、七个插件构建和 clean-build 重建均通过；插件 pack 生命周期钩子隔离及 funnel/waterfall `src/`→`lib/` 发布边界已进入该链路。正式 `pnpm dsh preflight` 的 `prepare → build → runtime(offline) → release → test → receive → evidence` 全部 PASS，`pnpm dsh test` 为 102/102 PASS，`doctor --release` 和只读 `preflight --check` 均 PASS。该结果仍不关闭 T15/T17/T21 的签名/SBOM、精确宿主激活、进程内回退、canary 和远端回执门禁。
+最新 B0 `--check` 在隔离 Python 3.14.4 环境完成：618 项 pytest、314 项 B0/Node 测试、七个插件构建和 clean-build 重建均通过；插件 pack 生命周期钩子隔离及 funnel/waterfall `src/`→`lib/` 发布边界已进入该链路。`--audit` 已在已准备的固定上游上单独通过（0 known vulnerabilities）。上一次正式 preflight 的 `prepare → build → runtime(offline) → release → test → receive → evidence` 全部 PASS，但它绑定 `2782b854`；当前代码新增 audit 阶段后必须从最终 clean HEAD 重新跑完整 `prepare → audit → build → runtime → release → test → receive → evidence`。该结果仍不关闭 T15/T17/T21 的签名/SBOM、精确宿主激活、进程内回退、canary 和远端回执门禁。
 
 ## 目标架构
 

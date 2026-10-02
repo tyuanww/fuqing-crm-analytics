@@ -15,7 +15,7 @@ DSH_UPSTREAM_RUNTIME_BUNDLE=/absolute/pinned/runtime.tar.zst \
 DSH_UPSTREAM_RUNTIME_BUNDLE=/absolute/pinned/runtime.tar.zst \
   pnpm dsh preflight --check --python /absolute/path/to/python3.14 \
   --tag dsh-preflight-<short-sha>
-# 首次候选没有 runtime bundle 时，直接运行正式 preflight；prepare 会联网准备固定依赖，runtime 阶段随后离线生成固定包
+# 首次候选没有 runtime bundle 时，直接运行正式 preflight；prepare 会联网准备固定依赖，audit 单独联网审计，runtime 阶段随后离线生成固定包
 pnpm dsh preflight --python /absolute/path/to/python3.14 \
   --source-sha "$(git rev-parse HEAD)" \
   --tag dsh-preflight-<short-sha>
@@ -41,7 +41,7 @@ runtime bundle 必须由固定上游 checkout 生成，文件名必须包含 `47
 <a id="dsh-quickstart-troubleshooting"></a>
 遇到阻断时先复制错误码和 `ref=` 文档路径，再按链接修复；不要用 `--scope local` 绕过 release gate。
 
-正式 `pnpm dsh preflight` 会在 tag 前执行固定上游准备、全部生产插件构建、完整 runtime secret/deny-name 扫描和 release contract tests；它不创建 tag、draft、asset 或 GitHub Release。命令按 `prepare → build → runtime → release → test → receive → evidence` 输出阶段事件、耗时和产物目录，失败时给出稳定错误码。只有 `prepare` 阶段允许为固定锁文件下载依赖；prepare 成功后，runtime bundle 使用同一 pnpm store 离线打包，避免重复访问外部 CDN。CI 的 `dsh-release-evidence` 必须绑定这个 exact-SHA preflight，并复用它生成的 runtime tarball。`pnpm dsh release --offline` 会在 `.context/release-evidence/<tag>/` 生成 pre-manifest、source tarball、固定 rc2 runtime tarball、release manifest、`SHA256SUMS` 和脱敏 CI evidence；它要求 runtime bundle 已由固定上游 checkout 构建，不上传 asset、打 tag或发布 GitHub Release，并且必须提供显式 `RELEASE_STATE_PATH`（或 `--state-path`）。发布前必须有干净 reviewed commit、成功 preflight/evidence、publication sidecar 和独立授权。`pnpm dsh receive`、`reconcile`、`status`、`resume` 共用同一绝对 state path；未提供时 fail closed。`why-blocked` 用于解释阻断；`rollback` 默认只显示现场 runbook，不猜测 systemd 命令。
+正式 `pnpm dsh preflight` 会在 tag 前执行固定上游准备、依赖安全审计、全部生产插件构建、完整 runtime secret/deny-name 扫描和 release contract tests；它不创建 tag、draft、asset 或 GitHub Release。命令按 `prepare → audit → build → runtime → release → test → receive → evidence` 输出阶段事件、耗时和产物目录，失败时给出稳定错误码。`prepare` 和 `audit` 允许联网；审计被单独拆成可重试阶段，registry 短暂不可用时保留已准备的固定 checkout，不把网络失败伪装成通过。audit 通过后，runtime bundle 使用同一 pnpm store 离线打包，避免重复访问外部 CDN。CI 的 `dsh-release-evidence` 必须绑定这个 exact-SHA preflight，并复用它生成的 runtime tarball。`pnpm dsh release --offline` 会在 `.context/release-evidence/<tag>/` 生成 pre-manifest、source tarball、固定 rc2 runtime tarball、release manifest、`SHA256SUMS` 和脱敏 CI evidence；它要求 runtime bundle 已由固定上游 checkout 构建，不上传 asset、打 tag或发布 GitHub Release，并且必须提供显式 `RELEASE_STATE_PATH`（或 `--state-path`）。发布前必须有干净 reviewed commit、成功 preflight/evidence、publication sidecar 和独立授权。`pnpm dsh receive`、`reconcile`、`status`、`resume` 共用同一绝对 state path；未提供时 fail closed。`why-blocked` 用于解释阻断；`rollback` 默认只显示现场 runbook，不猜测 systemd 命令。
 
 杭州部署时，Tailscale 只用于 SSH 控制面和传输小型 publication/attestation sidecar。大体积 source/runtime 包由杭州主机直接从 immutable GitHub Release 下载：运行 `deploy/wsl/fetch-release.sh` 后再执行 `install-release.sh`。fetch 支持断点续传、重试、临时文件、SHA-256 校验和 `release-fetch.v1.json` 回执；不要从 Mac 通过 `scp`/`rsync` 中转 runtime 包，也不要在生产执行 `git pull` 或现场编译。
 
