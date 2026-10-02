@@ -14,6 +14,14 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
+### 当前本地 rc2 候选门禁（2026-10-03）
+
+- 最终 reviewed source 是 `95fd4e9ea49bcee8162864a0bb689f89c8190569`；固定 DSH 为 `0.1.7-rc.2`，上游 SHA 为 `477b4f420553e8a52c2fbccc464d7561b239c443`。
+- `dsh-preflight-95fd4e9e` 已完成 `prepare → audit → build → runtime → release → test → receive → evidence`，八阶段均 PASS，102/102 测试通过；证据目录为 `.context/release-preflight/dsh-preflight-95fd4e9e/`，runtime SHA-256 为 `6acb435bb61c4cbea9459d71572552d2459341e2ed88975860032257132b2c1d`。
+- `doctor --release`、`preflight --check` 和 `verify --scope local` 均 PASS；local verify 明确标记 WSL2、真实 DuckDB、真实 HTTP SLI 为 `NOT_RUN`。
+- workbench candidate digest 为 `b12d082964dd720e5a2813281333f1ad6e702bd8a80db9baf7c9f46e41263371`，shine-brand candidate digest 为 `3ea086e911635d22486ce7aee132318394c1d0fc7040bb232c9f320064250dc0`；两者均绑定同一 source SHA 和 DSH pin。
+- 本地候选尚未 push、创建 GitHub Release 或切换杭州；T2/T13/T15/T17/T21 的现场宿主、签名/SBOM、canary/rollback、远端 receive/reconcile 仍是 `PARTIAL`/`NOT_RUN`。
+
 ## 本轮施工计划
 
 > r3 现场收尾记录见 [r3 收尾记录](docs/release/dsh-rc2-candidate/closeout-20260930.md)；r1 的 immutable Release、fetch receipt 和杭州 current 状态以本页与 runbook 为准。下方较早段落保留历史候选与未部署时的证据语境；不要用其“尚未执行”字样覆盖 2026-09-30 的事实。
