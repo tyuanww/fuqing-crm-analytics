@@ -173,7 +173,7 @@ test('promotion receives and records the pinned upstream runtime bundle', async 
 });
 test('install rejects the unverified default path', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); await assert.rejects(() => installRelease({artifact:archive,manifestPath:m,releaseRoot:join(root,'release-root'),tag:'dsh-test'}), /RELEASE_TRUST_INPUTS_REQUIRED/); });
 test('release evidence workflow accepts a candidate descendant of main', async () => { const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-evidence.yml'), 'utf8'); assert.match(workflow, /git merge-base --is-ancestor origin\/main "\$REVIEWED_SHA"/); });
-test('release preflight workflow permits the pinned runtime dependency fetch', async () => { const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-preflight.yml'), 'utf8'); const source = await readFile(join(process.cwd(), 'scripts/release/preflight.mjs'), 'utf8'); assert.match(source, /runtime-bundle\.mjs[\s\S]*--online/); assert.match(workflow, /scripts\/dsh\.mjs preflight/); });
+test('release preflight prepares dependencies online and packages the runtime offline', async () => { const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-preflight.yml'), 'utf8'); const source = await readFile(join(process.cwd(), 'scripts/release/preflight.mjs'), 'utf8'); assert.match(source, /stage\('prepare'[\s\S]*pipeline\.mjs/); assert.match(source, /runtime-bundle\.mjs[\s\S]*--output/); assert.doesNotMatch(source, /runtime-bundle\.mjs[\s\S]*--online/); assert.match(workflow, /scripts\/dsh\.mjs preflight/); });
 test('preflight bundle summary binds every release asset to the manifest', async () => {
   const root = await fixture();
   const tag = 'dsh-test-preflight';
@@ -216,7 +216,7 @@ test('release preflight builds the runtime before protected tag creation', async
   assert.match(workflow, /scripts\/dsh\.mjs preflight/);
   assert.match(workflow, /dsh-rc2-preflight-/);
   assert.match(source, /runtime-bundle\.mjs/);
-  assert.match(source, /--online/);
+  assert.doesNotMatch(source, /runtime-bundle\.mjs[\s\S]*--online/);
   assert.match(source, /scripts\/dsh\.mjs', 'test'/);
   assert.match(source, /requireUpstream: checkOnly/);
 });
