@@ -9,7 +9,8 @@ import { DSH_UPSTREAM_SHA } from './toolchain.mjs';
 export const UPSTREAM_SHA = DSH_UPSTREAM_SHA;
 export const RUNTIME_NAME = `shinemage-dsh-upstream-runtime-${UPSTREAM_SHA}.tar.zst`;
 const LOCAL_STAGES = ['prepare', 'audit', 'build', 'runtime', 'release', 'test', 'receive', 'evidence'];
-const COVERAGE_KEYS = ['prepare', 'audit', 'build', 'runtime', 'release', 'test', 'receive', 'wsl2', 'host_http'];
+const LOCAL_COVERAGE_KEYS = ['prepare', 'audit', 'build', 'runtime', 'release', 'test', 'receive'];
+const COVERAGE_KEYS = [...LOCAL_COVERAGE_KEYS, 'wsl2', 'host_http'];
 const COVERAGE_VALUES = new Set(['PASS', 'PARTIAL', 'NOT_RUN']);
 export function releaseAssetNames(tag) {
   assert.match(tag, /^dsh-[A-Za-z0-9._-]+$/);
@@ -68,7 +69,7 @@ export async function verifyPreflight(directory, { tag, sourceSha }) {
   for (const key of COVERAGE_KEYS) {
     const value = summary.evidence_coverage[key];
     assert.ok(COVERAGE_VALUES.has(value), `PREFLIGHT_COVERAGE_VALUE_INVALID ${key}`);
-    if (COVERAGE_KEYS.slice(0, 6).includes(key)) assert.equal(value, 'PASS', `PREFLIGHT_COVERAGE_LOCAL_NOT_PASS ${key}`);
+    if (LOCAL_COVERAGE_KEYS.includes(key)) assert.equal(value, 'PASS', `PREFLIGHT_COVERAGE_LOCAL_NOT_PASS ${key}`);
   }
   assert.deepEqual((await readdir(directory)).sort(), [...releaseAssetNames(tag), 'release-preflight.json'].sort(), 'PREFLIGHT_FILES_MISMATCH');
   const actual = await summarizePreflight(directory, { tag, sourceSha });
