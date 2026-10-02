@@ -1,6 +1,6 @@
 # DSH G0 后续复核证据（2026-10-02）
 
-本记录接在代码审查提交 `2dafe85fb2e4a791e3f53fb40c0165983253733f` 之后，记录当前 clean commit `2782b854126abe40f68d347ec1b4e9ded3c9a84a` 的正式本地候选复核。只使用 synthetic fixture、固定上游 checkout 和隔离临时目录；没有读取真实 DuckDB、启动 6677/旧 CRM、连接杭州主机或执行 GitHub 发布。
+本记录接在代码审查提交 `2dafe85fb2e4a791e3f53fb40c0165983253733f` 之后，记录代码修复基线 `2782b854` 的正式本地候选复核；随后仅同步了本记录和计划账本。任何正式发布都必须以最终 clean HEAD 重新生成 candidate/preflight，不能复用旧 SHA。只使用 synthetic fixture、固定上游 checkout 和隔离临时目录；没有读取真实 DuckDB、启动 6677/旧 CRM、连接杭州主机或执行 GitHub 发布。
 
 ## 先失败后修复
 
