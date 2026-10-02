@@ -10,7 +10,7 @@
 
 ## 已确认的事实与约束
 
-- 当前干净迁移基线是 `main@493a27cc`，工作区为 `/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics-public`。
+- 当前干净迁移基线是 `main@2782b854`，工作区为 `/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics-public`。
 - 当前项目固定 DSH `0.1.7-rc.2`，上游 SHA `477b4f420553e8a52c2fbccc464d7561b239c443`；官方候选 `0.2.0-rc.2` 是另一条兼容线，不能只改一个版本号。
 - 当前业务包至少有 `analytics-workbench`、`crm-knowledge`、`shine-brand`、`shine-board`、`shine-query`、`shine-funnel`、`shine-waterfall`、`shine-crowd-action`；它们仍在同一仓库内，且多个构建脚本依赖 `analytics-workbench/toolchain.mjs` 或其源码。
 - 每个 DSH bundle 必须保持 `package.json`、`dsh.bundle.patch`、构建产物、精确 `files/exports`、DSH/Cordis peer 合同和 `./invariant` 验证；bundle 变更后按官方合同重启 profile 生效。
@@ -23,17 +23,17 @@
 
 | 任务 | 当前状态 | 已有证据 | 尚未关闭 |
 |---|---|---|---|
-| T2 | PARTIAL | 0.1.7-rc.2 与 0.2.0-rc.2 精确 checkout、静态兼容扫描和 SHA 记录 | 精确运行时的 load/unload/session/WAL 证据 |
-| T13 | PARTIAL | profile manifest、显式 state path、release/receive journal、status/resume/reconcile fail-closed | preflight 状态 sidecar、完整崩溃 replay 与现场回执 |
-| T15 | PARTIAL | 合成包 4/4 回归、真实 workbench 与 shine-brand build/test、七插件 clean-build、pack digest、共享 dev-kit 边界、funnel/waterfall `lib/` 发布边界、build-tools audit 0 漏洞 | clean reviewed commit 后两包重打、签名/SBOM/来源信任和跨包边界 |
-| T17 | PARTIAL / BLOCKED | 进程级 synthetic host 的 hang/crash/restart/WAL/native fallback | 0.1.7 精确宿主、进程内 unload 与原子激活能力 |
-| T21 | PARTIAL | `pnpm dsh plugin candidate` 生成 profile/pack/capability/journal 收据 | canary/rollback、远端 receive/reconcile、clean reviewed commit 后的最新 candidate |
+| T2 | PARTIAL | 0.1.7-rc.2 与 0.2.0-rc.2 精确 checkout、静态兼容矩阵 SUPPORTED；0.1.7 固定 checkout 的官方 plugin-manager/runner/session/WAL 相关测试 167/167 PASS | 0.1.7 精确生产 runtime 的 load/unload/session/WAL 现场证据；0.2.0 生命周期依赖仍 DEFERRED |
+| T13 | PARTIAL | profile manifest、显式 state path、release/receive journal、status/resume/reconcile fail-closed；`release-preflight.json` sidecar、release state status/resume 已实际生成 | 完整崩溃 replay、远端 receipt/reconcile 和现场回执 |
+| T15 | PARTIAL | clean reviewed commit `2782b854` 后 workbench/shine-brand 两包 candidate 重打、七插件 clean-build、pack digest、共享 dev-kit 边界、funnel/waterfall `lib/` 发布边界、build-tools audit 0 漏洞 | 签名/SBOM/来源信任和跨包源码边界；叶子包仍引用 workspace 的 workbench toolchain/组件源码 |
+| T17 | PARTIAL / BLOCKED | synthetic host 的 hang/crash/restart/WAL/native fallback 和 profile reconcile；host evidence 明确记录 `in-process-unload=BLOCKED` | 0.1.7 精确宿主、进程内 unload 与原子激活能力 |
+| T21 | PARTIAL | 最新 `pnpm dsh plugin candidate` 收据绑定 source `2782b854`、profile/pack/capability/journal；workbench 与 shine-brand candidate 均已重打 | canary/rollback、远端 receive/reconcile、候选回执与 host activation 的接线 |
 | T22 | IMPLEMENTED / DOCS PASS | README、docs 索引、rc2 Quickstart 和插件作者 Quickstart 已统一当前事实与三步入口 | 现场 host/canary/rollback 仍不属于文档门禁 |
 | T23 | IMPLEMENTED / READINESS PASS | `doctor --release` 输出聚合阻断码、remedy 和 Quickstart 锚点；保持退出码 2 与 fail-closed | 正式 runtime、clean reviewed commit 和远端证据仍由发布门禁负责 |
 
-本轮把 `brace-expansion` 从 2.1.6 固定到 2.1.7；build-tools 的在线生产依赖审计为 0 个漏洞，并由 `scripts/release/supply-chain.test.mjs` 固定回归。审查修复已提交为 `493a27cc`，工作树当前 clean；仍需从这个 reviewed commit 重新生成最新 immutable candidate，不能绕过这个门禁。
+本轮把 `brace-expansion` 从 2.1.6 固定到 2.1.7；build-tools 的在线生产依赖审计为 0 个漏洞，并由 `scripts/release/supply-chain.test.mjs` 固定回归。代码审查修复提交为 `2dafe85f`，随后修复 runtime 阶段重复联网的提交为 `2782b854`，工作树当前 clean。正式 preflight 已从 `2782b854` 生成并验证 immutable candidate；首次失败的根因和修复证据见 `docs/hackathon/evidence/dsh-g0-followup-20261002.md`。
 
-最新 B0 `--check` 在隔离 Python 3.14.4 环境完成：618 项 pytest、314 项 B0/Node 测试、七个插件构建和 clean-build 重建均通过；插件 pack 生命周期钩子隔离及 funnel/waterfall `src/`→`lib/` 发布边界已进入该链路。最新 `pnpm dsh test` 为 102/102 PASS。该结果仍不关闭 T15/T17/T21 的最新 candidate、签名/SBOM、宿主激活、回退和远端回执门禁。
+最新 B0 `--check` 在隔离 Python 3.14.4 环境完成：618 项 pytest、314 项 B0/Node 测试、七个插件构建和 clean-build 重建均通过；插件 pack 生命周期钩子隔离及 funnel/waterfall `src/`→`lib/` 发布边界已进入该链路。正式 `pnpm dsh preflight` 的 `prepare → build → runtime(offline) → release → test → receive → evidence` 全部 PASS，`pnpm dsh test` 为 102/102 PASS，`doctor --release` 和只读 `preflight --check` 均 PASS。该结果仍不关闭 T15/T17/T21 的签名/SBOM、精确宿主激活、进程内回退、canary 和远端回执门禁。
 
 ## 目标架构
 
