@@ -13,13 +13,12 @@ import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { receiveArtifact } from './artifact.mjs';
 import { releaseAssetNames, summarizePreflight, verifyPreflight, UPSTREAM_SHA } from './preflight-bundle.mjs';
-import { collectReleaseReadiness, printReadiness, RELEASE_PLUGINS } from './readiness.mjs';
+import { collectReleaseReadiness, printReadiness } from './readiness.mjs';
 import { DSH_SDK_VERSION } from './toolchain.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const upstream = resolve(process.env.DSH_UPSTREAM_CHECKOUT || join(root, `.context/dsh-b0/upstream-${DSH_SDK_VERSION}`));
 const pin = UPSTREAM_SHA;
-const plugins = RELEASE_PLUGINS;
 
 function option(name, fallback = null) {
   const index = process.argv.indexOf(name);
@@ -73,6 +72,8 @@ if (checkOnly) {
   process.exit(0);
 }
 
+const plugins = readiness.profile.plugins.map(item => item.path);
+
 assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(), sourceSha, 'PREFLIGHT_SOURCE_SHA_MISMATCH');
 
 const stageTimings = [];
@@ -122,7 +123,7 @@ try {
   assert.equal(execFileSync('git', ['-C', upstream, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), pin, 'PREFLIGHT_UPSTREAM_SHA_MISMATCH');
   await stage('build', () => { for (const plugin of plugins) run(process.execPath, [`${plugin}/build.mjs`, upstream]); });
   await stage('runtime', () => run(process.execPath, ['scripts/release/runtime-bundle.mjs', '--upstream', upstream, '--output', runtimeOutput, '--online']));
-  await stage('release', () => run(process.execPath, ['scripts/dsh.mjs', 'release', '--offline', '--tag', tag], { DSH_UPSTREAM_RUNTIME_BUNDLE: runtimeOutput }));
+  await stage('release', () => run(process.execPath, ['scripts/dsh.mjs', 'release', '--offline', '--tag', tag], { DSH_UPSTREAM_RUNTIME_BUNDLE: runtimeOutput, RELEASE_STATE_PATH: join(runDir, 'release-state.json') }));
   await stage('test', () => run(process.execPath, ['scripts/dsh.mjs', 'test']));
   const scratch = await mkdtemp(join(tmpdir(), 'release-preflight-receive-'));
   try {

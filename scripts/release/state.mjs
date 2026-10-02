@@ -19,6 +19,7 @@ export const PHASES = [
 const STATE_SCHEMA = 'release-state/v2';
 const KEY = /^[A-Za-z0-9][A-Za-z0-9._:-]{7,199}$/;
 const TERMINAL = new Set(['RECEIPT']);
+const IDENTITY_FIELDS = ['source_sha', 'manifest_sha256', 'artifact_sha256', 'sha256sums_sha256', 'evidence_index_sha256', 'assets'];
 
 function own(object, key) { return Object.prototype.hasOwnProperty.call(object, key); }
 function now() { return new Date().toISOString(); }
@@ -103,6 +104,16 @@ function appendJournal(state, value) {
   return entry;
 }
 
+function promoteIdentity(state, data, { allowChange = false } = {}) {
+  for (const key of IDENTITY_FIELDS) {
+    if (!own(data, key)) continue;
+    if (!allowChange && state[key] !== undefined && state[key] !== null && digest(state[key]) !== digest(data[key])) {
+      throw new Error(`RELEASE_STATE_IDENTITY_CONFLICT ${key}`);
+    }
+    state[key] = data[key];
+  }
+}
+
 /** Record an ordered phase transition. Skips and regressions fail closed. */
 export async function transition(path, phase, data = {}) {
   if (!PHASES.includes(phase)) throw new Error(`PHASE_INVALID ${phase}`);
@@ -117,6 +128,7 @@ export async function transition(path, phase, data = {}) {
       if (state.release_tag !== null && state.release_tag !== data.release_tag) throw new Error('RELEASE_STATE_TAG_CONFLICT');
       state.release_tag = data.release_tag;
     }
+    promoteIdentity(state, data);
     const entry = appendJournal(state, { phase, event: 'PHASE', status: 'COMMITTED', ...data });
     state.phase = phase; state.phase_status = 'COMMITTED'; await save(path, state); return entry;
   });
@@ -130,10 +142,18 @@ export async function transition(path, phase, data = {}) {
  * must record an ordered sequence such as rc1 -> rc2 -> rollback -> rc2.
  * Promotion is the only caller allowed to opt into that controlled change.
  */
-export async function recordEvent(path, data = {}, { allowTagChange = false } = {}) {
+export async function recordEvent(path, data = {}, { allowTagChange = false, allowIdentityChange = false, idempotencyKey = null } = {}) {
   if (!data || typeof data !== 'object' || Array.isArray(data) || ['phase', 'event'].some(key => own(data, key))) throw new Error('RELEASE_EVENT_INVALID');
+  if (idempotencyKey !== null && !KEY.test(idempotencyKey)) throw new Error('IDEMPOTENCY_KEY_INVALID');
+  const fingerprint = idempotencyKey === null ? null : digest(data);
   return withLock(path, async () => {
     const state = await load(path);
+    if (idempotencyKey !== null && own(state.idempotency, idempotencyKey)) {
+      const prior = state.idempotency[idempotencyKey];
+      if (prior.fingerprint !== fingerprint) throw new Error('RELEASE_EVENT_CONFLICT');
+      if (prior.status !== 'COMMITTED') throw new Error('RELEASE_EVENT_UNKNOWN');
+      return prior.result;
+    }
     const previousReleaseTag = state.release_tag;
     const releaseTagChanged = data.release_tag !== undefined && state.release_tag !== null && state.release_tag !== data.release_tag;
     if (data.release_tag !== undefined) {
@@ -141,8 +161,11 @@ export async function recordEvent(path, data = {}, { allowTagChange = false } = 
       if (releaseTagChanged && allowTagChange !== true) throw new Error('RELEASE_STATE_TAG_CONFLICT');
       state.release_tag = data.release_tag;
     }
+    promoteIdentity(state, data, { allowChange: allowIdentityChange || allowTagChange });
     const event = releaseTagChanged ? { release_tag_previous: previousReleaseTag } : {};
-    const entry = appendJournal(state, { phase: state.phase, event: 'OBSERVATION', ...data, ...event }); await save(path, state); return entry;
+    const entry = appendJournal(state, { phase: state.phase, event: 'OBSERVATION', ...data, ...event });
+    if (idempotencyKey !== null) state.idempotency[idempotencyKey] = { status: 'COMMITTED', fingerprint, result: entry, completed_at: entry.at };
+    await save(path, state); return entry;
   });
 }
 

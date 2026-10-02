@@ -7,14 +7,16 @@ import { fileURLToPath } from 'node:url';
 import { buildPreManifest, packArtifact, receiveArtifact, sha256 } from './release/artifact.mjs';
 import { assertSchema } from './release/schema.mjs';
 import { verifyPayload } from './release/artifact.mjs';
-import { readState, reconcileState, resume } from './release/state.mjs';
+import { readState, reconcileState, recordEvent, resume } from './release/state.mjs';
 import { runLocalVerification } from './release/local-verify.mjs';
 import { collectReleaseReadiness, printReadiness } from './release/readiness.mjs';
 import { DSH_UPSTREAM_SHA, NODE_MAJOR, PNPM_VERSION } from './release/toolchain.mjs';
+import { createPluginCandidate } from './release/plugin-candidate.mjs';
+import { loadReleaseProfile } from './release/profile.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const releaseEvidence = join(root, '.context/release-evidence');
-const COMMANDS = ['dev', 'test', 'preflight', 'release', 'receive', 'reconcile', 'verify', 'rollback', 'doctor', 'status', 'why-blocked', 'retry', 'resume'];
+const COMMANDS = ['dev', 'test', 'preflight', 'release', 'receive', 'reconcile', 'verify', 'rollback', 'doctor', 'status', 'why-blocked', 'retry', 'resume', 'plugin'];
 function usage() {
   console.log(`Usage: pnpm dsh <command> [options]
 
@@ -59,13 +61,15 @@ async function doctor(args = [], { setExitCode = true } = {}) {
 }
 async function release(args) {
   if (args.includes('--help') || args.includes('-h')) {
-    console.log('Usage: pnpm dsh release [--offline|--dry-run] [--tag TAG] [--config PATH]');
+    console.log('Usage: pnpm dsh release [--offline|--dry-run] [--tag TAG] [--config PATH] --state-path /absolute/release-state.json');
     console.log('Precedence: --tag > DSH_RELEASE_TAG > config.release_tag > VERSION default; config path: --config > DSH_CONFIG_FILE > .dshrc.json');
     return;
   }
   const tagIndex = args.indexOf('--tag');
+  if (args.filter(value => value === '--tag').length > 1) throw new Error('RELEASE_TAG_AMBIGUOUS');
   if (tagIndex >= 0 && !args[tagIndex + 1]) throw new Error('RELEASE_TAG_REQUIRED');
   const configIndex = args.indexOf('--config');
+  if (args.filter(value => value === '--config').length > 1) throw new Error('RELEASE_CONFIG_AMBIGUOUS');
   if (configIndex >= 0 && !args[configIndex + 1]) throw new Error('RELEASE_CONFIG_REQUIRED');
   const configPath = configIndex >= 0 ? args[configIndex + 1] : (process.env.DSH_CONFIG_FILE || join(root, '.dshrc.json'));
   let config = {};
@@ -75,25 +79,28 @@ async function release(args) {
   }
   const configuredTag = config.release_tag || `dsh-${(await readFile(join(root, 'VERSION'), 'utf8')).trim()}-candidate`;
   const tag = tagIndex >= 0 ? args[tagIndex + 1] : (process.env.DSH_RELEASE_TAG || configuredTag);
-  const allowed = new Set(['--offline', '--dry-run', '--tag', '--config']);
+  const allowed = new Set(['--offline', '--dry-run', '--tag', '--config', '--state-path']);
   for (let index = 0; index < args.length; index += 1) {
     const item = args[index];
     if (!item.startsWith('--')) continue;
     if (!allowed.has(item)) throw new Error(`RELEASE_OPTION_UNKNOWN ${item}`);
-    if (item === '--tag' || item === '--config') index += 1;
+    if (item === '--tag' || item === '--config' || item === '--state-path') index += 1;
   }
   const offline = args.includes('--offline') || args.includes('--dry-run');
   if (!offline) throw new Error('RELEASE_NETWORK_AUTH_REQUIRED use --offline for local preparation; GitHub publish is a separate authorized step');
+  const statePath = explicitStatePath(args);
   const status = git(['status', '--porcelain', '--untracked-files=all']);
   if (status) throw new Error('RELEASE_BLOCKED_DIRTY_WORKTREE reviewed commit must be clean; use a clean CI checkout to build the immutable artifact');
   const sourceSha = git(['rev-parse', 'HEAD']); const version = (await readFile(join(root, 'VERSION'), 'utf8')).trim();
   const upstreamSha = DSH_UPSTREAM_SHA;
+  const profile = await loadReleaseProfile({ root });
   const runtimeInput = process.env.DSH_UPSTREAM_RUNTIME_BUNDLE;
   if (!runtimeInput) throw new Error('RELEASE_UPSTREAM_RUNTIME_REQUIRED');
   const runtimeInfo = await stat(runtimeInput).catch(() => null);
   if (!runtimeInfo?.isFile() || runtimeInfo.size < 1) throw new Error('RELEASE_UPSTREAM_RUNTIME_INVALID');
   const runtimeName = `shinemage-dsh-upstream-runtime-${upstreamSha}.tar.zst`;
   const dir = join(releaseEvidence, tag);
+  await recordEvent(statePath, { release_tag: tag, status: 'RELEASE_PREPARE_INTENT', source_sha: sourceSha, dsh_upstream_sha: upstreamSha, profile_digest: profile.digest });
   await mkdir(releaseEvidence, { recursive: true });
   if (await access(dir).then(() => true, () => false)) {
     const entries = await readdir(dir);
@@ -117,15 +124,47 @@ async function release(args) {
   const sums = `${bundle.sha256}  ${tag}.tar.zst\n${runtimeSha256}  ${runtimeName}\n${await sha256(manifestPath)}  release-manifest.v1.json\n`; await writeFile(join(dir, 'SHA256SUMS'), sums, { mode: 0o600 });
   await writeFile(join(dir, 'ci-evidence-index.v1.json'), JSON.stringify({ schema_version: 'ci-evidence-index/v1', release_tag: tag, entries: [{ name: 'local-doctor', status: 'PARTIAL', ref: 'pnpm dsh doctor', sha256: preSha }, { name: 'upstream-runtime-bundle', status: 'PASS', ref: runtimeName, sha256: runtimeSha256 }, { name: 'wsl2-cold', status: 'NOT_RUN', ref: 'docs/release/dsh-rc2-candidate/host-preflight.md' }] }, null, 2) + '\n', { mode: 0o600 });
   await verifyPayload(manifestPath, root);
+  await recordEvent(statePath, { release_tag: tag, status: 'RELEASE_PREPARED', source_sha: sourceSha, dsh_upstream_sha: upstreamSha, profile_digest: profile.digest, artifact_sha256: bundle.sha256, manifest_sha256: await sha256(manifestPath) });
   console.log(`DSH_RELEASE_PREPARED tag=${tag} pre_manifest=${prePath} manifest=${manifestPath}`); console.log('DSH_RELEASE_STATUS INTERNAL_ONLY_PARTIAL');
   } catch (error) {
+    await recordEvent(statePath, { release_tag: tag, status: 'RELEASE_FAILED', error_code: String(error?.message ?? '').match(/[A-Z][A-Z0-9_]{3,}/)?.[0] ?? 'RELEASE_FAILED' }).catch(() => {});
     const entries = await readdir(dir).catch(() => []);
     if (entries.length === 0) await rm(dir, { recursive: true, force: true });
     throw error;
   }
 }
+function explicitStatePath(args) {
+  const indexes = args.flatMap((value, index) => value === '--state-path' ? [index] : []);
+  if (indexes.length > 1) throw new Error('RELEASE_STATE_PATH_AMBIGUOUS');
+  const index = indexes[0] ?? -1;
+  const value = index >= 0 ? args[index + 1] : process.env.RELEASE_STATE_PATH;
+  if (!value || value.startsWith('--')) throw new Error('RELEASE_STATE_PATH_REQUIRED');
+  if (!value.startsWith('/')) throw new Error('RELEASE_STATE_PATH_ABSOLUTE_REQUIRED');
+  return resolve(value);
+}
+function stateCommandArgs(args, { remote = false } = {}) {
+  const positional = [];
+  if (args.filter(value => value === '--state-path').length > 1) throw new Error('RELEASE_STATE_PATH_AMBIGUOUS');
+  for (let index = 0; index < args.length; index += 1) {
+    if (args[index] === '--state-path') {
+      requiredOption(args, '--state-path');
+      index += 1;
+    } else if (args[index].startsWith('-')) {
+      throw new Error(`STATE_OPTION_UNKNOWN ${args[index]}`);
+    } else positional.push(args[index]);
+  }
+  const hasOption = args.includes('--state-path');
+  let statePath;
+  if (hasOption) statePath = explicitStatePath(args);
+  else if (positional.length > (remote ? 1 : 0)) statePath = explicitStatePath(['--state-path', positional.shift()]);
+  else statePath = explicitStatePath([]);
+  if (positional.length !== (remote ? 1 : 0)) throw new Error(remote ? 'REMOTE_RECEIPT_REQUIRED' : 'STATE_ARGUMENTS_INVALID');
+  return { statePath, remotePath: positional[0] };
+}
 function requiredOption(args, name) {
-  const index = args.indexOf(name);
+  const indexes = args.flatMap((value, index) => value === name ? [index] : []);
+  if (indexes.length > 1) throw new Error(`${name.slice(2).toUpperCase()}_AMBIGUOUS`);
+  const index = indexes[0] ?? -1;
   if (index < 0 || !args[index + 1] || args[index + 1].startsWith('--')) throw new Error(`${name.slice(2).toUpperCase()}_REQUIRED`);
   return args[index + 1];
 }
@@ -138,21 +177,62 @@ async function receive(args) {
   const artifact = requiredOption(args, '--artifact');
   const manifestPath = requiredOption(args, '--manifest');
   const destination = requiredOption(args, '--destination');
+  const statePath = explicitStatePath(args);
   const maxEntries = positiveOption(args, '--max-entries', 10000);
   const maxBytes = positiveOption(args, '--max-bytes', 512 * 1024 * 1024);
-  const allowed = new Set(['--artifact', '--manifest', '--destination', '--max-entries', '--max-bytes']);
+  const allowed = new Set(['--artifact', '--manifest', '--destination', '--max-entries', '--max-bytes', '--state-path']);
   for (let index = 0; index < args.length; index += 1) {
     if (!args[index].startsWith('--')) continue;
     if (!allowed.has(args[index])) throw new Error(`RECEIVE_OPTION_UNKNOWN ${args[index]}`);
     index += 1;
   }
+  // Persist an intent before any bytes are installed. If extraction or the
+  // final receipt write fails, the journal remains visibly incomplete and a
+  // later reconcile can inspect it instead of treating the directory as a
+  // successful receive.
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+  await assertSchema(manifest, join(root, 'scripts/release/schemas/release-manifest.v1.schema.json'));
+  await recordEvent(statePath, {
+    release_tag: manifest.release_tag,
+    status: 'RECEIVE_INTENT',
+    artifact_sha256: manifest.artifact_sha256,
+    destination: 'explicit',
+  }, { idempotencyKey: `receive-intent:${manifest.artifact_sha256}` });
   const result = await receiveArtifact({ artifact, manifestPath, destination, maxEntries, maxBytes });
+  await recordEvent(statePath, { release_tag: result.manifest.release_tag, status: 'RECEIVED', artifact_sha256: result.sha256, destination: 'explicit' });
   console.log(`DSH_RECEIVE_PASS tag=${result.manifest.release_tag} entries=${result.entries} artifact_sha256=${result.sha256} destination=${destination}`);
 }
 async function test() { const tests = readdirSync(join(root, 'scripts/release')).filter(name => name.endsWith('.test.mjs')).map(name => join('scripts/release', name)); return execFileSync(process.execPath, ['--test', ...tests], { cwd: root, encoding: 'utf8', stdio: 'inherit' }); }
 async function preflight(args) { return execFileSync(process.execPath, [join(root, 'scripts/release/preflight.mjs'), ...args], { cwd: root, encoding: 'utf8', stdio: 'inherit' }); }
+async function plugin(args) {
+  const [subcommand, ...options] = args;
+  if (!subcommand || subcommand === '--help' || subcommand === '-h') {
+    console.log('Usage: pnpm dsh plugin candidate --plugin /absolute/plugin --output-dir /absolute/output --state-path /absolute/state.json [--profile /relative/profile.json] [--previous-profile /relative/profile.json]');
+    return;
+  }
+  if (subcommand !== 'candidate') throw new Error(`PLUGIN_COMMAND_UNKNOWN ${subcommand}`);
+  if (options.includes('--help') || options.includes('-h')) {
+    console.log('Usage: pnpm dsh plugin candidate --plugin /absolute/plugin --output-dir /absolute/output --state-path /absolute/state.json [--profile /relative/profile.json] [--previous-profile /relative/profile.json]');
+    return;
+  }
+  const allowed = new Set(['--plugin', '--output-dir', '--state-path', '--profile', '--previous-profile']);
+  for (let index = 0; index < options.length; index += 1) {
+    const item = options[index];
+    if (!allowed.has(item)) throw new Error(`PLUGIN_OPTION_UNKNOWN ${item}`);
+    index += 1;
+  }
+  const candidate = await createPluginCandidate({
+    plugin: requiredOption(options, '--plugin'),
+    outputDir: requiredOption(options, '--output-dir'),
+    statePath: requiredOption(options, '--state-path'),
+    profileManifest: options.includes('--profile') ? requiredOption(options, '--profile') : null,
+    previousProfile: options.includes('--previous-profile') ? requiredOption(options, '--previous-profile') : null,
+  });
+  console.log(JSON.stringify(candidate, null, 2));
+}
 async function verify(args = []) {
   const scopeIndex = args.indexOf('--scope');
+  if (args.filter(value => value === '--scope').length > 1) throw new Error('VERIFY_SCOPE_AMBIGUOUS');
   const scope = scopeIndex >= 0 ? args[scopeIndex + 1] : 'release';
   if (scopeIndex >= 0 && (!scope || scope.startsWith('--'))) throw new Error('VERIFY_SCOPE_REQUIRED');
   if (!['local', 'release'].includes(scope)) throw new Error(`VERIFY_SCOPE_INVALID ${scope}`);
@@ -191,20 +271,19 @@ async function main() {
   if (command === 'test') return test();
   if (command === 'verify') return verify(args);
   if (command === 'reconcile') {
-    const statePath = args[0] || join(releaseEvidence, 'state.json');
-    const remotePath = args[1];
-    if (!remotePath) throw new Error('REMOTE_RECEIPT_REQUIRED');
+    const { statePath, remotePath } = stateCommandArgs(args, { remote: true });
     const remote = JSON.parse(await readFile(remotePath, 'utf8'));
     const result = await reconcileState(statePath, remote);
     console.log(JSON.stringify(result, null, 2));
     if (['CONFLICT', 'UNKNOWN'].includes(result.status)) process.exitCode = 2;
     return;
   }
-  if (command === 'status' || command === 'resume') { const path = args[0] || join(releaseEvidence, 'state.json'); console.log(JSON.stringify(await (command === 'resume' ? resume(path) : readState(path)), null, 2)); return; }
+  if (command === 'status' || command === 'resume') { const { statePath } = stateCommandArgs(args); console.log(JSON.stringify(await (command === 'resume' ? resume(statePath) : readState(statePath)), null, 2)); return; }
   if (command === 'why-blocked') { console.log('DSH_BLOCKED GitHub push/tag/release、杭州重启/route/切换需要单独授权；真实模型、131GB DuckDB、WSL2 冷验证为 NOT_RUN/PARTIAL'); return; }
   if (command === 'retry') { console.log('DSH_RETRY requires a durable state path and idempotency key; no remote side effect was attempted'); return; }
   if (command === 'dev') { const { spawn } = await import('node:child_process'); const child = spawn(process.execPath, [join(root, 'scripts/dsh-dev/cli.mjs'), ...args], { cwd: root, stdio: 'inherit' }); child.on('exit', code => { process.exitCode = code ?? 1; }); return; }
   if (command === 'rollback') { console.log('DSH_ROLLBACK dry-run only; use deploy/wsl/rollback-release.sh with a recorded receipt'); return; }
+  if (command === 'plugin') return plugin(args);
   return usage();
 }
 main().catch(error => { console.error(`DSH_ERROR ${error.message}`); process.exitCode = 2; });

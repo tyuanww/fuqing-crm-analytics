@@ -150,8 +150,9 @@ print('B0 exact Python closure verified')
   const sourceTests = (await readdir(join(plugin, 'test'))).filter(name => name.endsWith('.test.mjs') && !builtTests.includes(name));
   run(process.execPath, ['--test', ...sourceTests.map(name => join(plugin, 'test', name)),
     'scripts/dsh-b0/gateway-policy.test.mjs', 'scripts/dsh-b0/transport-safety.test.mjs', 'scripts/dsh-b0/mock-provider.test.mjs',
-    'scripts/dsh-b0/lifecycle-observer.test.mjs', 'scripts/dsh-b0/permission-fence.test.mjs', 'scripts/dsh-b0/ui-seams.test.mjs',
+    'scripts/dsh-b0/lifecycle-observer.test.mjs', 'scripts/dsh-b0/host-feasibility.test.mjs', 'scripts/dsh-b0/compatibility-matrix.test.mjs', 'scripts/dsh-b0/permission-fence.test.mjs', 'scripts/dsh-b0/ui-seams.test.mjs',
     'scripts/dsh-b0/package-manager-env.test.mjs', 'scripts/dsh-b0/diagnostic-sink.test.mjs',
+    'scripts/release/plugin-pack.test.mjs', 'scripts/release/plugin-candidate.test.mjs', 'scripts/release/profile.test.mjs', 'scripts/release/plugin-boundary.test.mjs', 'scripts/release/supply-chain.test.mjs',
     'scripts/dsh-b0/clean-build.test.mjs',
     'scripts/dsh-b0/native-state-smoke.test.mjs', 'scripts/dsh-b0/native-query-smoke.test.mjs',
     'scripts/dsh-b0/native-query-fault-smoke.test.mjs', 'scripts/dsh-b0/native-query-assets-smoke.test.mjs',
@@ -202,6 +203,7 @@ print('B0 exact Python closure verified')
     for (const item of ['package.json', 'toolchain.json', 'toolchain.mjs', 'build.mjs', 'pack-skills.mjs', 'skill-package.lock.json', 'query-skill-package.lock.json', 'first-purchase-query-skill-package.lock.json', 'skills', 'src', 'test']) {
       await copyTreeBounded(join(plugin, item), join(clean, item), { destinationRoot: cleanRoot, budget });
     }
+    await copyTreeBounded(join(root, 'dsh-plugins/plugin-kit'), join(cleanRoot, 'plugin-kit'), { destinationRoot: cleanRoot, budget });
     await copyTreeBounded(join(shineWaterfall, 'src'), join(cleanRoot, 'shine-waterfall', 'src'), { destinationRoot: cleanRoot, budget });
     await copyTreeBounded(join(shineFunnel, 'src'), join(cleanRoot, 'shine-funnel', 'src'), { destinationRoot: cleanRoot, budget });
     await mkdir(join(clean, 'build-tools'));

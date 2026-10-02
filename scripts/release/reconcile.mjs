@@ -46,6 +46,12 @@ export function reconcileRemote({ local, remote }) {
   if (remote.phase != null && !PHASES.includes(remote.phase)) return { status: 'UNKNOWN', reason: 'remote_phase_unrecognized', remote_phase: remote.phase, action: 'STOP_AND_INSPECT' };
   const localPhase = phaseIndex(local.phase);
   const remotePhase = phaseIndex(remote.phase);
+  const publicationPhase = phaseIndex('UPLOAD_TARBALLS');
+  const hasIdentity = ['source_sha', 'manifest_sha256', 'artifact_sha256', 'sha256sums_sha256']
+    .some(key => local[key] != null || remote[key] != null);
+  if (remotePhase >= publicationPhase && remotePhase >= localPhase && !hasIdentity) {
+    return { status: 'UNKNOWN', reason: 'publication_identity_missing', action: 'QUERY_REMOTE_METADATA' };
+  }
   if (remotePhase > localPhase) return { status: 'REMOTE_AHEAD', remote_phase: remote.phase, local_phase: local.phase ?? null, action: 'ADOPT_REMOTE_AFTER_DIGEST_CHECK' };
   if (remotePhase < localPhase) return { status: 'REMOTE_BEHIND', remote_phase: remote.phase ?? null, local_phase: local.phase, action: 'RESUME_MISSING_REMOTE_PHASE' };
   // phase_status=COMMITTED describes the local journal transition, while

@@ -1,0 +1,7 @@
+{
+  "name": "@shine-mage/dsh-plugin-kit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Dev-only shared toolchain binding for independently built ShineMage DSH plugins"
+}

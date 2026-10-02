@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
-import { access, mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
-import { join, relative, resolve, sep } from 'node:path';
+import { access, lstat, mkdir, mkdtemp, readdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
+import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { assertSchema, readSchema, validateSchema } from './schema.mjs';
@@ -88,6 +88,7 @@ export async function packArtifact({ rootDir = root, allowlist, output }) {
 }
 
 export async function receiveArtifact({ artifact, manifestPath, destination, maxEntries = 10000, maxBytes = 512 * 1024 * 1024 }) {
+  const finalDestination = resolve(destination);
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
   await assertSchema(manifest, join(schemaDir, 'release-manifest.v1.schema.json'));
   if (!Array.isArray(manifest.archive_allowlist) || manifest.archive_allowlist.length === 0) throw new Error('ALLOWLIST_EMPTY');
@@ -96,28 +97,43 @@ export async function receiveArtifact({ artifact, manifestPath, destination, max
   if (!Array.isArray(manifest.payload) || manifest.payload.length === 0 || new Set(manifest.payload.map(item => item.path)).size !== manifest.payload.length || manifest.payload.some(item => !safeManifestPath(item.path))) throw new Error('PAYLOAD_EMPTY_OR_PATH_INVALID');
   const artifactInfo = await stat(artifact);
   if (artifactInfo.size !== manifest.artifact_bytes || await sha256(artifact) !== manifest.artifact_sha256) throw new Error('ARTIFACT_DIGEST_MISMATCH');
-  if (await access(destination).then(() => true, () => false)) throw new Error('DESTINATION_MUST_NOT_EXIST');
-  await run('python3', [join(scripts, 'secure-unpack.py'), artifact, destination, '--max-entries', String(maxEntries), '--max-bytes', String(maxBytes)]);
-  const files = await collectAllowlist(destination, { allowlist: manifest.archive_allowlist });
-  const all = await listFiles(destination);
-  const unexpected = all.filter(path => !allowed(path, manifest.archive_allowlist));
-  if (unexpected.length) throw new Error(`ALLOWLIST_VIOLATION ${unexpected.join(',')}`);
-  const payloadPaths = manifest.payload.map(item => item.path).sort();
-  const actualPaths = all.filter(path => !path.endsWith('/')).sort();
-  if (payloadPaths.length !== actualPaths.length || payloadPaths.some((p, i) => p !== actualPaths[i])) throw new Error('PAYLOAD_PATHS_MISMATCH');
-  for (const item of manifest.payload) {
-    const path = join(destination, item.path);
-    const info = await stat(path);
-    if (info.size !== item.bytes || await sha256(path) !== item.sha256) throw new Error(`PAYLOAD_DIGEST_MISMATCH ${item.path}`);
-  }
-  const findings = await scanTree(destination, { maxBytes });
-  assertClean(findings);
-  if (manifest.toolchain) {
-    for (const required of ['package.json', 'pnpm-lock.yaml', 'scripts/dsh.mjs', 'deploy/wsl/install-release.sh']) {
-      if (!actualPaths.includes(required)) throw new Error(`RUNTIME_ENTRYPOINT_MISSING ${required}`);
+  const destinationInfo = await lstat(finalDestination).catch(error => {
+    if (error.code === 'ENOENT') return null;
+    throw error;
+  });
+  if (destinationInfo) throw new Error('DESTINATION_MUST_NOT_EXIST');
+  await mkdir(dirname(finalDestination), { recursive: true, mode: 0o700 });
+  const stageRoot = await mkdtemp(join(dirname(finalDestination), `.dsh-receive-${basename(finalDestination)}-`));
+  const stagingDestination = join(stageRoot, 'payload');
+  try {
+    // Keep the unpacked tree private until every allowlist, payload digest,
+    // secret scan and runtime-entrypoint check passes. A failed validation must
+    // never leave an unverified directory at the caller's destination.
+    await run('python3', [join(scripts, 'secure-unpack.py'), artifact, stagingDestination, '--max-entries', String(maxEntries), '--max-bytes', String(maxBytes)]);
+    const files = await collectAllowlist(stagingDestination, { allowlist: manifest.archive_allowlist });
+    const all = await listFiles(stagingDestination);
+    const unexpected = all.filter(path => !allowed(path, manifest.archive_allowlist));
+    if (unexpected.length) throw new Error(`ALLOWLIST_VIOLATION ${unexpected.join(',')}`);
+    const payloadPaths = manifest.payload.map(item => item.path).sort();
+    const actualPaths = all.filter(path => !path.endsWith('/')).sort();
+    if (payloadPaths.length !== actualPaths.length || payloadPaths.some((p, i) => p !== actualPaths[i])) throw new Error('PAYLOAD_PATHS_MISMATCH');
+    for (const item of manifest.payload) {
+      const path = join(stagingDestination, item.path);
+      const info = await stat(path);
+      if (info.size !== item.bytes || await sha256(path) !== item.sha256) throw new Error(`PAYLOAD_DIGEST_MISMATCH ${item.path}`);
     }
+    const findings = await scanTree(stagingDestination, { maxBytes });
+    assertClean(findings);
+    if (manifest.toolchain) {
+      for (const required of ['package.json', 'pnpm-lock.yaml', 'scripts/dsh.mjs', 'deploy/wsl/install-release.sh']) {
+        if (!actualPaths.includes(required)) throw new Error(`RUNTIME_ENTRYPOINT_MISSING ${required}`);
+      }
+    }
+    await rename(stagingDestination, finalDestination);
+    return { manifest, entries: files.length, sha256: manifest.artifact_sha256 };
+  } finally {
+    await rm(stageRoot, { recursive: true, force: true });
   }
-  return { manifest, entries: files.length, sha256: manifest.artifact_sha256 };
 }
 
 async function listFiles(dir) {

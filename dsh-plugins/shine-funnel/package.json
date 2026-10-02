@@ -10,11 +10,11 @@
   "exports": {
     ".": "./lib/index.js",
     "./client": "./lib/client.js",
-    "./funnel": "./src/funnel.mjs",
+    "./funnel": "./lib/funnel.mjs",
     "./cordis.patch.yml": "./cordis.patch.yml",
     "./package.json": "./package.json"
   },
-  "files": ["lib/index.js", "lib/client.js", "src/funnel.mjs", "cordis.patch.yml"],
+  "files": ["lib/index.js", "lib/client.js", "lib/funnel.mjs", "cordis.patch.yml"],
   "dsh": {
     "client": {
       "platform": "web",

@@ -1,13 +1,14 @@
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { readFile } from 'node:fs/promises';
-import { bindToolchain } from '../analytics-workbench/toolchain.mjs';
+import { copyFile, readFile } from 'node:fs/promises';
+import { bindToolchain } from '../plugin-kit/toolchain.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const workbench = resolve(root, '../analytics-workbench');
 const upstream = resolve(process.argv[2] ?? join(root, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
 const manifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
-const { build } = await bindToolchain(workbench, upstream, process.argv[3] && resolve(process.argv[3]));
+const buildTools = resolve(process.argv[3] ?? join(workbench, 'build-tools'));
+const { build } = await bindToolchain(root, upstream, buildTools, workbench);
 
 const common = { absWorkingDir: root, bundle: true, sourcemap: true, logLevel: 'info', minifyWhitespace: true };
 await build({
@@ -23,4 +24,5 @@ await build({
   banner: { js: `window.__ModuleLoader__.load({ id: ${JSON.stringify(manifest.name)}, factory: (require) => {\nvar module = { exports: {} }; var exports = module.exports;` },
   footer: { js: 'return module.exports;\n} });' },
 });
+await copyFile(join(root, 'src/funnel.mjs'), join(root, 'lib/funnel.mjs'));
 console.log(`shine-funnel built. Host entry: ${pathToFileURL(join(root, 'lib/index.js')).href}`);

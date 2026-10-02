@@ -1,13 +1,14 @@
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { readFile } from 'node:fs/promises';
-import { bindToolchain } from '../analytics-workbench/toolchain.mjs';
+import { bindToolchain } from '../plugin-kit/toolchain.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const workbench = resolve(root, '../analytics-workbench');
 const upstream = resolve(process.argv[2] ?? join(root, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
 const manifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
-const { build } = await bindToolchain(workbench, upstream, process.argv[3] && resolve(process.argv[3]));
+const buildTools = resolve(process.argv[3] ?? join(workbench, 'build-tools'));
+const { build } = await bindToolchain(root, upstream, buildTools, workbench);
 
 const common = { absWorkingDir: root, bundle: true, sourcemap: true, logLevel: 'info', minifyWhitespace: true };
 await build({

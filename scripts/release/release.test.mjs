@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdir, mkdtemp, readFile, readlink, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readlink, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
@@ -40,7 +40,7 @@ async function manifest(root, archive, tag='dsh-test', payloadData={'VERSION':'0
   const path=join(root,'manifest.json'); await writeFile(path,JSON.stringify(m)); return path;
 }
 
-test('receiver binds archive digest and extracted payload exactly', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); const out=join(root,'out'); const got=await receiveArtifact({artifact:archive,manifestPath:m,destination:out}); assert.equal(got.entries,1); });
+test('receiver binds archive digest and extracted payload exactly', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); const out=join(root,'nested','out'); const got=await receiveArtifact({artifact:archive,manifestPath:m,destination:out}); assert.equal(got.entries,1); });
 test('artifact allowlist omits source maps from runtime payloads', async () => {
   const root = await fixture();
   await writeFile(join(root, 'VERSION'), '0.18.0.1\n');
@@ -67,8 +67,8 @@ test('receiver enforces expanded archive size and rejects links', async () => {
   const linkArchive=join(root,'link.tar.gz'); archiveWithEntries(linkArchive,[{name:'VERSION',data:'0.18.0.1\n'},{name:'link',type:'symlink',linkname:'VERSION'}]); const linkManifest=await manifest(root,linkArchive,'dsh-link',{'VERSION':'0.18.0.1\n','link':'0.18.0.1\n'}); await assert.rejects(()=>receiveArtifact({artifact:linkArchive,manifestPath:linkManifest,destination:join(root,'link-out')}), /ARCHIVE_LINK_OR_DEVICE/);
 });
 test('receiver scans final extracted content and deny names', async () => {
-  const root=await fixture(), secretArchive=join(root,'secret.tar.gz'); const secretValue=['live','token-value-1234567890'].join('-'); const secret=`TOKEN = '${secretValue}'`; archiveWithEntries(secretArchive,[{name:'VERSION',data:'0.18.0.1\n'},{name:'config.txt',data:secret}]); const secretManifest=await manifest(root,secretArchive,'dsh-secret',{'VERSION':'0.18.0.1\n','config.txt':secret}); await assert.rejects(()=>receiveArtifact({artifact:secretArchive,manifestPath:secretManifest,destination:join(root,'secret-out')}), /SECRET_SCAN_FAILED/);
-  const denyArchive=join(root,'deny.tar.gz'); archiveWithEntries(denyArchive,[{name:'VERSION',data:'0.18.0.1\n'},{name:'.env',data:'synthetic'}]); const denyManifest=await manifest(root,denyArchive,'dsh-deny',{'VERSION':'0.18.0.1\n','.env':'synthetic'}); await assert.rejects(()=>receiveArtifact({artifact:denyArchive,manifestPath:denyManifest,destination:join(root,'deny-out')}), /SECRET_SCAN_FAILED/);
+  const root=await fixture(), secretArchive=join(root,'secret.tar.gz'); const secretValue=['live','token-value-1234567890'].join('-'); const secret=`TOKEN = '${secretValue}'`; archiveWithEntries(secretArchive,[{name:'VERSION',data:'0.18.0.1\n'},{name:'config.txt',data:secret}]); const secretManifest=await manifest(root,secretArchive,'dsh-secret',{'VERSION':'0.18.0.1\n','config.txt':secret}); const secretOut=join(root,'secret-out'); await assert.rejects(()=>receiveArtifact({artifact:secretArchive,manifestPath:secretManifest,destination:secretOut}), /SECRET_SCAN_FAILED/); await assert.rejects(() => stat(secretOut), { code: 'ENOENT' });
+  const denyArchive=join(root,'deny.tar.gz'); archiveWithEntries(denyArchive,[{name:'VERSION',data:'0.18.0.1\n'},{name:'.env',data:'synthetic'}]); const denyManifest=await manifest(root,denyArchive,'dsh-deny',{'VERSION':'0.18.0.1\n','.env':'synthetic'}); const denyOut=join(root,'deny-out'); await assert.rejects(()=>receiveArtifact({artifact:denyArchive,manifestPath:denyManifest,destination:denyOut}), /SECRET_SCAN_FAILED/); await assert.rejects(() => stat(denyOut), { code: 'ENOENT' });
 });
 test('secret scan distinguishes explicit synthetic fixtures from real assignments', () => {
   const live = ['live', 'token-value-1234567890'].join('-');

@@ -4,6 +4,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
+import { transition } from './state.mjs';
 
 const root = join(import.meta.dirname, '..', '..');
 const cli = join(root, 'scripts/dsh.mjs');
@@ -16,6 +17,8 @@ test('dsh exposes stable help and version output', () => {
   assert.match(version, /^DSH_VERSION \d+\.\d+\.\d+\.\d+ upstream=477b4f42/m);
   const releaseHelp = execFileSync(process.execPath, [cli, 'release', '--help'], { encoding: 'utf8' });
   assert.match(releaseHelp, /Precedence: --tag/);
+  const pluginHelp = execFileSync(process.execPath, [cli, 'plugin', 'candidate', '--help'], { encoding: 'utf8' });
+  assert.match(pluginHelp, /--state-path/);
 });
 
 test('dsh rejects unknown commands with exit code 2', () => {
@@ -44,6 +47,8 @@ test('doctor release reports readiness blockers without writing an artifact', ()
   const result = spawnSync(process.execPath, [cli, 'doctor', '--release'], { encoding: 'utf8', env: { ...process.env, DSH_UPSTREAM_RUNTIME_BUNDLE: '' } });
   assert.equal(result.status, 2);
   assert.match(result.stdout, /DSH_DOCTOR_RELEASE FAIL runtime-bundle=/);
+  assert.match(result.stdout, /DSH_DOCTOR_RELEASE_BLOCKERS count=/);
+  assert.match(result.stdout, /docs\/operating\/dsh-rc2-quickstart\.md#dsh-quickstart-runtime/);
 });
 
 test('doctor release rejects an uncompressed or misnamed runtime bundle', async () => {
@@ -59,6 +64,47 @@ test('doctor release rejects an uncompressed or misnamed runtime bundle', async 
     assert.match(result.stdout, /runtime-bundle=.*zstd-invalid/);
   } finally {
     await rm(rootDir, { recursive: true, force: true });
+  }
+});
+
+test('release and status fail closed without an explicit durable state path', () => {
+  const release = spawnSync(process.execPath, [cli, 'release', '--offline', '--tag', 'dsh-state-required'], { encoding: 'utf8', env: { ...process.env, RELEASE_STATE_PATH: '' } });
+  assert.equal(release.status, 2);
+  assert.match(release.stderr, /RELEASE_STATE_PATH_REQUIRED/);
+  const status = spawnSync(process.execPath, [cli, 'status'], { encoding: 'utf8', env: { ...process.env, RELEASE_STATE_PATH: '' } });
+  assert.equal(status.status, 2);
+  assert.match(status.stderr, /RELEASE_STATE_PATH_REQUIRED/);
+});
+
+test('state commands read the explicit absolute journal using flag, positional or environment input', async t => {
+  const dir = await mkdtemp(join(tmpdir(), 'dsh-cli-state-'));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const path = join(dir, 'state.json');
+  await transition(path, 'BUILD', { release_tag: 'dsh-explicit-state' });
+  for (const command of ['status', 'resume']) {
+    for (const args of [['--state-path', path], [path], []]) {
+      const result = spawnSync(process.execPath, [cli, command, ...args], {
+        encoding: 'utf8', env: { ...process.env, RELEASE_STATE_PATH: path },
+      });
+      assert.equal(result.status, 0, result.stderr);
+      assert.equal(JSON.parse(result.stdout).release_tag, 'dsh-explicit-state');
+      assert.equal(JSON.parse(result.stdout).phase, 'BUILD');
+    }
+    const invalid = spawnSync(process.execPath, [cli, command, 'relative.json'], { encoding: 'utf8' });
+    assert.equal(invalid.status, 2);
+    assert.match(invalid.stderr, /RELEASE_STATE_PATH_ABSOLUTE_REQUIRED/);
+    const ambiguous = spawnSync(process.execPath, [cli, command, '--state-path', path, '--state-path', path], { encoding: 'utf8' });
+    assert.equal(ambiguous.status, 2);
+    assert.match(ambiguous.stderr, /RELEASE_STATE_PATH_AMBIGUOUS/);
+  }
+  const receipt = join(dir, 'remote.json');
+  await writeFile(receipt, JSON.stringify({ release_tag: 'dsh-explicit-state', phase: 'BUILD', status: 'DRAFT' }));
+  for (const args of [[path, receipt], ['--state-path', path, receipt], [receipt]]) {
+    const result = spawnSync(process.execPath, [cli, 'reconcile', ...args], {
+      encoding: 'utf8', env: { ...process.env, RELEASE_STATE_PATH: path },
+    });
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(JSON.parse(result.stdout).status, 'RECONCILED');
   }
 });
 

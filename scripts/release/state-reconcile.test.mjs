@@ -62,6 +62,26 @@ test('reconcile decision is durable and never silently adopts remote state', asy
   assert.equal(state.journal.at(-1).status, 'RECONCILED');
 });
 
+test('publication identity is promoted into state and missing identity stays unknown', async () => {
+  const root = await fixture(); const path = join(root, 'state.json');
+  await transition(path, 'BUILD', { release_tag: 'dsh-identity-test', source_sha: 'a'.repeat(40) });
+  await transition(path, 'CREATE_DRAFT_RELEASE');
+  await transition(path, 'UPLOAD_TARBALLS', { artifact_sha256: 'b'.repeat(64), manifest_sha256: 'c'.repeat(64) });
+  const state = await readState(path);
+  assert.equal(state.source_sha, 'a'.repeat(40));
+  assert.equal(state.artifact_sha256, 'b'.repeat(64));
+  assert.equal(state.manifest_sha256, 'c'.repeat(64));
+  assert.equal(reconcileRemote({
+    local: state,
+    remote: { release_tag: 'dsh-identity-test', phase: 'UPLOAD_TARBALLS', status: 'UPLOADED', source_sha: 'a'.repeat(40), artifact_sha256: 'b'.repeat(64), manifest_sha256: 'c'.repeat(64) },
+  }).status, 'RECONCILED');
+  assert.equal(reconcileRemote({
+    local: { release_tag: 'dsh-identity-test', phase: 'UPLOAD_TARBALLS' },
+    remote: { release_tag: 'dsh-identity-test', phase: 'UPLOAD_TARBALLS', status: 'UPLOADED' },
+  }).status, 'UNKNOWN');
+  await assert.rejects(() => recordEvent(path, { artifact_sha256: 'd'.repeat(64) }), /RELEASE_STATE_IDENTITY_CONFLICT artifact_sha256/);
+});
+
 test('a killed idempotent worker leaves a resumable unknown operation', async () => {
   const root = await fixture(); const path = join(root, 'crash-state.json');
   const moduleUrl = new URL('./state.mjs', import.meta.url).href;
