@@ -44,7 +44,7 @@ let env = {
   PYTHONPATH: root, PYTHONNOUSERSITE: '1', PYTHON_DOTENV_DISABLED: '1',
   PYTHONDONTWRITEBYTECODE: '1', PYTHONUNBUFFERED: '1',
   B0_BUILD_UPSTREAM: upstream,
-  COREPACK_ENABLE_DOWNLOAD_PROMPT: '0', LEFTHOOK: '0',
+  COREPACK_ENABLE_DOWNLOAD_PROMPT: '0', LEFTHOOK: '0', CI: '1',
 };
 function run(command, args, cwd = root, extraEnv = {}) {
   const result = spawnSync(command, args, { cwd, env: { ...env, ...extraEnv }, stdio: 'inherit', timeout: 900000 });
@@ -78,6 +78,11 @@ if (mode === '--prepare') {
   }
   await verifySource();
   await preparePackageManager();
+  // Hydrate every lockfile entry into the pnpm store before install. A
+  // reused node_modules tree can otherwise make install report "up to date"
+  // while an external tarball (for example SheetJS) is still absent from the
+  // store needed by the later offline runtime deploy.
+  run('corepack', ['pnpm', 'fetch', '--frozen-lockfile', '--registry=https://registry.npmjs.org'], upstream);
   run('corepack', ['pnpm', 'install', '--frozen-lockfile', '--ignore-scripts', '--registry=https://registry.npmjs.org'], upstream);
   // Only native dependencies needed by this fixed profile. No repository hook
   // installer, optional provider SDK lifecycle, global configuration or publish.

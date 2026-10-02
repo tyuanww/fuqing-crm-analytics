@@ -248,7 +248,10 @@ await mkdir(resolve(output, '..'), { recursive: true });
 const work = await mkdtemp(join(tmpdir(), 'dsh-runtime-bundle-'));
 const deployed = join(work, 'dsh');
 try {
-  const deployArgs = ['pnpm', 'deploy', '--legacy'];
+  // A production runtime must never execute upstream lifecycle hooks in the
+  // temporary deploy directory. Preparation already hydrated and built the
+  // pinned checkout; deploy only materializes those verified files.
+  const deployArgs = ['pnpm', 'deploy', '--legacy', '--ignore-scripts'];
   if (!online) deployArgs.push('--offline');
   deployArgs.push('--filter', '@deepseek-ai/dsh', '--prod', deployed);
   await execFile('corepack', deployArgs, {

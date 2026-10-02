@@ -258,6 +258,7 @@ test('runtime bundle enforces production pruning, secret scan and peer collision
   assert.match(source, /MAX_TEXT_SCAN_BYTES/);
   assert.match(source, /RUNTIME_PEER_ALIAS_COLLISION/);
   assert.match(source, /\['cordis', 'cosmokit'\]/);
+  assert.match(source, /deploy', '--legacy', '--ignore-scripts/);
   assert.doesNotMatch(source, /scanAssignments:\s*!\/\(\^\|\\\/\)node_modules/);
 });
 test('runtime artifact allowlist carries the release evidence workflow', async () => {
