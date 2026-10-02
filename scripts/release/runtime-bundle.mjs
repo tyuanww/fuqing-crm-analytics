@@ -2,7 +2,7 @@
 
 /** Build the immutable, production-only DSH runtime closure from a pinned checkout. */
 import assert from 'node:assert/strict';
-import { access, cp, lstat, mkdir, mkdtemp, readdir, readFile, readlink, rm, stat, symlink } from 'node:fs/promises';
+import { access, cp, lstat, mkdir, mkdtemp, readdir, readFile, readlink, rm, stat, symlink, writeFile } from 'node:fs/promises';
 import { execFile as execFileCallback } from 'node:child_process';
 import { promisify } from 'node:util';
 import { dirname, join, relative, resolve } from 'node:path';
@@ -24,6 +24,87 @@ const TEXT_FILE = /\.(?:cjs|css|html|ini|json|js|mjs|mts|sh|txt|ts|tsx|yaml|yml)
 const MAX_TEXT_SCAN_BYTES = 16 * 1024 * 1024;
 
 function relativePath(root, path) { return relative(root, path).split('\\').join('/'); }
+
+function escapeRegExp(value) { return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+async function listPackageJsonFiles(root) {
+  const files = [];
+  async function walk(directory) {
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      if (entry.name === '.git' || entry.name === 'node_modules') continue;
+      const path = join(directory, entry.name);
+      if (entry.isDirectory()) await walk(path);
+      else if (entry.isFile() && (entry.name === 'package.json' || entry.name === 'pnpm-lock.yaml')) files.push(path);
+    }
+  }
+  await walk(root);
+  return files;
+}
+
+async function findPreparedPackage(upstream, packageName) {
+  const pnpmRoot = join(upstream, 'node_modules/.pnpm');
+  const entries = await readdir(pnpmRoot, { withFileTypes: true });
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    const modules = join(pnpmRoot, entry.name, 'node_modules');
+    const scoped = await readdir(modules, { withFileTypes: true }).catch(() => []);
+    for (const candidate of scoped) {
+      const roots = candidate.name.startsWith('@')
+        ? (await readdir(join(modules, candidate.name), { withFileTypes: true }).catch(() => []))
+          .filter(item => item.isDirectory()).map(item => join(modules, candidate.name, item.name))
+        : [join(modules, candidate.name)];
+      for (const packageRoot of roots) {
+        const manifest = JSON.parse(await readFile(join(packageRoot, 'package.json'), 'utf8').catch(() => '{}'));
+        if (manifest.name === packageName) return packageRoot;
+      }
+    }
+  }
+  throw new Error(`RUNTIME_DIRECT_TARBALL_NOT_PREPARED ${packageName}`);
+}
+
+/**
+ * pnpm 11's legacy deploy still probes a direct tarball URL even in --offline
+ * mode. Bind every direct tarball recorded by the pinned lockfile to the
+ * already prepared package bytes instead. The upstream checkout is restored
+ * byte-for-byte before this function returns; the local file binding only
+ * exists inside the temporary deploy operation.
+ */
+async function prepareOfflineDirectTarballs(upstream, work) {
+  const lockPath = join(upstream, 'pnpm-lock.yaml');
+  const lock = await readFile(lockPath, 'utf8');
+  const urls = [...lock.matchAll(/tarball:\s*(https?:\/\/[^,\s}]+)/g)].map(match => match[1]);
+  const changed = [];
+  try {
+    for (const url of [...new Set(urls)]) {
+      const packageMatch = lock.match(new RegExp(`(?:^|\\n)\\s{2}(.+?)@${escapeRegExp(url)}:\\s*\\n`));
+      if (!packageMatch) throw new Error(`RUNTIME_DIRECT_TARBALL_PACKAGE_UNKNOWN ${url}`);
+      const packageName = packageMatch[1].trim();
+      const packageRoot = await findPreparedPackage(upstream, packageName);
+      const safeName = packageName.replace(/[^a-zA-Z0-9._-]+/g, '-');
+      const staging = join(work, 'direct-tarballs', safeName);
+      await mkdir(staging, { recursive: true, mode: 0o700 });
+      await cp(packageRoot, join(staging, 'package'), { recursive: true, dereference: false });
+      const archive = join(staging, `${safeName}.tgz`);
+      await execFile('tar', ['-czf', archive, '-C', staging, 'package']);
+      const replacement = `file:${archive}`;
+      for (const path of await listPackageJsonFiles(upstream)) {
+        const bytes = await readFile(path);
+        if (!bytes.includes(Buffer.from(url))) continue;
+        changed.push({ path, bytes });
+        await writeFile(path, bytes.toString('utf8').split(url).join(replacement));
+      }
+    }
+  } catch (error) {
+    for (const item of changed.reverse()) await writeFile(item.path, item.bytes);
+    throw error;
+  }
+  let restored = false;
+  return async () => {
+    if (restored) return;
+    restored = true;
+    for (const item of changed.reverse()) await writeFile(item.path, item.bytes);
+  };
+}
 
 async function pruneDevelopmentFiles(root) {
   let removed = 0;
@@ -247,7 +328,9 @@ await mkdir(resolve(output, '..'), { recursive: true });
 
 const work = await mkdtemp(join(tmpdir(), 'dsh-runtime-bundle-'));
 const deployed = join(work, 'dsh');
+let restoreDirectTarballs = async () => {};
 try {
+  if (!online) restoreDirectTarballs = await prepareOfflineDirectTarballs(upstream, work);
   // A production runtime must never execute upstream lifecycle hooks in the
   // temporary deploy directory. Preparation already hydrated and built the
   // pinned checkout; deploy only materializes those verified files.
@@ -259,6 +342,8 @@ try {
     env: { ...process.env, COREPACK_ENABLE_DOWNLOAD_PROMPT: '0', CI: '1' },
     maxBuffer: 4 * 1024 * 1024,
   });
+  await restoreDirectTarballs();
+  restoreDirectTarballs = async () => {};
   const materialized = await materializeExternalSymlinks(deployed, upstream, upstreamSha);
   for (const path of REQUIRED) await access(join(deployed, path));
   await execFile('tar', ['--zstd', '--no-xattrs', '--no-acls', '-cf', output, '-C', deployed, '.'], { maxBuffer: 4 * 1024 * 1024 });
@@ -266,5 +351,6 @@ try {
   assert.ok(info.size > 0, 'RUNTIME_BUNDLE_EMPTY');
   console.log(JSON.stringify({ status: 'BUILT', upstream_sha: upstreamSha, network_mode: online ? 'online' : 'offline', path: output, bytes: info.size, ...materialized }));
 } finally {
+  await restoreDirectTarballs();
   await rm(work, { recursive: true, force: true });
 }

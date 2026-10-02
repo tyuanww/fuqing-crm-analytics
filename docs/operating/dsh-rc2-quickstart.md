@@ -48,3 +48,4 @@ runtime bundle 必须由固定上游 checkout 生成，文件名必须包含 `47
 `pnpm dsh verify --scope local` 只验证本地 synthetic compatibility/backpressure，全部通过时返回 `0`；默认 `pnpm dsh verify` 或 `pnpm dsh verify --scope release` 是发布门禁：只要 rc1/rc2、15 分钟 HTTP SLI 或真实 backpressure 证据未运行，就打印 `RELEASE_BLOCKED` 并以退出码 `2` 结束。local 绿色结果不能替代 release gate。
 
 未接通的保存、导出和真实发送能力显示 `NOT_AVAILABLE` 及原因，不写入伪成功回执。
+离线 runtime 的直链依赖也必须可复现：`prepare` 先按固定锁文件预热 pnpm store；若锁文件仍记录 HTTPS tarball，runtime 阶段会从已准备的 pinned checkout 找到同一包内容，生成临时本地 tarball 供 deploy 使用，并在 deploy 完成后逐字节恢复 checkout。包内容未准备时以 `RUNTIME_DIRECT_TARBALL_NOT_PREPARED` fail closed，不退回 CDN 探测。

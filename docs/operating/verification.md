@@ -153,3 +153,4 @@ Logo 使用当前 checkout 的 Git LFS 字节，可执行
 `git lfs pull --include=frontend-vue3/src/assets/brand/shine-mage.png --exclude=`。
 不再从相邻工作树读取 Logo。supervisor 单测只选空闲 4328/4329；已有监听不停止。
 比赛 HTTP 演示仍为 synthetic；T13/T15/T16 不由单元测试替代。
+离线 runtime deploy 对锁文件中的 HTTPS 直链使用已准备 checkout 内的包内容生成临时本地 tarball，deploy 完成后恢复 pinned checkout；未准备的直链以 `RUNTIME_DIRECT_TARBALL_NOT_PREPARED` 失败。
