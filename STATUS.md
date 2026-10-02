@@ -16,10 +16,10 @@
 
 ### 当前本地 rc2 候选门禁（2026-10-03）
 
-- 最终 reviewed source 是 `95fd4e9ea49bcee8162864a0bb689f89c8190569`；固定 DSH 为 `0.1.7-rc.2`，上游 SHA 为 `477b4f420553e8a52c2fbccc464d7561b239c443`。
-- `dsh-preflight-95fd4e9e` 已完成 `prepare → audit → build → runtime → release → test → receive → evidence`，八阶段均 PASS，102/102 测试通过；证据目录为 `.context/release-preflight/dsh-preflight-95fd4e9e/`，runtime SHA-256 为 `6acb435bb61c4cbea9459d71572552d2459341e2ed88975860032257132b2c1d`。
+- 固定 DSH 为 `0.1.7-rc.2`，上游 SHA 为 `477b4f420553e8a52c2fbccc464d7561b239c443`；当前 source SHA、preflight tag、runtime/manifest digest 只以同一候选目录下的 `release-preflight.json`、`release-manifest.v1.json` 和 `SHA256SUMS` 为准，不在本页复制易漂移的提交号。
+- 最新本地 preflight 已完成 `prepare → audit → build → runtime → release → test → receive → evidence`，八阶段均 PASS，102/102 测试通过；精确证据目录由 preflight 输出的 tag 定位于 `.context/release-preflight/<tag>/`。
 - `doctor --release`、`preflight --check` 和 `verify --scope local` 均 PASS；local verify 明确标记 WSL2、真实 DuckDB、真实 HTTP SLI 为 `NOT_RUN`。
-- workbench candidate digest 为 `b12d082964dd720e5a2813281333f1ad6e702bd8a80db9baf7c9f46e41263371`，shine-brand candidate digest 为 `3ea086e911635d22486ce7aee132318394c1d0fc7040bb232c9f320064250dc0`；两者均绑定同一 source SHA 和 DSH pin。
+- workbench 与 shine-brand candidate 均绑定同一 source SHA 和 DSH pin；精确 candidate digest 只以 `.context/checks/rc2-final-<tag>/candidate-*/candidate.json` 为准。
 - 本地候选尚未 push、创建 GitHub Release 或切换杭州；T2/T13/T15/T17/T21 的现场宿主、签名/SBOM、canary/rollback、远端 receive/reconcile 仍是 `PARTIAL`/`NOT_RUN`。
 
 ## 本轮施工计划
