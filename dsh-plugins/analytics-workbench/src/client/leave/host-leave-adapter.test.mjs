@@ -35,7 +35,7 @@ import { librarySnapshot as snap, libraryPreview as draft, ok, failed, listOf } 
 
 const plugin = fileURLToPath(new URL('../../..', import.meta.url));
 const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream'));
-const pin = JSON.parse(await readFile(join(plugin, 'toolchain.json'), 'utf8'));
+const pin = JSON.parse(await readFile(join(plugin, '../plugin-kit/toolchain.json'), 'utf8'));
 
 function git(args) {
   const bins = ['/usr/bin/git', '/opt/homebrew/bin/git', 'git'];

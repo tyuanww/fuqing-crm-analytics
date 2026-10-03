@@ -7,7 +7,7 @@ import { projectComponent } from '../../analytics-workbench/src/board-spec/compo
 
 const content = counts => ({ unit: '人', cohort_label: '合成同一人群', counting_rule: '至少1/2/3笔有效订单',
   stages: counts.map((count, index) => ({ label: `阶段${index + 1}`, count })) });
-const cases = JSON.parse(readFileSync(new URL('../tests/funnel-cases.json', import.meta.url)));
+const cases = JSON.parse(readFileSync(new URL('../../board-components/test/funnel-cases.json', import.meta.url)));
 for (const sample of cases) test(`funnel shared contract: ${sample.name}`, () => {
   const input = content(sample.counts), before = structuredClone(input), geometry = funnelGeometry(input);
   assert.equal(!!geometry, sample.valid);

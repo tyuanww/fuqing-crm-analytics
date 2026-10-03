@@ -1,6 +1,6 @@
 import test, { after } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFile } from 'node:child_process';
@@ -44,4 +44,15 @@ test('sha mismatch is a hard block and does not scan another revision', async ()
   const row = await inspectCheckout({ id: 'fixture', version: 'fixture', checkout: repo, expectedSha: 'a'.repeat(40), role: 'blocking' });
   assert.equal(row.status, 'BLOCKED');
   assert.equal(row.reason, 'UPSTREAM_SHA_MISMATCH');
+});
+
+test('static evidence is bound to the exact commit even if working sources differ', async () => {
+  const path = join(repo, 'packages/core/contract.ts');
+  const original = await readFile(path);
+  try {
+    await writeFile(path, 'export const nothing = true;\n');
+    const row = await inspectCheckout({ id: 'fixture', version: 'fixture', checkout: repo, expectedSha: fixtureSha, role: 'blocking' });
+    assert.equal(row.status, 'SUPPORTED');
+    assert.deepEqual(row.source_scan.capability_slot.matches, [{ file: 'packages/core/contract.ts' }]);
+  } finally { await writeFile(path, original); }
 });

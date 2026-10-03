@@ -27,19 +27,19 @@ const BENIGN_PROTOCOL_LITERAL = new Set([
   'impersonated-placeholder',
 ]);
 
-export function scanText(text, name = '<input>', { scanAssignments = true } = {}) {
+export function scanText(text, name = '<input>', { scanAssignments = true, allowSyntheticFixtures = true } = {}) {
   const findings = SECRET_PATTERNS.some(pattern => pattern.test(text)) ? [`SECRET_PATTERN ${name}`] : [];
   if (!scanAssignments) return [...new Set(findings)];
   for (const match of text.matchAll(ASSIGNMENT)) {
     // Synthetic values are exempt only inside explicitly named fixtures/tests;
     // a production/config file containing the same marker must still fail closed.
-    const syntheticFixture = /(?:fixture|test|spec)/i.test(name) && SYNTHETIC_MARKER.test(match[1]);
+    const syntheticFixture = allowSyntheticFixtures && /(?:fixture|test|spec)/i.test(name) && SYNTHETIC_MARKER.test(match[1]);
     if (!syntheticFixture && !BENIGN_PROTOCOL_LITERAL.has(match[1])) findings.push(`SECRET_PATTERN ${name}`);
   }
   return [...new Set(findings)];
 }
 
-export async function scanTree(root, { maxBytes = 20 * 1024 * 1024, include = () => true } = {}) {
+export async function scanTree(root, { maxBytes = 20 * 1024 * 1024, include = () => true, allowSyntheticFixtures = true } = {}) {
   const findings = [];
   let bytes = 0;
   async function visit(dir) {
@@ -54,7 +54,7 @@ export async function scanTree(root, { maxBytes = 20 * 1024 * 1024, include = ()
         if (bytes > maxBytes) throw new Error(`SCAN_SIZE_LIMIT ${maxBytes}`);
         // Large files are rejected rather than silently omitted: a secret scan must be complete.
         if (info.size > 2 * 1024 * 1024) throw new Error(`SCAN_FILE_LIMIT ${path}`);
-        findings.push(...scanText(await readFile(path, 'utf8'), path));
+        findings.push(...scanText(await readFile(path, 'utf8'), rel, { allowSyntheticFixtures }));
       }
     }
   }

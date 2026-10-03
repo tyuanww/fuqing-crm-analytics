@@ -14,7 +14,7 @@ const option = name => { const index = argv.indexOf(name); return index < 0 ? un
 assert.ok(argv.length === 6 && argv[0] === '--upstream' && argv[2] === '--python' && argv[4] === '--port', 'Use --upstream /absolute/pinned-checkout --python /absolute/python3.14 --port <unused-port>');
 const upstream = option('--upstream'), python = option('--python'), port = Number(option('--port'));
 assert.ok(isAbsolute(upstream) && isAbsolute(python) && Number.isSafeInteger(port) && port >= 1024 && port <= 65535);
-const pin = JSON.parse(await readFile(join(root, 'dsh-plugins/analytics-workbench/toolchain.json')));
+const pin = JSON.parse(await readFile(join(root, 'dsh-plugins/plugin-kit/toolchain.json')));
 assert.equal(Number(process.versions.node.split('.')[0]), pin.node_major);
 assert.equal(execFileSync('git', ['-C', upstream, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), pin.upstream_sha);
 assert.equal(execFileSync('git', ['-C', upstream, 'status', '--porcelain', '--untracked-files=no'], { encoding: 'utf8' }).trim(), '');

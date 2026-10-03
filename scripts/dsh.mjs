@@ -4,7 +4,8 @@ import { readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildPreManifest, packArtifact, receiveArtifact, sha256 } from './release/artifact.mjs';
+import { buildPreManifest, packArtifact, sha256 } from './release/artifact.mjs';
+import { receiveRelease } from './release/receive.mjs';
 import { assertSchema } from './release/schema.mjs';
 import { verifyPayload } from './release/artifact.mjs';
 import { readState, reconcileState, recordEvent, resume } from './release/state.mjs';
@@ -186,21 +187,8 @@ async function receive(args) {
     if (!allowed.has(args[index])) throw new Error(`RECEIVE_OPTION_UNKNOWN ${args[index]}`);
     index += 1;
   }
-  // Persist an intent before any bytes are installed. If extraction or the
-  // final receipt write fails, the journal remains visibly incomplete and a
-  // later reconcile can inspect it instead of treating the directory as a
-  // successful receive.
-  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
-  await assertSchema(manifest, join(root, 'scripts/release/schemas/release-manifest.v1.schema.json'));
-  await recordEvent(statePath, {
-    release_tag: manifest.release_tag,
-    status: 'RECEIVE_INTENT',
-    artifact_sha256: manifest.artifact_sha256,
-    destination: 'explicit',
-  }, { idempotencyKey: `receive-intent:${manifest.artifact_sha256}` });
-  const result = await receiveArtifact({ artifact, manifestPath, destination, maxEntries, maxBytes });
-  await recordEvent(statePath, { release_tag: result.manifest.release_tag, status: 'RECEIVED', artifact_sha256: result.sha256, destination: 'explicit' });
-  console.log(`DSH_RECEIVE_PASS tag=${result.manifest.release_tag} entries=${result.entries} artifact_sha256=${result.sha256} destination=${destination}`);
+  const result = await receiveRelease({ statePath, artifact, manifestPath, destination, maxEntries, maxBytes });
+  console.log(`DSH_RECEIVE_PASS tag=${result.release_tag} entries=${result.entries} artifact_sha256=${result.artifact_sha256} destination=${destination}`);
 }
 async function test() { const tests = readdirSync(join(root, 'scripts/release')).filter(name => name.endsWith('.test.mjs')).map(name => join('scripts/release', name)); return execFileSync(process.execPath, ['--test', ...tests], { cwd: root, encoding: 'utf8', stdio: 'inherit' }); }
 async function preflight(args) { return execFileSync(process.execPath, [join(root, 'scripts/release/preflight.mjs'), ...args], { cwd: root, encoding: 'utf8', stdio: 'inherit' }); }

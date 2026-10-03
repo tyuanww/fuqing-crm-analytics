@@ -161,6 +161,9 @@ export async function recordEvent(path, data = {}, { allowTagChange = false, all
       if (releaseTagChanged && allowTagChange !== true) throw new Error('RELEASE_STATE_TAG_CONFLICT');
       state.release_tag = data.release_tag;
     }
+    // A host journal spans releases, but an identity never spans tags. Missing
+    // fields for the new tag must remain unknown instead of inheriting old bytes.
+    if (releaseTagChanged) for (const key of IDENTITY_FIELDS) delete state[key];
     promoteIdentity(state, data, { allowChange: allowIdentityChange || allowTagChange });
     const event = releaseTagChanged ? { release_tag_previous: previousReleaseTag } : {};
     const entry = appendJournal(state, { phase: state.phase, event: 'OBSERVATION', ...data, ...event });
@@ -202,6 +205,15 @@ export async function idempotent(path, idempotencyKey, operation, options = {}) 
     if (own(state.idempotency, idempotencyKey)) {
       const prior = state.idempotency[idempotencyKey];
       if (prior.fingerprint !== fingerprint) return { replay: true, status: 'CONFLICT', idempotency_key: idempotencyKey };
+      if (['IN_PROGRESS', 'UNKNOWN'].includes(prior.status) && options.reconcile) {
+        const recovered = await options.reconcile();
+        if (recovered !== undefined) {
+          state.idempotency[idempotencyKey] = { ...prior, status: 'COMMITTED', result: recovered, completed_at: now() };
+          appendJournal(state, { phase: state.phase, event: 'IDEMPOTENCY', idempotency_key: idempotencyKey, status: 'COMMITTED', fingerprint, reconciled: true, result: recovered });
+          await save(path, state);
+          return { replay: true, status: 'COMMITTED', result: recovered, idempotency_key: idempotencyKey };
+        }
+      }
       if (prior.status === 'IN_PROGRESS') return { replay: true, status: 'UNKNOWN', reason: 'prior_operation_may_have_committed', idempotency_key: idempotencyKey };
       if (prior.status === 'UNKNOWN') return { replay: true, status: 'UNKNOWN', reason: 'reconcile_required', idempotency_key: idempotencyKey };
       if (prior.status === 'FAILED') return { replay: true, status: 'FAILED', error: prior.error, idempotency_key: idempotencyKey };

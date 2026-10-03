@@ -82,6 +82,21 @@ test('publication identity is promoted into state and missing identity stays unk
   await assert.rejects(() => recordEvent(path, { artifact_sha256: 'd'.repeat(64) }), /RELEASE_STATE_IDENTITY_CONFLICT artifact_sha256/);
 });
 
+test('host tag changes clear old identity while the journal retains both releases', async () => {
+  const path = join(await fixture(), 'host-state.json');
+  await recordEvent(path, { release_tag: 'dsh-old', source_sha: 'a'.repeat(40), artifact_sha256: 'b'.repeat(64), manifest_sha256: 'c'.repeat(64), assets: [{ name: 'old' }] });
+  await recordEvent(path, { release_tag: 'dsh-new', source_sha: 'd'.repeat(40), status: 'PREPARE_INTENT' }, { allowTagChange: true });
+  const state = await readState(path);
+  assert.equal(state.release_tag, 'dsh-new');
+  assert.equal(state.source_sha, 'd'.repeat(40));
+  assert.equal(state.artifact_sha256, undefined);
+  assert.equal(state.manifest_sha256, undefined);
+  assert.equal(state.assets, undefined);
+  assert.equal(state.journal[0].artifact_sha256, 'b'.repeat(64));
+  await recordEvent(path, { release_tag: 'dsh-new', artifact_sha256: 'e'.repeat(64) });
+  assert.equal((await readState(path)).artifact_sha256, 'e'.repeat(64));
+});
+
 test('a killed idempotent worker leaves a resumable unknown operation', async () => {
   const root = await fixture(); const path = join(root, 'crash-state.json');
   const moduleUrl = new URL('./state.mjs', import.meta.url).href;

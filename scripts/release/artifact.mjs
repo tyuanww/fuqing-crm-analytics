@@ -87,8 +87,7 @@ export async function packArtifact({ rootDir = root, allowlist, output }) {
   return { path: output, bytes: (await stat(output)).size, sha256: await sha256(output) };
 }
 
-export async function receiveArtifact({ artifact, manifestPath, destination, maxEntries = 10000, maxBytes = 512 * 1024 * 1024 }) {
-  const finalDestination = resolve(destination);
+async function receiveManifest(artifact, manifestPath) {
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
   await assertSchema(manifest, join(schemaDir, 'release-manifest.v1.schema.json'));
   if (!Array.isArray(manifest.archive_allowlist) || manifest.archive_allowlist.length === 0) throw new Error('ALLOWLIST_EMPTY');
@@ -97,6 +96,45 @@ export async function receiveArtifact({ artifact, manifestPath, destination, max
   if (!Array.isArray(manifest.payload) || manifest.payload.length === 0 || new Set(manifest.payload.map(item => item.path)).size !== manifest.payload.length || manifest.payload.some(item => !safeManifestPath(item.path))) throw new Error('PAYLOAD_EMPTY_OR_PATH_INVALID');
   const artifactInfo = await stat(artifact);
   if (artifactInfo.size !== manifest.artifact_bytes || await sha256(artifact) !== manifest.artifact_sha256) throw new Error('ARTIFACT_DIGEST_MISMATCH');
+  return manifest;
+}
+
+async function verifyReceivedTree(manifest, destination, { maxEntries, maxBytes }) {
+  const rootInfo = await lstat(destination);
+  if (!rootInfo.isDirectory() || rootInfo.isSymbolicLink()) throw new Error('RECEIVE_DESTINATION_INVALID');
+  const files = await collectAllowlist(destination, { allowlist: manifest.archive_allowlist, maxFiles: maxEntries });
+  const all = await listFiles(destination);
+  if (all.length > maxEntries) throw new Error('ARCHIVE_ENTRY_LIMIT');
+  const unexpected = all.filter(path => !allowed(path, manifest.archive_allowlist));
+  if (unexpected.length) throw new Error(`ALLOWLIST_VIOLATION ${unexpected.join(',')}`);
+  const payloadPaths = manifest.payload.map(item => item.path).sort();
+  if (payloadPaths.length !== all.length || payloadPaths.some((p, i) => p !== all[i])) throw new Error('PAYLOAD_PATHS_MISMATCH');
+  let bytes = 0;
+  for (const item of manifest.payload) {
+    const path = join(destination, item.path);
+    const info = await lstat(path);
+    bytes += info.size;
+    if (bytes > maxBytes) throw new Error('ARCHIVE_SIZE_LIMIT');
+    if (!info.isFile() || info.isSymbolicLink() || info.size !== item.bytes || await sha256(path) !== item.sha256) throw new Error(`PAYLOAD_DIGEST_MISMATCH ${item.path}`);
+  }
+  assertClean(await scanTree(destination, { maxBytes }));
+  if (manifest.toolchain) {
+    for (const required of ['package.json', 'pnpm-lock.yaml', 'scripts/dsh.mjs', 'deploy/wsl/install-release.sh']) {
+      if (!all.includes(required)) throw new Error(`RUNTIME_ENTRYPOINT_MISSING ${required}`);
+    }
+  }
+  return { manifest, entries: files.length, sha256: manifest.artifact_sha256 };
+}
+
+/** Reconcile only by verifying the exact installed bytes; never overwrite. */
+export async function verifyReceivedArtifact({ artifact, manifestPath, destination, maxEntries = 10000, maxBytes = 512 * 1024 * 1024 }) {
+  const manifest = await receiveManifest(artifact, manifestPath);
+  return verifyReceivedTree(manifest, resolve(destination), { maxEntries, maxBytes });
+}
+
+export async function receiveArtifact({ artifact, manifestPath, destination, maxEntries = 10000, maxBytes = 512 * 1024 * 1024 }) {
+  const finalDestination = resolve(destination);
+  const manifest = await receiveManifest(artifact, manifestPath);
   const destinationInfo = await lstat(finalDestination).catch(error => {
     if (error.code === 'ENOENT') return null;
     throw error;
@@ -110,27 +148,9 @@ export async function receiveArtifact({ artifact, manifestPath, destination, max
     // secret scan and runtime-entrypoint check passes. A failed validation must
     // never leave an unverified directory at the caller's destination.
     await run('python3', [join(scripts, 'secure-unpack.py'), artifact, stagingDestination, '--max-entries', String(maxEntries), '--max-bytes', String(maxBytes)]);
-    const files = await collectAllowlist(stagingDestination, { allowlist: manifest.archive_allowlist });
-    const all = await listFiles(stagingDestination);
-    const unexpected = all.filter(path => !allowed(path, manifest.archive_allowlist));
-    if (unexpected.length) throw new Error(`ALLOWLIST_VIOLATION ${unexpected.join(',')}`);
-    const payloadPaths = manifest.payload.map(item => item.path).sort();
-    const actualPaths = all.filter(path => !path.endsWith('/')).sort();
-    if (payloadPaths.length !== actualPaths.length || payloadPaths.some((p, i) => p !== actualPaths[i])) throw new Error('PAYLOAD_PATHS_MISMATCH');
-    for (const item of manifest.payload) {
-      const path = join(stagingDestination, item.path);
-      const info = await stat(path);
-      if (info.size !== item.bytes || await sha256(path) !== item.sha256) throw new Error(`PAYLOAD_DIGEST_MISMATCH ${item.path}`);
-    }
-    const findings = await scanTree(stagingDestination, { maxBytes });
-    assertClean(findings);
-    if (manifest.toolchain) {
-      for (const required of ['package.json', 'pnpm-lock.yaml', 'scripts/dsh.mjs', 'deploy/wsl/install-release.sh']) {
-        if (!actualPaths.includes(required)) throw new Error(`RUNTIME_ENTRYPOINT_MISSING ${required}`);
-      }
-    }
+    const result = await verifyReceivedTree(manifest, stagingDestination, { maxEntries, maxBytes });
     await rename(stagingDestination, finalDestination);
-    return { manifest, entries: files.length, sha256: manifest.artifact_sha256 };
+    return result;
   } finally {
     await rm(stageRoot, { recursive: true, force: true });
   }
@@ -142,6 +162,7 @@ async function listFiles(dir) {
     for (const entry of await readdir(current, { withFileTypes: true })) {
       const path = join(current, entry.name);
       const rel = relative(dir, path).split(sep).join('/');
+      if (entry.isSymbolicLink() || (!entry.isDirectory() && !entry.isFile())) throw new Error(`RECEIVE_SPECIAL_FILE ${rel}`);
       if (entry.isDirectory()) await walk(path);
       else output.push(rel);
     }

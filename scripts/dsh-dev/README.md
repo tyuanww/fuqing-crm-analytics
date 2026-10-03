@@ -2,7 +2,7 @@
 
 本地完整 DSH web 基座入口。不是 B0 合成笼，不管理 8000/5173/15173/4315–4319。
 
-候选固定上游：`deepseek-ai/deepseek-harness@477b4f420553e8a52c2fbccc464d7561b239c443`（0.1.7-rc.2，见 `toolchain.json`）。Node 24。杭州现役 6677 仍使用旧 RC1 checkout，候选切换未执行；旧 alpha2 checkout 保留作回退。后续再升版本仍改 `dsh-plugins/analytics-workbench/toolchain.json` 与本入口 `PINNED_SHA`，不要直接改上游源码。
+候选固定上游：`deepseek-ai/deepseek-harness@477b4f420553e8a52c2fbccc464d7561b239c443`（0.1.7-rc.2，见 `toolchain.json`）。Node 24。杭州现役与候选状态以根 [STATUS](../../STATUS.md) 的带日期快照为准。后续再升版本仍改 `dsh-plugins/plugin-kit/toolchain.json`；本入口 `PINNED_SHA` 从同一配置导入，不要直接改上游源码。
 
 ## 命令
 

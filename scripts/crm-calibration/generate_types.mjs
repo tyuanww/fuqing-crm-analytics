@@ -5,7 +5,7 @@ import { dirname, resolve, join } from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const deps = process.argv.slice(2).find(arg => arg !== '--check') ?? join(root, 'dsh-plugins/analytics-workbench/build-tools');
+const deps = process.argv.slice(2).find(arg => arg !== '--check') ?? join(root, 'dsh-plugins/plugin-kit/build-tools');
 const req = createRequire(join(resolve(deps), 'package.json'));
 assert.equal(req('typescript').version, '6.0.3');
 assert.equal(JSON.parse(await readFile(req.resolve('openapi-typescript/package.json'))).version, '7.13.0');

@@ -38,12 +38,13 @@ async function git(checkout, args) {
   }
 }
 
-async function scanPattern(checkout, pattern) {
+async function scanPattern(checkout, pattern, sourceSha) {
   // File names are enough for the static evidence and avoid copying source
   // lines (which could contain fixture secrets) into a receipt.
-  const result = await git(checkout, ['grep', '-l', '-E', pattern, '--', ...SOURCE_PATHS]);
+  // Bind static evidence to the reviewed tree, never to mutable worktree bytes.
+  const result = await git(checkout, ['grep', '-l', '-E', pattern, sourceSha, '--', ...SOURCE_PATHS]);
   if (typeof result !== 'string') return { matches: [], error: result.error };
-  const matches = result.split('\n').filter(Boolean).slice(0, 20).map(file => ({ file: file.slice(0, 300) }));
+  const matches = result.split('\n').filter(Boolean).slice(0, 20).map(file => ({ file: file.slice(sourceSha.length + 1, sourceSha.length + 301) }));
   return { matches };
 }
 
@@ -57,7 +58,7 @@ export async function inspectCheckout({ id, version, checkout, expectedSha, role
   if (!/^[0-9a-f]{40}$/.test(expectedSha) || actual !== expectedSha) {
     return { ...base, status: 'BLOCKED', reason: 'UPSTREAM_SHA_MISMATCH' };
   }
-  for (const [key, pattern] of Object.entries(PATTERNS)) base.source_scan[key] = await scanPattern(checkout, pattern);
+  for (const [key, pattern] of Object.entries(PATTERNS)) base.source_scan[key] = await scanPattern(checkout, pattern, expectedSha);
   const missing = Object.entries(base.source_scan).filter(([, result]) => !result.matches?.length).map(([key]) => key);
   return { ...base, status: missing.length ? 'BLOCKED' : 'SUPPORTED', reason: missing.length ? 'SOURCE_FAMILY_NOT_FOUND' : null,
     source_scan_missing: missing };

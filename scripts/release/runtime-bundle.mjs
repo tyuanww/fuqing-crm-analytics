@@ -2,13 +2,15 @@
 
 /** Build the immutable, production-only DSH runtime closure from a pinned checkout. */
 import assert from 'node:assert/strict';
-import { access, cp, lstat, mkdir, mkdtemp, readdir, readFile, readlink, rm, stat, symlink, writeFile } from 'node:fs/promises';
+import { access, cp, lstat, mkdir, mkdtemp, readdir, readFile, readlink, realpath, rm, stat, symlink, writeFile } from 'node:fs/promises';
 import { execFile as execFileCallback } from 'node:child_process';
 import { promisify } from 'node:util';
 import { dirname, join, relative, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
 import { scanText } from './secret-scan.mjs';
 import { DSH_UPSTREAM_SHA as PIN } from './toolchain.mjs';
+import { bindRuntimeInputs, prepareRuntimeInputs, runtimeDeployArgs, stageRuntimeWorkspace, verifyRuntimePreparation } from './runtime-inputs.mjs';
 
 const execFile = promisify(execFileCallback);
 const REQUIRED = [
@@ -24,90 +26,6 @@ const TEXT_FILE = /\.(?:cjs|css|html|ini|json|js|mjs|mts|sh|txt|ts|tsx|yaml|yml)
 const MAX_TEXT_SCAN_BYTES = 16 * 1024 * 1024;
 
 function relativePath(root, path) { return relative(root, path).split('\\').join('/'); }
-
-function escapeRegExp(value) { return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
-
-async function listPackageJsonFiles(root) {
-  const files = [];
-  async function walk(directory) {
-    for (const entry of await readdir(directory, { withFileTypes: true })) {
-      if (entry.name === '.git' || entry.name === 'node_modules') continue;
-      const path = join(directory, entry.name);
-      if (entry.isDirectory()) await walk(path);
-      else if (entry.isFile() && (entry.name === 'package.json' || entry.name === 'pnpm-lock.yaml')) files.push(path);
-    }
-  }
-  await walk(root);
-  return files;
-}
-
-async function findPreparedPackage(upstream, packageName) {
-  const pnpmRoot = join(upstream, 'node_modules/.pnpm');
-  const entries = await readdir(pnpmRoot, { withFileTypes: true });
-  for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
-    const modules = join(pnpmRoot, entry.name, 'node_modules');
-    const scoped = await readdir(modules, { withFileTypes: true }).catch(() => []);
-    for (const candidate of scoped) {
-      const roots = candidate.name.startsWith('@')
-        ? (await readdir(join(modules, candidate.name), { withFileTypes: true }).catch(() => []))
-          .filter(item => item.isDirectory()).map(item => join(modules, candidate.name, item.name))
-        : [join(modules, candidate.name)];
-      for (const packageRoot of roots) {
-        const manifest = JSON.parse(await readFile(join(packageRoot, 'package.json'), 'utf8').catch(() => '{}'));
-        if (manifest.name === packageName) return packageRoot;
-      }
-    }
-  }
-  throw new Error(`RUNTIME_DIRECT_TARBALL_NOT_PREPARED ${packageName}`);
-}
-
-/**
- * pnpm 11's legacy deploy still probes a direct tarball URL even in --offline
- * mode. Bind every direct tarball recorded by the pinned lockfile to the
- * already prepared package bytes instead. The upstream checkout is restored
- * byte-for-byte before this function returns; the local file binding only
- * exists inside the temporary deploy operation.
- */
-async function prepareOfflineDirectTarballs(upstream, work) {
-  const lockPath = join(upstream, 'pnpm-lock.yaml');
-  const lock = await readFile(lockPath, 'utf8');
-  const urls = [...lock.matchAll(/tarball:\s*(https?:\/\/[^,\s}]+)/g)].map(match => match[1]);
-  const changed = [];
-  try {
-    for (const url of [...new Set(urls)]) {
-      const packageMatch = lock.match(new RegExp(`(?:^|\\n)\\s{2}(.+?)@${escapeRegExp(url)}:\\s*\\n`));
-      if (!packageMatch) throw new Error(`RUNTIME_DIRECT_TARBALL_PACKAGE_UNKNOWN ${url}`);
-      const packageName = packageMatch[1].trim();
-      const packageRoot = await findPreparedPackage(upstream, packageName);
-      const safeName = packageName.replace(/[^a-zA-Z0-9._-]+/g, '-');
-      const staging = join(work, 'direct-tarballs', safeName);
-      await mkdir(staging, { recursive: true, mode: 0o700 });
-      await cp(packageRoot, join(staging, 'package'), { recursive: true, dereference: false });
-      const archive = join(staging, `${safeName}.tgz`);
-      await execFile('tar', ['-czf', archive, '-C', staging, 'package']);
-      const replacement = `file:${archive}`;
-      let replaced = false;
-      for (const path of await listPackageJsonFiles(upstream)) {
-        const bytes = await readFile(path);
-        if (!bytes.includes(Buffer.from(url))) continue;
-        changed.push({ path, bytes });
-        await writeFile(path, bytes.toString('utf8').split(url).join(replacement));
-        replaced = true;
-      }
-      if (!replaced) throw new Error(`RUNTIME_DIRECT_TARBALL_BINDING_MISSING ${url}`);
-    }
-  } catch (error) {
-    for (const item of changed.reverse()) await writeFile(item.path, item.bytes);
-    throw error;
-  }
-  let restored = false;
-  return async () => {
-    if (restored) return;
-    restored = true;
-    for (const item of changed.reverse()) await writeFile(item.path, item.bytes);
-  };
-}
 
 async function pruneDevelopmentFiles(root) {
   let removed = 0;
@@ -313,7 +231,7 @@ function option(name) {
   return resolve(process.argv[index + 1]);
 }
 
-const upstream = option('--upstream');
+const upstream = await realpath(option('--upstream'));
 const output = option('--output');
 const online = process.argv.includes('--online');
 assert.equal(process.argv.filter(arg => arg.startsWith('--')).length, online ? 3 : 2, 'RUNTIME_BUNDLE_OPTION_UNKNOWN');
@@ -322,6 +240,7 @@ const upstreamSha = (await execFile('git', ['-C', upstream, 'rev-parse', 'HEAD']
 assert.equal(upstreamSha, PIN, 'UPSTREAM_SHA_MISMATCH');
 const upstreamStatus = (await execFile('git', ['-C', upstream, 'status', '--porcelain', '--untracked-files=no'])).stdout.trim();
 assert.equal(upstreamStatus, '', `UPSTREAM_CHECKOUT_DIRTY ${upstreamStatus}`);
+if (!online) await verifyRuntimePreparation(upstream);
 const outputInfo = await stat(output).catch(error => {
   if (error.code === 'ENOENT') return null;
   throw error;
@@ -329,31 +248,39 @@ const outputInfo = await stat(output).catch(error => {
 assert.equal(outputInfo, null, 'RUNTIME_BUNDLE_OUTPUT_EXISTS');
 await mkdir(resolve(output, '..'), { recursive: true });
 
-const work = await mkdtemp(join(tmpdir(), 'dsh-runtime-bundle-'));
+// macOS /var is a symlink; pnpm must use one canonical workspace/deploy root.
+const work = await realpath(await mkdtemp(join(tmpdir(), 'dsh-runtime-bundle-')));
 const deployed = join(work, 'dsh');
-let restoreDirectTarballs = async () => {};
 try {
-  if (!online) restoreDirectTarballs = await prepareOfflineDirectTarballs(upstream, work);
+  if (online) await prepareRuntimeInputs(upstream);
+  const workspace = await stageRuntimeWorkspace(upstream, join(work, 'workspace'));
+  const restoreStagedMetadata = await bindRuntimeInputs(upstream, workspace, work);
   // A production runtime must never execute upstream lifecycle hooks in the
   // temporary deploy directory. Preparation already hydrated and built the
   // pinned checkout; deploy only materializes those verified files.
-  const deployArgs = ['pnpm', 'deploy', '--legacy', '--ignore-scripts'];
-  if (!online) deployArgs.push('--offline');
-  deployArgs.push('--filter', '@deepseek-ai/dsh', '--prod', deployed);
-  await execFile('corepack', deployArgs, {
-    cwd: upstream,
-    env: { ...process.env, COREPACK_ENABLE_DOWNLOAD_PROMPT: '0', CI: '1' },
+  // The modern shared-lockfile deploy converts link: workspace importers into
+  // directory snapshots and installs the derived closure frozen. Legacy
+  // deploy deliberately re-resolves semver ranges, even with --offline.
+  // Select this only in the private stage; upstream configuration stays intact.
+  // pnpm explicitly supports trusting a lock already verified by preparation.
+  // The receipt above binds the exact original lock, policy, pin and tools;
+  // cached direct tarballs retain their original integrity. Online audit stays
+  // a separate required preflight stage. Missing proof never disables policy.
+  await execFile('corepack', runtimeDeployArgs(deployed, { online }), {
+    cwd: workspace,
+    env: { ...process.env, COREPACK_ENABLE_DOWNLOAD_PROMPT: '0', CI: '1',
+      ...(!online ? { NODE_OPTIONS: `--require ${JSON.stringify(fileURLToPath(new URL('./runtime-offline.cjs', import.meta.url)))}`, npm_config_fetch_retries: '0' } : {}),
+    },
+    timeout: 900000,
     maxBuffer: 4 * 1024 * 1024,
   });
-  await restoreDirectTarballs();
-  restoreDirectTarballs = async () => {};
-  const materialized = await materializeExternalSymlinks(deployed, upstream, upstreamSha);
+  await restoreStagedMetadata();
+  const materialized = await materializeExternalSymlinks(deployed, workspace, upstreamSha);
   for (const path of REQUIRED) await access(join(deployed, path));
   await execFile('tar', ['--zstd', '--no-xattrs', '--no-acls', '-cf', output, '-C', deployed, '.'], { maxBuffer: 4 * 1024 * 1024 });
   const info = await stat(output);
   assert.ok(info.size > 0, 'RUNTIME_BUNDLE_EMPTY');
   console.log(JSON.stringify({ status: 'BUILT', upstream_sha: upstreamSha, network_mode: online ? 'online' : 'offline', path: output, bytes: info.size, ...materialized }));
 } finally {
-  await restoreDirectTarballs();
   await rm(work, { recursive: true, force: true });
 }

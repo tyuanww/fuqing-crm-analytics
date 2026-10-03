@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { PINNED_SHA, NODE_MAJOR } from './constants.mjs';
 
 export async function readToolchain(repoRoot) {
-  const pin = JSON.parse(await readFile(join(repoRoot, 'dsh-plugins/analytics-workbench/toolchain.json'), 'utf8'));
+  const pin = JSON.parse(await readFile(join(repoRoot, 'dsh-plugins/plugin-kit/toolchain.json'), 'utf8'));
   assert.equal(pin.upstream_sha, PINNED_SHA, 'toolchain.json drifted from the fixed upstream SHA');
   assert.equal(pin.node_major, NODE_MAJOR);
   return pin;

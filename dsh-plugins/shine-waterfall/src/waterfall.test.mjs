@@ -5,7 +5,7 @@ import { waterfallGeometry } from './waterfall.mjs';
 import { projectComponent } from '../../analytics-workbench/src/board-spec/component-view.mjs';
 import { parseComponentProps } from '../../analytics-workbench/src/board-spec/component-catalog.mjs';
 
-const cases = JSON.parse(readFileSync(new URL('../tests/waterfall-cases.json', import.meta.url)));
+const cases = JSON.parse(readFileSync(new URL('../../board-components/test/waterfall-cases.json', import.meta.url)));
 for (const item of cases) test(`waterfall shared geometry contract: ${item.name}`, () => {
   const before = structuredClone(item.data), geometry = waterfallGeometry(item.data);
   assert.equal(Boolean(geometry), item.valid);

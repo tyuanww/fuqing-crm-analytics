@@ -68,6 +68,15 @@ export async function copyTreeBounded(source, destination, options = {}) {
   return { files: budget.files, bytes: budget.bytes };
 }
 
+/** Copy only kit-owned source/lock inputs; prepared dependencies stay external. */
+export async function copyPluginKitSources(source, destination, options = {}) {
+  const shared = { ...options, budget: options.budget ?? { bytes: 0, files: 0 } };
+  for (const item of ['package.json', 'toolchain.json', 'toolchain.mjs', 'packaged-dependencies.mjs', 'README.md',
+    'build-tools/package.json', 'build-tools/pnpm-lock.yaml', 'build-tools/pnpm-workspace.yaml', 'build-tools/patches']) {
+    await copyTreeBounded(join(source, item), join(destination, item), shared);
+  }
+}
+
 export async function createCleanRoot(parent) {
   const root = resolve(parent);
   await mkdir(root, { recursive: true, mode: 0o700 });

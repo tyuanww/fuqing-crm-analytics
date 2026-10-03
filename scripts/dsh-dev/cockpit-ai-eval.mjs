@@ -22,7 +22,7 @@ assert.deepEqual(args.filter((_, i) => i % 2 === 0), ['--runtime', '--upstream',
 const [runtime, upstream, python, output] = args.filter((_, i) => i % 2 === 1);
 assert.ok([runtime, upstream, python, output].every(p => typeof p === 'string' && isAbsolute(p)));
 assert.equal(Number(process.versions.node.split('.')[0]), 24);
-const pin = JSON.parse(await readFile(join(repo, 'dsh-plugins/analytics-workbench/toolchain.json')));
+const pin = JSON.parse(await readFile(join(repo, 'dsh-plugins/plugin-kit/toolchain.json')));
 assert.equal(execFileSync('git', ['-C', upstream, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), pin.upstream_sha);
 const { WebSocket } = createRequire(join(upstream, 'packages/api/gateway/package.json'))('ws');
 const parent = await mkdtemp(join(tmpdir(), 'cockpit-model-eval-'));

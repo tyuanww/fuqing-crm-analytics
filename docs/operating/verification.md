@@ -32,7 +32,7 @@ CI 的 `lint` job 只安装从 `requirements-lock.txt` 读取的唯一 Ruff 精�
 
 ## Mac 开发与杭州生产的 Git 预检
 
-活动仓库只允许公共远端 `tyuanww/fuqing-crm-analytics`。Mac 上创建 feature 分支、跑本地检查并通过 PR；杭州只拉取已合入 `main` 的批准 SHA，不在服务器编辑或直接跟踪浮动分支。
+活动仓库只允许公共远端 `tyuanww/fuqing-crm-analytics`。Mac 上创建 feature 分支、跑本地检查并通过 PR；杭州从 immutable Release 下载绑定批准 source SHA 的 artifact，不在服务器 `git pull`、编辑源码或跟踪浮动分支。
 
 ```bash
 git remote get-url origin
@@ -41,7 +41,7 @@ git status --short --branch
 git branch --show-current
 ```
 
-两条 remote URL 都应指向 `tyuanww/fuqing-crm-analytics`；发现旧账号、脏工作树或未批准的服务器分支时先停在预检。生产切换前，另核对杭州 checkout 的 SHA、容器配置和健康检查，不能把 `git push` 当成部署完成。
+两条 remote URL 都应指向 `tyuanww/fuqing-crm-analytics`；发现旧账号、脏工作树或未批准的服务器分支时先停在预检。生产切换前，另核对杭州 installed manifest/source SHA、容器配置和健康检查，不能把 `git push` 当成部署完成。
 
 ## 本地命令
 
@@ -122,7 +122,7 @@ node --test --test-concurrency=1 \
 
 每次 backend runner 创建新的 `.context/checks/<time>/`，记录解释器、HEAD、Python 检查源码摘要、完整目标与命令、每组退出码/耗时/峰值 RSS、JUnit 与最终结果；失败也保留。摘要是可审查证据，不是绕过检查的授权或自动缓存键。`summarize_checks.py` 汇总 JUnit 子 suite，避免过去从空根属性得到 None。
 
-当前规则只在 AGENTS；当前产品任务状态在 B0 执行清单；日期报告是不可回写的历史证据。本次治理记录单列本地补丁、旧成绩和未运行项目。Git/远端 CI/真实业务验收分别交付，不能因为本地检查通过标记产品完成。
+当前规则只在 AGENTS；当前产品任务状态在 STATUS 与 TODOS；B0 执行清单保留历史；日期报告是不可回写的历史证据。本次治理记录单列本地补丁、旧成绩和未运行项目。Git/远端 CI/真实业务验收分别交付，不能因为本地检查通过标记产品完成。
 
 ## DSH 基座兼容的独立验证
 
@@ -153,4 +153,12 @@ Logo 使用当前 checkout 的 Git LFS 字节，可执行
 `git lfs pull --include=frontend-vue3/src/assets/brand/shine-mage.png --exclude=`。
 不再从相邻工作树读取 Logo。supervisor 单测只选空闲 4328/4329；已有监听不停止。
 比赛 HTTP 演示仍为 synthetic；T13/T15/T16 不由单元测试替代。
-离线 runtime deploy 对锁文件中的 HTTPS 直链使用已准备 checkout 内的包内容生成临时本地 tarball，deploy 完成后恢复 pinned checkout；未准备的直链以 `RUNTIME_DIRECT_TARBALL_NOT_PREPARED` 失败。
+离线 runtime deploy 在私有 staging 副本中运行，不改写 pinned checkout。HTTPS 直链使用准备阶段缓存的原始 tarball，并按固定锁文件的 SHA-512 integrity 校验；不把已安装目录重新打包冒充原始包。缓存缺失或摘要不符会阻断，离线阶段不重新解析依赖版本。
+
+## 插件边界与独立构建
+
+固定工具链由 `dsh-plugins/plugin-kit/toolchain.json` 和 `plugin-kit/build-tools/` 维护；不从相邻旧仓库发现依赖。`node scripts/dsh-b0/plugin-boundaries.mjs --check` 核对当前所有插件的 owner、直接 import、字面路由、合同与构建 DAG；新增源码耦合、循环、过期例外或清单漂移均阻断。已验证入口与边界负测，具体命令和结果见 [本轮审核](../hackathon/evidence/dsh-g0-decoupling-review-20261003.md)。边界说明见 [架构清单](../architecture/shinemage-plugin-boundaries.md)。
+
+B0 `--check` 包含边界负测、`plugin-isolation.test.mjs` 和既有 workbench clean rebuild。独立包测试只复制 kit 与单个 leaf 源码，复用相同锁文件的第三方依赖；在临时 Git 夹具中构建、执行现有生命周期单测并受控打包。临时提交不属于产品历史，不充当 reviewed release SHA。这些测试不启动真实 DSH、不证明热卸载或跨版本兼容。
+
+B0 `--check` 先独立构建 board-components 并绑定受摘要约束的 tarball，再验证公开导出/类型、失真输入和几何语义。workbench clean rebuild 只含 workbench 源码与 kit，图表通过同一个 tarball 输入；不会复制 funnel/waterfall 源码。临时 Git 夹具内再执行受控 pack，记录 `fixture_only`，不冒充正式 reviewed source。`backend/tests/test_board_funnel.py` 与 `test_board_waterfall.py` 消费领域包拥有的同一套 JSON 标本，按受影响文件单独运行。

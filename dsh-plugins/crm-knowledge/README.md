@@ -1,6 +1,6 @@
 # CRM 知识与指标候选插件
 
-固定 SDK：DSH 0.1.7-rc.2（见 analytics-workbench `toolchain.json`），Node 24，Python 3.14+。本候选插件按 rc2 构建；杭州现役 6677 仍加载 RC1，切换未执行；旧 alpha2 checkout 仅用于回退。独立插件，包含合成资料源及默认未连接的看板 GSV HTTP 适配，通过 analytics-workbench 的可选 `cockpit.crm` 插槽展示引用，不修改 DSH 上游或比赛事实合同。构建依赖只读复用已准备好的固定 checkout，不下载或自动安装。
+固定 SDK：DSH 0.1.7-rc.2（见 [`../plugin-kit/toolchain.json`](../plugin-kit/toolchain.json)），Node 24，Python 3.14+。本插件按 rc2 构建；杭州状态以根 [STATUS](../../STATUS.md) 的带日期现场快照为准。独立插件，包含合成资料源及默认未连接的看板 GSV HTTP 适配，通过 analytics-workbench 的可选 `cockpit.crm` 插槽展示引用，不修改 DSH 上游或比赛事实合同。构建依赖只读复用已准备好的固定 checkout，不下载或自动安装。
 
 本包依赖当前工作区中的 `backend/`、`scripts/crm-calibration/` 和 `knowledge/crm/`，当前不支持脱离仓库单独发布。
 
@@ -81,7 +81,7 @@
 python3 scripts/crm-calibration/verify.py \
   --node /absolute/node24 \
   --upstream /absolute/pinned-dsh-checkout \
-  --build-tools /absolute/analytics-workbench/build-tools
+  --build-tools /absolute/plugin-kit/build-tools
 ```
 
 从仓库根目录运行。它执行后端定向测试、Ruff、离线合同核验、类型检查、插件构建、CLI、合成 HTTP 和真实 ToolRuntime 验证，日志保存在 `.context/checks/crm-candidate-<timestamp>/`。HTTP 测试仅使用本次拥有的临时回环端口并关闭；不启动现役 HTTP/Web、profile、ETL、模型或图服务，不读取真实凭据或数据库。

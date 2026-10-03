@@ -1,3 +1,17 @@
+## [Unreleased]
+
+### Fixed
+
+- 恢复被误写的验证入口矩阵；插件边界扫描补齐 TypeScript import-equals，防止直接依赖漏检。
+- 漏斗/瀑布计算和类型归入独立 board-components 领域包；workbench 改用固定 tarball 公开导出，保留旧插件身份与导出，构建前拒绝错包/篡改/未锁定输入。
+
+- 插件固定工具链与 build-tools 锁归入 dev-only plugin-kit；叶子构建不再依赖 workbench 配置，CRM 构建复用同一校验器。
+- 增加实际源码边界清单、漂移门禁与两叶子包隔离 build/test/pack，C0 生成器同步 manifest 与消费者摘要。
+- 固定 DSH runtime 在私有副本打包，使用锁定的原始 tarball 与 frozen deploy；中断不会改写上游 checkout，离线阶段不再重新解析版本范围。
+- 独立插件最终包执行敏感文件、secret 和声明入口检查，通过后才公开产物。
+- 接收失败保留 UNKNOWN；校验已安装字节后恢复丢失回执，跨 release tag 不继承旧包身份，静态兼容证据绑定精确 Git tree。
+- 统一拆分计划、Quickstart 与设计规范的当前/历史边界，保留未执行的宿主和发布验收。
+
 ## [0.20.0.0] - 2026-09-30
 
 ### Added

@@ -14,13 +14,16 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 当前本地 rc2 候选门禁（2026-10-03）
+### 当前本地 rc2 候选门禁（2026-10-03 审查修复）
 
-- 固定 DSH 为 `0.1.7-rc.2`，上游 SHA 为 `477b4f420553e8a52c2fbccc464d7561b239c443`；当前 source SHA、preflight tag、runtime/manifest digest 只以同一候选目录下的 `release-preflight.json`、`release-manifest.v1.json` 和 `SHA256SUMS` 为准，不在本页复制易漂移的提交号。
-- 最新本地 preflight 已完成 `prepare → audit → build → runtime → release → test → receive → evidence`，八阶段均 PASS，102/102 测试通过；精确证据目录由 preflight 输出的 tag 定位于 `.context/release-preflight/<tag>/`。
-- `doctor --release`、`preflight --check` 和 `verify --scope local` 均 PASS；local verify 明确标记 WSL2、真实 DuckDB、真实 HTTP SLI 为 `NOT_RUN`。
-- workbench 与 shine-brand candidate 均绑定同一 source SHA 和 DSH pin；精确 candidate digest 只以 `.context/checks/rc2-final-<tag>/candidate-*/candidate.json` 为准。
-- 本地候选尚未 push、创建 GitHub Release 或切换杭州；T2/T13/T15/T17/T21 的现场宿主、签名/SBOM、canary/rollback、远端 receive/reconcile 仍是 `PARTIAL`/`NOT_RUN`。
+- 本次从公共仓库 `main@d4261aa3` 开始，保留 13 个本地提交及原工作树修改。DSH 仍固定 `0.1.7-rc.2` / `477b4f420553e8a52c2fbccc464d7561b239c443`，VERSION 未变。用户已授权审核通过后本地提交；候选在独立 `codex/plugin-boundary-review` 工作树，提交结果以 Git 为准。未 push、发布或修改杭州。
+- 上一轮八阶段 preflight、102/102 测试及 candidate 回执只证明其绑定的旧 SHA；**本次修改后正式 preflight 尚未重跑**。最终候选必须从 clean reviewed SHA 重建，不复用旧 PASS。
+- 本轮修复 OCR-01–07：runtime 私有副本与原始包 integrity、插件最终包安全/入口校验、receive 恢复、跨 tag 身份与精确 Git tree 扫描。专项回归 **123/123 PASS**；真实固定上游 prepare、现有 build-tools audit、离线 runtime 构建，以及 workbench/shine-brand pack 通过。详见 [修复与规划审核证据](docs/hackathon/evidence/dsh-g0-review-fixes-20261003.md)。本机包是 Darwin arm64 验证产物，不是 WSL2 上线包。
+- 大型拆分计划已全文复核：统一 G0 → 首期 workspace 试点 → stop/go → 物理分仓的顺序，保留独立 CRM/知识库插件与官方 DSH 底座目标。T1 已完成边界设计、10 包机器清单、唯一构建 DAG 与漂移检查；T15 已把 pin/build-tools 归入 kit，并验证 brand/query 独立 build/test/pack。board-components 的固定 tarball/公开类型已替换 6 条源码引用，workbench 独立重建/pack 通过；CRM 的 5 条源码/类型引用仍开放。T2/T17 精确宿主、签名/SBOM、canary/rollback 与远端 receive/reconcile 仍 `PARTIAL`/`NOT_RUN`。
+- 同日上一阶段验证（不是下方新增改动的全量重跑）：48 项锁定依赖的隔离环境中，共享合成 backend **2922 PASS / 77 SKIP / 71 deselect**，Vue build 与 **223/223**，release 专项 **119/119**，最终 B0 pipeline **PASS**（Python **618/618**；Node 各阶段合计 **1370 PASS / 1 SKIP**，含 clean 重跑）。实际 8 插件 build、两叶子隔离包、workbench clean rebuild 通过；详见 [边界与隔离构建证据](docs/hackathon/evidence/dsh-g0-boundaries-20261003.md)。
+- 图表解耦本轮证据、命令、包 SHA、测试结果与剩余项见 [图表解耦记录](docs/hackathon/evidence/dsh-g0-board-components-20261003.md)。产物均是本地构建/临时 Git 夹具，不是新 Release；VERSION、DSH pin 与生产 profile 未改变。
+- 本轮没有重跑完整原生 DSH profile 生命周期、WSL2/WAL、真实 HTTP SLI、浏览器/模型或业务 UAT；B0 Loader/合成服务测试不替代上述门禁。杭州状态沿用上方注明日期的现场快照，未作新的上线判断。
+- 提交前 OCR 全范围审核及修复见 [解耦审核](docs/hackathon/evidence/dsh-g0-decoupling-review-20261003.md)：恢复误写的验证矩阵，堵住 TypeScript import-equals 的依赖漏检。本次 Node 回归 **176/176**、图表后端 **43/43**；后续仍先处理 CRM 的 5 条内部引用。
 
 ## 本轮施工计划
 

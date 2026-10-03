@@ -178,7 +178,7 @@ async function inspectUpstream(explicit) {
   if (!upstream) {
     return { status: 'missing', tried };
   }
-  const pinPath = join(repoRoot, 'dsh-plugins/analytics-workbench/toolchain.json');
+  const pinPath = join(repoRoot, 'dsh-plugins/plugin-kit/toolchain.json');
   const pin = JSON.parse(await readFile(pinPath, 'utf8'));
   const head = git(upstream, ['rev-parse', 'HEAD']);
   const dirty = git(upstream, ['status', '--porcelain', '--untracked-files=no']);

@@ -1,18 +1,31 @@
 # DSH 插件作者 Quickstart
 
-这条路径只验证一个插件包。DSH、CRM 服务、知识库和真实业务数据不随插件构建；插件失败时保留 DSH 原生对话。插件包默认不得覆盖原生标题、侧栏、会话或工具合同，未接通的 capability 必须显示 `NOT_AVAILABLE` 及原因。
+这条路径只验证一个插件包。DSH、CRM 服务、知识库和真实业务数据不随插件构建；插件失败时保留 DSH 原生对话是 T17 宿主验收目标，当前 pack/candidate 尚不能证明进程隔离。插件包默认不得覆盖原生标题、侧栏、会话或工具合同，未接通的 capability 必须显示 `NOT_AVAILABLE` 及原因。
 
 ## 前置条件
 
 - Node `24.19.0`、pnpm `11.7.0`、Python `3.14+`。
 - 插件位于 profile allowlist 中，包名匹配 `@shine-mage/*`。
 - `package.json` 使用 `type: module`、`packageManager: pnpm@11.7.0`，并把 `@deepseek-ai/dsh-tools` 固定为 `0.1.7-rc.2` peer。
-- `files` 只声明运行时 `lib/`、bundle patch 和必要的 README/LICENSE；不得包含 `src/`、测试、`node_modules`、source map、符号链接或 workspace/file/link 依赖。
+- `files` 只声明运行时 `lib/`、bundle patch、已打包领域输入的 digest lock 和必要的 README/LICENSE；不得包含 `src/`、测试、`node_modules`、source map、符号链接或 workspace/file/link 依赖。
 
 <a id="plugin-contract"></a>
 ## 包合同
 
-每个插件有自己的 `build.mjs`、测试和版本。构建期可以使用 workspace 内的 `dsh-plugins/plugin-kit`，但运行时只消费自身包、公开 DSH capability 合同和服务 API；不能导入 `analytics-workbench` 或其他插件的 toolchain 源码。profile 只组合已打包版本，不拥有插件源码。
+每个插件有自己的 `build.mjs`、测试和版本。构建期可以使用 workspace 内的 `dsh-plugins/plugin-kit`，但运行时只消费自身包、公开 DSH capability 合同和服务 API；不能导入 `analytics-workbench` 或其他插件的 toolchain 源码。profile 只组合已打包版本，不拥有插件源码。固定 pin、manifest/lock 和补丁位于 `plugin-kit/toolchain.json` 与 `plugin-kit/build-tools/`；workbench 只保留自己的业务类型检查。
+
+## 图表领域包输入
+
+workbench、funnel、waterfall 使用 `@shine-mage/board-components` 的公开代码/类型导出。包版本在各自 `devDependencies` 固定，tarball SHA-256 在 `bundled-dependencies.json` 固定；构建将代码打入插件，线上无新的 runtime peer。包的完整输入步骤：
+
+```bash
+# 仓库内开发：生成同一个不可变图表包；B0 --check 和 preflight 已包含此步
+node dsh-plugins/board-components/build.mjs
+# 只为源测试绑定本地 tarball；build.mjs 会自行校验并绑定
+node scripts/dsh-b0/package-inputs.mjs
+```
+
+独立 checkout 接收同一个 tarball 后，设置 `DSH_PACKAGE_INPUTS=/absolute/package-input-directory` 即可构建，无需相邻图表插件或其源码。该目录是显式可信的构建输入，摘要由消费者 lock 校验；不存在时返回 `PACKAGE_INPUT_REQUIRED`，不联网找 latest、不回退到源码。`PACKAGE_INPUT_DIGEST`/`PACKAGE_INSTALLED_DRIFT` 阻断篡改；同版本不同字节返回 `PACKAGE_OUTPUT_CONFLICT`，应升级领域包版本并审查 lock，不能覆盖旧 artifact。详见 [领域包说明](../../dsh-plugins/board-components/README.md)。
 
 ## 三步本地路径
 
@@ -28,19 +41,25 @@ pnpm test
 
 # 3. 回到仓库根目录生成独立 candidate receipt
 cd ../..
-rm -rf /tmp/shine-mage-plugin-candidate
+candidate_root="$(mktemp -d "${TMPDIR:-/tmp}/shine-mage-plugin.XXXXXX")"
 pnpm dsh plugin candidate \
   --plugin "$PWD/dsh-plugins/shine-brand" \
-  --output-dir /tmp/shine-mage-plugin-candidate \
-  --state-path /tmp/shine-mage-plugin-state.json
-cat /tmp/shine-mage-plugin-candidate/candidate.json
+  --output-dir "$candidate_root/pack" \
+  --state-path "$candidate_root/state.json"
+cat "$candidate_root/pack/candidate.json"
 ```
 
 候选回执绑定插件 source SHA、包 SHA-256、profile digest、固定 DSH pin、capability 和 `CANDIDATE_PREPARED` journal。`canary`、`rollback` 和远端 receive 在当前首期显示 `NOT_RUN`/`NOT_AVAILABLE`，这不是发布成功；不能把 tarball 直接放进杭州 current。
 
+最终 tarball 在私有临时目录安全解包，核对 `exports`（含条件分支）、`main`/`module` 和 `dsh.bundle.patch` 指向的文件，再执行敏感文件/secret scan；通过后才发布包与回执。源码映射、敏感文件或缺失入口均阻断，内容校验失败不发布 tarball；通过校验后若回执落盘失败，已验证包仍保留，需核对输出后使用新的候选目录重试。通配 exports 暂不支持，须列出明确入口。
+
 ## 失败处理
 
 `PLUGIN_PACK_SOURCE_DIRTY` 表示必须先完成 reviewed commit，再从干净 checkout 重打包；不要删除校验或使用 dirty 包。`PROFILE_PLUGIN_*` 表示 profile 与 package 合同不一致。候选输出目录必须为空，state path 必须是绝对路径并与后续 reconcile/status/resume 共用。真实 DSH 宿主、WSL2/WAL、远端回执和生产切换另有门禁与授权。
+
+## 边界检查
+
+本地或 CI 运行 `node scripts/dsh-b0/plugin-boundaries.mjs --check`，核对包 owner、公开/内部合同、跨包引用、构建 DAG 与清单漂移。B0 pipeline 同时运行两个叶子包的 source-only 隔离 build/test/pack；这种本地夹具证据不代替真实宿主安装、服务合同或 clean reviewed SHA 的候选。当前 5 条 CRM → workbench 临时业务源码依赖见 [边界清单](../architecture/shinemage-plugin-boundaries.md)。
 
 ## 相关入口
 

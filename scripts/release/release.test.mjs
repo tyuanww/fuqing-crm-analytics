@@ -6,6 +6,8 @@ import { basename, dirname, join, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 import test from 'node:test';
 import { collectAllowlist, packArtifact, receiveArtifact } from './artifact.mjs';
+import { receiveRelease } from './receive.mjs';
+import { readState, resume } from './state.mjs';
 import { issueToken, consumeToken, tokenExchangeResponse } from './auth-contract.mjs';
 import { assertPublicationAssets, assertReleaseInputs, installRelease as installReleaseRaw, activateRelease as activateReleaseRaw, materializePluginPeerLinks, rollbackRelease as rollbackReleaseRaw } from './promotion.mjs';
 import { beginAction, finishAction, receipt } from './action-contract.mjs';
@@ -41,6 +43,31 @@ async function manifest(root, archive, tag='dsh-test', payloadData={'VERSION':'0
 }
 
 test('receiver binds archive digest and extracted payload exactly', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); const out=join(root,'nested','out'); const got=await receiveArtifact({artifact:archive,manifestPath:m,destination:out}); assert.equal(got.entries,1); });
+test('receive failure stays UNKNOWN and verifies installed bytes before recovering a lost receipt', async () => {
+  const root = await fixture(), artifact = join(root, 'a.tar.gz');
+  tar(artifact);
+  const manifestPath = await manifest(root, artifact);
+  const bytes = await readFile(artifact);
+  const input = { artifact, manifestPath, destination: join(root, 'installed'), statePath: join(root, 'state.json') };
+  await writeFile(artifact, 'corrupt');
+  await assert.rejects(() => receiveRelease(input), /ARTIFACT_DIGEST_MISMATCH/);
+  assert.equal((await resume(input.statePath)).action_required, true);
+  await writeFile(artifact, bytes);
+  await assert.rejects(() => receiveRelease(input), /RECEIVE_UNKNOWN/);
+  // Recreate the extraction-committed/receipt-lost boundary using real bytes.
+  await receiveArtifact(input);
+  await writeFile(join(input.destination, 'VERSION'), 'wrong');
+  await assert.rejects(() => receiveRelease(input), /RECEIVE_UNKNOWN/);
+  assert.equal((await resume(input.statePath)).action_required, true);
+  await writeFile(join(input.destination, 'VERSION'), '0.18.0.1\n');
+  const recovered = await receiveRelease(input);
+  assert.equal(recovered.status, 'RECEIVED');
+  assert.equal((await resume(input.statePath)).action_required, false);
+  assert.deepEqual(await receiveRelease(input), recovered);
+  const second = await receiveRelease({ ...input, destination: join(root, 'second') });
+  assert.notEqual(second.destination_sha256, recovered.destination_sha256);
+  assert.equal(Object.keys((await readState(input.statePath)).idempotency).length, 2);
+});
 test('artifact allowlist omits source maps from runtime payloads', async () => {
   const root = await fixture();
   await writeFile(join(root, 'VERSION'), '0.18.0.1\n');
@@ -258,12 +285,9 @@ test('runtime bundle enforces production pruning, secret scan and peer collision
   assert.match(source, /MAX_TEXT_SCAN_BYTES/);
   assert.match(source, /RUNTIME_PEER_ALIAS_COLLISION/);
   assert.match(source, /\['cordis', 'cosmokit'\]/);
-  assert.match(source, /deploy', '--legacy', '--ignore-scripts/);
-  assert.match(source, /prepareOfflineDirectTarballs/);
-  assert.match(source, /RUNTIME_DIRECT_TARBALL_NOT_PREPARED/);
-  assert.match(source, /RUNTIME_DIRECT_TARBALL_BINDING_MISSING/);
-  assert.match(source, /await restoreDirectTarballs\(\)/);
-  assert.match(source, /file:\$\{archive\}/);
+  assert.match(source, /runtimeDeployArgs\(deployed, \{ online \}\)/);
+  assert.match(source, /stageRuntimeWorkspace/);
+  assert.match(source, /cwd: workspace/);
   assert.doesNotMatch(source, /scanAssignments:\s*!\/\(\^\|\\\/\)node_modules/);
 });
 test('runtime artifact allowlist carries the release evidence workflow', async () => {

@@ -40,6 +40,8 @@ __pycache__/
 
 # 前端依赖 & 构建产物
 node_modules/
+# The migrated kit may reuse a prepared dependency tree via a local symlink.
+/dsh-plugins/plugin-kit/build-tools/node_modules
 frontend-vue3/node_modules/
 frontend-vue3/dist/
 

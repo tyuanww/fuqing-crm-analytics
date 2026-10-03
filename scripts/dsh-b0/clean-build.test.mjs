@@ -2,8 +2,22 @@ import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, readFile, symlink, writeFile, lstat, rm, utimes } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import test from 'node:test';
-import { CLEAN_BUILD_LIMITS, copyTreeBounded, createCleanRoot, reapStaleCleanRoots, removeCleanRoot } from './clean-build.mjs';
+import { CLEAN_BUILD_LIMITS, copyPluginKitSources, copyTreeBounded, createCleanRoot, reapStaleCleanRoots, removeCleanRoot } from './clean-build.mjs';
+
+test('kit source copy preserves actual pin/lock inputs without copying prepared dependencies', async t => {
+  const source = fileURLToPath(new URL('../../dsh-plugins/plugin-kit', import.meta.url));
+  const target = await mkdtemp(join(tmpdir(), 'b0-clean-kit-'));
+  t.after(() => rm(target, { recursive: true, force: true }));
+  await copyPluginKitSources(source, target, { destinationRoot: target });
+  for (const file of ['toolchain.json', 'build-tools/pnpm-lock.yaml', 'build-tools/patches/antd@5.29.3.patch']) {
+    assert.deepEqual(await readFile(join(target, file)), await readFile(join(source, file)));
+  }
+  await assert.rejects(() => lstat(join(target, 'build-tools/node_modules')), { code: 'ENOENT' });
+  const budget = { bytes: 0, files: 0 };
+  await assert.rejects(() => copyPluginKitSources(source, target, { budget, limits: { maxFiles: 1 } }), /file limit/);
+});
 
 test('bounded clean copy rejects links and dependency trees', async t => {
   const source = await mkdtemp(join(tmpdir(), 'b0-clean-source-'));

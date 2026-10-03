@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import toolchain from '../../dsh-plugins/analytics-workbench/toolchain.json' with { type: 'json' };
+import toolchain from '../../dsh-plugins/plugin-kit/toolchain.json' with { type: 'json' };
 
 assert.equal(toolchain.schema_version, 'dsh-b0-toolchain/v1', 'TOOLCHAIN_SCHEMA_INVALID');
 assert.match(toolchain.upstream_sha, /^[0-9a-f]{40}$/, 'TOOLCHAIN_UPSTREAM_SHA_INVALID');

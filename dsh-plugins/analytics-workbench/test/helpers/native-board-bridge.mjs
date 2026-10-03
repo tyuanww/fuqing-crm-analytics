@@ -11,7 +11,7 @@ import { callBoardConnection } from '../../src/board-spec/connection-call.mjs';
 
 const plugin = fileURLToPath(new URL('../..', import.meta.url));
 const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
-const pin = JSON.parse(await readFile(join(plugin, 'toolchain.json'), 'utf8'));
+const pin = JSON.parse(await readFile(join(plugin, '../plugin-kit/toolchain.json'), 'utf8'));
 assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], { cwd: upstream, encoding: 'utf8' }).trim(), pin.upstream_sha);
 const { Context } = createRequire(join(plugin, 'package.json'))('@deepseek-ai/cordis');
 const connection = await import(pathToFileURL(join(upstream, 'packages/client/connection/lib/index.js')).href);

@@ -1,0 +1,3646 @@
+{
+  "schema_version": "shinemage-plugin-boundaries/v1",
+  "inspection_baseline_sha": "d4261aa338ff4ed5543866b8c63cdba627e49518",
+  "upstream": {
+    "sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+    "sdk_version": "0.1.7-rc.2",
+    "pin_owner": "dsh-plugins/plugin-kit/toolchain.json"
+  },
+  "scope": "static-source-imports-and-literal-routes; not a runtime conformance test",
+  "packages": [
+    {
+      "path": "dsh-plugins/analytics-workbench",
+      "name": "@shine-mage/dsh-analytics-workbench-b0",
+      "version": "0.0.0-b0",
+      "domain": "analysis/pages/cockpit",
+      "target_repository": "shinemage-dsh-analytics-workbench",
+      "kind": "plugin",
+      "exports": {
+        ".": "./lib/index.js",
+        "./tool": "./lib/tool.js",
+        "./client": "./lib/client.js",
+        "./cordis.patch.yml": "./cordis.patch.yml",
+        "./package.json": "./package.json"
+      },
+      "files": [
+        "lib/index.js",
+        "lib/tool.js",
+        "lib/skills.js",
+        "lib/client.js",
+        "cordis.patch.yml",
+        "bundled-dependencies.json"
+      ],
+      "peers": {
+        "@deepseek-ai/dsh-tools": "0.1.7-rc.2"
+      },
+      "dependencies": {},
+      "dev_dependencies": {
+        "@shine-mage/board-components": "0.1.0"
+      },
+      "bundled_inputs": [
+        {
+          "name": "@shine-mage/board-components",
+          "version": "0.1.0",
+          "tarball": "shine-mage-board-components-0.1.0.tgz",
+          "sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182"
+        }
+      ],
+      "dsh": {
+        "client": {
+          "platform": "web",
+          "inject": [
+            "@deepseek-ai/dsh-client-connection",
+            "@deepseek-ai/dsh-client-ui-renderer",
+            "@deepseek-ai/dsh-client-ui-sidebar",
+            "@deepseek-ai/dsh-client-ui-layout",
+            "@deepseek-ai/dsh-client-ui-workspace",
+            "@deepseek-ai/dsh-client-ui-theme",
+            "@deepseek-ai/dsh-client-ui-tool",
+            "@deepseek-ai/dsh-client-ui-conversation",
+            "@deepseek-ai/dsh-api-session-controller",
+            "@deepseek-ai/dsh-api-workspace-files",
+            "@deepseek-ai/dsh-client-ui-sidebar-right"
+          ]
+        },
+        "bundle": {
+          "patch": "./cordis.patch.yml"
+        }
+      },
+      "commands": {
+        "build": "node build.mjs",
+        "test": "node --test test/model.test.mjs test/initial-session.test.mjs test/native-evidence.test.mjs test/run-view.test.mjs && pnpm test:html-edit",
+        "test:html-edit": "node --test src/free-page/resource/package-normalize.test.mjs src/client/free-html-library/html-import.test.mjs src/client/html-selection-bridge.test.mjs src/client/free-html-library/store.test.mjs src/client/free-html-library/p12-live-adapters.test.mjs src/client/free-html-library/source-draft.test.mjs src/client/cockpit-ai-client.test.mjs src/free-page/edit/intent-router.test.mjs src/free-page/edit/selection-context.test.mjs test/dynamic-chart-browser-seam.test.mjs",
+        "test:built": "node --test test/built.test.mjs"
+      },
+      "manifest_sha256": "6af4049a22366b9f347645baf3e8731b2c57d9918650ba00096873d9f0a93ee0"
+    },
+    {
+      "path": "dsh-plugins/board-components",
+      "name": "@shine-mage/board-components",
+      "version": "0.1.0",
+      "domain": "board-components",
+      "target_repository": "shinemage-dsh-board-components",
+      "kind": "domain-library",
+      "exports": {
+        "./funnel": {
+          "types": "./lib/funnel.d.mts",
+          "import": "./lib/funnel.mjs"
+        },
+        "./waterfall": {
+          "types": "./lib/waterfall.d.mts",
+          "import": "./lib/waterfall.mjs"
+        }
+      },
+      "files": [
+        "lib/funnel.mjs",
+        "lib/funnel.d.mts",
+        "lib/waterfall.mjs",
+        "lib/waterfall.d.mts"
+      ],
+      "peers": {},
+      "dependencies": {},
+      "dev_dependencies": {},
+      "bundled_inputs": [],
+      "dsh": {},
+      "commands": {
+        "build": "node build.mjs",
+        "test": "node --test test/*.test.mjs"
+      },
+      "manifest_sha256": "a31b77f3c25805a8c59735a2473e3cdf2c35c9b22a466fdfdbb1b982d920fbf9"
+    },
+    {
+      "path": "dsh-plugins/crm-knowledge",
+      "name": "@shine-mage/dsh-crm-knowledge",
+      "version": "0.0.0-candidate",
+      "domain": "crm-and-knowledge-migration-adapter",
+      "target_repository": "shinemage-dsh-crm + shinemage-dsh-knowledge",
+      "kind": "plugin",
+      "exports": {
+        ".": "./lib/index.js",
+        "./host": "./lib/host.js",
+        "./graph-tools": "./lib/graph-tools.js",
+        "./client": "./lib/client.js",
+        "./package.json": "./package.json",
+        "./cordis.patch.yml": "./cordis.patch.yml"
+      },
+      "files": [
+        "lib",
+        "cordis.patch.yml"
+      ],
+      "peers": {
+        "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
+        "@deepseek-ai/cordis": "4.0.2"
+      },
+      "dependencies": {},
+      "dev_dependencies": {},
+      "bundled_inputs": [],
+      "dsh": {
+        "client": {
+          "platform": "web",
+          "inject": [
+            "@deepseek-ai/dsh-client-ui-conversation",
+            "@deepseek-ai/dsh-client-ui-renderer",
+            "@deepseek-ai/dsh-api-session-controller"
+          ]
+        },
+        "bundle": {
+          "patch": "./cordis.patch.yml"
+        }
+      },
+      "commands": {
+        "test": "node --test test/*.test.mjs",
+        "build": "node build.mjs",
+        "test:host": "node --test test/host.integration.mjs"
+      },
+      "manifest_sha256": "5917216b06d0c26d90465b0d6e860a98b017b6e618f0610643e75fbc0c75349e"
+    },
+    {
+      "path": "dsh-plugins/plugin-kit",
+      "name": "@shine-mage/dsh-plugin-kit",
+      "version": "0.1.0",
+      "domain": "build-tooling",
+      "target_repository": "shinemage-dsh-plugin-kit",
+      "kind": "dev-tool",
+      "exports": {},
+      "files": [],
+      "peers": {},
+      "dependencies": {},
+      "dev_dependencies": {},
+      "bundled_inputs": [],
+      "dsh": {},
+      "commands": {},
+      "manifest_sha256": "8f2d01c745dfc280f86913fe6dc8d5f489ea4ef78137ea1b1da9947eea712c2c"
+    },
+    {
+      "path": "dsh-plugins/shine-board",
+      "name": "@shine-mage/dsh-shine-board",
+      "version": "0.0.0-b0",
+      "domain": "board",
+      "target_repository": "shinemage-dsh-board",
+      "kind": "plugin",
+      "exports": {
+        ".": "./lib/index.js",
+        "./client": "./lib/client.js",
+        "./cordis.patch.yml": "./cordis.patch.yml",
+        "./package.json": "./package.json"
+      },
+      "files": [
+        "lib/index.js",
+        "lib/client.js",
+        "cordis.patch.yml"
+      ],
+      "peers": {
+        "@deepseek-ai/dsh-tools": "0.1.7-rc.2"
+      },
+      "dependencies": {},
+      "dev_dependencies": {},
+      "bundled_inputs": [],
+      "dsh": {
+        "client": {
+          "platform": "web",
+          "inject": [
+            "@deepseek-ai/dsh-client-ui-renderer",
+            "@deepseek-ai/dsh-client-ui-sidebar",
+            "@deepseek-ai/dsh-client-ui-slots"
+          ]
+        },
+        "bundle": {
+          "patch": "./cordis.patch.yml"
+        }
+      },
+      "commands": {
+        "build": "node build.mjs",
+        "test": "node --test src/client-lifecycle.test.mjs"
+      },
+      "manifest_sha256": "9a728188e7bbce13f9c85d5f151f288378fd98b76ac54938f8459834033e4b3b"
+    },
+    {
+      "path": "dsh-plugins/shine-brand",
+      "name": "@shine-mage/dsh-shine-brand",
+      "version": "0.0.0-b0",
+      "domain": "plugin-theme",
+      "target_repository": "shinemage-dsh-brand",
+      "kind": "plugin",
+      "exports": {
+        ".": "./lib/index.js",
+        "./client": "./lib/client.js",
+        "./cordis.patch.yml": "./cordis.patch.yml",
+        "./package.json": "./package.json"
+      },
+      "files": [
+        "lib/index.js",
+        "lib/client.js",
+        "cordis.patch.yml"
+      ],
+      "peers": {
+        "@deepseek-ai/dsh-tools": "0.1.7-rc.2"
+      },
+      "dependencies": {},
+      "dev_dependencies": {},
+      "bundled_inputs": [],
+      "dsh": {
+        "client": {
+          "platform": "web",
+          "inject": [
+            "@deepseek-ai/dsh-client-ui-renderer",
+            "@deepseek-ai/dsh-client-ui-sidebar"
+          ]
+        },
+        "bundle": {
+          "patch": "./cordis.patch.yml"
+        }
+      },
+      "commands": {
+        "build": "node build.mjs",
+        "test": "node --test src/brand-surface.test.mjs src/client-lifecycle.test.mjs"
+      },
+      "manifest_sha256": "83169df743f7175d514f99d72e08621363a61eeda91dbb12fe6552b30f3a7297"
+    },
+    {
+      "path": "dsh-plugins/shine-crowd-action",
+      "name": "@shine-mage/dsh-shine-crowd-action",
+      "version": "0.0.0-b0",
+      "domain": "board-marker",
+      "target_repository": "shinemage-dsh-board",
+      "kind": "plugin",
+      "exports": {
+        ".": "./lib/index.js",
+        "./client": "./lib/client.js",
+        "./cordis.patch.yml": "./cordis.patch.yml",
+        "./package.json": "./package.json"
+      },
+      "files": [
+        "lib/index.js",
+        "lib/client.js",
+        "cordis.patch.yml"
+      ],
+      "peers": {
+        "@deepseek-ai/dsh-tools": "0.1.7-rc.2"
+      },
+      "dependencies": {},
+      "dev_dependencies": {},
+      "bundled_inputs": [],
+      "dsh": {
+        "client": {
+          "platform": "web",
+          "inject": [
+            "@deepseek-ai/dsh-client-ui-renderer",
+            "@deepseek-ai/dsh-client-ui-sidebar",
+            "@deepseek-ai/dsh-client-ui-slots"
+          ]
+        },
+        "bundle": {
+          "patch": "./cordis.patch.yml"
+        }
+      },
+      "commands": {
+        "build": "node build.mjs",
+        "test": "node --test src/client-lifecycle.test.mjs"
+      },
+      "manifest_sha256": "2f1edb49f8bf4ada971ddeb20c37e3e69c6303c6000adf0d34203c6903e731c1"
+    },
+    {
+      "path": "dsh-plugins/shine-funnel",
+      "name": "@shine-mage/dsh-shine-funnel",
+      "version": "0.0.0-b0",
+      "domain": "board-components",
+      "target_repository": "shinemage-dsh-board-components",
+      "kind": "plugin",
+      "exports": {
+        ".": "./lib/index.js",
+        "./client": "./lib/client.js",
+        "./funnel": {
+          "types": "./lib/funnel.d.mts",
+          "import": "./lib/funnel.mjs",
+          "default": "./lib/funnel.mjs"
+        },
+        "./cordis.patch.yml": "./cordis.patch.yml",
+        "./package.json": "./package.json"
+      },
+      "files": [
+        "lib/index.js",
+        "lib/client.js",
+        "lib/funnel.mjs",
+        "cordis.patch.yml",
+        "lib/funnel.d.mts",
+        "bundled-dependencies.json"
+      ],
+      "peers": {
+        "@deepseek-ai/dsh-tools": "0.1.7-rc.2"
+      },
+      "dependencies": {},
+      "dev_dependencies": {
+        "@shine-mage/board-components": "0.1.0"
+      },
+      "bundled_inputs": [
+        {
+          "name": "@shine-mage/board-components",
+          "version": "0.1.0",
+          "tarball": "shine-mage-board-components-0.1.0.tgz",
+          "sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182"
+        }
+      ],
+      "dsh": {
+        "client": {
+          "platform": "web",
+          "inject": [
+            "@deepseek-ai/dsh-client-ui-renderer",
+            "@deepseek-ai/dsh-client-ui-sidebar",
+            "@deepseek-ai/dsh-client-ui-slots"
+          ]
+        },
+        "bundle": {
+          "patch": "./cordis.patch.yml"
+        }
+      },
+      "commands": {
+        "build": "node build.mjs",
+        "test": "node --test src/funnel.test.mjs src/client-lifecycle.test.mjs"
+      },
+      "manifest_sha256": "746ca42b0eac4d33112229c52753ec3232df130757af611982bbd8d80552822c"
+    },
+    {
+      "path": "dsh-plugins/shine-query",
+      "name": "@shine-mage/dsh-shine-query",
+      "version": "0.0.0-b0",
+      "domain": "query",
+      "target_repository": "shinemage-dsh-query",
+      "kind": "plugin",
+      "exports": {
+        ".": "./lib/index.js",
+        "./client": "./lib/client.js",
+        "./cordis.patch.yml": "./cordis.patch.yml",
+        "./package.json": "./package.json"
+      },
+      "files": [
+        "lib/index.js",
+        "lib/client.js",
+        "cordis.patch.yml"
+      ],
+      "peers": {
+        "@deepseek-ai/dsh-tools": "0.1.7-rc.2"
+      },
+      "dependencies": {},
+      "dev_dependencies": {},
+      "bundled_inputs": [],
+      "dsh": {
+        "client": {
+          "platform": "web",
+          "inject": [
+            "@deepseek-ai/dsh-client-ui-renderer",
+            "@deepseek-ai/dsh-client-ui-sidebar",
+            "@deepseek-ai/dsh-client-ui-slots"
+          ]
+        },
+        "bundle": {
+          "patch": "./cordis.patch.yml"
+        }
+      },
+      "commands": {
+        "build": "node build.mjs",
+        "test": "node --test src/client-lifecycle.test.mjs"
+      },
+      "manifest_sha256": "c399228d0a712e1ce2740ad0fb17971c603bdb9d739becfdacc1bbb98bad002a"
+    },
+    {
+      "path": "dsh-plugins/shine-waterfall",
+      "name": "@shine-mage/dsh-shine-waterfall",
+      "version": "0.0.0-b0",
+      "domain": "board-components",
+      "target_repository": "shinemage-dsh-board-components",
+      "kind": "plugin",
+      "exports": {
+        ".": "./lib/index.js",
+        "./client": "./lib/client.js",
+        "./waterfall": {
+          "types": "./lib/waterfall.d.mts",
+          "import": "./lib/waterfall.mjs",
+          "default": "./lib/waterfall.mjs"
+        },
+        "./cordis.patch.yml": "./cordis.patch.yml",
+        "./package.json": "./package.json"
+      },
+      "files": [
+        "lib/index.js",
+        "lib/client.js",
+        "lib/waterfall.mjs",
+        "cordis.patch.yml",
+        "lib/waterfall.d.mts",
+        "bundled-dependencies.json"
+      ],
+      "peers": {
+        "@deepseek-ai/dsh-tools": "0.1.7-rc.2"
+      },
+      "dependencies": {},
+      "dev_dependencies": {
+        "@shine-mage/board-components": "0.1.0"
+      },
+      "bundled_inputs": [
+        {
+          "name": "@shine-mage/board-components",
+          "version": "0.1.0",
+          "tarball": "shine-mage-board-components-0.1.0.tgz",
+          "sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182"
+        }
+      ],
+      "dsh": {
+        "client": {
+          "platform": "web",
+          "inject": [
+            "@deepseek-ai/dsh-client-ui-renderer",
+            "@deepseek-ai/dsh-client-ui-sidebar",
+            "@deepseek-ai/dsh-client-ui-slots"
+          ]
+        },
+        "bundle": {
+          "patch": "./cordis.patch.yml"
+        }
+      },
+      "commands": {
+        "build": "node build.mjs",
+        "test": "node --test src/waterfall.test.mjs src/client-lifecycle.test.mjs"
+      },
+      "manifest_sha256": "011783ac55a6b567db51dbfdc1c97ffd142727ac52bfc7911801dc71fa6bed60"
+    }
+  ],
+  "source_files_scanned": 579,
+  "cross_package_edges": [
+    {
+      "consumer": "analytics-workbench",
+      "provider": "board-components",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/board-spec/component-view.mjs",
+      "target": "dsh-plugins/board-components",
+      "specifier": "@shine-mage/board-components/funnel",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "board-components",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/board-spec/component-view.mjs",
+      "target": "dsh-plugins/board-components",
+      "specifier": "@shine-mage/board-components/waterfall",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "board-components",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/board-spec/funnel.d.mts",
+      "target": "dsh-plugins/board-components",
+      "specifier": "@shine-mage/board-components/funnel",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "board-components",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/board-spec/waterfall.d.mts",
+      "target": "dsh-plugins/board-components",
+      "specifier": "@shine-mage/board-components/waterfall",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "board-components",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/library-components.tsx",
+      "target": "dsh-plugins/board-components",
+      "specifier": "@shine-mage/board-components/funnel",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "board-components",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/library-components.tsx",
+      "target": "dsh-plugins/board-components",
+      "specifier": "@shine-mage/board-components/waterfall",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/analytics-workbench/toolchain.mjs",
+      "target": "dsh-plugins/plugin-kit/toolchain.mjs",
+      "specifier": "../plugin-kit/toolchain.mjs",
+      "access": "source",
+      "type_only": false
+    },
+    {
+      "consumer": "board-components",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/board-components/build.mjs",
+      "target": "dsh-plugins/plugin-kit/packaged-dependencies.mjs",
+      "specifier": "../plugin-kit/packaged-dependencies.mjs",
+      "access": "source",
+      "type_only": false
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/client/crm-library.tsx",
+      "target": "dsh-plugins/analytics-workbench/src/client/competition-shell/tokens",
+      "specifier": "../../../analytics-workbench/src/client/competition-shell/tokens",
+      "access": "source",
+      "type_only": false
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/client/index.tsx",
+      "target": "dsh-plugins/analytics-workbench/src/client/cockpit-extension",
+      "specifier": "../../../analytics-workbench/src/client/cockpit-extension",
+      "access": "source",
+      "type_only": true
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/client/index.tsx",
+      "target": "dsh-plugins/analytics-workbench/src/client/competition-shell/tokens",
+      "specifier": "../../../analytics-workbench/src/client/competition-shell/tokens",
+      "access": "source",
+      "type_only": false
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/index.ts",
+      "target": "dsh-plugins/analytics-workbench/src/competition-agent/page-family.mjs",
+      "specifier": "../../analytics-workbench/src/competition-agent/page-family.mjs",
+      "access": "source",
+      "type_only": false
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/index.ts",
+      "target": "dsh-plugins/analytics-workbench/src/competition-agent/page-tools.mjs",
+      "specifier": "../../analytics-workbench/src/competition-agent/page-tools.mjs",
+      "access": "source",
+      "type_only": false
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/crm-journey-browser.test.mjs",
+      "target": "dsh-plugins/analytics-workbench/src/free-page/runtime/chrome-cdp.mjs",
+      "specifier": "../../analytics-workbench/src/free-page/runtime/chrome-cdp.mjs",
+      "access": "source",
+      "type_only": false
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/crm-knowledge/build.mjs",
+      "target": "dsh-plugins/plugin-kit/toolchain.mjs",
+      "specifier": "../plugin-kit/toolchain.mjs",
+      "access": "source",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-board",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-board/build.mjs",
+      "target": "dsh-plugins/plugin-kit/toolchain.mjs",
+      "specifier": "../plugin-kit/toolchain.mjs",
+      "access": "source",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-brand",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-brand/build.mjs",
+      "target": "dsh-plugins/plugin-kit/toolchain.mjs",
+      "specifier": "../plugin-kit/toolchain.mjs",
+      "access": "source",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-crowd-action",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-crowd-action/build.mjs",
+      "target": "dsh-plugins/plugin-kit/toolchain.mjs",
+      "specifier": "../plugin-kit/toolchain.mjs",
+      "access": "source",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-funnel",
+      "provider": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/shine-funnel/src/funnel.test.mjs",
+      "target": "dsh-plugins/analytics-workbench/src/board-spec/component-catalog.mjs",
+      "specifier": "../../analytics-workbench/src/board-spec/component-catalog.mjs",
+      "access": "source",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-funnel",
+      "provider": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/shine-funnel/src/funnel.test.mjs",
+      "target": "dsh-plugins/analytics-workbench/src/board-spec/component-view.mjs",
+      "specifier": "../../analytics-workbench/src/board-spec/component-view.mjs",
+      "access": "source",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-funnel",
+      "provider": "board-components",
+      "phase": "runtime",
+      "source": "dsh-plugins/shine-funnel/src/funnel.d.mts",
+      "target": "dsh-plugins/board-components",
+      "specifier": "@shine-mage/board-components/funnel",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-funnel",
+      "provider": "board-components",
+      "phase": "runtime",
+      "source": "dsh-plugins/shine-funnel/src/funnel.mjs",
+      "target": "dsh-plugins/board-components",
+      "specifier": "@shine-mage/board-components/funnel",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-funnel",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-funnel/build.mjs",
+      "target": "dsh-plugins/plugin-kit/toolchain.mjs",
+      "specifier": "../plugin-kit/toolchain.mjs",
+      "access": "source",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-query",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-query/build.mjs",
+      "target": "dsh-plugins/plugin-kit/toolchain.mjs",
+      "specifier": "../plugin-kit/toolchain.mjs",
+      "access": "source",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-waterfall",
+      "provider": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/shine-waterfall/src/waterfall.test.mjs",
+      "target": "dsh-plugins/analytics-workbench/src/board-spec/component-catalog.mjs",
+      "specifier": "../../analytics-workbench/src/board-spec/component-catalog.mjs",
+      "access": "source",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-waterfall",
+      "provider": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/shine-waterfall/src/waterfall.test.mjs",
+      "target": "dsh-plugins/analytics-workbench/src/board-spec/component-view.mjs",
+      "specifier": "../../analytics-workbench/src/board-spec/component-view.mjs",
+      "access": "source",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-waterfall",
+      "provider": "board-components",
+      "phase": "runtime",
+      "source": "dsh-plugins/shine-waterfall/src/waterfall.d.mts",
+      "target": "dsh-plugins/board-components",
+      "specifier": "@shine-mage/board-components/waterfall",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-waterfall",
+      "provider": "board-components",
+      "phase": "runtime",
+      "source": "dsh-plugins/shine-waterfall/src/waterfall.mjs",
+      "target": "dsh-plugins/board-components",
+      "specifier": "@shine-mage/board-components/waterfall",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-waterfall",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-waterfall/build.mjs",
+      "target": "dsh-plugins/plugin-kit/toolchain.mjs",
+      "specifier": "../plugin-kit/toolchain.mjs",
+      "access": "source",
+      "type_only": false
+    }
+  ],
+  "build_layers": [
+    [
+      "plugin-kit"
+    ],
+    [
+      "board-components",
+      "shine-board",
+      "shine-brand",
+      "shine-crowd-action",
+      "shine-query"
+    ],
+    [
+      "analytics-workbench",
+      "shine-funnel",
+      "shine-waterfall"
+    ],
+    [
+      "crm-knowledge"
+    ]
+  ],
+  "repository_edges": [
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/native-composition-browser-probe.mjs",
+      "target": "scripts/dsh-dev/ports.mjs"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/native-composition-browser-probe.mjs",
+      "target": "scripts/dsh-dev/serve.mjs"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/query-fault.test.mjs",
+      "target": "scripts/dsh-b0/native-query-fault-scenario.mjs"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/dashboard.test.mjs",
+      "target": "frontend-vue3/src/constants/channels.ts"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/graph.test.mjs",
+      "target": "scripts/crm-calibration/graph-ledger.mjs"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/profile.test.mjs",
+      "target": "scripts/crm-calibration/prepare-profile.mjs"
+    }
+  ],
+  "literal_endpoints": [
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/analysis-contract.generated.d.ts",
+      "route": "/api/v1/analytics/analyses",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/analysis-contract.generated.d.ts",
+      "route": "/api/v1/analytics/analyses/{analysis_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/analysis-contract.generated.d.ts",
+      "route": "/api/v1/analytics/analyses/{analysis_id}/versions",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/asset-http.mjs",
+      "route": "/b0/assets",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/board-browser-api.ts",
+      "route": "/api/{parameter}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/board-spec/server-http.mjs",
+      "route": "/api/v1/analytics/board-spec",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/artifact-inbox.mjs",
+      "route": "/api/v1/analytics/cockpit-artifacts",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/asset-overlay.tsx",
+      "route": "/b0/analyses",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/asset-overlay.tsx",
+      "route": "/b0/dashboards",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/asset-overlay.tsx",
+      "route": "/b0/dashboards/{parameter}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/asset-overlay.tsx",
+      "route": "/b0/dashboards/{parameter}/preview",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/asset-overlay.tsx",
+      "route": "/b0/dashboards/{parameter}/versions",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/cockpit-ai-client.mjs",
+      "route": "/api/v1/analytics/cockpit-ai",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/cockpit-ai-client.mjs",
+      "route": "/api/v1/analytics/page-edit-contexts",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/cockpit-file-client.mjs",
+      "route": "/api/v1/analytics/cockpit-files",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/competition-actions/transport.mjs",
+      "route": "/api/v1/analytics/competition",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/competition-board/transport.mjs",
+      "route": "/api/v1/analytics/competition",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/competition-http.d.mts",
+      "route": "/api/v1/analytics/competition",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/competition-http.mjs",
+      "route": "/api/v1/analytics/competition",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/competition-shell/tokens.ts",
+      "route": "/b0/brand/logo.png",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/competition-shell/tokens.ts",
+      "route": "/b0/brand/mark.svg",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/competition-shell/tokens.ts",
+      "route": "/b0/brand/noto-sans-sc-ofl.txt",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/competition-shell/tokens.ts",
+      "route": "/b0/brand/noto-sans-sc.woff2",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/competition-shell/tokens.ts",
+      "route": "/b0/brand/outfit-ofl.txt",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/competition-shell/tokens.ts",
+      "route": "/b0/brand/outfit.ttf",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/first-purchase-query-card.tsx",
+      "route": "/api/session/cancel",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/first-purchase-query-card.tsx",
+      "route": "/b0/analyses",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/first-purchase-query-card.tsx",
+      "route": "/b0/dashboards",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/first-purchase-query-card.tsx",
+      "route": "/b0/dashboards/{parameter}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/first-purchase-query-card.tsx",
+      "route": "/b0/dashboards/{parameter}/versions",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/free-html-library/live-adapters.mjs",
+      "route": "/api/v1/analytics/page-edit-contexts",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/free-html-library/page-http.mjs",
+      "route": "/api/v1/analytics/page-documents",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/free-html-library/page-http.mjs",
+      "route": "/api/v1/analytics/page-result-access",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/index.tsx",
+      "route": "/api/v1/analytics/board-spec/ask",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/index.tsx",
+      "route": "/b0/board-sample",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/query-card.tsx",
+      "route": "/api/session/cancel",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/query-card.tsx",
+      "route": "/b0/analyses",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/query-card.tsx",
+      "route": "/b0/dashboards",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/query-card.tsx",
+      "route": "/b0/dashboards/{parameter}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/query-card.tsx",
+      "route": "/b0/dashboards/{parameter}/versions",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/cockpit-contract.generated.d.ts",
+      "route": "/api/v1/analytics/dashboards",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/cockpit-contract.generated.d.ts",
+      "route": "/api/v1/analytics/dashboards/{dashboard_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/cockpit-contract.generated.d.ts",
+      "route": "/api/v1/analytics/dashboards/{dashboard_id}/preview",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/cockpit-contract.generated.d.ts",
+      "route": "/api/v1/analytics/dashboards/{dashboard_id}/versions",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/cockpit-history-api.ts",
+      "route": "/api/shine-mage-deliveries",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/competition-agent/family.mjs",
+      "route": "/api/v1/analytics/catalog",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/competition-agent/family.mjs",
+      "route": "/api/v1/audience/summary",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/competition-agent/family.mjs",
+      "route": "/api/v1/audience/table",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/analyses",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/analyses/{analysis_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/analyses/{analysis_id}/versions",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-cockpit-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/dashboards",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-cockpit-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/dashboards/{dashboard_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-cockpit-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/dashboards/{dashboard_id}/preview",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-cockpit-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/dashboards/{dashboard_id}/versions",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/runs",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/runs/{run_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/runs/{run_id}/cancel",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-query-model.d.mts",
+      "route": "/internal/native/first-purchase",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-query-model.mjs",
+      "route": "/internal/native/first-purchase",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-query-tool.ts",
+      "route": "/internal/native/first-purchase",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.generated.d.ts",
+      "route": "/api/v1/analytics/page-documents/pages",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.generated.d.ts",
+      "route": "/api/v1/analytics/page-documents/pages/{page_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.generated.d.ts",
+      "route": "/api/v1/analytics/page-documents/pages/{page_id}/patch-preview",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.generated.d.ts",
+      "route": "/api/v1/analytics/page-documents/pages/{page_id}/rollback-preview",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.generated.d.ts",
+      "route": "/api/v1/analytics/page-documents/pages/{page_id}/save-preview",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.generated.d.ts",
+      "route": "/api/v1/analytics/page-documents/pages/{page_id}/versions",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.generated.d.ts",
+      "route": "/api/v1/analytics/page-documents/previews",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.generated.d.ts",
+      "route": "/api/v1/analytics/page-documents/previews/{preview_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.generated.d.ts",
+      "route": "/api/v1/analytics/page-documents/previews/{preview_id}/cancel",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.generated.d.ts",
+      "route": "/api/v1/analytics/page-documents/previews/{preview_id}/confirm",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/query-model.d.mts",
+      "route": "/internal/native/channel-followup",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/query-model.mjs",
+      "route": "/internal/native/channel-followup",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/query-tool.ts",
+      "route": "/internal/native/channel-followup",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/run-contract.generated.d.ts",
+      "route": "/api/v1/analytics/conversations",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/run-contract.generated.d.ts",
+      "route": "/api/v1/analytics/conversations/{conversation_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/run-contract.generated.d.ts",
+      "route": "/api/v1/analytics/conversations/{conversation_id}/runs",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/run-contract.generated.d.ts",
+      "route": "/api/v1/analytics/runs/{run_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/run-contract.generated.d.ts",
+      "route": "/api/v1/analytics/runs/{run_id}/cancel",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/run-contract.generated.d.ts",
+      "route": "/api/v1/analytics/runs/{run_id}/events",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/run-view.mjs",
+      "route": "/b0/context",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/run-view.mjs",
+      "route": "/b0/runs/{parameter}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/runtime-context.ts",
+      "route": "/internal/native/run-context",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/runtime-endpoints.ts",
+      "route": "/internal/native/",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/tool.ts",
+      "route": "/internal/native/fixture",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/board-spec/ask.test.mjs",
+      "route": "/api/v1/analytics/competition/results",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/client/cockpit-main-panel.test.mjs",
+      "route": "/api/v1/analytics/results",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/client/competition-http.test.mjs",
+      "route": "/api/v1/analytics/competition/candidates/preview",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/client/competition-http.test.mjs",
+      "route": "/api/v1/analytics/competition/results",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/client/free-html-library/html-import.test.mjs",
+      "route": "/api/stream",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/client/free-html-library/p12-live-adapters.test.mjs",
+      "route": "/api/v1/analytics/page-result-access",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/client/free-html-library/page-http-globals.test.mjs",
+      "route": "/api/v1/analytics/page-documents/pages",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/free-page/resource/network-policy.test.mjs",
+      "route": "/api/stream",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/asset-http.test.mjs",
+      "route": "/b0/analyses",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/asset-http.test.mjs",
+      "route": "/b0/assets",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/asset-overlay.test.mjs",
+      "route": "/b0/analyses",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/asset-overlay.test.mjs",
+      "route": "/b0/assets",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/asset-overlay.test.mjs",
+      "route": "/b0/dashboards",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/asset-overlay.test.mjs",
+      "route": "/b0/dashboards/{parameter}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/asset-overlay.test.mjs",
+      "route": "/b0/dashboards/{parameter}/",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/asset-overlay.test.mjs",
+      "route": "/b0/dashboards/{parameter}/preview",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/asset-overlay.test.mjs",
+      "route": "/b0/dashboards/{parameter}/versions",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/asset-overlay.test.mjs",
+      "route": "/b0/dashboards/dashboard_1/preview",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/cockpit-ai-client.test.mjs",
+      "route": "/api/v1/analytics/cockpit-ai",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/cockpit-ui-ux-browser-probe.mjs",
+      "route": "/api/v1/analytics/board-spec",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/cockpit-ui-ux-browser-probe.mjs",
+      "route": "/api/v1/analytics/cockpit-ai",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/cockpit-ui-ux-browser-probe.mjs",
+      "route": "/api/v1/analytics/cockpit-files",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/cockpit-ui-ux-browser-probe.mjs",
+      "route": "/api/v1/analytics/page-documents/",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/cockpit-v2-browser-probe.mjs",
+      "route": "/api/v1/analytics/board-spec",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/cockpit-v2-browser-probe.mjs",
+      "route": "/api/v1/analytics/page-documents/",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/cockpit-v2-browser-probe.mjs",
+      "route": "/api/v1/analytics/page-documents/pages",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/cockpit-v2-browser-probe.mjs",
+      "route": "/api/v1/analytics/page-documents/pages/",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/cockpit-v2-browser-probe.mjs",
+      "route": "/api/v1/analytics/page-documents/previews/",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/first-purchase-contract.typecheck.ts",
+      "route": "/api/v1/analytics-first-purchase/runs",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/helpers/board-fault-proxy.mjs",
+      "route": "/api/v1/analytics/board-spec",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/helpers/cockpit-history-seed.mjs",
+      "route": "/api/cockpit-history-seed",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/helpers/cockpit-presentation-flow.mjs",
+      "route": "/api/v1/analytics/page-documents",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/library-layout-browser-probe.mjs",
+      "route": "/b0/brand/outfit.ttf",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/loader.test.mjs",
+      "route": "/api/shine-mage-board",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/native-prompt-inject.test.mjs",
+      "route": "/api/v1/analytics/cockpit-ai",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/query-card-save.test.mjs",
+      "route": "/b0/analyses",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/query-card-save.test.mjs",
+      "route": "/b0/assets",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/query-card-save.test.mjs",
+      "route": "/b0/dashboards",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/query-card-save.test.mjs",
+      "route": "/b0/dashboards/dashboard_1",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/query-card-save.test.mjs",
+      "route": "/b0/dashboards/dashboard_1/versions",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/query-run-contract.typecheck.ts",
+      "route": "/internal/store/analytics-query/runs/run_fixture",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/query-skills-loader.test.mjs",
+      "route": "/internal/native/run-context",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/run-contract.typecheck.ts",
+      "route": "/api/v1/analytics/runs/run_fixture",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/run-view.test.mjs",
+      "route": "/b0/context",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/run-view.test.mjs",
+      "route": "/b0/runs/{parameter}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/skills-loader.test.mjs",
+      "route": "/internal/native/run-context",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/client/crm-library.tsx",
+      "route": "/api/crm-knowledge/assets",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/client/index.tsx",
+      "route": "/api/crm-knowledge/connection",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/crm-assets.mjs",
+      "route": "/api/v1/auth/me",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/crm-assets.mjs",
+      "route": "/api/v1/metrics/",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/crm-assets.mjs",
+      "route": "/api/v1/metrics/crm-analyses/{parameter}/knowledge-citations",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard-access.mjs",
+      "route": "/api/crm-knowledge/assets",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard-access.mjs",
+      "route": "/api/crm-knowledge/connection",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard-access.mjs",
+      "route": "/api/v1/auth/login",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/crm-analyses",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/crm-analyses/{asset_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/crm-analyses/{asset_id}/knowledge-citations",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/crm-analyses/{asset_id}/shares",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/crm-analyses/{asset_id}/shares/{username}/revoke",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/crm-boards",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/crm-boards/{asset_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/crm-cockpit-references",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/crm-cockpit-references/{asset_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/crm-library",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/dashboard-membership",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/dashboard-net-gsv",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/dashboard-purchases",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/dashboard-readiness",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/dashboard-snapshots",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/dashboard-snapshots/{asset_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard.mjs",
+      "route": "/api/v1/auth/me",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard.mjs",
+      "route": "/api/v1/metrics/cutoff",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard.mjs",
+      "route": "/api/v1/metrics/dashboard-membership",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard.mjs",
+      "route": "/api/v1/metrics/dashboard-net-gsv",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard.mjs",
+      "route": "/api/v1/metrics/dashboard-purchases",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard.mjs",
+      "route": "/api/v1/metrics/dashboard-readiness",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard.mjs",
+      "route": "/api/v1/metrics/overview",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard.mjs",
+      "route": "/api/v1/metrics/trend",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/graph.mjs",
+      "route": "/api/v1",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/http-contract.generated.d.ts",
+      "route": "/api/v1/crm-metrics/capabilities",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/http-contract.generated.d.ts",
+      "route": "/api/v1/crm-metrics/explain",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/http-contract.generated.d.ts",
+      "route": "/api/v1/crm-metrics/query",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/closeout.test.mjs",
+      "route": "/api/v1/auth/me",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/closeout.test.mjs",
+      "route": "/api/v1/metrics/dashboard-readiness",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/crm-assets.test.mjs",
+      "route": "/api/v1/auth/me",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/crm-assets.test.mjs",
+      "route": "/api/v1/metrics/crm-library",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/dashboard.fixture.mjs",
+      "route": "/api/v1/auth/login",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/dashboard.fixture.mjs",
+      "route": "/api/v1/auth/me",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/dashboard.fixture.mjs",
+      "route": "/api/v1/metrics/cutoff",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/dashboard.fixture.mjs",
+      "route": "/api/v1/metrics/overview",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/dashboard.fixture.mjs",
+      "route": "/api/v1/metrics/trend",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/dashboard.test.mjs",
+      "route": "/api/v1/auth/me",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/dashboard.test.mjs",
+      "route": "/api/v1/metrics/cutoff",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/dashboard.test.mjs",
+      "route": "/api/v1/metrics/overview",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/dashboard.test.mjs",
+      "route": "/api/v1/metrics/trend",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/graph.fixture.mjs",
+      "route": "/api/v1/",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/graph.fixture.mjs",
+      "route": "/api/v1/chunks/by-id/",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/graph.fixture.mjs",
+      "route": "/api/v1/knowledge-search",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/graph.fixture.mjs",
+      "route": "/api/v1/knowledge/",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/graph.test.mjs",
+      "route": "/api/v1/knowledge/",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/login-ui.test.mjs",
+      "route": "/api/crm-knowledge/assets",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/purchases.test.mjs",
+      "route": "/api/v1/auth/me",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/purchases.test.mjs",
+      "route": "/api/v1/metrics/dashboard-purchases",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "shine-brand",
+      "phase": "runtime",
+      "source": "dsh-plugins/shine-brand/src/brand-surface.mjs",
+      "route": "/b0/brand/mark.svg",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "shine-brand",
+      "phase": "test",
+      "source": "dsh-plugins/shine-brand/src/brand-surface.test.mjs",
+      "route": "/b0/brand/mark.svg",
+      "contract": "OBSERVED_NOT_FROZEN"
+    }
+  ],
+  "unresolved_dynamic_imports": [
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/client/board-spec-canvas.test.mjs",
+      "line": 78
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/client/cockpit-composition-dom.test.mjs",
+      "line": 20
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/client/cockpit-main-panel.test.mjs",
+      "line": 129
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/client/cockpit-sidebar.test.mjs",
+      "line": 21
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/client/competition-board/competition-board-dom.test.mjs",
+      "line": 25
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/client/competition-board/competition-board-dom.test.mjs",
+      "line": 614
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/client/competition-board/competition-board-dom.test.mjs",
+      "line": 653
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/client/free-html-library/free-html-library.test.mjs",
+      "line": 24
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/client/html-hover-layer-dom.test.mjs",
+      "line": 22
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/client/html-selection-bridge.regression-1.test.mjs",
+      "line": 76
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/client/leave/host-leave-adapter.test.mjs",
+      "line": 60
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/client/leave/leave-prompt.test.mjs",
+      "line": 29
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/client/library-workspace.test.mjs",
+      "line": 28
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/client/staff-main-panel.test.mjs",
+      "line": 56
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/client/workspace-files-host.test.mjs",
+      "line": 25
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/competition-agent/competition-agent.test.mjs",
+      "line": 132
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/asset-overlay.test.mjs",
+      "line": 21
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/built.test.mjs",
+      "line": 13
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/built.test.mjs",
+      "line": 16
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/built.test.mjs",
+      "line": 29
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/helpers/native-board-bridge.mjs",
+      "line": 17
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/helpers/native-board-bridge.mjs",
+      "line": 25
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/helpers/native-composition-history.mjs",
+      "line": 6
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
+      "line": 133
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
+      "line": 14
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
+      "line": 15
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
+      "line": 16
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
+      "line": 17
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
+      "line": 18
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
+      "line": 19
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/library-board-http.integration.mjs",
+      "line": 44
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/library-board-http.integration.mjs",
+      "line": 50
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/loader.test.mjs",
+      "line": 138
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/loader.test.mjs",
+      "line": 17
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/loader.test.mjs",
+      "line": 41
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/loader.test.mjs",
+      "line": 86
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/native-composition-history.test.mjs",
+      "line": 7
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/native-fixture-client-boundary.test.mjs",
+      "line": 16
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/native-prompt-inject.test.mjs",
+      "line": 17
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/native-slot-ownership.test.mjs",
+      "line": 13
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/plugin-ui-lifecycle.test.mjs",
+      "line": 13
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/query-card-cancel.test.mjs",
+      "line": 20
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/query-card-save.test.mjs",
+      "line": 20
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/query-skills-loader.test.mjs",
+      "line": 16
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/query-skills-loader.test.mjs",
+      "line": 9
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/skills-loader.test.mjs",
+      "line": 13
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/skills-loader.test.mjs",
+      "line": 23
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/tool-card-harness.mjs",
+      "line": 92
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/tests/competition-acceptance/fail-closed-dom.test.mjs",
+      "line": 42
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/tests/competition-acceptance/fail-closed-dom.test.mjs",
+      "line": 62
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/tests/competition-acceptance/fail-closed-dom.test.mjs",
+      "line": 65
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/host.integration.mjs",
+      "line": 16
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/host.integration.mjs",
+      "line": 20
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/host.integration.mjs",
+      "line": 21
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/login-native.fixture.mjs",
+      "line": 12
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/login-native.fixture.mjs",
+      "line": 17
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/login-native.fixture.mjs",
+      "line": 18
+    }
+  ],
+  "external_imports": [
+    {
+      "consumer": "analytics-workbench",
+      "phase": "build",
+      "specifier": "node:assert/strict"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "build",
+      "specifier": "node:fs"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "build",
+      "specifier": "node:fs/promises"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "build",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "build",
+      "specifier": "node:url"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/cordis"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-agent"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-api-session-controller"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-api-session-controller/client"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-client-connection"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-client-connection/client"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-client-store"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-client-ui-conversation/client"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-client-ui-layout/client"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-client-ui-renderer/client"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-client-ui-settings/client"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-client-ui-sidebar-right/client"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-client-ui-sidebar/client"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-client-ui-slots"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-client-ui-theme/client"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-client-ui-tool/client"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-client-ui-workspace/client"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-llm"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-session-query"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-session"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-session/types"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-skill"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-tools"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "antd/es/button"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "antd/es/checkbox"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "antd/es/config-provider"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "antd/es/input"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "antd/es/input/TextArea"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "antd/es/radio"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "antd/es/select"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "antd/es/theme"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "node:assert/strict"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "node:child_process"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "node:crypto"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "node:events"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "node:fs"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "node:fs/promises"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "node:http"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "node:os"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "node:timers/promises"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "node:url"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "react"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "specifier": "@deepseek-ai/dsh-client-ui-slots"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "specifier": "node:assert/strict"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "specifier": "node:child_process"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "specifier": "node:crypto"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "specifier": "node:events"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "specifier": "node:fs"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "specifier": "node:fs/promises"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "specifier": "node:http"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "specifier": "node:module"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "specifier": "node:net"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "specifier": "node:os"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "specifier": "node:readline"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "specifier": "node:test"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "specifier": "node:timers/promises"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "specifier": "node:url"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "specifier": "node:vm"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "specifier": "os"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "specifier": "playwright"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "specifier": "react-dom/client"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "specifier": "react-dom/server"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "specifier": "react"
+    },
+    {
+      "consumer": "board-components",
+      "phase": "build",
+      "specifier": "node:assert/strict"
+    },
+    {
+      "consumer": "board-components",
+      "phase": "build",
+      "specifier": "node:child_process"
+    },
+    {
+      "consumer": "board-components",
+      "phase": "build",
+      "specifier": "node:fs/promises"
+    },
+    {
+      "consumer": "board-components",
+      "phase": "build",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "board-components",
+      "phase": "build",
+      "specifier": "node:url"
+    },
+    {
+      "consumer": "board-components",
+      "phase": "test",
+      "specifier": "node:assert/strict"
+    },
+    {
+      "consumer": "board-components",
+      "phase": "test",
+      "specifier": "node:fs"
+    },
+    {
+      "consumer": "board-components",
+      "phase": "test",
+      "specifier": "node:test"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "build",
+      "specifier": "node:assert/strict"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "build",
+      "specifier": "node:fs/promises"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "build",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "build",
+      "specifier": "node:url"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/cordis"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-api-session-controller/remote"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-api-workspace-controller/remote"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-client-connection"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-client-ui-conversation/client"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-client-ui-renderer/client"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-client-ui-slots"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-host-webserver"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-session"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-tools"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "specifier": "antd"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "specifier": "node:child_process"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "specifier": "node:crypto"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "specifier": "node:fs/promises"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "specifier": "node:url"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "specifier": "react"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "specifier": "node:assert/strict"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "specifier": "node:child_process"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "specifier": "node:crypto"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "specifier": "node:events"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "specifier": "node:fs/promises"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "specifier": "node:http"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "specifier": "node:module"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "specifier": "node:net"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "specifier": "node:os"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "specifier": "node:test"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "specifier": "node:url"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "specifier": "node:vm"
+    },
+    {
+      "consumer": "plugin-kit",
+      "phase": "build",
+      "specifier": "node:assert/strict"
+    },
+    {
+      "consumer": "plugin-kit",
+      "phase": "build",
+      "specifier": "node:child_process"
+    },
+    {
+      "consumer": "plugin-kit",
+      "phase": "build",
+      "specifier": "node:crypto"
+    },
+    {
+      "consumer": "plugin-kit",
+      "phase": "build",
+      "specifier": "node:fs/promises"
+    },
+    {
+      "consumer": "plugin-kit",
+      "phase": "build",
+      "specifier": "node:module"
+    },
+    {
+      "consumer": "plugin-kit",
+      "phase": "build",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "plugin-kit",
+      "phase": "build",
+      "specifier": "node:url"
+    },
+    {
+      "consumer": "shine-board",
+      "phase": "build",
+      "specifier": "node:fs/promises"
+    },
+    {
+      "consumer": "shine-board",
+      "phase": "build",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "shine-board",
+      "phase": "build",
+      "specifier": "node:url"
+    },
+    {
+      "consumer": "shine-board",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-client-core"
+    },
+    {
+      "consumer": "shine-board",
+      "phase": "test",
+      "specifier": "node:assert/strict"
+    },
+    {
+      "consumer": "shine-board",
+      "phase": "test",
+      "specifier": "node:fs/promises"
+    },
+    {
+      "consumer": "shine-board",
+      "phase": "test",
+      "specifier": "node:module"
+    },
+    {
+      "consumer": "shine-board",
+      "phase": "test",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "shine-board",
+      "phase": "test",
+      "specifier": "node:test"
+    },
+    {
+      "consumer": "shine-board",
+      "phase": "test",
+      "specifier": "node:url"
+    },
+    {
+      "consumer": "shine-board",
+      "phase": "test",
+      "specifier": "node:vm"
+    },
+    {
+      "consumer": "shine-brand",
+      "phase": "build",
+      "specifier": "node:fs/promises"
+    },
+    {
+      "consumer": "shine-brand",
+      "phase": "build",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "shine-brand",
+      "phase": "build",
+      "specifier": "node:url"
+    },
+    {
+      "consumer": "shine-brand",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/cordis"
+    },
+    {
+      "consumer": "shine-brand",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-client-ui-renderer/client"
+    },
+    {
+      "consumer": "shine-brand",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-client-ui-sidebar/client"
+    },
+    {
+      "consumer": "shine-brand",
+      "phase": "test",
+      "specifier": "node:assert/strict"
+    },
+    {
+      "consumer": "shine-brand",
+      "phase": "test",
+      "specifier": "node:fs/promises"
+    },
+    {
+      "consumer": "shine-brand",
+      "phase": "test",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "shine-brand",
+      "phase": "test",
+      "specifier": "node:test"
+    },
+    {
+      "consumer": "shine-brand",
+      "phase": "test",
+      "specifier": "node:url"
+    },
+    {
+      "consumer": "shine-brand",
+      "phase": "test",
+      "specifier": "node:vm"
+    },
+    {
+      "consumer": "shine-crowd-action",
+      "phase": "build",
+      "specifier": "node:fs/promises"
+    },
+    {
+      "consumer": "shine-crowd-action",
+      "phase": "build",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "shine-crowd-action",
+      "phase": "build",
+      "specifier": "node:url"
+    },
+    {
+      "consumer": "shine-crowd-action",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-client-core"
+    },
+    {
+      "consumer": "shine-crowd-action",
+      "phase": "test",
+      "specifier": "node:assert/strict"
+    },
+    {
+      "consumer": "shine-crowd-action",
+      "phase": "test",
+      "specifier": "node:fs/promises"
+    },
+    {
+      "consumer": "shine-crowd-action",
+      "phase": "test",
+      "specifier": "node:module"
+    },
+    {
+      "consumer": "shine-crowd-action",
+      "phase": "test",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "shine-crowd-action",
+      "phase": "test",
+      "specifier": "node:test"
+    },
+    {
+      "consumer": "shine-crowd-action",
+      "phase": "test",
+      "specifier": "node:url"
+    },
+    {
+      "consumer": "shine-crowd-action",
+      "phase": "test",
+      "specifier": "node:vm"
+    },
+    {
+      "consumer": "shine-funnel",
+      "phase": "build",
+      "specifier": "node:fs/promises"
+    },
+    {
+      "consumer": "shine-funnel",
+      "phase": "build",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "shine-funnel",
+      "phase": "build",
+      "specifier": "node:url"
+    },
+    {
+      "consumer": "shine-funnel",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-client-core"
+    },
+    {
+      "consumer": "shine-funnel",
+      "phase": "test",
+      "specifier": "node:assert/strict"
+    },
+    {
+      "consumer": "shine-funnel",
+      "phase": "test",
+      "specifier": "node:fs"
+    },
+    {
+      "consumer": "shine-funnel",
+      "phase": "test",
+      "specifier": "node:fs/promises"
+    },
+    {
+      "consumer": "shine-funnel",
+      "phase": "test",
+      "specifier": "node:module"
+    },
+    {
+      "consumer": "shine-funnel",
+      "phase": "test",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "shine-funnel",
+      "phase": "test",
+      "specifier": "node:test"
+    },
+    {
+      "consumer": "shine-funnel",
+      "phase": "test",
+      "specifier": "node:url"
+    },
+    {
+      "consumer": "shine-funnel",
+      "phase": "test",
+      "specifier": "node:vm"
+    },
+    {
+      "consumer": "shine-query",
+      "phase": "build",
+      "specifier": "node:fs/promises"
+    },
+    {
+      "consumer": "shine-query",
+      "phase": "build",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "shine-query",
+      "phase": "build",
+      "specifier": "node:url"
+    },
+    {
+      "consumer": "shine-query",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-client-core"
+    },
+    {
+      "consumer": "shine-query",
+      "phase": "test",
+      "specifier": "node:assert/strict"
+    },
+    {
+      "consumer": "shine-query",
+      "phase": "test",
+      "specifier": "node:fs/promises"
+    },
+    {
+      "consumer": "shine-query",
+      "phase": "test",
+      "specifier": "node:module"
+    },
+    {
+      "consumer": "shine-query",
+      "phase": "test",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "shine-query",
+      "phase": "test",
+      "specifier": "node:test"
+    },
+    {
+      "consumer": "shine-query",
+      "phase": "test",
+      "specifier": "node:url"
+    },
+    {
+      "consumer": "shine-query",
+      "phase": "test",
+      "specifier": "node:vm"
+    },
+    {
+      "consumer": "shine-waterfall",
+      "phase": "build",
+      "specifier": "node:fs/promises"
+    },
+    {
+      "consumer": "shine-waterfall",
+      "phase": "build",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "shine-waterfall",
+      "phase": "build",
+      "specifier": "node:url"
+    },
+    {
+      "consumer": "shine-waterfall",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-client-core"
+    },
+    {
+      "consumer": "shine-waterfall",
+      "phase": "test",
+      "specifier": "node:assert/strict"
+    },
+    {
+      "consumer": "shine-waterfall",
+      "phase": "test",
+      "specifier": "node:fs"
+    },
+    {
+      "consumer": "shine-waterfall",
+      "phase": "test",
+      "specifier": "node:fs/promises"
+    },
+    {
+      "consumer": "shine-waterfall",
+      "phase": "test",
+      "specifier": "node:module"
+    },
+    {
+      "consumer": "shine-waterfall",
+      "phase": "test",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "shine-waterfall",
+      "phase": "test",
+      "specifier": "node:test"
+    },
+    {
+      "consumer": "shine-waterfall",
+      "phase": "test",
+      "specifier": "node:url"
+    },
+    {
+      "consumer": "shine-waterfall",
+      "phase": "test",
+      "specifier": "node:vm"
+    }
+  ],
+  "contracts": [
+    {
+      "id": "pinned-dsh-sdk",
+      "owner": "official-dsh",
+      "source": "dsh-plugins/plugin-kit/toolchain.json",
+      "generator": null,
+      "consumers": [
+        "all-plugins",
+        "release-control"
+      ],
+      "compatibility": "Exact SHA/SDK/lock; upgrade only in isolated candidate; source pin is not runtime proof.",
+      "status": "PINNED_UPSTREAM",
+      "source_sha256": "f3bc55626629314e8728310f9df5eb48a362345c865020b6302aad27e1c022ee"
+    },
+    {
+      "id": "crm-metrics",
+      "owner": "crm-service",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
+      "generator": "scripts/crm-calibration/generate_types.mjs",
+      "consumers": [
+        "crm-knowledge"
+      ],
+      "compatibility": "CRM owns schemas and permissions; consumer tests; no database bundled.",
+      "status": "GENERATED_DOMAIN_V1",
+      "source_sha256": "72baa5ca7fd3b750af5aa7bb963948ee2e8102900ad6be16659dfe52e381440c"
+    },
+    {
+      "id": "crm-metrics-tool-schema",
+      "owner": "crm-service",
+      "source": "dsh-plugins/crm-knowledge/src/contract.generated.ts",
+      "generator": "scripts/crm-calibration/generate_contract.py",
+      "consumers": [
+        "crm-knowledge"
+      ],
+      "compatibility": "Generated request/output tool schema for synthetic CRM metrics; knowledge contracts remain separately owned and are not defined by this file.",
+      "status": "GENERATED_DOMAIN_V1",
+      "source_sha256": "9c0dc0d6755c418bd9f8a12f4dfa34b444687d7e84b3f384f9c91f1bd1a879fb"
+    },
+    {
+      "id": "first-purchase",
+      "owner": "analysis-service",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-contract.generated.d.ts",
+      "generator": "scripts/dsh-b0/first-purchase-contract.mjs",
+      "consumers": [
+        "analytics-workbench"
+      ],
+      "compatibility": "B0 ratios 0-1; T3 freezes public compatibility window before physical extraction.",
+      "status": "GENERATED_DOMAIN_V1",
+      "source_sha256": "f348e3e9ef2742194f13d552a3bb30f903f88fbbc09fab42de12aba016d14a08"
+    },
+    {
+      "id": "saved-analysis",
+      "owner": "analysis-service",
+      "source": "dsh-plugins/analytics-workbench/src/analysis-contract.generated.d.ts",
+      "generator": "scripts/dsh-b0/analysis-contract.mjs",
+      "consumers": [
+        "analytics-workbench"
+      ],
+      "compatibility": "Service owns durable records; profile rollback is not data rollback; D4-C gate.",
+      "status": "GENERATED_DOMAIN_V1",
+      "source_sha256": "7511c14bc92e15a59342413878341a76bf1557175adaf853fe8ab74c60df3172"
+    },
+    {
+      "id": "board-spec",
+      "owner": "board-domain",
+      "source": "dsh-plugins/analytics-workbench/src/board-spec-contract.generated.d.ts",
+      "generator": "scripts/dsh-b0/board-spec-contract.mjs",
+      "consumers": [
+        "analytics-workbench",
+        "board-components"
+      ],
+      "compatibility": "Preserve semantic and geometry consumer tests; move domain schema with domain owner.",
+      "status": "GENERATED_DOMAIN_V1",
+      "source_sha256": "1b518cdcdfdd66a598fe95eff29c7ddeec2d4aebb29ece504c9a6fd710c245a0"
+    },
+    {
+      "id": "crm-cockpit-slot",
+      "owner": "analysis-workbench",
+      "source": "dsh-plugins/analytics-workbench/src/client/cockpit-extension.ts",
+      "generator": null,
+      "consumers": [
+        "crm-knowledge"
+      ],
+      "compatibility": "Optional cockpit slot; type is currently cross-source and must become an explicit public contract.",
+      "status": "INTERNAL_NOT_PUBLIC",
+      "source_sha256": "258f046b41667afed4aa2078fb4b359533a5a8b1d3af9f090566e5decfdbe939"
+    },
+    {
+      "id": "page-generation-tool",
+      "owner": "page-domain",
+      "source": "dsh-plugins/analytics-workbench/src/competition-agent/page-family.mjs",
+      "generator": null,
+      "consumers": [
+        "crm-knowledge",
+        "analytics-workbench"
+      ],
+      "compatibility": "Current source coupling; do not freeze internal native routes as a public API.",
+      "status": "INTERNAL_NOT_PUBLIC",
+      "source_sha256": "06a94e24bec769a1d245c81c9af966513ca257f5ede9c59d05ba6e658bdc0d06"
+    },
+    {
+      "id": "board-funnel-geometry-v1",
+      "owner": "board-components",
+      "source": "dsh-plugins/board-components/src/funnel.d.mts",
+      "generator": null,
+      "consumers": [
+        "analytics-workbench",
+        "shine-funnel"
+      ],
+      "compatibility": "SemVer library exports; exact tarball digest and bundled dependency lock per consumer.",
+      "status": "DOMAIN_V1",
+      "source_sha256": "30c157c4cefc1ad5f8182e65af5777f39fcfd473987e1eabc47553f2f3d3c455"
+    },
+    {
+      "id": "board-waterfall-geometry-v1",
+      "owner": "board-components",
+      "source": "dsh-plugins/board-components/src/waterfall.d.mts",
+      "generator": null,
+      "consumers": [
+        "analytics-workbench",
+        "shine-waterfall"
+      ],
+      "compatibility": "SemVer library exports; exact tarball digest and bundled dependency lock per consumer.",
+      "status": "DOMAIN_V1",
+      "source_sha256": "34b0be969c2f73b3dd1a7633b2e953c74bd5b12c80ed978ac3be0d51ee4a2210"
+    }
+  ],
+  "command_owners": [
+    {
+      "entry": "scripts/dsh.mjs",
+      "owner": "release-control",
+      "scope": "User CLI dispatch; local/release scopes and explicit state."
+    },
+    {
+      "entry": "scripts/release/preflight.mjs",
+      "owner": "release-control",
+      "scope": "Pinned candidate orchestration; no production activation."
+    },
+    {
+      "entry": "scripts/release/plugin-pack.mjs",
+      "owner": "release-control",
+      "scope": "Verified immutable plugin package only."
+    },
+    {
+      "entry": "scripts/release/plugin-candidate.mjs",
+      "owner": "release-control",
+      "scope": "PARTIAL profile/pack/journal receipt; no host activation."
+    },
+    {
+      "entry": "scripts/dsh-b0/pipeline.mjs",
+      "owner": "build-tooling",
+      "scope": "Shared local/CI prepare/audit/check."
+    },
+    {
+      "entry": "scripts/dsh-b0/plugin-boundaries.mjs",
+      "owner": "architecture-maintainer",
+      "scope": "Static ownership/import/route inventory and drift gate."
+    },
+    {
+      "entry": "scripts/dsh-dev/cli.mjs",
+      "owner": "host-dev-adapter",
+      "scope": "Explicit isolated host lifecycle; never an implicit test side effect."
+    },
+    {
+      "entry": "deploy/wsl/install-release.sh",
+      "owner": "deploy-owner",
+      "scope": "Explicit immutable remote install; separate authorization."
+    }
+  ],
+  "extraction_exceptions": [
+    {
+      "consumer": "crm-knowledge",
+      "provider": "analytics-workbench",
+      "source": "dsh-plugins/crm-knowledge/src/index.ts",
+      "target": "dsh-plugins/analytics-workbench/src/competition-agent/page-tools.mjs",
+      "remedy": "Extract the domain-owned API/type or replace the page tool call with a versioned service capability.",
+      "retire_when": "CRM adapter has consumer contract tests and imports no workbench source."
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "analytics-workbench",
+      "source": "dsh-plugins/crm-knowledge/src/index.ts",
+      "target": "dsh-plugins/analytics-workbench/src/competition-agent/page-family.mjs",
+      "remedy": "Extract the domain-owned API/type or replace the page tool call with a versioned service capability.",
+      "retire_when": "CRM adapter has consumer contract tests and imports no workbench source."
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "analytics-workbench",
+      "source": "dsh-plugins/crm-knowledge/src/client/index.tsx",
+      "target": "dsh-plugins/analytics-workbench/src/client/competition-shell/tokens",
+      "remedy": "Extract the domain-owned API/type or replace the page tool call with a versioned service capability.",
+      "retire_when": "CRM adapter has consumer contract tests and imports no workbench source."
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "analytics-workbench",
+      "source": "dsh-plugins/crm-knowledge/src/client/index.tsx",
+      "target": "dsh-plugins/analytics-workbench/src/client/cockpit-extension",
+      "remedy": "Extract the domain-owned API/type or replace the page tool call with a versioned service capability.",
+      "retire_when": "CRM adapter has consumer contract tests and imports no workbench source."
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "analytics-workbench",
+      "source": "dsh-plugins/crm-knowledge/src/client/crm-library.tsx",
+      "target": "dsh-plugins/analytics-workbench/src/client/competition-shell/tokens",
+      "remedy": "Extract the domain-owned API/type or replace the page tool call with a versioned service capability.",
+      "retire_when": "CRM adapter has consumer contract tests and imports no workbench source."
+    }
+  ]
+}

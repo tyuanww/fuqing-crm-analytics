@@ -5,8 +5,8 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../..', import.meta.url));
-const workspacePath = join(root, 'dsh-plugins/analytics-workbench/build-tools/pnpm-workspace.yaml');
-const lockPath = join(root, 'dsh-plugins/analytics-workbench/build-tools/pnpm-lock.yaml');
+const workspacePath = join(root, 'dsh-plugins/plugin-kit/build-tools/pnpm-workspace.yaml');
+const lockPath = join(root, 'dsh-plugins/plugin-kit/build-tools/pnpm-lock.yaml');
 
 test('build-tools pins the fixed brace-expansion release in both override and lockfile', async () => {
   const workspace = await readFile(workspacePath, 'utf8');

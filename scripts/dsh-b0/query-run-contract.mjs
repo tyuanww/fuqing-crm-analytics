@@ -62,7 +62,7 @@ if (schema.components?.schemas?.AnalyticsB0Result || schema.components?.schemas?
   throw new Error('query-run contract must not publish B0 run snapshot/result types');
 }
 const digest = createHash('sha256').update(JSON.stringify(schema)).digest('hex');
-const buildRequire = createRequire(join(root, 'dsh-plugins/analytics-workbench/build-tools/package.json'));
+const buildRequire = createRequire(join(root, 'dsh-plugins/plugin-kit/build-tools/package.json'));
 const { default: openapiTS, astToString } = buildRequire('openapi-typescript');
 const ts = buildRequire('typescript');
 const generatorVersion = JSON.parse(await readFile(buildRequire.resolve('openapi-typescript/package.json'), 'utf8')).version;

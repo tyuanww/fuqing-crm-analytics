@@ -45,7 +45,7 @@ function assertLocalRefs(value) {
 }
 assertLocalRefs(schema);
 const digest = createHash('sha256').update(JSON.stringify(schema)).digest('hex');
-const buildRequire = createRequire(join(root, 'dsh-plugins/analytics-workbench/build-tools/package.json'));
+const buildRequire = createRequire(join(root, 'dsh-plugins/plugin-kit/build-tools/package.json'));
 // Reuse the already installed, version-checked tools. No installs or upgrades.
 const { default: openapiTS, astToString } = buildRequire('openapi-typescript');
 const ts = buildRequire('typescript');

@@ -255,6 +255,22 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 
 - [x] 视觉与状态恢复增量进入 4325/18083；五库新备份恢复及浏览器重开通过，[快速 canary DEGRADED](PRODUCT-CANDIDATE-SWITCH-2026-09-10.md)保留既有 B0 404。**Completed:** 2026-09-10
 
+## 2026-10-03 G0 审查修复与规划全文复核
+
+证据：[修复与规划审核](./evidence/dsh-g0-review-fixes-20261003.md)。本卡是本轮结果，不覆盖下方历史记录。
+
+- [x] OCR-01/02：runtime 使用私有副本、锁文件 SHA-512 原始直链缓存与 frozen deploy；上游源码不变，实际离线包和独立解包验证通过。
+- [x] OCR-03/06：真实插件最终 tarball 安全扫描与入口校验；已验证敏感文件、source map、内联密钥和缺失入口被拒绝，回归见 `scripts/release/plugin-pack.test.mjs`。
+- [x] OCR-04/05/07：receive UNKNOWN/校验后恢复、跨 tag 身份清理、精确 commit tree 静态扫描；本轮专项合计 123/123 PASS。
+- [x] 全文审核大型拆分计划，修正依赖顺序、保存/隔离承诺、旧证据范围、无效命令与 native-first 文档冲突。
+- [x] T1：边界设计、10 包机器清单、唯一构建 DAG 与 8 项 AST/负测落地；本地和 CI 共用 B0 漂移检查。首轮见 [边界证据](./evidence/dsh-g0-boundaries-20261003.md)，本轮更新见 [图表解耦证据](./evidence/dsh-g0-board-components-20261003.md)。
+- [x] T15 子项：pin/build-tools/补丁由 kit 独立拥有；brand/query 无 workbench 源码的 build/test/pack 通过，8 插件实际构建通过。
+- [x] T15 图表子项：board-components 公开导出替换 6 条引用；固定 tarball/公开类型、旧导出兼容、workbench 独立重建与受控 pack 通过。见 [图表解耦证据](./evidence/dsh-g0-board-components-20261003.md)。
+- [ ] T15 剩余：CRM 公共合同替换 5 条 workbench 引用；invariant、精确宿主和供应链验收仍开放。整体仍 PARTIAL。
+- [ ] T2/T17：精确宿主生命周期、会话/WAL、故障隔离、受控重启和恢复；现有 synthetic PASS 不替代。
+- [ ] T3/T7/D4-C：用服务状态和回放矩阵决定首个 D15 是否启用 durable save。
+- [ ] 在授权提交后的 clean reviewed SHA 重跑完整 preflight，再处理签名/SBOM、canary/rollback 与远端门禁；不把本地 pack 视为可上线。
+
 ## 2026-09-30 rc2 DX triage follow-up
 
 以下任务来自 `docs/plans/dsh-rc2-environment-promotion.md` 的 DevEx TRIAGE 评审，先登记，不把未实现项写成已完成：

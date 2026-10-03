@@ -1,5 +1,4 @@
 <!-- /autoplan restore point: "/Users/hutou/.gstack/projects/tyuanww-fuqing-crm-analytics/main-autoplan-restore-20261001-161631.md" -->
-## Implementation plan
 # ShineMage 插件平台拆分与 DSH 独立升级计划
 
 ## 目标
@@ -8,12 +7,26 @@
 
 本计划只覆盖架构拆分、合同抽取、仓库边界、独立构建/测试/发布和候选 profile 验收。真实杭州切换、Windows/WSL 重启、Cloudflare route、真实 DuckDB 数据迁移、GitHub 发布和删除旧运行时均不在本计划默认授权内。
 
+## 当前执行依据（2026-10-03 全文复核）
+
+本页后半部分保存多轮评审原文。**当前顺序以本节、当前实现账本和 Eng Review Rerun 3 的 D3–D8 最终答案为准**；历史 `Applied`/`Approval readiness: PASS` 仅代表决定已写入计划，不代表代码或验收通过。历史待答题和测试数不产生新的审批或当前通过结论。
+
+1. 保留“官方 DSH 底座 + 各领域独立插件/服务仓”的目标；先在 workspace 证明边界，stop/go 后再物理分仓。首期 DSH 只阻塞 `0.1.7-rc.2`，`0.2.0` 为后续独立候选。
+2. 先做 G0：T1 边界清单、T2/T17 精确宿主证据、T15 无业务叶子包、T13 状态路径，以及 T3/T7 的服务保存/回放矩阵。G0 不依赖尚未实现的 D15 UI 或 stop/go；可执行前置测试不因 T17 尚未通过而自我阻塞。
+3. T15 的 workspace 解耦与独立 pack 在 G0/stop/go **之前**；物理仓库迁移在 **之后**。先选低耦合 brand 证明包边界，再验证 D15 workbench 包；实际迁移顺序为 brand → board-components → CRM adapter → query/cockpit/workbench，最终以 T1 DAG 复核。
+4. D4-C 保留 durable save 目标，但只有服务状态、candidate/correlation/idempotency 和 forward-fix/重放矩阵通过才进入首个 D15 candidate；否则显示保存禁用及原因，只交付可核对结果。
+5. D7-A 保留首个可交付 candidate 的完整签名/SBOM/CVE、canary、回退、灰度与 RACI 门禁。**G0 本地 pack 可以先生成 PARTIAL 回执，不能因此删掉完整候选门禁**。catalog、物理多仓、杭州切换及 0.2.0 激活仍后置。
+6. T17 未证明同进程隔离；保留旧 active 指针不等于旧进程仍健康，也不等于业务数据回滚。必须分别证明可用性、受控重启、WAL 恢复和服务状态处理。
+7. T21 目前只打包并写 profile/capability/journal 回执，canary、runtime install、WAL、回退为 `NOT_RUN/NOT_AVAILABLE`；未来宿主 harness 的 PID/端口/临时目录合同仍归 T17，不伪装成当前命令行为。
+
+全文核对与本轮代码修复证据见 [2026-10-03 审查修复记录](../hackathon/evidence/dsh-g0-review-fixes-20261003.md)。未关闭的实施项沿用 T1–T23，不新增重复规划或再次询问已回答的选择。
+
 ## 已确认的事实与约束
 
-- 当前干净迁移基线是 `main@2782b854`，工作区为 `/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics-public`。
+- 最初迁移盘点基线为 `main@fcbd1324`；本次修复从 `main@d4261aa3` 开始，工作树包含本轮未提交修复，不能称为干净 release 基线，工作区为 `/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics-public`。
 - 当前项目固定 DSH `0.1.7-rc.2`，上游 SHA `477b4f420553e8a52c2fbccc464d7561b239c443`；官方候选 `0.2.0-rc.2` 是另一条兼容线，不能只改一个版本号。
-- 当前业务包至少有 `analytics-workbench`、`crm-knowledge`、`shine-brand`、`shine-board`、`shine-query`、`shine-funnel`、`shine-waterfall`、`shine-crowd-action`；它们仍在同一仓库内，且多个构建脚本依赖 `analytics-workbench/toolchain.mjs` 或其源码。
-- 每个 DSH bundle 必须保持 `package.json`、`dsh.bundle.patch`、构建产物、精确 `files/exports`、DSH/Cordis peer 合同和 `./invariant` 验证；bundle 变更后按官方合同重启 profile 生效。
+- 当前业务包至少有 `analytics-workbench`、`crm-knowledge`、`shine-brand`、`shine-board`、`shine-query`、`shine-funnel`、`shine-waterfall`、`shine-crowd-action`；它们仍在同一仓库内，叶子构建已改用 workspace dev-only `plugin-kit`，pin/build-tools 已归 kit 所有；图表 6 条引用已迁至固定 tarball 的公共导出；CRM 仍有 5 条跨包源码/类型引用，尚未完成独立仓库边界。
+- 目标 bundle 验收必须保持 `package.json`、`dsh.bundle.patch`、构建产物、精确 `files/exports`、DSH/Cordis peer 合同和 `./invariant` 验证；bundle 变更后按官方合同重启 profile 生效。
 - 保留 DSH 原生 Web/单一 Agent Loop/会话/工具合同；插件只能通过官方 bundle、client、slot、service/provider/consumer 合同扩展，不复制或修改 DSH 上游源码。
 - 后端、知识库、DuckDB 和生产密钥属于服务/数据层，不随插件 npm 包发布；测试只能使用 synthetic fixture 和隔离小库。
 
@@ -23,17 +36,20 @@
 
 | 任务 | 当前状态 | 已有证据 | 尚未关闭 |
 |---|---|---|---|
+| T1 | IMPLEMENTED / STATIC PASS | 架构设计、机器 policy/inventory、10 包/579 文件/29 条跨包引用/190 处字面路径、10 条合同与 8 个主入口；AST drift/循环/越界/公开导出负测 8/8 PASS，纳入 B0 pipeline | 这只关闭依赖盘点；真实宿主与服务语义由 T2/T3/T17 验证 |
 | T2 | PARTIAL | 0.1.7-rc.2 与 0.2.0-rc.2 精确 checkout、静态兼容矩阵 SUPPORTED；0.1.7 固定 checkout 的官方 plugin-manager/runner/session/WAL 相关测试 167/167 PASS | 0.1.7 精确生产 runtime 的 load/unload/session/WAL 现场证据；0.2.0 生命周期依赖仍 DEFERRED |
 | T13 | PARTIAL | profile manifest、显式 state path、release/receive journal、status/resume/reconcile fail-closed；`release-preflight.json` sidecar、release state status/resume 已实际生成 | 完整崩溃 replay、远端 receipt/reconcile 和现场回执 |
-| T15 | PARTIAL | 最新 clean reviewed commit 的正式 preflight 完成七插件 clean-build、runtime 离线打包、pack digest、共享 dev-kit 边界、funnel/waterfall `lib/` 发布边界、build-tools audit 0 漏洞；workbench/shine-brand candidate 已绑定同一 SHA，精确身份以对应 preflight/candidate JSON 为准 | 签名/SBOM/来源信任和跨包源码边界；叶子包仍引用 workspace 的 workbench toolchain/组件源码 |
+| T15 | PARTIAL | kit 独立 pin/lock；brand/query 隔离 build/test/pack；board-components 固定 tarball/公开代码与类型；workbench 无图表源码的 clean rebuild/类型/受控 pack 通过，六份编译产物一致 | CRM 的 5 条源码/类型引用、完整 invariant/精确宿主合同、签名/SBOM/来源信任仍未关闭 |
 | T17 | PARTIAL / BLOCKED | synthetic host 的 hang/crash/restart/WAL/native fallback 和 profile reconcile；host evidence 明确记录 `in-process-unload=BLOCKED` | 0.1.7 精确宿主、进程内 unload 与原子激活能力 |
-| T21 | PARTIAL | `pnpm dsh plugin candidate` 收据已绑定最新 source、profile/pack/capability/journal；精确 candidate digest 以 `.context/checks/rc2-final-<tag>/candidate-*/candidate.json` 为准 | canary/rollback、远端 receive/reconcile、候选回执与 host activation 的接线 |
+| T21 | PARTIAL | `pnpm dsh plugin candidate` 旧收据已绑定对应 source、profile/pack/capability/journal；精确 candidate digest 以 `.context/checks/rc2-final-<tag>/candidate-*/candidate.json` 为准 | canary/rollback、远端 receive/reconcile、候选回执与 host activation 的接线 |
 | T22 | IMPLEMENTED / DOCS PASS | README、docs 索引、rc2 Quickstart 和插件作者 Quickstart 已统一当前事实与三步入口 | 现场 host/canary/rollback 仍不属于文档门禁 |
-| T23 | IMPLEMENTED / READINESS PASS | `doctor --release` 与只读 `preflight --check` 均以 `403fb063` 的固定 runtime 通过，输出聚合阻断码、remedy 和 Quickstart 锚点；保持退出码 2 与 fail-closed | 远端证据仍由发布门禁负责 |
+| T23 | IMPLEMENTED / READINESS PASS | 聚合阻断码、remedy 和 Quickstart 锚点已实现；检查成功返回 0，缺项/门禁阻断返回 2；旧 runtime 的 readiness 结果仅属历史证据 | 远端证据仍由发布门禁负责 |
 
-本轮把 `brace-expansion` 从 2.1.6 固定到 2.1.7；build-tools 的在线生产依赖审计为 0 个漏洞，并由 `scripts/release/supply-chain.test.mjs` 固定回归。代码审查修复提交为 `2dafe85f`，随后修复 runtime 阶段重复联网的提交为 `2782b854`。本轮又把依赖审计从 `--prepare` 拆成独立的 `--audit` 阶段，并让 `prepare` 先完整预热锁文件到 pnpm store、让 runtime 临时 deploy 禁止生命周期脚本：registry 短暂不可用时，已准备的固定 checkout 可以保留并只重试审计，外部 tarball 不会在离线 runtime 阶段临时联网，同时仍对审计失败 fail closed。首次失败的 runtime 根因见 `docs/hackathon/evidence/dsh-g0-followup-20261002.md`；最新正式 preflight 的精确 tag、source、asset 和候选 digest 只以对应 JSON/SHA256SUMS 为准。
+历史 B0 618 项 pytest、314 项 Node 测试、七插件构建和 clean rebuild，以及八阶段 preflight 102/102，均只证明各自证据文件绑定的旧 source SHA。`brace-expansion@2.1.7` 与 prepare/audit 分阶段修复继续保留；审计的“0 漏洞”只描述当次结果，不是永久安全保证。
 
-最新 B0 `--check` 在隔离 Python 3.14.4 环境完成：618 项 pytest、314 项 B0/Node 测试、七个插件构建和 clean-build 重建均通过；插件 pack 生命周期钩子隔离及 funnel/waterfall `src/`→`lib/` 发布边界已进入该链路。`--audit` 已在已准备的固定上游上单独通过（0 known vulnerabilities）。上一次正式 preflight 的 `prepare → build → runtime(offline) → release → test → receive → evidence` 全部 PASS，但它绑定 `2782b854`；当前代码新增 audit 阶段后必须从最终 clean HEAD 重新跑完整 `prepare → audit → build → runtime → release → test → receive → evidence`。该结果仍不关闭 T15/T17/T21 的签名/SBOM、精确宿主激活、进程内回退、canary 和远端回执门禁。
+2026-10-03 审查发现 runtime 原地改写/错包绑定、plugin pack 内容/入口漏验、receive 假完成、跨 tag 身份继承和静态扫描未绑定 Git tree 共七项问题。本轮修复及新测试记录在上述证据页；当前未提交修复必须在授权提交后从最终 clean SHA 重跑正式 preflight，不能沿用旧 PASS。runtime 现在只在独立工作副本改元数据，直链包用锁文件 SHA-512 绑定原始缓存；最终包检查和真实离线运行结果各自列出。
+
+本次 T1/T15 首轮实现见 [边界与隔离构建证据](../hackathon/evidence/dsh-g0-boundaries-20261003.md)，最新图表领域包、workbench pack 与测试结果见 [图表解耦证据](../hackathon/evidence/dsh-g0-board-components-20261003.md)；长期边界见 [架构设计](../architecture/shinemage-plugin-platform.md)。
 
 ## 目标架构
 
@@ -44,7 +60,8 @@ DeepSeek Harness 官方宿主仓库
             ├─ dsh.profile.bundles + pnpm lock
             ├─ @shine-mage/dsh-brand
             ├─ @shine-mage/dsh-analytics-workbench-b0（首期稳定身份；stop/go 后如需拆分按新 artifact 规则迁移）
-            ├─ @shine-mage/dsh-crm-knowledge（CRM domain + 薄 DSH adapter）
+            ├─ CRM 插件（从 crm-knowledge 的 CRM domain + 薄 adapter 迁出）
+            ├─ 知识库插件（从 crm-knowledge 的知识能力迁出）
             ├─ @shine-mage/dsh-query
             ├─ @shine-mage/dsh-board-cockpit
             └─ @shine-mage/dsh-board-components（funnel + waterfall）
@@ -53,12 +70,12 @@ DeepSeek Harness 官方宿主仓库
                  └─ 版本化 API/contract → ShineMage CRM API 服务
                                       ├─ synthetic DuckDB adapter
                                       ├─ CRM/分析状态
-                                      └─ 知识库适配器
+                                      └─ 知识库 API adapter → 独立知识库服务
 ```
 
 ## 首期垂直切片与 stop/go 闸门
 
-首期只交付一条用户可见的 CRM/分析能力：固定为 D15 已批准的原生 DSH 会话 → first-purchase prompt → 绑定 worker 结果 → 权限/来源引用 → 成功或取消/`EXECUTION_UNKNOWN` 恢复 → 保存分析路径；cockpit preview/apply 只作为同一候选的后续断言。它使用当前仓库的 workspace/package 边界和 immutable profile candidate，不先物理拆成多个 Git 仓库。
+首期只交付一条用户可见的 CRM/分析能力：固定为 D15 已批准的原生 DSH 会话 → first-purchase prompt → 绑定 worker 结果 → 权限/来源引用 → 成功或取消/`EXECUTION_UNKNOWN` 恢复；保存分析按 D4-C 的 G0 服务状态证据决定是否启用；cockpit preview/apply 只作为同一候选的后续断言。它使用当前仓库的 workspace/package 边界和 immutable profile candidate，不先物理拆成多个 Git 仓库。
 
 首期必须先完成 DSH 合同 spike、API/schema baseline、兼容 adapter、activation transaction 和供应链门禁。物理多仓、完整私有 catalog、全部插件拆分和杭州切换只有在 2–4 周 stop/go 评审通过后才进入下一阶段。
 
@@ -84,8 +101,8 @@ RACI 在 Phase 0 产出，至少为 build、receive、UAT、cutover、rollback �
 ### 3. 每个可独立发布的领域一个插件仓库
 
 - `shinemage-dsh-brand`：品牌和受控 UI 主题入口，只覆盖允许的品牌层，不伪装原生标题、侧栏、会话和工具合同。
-- `shinemage-dsh-analytics-workbench`：B0 工具、自由 HTML 编辑链、候选保存/预览/版本操作和其 client 适配。它是最大的插件，先拆。
-- `shinemage-dsh-crm-knowledge`：CRM 指标、知识库工具和受控页面槽位；不携带数据库文件或 FastAPI 服务。
+- `shinemage-dsh-analytics-workbench`：B0 工具、自由 HTML 编辑链、候选保存/预览/版本操作和其 client 适配。它承载首期 D15 workspace 试点；物理拆仓顺序靠后，不先整体搬迁。
+- `shinemage-dsh-crm` 与 `shinemage-dsh-knowledge`：CRM、知识库各自的工具和受控页面槽位。当前合并包 `crm-knowledge` 是迁移来源，最终边界按领域拆开；不携带数据库文件或 FastAPI 服务。
 - `shinemage-dsh-query`：查询/诊断工具及结果展示合同。
 - `shinemage-dsh-board`：看板生成/预览/确认和 board kind；只依赖合同与 query/result service。
 - `shinemage-dsh-board-components`：先把 funnel 与 waterfall 放在同一领域包，消除当前反向源码依赖；`crowd-action` 这类 marker-only 包先随 board/profile 组合，只有具备独立生命周期、版本和验收证据时才拆成单包。
@@ -102,7 +119,7 @@ RACI 在 Phase 0 产出，至少为 build、receive、UAT、cutover、rollback �
 
 ### 6. `shinemage-deploy`
 
-保存 immutable artifact 接收、sidecar/manifest、WSL side-by-side activation、rollback、service ownership、Tailscale 只作为传输和探针，不承担构建。生产只接收已验证包，不 `git pull`、不现场编译。
+保存 immutable artifact 接收、sidecar/manifest、WSL side-by-side activation、rollback、service ownership、Tailscale 只作 SSH 控制/探针和小型 sidecar 传输；大包由杭州从固定 GitHub Release 直接下载。生产只接收已验证包，不 `git pull`、不现场编译。
 
 私有 ShineMage catalog/admission 是后置能力，不属于首期垂直切片。首期 admission 由 profile allowlist、签名/来源 manifest、SBOM、漏洞门禁和撤销元数据承担；只有多生产者或审计量达到 stop/go 记录中的阈值后，才创建独立 catalog 服务。
 
@@ -110,7 +127,7 @@ RACI 在 Phase 0 产出，至少为 build、receive、UAT、cutover、rollback �
 
 ### Phase 0：基线和依赖图
 
-1. 在干净 `main@fcbd1324` 上生成插件清单、文件归属、跨包 import、build/test 入口和运行时 peer 矩阵。
+1. 以 `fcbd1324` 历史盘点为起点，按本次实际 Git 状态更新插件清单、文件归属、跨包 import、build/test 入口和运行时 peer 矩阵。
 2. 将每个包的公开 API、DSH/Cordis peer、后端 endpoint、状态目录和资源文件写入 `docs/architecture/shinemage-plugin-boundaries.md`。
 3. 建立 `shinemage-dsh-host`、profile、插件、服务、部署的版本关系图。
 4. 通过 `rg`/CodeGraph 确认没有真实 DuckDB、凭据或生产路径被纳入拆分输入。
@@ -126,7 +143,7 @@ RACI 在 Phase 0 产出，至少为 build、receive、UAT、cutover、rollback �
 3. 为 0.1.7-rc.2 建立兼容基线；扫描 `ctx.shell.run/start`、工具结果 union、session/WAL synthetic resume。
 4. 冻结首期 CRM/API 与领域 schema baseline，建立兼容 adapter、版本窗口、生成类型和 profile × service × durable-state 回退矩阵；先用 synthetic/隔离小库验证 expand/contract 与 backup/restore。adapter 属于服务合同边界或独立迁移包，不进入首期插件运行包；记录删除条件、owner 和兼容窗口。比例字段必须沿 semantic → contract → caller 固定为 B0 的 0–1 口径，禁止旧 CRM raw ratio 直接复用。
 5. 按 T17 的真实宿主结果定义失败边界：先覆盖部分注册、全局副作用、挂死、进程崩溃、超时和 receipt mismatch；只有宿主能力已证实才允许宣称 activation transaction/atomic rollback，否则首期只保留旧 profile 并走 disable/native + host restart。
-6. 首期供应链门禁最低为 profile allowlist、packed digest、来源/manifest、files/exports、peer/invariant 和审计回执；签名、SBOM、漏洞阈值、轮换/撤销工具若未可执行则 fail-closed 或明确后置，不能用计划文字代替拒绝证据。
+6. 首期供应链门禁最低为 profile allowlist、packed digest、来源/manifest、files/exports、peer/invariant 和审计回执；按最终 D7-A，签名、SBOM、漏洞阈值、轮换/撤销仍是首个可交付 candidate 的门禁；未可执行时保持 BLOCKED，G0 pack 可以 PARTIAL，但不能把完整门禁后置。
 7. 不改变非切片运行路径；旧仓库通过临时 compatibility adapter 消费新合同。
 
 验收（workspace 前置能力，非物理多仓 DoD）：合同包和 dev-only kit 可在当前 workspace build/test/package；旧仓库测试不减少；无 DSH 上游改动。
@@ -160,7 +177,7 @@ RACI 在 Phase 0 产出，至少为 build、receive、UAT、cutover、rollback �
 2. 插件版本升级只生成新的 profile candidate，不重建 DSH 或服务。
 3. candidate manifest 绑定每个包的版本、digest、DSH SHA、contracts SHA、runtime、构建器和证据。
 4. GitHub Release 只发布 immutable profile artifact；杭州 receive/verify/reconcile/activate 使用同一 artifact。
-5. side-by-side 保留旧 profile，失败时原子回退；Tailscale 只用于传输/探针/人工批准。
+5. side-by-side 保留旧 profile；active 指针切换与回退、进程重启、WAL 和服务状态分别按 T17/T3 证据处理。Tailscale 用于控制/探针和小 sidecar，大包从 immutable Release 直取。
 
 验收：修改一个插件可以独立生成 profile patch；DSH/服务没有无关重建；回退可恢复旧 profile。
 
@@ -168,7 +185,7 @@ RACI 在 Phase 0 产出，至少为 build、receive、UAT、cutover、rollback �
 
 1. 从官方 tag/SHA 建立独立 host candidate profile。
 2. 批量更新所有插件 peer/devDependency 与 lock，不放宽到浮动 latest；业务合同仍按领域版本锁定。
-3. 执行 API grep/typecheck，重点是 `ctx.shell.run/start` 删除、工具 timeout/promoted 结果、Desktop/web profile 初始化差异。
+3. 执行 API grep/typecheck，核对 `ctx.shell.run/start` 是否变化、工具 timeout/promoted 结果和 Desktop/web profile 初始化差异；静态关键词命中不能证明某接口已删除或运行时兼容。
 4. 执行 plugin manifest dump、tool catalog、UI slot、权限、session/WAL synthetic resume、install/load/unload/restart/rollback。
 5. 仅在候选 profile 全部通过后，更新 profile lock；插件与 host 仍分别发版。
 
@@ -221,21 +238,32 @@ RACI 在 Phase 0 产出，至少为 build、receive、UAT、cutover、rollback �
 - **Artifact 身份规则（Eng Rerun）**：首期 `package_id`、DSH plugin/tool id、profile bundle key 和 candidate receipt 中的 artifact identity 在 stop/go 前后保持不变；`@shine-mage/dsh-analytics-workbench` 只能作为未来明确迁移后的新 artifact 身份，不能把 scope、包名或 `-b0` 后缀静默改名。任何改名都必须生成新包、新 digest、新迁移/回退记录，并保留旧身份的 resume 映射。
 - FastAPI 的 `/internal/native/prompt`、绑定 worker、权限/来源引用和保存边界仍属于服务侧 adapter 与 synthetic fixture；它们不是把 backend 源码打进插件包，也不是插件的长期公开合同。D15 的跨层 receipt 必须绑定 `correlation_id`、`candidate_digest`、服务/API 版本、分析 durable-state key、permission/source owner 和 idempotency key；profile 回退不自动回滚已写入的服务状态，必须按矩阵执行服务侧恢复或 forward-fix。
 - crm-knowledge、shine-query、board、brand、funnel、waterfall 和 crowd-action 只在当前 profile 中作为依赖/组合背景，不作为首期独立拆仓验收对象；后续按 stop/go 顺序迁移。
-## 验证命令草案
+## 当前可执行命令与后续门禁
+
+以下在仓库根、固定 Node 24/pnpm 11.7 环境运行；包构建前须已有固定上游准备产物。完整准备说明见 [插件作者入口](../operating/dsh-plugin-author-quickstart.md) 与 [rc2 Quickstart](../operating/dsh-rc2-quickstart.md)。
 
 ```bash
-pnpm dsh doctor --release
+pnpm dsh doctor
 pnpm dsh test
 pnpm dsh verify --scope local
-pnpm dsh preflight --check
-pnpm --filter @shine-mage/dsh-analytics-workbench-b0 test
-pnpm --filter @shine-mage/dsh-analytics-workbench-b0 build
-pnpm dsh plugin candidate --plugin @shine-mage/dsh-analytics-workbench-b0 --state-dir /tmp/shinemage-dsh-state
-# 物理 profile-repo / GitHub Release 属于 stop/go 后置阶段，不是首期命令
+node dsh-plugins/board-components/build.mjs
+pnpm --dir dsh-plugins/analytics-workbench build "$PWD/.context/dsh-b0/upstream-0.1.7-rc.2"
+pnpm --dir dsh-plugins/analytics-workbench test
+# 只打包选定插件；输出使用新目录，不删除旧证据
+candidate_root="$(mktemp -d "${TMPDIR:-/tmp}/shinemage-candidate.XXXXXX")"
+pnpm dsh plugin candidate \
+  --plugin "$PWD/dsh-plugins/analytics-workbench" \
+  --output-dir "$candidate_root/pack" \
+  --state-path "$candidate_root/state.json"
+# status/resume 读取同一 journal；canary/安装/回退尚未接通
+pnpm dsh status --state-path "$candidate_root/state.json"
 ```
 
-所有命令必须使用固定 Node/pnpm、固定 DSH SHA 和 synthetic fixture；candidate 命令拥有隔离的 profile/DSH home/WAL/B0 SQLite 临时目录，记录 PID/端口 owner，退出时只清理自己创建的目录；不得读取真实 DSH home、真实 DuckDB 或生产服务。真实生产动作另行授权。
+`doctor --release`/`preflight --check` 另需 clean reviewed source、绝对 Python 和固定 runtime；参数见 Quickstart，不能把省略参数的草案当作通过命令。上述 plugin candidate 不创建 DSH home/WAL、不启动宿主；未来 T17 harness 必须拥有自己的 profile、DSH home、WAL、B0 SQLite、PID 和端口，不能使用操作者真实 home。现场动作仍另行授权。
+
 ## Review record
+
+> 以下为 2026-10-01 至 10-02 的评审历史与目标合同。`currentDecision`、`Applied`、测试数和当时的缺项均保留其时间语境；最新任务状态以页首账本为准，后续 D3–D8 已回答的选择不重新打开。
 
 ### CEO Step 0
 
@@ -430,9 +458,9 @@ Write the design after the first extraction. This keeps the first implementation
 - Feasibility blockers: exact DSH 0.1.7/0.2.0 contract evidence; CRM/API adapter and state rollback matrix; activation isolation mechanism; signing/SBOM/vulnerability tooling; production-shaped fixture source; named owners and authorized pre-production/UAT endpoint.
 - Pending choices retained for later gates: measured numeric targets after baseline, catalog trigger threshold, real Hangzhou UAT authorization, and DSH 0.2.0-rc.2 cutover approval. The first user-visible path is frozen by D15 below.
 
-### 当前首期闸门优先级（覆盖历史阶段草案）
+### 首期闸门优先级（已由 Eng Rerun 3 D3–D8 收敛）
 
-0I 和 CEO 扩展记录保留长期目标与历史决策，但当前实现只执行首期实现完成定义。Phase 0–2 的验收优先级为：命名的 @shine-mage/dsh-analytics-workbench-b0、DSH 0.1.7-rc.2、packed artifact、显式 state path、D15 synthetic 路径、T17 已证实失败处理和旧 profile 保持 active。双仓 kit 验收、全 pin conformance、签名/SBOM/CVE 完整工具链、production-shaped fixture、灰窗、catalog、杭州和 0.2.0 均标为 post-gate；未完成这些后置项不能阻塞当前切片开工，也不能被写成首期已通过。
+早期复核曾建议把签名/SBOM/CVE、生产形状 fixture、灰窗和 RACI 全部后置；最终 D7-A 未采纳该缩减。当前遵循页首执行依据：先跑 G0 可行性证据，再交付带完整安全/canary/回退门禁的 D15 候选；保存是否进入候选按 D4-C。只有 catalog、物理多仓、远端动作和 0.2.0 激活仍后置，不能把早期建议当作当前豁免。
 
 <!-- autoplan-accepted:ceo -->
 - Keep the DSH upstream source independent and preserve native-first behavior; plugins use official bundle/client/slot/service contracts and cannot replace native title, sidebar, session, or tool ownership.
@@ -855,7 +883,7 @@ build pinned source → package/sign/SBOM → offline verify
 | `QUEUED` | 已接收 action，显示 action id 的短摘要、排队原因和最近更新时间；不伪造百分比 | 允许取消或查看状态；禁止重复提交和保存 | `role=status` + `aria-busy=true`，阶段变化只播报一次 |
 | `AUTHORIZING` | 正在核对权限、数据范围和 capability；显示 elapsed 与 last-updated | 允许取消；禁止重复提交、保存和显示数字 | `aria-live=polite` 播报阶段，不使用无阶段全屏 skeleton |
 | `RUNNING` | 正在执行绑定 worker，显示真实阶段、elapsed、last-updated 和可取消提示 | 允许取消；禁止重复提交和保存 | `role=status` + `aria-busy=true`；不伪造百分比 |
-| `VALIDATING` | 正在校验结果、来源和 freshness；结果未确认前不展示经营结论 | 允许查看状态；禁止保存、导出、发送和重复 action | 阶段变化进入 `aria-live=polite`，焦点留在状态卡 |
+| `VALIDATING` | 正在校验结果、来源和 freshness；结果未确认前不展示经营结论 | 允许查看状态；禁止保存、导出、发送和重复 action | 阶段变化进入独立 `aria-live=polite`，焦点保持在当前用户操作处 |
 | `READY_TO_SAVE` | 校验通过，显示结果、provenance、synthetic 标记和保存前提示 | 允许预览/确认保存；禁止把预览当历史版本 | `aria-busy=false`；焦点按用户动作落在结果标题或保存动作 |
 | `EMPTY` | “没有符合当前范围的结果”及数据时间/范围；不把空结果写成经营结论 | 允许修改问题或范围；禁止保存空结果 | 空态标题可读，主动作可聚焦 |
 | `PERMISSION_DENIED` | 缺少的权限、数据范围和下一步联系/申请路径 | 允许回到原生对话或申请权限；禁止保存、导出、发送 | 错误说明进入 live region，焦点落在下一步动作 |
@@ -870,14 +898,14 @@ build pinned source → package/sign/SBOM → offline verify
 | `SAVE_FAILED` | 当前结果未保存，失败原因可理解 | 允许使用同一保存动作重试；禁止创建新版本的重复请求 | 错误进入 live region，焦点落在重试动作 |
 | `SAVE_UNKNOWN` | 保存结果尚未确认，显示 action id/最后已知阶段 | 允许 reconcile 同一 action；禁止再次创建保存动作或宣称成功 | `aria-live=assertive` 播报未知状态；焦点落在核对动作 |
 | `SAVE_CONFLICT` | 已有版本发生变化，当前结果仍可查看 | 允许查看已有版本或生成新的明确保存意图；禁止覆盖他人/更新后的版本 | 焦点落在查看版本/重新保存动作 |
-| `HOST_RESTART_REQUIRED` | 宿主进程需要重启才能完成隔离/加载；显示旧 profile 仍在运行、草稿和 receipt 已保留 | 允许查看回执、复制恢复命令、重启后重新打开会话；禁止在重启前重提同一 action、保存或宣称插件已加载 | `aria-live=assertive` 播报重启要求；焦点落在“重新打开会话/核对状态” |
+| `HOST_RESTART_REQUIRED` | 宿主进程需要重启才能完成隔离/加载；显示旧 active 指针保留、进程可用性待核对，草稿和 receipt 按恢复合同保留 | 允许查看回执、复制恢复命令、重启后重新打开会话；禁止在重启前重提同一 action、保存或宣称插件已加载 | `aria-live=assertive` 播报重启要求；焦点落在“重新打开会话/核对状态” |
 | `SUCCESS_UNSAVED` | 数字、权限、来源、synthetic 标记和“尚未保存” | 允许预览/确认保存；禁止把预览当历史版本 | 焦点落在结果标题，保存为明确的后续动作 |
 | `SAVED` | 新版本、时间、receipt 和后续查看入口 | 允许查看/回退（按权限）；禁止覆盖旧版本 | 保存回执进入 live region，焦点落在版本链接 |
 | `PARTIAL` | 哪个 capability 被关闭、哪些结果仍可信及限制 | 允许查看可用部分或回到原生；禁止隐藏限制后保存完整结论 | 文案、图标和结构同时表达部分状态 |
 | `STALE` | 结果仍可查看，但 freshness 已超过允许保存窗口，显示数据时间和过期原因 | 允许刷新/重新查询；禁止保存为新版本或伪装成当前结论 | `aria-live=polite` 播报过期原因，焦点落在刷新动作 |
 | `EXPIRED` | 结果已不能用于当前保存合同，保留原 receipt 和失效时间 | 允许重新查询或查看历史；禁止保存、导出或发送 | `aria-live=assertive` 播报失效，焦点落在重新查询动作 |
 
-状态合同只描述用户面；profile journal 的 `PASS/PARTIAL/NOT_RUN/BLOCKED`、canary、rollback 和 candidate digest 仍属于维护者控制面，不能直接复用为老板界面的文案。所有非 `SUCCESS_UNSAVED` 状态默认不能保存，除非后续合同逐项放行。
+状态合同只描述用户面；profile journal 的 `PASS/PARTIAL/NOT_RUN/BLOCKED`、canary、rollback 和 candidate digest 仍属于维护者控制面，不能直接复用为老板界面的文案。`READY_TO_SAVE` 是展示阶段，只能对应服务已确认的 `SUCCESS_UNSAVED` 结果；保存还须同时满足 D4-C、`FRESH`、权限和完整 provenance。其它状态默认不能保存，不能由前端阶段值自行放行。
 
 **加载、计时与未知结果语义（已批准 D8 补充）**
 
@@ -1029,7 +1057,7 @@ T14 必须用键盘和至少一个真实浏览器读屏/可访问性树检查上
 
 **宿主重启恢复语义（已批准 D14 补充）**
 
-当 T17 的进程级隔离证据表明插件故障、未卸载干净或 native loop 需要重启时，业务面必须进入 `HOST_RESTART_REQUIRED`，而不是把它压成普通 `FAILED`。该状态携带原 `action_id`、`correlation_id`、candidate/profile digest、最后已知阶段、草稿引用、receipt 引用和重启原因；旧 profile/原生 DSH 会话保持 active，直到维护者完成受控重启与 reconcile。
+当 T17 的进程级隔离证据表明插件故障、未卸载干净或 native loop 需要重启时，业务面必须进入 `HOST_RESTART_REQUIRED`，而不是把它压成普通 `FAILED`。该状态携带原 `action_id`、`correlation_id`、candidate/profile digest、最后已知阶段、草稿引用、receipt 引用和重启原因；旧 profile 的 active 指针保持不变；宿主崩溃时不得声称原生会话仍可用，必须待受控重启、健康探针和 reconcile 确认恢复。
 
 重启前禁止再次提交同一 action、保存、导出、发送或显示“插件已恢复”。维护者控制面提供受控重启命令和 ownership 检查；业务面只提供“查看回执”“复制恢复说明”“重新打开会话/核对状态”。重启后若 reconcile 确认 action 未执行，进入 `CANCELLED_NO_ACTIVE_RUN` 或允许新问题；若仍无法确认，保持 `EXECUTION_UNKNOWN`；只有真实 receipt 到达才进入 `SUCCESS_UNSAVED`。草稿和 receipt 不能因重启丢失，也不能自动重放造成重复保存。
 
@@ -1382,7 +1410,7 @@ preflight.mjs:47 与 preflight-bundle.mjs:42 已有自动执行阶段计时，**
 ## What already exists
 
 - 当前仓库已有 DSH bundle/package/invariant、analytics-workbench、CRM/knowledge backend、release/readiness、receive/verify/reconcile、side-by-side/rollback 和 synthetic verification 入口；首期应复用并统一状态源，不另起第二套实现。
-- 官方 DSH 0.1.7-rc.2 pin、上游 SHA、插件 peer/devDependency 和 0.2.0-rc.2 官方候选资料已盘查；`ctx.shell.run/start` breaking change、bundle/profile 重启合同和 Plugin Hub 社区性质已有证据。
+- 官方 DSH 0.1.7-rc.2 pin、上游 SHA、插件 peer/devDependency 和 0.2.0-rc.2 官方候选资料已盘查；`ctx.shell.run/start`、bundle/profile 重启及 WAL 的精确变化仍需对应源码/运行证据；静态 SUPPORTED 不代表生命周期通过。
 - 现有 HTML 编辑链、绑定页面保护、native fallback、disabled/NOT_AVAILABLE 文案和后端/前端测试是首期用户路径的基础；本计划只要求独立 candidate/合同/回退证据，不宣称现场 UAT。
 
 ## Dream state delta
@@ -1404,6 +1432,8 @@ preflight.mjs:47 与 preflight-bundle.mjs:42 已有自动执行阶段计时，**
 
 ## Failure Modes Registry
 
+> 这是目标验收矩阵。下表 Y 表示必须有的处理/测试，不表示本次已运行；实际 PASS/PARTIAL/NOT_RUN 见页首账本和证据页。
+
 | CODEPATH | FAILURE MODE | RESCUED? | TEST? | USER SEES? | LOGGED? |
 |---|---|---:|---:|---|---:|
 | contract spike | unsupported DSH pin | Y | Y | blocked with pin/reason | Y |
@@ -1421,10 +1451,11 @@ preflight.mjs:47 与 preflight-bundle.mjs:42 已有自动执行阶段计时，**
 
 Synthesized from this review's findings. Run with Claude Code or Codex; checkbox as you ship.
 
-- [ ] **T1 (P1, human: ~4h / CC: ~30min)** — Phase 0 inventory — generate the unique dependency DAG, package ownership, command owner map, and machine-readable boundary manifest.
+- [x] **T1 (P1, human: ~4h / CC: ~30min)** — Phase 0 inventory — generate the unique dependency DAG, package ownership, command owner map, and machine-readable boundary manifest.
   - Surfaced by: Section 1 ARCH-001 and Section 5 QUALITY-001.
-  - Files: `docs/architecture/shinemage-plugin-boundaries.md`, `docs/architecture/shinemage-plugin-boundaries.json`, `scripts/dsh-b0/` inventory entry (to be determined).
-  - Verify: inventory covers every `dsh-plugins` package, reverse import, endpoint and real command; `git diff --check`; no real DuckDB/path/secret included.
+  - Files: `docs/architecture/shinemage-plugin-platform.md`, `docs/architecture/shinemage-plugin-boundaries.md`, `docs/architecture/shinemage-plugin-boundaries.json`, `config/shinemage-plugin-boundaries.v1.json`, `scripts/dsh-b0/plugin-boundaries.mjs`.
+  - Verify: inventory covers every `dsh-plugins` package, direct/reverse imports, literal service/gateway paths and real package/control commands; dynamic dispatch, auth and lifecycle require separate runtime evidence. `git diff --check`; no real DuckDB/path/secret included.
+  - Status 2026-10-03: **IMPLEMENTED / STATIC PASS**. All 10 packages, 579 sources, 29 cross-package imports, 190 literal route occurrences, 10 owned contracts and 8 control entries are inventoried. Eight parser/policy tests and the B0 pipeline pass. Five temporary CRM source edges have explicit retirement conditions; T1 completion does not close T15/T17. Evidence: `docs/hackathon/evidence/dsh-g0-board-components-20261003.md`.
 
 - [ ] **T2 (P1, human: ~6h / CC: ~35min)** — DSH contract spike — compare exact 0.1.7-rc.2 and 0.2.0-rc.2 capability, slot, client lifecycle, restart/unload, shell/tool timeout and synthetic session/WAL behavior.
   - Surfaced by: CEO-REVIEW-002 and Section 1 ARCH-002.
@@ -1499,6 +1530,9 @@ Synthesized from this review's findings. Run with Claude Code or Codex; checkbox
   - Verify: two plugin packages build from clean package boundaries without importing workbench source or runtime state; each package produces a controlled pack/tarball whose files/exports and peer/invariant checks fail closed; `workspace:*` and file links are resolved or rejected before packing; the digest is over that pack output plus pinned generated-contract inputs, not a workspace or file: link; the extraction order remains shine-brand → board-components → CRM adapter → query/cockpit/workbench.
   - Status 2026-10-02: **PARTIAL**. A controlled plugin-only pack boundary now validates package identity, exact DSH peer pin, package manager, allowlisted build output, symlink/special-file and workspace/file/link dependency rejection, clean source commit, tarball entry allowlist and SHA-256 receipt. Synthetic fixture: 4/4 pass; the boundary regression suite is 8/8. After fixed upstream dependencies were prepared in ignored `.context/dsh-b0`, the real workbench host/client typecheck, build and pack passed; the real `shine-brand` build and 7/7 lifecycle tests pass, and its pack passed before the shared build entry refactor. The new workspace dev-only `plugin-kit` removes leaf build imports from workbench toolchain source, with a boundary regression test; funnel/waterfall now copy their source helper into `lib/` and publish only `lib/` exports. A clean reviewed commit must rerun both real tarballs. The build-tools `brace-expansion` finding was fixed at 2.1.7 and online production audit is now 0 vulnerabilities, with a supply-chain regression test. Signature/SBOM/source trust and the full two-package boundary remain open. Evidence: `scripts/release/plugin-pack.mjs`, `scripts/release/plugin-pack.test.mjs`, `scripts/release/plugin-boundary.test.mjs`, `scripts/release/supply-chain.test.mjs`, `docs/hackathon/evidence/dsh-g0-plugin-pack-20261002.md`.
 
+  - [x] Workspace board-components extraction: public JS/types, digest-pinned input, legacy subpath consumers, workbench source-only rebuild and controlled pack.
+  - Status 2026-10-03: **PARTIAL**. Kit owns pin/lock/patches. Brand/query isolated build/test/pack remain covered; board-components now publishes an exact tarball with JS/types and no DSH runtime dependency. Workbench and legacy graph adapters consume public exports with digest locks; the six workbench source edges are retired. Workbench clean rebuild and controlled pack use only its own source, kit and the locked tarball; six compiled outputs match. Fixture commits are not reviewed release identities. Five CRM source edges, invariant/native lifecycle and supply-chain gates remain open. Evidence: `docs/hackathon/evidence/dsh-g0-board-components-20261003.md`.
+
 - [ ] **T16 (P2, human: ~3h / CC: ~15min)** — Preflight build baseline and bounded parallelism gate — measure serial plugin build time first, then document whether independent package builds can run in parallel without changing ordered admission or activation.
   - Surfaced by: Performance Eng finding PERF-ENG-001 and `scripts/release/preflight.mjs:121-126`.
   - Files: `scripts/release/preflight.mjs`, `docs/operating/` SLI/runbook and synthetic load fixtures.
@@ -1550,17 +1584,17 @@ Synthesized from this review's findings. Run with Claude Code or Codex; checkbox
 
 ## Worktree parallelization strategy
 
-The first slice has several independent evidence lanes, but profile, contract and state files are shared boundaries. Keep the lanes disjoint until their evidence is merged; do not parallelize physical extraction or activation changes before T17/T1 are complete.
+This is a dependency map, not automatic authorization to create agents/worktrees. The first slice has several independent evidence lanes, but profile, contract and state files are shared boundaries. Keep the lanes disjoint until their evidence is merged; do not parallelize physical extraction or activation changes before T17/T1 are complete.
 
 | Step | Modules touched | Depends on |
 |---|---|---|
 | Lane A — inventory and DSH contracts (T1 → T2 → T20) | `docs/architecture/`, `.context/dsh-b0/`, synthetic DSH fixtures | — |
-| Lane B — CRM/API and native path (T3 → T14 → T17) | `backend/contracts/`, `backend/tests/`, `scripts/dsh-b0/` | T1 for boundary ownership; T17 blocks stronger activation claims |
+| Lane B — CRM/API and native path (T3/T7 save matrix → T14; after T17) | `backend/contracts/`, `backend/tests/`, `scripts/dsh-b0/` | T1 for boundary ownership; T17 blocks stronger activation claims |
 | Lane C — profile/release/trust (T5 → T7 → T13 → T19) | `scripts/release/`, profile manifest, evidence/runbooks | T1/T2 for pins and bundle ownership |
 | Lane D — measurement and stop/go (T10 → T16 → T18 → T12) | `docs/operating/`, synthetic load/recovery fixtures | Lanes A–C evidence and T17 |
-| Sequential extraction (T15) | `dsh-plugins/`, package manifests/exports, boundary manifest | T1, T3, T17, then stop/go |
+| Workspace package proof (T15) | `dsh-plugins/`, package manifests/exports, boundary manifest | T1; leaf pack can precede T17; D15 install follows T17. Physical split follows stop/go. |
 
-Execution order: launch Lane A and the read-only parts of Lane B/C; merge the inventory and contract evidence; run T17 before any activation implementation; then run T14/T13/T19 and the measurement lane. T15 and physical repository extraction remain sequential after the stop/go gate. Shared conflicts are the boundary manifest, profile schema, release journal and generated contract types; one owner updates each in order.
+Execution order: launch Lane A and the read-only parts of Lane B/C; merge the inventory and contract evidence; run T17 before any activation implementation; then run T14/T13/T19 and the measurement lane. T15 workspace package proof runs before stop/go and is a G0 input; only physical repository extraction waits until after stop/go. Shared conflicts are the boundary manifest, profile schema, release journal and generated contract types; one owner updates each in order.
 
 ## Failure modes
 
@@ -1619,7 +1653,9 @@ The diagrams in this plan are newly generated for the current workspace-first pl
 | Diagrams produced | architecture, data flow, state machine, error flow (registry), deployment, rollback (deployment sequence plus rollback contract) |
 | Stale diagrams found | 0 |
 | Unresolved decisions | Prior CEO/Eng six-item set remains; this DX review adds one unanswered optional T23 presentation decision. |
-## DX Completion Summary
+## DX Completion Summary（历史快照）
+
+> 此表记录早期评审结束时的状态；T23 已回答并实现，T21 已有 PARTIAL 命令，当前不再有该待选题。
 
 | Item | Result |
 |---|---|
@@ -2169,4 +2205,4 @@ Approval readiness: **PASS for this review's decisions** — D1-A freshness enve
 
 **UNRESOLVED DECISIONS:**
 - Current Eng Review: none; D1–D8 and DX8/T23 have explicit answers. Remaining T17/T13/T15/T21/T9/T14 items are implementation or evidence gates, not unanswered choices.
-- +12 unresolved from prior reviews: CEO 6, Design 5 and DX 1; those historical ledger rows remain preserved even though the current Eng decisions close the scope questions they touched.
+- 历史评审曾计 CEO 6、Design 5、DX 1；这不是 12 个当前待答题。D3–D8 已关闭本轮选择，剩余是 T17 宿主、T3 保存、T15 包边界、T5/T19 信任链、T9/T14 UI 和 T10/T12 测量等实施证据。
