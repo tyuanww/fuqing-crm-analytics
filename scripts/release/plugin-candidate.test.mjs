@@ -8,6 +8,7 @@ import { promisify } from 'node:util';
 import test from 'node:test';
 import { createPluginCandidate } from './plugin-candidate.mjs';
 import { recordEvent } from './state.mjs';
+import { serviceFixture } from './test-fixtures/service-compatibility.mjs';
 
 const exec = promisify(execFile);
 const SHA = '477b4f420553e8a52c2fbccc464d7561b239c443';
@@ -74,4 +75,35 @@ test('plugin candidate rejects missing state path and unallowlisted package', as
   await writeFile(join(other, 'package.json'), JSON.stringify({ name: '@shine-mage/other', version: '0.1.0', packageManager: 'pnpm@11.7.0', type: 'module', peerDependencies: { '@deepseek-ai/dsh-tools': '0.1.7-rc.2' }, files: ['lib/'] }));
   await writeFile(join(other, 'lib/index.js'), 'export {};\n');
   await assert.rejects(() => createPluginCandidate({ ...input, plugin: other, outputDir: join(input.root, 'other-candidate'), profileManifest: input.profile }), /PLUGIN_CANDIDATE_NOT_ALLOWLISTED/);
+});
+
+test('candidate binds service proof and rejects missing/tampered evidence before packing', async t => {
+  const input = await fixture(t), { binding, evidenceJson, gate } = await serviceFixture();
+  const profilePath = join(input.root, input.profile);
+  const profile = JSON.parse(await readFile(profilePath));
+  await writeFile(profilePath, JSON.stringify({ ...profile, service_binding: binding }));
+  await assert.rejects(() => createPluginCandidate({ ...input, profileManifest: input.profile }), /SERVICE_EVIDENCE_REQUIRED/);
+  await assert.rejects(() => readFile(join(input.outputDir, 'candidate.json')), { code: 'ENOENT' });
+  const evidencePath = join(input.root, 'service-evidence.json');
+  await writeFile(evidencePath, evidenceJson + ' ');
+  await assert.rejects(() => createPluginCandidate({ ...input, profileManifest: input.profile, serviceEvidencePath: evidencePath }), /SERVICE_EVIDENCE_DIGEST_MISMATCH/);
+  await assert.rejects(() => readFile(input.statePath), { code: 'ENOENT' });
+  await writeFile(evidencePath, evidenceJson);
+  const result = await createPluginCandidate({ ...input, profileManifest: input.profile, serviceEvidencePath: evidencePath });
+  assert.deepEqual(result.service_compatibility, gate);
+  assert.deepEqual(JSON.parse(await readFile(input.statePath)).journal.at(-1).service_binding, binding);
+  const { candidate_digest, activation, state_scope, ...base } = result;
+  assert.equal(candidate_digest, createHash('sha256').update(JSON.stringify(base)).digest('hex'));
+});
+
+test('candidate cannot remove a previous profile service contract or request an old writer', async t => {
+  const input = await fixture(t), { binding, evidenceJson, evidence } = await serviceFixture();
+  const profile = JSON.parse(await readFile(join(input.root, input.profile)));
+  const previous = 'config/previous.json', path = join(input.root, 'receipt.json');
+  await writeFile(join(input.root, previous), JSON.stringify({ ...profile, service_binding: binding }));
+  await assert.rejects(() => createPluginCandidate({ ...input, profileManifest: input.profile, previousProfile: previous }), /SERVICE_BINDING_REMOVAL_FORBIDDEN/);
+  await writeFile(join(input.root, input.profile), JSON.stringify({ ...profile, service_binding: { ...binding, source_sha: evidence.baseline } }));
+  await writeFile(path, evidenceJson);
+  await assert.rejects(() => createPluginCandidate({ ...input, profileManifest: input.profile, serviceEvidencePath: path }), /SERVICE_OLD_WRITER_FORBIDDEN/);
+  await assert.rejects(() => readFile(input.statePath), { code: 'ENOENT' });
 });

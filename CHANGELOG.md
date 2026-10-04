@@ -2,6 +2,9 @@
 
 ### Added
 
+- D15 本地候选可显式绑定服务源码、API/状态版本和实际兼容回执；同一绑定进入 candidate、release payload/profile、安装标记及 journal。激活/回退在幂等返回和指针写入前核验，拒绝旧服务可写降级、绑定丢失和错包；本机证据不能授权现场激活，生产保存 UI 仍未启用。
+- `preflight` 提前校验并向 release 传递服务兼容证据，避免声明保存服务后完成构建才发现缺少回执。
+
 - 首购分析增加版本化结果/来源与服务端 freshness、精确候选准入、受控保存及 SAVED/SAVE_UNKNOWN 回执。写锁内重验当前权限和有效期，分析/回执/来源同事务落盘；丢失响应可在任务或策略移除后精确重放。旧 v1/SQLite schema 保留，显式启用 D15 策略后旧保存入口拒绝绕过门禁；生产策略与保存 UI 仍未启用。
 
 - `pnpm dsh plugin verify-host` 将同一插件候选、profile 快照、CRM/知识组合和固定 rc2 的本机宿主证据接到既有 journal；重试幂等，不修改候选或激活服务。增加 SQLite 提交前后进程丢失、保存回放与 forward-fix 验证；这些本地结果不放行生产发布或 D15 保存门禁。

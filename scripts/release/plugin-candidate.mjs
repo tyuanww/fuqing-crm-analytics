@@ -16,6 +16,7 @@ import { capabilityMatrix } from './action-contract.mjs';
 import { packPlugin } from './plugin-pack.mjs';
 import { loadReleaseProfile } from './profile.mjs';
 import { recordEvent } from './state.mjs';
+import { prepareServiceCompatibility } from './service-compatibility.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const SHA256 = /^[a-f0-9]{64}$/;
@@ -51,7 +52,7 @@ function profileDiff(current, previous) {
   };
 }
 
-export async function createPluginCandidate({ root: candidateRoot = root, plugin, outputDir, statePath, profileManifest = null, previousProfile = null } = {}) {
+export async function createPluginCandidate({ root: candidateRoot = root, plugin, outputDir, statePath, profileManifest = null, previousProfile = null, serviceEvidencePath = null } = {}) {
   const repo = resolve(candidateRoot);
   const pluginRoot = absolute(plugin, 'PLUGIN_CANDIDATE_PLUGIN_REQUIRED');
   const destination = absolute(outputDir, 'PLUGIN_CANDIDATE_OUTPUT_REQUIRED');
@@ -69,6 +70,8 @@ export async function createPluginCandidate({ root: candidateRoot = root, plugin
   assert.equal(pluginReal, profilePluginReal, 'PLUGIN_CANDIDATE_PLUGIN_PATH_MISMATCH');
   // Validate all read-only inputs before producing a package.
   const prior = previousProfile ? await loadReleaseProfile({ root: repo, manifestPath: previousProfile }) : null;
+  assert.ok(!prior?.profile.service_binding || profile.profile.service_binding, 'SERVICE_BINDING_REMOVAL_FORBIDDEN');
+  const serviceGate = await prepareServiceCompatibility(profile.profile.service_binding, serviceEvidencePath);
   await access(destination).catch(async error => { if (error.code !== 'ENOENT') throw error; await mkdir(destination, { recursive: true, mode: 0o700 }); });
   assert.equal((await readdir(destination)).length, 0, 'PLUGIN_CANDIDATE_OUTPUT_MUST_BE_EMPTY');
   const packReceipt = await packPlugin({ plugin: pluginReal, outputDir: destination, manifestPath: resolve(destination, 'plugin-pack.json') });
@@ -85,6 +88,7 @@ export async function createPluginCandidate({ root: candidateRoot = root, plugin
     profile_snapshot: { name: 'profile.json', sha256: profile.digest },
     plugin: { id: selected.id, path: selected.path, version: packReceipt.package_version, dsh_pin: packReceipt.dsh_pin },
     source_sha: packReceipt.source_sha,
+    ...(serviceGate ? { service_compatibility: serviceGate } : {}),
     pack: { name: packReceipt.tarball.name, sha256: packReceipt.tarball.sha256, bytes: packReceipt.tarball.bytes },
     capabilities,
     profile_diff: profileDiff(profile.profile, prior?.profile),
@@ -110,6 +114,7 @@ export async function createPluginCandidate({ root: candidateRoot = root, plugin
     candidate_digest: candidate.candidate_digest,
     profile_digest: profile.digest,
     pack_sha256: packReceipt.tarball.sha256,
+    ...(serviceGate ? { service_binding: serviceGate.binding } : {}),
   }, { idempotencyKey: `candidate-intent:${candidateKey}` });
   await writeAtomic(pendingPath, candidate);
   await rename(pendingPath, receiptPath);
@@ -121,6 +126,7 @@ export async function createPluginCandidate({ root: candidateRoot = root, plugin
       candidate_digest: candidate.candidate_digest,
       profile_digest: profile.digest,
       pack_sha256: packReceipt.tarball.sha256,
+      ...(serviceGate ? { service_binding: serviceGate.binding } : {}),
     }, { idempotencyKey: `candidate:${candidateKey}` });
   } catch (error) {
     // Make an uncommitted receipt visibly pending so operators cannot mistake
@@ -139,9 +145,9 @@ function option(name) {
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
   try {
     if (process.argv.includes('--help') || process.argv.includes('-h')) {
-      console.log('Usage: pnpm dsh plugin candidate --plugin /absolute/plugin --output-dir /absolute/output --state-path /absolute/state.json [--profile /relative/profile.json] [--previous-profile /relative/profile.json]');
+      console.log('Usage: pnpm dsh plugin candidate --plugin /absolute/plugin --output-dir /absolute/output --state-path /absolute/state.json [--profile /relative/profile.json] [--previous-profile /relative/profile.json] [--service-evidence /absolute/receipt.json]');
     } else {
-      const candidate = await createPluginCandidate({ plugin: option('--plugin'), outputDir: option('--output-dir'), statePath: option('--state-path'), profileManifest: option('--profile'), previousProfile: option('--previous-profile') });
+      const candidate = await createPluginCandidate({ plugin: option('--plugin'), outputDir: option('--output-dir'), statePath: option('--state-path'), profileManifest: option('--profile'), previousProfile: option('--previous-profile'), serviceEvidencePath: option('--service-evidence') });
       console.log(JSON.stringify(candidate, null, 2));
     }
   } catch (error) {

@@ -48,4 +48,4 @@ identity schema 为 `analytics-first-purchase-save-identity/v1`，含 action_id�
 
 SQLite schema 仍为 1，无迁移。保存旁证使用现有幂等表中的独立 operation；旧 saved-analysis/native-receipt/cockpit v1 的字段不变，PINNED 继续表示固定快照。已有 v1 保存保留；服务显式配置 D15 provider 后，旧 POST analyses 返回 VERSIONED_SAVE_REQUIRED，避免绕过新门禁。纯标题 forward-fix 保留原 facts 和 provenance，创建新版本；原保存回执仍指向原版本，profile 回退不删除数据。
 
-插件严格 decoder 与类型见 `first-purchase-save-model.mjs/.d.mts`；它不读取本地时钟决定资格，也不改变现有 UI。验证命令与证据见[本轮记录](../hackathon/evidence/dsh-g0-save-admission-20261004.md)。固定源码对的[兼容窗口](../architecture/first-purchase-service-compatibility.md)已实测：旧服务仅允许只读身份，D15 可写状态禁止随 profile 降级。服务包/依赖窗口及激活门禁、生产策略/认证接线、UI 和现场验收继续 PARTIAL/NOT_RUN。
+插件严格 decoder 与类型见 `first-purchase-save-model.mjs/.d.mts`；它不读取本地时钟决定资格，也不改变现有 UI。验证命令与证据见[本轮记录](../hackathon/evidence/dsh-g0-save-admission-20261004.md)。固定源码对的[兼容窗口](../architecture/first-purchase-service-compatibility.md)已实测：旧服务仅允许只读身份，D15 可写状态禁止随 profile 降级。候选/接收/激活/回退已消费显式 `service_binding`，但本机证据仅允许准备 candidate；现场激活仍 fail closed。服务包/依赖窗口、目标主机证据验证器、生产策略/认证接线、UI 和现场验收继续 PARTIAL/NOT_RUN。

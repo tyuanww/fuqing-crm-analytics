@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdir, mkdtemp, readFile, readlink, stat, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readlink, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
@@ -17,6 +17,7 @@ import { evaluateSli } from './operator-gate.mjs';
 import { pageGuard } from './page-policy.mjs';
 import { scanText } from './secret-scan.mjs';
 import { releaseAssetNames, summarizePreflight, verifyPreflight, UPSTREAM_SHA } from './preflight-bundle.mjs';
+import { serviceFixture } from './test-fixtures/service-compatibility.mjs';
 
 const fixture = () => mkdtemp(join(tmpdir(), 'dsh-release-'));
 const testStatePath = releaseRoot => join(dirname(releaseRoot), 'release-state.json');
@@ -41,6 +42,52 @@ async function manifest(root, archive, tag='dsh-test', payloadData={'VERSION':'0
   const m={schema_version:'release-manifest/v1',release_tag:tag,product_version:'0.18.0.1',source_sha:'a'.repeat(40),dsh_upstream_sha:'4'.repeat(40),archive_allowlist:Object.keys(payloadData),denylist_version:'release-denylist/v1',artifact_bytes:bytes.length,artifact_sha256:sha(bytes),payload};
   const path=join(root,'manifest.json'); await writeFile(path,JSON.stringify(m)); return path;
 }
+
+test('artifact receive/install binds profile and service evidence, but local evidence cannot activate', async t => {
+  const root = await fixture(), archive = join(root, 'with-service.tar.gz');
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const { binding, gate } = await serviceFixture();
+  const profile = { schema_version: 'dsh-profile/v1', profile_id: 'service-test',
+    dsh: { sdk_version: '0.1.7-rc.2', upstream_sha: UPSTREAM_SHA },
+    plugins: [{ path: 'plugin', id: '@shine-mage/test-plugin', build: 'build.mjs', enabled: true }],
+    service_binding: binding };
+  const profileBytes = JSON.stringify(profile), profilePath = 'config/profile.json';
+  archiveWithEntries(archive, [{ name: 'VERSION', data: '0.18.0.1\n' }, { name: profilePath, data: profileBytes }]);
+  const manifestPath = await manifest(root, archive, 'dsh-service', { VERSION: '0.18.0.1\n', [profilePath]: profileBytes });
+  const original = JSON.parse(await readFile(manifestPath));
+  original.profile_snapshot = { path: profilePath, sha256: sha(profileBytes) };
+  original.service_compatibility = gate;
+  await writeFile(manifestPath, JSON.stringify(original));
+  const releaseRoot = join(root, 'host'), statePath = join(root, 'journal.json');
+  const input = { artifact: archive, manifestPath, releaseRoot, tag: 'dsh-service', statePath, offline: true };
+  const installed = await installRelease(input);
+  assert.deepEqual(JSON.parse(await readFile(join(installed.path, 'release-marker.json'))).service_compatibility, gate);
+  const journal = await readFile(statePath, 'utf8');
+  await assert.rejects(() => activateRelease({ ...input, sourceSha: 'a'.repeat(40) }), /SERVICE_ACTIVATION_EVIDENCE_INCOMPLETE/);
+  assert.equal(await readFile(statePath, 'utf8'), journal);
+  await assert.rejects(() => readlink(join(releaseRoot, 'current')), { code: 'ENOENT' });
+  const markerPath = join(installed.path, 'release-marker.json');
+  const marker = JSON.parse(await readFile(markerPath));
+  marker.service_compatibility = { ...gate, binding: { ...binding, access: 'read-only' } };
+  await writeFile(markerPath, JSON.stringify(marker));
+  await assert.rejects(() => activateRelease({ ...input, sourceSha: 'a'.repeat(40) }), /SERVICE_JOURNAL_BINDING_MISMATCH/);
+  assert.equal(await readFile(statePath, 'utf8'), journal);
+  delete marker.service_compatibility;
+  await writeFile(markerPath, JSON.stringify(marker));
+  await assert.rejects(() => activateRelease({ ...input, sourceSha: 'a'.repeat(40) }), /SERVICE_BINDING_REMOVAL_FORBIDDEN/);
+  assert.equal(await readFile(statePath, 'utf8'), journal);
+  await assert.rejects(() => readlink(join(releaseRoot, 'current')), { code: 'ENOENT' });
+  for (const [name, change, expected] of [
+    ['removed-proof', v => { delete v.service_compatibility; }, /SERVICE_GATE_SHAPE/],
+    ['changed-proof', v => { v.service_compatibility.evidence_json += ' '; }, /SERVICE_EVIDENCE_DIGEST_MISMATCH/],
+    ['removed-profile', v => { delete v.profile_snapshot; }, /SERVICE_PROFILE_SNAPSHOT_REQUIRED/],
+    ['wrong-profile', v => { v.profile_snapshot.sha256 = '0'.repeat(64); }, /SERVICE_PROFILE_PAYLOAD_MISMATCH/],
+    ['unknown-field', v => { v.service_compatibility.bypass = true; }, /SCHEMA_INVALID/],
+  ]) {
+    const changed = structuredClone(original); change(changed); await writeFile(manifestPath, JSON.stringify(changed));
+    await assert.rejects(() => receiveArtifact({ artifact: archive, manifestPath, destination: join(root, name) }), expected);
+  }
+});
 
 test('receiver binds archive digest and extracted payload exactly', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); const out=join(root,'nested','out'); const got=await receiveArtifact({artifact:archive,manifestPath:m,destination:out}); assert.equal(got.entries,1); });
 test('receive failure stays UNKNOWN and verifies installed bytes before recovering a lost receipt', async () => {

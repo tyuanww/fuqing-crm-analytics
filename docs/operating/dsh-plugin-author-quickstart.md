@@ -53,6 +53,12 @@ cat "$candidate_root/pack/candidate.json"
 
 最终 tarball 在私有临时目录安全解包，核对 `exports`（含条件分支）、`main`/`module` 和 `dsh.bundle.patch` 指向的文件，再执行敏感文件/secret scan；通过后才发布包与回执。源码映射、敏感文件或缺失入口均阻断，内容校验失败不发布 tarball；通过校验后若回执落盘失败，已验证包仍保留，需核对输出后使用新的候选目录重试。通配 exports 暂不支持，须列出明确入口。
 
+## 声明保存服务依赖（本地候选）
+
+使用 D15 保存的显式试验 profile 增加 [`service_binding`](../architecture/first-purchase-service-compatibility.md#候选和主机门禁)，记录精确服务源码、API/状态合同、访问模式、保留服务/数据的回退规则，以及实际兼容回执的 SHA-256。先执行 `service-save-compatibility.py`，再向上述 `plugin candidate` 命令追加 `--profile config/your-profile.json --service-evidence /absolute/receipt.json`。
+
+候选同时保存原回执、绑定和 digest；已验证缺失证据、旧服务可写组合、陈旧验证器或与 profile 不符均在打包前拒绝。通过只表示 `LOCAL_COMPATIBLE`，`release_ready=false`；缺最终服务包/主机证据时实际激活继续拒绝。单纯展示插件无需声明该服务，默认 profile 与生产保存开关不变。`verify-host` 的 CRM＋知识宿主观测不能替代 analysis-service 验收。
+
 ## 连接已有宿主证据（CRM＋知识首期）
 
 专用 allowlist `config/dsh-profile.crm-knowledge.rc2.json` 只选择 CRM 和知识两个独立包，默认七插件 release profile 不变。在同一干净提交与已完成构建/测试的双包上执行：

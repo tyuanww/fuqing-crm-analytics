@@ -15,6 +15,7 @@ import { receiveArtifact } from './artifact.mjs';
 import { releaseAssetNames, summarizePreflight, verifyPreflight, UPSTREAM_SHA } from './preflight-bundle.mjs';
 import { collectReleaseReadiness, printReadiness } from './readiness.mjs';
 import { DSH_SDK_VERSION } from './toolchain.mjs';
+import { prepareServiceCompatibility } from './service-compatibility.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const upstream = resolve(process.env.DSH_UPSTREAM_CHECKOUT || join(root, `.context/dsh-b0/upstream-${DSH_SDK_VERSION}`));
@@ -29,12 +30,21 @@ function option(name, fallback = null) {
 }
 
 if (process.argv.includes('--help') || process.argv.includes('-h')) {
-  console.log('Usage: node scripts/release/preflight.mjs [--check] --python /absolute/python3.14 --tag TAG [--source-sha SHA] [--output-dir PATH]');
+  console.log('Usage: node scripts/release/preflight.mjs [--check] --python /absolute/python3.14 --tag TAG [--source-sha SHA] [--output-dir PATH] [--service-evidence /absolute/receipt.json]');
   console.log('--check is read-only: it validates toolchain, clean tree, pinned upstream, runtime bundle, plugins, zstd and output paths without network/build/artifact side effects.');
   process.exit(0);
 }
 
 const checkOnly = process.argv.includes('--check');
+if (process.argv.filter(value => value === '--service-evidence').length > 1) {
+  console.error('SERVICE_EVIDENCE_AMBIGUOUS'); process.exit(2);
+}
+const serviceEvidenceIndex = process.argv.indexOf('--service-evidence');
+const serviceEvidenceValue = serviceEvidenceIndex < 0 ? null : process.argv[serviceEvidenceIndex + 1];
+if (serviceEvidenceIndex >= 0 && (!serviceEvidenceValue || serviceEvidenceValue.startsWith('--'))) {
+  console.error('SERVICE_EVIDENCE_REQUIRED'); process.exit(2);
+}
+const serviceEvidencePath = serviceEvidenceValue ? resolve(serviceEvidenceValue) : null;
 const pythonValue = option('--python');
 const tag = option('--tag');
 assert.ok(pythonValue && isAbsolute(pythonValue), 'ABSOLUTE_PYTHON_REQUIRED');
@@ -59,6 +69,19 @@ if (currentSourceSha !== sourceSha) {
 // prepare stage.  The read-only check must still require that checkout, while
 // the build path may start on a clean runner where it does not exist yet.
 const readiness = await collectReleaseReadiness({ root, pythonPath: python, upstreamPath: upstream, outputDir, requireClean: true, requireRuntime: checkOnly, requireOutput: true, requireUpstream: checkOnly });
+// Validate before prepare/build/network work; release validates the same bytes
+// again. A local service PASS never overrides runtime or production gates.
+if (readiness.profile) {
+  try {
+    const gate = await prepareServiceCompatibility(readiness.profile.profile.service_binding, serviceEvidencePath);
+    readiness.checks.push({ name: 'service-compatibility', ok: true, value: gate?.status ?? 'NOT_REQUIRED' });
+  } catch (error) {
+    const code = String(error?.message ?? '').match(/SERVICE_[A-Z0-9_]+/)?.[0] ?? 'SERVICE_EVIDENCE_INVALID';
+    readiness.checks.push({ name: 'service-compatibility', ok: false, value: 'unverified', code,
+      remedy: 'supply --service-evidence with the receipt bound to the selected profile',
+      ref: 'docs/architecture/first-purchase-service-compatibility.md' });
+  }
+}
 const evidenceExists = await lstat(evidenceDir).then(() => true, error => { if (error.code === 'ENOENT') return false; throw error; });
 if (evidenceExists) readiness.checks.push({ name: 'tag-evidence', ok: false, value: evidenceDir, code: 'PREFLIGHT_EVIDENCE_EXISTS', remedy: 'inspect prior evidence and use a fresh tag for a new run' });
 readiness.ok = readiness.checks.every(check => check.ok);
@@ -133,7 +156,9 @@ try {
   // succeeds, package that exact pnpm store offline so a transient registry
   // or CDN outage cannot invalidate an otherwise ready candidate.
   await stage('runtime', () => run(process.execPath, ['scripts/release/runtime-bundle.mjs', '--upstream', upstream, '--output', runtimeOutput]));
-  await stage('release', () => run(process.execPath, ['scripts/dsh.mjs', 'release', '--offline', '--tag', tag], { DSH_UPSTREAM_RUNTIME_BUNDLE: runtimeOutput, RELEASE_STATE_PATH: join(runDir, 'release-state.json') }));
+  await stage('release', () => run(process.execPath, ['scripts/dsh.mjs', 'release', '--offline', '--tag', tag,
+    ...(serviceEvidencePath ? ['--service-evidence', serviceEvidencePath] : [])],
+  { DSH_UPSTREAM_RUNTIME_BUNDLE: runtimeOutput, RELEASE_STATE_PATH: join(runDir, 'release-state.json') }));
   await stage('test', () => run(process.execPath, ['scripts/dsh.mjs', 'test']));
   const scratch = await mkdtemp(join(tmpdir(), 'release-preflight-receive-'));
   try {

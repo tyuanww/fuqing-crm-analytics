@@ -34,7 +34,7 @@
 
 ## release 参数和配置优先级
 
-`release` 只接受 `--offline`、`--dry-run`、`--tag`、`--config` 和 `--state-path`。state path 必须是绝对路径，可用命令参数或 `RELEASE_STATE_PATH` 提供；不会猜测 `.context/release-evidence/state.json`。release tag 的优先级是：
+`release` 只接受 `--offline`、`--dry-run`、`--tag`、`--config`、`--state-path` 和 `--service-evidence`。state path 必须是绝对路径，可用命令参数或 `RELEASE_STATE_PATH` 提供；不会猜测 `.context/release-evidence/state.json`。release tag 的优先级是：
 
 1. `--tag TAG`
 2. 环境变量 `DSH_RELEASE_TAG`
@@ -42,6 +42,10 @@
 4. `VERSION` 推导出的 `dsh-<VERSION>-candidate`
 
 配置文件路径的优先级是 `--config`、`DSH_CONFIG_FILE`、仓库根目录 `.dshrc.json`。tag 必须匹配 `dsh-[A-Za-z0-9._-]+`。`release` 会拒绝 dirty worktree 和已存在的非空 evidence 目录，保证证据目录不可覆盖。
+
+`plugin candidate` 也支持 `--service-evidence /absolute/receipt.json`。当 profile 声明 D15 `service_binding` 时该参数必需；无声明时不接受额外证据。新 release manifest 将所选 profile 的路径/摘要绑定到实际 payload，并嵌入同一服务兼容回执；完整字段见[服务兼容合同](../architecture/first-purchase-service-compatibility.md#候选和主机门禁)。当前只支持本地源码兼容证据，现场 activation/rollback 对该声明保持 `SERVICE_ACTIVATION_EVIDENCE_INCOMPLETE`；`--offline` 不放行激活，旧服务可写组合更早返回 `SERVICE_OLD_WRITER_FORBIDDEN`。
+
+`preflight [--check] --service-evidence /absolute/receipt.json` 在 readiness 阶段检查此证据，正式执行时继续传给 `release --offline`；其他 runtime、clean tree 与发布门禁保持独立。缺证据、缺参数值或重复参数均返回阻断，正式八阶段未在此次局部门禁审查中重跑。
 
 ## artifact 内容合同
 

@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { transition } from './state.mjs';
+import { serviceFixture } from './test-fixtures/service-compatibility.mjs';
 
 const root = join(import.meta.dirname, '..', '..');
 const cli = join(root, 'scripts/dsh.mjs');
@@ -155,4 +156,41 @@ test('preflight check rejects a source SHA that is not the current checkout', as
   } finally {
     await rm(rootDir, { recursive: true, force: true });
   }
+});
+
+test('preflight checks declared service evidence before build and preserves its read-only boundary', async t => {
+  await mkdir(join(root, '.context'), { recursive: true });
+  const trial = await mkdtemp(join(root, '.context/preflight-service-'));
+  t.after(() => rm(trial, { recursive: true, force: true }));
+  const { binding, evidenceJson } = await serviceFixture();
+  const profile = JSON.parse(await readFile(join(root, 'config/dsh-profile.rc2.json')));
+  const profilePath = join(trial, 'profile.json'), evidencePath = join(trial, 'receipt.json');
+  await writeFile(profilePath, JSON.stringify({ ...profile, service_binding: binding }));
+  await writeFile(evidencePath, evidenceJson);
+  const python = execFileSync('sh', ['-c', 'command -v python3'], { encoding: 'utf8' }).trim();
+  const output = join(trial, 'output');
+  const run = extra => spawnSync(process.execPath, [join(root, 'scripts/release/preflight.mjs'), '--check', '--python', python, '--tag', 'dsh-service-precheck', '--output-dir', output, ...extra], {
+    cwd: root, encoding: 'utf8', timeout: 10000,
+    env: { ...process.env, DSH_PROFILE_MANIFEST: profilePath, DSH_UPSTREAM_RUNTIME_BUNDLE: '' },
+  });
+  const missing = run([]);
+  assert.equal(missing.status, 2);
+  assert.match(missing.stdout + missing.stderr, /SERVICE_EVIDENCE_REQUIRED/);
+  const valid = run(['--service-evidence', evidencePath]);
+  assert.match(valid.stdout, /PASS service-compatibility=LOCAL_COMPATIBLE/);
+  // No runtime bundle: valid service evidence must not override other gates.
+  assert.equal(valid.status, 2);
+  assert.match(valid.stdout, /RELEASE_UPSTREAM_RUNTIME_REQUIRED/);
+  await writeFile(evidencePath, evidenceJson + ' ');
+  const tampered = run(['--service-evidence', evidencePath]);
+  assert.equal(tampered.status, 2);
+  assert.match(tampered.stdout + tampered.stderr, /SERVICE_EVIDENCE_DIGEST_MISMATCH/);
+  const duplicate = run(['--service-evidence', evidencePath, '--service-evidence', evidencePath]);
+  assert.equal(duplicate.status, 2);
+  assert.match(duplicate.stderr, /SERVICE_EVIDENCE_AMBIGUOUS/);
+  const missingValue = run(['--service-evidence']);
+  assert.equal(missingValue.status, 2);
+  assert.match(missingValue.stderr, /SERVICE_EVIDENCE_REQUIRED/);
+  for (const result of [missing, valid, tampered, duplicate, missingValue]) assert.doesNotMatch(result.stdout, /DSH_PREFLIGHT_STAGE /);
+  await assert.rejects(() => readFile(join(output, 'release-preflight.json')), { code: 'ENOENT' });
 });

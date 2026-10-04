@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { lstat, readFile, realpath } from 'node:fs/promises';
 import { join, relative, resolve, sep } from 'node:path';
 import { DSH_SDK_VERSION, DSH_UPSTREAM_SHA } from './toolchain.mjs';
+import { validateServiceBinding } from './service-compatibility.mjs';
 
 export const PROFILE_SCHEMA = 'dsh-profile/v1';
 export const DEFAULT_PROFILE_MANIFEST = 'config/dsh-profile.rc2.json';
@@ -29,6 +30,7 @@ async function canonicalInside(root, candidate, code) {
 export function validateProfile(profile) {
   assert.ok(profile && typeof profile === 'object' && !Array.isArray(profile), 'PROFILE_MANIFEST_INVALID');
   assert.equal(profile.schema_version, PROFILE_SCHEMA, 'PROFILE_SCHEMA_UNSUPPORTED');
+  if (Object.hasOwn(profile, 'service_binding')) validateServiceBinding(profile.service_binding);
   assert.match(profile.profile_id, /^[a-z0-9][a-z0-9._-]{1,63}$/, 'PROFILE_ID_INVALID');
   assert.deepEqual(profile.dsh, { sdk_version: DSH_SDK_VERSION, upstream_sha: DSH_UPSTREAM_SHA }, 'PROFILE_DSH_PIN_MISMATCH');
   assert.ok(Array.isArray(profile.plugins) && profile.plugins.length > 0, 'PROFILE_PLUGINS_REQUIRED');

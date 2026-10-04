@@ -10,6 +10,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';
 import { validateProfile } from './profile.mjs';
 import { readState, recordEvent } from './state.mjs';
+import { validateServiceGate } from './service-compatibility.mjs';
 import { DSH_SDK_VERSION, DSH_UPSTREAM_SHA, NODE_MAJOR } from './toolchain.mjs';
 
 export const HOST_EVIDENCE_SCHEMA = 'dsh-pinned-host-acceptance/v2';
@@ -118,6 +119,11 @@ export async function verifyPluginHost({ candidatePath, evidencePath, statePath 
   assert.equal(hash(profileBytes), candidate.profile_digest, 'PLUGIN_HOST_PROFILE_DIGEST_MISMATCH');
   const profile = decode(profileBytes); validateProfile(profile);
   assert.equal(profile.profile_id, candidate.profile_id, 'PLUGIN_HOST_PROFILE_ID_MISMATCH');
+  if (Object.hasOwn(profile, 'service_binding')) {
+    await validateServiceGate(candidate.service_compatibility, profile.service_binding);
+  } else {
+    assert.equal(candidate.service_compatibility, undefined, 'SERVICE_PROFILE_BINDING_MISMATCH');
+  }
   // This exact drill covers only the approved CRM + knowledge slice. It
   // cannot certify an entire seven-plugin profile from one package's PASS.
   assert.deepEqual(profile.plugins.map(p => p.id), DOMAINS.map(p => p.id), 'PLUGIN_HOST_PROFILE_SCOPE_MISMATCH');

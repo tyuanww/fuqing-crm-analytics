@@ -14,12 +14,20 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 当前服务跨版本状态验证（2026-10-04）
+### 当前服务兼容证据门禁（2026-10-04，本地增量）
 
-- D15 审核修复已正常 hooks 本地提交为 `a50bd42492195040efaa6989c90e4fe84030551c`，提交后工作树干净，未 push；本节验证器/文档是随后新增的未提交工作。
+- 上一批兼容验证器/文档已完成 OCR delegate 全范围审核 **10/10**，正常 hooks 本地提交为 `d321971f6d56b5148c5715ad0461410290665f66`；固定源码对重跑 **9/9**、CLI 负测 **4/4**。随后门禁代码/文档已获审核修复后本地提交授权，最新提交以 Git 为准；未 push。
+- 显式保存 profile 的服务源码、API/状态版本、访问模式与实际兼容回执已绑定到 candidate、release payload/profile、安装 marker 和既有 journal。激活/回退及幂等重试在改变指针前检查；旧服务可写降级、缺证据/错版本/篡改和安装绑定丢失均拒绝。
+- 本轮 release suite **169 PASS / 0 SKIP**；完整 B0 **退出 0**，Python **665 PASS**，Node 阶段合计 **1508 PASS / 1 SKIP**（含 clean 重跑）。真实插件 candidate 已生成，真实回执的主机 CLI **3/3 拒绝负测**通过；指针和 journal 保持不变。首次失败、修复及证据见[本轮记录](docs/hackathon/evidence/dsh-g0-service-gate-20261004.md)。
+- 随后的提交前 OCR delegate 审查发现并修复 `preflight` 未校验/传递服务证据的问题；真实只读 CLI 负测先失败后通过，修复后 release suite **170 PASS / 0 SKIP**。上段 B0 属实现阶段结果，本次仅改发布入口，没有冒作重新执行完整 B0。见[提交前审核](docs/hackathon/evidence/dsh-g0-service-gate-review-20261004.md)。
+- T3/T7 仍 **PARTIAL**：目前只有本机源码兼容证据，所有声明 D15 服务的现场激活明确阻断。下一步补精确服务包/依赖与主机证据，再接 DSH 保存 UI、生产形状时限/UNKNOWN 与浏览器/WSL 验收；G0/stop-go 后推进物理分仓。生产 profile/provider 与保存 UI 未启用，本轮未操作杭州。
+
+### 上一批服务跨版本状态验证（2026-10-04）
+
+- D15 审核修复已正常 hooks 本地提交为 `a50bd42492195040efaa6989c90e4fe84030551c`，提交后工作树曾干净，未 push；本节验证器/文档当时为新增工作，现已随 `d321971f` 提交。
 - 固定旧服务 `56198c32` 与新服务 `a50bd424` 的实际源码，在独立进程完成 **9/9 预期观测**：旧状态升级、旧服务只读、恢复新版精确回放、标题 forward-fix、小库备份恢复与未知 schema 拒绝；另有 **4/4 CLI 负测**通过。见[证据](docs/hackathon/evidence/dsh-g0-service-save-compat-20261004.md)。
 - 已验证旧服务可写会让新标题版本失去 provenance；该组合明确 **BLOCKED**。插件/profile 回退应保留新版分析服务和 durable state；旧服务仅可用只读身份恢复访问。详见[兼容窗口](docs/architecture/first-purchase-service-compatibility.md)。
-- T3/T7 仍 PARTIAL：候选/激活门禁还未消费服务兼容证据，精确服务包/依赖窗口、生产形状时限、UI/浏览器/WSL 仍开放。保存 UI 保持 NOT_AVAILABLE；本轮无生产操作。
+- 该阶段候选/激活门禁尚未消费兼容证据，后续接线见上节；精确服务包/依赖窗口、生产形状时限、UI/浏览器/WSL 仍开放，T3/T7 仍 PARTIAL。保存 UI 保持 NOT_AVAILABLE；该阶段无生产操作。
 
 ### 上一批 D15 服务保存审核（2026-10-04）
 

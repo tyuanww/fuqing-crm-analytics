@@ -15,6 +15,28 @@
     "artifact_sha256"
   ],
   "properties": {
+    "profile_snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "service_compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "binding", "evidence_json", "status", "release_ready", "activation"],
+      "properties": {
+        "schema_version": { "type": "string", "enum": ["dsh-service-compatibility-gate/v1"] },
+        "binding": { "type": "object" },
+        "evidence_json": { "type": "string" },
+        "status": { "type": "string", "enum": ["LOCAL_COMPATIBLE"] },
+        "release_ready": { "type": "boolean", "enum": [false] },
+        "activation": { "type": "string", "enum": ["BLOCKED_SERVICE_PACKAGE_AND_HOST_EVIDENCE_REQUIRED"] }
+      }
+    },
     "schema_version": {
       "type": "string",
       "enum": [

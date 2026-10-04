@@ -15,6 +15,7 @@ import { DSH_UPSTREAM_SHA, NODE_MAJOR, PNPM_VERSION } from './release/toolchain.
 import { createPluginCandidate } from './release/plugin-candidate.mjs';
 import { verifyPluginHost } from './release/plugin-host-evidence.mjs';
 import { loadReleaseProfile } from './release/profile.mjs';
+import { prepareServiceCompatibility } from './release/service-compatibility.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const releaseEvidence = join(root, '.context/release-evidence');
@@ -63,7 +64,7 @@ async function doctor(args = [], { setExitCode = true } = {}) {
 }
 async function release(args) {
   if (args.includes('--help') || args.includes('-h')) {
-    console.log('Usage: pnpm dsh release [--offline|--dry-run] [--tag TAG] [--config PATH] --state-path /absolute/release-state.json');
+    console.log('Usage: pnpm dsh release [--offline|--dry-run] [--tag TAG] [--config PATH] --state-path /absolute/release-state.json [--service-evidence /absolute/receipt.json]');
     console.log('Precedence: --tag > DSH_RELEASE_TAG > config.release_tag > VERSION default; config path: --config > DSH_CONFIG_FILE > .dshrc.json');
     return;
   }
@@ -81,12 +82,13 @@ async function release(args) {
   }
   const configuredTag = config.release_tag || `dsh-${(await readFile(join(root, 'VERSION'), 'utf8')).trim()}-candidate`;
   const tag = tagIndex >= 0 ? args[tagIndex + 1] : (process.env.DSH_RELEASE_TAG || configuredTag);
-  const allowed = new Set(['--offline', '--dry-run', '--tag', '--config', '--state-path']);
+  const allowed = new Set(['--offline', '--dry-run', '--tag', '--config', '--state-path', '--service-evidence']);
+  if (args.filter(value => value === '--service-evidence').length > 1) throw new Error('SERVICE_EVIDENCE_AMBIGUOUS');
   for (let index = 0; index < args.length; index += 1) {
     const item = args[index];
     if (!item.startsWith('--')) continue;
     if (!allowed.has(item)) throw new Error(`RELEASE_OPTION_UNKNOWN ${item}`);
-    if (item === '--tag' || item === '--config' || item === '--state-path') index += 1;
+    if (item === '--tag' || item === '--config' || item === '--state-path' || item === '--service-evidence') index += 1;
   }
   const offline = args.includes('--offline') || args.includes('--dry-run');
   if (!offline) throw new Error('RELEASE_NETWORK_AUTH_REQUIRED use --offline for local preparation; GitHub publish is a separate authorized step');
@@ -96,6 +98,8 @@ async function release(args) {
   const sourceSha = git(['rev-parse', 'HEAD']); const version = (await readFile(join(root, 'VERSION'), 'utf8')).trim();
   const upstreamSha = DSH_UPSTREAM_SHA;
   const profile = await loadReleaseProfile({ root });
+  const serviceGate = await prepareServiceCompatibility(profile.profile.service_binding,
+    args.includes('--service-evidence') ? requiredOption(args, '--service-evidence') : null);
   const runtimeInput = process.env.DSH_UPSTREAM_RUNTIME_BUNDLE;
   if (!runtimeInput) throw new Error('RELEASE_UPSTREAM_RUNTIME_REQUIRED');
   const runtimeInfo = await stat(runtimeInput).catch(() => null);
@@ -120,6 +124,8 @@ async function release(args) {
   const prePath = join(dir, 'pre-manifest.v1.json'); const preSha = await sha256(prePath);
   const bundle = await packArtifact({ rootDir: root, allowlist: pre.archive_allowlist, output: join(dir, `${tag}.tar.zst`) });
   const manifest = { schema_version: 'release-manifest/v1', release_tag: tag, product_version: version, source_sha: sourceSha, dsh_upstream_sha: upstreamSha, pre_manifest_sha256: preSha, archive_allowlist: pre.archive_allowlist, denylist_version: 'release-denylist/v1', build_time: new Date().toISOString(), retention_until: 'NOT_SET_UNTIL_PUBLISHED', toolchain: { node: process.versions.node, pnpm: PNPM_VERSION }, artifact_bytes: bundle.bytes, artifact_sha256: bundle.sha256, upstream_runtime: { name: runtimeName, role: 'upstream-runtime-bundle', upstream_sha: upstreamSha, bytes: runtimeBytes, sha256: runtimeSha256 },
+    profile_snapshot: { path: profile.path.slice(root.length + 1), sha256: profile.digest },
+    ...(serviceGate ? { service_compatibility: serviceGate } : {}),
     payload: await Promise.all(pre.archive_allowlist.map(async path => ({ path, role: 'runtime-source', bytes: (await stat(join(root, path))).size, sha256: await sha256(join(root, path)) }))) };
   await assertSchema(manifest, join(root, 'scripts/release/schemas/release-manifest.v1.schema.json'));
   const manifestPath = join(dir, 'release-manifest.v1.json'); await writeFile(manifestPath, JSON.stringify(manifest, null, 2) + '\n', { mode: 0o600 });
@@ -195,7 +201,7 @@ async function test() { const tests = readdirSync(join(root, 'scripts/release'))
 async function preflight(args) { return execFileSync(process.execPath, [join(root, 'scripts/release/preflight.mjs'), ...args], { cwd: root, encoding: 'utf8', stdio: 'inherit' }); }
 async function plugin(args) {
   const [subcommand, ...options] = args;
-  const usage = 'Usage:\n  pnpm dsh plugin candidate --plugin /absolute/plugin --output-dir /absolute/output --state-path /absolute/state.json [--profile config/profile.json] [--previous-profile config/profile.json]\n  pnpm dsh plugin verify-host --candidate /absolute/candidate.json --evidence /absolute/evidence.json --state-path /absolute/state.json\nverify-host checks existing local evidence and appends to the candidate journal; it does not start or activate a host.';
+  const usage = 'Usage:\n  pnpm dsh plugin candidate --plugin /absolute/plugin --output-dir /absolute/output --state-path /absolute/state.json [--profile config/profile.json] [--previous-profile config/profile.json] [--service-evidence /absolute/receipt.json]\n  pnpm dsh plugin verify-host --candidate /absolute/candidate.json --evidence /absolute/evidence.json --state-path /absolute/state.json\nverify-host checks existing local evidence and appends to the candidate journal; it does not start or activate a host.';
   if (!subcommand || subcommand === '--help' || subcommand === '-h') {
     console.log(usage);
     return;
@@ -205,7 +211,7 @@ async function plugin(args) {
     console.log(usage);
     return;
   }
-  const allowed = new Set(subcommand === 'candidate' ? ['--plugin', '--output-dir', '--state-path', '--profile', '--previous-profile'] : ['--candidate', '--evidence', '--state-path']);
+  const allowed = new Set(subcommand === 'candidate' ? ['--plugin', '--output-dir', '--state-path', '--profile', '--previous-profile', '--service-evidence'] : ['--candidate', '--evidence', '--state-path']);
   const seen = new Set();
   for (let index = 0; index < options.length; index += 2) {
     const item = options[index];
@@ -226,6 +232,7 @@ async function plugin(args) {
     statePath: requiredOption(options, '--state-path'),
     profileManifest: options.includes('--profile') ? requiredOption(options, '--profile') : null,
     previousProfile: options.includes('--previous-profile') ? requiredOption(options, '--previous-profile') : null,
+    serviceEvidencePath: options.includes('--service-evidence') ? requiredOption(options, '--service-evidence') : null,
   });
   console.log(JSON.stringify(candidate, null, 2));
 }

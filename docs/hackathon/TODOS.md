@@ -281,9 +281,10 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 - [x] T3/T7 D15 本地服务准入子项（2026-10-04）：独立版本的结果/freshness/provenance、显式候选 allowlist、写锁内重验、公开保存 adapter、不可变来源及严格插件 decoder；六文件 71 PASS、完整 B0 658 Python PASS。见[准入证据](./evidence/dsh-g0-save-admission-20261004.md)，不启用生产保存 UI。
 - [x] D15 保存 OCR delegate（2026-10-04）：29/29 原始路径审查，修复实际分析缺失/来源不匹配仍报 SAVED、持久化合同字段被默认值补齐的问题；已验证 7 个负测先失败后通过，相关后端 78 PASS，完整 B0 Python 665 PASS。见[审核证据](./evidence/dsh-g0-save-review-20261004.md)。
 - [x] T3/T7 固定服务源码兼容子项（2026-10-04）：旧 `56198c32` / 新 `a50bd424` 完成 9/9 预期观测和 4/4 CLI 负测；已确认旧服务写 D15 状态不保留来源，明确阻断可写降级。见[兼容窗口](../architecture/first-purchase-service-compatibility.md)与[证据](./evidence/dsh-g0-service-save-compat-20261004.md)。
+- [x] T3/T7 本地候选兼容门禁子项（2026-10-04）：显式 service binding 与实际回执绑定 candidate、profile/payload、安装 marker/journal；已验证阻断旧 writer、缺失/篡改与幂等重试绕过。release 169 PASS、实际 CLI 拒绝 3/3，见[门禁证据](./evidence/dsh-g0-service-gate-20261004.md)。仅 LOCAL_COMPATIBLE，现场激活仍 BLOCKED。
 - [ ] T15 剩余：插件/服务物理分仓与平台依赖冷安装、invariant、供应链门禁；kit 仍以相邻 workspace 路径消费，迁移前改成固定开发依赖并验证独立仓根目录构建。整体仍 PARTIAL。
 - [ ] T2/T17 剩余：Windows/WSL、rc1→rc2/torn-frame、浏览器/client、shell/tool union 与目标平台 runtime；本机十项不代签这些验收。同进程任意插件隔离不承诺。
-- [ ] T3/T7/D4-C：本机固定源码兼容窗口已建立；继续将旧服务可写降级阻断接入候选/激活门禁，验证精确服务包/依赖兼容、生产形状时限/UNKNOWN、DSH UI/浏览器与完整候选门禁。生产 provider/profile 未启用，保存 UI 继续 NOT_AVAILABLE。
+- [ ] T3/T7/D4-C：本机兼容结果已接入候选/激活拒绝门禁；继续验证精确服务包/依赖兼容，补目标主机证据验证器，再完成生产形状时限/UNKNOWN、DSH UI/浏览器与完整候选门禁。生产 provider/profile 未启用，保存 UI 继续 NOT_AVAILABLE。
 - [ ] T13/T21：生产 activation journal、远端 receive/reconcile 与现场恢复；本机 `LOCAL_HOST_VERIFIED` 不替代这些门禁。
 - [ ] 在授权提交后的 clean reviewed SHA 重跑完整 preflight，再处理签名/SBOM、canary/rollback 与远端门禁；不把本地 pack 视为可上线。
 

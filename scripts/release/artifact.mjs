@@ -6,6 +6,8 @@ import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { assertSchema, readSchema, validateSchema } from './schema.mjs';
 import { assertClean, scanTree } from './secret-scan.mjs';
+import { validateServiceGate } from './service-compatibility.mjs';
+import { validateProfile } from './profile.mjs';
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const scripts = join(root, 'scripts/release');
@@ -90,6 +92,10 @@ export async function packArtifact({ rootDir = root, allowlist, output }) {
 async function receiveManifest(artifact, manifestPath) {
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
   await assertSchema(manifest, join(schemaDir, 'release-manifest.v1.schema.json'));
+  if (Object.hasOwn(manifest, 'service_compatibility')) {
+    if (!manifest.profile_snapshot) throw new Error('SERVICE_PROFILE_SNAPSHOT_REQUIRED');
+    await validateServiceGate(manifest.service_compatibility);
+  }
   if (!Array.isArray(manifest.archive_allowlist) || manifest.archive_allowlist.length === 0) throw new Error('ALLOWLIST_EMPTY');
   const safeManifestPath = value => typeof value === 'string' && value.length > 0 && !value.startsWith('/') && !value.includes('\\') && !value.split('/').some(part => part === '' || part === '.' || part === '..');
   if (new Set(manifest.archive_allowlist).size !== manifest.archive_allowlist.length || manifest.archive_allowlist.some(value => !safeManifestPath(value))) throw new Error('ALLOWLIST_PATH_INVALID');
@@ -118,12 +124,35 @@ async function verifyReceivedTree(manifest, destination, { maxEntries, maxBytes 
     if (!info.isFile() || info.isSymbolicLink() || info.size !== item.bytes || await sha256(path) !== item.sha256) throw new Error(`PAYLOAD_DIGEST_MISMATCH ${item.path}`);
   }
   assertClean(await scanTree(destination, { maxBytes }));
+  await verifyProfileBinding(manifest, destination);
   if (manifest.toolchain) {
     for (const required of ['package.json', 'pnpm-lock.yaml', 'scripts/dsh.mjs', 'deploy/wsl/install-release.sh']) {
       if (!all.includes(required)) throw new Error(`RUNTIME_ENTRYPOINT_MISSING ${required}`);
     }
   }
   return { manifest, entries: files.length, sha256: manifest.artifact_sha256 };
+}
+
+async function verifyProfileBinding(manifest, directory) {
+  if (!manifest.profile_snapshot) {
+    if (Object.hasOwn(manifest, 'service_compatibility')) throw new Error('SERVICE_PROFILE_SNAPSHOT_REQUIRED');
+    return; // Historical releases have no D15 service declaration.
+  }
+  const snapshot = manifest.profile_snapshot;
+  if (typeof snapshot.path !== 'string' || !snapshot.path || snapshot.path.startsWith('/')
+      || snapshot.path.includes('\\') || snapshot.path.split('/').some(part => !part || part === '.' || part === '..')) {
+    throw new Error('SERVICE_PROFILE_PATH_INVALID');
+  }
+  const entry = manifest.payload.find(row => row.path === snapshot.path);
+  if (!entry || entry.sha256 !== snapshot.sha256 || entry.bytes > 256 * 1024) throw new Error('SERVICE_PROFILE_PAYLOAD_MISMATCH');
+  const bytes = await readFile(join(directory, snapshot.path));
+  if (createHash('sha256').update(bytes).digest('hex') !== snapshot.sha256) throw new Error('SERVICE_PROFILE_DIGEST_MISMATCH');
+  const profile = JSON.parse(bytes); validateProfile(profile);
+  if (Object.hasOwn(profile, 'service_binding')) {
+    await validateServiceGate(manifest.service_compatibility, profile.service_binding);
+  } else if (Object.hasOwn(manifest, 'service_compatibility')) {
+    throw new Error('SERVICE_PROFILE_BINDING_MISMATCH');
+  }
 }
 
 /** Reconcile only by verifying the exact installed bytes; never overwrite. */
@@ -174,6 +203,7 @@ async function listFiles(dir) {
 export async function verifyPayload(manifestPath, payloadDir) {
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
   await assertSchema(manifest, join(schemaDir, 'release-manifest.v1.schema.json'));
+  await verifyProfileBinding(manifest, payloadDir);
   for (const item of manifest.payload) {
     if (!item.path || item.path.startsWith('/') || item.path.split('/').includes('..') || item.path.includes('\\')) throw new Error(`PAYLOAD_PATH_INVALID ${item.path}`);
     const path = join(payloadDir, item.path);

@@ -16,7 +16,11 @@ profile 当前固定：
 
 `pnpm dsh doctor --release` 和 `scripts/release/preflight.mjs` 使用同一加载器。profile 改动会先体现在 readiness 和候选构建输入中；T21 candidate 现在携带原字节 `profile.json`，将其 SHA-256 同时绑定到 candidate digest 和 `CANDIDATE_PREPARED` journal。必须显式指定同一绝对 state path；远端 receipt/activation 接线仍为 T13 未完成部分。
 
-`config/dsh-profile.crm-knowledge.rc2.json` 是另一个显式选择的首期双包 allowlist，不替换默认七插件 profile。`plugin verify-host` 只接受该双包范围，校验所选候选包和已实测的伴随包、实际 composition 与宿主证据，再向既有 journal 追加 `CANDIDATE_HOST_VERIFIED`。profile 本身只定义选择/顺序；精确版本与完整包摘要来自不可变 candidate/host 回执，不把 allowlist 当作完整版本锁或发布批准。
+`config/dsh-profile.crm-knowledge.rc2.json` 是另一个显式选择的首期双包 allowlist，不替换默认七插件 profile。`plugin verify-host` 只接受该双包范围，校验所选候选包和已实测的伴随包、实际 composition 与宿主证据，再向既有 journal 追加 `CANDIDATE_HOST_VERIFIED`。插件列表本身只定义选择/顺序；精确版本与完整包摘要来自不可变 candidate/host 回执，不把 allowlist 当作完整版本锁或发布批准。
+
+显式 D15 试验 profile 可另带 `service_binding`，字段与当前证据范围见[服务兼容合同](first-purchase-service-compatibility.md#候选和主机门禁)。profile 加载器仅检查声明形状；`plugin candidate` / `release --offline` 通过 `--service-evidence` 核对实际回执，并将其与 profile/payload、candidate 和安装 journal 绑定。删除已声明的绑定、要求旧服务可写或证据不匹配均拒绝；本机证据不允许现场激活。默认七插件与双包 profile 不变，普通插件无需业务服务声明。
+
+`preflight` 和 `preflight --check` 同样接受 `--service-evidence`：在 prepare/build 前检查回执，正式执行时将同一路径传给 release 再验证。单项 LOCAL_COMPATIBLE 不覆盖 dirty tree、runtime 或其他 readiness 阻断。
 
 ## 变更边界
 

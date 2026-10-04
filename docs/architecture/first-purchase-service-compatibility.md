@@ -24,9 +24,30 @@
 
 1. 回退插件/profile 时，保留与 D15 状态兼容的新 analysis-service；停用新保存入口也不删除已保存记录、回执或 provenance。
 2. 若必须临时恢复旧服务，只允许配置无 `analysis:save` 的身份供读取。旧服务不能承担 D15 reconcile，界面应显示 NOT_AVAILABLE 并保留原请求身份，等待兼容服务恢复。
-3. **不能仅因 schema 仍为 1 就把服务降级为可写。** 候选/激活控制面尚需消费此兼容约束，并拒绝旧服务写入组合；目前本页与验证回执是证据，不是已经接通的生产防护。
+3. **不能仅因 schema 仍为 1 就把服务降级为可写。** 候选控制面已拒绝旧服务可写组合；接收/安装保留同一绑定，激活和回退在写 journal、修改指针或幂等返回前重新校验。当前只有本机源码证据，所有声明该服务的现场激活仍拒绝，不表示已经验证生产身份和写权限。
 4. 如果绕过限制已经用旧服务写入，先保留状态并恢复兼容服务核对原版本；不可把最新版本伪装为有来源的结果，不自动复制历史 provenance 或重跑查询来补齐。
 
-完整 G0 放行仍需要精确服务包及依赖窗口、候选/激活门禁接线、生产形状时限/UNKNOWN、DSH UI/浏览器与目标平台证据。本机验证回执固定 `release_ready=false`；`status=PASS` 只表示预期观测完成，包括旧写入不兼容的负面观测。
+## 候选和主机门禁
+
+显式试验 profile 可增加 `service_binding`。默认 profile 不声明/启用 D15 保存；当前合同仅覆盖首购 analysis-service，不强迫纯展示插件依赖业务服务。
+
+| 字段 | 当前合同 |
+|---|---|
+| `schema_version` / `service_id` | `dsh-service-binding/v1` / `analytics-first-purchase` |
+| `source_sha` / `api_version` | 验证回执中的精确 40 位 baseline 或 candidate / `1.0.0`；相同 API 版本不等于任意源码兼容 |
+| `state` | `owner=analysis-service`、`application_id=1397572502`、`schema_version=1`、`contract=analytics-first-purchase-saved-provenance/v1` |
+| `access` | `read-only` 或 `read-write`；baseline 的 `read-write` 明确拒绝 |
+| `lifecycle` / `rollback` | `external` / `preserve-service-and-state`；插件包不托管、删除或迁移服务数据 |
+| `evidence_sha256` | `service-save-compatibility.py` 实际生成的 `receipt.json` 原字节 SHA-256 |
+
+`plugin candidate` 与 `release --offline` 使用 `--service-evidence /absolute/receipt.json`；前者用 `--profile` 选择 profile，后者沿用 `DSH_PROFILE_MANIFEST`。控制面核对完整观测、源码对和当前 runner/probe 摘要，将原始回执快照嵌入 `service_compatibility` 并纳入候选摘要。只接受有界普通文件，链接/FIFO/缺字段/篡改/陈旧验证器均拒绝。回执是可复核的本机观测，并非签名的生产证明。
+
+正式 `preflight` 和只读 `preflight --check` 也接受同一参数；兼容检查在联网/构建前执行，正式阶段将路径继续传给 release 并重验原字节。重复参数、缺值和失配均阻断，不能等到 runtime 构建完成才发现缺证据。
+
+新 source release 的 `profile_snapshot` 必须对应实际 payload 文件和摘要；service proof 与包内 profile 不一致时接收失败。安装将绑定写入 marker 及既有 PREPARE_INTENT/PREPARED journal；激活/回退核对目标绑定、当前 marker 和历史激活绑定，删除 marker 中的服务字段也不能从该 journal 降成 legacy 路径。未声明服务的历史 release 保留原行为；不把它们追认成通过 D15 验收。
+
+本机证据得到 `LOCAL_COMPATIBLE`、`release_ready=false` 和 `BLOCKED_SERVICE_PACKAGE_AND_HOST_EVIDENCE_REQUIRED`。实际激活返回 `SERVICE_ACTIVATION_EVIDENCE_INCOMPLETE`，没有 override。门禁不启动服务、不授予身份、不读取数据库；真正的目标身份只读性仍须现场验证。
+
+完整 G0 放行仍需要精确服务包及依赖窗口、目标主机服务证据验证器、生产形状时限/UNKNOWN、DSH UI/浏览器与目标平台证据。本机回执 `status=PASS` 只表示预期观测完成，包括旧写入不兼容的负面观测。候选接线和拒绝后的无副作用验证见[本轮门禁证据](../hackathon/evidence/dsh-g0-service-gate-20261004.md)。
 
 执行入口和失败记录见[跨版本验证证据](../hackathon/evidence/dsh-g0-service-save-compat-20261004.md)。
