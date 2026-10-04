@@ -25,16 +25,24 @@
     "./cordis.patch.yml": "./cordis.patch.yml"
   },
   "files": [
-    "lib",
+    "lib/index.js",
+    "lib/host.js",
+    "lib/graph-tools.js",
+    "lib/client.js",
     "cordis.patch.yml"
   ],
   "dsh": {
     "client": {
       "platform": "web",
-      "inject": ["@deepseek-ai/dsh-client-ui-conversation", "@deepseek-ai/dsh-client-ui-renderer", "@deepseek-ai/dsh-api-session-controller"]
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-api-session-controller"
+      ]
     },
     "bundle": {
       "patch": "./cordis.patch.yml"
     }
-  }
+  },
+  "packageManager": "pnpm@11.7.0"
 }

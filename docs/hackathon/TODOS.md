@@ -266,7 +266,12 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 - [x] T1：边界设计、10 包机器清单、唯一构建 DAG 与 8 项 AST/负测落地；本地和 CI 共用 B0 漂移检查。首轮见 [边界证据](./evidence/dsh-g0-boundaries-20261003.md)，本轮更新见 [图表解耦证据](./evidence/dsh-g0-board-components-20261003.md)。
 - [x] T15 子项：pin/build-tools/补丁由 kit 独立拥有；brand/query 无 workbench 源码的 build/test/pack 通过，8 插件实际构建通过。
 - [x] T15 图表子项：board-components 公开导出替换 6 条引用；固定 tarball/公开类型、旧导出兼容、workbench 独立重建与受控 pack 通过。见 [图表解耦证据](./evidence/dsh-g0-board-components-20261003.md)。
-- [ ] T15 剩余：CRM 公共合同替换 5 条 workbench 引用；invariant、精确宿主和供应链验收仍开放。整体仍 PARTIAL。
+- [x] T15 CRM slot 子项：领域 v1 合同生成双方类型，CRM 不再读取 workbench 私有 slot 类型；服务/宿主验收范围不扩大。见 [增量证据](./evidence/dsh-g0-crm-slot-20261003.md)。
+- [x] T15 CRM 页面/主题子项：4 条内部引用全部解除，profile 显式装配页面工具，品牌内容合同生成本地副本；CRM 无相邻插件源码的 build/test/pack 通过。见 [CRM 端证据](./evidence/dsh-g0-crm-decoupling-20261003.md)。
+- [x] T15/T3 CRM 合成服务子项（2026-10-04）：插件不再启动 Python/查找主仓路径；合成指标与公开知识解释分别使用显式 HTTP API 1.0.0，缺服务明确 NOT_AVAILABLE。已验证双服务故障边界与实际 tarball 解包加载，见 [证据](./evidence/dsh-g0-crm-service-boundary-20261004.md)。
+- [x] T15 服务应用包子项（2026-10-04）：指标/知识分别按明确清单生成不可变候选，逐文件绑定摘要与资源 owner；知识不再加载指标引擎或 DuckDB。实际 tarball 在仓库外、最小声明依赖 venv 中完成三种查询/解释和单服务停止验证，见[独立包入口](../operating/crm-service-packages.md)与[证据](./evidence/dsh-g0-crm-service-packaging-20261004.md)。
+- [x] CRM 增量 OCR delegate 提交前审核（2026-10-04）：覆盖 87 个原有路径，修复实际错误响应与 OpenAPI/TS 类型不一致及文档漂移；修复后的 backend、CRM、B0 已重跑，见[审核记录](./evidence/dsh-g0-crm-review-20261004.md)。本地 commit 不关闭以下发布/现场门禁。
+- [ ] T15 剩余：CRM/知识插件最终拆包、服务物理分仓与平台依赖冷安装、invariant、精确宿主和供应链验收仍开放。整体仍 PARTIAL。
 - [ ] T2/T17：精确宿主生命周期、会话/WAL、故障隔离、受控重启和恢复；现有 synthetic PASS 不替代。
 - [ ] T3/T7/D4-C：用服务状态和回放矩阵决定首个 D15 是否启用 durable save。
 - [ ] 在授权提交后的 clean reviewed SHA 重跑完整 preflight，再处理签名/SBOM、canary/rollback 与远端门禁；不把本地 pack 视为可上线。

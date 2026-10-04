@@ -20,12 +20,14 @@
         "./tool": "./lib/tool.js",
         "./client": "./lib/client.js",
         "./cordis.patch.yml": "./cordis.patch.yml",
-        "./package.json": "./package.json"
+        "./package.json": "./package.json",
+        "./page-tools": "./lib/page-tools.js"
       },
       "files": [
         "lib/index.js",
         "lib/tool.js",
         "lib/skills.js",
+        "lib/page-tools.js",
         "lib/client.js",
         "cordis.patch.yml",
         "bundled-dependencies.json"
@@ -72,7 +74,7 @@
         "test:html-edit": "node --test src/free-page/resource/package-normalize.test.mjs src/client/free-html-library/html-import.test.mjs src/client/html-selection-bridge.test.mjs src/client/free-html-library/store.test.mjs src/client/free-html-library/p12-live-adapters.test.mjs src/client/free-html-library/source-draft.test.mjs src/client/cockpit-ai-client.test.mjs src/free-page/edit/intent-router.test.mjs src/free-page/edit/selection-context.test.mjs test/dynamic-chart-browser-seam.test.mjs",
         "test:built": "node --test test/built.test.mjs"
       },
-      "manifest_sha256": "6af4049a22366b9f347645baf3e8731b2c57d9918650ba00096873d9f0a93ee0"
+      "manifest_sha256": "0aaffaae2c53c358faa247043ac277f8835233cf983c0530dbfc56b1dd85bcd9"
     },
     {
       "path": "dsh-plugins/board-components",
@@ -124,7 +126,10 @@
         "./cordis.patch.yml": "./cordis.patch.yml"
       },
       "files": [
-        "lib",
+        "lib/index.js",
+        "lib/host.js",
+        "lib/graph-tools.js",
+        "lib/client.js",
         "cordis.patch.yml"
       ],
       "peers": {
@@ -152,7 +157,7 @@
         "build": "node build.mjs",
         "test:host": "node --test test/host.integration.mjs"
       },
-      "manifest_sha256": "5917216b06d0c26d90465b0d6e860a98b017b6e618f0610643e75fbc0c75349e"
+      "manifest_sha256": "3cbbaf1cb6f0288623a4a020f065716f5987a150b73e045a5eb51253e8b40915"
     },
     {
       "path": "dsh-plugins/plugin-kit",
@@ -463,7 +468,7 @@
       "manifest_sha256": "011783ac55a6b567db51dbfdc1c97ffd142727ac52bfc7911801dc71fa6bed60"
     }
   ],
-  "source_files_scanned": 579,
+  "source_files_scanned": 591,
   "cross_package_edges": [
     {
       "consumer": "analytics-workbench",
@@ -542,56 +547,6 @@
       "source": "dsh-plugins/board-components/build.mjs",
       "target": "dsh-plugins/plugin-kit/packaged-dependencies.mjs",
       "specifier": "../plugin-kit/packaged-dependencies.mjs",
-      "access": "source",
-      "type_only": false
-    },
-    {
-      "consumer": "crm-knowledge",
-      "provider": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/client/crm-library.tsx",
-      "target": "dsh-plugins/analytics-workbench/src/client/competition-shell/tokens",
-      "specifier": "../../../analytics-workbench/src/client/competition-shell/tokens",
-      "access": "source",
-      "type_only": false
-    },
-    {
-      "consumer": "crm-knowledge",
-      "provider": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/client/index.tsx",
-      "target": "dsh-plugins/analytics-workbench/src/client/cockpit-extension",
-      "specifier": "../../../analytics-workbench/src/client/cockpit-extension",
-      "access": "source",
-      "type_only": true
-    },
-    {
-      "consumer": "crm-knowledge",
-      "provider": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/client/index.tsx",
-      "target": "dsh-plugins/analytics-workbench/src/client/competition-shell/tokens",
-      "specifier": "../../../analytics-workbench/src/client/competition-shell/tokens",
-      "access": "source",
-      "type_only": false
-    },
-    {
-      "consumer": "crm-knowledge",
-      "provider": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/index.ts",
-      "target": "dsh-plugins/analytics-workbench/src/competition-agent/page-family.mjs",
-      "specifier": "../../analytics-workbench/src/competition-agent/page-family.mjs",
-      "access": "source",
-      "type_only": false
-    },
-    {
-      "consumer": "crm-knowledge",
-      "provider": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/index.ts",
-      "target": "dsh-plugins/analytics-workbench/src/competition-agent/page-tools.mjs",
-      "specifier": "../../analytics-workbench/src/competition-agent/page-tools.mjs",
       "access": "source",
       "type_only": false
     },
@@ -762,6 +717,7 @@
     ],
     [
       "board-components",
+      "crm-knowledge",
       "shine-board",
       "shine-brand",
       "shine-crowd-action",
@@ -771,9 +727,6 @@
       "analytics-workbench",
       "shine-funnel",
       "shine-waterfall"
-    ],
-    [
-      "crm-knowledge"
     ]
   ],
   "repository_edges": [
@@ -1974,14 +1927,35 @@
       "consumer": "crm-knowledge",
       "phase": "runtime",
       "source": "dsh-plugins/crm-knowledge/src/http-contract.generated.d.ts",
-      "route": "/api/v1/crm-metrics/explain",
+      "route": "/api/v1/crm-metrics/query",
       "contract": "OBSERVED_NOT_FROZEN"
     },
     {
       "consumer": "crm-knowledge",
       "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/http-contract.generated.d.ts",
-      "route": "/api/v1/crm-metrics/query",
+      "source": "dsh-plugins/crm-knowledge/src/knowledge-contract.generated.d.ts",
+      "route": "/api/v1/crm-knowledge/capabilities",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/knowledge-contract.generated.d.ts",
+      "route": "/api/v1/crm-knowledge/explain",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/service-contract.generated.mjs",
+      "route": "/api/v1/crm-knowledge",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/service-contract.generated.mjs",
+      "route": "/api/v1/crm-metrics",
       "contract": "OBSERVED_NOT_FROZEN"
     },
     {
@@ -2113,8 +2087,57 @@
     {
       "consumer": "crm-knowledge",
       "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/host.integration.mjs",
+      "route": "/api/v1/auth/login",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/host.integration.mjs",
+      "route": "/api/v1/auth/me",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/host.integration.mjs",
+      "route": "/api/v1/metrics/cutoff",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/host.integration.mjs",
+      "route": "/api/v1/metrics/overview",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/host.integration.mjs",
+      "route": "/api/v1/metrics/trend",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/login-ui.test.mjs",
       "route": "/api/crm-knowledge/assets",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/package.test.mjs",
+      "route": "/api/v1/crm-metrics",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/package.test.mjs",
+      "route": "/api/v1/crm-metrics/capabilities",
       "contract": "OBSERVED_NOT_FROZEN"
     },
     {
@@ -2129,6 +2152,13 @@
       "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/purchases.test.mjs",
       "route": "/api/v1/metrics/dashboard-purchases",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/service.fixture.mjs",
+      "route": "/api/v1/crm-",
       "contract": "OBSERVED_NOT_FROZEN"
     },
     {
@@ -2457,19 +2487,19 @@
       "consumer": "crm-knowledge",
       "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/host.integration.mjs",
-      "line": 16
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "test",
-      "source": "dsh-plugins/crm-knowledge/test/host.integration.mjs",
-      "line": 20
+      "line": 17
     },
     {
       "consumer": "crm-knowledge",
       "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/host.integration.mjs",
       "line": 21
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/host.integration.mjs",
+      "line": 22
     },
     {
       "consumer": "crm-knowledge",
@@ -2488,6 +2518,48 @@
       "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/login-native.fixture.mjs",
       "line": 18
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/package.test.mjs",
+      "line": 15
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/package.test.mjs",
+      "line": 16
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/package.test.mjs",
+      "line": 17
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/page-composition.integration.mjs",
+      "line": 10
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/page-composition.integration.mjs",
+      "line": 11
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/page-composition.integration.mjs",
+      "line": 12
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/page-composition.integration.mjs",
+      "line": 9
     }
   ],
   "external_imports": [
@@ -2959,11 +3031,6 @@
     {
       "consumer": "crm-knowledge",
       "phase": "runtime",
-      "specifier": "node:child_process"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
       "specifier": "node:crypto"
     },
     {
@@ -2975,11 +3042,6 @@
       "consumer": "crm-knowledge",
       "phase": "runtime",
       "specifier": "node:path"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
-      "specifier": "node:url"
     },
     {
       "consumer": "crm-knowledge",
@@ -3040,6 +3102,11 @@
       "consumer": "crm-knowledge",
       "phase": "test",
       "specifier": "node:test"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "specifier": "node:timers/promises"
     },
     {
       "consumer": "crm-knowledge",
@@ -3510,27 +3577,28 @@
     {
       "id": "crm-cockpit-slot",
       "owner": "analysis-workbench",
-      "source": "dsh-plugins/analytics-workbench/src/client/cockpit-extension.ts",
-      "generator": null,
+      "source": "dsh-plugins/analytics-workbench/contracts/cockpit-slot.v1.json",
+      "generator": "scripts/dsh-b0/cockpit-slot-contract.mjs",
       "consumers": [
+        "analytics-workbench",
         "crm-knowledge"
       ],
-      "compatibility": "Optional cockpit slot; type is currently cross-source and must become an explicit public contract.",
-      "status": "INTERNAL_NOT_PUBLIC",
-      "source_sha256": "258f046b41667afed4aa2078fb4b359533a5a8b1d3af9f090566e5decfdbe939"
+      "compatibility": "Frozen v1 optional single/root slot; generated consumer copies checked for drift; no host activation or service permission implied.",
+      "status": "DOMAIN_V1",
+      "source_sha256": "246b79f09de2cd3132775c3869b170f9a14ce2723f72e670694ae486fcbcc941"
     },
     {
       "id": "page-generation-tool",
       "owner": "page-domain",
-      "source": "dsh-plugins/analytics-workbench/src/competition-agent/page-family.mjs",
+      "source": "dsh-plugins/analytics-workbench/src/page-tools.ts",
       "generator": null,
       "consumers": [
-        "crm-knowledge",
-        "analytics-workbench"
+        "analytics-workbench",
+        "crm-profile-composer"
       ],
-      "compatibility": "Current source coupling; do not freeze internal native routes as a public API.",
-      "status": "INTERNAL_NOT_PUBLIC",
-      "source_sha256": "06a94e24bec769a1d245c81c9af966513ca257f5ede9c59d05ba6e658bdc0d06"
+      "compatibility": "Page domain owns the optional tools-only public ./page-tools entry. Profile explicitly selects its built package; CRM ships no page parser or registration.",
+      "status": "DOMAIN_V1",
+      "source_sha256": "f91112b47b6a330526fae3252c3474299bba0861540c71a0fa3e7e017bf10e22"
     },
     {
       "id": "board-funnel-geometry-v1",
@@ -3557,6 +3625,43 @@
       "compatibility": "SemVer library exports; exact tarball digest and bundled dependency lock per consumer.",
       "status": "DOMAIN_V1",
       "source_sha256": "34b0be969c2f73b3dd1a7633b2e953c74bd5b12c80ed978ac3be0d51ee4a2210"
+    },
+    {
+      "id": "plugin-content-theme-v1",
+      "owner": "shine-brand",
+      "source": "dsh-plugins/shine-brand/contracts/content-theme.v1.json",
+      "generator": "scripts/dsh-b0/content-theme-contract.mjs",
+      "consumers": [
+        "analytics-workbench",
+        "crm-knowledge"
+      ],
+      "compatibility": "Brand-owned content tokens; generated copies with source digest, no runtime brand activation or native chrome changes.",
+      "status": "DOMAIN_V1",
+      "source_sha256": "d59cebc56829e87c01cde7c63284be0e9bc6e43fe0ff42d6145297e3e49e8a74"
+    },
+    {
+      "id": "crm-metrics-service-api",
+      "owner": "crm-service",
+      "source": "backend/contracts/crm-metrics-service.v1.json",
+      "generator": "scripts/crm-calibration/generate_contract.py",
+      "consumers": [
+        "crm-knowledge"
+      ],
+      "compatibility": "Exact API 1.0.0 per request; independent configured loopback origin; no Python/repository fallback. Synthetic fixtures only; no durable save.",
+      "status": "DOMAIN_V1",
+      "source_sha256": "85a9b4605b1ed6cc529322b6fd0df873d7d9681b3e0ffa1571d4379a376ab7e9"
+    },
+    {
+      "id": "crm-knowledge-service-api",
+      "owner": "knowledge-service",
+      "source": "backend/contracts/crm-knowledge-service.v1.json",
+      "generator": "scripts/crm-calibration/generate_contract.py",
+      "consumers": [
+        "crm-knowledge"
+      ],
+      "compatibility": "Exact API 1.0.0 per request; independent configured loopback origin; no Python/repository fallback. Synthetic fixtures only; no durable save.",
+      "status": "DOMAIN_V1",
+      "source_sha256": "b5fd55bbadcd115a8ecf2318347c04d5749fd86e22815df8bce07ea1dd55c7bf"
     }
   ],
   "command_owners": [
@@ -3599,48 +3704,17 @@
       "entry": "deploy/wsl/install-release.sh",
       "owner": "deploy-owner",
       "scope": "Explicit immutable remote install; separate authorization."
+    },
+    {
+      "entry": "scripts/crm-calibration/package-service.mjs",
+      "owner": "release-control",
+      "scope": "Allowlisted synthetic service application artifact and digest only; no dependency install, production release or activation."
+    },
+    {
+      "entry": "scripts/crm-calibration/service-entry.py",
+      "owner": "backend-services",
+      "scope": "Verify one service artifact and exact dependencies; explicit loopback-only owned process. CRM/knowledge owner comes from its manifest."
     }
   ],
-  "extraction_exceptions": [
-    {
-      "consumer": "crm-knowledge",
-      "provider": "analytics-workbench",
-      "source": "dsh-plugins/crm-knowledge/src/index.ts",
-      "target": "dsh-plugins/analytics-workbench/src/competition-agent/page-tools.mjs",
-      "remedy": "Extract the domain-owned API/type or replace the page tool call with a versioned service capability.",
-      "retire_when": "CRM adapter has consumer contract tests and imports no workbench source."
-    },
-    {
-      "consumer": "crm-knowledge",
-      "provider": "analytics-workbench",
-      "source": "dsh-plugins/crm-knowledge/src/index.ts",
-      "target": "dsh-plugins/analytics-workbench/src/competition-agent/page-family.mjs",
-      "remedy": "Extract the domain-owned API/type or replace the page tool call with a versioned service capability.",
-      "retire_when": "CRM adapter has consumer contract tests and imports no workbench source."
-    },
-    {
-      "consumer": "crm-knowledge",
-      "provider": "analytics-workbench",
-      "source": "dsh-plugins/crm-knowledge/src/client/index.tsx",
-      "target": "dsh-plugins/analytics-workbench/src/client/competition-shell/tokens",
-      "remedy": "Extract the domain-owned API/type or replace the page tool call with a versioned service capability.",
-      "retire_when": "CRM adapter has consumer contract tests and imports no workbench source."
-    },
-    {
-      "consumer": "crm-knowledge",
-      "provider": "analytics-workbench",
-      "source": "dsh-plugins/crm-knowledge/src/client/index.tsx",
-      "target": "dsh-plugins/analytics-workbench/src/client/cockpit-extension",
-      "remedy": "Extract the domain-owned API/type or replace the page tool call with a versioned service capability.",
-      "retire_when": "CRM adapter has consumer contract tests and imports no workbench source."
-    },
-    {
-      "consumer": "crm-knowledge",
-      "provider": "analytics-workbench",
-      "source": "dsh-plugins/crm-knowledge/src/client/crm-library.tsx",
-      "target": "dsh-plugins/analytics-workbench/src/client/competition-shell/tokens",
-      "remedy": "Extract the domain-owned API/type or replace the page tool call with a versioned service capability.",
-      "retire_when": "CRM adapter has consumer contract tests and imports no workbench source."
-    }
-  ]
+  "extraction_exceptions": []
 }

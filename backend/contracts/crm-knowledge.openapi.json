@@ -1,0 +1,321 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "CRM knowledge candidate",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/v1/crm-knowledge/capabilities": {
+      "get": {
+        "summary": "Capabilities",
+        "operationId": "capabilities_api_v1_crm_knowledge_capabilities_get",
+        "parameters": [
+          {
+            "name": "X-ShineMage-Contract",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Exact public synthetic service API identity; not an authentication credential.",
+              "const": "crm-knowledge-service/1.0.0",
+              "title": "X-Shinemage-Contract"
+            },
+            "description": "Exact public synthetic service API identity; not an authentication credential."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "403": {
+            "description": "Browser Origin rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Service API identity mismatch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid request; input details are not echoed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/crm-knowledge/explain": {
+      "post": {
+        "summary": "Explain",
+        "operationId": "explain_api_v1_crm_knowledge_explain_post",
+        "parameters": [
+          {
+            "name": "X-ShineMage-Contract",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Exact public synthetic service API identity; not an authentication credential.",
+              "const": "crm-knowledge-service/1.0.0",
+              "title": "X-Shinemage-Contract"
+            },
+            "description": "Exact public synthetic service API identity; not an authentication credential."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgeExplainRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeExplanation"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Browser Origin rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Service API identity mismatch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid request; input details are not echoed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "KnowledgeExplainRequest": {
+        "properties": {
+          "topic": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Topic"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "topic"
+        ],
+        "title": "KnowledgeExplainRequest"
+      },
+      "KnowledgeExplanation": {
+        "properties": {
+          "topic": {
+            "type": "string",
+            "title": "Topic"
+          },
+          "metric_version": {
+            "type": "string",
+            "const": "crm-metrics/v1",
+            "title": "Metric Version"
+          },
+          "pack_version": {
+            "type": "string",
+            "const": "crm-knowledge-offline/v1",
+            "title": "Pack Version"
+          },
+          "pack_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Pack Sha256"
+          },
+          "decision_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Decision Ids"
+          },
+          "evidence_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence Refs"
+          },
+          "sources": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Sources"
+          },
+          "relations": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Relations"
+          },
+          "context_nodes": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Context Nodes"
+          },
+          "implementation_status": {
+            "type": "string",
+            "title": "Implementation Status"
+          },
+          "content_scope": {
+            "type": "string",
+            "const": "public_synthetic_pack_only",
+            "title": "Content Scope"
+          },
+          "synthetic": {
+            "type": "boolean",
+            "const": true,
+            "title": "Synthetic"
+          },
+          "publication_status": {
+            "type": "string",
+            "const": "local_isolated_candidate",
+            "title": "Publication Status"
+          },
+          "document_acl_connected": {
+            "type": "boolean",
+            "const": false,
+            "title": "Document Acl Connected"
+          },
+          "code_fixed_in_legacy_services": {
+            "type": "boolean",
+            "const": false,
+            "title": "Code Fixed In Legacy Services"
+          },
+          "execution_authorized": {
+            "type": "boolean",
+            "const": false,
+            "title": "Execution Authorized"
+          },
+          "real_business_acceptance": {
+            "type": "boolean",
+            "const": false,
+            "title": "Real Business Acceptance"
+          },
+          "dsh_using_neo4j": {
+            "type": "boolean",
+            "const": false,
+            "title": "Dsh Using Neo4J"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "topic",
+          "metric_version",
+          "pack_version",
+          "pack_sha256",
+          "decision_ids",
+          "evidence_refs",
+          "sources",
+          "relations",
+          "context_nodes",
+          "implementation_status",
+          "content_scope",
+          "synthetic",
+          "publication_status",
+          "document_acl_connected",
+          "code_fixed_in_legacy_services",
+          "execution_authorized",
+          "real_business_acceptance",
+          "dsh_using_neo4j"
+        ],
+        "title": "KnowledgeExplanation"
+      },
+      "ServiceError": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "UNAVAILABLE",
+            "title": "Status"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status",
+          "code"
+        ],
+        "title": "ServiceError",
+        "description": "Sanitized wire errors shared by the two public synthetic transports."
+      }
+    }
+  }
+}

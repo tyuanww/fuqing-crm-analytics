@@ -58,13 +58,15 @@ python3 scripts/run_backend_tests_bounded.py
 python3 scripts/run_backend_tests_bounded.py backend/tests/test_local_demo_access.py
 ```
 
-包含 B0/Vue 的检查会先核对 Node 24，再运行耗时步骤；手工入口可用 `--node /absolute/node` 选择已有解释器。Git hook 继承调用 shell 的 PATH，需要在该次操作中选用已有 Node 24，不自动安装或修改全局版本。ruff 锁 `0.16.8`，`pyproject.toml` 的 `lint.select` 为 `E4/E7/E9/F`（0.15 默认集）；不要用无 select 的 `ruff check .` 去套 0.16 的 413 条默认规则。
+包含 B0/Vue 的检查会先核对 Node 24，再运行耗时步骤；手工入口可用 `--node /absolute/node` 选择已有解释器。Git hook 继承调用 shell 的 PATH，需要在该次操作中选用已有 Node 24，不自动安装或修改全局版本。ruff 锁 `0.16.9`（以 `requirements-lock.txt` 为准），`pyproject.toml` 的 `lint.select` 为 `E4/E7/E9/F`（0.15 默认集）；不要用无 select 的 `ruff check .` 去套 0.16 的 413 条默认规则。
 
 DSH 本地开发可直接用 `./scripts/dsh-dev/run.sh diagnose`、`check` 和 `probe`；包装器读取 `.nvmrc` 约定并自动选择 Node 24.19.0，不修改系统 Node。没有标准 Homebrew 路径时设置 `DSH_DEV_NODE=/absolute/node24`。
 
 B0 独立入口：`node scripts/dsh-b0/pipeline.mjs --check --python /absolute/python3.14`；不带参数或传 `--help` 会打印用法，不启动任何服务。`--prepare` 会下载固定上游、先用锁文件完整预热 pnpm store，再安装构建依赖；`--audit` 只对已准备的 build-tools 闭包执行在线高危审计；二者属于明确动作，preflight 会把审计作为独立 fail-closed 阶段记录，网络异常时可单独重试。插件 `package.json` 的 `test` 是部分源测试便捷入口，`test:built` 也只有一个子集，均不能作为完整 B0 通过声明。原生查询资产需显式 `node scripts/dsh-b0/serve.mjs --python /absolute/python3.14 --native-query-assets`，不替代默认 `--native-query`。离线分析/驾驶舱合同用 `scripts/dsh-b0/analysis-contract.mjs` 与 `cockpit-contract.mjs`，不启动旧 CRM。旧 Vue 的依赖由 `frontend-vue3/package-lock.json` 管理，B0 的固定版本由 toolchain/自身锁管理，旧后端由 requirements-lock 管理；此轮未升级依赖。
 
 已有固定版本工具链可通过环境变量 `B0_BUILD_UPSTREAM=/absolute/prepared/upstream` 供 `--check` 只读复用。仍强制验证上游 SHA、锁文件、SDK 与类型版本；不下载、不升级。该覆盖不允许用于 `--prepare`。
+
+独立 synthetic CRM/知识服务包：`CRM_SERVICE_PYTHON=/absolute/locked-python3.14 node --test --test-concurrency=1 scripts/crm-calibration/service-package.test.mjs`。共享后端 profile 的 `test_crm_service_packages.py` 调用同一实际 pack/解包/最小依赖 venv/双服务 HTTP 验证；因此全量后端验证也需要现有 Node 24 与 zstd。CI Python job 已声明这两项工具，不会从 B0 的最小 Python 锁冒充服务依赖。测试只操作自己创建的临时目录和进程，不表示完整 DSH、WSL 冷安装或真实数据验收；[服务包说明](./crm-service-packages.md)列出剩余门禁。
 
 干净重建只复制固定白名单源码，不跟随符号链接，也不进入 `.git`、`.context`、`node_modules`、`dist` 或 `lib`。复制总量上限为 256 MiB、5 万文件和 32 层目录；临时目录带专属标记，正常失败会在 `finally` 清理，启动时还会回收超过 24 小时的已标记残留。构建被强制终止时不会保证即时删除，但不会再无边界复制依赖树。
 
@@ -159,6 +161,12 @@ Logo 使用当前 checkout 的 Git LFS 字节，可执行
 
 固定工具链由 `dsh-plugins/plugin-kit/toolchain.json` 和 `plugin-kit/build-tools/` 维护；不从相邻旧仓库发现依赖。`node scripts/dsh-b0/plugin-boundaries.mjs --check` 核对当前所有插件的 owner、直接 import、字面路由、合同与构建 DAG；新增源码耦合、循环、过期例外或清单漂移均阻断。已验证入口与边界负测，具体命令和结果见 [本轮审核](../hackathon/evidence/dsh-g0-decoupling-review-20261003.md)。边界说明见 [架构清单](../architecture/shinemage-plugin-boundaries.md)。
 
-B0 `--check` 包含边界负测、`plugin-isolation.test.mjs` 和既有 workbench clean rebuild。独立包测试只复制 kit 与单个 leaf 源码，复用相同锁文件的第三方依赖；在临时 Git 夹具中构建、执行现有生命周期单测并受控打包。临时提交不属于产品历史，不充当 reviewed release SHA。这些测试不启动真实 DSH、不证明热卸载或跨版本兼容。
+B0 `--check` 包含边界负测、`plugin-isolation.test.mjs` 和既有 workbench clean rebuild。CRM 也纳入独立源码构建/固定 SDK 组件注册测试/受控 pack，以及页面提供方组合与卸载测试。独立包测试只复制 kit 与单个 leaf 源码，复用相同锁文件的第三方依赖；在临时 Git 夹具中构建、执行现有生命周期单测并受控打包。临时提交不属于产品历史，不充当 reviewed release SHA。这些测试不启动真实 DSH、不证明热卸载或跨版本兼容。
 
 B0 `--check` 先独立构建 board-components 并绑定受摘要约束的 tarball，再验证公开导出/类型、失真输入和几何语义。workbench clean rebuild 只含 workbench 源码与 kit，图表通过同一个 tarball 输入；不会复制 funnel/waterfall 源码。临时 Git 夹具内再执行受控 pack，记录 `fixture_only`，不冒充正式 reviewed source。`backend/tests/test_board_funnel.py` 与 `test_board_waterfall.py` 消费领域包拥有的同一套 JSON 标本，按受影响文件单独运行。
+
+驾驶舱与 CRM 的 slot 形状由领域 JSON 生成各自的本地类型，B0 自动运行 `cockpit-slot-contract.mjs --check` 和对应消费者/漂移负测。独立消费者只携带自己的生成物；完整固定 SDK 类型检查和原生 SlotCore/编译后 UI 测试仍保留，不以纯类型通过替代宿主验收。
+
+品牌内容主题由 `content-theme-contract.mjs --check` 和真实消费者测试核验；生成物纳入双方包内，无品牌插件运行时依赖。CRM 全部 Node/Host/UI 回归需要完整 backend 锁定 Python（`CRM_METRICS_PYTHON=/absolute/backend-python`），不能复用最小 B0 Python 冒称通过；Chrome 旅程单列，不纳入本轮合成 UI 结论。当前命令、范围及失败修复见 [CRM 端解耦证据](../hackathon/evidence/dsh-g0-crm-decoupling-20261003.md)。
+
+2026-10-04 CRM 插件已改为显式 HTTP 服务配置；上述 Python 变量现在只供测试启动本次拥有的合成 API 进程，插件不再读取它。新增 `service-client.test.mjs` 的版本/超时/取消/重定向/响应大小/异常响应负测纳入 B0；`service-http.integration.mjs` 与 `tools.test.mjs` 在完整锁定 backend Python 下验证实际双 ASGI 服务。独立包测试额外对最终 tarball 安全解包，只提供固定 SDK 依赖后执行包级 ToolRuntime 验证。领域生成物漂移由 `test_crm_service_contracts.py` 与离线生成器检查；这些结果不证明完整原生 profile 或杭州已上线。详见 [服务边界](./crm-plugin-service-boundary.md) 与 [当前证据](../hackathon/evidence/dsh-g0-crm-service-boundary-20261004.md)。

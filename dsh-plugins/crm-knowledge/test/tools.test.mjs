@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
-import { explainCrm, listCapabilities, queryCrmMetrics } from '../src/run.mjs';
+import { test, before, after } from 'node:test';
+import { createCrmServices } from '../src/service-client.mjs';
+import { serveCrmServices } from './service.fixture.mjs';
+let services;
+const cleanup = [];
+before(async () => { services = createCrmServices((await serveCrmServices({ after: fn => cleanup.push(fn) })).config); });
+after(async () => { for (const close of cleanup) await close(); });
 
 const base = {
   source_id: 'synthetic-crm-metrics',
@@ -16,8 +21,8 @@ const base = {
   amount_already_net: false,
 };
 
-test('sales query returns versioned facts', () => {
-  const result = queryCrmMetrics({ ...base, query_id: 'sales_window_summary' });
+test('sales query returns versioned facts over the independent service', async () => {
+  const result = await services.query({ ...base, query_id: 'sales_window_summary' });
   assert.equal(result.metric_version, 'crm-metrics/v1');
   assert.equal(result.synthetic, true);
   assert.equal(result.real_business_acceptance, false);
@@ -27,33 +32,33 @@ test('sales query returns versioned facts', () => {
   assert.ok(result.limitations.some((item) => item.code === 'D019_SOURCE_UNVERIFIED'));
 });
 
-test('repurchase query returns rate or empty reason', () => {
-  const result = queryCrmMetrics({ ...base, query_id: 'existing_customer_repurchase' });
+test('repurchase query returns rate or empty reason', async () => {
+  const result = await services.query({ ...base, query_id: 'existing_customer_repurchase' });
   assert.ok(result.facts.opening_old_customers.value >= 1);
   assert.ok(result.facts.repurchase_rate.value !== undefined);
 });
 
-test('sample followup keeps ROI disclaimer and maturity split', () => {
-  const result = queryCrmMetrics({ ...base, query_id: 'sample_followup', observation_days: 14 });
+test('sample followup keeps ROI disclaimer and maturity split', async () => {
+  const result = await services.query({ ...base, query_id: 'sample_followup', observation_days: 14 });
   assert.match(result.facts.sampling_roi_disclaimer, /复购收入表现/);
   assert.ok(result.facts.immature_count.value >= 1);
 });
 
-test('explain cites decisions and does not claim legacy code is fixed', () => {
-  const result = explainCrm('客单价');
+test('explain cites decisions and does not claim legacy code is fixed', async () => {
+  const result = await services.explain('客单价');
   assert.ok(result.decision_ids.includes('D001'));
   assert.equal(result.code_fixed_in_legacy_services, false);
   assert.ok(result.evidence_refs.length >= 1);
 });
 
-test('capabilities stay synthetic and leave competition untouched', () => {
-  const result = listCapabilities();
+test('capabilities stay synthetic and leave competition untouched', async () => {
+  const result = await services.capabilities();
   assert.equal(result.synthetic_only, true);
   assert.equal(result.real_archive, false);
   assert.equal(result.competition_scope_untouched, true);
   assert.equal(result.d019, 'unverified');
 });
 
-test('real data flag is rejected before CLI facts', () => {
-  assert.throws(() => queryCrmMetrics({ ...base, query_id: 'sales_window_summary', contains_real_data: true }));
+test('real data flag is rejected before any service request', () => {
+  assert.throws(() => services.query({ ...base, query_id: 'sales_window_summary', contains_real_data: true }));
 });

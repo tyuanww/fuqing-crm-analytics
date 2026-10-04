@@ -5,7 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from backend.semantic.crm_metrics_v1 import explain_topic
+from backend.services.crm_knowledge_topics import explain_topic
 
 PACK = Path(__file__).resolve().parents[2] / "knowledge" / "crm"
 TOPICS = {
@@ -19,20 +19,23 @@ TOPICS = {
 KEYWORDS = [("客单件", "items"), ("人均件数", "items"), ("ipt", "items"), ("会员溢价", "member_premium"), ("客单价", "aus"), ("每单金额", "aov"), ("部分退款", "gsv"), ("新会员转化", "new_member_conversion"), ("派样", "sample_followup"), ("教材与旧代码", "conflicts"), ("知识图谱", "runtime"), ("访问", "permission"), ("发券", "authorization")]
 
 
-def read_items(rel: str) -> list[dict]:
-    return json.loads((PACK / rel).read_text())["items"]
+def read_items(rel: str, pack: Path) -> list[dict]:
+    return json.loads((pack / rel).read_text())["items"]
 
 
-def explain_knowledge(topic: str) -> dict:
+def explain_knowledge(topic: str, *, pack: Path | None = None, verify_local_implementation: bool = True) -> dict:
+    # The standalone app supplies its own allowlisted resource directory. Only
+    # the legacy in-repository adapter evaluates historical source receipts.
+    pack = PACK if pack is None else pack
     canonical = next((key for word, key in KEYWORDS if word in topic.lower()), topic)
     base = explain_topic(canonical)
     key = base["topic"]
     seed_ids = set(TOPICS.get(key, []))
-    nodes = read_items("graph/nodes.json")
+    nodes = read_items("graph/nodes.json", pack)
     index = {node["id"]: node for node in nodes}
-    metrics = read_items("definitions/metrics.json")
-    evidence = read_items("definitions/evidence.json")
-    edges = read_items("graph/edges.json")
+    metrics = read_items("definitions/metrics.json", pack)
+    evidence = read_items("definitions/evidence.json", pack)
+    edges = read_items("graph/edges.json", pack)
     selected = set(seed_ids)
     # Include explicitly related conflicts/old formulas, then follow dependencies.
     selected.update(edge["to"] for edge in edges if edge["from"] in seed_ids and edge["type"] == "SUPERSEDES")
@@ -81,12 +84,12 @@ def explain_knowledge(topic: str) -> dict:
     if key == "runtime":
         base.update(implementation_status="runtime_not_assessed", missing=[])
         base["interpretation"] = "本工具只读取离线知识与依赖关系，不检查部署状态。在线教材图谱请调用 query_crm_knowledge_graph，是否接通以该工具的实际结果为准。"
-    base["pack_sha256"] = hashlib.sha256((PACK / "pack.json").read_bytes()).hexdigest()
-    receipt = PACK / "verification.json"
+    base["pack_sha256"] = hashlib.sha256((pack / "pack.json").read_bytes()).hexdigest()
+    receipt = pack / "verification.json"
     if receipt.exists():
         report = json.loads(receipt.read_text())
-        root = PACK.parents[1]
-        valid = all((root / path).is_file() and hashlib.sha256((root / path).read_bytes()).hexdigest() == digest for path, digest in report.get("implementation_files", {}).items())
+        root = pack.parents[1]
+        valid = verify_local_implementation and all((root / path).is_file() and hashlib.sha256((root / path).read_bytes()).hexdigest() == digest for path, digest in report.get("implementation_files", {}).items())
         if valid and report.get("implementation_files"):
             base["implementation_verification"] = report
             if metric and metric["id"] in report.get("verified_metric_ids", []):
@@ -94,4 +97,7 @@ def explain_knowledge(topic: str) -> dict:
         elif metric and metric["id"] in report.get("verified_metric_ids", []):
             base["implementation_status"] = "verification_outdated"
             base["verification_note"] = "曾有合成验证记录，但当前文件指纹已变化；需要重新验证，不能据此声称未实现或已经验证通过。"
+        if not verify_local_implementation:
+            base["implementation_verification_scope"] = "not_evaluated_in_service_package"
+            base["verification_note"] = "服务包保留历史验证记录，但不包含或读取主仓实现文件；不能据此声称当前 CRM 实现已经验证通过。"
     return base

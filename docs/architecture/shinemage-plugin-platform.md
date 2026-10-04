@@ -19,7 +19,7 @@
 
 `toolchain.json`、build-tools manifest/lock/补丁现在位于 kit；release、B0 pipeline、开发入口和合同生成器读取同一份 pin。不能为了让一个包构建成功，静默从相邻历史仓库找依赖。已准备的第三方依赖可以复用，但须与 kit 锁定输入一致。
 
-当前事实见[机器清单与依赖说明](./shinemage-plugin-boundaries.md)。首批 leaf 已能脱离 workbench 构建；CRM 与 workbench 的业务源码依赖仍须按清单拆解。这是构建层进展，不是已完成运行时隔离。
+当前事实见[机器清单与依赖说明](./shinemage-plugin-boundaries.md)。首批 leaf 已能脱离 workbench 构建；CRM 原 5 条 workbench 私有引用全部解除，合成 Python 查询/知识解释也改为显式配置的独立服务 HTTP API 1.0.0。插件不再发现主仓路径或启动 Python。两项服务已各自产出[独立应用候选包](../operating/crm-service-packages.md)，资源与依赖按领域锁定；知识服务不再加载指标引擎或 DuckDB。源码仍在 workspace，尚未物理分仓。源码/服务边界进展不等于完整宿主故障隔离。
 
 ## 领域合同不能变成共享业务单体
 
@@ -39,7 +39,7 @@ profile 回退不回滚已写入 CRM/SQLite 的记录。D15 是否启用 durable
 ## 实施顺序与放行
 
 1. T1 固化 owner、实际依赖和边界检查；T15 先证明 dev kit 与低耦合 leaf 包。
-2. board-components 已拥有公开计算/类型，workbench 的 6 条图表源码引用已改为固定 tarball，独立 build/pack 与消费者回归已有本地证据。下一步替换 CRM 的 5 条 workbench 内部引用。细目在机器清单，每解除一条就删除对应临时例外；不把源码解耦当作生命周期验收。
+2. board-components 已拥有公开计算/类型，workbench 的 6 条图表源码引用已改为固定 tarball，独立 build/pack 与消费者回归已有本地证据。CRM 的 slot/主题改为领域版本化生成合同，页面工具由 profile 装配公开入口，原 5 条 workbench 内部引用全部解除；单包构建/测试/pack 通过。细目在机器清单，每解除一条就删除对应临时例外；不把源码解耦当作生命周期验收。
 3. T2/T17 固定宿主证据与 T3/T7 保存矩阵通过后，完成 D15 workbench 包的独立 candidate、canary 和回退证据。
 4. 保留批准的签名、SBOM/CVE、来源、权限、灰度和责任门禁；首期 stop/go 之后再按 DAG 物理分仓、建立多生产者 catalog。
 

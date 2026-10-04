@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 import hashlib
 import json
 import os
+import shutil
 from pathlib import Path
 import subprocess
 import sys
@@ -14,6 +15,8 @@ from tempfile import TemporaryDirectory
 
 ROOT = Path(__file__).resolve().parents[2]
 TESTS = [
+    "test_crm_service_packages.py",
+    "test_crm_service_contracts.py",
     "test_crm_analysis.py",
     "test_crm_dashboard_purchases.py", "test_crm_dashboard_closeout.py",
     "test_analytics_query_worker.py", "test_analytics_first_purchase_native.py",
@@ -26,9 +29,11 @@ TESTS = [
 
 def source_hashes():
     files = set()
-    for rel in ["backend/services/crm_readonly", "dsh-plugins/crm-knowledge/src", "dsh-plugins/crm-knowledge/test", "scripts/crm-calibration", "backend/tests/fixtures/crm_metrics_v1", "backend/tests/fixtures/crm_readonly", "knowledge/crm/definitions", "knowledge/crm/graph", "knowledge/crm/textbook", "knowledge/crm/tools", "knowledge/crm/tests", "knowledge/crm/schema", "knowledge/crm/code_snapshots"]:
+    for rel in ["backend/services/crm_readonly", "services/crm-metrics", "services/crm-knowledge", "dsh-plugins/crm-knowledge/src", "dsh-plugins/crm-knowledge/test", "scripts/crm-calibration", "backend/tests/fixtures/crm_metrics_v1", "backend/tests/fixtures/crm_readonly", "knowledge/crm/definitions", "knowledge/crm/graph", "knowledge/crm/textbook", "knowledge/crm/tools", "knowledge/crm/tests", "knowledge/crm/schema", "knowledge/crm/code_snapshots"]:
         files.update(p for p in (ROOT / rel).rglob("*") if p.is_file() and p.suffix in {".py", ".ts", ".tsx", ".mjs", ".json"})
-    for rel in ["backend/semantic/crm_metrics_v1.py", "backend/semantic/crm_metrics_compose.py", "backend/contracts/crm_metrics_v1.py", "backend/crm_metrics_app.py", "backend/services/crm_knowledge.py", "dsh-plugins/crm-knowledge/build.mjs", "dsh-plugins/crm-knowledge/package.json", "backend/contracts/crm-metrics.openapi.json", "dsh-plugins/crm-knowledge/cordis.patch.yml", "dsh-plugins/analytics-workbench/src/client/competition-shell/tokens.ts"]:
+    for rel in ["backend/semantic/crm_metrics_v1.py", "backend/semantic/crm_metrics_compose.py", "backend/contracts/crm_metrics_v1.py", "backend/crm_metrics_app.py", "backend/services/crm_knowledge.py", "dsh-plugins/crm-knowledge/build.mjs", "dsh-plugins/crm-knowledge/package.json", "backend/contracts/crm-metrics.openapi.json", "dsh-plugins/crm-knowledge/cordis.patch.yml", "dsh-plugins/analytics-workbench/src/client/competition-shell/tokens.ts",
+                "backend/crm_knowledge_app.py", "backend/crm_service_contracts.py", "backend/contracts/crm_knowledge_v1.py", "backend/services/crm_knowledge_topics.py", "backend/contracts/crm-metrics-service.openapi.json",
+                "backend/contracts/crm-metrics-service.v1.json", "backend/contracts/crm-knowledge-service.v1.json", "backend/contracts/crm-knowledge.openapi.json"]:
         files.add(ROOT / rel)
     files.update(ROOT / "backend/tests" / item for item in TESTS)
     files.update(ROOT / rel for rel in ["backend/contracts/crm_analysis.py", "backend/services/crm_analysis.py", "backend/middleware/query_router.py",
@@ -63,7 +68,10 @@ def main():
     with TemporaryDirectory(prefix="crm-verify-") as temp:
         home = Path(temp) / "home"
         home.mkdir(mode=0o700)
-        env = dict(PATH=os.pathsep.join([str(args.node.resolve().parent), str(Path(sys.executable).parent), "/usr/bin", "/bin", "/usr/sbin", "/sbin"]), HOME=str(home), TMPDIR=temp, LANG="en_US.UTF-8", PYTHONPATH=str(ROOT), PYTHON_DOTENV_DISABLED="1", PYTHONDONTWRITEBYTECODE="1", B0_BUILD_UPSTREAM=str(args.upstream.resolve()), CRM_METRICS_PYTHON=sys.executable)
+        zstd = shutil.which("zstd")
+        if not zstd:
+            raise SystemExit("CRM_SERVICE_PACKAGE_ZSTD_REQUIRED")
+        env = dict(PATH=os.pathsep.join([str(args.node.resolve().parent), str(Path(sys.executable).parent), str(Path(zstd).parent), "/usr/bin", "/bin", "/usr/sbin", "/sbin"]), HOME=str(home), TMPDIR=temp, LANG="en_US.UTF-8", PYTHONPATH=str(ROOT), PYTHON_DOTENV_DISABLED="1", PYTHONDONTWRITEBYTECODE="1", B0_BUILD_UPSTREAM=str(args.upstream.resolve()), CRM_METRICS_PYTHON=sys.executable, CRM_SERVICE_PYTHON=sys.executable)
         commands = [
             ("crm-assets-ruff", [sys.executable, "-m", "ruff", "check", "backend/contracts/crm_analysis.py", "backend/services/crm_analysis.py", "backend/middleware/query_router.py", "backend/routers/crm_dashboard.py", "dsh-plugins/crm-knowledge/test/crm-journey-server.py"]),
             ("backend", [sys.executable, "scripts/run_backend_tests_bounded.py", *["backend/tests/" + item for item in TESTS], "--report-dir", str(report / "backend")]),
@@ -71,7 +79,8 @@ def main():
             ("wire-contract", [sys.executable, "scripts/crm-calibration/generate_contract.py", "--check"]),
             ("http-types", [str(args.node), "scripts/crm-calibration/generate_types.mjs", str(args.build_tools), "--check"]),
             ("build", [str(args.node), "dsh-plugins/crm-knowledge/build.mjs", str(args.upstream), str(args.build_tools)]),
-            ("cli-tools", [str(args.node), "--test", *[str(p.relative_to(ROOT)) for p in sorted((ROOT / "dsh-plugins/crm-knowledge/test").glob("*.test.mjs"))]]),
+            ("service-tools", [str(args.node), "--test", "--test-concurrency=1", *[str(p.relative_to(ROOT)) for p in sorted((ROOT / "dsh-plugins/crm-knowledge/test").glob("*.test.mjs"))]]),
+            ("service-http", [str(args.node), "--test", "dsh-plugins/crm-knowledge/test/service-http.integration.mjs"]),
             ("host-tools", [str(args.node), "--test", "dsh-plugins/crm-knowledge/test/host.integration.mjs"]),
         ]
         for name, cmd in commands:

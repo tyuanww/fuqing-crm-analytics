@@ -28,7 +28,7 @@ test('the checked inventory equals current sources and includes every plugin', a
   const checked = JSON.parse(await readFile(new URL('../../docs/architecture/shinemage-plugin-boundaries.json', import.meta.url), 'utf8'));
   assert.deepEqual(result, checked);
   assert.equal(result.packages.length, 10);
-  assert.equal(result.extraction_exceptions.length, 5);
+  assert.equal(result.extraction_exceptions.length, 0);
   assert.ok(result.cross_package_edges.filter(edge => edge.consumer === 'analytics-workbench' && edge.phase === 'runtime').every(edge => edge.access === 'public-export'));
   assert.ok(result.build_layers[0].includes('plugin-kit'));
   assert.ok(result.unresolved_dynamic_imports.every(item => item.phase === 'test'));

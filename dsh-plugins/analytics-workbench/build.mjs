@@ -22,7 +22,7 @@ const external = [
 ];
 const common = { absWorkingDir: root, bundle: true, sourcemap: true, logLevel: 'info', minifyWhitespace: true };
 await build({
-  ...common, entryPoints: ['src/index.ts', 'src/tool.ts', 'src/skills.ts'], outdir: 'lib', platform: 'node',
+  ...common, entryPoints: ['src/index.ts', 'src/tool.ts', 'src/skills.ts', 'src/page-tools.ts'], outdir: 'lib', platform: 'node',
   target: 'node24', format: 'esm',
   define: {
     __B0_SKILL_PACKAGE__: JSON.stringify(skillPackage),

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
+import { competitionColor, competitionFont, antdSeedToken } from './tokens.ts';
 
 const dir = fileURLToPath(new URL('.', import.meta.url));
 const stylesPath = join(dir, '../styles.ts');
@@ -28,21 +29,21 @@ test('competition shell exports the A6 contract names with the locked AntD provi
 
 test('brand tokens follow DESIGN.md and keep original asset URLs', async () => {
   const tokens = await source('tokens.ts');
-  assert.match(tokens, /#09050D/);
-  assert.match(tokens, /#805D9D/);
+  assert.equal(competitionColor.background, '#09050D');
+  assert.equal(competitionColor.brandPrimary, '#805D9D');
   assert.match(tokens, /rgba\(255, 255, 255, 0\.10\)/);
-  assert.match(tokens, /#D3C3E8/);
-  assert.match(tokens, /#F2FFDC/);
-  assert.match(tokens, /#FEFCFF/);
-  assert.match(tokens, /#FF7D91/);
+  assert.equal(competitionColor.brandSecondary, '#D3C3E8');
+  assert.equal(competitionColor.brandAccent, '#F2FFDC');
+  assert.equal(competitionColor.ink, '#FEFCFF');
+  assert.equal(competitionColor.danger, '#FF7D91');
   assert.match(tokens, /21b8273703b9015027b572cb830b8bb01e9fc406c39b14ec7c228fbcdcaf4000/);
   assert.match(tokens, /\/b0\/brand\/logo\.png/);
   assert.match(tokens, /brightness\(0\) invert\(1\)/);
-  assert.match(tokens, /controlHeight: 44/);
-  assert.match(tokens, /Noto Sans SC/);
+  assert.equal(antdSeedToken.controlHeight, 44);
+  assert.match(competitionFont.body, /Noto Sans SC/);
   assert.match(tokens, /--sm-focus/);
   assert.match(tokens, /LIBRARY_THEME_MAP/);
-  assert.doesNotMatch(tokens, /body: "'Alibaba PuHuiTi 3.0'/);
+  assert.doesNotMatch(competitionFont.body, /Alibaba PuHuiTi/);
   assert.doesNotMatch(tokens, /frontend-vue3\/src\/theme/);
 });
 

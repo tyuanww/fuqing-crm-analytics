@@ -16,12 +16,14 @@
     "./tool": "./lib/tool.js",
     "./client": "./lib/client.js",
     "./cordis.patch.yml": "./cordis.patch.yml",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./page-tools": "./lib/page-tools.js"
   },
   "files": [
     "lib/index.js",
     "lib/tool.js",
     "lib/skills.js",
+    "lib/page-tools.js",
     "lib/client.js",
     "cordis.patch.yml",
     "bundled-dependencies.json"

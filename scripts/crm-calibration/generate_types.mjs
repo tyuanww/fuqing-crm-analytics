@@ -11,7 +11,8 @@ assert.equal(req('typescript').version, '6.0.3');
 assert.equal(JSON.parse(await readFile(req.resolve('openapi-typescript/package.json'))).version, '7.13.0');
 const { default: openapiTS, astToString } = req('openapi-typescript');
 for (const [schemaFile, typeFile] of [
-  ['crm-metrics.openapi.json', 'http-contract.generated.d.ts'],
+  ['crm-metrics-service.openapi.json', 'http-contract.generated.d.ts'],
+  ['crm-knowledge.openapi.json', 'knowledge-contract.generated.d.ts'],
   ['crm-dashboard.openapi.json', 'dashboard-contract.generated.d.ts'],
 ]) {
   const schema = JSON.parse(await readFile(join(root, 'backend/contracts', schemaFile)));

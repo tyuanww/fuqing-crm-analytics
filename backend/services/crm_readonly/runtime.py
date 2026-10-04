@@ -15,9 +15,10 @@ from backend.semantic.crm_metrics_v1 import MetricContractError, default_synthet
 from backend.services.crm_readonly import CrmReadonlyAdapter, GrainRequest, SourceRegistry, build_synthetic_grain_source
 
 
-def query_candidate(request: dict) -> dict:
+def query_candidate(request: dict, *, fixture_path: Path | None = None) -> dict:
     body = MetricRequest.model_validate(request)
-    fixture = json.loads(default_synthetic_path().read_text())
+    # Only the service owner sets this resource path; it is never an API field.
+    fixture = json.loads((fixture_path or default_synthetic_path()).read_text())
     if body.contains_real_data or fixture["contains_real_data"]:
         raise MetricContractError("FORBIDDEN", "candidate is synthetic only")
     if body.source_id != fixture["source_id"]:

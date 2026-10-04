@@ -4,7 +4,7 @@
 
 ## 前置条件
 
-- Node `24.19.0`、pnpm `11.7.0`、Python `3.14+`。
+- 插件开发使用 Node `24.19.0`、pnpm `11.7.0`。Python `3.14+` 属于后端服务、合成集成测试与发布校验工具的环境，不是 CRM 插件运行依赖。
 - 插件位于 profile allowlist 中，包名匹配 `@shine-mage/*`。
 - `package.json` 使用 `type: module`、`packageManager: pnpm@11.7.0`，并把 `@deepseek-ai/dsh-tools` 固定为 `0.1.7-rc.2` peer。
 - `files` 只声明运行时 `lib/`、bundle patch、已打包领域输入的 digest lock 和必要的 README/LICENSE；不得包含 `src/`、测试、`node_modules`、source map、符号链接或 workspace/file/link 依赖。
@@ -59,7 +59,7 @@ cat "$candidate_root/pack/candidate.json"
 
 ## 边界检查
 
-本地或 CI 运行 `node scripts/dsh-b0/plugin-boundaries.mjs --check`，核对包 owner、公开/内部合同、跨包引用、构建 DAG 与清单漂移。B0 pipeline 同时运行两个叶子包的 source-only 隔离 build/test/pack；这种本地夹具证据不代替真实宿主安装、服务合同或 clean reviewed SHA 的候选。当前 5 条 CRM → workbench 临时业务源码依赖见 [边界清单](../architecture/shinemage-plugin-boundaries.md)。
+本地或 CI 运行 `node scripts/dsh-b0/plugin-boundaries.mjs --check`，核对包 owner、公开/内部合同、跨包引用、构建 DAG 与清单漂移。B0 pipeline 同时运行两个叶子包的 source-only 隔离 build/test/pack；这种本地夹具证据不代替真实宿主安装、服务合同或 clean reviewed SHA 的候选。CRM 的生产源码例外已归零；slot/主题合同由领域生成，页面工具在 profile 层显式装配，见 [边界清单](../architecture/shinemage-plugin-boundaries.md)。
 
 ## 相关入口
 
@@ -67,3 +67,4 @@ cat "$candidate_root/pack/candidate.json"
 - [profile manifest](../architecture/dsh-profile-manifest.md)
 - [release artifact reference](../reference/dsh-rc2-release-artifact.md)
 - [当前状态](../../STATUS.md)
+- [CRM 插件与独立合成服务](./crm-plugin-service-boundary.md)

@@ -1,0 +1,9 @@
+{
+  "contract": "crm-metrics-service",
+  "api_version": "1.0.0",
+  "base_path": "/api/v1/crm-metrics",
+  "owner": "crm-service",
+  "scope": "synthetic_only",
+  "compatibility": "exact_api_version",
+  "operations": ["capabilities", "query"]
+}

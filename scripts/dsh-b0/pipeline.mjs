@@ -112,6 +112,10 @@ if (mode === '--prepare') {
   run(process.execPath, ['dsh-plugins/board-components/build.mjs', env.DSH_PACKAGE_INPUTS]);
   // Bind packed libraries before source-level consumer tests.
   run(process.execPath, ['scripts/dsh-b0/package-inputs.mjs', env.DSH_PACKAGE_INPUTS]);
+  run(process.execPath, ['scripts/dsh-b0/content-theme-contract.mjs', '--check']);
+  run(process.execPath, ['--test', 'scripts/dsh-b0/content-theme-contract.test.mjs']);
+  run(process.execPath, ['scripts/dsh-b0/cockpit-slot-contract.mjs', '--check']);
+  run(process.execPath, ['--test', 'scripts/dsh-b0/cockpit-slot-contract.test.mjs']);
   run(process.execPath, ['--test', 'scripts/dsh-b0/package-inputs.test.mjs', 'dsh-plugins/board-components/test/geometry.test.mjs']);
   run(process.execPath, ['scripts/dsh-b0/plugin-boundaries.mjs', '--check']);
   run(process.execPath, ['--test', 'scripts/dsh-b0/plugin-boundaries.test.mjs']);
@@ -184,6 +188,8 @@ print('B0 exact Python closure verified')
     'scripts/dsh-b0/native-query-fault-smoke.test.mjs', 'scripts/dsh-b0/native-query-assets-smoke.test.mjs',
     'scripts/dsh-b0/asset-routes.test.mjs']);
   run(process.execPath, [join(plugin, 'build.mjs'), upstream]);
+  run(process.execPath, ['dsh-plugins/crm-knowledge/build.mjs', upstream]);
+  run(process.execPath, ['--test', 'dsh-plugins/crm-knowledge/test/package.test.mjs', 'dsh-plugins/crm-knowledge/test/page-composition.integration.mjs', 'dsh-plugins/crm-knowledge/test/profile.test.mjs', 'dsh-plugins/crm-knowledge/test/service-client.test.mjs']);
   run(process.execPath, [join(shineBrand, 'build.mjs'), upstream]);
   run(process.execPath, [join(shineWaterfall, 'build.mjs'), upstream]);
   run(process.execPath, [join(shineCrowdAction, 'build.mjs'), upstream]);
@@ -243,7 +249,7 @@ print('B0 exact Python closure verified')
     run(process.execPath, [join(clean, 'build.mjs'), upstream, buildTools]);
     run(process.execPath, ['--test', ...builtTests.map(file => join(clean, 'test', file))], clean, { B0_BUILD_UPSTREAM: upstream });
     const hashes = {};
-    for (const item of ['index.js', 'tool.js', 'skills.js', 'client.js', 'views/saved-analysis-view.js', 'views/cockpit-view.js']) {
+    for (const item of ['index.js', 'tool.js', 'skills.js', 'page-tools.js', 'client.js', 'views/saved-analysis-view.js', 'views/cockpit-view.js']) {
       const original = await readFile(join(plugin, 'lib', item));
       const rebuilt = await readFile(join(clean, 'lib', item));
       assert.deepEqual(original, rebuilt, `Clean build output mismatch: ${item}`);

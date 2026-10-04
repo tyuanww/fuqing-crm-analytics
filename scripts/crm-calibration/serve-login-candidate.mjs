@@ -11,16 +11,16 @@ import { findReadyUrl, redactLaunchLog } from '../dsh-b0/transport-safety.mjs';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
 const option = name => { const index = argv.indexOf(name); return index < 0 ? undefined : argv[index + 1]; };
-assert.ok(argv.length === 6 && argv[0] === '--upstream' && argv[2] === '--python' && argv[4] === '--port', 'Use --upstream /absolute/pinned-checkout --python /absolute/python3.14 --port <unused-port>');
-const upstream = option('--upstream'), python = option('--python'), port = Number(option('--port'));
-assert.ok(isAbsolute(upstream) && isAbsolute(python) && Number.isSafeInteger(port) && port >= 1024 && port <= 65535);
+assert.ok(argv.length === 4 && argv[0] === '--upstream' && argv[2] === '--port', 'Use --upstream /absolute/pinned-checkout --port <unused-port>; Python is no longer a plugin prerequisite');
+const upstream = option('--upstream'), port = Number(option('--port'));
+assert.ok(isAbsolute(upstream) && Number.isSafeInteger(port) && port >= 1024 && port <= 65535);
 const pin = JSON.parse(await readFile(join(root, 'dsh-plugins/plugin-kit/toolchain.json')));
 assert.equal(Number(process.versions.node.split('.')[0]), pin.node_major);
 assert.equal(execFileSync('git', ['-C', upstream, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), pin.upstream_sha);
 assert.equal(execFileSync('git', ['-C', upstream, 'status', '--porcelain', '--untracked-files=no'], { encoding: 'utf8' }).trim(), '');
 const plugin = join(root, 'dsh-plugins/crm-knowledge');
 const cli = join(upstream, 'apps/cli/lib/bin.js');
-for (const path of [cli, python, join(plugin, 'lib/index.js'), join(plugin, 'lib/host.js'), join(plugin, 'lib/client.js')]) await access(path);
+for (const path of [cli, join(plugin, 'lib/index.js'), join(plugin, 'lib/host.js'), join(plugin, 'lib/client.js')]) await access(path);
 await new Promise((ok, reject) => { const probe = createServer(); probe.once('error', reject); probe.listen(port, '127.0.0.1', () => probe.close(ok)); });
 const parent = join(root, '.context/crm-login-candidate'); await mkdir(parent, { recursive: true, mode: 0o700 });
 const runtime = await mkdtemp(join(parent, 'run-'));
@@ -53,7 +53,7 @@ await writeJson(join(runtime, 'candidate.patch.yml'), [
 ]);
 const environment = { HOME: process.env.HOME, PATH: `${dirname(process.execPath)}:/usr/bin:/bin`, LANG: 'en_US.UTF-8', TZ: 'Asia/Shanghai',
   DSH_HOME: candidateHome, DSH_AGENTS_HOME: join(candidateHome, 'agents'), DSH_BUNDLED_SKILL_DIR: join(runtime, 'skills'),
-  DSH_TELEMETRY_DISABLED: '1', OPENSSL_CONF: '/dev/null', TMPDIR: join(runtime, 'tmp'), CRM_METRICS_PYTHON: python };
+  DSH_TELEMETRY_DISABLED: '1', OPENSSL_CONF: '/dev/null', TMPDIR: join(runtime, 'tmp') };
 const origin = `http://127.0.0.1:${port}`;
 const child = spawn(process.execPath, [cli, '--profile', 'web', '--patch', join(runtime, 'candidate.patch.yml'), '--host', '127.0.0.1', '--port', String(port), '--no-open'],
   { cwd: workspace, env: environment, stdio: ['ignore', 'pipe', 'pipe'] });

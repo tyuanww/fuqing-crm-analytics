@@ -16,14 +16,40 @@
 
 ### 当前本地 rc2 候选门禁（2026-10-03 审查修复）
 
-- 本次从公共仓库 `main@d4261aa3` 开始，保留 13 个本地提交及原工作树修改。DSH 仍固定 `0.1.7-rc.2` / `477b4f420553e8a52c2fbccc464d7561b239c443`，VERSION 未变。用户已授权审核通过后本地提交；候选在独立 `codex/plugin-boundary-review` 工作树，提交结果以 Git 为准。未 push、发布或修改杭州。
+- 本次从公共仓库 `main@d4261aa3` 开始，保留 13 个本地提交及原工作树修改。DSH 仍固定 `0.1.7-rc.2` / `477b4f420553e8a52c2fbccc464d7561b239c443`，VERSION 未变。前置审核修复为 `f55908df`，独立分支为 `codex/plugin-boundary-review`；原 public main 未切换或清理。本次提交收拢其后的 CRM slot、页面/主题、服务边界与独立应用包成果及 OCR 修复，准确提交号以本分支 Git 历史为准。未 push、发布或修改杭州。
 - 上一轮八阶段 preflight、102/102 测试及 candidate 回执只证明其绑定的旧 SHA；**本次修改后正式 preflight 尚未重跑**。最终候选必须从 clean reviewed SHA 重建，不复用旧 PASS。
 - 本轮修复 OCR-01–07：runtime 私有副本与原始包 integrity、插件最终包安全/入口校验、receive 恢复、跨 tag 身份与精确 Git tree 扫描。专项回归 **123/123 PASS**；真实固定上游 prepare、现有 build-tools audit、离线 runtime 构建，以及 workbench/shine-brand pack 通过。详见 [修复与规划审核证据](docs/hackathon/evidence/dsh-g0-review-fixes-20261003.md)。本机包是 Darwin arm64 验证产物，不是 WSL2 上线包。
-- 大型拆分计划已全文复核：统一 G0 → 首期 workspace 试点 → stop/go → 物理分仓的顺序，保留独立 CRM/知识库插件与官方 DSH 底座目标。T1 已完成边界设计、10 包机器清单、唯一构建 DAG 与漂移检查；T15 已把 pin/build-tools 归入 kit，并验证 brand/query 独立 build/test/pack。board-components 的固定 tarball/公开类型已替换 6 条源码引用，workbench 独立重建/pack 通过；CRM 的 5 条源码/类型引用仍开放。T2/T17 精确宿主、签名/SBOM、canary/rollback 与远端 receive/reconcile 仍 `PARTIAL`/`NOT_RUN`。
+- 大型拆分计划已全文复核：统一 G0 → 首期 workspace 试点 → stop/go → 物理分仓的顺序，保留独立 CRM/知识库插件与官方 DSH 底座目标。T1 已完成边界设计、10 包机器清单、唯一构建 DAG 与漂移检查；T15 已把 pin/build-tools 归入 kit，并验证 brand/query 独立 build/test/pack。board-components 的固定 tarball/公开类型已替换 6 条源码引用，workbench 独立重建/pack 通过；CRM 的 slot、页面与主题私有源码引用均已解除，生产源码例外为 0；合成服务 HTTP 边界与独立应用打包已推进，细目见下方 2026-10-04 记录；真实服务合同与物理分仓仍开放。T2/T17 精确宿主、签名/SBOM、canary/rollback 与远端 receive/reconcile 仍 `PARTIAL`/`NOT_RUN`。
 - 同日上一阶段验证（不是下方新增改动的全量重跑）：48 项锁定依赖的隔离环境中，共享合成 backend **2922 PASS / 77 SKIP / 71 deselect**，Vue build 与 **223/223**，release 专项 **119/119**，最终 B0 pipeline **PASS**（Python **618/618**；Node 各阶段合计 **1370 PASS / 1 SKIP**，含 clean 重跑）。实际 8 插件 build、两叶子隔离包、workbench clean rebuild 通过；详见 [边界与隔离构建证据](docs/hackathon/evidence/dsh-g0-boundaries-20261003.md)。
 - 图表解耦本轮证据、命令、包 SHA、测试结果与剩余项见 [图表解耦记录](docs/hackathon/evidence/dsh-g0-board-components-20261003.md)。产物均是本地构建/临时 Git 夹具，不是新 Release；VERSION、DSH pin 与生产 profile 未改变。
 - 本轮没有重跑完整原生 DSH profile 生命周期、WSL2/WAL、真实 HTTP SLI、浏览器/模型或业务 UAT；B0 Loader/合成服务测试不替代上述门禁。杭州状态沿用上方注明日期的现场快照，未作新的上线判断。
-- 提交前 OCR 全范围审核及修复见 [解耦审核](docs/hackathon/evidence/dsh-g0-decoupling-review-20261003.md)：恢复误写的验证矩阵，堵住 TypeScript import-equals 的依赖漏检。本次 Node 回归 **176/176**、图表后端 **43/43**；后续仍先处理 CRM 的 5 条内部引用。
+- 提交前 OCR 全范围审核及修复见 [解耦审核](docs/hackathon/evidence/dsh-g0-decoupling-review-20261003.md)：恢复误写的验证矩阵，堵住 TypeScript import-equals 的依赖漏检。本次 Node 回归 **176/176**、图表后端 **43/43**；后续 CRM 增量与该已提交审核分开记录。
+
+- 上一阶段 CRM slot 增量：领域 v1 JSON → 双方本地生成合同，源码例外 **5→4**。本轮完整 B0 **PASS**（Python **618/618**；Node 阶段合计 **1413 PASS / 1 SKIP**），CRM host/client 构建与编译后 UI **9/9** 通过。证据见 [CRM slot 解耦](docs/hackathon/evidence/dsh-g0-crm-slot-20261003.md)；未提交增量不冒充 `f55908df` 内容。
+
+- 最新 CRM 端：workbench 生产源码例外 **4→0**，页面工具归公开入口并由 profile 显式组合，主题归品牌领域合同。单包 build/test/pack 与 CRM 全部合成回归 **135/135** 已通过；最终 B0 **PASS**（Python **618 PASS**；Node 阶段合计 **1425 PASS / 1 SKIP**），7 份产物 clean rebuild 一致。实际 CRM 单包/含页面候选 profile 配置生成通过，未加载宿主；结果见 [CRM 端解耦证据](docs/hackathon/evidence/dsh-g0-crm-decoupling-20261003.md)。本轮仍未提交，未推进生产。
+
+### 上一阶段 CRM 服务调用解耦（2026-10-04，本地未提交）
+
+- 在原有 45 个未提交文件基础上继续实现，保留 `codex/plugin-boundary-review@f55908df` 与旧修改；本轮没有 commit、push、Release 或杭州操作。
+- CRM 插件已移除相对主仓路径和 Python 子进程调用。合成指标与公开知识解释分别通过显式 HTTP origin 和领域 API 1.0.0 调用，服务未配置/版本不符/断连时明确 NOT_AVAILABLE；已有真实 CRM 登录、账号权限和看板工具保留。独立知识 ASGI app 与旧 metrics/explain 兼容 adapter 并存，服务实现和知识资源仍在现仓。
+- profile 改为 `crm-profile-assets/v2`，不再要求 Python；旧 `--python` 返回迁移提示，只生成新 profile。新请求头约束已进入 OpenAPI/生成类型，不把版本协商当作认证。配置生成仅是 CONFIGURED_NOT_RUN。
+- 当前 CRM 回归 **146 PASS / 0 SKIP**，后端定向 **67 PASS**；实际双服务进程与单服务停止、独立 build/test/pack、最终 tarball 安全解包后固定 SDK 加载已通过。详细命令、最终 B0、失败记录及文件清单见 [本轮证据](docs/hackathon/evidence/dsh-g0-crm-service-boundary-20261004.md)。
+- T15/T3 仍 PARTIAL：服务独立打包、CRM/知识插件最终拆包、真实服务版本窗口、D15 保存/UNKNOWN 回放矩阵、精确宿主/WAL、签名/SBOM/CVE、canary/回退和杭州上线未完成；上轮 OCR 只覆盖其原始源码快照。
+
+### CRM/知识服务独立应用包（2026-10-04，审核前阶段记录）
+
+- 继续在 `codex/plugin-boundary-review@f55908df` 的现有工作树修改，既有未提交成果保留。指标与知识服务各有明确文件/资源 allowlist、独立依赖锁、API/软件版本和不可变 `.tar.zst`；只打包公开 synthetic 输入，知识服务不再加载指标引擎或 DuckDB。旧 factory/CLI adapter 保留，独立指标入口不再提供知识解释。
+- 实际包已在仓库外、仅含声明依赖的临时 venv 中完成 3 种指标查询、知识解释、OpenAPI 核对与单服务停止验证；篡改/缺资源/链接/额外文件/错误依赖/secret 均拒绝，输出目录不可覆盖。最终 artifact 摘要与实际 HTTP 测试中的包一致，详见[服务包证据](docs/hackathon/evidence/dsh-g0-crm-service-packaging-20261004.md)和[运行入口](docs/operating/crm-service-packages.md)。
+- 本轮真实验证：服务包 **4/4** 集成场景；共享全量合成后端 **2936 PASS / 77 SKIP / 71 deselect**；CRM **146 PASS / 0 SKIP**；B0 **PASS**（Python **618 PASS**，Node 阶段合计 **1435 PASS / 1 SKIP**，含 clean 重跑）。离线合同/类型、Ruff、边界清单和差异检查通过。失败的首次包断言与过期 inventory 日志保留，不作为当前通过证据。
+- T15 只新增“服务应用独立打包/资源清单”子项完成。下一步是 CRM/知识组合插件的最终拆包；服务物理分仓、平台依赖冷安装、真实 CRM 合同、D15 保存/UNKNOWN、精确宿主/WAL、签名/SBOM/CVE、canary/回退仍开放。候选 `release_ready=false`，没有 commit、push、远端 CI、Release 或杭州切换；不把已配置 CI 当成已经远端通过。
+
+### CRM 增量提交前审核（2026-10-04，当前结果）
+
+- 用户授权 OCR delegate 审核、修复后本地 commit。本轮覆盖原有全部 87 个未提交路径：OCR 61/61，另补审 26 个默认排除的文档、生成物、测试和删除项；同宿主对抗性复核没有额外发现。完整记录见[CRM 提交前审核](docs/hackathon/evidence/dsh-g0-crm-review-20261004.md)。
+- 修复 API 错误合同：实际 400/403/409/422 使用 `status/code`，现在 OpenAPI 与生成类型同步声明 `ServiceError`，不再误报 FastAPI 默认 `detail`。新增 3 项回归先复现失败再通过；同步服务打包进度与 Ruff 版本文字。
+- 修复后本轮重跑：完整合成 backend **2939 PASS / 77 SKIP / 71 deselect**；CRM **146 PASS / 0 SKIP**；B0 **PASS**（Python **618 PASS**，Node 阶段合计 **1435 PASS / 1 SKIP**，含 clean 重跑）。16 项服务 API 测试、实际服务包隔离运行、离线合同/类型、Ruff、边界清单均通过。下方及上方历史阶段的“未提交”和包 SHA 仅描述当时快照，不是新提交的 release 证据。
+- 本轮审核无未关闭 P0/P1；产品仍 PARTIAL。CRM/知识插件最终拆包、真实数据/API、完整宿主/WAL、冷安装和供应链/回退仍待完成。没有远端 CI、push、Release 或杭州操作；正式候选须从 clean reviewed SHA 重建。
 
 ## 本轮施工计划
 

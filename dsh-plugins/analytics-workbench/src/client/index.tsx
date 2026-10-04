@@ -55,6 +55,7 @@ import { createArtifactInboxClient } from './artifact-inbox.mjs';
 import { GenerateChipIcon, LibraryGenerateDock, LibraryPreviewToolCard } from './library-workspace.tsx';
 import { BOARD_GENERATE_TOOL_NAME, BOARD_EDIT_TOOL_NAME } from '../competition-agent/family.mjs';
 import { PAGE_GENERATE_TOOL_NAME, PAGE_REQUEST_ID_PATTERN, PAGE_TOOL_RESULT_SCHEMA } from '../competition-agent/page-family.mjs';
+import { CRM_COCKPIT_SLOT } from './cockpit-extension';
 import { fileResourceAddress, isSafeWorkspaceRelPath } from './cockpit-products.mjs';
 import { createCockpitDelivery } from './cockpit-delivery.mjs';
 import { createCockpitFileClient } from './cockpit-file-client.mjs';
@@ -942,7 +943,7 @@ export function apply(ctx: Context): void {
   }, CockpitPanelIcon));
   ctx.slots.inject('main', () => ctx.slots.register({
     name: 'main', key: COCKPIT_PANEL_ID,
-    children: { 'cockpit.crm': { kind: 'single', scope: 'root' } },
+    children: { 'cockpit.crm': CRM_COCKPIT_SLOT },
     inject: () => {
       const http = competitionHttpOptions();
       return {

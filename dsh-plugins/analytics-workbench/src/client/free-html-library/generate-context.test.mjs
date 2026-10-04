@@ -1,11 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
-import { join } from 'node:path';
+import { competitionFont } from '../competition-shell/tokens.ts';
 import { ANTI_TEMPLATE, buildGenerateContext, SHINE_INVARIANTS, themeValueCopy } from './generate-context.mjs';
-
-const tokens = await readFile(join(fileURLToPath(new URL('../competition-shell/tokens.ts', import.meta.url))), 'utf8');
 
 test('generate context always carries SHINE invariants and never a component whitelist', () => {
   const none = buildGenerateContext({ prompt: '做一张复盘页' });
@@ -47,9 +43,8 @@ test('theme value copy matches competition-shell declared Noto stack and is not 
   const copy = themeValueCopy('dark');
   assert.match(copy.font.body, /Noto Sans SC/);
   assert.doesNotMatch(copy.font.body, /PuHuiTi/);
-  assert.match(tokens, /Noto Sans SC/);
-  assert.match(tokens, /candidateChinese/);
-  assert.doesNotMatch(tokens.slice(tokens.indexOf('body:')), /^[\s\S]*body: "'Alibaba PuHuiTi/);
+  assert.equal(copy.font.body, competitionFont.body);
+  assert.match(competitionFont.candidateChinese, /Alibaba PuHuiTi/);
   assert.equal(copy.color.purpleEmphasisOnly, '#805D9D');
   assert.match(copy.note, /Not a second palette/);
 });

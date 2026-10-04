@@ -1,0 +1,11 @@
+{
+  "schema_version": "shinemage-cockpit-slot/v1",
+  "version": "1.0.0",
+  "owner": "analysis-workbench",
+  "name": "cockpit.crm",
+  "slot": {
+    "kind": "single",
+    "scope": "root"
+  },
+  "optional": true
+}

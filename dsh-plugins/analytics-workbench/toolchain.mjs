@@ -4,7 +4,7 @@ export { bindToolchain } from '../plugin-kit/toolchain.mjs';
 export function checkTypes(plugin, compiler) {
   const ts = compiler;
   for (const [face, entries, types] of [
-    ['host', ['src/index.ts', 'src/tool.ts', 'src/skills.ts'], ['node']],
+    ['host', ['src/index.ts', 'src/tool.ts', 'src/skills.ts', 'src/page-tools.ts'], ['node']],
     ['client', ['src/client/index.tsx', 'src/client/platform.d.ts', 'src/saved-analysis-view.tsx', 'src/cockpit-view.tsx', 'src/first-purchase-saved-analysis-view.tsx', 'src/first-purchase-cockpit-view.tsx', 'test/run-contract.typecheck.ts'], ['react']],
   ]) {
     const program = ts.createProgram(entries.map(entry => join(plugin, entry)), {

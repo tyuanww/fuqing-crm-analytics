@@ -53,48 +53,7 @@
       "kind": "domain-library"
     }
   },
-  "allowed_runtime_edges": [
-    {
-      "consumer": "crm-knowledge",
-      "provider": "analytics-workbench",
-      "source": "dsh-plugins/crm-knowledge/src/index.ts",
-      "target": "dsh-plugins/analytics-workbench/src/competition-agent/page-tools.mjs",
-      "remedy": "Extract the domain-owned API/type or replace the page tool call with a versioned service capability.",
-      "retire_when": "CRM adapter has consumer contract tests and imports no workbench source."
-    },
-    {
-      "consumer": "crm-knowledge",
-      "provider": "analytics-workbench",
-      "source": "dsh-plugins/crm-knowledge/src/index.ts",
-      "target": "dsh-plugins/analytics-workbench/src/competition-agent/page-family.mjs",
-      "remedy": "Extract the domain-owned API/type or replace the page tool call with a versioned service capability.",
-      "retire_when": "CRM adapter has consumer contract tests and imports no workbench source."
-    },
-    {
-      "consumer": "crm-knowledge",
-      "provider": "analytics-workbench",
-      "source": "dsh-plugins/crm-knowledge/src/client/index.tsx",
-      "target": "dsh-plugins/analytics-workbench/src/client/competition-shell/tokens",
-      "remedy": "Extract the domain-owned API/type or replace the page tool call with a versioned service capability.",
-      "retire_when": "CRM adapter has consumer contract tests and imports no workbench source."
-    },
-    {
-      "consumer": "crm-knowledge",
-      "provider": "analytics-workbench",
-      "source": "dsh-plugins/crm-knowledge/src/client/index.tsx",
-      "target": "dsh-plugins/analytics-workbench/src/client/cockpit-extension",
-      "remedy": "Extract the domain-owned API/type or replace the page tool call with a versioned service capability.",
-      "retire_when": "CRM adapter has consumer contract tests and imports no workbench source."
-    },
-    {
-      "consumer": "crm-knowledge",
-      "provider": "analytics-workbench",
-      "source": "dsh-plugins/crm-knowledge/src/client/crm-library.tsx",
-      "target": "dsh-plugins/analytics-workbench/src/client/competition-shell/tokens",
-      "remedy": "Extract the domain-owned API/type or replace the page tool call with a versioned service capability.",
-      "retire_when": "CRM adapter has consumer contract tests and imports no workbench source."
-    }
-  ],
+  "allowed_runtime_edges": [],
   "command_owners": [
     {
       "entry": "scripts/dsh.mjs",
@@ -135,6 +94,16 @@
       "entry": "deploy/wsl/install-release.sh",
       "owner": "deploy-owner",
       "scope": "Explicit immutable remote install; separate authorization."
+    },
+    {
+      "entry": "scripts/crm-calibration/package-service.mjs",
+      "owner": "release-control",
+      "scope": "Allowlisted synthetic service application artifact and digest only; no dependency install, production release or activation."
+    },
+    {
+      "entry": "scripts/crm-calibration/service-entry.py",
+      "owner": "backend-services",
+      "scope": "Verify one service artifact and exact dependencies; explicit loopback-only owned process. CRM/knowledge owner comes from its manifest."
     }
   ],
   "contracts": [
@@ -209,25 +178,26 @@
     {
       "id": "crm-cockpit-slot",
       "owner": "analysis-workbench",
-      "source": "dsh-plugins/analytics-workbench/src/client/cockpit-extension.ts",
-      "generator": null,
+      "source": "dsh-plugins/analytics-workbench/contracts/cockpit-slot.v1.json",
+      "generator": "scripts/dsh-b0/cockpit-slot-contract.mjs",
       "consumers": [
+        "analytics-workbench",
         "crm-knowledge"
       ],
-      "compatibility": "Optional cockpit slot; type is currently cross-source and must become an explicit public contract.",
-      "status": "INTERNAL_NOT_PUBLIC"
+      "compatibility": "Frozen v1 optional single/root slot; generated consumer copies checked for drift; no host activation or service permission implied.",
+      "status": "DOMAIN_V1"
     },
     {
       "id": "page-generation-tool",
       "owner": "page-domain",
-      "source": "dsh-plugins/analytics-workbench/src/competition-agent/page-family.mjs",
+      "source": "dsh-plugins/analytics-workbench/src/page-tools.ts",
       "generator": null,
       "consumers": [
-        "crm-knowledge",
-        "analytics-workbench"
+        "analytics-workbench",
+        "crm-profile-composer"
       ],
-      "compatibility": "Current source coupling; do not freeze internal native routes as a public API.",
-      "status": "INTERNAL_NOT_PUBLIC"
+      "compatibility": "Page domain owns the optional tools-only public ./page-tools entry. Profile explicitly selects its built package; CRM ships no page parser or registration.",
+      "status": "DOMAIN_V1"
     },
     {
       "id": "board-funnel-geometry-v1",
@@ -251,6 +221,40 @@
         "shine-waterfall"
       ],
       "compatibility": "SemVer library exports; exact tarball digest and bundled dependency lock per consumer.",
+      "status": "DOMAIN_V1"
+    },
+    {
+      "id": "plugin-content-theme-v1",
+      "owner": "shine-brand",
+      "source": "dsh-plugins/shine-brand/contracts/content-theme.v1.json",
+      "generator": "scripts/dsh-b0/content-theme-contract.mjs",
+      "consumers": [
+        "analytics-workbench",
+        "crm-knowledge"
+      ],
+      "compatibility": "Brand-owned content tokens; generated copies with source digest, no runtime brand activation or native chrome changes.",
+      "status": "DOMAIN_V1"
+    },
+    {
+      "id": "crm-metrics-service-api",
+      "owner": "crm-service",
+      "source": "backend/contracts/crm-metrics-service.v1.json",
+      "generator": "scripts/crm-calibration/generate_contract.py",
+      "consumers": [
+        "crm-knowledge"
+      ],
+      "compatibility": "Exact API 1.0.0 per request; independent configured loopback origin; no Python/repository fallback. Synthetic fixtures only; no durable save.",
+      "status": "DOMAIN_V1"
+    },
+    {
+      "id": "crm-knowledge-service-api",
+      "owner": "knowledge-service",
+      "source": "backend/contracts/crm-knowledge-service.v1.json",
+      "generator": "scripts/crm-calibration/generate_contract.py",
+      "consumers": [
+        "crm-knowledge"
+      ],
+      "compatibility": "Exact API 1.0.0 per request; independent configured loopback origin; no Python/repository fallback. Synthetic fixtures only; no durable save.",
       "status": "DOMAIN_V1"
     }
   ]

@@ -9,6 +9,7 @@ import { serveDashboard, request as dashboardRequest, SYNTHETIC_PASSWORD } from 
 import { mountLoginHost } from './login-native.fixture.mjs';
 import { serveAssets, snapshot, analysis, reference } from './crm-assets.fixture.mjs';
 import { graphFixture, CHUNK } from './graph.fixture.mjs';
+import { serveCrmServices } from './service.fixture.mjs';
 
 const plugin = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const upstream = process.env.B0_BUILD_UPSTREAM;
@@ -50,13 +51,14 @@ const base = {
 };
 
 test('registered tools execute all queries through B/A and retrieve C evidence', async t => {
+  const services = await serveCrmServices(t);
   const home = await mkdtemp(join(tmpdir(), 'crm-host-test-'));
   const previous = process.env.HOME;
   process.env.HOME = home;
   const ctx = new Context();
   try {
     await mountAgentLoopTestDependencies(ctx);
-    const instance = await ctx.plugin(built);
+    const instance = await ctx.plugin(built, services.config);
     const agent = { session: { id: 'crm-synthetic-host' } };
     let counter = 0;
     const execute = (name, args, signal = new AbortController().signal) => ctx.tools.execute({
@@ -86,6 +88,11 @@ test('registered tools execute all queries through B/A and retrieve C evidence',
       assert.equal(outcome.value.dsh_using_neo4j, false);
       assert.match(outcome.value.preferred_operational_definition.aus, /当前看板GSV/);
       assert.equal(outcome.value.preferred_operational_definition.real_business_acceptance, false);
+      const gsv = await execute('crm_knowledge_explain', { topic: 'GSV' });
+      assert.equal(gsv.isError, false, JSON.stringify(gsv));
+      assert.equal(gsv.value.preferred_real_gsv.default_for_real_gsv, 'query_crm_dashboard_gsv');
+      assert.equal(gsv.value.target_candidate.definition.id, 'metric.gsv_net:target-v1');
+      assert.equal(gsv.value.target_candidate.real_business_acceptance, false);
     });
     await t.test('rejects real source and arbitrary SQL at host boundary', async () => {
       const real = await execute('query_crm_metrics_v1', { request: { ...base, query_id: 'sales_window_summary', contains_real_data: true } });
@@ -169,6 +176,9 @@ test('browser login reaches the pinned tools without exposing credentials', asyn
   const fixture = await serveDashboard(t);
   const host = await mountLoginHost(t, fixture.binding.baseUrl);
   const { execute } = host;
+  // Query GSV has an explicit cutoff request; rejected operations must add no calls.
+  const expectedCalls = ['/api/v1/auth/login', '/api/v1/auth/me', '/api/v1/metrics/overview',
+    '/api/v1/metrics/trend', '/api/v1/metrics/cutoff'];
     await t.test('native cookie and matching Origin are mandatory', async () => {
       for (const headers of [{ cookie: '' }, { origin: 'https://example.com' }, { origin: '' }, { 'x-crm-ui': '' }]) {
         const res = await host.call('login', { username: 'fixture-user', password: SYNTHETIC_PASSWORD }, headers);
@@ -197,42 +207,43 @@ test('browser login reaches the pinned tools without exposing credentials', asyn
       assert.equal(outcome.value.gsv.amount_yuan, '100.31');
       assert.equal(outcome.value.filters.channel, '淘客');
       assert.equal(outcome.value.synthetic, true);
+      assert.equal(outcome.value.warehouse_cutoff, '2026-07-10');
       assert.equal(outcome.value.contains_real_data, false);
       assert.equal('member_premium' in outcome.value, false);
-      assert.equal(fixture.calls.length, 4);
+      assert.deepEqual(fixture.calls.map(call => call.path), expectedCalls);
     });
     await t.test('a different host session cannot borrow this login', async () => {
       const outcome = await execute('query_crm_dashboard_gsv', dashboardRequest, 'another-session');
       assert.equal(outcome.value.status, 'UNAVAILABLE');
       assert.equal(outcome.value.reason.code, 'NOT_CONNECTED');
-      assert.equal(fixture.calls.length, 4);
+      assert.deepEqual(fixture.calls.map(call => call.path), expectedCalls);
     });
     await t.test('tool arguments cannot override connection or credentials', async () => {
       for (const extra of [{ token: fixture.binding.token }, { base_url: fixture.binding.baseUrl }, { sql: 'select 1' }, { refund_as_of: '2026-02-01' }]) {
         const outcome = await execute('query_crm_dashboard_gsv', { ...dashboardRequest, ...extra });
         assert.ok(outcome.isError || outcome.value?.reason?.code === 'INVALID_REQUEST', JSON.stringify(outcome));
       }
-      assert.equal(fixture.calls.length, 4);
+      assert.deepEqual(fixture.calls.map(call => call.path), expectedCalls);
     });
     await t.test('capabilities keep synthetic and authenticated sources distinct', async () => {
       const outcome = await execute('crm_metrics_capabilities', {});
       assert.equal(outcome.isError, false, JSON.stringify(outcome));
-      assert.equal(outcome.value.synthetic_candidate.synthetic_only, true);
+      assert.equal(outcome.value.synthetic_candidate.status, 'NOT_AVAILABLE');
+      assert.equal(outcome.value.synthetic_candidate.reason.code, 'SERVICE_NOT_CONFIGURED');
       assert.equal(outcome.value.dashboard.connection_state, 'LOGIN_BOUND');
       assert.equal(JSON.stringify(outcome).includes(fixture.binding.token), false);
     });
-    await t.test('GSV knowledge leads with the accepted dashboard and labels the target candidate', async () => {
+    await t.test('missing knowledge service stays unavailable without hiding the authenticated dashboard', async () => {
       const outcome = await execute('crm_knowledge_explain', { topic: 'GSV' });
       assert.equal(outcome.isError, false, JSON.stringify(outcome));
-      assert.equal(outcome.value.preferred_real_gsv.default_for_real_gsv, 'query_crm_dashboard_gsv');
-      assert.equal(outcome.value.target_candidate.definition.id, 'metric.gsv_net:target-v1');
-      assert.equal(outcome.value.target_candidate.real_business_acceptance, false);
+      assert.equal(outcome.value.status, 'NOT_AVAILABLE');
+      assert.equal(outcome.value.reason.code, 'SERVICE_NOT_CONFIGURED');
     });
     await t.test('missing host binding reports unavailable without querying or falling back', async () => {
       const disconnected = await host.call('disconnect'); assert.equal(disconnected.status, 200); await disconnected.arrayBuffer();
       const outcome = await execute('query_crm_dashboard_gsv', dashboardRequest);
       assert.equal(outcome.value.reason.code, 'NOT_CONNECTED');
-      assert.equal(fixture.calls.length, 4);
+      assert.deepEqual(fixture.calls.map(call => call.path), expectedCalls);
       assert.equal(fixture.calls.some(call => call.path.endsWith('/logout')), false);
     });
     await t.test('unload removes the added tool', async () => {

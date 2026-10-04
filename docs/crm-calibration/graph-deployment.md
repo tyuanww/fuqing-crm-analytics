@@ -60,11 +60,10 @@ node scripts/crm-calibration/graph-ledger.mjs \
 node scripts/crm-calibration/prepare-profile.mjs \
   --output /absolute/new-private-output \
   --plugin /absolute/repository/dsh-plugins/crm-knowledge \
-  --python /absolute/python3.14 \
   --graph-settings /private/graph-settings.json
 ```
 
-此命令只写新的输出目录，拒绝覆盖；不会修改现有 profile 或启停服务。输出 `host.patch.yml`、`preset/` 和带文件哈希的 manifest。模块 URL 带构建哈希，避免长期宿主复用旧模块；Python 显式传给该 preset，不再改整个进程的环境变量。输出目录和插件 checkout 是运行依赖，不能随意移动或清理。
+此命令只写新的输出目录，拒绝覆盖；不会修改现有 profile 或启停服务。输出 `host.patch.yml`、`preset/` 和带文件哈希的 `crm-profile-assets/v2` manifest。模块 URL 带构建哈希，避免长期宿主复用旧模块。2026-10-04 起插件不再调用本仓 Python；上例只配置在线图谱，公开合成查询/知识解释保持 NOT_AVAILABLE。需要这两项能力时分别传 `--metrics-origin` 和 `--knowledge-origin`，详见[独立服务边界](../operating/crm-plugin-service-boundary.md)。输出目录和已安装插件目录是运行依赖，不能随意移动或清理。
 
 部署时先备份目标 preset 的三个文件，核对已有 host 入口。如果尚无 CRM host，将生成的具体 `file:///.../lib/host.js` 插入一次；固定 DSH 版不能通过包子入口稳定发现登录 client。已有 `crm-knowledge-live-host` 时不重复插入，也不覆盖其他 profile 项。将 `preset/` 中三个文件放入所选 harness 的 `.agent-presets/crm-knowledge/`，保留生成目录中的 tools 模块。新建会话选择“CRM 知识与指标”。教材检索/引用展开走本插件的 `query_crm_knowledge_sources` 与 `expand_crm_knowledge_citation`，须已连接 CRM。若同一宿主仍加载 dsh-weknora 的共享 retrieve 工具，那不是本轮账号隔离；本插件不修改 DSH 上游，也不把它当作 ACL 完成。本生成器不迁移模型、凭据或其它知识库。
 

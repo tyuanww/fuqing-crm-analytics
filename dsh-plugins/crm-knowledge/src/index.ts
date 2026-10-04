@@ -1,18 +1,16 @@
 import type { Context } from '@deepseek-ai/cordis';
 import { defineTool } from '@deepseek-ai/dsh-tools';
 import { schemas } from './contract.generated.js';
-import { runCrmCliAsync } from './run.mjs';
+import { createCrmServices, unavailableSchema } from './service-client.mjs';
 import { CHANNELS, CHANNEL_QUERY_DESCRIPTION, dashboardCapabilities, dashboardKnowledgeContext, queryDashboardGsv, queryDashboardPurchases,
   queryDashboardReadiness, queryDashboardMembership, queryDashboardNetGsv } from './dashboard.mjs';
-import { executePageTool, PAGE_TOOL_PARAMETERS } from '../../analytics-workbench/src/competition-agent/page-tools.mjs';
-import { PAGE_GENERATE_TOOL_NAME } from '../../analytics-workbench/src/competition-agent/page-family.mjs';
 import type {} from './dashboard-service.js';
 
 export const name = 'crm-knowledge-candidate';
 export const inject = ['tools'];
 
-export function apply(ctx: Context, config: { python?: string } = {}): void {
-  const run = (payload: unknown, signal?: AbortSignal) => runCrmCliAsync(payload, signal, config.python);
+export function apply(ctx: Context, config: { metricsOrigin?: string; knowledgeOrigin?: string } = {}): void {
+  const services = createCrmServices(config);
   ctx.tools.register(defineTool({
     name: 'query_crm_dashboard_snapshot',
     description: '查询看板 GSV、AOV、AUS 及覆盖，并由 CRM 服务保存不可变的结果快照，供用户稍后保存分析、加入驾驶舱。仅接受日期/渠道/剔除低价；不接受模型提供的数字。需要当前对话 CRM 登录和独立快照存储；失败不回退合成资料。保存分析和驾驶舱引用由用户在 CRM 分析窗口确认。',
@@ -70,18 +68,19 @@ export function apply(ctx: Context, config: { python?: string } = {}): void {
     name: 'query_crm_metrics_v1',
     description: '查询 CRM 合成候选资料的销售表现、老客回购和派样后复购。金额为 CNY 分；保留未知和不可用原因，不能当作真实业务结果。',
     parameters: { request: { ...schemas.request, required: true } },
-    output: { schema: schemas.output, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
+    output: { schema: { oneOf: [schemas.output, unavailableSchema] }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
     timeoutMs: 35000, isConcurrencySafe: () => true,
-    execute: async (args, exec) => run({ action: 'query', request: args.request }, exec.signal),
+    execute: async (args, exec) => services.query(args.request, exec.signal),
   }));
   ctx.tools.register(defineTool({
     name: 'crm_knowledge_explain',
-    description: '读取本地 CRM 知识包的已确认指标定义、决议、教材出处和离线依赖关系。区分目标口径与合成验证；此工具不查询在线图谱，也不代表其他指标已经完成真实业务验收。',
+    description: '通过独立知识服务读取公开合成知识包的已确认指标定义、决议、教材出处和离线依赖关系。服务未配置时返回 NOT_AVAILABLE。区分目标口径与合成验证；此工具不查询在线图谱，也不代表真实业务验收。',
     parameters: { topic: { type: 'string', required: true } },
     output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
     timeoutMs: 35000, isConcurrencySafe: () => true,
     execute: async (args, exec) => {
-      const target = await run({ action: 'explain', topic: args.topic }, exec.signal);
+      const target = await services.explain(args.topic, exec.signal);
+      if (target.status === 'NOT_AVAILABLE') return target;
       if (/\baus\b|\baov\b|客单价|每单金额/i.test(args.topic)) {
         target.preferred_operational_definition = {
           decision: '用户2026-09-20确认：真实AUS、AOV沿用当前看板GSV，扣退款净额版单列。',
@@ -162,7 +161,7 @@ export function apply(ctx: Context, config: { python?: string } = {}): void {
     parameters: {},
     output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
     execute: async (_args, exec) => ({
-      synthetic_candidate: await run({ action: 'capabilities' }, exec.signal),
+      synthetic_candidate: await services.capabilities(exec.signal),
       dashboard: ctx.get('crmDashboard')?.capabilities(exec.agent?.session.id) ?? dashboardCapabilities(),
     }),
   }));
@@ -174,23 +173,20 @@ export function apply(ctx: Context, config: { python?: string } = {}): void {
     execute: async (_args, exec) => {
       const dashboard = ctx.get('crmDashboard')?.capabilities(exec.agent?.session.id) ?? dashboardCapabilities();
       const boardConfigured = Boolean(process.env.COMPETITION_HTTP_BASE && process.env.COMPETITION_HTTP_TOKEN);
+      const pageTool = ctx.tools.get('free_html_page_generate', exec.agent);
       return {
         crm_login: typeof dashboard.connection_state === 'string' ? dashboard.connection_state : 'NOT_CONNECTED',
         gsv: 'unknown_until_query_crm_dashboard_gsv_is_called',
         purchases: 'unknown_until_query_crm_dashboard_purchases_is_called',
         snapshot: 'unknown_until_query_crm_dashboard_snapshot_is_called',
         knowledge_base: 'weknora_http_18092',
+        synthetic_services: services.availability(),
+        page_delivery: pageTool
+          ? { status: 'AVAILABLE', execution: 'NOT_RUN', reason: null }
+          : { status: 'NOT_AVAILABLE', execution: 'NOT_RUN', reason: 'PAGE_PROVIDER_NOT_INSTALLED_OR_NOT_VISIBLE' },
         board_tools: boardConfigured ? 'competition_board_tools_can_register' : 'not_configured',
         absent_names: ['copyright'],
       };
     },
-  }));
-  ctx.tools.register(defineTool({
-    name: PAGE_GENERATE_TOOL_NAME,
-    description: '用户要生成 HTML 或驾驶舱时，把你在本回复里写好的自由 HTML 页面交出来。request_id 必须逐字复制用户消息中的 page-gen 标识；消息里没有时，填写一个 page-gen- 开头的新标识。不要写本地文件，不要改成 BoardSpec。本工具只交付源码包，保存由工作台完成。',
-    parameters: PAGE_TOOL_PARAMETERS[PAGE_GENERATE_TOOL_NAME] as never,
-    output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }], presentationMeta: (_args, value) => value },
-    timeoutMs: 6000, isConcurrencySafe: () => false,
-    execute: async (args, exec) => executePageTool(PAGE_GENERATE_TOOL_NAME, args as Record<string, unknown>, exec) as never,
   }));
 }
