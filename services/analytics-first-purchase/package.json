@@ -1,0 +1,147 @@
+{
+  "schema_version": "shinemage-service-inputs/v1",
+  "domain": "first-purchase",
+  "name": "shinemage-analytics-first-purchase-service",
+  "version": "0.1.0rc1",
+  "api_version": "1.0.0",
+  "owner": "analysis-service",
+  "scope": "synthetic_only",
+  "python": "3.14",
+  "dependencies": {
+    "annotated-doc": "0.0.5",
+    "annotated-types": "0.8.0",
+    "anyio": "4.15.1",
+    "click": "8.5.0",
+    "fastapi": "0.141.1",
+    "h11": "0.16.0",
+    "idna": "3.19",
+    "pydantic": "2.13.5",
+    "pydantic-core": "2.46.5",
+    "starlette": "1.6.0",
+    "typing-extensions": "4.16.0",
+    "typing-inspection": "0.4.4",
+    "uvicorn": "0.47.0"
+  },
+  "files": {
+    "backend/__init__.py": {
+      "source": "scripts/crm-calibration/service-namespace.py",
+      "role": "bootstrap"
+    },
+    "backend/analytics_app.py": {
+      "source": "backend/analytics_app.py",
+      "role": "code"
+    },
+    "backend/analytics_first_purchase_analysis_app.py": {
+      "source": "backend/analytics_first_purchase_analysis_app.py",
+      "role": "code"
+    },
+    "backend/analytics_fixture.py": {
+      "source": "backend/analytics_fixture.py",
+      "role": "code"
+    },
+    "backend/contracts/__init__.py": {
+      "source": "scripts/crm-calibration/service-namespace.py",
+      "role": "bootstrap"
+    },
+    "backend/contracts/analytics-first-purchase-service.v1.json": {
+      "source": "backend/contracts/analytics-first-purchase-service.v1.json",
+      "role": "resource"
+    },
+    "backend/contracts/analytics.py": {
+      "source": "backend/contracts/analytics.py",
+      "role": "code"
+    },
+    "backend/contracts/analytics_first_purchase.py": {
+      "source": "backend/contracts/analytics_first_purchase.py",
+      "role": "code"
+    },
+    "backend/contracts/analytics_first_purchase_analysis.py": {
+      "source": "backend/contracts/analytics_first_purchase_analysis.py",
+      "role": "code"
+    },
+    "backend/contracts/analytics_first_purchase_kernel.py": {
+      "source": "backend/contracts/analytics_first_purchase_kernel.py",
+      "role": "code"
+    },
+    "backend/contracts/analytics_first_purchase_run.py": {
+      "source": "backend/contracts/analytics_first_purchase_run.py",
+      "role": "code"
+    },
+    "backend/contracts/analytics_query.py": {
+      "source": "backend/contracts/analytics_query.py",
+      "role": "code"
+    },
+    "backend/contracts/analytics_query_run.py": {
+      "source": "backend/contracts/analytics_query_run.py",
+      "role": "code"
+    },
+    "backend/semantic/__init__.py": {
+      "source": "scripts/crm-calibration/service-namespace.py",
+      "role": "bootstrap"
+    },
+    "backend/semantic/analytics_b0.py": {
+      "source": "backend/semantic/analytics_b0.py",
+      "role": "code"
+    },
+    "backend/semantic/analytics_channel_followup.py": {
+      "source": "backend/semantic/analytics_channel_followup.py",
+      "role": "code"
+    },
+    "backend/services/__init__.py": {
+      "source": "scripts/crm-calibration/service-namespace.py",
+      "role": "bootstrap"
+    },
+    "backend/services/analytics/__init__.py": {
+      "source": "scripts/crm-calibration/service-namespace.py",
+      "role": "bootstrap"
+    },
+    "backend/services/analytics/access.py": {
+      "source": "backend/services/analytics/access.py",
+      "role": "code"
+    },
+    "backend/services/analytics/catalog.py": {
+      "source": "backend/services/analytics/catalog.py",
+      "role": "code"
+    },
+    "backend/services/analytics/execution_lease.py": {
+      "source": "backend/services/analytics/execution_lease.py",
+      "role": "code"
+    },
+    "backend/services/analytics/first_purchase/__init__.py": {
+      "source": "scripts/crm-calibration/service-namespace.py",
+      "role": "bootstrap"
+    },
+    "backend/services/analytics/first_purchase/asset_state.py": {
+      "source": "backend/services/analytics/first_purchase/asset_state.py",
+      "role": "code"
+    },
+    "backend/services/analytics/first_purchase/save_policy.py": {
+      "source": "backend/services/analytics/first_purchase/save_policy.py",
+      "role": "code"
+    },
+    "backend/services/analytics/first_purchase/saved.py": {
+      "source": "backend/services/analytics/first_purchase/saved.py",
+      "role": "code"
+    },
+    "backend/services/analytics/first_purchase/source.py": {
+      "source": "backend/services/analytics/first_purchase/source.py",
+      "role": "code"
+    },
+    "backend/services/analytics/jobs.py": {
+      "source": "backend/services/analytics/jobs.py",
+      "role": "code"
+    },
+    "backend/services/analytics/query_codecs.py": {
+      "source": "backend/services/analytics/query_codecs.py",
+      "role": "code"
+    },
+    "backend/services/analytics/resource_profile.py": {
+      "source": "backend/services/analytics/resource_profile.py",
+      "role": "code"
+    },
+    "service.py": {
+      "source": "scripts/crm-calibration/service-entry.py",
+      "role": "bootstrap"
+    }
+  }
+}

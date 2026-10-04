@@ -70,6 +70,10 @@ B0 独立入口：`node scripts/dsh-b0/pipeline.mjs --check --python /absolute/p
 
 干净重建只复制固定白名单源码，不跟随符号链接，也不进入 `.git`、`.context`、`node_modules`、`dist` 或 `lib`。复制总量上限为 256 MiB、5 万文件和 32 层目录；临时目录带专属标记，正常失败会在 `finally` 清理，启动时还会回收超过 24 小时的已标记残留。构建被强制终止时不会保证即时删除，但不会再无边界复制依赖树。
 
+2026-10-04：上面的服务包入口也覆盖首购分析的独立包，含 13 项精确依赖、HTTP 保存/重启回放、状态合同漂移和 FIFO 拒绝。共享 runner 仍调用同一测试文件；本机包验证不替代跨包版本配对或平台依赖冷安装，见[新包证据](../hackathon/evidence/dsh-g0-analysis-service-package-20261004.md)。
+
+2026-10-05：另有显式 `node scripts/crm-calibration/service-package-compatibility.mjs` 入口，将两个固定源码 SHA 打成真实 archive，各自在新 venv 用离线 hash wheel 安装后执行 9 项 HTTP 兼容观测；参数与前置见[服务包说明](./crm-service-packages.md#精确旧新包的-opt-in-兼容验证)。这项需要已有历史 Git 对象和平台 wheelhouse，普通 CI 不自动下载/运行；本次 Darwin arm64 结果见[配对证据](../hackathon/evidence/dsh-g0-service-artifact-pair-20261005.md)，不代表 WSL 或生产激活。`backend/tests/test_service_artifact_compatibility.py` 的 CLI 负测纳入共享后端入口，覆盖浮动/相同版本、相对路径、重复参数、既有证据不覆盖与失败回执；没有历史对象时失败不能记成 PASS。
+
 保存分析/驾驶舱的 finite mock 组件仍须独立通过类型检查、编译后 DOM 测试与干净重建。HTTP CONNECTED overlay 另有 `query-card-save`、`asset-overlay`、`native-query-assets-smoke` 与独立 analysis/cockpit HTTP 测试。`asset-overlay` 编译后 DOM（mock transport）覆盖 discard、过期预览、拖拽提交，以及撤销整板、从已保存分析加入、无板时创建、预览/保存 409 后重读；不是浏览器 E2E。默认查询入口不带资产能力。
 
 ## 提交内容与历史审计

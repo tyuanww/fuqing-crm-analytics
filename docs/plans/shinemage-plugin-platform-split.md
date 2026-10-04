@@ -30,9 +30,13 @@
 - 保留 DSH 原生 Web/单一 Agent Loop/会话/工具合同；插件只能通过官方 bundle、client、slot、service/provider/consumer 合同扩展，不复制或修改 DSH 上游源码。
 - 后端、知识库、DuckDB 和生产密钥属于服务/数据层，不随插件 npm 包发布；测试只能使用 synthetic fixture 和隔离小库。
 
-## 当前实现账本（2026-10-04）
+## 当前实现账本（2026-10-05）
 
 本计划已进入首期 workspace 垂直切片的实现阶段。下面只记录本工作树实际证据；后文的评审记录保留为历史决策，不覆盖这张账本。
+
+2026-10-04 的服务门禁经 26/26 文件审核修复，以 `809a9367` 本地提交；其后独立首购服务包与同版本恢复验证见[服务包证据](../hackathon/evidence/dsh-g0-analysis-service-package-20261004.md)。2026-10-05 已用旧 `56198c32` / 新 `a50bd424` 的实际 archive，在两个新 venv 离线 hash wheel 冷安装并完成 **9/9**；共享后端 **25 PASS**（内部 8 个包集成场景）、SIGTERM 回收通过，见[最新配对证据](../hackathon/evidence/dsh-g0-service-artifact-pair-20261005.md)。这轮仍未提交；新 artifact 回执尚未接入门禁，只证明本机 Darwin arm64，T3/T7/T15 与目标 WSL/生产/供应链验收继续 PARTIAL。
+
+提交前追加 OCR delegate：原始 **21/21** 文件覆盖，修复 Git replacement 与取消回收两个问题；修复后共享后端 **25 PASS**（内部 10 个包场景）、实际双包 **9/9 PASS**，见[审核记录](../hackathon/evidence/dsh-g0-service-artifact-review-20261005.md)。上段 8 场景为实现阶段证据，不是修复后的数字；下一步仍为 artifact/目标主机证据接线。
 
 | 任务 | 当前状态 | 已有证据 | 尚未关闭 |
 |---|---|---|---|
@@ -40,8 +44,8 @@
 | T2 | PARTIAL / LOCAL HOST PASS | 保留原静态/官方单测证据；2026-10-04 固定 rc2 官方 Web CLI 的实际加载、正常重启、原生 v4 会话/WAL 在途恢复、回退/恢复旧组合已通过，见[宿主证据](../hackathon/evidence/dsh-g0-pinned-host-20261004.md) | 目标平台 runtime、Windows/WSL、rc1→rc2/torn-frame、浏览器与 shell/tool union；0.2.0 仍 DEFERRED |
 | T13 | PARTIAL / LOCAL JOURNAL PASS | profile/state/既有 journal 保留；候选快照与 v2 host evidence 已通过 CLI 幂等接入 `CANDIDATE_HOST_VERIFIED`，重复不改原候选，见[本轮证据](../hackathon/evidence/dsh-g0-host-journal-20261004.md) | 生产 activation 崩溃 replay、远端 receipt/reconcile 和现场回执 |
 | T15 | PARTIAL | kit、brand/query、图表与 workbench 独立构建成果保留；指标/知识服务已独立打包。CRM 与知识插件也已分别 build/test/pack、安全解包加载，profile v3 为每个模块单独绑定指纹；可撤销身份合同避免引用落入失效会话，见 [插件拆分证据](../hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md) | 物理分仓/平台依赖冷安装、完整 invariant/精确宿主合同、签名/SBOM/来源信任仍未关闭 |
-| T3 | PARTIAL / LOCAL SERVICE GATE PASS | 合成领域 API、版本化结果/来源、受控保存及 decoder 已完成；固定新旧源码的[兼容窗口](../architecture/first-purchase-service-compatibility.md)已绑定到 candidate、profile/payload 与安装 journal；release suite 169 PASS，见[门禁证据](../hackathon/evidence/dsh-g0-service-gate-20261004.md) | 精确服务包/依赖窗口、目标主机证据验证器、生产策略与 DSH UI/浏览器未完成；本机证据不放行激活 |
-| T7 | PARTIAL / LOCAL SAVE RECOVERY PASS | 保存分析/双身份索引/provenance 同事务；跨版本恢复、forward-fix、小库备份恢复 9/9 预期观测完成，见[跨版本证据](../hackathon/evidence/dsh-g0-service-save-compat-20261004.md)；旧 writer、绑定丢失及重试绕过已被候选/激活/回退门禁拒绝，真实 CLI 3/3 负测通过 | 生产形状时钟/UNKNOWN 窗口、最终服务包/主机证据和完整候选门禁未完成；生产保存 UI 未启用 |
+| T3 | PARTIAL / LOCAL ARTIFACT PAIR PASS | 合成领域 API、受控保存和源码门禁已完成；两个精确服务包/独立依赖环境在本机完成 9/9 观测，见[兼容窗口](../architecture/first-purchase-service-compatibility.md)和上方最新证据 | artifact 证据接线、目标主机验证器、WSL/生产策略与 DSH UI/浏览器未完成；本机证据不放行激活 |
+| T7 | PARTIAL / LOCAL SAVE RECOVERY PASS | 同事务保存、固定源码与精确包两层的跨版本恢复/forward-fix/小库备份恢复均有 9/9 观测；旧 writer 仍会丢失来源，拒绝可写降级的门禁保留 | 生产形状时钟/UNKNOWN 窗口、最终 reviewed 服务包/主机证据和完整候选门禁未完成；生产保存 UI 未启用 |
 | T17 | PARTIAL / LOCAL HOST PASS | 固定官方 Web CLI 十项场景及父命令中断回收；实测 preset 移除后现有会话保留工具，同进程挂死需外部重启；已明确 `HOST_RESTART_REQUIRED` | 任意插件同进程隔离不承诺；生产 activation/journal/canary、目标平台与真实服务恢复仍开放，测试指针不替代原子部署 |
 | T21 | PARTIAL / LOCAL HOST RECEIPT PASS | `plugin candidate` 携带 profile 快照；`plugin verify-host` 核验所选候选与实测双包组合，记录当前平台/源码/十项场景的观测。真实同包重跑与 CLI 重试通过，当前 raw 为 `.context/checks/plugin-host-journal-20261004/` | 生产 canary/rollback、远端 receive/reconcile、host activation；本机观测仍 release_ready=false |
 | T22 | IMPLEMENTED / DOCS PASS | README、docs 索引、rc2 Quickstart 和插件作者 Quickstart 已统一当前事实与三步入口 | 现场 host/canary/rollback 仍不属于文档门禁 |

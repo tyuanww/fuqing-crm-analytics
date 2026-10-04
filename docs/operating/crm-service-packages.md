@@ -1,17 +1,18 @@
-# CRM 与知识服务独立候选包
+# CRM、知识与首购分析服务独立候选包
 
-这是 T15 的本地 synthetic 交付入口。插件只消费 HTTP；两个服务分别拥有应用包、资源清单、Python 依赖锁和进程。服务包不携带 DSH、插件、真实数据库、账号配置或主仓运行环境。当前源码仍在同一 workspace；尚未物理分仓、发布或在杭州安装。
+这是 T15 / T3 / T7 的本地 synthetic 交付入口。服务分别拥有应用包、资源清单、Python 依赖锁和进程。包不携带 DSH、插件、真实数据库、账号配置或主仓运行环境。首购保存的插件 UI 尚未接通；当前源码仍在同一 workspace，尚未物理分仓、发布或在杭州安装。
 
-## 两个交付单元
+## 三个交付单元
 
 | 单元 | 输入与 owner | 对外合同 | 包内资源 |
 |---|---|---|---|
 | `shinemage-crm-metrics-service` | [指标包清单](../../services/crm-metrics/package.json)，`crm-service` | `crm-metrics-service/1.0.0` | 唯一明确的 synthetic JSON，运行时创建并关闭自己的临时小型 DuckDB |
 | `shinemage-crm-knowledge-service` | [知识包清单](../../services/crm-knowledge/package.json)，`knowledge-service` | `crm-knowledge-service/1.0.0` | `pack`、历史验证、节点、边、指标定义与证据索引共 6 份公开 JSON；没有私有源文件、数据库或 DuckDB 依赖 |
+| `shinemage-analytics-first-purchase-service` | [首购包清单](../../services/analytics-first-purchase/package.json)，`analysis-service` | [服务身份及状态合同](../../backend/contracts/analytics-first-purchase-service.v1.json)，API 1.0.0 | 保存 API、权限/状态/来源逻辑与共享 RunStore 合同；无 fixture JSON、worker、DSH、知识资源和 DuckDB 依赖 |
 
 服务软件版本初始为 `0.1.0rc1`，与产品 VERSION、DSH pin、API 版本分开。每份输入清单逐文件声明 source、打包后的 target 和 code/resource/bootstrap 归属；不通配复制 `backend/`、`knowledge/` 或仓库。领域实现只有一份源文件，打包原样复制，不生成第二套业务实现。
 
-包内 `backend` 是应用的私有实现命名空间，使用[无副作用初始化入口](../../scripts/crm-calibration/service-namespace.py)，不加载旧 CRM 的聚合合同/语义导出。**两个包各用独立目录、venv 和进程；不把它们混装成共享 Python 库。** 后续移至独立仓库时迁移这些已验证的输入边界；不是把整个旧 backend 搬进每个新仓。
+包内 `backend` 是应用的私有实现命名空间，使用[无副作用初始化入口](../../scripts/crm-calibration/service-namespace.py)，不加载旧 CRM 的聚合合同/语义导出。**各包使用独立目录、venv 和进程，不混装成共享 Python 库。** 首购包暂时保留共享 RunStore 及其协议依赖；这是受清单约束的服务内部闭包，不是已经拆开的查询服务 API。
 
 ## 本地打包和核对
 
@@ -24,11 +25,20 @@ node scripts/crm-calibration/package-service.mjs \
 node scripts/crm-calibration/package-service.mjs \
   --service knowledge --python /absolute/locked-python3.14 \
   --output /absolute/new-knowledge-candidate
+node scripts/crm-calibration/package-service.mjs \
+  --service first-purchase --python /absolute/locked-python3.14 \
+  --output /absolute/new-analysis-candidate
 ```
 
 每个新目录包含 `.tar.zst`、`service-manifest.json`、`candidate-receipt.json`。回执绑定 archive SHA-256、manifest SHA-256、Git 基线、dirty 状态及实际文件摘要。dirty 输入明确标为未审查候选；所有候选均 `release_ready=false`，签名/供应链、安装和激活初始为 `NOT_RUN`。同样输入产生相同包；输出目录已存在则拒绝，不覆盖旧候选。
 
 打包按顺序完成：验证精确清单 → 拒绝源符号链接/越界/过大输入 → 复制允许的文件 → 生成依赖锁与摘要 → 扫描实际包内容的 secret → 在包内执行只读 `check` → 复查输入未改变 → 复用现有 release tar/zstd 打包器。候选回执最后写入；中断留下的无回执目录不能视为成功候选，使用新目录重试。
+
+首购包额外在复制后、扫描前，从实际暂存 factory 和该包固定依赖生成 `openapi.json`（manifest 的 `role=contract`），生成器禁止 SQLite 连接、socket 连接/绑定与子进程启动。它不是沿用 B0 另一套依赖生成的 JSON：本次实测 FastAPI 0.136.1/Pydantic 2.13.2 与服务的 0.141.1/2.13.5 对回执 discriminator 的 schema 表达有差异。独立包的 schema 随 artifact 固定，并在最小依赖进程中与实际 HTTP factory 逐字段核对；现有 B0 合同与插件类型未修改。
+
+首购包可额外指定 `--source <40位Git-SHA>`：只从该 Git tree 读取 `role=code` 的普通文件，并核对该 SHA 的 `requirements-lock.txt`。`source` 记录当前打包器所在工作树的 HEAD/dirty/清单摘要，`service_source` 另记实际服务 SHA/历史锁摘要；bootstrap、资源及配方仍来自当前工作树，不能把它当成历史已发布包。命令不 fetch、checkout 或改写分支。
+
+仅跨版本验收的旧基线增加 `--compatibility-baseline`，使用[显式旧配方](../../services/analytics-first-purchase/compatibility-baseline.json)，保留旧 API 与 saved-analysis/v1；`0.0.0rc1` 是此次诊断重打包身份。该标志必须同时指定精确 SHA，不能给当前 D15 源码换个旧版本标签，状态常量和生成的 OpenAPI 会拒绝错误组合。
 
 将 receipt 中的 archive digest 与实际文件核对后，使用现有安全解包器写入**新的**安装目录，再检查包内 manifest digest：
 
@@ -58,17 +68,43 @@ node scripts/crm-calibration/package-service.mjs \
 
 知识服务不再导入指标计算引擎。历史 `verification.json` 作为带来源的旧记录保留，独立包不会据此打开主仓文件，也不会把旧记录冒充当前验证；结果明确标记 `implementation_verification_scope=not_evaluated_in_service_package`。
 
+首购包的 `service.py serve --port 0` 默认不配置身份、状态目录、RunStore 或保存策略；实际请求返回 401，不创建数据库，也不启用旧写入口。服务 owner 后续须通过公开 factory 注入受信任依赖。当前只有包外的[隔离测试驱动](../../scripts/crm-calibration/first-purchase-package.fixture.py)注入临时身份、合成状态和固定时钟；它不进入包，不是生产启动配置。生产鉴权与目标主机注入仍未交付。
+
 ## 验证与尚未完成的交付
 
 ```sh
-# 实际 pack → 安全解包 → 最小依赖 venv → 双服务 HTTP → 停止一个服务
+# 实际 pack → 安全解包 → 最小依赖 venv → 三种服务 HTTP / 保存重启回放
 CRM_SERVICE_PYTHON=/absolute/locked-python3.14 \
   node --test --test-concurrency=1 scripts/crm-calibration/service-package.test.mjs
 # 本地/CI 共享后端入口，也运行同一组真实包验证
 /absolute/locked-python3.14 scripts/run_backend_tests_bounded.py \
-  backend/tests/test_crm_service_packages.py backend/tests/test_crm_service_contracts.py
+  backend/tests/test_crm_service_packages.py backend/tests/test_crm_service_contracts.py \
+  backend/tests/test_service_artifact_compatibility.py
 ```
 
 测试创建并清理本次拥有的应用目录、venv、小型合成库和端口；依赖从已有固定环境按包清单复制，不联网、不复制业务数据。覆盖三种指标查询、知识解释、OpenAPI 一致性、真实数据拒绝、单服务停止、确定性构建、缺资源/篡改/链接/额外文件/错误依赖/secret 拒绝和不覆盖既有候选。CI 的 Python job 配置 Node 24 与 zstd；远端 CI 是否通过须看该次实际运行。
 
-本地最小依赖验证不是 WSL 冷安装。Python 可执行文件、平台依赖 wheelhouse、签名/SBOM/CVE、干净 reviewed SHA、受信任 receive、canary 与回退仍需独立交付证据；生产不能现场编译或在线解析浮动依赖。这两个包也未覆盖真实 CRM 看板、私有知识库权限、持久化数据或 D15 保存。CRM/知识插件仍是组合迁移包，最终插件拆包是下一项；T3/T15 整体仍 PARTIAL。
+首购场景使用仓库的实际合成 worker 预置一个成功任务；包外最小依赖进程只消费该小型状态，验证保存、无 RunStore/策略的重启回放、SAVE_UNKNOWN、权限/冲突拒绝及标题 forward-fix。最小依赖进程显式拒绝导入 DuckDB、CRM/知识应用、worker、httpx 等未声明模块。另有源文件/安装 manifest 的 FIFO 和合同生成副作用负测。
+
+上述日常包测试按已安装的 lock closure 复制依赖；它不代替下面的 wheel 冷安装。Python 可执行文件、目标平台 wheelhouse、签名/SBOM/CVE、干净 reviewed SHA、受信任 receive、canary 与回退仍需独立证据；生产不能现场编译或在线解析浮动依赖。真实 CRM 看板、私有知识库权限和生产数据不在这些包的验收范围。CRM/知识插件已分别拆为候选包；首购初始包结果见[证据](../hackathon/evidence/dsh-g0-analysis-service-package-20261004.md)。T3/T7/T15 仍 PARTIAL，保存 UI 与现场激活门禁保持关闭。
+
+## 精确旧/新包的 opt-in 兼容验证
+
+前置：本地对象库有这两个完整 SHA、两个构建/seed Python 环境满足各自历史锁、已有对应平台的 wheelhouse。验证器不下载依赖或补 Git 历史；CI 浅克隆没有历史对象时不能伪报通过。wheelhouse 只能包含该服务闭包的 13 个固定 wheel，不接受源码包、重复/额外/错版本依赖；安装到新 venv 使用 `--no-index --no-deps --require-hashes`，并对实际安装的完整 dependency inventory 再核对一次。
+
+```sh
+node scripts/crm-calibration/service-package-compatibility.mjs \
+  --baseline 56198c32a52d9822c7a3338d92b0fa077d1c61bc \
+  --candidate a50bd42492195040efaa6989c90e4fe84030551c \
+  --baseline-python /absolute/baseline-build-venv/bin/python \
+  --candidate-python /absolute/candidate-build-venv/bin/python \
+  --baseline-wheelhouse /absolute/baseline-wheels \
+  --candidate-wheelhouse /absolute/candidate-wheels \
+  --output /absolute/new-pair-evidence
+```
+
+生成 baseline/candidate 两个不可变 archive、manifest、candidate receipt，以及顶层 `receipt.json` 和逐场景进程日志。先安全解包、冷安装、校验包，再用旧源码的合成 worker 在包外生成一次隔离输入；9 项 HTTP 观测只从解包后的应用导入服务，不依赖主仓源码或 worker。临时状态始终新建，不接受已有生产数据库路径；完成或正常失败后回收本次进程和临时目录，保留 artifact/日志。
+
+回执 `shinemage-service-artifact-compatibility/v1` 包含双 archive/manifest hash、实际 Python/依赖版本和 wheel hash。PASS 仅说明全部预期观测完成；其中旧服务可写破坏来源的观测会得到 `BLOCKED_PROVENANCE_NOT_PRESERVED`。失败/中断保留 FAIL 和已完成项目，退出码 2；已有输出目录拒绝覆盖，重试必须用新目录。SIGINT/SIGTERM 在当前有界构建步骤结束后中止并回收，SIGKILL 无法保证即时清理。
+
+当前实测为 Darwin arm64 / Python 3.14.4，两个旧/新源码锁的 13 项版本相同；这是独立冷安装证据，不是跨依赖版本升级或 WSL 证据。wheel hash 固定实际安装字节，不能证明发布者身份。该回执尚未接入候选的 `--service-evidence` 或主机激活门禁，保持 `release_ready=false`。最新结果见[包配对证据](../hackathon/evidence/dsh-g0-service-artifact-pair-20261005.md)；下一步是 artifact/依赖摘要与目标主机证据接线。

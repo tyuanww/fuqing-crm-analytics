@@ -1,0 +1,12 @@
+{
+  "contract": "analytics-first-purchase-service",
+  "api_version": "1.0.0",
+  "owner": "analysis-service",
+  "scope": "synthetic_only",
+  "state": {
+    "owner": "analysis-service",
+    "application_id": 1397572502,
+    "schema_version": 1,
+    "contract": "analytics-first-purchase-saved-analysis/v1"
+  }
+}

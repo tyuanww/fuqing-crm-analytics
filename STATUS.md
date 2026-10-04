@@ -14,7 +14,27 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 当前服务兼容证据门禁（2026-10-04，本地增量）
+### 当前服务包审核与提交检查（2026-10-05）
+
+- OCR delegate 覆盖原始 **21/21** 文件（11 个选中、10 个补审），无跳过。确认并修复 Git replacement 破坏精确 SHA 归属，以及取消打断退出回收两个问题；新增两项负测先失败后通过，详见[审核记录](docs/hackathon/evidence/dsh-g0-service-artifact-review-20261005.md)。
+- 修复后共享后端 **25 PASS / 0 SKIP**（内部 **10** 个包场景），实际双包重新 **9/9 PASS**；Ruff/语法/diff 检查通过。本轮已获本地 commit 授权，准确 SHA 以 Git 为准；下方“未提交”是当时的实现阶段快照。
+- T3/T7/T15 仍 PARTIAL；继续接 artifact/依赖证据与目标主机验证器，生产激活、WSL、真实身份与保存 UI 门禁保留。未 push、发布或操作杭州。
+
+### 上一阶段精确服务包配对（2026-10-05，审核前未提交）
+
+- 从 `codex/plugin-boundary-review@809a9367` 的既有修改继续，打包旧 `56198c32` / 新 `a50bd424` 的实际代码；manifest 分开绑定历史服务 SHA、历史依赖锁与当前打包清单/文件摘要，没有切换工作树或改业务 API。
+- 两个真实 archive 安全解包后，各自在新 venv 从预备 wheelhouse 离线、带 hash 安装 13 项精确依赖；Darwin arm64 / Python 3.14.4 完成 **9/9 预期观测**，旧服务可写降级会丢失来源，仍明确 BLOCKED。两版历史锁中的依赖版本恰好相同，不是跨依赖升级证明。
+- 当前共享后端 **25 PASS / 0 SKIP**（内部包测试 **8 个实际集成场景**）；实际配对命令的 SIGTERM 探针返回退出码 2 / `SERVICE_PAIR_CANCELLED`，保留 FAIL 回执且自有端口关闭。旧临时 Python 依赖不匹配的失败已保留，另建隔离锁环境完成验证。详见[本轮证据](docs/hackathon/evidence/dsh-g0-service-artifact-pair-20261005.md)。
+- 新 artifact 回执尚未接入现有源码证据门禁，`release_ready=false`；T3/T7/T15 仍 PARTIAL。下一步接精确 artifact/依赖摘要与目标主机证据验证器，再做 WSL 冷安装、生产身份/状态注入和现场验收；DSH 保存 UI/完整候选供应链仍开放，G0/stop-go 后物理分仓。本轮未 commit、push、发布或操作杭州。
+
+### 上一阶段首购分析服务独立包（2026-10-04，本地未提交）
+
+- 上一批服务兼容门禁已按 OCR delegate 审核修复，正常 hooks 提交为 `809a9367a94bc8be3c7c329868d8680deeae1377`；26/26 文件覆盖，提交前 release suite 170 PASS。未 push。
+- 继续复用既有服务打包器，增加首购分析服务独立清单、13 项精确依赖和同包生成的 OpenAPI；默认无身份/状态配置。实际 tarball 在仓库外、最小依赖进程完成保存、重启后回执查询/回放、权限/冲突拒绝、SAVE_UNKNOWN 和保留来源的 forward-fix。
+- 当前共享 bounded 验证 **17 PASS / 0 SKIP**，其中实际执行 **7 个服务包集成场景**；已修复依赖版本导致的包内 OpenAPI 漂移，并加入 FIFO/合同生成副作用负测。证据见[本轮记录](docs/hackathon/evidence/dsh-g0-analysis-service-package-20261004.md)。本批业务 API 源码未改，未重新运行完整 B0。
+- 本次新包只验证同版本隔离部署，不替代旧/新服务包配对、平台依赖冷安装、主机证据验证器、WSL 或生产授权。T3/T7/T15 仍 PARTIAL；`release_ready=false`、保存 UI NOT_AVAILABLE、现场激活仍阻断。下一步是配对精确旧/新 artifact 与各自依赖，再接目标主机证据；G0/stop-go 后物理分仓。
+
+### 上一批服务兼容证据门禁（2026-10-04，已本地提交）
 
 - 上一批兼容验证器/文档已完成 OCR delegate 全范围审核 **10/10**，正常 hooks 本地提交为 `d321971f6d56b5148c5715ad0461410290665f66`；固定源码对重跑 **9/9**、CLI 负测 **4/4**。随后门禁代码/文档已获审核修复后本地提交授权，最新提交以 Git 为准；未 push。
 - 显式保存 profile 的服务源码、API/状态版本、访问模式与实际兼容回执已绑定到 candidate、release payload/profile、安装 marker 和既有 journal。激活/回退及幂等重试在改变指针前检查；旧服务可写降级、缺证据/错版本/篡改和安装绑定丢失均拒绝。

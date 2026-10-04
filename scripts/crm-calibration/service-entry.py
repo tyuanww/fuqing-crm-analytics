@@ -6,9 +6,11 @@ import argparse
 import hashlib
 from importlib.metadata import PackageNotFoundError, version
 import json
+import os
 from pathlib import Path, PurePosixPath
 import re
 import socket
+import stat
 import sys
 
 sys.dont_write_bytecode = True
@@ -17,6 +19,7 @@ MAX_BYTES = 8 * 1024 * 1024
 IDENTITIES = {
     "metrics": ("shinemage-crm-metrics-service", "crm-metrics-service", "crm-service", "synthetic_only"),
     "knowledge": ("shinemage-crm-knowledge-service", "crm-knowledge-service", "knowledge-service", "public_synthetic_pack_only"),
+    "first-purchase": ("shinemage-analytics-first-purchase-service", "analytics-first-purchase-service", "analysis-service", "synthetic_only"),
 }
 
 
@@ -33,6 +36,19 @@ def relative_path(value):
     return path
 
 
+def read_regular(path, limit):
+    """Bound reads and reject special files without blocking on a FIFO."""
+    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+    with os.fdopen(fd, "rb") as stream:
+        info = os.fstat(stream.fileno())
+        if not stat.S_ISREG(info.st_mode) or info.st_size > limit:
+            fail("SERVICE_SPECIAL_FILE_OR_SIZE")
+        data = stream.read(limit + 1)
+        if len(data) != info.st_size or len(data) > limit:
+            fail("SERVICE_FILE_CHANGED")
+        return data
+
+
 def verify():
     """Local integrity/readiness only. This is not signature or release approval."""
     if not sys.flags.isolated:
@@ -40,14 +56,24 @@ def verify():
     manifest_path = ROOT / "service-manifest.json"
     if manifest_path.is_symlink() or manifest_path.stat().st_size > 256 * 1024:
         fail("SERVICE_MANIFEST_INVALID")
-    manifest_bytes = manifest_path.read_bytes()
+    manifest_bytes = read_regular(manifest_path, 256 * 1024)
     manifest = json.loads(manifest_bytes)
     required = {"schema_version", "domain", "name", "version", "api_version", "owner", "scope", "python", "dependencies", "files", "source", "release_ready"}
+    if "service_source" in manifest:
+        required.add("service_source")
     if set(manifest) != required or manifest["schema_version"] != "shinemage-service-package/v1" or manifest["release_ready"] is not False:
         fail("SERVICE_MANIFEST_INVALID")
     domain = manifest["domain"]
     if domain not in IDENTITIES:
         fail("SERVICE_DOMAIN_INVALID")
+    if "service_source" in manifest:
+        origin = manifest["service_source"]
+        if (domain != "first-purchase" or not isinstance(origin, dict)
+                or set(origin) != {"commit", "requirements_sha256", "scope"}
+                or not re.fullmatch(r"[0-9a-f]{40}", str(origin.get("commit")))
+                or not re.fullmatch(r"[0-9a-f]{64}", str(origin.get("requirements_sha256")))
+                or origin.get("scope") != "exact-git-code-current-packaging"):
+            fail("SERVICE_SOURCE_INVALID")
     name, contract, owner, scope = IDENTITIES[domain]
     if (manifest["name"], manifest["owner"], manifest["scope"], manifest["api_version"]) != (name, owner, scope, "1.0.0"):
         fail("SERVICE_IDENTITY_MISMATCH")
@@ -56,9 +82,15 @@ def verify():
     source = manifest["source"]
     if not isinstance(source, dict) or set(source) != {"commit", "worktree_dirty", "inputs_manifest", "inputs_sha256"}:
         fail("SERVICE_SOURCE_INVALID")
+    baseline = domain == "first-purchase" and source["inputs_manifest"] == "services/analytics-first-purchase/compatibility-baseline.json"
+    inputs_path = f"services/{contract.removesuffix('-service')}/package.json"
+    if baseline:
+        if "service_source" not in manifest or manifest["version"] != "0.0.0rc1":
+            fail("SERVICE_SOURCE_INVALID")
+        inputs_path = "services/analytics-first-purchase/compatibility-baseline.json"
     if (not re.fullmatch(r"[0-9a-f]{40}", str(source["commit"]))
             or type(source["worktree_dirty"]) is not bool
-            or source["inputs_manifest"] != f"services/crm-{domain}/package.json"
+            or source["inputs_manifest"] != inputs_path
             or not re.fullmatch(r"[0-9a-f]{64}", str(source["inputs_sha256"]))):
         fail("SERVICE_SOURCE_INVALID")
     if manifest["python"] != "3.14" or sys.version_info[:2] != (3, 14):
@@ -74,7 +106,10 @@ def verify():
         if not isinstance(item, dict) or set(item) != {"sha256", "bytes", "source", "role"}:
             fail("SERVICE_FILE_RECORD_INVALID")
         relative_path(item["source"])
-        if item["role"] not in {"code", "resource", "bootstrap", "lock"} or not re.fullmatch(r"[0-9a-f]{64}", str(item["sha256"])):
+        if item["role"] not in {"code", "resource", "bootstrap", "lock", "contract"} or not re.fullmatch(r"[0-9a-f]{64}", str(item["sha256"])):
+            fail("SERVICE_FILE_RECORD_INVALID")
+        if item["role"] == "contract" and (domain != "first-purchase" or rel != "openapi.json"
+                or item["source"] != "backend/analytics_first_purchase_analysis_app.py"):
             fail("SERVICE_FILE_RECORD_INVALID")
         if type(item["bytes"]) is not int or not 0 <= item["bytes"] <= 2 * 1024 * 1024:
             fail("SERVICE_SIZE_LIMIT")
@@ -86,7 +121,7 @@ def verify():
         total += item["bytes"]
         if total > MAX_BYTES:
             fail("SERVICE_SIZE_LIMIT")
-        if hashlib.sha256(target.read_bytes()).hexdigest() != item["sha256"]:
+        if hashlib.sha256(read_regular(target, item["bytes"])).hexdigest() != item["sha256"]:
             fail("SERVICE_DIGEST_MISMATCH")
     actual = set()
     allowed_dirs = {parent.as_posix() for rel in files for parent in PurePosixPath(rel).parents}
@@ -119,17 +154,32 @@ def verify():
             fail("SERVICE_DEPENDENCY_MISSING")
         if installed != pin:
             fail("SERVICE_DEPENDENCY_VERSION_MISMATCH")
-    contract_doc = json.loads((ROOT / f"backend/contracts/crm-{domain}-service.v1.json").read_text())
+    contract_doc = json.loads(read_regular(ROOT / f"backend/contracts/{contract}.v1.json", 256 * 1024))
     if any(contract_doc.get(key) != value for key, value in {"contract": contract, "api_version": "1.0.0", "owner": owner, "scope": scope}.items()):
         fail("SERVICE_API_IDENTITY_MISMATCH")
     if domain == "metrics":
         fixture = json.loads((ROOT / "resources/synthetic-store-v1.json").read_text())
         if fixture.get("contains_real_data") is not False or fixture.get("source_id") != "synthetic-crm-metrics":
             fail("SERVICE_SYNTHETIC_RESOURCE_REQUIRED")
-    else:
+    elif domain == "knowledge":
         pack = json.loads((ROOT / "resources/knowledge/pack.json").read_text())
         if any(pack.get(key) is not False for key in ("contains_real_data", "contains_credentials", "private_source_text_included")):
             fail("SERVICE_PUBLIC_RESOURCE_REQUIRED")
+    else:
+        if contract_doc.get("state") != {
+            "owner": "analysis-service", "application_id": 1397572502, "schema_version": 1,
+            "contract": "analytics-first-purchase-saved-analysis/v1" if baseline else "analytics-first-purchase-saved-provenance/v1",
+        }:
+            fail("SERVICE_STATE_IDENTITY_MISMATCH")
+        schema = json.loads(read_regular(ROOT / "openapi.json", 2 * 1024 * 1024))
+        if schema.get("x-first-purchase-saved-analysis-http") is not True:
+            fail("SERVICE_API_IDENTITY_MISMATCH")
+        if baseline:
+            if ("x-d15-save-policy" in schema
+                    or "/api/v1/analytics-first-purchase/save-receipts" in schema.get("paths", {})):
+                fail("SERVICE_API_IDENTITY_MISMATCH")
+        elif schema.get("x-d15-save-policy") != "explicit-server-admission-required":
+            fail("SERVICE_API_IDENTITY_MISMATCH")
     return manifest, hashlib.sha256(manifest_bytes).hexdigest()
 
 
@@ -152,9 +202,15 @@ def main():
     if manifest["domain"] == "metrics":
         from backend.crm_metrics_app import create_crm_metrics_app
         app = create_crm_metrics_app(synthetic_path=ROOT / "resources/synthetic-store-v1.json", legacy_adapter=False)
-    else:
+    elif manifest["domain"] == "knowledge":
         from backend.crm_knowledge_app import create_crm_knowledge_app
         app = create_crm_knowledge_app(pack_path=ROOT / "resources/knowledge", verify_local_implementation=False)
+    else:
+        from backend.analytics_first_purchase_analysis_app import create_first_purchase_analysis_app
+        # Explicit service-owner injection is required for identities/state/policy.
+        # An unconfigured listener opens no DB and cannot accept a legacy write.
+        baseline = manifest["source"]["inputs_manifest"].endswith("/compatibility-baseline.json")
+        app = create_first_purchase_analysis_app(**({} if baseline else {"save_policy": lambda: None}))
     with socket.socket() as sock:
         sock.bind(("127.0.0.1", args.port))
         sock.listen(64)
