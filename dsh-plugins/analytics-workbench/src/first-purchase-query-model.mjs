@@ -86,6 +86,7 @@ function decodeFacts(value, observationDays) {
   return value;
 }
 
+export { decodeFilters as decodeFirstPurchaseResolvedFilters };
 function decodeFilters(value) {
   if (!exact(value, FILTER_KEYS)) return null;
   if (value.schema_version !== FIRST_PURCHASE_SCHEMA || value.query_id !== 'first_purchase_product_path'
@@ -104,6 +105,7 @@ function decodeFilters(value) {
   return value;
 }
 
+export { decodeResult as decodeFirstPurchaseResult };
 function decodeResult(value) {
   if (!exact(value, RESULT_KEYS)) return null;
   if (value.schema_version !== FIRST_PURCHASE_SCHEMA || value.answer_mode !== 'DETERMINISTIC_TOOL'

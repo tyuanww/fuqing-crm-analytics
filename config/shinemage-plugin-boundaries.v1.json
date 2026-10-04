@@ -285,6 +285,28 @@
       ],
       "compatibility": "CRM owns operational meaning; byte-identical generated consumers, no account data or sibling runtime import.",
       "status": "DOMAIN_V1"
+    },
+    {
+      "id": "first-purchase-save-receipt",
+      "owner": "analysis-service",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
+      "generator": "scripts/dsh-b0/first-purchase-analysis-contract.mjs",
+      "consumers": [
+        "analytics-workbench"
+      ],
+      "compatibility": "Receipt API 1.0.0 binds action/candidate/correlation and durable state. Read-only reconcile survives admission revocation. New writes require explicit service policy; legacy saved-analysis/cockpit v1 and SQLite schema 1 remain unchanged.",
+      "status": "GENERATED_DOMAIN_V1"
+    },
+    {
+      "id": "first-purchase-save-result",
+      "owner": "analysis-service",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
+      "generator": "scripts/dsh-b0/first-purchase-analysis-contract.mjs",
+      "consumers": [
+        "analytics-workbench"
+      ],
+      "compatibility": "Independent D15 result/provenance API 1.0.0 with service-owned freshness and exact candidate admission. Strict consumer decoder; immutable saved provenance shares the existing transaction. No production defaults or unversioned PINNED reinterpretation.",
+      "status": "GENERATED_DOMAIN_V1"
     }
   ]
 }

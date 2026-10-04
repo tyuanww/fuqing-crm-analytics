@@ -36,12 +36,12 @@
 
 | 任务 | 当前状态 | 已有证据 | 尚未关闭 |
 |---|---|---|---|
-| T1 | IMPLEMENTED / STATIC PASS | 架构设计、机器 policy/inventory、11 包/607 文件/29 条跨包引用/202 处字面路径、15 条合同与 10 个主入口；含 import-equals 的 AST drift/循环/越界/公开导出负测纳入 B0 pipeline | 这只关闭依赖盘点；真实宿主与服务语义由 T2/T3/T17 验证 |
+| T1 | IMPLEMENTED / STATIC PASS | 架构设计、机器 policy/inventory、11 包/610 文件/29 条跨包引用/206 处字面路径、17 条合同与 10 个主入口；含 import-equals 的 AST drift/循环/越界/公开导出负测纳入 B0 pipeline | 这只关闭依赖盘点；真实宿主与服务语义由 T2/T3/T17 验证 |
 | T2 | PARTIAL / LOCAL HOST PASS | 保留原静态/官方单测证据；2026-10-04 固定 rc2 官方 Web CLI 的实际加载、正常重启、原生 v4 会话/WAL 在途恢复、回退/恢复旧组合已通过，见[宿主证据](../hackathon/evidence/dsh-g0-pinned-host-20261004.md) | 目标平台 runtime、Windows/WSL、rc1→rc2/torn-frame、浏览器与 shell/tool union；0.2.0 仍 DEFERRED |
 | T13 | PARTIAL / LOCAL JOURNAL PASS | profile/state/既有 journal 保留；候选快照与 v2 host evidence 已通过 CLI 幂等接入 `CANDIDATE_HOST_VERIFIED`，重复不改原候选，见[本轮证据](../hackathon/evidence/dsh-g0-host-journal-20261004.md) | 生产 activation 崩溃 replay、远端 receipt/reconcile 和现场回执 |
 | T15 | PARTIAL | kit、brand/query、图表与 workbench 独立构建成果保留；指标/知识服务已独立打包。CRM 与知识插件也已分别 build/test/pack、安全解包加载，profile v3 为每个模块单独绑定指纹；可撤销身份合同避免引用落入失效会话，见 [插件拆分证据](../hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md) | 物理分仓/平台依赖冷安装、完整 invariant/精确宿主合同、签名/SBOM/来源信任仍未关闭 |
-| T3 | PARTIAL / SYNTHETIC API PASS | 合成指标与公开知识解释各有 owner、API 1.0.0、离线 schema/类型与输入摘要；双进程 loopback、版本/异常响应拒绝、单服务故障独立验证；见 [服务边界证据](../hackathon/evidence/dsh-g0-crm-service-boundary-20261004.md) | 真实 CRM API 兼容窗口、D15 public envelope、T7 durable save/UNKNOWN 回放与服务状态矩阵未完成 |
-| T7 | PARTIAL / LOCAL STATE PASS | 当前 v1 SQLite 提交前/后真实进程丢失、新进程幂等重放、冲突/权限拒绝、保留旧版本的 forward-fix 和 schema 拒绝共 5 个新场景通过；含现有回归 31 PASS，见[存储恢复证据](../hackathon/evidence/dsh-g0-host-journal-20261004.md) | D15 candidate/correlation/UNKNOWN receipt 合同、跨服务版本迁移/恢复；保存继续 NOT_AVAILABLE |
+| T3 | PARTIAL / LOCAL ADMISSION PASS | 合成领域 API 保留；analysis-service 新增独立结果/provenance/freshness、精确候选准入、受控公开保存及严格 decoder，生成 TS 同步；见[准入证据](../hackathon/evidence/dsh-g0-save-admission-20261004.md) | 真实服务兼容窗口、生产策略与 DSH UI 接线/浏览器未完成 |
+| T7 | PARTIAL / LOCAL SAVE RECOVERY PASS | 保存分析、双身份索引和 provenance 同事务落盘；新 API 三个 SIGKILL 点、无任务/策略的精确重放、锁内过期/撤权与 forward-fix 通过；OCR 修复后相关 bounded 六文件 78 PASS，见[审核证据](../hackathon/evidence/dsh-g0-save-review-20261004.md) | 跨服务版本迁移/恢复、生产形状时钟/UNKNOWN 窗口和完整候选门禁；生产保存 UI 未启用 |
 | T17 | PARTIAL / LOCAL HOST PASS | 固定官方 Web CLI 十项场景及父命令中断回收；实测 preset 移除后现有会话保留工具，同进程挂死需外部重启；已明确 `HOST_RESTART_REQUIRED` | 任意插件同进程隔离不承诺；生产 activation/journal/canary、目标平台与真实服务恢复仍开放，测试指针不替代原子部署 |
 | T21 | PARTIAL / LOCAL HOST RECEIPT PASS | `plugin candidate` 携带 profile 快照；`plugin verify-host` 核验所选候选与实测双包组合，记录当前平台/源码/十项场景的观测。真实同包重跑与 CLI 重试通过，当前 raw 为 `.context/checks/plugin-host-journal-20261004/` | 生产 canary/rollback、远端 receive/reconcile、host activation；本机观测仍 release_ready=false |
 | T22 | IMPLEMENTED / DOCS PASS | README、docs 索引、rc2 Quickstart 和插件作者 Quickstart 已统一当前事实与三步入口 | 现场 host/canary/rollback 仍不属于文档门禁 |

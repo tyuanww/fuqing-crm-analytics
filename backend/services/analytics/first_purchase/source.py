@@ -39,6 +39,7 @@ class FirstPurchaseTrustedSource:
     primary_result_ref: str | None
     method_package_digest: str | None
     source_layer: Literal["runstore_get_local", "runstore_succeeded_source"]
+    generated_at: str | None = None
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -57,6 +58,7 @@ class FirstPurchaseTrustedSource:
             "primary_result_ref": self.primary_result_ref,
             "method_package_digest": self.method_package_digest,
             "source_layer": self.source_layer,
+            "generated_at": self.generated_at,
         }
 
 
@@ -76,10 +78,10 @@ def _validate_operating_result(result: FirstPurchaseResult) -> None:
 
 
 def resolve_trusted_first_purchase_source(
-    run_store: RunStore, principal: AnalyticsPrincipal, run_id: str,
+    run_store: RunStore, principal: AnalyticsPrincipal, run_id: str, *, capability: str = CAPABILITY_SAVE,
 ) -> FirstPurchaseTrustedSource:
     """Read the authorized frozen step, result and method from the shared kernel."""
-    require(principal, CAPABILITY_SAVE, data_scope=FIRST_PURCHASE_DATA_SCOPE)
+    require(principal, capability, data_scope=FIRST_PURCHASE_DATA_SCOPE)
     if run_store.family != FIRST_PURCHASE_RUN_FAMILY:
         raise AnalyticsError(409, "FAMILY_MISMATCH", "任务合同与当前实例不一致。")
     source = run_store.succeeded_operating_source(principal, run_id)

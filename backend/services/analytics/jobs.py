@@ -1065,6 +1065,9 @@ class RunStore:
             }
             if self.family == "first_purchase":
                 source["method_package_digest"] = binding.method_package_digest
+                # Terminal run transition time, not the data snapshot's as_of or
+                # the time this result is fetched. Read in the same transaction.
+                source["generated_at"] = _timestamp(row["updated_ms"]).isoformat()
             return source
 
     def rebuild_context(self, principal, run_id, attempt_id, *, package_digest, unit_id, resource=None):

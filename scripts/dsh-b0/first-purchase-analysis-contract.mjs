@@ -52,6 +52,10 @@ assertLocalRefs(schema);
 if (!schema.paths?.['/api/v1/analytics-first-purchase/analyses']) throw new Error('missing first-purchase analyses collection path');
 if (schema.paths['/api/v1/analytics/analyses']) throw new Error('first-purchase analysis contract must not publish channel analysis routes');
 if (schema.paths['/api/v1/analytics-query/runs/{run_id}']) throw new Error('first-purchase analysis contract must not publish query session routes');
+if (schema.paths['/api/v1/analytics-first-purchase/save-receipts']?.post?.['x-explicit-save-policy-required'] !== true
+  || schema.paths['/api/v1/analytics-first-purchase/save-results/inspect']?.post?.['x-read-only'] !== true) {
+  throw new Error('D15 must expose explicit admission and read-only inspection, not internal native routes');
+}
 const digest = createHash('sha256').update(JSON.stringify(schema)).digest('hex');
 const toolsPackage = process.env.B0_OPENAPI_TOOLS || join(root, 'dsh-plugins/plugin-kit/build-tools/package.json');
 if (!isAbsolute(toolsPackage)) throw new Error('B0_OPENAPI_TOOLS must be an absolute package.json path');

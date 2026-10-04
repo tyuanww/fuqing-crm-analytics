@@ -14,7 +14,27 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 当前候选与宿主接线审核（2026-10-04）
+### 当前 D15 服务保存审核（2026-10-04）
+
+- OCR delegate 审核原始变更 **29/29**：15 个工具选中文件与 14 个补审文件全部覆盖，未跳过。修复两项已确认问题：回执必须在同一事务快照内核对实际分析版本与来源；持久化回执/provenance 缺字段或被模型归一化时 fail closed。
+- 7 个隔离负测先失败后通过；修复后保存两文件 **42 PASS**，相关 bounded 六文件 **78 PASS / 0 SKIP**；完整 B0 **退出 0**，Python **665 PASS**，Node 各阶段合计 **1506 PASS / 1 SKIP**（含 clean 重跑），生成合同、类型、边界与 clean rebuild 通过。见[本次审核证据](docs/hackathon/evidence/dsh-g0-save-review-20261004.md)。
+- 本轮已获本地提交授权，准确提交号以 Git 为准；下一步是以固定新旧服务源码验证持久状态兼容和 forward-fix。T3/T7 仍 PARTIAL，生产保存 UI 仍 NOT_AVAILABLE；本次未 push、发布或操作杭州。
+
+### 审核前 D15 服务保存门禁增量（2026-10-04）
+
+- 承接回执存储，完成独立版本的结果/provenance/freshness、服务端精确候选 allowlist、受控公开保存 API 与严格插件 decoder。新保存在写锁内重验当前权限、候选、来源和有效期；旧保存接口在启用 D15 策略的服务内不能绕过门禁。
+- 分析、回执双索引与保存来源同事务落盘；提交后丢失响应，可在无 RunStore/无候选策略时精确重放原回执。保留旧 v1、SQLite schema 1 与 PINNED 语义，标题 forward-fix 保留原来源。
+- 本次共享 bounded backend 六文件 **71 PASS / 0 SKIP**；完整 B0 **退出 0**，Python **658 PASS**，Node 各阶段合计 **1506 PASS / 1 SKIP**（含 clean 重跑），生成合同/完整类型检查/clean rebuild 均通过。首轮断言失败和修复记录见[本轮证据](docs/hackathon/evidence/dsh-g0-save-admission-20261004.md)，接口见[操作说明](docs/operating/first-purchase-save-admission.md)。
+- 此节记录审核前未提交增量，当时 HEAD 为 `56198c32`；本次修复及更新结果见上节。D15/T3/T7 仍 **PARTIAL**：服务跨版本窗口、生产形状时限/UNKNOWN、DSH UI 接线与浏览器/现场门禁尚未关闭。生产策略/profile 未启用，保存 UI 保持 `NOT_AVAILABLE`，物理分仓仍在 G0/stop-go 后。
+
+### 上一轮 D15 保存回执增量（2026-10-04）
+
+- 上一轮 31 文件的宿主/journal 审核修复已通过正常 hooks 本地提交：`56198c32a52d9822c7a3338d92b0fa077d1c61bc`，提交后工作树曾干净，未 push。
+- 继续 T3/T7：首购保存 owner 新增 candidate/correlation/action/幂等身份与 durable state key 回执，复用既有 SQLite 事务和幂等表；两个身份索引与分析记录同事务落盘，不新增发布账本或数据迁移。新只读 `save-receipts/reconcile` 不依赖 RunStore，不重跑模型/查询。
+- 新增 13 项回执测试；共享 bounded backend 的 4 个相关文件 **44 PASS**。正式 B0 **PASS**：Python **636 PASS**、Node 各阶段合计 **1506 PASS / 1 SKIP**（含 clean 重跑）；OpenAPI/TS、领域边界、完整插件类型检查与干净构建均通过。详细结果及首次 drift 失败见[本轮证据](docs/hackathon/evidence/dsh-g0-save-receipt-20261004.md)。
+- 此阶段当时只是 G0 存储和查询合同（后续服务门禁见上节）：D15 写 API/插件 UI 尚未启用；服务端 freshness、候选准入、跨服务版本窗口/恢复与完整候选门禁仍开放，`save: NOT_AVAILABLE` 不变。本节为提交后的未提交增量，不能算入 `56198c32`。
+
+### 上一轮候选与宿主接线审核（2026-10-04）
 
 - OCR delegate 覆盖原始变更 **30/30**（含工具排除的文档/Python 补审），修复特殊文件输入阻塞与安装内容未直接绑定 tarball 两个问题。负测先失败后通过；没有剩余已确认的本轮代码审查缺陷。见[审查记录](docs/hackathon/evidence/dsh-g0-host-journal-review-20261004.md)。
 - 修复后 release suite **146 PASS / 0 SKIP**、profile/入口负测 **9 PASS / 0 SKIP**、首购保存恢复/分析/native **31 PASS**；固定官方 rc2 Web CLI 重新完成 **10/10**，CLI journal 重试幂等，所有自有宿主已回收，上游 tracked source 干净。

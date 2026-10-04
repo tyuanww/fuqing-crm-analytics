@@ -32,7 +32,7 @@ node --test scripts/dsh-b0/plugin-boundaries.test.mjs
 | `crm-knowledge` | CRM 登录/指标/分析 adapter | `shinemage-dsh-crm` | 保留包 ID，版本 `0.0.0-crm.1`；已移出知识工具，无兄弟插件业务源码依赖 |
 | `knowledge` | 公开解释/教材检索/图谱 | `shinemage-dsh-knowledge` | 新独立包；公开解释无 CRM 依赖，私有教材消费可选身份能力合同 |
 
-扫描覆盖 11 个包、607 个 JS/TS 源码文件。29 条跨包引用中：10 条为构建到 kit，10 条为已锁定领域包公开导出，9 条只用于测试；生产源码例外为 0。另有 6 条仓库测试引用；70 处非字面动态导入均在测试中，不作为运行时兼容证据。
+扫描覆盖 11 个包、610 个 JS/TS 源码文件。29 条跨包引用中：10 条为构建到 kit，10 条为已锁定领域包公开导出，9 条只用于测试；生产源码例外为 0。另有 6 条仓库测试引用；70 处非字面动态导入均在测试中，不作为运行时兼容证据。
 
 构建 DAG：`plugin-kit` → `board-components`、`crm-knowledge`、`knowledge` 与四个无需图表输入的 leaf → `analytics-workbench`/`shine-funnel`/`shine-waterfall`。箭头表示构建依赖，不是宿主 bundle 激活顺序；本地 profile v3 分别选择 CRM、知识与页面模块，生产 profile 未改变。
 
@@ -52,9 +52,9 @@ node --test scripts/dsh-b0/plugin-boundaries.test.mjs
 
 服务不在插件包内：`backend/analytics_*` 与 `backend/services/analytics/` 拥有 B0 分析及持久化；CRM 的 `backend/crm_metrics_app.py`、`backend/routers/metrics.py` 与领域合同拥有指标/权限；知识库服务及其数据拥有独立生命周期。插件通过 adapter 调用，不拥有生产 DuckDB、凭据或服务数据迁移。
 
-当前提取 `/api/`、`/internal/`、`/b0/` 字面路径及模板路径，共 202 处声明、120 种路径；包括测试夹具和 gateway 资源路径，**不是 120 个已经接通的公开 API**。清单标明来源与 phase，去掉 origin 和 query 值。内部路径标为 `INTERNAL_NOT_PUBLIC`，其他路径标为 `OBSERVED_NOT_FROZEN`。
+当前提取 `/api/`、`/internal/`、`/b0/` 字面路径及模板路径，共 206 处声明、124 种路径；包括测试夹具和 gateway 资源路径，**不是 124 个已经接通的公开 API**。清单标明来源与 phase，去掉 origin 和 query 值。内部路径标为 `INTERNAL_NOT_PUBLIC`，其他路径标为 `OBSERVED_NOT_FROZEN`。
 
-当前 15 条重要合同包括 DSH pin、领域 schema/slot/主题/图表、两项服务 API 1.0.0，以及拆分新增的可撤销知识身份能力 v1 和公开 GSV 定义 v1；每条有 owner、消费者、生成器、源 SHA-256 与兼容政策。后两项由 CRM 领域维护并生成双方本地副本，不是共享业务运行时。页面交付仍由 workbench 的公开 `./page-tools` 入口拥有。新服务仅支持精确 API 1.0.0，见[服务边界](../operating/crm-plugin-service-boundary.md)；T3 的真实服务版本窗口、D15 服务状态与保存矩阵仍未完成。
+当前 17 条重要合同包括 DSH pin、领域 schema/slot/主题/图表、两项服务 API 1.0.0、可撤销知识身份能力 v1、公开 GSV 定义 v1，以及 analysis-service 的首购保存回执、独立结果/provenance v1；每条有 owner、消费者、生成器、源 SHA-256 与兼容政策。身份/GSV 由 CRM 领域维护并生成双方本地副本，不是共享业务运行时。回执支持只读 reconcile；新写入由服务端显式候选/freshness 策略控制，存储身份本身不授予资格；旧 saved-analysis/cockpit v1 和 SQLite schema 1 不变。页面交付仍由 workbench 的公开 `./page-tools` 入口拥有。新服务仅支持精确 API 1.0.0，见[服务边界](../operating/crm-plugin-service-boundary.md)；D15 本地结果/freshness 和受控保存 adapter 已通过验证，见[接口边界](../operating/first-purchase-save-admission.md)；真实服务版本窗口、生产策略与 UI/现场门禁仍未完成。
 
 10 个主要控制入口由 release-control、build-tooling、host-dev-adapter、deploy-owner、backend-services 等逻辑 owner 负责；新增独立服务打包与受控运行入口，包内全部 scripts 随 manifest 记录。逻辑 owner 是职责边界，不能替代后续现场 RACI、授权与主备安排。
 

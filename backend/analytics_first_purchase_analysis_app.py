@@ -24,19 +24,29 @@ from backend.contracts.analytics_first_purchase_analysis import (
     FirstPurchaseSavedAnalysis,
     FirstPurchaseSavedAnalysisList,
     FirstPurchaseSavedAnalysisListItem,
+    FirstPurchaseSaveIdentity,
+    FirstPurchaseSaveReceipt,
+    FirstPurchaseSaveInspectRequest,
+    FirstPurchaseSaveCommand,
+    FirstPurchaseSaveResult,
+    FirstPurchaseSavedReceipt,
+    FirstPurchaseSavedProvenance,
     HTTP_API_CONNECTED,
 )
 from backend.contracts.analytics_first_purchase_run import FIRST_PURCHASE_HTTP_PREFIX
-from backend.services.analytics.access import AnalyticsError, B0IdentityRegistry
+from backend.services.analytics.access import AnalyticsError, B0IdentityRegistry, require
 from backend.services.analytics.first_purchase.asset_state import validate_key
 from backend.services.analytics.first_purchase.saved import (
     FirstPurchaseSavedAnalysisRecord,
     FirstPurchaseSavedAnalysisStore,
 )
 from backend.services.analytics.first_purchase.source import resolve_trusted_first_purchase_source
+from backend.services.analytics.first_purchase.save_policy import FirstPurchaseSavePolicy, result_envelope
 from backend.services.analytics.jobs import RunStore
 
 PREFIX = FIRST_PURCHASE_HTTP_PREFIX + "/analyses"
+RECEIPT_PREFIX = FIRST_PURCHASE_HTTP_PREFIX + "/save-receipts"
+RESULT_PREFIX = FIRST_PURCHASE_HTTP_PREFIX + "/save-results"
 VERSION_HEADER = {
     "name": "If-Match", "in": "header", "required": True,
     "schema": {"type": "string", "pattern": "^[1-9][0-9]{0,15}$"},
@@ -70,6 +80,7 @@ def create_first_purchase_analysis_app(
     identities: B0IdentityRegistry | None = None,
     *,
     runtime_ready: Callable[[], bool] | None = None,
+    save_policy: Callable[[], FirstPurchaseSavePolicy | None] | None = None,
 ) -> FastAPI:
     app = FastAPI(title="Shine Mage First-Purchase Saved Analysis", version=ANALYSIS_SCHEMA,
                   docs_url=None, redoc_url=None, openapi_url=None)
@@ -109,11 +120,72 @@ def create_first_purchase_analysis_app(
 
     errors = {code: {"model": AnalyticsErrorResponse} for code in (400, 401, 403, 404, 409, 410, 413, 422, 428, 429, 503)}
 
+    def current_policy():
+        policy = save_policy() if save_policy is not None else None
+        if policy is not None and not isinstance(policy, FirstPurchaseSavePolicy):
+            raise AnalyticsError(503, "SAVE_POLICY_INVALID", "保存策略尚未正确配置。")
+        return policy
+
+    @app.post(RESULT_PREFIX + "/inspect", response_model=FirstPurchaseSaveResult,
+              operation_id="analytics_first_purchase_save_result_inspect", responses=errors,
+              openapi_extra={"parameters": [KEY_HEADER], "x-read-only": True})
+    def inspect_save_result(payload: FirstPurchaseSaveInspectRequest, request: Request, response: Response):
+        actor = principal(request)
+        key = validate_key(_single_header(request, "idempotency-key"))
+        source = resolve_trusted_first_purchase_source(runs(), actor, payload.created_from_run_id,
+                                                       capability="analysis:read")
+        stored = analyses().result_already_saved(actor, key, payload.identity, source)
+        result = result_envelope(source, actor, payload.identity, current_policy(),
+                                 checked_ms=analyses().clock(), already_saved=stored)
+        response.headers["cache-control"] = "no-store"
+        return result
+
+    @app.post(RECEIPT_PREFIX, status_code=201, response_model=FirstPurchaseSavedReceipt,
+              operation_id="analytics_first_purchase_save_receipt_create", responses=errors,
+              openapi_extra={"parameters": [KEY_HEADER], "x-explicit-save-policy-required": True})
+    def save_result(payload: FirstPurchaseSaveCommand, request: Request, response: Response):
+        actor = principal(request)
+        key = validate_key(_single_header(request, "idempotency-key"))
+
+        def authorize():
+            current = principal(request)
+            if current.actor_id != actor.actor_id:
+                raise AnalyticsError(403, "FORBIDDEN", "当前身份已变化，请重新核对。")
+            for capability in ("analysis:read", "analysis:save"):
+                require(current, capability, data_scope="first-purchase-fixture")
+
+        def resolve():
+            policy = current_policy()
+            if policy is None:
+                raise AnalyticsError(503, "SAVE_POLICY_NOT_CONFIGURED", "D15 保存尚未显式准入。")
+            current = principal(request)
+            source = resolve_trusted_first_purchase_source(runs(), current, payload.created_from_run_id)
+            envelope = result_envelope(source, current, payload.identity, policy,
+                                       checked_ms=analyses().clock(), already_saved=False)
+            return source, envelope
+
+        receipt = analyses().save_admitted(actor, key, payload, authorize=authorize, resolve=resolve)
+        response.headers.update({"cache-control": "no-store", "location": f"{PREFIX}/{receipt.analysis_ref.analysis_id}"})
+        return receipt
+
+    @app.post(RECEIPT_PREFIX + "/reconcile", response_model=FirstPurchaseSaveReceipt,
+              operation_id="analytics_first_purchase_save_receipt_reconcile", responses=errors,
+              openapi_extra={"parameters": [KEY_HEADER], "x-read-only": True})
+    def reconcile_save_receipt(payload: FirstPurchaseSaveIdentity, request: Request, response: Response):
+        actor = principal(request)
+        receipt = analyses().lookup_save_receipt(
+            actor, validate_key(_single_header(request, "idempotency-key")), payload,
+        )
+        response.headers["cache-control"] = "no-store"
+        return receipt
+
     @app.post(PREFIX, status_code=201, response_model=FirstPurchaseSavedAnalysis,
               operation_id="analytics_first_purchase_analysis_create", responses=errors,
               openapi_extra={"parameters": [KEY_HEADER]})
     def create_analysis(payload: FirstPurchaseAnalysisCreateRequest, request: Request, response: Response):
         actor = principal(request)
+        if save_policy is not None:
+            raise AnalyticsError(409, "VERSIONED_SAVE_REQUIRED", "此服务已启用 D15 保存门禁，请使用版本化保存接口。")
         visual = None if payload.visual_spec is None else payload.visual_spec.model_dump(mode="json")
         trusted = resolve_trusted_first_purchase_source(runs(), actor, payload.created_from_run_id)
         record = analyses().save_from_trusted_source(
@@ -145,6 +217,14 @@ def create_first_purchase_analysis_app(
         response.headers.update({"cache-control": "no-store", "etag": str(document.version)})
         return document
 
+    @app.get(PREFIX + "/{analysis_id}/provenance", response_model=FirstPurchaseSavedProvenance,
+             operation_id="analytics_first_purchase_saved_provenance_get", responses=errors)
+    def get_saved_provenance(analysis_id: str, request: Request, response: Response, version: int | None = None):
+        actor = principal(request)
+        document = analyses().saved_provenance(actor, analysis_id, version)
+        response.headers["cache-control"] = "no-store"
+        return document
+
     @app.post(PREFIX + "/{analysis_id}/versions", status_code=201, response_model=FirstPurchaseSavedAnalysis,
               operation_id="analytics_first_purchase_analysis_publish_title", responses=errors,
               openapi_extra={"parameters": [KEY_HEADER, VERSION_HEADER]})
@@ -171,6 +251,7 @@ def create_first_purchase_analysis_app(
             schema["x-not-b0-run-kernel"] = True
             schema["x-query-session-fence"] = False
             schema["x-shared-succeeded-source"] = True
+            schema["x-d15-save-policy"] = "explicit-server-admission-required"
             app.openapi_schema = schema
         return app.openapi_schema
 

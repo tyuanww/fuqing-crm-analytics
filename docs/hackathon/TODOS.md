@@ -277,9 +277,12 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 - [x] T13/T21 本机回执接线（2026-10-04）：profile 快照、候选包和固定双包组合绑定 v2 host evidence，`verify-host` 复用原 journal 幂等追加观测；真实宿主重新完成 10/10，CLI 重试不改 candidate/不追加记录。release suite 142 PASS；见[接线证据](./evidence/dsh-g0-host-journal-20261004.md)。
 - [x] T3/T7 同版本存储恢复子项（2026-10-04）：新增提交前/后 SIGKILL、丢失响应重试、冲突/撤权、forward-fix 与未知 schema 拒绝，共 5 个场景；含既有分析/原生回归 31 PASS。仅证明隔离 SQLite，不关闭下方 D15 保存合同门禁。
 - [x] 宿主/journal OCR delegate（2026-10-04）：原始 30/30 路径审查，修复 FIFO 阻塞与安装内容/tarball 不一致漏检；release 146、profile/负测 9、后端 31、真实宿主 10 场景重新通过。见[审核证据](./evidence/dsh-g0-host-journal-review-20261004.md)。
+- [x] T3/T7 G0 回执存储与只读查询子项（2026-10-04，`56198c32` 后增量）：保存身份、候选/关联 ID、durable key 与分析同事务写入；13 个新场景验证并发、提交前/后 SIGKILL、新进程查询/回放、撤权/冲突和 forward-fix，相关 bounded 后端 44 PASS。见[回执证据](./evidence/dsh-g0-save-receipt-20261004.md)。
+- [x] T3/T7 D15 本地服务准入子项（2026-10-04）：独立版本的结果/freshness/provenance、显式候选 allowlist、写锁内重验、公开保存 adapter、不可变来源及严格插件 decoder；六文件 71 PASS、完整 B0 658 Python PASS。见[准入证据](./evidence/dsh-g0-save-admission-20261004.md)，不启用生产保存 UI。
+- [x] D15 保存 OCR delegate（2026-10-04）：29/29 原始路径审查，修复实际分析缺失/来源不匹配仍报 SAVED、持久化合同字段被默认值补齐的问题；已验证 7 个负测先失败后通过，相关后端 78 PASS，完整 B0 Python 665 PASS。见[审核证据](./evidence/dsh-g0-save-review-20261004.md)。
 - [ ] T15 剩余：插件/服务物理分仓与平台依赖冷安装、invariant、供应链门禁；kit 仍以相邻 workspace 路径消费，迁移前改成固定开发依赖并验证独立仓根目录构建。整体仍 PARTIAL。
 - [ ] T2/T17 剩余：Windows/WSL、rc1→rc2/torn-frame、浏览器/client、shell/tool union 与目标平台 runtime；本机十项不代签这些验收。同进程任意插件隔离不承诺。
-- [ ] T3/T7/D4-C：补齐 D15 candidate/correlation/UNKNOWN receipt、完整服务兼容窗口和跨版本 forward-fix；当前按门禁继续禁用保存，同版本 SQLite 子项已在上方留证。
+- [ ] T3/T7/D4-C：回执、版本化结果/freshness、受控保存与严格 decoder 已完成本地子项；继续服务兼容窗口/跨版本 forward-fix、生产形状时限/UNKNOWN、DSH UI/浏览器与完整候选门禁。生产 provider/profile 未启用，保存 UI 继续 NOT_AVAILABLE。
 - [ ] T13/T21：生产 activation journal、远端 receive/reconcile 与现场恢复；本机 `LOCAL_HOST_VERIFIED` 不替代这些门禁。
 - [ ] 在授权提交后的 clean reviewed SHA 重跑完整 preflight，再处理签名/SBOM、canary/rollback 与远端门禁；不把本地 pack 视为可上线。
 

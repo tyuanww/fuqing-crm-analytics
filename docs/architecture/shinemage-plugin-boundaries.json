@@ -502,7 +502,7 @@
       "manifest_sha256": "011783ac55a6b567db51dbfdc1c97ffd142727ac52bfc7911801dc71fa6bed60"
     }
   ],
-  "source_files_scanned": 607,
+  "source_files_scanned": 610,
   "cross_package_edges": [
     {
       "consumer": "analytics-workbench",
@@ -1207,7 +1207,35 @@
       "consumer": "analytics-workbench",
       "phase": "runtime",
       "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/analyses/{analysis_id}/provenance",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
       "route": "/api/v1/analytics-first-purchase/analyses/{analysis_id}/versions",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/save-receipts",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/save-receipts/reconcile",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/save-results/inspect",
       "contract": "OBSERVED_NOT_FROZEN"
     },
     {
@@ -3891,6 +3919,30 @@
       "compatibility": "CRM owns operational meaning; byte-identical generated consumers, no account data or sibling runtime import.",
       "status": "DOMAIN_V1",
       "source_sha256": "91947e554e9b05571a069e2dc5f5f1427c08f57b93a939882dbec9a1b0c646d8"
+    },
+    {
+      "id": "first-purchase-save-receipt",
+      "owner": "analysis-service",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
+      "generator": "scripts/dsh-b0/first-purchase-analysis-contract.mjs",
+      "consumers": [
+        "analytics-workbench"
+      ],
+      "compatibility": "Receipt API 1.0.0 binds action/candidate/correlation and durable state. Read-only reconcile survives admission revocation. New writes require explicit service policy; legacy saved-analysis/cockpit v1 and SQLite schema 1 remain unchanged.",
+      "status": "GENERATED_DOMAIN_V1",
+      "source_sha256": "5b7202261d83e720c5faf505c52161773ee7f051496f6aa9929adab70fe00e0f"
+    },
+    {
+      "id": "first-purchase-save-result",
+      "owner": "analysis-service",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
+      "generator": "scripts/dsh-b0/first-purchase-analysis-contract.mjs",
+      "consumers": [
+        "analytics-workbench"
+      ],
+      "compatibility": "Independent D15 result/provenance API 1.0.0 with service-owned freshness and exact candidate admission. Strict consumer decoder; immutable saved provenance shares the existing transaction. No production defaults or unversioned PINNED reinterpretation.",
+      "status": "GENERATED_DOMAIN_V1",
+      "source_sha256": "5b7202261d83e720c5faf505c52161773ee7f051496f6aa9929adab70fe00e0f"
     }
   ],
   "command_owners": [
