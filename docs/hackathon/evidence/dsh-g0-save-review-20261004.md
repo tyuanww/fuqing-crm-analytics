@@ -19,8 +19,8 @@
 
 - 修复前：两个保存测试文件中 7 个新负测全部失败，35 deselected；`regression-before.log`。
 - 修复后：`python -m pytest --noconftest -q backend/tests/test_analytics_first_purchase_save_api.py backend/tests/test_analytics_first_purchase_save_receipts.py`，42 PASS，2 个依赖弃用警告；`regression-after.log`。
-- 共享 bounded pytest 入口执行保存 API、回执、恢复、分析、native、cockpit 六文件，78 PASS / 0 SKIP；`bounded-backend.log`，原始报告 `.context/checks/20261004T130817818165Z/summary.json`。
-- 固定 Node 24.19.0、pnpm 11.7.0、Python 3.14.4 下运行 `node scripts/dsh-b0/pipeline.mjs test`：退出 0，Python 665 PASS，Node 各阶段合计 1506 PASS / 1 SKIP（包含 clean 重跑），完整类型检查、合同与 clean rebuild 通过；`b0.log`。
+- 共享 bounded pytest 入口执行保存 API、回执、恢复、分析、source、native 六文件，78 PASS / 0 SKIP；`bounded-backend.log`，原始报告 `.context/checks/20261004T130817818165Z/summary.json`。
+- 固定 Node 24.19.0、pnpm 11.7.0、Python 3.14.4 下运行 `node scripts/dsh-b0/pipeline.mjs --check --python /absolute/python3.14`：退出 0，Python 665 PASS，Node 各阶段合计 1506 PASS / 1 SKIP（包含 clean 重跑），完整类型检查、合同与 clean rebuild 通过；`b0.log`。
 - 唯一 Node skip 是未提供独立 HTML 示例包的既有条件用例，不能解释为该真实示例已验收。Python 警告为依赖弃用提示。
 - `node scripts/dsh-b0/first-purchase-analysis-contract.mjs --check`、边界清单 `--check`、受影响 Python Ruff、`git diff --check` 通过。OpenAPI SHA-256：`3b45ef6df28219827343f9b1bcc0c6c8c35f46dd05790b340ed1f266c9a702b4`。
 

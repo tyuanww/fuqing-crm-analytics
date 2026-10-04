@@ -14,7 +14,14 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 当前 D15 服务保存审核（2026-10-04）
+### 当前服务跨版本状态验证（2026-10-04）
+
+- D15 审核修复已正常 hooks 本地提交为 `a50bd42492195040efaa6989c90e4fe84030551c`，提交后工作树干净，未 push；本节验证器/文档是随后新增的未提交工作。
+- 固定旧服务 `56198c32` 与新服务 `a50bd424` 的实际源码，在独立进程完成 **9/9 预期观测**：旧状态升级、旧服务只读、恢复新版精确回放、标题 forward-fix、小库备份恢复与未知 schema 拒绝；另有 **4/4 CLI 负测**通过。见[证据](docs/hackathon/evidence/dsh-g0-service-save-compat-20261004.md)。
+- 已验证旧服务可写会让新标题版本失去 provenance；该组合明确 **BLOCKED**。插件/profile 回退应保留新版分析服务和 durable state；旧服务仅可用只读身份恢复访问。详见[兼容窗口](docs/architecture/first-purchase-service-compatibility.md)。
+- T3/T7 仍 PARTIAL：候选/激活门禁还未消费服务兼容证据，精确服务包/依赖窗口、生产形状时限、UI/浏览器/WSL 仍开放。保存 UI 保持 NOT_AVAILABLE；本轮无生产操作。
+
+### 上一批 D15 服务保存审核（2026-10-04）
 
 - OCR delegate 审核原始变更 **29/29**：15 个工具选中文件与 14 个补审文件全部覆盖，未跳过。修复两项已确认问题：回执必须在同一事务快照内核对实际分析版本与来源；持久化回执/provenance 缺字段或被模型归一化时 fail closed。
 - 7 个隔离负测先失败后通过；修复后保存两文件 **42 PASS**，相关 bounded 六文件 **78 PASS / 0 SKIP**；完整 B0 **退出 0**，Python **665 PASS**，Node 各阶段合计 **1506 PASS / 1 SKIP**（含 clean 重跑），生成合同、类型、边界与 clean rebuild 通过。见[本次审核证据](docs/hackathon/evidence/dsh-g0-save-review-20261004.md)。
