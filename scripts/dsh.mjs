@@ -13,6 +13,7 @@ import { runLocalVerification } from './release/local-verify.mjs';
 import { collectReleaseReadiness, printReadiness } from './release/readiness.mjs';
 import { DSH_UPSTREAM_SHA, NODE_MAJOR, PNPM_VERSION } from './release/toolchain.mjs';
 import { createPluginCandidate } from './release/plugin-candidate.mjs';
+import { verifyPluginHost } from './release/plugin-host-evidence.mjs';
 import { loadReleaseProfile } from './release/profile.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
@@ -194,20 +195,30 @@ async function test() { const tests = readdirSync(join(root, 'scripts/release'))
 async function preflight(args) { return execFileSync(process.execPath, [join(root, 'scripts/release/preflight.mjs'), ...args], { cwd: root, encoding: 'utf8', stdio: 'inherit' }); }
 async function plugin(args) {
   const [subcommand, ...options] = args;
+  const usage = 'Usage:\n  pnpm dsh plugin candidate --plugin /absolute/plugin --output-dir /absolute/output --state-path /absolute/state.json [--profile config/profile.json] [--previous-profile config/profile.json]\n  pnpm dsh plugin verify-host --candidate /absolute/candidate.json --evidence /absolute/evidence.json --state-path /absolute/state.json\nverify-host checks existing local evidence and appends to the candidate journal; it does not start or activate a host.';
   if (!subcommand || subcommand === '--help' || subcommand === '-h') {
-    console.log('Usage: pnpm dsh plugin candidate --plugin /absolute/plugin --output-dir /absolute/output --state-path /absolute/state.json [--profile /relative/profile.json] [--previous-profile /relative/profile.json]');
+    console.log(usage);
     return;
   }
-  if (subcommand !== 'candidate') throw new Error(`PLUGIN_COMMAND_UNKNOWN ${subcommand}`);
+  if (!['candidate', 'verify-host'].includes(subcommand)) throw new Error(`PLUGIN_COMMAND_UNKNOWN ${subcommand}`);
   if (options.includes('--help') || options.includes('-h')) {
-    console.log('Usage: pnpm dsh plugin candidate --plugin /absolute/plugin --output-dir /absolute/output --state-path /absolute/state.json [--profile /relative/profile.json] [--previous-profile /relative/profile.json]');
+    console.log(usage);
     return;
   }
-  const allowed = new Set(['--plugin', '--output-dir', '--state-path', '--profile', '--previous-profile']);
-  for (let index = 0; index < options.length; index += 1) {
+  const allowed = new Set(subcommand === 'candidate' ? ['--plugin', '--output-dir', '--state-path', '--profile', '--previous-profile'] : ['--candidate', '--evidence', '--state-path']);
+  const seen = new Set();
+  for (let index = 0; index < options.length; index += 2) {
     const item = options[index];
     if (!allowed.has(item)) throw new Error(`PLUGIN_OPTION_UNKNOWN ${item}`);
-    index += 1;
+    if (seen.has(item)) throw new Error(`PLUGIN_OPTION_DUPLICATE ${item}`);
+    if (!options[index + 1] || options[index + 1].startsWith('--')) throw new Error(`PLUGIN_OPTION_VALUE_REQUIRED ${item}`);
+    seen.add(item);
+  }
+  if (subcommand === 'verify-host') {
+    const observation = await verifyPluginHost({ candidatePath: requiredOption(options, '--candidate'),
+      evidencePath: requiredOption(options, '--evidence'), statePath: requiredOption(options, '--state-path') });
+    console.log(JSON.stringify(observation, null, 2));
+    return;
   }
   const candidate = await createPluginCandidate({
     plugin: requiredOption(options, '--plugin'),

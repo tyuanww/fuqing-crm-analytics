@@ -14,13 +14,32 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 当前本地 CRM/知识插件拆分（2026-10-04，提交前审核完成）
+### 当前候选与宿主接线审核（2026-10-04）
+
+- OCR delegate 覆盖原始变更 **30/30**（含工具排除的文档/Python 补审），修复特殊文件输入阻塞与安装内容未直接绑定 tarball 两个问题。负测先失败后通过；没有剩余已确认的本轮代码审查缺陷。见[审查记录](docs/hackathon/evidence/dsh-g0-host-journal-review-20261004.md)。
+- 修复后 release suite **146 PASS / 0 SKIP**、profile/入口负测 **9 PASS / 0 SKIP**、首购保存恢复/分析/native **31 PASS**；固定官方 rc2 Web CLI 重新完成 **10/10**，CLI journal 重试幂等，所有自有宿主已回收，上游 tracked source 干净。
+- 已授权本地 commit，实际提交以 Git 为准；下一步为 T3/T7 D15 保存回执与 UNKNOWN 查询。生产、目标平台、供应链和物理分仓门禁仍保留，不触发 push 或杭州切换。
+
+### 审核前候选与宿主接线（2026-10-04，本地增量）
+
+- 在既有固定宿主增量上增加 `pnpm dsh plugin verify-host`：candidate 携带 profile 原字节快照，核对固定 DSH、双包版本/摘要、实际 composition、会话文件与十项 v2 宿主证据后，幂等写入原 journal；不改写 candidate。默认七插件 profile 不变，首期显式选 CRM＋知识双包。
+- 本轮重新执行真实官方 Web CLI **10/10 场景**，独立 CLI 写入 `CANDIDATE_HOST_VERIFIED`，重复调用保持相同 journal 和候选字节。release suite **142 PASS / 0 SKIP**。隔离源码保持已审核的 `1737adc3`，两个 tarball 与上一轮逐字节相同；验收器未提交源码另有摘要绑定，见[本轮证据](docs/hackathon/evidence/dsh-g0-host-journal-20261004.md)。
+- T3/T7 新增 **5 个**真实子进程/隔离 SQLite 故障场景；含既有首购分析与原生链路共 **31 PASS**。已证明同版本提交前后崩溃、丢失响应重放、冲突/权限拒绝与 forward-fix；D15 candidate/correlation/UNKNOWN receipt 合同仍未完成，保存门禁保持 `NOT_AVAILABLE`。
+- T13/T21 的本机观测接线已完成，整体仍 PARTIAL：`release_ready: false`，生产 activation、远端 reconcile、目标平台/供应链/canary 未关闭。kit 独立 dev dependency 和物理分仓仍待后续 G0/stop-go；本轮未 commit、push、发布或操作杭州。
+
+### 上一阶段固定宿主验收（2026-10-04，本地增量）
+
+- CRM/知识拆分与 OCR 修复已本地提交为 `1737adc3cffeb9db5fbbcee222fb044526324d40`，未 push。提交后新增固定官方 Web CLI 验收入口和 profile 加载修复；这些增量的提交状态以 Git 为准，不能冒作该 commit 内容。
+- 真实 rc2 宿主此前不会加载生成的旧 preset 目录；现已增加官方 `@deepseek-ai/dsh-agent-preset` 声明补丁。固定双包 tarball 在本机官方 Web CLI 完成 **10/10 场景**：加载/组合、实际工具降级、正常重启、在途崩溃后的原生 v4 会话恢复、挂死进程回收、原生回退和恢复旧组合。父命令中断回收也通过，入口负测/profile **9 PASS / 0 SKIP**。详见[固定宿主证据](docs/hackathon/evidence/dsh-g0-pinned-host-20261004.md)。
+- 移除 preset 只禁止新绑定，已有会话仍持有旧工具，整体切换按 `HOST_RESTART_REQUIRED`；任意同进程插件隔离不承诺。T2/T17 本机子项已验证；T13/T21 本机接线与 T3/T7 存储恢复的后续结果见上节。WSL/跨版本、浏览器、真实模型/业务、供应链和现场 canary 仍开放；物理分仓继续受 G0/stop-go 约束。
+
+### 上一阶段 CRM/知识插件拆分（2026-10-04，已本地提交）
 
 - 上一轮 OCR 修复已本地提交为 `ff7fc5fc0fa0295969fe789bc0bd7983a670c73a`。本轮从该干净基线继续 `codex/plugin-boundary-review`，完成本地拆分、OCR 审查修复和验证；本地提交以 Git 为准，未 push、发布或操作杭州，VERSION 与固定 DSH 未变。
 - CRM 包保留身份 `@shine-mage/dsh-crm-knowledge`，候选版本 `0.0.0-crm.1`；知识工具迁入 `@shine-mage/dsh-knowledge@0.0.0-candidate.1`。两包无相互业务源码导入，可分别构建/打包；profile v3 独立装配每个模块，拒绝把旧合包和新知识包混装。公开解释不需要 CRM，私有教材当前通过可撤销身份合同使用 CRM Host，不共享密码/令牌。
 - 本轮统一验证入口通过：后端定向 **206 PASS**、Node **160 PASS / 0 SKIP**；额外页面组合纳入全插件回归 **162 PASS / 0 SKIP**。真实 CLI 已分别生成 CRM-only、knowledge-only、含页面的组合 profile，均仅 CONFIGURED_NOT_RUN。最终 B0 **PASS**（Python **618 PASS**，Node 阶段合计 **1473 PASS / 1 SKIP**，含 clean 重跑）；独立 tarball 与失败修复记录见[插件拆分证据](docs/hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md)。
 - 本次 OCR delegate 覆盖 68/68 原始变更路径，修复卸载后公开知识和 CRM 工具迟到成功的问题；修复后双包构建、受影响插件 **166 PASS / 0 SKIP**、隔离打包/边界 **16 PASS / 0 SKIP**。详见[本次审核证据](docs/hackathon/evidence/dsh-g0-crm-split-review-20261004.md)；上段 B0/后端数字属于拆分实现阶段，未冒作本次修复后重跑。
-- T15 本地插件拆包子项完成，整体仍 PARTIAL。下一步仍需精确宿主/profile 生命周期与会话/WAL、T3/T7 保存/UNKNOWN 回放、供应链/canary/回退和 clean reviewed candidate；物理分仓在批准的 G0/stop-go 之后。本轮没有浏览器、真实模型/数据或杭州 UAT，新包没有上线。
+- T15 本地插件拆包子项完成，整体仍 PARTIAL。提交后的精确宿主本机证据见上节；T3/T7 保存/UNKNOWN 回放、供应链/canary/现场回退和 clean reviewed candidate 仍开放，物理分仓在批准的 G0/stop-go 之后。本轮没有浏览器、真实模型/数据或杭州 UAT，新包没有上线。
 
 ### 上一轮本地 rc2 候选门禁（2026-10-03 审查修复）
 

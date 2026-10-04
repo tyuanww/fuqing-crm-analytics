@@ -42,6 +42,8 @@ node scripts/crm-calibration/prepare-profile.mjs \
 
 入口校验各包身份、固定 DSH/Cordis peer、组合合同 v1、公开 export 和打包 allowlist，分别记录包指纹；只写新配置，不安装、不激活、不执行插件。省略知识插件及其 origin 即为纯 CRM profile；省略页面提供方时 CRM 查询/登录仍可用，`crm_service_health.page_delivery` 返回 `NOT_AVAILABLE` 与 `PAGE_PROVIDER_NOT_INSTALLED_OR_NOT_VISIBLE`。`AVAILABLE/NOT_RUN` 只表示工具在当前 scope 可见，不证明保存或页面 UAT 已完成。页面预览/确认仍需工作台 UI 与服务，不能只装 tools adapter 就宣称可保存。
 
+宿主加载时须显式传入生成的 `host.patch.yml` 和 `preset.patch.yml`；后者使用官方 `@deepseek-ai/dsh-agent-preset` 声明。旧 `preset/` 目录只作可检查描述，rc2 不会自动扫描注册。整体插件切换采用受控重启；已有会话不会因删除 preset 声明立即卸载。实际本机宿主、原生会话/WAL 和回退证据见[固定宿主验收](../../docs/hackathon/evidence/dsh-g0-pinned-host-20261004.md)，不代表杭州或真实服务通过。
+
 主题和 slot 都编译本包自带的生成合同；主题由 `shine-brand/contracts/content-theme.v1.json` 维护，不要求运行品牌插件，不改官方 DSH 原生界面。生成物 drift 由 B0 pipeline 检查。更新完整候选须从 reviewed SHA 重建，本地 fixture pack 不是可发布版本。
 
 ## 看板 GSV 连接边界

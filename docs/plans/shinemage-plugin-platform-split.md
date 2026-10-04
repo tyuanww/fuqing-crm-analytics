@@ -17,7 +17,7 @@
 4. D4-C 保留 durable save 目标，但只有服务状态、candidate/correlation/idempotency 和 forward-fix/重放矩阵通过才进入首个 D15 candidate；否则显示保存禁用及原因，只交付可核对结果。
 5. D7-A 保留首个可交付 candidate 的完整签名/SBOM/CVE、canary、回退、灰度与 RACI 门禁。**G0 本地 pack 可以先生成 PARTIAL 回执，不能因此删掉完整候选门禁**。catalog、物理多仓、杭州切换及 0.2.0 激活仍后置。
 6. T17 未证明同进程隔离；保留旧 active 指针不等于旧进程仍健康，也不等于业务数据回滚。必须分别证明可用性、受控重启、WAL 恢复和服务状态处理。
-7. T21 目前只打包并写 profile/capability/journal 回执，canary、runtime install、WAL、回退为 `NOT_RUN/NOT_AVAILABLE`；未来宿主 harness 的 PID/端口/临时目录合同仍归 T17，不伪装成当前命令行为。
+7. T21 目前生成不可变 pack/profile/capability/journal 回执；`plugin verify-host` 可追加与候选一致的本机宿主观测，不能激活宿主。T17 独立 opt-in harness 已验证本机原生会话与重启回退；生产 canary、runtime install、远端 WAL/回退仍为 `NOT_RUN/NOT_AVAILABLE`。
 
 全文核对与本轮代码修复证据见 [2026-10-03 审查修复记录](../hackathon/evidence/dsh-g0-review-fixes-20261003.md)。未关闭的实施项沿用 T1–T23，不新增重复规划或再次询问已回答的选择。
 
@@ -37,12 +37,13 @@
 | 任务 | 当前状态 | 已有证据 | 尚未关闭 |
 |---|---|---|---|
 | T1 | IMPLEMENTED / STATIC PASS | 架构设计、机器 policy/inventory、11 包/607 文件/29 条跨包引用/202 处字面路径、15 条合同与 10 个主入口；含 import-equals 的 AST drift/循环/越界/公开导出负测纳入 B0 pipeline | 这只关闭依赖盘点；真实宿主与服务语义由 T2/T3/T17 验证 |
-| T2 | PARTIAL | 0.1.7-rc.2 与 0.2.0-rc.2 精确 checkout、静态兼容矩阵 SUPPORTED；0.1.7 固定 checkout 的官方 plugin-manager/runner/session/WAL 相关测试 167/167 PASS | 0.1.7 精确生产 runtime 的 load/unload/session/WAL 现场证据；0.2.0 生命周期依赖仍 DEFERRED |
-| T13 | PARTIAL | profile manifest、显式 state path、release/receive journal、status/resume/reconcile fail-closed；`release-preflight.json` sidecar、release state status/resume 已实际生成 | 完整崩溃 replay、远端 receipt/reconcile 和现场回执 |
+| T2 | PARTIAL / LOCAL HOST PASS | 保留原静态/官方单测证据；2026-10-04 固定 rc2 官方 Web CLI 的实际加载、正常重启、原生 v4 会话/WAL 在途恢复、回退/恢复旧组合已通过，见[宿主证据](../hackathon/evidence/dsh-g0-pinned-host-20261004.md) | 目标平台 runtime、Windows/WSL、rc1→rc2/torn-frame、浏览器与 shell/tool union；0.2.0 仍 DEFERRED |
+| T13 | PARTIAL / LOCAL JOURNAL PASS | profile/state/既有 journal 保留；候选快照与 v2 host evidence 已通过 CLI 幂等接入 `CANDIDATE_HOST_VERIFIED`，重复不改原候选，见[本轮证据](../hackathon/evidence/dsh-g0-host-journal-20261004.md) | 生产 activation 崩溃 replay、远端 receipt/reconcile 和现场回执 |
 | T15 | PARTIAL | kit、brand/query、图表与 workbench 独立构建成果保留；指标/知识服务已独立打包。CRM 与知识插件也已分别 build/test/pack、安全解包加载，profile v3 为每个模块单独绑定指纹；可撤销身份合同避免引用落入失效会话，见 [插件拆分证据](../hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md) | 物理分仓/平台依赖冷安装、完整 invariant/精确宿主合同、签名/SBOM/来源信任仍未关闭 |
 | T3 | PARTIAL / SYNTHETIC API PASS | 合成指标与公开知识解释各有 owner、API 1.0.0、离线 schema/类型与输入摘要；双进程 loopback、版本/异常响应拒绝、单服务故障独立验证；见 [服务边界证据](../hackathon/evidence/dsh-g0-crm-service-boundary-20261004.md) | 真实 CRM API 兼容窗口、D15 public envelope、T7 durable save/UNKNOWN 回放与服务状态矩阵未完成 |
-| T17 | PARTIAL / BLOCKED | synthetic host 的 hang/crash/restart/WAL/native fallback 和 profile reconcile；host evidence 明确记录 `in-process-unload=BLOCKED` | 0.1.7 精确宿主、进程内 unload 与原子激活能力 |
-| T21 | PARTIAL | `pnpm dsh plugin candidate` 旧收据已绑定对应 source、profile/pack/capability/journal；精确 candidate digest 以 `.context/checks/rc2-final-<tag>/candidate-*/candidate.json` 为准 | canary/rollback、远端 receive/reconcile、候选回执与 host activation 的接线 |
+| T7 | PARTIAL / LOCAL STATE PASS | 当前 v1 SQLite 提交前/后真实进程丢失、新进程幂等重放、冲突/权限拒绝、保留旧版本的 forward-fix 和 schema 拒绝共 5 个新场景通过；含现有回归 31 PASS，见[存储恢复证据](../hackathon/evidence/dsh-g0-host-journal-20261004.md) | D15 candidate/correlation/UNKNOWN receipt 合同、跨服务版本迁移/恢复；保存继续 NOT_AVAILABLE |
+| T17 | PARTIAL / LOCAL HOST PASS | 固定官方 Web CLI 十项场景及父命令中断回收；实测 preset 移除后现有会话保留工具，同进程挂死需外部重启；已明确 `HOST_RESTART_REQUIRED` | 任意插件同进程隔离不承诺；生产 activation/journal/canary、目标平台与真实服务恢复仍开放，测试指针不替代原子部署 |
+| T21 | PARTIAL / LOCAL HOST RECEIPT PASS | `plugin candidate` 携带 profile 快照；`plugin verify-host` 核验所选候选与实测双包组合，记录当前平台/源码/十项场景的观测。真实同包重跑与 CLI 重试通过，当前 raw 为 `.context/checks/plugin-host-journal-20261004/` | 生产 canary/rollback、远端 receive/reconcile、host activation；本机观测仍 release_ready=false |
 | T22 | IMPLEMENTED / DOCS PASS | README、docs 索引、rc2 Quickstart 和插件作者 Quickstart 已统一当前事实与三步入口 | 现场 host/canary/rollback 仍不属于文档门禁 |
 | T23 | IMPLEMENTED / READINESS PASS | 聚合阻断码、remedy 和 Quickstart 锚点已实现；检查成功返回 0，缺项/门禁阻断返回 2；旧 runtime 的 readiness 结果仅属历史证据 | 远端证据仍由发布门禁负责 |
 

@@ -26,10 +26,10 @@ node scripts/crm-calibration/prepare-profile.mjs \
 
 这会生成仅含知识工具的配置；不探活、不安装、不激活宿主。需要私有教材时，另选 `--plugin /absolute/installed/crm` 和 `--graph-settings /absolute/private/settings.json`；配置格式、账号映射和历史现场证据见[图谱说明](../../docs/crm-calibration/graph-deployment.md)。
 
-`cordis.patch.yml` 为空补丁，因为本包没有 Host UI，Agent 工具由 profile 显式选择。仅将 bundle 加入列表不会自动为所有会话注册工具。profile v3 为每个模块生成独立 Cordis 条目，不把多个 `apply()` 合进同一作用域；缺插件时保持 DSH 原生对话。
+`cordis.patch.yml` 为空补丁，因为本包没有 Host UI，Agent 工具由 profile 显式选择。仅将 bundle 加入列表不会自动为所有会话注册工具。profile v3 为每个模块生成独立 Cordis 条目，不把多个 `apply()` 合进同一作用域。宿主显式加载生成的 `preset.patch.yml`，通过官方 `@deepseek-ai/dsh-agent-preset` 注册；单独复制 `preset/` 描述文件不会注册。整组切换按受控重启处理，不能承诺移除声明立即卸载旧会话；禁用业务工具后原生对话可恢复。
 
 ## 合同和验证边界
 
 HTTP schema/类型、传输层、公开 GSV 定义与身份能力声明均携带本地生成物。维护源与 SHA 见[机器边界清单](../../docs/architecture/shinemage-plugin-boundaries.md)；`generate_contract.py --check` 和 `generate_types.mjs --check` 检查漂移。构建不读取 CRM 业务实现或兄弟插件源码；dev kit 只用于构建，不打入运行产物。
 
-两插件的统一验证用[CRM 验证入口](../crm-knowledge/README.md#本地复验)。实际 tarball 的安全解包、固定 SDK 加载和双插件组合见[本轮证据](../../docs/hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md)。这些是本地 synthetic/SDK 证据，未证明完整 DSH profile 热插拔、进程崩溃隔离、WSL/WAL、真实知识库 UAT 或生产发布。当前仍为本地候选。
+两插件的统一验证用[CRM 验证入口](../crm-knowledge/README.md#本地复验)。实际 tarball 的安全解包、固定 SDK 加载和双插件组合见[拆分证据](../../docs/hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md)。后续[固定官方 Web 宿主验收](../../docs/hackathon/evidence/dsh-g0-pinned-host-20261004.md)已验证本机加载、重启、原生 synthetic 会话/WAL 与禁用/恢复；同进程任意插件隔离、WSL、真实知识库 UAT 和生产发布仍未通过。当前仍为本地候选。

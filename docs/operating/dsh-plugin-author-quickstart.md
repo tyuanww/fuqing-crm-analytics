@@ -49,9 +49,39 @@ pnpm dsh plugin candidate \
 cat "$candidate_root/pack/candidate.json"
 ```
 
-候选回执绑定插件 source SHA、包 SHA-256、profile digest、固定 DSH pin、capability 和 `CANDIDATE_PREPARED` journal。`canary`、`rollback` 和远端 receive 在当前首期显示 `NOT_RUN`/`NOT_AVAILABLE`，这不是发布成功；不能把 tarball 直接放进杭州 current。
+候选目录携带原字节 `profile.json` 快照；回执绑定插件 source SHA、包 SHA-256、profile digest、固定 DSH pin、capability 和 `CANDIDATE_PREPARED` journal。`canary`、`rollback` 和远端 receive 在当前首期显示 `NOT_RUN`/`NOT_AVAILABLE`，这不是发布成功；不能把 tarball 直接放进杭州 current。
 
 最终 tarball 在私有临时目录安全解包，核对 `exports`（含条件分支）、`main`/`module` 和 `dsh.bundle.patch` 指向的文件，再执行敏感文件/secret scan；通过后才发布包与回执。源码映射、敏感文件或缺失入口均阻断，内容校验失败不发布 tarball；通过校验后若回执落盘失败，已验证包仍保留，需核对输出后使用新的候选目录重试。通配 exports 暂不支持，须列出明确入口。
+
+## 连接已有宿主证据（CRM＋知识首期）
+
+专用 allowlist `config/dsh-profile.crm-knowledge.rc2.json` 只选择 CRM 和知识两个独立包，默认七插件 release profile 不变。在同一干净提交与已完成构建/测试的双包上执行：
+
+```bash
+plugin_trial="$(mktemp -d "${TMPDIR:-/tmp}/shine-mage-host.XXXXXX")"
+pnpm dsh plugin candidate \
+  --plugin "$PWD/dsh-plugins/crm-knowledge" \
+  --profile config/dsh-profile.crm-knowledge.rc2.json \
+  --output-dir "$plugin_trial/candidate" \
+  --state-path "$plugin_trial/state.json"
+
+# 仅启动/重启该命令自己创建的宿主和 loopback 模型夹具；含 SIGKILL 负测
+node scripts/dsh-b0/pinned-host-acceptance.mjs \
+  --upstream /absolute/unchanged-built-dsh-0.1.7-rc.2 \
+  --output "$plugin_trial/host"
+
+# 只读候选/证据，向既有 journal 追加一次观测；不启动或激活宿主
+pnpm dsh plugin verify-host \
+  --candidate "$plugin_trial/candidate/candidate.json" \
+  --evidence "$plugin_trial/host/evidence.json" \
+  --state-path "$plugin_trial/state.json"
+```
+
+成功返回 `LOCAL_HOST_VERIFIED` 与 `CANDIDATE_HOST_VERIFIED` journal 序号/摘要；同输入重试返回同一记录，原 candidate 保持不变。它只认证所选候选在回执列出的固定双包组合下的**本机观测**；伴随包摘要、平台、固定 DSH 和测试脚本源码均随证据核验。它不是数字签名、任意 profile 的兼容证明或部署许可，`release_ready: false`、activation/service state 仍为 `NOT_RUN`。
+
+验证器使用现有 `python3` 安全解包入口，在本次私有临时目录中复核已验摘要的 tarball，逐文件比对安装内容（含非入口资源），结束清理该临时目录；不执行包内代码。只核对安装目录自身的 manifest 摘要不够，包和安装目录内容不一致会返回 `PLUGIN_HOST_INSTALLED_PACK_MISMATCH`。特殊文件输入在读取前拒绝，不能令 CLI 一直等待。
+
+旧 `dsh-pinned-host-acceptance/v1` 不能用来写入通过回执，必须重新跑宿主；没有 profile 快照的旧 candidate 必须重新生成。错误 pin、错误 source/包、缺场景、证据文件被改或没有 `CANDIDATE_PREPARED` 的 journal 均在写入前拒绝。单域或其他组合返回 `PLUGIN_HOST_PROFILE_SCOPE_MISMATCH`，不能拿双包测试结果替代验收。[本次实证](../hackathon/evidence/dsh-g0-host-journal-20261004.md)。
 
 ## 失败处理
 

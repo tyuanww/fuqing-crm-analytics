@@ -42,6 +42,9 @@ test('plugin candidate binds pack, profile and durable journal receipt', async t
   assert.ok(!JSON.stringify(candidate).includes(input.root));
   assert.equal(candidate.canary.status, 'NOT_RUN');
   assert.equal(candidate.next_commands.receive.status, 'NOT_AVAILABLE');
+  const snapshot = await readFile(join(input.outputDir, 'profile.json'));
+  assert.deepEqual(snapshot, await readFile(join(input.root, input.profile)));
+  assert.deepEqual(candidate.profile_snapshot, { name: 'profile.json', sha256: createHash('sha256').update(snapshot).digest('hex') });
   assert.deepEqual(JSON.parse(await readFile(join(input.outputDir, 'candidate.json'), 'utf8')), candidate);
   const state = JSON.parse(await readFile(input.statePath, 'utf8'));
   assert.equal(state.journal.at(-1).status, 'CANDIDATE_PREPARED');

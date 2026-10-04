@@ -73,11 +73,16 @@ export async function createPluginCandidate({ root: candidateRoot = root, plugin
   assert.equal((await readdir(destination)).length, 0, 'PLUGIN_CANDIDATE_OUTPUT_MUST_BE_EMPTY');
   const packReceipt = await packPlugin({ plugin: pluginReal, outputDir: destination, manifestPath: resolve(destination, 'plugin-pack.json') });
   assert.match(packReceipt.tarball.sha256, SHA256, 'PLUGIN_CANDIDATE_PACK_DIGEST_INVALID');
+  // Carry the exact allowlist with the candidate. Host verification must not
+  // re-read a mutable workspace profile or rewrite this immutable receipt.
+  assert.equal(createHash('sha256').update(profile.contents).digest('hex'), profile.digest, 'PLUGIN_CANDIDATE_PROFILE_ENCODING');
+  await writeFile(resolve(destination, 'profile.json'), profile.contents, { mode: 0o600, flag: 'wx' });
   const capabilities = capabilityMatrix();
   const candidateBase = {
     schema_version: 'dsh-plugin-candidate/v1',
     profile_id: profile.profile.profile_id,
     profile_digest: profile.digest,
+    profile_snapshot: { name: 'profile.json', sha256: profile.digest },
     plugin: { id: selected.id, path: selected.path, version: packReceipt.package_version, dsh_pin: packReceipt.dsh_pin },
     source_sha: packReceipt.source_sha,
     pack: { name: packReceipt.tarball.name, sha256: packReceipt.tarball.sha256, bytes: packReceipt.tarball.bytes },

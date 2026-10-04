@@ -26,6 +26,8 @@ node scripts/crm-calibration/prepare-profile.mjs \
 
 输出 `crm-profile-assets/v3`，分别记录每个包的身份、版本、入口摘要、组合指纹以及服务配置状态 `CONFIGURED_NOT_RUN`。模块按各自包指纹绑定，知识包更新不会改变 CRM 的模块指纹；Agent 的 CRM、知识解释、图谱与页面工具使用独立 Cordis 条目，不再生成聚合 `tools.mjs`。这是配置证据，不是不可变包的发布签名或运行验收。
 
+rc2 的实际加载入口是生成的 `preset.patch.yml`，其中通过官方 `@deepseek-ai/dsh-agent-preset` 声明 `crm-knowledge`。由宿主 owner 在获授权的新隔离 profile 中同时传入 `--patch <output>/host.patch.yml --patch <output>/preset.patch.yml`。`preset/preset.yml` 和 `preset/agent.cordis.yml` 保留为可检查的装配描述，单独复制这个目录不会注册 preset；不能省略第二个 patch。已有同名条目先由 owner 核对更新，不重复插入。
+
 生成器拒绝旧合包、错身份/peer、错组合合同、私有/缺失导出及链接文件。旧 `--python` 参数返回 `CRM_PROFILE_PYTHON_REMOVED`。旧 v2 profile 与旧包一起保留，迁移时安装两个新候选并生成新 profile，再完成授权的宿主加载/受控重启；不覆盖旧 profile，也不能把新知识包追加到旧合包上而重复注册工具。
 
 ## 可选身份合同
@@ -66,4 +68,4 @@ node --test dsh-plugins/crm-knowledge/test/service-client.test.mjs \
 
 `CRM_METRICS_PYTHON` 只供跨服务测试夹具选择解释器，不再是插件运行配置。夹具启动两个本次拥有的临时 loopback 服务，使用空白 HOME/TMP 与绝对 PYTHONPATH；结束只停止这两个子进程。B0 覆盖单包构建、实际 tarball 安全解包后加载和未配置服务时的降级；不证明完整 DSH profile 生命周期。
 
-独立服务应用与 CRM/知识插件的本地拆包已验证，见[插件拆分证据](../hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md)。源码仍在 workspace；物理分仓、平台依赖冷安装、真实 CRM API 兼容窗口、D15 保存/UNKNOWN 回放矩阵、精确宿主/WAL、供应链与 canary/回退仍开放。此只读合成合同没有引入 durable save，profile 回退不被声明为数据库回滚。取消会终止插件的 HTTP 等待，不宣称能强行中止服务端已开始的只读计算；服务端持久任务的取消/恢复另由 T7/T17 验证。
+独立服务应用与 CRM/知识插件的本地拆包已验证，见[插件拆分证据](../hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md)。固定 rc2 Web CLI 的本机加载、受控重启、原生会话/WAL 和回退也已[实际验证](../hackathon/evidence/dsh-g0-pinned-host-20261004.md)，不包括浏览器、真实服务或 WSL。源码仍在 workspace；物理分仓、平台依赖冷安装、真实 CRM API 兼容窗口、D15 保存/UNKNOWN 回放矩阵、供应链与现场 canary/回退仍开放。此只读合成合同没有引入 durable save，profile 回退不被声明为数据库回滚。取消会终止插件的 HTTP 等待，不宣称能强行中止服务端已开始的只读计算；服务端持久任务的取消/恢复另由 T7/T17 验证。

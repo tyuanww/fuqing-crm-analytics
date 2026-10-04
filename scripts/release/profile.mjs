@@ -26,7 +26,7 @@ async function canonicalInside(root, candidate, code) {
   return candidateReal;
 }
 
-function validateProfile(profile) {
+export function validateProfile(profile) {
   assert.ok(profile && typeof profile === 'object' && !Array.isArray(profile), 'PROFILE_MANIFEST_INVALID');
   assert.equal(profile.schema_version, PROFILE_SCHEMA, 'PROFILE_SCHEMA_UNSUPPORTED');
   assert.match(profile.profile_id, /^[a-z0-9][a-z0-9._-]{1,63}$/, 'PROFILE_ID_INVALID');
@@ -87,6 +87,7 @@ export async function loadReleaseProfile({ root, manifestPath = null } = {}) {
   }
   return Object.freeze({
     path,
+    contents: bytes.toString('utf8'),
     digest: digest(bytes),
     profile,
     plugins: Object.freeze(plugins),

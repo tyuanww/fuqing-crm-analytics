@@ -30,6 +30,11 @@ test('profile composes independent agent scopes instead of aggregating apply cal
   assert.match(rows.find(x => x.id === 'crm-tools').name, /CRM%20/);
   assert.match(rows.find(x => x.id === 'knowledge-graph-v1').name, /knowledge\/lib\/graph-tools.js/);
   assert.equal(files['preset/tools.mjs'], undefined);
+  const declarations = JSON.parse(files['preset.patch.yml'])[0].insert;
+  assert.equal(declarations.length, 1);
+  assert.equal(declarations[0].name, '@deepseek-ai/dsh-agent-preset');
+  assert.equal(declarations[0].config.id, 'crm-knowledge');
+  assert.deepEqual(declarations[0].config.plugins, rows);
   assert.doesNotMatch(JSON.stringify(files), /python|CRM_METRICS_PYTHON|process.env/);
 });
 test('either domain can be selected alone and preparation cannot overwrite existing assets', async t => {
@@ -38,6 +43,7 @@ test('either domain can be selected alone and preparation cannot overwrite exist
     const output = join(f.root, domain + '-only');
     const result = await prepareProfile({ output, ...selection });
     assert.equal(result.schema, 'crm-profile-assets/v3');
+    assert.deepEqual(result.preset_loader, { contract: 'dsh-agent-preset-declaration/v1', id: 'crm-knowledge', patch: 'preset.patch.yml' });
     assert.deepEqual(Object.keys(result.packages), [domain]);
     assert.equal(result.existing_profile_changed, false); assert.equal(result.service_started_or_restarted, false);
     const body = await readFile(join(output, 'preset/agent.cordis.yml'), 'utf8');

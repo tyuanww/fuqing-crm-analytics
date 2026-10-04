@@ -50,6 +50,10 @@ export function renderProfile({ output, plugin, knowledgePlugin, graphSettingsFi
       { id: 'crm-knowledge-login-host', disabled: true },
       { insert: [{ id: 'crm-knowledge-live-host', name: moduleUrl(plugin, 'lib/host.js', packages.crm?.sha256 ?? revision) }] },
     ] : [], null, 2) + '\n',
+    // rc2 declares presets as scoped Cordis plugins; it does not scan preset directories.
+    'preset.patch.yml': JSON.stringify([{ insert: [{ id: 'preset-shinemage-crm-knowledge',
+      name: '@deepseek-ai/dsh-agent-preset', config: { id: 'crm-knowledge', name: title,
+        description: title, order: 2, plugins: entries } }] }], null, 2) + '\n',
     'preset/preset.yml': JSON.stringify({ name: title, description: title, order: 2 }, null, 2) + '\n',
     'preset/agent.cordis.yml': JSON.stringify(entries, null, 2) + '\n',
   };
@@ -105,6 +109,7 @@ export async function prepareProfile(options) {
   await mkdir(join(output, 'preset'), { mode: 0o700 });
   for (const [name, content] of Object.entries(files)) await writeFile(join(output, name), content, { mode: 0o600, flag: 'wx' });
   const receipt = { schema: 'crm-profile-assets/v3', revision, packages, graph_configured: Boolean(graphSettingsFile),
+    preset_loader: { contract: 'dsh-agent-preset-declaration/v1', id: 'crm-knowledge', patch: 'preset.patch.yml' },
     private_knowledge_identity: graphSettingsFile ? plugin ? 'CRM_LEASE_CONFIGURED_NOT_RUN' : 'NOT_AVAILABLE_NO_IDENTITY_PROVIDER' : 'NOT_REQUESTED',
     synthetic_services: Object.fromEntries(['metrics', 'knowledge'].map(domain => [domain, services[domain + 'Origin']
       ? { status: 'CONFIGURED_NOT_RUN', origin: services[domain + 'Origin'], api_version: '1.0.0' }

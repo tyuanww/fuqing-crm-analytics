@@ -172,3 +172,11 @@ B0 `--check` 先独立构建 board-components 并绑定受摘要约束的 tarbal
 2026-10-04 CRM 插件已改为显式 HTTP 服务配置；上述 Python 变量现在只供测试启动本次拥有的合成 API 进程，插件不再读取它。新增 `service-client.test.mjs` 的版本/超时/取消/重定向/响应大小/异常响应负测纳入 B0；`service-http.integration.mjs` 与 `tools.test.mjs` 在完整锁定 backend Python 下验证实际双 ASGI 服务。独立包测试额外对最终 tarball 安全解包，只提供固定 SDK 依赖后执行包级 ToolRuntime 验证。领域生成物漂移由 `test_crm_service_contracts.py` 与离线生成器检查；这些结果不证明完整原生 profile 或杭州已上线。详见 [服务边界](./crm-plugin-service-boundary.md) 与 [当前证据](../hackathon/evidence/dsh-g0-crm-service-boundary-20261004.md)。
 
 同日插件拆包后，`scripts/crm-calibration/verify.py --node /absolute/node24 --upstream /absolute/pinned-dsh-checkout --build-tools /absolute/plugin-kit/build-tools` 由锁定 backend Python 执行，实际构建 CRM 与知识包，再跑两域工具、跨服务 HTTP、Host 和身份撤销组合测试。知识 schema/类型生成物归 `dsh-plugins/knowledge/src`，独立包回归与类型检查纳入 B0；`plugin-isolation.test.mjs` 只复制各自源码和 kit，分别 pack/安全解包/加载最终 tarball。页面组合仍由 B0 在提供方构建后验证。浏览器、完整 DSH profile、WSL/WAL 与真实服务 UAT 单列，详见[本轮拆分证据](../hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md)。
+
+固定官方宿主验收使用显式入口 `node scripts/dsh-b0/pinned-host-acceptance.mjs --upstream /absolute/unchanged-built-dsh-0.1.7-rc.2 --output /absolute/new-private-evidence`。命令自己拥有 HOME/profile/session、loopback 模型夹具、动态端口与所有子进程；会实际进行重启、SIGKILL 和同步挂死负测，结束仅回收自有实例。默认从干净插件源码 pack；`--packages-from /absolute/prior-host-evidence` 可复核并复用同一包。没有真实模型、业务数据或现役服务访问，不替代目标平台、完整 runtime 信任链与浏览器验收。[实际证据](../hackathon/evidence/dsh-g0-pinned-host-20261004.md)及[兼容矩阵](../architecture/dsh-compatibility-matrix.md)记录范围。
+
+这个真实宿主入口不自动加入日常 B0；B0 只运行 `pinned-host-acceptance.test.mjs` 的四项启动前负测，传入已有 `B0_BUILD_UPSTREAM`，检查错误 pin、路径、拒覆盖和包篡改。单独跑该测试而未提供固定 checkout 时，两项依赖 exact checkout 的检查明确 SKIP，不能记为全通过。
+
+`pnpm dsh plugin verify-host --candidate /absolute/candidate.json --evidence /absolute/evidence.json --state-path /absolute/state.json` 核验已有 v2 宿主证据并幂等追加到原 candidate journal；该命令不运行宿主。`plugin-host-evidence.test.mjs` 纳入 release suite/B0，用明确的 verifier-only 夹具检查缺项、篡改、错误 scope/journal 和重试，不能将这些夹具视为真实宿主通过；真实命令的十项场景与 CLI 接线另行留证，见[本机接线与服务状态证据](../hackathon/evidence/dsh-g0-host-journal-20261004.md)。
+
+T3/T7 的 `backend/tests/test_analytics_first_purchase_save_recovery.py` 纳入现有 B0 Python 目标和常规 backend 回归：只用隔离合成 RunStore/SQLite，分别在提交前后 SIGKILL 自有子进程，通过新进程重放、冲突/权限拒绝、保留旧版本的 forward-fix 和不兼容 schema 拒绝验证存储边界。这仍不证明 D15 candidate/correlation 回执、业务数据迁移或跨版本服务回退；保存门禁继续关闭。

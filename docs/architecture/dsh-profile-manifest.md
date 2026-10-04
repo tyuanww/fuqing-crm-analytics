@@ -14,7 +14,9 @@ profile 当前固定：
 
 `scripts/release/profile.mjs` 只读加载并校验 profile。它拒绝绝对路径、路径穿越、重复插件、包名不一致、DSH peer 不匹配和未提供 build 入口，并返回 profile 文件的 SHA-256。它不安装依赖、不构建、不启动宿主、不读取业务数据。
 
-`pnpm dsh doctor --release` 和 `scripts/release/preflight.mjs` 使用同一加载器。profile 改动会先体现在 readiness 和候选构建输入中；profile digest 会随证据记录，后续 T21 candidate/journal 需要把它绑定到 candidate receipt。当前 `RELEASE_STATE_PATH` 的统一 journal 仍属于 T13 未完成部分。
+`pnpm dsh doctor --release` 和 `scripts/release/preflight.mjs` 使用同一加载器。profile 改动会先体现在 readiness 和候选构建输入中；T21 candidate 现在携带原字节 `profile.json`，将其 SHA-256 同时绑定到 candidate digest 和 `CANDIDATE_PREPARED` journal。必须显式指定同一绝对 state path；远端 receipt/activation 接线仍为 T13 未完成部分。
+
+`config/dsh-profile.crm-knowledge.rc2.json` 是另一个显式选择的首期双包 allowlist，不替换默认七插件 profile。`plugin verify-host` 只接受该双包范围，校验所选候选包和已实测的伴随包、实际 composition 与宿主证据，再向既有 journal 追加 `CANDIDATE_HOST_VERIFIED`。profile 本身只定义选择/顺序；精确版本与完整包摘要来自不可变 candidate/host 回执，不把 allowlist 当作完整版本锁或发布批准。
 
 ## 变更边界
 

@@ -64,11 +64,11 @@ node scripts/crm-calibration/prepare-profile.mjs \
   --graph-settings /private/graph-settings.json
 ```
 
-此命令只写新的输出目录，拒绝覆盖；不会修改现有 profile 或启停服务。输出 `host.patch.yml`、`preset/preset.yml`、`preset/agent.cordis.yml` 和带文件/独立包指纹的 `crm-profile-assets/v3` manifest。上例只配置在线图谱，公开合成查询/知识解释保持 NOT_AVAILABLE。需要这两项能力时分别传 `--metrics-origin` 和 `--knowledge-origin`，详见[独立服务边界](../operating/crm-plugin-service-boundary.md)。输出目录和已安装插件目录是运行依赖，不能随意移动或清理。
+此命令只写新的输出目录，拒绝覆盖；不会修改现有 profile 或启停服务。输出 `host.patch.yml`、官方 preset 声明入口 `preset.patch.yml`、可检查的 `preset/preset.yml` / `preset/agent.cordis.yml` 和带文件/独立包指纹的 `crm-profile-assets/v3` manifest。上例只配置在线图谱，公开合成查询/知识解释保持 NOT_AVAILABLE。需要这两项能力时分别传 `--metrics-origin` 和 `--knowledge-origin`，详见[独立服务边界](../operating/crm-plugin-service-boundary.md)。输出目录和已安装插件目录是运行依赖，不能随意移动或清理。
 
-部署前保留旧 profile 与旧包并核对 Host 入口。在新隔离 profile 中装配两个固定候选包及生成的两个 preset 文件；v3 不再使用聚合 `tools.mjs`，不能向旧合包会话追加新知识工具。已有 `crm-knowledge-live-host` 时应由部署 owner 更新该条目的精确候选入口，不能再次插入同名条目，也不能覆盖其他 profile 项；生成的 Host 补丁适用于新 profile，不能盲目重复应用。教材检索/引用展开走知识插件的 `query_crm_knowledge_sources` 与 `expand_crm_knowledge_citation`，当前身份提供方仍要求连接 CRM。本生成器不迁移模型、凭据或其它知识库。
+部署前保留旧 profile 与旧包并核对 Host 入口。在新隔离 profile 中安装两个固定候选包，并让官方 CLI 显式加载 `--patch <output>/host.patch.yml --patch <output>/preset.patch.yml`。rc2 不扫描上述 preset 目录，复制两个描述文件不会注册工具。v3 不再使用聚合 `tools.mjs`，不能向旧合包会话追加新知识工具。已有 `crm-knowledge-live-host` 或 `preset-shinemage-crm-knowledge` 时应由部署 owner 更新该条目的精确候选入口，不能再次插入同名条目，也不能覆盖其他 profile 项；生成补丁适用于新 profile，不能盲目重复应用。教材检索/引用展开走知识插件的 `query_crm_knowledge_sources` 与 `expand_crm_knowledge_citation`，当前身份提供方仍要求连接 CRM。本生成器不迁移模型、凭据或其它知识库。
 
-新增身份能力要求新的 CRM Host；仅替换 preset 无法让旧 Host 提供该能力。精确 DSH 的 profile 加载、受控重启、会话/WAL 和回退须先在隔离候选验证，现场切换按授权执行，本轮未运行。重启后重新连接 CRM；回退恢复对应的旧 profile 与旧包，不声称登录内存或服务数据能够自动回滚。禁止据此清空 runtime 或删除图数据卷。共享 `weknora_search` 不具备本合同的账号隔离，原生工具 guard 仅是选中图谱模块时的补充限制，不代替服务端权限。
+新增身份能力要求新的 CRM Host；仅替换 preset 无法让旧 Host 提供该能力。精确 rc2 profile 加载、受控重启、原生会话/WAL 和回退已在本机隔离候选[验证](../hackathon/evidence/dsh-g0-pinned-host-20261004.md)，未包含在线图谱、浏览器、WSL 或现场切换。移除声明后旧会话仍持有原工具，整体切换按 `HOST_RESTART_REQUIRED` 处理。重启后重新连接 CRM；回退恢复对应的旧 profile 与旧包，不声称登录内存或服务数据能够自动回滚。禁止据此清空 runtime 或删除图数据卷。共享 `weknora_search` 不具备本合同的账号隔离，原生工具 guard 仅是选中图谱模块时的补充限制，不代替服务端权限。
 
 ## 验证层级
 

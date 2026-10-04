@@ -273,9 +273,14 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 - [x] CRM 增量 OCR delegate 提交前审核（2026-10-04）：覆盖 87 个原有路径，修复实际错误响应与 OpenAPI/TS 类型不一致及文档漂移；修复后的 backend、CRM、B0 已重跑，见[审核记录](./evidence/dsh-g0-crm-review-20261004.md)。本地 commit 不关闭以下发布/现场门禁。
 - [x] T15 CRM/知识插件拆包子项（2026-10-04）：分别构建、测试、打包与安全解包后固定 SDK 加载；profile v3 可单独或组合选择，身份 lease 在断开/Host 或知识模块卸载后拒绝迟到结果。见[插件拆分证据](./evidence/dsh-g0-crm-plugin-split-20261004.md)。
 - [x] 插件拆包 OCR delegate（2026-10-04）：68/68 路径已审；修复公开知识/CRM owner 卸载后的迟到结果，三项负测先失败后通过，166 项插件与 16 项隔离/边界回归通过，见[审查证据](./evidence/dsh-g0-crm-split-review-20261004.md)。
-- [ ] T15 剩余：插件/服务物理分仓与平台依赖冷安装、invariant、精确宿主和供应链验收仍开放。整体仍 PARTIAL。
-- [ ] T2/T17：精确宿主生命周期、会话/WAL、故障隔离、受控重启和恢复；现有 synthetic PASS 不替代。
-- [ ] T3/T7/D4-C：用服务状态和回放矩阵决定首个 D15 是否启用 durable save。
+- [x] T2/T17 本机精确宿主子项（2026-10-04）：官方 rc2 Web CLI 完成 10/10 场景和父命令中断回收；修复旧 preset 目录不会注册的接线，实测移除声明保留已有会话，整体切换采用 HOST_RESTART_REQUIRED。见[宿主证据](./evidence/dsh-g0-pinned-host-20261004.md)。
+- [x] T13/T21 本机回执接线（2026-10-04）：profile 快照、候选包和固定双包组合绑定 v2 host evidence，`verify-host` 复用原 journal 幂等追加观测；真实宿主重新完成 10/10，CLI 重试不改 candidate/不追加记录。release suite 142 PASS；见[接线证据](./evidence/dsh-g0-host-journal-20261004.md)。
+- [x] T3/T7 同版本存储恢复子项（2026-10-04）：新增提交前/后 SIGKILL、丢失响应重试、冲突/撤权、forward-fix 与未知 schema 拒绝，共 5 个场景；含既有分析/原生回归 31 PASS。仅证明隔离 SQLite，不关闭下方 D15 保存合同门禁。
+- [x] 宿主/journal OCR delegate（2026-10-04）：原始 30/30 路径审查，修复 FIFO 阻塞与安装内容/tarball 不一致漏检；release 146、profile/负测 9、后端 31、真实宿主 10 场景重新通过。见[审核证据](./evidence/dsh-g0-host-journal-review-20261004.md)。
+- [ ] T15 剩余：插件/服务物理分仓与平台依赖冷安装、invariant、供应链门禁；kit 仍以相邻 workspace 路径消费，迁移前改成固定开发依赖并验证独立仓根目录构建。整体仍 PARTIAL。
+- [ ] T2/T17 剩余：Windows/WSL、rc1→rc2/torn-frame、浏览器/client、shell/tool union 与目标平台 runtime；本机十项不代签这些验收。同进程任意插件隔离不承诺。
+- [ ] T3/T7/D4-C：补齐 D15 candidate/correlation/UNKNOWN receipt、完整服务兼容窗口和跨版本 forward-fix；当前按门禁继续禁用保存，同版本 SQLite 子项已在上方留证。
+- [ ] T13/T21：生产 activation journal、远端 receive/reconcile 与现场恢复；本机 `LOCAL_HOST_VERIFIED` 不替代这些门禁。
 - [ ] 在授权提交后的 clean reviewed SHA 重跑完整 preflight，再处理签名/SBOM、canary/rollback 与远端门禁；不把本地 pack 视为可上线。
 
 ## 2026-09-30 rc2 DX triage follow-up

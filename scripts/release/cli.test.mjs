@@ -19,6 +19,21 @@ test('dsh exposes stable help and version output', () => {
   assert.match(releaseHelp, /Precedence: --tag/);
   const pluginHelp = execFileSync(process.execPath, [cli, 'plugin', 'candidate', '--help'], { encoding: 'utf8' });
   assert.match(pluginHelp, /--state-path/);
+  const hostHelp = execFileSync(process.execPath, [cli, 'plugin', 'verify-host', '--help'], { encoding: 'utf8' });
+  assert.match(hostHelp, /--candidate.*--evidence.*--state-path/);
+  assert.match(hostHelp, /does not start or activate a host/);
+});
+
+test('plugin evidence CLI rejects ambiguous, missing and unsupported options before IO', () => {
+  for (const [args, code] of [
+    [['--candidate', '/candidate', '--candidate', '/other'], 'PLUGIN_OPTION_DUPLICATE'],
+    [['--candidate', '--evidence', '/evidence'], 'PLUGIN_OPTION_VALUE_REQUIRED'],
+    [['--activate', '/host'], 'PLUGIN_OPTION_UNKNOWN'],
+  ]) {
+    const result = spawnSync(process.execPath, [cli, 'plugin', 'verify-host', ...args], { encoding: 'utf8' });
+    assert.equal(result.status, 2);
+    assert.ok(result.stderr.includes(code), result.stderr);
+  }
 });
 
 test('dsh rejects unknown commands with exit code 2', () => {
