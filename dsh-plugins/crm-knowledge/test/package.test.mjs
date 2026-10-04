@@ -28,17 +28,15 @@ test('CRM alone keeps its tools and explicitly reports the absent page provider'
   assert.deepEqual(result.value.page_delivery, { status: 'NOT_AVAILABLE', execution: 'NOT_RUN', reason: 'PAGE_PROVIDER_NOT_INSTALLED_OR_NOT_VISIBLE' });
   assert.equal(result.value.crm_login, 'NOT_CONNECTED');
   assert.equal(result.value.synthetic_services.metrics.reason.code, 'SERVICE_NOT_CONFIGURED');
-  assert.equal(result.value.synthetic_services.knowledge.reason.code, 'SERVICE_NOT_CONFIGURED');
+  assert.equal(result.value.synthetic_services.knowledge, undefined);
+  assert.equal(result.value.knowledge_explanation.reason, 'KNOWLEDGE_PLUGIN_NOT_INSTALLED_OR_NOT_VISIBLE');
   const capabilities = await ctx.tools.execute({ name: 'crm_metrics_capabilities', arguments: {}, agent,
     callId: 'isolated-capabilities', signal: new AbortController().signal });
   assert.equal(capabilities.isError, false);
   assert.equal(capabilities.value.synthetic_candidate.status, 'NOT_AVAILABLE');
   assert.equal(capabilities.value.dashboard.connection_state, 'NOT_CONNECTED');
-  const knowledge = await ctx.tools.execute({ name: 'crm_knowledge_explain', arguments: { topic: '客单价' }, agent,
-    callId: 'isolated-knowledge', signal: new AbortController().signal });
-  assert.equal(knowledge.isError, false);
-  assert.equal(knowledge.value.reason.code, 'SERVICE_NOT_CONFIGURED');
-  assert.equal(knowledge.value.preferred_operational_definition, undefined);
+  assert.equal(ctx.tools.get('crm_knowledge_explain', agent), undefined);
+  assert.equal(ctx.tools.get('query_crm_knowledge_graph', agent), undefined);
   const query = await ctx.tools.execute({ name: 'query_crm_metrics_v1', arguments: { request: {
     source_id: 'synthetic-crm-metrics', contains_real_data: false, metric_version: 'crm-metrics/v1',
     query_id: 'sales_window_summary', period_start: '2026-09-01', period_end_exclusive: '2026-10-01',
@@ -96,4 +94,43 @@ test('built CRM client can register its native dock with no workbench or brand p
   assert.equal(typeof registrations[0].component, 'function');
   for (const dispose of disposers) dispose();
   assert.equal(registrations.length, 0);
+});
+
+test('unloading CRM cancels its HTTP capabilities call without accepting a late response', async t => {
+  const started = Promise.withResolvers();
+  const server = createServer((_req, res) => started.resolve(res));
+  server.listen(0, '127.0.0.1'); await once(server, 'listening');
+  t.after(() => new Promise(resolve => { server.closeAllConnections(); server.close(resolve); }));
+  const ctx = new Context(); t.after(() => ctx.fiber.dispose()); await mountAgentLoopTestDependencies(ctx);
+  const owner = await ctx.plugin(crm, { metricsOrigin: 'http://127.0.0.1:' + server.address().port });
+  const agent = { session: { id: 'crm-unload-fixture' } };
+  const pending = ctx.tools.execute({ name: 'crm_metrics_capabilities', arguments: {}, agent,
+    callId: 'unload-capabilities', signal: new AbortController().signal });
+  const response = await started.promise;
+  await owner.dispose();
+  assert.equal(ctx.tools.get('crm_metrics_capabilities', agent), undefined);
+  response.writeHead(200, { 'Content-Type': 'application/json', 'X-ShineMage-Contract': 'crm-metrics-service/1.0.0' });
+  response.end(JSON.stringify({ contract: 'crm-metrics-service', api_version: '1.0.0', base_path: '/api/v1/crm-metrics',
+    scope: 'synthetic_only', compatibility: 'exact_api_version', operations: ['capabilities', 'query'],
+    synthetic_only: true, real_archive: false, metric_version: 'crm-metrics/v1' }));
+  const late = await pending;
+  assert.equal(late.isError, true, JSON.stringify(late)); assert.equal(late.value, undefined);
+});
+
+test('unloaded CRM cannot accept a late dashboard result even when its provider ignores abort', async t => {
+  const started = Promise.withResolvers(), completed = Promise.withResolvers();
+  const ctx = new Context(); t.after(() => ctx.fiber.dispose()); await mountAgentLoopTestDependencies(ctx);
+  ctx.provide('crmDashboard', { query: async (_session, _args, signal) => {
+    started.resolve(signal); return completed.promise;
+  } });
+  const owner = await ctx.plugin(crm);
+  const pending = ctx.tools.execute({ name: 'query_crm_dashboard_gsv',
+    arguments: { start_date: '2026-09-01', end_date: '2026-09-02' },
+    agent: { session: { id: 'crm-unload-fixture' } }, callId: 'unload-dashboard', signal: new AbortController().signal });
+  const signal = await started.promise;
+  await owner.dispose();
+  completed.resolve({ status: 'OK', synthetic: true, private_value: 'late-result' });
+  const late = await pending;
+  assert.equal(signal.aborted, true);
+  assert.equal(late.isError, true, JSON.stringify(late)); assert.equal(late.value, undefined);
 });

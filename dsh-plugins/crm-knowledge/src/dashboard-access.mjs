@@ -1,3 +1,4 @@
+import { KNOWLEDGE_ACCESS_CONTRACT } from './knowledge-access.generated.ts';
 /** CRM credentials stay in this host closure, never env, disk, RPC or tool output. */
 import { dashboardOrigin, queryDashboardGsv, queryDashboardPurchases, queryDashboardReadiness,
   queryDashboardMembership, queryDashboardNetGsv, dashboardCapabilities } from './dashboard.mjs';
@@ -148,6 +149,22 @@ export function createDashboardAccess({ baseUrl = 'http://127.0.0.1:8000', brows
     },
   });
 
+  // A revocable lease is the only knowledge-facing view of this login grant.
+  const knowledgeService = Object.freeze({
+    contract: KNOWLEDGE_ACCESS_CONTRACT,
+    authorize(sessionId) {
+      prune();
+      const record = records.get(sessionId);
+      if (disposed || !record || !hasSession(sessionId)) return null;
+      const isCurrent = () => {
+        prune();
+        return !disposed && records.get(sessionId) === record && hasSession(sessionId);
+      };
+      return Object.freeze({ username: record.binding.username, signal: record.controller.signal, isCurrent,
+        rememberCitations(citations) { if (isCurrent()) service.rememberCitations(sessionId, citations); } });
+    },
+  });
+
   async function browser(request) {
     // Native Connection already verifies its cookie/Host. Require Origin as well
     // for credential submission, plus JSON/custom header to reject form CSRF.
@@ -204,5 +221,5 @@ export function createDashboardAccess({ baseUrl = 'http://127.0.0.1:8000', brows
     } catch { return error(signal.aborted ? 'CANCELLED' : 'SERVICE_UNAVAILABLE', 503); }
     finally { input.password = ''; if (pending.get(sessionId) === controller) pending.delete(sessionId); }
   }
-  return { service, browser, dispose() { disposed = true; clearInterval(cleanup); for (const id of new Set([...records.keys(), ...pending.keys()])) forget(id); } };
+  return { service, knowledgeService, browser, dispose() { disposed = true; clearInterval(cleanup); for (const id of new Set([...records.keys(), ...pending.keys()])) forget(id); } };
 }

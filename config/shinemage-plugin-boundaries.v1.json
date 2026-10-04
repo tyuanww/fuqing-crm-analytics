@@ -13,8 +13,8 @@
       "kind": "plugin"
     },
     "crm-knowledge": {
-      "domain": "crm-and-knowledge-migration-adapter",
-      "target_repository": "shinemage-dsh-crm + shinemage-dsh-knowledge",
+      "domain": "crm-adapter",
+      "target_repository": "shinemage-dsh-crm",
       "kind": "plugin"
     },
     "shine-brand": {
@@ -51,6 +51,11 @@
       "domain": "board-components",
       "target_repository": "shinemage-dsh-board-components",
       "kind": "domain-library"
+    },
+    "knowledge": {
+      "domain": "knowledge",
+      "target_repository": "shinemage-dsh-knowledge",
+      "kind": "plugin"
     }
   },
   "allowed_runtime_edges": [],
@@ -252,9 +257,33 @@
       "source": "backend/contracts/crm-knowledge-service.v1.json",
       "generator": "scripts/crm-calibration/generate_contract.py",
       "consumers": [
-        "crm-knowledge"
+        "knowledge"
       ],
       "compatibility": "Exact API 1.0.0 per request; independent configured loopback origin; no Python/repository fallback. Synthetic fixtures only; no durable save.",
+      "status": "DOMAIN_V1"
+    },
+    {
+      "id": "crm-knowledge-access-v1",
+      "owner": "crm-service",
+      "source": "dsh-plugins/crm-knowledge/contracts/knowledge-access.v1.ts",
+      "generator": "scripts/crm-calibration/generate_contract.py",
+      "consumers": [
+        "crm-knowledge",
+        "knowledge"
+      ],
+      "compatibility": "Optional exact v1 service; credential-free, revocable per-login lease and fenced citation sink. No runtime CRM import.",
+      "status": "DOMAIN_V1"
+    },
+    {
+      "id": "crm-dashboard-definition-v1",
+      "owner": "crm-service",
+      "source": "dsh-plugins/crm-knowledge/contracts/dashboard-definition.v1.mjs",
+      "generator": "scripts/crm-calibration/generate_contract.py",
+      "consumers": [
+        "crm-knowledge",
+        "knowledge"
+      ],
+      "compatibility": "CRM owns operational meaning; byte-identical generated consumers, no account data or sibling runtime import.",
       "status": "DOMAIN_V1"
     }
   ]

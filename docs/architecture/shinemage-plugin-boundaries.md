@@ -29,11 +29,12 @@ node --test scripts/dsh-b0/plugin-boundaries.test.mjs
 | `shine-funnel` / `shine-waterfall` | DSH 图表插件适配 | `shinemage-dsh-board-components` | 保留 ID/原有导出，构建时消费领域包并打入产物 |
 | `shine-board` / `shine-crowd-action` | board/marker | `shinemage-dsh-board` | 先组合，未证明独立生命周期前不额外拆仓 |
 | `analytics-workbench` | 分析、页面、驾驶舱 | `shinemage-dsh-analytics-workbench` | 首期 D15 载体；现有 artifact 包名保持不变 |
-| `crm-knowledge` | CRM/知识库迁移 adapter | `shinemage-dsh-crm` + `shinemage-dsh-knowledge` | 当前仍合包；已消除对 workbench 的生产源码依赖，独立 build/test/pack 已验证 |
+| `crm-knowledge` | CRM 登录/指标/分析 adapter | `shinemage-dsh-crm` | 保留包 ID，版本 `0.0.0-crm.1`；已移出知识工具，无兄弟插件业务源码依赖 |
+| `knowledge` | 公开解释/教材检索/图谱 | `shinemage-dsh-knowledge` | 新独立包；公开解释无 CRM 依赖，私有教材消费可选身份能力合同 |
 
-扫描覆盖 10 个包、591 个 JS/TS 源码文件。24 条跨包引用中：9 条为构建到 kit，10 条为已锁定领域包公开导出，5 条只用于测试；生产源码例外为 0。另有 6 条仓库测试引用；64 处非字面动态导入均在测试中，不作为运行时兼容证据。
+扫描覆盖 11 个包、607 个 JS/TS 源码文件。29 条跨包引用中：10 条为构建到 kit，10 条为已锁定领域包公开导出，9 条只用于测试；生产源码例外为 0。另有 6 条仓库测试引用；70 处非字面动态导入均在测试中，不作为运行时兼容证据。
 
-构建 DAG：`plugin-kit` → `board-components`、`crm-knowledge` 与四个无需图表输入的 leaf → `analytics-workbench`/`shine-funnel`/`shine-waterfall`。箭头表示前后依赖，不是宿主 bundle 激活顺序；profile 组合未改变。
+构建 DAG：`plugin-kit` → `board-components`、`crm-knowledge`、`knowledge` 与四个无需图表输入的 leaf → `analytics-workbench`/`shine-funnel`/`shine-waterfall`。箭头表示构建依赖，不是宿主 bundle 激活顺序；本地 profile v3 分别选择 CRM、知识与页面模块，生产 profile 未改变。
 
 ## 已解除与剩余依赖
 
@@ -43,7 +44,7 @@ node --test scripts/dsh-b0/plugin-boundaries.test.mjs
 | funnel/waterfall → board-components | 4 | 旧导出转接公共领域包；最终 JS/类型独立可消费 | 已验证 ESM、Node require、TypeScript |
 | CRM → workbench | 0 | slot/主题为领域生成合同；页面工具由 profile 装配公开入口 | 原 5 条私有源码/类型引用全部解除；服务端与生产运行仍另验 |
 
-运行时导入 dev kit、未声明/未锁定的领域包、未发布的私有 subpath、源码绕行、循环、过期例外和 inventory drift 都会阻断。公开依赖无需源码例外，但必须指向领域包实际 `files/exports`，并有消费者的精确版本和 digest lock。当前无生产源码例外；CRM 已通过两个显式 HTTP origin 消费合成查询/知识解释 API 1.0.0，不再从插件启动 Python CLI。服务实现仍在本仓，物理服务分仓和真实 CRM 合同仍未完成。
+运行时导入 dev kit、未声明/未锁定的领域包、未发布的私有 subpath、源码绕行、循环、过期例外和 inventory drift 都会阻断。公开依赖无需源码例外，但必须指向领域包实际 `files/exports`，并有消费者的精确版本和 digest lock。当前无生产源码例外；CRM 和知识插件各自消费本领域 HTTP API 1.0.0，不再从插件启动 Python CLI。服务实现仍在本仓，物理服务分仓和真实 CRM 合同仍未完成。
 
 图表 tarball 只作为构建输入；读取器向 stdout 解包并校验，绝不让 archive 路径直接写入磁盘。私有内容寻址目录中的字节会再次校验；缺包或改动不自动退回源码。三消费者把同一个摘要写入发布包的 `bundled-dependencies.json`，线上无新增依赖。更新领域代码必须新版本/新摘要与消费者回归，不能覆盖已生成的同版本不同内容包。
 
@@ -51,9 +52,9 @@ node --test scripts/dsh-b0/plugin-boundaries.test.mjs
 
 服务不在插件包内：`backend/analytics_*` 与 `backend/services/analytics/` 拥有 B0 分析及持久化；CRM 的 `backend/crm_metrics_app.py`、`backend/routers/metrics.py` 与领域合同拥有指标/权限；知识库服务及其数据拥有独立生命周期。插件通过 adapter 调用，不拥有生产 DuckDB、凭据或服务数据迁移。
 
-当前提取 `/api/`、`/internal/`、`/b0/` 字面路径及模板路径，共 202 处声明、121 种路径；包括测试夹具和 gateway 资源路径，**不是 121 个已经接通的公开 API**。清单标明来源与 phase，去掉 origin 和 query 值。内部路径标为 `INTERNAL_NOT_PUBLIC`，其他路径标为 `OBSERVED_NOT_FROZEN`。
+当前提取 `/api/`、`/internal/`、`/b0/` 字面路径及模板路径，共 202 处声明、120 种路径；包括测试夹具和 gateway 资源路径，**不是 120 个已经接通的公开 API**。清单标明来源与 phase，去掉 origin 和 query 值。内部路径标为 `INTERNAL_NOT_PUBLIC`，其他路径标为 `OBSERVED_NOT_FROZEN`。
 
-当前 13 条重要合同除 DSH pin、领域 schema/slot/主题/图表外，新增各自 owner 的合成 CRM 与公开知识服务 API 1.0.0；每条有 owner、消费者、生成器、源 SHA-256 与兼容政策。页面交付仍由 workbench 的公开 `./page-tools` 入口拥有。新服务仅支持精确 API 1.0.0，见[服务边界](../operating/crm-plugin-service-boundary.md)；T3 的真实服务版本窗口、D15 服务状态与保存矩阵仍未完成。
+当前 15 条重要合同包括 DSH pin、领域 schema/slot/主题/图表、两项服务 API 1.0.0，以及拆分新增的可撤销知识身份能力 v1 和公开 GSV 定义 v1；每条有 owner、消费者、生成器、源 SHA-256 与兼容政策。后两项由 CRM 领域维护并生成双方本地副本，不是共享业务运行时。页面交付仍由 workbench 的公开 `./page-tools` 入口拥有。新服务仅支持精确 API 1.0.0，见[服务边界](../operating/crm-plugin-service-boundary.md)；T3 的真实服务版本窗口、D15 服务状态与保存矩阵仍未完成。
 
 10 个主要控制入口由 release-control、build-tooling、host-dev-adapter、deploy-owner、backend-services 等逻辑 owner 负责；新增独立服务打包与受控运行入口，包内全部 scripts 随 manifest 记录。逻辑 owner 是职责边界，不能替代后续现场 RACI、授权与主备安排。
 
@@ -63,7 +64,7 @@ node --test scripts/dsh-b0/plugin-boundaries.test.mjs
 
 解析器使用固定 TypeScript 6.0.3 AST，不执行待扫描源码。它提取直接 import/export、import type、TypeScript import-equals 和字面 require/import；非静态直接 import/require 在非测试源码中拒绝。动态拼接路由、别名 loader、HTTP 方法/权限、进程生命周期仍须合同与真实宿主测试，不能靠此静态清单证明。新增这类间接机制需补受控合同与针对性验证，不能通过改测试后缀规避边界。
 
-T1 完成代表当前依赖可见、可检查；T15 仍为 PARTIAL。两个 marker/leaf、CRM 与 workbench 的隔离构建/pack、现有生命周期单测，不替代真实 DSH unload/restart/WAL、服务保存、签名/SBOM 或杭州上线验收。
+T1 完成代表当前依赖可见、可检查；T15 仍为 PARTIAL。两个 marker/leaf、CRM、知识与 workbench 的隔离构建/pack、现有生命周期单测，不替代真实 DSH unload/restart/WAL、服务保存、签名/SBOM 或杭州上线验收。CRM/知识分别选择、组合卸载与身份撤销的当前证据见[插件拆分记录](../hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md)。
 
 ## CRM 插槽合同增量
 

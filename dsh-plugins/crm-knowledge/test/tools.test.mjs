@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict';
 import { test, before, after } from 'node:test';
-import { createCrmServices } from '../src/service-client.mjs';
+import { createMetricsService } from '../src/service-client.mjs';
+import { createKnowledgeService } from '../../knowledge/src/service-client.mjs';
 import { serveCrmServices } from './service.fixture.mjs';
-let services;
+let services, knowledge;
 const cleanup = [];
-before(async () => { services = createCrmServices((await serveCrmServices({ after: fn => cleanup.push(fn) })).config); });
+before(async () => { const { config } = await serveCrmServices({ after: fn => cleanup.push(fn) });
+  services = createMetricsService(config); knowledge = createKnowledgeService(config); });
 after(async () => { for (const close of cleanup) await close(); });
 
 const base = {
@@ -45,7 +47,7 @@ test('sample followup keeps ROI disclaimer and maturity split', async () => {
 });
 
 test('explain cites decisions and does not claim legacy code is fixed', async () => {
-  const result = await services.explain('客单价');
+  const result = await knowledge.explain('客单价');
   assert.ok(result.decision_ids.includes('D001'));
   assert.equal(result.code_fixed_in_legacy_services, false);
   assert.ok(result.evidence_refs.length >= 1);
@@ -59,6 +61,6 @@ test('capabilities stay synthetic and leave competition untouched', async () => 
   assert.equal(result.d019, 'unverified');
 });
 
-test('real data flag is rejected before any service request', () => {
-  assert.throws(() => services.query({ ...base, query_id: 'sales_window_summary', contains_real_data: true }));
+test('real data flag is rejected before any service request', async () => {
+  await assert.rejects(services.query({ ...base, query_id: 'sales_window_summary', contains_real_data: true }));
 });

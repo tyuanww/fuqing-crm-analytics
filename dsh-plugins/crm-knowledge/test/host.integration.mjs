@@ -8,7 +8,7 @@ import { tmpdir } from 'node:os';
 import { serveDashboard, request as dashboardRequest, SYNTHETIC_PASSWORD } from './dashboard.fixture.mjs';
 import { mountLoginHost } from './login-native.fixture.mjs';
 import { serveAssets, snapshot, analysis, reference } from './crm-assets.fixture.mjs';
-import { graphFixture, CHUNK } from './graph.fixture.mjs';
+import { graphFixture, CHUNK } from '../../knowledge/test/graph.fixture.mjs';
 import { serveCrmServices } from './service.fixture.mjs';
 
 const plugin = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -19,7 +19,8 @@ const { Context } = await load('vendor/cordis');
 const { mountAgentLoopTestDependencies } = await load('packages/test-support/agent-loop-testkit');
 const { defineTool } = await load('packages/core/tools');
 const built = await import(pathToFileURL(join(plugin, 'lib/index.js')).href);
-const graphTools = await import(pathToFileURL(join(plugin, 'lib/graph-tools.js')).href);
+const knowledge = await import(pathToFileURL(join(plugin, '../knowledge/lib/index.js')).href);
+const graphTools = await import(pathToFileURL(join(plugin, '../knowledge/lib/graph-tools.js')).href);
 test('native tool captures trusted CRM snapshot; browser confirms saved analysis and cockpit reference', async t => {
   const fixture = await serveAssets(t);
   const host = await mountLoginHost(t, fixture.binding.baseUrl);
@@ -59,6 +60,7 @@ test('registered tools execute all queries through B/A and retrieve C evidence',
   try {
     await mountAgentLoopTestDependencies(ctx);
     const instance = await ctx.plugin(built, services.config);
+    await ctx.plugin(knowledge, services.config);
     const agent = { session: { id: 'crm-synthetic-host' } };
     let counter = 0;
     const execute = (name, args, signal = new AbortController().signal) => ctx.tools.execute({
@@ -234,6 +236,7 @@ test('browser login reaches the pinned tools without exposing credentials', asyn
       assert.equal(JSON.stringify(outcome).includes(fixture.binding.token), false);
     });
     await t.test('missing knowledge service stays unavailable without hiding the authenticated dashboard', async () => {
+      await host.ctx.plugin(knowledge);
       const outcome = await execute('crm_knowledge_explain', { topic: 'GSV' });
       assert.equal(outcome.isError, false, JSON.stringify(outcome));
       assert.equal(outcome.value.status, 'NOT_AVAILABLE');

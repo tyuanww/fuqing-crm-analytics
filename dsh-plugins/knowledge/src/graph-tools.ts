@@ -1,19 +1,10 @@
 import type { Context } from '@deepseek-ai/cordis';
 import { defineTool } from '@deepseek-ai/dsh-tools';
 import { citationsFromGraphResult, createGraphReader } from './graph.mjs';
+import { KNOWLEDGE_ACCESS_CONTRACT } from './knowledge-access.generated.js';
 
 export const name = 'crm-textbook-graph';
 export const inject = ['tools'];
-
-function principalOf(ctx: Context, sessionId: string | undefined) {
-  const username = ctx.get('crmDashboard')?.principal?.(sessionId ?? '')?.username;
-  return username ? { principal: { username } } : undefined;
-}
-
-function remember(ctx: Context, sessionId: string | undefined, result: { status?: string; sources?: unknown; source?: unknown; document?: unknown }) {
-  if (result?.status !== 'OK') return;
-  ctx.get('crmDashboard')?.rememberCitations?.(sessionId ?? '', citationsFromGraphResult(result));
-}
 
 function isolateSharedRetrieve(ctx: Context) {
   const runtime = ctx.tools as { guard?: (fn: (execution: { name: string }) => string | undefined) => () => void };
@@ -32,6 +23,25 @@ function isolateSharedRetrieve(ctx: Context) {
 /** System preset configuration only. The model cannot select a credential, account or document. */
 export function apply(ctx: Context, config: { settingsFile?: string } = {}): void {
   const graph = createGraphReader(config.settingsFile);
+  const lifetime = new AbortController();
+  ctx.effect(() => () => lifetime.abort(), 'knowledge: cancel owned graph requests');
+  const denied = (code: string) => ({ schema_version: 'crm-textbook-graph/v1', status: 'UNAVAILABLE',
+    reason: { code, message: '知识访问身份不可用或已撤销，未返回教材或历史结果。' },
+    relations: [], sources: [], review_notes: [] });
+  async function execute(operation: 'query' | 'retrieve' | 'expand', args: unknown, sessionId: string | undefined, signal: AbortSignal) {
+    signal.throwIfAborted();
+    const provider = ctx.get('crmKnowledgeAccess');
+    if (!provider) return denied('IDENTITY_PROVIDER_NOT_AVAILABLE');
+    if (provider.contract !== KNOWLEDGE_ACCESS_CONTRACT || typeof provider.authorize !== 'function') return denied('IDENTITY_CONTRACT_MISMATCH');
+    const lease = provider.authorize(sessionId ?? '');
+    if (!lease || !lease.isCurrent() || lifetime.signal.aborted) return denied('NOT_CONNECTED');
+    const combined = AbortSignal.any([signal, lease.signal, lifetime.signal]);
+    const result = await graph[operation](args, combined, { principal: { username: lease.username } });
+    signal.throwIfAborted();
+    if (lifetime.signal.aborted || lease.signal.aborted || !lease.isCurrent() || ctx.get('crmKnowledgeAccess') !== provider) return denied('NOT_CONNECTED');
+    if (result?.status === 'OK') lease.rememberCitations(citationsFromGraphResult(result));
+    return result;
+  }
   const json = { schema: { type: 'json' as const }, render: (_args: unknown, value: unknown) => [{ type: 'text' as const, text: JSON.stringify(value) }] };
   ctx.tools.register(defineTool({
     name: 'query_crm_knowledge_graph',
@@ -42,9 +52,7 @@ export function apply(ctx: Context, config: { settingsFile?: string } = {}): voi
     },
     output: json, timeoutMs: 18000, isConcurrencySafe: () => false,
     execute: async (args, exec) => {
-      const result = await graph.query(args, exec.signal, principalOf(ctx, exec.agent?.session.id));
-      remember(ctx, exec.agent?.session.id, result);
-      return result;
+      return execute('query', args, exec.agent?.session.id, exec.signal);
     },
   }));
   ctx.tools.register(defineTool({
@@ -56,9 +64,7 @@ export function apply(ctx: Context, config: { settingsFile?: string } = {}): voi
     },
     output: json, timeoutMs: 18000, isConcurrencySafe: () => false,
     execute: async (args, exec) => {
-      const result = await graph.retrieve(args, exec.signal, principalOf(ctx, exec.agent?.session.id));
-      remember(ctx, exec.agent?.session.id, result);
-      return result;
+      return execute('retrieve', args, exec.agent?.session.id, exec.signal);
     },
   }));
   ctx.tools.register(defineTool({
@@ -69,9 +75,7 @@ export function apply(ctx: Context, config: { settingsFile?: string } = {}): voi
     },
     output: json, timeoutMs: 18000, isConcurrencySafe: () => false,
     execute: async (args, exec) => {
-      const result = await graph.expand(args, exec.signal, principalOf(ctx, exec.agent?.session.id));
-      remember(ctx, exec.agent?.session.id, result);
-      return result;
+      return execute('expand', args, exec.agent?.session.id, exec.signal);
     },
   }));
   isolateSharedRetrieve(ctx);

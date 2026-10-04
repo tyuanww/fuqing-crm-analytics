@@ -29,6 +29,12 @@ TESTS = [
 
 def source_hashes():
     files = set()
+    for plugin in ("crm-knowledge", "knowledge"):
+        for folder in ("src", "test", "contracts"):
+            files.update(p for p in (ROOT / "dsh-plugins" / plugin / folder).rglob("*")
+                         if p.is_file() and p.suffix in {".py", ".ts", ".tsx", ".mjs", ".json"})
+        files.update(ROOT / "dsh-plugins" / plugin / name
+                     for name in ("package.json", "build.mjs", "cordis.patch.yml"))
     for rel in ["backend/services/crm_readonly", "services/crm-metrics", "services/crm-knowledge", "dsh-plugins/crm-knowledge/src", "dsh-plugins/crm-knowledge/test", "scripts/crm-calibration", "backend/tests/fixtures/crm_metrics_v1", "backend/tests/fixtures/crm_readonly", "knowledge/crm/definitions", "knowledge/crm/graph", "knowledge/crm/textbook", "knowledge/crm/tools", "knowledge/crm/tests", "knowledge/crm/schema", "knowledge/crm/code_snapshots"]:
         files.update(p for p in (ROOT / rel).rglob("*") if p.is_file() and p.suffix in {".py", ".ts", ".tsx", ".mjs", ".json"})
     for rel in ["backend/semantic/crm_metrics_v1.py", "backend/semantic/crm_metrics_compose.py", "backend/contracts/crm_metrics_v1.py", "backend/crm_metrics_app.py", "backend/services/crm_knowledge.py", "dsh-plugins/crm-knowledge/build.mjs", "dsh-plugins/crm-knowledge/package.json", "backend/contracts/crm-metrics.openapi.json", "dsh-plugins/crm-knowledge/cordis.patch.yml", "dsh-plugins/analytics-workbench/src/client/competition-shell/tokens.ts",
@@ -78,10 +84,13 @@ def main():
             ("ruff", [sys.executable, "-m", "ruff", "check", "backend/semantic/crm_metrics_v1.py", "backend/semantic/crm_metrics_compose.py", "backend/contracts/crm_metrics_v1.py", "backend/crm_metrics_app.py", "backend/services/crm_readonly", "backend/services/crm_knowledge.py", "backend/contracts/crm_dashboard.py", "backend/routers/crm_dashboard.py", "backend/routers/metrics.py", "backend/services/metrics/dashboard_source.py", "backend/services/metrics/dashboard_membership.py", "backend/services/metrics/dashboard_net_gsv.py", "backend/services/crm_document_acl.py", "dsh-plugins/crm-knowledge/test/crm-assets.fixture.py", "scripts/crm-calibration", *["backend/tests/" + item for item in TESTS]]),
             ("wire-contract", [sys.executable, "scripts/crm-calibration/generate_contract.py", "--check"]),
             ("http-types", [str(args.node), "scripts/crm-calibration/generate_types.mjs", str(args.build_tools), "--check"]),
-            ("build", [str(args.node), "dsh-plugins/crm-knowledge/build.mjs", str(args.upstream), str(args.build_tools)]),
+            ("build-crm", [str(args.node), "dsh-plugins/crm-knowledge/build.mjs", str(args.upstream), str(args.build_tools)]),
+            ("build-knowledge", [str(args.node), "dsh-plugins/knowledge/build.mjs", str(args.upstream), str(args.build_tools)]),
             ("service-tools", [str(args.node), "--test", "--test-concurrency=1", *[str(p.relative_to(ROOT)) for p in sorted((ROOT / "dsh-plugins/crm-knowledge/test").glob("*.test.mjs"))]]),
+            ("knowledge-tools", [str(args.node), "--test", "--test-concurrency=1", *[str(p.relative_to(ROOT)) for p in sorted((ROOT / "dsh-plugins/knowledge/test").glob("*.test.mjs"))]]),
             ("service-http", [str(args.node), "--test", "dsh-plugins/crm-knowledge/test/service-http.integration.mjs"]),
             ("host-tools", [str(args.node), "--test", "dsh-plugins/crm-knowledge/test/host.integration.mjs"]),
+            ("knowledge-composition", [str(args.node), "--test", "dsh-plugins/crm-knowledge/test/knowledge-composition.integration.mjs"]),
         ]
         for name, cmd in commands:
             proc = subprocess.run(cmd, cwd=ROOT, env=env, text=True, capture_output=True, timeout=120)

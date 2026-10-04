@@ -1,85 +1,99 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile, readFile, rm, access } from 'node:fs/promises';
-import { createHash } from 'node:crypto';
+import { mkdtemp, mkdir, writeFile, readFile, rm, access, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { prepareProfile, renderProfile } from '../../../scripts/crm-calibration/prepare-profile.mjs';
-
-test('profile uses explicit independent service bindings without Python', () => {
-  const files = renderProfile({ output: '/output', plugin: '/fixture/CRM 有空格',
+async function fixture(t) {
+  const root = await mkdtemp(join(tmpdir(), 'split-profile-')); t.after(() => rm(root, { recursive: true, force: true }));
+  const make = async (domain, name, entries) => {
+    const path = join(root, domain); await mkdir(join(path, 'lib'), { recursive: true });
+    const manifest = { name, version: '0.0.0-fixture', shinemage: { plugin_domain: domain, composition_contract: 'crm-knowledge-split/v1' },
+      peerDependencies: { '@deepseek-ai/dsh-tools': '0.1.7-rc.2', ...(domain === 'page' ? {} : { '@deepseek-ai/cordis': '4.0.2' }) },
+      exports: entries, files: Object.values(entries).map(value => value.slice(2)) };
+    await writeFile(join(path, 'package.json'), JSON.stringify(manifest));
+    for (const entry of manifest.files) await writeFile(join(path, entry), 'throw new Error("profile preparation must not execute this package");');
+    return path;
+  };
+  return { root,
+    plugin: await make('crm', '@shine-mage/dsh-crm-knowledge', { '.': './lib/index.js', './host': './lib/host.js', './client': './lib/client.js' }),
+    knowledgePlugin: await make('knowledge', '@shine-mage/dsh-knowledge', { '.': './lib/index.js', './graph-tools': './lib/graph-tools.js' }),
+    pageToolsPlugin: await make('page', '@shine-mage/dsh-analytics-workbench-b0', { './page-tools': './lib/page-tools.js' }) };
+}
+test('profile composes independent agent scopes instead of aggregating apply calls', () => {
+  const files = renderProfile({ output: '/output', plugin: '/fixture/CRM 有空格', knowledgePlugin: '/fixture/knowledge',
     metricsOrigin: 'http://127.0.0.1:10101', knowledgeOrigin: 'http://127.0.0.1:10102', graphSettingsFile: '/private/graph.json' });
-  const patch = JSON.parse(files['host.patch.yml']);
-  assert.equal(patch[1].insert[0].name, 'file:///fixture/CRM%20%E6%9C%89%E7%A9%BA%E6%A0%BC/lib/host.js');
-  assert.match(files['preset/tools.mjs'], /"metricsOrigin":"http:\/\/127.0.0.1:10101"/);
-  assert.match(files['preset/tools.mjs'], /"knowledgeOrigin":"http:\/\/127.0.0.1:10102"/);
-  assert.doesNotMatch(files['preset/tools.mjs'], /python|CRM_METRICS_PYTHON/);
-  assert.match(files['preset/tools.mjs'], /graph.apply/); assert.doesNotMatch(files['preset/tools.mjs'], /process.env/);
-  assert.equal(JSON.parse(files['preset/preset.yml']).name, 'CRM 知识与指标');
-  assert.ok(!renderProfile({ output: '/output', plugin: '/plugin' })['preset/tools.mjs'].includes('graph.apply'));
+  const rows = JSON.parse(files['preset/agent.cordis.yml']);
+  assert.equal(rows.find(x => x.id === 'crm-tools').config.metricsOrigin, 'http://127.0.0.1:10101');
+  assert.equal(rows.find(x => x.id === 'crm-tools').config.knowledgeOrigin, undefined);
+  assert.equal(rows.find(x => x.id === 'knowledge-tools-v1').config.knowledgeOrigin, 'http://127.0.0.1:10102');
+  assert.match(rows.find(x => x.id === 'crm-tools').name, /CRM%20/);
+  assert.match(rows.find(x => x.id === 'knowledge-graph-v1').name, /knowledge\/lib\/graph-tools.js/);
+  assert.equal(files['preset/tools.mjs'], undefined);
+  assert.doesNotMatch(JSON.stringify(files), /python|CRM_METRICS_PYTHON|process.env/);
 });
-
-test('preparation writes only new private output, refuses overwrite, leaves existing assets intact', async t => {
-  const dir = await mkdtemp(join(tmpdir(), 'crm-profile-')); t.after(() => rm(dir, { recursive: true }));
-  const plugin = join(dir, 'plugin'); await mkdir(join(plugin, 'lib'), { recursive: true });
-  for (const file of ['host.js', 'client.js', 'index.js']) await writeFile(join(plugin, 'lib', file), 'fixture');
-  const output = join(dir, 'new-output'); const options = { plugin, output };
-  const result = await prepareProfile(options); assert.equal(result.existing_profile_changed, false);
-  assert.equal(result.page_delivery.status, 'NOT_AVAILABLE');
-  assert.equal(result.schema, 'crm-profile-assets/v2');
-  assert.equal(result.synthetic_services.metrics.reason, 'SERVICE_NOT_CONFIGURED');
-  assert.equal(result.synthetic_services.knowledge.reason, 'SERVICE_NOT_CONFIGURED');
-  const before = await readFile(join(output, 'preset/tools.mjs'), 'utf8');
-  assert.ok(before.includes('?crm_build=' + result.revision));
-  await assert.rejects(prepareProfile(options), /EEXIST/);
-  assert.equal(await readFile(join(output, 'preset/tools.mjs'), 'utf8'), before);
-  assert.equal(await readFile(join(plugin, 'lib/index.js'), 'utf8'), 'fixture');
-});
-
-test('profile composes the selected public page entry with a digest, without importing it into CRM', async t => {
-  const dir = await mkdtemp(join(tmpdir(), 'crm-page-profile-')); t.after(() => rm(dir, { recursive: true }));
-  const plugin = join(dir, 'crm'), pageToolsPlugin = join(dir, 'page provider');
-  await mkdir(join(plugin, 'lib'), { recursive: true }); await mkdir(join(pageToolsPlugin, 'lib'), { recursive: true });
-  for (const file of ['host.js', 'client.js', 'index.js']) await writeFile(join(plugin, 'lib', file), 'fixture');
-  const manifest = { name: '@shine-mage/dsh-analytics-workbench-b0', version: '0.0.0-b0',
-    peerDependencies: { '@deepseek-ai/dsh-tools': '0.1.7-rc.2' },
-    exports: { './page-tools': './lib/page-tools.js' }, files: ['lib/page-tools.js'] };
-  await writeFile(join(pageToolsPlugin, 'package.json'), JSON.stringify(manifest));
-  const code = 'throw new Error("profile preparation must not execute modules");';
-  await writeFile(join(pageToolsPlugin, 'lib/page-tools.js'), code);
-  const output = join(dir, 'composed');
-  const receipt = await prepareProfile({ output, plugin, pageToolsPlugin });
-  const digest = createHash('sha256').update(code).digest('hex');
-  assert.equal(receipt.page_delivery.sha256, digest);
-  assert.equal(receipt.page_delivery.status, 'CONFIGURED_NOT_RUN');
-  const patch = JSON.parse(await readFile(join(output, 'preset/agent.cordis.yml')));
-  const page = patch.find(row => row.id === 'workbench-page-tools-v1');
-  assert.ok(page.name.includes('page%20provider/lib/page-tools.js?page_build=' + digest));
-  assert.doesNotMatch(await readFile(join(output, 'preset/tools.mjs'), 'utf8'), /page-tools|workbench/);
-  for (const [reason, update] of [
-    ['identity', m => { m.name = '@untrusted/fake'; }],
-    ['pin', m => { m.peerDependencies['@deepseek-ai/dsh-tools'] = 'latest'; }],
-    ['private', m => { m.exports['./page-tools'] = './src/page-tools.ts'; }],
-    ['unpacked', m => { m.files = []; }],
-  ]) {
-    const bad = structuredClone(manifest); update(bad);
-    await writeFile(join(pageToolsPlugin, 'package.json'), JSON.stringify(bad));
-    const refused = join(dir, reason);
-    await assert.rejects(() => prepareProfile({ output: refused, plugin, pageToolsPlugin }), /PAGE_PROVIDER_/);
-    await assert.rejects(() => access(refused), /ENOENT/);
+test('either domain can be selected alone and preparation cannot overwrite existing assets', async t => {
+  const f = await fixture(t);
+  for (const [domain, selection] of [['crm', { plugin: f.plugin }], ['knowledge', { knowledgePlugin: f.knowledgePlugin }]]) {
+    const output = join(f.root, domain + '-only');
+    const result = await prepareProfile({ output, ...selection });
+    assert.equal(result.schema, 'crm-profile-assets/v3');
+    assert.deepEqual(Object.keys(result.packages), [domain]);
+    assert.equal(result.existing_profile_changed, false); assert.equal(result.service_started_or_restarted, false);
+    const body = await readFile(join(output, 'preset/agent.cordis.yml'), 'utf8');
+    const rows = JSON.parse(body);
+    assert.equal(rows.length, 2);
+    assert.ok(rows[1].name.includes('?build=' + result.packages[domain].sha256));
+    if (domain === 'knowledge') {
+      assert.deepEqual(JSON.parse(await readFile(join(output, 'host.patch.yml'))), []);
+      assert.doesNotMatch(rows[0].config.prefix, /query_crm_dashboard_gsv|query_crm_metrics_v1/);
+    } else assert.doesNotMatch(rows[0].config.prefix, /crm_knowledge_explain|query_crm_knowledge_graph/);
+    await assert.rejects(prepareProfile({ output, ...selection }), /EEXIST/);
+    assert.equal(await readFile(join(output, 'preset/agent.cordis.yml'), 'utf8'), body);
   }
 });
-
-test('legacy Python and unsafe service bindings fail before writing profile assets', async t => {
-  const dir = await mkdtemp(join(tmpdir(), 'crm-service-profile-')); t.after(() => rm(dir, { recursive: true }));
-  for (const [name, config, error] of [
-    ['legacy', { python: '/not/executed/python' }, /CRM_PROFILE_PYTHON_REMOVED/],
-    ['external', { metricsOrigin: 'https://example.invalid' }, /CRM_PROFILE_SERVICE_ORIGIN_INVALID/],
-    ['credentials', { knowledgeOrigin: 'http://user:secret@127.0.0.1:10102' }, /CRM_PROFILE_SERVICE_ORIGIN_INVALID/],
-    ['path', { metricsOrigin: 'http://127.0.0.1:10101/internal' }, /CRM_PROFILE_SERVICE_ORIGIN_INVALID/],
+test('a knowledge-only update changes its binding without changing the CRM binding', async t => {
+  const f = await fixture(t);
+  const before = await prepareProfile({ ...f, output: join(f.root, 'first') });
+  await writeFile(join(f.knowledgePlugin, 'lib/index.js'), 'export const next = true;');
+  const after = await prepareProfile({ ...f, output: join(f.root, 'second') });
+  assert.equal(before.packages.crm.sha256, after.packages.crm.sha256);
+  assert.notEqual(before.packages.knowledge.sha256, after.packages.knowledge.sha256);
+  assert.notEqual(before.revision, after.revision);
+  assert.equal(after.page_delivery.status, 'CONFIGURED_NOT_RUN');
+});
+test('old combined artifacts, wrong identities/peers, private exports and symlinked entries fail before output', async t => {
+  const f = await fixture(t); const path = join(f.knowledgePlugin, 'package.json');
+  const original = JSON.parse(await readFile(path));
+  for (const [key, mutate, pattern] of [
+    ['identity', m => { m.name = '@unknown/plugin'; }, /_IDENTITY/],
+    ['pin', m => { m.peerDependencies['@deepseek-ai/dsh-tools'] = 'latest'; }, /_DSH_PIN/],
+    ['cordis', m => { m.peerDependencies['@deepseek-ai/cordis'] = '*'; }, /_CORDIS_PIN/],
+    ['legacy', m => { delete m.shinemage; }, /SPLIT_PACKAGE_REQUIRED/],
+    ['contract', m => { m.shinemage.composition_contract = 'crm-knowledge-split/v2'; }, /COMPOSITION_CONTRACT_MISMATCH/],
+    ['private', m => { m.exports['.'] = './src/index.ts'; }, /PUBLIC_EXPORT_REQUIRED/],
+    ['not-packed', m => { m.files = []; }, /EXPORT_NOT_PACKED/],
   ]) {
-    const output = join(dir, name);
-    await assert.rejects(() => prepareProfile({ output, plugin: '/not/read/plugin', ...config }), error);
-    await assert.rejects(() => access(output), /ENOENT/);
+    const bad = structuredClone(original); mutate(bad); await writeFile(path, JSON.stringify(bad));
+    const output = join(f.root, key);
+    await assert.rejects(prepareProfile({ output, knowledgePlugin: f.knowledgePlugin }), pattern);
+    await assert.rejects(access(output), /ENOENT/);
+  }
+  await writeFile(path, JSON.stringify(original));
+  const entry = join(f.knowledgePlugin, 'lib/index.js'); await rm(entry); await symlink(join(f.plugin, 'lib/index.js'), entry);
+  await assert.rejects(prepareProfile({ output: join(f.root, 'linked'), knowledgePlugin: f.knowledgePlugin }), /PACKAGE_FILE_INVALID/);
+});
+test('legacy Python, invalid origins and silently missing domain selections are rejected', async t => {
+  const root = await mkdtemp(join(tmpdir(), 'invalid-profile-')); t.after(() => rm(root, { recursive: true }));
+  for (const [name, config, error] of [
+    ['legacy', { plugin: '/not/read', python: '/not/executed/python' }, /PYTHON_REMOVED/],
+    ['external', { plugin: '/not/read', metricsOrigin: 'https://example.invalid' }, /SERVICE_ORIGIN_INVALID/],
+    ['credentials', { plugin: '/not/read', knowledgeOrigin: 'http://user:secret@127.0.0.1' }, /SERVICE_ORIGIN_INVALID/],
+    ['knowledge', { plugin: '/not/read', knowledgeOrigin: 'http://127.0.0.1:1234' }, /KNOWLEDGE_PLUGIN_REQUIRED/],
+    ['graph', { plugin: '/not/read', graphSettingsFile: '/not/read/config' }, /KNOWLEDGE_PLUGIN_REQUIRED/],
+    ['empty', {}, /PLUGIN_REQUIRED/],
+  ]) {
+    const output = join(root, name); await assert.rejects(prepareProfile({ output, ...config }), error);
+    await assert.rejects(access(output), /ENOENT/);
   }
 });

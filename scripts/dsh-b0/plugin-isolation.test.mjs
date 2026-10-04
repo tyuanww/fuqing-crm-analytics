@@ -17,7 +17,7 @@ const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(repository, '.con
 const buildTools = join(repository, 'dsh-plugins/plugin-kit/build-tools');
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 
-for (const name of ['shine-brand', 'shine-query', 'crm-knowledge']) {
+for (const name of ['shine-brand', 'shine-query', 'crm-knowledge', 'knowledge']) {
   test(`${name} builds, tests and packs with only its own source and the dev kit`, { timeout: 240000 }, async t => {
     const root = await mkdtemp(join(tmpdir(), 'dsh-independent-plugin-'));
     t.after(() => rm(root, { recursive: true, force: true }));
@@ -28,7 +28,7 @@ for (const name of ['shine-brand', 'shine-query', 'crm-knowledge']) {
     for (const item of ['package.json', 'build.mjs', 'src', 'cordis.patch.yml']) {
       await copyTreeBounded(join(source, item), join(plugin, item), options);
     }
-    if (name === 'crm-knowledge') {
+    if (['crm-knowledge', 'knowledge'].includes(name)) {
       // This test has no Python fixture or workbench source dependency.
       for (const file of ['contract.typecheck.ts', 'package.test.mjs']) {
         await copyTreeBounded(join(source, 'test', file), join(plugin, 'test', file), options);
@@ -45,16 +45,16 @@ for (const name of ['shine-brand', 'shine-query', 'crm-knowledge']) {
     await command('git', ['-c', 'user.name=isolated-fixture', '-c', 'user.email=fixture@example.invalid',
       '-c', 'commit.gpgsign=false', '-c', 'core.hooksPath=/dev/null', 'commit', '-qm', 'synthetic independent package fixture']);
     await command(process.execPath, [join(plugin, 'build.mjs'), upstream, buildTools]);
-    const tests = name === 'crm-knowledge' ? ['test/package.test.mjs']
+    const tests = ['crm-knowledge', 'knowledge'].includes(name) ? ['test/package.test.mjs']
       : (await readdir(join(plugin, 'src'))).filter(file => file.endsWith('.test.mjs')).sort().map(file => `src/${file}`);
     assert.ok(tests.length, 'ISOLATED_PACKAGE_TESTS_REQUIRED');
     await command(process.execPath, ['--test', ...tests.map(file => join(plugin, file))], plugin);
     const receipt = await packPlugin({ plugin, outputDir: join(root, 'out') });
     assert.equal(receipt.activation, 'NOT_RUN');
     assert.equal(receipt.dsh_pin, '0.1.7-rc.2');
-    const artifacts = ['lib/index.js', 'lib/client.js', ...(name === 'crm-knowledge' ? ['lib/host.js', 'lib/graph-tools.js'] : [])];
+    const artifacts = JSON.parse(await readFile(join(plugin, 'package.json'))).files.filter(file => file.startsWith('lib/'));
     assert.deepEqual(receipt.entries.sort(), ['cordis.patch.yml', ...artifacts, 'package.json'].sort());
-    if (name === 'crm-knowledge') {
+    if (['crm-knowledge', 'knowledge'].includes(name)) {
       // Exercise the actual verified archive, not the nearby build directory.
       // Only pinned SDK peers are supplied by this synthetic host fixture.
       const installed = join(root, 'installed/package');
@@ -62,7 +62,7 @@ for (const name of ['shine-brand', 'shine-query', 'crm-knowledge']) {
         join(root, 'out', receipt.tarball.name), join(root, 'installed'), '--max-entries', '100', '--max-bytes', '4194304']);
       assert.deepEqual((await readdir(installed)).sort(), ['cordis.patch.yml', 'lib', 'package.json']);
       await symlink(join(plugin, 'node_modules'), join(installed, 'node_modules'), 'dir');
-      await command(process.execPath, ['--test', join(plugin, 'test/package.test.mjs')], installed, { CRM_TEST_PLUGIN_ROOT: installed });
+      await command(process.execPath, ['--test', join(plugin, 'test/package.test.mjs')], installed, { CRM_TEST_PLUGIN_ROOT: installed, KNOWLEDGE_TEST_PLUGIN_ROOT: installed });
     }
     const outputs = {};
     for (const file of artifacts) {

@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../..', import.meta.url));
-const leafBuilds = ['shine-brand', 'shine-board', 'shine-query', 'shine-funnel', 'shine-waterfall', 'shine-crowd-action', 'crm-knowledge'];
+const leafBuilds = ['shine-brand', 'shine-board', 'shine-query', 'shine-funnel', 'shine-waterfall', 'shine-crowd-action', 'crm-knowledge', 'knowledge'];
 
 test('leaf plugin builds use the shared dev kit and do not import workbench toolchain source', async () => {
   for (const name of leafBuilds) {

@@ -113,14 +113,13 @@
     {
       "path": "dsh-plugins/crm-knowledge",
       "name": "@shine-mage/dsh-crm-knowledge",
-      "version": "0.0.0-candidate",
-      "domain": "crm-and-knowledge-migration-adapter",
-      "target_repository": "shinemage-dsh-crm + shinemage-dsh-knowledge",
+      "version": "0.0.0-crm.1",
+      "domain": "crm-adapter",
+      "target_repository": "shinemage-dsh-crm",
       "kind": "plugin",
       "exports": {
         ".": "./lib/index.js",
         "./host": "./lib/host.js",
-        "./graph-tools": "./lib/graph-tools.js",
         "./client": "./lib/client.js",
         "./package.json": "./package.json",
         "./cordis.patch.yml": "./cordis.patch.yml"
@@ -128,7 +127,6 @@
       "files": [
         "lib/index.js",
         "lib/host.js",
-        "lib/graph-tools.js",
         "lib/client.js",
         "cordis.patch.yml"
       ],
@@ -157,7 +155,43 @@
         "build": "node build.mjs",
         "test:host": "node --test test/host.integration.mjs"
       },
-      "manifest_sha256": "3cbbaf1cb6f0288623a4a020f065716f5987a150b73e045a5eb51253e8b40915"
+      "manifest_sha256": "4e72ab0bfca1adfa294ffa0969c017b3766d5c73249bc98097c1678612c6a28b"
+    },
+    {
+      "path": "dsh-plugins/knowledge",
+      "name": "@shine-mage/dsh-knowledge",
+      "version": "0.0.0-candidate.1",
+      "domain": "knowledge",
+      "target_repository": "shinemage-dsh-knowledge",
+      "kind": "plugin",
+      "exports": {
+        ".": "./lib/index.js",
+        "./graph-tools": "./lib/graph-tools.js",
+        "./package.json": "./package.json",
+        "./cordis.patch.yml": "./cordis.patch.yml"
+      },
+      "files": [
+        "lib/index.js",
+        "lib/graph-tools.js",
+        "cordis.patch.yml"
+      ],
+      "peers": {
+        "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
+        "@deepseek-ai/cordis": "4.0.2"
+      },
+      "dependencies": {},
+      "dev_dependencies": {},
+      "bundled_inputs": [],
+      "dsh": {
+        "bundle": {
+          "patch": "./cordis.patch.yml"
+        }
+      },
+      "commands": {
+        "build": "node build.mjs",
+        "test": "node --test test/*.test.mjs"
+      },
+      "manifest_sha256": "9fb6722229cb7ccbe10857b0b161feb4fb6fa915766b53f2bc711465d48a4f82"
     },
     {
       "path": "dsh-plugins/plugin-kit",
@@ -468,7 +502,7 @@
       "manifest_sha256": "011783ac55a6b567db51dbfdc1c97ffd142727ac52bfc7911801dc71fa6bed60"
     }
   ],
-  "source_files_scanned": 591,
+  "source_files_scanned": 607,
   "cross_package_edges": [
     {
       "consumer": "analytics-workbench",
@@ -562,9 +596,59 @@
     },
     {
       "consumer": "crm-knowledge",
+      "provider": "knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/host.integration.mjs",
+      "target": "dsh-plugins/knowledge/test/graph.fixture.mjs",
+      "specifier": "../../knowledge/test/graph.fixture.mjs",
+      "access": "source",
+      "type_only": false
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/knowledge-composition.integration.mjs",
+      "target": "dsh-plugins/knowledge/test/graph.fixture.mjs",
+      "specifier": "../../knowledge/test/graph.fixture.mjs",
+      "access": "source",
+      "type_only": false
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/service-http.integration.mjs",
+      "target": "dsh-plugins/knowledge/src/service-client.mjs",
+      "specifier": "../../knowledge/src/service-client.mjs",
+      "access": "source",
+      "type_only": false
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/tools.test.mjs",
+      "target": "dsh-plugins/knowledge/src/service-client.mjs",
+      "specifier": "../../knowledge/src/service-client.mjs",
+      "access": "source",
+      "type_only": false
+    },
+    {
+      "consumer": "crm-knowledge",
       "provider": "plugin-kit",
       "phase": "build",
       "source": "dsh-plugins/crm-knowledge/build.mjs",
+      "target": "dsh-plugins/plugin-kit/toolchain.mjs",
+      "specifier": "../plugin-kit/toolchain.mjs",
+      "access": "source",
+      "type_only": false
+    },
+    {
+      "consumer": "knowledge",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/knowledge/build.mjs",
       "target": "dsh-plugins/plugin-kit/toolchain.mjs",
       "specifier": "../plugin-kit/toolchain.mjs",
       "access": "source",
@@ -718,6 +802,7 @@
     [
       "board-components",
       "crm-knowledge",
+      "knowledge",
       "shine-board",
       "shine-brand",
       "shine-crowd-action",
@@ -757,14 +842,14 @@
     {
       "consumer": "crm-knowledge",
       "phase": "test",
-      "source": "dsh-plugins/crm-knowledge/test/graph.test.mjs",
-      "target": "scripts/crm-calibration/graph-ledger.mjs"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/profile.test.mjs",
       "target": "scripts/crm-calibration/prepare-profile.mjs"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/knowledge/test/graph.test.mjs",
+      "target": "scripts/crm-calibration/graph-ledger.mjs"
     }
   ],
   "literal_endpoints": [
@@ -1912,13 +1997,6 @@
     {
       "consumer": "crm-knowledge",
       "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/graph.mjs",
-      "route": "/api/v1",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
       "source": "dsh-plugins/crm-knowledge/src/http-contract.generated.d.ts",
       "route": "/api/v1/crm-metrics/capabilities",
       "contract": "OBSERVED_NOT_FROZEN"
@@ -1928,27 +2006,6 @@
       "phase": "runtime",
       "source": "dsh-plugins/crm-knowledge/src/http-contract.generated.d.ts",
       "route": "/api/v1/crm-metrics/query",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/knowledge-contract.generated.d.ts",
-      "route": "/api/v1/crm-knowledge/capabilities",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/knowledge-contract.generated.d.ts",
-      "route": "/api/v1/crm-knowledge/explain",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/service-contract.generated.mjs",
-      "route": "/api/v1/crm-knowledge",
       "contract": "OBSERVED_NOT_FROZEN"
     },
     {
@@ -2052,41 +2109,6 @@
     {
       "consumer": "crm-knowledge",
       "phase": "test",
-      "source": "dsh-plugins/crm-knowledge/test/graph.fixture.mjs",
-      "route": "/api/v1/",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "test",
-      "source": "dsh-plugins/crm-knowledge/test/graph.fixture.mjs",
-      "route": "/api/v1/chunks/by-id/",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "test",
-      "source": "dsh-plugins/crm-knowledge/test/graph.fixture.mjs",
-      "route": "/api/v1/knowledge-search",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "test",
-      "source": "dsh-plugins/crm-knowledge/test/graph.fixture.mjs",
-      "route": "/api/v1/knowledge/",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "test",
-      "source": "dsh-plugins/crm-knowledge/test/graph.test.mjs",
-      "route": "/api/v1/knowledge/",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/host.integration.mjs",
       "route": "/api/v1/auth/login",
       "contract": "OBSERVED_NOT_FROZEN"
@@ -2159,6 +2181,76 @@
       "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/service.fixture.mjs",
       "route": "/api/v1/crm-",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/knowledge/src/graph.mjs",
+      "route": "/api/v1",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/knowledge/src/knowledge-contract.generated.d.ts",
+      "route": "/api/v1/crm-knowledge/capabilities",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/knowledge/src/knowledge-contract.generated.d.ts",
+      "route": "/api/v1/crm-knowledge/explain",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/knowledge/src/service-contract.generated.mjs",
+      "route": "/api/v1/crm-knowledge",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/knowledge/test/graph.fixture.mjs",
+      "route": "/api/v1/",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/knowledge/test/graph.fixture.mjs",
+      "route": "/api/v1/chunks/by-id/",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/knowledge/test/graph.fixture.mjs",
+      "route": "/api/v1/knowledge-search",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/knowledge/test/graph.fixture.mjs",
+      "route": "/api/v1/knowledge/",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/knowledge/test/graph.test.mjs",
+      "route": "/api/v1/knowledge/",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/knowledge/test/service-client.test.mjs",
+      "route": "/api/v1/crm-knowledge/explain",
       "contract": "OBSERVED_NOT_FROZEN"
     },
     {
@@ -2504,6 +2596,18 @@
     {
       "consumer": "crm-knowledge",
       "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/host.integration.mjs",
+      "line": 23
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/knowledge-composition.integration.mjs",
+      "line": 12
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/login-native.fixture.mjs",
       "line": 12
     },
@@ -2560,6 +2664,30 @@
       "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/page-composition.integration.mjs",
       "line": 9
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/knowledge/test/package.test.mjs",
+      "line": 12
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/knowledge/test/package.test.mjs",
+      "line": 13
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/knowledge/test/package.test.mjs",
+      "line": 14
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/knowledge/test/package.test.mjs",
+      "line": 15
     }
   ],
   "external_imports": [
@@ -2956,6 +3084,11 @@
     {
       "consumer": "crm-knowledge",
       "phase": "build",
+      "specifier": "@deepseek-ai/cordis"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "build",
       "specifier": "node:assert/strict"
     },
     {
@@ -3036,16 +3169,6 @@
     {
       "consumer": "crm-knowledge",
       "phase": "runtime",
-      "specifier": "node:fs/promises"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
-      "specifier": "node:path"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
       "specifier": "react"
     },
     {
@@ -3057,11 +3180,6 @@
       "consumer": "crm-knowledge",
       "phase": "test",
       "specifier": "node:child_process"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "test",
-      "specifier": "node:crypto"
     },
     {
       "consumer": "crm-knowledge",
@@ -3117,6 +3235,91 @@
       "consumer": "crm-knowledge",
       "phase": "test",
       "specifier": "node:vm"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "build",
+      "specifier": "node:assert/strict"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "build",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "build",
+      "specifier": "node:url"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/cordis"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-tools"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "runtime",
+      "specifier": "node:crypto"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "runtime",
+      "specifier": "node:fs/promises"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "runtime",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
+      "specifier": "node:assert/strict"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
+      "specifier": "node:crypto"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
+      "specifier": "node:events"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
+      "specifier": "node:fs/promises"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
+      "specifier": "node:http"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
+      "specifier": "node:os"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
+      "specifier": "node:test"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
+      "specifier": "node:url"
     },
     {
       "consumer": "plugin-kit",
@@ -3657,11 +3860,37 @@
       "source": "backend/contracts/crm-knowledge-service.v1.json",
       "generator": "scripts/crm-calibration/generate_contract.py",
       "consumers": [
-        "crm-knowledge"
+        "knowledge"
       ],
       "compatibility": "Exact API 1.0.0 per request; independent configured loopback origin; no Python/repository fallback. Synthetic fixtures only; no durable save.",
       "status": "DOMAIN_V1",
       "source_sha256": "b5fd55bbadcd115a8ecf2318347c04d5749fd86e22815df8bce07ea1dd55c7bf"
+    },
+    {
+      "id": "crm-knowledge-access-v1",
+      "owner": "crm-service",
+      "source": "dsh-plugins/crm-knowledge/contracts/knowledge-access.v1.ts",
+      "generator": "scripts/crm-calibration/generate_contract.py",
+      "consumers": [
+        "crm-knowledge",
+        "knowledge"
+      ],
+      "compatibility": "Optional exact v1 service; credential-free, revocable per-login lease and fenced citation sink. No runtime CRM import.",
+      "status": "DOMAIN_V1",
+      "source_sha256": "1c7e6042b67742250b1b6b11f20e745bbf62516322c37a6ebde24fb553eff8e8"
+    },
+    {
+      "id": "crm-dashboard-definition-v1",
+      "owner": "crm-service",
+      "source": "dsh-plugins/crm-knowledge/contracts/dashboard-definition.v1.mjs",
+      "generator": "scripts/crm-calibration/generate_contract.py",
+      "consumers": [
+        "crm-knowledge",
+        "knowledge"
+      ],
+      "compatibility": "CRM owns operational meaning; byte-identical generated consumers, no account data or sibling runtime import.",
+      "status": "DOMAIN_V1",
+      "source_sha256": "91947e554e9b05571a069e2dc5f5f1427c08f57b93a939882dbec9a1b0c646d8"
     }
   ],
   "command_owners": [

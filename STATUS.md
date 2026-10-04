@@ -14,7 +14,15 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 当前本地 rc2 候选门禁（2026-10-03 审查修复）
+### 当前本地 CRM/知识插件拆分（2026-10-04，提交前审核完成）
+
+- 上一轮 OCR 修复已本地提交为 `ff7fc5fc0fa0295969fe789bc0bd7983a670c73a`。本轮从该干净基线继续 `codex/plugin-boundary-review`，完成本地拆分、OCR 审查修复和验证；本地提交以 Git 为准，未 push、发布或操作杭州，VERSION 与固定 DSH 未变。
+- CRM 包保留身份 `@shine-mage/dsh-crm-knowledge`，候选版本 `0.0.0-crm.1`；知识工具迁入 `@shine-mage/dsh-knowledge@0.0.0-candidate.1`。两包无相互业务源码导入，可分别构建/打包；profile v3 独立装配每个模块，拒绝把旧合包和新知识包混装。公开解释不需要 CRM，私有教材当前通过可撤销身份合同使用 CRM Host，不共享密码/令牌。
+- 本轮统一验证入口通过：后端定向 **206 PASS**、Node **160 PASS / 0 SKIP**；额外页面组合纳入全插件回归 **162 PASS / 0 SKIP**。真实 CLI 已分别生成 CRM-only、knowledge-only、含页面的组合 profile，均仅 CONFIGURED_NOT_RUN。最终 B0 **PASS**（Python **618 PASS**，Node 阶段合计 **1473 PASS / 1 SKIP**，含 clean 重跑）；独立 tarball 与失败修复记录见[插件拆分证据](docs/hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md)。
+- 本次 OCR delegate 覆盖 68/68 原始变更路径，修复卸载后公开知识和 CRM 工具迟到成功的问题；修复后双包构建、受影响插件 **166 PASS / 0 SKIP**、隔离打包/边界 **16 PASS / 0 SKIP**。详见[本次审核证据](docs/hackathon/evidence/dsh-g0-crm-split-review-20261004.md)；上段 B0/后端数字属于拆分实现阶段，未冒作本次修复后重跑。
+- T15 本地插件拆包子项完成，整体仍 PARTIAL。下一步仍需精确宿主/profile 生命周期与会话/WAL、T3/T7 保存/UNKNOWN 回放、供应链/canary/回退和 clean reviewed candidate；物理分仓在批准的 G0/stop-go 之后。本轮没有浏览器、真实模型/数据或杭州 UAT，新包没有上线。
+
+### 上一轮本地 rc2 候选门禁（2026-10-03 审查修复）
 
 - 本次从公共仓库 `main@d4261aa3` 开始，保留 13 个本地提交及原工作树修改。DSH 仍固定 `0.1.7-rc.2` / `477b4f420553e8a52c2fbccc464d7561b239c443`，VERSION 未变。前置审核修复为 `f55908df`，独立分支为 `codex/plugin-boundary-review`；原 public main 未切换或清理。本次提交收拢其后的 CRM slot、页面/主题、服务边界与独立应用包成果及 OCR 修复，准确提交号以本分支 Git 历史为准。未 push、发布或修改杭州。
 - 上一轮八阶段 preflight、102/102 测试及 candidate 回执只证明其绑定的旧 SHA；**本次修改后正式 preflight 尚未重跑**。最终候选必须从 clean reviewed SHA 重建，不复用旧 PASS。

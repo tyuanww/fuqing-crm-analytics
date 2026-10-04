@@ -9,7 +9,7 @@ const upstream = resolve(process.argv[2] ?? process.env.B0_BUILD_UPSTREAM ?? joi
 const toolsInput = process.argv[3] ?? process.env.B0_BUILD_TOOLS;
 const { compiler: ts, build } = await bindToolchain(root, upstream, toolsInput ? resolve(toolsInput) : undefined);
 for (const [entries, types] of [
-  [['src/index.ts', 'src/host.ts', 'src/graph-tools.ts', 'test/contract.typecheck.ts'], ['node']],
+  [['src/index.ts', 'src/host.ts', 'test/contract.typecheck.ts'], ['node']],
   [['src/client/index.tsx'], ['react']],
 ]) {
 const program = ts.createProgram(entries.map(file => join(root, file)), {
@@ -24,7 +24,7 @@ const program = ts.createProgram(entries.map(file => join(root, file)), {
 const errors = ts.getPreEmitDiagnostics(program);
 assert.equal(errors.length, 0, ts.formatDiagnosticsWithColorAndContext(errors, { getCanonicalFileName: x => x, getCurrentDirectory: () => root, getNewLine: () => '\n' }));
 }
-await build({ absWorkingDir: root, entryPoints: ['src/index.ts', 'src/host.ts', 'src/graph-tools.ts'], outdir: 'lib', bundle: true, platform: 'node', target: 'node24', format: 'esm', external: ['@deepseek-ai/*'] });
+await build({ absWorkingDir: root, entryPoints: ['src/index.ts', 'src/host.ts'], outdir: 'lib', bundle: true, platform: 'node', target: 'node24', format: 'esm', external: ['@deepseek-ai/*'] });
 const manifest = JSON.parse(await readFile(join(root, 'package.json')));
 const client = await build({ absWorkingDir: root, entryPoints: ['src/client/index.tsx'], outfile: 'lib/client.js',
   bundle: true, platform: 'browser', target: 'es2022', format: 'cjs', jsx: 'automatic', minify: true, metafile: true,

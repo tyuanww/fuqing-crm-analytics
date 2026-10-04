@@ -21,6 +21,8 @@
 
 当前事实见[机器清单与依赖说明](./shinemage-plugin-boundaries.md)。首批 leaf 已能脱离 workbench 构建；CRM 原 5 条 workbench 私有引用全部解除，合成 Python 查询/知识解释也改为显式配置的独立服务 HTTP API 1.0.0。插件不再发现主仓路径或启动 Python。两项服务已各自产出[独立应用候选包](../operating/crm-service-packages.md)，资源与依赖按领域锁定；知识服务不再加载指标引擎或 DuckDB。源码仍在 workspace，尚未物理分仓。源码/服务边界进展不等于完整宿主故障隔离。
 
+CRM 与知识插件也已拆成两个独立候选包：CRM 保留旧包 ID，知识使用 `@shine-mage/dsh-knowledge`；profile v3 按包分别选择、分别记录指纹。双方只共享领域 owner 维护的公开合同生成物；私有知识通过可撤销会话 lease 获取身份，不读取 CRM 实现或凭据。公开解释可独立运行，私有教材当前仍需要 CRM Host 作为身份提供方。迁移需要新 profile 和对应新 Host，不能宣称原地热替换已验证，详见[服务与插件边界](../operating/crm-plugin-service-boundary.md)。
+
 ## 领域合同不能变成共享业务单体
 
 - 极小的跨插件合同只约定 capability 的提供/消费、slot、结果 envelope 与不可用状态。

@@ -25,7 +25,7 @@
 
 - 最初迁移盘点基线为 `main@fcbd1324`；本次修复从公共仓库 `main@d4261aa3` 开始。前置审核修复在独立分支 `codex/plugin-boundary-review` 为 `f55908df`，当前工作区为 `/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics`。本次本地提交包含后续 CRM 解耦增量与 2026-10-04 OCR 修复，准确 SHA 以 Git 为准，审核证据见[提交前审核](../hackathon/evidence/dsh-g0-crm-review-20261004.md)。本地提交不等于 clean reviewed release artifact 已重建；原公共 main 及其修改保留。
 - 当前项目固定 DSH `0.1.7-rc.2`，上游 SHA `477b4f420553e8a52c2fbccc464d7561b239c443`；官方候选 `0.2.0-rc.2` 是另一条兼容线，不能只改一个版本号。
-- 当前业务包至少有 `analytics-workbench`、`crm-knowledge`、`shine-brand`、`shine-board`、`shine-query`、`shine-funnel`、`shine-waterfall`、`shine-crowd-action`；它们仍在同一仓库内，叶子构建已改用 workspace dev-only `plugin-kit`，pin/build-tools 已归 kit 所有；图表 6 条引用已迁至固定 tarball 的公共导出；CRM 原 5 条跨包源码/类型引用已全部解除。2026-10-04 合成查询/知识解释改为分别配置的 HTTP API 1.0.0，插件不再依赖本仓 Python 路径；服务源码与知识资源的 authoring 输入仍在本仓，但已按领域清单分别打成独立应用候选，并在最小依赖的隔离进程中运行；物理分仓、平台依赖冷安装和最终插件拆包未完成。
+- 当前业务包至少有 `analytics-workbench`、`crm-knowledge`、`knowledge`、`shine-brand`、`shine-board`、`shine-query`、`shine-funnel`、`shine-waterfall`、`shine-crowd-action`；它们仍在同一仓库内，叶子构建已改用 workspace dev-only `plugin-kit`，pin/build-tools 已归 kit 所有；图表 6 条引用已迁至固定 tarball 的公共导出；CRM 原 5 条跨包源码/类型引用已全部解除。2026-10-04 合成查询/知识解释改为分别配置的 HTTP API 1.0.0，插件不再依赖本仓 Python 路径；服务源码与知识资源的 authoring 输入仍在本仓，但已按领域清单分别打成独立应用候选，并在最小依赖的隔离进程中运行；CRM 与知识插件现已在 workspace 拆成两个本地候选包，各自 build/test/pack，profile v3 独立选择；物理分仓、平台依赖冷安装与宿主/发布验收未完成。
 - 目标 bundle 验收必须保持 `package.json`、`dsh.bundle.patch`、构建产物、精确 `files/exports`、DSH/Cordis peer 合同和 `./invariant` 验证；bundle 变更后按官方合同重启 profile 生效。
 - 保留 DSH 原生 Web/单一 Agent Loop/会话/工具合同；插件只能通过官方 bundle、client、slot、service/provider/consumer 合同扩展，不复制或修改 DSH 上游源码。
 - 后端、知识库、DuckDB 和生产密钥属于服务/数据层，不随插件 npm 包发布；测试只能使用 synthetic fixture 和隔离小库。
@@ -36,10 +36,10 @@
 
 | 任务 | 当前状态 | 已有证据 | 尚未关闭 |
 |---|---|---|---|
-| T1 | IMPLEMENTED / STATIC PASS | 架构设计、机器 policy/inventory、10 包/591 文件/24 条跨包引用/202 处字面路径、13 条合同与 10 个主入口；含 import-equals 的 AST drift/循环/越界/公开导出负测纳入 B0 pipeline | 这只关闭依赖盘点；真实宿主与服务语义由 T2/T3/T17 验证 |
+| T1 | IMPLEMENTED / STATIC PASS | 架构设计、机器 policy/inventory、11 包/607 文件/29 条跨包引用/202 处字面路径、15 条合同与 10 个主入口；含 import-equals 的 AST drift/循环/越界/公开导出负测纳入 B0 pipeline | 这只关闭依赖盘点；真实宿主与服务语义由 T2/T3/T17 验证 |
 | T2 | PARTIAL | 0.1.7-rc.2 与 0.2.0-rc.2 精确 checkout、静态兼容矩阵 SUPPORTED；0.1.7 固定 checkout 的官方 plugin-manager/runner/session/WAL 相关测试 167/167 PASS | 0.1.7 精确生产 runtime 的 load/unload/session/WAL 现场证据；0.2.0 生命周期依赖仍 DEFERRED |
 | T13 | PARTIAL | profile manifest、显式 state path、release/receive journal、status/resume/reconcile fail-closed；`release-preflight.json` sidecar、release state status/resume 已实际生成 | 完整崩溃 replay、远端 receipt/reconcile 和现场回执 |
-| T15 | PARTIAL | kit、brand/query、图表与 workbench 独立构建成果保留；CRM 无 Python/主仓路径的服务客户端已实现，单包构建/受控 pack 及实际 tarball 解包后固定 SDK 加载通过；页面工具在 profile 层独立组合；指标/知识服务已分别按资源/依赖清单打包，并在仓库外的最小依赖 venv 中验证，见 [独立服务包证据](../hackathon/evidence/dsh-g0-crm-service-packaging-20261004.md) | CRM/知识插件最终拆包、服务物理分仓/平台依赖冷安装、完整 invariant/精确宿主合同、签名/SBOM/来源信任仍未关闭 |
+| T15 | PARTIAL | kit、brand/query、图表与 workbench 独立构建成果保留；指标/知识服务已独立打包。CRM 与知识插件也已分别 build/test/pack、安全解包加载，profile v3 为每个模块单独绑定指纹；可撤销身份合同避免引用落入失效会话，见 [插件拆分证据](../hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md) | 物理分仓/平台依赖冷安装、完整 invariant/精确宿主合同、签名/SBOM/来源信任仍未关闭 |
 | T3 | PARTIAL / SYNTHETIC API PASS | 合成指标与公开知识解释各有 owner、API 1.0.0、离线 schema/类型与输入摘要；双进程 loopback、版本/异常响应拒绝、单服务故障独立验证；见 [服务边界证据](../hackathon/evidence/dsh-g0-crm-service-boundary-20261004.md) | 真实 CRM API 兼容窗口、D15 public envelope、T7 durable save/UNKNOWN 回放与服务状态矩阵未完成 |
 | T17 | PARTIAL / BLOCKED | synthetic host 的 hang/crash/restart/WAL/native fallback 和 profile reconcile；host evidence 明确记录 `in-process-unload=BLOCKED` | 0.1.7 精确宿主、进程内 unload 与原子激活能力 |
 | T21 | PARTIAL | `pnpm dsh plugin candidate` 旧收据已绑定对应 source、profile/pack/capability/journal；精确 candidate digest 以 `.context/checks/rc2-final-<tag>/candidate-*/candidate.json` 为准 | canary/rollback、远端 receive/reconcile、候选回执与 host activation 的接线 |
@@ -1535,6 +1535,8 @@ Synthesized from this review's findings. Run with Claude Code or Codex; checkbox
 
   - [x] Workspace board-components extraction: public JS/types, digest-pinned input, legacy subpath consumers, workbench source-only rebuild and controlled pack.
   - Status 2026-10-03: **PARTIAL**. Kit owns pin/lock/patches. Brand/query isolated build/test/pack remain covered; board-components now publishes an exact tarball with JS/types and no DSH runtime dependency. Workbench and legacy graph adapters consume public exports with digest locks; the six workbench source edges are retired. Workbench clean rebuild and controlled pack use only its own source, kit and the locked tarball; six compiled outputs match. Fixture commits are not reviewed release identities. Five CRM source edges, invariant/native lifecycle and supply-chain gates remain open. Evidence: `docs/hackathon/evidence/dsh-g0-board-components-20261003.md`.
+
+  - [x] 2026-10-04 workspace CRM/知识插件拆包：两个独立候选、生成合同、profile v3、可撤销身份 lease、真实包组合配置和 SDK 卸载/迟到结果回归。详见[本轮证据](../hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md)。物理分仓与完整宿主门禁仍开放；上方历史状态不代表当前源码耦合仍存在。
 
 - [ ] **T16 (P2, human: ~3h / CC: ~15min)** — Preflight build baseline and bounded parallelism gate — measure serial plugin build time first, then document whether independent package builds can run in parallel without changing ordered admission or activation.
   - Surfaced by: Performance Eng finding PERF-ENG-001 and `scripts/release/preflight.mjs:121-126`.

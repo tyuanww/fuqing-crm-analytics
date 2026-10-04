@@ -130,3 +130,27 @@ test('a disposed or new host does not retain any authorization', async t => {
   const fresh = createDashboardAccess({ baseUrl: fixture.binding.baseUrl, browserOrigin: uiOrigin, hasSession: () => true }); t.after(() => fresh.dispose());
   assert.equal(fresh.service.capabilities('fixture-session').connection_state, 'NOT_CONNECTED');
 });
+
+test('knowledge leases expose no credentials and cannot survive logout/relogin, expiry or disposal', async t => {
+  let now = Date.now();
+  const { access, call, sessions } = await setup(t, undefined, { now: () => now, ttlMs: 1000 });
+  assert.equal(access.knowledgeService.contract, 'shinemage-knowledge-access/v1');
+  assert.equal(access.knowledgeService.authorize('fixture-session'), null);
+  await call(login);
+  const lease = access.knowledgeService.authorize('fixture-session');
+  assert.deepEqual(Object.keys(lease).sort(), ['isCurrent', 'rememberCitations', 'signal', 'username']);
+  assert.equal(lease.username, 'fixture-user'); noSecret(lease);
+  assert.equal(access.knowledgeService.authorize('other'), null);
+  await call(disconnect); await call(login);
+  assert.equal(lease.isCurrent(), false); assert.equal(lease.signal.aborted, true);
+  lease.rememberCitations([{ chunk_id: 'old-grant-reference' }]);
+  assert.deepEqual(access.service.takeSessionCitations('fixture-session'), []);
+  const current = access.knowledgeService.authorize('fixture-session');
+  assert.equal(current.isCurrent(), true);
+  now += 1001; assert.equal(current.isCurrent(), false); assert.equal(current.signal.aborted, true);
+  await call(login); const removed = access.knowledgeService.authorize('fixture-session');
+  sessions.delete('fixture-session'); assert.equal(removed.isCurrent(), false);
+  sessions.add('fixture-session'); await call(login);
+  const disposed = access.knowledgeService.authorize('fixture-session'); access.dispose();
+  assert.equal(disposed.isCurrent(), false); assert.equal(disposed.signal.aborted, true);
+});

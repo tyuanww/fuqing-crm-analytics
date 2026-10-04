@@ -1,8 +1,10 @@
-# CRM 知识与指标候选插件
+# CRM 指标与分析候选插件
 
 固定 SDK：DSH 0.1.7-rc.2（见 [`../plugin-kit/toolchain.json`](../plugin-kit/toolchain.json)），Node 24。插件运行不需要 Python；服务和跨服务测试另用锁定 Python 3.14+。本插件按 rc2 构建；杭州状态以根 [STATUS](../../STATUS.md) 的带日期现场快照为准。独立插件，包含显式配置的合成服务客户端及默认未连接的看板 GSV HTTP 适配，通过 analytics-workbench 的可选 `cockpit.crm` 插槽展示引用，不修改 DSH 上游或比赛事实合同。构建依赖只读复用已准备好的固定 checkout，不下载或自动安装。
 
-生产插件源码已不再引用 workbench 内部实现，可只携带自身源码与 dev kit 完成类型检查、构建和受控打包。合成查询与知识解释通过各自的 HTTP API 1.0.0 调用服务，插件不再寻找仓库目录或启动 Python。未配置服务时返回 `NOT_AVAILABLE / SERVICE_NOT_CONFIGURED`；真实看板登录与查询不会改查合成源。Python 实现和知识资源当前仍在服务侧主仓；两项服务已分别完成[独立应用候选打包与隔离运行](../../docs/operating/crm-service-packages.md)，物理分仓、平台依赖冷安装及精确宿主发布证据尚未完成。配置、迁移与兼容窗口见[服务边界](../../docs/operating/crm-plugin-service-boundary.md)。
+本包保留身份 `@shine-mage/dsh-crm-knowledge`，拆分候选版本为 `0.0.0-crm.1`，只拥有 CRM 登录、指标与分析；公开知识解释和图谱工具已迁入[独立知识插件](../knowledge/README.md)。两个包各自构建、测试和打包，生产源码没有相互导入，也不引用 workbench 内部实现。CRM 只携带指标 HTTP API 1.0.0 客户端，不查找主仓目录或启动 Python。未配置合成服务时返回 `NOT_AVAILABLE / SERVICE_NOT_CONFIGURED`；真实看板登录与查询不会改查合成源。
+
+Python 实现和知识资源的维护源仍在 workspace；两项服务已分别完成[独立应用候选打包与隔离运行](../../docs/operating/crm-service-packages.md)。物理分仓、平台依赖冷安装及精确宿主发布证据尚未完成。配置、迁移与兼容窗口见[服务边界](../../docs/operating/crm-plugin-service-boundary.md)。
 
 ## 注册的工具
 
@@ -15,12 +17,10 @@
 | `query_crm_dashboard_net_gsv` | 扣实际成功退款的净额GSV，与看板GSV分列；必须带退款截止日，缺事件时不可用 |
 | `query_crm_dashboard_snapshot` | 服务端查询并保存可信的不可变销售快照，供用户确认保存分析及加入驾驶舱 |
 | `query_crm_metrics_v1` | 销售表现、老客回购、派样后复购；全部经过只读适配 → 计算器 |
-| `crm_knowledge_explain` | 知识包定义、证据、冲突和离线依赖关系；说明合成验证状态 |
 | `crm_metrics_capabilities` | 可执行查询与未接入的真实资料能力 |
 | `crm_service_health` | 查看当前对话连接及 Purchases、快照、知识库、驾驶舱工具的真实状态；页面提供方未装配时明确 `NOT_AVAILABLE`，其余未知状态保持 `unknown` |
-| `query_crm_knowledge_graph`（可选 graph-tools 模块） | 当前 CRM 账号被授权教材的 Neo4j 一跳关系、分块/页码、文档版本和审核状态 |
-| `query_crm_knowledge_sources` | 在授权教材中检索原文分块；须已连接 CRM |
-| `expand_crm_knowledge_citation` | 按分块 ID 展开引用；每次重查账号权限和文档版本 |
+
+`crm_knowledge_explain` 及 `query_crm_knowledge_graph/sources`、`expand_crm_knowledge_citation` 由知识包的公开入口注册，须在 profile 中另行选择。CRM 单独安装时，这些工具不注册；`crm_service_health.knowledge_base/knowledge_explanation` 明确报告未安装或不可见，原有指标工具仍可用。
 
 工具参数没有 SQL、数据库路径或凭据。合成工具的 `source_id` 仍仅允许 `synthetic-crm-metrics`，拒绝真实库；金额为分。看板工具返回元的十进制字符串和整数分，不扣退款、不返回尚未校准的旧客单价/会员溢价。未知、不可用和权限来源均保留。教材检索/图查询按 CRM 登录用户名映射到私有 grants，不把共享 retrieve key 当账号隔离。候选 preset 隔离 `weknora_search`；现役 preset 未改。
 
@@ -34,12 +34,13 @@
 node scripts/crm-calibration/prepare-profile.mjs \
   --output /absolute/new-private-profile \
   --plugin /absolute/installed/crm \
+  --knowledge-plugin /absolute/installed/knowledge \
   --metrics-origin http://127.0.0.1:18101 \
   --knowledge-origin http://127.0.0.1:18102 \
   --page-tools-plugin /absolute/installed/workbench
 ```
 
-入口校验包身份、DSH peer、公开 export 和打包 allowlist，记录 entry digest；只写新配置，不安装、不激活、不执行插件。省略页面提供方时 CRM 查询/登录仍可用，`crm_service_health.page_delivery` 返回 `NOT_AVAILABLE` 与 `PAGE_PROVIDER_NOT_INSTALLED_OR_NOT_VISIBLE`。`AVAILABLE/NOT_RUN` 只表示工具在当前 scope 可见，不证明保存或页面 UAT 已完成。页面预览/确认仍需工作台 UI 与服务，不能只装 tools adapter 就宣称可保存。
+入口校验各包身份、固定 DSH/Cordis peer、组合合同 v1、公开 export 和打包 allowlist，分别记录包指纹；只写新配置，不安装、不激活、不执行插件。省略知识插件及其 origin 即为纯 CRM profile；省略页面提供方时 CRM 查询/登录仍可用，`crm_service_health.page_delivery` 返回 `NOT_AVAILABLE` 与 `PAGE_PROVIDER_NOT_INSTALLED_OR_NOT_VISIBLE`。`AVAILABLE/NOT_RUN` 只表示工具在当前 scope 可见，不证明保存或页面 UAT 已完成。页面预览/确认仍需工作台 UI 与服务，不能只装 tools adapter 就宣称可保存。
 
 主题和 slot 都编译本包自带的生成合同；主题由 `shine-brand/contracts/content-theme.v1.json` 维护，不要求运行品牌插件，不改官方 DSH 原生界面。生成物 drift 由 B0 pipeline 检查。更新完整候选须从 reviewed SHA 重建，本地 fixture pack 不是可发布版本。
 
@@ -100,7 +101,7 @@ python3 scripts/crm-calibration/verify.py \
   --build-tools /absolute/plugin-kit/build-tools
 ```
 
-从仓库根目录运行。它执行后端定向测试、Ruff、离线合同核验、类型检查、插件构建、合成 HTTP 和真实 ToolRuntime 验证，日志保存在 `.context/checks/crm-candidate-<timestamp>/`。CRM 与页面提供方组合测试 `test/page-composition.integration.mjs` 由 B0 在双方构建后执行，不让 CRM 单包测试隐式依赖相邻插件。HTTP 测试仅使用本次拥有的临时回环端口并关闭；不启动现役 HTTP/Web、profile、ETL、模型或图服务，不读取真实凭据或数据库。
+从仓库根目录使用锁定 Python 3.14 运行。它执行后端定向测试、Ruff、离线合同核验、两插件的类型检查/构建/测试、合成 HTTP 与固定 SDK ToolRuntime 组合验证，日志保存在 `.context/checks/crm-candidate-<timestamp>/`。CRM 与页面提供方组合测试 `test/page-composition.integration.mjs` 由 B0 在双方构建后执行；双插件组合测试为 `test/knowledge-composition.integration.mjs`，不让单包隔离测试隐式依赖兄弟业务源码。HTTP 测试仅使用本次拥有的临时回环端口并关闭；不启动现役 HTTP/Web、profile、ETL、模型或图服务，不读取真实凭据或数据库。浏览器旅程需单独执行，默认跳过。
 
 离线合同更新：`python3 scripts/crm-calibration/generate_contract.py`，再用 Node 24 运行 `scripts/crm-calibration/generate_types.mjs /absolute/build-tools`；`--check` 可检测漂移。
 
@@ -108,7 +109,7 @@ python3 scripts/crm-calibration/verify.py \
 
 `test/host.integration.mjs` 使用真实固定 Cordis 与 ToolRuntime 加载构建后的包并执行工具，不调用 LLM；取消、错误请求、卸载一起验证。#216交付时与其后本机验收分别记录，见[公开交付说明](../../docs/crm-calibration/public-release.md)及[图谱部署](../../docs/crm-calibration/graph-deployment.md)。
 
-图谱配置见[图谱部署](../../docs/crm-calibration/graph-deployment.md)。生成器使用具体 host 文件入口与显式服务地址，输出 `crm-profile-assets/v2`；只生成新文件，不探测或启动服务。旧 `--python` 参数会明确报迁移提示；已有 profile 不自动覆盖。旧包 patch 保留兼容记录，不作为已验证的登录 UI 部署入口。
+图谱配置见[图谱部署](../../docs/crm-calibration/graph-deployment.md)。生成器使用具体 host 文件入口与显式服务地址，输出 `crm-profile-assets/v3`；各领域是独立 Cordis 条目，不再生成聚合 `tools.mjs`。每个模块绑定自己的包指纹，更新知识包不改变 CRM 模块指纹。旧合包不接受为 v3 输入；v2/旧 profile 保留旧包，迁移须生成新 profile 并完成授权宿主验收，不能原地覆盖包后宣称完成。生成器不探测或启动服务；旧 `--python` 返回迁移提示。
 
 ## 独立登录候选
 

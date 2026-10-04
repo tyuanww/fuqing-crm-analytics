@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { writeFile } from 'node:fs/promises';
 import { isAbsolute, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { createGraphReader } from '../../dsh-plugins/crm-knowledge/src/graph.mjs';
+import { createGraphReader } from '../../dsh-plugins/knowledge/src/graph.mjs';
 
 export async function writeGraphLedger({ settingsFile, principal, output }) {
   assert.ok(isAbsolute(settingsFile) && isAbsolute(output), 'settings and output must be absolute');
