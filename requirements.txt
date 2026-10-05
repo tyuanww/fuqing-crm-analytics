@@ -12,7 +12,7 @@ numpy>=2.5.3           # 数值计算
 
 # Web 框架
 fastapi>=0.141.1,<0.141.2  # 现代异步 Web 框架（锁定本次通过验证的 0.141.1）
-uvicorn>=0.27.0         # ASGI 服务器
+uvicorn>=0.54.0         # ASGI 服务器
 httpx>=0.28.1          # ONLYOFFICE 异步回调与保存命令；精确版本见 lock
 # starlette 经 fastapi 传递安装；下限对齐 lock 的 1.6.0，FastAPI 0.141.1 锁定在本次升级范围
 starlette>=1.6.0
