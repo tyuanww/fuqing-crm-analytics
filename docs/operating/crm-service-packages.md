@@ -125,3 +125,22 @@ pnpm dsh plugin verify-service \
 PREPARED 回执必须存在于实际 journal，幂等缓存不能单独证明已准备。在取得 journal 写锁后再次核对前置 seq/digest，允许其他观测追加，拒绝历史被替换；重复回执也必须与实际 journal 对应。状态文件只接受不超过 64 MiB 的普通文件，拒绝链接、FIFO 和越界文件；没有自动轮转或删除历史。CLI 失败只打印稳定错误码，不回显断言差异、输入字段或子进程输出；例如 `PLUGIN_SERVICE_PREPARED_NOT_DURABLE`、`RELEASE_EVENT_PREREQUISITE_CHANGED`，未知错误为 `PLUGIN_SERVICE_VERIFICATION_FAILED`。保留原始输入和 journal 进行本地排查，不通过手工改缓存绕过。
 
 成功为 `LOCAL_SERVICE_ARTIFACTS_VERIFIED`，始终 `release_ready=false`、`target_host=NOT_RUN`、`supply_chain=NOT_RUN`、`activation=BLOCKED_TARGET_HOST_AND_SUPPLY_CHAIN_REQUIRED`。本地 JSON/hash 不证明发布者身份；该命令不重新安装 wheel，不把记录中的平台升级为 WSL 验收。激活门禁仍阻断。实际 CLI、负测和重试证据见[接线记录](../hackathon/evidence/dsh-g0-service-artifact-gate-20261005.md)。
+
+## 安装前的目标主机只读预检
+
+先完成上述包核验，再在拟安装服务的 WSL2 内运行。准备所选 manifest 和**对应目标平台**的固定 wheelhouse；`--manifest-sha256` 必须取自已经核验的候选回执，不能凭重新计算未知文件的摘要替代来源核验。当前仅支持首购分析服务。
+
+```sh
+pnpm dsh plugin service-preflight \
+  --python /absolute/existing-python3.14 \
+  --manifest /absolute/service-manifest.json \
+  --manifest-sha256 VERIFIED_MANIFEST_SHA256 \
+  --wheelhouse /absolute/target-platform-wheels
+```
+
+使用所选解释器的既有 pip/packaging 计算实际 Python/ABI/平台标签和 Requires-Python，不联网、不安装依赖。Python 必须为 3.14；WSL2 当前按 Linux 内核中的 `microsoft` 与 `wsl2` 标记识别，其他环境或无法识别的自定义内核保持 BLOCKED。wheelhouse 必须只含清单的精确闭包，每项恰好一个 wheel；拒绝缺项、多项、源码包、错误版本/元数据、符号链接和特殊文件。普通输入读取有界；manifest 最多 256 KiB，单 wheel 最多 64 MiB，总 wheel 最多 256 MiB。
+
+每个 wheel 还须包含与名称/版本一致的唯一顶层 dist-info、WHEEL 1.0 和 METADATA；WHEEL 内部标签必须等于文件名展开后的标签，不能通过改名把 Mac wheel 变成 Linux wheel。按当前 Python/平台评估 Requires-Dist marker，所有生效依赖必须由锁定清单中的版本满足。当前精确服务锁不请求 extras，生效的 extras 或直接 URL 依赖明确拒绝；未生效的可选依赖不误报。该检查只处理有界元数据，不验证整个 wheel 的可安装性、全部文件内容或二进制可加载性，仍需要冷安装。
+JSON 合同为 `shinemage-service-target-preflight/v1`，包含 manifest 摘要、平台事实、检查结果和每个 wheel 的摘要。全部匹配返回 `SERVICE_TARGET_PREFLIGHT_PASS`/退出 0；环境不匹配为 `…_BLOCKED`/退出 2；输入损坏为 `…_INVALID`/退出 2，只输出稳定错误码。该命令不校验完整 archive、不验证发布者身份、不导入或安装服务，也不写 candidate/journal；始终 `release_ready=false`、`activation=BLOCKED`，冷安装/身份状态/HTTP 恢复/供应链仍 NOT_RUN。
+
+例如 macOS arm64 的 `pydantic-core` wheel 不能充当 WSL 平台依赖；主机预检通过后仍须由目标平台离线冷安装和真实服务恢复观测证明可运行。当前实现与本机/隔离测试见[预检证据](../hackathon/evidence/dsh-g0-service-target-preflight-20261006.md)。

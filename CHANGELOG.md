@@ -2,6 +2,7 @@
 
 ### Added
 
+- `pnpm dsh plugin service-preflight` 只读核对首购服务 manifest 摘要、Python 3.14、WSL2、离线 wheel 清单、平台/ABI 与 Requires-Python。输出依赖摘要和明确阻断原因，不安装服务、不写状态或候选 journal；冷安装和供应链仍须独立验收。
 - `pnpm dsh plugin verify-service` 将精确旧/新服务包、依赖观测与原候选/profile/源码证据绑定，核对实际 archive 内容后幂等写入现有 journal。仍不启动服务，目标主机、供应链和生产激活保持阻断。
 - 首购服务兼容验证可从两个精确 Git SHA 生成独立包，区分服务源码和打包器来源；在两个新 venv 中按 wheel hash 离线安装精确依赖，验证旧状态读取、重启回放、备份恢复和拒绝未知 schema。回执保留两个 archive/manifest/依赖摘要；旧服务可写降级与生产激活继续阻断。
 - 首购分析服务新增独立应用候选包与 13 项固定依赖；OpenAPI 由同包 factory/依赖离线生成，实际最小依赖进程验证保存、重启回放和保留来源的标题修正。默认不配置身份或状态，生产保存仍未启用。
@@ -14,6 +15,7 @@
 
 ### Fixed
 
+- 目标主机预检补齐 wheel 的安装元数据和依赖约束检查：核对 dist-info 身份、WHEEL 1.0、内部/文件名标签，拒绝改名伪装平台；按当前环境计算 Requires-Dist，提前拒绝缺依赖、版本冲突及未支持的 active extras/URL。
 - 服务包证据接线要求 PREPARED 索引与实际 journal 一致，并在同一写锁内重验前置事件；拒绝孤立回执、验证期间历史替换及被改写的幂等返回。状态/锁文件增加有界普通文件读取，`verify-service` 错误仅输出稳定代码，避免卡在 FIFO 或回显输入。
 - 精确服务源码读取忽略本地 Git replacement，避免同一 SHA 被替换为其他提交内容；服务验证器在退出期间收到取消信号时继续完成有界回收，不遗留占用端口的测试进程。
 - 服务打包器和包内检查拒绝 FIFO 等特殊文件，避免读取时等待不退出；独立服务不再套用另一套 B0 依赖生成的保存回执 OpenAPI。

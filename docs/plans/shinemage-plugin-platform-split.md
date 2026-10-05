@@ -42,6 +42,10 @@
 
 本次 OCR 接线审核已覆盖原始 15/15 路径，并补审 state owner 的修复。已核对并修复 journal 前置关系、特殊文件阻塞和错误内容回显；4 项复现负测修复后全通过，完整 release suite **206 PASS / 0 SKIP**，实际双包 CLI 重试通过。见[审核证据](../hackathon/evidence/dsh-g0-service-artifact-gate-review-20261005.md)。目标主机、供应链和激活条件保持未关闭。
 
+上述接线及审核修复已本地提交为 `1b443646`。2026-10-06 的下一步增量增加只读 `plugin service-preflight`，在安装前检查目标 Python/WSL2 和固定 wheel 的 ABI、平台、Requires-Python；24 项测试和本次 206 项 release suite 通过。实际 Mac 检查正确 BLOCKED，不写 journal、不闭合目标主机门禁，见[预检证据](../hackathon/evidence/dsh-g0-service-target-preflight-20261006.md)。下一步仍为目标平台冷安装、身份/状态注入与服务恢复回执。
+
+提交前 OCR 已覆盖上述原始 11/11 文件。已核对并修复 wheel 安装格式/标签和 active Requires-Dist 两类问题；6 项复现负测修复后通过，当前专项 **35 PASS**、完整 release suite **206 PASS**，实际 13 个 wheel 检查通过，Mac 的 WSL2 阻断保留。见[审核证据](../hackathon/evidence/dsh-g0-service-target-preflight-review-20261006.md)，未关闭任何现场门禁。
+
 | 任务 | 当前状态 | 已有证据 | 尚未关闭 |
 |---|---|---|---|
 | T1 | IMPLEMENTED / STATIC PASS | 架构设计、机器 policy/inventory、11 包/610 文件/29 条跨包引用/206 处字面路径、17 条合同与 10 个主入口；含 import-equals 的 AST drift/循环/越界/公开导出负测纳入 B0 pipeline | 这只关闭依赖盘点；真实宿主与服务语义由 T2/T3/T17 验证 |

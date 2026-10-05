@@ -78,6 +78,9 @@ B0 独立入口：`node scripts/dsh-b0/pipeline.mjs --check --python /absolute/p
 
 服务包证据接线验证：`node --test --test-concurrency=1 scripts/release/plugin-service-evidence.test.mjs scripts/release/state-reconcile.test.mjs`，也由 `pnpm dsh test` 的 release suite 自动收集。使用 validator-only 小包夹具验证候选/journal 绑定、写锁内前置历史核对、实际安全解包、源码/清单/依赖漂移、特殊文件、错误脱敏与幂等；这些夹具不是实际服务运行证据。对已实际运行的双包调用 `pnpm dsh plugin verify-service` 的另行结果见[接线记录](../hackathon/evidence/dsh-g0-service-artifact-gate-20261005.md)；审核修复、本次 **206 PASS** 和实际 CLI 重试见[2026-10-05 审核记录](../hackathon/evidence/dsh-g0-service-artifact-gate-review-20261005.md)。
 
+目标主机只读预检：`python scripts/run_backend_tests_bounded.py backend/tests/test_service_target_preflight.py`（固定 Python 3.14，PATH 使用 Node 24）。同一测试纳入共享后端矩阵，覆盖实际 CLI、只读审计钩子、WSL 形状的标签匹配/拒绝、Requires-Python、精确闭包和输入负测。WSL 事实注入只存在于测试子进程，不是生产参数；不是 WSL 实机验收。当前 **24 PASS** 与实际 Mac BLOCKED 结果见[证据](../hackathon/evidence/dsh-g0-service-target-preflight-20261006.md)。
+
+随后 OCR 增加 WHEEL/dist-info/改名标签、active Requires-Dist 及 optional marker 的回归，当前同一入口 **35 PASS**；6 项负测先失败后通过，实际依赖包重验通过，见[审核证据](../hackathon/evidence/dsh-g0-service-target-preflight-review-20261006.md)。
 ## 提交内容与历史审计
 
 Excel SSOT 的提交入口使用 `--staged`：从 Git index 读取变更 view 文件全文，工作树中未暂存的修复不能掩盖错误；新增/重命名文件同样校验四条规则。无参数命令仍全量扫描 views。`--only-new` 为 `--staged` 的兼容别名，原先该参数仅打印文案但没有筛选。

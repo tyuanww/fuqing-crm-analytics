@@ -14,11 +14,24 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 当前服务包接线审核（2026-10-05）
+### 当前目标主机预检审核（2026-10-06）
+
+- OCR delegate 已覆盖原始 **11/11** 路径（2 个工具选中、测试与 8 份文档补审），没有跳过。已验证并修复 wheel 安装元数据/标签漏检，以及 active Requires-Dist 未核对两类问题；6 项复现负测先失败后通过。
+- 修复后共享 bounded 预检 **35 PASS / 0 SKIP**，完整 release suite **206 PASS / 0 SKIP**；实际 13 个 wheel 通过新增格式/依赖检查，Mac 仍因不是 WSL2 正确 BLOCKED，14 个输入内容/mtime 不变。见[审核记录](docs/hackathon/evidence/dsh-g0-service-target-preflight-review-20261006.md)。
+- 本批已获本地 commit 授权，使用正常 hooks，准确 SHA 以 Git 为准；下一步开始固定目标平台依赖和离线冷安装准备。生产激活、现场服务恢复与供应链门禁仍保留，未操作杭州或真实数据。
+
+### 审核前目标主机只读预检（2026-10-06）
+
+- 上一批服务包接线及 OCR 修复已通过正常 hooks 本地提交为 `1b443646132a8e90b002988c9635b5993ed55d4b`（18 文件），未 push；本节为提交后的下一步增量，尚未提交。
+- 新增 `pnpm dsh plugin service-preflight`：按外部已核验的 manifest SHA 检查 Python、WSL2、精确 wheel 闭包、ABI/平台标签与 Requires-Python，拒绝错包/篡改/链接/FIFO，不安装、不联网、不启动服务或改 journal。
+- 本次共享 bounded 预检 **24 PASS / 0 SKIP**，release suite **206 PASS / 0 SKIP**；实际候选与 13 个 wheel 的 CLI 检查正确返回 macOS 非 WSL2 的 BLOCKED，14 个输入内容/mtime 不变，Ruff/语法检查通过。见[本轮证据](docs/hackathon/evidence/dsh-g0-service-target-preflight-20261006.md)。
+- T3/T7/T15/T21 仍 PARTIAL。预检不代表 WSL 实机、离线冷安装、身份/状态注入或 HTTP 恢复已通过；本机 pydantic-core 是 macOS arm64 wheel，目标 WSL 需准备自己的固定平台 wheel。下一步接目标平台冷安装与服务验收回执，激活继续 BLOCKED；本轮未操作杭州、真实数据或发布。
+
+### 上一批服务包接线审核（2026-10-05）
 
 - OCR delegate 原始范围 **15/15** 路径全部覆盖（5 个代码/测试、10 个文档），另补审修复涉及的 state owner 和测试。确认并修复 3 类问题：journal 前置关系丢失、状态特殊文件阻塞、CLI 回显未受信任内容。
 - 4 项负测从 **0 PASS / 4 FAIL** 修至 **4/4 PASS**；本次完整 release suite **206 PASS / 0 SKIP**。原真实双包通过修复后 CLI，重复执行保持同一 seq/digest，候选和 journal 字节不变。见[审核证据](docs/hackathon/evidence/dsh-g0-service-artifact-gate-review-20261005.md)。
-- 已获审核修复后本地 commit 授权，走正常 hooks；准确 SHA 以 Git 为准。目标主机/供应链仍 NOT_RUN，激活继续 BLOCKED；下一步从只读目标主机验收准备开始，未操作杭州或真实数据。
+- 已通过正常 hooks 本地提交为 `1b443646`。目标主机/供应链仍 NOT_RUN，激活继续 BLOCKED；提交后的只读预检增量见上节，未操作杭州或真实数据。
 
 ### 审核前服务包证据接线（2026-10-05）
 

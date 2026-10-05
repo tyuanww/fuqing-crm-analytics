@@ -288,6 +288,8 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 - [x] 服务包 OCR delegate（2026-10-05）：原始 **21/21** 路径全覆盖，Git replacement 与取消回收两个缺陷修复；修复后共享后端 25 PASS（内部 10 个包场景）、固定双包 9/9。见[审核证据](./evidence/dsh-g0-service-artifact-review-20261005.md)。
 - [x] T3/T7/T13/T21 本机服务包回执接线（2026-10-05，`82c1f5cd` 后增量）：`plugin verify-service` 将原候选、源码回执、两份实际包与依赖记录绑定原 journal；新门禁 29 PASS、release suite 199 PASS，实际 CLI 重试幂等及 3 项篡改拒绝通过。见[接线证据](./evidence/dsh-g0-service-artifact-gate-20261005.md)。不关闭目标主机或生产门禁。
 - [x] 服务包接线 OCR delegate（2026-10-05）：原始 15/15 路径和两份修复文件已审；已验证 journal 前置/并发历史、FIFO 与日志回显四项负测先失败后通过，完整 release suite 206 PASS，实际双包 CLI 重试通过。见[审核证据](./evidence/dsh-g0-service-artifact-gate-review-20261005.md)。
+- [x] T3/T15 目标主机预检子项（2026-10-06，`1b443646` 后未提交增量）：`plugin service-preflight` 只读校验 manifest 摘要、WSL2/Python、离线 wheel 清单/平台/ABI/Requires-Python；24 PASS，release suite 206 PASS，实际包在 Mac 正确 BLOCKED。见[证据](./evidence/dsh-g0-service-target-preflight-20261006.md)；不关闭真实 WSL、安装、身份与恢复门禁。
+- [x] 目标主机预检 OCR delegate（2026-10-06）：原始 11/11 覆盖，安装格式/标签与依赖约束两类问题已修；6 项复现负测修复后通过，专项 35 PASS、release suite 206 PASS，实际 wheel 无误拒绝。见[审核记录](./evidence/dsh-g0-service-target-preflight-review-20261006.md)。
 - [ ] T2/T17 剩余：Windows/WSL、rc1→rc2/torn-frame、浏览器/client、shell/tool union 与目标平台 runtime；本机十项不代签这些验收。同进程任意插件隔离不承诺。
 - [ ] T3/T7/D4-C：源码兼容与精确包/依赖观测已接入本机候选 journal；继续实现目标主机服务证据验证器，完成 WSL 冷安装、受控身份/状态注入、生产形状时限/UNKNOWN、DSH UI/浏览器与完整供应链门禁。生产 provider/profile 未启用，保存 UI 继续 NOT_AVAILABLE。
 - [ ] T13/T21：生产 activation journal、远端 receive/reconcile 与现场恢复；本机 `LOCAL_HOST_VERIFIED` 不替代这些门禁。

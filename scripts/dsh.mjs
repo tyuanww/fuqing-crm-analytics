@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { access, copyFile, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { readdirSync } from 'node:fs';
-import { execFileSync } from 'node:child_process';
-import { join, resolve } from 'node:path';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildPreManifest, packArtifact, sha256 } from './release/artifact.mjs';
 import { receiveRelease } from './release/receive.mjs';
@@ -200,19 +200,37 @@ async function receive(args) {
 }
 async function test() { const tests = readdirSync(join(root, 'scripts/release')).filter(name => name.endsWith('.test.mjs')).map(name => join('scripts/release', name)); return execFileSync(process.execPath, ['--test', ...tests], { cwd: root, encoding: 'utf8', stdio: 'inherit' }); }
 async function preflight(args) { return execFileSync(process.execPath, [join(root, 'scripts/release/preflight.mjs'), ...args], { cwd: root, encoding: 'utf8', stdio: 'inherit' }); }
+function serviceTargetPreflight(options) {
+  const python = requiredOption(options, '--python');
+  if (!isAbsolute(python)) throw new Error('SERVICE_TARGET_ABSOLUTE_PYTHON_REQUIRED');
+  const args = ['-I', '-B', join(root, 'scripts/crm-calibration/service-target-preflight.py')];
+  for (const flag of ['--manifest', '--manifest-sha256', '--wheelhouse']) args.push(flag, requiredOption(options, flag));
+  const run = spawnSync(python, args, { cwd: root, encoding: 'utf8', timeout: 30000,
+    maxBuffer: 512 * 1024, env: { PATH: process.env.PATH ?? '/usr/bin:/bin' } });
+  if (run.error || run.signal || ![0, 2].includes(run.status)) throw new Error('SERVICE_TARGET_PROBE_FAILED');
+  let report;
+  try { report = JSON.parse(run.stdout); } catch { throw new Error('SERVICE_TARGET_REPORT_INVALID'); }
+  if (report?.schema_version !== 'shinemage-service-target-preflight/v1' || report.release_ready !== false
+    || report.activation !== 'BLOCKED') throw new Error('SERVICE_TARGET_REPORT_INVALID');
+  console.log(JSON.stringify(report, null, 2));
+  process.exitCode = run.status;
+}
 async function plugin(args) {
   const [subcommand, ...options] = args;
   const usage = 'Usage:\n  pnpm dsh plugin candidate --plugin /absolute/plugin --output-dir /absolute/output --state-path /absolute/state.json [--profile config/profile.json] [--previous-profile config/profile.json] [--service-evidence /absolute/receipt.json]\n  pnpm dsh plugin verify-host --candidate /absolute/candidate.json --evidence /absolute/evidence.json --state-path /absolute/state.json\n  pnpm dsh plugin verify-service --candidate /absolute/candidate.json --evidence /absolute/service-pair/receipt.json --state-path /absolute/state.json\nverify-host checks existing local evidence and appends to the candidate journal; it does not start or activate a host.\nverify-service checks local service artifacts and appends to the same journal; target-host and supply-chain gates remain BLOCKED. It does not start or activate a service.';
+  const targetUsage = '  pnpm dsh plugin service-preflight --python /absolute/python3.14 --manifest /absolute/service-manifest.json --manifest-sha256 SHA256 --wheelhouse /absolute/wheels\nservice-preflight is read-only: checks WSL2, Python and wheel tags; never installs, starts a service or changes a journal.';
   if (!subcommand || subcommand === '--help' || subcommand === '-h') {
-    console.log(usage);
+    console.log(usage + '\n' + targetUsage);
     return;
   }
-  if (!['candidate', 'verify-host', 'verify-service'].includes(subcommand)) throw new Error(`PLUGIN_COMMAND_UNKNOWN ${subcommand}`);
+  if (!['candidate', 'verify-host', 'verify-service', 'service-preflight'].includes(subcommand)) throw new Error(`PLUGIN_COMMAND_UNKNOWN ${subcommand}`);
   if (options.includes('--help') || options.includes('-h')) {
-    console.log(usage);
+    console.log(usage + '\n' + targetUsage);
     return;
   }
-  const allowed = new Set(subcommand === 'candidate' ? ['--plugin', '--output-dir', '--state-path', '--profile', '--previous-profile', '--service-evidence'] : ['--candidate', '--evidence', '--state-path']);
+  let allowed = new Set(['--candidate', '--evidence', '--state-path']);
+  if (subcommand === 'candidate') allowed = new Set(['--plugin', '--output-dir', '--state-path', '--profile', '--previous-profile', '--service-evidence']);
+  if (subcommand === 'service-preflight') allowed = new Set(['--python', '--manifest', '--manifest-sha256', '--wheelhouse']);
   const seen = new Set();
   for (let index = 0; index < options.length; index += 2) {
     const item = options[index];
@@ -221,6 +239,7 @@ async function plugin(args) {
     if (!options[index + 1] || options[index + 1].startsWith('--')) throw new Error(`PLUGIN_OPTION_VALUE_REQUIRED ${item}`);
     seen.add(item);
   }
+  if (subcommand === 'service-preflight') return serviceTargetPreflight(options);
   if (subcommand === 'verify-host' || subcommand === 'verify-service') {
     const verifier = subcommand === 'verify-host' ? verifyPluginHost : verifyPluginService;
     let observation;
