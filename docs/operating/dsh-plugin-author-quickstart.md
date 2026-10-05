@@ -61,6 +61,8 @@ cat "$candidate_root/pack/candidate.json"
 
 ## 连接已有宿主证据（CRM＋知识首期）
 
+声明保存服务的候选，还可按[服务包说明](./crm-service-packages.md#将包回执绑定已有候选)运行 `pnpm dsh plugin verify-service`，把已运行的双服务包观测接入同一 journal。它不替换上述源码回执，也不使本机宿主观测成为目标 WSL 或生产保存验收。
+
 专用 allowlist `config/dsh-profile.crm-knowledge.rc2.json` 只选择 CRM 和知识两个独立包，默认七插件 release profile 不变。在同一干净提交与已完成构建/测试的双包上执行：
 
 ```bash

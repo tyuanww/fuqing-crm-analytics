@@ -20,6 +20,7 @@
 | `pnpm dsh receive --artifact FILE --manifest FILE --destination DIR --state-path /absolute/state.json [--max-entries N] [--max-bytes N]` | 校验并安全解包一个 release artifact，并把接收结果写入同一 durable journal | 目标目录必须不可用；默认最多 10000 个条目、512 MiB 展开后字节数，失败时拒绝接收 |
 | `pnpm dsh plugin candidate --plugin /absolute/plugin --output-dir /absolute/output --state-path /absolute/state.json` | 按 profile allowlist 打包一个独立插件，生成 pack/candidate receipt 和本地 journal | 只写新的本地输出目录；不激活、不上传、不重启；canary/rollback/remote receive 未运行时明确标记 `NOT_RUN`/`NOT_AVAILABLE` |
 | `pnpm dsh plugin verify-host --candidate /absolute/candidate.json --evidence /absolute/evidence.json --state-path /absolute/state.json` | 核对候选快照、双包组合、固定宿主 v2 证据和既有 prepared journal，幂等追加本机观测 | 不改候选、不启动宿主；成功为 `LOCAL_HOST_VERIFIED`，仍 `release_ready: false`；仅支持 CRM＋知识首期组合，失配退出 2 且不写 journal |
+| `pnpm dsh plugin verify-service --candidate /absolute/candidate.json --evidence /absolute/pair/receipt.json --state-path /absolute/state.json` | 核对原候选、源码证据与两份实际服务包/依赖观测，幂等追加原 journal | `LOCAL_SERVICE_ARTIFACTS_VERIFIED` 仅为本机结论；目标主机/供应链 NOT_RUN，激活仍 BLOCKED；不运行包内代码，失配退出 2 |
 | `pnpm dsh verify --scope local` | 运行本地 doctor、synthetic compatibility/backpressure | 本地合同通过返回 0；不代表生产可发布 |
 | `pnpm dsh verify [--scope release]` | 运行发布级 doctor、synthetic compatibility/backpressure 并检查发布门禁 | 当前真实 WSL2/HTTP/15 分钟 SLI 未完成时退出 2 并打印 `RELEASE_BLOCKED` |
 | `pnpm dsh preflight --check --python ABS --tag TAG` | 在已有 runtime bundle 时只读检查正式 preflight 的工具链、固定 upstream、插件入口、runtime bundle 和输出目录 | 检查失败在构建前退出 2，不联网、不生成 artifact；正式 `preflight` 会自行生成 runtime |

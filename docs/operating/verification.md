@@ -76,6 +76,8 @@ B0 独立入口：`node scripts/dsh-b0/pipeline.mjs --check --python /absolute/p
 
 保存分析/驾驶舱的 finite mock 组件仍须独立通过类型检查、编译后 DOM 测试与干净重建。HTTP CONNECTED overlay 另有 `query-card-save`、`asset-overlay`、`native-query-assets-smoke` 与独立 analysis/cockpit HTTP 测试。`asset-overlay` 编译后 DOM（mock transport）覆盖 discard、过期预览、拖拽提交，以及撤销整板、从已保存分析加入、无板时创建、预览/保存 409 后重读；不是浏览器 E2E。默认查询入口不带资产能力。
 
+服务包证据接线验证：`node --test --test-concurrency=1 scripts/release/plugin-service-evidence.test.mjs scripts/release/state-reconcile.test.mjs`，也由 `pnpm dsh test` 的 release suite 自动收集。使用 validator-only 小包夹具验证候选/journal 绑定、写锁内前置历史核对、实际安全解包、源码/清单/依赖漂移、特殊文件、错误脱敏与幂等；这些夹具不是实际服务运行证据。对已实际运行的双包调用 `pnpm dsh plugin verify-service` 的另行结果见[接线记录](../hackathon/evidence/dsh-g0-service-artifact-gate-20261005.md)；审核修复、本次 **206 PASS** 和实际 CLI 重试见[2026-10-05 审核记录](../hackathon/evidence/dsh-g0-service-artifact-gate-review-20261005.md)。
+
 ## 提交内容与历史审计
 
 Excel SSOT 的提交入口使用 `--staged`：从 Git index 读取变更 view 文件全文，工作树中未暂存的修复不能掩盖错误；新增/重命名文件同样校验四条规则。无参数命令仍全量扫描 views。`--only-new` 为 `--staged` 的兼容别名，原先该参数仅打印文案但没有筛选。

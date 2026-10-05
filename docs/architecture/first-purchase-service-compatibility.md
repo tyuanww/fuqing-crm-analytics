@@ -49,8 +49,12 @@
 
 本机证据得到 `LOCAL_COMPATIBLE`、`release_ready=false` 和 `BLOCKED_SERVICE_PACKAGE_AND_HOST_EVIDENCE_REQUIRED`。实际激活返回 `SERVICE_ACTIVATION_EVIDENCE_INCOMPLETE`，没有 override。门禁不启动服务、不授予身份、不读取数据库；真正的目标身份只读性仍须现场验证。
 
-完整 G0 放行仍需要 artifact/依赖证据接线、目标主机服务证据验证器、生产形状时限/UNKNOWN、DSH UI/浏览器与目标平台证据。本机回执 `status=PASS` 只表示预期观测完成，包括旧写入不兼容的负面观测。候选接线和拒绝后的无副作用验证见[门禁证据](../hackathon/evidence/dsh-g0-service-gate-20261004.md)。
+完整 G0 放行仍需要目标主机服务证据验证器、供应链、生产形状时限/UNKNOWN、DSH UI/浏览器与目标平台证据。本机回执 `status=PASS` 只表示预期观测完成，包括旧写入不兼容的负面观测。源码候选接线和拒绝后的无副作用验证见[门禁证据](../hackathon/evidence/dsh-g0-service-gate-20261004.md)。
 
 2026-10-04 完成新服务独立包与同版本 HTTP 恢复，见[当时证据](../hackathon/evidence/dsh-g0-analysis-service-package-20261004.md)。2026-10-05 的[精确包配对证据](../hackathon/evidence/dsh-g0-service-artifact-pair-20261005.md)覆盖上表全部 9 项观测；新回执 `shinemage-service-artifact-compatibility/v1` 记录两个 archive/manifest、安装后的实际依赖、wheel hash 和验证器摘要，始终 `release_ready=false` / `BLOCKED_TARGET_HOST_AND_SUPPLY_CHAIN_REQUIRED`。它不替换现有 `service-save-compatibility.py` 的源码回执，也不能直接作为现有 `--service-evidence` 输入；没有据此解除 `SERVICE_ACTIVATION_EVIDENCE_INCOMPLETE`。
 
 执行入口和失败记录见[跨版本验证证据](../hackathon/evidence/dsh-g0-service-save-compat-20261004.md)。
+
+2026-10-05 增加 `plugin verify-service --candidate … --evidence /absolute/pair/receipt.json --state-path …`。它先重验候选原始 digest/profile/service gate 和已存在的 PREPARED journal，再核对同一源码对的包内外 manifest、每个允许文件、源码回执中的 code 摘要、当前 bootstrap/resource/recipe、精确依赖与 wheel 观测，最后追加 `CANDIDATE_SERVICE_ARTIFACTS_VERIFIED`；新进程重试不重复记录。候选原文件与源码回执不变，artifact 回执不能代替 `--service-evidence`。
+
+该命令返回 `LOCAL_SERVICE_ARTIFACTS_VERIFIED`，不是目标主机结论；`target_host=NOT_RUN`、`supply_chain=NOT_RUN`、`release_ready=false`。它复核已有安装观测而不重新安装 wheel、验证签名或执行包内代码。既有激活/回退门禁不消费此本机事件作放行依据，仍返回 `SERVICE_ACTIVATION_EVIDENCE_INCOMPLETE`。详见[本机接线证据](../hackathon/evidence/dsh-g0-service-artifact-gate-20261005.md)。

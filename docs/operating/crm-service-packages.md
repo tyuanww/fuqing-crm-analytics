@@ -107,4 +107,21 @@ node scripts/crm-calibration/service-package-compatibility.mjs \
 
 回执 `shinemage-service-artifact-compatibility/v1` 包含双 archive/manifest hash、实际 Python/依赖版本和 wheel hash。PASS 仅说明全部预期观测完成；其中旧服务可写破坏来源的观测会得到 `BLOCKED_PROVENANCE_NOT_PRESERVED`。失败/中断保留 FAIL 和已完成项目，退出码 2；已有输出目录拒绝覆盖，重试必须用新目录。SIGINT/SIGTERM 在当前有界构建步骤结束后中止并回收，SIGKILL 无法保证即时清理。
 
-当前实测为 Darwin arm64 / Python 3.14.4，两个旧/新源码锁的 13 项版本相同；这是独立冷安装证据，不是跨依赖版本升级或 WSL 证据。wheel hash 固定实际安装字节，不能证明发布者身份。该回执尚未接入候选的 `--service-evidence` 或主机激活门禁，保持 `release_ready=false`。最新结果见[包配对证据](../hackathon/evidence/dsh-g0-service-artifact-pair-20261005.md)；下一步是 artifact/依赖摘要与目标主机证据接线。
+当前实测为 Darwin arm64 / Python 3.14.4，两个旧/新源码锁的 13 项版本相同；这是独立冷安装证据，不是跨依赖版本升级或 WSL 证据。wheel hash 固定实际安装字节，不能证明发布者身份。包回执不可作为候选的 `--service-evidence` 输入，也不放行主机激活；通过下面的补充核验接入候选 journal。原始观测见[包配对证据](../hackathon/evidence/dsh-g0-service-artifact-pair-20261005.md)。
+
+## 将包回执绑定已有候选
+
+前置：已有绑定同一旧/新源码回执的 plugin candidate、其原 `profile.json`/plugin tarball 和 PREPARED journal；已有上一节实际双包产物。当前机器只需 Node 24、Python3 和 zstd 做有界安全解包，不安装依赖、不启动服务或读取数据库。
+
+```sh
+pnpm dsh plugin verify-service \
+  --candidate /absolute/plugin-candidate/candidate.json \
+  --evidence /absolute/service-pair/receipt.json \
+  --state-path /absolute/plugin-state.json
+```
+
+核验原 candidate/profile/plugin pack/source gate → 同一服务源码对与 9 项观测 → 当前验证器/recipe 指纹 → 两个 archive 的实际字节和内外 manifest → 精确文件白名单、code 源码摘要、bootstrap/resource、依赖锁与安装观测 → 在原 journal 幂等追加 `CANDIDATE_SERVICE_ARTIFACTS_VERIFIED`。记录候选、artifact evidence、两份 archive/manifest 和依赖观测 digest；失败退出 2，写 journal 前完成全部检查。重试会再次验文件，并返回同一 journal seq/digest，不改写 candidate。
+
+PREPARED 回执必须存在于实际 journal，幂等缓存不能单独证明已准备。在取得 journal 写锁后再次核对前置 seq/digest，允许其他观测追加，拒绝历史被替换；重复回执也必须与实际 journal 对应。状态文件只接受不超过 64 MiB 的普通文件，拒绝链接、FIFO 和越界文件；没有自动轮转或删除历史。CLI 失败只打印稳定错误码，不回显断言差异、输入字段或子进程输出；例如 `PLUGIN_SERVICE_PREPARED_NOT_DURABLE`、`RELEASE_EVENT_PREREQUISITE_CHANGED`，未知错误为 `PLUGIN_SERVICE_VERIFICATION_FAILED`。保留原始输入和 journal 进行本地排查，不通过手工改缓存绕过。
+
+成功为 `LOCAL_SERVICE_ARTIFACTS_VERIFIED`，始终 `release_ready=false`、`target_host=NOT_RUN`、`supply_chain=NOT_RUN`、`activation=BLOCKED_TARGET_HOST_AND_SUPPLY_CHAIN_REQUIRED`。本地 JSON/hash 不证明发布者身份；该命令不重新安装 wheel，不把记录中的平台升级为 WSL 验收。激活门禁仍阻断。实际 CLI、负测和重试证据见[接线记录](../hackathon/evidence/dsh-g0-service-artifact-gate-20261005.md)。

@@ -14,6 +14,7 @@ import { collectReleaseReadiness, printReadiness } from './release/readiness.mjs
 import { DSH_UPSTREAM_SHA, NODE_MAJOR, PNPM_VERSION } from './release/toolchain.mjs';
 import { createPluginCandidate } from './release/plugin-candidate.mjs';
 import { verifyPluginHost } from './release/plugin-host-evidence.mjs';
+import { verifyPluginService } from './release/plugin-service-evidence.mjs';
 import { loadReleaseProfile } from './release/profile.mjs';
 import { prepareServiceCompatibility } from './release/service-compatibility.mjs';
 
@@ -201,12 +202,12 @@ async function test() { const tests = readdirSync(join(root, 'scripts/release'))
 async function preflight(args) { return execFileSync(process.execPath, [join(root, 'scripts/release/preflight.mjs'), ...args], { cwd: root, encoding: 'utf8', stdio: 'inherit' }); }
 async function plugin(args) {
   const [subcommand, ...options] = args;
-  const usage = 'Usage:\n  pnpm dsh plugin candidate --plugin /absolute/plugin --output-dir /absolute/output --state-path /absolute/state.json [--profile config/profile.json] [--previous-profile config/profile.json] [--service-evidence /absolute/receipt.json]\n  pnpm dsh plugin verify-host --candidate /absolute/candidate.json --evidence /absolute/evidence.json --state-path /absolute/state.json\nverify-host checks existing local evidence and appends to the candidate journal; it does not start or activate a host.';
+  const usage = 'Usage:\n  pnpm dsh plugin candidate --plugin /absolute/plugin --output-dir /absolute/output --state-path /absolute/state.json [--profile config/profile.json] [--previous-profile config/profile.json] [--service-evidence /absolute/receipt.json]\n  pnpm dsh plugin verify-host --candidate /absolute/candidate.json --evidence /absolute/evidence.json --state-path /absolute/state.json\n  pnpm dsh plugin verify-service --candidate /absolute/candidate.json --evidence /absolute/service-pair/receipt.json --state-path /absolute/state.json\nverify-host checks existing local evidence and appends to the candidate journal; it does not start or activate a host.\nverify-service checks local service artifacts and appends to the same journal; target-host and supply-chain gates remain BLOCKED. It does not start or activate a service.';
   if (!subcommand || subcommand === '--help' || subcommand === '-h') {
     console.log(usage);
     return;
   }
-  if (!['candidate', 'verify-host'].includes(subcommand)) throw new Error(`PLUGIN_COMMAND_UNKNOWN ${subcommand}`);
+  if (!['candidate', 'verify-host', 'verify-service'].includes(subcommand)) throw new Error(`PLUGIN_COMMAND_UNKNOWN ${subcommand}`);
   if (options.includes('--help') || options.includes('-h')) {
     console.log(usage);
     return;
@@ -220,9 +221,19 @@ async function plugin(args) {
     if (!options[index + 1] || options[index + 1].startsWith('--')) throw new Error(`PLUGIN_OPTION_VALUE_REQUIRED ${item}`);
     seen.add(item);
   }
-  if (subcommand === 'verify-host') {
-    const observation = await verifyPluginHost({ candidatePath: requiredOption(options, '--candidate'),
-      evidencePath: requiredOption(options, '--evidence'), statePath: requiredOption(options, '--state-path') });
+  if (subcommand === 'verify-host' || subcommand === 'verify-service') {
+    const verifier = subcommand === 'verify-host' ? verifyPluginHost : verifyPluginService;
+    let observation;
+    try {
+      observation = await verifier({ candidatePath: requiredOption(options, '--candidate'),
+        evidencePath: requiredOption(options, '--evidence'), statePath: requiredOption(options, '--state-path') });
+    } catch (error) {
+      if (subcommand !== 'verify-service') throw error;
+      // Assertion diffs and child stderr may contain untrusted artifact values.
+      // Only the stable code belongs in CLI/CI logs, never the supplied content.
+      const code = String(error.message).match(/^(?:SERVICE|PLUGIN_SERVICE|RELEASE|ARCHIVE|DSH)_[A-Z0-9_]+\b/)?.[0];
+      throw new Error(code ?? 'PLUGIN_SERVICE_VERIFICATION_FAILED');
+    }
     console.log(JSON.stringify(observation, null, 2));
     return;
   }

@@ -14,10 +14,23 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 当前服务包审核与提交检查（2026-10-05）
+### 当前服务包接线审核（2026-10-05）
+
+- OCR delegate 原始范围 **15/15** 路径全部覆盖（5 个代码/测试、10 个文档），另补审修复涉及的 state owner 和测试。确认并修复 3 类问题：journal 前置关系丢失、状态特殊文件阻塞、CLI 回显未受信任内容。
+- 4 项负测从 **0 PASS / 4 FAIL** 修至 **4/4 PASS**；本次完整 release suite **206 PASS / 0 SKIP**。原真实双包通过修复后 CLI，重复执行保持同一 seq/digest，候选和 journal 字节不变。见[审核证据](docs/hackathon/evidence/dsh-g0-service-artifact-gate-review-20261005.md)。
+- 已获审核修复后本地 commit 授权，走正常 hooks；准确 SHA 以 Git 为准。目标主机/供应链仍 NOT_RUN，激活继续 BLOCKED；下一步从只读目标主机验收准备开始，未操作杭州或真实数据。
+
+### 审核前服务包证据接线（2026-10-05）
+
+- 上一批服务包及 OCR 修复通过正常 hooks 提交为 `82c1f5cdeb0cac3f5f0ac89ec7eafdb799383e95`（22 文件）；提交后工作树曾干净，未 push。本节是提交后的下一步，尚未提交。
+- `pnpm dsh plugin verify-service` 已核对候选/profile/源码回执、两个实际 archive 的内外 manifest/文件/依赖记录，再向原 journal 幂等追加 `CANDIDATE_SERVICE_ARTIFACTS_VERIFIED`。不修改候选，不启动服务。
+- 新门禁 **29 PASS**，完整 release suite **199 PASS / 0 SKIP**；此前两份实际服务包经 CLI 核验通过，重复执行保持同一第 3 条 journal，3 项篡改负测拒绝且候选/journal 不变。首次 OpenAPI 版本比较和 help 回归失败已修复并保留日志，见[本轮证据](docs/hackathon/evidence/dsh-g0-service-artifact-gate-20261005.md)。
+- T3/T7/T15/T21 仍 PARTIAL：本机证据仍 `release_ready=false`，目标主机和供应链 NOT_RUN。下一步补 WSL 目标主机服务合同、受控身份/状态注入、冷安装与时限/UNKNOWN 验收；DSH 保存 UI/浏览器及 G0 后物理分仓仍开放。本轮没有杭州、真实数据或发布操作。
+
+### 上一批服务包审核与提交（2026-10-05）
 
 - OCR delegate 覆盖原始 **21/21** 文件（11 个选中、10 个补审），无跳过。确认并修复 Git replacement 破坏精确 SHA 归属，以及取消打断退出回收两个问题；新增两项负测先失败后通过，详见[审核记录](docs/hackathon/evidence/dsh-g0-service-artifact-review-20261005.md)。
-- 修复后共享后端 **25 PASS / 0 SKIP**（内部 **10** 个包场景），实际双包重新 **9/9 PASS**；Ruff/语法/diff 检查通过。本轮已获本地 commit 授权，准确 SHA 以 Git 为准；下方“未提交”是当时的实现阶段快照。
+- 修复后共享后端 **25 PASS / 0 SKIP**（内部 **10** 个包场景），实际双包重新 **9/9 PASS**；Ruff/语法/diff 检查通过，已提交为 `82c1f5cd`；下方“未提交”是当时的实现阶段快照。
 - T3/T7/T15 仍 PARTIAL；继续接 artifact/依赖证据与目标主机验证器，生产激活、WSL、真实身份与保存 UI 门禁保留。未 push、发布或操作杭州。
 
 ### 上一阶段精确服务包配对（2026-10-05，审核前未提交）
