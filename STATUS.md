@@ -14,11 +14,24 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 当前目标主机预检审核（2026-10-06）
+### 当前 WSL 首购服务隔离验收（2026-10-06）
+
+- 延续 `codex/plugin-boundary-review@79434033`，同一旧/新不可变服务包已在实际杭州 WSL2 / Python 3.14.4 完成 **14/14 检查**：两个独立 venv 各安装 13 个固定 wheel，并完成合成身份/状态、HTTP 保存、权限/冲突拒绝、SIGKILL 后幂等恢复、只读回退、备份恢复与未知 schema 拒绝。见[现场验收证据](docs/hackathon/evidence/dsh-g0-service-target-acceptance-20261006.md)。
+- 逐文件传输超时后改用单个固定包；首次运行的合成状态目录权限错误已定位并修正夹具，保留 FAIL 后在新目录重跑。服务 archive 与依赖未改动。成功轮次 10 个、失败轮次 1 个临时进程均已回收，安装/状态目录已清理，生产 6677/18090/18092/18093/18094 的监听/PID 快照一致。
+- 仅关闭首购服务的 WSL **synthetic** 冷安装/恢复子项。旧 writer 仍禁止可写降级；真实身份/策略、生产时间窗口、目标回执验证器与 candidate journal、供应链、DSH 宿主/浏览器和其他服务仍未关闭。`release_ready=false`，保存 UI/生产激活保持关闭。下一步接目标证据到原候选门禁，再准备最终干净候选；本轮未 commit、push 或生产切换。
+
+### 上一阶段 WSL 平台依赖准备（2026-10-06）
+
+- 预检及 OCR 修复已通过正常 hooks 本地提交为 `7943403319eeefcb3a191e03e4e1dc03772a0cc3`（12 文件）；提交后工作树曾干净，未 push。本节与证据记录为提交后的下一步，尚未提交。
+- 已通过现有 Tailscale/SSH 只读核验杭州：Linux x86_64、WSL2 内核、glibc 2.39、Python 3.14.4、pip 26.0.1，取得实际解释器的 1226 个兼容标签。没有启动/重启或配置生产服务。
+- 在本地按原服务 manifest 的 13 项精确版本、目标标签和官方 PyPI 元数据准备 Linux wheelhouse，共 **3,262,610 字节**；逐包 SHA-256、版本、目标标签和文件集合复核通过。没有安装这些 wheel。见[平台准备证据](docs/hackathon/evidence/dsh-g0-service-target-platform-20261006.md)。
+- 该准备阶段的目标预检、冷安装及恢复当时为 NOT_RUN；后续实际 WSL 合成验收见上节。来源签名、生产身份与候选门禁尚未关闭，激活保持 BLOCKED。
+
+### 已提交的目标主机预检审核（2026-10-06）
 
 - OCR delegate 已覆盖原始 **11/11** 路径（2 个工具选中、测试与 8 份文档补审），没有跳过。已验证并修复 wheel 安装元数据/标签漏检，以及 active Requires-Dist 未核对两类问题；6 项复现负测先失败后通过。
 - 修复后共享 bounded 预检 **35 PASS / 0 SKIP**，完整 release suite **206 PASS / 0 SKIP**；实际 13 个 wheel 通过新增格式/依赖检查，Mac 仍因不是 WSL2 正确 BLOCKED，14 个输入内容/mtime 不变。见[审核记录](docs/hackathon/evidence/dsh-g0-service-target-preflight-review-20261006.md)。
-- 本批已获本地 commit 授权，使用正常 hooks，准确 SHA 以 Git 为准；下一步开始固定目标平台依赖和离线冷安装准备。生产激活、现场服务恢复与供应链门禁仍保留，未操作杭州或真实数据。
+- 本批通过正常 hooks 提交为 `79434033`；审核阶段未操作杭州或真实数据。提交后的只读环境核验与依赖准备见上节；生产激活、现场服务恢复与供应链门禁仍保留。
 
 ### 审核前目标主机只读预检（2026-10-06）
 

@@ -81,6 +81,9 @@ B0 独立入口：`node scripts/dsh-b0/pipeline.mjs --check --python /absolute/p
 目标主机只读预检：`python scripts/run_backend_tests_bounded.py backend/tests/test_service_target_preflight.py`（固定 Python 3.14，PATH 使用 Node 24）。同一测试纳入共享后端矩阵，覆盖实际 CLI、只读审计钩子、WSL 形状的标签匹配/拒绝、Requires-Python、精确闭包和输入负测。WSL 事实注入只存在于测试子进程，不是生产参数；不是 WSL 实机验收。当前 **24 PASS** 与实际 Mac BLOCKED 结果见[证据](../hackathon/evidence/dsh-g0-service-target-preflight-20261006.md)。
 
 随后 OCR 增加 WHEEL/dist-info/改名标签、active Requires-Dist 及 optional marker 的回归，当前同一入口 **35 PASS**；6 项负测先失败后通过，实际依赖包重验通过，见[审核证据](../hackathon/evidence/dsh-g0-service-target-preflight-review-20261006.md)。
+
+2026-10-06 另行实际运行首购服务 WSL 合成验收 **14/14**：原双包、13 个固定 Linux wheel、两个新 venv、真实 HTTP 保存/权限/崩溃恢复/只读回退与未知 schema 拒绝，见[现场证据](../hackathon/evidence/dsh-g0-service-target-acceptance-20261006.md)。使用现有 helper 的有限验收编排，不新增生产安装入口或 CI 自动远端动作；合成状态目录必须保留 `0700`。本次现场结果不替代上面的单元测试，也未重跑历史 35/206 项套件；不代表 DSH 宿主、浏览器、真实身份/时间窗口或供应链通过，目标回执尚未接入 candidate journal。
+
 ## 提交内容与历史审计
 
 Excel SSOT 的提交入口使用 `--staged`：从 Git index 读取变更 view 文件全文，工作树中未暂存的修复不能掩盖错误；新增/重命名文件同样校验四条规则。无参数命令仍全量扫描 views。`--only-new` 为 `--staged` 的兼容别名，原先该参数仅打印文案但没有筛选。

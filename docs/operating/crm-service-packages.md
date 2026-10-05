@@ -107,7 +107,7 @@ node scripts/crm-calibration/service-package-compatibility.mjs \
 
 回执 `shinemage-service-artifact-compatibility/v1` 包含双 archive/manifest hash、实际 Python/依赖版本和 wheel hash。PASS 仅说明全部预期观测完成；其中旧服务可写破坏来源的观测会得到 `BLOCKED_PROVENANCE_NOT_PRESERVED`。失败/中断保留 FAIL 和已完成项目，退出码 2；已有输出目录拒绝覆盖，重试必须用新目录。SIGINT/SIGTERM 在当前有界构建步骤结束后中止并回收，SIGKILL 无法保证即时清理。
 
-当前实测为 Darwin arm64 / Python 3.14.4，两个旧/新源码锁的 13 项版本相同；这是独立冷安装证据，不是跨依赖版本升级或 WSL 证据。wheel hash 固定实际安装字节，不能证明发布者身份。包回执不可作为候选的 `--service-evidence` 输入，也不放行主机激活；通过下面的补充核验接入候选 journal。原始观测见[包配对证据](../hackathon/evidence/dsh-g0-service-artifact-pair-20261005.md)。
+2026-10-05 的配对实测为 Darwin arm64 / Python 3.14.4，两个旧/新源码锁的 13 项版本相同；这是独立冷安装证据，不是跨依赖版本升级或 WSL 证据，后续 WSL 结果见本页末节。wheel hash 固定实际安装字节，不能证明发布者身份。包回执不可作为候选的 `--service-evidence` 输入，也不放行主机激活；通过下面的补充核验接入候选 journal。原始观测见[包配对证据](../hackathon/evidence/dsh-g0-service-artifact-pair-20261005.md)。
 
 ## 将包回执绑定已有候选
 
@@ -144,3 +144,11 @@ pnpm dsh plugin service-preflight \
 JSON 合同为 `shinemage-service-target-preflight/v1`，包含 manifest 摘要、平台事实、检查结果和每个 wheel 的摘要。全部匹配返回 `SERVICE_TARGET_PREFLIGHT_PASS`/退出 0；环境不匹配为 `…_BLOCKED`/退出 2；输入损坏为 `…_INVALID`/退出 2，只输出稳定错误码。该命令不校验完整 archive、不验证发布者身份、不导入或安装服务，也不写 candidate/journal；始终 `release_ready=false`、`activation=BLOCKED`，冷安装/身份状态/HTTP 恢复/供应链仍 NOT_RUN。
 
 例如 macOS arm64 的 `pydantic-core` wheel 不能充当 WSL 平台依赖；主机预检通过后仍须由目标平台离线冷安装和真实服务恢复观测证明可运行。当前实现与本机/隔离测试见[预检证据](../hackathon/evidence/dsh-g0-service-target-preflight-20261006.md)。
+
+## 已完成的首购 WSL 合成验收
+
+2026-10-06 已将原固定双包和对应 Linux wheel 传到杭州专属临时目录，在现有低权限账号下复用上述预检、安全解包、离线 venv 和包外 fixture，实际完成 **14/14 检查**；包括权限拒绝、保存幂等、SIGKILL 后恢复、旧服务只读、合成小库备份恢复及未知 schema 拒绝。进程和安装目录回收后，生产入口监听/PID 快照不变。具体输入摘要、命令、失败和成功回执见[现场证据](../hackathon/evidence/dsh-g0-service-target-acceptance-20261006.md)。
+
+传送测试状态时，archive 必须显式保留状态目录 `0700`，不能只打包文件而丢失目录权限；本次首次启动被此约束正确拒绝，修正夹具后在新目录重跑。复用原不可变应用包，生产端不编译、无在线依赖解析。常规插件 UI/工具变化仍只需要更新相应插件；此次冷安装是独立后端服务的验收，不意味着每次插件更新都重装 DSH 和所有服务。
+
+本次身份、候选准入 digest 与时钟仍是合成 fixture；原包的 dirty 来源标记保留。真实身份/状态策略、生产时间窗口、目标回执验证器/原 journal、最终 reviewed 包与供应链仍未关闭，保存 UI 和生产激活保持关闭。旧版可写降级会丢失来源，回退插件时应保留新版服务与 durable state。其他服务、官方 DSH 宿主、真实业务/浏览器未由此验收覆盖。
