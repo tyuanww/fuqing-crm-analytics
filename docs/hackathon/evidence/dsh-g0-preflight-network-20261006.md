@@ -43,3 +43,11 @@
 只将该演练脚本的环境合成值改为 `synthetic`。其 provider 地址仍为自有 loopback fixture；不改 scanner、阈值或白名单，也不改业务插件。按实际 artifact allowlist 重扫 **1846 文件 / 0 findings**，并确认旧长字符串继续被拒绝，结果在 `.context/checks/candidate-0e978f9e-20261006/secret-scan-fixed.json`。
 
 同目录 `plugin-contracts.log` 是该轮实际 CRM/知识定向合同 **55 PASS / 0 SKIP**，不是完整 B0 或浏览器验收。合成凭据修复后的新宿主演练和完整 preflight 要从下一个 clean SHA 记录，不能沿用旧宿主 evidence 的输入摘要。
+
+## 多 profile 的测试环境依赖
+
+合成凭据修复经 3/3 OCR delegate 覆盖和正常 hooks 提交为 `81478dd4be69c2f463fb74c87089b9466cf75552`。该 SHA 的正式 preflight 通过 prepare/audit/build/runtime/release；test 为 **242 PASS / 1 FAIL**。唯一失败的旧 profile 测试未指定 manifest，却固定期望默认七插件 profile，在 `DSH_PROFILE_MANIFEST=config/dsh-profile.crm-knowledge.rc2.json` 下实际加载的是两个插件。
+
+修复仅限测试：默认 profile 用显式路径断言；另以两个隔离子进程验证无环境选择时加载默认配置、有环境选择时加载 CRM/知识配置。保持真实 loader、候选配置和断言语义不变，不从 preflight 移除 profile 或跳过测试。修复后的整套 release 测试在同一个 CRM profile 环境下 **244 PASS / 0 FAIL / 0 SKIP**。
+
+日志位于 `.context/checks/candidate-81478dd4-20261006/` 的 `preflight.log`、`profile-suite-fixed.log`；失败 stage 回执保留于 `.context/release-preflight-runs/dsh-preflight-crm-81478dd4-asIYLY/`。下一轮完整 bundle 和 fresh host 结果仍须单独记录。

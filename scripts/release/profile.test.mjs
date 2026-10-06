@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { mkdtemp, mkdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -7,12 +8,25 @@ import { loadReleaseProfile } from './profile.mjs';
 
 const root = resolve(import.meta.dirname, '../..');
 
-test('release profile loads the pinned plugin order and digest', async () => {
-  const result = await loadReleaseProfile({ root });
+test('explicit default profile loads its pinned order independently of the caller environment', async () => {
+  const result = await loadReleaseProfile({ root, manifestPath: 'config/dsh-profile.rc2.json' });
   assert.equal(result.profile.profile_id, 'dsh-rc2');
   assert.equal(result.plugins.length, 7);
   assert.equal(result.plugins[0].id, '@shine-mage/dsh-analytics-workbench-b0');
   assert.match(result.digest, /^[a-f0-9]{64}$/);
+});
+
+test('profile loader selects the default or CRM/knowledge profile from an isolated caller environment', () => {
+  for (const [manifest, expectedId, count] of [
+    [null, 'dsh-rc2', 7], ['config/dsh-profile.crm-knowledge.rc2.json', 'crm-knowledge-rc2', 2],
+  ]) {
+    const child = spawnSync(process.execPath, ['--input-type=module', '-e',
+      "import {loadReleaseProfile} from './scripts/release/profile.mjs'; const r=await loadReleaseProfile({root:process.cwd()}); console.log(JSON.stringify({id:r.profile.profile_id,count:r.plugins.length}));"], {
+      cwd: root, env: manifest ? { DSH_PROFILE_MANIFEST: manifest } : {}, encoding: 'utf8', timeout: 5000,
+    });
+    assert.equal(child.status, 0, child.stderr);
+    assert.deepEqual(JSON.parse(child.stdout), { id: expectedId, count });
+  }
 });
 
 test('release profile fails closed on a path or DSH pin change', async t => {
