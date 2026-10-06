@@ -112,7 +112,7 @@ def _attach_first_purchase_assets(app, config, run_store, registry) -> None:
     app.state.cockpit_store = cockpit_store
 
 
-def create_first_purchase_native_app(config, *, bridge=None):
+def create_first_purchase_native_app(config, *, bridge=None, source_identities=None):
     runtime_token, gateway_token = config["runtime_token"], config["gateway_token"]
     if len(runtime_token) < 32 or len(gateway_token) < 32 or runtime_token == gateway_token:
         raise ValueError("separate explicit local capabilities required")
@@ -270,4 +270,9 @@ def create_first_purchase_native_app(config, *, bridge=None):
 
     if config.get("asset_capabilities") is not None:
         _attach_first_purchase_assets(app, config, store, registry)
+    if source_identities is not None:
+        # Service owner opts in; neither browser input nor a profile digest
+        # configures credentials. The query owner alone retains the RunStore.
+        from backend.analytics_first_purchase_source_app import create_first_purchase_source_app
+        app.router.routes.extend(create_first_purchase_source_app(store, source_identities).router.routes)
     return app

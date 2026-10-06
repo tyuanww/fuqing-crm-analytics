@@ -205,6 +205,10 @@ CRM 首购的真实宿主 HTTP 链另有显式入口：先按已有 SDK 链接�
 
 该组合输入的 v3 schema 再增加绝对 `kernel_receipt_path` 与 `kernel_receipt_sha256`，并要求 `B0_NATIVE_CRM_KERNEL_WHEELHOUSE`。查询演练包由 `first-purchase-kernel-artifacts.mjs` 从完整固定 Git SHA/显式 allowlist 打包，复用现有安全解包、文件验证和离线安装器；不产生生产 profile 或 release journal。实际查询 API/dispatcher/worker 位于另一独立 venv/进程，私有 pipe 仅驱动原 dispatcher 和读取观测，不新增业务 HTTP 端点。输入错误拒绝回落，四种模式/重启/回收命令见[包级查询证据](../hackathon/evidence/dsh-g0-first-purchase-kernel-host-20261007.md)。日常 B0 纳入 `first-purchase-kernel-artifacts.test.mjs` 和 `test_first_purchase_packed_kernel_support.py` 的保护测试；实际冷安装 guard 另需 `B0_NATIVE_CRM_KERNEL_RECEIPT`/Python/wheelhouse。保存与查询仍共享同一合成 RunStore/SQLite，代码包隔离不等于存储服务解耦。
 
+2026-10-07 增加源码模式 `B0_NATIVE_CRM_SOURCE_HTTP=1`：同一官方 Host 测试通过新的 `first-purchase-frozen-source/v1` 查询来源 API 保存结果，保存 factory 的 `run_store=None`。默认仍保留旧兼容路径；这个开关与 `B0_NATIVE_CRM_ARTIFACT_MANIFEST` 不能同时使用，旧固定包缺少新接口，不能悄悄回落或套用旧证据。此次新旧 HTTP 模式分别验证，浏览器/新双包/WSL 未重跑，见[源码边界证据](../hackathon/evidence/dsh-g0-first-purchase-source-http-20261007.md)。
+
+`backend/tests/test_analytics_first_purchase_source_http.py` 纳入 B0：真实 loopback 检查来源/权限/版本/大小/超时/撤权与争锁；独立保存子进程有 SQLite audit guard，只允许打开其自有分析库，查询下线后新进程可核对/重放原回执。两套实际 allowlist 的隔离导入另验证不依赖邻接源码。`first-purchase-analysis-contract.mjs --check --python /absolute/python3.14` 同时离线检查分析 API/原插件类型与新 source OpenAPI；服务间合同不生成新浏览器 API。归档测试与这些源码测试不能替代 exact-SHA 双包、目标 runtime 或生产准入。
+
 `pnpm dsh plugin verify-host --candidate /absolute/candidate.json --evidence /absolute/evidence.json --state-path /absolute/state.json` 核验已有 v2 宿主证据并幂等追加到原 candidate journal；该命令不运行宿主。`plugin-host-evidence.test.mjs` 纳入 release suite/B0，用明确的 verifier-only 夹具检查缺项、篡改、错误 scope/journal 和重试，不能将这些夹具视为真实宿主通过；真实命令的十项场景与 CLI 接线另行留证，见[本机接线与服务状态证据](../hackathon/evidence/dsh-g0-host-journal-20261004.md)。
 
 T3/T7 的 `backend/tests/test_analytics_first_purchase_save_recovery.py` 纳入现有 B0 Python 目标和常规 backend 回归：只用隔离合成 RunStore/SQLite，分别在提交前后 SIGKILL 自有子进程，通过新进程重放、冲突/权限拒绝、保留旧版本的 forward-fix 和不兼容 schema 拒绝验证存储边界。这仍不证明 D15 candidate/correlation 回执、业务数据迁移或跨版本服务回退；保存门禁继续关闭。

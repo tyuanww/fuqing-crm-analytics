@@ -67,6 +67,10 @@
       "source": "backend/contracts/analytics_first_purchase_run.py",
       "role": "code"
     },
+    "backend/contracts/analytics_first_purchase_source.py": {
+      "source": "backend/contracts/analytics_first_purchase_source.py",
+      "role": "code"
+    },
     "backend/contracts/analytics_query.py": {
       "source": "backend/contracts/analytics_query.py",
       "role": "code"
@@ -119,6 +123,14 @@
       "source": "backend/services/analytics/first_purchase/crm_identity.py",
       "role": "code"
     },
+    "backend/services/analytics/first_purchase/identity.py": {
+      "source": "backend/services/analytics/first_purchase/identity.py",
+      "role": "code"
+    },
+    "backend/services/analytics/first_purchase/loopback_http.py": {
+      "source": "backend/services/analytics/first_purchase/loopback_http.py",
+      "role": "code"
+    },
     "backend/services/analytics/first_purchase/save_policy.py": {
       "source": "backend/services/analytics/first_purchase/save_policy.py",
       "role": "code"
@@ -129,6 +141,10 @@
     },
     "backend/services/analytics/first_purchase/source.py": {
       "source": "backend/services/analytics/first_purchase/source.py",
+      "role": "code"
+    },
+    "backend/services/analytics/first_purchase/source_http.py": {
+      "source": "backend/services/analytics/first_purchase/source_http.py",
       "role": "code"
     },
     "backend/services/analytics/jobs.py": {

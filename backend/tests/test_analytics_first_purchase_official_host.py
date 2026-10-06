@@ -17,6 +17,7 @@ from backend.analytics_first_purchase_native import create_first_purchase_native
 from backend.services.analytics.first_purchase.crm_identity import CRMFirstPurchaseIdentityResolver
 from backend.services.analytics.first_purchase.save_policy import FirstPurchaseSavePolicy
 from backend.services.analytics.first_purchase.saved import FirstPurchaseSavedAnalysisStore
+from backend.services.analytics.first_purchase.source_http import HTTPFirstPurchaseSourceResolver
 from backend.tests.analytics_run_support import sqlite_connection
 from backend.tests.first_purchase_packed_service_support import PackedFirstPurchaseService
 from backend.tests.first_purchase_packed_kernel_support import PackedFirstPurchaseKernel
@@ -33,6 +34,10 @@ TOKEN = "synthetic-query-save-token-0000000000"
 def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_path):
     upstream = Path(os.environ["B0_NATIVE_CRM_HOST_UPSTREAM"])
     assert upstream.is_absolute()
+    source_http = os.environ.get("B0_NATIVE_CRM_SOURCE_HTTP")
+    assert source_http in (None, "1"), "HOST_SOURCE_MODE_INVALID"
+    # Old immutable packages predate this opt-in source API. Never relabel them.
+    assert not (source_http and os.environ.get("B0_NATIVE_CRM_ARTIFACT_MANIFEST")), "HOST_SOURCE_REQUIRES_NEW_PACKAGES"
     node = shutil.which(os.environ.get("NODE", "node"))
     assert node is not None
     process = subprocess.Popen([node, str(ROOT / "scripts/dsh-b0/first-purchase-crm-host.probe.mjs")],
@@ -91,24 +96,25 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
                 "HOST_KERNEL_MODE_MISMATCH: never fall back from v3 to a source fixture"
         # Explicit fixed B0 port block only. Bind fails if someone else owns it.
         kernel_config = {**config(tmp_path), "port_base": 4335, "method_package_digest": digest}
-        if packed_kernel:
-            runs = dispatcher = PackedFirstPurchaseKernel(packed_kernel, tmp_path, candidate_digest, kernel_config)
-            kernel_context = dispatcher
-        else:
-            app = create_first_purchase_native_app(kernel_config)
-            runs, dispatcher = app.state.store, app.state.dispatcher
-            kernel_context = serve(app, port=4335)
         analyses = private_dir(tmp_path, "analyses")
         policy = FirstPurchaseSavePolicy("official-host-no-age-v1", frozenset({candidate_digest}), None, None,
                                          check_freshness=False)
         with serve(crm) as crm_origin:
+            identities = CRMFirstPurchaseIdentityResolver(crm_origin, frozenset({"crm-owner"}), allow_query=True)
+            if packed_kernel:
+                runs = dispatcher = PackedFirstPurchaseKernel(packed_kernel, tmp_path, candidate_digest, kernel_config)
+                kernel_context = dispatcher
+            else:
+                app = create_first_purchase_native_app(kernel_config, source_identities=identities if source_http else None)
+                runs, dispatcher = app.state.store, app.state.dispatcher
+                kernel_context = serve(app, port=4335)
             if packed_service:
                 saved = PackedFirstPurchaseService(packed_service, tmp_path, candidate_digest, crm_origin)
                 service_context = saved
             else:
                 saved = FirstPurchaseSavedAnalysisStore(analyses)
-                service = create_first_purchase_analysis_app(runs, saved,
-                    CRMFirstPurchaseIdentityResolver(crm_origin, frozenset({"crm-owner"}), allow_query=True),
+                service = create_first_purchase_analysis_app(None if source_http else runs, saved, identities,
+                    source_resolver=HTTPFirstPurchaseSourceResolver("http://127.0.0.1:4335") if source_http else None,
                     save_policy=lambda: policy)
                 service_context = serve(service)
             with service_context as running, kernel_context as kernel_origin:
@@ -217,6 +223,13 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
                     assert client.get("/internal/native/context", headers=auth()).status_code == 401
         assert checks and all(checks)
         assert analysis_counts(saved)["analyses"] == 1
+        if source_http:
+            (tmp_path / "source-boundary.json").write_text(json.dumps({
+                "scope": "workspace-official-host-query-source-http",
+                "source_contract": "first-purchase-frozen-source/v1",
+                "save_run_store_argument": None, "query_worker_count": len(runs.worker_records(active_only=False)),
+                "analysis_count": 1, "source_mode": "explicit-loopback-http", "release_ready": False,
+            }, indent=2) + "\n")
     finally:
         if dispatcher is not None:
             dispatcher.close()

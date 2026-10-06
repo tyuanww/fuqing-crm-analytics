@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import re
 import sqlite3
-from typing import Callable, Protocol
+from typing import Callable, TYPE_CHECKING
 
 from fastapi import FastAPI, Request, Response
 from fastapi.exceptions import RequestValidationError
@@ -36,15 +36,19 @@ from backend.contracts.analytics_first_purchase_analysis import (
     HTTP_API_CONNECTED,
 )
 from backend.contracts.analytics_first_purchase_run import FIRST_PURCHASE_HTTP_PREFIX
-from backend.services.analytics.access import AnalyticsError, AnalyticsPrincipal, B0IdentityRegistry, require
+from backend.services.analytics.access import AnalyticsError, B0IdentityRegistry, require
 from backend.services.analytics.first_purchase.asset_state import validate_key
 from backend.services.analytics.first_purchase.saved import (
     FirstPurchaseSavedAnalysisRecord,
     FirstPurchaseSavedAnalysisStore,
 )
-from backend.services.analytics.first_purchase.source import resolve_trusted_first_purchase_source
+from backend.services.analytics.first_purchase.source import FirstPurchaseSourceResolver, LocalFirstPurchaseSourceResolver
+from backend.services.analytics.first_purchase.identity import (
+    FirstPurchaseIdentityResolver, resolve_identity as _resolve_identity, identity_unavailable as _identity_unavailable,
+)
 from backend.services.analytics.first_purchase.save_policy import FirstPurchaseSavePolicy, result_envelope
-from backend.services.analytics.jobs import RunStore
+if TYPE_CHECKING:
+    from backend.services.analytics.jobs import RunStore
 
 PREFIX = FIRST_PURCHASE_HTTP_PREFIX + "/analyses"
 RECEIPT_PREFIX = FIRST_PURCHASE_HTTP_PREFIX + "/save-receipts"
@@ -53,51 +57,6 @@ VERSION_HEADER = {
     "name": "If-Match", "in": "header", "required": True,
     "schema": {"type": "string", "pattern": "^[1-9][0-9]{0,15}$"},
 }
-
-
-class FirstPurchaseIdentityResolver(Protocol):
-    """Service-owned adapter: authenticate and return current immutable grants.
-
-    The adapter owns credential verification and revocation. Candidate digests,
-    client-supplied actors and plugin state are never identity credentials.
-    Implementations must bound their own I/O; no identity snapshot is cached here.
-    """
-
-    def resolve(self, authorization: str | None) -> AnalyticsPrincipal: ...
-
-
-def _identity_unavailable() -> AnalyticsError:
-    return AnalyticsError(503, "IDENTITY_UNAVAILABLE", "身份服务暂不可用，请稍后重试。", retryable=True)
-
-
-def _valid_identity_claim(value: object) -> bool:
-    return (isinstance(value, str) and 1 <= len(value) <= 128 and bool(value.strip())
-            and value.isprintable())
-
-
-def _resolve_identity(registry: FirstPurchaseIdentityResolver, authorization: str | None) -> AnalyticsPrincipal:
-    # Reject malformed credentials before handing them to a deployment adapter.
-    if (not authorization or not authorization.startswith("Bearer ") or not 8 <= len(authorization) <= 1024
-            or any(ord(char) < 33 or ord(char) > 126 for char in authorization[7:])):
-        raise AnalyticsError(401, "UNAUTHENTICATED", "请提供有效的访问凭证。")
-    try:
-        actor = registry.resolve(authorization)
-        if not isinstance(actor, AnalyticsPrincipal) or not _valid_identity_claim(actor.actor_id):
-            raise _identity_unavailable()
-        for grants in (actor.capabilities, actor.data_scopes):
-            if (not isinstance(grants, frozenset) or len(grants) > 128
-                    or any(not _valid_identity_claim(value) for value in grants)):
-                raise _identity_unavailable()
-        return actor
-    except AnalyticsError as error:
-        if error.status == 401:
-            raise AnalyticsError(401, "UNAUTHENTICATED", "访问凭证无效或已失效，请重新认证。") from None
-        if error.status == 403:
-            raise AnalyticsError(403, "FORBIDDEN", "当前身份无权访问此服务。") from None
-        raise _identity_unavailable() from None
-    except Exception:
-        # Do not pass provider messages, recovery URLs or exception context to HTTP/logs.
-        raise _identity_unavailable() from None
 
 
 def _analysis_version(request: Request) -> int:
@@ -126,9 +85,14 @@ def create_first_purchase_analysis_app(
     analysis_store: FirstPurchaseSavedAnalysisStore | None = None,
     identities: FirstPurchaseIdentityResolver | None = None,
     *,
+    source_resolver: FirstPurchaseSourceResolver | None = None,
     runtime_ready: Callable[[], bool] | None = None,
     save_policy: Callable[[], FirstPurchaseSavePolicy | None] | None = None,
 ) -> FastAPI:
+    if run_store is not None and source_resolver is not None:
+        raise ValueError("FIRST_PURCHASE_SOURCE_AMBIGUOUS")
+    source_reader = (source_resolver if source_resolver is not None else
+                     LocalFirstPurchaseSourceResolver(run_store) if run_store is not None else None)
     app = FastAPI(title="Shine Mage First-Purchase Saved Analysis", version=ANALYSIS_SCHEMA,
                   docs_url=None, redoc_url=None, openapi_url=None)
     app.add_middleware(_BodyLimit)
@@ -137,10 +101,12 @@ def create_first_purchase_analysis_app(
     def principal(request: Request):
         return _resolve_identity(registry, _single_header(request, "authorization"))
 
-    def runs() -> RunStore:
-        if run_store is None:
+    def source(request, actor, run_id, *, capability="analysis:save"):
+        if source_reader is None:
             raise AnalyticsError(503, "KERNEL_NOT_CONFIGURED", "查询任务内核尚未显式配置。")
-        return run_store
+        require(actor, capability, data_scope="first-purchase-fixture")
+        return source_reader.resolve(actor, run_id, capability=capability,
+                                     authorization=_single_header(request, "authorization"))
 
     def analyses() -> FirstPurchaseSavedAnalysisStore:
         if analysis_store is None:
@@ -196,10 +162,9 @@ def create_first_purchase_analysis_app(
     def inspect_save_result(payload: FirstPurchaseSaveInspectRequest, request: Request, response: Response):
         actor = principal(request)
         key = validate_key(_single_header(request, "idempotency-key"))
-        source = resolve_trusted_first_purchase_source(runs(), actor, payload.created_from_run_id,
-                                                       capability="analysis:read")
-        stored = analyses().result_already_saved(actor, key, payload.identity, source)
-        result = result_envelope(source, actor, payload.identity, current_policy(),
+        trusted = source(request, actor, payload.created_from_run_id, capability="analysis:read")
+        stored = analyses().result_already_saved(actor, key, payload.identity, trusted)
+        result = result_envelope(trusted, actor, payload.identity, current_policy(),
                                  checked_ms=analyses().clock(), already_saved=stored)
         response.headers["cache-control"] = "no-store"
         return result
@@ -217,16 +182,24 @@ def create_first_purchase_analysis_app(
                 raise AnalyticsError(403, "FORBIDDEN", "当前身份已变化，请重新核对。")
             for capability in ("analysis:read", "analysis:save"):
                 require(current, capability, data_scope="first-purchase-fixture")
+            return current
 
         def resolve():
             policy = current_policy()
             if policy is None:
                 raise AnalyticsError(503, "SAVE_POLICY_NOT_CONFIGURED", "D15 保存尚未显式准入。")
             current = principal(request)
-            source = resolve_trusted_first_purchase_source(runs(), current, payload.created_from_run_id)
-            envelope = result_envelope(source, current, payload.identity, policy,
+            trusted = source(request, current, payload.created_from_run_id)
+            if source_resolver is not None:
+                # Remote I/O may span an identity/policy change. Revalidate
+                # after the read, under the same local write transaction.
+                current = authorize()
+                policy = current_policy()
+                if policy is None:
+                    raise AnalyticsError(503, "SAVE_POLICY_NOT_CONFIGURED", "D15 保存尚未显式准入。")
+            envelope = result_envelope(trusted, current, payload.identity, policy,
                                        checked_ms=analyses().clock(), already_saved=False)
-            return source, envelope
+            return trusted, envelope
 
         receipt = analyses().save_admitted(actor, key, payload, authorize=authorize, resolve=resolve)
         response.headers.update({"cache-control": "no-store", "location": f"{PREFIX}/{receipt.analysis_ref.analysis_id}"})
@@ -250,10 +223,10 @@ def create_first_purchase_analysis_app(
         actor = principal(request)
         # Only the original synthetic registry retains legacy fixture behavior.
         # An external resolver must never bypass admission by omitting a policy.
-        if save_policy is not None or type(registry) is not B0IdentityRegistry:
+        if save_policy is not None or source_resolver is not None or type(registry) is not B0IdentityRegistry:
             raise AnalyticsError(409, "VERSIONED_SAVE_REQUIRED", "请使用带显式准入策略的版本化保存接口。")
         visual = None if payload.visual_spec is None else payload.visual_spec.model_dump(mode="json")
-        trusted = resolve_trusted_first_purchase_source(runs(), actor, payload.created_from_run_id)
+        trusted = source(request, actor, payload.created_from_run_id)
         record = analyses().save_from_trusted_source(
             actor, validate_key(_single_header(request, "idempotency-key")),
             title=payload.title, visual_spec=visual, trusted=trusted,

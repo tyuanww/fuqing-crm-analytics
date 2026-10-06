@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Literal
+from typing import Any, Literal, Protocol, TYPE_CHECKING
 
 
 from backend.contracts.analytics_first_purchase import (
@@ -15,7 +15,8 @@ from backend.contracts.analytics_first_purchase import (
 )
 from backend.contracts.analytics_first_purchase_run import FIRST_PURCHASE_DATA_SCOPE, FIRST_PURCHASE_RUN_FAMILY
 from backend.services.analytics.access import AnalyticsError, AnalyticsPrincipal, require
-from backend.services.analytics.jobs import RunStore
+if TYPE_CHECKING:
+    from backend.services.analytics.jobs import RunStore
 
 CAPABILITY_SAVE = "analysis:save"
 SOURCE_LAYER_LOCAL = "runstore_get_local"
@@ -38,7 +39,7 @@ class FirstPurchaseTrustedSource:
     owner_id: str
     primary_result_ref: str | None
     method_package_digest: str | None
-    source_layer: Literal["runstore_get_local", "runstore_succeeded_source"]
+    source_layer: Literal["runstore_get_local", "runstore_succeeded_source", "query_source_http_v1"]
     generated_at: str | None = None
 
     def as_dict(self) -> dict[str, Any]:
@@ -89,3 +90,20 @@ def resolve_trusted_first_purchase_source(
         raise AnalyticsError(404, "NOT_FOUND", "任务不存在或当前身份不可见。")
     _validate_operating_result(FirstPurchaseResult.model_validate(source["result"]))
     return FirstPurchaseTrustedSource(**source, source_layer=SOURCE_LAYER_SHARED)
+
+
+class FirstPurchaseSourceResolver(Protocol):
+    """Owner-configured read boundary; credentials are never cached or persisted."""
+
+    def resolve(self, principal: AnalyticsPrincipal, run_id: str, *, capability: str,
+                authorization: str | None) -> FirstPurchaseTrustedSource: ...
+
+
+@dataclass(frozen=True)
+class LocalFirstPurchaseSourceResolver:
+    """Explicit compatibility adapter for the existing single-service fixture."""
+
+    run_store: RunStore
+
+    def resolve(self, principal, run_id, *, capability, authorization):
+        return resolve_trusted_first_purchase_source(self.run_store, principal, run_id, capability=capability)

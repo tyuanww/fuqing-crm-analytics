@@ -14,7 +14,13 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 独立查询包的宿主组合（2026-10-07，当前进度）
+### 查询与保存的存储边界（2026-10-07，当前进度）
+
+- 在 `253cdbc7` 上新增 query-owned `first-purchase-frozen-source/v1` 只读 HTTP 接口与显式保存服务 resolver。新路径只把查询 URL 提供给保存进程，RunStore/SQLite 由查询服务独占；原本机适配保留，不隐式切换旧部署。见[本轮证据](docs/hackathon/evidence/dsh-g0-first-purchase-source-http-20261007.md)。
+- 当前受影响后端 **226 PASS**、实际 allowlist 隔离导入 **2 PASS**；独立保存进程只打开自己的分析库，查询下线后重启/回执核对/重放不重复保存。官方固定 rc2 的新 HTTP 来源与原兼容路径各 **1 PASS**；当前工作树服务归档回归两种时效模式 **2 PASS**，不是 clean release candidate。
+- **仍 PARTIAL**：源码层存储边界子项关闭；新双包的 exact-SHA 组合、WSL/恢复、供应链和生产准入尚未完成。本轮 OCR 提交前复审覆盖 23/23，无新增阻塞缺陷；新一轮受影响后端 228 PASS、官方新 HTTP 路径 1 PASS，合同/Ruff/差异检查通过。未发布或操作杭州；旧包/旧 WSL 结论不转移到新接口。
+
+### 独立查询包的宿主组合（2026-10-07，上一阶段）
 
 - 从 clean `43630981` 继续，新增显式查询内核演练包：46 个允许文件固定取自该 Git SHA，15 个依赖按仓库锁安装到独立 venv（含 DuckDB 1.5.6）。原 workbench/CRM/保存服务三包复用；查询 API、dispatcher 和实际 worker 从解包目录运行。见[本轮证据](docs/hackathon/evidence/dsh-g0-first-purchase-kernel-host-20261007.md)。
 - 最终保护/model **30 PASS / 0 SKIP**，启动失败/回收 **5 PASS**；workspace HTTP、v2 保存服务 HTTP、v3 全包 HTTP、v3 Chrome 各 **1 PASS**，Chrome **5 场景**。查询服务独立重启、同请求重放仍只有一个 worker/分析；19 个记录的自有 PID 已退出，旧 437 文件与 journal seq 3 不变。

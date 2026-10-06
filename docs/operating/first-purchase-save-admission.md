@@ -120,3 +120,19 @@ workbench 在显式 first-purchase runtime family、登记 session 和固定 B0 
 rc2 空会话尚无原生历史面板时，插件只经公开 `command/executed` 与会话 input notice 展示自己命令的结果；其他命令与原生行为不变。首购卡片独立注册自己的工具名，不依赖 shine-query 的全局开关。官方原生工具折叠默认行为保留。
 
 本次 HTTP 整链和 Chrome headless 五项观测分别实际通过，见[证据](../hackathon/evidence/dsh-g0-native-command-browser-20261006.md)。仍仅为本地源码、合成 CRM/JSON、mock 模型和隔离 SQLite；新 clean 候选、目标主机、headed/无障碍/真实模型与业务验收仍开放，不代表生产保存已启用。
+
+
+## 查询服务与保存服务的存储边界（2026-10-07）
+
+新增领域合同 `first-purchase-frozen-source/v1`，API `1.0.0`。提供方是查询内核，消费方是独立分析保存服务；Pydantic/生成的 [OpenAPI](../../backend/contracts/analytics-first-purchase-source.openapi.json) 由本领域维护，不加入 DSH 核心或公共插件 ABI。当前只接合成首购数据。未知 schema/API 版本拒绝；发布组合以后用固定源码与包摘要绑定合同，当前源码通过不等于旧包支持它。
+
+- 查询 owner 显式调用 `create_first_purchase_source_app(run_store, identities)`，或向原 native factory 传入 `source_identities`，才挂载 `POST /api/v1/analytics-first-purchase/sources/resolve`。该接口只读冻结 SUCCEEDED 来源，无派发、数据迁移或资产写入。
+- 请求只包含 schema、run ID 和 `analysis:read|analysis:save` 目的。查询服务独立验证同一 Bearer 的当前账号、scope、权限和 run owner；不信任浏览器传来的 actor、权限、事实、SQLite 路径或 candidate。
+- 保存 owner 显式注入 `HTTPFirstPurchaseSourceResolver(origin)`，且 `run_store=None`。origin 目前仅支持同机字面 loopback HTTP；不解析 DNS、不用代理、不跟随重定向/设置 Cookie，不缓存凭证或结果。每次请求默认总时限 2 秒（配置上限 5 秒），响应 512 KiB，头 16 KiB；重复字段、缺字段、类型修补、摘要/owner/run/请求结果不一致均拒绝。
+- 原单体/合成路径仍使用本地 resolver，同时配置本地 RunStore 与其他 resolver 会拒绝启动。HTTP 模式不允许通过旧 `POST /analyses` 绕过候选准入。
+- 新保存取得本地写锁后读取来源，远程调用完成后再次检查当前身份和保存策略，再原子提交分析、来源和两种回执。慢来源可能导致其他写请求返回可重试的 `STATE_UNAVAILABLE`；恢复后按原标识核对/重试，不新建动作来绕过。
+- 回执重放先验证当前账号与权限；相同请求可直接返回原回执，不依赖查询服务在线或旧候选仍准入。冲突仍拒绝。新保存在来源服务不可用时返回 `SOURCE_UNAVAILABLE`，不会伪称未执行或自动补写。
+
+这是经过身份验证的不可变来源快照与本地事务，不是跨服务分布式事务。权限检查之后的外部撤权无法与本地提交形成同一数据库事务；若未来要求严格跨服务原子撤权，需要单独版本化授权租约，不以本次结果作保证。现阶段代码没有数据库迁移、复制或删除；profile 回退也不删除已保存分析。
+
+已完成独立进程/官方 Host 的本机合成验证，证据见[本轮记录](../hackathon/evidence/dsh-g0-first-purchase-source-http-20261007.md)。新 clean 双包、Linux/WSL、远端凭据传递/传输保护、生产账号准入仍是后续 gate；当前默认部署未切换。

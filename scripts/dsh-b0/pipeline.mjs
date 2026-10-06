@@ -160,6 +160,7 @@ print('B0 exact Python closure verified')
   // HTTP/computation tests import the archived CRM dependency closure and run
   // under the shared bounded backend profile, not the minimal B0 interpreter.
   pyTests.push('backend/tests/test_analytics_first_purchase_native_identity.py',
+    'backend/tests/test_analytics_first_purchase_source_http.py',
     'backend/tests/test_analytics_first_purchase_native_crm_http.py',
     'backend/tests/test_first_purchase_packed_service_support.py',
     'backend/tests/test_first_purchase_packed_kernel_support.py',
@@ -180,6 +181,7 @@ print('B0 exact Python closure verified')
     'backend/analytics_first_purchase_app.py', 'backend/analytics_first_purchase_analysis_app.py', 'backend/analytics_first_purchase_cockpit_app.py', 'backend/analytics_first_purchase_native.py', 'backend/contracts/analytics_first_purchase_analysis.py', 'backend/contracts/analytics_first_purchase_cockpit.py', 'backend/analytics_first_purchase_fixture.py',
     'backend/services/analytics/first_purchase', 'backend/services/analytics/customer_features', 'backend/services/analytics/query_codecs.py',
     'backend/contracts/analytics_first_purchase_kernel.py', 'backend/contracts/analytics_first_purchase_run.py',
+    'backend/contracts/analytics_first_purchase_source.py', 'backend/analytics_first_purchase_source_app.py',
     'backend/analytics_fixture.py', 'backend/analytics_query_fixture.py', 'backend/analytics_worker.py', 'backend/semantic/analytics_b0.py',
     'backend/semantic/analytics_channel_followup.py',
     'backend/contracts/analytics.py', 'backend/contracts/analytics_query.py', 'backend/contracts/analytics_query_run.py',
