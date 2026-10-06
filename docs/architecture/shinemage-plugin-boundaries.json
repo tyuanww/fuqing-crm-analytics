@@ -502,7 +502,7 @@
       "manifest_sha256": "011783ac55a6b567db51dbfdc1c97ffd142727ac52bfc7911801dc71fa6bed60"
     }
   ],
-  "source_files_scanned": 626,
+  "source_files_scanned": 630,
   "cross_package_edges": [
     {
       "consumer": "analytics-workbench",
@@ -562,6 +562,16 @@
       "target": "dsh-plugins/board-components",
       "specifier": "@shine-mage/board-components/waterfall",
       "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/first-purchase-native-crm.probe.mjs",
+      "target": "dsh-plugins/crm-knowledge/src/dashboard-access.mjs",
+      "specifier": "../../crm-knowledge/src/dashboard-access.mjs",
+      "access": "source",
       "type_only": false
     },
     {
@@ -1223,6 +1233,13 @@
     {
       "consumer": "analytics-workbench",
       "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/session-identity",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
       "source": "dsh-plugins/analytics-workbench/src/first-purchase-cockpit-contract.generated.d.ts",
       "route": "/api/v1/analytics-first-purchase/dashboards",
       "contract": "OBSERVED_NOT_FROZEN"
@@ -1673,6 +1690,13 @@
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/first-purchase-contract.typecheck.ts",
       "route": "/api/v1/analytics-first-purchase/runs",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/first-purchase-native-crm.probe.mjs",
+      "route": "/api/analytics-first-purchase/save",
       "contract": "OBSERVED_NOT_FROZEN"
     },
     {
@@ -3977,7 +4001,7 @@
       ],
       "compatibility": "Receipt API 1.0.0 binds action/candidate/correlation and durable state. Read-only reconcile survives admission revocation. New writes require explicit service policy; legacy saved-analysis/cockpit v1 and SQLite schema 1 remain unchanged.",
       "status": "GENERATED_DOMAIN_V1",
-      "source_sha256": "1a2daff8a85217f523726b9c8a06228ec5215f586427ad8cbfaa6be3a58cb0e8"
+      "source_sha256": "2a8f460e6169f09957f58f9452b876092c76e60091d916bfef4f6f52a77646e6"
     },
     {
       "id": "first-purchase-save-result",
@@ -3989,7 +4013,19 @@
       ],
       "compatibility": "Independent D15 result/provenance API 1.0.0 with service-owned freshness and exact candidate admission. Strict consumer decoder; immutable saved provenance shares the existing transaction. No production defaults or unversioned PINNED reinterpretation.",
       "status": "GENERATED_DOMAIN_V1",
-      "source_sha256": "1a2daff8a85217f523726b9c8a06228ec5215f586427ad8cbfaa6be3a58cb0e8"
+      "source_sha256": "2a8f460e6169f09957f58f9452b876092c76e60091d916bfef4f6f52a77646e6"
+    },
+    {
+      "id": "first-purchase-session-identity",
+      "owner": "analysis-service",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
+      "generator": "scripts/dsh-b0/first-purchase-analysis-contract.mjs",
+      "consumers": [
+        "analytics-workbench"
+      ],
+      "compatibility": "Additive read-only identity/v1; fresh explicit synthetic query grant via the CRM-owned credential lease. No client actor, cached credentials, owner alias or implicit production admission.",
+      "status": "GENERATED_DOMAIN_V1",
+      "source_sha256": "2a8f460e6169f09957f58f9452b876092c76e60091d916bfef4f6f52a77646e6"
     },
     {
       "id": "crm-first-purchase-access-v1",
@@ -3999,9 +4035,9 @@
       "consumers": [
         "analytics-workbench"
       ],
-      "compatibility": "Optional revocable per-session CRM lease; finite loopback inspect/save/reconcile only, no credentials exported. Independent service owns authorization, candidate policy and durable state.",
+      "compatibility": "Optional revocable per-session CRM lease; finite loopback identity/inspect/save/reconcile only, no credentials exported; query identity is additive and requires an explicit service grant. Independent service owns authorization, candidate policy and durable state.",
       "status": "DOMAIN_V1",
-      "source_sha256": "66f6b49cc6eb8e4bf550d0b5ffc5eb14e192cd1e2eefafe218d9998cb1a2cac7"
+      "source_sha256": "fe92c77088c2a14ac8cfe1218af202b0cb29b47b48c428703c36a3a3700926ba"
     }
   ],
   "command_owners": [

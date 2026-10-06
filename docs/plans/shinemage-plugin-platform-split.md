@@ -68,8 +68,9 @@
 
 该实现已正常提交 `48e7ddfc`，新 clean 源码/实际离线双包各 **9/9 PASS**，新候选 `9f00fadb…` 绑定服务包 `8f096a13…`。本轮构建及相关 **95 PASS**，同一包的 CRM 合成身份、关闭时效、保存与状态重新打开回放 **6/6 PASS**，实际响应通过插件 decoder。新双包在杭州 WSL 固定 A64/开启时效场景另完成 **14/14 PASS**，journal seq 4、重试 131 文件不变；10 个临时进程与本次目录已回收、现役监听/PID 不变。已核对[本次候选证据](../hackathon/evidence/dsh-g0-save-time-policy-candidate-20261006.md)与[任务账本](../hackathon/TODOS.md)：只关闭这些具体子项，真实 CRM 接入、目标关闭时效链、DSH UI/浏览器、供应链和物理分仓仍未完成，T3/T7 保持 PARTIAL。
 
-2026-10-06 保存 UI 增量：CRM 的可选会话 lease 通过生成合同连接 workbench 公开保存 adapter；原生壳不变、默认禁用，卡片不再走旧 `/b0/analyses`。当前相关后端 132 PASS、审修后 Node 51 PASS、编译卡片 7 PASS、真实 HTTP 链 1 PASS（7 项观测）；已核对[实现/审核证据](../hackathon/evidence/dsh-g0-save-ui-20261006.md)。T9/T14 只关闭本地接线子项：实际 DSH 内核仍固定 synthetic-demo，CRM 账号/run 归属、宿主 Cookie/路由、headed 浏览器和新 clean 插件包未验收，不能视为生产保存已启用或 G0/供应链已完成。
+2026-10-06 保存 UI 增量：CRM 的可选会话 lease 通过生成合同连接 workbench 公开保存 adapter；原生壳不变、默认禁用，卡片不再走旧 `/b0/analyses`。当前相关后端 132 PASS、审修后 Node 51 PASS、编译卡片 7 PASS、真实 HTTP 链 1 PASS（7 项观测）；已核对[实现/审核证据](../hackathon/evidence/dsh-g0-save-ui-20261006.md)。T9/T14 只关闭本地接线子项：该阶段仅验证固定 synthetic-demo；后续可选归属接缝见下一段，实际宿主 Cookie/路由、headed 浏览器和新 clean 插件包仍未验收，不能视为生产保存已启用或 G0/供应链已完成。
 
+2026-10-06 查询归属增量：显式 CRM session 模式复用现有 Host bridge 与服务身份检查，真实 HTTP 合成链已覆盖登录、worker 查询、同账号保存及 ACK 恢复；原生 session owner 不重绑，服务暂不可用只暂停原任务。已核对[本轮证据](../hackathon/evidence/dsh-g0-native-crm-owner-20261006.md)。T3/T9/T14 仍 PARTIAL：Host 接收器为夹具，旧 B0 gateway 不是 CRM 登录入口；实际官方宿主/admission/Cookie/浏览器、clean 候选、供应链与目标主机仍开放。
 
 | 任务 | 当前状态 | 已有证据 | 尚未关闭 |
 |---|---|---|---|

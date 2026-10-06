@@ -1637,6 +1637,48 @@
         "title": "FirstPurchaseSavedSnapshot",
         "type": "object"
       },
+      "FirstPurchaseSessionIdentity": {
+        "additionalProperties": false,
+        "properties": {
+          "data_scope": {
+            "const": "first-purchase-fixture",
+            "default": "first-purchase-fixture",
+            "title": "Data Scope",
+            "type": "string"
+          },
+          "owner_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]+$",
+            "title": "Owner Id",
+            "type": "string"
+          },
+          "query_access": {
+            "const": "GRANTED",
+            "default": "GRANTED",
+            "title": "Query Access",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "first-purchase-session-identity/v1",
+            "default": "first-purchase-session-identity/v1",
+            "title": "Schema Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "owner_id"
+        ],
+        "title": "FirstPurchaseSessionIdentity",
+        "type": "object"
+      },
+      "FirstPurchaseSessionIdentityRequest": {
+        "additionalProperties": false,
+        "description": "Empty: session and actor come from trusted host/authentication, never input.",
+        "properties": {},
+        "title": "FirstPurchaseSessionIdentityRequest",
+        "type": "object"
+      },
       "FirstPurchaseUnknownSaveReceipt": {
         "additionalProperties": false,
         "description": "No committed receipt visible; never proof that a request was not received.",
@@ -2979,6 +3021,146 @@
         "summary": "Inspect Save Result",
         "x-read-only": true
       }
+    },
+    "/api/v1/analytics-first-purchase/session-identity": {
+      "post": {
+        "operationId": "analytics_first_purchase_session_identity",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FirstPurchaseSessionIdentityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirstPurchaseSessionIdentity"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Gone"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "428": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Precondition Required"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Session Identity",
+        "x-query-grant-required": true,
+        "x-read-only": true
+      }
     }
   },
   "security": [
@@ -2992,5 +3174,5 @@
   "x-query-session-fence": false,
   "x-saved-analysis-http": true,
   "x-shared-succeeded-source": true,
-  "x-schema-sha256": "6209894f434fa0cadb746b46400064dbcec6eee8a80279423f2d1b8db52725ee"
+  "x-schema-sha256": "fd51367e1f530302bd6211fb227020254f2ff0e0e63e56285a84104e09627204"
 }

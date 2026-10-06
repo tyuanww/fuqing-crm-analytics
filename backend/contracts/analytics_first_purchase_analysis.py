@@ -32,6 +32,17 @@ VISUAL_SCHEMA = "analytics-visual-table/v1"
 HTTP_API_CONNECTED = "CONNECTED"
 
 
+class FirstPurchaseSessionIdentityRequest(AnalyticsModel):
+    """Empty: session and actor come from trusted host/authentication, never input."""
+
+
+class FirstPurchaseSessionIdentity(AnalyticsModel):
+    schema_version: Literal["first-purchase-session-identity/v1"] = "first-purchase-session-identity/v1"
+    owner_id: OpaqueId
+    data_scope: Literal["first-purchase-fixture"] = "first-purchase-fixture"
+    query_access: Literal["GRANTED"] = "GRANTED"
+
+
 class FirstPurchaseVisualSpec(AnalyticsModel):
     schema_version: Literal["analytics-visual-table/v1"] = VISUAL_SCHEMA
     kind: Literal["TABLE"] = "TABLE"

@@ -9,6 +9,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { nativeJournal, summarizeJournal, evidenceFor, requestIdOf } from './native-evidence.mjs';
 import { runtimePortBase } from './runtime-endpoints.ts';
 import { registeredSessionIds } from './runtime-family.mjs';
+import { observeNativeIdentity } from './first-purchase-native-identity.mjs';
 
 export const name = 'analytics-workbench-b0-bridge';
 export const inject = ['agents', 'sessions', 'sessionController'];
@@ -34,6 +35,11 @@ export function apply(ctx: Context): void {
       for await (const chunk of req) { raw += chunk; if (Buffer.byteLength(raw) > 65536) return respond(413, { error: 'too-large' }); }
       const intent = JSON.parse(raw);
       if (req.url === '/health') return respond(200, { ready: sessions.every(sessionId => ctx.agents.get(sessionId as never) !== undefined) });
+      if (req.url === '/identity') {
+        if (!intent || Object.keys(intent).length !== 1 || !id(intent.session_id) || !sessions.includes(intent.session_id)
+          || !ctx.sessions.get(intent.session_id as never)) return respond(409, { error: 'binding' });
+        return respond(200, await observeNativeIdentity(() => ctx.get('crmFirstPurchaseAccess'), intent.session_id));
+      }
       if (!intent || ['run_id', 'attempt_id', 'session_id', 'request_id'].some(key => !id(intent[key])) || !sessions.includes(intent.session_id)) return respond(409, { error: 'binding' });
       let agent = ctx.agents.get(intent.session_id as never);
       if (!agent && req.url === '/observe') {

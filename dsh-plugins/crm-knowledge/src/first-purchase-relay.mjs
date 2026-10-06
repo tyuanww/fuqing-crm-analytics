@@ -2,7 +2,7 @@
 import { request } from 'node:http';
 import { dashboardOrigin } from './dashboard.mjs';
 
-const paths = Object.freeze({ inspect: '/save-results/inspect', save: '/save-receipts', reconcile: '/save-receipts/reconcile' });
+const paths = Object.freeze({ identity: '/session-identity', inspect: '/save-results/inspect', save: '/save-receipts', reconcile: '/save-receipts/reconcile' });
 export function createFirstPurchaseRelay(origin) {
   const base = origin === undefined ? null : dashboardOrigin(origin);
   return Object.freeze({ configured: base !== null,

@@ -765,6 +765,12 @@ class RunStore:
                 if self.is_query:
                     return self._replay_query_conversation(con, principal, prior["response_json"])
                 return conversation_type.model_validate_json(prior["response_json"])
+            if runtime_session_id is not None and con.execute(
+                "SELECT 1 FROM conversations WHERE runtime_session_id=?", (runtime_session_id,),
+            ).fetchone():
+                # A native session retains its original owner, including after
+                # logout/restart. Another login must use a distinct session.
+                raise AnalyticsError(409, "SESSION_ALREADY_BOUND", "当前会话已有身份绑定，请使用独立会话。")
             counts = con.execute("SELECT count(*), count(CASE WHEN owner=? THEN 1 END) FROM conversations",
                                  (principal.actor_id,)).fetchone()
             if counts[0] >= self.profile.max_retained_conversations or counts[1] >= self.profile.max_retained_conversations_per_actor:
@@ -776,6 +782,19 @@ class RunStore:
                         (response.conversation_id, principal.actor_id, request.title, now, runtime_session_id or _id("session")))
             self._remember(con, principal, "conversation:create", "", key, digest, response.model_dump(mode="json"), 201)
         return response
+
+    def get_native_conversation(self, principal: AnalyticsPrincipal, runtime_session_id: str):
+        """Read an existing binding without allocating a conversation or taking a writer lock."""
+        self._require(principal, "run:read")
+        with self._connection(readonly=True) as con:
+            row = con.execute(
+                "SELECT conversation_id, owner FROM conversations WHERE runtime_session_id=?", (runtime_session_id,),
+            ).fetchone()
+        if row is None:
+            return None
+        if row["owner"] != principal.actor_id:
+            raise AnalyticsError(409, "SESSION_ALREADY_BOUND", "当前会话已有身份绑定，请使用独立会话。")
+        return self.get_conversation(principal, row["conversation_id"])
 
     def get_conversation(self, principal: AnalyticsPrincipal, conversation_id: str):
         self._require(principal, "run:read")

@@ -1,4 +1,4 @@
-/** Generated first-purchase saved-analysis HTTP contract; do not edit. OpenAPI SHA-256: 6209894f434fa0cadb746b46400064dbcec6eee8a80279423f2d1b8db52725ee */
+/** Generated first-purchase saved-analysis HTTP contract; do not edit. OpenAPI SHA-256: fd51367e1f530302bd6211fb227020254f2ff0e0e63e56285a84104e09627204 */
 export interface paths {
     "/api/v1/analytics-first-purchase/analyses": {
         parameters: {
@@ -114,6 +114,23 @@ export interface paths {
         put?: never;
         /** Inspect Save Result */
         post: operations["analytics_first_purchase_save_result_inspect"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/analytics-first-purchase/session-identity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Session Identity */
+        post: operations["analytics_first_purchase_session_identity"];
         delete?: never;
         options?: never;
         head?: never;
@@ -919,6 +936,34 @@ export interface components {
              */
             service_owner: "analytics-first-purchase";
         };
+        /** FirstPurchaseSessionIdentity */
+        FirstPurchaseSessionIdentity: {
+            /**
+             * Data Scope
+             * @default first-purchase-fixture
+             * @constant
+             */
+            data_scope: "first-purchase-fixture";
+            /** Owner Id */
+            owner_id: string;
+            /**
+             * Query Access
+             * @default GRANTED
+             * @constant
+             */
+            query_access: "GRANTED";
+            /**
+             * Schema Version
+             * @default first-purchase-session-identity/v1
+             * @constant
+             */
+            schema_version: "first-purchase-session-identity/v1";
+        };
+        /**
+         * FirstPurchaseSessionIdentityRequest
+         * @description Empty: session and actor come from trusted host/authentication, never input.
+         */
+        FirstPurchaseSessionIdentityRequest: Record<string, never>;
         /**
          * FirstPurchaseUnknownSaveReceipt
          * @description No committed receipt visible; never proof that a request was not received.
@@ -1891,6 +1936,129 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FirstPurchaseSaveResult"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsErrorResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsErrorResponse"];
+                };
+            };
+            /** @description Gone */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsErrorResponse"];
+                };
+            };
+            /** @description Content Too Large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsErrorResponse"];
+                };
+            };
+            /** @description Precondition Required */
+            428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsErrorResponse"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsErrorResponse"];
+                };
+            };
+        };
+    };
+    analytics_first_purchase_session_identity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FirstPurchaseSessionIdentityRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FirstPurchaseSessionIdentity"];
                 };
             };
             /** @description Bad Request */

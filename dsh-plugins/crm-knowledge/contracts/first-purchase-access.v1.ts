@@ -2,7 +2,7 @@
 import type {} from '@deepseek-ai/cordis';
 
 export const FIRST_PURCHASE_ACCESS_CONTRACT = 'shinemage-first-purchase-access/v1' as const;
-export type FirstPurchaseOperation = 'inspect' | 'save' | 'reconcile';
+export type FirstPurchaseOperation = 'identity' | 'inspect' | 'save' | 'reconcile';
 export interface FirstPurchaseLease {
   readonly username: string;
   readonly signal: AbortSignal;

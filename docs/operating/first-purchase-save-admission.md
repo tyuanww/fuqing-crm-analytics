@@ -32,6 +32,7 @@ policy = FirstPurchaseSavePolicy(
 
 | 接口 | 请求与含义 |
 |---|---|
+| `POST /session-identity` | 只读，body 必须为 `{}`。重新校验当前身份及三项 query 权限；返回 `first-purchase-session-identity/v1`。不接受 owner/session/token 字段，不创建 run、不启用保存。 |
 | `POST /save-results/inspect` | 只读；`schema_version=analytics-first-purchase-save-inspect/v1`、identity、created_from_run_id，及 `Idempotency-Key`。返回服务结果、provenance、freshness 和保存资格。 |
 | `POST /save-receipts` | `schema_version=analytics-first-purchase-save-command/v1`、相同 identity/run、预览 evidence_digest、title、可选 TABLE visual_spec，及同一幂等键。显式确认后发起；客户端不能上传 facts、owner、freshness 或 save_eligible。 |
 | `POST /save-receipts/reconcile` | 只读；原 identity 与幂等键。即使运行任务或候选策略已移除，仍可查询 SAVED/SAVE_UNKNOWN；重新检查当前 read/save 权限。 |
@@ -83,4 +84,19 @@ NOT_CHECKED 扩展了严格枚举，旧 D15 服务/插件不能保证识别。�
 
 CRM 连接事件取消旧请求、清空旧显示；服务器撤销 grant 后不发布迟到结果。卡片直接展示服务端 `NOT_CHECKED`，不把它标作 FRESH，不取消会话有效期。
 
-**当前限制**：`analytics_first_purchase_native.py` 仍是独立 B0 synthetic 运行时，actor 固定 synthetic-demo。接上真实管理员并不授予它读取/保存该账号 run 的权限；本轮没有别名映射或管理员绕过。下一步需在隔离固定 DSH 中证明查询 run 与 CRM 身份一致，以及实际 Cookie、路由、卸载/重启和浏览器流程。已核对[本轮证据](../hackathon/evidence/dsh-g0-save-ui-20261006.md)：当前只通过本地源码/HTTP/jsdom，不代签生产或 headed Chrome。
+上述保存卡片阶段只验证固定 synthetic-demo 的 HTTP 来源，见[该阶段证据](../hackathon/evidence/dsh-g0-save-ui-20261006.md)。后续查询归属接缝见下节；既有 fixture 不会被管理员接管。
+
+## 原生查询的 CRM 归属接缝（2026-10-06）
+
+本地隔离场景可以显式配置两端，缺一端就拒绝访问：
+
+- 原生查询 factory 的 `identity_mode="crm-session"`。未指定仍是既有 synthetic 演练模式；不会自动切换现有状态。CRM 模式拒绝旧 `asset_capabilities`，保存必须走独立版本化服务。
+- 独立保存服务 owner 构造 `CRMFirstPurchaseIdentityResolver(..., allow_query=True)`。默认为 `False`；当前账号 allowlist、CRM `/auth/me` 管理员权限、合成数据 scope 继续逐次检查。准入候选及保存策略另行配置，身份结果不代表生产放行。
+
+查询内核经已有 runtime token 保护的 Host bridge 读取当前原生 session 的身份观察。workbench 只调用 CRM 的可撤销 lease；CRM token 仍只在其 host 闭包及到配置服务的 Authorization 中出现。Host 只接受登记且仍存在的 session；服务 owner 与 lease username 必须一致。身份观察不缓存、不落盘，不是可复用令牌；缺插件、旧服务不支持接口、错误合同或超时均拒绝。
+
+RunStore 沿用原生 session 的唯一持久绑定。新 run 的 owner 和权限 scope 来自服务身份；同一 session 换账号，或把历史 synthetic-demo session 改接 CRM，返回 `SESSION_ALREADY_BOUND`。必须显式准备独立 session/隔离状态，不能改写原 owner 或把旧结果授予管理员。相同账号重启后重放原 request 仍返回原 run。
+
+未登录/退出/明确撤权与服务不可用分开处理：前者拒绝访问并停止派发；后者返回 `IDENTITY_UNAVAILABLE`，暂停派发、保留原排队任务，恢复后沿用原 request。活动任务继续遵循现有 deadline、worker 退出和 UNKNOWN 证据规则，不把网络故障伪称为账号撤权。
+
+本次实际 HTTP 验证使用合成 CRM 账号、真实查询 worker 和隔离 SQLite，覆盖查询→保存→ACK 丢失→回执恢复/重放。Host 调度接收器是受控夹具，**不代表官方 DSH 或浏览器验收**。现有 B0 演练 gateway 在登录前检查查询权限，不能直接当作 CRM 登录/生产入口；下一步须在固定官方宿主验证受控 admission、登录路由/Cookie、会话恢复与卡片，再生成 clean 候选。默认启动、生产 profile 和杭州现役未改变。见[本次证据](../hackathon/evidence/dsh-g0-native-crm-owner-20261006.md)。

@@ -309,6 +309,17 @@
       "status": "GENERATED_DOMAIN_V1"
     },
     {
+      "id": "first-purchase-session-identity",
+      "owner": "analysis-service",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
+      "generator": "scripts/dsh-b0/first-purchase-analysis-contract.mjs",
+      "consumers": [
+        "analytics-workbench"
+      ],
+      "compatibility": "Additive read-only identity/v1; fresh explicit synthetic query grant via the CRM-owned credential lease. No client actor, cached credentials, owner alias or implicit production admission.",
+      "status": "GENERATED_DOMAIN_V1"
+    },
+    {
       "id": "crm-first-purchase-access-v1",
       "owner": "crm-knowledge",
       "source": "dsh-plugins/crm-knowledge/contracts/first-purchase-access.v1.ts",
@@ -316,7 +327,7 @@
       "consumers": [
         "analytics-workbench"
       ],
-      "compatibility": "Optional revocable per-session CRM lease; finite loopback inspect/save/reconcile only, no credentials exported. Independent service owns authorization, candidate policy and durable state.",
+      "compatibility": "Optional revocable per-session CRM lease; finite loopback identity/inspect/save/reconcile only, no credentials exported; query identity is additive and requires an explicit service grant. Independent service owns authorization, candidate policy and durable state.",
       "status": "DOMAIN_V1"
     }
   ]

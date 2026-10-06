@@ -31,6 +31,8 @@ from backend.contracts.analytics_first_purchase_analysis import (
     FirstPurchaseSaveResult,
     FirstPurchaseSavedReceipt,
     FirstPurchaseSavedProvenance,
+    FirstPurchaseSessionIdentity,
+    FirstPurchaseSessionIdentityRequest,
     HTTP_API_CONNECTED,
 )
 from backend.contracts.analytics_first_purchase_run import FIRST_PURCHASE_HTTP_PREFIX
@@ -164,6 +166,20 @@ def create_first_purchase_analysis_app(
         )
 
     errors = {code: {"model": AnalyticsErrorResponse} for code in (400, 401, 403, 404, 409, 410, 413, 422, 428, 429, 503)}
+
+    @app.post(FIRST_PURCHASE_HTTP_PREFIX + "/session-identity", response_model=FirstPurchaseSessionIdentity,
+              operation_id="analytics_first_purchase_session_identity", responses=errors,
+              openapi_extra={"x-read-only": True, "x-query-grant-required": True})
+    def session_identity(payload: FirstPurchaseSessionIdentityRequest, request: Request, response: Response):
+        actor = principal(request)
+        for capability in ("run:create", "run:read", "run:cancel"):
+            require(actor, capability, data_scope="first-purchase-fixture")
+        try:
+            identity = FirstPurchaseSessionIdentity(owner_id=actor.actor_id)
+        except ValueError:
+            raise _identity_unavailable() from None
+        response.headers["cache-control"] = "no-store"
+        return identity
 
     def current_policy():
         try:

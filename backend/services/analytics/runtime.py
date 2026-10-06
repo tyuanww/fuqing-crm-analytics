@@ -35,7 +35,7 @@ class HostBridge:
         self.opener = build_opener(ProxyHandler({}), _NoRedirect())
 
     def call(self, operation, payload):
-        if operation not in {"health", "dispatch", "observe", "cancel"}:
+        if operation not in {"health", "dispatch", "observe", "cancel", "identity"}:
             raise ValueError("unsupported bridge operation")
         request = Request(self.origin + "/" + operation, data=json.dumps(payload).encode(), method="POST",
                           headers={"Content-Type": "application/json", "Authorization": "Bearer " + self.token})

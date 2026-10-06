@@ -1,6 +1,8 @@
 """Optional CRM /auth/me adapter. No login, password, token cache or CRM imports.
 
-Only the first-purchase synthetic scope is granted. The service owner explicitly
+Only the first-purchase synthetic scope is granted. Query execution additionally
+requires allow_query=True; existing saved-analysis deployments keep it disabled.
+The service owner explicitly
 selects an existing administrator; a successful identity check never admits a
 candidate or configures a save policy. Default application startup stays closed.
 """
@@ -52,6 +54,7 @@ class CRMFirstPurchaseIdentityResolver:
     origin: str
     allowed_usernames: frozenset[str]
     timeout_seconds: float = 2.0
+    allow_query: bool = False
     _address: tuple[str, int] = field(init=False, repr=False)
     _family: int = field(init=False, repr=False)
     _host_header: str = field(init=False, repr=False)
@@ -79,6 +82,8 @@ class CRMFirstPurchaseIdentityResolver:
             raise ValueError("CRM_IDENTITY_EXPLICIT_ACCOUNTS_REQUIRED")
         if type(self.timeout_seconds) not in (int, float) or not 0 < self.timeout_seconds <= 5:
             raise ValueError("CRM_IDENTITY_TIMEOUT_INVALID")
+        if type(self.allow_query) is not bool:
+            raise ValueError("CRM_IDENTITY_QUERY_GRANT_INVALID")
 
     def resolve(self, authorization: str | None) -> AnalyticsPrincipal:
         if (not isinstance(authorization, str) or not authorization.startswith("Bearer ")
@@ -93,8 +98,11 @@ class CRMFirstPurchaseIdentityResolver:
                 raise ValueError("CRM_IDENTITY_RESPONSE_INVALID")
             if payload["username"] not in self.allowed_usernames or not payload["is_admin"]:
                 raise AnalyticsError(403, "FORBIDDEN", "当前身份无权访问此服务。")
+            capabilities = frozenset({"run:read", "analysis:read", "analysis:save"})
+            if self.allow_query:
+                capabilities |= frozenset({"run:create", "run:cancel"})
             return AnalyticsPrincipal(payload["username"],
-                                      frozenset({"run:read", "analysis:read", "analysis:save"}),
+                                      capabilities,
                                       frozenset({"first-purchase-fixture"}))
         except AnalyticsError:
             raise
