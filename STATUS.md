@@ -19,7 +19,8 @@
 - 按用户确认沿用现有 CRM 管理员账号，不新建账号体系。新增首购服务可选 `CRMFirstPurchaseIdentityResolver`，经既有 `/api/v1/auth/me` 校验 Bearer；不保存密码或 token，不导入旧 CRM 实现。显式账号名单与当前管理员权限均须匹配，每次重新校验；身份成功不等于保存准入。
 - 本次五文件保存/恢复/身份回归 **134 PASS**，实际独立包 **1 PASS**（含 5 项新 CRM 身份观测）；OpenAPI/TypeScript 和 Ruff 通过。复用现有固定 `h11`，13 项依赖未变；DSH、插件运行时代码和默认服务启动未改，仅同步生成的合同摘要。见[本轮证据](docs/hackathon/evidence/dsh-g0-crm-identity-adapter-20261006.md)。
 - OCR 审核发现并修复旧写入口绕过准入：外部身份一律要求版本化保存，负测先 201 失败、修复后拒绝且不落盘；134 项回归、90 项服务门禁与独立包已重跑通过。
-- 本 adapter 尚未成为 clean 候选、未在杭州或真实 CRM 登录验证；下节 WSL 14 项只属于 `80aba9c1` 的原包。生产有效期仍待确认，真实候选准入、供应链、目标 DSH/UI 与物理分仓保持开放；没有生产保存/激活或 GitHub 操作。
+- 审修后正常 hooks 提交 `7edf7710`；该 clean SHA 源码兼容与实际离线双包各 **9/9 PASS**，同一新 archive 的 adapter **5/5 PASS**，固定包 79049 B / `26b07aa7…`。现有控制面重验通过，旧目标回执拒绝，生产激活仍阻断。
+- 新服务包尚未绑定新的 plugin candidate/journal，未在杭州或真实 CRM 登录验证；下节 WSL 14 项只属于 `80aba9c1` 的原包。生产有效期仍待确认，真实候选准入、供应链、目标 DSH/UI 与物理分仓保持开放；没有生产保存/激活或 GitHub 操作。
 
 ### 首购身份接口与 clean 服务候选（2026-10-06）
 

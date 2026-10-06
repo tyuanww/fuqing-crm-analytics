@@ -62,7 +62,7 @@
 
 上述 clean 绑定批次经 OCR delegate 审修后已通过正常 hooks 提交 `c95751f8`。下一步本地增量补齐首购服务 owner 的同步身份接口、身份/策略故障脱敏及撤权边界，保存/恢复 **74 PASS**、实际独立包场景 **1 PASS**，见[身份接缝证据](../hackathon/evidence/dsh-g0-service-identity-boundary-20261006.md)。本批完成 **8/8** 提交前审核，正常 hooks 提交 `80aba9c1`；随后该 clean SHA 的源码兼容与实际离线包各 **9/9 PASS**，新候选 `4e49cc04…` 经现有 CLI 记入本地 journal 第 3 条事件，重试不改 58 文件。插件 tarball 与上次逐字节相同，未重建 DSH/插件；旧 `2be518e5` 固定包与回执保留。随后同一 `80aba9c1` 包已另行完成 WSL 合成 **14/14 PASS**，真实 CLI 绑定 journal 第 4 条事件，重试不改 131 文件，旧 129 文件保留；10 个自有进程与目录已回收、现役监听不变。生产认证、真实候选 allowlist 与时限仍开放，T3/T7 不改为完成。
 
-继续按用户确认复用现有 CRM 管理员身份：可选服务 adapter 只消费既有 `/api/v1/auth/me`，不共享 CRM 实现、不新建账号/密码或扩展 DSH。每次重新认证、总 I/O 超时、严格响应上限和失败拒绝已在本地验证；五文件 **134 PASS**，实际独立包 **1 PASS**（含 5 项 adapter 观测）。见[CRM 身份适配证据](../hackathon/evidence/dsh-g0-crm-identity-adapter-20261006.md)。当前是新的本地源码/测试包增量，不是上述 WSL 包；clean candidate、真实 CRM 现场接入与生产时限仍未完成。
+继续按用户确认复用现有 CRM 管理员身份：可选服务 adapter 只消费既有 `/api/v1/auth/me`，不共享 CRM 实现、不新建账号/密码或扩展 DSH。每次重新认证、总 I/O 超时、严格响应上限和失败拒绝已在本地验证；五文件 **134 PASS**，实际独立包 **1 PASS**（含 5 项 adapter 观测）。见[CRM 身份适配证据](../hackathon/evidence/dsh-g0-crm-identity-adapter-20261006.md)。OCR 审修已修复旧写入口绕过准入，正常 hooks 提交 `7edf7710`；其 clean 服务包另完成源码/实际离线包各 **9/9 PASS**、同一 archive adapter **5/5 PASS**。这是新的服务包，不是上述 WSL 包；新插件候选绑定、真实 CRM 现场接入与生产时限仍未完成。
 
 | 任务 | 当前状态 | 已有证据 | 尚未关闭 |
 |---|---|---|---|

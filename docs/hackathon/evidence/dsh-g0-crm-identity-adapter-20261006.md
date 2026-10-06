@@ -58,4 +58,27 @@ node scripts/dsh-b0/first-purchase-analysis-contract.mjs --check \
 
 本轮先完成上一个 `80aba9c1` 固定双包的杭州 WSL **14/14 PASS**，真实 CLI 绑定原候选 journal seq 4，10 个临时 PID/目录已回收，生产监听/PID 不变，见[该包现场记录](./dsh-g0-service-identity-boundary-20261006.md)。本页新增 adapter 不在该包内，不继承其现场结论。
 
-T3/T7 继续 PARTIAL：新 adapter 的 clean 候选、真实 CRM 会话/撤权与目标平台接入、真实 candidate allowlist、可信策略配置及生产时限仍待完成。供应链、目标 DSH/session/WAL、浏览器/真实 UAT 和物理分仓沿用 G0/stop-go；本轮没有 GitHub push/发布、生产切换或真实数据访问。
+T3/T7 继续 PARTIAL：新 adapter 的 clean 服务包已完成下节验证；新插件候选绑定、真实 CRM 会话/撤权与目标平台接入、真实 candidate allowlist、可信策略配置及生产时限仍待完成。供应链、目标 DSH/session/WAL、浏览器/真实 UAT 和物理分仓沿用 G0/stop-go；本轮没有 GitHub push/发布、生产切换或真实数据访问。
+
+## 审核提交后的固定服务包
+
+已通过正常 hooks 本地提交 **`7edf771050cbcfcf31ad4a88b679e62ad31bf651`**；工作树干净后生成以下产物，没有 push。首次 commit 被文档实证检查拦截，已为“未配置策略拒绝保存”补充实际回归链接，再通过原 hook，没有绕过。18 处既有 test-order WARN 保持非阻断。
+
+使用同一固定基线 `56198c32a52d9822c7a3338d92b0fa077d1c61bc`，源码 SQLite/ASGI **9/9 PASS**；两个实际 archive 各自使用已有 wheelhouse 的 13 项锁依赖、两个新 venv，离线 HTTP 兼容 **9/9 PASS**。另外安全解包同一新 archive，在第三个离线最小 venv 执行包内 adapter，**5/5** 身份观测 PASS。没有重新构建 DSH 或运行时插件。
+
+| 对象 | 固定值 |
+|---|---|
+| candidate 服务包 | **79049 B** / `26b07aa7a62d62b18610c4d8badddd649c58542c35dcd80e5c5faed00b4f99df` |
+| candidate manifest | `86b6c5ebfcd66647d2601e3fbcc87680337c9052019b521e282b6d8de79171d6` |
+| baseline 服务包 | 66647 B / `b968944d212d66ad4d93f79124e1d00e75b93abe5093c9d447fac5ec4d05687a`；旧代码与当前配方，不冒作历史发布包 |
+| baseline manifest | `a5a9da1f0be4037e1d8d174ea37e8133c8e2ef458fd3863c6e41cb347eb4a444` |
+| 源码回执 | `64454bfd18d49354d6b7eed97d965109274d6d9a9f19093c29cea60ceab7199f` |
+| 实际包回执 | `e1291bcbe63e5b6d3ab1bbfb2111d8b0dcc7d9a2fba5cdff00649967a9a077b0` |
+
+两包 `source.worktree_dirty=false`；candidate 的实际服务代码来源与配方均为 `7edf7710`。通过现有 `prepareServiceCompatibility` / `verifyServiceArtifactEvidence` 得到 `LOCAL_SERVICE_ARTIFACTS_VERIFIED`。提供 `80aba9c1` 的 WSL 回执时得到 `SERVICE_TARGET_PAIR_MISMATCH`；实际本地调用激活门禁仍抛出 `SERVICE_ACTIVATION_EVIDENCE_INCOMPLETE`，没有网络或主机动作。
+
+证据根 `.context/checks/service-crm-identity-clean-7edf7710-20261006/`：`source.log`、`pair.log`、`source/`、`pair/`、`service-binding.json`、`source-gate.json`、`artifact-verification.json`、`adapter-verification.json` 与 `gate-verification.json`。源码/包配对命令沿用[clean 服务入口](./dsh-g0-service-clean-candidate-20261006.md)，candidate 改为完整 `7edf7710…`、output 改为本根目录。临时应用/venv 均由 runner finally 回收；配对 runner 不记录各进程 PID，不将空列表当作独立逐 PID 证明。
+
+额外 adapter 冷安装检查首次因其隔离 PATH 未包含已有 zstd 而失败，临时目录已回收；补入明确的本机工具目录后通过，未安装或替换依赖。另一次本地断言误把 Node 错误正文（附摘要 diff）与单一错误码做全字符串相等；改为核对首行错误码，验证器始终正确拒绝旧 WSL 回执。原日志和 `gate-check-initial.json` 说明保留。
+
+**本节只完成 clean 服务包。** 新 plugin candidate/journal 绑定、WSL/真实 CRM 现场验证、生产保存策略与供应链仍 NOT_RUN；`release_ready=false`。后续纯证据文档提交不改变本表服务来源，不需为文档重打包。旧 129 个产物与 `80aba9c1` 候选的 131 个产物/回执/journal 均已核对保留。

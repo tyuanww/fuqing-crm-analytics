@@ -101,7 +101,7 @@ identities = CRMFirstPurchaseIdentityResolver(
 - CRM 401/403 分别拒绝为未认证/无权限，其余失败为可重试 503 `IDENTITY_UNAVAILABLE`，不透传响应正文或凭证。保存事务内仍按既有检查点重验，认证服务故障时不能新写入分析/回执；没有承诺跨 CRM 和 SQLite 的分布式原子撤权。
 - 旧 `POST /analyses` 仅保留原 B0 注册表的合成兼容行为，任何外部 resolver 即使漏配 policy callback 也返回 409 `VERSIONED_SAVE_REQUIRED`，不能绕过准入。默认 `service.py serve` 仍不注入 adapter、RunStore、状态或策略。通过身份校验不能自动填写 candidate allowlist 或有效期；定向测试已验证：策略未配置时保持 `POLICY_NOT_CONFIGURED`/禁用保存（见 [identity-alone 回归](../../backend/tests/test_analytics_first_purchase_crm_identity.py)）。公共知识插件无需 CRM，其他身份 provider 仍可通过原协议独立实现。
 
-本增量[本地 134 项回归与实际包观测](../hackathon/evidence/dsh-g0-crm-identity-adapter-20261006.md)已通过；真实 CRM 登录/会话撤销、生产候选准入、有效期、clean artifact 与其杭州验收仍未完成。现役服务和保存 UI 未切换。
+本增量[本地 134 项回归与实际包观测](../hackathon/evidence/dsh-g0-crm-identity-adapter-20261006.md)已通过；审修提交 `7edf7710` 的 clean 服务包另完成源码/离线包各 9/9、包内 adapter 5/5。新 plugin candidate/journal、真实 CRM 登录/会话撤销、生产候选准入、有效期与该包杭州验收仍未完成。现役服务和保存 UI 未切换。
 
 ## 验证与尚未完成的交付
 
