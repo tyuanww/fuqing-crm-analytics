@@ -181,3 +181,40 @@ def test_identity_status_and_cancel_before_first_prompt_do_not_create_conversati
     assert cancel.status_code == 409 and cancel.json()["error"]["code"] == "NO_ACTIVE_RUN"
     with sqlite_connection(app.state.store.path) as db:
         assert db.execute("SELECT count(*) FROM conversations").fetchone()[0] == 0
+
+
+def test_transient_identity_outage_keeps_known_running_observation_and_original_intent(tmp_path):
+    class RecoveringIdentityReceiver(IdentityReceiver):
+        fail_once = False
+
+        def call(self, operation, payload):
+            if operation == "identity" and self.fail_once:
+                self.fail_once = False
+                raise OSError("controlled one-shot identity outage")
+            return super().call(operation, payload)
+
+    bridge = RecoveringIdentityReceiver()
+    app = create_first_purchase_native_app(config(tmp_path), bridge=bridge)
+    dispatcher = app.state.dispatcher
+    dispatcher.start()
+    try:
+        dispatcher.tick()
+        client = TestClient(app)
+        accepted = client.post("/internal/native/prompt", json=native_prompt(), headers=auth()).json()
+        dispatcher.tick()
+        before = app.state.store.get(fp_actor("crm-owner"), accepted["run_id"])
+        intent = app.state.store.runtime_work()[0]["intent"]
+        assert before.status == "RUNNING"
+        bridge.fail_once = True
+        dispatcher.tick()
+        assert app.state.store.get(fp_actor("crm-owner"), accepted["run_id"]) == before
+        assert dispatcher.ready is False and dispatcher.last_error == "IDENTITY_UNAVAILABLE"
+        dispatcher.tick()
+        assert dispatcher.ready and dispatcher.last_error is None
+        assert app.state.store.runtime_work()[0]["intent"] == intent
+        assert app.state.store.get(fp_actor("crm-owner"), accepted["run_id"]).status == "RUNNING"
+        assert sum(op == "dispatch" for op, _ in bridge.calls) == 1
+        assert all(event.payload.status not in {"UNKNOWN", "CANCELLING"}
+                   for event in app.state.store.events(fp_actor("crm-owner"), accepted["run_id"]))
+    finally:
+        dispatcher.close()

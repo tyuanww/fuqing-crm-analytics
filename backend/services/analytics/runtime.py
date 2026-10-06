@@ -108,14 +108,15 @@ class RunDispatcher:
         try:
             self._tick()
             self.last_error = None
-        except (AnalyticsError, sqlite3.DatabaseError):
-            # A held SQLite writer must pause new admissions, not terminate the
-            # background task forever with an old ready=True value. Next tick
-            # reconciles original intents; it never retries external dispatch.
+        except (AnalyticsError, sqlite3.DatabaseError) as error:
+            # Persistence/identity outages pause admissions without changing
+            # known Host evidence. Reconcile the same intent on the next tick.
             self.ready = False
-            if self.last_error != "STATE_UNAVAILABLE":
-                logging.getLogger(__name__).warning("B0 state unavailable; new dispatch paused until reconciliation")
-            self.last_error = "STATE_UNAVAILABLE"
+            code = ("IDENTITY_UNAVAILABLE" if isinstance(error, AnalyticsError)
+                    and error.status == 503 and error.code == "IDENTITY_UNAVAILABLE" else "STATE_UNAVAILABLE")
+            if self.last_error != code:
+                logging.getLogger(__name__).warning("B0 %s; new dispatch paused until reconciliation", code)
+            self.last_error = code
 
     def _tick(self):
         if self.workers is not None:
@@ -140,9 +141,9 @@ class RunDispatcher:
             except Exception as error:
                 if isinstance(error, sqlite3.DatabaseError) or (
                     isinstance(error, AnalyticsError)
-                    and error.status == 503 and error.code == "STATE_UNAVAILABLE"
+                    and error.status == 503 and error.code in {"STATE_UNAVAILABLE", "IDENTITY_UNAVAILABLE"}
                 ):
-                    # Local persistence failure is not unknown Host evidence.
+                    # Local persistence/identity failure is not unknown Host evidence.
                     # Let tick pause admissions and reconcile the same intent.
                     raise
                 self.ready = False

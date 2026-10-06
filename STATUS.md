@@ -14,7 +14,12 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### CRM 账号到原生查询归属（2026-10-06，当前进度）
+### CRM 查询归属复审（2026-10-06，当前进度）
+
+- OCR delegate 已补审 `9d1a9acf` 全部 **29/29** 文件；复现并修复运行中身份瞬时 503 被误写 UNKNOWN 的分支。保留原任务与 Host 状态，暂停新派发并给出身份故障诊断，恢复不重发。
+- 本次修复后相关后端 **94 PASS**、Node **15 PASS**，合同/边界/Ruff/差异检查通过；已核对[本次审核与失败证据](docs/hackathon/evidence/dsh-g0-native-crm-review-20261006.md)。仍 PARTIAL；接续固定官方宿主登录、查询准入与保存整链，不继承旧 HTTP 夹具作为宿主通过。
+
+### CRM 账号到原生查询归属（2026-10-06，上一阶段）
 
 - 从 `95b78e8f` 干净工作树继续。新增显式 CRM session 身份模式，复用现有 Host bridge、CRM 可撤销 lease 和公开服务身份检查；新查询/保存使用同一认证账号，不缓存 CRM 凭据或身份观察，不把 synthetic-demo 映射为管理员。
 - 原生 session 的 owner 持久绑定；换账号/旧 fixture 改归属明确拒绝。身份服务暂不可用只暂停派发；退出登录或明确撤权才撤销查询权限，恢复仍用原任务。默认模式、上游 DSH 和生产 profile 未改。

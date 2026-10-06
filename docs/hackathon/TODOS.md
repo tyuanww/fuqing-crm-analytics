@@ -304,6 +304,7 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 - [x] T9/T14 保存 UI 本地接线子项（2026-10-06）：复用 CRM 会话凭据、公开版本化服务、原请求保存/核对/重试与可见禁用；两个插件构建、相关后端 132 PASS、审修后 Node 51 PASS、编译卡片 7 PASS，真实 HTTP 集成 1 PASS（7 项观测）。已核对[本轮证据](./evidence/dsh-g0-save-ui-20261006.md)，不关闭上方 T3/T7/D4-C；后续账号/run 归属接缝见下一项，实际 DSH/浏览器仍待验收。
 - [x] T3/T9 CRM 查询归属本地接缝（2026-10-06）：显式模式沿用 Host bridge 与 CRM 可撤销 lease，新 run 归属真实认证的合成账号；真实 worker/HTTP 保存/ACK 恢复通过，换账号及旧 fixture 重绑拒绝。已核对[本轮证据](./evidence/dsh-g0-native-crm-owner-20261006.md)；服务故障暂停原任务，不误判撤权。
 - [ ] T3/T9/T14 固定官方 DSH 的 CRM 登录/admission/查询/保存验收：本次 Host 接收器仍为夹具；旧 B0 gateway 的登录前 query gate 不能充当 CRM 登录入口。需验证实际 Cookie/路由、重启/会话、浏览器与新 clean candidate，生产 gate 不变。
+- [x] 查询归属复审（2026-10-06）：`9d1a9acf` 全部 29/29 文件已核对；修复运行中身份瞬时故障被误写 UNKNOWN，94 项后端与 15 项 Node 回归通过，见[本轮证据](./evidence/dsh-g0-native-crm-review-20261006.md)。上述官方宿主整链保持开放。
 
 - [x] T3/T7 现有 CRM 身份适配子项（2026-10-06，本地增量）：可选 loopback `/api/v1/auth/me` adapter，显式现有账号与当前管理员授权、无密码/token 缓存、撤权/超时/畸形响应拒绝；五文件 **134 PASS**，实际包 **1 PASS** 含 5 项身份观测。见[证据](./evidence/dsh-g0-crm-identity-adapter-20261006.md)。审修后正常 hooks 提交 `7edf7710`；该 clean SHA 源码/实际离线包各 **9/9 PASS**，同一 archive 的 adapter **5/5 PASS**，固定包 `26b07aa7…`。新 plugin candidate/journal 与真实 CRM/WSL 接入未验收，不开启生产保存。
 - [x] T3/T7 clean 首购服务本机候选（2026-10-06）：从审核提交 `2be518e5` 生成双包，打包来源均 clean；源码 **9/9**、实际离线包/HTTP **9/9**，控制面重验及旧 WSL 回执误用拒绝通过，见[证据](./evidence/dsh-g0-service-clean-candidate-20261006.md)。该准备阶段的 plugin journal/WSL 为 NOT_RUN；后续独立实测见下一项，不继承旧包目标结论。
