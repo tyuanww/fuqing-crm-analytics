@@ -160,6 +160,7 @@ print('B0 exact Python closure verified')
   // under the shared bounded backend profile, not the minimal B0 interpreter.
   pyTests.push('backend/tests/test_analytics_first_purchase_native_identity.py',
     'backend/tests/test_analytics_first_purchase_native_crm_http.py',
+    'backend/tests/test_first_purchase_packed_service_support.py',
     'backend/tests/test_competition_assets.py',
     'backend/services/analytics/competition_diagnosis/tests/test_competition_diagnosis.py',
     'backend/tests/test_page_documents.py',

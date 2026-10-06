@@ -14,11 +14,17 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 精确插件包的宿主与浏览器（2026-10-06，当前进度）
+### 独立保存服务包的宿主组合（2026-10-07，当前进度）
+
+- 从 clean `212005bc` 继续，复用 workbench/CRM 包及原 `d7025f75…` 服务 archive，在独立离线 venv/进程加载保存服务。未重新打包；原生登录、查询、保存和回执链通过，保存服务单独重启后经 Host 重放同一请求，分析记录仍为 1。见[本轮证据](docs/hackathon/evidence/dsh-g0-first-purchase-service-host-20261007.md)。
+- 当前保护/model **27 PASS**、后端 **5 PASS**；workspace HTTP、artifact HTTP、artifact Chrome 各 **1 PASS**，Chrome **5 场景**。最终 9 个自有 Host/服务 PID 已退出、5 个端口无监听，旧证据 437 文件与 journal 未变。
+- **仍 PARTIAL**：关闭本机“插件包 + 保存服务包”组合子项。CRM/model、查询 kernel/worker 仍为合成源码夹具；查询内核包级组合、新包 WSL/恢复、供应链和生产 gate 尚未关闭。本轮未操作杭州或发布。
+
+### 精确插件包的宿主与浏览器（2026-10-06，上一阶段）
 
 - 复用 `9611589c` workbench 包，并从 clean `d3fe7f94` 构建固定 CRM 包；通过新的显式 artifact 模式在私有目录解包，复用生产接收器的 peer 链接，用真实 candidate digest 验证。未改业务插件或 DSH 上游。
 - 官方 Host HTTP **1 PASS**，紧接运行的 Chrome headless **1 PASS / 5 项观测**；保护/model 测试 **21 PASS**、受影响后端 **3 PASS**。已修复演练缺 transitive SDK、固定端口 TIME_WAIT 和父初始化错误被遮蔽的问题；见[本次证据](docs/hackathon/evidence/dsh-g0-first-purchase-artifact-host-20261006.md)。
-- **仍 PARTIAL**：这次只证明精确插件包组合，服务/查询内核仍由隔离源码夹具运行。旧候选 83 文件及 journal seq 3 未改，临时监听和 Host 已回收。下一步接独立服务 archive 的同组合验收，再做新包 WSL/生产门禁；本轮未操作杭州或发布。
+- **当时 PARTIAL**：该阶段只证明精确插件包组合，服务/查询内核由源码夹具运行。旧候选 83 文件及 journal seq 3 未改，临时监听和 Host 已回收；保存服务 archive 的后续进展见上节。
 
 ### 原生命令 clean 候选（2026-10-06，上一阶段）
 

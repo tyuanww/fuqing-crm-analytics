@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, access, symlink } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, access, symlink, cp } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
@@ -11,6 +11,7 @@ import { runFirstPurchaseBrowser } from './first-purchase-browser.probe.mjs';
 import { prepareFirstPurchaseArtifacts, verifyFirstPurchaseInstalledArtifacts } from './first-purchase-artifacts.mjs';
 import { serviceFixture } from '../release/test-fixtures/service-compatibility.mjs';
 import { DSH_SDK_VERSION, DSH_UPSTREAM_SHA } from '../release/toolchain.mjs';
+import { readFirstPurchaseService, installFirstPurchaseService, verifyFirstPurchaseService } from './first-purchase-service-artifacts.mjs';
 
 const repository = fileURLToPath(new URL('../..', import.meta.url));
 const upstream = process.env.B0_BUILD_UPSTREAM;
@@ -141,6 +142,12 @@ async function artifactFixture(t) {
 
 for (const [name, mutate, error] of [
   ['unknown input', async f => { f.manifest.extra = true; await f.write(f.manifestPath, f.manifest); }, /HOST_ARTIFACT_SCHEMA/],
+  ['incomplete service opt-in', async f => {
+    f.manifest.schema_version = 'dsh-first-purchase-host-artifacts/v2'; await f.write(f.manifestPath, f.manifest);
+  }, /HOST_ARTIFACT_SCHEMA/],
+  ['implicit service opt-in', async f => {
+    f.manifest.service_evidence_path = '/not-an-opt-in'; await f.write(f.manifestPath, f.manifest);
+  }, /HOST_ARTIFACT_SCHEMA/],
   ['wrong candidate', async f => { f.manifest.candidate_sha256 = '0'.repeat(64); await f.write(f.manifestPath, f.manifest); }, /HOST_ARTIFACT_CANDIDATE_BYTES/],
   ['profile drift', f => f.write(join(f.directory, 'profile.json'), {}), /HOST_ARTIFACT_PROFILE_DIGEST/],
   ['tarball tamper', f => writeFile(join(f.directory, 'workbench.tgz'), 'changed'), /HOST_ARTIFACT_PACK_SIZE/],
@@ -187,4 +194,40 @@ test('parent setup failure closes the artifact driver without masking its origin
     } });
   assert.deepEqual(JSON.parse(output), { method_digest: 'a'.repeat(64), candidate_digest: f.candidate.candidate_digest });
   assert.deepEqual((await readdir(f.output)).sort(), ['crm', 'crm.tgz', 'dsh-plugins', 'packages.json', 'upstream', 'workbench', 'workbench.tgz']);
+});
+
+test('saved-analysis install requires explicit absolute inputs before reading files', async () => {
+  await assert.rejects(readFirstPurchaseService({ evidencePath: '.', python: '/unavailable', wheelhouse: '/unavailable' }), /HOST_SERVICE_ABSOLUTE_PATH/);
+});
+
+const serviceExact = { skip: !['B0_NATIVE_CRM_ARTIFACT_MANIFEST', 'B0_NATIVE_CRM_SERVICE_PYTHON', 'B0_NATIVE_CRM_SERVICE_WHEELHOUSE']
+  .every(name => process.env[name]) && 'Explicit existing service pair/Python/wheelhouse required.' };
+async function serviceArtifactOptions() {
+  const input = JSON.parse(await readFile(process.env.B0_NATIVE_CRM_ARTIFACT_MANIFEST));
+  const candidate = JSON.parse(await readFile(input.candidate_path));
+  return { evidencePath: input.service_evidence_path, expectedSha: input.service_evidence_sha256,
+    gate: candidate.service_compatibility, python: process.env.B0_NATIVE_CRM_SERVICE_PYTHON,
+    wheelhouse: process.env.B0_NATIVE_CRM_SERVICE_WHEELHOUSE };
+}
+test('saved-analysis composition rejects a changed pair receipt before installation', serviceExact, async () => {
+  await assert.rejects(readFirstPurchaseService({ ...await serviceArtifactOptions(), expectedSha: '0'.repeat(64) }), /HOST_SERVICE_EVIDENCE_DIGEST/);
+});
+test('saved-analysis composition rejects same-name wheels with different immutable bytes', serviceExact, async t => {
+  const options = await serviceArtifactOptions(), directory = await fixture(t), wheelhouse = join(directory, 'wheels');
+  await cp(options.wheelhouse, wheelhouse, { recursive: true });
+  const pair = JSON.parse(await readFile(options.evidencePath));
+  const wheel = Object.values(pair.artifacts.candidate.installed.wheels)[0];
+  await writeFile(join(wheelhouse, wheel.file), 'changed wheel bytes');
+  await assert.rejects(readFirstPurchaseService({ ...options, wheelhouse }), /HOST_SERVICE_WHEEL_CHANGED/);
+});
+test('saved-analysis cold install checks exact closure, exclusive output and bootstrap integrity', serviceExact, async t => {
+  const spec = await readFirstPurchaseService(await serviceArtifactOptions());
+  const directory = await fixture(t), output = join(directory, 'installed-service');
+  const prepared = await installFirstPurchaseService(spec, output);
+  assert.equal(prepared.receipt.release_ready, false);
+  await verifyFirstPurchaseService(prepared);
+  await assert.rejects(installFirstPurchaseService(spec, output), /EEXIST/);
+  // A modified bootstrap must be rejected by bytes before it can run again.
+  await writeFile(join(prepared.app, 'service.py'), "raise RuntimeError('must never execute changed bootstrap')\n");
+  await assert.rejects(verifyFirstPurchaseService(prepared), /HOST_SERVICE_INSTALLED_SIZE/);
 });

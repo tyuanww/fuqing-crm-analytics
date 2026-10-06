@@ -62,6 +62,8 @@ manifest 使用 `dsh-first-purchase-host-artifacts/v1`，必须包含绝对 `can
 
 下一步沿用 T3/T7/T13/T17/T21：将独立服务 archive 接入同一组合验收，补目标 WSL/runtime/恢复与回执门禁；供应链、真实模型/生产 UAT、headed/移动端/读屏和生产激活仍开放。G0/stop-go 后再物理分仓。本轮没有连接杭州、访问真实 DuckDB、push 或发布。
 
+后续接续：本批已正常提交 `212005bc`。原插件包与独立保存服务 archive 的[同宿主组合验收](./dsh-g0-first-purchase-service-host-20261007.md)已完成本机子项；本页原始包、回执和 journal 保留，查询 kernel/worker 与生产验收仍不在该通过范围。
+
 ## 提交前审核
 
 沿用 OCR delegate 的确定性 preview/rule，由当前 Agent 审查全部 **11/11** 文件（含默认排除的 2 份 Python 和 6 份 Markdown），**0 skipped、100%**。本轮发现的 SDK 链接、端口复用与父失败归因问题已修复并实际复验，另补运行前 Node 检查和运行后包/SDK 链接完整性负测；本轮无未关闭代码发现。review 清单保存为 `review-summary-final.json`，新增文档链接、回执摘要和最终源码一致性核对保存为 `document-links-final.json`。首次提交的文档声明检查要求近行证据，已对照上述实际回执与 EEXIST 测试补明出处，未跳过 hook。此结论不关闭上节的集成与生产开放项，也不是独立外部 reviewer 的背书。

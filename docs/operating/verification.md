@@ -201,6 +201,8 @@ CRM 首购的真实宿主 HTTP 链另有显式入口：先按已有 SDK 链接�
 
 同一入口可显式增加 `B0_NATIVE_CRM_ARTIFACT_MANIFEST=/absolute/owned/input.json`，安全解包并加载固定 workbench 候选与 CRM 包，保存使用真实 candidate digest。输入 schema/绝对路径/文件摘要见[包级验收](../hackathon/evidence/dsh-g0-first-purchase-artifact-host-20261006.md)；pytest 自动分配独立输出，沿用现有生产 peer link helper，结束后验证文件和 SDK 链接完整性。不提供变量仍走 workspace 模式；服务/查询内核仍为源码合成夹具，不代表服务 archive 已整链通过。自有 HTTP fixture 支持关闭连接后的端口复用，仍拒绝现有 live listener；不要杀其他进程腾端口。
 
+该输入的 v2 schema 增加固定 `service_evidence_path` / `service_evidence_sha256`，同时要求显式 `B0_NATIVE_CRM_SERVICE_PYTHON` 和 `B0_NATIVE_CRM_SERVICE_WHEELHOUSE`。它复用原服务 verifier 和离线 hash 安装器，在独立 venv/进程运行保存服务，验证 Host 重放与服务重启，拒绝回落到源码服务；v1 保持上一段范围。具体[命令与范围](../hackathon/evidence/dsh-g0-first-purchase-service-host-20261007.md)已核对：查询内核/CRM/model 仍是源码合成夹具，不等于整套生产 runtime。`test_first_purchase_packed_service_support.py` 的启动拒绝/回收负测纳入 B0；真实宿主/服务包验收仍需 opt-in，同端口模式顺序运行。
+
 `pnpm dsh plugin verify-host --candidate /absolute/candidate.json --evidence /absolute/evidence.json --state-path /absolute/state.json` 核验已有 v2 宿主证据并幂等追加到原 candidate journal；该命令不运行宿主。`plugin-host-evidence.test.mjs` 纳入 release suite/B0，用明确的 verifier-only 夹具检查缺项、篡改、错误 scope/journal 和重试，不能将这些夹具视为真实宿主通过；真实命令的十项场景与 CLI 接线另行留证，见[本机接线与服务状态证据](../hackathon/evidence/dsh-g0-host-journal-20261004.md)。
 
 T3/T7 的 `backend/tests/test_analytics_first_purchase_save_recovery.py` 纳入现有 B0 Python 目标和常规 backend 回归：只用隔离合成 RunStore/SQLite，分别在提交前后 SIGKILL 自有子进程，通过新进程重放、冲突/权限拒绝、保留旧版本的 forward-fix 和不兼容 schema 拒绝验证存储边界。这仍不证明 D15 candidate/correlation 回执、业务数据迁移或跨版本服务回退；保存门禁继续关闭。

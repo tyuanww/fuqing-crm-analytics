@@ -19,6 +19,8 @@ const packed = process.env.B0_NATIVE_CRM_ARTIFACT_MANIFEST ? await prepareFirstP
   manifestPath: process.env.B0_NATIVE_CRM_ARTIFACT_MANIFEST,
   output: process.env.B0_NATIVE_CRM_ARTIFACT_OUTPUT,
   upstream: process.env.B0_NATIVE_CRM_HOST_UPSTREAM,
+  python: process.env.B0_NATIVE_CRM_SERVICE_PYTHON,
+  wheelhouse: process.env.B0_NATIVE_CRM_SERVICE_WHEELHOUSE,
 }) : null;
 const workbench = packed?.workbench ?? join(repository, 'dsh-plugins/analytics-workbench');
 const crmPlugin = packed?.crm ?? join(repository, 'dsh-plugins/crm-knowledge');
@@ -31,7 +33,9 @@ if (packed) {
 }
 const { firstPurchaseMethodPackageDigest } = await import(pathToFileURL(join(workbench, 'lib/skills.js')).href);
 const send = value => process.stdout.write(JSON.stringify(value) + '\n');
-send({ method_digest: firstPurchaseMethodPackageDigest, candidate_digest: candidateDigest });
+send({ method_digest: firstPurchaseMethodPackageDigest, candidate_digest: candidateDigest,
+  ...packed?.service ? { service: { app: packed.service.app, python: packed.service.python,
+    manifest_sha256: packed.service.receipt.manifest_sha256 } } : {} });
 const lines = createInterface({ input: process.stdin }), iterator = lines[Symbol.asyncIterator]();
 const firstInput = await iterator.next();
 // The parent may fail to bind its own fixtures after receiving our handshake.
@@ -124,6 +128,7 @@ try {
   assert.deepEqual((await crm('status')).value, { ok: true, connected: false, username: null, expires_at: null });
   record({ stage: 'cookie-origin-csrf-and-login-bootstrap', status: 'PASS' });
   send({ ready: true });
+  let replaySaved;
   for await (const line of { [Symbol.asyncIterator]: () => iterator }) {
     const command = JSON.parse(line);
     if (command.operation === 'browser') {
@@ -158,6 +163,12 @@ try {
       record({ stage: 'durable-session-and-cookie-reused-crm-relogin-required', status: 'PASS' });
       send({ ok: true, preserved: true }); continue;
     }
+    if (command.operation === 'replay-save') {
+      assert.equal(typeof replaySaved, 'function');
+      await replaySaved();
+      record({ stage: 'same-save-intent-after-independent-service-restart', status: 'PASS' });
+      send({ ok: true, replayed: true }); continue;
+    }
     assert.equal(command.operation, 'save');
     const target = { session_id: input.session_id, run_id: command.run_id, call_id: command.call_id };
     const values = new Map(), storage = { getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value) };
@@ -178,6 +189,7 @@ try {
     const reopened = createSaveController({ target, storage, request, onChange() {} }); controllers.push(reopened);
     await reopened.start(); assert.equal(reopened.getState().phase, 'saved'); assert.equal(writes, 1);
     assert.deepEqual((await transport(target, 'save', original)).value, reopened.getState().receipt);
+    replaySaved = async () => assert.deepEqual((await transport(target, 'save', original)).value, reopened.getState().receipt);
     record({ stage: 'official-fetch-save-ack-loss-reconcile-replay', status: 'PASS' });
     send({ ok: true, saved: true, writes });
   }

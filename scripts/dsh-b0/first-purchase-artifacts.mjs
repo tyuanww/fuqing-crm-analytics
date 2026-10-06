@@ -11,6 +11,7 @@ import { validateProfile } from '../release/profile.mjs';
 import { DSH_SDK_VERSION, DSH_UPSTREAM_SHA, NODE_MAJOR } from '../release/toolchain.mjs';
 import { assertClean, scanTree } from '../release/secret-scan.mjs';
 import { materializePluginPeerLinks } from '../release/promotion.mjs';
+import { readFirstPurchaseService, installFirstPurchaseService, verifyFirstPurchaseService } from './first-purchase-service-artifacts.mjs';
 
 const root = fileURLToPath(new URL('../..', import.meta.url)), exec = promisify(execFile);
 const PRIVATE = { mode: 0o600, flag: 'wx' }, HEX = /^[a-f0-9]{64}$/;
@@ -38,12 +39,14 @@ async function inventory(directory) {
   return files;
 }
 
-export async function prepareFirstPurchaseArtifacts({ manifestPath, output, upstream }) {
+export async function prepareFirstPurchaseArtifacts({ manifestPath, output, upstream, python, wheelhouse }) {
   assert.equal(Number(process.versions.node.split('.')[0]), NODE_MAJOR, 'HOST_ARTIFACT_NODE_VERSION');
   for (const path of [manifestPath, output, upstream]) assert.ok(typeof path === 'string' && isAbsolute(path), 'HOST_ARTIFACT_ABSOLUTE_PATH');
   const manifestBytes = await readArtifactFile(manifestPath, 16 * 1024), input = decode(manifestBytes);
-  exact(input, ['schema_version', 'candidate_path', 'candidate_sha256', 'crm_pack_path', 'crm_pack_sha256']);
-  assert.equal(input.schema_version, 'dsh-first-purchase-host-artifacts/v1', 'HOST_ARTIFACT_SCHEMA');
+  const withService = input.schema_version === 'dsh-first-purchase-host-artifacts/v2';
+  exact(input, ['schema_version', 'candidate_path', 'candidate_sha256', 'crm_pack_path', 'crm_pack_sha256',
+    ...withService ? ['service_evidence_path', 'service_evidence_sha256'] : []]);
+  assert.ok(withService || input.schema_version === 'dsh-first-purchase-host-artifacts/v1', 'HOST_ARTIFACT_SCHEMA');
   for (const key of ['candidate_path', 'crm_pack_path']) assert.ok(typeof input[key] === 'string' && isAbsolute(input[key]), 'HOST_ARTIFACT_ABSOLUTE_PATH');
   for (const key of ['candidate_sha256', 'crm_pack_sha256']) assert.match(input[key] ?? '', HEX, 'HOST_ARTIFACT_DIGEST');
   const candidateBytes = await readArtifactFile(input.candidate_path), crmBytes = await readArtifactFile(input.crm_pack_path);
@@ -91,6 +94,8 @@ export async function prepareFirstPurchaseArtifacts({ manifestPath, output, upst
   assert.equal((await exec('git', ['rev-parse', 'HEAD'], { cwd: upstream, timeout: 5000 })).stdout.trim(), DSH_UPSTREAM_SHA, 'HOST_ARTIFACT_UPSTREAM_SHA');
   assert.equal((await exec('git', ['status', '--porcelain', '-uno'], { cwd: upstream, timeout: 5000 })).stdout.trim(), '', 'HOST_ARTIFACT_UPSTREAM_DIRTY');
   assert.equal(decode(await readArtifactFile(join(upstream, 'apps/cli/package.json'))).version, DSH_SDK_VERSION, 'HOST_ARTIFACT_UPSTREAM_VERSION');
+  const serviceSpec = withService ? await readFirstPurchaseService({ evidencePath: input.service_evidence_path,
+    expectedSha: input.service_evidence_sha256, gate: candidate.service_compatibility, python, wheelhouse }) : null;
   await mkdir(output, { mode: 0o700 }); // exclusive: never overwrite an old drill
   await mkdir(join(output, 'dsh-plugins'), { mode: 0o700 });
   const installed = {}, packages = {};
@@ -119,15 +124,19 @@ export async function prepareFirstPurchaseArtifacts({ manifestPath, output, upst
   await symlink(upstream, join(output, 'upstream'), 'dir');
   await materializePluginPeerLinks(output);
   const peerPath = join(output, 'upstream/node_modules/.pnpm/node_modules/@deepseek-ai');
+  const service = serviceSpec ? await installFirstPurchaseService(serviceSpec, join(output, 'service')) : null;
   const evidence = { schema_version: 'dsh-first-purchase-host-artifacts-observed/v1',
-    scope: 'local-plugin-composition-only', input_sha256: hash(manifestBytes), candidate_digest: digest,
-    upstream_sha: DSH_UPSTREAM_SHA, packages, service_runtime: 'workspace-synthetic-service',
+    scope: service ? 'local-plugins-and-saved-analysis-artifact' : 'local-plugin-composition-only',
+    input_sha256: hash(manifestBytes), candidate_digest: digest,
+    upstream_sha: DSH_UPSTREAM_SHA, packages, service_runtime: service?.receipt.service_runtime ?? 'workspace-synthetic-service',
+    ...service ? { service: service.receipt } : {},
     activation: 'NOT_RUN', release_ready: false };
   await writeFile(join(output, 'packages.json'), json(evidence), PRIVATE);
-  return { ...installed, candidateDigest: digest, evidence, output, upstream, peerPath };
+  return { ...installed, candidateDigest: digest, evidence, output, upstream, peerPath, service };
 }
 
 export async function verifyFirstPurchaseInstalledArtifacts(prepared) {
+  if (prepared.service) await verifyFirstPurchaseService(prepared.service);
   assert.equal(await readlink(join(prepared.output, 'upstream')), prepared.upstream, 'HOST_ARTIFACT_UPSTREAM_CHANGED');
   for (const domain of Object.keys(domains)) {
     const modules = join(prepared[domain], 'node_modules');

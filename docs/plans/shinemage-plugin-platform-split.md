@@ -78,7 +78,9 @@
 
 上述原生命令批次正常 hooks 提交为 `9611589c`，从其 clean SHA 新建 workbench 与独立服务候选。源码/实际双包各 **9/9 PASS**、相关 **106 PASS**、同包合成 CRM/NOT_CHECKED 保存 **6/6 PASS**；候选 `ca79774b…` 的服务回执进入 seq 3，52 个当前文件与 195 个旧证据保留，旧 WSL 回执拒绝。见[本次候选证据](../hackathon/evidence/dsh-g0-native-command-candidate-20261006.md)。当时未验证精确插件包组合；后续进展见下一段，现有 verify-host 的 CRM + knowledge 范围不变。
 
-继续从 clean `d3fe7f94` 打包 CRM，与旧 workbench tarball 组成显式隔离输入。实际加载解包后两个插件，官方 HTTP **1 PASS**、连续 Chrome **1 PASS / 5 项观测**，保护/model **21 PASS**、受影响后端 **3 PASS**；修复演练 SDK 链接/TIME_WAIT/EOF 归因，包内容、83 个旧候选文件与 journal 保持不变。见[精确插件包证据](../hackathon/evidence/dsh-g0-first-purchase-artifact-host-20261006.md)。服务/查询内核仍为源码夹具；独立服务 archive 的同组合验收、新包目标环境和生产门禁继续开放。
+继续从 clean `d3fe7f94` 打包 CRM，与旧 workbench tarball 组成显式隔离输入。实际加载解包后两个插件，官方 HTTP **1 PASS**、连续 Chrome **1 PASS / 5 项观测**，保护/model **21 PASS**、受影响后端 **3 PASS**；修复演练 SDK 链接/TIME_WAIT/EOF 归因，包内容、83 个旧候选文件与 journal 保持不变。见[精确插件包证据](../hackathon/evidence/dsh-g0-first-purchase-artifact-host-20261006.md)。该阶段服务/查询内核为源码夹具；后续保存服务 archive 组合见下一段，新包目标环境和生产门禁保持开放。
+
+2026-10-07 从 clean `212005bc` 继续，原三个包未重建。保存服务 archive 已在独立离线 venv/进程接入同一官方 Host/Chrome，artifact HTTP 与 Chrome 各 **1 PASS**（5 浏览器场景），保存进程同端口重启后经 Host 重放同一请求，分析仍一条；旧 workspace **1 PASS**、保护/model **27 PASS**、后端 **5 PASS**。已核对[本轮证据](../hackathon/evidence/dsh-g0-first-purchase-service-host-20261007.md)。关闭本机保存服务包组合子项；查询 kernel/worker 仍为源码夹具，目标环境、供应链/生产门禁不变，437 个旧证据文件/journal 保留。
 
 | 任务 | 当前状态 | 已有证据 | 尚未关闭 |
 |---|---|---|---|
@@ -86,7 +88,7 @@
 | T2 | PARTIAL / LOCAL HOST PASS | 保留原静态/官方单测证据；2026-10-04 固定 rc2 官方 Web CLI 的实际加载、正常重启、原生 v4 会话/WAL 在途恢复、回退/恢复旧组合已通过，见[宿主证据](../hackathon/evidence/dsh-g0-pinned-host-20261004.md) | 目标平台 runtime、Windows/WSL、rc1→rc2/torn-frame、浏览器与 shell/tool union；0.2.0 仍 DEFERRED |
 | T13 | PARTIAL / LOCAL JOURNAL PASS | profile/state/既有 journal 保留；候选快照与 v2 host evidence 已通过 CLI 幂等接入 `CANDIDATE_HOST_VERIFIED`，重复不改原候选，见[本轮证据](../hackathon/evidence/dsh-g0-host-journal-20261004.md) | 生产 activation 崩溃 replay、远端 receipt/reconcile 和现场回执 |
 | T15 | PARTIAL | kit、brand/query、图表与 workbench 独立构建成果保留；指标/知识服务已独立打包。CRM 与知识插件也已分别 build/test/pack、安全解包加载，profile v3 独立绑定指纹；首购 `48e7ddfc` 双包已在 WSL 离线验收，新 `9611589c` 包仅本机通过，见上方证据与[插件拆分证据](../hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md) | 物理分仓、新包目标验收、指标/知识服务的目标安装、完整 invariant/精确宿主合同、签名/SBOM/来源信任仍未关闭 |
-| T3 | PARTIAL / LOCAL PACKED PLUGIN UI PASS | `9611589c` workbench 与固定 CRM 包经官方 HTTP/Chrome 合成链通过；独立服务另有源码/实际包各 9/9、CRM 保存 6/6、journal seq 3，见[兼容窗口](../architecture/first-purchase-service-compatibility.md)与上方记录 | 独立服务 archive 的同组合、新包目标机、生产身份/run 归属与候选准入/状态策略、供应链、真实模型未完成；合成身份不是生产授权 |
+| T3 | PARTIAL / LOCAL PLUGIN + SAVE SERVICE ARTIFACT PASS | 固定 workbench/CRM 与原独立保存服务包已通过同一官方 HTTP/Chrome、服务重启与同请求重放；journal seq 3 未改，见[兼容窗口](../architecture/first-purchase-service-compatibility.md)与上方记录 | 查询内核包级组合、新包目标机、生产身份/run 归属与候选准入/状态策略、供应链、真实模型未完成；合成身份不是生产授权 |
 | T7 | PARTIAL / PRIOR WSL + CURRENT LOCAL RECOVERY PASS | 旧 `48e7ddfc` 包完成实际 WSL HTTP/SIGKILL/回放/只读回退/小库恢复；新 `9611589c` 包仅本机离线/恢复通过，旧 WSL 回执拒绝；旧 writer 可写降级仍阻断 | 新包目标恢复、生产形状 UNKNOWN 与完整候选门禁未完成；结果年龄判断暂缓，生产保存 UI 未启用 |
 | T17 | PARTIAL / LOCAL HOST PASS | 固定官方 Web CLI 十项场景及父命令中断回收；实测 preset 移除后现有会话保留工具，同进程挂死需外部重启；已明确 `HOST_RESTART_REQUIRED` | 任意插件同进程隔离不承诺；生产 activation/journal/canary、目标平台与真实服务恢复仍开放，测试指针不替代原子部署 |
 | T21 | PARTIAL / LOCAL HOST + SERVICE RECEIPT PASS | `plugin candidate` 携带 profile 快照；`verify-host` 绑定固定宿主十项观测；`verify-service` 绑定精确服务双包九项观测及可选 WSL 十四项合成观测，均以原 journal 幂等记账，见上方最新证据 | 生产 canary/rollback、远端 receive/reconcile、host activation；本机核验仍 release_ready=false，目标 JSON 不证明发布者身份 |

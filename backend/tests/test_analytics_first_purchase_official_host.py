@@ -18,6 +18,7 @@ from backend.services.analytics.first_purchase.crm_identity import CRMFirstPurch
 from backend.services.analytics.first_purchase.save_policy import FirstPurchaseSavePolicy
 from backend.services.analytics.first_purchase.saved import FirstPurchaseSavedAnalysisStore
 from backend.tests.analytics_run_support import sqlite_connection
+from backend.tests.first_purchase_packed_service_support import PackedFirstPurchaseService
 from backend.tests.test_analytics_first_purchase_analysis import analysis_counts, private_dir
 from backend.tests.test_analytics_first_purchase_native import GATEWAY, RUNTIME, SESSION, auth, fp_actor, native_prompt
 from backend.tests.test_analytics_first_purchase_native_identity import config
@@ -41,7 +42,7 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
     browser_wait = False
 
     def receive():
-        deadline = monotonic() + (150 if browser_wait else 60)
+        deadline = monotonic() + (150 if browser_wait or dispatcher is None else 60)
         while not select.select([process.stdout], [], [], 0.05)[0]:
             assert monotonic() < deadline, "owned official Host timed out"
             if browser_wait:
@@ -78,18 +79,49 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
         handshake = receive()
         digest, candidate_digest = handshake["method_digest"], handshake["candidate_digest"]
         assert re.fullmatch(r"[a-f0-9]{64}", candidate_digest)
+        packed_service = handshake.get("service")
+        manifest_path = os.environ.get("B0_NATIVE_CRM_ARTIFACT_MANIFEST")
+        if manifest_path:
+            requested = json.loads(Path(manifest_path).read_text())
+            assert bool(packed_service) == (requested["schema_version"] == "dsh-first-purchase-host-artifacts/v2"), \
+                "HOST_SERVICE_MODE_MISMATCH: never fall back from v2 to a source fixture"
         # Explicit fixed B0 port block only. Bind fails if someone else owns it.
         app = create_first_purchase_native_app({**config(tmp_path), "port_base": 4335,
                                                "method_package_digest": digest})
         runs, dispatcher = app.state.store, app.state.dispatcher
-        saved = FirstPurchaseSavedAnalysisStore(private_dir(tmp_path, "analyses"))
+        analyses = private_dir(tmp_path, "analyses")
         policy = FirstPurchaseSavePolicy("official-host-no-age-v1", frozenset({candidate_digest}), None, None,
                                          check_freshness=False)
         with serve(crm) as crm_origin:
-            service = create_first_purchase_analysis_app(runs, saved,
-                CRMFirstPurchaseIdentityResolver(crm_origin, frozenset({"crm-owner"}), allow_query=True),
-                save_policy=lambda: policy)
-            with serve(service) as service_origin, serve(app, port=4335) as kernel_origin:
+            if packed_service:
+                saved = PackedFirstPurchaseService(packed_service, tmp_path, candidate_digest, crm_origin)
+                service_context = saved
+            else:
+                saved = FirstPurchaseSavedAnalysisStore(analyses)
+                service = create_first_purchase_analysis_app(runs, saved,
+                    CRMFirstPurchaseIdentityResolver(crm_origin, frozenset({"crm-owner"}), allow_query=True),
+                    save_policy=lambda: policy)
+                service_context = serve(service)
+            with service_context as running, serve(app, port=4335) as kernel_origin:
+                service_origin = running.origin if packed_service else running
+
+                def verify_service_restart(*, replay=False):
+                    if not packed_service:
+                        return
+                    with httpx.Client(base_url=service_origin, trust_env=False, timeout=3,
+                                      headers={"Authorization": "Bearer " + TOKEN}) as client:
+                        before = client.get("/api/v1/analytics-first-purchase/analyses")
+                        assert before.status_code == 200
+                        saved.restart()
+                        assert saved.origin == service_origin
+                        after = client.get("/api/v1/analytics-first-purchase/analyses")
+                        assert after.status_code == 200 and after.json() == before.json()
+                    if replay:
+                        assert command({"operation": "replay-save"}) == {"ok": True, "replayed": True}
+                    assert analysis_counts(saved)["analyses"] == 1
+                    saved.receipts[-1]["restart_same_analysis"] = True
+                    saved.receipts[-1]["same_intent_replay"] = "PASS" if replay else "NOT_RUN_BROWSER_MODE"
+
                 assert command({"upstream": str(upstream), "output": str(tmp_path / "official-host"),
                     "crm_origin": crm_origin, "service_origin": service_origin,
                     "session_id": SESSION, "runtime_token": RUNTIME, "gateway_token": GATEWAY,
@@ -104,6 +136,7 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
                     assert analysis_counts(saved)["analyses"] == 1
                     assert len(runs.worker_records(active_only=False)) == 1
                     assert checks and all(checks)
+                    verify_service_restart()
                     return
                 with httpx.Client(base_url=kernel_origin, trust_env=False, timeout=15) as client:
                     assert client.post("/internal/native/prompt", json=native_prompt(), headers=auth()).status_code == 401
@@ -130,6 +163,7 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
                                              (run_id, result.primary_result_ref)).fetchone()[0]
                     assert command({"operation": "save", "run_id": run_id, "call_id": call_id}) == {
                         "ok": True, "saved": True, "writes": 1}
+                    verify_service_restart(replay=True)
                     status = command({"operation": "command", "line": f"/first-purchase-status {run_id}"})
                     assert f"{run_id}: SUCCEEDED" in status["result"]["text"]
                     # Queue another task, then cancel before dispatch. The completed card must
