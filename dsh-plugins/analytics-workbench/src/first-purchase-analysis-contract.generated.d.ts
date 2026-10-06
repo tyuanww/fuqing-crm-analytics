@@ -1,4 +1,4 @@
-/** Generated first-purchase saved-analysis HTTP contract; do not edit. OpenAPI SHA-256: 3b45ef6df28219827343f9b1bcc0c6c8c35f46dd05790b340ed1f266c9a702b4 */
+/** Generated first-purchase saved-analysis HTTP contract; do not edit. OpenAPI SHA-256: a32c455af4c564f308adbb743a65e888da864b8718a2e02a5202ada7c53f9b09 */
 export interface paths {
     "/api/v1/analytics-first-purchase/analyses": {
         parameters: {

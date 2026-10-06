@@ -229,11 +229,13 @@ def create_first_purchase_analysis_app(
 
     @app.post(PREFIX, status_code=201, response_model=FirstPurchaseSavedAnalysis,
               operation_id="analytics_first_purchase_analysis_create", responses=errors,
-              openapi_extra={"parameters": [KEY_HEADER]})
+              openapi_extra={"parameters": [KEY_HEADER], "x-legacy-b0-identity-only": True})
     def create_analysis(payload: FirstPurchaseAnalysisCreateRequest, request: Request, response: Response):
         actor = principal(request)
-        if save_policy is not None:
-            raise AnalyticsError(409, "VERSIONED_SAVE_REQUIRED", "此服务已启用 D15 保存门禁，请使用版本化保存接口。")
+        # Only the original synthetic registry retains legacy fixture behavior.
+        # An external resolver must never bypass admission by omitting a policy.
+        if save_policy is not None or type(registry) is not B0IdentityRegistry:
+            raise AnalyticsError(409, "VERSIONED_SAVE_REQUIRED", "请使用带显式准入策略的版本化保存接口。")
         visual = None if payload.visual_spec is None else payload.visual_spec.model_dump(mode="json")
         trusted = resolve_trusted_first_purchase_source(runs(), actor, payload.created_from_run_id)
         record = analyses().save_from_trusted_source(
@@ -291,7 +293,7 @@ def create_first_purchase_analysis_app(
             schema = get_openapi(title=app.title, version=app.version, routes=app.routes)
             schema.setdefault("components", {}).setdefault("securitySchemes", {})["AnalysisBearer"] = {
                 "type": "http", "scheme": "bearer",
-                "description": "Explicit local first-purchase analysis identity; not CRM auth.",
+                "description": "Explicit service-owned first-purchase identity; a provider may verify an existing CRM session.",
             }
             schema["security"] = [{"AnalysisBearer": []}]
             schema["x-saved-analysis-http"] = True

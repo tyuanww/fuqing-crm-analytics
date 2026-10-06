@@ -78,9 +78,30 @@ node scripts/crm-calibration/package-service.mjs \
 - resolver 每次请求与既有保存事务重验点重新调用；不缓存身份快照。保存重放和回执 reconcile 仍需当前读、写权限；只读身份可以读取其已有分析，不因此恢复保存资格。
 - provider 的 401/403 映射为固定 `UNAUTHENTICATED`/`FORBIDDEN`，其他异常或无效 principal 返回可重试的 503 `IDENTITY_UNAVAILABLE`。接口不回传 provider 原消息、错误码或 recovery URL。provider 自己的日志脱敏、网络超时与 I/O 上界由其实现负责，当前接口没有替它完成生产验收。
 - 策略 callback 失败返回可重试的 503 `SAVE_POLICY_UNAVAILABLE`，不写分析/回执；既有 `SAVE_POLICY_INVALID`、缺策略和候选拒绝规则保留。已经保存且身份仍获准的精确重放不依赖在线策略/source，不能因 provider 故障重复创建记录。
-- `FirstPurchaseSavePolicy` 的 allowlist 与时限仍由服务 owner 显式提供，不能从客户端 candidate digest、插件本地状态或未签名 journal 自动放行。HTTP/SQLite 合同、包文件清单和 13 项依赖锁未变。
+- `FirstPurchaseSavePolicy` 的 allowlist 与时限仍由服务 owner 显式提供，不能从客户端 candidate digest、插件本地状态或未签名 journal 自动放行。请求/响应字段、SQLite 合同与 13 项依赖锁未变；OpenAPI 适用范围说明已同步生成。
 
-本接缝只有[本地合成测试证据](../hackathon/evidence/dsh-g0-service-identity-boundary-20261006.md)。生产认证 provider、真实候选准入、生产时限及新 artifact 的目标验收仍为 NOT_RUN；不启用保存 UI 或激活入口。
+身份接缝 `80aba9c1` 的固定包已有[本机与 WSL 合成证据](../hackathon/evidence/dsh-g0-service-identity-boundary-20261006.md)，不证明真实 CRM 认证或生产保存准入。后续适配器增量单独验收如下。
+
+### 可选的现有 CRM 账号适配
+
+[CRMFirstPurchaseIdentityResolver](../../backend/services/analytics/first_purchase/crm_identity.py) 已纳入首购包的精确 code 清单，复用现有固定 `h11`，不增加依赖。它只向服务 owner 配置的 loopback CRM origin 请求 `GET /api/v1/auth/me`；对应现有 [CRM UserInfo 与 me](../../backend/routers/auth.py) 的 `username` / `is_admin` 合同，不导入旧 CRM 模块。
+
+```python
+from backend.services.analytics.first_purchase.crm_identity import CRMFirstPurchaseIdentityResolver
+
+# 只构造 adapter；existing_crm_origin 由部署 owner 明确提供。
+identities = CRMFirstPurchaseIdentityResolver(
+    existing_crm_origin, allowed_usernames=frozenset({"admin"}), timeout_seconds=2.0,
+)
+# 随后由服务 owner 向既有 create_first_purchase_analysis_app 显式注入。
+```
+
+- 复用已登录 CRM 的 Bearer，每次重验，不接收或保管密码，不调用 login，不缓存 token/权限。只接受显式账号且当前 `is_admin=true`；用户名原样作为 actor，不映射成合成用户。仅授予 `run:read`、`analysis:read`、`analysis:save` 与现有 `first-purchase-fixture` scope，不扩到真实业务数据或其他插件。
+- origin 必须是有端口的字面量 IPv4/IPv6 loopback HTTP 地址；禁止 DNS、路径、query、fragment、用户信息和代理。请求不发送 Cookie，不跟随重定向、不重试。单次校验默认总计 2 秒、最多允许配置为 5 秒；连接、请求与慢速响应共享同一截止时间。响应头至多 16 KiB、正文至多 4 KiB、线上总字节另有限额，拒绝压缩/升级和错误 schema。
+- CRM 401/403 分别拒绝为未认证/无权限，其余失败为可重试 503 `IDENTITY_UNAVAILABLE`，不透传响应正文或凭证。保存事务内仍按既有检查点重验，认证服务故障时不能新写入分析/回执；没有承诺跨 CRM 和 SQLite 的分布式原子撤权。
+- 旧 `POST /analyses` 仅保留原 B0 注册表的合成兼容行为，任何外部 resolver 即使漏配 policy callback 也返回 409 `VERSIONED_SAVE_REQUIRED`，不能绕过准入。默认 `service.py serve` 仍不注入 adapter、RunStore、状态或策略。通过身份校验不能自动填写 candidate allowlist 或有效期；定向测试已验证：策略未配置时保持 `POLICY_NOT_CONFIGURED`/禁用保存（见 [identity-alone 回归](../../backend/tests/test_analytics_first_purchase_crm_identity.py)）。公共知识插件无需 CRM，其他身份 provider 仍可通过原协议独立实现。
+
+本增量[本地 134 项回归与实际包观测](../hackathon/evidence/dsh-g0-crm-identity-adapter-20261006.md)已通过；真实 CRM 登录/会话撤销、生产候选准入、有效期、clean artifact 与其杭州验收仍未完成。现役服务和保存 UI 未切换。
 
 ## 验证与尚未完成的交付
 

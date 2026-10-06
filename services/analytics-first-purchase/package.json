@@ -115,6 +115,10 @@
       "source": "backend/services/analytics/first_purchase/asset_state.py",
       "role": "code"
     },
+    "backend/services/analytics/first_purchase/crm_identity.py": {
+      "source": "backend/services/analytics/first_purchase/crm_identity.py",
+      "role": "code"
+    },
     "backend/services/analytics/first_purchase/save_policy.py": {
       "source": "backend/services/analytics/first_purchase/save_policy.py",
       "role": "code"

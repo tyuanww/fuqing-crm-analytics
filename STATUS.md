@@ -14,6 +14,13 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
+### 现有 CRM 账号适配（2026-10-06，本地增量）
+
+- 按用户确认沿用现有 CRM 管理员账号，不新建账号体系。新增首购服务可选 `CRMFirstPurchaseIdentityResolver`，经既有 `/api/v1/auth/me` 校验 Bearer；不保存密码或 token，不导入旧 CRM 实现。显式账号名单与当前管理员权限均须匹配，每次重新校验；身份成功不等于保存准入。
+- 本次五文件保存/恢复/身份回归 **134 PASS**，实际独立包 **1 PASS**（含 5 项新 CRM 身份观测）；OpenAPI/TypeScript 和 Ruff 通过。复用现有固定 `h11`，13 项依赖未变；DSH、插件运行时代码和默认服务启动未改，仅同步生成的合同摘要。见[本轮证据](docs/hackathon/evidence/dsh-g0-crm-identity-adapter-20261006.md)。
+- OCR 审核发现并修复旧写入口绕过准入：外部身份一律要求版本化保存，负测先 201 失败、修复后拒绝且不落盘；134 项回归、90 项服务门禁与独立包已重跑通过。
+- 本 adapter 尚未成为 clean 候选、未在杭州或真实 CRM 登录验证；下节 WSL 14 项只属于 `80aba9c1` 的原包。生产有效期仍待确认，真实候选准入、供应链、目标 DSH/UI 与物理分仓保持开放；没有生产保存/激活或 GitHub 操作。
+
 ### 首购身份接口与 clean 服务候选（2026-10-06）
 
 - 上一批 clean 首购绑定文档经 OCR delegate 全量审核、修正并通过正常 hooks 提交为 `c95751f8`。随后按既定顺序补服务身份接缝，不改 DSH、插件或生产配置。
@@ -22,7 +29,7 @@
 - 提交前 OCR delegate 覆盖全部 **8/8** 文件，未确认新阻塞缺陷，通过正常 hooks 提交 **`80aba9c1`**。已核对 74 项测试报告与提交前 Python 检查输入摘要一致，本次不将复核说成重新执行。
 - 从该 clean SHA 完成源码兼容 **9/9 PASS**、两个实际包的离线 venv/HTTP **9/9 PASS**；新服务包 76478 B / `270cf084…`。新候选 `4e49cc04…` 绑定同一服务证据，真实 `plugin verify-service` 进入 journal 第 3 条事件，重试及旧 WSL 误用拒绝保持 58 文件不变。
 - 插件包仍为 421582 B / `5efdbec5…`，与上一候选逐字节相同；DSH、插件源码、依赖锁与上游均未改动，无需重建。旧 129 个输入/回执/journal 原样保留。
-- 本增量未执行 WSL/生产验收；下节旧包的 14 项回执不能用于证明新服务代码。生产 provider、真实 candidate allowlist 与时限策略仍未接通，保存 UI 与激活门禁不变。后续纯证据文档提交不改写包来源。
+- 同一 `80aba9c1` 服务双包随后在杭州 WSL2/Python 3.14.4 完成 **14/14 synthetic 验收**，新回执经真实 CLI 进入原 journal 第 4 条事件；重试 131 个文件不变，旧 129 个证据文件不变。10 个临时进程、安装目录与本次传输目录已回收，现役端口/PID 快照一致。生产身份、真实 candidate allowlist 与时限策略仍未接通，保存 UI 与激活门禁不变；该结果不能证明上方新增 CRM adapter。
 
 ### 当前 clean 首购插件／服务候选（2026-10-06）
 

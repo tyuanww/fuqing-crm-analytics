@@ -52,7 +52,7 @@ git diff --check
 ## 仍未关闭
 
 - T3/T7 仍 PARTIAL：实际生产身份/撤权来源、真实 plugin candidate allowlist、可信策略来源及生产 freshness/UNKNOWN 时限未接通。当前协议不提供签名认证、网络 timeout 或隔离外部 provider 的运行时。
-- 新代码已按下方记录从审核后的 clean commit 形成服务包并绑定本机 candidate；该新包的目标主机证据尚待取得。旧 `2be518e5` 双包、`afcdae56…` candidate、seq 4 与 WSL 14 项证据继续仅适用于原字节，不能给本增量背书。
+- 新代码已按下方记录从审核后的 clean commit 形成服务包并绑定本机 candidate；该新包随后取得独立目标主机证据，见末节。旧 `2be518e5` 双包、`afcdae56…` candidate、seq 4 与 WSL 14 项证据继续仅适用于原字节，不能给本增量背书。
 - 供应链、目标 DSH runtime/session/WAL、浏览器/真实 UAT、生产激活和物理分仓仍按原 G0/stop-go 关闭。保存 UI 维持 NOT_AVAILABLE；本轮没有 push、Release、生产切换或真实数据访问。
 
 ## 提交前 OCR delegate 审核
@@ -87,4 +87,17 @@ git diff --check
 
 命令沿用[clean 服务验证入口](./dsh-g0-service-clean-candidate-20261006.md)，candidate 参数改为完整 `80aba9c1…`、输出改为上述新目录；`plugin candidate` 指定本次 `profile.json`、源码回执和独立显式 `plugin-state.json`，`verify-service` 指定同一候选与包回执。后续纯证据文档提交不改变本表的来源，也不要求重打包。
 
-新包 **WSL/生产身份/真实候选准入/时限/供应链仍 NOT_RUN，release_ready=false**。本次仅本机 Darwin arm64 验证，未连接杭州、读取真实库、push、发布或激活；既有 WSL 14 项不迁移到新服务包。
+以上为本机候选阶段，当时 WSL 未运行；生产身份/真实候选准入/时限/供应链保持 NOT_RUN、release_ready=false。随后另行取得本包的现场证据如下，没有迁移旧包 WSL 结论。
+
+## 同一身份接缝包的 WSL 合成验收与 journal 接线
+
+随后通过 Tailscale 将上表的固定双包、13 个已有 Linux wheel、已审核有限 runner 和合成 seed 送入本次拥有的临时目录，以 `nobody`、空白环境、两个独立 venv 在 **WSL2 x86_64 / Python 3.14.4** 执行。没有现场重编译源码或下载依赖，没有启动或改动现役服务。
+
+- 冷安装/预检、旧记录升级、freshness/权限、冲突/SIGKILL、UNKNOWN 与幂等恢复、旧服务只读、forward-fix、合成备份冷恢复、禁止旧版写入和未知 schema 等 **14/14 PASS**。
+- 输入 manifest SHA-256 `bf20ebce5760a7ed6b7ca613c698d7d391e6f60b9dea4313960d55aa101a8ab1`；现场回执 `e02e95960239e1af8f73eb503786d7f493530f4851f61921adada2aab62a1e4c`。取回 50 份有界证据文件并验证传输摘要。
+- 真实 `pnpm dsh plugin verify-service` 携带 `--target-evidence` 与 `--target-input`，向原候选 `4e49cc04…` journal 追加 `CANDIDATE_SERVICE_TARGET_OBSERVED`，seq **4** / digest `2cb998a69cfb2009ed3141615ab7476908bb58f0688f1724636db136198a19e3`。原 3 条事件完整保留；再执行 CLI 后本次 131 个产物/证据/状态文件摘要、大小和 mtime 不变，上一候选 129 文件不变。
+- 10 个有记录的临时 PID 均已退出，无遗留临时安装目录；6677/18090/18092/18093/18094 的监听地址/PID 前后相同。取回并校验传输包后，依据唯一 owner marker 和输入/输出 SHA 清理了本次外层临时目录；未删除旧 release、runtime 或数据。
+
+证据位于上文根目录的 `target/`：`input/`、`result/receipt.json` 与 49 份配套文件、`target-run.log`、`target-before.json`/`target-after.json`、`binding-verification.json`、`verify-service-target*.stdout` 和 `owned-directory-cleanup.stdout`。生成/验收/清理脚本与所有失败日志保留在该目录，没有重写旧回执。
+
+该观测明确为 `UNATTESTED_OPERATOR_OBSERVATION`、`SYNTHETIC_A64_ONLY`；不是签名证明或真实 CRM 账号认证，production gate 仍 BLOCKED。接下来新增的[CRM HTTP 身份适配器](./dsh-g0-crm-identity-adapter-20261006.md)并不在 `80aba9c1` archive 内，不由本节 14 项背书。

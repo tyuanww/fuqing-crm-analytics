@@ -269,6 +269,13 @@ test('first-purchase archive saves, restarts, reconciles and forward-fixes in it
   assert.deepEqual(JSON.parse(installed.stdout).map(name => name.replace(/[-_.]+/g, '-')).sort(),
     Object.keys(manifest.dependencies).sort());
   await check(app, home, interpreter);
+  const crmIdentity = await exec(interpreter, ['-I', '-B', join(root, 'scripts/crm-calibration/crm-identity-package.fixture.py'), app],
+    { cwd: home, env: isolatedEnv(home), timeout: 15000 });
+  const identityReport = JSON.parse(crmIdentity.stdout);
+  assert.equal(identityReport.status, 'PASS');
+  assert.deepEqual(identityReport.observations,
+    ['existing-crm-account', 'revoked-admin', 'unapproved-account', 'revoked-session', 'identity-outage']);
+  t.diagnostic(`CRM_IDENTITY_PACKED ${identityReport.status} observations=${identityReport.observations.length}`);
   const base = '/api/v1/analytics-first-purchase';
   // The shipped entry has neither identity nor state. Merely starting it cannot
   // turn on D15, open a caller-selected DB, or grant access to the legacy writer.

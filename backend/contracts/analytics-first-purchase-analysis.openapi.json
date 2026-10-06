@@ -1742,7 +1742,7 @@
     },
     "securitySchemes": {
       "AnalysisBearer": {
-        "description": "Explicit local first-purchase analysis identity; not CRM auth.",
+        "description": "Explicit service-owned first-purchase identity; a provider may verify an existing CRM session.",
         "scheme": "bearer",
         "type": "http"
       }
@@ -2027,7 +2027,8 @@
             "description": "Service Unavailable"
           }
         },
-        "summary": "Create Analysis"
+        "summary": "Create Analysis",
+        "x-legacy-b0-identity-only": true
       }
     },
     "/api/v1/analytics-first-purchase/analyses/{analysis_id}": {
@@ -2988,5 +2989,5 @@
   "x-query-session-fence": false,
   "x-saved-analysis-http": true,
   "x-shared-succeeded-source": true,
-  "x-schema-sha256": "3b45ef6df28219827343f9b1bcc0c6c8c35f46dd05790b340ed1f266c9a702b4"
+  "x-schema-sha256": "a32c455af4c564f308adbb743a65e888da864b8718a2e02a5202ada7c53f9b09"
 }
