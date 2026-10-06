@@ -14,7 +14,14 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 结果时效暂缓与 clean 候选（2026-10-06，当前进度）
+### CRM 身份到首购保存卡片（2026-10-06，当前进度）
+
+- 从 `codex/plugin-boundary-review@ca64f9ca` 干净工作树继续。CRM 提供可撤销的可选会话能力，token 仅在 CRM host 内；workbench 通过生成的微型合同调用公开首购服务，移除该卡片旧 `/b0/analyses` 保存路径。默认未配置仍禁用，未改生产 profile。
+- 当前卡片支持核对来源/权限、显式保存、原请求持久保留、SAVE_UNKNOWN 核对和同请求重试；未接通的驾驶舱/导出/发送可见禁用。时效沿用用户决定，以服务端 `NOT_CHECKED` 展示，不在客户端推算陈旧/过期。
+- 本次相关后端 **132 PASS**；提交前修复后 Node **51 PASS**、编译卡片 **7 PASS**，真实 HTTP 集成重跑 **1 PASS（7 项观测）**，两个插件在固定 rc2/Node24 下构建通过。OCR 复现并修复登录失效残留回执、旧候选仍提示重试、转义凭据回显三项；已核对[本轮证据](docs/hackathon/evidence/dsh-g0-save-ui-20261006.md)与[保存合同](docs/operating/first-purchase-save-admission.md)。
+- **仍 PARTIAL**：真实 DSH 查询内核目前固定 `synthetic-demo`，本轮没有把它映射为 CRM 管理员。实际宿主内的账号/run 归属、Cookie/路由/浏览器、clean 插件候选、供应链与目标主机关闭时效链仍待验收；生产保存未启用。本轮没有 push、杭州操作或真实数据访问。
+
+### 结果时效暂缓与 clean 候选（2026-10-06，上一阶段）
 
 - 用户明确“陈旧和过期，暂时不考虑”。已增加服务 owner 显式关闭结果年龄检查的策略；返回 `NOT_CHECKED / DISABLED_BY_POLICY`，不标成 FRESH。账号/session、候选准入、完整来源、幂等保存与 UNKNOWN 恢复继续校验。
 - 实现阶段五文件回归 **163 PASS**，实际独立包的时效开启/关闭两种模式 **2 PASS**，包含保存、重启、回放与 forward-fix；OpenAPI/TypeScript 已同步。见[实现证据](docs/hackathon/evidence/dsh-g0-save-time-policy-20261006.md)。

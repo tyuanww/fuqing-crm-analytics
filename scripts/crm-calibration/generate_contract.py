@@ -112,6 +112,13 @@ def main():
                 f"// Generated from {source_path}; do not edit.\n"
                 + f"// source_sha256: {hashlib.sha256(source_bytes).hexdigest()}\n"
                 + source_bytes.decode())
+    source_path = "dsh-plugins/crm-knowledge/contracts/first-purchase-access.v1.ts"
+    source_bytes = (ROOT / source_path).read_bytes()
+    for plugin in ("crm-knowledge", "analytics-workbench"):
+        outputs[f"dsh-plugins/{plugin}/src/first-purchase-access.generated.ts"] = (
+            f"// Generated from {source_path}; do not edit.\n"
+            + f"// source_sha256: {hashlib.sha256(source_bytes).hexdigest()}\n"
+            + source_bytes.decode())
     for rel, text in outputs.items():
         dest = ROOT / rel
         if "--check" in sys.argv:

@@ -502,7 +502,7 @@
       "manifest_sha256": "011783ac55a6b567db51dbfdc1c97ffd142727ac52bfc7911801dc71fa6bed60"
     }
   ],
-  "source_files_scanned": 610,
+  "source_files_scanned": 626,
   "cross_package_edges": [
     {
       "consumer": "analytics-workbench",
@@ -562,6 +562,16 @@
       "target": "dsh-plugins/board-components",
       "specifier": "@shine-mage/board-components/waterfall",
       "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/first-purchase-save-http.probe.mjs",
+      "target": "dsh-plugins/crm-knowledge/src/dashboard-access.mjs",
+      "specifier": "../../crm-knowledge/src/dashboard-access.mjs",
+      "access": "source",
       "type_only": false
     },
     {
@@ -1038,34 +1048,6 @@
     {
       "consumer": "analytics-workbench",
       "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/client/first-purchase-query-card.tsx",
-      "route": "/b0/analyses",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/client/first-purchase-query-card.tsx",
-      "route": "/b0/dashboards",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/client/first-purchase-query-card.tsx",
-      "route": "/b0/dashboards/{parameter}",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/client/first-purchase-query-card.tsx",
-      "route": "/b0/dashboards/{parameter}/versions",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
       "source": "dsh-plugins/analytics-workbench/src/client/free-html-library/live-adapters.mjs",
       "route": "/api/v1/analytics/page-edit-contexts",
       "contract": "OBSERVED_NOT_FROZEN"
@@ -1307,6 +1289,20 @@
       "source": "dsh-plugins/analytics-workbench/src/first-purchase-query-tool.ts",
       "route": "/internal/native/first-purchase",
       "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-save-client.mjs",
+      "route": "/api/analytics-first-purchase/save",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-save-gateway.mjs",
+      "route": "/api/analytics-first-purchase/save",
+      "contract": "OBSERVED_NOT_FROZEN"
     },
     {
       "consumer": "analytics-workbench",
@@ -1682,6 +1678,34 @@
     {
       "consumer": "analytics-workbench",
       "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/first-purchase-save-client.test.mjs",
+      "route": "/api/analytics-first-purchase/save",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/first-purchase-save-dom.test.mjs",
+      "route": "/api/analytics-first-purchase/save",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/first-purchase-save-http.probe.mjs",
+      "route": "/api/analytics-first-purchase/save",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/first-purchase-save.fixture.mjs",
+      "route": "/api/analytics-first-purchase/save",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/helpers/board-fault-proxy.mjs",
       "route": "/api/v1/analytics/board-spec",
       "contract": "OBSERVED_NOT_FROZEN"
@@ -2020,6 +2044,13 @@
       "phase": "runtime",
       "source": "dsh-plugins/crm-knowledge/src/dashboard.mjs",
       "route": "/api/v1/metrics/trend",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/first-purchase-relay.mjs",
+      "route": "/api/v1/analytics-first-purchase",
       "contract": "OBSERVED_NOT_FROZEN"
     },
     {
@@ -2416,6 +2447,12 @@
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/built.test.mjs",
       "line": 29
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/first-purchase-save-dom.test.mjs",
+      "line": 18
     },
     {
       "consumer": "analytics-workbench",
@@ -2832,6 +2869,11 @@
     {
       "consumer": "analytics-workbench",
       "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-host-webserver"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
       "specifier": "@deepseek-ai/dsh-llm"
     },
     {
@@ -3193,6 +3235,11 @@
       "consumer": "crm-knowledge",
       "phase": "runtime",
       "specifier": "node:crypto"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "specifier": "node:http"
     },
     {
       "consumer": "crm-knowledge",
@@ -3930,7 +3977,7 @@
       ],
       "compatibility": "Receipt API 1.0.0 binds action/candidate/correlation and durable state. Read-only reconcile survives admission revocation. New writes require explicit service policy; legacy saved-analysis/cockpit v1 and SQLite schema 1 remain unchanged.",
       "status": "GENERATED_DOMAIN_V1",
-      "source_sha256": "5b7202261d83e720c5faf505c52161773ee7f051496f6aa9929adab70fe00e0f"
+      "source_sha256": "1a2daff8a85217f523726b9c8a06228ec5215f586427ad8cbfaa6be3a58cb0e8"
     },
     {
       "id": "first-purchase-save-result",
@@ -3942,7 +3989,19 @@
       ],
       "compatibility": "Independent D15 result/provenance API 1.0.0 with service-owned freshness and exact candidate admission. Strict consumer decoder; immutable saved provenance shares the existing transaction. No production defaults or unversioned PINNED reinterpretation.",
       "status": "GENERATED_DOMAIN_V1",
-      "source_sha256": "5b7202261d83e720c5faf505c52161773ee7f051496f6aa9929adab70fe00e0f"
+      "source_sha256": "1a2daff8a85217f523726b9c8a06228ec5215f586427ad8cbfaa6be3a58cb0e8"
+    },
+    {
+      "id": "crm-first-purchase-access-v1",
+      "owner": "crm-knowledge",
+      "source": "dsh-plugins/crm-knowledge/contracts/first-purchase-access.v1.ts",
+      "generator": "scripts/crm-calibration/generate_contract.py",
+      "consumers": [
+        "analytics-workbench"
+      ],
+      "compatibility": "Optional revocable per-session CRM lease; finite loopback inspect/save/reconcile only, no credentials exported. Independent service owns authorization, candidate policy and durable state.",
+      "status": "DOMAIN_V1",
+      "source_sha256": "66f6b49cc6eb8e4bf550d0b5ffc5eb14e192cd1e2eefafe218d9998cb1a2cac7"
     }
   ],
   "command_owners": [

@@ -64,4 +64,23 @@ SQLite schema 仍为 1，无迁移。保存旁证使用现有幂等表中的独�
 
 NOT_CHECKED 扩展了严格枚举，旧 D15 服务/插件不能保证识别。启用关闭时效的策略前须绑定支持同一 OpenAPI 摘要的服务与消费者；已写入此类来源后保留兼容服务和原状态，不能因 SQLite/API 版本未变而可写降级。旧 FRESH 记录仍按原语义读取，不回写为 NOT_CHECKED。本轮实际包覆盖两种模式的重启回放；历史跨包/WSL 回执不代表新模式已在目标机通过，见[本次证据](../hackathon/evidence/dsh-g0-save-time-policy-20261006.md)。
 
-插件严格 decoder 与类型见 `first-purchase-save-model.mjs/.d.mts`；它不读取本地时钟决定资格，也不改变现有 UI。验证命令与证据见[本轮记录](../hackathon/evidence/dsh-g0-save-admission-20261004.md)。固定源码对的[兼容窗口](../architecture/first-purchase-service-compatibility.md)已实测：旧服务仅允许只读身份，D15 可写状态禁止随 profile 降级。候选/接收/激活/回退已消费显式 `service_binding`，但本机证据仅允许准备 candidate；现场激活仍 fail closed。服务包/依赖窗口、目标主机证据验证器、生产策略/认证接线、UI 和现场验收继续 PARTIAL/NOT_RUN。
+插件严格 decoder 与类型见 `first-purchase-save-model.mjs/.d.mts`；它不读取本地时钟决定资格；初次实现当时未改变 UI，当前卡片接线见下节。验证命令与证据见[本轮记录](../hackathon/evidence/dsh-g0-save-admission-20261004.md)。固定源码对的[兼容窗口](../architecture/first-purchase-service-compatibility.md)已实测：旧服务仅允许只读身份，D15 可写状态禁止随 profile 降级。候选/接收/激活/回退已消费显式 `service_binding`，但本机证据仅允许准备 candidate；现场激活仍 fail closed。服务包/依赖窗口、目标主机证据验证器、生产策略/run 身份、真实宿主/浏览器和现场验收继续 PARTIAL/NOT_RUN；本地 UI 接线见下节。
+
+## CRM 会话与 workbench 卡片接线（2026-10-06）
+
+默认关闭，尚未修改任何生产 profile。已有 Host 插件行可显式传入以下非凭据配置；这不是发布准入，也不自动启动分析服务：
+
+| Owner | 配置/合同 | 用途 |
+|---|---|---|
+| CRM host `@shine-mage/dsh-crm-knowledge/host` | `firstPurchaseOrigin` | 已验收分析服务的 literal loopback HTTP origin；只允许 inspect/save/reconcile 三个固定路径，无代理/重定向。 |
+| workbench 根 Host 插件 | `firstPurchaseCandidateDigest` | 经核验的当前候选完整 SHA-256；必须同时被服务端 allowlist 准入，不能由浏览器指定新候选。 |
+| CRM host | 可选 `shinemage-first-purchase-access/v1` | 当前 DSH session 的可撤销 lease；token 不输出给 workbench、浏览器、模型或磁盘。 |
+| 独立分析服务 | 现有 CRM identity resolver + RunStore + save policy | 每次校验当前 CRM 账号/权限、run owner、来源与候选；继续显式关闭结果年龄检查。 |
+
+浏览器只调用 DSH authenticated Connection 的 `POST /api/analytics-first-purchase/save`，要求可信 Origin、JSON、自定义 UI header，拒绝跨站来源与 query string。请求 8 KiB、响应 512 KiB 上限；Host/relay/browser 时限分别为 12/10/15 秒。未配置、未连接、不可读或不可保存时显示原因，未连接的驾驶舱/导出/发送保持禁用。
+
+卡片先核对原回执和服务端资格，只有显式“确认保存分析”才写入。保存前将 identity/run/title/evidence digest 留在当前浏览器 localStorage，按账号、session、run、call 分区，不保存 token/password/facts。存储不可用或原记录损坏时拒绝新保存；不自动清理旧标识。超时/丢失 ACK 返回 SAVE_UNKNOWN，核对不到回执也不能声称未执行；明确重试只发送原请求。候选变化后仅核对旧 identity，禁止用新 identity 替代未知请求。换浏览器或删除这些记录可能失去旧候选定位，因此现场验收仍须覆盖恢复和人工查回执路径。
+
+CRM 连接事件取消旧请求、清空旧显示；服务器撤销 grant 后不发布迟到结果。卡片直接展示服务端 `NOT_CHECKED`，不把它标作 FRESH，不取消会话有效期。
+
+**当前限制**：`analytics_first_purchase_native.py` 仍是独立 B0 synthetic 运行时，actor 固定 synthetic-demo。接上真实管理员并不授予它读取/保存该账号 run 的权限；本轮没有别名映射或管理员绕过。下一步需在隔离固定 DSH 中证明查询 run 与 CRM 身份一致，以及实际 Cookie、路由、卸载/重启和浏览器流程。已核对[本轮证据](../hackathon/evidence/dsh-g0-save-ui-20261006.md)：当前只通过本地源码/HTTP/jsdom，不代签生产或 headed Chrome。

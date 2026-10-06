@@ -307,6 +307,17 @@
       ],
       "compatibility": "Independent D15 result/provenance API 1.0.0 with service-owned freshness and exact candidate admission. Strict consumer decoder; immutable saved provenance shares the existing transaction. No production defaults or unversioned PINNED reinterpretation.",
       "status": "GENERATED_DOMAIN_V1"
+    },
+    {
+      "id": "crm-first-purchase-access-v1",
+      "owner": "crm-knowledge",
+      "source": "dsh-plugins/crm-knowledge/contracts/first-purchase-access.v1.ts",
+      "generator": "scripts/crm-calibration/generate_contract.py",
+      "consumers": [
+        "analytics-workbench"
+      ],
+      "compatibility": "Optional revocable per-session CRM lease; finite loopback inspect/save/reconcile only, no credentials exported. Independent service owns authorization, candidate policy and durable state.",
+      "status": "DOMAIN_V1"
     }
   ]
 }

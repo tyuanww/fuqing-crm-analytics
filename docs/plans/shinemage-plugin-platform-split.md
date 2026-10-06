@@ -68,13 +68,16 @@
 
 该实现已正常提交 `48e7ddfc`，新 clean 源码/实际离线双包各 **9/9 PASS**，新候选 `9f00fadb…` 绑定服务包 `8f096a13…`。本轮构建及相关 **95 PASS**，同一包的 CRM 合成身份、关闭时效、保存与状态重新打开回放 **6/6 PASS**，实际响应通过插件 decoder。新双包在杭州 WSL 固定 A64/开启时效场景另完成 **14/14 PASS**，journal seq 4、重试 131 文件不变；10 个临时进程与本次目录已回收、现役监听/PID 不变。已核对[本次候选证据](../hackathon/evidence/dsh-g0-save-time-policy-candidate-20261006.md)与[任务账本](../hackathon/TODOS.md)：只关闭这些具体子项，真实 CRM 接入、目标关闭时效链、DSH UI/浏览器、供应链和物理分仓仍未完成，T3/T7 保持 PARTIAL。
 
+2026-10-06 保存 UI 增量：CRM 的可选会话 lease 通过生成合同连接 workbench 公开保存 adapter；原生壳不变、默认禁用，卡片不再走旧 `/b0/analyses`。当前相关后端 132 PASS、审修后 Node 51 PASS、编译卡片 7 PASS、真实 HTTP 链 1 PASS（7 项观测）；已核对[实现/审核证据](../hackathon/evidence/dsh-g0-save-ui-20261006.md)。T9/T14 只关闭本地接线子项：实际 DSH 内核仍固定 synthetic-demo，CRM 账号/run 归属、宿主 Cookie/路由、headed 浏览器和新 clean 插件包未验收，不能视为生产保存已启用或 G0/供应链已完成。
+
+
 | 任务 | 当前状态 | 已有证据 | 尚未关闭 |
 |---|---|---|---|
 | T1 | IMPLEMENTED / STATIC PASS | 架构设计、机器 policy/inventory、11 包/610 文件/29 条跨包引用/206 处字面路径、17 条合同与 10 个主入口；含 import-equals 的 AST drift/循环/越界/公开导出负测纳入 B0 pipeline | 这只关闭依赖盘点；真实宿主与服务语义由 T2/T3/T17 验证 |
 | T2 | PARTIAL / LOCAL HOST PASS | 保留原静态/官方单测证据；2026-10-04 固定 rc2 官方 Web CLI 的实际加载、正常重启、原生 v4 会话/WAL 在途恢复、回退/恢复旧组合已通过，见[宿主证据](../hackathon/evidence/dsh-g0-pinned-host-20261004.md) | 目标平台 runtime、Windows/WSL、rc1→rc2/torn-frame、浏览器与 shell/tool union；0.2.0 仍 DEFERRED |
 | T13 | PARTIAL / LOCAL JOURNAL PASS | profile/state/既有 journal 保留；候选快照与 v2 host evidence 已通过 CLI 幂等接入 `CANDIDATE_HOST_VERIFIED`，重复不改原候选，见[本轮证据](../hackathon/evidence/dsh-g0-host-journal-20261004.md) | 生产 activation 崩溃 replay、远端 receipt/reconcile 和现场回执 |
 | T15 | PARTIAL | kit、brand/query、图表与 workbench 独立构建成果保留；指标/知识服务已独立打包。CRM 与知识插件也已分别 build/test/pack、安全解包加载，profile v3 独立绑定指纹；首购双包已在 WSL 离线冷安装并验收，见上方现场证据与[插件拆分证据](../hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md) | 物理分仓、指标/知识服务的目标安装、完整 invariant/精确宿主合同、签名/SBOM/来源信任仍未关闭 |
-| T3 | PARTIAL / CLEAN SERVICE WSL PASS | 最新 `48e7ddfc` clean 服务的源码/实际包各 9/9，WSL 固定场景 14/14，首购 plugin candidate journal seq 4；另有本机 CRM/关闭时效 6/6，见[兼容窗口](../architecture/first-purchase-service-compatibility.md)与上方证据 | 生产身份/候选准入/状态策略、供应链与 DSH UI/浏览器未完成；合成身份和 A64 策略不是生产授权 |
+| T3 | PARTIAL / CLEAN SERVICE WSL PASS | 最新 `48e7ddfc` clean 服务的源码/实际包各 9/9，WSL 固定场景 14/14，首购 plugin candidate journal seq 4；另有本机 CRM/关闭时效 6/6，见[兼容窗口](../architecture/first-purchase-service-compatibility.md)与上方证据 | 生产身份/run 归属、候选准入/状态策略、供应链与 DSH 宿主/浏览器未完成；UI 本地接线已验证，合成身份和 A64 策略不是生产授权 |
 | T7 | PARTIAL / CLEAN WSL SAVE RECOVERY PASS | 新 clean 包完成实际 WSL HTTP 保存/SIGKILL/回放/只读回退/forward-fix/小库恢复；目标回执重试幂等，旧 writer 可写降级仍被阻断 | 生产形状 UNKNOWN 恢复及完整候选门禁未完成；结果年龄判断暂缓，生产保存 UI 未启用 |
 | T17 | PARTIAL / LOCAL HOST PASS | 固定官方 Web CLI 十项场景及父命令中断回收；实测 preset 移除后现有会话保留工具，同进程挂死需外部重启；已明确 `HOST_RESTART_REQUIRED` | 任意插件同进程隔离不承诺；生产 activation/journal/canary、目标平台与真实服务恢复仍开放，测试指针不替代原子部署 |
 | T21 | PARTIAL / LOCAL HOST + SERVICE RECEIPT PASS | `plugin candidate` 携带 profile 快照；`verify-host` 绑定固定宿主十项观测；`verify-service` 绑定精确服务双包九项观测及可选 WSL 十四项合成观测，均以原 journal 幂等记账，见上方最新证据 | 生产 canary/rollback、远端 receive/reconcile、host activation；本机核验仍 release_ready=false，目标 JSON 不证明发布者身份 |

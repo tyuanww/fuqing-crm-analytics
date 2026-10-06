@@ -1,4 +1,6 @@
 import { KNOWLEDGE_ACCESS_CONTRACT } from './knowledge-access.generated.ts';
+import { FIRST_PURCHASE_ACCESS_CONTRACT } from './first-purchase-access.generated.ts';
+import { createFirstPurchaseRelay } from './first-purchase-relay.mjs';
 /** CRM credentials stay in this host closure, never env, disk, RPC or tool output. */
 import { dashboardOrigin, queryDashboardGsv, queryDashboardPurchases, queryDashboardReadiness,
   queryDashboardMembership, queryDashboardNetGsv, dashboardCapabilities } from './dashboard.mjs';
@@ -41,17 +43,18 @@ async function readBoundedJson(stream, max) {
   } finally { await reader.cancel().catch(() => {}); reader.releaseLock(); }
 }
 
-/** @param {{baseUrl?: string, browserOrigin: string, dataKind?: 'real'|'synthetic', hasSession: (id: string) => boolean, now?: () => number, ttlMs?: number}} options */
 const PUBLIC_DEMO_ORIGIN = 'https://app.tyuan.chat';
 function trustedBrowserOrigins(browserOrigin) {
   const configured = Array.isArray(browserOrigin) ? browserOrigin : [browserOrigin];
   return new Set(configured.map((item) => item === PUBLIC_DEMO_ORIGIN ? item : dashboardOrigin(item)));
 }
-export function createDashboardAccess({ baseUrl = 'http://127.0.0.1:8000', browserOrigin, dataKind = 'real', hasSession, now = Date.now, ttlMs = TTL }) {
+/** @param {{baseUrl?: string, firstPurchaseOrigin?: string, browserOrigin: string|string[], dataKind?: 'real'|'synthetic', hasSession: (id: string) => boolean, now?: () => number, ttlMs?: number}} options */
+export function createDashboardAccess({ baseUrl = 'http://127.0.0.1:8000', firstPurchaseOrigin, browserOrigin, dataKind = 'real', hasSession, now = Date.now, ttlMs = TTL }) {
   const origin = dashboardOrigin(baseUrl);
   const trustedBrowserOrigin = trustedBrowserOrigins(browserOrigin);
   if (!['real', 'synthetic'].includes(dataKind) || typeof hasSession !== 'function' || !Number.isSafeInteger(ttlMs) || ttlMs <= 0 || ttlMs > TTL) throw new Error('Invalid CRM host configuration');
   const records = new Map(); const pending = new Map(); const citationLedger = new Map();
+  const firstPurchaseRelay = createFirstPurchaseRelay(firstPurchaseOrigin);
   let disposed = false;
   function forget(sessionId) {
     records.get(sessionId)?.controller.abort(); records.delete(sessionId);
@@ -165,6 +168,27 @@ export function createDashboardAccess({ baseUrl = 'http://127.0.0.1:8000', brows
     },
   });
 
+  const firstPurchaseService = Object.freeze({
+    contract: FIRST_PURCHASE_ACCESS_CONTRACT,
+    configured: firstPurchaseRelay.configured,
+    authorize(sessionId) {
+      prune();
+      const record = records.get(sessionId);
+      if (disposed || !firstPurchaseRelay.configured || !record || !hasSession(sessionId)) return null;
+      const isCurrent = () => { prune(); return !disposed && records.get(sessionId) === record && hasSession(sessionId); };
+      return Object.freeze({ username: record.binding.username, signal: record.controller.signal, isCurrent,
+        async request(operation, body, key, signal) {
+          if (!isCurrent()) throw new Error('FIRST_PURCHASE_GRANT_REVOKED');
+          const combined = signal ? AbortSignal.any([signal, record.controller.signal]) : record.controller.signal;
+          const result = await firstPurchaseRelay.request(operation, body, key, record.binding.token, combined);
+          if (!isCurrent() || combined.aborted) throw new Error('FIRST_PURCHASE_GRANT_REVOKED');
+          if (result.status === 401) forget(sessionId);
+          return result;
+        },
+      });
+    },
+  });
+
   async function browser(request) {
     // Native Connection already verifies its cookie/Host. Require Origin as well
     // for credential submission, plus JSON/custom header to reject form CSRF.
@@ -221,5 +245,5 @@ export function createDashboardAccess({ baseUrl = 'http://127.0.0.1:8000', brows
     } catch { return error(signal.aborted ? 'CANCELLED' : 'SERVICE_UNAVAILABLE', 503); }
     finally { input.password = ''; if (pending.get(sessionId) === controller) pending.delete(sessionId); }
   }
-  return { service, knowledgeService, browser, dispose() { disposed = true; clearInterval(cleanup); for (const id of new Set([...records.keys(), ...pending.keys()])) forget(id); } };
+  return { service, knowledgeService, firstPurchaseService, browser, dispose() { disposed = true; clearInterval(cleanup); for (const id of new Set([...records.keys(), ...pending.keys()])) forget(id); } };
 }

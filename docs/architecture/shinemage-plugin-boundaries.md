@@ -32,7 +32,7 @@ node --test scripts/dsh-b0/plugin-boundaries.test.mjs
 | `crm-knowledge` | CRM 登录/指标/分析 adapter | `shinemage-dsh-crm` | 保留包 ID，版本 `0.0.0-crm.1`；已移出知识工具，无兄弟插件业务源码依赖 |
 | `knowledge` | 公开解释/教材检索/图谱 | `shinemage-dsh-knowledge` | 新独立包；公开解释无 CRM 依赖，私有教材消费可选身份能力合同 |
 
-扫描覆盖 11 个包、610 个 JS/TS 源码文件。29 条跨包引用中：10 条为构建到 kit，10 条为已锁定领域包公开导出，9 条只用于测试；生产源码例外为 0。另有 6 条仓库测试引用；70 处非字面动态导入均在测试中，不作为运行时兼容证据。
+扫描覆盖 11 个包、626 个 JS/TS 源码文件。30 条跨包引用中：10 条为构建到 kit，10 条为已锁定领域包公开导出，10 条只用于测试；生产源码例外为 0。另有 6 条仓库测试引用；71 处非字面动态导入均在测试中，不作为运行时兼容证据。
 
 构建 DAG：`plugin-kit` → `board-components`、`crm-knowledge`、`knowledge` 与四个无需图表输入的 leaf → `analytics-workbench`/`shine-funnel`/`shine-waterfall`。箭头表示构建依赖，不是宿主 bundle 激活顺序；本地 profile v3 分别选择 CRM、知识与页面模块，生产 profile 未改变。
 
@@ -75,3 +75,7 @@ T1 完成代表当前依赖可见、可检查；T15 仍为 PARTIAL。两个 mark
 CRM 包不注册 HTML 页面交付工具。workbench 的公开 `./page-tools` 是仅依赖官方 `tools` 的适配入口，可由 CRM profile 的 `--page-tools-plugin` 显式组合；缺少提供方时 `crm_service_health.page_delivery` 返回 `NOT_AVAILABLE` 和原因，注册存在也只表明 AVAILABLE/NOT_RUN。源码包校验、取消、回执与保存职责保持页面领域所有。
 
 `shine-brand/contracts/content-theme.v1.json` 只拥有插件内容 token；生成双方本地副本，既不激活品牌插件，也不操作 DSH chrome。CRM 单包构建/测试/打包不读取 workbench 或 brand 源码；工作台的明暗/native token 数值前后完全一致。详见 [CRM 端解耦证据](../hackathon/evidence/dsh-g0-crm-decoupling-20261003.md)。
+
+### 可选首购保存能力
+
+`crm-knowledge/contracts/first-purchase-access.v1.ts` 由 CRM 维护，生成到 CRM 和 workbench 各自源码。CRM 只持有会话凭据并转发有限的 inspect/save/reconcile 操作；workbench 拥有卡片、候选关联和严格服务响应校验；分析服务负责账号授权、run 归属、候选准入和 durable state。未安装 CRM 或未配置服务时只禁用保存，不增加 workbench 的强制 CRM 注入依赖。新增跨包源码引用仅在真实 HTTP 测试 probe 中；生产源码例外仍为 0。已核对[本轮证据](../hackathon/evidence/dsh-g0-save-ui-20261006.md)。
