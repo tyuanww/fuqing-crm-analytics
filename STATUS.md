@@ -14,11 +14,14 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 当前 clean 首购服务候选（2026-10-06）
+### 当前 clean 首购插件／服务候选（2026-10-06）
 
 - 完整增量审核后已本地提交 `2be518e5`，随后从该 clean SHA 生成首购服务 `0.1.0rc1` 候选。源码兼容 **9/9 PASS**、两个实际包的离线 venv/HTTP 兼容 **9/9 PASS**；两包打包来源均 `worktree_dirty=false`，见[本次服务候选证据](docs/hackathon/evidence/dsh-g0-service-clean-candidate-20261006.md)。
-- 新候选 archive 为 75811 B / `190050f6eaecdaf199c87ca516e3ff9323e72187995721709e448f764c9217db`。控制面已复核实际包；旧 WSL 回执挪用于新包会被拒绝，生产激活负测仍阻断，临时测试进程已退出。
-- 新包的最终 plugin candidate journal 绑定、生产身份/策略、时限/UNKNOWN、目标 WSL 和供应链尚未完成。保存 UI 继续 NOT_AVAILABLE；没有远端操作或发布。此处记录不改变下方既有插件候选来源。
+- 新候选 archive 为 75811 B / `190050f6eaecdaf199c87ca516e3ff9323e72187995721709e448f764c9217db`。已绑定 clean 插件来源 `78779206`，候选 digest `afcdae56…`；本轮构建及相关 **100/100** 测试通过。插件、服务分别记录来源，未因文档提交重打服务包。
+- 同一新服务双包已在杭州 WSL2/Python 3.14.4 完成 **14/14 synthetic 验收**，真实回执经 `plugin verify-service` 进入原控制面的 candidate journal seq **4**。重试保持同一 seq/digest，129 个输入/产物/回执文件不变；旧 WSL 回执误用仍拒绝。见[本轮接线与现场证据](docs/hackathon/evidence/dsh-g0-service-candidate-binding-20261006.md)。
+- 10 个临时服务进程和安装目录已回收；6677/18090/18092/18093/18094 的监听/PID 快照一致。本次是服务隔离验收，没有生产切换或发布，也不替代 DSH 宿主/浏览器验收。
+- 本批提交前 OCR delegate 已补审全部 **4/4** 文档，修正“服务包回执失效”与“插件变化”的归因；本次门禁测试 **70 PASS**，既有回执 CLI 重验、129 文件不变通过。现场 14 项属于上一阶段结果，此次审核未重新操作杭州。
+- 生产身份/候选策略、时限/UNKNOWN、供应链与目标 DSH runtime 仍开放，`release_ready=false`、激活 BLOCKED、保存 UI 继续 NOT_AVAILABLE。下方 CRM/知识库候选及其来源保持不变。
 
 ### 已提交的完整候选链复审（2026-10-06）
 

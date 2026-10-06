@@ -56,7 +56,9 @@
 
 2026-10-06 的接线已提交 `356862bf`。随后在完整候选链实际修复代理透传、pnpm 重复准备、合成 key 扫描和 profile 测试环境四处问题；最终 clean SHA `9902bdd9` 的八阶段 preflight **PASS**（release 244 项），两份 CRM/知识独立包与官方 rc2 本机宿主 **10/10 PASS**。各自 journal seq 3 的幂等核验通过，见[最终本机候选](../hackathon/evidence/dsh-g0-clean-candidate-20261006.md)。这不关闭目标 WSL runtime、首购保存服务、生产身份、供应链或 G0/stop-go；上述“尚未提交”为各自历史阶段。
 
-2026-10-06 完整增量复审 **22/22** 覆盖，251 个不同用例通过，修正两处文档状态；见[审核记录](../hackathon/evidence/dsh-g0-candidate-full-review-20261006.md)。该批已提交 `2be518e5`，随后生成 clean 首购服务候选并完成源码/实际离线包各 **9/9 PASS**，见[新证据](../hackathon/evidence/dsh-g0-service-clean-candidate-20261006.md)。新包尚未绑定最终 plugin candidate journal，旧 WSL 回执误用会被拒绝；继续补新包目标、生产身份/策略及供应链，生产门禁不变。
+2026-10-06 完整增量复审 **22/22** 覆盖，251 个不同用例通过，修正两处文档状态；见[审核记录](../hackathon/evidence/dsh-g0-candidate-full-review-20261006.md)。该批已提交 `2be518e5`，随后生成 clean 首购服务候选并完成源码/实际离线包各 **9/9 PASS**，见[本机证据](../hackathon/evidence/dsh-g0-service-clean-candidate-20261006.md)。
+
+后续在 clean 插件来源 `78779206` 重新构建首购插件，绑定同一 `2be518e5` 服务包；本轮相关 **100 PASS / 0 SKIP**，新服务双包实际杭州 WSL 合成验收 **14/14 PASS**。新回执经既有 CLI 进入 candidate journal seq 4，重试及 129 文件不变、旧目标回执误用拒绝、生产激活阻断均已验证，见[接线与现场证据](../hackathon/evidence/dsh-g0-service-candidate-binding-20261006.md)。10 个临时进程已回收，生产监听/PID 不变；生产身份/候选准入、时限、供应链及目标 DSH 宿主仍开放。
 
 | 任务 | 当前状态 | 已有证据 | 尚未关闭 |
 |---|---|---|---|
@@ -64,8 +66,8 @@
 | T2 | PARTIAL / LOCAL HOST PASS | 保留原静态/官方单测证据；2026-10-04 固定 rc2 官方 Web CLI 的实际加载、正常重启、原生 v4 会话/WAL 在途恢复、回退/恢复旧组合已通过，见[宿主证据](../hackathon/evidence/dsh-g0-pinned-host-20261004.md) | 目标平台 runtime、Windows/WSL、rc1→rc2/torn-frame、浏览器与 shell/tool union；0.2.0 仍 DEFERRED |
 | T13 | PARTIAL / LOCAL JOURNAL PASS | profile/state/既有 journal 保留；候选快照与 v2 host evidence 已通过 CLI 幂等接入 `CANDIDATE_HOST_VERIFIED`，重复不改原候选，见[本轮证据](../hackathon/evidence/dsh-g0-host-journal-20261004.md) | 生产 activation 崩溃 replay、远端 receipt/reconcile 和现场回执 |
 | T15 | PARTIAL | kit、brand/query、图表与 workbench 独立构建成果保留；指标/知识服务已独立打包。CRM 与知识插件也已分别 build/test/pack、安全解包加载，profile v3 独立绑定指纹；首购双包已在 WSL 离线冷安装并验收，见上方现场证据与[插件拆分证据](../hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md) | 物理分仓、指标/知识服务的目标安装、完整 invariant/精确宿主合同、签名/SBOM/来源信任仍未关闭 |
-| T3 | PARTIAL / CLEAN LOCAL SERVICE PASS | 旧双包 9/9 与 WSL 14/14 已核验并接原 journal；新 `2be518e5` clean 服务包另有源码及实际包各 9/9，见[兼容窗口](../architecture/first-purchase-service-compatibility.md)与上方证据 | 新包最终 plugin candidate 绑定、目标 WSL、生产身份/策略、供应链与 DSH UI/浏览器未完成；不继承旧包现场结论 |
-| T7 | PARTIAL / LOCAL CLEAN SAVE RECOVERY PASS | 原 WSL HTTP 保存/SIGKILL/只读回退证据保留；新 clean 包的本机恢复/forward-fix/小库恢复 9/9 通过；旧 writer 可写降级仍被阻断 | 生产形状时钟/UNKNOWN 窗口、新包目标主机证据及完整候选门禁未完成；生产保存 UI 未启用 |
+| T3 | PARTIAL / CLEAN SERVICE WSL PASS | 新 `2be518e5` clean 服务双包已有本机源码/实际包各 9/9，另在 WSL 实测 14/14，并绑定首购 plugin candidate journal seq 4；见[兼容窗口](../architecture/first-purchase-service-compatibility.md)与上方证据 | 生产身份/候选准入/状态策略、供应链与 DSH UI/浏览器未完成；合成身份和 A64 策略不是生产授权 |
+| T7 | PARTIAL / CLEAN WSL SAVE RECOVERY PASS | 新 clean 包完成实际 WSL HTTP 保存/SIGKILL/回放/只读回退/forward-fix/小库恢复；目标回执重试幂等，旧 writer 可写降级仍被阻断 | 生产形状时钟/UNKNOWN 窗口及完整候选门禁未完成；生产保存 UI 未启用 |
 | T17 | PARTIAL / LOCAL HOST PASS | 固定官方 Web CLI 十项场景及父命令中断回收；实测 preset 移除后现有会话保留工具，同进程挂死需外部重启；已明确 `HOST_RESTART_REQUIRED` | 任意插件同进程隔离不承诺；生产 activation/journal/canary、目标平台与真实服务恢复仍开放，测试指针不替代原子部署 |
 | T21 | PARTIAL / LOCAL HOST + SERVICE RECEIPT PASS | `plugin candidate` 携带 profile 快照；`verify-host` 绑定固定宿主十项观测；`verify-service` 绑定精确服务双包九项观测及可选 WSL 十四项合成观测，均以原 journal 幂等记账，见上方最新证据 | 生产 canary/rollback、远端 receive/reconcile、host activation；本机核验仍 release_ready=false，目标 JSON 不证明发布者身份 |
 | T22 | IMPLEMENTED / DOCS PASS | README、docs 索引、rc2 Quickstart 和插件作者 Quickstart 已统一当前事实与三步入口 | 现场 host/canary/rollback 仍不属于文档门禁 |
