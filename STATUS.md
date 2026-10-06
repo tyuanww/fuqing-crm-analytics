@@ -14,6 +14,11 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
+### 当前完整候选链复审（2026-10-06）
+
+- OCR delegate 已覆盖 `2a89790b..0a183b6f` 的 **22/22 文件**，未确认新的代码缺陷；修正服务兼容说明及接线证据中的两处过期状态。当前回归合计 **251 个不同用例 PASS**，固定宿主保护检查的条件跳过项已补跑，见[完整审核记录](docs/hackathon/evidence/dsh-g0-candidate-full-review-20261006.md)。
+- 重新核验既有 bundle、双插件 journal 与 WSL 首购 journal；120 个输入/产物/回执文件不变。提交后继续准备 clean 首购服务候选；生产 gate 不变，未执行远端动作。
+
 ### 当前 CRM／知识库干净候选（2026-10-06）
 
 - 从审核后的 clean SHA `9902bdd93bee4b0ba7f30efb3d35e8928db62380` 生成 `dsh-preflight-crm-9902bdd9`：prepare/audit/build/runtime/release/test/receive/evidence **8/8 PASS**，release suite **244 PASS / 0 SKIP**，7 文件 bundle 已重新校验。成功轮次使用热缓存，用时 118590 ms，不含此前排错与宿主演练。

@@ -1,6 +1,6 @@
 # 首购服务 WSL 回执接入原候选 journal（2026-10-06）
 
-承接用户授权的“审核、修复、commit、下一步”。上一批 WSL 记录经 [OCR delegate](./dsh-g0-service-target-acceptance-review-20261006.md) 覆盖 7/7，修正两处低风险表述、核验原始输入后，通过正常 hooks 本地提交为 `2a89790b42326376f0808e0896b0a78877bd28ba`。没有 push。本页代码/测试/文档是提交后的下一步增量，尚未提交。
+承接用户授权的“审核、修复、commit、下一步”。上一批 WSL 记录经 [OCR delegate](./dsh-g0-service-target-acceptance-review-20261006.md) 覆盖 7/7，修正两处低风险表述、核验原始输入后，通过正常 hooks 本地提交为 `2a89790b42326376f0808e0896b0a78877bd28ba`。本页记载其后的接线增量，现已随 `356862bf` 本地提交；下方验证保留当时执行范围，没有 push。
 
 ## 实现边界
 

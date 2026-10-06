@@ -56,6 +56,8 @@
 
 2026-10-06 的接线已提交 `356862bf`。随后在完整候选链实际修复代理透传、pnpm 重复准备、合成 key 扫描和 profile 测试环境四处问题；最终 clean SHA `9902bdd9` 的八阶段 preflight **PASS**（release 244 项），两份 CRM/知识独立包与官方 rc2 本机宿主 **10/10 PASS**。各自 journal seq 3 的幂等核验通过，见[最终本机候选](../hackathon/evidence/dsh-g0-clean-candidate-20261006.md)。这不关闭目标 WSL runtime、首购保存服务、生产身份、供应链或 G0/stop-go；上述“尚未提交”为各自历史阶段。
 
+2026-10-06 完整增量复审 **22/22** 覆盖，251 个不同用例通过，修正两处文档状态；见[审核记录](../hackathon/evidence/dsh-g0-candidate-full-review-20261006.md)。下一项为 clean 首购服务候选，生产门禁不变。
+
 | 任务 | 当前状态 | 已有证据 | 尚未关闭 |
 |---|---|---|---|
 | T1 | IMPLEMENTED / STATIC PASS | 架构设计、机器 policy/inventory、11 包/610 文件/29 条跨包引用/206 处字面路径、17 条合同与 10 个主入口；含 import-equals 的 AST drift/循环/越界/公开导出负测纳入 B0 pipeline | 这只关闭依赖盘点；真实宿主与服务语义由 T2/T3/T17 验证 |
