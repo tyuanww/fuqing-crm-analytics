@@ -74,16 +74,18 @@
 
 后续已完成 `c7bbf3ae` 运行中身份故障审修，并通过固定官方 Host 的 CRM/首购 HTTP 整链 **1 PASS**：实际原生 loop/worker、Cookie/Origin、保存 ACK 恢复、同 authority 重启与重新登录；启动保护/model adapter **7 PASS**。已核对[独立宿主证据](../hackathon/evidence/dsh-g0-official-crm-http-20261006.md)。这一步替换了原来的受控 Host 调度接收器，当时查询准入仍由私有测试驱动器发起。
 
-最新原生准入从 `f3b7c0cc` 继续，使用官方 commands 服务，不抢占共享 RPC 或输入框；新增查询/status/精确取消，并修复空会话反馈及卡片跨插件开关依赖。新 HTTP 整链 **1 PASS**，Chrome headless **1 PASS / 5 项观测**，命令/编译卡片 **12 PASS**、相关后端 **35 PASS**；未连接 CRM 的普通原生对话可用。后续 OCR **27/27** 文件复核修复浏览器异常清理，8 项保护测试与 Chrome 五项重新通过，见[本轮证据](../hackathon/evidence/dsh-g0-native-command-browser-20261006.md)。T3/T9/T14 仍 PARTIAL：这是本地源码合成验证，新 clean 候选、headed/移动端/无障碍、真实模型、目标环境与生产 gate 保持开放；不继承旧包/WSL 回执为新源码通过。
+原生准入从 `f3b7c0cc` 继续，使用官方 commands 服务，不抢占共享 RPC 或输入框；新增查询/status/精确取消，并修复空会话反馈及卡片跨插件开关依赖。新 HTTP 整链 **1 PASS**，Chrome headless **1 PASS / 5 项观测**，命令/编译卡片 **12 PASS**、相关后端 **35 PASS**；未连接 CRM 的普通原生对话可用。后续 OCR **27/27** 文件复核修复浏览器异常清理，8 项保护测试与 Chrome 五项重新通过，见[本轮证据](../hackathon/evidence/dsh-g0-native-command-browser-20261006.md)。T3/T9/T14 仍 PARTIAL：当时仅完成本地源码合成验证，后续 clean 候选见下一段；headed/移动端/无障碍、真实模型、目标环境与生产 gate 保持开放，不继承旧包/WSL 回执为新源码通过。
+
+上述原生命令批次正常 hooks 提交为 `9611589c`，从其 clean SHA 新建 workbench 与独立服务候选。源码/实际双包各 **9/9 PASS**、相关 **106 PASS**、同包合成 CRM/NOT_CHECKED 保存 **6/6 PASS**；候选 `ca79774b…` 的服务回执进入 seq 3，52 个当前文件与 195 个旧证据保留，旧 WSL 回执拒绝。见[本次候选证据](../hackathon/evidence/dsh-g0-native-command-candidate-20261006.md)。尚未验证新包的 CRM 组合/宿主/浏览器或目标机；现有 verify-host 仅覆盖 CRM + knowledge，不能挪用，生产 gate 不变。
 
 | 任务 | 当前状态 | 已有证据 | 尚未关闭 |
 |---|---|---|---|
 | T1 | IMPLEMENTED / STATIC PASS | 架构设计、机器 policy/inventory、11 包及当前 AST 盘点；含 import-equals 的 drift/循环/越界/公开导出负测纳入 B0 pipeline，精确数量与源摘要以生成的边界清单为准 | 这只关闭依赖盘点；真实宿主与服务语义由 T2/T3/T17 验证 |
 | T2 | PARTIAL / LOCAL HOST PASS | 保留原静态/官方单测证据；2026-10-04 固定 rc2 官方 Web CLI 的实际加载、正常重启、原生 v4 会话/WAL 在途恢复、回退/恢复旧组合已通过，见[宿主证据](../hackathon/evidence/dsh-g0-pinned-host-20261004.md) | 目标平台 runtime、Windows/WSL、rc1→rc2/torn-frame、浏览器与 shell/tool union；0.2.0 仍 DEFERRED |
 | T13 | PARTIAL / LOCAL JOURNAL PASS | profile/state/既有 journal 保留；候选快照与 v2 host evidence 已通过 CLI 幂等接入 `CANDIDATE_HOST_VERIFIED`，重复不改原候选，见[本轮证据](../hackathon/evidence/dsh-g0-host-journal-20261004.md) | 生产 activation 崩溃 replay、远端 receipt/reconcile 和现场回执 |
-| T15 | PARTIAL | kit、brand/query、图表与 workbench 独立构建成果保留；指标/知识服务已独立打包。CRM 与知识插件也已分别 build/test/pack、安全解包加载，profile v3 独立绑定指纹；首购双包已在 WSL 离线冷安装并验收，见上方现场证据与[插件拆分证据](../hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md) | 物理分仓、指标/知识服务的目标安装、完整 invariant/精确宿主合同、签名/SBOM/来源信任仍未关闭 |
-| T3 | PARTIAL / LOCAL CRM UI PASS | `48e7ddfc` clean 服务的源码/实际包各 9/9、WSL 固定场景 14/14 和 journal seq 4 属于原包；后续源码已通过本地官方 Host/HTTP 与 Chrome 首购合成链，见[兼容窗口](../architecture/first-purchase-service-compatibility.md)与上方证据 | 新 clean 插件/服务候选、目标主机、生产身份/run 归属与候选准入/状态策略、供应链、完整浏览器/真实模型未完成；合成身份和 A64 策略不是生产授权 |
-| T7 | PARTIAL / CLEAN WSL SAVE RECOVERY PASS | 新 clean 包完成实际 WSL HTTP 保存/SIGKILL/回放/只读回退/forward-fix/小库恢复；目标回执重试幂等，旧 writer 可写降级仍被阻断 | 生产形状 UNKNOWN 恢复及完整候选门禁未完成；结果年龄判断暂缓，生产保存 UI 未启用 |
+| T15 | PARTIAL | kit、brand/query、图表与 workbench 独立构建成果保留；指标/知识服务已独立打包。CRM 与知识插件也已分别 build/test/pack、安全解包加载，profile v3 独立绑定指纹；首购 `48e7ddfc` 双包已在 WSL 离线验收，新 `9611589c` 包仅本机通过，见上方证据与[插件拆分证据](../hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md) | 物理分仓、新包目标验收、指标/知识服务的目标安装、完整 invariant/精确宿主合同、签名/SBOM/来源信任仍未关闭 |
+| T3 | PARTIAL / LOCAL CRM UI + CLEAN CANDIDATE PASS | `9611589c` clean workbench/服务候选：源码/实际包各 9/9、同包 CRM 保存 6/6、journal seq 3；源码官方 Host/HTTP 与 Chrome 合成链另有证据，见[兼容窗口](../architecture/first-purchase-service-compatibility.md)与上方记录 | 精确包的 CRM 组合/宿主/浏览器、新包目标机、生产身份/run 归属与候选准入/状态策略、供应链、真实模型未完成；合成身份不是生产授权 |
+| T7 | PARTIAL / PRIOR WSL + CURRENT LOCAL RECOVERY PASS | 旧 `48e7ddfc` 包完成实际 WSL HTTP/SIGKILL/回放/只读回退/小库恢复；新 `9611589c` 包仅本机离线/恢复通过，旧 WSL 回执拒绝；旧 writer 可写降级仍阻断 | 新包目标恢复、生产形状 UNKNOWN 与完整候选门禁未完成；结果年龄判断暂缓，生产保存 UI 未启用 |
 | T17 | PARTIAL / LOCAL HOST PASS | 固定官方 Web CLI 十项场景及父命令中断回收；实测 preset 移除后现有会话保留工具，同进程挂死需外部重启；已明确 `HOST_RESTART_REQUIRED` | 任意插件同进程隔离不承诺；生产 activation/journal/canary、目标平台与真实服务恢复仍开放，测试指针不替代原子部署 |
 | T21 | PARTIAL / LOCAL HOST + SERVICE RECEIPT PASS | `plugin candidate` 携带 profile 快照；`verify-host` 绑定固定宿主十项观测；`verify-service` 绑定精确服务双包九项观测及可选 WSL 十四项合成观测，均以原 journal 幂等记账，见上方最新证据 | 生产 canary/rollback、远端 receive/reconcile、host activation；本机核验仍 release_ready=false，目标 JSON 不证明发布者身份 |
 | T22 | IMPLEMENTED / DOCS PASS | README、docs 索引、rc2 Quickstart 和插件作者 Quickstart 已统一当前事实与三步入口 | 现场 host/canary/rollback 仍不属于文档门禁 |

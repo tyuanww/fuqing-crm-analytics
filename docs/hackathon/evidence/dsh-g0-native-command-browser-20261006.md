@@ -96,7 +96,7 @@ B0_NATIVE_CRM_HOST_UPSTREAM="$UPSTREAM" \
 
 ## 未关闭
 
-实现阶段记录时尚未提交；后续 OCR 审修见下节，提交身份以 Git 与新候选回执为准。尚未重建 clean plugin/service candidate，不能复用旧包的 PASS。
+实现阶段记录时尚未提交；后续 OCR 审修见下节，已正常提交为 `9611589c`。该 clean SHA 的插件/服务候选已另行构建验证，见[新候选证据](./dsh-g0-native-command-candidate-20261006.md)。本页 Chrome 仍只证明源码/本地编译产物，不能替代精确候选包的宿主与目标环境验收。
 
 T3/T9/T14 仍 PARTIAL。headed、移动端、读屏、真实模型、生产形状/UAT、签名/来源供应链、目标主机与生产激活没有本次通过证据；结果陈旧/过期检查仍按用户决定暂缓。未 push、创建 Release、切换杭州或访问真实 DuckDB。
 
