@@ -11,6 +11,8 @@ from time import monotonic, sleep
 
 from fastapi import FastAPI, Request, Response
 import uvicorn
+import httpx
+import pytest
 
 from backend.analytics_first_purchase_analysis_app import create_first_purchase_analysis_app
 from backend.services.analytics.first_purchase.crm_identity import CRMFirstPurchaseIdentityResolver
@@ -25,6 +27,12 @@ TOKEN = "synthetic-ui-only-token-0000000000"
 @contextmanager
 def serve(app, *, port=0):
     with socket.socket() as sock:
+        if os.name == "nt":
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        else:
+            # Reuse our closed socket's TIME_WAIT, never another live listener.
+            # SO_REUSEPORT is deliberately not enabled.
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind(("127.0.0.1", port))
         sock.listen(64)
         origin = f"http://127.0.0.1:{sock.getsockname()[1]}"
@@ -41,6 +49,19 @@ def serve(app, *, port=0):
             server.should_exit = True
             thread.join(timeout=5)
             assert not thread.is_alive(), "owned fixture server did not stop"
+
+
+def test_owned_http_fixture_reuses_closed_port_and_rejects_live_owner():
+    app = FastAPI()
+    port = 0
+    for _ in range(3):
+        with serve(app, port=port) as origin:
+            port = int(origin.rsplit(":", 1)[1])
+            with pytest.raises(OSError):
+                with serve(app, port=port):
+                    pytest.fail("a live owner must never be replaced")
+            with httpx.Client(trust_env=False, timeout=3) as client:
+                assert client.get(origin + "/missing", headers={"Connection": "close"}).status_code == 404
 
 
 def test_crm_login_save_unknown_reconcile_and_replay_over_real_http(tmp_path):

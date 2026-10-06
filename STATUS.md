@@ -14,11 +14,17 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 原生命令 clean 候选（2026-10-06，当前进度）
+### 精确插件包的宿主与浏览器（2026-10-06，当前进度）
+
+- 复用 `9611589c` workbench 包，并从 clean `d3fe7f94` 构建固定 CRM 包；通过新的显式 artifact 模式在私有目录解包，复用生产接收器的 peer 链接，用真实 candidate digest 验证。未改业务插件或 DSH 上游。
+- 官方 Host HTTP **1 PASS**，紧接运行的 Chrome headless **1 PASS / 5 项观测**；保护/model 测试 **21 PASS**、受影响后端 **3 PASS**。已修复演练缺 transitive SDK、固定端口 TIME_WAIT 和父初始化错误被遮蔽的问题；见[本次证据](docs/hackathon/evidence/dsh-g0-first-purchase-artifact-host-20261006.md)。
+- **仍 PARTIAL**：这次只证明精确插件包组合，服务/查询内核仍由隔离源码夹具运行。旧候选 83 文件及 journal seq 3 未改，临时监听和 Host 已回收。下一步接独立服务 archive 的同组合验收，再做新包 WSL/生产门禁；本轮未操作杭州或发布。
+
+### 原生命令 clean 候选（2026-10-06，上一阶段）
 
 - 原生命令/Chrome 批次已按 OCR delegate 审修并正常提交 `9611589c`，随后从干净 SHA 构建 workbench 和独立首购服务包。本次源码/实际双包兼容各 **9/9 PASS**，相关测试 **106 PASS**，同一服务 archive 的合成 CRM 保存链 **6/6 PASS**。见[候选证据](docs/hackathon/evidence/dsh-g0-native-command-candidate-20261006.md)。
 - 候选 `ca79774b…` 绑定插件 `b3571f04…`、服务 `d7025f75…`，本机回执进入 journal seq **3**。重试 52 个当前文件不变，旧 195 个证据文件保留；旧 WSL 回执以 `SERVICE_TARGET_PAIR_MISMATCH` 拒绝。
-- **仍 PARTIAL / 激活 BLOCKED**：当前只是 workbench 与服务的本地候选绑定。精确包的 CRM 组合/宿主/浏览器、新包目标机、供应链和生产 gate 未关闭；下节源码 Chrome 通过不替代包级验收。本轮未连接或切换杭州、未 push/发布。
+- **当时 PARTIAL / 激活 BLOCKED**：该阶段只是 workbench 与服务的本地候选绑定；后续精确插件包的宿主/浏览器见上节。独立服务组合、新包目标机、供应链和生产 gate 未关闭。
 
 ### 原生首购命令与 Chrome 接线（2026-10-06，上一阶段）
 

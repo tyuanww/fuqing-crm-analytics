@@ -76,7 +76,9 @@
 
 原生准入从 `f3b7c0cc` 继续，使用官方 commands 服务，不抢占共享 RPC 或输入框；新增查询/status/精确取消，并修复空会话反馈及卡片跨插件开关依赖。新 HTTP 整链 **1 PASS**，Chrome headless **1 PASS / 5 项观测**，命令/编译卡片 **12 PASS**、相关后端 **35 PASS**；未连接 CRM 的普通原生对话可用。后续 OCR **27/27** 文件复核修复浏览器异常清理，8 项保护测试与 Chrome 五项重新通过，见[本轮证据](../hackathon/evidence/dsh-g0-native-command-browser-20261006.md)。T3/T9/T14 仍 PARTIAL：当时仅完成本地源码合成验证，后续 clean 候选见下一段；headed/移动端/无障碍、真实模型、目标环境与生产 gate 保持开放，不继承旧包/WSL 回执为新源码通过。
 
-上述原生命令批次正常 hooks 提交为 `9611589c`，从其 clean SHA 新建 workbench 与独立服务候选。源码/实际双包各 **9/9 PASS**、相关 **106 PASS**、同包合成 CRM/NOT_CHECKED 保存 **6/6 PASS**；候选 `ca79774b…` 的服务回执进入 seq 3，52 个当前文件与 195 个旧证据保留，旧 WSL 回执拒绝。见[本次候选证据](../hackathon/evidence/dsh-g0-native-command-candidate-20261006.md)。尚未验证新包的 CRM 组合/宿主/浏览器或目标机；现有 verify-host 仅覆盖 CRM + knowledge，不能挪用，生产 gate 不变。
+上述原生命令批次正常 hooks 提交为 `9611589c`，从其 clean SHA 新建 workbench 与独立服务候选。源码/实际双包各 **9/9 PASS**、相关 **106 PASS**、同包合成 CRM/NOT_CHECKED 保存 **6/6 PASS**；候选 `ca79774b…` 的服务回执进入 seq 3，52 个当前文件与 195 个旧证据保留，旧 WSL 回执拒绝。见[本次候选证据](../hackathon/evidence/dsh-g0-native-command-candidate-20261006.md)。当时未验证精确插件包组合；后续进展见下一段，现有 verify-host 的 CRM + knowledge 范围不变。
+
+继续从 clean `d3fe7f94` 打包 CRM，与旧 workbench tarball 组成显式隔离输入。实际加载解包后两个插件，官方 HTTP **1 PASS**、连续 Chrome **1 PASS / 5 项观测**，保护/model **21 PASS**、受影响后端 **3 PASS**；修复演练 SDK 链接/TIME_WAIT/EOF 归因，包内容、83 个旧候选文件与 journal 保持不变。见[精确插件包证据](../hackathon/evidence/dsh-g0-first-purchase-artifact-host-20261006.md)。服务/查询内核仍为源码夹具；独立服务 archive 的同组合验收、新包目标环境和生产门禁继续开放。
 
 | 任务 | 当前状态 | 已有证据 | 尚未关闭 |
 |---|---|---|---|
@@ -84,7 +86,7 @@
 | T2 | PARTIAL / LOCAL HOST PASS | 保留原静态/官方单测证据；2026-10-04 固定 rc2 官方 Web CLI 的实际加载、正常重启、原生 v4 会话/WAL 在途恢复、回退/恢复旧组合已通过，见[宿主证据](../hackathon/evidence/dsh-g0-pinned-host-20261004.md) | 目标平台 runtime、Windows/WSL、rc1→rc2/torn-frame、浏览器与 shell/tool union；0.2.0 仍 DEFERRED |
 | T13 | PARTIAL / LOCAL JOURNAL PASS | profile/state/既有 journal 保留；候选快照与 v2 host evidence 已通过 CLI 幂等接入 `CANDIDATE_HOST_VERIFIED`，重复不改原候选，见[本轮证据](../hackathon/evidence/dsh-g0-host-journal-20261004.md) | 生产 activation 崩溃 replay、远端 receipt/reconcile 和现场回执 |
 | T15 | PARTIAL | kit、brand/query、图表与 workbench 独立构建成果保留；指标/知识服务已独立打包。CRM 与知识插件也已分别 build/test/pack、安全解包加载，profile v3 独立绑定指纹；首购 `48e7ddfc` 双包已在 WSL 离线验收，新 `9611589c` 包仅本机通过，见上方证据与[插件拆分证据](../hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md) | 物理分仓、新包目标验收、指标/知识服务的目标安装、完整 invariant/精确宿主合同、签名/SBOM/来源信任仍未关闭 |
-| T3 | PARTIAL / LOCAL CRM UI + CLEAN CANDIDATE PASS | `9611589c` clean workbench/服务候选：源码/实际包各 9/9、同包 CRM 保存 6/6、journal seq 3；源码官方 Host/HTTP 与 Chrome 合成链另有证据，见[兼容窗口](../architecture/first-purchase-service-compatibility.md)与上方记录 | 精确包的 CRM 组合/宿主/浏览器、新包目标机、生产身份/run 归属与候选准入/状态策略、供应链、真实模型未完成；合成身份不是生产授权 |
+| T3 | PARTIAL / LOCAL PACKED PLUGIN UI PASS | `9611589c` workbench 与固定 CRM 包经官方 HTTP/Chrome 合成链通过；独立服务另有源码/实际包各 9/9、CRM 保存 6/6、journal seq 3，见[兼容窗口](../architecture/first-purchase-service-compatibility.md)与上方记录 | 独立服务 archive 的同组合、新包目标机、生产身份/run 归属与候选准入/状态策略、供应链、真实模型未完成；合成身份不是生产授权 |
 | T7 | PARTIAL / PRIOR WSL + CURRENT LOCAL RECOVERY PASS | 旧 `48e7ddfc` 包完成实际 WSL HTTP/SIGKILL/回放/只读回退/小库恢复；新 `9611589c` 包仅本机离线/恢复通过，旧 WSL 回执拒绝；旧 writer 可写降级仍阻断 | 新包目标恢复、生产形状 UNKNOWN 与完整候选门禁未完成；结果年龄判断暂缓，生产保存 UI 未启用 |
 | T17 | PARTIAL / LOCAL HOST PASS | 固定官方 Web CLI 十项场景及父命令中断回收；实测 preset 移除后现有会话保留工具，同进程挂死需外部重启；已明确 `HOST_RESTART_REQUIRED` | 任意插件同进程隔离不承诺；生产 activation/journal/canary、目标平台与真实服务恢复仍开放，测试指针不替代原子部署 |
 | T21 | PARTIAL / LOCAL HOST + SERVICE RECEIPT PASS | `plugin candidate` 携带 profile 快照；`verify-host` 绑定固定宿主十项观测；`verify-service` 绑定精确服务双包九项观测及可选 WSL 十四项合成观测，均以原 journal 幂等记账，见上方最新证据 | 生产 canary/rollback、远端 receive/reconcile、host activation；本机核验仍 release_ready=false，目标 JSON 不证明发布者身份 |

@@ -1,11 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, access } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, access, symlink } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { runPinnedHostAcceptance } from './pinned-host-acceptance.mjs';
 import { runFirstPurchaseBrowser } from './first-purchase-browser.probe.mjs';
+import { prepareFirstPurchaseArtifacts, verifyFirstPurchaseInstalledArtifacts } from './first-purchase-artifacts.mjs';
+import { serviceFixture } from '../release/test-fixtures/service-compatibility.mjs';
+import { DSH_SDK_VERSION, DSH_UPSTREAM_SHA } from '../release/toolchain.mjs';
 
 const repository = fileURLToPath(new URL('../..', import.meta.url));
 const upstream = process.env.B0_BUILD_UPSTREAM;
@@ -84,3 +89,102 @@ for (const stage of ['context', 'page', 'evidence', 'close']) {
     assert.equal(state.contextClosed, stage !== 'context');
   });
 }
+
+const digest = value => createHash('sha256').update(value).digest('hex');
+async function artifactFixture(t) {
+  const directory = await fixture(t), packs = {}, ids = {
+    workbench: '@shine-mage/dsh-analytics-workbench-b0', crm: '@shine-mage/dsh-crm-knowledge',
+  };
+  const write = (path, value) => writeFile(path, JSON.stringify(value) + '\n');
+  for (const [domain, id] of Object.entries(ids)) {
+    const stage = join(directory, domain), pkg = join(stage, 'package');
+    await mkdir(join(pkg, 'lib'), { recursive: true });
+    await write(join(pkg, 'package.json'), { name: id, version: '1.0.0',
+      peerDependencies: { '@deepseek-ai/dsh-tools': DSH_SDK_VERSION } });
+    await writeFile(join(pkg, 'lib/index.js'), "export function apply() { throw Error('fixture must not activate'); }\n");
+    const extra = domain === 'crm' ? 'lib/host.js' : 'lib/skills.js';
+    await writeFile(join(pkg, extra), domain === 'crm'
+      ? "export function apply() { throw Error('fixture must not activate'); }\n"
+      : `export const firstPurchaseMethodPackageDigest = '${'a'.repeat(64)}';\n`);
+    const name = domain + '.tgz', archive = join(directory, name);
+    execFileSync('tar', ['-czf', archive, '-C', stage, 'package'],
+      { env: { PATH: process.env.PATH, COPYFILE_DISABLE: '1' } });
+    const bytes = await readFile(archive);
+    packs[domain] = { schema_version: 'dsh-plugin-pack/v1', package_name: id, package_version: '1.0.0',
+      source_sha: 'b'.repeat(40), source_dirty: false, dsh_pin: DSH_SDK_VERSION,
+      tarball: { name, sha256: digest(bytes), bytes: bytes.length }, entries: ['lib/index.js', extra, 'package.json'] };
+  }
+  const { binding, gate } = await serviceFixture();
+  const profile = { schema_version: 'dsh-profile/v1', profile_id: 'fixture',
+    dsh: { sdk_version: DSH_SDK_VERSION, upstream_sha: DSH_UPSTREAM_SHA },
+    plugins: [{ path: 'dsh-plugins/analytics-workbench', id: ids.workbench, build: 'build.mjs', enabled: true }],
+    service_binding: binding };
+  await write(join(directory, 'profile.json'), profile);
+  const profileDigest = digest(await readFile(join(directory, 'profile.json')));
+  const base = { schema_version: 'dsh-plugin-candidate/v1', profile_id: 'fixture', profile_digest: profileDigest,
+    profile_snapshot: { name: 'profile.json', sha256: profileDigest },
+    source_sha: packs.workbench.source_sha,
+    plugin: { id: ids.workbench, path: 'dsh-plugins/analytics-workbench', version: '1.0.0', dsh_pin: DSH_SDK_VERSION },
+    service_compatibility: gate, pack: packs.workbench.tarball };
+  const candidate = { ...base, candidate_digest: digest(JSON.stringify(base)),
+    activation: 'NOT_RUN', state_scope: 'local-explicit-journal' };
+  await write(join(directory, 'candidate.json'), candidate);
+  await write(join(directory, 'plugin-pack.json'), packs.workbench);
+  await write(join(directory, 'crm-pack.json'), packs.crm);
+  const manifestPath = join(directory, 'input.json');
+  const manifest = { schema_version: 'dsh-first-purchase-host-artifacts/v1',
+    candidate_path: join(directory, 'candidate.json'), candidate_sha256: digest(await readFile(join(directory, 'candidate.json'))),
+    crm_pack_path: join(directory, 'crm-pack.json'), crm_pack_sha256: digest(await readFile(join(directory, 'crm-pack.json'))) };
+  await write(manifestPath, manifest);
+  return { directory, manifest, manifestPath, candidate, packs, write, output: join(directory, 'installed'), upstream: upstream ?? repository };
+}
+
+for (const [name, mutate, error] of [
+  ['unknown input', async f => { f.manifest.extra = true; await f.write(f.manifestPath, f.manifest); }, /HOST_ARTIFACT_SCHEMA/],
+  ['wrong candidate', async f => { f.manifest.candidate_sha256 = '0'.repeat(64); await f.write(f.manifestPath, f.manifest); }, /HOST_ARTIFACT_CANDIDATE_BYTES/],
+  ['profile drift', f => f.write(join(f.directory, 'profile.json'), {}), /HOST_ARTIFACT_PROFILE_DIGEST/],
+  ['tarball tamper', f => writeFile(join(f.directory, 'workbench.tgz'), 'changed'), /HOST_ARTIFACT_PACK_SIZE/],
+  ['dirty CRM', async f => {
+    f.packs.crm.source_dirty = true; await f.write(f.manifest.crm_pack_path, f.packs.crm);
+    f.manifest.crm_pack_sha256 = digest(await readFile(f.manifest.crm_pack_path)); await f.write(f.manifestPath, f.manifest);
+  }, /HOST_ARTIFACT_DIRTY_SOURCE/],
+  ['linked archive', async f => { const archive = join(f.directory, 'crm.tgz'); await rm(archive); await symlink('workbench.tgz', archive); }, /SERVICE_ARTIFACT_SYMLINK/],
+  ['FIFO receipt', async f => { await rm(f.manifest.crm_pack_path); execFileSync('mkfifo', [f.manifest.crm_pack_path]); }, /SERVICE_ARTIFACT_FILE_INVALID/],
+]) test('exact plugin drill rejects ' + name + ' before extraction or execution', async t => {
+  const f = await artifactFixture(t); await mutate(f);
+  await assert.rejects(prepareFirstPurchaseArtifacts(f), error);
+  await assert.rejects(access(f.output), /ENOENT/);
+});
+
+test('exact plugin drill loads verified bytes exclusively and detects post-run mutations', exact, async t => {
+  const f = await artifactFixture(t), prepared = await prepareFirstPurchaseArtifacts(f);
+  assert.equal(prepared.candidateDigest, f.candidate.candidate_digest);
+  assert.equal(prepared.evidence.release_ready, false);
+  assert.equal(prepared.evidence.service_runtime, 'workspace-synthetic-service');
+  assert.equal(await verifyFirstPurchaseInstalledArtifacts(prepared), true);
+  await assert.rejects(prepareFirstPurchaseArtifacts(f), /EEXIST/);
+  await writeFile(join(prepared.crm, 'lib/index.js'), 'changed after loading');
+  await assert.rejects(verifyFirstPurchaseInstalledArtifacts(prepared), /HOST_ARTIFACT_INSTALLED_CHANGED/);
+});
+
+test('exact plugin drill rejects extra files and redirected SDK links after execution', exact, async t => {
+  const f = await artifactFixture(t), prepared = await prepareFirstPurchaseArtifacts(f);
+  const extra = join(prepared.crm, 'extra.js');
+  await writeFile(extra, 'unexpected');
+  await assert.rejects(verifyFirstPurchaseInstalledArtifacts(prepared), /HOST_ARTIFACT_INSTALLED_CHANGED/);
+  await rm(extra);
+  const link = join(prepared.output, 'upstream');
+  await rm(link); await symlink(repository, link, 'dir');
+  await assert.rejects(verifyFirstPurchaseInstalledArtifacts(prepared), /HOST_ARTIFACT_UPSTREAM_CHANGED/);
+});
+
+test('parent setup failure closes the artifact driver without masking its original error', exact, async t => {
+  const f = await artifactFixture(t);
+  const output = execFileSync(process.execPath, [join(repository, 'scripts/dsh-b0/first-purchase-crm-host.probe.mjs')],
+    { cwd: f.directory, input: '', encoding: 'utf8', timeout: 10000, env: {
+      PATH: process.env.PATH, B0_NATIVE_CRM_ARTIFACT_MANIFEST: f.manifestPath,
+      B0_NATIVE_CRM_ARTIFACT_OUTPUT: f.output, B0_NATIVE_CRM_HOST_UPSTREAM: upstream,
+    } });
+  assert.deepEqual(JSON.parse(output), { method_digest: 'a'.repeat(64), candidate_digest: f.candidate.candidate_digest });
+  assert.deepEqual((await readdir(f.output)).sort(), ['crm', 'crm.tgz', 'dsh-plugins', 'packages.json', 'upstream', 'workbench', 'workbench.tgz']);
+});

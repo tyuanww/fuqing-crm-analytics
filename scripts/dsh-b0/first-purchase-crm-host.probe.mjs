@@ -11,15 +11,33 @@ import { firstPurchaseMockScript } from './first-purchase-scenario.mjs';
 import { DSH_UPSTREAM_SHA } from '../release/toolchain.mjs';
 import { createSaveController } from '../../dsh-plugins/analytics-workbench/src/first-purchase-save-client.mjs';
 import { firstPurchaseCommandEnvelope } from '../../dsh-plugins/analytics-workbench/src/first-purchase-command-client.mjs';
+import { prepareFirstPurchaseArtifacts, verifyFirstPurchaseInstalledArtifacts } from './first-purchase-artifacts.mjs';
 
 const repository = fileURLToPath(new URL('../..', import.meta.url));
-const workbench = join(repository, 'dsh-plugins/analytics-workbench');
+assert.equal(Number(process.versions.node.split('.')[0]), 24);
+const packed = process.env.B0_NATIVE_CRM_ARTIFACT_MANIFEST ? await prepareFirstPurchaseArtifacts({
+  manifestPath: process.env.B0_NATIVE_CRM_ARTIFACT_MANIFEST,
+  output: process.env.B0_NATIVE_CRM_ARTIFACT_OUTPUT,
+  upstream: process.env.B0_NATIVE_CRM_HOST_UPSTREAM,
+}) : null;
+const workbench = packed?.workbench ?? join(repository, 'dsh-plugins/analytics-workbench');
+const crmPlugin = packed?.crm ?? join(repository, 'dsh-plugins/crm-knowledge');
+const candidateDigest = packed?.candidateDigest ?? 'a'.repeat(64);
+if (packed) {
+  // Fail before starting services when a cold package cannot resolve its SDK.
+  for (const entry of [join(workbench, 'lib/index.js'), join(crmPlugin, 'lib/host.js')]) {
+    assert.equal(typeof (await import(pathToFileURL(entry).href)).apply, 'function');
+  }
+}
 const { firstPurchaseMethodPackageDigest } = await import(pathToFileURL(join(workbench, 'lib/skills.js')).href);
 const send = value => process.stdout.write(JSON.stringify(value) + '\n');
-send({ method_digest: firstPurchaseMethodPackageDigest });
+send({ method_digest: firstPurchaseMethodPackageDigest, candidate_digest: candidateDigest });
 const lines = createInterface({ input: process.stdin }), iterator = lines[Symbol.asyncIterator]();
-const input = JSON.parse((await iterator.next()).value);
-assert.equal(Number(process.versions.node.split('.')[0]), 24);
+const firstInput = await iterator.next();
+// The parent may fail to bind its own fixtures after receiving our handshake.
+// No Host/model exists yet; exit cleanly so its original error remains visible.
+if (firstInput.done) process.exit(0);
+const input = JSON.parse(firstInput.value);
 assert.equal(execFileSync('git', ['-C', input.upstream, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), DSH_UPSTREAM_SHA);
 assert.equal(execFileSync('git', ['-C', input.upstream, 'status', '--porcelain', '-uno'], { encoding: 'utf8' }).trim(), '');
 const root = input.output;
@@ -54,10 +72,10 @@ try {
       { id: 'owned-preset', name: '@deepseek-ai/dsh-agent-preset', config: { id: 'owned-first-purchase',
         name: 'Owned synthetic first-purchase', plugins: agentPlugins } },
       { id: 'owned-native-preset', name: '@deepseek-ai/dsh-agent-preset', config: { id: 'owned-native', name: 'Owned native', plugins: [] } },
-      { id: 'owned-crm', name: pathToFileURL(join(repository, 'dsh-plugins/crm-knowledge/lib/host.js')).href,
+      { id: 'owned-crm', name: pathToFileURL(join(crmPlugin, 'lib/host.js')).href,
         config: { baseUrl: input.crm_origin, firstPurchaseOrigin: input.service_origin, dataKind: 'synthetic' } },
       { id: 'owned-workbench', name: pathToFileURL(join(workbench, 'lib/index.js')).href,
-        config: { firstPurchaseCandidateDigest: 'a'.repeat(64) } },
+        config: { firstPurchaseCandidateDigest: candidateDigest } },
       { id: 'owned-observer', name: pathToFileURL(join(repository, 'scripts/dsh-b0/pinned-host-observer.mjs')).href,
         config: { presetId: 'owned-first-purchase', nativePresetId: 'owned-native', workspace: join(root, 'workspace'),
           llmModule: pathToFileURL(join(input.upstream, 'packages/llm/llm/lib/index.js')).href } },
@@ -167,8 +185,16 @@ try {
   controllers.forEach(controller => controller.dispose());
   const cleanup = await Promise.allSettled([host?.stop(true), model?.close()]);
   process.off('SIGINT', interrupt); process.off('SIGTERM', interrupt);
+  let packageIntegrity = 'NOT_APPLICABLE_WORKSPACE';
+  if (packed) {
+    try { await verifyFirstPurchaseInstalledArtifacts(packed); packageIntegrity = 'PASS'; }
+    catch { packageIntegrity = 'FAIL'; }
+  }
   await write(join(root, 'http-observations.json'), { upstream_sha: DSH_UPSTREAM_SHA, observations,
     cleanup_ok: cleanup.every(item => item.status === 'fulfilled'), browser: browserResult ?? 'NOT_RUN',
+    candidate_digest: candidateDigest, artifacts: packed?.evidence ?? 'WORKSPACE_COMPILED_OUTPUT',
+    package_integrity: packageIntegrity,
     admission: browserResult ? 'official native composer slash command in Chrome' : 'official commands/execute HTTP; browser rendering NOT_RUN' });
   assert.ok(cleanup.every(item => item.status === 'fulfilled'), 'OWNED_CRM_HOST_CLEANUP_FAILED');
+  assert.notEqual(packageIntegrity, 'FAIL', 'OWNED_CRM_HOST_PACKAGE_CHANGED');
 }

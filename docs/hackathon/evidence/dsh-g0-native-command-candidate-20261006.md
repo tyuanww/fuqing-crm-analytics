@@ -58,6 +58,8 @@
 
 本轮未访问真实 DuckDB、连接杭州、push、发布或切换服务。候选源码身份始终为 `9611589c`，后续纯证据文档提交不触发重打包。
 
+后续接续：本页记录已随 `d3fe7f94` 提交。相同 workbench tarball 与另行固定的 CRM 包已完成[包级宿主/浏览器验收](./dsh-g0-first-purchase-artifact-host-20261006.md)；这不改变本页原始回执或 journal，也不把源码服务夹具的通过视为独立服务 archive 整链通过。
+
 ## 证据落档审核
 
 沿用 OCR delegate 的确定性 preview/rule，由当前 Agent 补审默认排除的五份 Markdown：**5/5 reviewed、0 skipped、100%**。核对真实回执、SHA、测试计数和范围，修正计划中未注明包版本的 WSL 表述。无新代码缺陷；审核清单、链接和产物保留检查分别保存为 `review-summary.json`、`document-links.json`、`final-integrity.json`。纯文档修订未重复执行业务测试。

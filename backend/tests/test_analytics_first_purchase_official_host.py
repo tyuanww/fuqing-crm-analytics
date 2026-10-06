@@ -34,7 +34,8 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
     node = shutil.which(os.environ.get("NODE", "node"))
     assert node is not None
     process = subprocess.Popen([node, str(ROOT / "scripts/dsh-b0/first-purchase-crm-host.probe.mjs")],
-        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, cwd=tmp_path)
+        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, cwd=tmp_path,
+        env={**os.environ, "B0_NATIVE_CRM_ARTIFACT_OUTPUT": str(tmp_path / "plugin-artifacts")})
     dispatcher = None
     errors = []
     browser_wait = False
@@ -74,13 +75,15 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
         return {"username": "crm-owner", "is_admin": True}
 
     try:
-        digest = receive()["method_digest"]
+        handshake = receive()
+        digest, candidate_digest = handshake["method_digest"], handshake["candidate_digest"]
+        assert re.fullmatch(r"[a-f0-9]{64}", candidate_digest)
         # Explicit fixed B0 port block only. Bind fails if someone else owns it.
         app = create_first_purchase_native_app({**config(tmp_path), "port_base": 4335,
                                                "method_package_digest": digest})
         runs, dispatcher = app.state.store, app.state.dispatcher
         saved = FirstPurchaseSavedAnalysisStore(private_dir(tmp_path, "analyses"))
-        policy = FirstPurchaseSavePolicy("official-host-no-age-v1", frozenset({"a" * 64}), None, None,
+        policy = FirstPurchaseSavePolicy("official-host-no-age-v1", frozenset({candidate_digest}), None, None,
                                          check_freshness=False)
         with serve(crm) as crm_origin:
             service = create_first_purchase_analysis_app(runs, saved,
