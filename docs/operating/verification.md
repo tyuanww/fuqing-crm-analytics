@@ -195,6 +195,8 @@ B0 `--check` 先独立构建 board-components 并绑定受摘要约束的 tarbal
 
 这个真实宿主入口不自动加入日常 B0；B0 只运行 `pinned-host-acceptance.test.mjs` 的四项启动前负测，传入已有 `B0_BUILD_UPSTREAM`，检查错误 pin、路径、拒覆盖和包篡改。单独跑该测试而未提供固定 checkout 时，两项依赖 exact checkout 的检查明确 SKIP，不能记为全通过。
 
+CRM 首购的真实宿主 HTTP 链另有显式入口：先按已有 SDK 链接构建 workbench 与 CRM 插件，再在 Node24 / B0 Python3.14 环境运行 `B0_NATIVE_CRM_HOST_UPSTREAM=/absolute/unchanged-built-dsh-0.1.7-rc.2 python -m pytest --noconftest -q -W error::ResourceWarning backend/tests/test_analytics_first_purchase_official_host.py`。未设置该变量时明确 SKIP；不安装依赖、不修改上游，独占临时 4335/4336/4337，端口占用就失败，不能杀现有进程腾位置。它使用合成 CRM/model/JSON 和独立 SQLite，实际加载官方 Web CLI、校验 Cookie/Origin、登录、原生 worker、保存/核对和重启；查询由私有测试入口准入，不能据此声称浏览器原生输入框或 headed UI 通过。结束回收自有实例，见[当前证据](../hackathon/evidence/dsh-g0-official-crm-http-20261006.md)。如需保留 pytest 临时文件，`--basetemp` 只能传新的专用证据目录，不能复用旧证据目录。
+
 `pnpm dsh plugin verify-host --candidate /absolute/candidate.json --evidence /absolute/evidence.json --state-path /absolute/state.json` 核验已有 v2 宿主证据并幂等追加到原 candidate journal；该命令不运行宿主。`plugin-host-evidence.test.mjs` 纳入 release suite/B0，用明确的 verifier-only 夹具检查缺项、篡改、错误 scope/journal 和重试，不能将这些夹具视为真实宿主通过；真实命令的十项场景与 CLI 接线另行留证，见[本机接线与服务状态证据](../hackathon/evidence/dsh-g0-host-journal-20261004.md)。
 
 T3/T7 的 `backend/tests/test_analytics_first_purchase_save_recovery.py` 纳入现有 B0 Python 目标和常规 backend 回归：只用隔离合成 RunStore/SQLite，分别在提交前后 SIGKILL 自有子进程，通过新进程重放、冲突/权限拒绝、保留旧版本的 forward-fix 和不兼容 schema 拒绝验证存储边界。这仍不证明 D15 candidate/correlation 回执、业务数据迁移或跨版本服务回退；保存门禁继续关闭。

@@ -1,7 +1,7 @@
 /** Test-only IPC observer loaded by the unchanged official Web CLI. No HTTP control endpoint. */
 import { createHash } from 'node:crypto';
 
-export const inject = ['loader', 'agentPresets', 'agents', 'sessionPersistence', 'tools', 'appReady'];
+export const inject = ['loader', 'agentPresets', 'agents', 'sessionPersistence', 'tools', 'appReady', 'connection', 'webServer'];
 export async function apply(ctx, config) {
   if (!process.send || !config.presetId || !config.workspace) throw Error('OWNED_HOST_OBSERVER_CONFIGURATION_REQUIRED');
   const handles = new Map();
@@ -30,6 +30,11 @@ export async function apply(ctx, config) {
     } finally { await reader.close(); }
   }
   async function command(message) {
+    // Returned only over the parent-owned IPC pipe, never in a log or receipt.
+    if (message.command === 'web-access') {
+      const origin = `http://127.0.0.1:${ctx.webServer.port}`;
+      return { origin, launchUrl: ctx.connection.authenticatedUrl(origin + '/') };
+    }
     if (message.command === 'roster') {
       await ctx.loader.await();
       return { pid: process.pid, presets: await ctx.agentPresets.list(),

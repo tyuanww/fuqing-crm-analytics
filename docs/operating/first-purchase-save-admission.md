@@ -100,3 +100,5 @@ RunStore 沿用原生 session 的唯一持久绑定。新 run 的 owner 和权�
 未登录/退出/明确撤权与服务不可用分开处理：前者拒绝访问并停止派发；后者返回 `IDENTITY_UNAVAILABLE`，暂停派发、保留原排队任务，恢复后沿用原 request。活动任务继续遵循现有 deadline、worker 退出和 UNKNOWN 证据规则，不把网络故障伪称为账号撤权。
 
 本次实际 HTTP 验证使用合成 CRM 账号、真实查询 worker 和隔离 SQLite，覆盖查询→保存→ACK 丢失→回执恢复/重放。Host 调度接收器是受控夹具，**不代表官方 DSH 或浏览器验收**。现有 B0 演练 gateway 在登录前检查查询权限，不能直接当作 CRM 登录/生产入口；下一步须在固定官方宿主验证受控 admission、登录路由/Cookie、会话恢复与卡片，再生成 clean 候选。默认启动、生产 profile 和杭州现役未改变。见[本次证据](../hackathon/evidence/dsh-g0-native-crm-owner-20261006.md)。
+
+后续独立官方宿主验证已完成 Cookie/Origin、CRM 登录、原生 loop/worker、保存回执和重启重新登录，见[官方 Host HTTP 证据](../hackathon/evidence/dsh-g0-official-crm-http-20261006.md)。其中查询准入由私有测试驱动器发起；浏览器原生输入框准入与 headed UI 仍未验证。官方 Cookie 绑定 authority，验证重启时应保持同一监听地址，不能把更换随机端口后的 401 误判为凭据持久化失败。

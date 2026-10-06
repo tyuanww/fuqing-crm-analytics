@@ -23,9 +23,9 @@ TOKEN = "synthetic-ui-only-token-0000000000"
 
 
 @contextmanager
-def serve(app):
+def serve(app, *, port=0):
     with socket.socket() as sock:
-        sock.bind(("127.0.0.1", 0))
+        sock.bind(("127.0.0.1", port))
         sock.listen(64)
         origin = f"http://127.0.0.1:{sock.getsockname()[1]}"
         server = uvicorn.Server(uvicorn.Config(app, log_level="critical", access_log=False, lifespan="off"))

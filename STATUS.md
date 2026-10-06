@@ -14,7 +14,13 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### CRM 查询归属复审（2026-10-06，当前进度）
+### 官方宿主 CRM / 首购 HTTP（2026-10-06，当前进度）
+
+- 查询归属复审已正常提交 `c7bbf3ae`。随后在未修改的固定 rc2 Web CLI 实跑 CRM 登录、真实原生 loop/worker 查询、同账号保存、ACK 核对和宿主重启；新整链测试 **1 PASS / 0 SKIP**，启动保护/model adapter **7 PASS**，两个插件构建通过。已核对[本次证据和失败根因](docs/hackathon/evidence/dsh-g0-official-crm-http-20261006.md)。
+- 官方 Cookie 在相同 authority 的重启后可复用；CRM 内存凭据清空，重新登录后重放原 run 不重复派发/保存。本次自有 Host/worker/临时 HTTP 服务已回收。
+- **仍 PARTIAL**：本次从私有 kernel HTTP 准入，未接浏览器原生输入框；headed 浏览器未运行，clean 候选/目标环境/生产 gate 未关闭。下一步用官方扩展边界接浏览器准入，不能再占用官方共享 RPC interceptor。没有 push、杭州切换或真实数据访问。
+
+### CRM 查询归属复审（2026-10-06，上一阶段）
 
 - OCR delegate 已补审 `9d1a9acf` 全部 **29/29** 文件；复现并修复运行中身份瞬时 503 被误写 UNKNOWN 的分支。保留原任务与 Host 状态，暂停新派发并给出身份故障诊断，恢复不重发。
 - 本次修复后相关后端 **94 PASS**、Node **15 PASS**，合同/边界/Ruff/差异检查通过；已核对[本次审核与失败证据](docs/hackathon/evidence/dsh-g0-native-crm-review-20261006.md)。仍 PARTIAL；接续固定官方宿主登录、查询准入与保存整链，不继承旧 HTTP 夹具作为宿主通过。

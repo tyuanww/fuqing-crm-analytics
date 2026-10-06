@@ -72,6 +72,8 @@
 
 2026-10-06 查询归属增量：显式 CRM session 模式复用现有 Host bridge 与服务身份检查，真实 HTTP 合成链已覆盖登录、worker 查询、同账号保存及 ACK 恢复；原生 session owner 不重绑，服务暂不可用只暂停原任务。已核对[本轮证据](../hackathon/evidence/dsh-g0-native-crm-owner-20261006.md)。T3/T9/T14 仍 PARTIAL：Host 接收器为夹具，旧 B0 gateway 不是 CRM 登录入口；实际官方宿主/admission/Cookie/浏览器、clean 候选、供应链与目标主机仍开放。
 
+后续已完成 `c7bbf3ae` 运行中身份故障审修，并通过固定官方 Host 的 CRM/首购 HTTP 整链 **1 PASS**：实际原生 loop/worker、Cookie/Origin、保存 ACK 恢复、同 authority 重启与重新登录；启动保护/model adapter **7 PASS**。已核对[独立宿主证据](../hackathon/evidence/dsh-g0-official-crm-http-20261006.md)。这一步替换了原来的受控 Host 调度接收器，但查询准入仍由私有测试驱动器发起；浏览器原生输入框准入、headed UI、新 clean 候选及目标环境继续开放，不关闭 T3/T9/T14 总项。
+
 | 任务 | 当前状态 | 已有证据 | 尚未关闭 |
 |---|---|---|---|
 | T1 | IMPLEMENTED / STATIC PASS | 架构设计、机器 policy/inventory、11 包/610 文件/29 条跨包引用/206 处字面路径、17 条合同与 10 个主入口；含 import-equals 的 AST drift/循环/越界/公开导出负测纳入 B0 pipeline | 这只关闭依赖盘点；真实宿主与服务语义由 T2/T3/T17 验证 |
