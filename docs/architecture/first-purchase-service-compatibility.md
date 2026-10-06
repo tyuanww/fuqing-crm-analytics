@@ -4,11 +4,13 @@
 
 ## 当前时效决定（2026-10-06）
 
-用户暂缓陈旧/过期判断。新服务以显式策略输出并保存 `NOT_CHECKED / DISABLED_BY_POLICY`；旧 FRESH 保存仍保留原语义，身份、准入、完整来源与幂等边界不变，详见[保存准入](../operating/first-purchase-save-admission.md)。当前源码 163 项、实际包两种模式 2 项通过；这是同版本本机测试，新的固定跨包/WSL 兼容证据仍 NOT_RUN。
+用户暂缓陈旧/过期判断。新服务以显式策略输出并保存 `NOT_CHECKED / DISABLED_BY_POLICY`；旧 FRESH 保存仍保留原语义，身份、准入、完整来源与幂等边界不变，详见[保存准入](../operating/first-purchase-save-admission.md)。实现阶段源码 163 项、实际包两种模式 2 项通过。
+
+最新固定候选为 clean `48e7ddfc42191d0f32aa3508fa6b5a889ee76ceb`，包 SHA-256 `8f096a132ab00e128db98604e1b443033d8884c0b5981a1328463b520a71a5e7`。与旧 `56198c32` 的源码/离线双包各 **9/9 PASS**、杭州 WSL **14/14 PASS**，这些固定场景仍为开启时效模式。另有同一候选 archive 的本机 CRM 合成身份/NOT_CHECKED 保存与重新打开状态回放 **6/6 PASS**，并通过当前 decoder；不能推广为旧 D15 服务可读 NOT_CHECKED，或该组合的 WSL/生产通过。新候选 journal seq 4 及边界见[本次证据](../hackathon/evidence/dsh-g0-save-time-policy-candidate-20261006.md)。
 
 新枚举不能按 API/SQLite 版本相同就判断旧 D15 服务或插件可读。启用前须使用匹配合同的消费者，已写入新来源后保留兼容服务和状态；profile 回退不自动降级该服务。下方历史窗口只覆盖各自绑定的源码、验证器与 artifact，不证明 NOT_CHECKED 的跨版本支持。测试 driver 本轮增加显式关闭时效的场景，其摘要变化必须生成新证据，旧回执不回写。
 
-## 当前可复核窗口
+## 历史窗口与后续固定包
 
 - 旧服务：commit `56198c32a52d9822c7a3338d92b0fa077d1c61bc`，不提供 D15 保存/来源 API。
 - 新服务：commit `a50bd42492195040efaa6989c90e4fe84030551c`，版本化保存门禁与回执。
@@ -59,7 +61,7 @@
 
 本机证据得到 `LOCAL_COMPATIBLE`、`release_ready=false` 和 `BLOCKED_SERVICE_PACKAGE_AND_HOST_EVIDENCE_REQUIRED`。实际激活返回 `SERVICE_ACTIVATION_EVIDENCE_INCOMPLETE`，没有 override。门禁不启动服务、不授予身份、不读取数据库；真正的目标身份只读性仍须现场验证。
 
-完整 G0 放行仍需要生产身份/策略、供应链、生产形状 UNKNOWN 恢复、DSH UI/浏览器与目标 DSH runtime 证据。当前 `2be518e5` 双包已完成候选绑定与目标合成验收；后续服务源码变化须形成新包并取得对应证据。合成回执 `status=PASS` 只表示预期观测完成，包括旧写入不兼容的负面观测。源码候选接线和拒绝后的无副作用验证见[门禁证据](../hackathon/evidence/dsh-g0-service-gate-20261004.md)。
+完整 G0 放行仍需要生产身份/策略、供应链、生产形状 UNKNOWN 恢复、DSH UI/浏览器与目标 DSH runtime 证据。最新固定包见本页首节；后续服务源码变化须形成新包并取得对应证据。合成回执 `status=PASS` 只表示预期观测完成，包括旧写入不兼容的负面观测。源码候选接线和拒绝后的无副作用验证见[门禁证据](../hackathon/evidence/dsh-g0-service-gate-20261004.md)。
 
 2026-10-04 完成新服务独立包与同版本 HTTP 恢复，见[当时证据](../hackathon/evidence/dsh-g0-analysis-service-package-20261004.md)。2026-10-05 的[精确包配对证据](../hackathon/evidence/dsh-g0-service-artifact-pair-20261005.md)覆盖上表全部 9 项观测；新回执 `shinemage-service-artifact-compatibility/v1` 记录两个 archive/manifest、安装后的实际依赖、wheel hash 和验证器摘要，始终 `release_ready=false` / `BLOCKED_TARGET_HOST_AND_SUPPLY_CHAIN_REQUIRED`。它不替换现有 `service-save-compatibility.py` 的源码回执，也不能直接作为现有 `--service-evidence` 输入；没有据此解除 `SERVICE_ACTIVATION_EVIDENCE_INCOMPLETE`。
 

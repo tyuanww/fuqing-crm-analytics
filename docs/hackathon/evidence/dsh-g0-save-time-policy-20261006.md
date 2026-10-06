@@ -36,4 +36,6 @@ OpenAPI 内容摘要：`6209894f434fa0cadb746b46400064dbcec6eee8a80279423f2d1b8d
 
 本轮没有修改 DSH、升级依赖、访问真实数据、登录真实 CRM、发布或切换杭州服务。默认 app/profile 仍未配置生产保存 provider，UI 仍 NOT_AVAILABLE。结果年龄暂缓不取消登录/session 有效性、HTTP 超时或 UNKNOWN 恢复。
 
-新枚举可能被旧服务/插件拒绝。启用前须绑定匹配合同的消费者，保留兼容服务与 durable state，不能把 profile 回退理解为状态降级。新的 clean 双包/候选绑定、目标 WSL、浏览器和真实身份接入均 **NOT_RUN**；旧 WSL 回执只属于原固定字节，测试 driver 的新摘要也须进入新证据。T3/T7 和完整生产准入仍 **PARTIAL**。
+新枚举可能被旧服务/插件拒绝。启用前须绑定匹配合同的消费者，保留兼容服务与 durable state，不能把 profile 回退理解为状态降级。此实现阶段的 clean 双包/候选绑定、目标 WSL、浏览器和真实身份接入均 **NOT_RUN**；旧 WSL 回执只属于原固定字节，测试 driver 的新摘要也须进入新证据。T3/T7 和完整生产准入仍 **PARTIAL**。
+
+后续已正常提交 `48e7ddfc`，并另行执行新 clean 候选和固定 WSL 验收，见[后续证据](./dsh-g0-save-time-policy-candidate-20261006.md)。该页区分本机 CRM/关闭时效 6 项与 WSL 固定开启时效 14 项；不改写本页工作树测试包的来源或将生产接入记为通过。

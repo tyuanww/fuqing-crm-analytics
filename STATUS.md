@@ -14,11 +14,13 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 结果时效暂缓（2026-10-06，当前决定）
+### 结果时效暂缓与 clean 候选（2026-10-06，当前进度）
 
 - 用户明确“陈旧和过期，暂时不考虑”。已增加服务 owner 显式关闭结果年龄检查的策略；返回 `NOT_CHECKED / DISABLED_BY_POLICY`，不标成 FRESH。账号/session、候选准入、完整来源、幂等保存与 UNKNOWN 恢复继续校验。
-- 本轮五文件回归 **163 PASS**，实际独立包的时效开启/关闭两种模式 **2 PASS**，包含保存、重启、回放与 forward-fix；OpenAPI/TypeScript 已同步。见[本轮证据](docs/hackathon/evidence/dsh-g0-save-time-policy-20261006.md)。
-- 新源码、新消费者与新验证器尚未形成 clean 配对/WSL 回执；旧证据保留其原范围，不继承。本轮没有连接生产账号、启用保存 UI 或切换杭州服务；T3/T7 继续 PARTIAL。下方历史阶段中的“时限待确认”以本节为准，响应超时和 SAVE_UNKNOWN 门禁未取消。
+- 实现阶段五文件回归 **163 PASS**，实际独立包的时效开启/关闭两种模式 **2 PASS**，包含保存、重启、回放与 forward-fix；OpenAPI/TypeScript 已同步。见[实现证据](docs/hackathon/evidence/dsh-g0-save-time-policy-20261006.md)。
+- 实现已提交 `48e7ddfc`，随后从该 clean SHA 生成新服务包 `8f096a13…` 并绑定候选 `9f00fadb…`。本次源码与实际离线双包各 **9/9 PASS**，构建及相关 **95 PASS / 0 SKIP**；同一 archive 的 CRM 合成身份→关闭时效→保存→重新打开状态回放 **6/6 PASS**，真实 HTTP 响应通过当前插件 decoder。
+- 同一服务双包在杭州 WSL2/Python 3.14.4 完成 **14/14 synthetic 验收**，真实 CLI 追加 journal seq **4**，重试 131 文件不变、旧 67 文件保留。10 个临时进程与本次远端目录已回收，现役监听/PID 快照一致。见[本次候选与现场证据](docs/hackathon/evidence/dsh-g0-save-time-policy-candidate-20261006.md)。
+- WSL 固定场景使用合成 A64 准入和开启时效模式；CRM 身份/关闭时效组合的 6 项属于本机验证。未登录真实 CRM、接通保存 UI 或切换生产；T3/T7 继续 PARTIAL。下方历史阶段中的“时限待确认”以本节为准，响应超时和 SAVE_UNKNOWN 门禁未取消。
 
 ### 现有 CRM 账号适配（2026-10-06，本地增量）
 
