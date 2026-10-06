@@ -8,6 +8,7 @@ import importlib.abc
 import json
 import os
 from pathlib import Path
+import re
 import socket
 import sys
 import threading
@@ -56,8 +57,10 @@ def main():
     assert (state / ".owned-first-purchase-host").read_text() == "owned-synthetic-host/v1\n" + digest + "\n"
     manifest = verify(source, expected)
     config = json.loads(sys.stdin.buffer.readline(65537))
+    source_http = "source_contract" in config
     assert set(config) == {"state_dir", "runtime_token", "gateway_token", "session_id", "snapshot",
-                           "method_package_digest", "identity_mode", "port_base"}
+                           "method_package_digest", "identity_mode", "port_base"} | (
+                               {"source_contract", "crm_origin"} if source_http else set())
     assert Path(config["state_dir"]).resolve(strict=True) == state / "state"
     assert config["identity_mode"] == "crm-session" and config["port_base"] == 4335
     sys.meta_path.insert(0, DenyLegacy())
@@ -67,7 +70,13 @@ def main():
     from backend.services.analytics.access import AnalyticsPrincipal
     from backend.services.analytics import worker
     assert worker.REPO_ROOT == source, "HOST_KERNEL_WORKER_SOURCE"
-    app = create_first_purchase_native_app(config)
+    identities = None
+    if source_http:
+        assert config["source_contract"] == "first-purchase-frozen-source/v1"
+        assert re.fullmatch(r"http://127\.0\.0\.1:[1-9][0-9]{0,4}", config["crm_origin"])
+        from backend.services.analytics.first_purchase.crm_identity import CRMFirstPurchaseIdentityResolver
+        identities = CRMFirstPurchaseIdentityResolver(config["crm_origin"], frozenset({"crm-owner"}), allow_query=True)
+    app = create_first_purchase_native_app(config, **({"source_identities": identities} if source_http else {}))
     store, dispatcher = app.state.store, app.state.dispatcher
     principal = AnalyticsPrincipal("crm-owner", frozenset({"run:create", "run:read", "run:cancel"}),
                                    frozenset({"first-purchase-fixture"}))
@@ -97,6 +106,7 @@ def main():
                 sleep(0.01)
             emit({"status": "KERNEL_SOCKET_BOUND", "pid": os.getpid(), "port": 4335,
                   "manifest_sha256": expected, "source_sha": manifest["source_sha"], "imports": origins(),
+                  **({"source_contract": config["source_contract"]} if source_http else {}),
                   "worker_root": str(worker.REPO_ROOT), "python": sys.executable, "release_ready": False})
             for line in sys.stdin.buffer:
                 assert len(line) <= 4096, "HOST_KERNEL_PIPE_LIMIT"

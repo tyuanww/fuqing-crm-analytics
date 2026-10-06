@@ -90,10 +90,13 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
         manifest_path = os.environ.get("B0_NATIVE_CRM_ARTIFACT_MANIFEST")
         if manifest_path:
             requested = json.loads(Path(manifest_path).read_text())
-            assert bool(packed_service) == (requested["schema_version"] in {"dsh-first-purchase-host-artifacts/v2", "dsh-first-purchase-host-artifacts/v3"}), \
+            source_http = requested["schema_version"] == "dsh-first-purchase-host-artifacts/v4"
+            assert bool(packed_service) == (requested["schema_version"] in {"dsh-first-purchase-host-artifacts/v2", "dsh-first-purchase-host-artifacts/v3", "dsh-first-purchase-host-artifacts/v4"}), \
                 "HOST_SERVICE_MODE_MISMATCH: never fall back from v2 to a source fixture"
-            assert bool(packed_kernel) == (requested["schema_version"] == "dsh-first-purchase-host-artifacts/v3"), \
+            assert bool(packed_kernel) == (requested["schema_version"] in {"dsh-first-purchase-host-artifacts/v3", "dsh-first-purchase-host-artifacts/v4"}), \
                 "HOST_KERNEL_MODE_MISMATCH: never fall back from v3 to a source fixture"
+            for spec in (packed_service, packed_kernel):
+                assert (spec or {}).get("source_contract") == ("first-purchase-frozen-source/v1" if source_http else None)
         # Explicit fixed B0 port block only. Bind fails if someone else owns it.
         kernel_config = {**config(tmp_path), "port_base": 4335, "method_package_digest": digest}
         analyses = private_dir(tmp_path, "analyses")
@@ -102,6 +105,9 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
         with serve(crm) as crm_origin:
             identities = CRMFirstPurchaseIdentityResolver(crm_origin, frozenset({"crm-owner"}), allow_query=True)
             if packed_kernel:
+                if source_http:
+                    kernel_config.update(source_contract="first-purchase-frozen-source/v1", crm_origin=crm_origin)
+                    (tmp_path / ".owned-first-purchase-host").write_text("owned-synthetic-host/v1\n" + candidate_digest + "\n")
                 runs = dispatcher = PackedFirstPurchaseKernel(packed_kernel, tmp_path, candidate_digest, kernel_config)
                 kernel_context = dispatcher
             else:
@@ -109,7 +115,10 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
                 runs, dispatcher = app.state.store, app.state.dispatcher
                 kernel_context = serve(app, port=4335)
             if packed_service:
-                saved = PackedFirstPurchaseService(packed_service, tmp_path, candidate_digest, crm_origin)
+                save_state = private_dir(tmp_path, "save-owner") if source_http else tmp_path
+                if source_http:
+                    private_dir(save_state, "analyses")
+                saved = PackedFirstPurchaseService(packed_service, save_state, candidate_digest, crm_origin)
                 service_context = saved
             else:
                 saved = FirstPurchaseSavedAnalysisStore(analyses)
@@ -123,19 +132,40 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
                 def verify_service_restart(*, replay=False):
                     if not packed_service:
                         return
-                    with httpx.Client(base_url=service_origin, trust_env=False, timeout=3,
-                                      headers={"Authorization": "Bearer " + TOKEN}) as client:
-                        before = client.get("/api/v1/analytics-first-purchase/analyses")
-                        assert before.status_code == 200
-                        saved.restart()
-                        assert saved.origin == service_origin
-                        after = client.get("/api/v1/analytics-first-purchase/analyses")
-                        assert after.status_code == 200 and after.json() == before.json()
-                    if replay:
-                        assert command({"operation": "replay-save"}) == {"ok": True, "replayed": True}
+                    query_offline = bool(source_http and packed_kernel)
+                    if query_offline:
+                        dispatcher.close()
+                        assert dispatcher.receipts[-1]["cleanup_ok"]
+                    try:
+                        with httpx.Client(base_url=service_origin, trust_env=False, timeout=3,
+                                          headers={"Authorization": "Bearer " + TOKEN}) as client:
+                            before = client.get("/api/v1/analytics-first-purchase/analyses")
+                            assert before.status_code == 200
+                            saved.restart()
+                            assert saved.origin == service_origin
+                            after = client.get("/api/v1/analytics-first-purchase/analyses")
+                            assert after.status_code == 200 and after.json() == before.json()
+                        if replay:
+                            assert command({"operation": "replay-save"}) == {"ok": True, "replayed": True}
+                        saved.receipts[-1]["query_offline_replay"] = "PASS" if query_offline and replay else "NOT_RUN"
+                    finally:
+                        if query_offline:
+                            dispatcher.launch()
+                            dispatcher.start()
+                            dispatcher.tick()
                     assert analysis_counts(saved)["analyses"] == 1
                     saved.receipts[-1]["restart_same_analysis"] = True
                     saved.receipts[-1]["same_intent_replay"] = "PASS" if replay else "NOT_RUN_BROWSER_MODE"
+
+                def record_source_boundary():
+                    if source_http:
+                        (tmp_path / "source-boundary.json").write_text(json.dumps({
+                            "scope": "artifact-official-host-query-source-http" if packed_kernel else "workspace-official-host-query-source-http",
+                            "source_contract": "first-purchase-frozen-source/v1",
+                            "save_run_store_argument": None, "query_worker_count": len(runs.worker_records(active_only=False)),
+                            "analysis_count": analysis_counts(saved)["analyses"],
+                            "source_mode": "explicit-loopback-http", "release_ready": False,
+                        }, indent=2) + "\n")
 
                 assert command({"upstream": str(upstream), "output": str(tmp_path / "official-host"),
                     "crm_origin": crm_origin, "service_origin": service_origin,
@@ -155,6 +185,7 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
                     if packed_kernel:
                         dispatcher.restart()
                         assert len(runs.worker_records(active_only=False)) == 1 and not runs.worker_records()
+                    record_source_boundary()
                     return
                 with httpx.Client(base_url=kernel_origin, trust_env=False, timeout=15) as client:
                     assert client.post("/internal/native/prompt", json=native_prompt(), headers=auth()).status_code == 401
@@ -221,15 +252,9 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
                     assert runs.get(fp_actor("crm-owner"), run_id).diagnostics.dispatch_attempts == 1
                     assert command({"operation": "disconnect"}) == {"ok": True, "connected": False}
                     assert client.get("/internal/native/context", headers=auth()).status_code == 401
+                record_source_boundary()
         assert checks and all(checks)
         assert analysis_counts(saved)["analyses"] == 1
-        if source_http:
-            (tmp_path / "source-boundary.json").write_text(json.dumps({
-                "scope": "workspace-official-host-query-source-http",
-                "source_contract": "first-purchase-frozen-source/v1",
-                "save_run_store_argument": None, "query_worker_count": len(runs.worker_records(active_only=False)),
-                "analysis_count": 1, "source_mode": "explicit-loopback-http", "release_ready": False,
-            }, indent=2) + "\n")
     finally:
         if dispatcher is not None:
             dispatcher.close()

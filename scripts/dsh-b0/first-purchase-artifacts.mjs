@@ -19,6 +19,16 @@ const PRIVATE = { mode: 0o600, flag: 'wx' }, HEX = /^[a-f0-9]{64}$/;
 const decode = bytes => JSON.parse(bytes.toString('utf8'));
 const json = value => JSON.stringify(value, null, 2) + '\n';
 const domains = { workbench: '@shine-mage/dsh-analytics-workbench-b0', crm: '@shine-mage/dsh-crm-knowledge' };
+export const FIRST_PURCHASE_SOURCE_CONTRACT = 'first-purchase-frozen-source/v1';
+export function verifyFirstPurchaseSourceContract(serviceManifest, kernelManifest) {
+  const contract = 'backend/contracts/analytics_first_purchase_source.py';
+  const consumer = serviceManifest.files?.[contract], provider = kernelManifest.files?.[contract];
+  assert.ok(consumer && provider
+    && serviceManifest.files['backend/services/analytics/first_purchase/source_http.py']
+    && kernelManifest.files['backend/analytics_first_purchase_source_app.py'], 'HOST_SOURCE_PACKAGE_REQUIRED');
+  assert.match(consumer.sha256 ?? '', HEX, 'HOST_SOURCE_CONTRACT_DIGEST');
+  assert.equal(consumer.sha256, provider.sha256, 'HOST_SOURCE_CONTRACT_MISMATCH');
+}
 function exact(value, keys) {
   assert.ok(value && typeof value === 'object' && !Array.isArray(value), 'HOST_ARTIFACT_SCHEMA');
   assert.deepEqual(Object.keys(value).sort(), [...keys].sort(), 'HOST_ARTIFACT_SCHEMA');
@@ -44,7 +54,8 @@ export async function prepareFirstPurchaseArtifacts({ manifestPath, output, upst
   assert.equal(Number(process.versions.node.split('.')[0]), NODE_MAJOR, 'HOST_ARTIFACT_NODE_VERSION');
   for (const path of [manifestPath, output, upstream]) assert.ok(typeof path === 'string' && isAbsolute(path), 'HOST_ARTIFACT_ABSOLUTE_PATH');
   const manifestBytes = await readArtifactFile(manifestPath, 16 * 1024), input = decode(manifestBytes);
-  const withKernel = input.schema_version === 'dsh-first-purchase-host-artifacts/v3';
+  const withSourceHTTP = input.schema_version === 'dsh-first-purchase-host-artifacts/v4';
+  const withKernel = withSourceHTTP || input.schema_version === 'dsh-first-purchase-host-artifacts/v3';
   const withService = withKernel || input.schema_version === 'dsh-first-purchase-host-artifacts/v2';
   exact(input, ['schema_version', 'candidate_path', 'candidate_sha256', 'crm_pack_path', 'crm_pack_sha256',
     ...withService ? ['service_evidence_path', 'service_evidence_sha256'] : [],
@@ -137,8 +148,13 @@ export async function prepareFirstPurchaseArtifacts({ manifestPath, output, upst
   const kernel = withKernel ? await prepareFirstPurchaseKernel({ receiptPath: input.kernel_receipt_path,
     expectedSha: input.kernel_receipt_sha256, output: join(output, 'kernel'), python, wheelhouse: kernelWheelhouse }) : null;
   if (kernel) service.receipt.query_runtime = 'independent-offline-query-artifact';
+  if (withSourceHTTP) {
+    verifyFirstPurchaseSourceContract(decode(service.manifest), decode(kernel.manifest));
+    service.receipt.source_contract = kernel.receipt.source_contract = FIRST_PURCHASE_SOURCE_CONTRACT;
+  }
   let scope = service ? 'local-plugins-and-saved-analysis-artifact' : 'local-plugin-composition-only';
   if (kernel) scope = 'local-plugins-save-and-query-artifacts';
+  if (withSourceHTTP) scope = 'local-artifacts-with-query-source-http';
   const evidence = { schema_version: 'dsh-first-purchase-host-artifacts-observed/v1', scope,
     input_sha256: hash(manifestBytes), candidate_digest: digest,
     upstream_sha: DSH_UPSTREAM_SHA, packages, service_runtime: service?.receipt.service_runtime ?? 'workspace-synthetic-service',

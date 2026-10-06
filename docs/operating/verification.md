@@ -209,6 +209,8 @@ CRM 首购的真实宿主 HTTP 链另有显式入口：先按已有 SDK 链接�
 
 `backend/tests/test_analytics_first_purchase_source_http.py` 纳入 B0：真实 loopback 检查来源/权限/版本/大小/超时/撤权与争锁；独立保存子进程有 SQLite audit guard，只允许打开其自有分析库，查询下线后新进程可核对/重放原回执。两套实际 allowlist 的隔离导入另验证不依赖邻接源码。`first-purchase-analysis-contract.mjs --check --python /absolute/python3.14` 同时离线检查分析 API/原插件类型与新 source OpenAPI；服务间合同不生成新浏览器 API。归档测试与这些源码测试不能替代 exact-SHA 双包、目标 runtime 或生产准入。
 
+固定包来源模式使用 `dsh-first-purchase-host-artifacts/v4`（字段与 v3 相同），不设置工作树专用的 `B0_NATIVE_CRM_SOURCE_HTTP`。v4 对保存/查询包 source 合同摘要及实现入口做校验，再由实际进程走 HTTP；缺项不能回落到 v3 或工作树。保存进程使用专属目录，并在导入包前启用 SQLite audit guard；原 v3 本机适配模式仍可显式回归。新模式固定包、Chrome、查询离线重放和冷安装的实际命令/输入/边界见[本轮证据](../hackathon/evidence/dsh-g0-first-purchase-source-packages-20261007.md)，不继承旧 WSL 验收。
+
 `pnpm dsh plugin verify-host --candidate /absolute/candidate.json --evidence /absolute/evidence.json --state-path /absolute/state.json` 核验已有 v2 宿主证据并幂等追加到原 candidate journal；该命令不运行宿主。`plugin-host-evidence.test.mjs` 纳入 release suite/B0，用明确的 verifier-only 夹具检查缺项、篡改、错误 scope/journal 和重试，不能将这些夹具视为真实宿主通过；真实命令的十项场景与 CLI 接线另行留证，见[本机接线与服务状态证据](../hackathon/evidence/dsh-g0-host-journal-20261004.md)。
 
 T3/T7 的 `backend/tests/test_analytics_first_purchase_save_recovery.py` 纳入现有 B0 Python 目标和常规 backend 回归：只用隔离合成 RunStore/SQLite，分别在提交前后 SIGKILL 自有子进程，通过新进程重放、冲突/权限拒绝、保留旧版本的 forward-fix 和不兼容 schema 拒绝验证存储边界。这仍不证明 D15 candidate/correlation 回执、业务数据迁移或跨版本服务回退；保存门禁继续关闭。

@@ -38,8 +38,11 @@ class PackedFirstPurchaseService:
                 cwd=self.state, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=self.error_log, text=True,
                 env={"PATH": str(Path(python).parent) + os.pathsep + "/usr/bin:/bin", "HOME": str(self.state),
                      "TMPDIR": str(self.state), "PYTHONPATH": "/repository-not-available", "PYTHON_DOTENV_DISABLED": "1"})
-            self.process.stdin.write(json.dumps({"crm_origin": self.crm_origin,
-                "query_runtime": self.spec.get("query_runtime", "workspace-synthetic-kernel")}))
+            config = {"crm_origin": self.crm_origin,
+                      "query_runtime": self.spec.get("query_runtime", "workspace-synthetic-kernel")}
+            if "source_contract" in self.spec:
+                config.update(source_contract=self.spec["source_contract"], source_origin="http://127.0.0.1:4335")
+            self.process.stdin.write(json.dumps(config))
             self.process.stdin.close()
             assert select.select([self.process.stdout], [], [], 20)[0], "HOST_SERVICE_START_TIMEOUT"
             line = self.process.stdout.readline(65537)
@@ -48,6 +51,10 @@ class PackedFirstPurchaseService:
             assert receipt["status"] == "SERVICE_SOCKET_BOUND"
             assert receipt["manifest_sha256"] == self.spec["manifest_sha256"]
             assert receipt["candidate_digest"] == self.digest and receipt["pid"] == self.process.pid
+            if "source_contract" in self.spec:
+                assert receipt["source_contract"] == self.spec["source_contract"]
+                assert receipt["sqlite_scope"] == "saved-analysis-only"
+                assert receipt["sqlite_files"] == ["analyses/first_purchase_analyses.sqlite3"]
             assert type(receipt["port"]) is int and 0 < receipt["port"] <= 65535
             assert not self.port or receipt["port"] == self.port
             self.port = receipt["port"]

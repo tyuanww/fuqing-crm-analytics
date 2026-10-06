@@ -62,6 +62,7 @@ class PackedFirstPurchaseKernel:
             assert receipt["status"] == "KERNEL_SOCKET_BOUND" and receipt["pid"] == self.process.pid
             assert receipt["manifest_sha256"] == self.spec["manifest_sha256"] and receipt["port"] == 4335
             assert receipt["worker_root"] == self.spec["app"] and receipt["python"] == python
+            assert receipt.get("source_contract") == self.spec.get("source_contract")
             self.receipts.append(receipt)
             return self.origin
         except BaseException:

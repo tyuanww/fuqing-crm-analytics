@@ -8,7 +8,7 @@ import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { runPinnedHostAcceptance } from './pinned-host-acceptance.mjs';
 import { runFirstPurchaseBrowser } from './first-purchase-browser.probe.mjs';
-import { prepareFirstPurchaseArtifacts, verifyFirstPurchaseInstalledArtifacts } from './first-purchase-artifacts.mjs';
+import { prepareFirstPurchaseArtifacts, verifyFirstPurchaseInstalledArtifacts, verifyFirstPurchaseSourceContract } from './first-purchase-artifacts.mjs';
 import { serviceFixture } from '../release/test-fixtures/service-compatibility.mjs';
 import { DSH_SDK_VERSION, DSH_UPSTREAM_SHA } from '../release/toolchain.mjs';
 import { readFirstPurchaseService, installFirstPurchaseService, verifyFirstPurchaseService } from './first-purchase-service-artifacts.mjs';
@@ -145,6 +145,9 @@ for (const [name, mutate, error] of [
   ['incomplete service opt-in', async f => {
     f.manifest.schema_version = 'dsh-first-purchase-host-artifacts/v2'; await f.write(f.manifestPath, f.manifest);
   }, /HOST_ARTIFACT_SCHEMA/],
+  ['source HTTP without both fixed packages', async f => {
+    f.manifest.schema_version = 'dsh-first-purchase-host-artifacts/v4'; await f.write(f.manifestPath, f.manifest);
+  }, /HOST_ARTIFACT_SCHEMA/],
   ['implicit service opt-in', async f => {
     f.manifest.service_evidence_path = '/not-an-opt-in'; await f.write(f.manifestPath, f.manifest);
   }, /HOST_ARTIFACT_SCHEMA/],
@@ -198,6 +201,19 @@ test('parent setup failure closes the artifact driver without masking its origin
 
 test('saved-analysis install requires explicit absolute inputs before reading files', async () => {
   await assert.rejects(readFirstPurchaseService({ evidencePath: '.', python: '/unavailable', wheelhouse: '/unavailable' }), /HOST_SERVICE_ABSOLUTE_PATH/);
+});
+
+test('source HTTP composition rejects legacy packages and different domain contracts', () => {
+  const contract = 'backend/contracts/analytics_first_purchase_source.py';
+  const service = { files: { [contract]: { sha256: 'a'.repeat(64) },
+    'backend/services/analytics/first_purchase/source_http.py': { sha256: 'b'.repeat(64) } } };
+  const kernel = { files: { [contract]: { sha256: 'a'.repeat(64) },
+    'backend/analytics_first_purchase_source_app.py': { sha256: 'c'.repeat(64) } } };
+  assert.doesNotThrow(() => verifyFirstPurchaseSourceContract(service, kernel));
+  assert.throws(() => verifyFirstPurchaseSourceContract({ files: {} }, kernel), /HOST_SOURCE_PACKAGE_REQUIRED/);
+  assert.throws(() => verifyFirstPurchaseSourceContract(service, { files: {} }), /HOST_SOURCE_PACKAGE_REQUIRED/);
+  kernel.files[contract].sha256 = 'd'.repeat(64);
+  assert.throws(() => verifyFirstPurchaseSourceContract(service, kernel), /HOST_SOURCE_CONTRACT_MISMATCH/);
 });
 
 const serviceExact = { skip: !['B0_NATIVE_CRM_ARTIFACT_MANIFEST', 'B0_NATIVE_CRM_SERVICE_PYTHON', 'B0_NATIVE_CRM_SERVICE_WHEELHOUSE']

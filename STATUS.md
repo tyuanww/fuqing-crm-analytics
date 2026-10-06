@@ -14,7 +14,13 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 查询与保存的存储边界（2026-10-07，当前进度）
+### 新来源 HTTP 的固定双包组合（2026-10-07，当前进度）
+
+- 源码边界按 OCR delegate 覆盖 23/23 文件，当前后端 228 PASS、官方新路径 1 PASS，经正常 hooks 提交 `f9726f68`。从该 clean SHA 生成独立查询/保存包；workbench 包字节未变、CRM 包复用，官方 DSH 未修改。见[本轮固定包证据](docs/hackathon/evidence/dsh-g0-first-purchase-source-packages-20261007.md)。
+- 新 v4 组合要求两包 source 合同一致；保存进程仅获自有状态目录和查询 URL，SQLite audit 拒绝打开查询库。源码/实际保存双包各 **9/9 PASS**，保护 **29 PASS**、进程回收 **6 PASS**；v4 HTTP、同包 v3 兼容、v4 Chrome 各 **1 PASS**，Chrome **5 场景**。查询下线后重启保存服务，原回执仍可重放且只有一条分析。
+- 新候选 `861d6ef1…` 的服务回执进入新 journal seq **3**；重试 16 个文件不变、13 个旧固定文件保持原 SHA，23 个记录的临时 PID 已退出。组合驱动/文档为本轮审核后的独立增量，业务包来源不随驱动提交变化。**仍 PARTIAL**：新包 WSL/恢复、真实模型/业务 UAT、供应链与生产门禁未关闭；本轮没有 push、发布、访问真实数据或操作杭州。
+
+### 查询与保存的存储边界（2026-10-07，源码阶段）
 
 - 在 `253cdbc7` 上新增 query-owned `first-purchase-frozen-source/v1` 只读 HTTP 接口与显式保存服务 resolver。新路径只把查询 URL 提供给保存进程，RunStore/SQLite 由查询服务独占；原本机适配保留，不隐式切换旧部署。见[本轮证据](docs/hackathon/evidence/dsh-g0-first-purchase-source-http-20261007.md)。
 - 当前受影响后端 **226 PASS**、实际 allowlist 隔离导入 **2 PASS**；独立保存进程只打开自己的分析库，查询下线后重启/回执核对/重放不重复保存。官方固定 rc2 的新 HTTP 来源与原兼容路径各 **1 PASS**；当前工作树服务归档回归两种时效模式 **2 PASS**，不是 clean release candidate。

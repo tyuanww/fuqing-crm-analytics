@@ -12,6 +12,7 @@ import re
 import runpy
 import socket
 import sys
+from urllib.parse import unquote, urlsplit
 
 sys.dont_write_bytecode = True
 
@@ -39,8 +40,22 @@ def main():
     assert (state / ".owned-first-purchase-host").read_text() == "owned-synthetic-host/v1\n" + digest + "\n"
     assert hashlib.sha256((source / "service-manifest.json").read_bytes()).hexdigest() == expected_manifest
     config = json.loads(sys.stdin.buffer.read(4097))
-    assert set(config) == {"crm_origin", "query_runtime"}
+    source_http = "source_contract" in config
+    assert set(config) == {"crm_origin", "query_runtime"} | ({"source_contract", "source_origin"} if source_http else set())
     assert config["query_runtime"] in {"workspace-synthetic-kernel", "independent-offline-query-artifact"}
+    opened = set()
+    if source_http:
+        assert config["source_contract"] == "first-purchase-frozen-source/v1"
+        assert config["query_runtime"] == "independent-offline-query-artifact"
+        assert config["source_origin"] == "http://127.0.0.1:4335"
+        def own_sqlite_only(event, args):
+            if event == "sqlite3.connect":
+                raw = str(args[0])
+                uri = urlsplit(raw)
+                path = Path(unquote(uri.path) if uri.scheme == "file" and not uri.netloc else raw).resolve()
+                assert path == state / "analyses/first_purchase_analyses.sqlite3", "HOST_SERVICE_QUERY_DB_FORBIDDEN"
+                opened.add(path.relative_to(state).as_posix())
+        sys.addaudithook(own_sqlite_only)
     # This drill cannot contact a production CRM: the parent owns a literal IPv4 loopback.
     assert re.fullmatch(r"http://127\.0\.0\.1:[1-9][0-9]{0,4}", config["crm_origin"])
     port = int(port_arg)
@@ -55,8 +70,6 @@ def main():
     from backend.services.analytics.first_purchase.crm_identity import CRMFirstPurchaseIdentityResolver
     from backend.services.analytics.first_purchase.save_policy import FirstPurchaseSavePolicy
     from backend.services.analytics.first_purchase.saved import FirstPurchaseSavedAnalysisStore
-    from backend.services.analytics.jobs import RunStore
-    from backend.services.analytics.resource_profile import B0ResourceProfile, B0_SMALL_FIXTURE_PROFILE
 
     def import_origins():
         modules = {name: Path(module.__file__).resolve() for name, module in list(sys.modules.items())
@@ -64,13 +77,21 @@ def main():
         assert modules and all(path.is_relative_to(source) for path in modules.values())
         return {name: path.relative_to(source).as_posix() for name, path in sorted(modules.items())}
 
-    runs = RunStore(state / "state", B0ResourceProfile(**B0_SMALL_FIXTURE_PROFILE), family="first_purchase")
+    runs = reader = None
+    if source_http:
+        from backend.services.analytics.first_purchase.source_http import HTTPFirstPurchaseSourceResolver
+        reader = HTTPFirstPurchaseSourceResolver(config["source_origin"])
+    else:
+        from backend.services.analytics.jobs import RunStore
+        from backend.services.analytics.resource_profile import B0ResourceProfile, B0_SMALL_FIXTURE_PROFILE
+        runs = RunStore(state / "state", B0ResourceProfile(**B0_SMALL_FIXTURE_PROFILE), family="first_purchase")
     store = FirstPurchaseSavedAnalysisStore(state / "analyses")
     policy = FirstPurchaseSavePolicy("official-host-no-age-v1", frozenset({digest}), None, None, check_freshness=False)
     try:
+        options = {"source_resolver": reader} if source_http else {}
         app = create_first_purchase_analysis_app(runs, store,
             CRMFirstPurchaseIdentityResolver(config["crm_origin"], frozenset({"crm-owner"}), allow_query=True),
-            save_policy=lambda: policy)
+            save_policy=lambda: policy, **options)
         assert app.openapi() == json.loads((source / "openapi.json").read_text())
         with socket.socket() as sock:
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -79,6 +100,8 @@ def main():
             print(json.dumps({"status": "SERVICE_SOCKET_BOUND", "port": sock.getsockname()[1],
                 "pid": os.getpid(), "manifest_sha256": manifest_digest, "candidate_digest": digest,
                 "openapi": "MATCHED", "imports": import_origins(), "scope": "saved-analysis-artifact-only",
+                **({"source_contract": config["source_contract"], "sqlite_scope": "saved-analysis-only",
+                    "sqlite_files": sorted(opened)} if source_http else {}),
                 "query_runtime": config["query_runtime"], "release_ready": False}), flush=True)
             uvicorn.Server(uvicorn.Config(app, log_level="warning", access_log=False, lifespan="off")).run(sockets=[sock])
         import_origins()

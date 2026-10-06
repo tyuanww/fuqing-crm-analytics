@@ -135,4 +135,4 @@ rc2 空会话尚无原生历史面板时，插件只经公开 `command/executed`
 
 这是经过身份验证的不可变来源快照与本地事务，不是跨服务分布式事务。权限检查之后的外部撤权无法与本地提交形成同一数据库事务；若未来要求严格跨服务原子撤权，需要单独版本化授权租约，不以本次结果作保证。现阶段代码没有数据库迁移、复制或删除；profile 回退也不删除已保存分析。
 
-已完成独立进程/官方 Host 的本机合成验证，证据见[本轮记录](../hackathon/evidence/dsh-g0-first-purchase-source-http-20261007.md)。新 clean 双包、Linux/WSL、远端凭据传递/传输保护、生产账号准入仍是后续 gate；当前默认部署未切换。
+已完成[源码边界](../hackathon/evidence/dsh-g0-first-purchase-source-http-20261007.md)和 `f9726f68` 的[固定查询/保存双包组合](../hackathon/evidence/dsh-g0-first-purchase-source-packages-20261007.md)：官方 HTTP/Chrome、独立状态目录与查询下线后的保存重启/回执重放通过。新包 Linux/WSL、远端凭据传递/传输保护、生产账号准入仍是后续 gate；当前默认部署未切换。
