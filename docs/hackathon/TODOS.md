@@ -294,11 +294,12 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 - [x] T3/T7/T15 首购服务 WSL 合成验收子项（2026-10-06）：复用固定双包，现有低权限账号的两个独立 venv 离线冷安装、真实 HTTP 保存/权限/冲突、SIGKILL 后幂等恢复、旧版只读与未知 schema 拒绝等 **14/14**；修正测试夹具目录权限，前次失败保留。成功轮次 10 个、失败轮次 1 个临时进程与安装目录均已回收，生产入口监听/PID 不变。见[证据](./evidence/dsh-g0-service-target-acceptance-20261006.md)。不关闭生产身份、供应链或 DSH 宿主验收。
 - [ ] T2/T17 剩余：Windows/WSL、rc1→rc2/torn-frame、浏览器/client、shell/tool union 与目标平台 runtime；本机十项不代签这些验收。同进程任意插件隔离不承诺。
 - [x] WSL 验收记录 OCR delegate（2026-10-06）：原始 7/7 文件覆盖，进程数量/时间范围两处低风险说明已修；核对原始脚本、28 个输入与实际回执后，本地提交为 `2a89790b`，未 push。见[审核记录](./evidence/dsh-g0-service-target-acceptance-review-20261006.md)。
-- [x] T3/T7/T13/T21 首购 WSL 回执接线子项（2026-10-06，`2a89790b` 后未提交增量）：沿用 `plugin verify-service` 核对既有目标回执/输入/runner/日志/清理，幂等追加原 journal。新测试 37 PASS、完整 release suite 243 PASS；真实回执进入 seq 4，重试一致，108 个输入/证据文件不变。见[接线证据](./evidence/dsh-g0-service-target-gate-20261006.md)。仍是未签名合成观测，不放行生产。
+- [x] T3/T7/T13/T21 首购 WSL 回执接线子项（2026-10-06，已提交 `356862bf`）：沿用 `plugin verify-service` 核对既有目标回执/输入/runner/日志/清理，幂等追加原 journal。新测试 37 PASS、完整 release suite 243 PASS；真实回执进入 seq 4，重试一致，108 个输入/证据文件不变。见[接线证据](./evidence/dsh-g0-service-target-gate-20261006.md)。仍是未签名合成观测，不放行生产。
 - [x] 目标回执接线提交前审核（2026-10-06）：原始 14/14 全覆盖，无新确认缺陷；本次 release suite 243 PASS，原真实回执 CLI 重试与输入/journal 保留通过。见[审核记录](./evidence/dsh-g0-service-target-gate-review-20261006.md)，按正常 hooks 本地提交，生产门禁不变。
-- [ ] T3/T7/D4-C：源码兼容、精确包/依赖及 WSL 合成回执已接入原候选 journal；继续从审核后的干净 SHA 准备最终候选，完成生产身份/状态策略、生产形状时限/UNKNOWN、DSH UI/浏览器与完整供应链门禁。生产 provider/profile 未启用，保存 UI 继续 NOT_AVAILABLE。
+- [ ] T3/T7/D4-C：源码兼容、精确包/依赖及 WSL 合成回执已接入原候选 journal；继续从审核后的干净 SHA 准备最终首购服务候选，完成生产身份/状态策略、生产形状时限/UNKNOWN、DSH UI/浏览器与完整供应链门禁。生产 provider/profile 未启用，保存 UI 继续 NOT_AVAILABLE；下方 CRM/知识插件候选不含该 service binding。
 - [ ] T13/T21：生产 activation journal、远端 receive/reconcile 与现场恢复；本机 `LOCAL_HOST_VERIFIED` 不替代这些门禁。
-- [ ] 在授权提交后的 clean reviewed SHA 重跑完整 preflight，再处理签名/SBOM、canary/rollback 与远端门禁；不把本地 pack 视为可上线。
+- [x] T2/T13/T17/T21 clean CRM/知识本机候选（2026-10-06）：源码 `9902bdd9` 的正式 preflight **8/8 PASS**、release suite **244 PASS**；两份独立包与实际官方宿主 **10/10 PASS**，各自 journal seq 3 重试不改文件，5 个临时宿主退出。见[验收证据](./evidence/dsh-g0-clean-candidate-20261006.md)。生产与目标 WSL runtime 仍 NOT_RUN。
+- [ ] 完整候选签名/SBOM/CVE、canary/rollback 与远端门禁；不把上述本机包和回执视为可上线，仍按 G0/stop-go 决定物理分仓。
 
 ## 2026-09-30 rc2 DX triage follow-up
 

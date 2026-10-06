@@ -54,13 +54,15 @@
 
 提交前补充审核已覆盖上述原始 **14/14** 文件（含 OCR 未选中的 8 份文档），没有确认新缺陷；本次 release suite **243 PASS**，真实 WSL 回执经本地 CLI 再核验，原输入和 journal 保持不变。见[审核记录](../hackathon/evidence/dsh-g0-service-target-gate-review-20261006.md)。接线批次按正常 hooks 本地提交，再从固定 clean SHA 运行候选 preflight；不把审核通过等同生产放行。
 
+2026-10-06 的接线已提交 `356862bf`。随后在完整候选链实际修复代理透传、pnpm 重复准备、合成 key 扫描和 profile 测试环境四处问题；最终 clean SHA `9902bdd9` 的八阶段 preflight **PASS**（release 244 项），两份 CRM/知识独立包与官方 rc2 本机宿主 **10/10 PASS**。各自 journal seq 3 的幂等核验通过，见[最终本机候选](../hackathon/evidence/dsh-g0-clean-candidate-20261006.md)。这不关闭目标 WSL runtime、首购保存服务、生产身份、供应链或 G0/stop-go；上述“尚未提交”为各自历史阶段。
+
 | 任务 | 当前状态 | 已有证据 | 尚未关闭 |
 |---|---|---|---|
 | T1 | IMPLEMENTED / STATIC PASS | 架构设计、机器 policy/inventory、11 包/610 文件/29 条跨包引用/206 处字面路径、17 条合同与 10 个主入口；含 import-equals 的 AST drift/循环/越界/公开导出负测纳入 B0 pipeline | 这只关闭依赖盘点；真实宿主与服务语义由 T2/T3/T17 验证 |
 | T2 | PARTIAL / LOCAL HOST PASS | 保留原静态/官方单测证据；2026-10-04 固定 rc2 官方 Web CLI 的实际加载、正常重启、原生 v4 会话/WAL 在途恢复、回退/恢复旧组合已通过，见[宿主证据](../hackathon/evidence/dsh-g0-pinned-host-20261004.md) | 目标平台 runtime、Windows/WSL、rc1→rc2/torn-frame、浏览器与 shell/tool union；0.2.0 仍 DEFERRED |
 | T13 | PARTIAL / LOCAL JOURNAL PASS | profile/state/既有 journal 保留；候选快照与 v2 host evidence 已通过 CLI 幂等接入 `CANDIDATE_HOST_VERIFIED`，重复不改原候选，见[本轮证据](../hackathon/evidence/dsh-g0-host-journal-20261004.md) | 生产 activation 崩溃 replay、远端 receipt/reconcile 和现场回执 |
 | T15 | PARTIAL | kit、brand/query、图表与 workbench 独立构建成果保留；指标/知识服务已独立打包。CRM 与知识插件也已分别 build/test/pack、安全解包加载，profile v3 独立绑定指纹；首购双包已在 WSL 离线冷安装并验收，见上方现场证据与[插件拆分证据](../hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md) | 物理分仓、指标/知识服务的目标安装、完整 invariant/精确宿主合同、签名/SBOM/来源信任仍未关闭 |
-| T3 | PARTIAL / WSL SYNTHETIC PASS | 合成领域 API、受控保存和源码门禁已完成；本机精确双包 9/9 与首购 WSL 14/14 合成回执均已核验并接原 journal，见[兼容窗口](../architecture/first-purchase-service-compatibility.md)与上方证据 | 最终干净候选、生产身份/策略、供应链与 DSH UI/浏览器未完成；现场合成证据不放行激活 |
+| T3 | PARTIAL / WSL SYNTHETIC PASS | 合成领域 API、受控保存和源码门禁已完成；本机精确双包 9/9 与首购 WSL 14/14 合成回执均已核验并接原 journal，见[兼容窗口](../architecture/first-purchase-service-compatibility.md)与上方证据 | 最终干净首购服务候选、生产身份/策略、供应链与 DSH UI/浏览器未完成；CRM/知识插件本机候选及现场合成证据不放行保存服务激活 |
 | T7 | PARTIAL / WSL SAVE RECOVERY PASS | 本机固定源码/精确包的跨版本证据保留；WSL 真实 HTTP 保存、SIGKILL 恢复、只读回退和小库恢复已通过；旧 writer 仍会丢失来源，拒绝可写降级的门禁保留 | 生产形状时钟/UNKNOWN 窗口、最终 reviewed 服务包/主机证据和完整候选门禁未完成；生产保存 UI 未启用 |
 | T17 | PARTIAL / LOCAL HOST PASS | 固定官方 Web CLI 十项场景及父命令中断回收；实测 preset 移除后现有会话保留工具，同进程挂死需外部重启；已明确 `HOST_RESTART_REQUIRED` | 任意插件同进程隔离不承诺；生产 activation/journal/canary、目标平台与真实服务恢复仍开放，测试指针不替代原子部署 |
 | T21 | PARTIAL / LOCAL HOST + SERVICE RECEIPT PASS | `plugin candidate` 携带 profile 快照；`verify-host` 绑定固定宿主十项观测；`verify-service` 绑定精确服务双包九项观测及可选 WSL 十四项合成观测，均以原 journal 幂等记账，见上方最新证据 | 生产 canary/rollback、远端 receive/reconcile、host activation；本机核验仍 release_ready=false，目标 JSON 不证明发布者身份 |

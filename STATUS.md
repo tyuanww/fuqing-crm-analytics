@@ -14,7 +14,14 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 当前干净候选准备与网络修复（2026-10-06）
+### 当前 CRM／知识库干净候选（2026-10-06）
+
+- 从审核后的 clean SHA `9902bdd93bee4b0ba7f30efb3d35e8928db62380` 生成 `dsh-preflight-crm-9902bdd9`：prepare/audit/build/runtime/release/test/receive/evidence **8/8 PASS**，release suite **244 PASS / 0 SKIP**，7 文件 bundle 已重新校验。成功轮次使用热缓存，用时 118590 ms，不含此前排错与宿主演练。
+- CRM **233968 B**、知识 **14461 B** 两份独立候选绑定相同 source/profile。实际官方 rc2 Web CLI **10/10 PASS**，覆盖加载、重启、在途会话恢复和原生回退；两份包各自 `verify-host` 写入 journal seq 3，重试不改候选/包/journal，5 个临时宿主 PID 已退出。见[候选验收证据](docs/hackathon/evidence/dsh-g0-clean-candidate-20261006.md)。
+- 只证明本机 Darwin arm64、合成模型/会话；`release_ready=false`、生产 activation `NOT_RUN`。本 profile 不启用首购保存 service binding。WSL DSH runtime、生产身份/时限、签名/SBOM/CVE、浏览器/真实 UAT、远端激活与物理分仓保持开放；杭州生产状态本轮未复查或切换。
+- 下列网络/准备记录是本轮失败到修复的历史过程；最终候选 source 固定为 `9902bdd9`，后续纯证据文档提交不改写此来源。没有 push 或发布。
+
+### 本轮候选准备故障与修复过程（2026-10-06）
 
 - WSL 回执接线已通过正常 hooks 提交为 `356862bf22a1c4fc67f96904f1baffa21fadc2c2`，提交后工作树干净。正式 CRM＋知识库 profile preflight 已实际执行：固定 DSH 准备/构建通过，在线 audit 因未继承本机代理而失败；没有把失败记为候选通过。
 - 已定位并修复 B0 环境白名单丢弃显式代理的问题，只向 Git/pnpm 在线命令透传标准代理变量。真实 audit 修复后 PASS；专项子进程/环境回归通过，完整验证及审核结果见[网络修复证据](docs/hackathon/evidence/dsh-g0-preflight-network-20261006.md)。生产状态未改变。
