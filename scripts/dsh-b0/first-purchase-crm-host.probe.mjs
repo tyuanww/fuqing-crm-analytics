@@ -21,6 +21,7 @@ const packed = process.env.B0_NATIVE_CRM_ARTIFACT_MANIFEST ? await prepareFirstP
   upstream: process.env.B0_NATIVE_CRM_HOST_UPSTREAM,
   python: process.env.B0_NATIVE_CRM_SERVICE_PYTHON,
   wheelhouse: process.env.B0_NATIVE_CRM_SERVICE_WHEELHOUSE,
+  kernelWheelhouse: process.env.B0_NATIVE_CRM_KERNEL_WHEELHOUSE,
 }) : null;
 const workbench = packed?.workbench ?? join(repository, 'dsh-plugins/analytics-workbench');
 const crmPlugin = packed?.crm ?? join(repository, 'dsh-plugins/crm-knowledge');
@@ -34,8 +35,11 @@ if (packed) {
 const { firstPurchaseMethodPackageDigest } = await import(pathToFileURL(join(workbench, 'lib/skills.js')).href);
 const send = value => process.stdout.write(JSON.stringify(value) + '\n');
 send({ method_digest: firstPurchaseMethodPackageDigest, candidate_digest: candidateDigest,
+  ...packed?.kernel ? { kernel: { app: packed.kernel.app, python: packed.kernel.python,
+    manifest_sha256: packed.kernel.receipt.manifest_sha256 } } : {},
   ...packed?.service ? { service: { app: packed.service.app, python: packed.service.python,
-    manifest_sha256: packed.service.receipt.manifest_sha256 } } : {} });
+    manifest_sha256: packed.service.receipt.manifest_sha256,
+    query_runtime: packed.service.receipt.query_runtime } } : {} });
 const lines = createInterface({ input: process.stdin }), iterator = lines[Symbol.asyncIterator]();
 const firstInput = await iterator.next();
 // The parent may fail to bind its own fixtures after receiving our handshake.

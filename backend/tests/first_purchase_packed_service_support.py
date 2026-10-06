@@ -38,7 +38,8 @@ class PackedFirstPurchaseService:
                 cwd=self.state, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=self.error_log, text=True,
                 env={"PATH": str(Path(python).parent) + os.pathsep + "/usr/bin:/bin", "HOME": str(self.state),
                      "TMPDIR": str(self.state), "PYTHONPATH": "/repository-not-available", "PYTHON_DOTENV_DISABLED": "1"})
-            self.process.stdin.write(json.dumps({"crm_origin": self.crm_origin}))
+            self.process.stdin.write(json.dumps({"crm_origin": self.crm_origin,
+                "query_runtime": self.spec.get("query_runtime", "workspace-synthetic-kernel")}))
             self.process.stdin.close()
             assert select.select([self.process.stdout], [], [], 20)[0], "HOST_SERVICE_START_TIMEOUT"
             line = self.process.stdout.readline(65537)

@@ -125,6 +125,7 @@ if (mode === '--prepare') {
   run(process.execPath, ['--test', 'scripts/dsh-b0/plugin-boundaries.test.mjs']);
   // Guard tests fail before process startup. The real-host drill remains opt-in.
   run(process.execPath, ['--test', 'scripts/dsh-b0/pinned-host-acceptance.test.mjs']);
+  run(process.execPath, ['--test', 'scripts/dsh-b0/first-purchase-kernel-artifacts.test.mjs']);
   for (const file of ['asset-ui-smoke.mjs', 'theme-ui-smoke.mjs', 'native-ui-smoke.mjs', 'native-card-smoke.mjs', 'native-state-smoke.mjs', 'native-query-smoke.mjs', 'native-query-fault-smoke.mjs', 'native-query-fault-scenario.mjs', 'query-scenario.mjs', 'tool-card-dom-smoke.mjs', 'gateway-smoke.mjs', 'control-permission-probe.mjs', 'native-query-assets-smoke.mjs', 'asset-routes.mjs']) {
     run(process.execPath, ['--check', join(root, 'scripts/dsh-b0', file)]);
   }
@@ -161,6 +162,7 @@ print('B0 exact Python closure verified')
   pyTests.push('backend/tests/test_analytics_first_purchase_native_identity.py',
     'backend/tests/test_analytics_first_purchase_native_crm_http.py',
     'backend/tests/test_first_purchase_packed_service_support.py',
+    'backend/tests/test_first_purchase_packed_kernel_support.py',
     'backend/tests/test_competition_assets.py',
     'backend/services/analytics/competition_diagnosis/tests/test_competition_diagnosis.py',
     'backend/tests/test_page_documents.py',

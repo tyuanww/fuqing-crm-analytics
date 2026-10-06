@@ -46,8 +46,8 @@ export async function readFirstPurchaseService({ evidencePath, expectedSha, gate
   return { receipt, archive, manifest, wheels, python, evidenceSha256: expectedSha };
 }
 
-async function verifyFiles(app, manifestBytes) {
-  assert.deepEqual(await insideArtifact(app, 'service-manifest.json'), manifestBytes, 'HOST_SERVICE_INSTALLED_MANIFEST');
+export async function verifyFiles(app, manifestBytes, manifestName = 'service-manifest.json') {
+  assert.deepEqual(await insideArtifact(app, manifestName), manifestBytes, 'HOST_SERVICE_INSTALLED_MANIFEST');
   const manifest = decode(manifestBytes), actual = [];
   async function walk(relative = '') {
     for (const entry of await readdir(join(app, relative), { withFileTypes: true })) {
@@ -57,7 +57,7 @@ async function verifyFiles(app, manifestBytes) {
     }
   }
   await walk();
-  assert.deepEqual(actual.sort(), [...Object.keys(manifest.files), 'service-manifest.json'].sort(), 'HOST_SERVICE_FILE_SET');
+  assert.deepEqual(actual.sort(), [...Object.keys(manifest.files), manifestName].sort(), 'HOST_SERVICE_FILE_SET');
   for (const [name, row] of Object.entries(manifest.files)) {
     const bytes = await insideArtifact(app, name, 2 * 1024 * 1024, true);
     assert.equal(bytes.length, row.bytes, 'HOST_SERVICE_INSTALLED_SIZE');

@@ -19,6 +19,7 @@ from backend.services.analytics.first_purchase.save_policy import FirstPurchaseS
 from backend.services.analytics.first_purchase.saved import FirstPurchaseSavedAnalysisStore
 from backend.tests.analytics_run_support import sqlite_connection
 from backend.tests.first_purchase_packed_service_support import PackedFirstPurchaseService
+from backend.tests.first_purchase_packed_kernel_support import PackedFirstPurchaseKernel
 from backend.tests.test_analytics_first_purchase_analysis import analysis_counts, private_dir
 from backend.tests.test_analytics_first_purchase_native import GATEWAY, RUNTIME, SESSION, auth, fp_actor, native_prompt
 from backend.tests.test_analytics_first_purchase_native_identity import config
@@ -80,15 +81,23 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
         digest, candidate_digest = handshake["method_digest"], handshake["candidate_digest"]
         assert re.fullmatch(r"[a-f0-9]{64}", candidate_digest)
         packed_service = handshake.get("service")
+        packed_kernel = handshake.get("kernel")
         manifest_path = os.environ.get("B0_NATIVE_CRM_ARTIFACT_MANIFEST")
         if manifest_path:
             requested = json.loads(Path(manifest_path).read_text())
-            assert bool(packed_service) == (requested["schema_version"] == "dsh-first-purchase-host-artifacts/v2"), \
+            assert bool(packed_service) == (requested["schema_version"] in {"dsh-first-purchase-host-artifacts/v2", "dsh-first-purchase-host-artifacts/v3"}), \
                 "HOST_SERVICE_MODE_MISMATCH: never fall back from v2 to a source fixture"
+            assert bool(packed_kernel) == (requested["schema_version"] == "dsh-first-purchase-host-artifacts/v3"), \
+                "HOST_KERNEL_MODE_MISMATCH: never fall back from v3 to a source fixture"
         # Explicit fixed B0 port block only. Bind fails if someone else owns it.
-        app = create_first_purchase_native_app({**config(tmp_path), "port_base": 4335,
-                                               "method_package_digest": digest})
-        runs, dispatcher = app.state.store, app.state.dispatcher
+        kernel_config = {**config(tmp_path), "port_base": 4335, "method_package_digest": digest}
+        if packed_kernel:
+            runs = dispatcher = PackedFirstPurchaseKernel(packed_kernel, tmp_path, candidate_digest, kernel_config)
+            kernel_context = dispatcher
+        else:
+            app = create_first_purchase_native_app(kernel_config)
+            runs, dispatcher = app.state.store, app.state.dispatcher
+            kernel_context = serve(app, port=4335)
         analyses = private_dir(tmp_path, "analyses")
         policy = FirstPurchaseSavePolicy("official-host-no-age-v1", frozenset({candidate_digest}), None, None,
                                          check_freshness=False)
@@ -102,7 +111,7 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
                     CRMFirstPurchaseIdentityResolver(crm_origin, frozenset({"crm-owner"}), allow_query=True),
                     save_policy=lambda: policy)
                 service_context = serve(service)
-            with service_context as running, serve(app, port=4335) as kernel_origin:
+            with service_context as running, kernel_context as kernel_origin:
                 service_origin = running.origin if packed_service else running
 
                 def verify_service_restart(*, replay=False):
@@ -137,6 +146,9 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
                     assert len(runs.worker_records(active_only=False)) == 1
                     assert checks and all(checks)
                     verify_service_restart()
+                    if packed_kernel:
+                        dispatcher.restart()
+                        assert len(runs.worker_records(active_only=False)) == 1 and not runs.worker_records()
                     return
                 with httpx.Client(base_url=kernel_origin, trust_env=False, timeout=15) as client:
                     assert client.post("/internal/native/prompt", json=native_prompt(), headers=auth()).status_code == 401
@@ -164,6 +176,15 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
                     assert command({"operation": "save", "run_id": run_id, "call_id": call_id}) == {
                         "ok": True, "saved": True, "writes": 1}
                     verify_service_restart(replay=True)
+                    if packed_kernel:
+                        dispatcher.restart()
+                        restored = runs.get(fp_actor("crm-owner"), run_id)
+                        assert restored.model_dump(mode="json") == result.model_dump(mode="json")
+                        replayed = client.post("/internal/native/prompt", json=native_prompt("fp-" + accepted["commandId"]), headers=auth())
+                        assert replayed.status_code == 202 and replayed.json()["run_id"] == run_id
+                        dispatcher.tick()
+                        assert len(runs.worker_records(active_only=False)) == 1 and not runs.worker_records()
+                        assert command({"operation": "replay-save"}) == {"ok": True, "replayed": True}
                     status = command({"operation": "command", "line": f"/first-purchase-status {run_id}"})
                     assert f"{run_id}: SUCCEEDED" in status["result"]["text"]
                     # Queue another task, then cancel before dispatch. The completed card must

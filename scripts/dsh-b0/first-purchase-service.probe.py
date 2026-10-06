@@ -39,7 +39,8 @@ def main():
     assert (state / ".owned-first-purchase-host").read_text() == "owned-synthetic-host/v1\n" + digest + "\n"
     assert hashlib.sha256((source / "service-manifest.json").read_bytes()).hexdigest() == expected_manifest
     config = json.loads(sys.stdin.buffer.read(4097))
-    assert set(config) == {"crm_origin"}
+    assert set(config) == {"crm_origin", "query_runtime"}
+    assert config["query_runtime"] in {"workspace-synthetic-kernel", "independent-offline-query-artifact"}
     # This drill cannot contact a production CRM: the parent owns a literal IPv4 loopback.
     assert re.fullmatch(r"http://127\.0\.0\.1:[1-9][0-9]{0,4}", config["crm_origin"])
     port = int(port_arg)
@@ -78,7 +79,7 @@ def main():
             print(json.dumps({"status": "SERVICE_SOCKET_BOUND", "port": sock.getsockname()[1],
                 "pid": os.getpid(), "manifest_sha256": manifest_digest, "candidate_digest": digest,
                 "openapi": "MATCHED", "imports": import_origins(), "scope": "saved-analysis-artifact-only",
-                "query_runtime": "workspace-synthetic-kernel", "release_ready": False}), flush=True)
+                "query_runtime": config["query_runtime"], "release_ready": False}), flush=True)
             uvicorn.Server(uvicorn.Config(app, log_level="warning", access_log=False, lifespan="off")).run(sockets=[sock])
         import_origins()
         entry["verify"]()
