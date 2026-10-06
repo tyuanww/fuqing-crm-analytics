@@ -1,6 +1,6 @@
 # CRM、知识与首购分析服务独立候选包
 
-这是 T15 / T3 / T7 的本地 synthetic 交付入口。服务分别拥有应用包、资源清单、Python 依赖锁和进程。包不携带 DSH、插件、真实数据库、账号配置或主仓运行环境。首购保存的插件 UI 尚未接通；当前源码仍在同一 workspace，尚未物理分仓、发布或在杭州安装。
+这是 T15 / T3 / T7 的 synthetic 交付入口。服务分别拥有应用包、资源清单、Python 依赖锁和进程。包不携带 DSH、插件、真实数据库、账号配置或主仓运行环境。首购保存的插件 UI 尚未接通；当前源码仍在同一 workspace，尚未物理分仓、发布或安装到杭州生产环境。首购固定双包已完成杭州临时隔离安装验收，详见[兼容窗口](../architecture/first-purchase-service-compatibility.md)，不代表其他服务或后续源码通过。
 
 ## 三个交付单元
 
@@ -69,6 +69,18 @@ node scripts/crm-calibration/package-service.mjs \
 知识服务不再导入指标计算引擎。历史 `verification.json` 作为带来源的旧记录保留，独立包不会据此打开主仓文件，也不会把旧记录冒充当前验证；结果明确标记 `implementation_verification_scope=not_evaluated_in_service_package`。
 
 首购包的 `service.py serve --port 0` 默认不配置身份、状态目录、RunStore 或保存策略；实际请求返回 401，不创建数据库，也不启用旧写入口。服务 owner 后续须通过公开 factory 注入受信任依赖。当前只有包外的[隔离测试驱动](../../scripts/crm-calibration/first-purchase-package.fixture.py)注入临时身份、合成状态和固定时钟；它不进入包，不是生产启动配置。生产鉴权与目标主机注入仍未交付。
+
+## 首购服务身份与策略接入边界
+
+`create_first_purchase_analysis_app(..., identities=resolver, save_policy=provider)` 的身份参数遵循同模块的 `FirstPurchaseIdentityResolver` 同步接口。服务 owner 负责验证凭证及其时效/撤销，返回现有 `AnalyticsPrincipal`；不要求继承 B0 注册表，也不依赖 DSH 或旧 CRM 登录代码。未配置身份时仍使用空 B0 注册表并拒绝访问，B0 fixture 不是生产认证。
+
+- 请求使用 `Bearer ` 加非空、无空格的可见 ASCII token，整个 Authorization 最多 1024 字符；重复头仍按既有合同拒绝。actor 为非空可打印字符串，最多 128 字符；capabilities/data_scopes 必须为 `frozenset[str]`，每组最多 128 项，每项同样有界。空权限集合不会自动获权。
+- resolver 每次请求与既有保存事务重验点重新调用；不缓存身份快照。保存重放和回执 reconcile 仍需当前读、写权限；只读身份可以读取其已有分析，不因此恢复保存资格。
+- provider 的 401/403 映射为固定 `UNAUTHENTICATED`/`FORBIDDEN`，其他异常或无效 principal 返回可重试的 503 `IDENTITY_UNAVAILABLE`。接口不回传 provider 原消息、错误码或 recovery URL。provider 自己的日志脱敏、网络超时与 I/O 上界由其实现负责，当前接口没有替它完成生产验收。
+- 策略 callback 失败返回可重试的 503 `SAVE_POLICY_UNAVAILABLE`，不写分析/回执；既有 `SAVE_POLICY_INVALID`、缺策略和候选拒绝规则保留。已经保存且身份仍获准的精确重放不依赖在线策略/source，不能因 provider 故障重复创建记录。
+- `FirstPurchaseSavePolicy` 的 allowlist 与时限仍由服务 owner 显式提供，不能从客户端 candidate digest、插件本地状态或未签名 journal 自动放行。HTTP/SQLite 合同、包文件清单和 13 项依赖锁未变。
+
+本接缝只有[本地合成测试证据](../hackathon/evidence/dsh-g0-service-identity-boundary-20261006.md)。生产认证 provider、真实候选准入、生产时限及新 artifact 的目标验收仍为 NOT_RUN；不启用保存 UI 或激活入口。
 
 ## 验证与尚未完成的交付
 

@@ -10,7 +10,9 @@
 - 数据仅为每次新建的 synthetic JSON/SQLite。2026-10-04 的源码对运行于同一锁环境；2026-10-05 改为两个实际 archive、两个独立 venv，各自从本机 wheelhouse 离线 hash 安装 13 项精确依赖。两版历史依赖锁相同（Python 3.14.4 / FastAPI 0.141.1 / Pydantic 2.13.5），所以验证了安装隔离，没有验证依赖版本升级。
 - 2026-10-05 的包配对运行于 Darwin arm64。历史服务代码取自精确 Git tree，打包器/bootstrap/资源清单取自当时工作树，分别记入 `service_source` 和 `source`，不冒充曾发布的历史包。2026-10-06 同一双包另有 WSL 首购服务合成验收及 journal 接线，见本页末节；新 clean 包的本机结果单独列于下段，生产身份和目标 DSH runtime 仍未验证。
 
-2026-10-06 审核提交 `2be518e584d3adfb0343be58049dc3c674cea2f9` 另生成 clean 首购候选，与同一旧服务源码对比，源码和实际双包分别 **9/9 PASS**，兼容结论与下表一致。两包打包来源均 `worktree_dirty=false`；这是新的 artifact 对，旧 WSL 观测不能移植。新包的最终 plugin candidate journal 绑定、目标 WSL 与生产身份/策略仍未完成，详见[clean 服务候选证据](../hackathon/evidence/dsh-g0-service-clean-candidate-20261006.md)。
+2026-10-06 审核提交 `2be518e584d3adfb0343be58049dc3c674cea2f9` 另生成 clean 首购候选，与同一旧服务源码对比，源码和实际双包分别 **9/9 PASS**，兼容结论与下表一致。两包打包来源均 `worktree_dirty=false`；这是新的 artifact 对，旧 WSL 观测不能移植。随后同一新双包另做 WSL 合成 **14/14 PASS**，绑定插件来源 `78779206`、candidate journal seq 4，见[候选绑定与现场证据](../hackathon/evidence/dsh-g0-service-candidate-binding-20261006.md)；[clean 服务准备记录](../hackathon/evidence/dsh-g0-service-clean-candidate-20261006.md)中的 NOT_RUN 属于此前阶段。生产身份/策略仍未完成。
+
+`c95751f8` 之后的工作树另有[身份 resolver 边界增量](../hackathon/evidence/dsh-g0-service-identity-boundary-20261006.md)，已完成本地测试与实际包测试、8/8 提交前审核，尚未生成 clean 候选；不能继承上述固定双包的 WSL 结论。没有将身份 adapter 或候选 digest 当作生产认证、供应链签名或保存准入。
 
 | 服务 / 状态 / 动作 | 结论 | 操作边界 |
 |---|---|---|
@@ -51,7 +53,7 @@
 
 本机证据得到 `LOCAL_COMPATIBLE`、`release_ready=false` 和 `BLOCKED_SERVICE_PACKAGE_AND_HOST_EVIDENCE_REQUIRED`。实际激活返回 `SERVICE_ACTIVATION_EVIDENCE_INCOMPLETE`，没有 override。门禁不启动服务、不授予身份、不读取数据库；真正的目标身份只读性仍须现场验证。
 
-完整 G0 放行仍需要新 clean 首购包的最终 plugin candidate 绑定与目标验收、生产身份/策略、供应链、生产形状时限/UNKNOWN、DSH UI/浏览器与目标 DSH runtime 证据。合成回执 `status=PASS` 只表示预期观测完成，包括旧写入不兼容的负面观测。源码候选接线和拒绝后的无副作用验证见[门禁证据](../hackathon/evidence/dsh-g0-service-gate-20261004.md)。
+完整 G0 放行仍需要生产身份/策略、供应链、生产形状时限/UNKNOWN、DSH UI/浏览器与目标 DSH runtime 证据。当前 `2be518e5` 双包已完成候选绑定与目标合成验收；后续服务源码变化须形成新包并取得对应证据。合成回执 `status=PASS` 只表示预期观测完成，包括旧写入不兼容的负面观测。源码候选接线和拒绝后的无副作用验证见[门禁证据](../hackathon/evidence/dsh-g0-service-gate-20261004.md)。
 
 2026-10-04 完成新服务独立包与同版本 HTTP 恢复，见[当时证据](../hackathon/evidence/dsh-g0-analysis-service-package-20261004.md)。2026-10-05 的[精确包配对证据](../hackathon/evidence/dsh-g0-service-artifact-pair-20261005.md)覆盖上表全部 9 项观测；新回执 `shinemage-service-artifact-compatibility/v1` 记录两个 archive/manifest、安装后的实际依赖、wheel hash 和验证器摘要，始终 `release_ready=false` / `BLOCKED_TARGET_HOST_AND_SUPPLY_CHAIN_REQUIRED`。它不替换现有 `service-save-compatibility.py` 的源码回执，也不能直接作为现有 `--service-evidence` 输入；没有据此解除 `SERVICE_ACTIVATION_EVIDENCE_INCOMPLETE`。
 

@@ -60,6 +60,8 @@
 
 后续在 clean 插件来源 `78779206` 重新构建首购插件，绑定同一 `2be518e5` 服务包；本轮相关 **100 PASS / 0 SKIP**，新服务双包实际杭州 WSL 合成验收 **14/14 PASS**。新回执经既有 CLI 进入 candidate journal seq 4，重试及 129 文件不变、旧目标回执误用拒绝、生产激活阻断均已验证，见[接线与现场证据](../hackathon/evidence/dsh-g0-service-candidate-binding-20261006.md)。10 个临时进程已回收，生产监听/PID 不变；生产身份/候选准入、时限、供应链及目标 DSH 宿主仍开放。
 
+上述 clean 绑定批次经 OCR delegate 审修后已通过正常 hooks 提交 `c95751f8`。下一步本地增量补齐首购服务 owner 的同步身份接口、身份/策略故障脱敏及撤权边界，当前保存/恢复 **74 PASS**、实际独立包场景 **1 PASS**，见[身份接缝证据](../hackathon/evidence/dsh-g0-service-identity-boundary-20261006.md)。本批另完成 **8/8** 提交前审核，尚未替换 `2be518e5` 的固定包与回执；生产认证、真实候选 allowlist、时限与新包目标验收仍开放，T3/T7 不改为完成。
+
 | 任务 | 当前状态 | 已有证据 | 尚未关闭 |
 |---|---|---|---|
 | T1 | IMPLEMENTED / STATIC PASS | 架构设计、机器 policy/inventory、11 包/610 文件/29 条跨包引用/206 处字面路径、17 条合同与 10 个主入口；含 import-equals 的 AST drift/循环/越界/公开导出负测纳入 B0 pipeline | 这只关闭依赖盘点；真实宿主与服务语义由 T2/T3/T17 验证 |

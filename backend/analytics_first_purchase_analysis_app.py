@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import re
 import sqlite3
-from typing import Callable
+from typing import Callable, Protocol
 
 from fastapi import FastAPI, Request, Response
 from fastapi.exceptions import RequestValidationError
@@ -34,7 +34,7 @@ from backend.contracts.analytics_first_purchase_analysis import (
     HTTP_API_CONNECTED,
 )
 from backend.contracts.analytics_first_purchase_run import FIRST_PURCHASE_HTTP_PREFIX
-from backend.services.analytics.access import AnalyticsError, B0IdentityRegistry, require
+from backend.services.analytics.access import AnalyticsError, AnalyticsPrincipal, B0IdentityRegistry, require
 from backend.services.analytics.first_purchase.asset_state import validate_key
 from backend.services.analytics.first_purchase.saved import (
     FirstPurchaseSavedAnalysisRecord,
@@ -51,6 +51,51 @@ VERSION_HEADER = {
     "name": "If-Match", "in": "header", "required": True,
     "schema": {"type": "string", "pattern": "^[1-9][0-9]{0,15}$"},
 }
+
+
+class FirstPurchaseIdentityResolver(Protocol):
+    """Service-owned adapter: authenticate and return current immutable grants.
+
+    The adapter owns credential verification and revocation. Candidate digests,
+    client-supplied actors and plugin state are never identity credentials.
+    Implementations must bound their own I/O; no identity snapshot is cached here.
+    """
+
+    def resolve(self, authorization: str | None) -> AnalyticsPrincipal: ...
+
+
+def _identity_unavailable() -> AnalyticsError:
+    return AnalyticsError(503, "IDENTITY_UNAVAILABLE", "身份服务暂不可用，请稍后重试。", retryable=True)
+
+
+def _valid_identity_claim(value: object) -> bool:
+    return (isinstance(value, str) and 1 <= len(value) <= 128 and bool(value.strip())
+            and value.isprintable())
+
+
+def _resolve_identity(registry: FirstPurchaseIdentityResolver, authorization: str | None) -> AnalyticsPrincipal:
+    # Reject malformed credentials before handing them to a deployment adapter.
+    if (not authorization or not authorization.startswith("Bearer ") or not 8 <= len(authorization) <= 1024
+            or any(ord(char) < 33 or ord(char) > 126 for char in authorization[7:])):
+        raise AnalyticsError(401, "UNAUTHENTICATED", "请提供有效的访问凭证。")
+    try:
+        actor = registry.resolve(authorization)
+        if not isinstance(actor, AnalyticsPrincipal) or not _valid_identity_claim(actor.actor_id):
+            raise _identity_unavailable()
+        for grants in (actor.capabilities, actor.data_scopes):
+            if (not isinstance(grants, frozenset) or len(grants) > 128
+                    or any(not _valid_identity_claim(value) for value in grants)):
+                raise _identity_unavailable()
+        return actor
+    except AnalyticsError as error:
+        if error.status == 401:
+            raise AnalyticsError(401, "UNAUTHENTICATED", "访问凭证无效或已失效，请重新认证。") from None
+        if error.status == 403:
+            raise AnalyticsError(403, "FORBIDDEN", "当前身份无权访问此服务。") from None
+        raise _identity_unavailable() from None
+    except Exception:
+        # Do not pass provider messages, recovery URLs or exception context to HTTP/logs.
+        raise _identity_unavailable() from None
 
 
 def _analysis_version(request: Request) -> int:
@@ -77,7 +122,7 @@ def http_list_item(item: dict) -> FirstPurchaseSavedAnalysisListItem:
 def create_first_purchase_analysis_app(
     run_store: RunStore | None = None,
     analysis_store: FirstPurchaseSavedAnalysisStore | None = None,
-    identities: B0IdentityRegistry | None = None,
+    identities: FirstPurchaseIdentityResolver | None = None,
     *,
     runtime_ready: Callable[[], bool] | None = None,
     save_policy: Callable[[], FirstPurchaseSavePolicy | None] | None = None,
@@ -85,10 +130,10 @@ def create_first_purchase_analysis_app(
     app = FastAPI(title="Shine Mage First-Purchase Saved Analysis", version=ANALYSIS_SCHEMA,
                   docs_url=None, redoc_url=None, openapi_url=None)
     app.add_middleware(_BodyLimit)
-    registry = identities or B0IdentityRegistry()
+    registry = identities if identities is not None else B0IdentityRegistry()
 
     def principal(request: Request):
-        return registry.resolve(_single_header(request, "authorization"))
+        return _resolve_identity(registry, _single_header(request, "authorization"))
 
     def runs() -> RunStore:
         if run_store is None:
@@ -121,7 +166,10 @@ def create_first_purchase_analysis_app(
     errors = {code: {"model": AnalyticsErrorResponse} for code in (400, 401, 403, 404, 409, 410, 413, 422, 428, 429, 503)}
 
     def current_policy():
-        policy = save_policy() if save_policy is not None else None
+        try:
+            policy = save_policy() if save_policy is not None else None
+        except Exception:
+            raise AnalyticsError(503, "SAVE_POLICY_UNAVAILABLE", "保存策略暂不可用，请稍后重试。", retryable=True) from None
         if policy is not None and not isinstance(policy, FirstPurchaseSavePolicy):
             raise AnalyticsError(503, "SAVE_POLICY_INVALID", "保存策略尚未正确配置。")
         return policy

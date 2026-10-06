@@ -21,6 +21,7 @@ from fastapi.testclient import TestClient
 
 from backend.analytics_first_purchase_analysis_app import PREFIX, RECEIPT_PREFIX, RESULT_PREFIX, create_first_purchase_analysis_app
 from backend.contracts.analytics_first_purchase_analysis import FirstPurchaseSaveCommand
+from backend.services.analytics.access import AnalyticsError
 from backend.services.analytics.first_purchase import saved
 from backend.services.analytics.first_purchase.save_policy import FirstPurchaseSavePolicy, result_envelope
 from backend.services.analytics.first_purchase.saved import FirstPurchaseSavedAnalysisStore
@@ -58,6 +59,126 @@ def inspect(api, command, **options):
 
 def save(api, command, **options):
     return api.post(RECEIPT_PREFIX, json=command, headers=headers(key="save-1"), **options)
+
+
+class ServiceIdentityProvider:
+    """Service-owner adapter with no B0 registry inheritance or token store."""
+
+    def __init__(self, principal=None, error=None):
+        self.principal = principal if principal is not None else asset_actor()
+        self.error = error
+        self.calls = []
+
+    def resolve(self, authorization):
+        self.calls.append(authorization)
+        if self.error is not None:
+            raise self.error
+        return self.principal
+
+
+def test_provider_boundary_uses_falsy_explicit_adapter_and_rechecks_revocation(gate):
+    _, store, state, _, runs, command = gate
+
+    class FalsyProvider(ServiceIdentityProvider):
+        def __bool__(self):
+            return False
+
+    provider = FalsyProvider()
+    with TestClient(create_first_purchase_analysis_app(
+        runs, store, provider, save_policy=lambda: state["policy"],
+    )) as api:
+        assert inspect(api, command).json()["save_eligible"]
+        receipt = save(api, command)
+        assert receipt.status_code == 201, receipt.text
+        provider.principal = asset_actor(capabilities={"run:read", "analysis:read"})
+        assert save(api, command).status_code == 403  # Replays need current write permission too.
+        denied_reconcile = api.post(RECEIPT_PREFIX + "/reconcile", json=command["identity"], headers=headers(key="save-1"))
+        assert denied_reconcile.status_code == 403  # Receipt lookup retains its read + save contract.
+        assert api.get(f'{PREFIX}/{receipt.json()["analysis_ref"]["analysis_id"]}', headers=headers()).status_code == 200
+        provider.principal = asset_actor()
+        found = api.post(RECEIPT_PREFIX + "/reconcile", json=command["identity"], headers=headers(key="save-1"))
+        assert found.status_code == 200 and found.json() == receipt.json()
+        provider.error = AnalyticsError(401, "PROVIDER_EXPIRED", "private-provider-detail")
+        denied = api.post(RECEIPT_PREFIX + "/reconcile", json=command["identity"], headers=headers(key="save-1"))
+        assert denied.status_code == 401 and denied.json()["error"]["code"] == "UNAUTHENTICATED"
+        assert "private-provider-detail" not in denied.text
+    assert len(provider.calls) >= 7
+    assert analysis_counts(store) == {"analyses": 1, "idempotency": 3}
+
+
+@pytest.mark.parametrize(("error", "status", "code"), [
+    (RuntimeError("private-provider-detail"), 503, "IDENTITY_UNAVAILABLE"),
+    (AnalyticsError(401, "PROVIDER_EXPIRED", "private-provider-detail"), 401, "UNAUTHENTICATED"),
+    (AnalyticsError(403, "PROVIDER_DENIED", "private-provider-detail"), 403, "FORBIDDEN"),
+    (AnalyticsError(503, "PROVIDER_FAILED", "private-provider-detail"), 503, "IDENTITY_UNAVAILABLE"),
+])
+def test_provider_boundary_maps_failures_without_logging_or_disclosing_details(gate, caplog, error, status, code):
+    _, store, state, _, runs, command = gate
+    provider = ServiceIdentityProvider(error=error)
+    with TestClient(create_first_purchase_analysis_app(
+        runs, store, provider, save_policy=lambda: state["policy"],
+    ), raise_server_exceptions=False) as api:
+        response = save(api, command)
+        assert response.status_code == status
+        assert response.json()["error"]["code"] == code
+        assert response.json()["error"]["retryable"] is (status == 503)
+        assert "private-provider-detail" not in response.text + caplog.text
+    assert analysis_counts(store) == {"analyses": 0, "idempotency": 0}
+
+
+@pytest.mark.parametrize("principal", [
+    {"actor_id": "untrusted-object"},
+    replace(asset_actor(), actor_id=None),
+    replace(asset_actor(), actor_id="control\ncharacter"),
+    replace(asset_actor(), actor_id="control\x85character"),
+    replace(asset_actor(), actor_id="x" * 129),
+    replace(asset_actor(), capabilities={"analysis:save"}),
+    replace(asset_actor(), capabilities=frozenset(str(index) for index in range(129))),
+    replace(asset_actor(), data_scopes=frozenset({1})),
+])
+def test_provider_boundary_rejects_invalid_principal_without_writes(gate, principal):
+    _, store, state, _, runs, command = gate
+    with TestClient(create_first_purchase_analysis_app(
+        runs, store, ServiceIdentityProvider(principal), save_policy=lambda: state["policy"],
+    ), raise_server_exceptions=False) as api:
+        response = save(api, command)
+        assert response.status_code == 503, response.text
+        assert response.json()["error"]["code"] == "IDENTITY_UNAVAILABLE"
+    assert analysis_counts(store) == {"analyses": 0, "idempotency": 0}
+
+
+@pytest.mark.parametrize("authorization", [None, "Basic not-a-bearer", "Bearer ", "Bearer a b"])
+def test_provider_boundary_rejects_malformed_authorization_before_adapter(gate, authorization):
+    _, store, state, _, runs, command = gate
+    provider = ServiceIdentityProvider()
+    supplied = {"idempotency-key": "save-1"}
+    if authorization is not None:
+        supplied["authorization"] = authorization
+    with TestClient(create_first_purchase_analysis_app(
+        runs, store, provider, save_policy=lambda: state["policy"],
+    )) as api:
+        response = api.post(RECEIPT_PREFIX, json=command, headers=supplied)
+        assert response.status_code == 401
+    assert provider.calls == []
+    assert analysis_counts(store) == {"analyses": 0, "idempotency": 0}
+
+
+@pytest.mark.parametrize("operation", ["inspect", "save"])
+def test_provider_boundary_policy_failure_is_retryable_and_cannot_write(gate, caplog, operation):
+    _, store, _, registry, runs, command = gate
+
+    def unavailable_policy():
+        raise RuntimeError("private-provider-detail")
+
+    with TestClient(create_first_purchase_analysis_app(
+        runs, store, registry, save_policy=unavailable_policy,
+    ), raise_server_exceptions=False) as api:
+        response = (inspect if operation == "inspect" else save)(api, command)
+        assert response.status_code == 503
+        assert response.json()["error"]["code"] == "SAVE_POLICY_UNAVAILABLE"
+        assert response.json()["error"]["retryable"] is True
+        assert "private-provider-detail" not in response.text + caplog.text
+    assert analysis_counts(store) == {"analyses": 0, "idempotency": 0}
 
 
 def test_public_save_persists_provenance_and_reopens_after_policy_and_run_disappear(gate):
