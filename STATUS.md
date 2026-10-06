@@ -19,6 +19,7 @@
 - WSL 回执接线已通过正常 hooks 提交为 `356862bf22a1c4fc67f96904f1baffa21fadc2c2`，提交后工作树干净。正式 CRM＋知识库 profile preflight 已实际执行：固定 DSH 准备/构建通过，在线 audit 因未继承本机代理而失败；没有把失败记为候选通过。
 - 已定位并修复 B0 环境白名单丢弃显式代理的问题，只向 Git/pnpm 在线命令透传标准代理变量。真实 audit 修复后 PASS；专项子进程/环境回归通过，完整验证及审核结果见[网络修复证据](docs/hackathon/evidence/dsh-g0-preflight-network-20261006.md)。生产状态未改变。
 - 代理修复已提交 `8a70667f`。新 clean preflight 进一步复现 pnpm 重复 fetch 后 install 快捷返回、丢失 `tsx` 链接；已收敛 frozen 参数关闭这项优化，隔离两轮安装与实际固定 DSH prepare/build 修复后通过。失败和修复证据见同一记录；正式完整候选仍需使用修复后的 clean SHA。
+- 重复安装修复已提交 `0e978f9e`；该 SHA 的 prepare、audit、双插件 build、离线 runtime 打包已通过，release 被宿主演练脚本的长合成 key 字符串拦住。已改成短占位值，扫描规则未改，1846 个发布清单文件重扫通过；旧字符串仍被拒绝。该候选 attempt 未记为完整 PASS。
 - 两份 `356862bf` 独立插件包已生成，但不代表完整 preflight 或生产就绪；修复提交后从新 clean SHA 重跑正式候选。本机旧 SDK 链接已保留备份并绑定本次固定 checkout，未修改 DSH 源码。生产身份/策略、时限/UNKNOWN、供应链、目标宿主/浏览器和物理分仓仍开放。
 
 ### 已提交的 WSL 回执与候选 journal 接线（2026-10-06）

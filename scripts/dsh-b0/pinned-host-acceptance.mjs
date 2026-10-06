@@ -63,7 +63,7 @@ async function startHost({ root, upstream, patches, modelOrigin, generation, sig
   signal.throwIfAborted();
   const env = { PATH: dirname(process.execPath) + ':/usr/bin:/bin', HOME: join(root, 'home'),
     TMPDIR: join(root, 'tmp'), DSH_HOME: join(root, 'dsh-home'), DSH_AGENTS_HOME: join(root, 'agents-home'),
-    DSH_TELEMETRY_DISABLED: '1', DEEPSEEK_API_KEY: 'synthetic-owned-no-provider-access',
+    DSH_TELEMETRY_DISABLED: '1', DEEPSEEK_API_KEY: 'synthetic',
     DEEPSEEK_BASE_URL: modelOrigin, DSH_PRIMARY_RUNTIME: '', NODE_NO_WARNINGS: '1' };
   const child = spawn(process.execPath, [join(upstream, 'apps/cli/lib/bin.js'), '--profile', 'web',
     ...patches.flatMap(path => ['--patch', path]), '--host', '127.0.0.1', '--port', '0', '--no-open'],

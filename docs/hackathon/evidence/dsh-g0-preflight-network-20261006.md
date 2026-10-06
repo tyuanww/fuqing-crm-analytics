@@ -35,3 +35,11 @@
 - 完整 release suite **243 PASS / 0 FAIL / 0 SKIP**。该增量 OCR delegate **7/7** 覆盖（3 个代码/测试、4 个文档），0 skipped，无新增确认缺陷；语法、引用和 diff 检查通过。原始日志在 `.context/checks/candidate-8a70667f-20261006/` 的 `preflight.log`、`repeat-install-test.log`、`repeat-install-test-retry.log`、`prepare-fixed.log`、`release-suite-repeat-fix.log` 及 `repeat-review-*.json`。
 
 这一步只修复本地候选准备的可重复性；完整 preflight、真实模型/浏览器和目标平台运行状态分别记账。
+
+## 宿主 fixture 合成凭据与完整 source scan
+
+重复准备修复通过正常 hooks 提交为 `0e978f9eff88bae777ff9c30c279da73f201c1e5`。该 clean SHA 的正式 preflight 已完成 prepare（32152 ms）、audit（1138 ms）、build（5155 ms）和离线 runtime（71098 ms，181233010 字节）。release 阶段因 `scripts/dsh-b0/pinned-host-acceptance.mjs` 的长合成 API key 字符串命中 secret scan 而阻断，完整 bundle 未生成。失败保留于 `.context/release-preflight-runs/dsh-preflight-crm-0e978f9e-s2Ms1S/`。
+
+只将该演练脚本的环境合成值改为 `synthetic`。其 provider 地址仍为自有 loopback fixture；不改 scanner、阈值或白名单，也不改业务插件。按实际 artifact allowlist 重扫 **1846 文件 / 0 findings**，并确认旧长字符串继续被拒绝，结果在 `.context/checks/candidate-0e978f9e-20261006/secret-scan-fixed.json`。
+
+同目录 `plugin-contracts.log` 是该轮实际 CRM/知识定向合同 **55 PASS / 0 SKIP**，不是完整 B0 或浏览器验收。合成凭据修复后的新宿主演练和完整 preflight 要从下一个 clean SHA 记录，不能沿用旧宿主 evidence 的输入摘要。
