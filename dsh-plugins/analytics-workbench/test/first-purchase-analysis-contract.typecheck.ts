@@ -52,5 +52,8 @@ export function decodePublicDocuments(value: unknown) {
 export type ForgedCommand = components['schemas']['FirstPurchaseSaveCommand']['save_eligible'];
 // @ts-expect-error PINNED retains cockpit meaning and is not a freshness state.
 export const pinnedFreshness: components['schemas']['FirstPurchaseFreshness']['freshness_state'] = 'PINNED';
+export const uncheckedFreshness: components['schemas']['FirstPurchaseFreshness']['freshness_state'] = 'NOT_CHECKED';
+// @ts-expect-error Age policy is service-owned, not a client-selected save option.
+export type ForgedTimePolicy = components['schemas']['FirstPurchaseSaveCommand']['check_freshness'];
 // @ts-expect-error This contract does not admit production business data.
 export const production: components['schemas']['FirstPurchaseSaveProvenance']['environment'] = 'production';

@@ -197,7 +197,9 @@ class FirstPurchaseSaveCommand(FirstPurchaseAnalysisCreateRequest):
 
 
 class FirstPurchaseFreshness(AnalyticsModel):
-    freshness_state: Literal["FRESH", "STALE", "EXPIRED", "UNKNOWN"]
+    """NOT_CHECKED records an explicit server policy, never a fresh-time claim."""
+
+    freshness_state: Literal["FRESH", "STALE", "EXPIRED", "UNKNOWN", "NOT_CHECKED"]
     freshness_checked_at: QueryDateTime
     freshness_stale_at: QueryDateTime | None
     freshness_expires_at: QueryDateTime | None
@@ -205,7 +207,23 @@ class FirstPurchaseFreshness(AnalyticsModel):
     max_age_ms: Annotated[int, Field(strict=True, gt=0)] | None
     expires_after_ms: Annotated[int, Field(strict=True, gt=0)] | None
     reason: Literal["WITHIN_WINDOW", "MAX_AGE_REACHED", "EXPIRED", "POLICY_NOT_CONFIGURED",
-                    "GENERATION_TIME_UNAVAILABLE", "CLOCK_BEFORE_GENERATION"]
+                    "GENERATION_TIME_UNAVAILABLE", "CLOCK_BEFORE_GENERATION", "DISABLED_BY_POLICY"]
+
+    @model_validator(mode="after")
+    def explicit_time_policy(self):
+        windows = (self.max_age_ms, self.expires_after_ms, self.freshness_stale_at, self.freshness_expires_at)
+        if self.freshness_state == "NOT_CHECKED" or self.reason == "DISABLED_BY_POLICY":
+            if (self.freshness_state != "NOT_CHECKED" or self.reason != "DISABLED_BY_POLICY"
+                    or self.policy_version is None or any(value is not None for value in windows)):
+                raise ValueError("unchecked age requires an explicit policy and no time windows")
+        elif self.policy_version is None:
+            if (self.freshness_state != "UNKNOWN" or self.reason != "POLICY_NOT_CONFIGURED"
+                    or any(value is not None for value in windows)):
+                raise ValueError("missing policy cannot establish freshness")
+        elif (self.max_age_ms is None or self.expires_after_ms is None
+              or not self.max_age_ms < self.expires_after_ms <= 2_147_483_647):
+            raise ValueError("checked age requires positive ordered time windows")
+        return self
 
 
 class FirstPurchasePermissionScope(AnalyticsModel):
@@ -256,14 +274,14 @@ class FirstPurchaseSaveResult(AnalyticsModel):
             raise ValueError("identity and provenance must bind the same candidate")
         if self.save_eligible:
             if (self.result_state != "SUCCESS_UNSAVED" or self.result.status != "OK"
-                    or self.provenance.freshness.freshness_state != "FRESH"
+                    or self.provenance.freshness.freshness_state not in {"FRESH", "NOT_CHECKED"}
                     or not self.provenance.permission_scope.can_save
                     or not self.provenance.permission_scope.can_read
                     or self.provenance.generated_at is None
                     or self.provenance.source_refs.primary_result_ref is None
                     or self.provenance.source_refs.method_package_digest is None
                     or self.save_ineligible_reason is not None):
-                raise ValueError("only a complete, authorized fresh result can be eligible")
+                raise ValueError("only a complete authorized result allowed by its time policy can be eligible")
         elif self.save_ineligible_reason is None:
             raise ValueError("an ineligible result must explain why")
         return self
@@ -283,7 +301,7 @@ class FirstPurchaseSavedProvenance(AnalyticsModel):
     def saved_evidence_is_complete(self):
         p = self.provenance
         if (self.identity.candidate_digest != p.candidate_digest or p.generated_at is None
-                or p.freshness.freshness_state != "FRESH" or not p.permission_scope.can_read
+                or p.freshness.freshness_state not in {"FRESH", "NOT_CHECKED"} or not p.permission_scope.can_read
                 or not p.permission_scope.can_save or p.source_refs.primary_result_ref is None
                 or p.source_refs.method_package_digest is None):
             raise ValueError("saved provenance must preserve the complete admitted save observation")

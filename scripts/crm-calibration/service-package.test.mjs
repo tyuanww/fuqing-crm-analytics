@@ -245,7 +245,8 @@ test('secret scanning uses the actual allowlisted payload and leaves no candidat
   await assert.rejects(readFile(join(output, 'candidate-receipt.json')), { code: 'ENOENT' });
 });
 
-test('first-purchase archive saves, restarts, reconciles and forward-fixes in its own minimal runtime', async t => {
+for (const checkFreshness of [true, false]) {
+test(`first-purchase archive saves, restarts, reconciles and forward-fixes (age check ${checkFreshness})`, async t => {
   const home = await scratch(t), output = join(home, 'analysis-candidate'), app = join(home, 'analysis-app');
   const receipt = await packService({ domain: 'first-purchase', output, python });
   t.diagnostic(`SERVICE_ARTIFACT domain=first-purchase sha256=${receipt.sha256} manifest=${receipt.manifest_sha256} bytes=${receipt.bytes}`);
@@ -295,7 +296,8 @@ test('first-purchase archive saves, restarts, reconciles and forward-fixes in it
   const command = { schema_version: 'analytics-first-purchase-save-command/v1', identity,
     created_from_run_id: context.run_id, title: 'isolated synthetic package', evidence_digest: context.evidence_digest };
   async function start(operation) {
-    const service = await startProcess(t, interpreter, ['-I', driver, operation, app, state], home, credentials);
+    const service = await startProcess(t, interpreter, ['-I', driver, operation, app, state,
+      ...(checkFreshness ? [] : ['--without-age-check'])], home, credentials);
     assert.equal(service.receipt.manifest_sha256, receipt.manifest_sha256);
     assert.equal(service.receipt.openapi, 'MATCHED');
     await ready(service.origin + base + '/analyses', {}, 401);
@@ -316,7 +318,15 @@ test('first-purchase archive saves, restarts, reconciles and forward-fixes in it
   const inspected = await request('/save-results/inspect', 200, {
     schema_version: 'analytics-first-purchase-save-inspect/v1', identity, created_from_run_id: context.run_id });
   assert.equal(inspected.save_eligible, true);
-  assert.equal(inspected.provenance.freshness.freshness_state, 'FRESH');
+  assert.equal(inspected.provenance.freshness.freshness_state, checkFreshness ? 'FRESH' : 'NOT_CHECKED');
+  if (!checkFreshness) {
+    assert.equal(inspected.provenance.freshness.reason, 'DISABLED_BY_POLICY');
+    for (const key of ['max_age_ms', 'expires_after_ms', 'freshness_stale_at', 'freshness_expires_at']) {
+      assert.equal(inspected.provenance.freshness[key], null);
+    }
+    assert.equal(Date.parse(inspected.provenance.freshness.freshness_checked_at)
+      - Date.parse(inspected.provenance.generated_at), 365 * 24 * 60 * 60 * 1000);
+  }
   const denied = await request('/save-receipts', 409, {
     ...command, identity: { ...identity, candidate_digest: 'b'.repeat(64) } });
   assert.equal(denied.error.code, 'CANDIDATE_NOT_ADMITTED');
@@ -363,6 +373,7 @@ test('first-purchase archive saves, restarts, reconciles and forward-fixes in it
   const repeated = await packService({ domain: 'first-purchase', output: join(home, 'analysis-again'), python });
   assert.equal(repeated.sha256, receipt.sha256);
 });
+}
 
 test('service input and installed manifest FIFOs fail without waiting for a writer', async t => {
   const { inputRoot, home } = await inputFixture(t);

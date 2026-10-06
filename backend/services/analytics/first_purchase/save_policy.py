@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 
 from backend.contracts.analytics_first_purchase import FirstPurchaseResult, parse_query_datetime
@@ -24,14 +24,17 @@ class FirstPurchaseSavePolicy:
     """Explicit server configuration; client digests never populate admission.
 
     The deploy owner must admit reviewed candidates outside this service. Test
-    policy windows are not measured production SLAs. Replace this immutable
-    value to revoke a candidate; every new write reads the provider again.
+    policy windows are not measured production SLAs. Age checks can be explicitly
+    disabled without granting candidate admission or changing permissions.
+    Replace this immutable value to revoke a candidate; every new write reads
+    the provider again.
     """
 
     policy_version: str
     admitted_candidates: frozenset[str]
-    max_age_ms: int
-    expires_after_ms: int
+    max_age_ms: int | None
+    expires_after_ms: int | None
+    check_freshness: bool = field(default=True, kw_only=True)
 
     def __post_init__(self):
         opaque(self.policy_version, label="policy_version")
@@ -39,6 +42,12 @@ class FirstPurchaseSavePolicy:
             raise ValueError("candidate admission must be an immutable set")
         for digest in self.admitted_candidates:
             sha256_hex(digest, label="candidate_digest")
+        if type(self.check_freshness) is not bool:
+            raise ValueError("check_freshness must be an explicit boolean")
+        if not self.check_freshness:
+            if self.max_age_ms is not None or self.expires_after_ms is not None:
+                raise ValueError("disabled age checks cannot contain time windows")
+            return
         if (type(self.max_age_ms) is not int or type(self.expires_after_ms) is not int
                 or not 0 < self.max_age_ms < self.expires_after_ms <= 2_147_483_647):
             raise ValueError("explicit positive ordered millisecond windows are required")
@@ -53,7 +62,9 @@ def result_envelope(
     generated_at = None if source.generated_at is None else parse_query_datetime(source.generated_at)
     stale_at = expires_at = None
     state, reason = "UNKNOWN", "POLICY_NOT_CONFIGURED"
-    if policy is not None:
+    if policy is not None and not policy.check_freshness:
+        state, reason = "NOT_CHECKED", "DISABLED_BY_POLICY"
+    elif policy is not None:
         reason = "GENERATION_TIME_UNAVAILABLE"
         if generated_at is not None:
             stale_at = generated_at + timedelta(milliseconds=policy.max_age_ms)

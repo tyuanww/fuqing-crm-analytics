@@ -228,6 +228,7 @@
       },
       "FirstPurchaseFreshness": {
         "additionalProperties": false,
+        "description": "NOT_CHECKED records an explicit server policy, never a fresh-time claim.",
         "properties": {
           "expires_after_ms": {
             "anyOf": [
@@ -275,7 +276,8 @@
               "FRESH",
               "STALE",
               "EXPIRED",
-              "UNKNOWN"
+              "UNKNOWN",
+              "NOT_CHECKED"
             ],
             "title": "Freshness State",
             "type": "string"
@@ -313,7 +315,8 @@
               "EXPIRED",
               "POLICY_NOT_CONFIGURED",
               "GENERATION_TIME_UNAVAILABLE",
-              "CLOCK_BEFORE_GENERATION"
+              "CLOCK_BEFORE_GENERATION",
+              "DISABLED_BY_POLICY"
             ],
             "title": "Reason",
             "type": "string"
@@ -2989,5 +2992,5 @@
   "x-query-session-fence": false,
   "x-saved-analysis-http": true,
   "x-shared-succeeded-source": true,
-  "x-schema-sha256": "a32c455af4c564f308adbb743a65e888da864b8718a2e02a5202ada7c53f9b09"
+  "x-schema-sha256": "6209894f434fa0cadb746b46400064dbcec6eee8a80279423f2d1b8db52725ee"
 }

@@ -16,7 +16,9 @@ sys.dont_write_bytecode = True
 
 
 def main():
-    operation, source_arg, state_arg = sys.argv[1:]
+    operation, source_arg, state_arg, *flags = sys.argv[1:]
+    assert flags in ([], ["--without-age-check"])
+    check_freshness = not flags
     source, state = Path(source_arg).resolve(), Path(state_arg).resolve()
     assert state.name == "analysis-state" and state.parent.name.startswith("crm-packed-service-")
     assert (state / ".synthetic-package-test").read_text() == "owned-synthetic-state/v1\n"
@@ -80,7 +82,8 @@ def main():
                                                 frozenset({"first-purchase-fixture"})))
     context = json.loads((state / "context.json").read_text())
     (state / "analyses").mkdir(mode=0o700, exist_ok=True)
-    store = FirstPurchaseSavedAnalysisStore(state / "analyses", clock=lambda: context["generated_ms"])
+    clock_ms = context["generated_ms"] + (0 if check_freshness else 365 * 24 * 60 * 60 * 1000)
+    store = FirstPurchaseSavedAnalysisStore(state / "analyses", clock=lambda: clock_ms)
     runs = None
     if operation in {"serve", "legacy-write"} and (state / "runs").exists():
         runs = RunStore(state / "runs", B0ResourceProfile(**B0_SMALL_FIXTURE_PROFILE), family="first_purchase")
@@ -89,6 +92,9 @@ def main():
         from backend.services.analytics.first_purchase.save_policy import FirstPurchaseSavePolicy
         policy = None if operation == "recover" else FirstPurchaseSavePolicy(
             "package-synthetic-v1", frozenset({"a" * 64}), 1000, 2000)
+        if operation != "recover" and not check_freshness:
+            policy = FirstPurchaseSavePolicy("package-no-age-v1", frozenset({"a" * 64}), None, None,
+                                             check_freshness=False)
         options["save_policy"] = lambda: policy
     app = api.create_first_purchase_analysis_app(runs, store, registry, **options)
     contract = json.loads((source / "openapi.json").read_text())

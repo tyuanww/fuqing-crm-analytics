@@ -39,6 +39,19 @@ for (const mutate of [
   assert.equal(result(value), null, mutate.toString());
 }
 assert.equal(result({...docs.stale, save_eligible: true, save_ineligible_reason: null}), null);
+if (docs.fresh.provenance.freshness.freshness_state === 'NOT_CHECKED') {
+  for (const [field, value] of [
+    ['freshness_state', 'FRESH'], ['reason', 'WITHIN_WINDOW'], ['policy_version', null],
+    ['max_age_ms', 1000], ['expires_after_ms', 2000],
+    ['freshness_stale_at', '2099-01-01T00:00:00Z'], ['freshness_expires_at', '2099-01-01T00:00:00Z'],
+  ]) {
+    for (const [doc, decode] of [[docs.fresh, result], [docs.frozen, provenance]]) {
+      const changed = structuredClone(doc);
+      changed.provenance.freshness[field] = value;
+      assert.equal(decode(changed), null, 'unchecked: ' + field);
+    }
+  }
+}
 assert.equal(receipt({...docs.unknown, status: 'SAVED'}), null);
 assert.equal(receipt({...docs.receipt, durable_state_key: 'invented'}), null);
 const bad = structuredClone(docs.frozen);

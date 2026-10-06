@@ -14,13 +14,19 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
+### 结果时效暂缓（2026-10-06，当前决定）
+
+- 用户明确“陈旧和过期，暂时不考虑”。已增加服务 owner 显式关闭结果年龄检查的策略；返回 `NOT_CHECKED / DISABLED_BY_POLICY`，不标成 FRESH。账号/session、候选准入、完整来源、幂等保存与 UNKNOWN 恢复继续校验。
+- 本轮五文件回归 **163 PASS**，实际独立包的时效开启/关闭两种模式 **2 PASS**，包含保存、重启、回放与 forward-fix；OpenAPI/TypeScript 已同步。见[本轮证据](docs/hackathon/evidence/dsh-g0-save-time-policy-20261006.md)。
+- 新源码、新消费者与新验证器尚未形成 clean 配对/WSL 回执；旧证据保留其原范围，不继承。本轮没有连接生产账号、启用保存 UI 或切换杭州服务；T3/T7 继续 PARTIAL。下方历史阶段中的“时限待确认”以本节为准，响应超时和 SAVE_UNKNOWN 门禁未取消。
+
 ### 现有 CRM 账号适配（2026-10-06，本地增量）
 
 - 按用户确认沿用现有 CRM 管理员账号，不新建账号体系。新增首购服务可选 `CRMFirstPurchaseIdentityResolver`，经既有 `/api/v1/auth/me` 校验 Bearer；不保存密码或 token，不导入旧 CRM 实现。显式账号名单与当前管理员权限均须匹配，每次重新校验；身份成功不等于保存准入。
 - 本次五文件保存/恢复/身份回归 **134 PASS**，实际独立包 **1 PASS**（含 5 项新 CRM 身份观测）；OpenAPI/TypeScript 和 Ruff 通过。复用现有固定 `h11`，13 项依赖未变；DSH、插件运行时代码和默认服务启动未改，仅同步生成的合同摘要。见[本轮证据](docs/hackathon/evidence/dsh-g0-crm-identity-adapter-20261006.md)。
 - OCR 审核发现并修复旧写入口绕过准入：外部身份一律要求版本化保存，负测先 201 失败、修复后拒绝且不落盘；134 项回归、90 项服务门禁与独立包已重跑通过。
 - 审修后正常 hooks 提交 `7edf7710`；该 clean SHA 源码兼容与实际离线双包各 **9/9 PASS**，同一新 archive 的 adapter **5/5 PASS**，固定包 79049 B / `26b07aa7…`。现有控制面重验通过，旧目标回执拒绝，生产激活仍阻断。
-- 新服务包尚未绑定新的 plugin candidate/journal，未在杭州或真实 CRM 登录验证；下节 WSL 14 项只属于 `80aba9c1` 的原包。生产有效期仍待确认，真实候选准入、供应链、目标 DSH/UI 与物理分仓保持开放；没有生产保存/激活或 GitHub 操作。
+- 新服务包尚未绑定新的 plugin candidate/journal，未在杭州或真实 CRM 登录验证；下节 WSL 14 项只属于 `80aba9c1` 的原包。陈旧/过期判断已按用户决定暂缓，不再等待阈值确认；真实候选准入、供应链、目标 DSH/UI 与物理分仓保持开放；没有生产保存/激活或 GitHub 操作。
 
 ### 首购身份接口与 clean 服务候选（2026-10-06）
 

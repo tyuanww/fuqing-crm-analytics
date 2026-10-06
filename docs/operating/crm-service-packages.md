@@ -78,7 +78,7 @@ node scripts/crm-calibration/package-service.mjs \
 - resolver 每次请求与既有保存事务重验点重新调用；不缓存身份快照。保存重放和回执 reconcile 仍需当前读、写权限；只读身份可以读取其已有分析，不因此恢复保存资格。
 - provider 的 401/403 映射为固定 `UNAUTHENTICATED`/`FORBIDDEN`，其他异常或无效 principal 返回可重试的 503 `IDENTITY_UNAVAILABLE`。接口不回传 provider 原消息、错误码或 recovery URL。provider 自己的日志脱敏、网络超时与 I/O 上界由其实现负责，当前接口没有替它完成生产验收。
 - 策略 callback 失败返回可重试的 503 `SAVE_POLICY_UNAVAILABLE`，不写分析/回执；既有 `SAVE_POLICY_INVALID`、缺策略和候选拒绝规则保留。已经保存且身份仍获准的精确重放不依赖在线策略/source，不能因 provider 故障重复创建记录。
-- `FirstPurchaseSavePolicy` 的 allowlist 与时限仍由服务 owner 显式提供，不能从客户端 candidate digest、插件本地状态或未签名 journal 自动放行。请求/响应字段、SQLite 合同与 13 项依赖锁未变；OpenAPI 适用范围说明已同步生成。
+- `FirstPurchaseSavePolicy` 的 allowlist 与时效开关由服务 owner 显式提供，不能从客户端 candidate digest、插件本地状态或未签名 journal 自动放行。2026-10-06 用户决定暂不考虑陈旧/过期：以 `check_freshness=False` 和两个 `None` 阈值配置，返回 `NOT_CHECKED`，不要求先提供生产阈值。默认仍检查时效，缺策略仍拒绝新保存；详见[保存准入](./first-purchase-save-admission.md)。SQLite 布局与 13 项依赖锁未变，响应枚举和生成的 OpenAPI/TypeScript 已同步；旧消费者不自动视为兼容。
 
 身份接缝 `80aba9c1` 的固定包已有[本机与 WSL 合成证据](../hackathon/evidence/dsh-g0-service-identity-boundary-20261006.md)，不证明真实 CRM 认证或生产保存准入。后续适配器增量单独验收如下。
 
@@ -201,4 +201,4 @@ JSON 合同为 `shinemage-service-target-preflight/v1`，包含 manifest 摘要�
 
 传送测试状态时，archive 必须显式保留状态目录 `0700`，不能只打包文件而丢失目录权限；本次首次启动被此约束正确拒绝，修正夹具后在新目录重跑。复用原不可变应用包，生产端不编译、无在线依赖解析。常规插件 UI/工具变化仍只需要更新相应插件；此次冷安装是独立后端服务的验收，不意味着每次插件更新都重装 DSH 和所有服务。
 
-本次身份、候选准入 digest 与时钟仍是合成 fixture；原包的 dirty 来源标记保留。目标回执现已通过上面的可选参数核验并接入原 journal；真实身份/状态策略、生产时间窗口、最终 reviewed 包与供应链仍未关闭，保存 UI 和生产激活保持关闭。旧版可写降级会丢失来源，回退插件时应保留新版服务与 durable state。其他服务、官方 DSH 宿主、真实业务/浏览器未由此验收覆盖。
+本次身份、候选准入 digest 与时钟仍是合成 fixture；原包的 dirty 来源标记保留。目标回执现已通过上面的可选参数核验并接入原 journal；真实身份/状态策略、最终 reviewed 包与供应链仍未关闭，保存 UI 和生产激活保持关闭。陈旧/过期判断已按上述用户决定暂缓，不再等待生产阈值；旧回执不覆盖新的 NOT_CHECKED 模式。旧版可写降级会丢失来源，回退插件时应保留新版服务与 durable state。其他服务、官方 DSH 宿主、真实业务/浏览器未由此验收覆盖。

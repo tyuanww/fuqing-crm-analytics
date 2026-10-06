@@ -27,6 +27,11 @@ function freshness(v, generated) {
   if (v.policy_version === null) return v.freshness_state === 'UNKNOWN' && v.reason === 'POLICY_NOT_CONFIGURED'
     && v.max_age_ms === null && v.expires_after_ms === null
     && v.freshness_stale_at === null && v.freshness_expires_at === null;
+  if (v.freshness_state === 'NOT_CHECKED' || v.reason === 'DISABLED_BY_POLICY') {
+    return opaque(v.policy_version) && v.freshness_state === 'NOT_CHECKED' && v.reason === 'DISABLED_BY_POLICY'
+      && v.max_age_ms === null && v.expires_after_ms === null
+      && v.freshness_stale_at === null && v.freshness_expires_at === null;
+  }
   if (!opaque(v.policy_version) || !positive(v.max_age_ms) || !positive(v.expires_after_ms)
     || v.max_age_ms >= v.expires_after_ms || v.expires_after_ms > 2_147_483_647) return false;
   if (generated === null) return v.freshness_state === 'UNKNOWN' && v.reason === 'GENERATION_TIME_UNAVAILABLE'
@@ -78,7 +83,7 @@ export function decodeFirstPurchaseSaveResult(v) {
   const complete = p.generated_at !== null && s.primary_result_ref !== null && s.method_package_digest !== null;
   if (v.result_state === 'SUCCESS_UNSAVED' && !complete) return null;
   if (v.save_eligible) {
-    if (v.result_state !== 'SUCCESS_UNSAVED' || !complete || p.freshness.freshness_state !== 'FRESH'
+    if (v.result_state !== 'SUCCESS_UNSAVED' || !complete || !['FRESH', 'NOT_CHECKED'].includes(p.freshness.freshness_state)
       || !p.permission_scope.can_read || !p.permission_scope.can_save || v.save_ineligible_reason !== null) return null;
   } else {
     const allowed = new Set(['ALREADY_SAVED', 'PROVENANCE_INCOMPLETE', 'PERMISSION_DENIED', 'CANDIDATE_NOT_ADMITTED',
@@ -110,7 +115,7 @@ export function decodeFirstPurchaseSavedProvenance(v) {
     || v.schema_version !== 'analytics-first-purchase-saved-provenance/v1' || v.api_version !== '1.0.0'
     || v.finite_mock !== true || !analysisRef(v.analysis_ref) || !identity(v.identity)
     || !provenance(v.provenance, v.identity, null)
-    || v.provenance.freshness.freshness_state !== 'FRESH'
+    || !['FRESH', 'NOT_CHECKED'].includes(v.provenance.freshness.freshness_state)
     || !v.provenance.permission_scope.can_read || !v.provenance.permission_scope.can_save
     || v.provenance.generated_at === null || v.provenance.source_refs.primary_result_ref === null
     || v.provenance.source_refs.method_package_digest === null) return null;

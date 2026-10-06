@@ -18,9 +18,10 @@ from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 
 from backend.analytics_first_purchase_analysis_app import PREFIX, RECEIPT_PREFIX, RESULT_PREFIX, create_first_purchase_analysis_app
-from backend.contracts.analytics_first_purchase_analysis import FirstPurchaseSaveCommand
+from backend.contracts.analytics_first_purchase_analysis import FirstPurchaseSaveCommand, FirstPurchaseSaveResult
 from backend.services.analytics.access import AnalyticsError
 from backend.services.analytics.first_purchase import saved
 from backend.services.analytics.first_purchase.save_policy import FirstPurchaseSavePolicy, result_envelope
@@ -181,13 +182,17 @@ def test_provider_boundary_policy_failure_is_retryable_and_cannot_write(gate, ca
     assert analysis_counts(store) == {"analyses": 0, "idempotency": 0}
 
 
-def test_public_save_persists_provenance_and_reopens_after_policy_and_run_disappear(gate):
+@pytest.mark.parametrize("check_freshness", [True, False])
+def test_public_save_persists_provenance_and_reopens_after_policy_and_run_disappear(gate, check_freshness):
     api, store, state, registry, _, command = gate
+    if not check_freshness:
+        state["policy"] = replace(state["policy"], max_age_ms=None, expires_after_ms=None, check_freshness=False)
+        state["now"] += 365 * 24 * 60 * 60 * 1000
     result = inspect(api, command)
     assert result.status_code == 200, result.text
     before = result.json()
     assert before["save_eligible"] and before["result_state"] == "SUCCESS_UNSAVED"
-    assert before["provenance"]["freshness"]["freshness_state"] == "FRESH"
+    assert before["provenance"]["freshness"]["freshness_state"] == ("FRESH" if check_freshness else "NOT_CHECKED")
     # Historical data as_of is not confused with server execution time.
     assert before["provenance"]["generated_at"] != before["result"]["as_of"]
     first = save(api, command)
@@ -235,9 +240,12 @@ def test_server_time_boundaries_and_no_sliding_expiry(gate, delta, freshness, re
         assert analysis_counts(store) == {"analyses": 0, "idempotency": 0}
 
 
+@pytest.mark.parametrize("check_freshness", [True, False])
 @pytest.mark.parametrize("change", ["candidate", "policy", "permission", "token", "source"])
-def test_inspect_is_not_authorization_rechecks_before_write(gate, change):
+def test_inspect_is_not_authorization_rechecks_before_write(gate, change, check_freshness):
     api, store, state, registry, _, command = gate
+    if not check_freshness:
+        state["policy"] = replace(state["policy"], max_age_ms=None, expires_after_ms=None, check_freshness=False)
     assert inspect(api, command).json()["save_eligible"]
     if change == "candidate":
         state["policy"] = replace(state["policy"], admitted_candidates=frozenset())
@@ -265,7 +273,8 @@ def test_default_disabled_v1_guard_and_untrusted_fields(gate):
         assert inspect(disabled, command).json()["save_ineligible_reason"] == "POLICY_NOT_CONFIGURED"
         assert save(disabled, command).status_code == 503
     for field, value in {"save_eligible": True, "owner_id": "other", "generated_at": "2099-01-01",
-                         "provenance": {}, "facts": {}, "freshness_state": "FRESH"}.items():
+                         "provenance": {}, "facts": {}, "freshness_state": "NOT_CHECKED",
+                         "check_freshness": False, "max_age_ms": None, "expires_after_ms": None}.items():
         assert save(api, {**command, field: value}).status_code == 422
     assert save(api, {**command, "schema_version": "v999"}).status_code == 422
     missing_schema = {key: value for key, value in command.items() if key != "schema_version"}
@@ -300,8 +309,11 @@ def test_waiting_for_write_lock_does_not_freeze_eligibility_or_permissions(gate)
     assert analysis_counts(store) == {"analyses": 0, "idempotency": 0}
 
 
-def test_partial_provenance_cannot_grant_a_save(gate):
+@pytest.mark.parametrize("check_freshness", [True, False])
+def test_partial_provenance_cannot_grant_a_save(gate, check_freshness):
     _, _, state, _, runs, command = gate
+    if not check_freshness:
+        state["policy"] = replace(state["policy"], max_age_ms=None, expires_after_ms=None, check_freshness=False)
     source = resolve_trusted_first_purchase_source(runs, asset_actor(), command["created_from_run_id"])
     for field in ("generated_at", "primary_result_ref", "method_package_digest"):
         envelope = result_envelope(replace(source, **{field: None}), asset_actor(), identity(), state["policy"],
@@ -341,13 +353,18 @@ def test_forward_fix_preserves_frozen_provenance_and_original_receipt(gate):
     assert FirstPurchaseSaveCommand.model_validate(command).title == command["title"]
 
 
-def test_real_http_documents_cross_the_plugin_decoder(gate):
+@pytest.mark.parametrize("check_freshness", [True, False])
+def test_real_http_documents_cross_the_plugin_decoder(gate, check_freshness):
     api, _, state, _, _, command = gate
     unknown = api.post(RECEIPT_PREFIX + "/reconcile", json=command["identity"], headers=headers(key="save-1")).json()
     fresh = inspect(api, command).json()
     state["now"] += 1000
     stale = inspect(api, command).json()
     state["now"] -= 1000
+    if not check_freshness:
+        state["policy"] = replace(state["policy"], max_age_ms=None, expires_after_ms=None, check_freshness=False)
+        state["now"] += 365 * 24 * 60 * 60 * 1000
+        fresh = inspect(api, command).json()
     receipt = save(api, command).json()
     frozen = api.get(f'{PREFIX}/{receipt["analysis_ref"]["analysis_id"]}/provenance', headers=headers()).json()
     observed = subprocess.run(
@@ -357,6 +374,69 @@ def test_real_http_documents_cross_the_plugin_decoder(gate):
     )
     assert observed.returncode == 0, observed.stderr
     assert "D15_WIRE_DECODER PASS" in observed.stdout
+
+
+@pytest.mark.parametrize("delta", [-1, 2000, 10 * 365 * 24 * 60 * 60 * 1000])
+def test_explicit_no_age_policy_does_not_claim_freshness_or_invent_deadlines(gate, delta):
+    api, _, state, _, _, command = gate
+    original = inspect(api, command).json()["provenance"]["generated_at"]
+    state["policy"] = replace(state["policy"], max_age_ms=None, expires_after_ms=None, check_freshness=False)
+    state["now"] += delta
+    result = inspect(api, command).json()
+    assert result["save_eligible"] and result["provenance"]["generated_at"] == original
+    observation = result["provenance"]["freshness"]
+    assert observation["freshness_state"] == "NOT_CHECKED" and observation["reason"] == "DISABLED_BY_POLICY"
+    assert observation["policy_version"] == state["policy"].policy_version
+    assert all(observation[key] is None for key in (
+        "max_age_ms", "expires_after_ms", "freshness_stale_at", "freshness_expires_at"))
+    assert save(api, command).status_code == 201
+
+
+@pytest.mark.parametrize("options", [
+    {}, {"check_freshness": True}, {"check_freshness": 0}, {"check_freshness": "false"},
+    {"check_freshness": None}, {"check_freshness": False, "max_age_ms": 1000},
+    {"check_freshness": False, "expires_after_ms": 2000},
+])
+def test_omitted_windows_or_ambiguous_flags_never_implicitly_disable_age_checks(options):
+    with pytest.raises(ValueError):
+        FirstPurchaseSavePolicy(**{
+            "policy_version": "policy-v1", "admitted_candidates": frozenset({"a" * 64}),
+            "max_age_ms": None, "expires_after_ms": None, **options,
+        })
+
+
+@pytest.mark.parametrize(("field", "value"), [
+    ("freshness_state", "FRESH"), ("reason", "WITHIN_WINDOW"), ("policy_version", None),
+    ("max_age_ms", 1000), ("expires_after_ms", 2000), ("freshness_stale_at", "2099-01-01T00:00:00Z"),
+    ("freshness_expires_at", "2099-01-01T00:00:00Z"),
+])
+def test_unchecked_observation_cannot_masquerade_as_fresh_or_an_unconfigured_policy(gate, field, value):
+    api, _, state, _, _, command = gate
+    state["policy"] = replace(state["policy"], max_age_ms=None, expires_after_ms=None, check_freshness=False)
+    document = inspect(api, command).json()
+    document["provenance"]["freshness"][field] = value
+    with pytest.raises(ValidationError):
+        FirstPurchaseSaveResult.model_validate(document)
+
+
+def test_switching_from_no_age_to_enforced_policy_under_write_lock_rechecks_age(gate):
+    api, store, state, _, _, command = gate
+    enforced = state["policy"]
+    state["policy"] = replace(enforced, max_age_ms=None, expires_after_ms=None, check_freshness=False)
+    state["now"] += 2000
+    assert inspect(api, command).json()["save_eligible"]
+    real_transaction = saved.transaction
+
+    @contextmanager
+    def policy_changed(*args, **kwargs):
+        with real_transaction(*args, **kwargs) as con:
+            state["policy"] = enforced
+            yield con
+
+    with patch.object(saved, "transaction", policy_changed):
+        response = save(api, command)
+    assert response.status_code == 409 and response.json()["error"]["code"] == "RESULT_EXPIRED"
+    assert analysis_counts(store) == {"analyses": 0, "idempotency": 0}
 
 
 def test_concurrent_public_saves_reserve_one_complete_record(gate):
@@ -403,11 +483,16 @@ from backend.services.analytics.first_purchase.save_policy import FirstPurchaseS
 from backend.services.analytics.jobs import RunStore
 from backend.tests.analytics_run_support import profile
 from backend.tests.test_analytics_first_purchase_analysis import make_registry, headers
-directory, operation, raw, clock = sys.argv[1:]
+directory, operation, raw, clock, age_mode = sys.argv[1:]
 command = json.loads(raw)
 store = saved.FirstPurchaseSavedAnalysisStore(Path(directory) / "analyses", clock=lambda: int(clock))
 runs = None if operation == "replay" else RunStore(Path(directory) / "state", profile(), family="first_purchase")
-policy = None if operation == "replay" else lambda: FirstPurchaseSavePolicy("test-policy-v1", frozenset({"a"*64}), 1000, 2000)
+def policy():
+    if operation == "replay":
+        return None
+    if age_mode == "disabled":
+        return FirstPurchaseSavePolicy("no-age-v1", frozenset({"a"*64}), None, None, check_freshness=False)
+    return FirstPurchaseSavePolicy("test-policy-v1", frozenset({"a"*64}), 1000, 2000)
 original = saved.remember
 def interrupted(con, actor, op, *args):
     if op == saved.SAVE_PROVENANCE_OPERATION and operation == "before-provenance":
@@ -426,15 +511,18 @@ with TestClient(create_first_purchase_analysis_app(runs, store, make_registry(),
 
 
 @pytest.mark.skipif(os.name != "posix", reason="owned POSIX child SIGKILL drill")
+@pytest.mark.parametrize("check_freshness", [True, False])
 @pytest.mark.parametrize(("point", "committed"), [
     ("before-provenance", 0), ("after-provenance", 0), ("after-commit", 1),
 ])
-def test_public_save_crash_has_no_provenance_gap_and_can_replay_without_run(gate, point, committed):
+def test_public_save_crash_has_no_provenance_gap_and_can_replay_without_run(gate, point, committed, check_freshness):
     _, store, state, _, _, command = gate
 
     def child(operation):
         return subprocess.run(
-            [sys.executable, "-c", CHILD, str(store.directory.parent), operation, json.dumps(command), str(state["now"])],
+            [sys.executable, "-c", CHILD, str(store.directory.parent), operation, json.dumps(command),
+             str(state["now"] if check_freshness else state["now"] + 86400000),
+             "enforced" if check_freshness else "disabled"],
             cwd=ROOT, env={**os.environ, "PYTHONPATH": str(ROOT)}, text=True, capture_output=True, timeout=20, check=False,
         )
 
@@ -447,6 +535,7 @@ def test_public_save_crash_has_no_provenance_gap_and_can_replay_without_run(gate
     receipt = json.loads(recovered.stdout)
     frozen = store.saved_provenance(asset_actor(), receipt["analysis_ref"]["analysis_id"], 1)
     assert frozen.identity.model_dump() == command["identity"]
+    assert frozen.provenance.freshness.freshness_state == ("FRESH" if check_freshness else "NOT_CHECKED")
     replayed = child("replay")
     assert replayed.returncode == 0, replayed.stderr
     assert json.loads(replayed.stdout) == receipt

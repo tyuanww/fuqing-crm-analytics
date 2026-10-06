@@ -1,4 +1,4 @@
-/** Generated first-purchase saved-analysis HTTP contract; do not edit. OpenAPI SHA-256: a32c455af4c564f308adbb743a65e888da864b8718a2e02a5202ada7c53f9b09 */
+/** Generated first-purchase saved-analysis HTTP contract; do not edit. OpenAPI SHA-256: 6209894f434fa0cadb746b46400064dbcec6eee8a80279423f2d1b8db52725ee */
 export interface paths {
     "/api/v1/analytics-first-purchase/analyses": {
         parameters: {
@@ -219,7 +219,10 @@ export interface components {
              */
             start_date: string;
         };
-        /** FirstPurchaseFreshness */
+        /**
+         * FirstPurchaseFreshness
+         * @description NOT_CHECKED records an explicit server policy, never a fresh-time claim.
+         */
         FirstPurchaseFreshness: {
             /** Expires After Ms */
             expires_after_ms: number | null;
@@ -236,7 +239,7 @@ export interface components {
              * Freshness State
              * @enum {string}
              */
-            freshness_state: "FRESH" | "STALE" | "EXPIRED" | "UNKNOWN";
+            freshness_state: "FRESH" | "STALE" | "EXPIRED" | "UNKNOWN" | "NOT_CHECKED";
             /** Max Age Ms */
             max_age_ms: number | null;
             /** Policy Version */
@@ -245,7 +248,7 @@ export interface components {
              * Reason
              * @enum {string}
              */
-            reason: "WITHIN_WINDOW" | "MAX_AGE_REACHED" | "EXPIRED" | "POLICY_NOT_CONFIGURED" | "GENERATION_TIME_UNAVAILABLE" | "CLOCK_BEFORE_GENERATION";
+            reason: "WITHIN_WINDOW" | "MAX_AGE_REACHED" | "EXPIRED" | "POLICY_NOT_CONFIGURED" | "GENERATION_TIME_UNAVAILABLE" | "CLOCK_BEFORE_GENERATION" | "DISABLED_BY_POLICY";
         };
         /** FirstPurchaseMetricRef */
         FirstPurchaseMetricRef: {
