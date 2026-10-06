@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, mkdir, writeFile, chmod } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { packageManagerEnv, packageNetworkEnv } from './package-manager-env.mjs';
+import { packageManagerEnv, packageNetworkEnv, dependencyCommands } from './package-manager-env.mjs';
 
 test('dependency child receives explicit proxies without TLS bypass or application credentials', () => {
   const transport = { HTTP_PROXY: 'http://127.0.0.1:7897', HTTPS_PROXY: 'http://127.0.0.1:7897',
@@ -46,4 +46,38 @@ test('nested upstream pnpm resolves through project-local Corepack with sanitize
   } finally {
     await rm(scratch, { recursive: true, force: true });
   }
+});
+
+test('repeated frozen fetch/install restores executable package links without running lifecycle scripts', async () => {
+  const scratch = await mkdtemp(join(tmpdir(), 'b0-repeat-install-'));
+  const env = { HOME: process.env.HOME, PATH: dirname(process.execPath) + ':/usr/bin:/bin',
+    COREPACK_ENABLE_NETWORK: '0', COREPACK_ENABLE_DOWNLOAD_PROMPT: '0', CI: '1' };
+  const run = (args, cwd) => {
+    const child = spawnSync('corepack', args, { cwd, env, encoding: 'utf8', timeout: 30000 });
+    assert.equal(child.status, 0, child.stderr + child.stdout);
+    return child.stdout.trim();
+  };
+  try {
+    const dependency = join(scratch, 'dependency'), consumer = join(scratch, 'consumer');
+    await mkdir(dependency); await mkdir(consumer);
+    await writeFile(join(dependency, 'package.json'), JSON.stringify({ name: 'owned-pinned-command', version: '1.0.0',
+      packageManager: 'pnpm@11.7.0', bin: { 'owned-pinned-command': 'bin.cjs' }, files: ['bin.cjs'],
+      scripts: { postinstall: 'node -e "require(\'fs\').writeFileSync(\'lifecycle-ran\', \'unexpected\')"' } }));
+    await writeFile(join(dependency, 'bin.cjs'), '#!/usr/bin/env node\nconsole.log("OWNED_COMMAND_OK");\n');
+    await chmod(join(dependency, 'bin.cjs'), 0o755);
+    run(['pnpm', 'pack', '--pack-destination', scratch], dependency);
+    await writeFile(join(consumer, 'package.json'), JSON.stringify({ private: true, packageManager: 'pnpm@11.7.0',
+      dependencies: { 'owned-pinned-command': 'file:../owned-pinned-command-1.0.0.tgz' } }));
+    await writeFile(join(consumer, 'pnpm-workspace.yaml'),
+      'packages: []\nallowBuilds:\n  "owned-pinned-command@file:../owned-pinned-command-1.0.0.tgz": true\n');
+    run(['pnpm', 'install', '--offline', '--ignore-scripts', '--lockfile-only'], consumer);
+    const lock = await readFile(join(consumer, 'pnpm-lock.yaml'));
+    for (let pass = 0; pass < 2; pass++) {
+      run([...dependencyCommands.fetch, '--offline'], consumer);
+      run([...dependencyCommands.install, '--offline'], consumer);
+      assert.equal(run(['pnpm', 'exec', 'owned-pinned-command'], consumer), 'OWNED_COMMAND_OK');
+      await assert.rejects(readFile(join(consumer, 'node_modules/owned-pinned-command/lifecycle-ran')), { code: 'ENOENT' });
+      assert.deepEqual(await readFile(join(consumer, 'pnpm-lock.yaml')), lock);
+    }
+  } finally { await rm(scratch, { recursive: true, force: true }); }
 });

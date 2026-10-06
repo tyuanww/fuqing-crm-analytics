@@ -68,6 +68,8 @@ B0 独立入口：`node scripts/dsh-b0/pipeline.mjs --check --python /absolute/p
 
 在线 `--prepare` / `--audit` 的 Git/pnpm 命令接受操作者显式传入的 `HTTP_PROXY`、`HTTPS_PROXY`、`ALL_PROXY`、`NO_PROXY` 及小写形式。macOS 系统代理不会自动成为终端环境；只有确认自己的代理地址后才在当前命令导出。不会改全局网络配置，也不会把代理加入离线构建/测试和业务宿主环境；TLS/audit 绕过参数及业务凭据仍不透传。审计接口超时或返回非 JSON 时继续 fail-closed，修复连接后单独重跑 `--audit`，正式 preflight 使用新 tag 保留旧失败证据。实际故障与修复见[网络证据](../hackathon/evidence/dsh-g0-preflight-network-20261006.md)。
 
+重复准备使用同一 helper 的 frozen fetch/install 参数：fetch 带 `--ignore-scripts`，install 显式关闭 `optimistic-repeat-install`，防止 pnpm 将仅有 virtual store 的目录误判为完整安装。不会禁用锁文件/完整性/供应链校验；构建用原生依赖仍只由已有 rebuild 清单处理。`package-manager-env.test.mjs` 在隔离本地包上连续运行两轮 fetch/install，验证可执行链接恢复、lock 字节不变与生命周期未执行。
+
 独立 synthetic CRM/知识服务包：`CRM_SERVICE_PYTHON=/absolute/locked-python3.14 node --test --test-concurrency=1 scripts/crm-calibration/service-package.test.mjs`。共享后端 profile 的 `test_crm_service_packages.py` 调用同一实际 pack/解包/最小依赖 venv/双服务 HTTP 验证；因此全量后端验证也需要现有 Node 24 与 zstd。CI Python job 已声明这两项工具，不会从 B0 的最小 Python 锁冒充服务依赖。测试只操作自己创建的临时目录和进程，不表示完整 DSH、WSL 冷安装或真实数据验收；[服务包说明](./crm-service-packages.md)列出剩余门禁。
 
 干净重建只复制固定白名单源码，不跟随符号链接，也不进入 `.git`、`.context`、`node_modules`、`dist` 或 `lib`。复制总量上限为 256 MiB、5 万文件和 32 层目录；临时目录带专属标记，正常失败会在 `finally` 清理，启动时还会回收超过 24 小时的已标记残留。构建被强制终止时不会保证即时删除，但不会再无边界复制依赖树。

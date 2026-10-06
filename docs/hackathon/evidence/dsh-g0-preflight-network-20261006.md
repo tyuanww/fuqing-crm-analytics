@@ -21,3 +21,17 @@
 同目录的 `release-suite-proxy-fix.log`、`proxy-review-preview.json`、`proxy-review-rules.json`、`proxy-review-summary.json` 与 `proxy-document-validation.json` 保存本次修复验证和审核范围。
 
 本轮没有上线、push、发布、迁移或读取真实 DuckDB；生产和物理分仓门禁保留。
+
+## 重复准备的第二处故障
+
+代理修复通过正常 hooks 提交为 `8a70667fdb2b9fb84717c8c902b1204c0992eda6`。从该 clean SHA 运行 `dsh-preflight-crm-8a70667f`，prepare 的 `build:official` 报 `tsx: command not found`；失败保留于 `.context/release-preflight-runs/dsh-preflight-crm-8a70667f-6N4xOb/`。
+
+检查固定 pnpm 11.7.0 的实际安装器及 `.modules.yaml` 后确认：fetch 将目录设为 `virtualStoreOnly=true` 并清掉入口链接，后续 install 的 `optimisticRepeatInstall` 根据缓存提前返回。对根 node_modules 下 `.bin`、`tsx`、`typescript` 执行 `ls -ld`，三者均返回 `No such file or directory`；这是该轮临时安装树的实际观测，上游源码和锁文件校验仍通过。
+
+修复统一 fetch/install 参数，install 显式 `--config.optimistic-repeat-install=false`，保留 frozen lock、完整性与供应链检查；fetch 同时增加 `--ignore-scripts`，原生构建继续使用已有显式 rebuild 清单。没有修改 DSH/pnpm 源码或全局配置。
+
+- `node --test scripts/dsh-b0/package-manager-env.test.mjs`：修复后 **3 PASS / 0 SKIP**。新增隔离包实际连续两轮 frozen fetch/install，命令入口可运行、lock 字节不变、即使允许的安装脚本也没有执行。初轮测试夹具的 file 包审批匹配不完整导致失败，改为精确本地 file spec 后通过，失败日志保留。
+- 实际 `pipeline --prepare --python /tmp/dsh-b0-python.qW3lHO/venv/bin/python`：**PASS**，含固定 DSH 官方 host/client 构建与来源/锁校验，不是仅测试复制实现。
+- 完整 release suite **243 PASS / 0 FAIL / 0 SKIP**。该增量 OCR delegate **7/7** 覆盖（3 个代码/测试、4 个文档），0 skipped，无新增确认缺陷；语法、引用和 diff 检查通过。原始日志在 `.context/checks/candidate-8a70667f-20261006/` 的 `preflight.log`、`repeat-install-test.log`、`repeat-install-test-retry.log`、`prepare-fixed.log`、`release-suite-repeat-fix.log` 及 `repeat-review-*.json`。
+
+这一步只修复本地候选准备的可重复性；完整 preflight、真实模型/浏览器和目标平台运行状态分别记账。

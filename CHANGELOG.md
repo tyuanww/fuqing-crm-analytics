@@ -16,6 +16,7 @@
 
 ### Fixed
 
+- 固定 pnpm 的重复准备不再因 optimistic repeat install 跳过链接恢复；fetch 禁止生命周期脚本，install 仍固定锁文件并实际恢复包入口，原生依赖仅走已有显式 rebuild 清单。
 - B0 在线 Git/pnpm 准备和依赖审计保留操作者显式传入的标准代理变量，修复宿主环境白名单丢弃代理后访问 npm 失败的问题；代理不进入离线构建/测试或业务宿主，不透传 TLS/audit 绕过参数。
 - 目标主机预检补齐 wheel 的安装元数据和依赖约束检查：核对 dist-info 身份、WHEEL 1.0、内部/文件名标签，拒绝改名伪装平台；按当前环境计算 Requires-Dist，提前拒绝缺依赖、版本冲突及未支持的 active extras/URL。
 - 服务包证据接线要求 PREPARED 索引与实际 journal 一致，并在同一写锁内重验前置事件；拒绝孤立回执、验证期间历史替换及被改写的幂等返回。状态/锁文件增加有界普通文件读取，`verify-service` 错误仅输出稳定代码，避免卡在 FIFO 或回显输入。

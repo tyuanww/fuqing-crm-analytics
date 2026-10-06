@@ -8,7 +8,7 @@ import { readFile, writeFile, mkdir, lstat, readdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { packageManagerEnv, packageNetworkEnv } from './package-manager-env.mjs';
+import { packageManagerEnv, packageNetworkEnv, dependencyCommands } from './package-manager-env.mjs';
 import { copyPluginKitSources, copyTreeBounded, createCleanRoot, reapStaleCleanRoots, removeCleanRoot } from './clean-build.mjs';
 import { prepareRuntimeInputs, recordRuntimePreparation } from '../release/runtime-inputs.mjs';
 import { packPlugin } from '../release/plugin-pack.mjs';
@@ -93,13 +93,13 @@ if (mode === '--prepare') {
   // reused node_modules tree can otherwise make install report "up to date"
   // while an external tarball (for example SheetJS) is still absent from the
   // store needed by the later offline runtime deploy.
-  run('corepack', ['pnpm', 'fetch', '--frozen-lockfile', '--registry=https://registry.npmjs.org'], upstream, networkEnv);
-  run('corepack', ['pnpm', 'install', '--frozen-lockfile', '--ignore-scripts', '--registry=https://registry.npmjs.org'], upstream, networkEnv);
+  run('corepack', dependencyCommands.fetch, upstream, networkEnv);
+  run('corepack', dependencyCommands.install, upstream, networkEnv);
   // Only native dependencies needed by this fixed profile. No repository hook
   // installer, optional provider SDK lifecycle, global configuration or publish.
   run('corepack', ['pnpm', 'rebuild', 'esbuild', 'fs-ext', 'koffi', 'node-pty'], upstream);
   run('corepack', ['pnpm', 'run', 'build:official'], upstream);
-  run('corepack', ['pnpm', 'install', '--frozen-lockfile', '--ignore-scripts', '--registry=https://registry.npmjs.org'], buildTools, networkEnv);
+  run('corepack', dependencyCommands.install, buildTools, networkEnv);
   await verifySource();
   await recordRuntimePreparation(upstream);
   console.log('B0 pinned preparation complete; run --audit then --check next. Python packages are never installed by this script.');
