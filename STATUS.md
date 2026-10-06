@@ -14,10 +14,16 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 当前完整候选链复审（2026-10-06）
+### 当前 clean 首购服务候选（2026-10-06）
+
+- 完整增量审核后已本地提交 `2be518e5`，随后从该 clean SHA 生成首购服务 `0.1.0rc1` 候选。源码兼容 **9/9 PASS**、两个实际包的离线 venv/HTTP 兼容 **9/9 PASS**；两包打包来源均 `worktree_dirty=false`，见[本次服务候选证据](docs/hackathon/evidence/dsh-g0-service-clean-candidate-20261006.md)。
+- 新候选 archive 为 75811 B / `190050f6eaecdaf199c87ca516e3ff9323e72187995721709e448f764c9217db`。控制面已复核实际包；旧 WSL 回执挪用于新包会被拒绝，生产激活负测仍阻断，临时测试进程已退出。
+- 新包的最终 plugin candidate journal 绑定、生产身份/策略、时限/UNKNOWN、目标 WSL 和供应链尚未完成。保存 UI 继续 NOT_AVAILABLE；没有远端操作或发布。此处记录不改变下方既有插件候选来源。
+
+### 已提交的完整候选链复审（2026-10-06）
 
 - OCR delegate 已覆盖 `2a89790b..0a183b6f` 的 **22/22 文件**，未确认新的代码缺陷；修正服务兼容说明及接线证据中的两处过期状态。当前回归合计 **251 个不同用例 PASS**，固定宿主保护检查的条件跳过项已补跑，见[完整审核记录](docs/hackathon/evidence/dsh-g0-candidate-full-review-20261006.md)。
-- 重新核验既有 bundle、双插件 journal 与 WSL 首购 journal；120 个输入/产物/回执文件不变。提交后继续准备 clean 首购服务候选；生产 gate 不变，未执行远端动作。
+- 重新核验既有 bundle、双插件 journal 与 WSL 首购 journal；120 个输入/产物/回执文件不变。审核修正已提交 `2be518e5`；后续 clean 首购候选见上节，生产 gate 不变。
 
 ### 当前 CRM／知识库干净候选（2026-10-06）
 

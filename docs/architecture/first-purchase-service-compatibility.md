@@ -8,7 +8,9 @@
 - 新服务：commit `a50bd42492195040efaa6989c90e4fe84030551c`，版本化保存门禁与回执。
 - 状态 owner：analysis-service；`first_purchase_analyses.sqlite3`，application_id `1397572502`，SQLite schema 1。
 - 数据仅为每次新建的 synthetic JSON/SQLite。2026-10-04 的源码对运行于同一锁环境；2026-10-05 改为两个实际 archive、两个独立 venv，各自从本机 wheelhouse 离线 hash 安装 13 项精确依赖。两版历史依赖锁相同（Python 3.14.4 / FastAPI 0.141.1 / Pydantic 2.13.5），所以验证了安装隔离，没有验证依赖版本升级。
-- 2026-10-05 的包配对运行于 Darwin arm64。历史服务代码取自精确 Git tree，打包器/bootstrap/资源清单取自当时工作树，分别记入 `service_source` 和 `source`，不冒充曾发布的历史包。2026-10-06 同一双包另有 WSL 首购服务合成验收及 journal 接线，见本页末节；最终 clean reviewed 首购包、生产身份和目标 DSH runtime 仍未验证。
+- 2026-10-05 的包配对运行于 Darwin arm64。历史服务代码取自精确 Git tree，打包器/bootstrap/资源清单取自当时工作树，分别记入 `service_source` 和 `source`，不冒充曾发布的历史包。2026-10-06 同一双包另有 WSL 首购服务合成验收及 journal 接线，见本页末节；新 clean 包的本机结果单独列于下段，生产身份和目标 DSH runtime 仍未验证。
+
+2026-10-06 审核提交 `2be518e584d3adfb0343be58049dc3c674cea2f9` 另生成 clean 首购候选，与同一旧服务源码对比，源码和实际双包分别 **9/9 PASS**，兼容结论与下表一致。两包打包来源均 `worktree_dirty=false`；这是新的 artifact 对，旧 WSL 观测不能移植。新包的最终 plugin candidate journal 绑定、目标 WSL 与生产身份/策略仍未完成，详见[clean 服务候选证据](../hackathon/evidence/dsh-g0-service-clean-candidate-20261006.md)。
 
 | 服务 / 状态 / 动作 | 结论 | 操作边界 |
 |---|---|---|
@@ -49,7 +51,7 @@
 
 本机证据得到 `LOCAL_COMPATIBLE`、`release_ready=false` 和 `BLOCKED_SERVICE_PACKAGE_AND_HOST_EVIDENCE_REQUIRED`。实际激活返回 `SERVICE_ACTIVATION_EVIDENCE_INCOMPLETE`，没有 override。门禁不启动服务、不授予身份、不读取数据库；真正的目标身份只读性仍须现场验证。
 
-完整 G0 放行仍需要最终 clean reviewed 首购服务候选、生产身份/策略、供应链、生产形状时限/UNKNOWN、DSH UI/浏览器与目标 DSH runtime 证据。合成回执 `status=PASS` 只表示预期观测完成，包括旧写入不兼容的负面观测。源码候选接线和拒绝后的无副作用验证见[门禁证据](../hackathon/evidence/dsh-g0-service-gate-20261004.md)。
+完整 G0 放行仍需要新 clean 首购包的最终 plugin candidate 绑定与目标验收、生产身份/策略、供应链、生产形状时限/UNKNOWN、DSH UI/浏览器与目标 DSH runtime 证据。合成回执 `status=PASS` 只表示预期观测完成，包括旧写入不兼容的负面观测。源码候选接线和拒绝后的无副作用验证见[门禁证据](../hackathon/evidence/dsh-g0-service-gate-20261004.md)。
 
 2026-10-04 完成新服务独立包与同版本 HTTP 恢复，见[当时证据](../hackathon/evidence/dsh-g0-analysis-service-package-20261004.md)。2026-10-05 的[精确包配对证据](../hackathon/evidence/dsh-g0-service-artifact-pair-20261005.md)覆盖上表全部 9 项观测；新回执 `shinemage-service-artifact-compatibility/v1` 记录两个 archive/manifest、安装后的实际依赖、wheel hash 和验证器摘要，始终 `release_ready=false` / `BLOCKED_TARGET_HOST_AND_SUPPLY_CHAIN_REQUIRED`。它不替换现有 `service-save-compatibility.py` 的源码回执，也不能直接作为现有 `--service-evidence` 输入；没有据此解除 `SERVICE_ACTIVATION_EVIDENCE_INCOMPLETE`。
 

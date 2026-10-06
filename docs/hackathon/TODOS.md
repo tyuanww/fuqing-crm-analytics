@@ -296,7 +296,8 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 - [x] WSL 验收记录 OCR delegate（2026-10-06）：原始 7/7 文件覆盖，进程数量/时间范围两处低风险说明已修；核对原始脚本、28 个输入与实际回执后，本地提交为 `2a89790b`，未 push。见[审核记录](./evidence/dsh-g0-service-target-acceptance-review-20261006.md)。
 - [x] T3/T7/T13/T21 首购 WSL 回执接线子项（2026-10-06，已提交 `356862bf`）：沿用 `plugin verify-service` 核对既有目标回执/输入/runner/日志/清理，幂等追加原 journal。新测试 37 PASS、完整 release suite 243 PASS；真实回执进入 seq 4，重试一致，108 个输入/证据文件不变。见[接线证据](./evidence/dsh-g0-service-target-gate-20261006.md)。仍是未签名合成观测，不放行生产。
 - [x] 目标回执接线提交前审核（2026-10-06）：原始 14/14 全覆盖，无新确认缺陷；本次 release suite 243 PASS，原真实回执 CLI 重试与输入/journal 保留通过。见[审核记录](./evidence/dsh-g0-service-target-gate-review-20261006.md)，按正常 hooks 本地提交，生产门禁不变。
-- [ ] T3/T7/D4-C：源码兼容、精确包/依赖及 WSL 合成回执已接入原候选 journal；继续从审核后的干净 SHA 准备最终首购服务候选，完成生产身份/状态策略、生产形状时限/UNKNOWN、DSH UI/浏览器与完整供应链门禁。生产 provider/profile 未启用，保存 UI 继续 NOT_AVAILABLE；下方 CRM/知识插件候选不含该 service binding。
+- [ ] T3/T7/D4-C：旧包源码/精确包与 WSL 合成回执已接原 journal；新 clean 首购包已有下列本机证据，继续绑定最终 plugin candidate、完成新包目标验收、生产身份/状态策略、生产形状时限/UNKNOWN、DSH UI/浏览器与完整供应链门禁。生产 provider/profile 未启用，保存 UI 继续 NOT_AVAILABLE；下方 CRM/知识插件候选不含该 service binding。
+- [x] T3/T7 clean 首购服务本机候选（2026-10-06）：从审核提交 `2be518e5` 生成双包，打包来源均 clean；源码 **9/9**、实际离线包/HTTP **9/9**，控制面重验及旧 WSL 回执误用拒绝通过，见[证据](./evidence/dsh-g0-service-clean-candidate-20261006.md)。新包 plugin journal/WSL/生产门禁保持 NOT_RUN，不把旧目标结果继承过来。
 - [x] 完整候选增量 OCR delegate（2026-10-06）：`2a89790b..0a183b6f` **22/22** 覆盖，两处文档状态已修；251 个不同用例通过，既有 bundle/journal 重验及 120 文件不变通过，见[审核证据](./evidence/dsh-g0-candidate-full-review-20261006.md)。本次不放行生产，随后准备 clean 首购候选。
 - [ ] T13/T21：生产 activation journal、远端 receive/reconcile 与现场恢复；本机 `LOCAL_HOST_VERIFIED` 不替代这些门禁。
 - [x] T2/T13/T17/T21 clean CRM/知识本机候选（2026-10-06）：源码 `9902bdd9` 的正式 preflight **8/8 PASS**、release suite **244 PASS**；两份独立包与实际官方宿主 **10/10 PASS**，各自 journal seq 3 重试不改文件，5 个临时宿主退出。见[验收证据](./evidence/dsh-g0-clean-candidate-20261006.md)。生产与目标 WSL runtime 仍 NOT_RUN。
