@@ -10,6 +10,7 @@ import { startB0MockProvider } from './mock-provider.mjs';
 import { firstPurchaseMockScript } from './first-purchase-scenario.mjs';
 import { DSH_UPSTREAM_SHA } from '../release/toolchain.mjs';
 import { createSaveController } from '../../dsh-plugins/analytics-workbench/src/first-purchase-save-client.mjs';
+import { firstPurchaseCommandEnvelope } from '../../dsh-plugins/analytics-workbench/src/first-purchase-command-client.mjs';
 
 const repository = fileURLToPath(new URL('../..', import.meta.url));
 const workbench = join(repository, 'dsh-plugins/analytics-workbench');
@@ -34,14 +35,15 @@ const agentPlugins = [
   { id: 'owned-skills', name: pathToFileURL(join(workbench, 'lib/skills.js')).href },
 ];
 await write(join(root, 'presets/owned-first-purchase/agent.cordis.yml'), agentPlugins);
-let host, model, origin, cookie, generation = 0;
+let host, model, origin, cookie, browserResult, generation = 0;
 const controllers = [], observations = [], signal = new AbortController();
 const interrupt = () => signal.abort();
 process.once('SIGINT', interrupt); process.once('SIGTERM', interrupt);
 const record = value => observations.push(value);
 try {
   const { startMockLlmServer } = await import(pathToFileURL(join(input.upstream, 'packages/test-support/llm-mock-server/lib/index.js')).href);
-  model = await startB0MockProvider(startMockLlmServer, { host: '127.0.0.1', port: 0, apiKey: 'synthetic', script: firstPurchaseMockScript() });
+  model = await startB0MockProvider(startMockLlmServer, { host: '127.0.0.1', port: 0, apiKey: 'synthetic',
+    script: [...firstPurchaseMockScript(), { sequence: ['success'], successText: 'SYNTHETIC_NATIVE_FALLBACK_OK', chunkDelayMs: 0 }] });
   const patch = join(root, 'host.patch.yml');
   await write(patch, [
     ...['session-title-llm', 'llm-pi-ai', 'web-search-deepseek', 'web-fetch-http', 'session-telemetry-otel',
@@ -51,19 +53,21 @@ try {
     { insert: [
       { id: 'owned-preset', name: '@deepseek-ai/dsh-agent-preset', config: { id: 'owned-first-purchase',
         name: 'Owned synthetic first-purchase', plugins: agentPlugins } },
+      { id: 'owned-native-preset', name: '@deepseek-ai/dsh-agent-preset', config: { id: 'owned-native', name: 'Owned native', plugins: [] } },
       { id: 'owned-crm', name: pathToFileURL(join(repository, 'dsh-plugins/crm-knowledge/lib/host.js')).href,
         config: { baseUrl: input.crm_origin, firstPurchaseOrigin: input.service_origin, dataKind: 'synthetic' } },
       { id: 'owned-workbench', name: pathToFileURL(join(workbench, 'lib/index.js')).href,
         config: { firstPurchaseCandidateDigest: 'a'.repeat(64) } },
       { id: 'owned-observer', name: pathToFileURL(join(repository, 'scripts/dsh-b0/pinned-host-observer.mjs')).href,
-        config: { presetId: 'owned-first-purchase', workspace: join(root, 'workspace'),
+        config: { presetId: 'owned-first-purchase', nativePresetId: 'owned-native', workspace: join(root, 'workspace'),
           llmModule: pathToFileURL(join(input.upstream, 'packages/llm/llm/lib/index.js')).href } },
     ] },
   ]);
   async function launch(resume = false) {
     host = await startHost({ root, upstream: input.upstream, patches: [patch], modelOrigin: model.baseURL,
       generation: ++generation, signal: signal.signal,
-      nativeFixture: { portBase: input.port_base, sessionId: input.session_id, runtimeToken: input.runtime_token } });
+      nativeFixture: { portBase: input.port_base, sessionId: input.session_id,
+        runtimeToken: input.runtime_token, gatewayToken: input.gateway_token } });
     const names = await host.request('tools', { sessionId: input.session_id, resume });
     assert.ok(names.includes('analytics_first_purchase_query'));
     const web = await host.request('web-access'); origin = web.origin;
@@ -78,7 +82,7 @@ try {
     const response = await fetch(origin + path, { method: 'POST', redirect: 'error', signal: AbortSignal.timeout(15000),
       headers: { cookie, origin, 'content-type': 'application/json', ...extra }, body: JSON.stringify(body) });
     const raw = await response.text();
-    assert.ok(!raw.includes(input.runtime_token) && !raw.includes('synthetic-query-save-token'));
+    assert.ok(!raw.includes(input.runtime_token) && !raw.includes(input.gateway_token) && !raw.includes('synthetic-query-save-token'));
     let value; try { value = JSON.parse(raw); } catch { value = null; }
     return { status: response.status, value };
   }
@@ -104,6 +108,23 @@ try {
   send({ ready: true });
   for await (const line of { [Symbol.asyncIterator]: () => iterator }) {
     const command = JSON.parse(line);
+    if (command.operation === 'browser') {
+      const { runFirstPurchaseBrowser } = await import('./first-purchase-browser.probe.mjs');
+      browserResult = { ok: false, browser: 'Chrome headless', status: 'PARTIAL' };
+      browserResult = await runFirstPurchaseBrowser({ modulePath: command.module_path, host, sessionId: input.session_id, output: root });
+      send(browserResult);
+      continue;
+    }
+    if (command.operation === 'command') {
+      const rpcId = `owned-${observations.length}`;
+      const response = await post('/api/commands/execute', firstPurchaseCommandEnvelope(input.session_id, command.line, rpcId));
+      assert.equal(response.status, 200); assert.equal(response.value.rpcId, rpcId);
+      assert.equal(response.value.result.ok, true);
+      const value = response.value.result.value;
+      assert.ok(['success', 'error'].includes(value.result.kind));
+      record({ stage: 'official-native-command', command: command.line.split(' ')[0], kind: value.result.kind });
+      send(value); continue;
+    }
     if (['login', 'disconnect', 'status'].includes(command.operation)) {
       const response = await crm(command.operation); assert.equal(response.status, 200);
       send({ ok: true, connected: response.value.connected }); continue;
@@ -147,7 +168,7 @@ try {
   const cleanup = await Promise.allSettled([host?.stop(true), model?.close()]);
   process.off('SIGINT', interrupt); process.off('SIGTERM', interrupt);
   await write(join(root, 'http-observations.json'), { upstream_sha: DSH_UPSTREAM_SHA, observations,
-    cleanup_ok: cleanup.every(item => item.status === 'fulfilled'), browser: 'NOT_RUN',
-    admission: 'private kernel HTTP from owned test driver, not native composer' });
+    cleanup_ok: cleanup.every(item => item.status === 'fulfilled'), browser: browserResult ?? 'NOT_RUN',
+    admission: browserResult ? 'official native composer slash command in Chrome' : 'official commands/execute HTTP; browser rendering NOT_RUN' });
   assert.ok(cleanup.every(item => item.status === 'fulfilled'), 'OWNED_CRM_HOST_CLEANUP_FAILED');
 }

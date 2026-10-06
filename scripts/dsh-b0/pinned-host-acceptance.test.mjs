@@ -3,8 +3,9 @@ import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, access } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { runPinnedHostAcceptance } from './pinned-host-acceptance.mjs';
+import { runFirstPurchaseBrowser } from './first-purchase-browser.probe.mjs';
 
 const repository = fileURLToPath(new URL('../..', import.meta.url));
 const upstream = process.env.B0_BUILD_UPSTREAM;
@@ -55,3 +56,31 @@ test('tampered immutable package fails before extraction or host startup and lea
   await assert.rejects(access(join(output, 'installed')), /ENOENT/);
   assert.ok(!(await readdir(output)).some(name => name.startsWith('host-')));
 });
+
+for (const stage of ['context', 'page', 'evidence', 'close']) {
+  test(`browser probe closes owned resources when ${stage} fails`, async t => {
+    const root = await fixture(t), modulePath = join(root, 'browser-fixture.mjs');
+    // This is a lifecycle fault fixture, not a Chrome acceptance result.
+    await writeFile(modulePath, `
+      export const state = { browserClosed: false, contextClosed: false };
+      const stage = ${JSON.stringify(stage)};
+      const page = { on() {}, setDefaultTimeout() {},
+        locator: () => ({ innerText: async () => 'owned fixture' }), screenshot: async () => {} };
+      const context = {
+        newPage: async () => { if (stage === 'page') throw Error('page'); return page; },
+        close: async () => { state.contextClosed = true; if (stage === 'close') throw Error('close'); }
+      };
+      export const chromium = { launch: async () => ({
+        newContext: async () => { if (stage === 'context') throw Error('context'); return context; },
+        close: async () => { state.browserClosed = true; }
+      }) };
+    `);
+    const { state } = await import(pathToFileURL(modulePath).href);
+    const output = stage === 'evidence' ? modulePath : root;
+    await assert.rejects(runFirstPurchaseBrowser({ modulePath, output, sessionId: 'owned',
+      host: { request: async () => { throw Error('stop before any browser interaction'); } } }),
+    stage === 'evidence' ? /ENOTDIR/ : new RegExp(stage));
+    assert.equal(state.browserClosed, true);
+    assert.equal(state.contextClosed, stage !== 'context');
+  });
+}

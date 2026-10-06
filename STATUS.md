@@ -14,11 +14,18 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 官方宿主 CRM / 首购 HTTP（2026-10-06，当前进度）
+### 原生首购命令与 Chrome 接线（2026-10-06，当前进度）
+
+- 从 `f3b7c0cc` 干净工作树继续。workbench 使用官方 `commands.register` 提供 `/first-purchase`、`/first-purchase-status` 和精确任务取消；复用原 kernel/Agent Loop，不修改上游、共享 RPC 或原生输入框。命令只在显式合成 profile 启用，CRM 登录与查询/保存归属保持一致。
+- 固定 rc2 的 **Chrome headless 整链 1 PASS / 5 项观测**：未登录拒绝、原生 CRM 登录、输入框查询与显式保存、刷新同一回执、未连接 CRM 的普通原生对话。修复空会话拒绝提示不可见、卡片误依赖其他插件开关、取消范围和迟到回执问题。最终 Host HTTP **1 PASS**、命令/编译卡片 **12 PASS**、相关后端 **35 PASS**，Node24 构建通过。见[本轮证据](docs/hackathon/evidence/dsh-g0-native-command-browser-20261006.md)。
+- OCR delegate 已复核本批 **27/27** 文件，修复浏览器初始化/诊断写入异常时的资源泄漏；保护回归 **8 PASS**、真实 Chrome 再跑 **1 PASS / 5 项观测**。按授权走正常 hooks 提交，准确 SHA 以 Git 和后续候选回执为准。
+- **仍 PARTIAL**：本地源码和隔离合成数据已验证；headed/移动端/读屏、真实模型与业务数据、新 clean 候选、目标主机及供应链/生产 gate 未关闭。下一步绑定新 clean 插件/服务候选。杭州现役与生产保存未变。
+
+### 官方宿主 CRM / 首购 HTTP（2026-10-06，上一阶段）
 
 - 查询归属复审已正常提交 `c7bbf3ae`。随后在未修改的固定 rc2 Web CLI 实跑 CRM 登录、真实原生 loop/worker 查询、同账号保存、ACK 核对和宿主重启；新整链测试 **1 PASS / 0 SKIP**，启动保护/model adapter **7 PASS**，两个插件构建通过。已核对[本次证据和失败根因](docs/hackathon/evidence/dsh-g0-official-crm-http-20261006.md)。
 - 官方 Cookie 在相同 authority 的重启后可复用；CRM 内存凭据清空，重新登录后重放原 run 不重复派发/保存。本次自有 Host/worker/临时 HTTP 服务已回收。
-- **仍 PARTIAL**：本次从私有 kernel HTTP 准入，未接浏览器原生输入框；headed 浏览器未运行，clean 候选/目标环境/生产 gate 未关闭。下一步用官方扩展边界接浏览器准入，不能再占用官方共享 RPC interceptor。没有 push、杭州切换或真实数据访问。
+- **当时 PARTIAL**：该阶段从私有 kernel HTTP 准入，未接浏览器原生输入框；后续原生命令和 Chrome 接线见上节。headed 浏览器、clean 候选/目标环境/生产 gate 仍开放。没有 push、杭州切换或真实数据访问。
 
 ### CRM 查询归属复审（2026-10-06，上一阶段）
 

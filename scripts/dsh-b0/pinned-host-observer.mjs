@@ -1,19 +1,19 @@
 /** Test-only IPC observer loaded by the unchanged official Web CLI. No HTTP control endpoint. */
 import { createHash } from 'node:crypto';
 
-export const inject = ['loader', 'agentPresets', 'agents', 'sessionPersistence', 'tools', 'appReady', 'connection', 'webServer'];
+export const inject = ['loader', 'agentPresets', 'agents', 'sessionPersistence', 'tools', 'appReady', 'connection', 'webServer', 'workspaceController', 'workspaceRegistry'];
 export async function apply(ctx, config) {
   if (!process.send || !config.presetId || !config.workspace) throw Error('OWNED_HOST_OBSERVER_CONFIGURATION_REQUIRED');
   const handles = new Map();
   const { createUserMessage } = await import(config.llmModule);
   const digest = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
   const send = message => { if (process.connected) process.send(message); };
-  async function session(id, resume) {
+  async function session(id, resume, presetId = config.presetId) {
     if (handles.has(id)) return handles.get(id).agent;
     const options = { agentOptions: { provider: 'deepseek-official', model: 'deepseek-v4-flash' },
-      setup: async agentCtx => { await ctx.agentPresets.mount(agentCtx, config.presetId); } };
+      setup: async agentCtx => { await ctx.agentPresets.mount(agentCtx, presetId); } };
     const handle = resume ? await ctx.agents.resume({ ...options, resumeSessionId: id })
-      : await ctx.agents.create({ ...options, sessionId: id, meta: { cwd: config.workspace, agentPreset: config.presetId } });
+      : await ctx.agents.create({ ...options, sessionId: id, meta: { cwd: config.workspace, agentPreset: presetId } });
     handles.set(id, handle);
     return handle.agent;
   }
@@ -30,6 +30,18 @@ export async function apply(ctx, config) {
     } finally { await reader.close(); }
   }
   async function command(message) {
+    if (message.command === 'create-native-session') {
+      if (!config.nativePresetId) throw Error('OWNED_NATIVE_PRESET_REQUIRED');
+      const agent = await session(message.sessionId, false, config.nativePresetId);
+      await ctx.sessionPersistence.flush();
+      return { tool_names: ctx.tools.schemas(agent).map(tool => tool.name) };
+    }
+    if (message.command === 'attach-workspace') {
+      const created = await ctx.workspaceController.create({ path: config.workspace });
+      await ctx.workspaceRegistry.get(created.workspace.workspaceId).attachSession(message.sessionId);
+      await ctx.sessionPersistence.flush();
+      return { attached: true };
+    }
     // Returned only over the parent-owned IPC pipe, never in a log or receipt.
     if (message.command === 'web-access') {
       const origin = `http://127.0.0.1:${ctx.webServer.port}`;

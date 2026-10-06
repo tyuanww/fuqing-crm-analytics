@@ -1,6 +1,7 @@
-"""Opt-in real pinned Host/HTTP, synthetic CRM/model/JSON only; no browser claim."""
+"""Opt-in pinned Host/HTTP and optional Chrome; synthetic CRM/model/JSON only."""
 import json
 import os
+import re
 from pathlib import Path
 import select
 import shutil
@@ -18,7 +19,7 @@ from backend.services.analytics.first_purchase.save_policy import FirstPurchaseS
 from backend.services.analytics.first_purchase.saved import FirstPurchaseSavedAnalysisStore
 from backend.tests.analytics_run_support import sqlite_connection
 from backend.tests.test_analytics_first_purchase_analysis import analysis_counts, private_dir
-from backend.tests.test_analytics_first_purchase_native import RUNTIME, SESSION, auth, fp_actor, native_prompt
+from backend.tests.test_analytics_first_purchase_native import GATEWAY, RUNTIME, SESSION, auth, fp_actor, native_prompt
 from backend.tests.test_analytics_first_purchase_native_identity import config
 from backend.tests.test_analytics_first_purchase_save_ui import serve
 
@@ -36,14 +37,19 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
         stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, cwd=tmp_path)
     dispatcher = None
     errors = []
+    browser_wait = False
 
     def receive():
-        assert select.select([process.stdout], [], [], 60)[0], "owned official Host timed out"
+        deadline = monotonic() + (150 if browser_wait else 60)
+        while not select.select([process.stdout], [], [], 0.05)[0]:
+            assert monotonic() < deadline, "owned official Host timed out"
+            if browser_wait:
+                dispatcher.tick()
         line = process.stdout.readline()
         if not line:
             errors.append(process.stderr.read())
             raise AssertionError(errors[-1])
-        assert TOKEN not in line and RUNTIME not in line
+        assert TOKEN not in line and RUNTIME not in line and GATEWAY not in line
         return json.loads(line)
 
     def command(value):
@@ -83,15 +89,27 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
             with serve(service) as service_origin, serve(app, port=4335) as kernel_origin:
                 assert command({"upstream": str(upstream), "output": str(tmp_path / "official-host"),
                     "crm_origin": crm_origin, "service_origin": service_origin,
-                    "session_id": SESSION, "runtime_token": RUNTIME, "port_base": 4335}) == {"ready": True}
+                    "session_id": SESSION, "runtime_token": RUNTIME, "gateway_token": GATEWAY,
+                    "port_base": 4335}) == {"ready": True}
                 dispatcher.start()
                 dispatcher.tick()
+                browser_module = os.environ.get("B0_NATIVE_CRM_BROWSER_MODULE")
+                if browser_module:
+                    browser_wait = True
+                    observed = command({"operation": "browser", "module_path": browser_module})
+                    assert observed["ok"] and len(observed["rows"]) == 5
+                    assert analysis_counts(saved)["analyses"] == 1
+                    assert len(runs.worker_records(active_only=False)) == 1
+                    assert checks and all(checks)
+                    return
                 with httpx.Client(base_url=kernel_origin, trust_env=False, timeout=15) as client:
                     assert client.post("/internal/native/prompt", json=native_prompt(), headers=auth()).status_code == 401
+                    denied = command({"operation": "command", "line": "/first-purchase 查看合成首购路径"})
+                    assert denied["result"]["kind"] == "error" and denied["result"]["text"].startswith("NOT_CONNECTED:")
                     assert command({"operation": "login"}) == {"ok": True, "connected": True}
-                    accepted = client.post("/internal/native/prompt", json=native_prompt(), headers=auth())
-                    assert accepted.status_code == 202, accepted.text
-                    run_id = accepted.json()["run_id"]
+                    accepted = command({"operation": "command", "line": "/first-purchase 查看合成首购路径"})
+                    assert accepted["result"]["kind"] == "success", accepted
+                    run_id = re.search(r"run_[a-f0-9]+", accepted["result"]["text"])[0]
                     deadline = monotonic() + 40
                     while True:
                         dispatcher.tick()
@@ -109,11 +127,31 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
                                              (run_id, result.primary_result_ref)).fetchone()[0]
                     assert command({"operation": "save", "run_id": run_id, "call_id": call_id}) == {
                         "ok": True, "saved": True, "writes": 1}
+                    status = command({"operation": "command", "line": f"/first-purchase-status {run_id}"})
+                    assert f"{run_id}: SUCCEEDED" in status["result"]["text"]
+                    # Queue another task, then cancel before dispatch. The completed card must
+                    # never target this newer task simply because it shares a Session.
+                    queued = command({"operation": "command", "line": "/first-purchase 取消这个合成任务"})
+                    assert queued["result"]["kind"] == "success", queued
+                    cancel_id = re.search(r"run_[a-f0-9]+", queued["result"]["text"])[0]
+                    old_card = command({"operation": "command", "line": f"/first-purchase-cancel call {call_id}"})
+                    assert old_card["result"]["text"].startswith("NO_ACTIVE_RUN:"), old_card
+                    assert runs.get(fp_actor("crm-owner"), cancel_id).status == "QUEUED"
+                    cancelled = command({"operation": "command", "line": f"/first-purchase-cancel run {cancel_id}"})
+                    assert cancelled["result"]["text"].startswith("CANCEL_ACCEPTED:"), cancelled
+                    assert runs.get(fp_actor("crm-owner"), cancel_id).status == "CANCELLED"
                     assert command({"operation": "restart"}) == {"ok": True, "preserved": True}
                     # DSH retains its own cookie and journal, CRM credentials are intentionally gone.
                     assert client.get("/internal/native/context", headers=auth()).status_code == 401
+                    status = command({"operation": "command", "line": "/first-purchase-status"})
+                    assert status["result"]["text"].startswith("NOT_CONNECTED:")
                     assert command({"operation": "login"}) == {"ok": True, "connected": True}
-                    replay = client.post("/internal/native/prompt", json=native_prompt(), headers=auth())
+                    status = command({"operation": "command", "line": "/first-purchase-status"})
+                    assert f"{run_id}: SUCCEEDED" in status["result"]["text"]
+                    assert f"{cancel_id}: CANCELLED" in status["result"]["text"]
+                    # Reproduce the exact command-derived private payload only to prove replay,
+                    # not as the admission path used by the browser-facing command above.
+                    replay = client.post("/internal/native/prompt", json=native_prompt("fp-" + accepted["commandId"]), headers=auth())
                     assert replay.status_code == 202 and replay.json()["run_id"] == run_id
                     dispatcher.tick()
                     assert runs.get(fp_actor("crm-owner"), run_id).diagnostics.dispatch_attempts == 1

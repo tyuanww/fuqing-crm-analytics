@@ -502,7 +502,7 @@
       "manifest_sha256": "011783ac55a6b567db51dbfdc1c97ffd142727ac52bfc7911801dc71fa6bed60"
     }
   ],
-  "source_files_scanned": 630,
+  "source_files_scanned": 638,
   "cross_package_edges": [
     {
       "consumer": "analytics-workbench",
@@ -1052,7 +1052,7 @@
       "consumer": "analytics-workbench",
       "phase": "runtime",
       "source": "dsh-plugins/analytics-workbench/src/client/first-purchase-query-card.tsx",
-      "route": "/api/session/cancel",
+      "route": "/api/commands/execute",
       "contract": "OBSERVED_NOT_FROZEN"
     },
     {
@@ -1264,6 +1264,34 @@
       "source": "dsh-plugins/analytics-workbench/src/first-purchase-cockpit-contract.generated.d.ts",
       "route": "/api/v1/analytics-first-purchase/dashboards/{dashboard_id}/versions",
       "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-commands.mjs",
+      "route": "/api/v1/analytics-first-purchase/runs/{parameter}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-commands.mjs",
+      "route": "/internal/native/context",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-commands.mjs",
+      "route": "/internal/native/first-purchase/cancel",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-commands.mjs",
+      "route": "/internal/native/prompt",
+      "contract": "INTERNAL_NOT_PUBLIC"
     },
     {
       "consumer": "analytics-workbench",
@@ -1688,6 +1716,20 @@
     {
       "consumer": "analytics-workbench",
       "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/first-purchase-commands.test.mjs",
+      "route": "/api/v1/analytics-first-purchase/runs/run-a",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/first-purchase-commands.test.mjs",
+      "route": "/internal/native/prompt",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/first-purchase-contract.typecheck.ts",
       "route": "/api/v1/analytics-first-purchase/runs",
       "contract": "OBSERVED_NOT_FROZEN"
@@ -1711,6 +1753,13 @@
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/first-purchase-save-dom.test.mjs",
       "route": "/api/analytics-first-purchase/save",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/first-purchase-save-dom.test.mjs",
+      "route": "/api/commands/execute",
       "contract": "OBSERVED_NOT_FROZEN"
     },
     {
@@ -2893,6 +2942,11 @@
     {
       "consumer": "analytics-workbench",
       "phase": "runtime",
+      "specifier": "@deepseek-ai/dsh-commands"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
       "specifier": "@deepseek-ai/dsh-host-webserver"
     },
     {
@@ -3813,7 +3867,7 @@
       ],
       "compatibility": "Exact SHA/SDK/lock; upgrade only in isolated candidate; source pin is not runtime proof.",
       "status": "PINNED_UPSTREAM",
-      "source_sha256": "f3bc55626629314e8728310f9df5eb48a362345c865020b6302aad27e1c022ee"
+      "source_sha256": "8c1ddee3e65c3067ecab448003432e98a723e404be48656e338c19ebb545661d"
     },
     {
       "id": "crm-metrics",

@@ -73,12 +73,12 @@ NOT_CHECKED 扩展了严格枚举，旧 D15 服务/插件不能保证识别。�
 
 | Owner | 配置/合同 | 用途 |
 |---|---|---|
-| CRM host `@shine-mage/dsh-crm-knowledge/host` | `firstPurchaseOrigin` | 已验收分析服务的 literal loopback HTTP origin；只允许 inspect/save/reconcile 三个固定路径，无代理/重定向。 |
+| CRM host `@shine-mage/dsh-crm-knowledge/host` | `firstPurchaseOrigin` | 已验收分析服务的 literal loopback HTTP origin；仅 identity/inspect/save/reconcile 四种固定操作，无代理/重定向。 |
 | workbench 根 Host 插件 | `firstPurchaseCandidateDigest` | 经核验的当前候选完整 SHA-256；必须同时被服务端 allowlist 准入，不能由浏览器指定新候选。 |
 | CRM host | 可选 `shinemage-first-purchase-access/v1` | 当前 DSH session 的可撤销 lease；token 不输出给 workbench、浏览器、模型或磁盘。 |
 | 独立分析服务 | 现有 CRM identity resolver + RunStore + save policy | 每次校验当前 CRM 账号/权限、run owner、来源与候选；继续显式关闭结果年龄检查。 |
 
-浏览器只调用 DSH authenticated Connection 的 `POST /api/analytics-first-purchase/save`，要求可信 Origin、JSON、自定义 UI header，拒绝跨站来源与 query string。请求 8 KiB、响应 512 KiB 上限；Host/relay/browser 时限分别为 12/10/15 秒。未配置、未连接、不可读或不可保存时显示原因，未连接的驾驶舱/导出/发送保持禁用。
+保存卡片只调用 DSH authenticated Connection 的 `POST /api/analytics-first-purchase/save`，要求可信 Origin、JSON、自定义 UI header，拒绝跨站来源与 query string。请求 8 KiB、响应 512 KiB 上限；Host/relay/browser 时限分别为 12/10/15 秒。未配置、未连接、不可读或不可保存时显示原因，未连接的驾驶舱/导出/发送保持禁用。
 
 卡片先核对原回执和服务端资格，只有显式“确认保存分析”才写入。保存前将 identity/run/title/evidence digest 留在当前浏览器 localStorage，按账号、session、run、call 分区，不保存 token/password/facts。存储不可用或原记录损坏时拒绝新保存；不自动清理旧标识。超时/丢失 ACK 返回 SAVE_UNKNOWN，核对不到回执也不能声称未执行；明确重试只发送原请求。候选变化后仅核对旧 identity，禁止用新 identity 替代未知请求。换浏览器或删除这些记录可能失去旧候选定位，因此现场验收仍须覆盖恢复和人工查回执路径。
 
@@ -101,4 +101,22 @@ RunStore 沿用原生 session 的唯一持久绑定。新 run 的 owner 和权�
 
 本次实际 HTTP 验证使用合成 CRM 账号、真实查询 worker 和隔离 SQLite，覆盖查询→保存→ACK 丢失→回执恢复/重放。Host 调度接收器是受控夹具，**不代表官方 DSH 或浏览器验收**。现有 B0 演练 gateway 在登录前检查查询权限，不能直接当作 CRM 登录/生产入口；下一步须在固定官方宿主验证受控 admission、登录路由/Cookie、会话恢复与卡片，再生成 clean 候选。默认启动、生产 profile 和杭州现役未改变。见[本次证据](../hackathon/evidence/dsh-g0-native-crm-owner-20261006.md)。
 
-后续独立官方宿主验证已完成 Cookie/Origin、CRM 登录、原生 loop/worker、保存回执和重启重新登录，见[官方 Host HTTP 证据](../hackathon/evidence/dsh-g0-official-crm-http-20261006.md)。其中查询准入由私有测试驱动器发起；浏览器原生输入框准入与 headed UI 仍未验证。官方 Cookie 绑定 authority，验证重启时应保持同一监听地址，不能把更换随机端口后的 401 误判为凭据持久化失败。
+后续独立官方宿主验证已完成 Cookie/Origin、CRM 登录、原生 loop/worker、保存回执和重启重新登录，见[官方 Host HTTP 证据](../hackathon/evidence/dsh-g0-official-crm-http-20261006.md)。该阶段查询准入由私有测试驱动器发起；最新官方命令与浏览器增量见下节。官方 Cookie 绑定 authority，验证重启时应保持同一监听地址，不能把更换随机端口后的 401 误判为凭据持久化失败。
+
+## 官方原生命令准入（2026-10-06，本地合成 profile）
+
+workbench 在显式 first-purchase runtime family、登记 session 和固定 B0 loopback 端口下，通过官方 `commands.register` 注册以下命令。未配置或普通其他会话返回 NOT_AVAILABLE，仍可继续原生对话；不覆盖 composer、`session/prompt` 或共享 `/api` interceptor。
+
+```text
+/first-purchase 查看合成首购路径
+/first-purchase-status [run_id]
+/first-purchase-cancel run <run_id>
+```
+
+先在官方原生槽位连接 CRM，再在输入框提交查询。Host 原生命令 ID 映射为 `fp-<commandId>`，由既有内核受理并交给原生 Agent Loop，不新增 ledger 或调度器。Host 的 `B0_GATEWAY_TOKEN` 必须与自有 kernel 的 gateway credential 一致，只在 Host 私有环境注入，不能写入 profile、浏览器包、模型提示或日志；它不替代 CRM 身份。适配层只访问固定 loopback 路径，12 秒时限、512 KiB 响应上限，未知/不完整受理回执不显示成功。
+
+查询请求超时或丢失响应返回 ADMISSION_UNKNOWN，先用只读 status 查看当前账号会话最近五个任务或指定任务，不自动重发。状态读取继续重验 CRM。取消只接受明确的 run，卡片内部则用 `call <call_id>` 经原 session journal 找到精确 request；不以“当前会话最新任务”代替。CANCEL_ACCEPTED 仅表示受理，WORKER_ACTIVE/CANCEL_UNKNOWN 不能显示已停止。切换会话后丢弃迟到回复。
+
+rc2 空会话尚无原生历史面板时，插件只经公开 `command/executed` 与会话 input notice 展示自己命令的结果；其他命令与原生行为不变。首购卡片独立注册自己的工具名，不依赖 shine-query 的全局开关。官方原生工具折叠默认行为保留。
+
+本次 HTTP 整链和 Chrome headless 五项观测分别实际通过，见[证据](../hackathon/evidence/dsh-g0-native-command-browser-20261006.md)。仍仅为本地源码、合成 CRM/JSON、mock 模型和隔离 SQLite；新 clean 候选、目标主机、headed/无障碍/真实模型与业务验收仍开放，不代表生产保存已启用。

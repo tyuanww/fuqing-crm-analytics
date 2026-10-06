@@ -5,10 +5,10 @@ import {
   type FirstPurchaseNativeReceipt, type FirstPurchaseProductRow,
 } from '../first-purchase-query-model.mjs';
 import { formatEmptyReason, formatRatioPercent } from '../query-format.mjs';
-import { QUERY_CANCEL_COPY, classifyCancelOutcome, sessionCancelEnvelope } from '../query-cancel.mjs';
+import { FIRST_PURCHASE_CANCEL_COPY, firstPurchaseCancelOutcome, firstPurchaseCommandEnvelope } from '../first-purchase-command-client.mjs';
 import { FirstPurchaseSaveActions } from './first-purchase-save-actions.tsx';
 
-type CancelPhase = 'idle' | 'submitting' | 'accepted' | 'error';
+type CancelPhase = 'idle' | keyof typeof FIRST_PURCHASE_CANCEL_COPY;
 
 function productLine(row: FirstPurchaseProductRow) {
   const ratio = formatRatioPercent(row.finished_conversion_ratio);
@@ -47,7 +47,7 @@ function RunningCard({
   phase, onCancel, inFlight,
 }: { phase: CancelPhase; onCancel: () => void; inFlight: boolean }) {
   const busy = phase === 'submitting' || phase === 'accepted';
-  const status = phase === 'idle' ? null : QUERY_CANCEL_COPY[phase];
+  const status = phase === 'idle' ? null : FIRST_PURCHASE_CANCEL_COPY[phase];
   return <div className="analytics-b0-card analytics-query-card" role="status"
     data-query-fault={inFlight ? 'in-flight' : 'running'} data-cancel-state={phase}>
     {inFlight ? '合成首购查询仍在途…' : '合成首购查询运行中…'}
@@ -69,7 +69,8 @@ export function FirstPurchaseQueryCard(props: ToolCallViewProps) {
     generationRef.current += 1;
     phaseRef.current = 'idle';
     setPhase('idle');
-  }, [callId]);
+    return () => { generationRef.current += 1; };
+  }, [sessionId, callId]);
 
   async function submitCancel() {
     if (phaseRef.current === 'submitting' || phaseRef.current === 'accepted') return;
@@ -80,17 +81,20 @@ export function FirstPurchaseQueryCard(props: ToolCallViewProps) {
     let outcome: CancelPhase = 'error';
     try {
       if (targetSession) {
-        const response = await fetch('/api/session/cancel', {
+        const rpcId = `fp-cancel-${crypto.randomUUID()}`;
+        const response = await fetch('/api/commands/execute', {
           method: 'POST', credentials: 'same-origin', cache: 'no-store', redirect: 'error',
+          signal: AbortSignal.timeout(15000),
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify(sessionCancelEnvelope(targetSession, `fp-query-cancel-${Date.now()}`)),
+          body: JSON.stringify(firstPurchaseCommandEnvelope(targetSession, `/first-purchase-cancel call ${callId}`, rpcId)),
         });
         let body: unknown = null;
         try { body = await response.json(); } catch { body = null; }
-        outcome = classifyCancelOutcome({ status: response.status, body });
+        outcome = (body as { rpcId?: string } | null)?.rpcId === rpcId
+          ? firstPurchaseCancelOutcome({ status: response.status, body }) : 'unknown';
       }
     } catch {
-      outcome = 'error';
+      outcome = 'unknown';
     }
     if (generationRef.current !== gen) return;
     phaseRef.current = outcome;

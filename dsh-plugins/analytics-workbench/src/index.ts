@@ -5,6 +5,7 @@ import * as competition from './competition-agent/apply.ts';
 import { registerFreeHtmlPageTool } from './competition-agent/apply.ts';
 import * as boardBrowserApi from './board-browser-api.ts';
 import * as firstPurchaseSaveApi from './first-purchase-save-api.ts';
+import * as firstPurchaseCommands from './first-purchase-commands.ts';
 import * as cockpitHistoryApi from './cockpit-history-api.ts';
 
 declare const __COMPETITION_SKILL_PACKAGE__: { manifest: object; contents: Record<string, string> };
@@ -16,6 +17,7 @@ export const inject = [...bridgeInject, 'tools'];
 
 export function apply(ctx: Context, config: { firstPurchaseCandidateDigest?: string } = {}): void {
   applyBridge(ctx);
+  ctx.inject(['commands'], scoped => { scoped.plugin(firstPurchaseCommands); });
   ctx.inject(['connection', 'webServer'], scoped => { scoped.plugin(firstPurchaseSaveApi, config); });
   registerFreeHtmlPageTool(ctx);
   ctx.inject(['connection', 'webServer'], (scoped) => { scoped.plugin(boardBrowserApi); });

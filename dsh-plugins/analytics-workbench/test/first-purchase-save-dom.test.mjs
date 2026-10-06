@@ -43,7 +43,8 @@ test('compiled card disables unavailable actions, saves explicitly, recovers los
     };
     vm.runInNewContext(source, { window: Object.assign(dom.window, { __ModuleLoader__: { load: f => { factory = f; } }, fetch: fetchImpl }),
       document: dom.window.document, fetch: fetchImpl, Event: dom.window.Event, CustomEvent: dom.window.CustomEvent,
-      AbortController, AbortSignal, TextDecoder, Uint8Array, __SHINE_QUERY__: true, __SHINE_BOARD__: true }, { timeout: 2000 });
+      AbortController, AbortSignal, TextDecoder, Uint8Array, crypto: globalThis.crypto,
+      __SHINE_QUERY__: false, __SHINE_BOARD__: false }, { timeout: 2000 });
     const api = factory.factory(name => {
       if (name === 'react') return React;
       if (name === 'react-dom') return webReq('react-dom');
@@ -72,6 +73,55 @@ test('compiled card disables unavailable actions, saves explicitly, recovers los
   } finally {
     if (mounted) await act(() => mounted.unmount()); dom.window.close();
     for (const [key, value] of Object.entries({ window: previous.window, document: previous.document, IS_REACT_ACT_ENVIRONMENT: previous.act })) {
+      if (value === undefined) delete globalThis[key]; else globalThis[key] = value;
+    }
+  }
+});
+
+test('compiled cancel uses exact call identity, suppresses double click and drops late replies after session switch', async () => {
+  const dom = new JSDOM('<div id="root"></div>', { url: 'http://127.0.0.1:43299/' });
+  const previous = { window: globalThis.window, document: globalThis.document, IS_REACT_ACT_ENVIRONMENT: globalThis.IS_REACT_ACT_ENVIRONMENT };
+  globalThis.window = dom.window; globalThis.document = dom.window.document; globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+  let mounted, finish;
+  try {
+    let factory; const requests = [];
+    const fetchImpl = async (url, options) => {
+      assert.equal(url, '/api/commands/execute');
+      const wire = JSON.parse(options.body); requests.push(wire);
+      if (requests.length === 1) await new Promise(resolve => { finish = resolve; });
+      return Response.json({ type: 'server-response', rpcId: wire.rpcId, result: { ok: true, value: { result:
+        requests.length === 1 ? { kind: 'success', text: 'CANCEL_ACCEPTED: 取消请求已受理；请核对执行是否退出。' }
+          : { kind: 'error', text: 'WORKER_ACTIVE: still active' } } } });
+    };
+    vm.runInNewContext(source, { window: Object.assign(dom.window, { __ModuleLoader__: { load: f => { factory = f; } } }),
+      document: dom.window.document, fetch: fetchImpl, AbortSignal, crypto: globalThis.crypto,
+      __SHINE_QUERY__: false, __SHINE_BOARD__: false }, { timeout: 2000 });
+    const api = factory.factory(name => {
+      if (name === 'react') return React;
+      if (name === 'react-dom') return webReq('react-dom');
+      if (name === 'react/jsx-runtime') return webReq('react/jsx-runtime');
+      if (name === '@deepseek-ai/dsh-client-store') return stores;
+      throw new Error(`unexpected module ${name}`);
+    });
+    const registrations = []; api.apply({ effect() {}, sessions: {}, slots: { inject: (_, fn) => fn(), register: (options, component) => { registrations.push({ options, component }); return () => {}; } } });
+    const Card = registrations.find(r => r.options.key === FIRST_PURCHASE_TOOL_NAME).component;
+    mounted = createRoot(dom.window.document.getElementById('root'));
+    const running = { callId: 'same-call', name: FIRST_PURCHASE_TOOL_NAME, argsRaw: '{}', turn: 1, step: 1, time: 0, subCalls: [] };
+    const render = sessionId => act(() => { mounted.render(React.createElement(Card, { block: running, sessionId })); });
+    const button = () => dom.window.document.querySelector('[data-testid="analytics-first-purchase-cancel"]');
+    const phase = () => dom.window.document.querySelector('[data-cancel-state]').getAttribute('data-cancel-state');
+    await render('original-session');
+    await act(() => { button().click(); button().click(); });
+    assert.equal(requests.length, 1);
+    assert.deepEqual(requests[0].payload.args, { agentId: 'original-session', line: '/first-purchase-cancel call same-call', submittedAttachments: [] });
+    await render('new-session'); await act(async () => { finish(); await delay(10); });
+    assert.equal(phase(), 'idle');
+    await act(async () => { button().click(); await delay(10); });
+    assert.equal(requests[1].payload.args.agentId, 'new-session'); assert.equal(phase(), 'active');
+    assert.ok(dom.window.document.body.textContent.includes('执行尚未确认退出'));
+  } finally {
+    finish?.(); if (mounted) await act(() => mounted.unmount()); dom.window.close();
+    for (const [key, value] of Object.entries(previous)) {
       if (value === undefined) delete globalThis[key]; else globalThis[key] = value;
     }
   }

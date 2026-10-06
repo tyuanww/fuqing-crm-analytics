@@ -29,6 +29,7 @@ import { QUERY_TOOL_NAME } from '../query-model.mjs';
 import { FIRST_PURCHASE_TOOL_NAME } from '../first-purchase-query-model.mjs';
 import { QueryToolCard } from './query-card.tsx';
 import { FirstPurchaseQueryCard } from './first-purchase-query-card.tsx';
+import { applyFirstPurchaseCommandFeedback } from './first-purchase-command-feedback.mjs';
 import { RunStatus } from './run-status.tsx';
 import { HttpAssetOverlay } from './asset-overlay.tsx';
 import { OverlayErrorBoundary } from './overlay-error-boundary.mjs';
@@ -464,6 +465,7 @@ export const name = 'analytics-workbench-b0-client';
 export const inject = ['slots', 'sessions', 'theme', 'layout', 'remote', 'remote.session', 'remote.workspaceFiles', 'sidebarRight', 'sidebarRightTabs', 'uiWorkspace'];
 
 export function apply(ctx: Context): void {
+  applyFirstPurchaseCommandFeedback(ctx);
   ctx.effect(() => bindInitialSession(ctx.sessions, () => {
     console.warn('analytics-b0: the configured primary session could not be selected; no fallback attempted');
   }), 'analytics-b0: select exact Host-listed primary once');
@@ -879,10 +881,12 @@ export function apply(ctx: Context): void {
     ctx.slots.inject('tool.call.toolview', () => ctx.slots.register({
       name: 'tool.call.toolview', key: QUERY_TOOL_NAME,
     }, QueryToolCard));
-    ctx.slots.inject('tool.call.toolview', () => ctx.slots.register({
-      name: 'tool.call.toolview', key: FIRST_PURCHASE_TOOL_NAME,
-    }, FirstPurchaseQueryCard));
   }
+  // This card belongs to this independently loaded plugin, not the legacy
+  // shine-query global flag. The native slot renders it only for its own tool.
+  ctx.slots.inject('tool.call.toolview', () => ctx.slots.register({
+    name: 'tool.call.toolview', key: FIRST_PURCHASE_TOOL_NAME,
+  }, FirstPurchaseQueryCard));
   if (boardPackEnabled()) {
     for (const toolName of [BOARD_GENERATE_TOOL_NAME, BOARD_EDIT_TOOL_NAME]) ctx.slots.inject('tool.call.toolview', () => ctx.slots.register({
       name: 'tool.call.toolview', key: toolName,
