@@ -124,7 +124,24 @@ pnpm dsh plugin verify-service \
 
 PREPARED 回执必须存在于实际 journal，幂等缓存不能单独证明已准备。在取得 journal 写锁后再次核对前置 seq/digest，允许其他观测追加，拒绝历史被替换；重复回执也必须与实际 journal 对应。状态文件只接受不超过 64 MiB 的普通文件，拒绝链接、FIFO 和越界文件；没有自动轮转或删除历史。CLI 失败只打印稳定错误码，不回显断言差异、输入字段或子进程输出；例如 `PLUGIN_SERVICE_PREPARED_NOT_DURABLE`、`RELEASE_EVENT_PREREQUISITE_CHANGED`，未知错误为 `PLUGIN_SERVICE_VERIFICATION_FAILED`。保留原始输入和 journal 进行本地排查，不通过手工改缓存绕过。
 
-成功为 `LOCAL_SERVICE_ARTIFACTS_VERIFIED`，始终 `release_ready=false`、`target_host=NOT_RUN`、`supply_chain=NOT_RUN`、`activation=BLOCKED_TARGET_HOST_AND_SUPPLY_CHAIN_REQUIRED`。本地 JSON/hash 不证明发布者身份；该命令不重新安装 wheel，不把记录中的平台升级为 WSL 验收。激活门禁仍阻断。实际 CLI、负测和重试证据见[接线记录](../hackathon/evidence/dsh-g0-service-artifact-gate-20261005.md)。
+不带目标参数时，成功为 `LOCAL_SERVICE_ARTIFACTS_VERIFIED`，始终 `release_ready=false`、`target_host=NOT_RUN`、`supply_chain=NOT_RUN`、`activation=BLOCKED_TARGET_HOST_AND_SUPPLY_CHAIN_REQUIRED`。本地 JSON/hash 不证明发布者身份；该命令不重新安装 wheel，不把记录中的平台升级为 WSL 验收。激活门禁仍阻断。实际 CLI、负测和重试证据见[接线记录](../hackathon/evidence/dsh-g0-service-artifact-gate-20261005.md)。
+
+已有 WSL 合成现场回执时，在同一命令上增加两个成对参数：
+
+```bash
+pnpm dsh plugin verify-service \
+  --candidate /absolute/plugin-candidate/candidate.json \
+  --evidence /absolute/service-pair/receipt.json \
+  --state-path /absolute/plugin-state.json \
+  --target-evidence /absolute/target-result/receipt.json \
+  --target-input /absolute/target-input/input-manifest.json
+```
+
+`target-result` 必须保留现场回执及完整日志、清理/生产监听 sidecar；`target-input` 保留固定双包、13 个 Linux wheel、合成 seed、helper 与输入 manifest。当前 v1 校验器只接受已审核的 2026-10-06 有限 runner 摘要；原字节存于 `scripts/release/test-fixtures/target-acceptance-20261006.py`，仅供追溯/测试，CLI 不执行它，不重新安装或连接杭州。新 runner 需单独审核及版本化，不能自动接受。
+
+写 journal 前核对原候选、服务证据以及目标输入/日志，拒绝未知字段、路径逃逸、链接/特殊文件、缺场景、未清理进程和虚假生产声明。复用原 artifact 事件后追加 `CANDIDATE_SERVICE_TARGET_OBSERVED`，在同一写锁下校验前置事件；若在两事件之间中断，重试沿用 artifact 事件后继续。相同参数重试会重验所有文件；原始 receipt 不被改写，幂等冲突不会覆盖历史。
+
+成功为 `LOCAL_WSL_SYNTHETIC_SERVICE_OBSERVATION_VERIFIED`，同时返回 `evidence_authenticity=UNATTESTED_OPERATOR_OBSERVATION`、`candidate_policy=SYNTHETIC_A64_ONLY`。这只绑定首购服务的既有合成观测，不证明真实身份/候选准入、签名来源或其他服务；生产激活仍 BLOCKED。验证失败退出 2，只输出稳定错误码。实际 CLI 和本次测试见[目标回执接线证据](../hackathon/evidence/dsh-g0-service-target-gate-20261006.md)。
 
 ## 安装前的目标主机只读预检
 
@@ -151,4 +168,4 @@ JSON 合同为 `shinemage-service-target-preflight/v1`，包含 manifest 摘要�
 
 传送测试状态时，archive 必须显式保留状态目录 `0700`，不能只打包文件而丢失目录权限；本次首次启动被此约束正确拒绝，修正夹具后在新目录重跑。复用原不可变应用包，生产端不编译、无在线依赖解析。常规插件 UI/工具变化仍只需要更新相应插件；此次冷安装是独立后端服务的验收，不意味着每次插件更新都重装 DSH 和所有服务。
 
-本次身份、候选准入 digest 与时钟仍是合成 fixture；原包的 dirty 来源标记保留。真实身份/状态策略、生产时间窗口、目标回执验证器/原 journal、最终 reviewed 包与供应链仍未关闭，保存 UI 和生产激活保持关闭。旧版可写降级会丢失来源，回退插件时应保留新版服务与 durable state。其他服务、官方 DSH 宿主、真实业务/浏览器未由此验收覆盖。
+本次身份、候选准入 digest 与时钟仍是合成 fixture；原包的 dirty 来源标记保留。目标回执现已通过上面的可选参数核验并接入原 journal；真实身份/状态策略、生产时间窗口、最终 reviewed 包与供应链仍未关闭，保存 UI 和生产激活保持关闭。旧版可写降级会丢失来源，回退插件时应保留新版服务与 durable state。其他服务、官方 DSH 宿主、真实业务/浏览器未由此验收覆盖。

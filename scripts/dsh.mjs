@@ -217,7 +217,7 @@ function serviceTargetPreflight(options) {
 }
 async function plugin(args) {
   const [subcommand, ...options] = args;
-  const usage = 'Usage:\n  pnpm dsh plugin candidate --plugin /absolute/plugin --output-dir /absolute/output --state-path /absolute/state.json [--profile config/profile.json] [--previous-profile config/profile.json] [--service-evidence /absolute/receipt.json]\n  pnpm dsh plugin verify-host --candidate /absolute/candidate.json --evidence /absolute/evidence.json --state-path /absolute/state.json\n  pnpm dsh plugin verify-service --candidate /absolute/candidate.json --evidence /absolute/service-pair/receipt.json --state-path /absolute/state.json\nverify-host checks existing local evidence and appends to the candidate journal; it does not start or activate a host.\nverify-service checks local service artifacts and appends to the same journal; target-host and supply-chain gates remain BLOCKED. It does not start or activate a service.';
+  const usage = 'Usage:\n  pnpm dsh plugin candidate --plugin /absolute/plugin --output-dir /absolute/output --state-path /absolute/state.json [--profile config/profile.json] [--previous-profile config/profile.json] [--service-evidence /absolute/receipt.json]\n  pnpm dsh plugin verify-host --candidate /absolute/candidate.json --evidence /absolute/evidence.json --state-path /absolute/state.json\n  pnpm dsh plugin verify-service --candidate /absolute/candidate.json --evidence /absolute/service-pair/receipt.json --state-path /absolute/state.json [--target-evidence /absolute/result/receipt.json --target-input /absolute/input/input-manifest.json]\nverify-host checks existing local evidence and appends to the candidate journal; it does not start or activate a host.\nverify-service checks service artifacts and optional archived WSL synthetic observations, then appends to the same journal. Both target options are required together. Production identity and supply-chain gates remain BLOCKED; local hashes are not remote attestation. It does not start or activate a service.';
   const targetUsage = '  pnpm dsh plugin service-preflight --python /absolute/python3.14 --manifest /absolute/service-manifest.json --manifest-sha256 SHA256 --wheelhouse /absolute/wheels\nservice-preflight is read-only: checks WSL2, Python and wheel tags; never installs, starts a service or changes a journal.';
   if (!subcommand || subcommand === '--help' || subcommand === '-h') {
     console.log(usage + '\n' + targetUsage);
@@ -229,6 +229,7 @@ async function plugin(args) {
     return;
   }
   let allowed = new Set(['--candidate', '--evidence', '--state-path']);
+  if (subcommand === 'verify-service') allowed = new Set([...allowed, '--target-evidence', '--target-input']);
   if (subcommand === 'candidate') allowed = new Set(['--plugin', '--output-dir', '--state-path', '--profile', '--previous-profile', '--service-evidence']);
   if (subcommand === 'service-preflight') allowed = new Set(['--python', '--manifest', '--manifest-sha256', '--wheelhouse']);
   const seen = new Set();
@@ -245,7 +246,9 @@ async function plugin(args) {
     let observation;
     try {
       observation = await verifier({ candidatePath: requiredOption(options, '--candidate'),
-        evidencePath: requiredOption(options, '--evidence'), statePath: requiredOption(options, '--state-path') });
+        evidencePath: requiredOption(options, '--evidence'), statePath: requiredOption(options, '--state-path'),
+        ...(subcommand === 'verify-service' ? { targetEvidencePath: options.includes('--target-evidence') ? requiredOption(options, '--target-evidence') : undefined,
+          targetInputPath: options.includes('--target-input') ? requiredOption(options, '--target-input') : undefined } : {}) });
     } catch (error) {
       if (subcommand !== 'verify-service') throw error;
       // Assertion diffs and child stderr may contain untrusted artifact values.

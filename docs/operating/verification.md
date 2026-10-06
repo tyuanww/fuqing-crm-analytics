@@ -82,7 +82,9 @@ B0 独立入口：`node scripts/dsh-b0/pipeline.mjs --check --python /absolute/p
 
 随后 OCR 增加 WHEEL/dist-info/改名标签、active Requires-Dist 及 optional marker 的回归，当前同一入口 **35 PASS**；6 项负测先失败后通过，实际依赖包重验通过，见[审核证据](../hackathon/evidence/dsh-g0-service-target-preflight-review-20261006.md)。
 
-2026-10-06 另行实际运行首购服务 WSL 合成验收 **14/14**：原双包、13 个固定 Linux wheel、两个新 venv、真实 HTTP 保存/权限/崩溃恢复/只读回退与未知 schema 拒绝，见[现场证据](../hackathon/evidence/dsh-g0-service-target-acceptance-20261006.md)。使用现有 helper 的有限验收编排，不新增生产安装入口或 CI 自动远端动作；合成状态目录必须保留 `0700`。本次现场结果不替代上面的单元测试，也未重跑历史 35/206 项套件；不代表 DSH 宿主、浏览器、真实身份/时间窗口或供应链通过，目标回执尚未接入 candidate journal。
+2026-10-06 另行实际运行首购服务 WSL 合成验收 **14/14**：原双包、13 个固定 Linux wheel、两个新 venv、真实 HTTP 保存/权限/崩溃恢复/只读回退与未知 schema 拒绝，见[现场证据](../hackathon/evidence/dsh-g0-service-target-acceptance-20261006.md)。使用现有 helper 的有限验收编排，不新增生产安装入口或 CI 自动远端动作；合成状态目录必须保留 `0700`。该现场阶段不替代上面的单元测试，也未重跑历史 35/206 项套件；不代表 DSH 宿主、浏览器、真实身份/时间窗口或供应链通过。当时目标回执尚未接 candidate journal，后续接线见下一段。
+
+WSL 目标回执接线：`node --test --test-concurrency=1 scripts/release/service-target-evidence.test.mjs`，已纳入 `pnpm dsh test` 自动发现。**37 PASS** 覆盖输入/日志/场景/清理篡改、只读回退声明、路径与特殊文件、幂等/恢复、错误脱敏；fixture 的 wheel/seed 是不可安装的解析器测试字节，不冒充 WSL 执行。固定 2026-10-06 runner 原字节只作审计输入，测试不执行它。同日完整 release suite **243 PASS / 0 SKIP**；另用已有真实现场回执执行本地 CLI，原 journal seq 4 和重试、108 文件不变通过，见[本次证据](../hackathon/evidence/dsh-g0-service-target-gate-20261006.md)。本步没有重新执行远端验收，生产 gate 继续 BLOCKED。
 
 ## 提交内容与历史审计
 

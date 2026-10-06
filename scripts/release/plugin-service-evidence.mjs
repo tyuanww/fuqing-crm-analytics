@@ -6,11 +6,13 @@ import { serviceDigest as hash, validateServiceGate } from './service-compatibil
 import { validateProfile } from './profile.mjs';
 import { readState, recordEvent } from './state.mjs';
 import { DSH_SDK_VERSION } from './toolchain.mjs';
+import { verifyServiceTargetEvidence } from './service-target-evidence.mjs';
 
 const digest = value => hash(JSON.stringify(value));
 const decode = bytes => JSON.parse(bytes.toString('utf8'));
 
-export async function verifyPluginService({ candidatePath, evidencePath, statePath } = {}) {
+export async function verifyPluginService({ candidatePath, evidencePath, statePath, targetEvidencePath, targetInputPath } = {}) {
+  assert.equal(targetEvidencePath !== undefined, targetInputPath !== undefined, 'PLUGIN_SERVICE_TARGET_ARGUMENTS_REQUIRED');
   for (const path of [candidatePath, evidencePath, statePath]) {
     assert.ok(typeof path === 'string' && isAbsolute(path), 'PLUGIN_SERVICE_ABSOLUTE_PATH_REQUIRED');
   }
@@ -55,10 +57,23 @@ export async function verifyPluginService({ candidatePath, evidencePath, statePa
     assert.deepEqual(prepared.result[name], value, 'PLUGIN_SERVICE_JOURNAL_MISMATCH');
   }
   const observation = await verifyServiceArtifactEvidence({ gate: candidate.service_compatibility, evidencePath });
+  // Reject invalid target inputs before appending even the base artifact event.
+  const target = targetEvidencePath === undefined ? null : await verifyServiceTargetEvidence({
+    artifactObservation: observation, evidencePath, targetEvidencePath, targetInputPath });
   const event = await recordEvent(statePath, { release_tag: prepared.result.release_tag,
     status: 'CANDIDATE_SERVICE_ARTIFACTS_VERIFIED', ...candidateFields,
     service_evidence_sha256: observation.service_evidence_sha256, observation },
   { idempotencyKey: `candidate-service:${candidateDigest}:${observation.service_evidence_sha256}`,
     requiredEvent: { seq: prepared.result.seq, digest: prepared.result.digest } });
+  if (target) {
+    // A crash after the base event is safe: retry reuses it and appends only this observation.
+    const targetEvent = await recordEvent(statePath, { release_tag: prepared.result.release_tag,
+      status: 'CANDIDATE_SERVICE_TARGET_OBSERVED', ...candidateFields,
+      service_artifact_event: { seq: event.seq, digest: event.digest }, observation: target },
+    { idempotencyKey: `candidate-service-target:${candidateDigest}:${target.target_evidence_sha256}`,
+      requiredEvent: { seq: event.seq, digest: event.digest } });
+    return { ...target, candidate_digest: candidateDigest, service_artifacts: observation,
+      service_artifact_journal_seq: event.seq, journal_seq: targetEvent.seq, journal_digest: targetEvent.digest };
+  }
   return { ...observation, candidate_digest: candidateDigest, journal_seq: event.seq, journal_digest: event.digest };
 }

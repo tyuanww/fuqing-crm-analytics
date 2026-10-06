@@ -2,6 +2,7 @@
 
 ### Added
 
+- `pnpm dsh plugin verify-service` 可通过成对的 `--target-evidence` / `--target-input` 核对既有 WSL 合成验收回执与固定输入、日志和清理记录，幂等绑定原候选 journal；不执行远端动作，不将未签名观测提升为生产身份或供应链证据，激活继续阻断。
 - `pnpm dsh plugin service-preflight` 只读核对首购服务 manifest 摘要、Python 3.14、WSL2、离线 wheel 清单、平台/ABI 与 Requires-Python。输出依赖摘要和明确阻断原因，不安装服务、不写状态或候选 journal；冷安装和供应链仍须独立验收。
 - `pnpm dsh plugin verify-service` 将精确旧/新服务包、依赖观测与原候选/profile/源码证据绑定，核对实际 archive 内容后幂等写入现有 journal。仍不启动服务，目标主机、供应链和生产激活保持阻断。
 - 首购服务兼容验证可从两个精确 Git SHA 生成独立包，区分服务源码和打包器来源；在两个新 venv 中按 wheel hash 离线安装精确依赖，验证旧状态读取、重启回放、备份恢复和拒绝未知 schema。回执保留两个 archive/manifest/依赖摘要；旧服务可写降级与生产激活继续阻断。

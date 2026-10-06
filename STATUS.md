@@ -14,15 +14,22 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 当前 WSL 首购服务隔离验收（2026-10-06）
+### 当前 WSL 回执与候选 journal 接线（2026-10-06）
+
+- 上一批 WSL 记录已按 OCR delegate 覆盖 **7/7** 文件，修正进程数量及准备/验收时间范围两处低风险表述，复核原始包/回执后，通过正常 hooks 提交为 `2a89790b42326376f0808e0896b0a78877bd28ba`；提交后工作树曾干净，未 push。见[审核记录](docs/hackathon/evidence/dsh-g0-service-target-acceptance-review-20261006.md)。
+- 提交后的下一步已扩展现有 `plugin verify-service`，显式接收 `--target-evidence` / `--target-input`，核对固定验收脚本、28 个输入文件、双包/依赖、14 场景及清理 sidecar，再向原 journal 幂等追加 `CANDIDATE_SERVICE_TARGET_OBSERVED`。没有新增状态账本或远端执行入口。
+- 新接线 **37 PASS**，本次完整 release suite **243 PASS / 0 FAIL / 0 SKIP**；原真实 WSL 回执经本地 CLI 核验进入 seq **4**，重复执行同一 seq/digest，108 个输入/证据文件的内容与 mtime 不变，前三条 journal 保留。见[接线证据](docs/hackathon/evidence/dsh-g0-service-target-gate-20261006.md)。
+- 本批接线已完成提交前 OCR delegate 审核：原始 **14/14** 覆盖，没有确认新缺陷，本次 release suite **243 PASS**，实际 CLI 重试不改输入/journal，见[审核记录](docs/hackathon/evidence/dsh-g0-service-target-gate-review-20261006.md)。本地提交号以 Git 为准；仍为未签名的合成观测，`release_ready=false` / 激活 BLOCKED。下一步从审核后的干净 SHA 准备候选，再补生产身份/策略、生产时限/UNKNOWN、供应链和 DSH 宿主/浏览器；其他服务与物理分仓也未完成。本步未重新执行杭州验收或改生产。
+
+### 已提交的 WSL 首购服务隔离验收（2026-10-06）
 
 - 延续 `codex/plugin-boundary-review@79434033`，同一旧/新不可变服务包已在实际杭州 WSL2 / Python 3.14.4 完成 **14/14 检查**：两个独立 venv 各安装 13 个固定 wheel，并完成合成身份/状态、HTTP 保存、权限/冲突拒绝、SIGKILL 后幂等恢复、只读回退、备份恢复与未知 schema 拒绝。见[现场验收证据](docs/hackathon/evidence/dsh-g0-service-target-acceptance-20261006.md)。
 - 逐文件传输超时后改用单个固定包；首次运行的合成状态目录权限错误已定位并修正夹具，保留 FAIL 后在新目录重跑。服务 archive 与依赖未改动。成功轮次 10 个、失败轮次 1 个临时进程均已回收，安装/状态目录已清理，生产 6677/18090/18092/18093/18094 的监听/PID 快照一致。
-- 仅关闭首购服务的 WSL **synthetic** 冷安装/恢复子项。旧 writer 仍禁止可写降级；真实身份/策略、生产时间窗口、目标回执验证器与 candidate journal、供应链、DSH 宿主/浏览器和其他服务仍未关闭。`release_ready=false`，保存 UI/生产激活保持关闭。下一步接目标证据到原候选门禁，再准备最终干净候选；本轮未 commit、push 或生产切换。
+- 仅关闭首购服务的 WSL **synthetic** 冷安装/恢复子项。旧 writer 仍禁止可写降级；真实身份/策略、生产时间窗口、供应链、DSH 宿主/浏览器和其他服务仍未关闭。`release_ready=false`，保存 UI/生产激活保持关闭。验收时目标回执尚未接 journal；后续接线见上节。本阶段文档已随 `2a89790b` 提交，未 push 或生产切换。
 
 ### 上一阶段 WSL 平台依赖准备（2026-10-06）
 
-- 预检及 OCR 修复已通过正常 hooks 本地提交为 `7943403319eeefcb3a191e03e4e1dc03772a0cc3`（12 文件）；提交后工作树曾干净，未 push。本节与证据记录为提交后的下一步，尚未提交。
+- 预检及 OCR 修复已通过正常 hooks 本地提交为 `7943403319eeefcb3a191e03e4e1dc03772a0cc3`（12 文件）；提交后工作树曾干净，未 push。本节为当时提交后的准备记录，后随 `2a89790b` 审核提交。
 - 已通过现有 Tailscale/SSH 只读核验杭州：Linux x86_64、WSL2 内核、glibc 2.39、Python 3.14.4、pip 26.0.1，取得实际解释器的 1226 个兼容标签。没有启动/重启或配置生产服务。
 - 在本地按原服务 manifest 的 13 项精确版本、目标标签和官方 PyPI 元数据准备 Linux wheelhouse，共 **3,262,610 字节**；逐包 SHA-256、版本、目标标签和文件集合复核通过。没有安装这些 wheel。见[平台准备证据](docs/hackathon/evidence/dsh-g0-service-target-platform-20261006.md)。
 - 该准备阶段的目标预检、冷安装及恢复当时为 NOT_RUN；后续实际 WSL 合成验收见上节。来源签名、生产身份与候选门禁尚未关闭，激活保持 BLOCKED。
