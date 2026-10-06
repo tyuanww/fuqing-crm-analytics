@@ -14,7 +14,13 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 当前 WSL 回执与候选 journal 接线（2026-10-06）
+### 当前干净候选准备与网络修复（2026-10-06）
+
+- WSL 回执接线已通过正常 hooks 提交为 `356862bf22a1c4fc67f96904f1baffa21fadc2c2`，提交后工作树干净。正式 CRM＋知识库 profile preflight 已实际执行：固定 DSH 准备/构建通过，在线 audit 因未继承本机代理而失败；没有把失败记为候选通过。
+- 已定位并修复 B0 环境白名单丢弃显式代理的问题，只向 Git/pnpm 在线命令透传标准代理变量。真实 audit 修复后 PASS；专项子进程/环境回归通过，完整验证及审核结果见[网络修复证据](docs/hackathon/evidence/dsh-g0-preflight-network-20261006.md)。生产状态未改变。
+- 两份 `356862bf` 独立插件包已生成，但不代表完整 preflight 或生产就绪；修复提交后从新 clean SHA 重跑正式候选。本机旧 SDK 链接已保留备份并绑定本次固定 checkout，未修改 DSH 源码。生产身份/策略、时限/UNKNOWN、供应链、目标宿主/浏览器和物理分仓仍开放。
+
+### 已提交的 WSL 回执与候选 journal 接线（2026-10-06）
 
 - 上一批 WSL 记录已按 OCR delegate 覆盖 **7/7** 文件，修正进程数量及准备/验收时间范围两处低风险表述，复核原始包/回执后，通过正常 hooks 提交为 `2a89790b42326376f0808e0896b0a78877bd28ba`；提交后工作树曾干净，未 push。见[审核记录](docs/hackathon/evidence/dsh-g0-service-target-acceptance-review-20261006.md)。
 - 提交后的下一步已扩展现有 `plugin verify-service`，显式接收 `--target-evidence` / `--target-input`，核对固定验收脚本、28 个输入文件、双包/依赖、14 场景及清理 sidecar，再向原 journal 幂等追加 `CANDIDATE_SERVICE_TARGET_OBSERVED`。没有新增状态账本或远端执行入口。

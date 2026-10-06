@@ -8,7 +8,7 @@ import { readFile, writeFile, mkdir, lstat, readdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { packageManagerEnv } from './package-manager-env.mjs';
+import { packageManagerEnv, packageNetworkEnv } from './package-manager-env.mjs';
 import { copyPluginKitSources, copyTreeBounded, createCleanRoot, reapStaleCleanRoots, removeCleanRoot } from './clean-build.mjs';
 import { prepareRuntimeInputs, recordRuntimePreparation } from '../release/runtime-inputs.mjs';
 import { packPlugin } from '../release/plugin-pack.mjs';
@@ -50,12 +50,16 @@ let env = {
   DSH_PACKAGE_INPUTS: join(b0, 'package-inputs'),
   COREPACK_ENABLE_DOWNLOAD_PROMPT: '0', LEFTHOOK: '0', CI: '1',
 };
+// Do not put proxy settings in the shared build/test environment. Only the
+// explicit network operations below inherit them; TLS/audit bypass flags,
+// provider credentials and arbitrary package-manager settings stay excluded.
+const networkEnv = packageNetworkEnv(process.env);
 function run(command, args, cwd = root, extraEnv = {}) {
   const result = spawnSync(command, args, { cwd, env: { ...env, ...extraEnv }, stdio: 'inherit', timeout: 900000 });
   assert.ok(!result.error && result.status === 0, `B0 stage failed: ${command} ${args.join(' ')} (${result.error?.message ?? result.status})`);
 }
-function output(command, args, cwd = root) {
-  const result = spawnSync(command, args, { cwd, env, encoding: 'utf8', timeout: 30000, maxBuffer: 1024 * 1024 });
+function output(command, args, cwd = root, extraEnv = {}) {
+  const result = spawnSync(command, args, { cwd, env: { ...env, ...extraEnv }, encoding: 'utf8', timeout: 30000, maxBuffer: 1024 * 1024 });
   assert.ok(!result.error && result.status === 0, `B0 verification failed: ${result.error?.message ?? result.stderr}`);
   return result.stdout.trim();
 }
@@ -68,7 +72,7 @@ async function verifySource() {
 }
 async function preparePackageManager() {
   env = await packageManagerEnv(join(b0, 'tool-bin'), env, upstream);
-  assert.equal(output('corepack', ['pnpm', '--version'], upstream), pin.pnpm);
+  assert.equal(output('corepack', ['pnpm', '--version'], upstream, mode === '--check' ? {} : networkEnv), pin.pnpm);
 }
 await mkdir(b0, { recursive: true, mode: 0o700 });
 if (mode === '--prepare') {
@@ -77,7 +81,7 @@ if (mode === '--prepare') {
   if (!exists) {
     await mkdir(upstream, { mode: 0o700 });
     run('git', ['init', '--quiet', upstream]);
-    run('git', ['-C', upstream, 'fetch', '--depth=1', pin.upstream_url, pin.upstream_sha]);
+    run('git', ['-C', upstream, 'fetch', '--depth=1', pin.upstream_url, pin.upstream_sha], root, networkEnv);
     run('git', ['-C', upstream, 'checkout', '--detach', pin.upstream_sha]);
   }
   await verifySource();
@@ -89,13 +93,13 @@ if (mode === '--prepare') {
   // reused node_modules tree can otherwise make install report "up to date"
   // while an external tarball (for example SheetJS) is still absent from the
   // store needed by the later offline runtime deploy.
-  run('corepack', ['pnpm', 'fetch', '--frozen-lockfile', '--registry=https://registry.npmjs.org'], upstream);
-  run('corepack', ['pnpm', 'install', '--frozen-lockfile', '--ignore-scripts', '--registry=https://registry.npmjs.org'], upstream);
+  run('corepack', ['pnpm', 'fetch', '--frozen-lockfile', '--registry=https://registry.npmjs.org'], upstream, networkEnv);
+  run('corepack', ['pnpm', 'install', '--frozen-lockfile', '--ignore-scripts', '--registry=https://registry.npmjs.org'], upstream, networkEnv);
   // Only native dependencies needed by this fixed profile. No repository hook
   // installer, optional provider SDK lifecycle, global configuration or publish.
   run('corepack', ['pnpm', 'rebuild', 'esbuild', 'fs-ext', 'koffi', 'node-pty'], upstream);
   run('corepack', ['pnpm', 'run', 'build:official'], upstream);
-  run('corepack', ['pnpm', 'install', '--frozen-lockfile', '--ignore-scripts', '--registry=https://registry.npmjs.org'], buildTools);
+  run('corepack', ['pnpm', 'install', '--frozen-lockfile', '--ignore-scripts', '--registry=https://registry.npmjs.org'], buildTools, networkEnv);
   await verifySource();
   await recordRuntimePreparation(upstream);
   console.log('B0 pinned preparation complete; run --audit then --check next. Python packages are never installed by this script.');
@@ -105,7 +109,7 @@ if (mode === '--prepare') {
   // produce a distinct, fail-closed audit stage in release evidence.
   await verifySource();
   await preparePackageManager();
-  run('corepack', ['pnpm', 'audit', '--prod', '--audit-level=high', '--registry=https://registry.npmjs.org'], buildTools);
+  run('corepack', ['pnpm', 'audit', '--prod', '--audit-level=high', '--registry=https://registry.npmjs.org'], buildTools, networkEnv);
   console.log('B0 dependency audit complete; run --check next.');
 } else {
   await verifySource();
