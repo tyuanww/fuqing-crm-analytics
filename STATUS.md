@@ -14,13 +14,15 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 首购身份接入边界增量（2026-10-06，本地审核通过）
+### 首购身份接口与 clean 服务候选（2026-10-06）
 
 - 上一批 clean 首购绑定文档经 OCR delegate 全量审核、修正并通过正常 hooks 提交为 `c95751f8`。随后按既定顺序补服务身份接缝，不改 DSH、插件或生产配置。
 - 首购 HTTP factory 改为服务 owner 可注入的同步身份接口；校验 Bearer 和不可变身份/权限，统一身份与策略 provider 的错误脱敏，保留每次请求及保存事务内的撤权重验。默认空 B0 注册表仍拒绝访问，候选 digest 不充当身份或准入授权。
 - 当前源码保存/恢复回归 **74 PASS**（含 19 个新增边界用例）；实际首购包的仓库外最小依赖 HTTP 场景 **1 PASS**，合同/TypeScript、Ruff 和差异检查通过。见[本地接缝证据](docs/hackathon/evidence/dsh-g0-service-identity-boundary-20261006.md)。
-- 提交前 OCR delegate 覆盖全部 **8/8** 文件，未确认新阻塞缺陷。已核对 74 项测试报告与当前 Python 检查输入摘要一致，本次不将复核说成重新执行；下一步从审核后的 clean SHA 生成服务包。
-- 本增量尚未生成 clean 发布候选或执行 WSL/生产验收；下节的固定旧候选及回执原样保留，不能用于证明这份新服务代码。生产 provider、真实 candidate allowlist 与时限策略仍未接通，保存 UI 与激活门禁不变。
+- 提交前 OCR delegate 覆盖全部 **8/8** 文件，未确认新阻塞缺陷，通过正常 hooks 提交 **`80aba9c1`**。已核对 74 项测试报告与提交前 Python 检查输入摘要一致，本次不将复核说成重新执行。
+- 从该 clean SHA 完成源码兼容 **9/9 PASS**、两个实际包的离线 venv/HTTP **9/9 PASS**；新服务包 76478 B / `270cf084…`。新候选 `4e49cc04…` 绑定同一服务证据，真实 `plugin verify-service` 进入 journal 第 3 条事件，重试及旧 WSL 误用拒绝保持 58 文件不变。
+- 插件包仍为 421582 B / `5efdbec5…`，与上一候选逐字节相同；DSH、插件源码、依赖锁与上游均未改动，无需重建。旧 129 个输入/回执/journal 原样保留。
+- 本增量未执行 WSL/生产验收；下节旧包的 14 项回执不能用于证明新服务代码。生产 provider、真实 candidate allowlist 与时限策略仍未接通，保存 UI 与激活门禁不变。后续纯证据文档提交不改写包来源。
 
 ### 当前 clean 首购插件／服务候选（2026-10-06）
 

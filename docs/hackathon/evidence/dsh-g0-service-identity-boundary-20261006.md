@@ -52,7 +52,7 @@ git diff --check
 ## 仍未关闭
 
 - T3/T7 仍 PARTIAL：实际生产身份/撤权来源、真实 plugin candidate allowlist、可信策略来源及生产 freshness/UNKNOWN 时限未接通。当前协议不提供签名认证、网络 timeout 或隔离外部 provider 的运行时。
-- 新代码经下方审核后，须从 clean commit 形成对应服务包，才能绑定新 candidate 和取得新服务包的目标证据。旧 `2be518e5` 双包、`afcdae56…` candidate、seq 4 与 WSL 14 项证据继续仅适用于原字节，不能给本增量背书。
+- 新代码已按下方记录从审核后的 clean commit 形成服务包并绑定本机 candidate；该新包的目标主机证据尚待取得。旧 `2be518e5` 双包、`afcdae56…` candidate、seq 4 与 WSL 14 项证据继续仅适用于原字节，不能给本增量背书。
 - 供应链、目标 DSH runtime/session/WAL、浏览器/真实 UAT、生产激活和物理分仓仍按原 G0/stop-go 关闭。保存 UI 维持 NOT_AVAILABLE；本轮没有 push、Release、生产切换或真实数据访问。
 
 ## 提交前 OCR delegate 审核
@@ -62,3 +62,29 @@ git diff --check
 已追踪 factory → 身份/策略边界 → 保存事务/reconcile/只读查询，以及包资源清单、默认启动、旧源码/包回执范围。未确认新阻塞缺陷。异常上下文的主动抑制用于防止外部 provider 信息进入 HTTP/日志，不把通用规则建议的异常链透传套在此安全边界；生产 provider 的超时与日志责任仍是明确开放项。
 
 当前 Python 检查输入 SHA-256 为 `8d96cee79d42c6155dcc042ef06ba0b21c2b7c27e256a3ebdc73a991754982d9`，与上方 74 项通过报告完全一致；本轮核对报告，不重复运行或声称新通过次数。审核期间只追加状态说明，未再改变应用/测试。原始选择、规则和对应性核验保存在 `.context/checks/service-identity-review-20261006/{preview.json,rules.json,source-check.json,review-summary.json}`；随后通过正常 hooks 本地提交，生成 clean 服务候选另行记录。
+
+## 审核后 clean 服务候选与本机接线
+
+身份接口批次已正常提交 **`80aba9c1facb34fd890cbc5eb9a2f2697140f245`**，提交后工作树干净，未 push。pre-commit 的 import、test-order 和 ground-truth 检查实际执行；既有 18 处 test-order WARN 未阻断，没有绕过 hooks。以下产物均在修改本段文档之前生成，打包来源 `worktree_dirty=false`。
+
+本次重新执行固定旧源码 `56198c32a52d9822c7a3338d92b0fa077d1c61bc` → 新源码 `80aba9c1…`：源码 synthetic SQLite/ASGI **9/9 PASS**；两个实际 archive、两个独立 venv，从已有 wheelhouse 以 hash 离线安装各自 13 项固定依赖后的 HTTP **9/9 PASS**。旧 writer 来源丢失继续作为预期负测被检出，禁止将其降级为可写；未知 schema 拒绝时小库字节不变。与上一轮的 74 项报告复核是不同层级，不能混算测试数。
+
+| 对象 | 本次固定值 |
+|---|---|
+| candidate 服务包 | 76478 B / SHA-256 `270cf084aaa6ac327ab9eba1357313d4390e411cd012b915a51ae4394f39fb5e` |
+| candidate manifest | `ab5cfcdf193d140dba7faa303aba858aeef3265cd5920eb5b9a264fd2c056b37` |
+| baseline 服务包 | 66646 B / `ab77dc53b9fca6c5d5d90a04683a47c1380777d934626faa043c06b8da8d764a`；旧源码配当前打包器，不冒充历史发布包 |
+| 源码回执 | `a133bac605dd4f56eacc79024532252638a8362514872d1923021e7e2124be9b` |
+| 实际包回执 | `1a302500e129347f1ab11cfa9d0186eecc37255ef997981e8a3e5d3c6b69a7f2` |
+| 新 candidate / profile digest | `4e49cc04b2b38391dcb90a60cd510a53a6f4d3a4160aadf63fb7c09b84bee127` / `59333fdec84e69691e7891465a8ca7b83bd705ffca7114325fe21a3f1006bf79` |
+| 插件 tarball | 421582 B / `5efdbec5d0239bdd5ead109442a30430163b867d684bf0168cc31ca59a44321d`，与上一候选逐字节相同 |
+
+先核对 `78779206..80aba9c1` 的插件、toolchain、打包器和合同输入无变化，再通过原 `plugin candidate` 生成新 profile/服务绑定。复用现有固定编译产物，新 tarball 与原包逐字节一致；没有重建 DSH 或插件，没有修改上游、依赖或生产 profile。新 candidate 的来源记录为当前 clean 提交，插件文件本身未变。
+
+实际 `pnpm dsh plugin verify-service` 复核新源码回执、双包和安装观测，追加原控制面的 `CANDIDATE_SERVICE_ARTIFACTS_VERIFIED`，journal 共 3 条。再次 CLI 执行及提供旧 WSL 回执的拒绝路径均未改动本次 58 个输入/产物/状态文件的摘要、长度、mtime；旧回执返回退出码 **2 / SERVICE_TARGET_PAIR_MISMATCH**。原候选的 129 个文件也保持不变。现有激活校验函数的本地调用仍返回 `SERVICE_ACTIVATION_EVIDENCE_INCOMPLETE`，没有操作生产主机。
+
+证据根 `.context/checks/service-identity-clean-80aba9c1-20261006/` 保存 `source.log`、`pair.log`、固定 `source/`/`pair/`、`service-binding.json`、`source-gate.json`、`verification.json`、`profile.json`、`plugin-candidate/`、`plugin-state.json`、`verify-service*.log`、`old-target-rejected.log` 和 `candidate-verification.json`。runner 正常完成其 finally 回收；本机 runner 不记录各进程 PID，未宣称本次有独立逐 PID 回收证据。
+
+命令沿用[clean 服务验证入口](./dsh-g0-service-clean-candidate-20261006.md)，candidate 参数改为完整 `80aba9c1…`、输出改为上述新目录；`plugin candidate` 指定本次 `profile.json`、源码回执和独立显式 `plugin-state.json`，`verify-service` 指定同一候选与包回执。后续纯证据文档提交不改变本表的来源，也不要求重打包。
+
+新包 **WSL/生产身份/真实候选准入/时限/供应链仍 NOT_RUN，release_ready=false**。本次仅本机 Darwin arm64 验证，未连接杭州、读取真实库、push、发布或激活；既有 WSL 14 项不迁移到新服务包。

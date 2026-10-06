@@ -60,7 +60,7 @@
 
 后续在 clean 插件来源 `78779206` 重新构建首购插件，绑定同一 `2be518e5` 服务包；本轮相关 **100 PASS / 0 SKIP**，新服务双包实际杭州 WSL 合成验收 **14/14 PASS**。新回执经既有 CLI 进入 candidate journal seq 4，重试及 129 文件不变、旧目标回执误用拒绝、生产激活阻断均已验证，见[接线与现场证据](../hackathon/evidence/dsh-g0-service-candidate-binding-20261006.md)。10 个临时进程已回收，生产监听/PID 不变；生产身份/候选准入、时限、供应链及目标 DSH 宿主仍开放。
 
-上述 clean 绑定批次经 OCR delegate 审修后已通过正常 hooks 提交 `c95751f8`。下一步本地增量补齐首购服务 owner 的同步身份接口、身份/策略故障脱敏及撤权边界，当前保存/恢复 **74 PASS**、实际独立包场景 **1 PASS**，见[身份接缝证据](../hackathon/evidence/dsh-g0-service-identity-boundary-20261006.md)。本批另完成 **8/8** 提交前审核，尚未替换 `2be518e5` 的固定包与回执；生产认证、真实候选 allowlist、时限与新包目标验收仍开放，T3/T7 不改为完成。
+上述 clean 绑定批次经 OCR delegate 审修后已通过正常 hooks 提交 `c95751f8`。下一步本地增量补齐首购服务 owner 的同步身份接口、身份/策略故障脱敏及撤权边界，保存/恢复 **74 PASS**、实际独立包场景 **1 PASS**，见[身份接缝证据](../hackathon/evidence/dsh-g0-service-identity-boundary-20261006.md)。本批完成 **8/8** 提交前审核，正常 hooks 提交 `80aba9c1`；随后该 clean SHA 的源码兼容与实际离线包各 **9/9 PASS**，新候选 `4e49cc04…` 经现有 CLI 记入本地 journal 第 3 条事件，重试不改 58 文件。插件 tarball 与上次逐字节相同，未重建 DSH/插件；旧 `2be518e5` 固定包与回执保留。生产认证、真实候选 allowlist、时限与新服务包目标验收仍开放，T3/T7 不改为完成。
 
 | 任务 | 当前状态 | 已有证据 | 尚未关闭 |
 |---|---|---|---|

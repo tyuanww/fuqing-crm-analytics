@@ -12,7 +12,7 @@
 
 2026-10-06 审核提交 `2be518e584d3adfb0343be58049dc3c674cea2f9` 另生成 clean 首购候选，与同一旧服务源码对比，源码和实际双包分别 **9/9 PASS**，兼容结论与下表一致。两包打包来源均 `worktree_dirty=false`；这是新的 artifact 对，旧 WSL 观测不能移植。随后同一新双包另做 WSL 合成 **14/14 PASS**，绑定插件来源 `78779206`、candidate journal seq 4，见[候选绑定与现场证据](../hackathon/evidence/dsh-g0-service-candidate-binding-20261006.md)；[clean 服务准备记录](../hackathon/evidence/dsh-g0-service-clean-candidate-20261006.md)中的 NOT_RUN 属于此前阶段。生产身份/策略仍未完成。
 
-`c95751f8` 之后的工作树另有[身份 resolver 边界增量](../hackathon/evidence/dsh-g0-service-identity-boundary-20261006.md)，已完成本地测试与实际包测试、8/8 提交前审核，尚未生成 clean 候选；不能继承上述固定双包的 WSL 结论。没有将身份 adapter 或候选 digest 当作生产认证、供应链签名或保存准入。
+`c95751f8` 之后的[身份 resolver 边界增量](../hackathon/evidence/dsh-g0-service-identity-boundary-20261006.md)已完成本地测试、8/8 提交前审核，并提交 `80aba9c1`。该 clean SHA 已生成新的服务双包，源码与实际离线包各 **9/9 PASS**，新候选 `4e49cc04…` 绑定本机服务回执、journal 第 3 条事件；插件 tarball 与上一候选相同。新服务包 WSL 仍 NOT_RUN，不能继承上述固定双包的现场结论。没有将身份 adapter 或候选 digest 当作生产认证、供应链签名或保存准入。
 
 | 服务 / 状态 / 动作 | 结论 | 操作边界 |
 |---|---|---|
