@@ -14,7 +14,14 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 新插件独立更新与杭州终态恢复（2026-10-07，当前进度）
+### 终态恢复回执门禁接线（2026-10-07，当前进度）
+
+- 上一批审修正常 hooks 提交 `25d9c53c`，本批从干净工作树继续。`plugin verify-host` 新增 `dsh-terminal-host-evidence/v1`，为同一 `a490457c…` 候选交叉核对固定控制器、runtime/四包、HTTP 23 项与恢复 2 项、FAILED/EXECUTION_UNKNOWN、活动名额释放、派发一次、持久前缀及清理观察。见[本轮证据](docs/hackathon/evidence/dsh-g0-first-purchase-terminal-gate-20261007.md)。
+- 已有真实杭州回执进入原候选 journal **seq 5 / CANDIDATE_TERMINAL_HOST_OBSERVED**，引用服务目标 seq 4；前四事件保持，CLI 重试字节/mtime 不变，实际错父事件退出 2 且不写状态。619 个受保护文件保持。**本次只关闭终态回执接线子项**。
+- 本轮完整 release suite **391 PASS / 0 SKIP / 0 FAIL**（含新门禁 37 项）。未重新执行杭州服务，不读取真实业务库；历史现场观察仍标记 `UNATTESTED_OPERATOR_OBSERVATION`，整体 PARTIAL / release_ready=false。本批代码、测试、文档经 OCR delegate 审查，随本次提交交付。
+- 下一步：同一新候选杭州隔离浏览器验收 → 其余准入证据/G0 stop-go；完整跨版本 corpus、当前包浏览器、真实身份/模型/UAT、供应链和生产 activation/canary/rollback 仍开放。物理分仓继续受 G0 约束。
+
+### 新插件独立更新与杭州终态恢复（2026-10-07，上一阶段）
 
 - 从干净 `3ffbd2a2` 只重建 workbench，固定新候选 `a490457c…` / tgz `c9770d11…`；CRM、查询/保存服务、profile 与官方 runtime 复用。仅三个编译入口变化，见[本轮证据](docs/hackathon/evidence/dsh-g0-first-purchase-terminal-candidate-20261007.md)。
 - 修复验收入口强制插件/服务同 SHA 的耦合，新增显式来源 v2；v1 保留原合同。新候选本机固定包 1 PASS，杭州来源 10/10 PASS、官方 Host SIGKILL 终态恢复 1 PASS（76.49 秒）：FAILED/EXECUTION_UNKNOWN、活动名额释放、派发一次、分析一条。**该候选的恢复缺陷现场子项关闭**。

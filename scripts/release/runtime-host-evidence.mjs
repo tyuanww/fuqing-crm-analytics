@@ -209,7 +209,7 @@ export async function verifyRuntimeHostEvidence({ candidatePath, evidencePath, s
   return { ...observation, journal_seq: event.seq, journal_digest: event.digest };
 }
 
-function checkObservations(rows) {
+export function checkObservations(rows) {
   assert.ok(Array.isArray(rows) && rows.length === 20, CODE + 'SCENARIOS');
   const pass = stage => ({stage,status:'PASS'}), command = (name,kind) => ({stage:'official-native-command',command:name,kind});
   const host = (row,stage,generation) => {
@@ -226,7 +226,8 @@ function checkObservations(rows) {
   assert.deepEqual(rows.slice(16),[pass('durable-session-and-cookie-reused-crm-relogin-required'),
     command('/first-purchase-status','error'),command('/first-purchase-status','success'),pass('native-session-without-business-tools')],CODE+'SCENARIOS');
 }
-export function checkProcesses(query,save,cleanup,http,queryManifest,saveManifest,candidate,queryHash,saveHash, { browser = false } = {}) {
+export function checkProcesses(query,save,cleanup,http,queryManifest,saveManifest,candidate,queryHash,saveHash, { browser = false, terminal = false } = {}) {
+  assert.ok(!(browser && terminal), CODE + 'PROCESS_MODE');
   assert.ok(Array.isArray(query)&&query.length===3&&Array.isArray(save)&&save.length===2,CODE+'PROCESSES');
   const pids=new Set(),workerEvents=[];
   const add=pid=>{assert.ok(Number.isSafeInteger(pid)&&pid>1&&!pids.has(pid),CODE+'PROCESS_PID');pids.add(pid);};
@@ -234,7 +235,7 @@ export function checkProcesses(query,save,cleanup,http,queryManifest,saveManifes
   for(const row of query){
     add(row.pid);assert.equal(row.source_contract,'first-purchase-frozen-source/v1',CODE+'PROCESS_SOURCE_CONTRACT');assert.equal(row.status,'KERNEL_SOCKET_BOUND',CODE+'PROCESS');assert.equal(row.port,4335,CODE+'PORT');
     assert.equal(row.manifest_sha256,queryHash,CODE+'PROCESS_MANIFEST');
-    assert.equal(row.source_sha,candidate.source_sha,CODE+'PROCESS_SOURCE');assert.equal(row.release_ready,false,CODE+'UNPROVEN');
+    assert.equal(row.source_sha,terminal ? candidate.service_compatibility?.binding?.source_sha : candidate.source_sha,CODE+'PROCESS_SOURCE');assert.equal(row.release_ready,false,CODE+'UNPROVEN');
     assert.equal(row.exit_code,0,CODE+'PROCESS_EXIT');assert.equal(row.forced_kill,false,CODE+'PROCESS_EXIT');assert.equal(row.cleanup_ok,true,CODE+'CLEANUP');
     assert.equal(row.stopped?.pid,row.pid,CODE+'PROCESS');assert.equal(row.stopped?.status,'KERNEL_STOPPED',CODE+'PROCESS');
     assert.equal(row.stopped?.active_workers,0,CODE+'CLEANUP');assert.equal(row.stopped?.integrity,'PASS',CODE+'INTEGRITY');
@@ -257,18 +258,21 @@ export function checkProcesses(query,save,cleanup,http,queryManifest,saveManifes
   add(http.observations[0].pid);
   if (browser) return { pids: [...pids], service_port: save[0].port };
   add(http.observations[15].pid);
+  if (terminal) { add(http.observations[21].pid); return { pids: [...pids], service_port: save[0].port }; }
   assert.deepEqual([...cleanup.pids].sort((a,b)=>a-b),[...pids].sort((a,b)=>a-b),CODE+'CLEANUP_PIDS');
   assert.deepEqual([...cleanup.ports_closed].sort((a,b)=>a-b),[4335,4336,4337,save[0].port].sort((a,b)=>a-b),CODE+'CLEANUP_PORTS');
 }
 
 /** Common immutable runtime/package checks shared by HTTP and browser observations. */
-export async function readRuntimeHostInputs({ payload, payloadRoot, candidateBytes, prior, directory, envelope, browser = false }) {
+export async function readRuntimeHostInputs({ payload, payloadRoot, candidateBytes, prior, directory, envelope, browser = false, terminal = false }) {
+  assert.ok(!(browser && terminal), CODE + 'INPUT_MODE');
   assert.deepEqual(payload.get('candidate/candidate.json'), candidateBytes, CODE + 'CANDIDATE');
   const manifest = decode(payload.get('input-v5.json'));
   assert.equal(manifest.schema_version, 'dsh-first-purchase-host-artifacts/v5', CODE + 'INPUT_MODE');
   const prefix = manifest.candidate_path?.match(browser
     ? /^(\/tmp\/owned-fp-browser-[A-Za-z0-9_-]+)\/payload\/candidate\/candidate.json$/
-    : /^(\/tmp\/owned-fp-runtime-[A-Za-z0-9_-]+)\/payload\/candidate\/candidate.json$/)?.[1];
+    : terminal ? /^(\/tmp\/owned-fp-terminal-[A-Za-z0-9_-]+)\/payload\/candidate\/candidate.json$/
+      : /^(\/tmp\/owned-fp-runtime-[A-Za-z0-9_-]+)\/payload\/candidate\/candidate.json$/)?.[1];
   assert.ok(prefix, CODE + 'INPUT_PATH');
   for (const [key, path] of Object.entries({ candidate: 'candidate/candidate.json', crm_pack: 'crm/plugin-pack.json',
     service_evidence: 'pair/receipt.json', kernel_receipt: 'query/receipt.json', runtime_manifest: 'runtime-manifest.json', platform_receipt: 'platform-receipt.json' })) {
@@ -287,7 +291,9 @@ export async function readRuntimeHostInputs({ payload, payloadRoot, candidateByt
   return { runtime, manifest, prefix };
 }
 
-export async function checkRuntimeHostComposition({ packages, payload, candidate, manifest, runtime, prior }) {
+export async function checkRuntimeHostComposition({ packages, payload, candidate, manifest, runtime, prior, independentSources = false }) {
+  const serviceSource = independentSources ? candidate.service_compatibility?.binding?.source_sha : candidate.source_sha;
+  assert.match(serviceSource ?? '', /^[a-f0-9]{40}$/, CODE + 'SOURCE');
   assert.equal(packages.schema_version, 'dsh-first-purchase-host-artifacts-observed/v1', CODE + 'PACKAGES');
   assert.equal(packages.scope, 'target-runtime-artifacts-with-query-source-http', CODE + 'PACKAGES');
   assert.equal(packages.input_sha256, hash(payload.get('input-v5.json')), CODE + 'INPUT_BINDING');
@@ -329,7 +335,7 @@ export async function checkRuntimeHostComposition({ packages, payload, candidate
   assert.equal(packages.platform_wheel_evidence_sha256, prior.target_evidence_sha256, CODE + 'PLATFORM_BINDING');
   const query = decode(payload.get('query/receipt.json')), pair = decode(payload.get('pair/receipt.json'));
   const service = packages.service, kernel = packages.kernel;
-  assert.equal(query.source_sha, candidate.source_sha, CODE + 'SOURCE');
+  assert.equal(query.source_sha, serviceSource, CODE + 'SOURCE');
   assert.equal(query.sha256, prior.query_archive_sha256, CODE + 'QUERY_BINDING');
   assert.equal(query.manifest_sha256, prior.query_manifest_sha256, CODE + 'QUERY_BINDING');
   assert.equal(hash(payload.get('query/kernel.tar.zst')), query.sha256, CODE + 'QUERY_BINDING');
@@ -338,7 +344,7 @@ export async function checkRuntimeHostComposition({ packages, payload, candidate
   assert.equal(service.archive_sha256, pair.artifacts.candidate.sha256, CODE + 'SERVICE_BINDING');
   assert.equal(hash(payload.get('pair/candidate/' + pair.artifacts.candidate.artifact)), service.archive_sha256, CODE + 'SERVICE_BINDING');
   assert.equal(service.manifest_sha256, hash(payload.get('pair/candidate/service-manifest.json')), CODE + 'SERVICE_BINDING');
-  assert.equal(service.source_sha, candidate.source_sha, CODE + 'SOURCE');
+  assert.equal(service.source_sha, serviceSource, CODE + 'SOURCE');
   assert.equal(service.evidence_sha256, manifest.service_evidence_sha256, CODE + 'SERVICE_BINDING');
   const { receipt_sha256, runtime_mode, source_contract, installed_wheels, ...originalKernel } = kernel;
   assert.deepEqual(originalKernel, query, CODE + 'QUERY_BINDING');

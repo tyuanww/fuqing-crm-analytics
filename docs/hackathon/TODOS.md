@@ -337,7 +337,8 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 - [x] T2/T7 目标恢复观测子项（2026-10-07）：原四包/runtime WSL 首购在途 SIGKILL、持久前缀/幂等/原生回退整链 1 PASS；rc2 截断与 rc1↔rc2 文本回合 4/4，旧新保存服务 forward-fix 14/14。原 15 输入、journal seq 6 与 185 远端 payload 保持，291 文件取回校验、临时进程/目录回收、生产快照不变，见[本轮证据](./evidence/dsh-g0-first-purchase-recovery-wsl-20261007.md)。不代表任务已从 UNKNOWN 恢复到终态。
 - [x] P1 / T2/T7 恢复请求投影的本机源码修复：官方异步读取、并发事件去重与生命周期处理落地；Node 66、后端 50、官方 Host 终态整链 1 PASS。中断任务 FAILED/EXECUTION_UNKNOWN、释放活动名额、无重复派发，见[修复证据](./evidence/dsh-g0-native-journal-recovery-fix-20261007.md)。前批恢复演练已提交 `de89a527`。
 - [x] T2/T7 新插件候选现场终态验收：`3ffbd2a2` 新插件 / `a490457c…` 候选复用原 CRM、服务和 runtime；本机固定包 1 PASS，杭州来源 10/10、Host 终态 1 PASS，见[本轮证据](./evidence/dsh-g0-first-purchase-terminal-candidate-20261007.md)。显式 v2 允许插件/服务独立 SHA，旧 `861d6ef1…` 的 UNKNOWN 事实保持。
-- [ ] T2/T7 终态回执门禁：新候选服务观察已入 journal seq 4；Host 终态原始回执封存，尚需专用 verifier 接线，不能复用旧 HTTP/浏览器事件。v2 验收入口/测试/文档经审修随本次提交交付；新候选其余准入证据和 G0 stop/go 仍开放。
+- [x] T2/T7 终态回执门禁（2026-10-07）：新增明确 terminal schema，原 `a490457c…` 候选封存 WSL 回执通过 `plugin verify-host` 接入 seq 5，引用服务目标 seq 4，保持旧 HTTP/browser 合同。完整 release 391 PASS（含新门禁 37），实际错父拒绝、重试不写、619 文件保持，见[本轮证据](./evidence/dsh-g0-first-purchase-terminal-gate-20261007.md)。只关闭该观察接线，本批经 OCR delegate 审查随本次提交交付，未重跑现场。
+- [ ] 新候选其余准入证据与 G0 stop/go：当前包浏览器、完整跨版本 corpus、真实身份/模型/UAT、签名/SBOM、生产 activation/canary/rollback；不继承旧候选的 HTTP/browser 事件。
 - [ ] 旧工作树差异与分仓前置按[并行边界](./evidence/dsh-g0-worktree-triage-20261007.md)推进：public 138 条均有当前/历史已提交 blob，不重复提交；HTML 34 文件待语义审查，kit 固定开发依赖和信任验证独立推进；共享候选/journal 顺序收口。
 
 ## 2026-09-30 rc2 DX triage follow-up

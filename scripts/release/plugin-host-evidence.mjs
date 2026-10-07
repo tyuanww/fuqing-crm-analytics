@@ -14,6 +14,7 @@ import { validateServiceGate } from './service-compatibility.mjs';
 import { DSH_SDK_VERSION, DSH_UPSTREAM_SHA, NODE_MAJOR } from './toolchain.mjs';
 import { BROWSER_HOST_SCHEMA, verifyBrowserHostEvidence } from './browser-host-evidence.mjs';
 import { RUNTIME_HOST_SCHEMA, verifyRuntimeHostEvidence } from './runtime-host-evidence.mjs';
+import { TERMINAL_HOST_SCHEMA, verifyTerminalHostEvidence } from './terminal-host-evidence.mjs';
 
 export const HOST_EVIDENCE_SCHEMA = 'dsh-pinned-host-acceptance/v2';
 export const HOST_SCOPE = 'owned-loopback-real-host-synthetic-model-and-session';
@@ -108,6 +109,9 @@ async function verifyInstalledPack(evidenceRoot, domain, bytes) {
 export async function verifyPluginHost({ candidatePath, evidencePath, statePath } = {}) {
   for (const path of [candidatePath, evidencePath, statePath]) assert.ok(typeof path === 'string' && isAbsolute(path), 'PLUGIN_HOST_ABSOLUTE_PATH_REQUIRED');
   const envelopeBytes = await boundedFile(evidencePath, 2 * 1024 * 1024);
+  if (decode(envelopeBytes).schema_version === TERMINAL_HOST_SCHEMA) {
+    return verifyTerminalHostEvidence({ candidatePath, evidencePath, statePath, envelopeBytes });
+  }
   if (decode(envelopeBytes).schema_version === BROWSER_HOST_SCHEMA) {
     return verifyBrowserHostEvidence({ candidatePath, evidencePath, statePath, envelopeBytes });
   }

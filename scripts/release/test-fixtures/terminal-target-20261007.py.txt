@@ -1,0 +1,35 @@
+import hashlib,json,os,pathlib,platform,subprocess,sys,time,shutil
+p=pathlib.Path(sys.argv[1]);payload=p/'payload';repo=p/'controller/repo';result=p/'host-result'
+assert sys.flags.isolated and sys.version_info[:2]==(3,14) and os.getuid()==65534
+assert 'wsl2' in platform.release().lower() and (p/'.owned').read_text()=='synthetic-first-purchase-terminal/20261007\n'
+result.mkdir(mode=0o700);home=result/'home';home.mkdir(mode=0o700)
+env={'PATH':'/usr/local/bin:/usr/bin:/bin','HOME':str(home),'TMPDIR':str(home),'PYTHON_DOTENV_DISABLED':'1','PYTHONDONTWRITEBYTECODE':'1','PYTEST_DISABLE_PLUGIN_AUTOLOAD':'1'}
+source=p/'source/input'
+start=time.monotonic()
+with (p/'source-run.stdout').open('x') as out,(p/'source-run.stderr').open('x') as err:
+ r=subprocess.run([sys.executable,'-I','-B',str(source/'helpers/first-purchase-source-target.probe.py'),'run-wsl',str(source),(p/'source-input-sha.txt').read_text().strip()],cwd=home,env=env,stdout=out,stderr=err,timeout=240)
+assert r.returncode==0,'SOURCE_TARGET_FAILED'
+receipt=p/'source/result/receipt.json';assert json.loads(receipt.read_bytes())['status']=='PASS'
+print('SOURCE_TARGET_10_PASS',flush=True)
+shutil.copyfile(receipt,payload/'platform-receipt.json')
+data={'schema_version':'dsh-first-purchase-host-artifacts/v5'}
+for key,name in {'candidate':'candidate/candidate.json','crm_pack':'crm/plugin-pack.json','service_evidence':'pair/receipt.json','kernel_receipt':'query/receipt.json','runtime_manifest':'runtime-manifest.json','platform_receipt':'platform-receipt.json'}.items():
+ f=payload/name;data[key+'_path']=str(f);data[key+'_sha256']=hashlib.sha256(f.read_bytes()).hexdigest()
+data['runtime_archive_path']=str(p/'runtime.tar.zst')
+(payload/'input-v5.json').write_text(json.dumps(data,indent=2)+'\n')
+wheels=result/'wheels';wheels.mkdir(mode=0o700)
+for directory in ['query-wheels','controller-wheels']:
+ for f in (payload/directory).glob('*.whl'):
+  assert not (wheels/f.name).exists();shutil.copyfile(f,wheels/f.name)
+with (result/'controller-install.stdout').open('x') as out,(result/'controller-install.stderr').open('x') as err:
+ r=subprocess.run([sys.executable,'-I','-B',str(repo/'scripts/crm-calibration/service-runtime.fixture.py'),str(payload/'controller.json'),str(result/'venv'),'--wheelhouse',str(wheels)],cwd=home,env=env,stdout=out,stderr=err,timeout=120)
+assert r.returncode==0,'CONTROLLER_INSTALL_FAILED';print('CONTROLLER_OFFLINE_INSTALL_PASS',flush=True)
+env.update(B0_NATIVE_CRM_ARTIFACT_MANIFEST=str(payload/'input-v5.json'),B0_NATIVE_CRM_SERVICE_PYTHON='/usr/local/bin/python3.14',B0_NATIVE_CRM_SERVICE_WHEELHOUSE=str(payload/'query-wheels'),B0_NATIVE_CRM_KERNEL_WHEELHOUSE=str(payload/'query-wheels'),B0_NATIVE_CRM_RECOVERY='terminal')
+args=['--noconftest','-q','--tb=short','-p','no:cacheprovider',str(repo/'backend/tests/test_analytics_first_purchase_official_host.py'),'--basetemp='+str(result/'tests')]
+command='import sys,pytest;sys.path.insert(0,'+repr(str(repo))+');sys.exit(pytest.main('+repr(args)+'))'
+with (result/'pytest.stdout').open('x') as out,(result/'pytest.stderr').open('x') as err:
+ r=subprocess.run([str(result/'venv/bin/python'),'-I','-B','-c',command],cwd=repo,env=env,stdout=out,stderr=err,timeout=420)
+candidate=json.loads((payload/'candidate/candidate.json').read_bytes())
+receipt={'schema_version':'first-purchase-terminal-target/v1','status':'PASS' if r.returncode==0 else 'FAIL','exit_code':r.returncode,'seconds':round(time.monotonic()-start,2),'candidate_digest':candidate['candidate_digest'],'plugin_source':candidate['source_sha'],'service_source':candidate['service_compatibility']['binding']['source_sha'],'platform':{'system':platform.system(),'machine':platform.machine(),'kernel':platform.release(),'python':platform.python_version(),'uid':os.getuid()},'runtime_sha256':'a049f061847dd48e58b159bdfe9f388ef7ea5efdaf8ead3c3b4293d7411fdcf4','production_identity':'NOT_RUN','supply_chain':'NOT_VERIFIED','activation':'NOT_RUN','release_ready':False}
+(result/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n');print(json.dumps(receipt),flush=True)
+sys.exit(r.returncode)
