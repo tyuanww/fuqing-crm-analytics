@@ -76,6 +76,8 @@ test('real kit tarball contains only declared source/locks and exposes its publi
   await exec('corepack', ['pnpm', 'install', '--offline', '--ignore-scripts', '--ignore-workspace',
     '--config.auto-install-peers=false', '--store-dir', join(root, 'fresh-store')], { cwd: consumer, env, timeout: 30000 });
   const installedKit = join(consumer, 'node_modules/@shine-mage/dsh-plugin-kit');
+  const archiveHelp = await exec('python3', [join(installedKit, 'sdk-archive.py'), '--help'], { cwd: consumer, env });
+  assert.match(archiveHelp.stdout, /pack,receive/);
   const help = await exec(process.execPath, [join(installedKit, 'prepare.mjs'), '--help'], { cwd: consumer, env });
   assert.match(help.stdout, /--destination/);
   await assert.rejects(exec(process.execPath, [join(installedKit, 'prepare.mjs'), '--destination', consumer], { cwd: consumer, env }), error => {

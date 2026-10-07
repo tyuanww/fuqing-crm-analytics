@@ -351,6 +351,8 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 - [x] T2 新构建 WSL 子项（2026-10-07）：固定官方 rc1 SHA/锁在独有目录以 nobody 冻结安装并执行 host/native 构建，text/tool/rich 12 场景、30 冷进程通过；98040 个构建输入保持，133 个结果文件取回核验。见[现场记录](./evidence/dsh-g0-kit-install-wsl-rebuild-20261007.md)。新可追踪输入的 WSL 验证不再待办；历史签名/供应链、未覆盖事件组合和真实业务准入仍开放。
 - [x] T15 全部 kit 消费者安装子项（2026-10-07）：10 个构建消费者使用精确开发依赖/public exports，实际离线安装后无相邻源码构建/测试 10/10；88 项相关回归、追加 HTTP 覆盖后 kit 15 项、CLI/release 73 项通过。修复跨插件测试耦合，领域包摘要不变，见[本轮证据](./evidence/dsh-g0-kit-all-consumers-20261007.md)。SDK/工具闭包分发、整台干净机器、签名和物理分仓仍开放；未提交或操作杭州。
 - [x] T15 kit 首次 SDK 准备子项（2026-10-07）：已安装 kit 在全新 HOME/Corepack/store 中获取固定官方源码并构建 SDK，26 个入口 READY；新输入下 10/10 消费者构建/测试、15 项套件、16 项保护测试和 67 项相关回归通过。修复 Node 公共 CA 输入和旧测试 Git index 写入，123781 个输入记录及旧证据保持，见[本轮证据](./evidence/dsh-g0-kit-bootstrap-20261007.md)。只关闭本机新依赖目录准备；预编译闭包/签名/registry、新机器/新入口 WSL 与物理分仓仍开放。
+- [x] T15 kit 审修与同平台迁移子项（2026-10-07）：前批经 OCR 审修正常 hooks 提交 `90d5012d`；迁移 SDK/工具/Corepack 后禁用原路径和外网，10/10 消费者构建/测试、15 项套件通过，两份各 124231 条输入记录保持。见[迁移证据](./evidence/dsh-g0-kit-relocation-20261007.md)。只关闭 Mac 支持构建路径迁移；安全归档、平台闭包/签名与全新机器/WSL 分发仍开放。
+- [x] T15 开发 SDK 本地归档往返子项（2026-10-07）：严格 blob/链接清单、pin/平台/准备记录和摘要限额，真实 812 MB 包接收后 10/10 消费者构建/测试；相关 38 PASS、16 项归档负测和 25 subtests PASS，原输入/证据/候选保持。见[本轮证据](./evidence/dsh-g0-kit-sdk-archive-20261007.md)。仅受控本地开发，秘密扫描/签名与跨平台/WSL 仍开放，未提交或发布。
 - [ ] 旧工作树差异与分仓前置按[并行边界](./evidence/dsh-g0-worktree-triage-20261007.md)推进：public 138 条均有当前/历史已提交 blob，不重复提交；HTML 34 文件待语义审查，kit 固定开发依赖和信任验证独立推进；共享候选/journal 顺序收口。
 
 ## 2026-09-30 rc2 DX triage follow-up

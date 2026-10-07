@@ -71,7 +71,7 @@ export async function copyTreeBounded(source, destination, options = {}) {
 /** Copy only kit-owned source/lock inputs; prepared dependencies stay external. */
 export async function copyPluginKitSources(source, destination, options = {}) {
   const shared = { ...options, budget: options.budget ?? { bytes: 0, files: 0 } };
-  for (const item of ['package.json', 'toolchain.json', 'toolchain.mjs', 'prepare.mjs', 'package-manager.mjs', 'sdk-inputs.mjs', 'check.mjs', 'packaged-dependencies.mjs', 'README.md',
+  for (const item of ['package.json', 'toolchain.json', 'toolchain.mjs', 'prepare.mjs', 'sdk-archive.py', 'package-manager.mjs', 'sdk-inputs.mjs', 'check.mjs', 'packaged-dependencies.mjs', 'README.md',
     'build-tools/package.json', 'build-tools/pnpm-lock.yaml', 'build-tools/pnpm-workspace.yaml', 'build-tools/patches']) {
     await copyTreeBounded(join(source, item), join(destination, item), shared);
   }

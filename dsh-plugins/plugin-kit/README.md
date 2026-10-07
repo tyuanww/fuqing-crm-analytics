@@ -40,6 +40,29 @@ node build.mjs /absolute/new-sdk-inputs/upstream /absolute/new-sdk-inputs/build-
 
 此入口的 READY 只表示开发 SDK/工具输入准备完毕：`scope=development-sdk-only`、`production_runtime=NOT_BUILT`、`supply_chain=NOT_VERIFIED`、`release_ready=false`。它不是预编译包、数字签名、运行时安装或部署命令。
 
+## 本地开发 SDK 归档与接收
+
+`sdk-archive.py` 为同平台开发目录提供离线传输，使用 Python 3.14 与绝对路径的 Node 24。源目录必须是上述 `prepare.mjs` 生成的 READY 目录，其平台、架构、上游 SHA 和 pin 摘要须与当前 kit 一致。输出和接收目录必须不存在，父目录须已存在：
+
+```sh
+python3 node_modules/@shine-mage/dsh-plugin-kit/sdk-archive.py pack \
+  --source /absolute/prepared-sdk-inputs \
+  --output /absolute/new-sdk-archive \
+  --node /absolute/node24
+
+python3 node_modules/@shine-mage/dsh-plugin-kit/sdk-archive.py receive \
+  --archive /absolute/new-sdk-archive/sdk.zip \
+  --sha256 REVIEWED_ARCHIVE_SHA256 \
+  --destination /absolute/new-received-sdk \
+  --node /absolute/node24
+```
+
+`pack` 输出 `sdk.zip` 与 `receipt.json`，后者记录 archive/manifest 摘要。接收时的 SHA 必须来自已核对的打包回执或后续受信清单；与不可信包一起下载的摘要本身不能证明发布者身份。接收端在读取归档前后核对同一文件描述符的 SHA，校验 exact schema、pin、OS/arch/Node major、大小/条目/ZIP 目录限额、文件摘要和封闭链接图，再运行同一 `check.mjs`。不执行 SDK、安装 hooks 或联网下载。
+
+归档只有内容寻址的普通文件和清单；相对符号链接在私有 staging 的所有文件验证后创建，不放宽生产解包规则。只允许 upstream/build-tools/corepack，排除调用者 HOME/store、Git 配置/hooks/logs 和敏感配置名；保留固定官方源码的两份公开 desktop `.env.*.example` 模板及 Git 校验必需的对象/index。成功时三个目录进入本次独占的目标目录；只有最终 `receipt.json` 为 LOCAL_READY 才表示接收完成。失败保留 BLOCKED 回执，清理本次 staging，既有目标绝不覆盖；不提供 resume/覆盖安装。
+
+接收后显式把 `new-received-sdk/upstream` 和 `new-received-sdk/build-tools` 传给 `check.mjs`/插件 build。本地归档仍为 **development-sdk-only**：`secret_scan=NOT_RUN`、`supply_chain=NOT_VERIFIED`、`release_ready=false`，没有发布、签名或全量依赖内容审计。当前真实归档/消费者验证仅覆盖 darwin-arm64；Linux/WSL、libc/原生 ABI 的兼容性须另验，Mac 包不能用于 WSL。它也不是已收敛的最小 SDK 闭包。完整供应链门禁通过前只在受控本地开发中使用，不上传到 Release 或生产环境。
+
 全部 10 个构建消费者（9 个插件与 board-components 领域包）已使用公开 package export 和精确 `0.1.0` devDependency，移除相邻 kit 源码 import。kit 不允许成为 runtime/optional/peer 依赖，也不能进入领域包的 `bundled-dependencies.json`。公开入口为 `./toolchain`、`./packaged-dependencies` 与只读 `./pin`；版本钉供开发测试读取，运行时代码不能导入 kit。
 
 本仓工作区由 B0 pipeline、release preflight、CRM calibration 与本地 reload 显式调用 `scripts/dsh-b0/plugin-kit-link.mjs` 连接当前 kit；手动构建前可在仓库根运行 `node scripts/dsh-b0/plugin-kit-link.mjs "$PWD/dsh-plugins/shine-brand" "$PWD/dsh-plugins/plugin-kit"`。这只建立构建期链接，重复调用不改已有相同链接，其他安装拒绝覆盖。reload 只接线本仓真实目录，外部 checkout 必须使用自己安装的 kit，不注入本仓工具。只读 `check.mjs` 不调用此适配器。

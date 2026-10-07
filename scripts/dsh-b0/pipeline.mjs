@@ -165,7 +165,7 @@ print('B0 exact Python closure verified')
   const pyTests = ['jobs', 'access', 'run_contracts', 'run_resources', 'native_runtime', 'worker', 'context', 'native_probe', 'query_contracts', 'channel_followup', 'query_jobs', 'query_run_contracts', 'query_worker', 'query_runtime', 'query_native_fault', 'saved_analyses', 'analysis_http', 'cockpit', 'cockpit_http', 'query_assets_runtime', 'first_purchase', 'first_purchase_http', 'first_purchase_kernel', 'first_purchase_analysis', 'first_purchase_save_recovery', 'first_purchase_save_receipts', 'first_purchase_save_api', 'first_purchase_save_ui', 'first_purchase_crm_identity', 'first_purchase_source', 'first_purchase_native', 'customer_features_w4', 'feature_publication_w5', 'runtime_ports'].map(name => `backend/tests/test_analytics_${name}.py`);
   // HTTP/computation tests import the archived CRM dependency closure and run
   // under the shared bounded backend profile, not the minimal B0 interpreter.
-  pyTests.push('backend/tests/test_analytics_first_purchase_native_identity.py',
+  pyTests.push('scripts/dsh-b0/test_sdk_archive.py', 'backend/tests/test_analytics_first_purchase_native_identity.py',
     'backend/tests/test_analytics_first_purchase_source_http.py',
     'backend/tests/test_analytics_first_purchase_native_crm_http.py',
     'backend/tests/test_first_purchase_packed_service_support.py',

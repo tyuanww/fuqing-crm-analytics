@@ -245,6 +245,8 @@ T3/T7 的 `backend/tests/test_analytics_first_purchase_save_recovery.py` 纳入�
 
 ### 插件开发 kit 验证
 
+`python3 -m pytest --noconftest -W error::ResourceWarning -q scripts/dsh-b0/test_sdk_archive.py` 验证 SDK 本地归档的 schema/平台、路径/链接图、摘要、ZIP 目录/大小上限、失败 staging 回收和不覆盖已有目标；已纳入 B0 Python 测试清单。实际包通过 `sdk-archive.py pack/receive` 生成并恢复后，仍须将恢复的 upstream/build-tools 显式传给 `plugin-kit.test.mjs`，不能只凭 pack 的 LOCAL_READY 判定构建可用。生产 `secure-unpack.py` 仍拒绝符号链接；开发归档为独立合同且 `release_ready=false`，签名/秘密扫描/跨平台证据单列。
+
 kit 自身的在线准备入口为 `node node_modules/@shine-mage/dsh-plugin-kit/prepare.mjs --destination /absolute/new-sdk-inputs`，可选 `--ca-file /absolute/public-ca-bundle.pem`。只接受新目录，固定官方 SHA/锁和工具版本；在独立 HOME/store 中安装并构建开发 SDK，不构建生产 runtime。该入口必须显式运行，不接入默认 doctor/check 或每次插件构建。`plugin-kit-prepare.test.mjs` 则只用隔离夹具验证环境、不覆盖、失败码、公共 CA 输入和中断/超时进程回收，已纳入 B0，不联网。
 
 首次准备完成后，使用 `B0_BUILD_UPSTREAM=/absolute/new-sdk-inputs/upstream B0_BUILD_TOOLS=/absolute/new-sdk-inputs/build-tools node --test scripts/dsh-b0/plugin-kit.test.mjs` 验证实际安装 kit 的全部 10 个消费者。冷准备的真实记录另见[本轮证据](../hackathon/evidence/dsh-g0-kit-bootstrap-20261007.md)，包括首次证书失败及修复后的新目录、固定输入保护和仍未运行的目标平台层级。只有设置两个新路径才证明消费新闭包；不能沿用仓库 build-tools 冒充完整冷准备。

@@ -18,7 +18,17 @@
 
 - 当前采用历史结果快照 + 保存时校验；陈旧/过期阈值已移出当前待办，不再等待确认，也不新增到期系统。保留生成时间/来源和 `NOT_CHECKED`，权限、候选准入、冲突、幂等与会话/请求超时保持；旧 wire/回执兼容不删除。见[决定与验证](docs/hackathon/evidence/dsh-g0-snapshot-policy-closeout-20261007.md)。
 
-### kit 增量提交前审核（2026-10-07，最新增量）
+### 开发 SDK 本地归档与接收（2026-10-07，最新增量）
+
+- 延续 `90d5012d` 和前轮四份文档，新增 kit `sdk-archive.py pack/receive`：普通内容块 + 严格链接清单、固定准备记录/pin/平台、归档/文件摘要与限额、独占目标和失败 staging 回收，生产解包规则保持。真实约 **812 MB** 归档在新目录接收通过，10/10 消费者离线构建/测试，相关 **38 PASS / 0 SKIP**；archive 负测 **16 PASS、25 subtests PASS**。见[本轮证据](docs/hackathon/evidence/dsh-g0-kit-sdk-archive-20261007.md)。
+- 原 SDK 124231 条、接收 manifest 141091 条、1318 个旧证据及 candidate/journal seq 6 保持。本批代码/测试/文档未提交，没有杭州或发布动作。只关闭同平台本地归档往返；完整秘密扫描、签名/SBOM/CVE/撤销、最小闭包与新机器/WSL 仍开放，回执继续 **release_ready=false / PARTIAL**。
+
+### kit 已提交与开发输入迁移（2026-10-07，上一增量）
+
+- 前批 OCR 审修的 64 个文件已通过正常 hooks 本地提交 **`90d5012d`**，提交后工作树干净；未 push 或部署。随后继续 T15，固定 SDK/工具/Corepack 在新目录、原 SDK/旧缓存不可读且外网禁用的 sandbox 内完成 **10/10** 消费者构建/测试（套件 **15 PASS / 0 SKIP**，27.64 秒），见[迁移验证](docs/hackathon/evidence/dsh-g0-kit-relocation-20261007.md)。
+- 原输入和迁移副本各 **124231** 条内容/链接/权限记录保持，原候选与 journal seq 6 不变。只关闭同一 Mac 的 kit 支持构建路径迁移；约 2.2 GB 是开发闭包的逻辑大小，不是插件部署包。跨平台预编译分发、签名与新机器/WSL 仍开放，整体 **PARTIAL**；本次后续增量只记录证据与任务状态。
+
+### kit 增量提交前审核（2026-10-07，已提交阶段）
 
 - 按用户指定 OCR delegate 完成 **50/50** 代码/配置路径及额外 **13/13** 文档核对；修复 pnpm symlink 入口静默空跑和最终 Git 预检继承应用环境的问题，两项负测先失败后通过。见[审核记录](docs/hackathon/evidence/dsh-g0-kit-review-20261007.md)。本次审核覆盖此前全部未提交 kit 增量，不改业务运行时或 DSH 上游。
 - 修复后保护测试 **18 PASS**，受影响回归 **156 项覆盖**（首次 153 PASS、3 项因测试 PATH 缺 zstd 失败；补齐已安装工具后对应 release 套件 **41/41 PASS**）。包含 10/10 独立消费者构建/测试；旧 1318 文件、候选和 journal seq 6 保持。当前范围没有未关闭高/中严重度发现；生产/分仓门禁仍 PARTIAL。

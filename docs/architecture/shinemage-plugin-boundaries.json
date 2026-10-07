@@ -218,6 +218,7 @@
         "toolchain.json",
         "toolchain.mjs",
         "prepare.mjs",
+        "sdk-archive.py",
         "package-manager.mjs",
         "sdk-inputs.mjs",
         "check.mjs",
@@ -234,7 +235,7 @@
       "bundled_inputs": [],
       "dsh": {},
       "commands": {},
-      "manifest_sha256": "85ca3435e5093a9b3a3250065d7e7030597d049a113d6a1922f442fa5318bd12"
+      "manifest_sha256": "dd5ba9a8bbacaeb596e5d473a45f06e9de4e6d7c3658b2094cff13d50ffb349d"
     },
     {
       "path": "dsh-plugins/shine-board",
