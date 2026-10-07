@@ -37,7 +37,7 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
     assert upstream is None or Path(upstream).is_absolute()
     source_http = os.environ.get("B0_NATIVE_CRM_SOURCE_HTTP")
     recovery = os.environ.get("B0_NATIVE_CRM_RECOVERY")
-    assert recovery in (None, "1"), "HOST_RECOVERY_MODE_INVALID"
+    assert recovery in (None, "1", "terminal"), "HOST_RECOVERY_MODE_INVALID"
     assert not (recovery and os.environ.get("B0_NATIVE_CRM_BROWSER_MODULE")), "HOST_RECOVERY_BROWSER_SCOPE_CONFLICT"
     assert source_http in (None, "1"), "HOST_SOURCE_MODE_INVALID"
     # Old immutable packages predate this opt-in source API. Never relabel them.
@@ -274,7 +274,19 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
                         assert command({"operation": "login"}) == {"ok": True, "connected": True}
                         dispatcher.tick()
                         interrupted = runs.get(fp_actor("crm-owner"), interrupted_id)
-                        assert interrupted.status == "UNKNOWN", interrupted.model_dump(mode="json")
+                        if recovery == "terminal":
+                            deadline = monotonic() + 10
+                            while interrupted.status != "FAILED" and monotonic() < deadline:
+                                sleep(0.05)
+                                dispatcher.tick()
+                                interrupted = runs.get(fp_actor("crm-owner"), interrupted_id)
+                            assert interrupted.status == "FAILED", interrupted.model_dump(mode="json")
+                            assert interrupted.diagnostics.error_code == "EXECUTION_UNKNOWN"
+                            assert not interrupted.diagnostics.execution_active
+                        else:
+                            # Reproduce the archived candidate honestly; this
+                            # historical mode is not the terminal-recovery gate.
+                            assert interrupted.status == "UNKNOWN", interrupted.model_dump(mode="json")
                         assert interrupted.diagnostics.dispatch_attempts == 1 and interrupted.result is None
                         same_intent = native_prompt("fp-" + admitted["commandId"])
                         same_intent["content"][0]["text"] = question

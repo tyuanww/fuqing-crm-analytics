@@ -14,10 +14,17 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 当前候选的 WSL 恢复验收（2026-10-07，当前进度）
+### 恢复投影源码修复与工作树核对（2026-10-07，当前进度）
+
+- 前批恢复演练/证据正常 hooks 提交 `de89a527`（15 文件）。本轮补官方异步历史投影、事件重叠和卸载处理，并为各入口显式声明服务依赖；Node 66 PASS、后端 50 PASS，官方 Host 终态整链 1 PASS（4.44 秒），见[修复证据](docs/hackathon/evidence/dsh-g0-native-journal-recovery-fix-20261007.md)。
+- 本机中断 run 为 `FAILED / EXECUTION_UNKNOWN`、`execution_active=false`，派发仍一次，原保存仍一条。**只关闭本机源码缺陷，不关闭新候选/杭州门禁**；旧候选 `861d6ef1…` 仍保留其 UNKNOWN 结果。当前没有生产切换。
+- 旧 public 的 138 条 Git 改动都能匹配当前分支或其历史已提交内容；HTML 工作树仍有 34 个文件待语义审查。见[归属与并行边界](docs/hackathon/evidence/dsh-g0-worktree-triage-20261007.md)。没有清理或覆盖旧工作树。
+- 下一步：本批审核提交后固定新插件候选，复用原服务/runtime 验证终态恢复；HTML 差异审修、独立构建依赖与包信任验证可按隔离边界并行，journal/候选接线顺序收口。整体仍 PARTIAL。
+
+### 当前候选的 WSL 恢复验收（2026-10-07，上一阶段）
 
 - 原四包/runtime 在目标 WSL2、UID 65534 完成正式首购受理→模型等待期间 SIGKILL→同一会话恢复；整链 **1 PASS（76.91 秒）**，50 条已提交事件前缀保持、同请求不重复派发、原保存仍一条、普通原生对话可用。官方持久化截断/rc1↔rc2 文本回合 **4/4 PASS**，固定新旧保存包的 forward-fix **14/14 PASS**，见[本轮证据](docs/hackathon/evidence/dsh-g0-first-purchase-recovery-wsl-20261007.md)。
-- **新确认 P1 未关闭**：崩溃业务 run 仍为 `UNKNOWN / execution_active=true`，不能视为终态恢复。当前 nativeJournal 只折叠实时事件，而 rc2 恢复 seed 不重发事件；下一步补官方持久化读取与恢复投影，再验证终态释放。不得仅凭进程退出清除状态。
+- **该阶段发现的 P1**：旧候选崩溃业务 run 为 `UNKNOWN / execution_active=true`，不能视为终态恢复。当时 nativeJournal 只折叠实时事件，而 rc2 恢复 seed 不重发事件；后续本机源码修复见上节，新候选终态验证仍开放。不得仅凭进程退出清除状态。
 - 本机新恢复/mock **8 PASS**、宿主保护 **45 PASS / 3 SKIP**；三项 skip 未冒充通过。15 个固定输入与 journal seq 6 保持，远端 185 个封存输入不变，291 个结果文件取回校验；临时进程/目录已回收，生产 current/监听/PID 未变。
 - **仍 PARTIAL / release_ready=false**：旧 rc1 编译闭包构建证明、完整跨版本 corpus、生产身份/UAT、供应链与 activation 等仍开放。恢复工具/证据已完成提交前 [OCR 14/14 审核](docs/hackathon/evidence/dsh-g0-recovery-harness-review-20261007.md)，作为独立测试批次交付；业务 P1 不在本批修复，未 push 或切换生产。
 

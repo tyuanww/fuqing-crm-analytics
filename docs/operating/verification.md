@@ -243,4 +243,6 @@ T3/T7 的 `backend/tests/test_analytics_first_purchase_save_recovery.py` 纳入�
 
 Node 24 下以 `B0_BUILD_UPSTREAM=/absolute/pinned-rc2-checkout node --test scripts/dsh-b0/recovery-model-gate.test.mjs scripts/dsh-b0/session-recovery.test.mjs scripts/dsh-b0/mock-provider.test.mjs` 验证故障代理、输出保护和官方 JSONL 冷读写；两个新测试入口已纳入同一 B0 pipeline。跨版本入口为 `node scripts/dsh-b0/session-recovery.mjs /absolute/new-output /absolute/rc2-modules /absolute/rc1-modules`，必须提供新输出目录和实际编译模块目录；缺 rc1 返回 PARTIAL/退出 2，子进程失败返回 FAIL/退出 1，不默认联网、构建或读取现有会话。
 
-实际首购 Host 通过原 `test_analytics_first_purchase_official_host.py` 加 `B0_NATIVE_CRM_RECOVERY=1` 显式运行，沿用 v5 不可变包输入，与 browser 模式互斥。本轮 WSL 整链 1 PASS、持久化 4/4 和服务兼容 14/14 的范围与原始日志见[恢复证据](../hackathon/evidence/dsh-g0-first-purchase-recovery-wsl-20261007.md)。该测试当前锁定原候选的安全 UNKNOWN 行为，**不能当作业务任务终态恢复门禁**；恢复历史投影及活动名额释放仍是 P1。本次未接入新的 release journal 事件。
+实际首购 Host 通过原 `test_analytics_first_purchase_official_host.py` 加 `B0_NATIVE_CRM_RECOVERY=1` 显式运行，沿用 v5 不可变包输入，与 browser 模式互斥。该阶段 WSL 整链 1 PASS、持久化 4/4 和服务兼容 14/14 的范围与原始日志见[恢复证据](../hackathon/evidence/dsh-g0-first-purchase-recovery-wsl-20261007.md)。此模式锁定原候选的安全 UNKNOWN 行为，**不能当作业务任务终态恢复门禁**；恢复历史投影及活动名额释放的本机修复见下段，新包验收仍开放。该阶段未接入新的 release journal 事件。
+
+修复后终态门禁显式使用 `B0_NATIVE_CRM_RECOVERY=terminal`：要求 FAILED/EXECUTION_UNKNOWN、活动名额释放、相同请求不重复派发和原分析唯一；`=1` 仅保留旧包的历史复现。源码模式与固定包模式继续互斥。当前源码/官方 Host 通过，命令、失败日志和范围见[投影修复证据](../hackathon/evidence/dsh-g0-native-journal-recovery-fix-20261007.md)；新包/杭州终态验证仍待执行。

@@ -15,8 +15,8 @@ import { firstPurchaseCommandEnvelope } from '../../dsh-plugins/analytics-workbe
 import { prepareFirstPurchaseArtifacts, verifyFirstPurchaseInstalledArtifacts } from './first-purchase-artifacts.mjs';
 
 const repository = fileURLToPath(new URL('../..', import.meta.url));
-assert.ok([undefined, '1'].includes(process.env.B0_NATIVE_CRM_RECOVERY), 'HOST_RECOVERY_MODE_INVALID');
-const recoveryEnabled = process.env.B0_NATIVE_CRM_RECOVERY === '1';
+assert.ok([undefined, '1', 'terminal'].includes(process.env.B0_NATIVE_CRM_RECOVERY), 'HOST_RECOVERY_MODE_INVALID');
+const recoveryEnabled = Boolean(process.env.B0_NATIVE_CRM_RECOVERY);
 assert.equal(Number(process.versions.node.split('.')[0]), 24);
 const packed = process.env.B0_NATIVE_CRM_ARTIFACT_MANIFEST ? await prepareFirstPurchaseArtifacts({
   manifestPath: process.env.B0_NATIVE_CRM_ARTIFACT_MANIFEST,
@@ -278,6 +278,7 @@ try {
     admission: browserResult ? 'official native composer slash command in Chrome' : 'official commands/execute HTTP; browser rendering NOT_RUN' });
   if (recoveryEnabled) await write(join(root, 'recovery-observations.json'), {
     schema_version: 'first-purchase-owned-recovery/v1', candidate_digest: candidateDigest,
+    expected_business_recovery: process.env.B0_NATIVE_CRM_RECOVERY === 'terminal' ? 'FAILED_SLOT_RELEASED' : 'LEGACY_UNKNOWN',
     upstream_sha: DSH_UPSTREAM_SHA, artifacts: packed?.evidence ?? 'WORKSPACE_COMPILED_OUTPUT',
     observations: recovery, cleanup_ok: cleanup.every(item => item.status === 'fulfilled'),
     package_integrity: packageIntegrity, production_activation: 'NOT_RUN', release_ready: false,

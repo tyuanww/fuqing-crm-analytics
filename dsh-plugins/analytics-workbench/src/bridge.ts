@@ -12,7 +12,7 @@ import { registeredSessionIds } from './runtime-family.mjs';
 import { observeNativeIdentity } from './first-purchase-native-identity.mjs';
 
 export const name = 'analytics-workbench-b0-bridge';
-export const inject = ['agents', 'sessions', 'sessionController'];
+export const inject = ['agents', 'sessions', 'sessionController', 'sessionQuery'];
 const id = (value: unknown): value is string => typeof value === 'string' && /^[A-Za-z0-9_.:-]{1,128}$/.test(value);
 
 export function apply(ctx: Context): void {
@@ -52,7 +52,7 @@ export function apply(ctx: Context): void {
         agent = restored.agent;
       }
       if (!agent) return respond(200, evidenceFor(intent, { received: false, successful_call_ids: [] }, false));
-      let summary = summarizeJournal(nativeJournal(ctx).of(agent.session), intent.request_id);
+      let summary = summarizeJournal(await nativeJournal(ctx).ready(agent.session), intent.request_id);
       if (req.url === '/dispatch') {
         if (summary.received) return respond(200, { accepted: true });
         // Inbox.hasPending was removed in 0.1.5; pending input is the two ordered lists.
@@ -82,7 +82,7 @@ export function apply(ctx: Context): void {
       if (req.url !== '/observe') return respond(404, { error: 'not-found' });
       const idle = await Promise.race([agent.whenIdle().then(() => true), delay(80, false)]);
       const durable = idle && await ctx.sessions.flush(agent.session);
-      summary = summarizeJournal(nativeJournal(ctx).of(agent.session), intent.request_id);
+      summary = summarizeJournal(await nativeJournal(ctx).ready(agent.session), intent.request_id);
       const exited = idle && durable && ctx.agents.get(intent.session_id as never) === agent && agent.status === 'idle'
         && agent.inbox.nextTurn.length === 0 && agent.inbox.nextStep.length === 0;
       return respond(200, evidenceFor(intent, summary, exited));

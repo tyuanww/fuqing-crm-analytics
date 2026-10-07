@@ -9,7 +9,7 @@ import { apply as applyFirstPurchaseQueryTool } from './first-purchase-query-too
 import { queryPackEnabled } from './feature-pack-gate.mjs';
 
 export const name = 'analytics-workbench-b0-tool';
-export const inject = ['tools'];
+export const inject = ['tools', 'sessions', 'sessionQuery'];
 
 /** The only Host capability contributed by this package. */
 export function apply(ctx: Context): void {
@@ -60,7 +60,7 @@ export function apply(ctx: Context): void {
       const token = process.env.B0_RUNTIME_TOKEN;
       const agent = exec.agent;
       if (!token || !agent || agent.id !== process.env.B0_SESSION_ID) throw new Error('B0 tool has no bound execution context');
-      const requestId = requestForToolIn(nativeJournal(ctx).of(agent.session), exec.callId);
+      const requestId = requestForToolIn(await nativeJournal(ctx).ready(agent.session), exec.callId);
       if (!requestId) throw new Error('B0 tool has no journal-correlated native request');
       const response = await fetch(kernelUrl('/internal/native/fixture'), {
         method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },

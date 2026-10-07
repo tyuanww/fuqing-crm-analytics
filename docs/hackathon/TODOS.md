@@ -335,7 +335,9 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 
 - [x] T2/T7 目标恢复前置核验（2026-10-07）：审修已提交 `b6cecdb6`；三次只读 SSH 核对工具/端口、现役 `dsh-0.20.0.0-r3`、rc1 `46a7f68b` tracked clean 和执行入口，固定恢复输入清单见[前置证据](./evidence/dsh-g0-first-purchase-recovery-preflight-20261007.md)。该阶段只关闭输入发现；后续实际运行见下一项。
 - [x] T2/T7 目标恢复观测子项（2026-10-07）：原四包/runtime WSL 首购在途 SIGKILL、持久前缀/幂等/原生回退整链 1 PASS；rc2 截断与 rc1↔rc2 文本回合 4/4，旧新保存服务 forward-fix 14/14。原 15 输入、journal seq 6 与 185 远端 payload 保持，291 文件取回校验、临时进程/目录回收、生产快照不变，见[本轮证据](./evidence/dsh-g0-first-purchase-recovery-wsl-20261007.md)。不代表任务已从 UNKNOWN 恢复到终态。
-- [ ] P1 / T2/T7 恢复请求投影：当前候选崩溃 run 为 UNKNOWN 且占活动名额；nativeJournal 只监听实时事件，rc2 恢复 seed 不重发事件。使用官方持久化读取补历史投影及并发事件/生命周期处理，保持 request/turn/exit 相关性；先负测与本机官方 Host，再审核新插件候选并复验终态释放。禁止靠旧 PID、超时或直接改库强制清除 UNKNOWN。
+- [x] P1 / T2/T7 恢复请求投影的本机源码修复：官方异步读取、并发事件去重与生命周期处理落地；Node 66、后端 50、官方 Host 终态整链 1 PASS。中断任务 FAILED/EXECUTION_UNKNOWN、释放活动名额、无重复派发，见[修复证据](./evidence/dsh-g0-native-journal-recovery-fix-20261007.md)。前批恢复演练已提交 `de89a527`。
+- [ ] T2/T7 新插件候选终态验收：审核提交新源码后重建插件包，组合原固定服务/runtime，复验本机及 WSL 终态恢复并接入回执。旧 `861d6ef1…` 的 UNKNOWN 事实保持，不把本机源码结论套到旧包。
+- [ ] 旧工作树差异与分仓前置按[并行边界](./evidence/dsh-g0-worktree-triage-20261007.md)推进：public 138 条均有当前/历史已提交 blob，不重复提交；HTML 34 文件待语义审查，kit 固定开发依赖和信任验证独立推进；共享候选/journal 顺序收口。
 
 ## 2026-09-30 rc2 DX triage follow-up
 
