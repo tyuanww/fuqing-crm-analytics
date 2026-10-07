@@ -1,0 +1,34 @@
+P='/tmp/owned-fp-browser-cku4mhx5'
+import hashlib,json,os,pathlib,platform,subprocess,sys,time,shutil
+p=pathlib.Path(P);payload=p/'payload';repo=p/'controller/repo';result=p/'browser-result'
+assert sys.flags.isolated and sys.version_info[:2]==(3,14) and os.getuid()==65534
+assert 'wsl2' in platform.release().lower() and (p/'.owned').read_text()=='synthetic-first-purchase-current-browser/20261007\n'
+result.mkdir(mode=0o700);home=result/'home';home.mkdir(mode=0o700)
+env={'PATH':'/usr/local/bin:/usr/bin:/bin','HOME':str(home),'TMPDIR':str(home),'PYTHON_DOTENV_DISABLED':'1','PYTHONDONTWRITEBYTECODE':'1','PYTEST_DISABLE_PLUGIN_AUTOLOAD':'1','B0_NATIVE_CRM_BROWSER_EXECUTABLE':str(p/'browser-launch-r3.sh')}
+data={'schema_version':'dsh-first-purchase-host-artifacts/v5'}
+for key,name in {'candidate':'candidate/candidate.json','crm_pack':'crm/plugin-pack.json','service_evidence':'pair/receipt.json','kernel_receipt':'query/receipt.json','runtime_manifest':'runtime-manifest.json','platform_receipt':'platform-receipt.json'}.items():
+ f=payload/name;data[key+'_path']=str(f);data[key+'_sha256']=hashlib.sha256(f.read_bytes()).hexdigest()
+data['runtime_archive_path']=str(p/'runtime.tar.zst')
+(payload/'input-v5.json').write_text(json.dumps(data,indent=2)+'\n')
+module=p/'browser-driver/node_modules/playwright/index.mjs'
+preflight="import { launchFirstPurchaseBrowser } from "+json.dumps((repo/'scripts/dsh-b0/first-purchase-browser.probe.mjs').as_uri())+"; const b=await launchFirstPurchaseBrowser({modulePath:"+json.dumps(str(module))+"}); let c; try{c=await b.newContext();const page=await c.newPage();await page.goto('about:blank');console.log(JSON.stringify({version:b.version(),platform:process.platform,uid:process.getuid(),scope:'target-browser-readiness-only'}));}finally{try{await c?.close();}finally{await b.close();}}"
+r=subprocess.run(['/usr/local/bin/node','--input-type=module','-e',preflight],cwd=home,env=env,capture_output=True,text=True,timeout=45)
+(result/'browser-preflight.stdout').write_text(r.stdout);(result/'browser-preflight.stderr').write_text(r.stderr)
+assert r.returncode==0,'BROWSER_PREFLIGHT_FAILED';print(r.stdout,flush=True)
+wheels=result/'wheels';wheels.mkdir(mode=0o700)
+for directory in ['query-wheels','controller-wheels']:
+ for f in (payload/directory).glob('*.whl'):
+  assert not (wheels/f.name).exists();shutil.copyfile(f,wheels/f.name)
+start=time.monotonic()
+with (result/'controller-install.stdout').open('x') as out,(result/'controller-install.stderr').open('x') as err:
+ r=subprocess.run([sys.executable,'-I','-B',str(repo/'scripts/crm-calibration/service-runtime.fixture.py'),str(payload/'controller.json'),str(result/'venv'),'--wheelhouse',str(wheels)],cwd=home,env=env,stdout=out,stderr=err,timeout=120)
+assert r.returncode==0,'CONTROLLER_INSTALL_FAILED';print('CONTROLLER_OFFLINE_INSTALL_PASS',flush=True)
+env.update(B0_NATIVE_CRM_ARTIFACT_MANIFEST=str(payload/'input-v5.json'),B0_NATIVE_CRM_SERVICE_PYTHON='/usr/local/bin/python3.14',B0_NATIVE_CRM_SERVICE_WHEELHOUSE=str(payload/'query-wheels'),B0_NATIVE_CRM_KERNEL_WHEELHOUSE=str(payload/'query-wheels'),B0_NATIVE_CRM_BROWSER_MODULE=str(module))
+args=['--noconftest','-q','--tb=short','-p','no:cacheprovider',str(repo/'backend/tests/test_analytics_first_purchase_official_host.py'),'--basetemp='+str(result/'tests')]
+command='import sys,pytest;sys.path.insert(0,'+repr(str(repo))+');sys.exit(pytest.main('+repr(args)+'))'
+with (result/'pytest.stdout').open('x') as out,(result/'pytest.stderr').open('x') as err:
+ r=subprocess.run([str(result/'venv/bin/python'),'-I','-B','-c',command],cwd=repo,env=env,stdout=out,stderr=err,timeout=480)
+candidate=json.loads((payload/'candidate/candidate.json').read_text())
+receipt={'candidate_digest':candidate['candidate_digest'],'plugin_source':candidate['source_sha'],'service_source':candidate['service_compatibility']['binding']['source_sha'],'schema_version':'dsh-current-candidate-browser-observation/v1','status':'PASS' if r.returncode==0 else 'FAIL','exit_code':r.returncode,'seconds':round(time.monotonic()-start,2),'scope':'actual-wsl2-synthetic-runtime-artifacts-browser','platform':{'system':platform.system(),'machine':platform.machine(),'kernel':platform.release(),'python':platform.python_version(),'uid':os.getuid()},'controller_sha256':hashlib.sha256((p/'controller/sources.json').read_bytes()).hexdigest(),'input_sha256':hashlib.sha256((p/'input-seal.json').read_bytes()).hexdigest(),'runtime_sha256':'a049f061847dd48e58b159bdfe9f388ef7ea5efdaf8ead3c3b4293d7411fdcf4','browser':json.loads((result/'browser-preflight.stdout').read_text()),'font_receipt_sha256':hashlib.sha256((p/'browser-font-receipt.json').read_bytes()).hexdigest(),'playwright_version':'1.62.1','headless':True,'mobile':'NOT_RUN','accessibility':'NOT_RUN','cross_version_recovery':'NOT_RUN','production_identity':'NOT_RUN','supply_chain':'NOT_VERIFIED','activation':'NOT_RUN','release_ready':False}
+(result/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n');print(json.dumps(receipt),flush=True)
+sys.exit(r.returncode)

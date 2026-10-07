@@ -226,7 +226,7 @@ export function checkObservations(rows) {
   assert.deepEqual(rows.slice(16),[pass('durable-session-and-cookie-reused-crm-relogin-required'),
     command('/first-purchase-status','error'),command('/first-purchase-status','success'),pass('native-session-without-business-tools')],CODE+'SCENARIOS');
 }
-export function checkProcesses(query,save,cleanup,http,queryManifest,saveManifest,candidate,queryHash,saveHash, { browser = false, terminal = false } = {}) {
+export function checkProcesses(query,save,cleanup,http,queryManifest,saveManifest,candidate,queryHash,saveHash, { browser = false, terminal = false, independentSources = terminal } = {}) {
   assert.ok(!(browser && terminal), CODE + 'PROCESS_MODE');
   assert.ok(Array.isArray(query)&&query.length===3&&Array.isArray(save)&&save.length===2,CODE+'PROCESSES');
   const pids=new Set(),workerEvents=[];
@@ -235,7 +235,7 @@ export function checkProcesses(query,save,cleanup,http,queryManifest,saveManifes
   for(const row of query){
     add(row.pid);assert.equal(row.source_contract,'first-purchase-frozen-source/v1',CODE+'PROCESS_SOURCE_CONTRACT');assert.equal(row.status,'KERNEL_SOCKET_BOUND',CODE+'PROCESS');assert.equal(row.port,4335,CODE+'PORT');
     assert.equal(row.manifest_sha256,queryHash,CODE+'PROCESS_MANIFEST');
-    assert.equal(row.source_sha,terminal ? candidate.service_compatibility?.binding?.source_sha : candidate.source_sha,CODE+'PROCESS_SOURCE');assert.equal(row.release_ready,false,CODE+'UNPROVEN');
+    assert.equal(row.source_sha,independentSources ? candidate.service_compatibility?.binding?.source_sha : candidate.source_sha,CODE+'PROCESS_SOURCE');assert.equal(row.release_ready,false,CODE+'UNPROVEN');
     assert.equal(row.exit_code,0,CODE+'PROCESS_EXIT');assert.equal(row.forced_kill,false,CODE+'PROCESS_EXIT');assert.equal(row.cleanup_ok,true,CODE+'CLEANUP');
     assert.equal(row.stopped?.pid,row.pid,CODE+'PROCESS');assert.equal(row.stopped?.status,'KERNEL_STOPPED',CODE+'PROCESS');
     assert.equal(row.stopped?.active_workers,0,CODE+'CLEANUP');assert.equal(row.stopped?.integrity,'PASS',CODE+'INTEGRITY');

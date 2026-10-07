@@ -14,7 +14,20 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 终态恢复回执门禁接线（2026-10-07，当前进度）
+### 新候选浏览器回执接线（2026-10-07，当前进度）
+
+- 在 `db16041a` 和前轮 5 个文档改动上继续，新增显式 `dsh-browser-host-evidence/v2`，仍走 `plugin verify-host`，独立核对插件/服务来源，关联终态 Host seq 5；v1 HTTP 父事件合同不变。见[本轮门禁证据](docs/hackathon/evidence/dsh-g0-current-browser-gate-20261007.md)。
+- 原 `a490457c…` 候选已追加 **seq 6 / CANDIDATE_BROWSER_HOST_OBSERVED**。原始 archive/inventory、固定 runner/控制器、五场景与清理观察通过；前五事件保持，重试不写，实际错误父事件拒绝，1318 个保护文件保持。
+- 本轮完整 release suite **429 PASS / 0 FAIL / 0 SKIP**（含 v2 38）；新门禁已进入 B0 测试清单。没有重新运行杭州浏览器、改包或生产动作。提交前 OCR delegate 21/21 已审查，修正文档验收范围；本次新跑 release 429 PASS（92.13 秒），实际重试/错父拒绝再次通过。本批及前轮文档随本次本地提交交付，整体仍 PARTIAL / release_ready=false。
+- 下一步：核对剩余 G0 证据与准入条件，继续完整跨版本、真实身份/模型/UAT、供应链和生产 activation/canary/rollback；物理分仓仍受 G0 约束。
+
+### 新候选杭州隔离浏览器验收（2026-10-07，上一阶段）
+
+- 终态门禁已审修并通过正常 hooks 提交 **`db16041a`**（16 文件）；本轮再用同一 `a490457c…` 候选完成杭州 Chrome headless **5/5 场景 / 官方 Host 1 PASS，78.00 秒**，见[新候选浏览器证据](docs/hackathon/evidence/dsh-g0-first-purchase-current-browser-20261007.md)。插件、CRM、服务、runtime 未重新构建。
+- 184 个结果文件及 inventory 已取回核对，620 个本机保护文件和 journal seq 5 保持；510 个密封远端输入保持、独有进程/目录已回收，生产 current/监听 PID 不变。截图中文可读，真实身份/模型和生产切换未运行。
+- 该阶段 journal 保持 seq 5；后续已通过上节显式 v2 接入 seq 6，没有套用旧同 SHA/browser 事件。整体 PARTIAL / release_ready=false；此阶段后续文档随浏览器 v2 门禁批次提交。
+
+### 终态恢复回执门禁接线（2026-10-07，已提交阶段）
 
 - 上一批审修正常 hooks 提交 `25d9c53c`，本批从干净工作树继续。`plugin verify-host` 新增 `dsh-terminal-host-evidence/v1`，为同一 `a490457c…` 候选交叉核对固定控制器、runtime/四包、HTTP 23 项与恢复 2 项、FAILED/EXECUTION_UNKNOWN、活动名额释放、派发一次、持久前缀及清理观察。见[本轮证据](docs/hackathon/evidence/dsh-g0-first-purchase-terminal-gate-20261007.md)。
 - 已有真实杭州回执进入原候选 journal **seq 5 / CANDIDATE_TERMINAL_HOST_OBSERVED**，引用服务目标 seq 4；前四事件保持，CLI 重试字节/mtime 不变，实际错父事件退出 2 且不写状态。619 个受保护文件保持。**本次只关闭终态回执接线子项**。

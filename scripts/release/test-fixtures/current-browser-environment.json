@@ -1,0 +1,60 @@
+{
+  "browser-font-receipt": {
+    "status": "PASS",
+    "package": {
+      "package": "fonts-noto-cjk",
+      "version": "1:20230817+repack1-3",
+      "bytes": 61229778,
+      "sha256": "7d64b985f6fe128c99eae5610d5c047338e572bdcfb2bb09736be01b824a7f6c"
+    },
+    "method": "download-and-extract-only",
+    "system_install": "NOT_RUN",
+    "fc_match": "Noto Sans CJK SC: /tmp/owned-fp-browser-cku4mhx5/browser-fonts/root/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+    "files": {
+      "browser-fonts/root/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc": {
+        "bytes": 20050760,
+        "sha256": "faa5f3656a78b2e2d450d27fe8382c778bc2b6bb5ea29c986664a6a435056ceb"
+      },
+      "browser-fonts/root/usr/share/fonts/opentype/noto/NotoSerifCJK-Regular.ttc": {
+        "bytes": 26286892,
+        "sha256": "93069d8e9e45d515cc421c971a79e6a5777704b348e36a9ef86578bf58adef77"
+      },
+      "browser-fonts/root/usr/share/fonts/opentype/noto/NotoSerifCJK-Bold.ttc": {
+        "bytes": 27294356,
+        "sha256": "9d3c0d769c703cfe41c49cbe2b14d4718e26545593dc247485486335b783fe94"
+      },
+      "browser-fonts/root/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc": {
+        "bytes": 19484784,
+        "sha256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a"
+      },
+      "browser-fonts/fonts.conf": {
+        "bytes": 460,
+        "sha256": "2a5737d1c7e795a7cf95bac497b5cb916a575c88d8c14ed4a3a244d239c45b63"
+      },
+      "browser-launch-r3.sh": {
+        "bytes": 257,
+        "sha256": "26c1a04f5c57f35541e5c8c18193c0a1e20b457026af775a6094c7fa5ea54395"
+      }
+    }
+  },
+  "browser-library-receipt": {
+    "status": "PASS",
+    "packages": [
+      {
+        "package": "libnspr4",
+        "version": "2:4.35-1.1build1",
+        "sha256": "e579e72d091f6c7a13f5a756c31065b15aae5b81840d61b069355aa2283c07b4",
+        "method": "download-and-extract-only"
+      },
+      {
+        "package": "libnss3",
+        "version": "2:3.98-1ubuntu0.2",
+        "sha256": "4254f11d782dfb970e78113519a59d440112ed43c4b56f709da0aef81da8651a",
+        "method": "download-and-extract-only"
+      }
+    ],
+    "missing_libraries": [],
+    "system_install": "NOT_RUN",
+    "launcher_sha256": "9562b1ea814b1afe5c309c519d3558e67038a60eec2f6151e5479738a3e1e8a5"
+  }
+}

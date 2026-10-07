@@ -201,7 +201,7 @@ print('B0 exact Python closure verified')
     'scripts/release/plugin-pack.test.mjs', 'scripts/release/plugin-candidate.test.mjs', 'scripts/release/plugin-host-evidence.test.mjs', 'scripts/release/profile.test.mjs', 'scripts/release/plugin-boundary.test.mjs', 'scripts/release/supply-chain.test.mjs',
     'scripts/release/runtime-host-evidence.test.mjs',
     'scripts/release/terminal-host-evidence.test.mjs',
-    'scripts/release/browser-host-evidence.test.mjs',
+    'scripts/release/browser-host-evidence.test.mjs', 'scripts/release/browser-host-v2.test.mjs',
     'scripts/dsh-b0/clean-build.test.mjs',
     'scripts/dsh-b0/native-state-smoke.test.mjs', 'scripts/dsh-b0/native-query-smoke.test.mjs',
     'scripts/dsh-b0/native-query-fault-smoke.test.mjs', 'scripts/dsh-b0/native-query-assets-smoke.test.mjs',

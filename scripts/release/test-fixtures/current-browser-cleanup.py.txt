@@ -1,0 +1,18 @@
+P='/tmp/owned-fp-browser-cku4mhx5'
+ARCHIVE_SHA='63fbf3f00c1762a217f633fc08aa2927e67814faffea1a30d3d08073813a7491'
+import pathlib,json,shutil,subprocess,re,hashlib
+p=pathlib.Path(P);assert p.parent==pathlib.Path('/tmp') and p.name.startswith('owned-fp-browser-') and not p.is_symlink()
+assert (p/'.owned').read_text()=='synthetic-first-purchase-current-browser/20261007\n'
+assert hashlib.file_digest((p/'results.tar.gz').open('rb'),'sha256').hexdigest()==ARCHIVE_SHA
+for v in pathlib.Path('/proc').iterdir():
+ if not v.name.isdigit():continue
+ try:cwd=(v/'cwd').resolve()
+ except OSError:continue
+ assert cwd!=p and p not in cwd.parents
+rows=subprocess.check_output(['ss','-ltnp'],text=True).splitlines()
+listeners=sorted(s.strip() for s in rows if re.search(r':(?:6677|18090|18092|18093|18094)\s',s))
+before=json.loads((p/'protected-before.json').read_text())
+assert listeners==before['listeners'] and str(pathlib.Path('/srv/shinemage/dsh/current').resolve())==before['current']
+assert not any(re.search(r':'+str(port)+r'\s',s) for s in rows for port in [4335,4336,4337])
+shutil.rmtree(p)
+print(json.dumps({'owned_directory_removed':not p.exists(),'production_unchanged':True,'evidence_retrieved_and_verified':True}))

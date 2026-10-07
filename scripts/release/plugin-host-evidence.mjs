@@ -12,7 +12,7 @@ import { validateProfile } from './profile.mjs';
 import { readState, recordEvent } from './state.mjs';
 import { validateServiceGate } from './service-compatibility.mjs';
 import { DSH_SDK_VERSION, DSH_UPSTREAM_SHA, NODE_MAJOR } from './toolchain.mjs';
-import { BROWSER_HOST_SCHEMA, verifyBrowserHostEvidence } from './browser-host-evidence.mjs';
+import { BROWSER_HOST_SCHEMA, BROWSER_HOST_V2_SCHEMA, verifyBrowserHostEvidence } from './browser-host-evidence.mjs';
 import { RUNTIME_HOST_SCHEMA, verifyRuntimeHostEvidence } from './runtime-host-evidence.mjs';
 import { TERMINAL_HOST_SCHEMA, verifyTerminalHostEvidence } from './terminal-host-evidence.mjs';
 
@@ -112,7 +112,7 @@ export async function verifyPluginHost({ candidatePath, evidencePath, statePath 
   if (decode(envelopeBytes).schema_version === TERMINAL_HOST_SCHEMA) {
     return verifyTerminalHostEvidence({ candidatePath, evidencePath, statePath, envelopeBytes });
   }
-  if (decode(envelopeBytes).schema_version === BROWSER_HOST_SCHEMA) {
+  if ([BROWSER_HOST_SCHEMA,BROWSER_HOST_V2_SCHEMA].includes(decode(envelopeBytes).schema_version)) {
     return verifyBrowserHostEvidence({ candidatePath, evidencePath, statePath, envelopeBytes });
   }
   if (decode(envelopeBytes).schema_version === RUNTIME_HOST_SCHEMA) {

@@ -26,7 +26,7 @@ async function sourceHash(path) {
   if (!sources.has(path)) sources.set(path, readGitInput(ROOT, TERMINAL_CONTROLLER_REVIEWED, path).then(hash));
   return sources.get(path);
 }
-async function controllerSources(controller, content) {
+export async function checkReviewedControllerSources(controller, content) {
   exact(controller, ['base_commit','scope','files'], 'CONTROLLER');
   assert.equal(controller.base_commit, TERMINAL_CONTROLLER_BASE, CODE + 'CONTROLLER_BASE');
   assert.equal(controller.scope, 'explicit-test-controller-with-local-v2-verifier-repair', CODE + 'CONTROLLER_SCOPE');
@@ -71,7 +71,7 @@ export async function verifyTerminalHostEvidence({ candidatePath, evidencePath, 
   const inputRoot = join(directory, dirname(envelope.inputs.name));
   const content = await checkedSet(inputRoot, input.files, 160 * 1024 * 1024);
   assert.equal(hash(content.get('controller/sources.json')), envelope.controller.sha256, CODE + 'CONTROLLER_BINDING');
-  await controllerSources(controller, content);
+  await checkReviewedControllerSources(controller, content);
   const inventory = await reference(envelope.inventory);
   const records = await checkedSet(join(directory, dirname(envelope.inventory.name)), inventory, 16 * 1024 * 1024);
   const required = name => { assert.ok(records.has(name), CODE + 'REQUIRED'); return records.get(name); };
@@ -126,18 +126,7 @@ export async function verifyTerminalHostEvidence({ candidatePath, evidencePath, 
   assert.equal(cleanup.sealed_files_unchanged, content.size, CODE + 'CLEANUP');
   assert.equal(hash(required('source/input/input.json')), prior.target_input_sha256, CODE + 'SOURCE_INPUT');
   assert.equal(cleanup.source_input_files_unchanged, Object.keys(data('source/input/input.json').files).length, CODE + 'CLEANUP');
-  const install = data('host-result/controller-install.stdout'), dependencies = decode(payload.get('controller.json')).dependencies;
-  exact(install, ['python','mode','wheels'], 'INSTALL');
-  assert.equal(install.python, prefix + '/host-result/venv/bin/python', CODE + 'INSTALL');
-  assert.equal(install.mode, 'offline-hashed-wheel-install', CODE + 'INSTALL');
-  exact(install.wheels, Object.keys(dependencies), 'INSTALL');
-  for (const [name,row] of Object.entries(install.wheels)) {
-    exact(row, ['file','version','sha256'], 'WHEEL');
-    assert.equal(row.version, dependencies[name], CODE + 'WHEEL');
-    assert.ok(typeof row.file === 'string' && /^[A-Za-z0-9_.+-]+\.whl$/.test(row.file), CODE + 'WHEEL');
-    const bytes = payload.get('query-wheels/' + row.file) ?? payload.get('controller-wheels/' + row.file);
-    assert.ok(bytes && hash(bytes) === row.sha256, CODE + 'WHEEL');
-  }
+  checkArchivedControllerInstall({ data, payload, prefix, resultDir:'host-result' });
   const stdout = required('host-result/pytest.stdout').toString('utf8');
   assert.ok(/\b1 passed\b/.test(stdout) && !/\b[1-9]\d* (?:failed|errors?|skipped)\b/.test(stdout), CODE + 'PYTEST');
   for (const name of ['pytest.stderr','controller-install.stderr']) assert.equal(required('host-result/' + name).length, 0, CODE + 'PYTEST');
@@ -158,4 +147,20 @@ export async function verifyTerminalHostEvidence({ candidatePath, evidencePath, 
     ...candidateFields,service_target_event:link,observation},
   {idempotencyKey:'candidate-terminal-host:' + candidate.candidate_digest + ':' + hash(envelopeBytes),requiredEvent:link});
   return {...observation,journal_seq:event.seq,journal_digest:event.digest};
+}
+
+/** Fixed-controller offline dependency observation shared by terminal and browser gates. */
+export function checkArchivedControllerInstall({ data, payload, prefix, resultDir }) {
+  const install = data(resultDir + '/controller-install.stdout'), dependencies = decode(payload.get('controller.json')).dependencies;
+  exact(install, ['python','mode','wheels'], 'INSTALL');
+  assert.equal(install.python, prefix + '/' + resultDir + '/venv/bin/python', CODE + 'INSTALL');
+  assert.equal(install.mode, 'offline-hashed-wheel-install', CODE + 'INSTALL');
+  exact(install.wheels, Object.keys(dependencies), 'INSTALL');
+  for (const [name,row] of Object.entries(install.wheels)) {
+    exact(row, ['file','version','sha256'], 'WHEEL');
+    assert.equal(row.version, dependencies[name], CODE + 'WHEEL');
+    assert.ok(typeof row.file === 'string' && /^[A-Za-z0-9_.+-]+\.whl$/.test(row.file), CODE + 'WHEEL');
+    const bytes = payload.get('query-wheels/' + row.file) ?? payload.get('controller-wheels/' + row.file);
+    assert.ok(bytes && hash(bytes) === row.sha256, CODE + 'WHEEL');
+  }
 }
