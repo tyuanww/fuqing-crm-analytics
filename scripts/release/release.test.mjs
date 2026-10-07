@@ -312,6 +312,9 @@ test('release publish workflow binds the exact evidence run and protected tag', 
   assert.match(workflow, /TAG_TARGET_CHANGED_AFTER_PUBLISH/);
   assert.match(workflow, /TAG_TARGET_CHANGED_FINAL/);
   assert.match(workflow, /gh attestation verify/);
+  const attestations = workflow.split('\n').filter(line => line.trim().startsWith('gh attestation verify'));
+  assert.equal(attestations.length, 2, 'application and runtime both need attestation');
+  for (const command of attestations) assert.match(command, /--source-digest "\$REVIEWED_SHA"/);
 });
 test('release publish workflow is idempotent and emits a verified publication sidecar', async () => {
   const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-publish.yml'), 'utf8');

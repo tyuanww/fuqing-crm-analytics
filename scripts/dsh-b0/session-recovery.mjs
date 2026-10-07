@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import { zstdCompress } from 'node:zlib';
 import { TOOL_CORPUS_ID, TOOL_EVENTS_PER_TURN } from './session-recovery-tool-corpus.mjs';
+import { RICH_CORPUS_ID, RICH_EVENTS_PER_TURN } from './session-recovery-rich-corpus.mjs';
 
 const exec = promisify(execFile), compress = promisify(zstdCompress);
 const probe = fileURLToPath(new URL('./session-recovery.probe.mjs', import.meta.url));
@@ -16,19 +17,26 @@ const encode = value => JSON.stringify(value, null, 2) + '\n';
 
 export async function runSessionRecoveryMatrix({ output, rc2Modules, rc1Modules, corpus = 'text' }) {
   assert.equal(Number(process.versions.node.split('.')[0]), 24);
-  assert.ok(['text', 'tool'].includes(corpus), 'RECOVERY_CORPUS_UNSUPPORTED');
-  const eventCount = corpus === 'tool' ? TOOL_EVENTS_PER_TURN : 6;
+  assert.ok(['text', 'tool', 'rich'].includes(corpus), 'RECOVERY_CORPUS_UNSUPPORTED');
+  const counts = { text: [6, 12], tool: [TOOL_EVENTS_PER_TURN, TOOL_EVENTS_PER_TURN * 2],
+    rich: [RICH_EVENTS_PER_TURN + 1, RICH_EVENTS_PER_TURN * 2 + 1] };
+  const [eventCount, appendedCount] = counts[corpus];
   assert.ok(isAbsolute(output) && isAbsolute(rc2Modules));
   if (rc1Modules) assert.ok(isAbsolute(rc1Modules));
   await mkdir(output, { mode: 0o700 }); // EEXIST is intentional: no reuse/overwrite.
   output = await realpath(output); // macOS /var aliases are legitimate; mkdir already refused an existing leaf.
   const rows = [], executions = [];
-  const result = { schema_version: corpus === 'tool' ? 'dsh-owned-session-recovery/v2' : 'dsh-owned-session-recovery/v1', scope: 'compiled-official-persistence-synthetic',
+  const schemas = { text: 'dsh-owned-session-recovery/v1', tool: 'dsh-owned-session-recovery/v2', rich: 'dsh-owned-session-recovery/v3' };
+  const result = { schema_version: schemas[corpus], scope: 'compiled-official-persistence-synthetic',
     rows, executions, corpus: corpus === 'tool'
       ? 'completed tool-call/result turns, success/error/meta and restored message surface; media/delegation NOT_RUN'
       : 'completed user/assistant turns with streamed text; tool/media/delegation NOT_RUN',
     ...(corpus === 'tool' ? { corpus_id: TOOL_CORPUS_ID, tool_execution: 'NOT_RUN', model_execution: 'NOT_RUN' } : {}),
     production_data: 'NOT_RUN', host_lifecycle: 'NOT_RUN', release_ready: false };
+  if (corpus === 'rich') Object.assign(result, { corpus_id: RICH_CORPUS_ID,
+    corpus: 'image/file references, relay/notice attribution, child header/descriptor/depth, reasoning/replay metadata',
+    tool_execution: 'NOT_RUN', model_execution: 'NOT_RUN', delegation_execution: 'NOT_RUN',
+    attachment_storage: 'NOT_RUN', attachment_rendering: 'NOT_RUN' });
   const fresh = async name => {
     const root = join(output, name); await mkdir(root, { mode: 0o700 });
     await writeFile(join(root, '.owned-session-recovery'), 'synthetic-only/v1\n', { mode: 0o600, flag: 'wx' });
@@ -79,10 +87,10 @@ export async function runSessionRecoveryMatrix({ output, rc2Modules, rc1Modules,
     const read = await run(root, 'read'); assert.equal(read.digest, initial.digest);
     assert.deepEqual(await readFile(path), torn, 'RECOVERY_READ_CHANGED_TORN_TAIL');
     const repaired = await run(root, 'append', false, eventCount);
-    assert.equal(repaired.prefix_digest, initial.digest); assert.equal(repaired.count, eventCount * 2);
+    assert.equal(repaired.prefix_digest, initial.digest); assert.equal(repaired.count, appendedCount);
     const cold = await run(root, 'read'); assert.equal(cold.digest, repaired.digest);
     assert.deepEqual((await readFile(path)).subarray(0, baseline.length), baseline);
-    rows.push({ id: 'rc2-torn-final-frame-recovery', status: 'PASS', committed_events: eventCount, recovered_events: eventCount * 2,
+    rows.push({ id: 'rc2-torn-final-frame-recovery', status: 'PASS', committed_events: eventCount, recovered_events: appendedCount,
       prefix_digest: initial.digest, injected_bytes: frame.length - 3, read_only_preserved_bytes: true,
       initial_file_sha256: hash(baseline), repaired_file_sha256: hash(await readFile(path)) });
     if (rc1Modules) {
@@ -93,10 +101,10 @@ export async function runSessionRecoveryMatrix({ output, rc2Modules, rc1Modules,
       const before = await inventory(cross), newer = await run(cross, 'read');
       assert.equal(newer.digest, old.digest); assert.deepEqual(await inventory(cross), before);
       const appended = await run(cross, 'append', false, eventCount);
-      assert.equal(appended.prefix_digest, old.digest); assert.equal(appended.count, eventCount * 2);
+      assert.equal(appended.prefix_digest, old.digest); assert.equal(appended.count, appendedCount);
       assert.equal((await run(cross, 'read')).digest, appended.digest);
       rows.push({ id: 'rc1-write-rc2-read-append', status: 'PASS', old_format: old.format_version,
-        new_format: appended.format_version, committed_events: eventCount, recovered_events: eventCount * 2 });
+        new_format: appended.format_version, committed_events: eventCount, recovered_events: appendedCount });
       const preRollback = await inventory(cross);
       let downgrade;
       try {
@@ -123,7 +131,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const args = process.argv.slice(2), positional = []; let corpus = 'text', seenCorpus = false;
   for (let index = 0; index < args.length; index++) {
     if (args[index] === '--corpus') {
-      assert.ok(!seenCorpus && ['text', 'tool'].includes(args[index + 1]), 'RECOVERY_CORPUS_UNSUPPORTED');
+      assert.ok(!seenCorpus && ['text', 'tool', 'rich'].includes(args[index + 1]), 'RECOVERY_CORPUS_UNSUPPORTED');
       seenCorpus = true; corpus = args[++index];
     } else {
       assert.ok(!args[index].startsWith('-'), 'RECOVERY_ARGUMENT_UNSUPPORTED'); positional.push(args[index]);

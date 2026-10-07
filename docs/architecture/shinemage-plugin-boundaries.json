@@ -200,15 +200,29 @@
       "domain": "build-tooling",
       "target_repository": "shinemage-dsh-plugin-kit",
       "kind": "dev-tool",
-      "exports": {},
-      "files": [],
+      "exports": {
+        "./toolchain": "./toolchain.mjs",
+        "./package.json": "./package.json"
+      },
+      "files": [
+        "toolchain.json",
+        "toolchain.mjs",
+        "sdk-inputs.mjs",
+        "check.mjs",
+        "packaged-dependencies.mjs",
+        "README.md",
+        "build-tools/package.json",
+        "build-tools/pnpm-lock.yaml",
+        "build-tools/pnpm-workspace.yaml",
+        "build-tools/patches"
+      ],
       "peers": {},
       "dependencies": {},
       "dev_dependencies": {},
       "bundled_inputs": [],
       "dsh": {},
       "commands": {},
-      "manifest_sha256": "8f2d01c745dfc280f86913fe6dc8d5f489ea4ef78137ea1b1da9947eea712c2c"
+      "manifest_sha256": "b4aaef2c82830472480ff98894d227d16f1dd2d37566a5bcb517ee53e6f6ab19"
     },
     {
       "path": "dsh-plugins/shine-board",
@@ -502,7 +516,7 @@
       "manifest_sha256": "011783ac55a6b567db51dbfdc1c97ffd142727ac52bfc7911801dc71fa6bed60"
     }
   ],
-  "source_files_scanned": 638,
+  "source_files_scanned": 640,
   "cross_package_edges": [
     {
       "consumer": "analytics-workbench",
@@ -2632,6 +2646,24 @@
     {
       "consumer": "analytics-workbench",
       "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/native-evidence.test.mjs",
+      "line": 169
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/native-evidence.test.mjs",
+      "line": 170
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/native-evidence.test.mjs",
+      "line": 171
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/native-fixture-client-boundary.test.mjs",
       "line": 16
     },
@@ -3073,6 +3105,11 @@
       "consumer": "analytics-workbench",
       "phase": "runtime",
       "specifier": "node:url"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "specifier": "node:util"
     },
     {
       "consumer": "analytics-workbench",

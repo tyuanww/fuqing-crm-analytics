@@ -112,3 +112,78 @@ test('cold tool-corpus probe rejects altered persisted tool content without repa
     assert.deepEqual(await readFile(logs[0]), tampered);
   } finally { await rm(root, { recursive: true }); }
 });
+
+test('official rc2 preserves attachment references, child metadata and depth across cold recovery', {
+  skip: !process.env.B0_BUILD_UPSTREAM && 'explicit built upstream required',
+}, async () => {
+  const root = await mkdtemp(join(tmpdir(), 'owned-session-rich-real-'));
+  try {
+    const output = join(root, 'result');
+    const result = await runSessionRecoveryMatrix({ output, corpus: 'rich',
+      rc2Modules: join(process.env.B0_BUILD_UPSTREAM, 'apps/cli/node_modules/@deepseek-ai') });
+    assert.equal(result.schema_version, 'dsh-owned-session-recovery/v3');
+    assert.equal(result.corpus_id, 'attachment-delegation-metadata/v1');
+    assert.equal(result.status, 'PARTIAL'); assert.equal(result.release_ready, false);
+    assert.equal(result.rows[0].status, 'PASS'); assert.equal(result.rows[0].committed_events, 8);
+    assert.equal(result.rows[0].recovered_events, 15); assert.equal(result.rows[1].status, 'NOT_RUN');
+    for (const key of ['tool_execution', 'model_execution', 'delegation_execution', 'attachment_storage', 'attachment_rendering']) {
+      assert.equal(result[key], 'NOT_RUN');
+    }
+    const initial = JSON.parse(await readFile(join(output, 'process-0.stdout'), 'utf8'));
+    const cold = JSON.parse(await readFile(join(output, 'process-3.stdout'), 'utf8'));
+    assert.deepEqual(cold.metadata, initial.metadata);
+    assert.equal(cold.metadata.header.parentSession, 'owned-synthetic-parent');
+    assert.equal(cold.metadata.delegation_depth, 2);
+    assert.equal(cold.events.filter(e => e.type === 'subagent/descriptor').length, 1);
+    const messages = cold.events.filter(e => e.type === 'user/message').map(e => e.data);
+    assert.deepEqual(messages.map(m => m.source.kind), ['agent-message', 'subagent-settled', 'agent-message', 'subagent-settled']);
+    const refs = messages[0].content.filter(b => ['image', 'file'].includes(b.type));
+    assert.equal(refs.length, 2); assert.equal(refs[0].attachment.width, 1);
+    assert.match(refs[0].attachment.attachmentId, /^[a-f0-9]{64}$/);
+    assert.equal(refs[1].attachment.name, '合成资料.txt');
+    assert.deepEqual(messages[2].content.filter(b => ['image', 'file'].includes(b.type)), refs);
+  } finally { await rm(root, { recursive: true }); }
+});
+
+test('cold rich probe rejects changed references, descriptor or delegation header before any append', {
+  skip: !process.env.B0_BUILD_UPSTREAM && 'explicit built upstream required',
+}, async t => {
+  const root = await mkdtemp(join(tmpdir(), 'owned-session-rich-corrupt-'));
+  try {
+    const output = join(root, 'result'), modules = join(process.env.B0_BUILD_UPSTREAM, 'apps/cli/node_modules/@deepseek-ai');
+    const result = await runSessionRecoveryMatrix({ output, rc2Modules: modules, corpus: 'rich' });
+    assert.equal(result.rows[0].status, 'PASS');
+    const owned = result.executions[0].root, logs = [];
+    async function walk(path) {
+      for (const entry of await readdir(path, { withFileTypes: true })) {
+        if (entry.isDirectory()) await walk(join(path, entry.name));
+        else if (entry.name.endsWith('.jsonl.zstd')) logs.push(join(path, entry.name));
+      }
+    }
+    await walk(owned); assert.equal(logs.length, 1);
+    const header = JSON.parse((await decompress(await readFile(logs[0]))).toString());
+    const original = JSON.parse(await readFile(join(output, 'process-3.stdout'), 'utf8')).events;
+    const cases = [
+      ['image identity', (_header, events) => { events.find(e => e.type === 'user/message').data.content[1].attachment.attachmentId = '0'.repeat(64); }],
+      ['file bytes', (_header, events) => { events.find(e => e.type === 'user/message').data.content[2].attachment.bytes++; }],
+      ['child composition', (_header, events) => { events.find(e => e.type === 'subagent/descriptor').data.agentProvider = 'other'; }],
+      ['delegation depth', (value) => { value.delegationDepth = 0; }],
+      ['parent identity', (value) => { value.parentSession = 'wrong-parent'; }],
+    ];
+    for (const [name, mutate] of cases) await t.test(name, async () => {
+      const h = structuredClone(header), events = structuredClone(original); mutate(h, events);
+      const tampered = Buffer.concat([await compress(Buffer.from(JSON.stringify(h) + '\n')),
+        await compress(Buffer.from(events.map(e => JSON.stringify(e) + '\n').join('')))]);
+      await writeFile(logs[0], tampered);
+      for (const operation of ['read', 'append']) {
+        const child = exec(process.execPath, [join(import.meta.dirname, 'session-recovery.probe.mjs')], {
+          cwd: owned, timeout: 30000, env: { PATH: '/usr/local/bin:/usr/bin:/bin', HOME: owned, TMPDIR: owned },
+        });
+        child.child.stdin.on('error', () => {});
+        child.child.stdin.end(JSON.stringify({ root: owned, modules, operation, version: '0.1.7-rc.2', corpus: 'rich' }));
+        await assert.rejects(child, error => error.code === 1 && /RECOVERY_RICH_(CORPUS_CONTENT|HEADER)/.test(error.stderr));
+        assert.deepEqual(await readFile(logs[0]), tampered);
+      }
+    });
+  } finally { await rm(root, { recursive: true }); }
+});

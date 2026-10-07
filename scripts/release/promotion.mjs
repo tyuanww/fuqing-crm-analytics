@@ -217,8 +217,10 @@ export async function installRelease({ artifact, upstreamRuntimeArtifact = null,
     assertPublicationAssets(publication, requiredAssetDigests);
     const approval = await verifyGitHubEnvironmentApproval({ repository, approvalRef: publication.approval_ref, releaseTag: tag, sourceSha: manifest.source_sha, gh });
     if (approval.status !== 'VERIFIED') throw new Error('RELEASE_APPROVAL_NOT_VERIFIED');
-    const attestation = await verifyAttestationBundle({ artifactPath: artifact, bundlePath: attestationBundlePath, repository, sourceRef, signerWorkflow, gh });
-    const runtimeAttestation = manifest.upstream_runtime ? await verifyAttestationBundle({ artifactPath: upstreamRuntimeArtifact, bundlePath: runtimeAttestationBundlePath, repository, sourceRef, signerWorkflow, gh }) : null;
+    const attestation = await verifyAttestationBundle({ artifactPath: artifact, bundlePath: attestationBundlePath, repository, sourceRef, sourceSha: manifest.source_sha, signerWorkflow, gh });
+    // This certificate identifies our packaging workflow's source commit;
+    // the DSH upstream SHA remains separately bound by the runtime manifest.
+    const runtimeAttestation = manifest.upstream_runtime ? await verifyAttestationBundle({ artifactPath: upstreamRuntimeArtifact, bundlePath: runtimeAttestationBundlePath, repository, sourceRef, sourceSha: manifest.source_sha, signerWorkflow, gh }) : null;
     if (sourceRef !== `refs/tags/${tag}`) throw new Error('RELEASE_SOURCE_REF_MISMATCH');
     const liveAssets = [
       { name: basename(artifact), sha256: manifest.artifact_sha256, size: (await stat(artifact)).size },

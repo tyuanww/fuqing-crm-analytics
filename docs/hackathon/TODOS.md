@@ -343,7 +343,10 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 - [x] T3/T7 结果年龄事项收口（2026-10-07）：采用历史快照 + 保存时校验，移除待定阈值要求；保留 wire/旧回执兼容，不新增到期系统，不取消身份/请求超时。见[收口证据](./evidence/dsh-g0-snapshot-policy-closeout-20261007.md)。
 - [x] T2/T7 工具语料本机第一步：显式 `--corpus tool`，固定 rc2 四冷进程 13→26 事件，tool/result/error/meta 与消息投影通过，相关测试 11 PASS；[证据](./evidence/dsh-g0-session-tool-corpus-20261007.md)。本机阶段跨版本 NOT_RUN；后续杭州验证见下项。media/delegation 仍开放，本批已提交 `aebf4e38`。
 - [x] T2/T7 工具语料杭州子项：固定 runtime、提交 `aebf4e38` 控制器，四项 4/4 PASS、10 冷进程；48 证据文件核对，输入/生产不变、自有目录回收。见[现场证据](./evidence/dsh-g0-session-tool-wsl-20261007.md)。只证明该工具语料；编译闭包、完整 corpus/业务准入继续开放，journal 未追加。
+- [x] T2/T7 附件引用/委派元数据语料子项（2026-10-07）：显式 rich/v3，本机 18 PASS，杭州四矩阵 4/4、10 冷进程，header/descriptor/depth/消息来源保留；49 文件回收核对与临时目录清理完成。见[本轮证据](./evidence/dsh-g0-session-rich-corpus-20261007.md)。工作树增量未提交；附件服务/渲染、真实子代理执行、其他事件组合和编译来源仍开放。
+- [x] T5/T19 release 来源绑定子项（2026-10-07）：source SHA 接入安装和 publish 验签，错误结构/digest/原始错误拒绝；release suite 434 PASS、真实 GitHub runtime 正确 SHA 通过且错误 SHA/包拒绝。四个叶子插件隔离构建/测试/打包 4/4 PASS。见[证据与剩余门禁](./evidence/dsh-g0-attestation-binding-20261007.md)。旧 rc1 编译来源、插件签名/SBOM/CVE/撤销和独立 kit 分发仍开放，本批未提交，不放行生产。
 - [ ] 新候选其余准入证据与 G0 stop/go：完整跨版本 corpus、真实身份/模型/UAT、签名/SBOM、生产 activation/canary/rollback；不继承旧候选的 HTTP/browser 事件。
+- [x] T2/T15 本机补证（2026-10-07）：固定 rc1 新源码/锁文件完成官方 host/native 构建，三语料 12 场景/30 冷进程通过，99839 个输入保持；kit 私有源码包/只读预检与实际解包构建完成，相关 21 PASS。见[本轮证据](./evidence/dsh-g0-rc1-rebuild-kit-20261007.md)。仍未关闭新输入 WSL 验证、旧完整闭包签名、kit 独立安装/SDK 分发和 T5/T19。
 - [ ] 旧工作树差异与分仓前置按[并行边界](./evidence/dsh-g0-worktree-triage-20261007.md)推进：public 138 条均有当前/历史已提交 blob，不重复提交；HTML 34 文件待语义审查，kit 固定开发依赖和信任验证独立推进；共享候选/journal 顺序收口。
 
 ## 2026-09-30 rc2 DX triage follow-up

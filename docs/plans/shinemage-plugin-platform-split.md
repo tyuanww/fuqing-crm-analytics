@@ -96,14 +96,16 @@
 
 2026-10-07 浏览器回执接线：复用原目标文件，通过独立 browser schema 将五场景观察记入原候选 journal **seq 6**，引用 seq 5 Host 事件；前五事件/15 输入保留，重试不改字节/mtime。完整 release **345 PASS / 0 SKIP**（新门禁 34），错父事件拒绝，见[本轮证据](../hackathon/evidence/dsh-g0-first-purchase-browser-gate-20261007.md)。不重新跑 WSL，也不授予生产准入；下一步目标在途/跨版本恢复。
 
+2026-10-07 本机增量：T2 的新 rc1 可追踪构建/三语料矩阵、T15 的 kit 本地包/只读预检已完成，见[最新证据](../hackathon/evidence/dsh-g0-rc1-rebuild-kit-20261007.md)。下表仍为整体状态；WSL 完整来源、新机器 kit 安装及供应链门禁没有由本机结果代签。
+
 | 任务 | 当前状态 | 已有证据 | 尚未关闭 |
 |---|---|---|---|
 | T1 | IMPLEMENTED / STATIC PASS | 架构设计、机器 policy/inventory、11 包及当前 AST 盘点；含 import-equals 的 drift/循环/越界/公开导出负测纳入 B0 pipeline，精确数量与源摘要以生成的边界清单为准 | 这只关闭依赖盘点；真实宿主与服务语义由 T2/T3/T17 验证 |
-| T2 | PARTIAL / WSL HOST HTTP + HEADLESS PASS | 原本机[宿主证据](../hackathon/evidence/dsh-g0-pinned-host-20261004.md)保留；固定 Linux runtime 在实际 WSL 加载四包、正常重启、保留 session journal 前缀和原生对话通过；随后同包 headless 五场景通过，见上方证据 | WSL 在途崩溃/torn-frame、rc1→rc2、headed/移动端/无障碍与 shell/tool union；0.2.0 仍 DEFERRED |
+| T2 | PARTIAL / WSL HOST + DECLARED TOOL CORPUS PASS | 固定 Linux runtime 和当前候选的杭州 HTTP/headless、在途崩溃终态恢复已实跑；文本、工具与附件/委派元数据语料的截断/rc1↔rc2/旧状态四项矩阵已通过，见[恢复证据](../hackathon/evidence/dsh-g0-first-purchase-terminal-candidate-20261007.md)、[工具语料](../hackathon/evidence/dsh-g0-session-tool-wsl-20261007.md)及[元数据语料](../hackathon/evidence/dsh-g0-session-rich-corpus-20261007.md) | rc1 编译闭包来源、完整语料范围、headed/移动端/无障碍与 shell/tool union；0.2.0 仍 DEFERRED |
 | T13 | PARTIAL / LOCAL JOURNAL PASS | profile/state/既有 journal 保留；候选快照与 v2 host evidence 已通过 CLI 幂等接入 `CANDIDATE_HOST_VERIFIED`，重复不改原候选，见[本轮证据](../hackathon/evidence/dsh-g0-host-journal-20261004.md) | 生产 activation 崩溃 replay、远端部署 receipt/reconcile；已有首购 HTTP/浏览器观察分别接入 seq 5/6 |
 | T15 | PARTIAL | 独立包/构建成果保留；新 `f9726f68` 查询/保存包、原 workbench/CRM 包与固定 Linux runtime 已完成 WSL 官方 HTTP 与 headless 五场景组合，见上方证据与[插件拆分证据](../hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md) | 物理分仓、headed/移动端/无障碍及跨版本验收、指标/知识服务的目标安装、完整 invariant/精确宿主合同、签名/SBOM/来源信任仍未关闭 |
 | T3 | PARTIAL / WSL HOST HTTP + HEADLESS ARTIFACT PASS | `f9726f68` 两包 owner 分离；本机官方 HTTP/Chrome、WSL 服务十项及实际 WSL 官方 Host/四包 HTTP 与 headless 五场景通过，保存进程只开自有库 | headed/移动端/无障碍、当前包跨旧版本目标矩阵、生产身份/候选准入、供应链及真实模型/UAT 未完成 |
-| T7 | PARTIAL / CURRENT WSL SAME-VERSION RECOVERY PASS | `f9726f68` 保存双包本机 9/9；当前查询/保存 archive 在 WSL 完成查询离线、保存 SIGKILL、同回执恢复、合成小库冷恢复和查询重启不重算，已接原 journal seq 4，见上方证据 | 跨旧版本目标恢复、生产形状 UNKNOWN 与完整候选门禁未完成；结果年龄判断暂缓，生产保存 UI 未启用 |
+| T7 | PARTIAL / WSL SYNTHETIC RECOVERY PASS | 查询/保存隔离恢复与新候选 FAILED/EXECUTION_UNKNOWN、名额释放/不重复派发已实跑；原保存包 forward-fix 14/14，文本/工具 session 跨版本 4/4 分别留证；见[服务恢复](../hackathon/evidence/dsh-g0-first-purchase-recovery-wsl-20261007.md)和[新候选终态](../hackathon/evidence/dsh-g0-first-purchase-terminal-candidate-20261007.md) | 真实业务/身份、编译来源与完整候选门禁未完成；结果采用历史快照，无年龄阈值待办，生产保存 UI 未启用 |
 | T17 | PARTIAL / LOCAL HOST PASS | 固定官方 Web CLI 十项场景及父命令中断回收；实测 preset 移除后现有会话保留工具，同进程挂死需外部重启；已明确 `HOST_RESTART_REQUIRED` | 任意插件同进程隔离不承诺；生产 activation/journal/canary、目标平台与真实服务恢复仍开放，测试指针不替代原子部署 |
 | T21 | PARTIAL / LOCAL HOST + SERVICE RECEIPT PASS | `plugin candidate` 携带 profile 快照；`verify-host` 分别绑定旧 v2 十项宿主观测、首购 WSL runtime 二十项 HTTP 观察和五项 headless 浏览器观察；`verify-service` 绑定精确服务双包九项观测及按各自 schema 区分的 WSL 十四项恢复/十项 source-HTTP 观测，均以原 journal 幂等记账，见上方最新证据 | 生产 canary/rollback、远端 receive/reconcile、host activation；本机核验仍 release_ready=false，目标 JSON 不证明发布者身份 |
 | T22 | IMPLEMENTED / DOCS PASS | README、docs 索引、rc2 Quickstart 和插件作者 Quickstart 已统一当前事实与三步入口 | 现场 host/canary/rollback 仍不属于文档门禁 |
@@ -1524,6 +1526,7 @@ Synthesized from this review's findings. Run with Claude Code or Codex; checkbox
   - Status 2026-10-03: **IMPLEMENTED / STATIC PASS**. All 10 packages, 579 sources, 29 cross-package imports, 190 literal route occurrences, 10 owned contracts and 8 control entries are inventoried. Eight parser/policy tests and the B0 pipeline pass. Five temporary CRM source edges have explicit retirement conditions; T1 completion does not close T15/T17. Evidence: `docs/hackathon/evidence/dsh-g0-board-components-20261003.md`.
 
 - [ ] **T2 (P1, human: ~6h / CC: ~35min)** — DSH contract spike — compare exact 0.1.7-rc.2 and 0.2.0-rc.2 capability, slot, client lifecycle, restart/unload, shell/tool timeout and synthetic session/WAL behavior.
+  - [x] 2026-10-07 新 rc1 本机来源补证：从官方固定 `46a7f68b…` 全新源码树冻结安装，执行官方 host/native 构建；text/tool/rich 共 12 场景、30 冷进程通过，99839 条输入前后不变。四个 JS 入口与旧 WSL 记录一致，但旧 WSL 完整闭包、签名来源和新构建的 WSL 验证仍开放；不关闭整个 T2。见[重建与 kit 证据](../hackathon/evidence/dsh-g0-rc1-rebuild-kit-20261007.md)。
   - Surfaced by: CEO-REVIEW-002 and Section 1 ARCH-002.
   - Files: `.context/dsh-b0/upstream/` evidence reference, `docs/architecture/dsh-compatibility-matrix.md`, synthetic fixture files (to be determined).
   - Verify: source SHA pinned; static grep/typecheck and isolated fixture rows produce explicit SUPPORTED/DEFERRED/BLOCKED results.
@@ -1539,6 +1542,8 @@ Synthesized from this review's findings. Run with Claude Code or Codex; checkbox
 
   - Tool target follow-up 2026-10-07: **WSL TOOL PERSISTENCE MATRIX 4/4 PASS / G0 PARTIAL**. Committed controller `aebf4e38`, immutable rc2 runtime and recorded rc1 compiled modules passed ten fresh processes: torn-tail repair, rc1→rc2 append, rc2→rc1 read, preserved-old-state rollback. 48 evidence files retrieved, owned directory reclaimed, production unchanged, journal remains seq 6. Complete corpus/build provenance and business gates remain open. Evidence: [tool WSL matrix](../hackathon/evidence/dsh-g0-session-tool-wsl-20261007.md).
 
+  - Attachment/delegation metadata follow-up 2026-10-07: **DECLARED RICH CORPUS WSL 4/4 PASS / G0 PARTIAL**. Explicit v3 preserves image/file references, relay/notice attribution, parent/header/depth and the one-time child descriptor. Local 18 PASS includes five corruption cases rejecting both read and append without writes; actual WSL ten cold processes pass with the immutable rc2 runtime. 49 files retrieved, owned directory reclaimed, production unchanged; controller is an uncommitted reviewed worktree increment. Attachment storage/rendering, live delegation, other event compositions and build provenance remain unproven. Evidence: [rich corpus](../hackathon/evidence/dsh-g0-session-rich-corpus-20261007.md).
+
 - [ ] **T3 (P1, human: ~8h / CC: ~45min)** — CRM/API baseline — freeze the first vertical slice contract, compatibility adapter, generated types, version window and profile×service×state rollback matrix.
   - Surfaced by: CEO-REVIEW-004 and Section 4 DATA-001.
   - Files: `backend/contracts/` and adapter location to be determined; `docs/architecture/shinemage-plugin-boundaries.md`.
@@ -1553,6 +1558,7 @@ Synthesized from this review's findings. Run with Claude Code or Codex; checkbox
   - Surfaced by: CEO-REVIEW-007, Section 3, Section 8.
   - Files: release/admission owner to be determined; `docs/operating/` runbook.
   - Verify: tampered, unsigned, revoked, vulnerable and path-traversal fixtures reject; valid candidate produces auditable evidence.
+  - [x] 2026-10-07：现有 release 验签绑定 certificate source SHA，应用/runtime 安装和 publish 同步；完整 release suite 434 PASS，真实 GitHub runtime 正确 SHA 通过、错 SHA/错包拒绝。T5/T19 整体仍 PARTIAL，插件签名接线、SBOM/CVE/撤销未代签。见[来源绑定证据](../hackathon/evidence/dsh-g0-attestation-binding-20261007.md)。
 
 - [ ] **T6 (P1, human: ~6h / CC: ~30min)** — Side-by-side canary and migration runbook — add gray/feature-flag defaults, active pointer, rollback thresholds, deprecation date and cleanup gate.
   - Surfaced by: CEO-REVIEW-008/009 and Section 9 DEPLOY-001/002.
@@ -1601,6 +1607,7 @@ Synthesized from this review's findings. Run with Claude Code or Codex; checkbox
   - Verify: the selected path uses one immutable candidate digest; the only user entry is native DSH composer → first-purchase-query-card → success-only saved-analysis-view; every D15 state row has visible copy, allowed/forbidden actions and focus/live-region behavior owned by an explicit host hook or plugin fallback; provenance fields and the synthetic marker remain visible in narrow and saved views and are present in generated/server/saved contracts; freshness/save eligibility uses the versioned envelope and old v1 receipts are rejected or adapted explicitly; stage transitions include elapsed/last-updated and timeout→UNKNOWN; each synthetic identity in the role/action matrix passes allowed and denied paths; ratio fields preserve the B0 0–1 contract; non-success cannot save; cancel distinguishes WORKER_ACTIVE from NO_ACTIVE_RUN; SAVE_UNKNOWN/SAVE_CONFLICT/HOST_RESTART_REQUIRED preserve draft/receipt and reconcile without false success; cross-layer `correlation_id`/idempotency prevents duplicate saves after replay; native DSH remains usable when the plugin is disabled; permission/source evidence is redacted and replayable; 320/375/768/1280, 200% and forced-colors checks cover the complete keyboard/live-region/focus path.
 
 - [ ] **T15 (P1, human: ~6h / CC: ~30min)** — Boundary extraction inventory and independent package build — record first-party callers for current shared imports and extract only the dev-only kit/public contracts needed for two independently buildable plugin packages.
+  - [x] 2026-10-07 dev kit 本地包合同：files/exports、只读 `check.mjs`、26 个 SDK main/types 边界校验、真实 tarball 安全解包消费及叶子构建通过；相关 21 项测试通过。kit 仍 private，独立安装接线、SDK/工具闭包分发和新机器验证未完成。见[重建与 kit 证据](../hackathon/evidence/dsh-g0-rc1-rebuild-kit-20261007.md)。
   - Surfaced by: Code Quality Eng finding QUALITY-ENG-001 (`shine-funnel`, `shine-query`, `shine-board` toolchain imports; `crm-knowledge` workbench imports).
   - Files: `dsh-plugins/*/build.mjs`, package manifests/exports, boundary manifest and architecture document; no DSH upstream files.
   - Verify: two plugin packages build from clean package boundaries without importing workbench source or runtime state; each package produces a controlled pack/tarball whose files/exports and peer/invariant checks fail closed; `workspace:*` and file links are resolved or rejected before packing; the digest is over that pack output plus pinned generated-contract inputs, not a workspace or file: link; the extraction order remains shine-brand → board-components → CRM adapter → query/cockpit/workbench.

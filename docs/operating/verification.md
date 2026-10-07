@@ -96,6 +96,8 @@ WSL 目标回执接线：`node --test --test-concurrency=1 scripts/release/servi
 
 首购目标浏览器回执门禁：`node --test scripts/release/browser-host-evidence.test.mjs`，由既有 release suite 自动发现。本轮新门禁 **34 PASS**，完整 `node --test scripts/release/*.test.mjs` **345 PASS / 0 SKIP**。复用现有 `plugin verify-host` 和 HTTP 的包/runtime 校验，通过独立 browser schema 绑定原候选 Host 事件；真实 WSL 回执接入 seq 6 的幂等/拒绝结果见[接线证据](../hackathon/evidence/dsh-g0-first-purchase-browser-gate-20261007.md)。单元夹具只验证解析与状态，命令不启动浏览器/WSL，不认证截图内容或签名，不放行生产。
 
+Release 来源绑定：`node --test scripts/release/attestation-binding.test.mjs scripts/release/trust.test.mjs`；新增测试随 `node --test scripts/release/*.test.mjs` 自动运行。覆盖缺/错 source SHA、输出结构/subject、错误脱敏、验证期间包变化；临时 verifier 是调用边界夹具。2026-10-07 完整套件 434 PASS、真实 GitHub runtime 签名正负验证与四个叶子插件隔离构建 4/4 见[本轮证据](../hackathon/evidence/dsh-g0-attestation-binding-20261007.md)，不表示新候选或生产准入通过。
+
 ## 提交内容与历史审计
 
 Excel SSOT 的提交入口使用 `--staged`：从 Git index 读取变更 view 文件全文，工作树中未暂存的修复不能掩盖错误；新增/重命名文件同样校验四条规则。无参数命令仍全量扫描 views。`--only-new` 为 `--staged` 的兼容别名，原先该参数仅打印文案但没有筛选。
@@ -239,13 +241,23 @@ T3/T7 的 `backend/tests/test_analytics_first_purchase_save_recovery.py` 纳入�
 
 兼容门禁回归由 `pnpm dsh test` 统一执行；定向入口为 `node --test scripts/release/service-compatibility.test.mjs scripts/release/plugin-candidate.test.mjs scripts/release/release.test.mjs scripts/release/promotion-retry.test.mjs`。这些测试使用自有临时目录，实际走 pack/receive/install/activate/rollback 与 journal，验证错误版本、旧 writer、篡改/缺证据、特殊文件、绑定丢失和幂等重试；验证器测试夹具不冒充真实兼容回执。真实源码对观测需另运行上段命令，本次结果见[门禁证据](../hackathon/evidence/dsh-g0-service-gate-20261004.md)。
 
+### 插件开发 kit 验证
+
+dev kit 输入预检在 Node 24 下显式运行 `node dsh-plugins/plugin-kit/check.mjs --upstream /absolute/pinned-rc2-checkout [--build-tools /absolute/identical-installed-build-tools]`。命令只读 source SHA/lock、工具版本和 SDK main/types 边界；不联网、不安装、不执行编译工具、不写插件链接。READY 仅表示本机 build inputs 可用，`release_ready=false`；缺项返回 BLOCKED/退出 2，不输出内部路径。实际构建继续调用同一 `bindToolchain` 的检查器，避免两套校验漂移。
+
+`B0_BUILD_UPSTREAM=/absolute/pinned-rc2-checkout node --test scripts/dsh-b0/plugin-kit.test.mjs scripts/dsh-b0/clean-build.test.mjs scripts/dsh-b0/plugin-isolation.test.mjs scripts/dsh-b0/plugin-boundaries.test.mjs` 验证实际 kit 打包/安全解包/public export 导入、SDK 边界负测、解包后叶子构建及原隔离回归；`plugin-kit.test.mjs` 已纳入 B0 pipeline。未设置 `B0_BUILD_UPSTREAM` 时须将真实解包构建记为 NOT_RUN，不能以其余包测试通过代替。kit 仍是 private 本地源码包，不含 SDK/已安装依赖，也未完成新机器分发。
+
 ### 首购候选恢复验收
+
+2026-10-07 的新 rc1 来源重建和同一恢复入口的三语料实测见[本轮证据](../hackathon/evidence/dsh-g0-rc1-rebuild-kit-20261007.md)：官方固定源码与锁、host/native 构建、输入清单及运行前后摘要已保留，本机 12 场景/30 冷进程通过。它不证明旧杭州编译闭包、历史签名或新输入的 WSL 结果；没有自动重建/部署入口，也不更改 rc2 pin。
 
 Node 24 下以 `B0_BUILD_UPSTREAM=/absolute/pinned-rc2-checkout node --test scripts/dsh-b0/recovery-model-gate.test.mjs scripts/dsh-b0/session-recovery.test.mjs scripts/dsh-b0/mock-provider.test.mjs` 验证故障代理、输出保护和官方 JSONL 冷读写；两个新测试入口已纳入同一 B0 pipeline。跨版本入口为 `node scripts/dsh-b0/session-recovery.mjs /absolute/new-output /absolute/rc2-modules /absolute/rc1-modules`，必须提供新输出目录和实际编译模块目录；缺 rc1 返回 PARTIAL/退出 2，子进程失败返回 FAIL/退出 1，不默认联网、构建或读取现有会话。
 
 实际首购 Host 通过原 `test_analytics_first_purchase_official_host.py` 加 `B0_NATIVE_CRM_RECOVERY=1` 显式运行，沿用 v5 不可变包输入，与 browser 模式互斥。该阶段 WSL 整链 1 PASS、持久化 4/4 和服务兼容 14/14 的范围与原始日志见[恢复证据](../hackathon/evidence/dsh-g0-first-purchase-recovery-wsl-20261007.md)。此模式锁定原候选的安全 UNKNOWN 行为，**不能当作业务任务终态恢复门禁**；恢复历史投影及活动名额释放的修复和新包验收见下段。该阶段未接入新的 release journal 事件。
 
 工具持久化语料用同一 `session-recovery.mjs` 命令附加 `--corpus tool`，可省略 rc1 位置参数运行仅 rc2 部分（返回 PARTIAL/2）。默认 `--corpus text` 保留历史文本范围；tool 模式为显式 v2 回执，比较调用/结果/错误/meta 与官方恢复消息投影，未执行真实工具。本机四冷进程及负测见[工具语料证据](../hackathon/evidence/dsh-g0-session-tool-corpus-20261007.md)；后续杭州同一工具语料已实际完成四项跨版本矩阵、10 冷进程，见[目标机证据](../hackathon/evidence/dsh-g0-session-tool-wsl-20261007.md)。这不关闭媒体/委派等完整 corpus 或编译闭包来源证明。传输控制器需包含 `session-recovery-tool-corpus.mjs`；不能从本机结果推定目标或生产通过。
+
+附件/委派元数据语料在同一入口使用 `--corpus rich`，为显式 v3 回执，第一轮 8 条事件、续写后 15 条（子会话 descriptor 只创建一次）。核对图片/文件引用、relay/notice 来源、会话头父级/delegationDepth、官方 descriptor/depth helper 和消息投影；附件存储/渲染、真实委派/模型仍 `NOT_RUN`。传输控制器须包含 `session-recovery-rich-corpus.mjs`，即使只运行默认 text/tool 也不能漏掉静态 import。相关冷恢复/篡改负测继续由上述 `session-recovery.test.mjs` 统一执行。
 
 修复后终态门禁显式使用 `B0_NATIVE_CRM_RECOVERY=terminal`：要求 FAILED/EXECUTION_UNKNOWN、活动名额释放、相同请求不重复派发和原分析唯一；`=1` 仅保留旧包的历史复现。源码模式与固定包模式继续互斥。本机源码/官方 Host 的命令和失败日志见[投影修复证据](../hackathon/evidence/dsh-g0-native-journal-recovery-fix-20261007.md)。新候选 `a490457c…` 的本机固定包与杭州 WSL2 终态恢复均已实际通过，见[新候选证据](../hackathon/evidence/dsh-g0-first-purchase-terminal-candidate-20261007.md)。原始回执现已通过下述专用 verifier 接入 seq 5，服务目标 seq 4 与 Host 终态 seq 5 是两个独立事件，生产准入仍为 PARTIAL。
 

@@ -2,6 +2,8 @@
 
 ### Added
 
+- 插件 dev kit 增加私有源码包合同与只读构建输入预检，构建前验证固定 SDK 编译入口/类型与工具版本，再加载工具和绑定依赖；支持实际 tarball 解包消费，仍需显式固定 SDK/build-tools，不代表 registry 发布或生产准入。
+
 - `pnpm dsh plugin verify-host` 增加独立 WSL headless 浏览器回执核验，引用同候选 runtime Host 事件并幂等入账；复用固定包校验，错误证据拒绝且日志脱敏，不启动远端服务或放行生产。
 
 - 显式合成首购 profile 增加官方原生 `/first-purchase` 查询、只读状态和精确 run/call 取消命令；继续由原 Agent Loop 与查询内核执行。查询准入不明时显示 UNKNOWN 并先核对，普通 DSH 对话保持可用，生产默认关闭。
@@ -25,6 +27,10 @@
 - `pnpm dsh plugin verify-host` 将同一插件候选、profile 快照、CRM/知识组合和固定 rc2 的本机宿主证据接到既有 journal；重试幂等，不修改候选或激活服务。增加 SQLite 提交前后进程丢失、保存回放与 forward-fix 验证；这些本地结果不放行生产发布或 D15 保存门禁。
 
 ### Fixed
+
+- 发布与安装的 artifact attestation 必须绑定 reviewed source SHA，并拒绝不匹配的包摘要、无效验证输出和校验期间包变化；失败回执不再包含验签进程原始错误。
+
+- 会话恢复验证新增附件引用与委派元数据语料，读取/续写前拒绝已变更的工具或元数据输入；同步已完成的杭州恢复事实，保留未验证的附件执行与生产准入边界。
 
 - 明确首购结果采用历史快照和保存时校验，不再将陈旧/过期阈值列为待确认事项；既有回执/时效字段保持兼容。
 

@@ -18,7 +18,23 @@
 
 - 当前采用历史结果快照 + 保存时校验；陈旧/过期阈值已移出当前待办，不再等待确认，也不新增到期系统。保留生成时间/来源和 `NOT_CHECKED`，权限、候选准入、冲突、幂等与会话/请求超时保持；旧 wire/回执兼容不删除。见[决定与验证](docs/hackathon/evidence/dsh-g0-snapshot-policy-closeout-20261007.md)。
 
-### 工具会话杭州跨版本验证（2026-10-07，当前进度）
+### rc1 重建与 kit 包边界（2026-10-07，当前增量）
+
+- 从固定 `46a7f68…` 新源码树完成冻结依赖、官方 host/native 构建；三类语料 **12 场景 / 30 冷进程通过**，99839 个构建输入条目保持。四个 rc1 manifest/JS 入口摘要与旧 WSL 记录一致，详见[本轮证据](docs/hackathon/evidence/dsh-g0-rc1-rebuild-kit-20261007.md)。这是本机新输入的构建追踪，旧 WSL 完整闭包与签名仍未认证。
+- kit 新增源码包白名单/公开 export 和只读输入预检；实际解包 kit 可构建叶子插件，相关 **21 PASS / 0 SKIP**，边界清单通过。仍需固定 SDK/build-tools，尚未发布 kit 或完成全新机器安装。本轮只在本机施工，保留既有候选/journal 与未提交改动，未 commit/push 或操作杭州，整体 PARTIAL。
+
+### 包来源绑定与独立构建复核（2026-10-07，前一增量）
+
+- 修复 release attestation 未强制绑定源码 SHA 的缺口；安装与 publish 两入口同步，拒绝无效 subject/结构和校验期间包变化，错误回执脱敏。本次完整 release suite **434 PASS / 0 FAIL / 0 SKIP**；真实 GitHub runtime 签名正确 SHA 通过、错误 SHA/包拒绝，见[本轮证据](docs/hackathon/evidence/dsh-g0-attestation-binding-20261007.md)。
+- 四个叶子插件在仅自身源码 + dev kit 的临时目录构建/测试/打包 **4/4 PASS**；仍依赖固定 SDK 和工具闭包，独立 kit 分发未完成。rc1 原编译来源继续 NOT_VERIFIED；T5/T19 的插件签名/SBOM/CVE/撤销与 G0 门禁仍开放。本轮没有杭州操作、GitHub 发布或提交，保留前批未提交修改，整体 PARTIAL。
+
+### 附件/委派元数据恢复（2026-10-07，当前增量）
+
+- 从干净 **`418edc29`** 继续 T2/T7，新增显式 `--corpus rich` / v3，核对图片/文件引用、relay/notice 来源、父会话、descriptor/delegationDepth 及官方恢复投影；tool/rich 续写前先验证已有语料。本机 **18 PASS / 0 FAIL / 0 SKIP**。
+- 新控制器按工作树字节封存，在杭州 WSL2/UID 65534 完成 **4/4 PASS、10 冷进程**，8→15 事件；49 个结果文件取回校验，30147 个 runtime 输入条目和五个控制器保持，临时目录已回收、生产快照不变。见[本轮证据](docs/hackathon/evidence/dsh-g0-session-rich-corpus-20261007.md)。本批尚未提交，不冒充 clean artifact；候选 journal 仍 seq 6，整体 PARTIAL。
+- 已同步当前兼容矩阵与计划 T2/T7 汇总，移除已完成项的 NOT_RUN 和结果年龄“暂缓”残留。下一步是旧 rc1 编译来源/包信任证明与独立构建前置；真实附件/委派执行、其他事件组合和生产准入不由本语料代签。
+
+### 工具会话杭州跨版本验证（2026-10-07，上一阶段）
 
 - 本机工具语料及结果年龄策略经 OCR delegate 13/13 审核，正常 hooks 提交 **`aebf4e38`**；当前年龄策略已收口，不再等待阈值。
 - 同一提交控制器在杭州 WSL2、UID 65534 完成工具持久化矩阵 **4/4 PASS，10 个冷进程全部退出 0**：截断恢复、rc1→rc2 读取续写、rc2→rc1 读取、保留旧状态回退。见[本轮证据](docs/hackathon/evidence/dsh-g0-session-tool-wsl-20261007.md)。
