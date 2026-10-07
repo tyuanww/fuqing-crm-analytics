@@ -282,7 +282,7 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 - [x] D15 保存 OCR delegate（2026-10-04）：29/29 原始路径审查，修复实际分析缺失/来源不匹配仍报 SAVED、持久化合同字段被默认值补齐的问题；已验证 7 个负测先失败后通过，相关后端 78 PASS，完整 B0 Python 665 PASS。见[审核证据](./evidence/dsh-g0-save-review-20261004.md)。
 - [x] T3/T7 固定服务源码兼容子项（2026-10-04）：旧 `56198c32` / 新 `a50bd424` 完成 9/9 预期观测和 4/4 CLI 负测；已确认旧服务写 D15 状态不保留来源，明确阻断可写降级。见[兼容窗口](../architecture/first-purchase-service-compatibility.md)与[证据](./evidence/dsh-g0-service-save-compat-20261004.md)。
 - [x] T3/T7 本地候选兼容门禁子项（2026-10-04）：显式 service binding 与实际回执绑定 candidate、profile/payload、安装 marker/journal；已验证阻断旧 writer、缺失/篡改与幂等重试绕过。release 169 PASS、实际 CLI 拒绝 3/3，见[门禁证据](./evidence/dsh-g0-service-gate-20261004.md)。仅 LOCAL_COMPATIBLE，现场激活仍 BLOCKED。
-- [ ] T15 剩余：插件/服务物理分仓、指标/知识服务的目标平台安装、invariant、供应链门禁；首购服务 WSL 合成安装已通过，但不代签其他服务。kit 全部消费者已改用固定开发依赖，新 SDK/工具目录构建通过；预编译闭包分发、整台干净机器与 registry 信任仍开放。整体仍 PARTIAL。
+- [ ] T15 剩余：插件/服务物理分仓、invariant、供应链门禁；首购、指标、知识服务各自的 WSL synthetic 冷安装已实际通过，生产安装/准入仍未完成。kit 全部消费者已改用固定开发依赖，新 SDK/工具目录构建通过；预编译闭包分发、整台干净机器与 registry 信任仍开放。整体仍 PARTIAL。
 - [x] T3/T7/T15 首购服务独立应用包子项（2026-10-04）：同包生成 OpenAPI、13 项固定依赖、仓库外实际 HTTP 保存/重启回放与 forward-fix；共享后端 17 PASS（含 7 个包集成场景），已验证 FIFO/合同生成副作用拒绝。见[服务包证据](./evidence/dsh-g0-analysis-service-package-20261004.md)。仅同版本本机 synthetic，不关闭下方精确旧/新包和主机门禁。
 - [x] T3/T7/T15 精确服务包配对子项（2026-10-05）：旧 `56198c32` / 新 `a50bd424` 两个实际 archive，各自离线 hash wheel 冷安装 13 项依赖，Darwin arm64 **9/9**；共享后端 **25 PASS**（包内 8 个集成场景）与 SIGTERM 回收通过。见[配对证据](./evidence/dsh-g0-service-artifact-pair-20261005.md)。新回执尚未被现有激活门禁消费，不替代 WSL/供应链/身份验证。
 - [x] 服务包 OCR delegate（2026-10-05）：原始 **21/21** 路径全覆盖，Git replacement 与取消回收两个缺陷修复；修复后共享后端 25 PASS（内部 10 个包场景）、固定双包 9/9。见[审核证据](./evidence/dsh-g0-service-artifact-review-20261005.md)。
@@ -364,9 +364,11 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 - [x] T15 v2 SDK 同平台缩减分发子项（2026-10-07）：前批已提交 `fd3ed8b6`；本轮仅携带插件 pnpm 11.28.2，实际 64.97 MB 包接收后禁用原 SDK/外网并只读消费，10/10 消费者、17 PASS，防护 56 PASS，接收拒绝 4/4。新字节 0 命中/17 缺口，222 个版本查完为 7 个版本/29 条公告；17 文件重核来源，仍 BLOCKED。首轮可选依赖悬空链接与新副本精确恢复单列，见[本轮证据](./evidence/dsh-g0-kit-sdk-v2-distribution-20261007.md)。本轮代码/测试/文档经限定范围审查后随本次本地提交收录；只关闭本机新包往返与盘查。
 - [x] T15 v2 SDK WSL 子项（2026-10-08）：全新依赖环境准备 256.411 秒、完整/缩减 pack/receive 通过；原 SDK 不可读、禁外网、只读输入下十消费者 **20 PASS / 0 SKIP**。修复跨平台验收误要求重打 gzip 与原包同 SHA，保留原领域包和三份消费锁。首轮 6/10 失败与恢复分别保留，见[本轮证据](./evidence/dsh-g0-sdk-wsl-immutable-inputs-20261008.md)。只关闭开发 SDK 目标平台子项，不是全新机器或生产验收。
 - [x] T15 来源信任细化（2026-10-08）：五包摘要/签名及篡改负测通过；真实 npm verifier 按发布时间接受历史有效密钥，17/17 文件来源字节重核。固定 0.2.0-rc.2 不能自动修复公告；七个精确依赖修复候选只完成查询，见[本轮证据](./evidence/dsh-g0-sdk-upstream-trust-20261008.md)。不等于整体信任放行。
-- [ ] T15 SDK 分发剩余项：处理当前固定 DSH 上游的 7 个受影响版本/29 条公告；完整准备环境中的官方旧 manager 另保留审查，不能用缩减包未携带来证明其安全。补完整 SBOM/发布者身份/最终签名/撤销、不透明内容安全与整台干净机器验收。上述历史密钥日期疑点和 v2 WSL 开发 SDK 已关闭，不重复列为 NOT_RUN。官方升级独立推进；物理分仓按 stop/go。完整 checkout 保留用于 SDK 维护，不把全量审计加入每次业务插件更新。
+- [x] T2/T15 官方升级候选盘查（2026-10-08）：重新读取全部25 releases/26 tags与30个npm CLI版本，精确核对三个新 release 和默认 master；29条公告仍在其原始锁，**BLOCKED_UPSTREAM_RELEASE**。26 bindings/29实际import/12slot静态矩阵与两profile的4个拒绝/通过断言完成，未安装未修复候选、不改现用pin。见[候选证据](./evidence/dsh-g0-sdk-upgrade-candidate-20261008.md)。勾选只表示本次盘查完成，不能作为升级或分发放行。
+- [x] T3/T15 指标/知识服务 WSL 冷安装（2026-10-08）：同一两包分别14/13项精确Linux wheel，2/2离线冷安装、15/15 HTTP与保护观测通过；新验证器12项边界通过。首次SIGTERM缺凭据失败保留，恢复只更新验证器、重新冷安装，4进程回收及生产监听/PID/current保持；135个取回证据逐项校验。见[目标证据](./evidence/dsh-g0-crm-services-target-20261008.md)。不是生产部署、任意代码隔离或journal准入门禁。
+- [ ] T15 SDK 分发剩余项：当前固定 DSH 上游的 7 个受影响版本/29 条公告仍由官方 release 未修复阻塞；最新 alpha/default master 亦未解除，不重复安装来证明同一缺口。完整准备环境中的官方旧 manager 另保留审查，不能用缩减包未携带来证明其安全。补完整 SBOM/发布者身份/最终签名/撤销、不透明内容安全与整台干净机器验收。上述历史密钥日期疑点和 v2 WSL 开发 SDK 已关闭，不重复列为 NOT_RUN。官方升级独立推进；物理分仓按 stop/go。完整 checkout 保留用于 SDK 维护，不把全量审计加入每次业务插件更新。
 - [x] 旧 HTML 工作树语义盘查与最小修复（2026-10-08）：43/43 覆盖，34 语义项已归类；两个源码文件的五类行为/测试问题修复，正式 build、35/111/2 前端、51+5 后端通过。见[本轮证据](./evidence/dsh-g0-html-semantic-integration-20261008.md)。public 138 条均有历史/当前 blob；旧树保留，不重复整文件合并。
-- [ ] 分仓前开发入口剩余：按已有 kit 显式构建入口收敛直接 pnpm 私有依赖安装/lock 路径，以及 HTML 共享合成合同夹具的独立供给；SDK 信任/目标平台和共享候选 journal 仍分别验证。
+- [x] T15 分仓前作者入口（2026-10-08）：显式审核kit/领域tar，独立开发父目录生成锁并实际frozen离线安装，发布manifest精确声明保持；三份synthetic夹具包内固定摘要并与原owner字节做drift核对，不再向上读主仓。formal build、35/111/2前端、25合同、package-inputs12、十消费者20 PASS/0 SKIP及AST边界12通过。审查确认祖先symlink绕过后真实FAIL→PASS，独立复核关闭；运行包8成员不含kit/夹具/作者入口。见[作者证据](./evidence/dsh-g0-plugin-author-inputs-20261008.md)与[综合审修](./evidence/dsh-g0-parallel-followup-review-20261008.md)。只关闭固定SDK下开发入口，不等于SDK分发信任、物理分仓或完整产品发布。
 
 ## 2026-09-30 rc2 DX triage follow-up
 

@@ -1,6 +1,6 @@
 # CRM、知识与首购分析服务独立候选包
 
-这是 T15 / T3 / T7 的 synthetic 交付入口。服务分别拥有应用包、资源清单、Python 依赖锁和进程。包不携带 DSH、插件、真实数据库、账号配置或主仓运行环境。首购保存的插件 UI 尚未接通；当前源码仍在同一 workspace，尚未物理分仓、发布或安装到杭州生产环境。首购固定双包已完成杭州临时隔离安装验收，详见[兼容窗口](../architecture/first-purchase-service-compatibility.md)，不代表其他服务或后续源码通过。
+这是 T15 / T3 / T7 的 synthetic 交付入口。服务分别拥有应用包、资源清单、Python 依赖锁和进程。包不携带 DSH、插件、真实数据库、账号配置或主仓运行环境。首购保存 UI 已接入显式合同及合成验收，默认未配置生产准入时仍 disabled/NOT_AVAILABLE；当前源码仍在同一 workspace，尚未物理分仓、发布或安装到杭州生产环境。首购固定双包的隔离验收见[兼容窗口](../architecture/first-purchase-service-compatibility.md)；指标/知识固定包的本次 WSL 结果见本页末节，各结果只覆盖自身固定输入。
 
 ## 三个交付单元
 
@@ -101,7 +101,7 @@ identities = CRMFirstPurchaseIdentityResolver(
 - CRM 401/403 分别拒绝为未认证/无权限，其余失败为可重试 503 `IDENTITY_UNAVAILABLE`，不透传响应正文或凭证。保存事务内仍按既有检查点重验，认证服务故障时不能新写入分析/回执；没有承诺跨 CRM 和 SQLite 的分布式原子撤权。
 - 旧 `POST /analyses` 仅保留原 B0 注册表的合成兼容行为，任何外部 resolver 即使漏配 policy callback 也返回 409 `VERSIONED_SAVE_REQUIRED`，不能绕过准入。默认 `service.py serve` 仍不注入 adapter、RunStore、状态或策略。通过身份校验不能自动填写 candidate allowlist 或有效期；定向测试已验证：策略未配置时保持 `POLICY_NOT_CONFIGURED`/禁用保存（见 [identity-alone 回归](../../backend/tests/test_analytics_first_purchase_crm_identity.py)）。公共知识插件无需 CRM，其他身份 provider 仍可通过原协议独立实现。
 
-本增量[本地 134 项回归与实际包观测](../hackathon/evidence/dsh-g0-crm-identity-adapter-20261006.md)已通过；审修提交 `7edf7710` 的 clean 服务包另完成源码/离线包各 9/9、包内 adapter 5/5。后续 `48e7ddfc` 增加显式关闭时效策略；其新 clean 服务包已绑定 plugin candidate/journal，源码/离线双包各 9/9、WSL 固定合成场景 14/14。本机另对同一包完成 CRM 合成身份→NOT_CHECKED 保存→重新打开状态回放 6/6，详见[新候选证据](../hackathon/evidence/dsh-g0-save-time-policy-candidate-20261006.md)。真实 CRM 登录/会话撤销、生产候选准入、目标关闭时效组合与保存 UI 尚未接通；结果陈旧/过期不再要求先给阈值。现役服务未切换。
+本增量[本地 134 项回归与实际包观测](../hackathon/evidence/dsh-g0-crm-identity-adapter-20261006.md)已通过；审修提交 `7edf7710` 的 clean 服务包另完成源码/离线包各 9/9、包内 adapter 5/5。后续 `48e7ddfc` 增加显式关闭时效策略；其新 clean 服务包已绑定 plugin candidate/journal，源码/离线双包各 9/9、WSL 固定合成场景 14/14。本机另对同一包完成 CRM 合成身份→NOT_CHECKED 保存→重新打开状态回放 6/6，详见[新候选证据](../hackathon/evidence/dsh-g0-save-time-policy-candidate-20261006.md)。这些是2026-10-06的范围；后续保存UI合成接线与headless观测见[当前候选证据](../hackathon/evidence/dsh-g0-first-purchase-current-browser-20261007.md)。真实CRM身份/撤销与生产候选准入仍开放，结果陈旧/过期不再要求先给阈值；现役服务未切换。
 
 ## 验证与尚未完成的交付
 
@@ -119,7 +119,7 @@ CRM_SERVICE_PYTHON=/absolute/locked-python3.14 \
 
 首购场景使用仓库的实际合成 worker 预置一个成功任务；包外最小依赖进程只消费该小型状态，验证保存、无 RunStore/策略的重启回放、SAVE_UNKNOWN、权限/冲突拒绝及标题 forward-fix。最小依赖进程显式拒绝导入 DuckDB、CRM/知识应用、worker、httpx 等未声明模块。另有源文件/安装 manifest 的 FIFO 和合同生成副作用负测。
 
-上述日常包测试按已安装的 lock closure 复制依赖；它不代替下面的 wheel 冷安装。Python 可执行文件、目标平台 wheelhouse、签名/SBOM/CVE、干净 reviewed SHA、受信任 receive、canary 与回退仍需独立证据；生产不能现场编译或在线解析浮动依赖。真实 CRM 看板、私有知识库权限和生产数据不在这些包的验收范围。CRM/知识插件已分别拆为候选包；首购初始包结果见[证据](../hackathon/evidence/dsh-g0-analysis-service-package-20261004.md)。T3/T7/T15 仍 PARTIAL，保存 UI 与现场激活门禁保持关闭。
+上述日常包测试按已安装的 lock closure 复制依赖；它不代替下面的 wheel 冷安装。Python 可执行文件、目标平台 wheelhouse、签名/SBOM/CVE、干净 reviewed SHA、受信任 receive、canary 与回退仍需独立证据；生产不能现场编译或在线解析浮动依赖。真实 CRM 看板、私有知识库权限和生产数据不在这些包的验收范围。CRM/知识插件已分别拆为候选包；首购初始包结果见[证据](../hackathon/evidence/dsh-g0-analysis-service-package-20261004.md)。T3/T7/T15 仍 PARTIAL；保存 UI 已有synthetic接线，生产保存与现场激活门禁保持关闭。
 
 ## 精确旧/新包的 opt-in 兼容验证
 
@@ -201,4 +201,12 @@ JSON 合同为 `shinemage-service-target-preflight/v1`，包含 manifest 摘要�
 
 传送测试状态时，archive 必须显式保留状态目录 `0700`，不能只打包文件而丢失目录权限；本次首次启动被此约束正确拒绝，修正夹具后在新目录重跑。复用原不可变应用包，生产端不编译、无在线依赖解析。常规插件 UI/工具变化仍只需要更新相应插件；此次冷安装是独立后端服务的验收，不意味着每次插件更新都重装 DSH 和所有服务。
 
-本次身份、候选准入 digest 与时钟仍是合成 fixture；原包的 dirty 来源标记保留。目标回执现已通过上面的可选参数核验并接入原 journal；真实身份/状态策略、最终 reviewed 包与供应链仍未关闭，保存 UI 和生产激活保持关闭。陈旧/过期判断已按上述用户决定暂缓，不再等待生产阈值；旧回执不覆盖新的 NOT_CHECKED 模式。旧版可写降级会丢失来源，回退插件时应保留新版服务与 durable state。其他服务、官方 DSH 宿主、真实业务/浏览器未由此验收覆盖。
+本次身份、候选准入 digest 与时钟仍是合成 fixture；原包的 dirty 来源标记保留。目标回执现已通过上面的可选参数核验并接入原 journal；真实身份/状态策略、最终 reviewed 包与供应链仍未关闭，生产保存与激活保持关闭。陈旧/过期判断已按上述用户决定暂缓，不再等待生产阈值；旧回执不覆盖新的 NOT_CHECKED 模式。旧版可写降级会丢失来源，回退插件时应保留新版服务与 durable state。其他服务、官方 DSH 宿主、真实业务/浏览器未由此验收覆盖，后续独立观测按各自日期和输入记录。
+
+## 指标与知识服务的 WSL 隔离观测（2026-10-08）
+
+metrics `1492219b…` 与 knowledge `7a48bb22…` 两个同一不可变包分别用14/13项精确Linux wheel完成目标平台离线冷安装，15/15 HTTP与保护观测通过。知识不安装DuckDB，两个服务独立停止/重启互不影响；4个自有进程回收，生产current和监听/PID保持。实际完整摘要、命令、输入与失败恢复见[本轮证据](../hackathon/evidence/dsh-g0-crm-services-target-20261008.md)。
+
+新 `scripts/crm-calibration/crm-services-target.py` 是显式opt-in的固定包验证器：要求已审核的39项输入manifest和对应摘要；复用安全解包、离线安装和check，不接受已有输出覆盖。`--phase install` 在隔离低权限环境冷安装，控制器将安装设为只读后再 `--phase http`。它不创建主机namespace、不编码SSH/杭州地址、不默认执行，也不是生产installer或candidate/journal准入器。现场隔离控制器与执行快照只留在本轮ignored证据目录，正常测试使用 `backend/tests/test_crm_services_target.py`，不会联系杭州。
+
+导入守卫的初始化与每次拒绝立即持久化，SIGTERM下保留 `guard-installed / final_snapshot=false`；只有正常解释器退出才标记退出快照。此证据属于固定已审代码的持续hook观测，不证明任意代码隔离。首次缺凭据失败和恢复都保留；两个服务的生产安装、签名来源与候选准入继续NOT_RUN/BLOCKED，不能沿用首购专用verifier自动接受本轮新runner。

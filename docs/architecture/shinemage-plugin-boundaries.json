@@ -72,10 +72,10 @@
       "commands": {
         "build": "node build.mjs",
         "test": "node --test test/model.test.mjs test/initial-session.test.mjs test/native-evidence.test.mjs test/run-view.test.mjs && pnpm test:html-edit",
-        "test:html-edit": "node --test src/free-page/resource/package-normalize.test.mjs src/client/free-html-library/html-import.test.mjs src/client/html-selection-bridge.test.mjs src/client/free-html-library/store.test.mjs src/client/free-html-library/p12-live-adapters.test.mjs src/client/free-html-library/source-draft.test.mjs src/client/cockpit-ai-client.test.mjs src/free-page/edit/intent-router.test.mjs src/free-page/edit/selection-context.test.mjs test/dynamic-chart-browser-seam.test.mjs",
+        "test:html-edit": "node --test src/free-page/resource/package-normalize.test.mjs src/client/free-html-library/html-import.test.mjs src/client/html-selection-bridge.test.mjs src/client/free-html-library/store.test.mjs src/client/free-html-library/p12-live-adapters.test.mjs src/client/free-html-library/source-draft.test.mjs test/cockpit-ai-client.test.mjs src/free-page/edit/intent-router.test.mjs src/free-page/edit/selection-context.test.mjs test/dynamic-chart-browser-seam.test.mjs test/draft-save-regression.test.mjs test/canvas-input-regression.test.mjs",
         "test:built": "node --test test/built.test.mjs"
       },
-      "manifest_sha256": "8a52b8f157a9658375efcd6e0023bf2ae322cd6f0430db01d182a3fab46b325c"
+      "manifest_sha256": "8c9f16b47012ef2ed8bbe549f24f067260f28f14bb2570c9387b7ad24887c6b4"
     },
     {
       "path": "dsh-plugins/board-components",
@@ -540,7 +540,7 @@
       "manifest_sha256": "1cd7ce082f80d1088aed5d9bb7940391c0c44485e8ed5abd5a8c711bb97282ca"
     }
   ],
-  "source_files_scanned": 644,
+  "source_files_scanned": 648,
   "cross_package_edges": [
     {
       "consumer": "analytics-workbench",
@@ -626,7 +626,27 @@
       "consumer": "analytics-workbench",
       "provider": "plugin-kit",
       "phase": "build",
+      "source": "dsh-plugins/analytics-workbench/author-inputs.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/packaged-dependencies",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "plugin-kit",
+      "phase": "build",
       "source": "dsh-plugins/analytics-workbench/toolchain.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "plugin-kit",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/canvas-input-regression.test.mjs",
       "target": "dsh-plugins/plugin-kit",
       "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
       "access": "public-export",
@@ -2863,12 +2883,27 @@
     {
       "consumer": "analytics-workbench",
       "phase": "build",
+      "specifier": "node:child_process"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "build",
+      "specifier": "node:crypto"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "build",
       "specifier": "node:fs"
     },
     {
       "consumer": "analytics-workbench",
       "phase": "build",
       "specifier": "node:fs/promises"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "build",
+      "specifier": "node:module"
     },
     {
       "consumer": "analytics-workbench",

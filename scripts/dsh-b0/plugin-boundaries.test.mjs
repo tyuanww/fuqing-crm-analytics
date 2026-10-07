@@ -156,6 +156,35 @@ test('public kit exports require an exact dev-only build dependency', async t =>
 });
 
 
+test('build-time resolved public kit imports retain dependency and runtime guards', async t => {
+  const f = await fixture(t);
+  const name = '@shine-mage/dsh-plugin-kit';
+  const provider = { name, version: '0.1.0', files: ['packaged-dependencies.mjs'],
+    exports: { './packaged-dependencies': './packaged-dependencies.mjs' } };
+  const consumer = { name: '@shine-mage/first', version: '1.0.0', devDependencies: { [name]: '0.1.0' } };
+  await writeFile(join(f.root, 'dsh-plugins/plugin-kit/package.json'), JSON.stringify(provider));
+  const manifestPath = join(f.root, 'dsh-plugins/first/package.json');
+  await writeFile(manifestPath, JSON.stringify(consumer));
+  const build = join(f.root, 'dsh-plugins/first/author-inputs.mjs');
+  const source = `const kit = await import(pathToFileURL(require.resolve('${name}/packaged-dependencies')));`;
+  await writeFile(build, source);
+  const result = await inspectBoundaries(f.root);
+  assert.deepEqual(result.cross_package_edges.map(({ access, phase, specifier }) => ({ access, phase, specifier })),
+    [{ access: 'public-export', phase: 'build', specifier: `${name}/packaged-dependencies` }]);
+  assert.deepEqual(result.unresolved_dynamic_imports, []);
+  consumer.devDependencies[name] = '^0.1.0'; await writeFile(manifestPath, JSON.stringify(consumer));
+  await assert.rejects(inspectBoundaries(f.root), /BOUNDARY_KIT_DEV_ONLY/);
+  consumer.devDependencies[name] = '0.1.0'; await writeFile(manifestPath, JSON.stringify(consumer));
+  await writeFile(build, source.replace('/packaged-dependencies', '/private'));
+  await assert.rejects(inspectBoundaries(f.root), /BOUNDARY_PRIVATE_SUBPATH/);
+  for (const expression of ['pathToFileURL(require.resolve(userInput))', 'pathToFileURL(other.resolve("x"))']) {
+    await writeFile(build, `const kit = await import(${expression});`);
+    await assert.rejects(inspectBoundaries(f.root), /BOUNDARY_DYNAMIC_RUNTIME_IMPORT/);
+  }
+  await writeFile(build, ''); await f.source('first', source);
+  await assert.rejects(inspectBoundaries(f.root), /BOUNDARY_DYNAMIC_RUNTIME_IMPORT/);
+});
+
 test('build consumers cannot fall back to sibling kit source', async t => {
   const f = await fixture(t);
   await writeFile(join(f.root, 'dsh-plugins/first/build.mjs'), "import '../plugin-kit/toolchain.mjs';");

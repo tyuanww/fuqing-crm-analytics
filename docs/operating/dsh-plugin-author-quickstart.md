@@ -14,9 +14,9 @@
 
 每个插件有自己的 `build.mjs`、测试和版本。构建期可以使用 workspace 内的 `dsh-plugins/plugin-kit`，但运行时只消费自身包、公开 DSH capability 合同和服务 API；不能导入 `analytics-workbench` 或其他插件的 toolchain 源码。profile 只组合已打包版本，不拥有插件源码。固定 pin、manifest/lock 和补丁位于 `plugin-kit/toolchain.json` 与 `plugin-kit/build-tools/`；workbench 只保留自己的业务类型检查。
 
-全部插件已改用 `@shine-mage/dsh-plugin-kit/toolchain` 公开导出与精确 `0.1.0` devDependency；board-components 使用 kit 的 `./packaged-dependencies` 公开入口。独立安装不需要相邻 kit 源码；本仓由下方显式 workspace 适配器准备，B0 pipeline/preflight 已包含该步。kit 仅限构建期，不能出现在运行时依赖或领域输入 lock 中。kit 已提供自身的首次 SDK 准备命令，预编译 SDK/工具分发和 registry 交付仍未完成，见 [kit 说明](../../dsh-plugins/plugin-kit/README.md)。
+全部插件已改用 `@shine-mage/dsh-plugin-kit/toolchain` 公开导出与精确 `0.1.0` devDependency；board-components 使用 kit 的 `./packaged-dependencies` 公开入口。独立安装不需要相邻 kit 源码；本仓由下方显式 workspace 适配器准备，B0 pipeline/preflight 已包含该步。kit 仅限构建期，不能出现在运行时依赖或领域输入 lock 中。kit 已提供自身的首次 SDK 准备命令，受控 SDK/工具归档与接收已有验证；受信分发与 registry 交付仍未完成，见 [kit 说明](../../dsh-plugins/plugin-kit/README.md)。
 
-在只有已安装 kit 的独立插件工程，先用 Node 24/Corepack/Git 运行 `node node_modules/@shine-mage/dsh-plugin-kit/prepare.mjs --destination /absolute/new-sdk-inputs`。这一步会联网取固定官方源码和冻结依赖，在新目录构建开发 SDK，不构建生产 runtime；已有目的目录拒绝覆盖，失败日志保留。之后调用 `node build.mjs /absolute/new-sdk-inputs/upstream /absolute/new-sdk-inputs/build-tools`，不再需要主仓预先准备的目录。公共 CA 参数、阶段回执和失败重试规则见 kit 说明；当前包仍 private，没有可直接从 registry 安装的发布版本。
+独立插件工程若尚无匹配 pin 的已审核 SDK 输入，才用 Node24/Corepack/Git 运行 `node node_modules/@shine-mage/dsh-plugin-kit/prepare.mjs --destination /absolute/new-sdk-inputs`。这一步会联网取固定官方源码和冻结依赖，在新目录构建开发 SDK，不构建生产 runtime；已有目的目录拒绝覆盖，失败日志保留。已有受控接收的同一SDK时直接复用，不因每次插件更新重新prepare。之后调用 `node build.mjs /absolute/new-sdk-inputs/upstream /absolute/new-sdk-inputs/build-tools`，不再需要主仓预先准备的目录。公共 CA 参数、阶段回执和失败重试规则见 kit 说明；当前包仍 private，没有可直接从 registry 安装的发布版本。
 
 ## 图表领域包输入
 
@@ -31,6 +31,42 @@ node scripts/dsh-b0/package-inputs.mjs
 ```
 
 独立 checkout 接收同一个 tarball 后，设置 `DSH_PACKAGE_INPUTS=/absolute/package-input-directory` 即可构建，无需相邻图表插件或其源码。该目录是显式可信的构建输入，摘要由消费者 lock 校验；不存在时返回 `PACKAGE_INPUT_REQUIRED`，不联网找 latest、不回退到源码。`PACKAGE_INPUT_DIGEST`/`PACKAGE_INSTALLED_DRIFT` 阻断篡改；同版本不同字节返回 `PACKAGE_OUTPUT_CONFLICT`，应升级领域包版本并审查 lock，不能覆盖旧 artifact。详见 [领域包说明](../../dsh-plugins/board-components/README.md)。
+
+## workbench 独立作者安装（固定本地输入）
+
+workbench 的旧 `pnpm-lock.yaml` 是历史 registry 闭包，不含后来加入的 private kit/board 开发输入。不能直接忽略它的 frozen 错误，也不能把本仓 kit symlink 当作独立安装。现由本包 `author-inputs.mjs` 在**新的开发者自有目录**准备离线父工程；插件发布 manifest 保持原精确版本，父工程的本地 tar overrides 和锁只用于开发，不进入运行时包。
+
+先接收与当前 pin 匹配的目标平台开发 SDK，以及已核对 SHA 的 kit tarball和消费者锁指定的原领域 tarball。kit仍 private；SHA须来自已核对的本地打包记录或受信记录，不能据此宣称registry发布或签名可信。SDK准备/接收方式见 [kit说明](../../dsh-plugins/plugin-kit/README.md)。不要在作者更新中重新准备上游、重打领域包或修改消费锁。
+
+```bash
+# 从 analytics-workbench 源码目录执行。所有输入必须已存在；destination必须尚不存在。
+export COREPACK_HOME=/absolute/received-sdk/corepack
+export COREPACK_ENABLE_NETWORK=0
+export COREPACK_ENABLE_AUTO_PIN=0
+export B0_BUILD_UPSTREAM=/absolute/received-sdk/upstream
+export B0_BUILD_TOOLS=/absolute/received-sdk/build-tools
+export DSH_SDK_CLOSURE_SHA256=REVIEWED_CLOSURE_SHA256
+export DSH_PACKAGE_INPUTS=/absolute/locked-domain-inputs
+
+node author-inputs.mjs \
+  --destination /absolute/new-author-workspace \
+  --kit /absolute/reviewed-kit.tgz \
+  --kit-sha256 REVIEWED_KIT_SHA256 \
+  --package-inputs "$DSH_PACKAGE_INPUTS"
+
+cd /absolute/new-author-workspace/plugin
+pnpm build
+pnpm test
+pnpm test:built
+```
+
+入口先核对kit原始摘要，只以本地tar、`--offline --ignore-scripts`安装；随后使用已安装kit的公开接口校验领域包SHA/身份，再创建开发workspace的精确输入锁，并真正执行 `--frozen-lockfile` 安装。首次显式准备需要生成开发锁；普通build/test不更新锁，不关闭frozen或版本校验。`autoInstallPeers:false` 仅避免尝试从registry安装完整DSH peer；构建仍必须经kit验证固定DSH SDK、上游pin、全部锁与工具版本。build的显式参数优先，其次读取上述B0环境变量。
+
+kit可复用标准pnpm虚拟store中已安装的领域包：先验证原锁tar，再逐字节核对已安装manifest与完整文件集合；没有覆盖、迁移或忽略外部安装。缺失输入、错误摘要、额外成员、特殊文件、SDK漂移或开发manifest/锁不一致均阻断。开发workspace中的 `author-inputs.json` 和 `logs/` 保留输入身份与安装证据；失败目录不覆盖，修复后选新目录重试。SDK、旧输入与现有作者工程不被此入口修改。
+
+源码副本包含本包 `test/fixtures/coordinator/` 的合成合同和固定OpenAPI，带owner/合同版本/原路径/SHA；测试不搜索相邻主仓。独立包仅验证固定服务合同conformance；仓库侧fixture drift测试与现有离线生成检查分别保证受追踪来源一致性和backend生成一致性。夹具、作者脚本、开发锁、kit及输入包均不进入发布tarball。
+
+实际验证和失败恢复见 [2026-10-08作者输入证据](../hackathon/evidence/dsh-g0-plugin-author-inputs-20261008.md)。这仍是开发构建路径，不是发布/安装宿主/激活授权。
 
 ## 三步本地路径
 

@@ -1,0 +1,27 @@
+{
+  "schema_version": "plugin-test-contract-fixtures/v1",
+  "source_commit": "68845ad0dfce2737d5e7b017916f16d4c8ec5255",
+  "files": [
+    {
+      "name": "frozen-contract-v0.json",
+      "owner": "free-page coordination contract",
+      "contract_version": "free-page/v1; free-page-bridge/v1",
+      "source_path": "docs/hackathon/free-html-cockpit/fixtures/frozen-contract-v0.json",
+      "sha256": "076b63f4b43c4b06c4e2a7066e25456e7f30410e8b84f3ecf3da523bfe6dc517"
+    },
+    {
+      "name": "d48-scope.fixture.json",
+      "owner": "free-page selection contract",
+      "contract_version": "D48 frozen scope fixture",
+      "source_path": "docs/hackathon/free-html-cockpit/fixtures/d48-scope.fixture.json",
+      "sha256": "37605e4391675f0f03cf76bbbecbcc4cd482519691aead9dec123b4811becfb8"
+    },
+    {
+      "name": "analytics-page.openapi.json",
+      "owner": "analytics page-documents service contract",
+      "contract_version": "free-page/v1",
+      "source_path": "backend/contracts/analytics-page.openapi.json",
+      "sha256": "aaba98882b5b3bd2b334cc4cafa740f7777035edacb2998695d7e29599655c05"
+    }
+  ]
+}

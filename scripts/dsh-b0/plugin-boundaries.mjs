@@ -135,6 +135,21 @@ export async function inspectBoundaries(root = repository) {
       }
       edges.push({ consumer, provider, phase, source, target, specifier, access, type_only: typeOnly });
     }
+    function resolvedKitSpecifier(expression) {
+      // The author installer resolves one reviewed public kit export from its
+      // newly installed parent. Recognize only this literal build/test form;
+      // arbitrary resolvers, expressions and every runtime use remain blocked.
+      if (phase === 'runtime' || !expression || !ts.isCallExpression(expression)
+        || !ts.isIdentifier(expression.expression) || expression.expression.text !== 'pathToFileURL'
+        || expression.arguments.length !== 1) return null;
+      const call = expression.arguments[0];
+      if (!ts.isCallExpression(call) || !ts.isPropertyAccessExpression(call.expression)
+        || !ts.isIdentifier(call.expression.expression) || call.expression.expression.text !== 'require'
+        || call.expression.name.text !== 'resolve' || call.arguments.length !== 1
+        || !ts.isStringLiteralLike(call.arguments[0])) return null;
+      const specifier = call.arguments[0].text;
+      return specifier.startsWith(`${DEV_KIT_NAME}/`) ? specifier : null;
+    }
     function visit(node) {
       if ((ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
         record(node.moduleSpecifier.text, Boolean(node.isTypeOnly || node.importClause?.isTypeOnly));
@@ -146,7 +161,12 @@ export async function inspectBoundaries(root = repository) {
         record(node.argument.literal.text, true);
       } else if (ts.isCallExpression(node) && (node.expression.kind === ts.SyntaxKind.ImportKeyword || (ts.isIdentifier(node.expression) && node.expression.text === 'require'))) {
         if (node.arguments.length === 1 && ts.isStringLiteralLike(node.arguments[0])) record(node.arguments[0].text, false);
-        else dynamic.push({ consumer, phase, source, line: ast.getLineAndCharacterOfPosition(node.getStart(ast)).line + 1 });
+        else {
+          const specifier = node.expression.kind === ts.SyntaxKind.ImportKeyword && node.arguments.length === 1
+            && resolvedKitSpecifier(node.arguments[0]);
+          if (specifier) record(specifier, false);
+          else dynamic.push({ consumer, phase, source, line: ast.getLineAndCharacterOfPosition(node.getStart(ast)).line + 1 });
+        }
       }
       let route;
       if (ts.isStringLiteralLike(node)) route = node.text;

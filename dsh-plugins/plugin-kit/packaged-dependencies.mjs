@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createHash, randomUUID } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { lstat, mkdir, readFile, readdir, realpath, rename, rm, symlink, writeFile } from 'node:fs/promises';
-import { dirname, join, relative } from 'node:path';
+import { basename, dirname, join, relative } from 'node:path';
 
 const LIMIT = 2 * 1024 * 1024;
 // The development kit is installed independently and must never be bundled
@@ -114,6 +114,29 @@ export async function bindPackagedDependencies(plugin, inputDirectory) {
     assert.ok(await lstat(tarball).catch(missing), `PACKAGE_INPUT_REQUIRED ${entry.tarball}; set DSH_PACKAGE_INPUTS to the directory containing the locked tarball`);
     const { files } = await readPackagedLibrary(tarball, entry);
     const modules = join(plugin, 'node_modules'), store = join(modules, '.shinemage-bundled');
+    const link = join(modules, entry.name);
+    const installed = await lstat(link).catch(missing);
+    if (installed) {
+      assert.ok(installed.isSymbolicLink(), 'PACKAGE_BINDING_FOREIGN');
+      for (const parent of [modules, dirname(link)]) {
+        const info = await lstat(parent);
+        assert.ok(info.isDirectory() && !info.isSymbolicLink(), 'PACKAGE_BINDING_DIRECTORY');
+      }
+      const previous = await realpath(link);
+      // Reuse a real pnpm tarball installation without rewriting its link or
+      // virtual store. Exact locked input bytes above remain authoritative.
+      const packageRoot = dirname(dirname(dirname(previous)));
+      const virtualStore = dirname(packageRoot);
+      if (basename(virtualStore) === '.pnpm' && basename(dirname(virtualStore)) === 'node_modules'
+        && relative(packageRoot, previous) === join('node_modules', entry.name)) {
+        for (const path of [virtualStore, packageRoot, dirname(dirname(previous)), dirname(previous), previous]) {
+          const info = await lstat(path);
+          assert.ok(info.isDirectory() && !info.isSymbolicLink(), 'PACKAGE_INSTALLED_SYMLINK');
+        }
+        await verifyInstalled(previous, files);
+        bound.push(entry); continue;
+      }
+    }
     await directory(modules); await directory(store);
     const target = join(store, entry.sha256);
     if (await lstat(target).catch(missing)) {
@@ -133,7 +156,6 @@ export async function bindPackagedDependencies(plugin, inputDirectory) {
         }
       } finally { await rm(staging, { recursive: true, force: true }); }
     }
-    const link = join(modules, entry.name);
     await directory(dirname(link));
     const existing = await lstat(link).catch(missing);
     if (existing) {

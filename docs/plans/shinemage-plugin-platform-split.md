@@ -21,6 +21,16 @@
 
 全文核对与本轮代码修复证据见 [2026-10-03 审查修复记录](../hackathon/evidence/dsh-g0-review-fixes-20261003.md)。未关闭的实施项沿用 T1–T23，不新增重复规划或再次询问已回答的选择。
 
+### 2026-10-08 前两组续推
+
+从干净 `68845ad0` 按已有队列并行推进，不新建规划。官方最新三个 release、默认 master 与 npm 发布索引已重新读取：尚无去除已知29条公告的官方候选，`BLOCKED_UPSTREAM_RELEASE`；26 bindings、29实际import、12slot和两profile探针只有静态/拒绝证据，没有安装或运行新宿主。固定 rc2 pin 和上游原字节保持，见[候选盘查](../hackathon/evidence/dsh-g0-sdk-upgrade-candidate-20261008.md)。
+
+指标与知识同一不可变服务包已在杭州自有namespace分别冷安装14/13项离线依赖，**2/2安装、15/15 HTTP与保护观测**通过。验证器首次依赖atexit导致SIGTERM缺凭据，原失败保留；改为同步记录guard/禁止attempt并区分正常退出后重新冷安装。4个自有进程回收，生产current与5个监听/PID保持。详见[目标证据](../hackathon/evidence/dsh-g0-crm-services-target-20261008.md)。关闭这两个fixed synthetic包的目标安装子项，不关闭生产准入、供应链或其他源码范围。
+
+后续按既有门禁补未覆盖宿主/UI/真实身份/生产形状和生产receive/reconcile/canary/回退，stop/go后物理分仓。SDK维护保持独立于每次插件更新；SDK分发BLOCKED、产品PARTIAL。
+
+作者入口与共享夹具亦已收口：独立开发父目录只消费审核后的kit/领域原tar，实际frozen离线安装；三份synthetic夹具固定在插件测试包内，同时检查owner字节漂移。正式build/typecheck与35基础/111 HTML/2产物/25合同通过，kit全10消费者回归20 PASS、package-inputs和AST边界各12 PASS，均0 skip。源码内祖先symlink写入经隔离复现后修复并独立复核，运行tar仍8成员且不含开发kit/测试夹具；见[作者证据](../hackathon/evidence/dsh-g0-plugin-author-inputs-20261008.md)与[综合审修](../hackathon/evidence/dsh-g0-parallel-followup-review-20261008.md)。没有将完整宿主维护或CRM数据库加入每次插件发布。
+
 ### 2026-10-08 v2 SDK 目标平台与来源收口
 
 按用户要求并行推进三个有独立边界的任务，主 Agent 顺序集成。SDK 缩减和 HTML 修复已分别本地提交 `d78c7cd5`、`e48a6ad3`，未 push。
@@ -31,7 +41,7 @@ T15 新 Linux SDK 在既有 WSL2 工具链、全新 HOME/store/Corepack 中实�
 
 ### 2026-10-08 HTML 历史差异收口（已提交 `e48a6ad3`）
 
-旧工作树 43 项已核对，34 语义项全部归类并修复两文件真实遗漏及测试入口问题；不是 34 个待开发功能。应用后固定 SDK 正式 build/typecheck、35 基础/111 HTML/2 产物测试通过，51 后端与5旧语义兼容通过，详见[本次证据](../hackathon/evidence/dsh-g0-html-semantic-integration-20261008.md)。本步不改上游/接口生成物、不回灌旧布局，不认证浏览器/真实模型/杭州 HTML 运行；私有依赖直接 pnpm 入口与独立测试夹具供给继续收敛。旧树保留。
+旧工作树 43 项已核对，34 语义项全部归类并修复两文件真实遗漏及测试入口问题；不是 34 个待开发功能。应用后固定 SDK 正式 build/typecheck、35 基础/111 HTML/2 产物测试通过，51 后端与5旧语义兼容通过，详见[本次证据](../hackathon/evidence/dsh-g0-html-semantic-integration-20261008.md)。本步不改上游/接口生成物、不回灌旧布局，不认证浏览器/真实模型/杭州 HTML 运行；私有依赖直接 pnpm 入口与独立测试夹具供给的后续收口见上节。旧树保留。
 
 ### 2026-10-07 v2 SDK 分发复验（已提交阶段）
 

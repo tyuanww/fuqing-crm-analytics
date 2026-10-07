@@ -299,3 +299,13 @@ Node 24 下以 `B0_BUILD_UPSTREAM=/absolute/pinned-rc2-checkout node --test scri
 已有 `node --test scripts/dsh-b0/plugin-kit.test.mjs` 可显式设置绝对 `DSH_PACKAGE_INPUTS`，指向包含已锁定 `shine-mage-board-components-0.1.0.tgz` 的目录。原 archive 由三份消费者锁核验，board 重建只比较全部内容，消费仍用原 archive；拒绝错误路径、特殊文件和摘要漂移，执行后核对原包与锁字节。未设置时保留原自生成与精确 SHA 行为。
 
 目标平台实跑仍同时需要 Node 24、固定 SDK/build-tools/Corepack 和缩减 closure SHA；缺少 SDK 时既有测试可能明确跳过部分消费者，不能将部分绿色结果报成十消费者通过。所有变量和本轮 WSL 命令、结果见[跨平台证据](../hackathon/evidence/dsh-g0-sdk-wsl-immutable-inputs-20261008.md)。此验证不准备生产 runtime、不激活服务，也不替代 SDK 内容/供应链放行。
+
+## 独立作者输入与指标/知识目标观测（2026-10-08）
+
+workbench 的日常独立入口见[作者 Quickstart](dsh-plugin-author-quickstart.md)：`author-inputs.mjs` 在新的源码外自有目录消费审核kit/领域原tar，生成开发锁并实际frozen离线安装。build使用同一固定SDK，包内test夹具可独立运行；发布包不携带作者入口、kit、夹具和开发lock。源内父目录symlink、已有输出、错误输入/锁/SDK摘要均拒绝，不修改发布manifest/原领域锁。改变kit的领域输入绑定时运行 `node --test scripts/dsh-b0/package-inputs.test.mjs`，本次12 PASS；改变resolver静态识别时运行 `node --test scripts/dsh-b0/plugin-boundaries.test.mjs` 和边界 `--check`，本次12 PASS，不能把未知动态resolver或runtime kit导入作为例外放行。
+
+包内三份synthetic夹具由固定白名单和SHA加载，测试还与当前追踪的schema/spec/OpenAPI来源逐字节比较，避免副本悄然过期；独立夹具不能代替owner当前代码生成合同。真实作者工程在主仓源码不可读/外网禁用、SDK与领域输入只读条件下实际完成formal `pnpm build/test/test:built/pack`，结果和负测见[本轮证据](../hackathon/evidence/dsh-g0-plugin-author-inputs-20261008.md)。
+
+指标/知识的受控目标验证器为 `scripts/crm-calibration/crm-services-target.py`，要求已审核input manifest与SHA、新owned输出、明确 `--phase install|http`；现场namespace/只读bind与权限由单独已审控制器提供，脚本不创建namespace、选择主机或默认连接远端。正常本地/CI后端入口会发现 `backend/tests/test_crm_services_target.py` 的12项隔离夹具测试，也可用共享bounded入口定向运行，**测试本身不连接杭州或启动生产服务**。本次WSL的2/2冷安装与15/15 HTTP、首次失败/恢复、清理和生产保护见[服务证据](../hackathon/evidence/dsh-g0-crm-services-target-20261008.md)；不能把新runner自动接入首购候选的专用verifier。
+
+本轮未运行完整B0/release、真实身份/业务/浏览器UAT、远端CI或生产切换。官方新版本盘查为[BLOCKED_UPSTREAM_RELEASE](../hackathon/evidence/dsh-g0-sdk-upgrade-candidate-20261008.md)，SDK分发保持BLOCKED，不能将开发入口与固定服务synthetic通过当成供应链或发布放行。

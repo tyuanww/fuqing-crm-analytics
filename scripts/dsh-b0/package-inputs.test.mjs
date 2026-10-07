@@ -187,3 +187,113 @@ test('producer rejects a floating declaration and a mismatched actual manager be
     await assert.rejects(readdir(output), { code: 'ENOENT' });
   }
 });
+
+test('real offline frozen pnpm tarball installation is reused unchanged and all drift fails closed', async t => {
+  const f = await consumer(t);
+  f.manifest.private = true;
+  f.manifest.packageManager = JSON.parse(await readFile(join(producer, 'package.json'))).packageManager;
+  await f.save();
+  await writeFile(join(f.root, 'pnpm-workspace.yaml'), `packages:\n  - '.'\nautoInstallPeers: false\noverrides:\n  '${entry.name}': ${JSON.stringify(`file:${artifact}`)}\n`);
+  const env = { ...process.env, CI: '', COREPACK_ENABLE_NETWORK: '0', COREPACK_ENABLE_AUTO_PIN: '0',
+    npm_config_offline: 'true' };
+  const install = args => execFileSync('pnpm', ['install', '--offline', '--ignore-scripts', '--store-dir', join(f.root, 'store'), ...args],
+    { cwd: f.root, env, encoding: 'utf8', timeout: 30000, stdio: 'pipe' });
+  install(['--lockfile-only']);
+  const lock = await readFile(join(f.root, 'pnpm-lock.yaml'));
+  install(['--frozen-lockfile']);
+  const { realpath, lstat, readlink } = await import('node:fs/promises');
+  const link = join(f.root, 'node_modules', entry.name), target = await realpath(link), originalLink = await readlink(link);
+  assert.ok(target.includes('/node_modules/.pnpm/'));
+  const pristine = await readPackagedLibrary(artifact, entry);
+  const aliased = await consumer(t);
+  await symlink(join(f.root, 'node_modules'), join(aliased.root, 'node_modules'), 'dir');
+  await assert.rejects(bindPackagedDependencies(aliased.root, inputs), /PACKAGE_BINDING_DIRECTORY/);
+  await bindPackagedDependencies(f.root, inputs);
+  assert.equal(await readlink(link), originalLink);
+  await assert.rejects(lstat(join(f.root, 'node_modules/.shinemage-bundled')), { code: 'ENOENT' });
+  assert.deepEqual(await readFile(join(f.root, 'pnpm-lock.yaml')), lock);
+  for (const name of ['lib/funnel.mjs', 'package.json']) {
+    const path = join(target, name), bytes = await readFile(path);
+    await writeFile(path, name === 'package.json' ? JSON.stringify({ name: 'wrong' }) : 'export const changed = true;');
+    await assert.rejects(bindPackagedDependencies(f.root, inputs), /PACKAGE_INSTALLED_DRIFT/);
+    await writeFile(path, bytes);
+  }
+  const extra = join(target, 'lib/extra.mjs'); await writeFile(extra, 'extra');
+  await assert.rejects(bindPackagedDependencies(f.root, inputs), /PACKAGE_INSTALLED_ENTRIES/); await rm(extra);
+  const member = join(target, 'lib/funnel.mjs'), bytes = await readFile(member);
+  await rm(member); await symlink(join(target, 'lib/waterfall.mjs'), member);
+  await assert.rejects(bindPackagedDependencies(f.root, inputs), /PACKAGE_INPUT_FILE_INVALID/); await rm(member);
+  run('mkfifo', [member], f.root);
+  await assert.rejects(bindPackagedDependencies(f.root, inputs), /PACKAGE_INPUT_FILE_INVALID/); await rm(member); await writeFile(member, bytes);
+  const badInputs = join(f.root, 'bad-inputs'); await mkdir(badInputs);
+  await writeFile(join(badInputs, entry.tarball), Buffer.concat([await readFile(artifact), Buffer.from('changed')]));
+  await assert.rejects(bindPackagedDependencies(f.root, badInputs), /PACKAGE_INPUT_DIGEST/);
+  await bindPackagedDependencies(f.root, inputs);
+  assert.equal(await readlink(link), originalLink);
+  for (const [name, content] of pristine.files) assert.deepEqual(await readFile(join(target, name)), content);
+  assert.equal(digest(await readFile(artifact)), entry.sha256);
+  t.diagnostic('real pnpm offline lock creation + frozen installation; original link, all bytes and lock preserved; file/manifest/extra/symlink/FIFO/wrong tar rejected');
+});
+
+test('independent workbench fixtures match their tracked contract owners byte for byte', async () => {
+  const fixtures = join(repository, 'dsh-plugins/analytics-workbench/test/fixtures/coordinator');
+  const provenance = JSON.parse(await readFile(join(fixtures, 'provenance.json')));
+  assert.equal(provenance.schema_version, 'plugin-test-contract-fixtures/v1');
+  const sources = {
+    'frozen-contract-v0.json': 'docs/hackathon/free-html-cockpit/fixtures/frozen-contract-v0.json',
+    'd48-scope.fixture.json': 'docs/hackathon/free-html-cockpit/fixtures/d48-scope.fixture.json',
+    'analytics-page.openapi.json': 'backend/contracts/analytics-page.openapi.json',
+  };
+  assert.deepEqual(provenance.files.map(item => item.name).sort(), Object.keys(sources).sort());
+  for (const record of provenance.files) {
+    assert.equal(record.source_path, sources[record.name]);
+    const expected = await readFile(join(repository, record.source_path));
+    const actual = await readFile(join(fixtures, record.name));
+    assert.equal(digest(actual), record.sha256, `fixture provenance digest: ${record.name}`);
+    assert.deepEqual(actual, expected, `update the reviewed independent fixture with its owner: ${record.source_path}`);
+  }
+});
+
+test('author destination resolves parent aliases before writes and allows outside aliases', async t => {
+  const root = await mkdtemp(join(tmpdir(), 'plugin-author-destination-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const source = join(root, 'source'), sourceDirectory = join(source, 'src');
+  await mkdir(sourceDirectory, { recursive: true });
+  const author = await readFile(join(repository, 'dsh-plugins/analytics-workbench/author-inputs.mjs'));
+  await writeFile(join(source, 'author-inputs.mjs'), author);
+  await writeFile(join(source, 'package.json'), JSON.stringify({ packageManager: 'pnpm@11.28.2' }));
+  await writeFile(join(sourceDirectory, 'original.txt'), 'source must stay unchanged');
+  const kit = join(root, 'kit.tgz'), domain = join(root, 'domain'), preload = join(root, 'stop-before-install.cjs');
+  const bytes = Buffer.from('guard-only fixture: stopped before package manager execution');
+  await writeFile(kit, bytes); await mkdir(domain);
+  await writeFile(preload, "require('node:child_process').execFileSync = () => { throw new Error('AUTHOR_TEST_STOP_BEFORE_PACKAGE_MANAGER'); }; require('node:module').syncBuiltinESMExports();\n");
+  const invoke = destination => {
+    try {
+      execFileSync(process.execPath, ['--require', preload, join(source, 'author-inputs.mjs'),
+        '--destination', destination, '--kit', kit, '--kit-sha256', digest(bytes), '--package-inputs', domain],
+      { cwd: root, env: { COREPACK_HOME: root }, encoding: 'utf8', stdio: 'pipe', timeout: 10000 });
+      assert.fail('guard probe unexpectedly completed');
+    } catch (error) {
+      assert.equal(error.status, 1);
+      return String(error.stderr);
+    }
+  };
+  const insideAlias = join(root, 'inside-alias'); await symlink(sourceDirectory, insideAlias, 'dir');
+  const rejected = invoke(join(insideAlias, 'new-author'));
+  t.diagnostic(JSON.stringify({ author_sha256: digest(author), source_was_written: (await readdir(sourceDirectory)).includes('new-author'),
+    destination_guard_rejected: rejected.includes('AUTHOR_DESTINATION_OUTSIDE_SOURCE') }));
+  assert.match(rejected, /AUTHOR_DESTINATION_OUTSIDE_SOURCE/);
+  assert.deepEqual(await readdir(sourceDirectory), ['original.txt']);
+  assert.deepEqual((await readdir(source)).sort(), ['author-inputs.mjs', 'package.json', 'src']);
+  assert.equal(await readFile(join(sourceDirectory, 'original.txt'), 'utf8'), 'source must stay unchanged');
+  const outside = join(root, 'outside'), outsideAlias = join(root, 'outside-alias');
+  await mkdir(outside); await symlink(outside, outsideAlias, 'dir');
+  // The plain tmpdir path also covers macOS /var -> /private canonicalization.
+  for (const [parent, name] of [[root, 'plain-author'], [outsideAlias, 'aliased-author']]) {
+    const destination = join(parent, name);
+    assert.match(invoke(destination), /AUTHOR_TEST_STOP_BEFORE_PACKAGE_MANAGER/);
+    assert.deepEqual(await readFile(join(destination, 'inputs/kit.tgz')), bytes);
+    assert.match(invoke(destination), /EEXIST/);
+  }
+  assert.deepEqual(await readdir(sourceDirectory), ['original.txt']);
+});
