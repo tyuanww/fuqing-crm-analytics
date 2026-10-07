@@ -159,4 +159,10 @@ node scripts/release/sdk-supply-chain.mjs --root /absolute/new-received-build-sd
 
 TLS 信任失败返回 `SDK_SUPPLY_OSV_TLS_TRUST`。本机实际使用 `NODE_EXTRA_CA_CERTS=/etc/ssl/cert.pem` 的系统公共 CA 后完成查询，不关闭 TLS；其他机器应按自己的信任配置处理。2026-10-07 固定 SDK 的实际结果为 **10 个依赖版本 / 42 条不同公告，分发 BLOCKED**，详见[证据](../../docs/hackathon/evidence/dsh-g0-kit-sdk-supply-chain-20261007.md)。不能以 build/test 通过替代该条件。
 
-后续审修排除了 pnpm 11.11.0 完整候选（内置依赖仍有公告），固定 11.28.2 仅完成包来源与 27 份带版本清单查询，尚未改 pin/安装或验证构建；DSH 0.2.0-rc.2 也不能自动关闭当前依赖问题。见[候选核对与剩余任务](../../docs/hackathon/evidence/dsh-g0-kit-sdk-supply-review-20261007.md)。
+上一阶段审修排除了 pnpm 11.11.0 完整候选（内置依赖仍有公告），完成了固定 11.28.2 的包来源与 27 份带版本清单查询。见[候选核对与剩余任务](../../docs/hackathon/evidence/dsh-g0-kit-sdk-supply-review-20261007.md)。本轮隔离安装/兼容验证见下节，仓库 pin 仍未改变；DSH 0.2.0-rc.2 也不能自动关闭当前依赖问题。
+
+### 包管理器候选验证
+
+现有安装测试支持显式 `B0_TEST_PNPM_VERSION=11.28.2`。须先将该精确版本及摘要对应的 manager 准备到独占 `COREPACK_HOME`，再结合 `B0_BUILD_UPSTREAM`、`B0_BUILD_TOOLS`、缩减模式的 `DSH_SDK_CLOSURE_SHA256` 运行 `node --test scripts/dsh-b0/plugin-kit.test.mjs`。候选模式要求前三个路径显式为绝对路径，缺项/相对路径以 `KIT_TEST_CANDIDATE_INPUT_REQUIRED` 在打包前失败，不允许跳过消费者或回退本仓工具/个人缓存。测试禁用 Corepack 网络/自动 pin，核验实际版本；候选声明只写自有 kit/插件副本，不改官方 SDK 和仓库 pin，也不改消费者的领域包摘要锁。不设置该参数就按原声明运行。
+
+2026-10-07 本机 11.28.2 与 11.7.0 各 10/10 消费者通过，图表 tarball 摘要一致；新空 store 的构建工具冻结安装与严格类型检查另通过。见[候选验证范围](../../docs/hackathon/evidence/dsh-g0-kit-pnpm-candidate-20261007.md)。这仅是测试入口，不能放进生产 prepare 作为版本检查豁免，也不证明 SDK 已用候选重新构建；正式 pin 迁移仍须保持官方声明和自有工具链边界。

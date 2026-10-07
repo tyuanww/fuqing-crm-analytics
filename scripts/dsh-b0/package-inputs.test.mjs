@@ -164,3 +164,26 @@ test('same-version changed output cannot replace the original immutable tarball'
   assert.throws(() => run(process.execPath, [join(fixture, 'build.mjs'), output], root), /PACKAGE_OUTPUT_CONFLICT/);
   assert.equal(digest(await readFile(join(output, entry.tarball))), entry.sha256);
 });
+
+test('producer rejects a floating declaration and a mismatched actual manager before writing output', async t => {
+  const root = await mkdtemp(join(tmpdir(), 'board-components-manager-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const fixture = join(root, 'producer'), output = join(root, 'output'), bin = join(root, 'bin');
+  for (const part of ['package.json', 'build.mjs', 'src']) {
+    await copyTreeBounded(join(producer, part), join(fixture, part), { destinationRoot: root });
+  }
+  await linkWorkspaceKit(fixture, join(independent, 'plugin-kit'));
+  await mkdir(bin);
+  await writeFile(join(bin, 'pnpm'), '#!/bin/sh\necho 0.0.0\n', { mode: 0o700 });
+  const manifest = JSON.parse(await readFile(join(fixture, 'package.json')));
+  const build = () => execFileSync(process.execPath, [join(fixture, 'build.mjs'), output], {
+    cwd: root, env: { PATH: `${bin}:${dirname(process.execPath)}:/usr/bin:/bin`, HOME: root },
+    timeout: 10000, stdio: 'pipe',
+  });
+  for (const [version, code] of [['latest', /PACKAGE_MANAGER_EXACT/], ['11.28.2', /Use the package-declared pnpm version/]]) {
+    manifest.packageManager = `pnpm@${version}`;
+    await writeFile(join(fixture, 'package.json'), JSON.stringify(manifest));
+    assert.throws(build, code);
+    await assert.rejects(readdir(output), { code: 'ENOENT' });
+  }
+});

@@ -9,8 +9,10 @@ import { readPackagedLibrary } from '@shine-mage/dsh-plugin-kit/packaged-depende
 const root = dirname(fileURLToPath(import.meta.url));
 const output = resolve(process.argv[2] ?? process.env.DSH_PACKAGE_INPUTS ?? join(root, '../../.context/dsh-b0/package-inputs'));
 assert.equal(process.versions.node.split('.')[0], '24', 'Use Node 24');
-assert.equal(execFileSync('pnpm', ['--version'], { cwd: root, encoding: 'utf8', timeout: 10000 }).trim(), '11.7.0', 'Use pnpm 11.7.0');
 const manifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
+assert.match(manifest.packageManager, /^pnpm@\d+\.\d+\.\d+$/, 'PACKAGE_MANAGER_EXACT');
+assert.equal(execFileSync('pnpm', ['--version'], { cwd: root, encoding: 'utf8', timeout: 10000 }).trim(),
+  manifest.packageManager.slice('pnpm@'.length), 'Use the package-declared pnpm version');
 assert.deepEqual(manifest.files, ['lib/funnel.mjs', 'lib/funnel.d.mts', 'lib/waterfall.mjs', 'lib/waterfall.d.mts'], 'PACKAGE_SOURCE_ALLOWLIST');
 assert.ok(!(await lstat(join(root, 'src'))).isSymbolicLink(), 'PACKAGE_SOURCE_SYMLINK');
 const packed = { ...manifest }; delete packed.scripts; delete packed.devDependencies;

@@ -18,7 +18,15 @@
 
 - 当前采用历史结果快照 + 保存时校验；陈旧/过期阈值已移出当前待办，不再等待确认，也不新增到期系统。保留生成时间/来源和 `NOT_CHECKED`，权限、候选准入、冲突、幂等与会话/请求超时保持；旧 wire/回执兼容不删除。见[决定与验证](docs/hackathon/evidence/dsh-g0-snapshot-policy-closeout-20261007.md)。
 
-### SDK 提交前审修与剩余任务（2026-10-07，当前）
+### pnpm 候选兼容验证（2026-10-07，当前）
+
+- 前批已本地提交 `efbf5417`，从干净工作树继续验证固定 pnpm **11.28.2**。独占 Corepack 缓存 454 个原始成员与已验来源包匹配；候选/旧 11.7.0 两轮均 **10/10 消费者、16 PASS / 0 SKIP**，原图表 tarball 摘要与消费者锁保持。详见[本轮证据](docs/hackathon/evidence/dsh-g0-kit-pnpm-candidate-20261007.md)。
+- 修复 board-components 构建器重复硬编码 manager 版本，改为读取本包精确声明；浮动/错版本仍在写输出前拒绝。现有安装测试增加显式候选参数，只修改自有副本，未放宽上游/SDK pin；相关边界 **25 PASS**。空 store 冻结安装 111 个工具依赖、安装后严格 TS/React/Ant Design 类型检查通过，锁/补丁未改。
+- 提交前 OCR 审核原 10/10 文件，另核对新增审修记录；修复候选模式漏传 SDK 时跳过 9 个消费者仍退出 0 的问题。新旧 manager 重新实跑各 **17 PASS / 0 SKIP、10/10 消费者**，相关边界 **25 PASS**；见[本轮审修](docs/hackathon/evidence/dsh-g0-kit-pnpm-review-20261007.md)。
+- 本批候选验证及审修随本次本地提交收录，父提交 `efbf5417`，准确 SHA 以 Git 为准；仓库 pin 和官方 DSH 源码保持，SDK/candidate/journal 未改，未 push 或操作杭州。该结果不等于新 SDK 构建完成或分发放行；产品 **PARTIAL / SDK BLOCKED**。
+- 下一步为区分官方声明与自有插件的 manager 后，受控迁移默认 pin/prepare/CI，并重新生成有来源证据的 SDK；不整体替换旧 pnpm 字段。官方依赖/供应链、WSL/干净机器和物理分仓仍按既有顺序推进。
+
+### SDK 提交前审修与剩余任务（2026-10-07，已提交）
 
 - 按 OCR delegate 完成原始 13/13 文件审核，新增审修账本另审；修复扫描器请求预算越界、失败时查询计数失真、HTTP 错误响应流未释放三项问题。回归先 3 FAIL 后通过；本次相关 Node **53 PASS / 0 SKIP**、归档 **27 PASS / 41 subtests PASS**，当前解析器只读验证同一 63.75 MB 包通过。详见[审修、初衷与剩余任务](docs/hackathon/evidence/dsh-g0-kit-sdk-supply-review-20261007.md)。
 - 当前代码重新查询同一 SDK：222 个版本全部完成、5 次请求，仍 **10 个版本 / 42 条公告，分发 BLOCKED**。pnpm 11.11.0 完整候选仍有 7 条公告；进一步核验的 **11.28.2** 包摘要/签名通过、27 份带版本清单查询无命中，可进入隔离兼容验证，尚未安装或改 pin。官方 DSH 0.2.0-rc.2 锁文件选定依赖仍命中公告，不能靠改版本号关闭。

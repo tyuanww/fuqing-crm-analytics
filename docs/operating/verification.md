@@ -265,6 +265,8 @@ dev kit 输入预检在 Node 24 下显式运行 `node dsh-plugins/plugin-kit/che
 
 后续 `plugin-kit.test.mjs` 已增加实际 pnpm 离线安装到新 store、无相邻 kit 的 shine-brand 构建、错误 kit 版本拒绝和 workspace 适配器幂等/拒绝外部安装。改动 `packaged-dependencies.mjs` 时同时运行 `scripts/dsh-b0/package-inputs.test.mjs`，保留图表领域 lock 校验，并拒绝把开发 kit 当成运行时领域输入；改动构建入口时同步核对 B0 pipeline 和 `scripts/release/preflight.mjs`。适配器只在正式 build 阶段运行，doctor/preflight `--check` 不创建链接。
 
+包管理器兼容试验复用 `plugin-kit.test.mjs`：显式 `B0_TEST_PNPM_VERSION=<精确版本>`、独占 `COREPACK_HOME`，保留原 SDK 的 `B0_BUILD_UPSTREAM/B0_BUILD_TOOLS/DSH_SDK_CLOSURE_SHA256`。候选模式强制显式绝对路径的 upstream、build-tools 和 Corepack cache，缺项/相对路径在打包前报 `KIT_TEST_CANDIDATE_INPUT_REQUIRED`；默认模式保留缺 SDK 时的明确 SKIP，不能将其当成全消费者通过。缓存须预先按固定来源摘要准备；测试内禁用 Corepack 联网并验证实际版本，只改测试副本声明，不改默认 pin、上游或领域包锁。默认路径与候选路径分别运行 10 个消费者；`package-inputs.test.mjs` 验证 producer 对浮动/错 manager 的拒绝。2026-10-07 11.28.2/11.7.0 A/B、本次冻结安装及范围见[证据](../hackathon/evidence/dsh-g0-kit-pnpm-candidate-20261007.md)，修复后各 17 PASS / 0 SKIP 见[审修](../hackathon/evidence/dsh-g0-kit-pnpm-review-20261007.md)，不能把复用 SDK 的消费者通过当作 SDK 冷构建通过。
+
 ### 首购候选恢复验收
 
 2026-10-07 的新 rc1 来源重建和同一恢复入口的三语料实测见[本轮证据](../hackathon/evidence/dsh-g0-rc1-rebuild-kit-20261007.md)：官方固定源码与锁、host/native 构建、输入清单及运行前后摘要已保留，本机 12 场景/30 冷进程通过。它不证明旧杭州编译闭包、历史签名或新输入的 WSL 结果；没有自动重建/部署入口，也不更改 rc2 pin。

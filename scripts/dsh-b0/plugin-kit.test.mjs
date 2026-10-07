@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { mkdtemp, mkdir, readFile, readdir, rm, symlink, writeFile, lstat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { dirname, isAbsolute, join } from 'node:path';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
@@ -13,10 +13,50 @@ import { linkWorkspaceKit, linkRepositoryKit } from './plugin-kit-link.mjs';
 const exec = promisify(execFile);
 const repository = fileURLToPath(new URL('../..', import.meta.url));
 const kit = join(repository, 'dsh-plugins/plugin-kit');
+// Test-only trial: never rewrite the repository kit or official SDK's pin.
+// Corepack's explicit version command runs from the caller-owned offline cache.
+function managerTrial(declared, candidate) {
+  assert.match(declared, /^pnpm@\d+\.\d+\.\d+$/, 'KIT_TEST_MANAGER_DECLARATION');
+  if (candidate !== undefined) assert.match(candidate, /^\d+\.\d+\.\d+$/, 'KIT_TEST_MANAGER_EXACT');
+  return { command: candidate === undefined ? 'pnpm' : `pnpm@${candidate}`,
+    version: candidate ?? declared.slice('pnpm@'.length) };
+}
+
+test('candidate manager selection rejects floating versions without changing the default declaration', () => {
+  assert.deepEqual(managerTrial('pnpm@11.7.0'), { command: 'pnpm', version: '11.7.0' });
+  assert.deepEqual(managerTrial('pnpm@11.7.0', '11.28.2'), { command: 'pnpm@11.28.2', version: '11.28.2' });
+  for (const value of ['', 'latest', '^11.28.2', '11', '11.28.2 --help', 'https://example.test/manager']) {
+    assert.throws(() => managerTrial('pnpm@11.7.0', value), /KIT_TEST_MANAGER_EXACT/);
+  }
+});
+
 async function owned(t) {
   const root = await mkdtemp(join(tmpdir(), 'owned-kit-'));
   t.after(() => rm(root, { recursive: true, force: true })); return root;
 }
+
+test('candidate trial rejects missing or relative SDK and cache inputs before packaging', async t => {
+  const root = await owned(t), home = join(root, 'home'), tmp = join(root, 'tmp');
+  await mkdir(home); await mkdir(tmp);
+  const inputs = ['B0_BUILD_UPSTREAM', 'B0_BUILD_TOOLS', 'COREPACK_HOME'];
+  const base = { PATH: `${dirname(process.execPath)}:/usr/bin:/bin`, HOME: home, TMPDIR: tmp,
+    COREPACK_ENABLE_NETWORK: '0', B0_TEST_PNPM_VERSION: '11.28.2',
+    ...Object.fromEntries(inputs.map(key => [key, join(root, key)])) };
+  for (const key of inputs) {
+    for (const value of [undefined, 'relative-input']) {
+      const env = { ...base };
+      if (value === undefined) delete env[key]; else env[key] = value;
+      await assert.rejects(exec(process.execPath, ['--test', '--test-name-pattern=^real kit tarball',
+        fileURLToPath(import.meta.url)], { cwd: root, env, timeout: 15000 }), error => {
+        assert.equal(error.code, 1);
+        assert.ok(error.stdout.includes(`KIT_TEST_CANDIDATE_INPUT_REQUIRED ${key}`), error.stdout);
+        return true;
+      });
+      assert.deepEqual(await readdir(tmp), [], 'invalid candidate started packaging');
+      assert.deepEqual(await readdir(home), [], 'invalid candidate touched manager cache/config');
+    }
+  }
+});
 
 test('SDK preflight is read-only and rejects missing, escaping, wrong and non-file entries', async t => {
   const root = await owned(t), sdk = join(root, 'sdk'); await mkdir(sdk);
@@ -51,17 +91,40 @@ test('kit check rejects invalid/missing inputs without exposing paths or creatin
 });
 
 test('real kit tarball contains only declared source/locks and exposes its public toolchain', async t => {
+  // An explicit manager trial must exercise every consumer, never report a
+  // successful partial run or fall back to the repository's tools/user cache.
+  if (process.env.B0_TEST_PNPM_VERSION !== undefined) {
+    for (const key of ['B0_BUILD_UPSTREAM', 'B0_BUILD_TOOLS', 'COREPACK_HOME']) {
+      assert.ok(typeof process.env[key] === 'string' && isAbsolute(process.env[key]),
+        `KIT_TEST_CANDIDATE_INPUT_REQUIRED ${key}`);
+    }
+  }
   const root = await owned(t), source = join(root, 'kit-source');
   await copyPluginKitSources(kit, source, { destinationRoot: root });
   // A credential-like accidental file and dependency directory must not ship.
   await writeFile(join(source, '.env'), 'SYNTHETIC_SENTINEL=do-not-pack\n');
   await mkdir(join(source, 'node_modules')); await writeFile(join(source, 'node_modules', 'sentinel'), 'not a dependency');
   const archive = join(root, 'kit.tgz');
+  const repositoryManifest = await readFile(join(kit, 'package.json'));
+  const trialManifest = JSON.parse(repositoryManifest);
+  const originalDeclaration = trialManifest.packageManager;
+  const manager = managerTrial(originalDeclaration, process.env.B0_TEST_PNPM_VERSION);
+  // Align only our disposable packaging fixture with the candidate. Do not
+  // suppress pnpm's version checks or mutate the official upstream manifest.
+  if (process.env.B0_TEST_PNPM_VERSION !== undefined) {
+    trialManifest.packageManager = `pnpm@${manager.version}`;
+    await writeFile(join(source, 'package.json'), JSON.stringify(trialManifest));
+  }
+  const declaration = trialManifest.packageManager;
   const env = { PATH: `${dirname(process.execPath)}:/usr/bin:/bin`, HOME: root, CI: '1',
     COREPACK_HOME: process.env.COREPACK_HOME ?? join(process.env.HOME, '.cache/node/corepack'), COREPACK_ENABLE_NETWORK: '0',
+    COREPACK_DEFAULT_TO_LATEST: '0', COREPACK_ENABLE_AUTO_PIN: '0',
     npm_config_ignore_scripts: 'true',
     ...(process.env.DSH_SDK_CLOSURE_SHA256 ? { DSH_SDK_CLOSURE_SHA256: process.env.DSH_SDK_CLOSURE_SHA256 } : {}) };
-  await exec('corepack', ['pnpm', 'pack', '--out', archive], { cwd: source, env, timeout: 30000 });
+  const version = await exec('corepack', [manager.command, '--version'], { cwd: source, env, timeout: 30000 });
+  assert.equal(version.stdout.trim(), manager.version, 'KIT_TEST_MANAGER_VERSION');
+  t.diagnostic(`actual pnpm ${manager.version}; trial declaration ${declaration}; repository declaration ${originalDeclaration}`);
+  await exec('corepack', [manager.command, 'pack', '--out', archive], { cwd: source, env, timeout: 30000 });
   await exec('python3', [join(repository, 'scripts/release/secure-unpack.py'), archive, join(root, 'installed'),
     '--max-entries', '100', '--max-bytes', '1048576'], { cwd: root, timeout: 10000 });
   const installed = join(root, 'installed/package');
@@ -72,10 +135,13 @@ test('real kit tarball contains only declared source/locks and exposes its publi
   const consumer = join(root, 'consumer'); await mkdir(consumer);
   // A real offline package-manager install, with a fresh local store. The kit
   // has no registry dependencies; this parent is an owned install fixture.
-  await writeFile(join(consumer, 'package.json'), JSON.stringify({ private: true, packageManager: 'pnpm@11.7.0',
+  await writeFile(join(consumer, 'package.json'), JSON.stringify({ private: true, packageManager: declaration,
     devDependencies: { '@shine-mage/dsh-plugin-kit': `file:${archive}` } }));
-  await exec('corepack', ['pnpm', 'install', '--offline', '--ignore-scripts', '--ignore-workspace',
+  const consumerManifest = await readFile(join(consumer, 'package.json'));
+  await exec('corepack', [manager.command, 'install', '--offline', '--ignore-scripts', '--ignore-workspace',
     '--config.auto-install-peers=false', '--store-dir', join(root, 'fresh-store')], { cwd: consumer, env, timeout: 30000 });
+  assert.deepEqual(await readFile(join(consumer, 'package.json')), consumerManifest, 'candidate manager rewrote the consumer declaration');
+  assert.equal(JSON.parse(await readFile(join(source, 'package.json'))).packageManager, declaration);
   const installedKit = join(consumer, 'node_modules/@shine-mage/dsh-plugin-kit');
   const archiveHelp = await exec('python3', [join(installedKit, 'sdk-archive.py'), '--help'], { cwd: consumer, env });
   assert.match(archiveHelp.stdout, /pack,receive/);
@@ -114,6 +180,13 @@ test('real kit tarball contains only declared source/locks and exposes its publi
       if (['crm-knowledge', 'knowledge'].includes(name)) items.push('test/contract.typecheck.ts', 'test/package.test.mjs');
       try {
         for (const item of items) await copyTreeBounded(join(source, item), join(plugin, item), { destinationRoot: root });
+        if (process.env.B0_TEST_PNPM_VERSION !== undefined) {
+          // All mutations here are to the owned fixture. Nested pnpm invocations
+          // must select the same real candidate, without version-check bypasses.
+          const manifest = JSON.parse(await readFile(join(plugin, 'package.json')));
+          manifest.packageManager = declaration;
+          await writeFile(join(plugin, 'package.json'), JSON.stringify(manifest));
+        }
         await assert.rejects(lstat(join(consumer, 'plugin-kit')), { code: 'ENOENT' });
         const args = name === 'board-components' ? [inputs] : [upstream, tools];
         const result = await exec(process.execPath, [join(plugin, 'build.mjs'), ...args], { cwd: root, env: buildEnv, timeout: 120000, maxBuffer: 2 * 1024 * 1024 });
@@ -121,6 +194,7 @@ test('real kit tarball contains only declared source/locks and exposes its publi
           const receipt = JSON.parse(result.stdout);
           const lock = JSON.parse(await readFile(join(repository, 'dsh-plugins/shine-funnel/bundled-dependencies.json')));
           assert.equal(receipt.sha256, lock.packages[0].sha256, 'dev kit migration changed the immutable domain tarball');
+          t.diagnostic(`domain sha ${receipt.sha256}; original consumer locks unchanged`);
         } else assert.ok((await readFile(join(plugin, 'lib/index.js'))).length > 0);
         const tests = name === 'board-components' ? ['test/geometry.test.mjs']
           : name === 'analytics-workbench' ? ['test/built.test.mjs', 'test/native-board-auth.test.mjs', 'test/native-prompt-inject.test.mjs', 'test/lane-g-delivery.test.mjs',
@@ -143,6 +217,7 @@ test('real kit tarball contains only declared source/locks and exposes its publi
   }
   if (upstreamIndex) assert.deepEqual(await readFile(inputRecord), upstreamIndex,
     'consumer build/test changed the pinned SDK identity record');
+  assert.deepEqual(await readFile(join(kit, 'package.json')), repositoryManifest, 'manager trial changed repository kit');
 });
 
 test('workspace kit link is explicit, idempotent and never replaces a foreign installation', async t => {

@@ -21,7 +21,11 @@
 
 全文核对与本轮代码修复证据见 [2026-10-03 审查修复记录](../hackathon/evidence/dsh-g0-review-fixes-20261003.md)。未关闭的实施项沿用 T1–T23，不新增重复规划或再次询问已回答的选择。
 
-### 2026-10-07 当前收口与执行顺序
+### 2026-10-07 pnpm 候选兼容增量
+
+从 `efbf5417` 干净基线继续：固定 11.28.2 候选与旧 11.7.0 各 10/10 消费者、16 PASS；图表包摘要/锁保持，边界 25 PASS。另完成空 store 的 111 包冻结安装及安装后严格类型检查。只关闭 T15 的插件开发侧 manager 候选验证，默认 pin/SDK 未替换；后续 OCR 修复候选漏传 SDK 时的绿色跳过，新旧各 17 PASS / 0 SKIP，见[审修](../hackathon/evidence/dsh-g0-kit-pnpm-review-20261007.md)。随本次本地提交收录，未操作杭州。下一步分别表达官方 DSH 声明与我方插件 manager，受控迁移准备入口/CI/SDK，不能改上游 packageManager 来绕过校验。见[本轮证据](../hackathon/evidence/dsh-g0-kit-pnpm-candidate-20261007.md)。
+
+### 2026-10-07 上一阶段收口与执行顺序
 
 SDK 归档/供应链原始 13 文件及新增审修记录已核对，三项扫描器问题修复；本次 53 项 Node、27 项归档/41 subtests 通过，随本批本地提交收录。SDK 查询仍 10 个版本/42 条公告 BLOCKED；pnpm 11.28.2 是下一隔离兼容候选，官方 DSH 0.2.0-rc.2 的锁仍含受影响依赖，不能仅改版本号。先收口工具链/官方升级与信任，再做目标平台 SDK/其他服务和剩余宿主/UI/生产形状验收，stop/go 后物理分仓。各线可并行准备，共享 candidate/journal 顺序集成。详见[本批审修、任务表和初衷核对](../hackathon/evidence/dsh-g0-kit-sdk-supply-review-20261007.md)；历史阶段的“未提交/NOT_RUN”按其日期理解，不能覆盖后续已完成子项。
 
@@ -1617,6 +1621,7 @@ Synthesized from this review's findings. Run with Claude Code or Codex; checkbox
   - [x] 2026-10-07 提交前 OCR：完整核对原 32 文件及新增审修记录；修复清单外链接中转，新增先红后绿负测和合法链/循环回归。修复后 38 项防护、17 项归档/25 subtests、缩减与完整 SDK 各 10/10 消费者通过，见[证据](../hackathon/evidence/dsh-g0-kit-sdk-review-20261007.md)。仅本地提交范围通过，17 项不透明内容及分发/供应链/跨平台仍开放。
   - [x] 2026-10-07 缩减格式同平台传输：共用归档器、显式双摘要、原清单字节不变；实际安装 kit 打包 63.75 MB，在新目录接收后 10/10 消费者构建与选定测试通过。27 项归档/41 subtests、38 项防护，真实 CLI 6 项拒绝；17 项不透明内容完成来源盘点，仍 0 命中/17 缺口 PARTIAL。见[本轮证据](../hackathon/evidence/dsh-g0-kit-sdk-compact-transport-20261007.md)。随本次供应链审修本地提交收录，不作为生产包。
   - [x] 2026-10-07 SDK 清单与供应链实查：新增默认离线 inventory/CycloneDX 和显式 OSV；50 项相关防护通过，222 个安装依赖版本实际命中 10 个版本/42 条不同公告，保持 BLOCKED。17 项不透明内容补来源字节核对，5 包密码学验签通过但 1 包密钥已过期；见[证据与修复候选](../hackathon/evidence/dsh-g0-kit-sdk-supply-chain-20261007.md)。未改固定上游/pin/SDK，随本次审修本地提交收录。
+  - [x] 2026-10-07 pnpm 11.28.2 插件侧候选：新旧 10/10 消费者分别 16 PASS，原图表包/锁不变；25 项防护、111 包冻结安装及新依赖严格类型检查通过。修复构建器重复版本硬编码，默认 pin、官方源码和 SDK 保持，详见[候选证据](../hackathon/evidence/dsh-g0-kit-pnpm-candidate-20261007.md)。后续审核修复候选缺输入时的误通过，各 17 PASS / 0 SKIP，随本次本地提交收录；不关闭新 SDK/目标平台/供应链。
   - [ ] 下一子项：受控处理 10 个依赖版本及兼容性、旧密钥信任，完成 17 项不透明内容审查、完整 SBOM/发布者身份/撤销，以及目标平台/WSL/干净机器验证；T15 整体与物理分仓仍开放。全量 SDK 审计归 SDK 分发，不附加为每次业务插件开发的重流程。
   - [x] 2026-10-07 SDK 本地归档/接收：kit 内显式内容寻址归档、封闭链接图、pin/平台与摘要限额；真实 812 MB 归档恢复后 10/10 消费者离线构建/测试，相关 38 PASS、16 项负测和 25 subtests PASS。生产 receiver 不变，源/接收输入与旧候选保持。只关闭 Mac 本地往返，签名/完整秘密扫描与最小闭包、WSL/新机器仍开放；见[归档证据](../hackathon/evidence/dsh-g0-kit-sdk-archive-20261007.md)。
   - [x] 2026-10-07 审修与同平台 SDK 迁移：前批正常 hooks 提交 `90d5012d`；迁移固定 SDK/工具/Corepack，sandbox 阻断原目录和外网后 10/10 消费者构建/测试通过（15 PASS / 0 SKIP），两份各 124231 条内容/链接/权限记录保持。只证明 kit 支持路径在 Mac 同平台可迁移，不关闭归档信任、跨平台或全新机器/WSL。见[迁移证据](../hackathon/evidence/dsh-g0-kit-relocation-20261007.md)。
