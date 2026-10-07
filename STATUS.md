@@ -18,11 +18,18 @@
 
 - 当前采用历史结果快照 + 保存时校验；陈旧/过期阈值已移出当前待办，不再等待确认，也不新增到期系统。保留生成时间/来源和 `NOT_CHECKED`，权限、候选准入、冲突、幂等与会话/请求超时保持；旧 wire/回执兼容不删除。见[决定与验证](docs/hackathon/evidence/dsh-g0-snapshot-policy-closeout-20261007.md)。
 
-### 工具会话恢复语料（2026-10-07，当前进度）
+### 工具会话杭州跨版本验证（2026-10-07，当前进度）
+
+- 本机工具语料及结果年龄策略经 OCR delegate 13/13 审核，正常 hooks 提交 **`aebf4e38`**；当前年龄策略已收口，不再等待阈值。
+- 同一提交控制器在杭州 WSL2、UID 65534 完成工具持久化矩阵 **4/4 PASS，10 个冷进程全部退出 0**：截断恢复、rc1→rc2 读取续写、rc2→rc1 读取、保留旧状态回退。见[本轮证据](docs/hackathon/evidence/dsh-g0-session-tool-wsl-20261007.md)。
+- 固定 runtime 包由杭州直接下载并核验；48 个证据文件已取回，30147 个 runtime 输入条目保持，1318 个本机保护文件保持；自有临时目录已回收，current/五个生产监听 PID 未变，候选 journal 仍 seq 6。未执行生产切换或真实工具/模型。
+- **仍 PARTIAL**：完整媒体/委派语料与 rc1 编译来源证明、真实身份/模型/UAT、供应链、生产准入和 G0 stop/go 未关闭。后续依既有顺序补兼容证据，推进包信任与独立构建前置，再收口物理分仓；不重新引入年龄阈值待办。
+
+### 工具会话恢复语料（2026-10-07，本机阶段）
 
 - 浏览器 v2 门禁经 OCR delegate 21/21 审修后，正常 hooks 本地提交 **`d8a84d66`**；提交后工作树干净，没有 push 或生产动作。
 - 已继续 T2/T7，增加显式 `--corpus tool`：固定 rc2 实际 reader/writer 四个冷进程完成 13→26 事件截断恢复和官方消息投影核对，调用/结果/错误/meta 保留。相关测试修正一处故障注入夹具后 **11 PASS / 0 FAIL / 0 SKIP**，见[本轮证据](docs/hackathon/evidence/dsh-g0-session-tool-corpus-20261007.md)。
-- 本机新语料只证明 rc2 持久化与消息恢复；rc1↔rc2 新语料、杭州复验、media/delegation 与编译闭包来源仍开放，CLI 返回 PARTIAL/2。candidate/journal seq 6 保持，本批经 OCR delegate 审核，随本次提交交付。
+- 本机阶段只证明 rc2 持久化与消息恢复，未提供 rc1 时 CLI 返回 PARTIAL/2；杭州工具跨版本已由上节后续完成。media/delegation 与编译闭包来源仍开放。candidate/journal seq 6 保持，本批已提交 `aebf4e38`。
 
 ### 新候选浏览器回执接线（2026-10-07，已提交阶段）
 

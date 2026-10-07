@@ -1537,6 +1537,8 @@ Synthesized from this review's findings. Run with Claude Code or Codex; checkbox
 
   - Tool corpus follow-up 2026-10-07: **LOCAL RC2 TOOL PERSISTENCE PASS / CROSS-VERSION NOT_RUN**. Explicit tool corpus uses the compiled official persistence and restored message surface, 13→26 events after a torn final frame; success/error/meta retained. Related suite 11 PASS after correcting the corruption fixture. No tool execution, target rerun, journal update or build attestation. Evidence: [tool corpus](../hackathon/evidence/dsh-g0-session-tool-corpus-20261007.md).
 
+  - Tool target follow-up 2026-10-07: **WSL TOOL PERSISTENCE MATRIX 4/4 PASS / G0 PARTIAL**. Committed controller `aebf4e38`, immutable rc2 runtime and recorded rc1 compiled modules passed ten fresh processes: torn-tail repair, rc1→rc2 append, rc2→rc1 read, preserved-old-state rollback. 48 evidence files retrieved, owned directory reclaimed, production unchanged, journal remains seq 6. Complete corpus/build provenance and business gates remain open. Evidence: [tool WSL matrix](../hackathon/evidence/dsh-g0-session-tool-wsl-20261007.md).
+
 - [ ] **T3 (P1, human: ~8h / CC: ~45min)** — CRM/API baseline — freeze the first vertical slice contract, compatibility adapter, generated types, version window and profile×service×state rollback matrix.
   - Surfaced by: CEO-REVIEW-004 and Section 4 DATA-001.
   - Files: `backend/contracts/` and adapter location to be determined; `docs/architecture/shinemage-plugin-boundaries.md`.

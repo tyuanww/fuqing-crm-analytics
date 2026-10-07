@@ -341,7 +341,8 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 - [x] 新候选浏览器现场子项（2026-10-07）：`a490457c…` 原四包/runtime 在杭州 WSL2 Chrome headless 5/5、官方 Host 1 PASS（78.00 秒），一条分析/一个 worker，截图中文可读；620 本机文件及 journal 保持，510 远端输入保持、临时目录回收、生产不变。见[证据](./evidence/dsh-g0-first-purchase-current-browser-20261007.md)；不是旧候选 browser PASS，也不是完整视觉/无障碍验收。
 - [x] 当前候选浏览器回执 journal 适配（2026-10-07）：显式 v2 关联终态 seq 5，独立来源/控制器/原 archive 与清单/五场景/清理核对后接入 seq 6；完整 release 429 PASS（含新门禁 38），实际错父拒绝、重试不写、1318 文件保持，见[门禁证据](./evidence/dsh-g0-current-browser-gate-20261007.md)。v1 不变，不重跑杭州、不放行生产；OCR delegate 21/21 审修后随本次提交交付，提交前新跑 release 429 PASS。
 - [x] T3/T7 结果年龄事项收口（2026-10-07）：采用历史快照 + 保存时校验，移除待定阈值要求；保留 wire/旧回执兼容，不新增到期系统，不取消身份/请求超时。见[收口证据](./evidence/dsh-g0-snapshot-policy-closeout-20261007.md)。
-- [x] T2/T7 工具语料本机第一步：显式 `--corpus tool`，固定 rc2 四冷进程 13→26 事件，tool/result/error/meta 与消息投影通过，相关测试 11 PASS；[证据](./evidence/dsh-g0-session-tool-corpus-20261007.md)。新工具语料跨版本/杭州及 media/delegation 仍 NOT_RUN；本批 OCR delegate 审核后随本次提交交付。
+- [x] T2/T7 工具语料本机第一步：显式 `--corpus tool`，固定 rc2 四冷进程 13→26 事件，tool/result/error/meta 与消息投影通过，相关测试 11 PASS；[证据](./evidence/dsh-g0-session-tool-corpus-20261007.md)。本机阶段跨版本 NOT_RUN；后续杭州验证见下项。media/delegation 仍开放，本批已提交 `aebf4e38`。
+- [x] T2/T7 工具语料杭州子项：固定 runtime、提交 `aebf4e38` 控制器，四项 4/4 PASS、10 冷进程；48 证据文件核对，输入/生产不变、自有目录回收。见[现场证据](./evidence/dsh-g0-session-tool-wsl-20261007.md)。只证明该工具语料；编译闭包、完整 corpus/业务准入继续开放，journal 未追加。
 - [ ] 新候选其余准入证据与 G0 stop/go：完整跨版本 corpus、真实身份/模型/UAT、签名/SBOM、生产 activation/canary/rollback；不继承旧候选的 HTTP/browser 事件。
 - [ ] 旧工作树差异与分仓前置按[并行边界](./evidence/dsh-g0-worktree-triage-20261007.md)推进：public 138 条均有当前/历史已提交 blob，不重复提交；HTML 34 文件待语义审查，kit 固定开发依赖和信任验证独立推进；共享候选/journal 顺序收口。
 

@@ -42,3 +42,6 @@ node scripts/dsh-b0/session-recovery.mjs "$OUT"   "$PWD/.context/dsh-b0/upstream
 使用 `/Users/hutou/.agents/skills/open-code-review-delegate/SKILL.md`：OCR 确定文件/规则，宿主完成审查，不调用外部模型。已核对 13 个变更文件（4 个 MJS、9 个文档，按 path/status 记账），无跳过，覆盖率 100%；OCR 排除的 Markdown 也人工核对。没有新增未关闭的高/中风险发现。工具夹具仍显式不执行真实工具；既有 terminal gate 固定历史 controller，不需要随本次脚本修改旧证据。
 
 提交前同一命令在 Node24 的已有固定 rc2 编译环境重新执行：**11 PASS / 0 FAIL / 0 SKIP，1.35 秒**，见 `.context/checks/session-tool-review-20261007/tests.log`；没有复用旧测试数冒充本轮通过。预览、规则、逐文件清单和摘要保存在同目录。另有[年龄策略收口](./dsh-g0-snapshot-policy-closeout-20261007.md)的独立 90 项本次回归。本批未重跑 release 全套或杭州；两者不能从这里推定通过。
+
+
+后续：本批已提交 `aebf4e38`，同一控制器的杭州工具语料四项已实际 4/4 PASS，详见[目标机跨版本证据](./dsh-g0-session-tool-wsl-20261007.md)。上文“未运行”描述保留本机阶段边界，不是当前现场状态；完整 corpus、编译来源和业务准入仍开放。
