@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFile, execFileSync } from 'node:child_process';
-import { cp, mkdtemp, readFile, rm, stat, symlink, writeFile } from 'node:fs/promises';
+import { cp, mkdtemp, readFile, readdir, rm, stat, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -180,3 +180,65 @@ test('CLI redacts untrusted values on errors and leaves the journal unchanged', 
   });
   assert.deepEqual(await readFile(input.statePath), before);
 });
+
+
+async function independentPlugin(input, version) {
+  const candidate = await bindSourceFixtureCandidate(input.directory, 'a'.repeat(40));
+  await writeFile(join(input.directory, 'target-input/candidate.json'), await readFile(input.candidatePath));
+  await change(input.targetInputPath, value => {
+    value.schema_version = 'synthetic-source-http-target-input/' + version;
+    value.candidate_digest = candidate.candidate_digest;
+  });
+  await change(input.targetEvidencePath, value => {
+    value.schema_version = 'source-http-target-observation/' + version;
+    value.candidate_digest = candidate.candidate_digest;
+  });
+  for (const name of await readdir(join(input.directory, 'target-result'))) {
+    if (name.endsWith('.json') && name !== 'receipt.json') await change(join(input.directory, 'target-result', name), value => {
+      if (Object.hasOwn(value, 'candidate_digest')) value.candidate_digest = candidate.candidate_digest;
+    });
+  }
+  for (const label of ['query', 'save']) {
+    const newRoot = '/tmp/owned-fp-terminal-fixture/source/source-http-owned-fixture';
+    await change(join(input.directory, 'target-result', label + '-install.stdout'), value => {
+      value.python = newRoot + '/' + label + '-venv/bin/python';
+    });
+    await change(join(input.directory, 'target-result', label + '-unpack.stdout'), value => {
+      value.destination = newRoot + '/' + label + '-app';
+    });
+  }
+  await refreshSourceInput(input.directory);
+}
+
+test('v2 accepts an independently updated plugin with unchanged service archives and explicit binding', async t => {
+  const input = await fixture(t), pair = await readFile(input.evidencePath);
+  await independentPlugin(input, 'v2');
+  const result = await verifyPluginService(input);
+  assert.equal(result.scenario_count, 10);
+  assert.equal(result.release_ready, false);
+  assert.deepEqual(await readFile(input.evidencePath), pair);
+});
+
+test('v1 cannot relabel an independent plugin update as historical shared-source evidence', async t => {
+  const input = await fixture(t);
+  await independentPlugin(input, 'v1');
+  await rejected(input, /SERVICE_SOURCE_TARGET_CANDIDATE_SOURCE/);
+});
+
+test('v2 cannot substitute a plugin SHA for its service source', async t => {
+  const input = await fixture(t);
+  await independentPlugin(input, 'v2');
+  await change(input.targetEvidencePath, value => { value.source_sha = 'a'.repeat(40); });
+  await rejected(input, /SERVICE_SOURCE_TARGET_SOURCE_BINDING/);
+});
+
+
+for (const path of ['/srv/production/query-venv/bin/python',
+  '/tmp/owned-fp-terminal-fixture/source/../source-http-owned-fixture/query-venv/bin/python',
+  '/tmp/owned-fp-terminal-other/source/source-http-owned-fixture/query-venv/bin/python']) {
+  test('v2 refuses an unowned, traversing or inconsistent install root: ' + path, async t => {
+    const input = await fixture(t); await independentPlugin(input, 'v2');
+    await change(join(input.directory, 'target-result/query-install.stdout'), value => { value.python = path; });
+    await rejected(input, /SERVICE_SOURCE_TARGET_(INSTALL_PATH|UNPACK)/);
+  });
+}

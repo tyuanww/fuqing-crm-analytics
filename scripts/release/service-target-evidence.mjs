@@ -101,7 +101,7 @@ export async function verifyServiceTargetEvidence({ artifactObservation, evidenc
   const pairBytes = await readArtifactFile(evidencePath), pair = decode(pairBytes);
   assert.equal(hash(pairBytes), artifactObservation.service_evidence_sha256, 'SERVICE_TARGET_PAIR_CHANGED');
   const bytes = await readArtifactFile(targetEvidencePath), report = decode(bytes), directory = dirname(targetEvidencePath);
-  if (report.schema_version === 'source-http-target-observation/v1') {
+  if (['source-http-target-observation/v1', 'source-http-target-observation/v2'].includes(report.schema_version)) {
     return verifySourceTargetEvidence({ artifactObservation, pairBytes, bytes, report, directory,
       targetEvidencePath, targetInputPath, candidate, candidateBytes });
   }

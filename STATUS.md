@@ -7,14 +7,22 @@
 |---|---|
 | Git 基线 | 产品 VERSION 为 `0.20.0.0`；`dsh-0.20.0.0-r1` immutable Release 已发布，源 SHA 为 `073c576c8d75d6ab16e2bac48b2cc99adf4a68bf`，DSH 上游 SHA 为 `477b4f420553e8a52c2fbccc464d7561b239c443`；main CI、exact-SHA preflight、evidence 和 publication workflow 均通过。 |
 | 产品 | **PARTIAL**；r3 已在杭州 current 运行并完成 DSH/CRM/B0 loopback smoke，但完整浏览器、真实模型、WAL 兼容、operator gate、10x backpressure、真实业务 UAT 和回退演练仍未完成。 |
-| DSH | 2026-10-07 只读复核：杭州 current 为 `/srv/shinemage/dsh/releases/dsh-0.20.0.0-r3`，VERSION 0.20.0.0，runtime package 为官方 0.1.7-rc.2；发布标记 source `fcbd1324…`。本轮没有切换生产，当前首购候选 `861d6ef1…` 未激活；其固定上游仍为 `477b4f42`。详见下方前置核验。 |
+| DSH | 2026-10-07 只读复核：杭州 current 为 `/srv/shinemage/dsh/releases/dsh-0.20.0.0-r3`，VERSION 0.20.0.0，runtime package 为官方 0.1.7-rc.2；发布标记 source `fcbd1324…`。本轮没有切换生产，最新首购候选 `a490457c…` 未激活，旧 `861d6ef1…` 保留；其固定上游仍为 `477b4f42`。详见下方前置核验。 |
 | CRM | 杭州 backend `127.0.0.1:18093`、frontend `127.0.0.1:18094` 健康；backend 镜像固定为 `sha256:bbcea629…`，容器内 DuckDB 为 `1.5.6`；真实库未读取。 |
 | WeKnora | 页面 `127.0.0.1:18090`、API `127.0.0.1:18092` 健康；数据卷与登录由 WeKnora 自身管理。 |
 | 公网入口 | `www.tyuan.chat`、`app.tyuan.chat`、`page.tyuan.chat`、`board.tyuan.chat`、`learn.tyuan.chat` 经 Cloudflare Tunnel；HTTP 已强制跳 HTTPS。 |
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 恢复投影源码修复与工作树核对（2026-10-07，当前进度）
+### 新插件独立更新与杭州终态恢复（2026-10-07，当前进度）
+
+- 从干净 `3ffbd2a2` 只重建 workbench，固定新候选 `a490457c…` / tgz `c9770d11…`；CRM、查询/保存服务、profile 与官方 runtime 复用。仅三个编译入口变化，见[本轮证据](docs/hackathon/evidence/dsh-g0-first-purchase-terminal-candidate-20261007.md)。
+- 修复验收入口强制插件/服务同 SHA 的耦合，新增显式来源 v2；v1 保留原合同。新候选本机固定包 1 PASS，杭州来源 10/10 PASS、官方 Host SIGKILL 终态恢复 1 PASS（76.49 秒）：FAILED/EXECUTION_UNKNOWN、活动名额释放、派发一次、分析一条。**该候选的恢复缺陷现场子项关闭**。
+- 新服务目标回执接入 journal seq 4，CLI 重试不改字节/mtime；Host 终态原始回执已封存，独立终态 journal verifier 尚未接通，不能套用旧候选 HTTP/浏览器事件。整体仍 PARTIAL / release_ready=false。
+- 349 个封存输入和 43 个来源输入保持，228 个结果归档条目取回校验；本次进程/目录回收、生产 current/五个监听/PID 未变。实施阶段完整 release suite 354 PASS / 0 SKIP，Python 11 PASS。本批 verifier/测试/文档经 OCR delegate 审修，随本次提交交付；提交号以 Git 为准，未发布或切换生产。审查验证见[本轮证据](docs/hackathon/evidence/dsh-g0-first-purchase-terminal-candidate-20261007.md#提交前审查与维修)。
+- 下一步：终态回执门禁接线 → 新候选其余准入证据/G0 stop-go；HTML 差异、独立构建和包信任仍按已定边界并行准备。
+
+### 恢复投影源码修复与工作树核对（2026-10-07，上一阶段）
 
 - 前批恢复演练/证据正常 hooks 提交 `de89a527`（15 文件）。本轮补官方异步历史投影、事件重叠和卸载处理，并为各入口显式声明服务依赖；Node 66 PASS、后端 50 PASS，官方 Host 终态整链 1 PASS（4.44 秒），见[修复证据](docs/hackathon/evidence/dsh-g0-native-journal-recovery-fix-20261007.md)。
 - 本机中断 run 为 `FAILED / EXECUTION_UNKNOWN`、`execution_active=false`，派发仍一次，原保存仍一条。**只关闭本机源码缺陷，不关闭新候选/杭州门禁**；旧候选 `861d6ef1…` 仍保留其 UNKNOWN 结果。当前没有生产切换。

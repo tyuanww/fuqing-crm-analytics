@@ -61,3 +61,25 @@ def test_unchanged_transfer_can_be_verified_without_mutation(sealed):
     assert verify(root, digest) == doc
     assert verify(root, digest) == doc
     assert before == {p.name: (p.read_bytes(), p.stat().st_mtime_ns) for p in root.iterdir()}
+
+
+@pytest.mark.parametrize("version,plugin_source,service_source,accepted", [
+    ("v1", "b" * 40, "b" * 40, True),
+    ("v1", "c" * 40, "b" * 40, False),
+    ("v2", "c" * 40, "b" * 40, True),
+    ("v2", "b" * 40, "c" * 40, False),
+])
+def test_source_binding_has_explicit_independent_plugin_contract(version, plugin_source, service_source, accepted):
+    verify = runpy.run_path(str(PROBE))["verify_source_binding"]
+    query = {"source_sha": "b" * 40}
+    pair = {"candidate": "b" * 40, "status": "PASS",
+            "artifacts": {"candidate": {"service_source": {"commit": "b" * 40}}}}
+    candidate = {"source_sha": plugin_source, "candidate_digest": "a" * 64,
+                 "service_compatibility": {"binding": {"source_sha": service_source}}}
+    inputs = {"schema_version": "synthetic-source-http-target-input/" + version,
+              "source_sha": "b" * 40, "candidate_digest": "a" * 64}
+    if accepted:
+        verify(query, pair, candidate, inputs)
+    else:
+        with pytest.raises(ValueError, match="CANDIDATE_SOURCE_BINDING"):
+            verify(query, pair, candidate, inputs)

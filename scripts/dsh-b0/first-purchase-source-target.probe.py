@@ -49,7 +49,7 @@ def verify_inputs(root, expected):
     require(re.fullmatch(r"[0-9a-f]{64}", expected) and sha(root / "input.json") == expected, "INPUT_DIGEST")
     doc = json.loads((root / "input.json").read_bytes())
     require(set(doc) == {"schema_version", "release_ready", "candidate_digest", "source_sha", "files"}
-            and doc["schema_version"] == "synthetic-source-http-target-input/v1"
+            and doc["schema_version"] in ("synthetic-source-http-target-input/v1", "synthetic-source-http-target-input/v2")
             and doc["release_ready"] is False, "INPUT_SCOPE")
     require(re.fullmatch(r"[0-9a-f]{64}", doc["candidate_digest"])
             and re.fullmatch(r"[0-9a-f]{40}", doc["source_sha"]), "INPUT_IDENTITY")
@@ -123,6 +123,16 @@ def query_child(source, state, digest, expected, fixture):
         uvicorn.Server(uvicorn.Config(app, access_log=False, log_level="warning", lifespan="off")).run(sockets=[sock])
 
 
+def verify_source_binding(query_receipt, pair, candidate, inputs):
+    # v1 preserves the historical shared-revision contract. In v2 the
+    # service binding owns service provenance; the plugin keeps its own SHA.
+    source = (candidate["service_compatibility"]["binding"]["source_sha"]
+              if inputs["schema_version"].endswith("/v2") else candidate["source_sha"])
+    require(query_receipt["source_sha"] == pair["candidate"] == pair["artifacts"]["candidate"]["service_source"]["commit"]
+            == source == inputs["source_sha"] and pair["status"] == "PASS"
+            and candidate["candidate_digest"] == inputs["candidate_digest"], "CANDIDATE_SOURCE_BINDING")
+
+
 class Drill:
     def __init__(self, root, expected, local):
         self.root, self.expected = root, expected
@@ -137,7 +147,8 @@ class Drill:
         self.identity = {"enabled": True, "admin": True, "username": "crm-owner"}
         self.processes, self.active = [], {}
         self.server = self.thread = None
-        self.report = {"schema_version": "source-http-target-observation/v1", "status": "RUNNING",
+        version = self.input["schema_version"].rsplit("/", 1)[1]
+        self.report = {"schema_version": "source-http-target-observation/" + version, "status": "RUNNING",
             "scope": "local-synthetic-package-http" if local else "actual-wsl2-synthetic-package-http",
             "input_sha256": expected, "source_sha": self.input["source_sha"],
             "candidate_digest": self.input["candidate_digest"], "release_ready": False,
@@ -295,9 +306,7 @@ class Drill:
         pair = json.loads((self.root / "save/pair.json").read_bytes())
         save_receipt = pair["artifacts"]["candidate"]
         candidate = json.loads((self.root / "candidate.json").read_bytes())
-        require(query_receipt["source_sha"] == pair["candidate"] == save_receipt["service_source"]["commit"]
-                == candidate["source_sha"] == self.input["source_sha"] and pair["status"] == "PASS"
-                and candidate["candidate_digest"] == self.input["candidate_digest"], "CANDIDATE_SOURCE_BINDING")
+        verify_source_binding(query_receipt, pair, candidate, self.input)
         for label, record, name in (("query", query_receipt, "kernel-manifest.json"), ("save", save_receipt, "service-manifest.json")):
             require(record["release_ready"] is False and sha(self.root / label / "archive.tar.zst") == record["sha256"]
                     and sha(self.root / label / name) == record["manifest_sha256"], "ARCHIVE_RECEIPT_BINDING")

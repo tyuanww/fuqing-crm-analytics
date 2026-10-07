@@ -11,6 +11,7 @@ const ROOT = fileURLToPath(new URL('../..', import.meta.url)), HEX = /^[a-f0-9]{
 const decode = bytes => JSON.parse(bytes.toString('utf8'));
 const CODE = 'SERVICE_SOURCE_TARGET_';
 // The fixed controller asserts the HTTP behavior; its receipt remains an operator observation.
+export const SOURCE_TARGET_RUNNER_V2_SHA256 = '37b4c835d9cf66f1114bbf56fc51895c0ee214f2382cb8aecef3954b20b212d9';
 export const SOURCE_TARGET_RUNNER_SHA256 = '1532ffac76fb0e0f802dbb445669fed0da44edc5f857a23dfee4e7fa0d7fa365';
 export const SOURCE_TARGET_HELPERS = Object.freeze(['scripts/dsh-b0/first-purchase-kernel.probe.py',
   'scripts/dsh-b0/first-purchase-service.probe.py', 'scripts/release/secure-unpack.py',
@@ -95,7 +96,8 @@ export async function verifySourceTargetEvidence({ artifactObservation, pairByte
   exact(report, ['schema_version', 'status', 'scope', 'input_sha256', 'source_sha', 'candidate_digest',
     'release_ready', 'dsh_host', 'activation', 'supply_chain', 'platform', 'observations', 'artifacts', 'processes', 'cleanup'], 'RECEIPT');
   assert.equal(report.status, 'PASS', CODE + 'NOT_PASS');
-  assert.equal(report.schema_version, 'source-http-target-observation/v1', CODE + 'SCHEMA');
+  const independent = report.schema_version === 'source-http-target-observation/v2';
+  assert.ok(independent || report.schema_version === 'source-http-target-observation/v1', CODE + 'SCHEMA');
   assert.equal(report.scope, 'actual-wsl2-synthetic-package-http', CODE + 'SCOPE');
   assert.equal(report.release_ready, false, CODE + 'FALSE_RELEASE_CLAIM');
   assert.equal(report.activation, 'BLOCKED', CODE + 'FALSE_RELEASE_CLAIM');
@@ -109,16 +111,17 @@ export async function verifySourceTargetEvidence({ artifactObservation, pairByte
   assert.ok(/microsoft/i.test(report.platform.kernel) && /wsl2/i.test(report.platform.kernel), CODE + 'PLATFORM');
   const pair = decode(pairBytes);
   assert.equal(report.source_sha, pair.candidate, CODE + 'SOURCE_BINDING');
-  // This finite runner requires a shared source revision. A future multi-repo
-  // runner needs its own explicit evidence schema, not relaxed historical checks.
-  assert.equal(report.source_sha, candidate.source_sha, CODE + 'CANDIDATE_SOURCE');
+  // v1 keeps its original shared-SHA contract. v2 explicitly binds service
+  // provenance to the candidate's service owner, independently of plugin code.
+  assert.equal(report.source_sha, independent ? candidate.service_compatibility?.binding?.source_sha
+    : candidate.source_sha, CODE + 'CANDIDATE_SOURCE');
   assert.equal(report.candidate_digest, candidate.candidate_digest, CODE + 'CANDIDATE_BINDING');
   const inputBytes = await readArtifactFile(targetInputPath), input = decode(inputBytes), inputRoot = dirname(targetInputPath);
   assert.equal(basename(targetInputPath), 'input.json', CODE + 'INPUT_PATH');
   assert.equal(basename(targetEvidencePath), 'receipt.json', CODE + 'RECEIPT_PATH');
   assert.equal(hash(inputBytes), report.input_sha256, CODE + 'INPUT_DIGEST');
   exact(input, ['schema_version', 'release_ready', 'source_sha', 'candidate_digest', 'files'], 'INPUT');
-  assert.equal(input.schema_version, 'synthetic-source-http-target-input/v1', CODE + 'INPUT_SCHEMA');
+  assert.equal(input.schema_version, 'synthetic-source-http-target-input/' + (independent ? 'v2' : 'v1'), CODE + 'INPUT_SCHEMA');
   assert.equal(input.release_ready, false, CODE + 'FALSE_RELEASE_CLAIM');
   assert.equal(input.source_sha, report.source_sha, CODE + 'SOURCE_BINDING');
   assert.equal(input.candidate_digest, report.candidate_digest, CODE + 'CANDIDATE_BINDING');
@@ -152,7 +155,9 @@ export async function verifySourceTargetEvidence({ artifactObservation, pairByte
   }
   assert.deepEqual(content.get('candidate.json'), candidateBytes, CODE + 'CANDIDATE_BINDING');
   assert.deepEqual(content.get('save/pair.json'), pairBytes, CODE + 'PAIR_BINDING');
-  assert.equal(input.files['helpers/first-purchase-source-target.probe.py'].sha256, SOURCE_TARGET_RUNNER_SHA256, CODE + 'RUNNER');
+  const runnerHash = input.files['helpers/first-purchase-source-target.probe.py'].sha256;
+  assert.ok((independent ? [SOURCE_TARGET_RUNNER_V2_SHA256]
+    : [SOURCE_TARGET_RUNNER_SHA256, SOURCE_TARGET_RUNNER_V2_SHA256]).includes(runnerHash), CODE + 'RUNNER');
   for (const path of SOURCE_TARGET_HELPERS)
     assert.equal(input.files['helpers/' + basename(path)].sha256, hash(await insideArtifact(ROOT, path)), CODE + 'HELPER');
   const manifests = { save: decode(content.get('save/service-manifest.json')) };
@@ -178,8 +183,12 @@ export async function verifySourceTargetEvidence({ artifactObservation, pairByte
     exact(installed, ['python', 'mode', 'wheels'], 'INSTALL');
     assert.equal(installed.mode, 'offline-hashed-wheel-install', CODE + 'INSTALL_MODE');
     assert.deepEqual(installed.wheels, actual.wheels, CODE + 'INSTALL_WHEELS');
-    const match = typeof installed.python === 'string' && installed.python.match(
-      /^(\/tmp\/shinemage-source-acceptance-[A-Za-z0-9_-]+\/source-http-owned-[A-Za-z0-9_-]+)\/(query|save)-venv\/bin\/python$/);
+    // v2 also supports the composed terminal drill's explicitly owned subtree.
+    // These paths are provenance strings only; never open a reported host path.
+    const installPattern = independent
+      ? /^(\/tmp\/(?:shinemage-source-acceptance-[A-Za-z0-9_-]+|owned-fp-terminal-[A-Za-z0-9_-]+\/source)\/source-http-owned-[A-Za-z0-9_-]+)\/(query|save)-venv\/bin\/python$/
+      : /^(\/tmp\/shinemage-source-acceptance-[A-Za-z0-9_-]+\/source-http-owned-[A-Za-z0-9_-]+)\/(query|save)-venv\/bin\/python$/;
+    const match = typeof installed.python === 'string' && installed.python.match(installPattern);
     assert.ok(match && match[2] === label, CODE + 'INSTALL_PATH');
     installRoot ??= match[1]; assert.equal(match[1], installRoot, CODE + 'INSTALL_PATH');
     const manifestFile = content.get(label + '/' + (label === 'query' ? 'kernel' : 'service') + '-manifest.json');
@@ -246,7 +255,7 @@ export async function verifySourceTargetEvidence({ artifactObservation, pairByte
   return { status: 'LOCAL_WSL_SYNTHETIC_SOURCE_HTTP_OBSERVATION_VERIFIED', scope: report.scope,
     target_evidence_sha256: hash(bytes), target_input_sha256: hash(inputBytes),
     supporting_evidence_sha256: hash(JSON.stringify(supporting)), service_evidence_sha256: artifactObservation.service_evidence_sha256,
-    runner_sha256: SOURCE_TARGET_RUNNER_SHA256, query_archive_sha256: report.artifacts.query.archive_sha256,
+    runner_sha256: runnerHash, query_archive_sha256: report.artifacts.query.archive_sha256,
     query_manifest_sha256: report.artifacts.query.manifest_sha256, platform: report.platform, scenario_count: SOURCE_TARGET_CASES.length,
     release_ready: false, activation: 'BLOCKED', dsh_host: 'NOT_RUN', cross_version_service_recovery: 'NOT_RUN',
     production_identity: 'NOT_RUN', supply_chain: 'NOT_RUN', production_listener_preservation: 'NOT_VERIFIED_BY_THIS_RECEIPT',

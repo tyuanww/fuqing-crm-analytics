@@ -117,12 +117,15 @@ export async function readFirstPurchasePlatform({ path, sha256, candidate }) {
   absolute(path); assert.match(sha256 ?? '', HEX, 'HOST_PLATFORM_DIGEST');
   const bytes = await readArtifactFile(path), report = decode(bytes);
   assert.equal(hash(bytes), sha256, 'HOST_PLATFORM_DIGEST');
-  assert.equal(report.schema_version, 'source-http-target-observation/v1', 'HOST_PLATFORM_SCHEMA');
+  const independent = report.schema_version === 'source-http-target-observation/v2';
+  assert.ok(independent || report.schema_version === 'source-http-target-observation/v1', 'HOST_PLATFORM_SCHEMA');
   assert.equal(report.scope, 'actual-wsl2-synthetic-package-http', 'HOST_PLATFORM_SCOPE');
   assert.equal(report.status, 'PASS', 'HOST_PLATFORM_STATUS');
   assert.equal(report.release_ready, false, 'HOST_PLATFORM_NOT_RELEASE');
   assert.equal(report.candidate_digest, candidate.candidate_digest, 'HOST_PLATFORM_CANDIDATE');
-  assert.equal(report.source_sha, candidate.source_sha, 'HOST_PLATFORM_SOURCE');
+  const serviceSource = independent ? candidate.service_compatibility?.binding?.source_sha : candidate.source_sha;
+  assert.match(serviceSource ?? '', /^[a-f0-9]{40}$/, 'HOST_PLATFORM_SOURCE');
+  assert.equal(report.source_sha, serviceSource, 'HOST_PLATFORM_SOURCE');
   assert.equal(report.platform?.system, 'Linux', 'HOST_PLATFORM_SYSTEM');
   assert.equal(report.platform?.machine, 'x86_64', 'HOST_PLATFORM_MACHINE');
   assert.equal(report.platform?.system, type(), 'HOST_PLATFORM_SYSTEM');

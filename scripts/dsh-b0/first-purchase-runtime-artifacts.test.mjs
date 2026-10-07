@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { access, mkdtemp, mkdir, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
-import { tmpdir } from 'node:os';
+import { tmpdir, type, machine } from 'node:os';
 import { join } from 'node:path';
 import { serviceDigest as hash } from '../release/service-compatibility.mjs';
 import { DSH_UPSTREAM_SHA } from '../release/toolchain.mjs';
@@ -124,4 +124,26 @@ test('runtime artifact mode is explicit and cannot silently use a checkout', asy
   await writeFile(manifestPath, JSON.stringify(doc));
   await assert.rejects(prepareFirstPurchaseArtifacts({ manifestPath, output, upstream: root }), /HOST_ARTIFACT_AMBIGUOUS_RUNTIME/);
   await assert.rejects(access(output), /ENOENT/);
+});
+
+
+test('v2 target wheels use service provenance, while v1 retains its shared-source requirement', async t => {
+  const root = await fixture(t), path = join(root, 'receipt.json');
+  const candidate = { candidate_digest: 'a'.repeat(64), source_sha: 'b'.repeat(40),
+    service_compatibility: { binding: { source_sha: 'c'.repeat(40) } } };
+  const report = { schema_version: 'source-http-target-observation/v2', scope: 'actual-wsl2-synthetic-package-http',
+    status: 'PASS', release_ready: false, candidate_digest: candidate.candidate_digest, source_sha: 'c'.repeat(40),
+    platform: { system: 'Linux', machine: 'x86_64', python: '3.14.4' }, artifacts: { query: {}, save: {} } };
+  async function run() {
+    const data = Buffer.from(JSON.stringify(report)); await writeFile(path, data);
+    return readFirstPurchasePlatform({ path, sha256: hash(data), candidate });
+  }
+  if (type() === 'Linux' && machine() === 'x86_64') assert.deepEqual((await run()).platform, report.platform);
+  else await assert.rejects(run(), /HOST_PLATFORM_(SYSTEM|MACHINE)/);
+  report.schema_version = 'source-http-target-observation/v1';
+  await assert.rejects(run(), /HOST_PLATFORM_SOURCE/);
+  report.schema_version = 'source-http-target-observation/v2';report.source_sha = candidate.source_sha;
+  await assert.rejects(run(), /HOST_PLATFORM_SOURCE/);
+  report.source_sha = 'c'.repeat(40);delete candidate.service_compatibility;
+  await assert.rejects(run(), /HOST_PLATFORM_SOURCE/);
 });
