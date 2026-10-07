@@ -6,6 +6,7 @@ from pathlib import Path
 import signal
 import subprocess
 import sys
+from types import SimpleNamespace
 
 import pytest
 
@@ -74,6 +75,94 @@ def test_existing_output_is_not_replaced(tmp_path):
         observer.install()
     assert list(output.iterdir()) == [marker]
     assert marker.read_text() == "keep"
+
+
+@pytest.mark.parametrize("aliased", [False, True])
+def test_cli_rejects_output_inside_inputs_before_any_write(tmp_path, aliased):
+    root, expected = input_fixture(tmp_path)
+    parent = root
+    if aliased:
+        parent = tmp_path / "input-alias"
+        parent.symlink_to(root, target_is_directory=True)
+    before = runner.snapshot(root)
+    result = subprocess.run([sys.executable, "-I", str(ROOT / "scripts/crm-calibration/crm-services-target.py"),
+        "--input", str(root), "--input-sha256", expected, "--output", str(parent / "result"),
+        "--phase", "install"], capture_output=True, text=True, timeout=10)
+    assert result.returncode != 0
+    assert "OUTPUT_OVERLAPS_INPUT" in result.stderr
+    assert runner.snapshot(root) == before
+    assert not (root / "result").exists()
+
+
+@pytest.mark.parametrize("domain", runner.DOMAINS)
+@pytest.mark.parametrize("changed_install", ["app", "venv"])
+def test_http_rejects_install_drift_before_starting_any_service(tmp_path, monkeypatch, domain, changed_install):
+    root, expected = input_fixture(tmp_path)
+    output = tmp_path / "output"
+    output.mkdir()
+    observer = runner.Observer(root, output, expected)
+    records = {}
+    for name in runner.DOMAINS:
+        app, venv = output / (name + "-app"), output / (name + "-venv")
+        app.mkdir()
+        venv.mkdir()
+        (app / "payload.txt").write_text("reviewed application")
+        (venv / "payload.txt").write_text("reviewed runtime")
+        records[name] = {"app": str(app), "python": str(venv / "bin/python"),
+                         "app_inventory": runner.snapshot(app), "venv_inventory": runner.snapshot(venv)}
+    runner.dump(output / "install-receipt.json", {"input_sha256": expected, "services": records})
+    (output / (domain + "-" + changed_install) / "payload.txt").write_text("changed between install and readonly bind")
+    # Exercise pre-start admission only; this fixture does not claim a real readonly mount or HTTP run.
+    monkeypatch.setattr(runner.os, "statvfs", lambda _path: SimpleNamespace(f_flag=os.ST_RDONLY))
+    started = []
+
+    def unexpected_start(*args):
+        started.append(args)
+        raise RuntimeError("STARTED_BEFORE_ALL_INSTALLS_VERIFIED")
+
+    monkeypatch.setattr(observer, "start", unexpected_start)
+    code = "INSTALL_PRE_DRIFT" if changed_install == "app" else "VENV_PRE_DRIFT"
+    with pytest.raises(RuntimeError, match=code):
+        observer.http()
+    assert not started
+
+
+@pytest.mark.parametrize("signal_stage", ["term", "kill"])
+def test_cleanup_handles_owned_exit_between_poll_and_signal(tmp_path, monkeypatch, signal_stage):
+    root, expected = input_fixture(tmp_path)
+    output = tmp_path / "output"
+    output.mkdir()
+    observer = runner.Observer(root, output, expected)
+    program = "print('ready',flush=True);import time;time.sleep(30)"
+    stubborn = "import signal;signal.signal(signal.SIGTERM,signal.SIG_IGN);" + program
+    children = [subprocess.Popen([sys.executable, "-c", code], stdout=subprocess.PIPE, text=True, start_new_session=True)
+                for code in [stubborn if signal_stage == "kill" else program, program]]
+    real_killpg = os.killpg
+    exited = False
+
+    def exit_before_signal(pid, sig):
+        nonlocal exited
+        if pid == children[0].pid and not exited and sig == (signal.SIGKILL if signal_stage == "kill" else signal.SIGTERM):
+            exited = True
+            children[0].kill()
+            children[0].wait(timeout=5)
+        return real_killpg(pid, sig)
+
+    try:
+        for child in children:
+            assert child.stdout.readline().strip() == "ready"
+        observer.processes = [("exit-race", children[0]), ("remaining-owned", children[1])]
+        monkeypatch.setattr(runner.os, "killpg", exit_before_signal)
+        records = observer.cleanup()
+        assert exited and all(row["reaped"] for row in records)
+        assert all(child.poll() is not None for child in children)
+        assert json.loads((output / "cleanup.json").read_text())["all_reaped"]
+    finally:
+        for child in children:
+            if child.poll() is None:
+                real_killpg(child.pid, signal.SIGKILL)
+            child.wait(timeout=5)
+            child.stdout.close()
 
 
 def test_cleanup_reaps_owned_stubborn_process_and_leaves_peer_alive(tmp_path):

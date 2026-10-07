@@ -70,7 +70,7 @@ HTTP 与保护总计 **15/15 PASS**；冷安装另计 **2/2 PASS**，不把预�
 
 主 Agent 已核对上述62个失败证据及73个恢复证据的完整摘要；旧guard的两个独立SIGTERM复现也已验证为“退出码-15、凭据未落盘”，原始命令/结果保存在 `original-guard-regression.json`。这里记录实际运行失败，不是根据源码推断或声明仓库代码不存在。
 
-用封存原 guard 的实际代码独立复现两种失败：普通等待和捕获禁止导入后，SIGTERM 都导致凭据缺失。修复只涉及新验证器及测试：在 app 导入前同步记录守卫状态，每个禁止 attempt 立即记录，区分初始化/被拒导入/正常退出快照。[边界测试](../../../backend/tests/test_crm_services_target.py)现 **12 PASS / 0 FAIL / 0 SKIP**，覆盖摘要漂移、缺项/额外/链接、wheel污染、已有输出保护、超时及顽固自有进程回收、真实 SIGTERM、捕获禁止导入和正常退出标记。
+用封存原 guard 的实际代码独立复现两种失败：普通等待和捕获禁止导入后，SIGTERM 都导致凭据缺失。修复只涉及新验证器及测试：在 app 导入前同步记录守卫状态，每个禁止 attempt 立即记录，区分初始化/被拒导入/正常退出快照。[边界测试](../../../backend/tests/test_crm_services_target.py)当次 **12 PASS / 0 FAIL / 0 SKIP**，覆盖摘要漂移、缺项/额外/链接、wheel污染、已有输出保护、超时及顽固自有进程回收、真实 SIGTERM、捕获禁止导入和正常退出标记。
 
 经主 Agent 重新审查冻结后，恢复先在远端重核旧39输入全部 hash，在新 owned 目录复制同一包与 wheels，仅更新 helper/manifest，之后再次核对新旧39项。旧失败目录与输入保持，未重新 pack 或重复传送27.9MB输入，只传小型修复；恢复的两个 venv 均重新冷安装。
 
@@ -91,6 +91,8 @@ HTTP 与保护总计 **15/15 PASS**；冷安装另计 **2/2 PASS**，不把预�
 | 恢复 `recovery-r1/evidence.tar.gz` | 73文件逐项校验；SHA `c6d0c245dd89c7e15628f3e8e81e25b7d722b591fa0486c6fe99414dcd785e50` |
 | 远端实际runner | SHA `8650257658327e849b9b52149e38d7047085156a956fcb7721f20d1c5f3f9bdd` |
 
-主 Agent 集成后仅将三处分号语句拆行以修复 Ruff E702，当前源码 SHA 为 `26c13aba43cf63e9b55d0f787a94ebeefb7c27b6e80142b522266ce7a097e9cf`；AST（排除位置属性）与远端执行快照完全相同，guard程序字符串未变。当前源码的 bounded 后端12项与Ruff再次通过，见 `.context/checks/parallel-followup-20261008/runner-format-equivalence.json` 和 `bounded-target-format/summary.json`。未仅为格式变化重复连接/执行WSL，也未把新源码摘要替换为远端实际摘要；原执行快照、135项取回文件和handoff摘要保留。
+主 Agent 集成后仅将三处分号语句拆行以修复 Ruff E702，该次格式化源码 SHA 为 `26c13aba43cf63e9b55d0f787a94ebeefb7c27b6e80142b522266ce7a097e9cf`；AST（排除位置属性）与远端执行快照完全相同，guard程序字符串未变。该次格式化源码的 bounded 后端12项与Ruff再次通过，见 `.context/checks/parallel-followup-20261008/runner-format-equivalence.json` 和 `bounded-target-format/summary.json`。未仅为格式变化重复连接/执行WSL，也未把新源码摘要替换为远端实际摘要；原执行快照、135项取回文件和handoff摘要保留。
 
 本次关闭这两个固定 synthetic 服务包的 WSL 离线冷安装与限定 HTTP 观测缺口。生产安装/激活、真实业务与私有知识 ACL、真实身份、签名来源/供应链、候选准入、浏览器 UAT、完整 B0/release 和远端 CI 均不在通过范围；产品保持 PARTIAL。
+
+后续对提交 `1dae6de7` 的[OCR审修](dsh-g0-parallel-followup-ocr-review-20261008.md)又修改路径、两套安装的启动前核验及进程退出竞态清理，已验证本地20项回归。新版runner本轮WSL为NOT_RUN，与本报告封存源码不再AST等价；上述远端实际runner摘要、2/2冷安装和15/15 HTTP只属于原执行，不替换为新源码现场通过。

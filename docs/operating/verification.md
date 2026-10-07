@@ -306,6 +306,8 @@ workbench 的日常独立入口见[作者 Quickstart](dsh-plugin-author-quicksta
 
 包内三份synthetic夹具由固定白名单和SHA加载，测试还与当前追踪的schema/spec/OpenAPI来源逐字节比较，避免副本悄然过期；独立夹具不能代替owner当前代码生成合同。真实作者工程在主仓源码不可读/外网禁用、SDK与领域输入只读条件下实际完成formal `pnpm build/test/test:built/pack`，结果和负测见[本轮证据](../hackathon/evidence/dsh-g0-plugin-author-inputs-20261008.md)。
 
-指标/知识的受控目标验证器为 `scripts/crm-calibration/crm-services-target.py`，要求已审核input manifest与SHA、新owned输出、明确 `--phase install|http`；现场namespace/只读bind与权限由单独已审控制器提供，脚本不创建namespace、选择主机或默认连接远端。正常本地/CI后端入口会发现 `backend/tests/test_crm_services_target.py` 的12项隔离夹具测试，也可用共享bounded入口定向运行，**测试本身不连接杭州或启动生产服务**。本次WSL的2/2冷安装与15/15 HTTP、首次失败/恢复、清理和生产保护见[服务证据](../hackathon/evidence/dsh-g0-crm-services-target-20261008.md)；不能把新runner自动接入首购候选的专用verifier。
+指标/知识的受控目标验证器为 `scripts/crm-calibration/crm-services-target.py`，要求已审核input manifest与SHA、新owned输出、明确 `--phase install|http`；现场namespace/只读bind与权限由单独已审控制器提供，脚本不创建namespace、选择主机或默认连接远端。正常本地/CI后端入口会发现 `backend/tests/test_crm_services_target.py` 的20项隔离夹具测试（含输出别名、两套安装启动前漂移和TERM/KILL退出竞态），也可用共享bounded入口定向运行，**测试本身不连接杭州或启动生产服务**。本次WSL的2/2冷安装与15/15 HTTP、首次失败/恢复、清理和生产保护见[服务证据](../hackathon/evidence/dsh-g0-crm-services-target-20261008.md)；不能把新runner自动接入首购候选的专用verifier。
 
 本轮未运行完整B0/release、真实身份/业务/浏览器UAT、远端CI或生产切换。官方新版本盘查为[BLOCKED_UPSTREAM_RELEASE](../hackathon/evidence/dsh-g0-sdk-upgrade-candidate-20261008.md)，SDK分发保持BLOCKED，不能将开发入口与固定服务synthetic通过当成供应链或发布放行。
+
+本批提交 `1dae6de7` 的后续OCR审修与本次20/12/12/25结果见[审核记录](../hackathon/evidence/dsh-g0-parallel-followup-ocr-review-20261008.md)。已修复runner的行为改变，本次新版WSL未运行，旧现场结果只对应原执行SHA。

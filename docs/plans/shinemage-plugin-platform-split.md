@@ -23,6 +23,8 @@
 
 ### 2026-10-08 前两组续推
 
+后续对本批提交 `1dae6de7` 完成 OCR delegate 和额外排除文件核对；3项验收工具问题已修复，本次bounded20/领域输入12/AST边界12/HTML合同25及清单检查通过。修后runner现场WSL为NOT_RUN，旧2/2与15/15只属于原执行快照；产品与SDK门禁不变，见[本次审修证据](../hackathon/evidence/dsh-g0-parallel-followup-ocr-review-20261008.md)。
+
 从干净 `68845ad0` 按已有队列并行推进，不新建规划。官方最新三个 release、默认 master 与 npm 发布索引已重新读取：尚无去除已知29条公告的官方候选，`BLOCKED_UPSTREAM_RELEASE`；26 bindings、29实际import、12slot和两profile探针只有静态/拒绝证据，没有安装或运行新宿主。固定 rc2 pin 和上游原字节保持，见[候选盘查](../hackathon/evidence/dsh-g0-sdk-upgrade-candidate-20261008.md)。
 
 指标与知识同一不可变服务包已在杭州自有namespace分别冷安装14/13项离线依赖，**2/2安装、15/15 HTTP与保护观测**通过。验证器首次依赖atexit导致SIGTERM缺凭据，原失败保留；改为同步记录guard/禁止attempt并区分正常退出后重新冷安装。4个自有进程回收，生产current与5个监听/PID保持。详见[目标证据](../hackathon/evidence/dsh-g0-crm-services-target-20261008.md)。关闭这两个fixed synthetic包的目标安装子项，不关闭生产准入、供应链或其他源码范围。

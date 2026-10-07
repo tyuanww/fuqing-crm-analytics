@@ -18,6 +18,11 @@
 
 - 当前采用历史结果快照 + 保存时校验；陈旧/过期阈值已移出当前待办，不再等待确认，也不新增到期系统。保留生成时间/来源和 `NOT_CHECKED`，权限、候选准入、冲突、幂等与会话/请求超时保持；旧 wire/回执兼容不删除。见[决定与验证](docs/hackathon/evidence/dsh-g0-snapshot-policy-closeout-20261007.md)。
 
+### 前两组 OCR 审修（2026-10-08）
+
+- 对本批提交 `1dae6de7` 完成 OCR delegate：14/14代码文件及额外17份测试/文档/固定副本全部核对。3项确认问题已修复：验收输出父目录别名写进输入、两个 app/venv 启动前核验不完整及 owned 进程退出竞态中断清理。当前 bounded **20 PASS**、领域输入12/AST边界12/HTML合同25及边界清单检查通过；原始失败保留。见[审修证据](docs/hackathon/evidence/dsh-g0-parallel-followup-ocr-review-20261008.md)。
+- 本次改变了验收器行为，修后 runner 的 WSL 为 **NOT_RUN**；前次2/2冷安装和15/15 HTTP仍只属于封存的实际源码/包。未更改固定SDK、上游、旧candidate/journal或杭州生产；产品PARTIAL、SDK分发BLOCKED，既有未覆盖现场/供应链/生产门禁继续开放。
+
 ### 前两组续推：官方升级候选与独立交付（2026-10-08）
 
 - 从干净 `68845ad0` 继续。本轮重新读取官方 25 releases、26 tags、30 个 npm CLI 版本：最新 GitHub alpha `0.2.1-alpha.1`、npm latest `0.2.0-rc.2` 及默认 master 的原始锁均未修复已查出的依赖公告，**BLOCKED_UPSTREAM_RELEASE**。26 bindings、29 个实际 import 与12个 slot 仅完成静态核对；没有以此声称新宿主安装/运行兼容，现用 rc2 pin 保持。见[候选与信任证据](docs/hackathon/evidence/dsh-g0-sdk-upgrade-candidate-20261008.md)。

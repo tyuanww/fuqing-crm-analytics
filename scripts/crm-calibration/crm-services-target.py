@@ -109,11 +109,17 @@ def snapshot(root):
 
 def stop_owned(process, grace=5):
     if process.poll() is None:
-        os.killpg(process.pid, signal.SIGTERM)
+        try:
+            os.killpg(process.pid, signal.SIGTERM)
+        except ProcessLookupError:
+            pass  # The owned group can exit between poll and signal; still reap it.
         try:
             process.wait(timeout=grace)
         except subprocess.TimeoutExpired:
-            os.killpg(process.pid, signal.SIGKILL)
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
             process.wait(timeout=5)
     require(process.poll() is not None, "PROCESS_NOT_REAPED")
     return {"pid": process.pid, "returncode": process.returncode, "reaped": True}
@@ -301,6 +307,10 @@ class Observer:
             require(bool(os.statvfs(app).f_flag & os.ST_RDONLY), "INSTALL_NOT_READONLY")
             require(bool(os.statvfs(self.output / (domain + "-venv")).f_flag & os.ST_RDONLY), "VENV_NOT_READONLY")
             require(snapshot(app) == records[domain]["app_inventory"], "INSTALL_PRE_DRIFT")
+            require(snapshot(self.output / (domain + "-venv")) == records[domain]["venv_inventory"], "VENV_PRE_DRIFT")
+        # Verify both installations before executing either service's interpreter.
+        for domain in DOMAINS:
+            app = Path(records[domain]["app"])
             services[domain] = self.start(domain, records, domain + "-first")
             capability = self.request(services[domain], "capabilities", 200)
             require(capability["owner"] == ("crm-service" if domain == "metrics" else "knowledge-service"), "CAPABILITY_OWNER")
@@ -366,7 +376,9 @@ def main():
     args = parser.parse_args()
     require(sys.version_info[:2] == (3, 14) and os.geteuid() != 0, "NONROOT_PYTHON314_REQUIRED")
     require(args.output.is_absolute() and not args.output.is_symlink(), "OUTPUT_PATH")
-    require(args.input.resolve() != args.output.resolve() and not args.output.is_relative_to(args.input), "OUTPUT_OVERLAPS_INPUT")
+    input_root, output_root = args.input.resolve(), args.output.resolve()
+    require(not output_root.is_relative_to(input_root) and not input_root.is_relative_to(output_root), "OUTPUT_OVERLAPS_INPUT")
+    args.output = output_root  # Use the same canonical destination for checks and writes.
     verify_inputs(args.input, args.input_sha256)
     observer = Observer(args.input, args.output, args.input_sha256)
     # Reject an existing install destination before cleanup/report writes.
