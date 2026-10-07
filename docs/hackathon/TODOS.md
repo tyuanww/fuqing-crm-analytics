@@ -292,7 +292,7 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 - [x] 目标主机预检 OCR delegate（2026-10-06）：原始 11/11 覆盖，安装格式/标签与依赖约束两类问题已修；6 项复现负测修复后通过，专项 35 PASS、release suite 206 PASS，实际 wheel 无误拒绝。见[审核记录](./evidence/dsh-g0-service-target-preflight-review-20261006.md)。
 - [x] T3/T15 目标平台依赖准备子项（2026-10-06，`79434033` 后）：已只读核验杭州 WSL2/x86_64/Python 3.14.4，按实际标签在本地准备 13 个固定 Linux wheel，并复核官方 SHA-256；见[证据](./evidence/dsh-g0-service-target-platform-20261006.md)。准备阶段未安装；后续实测见下一项。
 - [x] T3/T7/T15 首购服务 WSL 合成验收子项（2026-10-06）：复用固定双包，现有低权限账号的两个独立 venv 离线冷安装、真实 HTTP 保存/权限/冲突、SIGKILL 后幂等恢复、旧版只读与未知 schema 拒绝等 **14/14**；修正测试夹具目录权限，前次失败保留。成功轮次 10 个、失败轮次 1 个临时进程与安装目录均已回收，生产入口监听/PID 不变。见[证据](./evidence/dsh-g0-service-target-acceptance-20261006.md)。不关闭生产身份、供应链或 DSH 宿主验收。
-- [ ] T2/T17 剩余：Windows/WSL、rc1→rc2/torn-frame、浏览器/client、shell/tool union 与目标平台 runtime；本机十项不代签这些验收。同进程任意插件隔离不承诺。
+- [ ] T2/T17 剩余（2026-10-07 校准）：WSL 固定 runtime、已声明 text/tool/rich 语料及首购 headless 场景已有下方分项证据；补 shell/tool timeout/result union、附件实际存储/渲染、live delegation 与其他组合、完整 client/UI 验收。0.2 运行兼容独立推进；同进程任意插件隔离不承诺，不再把已通过子项笼统列为 NOT_RUN。
 - [x] WSL 验收记录 OCR delegate（2026-10-06）：原始 7/7 文件覆盖，进程数量/时间范围两处低风险说明已修；核对原始脚本、28 个输入与实际回执后，本地提交为 `2a89790b`，未 push。见[审核记录](./evidence/dsh-g0-service-target-acceptance-review-20261006.md)。
 - [x] T3/T7/T13/T21 首购 WSL 回执接线子项（2026-10-06，已提交 `356862bf`）：沿用 `plugin verify-service` 核对既有目标回执/输入/runner/日志/清理，幂等追加原 journal。新测试 37 PASS、完整 release suite 243 PASS；真实回执进入 seq 4，重试一致，108 个输入/证据文件不变。见[接线证据](./evidence/dsh-g0-service-target-gate-20261006.md)。仍是未签名合成观测，不放行生产。
 - [x] 目标回执接线提交前审核（2026-10-06）：原始 14/14 全覆盖，无新确认缺陷；本次 release suite 243 PASS，原真实回执 CLI 重试与输入/journal 保留通过。见[审核记录](./evidence/dsh-g0-service-target-gate-review-20261006.md)，按正常 hooks 本地提交，生产门禁不变。
@@ -356,7 +356,10 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 - [x] T15 SDK 内容审计入口与首轮来源分类（2026-10-07）：同一归档 115224 文件/8987 链接核对，55 个疑似命中和 553 个覆盖缺口，实际 **BLOCKED**；不豁免 vendor/test，不把来源相同当作安全通过。归档负测 17 PASS/25 subtests、审计/边界 18 PASS，见[证据](./evidence/dsh-g0-kit-content-audit-20261007.md)。该勾选只关闭审计入口与报告，不关闭秘密或供应链门禁；随本次审修提交收录。
 - [x] T15 同平台 SDK 缩减与消费（2026-10-07）：2.20 GB → 227.7 MB，固定摘要；旧 SDK/仓库依赖不可读、外网禁用时 10/10 消费者构建与选定测试通过，原完整 SDK 路径也 10/10，通过 35 项防护/边界验证。最终审计 0 命中/17 覆盖缺口仍 PARTIAL，见[证据](./evidence/dsh-g0-kit-sdk-closure-20261007.md)。该勾选只关闭本地 Mac 构建/测试范围，随本次审修提交收录。
 - [x] T15 缩减 SDK 提交前 OCR 审修（2026-10-07）：原 32/32 文件完成审核，补充本轮审修记录；封闭整条声明链接链，两个绕出清单再返回的负测先失败后通过。修复后 38 项防护、17 项归档/25 subtests、缩减与完整 SDK 各 10/10 消费者通过；内容审计仍 0 命中/17 缺口 PARTIAL。见[审修证据](./evidence/dsh-g0-kit-sdk-review-20261007.md)，本地提交，不发布或部署。
-- [ ] T15 SDK 分发剩余项：缩减格式安全归档/接收；按精确摘要审查 17 项不透明内容，补签名/来源证明、SBOM/CVE/撤销，再做目标平台/WSL 与干净机器验证。物理分仓仍按 stop/go 推进；完整 checkout 保留用于 SDK 维护，不把全量审计加入每次业务插件更新。
+- [x] T15 缩减格式同平台安全归档/接收（2026-10-07）：从 `d9770b9c` 继续，共用归档器和显式双摘要，真实安装 kit 打包 63.75 MB、接收后原 SDK 不可读条件下 10/10 消费者通过。归档 27 PASS/41 subtests、相关防护 38 PASS，修复链接解析和源目录输出保护；17 项不透明内容完成来源/归属盘点但不豁免。见[本轮证据](./evidence/dsh-g0-kit-sdk-compact-transport-20261007.md)。随本次供应链审修本地提交收录，仍 PARTIAL。
+- [x] T15 SDK 清单/漏洞实查（2026-10-07）：固定同一 closure，生成 360 包的 CycloneDX 清单；实际查询 222 个版本，命中 10 个版本/42 条不同公告。相关测试 50 PASS；17 项不透明文件补 npm tarball/固定源码字节核对，1 包签名密钥过期仍待审。见[供应链证据](./evidence/dsh-g0-kit-sdk-supply-chain-20261007.md)。只关闭检查入口和本次盘查，分发仍 BLOCKED；随本次审修本地提交收录。
+- [x] T15 归档/供应链提交前 OCR 审修（2026-10-07）：原始 13/13 + 新记录，共 14 文件；修复请求预算、查询进度和 HTTP 流释放，三项负测先失败后通过。本次 53 项 Node、27 项归档/41 subtests 与同包只读解析通过；pnpm 11.11.0 候选被拒，11.28.2 来源/27 包查询通过但兼容构建未运行。见[审修、剩余任务与初衷核对](./evidence/dsh-g0-kit-sdk-supply-review-20261007.md)，本批本地提交，SDK 分发仍 BLOCKED。
+- [ ] T15 SDK 分发剩余项：先验证固定 pnpm 11.28.2 兼容构建，DSH 官方升级独立处理其余受影响依赖（0.2.0-rc.2 锁仍有命中），核对旧密钥信任；完成 17 项不透明内容审查、完整 SBOM/发布者身份/撤销，再做目标平台/WSL 与干净机器验证。Mac 缩减归档往返已完成，不代表正式分发通过。物理分仓仍按 stop/go 推进；完整 checkout 保留用于 SDK 维护，不把全量审计加入每次业务插件更新。
 - [ ] 旧工作树差异与分仓前置按[并行边界](./evidence/dsh-g0-worktree-triage-20261007.md)推进：public 138 条均有当前/历史已提交 blob，不重复提交；HTML 34 文件待语义审查，kit 固定开发依赖和信任验证独立推进；共享候选/journal 顺序收口。
 
 ## 2026-09-30 rc2 DX triage follow-up

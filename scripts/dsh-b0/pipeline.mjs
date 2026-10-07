@@ -207,6 +207,7 @@ print('B0 exact Python closure verified')
     'scripts/release/terminal-host-evidence.test.mjs',
     'scripts/release/browser-host-evidence.test.mjs', 'scripts/release/browser-host-v2.test.mjs',
     'scripts/release/sdk-content-audit.test.mjs',
+    'scripts/release/sdk-supply-chain.test.mjs',
     'scripts/release/sdk-closure.test.mjs',
     'scripts/dsh-b0/clean-build.test.mjs',
     'scripts/dsh-b0/plugin-kit.test.mjs', 'scripts/dsh-b0/plugin-kit-prepare.test.mjs',

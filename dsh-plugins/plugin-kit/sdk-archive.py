@@ -13,7 +13,6 @@ import hashlib
 import json
 import os
 import pathlib
-import posixpath
 import re
 import shutil
 import stat
@@ -32,6 +31,9 @@ MAX_BYTES = 4 * 1024**3
 MAX_MANIFEST = 64 * 1024**2
 MAX_DIRECTORY = 64 * 1024**2
 SCHEMA = 'shinemage-development-sdk-archive/v1'
+CLOSURE_ARCHIVE_SCHEMA = 'shinemage-development-sdk-closure-archive/v1'
+CLOSURE_SCHEMA = 'shinemage-development-sdk-closure/v1'
+CLOSURE_MAX_MANIFEST = 32 * 1024**2
 HEX = re.compile(r'[a-f0-9]{64}\Z')
 GIT_FILE = re.compile(r'upstream/\.git/(?:HEAD|index|shallow|objects/(?:[a-f0-9]{2}/[a-f0-9]{38}|pack/pack-[a-f0-9]{40}\.(?:pack|idx)))\Z')
 GIT_DIR = re.compile(r'upstream/\.git(?:/(?:objects(?:/(?:pack|[a-f0-9]{2}))?|refs))?\Z')
@@ -100,9 +102,9 @@ def permitted(name, kind):
     return True
 
 
-def validate_manifest(manifest, identity):
+def validate_manifest(manifest, identity, schema=SCHEMA):
     keys(manifest, [*identity, 'schema', 'entries'])
-    need(manifest['schema'] == SCHEMA, 'SCHEMA')
+    need(manifest['schema'] == schema, 'SCHEMA')
     need(all(type(manifest[k]) is type(v) and manifest[k] == v for k, v in identity.items()), 'IDENTITY')
     entries = manifest['entries']
     need(type(entries) is dict and 0 < len(entries) <= MAX_ENTRIES, 'ENTRY_LIMIT')
@@ -131,23 +133,67 @@ def validate_manifest(manifest, identity):
             need(not any(ord(c) < 32 or ord(c) == 127 or c in '\\:' for c in target), 'LINK')
     need(all(entries.get(root) == {'kind': 'dir'} for root in ROOTS), 'ROOTS')
 
-    def resolve_virtual(name, depth=0):
-        need(depth < 64, 'LINK_CYCLE')
-        parts = path_parts(name)
-        for index in range(1, len(parts) + 1):
-            prefix = '/'.join(parts[:index])
-            row = entries.get(prefix)
+    def resolve_virtual(name):
+        # Resolve links before '..', as the filesystem does. Normalizing the
+        # whole string first could erase an undeclared or external intermediate.
+        pending = path_parts(name)[::-1]
+        parts = []
+        hops = 0
+        while pending:
+            part = pending.pop()
+            if part in ('', '.'):
+                continue
+            if part == '..':
+                need(parts, 'LINK_ESCAPE')
+                parts.pop()
+                continue
+            parts.append(part)
+            row = entries.get('/'.join(parts))
             need(row is not None, 'LINK_TARGET')
             if row['kind'] == 'link':
-                target = posixpath.normpath(posixpath.join(posixpath.dirname(prefix), row['target'], *parts[index:]))
-                return resolve_virtual(target, depth + 1)
-            need(index == len(parts) or row['kind'] == 'dir', 'LINK_PARENT')
-        return name
+                hops += 1
+                need(hops < 64, 'LINK_CYCLE')
+                parts.pop()
+                pending.extend(row['target'].split('/')[::-1])
+            else:
+                need(not pending or row['kind'] == 'dir', 'LINK_PARENT')
+        need(parts, 'LINK_TARGET')
+        return '/'.join(parts)
 
     for name, row in entries.items():
         if row['kind'] == 'link':
             resolve_virtual(name)
     return total
+
+
+def validate_closure(data, expected_sha, identity):
+    """Validate the exact closure bytes; never reconstruct its pinned JSON."""
+    need(isinstance(expected_sha, str) and HEX.fullmatch(expected_sha), 'CLOSURE_DIGEST')
+    need(len(data) <= CLOSURE_MAX_MANIFEST, 'CLOSURE_LIMIT')
+    need(hashlib.sha256(data).hexdigest() == expected_sha, 'CLOSURE_DIGEST')
+    closure = json_load(data)
+    keys(closure, ['schema', 'scope', 'upstream_sha', 'pin_sha256', 'source_archive_sha256',
+                   'platform', 'arch', 'node_major', 'entries'])
+    need(closure['schema'] == CLOSURE_SCHEMA and closure['scope'] == 'development-build-only', 'CLOSURE_SCHEMA')
+    need(all(type(closure[k]) is type(identity[k]) and closure[k] == identity[k]
+             for k in ('platform', 'arch', 'node_major', 'pin_sha256', 'upstream_sha')), 'CLOSURE_IDENTITY')
+    need(isinstance(closure['source_archive_sha256'], str) and HEX.fullmatch(closure['source_archive_sha256']), 'CLOSURE_ORIGIN')
+    entries = closure['entries']
+    total = validate_manifest({**identity, 'schema': SCHEMA, 'entries': entries}, identity)
+    need(len(entries) <= 100_000 and total <= 1024**3, 'CLOSURE_LIMIT')
+    for name, row in entries.items():
+        need(len(name) <= 1024 and '.git' not in name.split('/'), 'CLOSURE_PATH')
+        if row['kind'] == 'file':
+            need(row['bytes'] <= 64 * 1024**2, 'CLOSURE_LIMIT')
+        elif row['kind'] == 'link':
+            need(len(row['target']) <= 1024, 'CLOSURE_LIMIT')
+    return closure
+
+
+def read_closure(source, expected_sha, identity):
+    with open_regular(source / 'sdk-closure.json') as f:
+        data = f.read(CLOSURE_MAX_MANIFEST + 1)
+    return data, validate_closure(data, expected_sha, identity)
 
 
 def fresh_path(value):
@@ -177,9 +223,11 @@ def current_identity(node):
             'kit_version': json_load((KIT / 'package.json').read_bytes())['version']}
 
 
-def check_inputs(root, node):
-    result = subprocess.run([str(node), str(KIT / 'check.mjs'), '--upstream', str(root / 'upstream'), '--build-tools', str(root / 'build-tools')],
-                            cwd=root, env=node_environment(node), capture_output=True, timeout=90)
+def check_inputs(root, node, closure_sha=None):
+    args = [str(node), str(KIT / 'check.mjs'), '--upstream', str(root / 'upstream'), '--build-tools', str(root / 'build-tools')]
+    if closure_sha is not None:
+        args.extend(['--closure-sha256', closure_sha])
+    result = subprocess.run(args, cwd=root, env=node_environment(node), capture_output=True, timeout=90)
     need(result.returncode == 0 and json_load(result.stdout).get('status') == 'READY', 'INPUTS_BLOCKED')
 
 
@@ -240,15 +288,25 @@ def open_regular(path):
     return os.fdopen(fd, 'rb')
 
 
-def write_archive(source, archive, identity):
-    entries, omitted = inventory(source)
-    manifest = {**identity, 'schema': SCHEMA, 'entries': entries}
-    size = validate_manifest(manifest, identity)
+def write_archive(source, archive, identity, closure_sha=None):
+    closure_bytes = None
+    schema = SCHEMA
+    if closure_sha is None:
+        entries, omitted = inventory(source)
+    else:
+        closure_bytes, closure = read_closure(source, closure_sha, identity)
+        entries, omitted = closure['entries'], []
+        identity = {**identity, 'closure_sha256': closure_sha}
+        schema = CLOSURE_ARCHIVE_SCHEMA
+    manifest = {**identity, 'schema': schema, 'entries': entries}
+    size = validate_manifest(manifest, identity, schema)
     data = canonical(manifest)
     need(len(data) <= MAX_MANIFEST, 'MANIFEST_LIMIT')
     emitted = set()
     with zipfile.ZipFile(archive, 'x', compression=zipfile.ZIP_DEFLATED, compresslevel=1) as z:
         z.writestr('manifest.json', data)
+        if closure_bytes is not None:
+            z.writestr('sdk-closure.json', closure_bytes)
         for name, row in entries.items():
             if row['kind'] != 'file' or row['sha256'] in emitted:
                 continue
@@ -290,42 +348,51 @@ def check_zip_directory(stream):
         marker, length, _, _, disk, directory_disk, on_disk, count, size, offset = values
         need(marker == b'PK\x06\x06' and length == 44 and disk == directory_disk == 0 and on_disk == count, 'ZIP_DIRECTORY')
         directory_end = record_offset
-    need(count <= MAX_ENTRIES + 1 and size <= MAX_DIRECTORY and offset + size == directory_end, 'ZIP_DIRECTORY_LIMIT')
+    need(count <= MAX_ENTRIES + 2 and size <= MAX_DIRECTORY and offset + size == directory_end, 'ZIP_DIRECTORY_LIMIT')
     stream.seek(0)
 
 
 @contextmanager
-def verified_archive(archive, expected_sha, identity):
+def verified_archive(archive, expected_sha, identity, closure_sha=None):
     need(isinstance(expected_sha, str) and HEX.fullmatch(expected_sha), 'DIGEST')
+    schema, metadata = SCHEMA, {'manifest.json'}
+    if closure_sha is not None:
+        need(isinstance(closure_sha, str) and HEX.fullmatch(closure_sha), 'CLOSURE_DIGEST')
+        identity = {**identity, 'closure_sha256': closure_sha}
+        schema, metadata = CLOSURE_ARCHIVE_SCHEMA, {'manifest.json', 'sdk-closure.json'}
     with open_regular(archive) as f:
         need(os.fstat(f.fileno()).st_size <= MAX_BYTES, 'ARCHIVE_SIZE_LIMIT')
         need(digest(f) == expected_sha, 'ARCHIVE_DIGEST')
         check_zip_directory(f)
         with zipfile.ZipFile(f) as z:
             infos = z.infolist()
-            need(len(infos) <= MAX_ENTRIES + 1, 'ENTRY_LIMIT')
+            need(len(infos) <= MAX_ENTRIES + len(metadata), 'ENTRY_LIMIT')
             names = [i.filename for i in infos]
-            need(len(names) == len(set(names)) and 'manifest.json' in names, 'ARCHIVE_MEMBERS')
+            need(len(names) == len(set(names)) and metadata.issubset(names), 'ARCHIVE_MEMBERS')
             for info in infos:
                 need(info.orig_filename == info.filename, 'ARCHIVE_MEMBERS')
-                need(info.filename == 'manifest.json' or re.fullmatch(r'blobs/[a-f0-9]{64}', info.filename), 'ARCHIVE_MEMBERS')
+                need(info.filename in metadata or re.fullmatch(r'blobs/[a-f0-9]{64}', info.filename), 'ARCHIVE_MEMBERS')
                 mode = info.external_attr >> 16
                 need(stat.S_IFMT(mode) in (0, stat.S_IFREG) and not mode & 0o6000, 'ARCHIVE_TYPE')
                 need(not info.flag_bits & 1 and info.compress_type in (zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED), 'ARCHIVE_TYPE')
             need(z.getinfo('manifest.json').file_size <= MAX_MANIFEST, 'MANIFEST_LIMIT')
             manifest = json_load(z.read('manifest.json'))
-            validate_manifest(manifest, identity)
+            validate_manifest(manifest, identity, schema)
             entries = manifest['entries']
+            if closure_sha is not None:
+                need(z.getinfo('sdk-closure.json').file_size <= CLOSURE_MAX_MANIFEST, 'CLOSURE_LIMIT')
+                closure = validate_closure(z.read('sdk-closure.json'), closure_sha, identity)
+                need(entries == closure['entries'], 'CLOSURE_ENTRIES')
             blobs = {r['sha256']: r['bytes'] for r in entries.values() if r['kind'] == 'file'}
-            need(set(names) == {'manifest.json', *('blobs/' + sha for sha in blobs)}, 'ARCHIVE_MEMBERS')
+            need(set(names) == metadata | {'blobs/' + sha for sha in blobs}, 'ARCHIVE_MEMBERS')
             need(all(z.getinfo('blobs/' + sha).file_size == count for sha, count in blobs.items()), 'BLOB_SIZE')
             yield z, manifest
         f.seek(0)
         need(digest(f) == expected_sha, 'ARCHIVE_CHANGED')
 
 
-def restore_archive(archive, expected_sha, stage, identity):
-    with verified_archive(archive, expected_sha, identity) as (z, manifest):
+def restore_archive(archive, expected_sha, stage, identity, closure_sha=None):
+    with verified_archive(archive, expected_sha, identity, closure_sha) as (z, manifest):
         entries = manifest['entries']
         for name, row in sorted(entries.items(), key=lambda item: (item[0].count('/'), item[0])):
             target = stage / name
@@ -350,13 +417,16 @@ def restore_archive(archive, expected_sha, stage, identity):
             if row['kind'] == 'link':
                 resolved = (stage / name).resolve(strict=True)
                 need(stage in resolved.parents, 'LINK_ESCAPE')
+        if closure_sha is not None:
+            with (stage / 'sdk-closure.json').open('xb') as f:
+                f.write(z.read('sdk-closure.json'))
 
     return {'entries': len(entries), 'logical_bytes': sum(row.get('bytes', 0) for row in entries.values())}
 
 
-def inspect_archive(archive, expected_sha, identity):
+def inspect_archive(archive, expected_sha, identity, closure_sha=None):
     """Read-only content verification for repository-owned distribution audits."""
-    with verified_archive(archive, expected_sha, identity) as (z, manifest):
+    with verified_archive(archive, expected_sha, identity, closure_sha) as (z, manifest):
         blobs = {r['sha256'] for r in manifest['entries'].values() if r['kind'] == 'file'}
         for sha in blobs:
             with z.open('blobs/' + sha) as data:
@@ -373,32 +443,48 @@ def receipt(operation, **fields):
 def run(args):
     node = pathlib.Path(args.node)
     identity = current_identity(node)
+    closure_sha = getattr(args, 'closure_sha256', None)
+    if closure_sha is not None:
+        need(HEX.fullmatch(closure_sha), 'CLOSURE_DIGEST')
     destination = fresh_path(args.output if args.operation == 'pack' else args.destination)
+    source = None
+    if args.operation == 'pack':
+        source = pathlib.Path(args.source)
+        need(source.is_absolute() and source.is_dir(), 'SOURCE')
+        source = source.resolve(strict=True)
+        # Refuse before claiming a directory or writing a failure receipt into
+        # the input tree, including when the output parent is a directory alias.
+        need(source != destination and source not in destination.parents, 'OUTPUT_IN_SOURCE')
     # Claim exclusively; a racing or existing path can never be replaced.
     destination.mkdir(mode=0o700)
     stage = None
     try:
         if args.operation == 'pack':
-            source = pathlib.Path(args.source)
-            need(source.is_absolute() and source.is_dir(), 'SOURCE')
-            source = source.resolve(strict=True)
-            need(source != destination and source not in destination.parents, 'OUTPUT_IN_SOURCE')
-            check_preparation(source, identity)
-            check_inputs(source, node)
+            if closure_sha is None:
+                check_preparation(source, identity)
+            check_inputs(source, node, closure_sha)
             archive = destination / 'sdk.zip'
-            summary = write_archive(source, archive, identity)
+            summary = write_archive(source, archive, identity, closure_sha)
+            if closure_sha is not None:
+                check_inputs(source, node, closure_sha)
             with archive.open('rb') as f:
                 sha = digest(f)
             result = receipt('pack', **identity, **summary, archive_sha256=sha, archive_bytes=archive.stat().st_size)
         else:
             # Destination is reserved but empty until verification succeeds.
             stage = pathlib.Path(tempfile.mkdtemp(prefix='.kit-sdk-', dir=destination.parent))
-            summary = restore_archive(pathlib.Path(args.archive), args.sha256, stage, identity)
-            check_inputs(stage, node)
+            summary = restore_archive(pathlib.Path(args.archive), args.sha256, stage, identity, closure_sha)
+            check_inputs(stage, node, closure_sha)
             # Publish into our reserved directory; failure stays BLOCKED, never READY.
             for part in ROOTS:
                 os.rename(stage / part, destination / part)
+            if closure_sha is not None:
+                os.rename(stage / 'sdk-closure.json', destination / 'sdk-closure.json')
             result = receipt('receive', **identity, **summary, archive_sha256=args.sha256)
+        if closure_sha is not None:
+            _, closure = read_closure(source if args.operation == 'pack' else destination, closure_sha, identity)
+            result.update(schema=CLOSURE_ARCHIVE_SCHEMA, closure_sha256=closure_sha,
+                          source_archive_sha256=closure['source_archive_sha256'])
         (destination / 'receipt.json').write_bytes(canonical(result) + b'\n')
         return result
     except BaseException:
@@ -421,6 +507,7 @@ def main():
     receive.add_argument('--destination', required=True)
     for command in (pack, receive):
         command.add_argument('--node', required=True, help='absolute pinned Node executable')
+        command.add_argument('--closure-sha256', help='explicit reviewed closure digest; never inferred from archive')
     try:
         result = run(parser.parse_args())
     except (Invalid, OSError, ValueError, subprocess.SubprocessError, zipfile.BadZipFile, RuntimeError, struct.error, EOFError, zlib.error) as error:

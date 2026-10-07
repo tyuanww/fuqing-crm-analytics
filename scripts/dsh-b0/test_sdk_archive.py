@@ -132,6 +132,22 @@ class ArchiveTest(unittest.TestCase):
         with self.assertRaisesRegex(archive.Invalid, 'SPECIAL_FILE'):
             archive.inventory(self.source)
 
+    def test_link_components_cannot_be_erased_by_dotdot_normalization(self):
+        for target in ['missing/../module.js', '../../outside/../source/upstream/module.js']:
+            with self.subTest(target=target):
+                data = copy.deepcopy(self.manifest)
+                data['entries']['upstream/link']['target'] = target
+                with self.assertRaisesRegex(archive.Invalid, 'LINK_'):
+                    archive.validate_manifest(data, IDENTITY)
+        data = copy.deepcopy(self.manifest)
+        data['entries'].update({
+            'upstream/real': {'kind': 'dir'}, 'upstream/real/nested': {'kind': 'dir'},
+            'upstream/real/file': data['entries']['upstream/module.js'],
+            'upstream/alias': {'kind': 'link', 'target': 'real/nested'},
+            'upstream/link': {'kind': 'link', 'target': 'alias/../file'},
+        })
+        archive.validate_manifest(data, IDENTITY)
+
     def test_blob_digest_and_size_mismatch_fail_in_stage(self):
         manifest = copy.deepcopy(self.manifest)
         row = manifest['entries']['upstream/module.js']
@@ -194,6 +210,19 @@ class ArchiveTest(unittest.TestCase):
         with self.assertRaisesRegex(archive.Invalid, 'ABSOLUTE_PATH'):
             archive.fresh_path('relative')
 
+    def test_pack_output_inside_source_is_rejected_before_any_write(self):
+        import argparse
+        alias = self.root / 'alias'
+        alias.symlink_to(self.source, target_is_directory=True)
+        before = sorted(p.relative_to(self.source).as_posix() for p in self.source.rglob('*'))
+        for parent in [self.source, alias]:
+            with self.subTest(alias=parent == alias):
+                args = argparse.Namespace(operation='pack', node='/synthetic/node', source=str(self.source), output=str(parent / 'forbidden-output'))
+                with patch.object(archive, 'current_identity', return_value=IDENTITY):
+                    with self.assertRaisesRegex(archive.Invalid, 'OUTPUT_IN_SOURCE'):
+                        archive.run(args)
+                self.assertEqual(sorted(p.relative_to(self.source).as_posix() for p in self.source.rglob('*')), before)
+
     def test_cli_failure_keeps_blocked_receipt_and_removes_owned_stage(self):
         import argparse
         target = self.root / 'received'
@@ -223,6 +252,164 @@ class ArchiveTest(unittest.TestCase):
                 self.assertEqual(archive.main(), 2)
             self.assertEqual(json.loads(output.getvalue())['code'], 'KIT_ARCHIVE_FAILED')
             self.assertNotIn('SYNTHETIC_PRIVATE_PATH', output.getvalue())
+
+
+class ClosureArchiveTest(unittest.TestCase):
+    """The compact mode shares the archive parser, not implicit Git fallback."""
+
+    def setUp(self):
+        self.owner = tempfile.TemporaryDirectory(prefix='sdk-closure-transport-')
+        self.addCleanup(self.owner.cleanup)
+        self.root = Path(self.owner.name).resolve()
+        self.source = self.root / 'source'
+        entries = {}
+        for name in archive.ROOTS:
+            (self.source / name).mkdir(parents=True)
+            entries[name] = {'kind': 'dir'}
+        data = b'export const fixture = true;\n'
+        for name in ['upstream/module.js', 'build-tools/shared.js']:
+            (self.source / name).write_bytes(data)
+            (self.source / name).chmod(0o644)
+            entries[name] = {'kind': 'file', 'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest(), 'mode': 0o644}
+        (self.source / 'upstream/link').symlink_to('module.js')
+        entries['upstream/link'] = {'kind': 'link', 'target': 'module.js'}
+        self.closure = {k: v for k, v in IDENTITY.items() if k != 'kit_version'}
+        self.closure.update(schema=archive.CLOSURE_SCHEMA, scope='development-build-only',
+                            source_archive_sha256='c' * 64, entries=entries)
+        # Deliberately non-canonical JSON: transport must preserve exact bytes.
+        self.data = (json.dumps(self.closure, indent=2) + '\n').encode()
+        self.closure_sha = hashlib.sha256(self.data).hexdigest()
+        (self.source / 'sdk-closure.json').write_bytes(self.data)
+        self.file = self.root / 'sdk.zip'
+        self.summary = archive.write_archive(self.source, self.file, IDENTITY, self.closure_sha)
+        self.sha = hashlib.sha256(self.file.read_bytes()).hexdigest()
+
+    def changed_archive(self, transform):
+        with zipfile.ZipFile(self.file) as z:
+            parts = {info.filename: z.read(info) for info in z.infolist()}
+        transform(parts)
+        target = self.root / 'changed.zip'
+        with zipfile.ZipFile(target, 'w') as z:
+            for name, data in parts.items():
+                z.writestr(name, data)
+        return target, hashlib.sha256(target.read_bytes()).hexdigest()
+
+    def test_roundtrip_preserves_closure_digest_blobs_modes_and_links(self):
+        stage = self.root / 'stage'
+        stage.mkdir()
+        result = archive.restore_archive(self.file, self.sha, stage, IDENTITY, self.closure_sha)
+        self.assertEqual(result['entries'], 6)
+        self.assertEqual((stage / 'sdk-closure.json').read_bytes(), self.data)
+        self.assertEqual((stage / 'upstream/link').read_bytes(), (self.source / 'upstream/module.js').read_bytes())
+        self.assertEqual(stat.S_IMODE((stage / 'build-tools/shared.js').stat().st_mode), 0o644)
+        self.assertFalse((stage / 'upstream/.git').exists())
+        self.assertEqual(self.summary['blobs'], 1)
+        manifest = archive.inspect_archive(self.file, self.sha, IDENTITY, self.closure_sha)
+        self.assertEqual(manifest['schema'], archive.CLOSURE_ARCHIVE_SCHEMA)
+        self.assertEqual(manifest['closure_sha256'], self.closure_sha)
+
+    def test_compact_mode_requires_both_digests_without_fallback(self):
+        for outer, closure in [('0' * 64, self.closure_sha), (self.sha, '0' * 64), (self.sha, None)]:
+            with self.subTest(outer=outer, closure=closure):
+                with self.assertRaises(archive.Invalid):
+                    archive.inspect_archive(self.file, outer, IDENTITY, closure)
+        with self.assertRaisesRegex(archive.Invalid, 'CLOSURE_DIGEST'):
+            archive.inspect_archive(self.file, self.sha, IDENTITY, '')
+
+    def test_closure_bytes_cannot_be_swapped_with_a_new_outer_hash(self):
+        def change(parts):
+            parts['sdk-closure.json'] += b' '
+        file, sha = self.changed_archive(change)
+        with self.assertRaisesRegex(archive.Invalid, 'CLOSURE_DIGEST'):
+            archive.inspect_archive(file, sha, IDENTITY, self.closure_sha)
+
+    def test_outer_and_inner_file_graphs_must_agree(self):
+        def change(parts):
+            manifest = json.loads(parts['manifest.json'])
+            manifest['entries']['upstream/link']['target'] = '../build-tools/shared.js'
+            parts['manifest.json'] = archive.canonical(manifest)
+        file, sha = self.changed_archive(change)
+        with self.assertRaisesRegex(archive.Invalid, 'CLOSURE_ENTRIES'):
+            archive.inspect_archive(file, sha, IDENTITY, self.closure_sha)
+
+    def test_compact_identity_schema_paths_limits_and_native_zip_links_fail_closed(self):
+        for field, value in [('schema', 'unknown'), ('scope', 'runtime'), ('node_major', True),
+                             ('arch', 'wrong'), ('source_archive_sha256', 'bad'), ('extra', 1)]:
+            with self.subTest(field=field):
+                closure = copy.deepcopy(self.closure)
+                closure[field] = value
+                data = archive.canonical(closure)
+                with self.assertRaises(archive.Invalid):
+                    archive.validate_closure(data, hashlib.sha256(data).hexdigest(), IDENTITY)
+        for name, row in [('upstream/.git', {'kind': 'dir'}), ('upstream/data.sqlite', {'kind': 'dir'}),
+                          ('upstream/extra', {'kind': 'file', 'bytes': 65 * 1024**2, 'sha256': 'a' * 64, 'mode': 0o644})]:
+            with self.subTest(name=name):
+                closure = copy.deepcopy(self.closure)
+                closure['entries'][name] = row
+                data = archive.canonical(closure)
+                with self.assertRaises(archive.Invalid):
+                    archive.validate_closure(data, hashlib.sha256(data).hexdigest(), IDENTITY)
+        info = zipfile.ZipInfo('sdk-closure.json')
+        info.create_system = 3
+        info.external_attr = (stat.S_IFLNK | 0o777) << 16
+        def change(parts):
+            del parts['sdk-closure.json']
+            parts[info] = b'../../outside'
+        file, sha = self.changed_archive(change)
+        with self.assertRaisesRegex(archive.Invalid, 'ARCHIVE_TYPE'):
+            archive.inspect_archive(file, sha, IDENTITY, self.closure_sha)
+
+    def test_shared_parser_rejects_corrupt_blob_and_oversized_compact_manifest(self):
+        def change(parts):
+            key = next(name for name in parts if name.startswith('blobs/'))
+            parts[key] = b'x' * len(parts[key])
+        file, sha = self.changed_archive(change)
+        with self.assertRaisesRegex(archive.Invalid, 'BLOB_DIGEST'):
+            archive.inspect_archive(file, sha, IDENTITY, self.closure_sha)
+        with patch.object(archive, 'CLOSURE_MAX_MANIFEST', 1):
+            with self.assertRaisesRegex(archive.Invalid, 'CLOSURE_LIMIT'):
+                archive.inspect_archive(self.file, self.sha, IDENTITY, self.closure_sha)
+
+    def test_pack_cli_checks_source_before_and_after_and_never_infers_mode(self):
+        import argparse
+        target = self.root / 'pack'
+        args = argparse.Namespace(operation='pack', node='/synthetic/node', source=str(self.source),
+                                  output=str(target), closure_sha256=self.closure_sha)
+        with patch.object(archive, 'current_identity', return_value=IDENTITY), patch.object(archive, 'check_inputs') as check:
+            result = archive.run(args)
+        self.assertEqual(check.call_count, 2)
+        self.assertTrue(all(call.args[-1] == self.closure_sha for call in check.call_args_list))
+        self.assertEqual(result['closure_sha256'], self.closure_sha)
+        self.assertEqual(result['source_archive_sha256'], self.closure['source_archive_sha256'])
+        self.assertFalse(result['release_ready'])
+        args.output = str(self.root / 'not-inferred')
+        args.closure_sha256 = None
+        with patch.object(archive, 'current_identity', return_value=IDENTITY):
+            with self.assertRaises(FileNotFoundError):
+                archive.run(args)
+        self.assertEqual(json.loads((Path(args.output) / 'receipt.json').read_text())['status'], 'BLOCKED')
+
+    def test_receive_cli_stages_validates_and_never_overwrites(self):
+        import argparse
+        target = self.root / 'received'
+        args = argparse.Namespace(operation='receive', node='/synthetic/node', archive=str(self.file),
+                                  sha256=self.sha, destination=str(target), closure_sha256=self.closure_sha)
+        with patch.object(archive, 'current_identity', return_value=IDENTITY), patch.object(archive, 'check_inputs') as check:
+            result = archive.run(args)
+            with self.assertRaisesRegex(archive.Invalid, 'DESTINATION_EXISTS'):
+                archive.run(args)
+        self.assertEqual(check.call_count, 1)
+        self.assertEqual(check.call_args.args[-1], self.closure_sha)
+        self.assertEqual((target / 'sdk-closure.json').read_bytes(), self.data)
+        self.assertEqual(result['schema'], archive.CLOSURE_ARCHIVE_SCHEMA)
+        self.assertEqual(result['secret_scan'], 'NOT_RUN')
+        self.assertEqual(list(self.root.glob('.kit-sdk-*')), [])
+        args.destination = str(self.root / 'blocked')
+        with patch.object(archive, 'current_identity', return_value=IDENTITY), patch.object(archive, 'check_inputs', side_effect=archive.Invalid('KIT_ARCHIVE_INPUTS_BLOCKED')):
+            with self.assertRaisesRegex(archive.Invalid, 'INPUTS_BLOCKED'):
+                archive.run(args)
+        self.assertEqual(sorted(p.name for p in Path(args.destination).iterdir()), ['receipt.json'])
+        self.assertEqual(list(self.root.glob('.kit-sdk-*')), [])
 
 
 if __name__ == '__main__':

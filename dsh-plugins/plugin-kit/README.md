@@ -42,7 +42,7 @@ node build.mjs /absolute/new-sdk-inputs/upstream /absolute/new-sdk-inputs/build-
 
 ## 本地开发 SDK 归档与接收
 
-`sdk-archive.py` 为同平台开发目录提供离线传输，使用 Python 3.14 与绝对路径的 Node 24。源目录必须是上述 `prepare.mjs` 生成的 READY 目录，其平台、架构、上游 SHA 和 pin 摘要须与当前 kit 一致。输出和接收目录必须不存在，父目录须已存在：
+`sdk-archive.py` 为同平台开发目录提供离线传输，使用 Python 3.14 与绝对路径的 Node 24。默认完整模式的源目录必须是上述 `prepare.mjs` 生成的 READY 目录，其平台、架构、上游 SHA 和 pin 摘要须与当前 kit 一致；缩减模式需要显式摘要，见下节。输出和接收目录必须不存在，父目录须已存在：
 
 ```sh
 python3 node_modules/@shine-mage/dsh-plugin-kit/sdk-archive.py pack \
@@ -126,4 +126,37 @@ node scripts/release/sdk-content-audit.mjs --root /absolute/new-build-sdk \
   --closure-sha256 REVIEWED_CLOSURE_SHA256 --output /absolute/evidence/new-closure-audit.json
 ```
 
-当前只有同平台本地构建范围：**不是数学意义的最小集合，也不是签名分发包或生产 runtime**。旧 `sdk-archive.py pack/receive` 仍只接受完整准备输入，不用它直接打包缩减目录。缩减包的安全分发/接收、目标平台、完整内容审计及签名门禁尚待完成；`release_ready=false`。上述 SDK 维护动作不加入每个业务插件的日常构建流程。
+缩减目录通过同一个归档器的显式模式传输：
+
+```sh
+python3 node_modules/@shine-mage/dsh-plugin-kit/sdk-archive.py pack \
+  --source /absolute/new-build-sdk --output /absolute/new-compact-archive \
+  --closure-sha256 REVIEWED_CLOSURE_SHA256 --node /absolute/node24
+
+python3 node_modules/@shine-mage/dsh-plugin-kit/sdk-archive.py receive \
+  --archive /absolute/new-compact-archive/sdk.zip --sha256 REVIEWED_ARCHIVE_SHA256 \
+  --closure-sha256 REVIEWED_CLOSURE_SHA256 \
+  --destination /absolute/new-received-build-sdk --node /absolute/node24
+```
+
+`--sha256` 固定传输包，`--closure-sha256` 固定内部 SDK 清单，两者均由调用者显式提供。缩减归档采用 `shinemage-development-sdk-closure-archive/v1`，与完整格式区分；接收器不根据包内容猜模式，遗漏或错误摘要不能回退。原始 `sdk-closure.json` 字节保留，因此接收后仍使用同一 closure 摘要构建和审计。内外条目清单、固定 pin/平台、每个 blob、文件权限、整条链接路径均校验，继续复用原来的 ZIP 资源限额、独占目录、私有 staging 和失败回收。打包拒绝把输出写入源 SDK，包括目录别名路径。
+
+本地同平台往返与消费者验证不能代替目标平台验收：**不是数学意义的最小集合、签名分发包或生产 runtime**。回执保留原完整归档 SHA 作为来源记录，但该记录不是发布者签名；目标平台/WSL、完整内容审计、签名/SBOM/CVE/撤销仍须单列完成，`release_ready=false`。上述 SDK 维护动作不加入每个业务插件的日常构建流程。
+
+### SDK 供应链盘查（仓库维护入口）
+
+```sh
+# 默认只读、离线；输出目录须已存在，报告不能已存在或位于 SDK 内。
+node scripts/release/sdk-supply-chain.mjs --root /absolute/new-received-build-sdk \
+  --closure-sha256 REVIEWED_CLOSURE_SHA256 --output /absolute/evidence/new-inventory.json
+
+# 确认离线清单的待查询名称后，显式查询 OSV；不安装或执行依赖。
+node scripts/release/sdk-supply-chain.mjs --root /absolute/new-received-build-sdk \
+  --closure-sha256 REVIEWED_CLOSURE_SHA256 --output /absolute/evidence/new-advisories.json --osv
+```
+
+这两个命令从本仓根目录执行，不属于已安装 kit 的运行时 API。`--osv` 向固定 `api.osv.dev` 发送去重的安装依赖名称/版本；排除工作区及声明 `private:true` 的清单，但不代表已经核验私有 registry 的可见性。清单的 CycloneDX `bom` 保留 `incomplete`：包内隐藏/打包合并的依赖、依赖边、发布者身份和撤销未核验；`package.json` 摘要不冒充整包摘要。`NO_KNOWN_ADVISORIES` 只适用于本次查到的名称/版本，网络/分页失败为 `UNKNOWN`；报告分别计数 `requested/queried/completed/requests_sent`，逐包保留 `NOT_QUERIED/INCOMPLETE/COMPLETE`，失败不冒充全部查完；发现公告为 `BLOCKED`，其余未关闭条件为 `PARTIAL`，退出码均为 2，始终 `release_ready=false`。
+
+TLS 信任失败返回 `SDK_SUPPLY_OSV_TLS_TRUST`。本机实际使用 `NODE_EXTRA_CA_CERTS=/etc/ssl/cert.pem` 的系统公共 CA 后完成查询，不关闭 TLS；其他机器应按自己的信任配置处理。2026-10-07 固定 SDK 的实际结果为 **10 个依赖版本 / 42 条不同公告，分发 BLOCKED**，详见[证据](../../docs/hackathon/evidence/dsh-g0-kit-sdk-supply-chain-20261007.md)。不能以 build/test 通过替代该条件。
+
+后续审修排除了 pnpm 11.11.0 完整候选（内置依赖仍有公告），固定 11.28.2 仅完成包来源与 27 份带版本清单查询，尚未改 pin/安装或验证构建；DSH 0.2.0-rc.2 也不能自动关闭当前依赖问题。见[候选核对与剩余任务](../../docs/hackathon/evidence/dsh-g0-kit-sdk-supply-review-20261007.md)。
