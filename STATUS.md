@@ -18,7 +18,15 @@
 
 - 当前采用历史结果快照 + 保存时校验；陈旧/过期阈值已移出当前待办，不再等待确认，也不新增到期系统。保留生成时间/来源和 `NOT_CHECKED`，权限、候选准入、冲突、幂等与会话/请求超时保持；旧 wire/回执兼容不删除。见[决定与验证](docs/hackathon/evidence/dsh-g0-snapshot-policy-closeout-20261007.md)。
 
-### HTML 历史差异收口（2026-10-08）
+### v2 SDK 目标平台与来源复核（2026-10-08）
+
+- 本轮三个并行边界为 SDK 来源审查、杭州 WSL 隔离验证、旧 HTML 语义核对；共享文档和提交由主 Agent 顺序集成。前两批已通过正常 hooks 本地提交 **`d78c7cd5`** 和 **`e48a6ad3`**，未 push。
+- WSL 的新 HOME/store/Corepack 实际准备 **READY / 256.411 秒**，完整及缩减 SDK pack/receive 通过。复用封存的 Linux 缩减包，在非 root、禁外网、SDK/源码只读、生产目录不可读的消费者环境完成 **10/10 消费者、20 PASS / 0 FAIL / 0 SKIP**。范围是目标平台开发 SDK，不是整台干净主机或生产 runtime；见[目标验证与失败恢复](docs/hackathon/evidence/dsh-g0-sdk-wsl-immutable-inputs-20261008.md)。
+- 查明 Mac/Linux 的 gzip/zlib 差异会让同内容领域包的压缩摘要不同。验收现显式消费原锁定 tar，重建仅比较全部文件内容；未修改消费者锁或生产接收规则。首次 6/10 失败记录保留，恢复使用同一 SDK，无重复 prepare。
+- 来源审查关闭 npm 历史密钥有效期判断和 **17/17** 文件来源字节疑点；仍有上游 **7 个受影响版本 / 29 条公告**，发布者身份/撤销、完整组成与二进制安全未关闭，**SDK 分发 BLOCKED / 产品 PARTIAL**。精确修复版本只完成公开查询，尚未安装或兼容验证，见[来源与依赖报告](docs/hackathon/evidence/dsh-g0-sdk-upstream-trust-20261008.md)。
+- 下一步并行处理官方升级候选/供应链，以及其余指标/知识服务目标安装和插件作者入口；随后补未覆盖的宿主/UI/真实身份/生产形状验收。生产 receive/reconcile、切换/canary/回退和物理分仓仍按原门禁。年龄阈值不再是待办；本轮未激活新候选、未改 Cloudflare 或真实业务库。
+
+### HTML 历史差异收口（2026-10-08，已提交 `e48a6ad3`）
 
 - SDK 缩减增量已通过正常 hooks 本地提交 **`d78c7cd5`**，未 push。旧 HTML 工作树 43 项已逐项核对；34 项语义差异中只有两个源码文件有真实遗漏，其余为已接入、替代或历史证据。
 - 修复画布输入漏接、预览失败清稿、双向草稿互斥和显式放弃；修正测试入口漏跑 17 项。固定缩减 SDK 下正式 build/typecheck、35 基础 + 111 HTML + 2 构建产物测试通过；backend 定向 51、旧语义兼容 5 通过。见[本次证据与范围](docs/hackathon/evidence/dsh-g0-html-semantic-integration-20261008.md)。旧工作树不删除；直接 pnpm 私有依赖安装入口和共享测试夹具供给仍应在分仓前收敛，真实浏览器/模型/杭州 HTML 包验收未执行。

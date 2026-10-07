@@ -61,7 +61,7 @@ python3 node_modules/@shine-mage/dsh-plugin-kit/sdk-archive.py receive \
 
 归档只有内容寻址的普通文件和清单；相对符号链接在私有 staging 的所有文件验证后创建，不放宽生产解包规则。只允许 upstream/build-tools/corepack，排除调用者 HOME/store、Git 配置/hooks/logs 和敏感配置名；保留固定官方源码的两份公开 desktop `.env.*.example` 模板及 Git 校验必需的对象/index。成功时三个目录进入本次独占的目标目录；只有最终 `receipt.json` 为 LOCAL_READY 才表示接收完成。失败保留 BLOCKED 回执，清理本次 staging，既有目标绝不覆盖；不提供 resume/覆盖安装。
 
-接收后显式把 `new-received-sdk/upstream` 和 `new-received-sdk/build-tools` 传给 `check.mjs`/插件 build。本地归档仍为 **development-sdk-only**：`secret_scan=NOT_RUN`、`supply_chain=NOT_VERIFIED`、`release_ready=false`，没有发布、签名或全量依赖内容审计。当前真实归档/消费者验证仅覆盖 darwin-arm64；Linux/WSL、libc/原生 ABI 的兼容性须另验，Mac 包不能用于 WSL。它也不是已收敛的最小 SDK 闭包。完整供应链门禁通过前只在受控本地开发中使用，不上传到 Release 或生产环境。
+接收后显式把 `new-received-sdk/upstream` 和 `new-received-sdk/build-tools` 传给 `check.mjs`/插件 build。本地归档仍为 **development-sdk-only**：`secret_scan=NOT_RUN`、`supply_chain=NOT_VERIFIED`、`release_ready=false`，没有发布、签名或全量依赖内容审计。真实归档/消费者验证已分别覆盖 darwin-arm64 与 WSL2 linux-x64/glibc 2.39，后者见[2026-10-08 证据](../../docs/hackathon/evidence/dsh-g0-sdk-wsl-immutable-inputs-20261008.md)。两平台各自准备 SDK，Mac 包不能用于 WSL；其他 libc/原生 ABI 和整台干净机器仍须另验。完整模式也不是已收敛的最小 SDK 闭包。完整供应链门禁通过前只在受控隔离开发环境使用，不上传到 Release 或生产运行目录。
 
 全部 10 个构建消费者（9 个插件与 board-components 领域包）已使用公开 package export 和精确 `0.1.0` devDependency，移除相邻 kit 源码 import。kit 不允许成为 runtime/optional/peer 依赖，也不能进入领域包的 `bundled-dependencies.json`。公开入口为 `./toolchain`、`./packaged-dependencies` 与只读 `./pin`；版本钉供开发测试读取，运行时代码不能导入 kit。
 
@@ -74,6 +74,8 @@ python3 node_modules/@shine-mage/dsh-plugin-kit/sdk-archive.py receive \
 `scripts/dsh-b0/plugin-isolation.test.mjs` 把 kit 和单个叶子插件复制到独立临时目录，在没有 workbench 源码的情况下构建、测试并受控打包。测试 Git 提交只属于临时夹具，不能作为已审查的发布 SHA。当前仍是 workspace dev kit；正式独立 kit 分发、DSH 跨版本兼容和真实宿主安装按 G0 门禁推进。
 
 `packaged-dependencies.mjs` 只处理构建输入协议：按消费者精确版本和 SHA-256 核验 tarball/公开导出/类型，不执行包 hooks、不读取兄弟包源码、不包含图表逻辑。绑定目标是当前插件 `node_modules/.shinemage-bundled/<digest>` 的包字节，消费入口仍用标准 package exports；它不是 `workspace:`/`file:` 依赖。旧摘要目录保留，不自动删除。变更/外部链接/未锁定输入失败即阻断。
+
+跨平台验收须消费**同一份已经锁定的领域 tarball**。不同 OS/Node 内置 zlib 重打 gzip 可能得到不同压缩字节，即使全部源码和 tar 内容相同，也不能修改消费者摘要锁或拿重建包替代原包。`scripts/dsh-b0/plugin-kit.test.mjs` 支持显式绝对 `DSH_PACKAGE_INPUTS`：构建前按现有三份消费者锁校验原包，board 在独立输出验证重建内容，其余消费者始终读取原包，结束再次核对原输入。这个模式不替代 SDK 参数；必须同时提供固定 `B0_BUILD_UPSTREAM`、`B0_BUILD_TOOLS`、`COREPACK_HOME` 和缩减包的 `DSH_SDK_CLOSURE_SHA256`，只有实际十消费者全部执行、零跳过才算目标平台通过。证据与失败恢复见[WSL 验收记录](../../docs/hackathon/evidence/dsh-g0-sdk-wsl-immutable-inputs-20261008.md)。
 
 ### 分发前的仓库级内容审计
 
@@ -141,7 +143,7 @@ python3 node_modules/@shine-mage/dsh-plugin-kit/sdk-archive.py receive \
 
 `--sha256` 固定传输包，`--closure-sha256` 固定内部 SDK 清单，两者均由调用者显式提供。缩减归档采用 `shinemage-development-sdk-closure-archive/v1`，与完整格式区分；接收器不根据包内容猜模式，遗漏或错误摘要不能回退。原始 `sdk-closure.json` 字节保留，因此接收后仍使用同一 closure 摘要构建和审计。内外条目清单、固定 pin/平台、每个 blob、文件权限、整条链接路径均校验，继续复用原来的 ZIP 资源限额、独占目录、私有 staging 和失败回收。打包拒绝把输出写入源 SDK，包括目录别名路径。
 
-本地同平台往返与消费者验证不能代替目标平台验收：**不是数学意义的最小集合、签名分发包或生产 runtime**。回执保留原完整归档 SHA 作为来源记录，但该记录不是发布者签名；目标平台/WSL、完整内容审计、签名/SBOM/CVE/撤销仍须单列完成，`release_ready=false`。上述 SDK 维护动作不加入每个业务插件的日常构建流程。
+本地同平台往返与消费者验证不能代替其他目标平台验收：**不是数学意义的最小集合、签名分发包或生产 runtime**。回执保留原完整归档 SHA 作为来源记录，但该记录不是发布者签名；已验证的 WSL 范围见上文，完整内容审计、签名/SBOM/CVE/撤销和整台干净机器仍开放，`release_ready=false`。上述 SDK 维护动作不加入每个业务插件的日常构建流程。
 
 ### SDK 供应链盘查（仓库维护入口）
 
@@ -159,6 +161,8 @@ node scripts/release/sdk-supply-chain.mjs --root /absolute/new-received-build-sd
 
 TLS 信任失败返回 `SDK_SUPPLY_OSV_TLS_TRUST`。本机实际使用 `NODE_EXTRA_CA_CERTS=/etc/ssl/cert.pem` 的系统公共 CA 后完成查询，不关闭 TLS；其他机器应按自己的信任配置处理。2026-10-07 旧 pin SDK 命中 10 个依赖版本 / 42 条不同公告，见[历史证据](../../docs/hackathon/evidence/dsh-g0-kit-sdk-supply-chain-20261007.md)；当前 v2 缩减包重查为 **7 个版本 / 29 条不同公告，分发仍 BLOCKED**，见[v2 分发记录](../../docs/hackathon/evidence/dsh-g0-kit-sdk-v2-distribution-20261007.md)。不能以 build/test 通过替代该条件。
 
+2026-10-08 已按真实 npm 发布时间策略复核历史密钥有效期，并重验 17/17 不透明文件的来源字节；这只关闭特定来源疑点，不能替代发布者身份、撤销或二进制内容安全。七个版本/29 条公告仍开放，精确修复候选只完成公开查询，见[依赖路径与信任复核](../../docs/hackathon/evidence/dsh-g0-sdk-upstream-trust-20261008.md)。
+
 上一阶段审修排除了 pnpm 11.11.0 完整候选（内置依赖仍有公告），完成了固定 11.28.2 的包来源与 27 份带版本清单查询。见[候选核对与剩余任务](../../docs/hackathon/evidence/dsh-g0-kit-sdk-supply-review-20261007.md)。随后完成了隔离安装/兼容验证，当前默认 pin 的职责拆分见下节；DSH 0.2.0-rc.2 也不能自动关闭当前依赖问题。
 
 ### 包管理器候选验证
@@ -169,7 +173,7 @@ TLS 信任失败返回 `SDK_SUPPLY_OSV_TLS_TRUST`。本机实际使用 `NODE_EXT
 
 v2 的本机首次准备和消费者实测见[工具链拆分证据](../../docs/hackathon/evidence/dsh-g0-kit-manager-split-20261007.md)。完整准备环境保留两套 manager；`sdk-closure.mjs` 生成的插件开发包只保留 pin 中 `pnpm` 对应的完整版本目录，并验证包名/版本，不携带官方构建 manager 或其他缓存。该包用于消费已构建 SDK，不用于重新构建官方宿主。
 
-当前 v2 包的同平台 pack/receive 和 10/10 消费者实测已完成，见[分发复验](../../docs/hackathon/evidence/dsh-g0-kit-sdk-v2-distribution-20261007.md)。准备成功不代表完整依赖图可归档：可选依赖下载失败可能留下悬空链接，归档器仍拒绝；须在新输入目录补齐精确来源并留证，不能删链接或放宽校验。当前仅开发范围，完整供应链、目标平台/WSL 继续开放。
+当前 v2 包的 Mac 同平台 pack/receive 和 10/10 消费者实测见[分发复验](../../docs/hackathon/evidence/dsh-g0-kit-sdk-v2-distribution-20261007.md)；新 Linux SDK 已完成 WSL2 冷依赖准备、完整/缩减归档接收和 10/10 消费者（20 PASS / 0 SKIP），见[目标平台证据](../../docs/hackathon/evidence/dsh-g0-sdk-wsl-immutable-inputs-20261008.md)。准备成功不代表完整依赖图可归档：可选依赖下载失败可能留下悬空链接，归档器仍拒绝；须在新输入目录补齐精确来源并留证，不能删链接或放宽校验。本轮 Linux 首次归档未需要 Mac 的可选包恢复。当前仅开发范围，完整供应链、其他平台与整台干净机器继续开放。
 
 现有安装测试支持显式 `B0_TEST_PNPM_VERSION=11.28.2`。须先将该精确版本及摘要对应的 manager 准备到独占 `COREPACK_HOME`，再结合 `B0_BUILD_UPSTREAM`、`B0_BUILD_TOOLS`、缩减模式的 `DSH_SDK_CLOSURE_SHA256` 运行 `node --test scripts/dsh-b0/plugin-kit.test.mjs`。候选模式要求前三个路径显式为绝对路径，缺项/相对路径以 `KIT_TEST_CANDIDATE_INPUT_REQUIRED` 在打包前失败，不允许跳过消费者或回退本仓工具/个人缓存。测试禁用 Corepack 网络/自动 pin，核验实际版本；候选声明只写自有 kit/插件副本，不改官方 SDK 和仓库 pin，也不改消费者的领域包摘要锁。不设置该参数就按原声明运行。
 

@@ -292,3 +292,10 @@ Node 24 下以 `B0_BUILD_UPSTREAM=/absolute/pinned-rc2-checkout node --test scri
 同一 `plugin verify-host` 使用 `dsh-terminal-host-evidence/v1` 封套，只读取已封存的 `inputs/controller/inventory/runtime_archive` 相对路径与摘要，并要求同候选的 `service_target_event`。完整校验后追加 `CANDIDATE_TERMINAL_HOST_OBSERVED`；失败退出 2，重试不写文件。控制器固定已审查来源和历史 runner 字节，核对 HTTP 23 项、恢复 2 项、终态 run、会话前缀、原生回退和独立服务进程；不会执行包、安装依赖或联系杭州。定向命令为 `node --test scripts/release/terminal-host-evidence.test.mjs`，已进入 release suite 与 B0 清单；夹具只测校验器，不代表实际运行。原回执接线命令、一次真实 schema 适配失败及修复见[门禁证据](../hackathon/evidence/dsh-g0-first-purchase-terminal-gate-20261007.md)。保留 `release_ready=false`；原始事件正文/WAL 未在此命令中重新回放，哈希和断言属于未签名操作者观察。
 
 独立插件更新的来源验收使用 `synthetic-source-http-target-input/v2` / `source-http-target-observation/v2`：`source_sha` 指向查询/保存服务源码，必须与 candidate 的 `service_compatibility.binding.source_sha`、两份服务归档一致；插件源码仍由 candidate/pack 自身核对，不能要求跟服务同一次提交。v1 保留历史同 SHA 约束，不能重标旧回执。两种输入都绑定完整 candidate digest、包摘要、固定 runner 和实际目标证据；新插件必须生成自己的 v2 目标回执，不能复制旧 PASS。`first-purchase-runtime-artifacts.test.mjs`、`source-target-evidence.test.mjs` 和 `test_first_purchase_source_target_probe.py` 覆盖该边界。
+
+
+## v2 SDK 跨平台不可变领域输入（2026-10-08）
+
+已有 `node --test scripts/dsh-b0/plugin-kit.test.mjs` 可显式设置绝对 `DSH_PACKAGE_INPUTS`，指向包含已锁定 `shine-mage-board-components-0.1.0.tgz` 的目录。原 archive 由三份消费者锁核验，board 重建只比较全部内容，消费仍用原 archive；拒绝错误路径、特殊文件和摘要漂移，执行后核对原包与锁字节。未设置时保留原自生成与精确 SHA 行为。
+
+目标平台实跑仍同时需要 Node 24、固定 SDK/build-tools/Corepack 和缩减 closure SHA；缺少 SDK 时既有测试可能明确跳过部分消费者，不能将部分绿色结果报成十消费者通过。所有变量和本轮 WSL 命令、结果见[跨平台证据](../hackathon/evidence/dsh-g0-sdk-wsl-immutable-inputs-20261008.md)。此验证不准备生产 runtime、不激活服务，也不替代 SDK 内容/供应链放行。

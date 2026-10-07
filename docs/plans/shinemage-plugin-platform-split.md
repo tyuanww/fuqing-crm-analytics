@@ -21,7 +21,15 @@
 
 全文核对与本轮代码修复证据见 [2026-10-03 审查修复记录](../hackathon/evidence/dsh-g0-review-fixes-20261003.md)。未关闭的实施项沿用 T1–T23，不新增重复规划或再次询问已回答的选择。
 
-### 2026-10-08 HTML 历史差异收口
+### 2026-10-08 v2 SDK 目标平台与来源收口
+
+按用户要求并行推进三个有独立边界的任务，主 Agent 顺序集成。SDK 缩减和 HTML 修复已分别本地提交 `d78c7cd5`、`e48a6ad3`，未 push。
+
+T15 新 Linux SDK 在既有 WSL2 工具链、全新 HOME/store/Corepack 中实际准备 READY（256.411 秒），完整及缩减包往返通过；同一缩减包离线、非 root、只读隔离消费 **10/10、20 PASS / 0 FAIL / 0 SKIP**。首次失败定位到 gzip/zlib 跨平台压缩字节差异，修复验收器为消费同一原 tar、独立重建核对全部内容；原锁不变。见[目标验证](../hackathon/evidence/dsh-g0-sdk-wsl-immutable-inputs-20261008.md)。这不关闭整台干净机器、其他服务目标安装或生产验收。
+
+来源复核关闭历史签名密钥日期疑点及 17/17 文件来源字节，仍有上游 7 个版本/29 条公告；修复候选尚未安装/验证，完整组成、发布者身份/撤销与二进制安全继续阻断 SDK 分发。见[信任与依赖证据](../hackathon/evidence/dsh-g0-sdk-upstream-trust-20261008.md)。后续可并行官方升级/信任、其他服务目标安装和插件作者入口，候选/journal 集成仍单一 owner；剩余宿主/UI/真实身份/生产形状、现场 receive/reconcile/canary/回退之后按 stop/go 物理分仓，不为每次插件修改重跑官方 SDK 维护。
+
+### 2026-10-08 HTML 历史差异收口（已提交 `e48a6ad3`）
 
 旧工作树 43 项已核对，34 语义项全部归类并修复两文件真实遗漏及测试入口问题；不是 34 个待开发功能。应用后固定 SDK 正式 build/typecheck、35 基础/111 HTML/2 产物测试通过，51 后端与5旧语义兼容通过，详见[本次证据](../hackathon/evidence/dsh-g0-html-semantic-integration-20261008.md)。本步不改上游/接口生成物、不回灌旧布局，不认证浏览器/真实模型/杭州 HTML 运行；私有依赖直接 pnpm 入口与独立测试夹具供给继续收敛。旧树保留。
 

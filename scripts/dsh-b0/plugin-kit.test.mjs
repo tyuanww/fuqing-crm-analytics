@@ -6,6 +6,7 @@ import { dirname, isAbsolute, join } from 'node:path';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
+import { readPackagedLibrary, validatePackageLock } from '../../dsh-plugins/plugin-kit/packaged-dependencies.mjs';
 import { inspectSdkPackage } from '../../dsh-plugins/plugin-kit/sdk-inputs.mjs';
 import { copyPluginKitSources, copyTreeBounded } from './clean-build.mjs';
 import { linkWorkspaceKit, linkRepositoryKit } from './plugin-kit-link.mjs';
@@ -22,6 +23,28 @@ function managerTrial(declared, candidate) {
     version: candidate ?? declared.slice('pnpm@'.length) };
 }
 
+// Explicit domain artifacts retain their release-byte identity. A rebuild is
+// compared separately and must never become another consumer's input.
+async function immutableDomainInput(directory) {
+  if (directory === undefined) return null;
+  assert.ok(typeof directory === 'string' && isAbsolute(directory), 'KIT_TEST_DOMAIN_INPUT_ABSOLUTE');
+  const info = await lstat(directory);
+  assert.ok(info.isDirectory() && !info.isSymbolicLink(), 'KIT_TEST_DOMAIN_INPUT_DIRECTORY');
+  const locks = [];
+  let entry;
+  for (const name of ['shine-funnel', 'shine-waterfall', 'analytics-workbench']) {
+    const consumer = join(repository, 'dsh-plugins', name), path = join(consumer, 'bundled-dependencies.json');
+    const bytes = await readFile(path);
+    const lock = validatePackageLock(JSON.parse(bytes), JSON.parse(await readFile(join(consumer, 'package.json'))));
+    const candidate = lock.packages.find(item => item.name === '@shine-mage/board-components');
+    assert.ok(candidate, 'KIT_TEST_DOMAIN_LOCK_REQUIRED');
+    if (entry) assert.deepEqual(candidate, entry, 'KIT_TEST_DOMAIN_LOCK_DISAGREEMENT');
+    entry = candidate; locks.push({ path, bytes });
+  }
+  const path = join(directory, entry.tarball);
+  return { directory, path, entry, locks, ...await readPackagedLibrary(path, entry) };
+}
+
 test('candidate manager selection rejects floating versions without changing the default declaration', () => {
   assert.deepEqual(managerTrial('pnpm@11.7.0'), { command: 'pnpm', version: '11.7.0' });
   assert.deepEqual(managerTrial('pnpm@11.7.0', '11.28.2'), { command: 'pnpm@11.28.2', version: '11.28.2' });
@@ -34,6 +57,48 @@ async function owned(t) {
   const root = await mkdtemp(join(tmpdir(), 'owned-kit-'));
   t.after(() => rm(root, { recursive: true, force: true })); return root;
 }
+
+test('immutable domain input rejects relative and empty paths without fallback', async () => {
+  for (const value of ['', 'relative-input']) {
+    await assert.rejects(immutableDomainInput(value), /KIT_TEST_DOMAIN_INPUT_ABSOLUTE/);
+  }
+  assert.equal(await immutableDomainInput(undefined), null);
+});
+
+test('immutable domain input rejects a missing locked archive without fallback', async t => {
+  const root = await owned(t);
+  await assert.rejects(immutableDomainInput(root), { code: 'ENOENT' });
+  assert.deepEqual(await readdir(root), []);
+  const alias = join(root, 'alias'); await symlink(root, alias, 'dir');
+  await assert.rejects(immutableDomainInput(alias), /KIT_TEST_DOMAIN_INPUT_DIRECTORY/);
+});
+
+test('immutable domain input rejects byte drift even when the tar contents are unchanged', async t => {
+  const root = await owned(t);
+  const fixture = join(root, 'fixture'), input = join(root, 'input');
+  await mkdir(join(fixture, 'package/lib'), { recursive: true }); await mkdir(input);
+  const manifest = { name: '@shine-mage/board-components', version: '0.1.0', type: 'module',
+    files: ['lib/funnel.mjs', 'lib/funnel.d.mts'],
+    exports: { './funnel': { types: './lib/funnel.d.mts', import: './lib/funnel.mjs' } } };
+  await writeFile(join(fixture, 'package/package.json'), JSON.stringify(manifest));
+  await writeFile(join(fixture, 'package/lib/funnel.mjs'), 'export const fixture = true;');
+  await writeFile(join(fixture, 'package/lib/funnel.d.mts'), 'export declare const fixture: true;');
+  const originalPath = join(root, 'fixture.tgz');
+  await exec('tar', ['-czf', originalPath, 'package/package.json', ...manifest.files.map(file => `package/${file}`)],
+    { cwd: fixture, env: { ...process.env, COPYFILE_DISABLE: '1' } });
+  const original = await readPackagedLibrary(originalPath);
+  const changed = Buffer.from(await readFile(originalPath));
+  // Gzip MTIME is metadata: tar payload and all package files remain identical.
+  changed[4] ^= 1;
+  const path = join(input, 'shine-mage-board-components-0.1.0.tgz');
+  await writeFile(path, changed);
+  const decoded = await readPackagedLibrary(path);
+  assert.notEqual(decoded.sha256, original.sha256);
+  assert.deepEqual(decoded.files, original.files);
+  await assert.rejects(readPackagedLibrary(path, { name: manifest.name, version: manifest.version, sha256: original.sha256 }), /PACKAGE_INPUT_DIGEST/);
+  await assert.rejects(immutableDomainInput(input), /PACKAGE_INPUT_DIGEST/);
+  assert.equal((await readPackagedLibrary(originalPath)).sha256, original.sha256);
+});
 
 test('candidate trial rejects missing or relative SDK and cache inputs before packaging', async t => {
   const root = await owned(t), home = join(root, 'home'), tmp = join(root, 'tmp');
@@ -99,6 +164,13 @@ test('real kit tarball contains only declared source/locks and exposes its publi
         `KIT_TEST_CANDIDATE_INPUT_REQUIRED ${key}`);
     }
   }
+  const immutable = await immutableDomainInput(process.env.DSH_PACKAGE_INPUTS);
+  if (immutable) t.after(async () => {
+    const after = await readPackagedLibrary(immutable.path, immutable.entry);
+    assert.equal(after.sha256, immutable.sha256, 'consumer validation changed the immutable domain input');
+    for (const lock of immutable.locks) assert.deepEqual(await readFile(lock.path), lock.bytes, 'consumer validation changed a domain lock');
+    t.diagnostic(`immutable domain input before ${immutable.sha256}; after ${after.sha256}; all three consumer locks unchanged`);
+  });
   const root = await owned(t), source = join(root, 'kit-source');
   await copyPluginKitSources(kit, source, { destinationRoot: root });
   // A credential-like accidental file and dependency directory must not ship.
@@ -157,7 +229,8 @@ test('real kit tarball contains only declared source/locks and exposes its publi
   // plugin or kit source can satisfy an accidental relative import.
   const names = ['board-components', 'shine-brand', 'shine-query', 'shine-board', 'shine-crowd-action',
     'shine-funnel', 'shine-waterfall', 'crm-knowledge', 'knowledge', 'analytics-workbench'];
-  const plugin = join(consumer, 'plugin'), inputs = join(root, 'domain-inputs');
+  const plugin = join(consumer, 'plugin'), domainOutput = join(root, 'domain-inputs');
+  const inputs = immutable?.directory ?? domainOutput;
   const upstream = process.env.B0_BUILD_UPSTREAM, tools = process.env.B0_BUILD_TOOLS ?? join(kit, 'build-tools');
   const buildEnv = { ...env, ...(upstream ? { B0_BUILD_UPSTREAM: upstream } : {}), B0_BUILD_TOOLS: tools, DSH_PACKAGE_INPUTS: inputs };
   const inputRecord = upstream ? (process.env.DSH_SDK_CLOSURE_SHA256 ? join(dirname(upstream), 'sdk-closure.json') : join(upstream, '.git/index')) : null;
@@ -188,13 +261,21 @@ test('real kit tarball contains only declared source/locks and exposes its publi
           await writeFile(join(plugin, 'package.json'), JSON.stringify(manifest));
         }
         await assert.rejects(lstat(join(consumer, 'plugin-kit')), { code: 'ENOENT' });
-        const args = name === 'board-components' ? [inputs] : [upstream, tools];
+        const args = name === 'board-components' ? [domainOutput] : [upstream, tools];
         const result = await exec(process.execPath, [join(plugin, 'build.mjs'), ...args], { cwd: root, env: buildEnv, timeout: 120000, maxBuffer: 2 * 1024 * 1024 });
         if (name === 'board-components') {
           const receipt = JSON.parse(result.stdout);
-          const lock = JSON.parse(await readFile(join(repository, 'dsh-plugins/shine-funnel/bundled-dependencies.json')));
-          assert.equal(receipt.sha256, lock.packages[0].sha256, 'dev kit migration changed the immutable domain tarball');
-          t.diagnostic(`domain sha ${receipt.sha256}; original consumer locks unchanged`);
+          if (immutable) {
+            const rebuilt = await readPackagedLibrary(join(domainOutput, immutable.entry.tarball));
+            assert.equal(receipt.sha256, rebuilt.sha256, 'domain rebuild receipt mismatch');
+            assert.deepEqual(rebuilt.manifest, immutable.manifest, 'domain rebuild manifest drift');
+            assert.deepEqual(rebuilt.files, immutable.files, 'domain rebuild content drift');
+            t.diagnostic(`domain original sha ${immutable.sha256}; rebuilt sha ${rebuilt.sha256}; ${rebuilt.files.size} files and manifest identical; consumers retain original artifact`);
+          } else {
+            const lock = JSON.parse(await readFile(join(repository, 'dsh-plugins/shine-funnel/bundled-dependencies.json')));
+            assert.equal(receipt.sha256, lock.packages[0].sha256, 'dev kit migration changed the immutable domain tarball');
+            t.diagnostic(`domain sha ${receipt.sha256}; original consumer locks unchanged`);
+          }
         } else assert.ok((await readFile(join(plugin, 'lib/index.js'))).length > 0);
         const tests = name === 'board-components' ? ['test/geometry.test.mjs']
           : name === 'analytics-workbench' ? ['test/built.test.mjs', 'test/native-board-auth.test.mjs', 'test/native-prompt-inject.test.mjs', 'test/lane-g-delivery.test.mjs',
