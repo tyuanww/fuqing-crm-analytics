@@ -2,6 +2,8 @@
 
 ### Added
 
+- `pnpm dsh plugin verify-host` 增加独立 WSL headless 浏览器回执核验，引用同候选 runtime Host 事件并幂等入账；复用固定包校验，错误证据拒绝且日志脱敏，不启动远端服务或放行生产。
+
 - 显式合成首购 profile 增加官方原生 `/first-purchase` 查询、只读状态和精确 run/call 取消命令；继续由原 Agent Loop 与查询内核执行。查询准入不明时显示 UNKNOWN 并先核对，普通 DSH 对话保持可用，生产默认关闭。
 
 - 修复运行中 CRM 身份短暂不可用被误写为执行 UNKNOWN：暂停派发、保留原 intent，恢复后重新核对，不重复执行。

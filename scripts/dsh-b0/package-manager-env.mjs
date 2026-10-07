@@ -1,8 +1,24 @@
 /** Provide nested upstream scripts the same Corepack manager without global shims. */
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdir } from 'node:fs/promises';
-import { delimiter } from 'node:path';
+import { mkdir, realpath, stat } from 'node:fs/promises';
+import { delimiter, dirname, isAbsolute } from 'node:path';
+
+/** Locate the installed archive tool without forwarding the caller's environment. */
+export async function archiveToolEnv(env, sourcePath = process.env.PATH) {
+  const located = spawnSync('/bin/sh', ['-c', 'command -v zstd'], {
+    env: { PATH: sourcePath ?? env.PATH }, encoding: 'utf8', timeout: 5000,
+  });
+  const path = located.stdout?.trim();
+  assert.ok(!located.error && located.status === 0 && isAbsolute(path ?? ''), 'B0_ZSTD_REQUIRED');
+  const target = await realpath(path);
+  assert.ok((await stat(target)).isFile(), 'B0_ZSTD_REQUIRED');
+  const version = spawnSync(target, ['--version'], { env, encoding: 'utf8', timeout: 5000 });
+  assert.ok(!version.error && version.status === 0 && /zstandard|zstd/i.test(version.stdout), 'B0_ZSTD_REQUIRED');
+  // Existing Node/Python/system paths retain precedence. Resolve Homebrew's
+  // symlink to the specific tool directory instead of forwarding all of PATH.
+  return { ...env, PATH: `${env.PATH}${delimiter}${dirname(target)}` };
+}
 
 /** Explicit transport settings for public dependency fetch/audit commands only. */
 export function packageNetworkEnv(source) {

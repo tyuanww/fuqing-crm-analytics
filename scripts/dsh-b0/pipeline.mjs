@@ -8,7 +8,7 @@ import { readFile, writeFile, mkdir, lstat, readdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { packageManagerEnv, packageNetworkEnv, dependencyCommands } from './package-manager-env.mjs';
+import { packageManagerEnv, packageNetworkEnv, dependencyCommands, archiveToolEnv } from './package-manager-env.mjs';
 import { copyPluginKitSources, copyTreeBounded, createCleanRoot, reapStaleCleanRoots, removeCleanRoot } from './clean-build.mjs';
 import { prepareRuntimeInputs, recordRuntimePreparation } from '../release/runtime-inputs.mjs';
 import { packPlugin } from '../release/plugin-pack.mjs';
@@ -74,6 +74,7 @@ async function preparePackageManager() {
   env = await packageManagerEnv(join(b0, 'tool-bin'), env, upstream);
   assert.equal(output('corepack', ['pnpm', '--version'], upstream, mode === '--check' ? {} : networkEnv), pin.pnpm);
 }
+if (mode === '--check') env = await archiveToolEnv(env);
 await mkdir(b0, { recursive: true, mode: 0o700 });
 if (mode === '--prepare') {
   let exists = true;
@@ -197,6 +198,8 @@ print('B0 exact Python closure verified')
     'scripts/dsh-b0/lifecycle-observer.test.mjs', 'scripts/dsh-b0/host-feasibility.test.mjs', 'scripts/dsh-b0/compatibility-matrix.test.mjs', 'scripts/dsh-b0/permission-fence.test.mjs', 'scripts/dsh-b0/ui-seams.test.mjs',
     'scripts/dsh-b0/package-manager-env.test.mjs', 'scripts/dsh-b0/diagnostic-sink.test.mjs',
     'scripts/release/plugin-pack.test.mjs', 'scripts/release/plugin-candidate.test.mjs', 'scripts/release/plugin-host-evidence.test.mjs', 'scripts/release/profile.test.mjs', 'scripts/release/plugin-boundary.test.mjs', 'scripts/release/supply-chain.test.mjs',
+    'scripts/release/runtime-host-evidence.test.mjs',
+    'scripts/release/browser-host-evidence.test.mjs',
     'scripts/dsh-b0/clean-build.test.mjs',
     'scripts/dsh-b0/native-state-smoke.test.mjs', 'scripts/dsh-b0/native-query-smoke.test.mjs',
     'scripts/dsh-b0/native-query-fault-smoke.test.mjs', 'scripts/dsh-b0/native-query-assets-smoke.test.mjs',

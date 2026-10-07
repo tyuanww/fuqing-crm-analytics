@@ -1,17 +1,33 @@
 /** Opt-in Chrome UI test. Fresh context, synthetic credentials, no production profile. */
 import assert from 'node:assert/strict';
-import { writeFile } from 'node:fs/promises';
+import { writeFile, lstat, access } from 'node:fs/promises';
+import { constants } from 'node:fs';
 import { join, isAbsolute } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-export async function runFirstPurchaseBrowser({ modulePath, host, sessionId, output }) {
-  assert.ok(isAbsolute(modulePath));
+export async function launchFirstPurchaseBrowser({ modulePath, executablePath = process.env.B0_NATIVE_CRM_BROWSER_EXECUTABLE }) {
+  assert.ok(typeof modulePath === 'string' && isAbsolute(modulePath), 'HOST_BROWSER_MODULE_ABSOLUTE');
+  if (executablePath !== undefined) {
+    assert.ok(typeof executablePath === 'string' && isAbsolute(executablePath), 'HOST_BROWSER_EXECUTABLE_ABSOLUTE');
+    const info = await lstat(executablePath);
+    assert.ok(info.isFile() && !info.isSymbolicLink(), 'HOST_BROWSER_EXECUTABLE_REGULAR');
+    await access(executablePath, constants.X_OK);
+  }
   const { chromium } = await import(pathToFileURL(modulePath).href);
-  const browser = await chromium.launch({ channel: 'chrome', headless: true });
+  return chromium.launch({ ...(executablePath ? { executablePath } : { channel: 'chrome' }), headless: true });
+}
+
+export async function runFirstPurchaseBrowser({ modulePath, executablePath, host, sessionId, output }) {
+  let browser;
   let context, page;
   const errors = [], rows = [];
+  let browserVersion = 'NOT_STARTED';
   try {
-    context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    browser = await launchFirstPurchaseBrowser({ modulePath, executablePath });
+    browserVersion = browser.version?.() ?? 'UNKNOWN';
+    // Native role/text locators below exercise the Chinese UI contract; do not
+    // depend on the operating system's language (WSL defaults to English).
+    context = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'zh-CN' });
     page = await context.newPage();
     page.on('pageerror', error => errors.push(error.message));
     page.setDefaultTimeout(12000);
@@ -68,17 +84,17 @@ export async function runFirstPurchaseBrowser({ modulePath, host, sessionId, out
     rows.push('ordinary-native-composer-without-crm-login-or-business-preset');
     await page.screenshot({ path: join(output, 'browser-native.png'), fullPage: true });
     assert.deepEqual(errors, [], 'official browser page errors');
-    return { ok: true, browser: 'Chrome headless', rows };
+    return { ok: true, browser: 'Chrome headless', browser_version: browserVersion, platform: process.platform, locale: 'zh-CN', rows };
   } finally {
     try {
       if (page) {
         await writeFile(join(output, 'browser-last.txt'), await page.locator('body').innerText().catch(() => 'unavailable'), { mode: 0o600 });
         await page.screenshot({ path: join(output, 'browser-last.png'), fullPage: true }).catch(() => {});
       }
-      await writeFile(join(output, 'browser-observations.json'), JSON.stringify({ rows, errors, driver: 'Chrome headless' }, null, 2), { mode: 0o600 });
+      await writeFile(join(output, 'browser-observations.json'), JSON.stringify({ rows, errors, driver: 'Chrome headless', browser_version: browserVersion, platform: process.platform, locale: 'zh-CN' }, null, 2), { mode: 0o600 });
     } finally {
       // A setup or evidence-write failure must not strand our Chrome process.
-      try { await context?.close(); } finally { await browser.close(); }
+      try { await context?.close(); } finally { await browser?.close(); }
     }
   }
 }

@@ -303,7 +303,7 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 - [x] T3/T7/T21 时效策略 clean 候选接线（2026-10-06）：`48e7ddfc` 源码/实际离线双包各 **9/9 PASS**，当前构建及相关 **95 PASS**，同一 archive 的 CRM 合成身份与关闭时效链 **6/6 PASS**。新双包 WSL 固定场景 **14/14 PASS**、journal seq 4，重试 131 文件不变，10 个临时进程与本次远端目录回收、现役监听/PID 不变；见[证据](./evidence/dsh-g0-save-time-policy-candidate-20261006.md)。WSL 14 项不替代关闭时效/真实 CRM/浏览器验收；生产 gate 与上方 T3/T7/D4-C 保持开放。
 - [x] T9/T14 保存 UI 本地接线子项（2026-10-06）：复用 CRM 会话凭据、公开版本化服务、原请求保存/核对/重试与可见禁用；两个插件构建、相关后端 132 PASS、审修后 Node 51 PASS、编译卡片 7 PASS，真实 HTTP 集成 1 PASS（7 项观测）。已核对[本轮证据](./evidence/dsh-g0-save-ui-20261006.md)，不关闭上方 T3/T7/D4-C；后续账号/run 归属接缝见下一项，实际 DSH/浏览器仍待验收。
 - [x] T3/T9 CRM 查询归属本地接缝（2026-10-06）：显式模式沿用 Host bridge 与 CRM 可撤销 lease，新 run 归属真实认证的合成账号；真实 worker/HTTP 保存/ACK 恢复通过，换账号及旧 fixture 重绑拒绝。已核对[本轮证据](./evidence/dsh-g0-native-crm-owner-20261006.md)；服务故障暂停原任务，不误判撤权。
-- [ ] T3/T9/T14 固定官方 DSH 的 CRM 登录/admission/查询/保存验收：本机 HTTP/Chrome 与 WSL 固定 runtime/四包的官方 HTTP 整链已有下方证据；目标浏览器、headed/移动端/无障碍和生产形状验收仍待完成，生产 gate 不变。旧 B0 gateway 不能充当 CRM 登录入口。
+- [ ] T3/T9/T14 固定官方 DSH 的 CRM 登录/admission/查询/保存验收：本机 HTTP/Chrome 与 WSL 固定 runtime/四包的官方 HTTP 整链已有下方证据；目标桌面 headless 五场景已通过；headed/移动端/无障碍和生产形状验收仍待完成，生产 gate 不变。旧 B0 gateway 不能充当 CRM 登录入口。
 - [x] 官方 Host/HTTP 子项（2026-10-06）：固定 rc2 实际加载、Cookie/Origin/CSRF、CRM 登录、原生工具 worker、保存 ACK 核对、持久 session 重启与重新登录通过，整链 1 PASS、保护测试 7 PASS。已核对[证据](./evidence/dsh-g0-official-crm-http-20261006.md)；查询仍由私有测试入口准入，不称为浏览器完成。
 - [x] 官方原生命令/Chrome 子项（2026-10-06）：通过公开 slash-command 扩展接查询、只读状态、精确 run/call 取消；新 HTTP 整链 1 PASS，Chrome headless 1 PASS/5 项观测（登录前拒绝、登录、查询保存、刷新恢复、普通原生对话），命令/编译卡片 12 PASS、相关后端 35 PASS。已核对[证据](./evidence/dsh-g0-native-command-browser-20261006.md)；只关闭本地源码合成链，不关闭候选/目标机或生产 gate。
 - [x] T3/T7/T21 原生命令 clean 候选子项（2026-10-06）：OCR 27/27 审修后提交 `9611589c`；新 workbench/服务包固定同一 SHA，源码/实际双包各 9/9、相关测试 106、同包合成 CRM 保存 6/6 通过。候选 `ca79774b…` 的服务回执进入 seq 3；重试 52 文件不变、旧证据 195 文件保留，旧 WSL 回执拒绝。见[候选证据](./evidence/dsh-g0-native-command-candidate-20261006.md)；新包目标/组合宿主验收 NOT_RUN，生产激活 BLOCKED。
@@ -315,6 +315,7 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 - [x] T3/T7 新来源 HTTP 的 WSL 服务子项（2026-10-07）：同一 `f9726f68` 查询/保存 archive，实际杭州低权限隔离冷安装及来源/保存/查询离线/进程崩溃/备份恢复 **10/10 PASS**；输入保护 **7 PASS**、本机预演 **10/10 PASS**。5 个服务进程与 1 个物理 worker 已退出，临时目录已回收，现役监听/PID 不变；见[现场证据](./evidence/dsh-g0-first-purchase-source-wsl-20261007.md)。现场阶段原 journal 为 seq 3，后续接线见下一项；不等于目标 DSH 或生产通过。
 - [x] T3/T7/T13/T21 新来源 HTTP 目标回执接线（2026-10-07）：原始十项 WSL 回执、固定输入/runner、查询与保存包/源码、进程日志绑定原候选 journal seq 4；新门禁 34 PASS、完整 release suite 278 PASS，真实 CLI 幂等及本机/错候选拒绝通过。见[接线证据](./evidence/dsh-g0-first-purchase-source-target-gate-20261007.md)。只关闭本地核验记账，目标 DSH/跨旧版本恢复、真实身份、供应链和生产激活仍开放。
 - [x] T2/T3/T9/T14 固定 Linux runtime 的 WSL 官方 Host HTTP 子项（2026-10-07）：复用 `a049f061…` runtime 与原四包，非特权冷安装后登录/查询/保存/ACK 核对、服务/宿主正常重启和原生对话 **1 PASS**；保护 49、进程/输入 13、release 278、本机 v4 整链 1 PASS。8 个自有 PID 和临时目录回收，现役监听/PID 与原 candidate/journal seq 4 不变，见[本轮证据](./evidence/dsh-g0-first-purchase-runtime-host-20261007.md)。仅关闭目标 HTTP 组合，目标浏览器、跨版本/崩溃恢复、目标 Host 回执接线和生产 gate 仍开放。
+- [x] T2/T13/T21 目标首购 runtime Host 回执接线（2026-10-07）：上一批已提交 `4d792eeb`；新封套校验绑定原服务目标事件、控制器源码、密封输入/结果清单及真实 runtime 字节，原候选追加 seq 5，重试字节/mtime 不变。新负测 33、完整 release 311 PASS，前四事件和 15 个固定输入保留，见[本轮证据](./evidence/dsh-g0-first-purchase-runtime-host-gate-20261007.md)。仅核对已有操作者观察，不重跑目标机；目标浏览器/生产身份/供应链和 activation 仍开放。
 - [x] 查询归属复审（2026-10-06）：`9d1a9acf` 全部 29/29 文件已核对；修复运行中身份瞬时故障被误写 UNKNOWN，94 项后端与 15 项 Node 回归通过，见[本轮证据](./evidence/dsh-g0-native-crm-review-20261006.md)。上述官方宿主整链保持开放。
 
 - [x] T3/T7 现有 CRM 身份适配子项（2026-10-06，本地增量）：可选 loopback `/api/v1/auth/me` adapter，显式现有账号与当前管理员授权、无密码/token 缓存、撤权/超时/畸形响应拒绝；五文件 **134 PASS**，实际包 **1 PASS** 含 5 项身份观测。见[证据](./evidence/dsh-g0-crm-identity-adapter-20261006.md)。审修后正常 hooks 提交 `7edf7710`；该 clean SHA 源码/实际离线包各 **9/9 PASS**，同一 archive 的 adapter **5/5 PASS**，固定包 `26b07aa7…`。新 plugin candidate/journal 与真实 CRM/WSL 接入未验收，不开启生产保存。
@@ -325,6 +326,12 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 - [ ] T13/T21：生产 activation journal、远端 receive/reconcile 与现场恢复；本机 `LOCAL_HOST_VERIFIED` 不替代这些门禁。
 - [x] T2/T13/T17/T21 clean CRM/知识本机候选（2026-10-06）：源码 `9902bdd9` 的正式 preflight **8/8 PASS**、release suite **244 PASS**；两份独立包与实际官方宿主 **10/10 PASS**，各自 journal seq 3 重试不改文件，5 个临时宿主退出。见[验收证据](./evidence/dsh-g0-clean-candidate-20261006.md)。生产与目标 WSL runtime 仍 NOT_RUN。
 - [ ] 完整候选签名/SBOM/CVE、canary/rollback 与远端门禁；不把上述本机包和回执视为可上线，仍按 G0/stop-go 决定物理分仓。
+
+- [x] T2/T3/T14/T15 同一候选的目标桌面 headless 浏览器子项（2026-10-07）：连接恢复后，固定 runtime/原四包在实际 WSL2、UID 65534 完成官方 Host **1 PASS / 5 场景 PASS**；修复 locale 与临时浏览器缺 CJK 字库，中文截图核对完成。保护 **47 PASS / 4 SKIP / 0 FAIL**；原 15 输入与 journal seq 5 保留，未接入新 browser event。见[目标证据](./evidence/dsh-g0-first-purchase-target-browser-wsl-20261007.md)，此前[连接失败](./evidence/dsh-g0-first-purchase-target-browser-20261007.md)保留。仅关闭此 synthetic 子项，headed/移动端/无障碍、在途/跨版本、供应链与生产 gate 仍开放。
+
+- [x] T2/T13/T21 目标浏览器回执接线（2026-10-07）：既有 WSL headless 五场景以独立 browser schema 接入原候选 seq 6，引用 seq 5 runtime Host；共用 immutable runtime/包/进程校验，完整 release **345 PASS / 0 SKIP**（新门禁 34）。真实 CLI 重试字节/mtime 不变，错父事件拒绝，前五事件/15 输入保留，见[本轮证据](./evidence/dsh-g0-first-purchase-browser-gate-20261007.md)。只核验已有观察，未重跑杭州；生产、跨版本与完整 UI gate 保持开放。
+
+- [x] 2026-10-07 Host/browser 门禁审修：OCR 28/28；拒绝矛盾 pytest 日志、补 B0 browser 清单、修正文档。release 348 PASS，保护 52 PASS / 4 SKIP；原 seq 6/15 输入保留，见[审核证据](./evidence/dsh-g0-first-purchase-host-browser-review-20261007.md)。只关闭本批审修，不关闭目标在途/跨版本或生产 gate。
 
 ## 2026-09-30 rc2 DX triage follow-up
 

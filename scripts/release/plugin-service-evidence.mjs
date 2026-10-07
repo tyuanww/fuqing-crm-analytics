@@ -11,9 +11,8 @@ import { verifyServiceTargetEvidence } from './service-target-evidence.mjs';
 const digest = value => hash(JSON.stringify(value));
 const decode = bytes => JSON.parse(bytes.toString('utf8'));
 
-export async function verifyPluginService({ candidatePath, evidencePath, statePath, targetEvidencePath, targetInputPath } = {}) {
-  assert.equal(targetEvidencePath !== undefined, targetInputPath !== undefined, 'PLUGIN_SERVICE_TARGET_ARGUMENTS_REQUIRED');
-  for (const path of [candidatePath, evidencePath, statePath]) {
+export async function readPreparedServiceCandidate({ candidatePath, statePath } = {}) {
+  for (const path of [candidatePath, statePath]) {
     assert.ok(typeof path === 'string' && isAbsolute(path), 'PLUGIN_SERVICE_ABSOLUTE_PATH_REQUIRED');
   }
   const candidateBytes = await readArtifactFile(candidatePath), candidate = decode(candidateBytes), directory = dirname(candidatePath);
@@ -56,18 +55,25 @@ export async function verifyPluginService({ candidatePath, evidencePath, statePa
   for (const [name, value] of Object.entries(candidateFields)) {
     assert.deepEqual(prepared.result[name], value, 'PLUGIN_SERVICE_JOURNAL_MISMATCH');
   }
+  return { candidate, candidateBytes, candidateDigest, candidateFields, prepared: prepared.result, journal };
+}
+
+export async function verifyPluginService({ candidatePath, evidencePath, statePath, targetEvidencePath, targetInputPath } = {}) {
+  assert.equal(targetEvidencePath !== undefined, targetInputPath !== undefined, 'PLUGIN_SERVICE_TARGET_ARGUMENTS_REQUIRED');
+  assert.ok(typeof evidencePath === 'string' && isAbsolute(evidencePath), 'PLUGIN_SERVICE_ABSOLUTE_PATH_REQUIRED');
+  const { candidate, candidateBytes, candidateDigest, candidateFields, prepared } = await readPreparedServiceCandidate({ candidatePath, statePath });
   const observation = await verifyServiceArtifactEvidence({ gate: candidate.service_compatibility, evidencePath });
   // Reject invalid target inputs before appending even the base artifact event.
   const target = targetEvidencePath === undefined ? null : await verifyServiceTargetEvidence({
     artifactObservation: observation, evidencePath, targetEvidencePath, targetInputPath, candidate, candidateBytes });
-  const event = await recordEvent(statePath, { release_tag: prepared.result.release_tag,
+  const event = await recordEvent(statePath, { release_tag: prepared.release_tag,
     status: 'CANDIDATE_SERVICE_ARTIFACTS_VERIFIED', ...candidateFields,
     service_evidence_sha256: observation.service_evidence_sha256, observation },
   { idempotencyKey: `candidate-service:${candidateDigest}:${observation.service_evidence_sha256}`,
-    requiredEvent: { seq: prepared.result.seq, digest: prepared.result.digest } });
+    requiredEvent: { seq: prepared.seq, digest: prepared.digest } });
   if (target) {
     // A crash after the base event is safe: retry reuses it and appends only this observation.
-    const targetEvent = await recordEvent(statePath, { release_tag: prepared.result.release_tag,
+    const targetEvent = await recordEvent(statePath, { release_tag: prepared.release_tag,
       status: 'CANDIDATE_SERVICE_TARGET_OBSERVED', ...candidateFields,
       service_artifact_event: { seq: event.seq, digest: event.digest }, observation: target },
     { idempotencyKey: `candidate-service-target:${candidateDigest}:${target.target_evidence_sha256}`,

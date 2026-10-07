@@ -86,16 +86,22 @@
 
 2026-10-07 目标宿主增量：复用已发布的 Linux runtime `a049f061…`、原四包及独立目标 wheel，在杭州 WSL/UID 65534 通过官方 Host HTTP 整链 **1 PASS**；原生命令、查询 worker、保存/ACK 核对、查询/保存独立重启、宿主会话正常恢复和原生对话均实跑。本轮保护 **49 PASS**、进程/输入 **13 PASS**、release **278 PASS**，v4 本机回归 **1 PASS**。两次失败与修复、输入摘要及清理见[本轮证据](../hackathon/evidence/dsh-g0-first-purchase-runtime-host-20261007.md)。8 个自有 PID、临时目录回收，现役监听/PID 未变；原 journal seq 4 不变。只关闭目标 HTTP 子项，不能替代目标浏览器、跨版本/在途恢复或生产 activation。
 
+2026-10-07 目标宿主回执接线：上一批 29 文件正常 hooks 提交 `4d792eeb`；新首购封套在现有 `verify-host` 中独立校验，原始杭州 HTTP 观察进入候选 journal seq 5，前四事件和 15 个固定输入不变，重复命令不改字节/mtime。门禁 33、完整 release suite 311 PASS，见[本轮证据](../hackathon/evidence/dsh-g0-first-purchase-runtime-host-gate-20261007.md)。只新增本地核对与记账，不重复现场运行，也不改变生产准入。
+
+2026-10-07 目标浏览器阶段：12:21 的连接超时记录保留为[历史失败证据](../hackathon/evidence/dsh-g0-first-purchase-target-browser-20261007.md)。用户恢复连接后，同一 runtime/四包在实际杭州 WSL2、UID 65534 完成 **官方 Host 1 PASS / headless 五场景 PASS**；驱动固定中文 locale，临时补齐字库后截图中文可读。保护 47 PASS / 4 SKIP / 0 FAIL；原候选 15 输入和 journal seq 5 不变，新 browser observation 尚未接线，见[现场证据](../hackathon/evidence/dsh-g0-first-purchase-target-browser-wsl-20261007.md)。只关闭目标桌面 headless synthetic 子项，不替代跨版本、真实身份/UAT、供应链或生产放行。
+
+2026-10-07 浏览器回执接线：复用原目标文件，通过独立 browser schema 将五场景观察记入原候选 journal **seq 6**，引用 seq 5 Host 事件；前五事件/15 输入保留，重试不改字节/mtime。完整 release **345 PASS / 0 SKIP**（新门禁 34），错父事件拒绝，见[本轮证据](../hackathon/evidence/dsh-g0-first-purchase-browser-gate-20261007.md)。不重新跑 WSL，也不授予生产准入；下一步目标在途/跨版本恢复。
+
 | 任务 | 当前状态 | 已有证据 | 尚未关闭 |
 |---|---|---|---|
 | T1 | IMPLEMENTED / STATIC PASS | 架构设计、机器 policy/inventory、11 包及当前 AST 盘点；含 import-equals 的 drift/循环/越界/公开导出负测纳入 B0 pipeline，精确数量与源摘要以生成的边界清单为准 | 这只关闭依赖盘点；真实宿主与服务语义由 T2/T3/T17 验证 |
-| T2 | PARTIAL / WSL RUNTIME HOST HTTP PASS | 原本机[宿主证据](../hackathon/evidence/dsh-g0-pinned-host-20261004.md)保留；本轮固定 Linux runtime 在实际 WSL 加载四包、正常重启、保留 session journal 前缀和原生对话已通过，见上方证据 | WSL 在途崩溃/torn-frame、rc1→rc2、目标浏览器与 shell/tool union；0.2.0 仍 DEFERRED |
-| T13 | PARTIAL / LOCAL JOURNAL PASS | profile/state/既有 journal 保留；候选快照与 v2 host evidence 已通过 CLI 幂等接入 `CANDIDATE_HOST_VERIFIED`，重复不改原候选，见[本轮证据](../hackathon/evidence/dsh-g0-host-journal-20261004.md) | 生产 activation 崩溃 replay、远端 receipt/reconcile 和目标宿主回执 |
-| T15 | PARTIAL | 独立包/构建成果保留；新 `f9726f68` 查询/保存包、原 workbench/CRM 包与固定 Linux runtime 已完成 WSL 官方 HTTP 组合，见上方证据与[插件拆分证据](../hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md) | 物理分仓、目标浏览器/跨版本验收、指标/知识服务的目标安装、完整 invariant/精确宿主合同、签名/SBOM/来源信任仍未关闭 |
-| T3 | PARTIAL / WSL HOST HTTP ARTIFACT PASS | `f9726f68` 两包 owner 分离；本机官方 HTTP/Chrome、WSL 服务十项及本轮实际 WSL 官方 Host/四包 HTTP 整链通过，保存进程只开自有库 | 目标浏览器、当前包跨旧版本目标矩阵、生产身份/候选准入、供应链及真实模型/UAT 未完成 |
+| T2 | PARTIAL / WSL HOST HTTP + HEADLESS PASS | 原本机[宿主证据](../hackathon/evidence/dsh-g0-pinned-host-20261004.md)保留；固定 Linux runtime 在实际 WSL 加载四包、正常重启、保留 session journal 前缀和原生对话通过；随后同包 headless 五场景通过，见上方证据 | WSL 在途崩溃/torn-frame、rc1→rc2、headed/移动端/无障碍与 shell/tool union；0.2.0 仍 DEFERRED |
+| T13 | PARTIAL / LOCAL JOURNAL PASS | profile/state/既有 journal 保留；候选快照与 v2 host evidence 已通过 CLI 幂等接入 `CANDIDATE_HOST_VERIFIED`，重复不改原候选，见[本轮证据](../hackathon/evidence/dsh-g0-host-journal-20261004.md) | 生产 activation 崩溃 replay、远端部署 receipt/reconcile；已有首购 HTTP/浏览器观察分别接入 seq 5/6 |
+| T15 | PARTIAL | 独立包/构建成果保留；新 `f9726f68` 查询/保存包、原 workbench/CRM 包与固定 Linux runtime 已完成 WSL 官方 HTTP 与 headless 五场景组合，见上方证据与[插件拆分证据](../hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md) | 物理分仓、headed/移动端/无障碍及跨版本验收、指标/知识服务的目标安装、完整 invariant/精确宿主合同、签名/SBOM/来源信任仍未关闭 |
+| T3 | PARTIAL / WSL HOST HTTP + HEADLESS ARTIFACT PASS | `f9726f68` 两包 owner 分离；本机官方 HTTP/Chrome、WSL 服务十项及实际 WSL 官方 Host/四包 HTTP 与 headless 五场景通过，保存进程只开自有库 | headed/移动端/无障碍、当前包跨旧版本目标矩阵、生产身份/候选准入、供应链及真实模型/UAT 未完成 |
 | T7 | PARTIAL / CURRENT WSL SAME-VERSION RECOVERY PASS | `f9726f68` 保存双包本机 9/9；当前查询/保存 archive 在 WSL 完成查询离线、保存 SIGKILL、同回执恢复、合成小库冷恢复和查询重启不重算，已接原 journal seq 4，见上方证据 | 跨旧版本目标恢复、生产形状 UNKNOWN 与完整候选门禁未完成；结果年龄判断暂缓，生产保存 UI 未启用 |
 | T17 | PARTIAL / LOCAL HOST PASS | 固定官方 Web CLI 十项场景及父命令中断回收；实测 preset 移除后现有会话保留工具，同进程挂死需外部重启；已明确 `HOST_RESTART_REQUIRED` | 任意插件同进程隔离不承诺；生产 activation/journal/canary、目标平台与真实服务恢复仍开放，测试指针不替代原子部署 |
-| T21 | PARTIAL / LOCAL HOST + SERVICE RECEIPT PASS | `plugin candidate` 携带 profile 快照；`verify-host` 绑定固定宿主十项观测；`verify-service` 绑定精确服务双包九项观测及按各自 schema 区分的 WSL 十四项恢复/十项 source-HTTP 观测，均以原 journal 幂等记账，见上方最新证据 | 生产 canary/rollback、远端 receive/reconcile、host activation；本机核验仍 release_ready=false，目标 JSON 不证明发布者身份 |
+| T21 | PARTIAL / LOCAL HOST + SERVICE RECEIPT PASS | `plugin candidate` 携带 profile 快照；`verify-host` 分别绑定旧 v2 十项宿主观测、首购 WSL runtime 二十项 HTTP 观察和五项 headless 浏览器观察；`verify-service` 绑定精确服务双包九项观测及按各自 schema 区分的 WSL 十四项恢复/十项 source-HTTP 观测，均以原 journal 幂等记账，见上方最新证据 | 生产 canary/rollback、远端 receive/reconcile、host activation；本机核验仍 release_ready=false，目标 JSON 不证明发布者身份 |
 | T22 | IMPLEMENTED / DOCS PASS | README、docs 索引、rc2 Quickstart 和插件作者 Quickstart 已统一当前事实与三步入口 | 现场 host/canary/rollback 仍不属于文档门禁 |
 | T23 | IMPLEMENTED / READINESS PASS | 聚合阻断码、remedy 和 Quickstart 锚点已实现；检查成功返回 0，缺项/门禁阻断返回 2；旧 runtime 的 readiness 结果仅属历史证据 | 远端证据仍由发布门禁负责 |
 

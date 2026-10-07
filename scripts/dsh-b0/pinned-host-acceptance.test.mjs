@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, access, symlink, cp } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, access, symlink, cp, chmod } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { runPinnedHostAcceptance } from './pinned-host-acceptance.mjs';
-import { runFirstPurchaseBrowser } from './first-purchase-browser.probe.mjs';
+import { runFirstPurchaseBrowser, launchFirstPurchaseBrowser } from './first-purchase-browser.probe.mjs';
 import { prepareFirstPurchaseArtifacts, verifyFirstPurchaseInstalledArtifacts, verifyFirstPurchaseSourceContract } from './first-purchase-artifacts.mjs';
 import { serviceFixture } from '../release/test-fixtures/service-compatibility.mjs';
 import { DSH_SDK_VERSION, DSH_UPSTREAM_SHA } from '../release/toolchain.mjs';
@@ -63,6 +63,28 @@ test('tampered immutable package fails before extraction or host startup and lea
   assert.ok(!(await readdir(output)).some(name => name.startsWith('host-')));
 });
 
+test('browser executable is explicit, absolute and regular; never silently falls back', async t => {
+  const root = await fixture(t), modulePath = join(root, 'browser-fixture.mjs'), executable = join(root, 'owned-browser');
+  await writeFile(modulePath, 'export const chromium = { launch: async options => options };');
+  await writeFile(executable, '#!/bin/sh\nexit 0\n', { mode: 0o700 });
+  assert.deepEqual(await launchFirstPurchaseBrowser({ modulePath, executablePath: executable }), { executablePath: executable, headless: true });
+  await assert.rejects(launchFirstPurchaseBrowser({ modulePath, executablePath: 'chrome' }), /HOST_BROWSER_EXECUTABLE_ABSOLUTE/);
+  await assert.rejects(launchFirstPurchaseBrowser({ modulePath, executablePath: root }), /HOST_BROWSER_EXECUTABLE_REGULAR/);
+  const link = join(root, 'link'); await symlink(executable, link);
+  await assert.rejects(launchFirstPurchaseBrowser({ modulePath, executablePath: link }), /HOST_BROWSER_EXECUTABLE_REGULAR/);
+  await chmod(executable, 0o600);
+  await assert.rejects(launchFirstPurchaseBrowser({ modulePath, executablePath: executable }), /EACCES/);
+});
+
+test('browser launch failure preserves a NOT_STARTED observation', async t => {
+  const root = await fixture(t), modulePath = join(root, 'browser-fixture.mjs');
+  await writeFile(modulePath, 'export const chromium = { launch: async () => { throw Error("owned-launch-failure"); } };');
+  await assert.rejects(runFirstPurchaseBrowser({ modulePath, output: root }), /owned-launch-failure/);
+  const evidence = JSON.parse(await readFile(join(root, 'browser-observations.json')));
+  assert.equal(evidence.browser_version, 'NOT_STARTED');
+  assert.deepEqual(evidence.rows, []);
+});
+
 for (const stage of ['context', 'page', 'evidence', 'close']) {
   test(`browser probe closes owned resources when ${stage} fails`, async t => {
     const root = await fixture(t), modulePath = join(root, 'browser-fixture.mjs');
@@ -77,7 +99,7 @@ for (const stage of ['context', 'page', 'evidence', 'close']) {
         close: async () => { state.contextClosed = true; if (stage === 'close') throw Error('close'); }
       };
       export const chromium = { launch: async () => ({
-        newContext: async () => { if (stage === 'context') throw Error('context'); return context; },
+        newContext: async options => { state.contextOptions = options; if (stage === 'context') throw Error('context'); return context; },
         close: async () => { state.browserClosed = true; }
       }) };
     `);
@@ -87,6 +109,7 @@ for (const stage of ['context', 'page', 'evidence', 'close']) {
       host: { request: async () => { throw Error('stop before any browser interaction'); } } }),
     stage === 'evidence' ? /ENOTDIR/ : new RegExp(stage));
     assert.equal(state.browserClosed, true);
+    assert.equal(state.contextOptions.locale, 'zh-CN');
     assert.equal(state.contextClosed, stage !== 'context');
   });
 }

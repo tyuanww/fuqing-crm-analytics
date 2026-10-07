@@ -14,7 +14,33 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 固定 Linux runtime 与首购包的杭州宿主组合（2026-10-07，当前进度）
+### Host / 浏览器门禁审修（2026-10-07，当前进度）
+
+- OCR delegate 覆盖全部 **28/28** 原改动（17 代码/CI、11 文档）；修复 HTTP 矛盾 pytest 日志被接受、B0 清单遗漏 browser 门禁和保存准入文档陈旧。见[本轮审核记录](docs/hackathon/evidence/dsh-g0-first-purchase-host-browser-review-20261007.md)。
+- 本轮 release **348 PASS / 0 SKIP / 0 FAIL**；环境/宿主保护 **52 PASS / 4 SKIP / 0 FAIL**。原 HTTP/browser 回执重新核验成功，原 journal seq 6 字节/mtime 与 15 个固定输入不变；本批准备按授权正常 hooks 本地提交。
+- **仍 PARTIAL**：下一步目标 WSL 在途/torn-frame/跨版本恢复；其余生产门禁保持开放。本轮审修没有重跑现场、push 或生产切换。
+
+### 目标浏览器回执接线（2026-10-07，上一阶段）
+
+- 同一候选 `861d6ef1…` 的既有 WSL 五场景回执已通过 `plugin verify-host` 接入原 journal **seq 6**，引用原 runtime Host seq 5；前五事件和 15 个固定候选输入保留。实际 CLI 重试字节/mtime 不变，错父事件退出 2 且不写状态，见[本轮接线证据](docs/hackathon/evidence/dsh-g0-first-purchase-browser-gate-20261007.md)。
+- 新增 browser schema，复用 HTTP 的包/runtime/进程校验，明确 headless、synthetic、NOT_RUN 与未签名观察边界。本轮完整 release suite **345 PASS / 0 SKIP / 0 FAIL**（含新门禁 34 项）。只核验已有证据，没有重新运行杭州服务/浏览器，也未提交、推送或生产切换。
+- **仍 PARTIAL**：下一步为当前候选的目标在途/跨版本恢复；headed/移动端/无障碍、真实身份/模型/UAT、供应链与 activation/canary/rollback、物理分仓仍开放。`release_ready=false`。
+
+### 目标浏览器验收（2026-10-07，上一阶段）
+
+- 杭州 Tailscale/SSH 已恢复。候选 `861d6ef1…` 的原四包和固定 Linux runtime `a049f061…` 在实际 WSL2、UID 65534、Chrome headless 完成官方 Host **1 PASS / 5 场景 PASS**：登录前拒绝、CRM 登录、原生查询与确认保存、刷新核对、普通原生对话。见[本轮目标浏览器证据](docs/hackathon/evidence/dsh-g0-first-purchase-target-browser-wsl-20261007.md)。此前[12:21 连接失败记录](docs/hackathon/evidence/dsh-g0-first-purchase-target-browser-20261007.md)保留。
+- 修复驱动依赖系统语言的问题，固定 `zh-CN`；浏览器/缺失库/CJK 字库只在临时目录解包。最终 r3 **1 passed, 2 warnings，84.31 秒**，中文截图已核对；r1 失败和 r2 交互通过但缺字体的证据保留。本机保护 **47 PASS / 4 SKIP / 0 FAIL**，未重跑上一阶段 311 项 suite。
+- 该现场阶段原候选 15 个固定输入及 journal seq 5 保留；后续浏览器回执已独立接线至 seq 6，见上节，不冒用 HTTP-only 门禁。本轮临时目录已回收、测试端口已关闭，生产五个监听/PID 保持不变，无生产保存、activation、Git 提交或发布。整体仍 **PARTIAL**。
+- 同一候选的 browser observation 后续接线见上节；继续处理目标在途/跨版本恢复；headed/移动端/无障碍、真实身份/模型/UAT、供应链及生产 activation 仍开放。
+
+### 目标宿主回执接线（2026-10-07，上一阶段）
+
+- 上一批 29 文件已按正常 hooks 提交 `4d792eeb`；提交后工作树干净。当前新增首购 runtime Host 回执校验，沿用 `plugin verify-host`，未改变旧 CRM＋知识 v2 证据合同。
+- 原杭州证据、输入封套、固定控制器源码、runtime/插件/服务摘要及进程/清理记录经本地核对，进入候选 `861d6ef1…` 原 journal **seq 5**。重复命令不改字节/mtime，前四条事件和 15 个固定输入保持不变，见[本轮证据](docs/hackathon/evidence/dsh-g0-first-purchase-runtime-host-gate-20261007.md)。
+- 新门禁 **33 PASS**；本轮完整 release suite **311 PASS / 0 SKIP**。新事件为 `CANDIDATE_RUNTIME_HOST_OBSERVED`，保留 `UNATTESTED_OPERATOR_OBSERVATION` 和 `release_ready=false`；本轮未重跑杭州服务，也未 push、发布或切换生产。接线增量尚未提交。
+- **该阶段 PARTIAL**：目标桌面 headless 浏览器已在上节接续完成；在途/跨版本恢复、真实身份/UAT、供应链和生产 activation 仍开放。
+
+### 固定 Linux runtime 与首购包的杭州宿主组合（2026-10-07，上一阶段）
 
 - 复用已发布的固定 Linux runtime `a049f061…`，同一 workbench/CRM/查询/保存四包在杭州 WSL2、UID 65534 完成官方 Host HTTP **1 PASS**。实际原生命令、查询 worker、保存 ACK 核对、服务/宿主重启及无业务工具的原生对话通过；最终一条分析、一个 worker。见[本轮证据](docs/hackathon/evidence/dsh-g0-first-purchase-runtime-host-20261007.md)。
 - 新 v5 演练入口直接加载 immutable runtime，无需 DSH checkout；原 Mac pack receipt 保留，Linux wheel 单独核验。修复恢复测试过早采样的问题；本轮保护 **49 PASS**、进程/输入 **13 PASS**、release suite **278 PASS**、原 v4 整链 **1 PASS**。两次失败及修复证据保留。

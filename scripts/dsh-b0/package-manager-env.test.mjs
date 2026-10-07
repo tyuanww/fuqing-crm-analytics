@@ -1,11 +1,33 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, readFile, rm, mkdir, writeFile, chmod } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, mkdir, writeFile, chmod, symlink, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { packageManagerEnv, packageNetworkEnv, dependencyCommands } from './package-manager-env.mjs';
+import { packageManagerEnv, packageNetworkEnv, dependencyCommands, archiveToolEnv } from './package-manager-env.mjs';
+
+test('archive tool resolves a caller symlink while preserving the sanitized environment', async t => {
+  const scratch = await mkdtemp(join(tmpdir(), 'b0-archive-env-'));
+  t.after(() => rm(scratch, { recursive: true, force: true }));
+  const located = spawnSync('/bin/sh', ['-c', 'command -v zstd'], { encoding: 'utf8' });
+  assert.equal(located.status, 0);
+  const target = await realpath(located.stdout.trim());
+  await symlink(target, join(scratch, 'zstd'));
+  const input = Object.freeze({ PATH: '/usr/bin:/bin', CI: '1' });
+  const env = await archiveToolEnv(input, scratch);
+  assert.deepEqual(env, { PATH: `/usr/bin:/bin:${dirname(target)}`, CI: '1' });
+  assert.deepEqual(input, { PATH: '/usr/bin:/bin', CI: '1' });
+  assert.equal(spawnSync('zstd', ['--version'], { env, encoding: 'utf8' }).status, 0);
+});
+
+test('archive tool rejects a missing or broken executable before running tests', async t => {
+  const scratch = await mkdtemp(join(tmpdir(), 'b0-archive-missing-'));
+  t.after(() => rm(scratch, { recursive: true, force: true }));
+  await assert.rejects(archiveToolEnv({ PATH: '/usr/bin:/bin' }, scratch), /B0_ZSTD_REQUIRED/);
+  await writeFile(join(scratch, 'zstd'), '#!/bin/sh\nexit 1\n', { mode: 0o700 });
+  await assert.rejects(archiveToolEnv({ PATH: '/usr/bin:/bin' }, scratch), /B0_ZSTD_REQUIRED/);
+});
 
 test('dependency child receives explicit proxies without TLS bypass or application credentials', () => {
   const transport = { HTTP_PROXY: 'http://127.0.0.1:7897', HTTPS_PROXY: 'http://127.0.0.1:7897',

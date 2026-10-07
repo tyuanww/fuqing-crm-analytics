@@ -58,13 +58,15 @@ python3 scripts/run_backend_tests_bounded.py
 python3 scripts/run_backend_tests_bounded.py backend/tests/test_local_demo_access.py
 ```
 
-包含 B0/Vue 的检查会先核对 Node 24，再运行耗时步骤；手工入口可用 `--node /absolute/node` 选择已有解释器。Git hook 继承调用 shell 的 PATH，需要在该次操作中选用已有 Node 24，不自动安装或修改全局版本。ruff 锁 `0.16.9`（以 `requirements-lock.txt` 为准），`pyproject.toml` 的 `lint.select` 为 `E4/E7/E9/F`（0.15 默认集）；不要用无 select 的 `ruff check .` 去套 0.16 的 413 条默认规则。
+包含 B0/Vue 的检查会先核对 Node 24，再运行耗时步骤；手工入口可用 `--node /absolute/node` 选择已有解释器。Git hook 继承调用 shell 的 PATH，需要在该次操作中选用已有 Node 24，不自动安装或修改全局版本。已验证 `package-manager-env.test.mjs` 的工具定位和拒绝行为，B0 `--check` 还需现有 zstd：从调用方 PATH 定位，验证版本后将其解析后的工具目录附加到精简环境，缺失/不可运行时提前返回 `B0_ZSTD_REQUIRED`；不继承其他环境变量、不自动安装。ruff 锁 `0.16.9`（以 `requirements-lock.txt` 为准），`pyproject.toml` 的 `lint.select` 为 `E4/E7/E9/F`（0.15 默认集）；不要用无 select 的 `ruff check .` 去套 0.16 的 413 条默认规则。
 
 DSH 本地开发可直接用 `./scripts/dsh-dev/run.sh diagnose`、`check` 和 `probe`；包装器读取 `.nvmrc` 约定并自动选择 Node 24.19.0，不修改系统 Node。没有标准 Homebrew 路径时设置 `DSH_DEV_NODE=/absolute/node24`。
 
 B0 独立入口：`node scripts/dsh-b0/pipeline.mjs --check --python /absolute/python3.14`；不带参数或传 `--help` 会打印用法，不启动任何服务。`--prepare` 会下载固定上游、先用锁文件完整预热 pnpm store，再安装构建依赖；`--audit` 只对已准备的 build-tools 闭包执行在线高危审计；二者属于明确动作，preflight 会把审计作为独立 fail-closed 阶段记录，网络异常时可单独重试。插件 `package.json` 的 `test` 是部分源测试便捷入口，`test:built` 也只有一个子集，均不能作为完整 B0 通过声明。原生查询资产需显式 `node scripts/dsh-b0/serve.mjs --python /absolute/python3.14 --native-query-assets`，不替代默认 `--native-query`。离线分析/驾驶舱合同用 `scripts/dsh-b0/analysis-contract.mjs` 与 `cockpit-contract.mjs`，不启动旧 CRM。旧 Vue 的依赖由 `frontend-vue3/package-lock.json` 管理，B0 的固定版本由 toolchain/自身锁管理，旧后端由 requirements-lock 管理；此轮未升级依赖。
 
 已有固定版本工具链可通过环境变量 `B0_BUILD_UPSTREAM=/absolute/prepared/upstream` 供 `--check` 只读复用。仍强制验证上游 SHA、锁文件、SDK 与类型版本；不下载、不升级。该覆盖不允许用于 `--prepare`。
+
+首购官方 Host 的显式浏览器演练继续使用 `backend/tests/test_analytics_first_purchase_official_host.py` 与 `B0_NATIVE_CRM_BROWSER_MODULE=/absolute/playwright/index.mjs`。默认选择系统 Chrome；若使用独有临时目录中的固定 Chrome for Testing，可增加 `B0_NATIVE_CRM_BROWSER_EXECUTABLE=/absolute/regular-executable`，路径必须绝对、可执行且不能是 symlink，失败不回落到其他浏览器。驱动固定 `zh-CN` locale，与中文原生按钮定位一致，并记录实际浏览器版本、平台与启动状态；不自动安装浏览器或系统库。只有目标实际运行的结果才计为目标浏览器证据，本机空白页预检不能替代业务五场景。目标机还需可用的中文字体；DOM 断言通过不等于中文字形可见，必须复核实际截图。临时字体/库的来源与摘要单独记录，不改业务包；本次目标结果见[WSL 浏览器证据](../hackathon/evidence/dsh-g0-first-purchase-target-browser-wsl-20261007.md)。
 
 在线 `--prepare` / `--audit` 的 Git/pnpm 命令接受操作者显式传入的 `HTTP_PROXY`、`HTTPS_PROXY`、`ALL_PROXY`、`NO_PROXY` 及小写形式。macOS 系统代理不会自动成为终端环境；只有确认自己的代理地址后才在当前命令导出。不会改全局网络配置，也不会把代理加入离线构建/测试和业务宿主环境；TLS/audit 绕过参数及业务凭据仍不透传。审计接口超时或返回非 JSON 时继续 fail-closed，修复连接后单独重跑 `--audit`，正式 preflight 使用新 tag 保留旧失败证据。实际故障与修复见[网络证据](../hackathon/evidence/dsh-g0-preflight-network-20261006.md)。
 
@@ -91,6 +93,8 @@ B0 独立入口：`node scripts/dsh-b0/pipeline.mjs --check --python /absolute/p
 WSL 目标回执接线：`node --test --test-concurrency=1 scripts/release/service-target-evidence.test.mjs`，已纳入 `pnpm dsh test` 自动发现。**37 PASS** 覆盖输入/日志/场景/清理篡改、只读回退声明、路径与特殊文件、幂等/恢复、错误脱敏；fixture 的 wheel/seed 是不可安装的解析器测试字节，不冒充 WSL 执行。固定 2026-10-06 runner 原字节只作审计输入，测试不执行它。同日完整 release suite **243 PASS / 0 SKIP**；另用已有真实现场回执执行本地 CLI，原 journal seq 4 和重试、108 文件不变通过，见[本次证据](../hackathon/evidence/dsh-g0-service-target-gate-20261006.md)。本步没有重新执行远端验收，生产 gate 继续 BLOCKED。
 
 来源 HTTP 目标回执接线：`node --test scripts/release/source-target-evidence.test.mjs`（Node 24），由同一 `pnpm dsh test` 自动发现。当前 34 PASS；完整 release suite 278 PASS / 0 SKIP。核对当前 query/save 两包与候选源码关系、安全解包、固定 runner/helper、15/13 Linux 依赖、十项观测、重启/崩溃与独立存储握手；错误证据拒绝且不写 journal。夹具不运行实际服务或 WSL。已有实际杭州回执接入 journal seq 4 的结果、重试与证据边界见[本轮记录](../hackathon/evidence/dsh-g0-first-purchase-source-target-gate-20261007.md)，没有重跑目标服务。
+
+首购目标浏览器回执门禁：`node --test scripts/release/browser-host-evidence.test.mjs`，由既有 release suite 自动发现。本轮新门禁 **34 PASS**，完整 `node --test scripts/release/*.test.mjs` **345 PASS / 0 SKIP**。复用现有 `plugin verify-host` 和 HTTP 的包/runtime 校验，通过独立 browser schema 绑定原候选 Host 事件；真实 WSL 回执接入 seq 6 的幂等/拒绝结果见[接线证据](../hackathon/evidence/dsh-g0-first-purchase-browser-gate-20261007.md)。单元夹具只验证解析与状态，命令不启动浏览器/WSL，不认证截图内容或签名，不放行生产。
 
 ## 提交内容与历史审计
 
@@ -222,6 +226,10 @@ CRM 首购的真实宿主 HTTP 链另有显式入口：先按已有 SDK 链接�
 本次同一 `f9726f68` 包的实际杭州来源/同版本恢复 **10/10 PASS**，命令、摘要、失败修复及清理见[现场证据](../hackathon/evidence/dsh-g0-first-purchase-source-wsl-20261007.md)。该范围不启动 DSH/真实 CRM/模型，不关闭目标宿主或生产 gate；现场阶段回执接线当时未完成；现已由上文新的十项 schema 校验器接入原 journal seq 4，不能冒充旧十四项回执通过。
 
 `pnpm dsh plugin verify-host --candidate /absolute/candidate.json --evidence /absolute/evidence.json --state-path /absolute/state.json` 核验已有 v2 宿主证据并幂等追加到原 candidate journal；该命令不运行宿主。`plugin-host-evidence.test.mjs` 纳入 release suite/B0，用明确的 verifier-only 夹具检查缺项、篡改、错误 scope/journal 和重试，不能将这些夹具视为真实宿主通过；真实命令的十项场景与 CLI 接线另行留证，见[本机接线与服务状态证据](../hackathon/evidence/dsh-g0-host-journal-20261004.md)。
+
+同一 `plugin verify-host` 现在也接收 `dsh-runtime-host-evidence/v1` 封套：`inputs`、`controller`、`inventory`、`runtime_archive` 都是相对封套目录的 `{name, sha256}`，`service_target_event` 是原 journal 的 `{seq, digest}`。既有 WSL 主机输入与输出原字节保持不动；先核对原 source-HTTP 服务事件、固定控制器源码、完整文件清单/安全解包的插件安装摘要、runtime 流式摘要和 20 项 HTTP 记录，再以 `CANDIDATE_RUNTIME_HOST_OBSERVED` 幂等记账。旧 v2 分支不变。新分支不是浏览器、生产身份、签名或部署回退门禁。
+
+定向入口：Node 24 `node --test scripts/release/runtime-host-evidence.test.mjs`，已由 `pnpm dsh test` 自动发现；当前 **33 PASS**，同轮完整 release suite **311 PASS / 0 SKIP**。夹具中的 runtime/wheel 和 PASS 日志明确是不可安装的校验器输入，不当作现场运行证据。真实已有杭州回执 CLI 接线、幂等重试及原输入保护见[本轮证据](../hackathon/evidence/dsh-g0-first-purchase-runtime-host-gate-20261007.md)。命令只读取封套相关文件、在本机临时目录安全解包插件并写显式 journal，不执行包内代码、不启动 Host 或连接杭州。
 
 T3/T7 的 `backend/tests/test_analytics_first_purchase_save_recovery.py` 纳入现有 B0 Python 目标和常规 backend 回归：只用隔离合成 RunStore/SQLite，分别在提交前后 SIGKILL 自有子进程，通过新进程重放、冲突/权限拒绝、保留旧版本的 forward-fix 和不兼容 schema 拒绝验证存储边界。这仍不证明 D15 candidate/correlation 回执、业务数据迁移或跨版本服务回退；保存门禁继续关闭。
 

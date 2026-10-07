@@ -30,7 +30,7 @@ export async function repackServiceFixture(directory, label) {
   await json(evidencePath, evidence);
 }
 
-export async function createServiceArtifactFixture(directory, { sourceRevision } = {}) {
+export async function createServiceArtifactFixture(directory, { sourceRevision, pluginName = '@shine-mage/test-plugin' } = {}) {
   const { evidence: source, binding } = await serviceFixture();
   if (sourceRevision) {
     source.sources.find(row => row.commit === source.candidate).commit = sourceRevision;
@@ -88,13 +88,13 @@ export async function createServiceArtifactFixture(directory, { sourceRevision }
   await json(join(directory, 'pair/receipt.json'), pair);
   for (const label of ['baseline', 'candidate']) await repackServiceFixture(directory, label);
   await mkdir(join(directory, 'plugin/lib'), { recursive: true });
-  await json(join(directory, 'plugin/package.json'), { name: '@shine-mage/test-plugin', version: '0.1.0',
+  await json(join(directory, 'plugin/package.json'), { name: pluginName, version: '0.1.0',
     type: 'module', packageManager: `pnpm@${PNPM_VERSION}`, files: ['lib/'], peerDependencies: { '@deepseek-ai/dsh-tools': DSH_SDK_VERSION } });
   await writeFile(join(directory, 'plugin/lib/index.js'), 'export {};\n');
   await writeFile(join(directory, 'plugin/build.mjs'), 'export {};\n');
   await json(join(directory, 'profile.json'), { schema_version: 'dsh-profile/v1', profile_id: 'service-test',
     dsh: { sdk_version: DSH_SDK_VERSION, upstream_sha: DSH_UPSTREAM_SHA }, service_binding: binding,
-    plugins: [{ id: '@shine-mage/test-plugin', path: 'plugin', enabled: true, build: 'build.mjs' }] });
+    plugins: [{ id: pluginName, path: 'plugin', enabled: true, build: 'build.mjs' }] });
   for (const args of [['init', '-q'], ['config', 'user.email', 'fixture@example.invalid'], ['config', 'user.name', 'fixture'],
     ['add', 'plugin', 'profile.json'], ['commit', '-qm', 'isolated service verifier fixture']]) await exec('git', args, { cwd: directory });
   await createPluginCandidate({ root: directory, plugin: join(directory, 'plugin'), outputDir: join(directory, 'candidate'),
