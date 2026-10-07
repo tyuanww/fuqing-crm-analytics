@@ -7,6 +7,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createInterface } from 'node:readline';
 import { startHost } from './pinned-host-acceptance.mjs';
 import { startB0MockProvider } from './mock-provider.mjs';
+import { startRecoveryModelGate } from './recovery-model-gate.mjs';
 import { firstPurchaseMockScript } from './first-purchase-scenario.mjs';
 import { DSH_UPSTREAM_SHA } from '../release/toolchain.mjs';
 import { createSaveController } from '../../dsh-plugins/analytics-workbench/src/first-purchase-save-client.mjs';
@@ -14,6 +15,8 @@ import { firstPurchaseCommandEnvelope } from '../../dsh-plugins/analytics-workbe
 import { prepareFirstPurchaseArtifacts, verifyFirstPurchaseInstalledArtifacts } from './first-purchase-artifacts.mjs';
 
 const repository = fileURLToPath(new URL('../..', import.meta.url));
+assert.ok([undefined, '1'].includes(process.env.B0_NATIVE_CRM_RECOVERY), 'HOST_RECOVERY_MODE_INVALID');
+const recoveryEnabled = process.env.B0_NATIVE_CRM_RECOVERY === '1';
 assert.equal(Number(process.versions.node.split('.')[0]), 24);
 const packed = process.env.B0_NATIVE_CRM_ARTIFACT_MANIFEST ? await prepareFirstPurchaseArtifacts({
   manifestPath: process.env.B0_NATIVE_CRM_ARTIFACT_MANIFEST,
@@ -67,7 +70,8 @@ const agentPlugins = [
   { id: 'owned-skills', name: pathToFileURL(join(workbench, 'lib/skills.js')).href },
 ];
 await write(join(root, 'presets/owned-first-purchase/agent.cordis.yml'), agentPlugins);
-let host, model, origin, cookie, browserResult, generation = 0;
+let host, model, faultGate, origin, cookie, browserResult, generation = 0;
+const recovery = [];
 const controllers = [], observations = [], signal = new AbortController();
 const interrupt = () => signal.abort();
 process.once('SIGINT', interrupt); process.once('SIGTERM', interrupt);
@@ -76,12 +80,15 @@ try {
   const { startMockLlmServer } = await import(pathToFileURL(packed?.runtime?.mockModule
     ?? join(upstream, 'packages/test-support/llm-mock-server/lib/index.js')).href);
   model = await startB0MockProvider(startMockLlmServer, { host: '127.0.0.1', port: 0, apiKey: 'synthetic',
-    script: [...firstPurchaseMockScript(), { sequence: ['success'], successText: 'SYNTHETIC_NATIVE_FALLBACK_OK', chunkDelayMs: 0 }] });
+    script: [...firstPurchaseMockScript(), { sequence: ['success'], successText: 'SYNTHETIC_NATIVE_FALLBACK_OK', chunkDelayMs: 0 },
+      ...(recoveryEnabled ? [{ sequence: ['success'], successText: 'SYNTHETIC_CRASH_RECOVERY_OK', chunkDelayMs: 0 }] : [])] });
+  if (recoveryEnabled) faultGate = await startRecoveryModelGate(model.baseURL);
+  const modelOrigin = faultGate?.baseURL ?? model.baseURL;
   const patch = join(root, 'host.patch.yml');
   await write(patch, [
     ...['session-title-llm', 'llm-pi-ai', 'web-search-deepseek', 'web-fetch-http', 'session-telemetry-otel',
       'session-log-deepseek', 'plugin-package-inventory-deepseek', 'agent-instructions', 'skill-filesystem', 'hmr'].map(id => ({ id, disabled: true })),
-    { id: 'llm-deepseek', config: { apiKeyEnv: 'DEEPSEEK_API_KEY', baseURL: model.baseURL, thinking: 'disabled',
+    { id: 'llm-deepseek', config: { apiKeyEnv: 'DEEPSEEK_API_KEY', baseURL: modelOrigin, thinking: 'disabled',
       reasoningEffort: 'off', maxTokens: 1024, retryPolicy: { mode: 'normal', maxRetries: 0 } } },
     { insert: [
       { id: 'owned-preset', name: '@deepseek-ai/dsh-agent-preset', config: { id: 'owned-first-purchase',
@@ -97,7 +104,7 @@ try {
     ] },
   ]);
   async function launch(resume = false) {
-    host = await startHost({ root, upstream, runtimeLayout: Boolean(packed?.runtime), patches: [patch], modelOrigin: model.baseURL,
+    host = await startHost({ root, upstream, runtimeLayout: Boolean(packed?.runtime), patches: [patch], modelOrigin,
       generation: ++generation, signal: signal.signal,
       nativeFixture: { portBase: input.port_base, sessionId: input.session_id,
         runtimeToken: input.runtime_token, gatewayToken: input.gateway_token } });
@@ -139,9 +146,45 @@ try {
   assert.deepEqual((await crm('status')).value, { ok: true, connected: false, username: null, expires_at: null });
   record({ stage: 'cookie-origin-csrf-and-login-bootstrap', status: 'PASS' });
   send({ ready: true });
-  let replaySaved;
+  let replaySaved, crashBaseline;
   for await (const line of { [Symbol.asyncIterator]: () => iterator }) {
     const command = JSON.parse(line);
+    if (command.operation === 'arm-crash') {
+      assert.ok(recoveryEnabled && faultGate, 'HOST_RECOVERY_OPT_IN_REQUIRED');
+      crashBaseline = await host.request('inspect', { sessionId: input.session_id });
+      faultGate.arm();
+      send({ ok: true, armed: true }); continue;
+    }
+    if (command.operation === 'inflight-crash') {
+      assert.ok(recoveryEnabled && faultGate && crashBaseline, 'HOST_RECOVERY_OPT_IN_REQUIRED');
+      const deadline = Date.now() + 10000;
+      while (!faultGate.observed) {
+        assert.ok(Date.now() < deadline, 'HOST_RECOVERY_REQUEST_NOT_STARTED');
+        await new Promise(resolve => setTimeout(resolve, 20));
+      }
+      assert.ok(faultGate.pending, 'HOST_RECOVERY_REQUEST_NOT_PENDING');
+      const committed = await host.request('inspect', { sessionId: input.session_id });
+      assert.ok(committed.count > crashBaseline.count, 'HOST_RECOVERY_OPEN_TURN_NOT_PERSISTED');
+      const killed = host.pid;
+      assert.equal((await host.stop(true)).signal, 'SIGKILL'); host = null;
+      await launch(true);
+      const after = await host.request('inspect', { sessionId: input.session_id, prefix: committed.count });
+      assert.equal(after.prefix_digest, committed.digest, 'HOST_RECOVERY_PREFIX_CHANGED');
+      assert.equal((await crm('status')).value.connected, false);
+      recovery.push({ stage: 'current-candidate-inflight-crash', status: 'PASS', killed_pid: killed,
+        resumed_pid: host.pid, signal: 'SIGKILL', committed, recovered: after, crm_relogin_required: true });
+      send({ ok: true, recovered: true }); continue;
+    }
+    if (command.operation === 'recovery-fallback') {
+      assert.ok(recoveryEnabled && recovery.length === 1, 'HOST_RECOVERY_NOT_OBSERVED');
+      const sessionId = input.session_id + '-recovered-native';
+      const native = await host.request('create-native-session', { sessionId });
+      assert.ok(!native.tool_names.includes('analytics_first_purchase_query'));
+      const after = await host.request('prompt', { sessionId, text: 'Owned native conversation after crash' });
+      assert.ok(after.assistant.includes('SYNTHETIC_CRASH_RECOVERY_OK'));
+      recovery.push({ stage: 'native-fallback-after-inflight-crash', status: 'PASS', recovered: after });
+      send({ ok: true, fallback: true }); continue;
+    }
     if (command.operation === 'settle-query') {
       const settled = await host.request('idle', { sessionId: input.session_id });
       assert.ok(settled.assistant.length > 0);
@@ -221,7 +264,7 @@ try {
   }
 } finally {
   controllers.forEach(controller => controller.dispose());
-  const cleanup = await Promise.allSettled([host?.stop(true), model?.close()]);
+  const cleanup = await Promise.allSettled([host?.stop(true), faultGate?.close(), model?.close()]);
   process.off('SIGINT', interrupt); process.off('SIGTERM', interrupt);
   let packageIntegrity = 'NOT_APPLICABLE_WORKSPACE';
   if (packed) {
@@ -233,6 +276,12 @@ try {
     candidate_digest: candidateDigest, artifacts: packed?.evidence ?? 'WORKSPACE_COMPILED_OUTPUT',
     package_integrity: packageIntegrity,
     admission: browserResult ? 'official native composer slash command in Chrome' : 'official commands/execute HTTP; browser rendering NOT_RUN' });
+  if (recoveryEnabled) await write(join(root, 'recovery-observations.json'), {
+    schema_version: 'first-purchase-owned-recovery/v1', candidate_digest: candidateDigest,
+    upstream_sha: DSH_UPSTREAM_SHA, artifacts: packed?.evidence ?? 'WORKSPACE_COMPILED_OUTPUT',
+    observations: recovery, cleanup_ok: cleanup.every(item => item.status === 'fulfilled'),
+    package_integrity: packageIntegrity, production_activation: 'NOT_RUN', release_ready: false,
+  });
   assert.ok(cleanup.every(item => item.status === 'fulfilled'), 'OWNED_CRM_HOST_CLEANUP_FAILED');
   assert.notEqual(packageIntegrity, 'FAIL', 'OWNED_CRM_HOST_PACKAGE_CHANGED');
 }

@@ -238,3 +238,9 @@ T3/T7 的 `backend/tests/test_analytics_first_purchase_save_recovery.py` 纳入�
 跨版本状态使用显式入口 `python3.14 scripts/dsh-b0/service-save-compatibility.py --baseline <full-old-commit> --candidate <full-new-commit> --output /absolute/new-evidence`。它导出两个固定 Git tree 的受限源码和合成 JSON，以独立进程执行真实服务路由及小型 SQLite 恢复；不接受数据库路径，不联网、不切换分支、不启动监听端口。当前验证 pair 为 `56198c32` → `a50bd424`，其他 pair 必须重新验证。回执 `status=PASS` 是观测完成，旧可写服务仍 BLOCKED、`release_ready=false`；具体见[兼容窗口](../architecture/first-purchase-service-compatibility.md)与[证据](../hackathon/evidence/dsh-g0-service-save-compat-20261004.md)。此入口需要两份 Git 历史及显式运行，不自动加入无 Git 的 clean B0 测试。
 
 兼容门禁回归由 `pnpm dsh test` 统一执行；定向入口为 `node --test scripts/release/service-compatibility.test.mjs scripts/release/plugin-candidate.test.mjs scripts/release/release.test.mjs scripts/release/promotion-retry.test.mjs`。这些测试使用自有临时目录，实际走 pack/receive/install/activate/rollback 与 journal，验证错误版本、旧 writer、篡改/缺证据、特殊文件、绑定丢失和幂等重试；验证器测试夹具不冒充真实兼容回执。真实源码对观测需另运行上段命令，本次结果见[门禁证据](../hackathon/evidence/dsh-g0-service-gate-20261004.md)。
+
+### 首购候选恢复验收
+
+Node 24 下以 `B0_BUILD_UPSTREAM=/absolute/pinned-rc2-checkout node --test scripts/dsh-b0/recovery-model-gate.test.mjs scripts/dsh-b0/session-recovery.test.mjs scripts/dsh-b0/mock-provider.test.mjs` 验证故障代理、输出保护和官方 JSONL 冷读写；两个新测试入口已纳入同一 B0 pipeline。跨版本入口为 `node scripts/dsh-b0/session-recovery.mjs /absolute/new-output /absolute/rc2-modules /absolute/rc1-modules`，必须提供新输出目录和实际编译模块目录；缺 rc1 返回 PARTIAL/退出 2，子进程失败返回 FAIL/退出 1，不默认联网、构建或读取现有会话。
+
+实际首购 Host 通过原 `test_analytics_first_purchase_official_host.py` 加 `B0_NATIVE_CRM_RECOVERY=1` 显式运行，沿用 v5 不可变包输入，与 browser 模式互斥。本轮 WSL 整链 1 PASS、持久化 4/4 和服务兼容 14/14 的范围与原始日志见[恢复证据](../hackathon/evidence/dsh-g0-first-purchase-recovery-wsl-20261007.md)。该测试当前锁定原候选的安全 UNKNOWN 行为，**不能当作业务任务终态恢复门禁**；恢复历史投影及活动名额释放仍是 P1。本次未接入新的 release journal 事件。

@@ -333,6 +333,10 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 
 - [x] 2026-10-07 Host/browser 门禁审修：OCR 28/28；拒绝矛盾 pytest 日志、补 B0 browser 清单、修正文档。release 348 PASS，保护 52 PASS / 4 SKIP；原 seq 6/15 输入保留，见[审核证据](./evidence/dsh-g0-first-purchase-host-browser-review-20261007.md)。只关闭本批审修，不关闭目标在途/跨版本或生产 gate。
 
+- [x] T2/T7 目标恢复前置核验（2026-10-07）：审修已提交 `b6cecdb6`；三次只读 SSH 核对工具/端口、现役 `dsh-0.20.0.0-r3`、rc1 `46a7f68b` tracked clean 和执行入口，固定恢复输入清单见[前置证据](./evidence/dsh-g0-first-purchase-recovery-preflight-20261007.md)。该阶段只关闭输入发现；后续实际运行见下一项。
+- [x] T2/T7 目标恢复观测子项（2026-10-07）：原四包/runtime WSL 首购在途 SIGKILL、持久前缀/幂等/原生回退整链 1 PASS；rc2 截断与 rc1↔rc2 文本回合 4/4，旧新保存服务 forward-fix 14/14。原 15 输入、journal seq 6 与 185 远端 payload 保持，291 文件取回校验、临时进程/目录回收、生产快照不变，见[本轮证据](./evidence/dsh-g0-first-purchase-recovery-wsl-20261007.md)。不代表任务已从 UNKNOWN 恢复到终态。
+- [ ] P1 / T2/T7 恢复请求投影：当前候选崩溃 run 为 UNKNOWN 且占活动名额；nativeJournal 只监听实时事件，rc2 恢复 seed 不重发事件。使用官方持久化读取补历史投影及并发事件/生命周期处理，保持 request/turn/exit 相关性；先负测与本机官方 Host，再审核新插件候选并复验终态释放。禁止靠旧 PID、超时或直接改库强制清除 UNKNOWN。
+
 ## 2026-09-30 rc2 DX triage follow-up
 
 以下任务来自 `docs/plans/dsh-rc2-environment-promotion.md` 的 DevEx TRIAGE 评审，先登记，不把未实现项写成已完成：

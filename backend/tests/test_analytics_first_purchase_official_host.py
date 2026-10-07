@@ -36,6 +36,9 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
     upstream = os.environ.get("B0_NATIVE_CRM_HOST_UPSTREAM")
     assert upstream is None or Path(upstream).is_absolute()
     source_http = os.environ.get("B0_NATIVE_CRM_SOURCE_HTTP")
+    recovery = os.environ.get("B0_NATIVE_CRM_RECOVERY")
+    assert recovery in (None, "1"), "HOST_RECOVERY_MODE_INVALID"
+    assert not (recovery and os.environ.get("B0_NATIVE_CRM_BROWSER_MODULE")), "HOST_RECOVERY_BROWSER_SCOPE_CONFLICT"
     assert source_http in (None, "1"), "HOST_SOURCE_MODE_INVALID"
     # Old immutable packages predate this opt-in source API. Never relabel them.
     assert not (source_http and os.environ.get("B0_NATIVE_CRM_ARTIFACT_MANIFEST")), "HOST_SOURCE_REQUIRES_NEW_PACKAGES"
@@ -259,6 +262,31 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
                     assert command({"operation": "disconnect"}) == {"ok": True, "connected": False}
                     assert client.get("/internal/native/context", headers=auth()).status_code == 401
                     assert command({"operation": "native-fallback"}) == {"ok": True, "fallback": True}
+                    if recovery:
+                        assert command({"operation": "login"}) == {"ok": True, "connected": True}
+                        assert command({"operation": "arm-crash"}) == {"ok": True, "armed": True}
+                        question = "查看在途恢复合成首购"
+                        admitted = command({"operation": "command", "line": "/first-purchase " + question})
+                        assert admitted["result"]["kind"] == "success"
+                        interrupted_id = re.search(r"run_[a-f0-9]+", admitted["result"]["text"])[0]
+                        dispatcher.tick()
+                        assert command({"operation": "inflight-crash"}) == {"ok": True, "recovered": True}
+                        assert command({"operation": "login"}) == {"ok": True, "connected": True}
+                        dispatcher.tick()
+                        interrupted = runs.get(fp_actor("crm-owner"), interrupted_id)
+                        assert interrupted.status == "UNKNOWN", interrupted.model_dump(mode="json")
+                        assert interrupted.diagnostics.dispatch_attempts == 1 and interrupted.result is None
+                        same_intent = native_prompt("fp-" + admitted["commandId"])
+                        same_intent["content"][0]["text"] = question
+                        replay = client.post("/internal/native/prompt", json=same_intent, headers=auth())
+                        assert replay.status_code == 202 and replay.json()["run_id"] == interrupted_id
+                        dispatcher.tick()
+                        assert runs.get(fp_actor("crm-owner"), interrupted_id).diagnostics.dispatch_attempts == 1
+                        (tmp_path / "interrupted-run.json").write_text(json.dumps(interrupted.model_dump(mode="json"), indent=2) + "\n")
+                        assert command({"operation": "replay-save"}) == {"ok": True, "replayed": True}
+                        assert runs.get(fp_actor("crm-owner"), run_id).status == "SUCCEEDED"
+                        assert len(runs.worker_records(active_only=False)) == 1
+                        assert command({"operation": "recovery-fallback"}) == {"ok": True, "fallback": True}
                 record_source_boundary()
         assert checks and all(checks)
         assert analysis_counts(saved)["analyses"] == 1

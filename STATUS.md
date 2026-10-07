@@ -7,17 +7,30 @@
 |---|---|
 | Git 基线 | 产品 VERSION 为 `0.20.0.0`；`dsh-0.20.0.0-r1` immutable Release 已发布，源 SHA 为 `073c576c8d75d6ab16e2bac48b2cc99adf4a68bf`，DSH 上游 SHA 为 `477b4f420553e8a52c2fbccc464d7561b239c443`；main CI、exact-SHA preflight、evidence 和 publication workflow 均通过。 |
 | 产品 | **PARTIAL**；r3 已在杭州 current 运行并完成 DSH/CRM/B0 loopback smoke，但完整浏览器、真实模型、WAL 兼容、operator gate、10x backpressure、真实业务 UAT 和回退演练仍未完成。 |
-| DSH | 官方上游固定为 `477b4f42`（0.1.7-rc.2），不修改上游源码；杭州 current 仍为 `/srv/shinemage/dsh/releases/dsh-0.19.0.0-r3`，`dsh-0.20.0.0-r1` 已通过 Tailscale 只读复核并保留在 incoming，尚未 activate。 |
+| DSH | 2026-10-07 只读复核：杭州 current 为 `/srv/shinemage/dsh/releases/dsh-0.20.0.0-r3`，VERSION 0.20.0.0，runtime package 为官方 0.1.7-rc.2；发布标记 source `fcbd1324…`。本轮没有切换生产，当前首购候选 `861d6ef1…` 未激活；其固定上游仍为 `477b4f42`。详见下方前置核验。 |
 | CRM | 杭州 backend `127.0.0.1:18093`、frontend `127.0.0.1:18094` 健康；backend 镜像固定为 `sha256:bbcea629…`，容器内 DuckDB 为 `1.5.6`；真实库未读取。 |
 | WeKnora | 页面 `127.0.0.1:18090`、API `127.0.0.1:18092` 健康；数据卷与登录由 WeKnora 自身管理。 |
 | 公网入口 | `www.tyuan.chat`、`app.tyuan.chat`、`page.tyuan.chat`、`board.tyuan.chat`、`learn.tyuan.chat` 经 Cloudflare Tunnel；HTTP 已强制跳 HTTPS。 |
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### Host / 浏览器门禁审修（2026-10-07，当前进度）
+### 当前候选的 WSL 恢复验收（2026-10-07，当前进度）
+
+- 原四包/runtime 在目标 WSL2、UID 65534 完成正式首购受理→模型等待期间 SIGKILL→同一会话恢复；整链 **1 PASS（76.91 秒）**，50 条已提交事件前缀保持、同请求不重复派发、原保存仍一条、普通原生对话可用。官方持久化截断/rc1↔rc2 文本回合 **4/4 PASS**，固定新旧保存包的 forward-fix **14/14 PASS**，见[本轮证据](docs/hackathon/evidence/dsh-g0-first-purchase-recovery-wsl-20261007.md)。
+- **新确认 P1 未关闭**：崩溃业务 run 仍为 `UNKNOWN / execution_active=true`，不能视为终态恢复。当前 nativeJournal 只折叠实时事件，而 rc2 恢复 seed 不重发事件；下一步补官方持久化读取与恢复投影，再验证终态释放。不得仅凭进程退出清除状态。
+- 本机新恢复/mock **8 PASS**、宿主保护 **45 PASS / 3 SKIP**；三项 skip 未冒充通过。15 个固定输入与 journal seq 6 保持，远端 185 个封存输入不变，291 个结果文件取回校验；临时进程/目录已回收，生产 current/监听/PID 未变。
+- **仍 PARTIAL / release_ready=false**：旧 rc1 编译闭包构建证明、完整跨版本 corpus、生产身份/UAT、供应链与 activation 等仍开放。恢复工具/证据已完成提交前 [OCR 14/14 审核](docs/hackathon/evidence/dsh-g0-recovery-harness-review-20261007.md)，作为独立测试批次交付；业务 P1 不在本批修复，未 push 或切换生产。
+
+### 目标恢复矩阵前置核验（2026-10-07，上一阶段）
+
+- 上一批正常 hooks 本地提交 `b6cecdb6`，提交后干净；本步三次 Tailscale/SSH 只读命令成功，工具/空间/测试端口可用。已核对旧 rc1 commit `46a7f68b…` tracked clean 与现役 rc2 元数据，并纠正上表的过期 current 指针，见[本步证据](docs/hackathon/evidence/dsh-g0-first-purchase-recovery-preflight-20261007.md)。
+- 当时形成固定候选/新旧 runtime 的恢复输入清单，crash/torn-frame/跨版本场景为 **NOT_RUN**；随后实际执行结果见上节，旧 CRM/知识 Host 结果不代替首购当前包。
+- 该前置阶段仅新增证据与文档；随后同一未提交增量补了隔离 runner。没有生产服务动作、真实数据访问、push 或发布。
+
+### Host / 浏览器门禁审修（2026-10-07，上一阶段）
 
 - OCR delegate 覆盖全部 **28/28** 原改动（17 代码/CI、11 文档）；修复 HTTP 矛盾 pytest 日志被接受、B0 清单遗漏 browser 门禁和保存准入文档陈旧。见[本轮审核记录](docs/hackathon/evidence/dsh-g0-first-purchase-host-browser-review-20261007.md)。
-- 本轮 release **348 PASS / 0 SKIP / 0 FAIL**；环境/宿主保护 **52 PASS / 4 SKIP / 0 FAIL**。原 HTTP/browser 回执重新核验成功，原 journal seq 6 字节/mtime 与 15 个固定输入不变；本批准备按授权正常 hooks 本地提交。
+- 本轮 release **348 PASS / 0 SKIP / 0 FAIL**；环境/宿主保护 **52 PASS / 4 SKIP / 0 FAIL**。原 HTTP/browser 回执重新核验成功，原 journal seq 6 字节/mtime 与 15 个固定输入不变；本批已按授权正常 hooks 本地提交 `b6cecdb6`。
 - **仍 PARTIAL**：下一步目标 WSL 在途/torn-frame/跨版本恢复；其余生产门禁保持开放。本轮审修没有重跑现场、push 或生产切换。
 
 ### 目标浏览器回执接线（2026-10-07，上一阶段）
