@@ -5,6 +5,7 @@ import { createHash } from 'node:crypto';
 import { readFile, mkdir, symlink, lstat, realpath } from 'node:fs/promises';
 import { dirname, join, relative } from 'node:path';
 import { inspectSdkPackage } from './sdk-inputs.mjs';
+import { verifySdkClosure } from './sdk-closure.mjs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
@@ -13,26 +14,35 @@ export const toolchainRoot = dirname(fileURLToPath(import.meta.url));
 export const defaultBuildTools = join(toolchainRoot, 'build-tools');
 
 /** Check all fixed inputs without importing tool code or writing plugin links. */
-export async function inspectToolchain(upstream, buildTools = defaultBuildTools) {
-  const pin = JSON.parse(await readFile(join(toolchainRoot, 'toolchain.json'), 'utf8'));
+export async function inspectToolchain(upstream, buildTools = defaultBuildTools, closureSha256 = process.env.DSH_SDK_CLOSURE_SHA256) {
+  const pinBytes = await readFile(join(toolchainRoot, 'toolchain.json'));
+  const pin = JSON.parse(pinBytes);
   assert.equal(Number(process.versions.node.split('.')[0]), pin.node_major, 'Use the pinned Node major');
-  // The read-only final check has the same isolation as preparation stages.
-  // Do not forward app credentials or re-enable caller/global Git settings.
-  const gitEnv = { PATH: process.env.PATH ?? '/usr/bin:/bin', GIT_CONFIG_NOSYSTEM: '1',
-    GIT_CONFIG_GLOBAL: '/dev/null', GIT_TERMINAL_PROMPT: '0', GIT_OPTIONAL_LOCKS: '0', GIT_NO_REPLACE_OBJECTS: '1' };
-  const git = args => execFileSync('git', ['--no-optional-locks', '-c', 'core.fsmonitor=false', '-C', upstream, ...args], {
-    cwd: upstream, env: gitEnv, stdio: ['ignore', 'pipe', 'pipe'], encoding: 'utf8', timeout: 30000, maxBuffer: 1024 * 1024,
-  }).trim();
-  assert.equal(git(['rev-parse', 'HEAD']), pin.upstream_sha, 'Upstream SHA drift');
-  assert.equal(git(['status', '--porcelain', '--untracked-files=no']), '', 'Fixed upstream contains local source edits');
+  const compact = closureSha256 !== undefined && closureSha256 !== null;
+  if (compact) {
+    const root = await realpath(dirname(upstream));
+    assert.equal(await realpath(upstream), join(root, 'upstream'), 'KIT_CLOSURE_LAYOUT');
+    assert.equal(await realpath(buildTools), join(root, 'build-tools'), 'KIT_CLOSURE_LAYOUT');
+    await verifySdkClosure(root, closureSha256, pinBytes);
+  } else {
+    // The read-only final check has the same isolation as preparation stages.
+    // Do not forward app credentials or re-enable caller/global Git settings.
+    const gitEnv = { PATH: process.env.PATH ?? '/usr/bin:/bin', GIT_CONFIG_NOSYSTEM: '1',
+      GIT_CONFIG_GLOBAL: '/dev/null', GIT_TERMINAL_PROMPT: '0', GIT_OPTIONAL_LOCKS: '0', GIT_NO_REPLACE_OBJECTS: '1' };
+    const git = args => execFileSync('git', ['--no-optional-locks', '-c', 'core.fsmonitor=false', '-C', upstream, ...args], {
+      cwd: upstream, env: gitEnv, stdio: ['ignore', 'pipe', 'pipe'], encoding: 'utf8', timeout: 30000, maxBuffer: 1024 * 1024,
+    }).trim();
+    assert.equal(git(['rev-parse', 'HEAD']), pin.upstream_sha, 'Upstream SHA drift');
+    assert.equal(git(['status', '--porcelain', '--untracked-files=no']), '', 'Fixed upstream contains local source edits');
+  }
   assert.equal(createHash('sha256').update(await readFile(join(upstream, 'pnpm-lock.yaml'))).digest('hex'), pin.upstream_lock_sha256, 'Upstream lock drift');
   const upstreamManifest = JSON.parse(await readFile(join(upstream, 'package.json'), 'utf8'));
   assert.equal(upstreamManifest.packageManager, `pnpm@${pin.pnpm}`);
   const readJson = async path => JSON.parse(await readFile(path, 'utf8'));
-  const web = createRequire(join(upstream, 'apps/web/package.json'));
-  const vite = createRequire(web.resolve('vite/package.json'));
   const req = createRequire(join(upstream, 'package.json'));
-  const conversation = createRequire(join(upstream, 'packages/client/ui-conversation/package.json'));
+  const web = compact ? req : createRequire(join(upstream, 'apps/web/package.json'));
+  const vite = compact ? req : createRequire(web.resolve('vite/package.json'));
+  const conversation = compact ? req : createRequire(join(upstream, 'packages/client/ui-conversation/package.json'));
   assert.equal((await readJson(req.resolve('typescript/package.json'))).version, pin.typescript, 'Compiler version drift');
   assert.equal((await readJson(vite.resolve('esbuild/package.json'))).version, pin.esbuild, 'Bundler version drift');
   req.resolve('typescript'); vite.resolve('esbuild'); // Resolve entry files without executing them.
@@ -62,7 +72,11 @@ export async function inspectToolchain(upstream, buildTools = defaultBuildTools)
     assert.equal((await readJson(packagePath)).version, version);
     bindings.set(name, dirname(packagePath));
   }
-  return { pin, bindings, loadCompiler: () => req('typescript'), loadBundler: () => vite('esbuild') };
+  return { pin, bindings, loadCompiler: () => req('typescript'), loadBundler: () => vite('esbuild'),
+    loadBrowserModule: name => {
+      assert.ok(/^(react|react-dom)(\/[^.][^\\]*)?$/.test(name) && !name.split('/').includes('..'), 'KIT_BROWSER_MODULE');
+      return web(name);
+    } };
 }
 
 /** Bind only after the complete input preflight succeeds. */

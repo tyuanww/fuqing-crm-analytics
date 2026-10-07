@@ -221,6 +221,7 @@
         "sdk-archive.py",
         "package-manager.mjs",
         "sdk-inputs.mjs",
+        "sdk-closure.mjs",
         "check.mjs",
         "packaged-dependencies.mjs",
         "README.md",
@@ -235,7 +236,7 @@
       "bundled_inputs": [],
       "dsh": {},
       "commands": {},
-      "manifest_sha256": "dd5ba9a8bbacaeb596e5d473a45f06e9de4e6d7c3658b2094cff13d50ffb349d"
+      "manifest_sha256": "84957afa3fce24949d2847bdcb2bb530da79d71f7488fe2a9f90ffc9e265cda8"
     },
     {
       "path": "dsh-plugins/shine-board",
@@ -539,7 +540,7 @@
       "manifest_sha256": "f19d8e05bf2b52a3e4e7853f14494a50e1b850ff7279d3331cb02a1ef9d957f1"
     }
   ],
-  "source_files_scanned": 642,
+  "source_files_scanned": 644,
   "cross_package_edges": [
     {
       "consumer": "analytics-workbench",
@@ -635,69 +636,9 @@
       "consumer": "analytics-workbench",
       "provider": "plugin-kit",
       "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/src/client/cockpit-composition.test.mjs",
+      "source": "dsh-plugins/analytics-workbench/test/helpers/sdk-inputs.mjs",
       "target": "dsh-plugins/plugin-kit",
-      "specifier": "@shine-mage/dsh-plugin-kit/pin",
-      "access": "public-export",
-      "type_only": false
-    },
-    {
-      "consumer": "analytics-workbench",
-      "provider": "plugin-kit",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/src/client/leave/host-leave-adapter.test.mjs",
-      "target": "dsh-plugins/plugin-kit",
-      "specifier": "@shine-mage/dsh-plugin-kit/pin",
-      "access": "public-export",
-      "type_only": false
-    },
-    {
-      "consumer": "analytics-workbench",
-      "provider": "plugin-kit",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/helpers/native-board-bridge.mjs",
-      "target": "dsh-plugins/plugin-kit",
-      "specifier": "@shine-mage/dsh-plugin-kit/pin",
-      "access": "public-export",
-      "type_only": false
-    },
-    {
-      "consumer": "analytics-workbench",
-      "provider": "plugin-kit",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
-      "target": "dsh-plugins/plugin-kit",
-      "specifier": "@shine-mage/dsh-plugin-kit/pin",
-      "access": "public-export",
-      "type_only": false
-    },
-    {
-      "consumer": "analytics-workbench",
-      "provider": "plugin-kit",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/native-fixture-client-boundary.test.mjs",
-      "target": "dsh-plugins/plugin-kit",
-      "specifier": "@shine-mage/dsh-plugin-kit/pin",
-      "access": "public-export",
-      "type_only": false
-    },
-    {
-      "consumer": "analytics-workbench",
-      "provider": "plugin-kit",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/native-prompt-inject.test.mjs",
-      "target": "dsh-plugins/plugin-kit",
-      "specifier": "@shine-mage/dsh-plugin-kit/pin",
-      "access": "public-export",
-      "type_only": false
-    },
-    {
-      "consumer": "analytics-workbench",
-      "provider": "plugin-kit",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/native-slot-ownership.test.mjs",
-      "target": "dsh-plugins/plugin-kit",
-      "specifier": "@shine-mage/dsh-plugin-kit/pin",
+      "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
       "access": "public-export",
       "type_only": false
     },
@@ -2532,7 +2473,7 @@
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/src/client/leave/host-leave-adapter.test.mjs",
-      "line": 61
+      "line": 36
     },
     {
       "consumer": "analytics-workbench",
@@ -2574,19 +2515,19 @@
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/built.test.mjs",
-      "line": 13
+      "line": 12
     },
     {
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/built.test.mjs",
-      "line": 16
+      "line": 15
     },
     {
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/built.test.mjs",
-      "line": 29
+      "line": 28
     },
     {
       "consumer": "analytics-workbench",
@@ -2598,13 +2539,13 @@
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/helpers/native-board-bridge.mjs",
-      "line": 18
+      "line": 14
     },
     {
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/helpers/native-board-bridge.mjs",
-      "line": 26
+      "line": 21
     },
     {
       "consumer": "analytics-workbench",
@@ -2616,7 +2557,31 @@
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
-      "line": 134
+      "line": 11
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
+      "line": 12
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
+      "line": 13
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
+      "line": 130
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
+      "line": 14
     },
     {
       "consumer": "analytics-workbench",
@@ -2629,30 +2594,6 @@
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
       "line": 16
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
-      "line": 17
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
-      "line": 18
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
-      "line": 19
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
-      "line": 20
     },
     {
       "consumer": "analytics-workbench",
@@ -2718,19 +2659,19 @@
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/native-fixture-client-boundary.test.mjs",
-      "line": 17
+      "line": 13
     },
     {
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/native-prompt-inject.test.mjs",
-      "line": 18
+      "line": 14
     },
     {
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/native-slot-ownership.test.mjs",
-      "line": 14
+      "line": 10
     },
     {
       "consumer": "analytics-workbench",
@@ -3578,6 +3519,11 @@
       "consumer": "plugin-kit",
       "phase": "build",
       "specifier": "node:crypto"
+    },
+    {
+      "consumer": "plugin-kit",
+      "phase": "build",
+      "specifier": "node:fs"
     },
     {
       "consumer": "plugin-kit",

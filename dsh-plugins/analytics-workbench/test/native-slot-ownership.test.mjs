@@ -1,22 +1,13 @@
-import kitPin from '@shine-mage/dsh-plugin-kit/pin' with { type: 'json' };
+import { upstream } from './helpers/sdk-inputs.mjs';
 /** Real pinned SlotCore boundary checks, not a native-chat/browser acceptance test. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { execFileSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { resolve, join } from 'node:path';
+import { join } from 'node:path';
 
 const plugin = fileURLToPath(new URL('..', import.meta.url));
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
-const pin = kitPin;
-const upstreamSha = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: upstream, encoding: 'utf8' }).trim();
 const { SlotCore } = await import(pathToFileURL(join(upstream, 'packages/client/ui-slots/lib/index.js')).href);
-
-function requireMaterializedUpstream() {
-  assert.equal(upstreamSha, pin.upstream_sha, `local checkout must be materialized at ${pin.upstream_sha}`);
-  return true;
-}
 
 function fixture() {
   const core = new SlotCore();
@@ -34,7 +25,6 @@ function fixture() {
 }
 
 test('pinned core refuses a cockpit declaring the already-owned native conversation child', () => {
-  requireMaterializedUpstream();
   const core = fixture();
   const nativeEntries = core.entries('main.conversation');
   assert.throws(() => core.register({ name: 'main', key: 'cockpit', children: {
@@ -45,7 +35,6 @@ test('pinned core refuses a cockpit declaring the already-owned native conversat
 });
 
 test('rightbar is a single occupied seat: priority override shadows rather than appends native content', () => {
-  requireMaterializedUpstream();
   const core = fixture();
   const native = core.entriesOfSlot('rightbar')[0];
   assert.throws(() => core.register({ name: 'rightbar' }, () => null), /already has/);
@@ -57,7 +46,6 @@ test('rightbar is a single occupied seat: priority override shadows rather than 
 });
 
 test('additive business overlay can unload without removing the native main or rightbar', () => {
-  requireMaterializedUpstream();
   const core = fixture();
   const native = core.entriesOfSlot('main')[0];
   const right = core.entriesOfSlot('rightbar')[0];

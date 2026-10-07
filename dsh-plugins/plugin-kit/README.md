@@ -74,3 +74,56 @@ python3 node_modules/@shine-mage/dsh-plugin-kit/sdk-archive.py receive \
 `scripts/dsh-b0/plugin-isolation.test.mjs` 把 kit 和单个叶子插件复制到独立临时目录，在没有 workbench 源码的情况下构建、测试并受控打包。测试 Git 提交只属于临时夹具，不能作为已审查的发布 SHA。当前仍是 workspace dev kit；正式独立 kit 分发、DSH 跨版本兼容和真实宿主安装按 G0 门禁推进。
 
 `packaged-dependencies.mjs` 只处理构建输入协议：按消费者精确版本和 SHA-256 核验 tarball/公开导出/类型，不执行包 hooks、不读取兄弟包源码、不包含图表逻辑。绑定目标是当前插件 `node_modules/.shinemage-bundled/<digest>` 的包字节，消费入口仍用标准 package exports；它不是 `workspace:`/`file:` 依赖。旧摘要目录保留，不自动删除。变更/外部链接/未锁定输入失败即阻断。
+
+### 分发前的仓库级内容审计
+
+仓库维护者可显式运行下面的只读入口（不随 kit 安装，不是每个插件的日常构建步骤）：
+
+```sh
+node scripts/release/sdk-content-audit.mjs \
+  --archive /absolute/new-sdk-archive/sdk.zip --sha256 REVIEWED_SHA256 \
+  --root /absolute/new-received-sdk --python /absolute/python3.14 \
+  --output /absolute/evidence/new-sdk-audit.json
+```
+
+Node 使用固定 24.x；输出必须是 SDK 之外的新文件。先复用 `sdk-archive.py` 验证归档/清单/每个 blob，再核对接收树的清单内文件与链接；不执行 SDK，不联网，不修改原回执。只扫描清单内固定输入，不把接收目录里的额外文件当成受审内容，也不支持并发修改输入树。
+
+现有秘密模式检测不豁免 vendor/test 目录；报告只包含相对路径、摘要和分类，不包含命中值。16 MiB 以上文件只校验摘要，二进制、Git 对象和嵌套归档记录覆盖缺口。疑似命中返回 `BLOCKED`，有覆盖缺口返回 `PARTIAL`，两者退出码为 2；即使 `PATTERN_SCAN_PASS` 也只说明本次模式检查，始终 `release_ready=false`，不能代替来源、签名、SBOM 或完整内容审查。旧 pack/receive 的 `secret_scan=NOT_RUN` 不会被这个独立报告改写。
+
+### 缩减的插件构建输入
+
+完整 checkout 继续用于 SDK 维护和固定源码准备。仓库维护者可以从已核对的本地 SDK 归档，在**新目录**提取插件构建输入；该操作不联网、不安装依赖，也不改原上游：
+
+```sh
+node scripts/release/sdk-closure.mjs \
+  --source /absolute/received-sdk --destination /absolute/new-build-sdk \
+  --archive /absolute/sdk.zip --sha REVIEWED_ARCHIVE_SHA256 \
+  --python /absolute/python3.14
+```
+
+提取器使用仓库已有、固定 6.0.3 的 TypeScript parser；须先有仓库 build-tools 环境。它从 26 个固定 SDK 入口和固定编译工具出发，跟随已安装 dependencies/peer/optional 关系，再扫描已发布声明文件的实际裸包与 `@types` 引用。原生平台缺少的 optional 依赖记录在回执；已声明的必需依赖缺失则拒绝。原完整输入也无法解析的声明引用列入 `unresolved_declarations`，不猜测安装；仅有提取回执不能宣称类型兼容，必须完成目标消费者的完整类型检查。纯类型依赖只携带声明/包元数据/许可证，不带其运行程序。少数上游声明没有直接依赖边时，只绑定同一固定源码内唯一的官方包或 kit 已固定的 React/SDK 输入，不修改上游 package.json。
+
+为保持现有验收，提取器还保留官方 `agent-loop-testkit`、client modules 注册器及其必需运行依赖，以及清单中明确列出的八个宿主合同测试文件（LayoutController 编译文件与七个对应源码文件），以及原固定输入里的 JSDOM 和 Store 测试所需 Zustand/Immer。这些输入用于开发验证，不增加插件生产依赖，也不代表可以运行完整 DSH 宿主。工作台测试通过 kit 的 `inspectToolchain` 校验输入，使用它返回的 bundler/React 加载器；不再自行进入 `apps/web` 或要求缩减输入包含 Git 目录。测试使用外置构建输入时同时设置 `B0_BUILD_UPSTREAM`、`B0_BUILD_TOOLS` 和对应的 `DSH_SDK_CLOSURE_SHA256`。
+
+`receipt.json` 提供独立的 `closure_sha256`，指向 `sdk-closure.json`。摘要须通过已核对的本地提取结果或后续受信清单取得；本地摘要不证明发布者身份。每次使用前校验清单、来源 pin、OS/arch/Node、锁文件、全部文件/链接/模式和额外文件；没有 Git checkout 时，不会自动降级为跳过校验。
+
+插件作者使用已准备的缩减输入：
+
+```sh
+node node_modules/@shine-mage/dsh-plugin-kit/check.mjs \
+  --upstream /absolute/new-build-sdk/upstream \
+  --build-tools /absolute/new-build-sdk/build-tools \
+  --closure-sha256 REVIEWED_CLOSURE_SHA256
+
+DSH_SDK_CLOSURE_SHA256=REVIEWED_CLOSURE_SHA256 \
+  node build.mjs /absolute/new-build-sdk/upstream /absolute/new-build-sdk/build-tools
+```
+
+省略 closure 摘要时仍要求原完整 Git 输入；错误摘要拒绝，不回退。提取回执的 `consumers=NOT_RUN` 不会因后续构建自动改写，消费者和审计结果分别留证。缩减内容仍须显式审计：
+
+```sh
+node scripts/release/sdk-content-audit.mjs --root /absolute/new-build-sdk \
+  --closure-sha256 REVIEWED_CLOSURE_SHA256 --output /absolute/evidence/new-closure-audit.json
+```
+
+当前只有同平台本地构建范围：**不是数学意义的最小集合，也不是签名分发包或生产 runtime**。旧 `sdk-archive.py pack/receive` 仍只接受完整准备输入，不用它直接打包缩减目录。缩减包的安全分发/接收、目标平台、完整内容审计及签名门禁尚待完成；`release_ready=false`。上述 SDK 维护动作不加入每个业务插件的日常构建流程。

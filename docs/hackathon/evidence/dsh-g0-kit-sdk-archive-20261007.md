@@ -2,6 +2,8 @@
 
 从 `90d5012d` 及前轮四份未提交文档继续 T15。保留原工作树、候选与证据；本轮只做本地开发输入传输，不提交、推送、发布或操作杭州。整体 **PARTIAL / release_ready=false**。
 
+后续提交与审计：本批 15 个文件已于 `78175422` 经正常 hooks 本地提交；本页保留当时验证结果。提交后新增只读内容审计，结果及开放项见[后续证据](dsh-g0-kit-content-audit-20261007.md)。
+
 ## 新增合同
 
 kit 内的 `sdk-archive.py pack/receive` 是显式开发入口，不接入生产 receiver。源码包 files、clean-build 复制清单、真实安装测试和 B0 Python 测试清单同步。

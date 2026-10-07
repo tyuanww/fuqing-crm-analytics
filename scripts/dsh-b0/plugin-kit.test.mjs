@@ -59,7 +59,8 @@ test('real kit tarball contains only declared source/locks and exposes its publi
   const archive = join(root, 'kit.tgz');
   const env = { PATH: `${dirname(process.execPath)}:/usr/bin:/bin`, HOME: root, CI: '1',
     COREPACK_HOME: process.env.COREPACK_HOME ?? join(process.env.HOME, '.cache/node/corepack'), COREPACK_ENABLE_NETWORK: '0',
-    npm_config_ignore_scripts: 'true' };
+    npm_config_ignore_scripts: 'true',
+    ...(process.env.DSH_SDK_CLOSURE_SHA256 ? { DSH_SDK_CLOSURE_SHA256: process.env.DSH_SDK_CLOSURE_SHA256 } : {}) };
   await exec('corepack', ['pnpm', 'pack', '--out', archive], { cwd: source, env, timeout: 30000 });
   await exec('python3', [join(repository, 'scripts/release/secure-unpack.py'), archive, join(root, 'installed'),
     '--max-entries', '100', '--max-bytes', '1048576'], { cwd: root, timeout: 10000 });
@@ -92,13 +93,14 @@ test('real kit tarball contains only declared source/locks and exposes its publi
     'shine-funnel', 'shine-waterfall', 'crm-knowledge', 'knowledge', 'analytics-workbench'];
   const plugin = join(consumer, 'plugin'), inputs = join(root, 'domain-inputs');
   const upstream = process.env.B0_BUILD_UPSTREAM, tools = process.env.B0_BUILD_TOOLS ?? join(kit, 'build-tools');
-  const buildEnv = { ...env, ...(upstream ? { B0_BUILD_UPSTREAM: upstream } : {}), DSH_PACKAGE_INPUTS: inputs };
-  const upstreamIndex = upstream ? await readFile(join(upstream, '.git/index')) : null;
+  const buildEnv = { ...env, ...(upstream ? { B0_BUILD_UPSTREAM: upstream } : {}), B0_BUILD_TOOLS: tools, DSH_PACKAGE_INPUTS: inputs };
+  const inputRecord = upstream ? (process.env.DSH_SDK_CLOSURE_SHA256 ? join(dirname(upstream), 'sdk-closure.json') : join(upstream, '.git/index')) : null;
+  const upstreamIndex = inputRecord ? await readFile(inputRecord) : null;
   if (upstream) {
-    const before = await readFile(join(upstream, '.git/index'));
+    const before = await readFile(inputRecord);
     const check = await exec(process.execPath, [join(installedKit, 'check.mjs'), '--upstream', upstream, '--build-tools', tools], { cwd: root, env });
     assert.equal(JSON.parse(check.stdout).status, 'READY');
-    assert.deepEqual(await readFile(join(upstream, '.git/index')), before, 'read-only preflight changed Git index');
+    assert.deepEqual(await readFile(inputRecord), before, 'read-only preflight changed SDK identity record');
   }
   for (const name of names) {
     await t.test(`${name} consumes the installed kit without sibling source`, { skip: name !== 'board-components' && !upstream }, async () => {
@@ -139,8 +141,8 @@ test('real kit tarball contains only declared source/locks and exposes its publi
       } finally { await rm(plugin, { recursive: true, force: true }); }
     });
   }
-  if (upstreamIndex) assert.deepEqual(await readFile(join(upstream, '.git/index')), upstreamIndex,
-    'consumer build/test changed the pinned SDK Git index');
+  if (upstreamIndex) assert.deepEqual(await readFile(inputRecord), upstreamIndex,
+    'consumer build/test changed the pinned SDK identity record');
 });
 
 test('workspace kit link is explicit, idempotent and never replaces a foreign installation', async t => {

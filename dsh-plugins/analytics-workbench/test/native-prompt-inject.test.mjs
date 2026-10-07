@@ -1,19 +1,15 @@
-import kitPin from '@shine-mage/dsh-plugin-kit/pin' with { type: 'json' };
+import { upstream, sdk } from './helpers/sdk-inputs.mjs';
 /** Strict Cordis inject for native session.prompt. Uses compiled client + real Context. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
-import { execFileSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { resolve, join } from 'node:path';
+import { join } from 'node:path';
 import { ok } from './helpers/library-board-fixtures.mjs';
 
 const plugin = fileURLToPath(new URL('..', import.meta.url));
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
-const pin = kitPin;
-assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], { cwd: upstream, encoding: 'utf8' }).trim(), pin.upstream_sha);
-const webRequire = createRequire(join(upstream, 'apps/web/package.json'));
+const webRequire = sdk.loadBrowserModule;
 const { Context, Service } = createRequire(join(plugin, 'package.json'))('@deepseek-ai/cordis');
 const stores = await import(pathToFileURL(join(upstream, 'packages/client/store/lib/index.js')).href);
 const source = await readFile(join(plugin, 'lib/client.js'), 'utf8');

@@ -2,16 +2,22 @@
 import { isAbsolute } from 'node:path';
 import { inspectToolchain } from './toolchain.mjs';
 
-const usage = 'node check.mjs --upstream /absolute/pinned-dsh [--build-tools /absolute/locked-build-tools]';
+const usage = 'node check.mjs --upstream /absolute/pinned-dsh [--build-tools /absolute/locked-build-tools] [--closure-sha256 SHA]';
 const args = process.argv.slice(2);
 if (args.length === 1 && ['--help', '-h'].includes(args[0])) {
   console.log(usage);
 } else {
   let result;
   try {
-    if (![2, 4].includes(args.length) || args[0] !== '--upstream' || !isAbsolute(args[1])
-      || (args.length === 4 && (args[2] !== '--build-tools' || !isAbsolute(args[3])))) throw new Error('KIT_ARGUMENTS_INVALID');
-    const { pin, bindings } = await inspectToolchain(args[1], args[3]);
+    const options = {};
+    if (!args.length || args.length % 2) throw new Error('KIT_ARGUMENTS_INVALID');
+    for (let i = 0; i < args.length; i += 2) {
+      if (!['--upstream', '--build-tools', '--closure-sha256'].includes(args[i]) || Object.hasOwn(options, args[i])) throw new Error('KIT_ARGUMENTS_INVALID');
+      options[args[i]] = args[i + 1];
+    }
+    if (!options['--upstream'] || !isAbsolute(options['--upstream'])
+      || (options['--build-tools'] && !isAbsolute(options['--build-tools']))) throw new Error('KIT_ARGUMENTS_INVALID');
+    const { pin, bindings } = await inspectToolchain(options['--upstream'], options['--build-tools'], options['--closure-sha256']);
     result = { schema_version: 'shinemage-kit-inputs/v1', status: 'READY',
       scope: 'local-build-inputs-only', dsh_pin: pin.sdk_version, upstream_sha: pin.upstream_sha,
       sdk_packages: Object.keys(pin.sdk_bindings).length, bindings: bindings.size,

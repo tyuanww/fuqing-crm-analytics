@@ -1,17 +1,13 @@
-import kitPin from '@shine-mage/dsh-plugin-kit/pin' with { type: 'json' };
+import { upstream } from './helpers/sdk-inputs.mjs';
 /** Execute the pinned client's package scan against the actual test helper paths. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { join, resolve } from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { join } from 'node:path';
 
 const plugin = fileURLToPath(new URL('..', import.meta.url));
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
-const pin = kitPin;
-assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], { cwd: upstream, encoding: 'utf8' }).trim(), pin.upstream_sha);
 const moduleEntry = join(upstream, 'packages/client/modules/lib/index.js');
 const { Context } = createRequire(moduleEntry)('@deepseek-ai/cordis');
 const { ClientModuleRegistry } = await import(pathToFileURL(moduleEntry).href);

@@ -8,6 +8,7 @@ caller Git configuration, network download, or existing destination replacement.
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 import hashlib
 import json
 import os
@@ -293,7 +294,8 @@ def check_zip_directory(stream):
     stream.seek(0)
 
 
-def restore_archive(archive, expected_sha, stage, identity):
+@contextmanager
+def verified_archive(archive, expected_sha, identity):
     need(isinstance(expected_sha, str) and HEX.fullmatch(expected_sha), 'DIGEST')
     with open_regular(archive) as f:
         need(os.fstat(f.fileno()).st_size <= MAX_BYTES, 'ARCHIVE_SIZE_LIMIT')
@@ -312,37 +314,54 @@ def restore_archive(archive, expected_sha, stage, identity):
                 need(not info.flag_bits & 1 and info.compress_type in (zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED), 'ARCHIVE_TYPE')
             need(z.getinfo('manifest.json').file_size <= MAX_MANIFEST, 'MANIFEST_LIMIT')
             manifest = json_load(z.read('manifest.json'))
-            size = validate_manifest(manifest, identity)
+            validate_manifest(manifest, identity)
             entries = manifest['entries']
             blobs = {r['sha256']: r['bytes'] for r in entries.values() if r['kind'] == 'file'}
             need(set(names) == {'manifest.json', *('blobs/' + sha for sha in blobs)}, 'ARCHIVE_MEMBERS')
             need(all(z.getinfo('blobs/' + sha).file_size == count for sha, count in blobs.items()), 'BLOB_SIZE')
-            for name, row in sorted(entries.items(), key=lambda item: (item[0].count('/'), item[0])):
-                target = stage / name
-                if row['kind'] == 'dir':
-                    target.mkdir(mode=0o700)
-                elif row['kind'] == 'file':
-                    h = hashlib.sha256()
-                    count = 0
-                    with z.open('blobs/' + row['sha256']) as data, target.open('xb') as output:
-                        while chunk := data.read(1024 * 1024):
-                            count += len(chunk)
-                            need(count <= row['bytes'], 'BLOB_SIZE')
-                            h.update(chunk)
-                            output.write(chunk)
-                    need(count == row['bytes'] and h.hexdigest() == row['sha256'], 'BLOB_DIGEST')
-                    target.chmod(row['mode'])
-            # No file is written through a link: all parents were checked as dirs.
-            for name, row in entries.items():
-                if row['kind'] == 'link':
-                    (stage / name).symlink_to(row['target'])
-            for name, row in entries.items():
-                if row['kind'] == 'link':
-                    resolved = (stage / name).resolve(strict=True)
-                    need(stage in resolved.parents, 'LINK_ESCAPE')
+            yield z, manifest
         f.seek(0)
         need(digest(f) == expected_sha, 'ARCHIVE_CHANGED')
-    return {'entries': len(entries), 'logical_bytes': size}
+
+
+def restore_archive(archive, expected_sha, stage, identity):
+    with verified_archive(archive, expected_sha, identity) as (z, manifest):
+        entries = manifest['entries']
+        for name, row in sorted(entries.items(), key=lambda item: (item[0].count('/'), item[0])):
+            target = stage / name
+            if row['kind'] == 'dir':
+                target.mkdir(mode=0o700)
+            elif row['kind'] == 'file':
+                h = hashlib.sha256()
+                count = 0
+                with z.open('blobs/' + row['sha256']) as data, target.open('xb') as output:
+                    while chunk := data.read(1024 * 1024):
+                        count += len(chunk)
+                        need(count <= row['bytes'], 'BLOB_SIZE')
+                        h.update(chunk)
+                        output.write(chunk)
+                need(count == row['bytes'] and h.hexdigest() == row['sha256'], 'BLOB_DIGEST')
+                target.chmod(row['mode'])
+        # No file is written through a link: all parents were checked as dirs.
+        for name, row in entries.items():
+            if row['kind'] == 'link':
+                (stage / name).symlink_to(row['target'])
+        for name, row in entries.items():
+            if row['kind'] == 'link':
+                resolved = (stage / name).resolve(strict=True)
+                need(stage in resolved.parents, 'LINK_ESCAPE')
+
+    return {'entries': len(entries), 'logical_bytes': sum(row.get('bytes', 0) for row in entries.values())}
+
+
+def inspect_archive(archive, expected_sha, identity):
+    """Read-only content verification for repository-owned distribution audits."""
+    with verified_archive(archive, expected_sha, identity) as (z, manifest):
+        blobs = {r['sha256'] for r in manifest['entries'].values() if r['kind'] == 'file'}
+        for sha in blobs:
+            with z.open('blobs/' + sha) as data:
+                need(digest(data) == sha, 'BLOB_DIGEST')
+    return manifest
 
 
 def receipt(operation, **fields):

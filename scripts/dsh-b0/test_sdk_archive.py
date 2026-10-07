@@ -84,6 +84,16 @@ class ArchiveTest(unittest.TestCase):
             self.restore(sha='0' * 64)
         self.assertEqual(list((self.root / 'stage').iterdir()), [])
 
+    def test_readonly_archive_inspection_reuses_validation_and_checks_every_blob(self):
+        before = sorted(p.relative_to(self.root).as_posix() for p in self.root.rglob('*'))
+        self.assertEqual(archive.inspect_archive(self.zip, self.sha, IDENTITY), self.manifest)
+        self.assertEqual(sorted(p.relative_to(self.root).as_posix() for p in self.root.rglob('*')), before)
+        row = self.manifest['entries']['upstream/module.js']
+        self.blobs['blobs/' + row['sha256']] = b'x' * row['bytes']
+        file, sha = self.rewrite()
+        with self.assertRaisesRegex(archive.Invalid, 'BLOB_DIGEST'):
+            archive.inspect_archive(file, sha, IDENTITY)
+
     def test_exact_schema_pin_and_platform(self):
         for field, value in [('schema', 'unknown/v2'), ('platform', 'linux'), ('arch', 'x64'), ('node_major', True), ('pin_sha256', '0' * 64), ('surprise', 1)]:
             with self.subTest(field=field):
