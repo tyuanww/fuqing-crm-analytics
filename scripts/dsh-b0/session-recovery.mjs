@@ -7,21 +7,27 @@ import { isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import { zstdCompress } from 'node:zlib';
+import { TOOL_CORPUS_ID, TOOL_EVENTS_PER_TURN } from './session-recovery-tool-corpus.mjs';
 
 const exec = promisify(execFile), compress = promisify(zstdCompress);
 const probe = fileURLToPath(new URL('./session-recovery.probe.mjs', import.meta.url));
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const encode = value => JSON.stringify(value, null, 2) + '\n';
 
-export async function runSessionRecoveryMatrix({ output, rc2Modules, rc1Modules }) {
+export async function runSessionRecoveryMatrix({ output, rc2Modules, rc1Modules, corpus = 'text' }) {
   assert.equal(Number(process.versions.node.split('.')[0]), 24);
+  assert.ok(['text', 'tool'].includes(corpus), 'RECOVERY_CORPUS_UNSUPPORTED');
+  const eventCount = corpus === 'tool' ? TOOL_EVENTS_PER_TURN : 6;
   assert.ok(isAbsolute(output) && isAbsolute(rc2Modules));
   if (rc1Modules) assert.ok(isAbsolute(rc1Modules));
   await mkdir(output, { mode: 0o700 }); // EEXIST is intentional: no reuse/overwrite.
   output = await realpath(output); // macOS /var aliases are legitimate; mkdir already refused an existing leaf.
   const rows = [], executions = [];
-  const result = { schema_version: 'dsh-owned-session-recovery/v1', scope: 'compiled-official-persistence-synthetic',
-    rows, executions, corpus: 'completed user/assistant turns with streamed text; tool/media/delegation NOT_RUN',
+  const result = { schema_version: corpus === 'tool' ? 'dsh-owned-session-recovery/v2' : 'dsh-owned-session-recovery/v1', scope: 'compiled-official-persistence-synthetic',
+    rows, executions, corpus: corpus === 'tool'
+      ? 'completed tool-call/result turns, success/error/meta and restored message surface; media/delegation NOT_RUN'
+      : 'completed user/assistant turns with streamed text; tool/media/delegation NOT_RUN',
+    ...(corpus === 'tool' ? { corpus_id: TOOL_CORPUS_ID, tool_execution: 'NOT_RUN', model_execution: 'NOT_RUN' } : {}),
     production_data: 'NOT_RUN', host_lifecycle: 'NOT_RUN', release_ready: false };
   const fresh = async name => {
     const root = join(output, name); await mkdir(root, { mode: 0o700 });
@@ -30,7 +36,7 @@ export async function runSessionRecoveryMatrix({ output, rc2Modules, rc1Modules 
   };
   async function run(root, operation, old = false, prefix) {
     const input = { root, operation, modules: old ? rc1Modules : rc2Modules,
-      version: old ? '0.1.7-rc.1' : '0.1.7-rc.2', prefix };
+      version: old ? '0.1.7-rc.1' : '0.1.7-rc.2', prefix, corpus };
     const index = executions.length;
     let stdout = '', stderr = '', exitCode = 0;
     try {
@@ -63,34 +69,34 @@ export async function runSessionRecoveryMatrix({ output, rc2Modules, rc1Modules 
   }
   try {
     const root = await fresh('torn');
-    const initial = await run(root, 'create'); assert.equal(initial.count, 6);
+    const initial = await run(root, 'create'); assert.equal(initial.count, eventCount);
     const files = await inventory(root);
     const logs = Object.keys(files).filter(name => name.endsWith('.jsonl.zstd')); assert.equal(logs.length, 1);
     const path = join(root, logs[0]), baseline = await readFile(path);
-    const frame = await compress(Buffer.from(JSON.stringify({ type: 'turn/start', seq: 6, time: 7, data: { turn: 2 } }) + '\n'));
+    const frame = await compress(Buffer.from(JSON.stringify({ type: 'turn/start', seq: eventCount, time: eventCount + 1, data: { turn: 2 } }) + '\n'));
     await appendFile(path, frame.subarray(0, frame.length - 3));
     const torn = await readFile(path);
     const read = await run(root, 'read'); assert.equal(read.digest, initial.digest);
     assert.deepEqual(await readFile(path), torn, 'RECOVERY_READ_CHANGED_TORN_TAIL');
-    const repaired = await run(root, 'append', false, 6);
-    assert.equal(repaired.prefix_digest, initial.digest); assert.equal(repaired.count, 12);
+    const repaired = await run(root, 'append', false, eventCount);
+    assert.equal(repaired.prefix_digest, initial.digest); assert.equal(repaired.count, eventCount * 2);
     const cold = await run(root, 'read'); assert.equal(cold.digest, repaired.digest);
     assert.deepEqual((await readFile(path)).subarray(0, baseline.length), baseline);
-    rows.push({ id: 'rc2-torn-final-frame-recovery', status: 'PASS', committed_events: 6, recovered_events: 12,
+    rows.push({ id: 'rc2-torn-final-frame-recovery', status: 'PASS', committed_events: eventCount, recovered_events: eventCount * 2,
       prefix_digest: initial.digest, injected_bytes: frame.length - 3, read_only_preserved_bytes: true,
       initial_file_sha256: hash(baseline), repaired_file_sha256: hash(await readFile(path)) });
     if (rc1Modules) {
       const cross = await fresh('cross-version');
-      const old = await run(cross, 'create', true); assert.equal(old.count, 6);
+      const old = await run(cross, 'create', true); assert.equal(old.count, eventCount);
       // Owned synthetic snapshot demonstrates code rollback with OLD state only.
       const saved = join(output, 'old-state-snapshot'); await cp(cross, saved, { recursive: true, errorOnExist: true });
       const before = await inventory(cross), newer = await run(cross, 'read');
       assert.equal(newer.digest, old.digest); assert.deepEqual(await inventory(cross), before);
-      const appended = await run(cross, 'append', false, 6);
-      assert.equal(appended.prefix_digest, old.digest); assert.equal(appended.count, 12);
+      const appended = await run(cross, 'append', false, eventCount);
+      assert.equal(appended.prefix_digest, old.digest); assert.equal(appended.count, eventCount * 2);
       assert.equal((await run(cross, 'read')).digest, appended.digest);
       rows.push({ id: 'rc1-write-rc2-read-append', status: 'PASS', old_format: old.format_version,
-        new_format: appended.format_version, committed_events: 6, recovered_events: 12 });
+        new_format: appended.format_version, committed_events: eventCount, recovered_events: eventCount * 2 });
       const preRollback = await inventory(cross);
       let downgrade;
       try {
@@ -114,8 +120,18 @@ export async function runSessionRecoveryMatrix({ output, rc2Modules, rc1Modules 
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const [output, rc2Modules, rc1Modules] = process.argv.slice(2);
-  const result = await runSessionRecoveryMatrix({ output, rc2Modules, rc1Modules });
+  const args = process.argv.slice(2), positional = []; let corpus = 'text', seenCorpus = false;
+  for (let index = 0; index < args.length; index++) {
+    if (args[index] === '--corpus') {
+      assert.ok(!seenCorpus && ['text', 'tool'].includes(args[index + 1]), 'RECOVERY_CORPUS_UNSUPPORTED');
+      seenCorpus = true; corpus = args[++index];
+    } else {
+      assert.ok(!args[index].startsWith('-'), 'RECOVERY_ARGUMENT_UNSUPPORTED'); positional.push(args[index]);
+    }
+  }
+  assert.ok(positional.length === 2 || positional.length === 3, 'RECOVERY_ARGUMENT_COUNT');
+  const [output, rc2Modules, rc1Modules] = positional;
+  const result = await runSessionRecoveryMatrix({ output, rc2Modules, rc1Modules, corpus });
   console.log(JSON.stringify(result));
   process.exitCode = result.status === 'FAIL' ? 1 : result.status === 'PASS' ? 0 : 2;
 }

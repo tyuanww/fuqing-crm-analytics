@@ -2,18 +2,31 @@
 
 本入口是 analysis-service 的合成数据合同，API `1.0.0`。它不启动 DSH/CRM、连接真实数据库或决定发布。公开合同使用 `/api/v1/analytics-first-purchase`，不把 `/internal/native` 变成插件 API。
 
+## 当前产品选择：结果快照，不按年龄失效
+
+2026-10-07 收口此前“暂缓”表述：当前首购结果采用**历史快照 + 保存时校验**，不再把陈旧/过期阈值列为待确认事项，也不新增另一套到期系统。
+
+- 展示并保存生成时间、数据时间窗、来源和结果版本；这些说明结果属于哪次查询，不保证它代表当前实时数据。
+- 结果不会仅因放置时间变长而失去保存资格。需要更新数据时重新发起查询，产生新结果；页面刷新和重放不偷偷更新原快照。
+- 每次新保存仍校验当前身份/权限、精确候选准入、成功终态、来源和 evidence digest；写锁后重验，拒绝冲突，以原 action/幂等键恢复丢失回执。
+- 登录/session 有效期、HTTP/任务超时、权限撤销和 UNKNOWN 恢复仍有效，不能随结果年龄策略一起关闭。
+
+删除的是当前计划中“等待设置阈值”的产品待办。`freshness` 字段、`NOT_CHECKED / DISABLED_BY_POLICY` 和旧 FRESH/STALE/EXPIRED 读取/策略分支保留兼容，避免已有回执、严格 decoder 或旧消费者失效；不修改历史记录、不更改 schema，也不把 NOT_CHECKED 显示成“最新”。未来若业务确实需要年龄限制，应单独提出需求、版本化策略并验证消费者；不是本轮默认后续任务。缺策略仍拒绝保存，当前候选由服务 owner 显式配置下述无年龄策略，不改变旧调用的默认值。
+
+本项已核对实现并重新验证，见[本次收口证据](../hackathon/evidence/dsh-g0-snapshot-policy-closeout-20261007.md)。生产身份接入和保存准入仍按各自门禁执行，不能因本项完成自动启用。
+
 ## 服务配置
 
 `create_first_purchase_analysis_app(..., save_policy=provider)` 接收服务 owner 显式注入的策略提供函数。每次检查或新写入重新取策略，函数返回不可变 `FirstPurchaseSavePolicy` 或 `None`：
 
 - `policy_version`：有版本的服务策略标识。
 - `admitted_candidates`：精确 SHA-256 集合，由部署 owner 根据候选审核/准入证据提供；HTTP 请求不能向集合增加条目。
-- `check_freshness`：仅限服务端配置的关键字参数，默认 `True` 保留已有时限策略；显式 `False` 表示暂不检查结果年龄。缺策略不等于关闭时效。
+- `check_freshness`：仅限服务端配置的关键字参数，默认 `True` 保留已有时限策略；显式 `False` 表示采用不按年龄失效的结果快照策略。缺策略不等于关闭时效。
 - `max_age_ms`、`expires_after_ms`：开启检查时满足 `0 < max_age_ms < expires_after_ms <= 2147483647`；关闭时必须同时为 `None`。不接受超大期限冒充永久新鲜，也不把空阈值自动解释为关闭。
 
 当前原生 app/profile 未接入该 provider，生产保存 UI 仍是 `NOT_AVAILABLE`。本轮测试使用 1000/2000 ms 的可控时钟，不能拿这两个数当成生产参数。策略注入只证明服务边界；签名、来源、宿主/服务兼容窗口和 D4-C 放行仍由候选门禁负责。
 
-2026-10-06 用户决定：**陈旧和过期判断暂缓，不再等待生产阈值确认**。当前接入采用如下服务策略；`admitted_candidate_digests` 必须由 owner 提供真实审核准入集合，不得直接取自请求：
+2026-10-06 已实现的关闭时效策略继续用于上面的当前快照选择。接入采用如下服务策略；`admitted_candidate_digests` 必须由 owner 提供真实审核准入集合，不得直接取自请求：
 
 ```python
 from backend.services.analytics.first_purchase.save_policy import FirstPurchaseSavePolicy
@@ -40,7 +53,7 @@ policy = FirstPurchaseSavePolicy(
 
 identity schema 为 `analytics-first-purchase-save-identity/v1`，含 action_id、candidate_digest、correlation_id。identity 和幂等键用于关联与去重，本身不是授权凭据。保存前预览不是一次性授权；服务取得 SQLite 写锁后重新解析身份、候选、冻结结果及当前时效策略。
 
-## 结果与有效期
+## 快照结果与兼容时效合同
 
 独立 `analytics-first-purchase-save-result/v1` 包含原 first-purchase result、identity、result_state、provenance、save_eligible 和 save_ineligible_reason。provenance 的 environment 固定 `synthetic`，并保留 data_time_window、query_scope、permission_scope、source_refs、candidate_digest、generated_at 和 freshness。
 

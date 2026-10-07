@@ -1,9 +1,14 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile, readdir } from 'node:fs/promises';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+import { zstdCompress, zstdDecompress } from 'node:zlib';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { runSessionRecoveryMatrix } from './session-recovery.mjs';
+
+const exec = promisify(execFile), compress = promisify(zstdCompress), decompress = promisify(zstdDecompress);
 
 test('existing output is refused without touching its contents', async () => {
   const root = await mkdtemp(join(tmpdir(), 'owned-session-guard-'));
@@ -33,5 +38,77 @@ test('official rc2 cold reader/writer recovers an incomplete zstd frame', {
     assert.equal(result.status, 'PARTIAL');
     assert.equal(result.rows[0].status, 'PASS'); assert.equal(result.rows[1].status, 'NOT_RUN');
     assert.equal(result.executions.length, 4);
+  } finally { await rm(root, { recursive: true }); }
+});
+
+test('unknown corpus is rejected before creating output', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'owned-session-corpus-guard-'));
+  try {
+    const output = join(root, 'must-not-exist');
+    await assert.rejects(runSessionRecoveryMatrix({ output, rc2Modules: '/missing', corpus: 'all' }), /RECOVERY_CORPUS_UNSUPPORTED/);
+    assert.deepEqual(await readdir(root), []);
+  } finally { await rm(root, { recursive: true }); }
+});
+
+test('official rc2 retains tool pairs, error/meta and message surface after torn-tail repair', {
+  skip: !process.env.B0_BUILD_UPSTREAM && 'explicit built upstream required',
+}, async () => {
+  const root = await mkdtemp(join(tmpdir(), 'owned-session-tool-real-'));
+  try {
+    const output = join(root, 'result');
+    const result = await runSessionRecoveryMatrix({ output, corpus: 'tool',
+      rc2Modules: join(process.env.B0_BUILD_UPSTREAM, 'apps/cli/node_modules/@deepseek-ai') });
+    assert.equal(result.schema_version, 'dsh-owned-session-recovery/v2');
+    assert.equal(result.status, 'PARTIAL'); assert.equal(result.release_ready, false);
+    assert.equal(result.rows[0].status, 'PASS'); assert.equal(result.rows[0].committed_events, 13);
+    assert.equal(result.rows[0].recovered_events, 26); assert.equal(result.rows[1].status, 'NOT_RUN');
+    assert.equal(result.tool_execution, 'NOT_RUN'); assert.equal(result.model_execution, 'NOT_RUN');
+    assert.equal(result.executions.length, 4);
+    const cold = JSON.parse(await readFile(join(output, 'process-3.stdout'), 'utf8'));
+    const calls = cold.events.filter(event => event.type === 'tool/call');
+    const results = cold.events.filter(event => event.type === 'tool/result');
+    assert.equal(calls.length, 4);
+    assert.deepEqual(results.map(event => event.data.message.toolCallId), calls.map(event => event.data.callId));
+    assert.deepEqual(results.map(event => event.data.message.isError), [false, true, false, true]);
+    assert.equal(results[1].data.error.code, 'SYNTHETIC_DENIED');
+    assert.deepEqual(results[0].data.meta.rows, [{ count: 1 }]);
+  } finally { await rm(root, { recursive: true }); }
+});
+
+test('cold tool-corpus probe rejects altered persisted tool content without repairing it', {
+  skip: !process.env.B0_BUILD_UPSTREAM && 'explicit built upstream required',
+}, async () => {
+  const root = await mkdtemp(join(tmpdir(), 'owned-session-tool-corrupt-'));
+  try {
+    const output = join(root, 'result'), modules = join(process.env.B0_BUILD_UPSTREAM, 'apps/cli/node_modules/@deepseek-ai');
+    const result = await runSessionRecoveryMatrix({ output, rc2Modules: modules, corpus: 'tool' });
+    assert.equal(result.rows[0].status, 'PASS');
+    const owned = result.executions[0].root, logs = [];
+    async function walk(path) {
+      for (const entry of await readdir(path, { withFileTypes: true })) {
+        if (entry.isDirectory()) await walk(join(path, entry.name));
+        else if (entry.name.endsWith('.jsonl.zstd')) logs.push(join(path, entry.name));
+      }
+    }
+    await walk(owned); assert.equal(logs.length, 1);
+    // Node decodes the first frame only; the official format deliberately keeps
+    // the header in that frame. Rebuild a separate event frame from the verified
+    // cold-process output, then let the real reader parse the altered fixture.
+    const header = await decompress(await readFile(logs[0]));
+    assert.equal(JSON.parse(header.toString('utf8')).type, 'session');
+    const cold = JSON.parse(await readFile(join(output, 'process-3.stdout'), 'utf8'));
+    const event = cold.events.find(row => row.type === 'tool/result');
+    assert.equal(event.data.message.content[0].text, '合成结果：一条');
+    event.data.message.content[0].text = '篡改的合成结果';
+    const tampered = Buffer.concat([await compress(header),
+      await compress(Buffer.from(cold.events.map(row => JSON.stringify(row) + '\n').join('')))]);
+    await writeFile(logs[0], tampered);
+    const child = exec(process.execPath, [join(import.meta.dirname, 'session-recovery.probe.mjs')], {
+      cwd: owned, timeout: 30000, env: { PATH: '/usr/local/bin:/usr/bin:/bin', HOME: owned, TMPDIR: owned },
+    });
+    child.child.stdin.on('error', () => {});
+    child.child.stdin.end(JSON.stringify({ root: owned, modules, operation: 'read', version: '0.1.7-rc.2', corpus: 'tool' }));
+    await assert.rejects(child, error => error.code === 1 && /RECOVERY_TOOL_CORPUS_CONTENT/.test(error.stderr));
+    assert.deepEqual(await readFile(logs[0]), tampered);
   } finally { await rm(root, { recursive: true }); }
 });

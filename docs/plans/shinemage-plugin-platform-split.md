@@ -21,6 +21,10 @@
 
 全文核对与本轮代码修复证据见 [2026-10-03 审查修复记录](../hackathon/evidence/dsh-g0-review-fixes-20261003.md)。未关闭的实施项沿用 T1–T23，不新增重复规划或再次询问已回答的选择。
 
+### 2026-10-07 结果年龄策略收口
+
+当前产品采用历史结果快照，不按年龄失效；需要新数据重新查询。陈旧/过期阈值不再是本轮待办或发布阻塞，不新增替代到期系统。保留生成时间/来源、保存时身份与候选准入/冲突/幂等校验，以及现有无年龄策略 `NOT_CHECKED` 合同；不删除旧时效字段/兼容分支或取消 session/请求超时。后文历史 D9、Eng freshness 决策按各自日期保留，当前任务 T3/T7/T14 的年龄要求以本节和[保存准入](../operating/first-purchase-save-admission.md)为准，不能重新要求用户提供阈值。实现核对及本次验证见[收口证据](../hackathon/evidence/dsh-g0-snapshot-policy-closeout-20261007.md)。
+
 ## 已确认的事实与约束
 
 - 最初迁移盘点基线为 `main@fcbd1324`；本次修复从公共仓库 `main@d4261aa3` 开始。前置审核修复在独立分支 `codex/plugin-boundary-review` 为 `f55908df`，当前工作区为 `/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics`。本次本地提交包含后续 CRM 解耦增量与 2026-10-04 OCR 修复，准确 SHA 以 Git 为准，审核证据见[提交前审核](../hackathon/evidence/dsh-g0-crm-review-20261004.md)。本地提交不等于 clean reviewed release artifact 已重建；原公共 main 及其修改保留。
@@ -1530,6 +1534,8 @@ Synthesized from this review's findings. Run with Claude Code or Codex; checkbox
   - Journal follow-up 2026-10-07: **TERMINAL RECEIPT GATE IMPLEMENTED / G0 PARTIAL**. Explicit terminal envelope verifies the archived current-candidate observations and appends seq 5 linked to source-HTTP seq 4. Full release suite 391 PASS (37 new gate cases), real CLI replay idempotent, wrong parent rejected, 619 protected files unchanged. No new WSL execution or production activation; browser/current-candidate, cross-version corpus and remaining G0 gates stay open. Evidence: [terminal receipt gate](../hackathon/evidence/dsh-g0-first-purchase-terminal-gate-20261007.md).
   - Browser follow-up 2026-10-07: **CURRENT CANDIDATE BROWSER OBSERVED / G0 PARTIAL**. After terminal gate commit `db16041a`, the unchanged `a490457c…` packages passed actual WSL Chrome headless five scenarios / Host 1 PASS (78.00s). 184 result files verified, 620 local protected files and journal seq 5 unchanged; owned directory reclaimed and production unchanged. The new browser receipt still needs an explicit journal adapter; no inherited old-candidate event. Evidence: [current candidate browser](../hackathon/evidence/dsh-g0-first-purchase-current-browser-20261007.md).
   - Browser journal follow-up 2026-10-07: **CURRENT BROWSER RECEIPT GATE IMPLEMENTED / G0 PARTIAL**. Explicit browser v2 uses the terminal Host parent and independent plugin/service sources, retaining v1. Archived evidence accepted at seq 6, five prior events preserved, retry unchanged and wrong parent rejected. Release suite 429 PASS including 38 v2 cases; 1318 protected files unchanged. No remote rerun or production activation. Evidence: [browser v2 gate](../hackathon/evidence/dsh-g0-current-browser-gate-20261007.md).
+
+  - Tool corpus follow-up 2026-10-07: **LOCAL RC2 TOOL PERSISTENCE PASS / CROSS-VERSION NOT_RUN**. Explicit tool corpus uses the compiled official persistence and restored message surface, 13→26 events after a torn final frame; success/error/meta retained. Related suite 11 PASS after correcting the corruption fixture. No tool execution, target rerun, journal update or build attestation. Evidence: [tool corpus](../hackathon/evidence/dsh-g0-session-tool-corpus-20261007.md).
 
 - [ ] **T3 (P1, human: ~8h / CC: ~45min)** — CRM/API baseline — freeze the first vertical slice contract, compatibility adapter, generated types, version window and profile×service×state rollback matrix.
   - Surfaced by: CEO-REVIEW-004 and Section 4 DATA-001.

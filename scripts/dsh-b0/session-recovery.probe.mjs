@@ -4,12 +4,15 @@ import { createHash } from 'node:crypto';
 import { readFile, realpath, lstat } from 'node:fs/promises';
 import { isAbsolute, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { assertToolCorpus, toolRecoveryTurn } from './session-recovery-tool-corpus.mjs';
 
 const chunks = [];
 for await (const chunk of process.stdin) chunks.push(chunk);
 const input = JSON.parse(Buffer.concat(chunks));
 assert.equal(Number(process.versions.node.split('.')[0]), 24);
 assert.ok(['create', 'read', 'append'].includes(input.operation));
+const corpus = input.corpus ?? 'text';
+assert.ok(['text', 'tool'].includes(corpus), 'RECOVERY_CORPUS_UNSUPPORTED');
 assert.ok(isAbsolute(input.modules) && isAbsolute(input.root));
 assert.equal(await realpath(input.root), input.root, 'RECOVERY_ROOT_SYMLINK');
 assert.ok((await lstat(input.root)).isDirectory());
@@ -40,7 +43,7 @@ try {
     const prior = (await handle.read()).events;
     const turn = prior.filter(event => event.type === 'turn/start').length + 1;
     const seq = prior.length;
-    await handle.append([
+    await handle.append(corpus === 'tool' ? toolRecoveryTurn(turn, seq) : [
       { type: 'turn/start', seq, time: seq + 1, data: { turn } },
       { type: 'user/message', seq: seq + 1, time: seq + 2, surfaceOp: 'append', data: {
         id: `owned-user-${turn}`, role: 'user', source: { kind: 'user' },
@@ -65,6 +68,15 @@ try {
     await handle.flush();
   }
   const { events } = await handle.read();
+  if (corpus === 'tool') {
+    assertToolCorpus(events);
+    // Restore through the official session surface as well as comparing persistence bytes.
+    // This does not run an Agent Loop, tool or model.
+    const restored = packages['dsh-session'].module.Session.create(id, structuredClone(events));
+    assert.deepEqual(restored.deriveMessages(), events.filter(event =>
+      ['user/message', 'assistant/message', 'tool/result'].includes(event.type))
+      .map(event => event.type === 'user/message' ? event.data : event.data.message));
+  }
   process.stdout.write(JSON.stringify({ status: 'PASS', operation: input.operation,
     runtime_version: input.version, format_version: SESSION_FORMAT_VERSION, count: events.length,
     digest: hash(events), prefix_digest: hash(events.slice(0, input.prefix ?? events.length)),

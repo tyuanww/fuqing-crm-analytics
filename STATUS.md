@@ -14,7 +14,17 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 新候选浏览器回执接线（2026-10-07，当前进度）
+### 结果年龄策略收口（2026-10-07）
+
+- 当前采用历史结果快照 + 保存时校验；陈旧/过期阈值已移出当前待办，不再等待确认，也不新增到期系统。保留生成时间/来源和 `NOT_CHECKED`，权限、候选准入、冲突、幂等与会话/请求超时保持；旧 wire/回执兼容不删除。见[决定与验证](docs/hackathon/evidence/dsh-g0-snapshot-policy-closeout-20261007.md)。
+
+### 工具会话恢复语料（2026-10-07，当前进度）
+
+- 浏览器 v2 门禁经 OCR delegate 21/21 审修后，正常 hooks 本地提交 **`d8a84d66`**；提交后工作树干净，没有 push 或生产动作。
+- 已继续 T2/T7，增加显式 `--corpus tool`：固定 rc2 实际 reader/writer 四个冷进程完成 13→26 事件截断恢复和官方消息投影核对，调用/结果/错误/meta 保留。相关测试修正一处故障注入夹具后 **11 PASS / 0 FAIL / 0 SKIP**，见[本轮证据](docs/hackathon/evidence/dsh-g0-session-tool-corpus-20261007.md)。
+- 本机新语料只证明 rc2 持久化与消息恢复；rc1↔rc2 新语料、杭州复验、media/delegation 与编译闭包来源仍开放，CLI 返回 PARTIAL/2。candidate/journal seq 6 保持，本批经 OCR delegate 审核，随本次提交交付。
+
+### 新候选浏览器回执接线（2026-10-07，已提交阶段）
 
 - 在 `db16041a` 和前轮 5 个文档改动上继续，新增显式 `dsh-browser-host-evidence/v2`，仍走 `plugin verify-host`，独立核对插件/服务来源，关联终态 Host seq 5；v1 HTTP 父事件合同不变。见[本轮门禁证据](docs/hackathon/evidence/dsh-g0-current-browser-gate-20261007.md)。
 - 原 `a490457c…` 候选已追加 **seq 6 / CANDIDATE_BROWSER_HOST_OBSERVED**。原始 archive/inventory、固定 runner/控制器、五场景与清理观察通过；前五事件保持，重试不写，实际错误父事件拒绝，1318 个保护文件保持。
