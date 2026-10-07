@@ -18,6 +18,8 @@ node --test scripts/dsh-b0/plugin-boundaries.test.mjs
 
 `inspection_baseline_sha` 是开始盘点的提交，不是本地未提交修改的 reviewed SHA；当前变更由实际输入与清单差异复核，正式发布仍从干净已审查提交重建。
 
+全部 10 个构建消费者通过精确 devDependency 使用 kit 公开导出；测试通过 `./pin` 读取固定版本。边界检查拒绝构建入口回退到相邻 kit 源码，运行时仍禁止 kit。图表插件的跨工作台组合测试移到仓库级 `scripts/dsh-b0/geometry-composition.test.mjs`，领域 JSON 全矩阵继续归 board-components。该静态边界不证明 SDK/构建工具已可脱离固定 checkout 分发。
+
 ## 实际包与目标归属
 
 | 当前包目录 | 领域 | 目标仓库（尚未迁移） | 现状 |

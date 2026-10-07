@@ -1,3 +1,4 @@
+import kitPin from '@shine-mage/dsh-plugin-kit/pin' with { type: 'json' };
 /** Real pinned SlotCore boundary checks, not a native-chat/browser acceptance test. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -8,7 +9,7 @@ import { resolve, join } from 'node:path';
 
 const plugin = fileURLToPath(new URL('..', import.meta.url));
 const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
-const pin = JSON.parse(await readFile(join(plugin, '../plugin-kit/toolchain.json'), 'utf8'));
+const pin = kitPin;
 const upstreamSha = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: upstream, encoding: 'utf8' }).trim();
 const { SlotCore } = await import(pathToFileURL(join(upstream, 'packages/client/ui-slots/lib/index.js')).href);
 

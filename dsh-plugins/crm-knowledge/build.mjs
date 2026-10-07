@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { bindToolchain } from '../plugin-kit/toolchain.mjs';
+import { bindToolchain } from '@shine-mage/dsh-plugin-kit/toolchain';
 const root = dirname(fileURLToPath(import.meta.url));
 const upstream = resolve(process.argv[2] ?? process.env.B0_BUILD_UPSTREAM ?? join(root, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
 const toolsInput = process.argv[3] ?? process.env.B0_BUILD_TOOLS;

@@ -1,6 +1,6 @@
 /** Read-only source inventory. --write updates only the generated boundary manifest. */
 import assert from 'node:assert/strict';
-import { validatePackageLock } from '../../dsh-plugins/plugin-kit/packaged-dependencies.mjs';
+import { validatePackageLock, DEV_KIT_NAME } from '../../dsh-plugins/plugin-kit/packaged-dependencies.mjs';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { lstat, readFile, readdir, writeFile } from 'node:fs/promises';
@@ -75,7 +75,9 @@ export async function inspectBoundaries(root = repository) {
     const owner = policy.owners[directory.name];
     const lock = await readFile(join(path, 'bundled-dependencies.json'), 'utf8').catch(error => { if (error.code !== 'ENOENT') throw error; return null; });
     const bundled = lock ? validatePackageLock(JSON.parse(lock), manifest).packages : [];
-    assert.ok(bundled.length || !Object.keys(manifest.devDependencies ?? {}).some(name => name.startsWith('@shine-mage/')), 'BOUNDARY_BUNDLED_LOCK_REQUIRED');
+    assert.ok(bundled.length || !Object.keys(manifest.devDependencies ?? {}).some(name => name.startsWith('@shine-mage/') && name !== DEV_KIT_NAME), 'BOUNDARY_BUNDLED_LOCK_REQUIRED');
+    assert.ok(![manifest.dependencies, manifest.optionalDependencies, manifest.peerDependencies]
+      .some(group => group?.[DEV_KIT_NAME] !== undefined), 'BOUNDARY_KIT_DEV_ONLY');
     packages.push({ path: normalize(relative(root, path)), name: manifest.name, version: manifest.version, ...owner,
       exports: manifest.exports ?? {}, files: manifest.files ?? [], peers: manifest.peerDependencies ?? {},
       dependencies: manifest.dependencies ?? {}, dev_dependencies: manifest.devDependencies ?? {}, bundled_inputs: bundled, dsh: manifest.dsh ?? {},
@@ -105,9 +107,17 @@ export async function inspectBoundaries(root = repository) {
           const exported = pkg.exports[key];
           assert.ok(exported, `BOUNDARY_PRIVATE_SUBPATH ${specifier}`);
           const targets = typeof exported === 'string' ? [exported] : Object.values(exported);
-          assert.ok(targets.length && targets.every(value => typeof value === 'string' && value.startsWith('./lib/') && pkg.files.includes(value.slice(2))), 'BOUNDARY_EXPORT_NOT_PACKED');
           const caller = packages.find(p => p.path.split('/').at(-1) === consumer);
-          assert.ok(pkg.kind === 'domain-library' && caller.bundled_inputs.some(row => row.name === pkg.name && row.version === pkg.version), `BOUNDARY_PUBLIC_DEPENDENCY_REQUIRED ${specifier}`);
+          if (pkg.kind === 'dev-tool') {
+            assert.ok(pkg.name === '@shine-mage/dsh-plugin-kit' && ['build', 'test'].includes(phase)
+              && caller.dev_dependencies[pkg.name] === pkg.version && !caller.dependencies[pkg.name]
+              && !caller.peers[pkg.name], 'BOUNDARY_KIT_DEV_ONLY');
+            assert.ok(targets.length && targets.every(value => typeof value === 'string' && value.startsWith('./')
+              && safePath(value.slice(2)) && pkg.files.includes(value.slice(2))), 'BOUNDARY_EXPORT_NOT_PACKED');
+          } else {
+            assert.ok(targets.length && targets.every(value => typeof value === 'string' && value.startsWith('./lib/') && pkg.files.includes(value.slice(2))), 'BOUNDARY_EXPORT_NOT_PACKED');
+            assert.ok(pkg.kind === 'domain-library' && caller.bundled_inputs.some(row => row.name === pkg.name && row.version === pkg.version), `BOUNDARY_PUBLIC_DEPENDENCY_REQUIRED ${specifier}`);
+          }
         }
         else {
           if (specifier.startsWith('@shine-mage/')) throw new Error(`BOUNDARY_UNDECLARED_PACKAGE ${source}`);
@@ -153,7 +163,7 @@ export async function inspectBoundaries(root = repository) {
   }
   for (const edge of edges) {
     if (edge.access === 'public-export') continue;
-    if (edge.phase === 'test' || (edge.phase === 'build' && edge.provider === 'plugin-kit')) continue;
+    if (edge.phase === 'test') continue;
     assert.ok(policy.allowed_runtime_edges.some(rule => ['consumer', 'provider', 'source', 'target'].every(key => rule[key] === edge[key])), `BOUNDARY_UNAPPROVED_EDGE ${edge.source} -> ${edge.target}`);
   }
   for (const rule of policy.allowed_runtime_edges) assert.ok(edges.some(edge => ['consumer', 'provider', 'source', 'target'].every(key => rule[key] === edge[key])), `BOUNDARY_STALE_EXCEPTION ${rule.source}`);

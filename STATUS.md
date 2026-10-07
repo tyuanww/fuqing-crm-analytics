@@ -18,7 +18,31 @@
 
 - 当前采用历史结果快照 + 保存时校验；陈旧/过期阈值已移出当前待办，不再等待确认，也不新增到期系统。保留生成时间/来源和 `NOT_CHECKED`，权限、候选准入、冲突、幂等与会话/请求超时保持；旧 wire/回执兼容不删除。见[决定与验证](docs/hackathon/evidence/dsh-g0-snapshot-policy-closeout-20261007.md)。
 
-### rc1 重建与 kit 包边界（2026-10-07，当前增量）
+### kit 增量提交前审核（2026-10-07，最新增量）
+
+- 按用户指定 OCR delegate 完成 **50/50** 代码/配置路径及额外 **13/13** 文档核对；修复 pnpm symlink 入口静默空跑和最终 Git 预检继承应用环境的问题，两项负测先失败后通过。见[审核记录](docs/hackathon/evidence/dsh-g0-kit-review-20261007.md)。本次审核覆盖此前全部未提交 kit 增量，不改业务运行时或 DSH 上游。
+- 修复后保护测试 **18 PASS**，受影响回归 **156 项覆盖**（首次 153 PASS、3 项因测试 PATH 缺 zstd 失败；补齐已安装工具后对应 release 套件 **41/41 PASS**）。包含 10/10 独立消费者构建/测试；旧 1318 文件、候选和 journal seq 6 保持。当前范围没有未关闭高/中严重度发现；生产/分仓门禁仍 PARTIAL。
+- 本批按本次授权进行本地 commit，不外推或部署。提交后继续 SDK/工具闭包可移植性与分发验证；不复用旧冷准备结论冒充新版入口全程或目标 WSL 已运行。
+
+### kit 首次 SDK 准备（2026-10-07，上一增量）
+
+- kit 新增显式 `prepare.mjs`：从已安装的 kit 在全新 HOME/Corepack/store 中获取固定官方源码、冻结依赖，仅构建 SDK 与工具输入。真实空目录准备 **READY / 约 8 分 18 秒**，26 个 SDK 入口通过；不再要求提前存在主仓 SDK 目录。见[本轮证据](docs/hackathon/evidence/dsh-g0-kit-bootstrap-20261007.md)。
+- 新输入下全部 **10/10** 消费者构建/测试通过（kit 套件 **15 PASS**），修复旧测试 `git status` 刷新 index 后，**123781** 个 SDK/工具文件及链接记录保持。保护/安装测试 **16 PASS**、相关边界/发布回归 **67 PASS**；1318 个封存文件和原候选/journal seq 6 保持。
+- 首次遇到 Node CA 链不完整，显式公共 CA 文件恢复校验，未关闭 TLS；失败证据保留。整体仍 **PARTIAL**：这是本机新依赖目录，预编译闭包分发、整台干净机器/新入口 WSL、签名/registry、业务 UAT 和物理分仓仍开放。未 commit、push、发布或操作杭州。
+
+### 全部 kit 消费者迁移（2026-10-07，上一增量）
+
+- 在 `cc1d8497` 及前批未提交修改上继续，10 个构建消费者已全部改用 kit 精确开发依赖和公开导出；真实离线安装后，无相邻插件/kit 源码构建与测试 **10/10 PASS**。修复漏斗/瀑布图测试依赖工作台的问题，跨包断言由仓库级测试维护；领域包摘要保持。见[本轮证据](docs/hackathon/evidence/dsh-g0-kit-all-consumers-20261007.md)。
+- 相关回归 **88 PASS**；追加隔离 HTTP 覆盖后的 kit 套件 **15 PASS**（与 88 重叠），CLI/release **73 PASS**。B0/preflight/CRM calibration/reload 接线完成，未运行完整 pipeline、calibration 或实际 reload；1318 个封存文件、候选/journal seq 6 保持。
+- 本批仍未提交，没有杭州操作。该批安装测试使用固定已准备 SDK；后续新目录准备见上节。预编译 SDK/工具闭包分发、整台干净机器安装、签名/供应链与业务准入仍开放，物理分仓未关闭。
+
+### 已提交基线与独立 kit 安装（2026-10-07，上一增量）
+
+- 前一批 27 文件经审查及提交前 26 项定向验证、正常 hooks 本地提交 **`cc1d8497`**，随后从干净工作树继续。没有 push/发布或生产切换。
+- 首个 shine-brand 消费者改用 kit 公开包导出与精确 devDependency，实际 pnpm 离线安装到新 store 后，在没有相邻 kit 的目录构建/测试通过；B0/preflight 的 workspace 接线同步。相关 **34 PASS**、release CLI/核心 **53 PASS**，仍未覆盖 SDK 全新机器分发和 registry 签名交付。见[本轮证据](docs/hackathon/evidence/dsh-g0-kit-install-wsl-rebuild-20261007.md)。
+- WSL 已恢复连接；新隔离 rc1 官方 host/native 构建及三组恢复矩阵完成，现场取回/保护与清理结果见同一证据页。原 current 保持 r3，现有候选/journal 不换包，整体 PARTIAL。
+
+### rc1 重建与 kit 包边界（2026-10-07，上一增量）
 
 - 从固定 `46a7f68…` 新源码树完成冻结依赖、官方 host/native 构建；三类语料 **12 场景 / 30 冷进程通过**，99839 个构建输入条目保持。四个 rc1 manifest/JS 入口摘要与旧 WSL 记录一致，详见[本轮证据](docs/hackathon/evidence/dsh-g0-rc1-rebuild-kit-20261007.md)。这是本机新输入的构建追踪，旧 WSL 完整闭包与签名仍未认证。
 - kit 新增源码包白名单/公开 export 和只读输入预检；实际解包 kit 可构建叶子插件，相关 **21 PASS / 0 SKIP**，边界清单通过。仍需固定 SDK/build-tools，尚未发布 kit 或完成全新机器安装。本轮只在本机施工，保留既有候选/journal 与未提交改动，未 commit/push 或操作杭州，整体 PARTIAL。

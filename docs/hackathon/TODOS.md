@@ -282,7 +282,7 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 - [x] D15 保存 OCR delegate（2026-10-04）：29/29 原始路径审查，修复实际分析缺失/来源不匹配仍报 SAVED、持久化合同字段被默认值补齐的问题；已验证 7 个负测先失败后通过，相关后端 78 PASS，完整 B0 Python 665 PASS。见[审核证据](./evidence/dsh-g0-save-review-20261004.md)。
 - [x] T3/T7 固定服务源码兼容子项（2026-10-04）：旧 `56198c32` / 新 `a50bd424` 完成 9/9 预期观测和 4/4 CLI 负测；已确认旧服务写 D15 状态不保留来源，明确阻断可写降级。见[兼容窗口](../architecture/first-purchase-service-compatibility.md)与[证据](./evidence/dsh-g0-service-save-compat-20261004.md)。
 - [x] T3/T7 本地候选兼容门禁子项（2026-10-04）：显式 service binding 与实际回执绑定 candidate、profile/payload、安装 marker/journal；已验证阻断旧 writer、缺失/篡改与幂等重试绕过。release 169 PASS、实际 CLI 拒绝 3/3，见[门禁证据](./evidence/dsh-g0-service-gate-20261004.md)。仅 LOCAL_COMPATIBLE，现场激活仍 BLOCKED。
-- [ ] T15 剩余：插件/服务物理分仓、指标/知识服务的目标平台安装、invariant、供应链门禁；首购服务 WSL 合成安装已通过，但不代签其他服务。kit 仍以相邻 workspace 路径消费，迁移前改成固定开发依赖并验证独立仓根目录构建。整体仍 PARTIAL。
+- [ ] T15 剩余：插件/服务物理分仓、指标/知识服务的目标平台安装、invariant、供应链门禁；首购服务 WSL 合成安装已通过，但不代签其他服务。kit 全部消费者已改用固定开发依赖，新 SDK/工具目录构建通过；预编译闭包分发、整台干净机器与 registry 信任仍开放。整体仍 PARTIAL。
 - [x] T3/T7/T15 首购服务独立应用包子项（2026-10-04）：同包生成 OpenAPI、13 项固定依赖、仓库外实际 HTTP 保存/重启回放与 forward-fix；共享后端 17 PASS（含 7 个包集成场景），已验证 FIFO/合同生成副作用拒绝。见[服务包证据](./evidence/dsh-g0-analysis-service-package-20261004.md)。仅同版本本机 synthetic，不关闭下方精确旧/新包和主机门禁。
 - [x] T3/T7/T15 精确服务包配对子项（2026-10-05）：旧 `56198c32` / 新 `a50bd424` 两个实际 archive，各自离线 hash wheel 冷安装 13 项依赖，Darwin arm64 **9/9**；共享后端 **25 PASS**（包内 8 个集成场景）与 SIGTERM 回收通过。见[配对证据](./evidence/dsh-g0-service-artifact-pair-20261005.md)。新回执尚未被现有激活门禁消费，不替代 WSL/供应链/身份验证。
 - [x] 服务包 OCR delegate（2026-10-05）：原始 **21/21** 路径全覆盖，Git replacement 与取消回收两个缺陷修复；修复后共享后端 25 PASS（内部 10 个包场景）、固定双包 9/9。见[审核证据](./evidence/dsh-g0-service-artifact-review-20261005.md)。
@@ -347,6 +347,10 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 - [x] T5/T19 release 来源绑定子项（2026-10-07）：source SHA 接入安装和 publish 验签，错误结构/digest/原始错误拒绝；release suite 434 PASS、真实 GitHub runtime 正确 SHA 通过且错误 SHA/包拒绝。四个叶子插件隔离构建/测试/打包 4/4 PASS。见[证据与剩余门禁](./evidence/dsh-g0-attestation-binding-20261007.md)。旧 rc1 编译来源、插件签名/SBOM/CVE/撤销和独立 kit 分发仍开放，本批未提交，不放行生产。
 - [ ] 新候选其余准入证据与 G0 stop/go：完整跨版本 corpus、真实身份/模型/UAT、签名/SBOM、生产 activation/canary/rollback；不继承旧候选的 HTTP/browser 事件。
 - [x] T2/T15 本机补证（2026-10-07）：固定 rc1 新源码/锁文件完成官方 host/native 构建，三语料 12 场景/30 冷进程通过，99839 个输入保持；kit 私有源码包/只读预检与实际解包构建完成，相关 21 PASS。见[本轮证据](./evidence/dsh-g0-rc1-rebuild-kit-20261007.md)。仍未关闭新输入 WSL 验证、旧完整闭包签名、kit 独立安装/SDK 分发和 T5/T19。
+- [x] T15 首个消费者独立安装子项（2026-10-07）：前批已提交 `cc1d8497`；shine-brand 改用 kit 公开包导出，真实 pnpm 新 store 离线安装后无相邻 kit 构建/测试通过；workspace 适配器与 B0/preflight 同步，34 项相关回归及 53 项 release CLI/核心通过。见[当前增量](./evidence/dsh-g0-kit-install-wsl-rebuild-20261007.md)。其余消费者、SDK/工具全新机器安装、签名/registry 与物理分仓仍开放；该后续代码尚未提交。
+- [x] T2 新构建 WSL 子项（2026-10-07）：固定官方 rc1 SHA/锁在独有目录以 nobody 冻结安装并执行 host/native 构建，text/tool/rich 12 场景、30 冷进程通过；98040 个构建输入保持，133 个结果文件取回核验。见[现场记录](./evidence/dsh-g0-kit-install-wsl-rebuild-20261007.md)。新可追踪输入的 WSL 验证不再待办；历史签名/供应链、未覆盖事件组合和真实业务准入仍开放。
+- [x] T15 全部 kit 消费者安装子项（2026-10-07）：10 个构建消费者使用精确开发依赖/public exports，实际离线安装后无相邻源码构建/测试 10/10；88 项相关回归、追加 HTTP 覆盖后 kit 15 项、CLI/release 73 项通过。修复跨插件测试耦合，领域包摘要不变，见[本轮证据](./evidence/dsh-g0-kit-all-consumers-20261007.md)。SDK/工具闭包分发、整台干净机器、签名和物理分仓仍开放；未提交或操作杭州。
+- [x] T15 kit 首次 SDK 准备子项（2026-10-07）：已安装 kit 在全新 HOME/Corepack/store 中获取固定官方源码并构建 SDK，26 个入口 READY；新输入下 10/10 消费者构建/测试、15 项套件、16 项保护测试和 67 项相关回归通过。修复 Node 公共 CA 输入和旧测试 Git index 写入，123781 个输入记录及旧证据保持，见[本轮证据](./evidence/dsh-g0-kit-bootstrap-20261007.md)。只关闭本机新依赖目录准备；预编译闭包/签名/registry、新机器/新入口 WSL 与物理分仓仍开放。
 - [ ] 旧工作树差异与分仓前置按[并行边界](./evidence/dsh-g0-worktree-triage-20261007.md)推进：public 138 条均有当前/历史已提交 blob，不重复提交；HTML 34 文件待语义审查，kit 固定开发依赖和信任验证独立推进；共享候选/journal 顺序收口。
 
 ## 2026-09-30 rc2 DX triage follow-up

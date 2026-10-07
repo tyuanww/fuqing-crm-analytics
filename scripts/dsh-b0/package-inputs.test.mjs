@@ -8,8 +8,9 @@ import { copyFile, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } f
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { bindPackagedDependencies, readPackagedLibrary } from '../../dsh-plugins/plugin-kit/packaged-dependencies.mjs';
-import { copyTreeBounded } from './clean-build.mjs';
+import { bindPackagedDependencies, readPackagedLibrary, validatePackageLock, DEV_KIT_NAME } from '../../dsh-plugins/plugin-kit/packaged-dependencies.mjs';
+import { copyPluginKitSources, copyTreeBounded } from './clean-build.mjs';
+import { linkWorkspaceKit } from './plugin-kit-link.mjs';
 
 const repository = fileURLToPath(new URL('../..', import.meta.url));
 const tools = createRequire(join(repository, 'dsh-plugins/plugin-kit/build-tools/package.json'));
@@ -25,8 +26,8 @@ before(async () => {
   for (const part of ['package.json', 'build.mjs', 'src', 'test']) {
     await copyTreeBounded(join(repository, 'dsh-plugins/board-components', part), join(producer, part), options);
   }
-  await copyTreeBounded(join(repository, 'dsh-plugins/plugin-kit/packaged-dependencies.mjs'),
-    join(independent, 'plugin-kit/packaged-dependencies.mjs'), options);
+  await copyPluginKitSources(join(repository, 'dsh-plugins/plugin-kit'), join(independent, 'plugin-kit'), options);
+  await linkWorkspaceKit(producer, join(independent, 'plugin-kit'));
   run(process.execPath, [join(producer, 'build.mjs'), inputs], independent);
   artifact = join(inputs, entry.tarball);
 });
@@ -105,6 +106,15 @@ test('unlocked versions, registry links and unrecorded dependencies fail closed'
   await assert.rejects(() => bindPackagedDependencies(f.root, inputs), /PACKAGE_LOCK_MISSING/);
 });
 
+test('development kit is separate from locked runtime business inputs', async t => {
+  const f = await consumer(t);
+  f.manifest.devDependencies[DEV_KIT_NAME] = '0.1.0'; await f.save();
+  await bindPackagedDependencies(f.root, inputs);
+  await assert.rejects(readFile(join(f.root, 'node_modules', DEV_KIT_NAME, 'package.json')), { code: 'ENOENT' });
+  f.lock.packages.push({ name: DEV_KIT_NAME, version: '0.1.0', tarball: 'shine-mage-dsh-plugin-kit-0.1.0.tgz', sha256: 'a'.repeat(64) });
+  assert.throws(() => validatePackageLock(f.lock, f.manifest), /PACKAGE_KIT_MUST_NOT_BE_BUNDLED/);
+});
+
 test('installed input drift and unrelated dependency bindings are never silently replaced', async t => {
   const f = await consumer(t); await bindPackagedDependencies(f.root, inputs);
   const source = join(f.root, 'node_modules/@shine-mage/board-components/lib/funnel.mjs');
@@ -149,6 +159,7 @@ test('same-version changed output cannot replace the original immutable tarball'
   const fixture = join(root, 'board-components');
   for (const part of ['package.json', 'build.mjs', 'src']) await copyTreeBounded(join(producer, part), join(fixture, part), { destinationRoot: root });
   await copyTreeBounded(join(independent, 'plugin-kit'), join(root, 'plugin-kit'), { destinationRoot: root });
+  await linkWorkspaceKit(fixture, join(root, 'plugin-kit'));
   await writeFile(join(fixture, 'src/funnel.mjs'), 'export const funnelGeometry = () => null;\n');
   assert.throws(() => run(process.execPath, [join(fixture, 'build.mjs'), output], root), /PACKAGE_OUTPUT_CONFLICT/);
   assert.equal(digest(await readFile(join(output, entry.tarball))), entry.sha256);

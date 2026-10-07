@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-export { bindToolchain } from '../plugin-kit/toolchain.mjs';
+export { bindToolchain } from '@shine-mage/dsh-plugin-kit/toolchain';
 
 export function checkTypes(plugin, compiler) {
   const ts = compiler;

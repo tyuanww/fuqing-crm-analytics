@@ -10,7 +10,7 @@ const leafBuilds = ['shine-brand', 'shine-board', 'shine-query', 'shine-funnel',
 test('leaf plugin builds use the shared dev kit and do not import workbench toolchain source', async () => {
   for (const name of leafBuilds) {
     const source = await readFile(join(root, 'dsh-plugins', name, 'build.mjs'), 'utf8');
-    assert.match(source, /\.\.\/plugin-kit\/toolchain\.mjs/, `${name} must use plugin-kit`);
+    assert.match(source, /@shine-mage\/dsh-plugin-kit\/toolchain/, `${name} must use plugin-kit`);
     assert.doesNotMatch(source, /analytics-workbench/, `${name} build must not depend on workbench`);
   }
 });

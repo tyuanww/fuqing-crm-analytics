@@ -1,7 +1,7 @@
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { readFile } from 'node:fs/promises';
-import { bindToolchain } from '../plugin-kit/toolchain.mjs';
+import { bindToolchain } from '@shine-mage/dsh-plugin-kit/toolchain';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const upstream = resolve(process.argv[2] ?? join(root, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));

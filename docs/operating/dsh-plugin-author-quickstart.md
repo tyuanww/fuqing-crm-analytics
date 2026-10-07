@@ -14,12 +14,17 @@
 
 每个插件有自己的 `build.mjs`、测试和版本。构建期可以使用 workspace 内的 `dsh-plugins/plugin-kit`，但运行时只消费自身包、公开 DSH capability 合同和服务 API；不能导入 `analytics-workbench` 或其他插件的 toolchain 源码。profile 只组合已打包版本，不拥有插件源码。固定 pin、manifest/lock 和补丁位于 `plugin-kit/toolchain.json` 与 `plugin-kit/build-tools/`；workbench 只保留自己的业务类型检查。
 
+全部插件已改用 `@shine-mage/dsh-plugin-kit/toolchain` 公开导出与精确 `0.1.0` devDependency；board-components 使用 kit 的 `./packaged-dependencies` 公开入口。独立安装不需要相邻 kit 源码；本仓由下方显式 workspace 适配器准备，B0 pipeline/preflight 已包含该步。kit 仅限构建期，不能出现在运行时依赖或领域输入 lock 中。kit 已提供自身的首次 SDK 准备命令，预编译 SDK/工具分发和 registry 交付仍未完成，见 [kit 说明](../../dsh-plugins/plugin-kit/README.md)。
+
+在只有已安装 kit 的独立插件工程，先用 Node 24/Corepack/Git 运行 `node node_modules/@shine-mage/dsh-plugin-kit/prepare.mjs --destination /absolute/new-sdk-inputs`。这一步会联网取固定官方源码和冻结依赖，在新目录构建开发 SDK，不构建生产 runtime；已有目的目录拒绝覆盖，失败日志保留。之后调用 `node build.mjs /absolute/new-sdk-inputs/upstream /absolute/new-sdk-inputs/build-tools`，不再需要主仓预先准备的目录。公共 CA 参数、阶段回执和失败重试规则见 kit 说明；当前包仍 private，没有可直接从 registry 安装的发布版本。
+
 ## 图表领域包输入
 
 workbench、funnel、waterfall 使用 `@shine-mage/board-components` 的公开代码/类型导出。包版本在各自 `devDependencies` 固定，tarball SHA-256 在 `bundled-dependencies.json` 固定；构建将代码打入插件，线上无新的 runtime peer。包的完整输入步骤：
 
 ```bash
-# 仓库内开发：生成同一个不可变图表包；B0 --check 和 preflight 已包含此步
+# 仓库内开发：生成同一个不可变图表包；B0 --check 和 preflight 已包含这两步
+node scripts/dsh-b0/plugin-kit-link.mjs "$PWD/dsh-plugins/board-components" "$PWD/dsh-plugins/plugin-kit"
 node dsh-plugins/board-components/build.mjs
 # 只为源测试绑定本地 tarball；build.mjs 会自行校验并绑定
 node scripts/dsh-b0/package-inputs.mjs
@@ -35,6 +40,7 @@ pnpm dsh doctor
 pnpm dsh verify --scope local
 
 # 2. 在插件目录构建和测试（upstream 路径必须是固定 checkout）
+node scripts/dsh-b0/plugin-kit-link.mjs "$PWD/dsh-plugins/shine-brand" "$PWD/dsh-plugins/plugin-kit"
 cd dsh-plugins/shine-brand
 pnpm build "$PWD/../../.context/dsh-b0/upstream-0.1.7-rc.2"
 pnpm test

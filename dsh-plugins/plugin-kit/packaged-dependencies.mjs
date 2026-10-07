@@ -6,6 +6,11 @@ import { lstat, mkdir, readFile, readdir, realpath, rename, rm, symlink, writeFi
 import { dirname, join, relative } from 'node:path';
 
 const LIMIT = 2 * 1024 * 1024;
+// The development kit is installed independently and must never be bundled
+// into a runtime geometry/input package.
+export const DEV_KIT_NAME = '@shine-mage/dsh-plugin-kit';
+const businessDependencies = consumer => Object.keys(consumer.devDependencies ?? {})
+  .filter(name => name.startsWith('@shine-mage/') && name !== DEV_KIT_NAME);
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const exact = (object, keys, code) => assert.deepEqual(Object.keys(object).sort(), [...keys].sort(), code);
 const missing = error => { if (error.code !== 'ENOENT') throw error; return null; };
@@ -23,6 +28,7 @@ export function validatePackageLock(lock, consumer) {
   for (const entry of lock.packages) {
     exact(entry, ['name', 'version', 'tarball', 'sha256'], 'PACKAGE_LOCK_ENTRY_FIELDS');
     assert.match(entry.name, /^@shine-mage\/[a-z][a-z0-9-]+$/, 'PACKAGE_LOCK_NAME');
+    assert.notEqual(entry.name, DEV_KIT_NAME, 'PACKAGE_KIT_MUST_NOT_BE_BUNDLED');
     assert.match(entry.version, /^\d+\.\d+\.\d+(?:-[a-z0-9.-]+)?$/, 'PACKAGE_LOCK_VERSION');
     assert.match(entry.sha256, /^[a-f0-9]{64}$/, 'PACKAGE_LOCK_DIGEST');
     assert.equal(entry.tarball, `${entry.name.slice(1).replace('/', '-')}-${entry.version}.tgz`, 'PACKAGE_LOCK_TARBALL');
@@ -30,7 +36,7 @@ export function validatePackageLock(lock, consumer) {
     assert.equal(consumer.devDependencies?.[entry.name], entry.version, 'PACKAGE_LOCK_DECLARATION');
     assert.ok(!consumer.dependencies?.[entry.name] && !consumer.peerDependencies?.[entry.name], 'PACKAGE_MUST_BE_BUNDLED');
   }
-  for (const name of Object.keys(consumer.devDependencies ?? {}).filter(name => name.startsWith('@shine-mage/'))) {
+  for (const name of businessDependencies(consumer)) {
     assert.ok(seen.has(name), 'PACKAGE_LOCK_MISSING');
   }
   assert.ok(consumer.files?.includes('bundled-dependencies.json'), 'PACKAGE_LOCK_NOT_PUBLISHED');
@@ -99,7 +105,7 @@ export async function bindPackagedDependencies(plugin, inputDirectory) {
   const consumer = JSON.parse(await regular(join(plugin, 'package.json')));
   const bytes = await regular(join(plugin, 'bundled-dependencies.json')).catch(missing);
   if (!bytes) {
-    assert.ok(!Object.keys(consumer.devDependencies ?? {}).some(name => name.startsWith('@shine-mage/')), 'PACKAGE_LOCK_MISSING');
+    assert.equal(businessDependencies(consumer).length, 0, 'PACKAGE_LOCK_MISSING');
     return [];
   }
   const lock = validatePackageLock(JSON.parse(bytes), consumer), bound = [];

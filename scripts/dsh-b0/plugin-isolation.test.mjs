@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import { copyPluginKitSources, copyTreeBounded } from './clean-build.mjs';
 import { packPlugin } from '../release/plugin-pack.mjs';
+import { linkWorkspaceKit } from './plugin-kit-link.mjs';
 
 const exec = promisify(execFile);
 const repository = fileURLToPath(new URL('../..', import.meta.url));
@@ -44,6 +45,7 @@ for (const name of ['shine-brand', 'shine-query', 'crm-knowledge', 'knowledge'])
     await command('git', ['add', '.']);
     await command('git', ['-c', 'user.name=isolated-fixture', '-c', 'user.email=fixture@example.invalid',
       '-c', 'commit.gpgsign=false', '-c', 'core.hooksPath=/dev/null', 'commit', '-qm', 'synthetic independent package fixture']);
+    await linkWorkspaceKit(plugin, join(root, 'dsh-plugins/plugin-kit'));
     await command(process.execPath, [join(plugin, 'build.mjs'), upstream, buildTools]);
     const tests = ['crm-knowledge', 'knowledge'].includes(name) ? ['test/package.test.mjs']
       : (await readdir(join(plugin, 'src'))).filter(file => file.endsWith('.test.mjs')).sort().map(file => `src/${file}`);

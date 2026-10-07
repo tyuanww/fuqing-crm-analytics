@@ -41,6 +41,10 @@ def source_hashes():
                 "backend/crm_knowledge_app.py", "backend/crm_service_contracts.py", "backend/contracts/crm_knowledge_v1.py", "backend/services/crm_knowledge_topics.py", "backend/contracts/crm-metrics-service.openapi.json",
                 "backend/contracts/crm-metrics-service.v1.json", "backend/contracts/crm-knowledge-service.v1.json", "backend/contracts/crm-knowledge.openapi.json"]:
         files.add(ROOT / rel)
+    files.update(ROOT / rel for rel in ["scripts/dsh-b0/plugin-kit-link.mjs",
+        "dsh-plugins/plugin-kit/package.json", "dsh-plugins/plugin-kit/toolchain.mjs",
+        "dsh-plugins/plugin-kit/toolchain.json", "dsh-plugins/plugin-kit/sdk-inputs.mjs",
+        "dsh-plugins/plugin-kit/packaged-dependencies.mjs"])
     files.update(ROOT / "backend/tests" / item for item in TESTS)
     files.update(ROOT / rel for rel in ["backend/contracts/crm_analysis.py", "backend/services/crm_analysis.py", "backend/middleware/query_router.py",
         "dsh-plugins/analytics-workbench/src/client/cockpit-extension.ts", "dsh-plugins/analytics-workbench/src/client/cockpit-main-panel.tsx",
@@ -84,6 +88,8 @@ def main():
             ("ruff", [sys.executable, "-m", "ruff", "check", "backend/semantic/crm_metrics_v1.py", "backend/semantic/crm_metrics_compose.py", "backend/contracts/crm_metrics_v1.py", "backend/crm_metrics_app.py", "backend/services/crm_readonly", "backend/services/crm_knowledge.py", "backend/contracts/crm_dashboard.py", "backend/routers/crm_dashboard.py", "backend/routers/metrics.py", "backend/services/metrics/dashboard_source.py", "backend/services/metrics/dashboard_membership.py", "backend/services/metrics/dashboard_net_gsv.py", "backend/services/crm_document_acl.py", "dsh-plugins/crm-knowledge/test/crm-assets.fixture.py", "scripts/crm-calibration", *["backend/tests/" + item for item in TESTS]]),
             ("wire-contract", [sys.executable, "scripts/crm-calibration/generate_contract.py", "--check"]),
             ("http-types", [str(args.node), "scripts/crm-calibration/generate_types.mjs", str(args.build_tools), "--check"]),
+            ("kit-crm", [str(args.node), "scripts/dsh-b0/plugin-kit-link.mjs", str(ROOT / "dsh-plugins/crm-knowledge"), str(ROOT / "dsh-plugins/plugin-kit")]),
+            ("kit-knowledge", [str(args.node), "scripts/dsh-b0/plugin-kit-link.mjs", str(ROOT / "dsh-plugins/knowledge"), str(ROOT / "dsh-plugins/plugin-kit")]),
             ("build-crm", [str(args.node), "dsh-plugins/crm-knowledge/build.mjs", str(args.upstream), str(args.build_tools)]),
             ("build-knowledge", [str(args.node), "dsh-plugins/knowledge/build.mjs", str(args.upstream), str(args.build_tools)]),
             ("service-tools", [str(args.node), "--test", "--test-concurrency=1", *[str(p.relative_to(ROOT)) for p in sorted((ROOT / "dsh-plugins/crm-knowledge/test").glob("*.test.mjs"))]]),

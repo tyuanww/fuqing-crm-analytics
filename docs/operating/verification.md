@@ -187,6 +187,8 @@ Logo 使用当前 checkout 的 Git LFS 字节，可执行
 
 固定工具链由 `dsh-plugins/plugin-kit/toolchain.json` 和 `plugin-kit/build-tools/` 维护；不从相邻旧仓库发现依赖。`node scripts/dsh-b0/plugin-boundaries.mjs --check` 核对当前所有插件的 owner、直接 import、字面路由、合同与构建 DAG；新增源码耦合、循环、过期例外或清单漂移均阻断。已验证入口与边界负测，具体命令和结果见 [本轮审核](../hackathon/evidence/dsh-g0-decoupling-review-20261003.md)。边界说明见 [架构清单](../architecture/shinemage-plugin-boundaries.md)。
 
+`plugin-kit.test.mjs` 实际打包并用 pnpm 离线安装 kit（新 HOME/store），逐个复制全部 10 个消费者，在没有相邻插件/kit 源码时构建与执行各自测试；SDK/build-tools 仍为显式固定输入。工作台 pin 测试走 kit 公开导出，图表组合断言由 `geometry-composition.test.mjs` 承担，B0 同步执行。当前结果及未执行层级见[全部消费者迁移证据](../hackathon/evidence/dsh-g0-kit-all-consumers-20261007.md)。
+
 B0 `--check` 包含边界负测、`plugin-isolation.test.mjs` 和既有 workbench clean rebuild。CRM 也纳入独立源码构建/固定 SDK 组件注册测试/受控 pack，以及页面提供方组合与卸载测试。独立包测试只复制 kit 与单个 leaf 源码，复用相同锁文件的第三方依赖；在临时 Git 夹具中构建、执行现有生命周期单测并受控打包。临时提交不属于产品历史，不充当 reviewed release SHA。这些测试不启动真实 DSH、不证明热卸载或跨版本兼容。
 
 B0 `--check` 先独立构建 board-components 并绑定受摘要约束的 tarball，再验证公开导出/类型、失真输入和几何语义。workbench clean rebuild 只含 workbench 源码与 kit，图表通过同一个 tarball 输入；不会复制 funnel/waterfall 源码。临时 Git 夹具内再执行受控 pack，记录 `fixture_only`，不冒充正式 reviewed source。`backend/tests/test_board_funnel.py` 与 `test_board_waterfall.py` 消费领域包拥有的同一套 JSON 标本，按受影响文件单独运行。
@@ -243,9 +245,15 @@ T3/T7 的 `backend/tests/test_analytics_first_purchase_save_recovery.py` 纳入�
 
 ### 插件开发 kit 验证
 
+kit 自身的在线准备入口为 `node node_modules/@shine-mage/dsh-plugin-kit/prepare.mjs --destination /absolute/new-sdk-inputs`，可选 `--ca-file /absolute/public-ca-bundle.pem`。只接受新目录，固定官方 SHA/锁和工具版本；在独立 HOME/store 中安装并构建开发 SDK，不构建生产 runtime。该入口必须显式运行，不接入默认 doctor/check 或每次插件构建。`plugin-kit-prepare.test.mjs` 则只用隔离夹具验证环境、不覆盖、失败码、公共 CA 输入和中断/超时进程回收，已纳入 B0，不联网。
+
+首次准备完成后，使用 `B0_BUILD_UPSTREAM=/absolute/new-sdk-inputs/upstream B0_BUILD_TOOLS=/absolute/new-sdk-inputs/build-tools node --test scripts/dsh-b0/plugin-kit.test.mjs` 验证实际安装 kit 的全部 10 个消费者。冷准备的真实记录另见[本轮证据](../hackathon/evidence/dsh-g0-kit-bootstrap-20261007.md)，包括首次证书失败及修复后的新目录、固定输入保护和仍未运行的目标平台层级。只有设置两个新路径才证明消费新闭包；不能沿用仓库 build-tools 冒充完整冷准备。
+
 dev kit 输入预检在 Node 24 下显式运行 `node dsh-plugins/plugin-kit/check.mjs --upstream /absolute/pinned-rc2-checkout [--build-tools /absolute/identical-installed-build-tools]`。命令只读 source SHA/lock、工具版本和 SDK main/types 边界；不联网、不安装、不执行编译工具、不写插件链接。READY 仅表示本机 build inputs 可用，`release_ready=false`；缺项返回 BLOCKED/退出 2，不输出内部路径。实际构建继续调用同一 `bindToolchain` 的检查器，避免两套校验漂移。
 
 `B0_BUILD_UPSTREAM=/absolute/pinned-rc2-checkout node --test scripts/dsh-b0/plugin-kit.test.mjs scripts/dsh-b0/clean-build.test.mjs scripts/dsh-b0/plugin-isolation.test.mjs scripts/dsh-b0/plugin-boundaries.test.mjs` 验证实际 kit 打包/安全解包/public export 导入、SDK 边界负测、解包后叶子构建及原隔离回归；`plugin-kit.test.mjs` 已纳入 B0 pipeline。未设置 `B0_BUILD_UPSTREAM` 时须将真实解包构建记为 NOT_RUN，不能以其余包测试通过代替。kit 仍是 private 本地源码包，不含 SDK/已安装依赖，也未完成新机器分发。
+
+后续 `plugin-kit.test.mjs` 已增加实际 pnpm 离线安装到新 store、无相邻 kit 的 shine-brand 构建、错误 kit 版本拒绝和 workspace 适配器幂等/拒绝外部安装。改动 `packaged-dependencies.mjs` 时同时运行 `scripts/dsh-b0/package-inputs.test.mjs`，保留图表领域 lock 校验，并拒绝把开发 kit 当成运行时领域输入；改动构建入口时同步核对 B0 pipeline 和 `scripts/release/preflight.mjs`。适配器只在正式 build 阶段运行，doctor/preflight `--check` 不创建链接。
 
 ### 首购候选恢复验收
 

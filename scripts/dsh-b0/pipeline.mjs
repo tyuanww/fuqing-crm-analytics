@@ -10,6 +10,7 @@ import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { packageManagerEnv, packageNetworkEnv, dependencyCommands, archiveToolEnv } from './package-manager-env.mjs';
 import { copyPluginKitSources, copyTreeBounded, createCleanRoot, reapStaleCleanRoots, removeCleanRoot } from './clean-build.mjs';
+import { linkWorkspaceKit } from './plugin-kit-link.mjs';
 import { prepareRuntimeInputs, recordRuntimePreparation } from '../release/runtime-inputs.mjs';
 import { packPlugin } from '../release/plugin-pack.mjs';
 
@@ -114,6 +115,9 @@ if (mode === '--prepare') {
   console.log('B0 dependency audit complete; run --check next.');
 } else {
   await verifySource();
+  for (const name of ['board-components', 'analytics-workbench', 'crm-knowledge', 'knowledge', 'shine-brand', 'shine-waterfall', 'shine-crowd-action', 'shine-query', 'shine-board', 'shine-funnel']) {
+    await linkWorkspaceKit(join(root, 'dsh-plugins', name), kit);
+  }
   run(process.execPath, ['dsh-plugins/board-components/build.mjs', env.DSH_PACKAGE_INPUTS]);
   // Bind packed libraries before source-level consumer tests.
   run(process.execPath, ['scripts/dsh-b0/package-inputs.mjs', env.DSH_PACKAGE_INPUTS]);
@@ -121,7 +125,7 @@ if (mode === '--prepare') {
   run(process.execPath, ['--test', 'scripts/dsh-b0/content-theme-contract.test.mjs']);
   run(process.execPath, ['scripts/dsh-b0/cockpit-slot-contract.mjs', '--check']);
   run(process.execPath, ['--test', 'scripts/dsh-b0/cockpit-slot-contract.test.mjs']);
-  run(process.execPath, ['--test', 'scripts/dsh-b0/package-inputs.test.mjs', 'dsh-plugins/board-components/test/geometry.test.mjs']);
+  run(process.execPath, ['--test', 'scripts/dsh-b0/package-inputs.test.mjs', 'dsh-plugins/board-components/test/geometry.test.mjs', 'scripts/dsh-b0/geometry-composition.test.mjs']);
   run(process.execPath, ['scripts/dsh-b0/plugin-boundaries.mjs', '--check']);
   run(process.execPath, ['--test', 'scripts/dsh-b0/plugin-boundaries.test.mjs']);
   // Guard tests fail before process startup. The real-host drill remains opt-in.
@@ -203,7 +207,7 @@ print('B0 exact Python closure verified')
     'scripts/release/terminal-host-evidence.test.mjs',
     'scripts/release/browser-host-evidence.test.mjs', 'scripts/release/browser-host-v2.test.mjs',
     'scripts/dsh-b0/clean-build.test.mjs',
-    'scripts/dsh-b0/plugin-kit.test.mjs',
+    'scripts/dsh-b0/plugin-kit.test.mjs', 'scripts/dsh-b0/plugin-kit-prepare.test.mjs',
     'scripts/dsh-b0/native-state-smoke.test.mjs', 'scripts/dsh-b0/native-query-smoke.test.mjs',
     'scripts/dsh-b0/native-query-fault-smoke.test.mjs', 'scripts/dsh-b0/native-query-assets-smoke.test.mjs',
     'scripts/dsh-b0/asset-routes.test.mjs']);
@@ -268,6 +272,7 @@ print('B0 exact Python closure verified')
     run('git', ['add', '.'], cleanRoot);
     run('git', ['-c', 'user.name=isolated-fixture', '-c', 'user.email=fixture@example.invalid',
       '-c', 'commit.gpgsign=false', '-c', 'core.hooksPath=/dev/null', 'commit', '-qm', 'synthetic workbench package fixture'], cleanRoot);
+    await linkWorkspaceKit(clean, join(cleanRoot, 'plugin-kit'));
     run(process.execPath, [join(clean, 'build.mjs'), upstream, buildTools]);
     run(process.execPath, ['--test', ...builtTests.map(file => join(clean, 'test', file))], clean, { B0_BUILD_UPSTREAM: upstream });
     const hashes = {};

@@ -4,7 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { copyFile, link, lstat, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readPackagedLibrary } from '../plugin-kit/packaged-dependencies.mjs';
+import { readPackagedLibrary } from '@shine-mage/dsh-plugin-kit/packaged-dependencies';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const output = resolve(process.argv[2] ?? process.env.DSH_PACKAGE_INPUTS ?? join(root, '../../.context/dsh-b0/package-inputs'));
@@ -13,7 +13,7 @@ assert.equal(execFileSync('pnpm', ['--version'], { cwd: root, encoding: 'utf8', 
 const manifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
 assert.deepEqual(manifest.files, ['lib/funnel.mjs', 'lib/funnel.d.mts', 'lib/waterfall.mjs', 'lib/waterfall.d.mts'], 'PACKAGE_SOURCE_ALLOWLIST');
 assert.ok(!(await lstat(join(root, 'src'))).isSymbolicLink(), 'PACKAGE_SOURCE_SYMLINK');
-const packed = { ...manifest }; delete packed.scripts;
+const packed = { ...manifest }; delete packed.scripts; delete packed.devDependencies;
 await mkdir(output, { recursive: true });
 assert.ok(!(await lstat(output)).isSymbolicLink(), 'PACKAGE_OUTPUT_SYMLINK');
 const staging = await mkdtemp(join(output, '.board-components-'));

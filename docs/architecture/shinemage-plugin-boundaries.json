@@ -37,6 +37,7 @@
       },
       "dependencies": {},
       "dev_dependencies": {
+        "@shine-mage/dsh-plugin-kit": "0.1.0",
         "@shine-mage/board-components": "0.1.0"
       },
       "bundled_inputs": [
@@ -74,7 +75,7 @@
         "test:html-edit": "node --test src/free-page/resource/package-normalize.test.mjs src/client/free-html-library/html-import.test.mjs src/client/html-selection-bridge.test.mjs src/client/free-html-library/store.test.mjs src/client/free-html-library/p12-live-adapters.test.mjs src/client/free-html-library/source-draft.test.mjs src/client/cockpit-ai-client.test.mjs src/free-page/edit/intent-router.test.mjs src/free-page/edit/selection-context.test.mjs test/dynamic-chart-browser-seam.test.mjs",
         "test:built": "node --test test/built.test.mjs"
       },
-      "manifest_sha256": "0aaffaae2c53c358faa247043ac277f8835233cf983c0530dbfc56b1dd85bcd9"
+      "manifest_sha256": "0ed93f74983db17882e471c01e9a3c4152678c784a4dc14e72975fa8c0e21d60"
     },
     {
       "path": "dsh-plugins/board-components",
@@ -101,14 +102,16 @@
       ],
       "peers": {},
       "dependencies": {},
-      "dev_dependencies": {},
+      "dev_dependencies": {
+        "@shine-mage/dsh-plugin-kit": "0.1.0"
+      },
       "bundled_inputs": [],
       "dsh": {},
       "commands": {
         "build": "node build.mjs",
         "test": "node --test test/*.test.mjs"
       },
-      "manifest_sha256": "a31b77f3c25805a8c59735a2473e3cdf2c35c9b22a466fdfdbb1b982d920fbf9"
+      "manifest_sha256": "b1833d956f2c0cdf9be5f34286b88c5c2090aa929320ec524b267960e88ed7b3"
     },
     {
       "path": "dsh-plugins/crm-knowledge",
@@ -135,7 +138,9 @@
         "@deepseek-ai/cordis": "4.0.2"
       },
       "dependencies": {},
-      "dev_dependencies": {},
+      "dev_dependencies": {
+        "@shine-mage/dsh-plugin-kit": "0.1.0"
+      },
       "bundled_inputs": [],
       "dsh": {
         "client": {
@@ -155,7 +160,7 @@
         "build": "node build.mjs",
         "test:host": "node --test test/host.integration.mjs"
       },
-      "manifest_sha256": "4e72ab0bfca1adfa294ffa0969c017b3766d5c73249bc98097c1678612c6a28b"
+      "manifest_sha256": "211aab71c6019a6873f231b2dacd94beaba1e97fa547106eeac5715a381a60d2"
     },
     {
       "path": "dsh-plugins/knowledge",
@@ -180,7 +185,9 @@
         "@deepseek-ai/cordis": "4.0.2"
       },
       "dependencies": {},
-      "dev_dependencies": {},
+      "dev_dependencies": {
+        "@shine-mage/dsh-plugin-kit": "0.1.0"
+      },
       "bundled_inputs": [],
       "dsh": {
         "bundle": {
@@ -191,7 +198,7 @@
         "build": "node build.mjs",
         "test": "node --test test/*.test.mjs"
       },
-      "manifest_sha256": "9fb6722229cb7ccbe10857b0b161feb4fb6fa915766b53f2bc711465d48a4f82"
+      "manifest_sha256": "b298cc5096170ab482a0cc17ba8f8f936be834b94ec28e1bcbcd57c710d7a88c"
     },
     {
       "path": "dsh-plugins/plugin-kit",
@@ -202,11 +209,16 @@
       "kind": "dev-tool",
       "exports": {
         "./toolchain": "./toolchain.mjs",
+        "./prepare": "./prepare.mjs",
+        "./pin": "./toolchain.json",
+        "./packaged-dependencies": "./packaged-dependencies.mjs",
         "./package.json": "./package.json"
       },
       "files": [
         "toolchain.json",
         "toolchain.mjs",
+        "prepare.mjs",
+        "package-manager.mjs",
         "sdk-inputs.mjs",
         "check.mjs",
         "packaged-dependencies.mjs",
@@ -222,7 +234,7 @@
       "bundled_inputs": [],
       "dsh": {},
       "commands": {},
-      "manifest_sha256": "b4aaef2c82830472480ff98894d227d16f1dd2d37566a5bcb517ee53e6f6ab19"
+      "manifest_sha256": "85ca3435e5093a9b3a3250065d7e7030597d049a113d6a1922f442fa5318bd12"
     },
     {
       "path": "dsh-plugins/shine-board",
@@ -246,7 +258,9 @@
         "@deepseek-ai/dsh-tools": "0.1.7-rc.2"
       },
       "dependencies": {},
-      "dev_dependencies": {},
+      "dev_dependencies": {
+        "@shine-mage/dsh-plugin-kit": "0.1.0"
+      },
       "bundled_inputs": [],
       "dsh": {
         "client": {
@@ -265,7 +279,7 @@
         "build": "node build.mjs",
         "test": "node --test src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "9a728188e7bbce13f9c85d5f151f288378fd98b76ac54938f8459834033e4b3b"
+      "manifest_sha256": "faa79d85b88ab79891004e45a912e781161e00b9eace38096a132fa86b86a00a"
     },
     {
       "path": "dsh-plugins/shine-brand",
@@ -289,7 +303,9 @@
         "@deepseek-ai/dsh-tools": "0.1.7-rc.2"
       },
       "dependencies": {},
-      "dev_dependencies": {},
+      "dev_dependencies": {
+        "@shine-mage/dsh-plugin-kit": "0.1.0"
+      },
       "bundled_inputs": [],
       "dsh": {
         "client": {
@@ -307,7 +323,7 @@
         "build": "node build.mjs",
         "test": "node --test src/brand-surface.test.mjs src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "83169df743f7175d514f99d72e08621363a61eeda91dbb12fe6552b30f3a7297"
+      "manifest_sha256": "9b04bc24a38d18c6de7e242d5bf55ac8bf817042d3a38fd33e80766c0d71ae89"
     },
     {
       "path": "dsh-plugins/shine-crowd-action",
@@ -331,7 +347,9 @@
         "@deepseek-ai/dsh-tools": "0.1.7-rc.2"
       },
       "dependencies": {},
-      "dev_dependencies": {},
+      "dev_dependencies": {
+        "@shine-mage/dsh-plugin-kit": "0.1.0"
+      },
       "bundled_inputs": [],
       "dsh": {
         "client": {
@@ -350,7 +368,7 @@
         "build": "node build.mjs",
         "test": "node --test src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "2f1edb49f8bf4ada971ddeb20c37e3e69c6303c6000adf0d34203c6903e731c1"
+      "manifest_sha256": "552618e2c7fddb62aa2f57328d05a36681b2728bf8c4058db311f22918f8434f"
     },
     {
       "path": "dsh-plugins/shine-funnel",
@@ -383,6 +401,7 @@
       },
       "dependencies": {},
       "dev_dependencies": {
+        "@shine-mage/dsh-plugin-kit": "0.1.0",
         "@shine-mage/board-components": "0.1.0"
       },
       "bundled_inputs": [
@@ -410,7 +429,7 @@
         "build": "node build.mjs",
         "test": "node --test src/funnel.test.mjs src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "746ca42b0eac4d33112229c52753ec3232df130757af611982bbd8d80552822c"
+      "manifest_sha256": "7a751a30d71a92189ed2000668d5e66f75507bf63af6a9324315c5b08dc94dc2"
     },
     {
       "path": "dsh-plugins/shine-query",
@@ -434,7 +453,9 @@
         "@deepseek-ai/dsh-tools": "0.1.7-rc.2"
       },
       "dependencies": {},
-      "dev_dependencies": {},
+      "dev_dependencies": {
+        "@shine-mage/dsh-plugin-kit": "0.1.0"
+      },
       "bundled_inputs": [],
       "dsh": {
         "client": {
@@ -453,7 +474,7 @@
         "build": "node build.mjs",
         "test": "node --test src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "c399228d0a712e1ce2740ad0fb17971c603bdb9d739becfdacc1bbb98bad002a"
+      "manifest_sha256": "6f0367bb771b7b98b167c47261a18cd6886f23c78d2350454cc8c53002e101b9"
     },
     {
       "path": "dsh-plugins/shine-waterfall",
@@ -486,6 +507,7 @@
       },
       "dependencies": {},
       "dev_dependencies": {
+        "@shine-mage/dsh-plugin-kit": "0.1.0",
         "@shine-mage/board-components": "0.1.0"
       },
       "bundled_inputs": [
@@ -513,10 +535,10 @@
         "build": "node build.mjs",
         "test": "node --test src/waterfall.test.mjs src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "011783ac55a6b567db51dbfdc1c97ffd142727ac52bfc7911801dc71fa6bed60"
+      "manifest_sha256": "f19d8e05bf2b52a3e4e7853f14494a50e1b850ff7279d3331cb02a1ef9d957f1"
     }
   ],
-  "source_files_scanned": 640,
+  "source_files_scanned": 642,
   "cross_package_edges": [
     {
       "consumer": "analytics-workbench",
@@ -603,9 +625,79 @@
       "provider": "plugin-kit",
       "phase": "build",
       "source": "dsh-plugins/analytics-workbench/toolchain.mjs",
-      "target": "dsh-plugins/plugin-kit/toolchain.mjs",
-      "specifier": "../plugin-kit/toolchain.mjs",
-      "access": "source",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "plugin-kit",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/client/cockpit-composition.test.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/pin",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "plugin-kit",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/src/client/leave/host-leave-adapter.test.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/pin",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "plugin-kit",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/helpers/native-board-bridge.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/pin",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "plugin-kit",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/pin",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "plugin-kit",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/native-fixture-client-boundary.test.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/pin",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "plugin-kit",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/native-prompt-inject.test.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/pin",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "plugin-kit",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/native-slot-ownership.test.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/pin",
+      "access": "public-export",
       "type_only": false
     },
     {
@@ -613,9 +705,9 @@
       "provider": "plugin-kit",
       "phase": "build",
       "source": "dsh-plugins/board-components/build.mjs",
-      "target": "dsh-plugins/plugin-kit/packaged-dependencies.mjs",
-      "specifier": "../plugin-kit/packaged-dependencies.mjs",
-      "access": "source",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/packaged-dependencies",
+      "access": "public-export",
       "type_only": false
     },
     {
@@ -673,9 +765,9 @@
       "provider": "plugin-kit",
       "phase": "build",
       "source": "dsh-plugins/crm-knowledge/build.mjs",
-      "target": "dsh-plugins/plugin-kit/toolchain.mjs",
-      "specifier": "../plugin-kit/toolchain.mjs",
-      "access": "source",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
+      "access": "public-export",
       "type_only": false
     },
     {
@@ -683,9 +775,9 @@
       "provider": "plugin-kit",
       "phase": "build",
       "source": "dsh-plugins/knowledge/build.mjs",
-      "target": "dsh-plugins/plugin-kit/toolchain.mjs",
-      "specifier": "../plugin-kit/toolchain.mjs",
-      "access": "source",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
+      "access": "public-export",
       "type_only": false
     },
     {
@@ -693,9 +785,9 @@
       "provider": "plugin-kit",
       "phase": "build",
       "source": "dsh-plugins/shine-board/build.mjs",
-      "target": "dsh-plugins/plugin-kit/toolchain.mjs",
-      "specifier": "../plugin-kit/toolchain.mjs",
-      "access": "source",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
+      "access": "public-export",
       "type_only": false
     },
     {
@@ -703,9 +795,9 @@
       "provider": "plugin-kit",
       "phase": "build",
       "source": "dsh-plugins/shine-brand/build.mjs",
-      "target": "dsh-plugins/plugin-kit/toolchain.mjs",
-      "specifier": "../plugin-kit/toolchain.mjs",
-      "access": "source",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
+      "access": "public-export",
       "type_only": false
     },
     {
@@ -713,29 +805,9 @@
       "provider": "plugin-kit",
       "phase": "build",
       "source": "dsh-plugins/shine-crowd-action/build.mjs",
-      "target": "dsh-plugins/plugin-kit/toolchain.mjs",
-      "specifier": "../plugin-kit/toolchain.mjs",
-      "access": "source",
-      "type_only": false
-    },
-    {
-      "consumer": "shine-funnel",
-      "provider": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/shine-funnel/src/funnel.test.mjs",
-      "target": "dsh-plugins/analytics-workbench/src/board-spec/component-catalog.mjs",
-      "specifier": "../../analytics-workbench/src/board-spec/component-catalog.mjs",
-      "access": "source",
-      "type_only": false
-    },
-    {
-      "consumer": "shine-funnel",
-      "provider": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/shine-funnel/src/funnel.test.mjs",
-      "target": "dsh-plugins/analytics-workbench/src/board-spec/component-view.mjs",
-      "specifier": "../../analytics-workbench/src/board-spec/component-view.mjs",
-      "access": "source",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
+      "access": "public-export",
       "type_only": false
     },
     {
@@ -763,9 +835,9 @@
       "provider": "plugin-kit",
       "phase": "build",
       "source": "dsh-plugins/shine-funnel/build.mjs",
-      "target": "dsh-plugins/plugin-kit/toolchain.mjs",
-      "specifier": "../plugin-kit/toolchain.mjs",
-      "access": "source",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
+      "access": "public-export",
       "type_only": false
     },
     {
@@ -773,29 +845,9 @@
       "provider": "plugin-kit",
       "phase": "build",
       "source": "dsh-plugins/shine-query/build.mjs",
-      "target": "dsh-plugins/plugin-kit/toolchain.mjs",
-      "specifier": "../plugin-kit/toolchain.mjs",
-      "access": "source",
-      "type_only": false
-    },
-    {
-      "consumer": "shine-waterfall",
-      "provider": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/shine-waterfall/src/waterfall.test.mjs",
-      "target": "dsh-plugins/analytics-workbench/src/board-spec/component-catalog.mjs",
-      "specifier": "../../analytics-workbench/src/board-spec/component-catalog.mjs",
-      "access": "source",
-      "type_only": false
-    },
-    {
-      "consumer": "shine-waterfall",
-      "provider": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/shine-waterfall/src/waterfall.test.mjs",
-      "target": "dsh-plugins/analytics-workbench/src/board-spec/component-view.mjs",
-      "specifier": "../../analytics-workbench/src/board-spec/component-view.mjs",
-      "access": "source",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
+      "access": "public-export",
       "type_only": false
     },
     {
@@ -823,9 +875,9 @@
       "provider": "plugin-kit",
       "phase": "build",
       "source": "dsh-plugins/shine-waterfall/build.mjs",
-      "target": "dsh-plugins/plugin-kit/toolchain.mjs",
-      "specifier": "../plugin-kit/toolchain.mjs",
-      "access": "source",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
+      "access": "public-export",
       "type_only": false
     }
   ],
@@ -2479,7 +2531,7 @@
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/src/client/leave/host-leave-adapter.test.mjs",
-      "line": 60
+      "line": 61
     },
     {
       "consumer": "analytics-workbench",
@@ -2545,13 +2597,13 @@
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/helpers/native-board-bridge.mjs",
-      "line": 17
+      "line": 18
     },
     {
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/helpers/native-board-bridge.mjs",
-      "line": 25
+      "line": 26
     },
     {
       "consumer": "analytics-workbench",
@@ -2563,13 +2615,7 @@
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
-      "line": 133
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
-      "line": 14
+      "line": 134
     },
     {
       "consumer": "analytics-workbench",
@@ -2600,6 +2646,12 @@
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
       "line": 19
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
+      "line": 20
     },
     {
       "consumer": "analytics-workbench",
@@ -2665,19 +2717,19 @@
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/native-fixture-client-boundary.test.mjs",
-      "line": 16
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/native-prompt-inject.test.mjs",
       "line": 17
     },
     {
       "consumer": "analytics-workbench",
       "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/native-prompt-inject.test.mjs",
+      "line": 18
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/native-slot-ownership.test.mjs",
-      "line": 13
+      "line": 14
     },
     {
       "consumer": "analytics-workbench",
@@ -3744,11 +3796,6 @@
     {
       "consumer": "shine-funnel",
       "phase": "test",
-      "specifier": "node:fs"
-    },
-    {
-      "consumer": "shine-funnel",
-      "phase": "test",
       "specifier": "node:fs/promises"
     },
     {
@@ -3855,11 +3902,6 @@
       "consumer": "shine-waterfall",
       "phase": "test",
       "specifier": "node:assert/strict"
-    },
-    {
-      "consumer": "shine-waterfall",
-      "phase": "test",
-      "specifier": "node:fs"
     },
     {
       "consumer": "shine-waterfall",

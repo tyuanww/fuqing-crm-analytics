@@ -7,12 +7,13 @@
 在仓库根、Node 24 / pnpm 11.7.0 环境执行：
 
 ```bash
+node scripts/dsh-b0/plugin-kit-link.mjs "$PWD/dsh-plugins/board-components" "$PWD/dsh-plugins/plugin-kit"
 node dsh-plugins/board-components/build.mjs
 node scripts/dsh-b0/package-inputs.mjs
 node --test dsh-plugins/board-components/test/geometry.test.mjs scripts/dsh-b0/package-inputs.test.mjs
 ```
 
-构建只生成本地包输入，默认位于 `.context/dsh-b0/package-inputs/`；第一个位置参数可指定另一个输出目录。pnpm 按包自身的工作目录和 `packageManager` 解析。打包临时 manifest 删除 scripts；tarball 只有四份代码/类型和 package.json，无安装 hooks。输出同名包已存在时，只接受完全相同的摘要，不覆盖不同字节。
+构建只生成本地包输入，默认位于 `.context/dsh-b0/package-inputs/`；第一个位置参数可指定另一个输出目录。pnpm 按包自身的工作目录和 `packageManager` 解析。构建从 kit 精确开发依赖的公开入口导入解包校验器，不引用相邻源码；独立仓库使用已安装 kit。打包临时 manifest 删除 scripts 和 devDependencies；tarball 只有四份代码/类型和 package.json，无安装 hooks 或开发 kit 依赖。此次构建接线不改变既有 `0.1.0` tarball 的字节与摘要。输出同名包已存在时，只接受完全相同的摘要，不覆盖不同字节。
 
 消费者将精确版本写入 `devDependencies`，将 tarball 文件名与 SHA-256 写入 `bundled-dependencies.json`，通过 `DSH_PACKAGE_INPUTS=/absolute/inputs` 从任意目录消费同一个包。kit 验证 tarball 摘要、文件/类型/导出与已安装字节，绑定到插件私有的内容寻址目录，旧输入保留。构建将代码打入插件产物；线上无需再安装本领域包，也不需更改 profile。
 

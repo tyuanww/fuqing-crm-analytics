@@ -7,10 +7,13 @@
   "type": "module",
   "exports": {
     "./toolchain": "./toolchain.mjs",
+    "./prepare": "./prepare.mjs",
+    "./pin": "./toolchain.json",
+    "./packaged-dependencies": "./packaged-dependencies.mjs",
     "./package.json": "./package.json"
   },
   "files": [
-    "toolchain.json", "toolchain.mjs", "sdk-inputs.mjs", "check.mjs", "packaged-dependencies.mjs", "README.md",
+    "toolchain.json", "toolchain.mjs", "prepare.mjs", "package-manager.mjs", "sdk-inputs.mjs", "check.mjs", "packaged-dependencies.mjs", "README.md",
     "build-tools/package.json", "build-tools/pnpm-lock.yaml", "build-tools/pnpm-workspace.yaml", "build-tools/patches"
   ],
   "description": "Dev-only shared toolchain binding for independently built ShineMage DSH plugins"

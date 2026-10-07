@@ -126,3 +126,38 @@ test('domain public imports require an exact declared package, packed export and
   provider.files.pop(); await writeFile(join(f.root, 'dsh-plugins/second/package.json'), JSON.stringify(provider));
   await assert.rejects(() => inspectBoundaries(f.root), /BOUNDARY_EXPORT_NOT_PACKED/);
 });
+
+test('public kit exports require an exact dev-only build dependency', async t => {
+  const f = await fixture(t);
+  const name = '@shine-mage/dsh-plugin-kit';
+  const provider = { name, version: '0.1.0', files: ['toolchain.mjs'], exports: { './toolchain': './toolchain.mjs' } };
+  const consumer = { name: '@shine-mage/first', version: '1.0.0', devDependencies: { [name]: '0.1.0' } };
+  const saveConsumer = () => writeFile(join(f.root, 'dsh-plugins/first/package.json'), JSON.stringify(consumer));
+  await saveConsumer(); await writeFile(join(f.root, 'dsh-plugins/plugin-kit/package.json'), JSON.stringify(provider));
+  const build = join(f.root, 'dsh-plugins/first/build.mjs');
+  await writeFile(build, `import { bindToolchain } from '${name}/toolchain';`);
+  const result = await inspectBoundaries(f.root);
+  assert.equal(result.cross_package_edges[0].access, 'public-export');
+  assert.equal(result.cross_package_edges[0].phase, 'build');
+  assert.deepEqual(result.extraction_exceptions, []);
+  consumer.devDependencies[name] = '^0.1.0'; await saveConsumer();
+  await assert.rejects(inspectBoundaries(f.root), /BOUNDARY_KIT_DEV_ONLY/);
+  consumer.devDependencies[name] = '0.1.0'; consumer.dependencies = { [name]: '0.1.0' }; await saveConsumer();
+  await assert.rejects(inspectBoundaries(f.root), /BOUNDARY_KIT_DEV_ONLY/);
+  delete consumer.dependencies; await saveConsumer();
+  await f.source('first', `import { bindToolchain } from '${name}/toolchain';`);
+  await assert.rejects(inspectBoundaries(f.root), /BOUNDARY_KIT_DEV_ONLY/);
+  await f.source('first', '');
+  await writeFile(build, `import { bindToolchain } from '${name}/private';`);
+  await assert.rejects(inspectBoundaries(f.root), /BOUNDARY_PRIVATE_SUBPATH/);
+  await writeFile(build, `import { bindToolchain } from '${name}/toolchain';`);
+  provider.files = []; await writeFile(join(f.root, 'dsh-plugins/plugin-kit/package.json'), JSON.stringify(provider));
+  await assert.rejects(inspectBoundaries(f.root), /BOUNDARY_EXPORT_NOT_PACKED/);
+});
+
+
+test('build consumers cannot fall back to sibling kit source', async t => {
+  const f = await fixture(t);
+  await writeFile(join(f.root, 'dsh-plugins/first/build.mjs'), "import '../plugin-kit/toolchain.mjs';");
+  await assert.rejects(inspectBoundaries(f.root), /BOUNDARY_UNAPPROVED_EDGE/);
+});

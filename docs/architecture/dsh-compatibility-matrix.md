@@ -29,6 +29,8 @@
 
 ## G0 结论与下一步
 
+2026-10-07 后续：**新可追踪 rc1 构建的 WSL 子项已完成**，不再列为未执行。精确官方 SHA/tree/lock、隔离 pnpm 11.7.0/nobody 和官方 host/native 构建通过；text/tool/rich 共 12 场景/30 冷进程，98040 个输入保持，133 个结果文件取回。见[WSL 构建与矩阵证据](../hackathon/evidence/dsh-g0-kit-install-wsl-rebuild-20261007.md)。这是新的构建/执行追踪，历史旧编译闭包的签名认证仍未补造；T5 来源信任和完整事件/业务门禁保持区分。
+
 2026-10-07 补证：从固定 rc1 commit/lock 新建的本机输入已完成官方 host/native 构建与三语料 12 场景/30 冷进程，输入清单前后保持，四个 JS 入口与旧 WSL 观察一致。见[构建追踪](../hackathon/evidence/dsh-g0-rc1-rebuild-kit-20261007.md)。这项是 Darwin arm64 本地构建来源记录，不是旧 WSL 全闭包认证或签名；下方相关未关闭项保留此区分。
 
 当前可以确认的是：官方 rc2 Web CLI 通过显式 preset 声明加载双插件；候选移除后现有会话仍持有旧 revision；正常重启、进行中崩溃、原生回退和恢复原固定包均保留原生会话的已提交前缀。任意插件的同进程隔离仍不承诺，候选整体切换采用 `HOST_RESTART_REQUIRED`。登录内存需重建，profile 回退不回滚服务数据。

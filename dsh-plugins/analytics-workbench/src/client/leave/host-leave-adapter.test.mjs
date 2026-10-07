@@ -1,3 +1,4 @@
+import kitPin from '@shine-mage/dsh-plugin-kit/pin' with { type: 'json' };
 /**
  * T22 / T27 (D41, D46) — the real host leave seam.
  *
@@ -35,14 +36,14 @@ import { librarySnapshot as snap, libraryPreview as draft, ok, failed, listOf } 
 
 const plugin = fileURLToPath(new URL('../../..', import.meta.url));
 const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream'));
-const pin = JSON.parse(await readFile(join(plugin, '../plugin-kit/toolchain.json'), 'utf8'));
+const pin = kitPin;
 
 function git(args) {
   const bins = ['/usr/bin/git', '/opt/homebrew/bin/git', 'git'];
   let last;
   for (const bin of bins) {
     try {
-      return execFileSync(bin, args, { cwd: upstream, encoding: 'utf8' }).trim();
+      return execFileSync(bin, ['--no-optional-locks', '-c', 'core.fsmonitor=false', ...args], { cwd: upstream, encoding: 'utf8' }).trim();
     } catch (error) {
       last = error;
       if (error && error.code !== 'ENOENT') throw error;

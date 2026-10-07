@@ -1,3 +1,4 @@
+import kitPin from '@shine-mage/dsh-plugin-kit/pin' with { type: 'json' };
 /** Geometry/session/DOM ownership tests; not native browser acceptance. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -12,7 +13,7 @@ const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.c
 const { JSDOM } = createRequire(join(upstream, 'node_modules/jsdom/package.json'))('jsdom');
 
 test('composition is pinned and sizes continuous split, collapsed and narrow views without squeezing either minimum', () => {
-  assert.equal(COMPOSITION_PIN, JSON.parse(readFileSync(join(plugin, '../plugin-kit/toolchain.json'))).upstream_sha);
+  assert.equal(COMPOSITION_PIN, kitPin.upstream_sha);
   assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], { cwd: upstream, encoding: 'utf8' }).trim(), COMPOSITION_PIN,
     'composition tests must run against the exact pinned checkout');
   assert.deepEqual(compositionGeometry(1160), { mode: 'split', canvas: 712, chat: 440 });

@@ -1,6 +1,6 @@
 /** Exact upstream closure. No registry install, source rewrite or absolute URL in artifacts. */
 import assert from 'node:assert/strict';
-import { bindPackagedDependencies } from './packaged-dependencies.mjs';
+import { bindPackagedDependencies, DEV_KIT_NAME } from './packaged-dependencies.mjs';
 import { createHash } from 'node:crypto';
 import { readFile, mkdir, symlink, lstat, realpath } from 'node:fs/promises';
 import { dirname, join, relative } from 'node:path';
@@ -16,7 +16,10 @@ export const defaultBuildTools = join(toolchainRoot, 'build-tools');
 export async function inspectToolchain(upstream, buildTools = defaultBuildTools) {
   const pin = JSON.parse(await readFile(join(toolchainRoot, 'toolchain.json'), 'utf8'));
   assert.equal(Number(process.versions.node.split('.')[0]), pin.node_major, 'Use the pinned Node major');
-  const gitEnv = Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith('GIT_')));
+  // The read-only final check has the same isolation as preparation stages.
+  // Do not forward app credentials or re-enable caller/global Git settings.
+  const gitEnv = { PATH: process.env.PATH ?? '/usr/bin:/bin', GIT_CONFIG_NOSYSTEM: '1',
+    GIT_CONFIG_GLOBAL: '/dev/null', GIT_TERMINAL_PROMPT: '0', GIT_OPTIONAL_LOCKS: '0', GIT_NO_REPLACE_OBJECTS: '1' };
   const git = args => execFileSync('git', ['--no-optional-locks', '-c', 'core.fsmonitor=false', '-C', upstream, ...args], {
     cwd: upstream, env: gitEnv, stdio: ['ignore', 'pipe', 'pipe'], encoding: 'utf8', timeout: 30000, maxBuffer: 1024 * 1024,
   }).trim();
@@ -64,6 +67,13 @@ export async function inspectToolchain(upstream, buildTools = defaultBuildTools)
 
 /** Bind only after the complete input preflight succeeds. */
 export async function bindToolchain(plugin, upstream, buildTools = defaultBuildTools) {
+  const consumer = JSON.parse(await readFile(join(plugin, 'package.json'), 'utf8'));
+  const kit = JSON.parse(await readFile(join(toolchainRoot, 'package.json'), 'utf8'));
+  assert.ok(![consumer.dependencies, consumer.optionalDependencies, consumer.peerDependencies]
+    .some(group => group?.[DEV_KIT_NAME] !== undefined), 'KIT_MUST_BE_DEV_ONLY');
+  if (consumer.devDependencies?.[DEV_KIT_NAME] !== undefined) {
+    assert.equal(consumer.devDependencies[DEV_KIT_NAME], kit.version, 'KIT_VERSION_MISMATCH');
+  }
   const { pin, bindings, loadCompiler, loadBundler } = await inspectToolchain(upstream, buildTools);
   const compiler = loadCompiler(), esbuild = loadBundler();
   assert.equal(compiler.version, pin.typescript);
