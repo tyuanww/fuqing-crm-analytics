@@ -160,9 +160,21 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, onSourceF
     : Object.entries(styles).map(([key, item]) => `${key}: ${item}`).join('; ');
   const sourceValue = state.sourceDraft?.package?.[sourceFile] ?? current.package[sourceFile] ?? '';
   useEffect(() => { setAiOpen(false); setInstruction(''); setSendError(''); setPreviewNote(''); setStyleDraft(''); setAttrValue(''); setStructureDraft(''); }, [current.page_id, current.version, aiMode, formalNode?.node_id]);
+  const inlineOriginals = useRef(new Map<string, string>());
+  useEffect(() => { inlineOriginals.current.clear(); }, [current.page_id, current.version, state.draftReset]);
   const commitSelection = (node: TextNode | null) => {
     if (!node) { if (!state.textDraft?.changed) store.clearSelection(); return; }
+    const before = store.getSnapshot();
+    const previousDraft = before.selection?.node_id === node.node_id ? before.textDraft : null;
     store.selectLocatable(node); onInspect?.();
+    const accepted = store.getSnapshot().selection;
+    const textValue = node.selection_hints?.textValue;
+    if (accepted?.ok && accepted.node_id === node.node_id && node.editableText !== false && !node.inspectOnly && typeof textValue === 'string') {
+      const sourceText = previousDraft?.original ?? inlineOriginals.current.get(node.node_id)
+        ?? (node.richText && node.editorText ? node.editorText : node.runtime ? node.text : decodeText(node.text));
+      inlineOriginals.current.set(node.node_id, sourceText);
+      store.setReplacementText(textValue, sourceText);
+    }
     if (aiMode && !store.hasUnsavedChanges()) { setAiOpen(true); setSendError(''); }
   };
   const choose = (node: TextNode | null) => {
