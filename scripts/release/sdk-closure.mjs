@@ -6,6 +6,7 @@ import { dirname, isAbsolute, join, matchesGlob, relative, resolve, sep } from '
 import { fileURLToPath } from 'node:url';
 import { inspectArchive } from './sdk-content-audit.mjs';
 import { inspectToolchain } from '../../dsh-plugins/plugin-kit/toolchain.mjs';
+import { managerVersions } from '../../dsh-plugins/plugin-kit/package-manager.mjs';
 import { CLOSURE_SCHEMA, CLOSURE_LIMITS, closurePath, readClosureFile, sha256, verifySdkClosure } from '../../dsh-plugins/plugin-kit/sdk-closure.mjs';
 
 const repository = fileURLToPath(new URL('../..', import.meta.url));
@@ -99,6 +100,12 @@ export function sourceReader(source, manifest) {
 
 export async function discoverClosure(source, manifest, pin, compiler) {
   const reader = sourceReader(source, manifest), up = join(source, 'upstream');
+  // A plugin author consumes the built SDK; rebuilding official DSH belongs to
+  // the full preparation environment and must not enlarge the author cache.
+  const managerVersion = managerVersions(pin).plugins;
+  const managerRoot = `corepack/v1/pnpm/${managerVersion}`;
+  const manager = JSON.parse(await reader.read(`${managerRoot}/package.json`));
+  need(manager.name === 'pnpm' && manager.version === managerVersion, 'MANAGER_IDENTITY');
   const roots = Object.values(pin.sdk_bindings).map(path => `upstream/${path}`), aliases = [], missingOptional = [];
   for (const [name, path] of Object.entries(TEST_RUNTIME_INPUTS)) {
     const pkg = JSON.parse(await reader.read(`upstream/${path}/package.json`));
@@ -170,7 +177,7 @@ export async function discoverClosure(source, manifest, pin, compiler) {
       }
     }
   }
-  return { reader, packages, edges, missingOptional, declarationEdges, unresolvedDeclarations, typesOnly };
+  return { reader, packages, edges, missingOptional, declarationEdges, unresolvedDeclarations, typesOnly, managerRoot };
 }
 
 export async function createClosure({ source, destination, archive, sha: archiveSha, python }) {
@@ -189,7 +196,10 @@ export async function createClosure({ source, destination, archive, sha: archive
   const selected = new Map();
   for (const [name, row] of Object.entries(manifest.entries)) {
     if (row.kind === 'dir') continue;
-    if (name.startsWith('corepack/')) { selected.set(name, row); continue; }
+    if (name.startsWith('corepack/')) {
+      if (name.startsWith(graph.managerRoot + '/')) selected.set(name, row);
+      continue;
+    }
     let owner = dirname(name);
     while (owner !== '.' && !graph.packages.has(owner)) owner = dirname(owner);
     if (owner === '.') continue;

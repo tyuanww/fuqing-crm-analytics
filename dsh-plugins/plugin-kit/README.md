@@ -157,7 +157,7 @@ node scripts/release/sdk-supply-chain.mjs --root /absolute/new-received-build-sd
 
 这两个命令从本仓根目录执行，不属于已安装 kit 的运行时 API。`--osv` 向固定 `api.osv.dev` 发送去重的安装依赖名称/版本；排除工作区及声明 `private:true` 的清单，但不代表已经核验私有 registry 的可见性。清单的 CycloneDX `bom` 保留 `incomplete`：包内隐藏/打包合并的依赖、依赖边、发布者身份和撤销未核验；`package.json` 摘要不冒充整包摘要。`NO_KNOWN_ADVISORIES` 只适用于本次查到的名称/版本，网络/分页失败为 `UNKNOWN`；报告分别计数 `requested/queried/completed/requests_sent`，逐包保留 `NOT_QUERIED/INCOMPLETE/COMPLETE`，失败不冒充全部查完；发现公告为 `BLOCKED`，其余未关闭条件为 `PARTIAL`，退出码均为 2，始终 `release_ready=false`。
 
-TLS 信任失败返回 `SDK_SUPPLY_OSV_TLS_TRUST`。本机实际使用 `NODE_EXTRA_CA_CERTS=/etc/ssl/cert.pem` 的系统公共 CA 后完成查询，不关闭 TLS；其他机器应按自己的信任配置处理。2026-10-07 固定 SDK 的实际结果为 **10 个依赖版本 / 42 条不同公告，分发 BLOCKED**，详见[证据](../../docs/hackathon/evidence/dsh-g0-kit-sdk-supply-chain-20261007.md)。不能以 build/test 通过替代该条件。
+TLS 信任失败返回 `SDK_SUPPLY_OSV_TLS_TRUST`。本机实际使用 `NODE_EXTRA_CA_CERTS=/etc/ssl/cert.pem` 的系统公共 CA 后完成查询，不关闭 TLS；其他机器应按自己的信任配置处理。2026-10-07 旧 pin SDK 命中 10 个依赖版本 / 42 条不同公告，见[历史证据](../../docs/hackathon/evidence/dsh-g0-kit-sdk-supply-chain-20261007.md)；当前 v2 缩减包重查为 **7 个版本 / 29 条不同公告，分发仍 BLOCKED**，见[v2 分发记录](../../docs/hackathon/evidence/dsh-g0-kit-sdk-v2-distribution-20261007.md)。不能以 build/test 通过替代该条件。
 
 上一阶段审修排除了 pnpm 11.11.0 完整候选（内置依赖仍有公告），完成了固定 11.28.2 的包来源与 27 份带版本清单查询。见[候选核对与剩余任务](../../docs/hackathon/evidence/dsh-g0-kit-sdk-supply-review-20261007.md)。随后完成了隔离安装/兼容验证，当前默认 pin 的职责拆分见下节；DSH 0.2.0-rc.2 也不能自动关闭当前依赖问题。
 
@@ -167,7 +167,9 @@ TLS 信任失败返回 `SDK_SUPPLY_OSV_TLS_TRUST`。本机实际使用 `NODE_EXT
 
 新 pin 改变 SDK 身份摘要，旧 SDK 不会被新 kit 静默接受；需要显式准备新的开发输入，旧 kit/SDK 按旧 pin 继续保留。工具链准备属于维护步骤，不在日常插件 build 中自动执行。
 
-v2 的本机首次准备和消费者实测见[工具链拆分证据](../../docs/hackathon/evidence/dsh-g0-kit-manager-split-20261007.md)。新 SDK 仍包含官方构建所需的旧 manager，不能据自有工具升级宣称完整供应链通过；新身份的缩减归档、审计和目标平台证据单独完成。
+v2 的本机首次准备和消费者实测见[工具链拆分证据](../../docs/hackathon/evidence/dsh-g0-kit-manager-split-20261007.md)。完整准备环境保留两套 manager；`sdk-closure.mjs` 生成的插件开发包只保留 pin 中 `pnpm` 对应的完整版本目录，并验证包名/版本，不携带官方构建 manager 或其他缓存。该包用于消费已构建 SDK，不用于重新构建官方宿主。
+
+当前 v2 包的同平台 pack/receive 和 10/10 消费者实测已完成，见[分发复验](../../docs/hackathon/evidence/dsh-g0-kit-sdk-v2-distribution-20261007.md)。准备成功不代表完整依赖图可归档：可选依赖下载失败可能留下悬空链接，归档器仍拒绝；须在新输入目录补齐精确来源并留证，不能删链接或放宽校验。当前仅开发范围，完整供应链、目标平台/WSL 继续开放。
 
 现有安装测试支持显式 `B0_TEST_PNPM_VERSION=11.28.2`。须先将该精确版本及摘要对应的 manager 准备到独占 `COREPACK_HOME`，再结合 `B0_BUILD_UPSTREAM`、`B0_BUILD_TOOLS`、缩减模式的 `DSH_SDK_CLOSURE_SHA256` 运行 `node --test scripts/dsh-b0/plugin-kit.test.mjs`。候选模式要求前三个路径显式为绝对路径，缺项/相对路径以 `KIT_TEST_CANDIDATE_INPUT_REQUIRED` 在打包前失败，不允许跳过消费者或回退本仓工具/个人缓存。测试禁用 Corepack 网络/自动 pin，核验实际版本；候选声明只写自有 kit/插件副本，不改官方 SDK 和仓库 pin，也不改消费者的领域包摘要锁。不设置该参数就按原声明运行。
 

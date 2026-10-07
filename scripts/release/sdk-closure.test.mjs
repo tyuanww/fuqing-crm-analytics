@@ -175,15 +175,29 @@ test('dependency graph keeps type-only edges and source gaps distinct from manda
   await put('upstream/packages/core/demo/lib/index.d.ts', "export type X = import('@deepseek-ai/known').X; export type Y = import('source-missing-type').Y;");
   await put('upstream/vendor/known/lib/index.d.ts', 'export type X = string;');
   await put('build-tools/package.json', '{"dependencies":{}}');
-  const pin = { sdk_version: '1.0.0', sdk_bindings: { '@deepseek-ai/demo': 'packages/core/demo', '@deepseek-ai/dsh-client-ui-conversation': 'packages/client/conversation' } };
+  const managerPath = 'corepack/v1/pnpm/11.28.2/package.json';
+  const manager = JSON.stringify({ name: 'pnpm', version: '11.28.2' });
+  await put(managerPath, manager);
+  const pin = { schema_version: 'dsh-b0-toolchain/v2', upstream_pnpm: '11.7.0', pnpm: '11.28.2',
+    sdk_version: '1.0.0', sdk_bindings: { '@deepseek-ai/demo': 'packages/core/demo', '@deepseek-ai/dsh-client-ui-conversation': 'packages/client/conversation' } };
   const compiler = createRequire(new URL('../../dsh-plugins/plugin-kit/build-tools/package.json', import.meta.url))('typescript');
   const result = await discoverClosure(root, f.manifest, pin, compiler);
+  assert.equal(result.managerRoot, 'corepack/v1/pnpm/11.28.2');
   assert.ok(result.typesOnly.has('upstream/vendor/known'));
   assert.ok(result.packages.has('upstream/packages/test-support/agent-loop-testkit'));
   assert.ok(!result.typesOnly.has('upstream/packages/test-support/agent-loop-testkit'));
   assert.equal(result.unresolvedDeclarations.length, 1);
   assert.equal(result.unresolvedDeclarations[0].dependency, 'source-missing-type');
   assert.ok(result.edges.some(row => row.at === 'upstream/packages/core/demo/node_modules/@deepseek-ai/known'));
+  // Neither an old cache nor a relabelled package can satisfy the plugin pin.
+  await put(managerPath, JSON.stringify({ name: 'pnpm', version: '11.7.0' }));
+  await assert.rejects(discoverClosure(root, f.manifest, pin, compiler), /KIT_CLOSURE_MANAGER_IDENTITY/);
+  await put(managerPath, JSON.stringify({ name: 'other-tool', version: '11.28.2' }));
+  await assert.rejects(discoverClosure(root, f.manifest, pin, compiler), /KIT_CLOSURE_MANAGER_IDENTITY/);
+  await put(managerPath, manager);
+  const managerRow = f.manifest.entries[managerPath]; delete f.manifest.entries[managerPath];
+  await assert.rejects(discoverClosure(root, f.manifest, pin, compiler), /KIT_CLOSURE_SOURCE_FILE/);
+  f.manifest.entries[managerPath] = managerRow;
   await pkg('upstream/packages/core/demo', '@deepseek-ai/demo', { dependencies: { 'required-missing': '1.0.0' } });
   await assert.rejects(discoverClosure(root, f.manifest, pin, compiler), /KIT_CLOSURE_DEPENDENCY_MISSING/);
   await assert.rejects(discoverClosure(root, f.manifest, { ...pin, sdk_version: 'wrong' }, compiler), /KIT_CLOSURE_TEST_INPUT_IDENTITY/);
