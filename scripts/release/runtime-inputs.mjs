@@ -5,7 +5,7 @@ import { cp, copyFile, link, lstat, mkdir, mkdtemp, readFile, readdir, readlink,
 import { basename, dirname, join, relative, resolve } from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { DSH_UPSTREAM_SHA, PNPM_VERSION, NODE_MAJOR } from './toolchain.mjs';
+import { DSH_UPSTREAM_SHA, UPSTREAM_PNPM_VERSION, NODE_MAJOR } from './toolchain.mjs';
 
 const exec = promisify(execFile);
 const MAX_TARBALL = 64 * 1024 * 1024;
@@ -50,7 +50,7 @@ async function preparationIdentity(upstream) {
     schema_version: 'dsh-runtime-preparation/v1', upstream_sha: DSH_UPSTREAM_SHA,
     lock_sha256: hash(await readFile(join(upstream, 'pnpm-lock.yaml'))),
     policy_sha256: hash(await readFile(join(upstream, 'pnpm-workspace.yaml'))),
-    pnpm: PNPM_VERSION, node_major: NODE_MAJOR,
+    pnpm: UPSTREAM_PNPM_VERSION, node_major: NODE_MAJOR,
   };
 }
 

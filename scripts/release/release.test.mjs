@@ -286,7 +286,12 @@ test('release preflight builds the runtime before protected tag creation', async
   assert.match(workflow, /reviewed_sha/);
   assert.match(workflow, /pull_request\.base\.sha/);
   assert.match(workflow, /git merge-base --is-ancestor "\$BASE_SHA" "\$REVIEWED_SHA"/);
-  assert.match(workflow, /corepack install --global pnpm@11\.7\.0/);
+  assert.match(workflow, /corepack install\s*\n/);
+  assert.match(workflow, /import \{ PNPM_VERSION \} from '\.\/scripts\/release\/toolchain\.mjs'/);
+  assert.match(workflow, /test "\$\(pnpm --version\)" = "\$plugin_pnpm"/);
+  assert.doesNotMatch(workflow, /corepack install --global|pnpm@\d/);
+  assert.match(workflow, /'dsh-plugins\/plugin-kit\/\*\*'/);
+  assert.doesNotMatch(workflow, /'dsh-plugins\/\*\*'/, 'ordinary plugin changes must not trigger full runtime preparation');
   assert.match(workflow, /scripts\/dsh\.mjs preflight/);
   assert.match(workflow, /dsh-rc2-preflight-/);
   assert.match(source, /runtime-bundle\.mjs/);

@@ -15,7 +15,7 @@ import { access, copyFile, link, lstat, mkdir, mkdtemp, readFile, readdir, realp
 import { promisify } from 'node:util';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { DSH_SDK_VERSION } from './toolchain.mjs';
+import { DSH_SDK_VERSION, PNPM_VERSION } from './toolchain.mjs';
 import { assertClean, scanTree } from './secret-scan.mjs';
 
 const exec = promisify(execFile);
@@ -106,7 +106,7 @@ async function inspectPackage(pluginRoot) {
   assert.match(manifest.name, /^@shine-mage\/[a-z0-9][a-z0-9-]+$/, 'PLUGIN_PACK_NAME_INVALID');
   assert.match(manifest.version, /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/, 'PLUGIN_PACK_VERSION_INVALID');
   assert.equal(manifest.type, 'module', 'PLUGIN_PACK_TYPE_INVALID');
-  assert.equal(manifest.packageManager, 'pnpm@11.7.0', 'PLUGIN_PACK_PACKAGE_MANAGER_INVALID');
+  assert.equal(manifest.packageManager, `pnpm@${PNPM_VERSION}`, 'PLUGIN_PACK_PACKAGE_MANAGER_INVALID');
   assert.equal(manifest.peerDependencies?.['@deepseek-ai/dsh-tools'], DSH_SDK_VERSION, 'PLUGIN_PACK_DSH_PEER_INVALID');
   const declared = manifest.files;
   assert.ok(Array.isArray(declared) && declared.length > 0, 'PLUGIN_PACK_FILES_REQUIRED');

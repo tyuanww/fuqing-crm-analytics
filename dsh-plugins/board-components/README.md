@@ -4,7 +4,7 @@
 
 公开入口是 `@shine-mage/board-components/funnel` 与 `@shine-mage/board-components/waterfall`，各自同时发布 `.mjs` 和 `.d.mts`。未知输入返回 `null`；漏斗人数必须嵌套、比例保持 0–1、零分母不可用；瀑布图保持数值守恒。工作台和旧图表插件仍拥有自己的 DSH 生命周期与展示合同。
 
-在仓库根、Node 24 / pnpm 11.7.0 环境执行：
+在仓库根、Node 24 / pnpm 11.28.2 环境执行（自有插件工具链；官方 DSH 构建版本由 kit 的 `upstream_pnpm` 单独固定）：
 
 ```bash
 node scripts/dsh-b0/plugin-kit-link.mjs "$PWD/dsh-plugins/board-components" "$PWD/dsh-plugins/plugin-kit"

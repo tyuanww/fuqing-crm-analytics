@@ -74,6 +74,7 @@ test('verifyUpstream accepts the immutable production runtime bundle only when r
     const verified = await verifyUpstream(upstream, pin);
     assert.equal(await assertCli(upstream), join(dir, 'lib/bin.js'));
     assert.equal(verified.runtime_bundle, true);
+    assert.equal(verified.pnpm, pin.upstream_pnpm, 'runtime provenance must retain the official manager');
     process.env.DSH_UPSTREAM_SHA = '0'.repeat(40);
     await assert.rejects(() => verifyUpstream(upstream, pin), /Runtime bundle upstream SHA/);
   } finally {

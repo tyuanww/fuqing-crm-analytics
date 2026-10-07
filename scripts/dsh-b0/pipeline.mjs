@@ -13,6 +13,7 @@ import { copyPluginKitSources, copyTreeBounded, createCleanRoot, reapStaleCleanR
 import { linkWorkspaceKit } from './plugin-kit-link.mjs';
 import { prepareRuntimeInputs, recordRuntimePreparation } from '../release/runtime-inputs.mjs';
 import { packPlugin } from '../release/plugin-pack.mjs';
+import { managerVersions } from '../../dsh-plugins/plugin-kit/package-manager.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const plugin = join(root, 'dsh-plugins/analytics-workbench');
@@ -41,6 +42,7 @@ assert.ok(!process.env.B0_BUILD_UPSTREAM || mode === '--check',
 // --check override for standalone callers and is rejected for --prepare.
 const upstream = resolve(process.env.DSH_UPSTREAM_CHECKOUT ?? process.env.B0_BUILD_UPSTREAM ?? join(b0, 'upstream-0.1.7-rc.2'));
 const pin = JSON.parse(await readFile(join(kit, 'toolchain.json'), 'utf8'));
+const managers = managerVersions(pin);
 assert.equal(Number(process.versions.node.split('.')[0]), pin.node_major);
 let env = {
   ...Object.fromEntries(Object.entries(process.env).filter(([key]) => ['HOME', 'CI', 'SYSTEMROOT'].includes(key))),
@@ -69,11 +71,14 @@ async function verifySource() {
   assert.equal(git(['rev-parse', 'HEAD']), pin.upstream_sha, 'Pinned upstream SHA mismatch');
   assert.equal(git(['status', '--porcelain', '--untracked-files=no']), '', 'Refusing locally modified upstream');
   assert.equal(createHash('sha256').update(await readFile(join(upstream, 'pnpm-lock.yaml'))).digest('hex'), pin.upstream_lock_sha256);
-  assert.equal(JSON.parse(await readFile(join(upstream, 'package.json'), 'utf8')).packageManager, `pnpm@${pin.pnpm}`);
+  assert.equal(JSON.parse(await readFile(join(upstream, 'package.json'), 'utf8')).packageManager, `pnpm@${managers.upstream}`);
 }
 async function preparePackageManager() {
   env = await packageManagerEnv(join(b0, 'tool-bin'), env, upstream);
-  assert.equal(output('corepack', ['pnpm', '--version'], upstream, mode === '--check' ? {} : networkEnv), pin.pnpm);
+  const transport = mode === '--check' ? { COREPACK_ENABLE_NETWORK: '0' } : networkEnv;
+  assert.equal(output('corepack', ['pnpm', '--version'], upstream, transport), managers.upstream);
+  assert.equal(JSON.parse(await readFile(join(buildTools, 'package.json'))).packageManager, `pnpm@${managers.plugins}`);
+  assert.equal(output('corepack', ['pnpm', '--version'], buildTools, transport), managers.plugins);
 }
 if (mode === '--check') env = await archiveToolEnv(env);
 await mkdir(b0, { recursive: true, mode: 0o700 });

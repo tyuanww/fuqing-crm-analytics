@@ -75,7 +75,7 @@
         "test:html-edit": "node --test src/free-page/resource/package-normalize.test.mjs src/client/free-html-library/html-import.test.mjs src/client/html-selection-bridge.test.mjs src/client/free-html-library/store.test.mjs src/client/free-html-library/p12-live-adapters.test.mjs src/client/free-html-library/source-draft.test.mjs src/client/cockpit-ai-client.test.mjs src/free-page/edit/intent-router.test.mjs src/free-page/edit/selection-context.test.mjs test/dynamic-chart-browser-seam.test.mjs",
         "test:built": "node --test test/built.test.mjs"
       },
-      "manifest_sha256": "0ed93f74983db17882e471c01e9a3c4152678c784a4dc14e72975fa8c0e21d60"
+      "manifest_sha256": "8a52b8f157a9658375efcd6e0023bf2ae322cd6f0430db01d182a3fab46b325c"
     },
     {
       "path": "dsh-plugins/board-components",
@@ -111,7 +111,7 @@
         "build": "node build.mjs",
         "test": "node --test test/*.test.mjs"
       },
-      "manifest_sha256": "b1833d956f2c0cdf9be5f34286b88c5c2090aa929320ec524b267960e88ed7b3"
+      "manifest_sha256": "c82cc3af5ee76e88a80846ff0108dd2758dfd0c77c81205530e834897d8464d8"
     },
     {
       "path": "dsh-plugins/crm-knowledge",
@@ -160,7 +160,7 @@
         "build": "node build.mjs",
         "test:host": "node --test test/host.integration.mjs"
       },
-      "manifest_sha256": "211aab71c6019a6873f231b2dacd94beaba1e97fa547106eeac5715a381a60d2"
+      "manifest_sha256": "4c0d3557fcd06f019201df21a4e5eba17c85689a46ac987747dbd02da3151243"
     },
     {
       "path": "dsh-plugins/knowledge",
@@ -198,7 +198,7 @@
         "build": "node build.mjs",
         "test": "node --test test/*.test.mjs"
       },
-      "manifest_sha256": "b298cc5096170ab482a0cc17ba8f8f936be834b94ec28e1bcbcd57c710d7a88c"
+      "manifest_sha256": "1b7d10a2892d06d4096f2408c8c6b0162d854113f87babd56339ae93f4d70c3c"
     },
     {
       "path": "dsh-plugins/plugin-kit",
@@ -236,7 +236,7 @@
       "bundled_inputs": [],
       "dsh": {},
       "commands": {},
-      "manifest_sha256": "84957afa3fce24949d2847bdcb2bb530da79d71f7488fe2a9f90ffc9e265cda8"
+      "manifest_sha256": "cfde59b91196e607fb4a009a115b0304429ba2bd51a69fa0e9e2784da79650ec"
     },
     {
       "path": "dsh-plugins/shine-board",
@@ -281,7 +281,7 @@
         "build": "node build.mjs",
         "test": "node --test src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "faa79d85b88ab79891004e45a912e781161e00b9eace38096a132fa86b86a00a"
+      "manifest_sha256": "c6c00edb7a31610651b9fc92aa3b5d96d9766900b9cc71b7a3aec8899f5ce1e0"
     },
     {
       "path": "dsh-plugins/shine-brand",
@@ -325,7 +325,7 @@
         "build": "node build.mjs",
         "test": "node --test src/brand-surface.test.mjs src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "9b04bc24a38d18c6de7e242d5bf55ac8bf817042d3a38fd33e80766c0d71ae89"
+      "manifest_sha256": "5baa3cca089cdeb33819274723b60c5c86c109f8b994025ed9b556629822e0f8"
     },
     {
       "path": "dsh-plugins/shine-crowd-action",
@@ -370,7 +370,7 @@
         "build": "node build.mjs",
         "test": "node --test src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "552618e2c7fddb62aa2f57328d05a36681b2728bf8c4058db311f22918f8434f"
+      "manifest_sha256": "a08f3ecc9af05e8d19386096082e74435ef968b0731f47af22ab3b8f096105e1"
     },
     {
       "path": "dsh-plugins/shine-funnel",
@@ -431,7 +431,7 @@
         "build": "node build.mjs",
         "test": "node --test src/funnel.test.mjs src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "7a751a30d71a92189ed2000668d5e66f75507bf63af6a9324315c5b08dc94dc2"
+      "manifest_sha256": "e702392cfa0c212e5f7372e4334fdbb9bd0147568c344af824320c3a8892ff12"
     },
     {
       "path": "dsh-plugins/shine-query",
@@ -476,7 +476,7 @@
         "build": "node build.mjs",
         "test": "node --test src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "6f0367bb771b7b98b167c47261a18cd6886f23c78d2350454cc8c53002e101b9"
+      "manifest_sha256": "f41df73b61e0515ca50f90088ee76abaf4fa0e85c178d9c7c9e99cd683f2be8b"
     },
     {
       "path": "dsh-plugins/shine-waterfall",
@@ -537,7 +537,7 @@
         "build": "node build.mjs",
         "test": "node --test src/waterfall.test.mjs src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "f19d8e05bf2b52a3e4e7853f14494a50e1b850ff7279d3331cb02a1ef9d957f1"
+      "manifest_sha256": "1cd7ce082f80d1088aed5d9bb7940391c0c44485e8ed5abd5a8c711bb97282ca"
     }
   ],
   "source_files_scanned": 644,
@@ -3893,7 +3893,7 @@
       ],
       "compatibility": "Exact SHA/SDK/lock; upgrade only in isolated candidate; source pin is not runtime proof.",
       "status": "PINNED_UPSTREAM",
-      "source_sha256": "8c1ddee3e65c3067ecab448003432e98a723e404be48656e338c19ebb545661d"
+      "source_sha256": "8f1eaf0b2b7ea1392cd45674bfbdd7498b2df6bb642db63f75d002df776511fe"
     },
     {
       "id": "crm-metrics",

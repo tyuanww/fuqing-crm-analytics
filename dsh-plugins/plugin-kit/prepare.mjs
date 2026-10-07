@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import { copyFile, lstat, mkdir, readFile, realpath, writeFile } from 'node:fs/promises';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { dependencyCommands, packageNetworkEnv } from './package-manager.mjs';
+import { dependencyCommands, packageNetworkEnv, managerVersions } from './package-manager.mjs';
 import { inspectToolchain, toolchainRoot } from './toolchain.mjs';
 
 const hash = value => createHash('sha256').update(value).digest('hex');
@@ -18,7 +18,7 @@ export function bootstrapEnvironment(destination, node = process.execPath) {
     HOME: join(destination, 'home'), TMPDIR: join(destination, 'tmp'),
     XDG_CACHE_HOME: join(destination, 'cache'), COREPACK_HOME: join(destination, 'corepack'),
     COREPACK_ENABLE_DOWNLOAD_PROMPT: '0', COREPACK_DEFAULT_TO_LATEST: '0',
-    COREPACK_ENABLE_PROJECT_SPEC: '1', CI: '1', LEFTHOOK: '0',
+    COREPACK_ENABLE_PROJECT_SPEC: '1', COREPACK_ENABLE_AUTO_PIN: '0', CI: '1', LEFTHOOK: '0',
     GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', GIT_TERMINAL_PROMPT: '0',
     GIT_OPTIONAL_LOCKS: '0', LANG: 'C.UTF-8', PYTHONNOUSERSITE: '1', PYTHON_DOTENV_DISABLED: '1' };
 }
@@ -65,6 +65,7 @@ export async function prepareSdk(destination, { signal, onStage = () => {}, tran
   assert.ok(isAbsolute(destination ?? ''), 'KIT_PREPARE_DESTINATION_ABSOLUTE');
   assert.ok(['darwin', 'linux'].includes(process.platform), 'KIT_PREPARE_PLATFORM_USE_WSL');
   const pin = JSON.parse(await readFile(join(toolchainRoot, 'toolchain.json')));
+  const managers = managerVersions(pin);
   assert.equal(Number(process.versions.node.split('.')[0]), pin.node_major, 'KIT_PREPARE_NODE');
   // The recipe is fixed by the installed kit. No caller URL, branch or hook.
   assert.equal(pin.upstream_url, 'https://github.com/deepseek-ai/deepseek-harness.git', 'KIT_PREPARE_SOURCE');
@@ -87,7 +88,8 @@ export async function prepareSdk(destination, { signal, onStage = () => {}, tran
   const receipt = { schema_version: 'shinemage-kit-preparation/v1', status: 'PREPARING',
     scope: 'development-sdk-only', upstream_sha: pin.upstream_sha, upstream_lock_sha256: pin.upstream_lock_sha256,
     pin_sha256: hash(await readFile(join(toolchainRoot, 'toolchain.json'))),
-    platform: process.platform, arch: process.arch, node: process.version, pnpm: pin.pnpm,
+    platform: process.platform, arch: process.arch, node: process.version,
+    pnpm: managers.plugins, upstream_pnpm: managers.upstream,
     paths: { upstream: 'upstream', build_tools: 'build-tools', store: 'store' },
     inputs: {}, stages: [], transport_ca_sha256: ca ? hash(ca) : null,
     supply_chain: 'NOT_VERIFIED', production_runtime: 'NOT_BUILT', release_ready: false };
@@ -129,9 +131,11 @@ export async function prepareSdk(destination, { signal, onStage = () => {}, tran
     assert.equal(await stage('source-sha', 'git', ['rev-parse', 'HEAD'], upstream), pin.upstream_sha, 'KIT_PREPARE_SOURCE');
     receipt.source_tree = await stage('source-tree', 'git', ['rev-parse', 'HEAD^{tree}'], upstream);
     assert.equal(hash(await readFile(join(upstream, 'pnpm-lock.yaml'))), pin.upstream_lock_sha256, 'KIT_PREPARE_LOCK');
-    assert.equal(JSON.parse(await readFile(join(upstream, 'package.json'))).packageManager, `pnpm@${pin.pnpm}`, 'KIT_PREPARE_MANAGER');
+    assert.equal(JSON.parse(await readFile(join(upstream, 'package.json'))).packageManager, `pnpm@${managers.upstream}`, 'KIT_PREPARE_MANAGER');
+    assert.equal(JSON.parse(await readFile(join(buildTools, 'package.json'))).packageManager, `pnpm@${managers.plugins}`, 'KIT_PREPARE_TOOLS_MANAGER');
     await stage('manager-shim', 'corepack', ['enable', '--install-directory', join(destination, 'bin'), 'pnpm'], upstream);
-    assert.equal(await stage('manager-version', 'corepack', ['pnpm', '--version'], upstream, true), pin.pnpm, 'KIT_PREPARE_MANAGER');
+    assert.equal(await stage('manager-upstream-version', 'corepack', ['pnpm', '--version'], upstream, true), managers.upstream, 'KIT_PREPARE_MANAGER');
+    assert.equal(await stage('manager-tools-version', 'corepack', ['pnpm', '--version'], buildTools, true), managers.plugins, 'KIT_PREPARE_TOOLS_MANAGER');
     const store = ['--store-dir', join(destination, 'store')];
     await stage('sdk-install', 'corepack', [...dependencyCommands.install, ...store], upstream, true);
     // SDK-only official build scripts: no web app, runtime install or host startup.

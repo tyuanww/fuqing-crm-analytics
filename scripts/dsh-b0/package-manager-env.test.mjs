@@ -1,3 +1,5 @@
+import { PNPM_VERSION, UPSTREAM_PNPM_VERSION } from '../release/toolchain.mjs';
+import { managerVersions } from '../../dsh-plugins/plugin-kit/package-manager.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
@@ -50,29 +52,54 @@ test('dependency child receives explicit proxies without TLS bypass or applicati
   assert.deepEqual(packageNetworkEnv({ HTTP_PROXY: '', HTTPS_PROXY: null, ALL_PROXY: 1 }), {});
 });
 
-test('nested upstream pnpm resolves through project-local Corepack with sanitized PATH', async () => {
+test('nested upstream and plugin commands select their own pinned manager from one local shim', async () => {
   const root = fileURLToPath(new URL('../..', import.meta.url));
   const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(root, '.context/dsh-b0/upstream-0.1.7-rc.2'));
-  const pin = JSON.parse(await readFile(join(root, 'dsh-plugins/plugin-kit/toolchain.json')));
   const scratch = await mkdtemp(join(tmpdir(), 'b0-pnpm-test-'));
   try {
     const original = { HOME: process.env.HOME, PATH: `${dirname(process.execPath)}:/usr/bin:/bin`,
+      ...(process.env.COREPACK_HOME ? { COREPACK_HOME: process.env.COREPACK_HOME } : {}),
       COREPACK_ENABLE_NETWORK: '0', COREPACK_ENABLE_DOWNLOAD_PROMPT: '0' };
     const env = await packageManagerEnv(join(scratch, 'bin'), original, upstream);
     assert.equal(original.PATH.startsWith(scratch), false);
     // Real nested shell, as used by upstream build:web; cached fixed manager only.
     const child = spawnSync('/bin/sh', ['-c', 'pnpm --version'], { cwd: upstream, env, encoding: 'utf8', timeout: 30000 });
     assert.equal(child.status, 0, child.stderr);
-    assert.equal(child.stdout.trim(), pin.pnpm);
+    assert.equal(child.stdout.trim(), UPSTREAM_PNPM_VERSION);
     assert.ok(env.PATH.startsWith(join(scratch, 'bin') + ':'));
+    const plugin = join(scratch, 'plugin'); await mkdir(plugin);
+    await writeFile(join(plugin, 'package.json'), JSON.stringify({ private: true, packageManager: `pnpm@${PNPM_VERSION}` }));
+    const own = spawnSync('/bin/sh', ['-c', 'pnpm --version'], { cwd: plugin, env, encoding: 'utf8', timeout: 30000 });
+    assert.equal(own.status, 0, own.stderr);
+    assert.equal(own.stdout.trim(), PNPM_VERSION);
   } finally {
     await rm(scratch, { recursive: true, force: true });
+  }
+});
+
+test('toolchain requires two explicit exact manager pins instead of inferring the upstream version', () => {
+  const pin = { schema_version: 'dsh-b0-toolchain/v2', upstream_pnpm: '11.7.0', pnpm: '11.28.2' };
+  assert.deepEqual(managerVersions(pin), { upstream: '11.7.0', plugins: '11.28.2' });
+  for (const update of [{ schema_version: 'dsh-b0-toolchain/v1' }, { upstream_pnpm: undefined },
+    { upstream_pnpm: '^11.7.0' }, { pnpm: undefined }, { pnpm: 'latest' }]) {
+    assert.throws(() => managerVersions({ ...pin, ...update }), /TOOLCHAIN_/);
+  }
+});
+
+test('all owned package declarations follow the plugin manager independently of the official pin', async () => {
+  const root = fileURLToPath(new URL('../..', import.meta.url));
+  for (const part of ['', 'dsh-plugins/plugin-kit', 'dsh-plugins/plugin-kit/build-tools',
+    ...['board-components', 'shine-brand', 'shine-query', 'shine-board', 'shine-crowd-action',
+      'shine-funnel', 'shine-waterfall', 'crm-knowledge', 'knowledge', 'analytics-workbench'].map(n => `dsh-plugins/${n}`)]) {
+    const manifest = JSON.parse(await readFile(join(root, part, 'package.json')));
+    assert.equal(manifest.packageManager, `pnpm@${PNPM_VERSION}`, part);
   }
 });
 
 test('repeated frozen fetch/install restores executable package links without running lifecycle scripts', async () => {
   const scratch = await mkdtemp(join(tmpdir(), 'b0-repeat-install-'));
   const env = { HOME: process.env.HOME, PATH: dirname(process.execPath) + ':/usr/bin:/bin',
+    ...(process.env.COREPACK_HOME ? { COREPACK_HOME: process.env.COREPACK_HOME } : {}),
     COREPACK_ENABLE_NETWORK: '0', COREPACK_ENABLE_DOWNLOAD_PROMPT: '0', CI: '1' };
   const run = (args, cwd) => {
     const child = spawnSync('corepack', args, { cwd, env, encoding: 'utf8', timeout: 30000 });
@@ -83,12 +110,12 @@ test('repeated frozen fetch/install restores executable package links without ru
     const dependency = join(scratch, 'dependency'), consumer = join(scratch, 'consumer');
     await mkdir(dependency); await mkdir(consumer);
     await writeFile(join(dependency, 'package.json'), JSON.stringify({ name: 'owned-pinned-command', version: '1.0.0',
-      packageManager: 'pnpm@11.7.0', bin: { 'owned-pinned-command': 'bin.cjs' }, files: ['bin.cjs'],
+      packageManager: `pnpm@${PNPM_VERSION}`, bin: { 'owned-pinned-command': 'bin.cjs' }, files: ['bin.cjs'],
       scripts: { postinstall: 'node -e "require(\'fs\').writeFileSync(\'lifecycle-ran\', \'unexpected\')"' } }));
     await writeFile(join(dependency, 'bin.cjs'), '#!/usr/bin/env node\nconsole.log("OWNED_COMMAND_OK");\n');
     await chmod(join(dependency, 'bin.cjs'), 0o755);
     run(['pnpm', 'pack', '--pack-destination', scratch], dependency);
-    await writeFile(join(consumer, 'package.json'), JSON.stringify({ private: true, packageManager: 'pnpm@11.7.0',
+    await writeFile(join(consumer, 'package.json'), JSON.stringify({ private: true, packageManager: `pnpm@${PNPM_VERSION}`,
       dependencies: { 'owned-pinned-command': 'file:../owned-pinned-command-1.0.0.tgz' } }));
     await writeFile(join(consumer, 'pnpm-workspace.yaml'),
       'packages: []\nallowBuilds:\n  "owned-pinned-command@file:../owned-pinned-command-1.0.0.tgz": true\n');

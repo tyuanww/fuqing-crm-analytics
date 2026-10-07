@@ -7,7 +7,7 @@
   "engines": {
     "node": "24.x"
   },
-  "packageManager": "pnpm@11.7.0",
+  "packageManager": "pnpm@11.28.2",
   "scripts": {
     "build": "node build.mjs",
     "test": "node --test test/*.test.mjs"

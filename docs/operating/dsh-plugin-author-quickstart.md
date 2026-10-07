@@ -4,9 +4,9 @@
 
 ## 前置条件
 
-- 插件开发使用 Node `24.19.0`、pnpm `11.7.0`。Python `3.14+` 属于后端服务、合成集成测试与发布校验工具的环境，不是 CRM 插件运行依赖。
+- 插件开发使用 Node `24.19.0`、pnpm `11.28.2`。Python `3.14+` 属于后端服务、合成集成测试与发布校验工具的环境，不是 CRM 插件运行依赖。
 - 插件位于 profile allowlist 中，包名匹配 `@shine-mage/*`。
-- `package.json` 使用 `type: module`、`packageManager: pnpm@11.7.0`，并把 `@deepseek-ai/dsh-tools` 固定为 `0.1.7-rc.2` peer。
+- `package.json` 使用 `type: module`、`packageManager: pnpm@11.28.2`，并把 `@deepseek-ai/dsh-tools` 固定为 `0.1.7-rc.2` peer。
 - `files` 只声明运行时 `lib/`、bundle patch、已打包领域输入的 digest lock 和必要的 README/LICENSE；不得包含 `src/`、测试、`node_modules`、source map、符号链接或 workspace/file/link 依赖。
 
 <a id="plugin-contract"></a>

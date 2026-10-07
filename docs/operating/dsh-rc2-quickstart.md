@@ -5,7 +5,7 @@
 <a id="dsh-quickstart-toolchain"></a>
 
 ```bash
-# 需要 Node 24、pnpm 11.7.0、Python 3.14+；不安装生产依赖
+# 需要 Node 24、插件工具 pnpm 11.28.2、Python 3.14+；不安装生产依赖
 pnpm dsh doctor
 pnpm dsh test
 pnpm dsh verify --scope local

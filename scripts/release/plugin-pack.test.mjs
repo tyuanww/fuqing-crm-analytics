@@ -1,3 +1,4 @@
+import { PNPM_VERSION } from './toolchain.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { access, mkdtemp, mkdir, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
@@ -15,7 +16,7 @@ async function fixture(t, { workspaceLink = null, symlinkOutput = false, lifecyc
   await mkdir(join(root, 'plugin/lib'), { recursive: true });
   await mkdir(join(root, 'out'), { recursive: true });
   await writeFile(join(root, 'plugin/package.json'), JSON.stringify({
-    name: '@shine-mage/dsh-synthetic-leaf', version: '0.1.0', private: true, packageManager: 'pnpm@11.7.0', type: 'module',
+    name: '@shine-mage/dsh-synthetic-leaf', version: '0.1.0', private: true, packageManager: `pnpm@${PNPM_VERSION}`, type: 'module',
     peerDependencies: { '@deepseek-ai/dsh-tools': '0.1.7-rc.2' }, files: ['lib/', 'cordis.patch.yml'],
     exports: { '.': { import: './lib/index.js' } }, main: './lib/index.js', dsh: { bundle: { patch: 'cordis.patch.yml' } },
     ...(lifecycle ? { scripts: { prepack: 'echo executed > ../prepack-ran' } } : {}),

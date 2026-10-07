@@ -4,6 +4,14 @@ import { spawnSync } from 'node:child_process';
 import { mkdir, realpath, stat } from 'node:fs/promises';
 import { delimiter, dirname, isAbsolute } from 'node:path';
 
+/** Official source recipes and our plugin tools evolve independently. */
+export function managerVersions(pin) {
+  assert.equal(pin.schema_version, 'dsh-b0-toolchain/v2', 'TOOLCHAIN_SCHEMA_INVALID');
+  assert.match(pin.upstream_pnpm, /^\d+\.\d+\.\d+$/, 'TOOLCHAIN_UPSTREAM_PNPM_INVALID');
+  assert.match(pin.pnpm, /^\d+\.\d+\.\d+$/, 'TOOLCHAIN_PNPM_VERSION_INVALID');
+  return { upstream: pin.upstream_pnpm, plugins: pin.pnpm };
+}
+
 /** Locate the installed archive tool without forwarding the caller's environment. */
 export async function archiveToolEnv(env, sourcePath = process.env.PATH) {
   const located = spawnSync('/bin/sh', ['-c', 'command -v zstd'], {

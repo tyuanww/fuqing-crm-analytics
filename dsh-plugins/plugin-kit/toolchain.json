@@ -1,10 +1,11 @@
 {
-  "schema_version": "dsh-b0-toolchain/v1",
+  "schema_version": "dsh-b0-toolchain/v2",
   "upstream_url": "https://github.com/deepseek-ai/deepseek-harness.git",
   "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
   "upstream_lock_sha256": "5d3980bcd2a0113101815aabfeb4f8a875d556a333521539b7f11d790f4a50aa",
   "node_major": 24,
-  "pnpm": "11.7.0",
+  "upstream_pnpm": "11.7.0",
+  "pnpm": "11.28.2",
   "typescript": "6.0.3",
   "esbuild": "0.25.12",
   "react": "18.3.1",

@@ -21,7 +21,11 @@
 
 全文核对与本轮代码修复证据见 [2026-10-03 审查修复记录](../hackathon/evidence/dsh-g0-review-fixes-20261003.md)。未关闭的实施项沿用 T1–T23，不新增重复规划或再次询问已回答的选择。
 
-### 2026-10-07 pnpm 候选兼容增量
+### 2026-10-07 官方与插件工具链拆分（当前）
+
+从已提交 `7efb5207` 继续 T15：v2 明确官方 `upstream_pnpm=11.7.0` 与插件 `pnpm=11.28.2`，更新自有包/准备入口/CI/回执来源，官方固定 SHA/锁不改。已安装 kit 在全新目录实际准备 SDK READY（552.808 秒）；旧 kit/SDK 可用，新 kit 拒绝误用旧身份。证据和实际消费者结果见[本轮记录](../hackathon/evidence/dsh-g0-kit-manager-split-20261007.md)。本批经提交前局部审查后按授权本地提交，未操作杭州，T15 整体仍 PARTIAL；接着核对新 SDK 的缩减分发与供应链，再做目标平台。官方升级、业务插件更新和服务部署保持独立。
+
+### 2026-10-07 pnpm 候选兼容增量（已提交阶段）
 
 从 `efbf5417` 干净基线继续：固定 11.28.2 候选与旧 11.7.0 各 10/10 消费者、16 PASS；图表包摘要/锁保持，边界 25 PASS。另完成空 store 的 111 包冻结安装及安装后严格类型检查。只关闭 T15 的插件开发侧 manager 候选验证，默认 pin/SDK 未替换；后续 OCR 修复候选漏传 SDK 时的绿色跳过，新旧各 17 PASS / 0 SKIP，见[审修](../hackathon/evidence/dsh-g0-kit-pnpm-review-20261007.md)。随本次本地提交收录，未操作杭州。下一步分别表达官方 DSH 声明与我方插件 manager，受控迁移准备入口/CI/SDK，不能改上游 packageManager 来绕过校验。见[本轮证据](../hackathon/evidence/dsh-g0-kit-pnpm-candidate-20261007.md)。
 

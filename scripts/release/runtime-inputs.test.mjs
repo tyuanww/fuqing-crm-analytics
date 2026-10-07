@@ -8,6 +8,7 @@ import { access, mkdir, mkdtemp, readFile, readlink, realpath, rm, symlink, writ
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { bindRuntimeInputs, directTarballInputs, recordRuntimePreparation, runtimeDeployArgs, runtimeInputCache, stageRuntimeWorkspace, verifyRuntimePreparation } from './runtime-inputs.mjs';
+import { UPSTREAM_PNPM_VERSION } from './toolchain.mjs';
 
 async function fixture(t) {
   const root = await mkdtemp(join(tmpdir(), 'runtime-inputs-'));
@@ -85,7 +86,9 @@ test('offline policy reuse requires a prepared receipt bound to the exact lock a
   const f = await fixture(t);
   await assert.rejects(() => verifyRuntimePreparation(f.upstream), /RUNTIME_PREPARATION_REQUIRED/);
   await recordRuntimePreparation(f.upstream);
-  assert.equal((await verifyRuntimePreparation(f.upstream)).status, 'PREPARED');
+  const prepared = await verifyRuntimePreparation(f.upstream);
+  assert.equal(prepared.status, 'PREPARED');
+  assert.equal(prepared.pnpm, UPSTREAM_PNPM_VERSION, 'official runtime receipt must not follow plugin manager upgrades');
   await writeFile(join(f.upstream, 'pnpm-workspace.yaml'), 'changed policy');
   await assert.rejects(() => verifyRuntimePreparation(f.upstream), /RUNTIME_PREPARATION_MISMATCH policy_sha256/);
   await writeFile(join(f.upstream, 'pnpm-lock.yaml'), 'changed lock');

@@ -245,6 +245,10 @@ T3/T7 的 `backend/tests/test_analytics_first_purchase_save_recovery.py` 纳入�
 
 ### 插件开发 kit 验证
 
+当前工具链 `dsh-b0-toolchain/v2` 区分 `upstream_pnpm`（官方固定源码构建）与 `pnpm`（自有插件/kit/build-tools）；必须是两个精确声明，旧 schema 不隐式推断。Node 24 下运行 `package-manager-env.test.mjs` 验证同一 shim 按 cwd 使用两套实际版本、13 个自有清单与冻结安装行为；调用 PATH 须能定位已安装 zstd，Corepack 缓存须预先含两个固定版本。SDK 首次准备记录两者，生产 runtime 的 provenance 仍记录上游版本。
+
+变更 pin 会改变 SDK 身份，先用新目录显式 prepare，再将新 upstream/build-tools/Corepack 同时传给安装消费者测试；不沿用旧 closure 摘要或关闭身份校验。2026-10-07 的 v2 冷准备、故障修复、10 消费者和旧 SDK 兼容边界见[当前证据](../hackathon/evidence/dsh-g0-kit-manager-split-20261007.md)。该范围不替代完整 B0 pipeline、生产 runtime、WSL、供应链或远端 CI。
+
 `python3 -m pytest --noconftest -W error::ResourceWarning -q scripts/dsh-b0/test_sdk_archive.py` 验证 SDK 本地归档的 schema/平台、路径/链接图、摘要、ZIP 目录/大小上限、失败 staging 回收和不覆盖已有目标；已纳入 B0 Python 测试清单。实际包通过 `sdk-archive.py pack/receive` 生成并恢复后，仍须将恢复的 upstream/build-tools 显式传给 `plugin-kit.test.mjs`，不能只凭 pack 的 LOCAL_READY 判定构建可用。生产 `secure-unpack.py` 仍拒绝符号链接；开发归档为独立合同且 `release_ready=false`，签名/秘密扫描/跨平台证据单列。
 
 `scripts/release/sdk-content-audit.mjs --archive /abs/sdk.zip --sha256 SHA --root /abs/received-sdk --python /abs/python3.14 --output /abs/new-report.json` 是显式仓库级分发审计，不在日常 pipeline 内扫描真实 SDK；B0 JS 清单只运行其 synthetic 防护测试 `sdk-content-audit.test.mjs`。实际入口重新验证归档和已接收清单内容；报告不得写入 SDK 或覆盖旧证据。`BLOCKED`（疑似命中）/`PARTIAL`（覆盖缺口）退出 2，`PATTERN_SCAN_PASS` 也不开放发布。模式检查有 16 MiB 单文件上限；binary/非 UTF-8、Git 对象、原生模块及嵌套归档均明确列缺口，完整内容/签名/供应链须单独完成，不通过测试数替代。

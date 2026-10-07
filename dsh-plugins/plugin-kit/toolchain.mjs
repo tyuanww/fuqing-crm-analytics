@@ -9,6 +9,7 @@ import { verifySdkClosure } from './sdk-closure.mjs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import { managerVersions } from './package-manager.mjs';
 
 export const toolchainRoot = dirname(fileURLToPath(import.meta.url));
 export const defaultBuildTools = join(toolchainRoot, 'build-tools');
@@ -17,6 +18,7 @@ export const defaultBuildTools = join(toolchainRoot, 'build-tools');
 export async function inspectToolchain(upstream, buildTools = defaultBuildTools, closureSha256 = process.env.DSH_SDK_CLOSURE_SHA256) {
   const pinBytes = await readFile(join(toolchainRoot, 'toolchain.json'));
   const pin = JSON.parse(pinBytes);
+  const managers = managerVersions(pin);
   assert.equal(Number(process.versions.node.split('.')[0]), pin.node_major, 'Use the pinned Node major');
   const compact = closureSha256 !== undefined && closureSha256 !== null;
   if (compact) {
@@ -37,7 +39,7 @@ export async function inspectToolchain(upstream, buildTools = defaultBuildTools,
   }
   assert.equal(createHash('sha256').update(await readFile(join(upstream, 'pnpm-lock.yaml'))).digest('hex'), pin.upstream_lock_sha256, 'Upstream lock drift');
   const upstreamManifest = JSON.parse(await readFile(join(upstream, 'package.json'), 'utf8'));
-  assert.equal(upstreamManifest.packageManager, `pnpm@${pin.pnpm}`);
+  assert.equal(upstreamManifest.packageManager, `pnpm@${managers.upstream}`, 'Upstream package manager drift');
   const readJson = async path => JSON.parse(await readFile(path, 'utf8'));
   const req = createRequire(join(upstream, 'package.json'));
   const web = compact ? req : createRequire(join(upstream, 'apps/web/package.json'));
@@ -53,6 +55,7 @@ export async function inspectToolchain(upstream, buildTools = defaultBuildTools,
     assert.deepEqual(await readFile(join(toolchainRoot, 'build-tools', file)), await readFile(join(buildTools, file)), `Build dependency ${file} differs`);
   }
   const buildManifest = await readJson(join(buildTools, 'package.json'));
+  assert.equal(buildManifest.packageManager, `pnpm@${managers.plugins}`, 'Build tools package manager drift');
   const business = createRequire(join(buildTools, 'package.json'));
   for (const name of ['antd', '@types/react-dom']) {
     const packagePath = business.resolve(`${name}/package.json`);
