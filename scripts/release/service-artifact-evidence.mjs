@@ -70,7 +70,10 @@ function installedRuntime(installed, dependencies) {
   }
 }
 
-async function verifyArchive(archive, manifestBytes, manifest, recipe, sourceFiles) {
+/** Inspect already-hashed bytes without importing code from the archive. */
+export async function verifyArtifactArchive(archive, manifestBytes, manifest, {
+  manifestName = 'service-manifest.json', keys = ['sha256', 'bytes', 'source', 'role'], verifyFile,
+}) {
   const work = await mkdtemp(join(tmpdir(), 'service-artifact-verify-'));
   try {
     // Unpack the bytes just hashed, not a second read of a mutable external path.
@@ -89,11 +92,11 @@ async function verifyArchive(archive, manifestBytes, manifest, recipe, sourceFil
       }
     }
     await walk(extracted);
-    assert.deepEqual(files.sort(), [...Object.keys(manifest.files), 'service-manifest.json'].sort(), 'SERVICE_ARTIFACT_FILE_SET');
-    assert.deepEqual(await insideArtifact(extracted, 'service-manifest.json'), manifestBytes, 'SERVICE_ARTIFACT_EMBEDDED_MANIFEST');
+    assert.deepEqual(files.sort(), [...Object.keys(manifest.files), manifestName].sort(), 'SERVICE_ARTIFACT_FILE_SET');
+    assert.deepEqual(await insideArtifact(extracted, manifestName), manifestBytes, 'SERVICE_ARTIFACT_EMBEDDED_MANIFEST');
     let total = 0;
     for (const [name, item] of Object.entries(manifest.files)) {
-      exact(item, ['sha256', 'bytes', 'source', 'role'], 'SERVICE_ARTIFACT_FILE_SHAPE');
+      exact(item, keys, 'SERVICE_ARTIFACT_FILE_SHAPE');
       assert.match(item.sha256 ?? '', HEX, 'SERVICE_ARTIFACT_FILE_DIGEST');
       assert.ok(Number.isSafeInteger(item.bytes) && item.bytes >= 0 && item.bytes <= 2 * 1024 * 1024, 'SERVICE_ARTIFACT_FILE_SIZE');
       total += item.bytes;
@@ -101,6 +104,14 @@ async function verifyArchive(archive, manifestBytes, manifest, recipe, sourceFil
       const bytes = await insideArtifact(extracted, name, 2 * 1024 * 1024, true);
       assert.equal(bytes.length, item.bytes, 'SERVICE_ARTIFACT_FILE_SIZE_MISMATCH');
       assert.equal(hash(bytes), item.sha256, 'SERVICE_ARTIFACT_FILE_HASH_MISMATCH');
+      await verifyFile(name, item, bytes);
+    }
+  } finally { await rm(work, { force: true, recursive: true }); }
+}
+
+async function verifyArchive(archive, manifestBytes, manifest, recipe, sourceFiles) {
+  return verifyArtifactArchive(archive, manifestBytes, manifest, {
+    async verifyFile(name, item, bytes) {
       if (Object.hasOwn(recipe.files, name)) {
         const spec = recipe.files[name];
         assert.deepEqual({ source: item.source, role: item.role }, spec, 'SERVICE_ARTIFACT_FILE_RECIPE_MISMATCH');
@@ -123,8 +134,8 @@ async function verifyArchive(archive, manifestBytes, manifest, recipe, sourceFil
         assert.equal(api.info?.version, 'analytics-first-purchase-saved-analysis/v1', 'SERVICE_ARTIFACT_OPENAPI_CONTRACT');
         assert.ok(api.paths && typeof api.paths === 'object' && !Array.isArray(api.paths), 'SERVICE_ARTIFACT_API_SHAPE');
       }
-    }
-  } finally { await rm(work, { force: true, recursive: true }); }
+    },
+  });
 }
 
 async function verifyPackage(evidenceRoot, label, artifact, sourceEvidence) {

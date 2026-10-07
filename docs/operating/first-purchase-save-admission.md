@@ -135,4 +135,6 @@ rc2 空会话尚无原生历史面板时，插件只经公开 `command/executed`
 
 这是经过身份验证的不可变来源快照与本地事务，不是跨服务分布式事务。权限检查之后的外部撤权无法与本地提交形成同一数据库事务；若未来要求严格跨服务原子撤权，需要单独版本化授权租约，不以本次结果作保证。现阶段代码没有数据库迁移、复制或删除；profile 回退也不删除已保存分析。
 
-已完成[源码边界](../hackathon/evidence/dsh-g0-first-purchase-source-http-20261007.md)和 `f9726f68` 的[固定查询/保存双包组合](../hackathon/evidence/dsh-g0-first-purchase-source-packages-20261007.md)：官方 HTTP/Chrome、独立状态目录与查询下线后的保存重启/回执重放通过。新包 Linux/WSL、远端凭据传递/传输保护、生产账号准入仍是后续 gate；当前默认部署未切换。
+已完成[源码边界](../hackathon/evidence/dsh-g0-first-purchase-source-http-20261007.md)和 `f9726f68` 的[固定查询/保存双包组合](../hackathon/evidence/dsh-g0-first-purchase-source-packages-20261007.md)：官方 HTTP/Chrome、独立状态目录与查询下线后的保存重启/回执重放通过。同一包随后在[杭州 WSL 服务隔离验收](../hackathon/evidence/dsh-g0-first-purchase-source-wsl-20261007.md)通过来源 HTTP、真实合成 worker、关闭时效、SIGKILL 回执恢复和备份恢复十项。现场回执已通过现有 CLI [接入原 journal seq 4](../hackathon/evidence/dsh-g0-first-purchase-source-target-gate-20261007.md)；目标 DSH 完整组合、跨旧版本目标矩阵、生产凭据传递/传输保护和账号准入仍是后续 gate；当前默认部署未切换。
+
+随后同一四包与既有 Linux runtime 在[杭州官方 Host HTTP 整链](../hackathon/evidence/dsh-g0-first-purchase-runtime-host-20261007.md)通过原生命令、查询/保存、ACK 核对、独立进程和宿主正常重启。只关闭目标 HTTP 组合；目标浏览器、在途/跨旧版本恢复、真实身份/生产准入和供应链仍未完成，新 Host 观察尚未写入 journal，生产保存保持原状。

@@ -59,8 +59,9 @@ async function modelFixture() {
     close: () => new Promise(resolve => { server.closeAllConnections(); server.close(resolve); }) };
 }
 
-export async function startHost({ root, upstream, patches, modelOrigin, generation, signal, nativeFixture }) {
+export async function startHost({ root, upstream, patches, modelOrigin, generation, signal, nativeFixture, runtimeLayout = false }) {
   signal.throwIfAborted();
+  assert.equal(typeof runtimeLayout, 'boolean', 'OWNED_HOST_RUNTIME_LAYOUT');
   if (nativeFixture) {
     assert.ok([4315, 4325, 4335].includes(nativeFixture.portBase), 'OWNED_HOST_PORT_BLOCK');
     assert.match(nativeFixture.sessionId, /^[A-Za-z0-9_.:-]{1,128}$/);
@@ -74,7 +75,7 @@ export async function startHost({ root, upstream, patches, modelOrigin, generati
     ...nativeFixture ? { B0_PORT_BASE: String(nativeFixture.portBase), B0_SESSION_ID: nativeFixture.sessionId,
       B0_RUNTIME_TOKEN: nativeFixture.runtimeToken, B0_RUNTIME_FAMILY: 'first_purchase',
       ...(nativeFixture.gatewayToken ? { B0_GATEWAY_TOKEN: nativeFixture.gatewayToken } : {}) } : {} };
-  const child = spawn(process.execPath, [join(upstream, 'apps/cli/lib/bin.js'), '--profile', 'web',
+  const child = spawn(process.execPath, [join(upstream, runtimeLayout ? 'lib/bin.js' : 'apps/cli/lib/bin.js'), '--profile', 'web',
     ...patches.flatMap(path => ['--patch', path]), '--host', '127.0.0.1', '--port',
     String(nativeFixture ? nativeFixture.portBase + 2 : 0), '--no-open'],
   { cwd: join(root, 'workspace'), env, stdio: ['ignore', 'pipe', 'pipe', 'ipc'] });

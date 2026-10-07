@@ -126,6 +126,7 @@ if (mode === '--prepare') {
   // Guard tests fail before process startup. The real-host drill remains opt-in.
   run(process.execPath, ['--test', 'scripts/dsh-b0/pinned-host-acceptance.test.mjs']);
   run(process.execPath, ['--test', 'scripts/dsh-b0/first-purchase-kernel-artifacts.test.mjs']);
+  run(process.execPath, ['--test', 'scripts/dsh-b0/first-purchase-runtime-artifacts.test.mjs']);
   for (const file of ['asset-ui-smoke.mjs', 'theme-ui-smoke.mjs', 'native-ui-smoke.mjs', 'native-card-smoke.mjs', 'native-state-smoke.mjs', 'native-query-smoke.mjs', 'native-query-fault-smoke.mjs', 'native-query-fault-scenario.mjs', 'query-scenario.mjs', 'tool-card-dom-smoke.mjs', 'gateway-smoke.mjs', 'control-permission-probe.mjs', 'native-query-assets-smoke.mjs', 'asset-routes.mjs']) {
     run(process.execPath, ['--check', join(root, 'scripts/dsh-b0', file)]);
   }

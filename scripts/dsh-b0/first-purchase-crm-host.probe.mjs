@@ -48,8 +48,12 @@ const firstInput = await iterator.next();
 // No Host/model exists yet; exit cleanly so its original error remains visible.
 if (firstInput.done) process.exit(0);
 const input = JSON.parse(firstInput.value);
-assert.equal(execFileSync('git', ['-C', input.upstream, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), DSH_UPSTREAM_SHA);
-assert.equal(execFileSync('git', ['-C', input.upstream, 'status', '--porcelain', '-uno'], { encoding: 'utf8' }).trim(), '');
+const upstream = packed?.runtime?.upstream ?? input.upstream;
+if (packed?.runtime) assert.equal(input.upstream, undefined, 'HOST_ARTIFACT_AMBIGUOUS_RUNTIME');
+else {
+  assert.equal(execFileSync('git', ['-C', upstream, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), DSH_UPSTREAM_SHA);
+  assert.equal(execFileSync('git', ['-C', upstream, 'status', '--porcelain', '-uno'], { encoding: 'utf8' }).trim(), '');
+}
 const root = input.output;
 await mkdir(root, { mode: 0o700 });
 for (const name of ['home', 'tmp', 'workspace', 'dsh-home', 'agents-home', 'presets/owned-first-purchase']) {
@@ -69,7 +73,8 @@ const interrupt = () => signal.abort();
 process.once('SIGINT', interrupt); process.once('SIGTERM', interrupt);
 const record = value => observations.push(value);
 try {
-  const { startMockLlmServer } = await import(pathToFileURL(join(input.upstream, 'packages/test-support/llm-mock-server/lib/index.js')).href);
+  const { startMockLlmServer } = await import(pathToFileURL(packed?.runtime?.mockModule
+    ?? join(upstream, 'packages/test-support/llm-mock-server/lib/index.js')).href);
   model = await startB0MockProvider(startMockLlmServer, { host: '127.0.0.1', port: 0, apiKey: 'synthetic',
     script: [...firstPurchaseMockScript(), { sequence: ['success'], successText: 'SYNTHETIC_NATIVE_FALLBACK_OK', chunkDelayMs: 0 }] });
   const patch = join(root, 'host.patch.yml');
@@ -88,11 +93,11 @@ try {
         config: { firstPurchaseCandidateDigest: candidateDigest } },
       { id: 'owned-observer', name: pathToFileURL(join(repository, 'scripts/dsh-b0/pinned-host-observer.mjs')).href,
         config: { presetId: 'owned-first-purchase', nativePresetId: 'owned-native', workspace: join(root, 'workspace'),
-          llmModule: pathToFileURL(join(input.upstream, 'packages/llm/llm/lib/index.js')).href } },
+          llmModule: pathToFileURL(packed?.runtime?.llmModule ?? join(upstream, 'packages/llm/llm/lib/index.js')).href } },
     ] },
   ]);
   async function launch(resume = false) {
-    host = await startHost({ root, upstream: input.upstream, patches: [patch], modelOrigin: model.baseURL,
+    host = await startHost({ root, upstream, runtimeLayout: Boolean(packed?.runtime), patches: [patch], modelOrigin: model.baseURL,
       generation: ++generation, signal: signal.signal,
       nativeFixture: { portBase: input.port_base, sessionId: input.session_id,
         runtimeToken: input.runtime_token, gatewayToken: input.gateway_token } });
@@ -137,6 +142,21 @@ try {
   let replaySaved;
   for await (const line of { [Symbol.asyncIterator]: () => iterator }) {
     const command = JSON.parse(line);
+    if (command.operation === 'settle-query') {
+      const settled = await host.request('idle', { sessionId: input.session_id });
+      assert.ok(settled.assistant.length > 0);
+      record({ stage: 'official-query-summary-settled', status: 'PASS' });
+      send({ ok: true, settled: true }); continue;
+    }
+    if (command.operation === 'native-fallback') {
+      const sessionId = input.session_id + '-native';
+      const native = await host.request('create-native-session', { sessionId });
+      assert.ok(!native.tool_names.includes('analytics_first_purchase_query'));
+      const response = await host.request('prompt', { sessionId, text: 'Owned synthetic native fallback' });
+      assert.ok(response.assistant.includes('SYNTHETIC_NATIVE_FALLBACK_OK'));
+      record({ stage: 'native-session-without-business-tools', status: 'PASS' });
+      send({ ok: true, fallback: true }); continue;
+    }
     if (command.operation === 'browser') {
       const { runFirstPurchaseBrowser } = await import('./first-purchase-browser.probe.mjs');
       browserResult = { ok: false, browser: 'Chrome headless', status: 'PARTIAL' };

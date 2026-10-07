@@ -16,7 +16,7 @@ export async function verifyPluginService({ candidatePath, evidencePath, statePa
   for (const path of [candidatePath, evidencePath, statePath]) {
     assert.ok(typeof path === 'string' && isAbsolute(path), 'PLUGIN_SERVICE_ABSOLUTE_PATH_REQUIRED');
   }
-  const candidate = decode(await readArtifactFile(candidatePath)), directory = dirname(candidatePath);
+  const candidateBytes = await readArtifactFile(candidatePath), candidate = decode(candidateBytes), directory = dirname(candidatePath);
   assert.equal(candidate.schema_version, 'dsh-plugin-candidate/v1', 'PLUGIN_SERVICE_CANDIDATE_SCHEMA');
   assert.equal(candidate.activation, 'NOT_RUN', 'PLUGIN_SERVICE_CANDIDATE_ACTIVATION');
   assert.equal(candidate.state_scope, 'local-explicit-journal', 'PLUGIN_SERVICE_CANDIDATE_STATE_SCOPE');
@@ -59,7 +59,7 @@ export async function verifyPluginService({ candidatePath, evidencePath, statePa
   const observation = await verifyServiceArtifactEvidence({ gate: candidate.service_compatibility, evidencePath });
   // Reject invalid target inputs before appending even the base artifact event.
   const target = targetEvidencePath === undefined ? null : await verifyServiceTargetEvidence({
-    artifactObservation: observation, evidencePath, targetEvidencePath, targetInputPath });
+    artifactObservation: observation, evidencePath, targetEvidencePath, targetInputPath, candidate, candidateBytes });
   const event = await recordEvent(statePath, { release_tag: prepared.result.release_tag,
     status: 'CANDIDATE_SERVICE_ARTIFACTS_VERIFIED', ...candidateFields,
     service_evidence_sha256: observation.service_evidence_sha256, observation },

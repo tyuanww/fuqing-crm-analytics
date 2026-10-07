@@ -5,6 +5,7 @@ import { dirname, isAbsolute, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { insideArtifact, readArtifactFile } from './service-artifact-evidence.mjs';
 import { serviceDigest as hash } from './service-compatibility.mjs';
+import { verifySourceTargetEvidence } from './source-target-evidence.mjs';
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const HEX = /^[a-f0-9]{64}$/;
@@ -93,13 +94,17 @@ function verifyPreparation(content, input, pair, wheels) {
   assert.ok(seen.has('.synthetic-package-test') && seen.has('context.json') && seen.has('runs/runs.sqlite3'), 'SERVICE_TARGET_SEED_FILES');
 }
 
-export async function verifyServiceTargetEvidence({ artifactObservation, evidencePath, targetEvidencePath, targetInputPath }) {
+export async function verifyServiceTargetEvidence({ artifactObservation, evidencePath, targetEvidencePath, targetInputPath, candidate, candidateBytes }) {
   for (const path of [evidencePath, targetEvidencePath, targetInputPath]) {
     assert.ok(typeof path === 'string' && isAbsolute(path), 'SERVICE_TARGET_ABSOLUTE_PATH_REQUIRED');
   }
   const pairBytes = await readArtifactFile(evidencePath), pair = decode(pairBytes);
   assert.equal(hash(pairBytes), artifactObservation.service_evidence_sha256, 'SERVICE_TARGET_PAIR_CHANGED');
   const bytes = await readArtifactFile(targetEvidencePath), report = decode(bytes), directory = dirname(targetEvidencePath);
+  if (report.schema_version === 'source-http-target-observation/v1') {
+    return verifySourceTargetEvidence({ artifactObservation, pairBytes, bytes, report, directory,
+      targetEvidencePath, targetInputPath, candidate, candidateBytes });
+  }
   // Inspect the result root as well as every leaf; symlinked roots are not evidence directories.
   const resultFiles = await fileSet(directory);
   exact(report, ['schema_version', 'status', 'scope', 'input_sha256', 'release_ready', 'activation', 'supply_chain',

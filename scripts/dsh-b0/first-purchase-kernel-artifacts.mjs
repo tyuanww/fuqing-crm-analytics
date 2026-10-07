@@ -10,6 +10,7 @@ import { readArtifactFile, insideArtifact } from '../release/service-artifact-ev
 import { serviceDigest as hash } from '../release/service-compatibility.mjs';
 import { assertClean, scanTree } from '../release/secret-scan.mjs';
 import { verifyFiles } from './first-purchase-service-artifacts.mjs';
+import { platformWheels } from './first-purchase-runtime-artifacts.mjs';
 
 const root = fileURLToPath(new URL('../..', import.meta.url)), exec = promisify(execFile);
 const recipePath = join(root, 'services/analytics-first-purchase-kernel/package.json');
@@ -82,7 +83,7 @@ export async function packFirstPurchaseKernel({ revision, output, python, wheelh
   return receipt;
 }
 
-export async function prepareFirstPurchaseKernel({ receiptPath, expectedSha, output, python, wheelhouse }) {
+export async function prepareFirstPurchaseKernel({ receiptPath, expectedSha, output, python, wheelhouse, platformObservation }) {
   for (const path of [receiptPath, output, python, wheelhouse]) assert.ok(typeof path === 'string' && isAbsolute(path), 'HOST_KERNEL_ABSOLUTE_PATH');
   assert.match(expectedSha ?? '', HEX, 'HOST_KERNEL_RECEIPT_DIGEST');
   const receiptBytes = await readArtifactFile(receiptPath), receipt = decode(receiptBytes);
@@ -110,8 +111,10 @@ export async function prepareFirstPurchaseKernel({ receiptPath, expectedSha, out
   assert.equal(hash(archive), receipt.sha256, 'HOST_KERNEL_ARCHIVE_DIGEST');
   assert.equal(archive.length, receipt.bytes, 'HOST_KERNEL_ARCHIVE_SIZE');
   assert.deepEqual(Object.keys(receipt.wheels).sort(), Object.keys(manifest.dependencies).sort(), 'HOST_KERNEL_WHEEL_CLOSURE');
+  const selectedWheels = platformObservation ? platformWheels(platformObservation, receipt.sha256,
+    receipt.manifest_sha256, manifest.dependencies) : receipt.wheels;
   const wheels = {};
-  for (const [name, row] of Object.entries(receipt.wheels)) {
+  for (const [name, row] of Object.entries(selectedWheels)) {
     assert.deepEqual(Object.keys(row).sort(), ['file', 'sha256', 'version']);
     assert.match(row.file, /^[a-zA-Z0-9_.-]+\.whl$/);
     assert.equal(row.version, manifest.dependencies[name]);
@@ -130,9 +133,10 @@ export async function prepareFirstPurchaseKernel({ receiptPath, expectedSha, out
   assertClean(await scanTree(app));
   const installed = decode(Buffer.from((await run(python, ['-I', join(root, 'scripts/crm-calibration/service-runtime.fixture.py'),
     join(app, 'kernel-manifest.json'), join(output, 'venv'), '--wheelhouse', join(output, 'wheels')], output)).stdout));
-  assert.deepEqual(installed.wheels, receipt.wheels, 'HOST_KERNEL_INSTALLED_WHEELS');
+  assert.deepEqual(installed.wheels, selectedWheels, 'HOST_KERNEL_INSTALLED_WHEELS');
   const prepared = { app, python: installed.python, output, manifest: manifestBytes,
-    receipt: { ...receipt, receipt_sha256: expectedSha, runtime_mode: installed.mode } };
+    receipt: { ...receipt, receipt_sha256: expectedSha, runtime_mode: installed.mode,
+      ...(platformObservation ? { installed_wheels: installed.wheels } : {}) } };
   await verifyFirstPurchaseKernel(prepared);
   return prepared;
 }

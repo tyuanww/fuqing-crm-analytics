@@ -8,6 +8,7 @@ import { promisify } from 'node:util';
 import { insideArtifact, readArtifactFile, verifyServiceArtifactEvidence } from '../release/service-artifact-evidence.mjs';
 import { serviceDigest as hash } from '../release/service-compatibility.mjs';
 import { assertClean, scanTree } from '../release/secret-scan.mjs';
+import { platformWheels } from './first-purchase-runtime-artifacts.mjs';
 
 const root = fileURLToPath(new URL('../..', import.meta.url)), exec = promisify(execFile);
 const PRIVATE = { mode: 0o600, flag: 'wx' }, decode = bytes => JSON.parse(bytes.toString('utf8'));
@@ -17,7 +18,7 @@ async function run(python, args, cwd) {
       HOME: cwd, TMPDIR: cwd, PYTHON_DOTENV_DISABLED: '1', PYTHONDONTWRITEBYTECODE: '1' } });
 }
 
-export async function readFirstPurchaseService({ evidencePath, expectedSha, gate, python, wheelhouse }) {
+export async function readFirstPurchaseService({ evidencePath, expectedSha, gate, python, wheelhouse, platformObservation }) {
   for (const path of [evidencePath, python, wheelhouse]) {
     assert.ok(typeof path === 'string' && isAbsolute(path), 'HOST_SERVICE_ABSOLUTE_PATH');
   }
@@ -34,16 +35,18 @@ export async function readFirstPurchaseService({ evidencePath, expectedSha, gate
   assert.equal(hash(archive), checked.artifacts.candidate.sha256, 'HOST_SERVICE_ARCHIVE_CHANGED');
   assert.equal(archive.length, receipt.bytes, 'HOST_SERVICE_ARCHIVE_SIZE');
   assert.equal(hash(manifest), checked.artifacts.candidate.manifest_sha256, 'HOST_SERVICE_MANIFEST_CHANGED');
+  const selectedWheels = platformObservation ? platformWheels(platformObservation, receipt.sha256,
+    receipt.manifest_sha256, decode(manifest).dependencies) : receipt.installed.wheels;
   const wheelInfo = await lstat(wheelhouse);
   assert.ok(wheelInfo.isDirectory() && !wheelInfo.isSymbolicLink(), 'HOST_SERVICE_WHEELHOUSE');
   const wheels = {};
-  for (const row of Object.values(receipt.installed.wheels)) {
+  for (const row of Object.values(selectedWheels)) {
     wheels[row.file] = await insideArtifact(wheelhouse, row.file, 64 * 1024 * 1024);
     assert.equal(hash(wheels[row.file]), row.sha256, 'HOST_SERVICE_WHEEL_CHANGED');
   }
   const version = (await run(python, ['-I', '-c', 'import sys;print(sys.version.split()[0])'], dirname(evidencePath))).stdout.trim();
   assert.match(version, /^3\.14\.\d+$/, 'HOST_SERVICE_PYTHON_VERSION');
-  return { receipt, archive, manifest, wheels, python, evidenceSha256: expectedSha };
+  return { receipt, archive, manifest, wheels, selectedWheels, python, evidenceSha256: expectedSha };
 }
 
 export async function verifyFiles(app, manifestBytes, manifestName = 'service-manifest.json') {
@@ -79,7 +82,7 @@ export async function installFirstPurchaseService(spec, output) {
   const installed = decode(Buffer.from((await run(spec.python, ['-I', join(root, 'scripts/crm-calibration/service-runtime.fixture.py'),
     join(app, 'service-manifest.json'), join(output, 'venv'), '--wheelhouse', wheelhouse], output)).stdout));
   assert.equal(installed.mode, 'offline-hashed-wheel-install', 'HOST_SERVICE_INSTALL_MODE');
-  assert.deepEqual(installed.wheels, spec.receipt.installed.wheels, 'HOST_SERVICE_INSTALLED_WHEELS');
+  assert.deepEqual(installed.wheels, spec.selectedWheels, 'HOST_SERVICE_INSTALLED_WHEELS');
   const prepared = { app, python: installed.python, output, manifest: spec.manifest, receipt: {
     archive_sha256: spec.receipt.sha256, manifest_sha256: spec.receipt.manifest_sha256,
     source_sha: spec.receipt.service_source.commit, evidence_sha256: spec.evidenceSha256,

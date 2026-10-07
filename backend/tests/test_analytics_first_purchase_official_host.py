@@ -30,10 +30,11 @@ ROOT = Path(__file__).resolve().parents[2]
 TOKEN = "synthetic-query-save-token-0000000000"
 
 
-@pytest.mark.skipif(not os.environ.get("B0_NATIVE_CRM_HOST_UPSTREAM"), reason="explicit pinned Host opt-in required")
+@pytest.mark.skipif(not (os.environ.get("B0_NATIVE_CRM_HOST_UPSTREAM") or os.environ.get("B0_NATIVE_CRM_ARTIFACT_MANIFEST")),
+                   reason="explicit pinned Host opt-in required")
 def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_path):
-    upstream = Path(os.environ["B0_NATIVE_CRM_HOST_UPSTREAM"])
-    assert upstream.is_absolute()
+    upstream = os.environ.get("B0_NATIVE_CRM_HOST_UPSTREAM")
+    assert upstream is None or Path(upstream).is_absolute()
     source_http = os.environ.get("B0_NATIVE_CRM_SOURCE_HTTP")
     assert source_http in (None, "1"), "HOST_SOURCE_MODE_INVALID"
     # Old immutable packages predate this opt-in source API. Never relabel them.
@@ -48,7 +49,7 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
     browser_wait = False
 
     def receive():
-        deadline = monotonic() + (150 if browser_wait or dispatcher is None else 60)
+        deadline = monotonic() + (300 if dispatcher is None else 150 if browser_wait else 60)
         while not select.select([process.stdout], [], [], 0.05)[0]:
             assert monotonic() < deadline, "owned official Host timed out"
             if browser_wait:
@@ -90,10 +91,10 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
         manifest_path = os.environ.get("B0_NATIVE_CRM_ARTIFACT_MANIFEST")
         if manifest_path:
             requested = json.loads(Path(manifest_path).read_text())
-            source_http = requested["schema_version"] == "dsh-first-purchase-host-artifacts/v4"
-            assert bool(packed_service) == (requested["schema_version"] in {"dsh-first-purchase-host-artifacts/v2", "dsh-first-purchase-host-artifacts/v3", "dsh-first-purchase-host-artifacts/v4"}), \
+            source_http = requested["schema_version"] in {"dsh-first-purchase-host-artifacts/v4", "dsh-first-purchase-host-artifacts/v5"}
+            assert bool(packed_service) == (source_http or requested["schema_version"] in {"dsh-first-purchase-host-artifacts/v2", "dsh-first-purchase-host-artifacts/v3"}), \
                 "HOST_SERVICE_MODE_MISMATCH: never fall back from v2 to a source fixture"
-            assert bool(packed_kernel) == (requested["schema_version"] in {"dsh-first-purchase-host-artifacts/v3", "dsh-first-purchase-host-artifacts/v4"}), \
+            assert bool(packed_kernel) == (source_http or requested["schema_version"] == "dsh-first-purchase-host-artifacts/v3"), \
                 "HOST_KERNEL_MODE_MISMATCH: never fall back from v3 to a source fixture"
             for spec in (packed_service, packed_kernel):
                 assert (spec or {}).get("source_contract") == ("first-purchase-frozen-source/v1" if source_http else None)
@@ -167,7 +168,7 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
                             "source_mode": "explicit-loopback-http", "release_ready": False,
                         }, indent=2) + "\n")
 
-                assert command({"upstream": str(upstream), "output": str(tmp_path / "official-host"),
+                assert command({**({"upstream": upstream} if upstream else {}), "output": str(tmp_path / "official-host"),
                     "crm_origin": crm_origin, "service_origin": service_origin,
                     "session_id": SESSION, "runtime_token": RUNTIME, "gateway_token": GATEWAY,
                     "port_base": 4335}) == {"ready": True}
@@ -203,6 +204,11 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
                             break
                         assert monotonic() < deadline, f"official Host query did not finish: {result.status}"
                         sleep(0.05)
+                    # Compute completion precedes the Host's bounded summary model
+                    # step, which legitimately appends run.updated. Capture the
+                    # recovery baseline only after that native turn is idle.
+                    assert command({"operation": "settle-query"}) == {"ok": True, "settled": True}
+                    result = runs.get(fp_actor("crm-owner"), run_id)
                     assert result.status == "SUCCEEDED", result.model_dump(mode="json")
                     assert result.result is not None
                     assert result.diagnostics.dispatch_attempts == 1
@@ -252,6 +258,7 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
                     assert runs.get(fp_actor("crm-owner"), run_id).diagnostics.dispatch_attempts == 1
                     assert command({"operation": "disconnect"}) == {"ok": True, "connected": False}
                     assert client.get("/internal/native/context", headers=auth()).status_code == 401
+                    assert command({"operation": "native-fallback"}) == {"ok": True, "fallback": True}
                 record_source_boundary()
         assert checks and all(checks)
         assert analysis_counts(saved)["analyses"] == 1
@@ -260,7 +267,7 @@ def test_official_host_crm_query_save_and_reauthentication_after_restart(tmp_pat
             dispatcher.close()
         process.stdin.close()
         try:
-            process.wait(timeout=15)
+            process.wait(timeout=60)
         except subprocess.TimeoutExpired:
             process.terminate()  # Its handler closes only its owned Host/model children.
             process.wait(timeout=15)

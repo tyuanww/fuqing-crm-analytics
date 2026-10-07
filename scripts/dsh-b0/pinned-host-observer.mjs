@@ -71,6 +71,10 @@ export async function apply(ctx, config) {
       return;
     }
     const agent = await session(message.sessionId, message.resume === true);
+    if (message.command === 'idle') {
+      await agent.whenIdle();
+      return inspect(message.sessionId, message.prefix);
+    }
     if (message.command === 'tools') return ctx.tools.schemas(agent).map(tool => tool.name);
     if (message.command === 'tool') return ctx.tools.execute({ name: message.name, arguments: message.args ?? {},
       agent, callId: 'owned-' + message.id, signal: AbortSignal.timeout(10000) });

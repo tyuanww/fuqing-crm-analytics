@@ -9,6 +9,7 @@ import { SERVICE_CASES, serviceDigest as hash } from '../service-compatibility.m
 import { SERVICE_ARTIFACT_INPUTS, SERVICE_ARTIFACT_SCOPE } from '../service-artifact-evidence.mjs';
 import { createPluginCandidate } from '../plugin-candidate.mjs';
 import { DSH_SDK_VERSION, DSH_UPSTREAM_SHA, PNPM_VERSION } from '../toolchain.mjs';
+import { readGitInput } from '../../crm-calibration/package-service.mjs';
 
 const root = fileURLToPath(new URL('../../..', import.meta.url)), exec = promisify(execFile);
 export const json = async (path, value) => writeFile(path, JSON.stringify(value, null, 2) + '\n');
@@ -29,8 +30,12 @@ export async function repackServiceFixture(directory, label) {
   await json(evidencePath, evidence);
 }
 
-export async function createServiceArtifactFixture(directory) {
+export async function createServiceArtifactFixture(directory, { sourceRevision } = {}) {
   const { evidence: source, binding } = await serviceFixture();
+  if (sourceRevision) {
+    source.sources.find(row => row.commit === source.candidate).commit = sourceRevision;
+    source.candidate = sourceRevision; binding.source_sha = sourceRevision;
+  }
   const artifacts = {};
   for (const label of ['baseline', 'candidate']) {
     const recipePath = `services/analytics-first-purchase/${label === 'baseline' ? 'compatibility-baseline.json' : 'package.json'}`;
@@ -44,7 +49,10 @@ export async function createServiceArtifactFixture(directory) {
       files[name] = { ...spec, sha256: hash(bytes), bytes: bytes.length };
     }
     for (const [name, spec] of Object.entries(recipe.files)) {
-      const bytes = spec.role === 'code' ? Buffer.from(`# validator fixture ${label} ${name}\n`) : await readFile(join(root, spec.source));
+      let bytes;
+      if (spec.role !== 'code') bytes = await readFile(join(root, spec.source));
+      else if (sourceRevision && label === 'candidate') bytes = await readGitInput(root, sourceRevision, spec.source);
+      else bytes = Buffer.from(`# validator fixture ${label} ${name}\n`);
       if (spec.role === 'code') sourceFiles[spec.source] = hash(bytes);
       await add(name, bytes, spec);
     }

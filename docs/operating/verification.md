@@ -90,6 +90,8 @@ B0 独立入口：`node scripts/dsh-b0/pipeline.mjs --check --python /absolute/p
 
 WSL 目标回执接线：`node --test --test-concurrency=1 scripts/release/service-target-evidence.test.mjs`，已纳入 `pnpm dsh test` 自动发现。**37 PASS** 覆盖输入/日志/场景/清理篡改、只读回退声明、路径与特殊文件、幂等/恢复、错误脱敏；fixture 的 wheel/seed 是不可安装的解析器测试字节，不冒充 WSL 执行。固定 2026-10-06 runner 原字节只作审计输入，测试不执行它。同日完整 release suite **243 PASS / 0 SKIP**；另用已有真实现场回执执行本地 CLI，原 journal seq 4 和重试、108 文件不变通过，见[本次证据](../hackathon/evidence/dsh-g0-service-target-gate-20261006.md)。本步没有重新执行远端验收，生产 gate 继续 BLOCKED。
 
+来源 HTTP 目标回执接线：`node --test scripts/release/source-target-evidence.test.mjs`（Node 24），由同一 `pnpm dsh test` 自动发现。当前 34 PASS；完整 release suite 278 PASS / 0 SKIP。核对当前 query/save 两包与候选源码关系、安全解包、固定 runner/helper、15/13 Linux 依赖、十项观测、重启/崩溃与独立存储握手；错误证据拒绝且不写 journal。夹具不运行实际服务或 WSL。已有实际杭州回执接入 journal seq 4 的结果、重试与证据边界见[本轮记录](../hackathon/evidence/dsh-g0-first-purchase-source-target-gate-20261007.md)，没有重跑目标服务。
+
 ## 提交内容与历史审计
 
 Excel SSOT 的提交入口使用 `--staged`：从 Git index 读取变更 view 文件全文，工作树中未暂存的修复不能掩盖错误；新增/重命名文件同样校验四条规则。无参数命令仍全量扫描 views。`--only-new` 为 `--staged` 的兼容别名，原先该参数仅打印文案但没有筛选。
@@ -210,6 +212,14 @@ CRM 首购的真实宿主 HTTP 链另有显式入口：先按已有 SDK 链接�
 `backend/tests/test_analytics_first_purchase_source_http.py` 纳入 B0：真实 loopback 检查来源/权限/版本/大小/超时/撤权与争锁；独立保存子进程有 SQLite audit guard，只允许打开其自有分析库，查询下线后新进程可核对/重放原回执。两套实际 allowlist 的隔离导入另验证不依赖邻接源码。`first-purchase-analysis-contract.mjs --check --python /absolute/python3.14` 同时离线检查分析 API/原插件类型与新 source OpenAPI；服务间合同不生成新浏览器 API。归档测试与这些源码测试不能替代 exact-SHA 双包、目标 runtime 或生产准入。
 
 固定包来源模式使用 `dsh-first-purchase-host-artifacts/v4`（字段与 v3 相同），不设置工作树专用的 `B0_NATIVE_CRM_SOURCE_HTTP`。v4 对保存/查询包 source 合同摘要及实现入口做校验，再由实际进程走 HTTP；缺项不能回落到 v3 或工作树。保存进程使用专属目录，并在导入包前启用 SQLite audit guard；原 v3 本机适配模式仍可显式回归。新模式固定包、Chrome、查询离线重放和冷安装的实际命令/输入/边界见[本轮证据](../hackathon/evidence/dsh-g0-first-purchase-source-packages-20261007.md)，不继承旧 WSL 验收。
+
+目标 immutable runtime 模式使用 `dsh-first-purchase-host-artifacts/v5`；输入字段和本次 WSL 命令/摘要见[目标宿主证据](../hackathon/evidence/dsh-g0-first-purchase-runtime-host-20261007.md)。同一个 `test_analytics_first_purchase_official_host.py` 入口读取 `B0_NATIVE_CRM_ARTIFACT_MANIFEST`、绝对 `B0_NATIVE_CRM_SERVICE_PYTHON`、两个 wheelhouse；**不设置** `B0_NATIVE_CRM_HOST_UPSTREAM` 或 `B0_NATIVE_CRM_SOURCE_HTTP`。v5 只接受固定 manifest/runtime 和匹配 candidate/source 的 Linux 依赖来源，安全解包与完整性检查后运行，绝不自动下载、编译或激活。Host 启动仍只在显式 opt-in 测试中发生。
+
+`node --test scripts/dsh-b0/first-purchase-runtime-artifacts.test.mjs` 纳入 B0 pipeline，普通保护检查不启动 Host。覆盖 runtime pin/digest/大小、输入替换、FIFO/符号链接、完整安装树、错误平台 wheel 和混用 checkout；真实目标机结果不能由这些负测代替。原生查询恢复基线须在总结 turn 空闲后截取，不能把计算完成时的中间 journal 序号拿来比较恢复状态。
+
+新来源的目标服务演练使用 `scripts/dsh-b0/first-purchase-source-target.probe.py run-wsl <absolute-sealed-input> <input-sha256>`（Python 3.14，`-I -B`）。输入目录含两包 archive/manifest、原来源 receipts、局部 candidate、固定 synthetic JSON、验收 helper 和目标平台各自 15/13 个 wheel；`input.json` 固定全量文件字节/摘要，验收不联网下载。只能在 WSL2、UID 65534 的专属临时目录运行，输出在其同级新建 `result`；4335 被占用则失败，不停止既有 owner。`run-local` 可用于预演，但输出 scope 不等于 WSL。
+
+本次同一 `f9726f68` 包的实际杭州来源/同版本恢复 **10/10 PASS**，命令、摘要、失败修复及清理见[现场证据](../hackathon/evidence/dsh-g0-first-purchase-source-wsl-20261007.md)。该范围不启动 DSH/真实 CRM/模型，不关闭目标宿主或生产 gate；现场阶段回执接线当时未完成；现已由上文新的十项 schema 校验器接入原 journal seq 4，不能冒充旧十四项回执通过。
 
 `pnpm dsh plugin verify-host --candidate /absolute/candidate.json --evidence /absolute/evidence.json --state-path /absolute/state.json` 核验已有 v2 宿主证据并幂等追加到原 candidate journal；该命令不运行宿主。`plugin-host-evidence.test.mjs` 纳入 release suite/B0，用明确的 verifier-only 夹具检查缺项、篡改、错误 scope/journal 和重试，不能将这些夹具视为真实宿主通过；真实命令的十项场景与 CLI 接线另行留证，见[本机接线与服务状态证据](../hackathon/evidence/dsh-g0-host-journal-20261004.md)。
 

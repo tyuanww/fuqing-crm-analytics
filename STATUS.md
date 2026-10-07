@@ -14,7 +14,26 @@
 | 安全响应头 | 全域 HSTS 6 个月；`learn` 使用 Permissions-Policy 和 CSP Report-Only，暂不启用 preload/includeSubDomains。 |
 | 数据与备份 | 生产 DuckDB 保留在杭州 `/srv/shinemage/data`，D 盘备份已校验；`incoming` 只读保留，不进 Git。 |
 
-### 新来源 HTTP 的固定双包组合（2026-10-07，当前进度）
+### 固定 Linux runtime 与首购包的杭州宿主组合（2026-10-07，当前进度）
+
+- 复用已发布的固定 Linux runtime `a049f061…`，同一 workbench/CRM/查询/保存四包在杭州 WSL2、UID 65534 完成官方 Host HTTP **1 PASS**。实际原生命令、查询 worker、保存 ACK 核对、服务/宿主重启及无业务工具的原生对话通过；最终一条分析、一个 worker。见[本轮证据](docs/hackathon/evidence/dsh-g0-first-purchase-runtime-host-20261007.md)。
+- 新 v5 演练入口直接加载 immutable runtime，无需 DSH checkout；原 Mac pack receipt 保留，Linux wheel 单独核验。修复恢复测试过早采样的问题；本轮保护 **49 PASS**、进程/输入 **13 PASS**、release suite **278 PASS**、原 v4 整链 **1 PASS**。两次失败及修复证据保留。
+- 8 个自有 PID、临时目录已回收，现役五个监听/PID 不变；原候选文件和 journal seq 4 不变。**仍 PARTIAL**：目标浏览器、在途/跨版本恢复、真实身份/UAT、供应链、目标 Host 回执接线与生产 activation 仍开放；本次未提交、推送或切换生产。
+
+### 来源 HTTP 的目标回执接线（2026-10-07，上一阶段）
+
+- 已将原始杭州 WSL 十项回执通过现有 `plugin verify-service` 接入候选 `861d6ef1…` 的原 journal **seq 4**，复用 seq 3 服务包事件；业务包仍固定 `f9726f68`。见[本轮接线证据](docs/hackathon/evidence/dsh-g0-first-purchase-source-target-gate-20261007.md)。
+- 当前新门禁 **34 PASS**，完整 release suite **278 PASS / 0 SKIP**；真实 CLI 重试不改 journal 字节/mtime，本机 scope 和错候选回执被拒绝。15 个固定候选文件、原现场输入/回执不变，前三条历史事件保留。审核补齐了固定 runner 对候选源码 SHA 的约束。
+- 目标宿主预检：Tailscale/SSH 正常，杭州 Node 24.21/Python 3.14、工具与临时空间具备。现有本机 runtime 含 Mac 原生依赖，演练仍依赖 checkout 布局；已定位已发布的另一份固定 runtime 元数据供复核，Linux 闭包/完整宿主验收尚未执行。详情见同一证据页。
+- **仍 PARTIAL**：仅关闭服务现场回执接线；目标 DSH/插件/浏览器、当前包跨旧版本目标恢复、真实身份/UAT、供应链与生产 activation 仍开放。新观测不证明生产监听、远端签名或完整部署身份；本轮未访问真实数据、切换杭州、push 或发布，本地增量尚未提交。
+
+### 固定查询/保存包的杭州 WSL（2026-10-07，上一阶段）
+
+- 上一批 15 文件已经正常 hooks 本地提交 `09080b77`；业务 archive 继续固定 `f9726f68`。同一查询包/保存包实际在杭州 WSL2、Python 3.14.4、UID 65534 的隔离目录完成 **10/10 PASS**：15/13 依赖离线冷安装、真实查询 worker、来源 HTTP、关闭年龄判断、SIGKILL 后回执重放和合成小库冷恢复。见[本轮 WSL 证据](docs/hackathon/evidence/dsh-g0-first-purchase-source-wsl-20261007.md)。
+- 本次输入保护 **7 PASS**；远端前本机预演 **10/10 PASS**，三次前置脚本失败及修复记录保留。目标 5 个服务进程、1 个 worker、安装/状态/传输目录均已回收，生产五个监听端口/PID 快照未变。16 个当前候选文件与 13 个旧证据保留。
+- **仍 PARTIAL**：这里只关闭新包服务来源/同版本恢复的 WSL 子项。该现场阶段原 journal 保持 seq 3；接线后续见上节，目标 DSH/插件/浏览器、当前包的跨旧版本目标矩阵、真实身份/UAT、供应链及生产 activation 未完成。新增 runner/测试/文档尚待本地提交；未 push、发布、切换生产或访问真实数据。
+
+### 新来源 HTTP 的固定双包组合（2026-10-07，上一阶段）
 
 - 源码边界按 OCR delegate 覆盖 23/23 文件，当前后端 228 PASS、官方新路径 1 PASS，经正常 hooks 提交 `f9726f68`。从该 clean SHA 生成独立查询/保存包；workbench 包字节未变、CRM 包复用，官方 DSH 未修改。见[本轮固定包证据](docs/hackathon/evidence/dsh-g0-first-purchase-source-packages-20261007.md)。
 - 新 v4 组合要求两包 source 合同一致；保存进程仅获自有状态目录和查询 URL，SQLite audit 拒绝打开查询库。源码/实际保存双包各 **9/9 PASS**，保护 **29 PASS**、进程回收 **6 PASS**；v4 HTTP、同包 v3 兼容、v4 Chrome 各 **1 PASS**，Chrome **5 场景**。查询下线后重启保存服务，原回执仍可重放且只有一条分析。
