@@ -159,3 +159,13 @@ test('runtime card copy previews through presentation without rewriting source',
   assert.equal(snapshot.js, pkg.js);
   assert.equal(snapshot.presentation.edits[0].text, '新的收入文案');
 });
+
+test('clean edit exit reports browse mode without claiming a save or unsaved work', async t => {
+  const store = createFreeHtmlLibraryStore(); t.after(() => store.dispose());
+  store.setPrompt('标题'); await store.generate();
+  const version = store.getSnapshot().current.version;
+  store.enterEdit(); store.exitEdit();
+  assert.equal(store.getSnapshot().mode, 'browse');
+  assert.equal(store.getSnapshot().current.version, version);
+  assert.doesNotMatch(store.getSnapshot().liveStatus, /未保存|已保存/);
+});

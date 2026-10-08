@@ -1,0 +1,192 @@
+{
+  "schema": "html-fix-delivery-preparation/v1",
+  "source_identity": "WORKTREE_UNCOMMITTED",
+  "base_HEAD": "8aabaaeb8d0e22a351088e1daefc164a5c0a2d09",
+  "base_HEAD_is_not_build_source_commit": true,
+  "source_files": {
+    "dsh-plugins/analytics-workbench/src/client/cockpit-workspace.tsx": "fb4ba39c2f253b3016391be0b67e02dd8ac4626eab41ab3871bbfa135446bb8b",
+    "dsh-plugins/analytics-workbench/src/client/free-html-library/store.mjs": "d7051b6170310ba8be56b7ec47d7f2aab1dfef8d3825c6647a955bd8e35ab5bb",
+    "dsh-plugins/analytics-workbench/src/client/free-html-library/store.test.mjs": "a78ce84f6f872e135c9173c381d8376b14128f64843ffded08c62c1736056d88",
+    "dsh-plugins/analytics-workbench/src/client/library-workspace.test.mjs": "5fc777a89f0517975d3c9239b8abc81676694267631358e2d13e8b9dd88a9aab"
+  },
+  "reused_test_evidence": {
+    "pass": 103,
+    "fail": 0,
+    "skip": 0,
+    "source_and_log_hashes_verified": true,
+    "new_execution": false,
+    "before_regression_fail": 3
+  },
+  "new_build": {
+    "argv": [
+      "/usr/bin/sandbox-exec",
+      "-f",
+      "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/html-fix-delivery-20261008/agent-a/build.sb",
+      "/Users/hutou/homebrew/opt/node@24/bin/corepack",
+      "pnpm",
+      "build"
+    ],
+    "cwd": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/html-fix-delivery-20261008/agent-a/author/plugin",
+    "exit": 0,
+    "seconds": 8.631814166903496,
+    "source_identity": "WORKTREE_UNCOMMITTED",
+    "source_snapshot_sha256": "c3c061d3c529941ee35f56efb6dcf5ed698c00a3dcc0ab855e6f3ee6ffe31402",
+    "release_ready": false,
+    "candidate": false
+  },
+  "host_typecheck": "PASS",
+  "client_typecheck": "PASS",
+  "built_outputs": {
+    "lib/client.js": {
+      "bytes": 1176352,
+      "sha256": "d50bb6272a18de3a892687192d95b52019bd8af2f959f5593dae1283b8043c03"
+    },
+    "lib/client.js.map": {
+      "bytes": 4005555,
+      "sha256": "9f32b050669570af76f1d9c9a5cac17dd417239f1886bc0eb32217c5002a5101"
+    },
+    "lib/page-tools.js.map": {
+      "bytes": 58203,
+      "sha256": "60f984e804ea63f76ed0f3f5109209d1c0af341d4c1aa4167cd18d48cc59949d"
+    },
+    "lib/tool.js.map": {
+      "bytes": 87025,
+      "sha256": "480abf549904699efaa7bbdfcf7fbeed5df65848f4fde23eb03e101ddeaddeae"
+    },
+    "lib/skills.js.map": {
+      "bytes": 237392,
+      "sha256": "2d060c1d004b5de6ab4deb6627b12f5a13ee63290aea99ce6510d37af0f7f789"
+    },
+    "lib/skills.js": {
+      "bytes": 107570,
+      "sha256": "c4b870b64626b5d8f7ed898c6cf2edd613fc7cabb39bd49490eb9b3bcf29c8b1"
+    },
+    "lib/index.js": {
+      "bytes": 143276,
+      "sha256": "f1b97a4457ad65d868c83eb6209ae4c14a9598415caf4376a5c6151ef962fd58"
+    },
+    "lib/index.js.map": {
+      "bytes": 326646,
+      "sha256": "e8f6428e3c00f235db0085dca3b4acb6dcf742924a421e0de48203fdff32a980"
+    },
+    "lib/page-tools.js": {
+      "bytes": 14160,
+      "sha256": "28b07f12a5aaff8096c604d9c53eef293a91be55ae82d48b069ab8c0e8fa5c70"
+    },
+    "lib/tool.js": {
+      "bytes": 38843,
+      "sha256": "e854349cb5187e2b045f280f8330f19da0e7d0acbe0ff4f07e8c747f710a4924"
+    },
+    "lib/views/first-purchase-saved-analysis-view.js": {
+      "bytes": 31864,
+      "sha256": "17880119f26d9d68544a446efd449a7976dbb2f3e4ee6fa8effe0510fd06dc2a"
+    },
+    "lib/views/first-purchase-cockpit-view.js.map": {
+      "bytes": 134194,
+      "sha256": "3dd2224e00ce5e220668e70c6d5ad124d2aa634d03c13283f60abd20f5e579d5"
+    },
+    "lib/views/saved-analysis-view.js.map": {
+      "bytes": 84225,
+      "sha256": "027f8a92f101411c5bec2aff8a6fab0e5a79c5839739f91816ad029625c11a2d"
+    },
+    "lib/views/cockpit-view.js.map": {
+      "bytes": 2282172,
+      "sha256": "5304fbc13db953538bf54e43afba8713f8ab48364fd9bc484e494ffcac2ce3b9"
+    },
+    "lib/views/first-purchase-cockpit-view.js": {
+      "bytes": 57147,
+      "sha256": "386581a0a5c8de0c41750eafb466f13e634d25cfc32da7af161a7df414827f22"
+    },
+    "lib/views/saved-analysis-view.js": {
+      "bytes": 39135,
+      "sha256": "012f6c752aa0294f8472a33d65619eacfb6ced8bc1d6d2c33e43250aa1aaff39"
+    },
+    "lib/views/cockpit-view.js": {
+      "bytes": 536289,
+      "sha256": "62c7f0640221be4523f2073f4ae3017cdc5663dd229a5fc145ad21bb49538712"
+    },
+    "lib/views/first-purchase-saved-analysis-view.js.map": {
+      "bytes": 58540,
+      "sha256": "bc2f6eb0484f5f8c04d5c91df8caa98bcf43c21209d5268722dff184556cb5b8"
+    }
+  },
+  "independent_adversarial_findings": 0,
+  "ci": {
+    "incremental_files": 7,
+    "incremental_plan": "B0 only",
+    "proposed_branch_files": 635,
+    "cached_base": "fcbd1324ac5a4b7367d9d7d2bb9bbebdbf32ba25",
+    "proposed_branch_plan": "backend full, B0, frontend, tooling, deployment, both dependency axes, filterbuilder",
+    "execution": "NOT_RUN",
+    "fetched_remote": false
+  },
+  "formal_candidate": "NOT_CREATED",
+  "old_candidate": "993daf31daa79137c22ce8d16c84b61892117386a9b7b8c5119fa0be62abefb0",
+  "old_journal_seq": 6,
+  "old_candidate_and_journal": "UNCHANGED",
+  "commit": "NOT_RUN",
+  "push_pr_release_deploy": "NOT_RUN",
+  "release_ready": false,
+  "raw_evidence": {
+    ".context/checks/html-fix-delivery-20261008/agent-a/build-result.json": {
+      "bytes": 669,
+      "sha256": "efdc30dda1bab1c2910f31c5e756a722215c488bdf8d40b09ef5fa4dec71cae5"
+    },
+    ".context/checks/html-fix-delivery-20261008/agent-a/build.stdout": {
+      "bytes": 253,
+      "sha256": "46d714f7d1a586f7077263dc1a711dacf438006fb9b3fe7142cdb304a132edba"
+    },
+    ".context/checks/html-fix-delivery-20261008/agent-a/build.stderr": {
+      "bytes": 904,
+      "sha256": "6e1fd2880ae34c2fbd5c5beea035faa655b200fbcfe2daa670091cdc428a8364"
+    },
+    ".context/checks/html-fix-delivery-20261008/agent-a/source-snapshot.json": {
+      "bytes": 90737,
+      "sha256": "c3c061d3c529941ee35f56efb6dcf5ed698c00a3dcc0ab855e6f3ee6ffe31402"
+    },
+    ".context/checks/html-fix-delivery-20261008/agent-a/build-artifacts.json": {
+      "bytes": 2835,
+      "sha256": "35a14488f257366ec5967936e08b9b8f684a20a80633d86f45cf32c6969b361d"
+    },
+    ".context/checks/html-fix-delivery-20261008/agent-a/evidence-reuse.json": {
+      "bytes": 1574,
+      "sha256": "985722f343cc965a6bba66bbf674210a51a445e4fb0e29e5e8fc0b09b929450d"
+    },
+    ".context/checks/html-fix-delivery-20261008/main-adversarial-review.json": {
+      "bytes": 2277,
+      "sha256": "3ddda3a16ade0235aff3f8bfa9a34713fe78815e23270f70b3685c8f6bbd7b5f"
+    },
+    ".context/checks/html-fix-delivery-20261008/agent-b/review.json": {
+      "bytes": 10924,
+      "sha256": "046fd86feb8f3f93bc3563f0baf2cb0fcb55fb26cd7199075dec66f64eb0c5a4"
+    },
+    ".context/checks/html-fix-delivery-20261008/agent-b/ci-plan.json": {
+      "bytes": 705,
+      "sha256": "3465b7f43c224cf1939fab4a3068f772a2f9752c1d474b09544e20e78f66cbdd"
+    },
+    ".context/checks/html-fix-delivery-20261008/agent-b/proposed-pr-plan.json": {
+      "bytes": 36969,
+      "sha256": "d3f59dcf52a227195c3f5578de16a82f96af2553c78b063739e8633abda31885"
+    },
+    ".context/checks/html-fix-delivery-20261008/agent-a/summary.json": {
+      "bytes": 3876,
+      "sha256": "e00bde11768db47167cf5c975e58a1ba8a515a36210a6aed505a8c6cf08227a6"
+    },
+    ".context/checks/html-fix-delivery-20261008/agent-a/review.md": {
+      "bytes": 3091,
+      "sha256": "2367ec7f4a10011fe70017b9302c7601c96b791a53161ac6e5f2b8cfa8ad67c0"
+    },
+    ".context/checks/html-fix-delivery-20261008/agent-a/archive-manifest.json": {
+      "bytes": 7699,
+      "sha256": "98c0a637fecde207e5abfb7da58065d406cb434f6f93c7956041d0e5a1b109b8"
+    }
+  },
+  "scoped_review_findings": 0,
+  "author_source_files_verified": 576,
+  "author_evidence_archive": {
+    "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/html-fix-delivery-20261008/agent-a/delivery-evidence.tar.gz",
+    "bytes": 2481959,
+    "sha256": "20181870316977ca3567c123a88ab4bce72fbadec27e8f00d91ee99efdca4d7e",
+    "members": 52
+  }
+}

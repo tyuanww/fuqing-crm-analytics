@@ -1495,3 +1495,37 @@ for (const cause of ['VERSION_CONFLICT', 'PREVIEW_EXPIRED', 'TRANSPORT_ERROR']) 
     assert.equal(left, leave ? 1 : 0);
   });
 }
+
+for (const choice of ['stay', 'discard']) test(`HTML save after leave ${choice} clears obsolete unsaved notices`, async t => {
+  const ui = await domFixture(t);
+  const library = createLibraryBoardClient(async () => ok({ items: [] }));
+  const pageStore = createFreeHtmlLibraryStore();
+  t.after(() => { library.dispose(); pageStore.dispose(); });
+  pageStore.setPrompt('原标题'); await pageStore.generate();
+  pageStore.enterEdit(); pageStore.selectLocatable({ node_id: 'n_title', mapping: 'valid' });
+  pageStore.setReplacementText('第一次草稿', '原标题');
+  await ui.render(React.createElement(LibraryCockpitPanel, { library, pageStore, initialSurface: 'pages',
+    themeSource: { subscribe: () => () => {}, getSnapshot: () => 'light' }, goConversation() {} }));
+  await ui.key(null, 'Escape');
+  assert.ok(ui.doc.querySelector('[data-testid="leave-prompt"]'), 'dirty exit must still ask for a decision');
+  await ui.click(`[data-testid="leave-${choice}"]`);
+  assert.equal(ui.doc.querySelector('[data-testid="leave-prompt"]'), null);
+  assert.equal(pageStore.getSnapshot().current.version, 1, 'stay/discard must not save');
+  if (choice === 'discard') {
+    assert.equal(pageStore.hasUnsavedChanges(), false);
+    assert.equal(pageStore.getSnapshot().mode, 'browse');
+    assert.doesNotMatch(ui.doc.querySelector('[data-testid="library-message"]')?.textContent ?? '', /有未保存修改/);
+    await ui.click('[data-testid="cockpit-edit-btn"]');
+  } else assert.equal(pageStore.hasUnsavedChanges(), true);
+  await act(async () => {
+    pageStore.selectLocatable({ node_id: 'n_title', mapping: 'valid' });
+    pageStore.setReplacementText('最终保存标题', '原标题');
+  });
+  await ui.click('[data-testid="cockpit-edit-btn"]');
+  assert.equal(pageStore.getSnapshot().current.version, 2);
+  assert.match(pageStore.getSnapshot().current.package.html, /最终保存标题/);
+  assert.equal(pageStore.hasUnsavedChanges(), false);
+  assert.equal(pageStore.getSnapshot().mode, 'browse');
+  assert.doesNotMatch(ui.doc.querySelector('[data-testid="library-message"]')?.textContent ?? '', /有未保存修改/);
+  assert.doesNotMatch(ui.doc.querySelector('[data-testid="library-live"]')?.textContent ?? '', /未保存/);
+});

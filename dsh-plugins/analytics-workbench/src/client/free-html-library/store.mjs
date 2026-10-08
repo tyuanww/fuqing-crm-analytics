@@ -609,7 +609,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
     enterEdit() { if (!state.current || state.busy || state.confirmationUncertain) return; emit({ mode: 'edit', liveStatus: '编辑中', overlay: 'selection' }); },
     exitEdit() {
       if (state.busy || hasUnsavedChanges()) { emit({ message: '请先确认或放弃当前修改' }); return; }
-      emit({ mode: 'browse', selection: null, overlay: null, contextPanel: state.contextPanel === 'ai' ? null : state.contextPanel, liveStatus: '浏览中。退出编辑未保存' });
+      emit({ mode: 'browse', selection: null, overlay: null, contextPanel: state.contextPanel === 'ai' ? null : state.contextPanel, liveStatus: '浏览中。已结束编辑' });
     },
     selectLocatable(request) {
       if (state.mode !== 'edit' || state.busy || state.confirmationUncertain || state.preview) return;
