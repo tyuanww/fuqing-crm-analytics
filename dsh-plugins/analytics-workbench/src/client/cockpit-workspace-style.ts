@@ -63,6 +63,9 @@ li[data-selected="1"] .cockpit-file-icon { color:#d65625; background:#fff0e9; }
 .cockpit-editor-canvas { display:flex; flex-direction:column; flex:1; min-width:0; min-height:0; }
 .cockpit-document-tools { display:flex; flex-wrap:wrap; align-items:center; gap:8px; min-height:48px; padding:10px 20px; border-bottom:1px solid #eee; }
 .cockpit-document-tools button { font-size:12px; min-height:28px; padding:3px 8px; border-color:transparent; background:transparent; color:#626262; }
+.sm-library-workspace :is(.cockpit-head-actions, .cockpit-document-tools, .cockpit-notice, .cockpit-mobile-context, .cockpit-modal-actions) button,
+.sm-library-workspace .cockpit-sidebar-header button,
+.sm-library-workspace .sm-leave-prompt button { min-width:44px; min-height:44px; }
 .cockpit-tool-actions { margin-left:auto; display:flex; gap:6px; flex-wrap:wrap; }
 .cockpit-frame-wrap { flex:1; min-height:360px; display:flex; flex-direction:column; min-width:0; background:#f7f7f7; }
 .cockpit-html-frame { display:block; border:0; width:100%; height:100%; min-height:440px; flex:1; background:white; }
@@ -132,7 +135,7 @@ li[data-selected="1"] .cockpit-file-icon { color:#d65625; background:#fff0e9; }
   .sm-library-rail { position:absolute; inset:0; z-index:30; width:100%; border:0; }
   .sm-library-workspace[data-mobile-inspector=true]:not([data-presenting=true]) .cockpit-editor-layout:has(.cockpit-sidebar) > .cockpit-editor-canvas { display:none; }
   .sm-library-workspace[data-mobile-inspector=false] .cockpit-sidebar { display:none; }
-  .cockpit-mobile-context { display:flex; gap:8px; padding:10px 16px; border-bottom:1px solid #eee; }
+  .cockpit-mobile-context { display:flex; flex-wrap:wrap; gap:8px; padding:10px 16px; border-bottom:1px solid #eee; }
   .cockpit-mobile-context button[aria-pressed=true] { color:#b34b21; background:#fff4ed; border-color:#ffd8c4; }
   .cockpit-sidebar { width:100%; flex:1; border:0; }
   .sm-library-pathbar { padding:6px 14px; }

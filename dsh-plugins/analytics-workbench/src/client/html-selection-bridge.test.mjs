@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { editableTextNodes, editablePageNodes, selectableNodes, acceptSelection, acceptTargets, selectionSrcdoc } from './html-selection-bridge.mjs';
+import { editableTextNodes, editablePageNodes, selectableNodes, acceptExitRequest, acceptSelection, acceptTargets, selectionSrcdoc } from './html-selection-bridge.mjs';
 import { sourceTextPreview, selectionForAI } from './html-source-selection.mjs';
 import { previewLiteralText } from './free-html-library/html-edit-kernel.mjs';
 
@@ -44,11 +44,23 @@ test('browse retains normal interactions; editing adds only the selection bridge
   const browse = selectionSrcdoc(pkg, config);
   const edit = selectionSrcdoc(pkg, { ...config, editing: true });
   assert.doesNotMatch(browse, /cockpit\.selection/);
+  assert.doesNotMatch(browse, /cockpit\.exit-request/);
   assert.match(edit, /cockpit\.selection/);
   assert.match(edit, /cockpit\.draft/);
+  assert.match(edit, /cockpit\.exit-request/);
   assert.match(edit, /Content-Security-Policy/);
   assert.doesNotMatch(edit, /allow-same-origin/);
   assert.match(edit, /data-cockpit-target.*data-cockpit-selected/);
+});
+test('iframe exit request is accepted only for the current frame and carries no selection payload', () => {
+  const source = {};
+  const context = { source, channel: 'nonce', pageId: 'page_a', version: 2 };
+  const data = { type: 'cockpit.exit-request', channel: 'nonce', pageId: 'page_a', version: 2 };
+  assert.equal(acceptExitRequest({ source, origin: 'null', data }, context), true);
+  for (const patch of [{ source: {} }, { origin: 'https://example.invalid' },
+    ...[{ channel: 'wrong' }, { pageId: 'other' }, { version: 1 }, { nodeId: null }].map(value => ({ data: { ...data, ...value } }))]) {
+    assert.equal(acceptExitRequest({ source, origin: 'null', ...patch }, context), false);
+  }
 });
 test('mixed mapped and inferred nodes identify the same text for manual and AI edits', () => {
   const mixed = { ...pkg, html: '<p data-shine-node="source_1">First</p><p>Second</p>',

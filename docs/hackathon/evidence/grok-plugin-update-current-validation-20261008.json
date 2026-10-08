@@ -1,0 +1,219 @@
+{
+  "schema": "shinemage-trial-followup/v1",
+  "runner_sha256": {
+    "scripts/dsh-b0/plugin-update-trial.mjs": "c33d210a137744ee58ed82cdb063e5717986120a5178d47b755c269fbd8f87a4",
+    "scripts/dsh-b0/pinned-host-acceptance.mjs": "66b091fc19d498439a067e169a1441d214e5ceab56b1506391ceb2708699740d"
+  },
+  "dsh": {
+    "version": "0.1.7-rc.2",
+    "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+    "cli_sha256": "935e95d05f4dc70a8a013eea59da80028946b5c139e45c6351dcaf2810ca00a1"
+  },
+  "overall": "PASS",
+  "records": [
+    {
+      "scenario": "01-controlled-update",
+      "status": "PASS",
+      "record_sha256": "b72c349190590625bd1043ea0b99e944bf0825cd3c1a45d1fd456093a1fe9064",
+      "owned_pids_alive": [],
+      "fixed_components_unchanged": true,
+      "elapsed_ms": 5507
+    },
+    {
+      "scenario": "02-same-digest-replay",
+      "status": "PASS",
+      "record_sha256": "4d033cbe0961732983fbba41e57eb96be726bb1059d9346c05e50829206ef151",
+      "owned_pids_alive": [],
+      "fixed_components_unchanged": true,
+      "elapsed_ms": 6136
+    },
+    {
+      "scenario": "03-interrupt-before-ready",
+      "status": "UNKNOWN_RECOVERED",
+      "record_sha256": "2a3c9c1518ea0d59764932b53477f67c778e366c6c8ec76dcd0ac512cf9cdee3",
+      "owned_pids_alive": [],
+      "fixed_components_unchanged": true,
+      "elapsed_ms": 4434
+    },
+    {
+      "scenario": "04-digest-mismatch-restore",
+      "status": "REJECTED_OLD_RETAINED",
+      "record_sha256": "4ee80d9e3a1f86cdac975d4f1b5d1c36d3a734034a518c4ad77ef43f3d358224",
+      "owned_pids_alive": [],
+      "fixed_components_unchanged": true,
+      "elapsed_ms": 4639
+    },
+    {
+      "scenario": "05-host-restart-required",
+      "status": "HOST_RESTART_REQUIRED_THEN_PASS",
+      "record_sha256": "9bde5dfd5d4a4b1b8f3bdbf7994fe87f27b856ae3cbe6fb18c496282a489b68a",
+      "owned_pids_alive": [],
+      "fixed_components_unchanged": true,
+      "elapsed_ms": 4427
+    },
+    {
+      "scenario": "06-inflight-kill-wal",
+      "status": "WAL_PREFIX_RECOVERED",
+      "record_sha256": "82d5ab1a82073800a93e5d88ce23f2cde026473d93accec982e0ea996c9c1e56",
+      "owned_pids_alive": [],
+      "fixed_components_unchanged": true,
+      "elapsed_ms": 5024
+    },
+    {
+      "scenario": "07-save-unknown-replay",
+      "status": "UNKNOWN_REPLAYED",
+      "record_sha256": "21e8050eac652a6adfa723a1e1bf4df7fda307b29756259f103392e825b25339",
+      "owned_pids_alive": [],
+      "fixed_components_unchanged": true,
+      "elapsed_ms": 6011
+    },
+    {
+      "scenario": "08-prepare-reject-restore-old",
+      "status": "FAILED_OLD_RESTORED",
+      "record_sha256": "f0a66b1fa52ca103a3716c6f154f4585b8b56f5aa8d2ed99c2e71f316cf0dfd2",
+      "owned_pids_alive": [],
+      "fixed_components_unchanged": true,
+      "elapsed_ms": 4236
+    },
+    {
+      "scenario": "09-native-fallback-then-new",
+      "status": "PASS",
+      "record_sha256": "71553fd6a31d3d64c127c0de305e887be4246d10ece6367f3df2d214e70e78d7",
+      "owned_pids_alive": [],
+      "fixed_components_unchanged": true,
+      "elapsed_ms": 4971
+    },
+    {
+      "scenario": "10-profile-rollback-keeps-data",
+      "status": "PASS",
+      "record_sha256": "05708e042604c009693f1bb2f8278b1faf63bf26a7e211bc1e0ddc567856db36",
+      "owned_pids_alive": [],
+      "fixed_components_unchanged": true,
+      "elapsed_ms": 5033
+    }
+  ],
+  "real_host_cancellation": [
+    {
+      "signal": "SIGINT",
+      "runner_pid": 51770,
+      "observed_dsh_pid": 52039,
+      "exit_code": 2,
+      "overall": "INTERRUPTED",
+      "interrupt": "SIGINT",
+      "runs": [
+        {
+          "scenario": "01-controlled-update",
+          "status": "INTERRUPTED"
+        }
+      ],
+      "not_started": [
+        {
+          "scenario": "02-same-digest-replay",
+          "status": "NOT_RUN"
+        },
+        {
+          "scenario": "03-interrupt-before-ready",
+          "status": "NOT_RUN"
+        },
+        {
+          "scenario": "04-digest-mismatch-restore",
+          "status": "NOT_RUN"
+        },
+        {
+          "scenario": "05-host-restart-required",
+          "status": "NOT_RUN"
+        },
+        {
+          "scenario": "06-inflight-kill-wal",
+          "status": "NOT_RUN"
+        },
+        {
+          "scenario": "07-save-unknown-replay",
+          "status": "NOT_RUN"
+        },
+        {
+          "scenario": "08-prepare-reject-restore-old",
+          "status": "NOT_RUN"
+        },
+        {
+          "scenario": "09-native-fallback-then-new",
+          "status": "NOT_RUN"
+        },
+        {
+          "scenario": "10-profile-rollback-keeps-data",
+          "status": "NOT_RUN"
+        }
+      ],
+      "cleanup_failed": false,
+      "host_gone": true,
+      "seconds_to_exit": 0.404,
+      "protected_ports_unchanged": true
+    },
+    {
+      "signal": "SIGTERM",
+      "runner_pid": 52114,
+      "observed_dsh_pid": 52387,
+      "exit_code": 2,
+      "overall": "INTERRUPTED",
+      "interrupt": "SIGTERM",
+      "runs": [
+        {
+          "scenario": "01-controlled-update",
+          "status": "INTERRUPTED"
+        }
+      ],
+      "not_started": [
+        {
+          "scenario": "02-same-digest-replay",
+          "status": "NOT_RUN"
+        },
+        {
+          "scenario": "03-interrupt-before-ready",
+          "status": "NOT_RUN"
+        },
+        {
+          "scenario": "04-digest-mismatch-restore",
+          "status": "NOT_RUN"
+        },
+        {
+          "scenario": "05-host-restart-required",
+          "status": "NOT_RUN"
+        },
+        {
+          "scenario": "06-inflight-kill-wal",
+          "status": "NOT_RUN"
+        },
+        {
+          "scenario": "07-save-unknown-replay",
+          "status": "NOT_RUN"
+        },
+        {
+          "scenario": "08-prepare-reject-restore-old",
+          "status": "NOT_RUN"
+        },
+        {
+          "scenario": "09-native-fallback-then-new",
+          "status": "NOT_RUN"
+        },
+        {
+          "scenario": "10-profile-rollback-keeps-data",
+          "status": "NOT_RUN"
+        }
+      ],
+      "cleanup_failed": false,
+      "host_gone": true,
+      "seconds_to_exit": 0.398,
+      "protected_ports_unchanged": true
+    }
+  ],
+  "protected_ports_unchanged": true,
+  "new_crm": {
+    "name": "shine-mage-dsh-crm-knowledge-0.0.0-crm.1.tgz",
+    "bytes": 234944,
+    "sha256": "295b234a951a989ff74c137dfe20ce5e466b6b8d67cbe3669afbaea83e709bc1"
+  },
+  "sdk_distribution": "BLOCKED",
+  "release_ready": false,
+  "runtime_plugin_failure_after_load": "NOT_COVERED",
+  "ci_journal": "NOT_RUN"
+}

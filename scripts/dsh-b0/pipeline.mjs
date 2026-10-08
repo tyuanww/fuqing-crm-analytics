@@ -52,6 +52,9 @@ let env = {
   B0_BUILD_UPSTREAM: upstream,
   DSH_PACKAGE_INPUTS: join(b0, 'package-inputs'),
   COREPACK_ENABLE_DOWNLOAD_PROMPT: '0', LEFTHOOK: '0', CI: '1',
+  // Every nested build/version probe must remain offline in check mode,
+  // including the board-components build before preparePackageManager runs.
+  ...(mode === '--check' ? { COREPACK_ENABLE_NETWORK: '0' } : {}),
 };
 // Do not put proxy settings in the shared build/test environment. Only the
 // explicit network operations below inherit them; TLS/audit bypass flags,
@@ -135,9 +138,11 @@ if (mode === '--prepare') {
   run(process.execPath, ['--test', 'scripts/dsh-b0/plugin-boundaries.test.mjs']);
   // Guard tests fail before process startup. The real-host drill remains opt-in.
   run(process.execPath, ['--test', 'scripts/dsh-b0/pinned-host-acceptance.test.mjs']);
+  run(process.execPath, ['--test', '--test-concurrency=1',
+    'scripts/dsh-b0/plugin-update-trial.test.mjs', 'scripts/dsh-b0/plugin-update-trial-cancel.test.mjs'], root, { FQ_B0_PYTHON: python });
   run(process.execPath, ['--test', 'scripts/dsh-b0/first-purchase-kernel-artifacts.test.mjs']);
   run(process.execPath, ['--test', 'scripts/dsh-b0/first-purchase-runtime-artifacts.test.mjs']);
-  for (const file of ['asset-ui-smoke.mjs', 'theme-ui-smoke.mjs', 'native-ui-smoke.mjs', 'native-card-smoke.mjs', 'native-state-smoke.mjs', 'native-query-smoke.mjs', 'native-query-fault-smoke.mjs', 'native-query-fault-scenario.mjs', 'query-scenario.mjs', 'tool-card-dom-smoke.mjs', 'gateway-smoke.mjs', 'control-permission-probe.mjs', 'native-query-assets-smoke.mjs', 'asset-routes.mjs']) {
+  for (const file of ['html-host-browser-ui.probe.mjs', 'plugin-update-trial.mjs', 'asset-ui-smoke.mjs', 'theme-ui-smoke.mjs', 'native-ui-smoke.mjs', 'native-card-smoke.mjs', 'native-state-smoke.mjs', 'native-query-smoke.mjs', 'native-query-fault-smoke.mjs', 'native-query-fault-scenario.mjs', 'query-scenario.mjs', 'tool-card-dom-smoke.mjs', 'gateway-smoke.mjs', 'control-permission-probe.mjs', 'native-query-assets-smoke.mjs', 'asset-routes.mjs']) {
     run(process.execPath, ['--check', join(root, 'scripts/dsh-b0', file)]);
   }
   run(python, ['-c', String.raw`
@@ -207,6 +212,7 @@ print('B0 exact Python closure verified')
     'scripts/dsh-b0/recovery-model-gate.test.mjs', 'scripts/dsh-b0/session-recovery.test.mjs',
     'scripts/dsh-b0/shell-tool-contract.test.mjs',
     'scripts/dsh-b0/html-host-browser-inputs.test.mjs',
+    'scripts/dsh-b0/html-host-browser-ui-args.test.mjs',
     'scripts/dsh-b0/html-host-browser-cleanup.test.mjs',
     'scripts/dsh-b0/lifecycle-observer.test.mjs', 'scripts/dsh-b0/host-feasibility.test.mjs', 'scripts/dsh-b0/compatibility-matrix.test.mjs', 'scripts/dsh-b0/permission-fence.test.mjs', 'scripts/dsh-b0/ui-seams.test.mjs',
     'scripts/dsh-b0/package-manager-env.test.mjs', 'scripts/dsh-b0/diagnostic-sink.test.mjs',

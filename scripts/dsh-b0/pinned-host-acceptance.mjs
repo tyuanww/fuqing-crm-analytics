@@ -59,7 +59,7 @@ async function modelFixture() {
     close: () => new Promise(resolve => { server.closeAllConnections(); server.close(resolve); }) };
 }
 
-export async function startHost({ root, upstream, patches, modelOrigin, generation, signal, nativeFixture, runtimeLayout = false }) {
+export async function startHost({ root, upstream, patches, modelOrigin, generation, signal, nativeFixture, runtimeLayout = false, onSpawn }) {
   signal.throwIfAborted();
   assert.equal(typeof runtimeLayout, 'boolean', 'OWNED_HOST_RUNTIME_LAYOUT');
   if (nativeFixture) {
@@ -79,8 +79,13 @@ export async function startHost({ root, upstream, patches, modelOrigin, generati
     ...patches.flatMap(path => ['--patch', path]), '--host', '127.0.0.1', '--port',
     String(nativeFixture ? nativeFixture.portBase + 2 : 0), '--no-open'],
   { cwd: join(root, 'workspace'), env, stdio: ['ignore', 'pipe', 'pipe', 'ipc'] });
-  const abort = () => { child.kill('SIGKILL'); };
-  signal.addEventListener('abort', abort, { once: true });
+  const abort = () => {
+    if (child.exitCode === null && child.signalCode === null) {
+      try { child.kill('SIGKILL'); } catch { /* already exited */ }
+    }
+  };
+  if (signal.aborted) abort();
+  else signal.addEventListener('abort', abort, { once: true });
   let out = '', err = '', seq = 0; const pending = new Map();
   child.stdout.on('data', chunk => { out = (out + chunk).slice(-512 * 1024); });
   child.stderr.on('data', chunk => { err = (err + chunk).slice(-512 * 1024); });
@@ -117,7 +122,10 @@ export async function startHost({ root, upstream, patches, modelOrigin, generati
       return result;
     })();
   }
-  try { await bounded(ready.promise, 45000, 'OWNED_HOST_START_TIMEOUT'); }
+  try {
+    if (onSpawn) onSpawn(child);
+    await bounded(ready.promise, 45000, 'OWNED_HOST_START_TIMEOUT');
+  }
   catch (error) { await stop(true); throw error; }
   return { pid: child.pid, request, stop };
 }

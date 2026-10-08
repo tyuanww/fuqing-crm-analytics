@@ -312,7 +312,7 @@ function selectionRuntime(config) {
           if (eligible.get(identity(parent)) === parent && (/^(section|article|li)$/.test(parent.localName) || (parent.hasAttribute('data-node') || parent.hasAttribute('data-page-block')) && parent.children.length)) { node = parent; break; }
         }
       }
-      if (node && eligible.get(identity(node)) === node) send(identity(node), node);
+      if (node && eligible.get(identity(node)) === node) { selected = identity(node); send(selected, node); }
     }, true);
     document.addEventListener('beforeinput', event => {
       const node = event.target.closest?.('[data-cockpit-target]');
@@ -332,10 +332,15 @@ function selectionRuntime(config) {
     for (const type of ['paste', 'drop']) document.addEventListener(type, event => { event.preventDefault(); event.stopImmediatePropagation(); }, true);
     document.addEventListener('submit', event => { event.preventDefault(); event.stopImmediatePropagation(); }, true);
     document.addEventListener('keydown', event => {
-      if (event.key === 'Escape') { event.preventDefault(); send(null); }
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        // The first Escape only clears the in-frame selection. A later Escape, with nothing selected, asks the parent to exit.
+        if (selected) { selected = null; send(null); }
+        else parent.postMessage({ type: 'cockpit.exit-request', channel: config.channel, pageId: config.pageId, version: config.version }, '*');
+      }
       if (event.key === 'Enter' && event.target.matches?.('[data-cockpit-target]')) {
         event.preventDefault(); event.stopImmediatePropagation(); sync(true);
-        if (eligible.get(identity(event.target)) === event.target) send(identity(event.target), event.target);
+        if (eligible.get(identity(event.target)) === event.target) { selected = identity(event.target); send(selected, event.target); }
       }
     }, true);
     sync(true);
@@ -356,6 +361,12 @@ export function selectionSrcdoc(pkg, { channel, pageId, version, nodes = [], sel
     editableIds: nodes.filter(row => row.editableText !== false && !row.inspectOnly).map(row => row.node_id), inspectIds: nodes.filter(row => row.inspectOnly || row.editable === false).map(row => row.node_id),
     runtimeOnly: nodes.filter(row => row.runtimeOnly).map(row => row.node_id), roots: nodes.filter(row => row.anchor && row.packageHash).map(({ node_id, anchor, packageHash }) => ({ node_id, anchor, packageHash })), selectBlocks }).replace(/</g, '\\u003c');
   return insertBeforeBodyEnd(src, '<script>(' + selectionRuntime.toString() + ')(' + config + ');</script>');
+}
+export function acceptExitRequest(event, { source, channel, pageId, version }) {
+  if (!source || event.source !== source || event.origin !== 'null') return false;
+  const data = event.data;
+  if (!data || data.type !== 'cockpit.exit-request' || data.channel !== channel || data.pageId !== pageId || data.version !== version) return false;
+  return Object.keys(data).length === 4 && Object.keys(data).every(key => ['type', 'channel', 'pageId', 'version'].includes(key));
 }
 export function acceptSelection(event, { source, channel, pageId, version, nodes }) {
   if (!source || event.source !== source || event.origin !== 'null') return undefined;

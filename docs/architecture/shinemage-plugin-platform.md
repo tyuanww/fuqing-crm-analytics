@@ -15,7 +15,7 @@
 
 ## 开发工具与运行时分开
 
-`dsh-plugins/plugin-kit` 只拥有固定工具链、依赖锁与构建绑定；它不导入业务插件、不读取服务状态、不进入插件 tarball。插件自己的类型检查、测试、生成物与业务行为由插件维护。当前仍以相邻 workspace 路径引用开发 kit；未来迁成版本化 dev dependency 时必须保留同样的干净包构建证据。
+`dsh-plugins/plugin-kit` 只拥有固定工具链、依赖锁与构建绑定；它不导入业务插件、不读取服务状态、不进入插件 tarball。插件自己的类型检查、测试、生成物与业务行为由插件维护。10 个构建消费者已使用精确开发依赖及 kit 公开导出；仓库内由显式 workspace 适配器连接，独立作者工程消费已核对的 kit tarball，见[作者入口](../operating/dsh-plugin-author-quickstart.md)。这不代表 kit 已在 registry 发布或 SDK 已获准分发。
 
 `toolchain.json`、build-tools manifest/lock/补丁现在位于 kit；release、B0 pipeline、开发入口和合同生成器读取同一份 pin。不能为了让一个包构建成功，静默从相邻历史仓库找依赖。已准备的第三方依赖可以复用，但须与 kit 锁定输入一致。
 
@@ -35,6 +35,8 @@ CRM 与知识插件也已拆成两个独立候选包：CRM 保留旧包 ID，知
 首期包身份保持现有 `@shine-mage/dsh-analytics-workbench-b0`；不能把目标仓库名称当成已获授权的 npm 包重命名。profile 只引用固定包及 digest。每次候选记录来源 SHA、生成合同摘要、DSH pin、capability 和 journal，不能用工作区目录作为发布身份。
 
 同进程插件挂死或部分注册不能靠静态分析证明可隔离。T17 必须在命令拥有的临时 profile/home/WAL/PID/端口中验证固定 DSH 的实际行为；不支持安全卸载时明确 `HOST_RESTART_REQUIRED`，按已验证的原生回退与受控重启处理。当前不宣称热插拔或无重启回退。
+
+2026-10-08 已在固定 rc2 的本机合成场景验证加载后阻塞、终止自有宿主、重启原生配置和恢复旧组合/会话，10/10 通过；见[A/B/C 集成验收](../hackathon/evidence/shinemage-abc-integration-20261008.md)。该结果只覆盖进程级恢复，不关闭任意插件隔离、生产或完整兼容门禁。SDK 审计属于工具链升级，不加入每次单插件更新。
 
 profile 回退不回滚已写入 CRM/SQLite 的记录。D15 是否启用 durable save 由 T3/T7 的服务状态矩阵决定：candidate/correlation/idempotency、成功但回执丢失、重复提交、UNKNOWN 重放和 forward-fix 都需要证据。证据不足时首个候选仍只交付可核对结果。
 

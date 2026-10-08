@@ -2,6 +2,8 @@
 
 这条路径只验证一个插件包。DSH、CRM 服务、知识库和真实业务数据不随插件构建；插件失败时保留 DSH 原生对话是 T17 宿主验收目标，当前 pack/candidate 尚不能证明进程隔离。插件包默认不得覆盖原生标题、侧栏、会话或工具合同，未接通的 capability 必须显示 `NOT_AVAILABLE` 及原因。
 
+单插件更新十场、整次取消和 HTML headed 探针的现有命令、输入范围及实际结果见[A/B/C 集成验收](../hackathon/evidence/shinemage-abc-integration-20261008.md)。这些是隔离验收入口，不是安装到现役环境的命令；进程级恢复通过不等于支持热插拔。
+
 ## 前置条件
 
 - 插件开发使用 Node `24.19.0`、pnpm `11.28.2`。Python `3.14+` 属于后端服务、合成集成测试与发布校验工具的环境，不是 CRM 插件运行依赖。
@@ -136,6 +138,8 @@ pnpm dsh plugin verify-host \
 ## 失败处理
 
 `PLUGIN_PACK_SOURCE_DIRTY` 表示必须先完成 reviewed commit，再从干净 checkout 重打包；不要删除校验或使用 dirty 包。`PROFILE_PLUGIN_*` 表示 profile 与 package 合同不一致。候选输出目录必须为空，state path 必须是绝对路径并与后续 reconcile/status/resume 共用。真实 DSH 宿主、WSL2/WAL、远端回执和生产切换另有门禁与授权。
+
+仓库级 `pipeline.mjs --check` 现在明确禁止 Corepack 联网；若提示 `Network access disabled by the environment`，先核对固定 pnpm 缓存是否已准备。该入口会净化环境，不能假定外层 PATH 或 `COREPACK_HOME` 被沿用。不要关闭 TLS 校验，也不要用单个包构建成功冒充全量检查通过；当前集成树的这一环境缺口仍见上述验收记录。
 
 ## 边界检查
 

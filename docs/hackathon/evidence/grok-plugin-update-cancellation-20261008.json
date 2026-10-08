@@ -1,0 +1,135 @@
+{
+  "schema": "shinemage-plugin-update-cancellation/v1",
+  "generated_utc": "2026-10-08T03:27:36.931Z",
+  "node": "v24.19.0",
+  "python": "3.14.4",
+  "dsh_host_scenarios": "NOT_RUN",
+  "runs": [
+    {
+      "mode": "during-int",
+      "signal": "SIGINT",
+      "exit_code": 2,
+      "exit_signal": null,
+      "sleeper_pid_seen": true,
+      "sleeper_reaped": true,
+      "overall": "INTERRUPTED",
+      "interrupt": "SIGINT",
+      "cleanup_failed": false,
+      "started": [
+        "one"
+      ],
+      "run_statuses": [
+        {
+          "scenario": "one",
+          "status": "INTERRUPTED",
+          "kill_sent": true,
+          "term_sent": true,
+          "remaining": false
+        }
+      ],
+      "not_started": [
+        {
+          "scenario": "two",
+          "status": "NOT_RUN"
+        }
+      ]
+    },
+    {
+      "mode": "during-term",
+      "signal": "SIGTERM",
+      "exit_code": 2,
+      "exit_signal": null,
+      "sleeper_pid_seen": true,
+      "sleeper_reaped": true,
+      "overall": "INTERRUPTED",
+      "interrupt": "SIGTERM",
+      "cleanup_failed": false,
+      "started": [
+        "one"
+      ],
+      "run_statuses": [
+        {
+          "scenario": "one",
+          "status": "INTERRUPTED",
+          "kill_sent": true,
+          "term_sent": true,
+          "remaining": false
+        }
+      ],
+      "not_started": [
+        {
+          "scenario": "two",
+          "status": "NOT_RUN"
+        }
+      ]
+    },
+    {
+      "mode": "gap-int",
+      "signal": "SIGINT",
+      "exit_code": 2,
+      "exit_signal": null,
+      "sleeper_pid_seen": false,
+      "sleeper_reaped": null,
+      "overall": "INTERRUPTED",
+      "interrupt": "SIGINT",
+      "cleanup_failed": false,
+      "started": [
+        "one"
+      ],
+      "run_statuses": [
+        {
+          "scenario": "one",
+          "status": "PASS",
+          "kill_sent": null,
+          "term_sent": null,
+          "remaining": null
+        }
+      ],
+      "not_started": [
+        {
+          "scenario": "two",
+          "status": "NOT_RUN"
+        }
+      ]
+    },
+    {
+      "mode": "after-term",
+      "signal": "SIGTERM",
+      "exit_code": 2,
+      "exit_signal": null,
+      "sleeper_pid_seen": false,
+      "sleeper_reaped": null,
+      "overall": "INTERRUPTED",
+      "interrupt": "SIGTERM",
+      "cleanup_failed": false,
+      "started": [
+        "one",
+        "two"
+      ],
+      "run_statuses": [
+        {
+          "scenario": "one",
+          "status": "PASS",
+          "kill_sent": null,
+          "term_sent": null,
+          "remaining": null
+        },
+        {
+          "scenario": "two",
+          "status": "PASS",
+          "kill_sent": null,
+          "term_sent": null,
+          "remaining": null
+        }
+      ],
+      "not_started": []
+    }
+  ],
+  "files": {
+    "scripts/dsh-b0/plugin-update-trial.mjs": "ea9e6d0d02a0da3d2329968a9bb162ecb8eca9bfb3175eb27c42bda51cf393f6",
+    "scripts/dsh-b0/plugin-update-trial.test.mjs": "6d6de27da038f5f2009cc4188cdc3e7a4a0007e21eb1c37d462e8c3c01871fe9",
+    "scripts/dsh-b0/plugin-update-trial-cancel.test.mjs": "9af610af57c2c914329b4560b54efb892fd4b74bfbedca68acd2d362f080efde",
+    "scripts/dsh-b0/plugin-update-trial-cancel-fixture.mjs": "807bd1ff58439a19a79512477d845ab02a9d7fc48c28ed0e82d1371785767869",
+    "scripts/dsh-b0/pinned-host-acceptance.mjs": "f10b317531f313efd1ffa106a9fae33420b7ee43d6ac732561503a0fd807263a"
+  }
+}

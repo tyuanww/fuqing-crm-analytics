@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import type { FreeHtmlLibraryStore } from './free-html-library/store.mjs';
-import { acceptSelection, acceptTargets, editablePageNodes, selectionSrcdoc, type TextNode } from './html-selection-bridge.mjs';
+import { acceptExitRequest, acceptSelection, acceptTargets, editablePageNodes, selectionSrcdoc, type TextNode } from './html-selection-bridge.mjs';
 import type { PageNode } from './html-node-graph-bridge.mjs';
 import { editorPageCatalog } from './editor-page-nodes.mjs';
 import { applyPresentationOverlay } from './presentation-overlay.mjs';
@@ -51,17 +51,18 @@ function completePagePackage<T extends { html: string; css: string; js: string; 
   };
 }
 
-export function HtmlPreview({ pkg, overlays = null, overlayNodes = [], pageId = 'workspace', version = 0, editing = false, selectBlocks = false, nodes = NO_NODES, editableIds = [], selected, draft = null, onUnresolved, onSelect, onTargets, title }: {
+export function HtmlPreview({ pkg, overlays = null, overlayNodes = [], pageId = 'workspace', version = 0, editing = false, selectBlocks = false, nodes = NO_NODES, editableIds = [], selected, draft = null, onUnresolved, onSelect, onTargets, onExitEdit, title }: {
   pkg: { html: string; css?: string; js?: string; resources?: unknown[]; presentation?: components['schemas']['PagePresentation'] | null }; pageId?: string; version?: number;
   overlays?: Record<string, { text?: string; style?: Record<string, string>; attributes?: Record<string, string> }> | null;
   overlayNodes?: Array<{ node_id?: string; source_range?: { start: number; end: number } | null }>;
   editing?: boolean; selectBlocks?: boolean; nodes?: TextNode[]; editableIds?: string[]; selected?: string;
   draft?: { nodeId: string; text: string; active: boolean; reset: number; style?: Record<string, string> | null } | null;
   onUnresolved?(count: number): void;
-  onSelect?(node: TextNode | null): void; onTargets?(nodes: TextNode[]): void; title: string;
+  onSelect?(node: TextNode | null): void; onTargets?(nodes: TextNode[]): void; onExitEdit?(): void; title: string;
 }) {
   const frame = useRef<HTMLIFrameElement>(null);
   const callback = useRef(onSelect); callback.current = onSelect;
+  const exitCallback = useRef(onExitEdit); exitCallback.current = onExitEdit;
   const targetsCallback = useRef(onTargets); targetsCallback.current = onTargets;
   const unresolvedCallback = useRef(onUnresolved); unresolvedCallback.current = onUnresolved;
   const draftStyleKey = draft?.style ? Object.entries(draft.style).map(([key, value]) => key + ':' + value).join(';') : '';
@@ -86,6 +87,7 @@ export function HtmlPreview({ pkg, overlays = null, overlayNodes = [], pageId = 
     let eligible: TextNode[] = [];
     const receive = (event: MessageEvent) => {
       const context = { source: frame.current?.contentWindow ?? null, channel, pageId, version, nodes };
+      if (acceptExitRequest(event, context)) { exitCallback.current?.(); return; }
       const targets = acceptTargets(event, context);
       if (targets !== undefined) { eligible = targets; targetsCallback.current?.(targets); return; }
       const node = acceptSelection(event, { ...context, nodes: eligible });
@@ -120,7 +122,7 @@ function decodeText(text: string) {
   const node = document.createElement('textarea'); node.innerHTML = text; return node.value;
 }
 const bindingCopy: Record<string, string> = { UNBOUND_SAMPLE: '未绑定数据', BOUND_VERIFIED: '已核验数据来源', BOUND_STALE: '数据绑定待更新' };
-export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, onSourceFallback, aiMode = false }: { store: FreeHtmlLibraryStore; onInspect?(): void; onWholeAI?(): void; onSourceFallback?(): void; aiMode?: boolean; onAI?(selection: AISourceSelection | null, instruction: string): Promise<boolean> }) {
+export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, onSourceFallback, onExitEdit, aiMode = false }: { store: FreeHtmlLibraryStore; onInspect?(): void; onWholeAI?(): void; onSourceFallback?(): void; onExitEdit?(): void; aiMode?: boolean; onAI?(selection: AISourceSelection | null, instruction: string): Promise<boolean> }) {
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
   const current = state.current!;
   const [sourceFile, setSourceFile] = useState<'html' | 'css' | 'js'>('html');
@@ -267,6 +269,7 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, onSourceF
           draft={selected ? { nodeId: selected.node_id, text: value, active: value !== original, reset: state.draftReset ?? 0, style: styleFocus === 'style' && Object.keys(styles).length ? styles : null } : null}
           onUnresolved={setUnresolvedEdits}
           onSelect={commitSelection}
+          onExitEdit={() => { if (state.contextPanel) store.closeContext(); else if (onExitEdit) onExitEdit(); else store.exitEdit(); }}
           onTargets={verified => setAvailability({ session, nodes: verified })} />
         : <div className="cockpit-empty"><h2>预览已暂停</h2><p>已保存的页面和当前修改均保留。</p><button onClick={() => store.restartPreview()}>恢复预览</button></div>}
       </div>
@@ -284,7 +287,7 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, onSourceF
         <textarea className="cockpit-source" data-testid="html-source-editor" rows={14} value={sourceValue}
           disabled={locked || (current.binding_state !== 'UNBOUND_SAMPLE' && sourceFile !== 'css')}
           onChange={event => store.setSourceText(sourceFile, event.target.value)} />
-        {current.binding_state !== 'UNBOUND_SAMPLE' && sourceFile !== 'css' ? <p className="cockpit-muted">绑定页面的 HTML/JavaScript 受保护，只允许受控 CSS 草稿。</p> : null}
+        {current.binding_state !== 'UNBOUND_SAMPLE' && sourceFile !== 'css' ? <p className="cockpit-muted" role="alert" data-testid="html-binding-rejection">绑定页面的 HTML/JavaScript 受保护，只允许受控 CSS 草稿。</p> : null}
         {state.sourceDraft?.changed ? <p className="cockpit-change">源码草稿已生成，确认前不会写入版本。</p> : null}
         <button disabled={locked || !state.sourceDraft?.changed} onClick={() => store.discardSourceDraft()}>放弃源码草稿</button>
         <button className="cockpit-primary" data-testid="html-source-preview" disabled={locked || !state.sourceDraft?.changed}

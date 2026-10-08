@@ -2,7 +2,9 @@
 
 当前提交、版本和现役见 [STATUS](./STATUS.md)。目录、端口和检索见 [维护地图](./docs/operating/maintainer-map.md)。对话生成 HTML 的步骤见 [从对话生成 HTML 驾驶舱](./docs/operating/cockpit-native-html.md)。产品仍 PARTIAL。
 
-> 当前事实（以 [STATUS](./STATUS.md) 为准）：产品 VERSION `0.20.0.0`，DSH `0.1.7-rc.2`，固定 upstream `477b4f42`；`dsh-0.20.0.0-r1` 已发布，杭州 current 仍是上一份运行版本，候选尚未 activate。产品仍是 PARTIAL；完整浏览器、真实模型、WAL、operator gate、10x backpressure、真实业务 UAT 和回退演练仍未关闭。后续发布必须从 clean reviewed commit 生成新的 immutable artifact，禁止 `git pull` 或现场编译。
+> 最近生产记录（[STATUS](./STATUS.md) 的 2026-10-07 核验）：产品 VERSION `0.20.0.0`，DSH `0.1.7-rc.2`，固定 upstream `477b4f42`；杭州 current 为 `dsh-0.20.0.0-r3`。本轮未复查或切换生产，新的插件候选未激活。产品仍 PARTIAL；局部合成验证不能替代真实模型、完整业务 UAT、生产准入及回退证据。后续发布必须从 clean reviewed commit 生成新的 immutable artifact，禁止 `git pull` 或现场编译。
+
+> 当前 A/B/C 集成（2026-10-08）：单插件更新与取消、固定宿主进程级恢复、HTML headed 验收和 SDK 信任盘查见[本轮集成验收](./docs/hackathon/evidence/shinemage-abc-integration-20261008.md)。全量 B0、SDK 分发与生产门禁仍有开放项；这份本地集成记录不代表新 Release。
 
 下方9月5–10日的决策、端口和候选追加保留为历史记录，不作为当前服务或Git HEAD。
 

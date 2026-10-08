@@ -3,6 +3,7 @@ export type TextNode = { anchor?: RenderedLocator['anchor']; packageHash?: strin
 export function editableTextNodes(pkg: any, manifest?: any): TextNode[];
 export function selectableNodes(pkg: any, manifest?: any): TextNode[];
 export function selectionSrcdoc(pkg: any, options: { channel: string; pageId: string; version: number; nodes?: TextNode[]; editableIds?: string[]; selected?: string | null; editing?: boolean; selectBlocks?: boolean }): string;
+export function acceptExitRequest(event: MessageEvent, context: { source: Window | null; channel: string; pageId: string; version: number }): boolean;
 export function acceptSelection(event: MessageEvent, context: { source: Window | null; channel: string; pageId: string; version: number; nodes: TextNode[] }): TextNode | null | undefined;
 export function acceptTargets(event: MessageEvent, context: { source: Window | null; channel: string; pageId: string; version: number; nodes: TextNode[] }): TextNode[] | undefined;
 
