@@ -126,6 +126,28 @@ def test_source_range_mapping_handles_quoted_greater_than_attributes():
     ) == (0, len(html))
 
 
+@pytest.mark.parametrize("tag,body", [
+    ("style", "body{margin:16px} section{padding:12px} button{min-height:24px}"),
+    ("script", "window.label='<h1>not-a-node</h1>'; window.counter=0;"),
+    ("template", "<section><span>not-an-active-node</span></section>"),
+    ("textarea", "not an active <span>node</span> after a long textarea body"),
+    ("title", "a long title with <span>plain text</span> for the following mapping"),
+])
+def test_raw_block_skips_only_its_own_body_and_preserves_following_node_ranges(tmp_path, tag, body):
+    html = f'<{tag}>{body}</{tag}><section id="parent"><h1>标题</h1><p><span>子元素文字</span></p></section>'
+    store = PageDocumentStore(private(tmp_path / tag))
+    request = PageDraft(title="Raw block", session_id=None, origin_file_id=f"file_{tag}",
+                        package={"html": html})
+    package = confirm(store, store.generate(ALICE, request), f"raw-block-{tag}")["spec"]["package"]
+    assert len(package["node_map"]) == 4
+    assert package["html"].startswith(f'<{tag}>{body}</{tag}>')
+    for name in ("section", "h1", "p", "span"):
+        node = next(row for row in package["node_map"] if row["node_id"].startswith(f"auto_{name}_"))
+        start, end = store._mapped_node_range(package, node["node_id"], "static_element")
+        assert package["html"][start:end].startswith(f"<{name}")
+    assert "子元素文字" in package["html"]
+
+
 def test_css_scope_parser_handles_quoted_braces():
     css = '[data-shine-node="n_card"]{--label:"a } b";color:red}'
     assert PageDocumentStore._canonical_css_ranges(

@@ -95,4 +95,4 @@ HTTP 与保护总计 **15/15 PASS**；冷安装另计 **2/2 PASS**，不把预�
 
 本次关闭这两个固定 synthetic 服务包的 WSL 离线冷安装与限定 HTTP 观测缺口。生产安装/激活、真实业务与私有知识 ACL、真实身份、签名来源/供应链、候选准入、浏览器 UAT、完整 B0/release 和远端 CI 均不在通过范围；产品保持 PARTIAL。
 
-后续对提交 `1dae6de7` 的[OCR审修](dsh-g0-parallel-followup-ocr-review-20261008.md)又修改路径、两套安装的启动前核验及进程退出竞态清理，已验证本地20项回归。新版runner本轮WSL为NOT_RUN，与本报告封存源码不再AST等价；上述远端实际runner摘要、2/2冷安装和15/15 HTTP只属于原执行，不替换为新源码现场通过。
+后续对提交 `1dae6de7` 的[OCR审修](dsh-g0-parallel-followup-ocr-review-20261008.md)又修改路径、两套安装的启动前核验及进程退出竞态清理，已验证本地20项回归并正常提交 `5bf2bc77`。审修提交时新版runner的WSL为NOT_RUN，与本报告封存源码不再AST等价；上述摘要、2/2冷安装和15/15 HTTP仍只属于原执行。随后新版原字节另行完成WSL复验，见[独立新证据](dsh-g0-crm-services-target-ocr-wsl-20261008.md)，不替换本报告的原始源码摘要和运行记录。

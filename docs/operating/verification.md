@@ -310,4 +310,31 @@ workbench 的日常独立入口见[作者 Quickstart](dsh-plugin-author-quicksta
 
 本轮未运行完整B0/release、真实身份/业务/浏览器UAT、远端CI或生产切换。官方新版本盘查为[BLOCKED_UPSTREAM_RELEASE](../hackathon/evidence/dsh-g0-sdk-upgrade-candidate-20261008.md)，SDK分发保持BLOCKED，不能将开发入口与固定服务synthetic通过当成供应链或发布放行。
 
-本批提交 `1dae6de7` 的后续OCR审修与本次20/12/12/25结果见[审核记录](../hackathon/evidence/dsh-g0-parallel-followup-ocr-review-20261008.md)。已修复runner的行为改变，本次新版WSL未运行，旧现场结果只对应原执行SHA。
+本批提交 `1dae6de7` 的后续OCR审修与当次20/12/12/25结果见[审核记录](../hackathon/evidence/dsh-g0-parallel-followup-ocr-review-20261008.md)，已正常提交 `5bf2bc77`。验收器行为改变后另在新WSL隔离环境运行该提交原字节，同一两包 **2/2冷安装、15/15 HTTP/保护 PASS**，见[当前源码现场证据](../hackathon/evidence/dsh-g0-crm-services-target-ocr-wsl-20261008.md)。本地20项回归不算WSL测试，旧现场结果仍只对应旧执行SHA；该观测不授予生产/候选准入。
+
+## 并发验证与SDK组成补证（2026-10-08）
+
+当前插件包的 HTML 宿主入口为 `scripts/dsh-b0/html-host-browser.probe.mjs`，先用 Node24 查看 `--help`。它只消费事先核对的 `html-host-input-audit/v1`：固定官方 rc2 checkout/CLI/Web、immutable 8 成员插件包，以及与当前源码逐字节一致的独立作者输入。不会构建源码或准备 SDK。
+
+运行前需已有 Python3.14 的合成后端测试依赖、Playwright 模块和可用的系统 Chrome；入口不安装这些环境。只读输入检查成功不等于浏览器、后端或整链已运行。
+
+```bash
+node scripts/dsh-b0/html-host-browser.probe.mjs \
+  --input /absolute/reviewed-inputs.json \
+  --output /absolute/worktree/.context/checks/new-owned-run \
+  --python /absolute/python3.14 \
+  --playwright /absolute/playwright/index.mjs \
+  --check
+```
+
+`--check` 只读核验且不创建输出；明确需要运行隔离宿主时替换为 `--run-isolated-host`。默认使用空闲 loopback 4328，拒绝 6677、既有输出、输入别名/漂移/额外成员和调用者 Git 配置干扰。后端使用当前源码和自有小型合成库；原生对话使用显式合成响应及候选文件写入器，真实模型不由此放行。浏览器/宿主/HTTP 回收独立执行，HTTP 优雅退出、TERM、KILL 与外层总预算有界，日志失败不能跳过后续回收。`html-host-browser-inputs.test.mjs`、`html-host-browser-cleanup.test.mjs` 纳入 B0 显式清单；HTML helper 和 renderer 回归也由插件正式入口及 B0 自动收集。
+
+本轮当前包 `285f882a…` 的官方宿主整链17项、独立 build/typecheck、35/129/2前端、25合同、10原生接线、56后端、32专项和独立renderer7项实际通过，见[当前包证据](../hackathon/evidence/dsh-g0-html-host-acceptance-20261008.md)。32专项是10 mounted、10输入防护、4清理、8renderer；与正式套件重叠，不累加为新的唯一测试总数。后端也按 `--noconftest -W error::ResourceWarning` 复验56项；完整B0、真实模型、WSL当前HTML包及生产未运行。
+
+当前验收器统一处理 SIGINT/SIGTERM（禁用 Playwright 默认信号退出）、运行期180秒后取消并进入独立有界清理；解释器5秒、HTTP10秒且覆盖body、失败截图/文本独立限时。进入编辑后首选区等待iframe桥接就绪。修后cleanup8/inputs10与真实Host两种中断、正常17项已通过，见[提交前审修](../hackathon/evidence/dsh-g0-host-tool-ocr-review-20261008.md)。上段32项属此前阶段，不用旧计数代替新源码验证。
+
+`scripts/dsh-b0/shell-tool-contract.test.mjs` 已加入B0显式清单。实际官方模块执行要求绝对 `B0_BUILD_UPSTREAM` 和新绝对 `DSH_TOOL_CONTRACT_EVIDENCE`；明确输入时修后12 tests/25内部场景通过。未设置时3个runtime/超时/中断测试是SKIP/NOT_RUN，9个输出边界/进程组/只读Git回归不能代替它们。该入口不prepare/build/install/启动Web、不连接模型或生产，45模块输入前后核对；编译artifact身份未验证。默认jobs超时promotion、timeout-policy清理与非硬中止、failure union及完整命令/故障证据见[合同报告](../hackathon/evidence/dsh-g0-shell-tool-contract-20261008.md)。仍须另补Web/模型/WAL/WSL/Windows范围。
+
+`node --test scripts/release/backpressure.test.mjs scripts/release/operator-gate.test.mjs scripts/release/local-verify.test.mjs scripts/release/cli.test.mjs` 使用Node24，当前21 PASS；新五项回归也纳入现有B0显式清单和release自动发现。任务首失败后停止派发并等待在途任务结束；callback须自身有界，本地loopback请求带5秒时限并读完响应。这不是生产负载、15分钟SLI或十次插件更新证据，见[失败与回收](../hackathon/evidence/dsh-g0-backpressure-drain-20261008.md)。完整B0/release在此子项未重跑。
+
+SDK补证使用现有只读 `sdk-content-audit.mjs` / `sdk-supply-chain.mjs` 及本轮有摘要的一次性离线组成/attestation控制器，不新增日常插件命令或运行全量prepare。pnpm来源验证显式补系统公开CA且保留TLS校验；禁网复验与拒绝矩阵通过。精确输入、控制器/原始响应摘要、保留依赖图/incomplete BOM及八类开放门禁见[本次补证](../hackathon/evidence/dsh-g0-sdk-trust-remaining-20261008.md)。能解码资产不证明无恶意内容、 ad-hoc签名不证明发布者，SDK保持BLOCKED。

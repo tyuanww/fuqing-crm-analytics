@@ -3,6 +3,7 @@ import { validatePresentation } from '../presentation/model.mjs';
 import { FREE_PAGE_CSP } from '../runtime/isolation-policy.mjs';
 import { pageBridgeBootstrap } from '../runtime/message-channel.mjs';
 import { bytesToBase64 } from '../resource/bytes.mjs';
+import { previewDocumentContent } from './document-content.mjs';
 
 function neutralizeWrapperBreakout(html) {
   return String(html)
@@ -47,7 +48,10 @@ export function buildSrcdoc({
 } = {}) {
   if (!validatePresentation(presentation, { html, css, js })) throw new Error('文案修改与页面来源不匹配。');
   const presentationScript = presentation?.edits?.length ? '<script>(' + presentationRuntime.toString() + ')(' + JSON.stringify(presentation.edits).replace(/</g, '\\u003c') + ');</script>' : '';
-  const rewrittenHtml = neutralizeWrapperBreakout(rewriteResources(html, resources));
+  const document = previewDocumentContent(html);
+  const htmlTag = neutralizeWrapperBreakout(rewriteResources(document.htmlTag, resources));
+  const bodyTag = neutralizeWrapperBreakout(rewriteResources(document.bodyTag, resources));
+  const rewrittenHtml = neutralizeWrapperBreakout(rewriteResources(document.content, resources));
   const rewrittenCss = neutralizeStyle(rewriteResources(css, resources));
   const rewrittenJs = neutralizeScript(rewriteResources(js, resources));
   const bootstrap = pageBridgeBootstrap({ instanceId, pageId, version, nonce });
@@ -57,7 +61,7 @@ export function buildSrcdoc({
       ? `<link rel="stylesheet" href="${resourceHref(row)}">`
       : `<style>@font-face{font-family:'fp-${row.resource_id}';src:url(${resourceHref(row)});}</style>`))
     .join('');
-  return `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="${FREE_PAGE_CSP}"><title>自由页面预览</title>${previewLinks}<style>${rewrittenCss}</style><script>${bootstrap}<\/script></head><body>${rewrittenHtml}<script>${rewrittenJs}<\/script>${presentationScript}</body></html>`;
+  return `<!doctype html>${htmlTag}<head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="${FREE_PAGE_CSP}"><title>自由页面预览</title>${previewLinks}<style>${rewrittenCss}</style><script>${bootstrap}<\/script></head>${bodyTag}${rewrittenHtml}<script>${rewrittenJs}<\/script>${presentationScript}</body></html>`;
 }
 
 export function previewResourceUrls(resources, createObjectUrl) {

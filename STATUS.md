@@ -18,10 +18,19 @@
 
 - 当前采用历史结果快照 + 保存时校验；陈旧/过期阈值已移出当前待办，不再等待确认，也不新增到期系统。保留生成时间/来源和 `NOT_CHECKED`，权限、候选准入、冲突、幂等与会话/请求超时保持；旧 wire/回执兼容不删除。见[决定与验证](docs/hackathon/evidence/dsh-g0-snapshot-policy-closeout-20261007.md)。
 
+### 宿主、工具与供应链并行推进（2026-10-08）
+
+- 本批提交前 OCR delegate 已核对38文件（23代码/15补充，0跳过），修复本地fsmonitor副作用、验收中断/无界等待和首次编辑iframe就绪竞态。当前正式shell **12/12、内部25**，HTML **17/17**及同字节SIGINT/SIGTERM实际清理通过；后端56和相关边界通过。原失败保留，正常hooks本地提交收录，准确SHA以Git为准；见[本次审修](docs/hackathon/evidence/dsh-g0-host-tool-ocr-review-20261008.md)。下列11/11、32项及源码SHA均属先前执行阶段；SDK BLOCKED/产品PARTIAL，未push或操作杭州。
+- 本轮从 `5bf2bc77` 继续，保留已有文档与现场证据；三个独立边界分别验证当前插件包的完整 HTML 宿主链、官方 shell/tool 合同及 SDK 组成/来源，主 Agent 集成共享状态。
+- 当前 HTML 插件包 `285f882a…`（8 成员、574 份源码/独立作者输入一致）在固定官方 rc2 Web CLI + headless Chrome 完成 **17/17 PASS**：首个 HTML tab、嵌套选区、事件阻断、源码草稿隔离、CSS-only 绑定保护、实际候选文件收取/预览/确认 v4 与历史回读。修复空 tab 判就绪、卸载后迟到开窗、后端 raw-block 重复偏移及完整文档外壳显示/资源替换问题；原 source/hash/node_map 和 CSP/sandbox 合同保持。正式独立 build/typecheck、35 基础 +129 HTML +2 产物、25 合同、10 原生接线、后端56及专项32通过；限定 renderer 独立负例7通过。自有资源回收，旧失败包/收据保留；见[当前包证据](docs/hackathon/evidence/dsh-g0-html-host-acceptance-20261008.md)。后端为当前源码与合成小库，候选由显式合成写入器生成；真实 DeepSeek、headed/移动端/读屏、该 HTML 包 WSL/生产仍 NOT_RUN，整体 PARTIAL。
+- 固定官方shell/tool模块与timeout-policy的本机实测完成：正式入口 **11/11 PASS、内部25场景PASS**，45输入保持，14自有命令/15进程组回收。默认jobs超时会promote而继续运行，policy等待清理并不保证同进程硬中止；失败union的error.info可选。真实超时/中断/leader退出后代负测留证，见[合同报告](docs/hackathon/evidence/dsh-g0-shell-tool-contract-20261008.md)。T2/T17仍PARTIAL，编译来源attestation及Web/模型/WAL/WSL范围不由本项放行。
+- 并发验证器的首失败后继续派发、在途请求尚未结束便返回的问题已实际复现并修复；本地 HTTP 请求增加有界超时并读完响应。相关 **21 PASS / 0 FAIL / 0 SKIP**，B0 显式测试登记与 pipeline 语法检查通过，见[失败与回收证据](docs/hackathon/evidence/dsh-g0-backpressure-drain-20261008.md)。这不关闭业务负载、15分钟 SLI 或十次插件更新门禁。
+- 固定 SDK 全部26,195文件补归属与保留依赖图，361组件的BOM仍声明incomplete；pnpm11.28.2的provenance/发布身份绑定、六项拒绝和禁网复验通过。17不透明项仅完成格式/有限解码/静态属性，完整安全继续开放；67项证据和30,546条输入记录核对通过。见[组成与信任补证](docs/hackathon/evidence/dsh-g0-sdk-trust-remaining-20261008.md)。上游29公告等八类范围仍使SDK分发BLOCKED，没有重新prepare或修改pin。
+
 ### 前两组 OCR 审修（2026-10-08）
 
 - 对本批提交 `1dae6de7` 完成 OCR delegate：14/14代码文件及额外17份测试/文档/固定副本全部核对。3项确认问题已修复：验收输出父目录别名写进输入、两个 app/venv 启动前核验不完整及 owned 进程退出竞态中断清理。当前 bounded **20 PASS**、领域输入12/AST边界12/HTML合同25及边界清单检查通过；原始失败保留。见[审修证据](docs/hackathon/evidence/dsh-g0-parallel-followup-ocr-review-20261008.md)。
-- 本次改变了验收器行为，修后 runner 的 WSL 为 **NOT_RUN**；前次2/2冷安装和15/15 HTTP仍只属于封存的实际源码/包。未更改固定SDK、上游、旧candidate/journal或杭州生产；产品PARTIAL、SDK分发BLOCKED，既有未覆盖现场/供应链/生产门禁继续开放。
+- 审修已通过正常 hooks 本地提交 `5bf2bc77`；提交时修后 runner 的 WSL 为 **NOT_RUN**，旧2/2冷安装和15/15 HTTP只属于封存源码。随后复用同一服务包，在杭州新自有namespace用该提交原字节重新验证 **2/2冷安装、15/15 HTTP/保护 PASS**（3.268/4.770秒），73项新证据及135项旧证据逐项核对，4个自有服务进程回收。见[当前源码现场复验](docs/hackathon/evidence/dsh-g0-crm-services-target-ocr-wsl-20261008.md)。生产current/5组监听PID、旧candidate/journal、领域包与pin保持；产品PARTIAL、SDK分发BLOCKED，未覆盖现场/供应链/生产门禁继续开放。
 
 ### 前两组续推：官方升级候选与独立交付（2026-10-08）
 
@@ -41,7 +50,7 @@
 ### HTML 历史差异收口（2026-10-08，已提交 `e48a6ad3`）
 
 - SDK 缩减增量已通过正常 hooks 本地提交 **`d78c7cd5`**，跨平台固定领域输入回归后提交 **`68845ad0`**，均未 push。旧 HTML 工作树 43 项已逐项核对；34 项语义差异中只有两个源码文件有真实遗漏，其余为已接入、替代或历史证据。
-- 修复画布输入漏接、预览失败清稿、双向草稿互斥和显式放弃；修正测试入口漏跑 17 项。固定缩减 SDK 下正式 build/typecheck、35 基础 + 111 HTML + 2 构建产物测试通过；backend 定向 51、旧语义兼容 5 通过。见[本次证据与范围](docs/hackathon/evidence/dsh-g0-html-semantic-integration-20261008.md)。旧工作树不删除；私有依赖安装和独立测试夹具已在上方续推中收敛，真实浏览器/模型/杭州 HTML 包验收未执行。
+- 修复画布输入漏接、预览失败清稿、双向草稿互斥和显式放弃；修正测试入口漏跑 17 项。固定缩减 SDK 下正式 build/typecheck、35 基础 + 111 HTML + 2 构建产物测试通过；backend 定向 51、旧语义兼容 5 通过。见[本次证据与范围](docs/hackathon/evidence/dsh-g0-html-semantic-integration-20261008.md)。旧工作树不删除；私有依赖安装和独立测试夹具已在上方续推中收敛。该历史批次没有浏览器证据；后续当前包本机官方Host/headless17项见上文，真实模型和杭州HTML包仍未验收。
 
 ### v2 SDK 缩减分发与复验（2026-10-07，已提交阶段）
 

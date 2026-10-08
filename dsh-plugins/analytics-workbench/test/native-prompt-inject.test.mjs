@@ -143,13 +143,24 @@ async function boot(t, {
     overrideTokens: () => () => {},
     getTheme: () => ({ active: { colorScheme: 'dark' } }),
   });
-  ctx.provide('uiWorkspace', { openSession(id) { snapshot.byId = Object.fromEntries(snapshot.ids.map(key => [key, { id: key, retainedBy: { mainView: key === id ? 1 : 0 } }])); } });
+  let mountedSession = SESSION_ID;
+  const mountedListeners = new Set(), mountingTimers = [];
+  t.after(() => { for (const timer of mountingTimers) clearTimeout(timer); });
+  ctx.provide('uiWorkspace', { openSession(id) {
+    snapshot.byId = Object.fromEntries(snapshot.ids.map(key => [key, { id: key, retainedBy: { mainView: key === id ? 1 : 0 } }]));
+    mountingTimers.push(setTimeout(() => { mountedSession = id; for (const listener of [...mountedListeners]) listener(); }, adoptionDelay));
+  } });
   ctx.provide('layout', { selectPanel() {} });
-  let adoptionReads = 0;
   ctx.provide('sidebarRight', {
-    openResource: address => openedResources.push(address),
-    tabsIn: () => ++adoptionReads > adoptionDelay ? [{ id: 'guide' }] : [],
-    openResourceIn: (sessionId, address) => openedResources.push({ sessionId, address }),
+    mounted: {
+      getSnapshot: () => mountedSession,
+      subscribe(listener) { mountedListeners.add(listener); return () => mountedListeners.delete(listener); },
+    },
+    openResource: address => openedResources.push(address.startsWith('dsh-resource://cockpit-ai/')
+      ? { sessionId: mountedSession, address } : address),
+    // A fresh adopted/mounted native seat legitimately owns no tab yet.
+    tabsIn: () => [],
+    openResourceIn: () => { throw new Error('internal sidebar face must not open HTML artifacts'); },
   });
   ctx.provide('sidebarRightTabs', { register: () => () => {} });
   await ctx.plugin({ name: 'remote.workspaceFiles', apply: c => { new RemoteWorkspaceLike(c, workspaceCalls); } }).await();
@@ -223,7 +234,10 @@ async function boot(t, {
     await fiber.dispose();
     disposeSlots();
   });
-  return { client, ctx, entries, prompts, fiber, saved, disposeSlots, workspaceCalls, openedResources, currentEdit: () => currentEdit };
+  return { client, ctx, entries, prompts, fiber, saved, disposeSlots, workspaceCalls, openedResources,
+    mountedWaiterCount: () => mountedListeners.size,
+    publishMounted(id) { mountedSession = id; for (const listener of [...mountedListeners]) listener(); },
+    currentEdit: () => currentEdit };
 }
 
 function generateDirect(entries) {
@@ -437,4 +451,27 @@ test('inline HTML request uses native prompt and opens only its adopted session 
   assert.equal(prompts[0].requestId, 'artifact-' + job.id);
   assert.match(prompts[0].content[0].text, /卡片标题改成季度收入/);
   assert.deepEqual(openedResources, [{ sessionId: job.session_id, address: 'dsh-resource://cockpit-ai/' + job.id }]);
+});
+
+test('disposing the real client plugin prevents a delayed HTML mount from opening a tab', async t => {
+  const previous = process.env.PAGE_DOCUMENTS_HTTP_BASE;
+  process.env.PAGE_DOCUMENTS_HTTP_BASE = 'http://127.0.0.1:18888';
+  t.after(() => { if (previous === undefined) delete process.env.PAGE_DOCUMENTS_HTTP_BASE; else process.env.PAGE_DOCUMENTS_HTTP_BASE = previous; });
+  let job;
+  t.mock.method(globalThis, 'fetch', async (_url, init) => {
+    job = { ...JSON.parse(init.body), status: 'WAITING', workspace: '/synthetic/owned',
+      session_id: 'session-cockpit-ai-delayed', title: 'standalone.html' };
+    return new Response(JSON.stringify(job));
+  });
+  const runtime = await boot(t, { adoptionDelay: 10000, createSession: async options => options.sessionId });
+  const { aiClient } = runtime.entries.find(row => row.options.name === 'main' && row.options.key === 'cockpit').options.inject();
+  const pending = aiClient.begin('page', 'page_test', 3, null, '等待中的 HTML 修改');
+  const deadline = Date.now() + 1000;
+  while (!runtime.mountedWaiterCount() && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 1));
+  assert.equal(runtime.mountedWaiterCount(), 1);
+  await runtime.fiber.dispose();
+  assert.equal(await pending, false);
+  assert.equal(runtime.mountedWaiterCount(), 0);
+  runtime.publishMounted(job.session_id);
+  assert.deepEqual(runtime.openedResources, []);
 });

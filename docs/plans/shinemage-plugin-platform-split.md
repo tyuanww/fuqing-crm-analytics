@@ -21,9 +21,23 @@
 
 全文核对与本轮代码修复证据见 [2026-10-03 审查修复记录](../hackathon/evidence/dsh-g0-review-fixes-20261003.md)。未关闭的实施项沿用 T1–T23，不新增重复规划或再次询问已回答的选择。
 
+### 2026-10-08 宿主、工具与供应链并行推进
+
+按用户授权在当前工作树从 `5bf2bc77` 继续，保留既有六项文档；三个独立边界为当前HTML包的完整宿主链、官方shell/tool执行合同、固定SDK组成/信任。主Agent统一集成测试清单与事实，不另建计划或修改旧candidate/journal。
+
+T15 当前 HTML 包 `285f882a…` 的8成员、574份源/独立作者输入均匹配，固定官方 rc2 + headless Chrome 完成 **17/17 PASS**。空会话首个tab、卸载取消、raw-block范围与完整document投影/资源替换修复后，actual candidate 写入、收取、预览、确认v4和版本回读均实跑。正式独立 build/typecheck、35/129/2 前端、25合同、10原生接线、56后端、32专项和独立renderer7项通过，清理与CI入口核对留证；详见[当前 HTML 包证据](../hackathon/evidence/dsh-g0-html-host-acceptance-20261008.md)。源/hash/node_map与CSP/sandbox保持；后端为当前源码夹具，模型为显式synthetic writer。真实模型、headed/移动/读屏、该包WSL/生产继续NOT_RUN，T15仍PARTIAL；旧失败和旧候选不覆盖。
+
+T2/T17官方模块子项使用真实固定Context/ToolRuntime/bash/jobs与timeout-policy，正式11 tests、内部25场景PASS，45输入与官方Git保持。14命令/15PGID回收，超时/中断和主进程退出后代回收已故障验证。默认jobs promotion不是kill，policy等待清理并不提供同进程硬中止；Web/模型/WAL/WSL/Windows和编译attestation继续NOT_RUN/NOT_VERIFIED。见[本机合同证据](../hackathon/evidence/dsh-g0-shell-tool-contract-20261008.md)，T2/T17整体PARTIAL。
+
+并发验证器首失败后继续派发且提前返回的问题已真实复现并修复，实际HTTP回归在内的21项通过；本地请求加有界时限并读完响应。见[本次证据](../hackathon/evidence/dsh-g0-backpressure-drain-20261008.md)。这只是T10/T16的验证器子项，不代表15分钟SLI、业务容量或T18十次更新。
+
+T5/T19/T15补全部26,195文件归属与361组件incomplete BOM，pnpm11.28.2的构建/发布身份、六项拒绝和禁网复验通过；67项证据、30,546条SDK输入保持。17不透明项的有限解码/静态属性不替代安全审查，完整SBOM/其他身份/撤销/上游29公告等八类范围继续BLOCKED，见[精确补证](../hackathon/evidence/dsh-g0-sdk-trust-remaining-20261008.md)。未再次prepare SDK，不把SDK维护绑定每个插件更新。
+
 ### 2026-10-08 前两组续推
 
-后续对本批提交 `1dae6de7` 完成 OCR delegate 和额外排除文件核对；3项验收工具问题已修复，本次bounded20/领域输入12/AST边界12/HTML合同25及清单检查通过。修后runner现场WSL为NOT_RUN，旧2/2与15/15只属于原执行快照；产品与SDK门禁不变，见[本次审修证据](../hackathon/evidence/dsh-g0-parallel-followup-ocr-review-20261008.md)。
+后续对本批提交 `1dae6de7` 完成 OCR delegate 和额外排除文件核对；3项验收工具问题已修复，本次bounded20/领域输入12/AST边界12/HTML合同25及清单检查通过，正常hooks提交 `5bf2bc77`。提交时修后runner现场WSL为NOT_RUN，旧2/2与15/15只属于原执行快照；见[本次审修证据](../hackathon/evidence/dsh-g0-parallel-followup-ocr-review-20261008.md)。
+
+随后按队列用 `5bf2bc77` 的验收器原字节、同一指标/知识服务包及固定wheel，在杭州新自有namespace完成 **2/2冷安装、15/15 HTTP/保护 PASS**（3.268/4.770秒）；73项新证据与135项旧证据完整核对、4进程回收，生产current/监听PID及原候选/pin保持。见[修后现场证据](../hackathon/evidence/dsh-g0-crm-services-target-ocr-wsl-20261008.md)。只关闭新版runner现场子项，不将本地20项负测算作WSL套件；产品与SDK供应链/生产准入门禁不变。
 
 从干净 `68845ad0` 按已有队列并行推进，不新建规划。官方最新三个 release、默认 master 与 npm 发布索引已重新读取：尚无去除已知29条公告的官方候选，`BLOCKED_UPSTREAM_RELEASE`；26 bindings、29实际import、12slot和两profile探针只有静态/拒绝证据，没有安装或运行新宿主。固定 rc2 pin 和上游原字节保持，见[候选盘查](../hackathon/evidence/dsh-g0-sdk-upgrade-candidate-20261008.md)。
 
@@ -141,12 +155,12 @@ SDK 归档/供应链原始 13 文件及新增审修记录已核对，三项扫�
 | 任务 | 当前状态 | 已有证据 | 尚未关闭 |
 |---|---|---|---|
 | T1 | IMPLEMENTED / STATIC PASS | 架构设计、机器 policy/inventory、11 包及当前 AST 盘点；含 import-equals 的 drift/循环/越界/公开导出负测纳入 B0 pipeline，精确数量与源摘要以生成的边界清单为准 | 这只关闭依赖盘点；真实宿主与服务语义由 T2/T3/T17 验证 |
-| T2 | PARTIAL / WSL HOST + DECLARED TOOL CORPUS PASS | 固定 Linux runtime 和当前候选的杭州 HTTP/headless、在途崩溃终态恢复已实跑；文本、工具与附件/委派元数据语料的截断/rc1↔rc2/旧状态四项矩阵已通过，见[恢复证据](../hackathon/evidence/dsh-g0-first-purchase-terminal-candidate-20261007.md)、[工具语料](../hackathon/evidence/dsh-g0-session-tool-wsl-20261007.md)及[元数据语料](../hackathon/evidence/dsh-g0-session-rich-corpus-20261007.md) | 新 rc1 可追踪 WSL 构建已通过；旧构建历史签名/来源信任、完整语料范围、headed/移动端/无障碍与 shell/tool union 仍开放；0.2.0 仍 DEFERRED |
+| T2 | PARTIAL / DECLARED CORPUS + LOCAL TOOL PASS | 固定Linux runtime的杭州HTTP/headless与在途崩溃恢复、文本/工具/附件委派元数据的四项恢复矩阵按各自来源通过；本轮固定官方shell/tool/jobs/timeout-policy本机25场景及11项正式测试通过，见[本机合同](../hackathon/evidence/dsh-g0-shell-tool-contract-20261008.md)及上方既有恢复证据 | 新rc1可追踪WSL构建已通过；旧构建历史信任、完整语料、headed/移动端/无障碍、shell/tool的Web派发/WAL/WSL组合及编译artifact身份仍开放；0.2.0仍DEFERRED |
 | T13 | PARTIAL / LOCAL JOURNAL PASS | profile/state/既有 journal 保留；候选快照与 v2 host evidence 已通过 CLI 幂等接入 `CANDIDATE_HOST_VERIFIED`，重复不改原候选，见[本轮证据](../hackathon/evidence/dsh-g0-host-journal-20261004.md) | 生产 activation 崩溃 replay、远端部署 receipt/reconcile；已有首购 HTTP/浏览器观察分别接入 seq 5/6 |
-| T15 | PARTIAL | 独立包/构建成果保留；新 `f9726f68` 查询/保存包、原 workbench/CRM 包与固定 Linux runtime 已完成 WSL 官方 HTTP 与 headless 五场景组合，见上方证据与[插件拆分证据](../hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md) | 物理分仓、headed/移动端/无障碍及跨版本验收、指标/知识服务的目标安装、完整 invariant/精确宿主合同、签名/SBOM/来源信任仍未关闭 |
+| T15 | PARTIAL | 独立包/构建成果保留；`f9726f68` 查询/保存包与固定Linux runtime的WSL官方HTTP/headless五场景、独立作者入口、开发SDK十消费者及指标/知识服务2/2目标冷安装与15/15保护观测已分别通过；修后服务runner已补现场复验。当前HTML包 `285f882a…` 另在本机固定官方Host/headless完成17项，见上方各自来源证据 | 当前HTML后端为源码夹具，其WSL包组合未运行；物理分仓、headed/移动端/无障碍、完整跨版本/精确宿主合同与invariant、其他服务源码范围、签名/完整SBOM/来源信任和生产准入仍未关闭；开发SDK验证不等于整台干净机器 |
 | T3 | PARTIAL / WSL HOST HTTP + HEADLESS ARTIFACT PASS | `f9726f68` 两包 owner 分离；本机官方 HTTP/Chrome、WSL 服务十项及实际 WSL 官方 Host/四包 HTTP 与 headless 五场景通过，保存进程只开自有库 | headed/移动端/无障碍、当前包跨旧版本目标矩阵、生产身份/候选准入、供应链及真实模型/UAT 未完成 |
 | T7 | PARTIAL / WSL SYNTHETIC RECOVERY PASS | 查询/保存隔离恢复与新候选 FAILED/EXECUTION_UNKNOWN、名额释放/不重复派发已实跑；原保存包 forward-fix 14/14，文本/工具 session 跨版本 4/4 分别留证；见[服务恢复](../hackathon/evidence/dsh-g0-first-purchase-recovery-wsl-20261007.md)和[新候选终态](../hackathon/evidence/dsh-g0-first-purchase-terminal-candidate-20261007.md) | 真实业务/身份、编译来源与完整候选门禁未完成；结果采用历史快照，无年龄阈值待办，生产保存 UI 未启用 |
-| T17 | PARTIAL / LOCAL HOST PASS | 固定官方 Web CLI 十项场景及父命令中断回收；实测 preset 移除后现有会话保留工具，同进程挂死需外部重启；已明确 `HOST_RESTART_REQUIRED` | 任意插件同进程隔离不承诺；生产 activation/journal/canary、目标平台与真实服务恢复仍开放，测试指针不替代原子部署 |
+| T17 | PARTIAL / LOCAL HOST + TOOL PASS | 固定官方Web CLI十项既有场景、父命令中断及本轮官方模块25场景/15自有进程组回收；preset移除后旧会话保留工具，同进程挂死需外部重启；默认jobs promotion与非硬中止的timeout-policy已实测 | 任意插件同进程隔离不承诺；生产activation/journal/canary、未覆盖目标平台与真实服务恢复仍开放，测试指针不替代原子部署 |
 | T21 | PARTIAL / LOCAL HOST + SERVICE RECEIPT PASS | `plugin candidate` 携带 profile 快照；`verify-host` 分别绑定旧 v2 十项宿主观测、首购 WSL runtime 二十项 HTTP 观察和五项 headless 浏览器观察；`verify-service` 绑定精确服务双包九项观测及按各自 schema 区分的 WSL 十四项恢复/十项 source-HTTP 观测，均以原 journal 幂等记账，见上方最新证据 | 生产 canary/rollback、远端 receive/reconcile、host activation；本机核验仍 release_ready=false，目标 JSON 不证明发布者身份 |
 | T22 | IMPLEMENTED / DOCS PASS | README、docs 索引、rc2 Quickstart 和插件作者 Quickstart 已统一当前事实与三步入口 | 现场 host/canary/rollback 仍不属于文档门禁 |
 | T23 | IMPLEMENTED / READINESS PASS | 聚合阻断码、remedy 和 Quickstart 锚点已实现；检查成功返回 0，缺项/门禁阻断返回 2；旧 runtime 的 readiness 结果仅属历史证据 | 远端证据仍由发布门禁负责 |

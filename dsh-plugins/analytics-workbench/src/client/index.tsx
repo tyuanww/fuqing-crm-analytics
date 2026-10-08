@@ -1,5 +1,6 @@
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar-right/client';
 import { CockpitArtifact, COCKPIT_ARTIFACT_TAB, cockpitArtifactAddress } from './cockpit-artifact.tsx';
+import { openNativeHtmlArtifact } from './open-native-html-artifact.mjs';
 import { CockpitPageTab, COCKPIT_PAGE_TAB, cockpitPageAddress } from './cockpit-page-tab.tsx';
 import { normalizeWorkspaceReadBytes, workspaceReadBytesRequest } from './workspace-read-bytes.mjs';
 import type {} from '@deepseek-ai/dsh-client-ui-workspace/client';
@@ -551,14 +552,19 @@ export function apply(ctx: Context): void {
   };
   const workspaceIdForPath = (path: string) => workspaceItems().find(item => item.path && item.path === path)?.workspaceId;
   const workspaceTitle = (workspaceId: string) => workspaceItems().find(item => item.workspaceId === workspaceId)?.title || '工作区';
+  const nativeArtifactLifetime = new AbortController();
+  ctx.effect(() => () => nativeArtifactLifetime.abort(), 'analytics-board: native artifact opening lifetime');
   const aiClient = createCockpitAIClient(pageDocumentsHttpOptions(), {
     async openNative(job) {
+      nativeArtifactLifetime.signal.throwIfAborted();
       const workspaceId = workspaceIdForPath(job.workspace);
       const sessionId = await ctx.sessions.create(workspaceId
         ? { workspaceId: workspaceId as never, sessionId: job.session_id as never }
         : { cwd: job.workspace, sessionId: job.session_id as never });
+      nativeArtifactLifetime.signal.throwIfAborted();
       aiSessionGroups.set(sessionId, workspaceId ? workspaceTitle(workspaceId) : '未分组');
       const showConversation = () => {
+        nativeArtifactLifetime.signal.throwIfAborted();
         ctx.uiWorkspace.openSession(sessionId);
         try { ctx.layout.selectPanel(null); } catch { /* stay if the host refuses the panel switch */ }
         try { ctx.layout.openRightbar(true, false); } catch { /* the conversation is already open */ }
@@ -570,6 +576,7 @@ export function apply(ctx: Context): void {
         sessionId, requestId: ('artifact-' + job.id) as never, mode: 'queue', clientTimeZone: 'Asia/Shanghai',
         content: [{ type: 'text', text: nativeArtifactPrompt(job) }],
       });
+      nativeArtifactLifetime.signal.throwIfAborted();
       if (!reply.ok || !reply.value.accepted) throw new Error('原生 AI 未接受请求。请在该对话选择并配置可用模型，再回驾驶舱重试打开；修改任务已保留。');
       showConversation();
       const preview = job.preview_name ?? (job.target_kind === 'page' ? 'current.html' : job.source_name);
@@ -577,10 +584,7 @@ export function apply(ctx: Context): void {
       if (address && job.target_kind === 'page') {
         // Navigation renders asynchronously. Target the adopted session, never
         // whichever old conversation still owns the visible seat this instant.
-        const deadline = Date.now() + 5000;
-        while (!ctx.sidebarRight.tabsIn(sessionId).length && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 25));
-        if (!ctx.sidebarRight.tabsIn(sessionId).length) throw new Error('对话已打开，右侧产物栏尚未就绪。任务已保留，请重试打开。');
-        ctx.sidebarRight.openResourceIn(sessionId, address);
+        await openNativeHtmlArtifact(ctx.sidebarRight, sessionId, address, { signal: nativeArtifactLifetime.signal });
       } else if (address) ctx.sidebarRight.openResource(address);
     },
     async onSaved(job) {
