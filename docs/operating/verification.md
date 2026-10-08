@@ -338,3 +338,7 @@ node scripts/dsh-b0/html-host-browser.probe.mjs \
 `node --test scripts/release/backpressure.test.mjs scripts/release/operator-gate.test.mjs scripts/release/local-verify.test.mjs scripts/release/cli.test.mjs` 使用Node24，当前21 PASS；新五项回归也纳入现有B0显式清单和release自动发现。任务首失败后停止派发并等待在途任务结束；callback须自身有界，本地loopback请求带5秒时限并读完响应。这不是生产负载、15分钟SLI或十次插件更新证据，见[失败与回收](../hackathon/evidence/dsh-g0-backpressure-drain-20261008.md)。完整B0/release在此子项未重跑。
 
 SDK补证使用现有只读 `sdk-content-audit.mjs` / `sdk-supply-chain.mjs` 及本轮有摘要的一次性离线组成/attestation控制器，不新增日常插件命令或运行全量prepare。pnpm来源验证显式补系统公开CA且保留TLS校验；禁网复验与拒绝矩阵通过。精确输入、控制器/原始响应摘要、保留依赖图/incomplete BOM及八类开放门禁见[本次补证](../hackathon/evidence/dsh-g0-sdk-trust-remaining-20261008.md)。能解码资产不证明无恶意内容、 ad-hoc签名不证明发布者，SDK保持BLOCKED。
+
+### 2026-10-08 A/B/C 本地候选关联
+
+集成提交 `bd647352` 已用既有 `pnpm dsh plugin candidate` 入口生成新 candidate/journal；profile 为原字节 `first-purchase-source-http-local`，固定服务源码 `f9726f68…`。当前 17 项包输入/candidate 合同通过，摘要链回读与 7 个不变运行成员核对通过。仅 `CANDIDATE_PREPARED`，不等于 service/host 验收、正式 CI 或激活；命令与回执见[本地候选证据](../hackathon/evidence/shinemage-abc-local-candidate-20261008.md)。

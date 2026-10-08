@@ -1,7 +1,9 @@
 # 项目状态 (Project Status)
 > 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。本页是当前运行与交付边界的 SSOT。
 
-## A/B/C 集成接续（2026-10-08，本地未提交）
+## A/B/C 集成接续（2026-10-08，本地候选已准备）
+
+已按授权本地提交集成成果 `bd647352`，正常钩子通过；沿用原字节 `first-purchase-source-http-local` 和固定服务绑定生成新 candidate `993daf31…` / 新包 `b75d90e9…`，新 journal seq 2 / `CANDIDATE_PREPARED`。只关闭本地候选关联，服务/宿主新组合、正式 CI、激活与生产仍未通过；SDK BLOCKED / release_ready=false。本轮固定环境专项 17 PASS，未重跑完整 B0；见[候选证据](docs/hackathon/evidence/shinemage-abc-local-candidate-20261008.md)。以下为候选准备之前各阶段的记录。
 
 当前集成树从 `e577f41b` detached HEAD 接续，原 `plugin-boundary-review` 的 14 份未提交文档保持只读。固定缓存已补齐，原始证据已本地归档，服务专项 28 PASS / 0 SKIP，完整本地 B0 第四轮退出 0（Python 855 PASS / 41 subtests；默认 8 SKIP）。随后显式补跑：官方 shell/tool **12 PASS / 0 SKIP**（内部 25 场景 PASS，`release_ready=false`）；当前配方查询冷安装 **3 PASS / 0 FAIL / 0 SKIP**，新回执绑定 `e577f41…` 与配方 `ddb70716…`，历史 `kernel-pack-r2` 未改。standalone example 仍缺 `COCKPIT_EXAMPLE_PACKAGE`。正式 candidate/journal 仍 **NOT_LINKED**，正式 CI 仍 **NOT_RUN**。工作区 OCR delegate 21/21，无 Critical/High，未改代码。见[接续](docs/hackathon/evidence/shinemage-abc-resume-20261008.md)、[剩余准入](docs/hackathon/evidence/shinemage-abc-remaining-20261008.md)、[当前配方查询包](docs/hackathon/evidence/shinemage-abc-kernel-current-20261008.md)。产品 PARTIAL、SDK 分发 BLOCKED。以下历史状态不直接代表本轮结果。
 

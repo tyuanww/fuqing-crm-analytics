@@ -8,6 +8,8 @@
 
 ### 2026-10-08 ShineMage A/B/C 集成本地接续
 
+最新：集成源码已本地提交 `bd647352`，新 candidate `993daf31…` / journal seq 2 已通过身份及摘要链核对，状态 **CANDIDATE_PREPARED**。只关闭此前 NOT_LINKED 的本地准备子项；针对新候选的服务/宿主、正式 CI 与激活仍未关闭，SDK BLOCKED / release_ready=false；不勾完父任务。见[本次证据](evidence/shinemage-abc-local-candidate-20261008.md)。下文保留候选准备前的执行阶段。
+
 按既有顺序已完成固定环境、完整本地 B0（默认 8 SKIP）、三个原字节归档、服务专项 28 PASS / 0 SKIP。五项里的官方 shell/tool 已显式跑过：**12 PASS / 0 SKIP**，内部 25 场景 PASS。当前配方查询冷安装已用新回执通过：**3 PASS / 0 FAIL / 0 SKIP**，绑定 `e577f41…` / `ddb70716…`；历史 `kernel-pack-r2` 未改。standalone example 仍缺页面包。当前 ABC candidate/journal 仍 **NOT_LINKED**，正式 CI 仍 **NOT_RUN**。记录见[接续](evidence/shinemage-abc-resume-20261008.md)、[剩余准入](evidence/shinemage-abc-remaining-20261008.md)、[当前配方查询包](evidence/shinemage-abc-kernel-current-20261008.md)。不重排任务或勾掉整个 T15/T17/T18/T19；原始工作树与历史失败保留，SDK 分发和真实业务验收分别关闭。物理分仓、各仓 CI/发布与 DSH 升级继续受既有 stop/go 约束。
 
 同日并行收尾只关闭具体子项：HTML 六项外审中五项 complete，剩余探针不再第三次续跑；固定包原生 200% 重排观察已收录。SDK `EMBED-INLINE-BYTES` 证据账本 PARTIAL，默认校验仍 NOT_VERIFIED，八条顶层门禁未新增 PASS。见[集成记录](evidence/shinemage-parallel-closeout-20261008.md)，不勾完 T5/T14/T15/T19，不改变 candidate/journal、CI 或生产准入。

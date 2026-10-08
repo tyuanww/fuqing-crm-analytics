@@ -1,0 +1,133 @@
+{
+  "schema": "shinemage-local-candidate-validation/v1",
+  "status": "PASS",
+  "scope": "local candidate preparation and journal integrity only",
+  "source_sha": "bd647352d02402c679b04172855e40ec8f2d96a5",
+  "candidate": {
+    "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/candidate/candidate.json",
+    "sha256": "e57173990a0a7b2c836492159b87e36d17c97a9afe78284d1daf9eaadc131fe6",
+    "digest": "993daf31daa79137c22ce8d16c84b61892117386a9b7b8c5119fa0be62abefb0"
+  },
+  "pack": {
+    "name": "shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+    "sha256": "b75d90e98167fea507e8ab3304beda98c6706d7130eb8eb4e6359209ad0fff1b",
+    "bytes": 438511
+  },
+  "profile_id": "first-purchase-source-http-local",
+  "profile_digest": "be3948850fc414ce1524226a544783de1ecb3253514cc7f1d8f3280280b3d0af",
+  "service_binding": {
+    "schema_version": "dsh-service-binding/v1",
+    "service_id": "analytics-first-purchase",
+    "source_sha": "f9726f682fc0d1d4c6aef6f07e6932c2c600c3d6",
+    "api_version": "1.0.0",
+    "state": {
+      "owner": "analysis-service",
+      "application_id": 1397572502,
+      "schema_version": 1,
+      "contract": "analytics-first-purchase-saved-provenance/v1"
+    },
+    "access": "read-write",
+    "lifecycle": "external",
+    "rollback": "preserve-service-and-state",
+    "evidence_sha256": "9a6a4a7a28e0ffc69441394c18030b0a51eb2a881c4d00566b535931f3b391b0"
+  },
+  "service_gate": {
+    "status": "LOCAL_COMPATIBLE",
+    "release_ready": false,
+    "activation": "BLOCKED_SERVICE_PACKAGE_AND_HOST_EVIDENCE_REQUIRED"
+  },
+  "journal": {
+    "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/plugin-state.json",
+    "sha256": "2a0b4f78d250c2e6f28f078d68669a701db75b5a115f35505a9945b7ceea2ded",
+    "seq": 2,
+    "statuses": [
+      "CANDIDATE_INTENT",
+      "CANDIDATE_PREPARED"
+    ]
+  },
+  "old_inputs_unchanged": true,
+  "activation": "NOT_RUN",
+  "canary": "NOT_RUN",
+  "rollback": "NOT_RUN",
+  "formal_ci": "NOT_RUN",
+  "release_ready": false,
+  "package_comparison": {
+    "status": "PASS",
+    "scope": "archive member comparison, not new headed or service-host acceptance",
+    "old_tar_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+    "new_tar_sha256": "b75d90e98167fea507e8ab3304beda98c6706d7130eb8eb4e6359209ad0fff1b",
+    "members": 8,
+    "exact_byte_members": 7,
+    "difference": {
+      "path": "package/package.json",
+      "change": "only scripts removed by controlled plugin-pack staging",
+      "removed_script_names": [
+        "build",
+        "test",
+        "test:html-edit",
+        "test:built"
+      ]
+    },
+    "new_candidate_headed": "NOT_RUN",
+    "release_ready": false
+  },
+  "review": {
+    "native": "complete;0findings",
+    "outside": "timeout180000ms;no findings",
+    "source_review_scope": "42 current incremental files",
+    "tests": {
+      "pass": 17,
+      "fail": 0,
+      "skip": 0,
+      "node": "24.19.0",
+      "python": "3.14.4",
+      "evidence": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/qa-r2/evidence.json"
+    }
+  },
+  "protected_trees": [
+    {
+      "tree": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics",
+      "head_unchanged": true,
+      "status_unchanged": true,
+      "dirty_files_unchanged": 14
+    },
+    {
+      "tree": "/Users/hutou/.codex/worktrees/grok-sdk-trust-closeout/fuqing-crm-analytics",
+      "head_unchanged": true,
+      "status_unchanged": true,
+      "dirty_files_unchanged": 37
+    },
+    {
+      "tree": "/Users/hutou/.codex/worktrees/shinemage-t14-html-ocr/fuqing-crm-analytics",
+      "head_unchanged": true,
+      "status_unchanged": true,
+      "dirty_files_unchanged": 35
+    }
+  ],
+  "raw_evidence": [
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/candidate-command.json",
+      "sha256": "de7aba37c01fbd1e70d625b20603ad0307522d27780bdec05465836b8c0f765a"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/candidate-validation.json",
+      "sha256": "4c779a736cbf882f6fc6fd498ba2b13ee25c831996efa84038a599887f24bbd0"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/package-comparison.json",
+      "sha256": "68c60e671d45a4c433dda40ef6746e9d690a6b5a24c81d4476eb129b16ecc9bf"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/review-result.json",
+      "sha256": "d41afb1a57e6b3045b9061d23c93874e52e1a5d479894e83d4f70fb784c266b1"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/qa-r2/evidence.json",
+      "sha256": "da2e44ce7a71dbd284ac3046530eeadf0b2b33093da6498e422423a842dbef37"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/commit-attempt-3.log",
+      "sha256": "3ca6d410d4b01b402b45fe6f7b99df8b466b6a901346406614566e793e715113"
+    }
+  ]
+}
