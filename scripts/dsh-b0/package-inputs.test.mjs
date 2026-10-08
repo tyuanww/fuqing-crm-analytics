@@ -240,6 +240,8 @@ test('independent workbench fixtures match their tracked contract owners byte fo
   const provenance = JSON.parse(await readFile(join(fixtures, 'provenance.json')));
   assert.equal(provenance.schema_version, 'plugin-test-contract-fixtures/v1');
   const sources = {
+    'analytics_first_purchase_v1_expected.json': 'backend/tests/fixtures/analytics_first_purchase_v1_expected.json',
+    'analytics_first_purchase_v1_missing_role_expected.json': 'backend/tests/fixtures/analytics_first_purchase_v1_missing_role_expected.json',
     'frozen-contract-v0.json': 'docs/hackathon/free-html-cockpit/fixtures/frozen-contract-v0.json',
     'd48-scope.fixture.json': 'docs/hackathon/free-html-cockpit/fixtures/d48-scope.fixture.json',
     'analytics-page.openapi.json': 'backend/contracts/analytics-page.openapi.json',

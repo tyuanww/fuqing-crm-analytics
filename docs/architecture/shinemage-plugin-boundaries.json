@@ -1836,7 +1836,21 @@
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/loader.test.mjs",
+      "route": "/api/analytics-first-purchase/save",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/loader.test.mjs",
       "route": "/api/shine-mage-board",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/loader.test.mjs",
+      "route": "/api/shine-mage-deliveries",
       "contract": "OBSERVED_NOT_FROZEN"
     },
     {
@@ -2631,7 +2645,7 @@
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/loader.test.mjs",
-      "line": 138
+      "line": 141
     },
     {
       "consumer": "analytics-workbench",
@@ -2643,13 +2657,13 @@
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/loader.test.mjs",
-      "line": 41
+      "line": 42
     },
     {
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/loader.test.mjs",
-      "line": 86
+      "line": 88
     },
     {
       "consumer": "analytics-workbench",
@@ -2715,7 +2729,7 @@
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/query-skills-loader.test.mjs",
-      "line": 16
+      "line": 17
     },
     {
       "consumer": "analytics-workbench",
@@ -2733,7 +2747,7 @@
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/skills-loader.test.mjs",
-      "line": 23
+      "line": 24
     },
     {
       "consumer": "analytics-workbench",

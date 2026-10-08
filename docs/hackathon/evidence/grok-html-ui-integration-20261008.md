@@ -1,5 +1,7 @@
 # HTML headed 验收交接（2026-10-08）
 
+> 后续 T14/T15 接续：原六项待补外审中的五项已取得 complete / 0 findings，探针 `html-host-browser-ui.probe.mjs` 两次 timeout，仍未关闭且不进行第三次续跑。固定 `ecaa86…` 包另有原生 200% 驾驶舱重排与正文可见观察；不是菜单/键盘焦点/读屏/真机验收。主 Agent 已核对原始 JSON、指纹、源码与截图，见[任务交接](shinemage-t14-html-ocr-20261008.md)和[集成核验](shinemage-parallel-closeout-20261008.md)。下文六项未完成等描述保留原执行时点；headed 25/25 未重跑，原探针 `browser_zoom_ui: NOT_RUN` 不改。
+
 基线 `cb6f723c66df4a66117ef5edbf9aacd4a94d2065`。工作树 `/Users/hutou/.codex/worktrees/grok-html-ui-acceptance/fuqing-crm-analytics`，分支 `codex/grok-html-ui-acceptance`。本文件只记录任务 B。没有 commit、push、PR、合并、发布或部署。集成前已完整阅读 `DESIGN.md`。
 
 ## 修改文件

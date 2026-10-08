@@ -14,6 +14,7 @@ const load = path => import(pathToFileURL(join(upstream, path, 'lib/index.js')).
 const { Context } = await load('vendor/cordis');
 const { mountAgentLoopTestDependencies } = await load('packages/test-support/agent-loop-testkit');
 const { default: AgentLoop } = await load('packages/core/agent-loop');
+const { default: SessionQuery } = await load('packages/session-query/session-query');
 const { default: SkillRegistry } = await load('packages/skill/skill');
 const skillTool = await load('packages/skill/tool-skill');
 const skillFilesystem = await load('packages/skill/skill-filesystem');
@@ -99,6 +100,7 @@ test('native skill loading and real compaction preserve fresh backend authority 
   const ctx = new Context();
   try {
     await mountAgentLoopTestDependencies(ctx);
+    await ctx.plugin(SessionQuery);
     await ctx.plugin(AgentLoop, { agents: [] });
     await ctx.plugin(TokenMeter);
     await ctx.plugin(SkillRegistry);

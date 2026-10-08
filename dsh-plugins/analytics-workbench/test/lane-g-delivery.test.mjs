@@ -137,7 +137,7 @@ test('tool card registration wires the delivery intake (compiled client)', {
     __ModuleLoader__: { load: row => { factoryRow = row; } },
   };
   const vm = await import('node:vm');
-  vm.runInNewContext(source, { window: browser, __SHINE_QUERY__: true, __SHINE_BOARD__: true }, { filename: 'analytics-b0-client.js', timeout: 1000 });
+  vm.runInNewContext(source, { window: browser, AbortController, __SHINE_QUERY__: true, __SHINE_BOARD__: true }, { filename: 'analytics-b0-client.js', timeout: 1000 });
   const client = factoryRow.factory(spec => {
     assert.ok(['react', 'react-dom', 'react/jsx-runtime', '@deepseek-ai/dsh-client-store'].includes(spec), `unexpected browser require: ${spec}`);
     return spec === '@deepseek-ai/dsh-client-store' ? stores : webRequire(spec);

@@ -1,0 +1,49 @@
+{
+  "schema": "shinemage-abc-kernel-current-admission/v1",
+  "date": "2026-10-08",
+  "base_sha": "e577f41b9247e3ac56052e21f84daed9dd32f163",
+  "checkout": "detached HEAD; previous uncommitted fixes retained",
+  "full_b0_repeated": false,
+  "release_ready": false,
+  "source_preserved": true,
+  "historical_kernel_pack_r2_unchanged": true,
+  "attempts": {
+    "r1": {
+      "status": "FAIL",
+      "reason": "PATH did not contain zstd; pack.py exited before writing a receipt",
+      "directory": ".context/checks/abc-kernel-current-20261008/kernel-pack",
+      "log": ".context/checks/abc-kernel-current-20261008/pack.log",
+      "log_sha256": "997ab7bef1a3fa5232f21287cd7706ff228c496697b49b193d93c03dc4b44fd6",
+      "seconds": 0.895
+    },
+    "r2": {
+      "status": "PASS",
+      "zstd": "/Users/hutou/homebrew/bin/zstd",
+      "zstd_version": "1.5.7",
+      "directory": ".context/checks/abc-kernel-current-20261008/current-pack",
+      "pack_log_sha256": "2432535cc40562c2a7e694683ed122ab74a7fb6ca57eff01824d3a57bcbc1e3c",
+      "pack_seconds": 1.503,
+      "cold_install_log_sha256": "84f43d32d9403e15fe8f63abdf55d94affdddc6fcfaa0d7aa31a6e5a65750ba2",
+      "cold_install_seconds": 0.713,
+      "tests": 3,
+      "pass": 3,
+      "fail": 0,
+      "skip": 0
+    }
+  },
+  "receipt": {
+    "sha256": "6d792dde914af13e2007d3fc56449481d17a4a83606cdb7c43e7fd2007b16683",
+    "archive_sha256": "a8db9aab0edb3a31633e7784f841b4c3ad85fe6f8232b35abb82fe611e345de7",
+    "archive_bytes": 113686,
+    "manifest_sha256": "dc566f94a5f381af4d3efd0eeb701a2f3bcdfb0b9add7d11a5ed15ff367c2ddf",
+    "source_sha": "e577f41b9247e3ac56052e21f84daed9dd32f163",
+    "inputs_sha256": "ddb70716f363e35661d9e1db24b25a4d18311843ce3c6c475302e7a135f1eb17",
+    "wheelhouse": "owned copy of the 15 historical wheels; historical bytes unchanged"
+  },
+  "candidate": {
+    "status": "NOT_LINKED",
+    "ran": false,
+    "blocker": "analytics-workbench has 16 tracked edits and 2 untracked fixtures, so plugin pack rejects PLUGIN_PACK_SOURCE_DIRTY. config/dsh-profile.rc2.json has no service_binding. The historical profile first-purchase-source-http-local is not the current profile."
+  },
+  "git_actions": "no commit/push/PR/merge/release/deploy"
+}

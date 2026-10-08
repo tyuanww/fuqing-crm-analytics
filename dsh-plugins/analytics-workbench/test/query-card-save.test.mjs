@@ -56,6 +56,7 @@ function restoreDom(previous) {
 async function mountCard(fetchImpl) {
   let factory;
   const context = {
+    AbortController,
     window: Object.assign(globalThis.window, { __ModuleLoader__: { load: row => { factory = row; } }, fetch: fetchImpl }),
     document: globalThis.document,
     fetch: fetchImpl,

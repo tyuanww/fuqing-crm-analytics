@@ -139,7 +139,7 @@ pnpm dsh plugin verify-host \
 
 `PLUGIN_PACK_SOURCE_DIRTY` 表示必须先完成 reviewed commit，再从干净 checkout 重打包；不要删除校验或使用 dirty 包。`PROFILE_PLUGIN_*` 表示 profile 与 package 合同不一致。候选输出目录必须为空，state path 必须是绝对路径并与后续 reconcile/status/resume 共用。真实 DSH 宿主、WSL2/WAL、远端回执和生产切换另有门禁与授权。
 
-仓库级 `pipeline.mjs --check` 现在明确禁止 Corepack 联网；若提示 `Network access disabled by the environment`，先核对固定 pnpm 缓存是否已准备。该入口会净化环境，不能假定外层 PATH 或 `COREPACK_HOME` 被沿用。不要关闭 TLS 校验，也不要用单个包构建成功冒充全量检查通过；当前集成树的这一环境缺口仍见上述验收记录。
+仓库级 `pipeline.mjs --check` 现在明确禁止 Corepack 联网；若提示 `Network access disabled by the environment`，先核对固定 pnpm 缓存是否已准备。该入口会净化环境，不能假定外层 PATH 或 `COREPACK_HOME` 被沿用。不要关闭 TLS 校验，也不要用单个包构建成功冒充全量检查通过；该次环境缺口的固定缓存/依赖准备、全量检查后续结果见[接续记录](../hackathon/evidence/shinemage-abc-resume-20261008.md)。可使用已准备缓存的独立 HOME；检查阶段本身仍不联网准备依赖。
 
 ## 边界检查
 

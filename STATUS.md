@@ -1,6 +1,16 @@
 # 项目状态 (Project Status)
 > 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。本页是当前运行与交付边界的 SSOT。
 
+## A/B/C 集成接续（2026-10-08，本地未提交）
+
+当前集成树从 `e577f41b` detached HEAD 接续，原 `plugin-boundary-review` 的 14 份未提交文档保持只读。固定缓存已补齐，原始证据已本地归档，服务专项 28 PASS / 0 SKIP，完整本地 B0 第四轮退出 0（Python 855 PASS / 41 subtests；默认 8 SKIP）。随后显式补跑：官方 shell/tool **12 PASS / 0 SKIP**（内部 25 场景 PASS，`release_ready=false`）；当前配方查询冷安装 **3 PASS / 0 FAIL / 0 SKIP**，新回执绑定 `e577f41…` 与配方 `ddb70716…`，历史 `kernel-pack-r2` 未改。standalone example 仍缺 `COCKPIT_EXAMPLE_PACKAGE`。正式 candidate/journal 仍 **NOT_LINKED**，正式 CI 仍 **NOT_RUN**。工作区 OCR delegate 21/21，无 Critical/High，未改代码。见[接续](docs/hackathon/evidence/shinemage-abc-resume-20261008.md)、[剩余准入](docs/hackathon/evidence/shinemage-abc-remaining-20261008.md)、[当前配方查询包](docs/hackathon/evidence/shinemage-abc-kernel-current-20261008.md)。产品 PARTIAL、SDK 分发 BLOCKED。以下历史状态不直接代表本轮结果。
+
+同日主 Agent 接续：原始日志/查询包/wheel 摘要复核与 95 文件增量归档完成；定位并用当前验证器核验历史服务绑定，仍为 LOCAL_COMPATIBLE / 激活关闭，未选择该 profile 或生成新候选。用户确认 standalone 页面包暂无，保持 NOT_RUN。见[交接核验](docs/hackathon/evidence/shinemage-abc-handoff-check-20261008.md)。
+
+同日并行交接已核对并收录：SDK 内联证据账本推进至 PARTIAL，产品校验字段仍 NOT_VERIFIED、分发仍 BLOCKED；HTML 原六项外审关闭五项，探针一项仍 timeout；固定包原生 200% 仅完成驾驶舱重排与正文可见观察。未改运行包或重跑已有验收，见[集成记录](docs/hackathon/evidence/shinemage-parallel-closeout-20261008.md)。
+
+同日 SDK 字节补证：graceful-fs 固定补丁重放对齐；212条安装记录中200条直接一致、2条既有补丁后对齐，余下7条缺文件/2条重复路径/1条网络失败。195/196个唯一tarball摘要匹配，完整包身份仍OPEN、分发BLOCKED，见[实际记录](docs/hackathon/evidence/shinemage-sdk-byte-closeout-20261008.md)。
+
 ## 当前快照（2026-09-30，DSH 0.1.7-rc.2 / VERSION 0.20.0.0）
 
 | 项 | 状态 |

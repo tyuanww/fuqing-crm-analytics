@@ -69,7 +69,11 @@ function output(command, args, cwd = root, extraEnv = {}) {
   assert.ok(!result.error && result.status === 0, `B0 verification failed: ${result.error?.message ?? result.stderr}`);
   return result.stdout.trim();
 }
-const git = args => output('git', ['-C', upstream, ...args]);
+// Reused fixed checkouts are read-only inputs, including their Git index.
+const git = args => output('git', ['--no-optional-locks', '-c', 'core.fsmonitor=false', '-C', upstream, ...args], root, {
+  GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', GIT_OPTIONAL_LOCKS: '0',
+  GIT_NO_REPLACE_OBJECTS: '1', GIT_TERMINAL_PROMPT: '0',
+});
 async function verifySource() {
   assert.equal(git(['rev-parse', 'HEAD']), pin.upstream_sha, 'Pinned upstream SHA mismatch');
   assert.equal(git(['status', '--porcelain', '--untracked-files=no']), '', 'Refusing locally modified upstream');
@@ -292,7 +296,7 @@ print('B0 exact Python closure verified')
       '-c', 'commit.gpgsign=false', '-c', 'core.hooksPath=/dev/null', 'commit', '-qm', 'synthetic workbench package fixture'], cleanRoot);
     await linkWorkspaceKit(clean, join(cleanRoot, 'plugin-kit'));
     run(process.execPath, [join(clean, 'build.mjs'), upstream, buildTools]);
-    run(process.execPath, ['--test', ...builtTests.map(file => join(clean, 'test', file))], clean, { B0_BUILD_UPSTREAM: upstream });
+    run(process.execPath, ['--test', ...builtTests.map(file => join(clean, 'test', file))], clean, { B0_BUILD_UPSTREAM: upstream, B0_BUILD_TOOLS: buildTools });
     const hashes = {};
     for (const item of ['index.js', 'tool.js', 'skills.js', 'page-tools.js', 'client.js', 'views/saved-analysis-view.js', 'views/cockpit-view.js']) {
       const original = await readFile(join(plugin, 'lib', item));

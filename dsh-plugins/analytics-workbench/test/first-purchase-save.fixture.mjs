@@ -1,10 +1,10 @@
-import { readFileSync } from 'node:fs';
+import { loadCoordinatorFixture } from '../src/free-page/fixture-loader.mjs';
 import { saveIdentity } from '../src/first-purchase-save-gateway.mjs';
 export const target = { session_id: 'fixture-session', run_id: 'fixture-run', call_id: 'fixture-call' };
 export const owner = 'fixture-user';
 export const candidate = 'a'.repeat(64);
 export const identity = saveIdentity(owner, target, candidate);
-const expected = JSON.parse(readFileSync(new URL('../../../backend/tests/fixtures/analytics_first_purchase_v1_expected.json', import.meta.url)));
+const expected = loadCoordinatorFixture('analytics_first_purchase_v1_expected.json');
 const result = expected.result;
 export const inspected = {
   schema_version: 'analytics-first-purchase-save-result/v1', api_version: '1.0.0', identity,

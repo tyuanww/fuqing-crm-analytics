@@ -36,7 +36,7 @@ CRM 与知识插件也已拆成两个独立候选包：CRM 保留旧包 ID，知
 
 同进程插件挂死或部分注册不能靠静态分析证明可隔离。T17 必须在命令拥有的临时 profile/home/WAL/PID/端口中验证固定 DSH 的实际行为；不支持安全卸载时明确 `HOST_RESTART_REQUIRED`，按已验证的原生回退与受控重启处理。当前不宣称热插拔或无重启回退。
 
-2026-10-08 已在固定 rc2 的本机合成场景验证加载后阻塞、终止自有宿主、重启原生配置和恢复旧组合/会话，10/10 通过；见[A/B/C 集成验收](../hackathon/evidence/shinemage-abc-integration-20261008.md)。该结果只覆盖进程级恢复，不关闭任意插件隔离、生产或完整兼容门禁。SDK 审计属于工具链升级，不加入每次单插件更新。
+2026-10-08 已在固定 rc2 的本机合成场景验证加载后阻塞、终止自有宿主、重启原生配置和恢复旧组合/会话，10/10 通过；见[A/B/C 集成验收](../hackathon/evidence/shinemage-abc-integration-20261008.md)。该结果只覆盖进程级恢复，不关闭任意插件隔离、生产或完整兼容门禁。同日后续本地准入：官方 shell/tool 显式三项加 9 项边界共 12 PASS；当前配方查询冷安装 3 PASS，回执绑 `e577f41b` / `ddb70716…`，`release_ready=false`。standalone example 与正式 candidate/journal 仍未关闭。见[剩余准入](../hackathon/evidence/shinemage-abc-remaining-20261008.md)和[当前配方查询包](../hackathon/evidence/shinemage-abc-kernel-current-20261008.md)。SDK 审计属于工具链升级，不加入每次单插件更新。
 
 profile 回退不回滚已写入 CRM/SQLite 的记录。D15 是否启用 durable save 由 T3/T7 的服务状态矩阵决定：candidate/correlation/idempotency、成功但回执丢失、重复提交、UNKNOWN 重放和 forward-fix 都需要证据。证据不足时首个候选仍只交付可核对结果。
 

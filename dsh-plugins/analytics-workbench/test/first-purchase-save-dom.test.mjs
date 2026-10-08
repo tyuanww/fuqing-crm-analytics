@@ -94,7 +94,7 @@ test('compiled cancel uses exact call identity, suppresses double click and drop
           : { kind: 'error', text: 'WORKER_ACTIVE: still active' } } } });
     };
     vm.runInNewContext(source, { window: Object.assign(dom.window, { __ModuleLoader__: { load: f => { factory = f; } } }),
-      document: dom.window.document, fetch: fetchImpl, AbortSignal, crypto: globalThis.crypto,
+      document: dom.window.document, fetch: fetchImpl, AbortController, AbortSignal, crypto: globalThis.crypto,
       __SHINE_QUERY__: false, __SHINE_BOARD__: false }, { timeout: 2000 });
     const api = factory.factory(name => {
       if (name === 'react') return React;

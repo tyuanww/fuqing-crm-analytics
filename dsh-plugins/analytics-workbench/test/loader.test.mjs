@@ -32,6 +32,7 @@ test('one package entry registers competition tools only for explicitly connecte
       const channels = [];
       ctx.provide('agents', {});
       ctx.provide('sessions', {});
+      ctx.provide('sessionQuery', { readSession: () => { assert.fail('loader-only test read a session'); } });
       ctx.provide('sessionController', {});
       ctx.provide('connection', { fetch: { register: (route) => { channels.push(route.path); } } });
       ctx.provide('webServer', {});
@@ -40,7 +41,7 @@ test('one package entry registers competition tools only for explicitly connecte
       try {
         await ctx.plugin(await import(pathToFileURL(join(plugin, 'lib/index.js')).href));
         await new Promise(resolve => setTimeout(resolve, 0));
-        assert.deepEqual(channels, ['/api/shine-mage-board']);
+        assert.deepEqual(channels, ['/api/analytics-first-purchase/save', '/api/shine-mage-board', '/api/shine-mage-deliveries']);
         assert.deepEqual(tools, ['free_html_page_generate', ...(connected ? ['competition_growth_skill_resource', 'competition_growth_capabilities',
           'competition_growth_step', 'competition_growth_patch', 'competition_board_catalog', 'competition_board_generate',
           'competition_board_edit_context', 'competition_board_edit'] : [])]);
@@ -75,6 +76,7 @@ test('built package root and per-agent tool load through real Cordis include and
       const registered = [];
       ctx.provide('agents', { get: () => undefined });
       ctx.provide('sessions', { flush: async () => { assert.fail('loader-only test executed a session'); } });
+      ctx.provide('sessionQuery', { readSession: () => { assert.fail('loader-only test read a session'); } });
       ctx.provide('sessionController', { prompt: async () => { assert.fail('loader-only test sent a prompt'); } });
       ctx.provide('tools', { register: tool => { registered.push(tool); } });
       try {
@@ -129,6 +131,7 @@ test('query-family Cordis loader registers query tool and two-session health', a
       const registered = [];
       ctx.provide('agents', { get: () => undefined });
       ctx.provide('sessions', { flush: async () => { assert.fail('loader-only test executed a session'); } });
+      ctx.provide('sessionQuery', { readSession: () => { assert.fail('loader-only test read a session'); } });
       ctx.provide('sessionController', { prompt: async () => { assert.fail('loader-only test sent a prompt'); } });
       ctx.provide('tools', { register: tool => { registered.push(tool); } });
       try {

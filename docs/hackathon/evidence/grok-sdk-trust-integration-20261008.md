@@ -1,5 +1,24 @@
 # SDK 信任证据索引（2026-10-08）
 
+## 后续固定字节补证
+
+graceful-fs 的固定官方补丁已在隔离文件上重放，输出与部署副本/map源一致。原212条只有lock声明的安装记录现已实际核对：196个唯一tarball中195个摘要匹配；200条安装记录直接相同、2条经既有antd/rc-picker补丁对齐；7条缺文件、2条重复成员路径、1条网络失败仍未关闭。完整包身份仍OPEN、SDK分发仍BLOCKED，不改默认校验或pipeline。见[字节补证](shinemage-sdk-byte-closeout-20261008.md)与[机器汇总](shinemage-sdk-byte-closeout-validation-20261008.json)。下方212条未比较及补丁未重放的文字保留为此前交接时点。
+
+## 最新接续：内联证据 PARTIAL，SDK 分发仍 BLOCKED
+
+后续专属树的[SDK 收尾交接](grok-sdk-trust-closeout-20261008.md)已由主 Agent 核对原始 JSON、官方 map 资产摘要、密封 bundle 字节和日志，见[集成核验](shinemage-parallel-closeout-20261008.md)与[机器记录](shinemage-parallel-closeout-validation-20261008.json)。这里只接收交接及证据，不导入两份新校验器源码、不应用 `product-delta.patch`，不修改 `sdk-supply-chain.mjs` 或 pipeline。
+
+| 层级 | 最新状态 | 含义 |
+|---|---|---|
+| `EMBED-INLINE-BYTES` 证据账本 | **PARTIAL** | 外部官方 map 位置一致、883 个唯一仓库源 blob 相符、部分 store 源字节已核对；尚未证明 recipe 的变换输出 |
+| 校验器 `inline_function_bytes` / 默认 `embedded_components` | **NOT_VERIFIED** | 产品校验默认值没有放宽；不能用账本 PARTIAL 覆盖机器结果 |
+| `SDK-EMBEDDED-COMPOSITION` | **PARTIAL** | 父门禁未关闭 |
+| SDK 分发 / `release_ready` | **BLOCKED / false** | 八条顶层门禁没有一条新增 PASS |
+
+15 个编译后 lib 源、86 个 null 源、其余 store tarball 和变换字节仍缺证明；212 个 installed-package 只有 lock integrity 声明，未逐包对字节。7 个受影响版本/29 条公告继续沿用原查询，本轮未重查。源码映射不等于完整包身份、撤销、native 安全、干净主机或最终分发签名通过。
+
+以下为此前 C 交接快照，保留其当时的 NOT_VERIFIED，不改写历史结果。
+
 基线 `cb6f723c66df4a66117ef5edbf9aacd4a94d2065`。工作树 `/Users/hutou/.codex/worktrees/grok-sdk-trust-evidence/fuqing-crm-analytics`，分支 `codex/grok-sdk-trust-evidence`。本轮只新增本索引。没有修改产品代码，没有改原证据目录，没有 commit、push、PR、合并、发布或部署。
 
 ## 原证据

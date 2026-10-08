@@ -1,0 +1,83 @@
+{
+  "schema": "shinemage-abc-remaining-admission/v1",
+  "date": "2026-10-08",
+  "base_sha": "e577f41b9247e3ac56052e21f84daed9dd32f163",
+  "checkout": "detached HEAD; previous uncommitted fixes retained",
+  "full_b0_repeated": false,
+  "release_ready": false,
+  "source_preserved": true,
+  "upstream": {
+    "head": "477b4f420553e8a52c2fbccc464d7561b239c443",
+    "lock_sha256": "5d3980bcd2a0113101815aabfeb4f8a875d556a333521539b7f11d790f4a50aa",
+    "index_sha256_before_and_after": "3d26472f79fb65f14c0538148813a1ff8386f984a3a882bb43a740b64f33245a",
+    "status_after": ""
+  },
+  "items": {
+    "query_archive_cold_install": {
+      "status": "FAIL",
+      "tests": 3,
+      "pass": 2,
+      "fail": 1,
+      "skip": 0,
+      "seconds": 0.091,
+      "log": ".context/checks/abc-resume-remaining-20261008/kernel-cold-install.log",
+      "log_sha256": "e596b3c2c877042f30427d3d61367c5a2d688925d82d611f8c20f5bb94f14896",
+      "historical_receipt": ".context/checks/first-purchase-kernel-host-20261007/kernel-pack-r2/receipt.json",
+      "historical_receipt_sha256": "e30eb0d7faf877235ed62029ddb97aa80f33909c5b7cb607feb283d97c72041f",
+      "historical_archive_sha256": "4f2a5412eec1b0694ed11dc9bf16ebba21d55684b4bad992c273673a64957c86",
+      "historical_inputs_sha256": "b1bc5d3b0bb845fd6287a188007f841da357ef08c086deecb02947cf7c60064e",
+      "current_recipe_sha256": "ddb70716f363e35661d9e1db24b25a4d18311843ce3c6c475302e7a135f1eb17",
+      "code": "HOST_KERNEL_MANIFEST_SCHEMA",
+      "reason": "Current kernel recipe lists six source files absent from the 2026-10-07 archive manifest. The historical receipt was not rewritten.",
+      "missing_for_current_recipe": [
+        "kernel receipt bound to inputs_sha256 ddb70716f363e35661d9e1db24b25a4d18311843ce3c6c475302e7a135f1eb17",
+        "matching kernel.tar.zst and kernel-manifest.json",
+        "wheelhouse whose file hashes match that new receipt"
+      ]
+    },
+    "shell_tool_runtime": {
+      "status": "PASS",
+      "tests": 12,
+      "pass": 12,
+      "fail": 0,
+      "skip": 0,
+      "seconds": 5.884,
+      "scenarios": 25,
+      "scenario_failed": 0,
+      "log": ".context/checks/abc-resume-remaining-20261008/shell-tool-runtime.log",
+      "log_sha256": "3f66eef8bec00bcd2aabd0abfa8d539546ed170e74bf5fa1bf2db9919676ee1a",
+      "evidence": [
+        ".context/checks/abc-resume-remaining-20261008/shell-tool",
+        ".context/checks/abc-resume-remaining-20261008/shell-tool-timeout",
+        ".context/checks/abc-resume-remaining-20261008/shell-tool-interrupt"
+      ],
+      "remaining_processes": 0,
+      "owned_pids": 14,
+      "release_ready": false,
+      "not_run": ["official-web-cli", "model-dispatch", "session-wal", "wsl-target", "production", "sandbox-enforcement"]
+    },
+    "standalone_example": {
+      "status": "NOT_RUN",
+      "reason": "COCKPIT_EXAMPLE_PACKAGE is unset. No checked-in or archived page package defines window.RevenueReview.",
+      "missing": ["COCKPIT_EXAMPLE_PACKAGE absolute JSON path"]
+    }
+  },
+  "journal": {
+    "path": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/checks/first-purchase-terminal-candidate-20261007/plugin-state.json",
+    "sha256": "b9ef9b1730abf2f9acfe0ba48473323e8aece9a4b8d85e79783932c9fe7f0149",
+    "candidate_sha256": "cb5a24e0183a41af75cc09bdbb9dd44be4c38ae2fecd185166de83e3f4787833",
+    "bound_pack_sha256": "c9770d111102791bcc34a0db9a41b23b7e43b3385a9c3909a620617f413ec64b",
+    "current_html_pack_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+    "unchanged": true,
+    "abc_formal_journal": "NOT_LINKED",
+    "formal_ci": "NOT_RUN",
+    "blocker": "Current tree is detached and dirty. A formal candidate needs one committed source SHA, a pack of that SHA, and a new journal. The historical six-event journal stays bound to c9770d."
+  },
+  "sdk": {
+    "distribution": "BLOCKED",
+    "embedded_composition": "PARTIAL",
+    "inline_function_bytes": "NOT_VERIFIED",
+    "advisory_lookup_this_turn": "NOT_RUN"
+  },
+  "git_actions": "no commit/push/PR/merge/release/deploy"
+}

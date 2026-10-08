@@ -280,6 +280,7 @@ test('real kit tarball contains only declared source/locks and exposes its publi
         const tests = name === 'board-components' ? ['test/geometry.test.mjs']
           : name === 'analytics-workbench' ? ['test/built.test.mjs', 'test/native-board-auth.test.mjs', 'test/native-prompt-inject.test.mjs', 'test/lane-g-delivery.test.mjs',
             'test/native-slot-ownership.test.mjs', 'test/native-fixture-client-boundary.test.mjs',
+            'test/first-purchase-query-model.test.mjs', 'test/first-purchase-query-card.test.mjs', 'test/first-purchase-save-dom.test.mjs',
             'src/client/leave/host-leave-adapter.test.mjs', 'src/client/cockpit-composition.test.mjs']
           : ['crm-knowledge', 'knowledge'].includes(name) ? ['test/package.test.mjs']
           : (await readdir(join(plugin, 'src'))).filter(file => file.endsWith('.test.mjs')).map(file => `src/${file}`);

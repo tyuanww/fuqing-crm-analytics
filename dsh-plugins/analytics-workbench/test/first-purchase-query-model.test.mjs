@@ -1,16 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { loadCoordinatorFixture } from '../src/free-page/fixture-loader.mjs';
 import {
   FIRST_PURCHASE_RECEIPT_LIMIT, decodeFirstPurchaseRequest, decodeFirstPurchaseReceipt,
   firstPurchaseSaveBinding, readBoundedJson, receiptMatchesRequest,
 } from '../src/first-purchase-query-model.mjs';
 
-const here = dirname(fileURLToPath(import.meta.url));
-const expected = JSON.parse(await readFile(join(here, '../../../backend/tests/fixtures/analytics_first_purchase_v1_expected.json'), 'utf8'));
-const missing = JSON.parse(await readFile(join(here, '../../../backend/tests/fixtures/analytics_first_purchase_v1_missing_role_expected.json'), 'utf8'));
+const expected = loadCoordinatorFixture('analytics_first_purchase_v1_expected.json');
+const missing = loadCoordinatorFixture('analytics_first_purchase_v1_missing_role_expected.json');
 
 const request = expected.request;
 

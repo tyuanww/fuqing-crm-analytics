@@ -94,6 +94,7 @@ export async function loadCardHarness() {
   let factory;
   const code = await readFile(join(root, 'lib/client.js'), 'utf8');
   vm.runInNewContext(code, {
+    AbortController,
     window: { __ModuleLoader__: { load: row => { factory = row; } } },
     __SHINE_QUERY__: true,
     __SHINE_BOARD__: true,
