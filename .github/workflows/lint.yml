@@ -197,7 +197,14 @@ jobs:
           lfs: true
       - name: Backend Dockerfile build (no push)
         run: |
-          docker build -t fuqing-crm-backend:ci -f Dockerfile .
+          set -euo pipefail
+          for delay in 0 30 60 120; do
+            if docker build -t fuqing-crm-backend:ci -f Dockerfile .; then
+              exit 0
+            fi
+            if [ "$delay" -gt 0 ]; then sleep "$delay"; fi
+          done
+          exit 1
       - name: Generate ephemeral test credentials (masked)
         # P0: 禁止 workflow 固定密码；每次 run 随机生成并 ::add-mask::
         run: |
@@ -230,7 +237,14 @@ jobs:
           chmod 0666 "$DB_DIR/fuqing_crm.duckdb"
       - name: Frontend Dockerfile build (no push)
         run: |
-          docker build -t fuqing-crm-frontend:ci -f frontend-vue3/Dockerfile frontend-vue3
+          set -euo pipefail
+          for delay in 0 30 60 120; do
+            if docker build -t fuqing-crm-frontend:ci -f frontend-vue3/Dockerfile frontend-vue3; then
+              exit 0
+            fi
+            if [ "$delay" -gt 0 ]; then sleep "$delay"; fi
+          done
+          exit 1
       - name: Run backend and frontend container smoke
         run: |
           set -euo pipefail
