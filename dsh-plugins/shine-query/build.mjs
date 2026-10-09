@@ -1,13 +1,16 @@
-import { dirname, resolve, join } from 'node:path';
+import { dirname, isAbsolute, resolve, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { readFile } from 'node:fs/promises';
 import { bindToolchain } from '@shine-mage/dsh-plugin-kit/toolchain';
 
 const root = dirname(fileURLToPath(import.meta.url));
-const upstream = resolve(process.argv[2] ?? join(root, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
+const upstreamInput = process.argv[2] ?? process.env.B0_BUILD_UPSTREAM;
+if (!upstreamInput || !isAbsolute(upstreamInput)) { console.error('UPSTREAM_NOT_CONFIGURED: pass an absolute pinned upstream checkout.'); process.exit(2); }
+const upstream = resolve(upstreamInput);
 const manifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
-const buildTools = process.argv[3] ? resolve(process.argv[3]) : undefined;
-const { build } = await bindToolchain(root, upstream, buildTools);
+const buildToolsInput = process.argv[3] ?? process.env.B0_BUILD_TOOLS;
+if (buildToolsInput && !isAbsolute(buildToolsInput)) { console.error('BUILD_TOOLS_NOT_CONFIGURED: pass an absolute build-tools directory.'); process.exit(2); }
+const { build } = await bindToolchain(root, upstream, buildToolsInput && resolve(buildToolsInput));
 
 const common = { absWorkingDir: root, bundle: true, sourcemap: true, logLevel: 'info', minifyWhitespace: true };
 await build({

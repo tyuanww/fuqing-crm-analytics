@@ -107,6 +107,6 @@ export async function bindToolchain(plugin, upstream, buildTools = defaultBuildT
       await symlink(relative(dirname(link), target), link, 'dir');
     }
   }
-  await bindPackagedDependencies(plugin, process.env.DSH_PACKAGE_INPUTS ?? join(toolchainRoot, '../../.context/dsh-b0/package-inputs'));
+  await bindPackagedDependencies(plugin, process.env.DSH_PACKAGE_INPUTS);
   return { pin, compiler, build: esbuild.build };
 }

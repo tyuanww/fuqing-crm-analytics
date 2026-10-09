@@ -138,6 +138,7 @@ if (mode === '--prepare') {
   run(process.execPath, ['scripts/dsh-b0/cockpit-slot-contract.mjs', '--check']);
   run(process.execPath, ['--test', 'scripts/dsh-b0/cockpit-slot-contract.test.mjs']);
   run(process.execPath, ['--test', 'scripts/dsh-b0/package-inputs.test.mjs', 'dsh-plugins/board-components/test/geometry.test.mjs', 'scripts/dsh-b0/geometry-composition.test.mjs']);
+  run(process.execPath, ['--test', 'scripts/dsh-b0/explicit-build-inputs.test.mjs']);
   run(process.execPath, ['scripts/dsh-b0/plugin-boundaries.mjs', '--check']);
   run(process.execPath, ['--test', 'scripts/dsh-b0/plugin-boundaries.test.mjs']);
   // Guard tests fail before process startup. The real-host drill remains opt-in.

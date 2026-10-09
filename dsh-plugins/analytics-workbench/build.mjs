@@ -1,14 +1,24 @@
 import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
-import { dirname, resolve, join } from 'node:path';
+import { dirname, isAbsolute, resolve, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { bindToolchain, checkTypes } from './toolchain.mjs';
 import { packSkills } from './pack-skills.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
-const upstream = resolve(process.argv[2] ?? process.env.B0_BUILD_UPSTREAM ?? join(root, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
+const upstreamInput = process.argv[2] ?? process.env.B0_BUILD_UPSTREAM;
+if (!upstreamInput || !isAbsolute(upstreamInput)) {
+  console.error('UPSTREAM_NOT_CONFIGURED: pass the pinned DeepSeek Harness checkout as an absolute first argument or B0_BUILD_UPSTREAM. This build does not search the main repository.');
+  process.exit(2);
+}
+const upstream = resolve(upstreamInput);
 const manifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
-const { build, compiler } = await bindToolchain(root, upstream, (process.argv[3] ?? process.env.B0_BUILD_TOOLS) && resolve(process.argv[3] ?? process.env.B0_BUILD_TOOLS));
+const buildToolsInput = process.argv[3] ?? process.env.B0_BUILD_TOOLS;
+if (buildToolsInput && !isAbsolute(buildToolsInput)) {
+  console.error('BUILD_TOOLS_NOT_CONFIGURED: pass an absolute build-tools directory as the third argument or B0_BUILD_TOOLS.');
+  process.exit(2);
+}
+const { build, compiler } = await bindToolchain(root, upstream, buildToolsInput && resolve(buildToolsInput));
 const skillPackage = await packSkills(root);
 const querySkillPackage = await packSkills(root, 'channel_followup');
 const firstPurchaseSkillPackage = await packSkills(root, 'first_purchase');

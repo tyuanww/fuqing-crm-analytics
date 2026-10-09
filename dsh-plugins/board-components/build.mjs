@@ -2,12 +2,17 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { copyFile, link, lstat, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readPackagedLibrary } from '@shine-mage/dsh-plugin-kit/packaged-dependencies';
 
 const root = dirname(fileURLToPath(import.meta.url));
-const output = resolve(process.argv[2] ?? process.env.DSH_PACKAGE_INPUTS ?? join(root, '../../.context/dsh-b0/package-inputs'));
+const outputInput = process.argv[2] ?? process.env.DSH_PACKAGE_INPUTS;
+if (!outputInput || !isAbsolute(outputInput)) {
+  console.error('PACKAGE_INPUT_REQUIRED: pass an absolute DSH_PACKAGE_INPUTS directory as the first argument or environment variable. This build does not search the main repository.');
+  process.exit(2);
+}
+const output = resolve(outputInput);
 assert.equal(process.versions.node.split('.')[0], '24', 'Use Node 24');
 const manifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
 assert.match(manifest.packageManager, /^pnpm@\d+\.\d+\.\d+$/, 'PACKAGE_MANAGER_EXACT');
