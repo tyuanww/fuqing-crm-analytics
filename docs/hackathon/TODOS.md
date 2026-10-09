@@ -6,7 +6,90 @@
 
 2026-09-13 用户确认“核心版本优先交付、扩库完善后置”。目标是问数后 AI 优先使用定制组件自由组板，板内按选定范围修改；首批六类不是最终上限。M1／产品仍 PARTIAL；原全量 App Goal 保持 PAUSED。本节承接原本地施工记录，不把旧冻结实现反推成最终需求。
 
+### 当前接续（2026-10-09，主仓）
+
+主仓前三组本地提交已完成：`c94dd3ee` 收录 15 个源码/测试，`a9c4d79d` 收录 72 份 10 月 8 日历史证据，`80d48d14` 收录 18 份 10 月 9 日交付记录。本节属于最后第 4 组的 9 份当前说明同步；具体 Git 快照与保存引用见 [STATUS](../../STATUS.md)，最终 HEAD/dirty 状态以实际 Git 为准。[分组前记录](./evidence/shinemage-main-repo-delivery-20261009.md)中的“76 笔、112/114 项、未提交”保留为当时现场。三笔提交没有引入新装配代码或新 candidate；主仓未 push、未建本轮集成 PR，整支 CI 未跑。分组前开放 PR 的 10 个 Dependabot 记录未在本轮重查。
+
+第 4 组完成后，沿既有清单继续正式插件产物、主仓按固定产物装配及适用组合验收；各插件编译输入、真实 CRM/WeKnora 接口和独立 DSH 升级/回退仍按原任务分别收尾。不因本地 Git 整理勾完 T1/T15/T19/T21，后续 Git 与发布动作按各自授权执行。
+
+八仓 Ubuntu PR CI 已通过的记录保留在下节，但不能写成主仓 CI 通过，也不能写成发布。插件仓合并另行授权。D/E 仍是 `NOT_IN_CURRENT_BUILD`。cordis peer 4.0.2 与固定输入 4.0.4 的差异仍在，构建通过不是宿主兼容。`shine-board` 不是完整看板。合成知识服务不是 WeKnora。封存组合的 headed/WSL2 seq 6 不能被后续 CRM 源码或新包继承；旧段里的「WSL 缺目标」不是当前结论。SDK 分发 BLOCKED 保持，且不阻塞本段的主仓整理。产品 PARTIAL，`release_ready=false`，不改 VERSION。
+
+### 2026-10-09 八仓私有远程、PR 与完整 CI
+
+[本轮记录](./evidence/shinemage-eight-remote-delivery-20261009.md)关闭这八仓的远程创建/push/PR 和真实 Ubuntu 构建 CI 子项。八个 PR #1 都保持 OPEN，首次功能、CI 配方、工作流修复按三笔提交保留；具体 SHA、run 和包见证据。工作流首次解析失败与本机下载失败保留。
+
+下句是八仓 CI 记录当时的插件仓队列，不是主仓本轮接续。合并与发布尚未授权，未完成。下一步沿原 stop/go：对应 PR 合并、各插件版本与独立发布、适用组合和真实 CRM/WeKnora 验收、官方 DSH 独立升级/回退。未合并、发布或部署，不勾完 T1/T15/T19/T21。SDK 分发继续独立 BLOCKED；下方远程 NOT_RUN 是此前时点。
+
+### 2026-10-09 八仓 CI 本地收尾与提交
+
+[八仓记录](./evidence/shinemage-independent-ci-closeout-20261009.md)关闭本轮本地 CI 实现、受影响验证及对应 `chore(ci)` 提交子项：Workbench `aa56dbe`、CRM `73efd8b`、Knowledge `5c4a775`、query `7220fa6`、board `613ba48`、crowd-action `680f01c`、funnel `e3f6a04`、waterfall `8110c61`。提交后真实 clone 已核对审查字节相等，不重复无变化的全链。
+
+下一项是八仓的远程建仓/push/PR 与真实 Ubuntu CI，按各自动作授权推进；不能扩用 shine-brand 的远程授权。其他七仓整套空缓存准备没有逐仓重跑，远程运行将补实际证据。CRM/WeKnora 真实接口、适用候选/发布和独立 DSH 升级仍按原队列。D/E 无 tsc；SDK 分发仍独立 BLOCKED；不勾完 T1/T15/T19/T21。下方未提交/缺完整输入是历史阶段。
+
+### 2026-10-09 Workbench 固定 CI 输入本地收口
+
+[本轮证据](./evidence/shinemage-workbench-ci-materialization-20261009.md)关闭 T21 下 Workbench 的本地输入准备子项：固定 Git 源码、冻结锁、官方 npm lib 归档可以生成新的 Linux x64 编译输入；新配方与断网消费者全链通过，严格类型检查保留。8 文件补丁已写入原作者仓并核对同字节，未提交。
+
+下一步沿原 Git 交付顺序审查并提交这笔 `chore(ci)`，再按实际授权执行远程仓/PR/Ubuntu CI。Ubuntu 与远程 CI 仍 NOT_RUN；其他插件按各自合同接续，不合并计数、不勾完 T1/T15/T19/T21。源码 checkout/build-tools 仍是固定编译输入；SDK 分发继续独立 BLOCKED，不作为全部独立仓工作的阻塞。下方“只用已准备 macOS 输入”是历史阶段。
+
+### 2026-10-09 D/E 本地提交、真实 clone 与 Workbench CI 输入
+
+[本轮证据](./evidence/shinemage-independent-de-git-and-ci-20261009.md)：五个 D/E 作者仓完成本地功能提交和真实 clone 上的安装、现有构建、本包测试、内容包。只关闭这些子项。类型检查仍是 NOT_IN_CURRENT_BUILD。
+
+CI 输入已有可审查的准备脚本、锁定清单和 workflow 补丁。本机已准备 checkout/build-tools 上的 Workbench 全链通过。只拉上游源码不够，缺已安装的 `vite` 等编译闭包。补丁要求 runner 预先放好 `477b4f42` 的 upstream 与对应平台 build-tools，尚未应用到作者仓，Ubuntu/远程未执行。不勾完 T1、T15、T19、T21。下段“五仓仍未提交”是复核时点。
+
+### 2026-10-09 D/E 五仓与三仓 Git 交付复核
+
+[最新汇总](./evidence/shinemage-independent-de-and-git-review-20261009.md)：九个既有插件都有本地作者工程；其中 shine-brand 沿用远程交付证据，Workbench/CRM/Knowledge 已提交并完成 r2 真实 clone，D/E 五仓仍未提交。仅关闭对应本地开发/构建子项，不将作者副本等同于 Git clone。
+
+T1/T15 接续：query、board、crowd-action、funnel、waterfall 按仓完成审查后的功能提交，再验证精确提交的真实 clone。T21 接续：为尚未远程交付的八仓解决实际固定输入供应和完整 CI，再按授权建仓/push/PR。不得用只跑 guard 的 workflow 抵扣构建，也不得将五仓原本没有的 tsc 写成通过。T17/T19、真实接口和独立 DSH 升级仍保持原准入，不重复 SDK 全审或旧组合测试。
+
+### 2026-10-09 三个业务插件本地提交与真实 clone
+
+[本轮证据](./evidence/shinemage-independent-abc-git-delivery-20261009.md)：三个作者仓各完成一笔本地功能提交，并从该 SHA 做了 `git clone --no-local`。隔离完整验证是 r2。只关闭“可独立检出的首次提交”和“本地真实 clone 上的固定输入安装、严格类型检查、本包构建、本包测试、内容包”这些子项。
+
+仍开放：远程建仓、push、PR、合并、发布、部署，以及带固定上游 checkout、已安装 build-tools 和 pnpm 11.28.2 入口的托管 runner。Workbench workflow 只跑边界检查。CRM 在 `test -d` / `test -f` 处停止，路径变量不会创建 checkout、build-tools 或 pnpm。Knowledge 在 `scripts/check-runner-inputs.mjs` 以退出码 2 和 `FIXED_SDK_INPUTS_NOT_CONFIGURED` 停止。这些 workflow 保持原门禁，未标成已就绪。不勾完 T1、T15、T19、T21。下段“无提交、未 clone”是审修时点。
+
+### 2026-10-09 三个业务插件独立作者仓审修
+
+[三仓审查证据](./evidence/shinemage-independent-abc-review-20261009.md)已收录 analytics-workbench、crm-knowledge、knowledge 的来源、固定 SDK 输入、本包测试和内容包回执。只关闭这三仓本地作者工程与现有隔离构建子项，不把 git init 记成已提交/clone/远程仓。Knowledge 两项审查修复已完成针对性验证；CRM CI 输入供应 P2 仍 OPEN。
+
+接续沿原 T1/T15/T21：各仓先完成可独立检出的功能提交，再做真实 clone 的干净安装/构建/本包验证；完整 CI 必须有实际可取得的固定输入，Workbench 的 guard workflow 不替代构建。CRM/Knowledge 不能仅填写本机路径变量就宣称 hosted runner 可运行。提交、远程建仓和 push/PR 按各仓授权执行；不扩用 shine-brand 的远程授权。不勾完父任务，不重跑无变化的 SDK/B0/旧组合验收。
+
+### 2026-10-08 shine-brand 的远程交付接续
+
+[本次远程证据](./evidence/shinemage-shine-brand-remote-20261008.md)：独立仓已按事件提交并推送，私有仓 `tyuanww/dsh-shine-brand` / PR #1，最新 2d7c17c 的 Ubuntu push/PR CI 均成功；真实远程 clone 后隔离构建/测试/打包通过。公开编译路径无需上游 checkout/build-tools；严格 SDK 类型、正式宿主/候选/发布仍开放。PR 尚未合并。
+
+只关闭该样本的本地/远程仓、公开依赖构建、clone 和本仓 CI 子项。下一项继续各插件真实独立化，完整看板以 analytics-workbench 的实现边界为准，不能只复制 shine-board 标记壳。其他插件的开发依赖、CRM/WeKnora 真实接口、DSH 升级仍按原任务；不勾完 T15/T19/T21，不重复全量 SDK 审计。
+
+### 2026-10-08 最终目标与既有任务对应
+
+本次澄清沿用 [原拆分计划](../plans/shinemage-plugin-platform-split.md)，只更新收尾目标与边界，不新增平台计划或更改下方历史勾选。最终要求是每个插件真实独立本地仓＋独立远程仓，分别持有锁文件、版本、CI 和发布；DSH 使用官方固定 npm 发行版独立安装升级；CRM 与 WeKnora 为独立服务；看板／驾驶舱能力具有独立仓库、版本、构建与交付，可作为 DSH 插件运行，不要求另建一套 Web 应用或服务。查询、保存继续由现有服务 owner 承接，DSH 插件提供运营入口。当前独立包/作者目录不等于已分仓，synthetic knowledge 不等于 WeKnora 接入，`board-components` 图表库拆包不等于完整看板能力已独立交付。
+
+| 既有任务 | 仍需收尾的目标及边界 |
+|---|---|
+| T1 / T15 | 沿现有 owner、公开合同和 DAG，完成各插件真实本地/远程仓及自有依赖锁、版本和独立构建；物理迁移依既有 stop/go，不把 workspace 包边界或临时作者副本记为完成。 |
+| T2 / T17 / T20 | 官方固定 npm runtime 的独立安装/升级与接口兼容；升级仅适配受影响插件，保留明确不可用原因、原生回退和必要的 `HOST_RESTART_REQUIRED`。不改上游，不承诺任意插件无重启热插拔。 |
+| T3 / T7 / T9 / T14 / T15 | CRM／WeKnora 独立服务、看板／驾驶舱能力的独立仓库与交付，以及 DSH 运营入口按真实 API、权限、状态 owner 和业务验收收尾；看板可作为插件运行，查询/保存仍由现有服务 owner 承接。保留现有合成包证据，不将其扩大为真实系统接入或完整看板能力独立交付。 |
+| T13 / T21 / T5 / T19 | 各仓独立 CI/发布及 profile 组合分别绑定精确源码、包、服务和信任证据；正式 CI、远程建仓、发布、部署按对应授权与门禁执行。本次新 candidate 已至 seq 6，不继承到未来不同包或不同仓库的发布。 |
+| T10 / T16 / T18 / T12 | 继续原 lead time/P95、失败恢复有界、native 恢复、维护成本/主备 owner 与 stop/go 记录。已有场景实测按原范围复用，剩余口径/责任与人工 GO 仍开放；不编造耗时或具名 owner。 |
+| T11 / T22 / T23 | 文档分别标注目标、已实现、已验证和阻塞范围；运行时 npm 安装不等于 npm-only 插件作者路径。现有 kit 仍依赖固定 SDK，该替代作者路径尚未验证。 |
+
+自制 SDK 分发仍 **BLOCKED**；确实消费该输入或受其影响的准入不得放宽。独立插件开发、边界/分仓文档可按自己的输入和授权推进，不以 SDK 全部审计完成作为统一前置，也不把 SDK 维护串入日常单插件更新。普通插件修改不应重建 DSH、迁移业务数据库或重复全量 SDK 审计。
+
+当前 A/B/C 本地集成见[独立化交付证据](./evidence/shinemage-plugin-independence-integration-20261008.md)。shine-brand 后续已完成独立远程仓、公开依赖构建和本仓 CI（见上段）；官方 npm rc2 品牌插件安装/加载有执行方记录和可复核文件证据，运行退出等安全回执不足。C 的源码边界增量已进入本地审修，不等于全部插件完成分仓。T1/T15/T17/T19 等父任务不整体勾完。
+
+接续仍是：按每个插件核对可用的精确开发依赖；shine-brand 的独立远程仓/clone/CI 子项已完成，PR 待审；其余插件逐个迁移；CRM/完整看板/WeKnora 按各自真实接口和身份合同验收；DSH 新版升级/回退单独进行。没有新输入时不循环重跑 SDK 审计。以下 `f8db3949` / `fd1fba4c…` / `a0d5dd08…` / seq 6 的证据保持原对象，不覆盖本轮新 CRM 字节。
+
 ### 2026-10-08 ShineMage A/B/C 集成本地接续
+
+HTML 提示修复已按授权仅七文件本地提交 `f8db3949`，新 candidate `fd1fba4c…` / 包 `a0d5dd08…` 已完成 headed 25 PASS、WSL2 来源 HTTP 10 PASS、terminal 1 PASS、browser 1 PASS / 5 场景；原正式校验器接入新 journal seq 6。审查无发现；103 项为同字节结果复用，禁网 build/typecheck 通过且 576 个 Git blob 与构建输入匹配。旧 b75/seq6 不变；只关闭本次提示修复及新包合成组合子项，不勾完 T5/T14/T15/T19。正式 CI、真实设备/模型/业务、SDK 与原 stop/go 仍开放，release_ready=false。见[提交与新组合证据](evidence/shinemage-html-fix-candidate-20261008.md)。以下为此前阶段。
+
+本轮收尾推进：五包原配方禁网编译，82 个发布 JS 对齐，覆盖 78 条 null-source 变换，剩余 6 包/8 路径暂停等待固定源码材料；当前 b75 包 headed 25 PASS / 0 FAIL 已收录，不继承旧包。正式 WSL2/CI、真实设备/业务/页面包和原 stop/go 输入仍缺，不勾完父任务、不提前分仓。见[本轮证据](evidence/shinemage-grok-handoff-transform-20261008.md)。以下是此前阶段。
+
+当前补证：固定配方在获授权的隔离环境实际禁网 build 成功，两个原始 JS bundle 与封存 SDK 逐字节一致；首轮 MISMATCH 保留。候选目标材料 43/349 成员离线检查完成，没有新目标回执或 journal 事件。SDK 仍 BLOCKED、内联证据账本 PARTIAL、产品默认 NOT_VERIFIED；八条顶层门禁与父任务不勾完。原生菜单/200% 焦点、真实 standalone 包、目标 WSL 与正式 CI 等缺口保持，见[实际结果与剩余输入](evidence/shinemage-input-unblock-20261008.md)。下段为前一轮接续记录。
+
+当前接续：新候选保持，正式 journal 已为 seq 3 / **CANDIDATE_SERVICE_ARTIFACTS_VERIFIED**；本机固定组合 terminal 专项 **1 PASS / 1 warning**，目标 WSL/宿主准入未关闭。SDK 196/196 tarball 摘要匹配，212 条安装记录为 201 直接一致＋2 固定补丁一致＋7 types-only 投影已解释＋2 重复路径拒绝，分发仍 BLOCKED。HTML 菜单与 200% 焦点因工具无法精确控制隔离窗口仍 NOT_RUN；standalone 仍缺真实页面包。正式 CI NOT_RUN、release_ready=false，T5/T14/T15/T17/T18/T19 不据此勾完。三线本轮证据与下一步固定输入见[准入续接](evidence/shinemage-admission-closeout-20261008.md)。本轮只补证和记录，无产品源码修改、新提交或远端动作。下面“最新”段落保留为候选准备阶段。
 
 最新：集成源码已本地提交 `bd647352`，新 candidate `993daf31…` / journal seq 2 已通过身份及摘要链核对，状态 **CANDIDATE_PREPARED**。只关闭此前 NOT_LINKED 的本地准备子项；针对新候选的服务/宿主、正式 CI 与激活仍未关闭，SDK BLOCKED / release_ready=false；不勾完父任务。见[本次证据](evidence/shinemage-abc-local-candidate-20261008.md)。下文保留候选准备前的执行阶段。
 

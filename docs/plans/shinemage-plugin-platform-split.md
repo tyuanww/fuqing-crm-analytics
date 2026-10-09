@@ -1,6 +1,24 @@
 <!-- /autoplan restore point: "/Users/hutou/.gstack/projects/tyuanww-fuqing-crm-analytics/main-autoplan-restore-20261001-161631.md" -->
 # ShineMage 插件平台拆分与 DSH 独立升级计划
 
+## 用户确认的最终目标与验收范围（2026-10-08）
+
+本节按用户 2026-10-08 的最终确认更新主线，优先于下文早期“当前”“首期 workspace”及范围冻结表述；边界以同步后的[架构方案](../architecture/shinemage-plugin-platform.md)为准。下文任务编号、阶段、stop/go 指标、owner 和历次 review 报告保留为实施与决策历史，不重新编排大计划，不把历史 NOT_RUN 或测试数当作当前结论。
+
+最终交付是每个插件都有真实独立的本地与远程仓库、版本、构建、CI 和发布边界；只改一个插件时，只处理该插件及实际受影响的合同/组合，不要求重建 DSH、迁移业务数据库或重复全量 SDK 审计。现有 workspace 分包、隔离作者工程和 tarball 验证是迁移依据。九个插件已有独立本地与远程仓库及各自 CI 证据；八仓最新完整 Ubuntu PR CI 已通过。PR 合并、独立发布、主仓装配迁移和适用组合验收仍待完成，主仓整支 CI 未跑。
+
+2026-10-09 的当前接续看 [STATUS](../../STATUS.md)，[分组前主仓交接](../hackathon/evidence/shinemage-main-repo-delivery-20261009.md)和[八仓远程交付](../hackathon/evidence/shinemage-eight-remote-delivery-20261009.md)保留各自时点。主仓源码/测试、10 月 8 日证据、10 月 9 日交付记录已分别提交为 `c94dd3ee`、`a9c4d79d`、`80d48d14`；本页属于随后第 4 组当前说明同步。独立仓 PR CI、PR 合并、独立发布和主仓 CI 分别记账，不互相替代。下文「仍在同一仓库 / 物理分仓未完成」保留为计划写作时的阶段，不删；独立远程仓已建立不等于物理分仓整体及 stop/go 已完成。当前主仓接续不是按本计划去合并插件仓。
+
+DSH 使用官方固定版本的 npm 发行包，独立安装和升级，不改上游源码；插件按官方接口及精确兼容版本适配。官方 npm 宿主运行包与插件编译依赖是两种输入。[shine-brand](../hackathon/evidence/shinemage-shine-brand-remote-20261008.md) 已通过无需主仓、兄弟源码、上游 checkout 或 build-tools 的公开依赖构建及本仓 CI；该结果仅覆盖本包编译、测试和内容打包，不证明严格 SDK 类型检查、宿主兼容或正式候选准入。其余八仓虽已完成不读取主仓/兄弟源码的独立构建，仍消费固定上游 checkout/build-tools，不能据此宣称所有插件的 npm-only 作者入口均已验收。目标仍是独立 clone 消费固定版本的 kit、类型/编译器和领域依赖包；其余插件进一步摆脱上游 checkout 的公开依赖构建验收仍待完成。
+
+CRM 与 WeKnora 分别作为独立服务维护，通过各自插件和版本化服务合同接入运营。看板拥有独立仓库、版本、构建与交付，可作为 DSH 插件运行，不新增“必须另建独立 Web 应用/看板服务”的要求。现有 `knowledge` 的 synthetic 服务验证不等于真实 WeKnora 已接入；`board-components` 图表库拆分不等于完整看板能力已经独立交付。
+
+SDK 整体分发保持 **BLOCKED**，产品保持 **PARTIAL**、`release_ready=false`。签名、SBOM、漏洞、撤销、来源与回退等既有门禁按实际交付 artifact 及其依赖适用性逐项保留和核验；不能把更换为官方 npm runtime 解释为现有 SDK 已获分发许可，也不能把该 SDK 的整体阻断扩大为所有独立仓库准备工作的前置阻断。日常插件更新复用已核验的固定开发输入，只重验变动及受影响范围；SDK/工具链自身更新或分发再进入相应专项。
+
+原 stop/go 的测量窗口、指标、主备 owner、真实业务验收及切换/回退条件仍未关闭，沿用原任务收尾并记录实际 GO/HOLD；本节不勾完 T5/T15/T19，也不增加平台、catalog 或新审批体系。插件不可用必须给原因并保留原生回退；固定宿主需要重启时如实说明，不承诺任意插件无重启热插拔。
+
+当前封存组合实测绑定提交 `f8db3949`、candidate `fd1fba4c…`、插件包 `a0d5dd08…`：该包 headed 25 PASS，WSL2 source 10 PASS、terminal 1 PASS、browser 1 PASS / 5 场景，journal 已由原校验器关联至 seq 6。见[本次候选验收](../hackathon/evidence/shinemage-html-fix-candidate-20261008.md)；这些不覆盖后续 CRM 源码或独立仓新产物，也不代表官方 npm 安装路径、主仓正式 CI、真实业务或生产通过。独立 clone 与作者仓 CI 另有各自产物证据；剩余精确 npm 宿主组合、单插件影响范围与宿主升级/回退判据见[验证入口](../operating/verification.md#最终方案的待实施验收2026-10-08)。
+
 ## 目标
 
 把当前 `fuqing-crm-analytics` 的二开形态收敛为可维护的 ShineMage 插件平台：DeepSeek Harness 使用官方上游版本，业务插件按领域独立发布，profile 只负责组合版本，CRM/知识库/数据服务独立运行。插件更新不再重新打包 DSH、CRM、DuckDB 或知识库；DSH 升级也不再与每个业务插件和数据服务绑定为一次大版本发布。

@@ -4,7 +4,9 @@
 
 > 最近生产记录（[STATUS](./STATUS.md) 的 2026-10-07 核验）：产品 VERSION `0.20.0.0`，DSH `0.1.7-rc.2`，固定 upstream `477b4f42`；杭州 current 为 `dsh-0.20.0.0-r3`。本轮未复查或切换生产，新的插件候选未激活。产品仍 PARTIAL；局部合成验证不能替代真实模型、完整业务 UAT、生产准入及回退证据。后续发布必须从 clean reviewed commit 生成新的 immutable artifact，禁止 `git pull` 或现场编译。
 
-> 当前 A/B/C 集成（2026-10-08）：单插件更新与取消、固定宿主进程级恢复、HTML headed 验收和 SDK 信任盘查见[本轮集成验收](./docs/hackathon/evidence/shinemage-abc-integration-20261008.md)。全量 B0、SDK 分发与生产门禁仍有开放项；这份本地集成记录不代表新 Release。
+> 当前插件主线（2026-10-08 用户确认）：每插件一个独立本地/远程仓库；官方 npm DSH 独立安装升级；CRM、看板、WeKnora 独立维护，通过插件接入运营。最终职责、现有 SDK 限制和完成判据见[插件方案](./docs/architecture/shinemage-plugin-platform.md)，当前任务见 [TODOS](./docs/hackathon/TODOS.md#m1-核心交付)。九个插件已有独立本地/远程仓及各自 CI 证据，八仓最新完整 Ubuntu PR CI 已通过；PR 未合并，独立发布和 npm 底座升级仍未完成。主仓整支 CI 未跑。主仓前三组已分别提交为 `c94dd3ee`（源码/测试）、`a9c4d79d`（10 月 8 日证据）、`80d48d14`（10 月 9 日交付记录）；本页属于随后第 4 组当前说明同步。最新 Git 状态和后续动作见 [STATUS](./STATUS.md)，[分组前交接](./docs/hackathon/evidence/shinemage-main-repo-delivery-20261009.md)保留原始快照；未 push 或建立主仓集成 PR。VERSION 仍是 `0.20.0.0`。
+
+> 当前已验组合：本地提交 `f8db3949`，新 candidate `fd1fba4c…` / 包 `a0d5dd08…`，headed 25 PASS、WSL2 source/terminal/browser 通过并接入 journal seq 6，见[本次记录](./docs/hackathon/evidence/shinemage-html-fix-candidate-20261008.md)。该封存组合不覆盖 `c94dd3ee` 中的 CRM 字节或独立仓新产物。完整 B0 的历史第四轮通过不等于当前正式 CI 通过；SDK 分发仍 BLOCKED、产品仍 PARTIAL，未发布或切换生产。
 
 下方9月5–10日的决策、端口和候选追加保留为历史记录，不作为当前服务或Git HEAD。
 
@@ -12,7 +14,7 @@
 
 > **历史价值定稿（2026-09-05）**：已确认让老板拍板一个有边界的天猫内部跨渠道客户增长试点，主线是“渠道 × 首购商品 × 后续购买”。见 [CEO 价值与首版决策方案](./docs/hackathon/CEO-VALUE-PLAN.md)。本段保留当时决策语境；当前运行和公网事实以 STATUS/HANDOVER 为准。
 
-> **当前交付（2026-09-10）**：competition 集成 #112 和 7 项审查修复 #114 已合入 main `788b5b1`；PR 与合并后的主线 CI 均通过。独立合成浏览器已验证连续成板、失败重试、保存布局重开及行动草稿 v2，见 [修复 QA](./docs/hackathon/COMPETITION-REPAIR-QA-2026-09-10.md)。当前按 [产品验收与发布准备账本](./docs/hackathon/PRODUCT-READINESS-2026-09-10.md) 推进；[单位来源修复](./docs/hackathon/COMPUTED-UNITS-DELIVERY-2026-09-10.md)已完成本地验证、五库恢复、候选切换和局部真实复测。T13 已有真实 DeepSeek 有界实测，T15 待本人验收，T16 仅合成单用户基线，T17 PARTIAL，整产品仍 PARTIAL。约千万行、10 人使用仍是规划输入，公网尚未部署。
+> **历史交付（2026-09-10）**：competition 集成 #112 和 7 项审查修复 #114 已合入 main `788b5b1`；PR 与合并后的主线 CI 均通过。独立合成浏览器已验证连续成板、失败重试、保存布局重开及行动草稿 v2，见 [修复 QA](./docs/hackathon/COMPETITION-REPAIR-QA-2026-09-10.md)。当前按 [产品验收与发布准备账本](./docs/hackathon/PRODUCT-READINESS-2026-09-10.md) 推进；[单位来源修复](./docs/hackathon/COMPUTED-UNITS-DELIVERY-2026-09-10.md)已完成本地验证、五库恢复、候选切换和局部真实复测。T13 已有真实 DeepSeek 有界实测，T15 待本人验收，T16 仅合成单用户基线，T17 PARTIAL，整产品仍 PARTIAL。约千万行、10 人使用仍是规划输入，公网尚未部署。
 
 > **候选追加**：4325/18083 均为 `84b0ac8`，模型配置和原资产保持，现有 2 块板、10 条结果、原草稿 v2；单位/标识/自动保存表述在本次真实用例通过，完整 T13 及 B0 404 仍开放，见[当前记录](./docs/hackathon/COMPUTED-UNITS-CANDIDATE-2026-09-10.md)。
 
@@ -48,7 +50,9 @@
 3. 端口、目录和哪份历史不要搜，见 [维护地图](./docs/operating/maintainer-map.md)。
 4. 驾驶舱怎么生成 HTML，见 [操作说明](./docs/operating/cockpit-native-html.md)。验证范围见 [当前验证入口](./docs/operating/verification.md)。完整 B0 检查命令是 `node scripts/dsh-b0/pipeline.mjs --check --python /absolute/python3.14`。
 
-### rc2 稳定交付入口
+### 当前 rc2 集成仓交付入口
+
+以下是当前集成仓的固定 runtime artifact 路径，仍可能构建上游；它不是最终的官方 npm 安装升级教程，也不是每次单插件修改的默认步骤。目标流程与尚未验证部分见[插件方案](./docs/architecture/shinemage-plugin-platform.md)。
 
 插件作者若只修改一个独立包，先看 [DSH 插件作者 Quickstart](./docs/operating/dsh-plugin-author-quickstart.md)，不要重复执行整仓发布。
 

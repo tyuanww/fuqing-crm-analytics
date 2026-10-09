@@ -2,7 +2,115 @@
 
 适用于成果工作树的本地补丁；是否已集成，以该工作树 Git 状态和远端证据为准。授权见 [AGENTS](../../AGENTS.md)。当前施工与缺口看根 [STATUS.md](../../STATUS.md) 和 [TODOS 的 M1 核心交付](../hackathon/TODOS.md#m1-核心交付)。黑客松入口与 [治理实施记录](../hackathon/WORKFLOW-GOVERNANCE-2026-09-06.md) 是历史证据链，不是本轮任务卡。
 
+## 当前接续的验证边界（2026-10-09）
+
+主仓源码/测试已提交为 `c94dd3ee`，两组历史证据分别提交为 `a9c4d79d`、`80d48d14`；本页属于随后第 4 组当前说明同步。三笔正常提交钩子均退出 0，提交文件与准备清单摘要一致，具体路径可用 `git show --stat --name-only <上述提交>` 核对。主仓整支 CI 未跑，没有本轮 ShineMage 集成 PR；分组前盘查的 10 个 Dependabot PR 未在本轮重查。八仓 Ubuntu PR CI 只验证对应作者仓，不能累加，也不能代替主仓。源码提交没有引入额外代码修订，沿用与该提交 15 个源码/测试文件字节一致的既有入口日志：`plugin-isolation.test.mjs` 外层 4 PASS 且内部测试实际执行，`knowledge-http.test.mjs` 与 `graph-ledger.test.mjs` 合计 9 PASS。没有重跑完整 B0、旧包 headed/WSL 或冷安装。装配侧没有新代码；正式包入口仍按摘要拒绝缺失、不符和错误组合，九仓普通 content pack 不是这些入口的输入。
+
+`fd1fba4c…` / `a0d5dd08…` 的 headed 与 WSL2 已经实跑，journal seq 6。后文「WSL 缺目标」「目标 WSL 未运行」若出现在更早段落，只描述那个时点。新的 CRM 源码和独立仓产物不能继承这次实跑。D/E 无独立 tsc，记 `NOT_IN_CURRENT_BUILD`。cordis peer 4.0.2 对固定输入 4.0.4 仍未证明宿主兼容。合成知识服务不是 WeKnora，`shine-board` 不是完整看板。SDK 分发 BLOCKED 保持，不把本页的主仓核对一并标成阻塞。产品 PARTIAL，`release_ready=false`。本轮不因此新跑全量 SDK 查询，也不把未发布的主仓整理写成发布通过。
+
+## 八仓真实 Ubuntu PR CI 验证（2026-10-09）
+
+[当前八仓记录](../hackathon/evidence/shinemage-eight-remote-delivery-20261009.md)及同名 validation JSON 绑定实际 PR head、GitHub 合成 merge checkout/tree、完整 run、固定输入和内容包。归档索引 `.context/checks/eight-remote-delivery-20261009/archive-manifest.json`；八个代表 PR job 均实际 success，包含新目录源码/依赖准备、各仓现有构建、本包测试及内容打包。
+
+前三仓严格类型检查通过；D/E 无独立 tsc。Workbench 193、CRM 103、Knowledge 和 D/E 各文件分组独立记录，辅助检查与 push/PR 不累加。首轮 workflow 上下文错误和上传空路径风险已修复、审查；原失败保留。主 Agent 复算 ZIP API digest、tarball 及成员，与前轮对应 Linux 包一致。该结论仅属作者仓 CI，不关闭 formal candidate/journal、宿主、真实业务或 SDK 分发。下方 Ubuntu NOT_RUN 为此前阶段。
+
+## 八仓固定 CI 本地收尾验证（2026-10-09）
+
+[当前证据](../hackathon/evidence/shinemage-independent-ci-closeout-20261009.md)及同名 validation JSON 绑定八笔本地 CI 提交。原始材料索引 `.context/checks/independent-ci-closeout-20261009/archive-manifest.json`；包含实际 argv、退出码、日志、锁、补丁和包。Workbench 原完整链按同字节复用，本轮新增进程组 3 项和输入保护 6 项通过；CRM 本包 103 项通过；Knowledge 按 graph22/service5/package5/identity12/boundary5 分别记录；D/E 各自生命周期、计算及边界按包记录。所有新消费者均为本地 Debian Linux x64 容器、禁网执行，不是 Ubuntu Actions。
+
+主 Agent 与独立宿主内审查核对实际文件/输入/产物摘要；两项 Workbench 失败处理缺口已修复，新增两个官方测试包补齐 CRM/Knowledge 缺口，旧失败保留。D/E 无 tsc；共同 3+6 保护证据不反复计数。其他七仓整套空缓存准备未重跑；远程 CI、正式 packPlugin/candidate、真实服务和底座升级不由本轮通过。提交后 clone 只核对精确字节，没有宣称重新执行完整构建。下方保留历史记录。
+
+## Workbench 新建 Linux CI 输入（2026-10-09）
+
+[本轮记录](../hackathon/evidence/shinemage-workbench-ci-materialization-20261009.md)与机器摘要绑定 Workbench `cc1dd6a`。任务根 `/Users/hutou/.codex/tasks/shinemage-ci-materialization-20261009/` 中 `recipe-consumer` 含待集成的 8 文件配方；实际命令和退出码在 `evidence/recipe-*/`，准备内部日志在 `recipe-r3/evidence/`。根必须是新的绝对目录，脚本拒绝覆盖；准备允许包管理器原安全策略查询，后续消费者步骤断网。
+
+最终准备、安装、预检、严格 host/client 构建、本包 23 文件 193 PASS、链接及内容包都退出 0；作者边界 5 PASS、输入保护 6 PASS 单独记录。Linux 包 `920183d4…` / 441102 字节 / 8 成员，与旧 macOS 包成员相同、归档不同。此为本地 Docker Debian Linux x64 仿真实测，Ubuntu GitHub Actions、正式 packPlugin/candidate 和其他插件验收均不由此通过。第一次获取超时、声明缺失、断网准备取消和 Git 归属失败目录均保留。旧验证不重写。
+
+## D/E 真实 clone 与 Workbench 已准备输入（2026-10-09）
+
+[交付记录](../hackathon/evidence/shinemage-independent-de-git-and-ci-20261009.md)绑定五个精确提交。验证使用各自新建的 `git clone --no-local` 目录。安装、预检、现有构建、按文件分开的本包测试和内容包退出码为 0。board 与 waterfall 各保留一次沙箱元数据拒绝失败，通过结果在新目录。第二次同名内容包写入被拒绝，首包摘要不变。五仓没有单独 tsc，不记类型检查通过。
+
+Workbench CI 输入的本机全链在 `/Users/hutou/.codex/tasks/shinemage-ci-inputs-20261009/evidence/run-prepared/`：边界、安装、预检、host/client 严格类型检查与构建、23 文件 193 项、链接检查和内容包均为 status 0。源码树单独预检退出码 1，停在缺失的 `vite/package.json`。Ubuntu 与 GitHub Actions 为 NOT_RUN。下段是此前复核。
+
+[主 Agent 审查](../hackathon/evidence/shinemage-independent-de-git-ci-review-20261009.md)进一步核对 Git blob/clone、实际 tarball、36 个公开包 integrity 与 26 个 main/types 入口。CI 输入供应保持 OPEN，未运行 Ubuntu/远程 CI。任务根 run-consumer.mjs 现在要求 `--run-root /绝对/新目录`，prepare-inputs.mjs 要求 `--evidence-root /绝对/新目录`；复用目录在执行前失败，旧记录不改。新增验证只包含 24 个 CLI/轻量夹具检查和两次语法检查，不计入原 193 项，不是新 SDK 构建。
+
+## D/E 独立作者仓与三仓 clone 的交接复核（2026-10-09）
+
+[本轮记录](../hackathon/evidence/shinemage-independent-de-and-git-review-20261009.md)区分 D/E 原始隔离验证、前三仓 r2 真实 clone 与本轮受影响的打包保护检查。原始日志、sandbox、命令和实际 tarball 共 355 份归档至 `.context/checks/independent-de-and-git-review-20261009/archive/`；源记录及失败轮不改。D/E 临时验证副本已删除，不事后补造全量输入封存；已保存的源码清单、命令和包成员按实际范围复核。
+
+前三仓 commit/tree/作者/r2 的 tracked 文件逐一一致；tarball 摘要与各自新回执一致。D/E 使用原构建方式，没有 tsc 步骤；原计数分包记录，重跑与各包之间均不累加。具体输入和隔离限制见新证据；不把列出路径拒绝等同整机 deny-default，不继承旧 candidate/headed/WSL。完整 CI 仍缺实际固定输入供应。
+
+## 三个独立作者仓的本地提交与 r2 clone（2026-10-09）
+
+[交付记录](../hackathon/evidence/shinemage-independent-abc-git-delivery-20261009.md)绑定三个精确提交。验证目录是各自 `evidence/git-delivery-20261009-r2/`，clone 是各自 `clones/r2`。使用 `git clone --no-local`，clone HEAD 与作者 HEAD 相同，没有 alternates。r1 证据和 clone 保留，不覆盖。
+
+r2 每仓单独记录安装、输入预检、严格类型检查与构建、本包测试、内容包。退出码都是 0。第二次内容包写入因目标已存在而退出 1，原 tarball 字节未变。Knowledge 的 graph、service-client、package、identity、author-boundary 按文件分开计数。CRM 守卫 11 和 Workbench 边界 5 属于更早结果，本轮没有重跑，也不加进 r2。
+
+r2 访问探针退出 0：主集成树、兄弟插件源码、`toolchain.mjs`、三个原作者仓和三个 r1 clone 为 EPERM；固定上游与适用 build-tools 为 READ。这不是全量 B0、headed、WSL、正式 packPlugin、candidate 或远程 CI。真实 WeKnora/Neo4j 仍是 NOT_RUN。下段是审修补测，早于这些提交。
+
+## 三个独立作者仓的审查与补测（2026-10-09）
+
+[三仓记录](../hackathon/evidence/shinemage-independent-abc-review-20261009.md)及其机器摘要区分原始验证与本轮补测。原始日志和失败轮共 169 个文件按摘要归档到 `.context/checks/independent-abc-review-20261009/archive/`，没有覆盖任务树证据。Workbench 验证副本全链通过；CRM 的沙箱 build/test 在作者仓执行，另一个副本只做离线安装；Knowledge 已删除旧验证副本，缺当次完整源码/sandbox argv 封存，按现存日志和产物成员证据收录，不补造历史。
+
+本轮新执行仅在 Knowledge 独立作者仓：`node --test --test-concurrency=1 scripts/author-boundary.test.mjs` 为 5 PASS，`node --test --test-concurrency=1 plugin/test/identity-lease.test.mjs` 为 12 PASS，均 0 FAIL / 0 SKIP；`bash -n scripts/isolate-verify.sh` 退出 0。固定 Node 24.19.0，绝对输入、cwd、环境白名单、40 秒外层限时和日志见上述证据中的 `knowledge/fix-validation-r1/validation.json`。这是受影响检查，不是新一轮隔离构建或完整 B0。
+
+三仓内容包均为执行方保存回执；临时 tgz 已被各自脚本删除。本轮核对当前成员字节，不声称重新计算原 tgz 摘要。没有正式 packPlugin、新 candidate、真实宿主/模型/业务测试或远程 CI。
+
+## shine-brand 独立远程 CI（2026-10-08）
+
+最新 [PR #1 / 2d7c17c](https://github.com/tyuanww/dsh-shine-brand/pull/1) 的 Ubuntu CI 已实跑成功，32 PASS / 0 FAIL / 0 SKIP；详见[原始日志、clone 与包身份](../hackathon/evidence/shinemage-shine-brand-remote-20261008.md)。`npm-author/package-lock.json` 固定公开编译器和打包器，首次联网安装锁定包，构建无需主仓/兄弟/上游 checkout/build-tools。macOS 实际文件访问隔离与 Ubuntu 托管 CI 分别记账。五个包内文件跨平台相同，归档摘要不同；严格 SDK 类型、宿主、正式 candidate/release 不属于该 CI 的通过范围。以下为此前入口的历史验证。
+
+## shine-brand 本地提交与独立 clone（2026-10-08）
+
+最新结果绑定独立仓 `981c270`，详见[证据与完整命令](../hackathon/evidence/shinemage-shine-brand-local-git-20261008.md)。本地 `git clone --no-local` 后无现成 lib/node_modules；sandbox 额外拒绝原独立仓，主仓/兄弟源码仍不可读，固定上游与 build-tools 只读放行。离线安装、预检、构建、内容打包退出 0；20 项输入与命令检查、7 项行为测试通过。两个运行 JS 同字节，README 修正后的内容包摘要 `9ccaa2ea…`。这不等于远程 clone、远程 CI 或上游 checkout 不可见的作者路径通过。下方 CI 等价验证与 A/B/C 表述保留前轮时点。
+
+## shine-brand 的本地 CI 等价验证（2026-10-08）
+
+独立仓新增 `scripts/pinned-pnpm.mjs` 与 `scripts/check-inputs.mjs`；本地及 workflow 均显式设置 `SHINE_BRAND_PNPM_ENTRY` 为已准备的 pnpm JS 文件绝对路径。安装/打包通过同一固定 Node 和该入口执行，拒绝缺路径和版本漂移，不回退 PATH/Corepack。安装后、构建前复用 kit 的 `inspectToolchain`，检查固定上游 SHA/锁、工具输入和 bindings；不准备/重建 DSH。精确输入、命令、退出及摘要见[本轮记录](../hackathon/evidence/shinemage-shine-brand-ci-inputs-20261008.md)。
+
+原 sandbox 屏蔽主仓/兄弟业务源码与网络，仍允许固定上游/build-tools。本轮 20 项输入/命令检查和 7 项行为测试各自通过，安装/预检/构建/内容打包退出 0；只代表本地等价步骤，不能写成远程 CI、全新 clone 或 npm-only 通过。既有 B0/宿主/服务/WSL 不重跑。
+
+## A/B/C 独立化本地集成（2026-10-08）
+
+[当前证据和机器记录](../hackathon/evidence/shinemage-plugin-independence-integration-20261008.md)绑定主树 `f8db3949` 加未提交增量，分别保留 A 原安装材料、B 独立仓 r3 与审修后的结果、C 原日志及集成后的合同测试。A 的安装文件/配置/下发字节可复核，运行命令终态为执行方报告；B 的本地独立仓构建使用受控 checkout/工具输入；后续本地 clone 已通过，远程 CI 未执行。下表最终判据尚未全部达到，不能把这些局部证据相加成整体通过。
+
+隔离入口现显式去除嵌套 Node 测试的 `NODE_TEST_CONTEXT` 并检查内部测试计数，避免递归跳过后退出 0 被当成通过。原漏测轮保留，后续以真正执行的包内测试为准。
+
+集成只补输入拒绝、CRM/知识 package（包括实际解包目录）、服务 HTTP/组合、图谱 owner 与页面/profile 等受影响检查；完整 B0、headed、WSL 不重复。精确命令、环境与各自退出码见新记录及 `.context/checks/plugin-independence-integration-20261008/`；旧失败及原始摘要保留。新 CRM 字节不写入或冒用现有 candidate/journal，SDK 分发仍 BLOCKED。
+
+## 最终方案的待实施验收（2026-10-08）
+
+用户确认的最终主线是各插件真实独立本地/远程仓库、版本、构建、CI 与交付；DSH 使用官方固定 npm 发行包独立安装升级；CRM 与 WeKnora 服务独立维护、分别由插件接入。看板独立仓库和交付，可在 DSH 内作为插件运行，不要求新增独立 Web 应用或看板服务。该主线优先于下文历史阶段的范围描述，继续使用[原计划编号和 stop/go](../plans/shinemage-plugin-platform-split.md#用户确认的最终目标与验收范围2026-10-08)，不新增平台建设任务。
+
+下表是**待实施的验收判据，不是已存在的全自动命令或 PASS 记录**。现有 workspace/独立作者副本测试可作输入证据，不能替代真实分仓后的 clean clone 和该仓 CI；以下步骤实施时再绑定实际仓库、包、入口、输入摘要及新输出目录，不凭占位路径生成成功回执。
+
+| 原任务范围 | 必要输入与实际验收判据 | 当前状态与证据边界 |
+|---|---|---|
+| T15/T21：独立插件仓库 | 每个实际本地/远程插件仓库有自己的版本、锁文件和构建/测试/打包入口；从远程精确提交独立 clone，在主仓、兄弟源码及上游 checkout 均不可见的环境构建。允许按摘要固定的开发依赖包、SDK/类型和领域 tarball；记录实际读取边界、安装、构建、测试及包内容 | shine-brand 已验公开工具构建、真实远程 clone 和本仓 Ubuntu CI；无需上游 checkout。严格 SDK 类型及其他各仓尚未完成，不能把该样本扩大为全部插件通过 |
+| T2/T17/T20：官方 npm 宿主组合 | 固定官方 npm 包名、精确版本、原 tarball 完整性及其官方来源，在自有安装根安装；核对实际可执行入口/版本和依赖身份，以独立插件包及精确服务绑定执行既有兼容、不可用原因、原生回退和必要重启路径。不得修改或依赖上游 checkout 作为运行前置 | A 已提供 rc2 品牌插件 npm 安装/加载记录，安装和下发字节已复算；运行终态缺独立安全回执，CRM/知识组合未验。旧 headed/WSL 只证明其封存对象 |
+| T15/T18：只改一个插件 | 保持宿主、其他插件、服务及数据 schema 固定；由该插件仓的真实差异选择构建/测试，再验证受影响的合同和组合。记录其他 artifact 摘要、服务与状态未被变更，不重建 DSH、不迁移数据库、不重跑无关 SDK 全审 | 已有十场更新等隔离证据保留；真实独立仓的增量路径及其 CI 待实施。若改公共合同/工具链，按真实消费者扩大范围；当前主仓 push/PR 仍按 merge-base 到待推 SHA 全范围选择 |
+| T3/T14/T15：服务与完整业务能力边界 | CRM、WeKnora 使用各自固定服务版本、公开合同与授权的隔离验收输入；插件分别记录连接、权限/失败原因与回退。完整看板单独核对其源码/构建/发布边界及已约定用户路径 | `knowledge` synthetic 不代表 WeKnora；图表 `board-components` 不代表完整看板独立交付。真实身份、模型及业务输入仍需对应条件与授权，不能用合成结果代替 |
+| T10/T12/T18/T19/T20：升级与回退 | 升级 DSH 时另建精确官方 npm 宿主版本候选，记录插件适配及旧/新宿主×插件×服务兼容结果；按原合同验证会话/状态恢复、禁用/原生回退、必要的进程重启和恢复旧组合，保留旧工件。不可逆服务状态只能走明确的 forward-fix | 升级路径待实施，不因当前 rc2 通过而放行新版本。原 stop/go 指标、观察窗口、主备 owner、真实业务及切换条件保持开放；代码回退不等于数据回退 |
+
+SDK 整体分发仍 **BLOCKED**；签名/SBOM/漏洞/撤销等安全门禁按本次交付 artifact 和实际依赖逐项核对，不取消门禁，也不把 SDK 整体阻断扩为独立仓库准备的统一阻断。固定开发输入未变的插件日常更新不附加全量 SDK 审计；SDK、工具链或相应分发物变化时，再执行对应专项。该划分不使 `release_ready` 变为 true。
+
+新仓的 CI 必须在其自身 clone 上实际执行并保留结果，不能直接把下文主仓选择器配置或旧通过数搬成新仓 PASS。此处只补判据，没有新建仓库、工作流、安装命令或发布入口；精确可执行用法随对应实现与验证交付。
+
 ## 单一检查定义
+
+2026-10-08 提示修复新包：提交 `f8db3949`、candidate `fd1fba4c…`、包 `a0d5dd08…`。原 `html-host-browser-ui.probe.mjs --run-isolated-host` 新跑 headed 25 PASS；原 WSL2 combined source/terminal 各运行一次（10 PASS / 1 PASS），browser 使用真实 terminal seq 5 父事件运行一次（1 PASS / 5 场景）。原 `plugin verify-service` / `plugin verify-host` 顺序接入新 journal seq 3–6，均退出 0。完整命令、固定输入、原始日志/截图及清理记录见[本次候选验收](../hackathon/evidence/shinemage-html-fix-candidate-20261008.md)。这些仅覆盖合成输入与隔离宿主，正式 CI/真实业务/生产未运行。
+
+构建与回归：[交付准备](../hackathon/evidence/shinemage-html-fix-delivery-20261008.md)中的禁网作者 build、host/client full typecheck 已通过；103 项为源码与日志摘要一致的结果复用，修前三失败仍保留。提交后重新核对 576 个 Git blob 与该构建快照相等，未伪称重新构建。七文件增量 CI 选择仅 B0，实际整支相对缓存基线的 635 文件与原 plan-only 输入相同，仍需更广检查；没有执行正式 CI。
+
+此前 b75 包的[WSL2 组合证据](../hackathon/evidence/shinemage-current-candidate-wsl-20261008.md)和[局部修复记录](../hackathon/evidence/shinemage-html-save-status-fix-20261008.md)保持原文，其中“尚未打包/提交”是当时状态。以下是历史阶段入口。
+
+2026-10-08 最新固定输入收尾：五包原配方编译、82 个 JS 原始字节比较以及当前 b75 包 headed 25 项的收录范围，见[执行、独立核对与失败保留](../hackathon/evidence/shinemage-grok-handoff-transform-20261008.md)。SDK 编译证据只属于隔离审计，不接入日常插件更新；本轮没有重跑 B0 或浏览器。以下是前轮及更早入口。
+
+2026-10-08 收尾：当前HTML输入使用原 `html-host-input-audit/v1`，576源码＋5原包构建成员完成author准备，真实 `validateProbeInputs` / `verifyReceivedMembers` 退出0，仅属输入门禁；[输入记录](../hackathon/evidence/shinemage-html-candidate-inputs-20261008.md)含精确命令和摘要。正式source/terminal仍要求真实WSL2，Docker仿真不能抵扣；当前源码相对缓存origin/main的CI选择已用原 `--plan-only` 核对，未运行CI或重复B0。SDK新增映射与stop/go计时边界见[收尾记录](../hackathon/evidence/shinemage-closeout-progress-20261008.md)。
+
+2026-10-08 隔离配方补证：固定源的 `pnpm run build` 在 `sandbox-exec` 的 `deny network*` 下执行，使用配方要求的精确 Node/manager；第二轮两个未经后处理的 bundle 与封存 SDK 逐字节一致。该动作是 SDK 专项，不进入日常插件更新，不替代全量 B0、正式 CI 或分发门禁。候选目标输入仅完成离线核对，未执行目标 runner。实际命令、第一轮差异、原始日志与范围见[隔离配方集成](../hackathon/evidence/shinemage-input-unblock-20261008.md)。以下为前一轮候选验证。
+
+2026-10-08 本地候选续接：现有 `pnpm dsh plugin verify-service` 以新 candidate、原 `pair-r2/receipt.json` 和主 Agent 独占 journal 写入 seq 3；服务工件关联通过，不代表目标宿主通过。随后 `backend/tests/test_analytics_first_purchase_official_host.py` 的既有 terminal 入口，以只更换 candidate 路径/摘要的新 input-v4 实跑 **1 PASS / 1 warning**，固定服务/查询/CRM 包保持。命令、输入差异、进程清理及原始日志见[候选专项](../hackathon/evidence/shinemage-candidate-admission-20261008.md)；三线摘要核对、归档和剩余缺口见[本轮集成](../hackathon/evidence/shinemage-admission-closeout-20261008.md)。本轮未重跑完整 B0，HTML 两项原生交互 NOT_RUN，正式 CI NOT_RUN。
 
 `scripts/ci/pre_push_path_class.py:verification_plan` 定义互相独立的 backend/B0/frontend/tooling/dependencies/deployment 维度，依赖审计细分为 python_dependencies/frontend_dependencies，另有 ground_truth 与 filterbuilder 触发轴；`scripts/ci/run_checks.py` 生成并执行命令。本地 pre-push、PR 的 Python/Vue/B0 检查共用它；PR CI 只通过 `lint.yml` 调用一次 `check-plan.yml`。`dsh-b0.yml` 仅 `workflow_dispatch` 做空机器 `--prepare`。B0 的本地与 CI 构建始终调用既有 `scripts/dsh-b0/pipeline.mjs`。`merge-gate` 在路径计划失败或已选 job 失败/取消时阻断；skip 不算失败。分支保护属于远端配置；2026-09-09 核验已包含 `b0-contract-build` 和 `merge-gate`，本轮不调整必需检查。
 

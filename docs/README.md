@@ -1,7 +1,9 @@
 # Docs 索引
 
 > 按 lifecycle 分层，新人约 5 分钟找到入口。  
-> **最后更新**: 2026-10-03。当前提交、运行和交付事实以根目录 [STATUS.md](../STATUS.md) 和 [HANDOVER.md](../HANDOVER.md) 为准。Mac 负责开发/测试，杭州 Windows + WSL 只运行批准 SHA。候选 DSH 钉 **0.1.7-rc.2**（`477b4f42`），`dsh-0.20.0.0-r1` 已发布但杭州 current 仍是上一份运行版本；产品仍 PARTIAL，黑客松与校准记录是档案，不是默认入口。
+> **最后更新**: 2026-10-09。当前提交、运行和交付事实以根目录 [STATUS.md](../STATUS.md) 和 [HANDOVER.md](../HANDOVER.md) 为准。插件主线是每插件独立本地/远程仓、官方 npm DSH 独立升级、CRM/看板/WeKnora 独立维护，见[最终方案与实际差距](./architecture/shinemage-plugin-platform.md)及 [TODOS](./hackathon/TODOS.md#m1-核心交付)。看板可作为独立交付的 DSH 插件，不要求新建另一套 Web 应用。当前仍 PARTIAL。九个插件已有独立远程仓和各自 CI 证据；八仓最新 Ubuntu PR CI 已通过，PR 未合并、未独立发布，主仓整支 CI 未跑。主仓前三组已提交为 `c94dd3ee`、`a9c4d79d`、`80d48d14`；本页属于第 4 组当前说明同步，最新 Git 状态以 STATUS 的主仓接续与实际 Git 为准。[分组前交接](./hackathon/evidence/shinemage-main-repo-delivery-20261009.md)保留原快照；本轮没有切换生产。
+>
+> **保留的 2026-10-03 快照**：当时 `dsh-0.20.0.0-r1` 已发布、杭州 current 仍是上一份运行版本，DSH 钉 `0.1.7-rc.2` / `477b4f42`。这不是本次现场核验；生产只能按批准 SHA 和实际授权操作。黑客松与校准记录是档案，不是默认入口。
 
 ## 黑客松当前实现
 
@@ -17,6 +19,7 @@
 | [`hackathon/README.md`](./hackathon/README.md) | CEO 价值、演示主链和数据边界（证据链；当前 SHA 看 STATUS） |
 | [`hackathon/PRODUCT-READINESS-2026-09-10.md`](./hackathon/PRODUCT-READINESS-2026-09-10.md) | 七阶段验收账本 |
 | [`hackathon/TODOS.md`](./hackathon/TODOS.md) | 验收缺口与延期项（不是执行授权） |
+| [`hackathon/evidence/shinemage-main-repo-delivery-20261009.md`](./hackathon/evidence/shinemage-main-repo-delivery-20261009.md) | 分组前主仓现场、15 文件审查、装配边界与原四组清单 |
 | [`hackathon/COCKPIT-UI-UX-2026-09-20.md`](./hackathon/COCKPIT-UI-UX-2026-09-20.md) | 0.13.0.0 驾驶舱合并、6677 reload、证据归档与未验收项 |
 | [`operating/maintainer-map.md`](./operating/maintainer-map.md) | 目录职责、端口域名、CodeGraph 检索。新人先看这篇 |
 | [`operating/mac-hangzhou-git-workflow.md`](./operating/mac-hangzhou-git-workflow.md) | Mac 开发、GitHub PR、杭州 WSL 生产部署的唯一链路 |
@@ -25,7 +28,7 @@
 | [`operating/dsh-rc2-quickstart.md`](./operating/dsh-rc2-quickstart.md) | rc2 artifact 准备教程 |
 | [`operating/dsh-plugin-author-quickstart.md`](./operating/dsh-plugin-author-quickstart.md) | 独立插件作者三步构建、测试和 candidate handoff |
 | [`./reference/dsh-rc2-release-artifact.md`](./reference/dsh-rc2-release-artifact.md) | release/receive/verify 命令与 artifact 合同 |
-| [`architecture/shinemage-plugin-platform.md`](./architecture/shinemage-plugin-platform.md) | 官方 DSH、独立插件/服务、profile 与部署边界 |
+| [`architecture/shinemage-plugin-platform.md`](./architecture/shinemage-plugin-platform.md) | 最终独立仓方案、官方 npm 底座、CRM/看板/WeKnora 边界与待验差距 |
 | [`architecture/shinemage-plugin-boundaries.md`](./architecture/shinemage-plugin-boundaries.md) | 当前包 owner、机器依赖 DAG、临时源码引用与检查入口 |
 | [`architecture/dsh-release-trust.md`](./architecture/dsh-release-trust.md) | immutable artifact、allowlist 和回退设计说明 |
 | [`hackathon/S3-ACCEPTANCE-2026-09-15.md`](./hackathon/S3-ACCEPTANCE-2026-09-15.md) | 9-15 指定 Figma 矩阵与正式壳 B3 代表路径（PARTIAL，不升版本） |
@@ -167,4 +170,4 @@ fuqing-crm-analytics/docs/
 
 ---
 
-**协作契约**: lint + test 必绿；e2e 默认不挡合（`team-workflow-v1`）。本仓库默认冷存、不是本地即生产；改 data 路径先问人。归档 DuckDB 不复制到演示。
+**当前协作契约**：按根 [AGENTS.md](../AGENTS.md) 和实际 GitHub 门禁选择验证；`team-workflow-v1` 中的 e2e 规则只作历史参考。本仓库默认冷存、不是本地即生产；改 data 路径先问人。归档 DuckDB 不复制到演示。

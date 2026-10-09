@@ -2,6 +2,20 @@
 
 本页描述 2026-10-04 本地候选，不代表杭州已升级。DSH 固定 0.1.7-rc.2。CRM 包保留身份 `@shine-mage/dsh-crm-knowledge`，版本为 `0.0.0-crm.1`；知识包独立为 `@shine-mage/dsh-knowledge@0.0.0-candidate.1`。真实 CRM 登录、资产保存及 WeKnora 的账号权限沿用原接口；这里的两项合成服务只处理公开 synthetic fixture，不读取业务数据库，不接受文件路径、SQL 或凭据。
 
+## 最终独立边界（2026-10-08 用户确认）
+
+[插件最终方案](../architecture/shinemage-plugin-platform.md)要求 CRM 业务、看板/驾驶舱、WeKnora 各自维护，通过各自独立仓库的 DSH 插件提供运营入口。CRM 服务管理数据和权限；看板通过查询/保存 API 工作，不读 CRM 私有源码或业务数据库；WeKnora 保持自身服务与权限生命周期，接入插件仅调用已验证接口。官方 DSH 使用固定 npm 发行版独立升级，不因业务插件变更重建底座。
+
+本页已验的公开 synthetic 知识服务不是 WeKnora，本页的插件拆包也不等于 WeKnora 接入已独立验收。当前私有教材身份 lease 仍由 CRM Host 提供；在独立知识仓收尾时需明确保留的公开身份合同与缺少提供方时的不可用原因，不把这一依赖隐藏为“完全无依赖”。`board-components` 是图表领域包，不代表完整看板能力已独立交付；看板可以作为独立仓库的 DSH 插件运行，不另加 Web 应用或服务要求。九个插件远程仓及各自 CI 已有证据；PR 合并、独立发布、官方 npm 组合与真实 API 验收仍待完成。本页历史合同和验证结论不作通过升级。
+
+2026-10-09 起，九个插件远程仓已经存在，八仓完整 Ubuntu PR CI 已有通过记录，但 PR 未合并，也没有独立发布。该 CI 不是本页合成合同的验收，更不是主仓整支 CI。本页的 synthetic 知识服务仍然不是 WeKnora。`shine-board` 仍然只是标记，完整页面在 analytics-workbench。CRM/Knowledge peer 4.0.2 与固定输入中的 cordis 4.0.4 尚未证明宿主兼容。本页所述源码边界增量已由主仓 `c94dd3ee` 本地提交；该提交中的 CRM 字节不能继承 `fd1fba4c…` / `a0d5dd08…` 的 headed 或 WSL2。主仓另两组历史证据已提交为 `a9c4d79d`、`80d48d14`，Git 接续见 [STATUS](../../STATUS.md)。旧段里的目标缺口保留；不要把本页改写成发布记录。
+
+## 本轮源码边界增量
+
+[2026-10-08 A/B/C 本地集成](../hackathon/evidence/shinemage-plugin-independence-integration-20261008.md)中，CRM 健康状态不再读取 `COMPETITION_HTTP_BASE/TOKEN` 推断看板可用性。`board_tools` 现在为对象：catalog 对当前 Agent 可见时 `{status: 'AVAILABLE', execution: 'NOT_RUN', reason: null}`，缺少或不可见时为 `NOT_AVAILABLE / BOARD_PLUGIN_NOT_INSTALLED_OR_NOT_VISIBLE`。这是字符串到对象的受影响工具结果合同；当前消费/断言已随改动核对，不能推断其他外部消费者已经适配，也不能用可见性代替实际执行。
+
+CRM 与知识测试通过公开 HTTP 合同交互，知识插件的 inventory 测试不再导入主仓 ledger writer，writer 覆盖归回主仓 owner。三插件构建缺上游输入时明确失败，不再默认寻找主仓 `.context`。Python 合成服务夹具、profile 和跨插件组合检查仍由集成仓维护，不能宣称所有测试已独立。`shine-board` 本身仍是标记，完整页面能力在 analytics-workbench；真实 CRM/WeKnora 业务和身份验收不由这些 synthetic 测试关闭。新 CRM 源码尚无新 candidate；既有封存组合保持原证据范围。
+
 ## 谁需要什么
 
 - 插件运行：Node 24、固定 DSH SDK、各自可选的服务地址。CRM 仅消费指标客户端，知识仅消费知识客户端；两包没有业务实现导入。不需要 Python，不查找主仓目录，不运行子进程。
@@ -68,4 +82,4 @@ node --test dsh-plugins/crm-knowledge/test/service-client.test.mjs \
 
 `CRM_METRICS_PYTHON` 只供跨服务测试夹具选择解释器，不再是插件运行配置。夹具启动两个本次拥有的临时 loopback 服务，使用空白 HOME/TMP 与绝对 PYTHONPATH；结束只停止这两个子进程。B0 覆盖单包构建、实际 tarball 安全解包后加载和未配置服务时的降级；不证明完整 DSH profile 生命周期。
 
-独立服务应用与 CRM/知识插件的本地拆包已验证，见[插件拆分证据](../hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md)。固定 rc2 Web CLI 的本机加载、受控重启、原生会话/WAL 和回退也已[实际验证](../hackathon/evidence/dsh-g0-pinned-host-20261004.md)，不包括浏览器、真实服务或 WSL。源码仍在 workspace；物理分仓、平台依赖冷安装、真实 CRM API 兼容窗口、D15 保存/UNKNOWN 回放矩阵、供应链与现场 canary/回退仍开放。此只读合成合同没有引入 durable save，profile 回退不被声明为数据库回滚。取消会终止插件的 HTTP 等待，不宣称能强行中止服务端已开始的只读计算；服务端持久任务的取消/恢复另由 T7/T17 验证。
+独立服务应用与 CRM/知识插件的本地拆包已验证，见[插件拆分证据](../hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md)。固定 rc2 Web CLI 的本机加载、受控重启、原生会话/WAL 和回退也已[实际验证](../hackathon/evidence/dsh-g0-pinned-host-20261004.md)，不包括浏览器、真实服务或 WSL。上述为 10 月 4 日的验证范围；后续分仓、冷安装与固定组合证据分别见[主仓当前交接](../hackathon/evidence/shinemage-main-repo-delivery-20261009.md)和[验证入口](./verification.md)，不能沿用当时的缺口作为当前结论。真实 CRM API 兼容窗口、供应链与生产 canary/回退仍按各自输入验收。此只读合成合同没有引入 durable save，profile 回退不被声明为数据库回滚。取消会终止插件的 HTTP 等待，不宣称能强行中止服务端已开始的只读计算；服务端持久任务的取消/恢复另由 T7/T17 验证。

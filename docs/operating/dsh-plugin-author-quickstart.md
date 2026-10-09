@@ -4,6 +4,88 @@
 
 单插件更新十场、整次取消和 HTML headed 探针的现有命令、输入范围及实际结果见[A/B/C 集成验收](../hackathon/evidence/shinemage-abc-integration-20261008.md)。这些是隔离验收入口，不是安装到现役环境的命令；进程级恢复通过不等于支持热插拔。
 
+## 可用的独立远程作者仓与 PR（2026-10-09）
+
+[八仓 URL、提交与 CI](../hackathon/evidence/shinemage-eight-remote-delivery-20261009.md)已可用于接续。每仓当前完整配方位于各自 `codex/*-independent` PR 分支，默认 main 仍是已审查的首次功能提交；不要把 main 当作已合入完整 CI 修复。Workbench 和 D/E 入口为 `.github/workflows/ci-full.yml`，CRM/Knowledge 为 `ci.yml`。
+
+完整 Ubuntu PR CI 已按固定输入实际通过；日常开发仍按本仓 DEVELOPMENT.md 复用已核对的编译输入，只运行本包构建/测试，无须重复 SDK 全量审计。本轮未提供正式发布版、未合并 PR，内容包不是安装候选。下方“没有远程 URL”按历史时点保留。
+
+这些 URL 只用于核对已经存在的作者仓 PR。本轮不合并、不发布、不部署，也不把八仓 Ubuntu CI 写成主仓 CI。D/E 的现有 build 仍无单独 tsc，类型检查是 `NOT_IN_CURRENT_BUILD`。不要把 `shine-board` 当成完整看板，不要把合成知识 HTTP 当成 WeKnora，不要因为构建通过就视为 cordis 4.0.2 peer 与固定输入 4.0.4 兼容。主仓 profile 与流水线仍从主仓源码构建；普通 content pack 不能改名后当作 `packPlugin` 候选。下方「没有远程 URL」「Ubuntu 未运行」是此前时点。主仓前三组已提交为 `c94dd3ee`、`a9c4d79d`、`80d48d14`，本页属于第 4 组当前说明同步；[分组前交接清单](../hackathon/evidence/shinemage-main-repo-delivery-20261009.md)保留原时点，最新 Git 接续看 [STATUS](../../STATUS.md)。本页的构建/候选示例不代表本轮执行授权。VERSION 不变。
+
+## 八仓完整 CI 的当前入口（2026-10-09）
+
+> 历史阶段记录：以下“当前”“尚未”仅指该轮；最新 Git/CI 与当前接续见 [STATUS](../../STATUS.md)。
+
+[八仓交付](../hackathon/evidence/shinemage-independent-ci-closeout-20261009.md)列出各自最新 `chore(ci)`、本地仓和验证边界。各仓 `inputs/ci/README.md` 说明固定 Node 24.19.0 / Python 3.14.4 / Linux x64 下的 `python scripts/ci/prepare-fixed-inputs.py --root /绝对/新目录`；消费命令仍以自己的 DEVELOPMENT.md 为准，不共用其他插件的环境名。CRM/Knowledge 用现有 `ci.yml` 完整入口；Workbench 和 D/E 用新增 `ci-full.yml`。
+
+准备需 GitHub/npm 网络，允许原安全策略查询；已有根会拒绝，失败根保留。普通开发可复用已核对输入，运行本包构建/测试/打包，无须每次重装 SDK。源码 checkout/build-tools 仍需提供，不是所有插件已支持 npm-only。八仓现在各有本地提交、工作区干净，但没有远程 URL；Ubuntu Actions 未运行，不能给出虚构 clone 地址或发布命令。下方是此前准备阶段。
+
+## Workbench 的可复现 CI 输入配方（2026-10-09）
+
+> 历史阶段记录：以下“当前”“尚未”仅指该轮；最新 Git/CI 与当前接续见 [STATUS](../../STATUS.md)。
+
+[本轮交付](../hackathon/evidence/shinemage-workbench-ci-materialization-20261009.md)提供 8 文件补丁，位于 `/Users/hutou/.codex/tasks/shinemage-ci-materialization-20261009/patches/workbench-ci.patch`，已应用到 Workbench 原作者仓，尚未提交。任务副本 `recipe-consumer` 中的 `inputs/ci/README.md` 说明精确运行时、输入清单、准备网络与新目录要求。配方已在 Linux x64 本地容器从空目录完成准备和严格消费者全链；Ubuntu 远程执行未做。
+
+这条配方按固定版本取得官方编译产物并安装依赖，不复制现成 SDK 安装目录，不重建 DSH；固定上游 checkout 和 build-tools 仍存在。不要把 Workbench 结果套用为 CRM、Knowledge 或 D/E 的构建/类型检查通过，也不要从本轮内容包继承旧候选身份。
+
+## D/E 五个作者仓的本地提交（2026-10-09）
+
+> 历史阶段记录：以下“当前”“尚未”仅指该轮；最新 Git/CI 与当前接续见 [STATUS](../../STATUS.md)。
+
+五个仓现在各有一笔本地提交，可用 `git clone --no-local` 取得不含 `lib/` 与 `node_modules/` 的树。当前已验证目录是各任务根下的 `clones/*-r1`，SHA 与作者 HEAD 相同，没有 alternates。没有远程 URL。命令、环境白名单和内容包见[交付证据](../hackathon/evidence/shinemage-independent-de-git-and-ci-20261009.md)。现有 build 仍无单独 tsc。下段“未提交、未真实 clone”是此前时点。
+
+## D/E 五个新增作者仓（2026-10-09）
+
+> 历史阶段记录：以下“当前”“尚未”仅指该轮；最新 Git/CI 与当前接续见 [STATUS](../../STATUS.md)。
+
+`/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/` 下已有 `dsh-shine-query`、`dsh-shine-board`、`dsh-shine-crowd-action`；`/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/` 下已有 `dsh-shine-funnel`、`dsh-shine-waterfall`。每仓命令以自己的 DEVELOPMENT.md 为准，显式提供固定上游、build-tools、pnpm 和本仓领域输入，缺失时失败而不搜索主仓。五仓仍未提交、未真实 clone、无 remote，不提供虚构远程安装命令。
+
+图表两仓继续使用摘要固定的 board-components 0.1.0 tarball，公开 funnel/waterfall subpath 和声明文件均已核对；叶子三仓只解除构建/测试路径耦合，board 未增加驾驶舱实现。五仓现有构建无单独 tsc，不能借固定 TypeScript 版本检查宣称类型检查通过。来源、原日志与实际包见[本轮记录](../hackathon/evidence/shinemage-independent-de-and-git-review-20261009.md)。
+
+## 最终独立仓路径与本页适用范围
+
+用户确认的终点是每插件独立本地/远程仓库、自己的锁/版本/CI/发布，DSH 使用官方精确 npm 发行版，CRM/看板/WeKnora 各自维护；详见[最终方案](../architecture/shinemage-plugin-platform.md)。本页保留固定 kit/领域包/SDK 路径，并补充已验收的 shine-brand 公开依赖构建和远程仓路径；其余八仓已有独立远程仓及完整 Ubuntu PR CI，但仍消费固定 checkout/build-tools，正式包、宿主组合和独立发布尚未完成。
+
+日常只改一个插件时复用已核对开发依赖，运行该插件 build/test/pack 与受影响合同检查，不执行整仓 runtime preflight、数据库迁移或 SDK 全量审计。底座升级另起官方精确 npm 候选，先验证旧插件兼容，只适配受影响插件，再核验回退。当前 kit 的 `sdk_bindings` 仍指向固定上游构建输入，安装官方 npm 运行时并不会自动提供全部编译类型/导出；收尾必须在主仓、上游 checkout 和相邻插件源码不可见时验证独立依赖输入，未通过前保留现有路径和失败证据。
+
+SDK 分发 BLOCKED 保持，只约束适用的工具链交付；不由本页放宽安全检查，也不把它变成每次插件修改的全量审计要求。现有 clone/依赖获取/CI 入口见各独立仓 DEVELOPMENT.md 和本页顶部远程交付记录；独立发布及新版 DSH 升级教程仍缺实际验收，不提供未发布包的安装命令。
+
+## 三个业务插件的本地提交与 clone 入口（2026-10-09）
+
+> 历史阶段记录：以下“当前”“尚未”仅指该轮；最新 Git/CI 与当前接续见 [STATUS](../../STATUS.md)。
+
+三个作者仓现在各有一笔本地提交。从该提交取得干净树的命令是 `git clone --no-local <作者仓> <新目录>`。当前已验证的目录是各任务根下的 `clones/r2`，精确 SHA 与作者仓 HEAD 相同，且没有 Git alternates。clone 起点不含 `lib/`、`node_modules/` 或旧 store；这些目录只在后续安装和构建后出现。
+
+| 插件 | 作者仓与分支 | 当前提交 |
+|---|---|---|
+| analytics-workbench | `.../shinemage-workbench-independent-20261008/dsh-analytics-workbench`，`codex/analytics-workbench-independent` | `cc1dd6a972c85bb0ef0d7f7131edd72e62335dc1` |
+| crm-knowledge | `.../shinemage-crm-independent-20261008/dsh-crm-knowledge`，`codex/crm-knowledge-independent` | `12b8259351d7e64429336faca96a175aad77d517` |
+| knowledge | `.../shinemage-knowledge-independent-20261008/dsh-knowledge`，`codex/knowledge-independent` | `d9e26776905cc00f57c550dd08318e37ee1d1b21` |
+
+共同输入仍是 Node 24.19.0、显式 pnpm 11.28.2 JS 入口、上游 `477b4f42`、kit `251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901`。Workbench 还锁定 board-components `22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182`。三仓没有远程 URL，不能从 GitHub clone。完整命令、环境白名单和 r2 日志见[交付证据](../hackathon/evidence/shinemage-independent-abc-git-delivery-20261009.md)。下段表格里的“无提交、未 clone”是审修时点。
+
+## 三个业务插件的本地作者入口（2026-10-09）
+
+> 历史阶段记录：以下“当前”“尚未”仅指该轮；最新 Git/CI 与当前接续见 [STATUS](../../STATUS.md)。
+
+本地独立作者仓和完整命令见各自 `DEVELOPMENT.md`：
+
+| 插件 | 本地仓目录 | 当前输入与边界 |
+|---|---|---|
+| analytics-workbench | `/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/dsh-analytics-workbench` | 固定 kit、board-components、上游 checkout/build-tools；保留 host/client 严格类型检查 |
+| crm-knowledge | `/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/dsh-crm-knowledge` | 固定 kit、上游 checkout/build-tools；本包合成夹具，跨服务合同仍在集成树 |
+| knowledge | `/Users/hutou/.codex/tasks/shinemage-knowledge-independent-20261008/dsh-knowledge` | 固定 kit、上游 checkout/build-tools；身份与图谱使用合成 HTTP，非真实 WeKnora |
+
+共同固定 Node 24.19.0、pnpm 11.28.2、DSH rc2 上游 `477b4f42`。各仓使用显式绝对输入，不回退主仓 `.context`；仍需这些开发输入，不是 npm-only 严格构建已通过。三仓当前无提交、无 remote、未 clone，不能提供已可用的远程安装命令。Workbench CI 仅边界检查，CRM/Knowledge CI 缺固定输入供应；先做本地提交与 clone，再按实际输入完善完整 CI。原日志、审修和未覆盖范围见[三仓证据](../hackathon/evidence/shinemage-independent-abc-review-20261009.md)。
+
+## shine-brand 独立仓样本
+
+独立仓在 `/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand`，私有远程 [tyuanww/dsh-shine-brand](https://github.com/tyuanww/dsh-shine-brand)，当前 [PR #1](https://github.com/tyuanww/dsh-shine-brand/pull/1)。默认公开编译器路径已在隔离本机和 Ubuntu CI 通过，无需主仓、兄弟源码、上游 checkout 或 build-tools。Node 24.19.0 / npm 11.17.0；包 ID/版本仍为 `@shine-mage/dsh-shine-brand@0.0.0-b0`。
+
+以下命令适用于 PR 分支 `codex/shine-brand-independent`，已验证 HEAD 为 `2d7c17c2afa8050fc2d6b5def6af34fcaf821667`；默认 `main` 仍为初始提交 `506b1a3e`，尚不包含 `npm-author/`。在该分支的独立仓根执行 `npm ci --prefix npm-author --ignore-scripts --no-audit --no-fund`，然后 `node npm-author/build.mjs`；本包完整测试/打包命令见该仓 DEVELOPMENT.md。首次安装从 registry 取得锁定 esbuild/pnpm 及平台二进制，不分发旧 SDK。保留原固定 SDK 兼容入口及其输入门禁。仅转换 TypeScript，不代表严格 SDK 类型、宿主或候选准入已通过。
+
+[远程交付证据](../hackathon/evidence/shinemage-shine-brand-remote-20261008.md)记录真实远程 clone、每次 32 项测试、CI 和跨平台包摘要。该样本无运行时外部依赖，不可原样当作其他插件的空模板；图表领域包、服务与身份合同须按各包核对。以下主仓/SDK 命令保留其原适用范围。
+
 ## 前置条件
 
 - 插件开发使用 Node `24.19.0`、pnpm `11.28.2`。Python `3.14+` 属于后端服务、合成集成测试与发布校验工具的环境，不是 CRM 插件运行依赖。
@@ -14,7 +96,7 @@
 <a id="plugin-contract"></a>
 ## 包合同
 
-每个插件有自己的 `build.mjs`、测试和版本。构建期可以使用 workspace 内的 `dsh-plugins/plugin-kit`，但运行时只消费自身包、公开 DSH capability 合同和服务 API；不能导入 `analytics-workbench` 或其他插件的 toolchain 源码。profile 只组合已打包版本，不拥有插件源码。固定 pin、manifest/lock 和补丁位于 `plugin-kit/toolchain.json` 与 `plugin-kit/build-tools/`；workbench 只保留自己的业务类型检查。
+每个插件有自己的 `build.mjs`、测试和版本。构建期可以使用 workspace 内的 `dsh-plugins/plugin-kit`，但运行时只消费自身包、公开 DSH capability 合同和服务 API；不能导入 `analytics-workbench` 或其他插件的 toolchain 源码。运行时 profile 的目标职责是组合已打包版本；当前主仓 profile/candidate 的准备入口仍消费主仓源码，装配迁移尚未完成。固定 pin、manifest/lock 和补丁位于 `plugin-kit/toolchain.json` 与 `plugin-kit/build-tools/`；workbench 只保留自己的业务类型检查。
 
 全部插件已改用 `@shine-mage/dsh-plugin-kit/toolchain` 公开导出与精确 `0.1.0` devDependency；board-components 使用 kit 的 `./packaged-dependencies` 公开入口。独立安装不需要相邻 kit 源码；本仓由下方显式 workspace 适配器准备，B0 pipeline/preflight 已包含该步。kit 仅限构建期，不能出现在运行时依赖或领域输入 lock 中。kit 已提供自身的首次 SDK 准备命令，受控 SDK/工具归档与接收已有验证；受信分发与 registry 交付仍未完成，见 [kit 说明](../../dsh-plugins/plugin-kit/README.md)。
 
@@ -70,7 +152,9 @@ kit可复用标准pnpm虚拟store中已安装的领域包：先验证原锁tar�
 
 实际验证和失败恢复见 [2026-10-08作者输入证据](../hackathon/evidence/dsh-g0-plugin-author-inputs-20261008.md)。这仍是开发构建路径，不是发布/安装宿主/激活授权。
 
-## 三步本地路径
+## 当前集成仓的三步本地路径
+
+此为固定输入已准备、源码已审查提交后的操作参考。15 个源码/测试已提交为 `c94dd3ee`，但该提交不自动授权生成候选，也不证明宿主兼容；本轮第 4 组只同步说明。后续按实际输入与动作授权使用本节，不重建或改写已有候选来替代新组合验收。
 
 ```bash
 # 1. 只读检查当前 profile、工具链和本地合同
@@ -143,7 +227,7 @@ pnpm dsh plugin verify-host \
 
 ## 边界检查
 
-本地或 CI 运行 `node scripts/dsh-b0/plugin-boundaries.mjs --check`，核对包 owner、公开/内部合同、跨包引用、构建 DAG 与清单漂移。B0 pipeline 同时运行两个叶子包的 source-only 隔离 build/test/pack；这种本地夹具证据不代替真实宿主安装、服务合同或 clean reviewed SHA 的候选。CRM 的生产源码例外已归零；slot/主题合同由领域生成，页面工具在 profile 层显式装配，见 [边界清单](../architecture/shinemage-plugin-boundaries.md)。
+本地或 CI 运行 `node scripts/dsh-b0/plugin-boundaries.mjs --check`，核对包 owner、公开/内部合同、跨包引用、构建 DAG 与清单漂移。B0 pipeline 调用四包隔离入口（shine-brand、shine-query、CRM、knowledge），其中 CRM/knowledge 还检查实际解包后的加载；这种本地夹具证据不代替真实宿主安装、服务合同或 clean reviewed SHA 的候选。CRM 的生产源码例外已归零；slot/主题合同由领域生成，页面工具在 profile 层显式装配，见 [边界清单](../architecture/shinemage-plugin-boundaries.md)。
 
 ## 相关入口
 
