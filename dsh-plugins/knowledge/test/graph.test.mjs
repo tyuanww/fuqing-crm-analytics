@@ -1,10 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { writeFile, chmod } from 'node:fs/promises';
-import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { citationsFromGraphResult, createGraphReader, shareCitationAccess } from '../src/graph.mjs';
-import { writeGraphLedger } from '../../../scripts/crm-calibration/graph-ledger.mjs';
 import { graphFixture, DOC, DOC_B, CHUNK, CHUNK_B, USER_A, USER_B, KB, principal } from './graph.fixture.mjs';
 
 const asA = principal(USER_A);
@@ -21,8 +19,10 @@ test('read graph only after CRM account ACL; parameterized query, bounded eviden
   assert.deepEqual(result.sources[0].page_refs, [161]); assert.equal(result.sources[0].id, CHUNK);
   assert.equal(result.relations[0].target, '非会员的AUS'); assert.equal(result.relations[0].semantic_verified, false);
   assert.equal(result.sources[0].content_sha256.length, 64);
-  assert.ok(f.state.calls.some(c => c.path === '/api/v1/knowledge/' + DOC));
-  assert.ok(f.state.calls.some(c => c.path === '/db/neo4j/tx/commit'));
+  assert.ok(f.state.calls.some(c => c.method === 'GET' && c.path === '/api/v1/knowledge/' + DOC));
+  assert.ok(f.state.calls.some(c => c.method === 'GET' && c.path === '/api/v1/chunks/by-id/' + CHUNK));
+  assert.equal(f.state.calls.some(c => c.method === 'POST' && c.path === '/api/v1/knowledge-search'), false);
+  assert.ok(f.state.calls.some(c => c.method === 'POST' && c.path === '/db/neo4j/tx/commit'));
   assert.equal(f.state.graphBodies[0].statements[0].parameters.topic, '会员溢价');
   assert.doesNotMatch(JSON.stringify(result), /fixture-key|fixture-password|Authorization|settings\.json/);
   f.state.denied = true;
@@ -203,6 +203,7 @@ test('retrieve is scoped to granted documents; search outage is fail-closed', as
   const f = await graphFixture(t); const reader = createGraphReader(f.settingsFile);
   const ok = await reader.retrieve({ query: '会员溢价' }, undefined, asA);
   assert.equal(ok.status, 'OK'); assert.equal(ok.sources[0].content_sha256.length, 64);
+  assert.ok(f.state.calls.some(c => c.method === 'POST' && c.path === '/api/v1/knowledge-search'));
   f.state.failSearch = true;
   assert.equal((await reader.retrieve({ query: '会员溢价' }, undefined, asA)).reason.code, 'SOURCE_UNAVAILABLE');
   f.state.failSearch = false; f.state.denied = true;
@@ -241,9 +242,9 @@ test('inventory reports explicit denominators for the deployed graph', async t =
   assert.equal(ledger.truncated, false);
   assert.equal(ledger.extraction_content_hashes_saved, false);
   assert.equal((await reader.inventory({}, undefined, asB)).reason.code, 'ACCESS_DENIED');
-  const output = join(f.directory, 'ledger.json');
-  const summary = await writeGraphLedger({ settingsFile: f.settingsFile, principal: USER_A, output });
-  assert.equal(summary.relations.total, 1); assert.equal(summary.truncated, false); assert.equal(summary.complete_graph_review, false);
+  assert.equal(ledger.schema_version, 'crm-graph-ledger/v1');
+  assert.equal(ledger.complete_graph_review, undefined);
+  assert.ok(ledger.limitations.length > 0);
 });
 
 test('inventory marks truncated when the relation cap is reached', async t => {

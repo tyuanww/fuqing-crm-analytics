@@ -146,8 +146,8 @@ export function apply(ctx: Context, config: { metricsOrigin?: string } = {}): vo
     output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
     execute: async (_args, exec) => owned(exec.signal, async () => {
       const dashboard = ctx.get('crmDashboard')?.capabilities(exec.agent?.session.id) ?? dashboardCapabilities();
-      const boardConfigured = Boolean(process.env.COMPETITION_HTTP_BASE && process.env.COMPETITION_HTTP_TOKEN);
       const pageTool = ctx.tools.get('free_html_page_generate', exec.agent);
+      const boardTool = ctx.tools.get('competition_board_catalog', exec.agent);
       return {
         crm_login: typeof dashboard.connection_state === 'string' ? dashboard.connection_state : 'NOT_CONNECTED',
         gsv: 'unknown_until_query_crm_dashboard_gsv_is_called',
@@ -163,7 +163,9 @@ export function apply(ctx: Context, config: { metricsOrigin?: string } = {}): vo
         page_delivery: pageTool
           ? { status: 'AVAILABLE', execution: 'NOT_RUN', reason: null }
           : { status: 'NOT_AVAILABLE', execution: 'NOT_RUN', reason: 'PAGE_PROVIDER_NOT_INSTALLED_OR_NOT_VISIBLE' },
-        board_tools: boardConfigured ? 'competition_board_tools_can_register' : 'not_configured',
+        board_tools: boardTool
+          ? { status: 'AVAILABLE', execution: 'NOT_RUN', reason: null }
+          : { status: 'NOT_AVAILABLE', execution: 'NOT_RUN', reason: 'BOARD_PLUGIN_NOT_INSTALLED_OR_NOT_VISIBLE' },
         absent_names: ['copyright'],
       };
     }),

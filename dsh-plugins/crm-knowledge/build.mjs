@@ -3,9 +3,14 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { bindToolchain } from '@shine-mage/dsh-plugin-kit/toolchain';
 const root = dirname(fileURLToPath(import.meta.url));
-const upstream = resolve(process.argv[2] ?? process.env.B0_BUILD_UPSTREAM ?? join(root, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
+const upstreamInput = process.argv[2] ?? process.env.B0_BUILD_UPSTREAM;
+if (!upstreamInput) {
+  console.error('UPSTREAM_NOT_CONFIGURED: pass the pinned DeepSeek Harness checkout as the first argument or B0_BUILD_UPSTREAM. This build does not search the main repository.');
+  process.exit(2);
+}
+const upstream = resolve(upstreamInput);
+const { bindToolchain } = await import('@shine-mage/dsh-plugin-kit/toolchain');
 const toolsInput = process.argv[3] ?? process.env.B0_BUILD_TOOLS;
 const { compiler: ts, build } = await bindToolchain(root, upstream, toolsInput ? resolve(toolsInput) : undefined);
 for (const [entries, types] of [

@@ -2,6 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
+import { spawn } from 'node:child_process';
 import { createServer } from 'node:http';
 import { once } from 'node:events';
 import { createRequire } from 'node:module';
@@ -14,6 +15,7 @@ const upstream = process.env.B0_BUILD_UPSTREAM;
 assert.ok(upstream, 'Use the verified pinned SDK checkout');
 const { Context } = await import(pathToFileURL(join(upstream, 'vendor/cordis/lib/index.js')).href);
 const { mountAgentLoopTestDependencies } = await import(pathToFileURL(join(upstream, 'packages/test-support/agent-loop-testkit/lib/index.js')).href);
+const { defineTool } = await import(pathToFileURL(join(upstream, 'packages/core/tools/lib/index.js')).href);
 const crm = await import(pathToFileURL(join(plugin, 'lib/index.js')).href);
 
 test('CRM alone keeps its tools and explicitly reports the absent page provider', async t => {
@@ -30,6 +32,8 @@ test('CRM alone keeps its tools and explicitly reports the absent page provider'
   assert.equal(result.value.synthetic_services.metrics.reason.code, 'SERVICE_NOT_CONFIGURED');
   assert.equal(result.value.synthetic_services.knowledge, undefined);
   assert.equal(result.value.knowledge_explanation.reason, 'KNOWLEDGE_PLUGIN_NOT_INSTALLED_OR_NOT_VISIBLE');
+  assert.deepEqual(result.value.board_tools, { status: 'NOT_AVAILABLE', execution: 'NOT_RUN', reason: 'BOARD_PLUGIN_NOT_INSTALLED_OR_NOT_VISIBLE' });
+  assert.equal(ctx.tools.get('competition_board_catalog', agent), undefined);
   const capabilities = await ctx.tools.execute({ name: 'crm_metrics_capabilities', arguments: {}, agent,
     callId: 'isolated-capabilities', signal: new AbortController().signal });
   assert.equal(capabilities.isError, false);
@@ -51,7 +55,51 @@ test('CRM alone keeps its tools and explicitly reports the absent page provider'
 
 test('shipped plugin has no Python subprocess or repository discovery path', async () => {
   const entry = await readFile(join(plugin, 'lib/index.js'), 'utf8');
-  assert.doesNotMatch(entry, /node:child_process|query_crm_metrics_v1\.py|CRM_METRICS_PYTHON|PYTHONPATH|scripts\/crm-calibration/);
+  assert.doesNotMatch(entry, /node:child_process|query_crm_metrics_v1\.py|CRM_METRICS_PYTHON|PYTHONPATH|scripts\/crm-calibration|COMPETITION_HTTP_BASE|COMPETITION_HTTP_TOKEN/);
+  assert.match(entry, /BOARD_PLUGIN_NOT_INSTALLED_OR_NOT_VISIBLE/);
+});
+
+test('board health follows catalog visibility and ignores competition HTTP env', async t => {
+  const previous = { base: process.env.COMPETITION_HTTP_BASE, token: process.env.COMPETITION_HTTP_TOKEN };
+  process.env.COMPETITION_HTTP_BASE = 'http://127.0.0.1:9';
+  process.env.COMPETITION_HTTP_TOKEN = 'synthetic-not-used';
+  t.after(() => {
+    if (previous.base === undefined) delete process.env.COMPETITION_HTTP_BASE;
+    else process.env.COMPETITION_HTTP_BASE = previous.base;
+    if (previous.token === undefined) delete process.env.COMPETITION_HTTP_TOKEN;
+    else process.env.COMPETITION_HTTP_TOKEN = previous.token;
+  });
+  const ctx = new Context(); t.after(() => ctx.fiber.dispose());
+  await mountAgentLoopTestDependencies(ctx);
+  await ctx.plugin(crm);
+  const agent = { session: { id: 'crm-board-visibility' } };
+  const hidden = await ctx.tools.execute({ name: 'crm_service_health', arguments: {}, agent,
+    callId: 'board-hidden', signal: new AbortController().signal });
+  assert.deepEqual(hidden.value.board_tools, { status: 'NOT_AVAILABLE', execution: 'NOT_RUN', reason: 'BOARD_PLUGIN_NOT_INSTALLED_OR_NOT_VISIBLE' });
+  ctx.tools.register(defineTool({
+    name: 'competition_board_catalog', description: 'fixture', parameters: {},
+    output: { schema: { type: 'json' }, render: () => [] }, execute: async () => ({ ok: true }),
+  }));
+  const visible = await ctx.tools.execute({ name: 'crm_service_health', arguments: {}, agent,
+    callId: 'board-visible', signal: new AbortController().signal });
+  assert.deepEqual(visible.value.board_tools, { status: 'AVAILABLE', execution: 'NOT_RUN', reason: null });
+});
+
+test('plugin build refuses a missing upstream instead of discovering the main repository', async () => {
+  const build = await readFile(join(plugin, 'build.mjs'), 'utf8');
+  assert.doesNotMatch(build, /\.context\/dsh-b0/);
+  const env = { ...process.env };
+  delete env.B0_BUILD_UPSTREAM;
+  const child = spawn(process.execPath, [join(plugin, 'build.mjs')], { env, cwd: plugin });
+  let stderr = '';
+  child.stderr.setEncoding('utf8');
+  child.stderr.on('data', chunk => { stderr += chunk; });
+  const code = await new Promise((resolve, reject) => {
+    child.on('error', reject);
+    child.on('exit', resolve);
+  });
+  assert.equal(code, 2, stderr);
+  assert.match(stderr, /UPSTREAM_NOT_CONFIGURED/);
 });
 
 test('built or unpacked CRM calls only its explicitly selected public service', async t => {

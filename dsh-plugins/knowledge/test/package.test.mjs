@@ -1,6 +1,7 @@
 /** Execute the actual built or verified-unpacked knowledge package with only pinned SDK peers. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
 import { createServer } from 'node:http';
 import { once } from 'node:events';
 import { readFile } from 'node:fs/promises';
@@ -85,4 +86,21 @@ test('unloading a knowledge owner cancels in-flight HTTP and fences its late ans
   const next = await execute('crm_knowledge_explain', { topic: 'probe' });
   assert.equal(next.isError, false);
   assert.equal(next.value.reason.code, 'SERVICE_NOT_CONFIGURED');
+});
+
+test('plugin build refuses a missing upstream instead of discovering the main repository', async () => {
+  const build = await readFile(join(plugin, 'build.mjs'), 'utf8');
+  assert.doesNotMatch(build, /\.context\/dsh-b0/);
+  const env = { ...process.env };
+  delete env.B0_BUILD_UPSTREAM;
+  const child = spawn(process.execPath, [join(plugin, 'build.mjs')], { env, cwd: plugin });
+  let stderr = '';
+  child.stderr.setEncoding('utf8');
+  child.stderr.on('data', chunk => { stderr += chunk; });
+  const code = await new Promise((resolve, reject) => {
+    child.on('error', reject);
+    child.on('exit', resolve);
+  });
+  assert.equal(code, 2, stderr);
+  assert.match(stderr, /UPSTREAM_NOT_CONFIGURED/);
 });
