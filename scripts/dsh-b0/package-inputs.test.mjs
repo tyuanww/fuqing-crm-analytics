@@ -6,7 +6,7 @@ import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { copyFile, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { bindPackagedDependencies, readPackagedLibrary, validatePackageLock, DEV_KIT_NAME } from '../../dsh-plugins/plugin-kit/packaged-dependencies.mjs';
 import { copyPluginKitSources, copyTreeBounded } from './clean-build.mjs';
@@ -18,18 +18,25 @@ const lockSource = JSON.parse(await readFile(join(repository, 'dsh-plugins/analy
 const entry = lockSource.packages[0];
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const run = (command, args, cwd) => execFileSync(command, args, { cwd, timeout: 60000, maxBuffer: 2 * 1024 * 1024, encoding: 'utf8', stdio: 'pipe' });
-let independent, producer, inputs, artifact;
+let independent, producer, inputs, artifact, generatedArtifact;
 before(async () => {
   independent = await mkdtemp(join(tmpdir(), 'board-components-independent-'));
-  producer = join(independent, 'board-components'); inputs = join(independent, 'inputs');
+  producer = join(independent, 'board-components');
+  const generatedInputs = join(independent, 'inputs');
+  generatedArtifact = join(generatedInputs, entry.tarball);
+  inputs = process.env.DSH_PACKAGE_INPUTS ? resolve(process.env.DSH_PACKAGE_INPUTS) : join(independent, 'inputs');
   const options = { destinationRoot: independent };
   for (const part of ['package.json', 'build.mjs', 'src', 'test']) {
     await copyTreeBounded(join(repository, 'dsh-plugins/board-components', part), join(producer, part), options);
   }
   await copyPluginKitSources(join(repository, 'dsh-plugins/plugin-kit'), join(independent, 'plugin-kit'), options);
   await linkWorkspaceKit(producer, join(independent, 'plugin-kit'));
-  run(process.execPath, [join(producer, 'build.mjs'), inputs], independent);
-  artifact = join(inputs, entry.tarball);
+  run(process.execPath, [join(producer, 'build.mjs'), generatedInputs], independent);
+  // A platform-specific pnpm pack may differ in gzip metadata even when the
+  // archive members are byte-identical. Consumers must use the explicitly
+  // locked input when the pipeline supplies one; the local rebuild remains
+  // checked below for member-level reproducibility.
+  artifact = process.env.DSH_PACKAGE_INPUTS ? join(inputs, entry.tarball) : generatedArtifact;
 });
 after(async () => { if (independent) await rm(independent, { recursive: true, force: true }); });
 
@@ -51,7 +58,15 @@ test('domain-only build is reproducible and the same tarball is pinned by all co
   run(process.execPath, ['--test', join(producer, 'test/geometry.test.mjs')], producer);
   const again = join(independent, 'second-output');
   run(process.execPath, [join(producer, 'build.mjs'), again], independent);
-  assert.deepEqual(await readFile(artifact), await readFile(join(again, entry.tarball)));
+  if (process.env.DSH_PACKAGE_INPUTS) {
+    const rebuilt = await readPackagedLibrary(generatedArtifact, entry);
+    const repeated = await readPackagedLibrary(join(again, entry.tarball), entry);
+    const locked = await readPackagedLibrary(artifact, entry);
+    assert.deepEqual([...rebuilt.files.entries()], [...repeated.files.entries()]);
+    assert.deepEqual([...rebuilt.files.entries()], [...locked.files.entries()]);
+  } else {
+    assert.deepEqual(await readFile(artifact), await readFile(join(again, entry.tarball)));
+  }
   const pack = await readPackagedLibrary(artifact, entry);
   assert.deepEqual([...pack.files.keys()].sort(), ['lib/funnel.d.mts', 'lib/funnel.mjs', 'lib/waterfall.d.mts', 'lib/waterfall.mjs', 'package.json']);
   for (const name of ['analytics-workbench', 'shine-funnel', 'shine-waterfall']) {

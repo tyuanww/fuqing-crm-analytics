@@ -152,6 +152,8 @@ test('secret scan distinguishes explicit synthetic fixtures from real assignment
   const privateHeader = ['-----BEGIN ', 'PRIVATE KEY-----'].join('');
   const privateFooter = ['-----END ', 'PRIVATE KEY-----'].join('');
   assert.deepEqual(scanText("TOKEN = 'test-only-synthetic-token'", 'fixture.test.mjs'), []);
+  assert.deepEqual(scanText("TOKEN = 'credential-never-echo'", 'probe.probe.mjs'), []);
+  assert.deepEqual(scanText("TOKEN = 'unexpected-top-level-token'", 'probe.test.mjs'), []);
   assert.deepEqual(scanText("TOKEN = 'test-only-synthetic-token'", 'config/runtime.env'), ['SECRET_PATTERN config/runtime.env']);
   assert.deepEqual(scanText(`TOKEN = '${live}'`, 'fixture.test.mjs'), ['SECRET_PATTERN fixture.test.mjs']);
   assert.deepEqual(scanText("token = 'x-cos-security-token'", 'sdk/base.js'), []);
