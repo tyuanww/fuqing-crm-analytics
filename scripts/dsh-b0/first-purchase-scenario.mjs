@@ -1,5 +1,6 @@
 /** Finite first-purchase native-query wire script. Mock never fabricates compute results. */
-import { FIRST_PURCHASE_TOOL_NAME } from '../../dsh-plugins/analytics-workbench/src/first-purchase-query-model.mjs';
+// Public tool id. Local so probe startup does not read workbench source. The protocol test locks it to the source export.
+export const FIRST_PURCHASE_TOOL_NAME = 'analytics_first_purchase_query';
 
 export function firstPurchaseRequest(observationDays = 30) {
   return {
