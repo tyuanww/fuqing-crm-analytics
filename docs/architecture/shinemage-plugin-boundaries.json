@@ -540,7 +540,7 @@
       "manifest_sha256": "1cd7ce082f80d1088aed5d9bb7940391c0c44485e8ed5abd5a8c711bb97282ca"
     }
   ],
-  "source_files_scanned": 652,
+  "source_files_scanned": 653,
   "cross_package_edges": [
     {
       "consumer": "analytics-workbench",
@@ -699,26 +699,6 @@
       "source": "dsh-plugins/crm-knowledge/test/knowledge-composition.integration.mjs",
       "target": "dsh-plugins/knowledge/test/graph.fixture.mjs",
       "specifier": "../../knowledge/test/graph.fixture.mjs",
-      "access": "source",
-      "type_only": false
-    },
-    {
-      "consumer": "crm-knowledge",
-      "provider": "knowledge",
-      "phase": "test",
-      "source": "dsh-plugins/crm-knowledge/test/service-http.integration.mjs",
-      "target": "dsh-plugins/knowledge/src/service-client.mjs",
-      "specifier": "../../knowledge/src/service-client.mjs",
-      "access": "source",
-      "type_only": false
-    },
-    {
-      "consumer": "crm-knowledge",
-      "provider": "knowledge",
-      "phase": "test",
-      "source": "dsh-plugins/crm-knowledge/test/tools.test.mjs",
-      "target": "dsh-plugins/knowledge/src/service-client.mjs",
-      "specifier": "../../knowledge/src/service-client.mjs",
       "access": "source",
       "type_only": false
     },
@@ -892,12 +872,6 @@
       "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/profile.test.mjs",
       "target": "scripts/crm-calibration/prepare-profile.mjs"
-    },
-    {
-      "consumer": "knowledge",
-      "phase": "test",
-      "source": "dsh-plugins/knowledge/test/graph.test.mjs",
-      "target": "scripts/crm-calibration/graph-ledger.mjs"
     }
   ],
   "literal_endpoints": [
@@ -2318,6 +2292,13 @@
     {
       "consumer": "crm-knowledge",
       "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/knowledge-http.mjs",
+      "route": "/api/v1/crm-knowledge/explain",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/login-ui.test.mjs",
       "route": "/api/crm-knowledge/assets",
       "contract": "OBSERVED_NOT_FROZEN"
@@ -2411,6 +2392,20 @@
       "phase": "test",
       "source": "dsh-plugins/knowledge/test/graph.fixture.mjs",
       "route": "/api/v1/knowledge/",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/knowledge/test/graph.test.mjs",
+      "route": "/api/v1/chunks/by-id/",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/knowledge/test/graph.test.mjs",
+      "route": "/api/v1/knowledge-search",
       "contract": "OBSERVED_NOT_FROZEN"
     },
     {
@@ -2825,12 +2820,6 @@
       "consumer": "crm-knowledge",
       "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/package.test.mjs",
-      "line": 15
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "test",
-      "source": "dsh-plugins/crm-knowledge/test/package.test.mjs",
       "line": 16
     },
     {
@@ -2838,6 +2827,18 @@
       "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/package.test.mjs",
       "line": 17
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/package.test.mjs",
+      "line": 18
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/package.test.mjs",
+      "line": 19
     },
     {
       "consumer": "crm-knowledge",
@@ -2867,12 +2868,6 @@
       "consumer": "knowledge",
       "phase": "test",
       "source": "dsh-plugins/knowledge/test/package.test.mjs",
-      "line": 12
-    },
-    {
-      "consumer": "knowledge",
-      "phase": "test",
-      "source": "dsh-plugins/knowledge/test/package.test.mjs",
       "line": 13
     },
     {
@@ -2886,6 +2881,12 @@
       "phase": "test",
       "source": "dsh-plugins/knowledge/test/package.test.mjs",
       "line": 15
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/knowledge/test/package.test.mjs",
+      "line": 16
     }
   ],
   "external_imports": [
@@ -3517,6 +3518,11 @@
     {
       "consumer": "knowledge",
       "phase": "test",
+      "specifier": "node:child_process"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
       "specifier": "node:crypto"
     },
     {
@@ -3622,12 +3628,12 @@
     {
       "consumer": "shine-board",
       "phase": "test",
-      "specifier": "node:fs/promises"
+      "specifier": "node:child_process"
     },
     {
       "consumer": "shine-board",
       "phase": "test",
-      "specifier": "node:module"
+      "specifier": "node:fs/promises"
     },
     {
       "consumer": "shine-board",
