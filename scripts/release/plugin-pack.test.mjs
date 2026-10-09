@@ -1,4 +1,5 @@
 import { PNPM_VERSION } from './toolchain.mjs';
+import { createHash } from 'node:crypto';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { access, mkdtemp, mkdir, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
@@ -6,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { packPlugin } from './plugin-pack.mjs';
+import { packPlugin, readPluginPack } from './plugin-pack.mjs';
 
 const exec = promisify(execFile);
 
@@ -108,4 +109,82 @@ test('controlled plugin pack removes lifecycle hooks before invoking pnpm', asyn
   const { stdout } = await exec('tar', ['-xOf', join(input.outputDir, receipt.tarball.name), 'package/package.json'], { encoding: 'utf8' });
   const packed = JSON.parse(stdout);
   assert.equal(packed.scripts, undefined);
+});
+
+const hash = bytes => createHash('sha256').update(bytes).digest('hex');
+async function formalPack(t) {
+  const input = await fixture(t);
+  const manifestPath = join(input.outputDir, 'plugin-pack.json');
+  const receipt = await packPlugin({ ...input, manifestPath });
+  const bytes = await readFile(manifestPath);
+  return { ...input, manifestPath, receipt, expectedSha256: hash(bytes) };
+}
+
+test('formal pack reader preserves exact bytes and needs neither Git sources nor pnpm', async t => {
+  const input = await formalPack(t);
+  const original = await readFile(join(input.outputDir, input.receipt.tarball.name));
+  await rm(input.plugin, { recursive: true });
+  await rm(join(input.root, '.git'), { recursive: true });
+  const received = await readPluginPack(input);
+  assert.deepEqual(received.receipt, input.receipt);
+  assert.deepEqual(received.archive, original);
+  assert.equal(hash(received.manifestBytes), input.expectedSha256);
+});
+
+test('formal pack reader rejects an unpinned or changed receipt and changed archive', async t => {
+  const input = await formalPack(t);
+  await assert.rejects(() => readPluginPack({ ...input, expectedSha256: null }), /PLUGIN_PACK_MANIFEST_DIGEST_REQUIRED/);
+  await assert.rejects(() => readPluginPack({ ...input, expectedSha256: '0'.repeat(64) }), /PLUGIN_PACK_MANIFEST_DIGEST_MISMATCH/);
+  const tar = join(input.outputDir, input.receipt.tarball.name), bytes = await readFile(tar);
+  bytes[bytes.length - 1] ^= 1;
+  await writeFile(tar, bytes);
+  await assert.rejects(() => readPluginPack(input), /PLUGIN_PACK_DIGEST_MISMATCH/);
+});
+
+for (const [name, change, error] of [
+  ['plain content pack', r => { r.schema_version = 'content-pack/v1'; }, /PLUGIN_PACK_SCHEMA/],
+  ['dirty source', r => { r.source_dirty = true; }, /PLUGIN_PACK_SOURCE_DIRTY/],
+  ['wrong DSH', r => { r.dsh_pin = '0.0.0'; }, /PLUGIN_PACK_DSH_PEER_INVALID/],
+  ['archive escape', r => { r.tarball.name = '../other.tgz'; }, /PLUGIN_PACK_TARBALL_NAME/],
+  ['missing member', r => { r.entries.pop(); }, /PLUGIN_PACK_ENTRY_SET_MISMATCH/],
+  ['duplicate member', r => { r.entries.push(r.entries[0]); }, /PLUGIN_PACK_FILES_DUPLICATE/],
+  ['wrong version', r => { r.package_version = '0.2.0'; r.tarball.name = r.tarball.name.replace('0.1.0', '0.2.0'); }, /PLUGIN_PACK_PACKAGE_VERSION_MISMATCH/],
+]) {
+  test(`formal pack reader rejects ${name} even when the supplied receipt hash matches`, async t => {
+    const input = await formalPack(t), oldName = input.receipt.tarball.name;
+    change(input.receipt);
+    if (name === 'wrong version') await writeFile(join(input.outputDir, input.receipt.tarball.name), await readFile(join(input.outputDir, oldName)));
+    const bytes = Buffer.from(JSON.stringify(input.receipt));
+    await writeFile(input.manifestPath, bytes);
+    await assert.rejects(() => readPluginPack({ ...input, expectedSha256: hash(bytes) }), error);
+  });
+}
+
+for (const [name, change, error] of [
+  ['lifecycle script', m => { m.scripts = { prepack: 'exit 9' }; }, /PLUGIN_PACK_LIFECYCLE_FORBIDDEN/],
+  ['unresolved peer', m => { m.peerDependencies['@deepseek-ai/dsh-tools'] = '0.0.0'; }, /PLUGIN_PACK_DSH_PEER_INVALID/],
+  ['missing entry', m => { m.main = './lib/missing.js'; }, /PLUGIN_PACK_ENTRY_MISSING/],
+]) {
+  test(`formal pack reader rejects archive ${name} with matching receipt and tar digests`, async t => {
+    const input = await formalPack(t);
+    const extracted = join(input.root, 'tampered'); await mkdir(extracted);
+    const tar = join(input.outputDir, input.receipt.tarball.name);
+    await exec('tar', ['-xzf', tar, '-C', extracted]);
+    const path = join(extracted, 'package/package.json'), manifest = JSON.parse(await readFile(path));
+    change(manifest); await writeFile(path, JSON.stringify(manifest));
+    await exec('tar', ['-czf', tar, '-C', extracted, 'package'], { env: { ...process.env, COPYFILE_DISABLE: '1' } });
+    const archive = await readFile(tar);
+    input.receipt.tarball.sha256 = hash(archive); input.receipt.tarball.bytes = archive.length;
+    const bytes = Buffer.from(JSON.stringify(input.receipt)); await writeFile(input.manifestPath, bytes);
+    await assert.rejects(() => readPluginPack({ ...input, expectedSha256: hash(bytes) }), error);
+  });
+}
+
+test('formal pack reader rejects receipt and archive symlinks', async t => {
+  const input = await formalPack(t), link = join(input.outputDir, 'receipt-link.json');
+  await symlink(input.manifestPath, link);
+  await assert.rejects(() => readPluginPack({ ...input, manifestPath: link }));
+  const tar = join(input.outputDir, input.receipt.tarball.name), outside = join(input.root, 'outside.tgz');
+  await writeFile(outside, await readFile(tar)); await rm(tar); await symlink(outside, tar);
+  await assert.rejects(() => readPluginPack(input), /SERVICE_ARTIFACT_SYMLINK/);
 });

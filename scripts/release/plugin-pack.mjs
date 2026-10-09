@@ -15,8 +15,10 @@ import { access, copyFile, link, lstat, mkdir, mkdtemp, readFile, readdir, realp
 import { promisify } from 'node:util';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { tmpdir } from 'node:os';
 import { DSH_SDK_VERSION, PNPM_VERSION } from './toolchain.mjs';
 import { assertClean, scanTree } from './secret-scan.mjs';
+import { readArtifactFile, insideArtifact } from './service-artifact-evidence.mjs';
 
 const exec = promisify(execFile);
 const SHA256 = /^[a-f0-9]{64}$/;
@@ -100,13 +102,14 @@ async function collectFiles(root, declared) {
   return files.sort();
 }
 
-async function inspectPackage(pluginRoot) {
-  const packagePath = join(pluginRoot, 'package.json');
-  const manifest = JSON.parse(await readFile(packagePath, 'utf8'));
+function inspectManifest(manifest, packed = false) {
   assert.match(manifest.name, /^@shine-mage\/[a-z0-9][a-z0-9-]+$/, 'PLUGIN_PACK_NAME_INVALID');
   assert.match(manifest.version, /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/, 'PLUGIN_PACK_VERSION_INVALID');
   assert.equal(manifest.type, 'module', 'PLUGIN_PACK_TYPE_INVALID');
-  assert.equal(manifest.packageManager, `pnpm@${PNPM_VERSION}`, 'PLUGIN_PACK_PACKAGE_MANAGER_INVALID');
+  if (!packed || manifest.packageManager !== undefined) {
+    assert.equal(manifest.packageManager, `pnpm@${PNPM_VERSION}`, 'PLUGIN_PACK_PACKAGE_MANAGER_INVALID');
+  }
+  if (packed) assert.equal(manifest.scripts, undefined, 'PLUGIN_PACK_LIFECYCLE_FORBIDDEN');
   assert.equal(manifest.peerDependencies?.['@deepseek-ai/dsh-tools'], DSH_SDK_VERSION, 'PLUGIN_PACK_DSH_PEER_INVALID');
   const declared = manifest.files;
   assert.ok(Array.isArray(declared) && declared.length > 0, 'PLUGIN_PACK_FILES_REQUIRED');
@@ -120,9 +123,77 @@ async function inspectPackage(pluginRoot) {
       assert.ok(typeof value === 'string' && !/^(?:workspace:|file:|link:)/.test(value), `PLUGIN_PACK_WORKSPACE_LINK ${name}`);
     }
   }
+  return declared;
+}
+
+async function inspectPackage(pluginRoot) {
+  const manifest = JSON.parse(await readFile(join(pluginRoot, 'package.json'), 'utf8'));
+  const declared = inspectManifest(manifest);
   const declaredFiles = await collectFiles(pluginRoot, declared);
   assert.ok(declaredFiles.some(file => file.startsWith('lib/')), 'PLUGIN_PACK_BUILD_OUTPUT_REQUIRED');
   return { manifest, declared, declaredFiles };
+}
+
+/** Consume an explicitly pinned formal pack, without source checkout or pnpm. */
+export async function readPluginPack({ manifestPath, expectedSha256 }) {
+  const path = safeAbsolute(manifestPath, 'PLUGIN_PACK_MANIFEST_INVALID');
+  assert.match(expectedSha256 ?? '', SHA256, 'PLUGIN_PACK_MANIFEST_DIGEST_REQUIRED');
+  const manifestBytes = await readArtifactFile(path, 256 * 1024);
+  assert.equal(digest(manifestBytes), expectedSha256, 'PLUGIN_PACK_MANIFEST_DIGEST_MISMATCH');
+  const receipt = JSON.parse(manifestBytes);
+  assert.equal(receipt.schema_version, 'dsh-plugin-pack/v1', 'PLUGIN_PACK_SCHEMA');
+  assert.match(receipt.package_name ?? '', /^@shine-mage\/[a-z0-9][a-z0-9-]+$/, 'PLUGIN_PACK_NAME_INVALID');
+  assert.match(receipt.package_version ?? '', /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/, 'PLUGIN_PACK_VERSION_INVALID');
+  assert.equal(receipt.dsh_pin, DSH_SDK_VERSION, 'PLUGIN_PACK_DSH_PEER_INVALID');
+  assert.match(receipt.source_sha ?? '', /^[a-f0-9]{40}$/, 'PLUGIN_PACK_GIT_SHA_INVALID');
+  assert.equal(receipt.source_dirty, false, 'PLUGIN_PACK_SOURCE_DIRTY');
+  assert.equal(receipt.activation, 'NOT_RUN', 'PLUGIN_PACK_ALREADY_ACTIVE');
+  assert.equal(receipt.state_path, 'NOT_APPLICABLE_PLUGIN_PACK_ONLY', 'PLUGIN_PACK_STATE_SCOPE');
+  const pack = receipt.tarball;
+  assert.equal(pack?.name, `${receipt.package_name.slice(1).replaceAll('/', '-')}-${receipt.package_version}.tgz`, 'PLUGIN_PACK_TARBALL_NAME');
+  assert.match(pack.sha256 ?? '', SHA256, 'PLUGIN_PACK_DIGEST_INVALID');
+  assert.ok(Number.isSafeInteger(pack.bytes) && pack.bytes > 0 && pack.bytes <= MAX_PACK_BYTES, 'PLUGIN_PACK_TARBALL_INVALID');
+  assert.ok(Array.isArray(receipt.entries) && receipt.entries.length > 0, 'PLUGIN_PACK_ENTRIES_REQUIRED');
+  assert.ok(receipt.entries.every(entry => typeof entry === 'string'), 'PLUGIN_PACK_ENTRY_INVALID');
+  assert.equal(new Set(receipt.entries).size, receipt.entries.length, 'PLUGIN_PACK_FILES_DUPLICATE');
+  const archive = await insideArtifact(dirname(path), pack.name, MAX_PACK_BYTES);
+  assert.equal(archive.length, pack.bytes, 'PLUGIN_PACK_SIZE_MISMATCH');
+  assert.equal(digest(archive), pack.sha256, 'PLUGIN_PACK_DIGEST_MISMATCH');
+  const work = await mkdtemp(join(tmpdir(), 'plugin-pack-receive-'));
+  try {
+    // Inspect the hashed bytes, never re-read the caller's mutable archive.
+    const tar = join(work, 'package.tgz'), unpacked = join(work, 'unpacked');
+    await writeFile(tar, archive, { mode: 0o600, flag: 'wx' });
+    await exec('python3', [fileURLToPath(new URL('./secure-unpack.py', import.meta.url)), tar, unpacked,
+      '--max-entries', '10000', '--max-bytes', String(MAX_PACK_BYTES)], { cwd: work, timeout: 30000, maxBuffer: 256 * 1024 });
+    assert.deepEqual(await readdir(unpacked), ['package'], 'PLUGIN_PACK_ARCHIVE_ROOT_INVALID');
+    const packageRoot = join(unpacked, 'package');
+    const manifest = JSON.parse(await insideArtifact(packageRoot, 'package.json', 256 * 1024));
+    assert.equal(manifest.name, receipt.package_name, 'PLUGIN_PACK_PACKAGE_NAME_MISMATCH');
+    assert.equal(manifest.version, receipt.package_version, 'PLUGIN_PACK_PACKAGE_VERSION_MISMATCH');
+    const declared = inspectManifest(manifest, true), entries = [];
+    async function walk(directory, prefix = '') {
+      for (const entry of await readdir(directory, { withFileTypes: true })) {
+        const rel = prefix + entry.name;
+        assert.ok(!/(?:^|\/)(?:src|test|tests|node_modules|\.git)(?:\/|$)/.test(rel) && !rel.endsWith('.map'), 'PLUGIN_PACK_SOURCE_PATH');
+        if (entry.isDirectory()) await walk(join(directory, entry.name), rel + '/');
+        else {
+          assert.ok(entry.isFile(), 'PLUGIN_PACK_SPECIAL_FILE');
+          assert.ok(packageFileAllowed(rel, declared), 'PLUGIN_PACK_TARBALL_UNDECLARED');
+          entries.push(rel);
+        }
+      }
+    }
+    await walk(packageRoot);
+    assert.deepEqual(entries.sort(), [...receipt.entries].sort(), 'PLUGIN_PACK_ENTRY_SET_MISMATCH');
+    // Declared assets, exports and patches must all be present in the archive.
+    assert.ok((await collectFiles(packageRoot, declared)).some(file => file.startsWith('lib/')), 'PLUGIN_PACK_BUILD_OUTPUT_REQUIRED');
+    verifyEntrypoints(manifest, entries);
+    assertClean(await scanTree(packageRoot, { maxBytes: MAX_PACK_BYTES, allowSyntheticFixtures: false }));
+    return { receipt, manifestBytes, archive };
+  } finally {
+    await rm(work, { recursive: true, force: true });
+  }
 }
 
 async function stagePackInput(pluginRoot, inspected, staging) {

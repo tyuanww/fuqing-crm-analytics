@@ -8,6 +8,7 @@ import { join } from 'node:path';
 import { promisify } from 'node:util';
 import test from 'node:test';
 import { createPluginCandidate } from './plugin-candidate.mjs';
+import { packPlugin } from './plugin-pack.mjs';
 import { recordEvent } from './state.mjs';
 import { serviceFixture } from './test-fixtures/service-compatibility.mjs';
 
@@ -107,4 +108,53 @@ test('candidate cannot remove a previous profile service contract or request an 
   await writeFile(path, evidenceJson);
   await assert.rejects(() => createPluginCandidate({ ...input, profileManifest: input.profile, serviceEvidencePath: path }), /SERVICE_OLD_WRITER_FORBIDDEN/);
   await assert.rejects(() => readFile(input.statePath), { code: 'ENOENT' });
+});
+
+async function detachedPack(t) {
+  const input = await fixture(t);
+  const packRoot = await mkdtemp(join(tmpdir(), 'dsh-external-pack-'));
+  t.after(() => rm(packRoot, { recursive: true, force: true }));
+  const packManifest = join(packRoot, 'plugin-pack.json');
+  const receipt = await packPlugin({ plugin: input.plugin, outputDir: packRoot, manifestPath: packManifest });
+  const packSha256 = createHash('sha256').update(await readFile(packManifest)).digest('hex');
+  await rm(input.plugin, { recursive: true });
+  return { ...input, plugin: undefined, packManifest, packSha256, receipt, profileManifest: input.profile };
+}
+
+test('candidate consumes an external formal pack with all plugin sources absent', async t => {
+  const input = await detachedPack(t), result = await createPluginCandidate(input);
+  assert.equal(result.plugin.path, 'plugin');
+  assert.equal(result.source_sha, input.receipt.source_sha);
+  assert.deepEqual(result.pack, input.receipt.tarball);
+  assert.deepEqual(await readFile(join(input.outputDir, 'plugin-pack.json')), await readFile(input.packManifest));
+  assert.equal(result.activation, 'NOT_RUN');
+  assert.equal(JSON.parse(await readFile(input.statePath)).journal.at(-1).status, 'CANDIDATE_PREPARED');
+  await assert.rejects(() => createPluginCandidate(input), /PLUGIN_CANDIDATE_OUTPUT_MUST_BE_EMPTY/);
+});
+
+test('artifact candidate rejects mixed input, missing pin and an unallowlisted package before writing', async t => {
+  const input = await detachedPack(t);
+  await assert.rejects(() => createPluginCandidate({ ...input, plugin: join(input.root, 'plugin') }), /PLUGIN_CANDIDATE_INPUT_CONFLICT/);
+  await assert.rejects(() => createPluginCandidate({ ...input, packSha256: null }), /PLUGIN_PACK_MANIFEST_DIGEST_REQUIRED/);
+  const path = join(input.root, input.profile), profile = JSON.parse(await readFile(path));
+  profile.plugins[0].id = '@shine-mage/another-plugin'; await writeFile(path, JSON.stringify(profile));
+  await assert.rejects(() => createPluginCandidate(input), /PLUGIN_CANDIDATE_NOT_ALLOWLISTED/);
+  await assert.rejects(() => readFile(input.statePath), { code: 'ENOENT' });
+  await assert.rejects(() => readFile(join(input.outputDir, 'plugin-pack.json')), { code: 'ENOENT' });
+});
+
+test('artifact candidate retains service evidence and previous binding removal gates without sources', async t => {
+  const input = await detachedPack(t), { binding, evidenceJson, gate } = await serviceFixture();
+  const path = join(input.root, input.profile), original = JSON.parse(await readFile(path));
+  await writeFile(path, JSON.stringify({ ...original, service_binding: binding }));
+  await assert.rejects(() => createPluginCandidate(input), /SERVICE_EVIDENCE_REQUIRED/);
+  const evidence = join(input.root, 'service.json'); await writeFile(evidence, evidenceJson + ' ');
+  await assert.rejects(() => createPluginCandidate({ ...input, serviceEvidencePath: evidence }), /SERVICE_EVIDENCE_DIGEST_MISMATCH/);
+  await assert.rejects(() => readFile(input.statePath), { code: 'ENOENT' });
+  const previous = 'config/previous.json'; await writeFile(join(input.root, previous), await readFile(path));
+  await writeFile(path, JSON.stringify(original));
+  await assert.rejects(() => createPluginCandidate({ ...input, previousProfile: previous }), /SERVICE_BINDING_REMOVAL_FORBIDDEN/);
+  await writeFile(path, JSON.stringify({ ...original, service_binding: binding }));
+  await writeFile(evidence, evidenceJson);
+  assert.deepEqual((await createPluginCandidate({ ...input, serviceEvidencePath: evidence })).service_compatibility, gate);
 });

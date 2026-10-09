@@ -13,8 +13,8 @@ import { access, mkdir, readdir, realpath, rename, writeFile } from 'node:fs/pro
 import { dirname, relative, resolve, sep } from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import { capabilityMatrix } from './action-contract.mjs';
-import { packPlugin } from './plugin-pack.mjs';
-import { loadReleaseProfile } from './profile.mjs';
+import { packPlugin, readPluginPack } from './plugin-pack.mjs';
+import { loadProfileSnapshot, loadReleaseProfile } from './profile.mjs';
 import { recordEvent } from './state.mjs';
 import { prepareServiceCompatibility } from './service-compatibility.mjs';
 
@@ -52,29 +52,43 @@ function profileDiff(current, previous) {
   };
 }
 
-export async function createPluginCandidate({ root: candidateRoot = root, plugin, outputDir, statePath, profileManifest = null, previousProfile = null, serviceEvidencePath = null } = {}) {
+export async function createPluginCandidate({ root: candidateRoot = root, plugin, packManifest = null, packSha256 = null, outputDir, statePath, profileManifest = null, previousProfile = null, serviceEvidencePath = null } = {}) {
   const repo = resolve(candidateRoot);
-  const pluginRoot = absolute(plugin, 'PLUGIN_CANDIDATE_PLUGIN_REQUIRED');
+  const fromPack = packManifest !== null;
+  assert.ok(fromPack ? !plugin : !packSha256, 'PLUGIN_CANDIDATE_INPUT_CONFLICT');
+  const pluginRoot = fromPack ? null : absolute(plugin, 'PLUGIN_CANDIDATE_PLUGIN_REQUIRED');
   const destination = absolute(outputDir, 'PLUGIN_CANDIDATE_OUTPUT_REQUIRED');
   const journal = absolute(statePath, 'PLUGIN_CANDIDATE_STATE_PATH_REQUIRED');
-  const pluginPath = relativePath(repo, pluginRoot, 'PLUGIN_CANDIDATE_PLUGIN_OUTSIDE_ROOT');
-  const profile = await loadReleaseProfile({ root: repo, manifestPath: profileManifest });
-  const selected = profile.plugins.find(item => item.path === pluginPath);
-  assert.ok(selected, `PLUGIN_CANDIDATE_NOT_ALLOWLISTED ${pluginPath}`);
+  // Artifact input retains the same logical allowlist and service contract;
+  // only source/build filesystem checks belong to the source-input path.
+  const loadProfile = fromPack ? loadProfileSnapshot : loadReleaseProfile;
+  const profile = await loadProfile({ root: repo, manifestPath: profileManifest });
+  const packed = fromPack ? await readPluginPack({ manifestPath: packManifest, expectedSha256: packSha256 }) : null;
+  const pluginPath = fromPack ? null : relativePath(repo, pluginRoot, 'PLUGIN_CANDIDATE_PLUGIN_OUTSIDE_ROOT');
+  const selected = profile.profile.plugins.find(item => fromPack ? item.id === packed.receipt.package_name : item.path === pluginPath);
+  assert.ok(selected, 'PLUGIN_CANDIDATE_NOT_ALLOWLISTED');
   assert.equal(selected.enabled, true, 'PLUGIN_CANDIDATE_DISABLED');
   // Bind the explicit CLI path to the profile's canonical path. A lexical
   // match alone could let a parent symlink redirect packing to an unreviewed
   // directory while still selecting an allowlisted profile entry.
-  const pluginReal = await realpath(pluginRoot).catch(error => { throw new Error(`PLUGIN_CANDIDATE_PLUGIN_PATH_INVALID ${error.code ?? 'unavailable'}`); });
-  const profilePluginReal = await realpath(resolve(repo, selected.path)).catch(error => { throw new Error(`PLUGIN_CANDIDATE_PROFILE_PATH_INVALID ${error.code ?? 'unavailable'}`); });
-  assert.equal(pluginReal, profilePluginReal, 'PLUGIN_CANDIDATE_PLUGIN_PATH_MISMATCH');
+  let pluginReal;
+  if (!fromPack) {
+    pluginReal = await realpath(pluginRoot).catch(error => { throw new Error(`PLUGIN_CANDIDATE_PLUGIN_PATH_INVALID ${error.code ?? 'unavailable'}`); });
+    const profilePluginReal = await realpath(resolve(repo, selected.path)).catch(error => { throw new Error(`PLUGIN_CANDIDATE_PROFILE_PATH_INVALID ${error.code ?? 'unavailable'}`); });
+    assert.equal(pluginReal, profilePluginReal, 'PLUGIN_CANDIDATE_PLUGIN_PATH_MISMATCH');
+  }
   // Validate all read-only inputs before producing a package.
-  const prior = previousProfile ? await loadReleaseProfile({ root: repo, manifestPath: previousProfile }) : null;
+  const prior = previousProfile ? await loadProfile({ root: repo, manifestPath: previousProfile }) : null;
   assert.ok(!prior?.profile.service_binding || profile.profile.service_binding, 'SERVICE_BINDING_REMOVAL_FORBIDDEN');
   const serviceGate = await prepareServiceCompatibility(profile.profile.service_binding, serviceEvidencePath);
   await access(destination).catch(async error => { if (error.code !== 'ENOENT') throw error; await mkdir(destination, { recursive: true, mode: 0o700 }); });
   assert.equal((await readdir(destination)).length, 0, 'PLUGIN_CANDIDATE_OUTPUT_MUST_BE_EMPTY');
-  const packReceipt = await packPlugin({ plugin: pluginReal, outputDir: destination, manifestPath: resolve(destination, 'plugin-pack.json') });
+  const packReceipt = packed?.receipt ?? await packPlugin({ plugin: pluginReal, outputDir: destination, manifestPath: resolve(destination, 'plugin-pack.json') });
+  assert.equal(packReceipt.package_name, selected.id, 'PLUGIN_CANDIDATE_PACKAGE_ID_MISMATCH');
+  if (packed) {
+    await writeFile(resolve(destination, packReceipt.tarball.name), packed.archive, { mode: 0o600, flag: 'wx' });
+    await writeFile(resolve(destination, 'plugin-pack.json'), packed.manifestBytes, { mode: 0o600, flag: 'wx' });
+  }
   assert.match(packReceipt.tarball.sha256, SHA256, 'PLUGIN_CANDIDATE_PACK_DIGEST_INVALID');
   // Carry the exact allowlist with the candidate. Host verification must not
   // re-read a mutable workspace profile or rewrite this immutable receipt.
@@ -145,9 +159,9 @@ function option(name) {
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
   try {
     if (process.argv.includes('--help') || process.argv.includes('-h')) {
-      console.log('Usage: pnpm dsh plugin candidate --plugin /absolute/plugin --output-dir /absolute/output --state-path /absolute/state.json [--profile /relative/profile.json] [--previous-profile /relative/profile.json] [--service-evidence /absolute/receipt.json]');
+      console.log('Usage: pnpm dsh plugin candidate (--plugin /absolute/plugin | --pack-manifest /absolute/plugin-pack.json --pack-sha256 SHA256) --output-dir /absolute/output --state-path /absolute/state.json [--profile /relative/profile.json] [--previous-profile /relative/profile.json] [--service-evidence /absolute/receipt.json]');
     } else {
-      const candidate = await createPluginCandidate({ plugin: option('--plugin'), outputDir: option('--output-dir'), statePath: option('--state-path'), profileManifest: option('--profile'), previousProfile: option('--previous-profile'), serviceEvidencePath: option('--service-evidence') });
+      const candidate = await createPluginCandidate({ plugin: option('--plugin'), packManifest: option('--pack-manifest'), packSha256: option('--pack-sha256'), outputDir: option('--output-dir'), statePath: option('--state-path'), profileManifest: option('--profile'), previousProfile: option('--previous-profile'), serviceEvidencePath: option('--service-evidence') });
       console.log(JSON.stringify(candidate, null, 2));
     }
   } catch (error) {

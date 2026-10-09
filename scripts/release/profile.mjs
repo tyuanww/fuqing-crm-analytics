@@ -51,11 +51,11 @@ export function validateProfile(profile) {
 }
 
 /**
- * Load the only release plugin input. Validation is deliberately strict and
- * read-only: no package manager, source build, host process or data store is
- * touched here.
+ * Load and validate the profile bytes and logical allowlist only. Artifact
+ * consumers bind a separately verified package; source-build callers must use
+ * loadReleaseProfile below for the source/build filesystem checks as well.
  */
-export async function loadReleaseProfile({ root, manifestPath = null } = {}) {
+export async function loadProfileSnapshot({ root, manifestPath = null } = {}) {
   assert.ok(typeof root === 'string' && root, 'PROFILE_ROOT_REQUIRED');
   const selected = manifestPath || process.env.DSH_PROFILE_MANIFEST || DEFAULT_PROFILE_MANIFEST;
   assert.ok(typeof selected === 'string' && selected, 'PROFILE_MANIFEST_REQUIRED');
@@ -67,6 +67,14 @@ export async function loadReleaseProfile({ root, manifestPath = null } = {}) {
   let profile;
   try { profile = JSON.parse(bytes); } catch { throw new Error('PROFILE_MANIFEST_JSON_INVALID'); }
   validateProfile(profile);
+  return Object.freeze({ path, contents: bytes.toString('utf8'), digest: digest(bytes), profile });
+}
+
+/** Source-build callers still require every configured source and build entry. */
+export async function loadReleaseProfile(options = {}) {
+  const { root } = options;
+  const snapshot = await loadProfileSnapshot(options);
+  const { profile } = snapshot;
   const plugins = [];
   for (const item of profile.plugins) {
     const pluginRoot = resolve(root, item.path);
@@ -88,10 +96,7 @@ export async function loadReleaseProfile({ root, manifestPath = null } = {}) {
     plugins.push({ ...item, package_version: manifest.version });
   }
   return Object.freeze({
-    path,
-    contents: bytes.toString('utf8'),
-    digest: digest(bytes),
-    profile,
+    ...snapshot,
     plugins: Object.freeze(plugins),
   });
 }

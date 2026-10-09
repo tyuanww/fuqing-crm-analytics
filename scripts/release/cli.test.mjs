@@ -10,6 +10,23 @@ import { serviceFixture } from './test-fixtures/service-compatibility.mjs';
 const root = join(import.meta.dirname, '..', '..');
 const cli = join(root, 'scripts/dsh.mjs');
 
+test('candidate CLI exposes pinned pack input and rejects ambiguous or missing pins', () => {
+  const help = spawnSync(process.execPath, [cli, 'plugin', 'candidate', '--help'], { encoding: 'utf8' });
+  assert.equal(help.status, 0);
+  assert.match(help.stdout, /--pack-manifest .*--pack-sha256 SHA256/);
+  const common = ['plugin', 'candidate', '--output-dir', '/unused-candidate', '--state-path', '/unused-journal'];
+  for (const [args, error] of [
+    [['--plugin', '/plugin', '--pack-manifest', '/pack.json'], /PLUGIN_CANDIDATE_INPUT_CONFLICT/],
+    [['--pack-manifest', '/pack.json'], /PLUGIN_PACK_MANIFEST_DIGEST_REQUIRED/],
+    [['--plugin', '/plugin', '--pack-sha256', '0'.repeat(64)], /PLUGIN_CANDIDATE_INPUT_CONFLICT/],
+    [['--pack-manifest', '/pack.json', '--pack-manifest', '/other.json'], /PLUGIN_OPTION_DUPLICATE/],
+  ]) {
+    const child = spawnSync(process.execPath, [cli, ...common, ...args], { cwd: root, encoding: 'utf8' });
+    assert.equal(child.status, 2, child.stderr);
+    assert.match(child.stderr, error);
+  }
+});
+
 test('dsh exposes stable help and version output', () => {
   const help = spawnSync(process.execPath, [cli, '--help'], { encoding: 'utf8' });
   assert.equal(help.status, 0);
