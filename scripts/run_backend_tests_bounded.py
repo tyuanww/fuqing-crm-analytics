@@ -107,6 +107,9 @@ def isolated_env(scratch: Path) -> dict[str, str]:
                GIT_CONFIG_NOSYSTEM='1', GIT_CONFIG_GLOBAL=os.devnull,
                FQ_CRM_PASSWORDS='admin:123456,fqsw:fqsw888,testuser:testpass123',
                FQ_CRM_ADMINS='admin', HEALTH_API_KEY='pytest-health-api-key')
+    service_python = os.environ.get('CRM_SERVICE_PYTHON')
+    if service_python:
+        env['CRM_SERVICE_PYTHON'] = service_python
     return env
 
 
