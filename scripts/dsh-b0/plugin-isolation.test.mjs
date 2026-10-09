@@ -36,8 +36,20 @@ for (const name of ['shine-brand', 'shine-query', 'crm-knowledge', 'knowledge'])
       }
     }
     assert.deepEqual((await readdir(join(root, 'dsh-plugins'))).sort(), ['plugin-kit', name].sort());
-    const command = (file, args, cwd = root, environment = {}) => exec(file, args, { cwd, timeout: 180000, maxBuffer: 2 * 1024 * 1024,
-      env: { ...process.env, B0_BUILD_UPSTREAM: upstream, ...environment } });
+    const command = (file, args, cwd = root, environment = {}) => {
+      const env = { ...process.env, B0_BUILD_UPSTREAM: upstream, ...environment };
+      // A nested CLI must start its own test runner. Inheriting child-v8 silently skips its files.
+      delete env.NODE_TEST_CONTEXT;
+      return exec(file, args, { cwd, timeout: 180000, maxBuffer: 2 * 1024 * 1024, env });
+    };
+    const packageTests = async (files, cwd, environment = {}) => {
+      const { stdout } = await command(process.execPath, ['--test', '--test-reporter=tap', ...files], cwd, environment);
+      const count = Number(stdout.match(/^# tests (\d+)$/m)?.[1]);
+      assert.ok(count > 0, 'ISOLATED_PACKAGE_TESTS_MUST_EXECUTE');
+      assert.match(stdout, /^# fail 0$/m);
+      assert.match(stdout, /^# skipped 0$/m);
+      t.diagnostic(JSON.stringify({ package: name, phase: environment.CRM_TEST_PLUGIN_ROOT ? 'installed' : 'source', tests: count, fail: 0, skipped: 0 }));
+    };
     // This throwaway test commit supplies pack's real provenance check. It is
     // never pushed, nor used as a reviewed product/release source identity.
     await writeFile(join(root, '.gitignore'), 'node_modules/\nlib/\nout/\n');
@@ -50,7 +62,7 @@ for (const name of ['shine-brand', 'shine-query', 'crm-knowledge', 'knowledge'])
     const tests = ['crm-knowledge', 'knowledge'].includes(name) ? ['test/package.test.mjs']
       : (await readdir(join(plugin, 'src'))).filter(file => file.endsWith('.test.mjs')).sort().map(file => `src/${file}`);
     assert.ok(tests.length, 'ISOLATED_PACKAGE_TESTS_REQUIRED');
-    await command(process.execPath, ['--test', ...tests.map(file => join(plugin, file))], plugin);
+    await packageTests(tests.map(file => join(plugin, file)), plugin);
     const receipt = await packPlugin({ plugin, outputDir: join(root, 'out') });
     assert.equal(receipt.activation, 'NOT_RUN');
     assert.equal(receipt.dsh_pin, '0.1.7-rc.2');
@@ -64,7 +76,7 @@ for (const name of ['shine-brand', 'shine-query', 'crm-knowledge', 'knowledge'])
         join(root, 'out', receipt.tarball.name), join(root, 'installed'), '--max-entries', '100', '--max-bytes', '4194304']);
       assert.deepEqual((await readdir(installed)).sort(), ['cordis.patch.yml', 'lib', 'package.json']);
       await symlink(join(plugin, 'node_modules'), join(installed, 'node_modules'), 'dir');
-      await command(process.execPath, ['--test', join(plugin, 'test/package.test.mjs')], installed, { CRM_TEST_PLUGIN_ROOT: installed, KNOWLEDGE_TEST_PLUGIN_ROOT: installed });
+      await packageTests([join(plugin, 'test/package.test.mjs')], installed, { CRM_TEST_PLUGIN_ROOT: installed, KNOWLEDGE_TEST_PLUGIN_ROOT: installed });
     }
     const outputs = {};
     for (const file of artifacts) {

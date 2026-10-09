@@ -236,8 +236,8 @@ print('B0 exact Python closure verified')
   run(process.execPath, [join(plugin, 'build.mjs'), upstream]);
   run(process.execPath, ['dsh-plugins/crm-knowledge/build.mjs', upstream]);
   run(process.execPath, ['dsh-plugins/knowledge/build.mjs', upstream]);
-  run(process.execPath, ['--test', 'dsh-plugins/knowledge/test/package.test.mjs', 'dsh-plugins/knowledge/test/service-client.test.mjs', 'dsh-plugins/knowledge/test/graph.test.mjs']);
-  run(process.execPath, ['--test', 'dsh-plugins/crm-knowledge/test/package.test.mjs', 'dsh-plugins/crm-knowledge/test/first-purchase-relay.test.mjs', 'dsh-plugins/crm-knowledge/test/page-composition.integration.mjs', 'dsh-plugins/crm-knowledge/test/knowledge-composition.integration.mjs', 'dsh-plugins/crm-knowledge/test/profile.test.mjs', 'dsh-plugins/crm-knowledge/test/service-client.test.mjs']);
+  run(process.execPath, ['--test', 'dsh-plugins/knowledge/test/package.test.mjs', 'dsh-plugins/knowledge/test/service-client.test.mjs', 'dsh-plugins/knowledge/test/graph.test.mjs', 'scripts/crm-calibration/graph-ledger.test.mjs']);
+  run(process.execPath, ['--test', 'dsh-plugins/crm-knowledge/test/package.test.mjs', 'dsh-plugins/crm-knowledge/test/first-purchase-relay.test.mjs', 'dsh-plugins/crm-knowledge/test/page-composition.integration.mjs', 'dsh-plugins/crm-knowledge/test/knowledge-composition.integration.mjs', 'dsh-plugins/crm-knowledge/test/profile.test.mjs', 'dsh-plugins/crm-knowledge/test/service-client.test.mjs', 'dsh-plugins/crm-knowledge/test/knowledge-http.test.mjs']);
   run(process.execPath, [join(shineBrand, 'build.mjs'), upstream]);
   run(process.execPath, [join(shineWaterfall, 'build.mjs'), upstream]);
   run(process.execPath, [join(shineCrowdAction, 'build.mjs'), upstream]);

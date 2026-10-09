@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
 import { test, before, after } from 'node:test';
 import { createMetricsService } from '../src/service-client.mjs';
-import { createKnowledgeService } from '../../knowledge/src/service-client.mjs';
+import { explainPublicKnowledge } from './knowledge-http.mjs';
 import { serveCrmServices } from './service.fixture.mjs';
-let services, knowledge;
+let services, knowledgeOrigin;
 const cleanup = [];
 before(async () => { const { config } = await serveCrmServices({ after: fn => cleanup.push(fn) });
-  services = createMetricsService(config); knowledge = createKnowledgeService(config); });
+  services = createMetricsService(config); knowledgeOrigin = config.knowledgeOrigin; });
 after(async () => { for (const close of cleanup) await close(); });
 
 const base = {
@@ -47,7 +47,7 @@ test('sample followup keeps ROI disclaimer and maturity split', async () => {
 });
 
 test('explain cites decisions and does not claim legacy code is fixed', async () => {
-  const result = await knowledge.explain('客单价');
+  const result = await explainPublicKnowledge(knowledgeOrigin, '客单价');
   assert.ok(result.decision_ids.includes('D001'));
   assert.equal(result.code_fixed_in_legacy_services, false);
   assert.ok(result.evidence_refs.length >= 1);
