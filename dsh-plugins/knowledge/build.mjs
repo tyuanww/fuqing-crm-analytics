@@ -1,16 +1,20 @@
 /** Build this plugin with its own source and the dev-only fixed SDK kit. */
 import assert from 'node:assert/strict';
-import { dirname, resolve, join } from 'node:path';
+import { dirname, isAbsolute, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const root = dirname(fileURLToPath(import.meta.url));
 const upstreamInput = process.argv[2] ?? process.env.B0_BUILD_UPSTREAM;
-if (!upstreamInput) {
+if (!upstreamInput || !isAbsolute(upstreamInput)) {
   console.error('UPSTREAM_NOT_CONFIGURED: pass the pinned DeepSeek Harness checkout as the first argument or B0_BUILD_UPSTREAM. This build does not search the main repository.');
   process.exit(2);
 }
 const upstream = resolve(upstreamInput);
 const { bindToolchain } = await import('@shine-mage/dsh-plugin-kit/toolchain');
 const toolsInput = process.argv[3] ?? process.env.B0_BUILD_TOOLS;
+if (toolsInput && !isAbsolute(toolsInput)) {
+  console.error('BUILD_TOOLS_NOT_CONFIGURED: pass an absolute build-tools directory as the third argument or B0_BUILD_TOOLS.');
+  process.exit(2);
+}
 const { compiler: ts, build } = await bindToolchain(root, upstream, toolsInput ? resolve(toolsInput) : undefined);
 const entries = ['src/index.ts', 'src/graph-tools.ts', 'test/contract.typecheck.ts'];
 const program = ts.createProgram(entries.map(file => join(root, file)), {

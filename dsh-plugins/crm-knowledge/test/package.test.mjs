@@ -85,21 +85,23 @@ test('board health follows catalog visibility and ignores competition HTTP env',
   assert.deepEqual(visible.value.board_tools, { status: 'AVAILABLE', execution: 'NOT_RUN', reason: null });
 });
 
-test('plugin build refuses a missing upstream instead of discovering the main repository', async () => {
+test('plugin build refuses missing or relative upstream instead of discovering the main repository', async () => {
   const build = await readFile(join(plugin, 'build.mjs'), 'utf8');
   assert.doesNotMatch(build, /\.context\/dsh-b0/);
   const env = { ...process.env };
   delete env.B0_BUILD_UPSTREAM;
-  const child = spawn(process.execPath, [join(plugin, 'build.mjs')], { env, cwd: plugin });
-  let stderr = '';
-  child.stderr.setEncoding('utf8');
-  child.stderr.on('data', chunk => { stderr += chunk; });
-  const code = await new Promise((resolve, reject) => {
-    child.on('error', reject);
-    child.on('exit', resolve);
-  });
-  assert.equal(code, 2, stderr);
-  assert.match(stderr, /UPSTREAM_NOT_CONFIGURED/);
+  for (const args of [[], ['relative/upstream']]) {
+    const child = spawn(process.execPath, [join(plugin, 'build.mjs'), ...args], { env, cwd: plugin });
+    let stderr = '';
+    child.stderr.setEncoding('utf8');
+    child.stderr.on('data', chunk => { stderr += chunk; });
+    const code = await new Promise((resolve, reject) => {
+      child.on('error', reject);
+      child.on('exit', resolve);
+    });
+    assert.equal(code, 2, stderr);
+    assert.match(stderr, /UPSTREAM_NOT_CONFIGURED/);
+  }
 });
 
 test('built or unpacked CRM calls only its explicitly selected public service', async t => {

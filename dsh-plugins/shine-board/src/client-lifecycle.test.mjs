@@ -29,19 +29,21 @@ test('apply marks the board pack present without a host require', () => {
   assert.equal(sandbox.__SHINE_BOARD__, true);
 });
 
-test('build names a missing upstream instead of searching the main repository', async () => {
+test('build names a missing or relative upstream instead of searching the main repository', async () => {
   const build = await readFile(join(root, 'build.mjs'), 'utf8');
   assert.doesNotMatch(build, /\.context\/dsh-b0/);
   const env = { ...process.env };
   delete env.B0_BUILD_UPSTREAM;
-  const child = spawn(process.execPath, [join(root, 'build.mjs')], { env, cwd: root });
-  let stderr = '';
-  child.stderr.setEncoding('utf8');
-  child.stderr.on('data', chunk => { stderr += chunk; });
-  const code = await new Promise((resolve, reject) => {
-    child.on('error', reject);
-    child.on('exit', resolve);
-  });
-  assert.equal(code, 2, stderr);
-  assert.match(stderr, /UPSTREAM_NOT_CONFIGURED/);
+  for (const args of [[], ['relative/upstream']]) {
+    const child = spawn(process.execPath, [join(root, 'build.mjs'), ...args], { env, cwd: root });
+    let stderr = '';
+    child.stderr.setEncoding('utf8');
+    child.stderr.on('data', chunk => { stderr += chunk; });
+    const code = await new Promise((resolve, reject) => {
+      child.on('error', reject);
+      child.on('exit', resolve);
+    });
+    assert.equal(code, 2, stderr);
+    assert.match(stderr, /UPSTREAM_NOT_CONFIGURED/);
+  }
 });
