@@ -1,0 +1,161 @@
+{
+  "schema": "shinemage-sdk-recipe-reproduction-closeout/v1",
+  "head": "8aabaaeb8d0e22a351088e1daefc164a5c0a2d09",
+  "scope": "fixed pnpm57e7b9b7 JS bundle recipe only; no full SDK build/distribution",
+  "source_commit": "57e7b9b76ac3a5ef67461093071b2264335a1a01",
+  "source_tree": "d506a194e838ba5d01fee37d42f075fe55f4f01b",
+  "source_blobs_verified_after_build": 8027,
+  "source_changes": [],
+  "source_locks_unchanged": true,
+  "recipe_node": "24.6.0",
+  "root_recipe_node": "26.10.0",
+  "package_manager": "12.7.0",
+  "esbuild": "0.28.2",
+  "native_preview": "7.0.0-dev.20260707.2",
+  "cargo_for_dependency_materialization": "1.97.0; no Rust native compilation",
+  "network_isolation": "sandbox-exec deny network* for original install/build; normal TLS only fixed input preparation",
+  "raw_bundle_comparison": [
+    {
+      "file": "pnpm.mjs",
+      "sealed_path": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/checks/kit-sdk-v2-distribution-20261007/received-r3/corepack/v1/pnpm/11.28.2/dist/pnpm.mjs",
+      "built_path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/work/pnpm/pnpm/pnpm11/pnpm/dist/pnpm.mjs",
+      "sealed_sha256": "00805e99c795e7067b0f459846393ca3f6a701ca9ae267fd48b99d11ecd423a8",
+      "built_sha256": "00805e99c795e7067b0f459846393ca3f6a701ca9ae267fd48b99d11ecd423a8",
+      "sealed_bytes": 15457230,
+      "built_bytes": 15457230,
+      "raw_bytes_equal": true,
+      "post_processing": false
+    },
+    {
+      "file": "worker.js",
+      "sealed_path": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/checks/kit-sdk-v2-distribution-20261007/received-r3/corepack/v1/pnpm/11.28.2/dist/worker.js",
+      "built_path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/work/pnpm/pnpm/pnpm11/pnpm/dist/worker.js",
+      "sealed_sha256": "9834d944929dba7566e230a084fff0ecdb1da1be777c72ecb5f00a41a04843a4",
+      "built_sha256": "9834d944929dba7566e230a084fff0ecdb1da1be777c72ecb5f00a41a04843a4",
+      "sealed_bytes": 613034,
+      "built_bytes": 613034,
+      "raw_bytes_equal": true,
+      "post_processing": false
+    }
+  ],
+  "exact_two_bundle_reproduction": true,
+  "input_counts": {
+    "registry_selected_darwin_declared_upper_bound": 1508,
+    "registry_original_main_lock": 1648,
+    "additional_manager_registry_inputs": 2,
+    "original_policy_records_with_runtime": 1649,
+    "cargo_registry_checksums": 774,
+    "cargo_git_fixed_commit": 1,
+    "native_install_log_scope": "204 of 231 workspace projects"
+  },
+  "all_48_stage_commands_exit_zero": true,
+  "prior_raw_mismatch_preserved": true,
+  "historical_failures": [
+    "store-import-probe initial sandbox coordinator lock denial",
+    "offline-import-fixture r1/r2 full metadata missing",
+    "source-install-r1 foreign-platform metadata missing",
+    "bundle raw r1 mismatch solely original relative store prefix"
+  ],
+  "product_code_changed": false,
+  "top_level_gates_unchanged": true,
+  "embedded_components": "PARTIAL",
+  "inline_function_bytes_default_product_value": "NOT_VERIFIED",
+  "sdk_distribution": "BLOCKED",
+  "release_ready": false,
+  "did_not_run": [
+    "B0",
+    "cold install",
+    "headed25",
+    "OSV7/29refresh",
+    "SEA/native release",
+    "SDK full rebuild",
+    "signature/revocation/clean host",
+    "real business/production"
+  ],
+  "evidence": [
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/sandbox-probe-result.json",
+      "sha256": "81d2a4d23caf4386b70751462b5f9e187178959880b4b17c251cad948f87ce7d"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/source-materialization.json",
+      "sha256": "5bb0ee66e8169e8db8e0c392222b9ee3d1ad1fd9a722b81056a14abc42094e2d"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/live-store-handoff.json",
+      "sha256": "2e93effc67243fe618280aad3c7ffad0dbe8e937b57a154d97319e0111d93f0a"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/dependency-input-plan.json",
+      "sha256": "7f726d6ab9d7fe0f2ab5c7c21b2ae4d635f4a29904bda1647894f42feaf37463"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/actual-install-scope.json",
+      "sha256": "4d8b75491282926365bad632ebd092a95efc952a77ddcab9dbf5717a91b5cd91"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/fetch-batches-result.json",
+      "sha256": "33de9f10beb5b151e3fe3609297c523674d9644549f969d4aa4fac0b1f8c51b1"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/policy-cache-plan.json",
+      "sha256": "f069e9dfb44d0d486ebe80e91c9d3e0f6cdc5b2f0ccb6cabfa1a021f328b1333"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/source-install-r1-result.json",
+      "sha256": "f1966ac0765db197d01ccc2aa9874e6511f24988354ebd4844d1a2a3b0d49dbb"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/source-install-r2-result.json",
+      "sha256": "44a2d8df6b45bcbb495bd9226bf3932817b3201a15b1eaed610ad9587ad88786"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/bundle-build-r1-result.json",
+      "sha256": "37f8ef13033f855c8444cda93ddb3058a53c059834ce9f4149c48d2481010c4b"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/bundle-comparison-r1.json",
+      "sha256": "7d3a43545b98f674f817c7a8f1d071d25874ab9f5bcac97e48541043683d20d6"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/bundle-prefix-diagnostic.json",
+      "sha256": "017b930bdc9ddbb22f532d8df7e966e0e34c1c1a574cabdb434809af748e6e25"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/official-aliases.json",
+      "sha256": "84ec79c25c5f431b5547609f524b7eae3353dd17a50ba9bf70323390a4efdc6e"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/cargo-prewarm-result.json",
+      "sha256": "0d45aa754c6df7420c9b102ae373d7b7b0ed3da4fe074bee5e07432461a4aaae"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/layout-plan.json",
+      "sha256": "dedf081811913d589e004eb2d0d7706f824441652e9b9de23823eb2157f86ed4"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/stages-result.json",
+      "sha256": "cf26bf4f03752c31a75b1f7ad911a1cc3cbc49ea1913b1181c3d1c6d95bfce80"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/source-install-command.json",
+      "sha256": "b4788db5bad0723ce8ea38bc82deade1e9a815310812f5f4f4d0a9b6ebcc93af"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/source-install-result.json",
+      "sha256": "9d4074fb04cc018767aecec4158aa1135384acb4e9d228e77bdf147eacd7cdb0"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/bundle-build-command.json",
+      "sha256": "8cf7999c4ccf7adf5949e9ec63f7c272cabede7930bfe64a646068bb097f675b"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/bundle-build-result.json",
+      "sha256": "87151b437c21cfff6502b0bef4ca4803bb02a9cdaac9cf816df73a4d6c87bab7"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/audit-result.json",
+      "sha256": "6adb48d59990d4845cfdd8dfcf35b7387b30aec5bf376db1f717a2a6d2ee7ffd"
+    }
+  ]
+}

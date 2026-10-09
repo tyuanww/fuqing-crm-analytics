@@ -1,0 +1,499 @@
+{
+  "schema": "sdk-three-fixed-package-transform-reproduction/v1",
+  "scope": "smart-buffer4.2.0, socks2.8.10, semver-range-intersect0.3.1 original build scripts, direct 12 published-JS comparisons",
+  "status": "RAW_JS_MATCH_12_OF_12",
+  "release_ready": false,
+  "sdk_distribution": "BLOCKED",
+  "EMBED_INLINE_BYTES": "PARTIAL",
+  "product_defaults": {
+    "embedded_components": "NOT_VERIFIED",
+    "inline_function_bytes": "NOT_VERIFIED"
+  },
+  "top_level_gates_unchanged": true,
+  "source_association": "Registry exact-version gitHead declaration to preserved codeload archive; not independently signed provenance or unique-source proof. No tarball repack.",
+  "toolchain": {
+    "node_path": "/Users/hutou/homebrew/Cellar/node@24/24.19.0/bin/node",
+    "version": "24.19.0",
+    "compiler_versions": {
+      "smart-buffer@4.2.0": "3.5.3",
+      "socks@2.8.10": "5.9.3",
+      "semver-range-intersect@0.3.1": "3.5.3"
+    },
+    "socks_prettier": "3.9.6"
+  },
+  "dependency_closure": {
+    "unique_archives": 16,
+    "materializations": 17,
+    "per_package": {
+      "smart-buffer@4.2.0": 4,
+      "socks@2.8.10": 10,
+      "semver-range-intersect@0.3.1": 3
+    },
+    "lock_sha512_match_all": true,
+    "normal_tls": true,
+    "install_lifecycle_executed": false,
+    "selection": "Original build direct tools plus complete runtime/type dependency closure; smart-buffer/socks all root ambient @types, semver explicit types=[]; no unrelated test/lint/release installation.",
+    "full_original_dev_lock_installed": false
+  },
+  "sandbox": {
+    "file": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/build-offline.sb",
+    "deny_network": true,
+    "deny_write_outside_new_root": true,
+    "deny_read_user_home_except_homebrew_and_new_root": true,
+    "home_tmp_config_cache_state": "per-package private newly created directories",
+    "actual_denial_probe": {
+      "name": "sandbox-denials",
+      "exit_code": 0,
+      "seconds": 0.038,
+      "log": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/logs/sandbox-denials.log"
+    },
+    "logs": "write EPERM\nnetwork EPERM\n",
+    "no_original_published_store_read_during_build": true
+  },
+  "builds": [
+    {
+      "name": "smart-buffer@4.2.0-build",
+      "exit_code": 0,
+      "seconds": 1.2,
+      "log": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/logs/smart-buffer@4.2.0-build.log"
+    },
+    {
+      "name": "socks@2.8.10-build",
+      "exit_code": 0,
+      "seconds": 1.325,
+      "log": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/logs/socks@2.8.10-build.log"
+    },
+    {
+      "name": "semver-range-intersect@0.3.1-build",
+      "exit_code": 0,
+      "seconds": 0.608,
+      "log": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/logs/semver-range-intersect@0.3.1-build.log"
+    }
+  ],
+  "original_scripts": {
+    "smart-buffer@4.2.0": "tsc -p ./",
+    "socks@2.8.10": "rm -rf build typings && prettier --write ./src/**/*.ts --config .prettierrc.yaml && tsc -p .",
+    "semver-range-intersect@0.3.1": "tsc"
+  },
+  "comparisons": [
+    {
+      "identity": "smart-buffer@4.2.0",
+      "source": "src/utils.ts",
+      "official_map": "pnpm.mjs.map",
+      "official_map_source_index": 913,
+      "generated": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/work/smart-buffer@4.2.0/build/utils.js",
+      "published": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/setup-pnpm/store/v11/links/@/smart-buffer/4.2.0/26acde58cd4ef8a6abbb855cd602f8d5b83a031818c1520d891292aba555689e/node_modules/smart-buffer/build/utils.js",
+      "generated_sha256": "451b2e82d359f3d8782be4830bd5d9df895434adbbbd911fbeb27e64fc59167d",
+      "published_sha256": "451b2e82d359f3d8782be4830bd5d9df895434adbbbd911fbeb27e64fc59167d",
+      "generated_bytes": 4273,
+      "published_bytes": 4273,
+      "raw_equal": true,
+      "postprocessing": false
+    },
+    {
+      "identity": "smart-buffer@4.2.0",
+      "source": "src/smartbuffer.ts",
+      "official_map": "pnpm.mjs.map",
+      "official_map_source_index": 914,
+      "generated": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/work/smart-buffer@4.2.0/build/smartbuffer.js",
+      "published": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/setup-pnpm/store/v11/links/@/smart-buffer/4.2.0/26acde58cd4ef8a6abbb855cd602f8d5b83a031818c1520d891292aba555689e/node_modules/smart-buffer/build/smartbuffer.js",
+      "generated_sha256": "6a73858a0aa6f7ac078d8156187ef97a713e44d52afccf6679a0a032539be0cc",
+      "published_sha256": "6a73858a0aa6f7ac078d8156187ef97a713e44d52afccf6679a0a032539be0cc",
+      "generated_bytes": 44500,
+      "published_bytes": 44500,
+      "raw_equal": true,
+      "postprocessing": false
+    },
+    {
+      "identity": "socks@2.8.10",
+      "source": "src/common/constants.ts",
+      "official_map": "pnpm.mjs.map",
+      "official_map_source_index": 915,
+      "generated": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/work/socks@2.8.10/build/common/constants.js",
+      "published": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/setup-pnpm/store/v11/links/@/socks/2.8.10/dddfec68fa135a49c375a7bb7fb4384fc4f29fc80882b2ad6eee549b3c00755d/node_modules/socks/build/common/constants.js",
+      "generated_sha256": "82009a5397740e3622c48bb3393aff5ccb9d86ec496e085e53bfee5f8e96ac7c",
+      "published_sha256": "82009a5397740e3622c48bb3393aff5ccb9d86ec496e085e53bfee5f8e96ac7c",
+      "generated_bytes": 7550,
+      "published_bytes": 7550,
+      "raw_equal": true,
+      "postprocessing": false
+    },
+    {
+      "identity": "socks@2.8.10",
+      "source": "src/common/util.ts",
+      "official_map": "pnpm.mjs.map",
+      "official_map_source_index": 916,
+      "generated": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/work/socks@2.8.10/build/common/util.js",
+      "published": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/setup-pnpm/store/v11/links/@/socks/2.8.10/dddfec68fa135a49c375a7bb7fb4384fc4f29fc80882b2ad6eee549b3c00755d/node_modules/socks/build/common/util.js",
+      "generated_sha256": "a445e54dd80007db8b0e84a60f685e07915bbb91c1e4453474182fe6f16dc1d6",
+      "published_sha256": "a445e54dd80007db8b0e84a60f685e07915bbb91c1e4453474182fe6f16dc1d6",
+      "generated_bytes": 675,
+      "published_bytes": 675,
+      "raw_equal": true,
+      "postprocessing": false
+    },
+    {
+      "identity": "socks@2.8.10",
+      "source": "src/common/helpers.ts",
+      "official_map": "pnpm.mjs.map",
+      "official_map_source_index": 926,
+      "generated": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/work/socks@2.8.10/build/common/helpers.js",
+      "published": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/setup-pnpm/store/v11/links/@/socks/2.8.10/dddfec68fa135a49c375a7bb7fb4384fc4f29fc80882b2ad6eee549b3c00755d/node_modules/socks/build/common/helpers.js",
+      "generated_sha256": "2cecc047139d98c81304ac42a5d93ba1c99a811ba880e332a92085d2ebd79bc8",
+      "published_sha256": "2cecc047139d98c81304ac42a5d93ba1c99a811ba880e332a92085d2ebd79bc8",
+      "generated_bytes": 6781,
+      "published_bytes": 6781,
+      "raw_equal": true,
+      "postprocessing": false
+    },
+    {
+      "identity": "socks@2.8.10",
+      "source": "src/common/receivebuffer.ts",
+      "official_map": "pnpm.mjs.map",
+      "official_map_source_index": 927,
+      "generated": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/work/socks@2.8.10/build/common/receivebuffer.js",
+      "published": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/setup-pnpm/store/v11/links/@/socks/2.8.10/dddfec68fa135a49c375a7bb7fb4384fc4f29fc80882b2ad6eee549b3c00755d/node_modules/socks/build/common/receivebuffer.js",
+      "generated_sha256": "49feb670a5499e20899d892740f80d1e3ef24deb64888a21dcabf6fe7419b4e8",
+      "published_sha256": "49feb670a5499e20899d892740f80d1e3ef24deb64888a21dcabf6fe7419b4e8",
+      "generated_bytes": 1549,
+      "published_bytes": 1549,
+      "raw_equal": true,
+      "postprocessing": false
+    },
+    {
+      "identity": "socks@2.8.10",
+      "source": "src/client/socksclient.ts",
+      "official_map": "pnpm.mjs.map",
+      "official_map_source_index": 928,
+      "generated": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/work/socks@2.8.10/build/client/socksclient.js",
+      "published": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/setup-pnpm/store/v11/links/@/socks/2.8.10/dddfec68fa135a49c375a7bb7fb4384fc4f29fc80882b2ad6eee549b3c00755d/node_modules/socks/build/client/socksclient.js",
+      "generated_sha256": "4b473feca4862b5c66ec0efa39ea2d40d07c845886b6081813b07d489fabd897",
+      "published_sha256": "4b473feca4862b5c66ec0efa39ea2d40d07c845886b6081813b07d489fabd897",
+      "generated_bytes": 35626,
+      "published_bytes": 35626,
+      "raw_equal": true,
+      "postprocessing": false
+    },
+    {
+      "identity": "socks@2.8.10",
+      "source": "src/index.ts",
+      "official_map": "pnpm.mjs.map",
+      "official_map_source_index": 929,
+      "generated": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/work/socks@2.8.10/build/index.js",
+      "published": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/setup-pnpm/store/v11/links/@/socks/2.8.10/dddfec68fa135a49c375a7bb7fb4384fc4f29fc80882b2ad6eee549b3c00755d/node_modules/socks/build/index.js",
+      "generated_sha256": "c82822bfe17665a9de990c99e1aea5d94874bcbc072f95b42c617bab3d097df7",
+      "published_sha256": "c82822bfe17665a9de990c99e1aea5d94874bcbc072f95b42c617bab3d097df7",
+      "generated_bytes": 846,
+      "published_bytes": 846,
+      "raw_equal": true,
+      "postprocessing": false
+    },
+    {
+      "identity": "semver-range-intersect@0.3.1",
+      "source": "src/utils.ts",
+      "official_map": "pnpm.mjs.map",
+      "official_map_source_index": 2073,
+      "generated": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/work/semver-range-intersect@0.3.1/dist/utils.js",
+      "published": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/setup-pnpm/store/v11/links/@/semver-range-intersect/0.3.1/62355b206a3d3bb7824814eb45059bb13baf842b2c19c3096d068b36f4bbabd9/node_modules/semver-range-intersect/dist/utils.js",
+      "generated_sha256": "e16333fdabd423494e7540270477ca09ec0d3120253f7d9d709d3e30be06ee64",
+      "published_sha256": "e16333fdabd423494e7540270477ca09ec0d3120253f7d9d709d3e30be06ee64",
+      "generated_bytes": 11317,
+      "published_bytes": 11317,
+      "raw_equal": true,
+      "postprocessing": false
+    },
+    {
+      "identity": "semver-range-intersect@0.3.1",
+      "source": "src/single-range.ts",
+      "official_map": "pnpm.mjs.map",
+      "official_map_source_index": 2074,
+      "generated": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/work/semver-range-intersect@0.3.1/dist/single-range.js",
+      "published": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/setup-pnpm/store/v11/links/@/semver-range-intersect/0.3.1/62355b206a3d3bb7824814eb45059bb13baf842b2c19c3096d068b36f4bbabd9/node_modules/semver-range-intersect/dist/single-range.js",
+      "generated_sha256": "dc1a6bd7a10a0064c850d79482087912bc255ea98be1a89ecb1860e37e62ca95",
+      "published_sha256": "dc1a6bd7a10a0064c850d79482087912bc255ea98be1a89ecb1860e37e62ca95",
+      "generated_bytes": 9881,
+      "published_bytes": 9881,
+      "raw_equal": true,
+      "postprocessing": false
+    },
+    {
+      "identity": "semver-range-intersect@0.3.1",
+      "source": "src/multi-range.ts",
+      "official_map": "pnpm.mjs.map",
+      "official_map_source_index": 2075,
+      "generated": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/work/semver-range-intersect@0.3.1/dist/multi-range.js",
+      "published": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/setup-pnpm/store/v11/links/@/semver-range-intersect/0.3.1/62355b206a3d3bb7824814eb45059bb13baf842b2c19c3096d068b36f4bbabd9/node_modules/semver-range-intersect/dist/multi-range.js",
+      "generated_sha256": "b2cdf78ba9edac76b1ff97af08a79be1c98605f3b570e1e4a5d57f582e199310",
+      "published_sha256": "b2cdf78ba9edac76b1ff97af08a79be1c98605f3b570e1e4a5d57f582e199310",
+      "generated_bytes": 3476,
+      "published_bytes": 3476,
+      "raw_equal": true,
+      "postprocessing": false
+    },
+    {
+      "identity": "semver-range-intersect@0.3.1",
+      "source": "src/index.ts",
+      "official_map": "pnpm.mjs.map",
+      "official_map_source_index": 2076,
+      "generated": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/work/semver-range-intersect@0.3.1/dist/index.js",
+      "published": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/setup-pnpm/store/v11/links/@/semver-range-intersect/0.3.1/62355b206a3d3bb7824814eb45059bb13baf842b2c19c3096d068b36f4bbabd9/node_modules/semver-range-intersect/dist/index.js",
+      "generated_sha256": "1514c6c414c0a491aca9e20bf3079178266f1cbc3fc3629b162a909f78227887",
+      "published_sha256": "1514c6c414c0a491aca9e20bf3079178266f1cbc3fc3629b162a909f78227887",
+      "generated_bytes": 1059,
+      "published_bytes": 1059,
+      "raw_equal": true,
+      "postprocessing": false
+    }
+  ],
+  "output_files_preexisting_in_commit_archive": 0,
+  "source_changes": {
+    "smart-buffer@4.2.0": {
+      "identity": "smart-buffer@4.2.0",
+      "changes": [],
+      "source_archive_count": 21,
+      "build_exit_code": 0
+    },
+    "socks@2.8.10": {
+      "identity": "socks@2.8.10",
+      "changes": [
+        {
+          "path": "src/common/helpers.ts",
+          "before_sha256": "20e6feac435e00cea4424fe729987eb2b97451add86ee892d6c9ad78c309d8a1",
+          "after_sha256": "da0447ffdc72e34076e33af0188ed0fa7d53d5787978df165c5ea2ce748e02f9"
+        },
+        {
+          "path": "typings/client/socksclient.d.ts",
+          "before_sha256": "aa7e6b64b597c32a65662e0b455e641748ab4ecc71aa31e4c8ad0678ca65bc5a",
+          "after_sha256": "eeae3f1fe3e3b7ba06684328cd96d213e55b72538d33bc3b2209058d9b58f2b8"
+        },
+        {
+          "path": "typings/common/constants.d.ts",
+          "before_sha256": "d7c7fd205f57abd1705b98d7f4b47b1dd8f256a3c9a98efb872d75ef27e9e59e",
+          "after_sha256": "1e7134fb9c85f78efb5e05384040da2d60e598c2b40b5f31f99f144c27794193"
+        },
+        {
+          "path": "typings/common/helpers.d.ts",
+          "before_sha256": "deba303acbc9067d4ac8389ec489ab33bfaa7aea4320b01cda1bbb03b0f079e9",
+          "after_sha256": "5ff814c2c97b5954995a5fd83049f043563acc4c571785900fbbb845ef7dffaa"
+        },
+        {
+          "path": "typings/common/receiveBuffer.d.ts",
+          "before_sha256": "777eceee31f9bb2b6cb66847f3cc3d4781139859b7fbfd62841f670490808ffb",
+          "after_sha256": "a207b5062cb86e646412437e8116c74bd1406767a2383b5e388874334c6373fe"
+        }
+      ],
+      "source_archive_count": 36,
+      "build_exit_code": 0
+    },
+    "semver-range-intersect@0.3.1": {
+      "identity": "semver-range-intersect@0.3.1",
+      "changes": [],
+      "source_archive_count": 21,
+      "build_exit_code": 0
+    }
+  },
+  "socks_formatting_scope": "Original prettier --write altered src/common/helpers.ts formatting in new copy. This original recipe transformation is preserved; no claim source bytes were unchanged. Four checked-in declarations also changed when original build regenerated typings, not included in JS match claims.",
+  "unchanged_package_config_lock_checks": [
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/work/smart-buffer@4.2.0/package.json",
+      "sha256": "188644cdf467d6a768ad25ed3ee8eb845dc5cb29aadc4c88ca7c5cb5f631d66a",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/work/smart-buffer@4.2.0/tsconfig.json",
+      "sha256": "1e87911d498cf9d2a73dd545871fc21c16705ce641d85e1c0d52e394ce7216d4",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/work/smart-buffer@4.2.0/yarn.lock",
+      "sha256": "2915b42acb1555937f2bca69d47f6fc17b5763f889741c03f61dc4bdd99582fd",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/work/socks@2.8.10/package.json",
+      "sha256": "1fe8018dc97df9031e1247b1449595e15f1606f19a63bbda902abdf12668a6cd",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/work/socks@2.8.10/tsconfig.json",
+      "sha256": "e5c9b74da971f96529e56c700db2c5f9a434356063e1279152f031580680fdce",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/work/socks@2.8.10/package-lock.json",
+      "sha256": "84132ad409a96125cc2f91ccfe9ee7d90f8b5b1cad29553406039a9615d8aa89",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/work/semver-range-intersect@0.3.1/package.json",
+      "sha256": "31bd1dd53d674e17f870296a69027fd0769f73198d8cced839a565653243f656",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/work/semver-range-intersect@0.3.1/tsconfig.json",
+      "sha256": "34515ead6d93675c5d099b362d0950c6fc06e91560628dd2ee7e89ebc3b8c12f",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/work/semver-range-intersect@0.3.1/package-lock.json",
+      "sha256": "e756399a8a810b81cebc249b26a5b6caebab5df4e63ef1c4b97aed5300f3c5ff",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/hutou/homebrew/Cellar/node@24/24.19.0/bin/node",
+      "sha256": "43f66a464e8597cb600f326f46ed7dfd39000825e89ca2fd6db84ba0a9b8cbcf",
+      "version": "24.19.0"
+    }
+  ],
+  "copied_raw_inputs": [
+    {
+      "origin": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-null-source-binding-20261008/archives/smart-buffer@4.2.0.tar.gz",
+      "copy": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/inputs/smart-buffer@4.2.0/source.tar.gz",
+      "sha256": "70ef032b30de3581aed153a4f25afc6cd856b40e50bc16ae27b66788df55984b",
+      "same_bytes": true
+    },
+    {
+      "origin": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-null-source-binding-20261008/registry/smart-buffer@4.2.0.json",
+      "copy": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/inputs/smart-buffer@4.2.0/registry.json",
+      "sha256": "bf6c3d78b5db406dfc3369b846f62f161c752598eaf0b27b8e2bbe74d774d7a2",
+      "same_bytes": true
+    },
+    {
+      "origin": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-null-source-binding-20261008/archives/socks@2.8.10.tar.gz",
+      "copy": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/inputs/socks@2.8.10/source.tar.gz",
+      "sha256": "dce82acf8c046e7aa97326ad890ae06d67dccc0bf8431ff5967a4b966edd00fc",
+      "same_bytes": true
+    },
+    {
+      "origin": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-null-source-binding-20261008/registry/socks@2.8.10.json",
+      "copy": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/inputs/socks@2.8.10/registry.json",
+      "sha256": "27b3852523bf0a2265228085b98b7e0902aa0ff5a6cc1c551dac840cf63256fd",
+      "same_bytes": true
+    },
+    {
+      "origin": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-null-source-binding-20261008/archives/semver-range-intersect@0.3.1.tar.gz",
+      "copy": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/inputs/semver-range-intersect@0.3.1/source.tar.gz",
+      "sha256": "f8b604803717cc128ac32cae2e77c71a966031384f7a1ab924d7f338b836931c",
+      "same_bytes": true
+    },
+    {
+      "origin": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-null-source-binding-20261008/registry/semver-range-intersect@0.3.1.json",
+      "copy": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/inputs/semver-range-intersect@0.3.1/registry.json",
+      "sha256": "14342675a8b3d8e63733cc922c22d4446637f1f9209230347a08b0d18811b202",
+      "same_bytes": true
+    },
+    {
+      "origin": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/setup-pnpm/store/v11/links/@/smart-buffer/4.2.0/26acde58cd4ef8a6abbb855cd602f8d5b83a031818c1520d891292aba555689e/node_modules/smart-buffer/build/utils.js",
+      "copy": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/reference-store/smart-buffer@4.2.0/build/utils.js",
+      "sha256": "451b2e82d359f3d8782be4830bd5d9df895434adbbbd911fbeb27e64fc59167d",
+      "same_bytes": true
+    },
+    {
+      "origin": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/setup-pnpm/store/v11/links/@/smart-buffer/4.2.0/26acde58cd4ef8a6abbb855cd602f8d5b83a031818c1520d891292aba555689e/node_modules/smart-buffer/build/smartbuffer.js",
+      "copy": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/reference-store/smart-buffer@4.2.0/build/smartbuffer.js",
+      "sha256": "6a73858a0aa6f7ac078d8156187ef97a713e44d52afccf6679a0a032539be0cc",
+      "same_bytes": true
+    },
+    {
+      "origin": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/setup-pnpm/store/v11/links/@/socks/2.8.10/dddfec68fa135a49c375a7bb7fb4384fc4f29fc80882b2ad6eee549b3c00755d/node_modules/socks/build/common/constants.js",
+      "copy": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/reference-store/socks@2.8.10/build/common/constants.js",
+      "sha256": "82009a5397740e3622c48bb3393aff5ccb9d86ec496e085e53bfee5f8e96ac7c",
+      "same_bytes": true
+    },
+    {
+      "origin": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/setup-pnpm/store/v11/links/@/socks/2.8.10/dddfec68fa135a49c375a7bb7fb4384fc4f29fc80882b2ad6eee549b3c00755d/node_modules/socks/build/common/util.js",
+      "copy": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/reference-store/socks@2.8.10/build/common/util.js",
+      "sha256": "a445e54dd80007db8b0e84a60f685e07915bbb91c1e4453474182fe6f16dc1d6",
+      "same_bytes": true
+    },
+    {
+      "origin": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/setup-pnpm/store/v11/links/@/socks/2.8.10/dddfec68fa135a49c375a7bb7fb4384fc4f29fc80882b2ad6eee549b3c00755d/node_modules/socks/build/common/helpers.js",
+      "copy": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/reference-store/socks@2.8.10/build/common/helpers.js",
+      "sha256": "2cecc047139d98c81304ac42a5d93ba1c99a811ba880e332a92085d2ebd79bc8",
+      "same_bytes": true
+    },
+    {
+      "origin": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/setup-pnpm/store/v11/links/@/socks/2.8.10/dddfec68fa135a49c375a7bb7fb4384fc4f29fc80882b2ad6eee549b3c00755d/node_modules/socks/build/common/receivebuffer.js",
+      "copy": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/reference-store/socks@2.8.10/build/common/receivebuffer.js",
+      "sha256": "49feb670a5499e20899d892740f80d1e3ef24deb64888a21dcabf6fe7419b4e8",
+      "same_bytes": true
+    },
+    {
+      "origin": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/setup-pnpm/store/v11/links/@/socks/2.8.10/dddfec68fa135a49c375a7bb7fb4384fc4f29fc80882b2ad6eee549b3c00755d/node_modules/socks/build/client/socksclient.js",
+      "copy": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/reference-store/socks@2.8.10/build/client/socksclient.js",
+      "sha256": "4b473feca4862b5c66ec0efa39ea2d40d07c845886b6081813b07d489fabd897",
+      "same_bytes": true
+    },
+    {
+      "origin": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/setup-pnpm/store/v11/links/@/socks/2.8.10/dddfec68fa135a49c375a7bb7fb4384fc4f29fc80882b2ad6eee549b3c00755d/node_modules/socks/build/index.js",
+      "copy": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/reference-store/socks@2.8.10/build/index.js",
+      "sha256": "c82822bfe17665a9de990c99e1aea5d94874bcbc072f95b42c617bab3d097df7",
+      "same_bytes": true
+    },
+    {
+      "origin": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/setup-pnpm/store/v11/links/@/semver-range-intersect/0.3.1/62355b206a3d3bb7824814eb45059bb13baf842b2c19c3096d068b36f4bbabd9/node_modules/semver-range-intersect/dist/utils.js",
+      "copy": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/reference-store/semver-range-intersect@0.3.1/dist/utils.js",
+      "sha256": "e16333fdabd423494e7540270477ca09ec0d3120253f7d9d709d3e30be06ee64",
+      "same_bytes": true
+    },
+    {
+      "origin": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/setup-pnpm/store/v11/links/@/semver-range-intersect/0.3.1/62355b206a3d3bb7824814eb45059bb13baf842b2c19c3096d068b36f4bbabd9/node_modules/semver-range-intersect/dist/single-range.js",
+      "copy": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/reference-store/semver-range-intersect@0.3.1/dist/single-range.js",
+      "sha256": "dc1a6bd7a10a0064c850d79482087912bc255ea98be1a89ecb1860e37e62ca95",
+      "same_bytes": true
+    },
+    {
+      "origin": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/setup-pnpm/store/v11/links/@/semver-range-intersect/0.3.1/62355b206a3d3bb7824814eb45059bb13baf842b2c19c3096d068b36f4bbabd9/node_modules/semver-range-intersect/dist/multi-range.js",
+      "copy": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/reference-store/semver-range-intersect@0.3.1/dist/multi-range.js",
+      "sha256": "b2cdf78ba9edac76b1ff97af08a79be1c98605f3b570e1e4a5d57f582e199310",
+      "same_bytes": true
+    },
+    {
+      "origin": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/setup-pnpm/store/v11/links/@/semver-range-intersect/0.3.1/62355b206a3d3bb7824814eb45059bb13baf842b2c19c3096d068b36f4bbabd9/node_modules/semver-range-intersect/dist/index.js",
+      "copy": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-20261008/reference-store/semver-range-intersect@0.3.1/dist/index.js",
+      "sha256": "1514c6c414c0a491aca9e20bf3079178266f1cbc3fc3629b162a909f78227887",
+      "same_bytes": true
+    }
+  ],
+  "failures_preserved": [
+    {
+      "stage": "prepare-r1",
+      "exit_code": 1,
+      "detail": "Local collector used packages instead of packages_with_git_head; stopped before extraction. Original controller/result retained."
+    },
+    {
+      "stage": "downloads-r1",
+      "identity": "@types/chai@4.1.7",
+      "exit_code": 28,
+      "detail": "Normal TLS connection timed out. Only this exact archive retried; r2 original lock SHA512 matched. No TLS bypass."
+    },
+    {
+      "stage": "compare-r1",
+      "exit_code": 1,
+      "detail": "Collector expected one upstream map; semver also has .d.ts.map. No build rerun/output mutation. r2 selects the one explicit compiled_js_sibling."
+    }
+  ],
+  "what_closed": "Only deterministic local transform for the corresponding12 formerly-null source paths into12 fixed-store published JS files. Each original source archive/lock and actual output remains available.",
+  "what_not_closed": [
+    "Official maps sourcesContent remain null; no map rewritten",
+    "No complete npm tarball/package identity audit",
+    "No signed source provenance or uniqueness proof",
+    "No package declarations/all maps equivalence claim",
+    "No native/resources/signature/revocation/clean-host gate",
+    "SDK distribution and eight top-level gates remain unchanged",
+    "No bundle/B0/model/production/OSV/new target run"
+  ],
+  "not_performed": [
+    "install lifecycle",
+    "global install",
+    "source/script/lock editing",
+    "JS postprocessing",
+    "build retries",
+    "store writes",
+    "commit",
+    "push",
+    "PR",
+    "publish",
+    "deploy"
+  ]
+}

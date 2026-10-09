@@ -1,0 +1,166 @@
+{
+  "schema": "shinemage-html-candidate-headed-evidence/v1",
+  "status": "CURRENT_PACKAGE_HEADED_OBSERVATION_RECORDED",
+  "release_ready": false,
+  "head": "8aabaaeb8d0e22a351088e1daefc164a5c0a2d09",
+  "branch": "",
+  "candidate_digest": "993daf31daa79137c22ce8d16c84b61892117386a9b7b8c5119fa0be62abefb0",
+  "package_source_sha": "bd647352d02402c679b04172855e40ec8f2d96a5",
+  "archive_sha256": "b75d90e98167fea507e8ab3304beda98c6706d7130eb8eb4e6359209ad0fff1b",
+  "archive_bytes": 438511,
+  "archive_unchanged_after_run": true,
+  "author_rebuilt": false,
+  "author_files": 581,
+  "source_files": 576,
+  "source_mismatch": 0,
+  "lib_mismatch": 0,
+  "loaded_package_members_match_input": 8,
+  "loaded_package_scripts": [],
+  "worktree_source_scripts": ["build", "test", "test:built", "test:html-edit"],
+  "host_loaded": "extracted b75 tarball",
+  "product_source_modified": false,
+  "candidate_regeneration_required": false,
+  "journal_modified": false,
+  "formal_receipt_created": false,
+  "input": {
+    "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-inputs-20261008/input.json",
+    "sha256": "6edbb79b5faff4eeb2c3ea2f9fa165fc2cc02d1e89025fc0d63eb2cd7541bf42",
+    "bytes": 66657
+  },
+  "runner": {
+    "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/scripts/dsh-b0/html-host-browser-ui.probe.mjs",
+    "sha256": "de75f75c222b72199b577298bf2bd28ebef79a082fcf680a144a464e54937d38",
+    "bytes": 45145,
+    "entry": "--run-isolated-host",
+    "headless_fallback": false
+  },
+  "interpreters": {
+    "node": "24.19.0",
+    "node_path": "/Users/hutou/homebrew/opt/node@24/bin/node",
+    "python": "3.14.4",
+    "python_path": "/Users/hutou/homebrew/opt/python@3.14/bin/python3.14"
+  },
+  "upstream": {
+    "sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+    "dirty_tracked": 0
+  },
+  "port": {
+    "selected": 4328,
+    "guard": "assertFree allows 4325-4329 and 14327",
+    "before": {
+      "4325": "FREE",
+      "4326": "FREE",
+      "4327": "FREE",
+      "4328": "FREE",
+      "4329": "FREE",
+      "14327": "FREE"
+    },
+    "after": {
+      "4325": "FREE",
+      "4326": "FREE",
+      "4327": "FREE",
+      "4328": "FREE",
+      "4329": "FREE",
+      "14327": "FREE"
+    },
+    "http_fixture": "ephemeral port 0"
+  },
+  "command": {
+    "argv": [
+      "/Users/hutou/homebrew/opt/node@24/bin/node",
+      "scripts/dsh-b0/html-host-browser-ui.probe.mjs",
+      "--input",
+      "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-inputs-20261008/input.json",
+      "--output",
+      "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-headed-b75-20261008",
+      "--python",
+      "/Users/hutou/homebrew/opt/python@3.14/bin/python3.14",
+      "--playwright",
+      "/Users/hutou/.gstack/repos/gstack/node_modules/playwright/index.mjs",
+      "--port",
+      "4328",
+      "--run-isolated-host"
+    ],
+    "cwd": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics",
+    "started": "2026-10-08T10:04:43Z",
+    "ended": "2026-10-08T10:04:55Z",
+    "exit_code": 0
+  },
+  "observation": {
+    "schema": "html-ui-headed-browser-observation/v1",
+    "headed": "RUN",
+    "headless": false,
+    "browser": "154.0.8037.98",
+    "channel": "chrome",
+    "profile": "playwright-temporary",
+    "personal_profile": "NOT_READ",
+    "window_bounds": "Browser.getWindowForTarget: No web contents in the target",
+    "pass": 25,
+    "fail": 0,
+    "errors": [],
+    "contains_real_data": false,
+    "real_model": "NOT_RUN",
+    "cleanup_ok": true,
+    "owned_pids": [8580, 8588],
+    "all_owned_gone": true
+  },
+  "emulated_rows_not_device_pass": {
+    "zoom-200-edit-action-operable": {
+      "status": "PASS",
+      "method": "cdp-Emulation.setDeviceMetricsOverride",
+      "browser_zoom_ui": "NOT_RUN"
+    },
+    "forced-colors-emulated-edit-text-remains": {
+      "status": "PASS",
+      "method": "chrome-emulated-forced-colors",
+      "windows_high_contrast": "NOT_RUN"
+    },
+    "viewport-cancel-save-history-visible-and-44px": {
+      "status": "PASS",
+      "method": "playwright-setViewportSize",
+      "device": "NOT_RUN"
+    }
+  },
+  "still_not_run": [
+    "native View menu",
+    "human 200% tab focus",
+    "screen reader",
+    "real touch",
+    "mobile device",
+    "windows high contrast",
+    "accessibility scanner",
+    "standalone COCKPIT_EXAMPLE_PACKAGE",
+    "probe external review",
+    "formal WSL2 source/terminal/browser",
+    "real model",
+    "real business",
+    "formal receipt",
+    "journal"
+  ],
+  "cua_retried": false,
+  "probe_external_review_retried": false,
+  "raw": {
+    "directory": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-headed-b75-20261008",
+    "results": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-headed-b75-20261008/results.json",
+      "sha256": "94a55fc113d9efb1bbe7b689a40998c8aa77133d0f32dafddef59f8247529d89",
+      "bytes": 10190
+    },
+    "execution_inputs": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-headed-b75-20261008/execution-inputs.json",
+      "sha256": "d4533dbcf6f908b00d02ce44ef9ed743218f6a87fc7b641a9bf586b9b9de9e7a",
+      "bytes": 1568
+    },
+    "package_install": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-headed-b75-20261008/package-install.json",
+      "sha256": "04072c65b6415ab358e78bad465cd5e8d2728a5f426ce548712d13f01b286399",
+      "bytes": 275
+    },
+    "screenshots": 12
+  },
+  "evidence_document": {
+    "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/docs/hackathon/evidence/shinemage-html-candidate-headed-20261008.md",
+    "sha256": "de7e39e85a58e1cccb8e4f90bac7bd8911a5e33fb5303f8e94198e212ec1720f",
+    "bytes": 4492
+  }
+}

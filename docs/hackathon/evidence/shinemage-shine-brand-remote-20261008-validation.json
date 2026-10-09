@@ -1,0 +1,411 @@
+{
+  "schema_version": "shine-brand-remote-delivery/v1",
+  "repository": {
+    "defaultBranchRef": {
+      "name": "main"
+    },
+    "isPrivate": true,
+    "nameWithOwner": "tyuanww/dsh-shine-brand",
+    "url": "https://github.com/tyuanww/dsh-shine-brand"
+  },
+  "pr": {
+    "baseRefName": "main",
+    "headRefName": "codex/shine-brand-independent",
+    "headRefOid": "2d7c17c2afa8050fc2d6b5def6af34fcaf821667",
+    "mergedAt": null,
+    "state": "OPEN",
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-08T15:37:10Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/tyuanww/dsh-shine-brand/actions/runs/37802176213/job/113396935387",
+        "name": "public-compiler",
+        "startedAt": "2026-10-08T15:36:43Z",
+        "status": "COMPLETED",
+        "workflowName": "shine-brand"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-08T15:37:05Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/tyuanww/dsh-shine-brand/actions/runs/37802167524/job/113396906486",
+        "name": "public-compiler",
+        "startedAt": "2026-10-08T15:36:39Z",
+        "status": "COMPLETED",
+        "workflowName": "shine-brand"
+      }
+    ],
+    "url": "https://github.com/tyuanww/dsh-shine-brand/pull/1"
+  },
+  "runs": [
+    {
+      "conclusion": "success",
+      "event": "push",
+      "headSha": "2d7c17c2afa8050fc2d6b5def6af34fcaf821667",
+      "jobs": [
+        {
+          "completedAt": "2026-10-08T15:37:05Z",
+          "conclusion": "success",
+          "databaseId": 113396906486,
+          "name": "public-compiler",
+          "startedAt": "2026-10-08T15:36:39Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-08T15:36:42Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-08T15:36:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-08T15:36:43Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 2,
+              "startedAt": "2026-10-08T15:36:42Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-08T15:36:54Z",
+              "conclusion": "success",
+              "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+              "number": 3,
+              "startedAt": "2026-10-08T15:36:43Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-08T15:36:56Z",
+              "conclusion": "success",
+              "name": "verify fixed runtime and install locked public build tools",
+              "number": 4,
+              "startedAt": "2026-10-08T15:36:54Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-08T15:36:56Z",
+              "conclusion": "success",
+              "name": "build this plugin without an upstream checkout or SDK",
+              "number": 5,
+              "startedAt": "2026-10-08T15:36:56Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-08T15:36:58Z",
+              "conclusion": "success",
+              "name": "input, boundary and brand behavior tests",
+              "number": 6,
+              "startedAt": "2026-10-08T15:36:56Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-08T15:36:59Z",
+              "conclusion": "success",
+              "name": "content pack with the locked pnpm entry",
+              "number": 7,
+              "startedAt": "2026-10-08T15:36:58Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-08T15:36:59Z",
+              "conclusion": "success",
+              "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+              "number": 13,
+              "startedAt": "2026-10-08T15:36:59Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-08T15:36:59Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 14,
+              "startedAt": "2026-10-08T15:36:59Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-08T15:36:59Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 15,
+              "startedAt": "2026-10-08T15:36:59Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/tyuanww/dsh-shine-brand/actions/runs/37802167524/job/113396906486"
+        }
+      ],
+      "status": "completed",
+      "url": "https://github.com/tyuanww/dsh-shine-brand/actions/runs/37802167524"
+    },
+    {
+      "conclusion": "success",
+      "event": "pull_request",
+      "headSha": "2d7c17c2afa8050fc2d6b5def6af34fcaf821667",
+      "jobs": [
+        {
+          "completedAt": "2026-10-08T15:37:10Z",
+          "conclusion": "success",
+          "databaseId": 113396935387,
+          "name": "public-compiler",
+          "startedAt": "2026-10-08T15:36:43Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-08T15:36:45Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-08T15:36:44Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-08T15:36:47Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 2,
+              "startedAt": "2026-10-08T15:36:45Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-08T15:36:59Z",
+              "conclusion": "success",
+              "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+              "number": 3,
+              "startedAt": "2026-10-08T15:36:47Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-08T15:37:00Z",
+              "conclusion": "success",
+              "name": "verify fixed runtime and install locked public build tools",
+              "number": 4,
+              "startedAt": "2026-10-08T15:36:59Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-08T15:37:00Z",
+              "conclusion": "success",
+              "name": "build this plugin without an upstream checkout or SDK",
+              "number": 5,
+              "startedAt": "2026-10-08T15:37:00Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-08T15:37:01Z",
+              "conclusion": "success",
+              "name": "input, boundary and brand behavior tests",
+              "number": 6,
+              "startedAt": "2026-10-08T15:37:00Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-08T15:37:02Z",
+              "conclusion": "success",
+              "name": "content pack with the locked pnpm entry",
+              "number": 7,
+              "startedAt": "2026-10-08T15:37:01Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-08T15:37:02Z",
+              "conclusion": "success",
+              "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+              "number": 13,
+              "startedAt": "2026-10-08T15:37:02Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-08T15:37:02Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "number": 14,
+              "startedAt": "2026-10-08T15:37:02Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-08T15:37:03Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 15,
+              "startedAt": "2026-10-08T15:37:02Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/tyuanww/dsh-shine-brand/actions/runs/37802176213/job/113396935387"
+        }
+      ],
+      "status": "completed",
+      "url": "https://github.com/tyuanww/dsh-shine-brand/actions/runs/37802176213"
+    }
+  ],
+  "source_clean": true,
+  "remote_clone": {
+    "head": "d695266affb438a6978414a362a6ab6f6fa19417",
+    "origin": "https://github.com/tyuanww/dsh-shine-brand.git",
+    "working_tree_clean": true,
+    "runtime_js_sha256": {
+      "index.js": "8b1f89bd6318f9a27bb0e34ae68fa3626496a7b02dedabf6bdfd2f0c2dab70f0",
+      "client.js": "03ed4e2a291e06cdbd4d16cc0ee5d7c53266849dc9f2269c043f551d00c8877e"
+    },
+    "pack": {
+      "schema_version": "shine-brand-content-pack/v1",
+      "formal_pack_plugin": "NOT_RUN",
+      "reason": "main-repo packPlugin was not invoked; content pack is not a formal candidate",
+      "release_ready": false,
+      "members": [
+        "package/README.md",
+        "package/cordis.patch.yml",
+        "package/lib/client.js",
+        "package/lib/index.js",
+        "package/package.json"
+      ],
+      "bytes": 2676,
+      "sha256": "9ccaa2ead44a0c9b8a5a3917ec7b78928a60921009d113c62c847eeed63dec7b"
+    },
+    "tests": {
+      "pass": 32,
+      "fail": 0,
+      "skip": 0
+    },
+    "network": "DENIED; install uses existing public npm cache with --offline",
+    "sdk_inputs": "DENIED",
+    "files": {
+      ".github/workflows/ci.yml": "8b23c43539216c2a1a814ed3ef4da49130b3b51a609ff84e3dbc2a602dccd1e5",
+      ".gitignore": "d216a762daf78395b9bd83dda3d45c9aef69781fc6326344bc151617e639d7d4",
+      ".npmrc": "367f6ef97f7b5737f180e3bc618b06155948292c03056aab6c84f7711d57a449",
+      "DEVELOPMENT.md": "2a39f61911f5c382e1a2572030c74e7afb5d646b35eeb4570b5894717c02e5c2",
+      "README.md": "e64002a20d065c9085cf1fa1baea4be7533fe8b367a9c413389361379e08d957",
+      "inputs/package-inputs/README.md": "f92f4331a67027c9a73a324473e8264c768edfae18e540ef90ef18eca46b79b2",
+      "npm-author/.npmrc": "97a7f1ab84ab1172007ba92d8fd581bfeeaffc3fe533490c13a56b57515c3bff",
+      "npm-author/build.mjs": "537fbf52e7cd62cc2feb3b4ca5cc63fd31edb2e66914c9ec5775a905ffa246e6",
+      "npm-author/build.test.mjs": "39191c1ea6e68f67072858fdc1c2e007ab7efa20604bbc0efbe9101e25f9a0c5",
+      "npm-author/package-lock.json": "205ba247d72f6eafed3abdc92985ef7ebc1cfb92d8fbecd293056aa2f16935c0",
+      "npm-author/package.json": "f1b31ab364329cdf0c4c3aad9515415b4a3e6aca65dde95b75e977c560abfff3",
+      "package.json": "0dc04679485fe6634ff4fbed1f1c25632f904d0f8af0b3dcd004c79ae326018a",
+      "plugin/README.md": "13732641cacfcf6f9024de47f0ffa1c30db8e9f4aac718dadc549860dfb90b6d",
+      "plugin/build-options.mjs": "d6f8b77eea10e3164ad285f7845dac63525464c63d9765b145b74787b6e5160f",
+      "plugin/build.mjs": "56a6fbbcf63212bead60efda15eac25b0dba307bd03af4bb24b435cb7159109a",
+      "plugin/contracts/content-theme.v1.json": "d59cebc56829e87c01cde7c63284be0e9bc6e43fe0ff42d6145297e3e49e8a74",
+      "plugin/cordis.patch.yml": "70dd510cf8f34ec8493bb257ad051ed4e6cabb00631640adc4fb497c44274c79",
+      "plugin/package.json": "5baa3cca089cdeb33819274723b60c5c86c109f8b994025ed9b556629822e0f8",
+      "plugin/src/brand-surface.mjs": "07e0c8c91d3a740ea4d65bc8fbb90688ab548f03fc10577130f6771a51f414fe",
+      "plugin/src/brand-surface.test.mjs": "3672f5df084c71c205fb960e015a354204a54188604d07094ad8db1f349cb622",
+      "plugin/src/client-lifecycle.test.mjs": "4e01ceb3052788d50fc45b0e292e98d8d11f4a918e0c56507e6a9b44114d244b",
+      "plugin/src/client.tsx": "f6d5c87a665a2ecd5e9bc87fce2df580814589a2ca953674ca66a7b643940dc1",
+      "plugin/src/index.ts": "a7c57969602c3294a76469548544d4c780fcc9b6cd38785a00ace5ce9e8e8b50",
+      "pnpm-lock.yaml": "3a0b5caad655452bc55b7131b998db78822a31d83953939acd89b85a4b907fb2",
+      "scripts/build-input.test.mjs": "8785053baae563204c9e29c36eb0ac0ace4ceaa7646c93b789c37ec253ad1b58",
+      "scripts/check-inputs.mjs": "d92022cae2aa8df029f24dfc477c8c5e049d032c1e8c96bcdd4174b70ec85161",
+      "scripts/pinned-pnpm.mjs": "228d58156e0fbd428a561ce76e0247f2881595ead0695254b9d533a7f68dfd9b",
+      "scripts/pinned-pnpm.test.mjs": "9289f418ec9ff0f9b60289aff14fa220f8f010fcbdab4b2f7826c16e2d42e3b2",
+      "scripts/verify-pack.mjs": "dcd37894761e3e16e6500721496f6048101f9f2d6a18d920745c585d39b12a7e",
+      "vendor/KIT-SHA256": "837a7c4156b82a5076124a3d138e01086701428c66948065a6232fad78518ca4",
+      "vendor/README.md": "c5d108bf192457065e5f37b1ae294a05654e3b49143d036f2a8fa225d9c48e67",
+      "vendor/dsh-plugin-kit-0.1.0.tgz": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901"
+    }
+  },
+  "ci_tests": {
+    "pass": 32,
+    "fail": 0,
+    "skip": 0,
+    "note": "per run; repeat runs are not summed"
+  },
+  "macos_pack": {
+    "schema_version": "shine-brand-content-pack/v1",
+    "formal_pack_plugin": "NOT_RUN",
+    "reason": "main-repo packPlugin was not invoked; content pack is not a formal candidate",
+    "release_ready": false,
+    "members": [
+      "package/README.md",
+      "package/cordis.patch.yml",
+      "package/lib/client.js",
+      "package/lib/index.js",
+      "package/package.json"
+    ],
+    "member_digests": {
+      "package/README.md": {
+        "bytes": 922,
+        "sha256": "13732641cacfcf6f9024de47f0ffa1c30db8e9f4aac718dadc549860dfb90b6d"
+      },
+      "package/cordis.patch.yml": {
+        "bytes": 145,
+        "sha256": "70dd510cf8f34ec8493bb257ad051ed4e6cabb00631640adc4fb497c44274c79"
+      },
+      "package/lib/client.js": {
+        "bytes": 2463,
+        "sha256": "03ed4e2a291e06cdbd4d16cc0ee5d7c53266849dc9f2269c043f551d00c8877e"
+      },
+      "package/lib/index.js": {
+        "bytes": 119,
+        "sha256": "8b1f89bd6318f9a27bb0e34ae68fa3626496a7b02dedabf6bdfd2f0c2dab70f0"
+      },
+      "package/package.json": {
+        "bytes": 1013,
+        "sha256": "a836d946c98259039cfbb2ba7efbcc1e61abc62740d4cdf438d033a81934322c"
+      }
+    },
+    "manifest_changes": {
+      "packageManager": {
+        "source": "pnpm@11.28.2",
+        "packed": null
+      }
+    },
+    "bytes": 2676,
+    "sha256": "9ccaa2ead44a0c9b8a5a3917ec7b78928a60921009d113c62c847eeed63dec7b"
+  },
+  "linux_pack": {
+    "schema_version": "shine-brand-content-pack/v1",
+    "formal_pack_plugin": "NOT_RUN",
+    "reason": "main-repo packPlugin was not invoked; content pack is not a formal candidate",
+    "release_ready": false,
+    "members": [
+      "package/README.md",
+      "package/cordis.patch.yml",
+      "package/lib/client.js",
+      "package/lib/index.js",
+      "package/package.json"
+    ],
+    "member_digests": {
+      "package/README.md": {
+        "bytes": 922,
+        "sha256": "13732641cacfcf6f9024de47f0ffa1c30db8e9f4aac718dadc549860dfb90b6d"
+      },
+      "package/cordis.patch.yml": {
+        "bytes": 145,
+        "sha256": "70dd510cf8f34ec8493bb257ad051ed4e6cabb00631640adc4fb497c44274c79"
+      },
+      "package/lib/client.js": {
+        "bytes": 2463,
+        "sha256": "03ed4e2a291e06cdbd4d16cc0ee5d7c53266849dc9f2269c043f551d00c8877e"
+      },
+      "package/lib/index.js": {
+        "bytes": 119,
+        "sha256": "8b1f89bd6318f9a27bb0e34ae68fa3626496a7b02dedabf6bdfd2f0c2dab70f0"
+      },
+      "package/package.json": {
+        "bytes": 1013,
+        "sha256": "a836d946c98259039cfbb2ba7efbcc1e61abc62740d4cdf438d033a81934322c"
+      }
+    },
+    "manifest_changes": {
+      "packageManager": {
+        "source": "pnpm@11.28.2",
+        "packed": null
+      }
+    },
+    "bytes": 2742,
+    "sha256": "513b1c1867ac11bc4a45060cb75ef373e343f1069aadb98420e5e5fd718e152d"
+  },
+  "all_5_member_bytes_equal": true,
+  "archive_bytes_equal": false,
+  "archive_difference": "archive/compression layer; exact header or compressor difference not isolated",
+  "merge": "NOT_RUN",
+  "release": "NOT_RUN",
+  "deploy": "NOT_RUN",
+  "formal_candidate": "NOT_RUN",
+  "strict_sdk_typecheck": "NOT_RUN",
+  "sdk_distribution": "BLOCKED",
+  "release_ready": false
+}

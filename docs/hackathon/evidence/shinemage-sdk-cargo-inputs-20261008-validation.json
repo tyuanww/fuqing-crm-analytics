@@ -1,0 +1,147 @@
+{
+  "schema": "shinemage-sdk-cargo-inputs-evidence/v1",
+  "worktree": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics",
+  "head": "8aabaaeb8d0e22a351088e1daefc164a5c0a2d09",
+  "scope": "documentation-only consolidation of completed C evidence; no checks rerun",
+  "source_recipe_commit": "57e7b9b76ac3a5ef67461093071b2264335a1a01",
+  "status": "CARGO_INPUTS_AND_PRIVATE_CACHE_READY",
+  "release_ready": false,
+  "sdk_distribution": "BLOCKED",
+  "embed_inline_bytes": "PARTIAL",
+  "top_level_gates_changed_to_pass": false,
+  "results_from_existing_evidence": {
+    "cargo_version_exit": 0,
+    "source_metadata_offline_readonly_exit": 0,
+    "prewarm_r2_exit": 0,
+    "prewarm_seconds": 47.4,
+    "fresh_fixture_network_denied_offline_exit": 0,
+    "offline_seconds": 2.62,
+    "offline_downloaded": 0,
+    "original_source_and_both_fixture_locks_identical": true
+  },
+  "counts_from_original_materialized_integrity": {
+    "registry": 774,
+    "git": 1,
+    "checked_files": 39201
+  },
+  "registry_checksum_scope": 774,
+  "git_checksum_scope": "One fixed commit; package_checksum=null, not a registry archive digest",
+  "cargo_lock_sha256": "dba6b09b5493311ba314259cb690fee97b72adcf5fb08eb700eeae5535ddd9d1",
+  "no_rust_compilation": true,
+  "synthetic_fixture_is_recipe_acceptance": false,
+  "alias_exact_source_bytes": true,
+  "raw_references": [
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/sdk-cargo-inputs-20261008/handoff.md",
+      "sha256": "82f163e0ba97c5d5f34867d78ad1825ea0468112e09e07d6475ab417cb0f74a7",
+      "bytes": 3748
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/sdk-cargo-inputs-20261008/summary.json",
+      "sha256": "32e27d88f03650ef6a79c14b90c37637d9b3949a5aa0f9df06fe751d60eaff62",
+      "bytes": 9123
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/sdk-cargo-inputs-20261008/materialized-integrity.json",
+      "sha256": "0ea0c27af896d7dac6acb55a55884005726f6f728636e822ad5d46fbcc9df91d",
+      "bytes": 429158
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/sdk-cargo-inputs-20261008/cargo-static-version.json",
+      "sha256": "eb910ed0c9458dad06cdad1ceb70550b98bb2d69920c8ef50d0958037e727440",
+      "bytes": 1474
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/sdk-cargo-inputs-20261008/logs/source-metadata-r1.json",
+      "sha256": "f2b14de8fe96c0252e88326cd12cd73af74cfb0746f7564f802067718c46afd9",
+      "bytes": 910
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/sdk-cargo-inputs-20261008/logs/prewarm-r1-result.json",
+      "sha256": "e54adb08ec05634cfcdf6fd8b34d494856fd8305aaa56026bec3d3cc267638d6",
+      "bytes": 3230
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/sdk-cargo-inputs-20261008/logs/prewarm-r1.log",
+      "sha256": "71067f916357e3e0cc1a8790e568505c34dc325caa2ffcb1d0a99d61b7a84c70",
+      "bytes": 211
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/sdk-cargo-inputs-20261008/logs/prewarm-r2-command.json",
+      "sha256": "e4f5dd842a8b1c0e58c9a952aa8434f2990ad57c43112782f58112c8c2a0ca6a",
+      "bytes": 3101
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/sdk-cargo-inputs-20261008/logs/prewarm-r2-result.json",
+      "sha256": "eb2fe1a8938ed87f055debe8ceaf0f3ac73b6a10bbd51161141fdd36a8f1e432",
+      "bytes": 3236
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/sdk-cargo-inputs-20261008/logs/prewarm-r2.log",
+      "sha256": "bef5caf7a6ed436ecd44cbfd50ccbfdc99bac3647d5f1a977d09bfaca30e085e",
+      "bytes": 4368
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/sdk-cargo-inputs-20261008/logs/offline-r1-command.json",
+      "sha256": "e3858875e2f725e64367ee45a26672a2179ea049d77e92bd9684303f2423ac5c",
+      "bytes": 3156
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/sdk-cargo-inputs-20261008/logs/offline-r1-result.json",
+      "sha256": "1e7f385c5775fe0e5df9e839c412aa18a491d6abf519c86445ca315260df5b84",
+      "bytes": 3291
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/sdk-cargo-inputs-20261008/logs/offline-r1.log",
+      "sha256": "0d206ec674c7aa3fb18859d5ae6038ae92dbf86e55b7df5e4744ce3cb4f64187",
+      "bytes": 346
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/sdk-cargo-inputs-20261008/run-phase.py",
+      "sha256": "e2a28d60336cb9f7912434bcf623bcd2c82fa9d8c8f79b37f54c4b6398e331e4",
+      "bytes": 1369
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/sdk-cargo-inputs-20261008/verify-offline.sb",
+      "sha256": "7a01e62ab451207d72301d5e505b49ccb5e1b036fbbc0ced2f01fee2d4f84509",
+      "bytes": 873
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/sdk-recipe-hook-review-20261008/review-r2.json",
+      "sha256": "07144e24ee1221af80c1ffa6f753c1f6c3d2b8c144b55205c01dd8fa85a9e93a",
+      "bytes": 14796
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/sdk-recipe-hook-review-20261008/review-r2.md",
+      "sha256": "f8a97715b0da792b79bc2f25737249153c54eb5b2ae20eba8f017bd41f0f26cf",
+      "bytes": 4691
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/sdk-recipe-hook-review-20261008/alias-routing.json",
+      "sha256": "19c4760319390e35470351b180bf570f60ab6bc7dadba86acff1e3976d614c6e",
+      "bytes": 2103
+    }
+  ],
+  "evidence_document": {
+    "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/docs/hackathon/evidence/shinemage-sdk-cargo-inputs-20261008.md",
+    "sha256": "5369f2423577e738a791ae01907f16788c1239efa54f1fd5a50c2f7cd0616148",
+    "bytes": 5177
+  },
+  "not_run_this_consolidation": [
+    "tests",
+    "metadata",
+    "native commands",
+    "cache warmup",
+    "build",
+    "audit rerun",
+    "shared store writes",
+    "product/source edits",
+    "commit/push/PR/merge/release/deploy"
+  ],
+  "open_items": [
+    "official recipe bundle output equality",
+    "SDK distribution and eight top-level gates",
+    "native trust/signature/revocation",
+    "real model/business/production acceptance"
+  ]
+}

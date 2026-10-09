@@ -1,0 +1,132 @@
+{
+  "schema": "shinemage-html-headed-independent-review-summary/v1",
+  "status": "RAW_OBSERVATION_CONSISTENT_WITH_PROVENANCE_LIMITATIONS",
+  "scope": "read-only original evidence and file identity review, not new browser execution",
+  "release_ready": false,
+  "findings": [],
+  "evidence_limitations": [
+    {
+      "id": "TOP_LEVEL_EXIT_NOT_IN_RAW",
+      "scope": "Grok handoff metadata and user declaration report top-level exit 0; no original process stdout/exit receipt is present in the raw directory. Child host/http exit 0 is independently in results.json; do not conflate with parent process exit."
+    },
+    {
+      "id": "EXTRA_PORT_SCAN_NOT_IN_RAW",
+      "scope": "Raw cleanup supports owned port 4328 free and owned processes gone at original cleanup. Additional before/after 4325-4329/14327 scans are handoff declarations only; not independently archived. No current port scan was performed."
+    }
+  ],
+  "head": "8aabaaeb8d0e22a351088e1daefc164a5c0a2d09",
+  "candidate_digest": "993daf31daa79137c22ce8d16c84b61892117386a9b7b8c5119fa0be62abefb0",
+  "archive": {
+    "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/candidate/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+    "bytes": 438511,
+    "sha256": "b75d90e98167fea507e8ab3304beda98c6706d7130eb8eb4e6359209ad0fff1b"
+  },
+  "raw_results": {
+    "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-headed-b75-20261008/results.json",
+    "bytes": 10190,
+    "sha256": "94a55fc113d9efb1bbe7b689a40998c8aa77133d0f32dafddef59f8247529d89"
+  },
+  "observation": {
+    "pass": 25,
+    "fail": 0,
+    "row_ids": [
+      "immutable-plugin-safe-receive-and-peer-link",
+      "headed-chrome-launch",
+      "headed-open-saved-html",
+      "keyboard-enter-edit-and-nested-selection",
+      "edit-mode-blocks-button-link-and-form",
+      "inline-preview-cancel-keeps-saved-version",
+      "explicit-save-then-version-readback",
+      "viewport-cancel-save-history-visible-and-44px",
+      "rollback-preview-cancel-keeps-v2",
+      "rollback-confirm-readback-v3",
+      "focus-ring-contrast-on-edit-action",
+      "escape-inside-preview-exits-edit",
+      "escape-on-parent-exits-edit",
+      "sidebar-close-restores-focus",
+      "tab-order-reaches-editor-close",
+      "keyboard-768-reaches-editor-actions",
+      "mobile-pressed-state-not-color-only",
+      "page-switch-never-leaks-source-draft",
+      "bound-html-js-and-data-source-rejected-in-ui",
+      "bound-rejection-is-live-region",
+      "bound-css-preview-cancel-keeps-version",
+      "bound-css-confirm-keeps-html-js",
+      "zoom-200-edit-action-operable",
+      "forced-colors-emulated-edit-text-remains",
+      "no-unhandled-browser-errors"
+    ],
+    "headless": false,
+    "new_run_in_this_review": false
+  },
+  "source_files": 576,
+  "package_members": 8,
+  "screenshots": 12,
+  "assertions": 335,
+  "assertions_are_not_product_tests": true,
+  "review_execution": {
+    "command": [
+      "/Users/hutou/homebrew/opt/python@3.14/bin/python3.14",
+      "-I",
+      "-B",
+      ".context/checks/html-candidate-headed-review-20261008/review.py"
+    ],
+    "cwd": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics",
+    "exit_code": 0,
+    "tool_output_chunk_id": "b9e7ba",
+    "scope": "this read-only review process; not Grok probe process"
+  },
+  "keyboard_scope": "automated: initial locator.focus(), then Shift+Tab/Tab and computed focus-visible style at 1280x900, not native 200% or a human physical keyboard",
+  "raw_refs": [
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-headed-review-20261008/review.py",
+      "bytes": 10553,
+      "sha256": "492e65f53a2e694d8d97236b659836f25f513aa55710296b7b31b263652bcb3a"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-headed-review-20261008/review.json",
+      "bytes": 157851,
+      "sha256": "b0ca6c471dbc4be7d6cbd0883c94037c573dec0b367e5a87cc7fa14fe4da9cd6"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-headed-review-20261008/archive-manifest.json",
+      "bytes": 8712,
+      "sha256": "5ed7763bbb5118680d1c0e81bfc64d3ff1eec2d45e731c959ddd2cc57d227b2f"
+    }
+  ],
+  "archive_file_count": 29,
+  "archive_bytes": 1650125,
+  "evidence_document": {
+    "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/docs/hackathon/evidence/shinemage-html-candidate-headed-review-20261008.md",
+    "bytes": 5458,
+    "sha256": "dfffd90dc612de47bc42b023914f0339a2e2bbe500490eda9b3f65939b5b08bd"
+  },
+  "actions": {
+    "browser": false,
+    "services": false,
+    "port_scan": false,
+    "tests": false,
+    "source_edit": false,
+    "historical_evidence_edit": false
+  },
+  "saved_status_observation": {
+    "classification": "PREEXISTING_STATUS_MESSAGE_AMBIGUITY_NOT_COVERED_BY_25_ROWS",
+    "note": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-headed-review-20261008/saved-status-note.json",
+      "bytes": 3178,
+      "sha256": "7f6fde2aaca6e8359a8576b2c13d4995b3ad2dd1ca0a7270c1fa76ddbd66b97c"
+    },
+    "old_screenshot": {
+      "path": "/Users/hutou/.codex/worktrees/grok-html-ui-acceptance/fuqing-crm-analytics/.context/checks/ocr-abc-20261008-r1/headed-after-review/03-saved-v2.png",
+      "bytes": 68948,
+      "sha256": "bc6e8dd1c425b85a8da106040cf808e0f6534e466786bcd8d2fe679a576cc09c"
+    },
+    "new_screenshot": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-headed-b75-20261008/03-saved-v2.png",
+      "bytes": 68944,
+      "sha256": "0f2c0ed70f00e61f53bcd086890c36d0773d3f4e3dea3a2578454bd59564a1f7"
+    },
+    "screenshots_byte_equal": false,
+    "product_change": false
+  }
+}

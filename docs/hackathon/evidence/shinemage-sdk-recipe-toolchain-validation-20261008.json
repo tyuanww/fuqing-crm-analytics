@@ -1,0 +1,299 @@
+{
+  "schema": "shinemage-sdk-recipe-toolchain/v1",
+  "scope": "isolated recipe reproduction tooling only; no default environment, SDK or DSH replacement",
+  "status": "TOOLCHAIN_READY",
+  "release_ready": false,
+  "source_recipe_commit": "57e7b9b76ac3a5ef67461093071b2264335a1a01",
+  "entries": {
+    "root_node": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/tools/node-26.10.0/bin/node",
+    "bundle_node": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/tools/node-24.6.0/bin/node",
+    "pnpm": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/tools/pnpm-12.7.0-native/pnpm"
+  },
+  "archives_directory": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/downloads",
+  "versions": [
+    {
+      "command": [
+        "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/tools/node-26.10.0/bin/node",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "v26.10.0\n"
+    },
+    {
+      "command": [
+        "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/tools/node-24.6.0/bin/node",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "v24.6.0\n"
+    },
+    {
+      "command": [
+        "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/tools/pnpm-12.7.0-native/pnpm",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "12.7.0\n"
+    }
+  ],
+  "requests": {
+    "total": 11,
+    "success": 8,
+    "failures_preserved": [
+      {
+        "url": "https://nodejs.org/dist/v24.6.0/SHASUMS256.txt",
+        "exit_code": 28,
+        "stderr": "curl: (28) SSL connection timeout\n"
+      },
+      {
+        "url": "https://registry.npmjs.org/pnpm/12.7.0",
+        "exit_code": 28,
+        "stderr": "curl: (28) SSL connection timeout\n"
+      },
+      {
+        "url": "https://registry.npmjs.org/@pnpm%2Fexe.darwin-arm64/12.7.0",
+        "exit_code": 28,
+        "stderr": "curl: (28) SSL connection timeout\n"
+      }
+    ]
+  },
+  "integrity": {
+    "node": "Official HTTPS SHASUMS256 exact filename and SHA256 equality",
+    "pnpm_wrapper_and_native": "Exact npm version metadata dist.integrity SHA512 and dist.shasum SHA1 equality",
+    "signature_or_revocation_verification": "NOT_RUN"
+  },
+  "extraction": {
+    "node26": {
+      "regular_files": 4743,
+      "contained_symlinks": 2
+    },
+    "node24": {
+      "regular_files": 5034,
+      "contained_symlinks": 3
+    },
+    "pnpm_wrapper": {
+      "regular_files": 449,
+      "symlinks": 0
+    },
+    "pnpm_native": {
+      "regular_files": 4,
+      "symlinks": 0
+    },
+    "checks": [
+      "relative contained paths",
+      "no traversal",
+      "no duplicate member paths",
+      "no special or hardlink members",
+      "contained symlink targets",
+      "new destination only"
+    ]
+  },
+  "scripts": {
+    "wrapper": {
+      "preinstall": "node install.js",
+      "postinstall": "node install.js",
+      "bundle-node-gyp": "node scripts/bundle-node-gyp.mjs"
+    },
+    "native": {},
+    "lifecycle_executed": false,
+    "wrapper_bootstrap_executed": false
+  },
+  "operations_not_run": [
+    "dependency install",
+    "source build",
+    "recipe byte comparison",
+    "native trust gate",
+    "OSV query",
+    "attestation verification",
+    "SDK distribution",
+    "candidate or journal mutation"
+  ],
+  "private_files_after_versions": [],
+  "raw_evidence": [
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/archive-verification.json",
+      "sha256": "156ef05a17435a19d11d2c90116f303caaecd16e7155fa231e7915805884d2ce",
+      "bytes": 1912
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/fetch.py",
+      "sha256": "f89ea40f1443f041180f462ccf867fbc38824d77ac29cc40d212e08a5eab604c",
+      "bytes": 1550
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/node-24.6.0-manifest.json",
+      "sha256": "a1daf11be828f041b30bd98c595cf8dc8bf59e1e70e60c2c0ec7fb77e03fe389",
+      "bytes": 1244174
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/node-26.10.0-manifest.json",
+      "sha256": "a3cca360dc0749fcc3255735eee7f88a2945791a21bcb4ebd69b6326ae99e915",
+      "bytes": 1167889
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/pnpm-12.7.0-native-manifest.json",
+      "sha256": "d82a1160e80c85f14793527eb38446948c8e7c130da102f266a4e0f811beb59a",
+      "bytes": 1280
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/pnpm-12.7.0-wrapper-manifest.json",
+      "sha256": "a350053478df5229a9ae9ebc469334073daa04674e08743a81473bc7be02088e",
+      "bytes": 102256
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/requests-r2.json",
+      "sha256": "78032d421f487ff1f2196ff1501c6aa84725d97f4647a6bf56b05a5d6f287148",
+      "bytes": 292
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/requests-r3.json",
+      "sha256": "a1b094f8ea4d416171a87aa205f8eb6140e2acdf4dbd9badf605778e1d499a24",
+      "bytes": 240
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/requests-r4.json",
+      "sha256": "b02792e35b864ca7a0c100380755d8bceb809fc8889f6049239c9fae54a61b8a",
+      "bytes": 118
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/requests-r5.json",
+      "sha256": "f8014770cffff5c45b1da93cbac1f27fe36630e2ec19c0ceb4ac1ca805cd739c",
+      "bytes": 121
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/requests-r6.json",
+      "sha256": "e09211769e87facb174a68f59b307c2dc311ec411d28609c8861b591503c0b54",
+      "bytes": 153
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/seal.py",
+      "sha256": "b27c756ad0ff88d0a112f9f7eb02b0f78f73ed3665c8453c7fd25b4075e81c22",
+      "bytes": 2816
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/verify-extract.py",
+      "sha256": "20b68de5b906503a93687b71ceebb85e60d759fe6955d4c608d9b1e7b706f292",
+      "bytes": 3017
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/verify-native.py",
+      "sha256": "6d0f11453ca0e1ec8d8cd9e898c749e6b2d4b03bbabe67696e5e78c2a8388d72",
+      "bytes": 2499
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/version-check.py",
+      "sha256": "a8b269cc6fa3d60970e4a045cbb443222c37694d7b439ada8b73c100e562516f",
+      "bytes": 974
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/downloads/node-24.6.0-SHASUMS256-r2.txt",
+      "sha256": "03a16e3c48e24c9f6f98d2284f21b9585db77d31cde4766c065b86c3089ab475",
+      "bytes": 2943
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/downloads/node-26.10.0-SHASUMS256.txt",
+      "sha256": "60588158620d74dd4b130f7ad972ad535571c476cdc4b17fcfd9c4155d3ed2e3",
+      "bytes": 3171
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/downloads/node-v24.6.0-darwin-arm64.tar.gz",
+      "sha256": "768f14952403e3025fed8e2887500dfa63eeb55628a9b203e4b8ebb0fb09c7eb",
+      "bytes": 51024329
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/downloads/node-v26.10.0-darwin-arm64.tar.gz",
+      "sha256": "751fdf7439f115d87ee2a8f3f18c065b6151852068e3e666ac60ac2996f75ac9",
+      "bytes": 58175384
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/downloads/pnpm-12.7.0.metadata-r2.json",
+      "sha256": "320d50cadc29763f7ae1cf49e578c952f0ea46b17eea1f89b0554a9faa5f1524",
+      "bytes": 2441
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/downloads/pnpm-12.7.0.tgz",
+      "sha256": "1a7fe4b36abead79ee13e2f2c2089ddd37fee016179b9fe56a85a44ef72aaf7f",
+      "bytes": 1010447
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/downloads/pnpm-exe-darwin-arm64-12.7.0.metadata-r2.json",
+      "sha256": "e95b26cc99a2657efc435fca146724311a4fb303a5c9497bf8192d171dd62994",
+      "bytes": 1421
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/downloads/pnpm-exe-darwin-arm64-12.7.0.tgz",
+      "sha256": "971c089cc6c57f2f5df0611b431401dd96dfa707de28ec7554d5eec552701b74",
+      "bytes": 22348324
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/logs/node-24.6.0-SHASUMS256-r2.txt.request.json",
+      "sha256": "3b367e105124e0fdd0cc49140f3db2e9df779f7393c15a7ccb2fc292ab54759e",
+      "bytes": 25964
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/logs/node-24.6.0-SHASUMS256.txt.request.json",
+      "sha256": "ce17a52888c2b2d9f00502ec199c40ba6e39286800ea013c1d0611da904b5b24",
+      "bytes": 2904
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/logs/node-24.6.0-version.json",
+      "sha256": "0de04bb4bd4b802c0f94bf6a6e4cacfca81ecbf87adb8b54f5544d49f27d7dc2",
+      "bytes": 1772
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/logs/node-26.10.0-SHASUMS256.txt.request.json",
+      "sha256": "eead4a9e54942c718ebe1c6004a89918606835c7168ad38b2b7b37d23499871f",
+      "bytes": 25962
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/logs/node-26.10.0-version.json",
+      "sha256": "a88021dc7fabfd43bf91c613b4a02ec6c5ea26296d4a04a2a97889e5be39cd77",
+      "bytes": 1774
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/logs/node-v24.6.0-darwin-arm64.tar.gz.request.json",
+      "sha256": "ac1de3a66dffad15e91bfdfc3a66ccad6e9a5cf175d318c0c442594ee4d949b3",
+      "bytes": 26085
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/logs/node-v26.10.0-darwin-arm64.tar.gz.request.json",
+      "sha256": "beff141e01cdc0b95bef728b4a792ad70a34572741f429ce8437b42c62603ec5",
+      "bytes": 26099
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/logs/pnpm-12.7.0-version.json",
+      "sha256": "276f563e7329b2802b4352b45d5dc4376501278f8ce4a4a514d6e3dba34eee7c",
+      "bytes": 2159
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/logs/pnpm-12.7.0.metadata-r2.json.request.json",
+      "sha256": "348e9a567610a627b650d52e937e5ca544b9f374df5a4468c7bbc933859e8b10",
+      "bytes": 10802
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/logs/pnpm-12.7.0.metadata.json.request.json",
+      "sha256": "450c14caaa487e072c591b94c0d479f451714d671d480c941f390ec32c47292d",
+      "bytes": 2850
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/logs/pnpm-12.7.0.tgz.request.json",
+      "sha256": "0082e8e6a86257d30806d9e6c3671adc8f58591d0eb94bc500d7d8c7c214e178",
+      "bytes": 10848
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/logs/pnpm-exe-darwin-arm64-12.7.0.metadata-r2.json.request.json",
+      "sha256": "f5f0fbe764491a292f124f26bea75446c9918d580c0604d6bfe4b11f1743c224",
+      "bytes": 10972
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/logs/pnpm-exe-darwin-arm64-12.7.0.metadata.json.request.json",
+      "sha256": "d62c2642e2e79895a9a3c21715f80e1de87c97b7e71b273a9d3fa976d6d5421c",
+      "bytes": 3021
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-toolchain-20261008/logs/pnpm-exe-darwin-arm64-12.7.0.tgz.request.json",
+      "sha256": "9c03007db1e0b12a93d09fbd1777582b0f5c9ca3a93e4d181057653efa818150",
+      "bytes": 11082
+    }
+  ]
+}

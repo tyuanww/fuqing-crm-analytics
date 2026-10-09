@@ -1,0 +1,749 @@
+{
+  "schema_version": "shinemage-plugin-independence-integration/v1",
+  "head": "f8db3949a7323c1e058c4d57f6287d4dbf54451d",
+  "checkout": "detached",
+  "baseline_dirty_count": 71,
+  "current_dirty_count": 88,
+  "porcelain_sha256": "b3b5e6802e09da60206fe3d7ef3d40eca70eea617fb566e4edb6e31ad274e2f7",
+  "baseline_porcelain_sha256": "7b3db47b385ac71ef13f8f6bf08b9a1c3d95cdb064e0d34666023600ebc42dba",
+  "inherited_unedited_files": {
+    "README.md": true,
+    "docs/README.md": true,
+    "docs/hackathon/evidence/grok-sdk-trust-integration-20261008.md": true,
+    "docs/plans/shinemage-plugin-platform-split.md": true,
+    "docs/hackathon/evidence/shinemage-admission-closeout-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-admission-closeout-validation-20261008.json": true,
+    "docs/hackathon/evidence/shinemage-candidate-admission-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-candidate-admission-validation-20261008.json": true,
+    "docs/hackathon/evidence/shinemage-candidate-target-preflight-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-candidate-target-preflight-validation-20261008.json": true,
+    "docs/hackathon/evidence/shinemage-closeout-progress-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-closeout-progress-validation-20261008.json": true,
+    "docs/hackathon/evidence/shinemage-current-browser-target-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-current-browser-target-20261008.validation.json": true,
+    "docs/hackathon/evidence/shinemage-current-candidate-wsl-20261008-validation.json": true,
+    "docs/hackathon/evidence/shinemage-current-candidate-wsl-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-grok-handoff-transform-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-grok-handoff-transform-validation-20261008.json": true,
+    "docs/hackathon/evidence/shinemage-html-candidate-gap-20261008-validation.json": true,
+    "docs/hackathon/evidence/shinemage-html-candidate-gap-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-html-candidate-headed-20261008-validation.json": true,
+    "docs/hackathon/evidence/shinemage-html-candidate-headed-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-html-candidate-headed-review-20261008-validation.json": true,
+    "docs/hackathon/evidence/shinemage-html-candidate-headed-review-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-html-candidate-inputs-20261008-validation.json": true,
+    "docs/hackathon/evidence/shinemage-html-candidate-inputs-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-html-fix-candidate-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-html-fix-candidate-validation-20261008.json": true,
+    "docs/hackathon/evidence/shinemage-html-line-closeout-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-html-native-route-20261008.json": true,
+    "docs/hackathon/evidence/shinemage-html-native-route-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-html-remaining-20261008.json": true,
+    "docs/hackathon/evidence/shinemage-html-remaining-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-html-save-status-fix-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-html-save-status-fix-validation-20261008.json": true,
+    "docs/hackathon/evidence/shinemage-input-unblock-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-input-unblock-validation-20261008.json": true,
+    "docs/hackathon/evidence/shinemage-sdk-cargo-inputs-20261008-validation.json": true,
+    "docs/hackathon/evidence/shinemage-sdk-cargo-inputs-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-sdk-embedded-gap-closeout-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-sdk-embedded-gap-closeout-validation-20261008.json": true,
+    "docs/hackathon/evidence/shinemage-sdk-evidence-followup-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-sdk-evidence-followup-validation-20261008.json": true,
+    "docs/hackathon/evidence/shinemage-sdk-null-source-binding-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-sdk-null-source-binding-validation-20261008.json": true,
+    "docs/hackathon/evidence/shinemage-sdk-recipe-inputs-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-sdk-recipe-inputs-validation-20261008.json": true,
+    "docs/hackathon/evidence/shinemage-sdk-recipe-reproduction-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-sdk-recipe-reproduction-validation-20261008.json": true,
+    "docs/hackathon/evidence/shinemage-sdk-recipe-toolchain-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-sdk-recipe-toolchain-validation-20261008.json": true,
+    "docs/hackathon/evidence/shinemage-sdk-runtime-prewarm-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-sdk-runtime-prewarm-validation-20261008.json": true,
+    "docs/hackathon/evidence/shinemage-sdk-table-transform-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-sdk-table-transform-validation-20261008.json": true,
+    "docs/hackathon/evidence/shinemage-sdk-three-package-transform-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-sdk-three-package-transform-validation-20261008.json": true,
+    "docs/hackathon/evidence/shinemage-stop-go-closeout-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-stop-go-closeout-validation-20261008.json": true,
+    "docs/hackathon/evidence/shinemage-target-address-check-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-target-address-check-validation-20261008.json": true,
+    "docs/hackathon/evidence/shinemage-target-ssh-auth-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-target-ssh-auth-validation-20261008.json": true,
+    "docs/hackathon/evidence/shinemage-target-ssh-diagnosis-20261008.md": true,
+    "docs/hackathon/evidence/shinemage-target-ssh-diagnosis-validation-20261008.json": true
+  },
+  "current_docs_changed": [
+    "STATUS.md",
+    "docs/hackathon/TODOS.md",
+    "docs/architecture/shinemage-plugin-platform.md",
+    "docs/operating/verification.md",
+    "docs/operating/dsh-plugin-author-quickstart.md",
+    "docs/operating/crm-plugin-service-boundary.md"
+  ],
+  "source_changes": [
+    {
+      "path": "dsh-plugins/crm-knowledge/build.mjs",
+      "sha256": "efad744736faf54c7fd4888f5e33b623cc200dd541885c898406bd9221625e06",
+      "bytes": 3275,
+      "before_sha256": "f429be94053e0b9c45bd79ae28e874971ba1a8f0d66377a3878b8cae899a5054",
+      "integrated_source_sha256": "efad744736faf54c7fd4888f5e33b623cc200dd541885c898406bd9221625e06"
+    },
+    {
+      "path": "dsh-plugins/crm-knowledge/src/index.ts",
+      "sha256": "b916d6df9e92800afffc064645fc3585731ce16a1d7eebdf01b28442da1632e6",
+      "bytes": 12456,
+      "before_sha256": "75654022def04026608796704fcddfa76678eab923eccd1b527c5a23f995e51f",
+      "integrated_source_sha256": "b916d6df9e92800afffc064645fc3585731ce16a1d7eebdf01b28442da1632e6"
+    },
+    {
+      "path": "dsh-plugins/crm-knowledge/test/package.test.mjs",
+      "sha256": "3721bfd0dffde24696d2ae5fe03851169455e08d02a00f082258f6a1436b9bcb",
+      "bytes": 11626,
+      "before_sha256": "cefa4d730170497d9d7f331d63b42fb3c905d67ff4f6215c511a6e3acb6a2e97",
+      "integrated_source_sha256": "4ae49d276d2d58b8cc6e95dcc2850a44db6ec5b533730f1b10d18cd458918aa2"
+    },
+    {
+      "path": "dsh-plugins/crm-knowledge/test/service-http.integration.mjs",
+      "sha256": "36b75d774700cc8e8de75e2d6b6c4a5da05b01a6a9a2db21883be7bb3edc771b",
+      "bytes": 1145,
+      "before_sha256": "3ec7700e8f1a76da5623ec056b7a386b42dc9276b21521a566e9e78d9d2ea5da",
+      "integrated_source_sha256": "36b75d774700cc8e8de75e2d6b6c4a5da05b01a6a9a2db21883be7bb3edc771b"
+    },
+    {
+      "path": "dsh-plugins/crm-knowledge/test/tools.test.mjs",
+      "sha256": "6256dee86d840aae5dc26d6ed0b078636c98324e6d91231d4d5cfde395056010",
+      "bytes": 3005,
+      "before_sha256": "722242e33ed0f9083611a1c43eade95eca72c81956a650eccb52011cc5fe86ed",
+      "integrated_source_sha256": "6256dee86d840aae5dc26d6ed0b078636c98324e6d91231d4d5cfde395056010"
+    },
+    {
+      "path": "dsh-plugins/knowledge/build.mjs",
+      "sha256": "cdf8f28073707730f544dbded94b74c8ed4aa7b92321e6fc850c85dd1448101a",
+      "bytes": 1866,
+      "before_sha256": "25ba9d28c69681fc93d7b6cb07958e31bc22ea1bc9a90541e68d15ac2addab83",
+      "integrated_source_sha256": "cdf8f28073707730f544dbded94b74c8ed4aa7b92321e6fc850c85dd1448101a"
+    },
+    {
+      "path": "dsh-plugins/knowledge/test/graph.test.mjs",
+      "sha256": "2206b1846c0fe2d0a54104b28d76b0ff8174b76160c6e6942102781c88d4c50d",
+      "bytes": 17267,
+      "before_sha256": "2da48b14953ba5e1ca9e7ecd9269cb160c8019f023b34e1c421acca368ea2471",
+      "integrated_source_sha256": "2206b1846c0fe2d0a54104b28d76b0ff8174b76160c6e6942102781c88d4c50d"
+    },
+    {
+      "path": "dsh-plugins/knowledge/test/package.test.mjs",
+      "sha256": "d15d7768c129ffd86c5c223bd0fb35efbd623b5955101d06c88dad5009d57586",
+      "bytes": 6416,
+      "before_sha256": "42b4752f8c686165d30de7af3cc81c49471fd64b06f4ea3211ae11d56a8ba242",
+      "integrated_source_sha256": "28d171ff26632fd6dbacd275a8761b9aea8d1c66eeff644e34b0a8a0958b198e"
+    },
+    {
+      "path": "dsh-plugins/shine-board/build.mjs",
+      "sha256": "200cb906066e0138d713f671cf65b72186f52dba5b7c0c0a9153cb9319e6aea4",
+      "bytes": 1792,
+      "before_sha256": "9c7af9918162675d6f711c7b74d22fcd63ac10f94a29931c20d038ae146eb030",
+      "integrated_source_sha256": "200cb906066e0138d713f671cf65b72186f52dba5b7c0c0a9153cb9319e6aea4"
+    },
+    {
+      "path": "dsh-plugins/shine-board/src/client-lifecycle.test.mjs",
+      "sha256": "823a4867d180225e3ffe0325f48d8981e5cb2692d23453448f31636a26d692b3",
+      "bytes": 1730,
+      "before_sha256": "4ee24878391519df6264d2700b98a56d9c13d4c0ef83c21d6970a69abea70843",
+      "integrated_source_sha256": "823a4867d180225e3ffe0325f48d8981e5cb2692d23453448f31636a26d692b3"
+    },
+    {
+      "path": "dsh-plugins/crm-knowledge/test/knowledge-http.mjs",
+      "sha256": "193b23defbfb22b7f90b3727ed81784122ca999827217c47b6d98ce3f4eab457",
+      "bytes": 2179,
+      "before_sha256": null,
+      "integrated_source_sha256": "5c23c8dd833eee157f4369c7e820eab92836bdc23b051e6accc678d570845e45"
+    },
+    {
+      "path": "dsh-plugins/crm-knowledge/test/knowledge-http.test.mjs",
+      "sha256": "ec124bc9c0d14d3ac7ebd6c282458d9d046e393bfc7caaa812459008bc228ae2",
+      "bytes": 3632,
+      "before_sha256": null,
+      "integrated_source_sha256": null
+    },
+    {
+      "path": "scripts/crm-calibration/graph-ledger.test.mjs",
+      "sha256": "04123302dbea28f894fb5646424e595446830ece25157b17700e2366cfb3fcae",
+      "bytes": 2264,
+      "before_sha256": null,
+      "integrated_source_sha256": null
+    },
+    {
+      "path": "scripts/dsh-b0/pipeline.mjs",
+      "sha256": "eff8fb83f6549e4f3e3a19e12365deb8650743112941da1f12e4d5f743a82d3b",
+      "bytes": 26359,
+      "before_sha256": "d9bdec6d99e92b222191ea6b08c2f8471eec1655fbb835f0f0737460648c8fe2",
+      "integrated_source_sha256": null
+    },
+    {
+      "path": "scripts/dsh-b0/plugin-isolation.test.mjs",
+      "sha256": "859d0878409a8a9e404317ab5eff4895ce2a8d52abbeee6b6ae811e24e95f031",
+      "bytes": 6023,
+      "before_sha256": "379094d98be81d6170c249b81c16c17af7845e6c1c73c25ed31f7fa0ad4d7273",
+      "integrated_source_sha256": null
+    }
+  ],
+  "b_independent_repository": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand",
+    "commit": "NONE",
+    "remote": "NONE",
+    "clone": "NOT_RUN",
+    "remote_ci": "NOT_RUN",
+    "guard_changes": [
+      {
+        "relative": "plugin/build.mjs",
+        "before": {
+          "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/plugin-independence-integration-20261008/review-b/before/plugin/build.mjs",
+          "bytes": 2142,
+          "sha256": "7f8370080407eb67447a14c2a4df3cb53f7386f2cc6fcb415d7005d6133e065f"
+        },
+        "after": {
+          "path": "/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand/plugin/build.mjs",
+          "bytes": 2047,
+          "sha256": "9b639edf4ed356f903421697d4d23b5a05f4073c50e1b8045f872acf5bbf544b"
+        }
+      },
+      {
+        "relative": "scripts/build-input.test.mjs",
+        "before": {
+          "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/plugin-independence-integration-20261008/review-b/before/scripts/build-input.test.mjs",
+          "bytes": 1302,
+          "sha256": "0c61db744dd98f853359bdfd3a9c05c82444e6c951eb7ed94df21570e8f01c80"
+        },
+        "after": {
+          "path": "/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand/scripts/build-input.test.mjs",
+          "bytes": 2788,
+          "sha256": "8785053baae563204c9e29c36eb0ac0ace4ceaa7646c93b789c37ec253ad1b58"
+        }
+      }
+    ],
+    "stages": {
+      "guard-before": {
+        "exit": 1,
+        "counts": {
+          "tests": 11,
+          "pass": 7,
+          "fail": 4,
+          "skipped": 0
+        }
+      },
+      "guard-after": {
+        "exit": 0,
+        "counts": {
+          "tests": 11,
+          "pass": 11,
+          "fail": 0,
+          "skipped": 0
+        }
+      },
+      "build-after": {
+        "exit": 0,
+        "counts": {}
+      },
+      "behavior-after": {
+        "exit": 0,
+        "counts": {
+          "tests": 7,
+          "pass": 7,
+          "fail": 0,
+          "skipped": 0
+        }
+      },
+      "pack-after": {
+        "exit": 0,
+        "counts": {}
+      }
+    },
+    "pack": {
+      "schema_version": "shine-brand-content-pack/v1",
+      "formal_pack_plugin": "NOT_RUN",
+      "reason": "local git has no commit; main-repo packPlugin was not invoked",
+      "release_ready": false,
+      "members": [
+        "package/README.md",
+        "package/cordis.patch.yml",
+        "package/lib/client.js",
+        "package/lib/index.js",
+        "package/package.json"
+      ],
+      "bytes": 2559,
+      "sha256": "e9e053442beca4a33d406b8fb428f778eebe19d99f3d5c85843c647a0a016757"
+    },
+    "npm_only_build": "NOT_VERIFIED",
+    "fixed_upstream_checkout_still_visible": true
+  },
+  "a_official_npm": {
+    "installed_tar_lock_versions_and_served_client": "VERIFIED_FILES",
+    "runtime_exit_http_status_cleanup": "OPERATOR_REPORTED_NOT_INDEPENDENTLY_REVERIFIED",
+    "kit_delta": false,
+    "full_plugin_compatibility": "NOT_RUN"
+  },
+  "c_source_tree_unchanged": {
+    "dsh-plugins/crm-knowledge/build.mjs": true,
+    "dsh-plugins/crm-knowledge/src/index.ts": true,
+    "dsh-plugins/crm-knowledge/test/package.test.mjs": true,
+    "dsh-plugins/crm-knowledge/test/service-http.integration.mjs": true,
+    "dsh-plugins/crm-knowledge/test/tools.test.mjs": true,
+    "dsh-plugins/knowledge/build.mjs": true,
+    "dsh-plugins/knowledge/test/graph.test.mjs": true,
+    "dsh-plugins/knowledge/test/package.test.mjs": true,
+    "dsh-plugins/shine-board/build.mjs": true,
+    "dsh-plugins/shine-board/src/client-lifecycle.test.mjs": true,
+    "dsh-plugins/crm-knowledge/test/knowledge-http.mjs": true
+  },
+  "c_runs": [
+    {
+      "record": ".context/checks/plugin-independence-integration-20261008/review-c/integration/logs/build-board.json",
+      "sha256": "2257a79e7d79c3d68ebb476348eec91bc2fd589db53aedff21db6b53f8bf6a89",
+      "command": [
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "dsh-plugins/shine-board/build.mjs"
+      ],
+      "exit_code": 0,
+      "counts": {}
+    },
+    {
+      "record": ".context/checks/plugin-independence-integration-20261008/review-c/integration/logs/build-crm.json",
+      "sha256": "c787d50a471216b69be21689e9a796413e1f3c2471e5c6b38fd4fd76de724ae4",
+      "command": [
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "dsh-plugins/crm-knowledge/build.mjs"
+      ],
+      "exit_code": 0,
+      "counts": {}
+    },
+    {
+      "record": ".context/checks/plugin-independence-integration-20261008/review-c/integration/logs/build-knowledge.json",
+      "sha256": "46fa847d4dbed1880aec3762e617bed4324c55d87f150bf9d2aa7f46a2ad2273",
+      "command": [
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "dsh-plugins/knowledge/build.mjs"
+      ],
+      "exit_code": 0,
+      "counts": {}
+    },
+    {
+      "record": ".context/checks/plugin-independence-integration-20261008/review-c/integration/logs/helper-before.json",
+      "sha256": "2bcb0f7fae512975c119595625934c993dd20b06ed73693f6b693d6fff001cfe",
+      "command": [
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--test",
+        "--test-name-pattern=response bytes",
+        "dsh-plugins/crm-knowledge/test/knowledge-http.test.mjs"
+      ],
+      "exit_code": 1,
+      "counts": {
+        "tests": 2,
+        "pass": 0,
+        "fail": 2,
+        "cancelled": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "record": ".context/checks/plugin-independence-integration-20261008/review-c/integration/logs/helper-owner.json",
+      "sha256": "740279b6688d3416360334da64a4bce5ae9f1ecabf00e0044ad7598c8d81acb5",
+      "command": [
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--test",
+        "--test-concurrency=1",
+        "dsh-plugins/crm-knowledge/test/knowledge-http.test.mjs",
+        "scripts/crm-calibration/graph-ledger.test.mjs"
+      ],
+      "exit_code": 0,
+      "counts": {
+        "tests": 9,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "record": ".context/checks/plugin-independence-integration-20261008/review-c/integration/logs/isolated-after.json",
+      "sha256": "e6b0320ea8f5e8cc647b127d35b1a50284e2343299cc3c76492eeeae04902270",
+      "command": [
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--test",
+        "--test-concurrency=1",
+        "scripts/dsh-b0/plugin-isolation.test.mjs"
+      ],
+      "exit_code": 0,
+      "counts": {
+        "tests": 4,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "record": ".context/checks/plugin-independence-integration-20261008/review-c/integration/logs/isolated-before-r2.json",
+      "sha256": "b9cf8445f617301d68c4877b301ed4d9af2e6a0c216c5557817d206ff4b1d898",
+      "command": [
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--test",
+        "--test-concurrency=1",
+        "--test-name-pattern=^(crm-knowledge|knowledge) builds, tests and packs",
+        "scripts/dsh-b0/plugin-isolation.test.mjs"
+      ],
+      "exit_code": 0,
+      "counts": {
+        "tests": 2,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "record": ".context/checks/plugin-independence-integration-20261008/review-c/integration/logs/isolated-before-r3.json",
+      "sha256": "c4a5d0bc4f5dd4b3b56895d6c23ab367bbb50d4f4fb3227092b2bfdf61ae7c59",
+      "command": [
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--test",
+        "--test-concurrency=1",
+        "scripts/dsh-b0/plugin-isolation.test.mjs"
+      ],
+      "exit_code": 0,
+      "counts": {
+        "tests": 4,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "record": ".context/checks/plugin-independence-integration-20261008/review-c/integration/logs/isolated-before-r4.json",
+      "sha256": "97c9da7e1843a21f315bb3545fb68d6a616e05bd3569e691b4e03e2e56261df3",
+      "command": [
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--test",
+        "--test-concurrency=1",
+        "scripts/dsh-b0/plugin-isolation.test.mjs"
+      ],
+      "exit_code": 1,
+      "counts": {
+        "tests": 4,
+        "pass": 2,
+        "fail": 2,
+        "cancelled": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "record": ".context/checks/plugin-independence-integration-20261008/review-c/integration/logs/isolated-before.json",
+      "sha256": "ce6d99d79b91544f486c35d98ec73e46f00dd34a97af58798c65bc110cee535e",
+      "command": [
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--test",
+        "--test-concurrency=1",
+        "--test-name-pattern=^(crm-knowledge|knowledge) builds, tests and packs",
+        "scripts/dsh-b0/plugin-isolation.test.mjs"
+      ],
+      "exit_code": 1,
+      "counts": {
+        "tests": 2,
+        "pass": 0,
+        "fail": 2,
+        "cancelled": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "record": ".context/checks/plugin-independence-integration-20261008/review-c/integration/logs/nested-diagnostic.json",
+      "sha256": "25df124ebc5b00515af2c0b03b89ff2d8984d2c44372b3021e4f13b8f5c653f6",
+      "command": [
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--test",
+        ".context/checks/plugin-independence-integration-20261008/review-c/integration/nested-probe.test.mjs"
+      ],
+      "exit_code": 0,
+      "counts": {
+        "tests": 1,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "record": ".context/checks/plugin-independence-integration-20261008/review-c/integration/logs/package-after.json",
+      "sha256": "efb2c376d6ccb8936746bcb65d4484afe78328b887de7297a45db58124d1e0d0",
+      "command": [
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--test",
+        "--test-concurrency=1",
+        "dsh-plugins/crm-knowledge/test/package.test.mjs",
+        "dsh-plugins/knowledge/test/package.test.mjs"
+      ],
+      "exit_code": 0,
+      "counts": {
+        "tests": 13,
+        "pass": 13,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "record": ".context/checks/plugin-independence-integration-20261008/review-c/integration/logs/pnpm-version.json",
+      "sha256": "ced2c98ecbdd97fcddcdcb2527664f6d3c71bcea38de5b36d2f3e401f0cb5b7b",
+      "command": [
+        "pnpm",
+        "--version"
+      ],
+      "exit_code": 0,
+      "counts": {}
+    },
+    {
+      "record": ".context/checks/plugin-independence-integration-20261008/review-c/integration/logs/targeted-behavior.json",
+      "sha256": "342f15c7664896ba3136a0a797dc0930f6159c6c0c6916da878f5c6f991cf2f0",
+      "command": [
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--test",
+        "--test-concurrency=1",
+        "dsh-plugins/knowledge/test/graph.test.mjs",
+        "dsh-plugins/knowledge/test/service-client.test.mjs",
+        "dsh-plugins/shine-board/src/client-lifecycle.test.mjs",
+        "dsh-plugins/crm-knowledge/test/tools.test.mjs",
+        "dsh-plugins/crm-knowledge/test/service-http.integration.mjs",
+        "dsh-plugins/crm-knowledge/test/knowledge-composition.integration.mjs",
+        "dsh-plugins/crm-knowledge/test/page-composition.integration.mjs",
+        "dsh-plugins/crm-knowledge/test/profile.test.mjs",
+        "dsh-plugins/crm-knowledge/test/service-client.test.mjs"
+      ],
+      "exit_code": 0,
+      "counts": {
+        "tests": 57,
+        "pass": 57,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      }
+    }
+  ],
+  "candidate_protection": {
+    ".context/checks/html-fix-candidate-20261008/candidate/candidate.json": {
+      "sha256": "393990343372b9258680e551c247795296d522d076b436c3ec270fd532ecfd25",
+      "equal_before": true
+    },
+    ".context/checks/html-fix-candidate-20261008/candidate/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz": {
+      "sha256": "a0d5dd08c5e97237fc38033f929eec33627ac42efa594a5ca5c87a0ee311d6b2",
+      "equal_before": true
+    },
+    ".context/checks/html-fix-candidate-20261008/plugin-state.json": {
+      "sha256": "f6d9848baf1da0a857819bbcf3367f18a9db67db9e0337e1198b8fce4b98e348",
+      "equal_before": true
+    }
+  },
+  "checks": [
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--check",
+        "scripts/dsh-b0/pipeline.mjs"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--check",
+        "scripts/dsh-b0/plugin-isolation.test.mjs"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "evidence_indices": [
+    {
+      "path": ".context/checks/plugin-independence-integration-20261008/review-a/summary.json",
+      "sha256": "2221324e97b90a22648d5adb18bc6e91a4f716e05d5095c9ce2a060b363274b2"
+    },
+    {
+      "path": ".context/checks/plugin-independence-integration-20261008/review-a/safe-manifest.json",
+      "sha256": "2d02c3044be45fce61734be2c8ef7985daf546783d4e194a5d49c894300161a3"
+    },
+    {
+      "path": ".context/checks/plugin-independence-integration-20261008/review-b/summary.json",
+      "sha256": "6cb46debd5eb54d995b7dc60b292aaeb9139771deff93e40133897f87e7330a6"
+    },
+    {
+      "path": ".context/checks/plugin-independence-integration-20261008/review-b/fix-summary.json",
+      "sha256": "6981176ca74614427cea32ff574678ca03e57af13d18556234102d0f01ad34ce"
+    },
+    {
+      "path": ".context/checks/plugin-independence-integration-20261008/review-b/fix.patch",
+      "sha256": "33cec18e49e54569956799df5f72e375189e31f24d3904c62ff048995ddbb6a0"
+    },
+    {
+      "path": ".context/checks/plugin-independence-integration-20261008/review-b/fix-archive-manifest.json",
+      "sha256": "06e4cb3471f38ea9dfeccd74b0731eb076e8174240eadcef097619b63cdc4908"
+    },
+    {
+      "path": ".context/checks/plugin-independence-integration-20261008/review-c/summary.json",
+      "sha256": "7fd74c8a62ad64f9e2100efbe32932e4ca46aafb453dda3c298b92c8a520c297"
+    },
+    {
+      "path": ".context/checks/plugin-independence-integration-20261008/review-c/integration/final-source-manifest.json",
+      "sha256": "8fab3d31aa9ccfbd62f2b089365e43b23982927fc817d8a5ec0b4591c73eed8f"
+    },
+    {
+      "path": ".context/checks/plugin-independence-integration-20261008/review-c/integration/final-tracked.diff",
+      "sha256": "b62f15dfbd5651b90edd888b9cb42f518b4aaaa667049e70c6d89cb5884926b6"
+    },
+    {
+      "path": ".context/checks/plugin-independence-integration-20261008/review-c/integration/original-c-log-archive.json",
+      "sha256": "c70879d20466f13b4f8e291296509accb458ef25b35e3e581839c8e9972898d8"
+    },
+    {
+      "path": ".context/checks/plugin-independence-integration-20261008/archive-ab-manifest.json",
+      "sha256": "e06c68680f9d3366d2eead04d7e208236e7a98166b895e2f4369c3ecb6dc8bc9"
+    },
+    {
+      "path": ".context/checks/plugin-independence-integration-20261008/review-c/integration/result.json",
+      "sha256": "86679dfae491af24f920ef14a6a32ad1b70a9335b522bd06bd1cfc48d491b981"
+    },
+    {
+      "path": ".context/checks/plugin-independence-integration-20261008/review-c/integration/handoff.md",
+      "sha256": "7203528ab4e9b2743dfcaa97d2abe5de4e4e527af8286aeadf900efef8a7d095"
+    },
+    {
+      "path": ".context/checks/plugin-independence-integration-20261008/review-c/integration/integration-final.patch",
+      "sha256": "afd600d7865229360b1506207dea400547395e3418542a6551494e19fb9065cd"
+    }
+  ],
+  "findings_resolved": [
+    "B-R1 mandatory absolute build-tools",
+    "C1 separate source and installed roots",
+    "C2 restore ledger writer coverage in owner",
+    "C3 bounded test HTTP caller",
+    "C4 clear inherited NODE_TEST_CONTEXT and assert inner test counts"
+  ],
+  "open_findings": [
+    {
+      "id": "A-R1",
+      "scope": "original npm runtime execution receipt",
+      "status": "MISSING_SAFE_INDEPENDENT_RECEIPT"
+    },
+    {
+      "id": "B-R2",
+      "scope": "future remote CI",
+      "status": "PNPM_COMMAND_NOT_BOUND_AND_RUNNER_INPUTS_MISSING"
+    }
+  ],
+  "new_product_commit": false,
+  "remote_actions": false,
+  "version_changed": false,
+  "full_b0": "NOT_RUN_THIS_TURN",
+  "sdk_distribution": "BLOCKED",
+  "product_status": "PARTIAL",
+  "release_ready": false,
+  "count_policy": "Report each scope separately; nested source/installed and repeated tests overlap; never sum A/B/C into overall PASS.",
+  "c_final_protection": {
+    "source_tree_11_files_unchanged": [
+      {
+        "path": "dsh-plugins/crm-knowledge/build.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "dsh-plugins/crm-knowledge/src/index.ts",
+        "unchanged": true
+      },
+      {
+        "path": "dsh-plugins/crm-knowledge/test/package.test.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "dsh-plugins/crm-knowledge/test/service-http.integration.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "dsh-plugins/crm-knowledge/test/tools.test.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "dsh-plugins/knowledge/build.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "dsh-plugins/knowledge/test/graph.test.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "dsh-plugins/knowledge/test/package.test.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "dsh-plugins/shine-board/build.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "dsh-plugins/shine-board/src/client-lifecycle.test.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "dsh-plugins/crm-knowledge/test/knowledge-http.mjs",
+        "unchanged": true
+      }
+    ],
+    "candidate_files_unchanged": [
+      {
+        "path": ".context/checks/html-fix-candidate-20261008/candidate/candidate.json",
+        "sha256": "393990343372b9258680e551c247795296d522d076b436c3ec270fd532ecfd25",
+        "bytes": 47946,
+        "unchanged": true
+      },
+      {
+        "path": ".context/checks/html-fix-candidate-20261008/candidate/plugin-pack.json",
+        "sha256": "79f37a04a61671a54fcc1132630895bbf24094ebe9f42ed228ff8e7b7719b5fc",
+        "bytes": 718,
+        "unchanged": true
+      },
+      {
+        "path": ".context/checks/html-fix-candidate-20261008/candidate/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+        "sha256": "a0d5dd08c5e97237fc38033f929eec33627ac42efa594a5ca5c87a0ee311d6b2",
+        "bytes": 438480,
+        "unchanged": true
+      },
+      {
+        "path": ".context/checks/html-fix-candidate-20261008/candidate/profile.json",
+        "sha256": "be3948850fc414ce1524226a544783de1ecb3253514cc7f1d8f3280280b3d0af",
+        "bytes": 980,
+        "unchanged": true
+      }
+    ],
+    "owned_processes_after": []
+  },
+  "version": "0.20.0.0",
+  "new_local_links_checked": 7,
+  "document_sha256": {
+    "STATUS.md": "43cca02d6f370cc3b972526959be2c79ca11cd5cbfe52eb4206ee8881032d314",
+    "docs/hackathon/TODOS.md": "f533efd9193a3bcdccbe675478f645475ca817e2013aec66d1e6c161fc4537a6",
+    "docs/architecture/shinemage-plugin-platform.md": "6be1738fa51f53fac59a42db151bfb46fc7fa1d5b06fc6bb78668de836ecb090",
+    "docs/operating/verification.md": "12614c542d2aeb5e4f1f6176eded51b27dd307ccc18717e8f90ea22cc39168f6",
+    "docs/operating/dsh-plugin-author-quickstart.md": "892f8d6773cb887d6a9c03bd5deebd2c846f7f7b9ec0dba89a09a8173531117e",
+    "docs/operating/crm-plugin-service-boundary.md": "08fa2109f9a2087ac2421d1a341c4776b28fa7dee48acb9430bdac96671b3f8a",
+    "docs/hackathon/evidence/shinemage-plugin-independence-integration-20261008.md": "203853650cbef71b737756a0a3f39298233d9b60498cfee79bc9cb462fb0b7de"
+  }
+}

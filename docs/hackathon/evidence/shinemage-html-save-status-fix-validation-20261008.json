@@ -1,0 +1,47 @@
+{
+  "schema": "html-save-status-local-fix/v1",
+  "head": "8aabaaeb8d0e22a351088e1daefc164a5c0a2d09",
+  "uncommitted_source_fix": true,
+  "files": {
+    "dsh-plugins/analytics-workbench/src/client/cockpit-workspace.tsx": "fb4ba39c2f253b3016391be0b67e02dd8ac4626eab41ab3871bbfa135446bb8b",
+    "dsh-plugins/analytics-workbench/src/client/free-html-library/store.mjs": "d7051b6170310ba8be56b7ec47d7f2aab1dfef8d3825c6647a955bd8e35ab5bb",
+    "dsh-plugins/analytics-workbench/src/client/free-html-library/store.test.mjs": "a78ce84f6f872e135c9173c381d8376b14128f64843ffded08c62c1736056d88",
+    "dsh-plugins/analytics-workbench/src/client/library-workspace.test.mjs": "5fc777a89f0517975d3c9239b8abc81676694267631358e2d13e8b9dd88a9aab"
+  },
+  "node": "24.19.0",
+  "before": {
+    "pass": 0,
+    "fail": 3,
+    "skip": 0,
+    "exit": 1,
+    "log": "before-tests.log"
+  },
+  "after": {
+    "pass": 103,
+    "fail": 0,
+    "skip": 0,
+    "exit": 0,
+    "log": "after-tests.log"
+  },
+  "scope": "compiled React/JSDOM and state/leave/save-failure tests; no new browser, B0, package or CI run",
+  "review": {
+    "findings": 0,
+    "sha256": "8d555712f4729d074b12f7881b9c30c2b118dc43b19375f16ff2039d81dcf8f7"
+  },
+  "candidate_files_unchanged": {
+    "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/candidate/candidate.json": "e57173990a0a7b2c836492159b87e36d17c97a9afe78284d1daf9eaadc131fe6",
+    "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/candidate/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz": "b75d90e98167fea507e8ab3304beda98c6706d7130eb8eb4e6359209ad0fff1b",
+    "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/plugin-state.json": "018bf8a055af8e2315c7071d54aa73bc9ab604c2cb8c2288d1ff2cd2b947ef6c"
+  },
+  "starting_evidence_preserved": true,
+  "release_ready": false,
+  "commit": false,
+  "target_first_address": "100.114.157.0 is macOS Self; remote acceptance NOT_RUN",
+  "target_second_address": "100.93.46.46 online Linux peer; hutou SSH publickey authentication denied, no remote commands",
+  "archive": {
+    "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/archives/html-save-status-fix-20261008/evidence.tar.gz",
+    "sha256": "628bd09213eb5d3c8b789fdefbff5312283e5c7544927102254297bd48f076ba",
+    "files": 20,
+    "all_members_verified": true
+  }
+}

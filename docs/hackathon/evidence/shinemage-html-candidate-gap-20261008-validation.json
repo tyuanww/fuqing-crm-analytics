@@ -1,0 +1,795 @@
+{
+  "schema": "shinemage-html-candidate-gap-evidence/v1",
+  "scope": "limited read-only exact archive/source/evidence comparison, no browser/host/test",
+  "release_ready": false,
+  "old_archive": {
+    "path": "/var/folders/tz/wswl3q3117v437rw68yd90gh0000gn/T/grok-html-ui-author-gapZ6s/workbench.tgz",
+    "sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+    "bytes": 438812
+  },
+  "current_archive": {
+    "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/candidate/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+    "sha256": "b75d90e98167fea507e8ab3304beda98c6706d7130eb8eb4e6359209ad0fff1b",
+    "bytes": 438511
+  },
+  "members": [
+    {
+      "path": "package/lib/client.js",
+      "old": {
+        "sha256": "584e98f41290e25677009b6811e59fe15f9606fbf71c2b193d4a7923ebc4dc72",
+        "bytes": 1176500,
+        "mode": "0o644"
+      },
+      "current": {
+        "sha256": "584e98f41290e25677009b6811e59fe15f9606fbf71c2b193d4a7923ebc4dc72",
+        "bytes": 1176500,
+        "mode": "0o644"
+      },
+      "same_bytes": true,
+      "same_mode": true
+    },
+    {
+      "path": "package/lib/index.js",
+      "old": {
+        "sha256": "f1b97a4457ad65d868c83eb6209ae4c14a9598415caf4376a5c6151ef962fd58",
+        "bytes": 143276,
+        "mode": "0o644"
+      },
+      "current": {
+        "sha256": "f1b97a4457ad65d868c83eb6209ae4c14a9598415caf4376a5c6151ef962fd58",
+        "bytes": 143276,
+        "mode": "0o644"
+      },
+      "same_bytes": true,
+      "same_mode": true
+    },
+    {
+      "path": "package/lib/page-tools.js",
+      "old": {
+        "sha256": "28b07f12a5aaff8096c604d9c53eef293a91be55ae82d48b069ab8c0e8fa5c70",
+        "bytes": 14160,
+        "mode": "0o644"
+      },
+      "current": {
+        "sha256": "28b07f12a5aaff8096c604d9c53eef293a91be55ae82d48b069ab8c0e8fa5c70",
+        "bytes": 14160,
+        "mode": "0o644"
+      },
+      "same_bytes": true,
+      "same_mode": true
+    },
+    {
+      "path": "package/lib/skills.js",
+      "old": {
+        "sha256": "c4b870b64626b5d8f7ed898c6cf2edd613fc7cabb39bd49490eb9b3bcf29c8b1",
+        "bytes": 107570,
+        "mode": "0o644"
+      },
+      "current": {
+        "sha256": "c4b870b64626b5d8f7ed898c6cf2edd613fc7cabb39bd49490eb9b3bcf29c8b1",
+        "bytes": 107570,
+        "mode": "0o644"
+      },
+      "same_bytes": true,
+      "same_mode": true
+    },
+    {
+      "path": "package/lib/tool.js",
+      "old": {
+        "sha256": "e854349cb5187e2b045f280f8330f19da0e7d0acbe0ff4f07e8c747f710a4924",
+        "bytes": 38843,
+        "mode": "0o644"
+      },
+      "current": {
+        "sha256": "e854349cb5187e2b045f280f8330f19da0e7d0acbe0ff4f07e8c747f710a4924",
+        "bytes": 38843,
+        "mode": "0o644"
+      },
+      "same_bytes": true,
+      "same_mode": true
+    },
+    {
+      "path": "package/bundled-dependencies.json",
+      "old": {
+        "sha256": "957ba54ce606fc735cc11c051b9d60c3703ab8bf0bc94dd00aac696b28afa06b",
+        "bytes": 306,
+        "mode": "0o644"
+      },
+      "current": {
+        "sha256": "957ba54ce606fc735cc11c051b9d60c3703ab8bf0bc94dd00aac696b28afa06b",
+        "bytes": 306,
+        "mode": "0o644"
+      },
+      "same_bytes": true,
+      "same_mode": true
+    },
+    {
+      "path": "package/package.json",
+      "old": {
+        "sha256": "a500b4154b951ec2917b57dfc5c20ffea56462aa2a695acfb09592f29093b206",
+        "bytes": 2436,
+        "mode": "0o644"
+      },
+      "current": {
+        "sha256": "33cbe7f5a527be520717b2559aeb3a213d9451da78028b02cda8b087356dc6f3",
+        "bytes": 1529,
+        "mode": "0o644"
+      },
+      "same_bytes": false,
+      "same_mode": true
+    },
+    {
+      "path": "package/cordis.patch.yml",
+      "old": {
+        "sha256": "901c01fe1237b5d1b25f60ce58252553053125519ae73fe356ff6e4365425b3f",
+        "bytes": 584,
+        "mode": "0o644"
+      },
+      "current": {
+        "sha256": "901c01fe1237b5d1b25f60ce58252553053125519ae73fe356ff6e4365425b3f",
+        "bytes": 584,
+        "mode": "0o644"
+      },
+      "same_bytes": true,
+      "same_mode": true
+    }
+  ],
+  "same_byte_members": 7,
+  "manifest_only_delta": {
+    "removed_scripts": {
+      "build": "node build.mjs",
+      "test": "node --test test/model.test.mjs test/initial-session.test.mjs test/native-evidence.test.mjs test/run-view.test.mjs && pnpm test:html-edit",
+      "test:html-edit": "node --test src/free-page/resource/package-normalize.test.mjs src/client/free-html-library/html-import.test.mjs src/client/html-selection-bridge.test.mjs src/client/free-html-library/store.test.mjs src/client/free-html-library/p12-live-adapters.test.mjs src/client/free-html-library/source-draft.test.mjs test/cockpit-ai-client.test.mjs src/free-page/edit/intent-router.test.mjs src/free-page/edit/selection-context.test.mjs test/dynamic-chart-browser-seam.test.mjs test/draft-save-regression.test.mjs test/canvas-input-regression.test.mjs test/open-native-html-artifact.test.mjs src/free-page/preview/srcdoc-builder.test.mjs",
+      "test:built": "node --test test/built.test.mjs"
+    },
+    "remaining_fields_equal": true
+  },
+  "source_inventory": {
+    "old_count": 574,
+    "current_count": 576,
+    "same_count": 558,
+    "changed_count": 16,
+    "added_count": 2,
+    "removed_count": 0,
+    "changes": [
+      {
+        "path": "src/free-page/fixture-loader.mjs",
+        "old_sha256": "fd762271cd11761e9d486d60b8ad8af4930390619e6401aceae253dd715ea39e",
+        "current_sha256": "c381e2f1b37b8aecc18e62fcc4418253068099036671599b6e2b7c3afd83dfe6",
+        "change": "CHANGED",
+        "classification": "source fixture digest registry, not a tarball runtime member"
+      },
+      {
+        "path": "test/asset-overlay.test.mjs",
+        "old_sha256": "d85646de938ff01e2b4fc97f55b50d5dcf9e2ed7af3eed43efe7ab2e63c188be",
+        "current_sha256": "d11ba5d483be56d6f9a860471b7563a9c79d3deeb7b65c295801a1bf8b8bb671",
+        "change": "CHANGED",
+        "classification": "test fixture, test adapter, or test provenance; not a tarball member"
+      },
+      {
+        "path": "test/first-purchase-query-card.test.mjs",
+        "old_sha256": "854fff259fa9d654dc2fc655c4d68182e0491fd7ab2dc56a572416e5d2c6ac5f",
+        "current_sha256": "6023ab115088ac127712a25843770439741f8354e1919e70c90ee303f750a642",
+        "change": "CHANGED",
+        "classification": "test fixture, test adapter, or test provenance; not a tarball member"
+      },
+      {
+        "path": "test/first-purchase-query-model.test.mjs",
+        "old_sha256": "df38353abd80c911f054fc64af2c48eb6416a8e4355e6cf957606ca8cead3da9",
+        "current_sha256": "c8835d68350cc620d9369283b5244297233418f019644809e602bdc693bc2db7",
+        "change": "CHANGED",
+        "classification": "test fixture, test adapter, or test provenance; not a tarball member"
+      },
+      {
+        "path": "test/first-purchase-save-dom.test.mjs",
+        "old_sha256": "f920a6a31697b0ca0d8b2be557e351768d6edd5de026afc3f7460add1314271b",
+        "current_sha256": "33d6ab5d04492aa263f532b139cec9ff5388f6630d68b0a01fafef80d4c86c3b",
+        "change": "CHANGED",
+        "classification": "test fixture, test adapter, or test provenance; not a tarball member"
+      },
+      {
+        "path": "test/first-purchase-save.fixture.mjs",
+        "old_sha256": "f187f2f9136322594dc181ceed9ea35b0e1ac31fe0c5ed103d2a228d5a996736",
+        "current_sha256": "676d26e46a9990bbf69157ea8ed3206f0d903aa8c48ec90d568b634b9e33de62",
+        "change": "CHANGED",
+        "classification": "test fixture, test adapter, or test provenance; not a tarball member"
+      },
+      {
+        "path": "test/fixtures/coordinator/README.md",
+        "old_sha256": "895e980cebfc2a44c688a98ee5e8b4ea306017ba3c28add20ae354c8b2a0129e",
+        "current_sha256": "d5fb83d24cf9e8bf1f318fa0d23cd754216d9f5fa27b9d8b4830a368826677cc",
+        "change": "CHANGED",
+        "classification": "test fixture, test adapter, or test provenance; not a tarball member"
+      },
+      {
+        "path": "test/fixtures/coordinator/analytics_first_purchase_v1_expected.json",
+        "old_sha256": null,
+        "current_sha256": "b26e4717183e0eb40d6e08f116c6ce7c8ae5c1f8a1c83aa667632e113b34ad24",
+        "change": "ADDED",
+        "classification": "test fixture, test adapter, or test provenance; not a tarball member"
+      },
+      {
+        "path": "test/fixtures/coordinator/analytics_first_purchase_v1_missing_role_expected.json",
+        "old_sha256": null,
+        "current_sha256": "26685d3c7b80aafbff4a692636c42e39158c0620171ed4be949c944261dbb0b2",
+        "change": "ADDED",
+        "classification": "test fixture, test adapter, or test provenance; not a tarball member"
+      },
+      {
+        "path": "test/fixtures/coordinator/provenance.json",
+        "old_sha256": "77734dbf28465a27dabdbce6b2e2d9322907817c95e01a9d214c3fcc4982c993",
+        "current_sha256": "7790d312e1ea91d3fc132b31f45f8563a235e6de08cfd02a212bf1a7ed25cfbe",
+        "change": "CHANGED",
+        "classification": "test fixture, test adapter, or test provenance; not a tarball member"
+      },
+      {
+        "path": "test/lane-g-delivery.test.mjs",
+        "old_sha256": "4351ba5694648816d67b0e517e531e5ad5cce15d27540e873304820a8399b24c",
+        "current_sha256": "04d975cdeb8bff727d1d2d78a5cfdede9c29aa2268a3e491d6e5c1037a0584a3",
+        "change": "CHANGED",
+        "classification": "test fixture, test adapter, or test provenance; not a tarball member"
+      },
+      {
+        "path": "test/loader.test.mjs",
+        "old_sha256": "9f6fc5e42047b66f1953e449db766c8315048f0c771d63a5085b7fe0b4c48fbb",
+        "current_sha256": "17a8c431742bdc7049d8cab26c90678b7d96d9a567596db8ea3f9b7543d7f589",
+        "change": "CHANGED",
+        "classification": "test fixture, test adapter, or test provenance; not a tarball member"
+      },
+      {
+        "path": "test/plugin-ui-lifecycle.test.mjs",
+        "old_sha256": "650e2f9cfe4406866894135002d89f7ee5b5a77ddd3d78af104f8317abeb8ca7",
+        "current_sha256": "41b41b8103be4efcba34955dead79da2e3072fb2c70d831853dd4ca8e8f460e4",
+        "change": "CHANGED",
+        "classification": "test fixture, test adapter, or test provenance; not a tarball member"
+      },
+      {
+        "path": "test/query-card-cancel.test.mjs",
+        "old_sha256": "06793d5e1def2021793d11d030401b367e6a103a1ee618f09afa17a5756b1c05",
+        "current_sha256": "e4fe35acadd34e10d1ccbce7cb6a9d06dc69386fa9c0e25c2d7271ae8ea5cce1",
+        "change": "CHANGED",
+        "classification": "test fixture, test adapter, or test provenance; not a tarball member"
+      },
+      {
+        "path": "test/query-card-save.test.mjs",
+        "old_sha256": "a4afa317d83c1578cf78d046173dfa103fd8b9a6e906fa61a9554860cf4d6eb7",
+        "current_sha256": "c4a6cae3eb14f8b27813e10e87bf954e6679c7f35c94e6f54dd33513ab79418f",
+        "change": "CHANGED",
+        "classification": "test fixture, test adapter, or test provenance; not a tarball member"
+      },
+      {
+        "path": "test/query-skills-loader.test.mjs",
+        "old_sha256": "09f52e85094cc07d5359ff038f23fcaf21c920823efe9ca0b1b48bc4dde6d4da",
+        "current_sha256": "f93305b403d1670ad7ec14561bda765596bc7a3cdb6d6adc2732301eb752131b",
+        "change": "CHANGED",
+        "classification": "test fixture, test adapter, or test provenance; not a tarball member"
+      },
+      {
+        "path": "test/skills-loader.test.mjs",
+        "old_sha256": "710be127446aefafa02b7f640aa57395d99417c1a23fb8061bd2d2a749707e8a",
+        "current_sha256": "aed538bc59be3d0bdc855a65603edc75e23e7e087a4603d3fb715e854017ade7",
+        "change": "CHANGED",
+        "classification": "test fixture, test adapter, or test provenance; not a tarball member"
+      },
+      {
+        "path": "test/tool-card-harness.mjs",
+        "old_sha256": "3150319160d281d77a10f62633f7eedbd8c32f69f1fe7cfcf46ab12aa8ead021",
+        "current_sha256": "a424a9b545310b7313caf461900ab9dab8e94df51a70d81d18a0b767c748f815",
+        "change": "CHANGED",
+        "classification": "test fixture, test adapter, or test provenance; not a tarball member"
+      }
+    ],
+    "old_author_archive_input_matches": true,
+    "old_author_mismatches": []
+  },
+  "harness_comparison": [
+    {
+      "path": "scripts/dsh-b0/html-host-browser-ui.probe.mjs",
+      "old_sha256": "de75f75c222b72199b577298bf2bd28ebef79a082fcf680a144a464e54937d38",
+      "current_sha256": "de75f75c222b72199b577298bf2bd28ebef79a082fcf680a144a464e54937d38",
+      "same_bytes": true
+    },
+    {
+      "path": "scripts/dsh-b0/html-host-browser-ui-args.mjs",
+      "old_sha256": "6a41326395226ff3086c23a4f32a283e280b11d79f92aae29c3df540871e7454",
+      "current_sha256": "6a41326395226ff3086c23a4f32a283e280b11d79f92aae29c3df540871e7454",
+      "same_bytes": true
+    },
+    {
+      "path": "scripts/dsh-b0/html-host-browser-inputs.mjs",
+      "old_sha256": "7a426fe87c70e23f8b854dcc603e7fbc76320f7e6e3460a4277126fda44fbe6b",
+      "current_sha256": "7a426fe87c70e23f8b854dcc603e7fbc76320f7e6e3460a4277126fda44fbe6b",
+      "same_bytes": true
+    },
+    {
+      "path": "scripts/dsh-b0/html-host-browser-cleanup.mjs",
+      "old_sha256": "46c4da1dc8c0def625f8209c9081eadef3b910cd13217318a966dbfd3865b1cf",
+      "current_sha256": "46c4da1dc8c0def625f8209c9081eadef3b910cd13217318a966dbfd3865b1cf",
+      "same_bytes": true
+    },
+    {
+      "path": "scripts/dsh-b0/html-host-browser-host.fixture.mjs",
+      "old_sha256": "ec92d03f26e27fab18bde3dd28a6bdc12cb3782201670a917165244bc58a788a",
+      "current_sha256": "ec92d03f26e27fab18bde3dd28a6bdc12cb3782201670a917165244bc58a788a",
+      "same_bytes": true
+    },
+    {
+      "path": "scripts/dsh-b0/html-host-browser-http.fixture.py",
+      "old_sha256": "18b1278116d8fcae3d1405fcb4f5f37f6223153eb8c552b5b79ff2fa26f2e46c",
+      "current_sha256": "18b1278116d8fcae3d1405fcb4f5f37f6223153eb8c552b5b79ff2fa26f2e46c",
+      "same_bytes": true
+    }
+  ],
+  "backend_fixture_comparison": [
+    {
+      "path": "backend/services/analytics/page_documents.py",
+      "old_sha256": "8a40c5081e95766474d1695c24e663af4fe2f30e4cf827100ac2df46869dc494",
+      "current_sha256": "8a40c5081e95766474d1695c24e663af4fe2f30e4cf827100ac2df46869dc494",
+      "same_bytes": true
+    },
+    {
+      "path": "backend/services/analytics/cockpit_ai.py",
+      "old_sha256": "94242cedc5c509e21ae122aeabfd66e391020b3582a490493fdcb45b9a237dad",
+      "current_sha256": "94242cedc5c509e21ae122aeabfd66e391020b3582a490493fdcb45b9a237dad",
+      "same_bytes": true
+    },
+    {
+      "path": "backend/services/analytics/page_documents_routes.py",
+      "old_sha256": "012f1bc1a3b1c56d133f6a8286813c2643dedfd4607d0aab0c90a71ef4b15db7",
+      "current_sha256": "012f1bc1a3b1c56d133f6a8286813c2643dedfd4607d0aab0c90a71ef4b15db7",
+      "same_bytes": true
+    },
+    {
+      "path": "backend/contracts/page_documents.py",
+      "old_sha256": "2d79c95c977c6d7d40b83366ed9174051a3253bd7e96e51185b5b464ce40bf47",
+      "current_sha256": "2d79c95c977c6d7d40b83366ed9174051a3253bd7e96e51185b5b464ce40bf47",
+      "same_bytes": true
+    }
+  ],
+  "headed_rows": [
+    {
+      "id": "immutable-plugin-safe-receive-and-peer-link",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "artifact/environment/session identity: requires current-candidate observation to claim current PASS",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    },
+    {
+      "id": "headed-chrome-launch",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "artifact/environment/session identity: requires current-candidate observation to claim current PASS",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    },
+    {
+      "id": "headed-open-saved-html",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "same runtime bytes: historical behavior reference only",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    },
+    {
+      "id": "keyboard-enter-edit-and-nested-selection",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "same runtime bytes: historical behavior reference only",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    },
+    {
+      "id": "edit-mode-blocks-button-link-and-form",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "same runtime bytes: historical behavior reference only",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    },
+    {
+      "id": "inline-preview-cancel-keeps-saved-version",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "same runtime bytes: historical behavior reference only",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    },
+    {
+      "id": "explicit-save-then-version-readback",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "same runtime bytes: historical behavior reference only",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    },
+    {
+      "id": "viewport-cancel-save-history-visible-and-44px",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "same runtime bytes: historical behavior reference only",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    },
+    {
+      "id": "rollback-preview-cancel-keeps-v2",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "same runtime bytes: historical behavior reference only",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    },
+    {
+      "id": "rollback-confirm-readback-v3",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "same runtime bytes: historical behavior reference only",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    },
+    {
+      "id": "focus-ring-contrast-on-edit-action",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "same runtime bytes: historical behavior reference only",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    },
+    {
+      "id": "escape-inside-preview-exits-edit",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "same runtime bytes: historical behavior reference only",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    },
+    {
+      "id": "escape-on-parent-exits-edit",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "same runtime bytes: historical behavior reference only",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    },
+    {
+      "id": "sidebar-close-restores-focus",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "same runtime bytes: historical behavior reference only",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    },
+    {
+      "id": "tab-order-reaches-editor-close",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "same runtime bytes: historical behavior reference only",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    },
+    {
+      "id": "keyboard-768-reaches-editor-actions",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "same runtime bytes: historical behavior reference only",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    },
+    {
+      "id": "mobile-pressed-state-not-color-only",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "same runtime bytes: historical behavior reference only",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    },
+    {
+      "id": "page-switch-never-leaks-source-draft",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "same runtime bytes: historical behavior reference only",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    },
+    {
+      "id": "bound-html-js-and-data-source-rejected-in-ui",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "same runtime bytes: historical behavior reference only",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    },
+    {
+      "id": "bound-rejection-is-live-region",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "same runtime bytes: historical behavior reference only",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    },
+    {
+      "id": "bound-css-preview-cancel-keeps-version",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "same runtime bytes: historical behavior reference only",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    },
+    {
+      "id": "bound-css-confirm-keeps-html-js",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "same runtime bytes: historical behavior reference only",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    },
+    {
+      "id": "zoom-200-edit-action-operable",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "same runtime bytes: historical behavior reference only; CDP emulation, not native browser menu zoom",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    },
+    {
+      "id": "forced-colors-emulated-edit-text-remains",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "same runtime bytes: historical behavior reference only; emulation, not Windows high contrast hardware",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    },
+    {
+      "id": "no-unhandled-browser-errors",
+      "historical_status": "PASS",
+      "historical_archive_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+      "basis": "artifact/environment/session identity: requires current-candidate observation to claim current PASS",
+      "current_candidate_status": "NOT_RUN",
+      "pass_inherited": false,
+      "new_feature_required": false
+    }
+  ],
+  "exact_inputs": {
+    "node": "/Users/hutou/homebrew/opt/node@24/bin/node",
+    "node_version": "24.19.0",
+    "python": "/Users/hutou/homebrew/opt/python@3.14/bin/python3.14",
+    "python_version": "3.14.4",
+    "playwright": "/Users/hutou/.gstack/repos/gstack/node_modules/playwright/index.mjs",
+    "upstream": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2",
+    "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+    "expected_cli_sha256": "935e95d05f4dc70a8a013eea59da80028946b5c139e45c6351dcaf2810ca00a1",
+    "expected_pin_sha256": "8f1eaf0b2b7ea1392cd45674bfbdd7498b2df6bb642db63f75d002df776511fe",
+    "runner": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/scripts/dsh-b0/html-host-browser-ui.probe.mjs",
+    "runner_sha256": "de75f75c222b72199b577298bf2bd28ebef79a082fcf680a144a464e54937d38",
+    "candidate": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/candidate/candidate.json",
+    "candidate_file_sha256": "e57173990a0a7b2c836492159b87e36d17c97a9afe78284d1daf9eaadc131fe6",
+    "candidate_digest": "993daf31daa79137c22ce8d16c84b61892117386a9b7b8c5119fa0be62abefb0",
+    "profile_id": "first-purchase-source-http-local",
+    "profile_digest": "be3948850fc414ce1524226a544783de1ecb3253514cc7f1d8f3280280b3d0af",
+    "service_binding": {
+      "schema_version": "dsh-service-binding/v1",
+      "service_id": "analytics-first-purchase",
+      "source_sha": "f9726f682fc0d1d4c6aef6f07e6932c2c600c3d6",
+      "api_version": "1.0.0",
+      "state": {
+        "owner": "analysis-service",
+        "application_id": 1397572502,
+        "schema_version": 1,
+        "contract": "analytics-first-purchase-saved-provenance/v1"
+      },
+      "access": "read-write",
+      "lifecycle": "external",
+      "rollback": "preserve-service-and-state",
+      "evidence_sha256": "9a6a4a7a28e0ffc69441394c18030b0a51eb2a881c4d00566b535931f3b391b0"
+    },
+    "source_sha": "bd647352d02402c679b04172855e40ec8f2d96a5",
+    "old_probe_input": "/Users/hutou/.codex/worktrees/grok-html-ui-acceptance/fuqing-crm-analytics/.context/checks/grok-html-ui-20261008-r2-input.json",
+    "old_probe_input_sha256": "4162b33f09697ed39268a078f7185658c670b16fb429b90f9093198e8283db96",
+    "old_probe_input_not_reusable_reason": [
+      "head is cb6f723 not integration 8aabaaeb",
+      "archive is ecaa86 not b75",
+      "source inventory 574 differs from current 576",
+      "old author snapshot matches historical 574 but not current 576"
+    ],
+    "new_probe_input_status": "NOT_PREPARED: must create new honest author snapshot/input, never mutate historical input",
+    "candidate_headed_or_service_receipt_created": false,
+    "owned_allowed_ports": [
+      4325,
+      4326,
+      4327,
+      4328,
+      4329,
+      14327
+    ],
+    "port_instruction": "future executor must reserve/check ownership, not assumed free by this read-only task"
+  },
+  "not_run": [
+    "browser",
+    "DSH",
+    "service",
+    "test",
+    "CUA retry",
+    "standalone search or creation",
+    "external OCR retry",
+    "real model",
+    "production"
+  ],
+  "historical_headed_result": "/Users/hutou/.codex/worktrees/grok-html-ui-acceptance/fuqing-crm-analytics/.context/checks/ocr-abc-20261008-r1/headed-after-review/results.json",
+  "historical_execution_input": "/Users/hutou/.codex/worktrees/grok-html-ui-acceptance/fuqing-crm-analytics/.context/checks/ocr-abc-20261008-r1/headed-after-review/execution-inputs.json",
+  "current_candidate_pass_inheritance": false,
+  "current_runtime_ui_diff": false,
+  "minimal_existing_remaining": [
+    {
+      "id": "CURRENT-CANDIDATE-HEADED",
+      "existing_owner": "T14/T15",
+      "status": "NOT_RUN",
+      "required": "Use b75 archive and newly honest current 576-file author/probe input with existing de75 runner. Current candidate own receive/load/UI observation; no claim that old PASS transfers.",
+      "input_blocker": "Old 574-file author/input is historical; new input is not prepared. No new cases or UI features requested.",
+      "no_old_package_rerun": true
+    },
+    {
+      "id": "NATIVE-VIEW-AND-200-TAB",
+      "existing_owner": "T14",
+      "status": "NOT_RUN / BLOCKED_NATIVE_INSTANCE_ROUTING",
+      "required": "Precisely controllable owned browser window/profile; real View menu click and native 200 percent zoom with keyboard Tab focus evidence; no JS focus/CSS injection or CDP emulation substitute.",
+      "input_blocker": "Known CUA interfaces cannot route isolated native window; do not retry same interface."
+    },
+    {
+      "id": "REAL-ACCESSIBILITY-DEVICES",
+      "existing_owner": "T14",
+      "status": "NOT_RUN",
+      "required": "Original pending real screen-reader, physical touch/mobile and Windows real high-contrast observations on owned environments.",
+      "input_blocker": "No supplied isolated screen-reader/device/Windows input; emulated PASS not equivalent."
+    },
+    {
+      "id": "REAL-STANDALONE-PACKAGE",
+      "existing_owner": "T14/T15",
+      "status": "NOT_RUN",
+      "required": "User-supplied absolute COCKPIT_EXAMPLE_PACKAGE JSON whose existing runtime provides window.RevenueReview.setScope/state and #kpiGrid/#chartBars; run only original named test.",
+      "entry": "dsh-plugins/analytics-workbench/src/client/html-rendered-text.test.mjs:308",
+      "input_blocker": "No actual page package supplied; do not search again or create replacement."
+    },
+    {
+      "id": "PROBE-EXTERNAL-REVIEW",
+      "existing_owner": "existing OCR closeout",
+      "status": "TIMEOUT / NOT_CLOSED",
+      "required": "A completed review result is absent for the exact probe fingerprint; keep absent.",
+      "constraint": "Do not third-run/resume or treat local/delegate review as external completion."
+    },
+    {
+      "id": "D15-CURRENT-CANDIDATE-TARGET",
+      "existing_owner": "A existing source/terminal/browser admission lane",
+      "status": "Target source HTTP / browser receipts and CI remain NOT_RUN",
+      "required": "Existing first-purchase-source-http-local profile, fixed f9726f68 service binding and candidate993daf/b75; real source HTTP success before new v5, then existing target terminal/browser chain.",
+      "scope": "Original native session first-purchase query, bound worker, permission/source result, cancellation/UNKNOWN, save only under current server admission, then optional same-candidate cockpit assertions.",
+      "already_completed_not_to_repeat": "Current-candidate local terminal 1 PASS remains its own limited evidence, not target receipt."
+    }
+  ],
+  "business_scope": {
+    "accepted": "D15 native first-purchase analysis",
+    "html_probe_is_business_receipt": false,
+    "no_new_age_threshold": "Current plan snapshot policy supersedes historic freshness-age requirements",
+    "formal_ci": "NOT_RUN"
+  },
+  "raw_references": [
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-gap-20261008/comparison.json",
+      "sha256": "9142bac9a575498dfd187e82f91eefe40acc1bc87bfa2b4737358e1bb6232e3f",
+      "bytes": 28539
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-gap-20261008/current-source-digests.json",
+      "sha256": "61a9e1231fc6f69901e08c72af96c0a3a85564db2d0149712d3dba76a4722bf6",
+      "bytes": 63483
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/grok-html-ui-acceptance/fuqing-crm-analytics/.context/checks/ocr-abc-20261008-r1/headed-after-review/results.json",
+      "sha256": "48ef2451c4b0f6186079adfb088446c92bbb5672de77882900e01f26c31ba219",
+      "bytes": 10194
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/grok-html-ui-acceptance/fuqing-crm-analytics/.context/checks/ocr-abc-20261008-r1/headed-after-review/execution-inputs.json",
+      "sha256": "954ad7d05d70df9c909f745025a7c33e58bcfe2233e99a3b88e68d903f735798",
+      "bytes": 1521
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/grok-html-ui-acceptance/fuqing-crm-analytics/.context/checks/grok-html-ui-20261008-r2-input.json",
+      "sha256": "4162b33f09697ed39268a078f7185658c670b16fb429b90f9093198e8283db96",
+      "bytes": 66170
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/docs/hackathon/evidence/shinemage-input-unblock-20261008.md",
+      "sha256": "5029b7626317fb3ec30b330042b701bbc496b6b78d61de70a5fbf966faace50c",
+      "bytes": 10201
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/docs/hackathon/evidence/shinemage-abc-local-candidate-20261008.md",
+      "sha256": "b4a5b3cd1856e1870ee0e772bdaa9aa8b62232a763fdd10521c617d2ccef8074",
+      "bytes": 6410
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/docs/hackathon/evidence/shinemage-admission-closeout-20261008.md",
+      "sha256": "a2c7f898e999504991fda5776255cf369d3096dfe06fa2d3c026b04ff2eb08b7",
+      "bytes": 6606
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/docs/hackathon/evidence/shinemage-candidate-target-preflight-20261008.md",
+      "sha256": "24d907fc31b66a2f9af1147b60eb498e9fc13bdc7e5cccea3c2d82ba81313fed",
+      "bytes": 6501
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/docs/hackathon/evidence/shinemage-t14-html-ocr-20261008.md",
+      "sha256": "f7990437c8f673dfdd1bf84716a577386eacbd9204f2fc660a867ecb3f854c35",
+      "bytes": 8805
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/docs/hackathon/evidence/shinemage-html-native-route-20261008.json",
+      "sha256": "d9deeae50431fc092e002edfae028e10f59e5d554935f68fc9a2c88d916f8463",
+      "bytes": 1850
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/docs/hackathon/evidence/shinemage-html-remaining-20261008.json",
+      "sha256": "423fe073de06e4d79844d2c3ab128dbd06e76e3a18f6c68717a94cea57252f0f",
+      "bytes": 5755
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/docs/plans/shinemage-plugin-platform-split.md",
+      "sha256": "9e22c3cdf9b03a24e52cbcd23525c7fe05f0f397287776152a8c2eec4815b668",
+      "bytes": 304708
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/DESIGN.md",
+      "sha256": "921855bf48696ccc2a9061b74bdbadaf4dd5836adc64e24ead72e43cddd7052d",
+      "bytes": 7721
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/scripts/dsh-b0/html-host-browser-ui.probe.mjs",
+      "sha256": "de75f75c222b72199b577298bf2bd28ebef79a082fcf680a144a464e54937d38",
+      "bytes": 45145
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/scripts/dsh-b0/html-host-browser-inputs.mjs",
+      "sha256": "7a426fe87c70e23f8b854dcc603e7fbc76320f7e6e3460a4277126fda44fbe6b",
+      "bytes": 10011
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/dsh-plugins/analytics-workbench/src/client/html-rendered-text.test.mjs",
+      "sha256": "282607b540a1f1528e04845401174ccfb4666da2bfbd08e3e1f765ad6d890e93",
+      "bytes": 24010
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-t14-html-ocr/fuqing-crm-analytics/.context/checks/t14-html-ocr-20261008/native-zoom-200-r2/result.json",
+      "sha256": "e1cd9124206a9ea1a71409e6256e852ed6b27a38960b36520f5674479b46e37e",
+      "bytes": 4132
+    }
+  ],
+  "evidence_document": {
+    "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/docs/hackathon/evidence/shinemage-html-candidate-gap-20261008.md",
+    "sha256": "7bf26c079c58b3ca8f93db5acd5d1a4dab8d0f6637a5239e274925d3c7a39ade",
+    "bytes": 4757
+  }
+}

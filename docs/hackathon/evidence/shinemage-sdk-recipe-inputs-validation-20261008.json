@@ -1,0 +1,878 @@
+{
+  "schema": "shinemage-sdk-recipe-inputs-closeout/v1",
+  "date": "2026-10-08",
+  "worktree": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics",
+  "head": "8aabaaeb8d0e22a351088e1daefc164a5c0a2d09",
+  "tools": {
+    "node": "24.19.0",
+    "python": "3.14.4",
+    "yaml": "existing PyYAML6.0.2 safe_load_all"
+  },
+  "source": {
+    "commit": "57e7b9b76ac3a5ef67461093071b2264335a1a01",
+    "tree": "d506a194e838ba5d01fee37d42f075fe55f4f01b",
+    "archive": {
+      "identity": "pnpm@57e7b9b76ac3a5ef67461093071b2264335a1a01",
+      "url": "https://codeload.github.com/pnpm/pnpm/tar.gz/57e7b9b76ac3a5ef67461093071b2264335a1a01",
+      "started_utc": "2026-10-08T08:24:22.190297+00:00",
+      "release_ready": false,
+      "archive": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/downloads-r2/pnpm-source.tgz",
+      "bytes": 12130452,
+      "sha256": "fc2d4ec80c236e682b571f4254b8969e68b7c2ddec34d95d4b905445826910f7",
+      "sha512": "sha512-grnYI7wwcjG0kCUPrarUySpUWxOPyRBGZCZI2mnKmZSh4hurbsBpaEdN17G3qOxbrKo7Q0t4A2AUlnzGmc2yOA==",
+      "status": "DOWNLOADED",
+      "integrity": "PENDING_FIXED_TREE_VERIFICATION",
+      "elapsed_seconds": 3.393
+    },
+    "verified_blobs": 8027,
+    "regular_files_materialized": 8021,
+    "links_as_metadata_only": 6,
+    "git_modes_verified": true,
+    "materialized_regular_mode": "0600",
+    "build_checkout_created": false
+  },
+  "compiler_packages": [
+    {
+      "identity": "esbuild@0.28.2",
+      "archive": {
+        "identity": "esbuild@0.28.2",
+        "url": "https://registry.npmjs.org/esbuild/-/esbuild-0.28.2.tgz",
+        "started_utc": "2026-10-08T08:23:28.068131+00:00",
+        "release_ready": false,
+        "archive": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/downloads-r1/0091ac1dc0891f181bdfbcc57a86d1c02d57c0679ac9fe3f4eef85be549be010.tgz",
+        "bytes": 34207,
+        "sha256": "e045f94c235c7adc50e77ba2a579c7bec41b496b6b47c3a7845f7c1e19959a88",
+        "sha512": "sha512-HKVLS8dvII+xoKW9kmqxbRKrnWEXfJJr/FZhhJmiqIB0e053QNYFqOBouTMO/k5sID4MvCiUCvv8b9M4h32wIA==",
+        "status": "DOWNLOADED",
+        "integrity": "LOCK_SHA512_MATCH",
+        "elapsed_seconds": 0.596
+      },
+      "file_count": 7
+    },
+    {
+      "identity": "@esbuild/darwin-arm64@0.28.2",
+      "archive": {
+        "identity": "@esbuild/darwin-arm64@0.28.2",
+        "url": "https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-0.28.2.tgz",
+        "started_utc": "2026-10-08T08:23:28.665002+00:00",
+        "release_ready": false,
+        "archive": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/downloads-r1/721282d04d4bb1bbe4662ae7fbaa872bc46c69e0b5a81d17ec0fee4f1fac0c59.tgz",
+        "bytes": 4434422,
+        "sha256": "1980cde09749094452b20d36ff267585ccb3f72749c7bc97291cd9996ccf5a2a",
+        "sha512": "sha512-n4KqkOQrraxHJcgjM1RvwbigfQKIKJVpM7xp+KsxiyUSrRdIXnt73VhrPAx0fV44hgfmIVKjxMN9J1t5jySVkw==",
+        "status": "DOWNLOADED",
+        "integrity": "LOCK_SHA512_MATCH",
+        "elapsed_seconds": 1.235
+      },
+      "file_count": 3
+    },
+    {
+      "identity": "@typescript/native-preview@7.0.0-dev.20260707.2",
+      "archive": {
+        "identity": "@typescript/native-preview@7.0.0-dev.20260707.2",
+        "url": "https://registry.npmjs.org/@typescript/native-preview/-/native-preview-7.0.0-dev.20260707.2.tgz",
+        "started_utc": "2026-10-08T08:23:29.900462+00:00",
+        "release_ready": false,
+        "archive": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/downloads-r1/d3b6c1ec2f37d33ed0b3fced3f95497894acdcabed77dc804adc1583aeaf56a7.tgz",
+        "bytes": 364665,
+        "sha256": "50cd22d1de46ec5f39ab27edf10d1b4ab35937eb1a6edcb171370f361b572289",
+        "sha512": "sha512-oUGp+Rep/hqMhPunyinsALUwSlzHINSxitifPiSaeqoKOKD2OlR9NE3TaPqwsl4NlGslsOSUXI1JotWQzpYCPg==",
+        "status": "DOWNLOADED",
+        "integrity": "LOCK_SHA512_MATCH",
+        "elapsed_seconds": 0.653
+      },
+      "file_count": 416
+    },
+    {
+      "identity": "@typescript/native-preview-darwin-arm64@7.0.0-dev.20260707.2",
+      "archive": {
+        "identity": "@typescript/native-preview-darwin-arm64@7.0.0-dev.20260707.2",
+        "url": "https://registry.npmjs.org/@typescript/native-preview-darwin-arm64/-/native-preview-darwin-arm64-7.0.0-dev.20260707.2.tgz",
+        "started_utc": "2026-10-08T08:23:30.553862+00:00",
+        "release_ready": false,
+        "archive": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/downloads-r1/826c84c72857a4a0e72707cd5e3e54936c5208769424cdc0dda0ef0bba823bb2.tgz",
+        "bytes": 9270694,
+        "sha256": "a6d0b46d71358db2d602324c553366a58fa1d031f5dfa12c09a35b6be17fe503",
+        "sha512": "sha512-wny2pgKjGbiZtnOIHVa3tXC1UfDqxNEFzyPGmiqybedG8hipG2Nfp0l5UxbaKCjkLacUpH/W5bP2hBOMVhCOzg==",
+        "status": "DOWNLOADED",
+        "integrity": "LOCK_SHA512_MATCH",
+        "elapsed_seconds": 1.29
+      },
+      "file_count": 113
+    }
+  ],
+  "auxiliary": {
+    "expected": 67,
+    "integrity_and_members_verified": 67,
+    "reused_previous_tarballs": 4,
+    "new_tarballs": 63,
+    "first_attempt_success": 56,
+    "first_attempt_timeout": 7,
+    "urllib_retry_recovered": 5,
+    "curl_ipv4_diagnostic_recovered": 2,
+    "old_failures_preserved": true,
+    "independent_of_compiler_four": true,
+    "download_bytes": 2281751
+  },
+  "declared_build_closure": {
+    "tsconfig_projects": 204,
+    "workspace_importers": 204,
+    "registry_identity_upper_bound": 880,
+    "includes_dev_and_test_declarations": true,
+    "not_minimum_runtime_import_graph": true,
+    "covered_by_this_batch": 71,
+    "not_covered_by_this_batch": 809,
+    "not_a_machine_wide_missing_claim": true,
+    "remaining_list": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/remaining-declared-inputs.json"
+  },
+  "recipe_runtimes": {
+    "24.6.0": "explicit runtime of pnpm11/pnpm package bundle script; emits pnpm.mjs and worker.js",
+    "26.10.0": "root devEngines.runtime pins this version with onFail=download, also release workflow bootstrap and root typecheck-only runner; package-manager runtime selection not executed, cannot omit this recipe input",
+    "26.0.0": "embedded SEA executable runtime in build-artifacts.ts; not needed to compare the two JS bundles",
+    "24.19.0": "current authorized controller runtime; unchanged"
+  },
+  "root_dev_engines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.7.0",
+      "onFail": "download"
+    },
+    "runtime": {
+      "name": "node",
+      "version": "26.10.0",
+      "onFail": "download"
+    }
+  },
+  "next_step_commands": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/commands-not-run.json",
+  "review_correction": "Initial Node26.10 description omitted root devEngines.runtime with onFail=download. A found it during read-only cross-review; superseded by build-input-closure-r2.json. Old record preserved; no command based on the incomplete statement was executed.",
+  "protected_input_records": [
+    {
+      "path": "/Users/hutou/.codex/worktrees/grok-sdk-trust-evidence/fuqing-crm-analytics/.context/checks/grok-sdk-trust-20261008T101338/official/commit.json",
+      "sha256": "e384023326e69bc2d003e82fc498dde5f0fae1496c96a08a3d2a2a41fd6dc7ba",
+      "mtime_ns": 1791426002903494957
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/grok-sdk-trust-evidence/fuqing-crm-analytics/.context/checks/grok-sdk-trust-20261008T101338/official/tree-recursive.json",
+      "sha256": "70a8d4fdc4da0da6107f24153bef3106e6acf43a55362ef31c66a3bbab7966f9",
+      "mtime_ns": 1791426216158665873
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/grok-sdk-trust-evidence/fuqing-crm-analytics/.context/checks/grok-sdk-trust-20261008T101338/official/pnpm-lock.yaml",
+      "sha256": "0dd3e839cb46139f376e0345ba6ea492a70cc9196caf6b74ae07703d0e485b94",
+      "mtime_ns": 1791426053392294367
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/docs/hackathon/evidence/shinemage-sdk-evidence-followup-validation-20261008.json",
+      "sha256": "70f243d81b86713c15c8dba096c8741c531b237176346392397c9cda803c6fde"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/docs/hackathon/evidence/shinemage-sdk-evidence-followup-20261008.md",
+      "sha256": "78fe6b18a9724b470b629a26307bb0b08e78df5ea61f879b21f1f47415ab2536"
+    }
+  ],
+  "sealed_bundles": [
+    {
+      "path": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/checks/kit-sdk-v2-distribution-20261007/received-r3/corepack/v1/pnpm/11.28.2/dist/pnpm.mjs",
+      "sha256": "00805e99c795e7067b0f459846393ca3f6a701ca9ae267fd48b99d11ecd423a8",
+      "bytes": 15457230,
+      "mtime_ns": 1791387852084592069
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/checks/kit-sdk-v2-distribution-20261007/received-r3/corepack/v1/pnpm/11.28.2/dist/worker.js",
+      "sha256": "9834d944929dba7566e230a084fff0ecdb1da1be777c72ecb5f00a41a04843a4",
+      "bytes": 613034,
+      "mtime_ns": 1791387852087166565
+    }
+  ],
+  "raw_evidence": [
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/request-plan.json",
+      "sha256": "374f03fa7fae163c2d30e7305638e487b809db0d6fdd8b133e6e8d31fe171b84",
+      "bytes": 3861,
+      "mtime_ns": 1791447783758940223
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/download.py",
+      "sha256": "13154de6581eafecd54537422dbc187e538cfb886e4f5e3ae5c4c6659488be29",
+      "bytes": 2848,
+      "mtime_ns": 1791447807928970125
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/download-r1.log",
+      "sha256": "fc208e0bec3b272dd5f958f1956d40c926b39490d97fb5b8056351d248147576",
+      "bytes": 596,
+      "mtime_ns": 1791447826214068745
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/downloads-r1/result.json",
+      "sha256": "20239ebc49bc9f3bb9e4e21414e59745e350193873a59ef841d95dd8e12ea0e4",
+      "bytes": 3814,
+      "mtime_ns": 1791447826215695334
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/download-r2.py",
+      "sha256": "d99ce95390c55ba5535d38a7a9db3db42bbc178dccd1c50b259701944bd21dda",
+      "bytes": 2884,
+      "mtime_ns": 1791447862110842219
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/download-r2.log",
+      "sha256": "8a13f4ee4ad274e18f03c9feaa6815198d3d4728ec9fa52b89a2ab8edd9b5089",
+      "bytes": 120,
+      "mtime_ns": 1791447865584018934
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/downloads-r2/result.json",
+      "sha256": "ebccf0162586c83358893b870c2fff4e92ca07ee6b50e751e80a26d901676d2a",
+      "bytes": 948,
+      "mtime_ns": 1791447865584741270
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/verify-inputs.py",
+      "sha256": "0a36f5fb993fe72329e86f0f2dc498c38f66bb8840250d413d85eeac9ad0b5db",
+      "bytes": 4441,
+      "mtime_ns": 1791447985729913977
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/verify-inputs.log",
+      "sha256": "2738870d7c361575dc2846e3fa50e88d69a694245ca809920b3acd77fd58744b",
+      "bytes": 148,
+      "mtime_ns": 1791447986998136804
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/source-verification.json",
+      "sha256": "edb058d44339356dbb1114ed9535ad26f4331fc238c15aedabd080fb3c00bdda",
+      "bytes": 2115699,
+      "mtime_ns": 1791447986877576594
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/source-links.json",
+      "sha256": "8d4e4cbf008cf8bee4c6c49f5fc487121b7cbfdd0f391be649af188deb17ff97",
+      "bytes": 771,
+      "mtime_ns": 1791447986873404176
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/compiler-packages.json",
+      "sha256": "d5c4608e7fa31b066d26553f64dfbc21375614d611dd17e1ea5917968b0723e9",
+      "bytes": 117773,
+      "mtime_ns": 1791447986995466651
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-plan.json",
+      "sha256": "261c458837cdd0ced46475fe1b89407b768ab1a76dc73f994a7b90d802d5c76e",
+      "bytes": 3530,
+      "mtime_ns": 1791448024438769814
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-request-plan.json",
+      "sha256": "7cf913a9398c4a8c7b6f0f1b35c9994255dc5d470786790ee82117aa5912dda5",
+      "bytes": 30366,
+      "mtime_ns": 1791448074668506261
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/download-auxiliary.py",
+      "sha256": "1b171756f5a418bb8c46715ef76eec38d026fd9adc4465630e9e60d962ec7a00",
+      "bytes": 2868,
+      "mtime_ns": 1791448074668703638
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/download-auxiliary-r1.log",
+      "sha256": "b96733a058b08eafad5f00841d5a115f2caa050ca0795785c229489522663449",
+      "bytes": 5787,
+      "mtime_ns": 1791448127170481579
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/result.json",
+      "sha256": "81207e9ba5a3cb218fc9cf142cb7395e1990b122e1754c97c7da60cb9e86460f",
+      "bytes": 45592,
+      "mtime_ns": 1791448127172029261
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-retry-plan.json",
+      "sha256": "f77bd0af93a03047db75d2670c9735a3a6e58d2a229f30204bff4e7ff11b5631",
+      "bytes": 5543,
+      "mtime_ns": 1791448208351036678
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/download-auxiliary-r2.py",
+      "sha256": "1a4ce2ef33b36058e5bd3f6ed8d7e3c183168c2f79b3788d1ee4188bb3a6156d",
+      "bytes": 2866,
+      "mtime_ns": 1791448208351608268
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/download-auxiliary-r2.log",
+      "sha256": "2a043ce3cd9c13376177bd691747e1f3986af45b75da8a616b8c097a707d3570",
+      "bytes": 680,
+      "mtime_ns": 1791448226816044403
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r2/result.json",
+      "sha256": "586c24c1b5f1a98bedfaa68aa60fb04da366b40a2957bf491886a7bcdde36ddc",
+      "bytes": 4708,
+      "mtime_ns": 1791448226818255092
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/verify-auxiliary.py",
+      "sha256": "420d8a8017f7958c0b0ff2f84f648f95fa591d38044142585cab52ba8cbcfbc3",
+      "bytes": 3019,
+      "mtime_ns": 1791448337199822526
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/verify-auxiliary.log",
+      "sha256": "ede1c7e039f57df8774b9380d2e8e362dc201efb5f166103d370f1d432bd958a",
+      "bytes": 126,
+      "mtime_ns": 1791448337776395884
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-verification.json",
+      "sha256": "74815ba07fe72c489fc479cd19853fa1adbf1dc32e6da42406786503adfec2bc",
+      "bytes": 366890,
+      "mtime_ns": 1791448337776307799
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/curl-diagnostic-plan.json",
+      "sha256": "92ec56dbfd214b312be5d1a1297140660f3acb599cf19ae159c595606f3bdffa",
+      "bytes": 196,
+      "mtime_ns": 1791448397462865761
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/curl-diagnostic.py",
+      "sha256": "365b4538fb5efce555fe5bbbeda8b7e7c6965944e8aea5dfdac47c751b21d4aa",
+      "bytes": 1943,
+      "mtime_ns": 1791448397515557517
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/curl-diagnostic.log",
+      "sha256": "f6b1f216dbf880223b76608aff889ea303f3392c59cdf048ef761824cf22abc3",
+      "bytes": 147,
+      "mtime_ns": 1791448399718359956
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/curl-ipv4-diagnostic/result.json",
+      "sha256": "f9555aa2557fdb62e230e0ca02b752bb2928dfa0fc3efdc8cfd64fae20979bca",
+      "bytes": 23633,
+      "mtime_ns": 1791448399719048713
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/verify-auxiliary-r2.py",
+      "sha256": "8cd56675d890ef81934653e8ede179b52c88abe7ef025d04d29e758e0a81bc51",
+      "bytes": 3147,
+      "mtime_ns": 1791448509454566890
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/verify-auxiliary-r2.log",
+      "sha256": "8a206ecf70b7f47a1e1bd2bb74d6f3d9084f1faa9676d3976210c21fbd6e93be",
+      "bytes": 87,
+      "mtime_ns": 1791448510001774901
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-verification-r2.json",
+      "sha256": "1902104359186c9172826f2420e19235d4e1715884d6b79677f84bd51347ca47",
+      "bytes": 374246,
+      "mtime_ns": 1791448510001395063
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/analyze-closure.py",
+      "sha256": "25d14a208a2ac1c864404add555bec92a09de6e645b94a8458558b4b52256f42",
+      "bytes": 5036,
+      "mtime_ns": 1791448266365816910
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/analyze-closure.log",
+      "sha256": "47cee295b5526f4318dc3b73f64f917bdcd7e0e97730b5c999f5d56ddcb19a75",
+      "bytes": 149,
+      "mtime_ns": 1791448266952542040
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/build-input-closure.json",
+      "sha256": "80cea09e6254618e4e0558102fb662785e4199229edadd7bfc80a41333ea5153",
+      "bytes": 529798,
+      "mtime_ns": 1791448266952415289
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/analyze-closure-r2.py",
+      "sha256": "7a8dd43bdefe8304290686c2b1987c0e19488a6ae14165e58c422aa739c8bb67",
+      "bytes": 5263,
+      "mtime_ns": 1791448487871813243
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/analyze-closure-r2.log",
+      "sha256": "47cee295b5526f4318dc3b73f64f917bdcd7e0e97730b5c999f5d56ddcb19a75",
+      "bytes": 149,
+      "mtime_ns": 1791448488393220861
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/build-input-closure-r2.json",
+      "sha256": "158406d4dc44afd7ccddeafedeafdfe23240c004d7361dd38d4250c1c4a79d04",
+      "bytes": 530201,
+      "mtime_ns": 1791448488392794274
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/remaining-declared-inputs.json",
+      "sha256": "9db9c2ca1b33d397686fe62d9b361491d842d2d90ce9e288e736d2425f908375",
+      "bytes": 141457,
+      "mtime_ns": 1791448589933448339
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/commands-not-run.json",
+      "sha256": "935baf6433883905e9f3d8fd3c20bdf51851d665720be311a88ae8d9642df1b2",
+      "bytes": 5597,
+      "mtime_ns": 1791448488423950305
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/finalize.py",
+      "sha256": "7a71bb03efe93529ff75c1241eb09cba26bedeeb6adf59fe5c57cb14dfce8b71",
+      "bytes": 5859,
+      "mtime_ns": 1791448589988753246
+    }
+  ],
+  "archive_hashes": [
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/downloads-r2/pnpm-source.tgz",
+      "sha256": "fc2d4ec80c236e682b571f4254b8969e68b7c2ddec34d95d4b905445826910f7",
+      "bytes": 12130452,
+      "mtime_ns": 1791447865565679950
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/downloads-r1/0091ac1dc0891f181bdfbcc57a86d1c02d57c0679ac9fe3f4eef85be549be010.tgz",
+      "sha256": "e045f94c235c7adc50e77ba2a579c7bec41b496b6b47c3a7845f7c1e19959a88",
+      "bytes": 34207,
+      "mtime_ns": 1791447808664408409
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/downloads-r1/721282d04d4bb1bbe4662ae7fbaa872bc46c69e0b5a81d17ec0fee4f1fac0c59.tgz",
+      "sha256": "1980cde09749094452b20d36ff267585ccb3f72749c7bc97291cd9996ccf5a2a",
+      "bytes": 4434422,
+      "mtime_ns": 1791447809893066339
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/downloads-r1/d3b6c1ec2f37d33ed0b3fced3f95497894acdcabed77dc804adc1583aeaf56a7.tgz",
+      "sha256": "50cd22d1de46ec5f39ab27edf10d1b4ab35937eb1a6edcb171370f361b572289",
+      "bytes": 364665,
+      "mtime_ns": 1791447810552689386
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/downloads-r1/826c84c72857a4a0e72707cd5e3e54936c5208769424cdc0dda0ef0bba823bb2.tgz",
+      "sha256": "a6d0b46d71358db2d602324c553366a58fa1d031f5dfa12c09a35b6be17fe503",
+      "bytes": 9270694,
+      "mtime_ns": 1791447811831277375
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/da9ff7b653d8032a71c04d7d8feb112e3c3dc5035dccde4bf3aec45fad59c975.tgz",
+      "sha256": "a924bfa317c78e8bdbb0bd361522aba431fffe0878bf3699a8cb35a6e50cf94c",
+      "bytes": 6586,
+      "mtime_ns": 1791448075760305381
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/90edd7cceba690103c38950454c30bf820ebeaeb2b4d1cee9ba44e724ad11c1b.tgz",
+      "sha256": "d8f8533551f21aca87b3fc2d4bc2e2cc7ab221104902c07da3df20baaf52136b",
+      "bytes": 4182,
+      "mtime_ns": 1791448075760053837
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/8af1f120ee67370371e475e66c13d34185be2266471de58f3d2d81b92bb4eb0a.tgz",
+      "sha256": "cbf9621f69b822ce97f71e842fea8e7bf9c7e986f01285689ede282092727d3d",
+      "bytes": 7360,
+      "mtime_ns": 1791448075764901804
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/1a365929125107ba26f8abc31234f7aa112e72e9a5f3ae55a3b5f0f0d41a705e.tgz",
+      "sha256": "d57554636ee07df3e1054cff70a8010b7cea3af2bd9ed50d2f17d5a98a766388",
+      "bytes": 153935,
+      "mtime_ns": 1791448075770042857
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/7fa0e28daa6f9c697017b06f32a9e31a57ccfb4f138a8daded68a5d002231e29.tgz",
+      "sha256": "0e0eadcdaada805db5d85b53ad5cdca0760b996ee199ec9658e7b34aa6c8e0d9",
+      "bytes": 2768,
+      "mtime_ns": 1791448076343950229
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/5d9d8851e0b3a24a8205740b06d1e7840fa94e67a27cefb37c9563a2603a3299.tgz",
+      "sha256": "9025508d9125eee531bbc49ce3ae560183975ad595f058c378bd56af4152fb16",
+      "bytes": 4199,
+      "mtime_ns": 1791448076349471369
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/curl-ipv4-diagnostic/8678db7ff88f0a720564104cc23418b1cd17db3e8d40318ad7e49065eec60b5f.tgz",
+      "sha256": "ef8448ec78f20b692f04fa6d01f39b5ab34c66404bea3429f5a39c6c9e0be8b4",
+      "bytes": 12620,
+      "mtime_ns": 1791448398213216672
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/ffc711d3f86d0196a2f0cb6ed0e22bfeb4fcb5714e637c4170d5086872a7dd26.tgz",
+      "sha256": "1cd18e862c8640b4568b1425a7df4ee030ff201d45b2da8f9f222d2987494ffc",
+      "bytes": 13972,
+      "mtime_ns": 1791448076352959781
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/50cb51119b3e7a0445ea15e1e026e95d2137df62a2bd344230886c9dcc0a7e64.tgz",
+      "sha256": "188c320cdc413adfec03098fda72af7a9b02152ba13d3a8f87f172d93ced38ea",
+      "bytes": 6255,
+      "mtime_ns": 1791448077211505648
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/d4ec33708205e0aab97e631fb8d69c095cd87da7c10128dcdac6b5ba2cc1395d.tgz",
+      "sha256": "6d9c2a6030dc642b77b3a4979dfa82138cdb426d2c0e5b09626ad063e384a309",
+      "bytes": 2429,
+      "mtime_ns": 1791448077211013143
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/4c2c6a72952a0691543f0ac5bb64357ad54d2c57d473cb42658845559fe918e7.tgz",
+      "sha256": "fe11d9bf8cb6b4144db236b56fa6991c60bb8b5f49dcc7d9cfd23687981bdb78",
+      "bytes": 46188,
+      "mtime_ns": 1791448077221768963
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/645b141d3027520f69209dba8e012e737f0ee8cad89ea8d0e26d02669d14a981.tgz",
+      "sha256": "d14dd1c35b4bd3b8aca3219fd3627eb7f3eb49cf6b4c8a7ca58b91fd7a190993",
+      "bytes": 5338,
+      "mtime_ns": 1791448077792133965
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/02b4e8e2d54164965454bfacf72c7389da39ca3cf3efd4b6c454d6e2615b2f70.tgz",
+      "sha256": "07d68ca479f86b8a1e793b46fa7e81db912643597663e45c2855ed62c698583e",
+      "bytes": 6991,
+      "mtime_ns": 1791448077792666053
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/dd5e0fd017ea7b15a653ce38491e564b1bc23433f786c16087e0241e13ec5a97.tgz",
+      "sha256": "5571ed1750bd1e77a0e4b5fea6e9afb3f2eb390a9576358c9aaacd04d3f60de8",
+      "bytes": 25301,
+      "mtime_ns": 1791448077814922368
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/a7ea9f9d907eca5d922a2d332ac31060235e707382b0c51db9398921da8df6ed.tgz",
+      "sha256": "cdcbf6387484c524461ddc4c338d2acb25276c4072ecea495959178d28367fef",
+      "bytes": 10427,
+      "mtime_ns": 1791448078381105034
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/15fb888391f02c2a94f17b3028abf82b6bef2336b6dd514a9116291dd7492616.tgz",
+      "sha256": "1a6c3a3446cb1d693cf6b62785e2f6d8f9596305aff474dd2b31b2d8d427593c",
+      "bytes": 5723,
+      "mtime_ns": 1791448078378457881
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/83de3b394293d96fb3fea968392a9d9ffb8b461f6c173bbb76a5bc51db5bec52.tgz",
+      "sha256": "704402651b02a1454f17d445fc7dd716efc282d059407126d58ef30a47e807aa",
+      "bytes": 9799,
+      "mtime_ns": 1791448078420441192
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/4e02065d743e966c10f7a3b7a9ad571211c9a9783c2f73c30177d534d0a62182.tgz",
+      "sha256": "de85afc7b11f18515fb018c429eac81f84012944feb3997a08a68792c9bbfcf5",
+      "bytes": 3438,
+      "mtime_ns": 1791448079182379098
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/0a11153a0f1311d8422ec17a41bdad864c1c72a55766a3520931b0aee78c7ebc.tgz",
+      "sha256": "9616afebd18b93592a79d48cce6a841604593ae90563f0ec5554a07b6952d6d5",
+      "bytes": 4853,
+      "mtime_ns": 1791448079167168440
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/59626fdea6dbc52eac323b0fbcb5441c5484bb059d4b38ce49e02549a8a6efeb.tgz",
+      "sha256": "020f184fa9c4e2905cf33c3d1dbba4b25a58e05f6f785f81cc931394e07b8970",
+      "bytes": 364690,
+      "mtime_ns": 1791448079044853213
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/ba2e3a5fbd1028da71e02d351c424d0d8063ffc9afe439a85d8b952077be8b8b.tgz",
+      "sha256": "e9d2b03f95573600e1c13124ce618e3142ed2c538d164595bedcd4408b8a4e4c",
+      "bytes": 4608,
+      "mtime_ns": 1791448079636365101
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/ff344c2ad41bd43a38997a3d431bf7c4f5ff3e25337d304d93d13a364d5191ca.tgz",
+      "sha256": "f72923e40416525e4212eb40981a9126d79dfe15d00100070b4199393722087b",
+      "bytes": 4046,
+      "mtime_ns": 1791448079780617264
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/37c8f2d884a3ac741d7e01cd2c9626e7614677d0eb0febb74a3d65fd230f0f99.tgz",
+      "sha256": "cd58136125b52514f55031b7e8529a68f357b633e90f99b4804b733a89dfe271",
+      "bytes": 10253,
+      "mtime_ns": 1791448079778702994
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/9975757ae9e01b0d541eb99b4a364b913d88ef10e61e4fc29af139f676abb07f.tgz",
+      "sha256": "8c5d4286146ad62fc1096981700ce1c22a167708926fca01f9ca74f9bb50bc19",
+      "bytes": 2663,
+      "mtime_ns": 1791448080233634922
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/ab2c83c8b42b81287351ae0551f52cc9ed15f1393ec9bfc97fe365820181fb13.tgz",
+      "sha256": "3fe453fb193bb58f6f0505dfb1151230935380b5b55e1f9864261c2aafc1bec6",
+      "bytes": 4255,
+      "mtime_ns": 1791448080390367132
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/08fd04d109dd1bfa520e74ca7e2623ba1cdfad34b272c3ac554cb67a8d563044.tgz",
+      "sha256": "7b75c1057198cf97696909a9bee176c9c5e9bcb5b03bf3ecef2f484defadd51e",
+      "bytes": 3730,
+      "mtime_ns": 1791448080392998785
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/43538ea04c427e36177ab7a56cca62f24adca305326c429cc1a6a192571ab866.tgz",
+      "sha256": "9dd833c75e16693641970a1c2c0aa6dd5f5da392424e23494ed9ba20311c381f",
+      "bytes": 1616,
+      "mtime_ns": 1791448080825024351
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/curl-ipv4-diagnostic/2f62e711a6921973ef3f9650fd3e06585fd3842e34078c8fa959481738600405.tgz",
+      "sha256": "47cfe872e088e28c53b736fef305324b57cc1cfc9f72a9b0f769f92731cb8359",
+      "bytes": 3756,
+      "mtime_ns": 1791448399712619230
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r2/aca9cdd4321dd851dbbfaf788934444ffe451fa027ea25ecda331e53138e9cd6.tgz",
+      "sha256": "d18739bbd7d0091d30d2cca58e120c8b70ac09a5a21aa4b2b3e9afb2dc4084d8",
+      "bytes": 697866,
+      "mtime_ns": 1791448209480394022
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r2/9805d0126218ae346dd9cf36026dea591e48f24176813c2131f11631adabbdb0.tgz",
+      "sha256": "b8381291c9b3c859c5b58e75da8bdde64b424344054893c774c68c3c443d7881",
+      "bytes": 3409,
+      "mtime_ns": 1791448209457724161
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/b2e59867d4ce279f073e590099b166e2b1f743b4db0e25cc24edf3bf56c09401.tgz",
+      "sha256": "c78d05f20aff3bc95f024b19e53f72998cfc5f69c42b126c49dff8b1b271bc46",
+      "bytes": 14663,
+      "mtime_ns": 1791448100472849430
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/7dfd90b95b048a79ebe8ed0a5438741772f81760d73bd59f1487537674efb86b.tgz",
+      "sha256": "5a3d2c8074a28229665727e47b8a1090941856a7962905efe05d20d3760355f8",
+      "bytes": 117068,
+      "mtime_ns": 1791448098940054192
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/8162d302efd0533ce00fc8a52dd6703dbb4205435af84e72b7694c608a729de4.tgz",
+      "sha256": "350a76c115b393c19d24654834261e5dc9f0e8cc5e08f3937fa80140f3e4ce83",
+      "bytes": 15520,
+      "mtime_ns": 1791448099358912288
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/919212b4955186da504895df53bd5ef4fd1f2c3a01fe44496d97b4ba2ba0c857.tgz",
+      "sha256": "52ac61be743755e3fdc98e560086d0d4a1e2c7fd3643387792db38e322d27d12",
+      "bytes": 83605,
+      "mtime_ns": 1791448099535473454
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/59e35d151569c433c688bae227dca660f215511b05326d5d5d9c8f267e71c26b.tgz",
+      "sha256": "656d56148ba099836db1bc2bd397fd8a385bd63708f9bca79458217dc770e1f7",
+      "bytes": 2221,
+      "mtime_ns": 1791448102999452021
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/d0d1303998dfae04e4f898f477380aac35568f4d6679f4ea913c2441cf9ebb0b.tgz",
+      "sha256": "cf51460ba370c698f68b976e514d113497339ba018b6003e8e8eb569c6fccfcf",
+      "bytes": 1979,
+      "mtime_ns": 1791448100123414595
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r2/6e22f608ff9d6c747d75ca23ba568afbef5e6127b1b575d31ac58edcef449db5.tgz",
+      "sha256": "effd84e09e1330542a84a243f1f4da21a700d459b83761eaca16070eb1fb8841",
+      "bytes": 1754,
+      "mtime_ns": 1791448210041051381
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/45184b2933ad20ea8c0ff532dd25b22384855a3ff2a9bf83a45ecd8696f1e0f5.tgz",
+      "sha256": "135c483e43689d0e17b1c56dd5e2dfea63a4d4afc749dc7ed6b66b97f7bc4e20",
+      "bytes": 5750,
+      "mtime_ns": 1791448102557213932
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/fcc0999f6dce974e8ad313c0accf0b47bbff0859c8f5fc694bc2459a16fab790.tgz",
+      "sha256": "ee71986a430792b5bf7e0c398355215b534d3eaec9cde73879db69fd58b14ef0",
+      "bytes": 1746,
+      "mtime_ns": 1791448104677248265
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/e1a2a032096ace66b422351e00b11b0229e42e4b49c2146f439f8fe442218451.tgz",
+      "sha256": "4b8999acb914830edcd3c5b8fec632b32c6bc759ac3edc86336f5a9e08ba7b92",
+      "bytes": 2258,
+      "mtime_ns": 1791448106629449605
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/bb7410d6076ae1fa569358e03bcf4baedd135f339480e5adcbe34805d5a0245c.tgz",
+      "sha256": "a07a198ca727816296616928237bfab6571f211750d798030b3b7a3f4a5473a3",
+      "bytes": 2067,
+      "mtime_ns": 1791448105777392638
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/885adc94c3a1b56bb842ab44f2520ed9f464dcce85127891506a979b213e8fb0.tgz",
+      "sha256": "dea3e3dab1c00c28fcb5871b1133b02050c7e110dde2dbe31e14067922c23ec1",
+      "bytes": 101468,
+      "mtime_ns": 1791448108922307854
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/6522bf8f898611f467290fab25f3235b819f7d9e7d8ba25d450001162f409c10.tgz",
+      "sha256": "4c843ba015bec815ac52116162559ab7b4b4efbd3b86f7fcf38f3d770decace6",
+      "bytes": 23492,
+      "mtime_ns": 1791448106374697086
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/b87a6455ad7e3c9f69d60042c9da9e6e2d0a1e33b773edb2976ba7e2bb465700.tgz",
+      "sha256": "fb004642d7260dba0cf61d4d2f0ce96fac49db27e81a75349b234decf9383085",
+      "bytes": 270833,
+      "mtime_ns": 1791448106978753728
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/b9b847105813a63ec5c1a9ba264ec1293a0156c5d464e95a13745cd6cafa7769.tgz",
+      "sha256": "3c58c7fc4c30035cdabb0b33e81d8e048935e134469491767cbaf89bd64c9b36",
+      "bytes": 3806,
+      "mtime_ns": 1791448109223444563
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/1a3574dac1bdd399b858dad105bf9813d4fb3211f4f2769ac83a61074da34e08.tgz",
+      "sha256": "ffaf0a20a201865e143aa27e57a83bf69a75547729a65cd3180bcba4f0f29ecd",
+      "bytes": 3676,
+      "mtime_ns": 1791448107560718309
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/bb55c6306e45b45933f2ae171d915f82af17291daa87095e62d0af08dd091594.tgz",
+      "sha256": "141faa56cef4953ffbe236336a09af64097560338de5abbce57f990fb62ac635",
+      "bytes": 3776,
+      "mtime_ns": 1791448108143277437
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r2/bacbd0cff46e308fa34a046b2f328872c07206758f0e01b47519ca5db8271034.tgz",
+      "sha256": "c6a29dbf1f4c0754a94387b379e699f5594216e16ef0d5ee17ccf9518f844dc1",
+      "bytes": 33636,
+      "mtime_ns": 1791448210085492092
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/49a719604e00d222b4f894e54e83f6a37eacefb85bbd7d7ff41d0b3cc6da47e4.tgz",
+      "sha256": "2460004412100eea8e96b98f14d3dfb4e22a6628654e5431d14f974c6201ca18",
+      "bytes": 4683,
+      "mtime_ns": 1791448112072105287
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r2/f0f5cbe2e7fa64d20e3b175000c76b716fd2371189685bd2279bf34850e21585.tgz",
+      "sha256": "3e0b33bb2cac954eddbadc3816f72ca7168bb69660fb298f4e5f1c25bf6ea368",
+      "bytes": 39858,
+      "mtime_ns": 1791448212160725042
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/04556ea212e9b8dcc25b68653ce0750bee31d072c2a7d55e1bfacba389c6b083.tgz",
+      "sha256": "6ba231f5377e0b18ef7ab0c65ca895708e21f1abff5999b24629436b0ff77ac8",
+      "bytes": 2813,
+      "mtime_ns": 1791448114183920825
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/a9cba97b71b818fb0a4978f8b14875ae118f292a19ffa97c8b2d848f9a897d89.tgz",
+      "sha256": "9acba5bd18a51e9cdf5898380e4df63f803e1844def64ae1a46f88cff86d556e",
+      "bytes": 1506,
+      "mtime_ns": 1791448114770632955
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/849fb37298f1c4dcdeb6065edc4242918c7533bcfda5c67747e6ce4620c587bb.tgz",
+      "sha256": "fedbabaa6db26c6be0183f82777dfa852d59a62f8885de93bd32ebc28758958f",
+      "bytes": 1503,
+      "mtime_ns": 1791448115397291999
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/05a6222bc2fd401d1f06e79df07aa3a2892368314ff8f6c022aa03a76988e174.tgz",
+      "sha256": "b227ce6f8aaa55f1838a34d94bd20bb568cd11f184d8ea596ef02e43b08a85c1",
+      "bytes": 45047,
+      "mtime_ns": 1791448118005227518
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/df0705846315cd025165a3f99ca86110443715bf426cd7ab74ec59df4cd8b17b.tgz",
+      "sha256": "5286968c06c82a1b05289147f4a61f233c498c39bd1501711984c501150926ef",
+      "bytes": 7672,
+      "mtime_ns": 1791448118612203941
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/5ad551060d44370794e770309e198719e94f939e46a3ea537b776c9c4fdad9e4.tgz",
+      "sha256": "439623fa6aab91600615ec757eaa137fcab40d3b35dda38df7444c15678f20a8",
+      "bytes": 3851,
+      "mtime_ns": 1791448120693474787
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/695c3ef9530b873f97c839eda6971040e70b0916a1b8f5cfb7c32bf68093d806.tgz",
+      "sha256": "9bdb75d0bff49f156dd8c3bcb0e06b3fa96c3d88ddd4c342a4345866a40c08ca",
+      "bytes": 2041,
+      "mtime_ns": 1791448119231684495
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/412e89e7603573f7724c105c6e5f14f03b204f0123b2bc4f1c8a189e33cf9884.tgz",
+      "sha256": "f2bead0b21242d44edb6d3d1852fc456fc56ea9489cd8b9a85a458055b219c5d",
+      "bytes": 1556,
+      "mtime_ns": 1791448119829016317
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/0acb1923e939242af9b8e298927c467d1ecc969b8bf38853d70a8148db24e607.tgz",
+      "sha256": "97da1160af5344534182e72502978374d20875d32c6071cd2dae997be604f7f9",
+      "bytes": 3810,
+      "mtime_ns": 1791448123461382592
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/94d9608b52e4554a40695f3e1bd0207dde3d4249158db5c5cdbeb73dd8c2397a.tgz",
+      "sha256": "a63a255ec20a935c3a3334a6645f9245db36e2319ddf1eb6bc0eab2bfe5b42d7",
+      "bytes": 7479,
+      "mtime_ns": 1791448121270117063
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/511cd56aa5943fd465da93776449b0a7249438206b5c5bfc22cc6d7e55ab0029.tgz",
+      "sha256": "a97dc4e6710fffbb8eba030fea59845d7272117d654cb842d5ba7a2e82af93e8",
+      "bytes": 1671,
+      "mtime_ns": 1791448122319826580
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/5a71f2b741944bf107d6e7f067241798a6e277e42e8ca1e28c4608ccc233f8ec.tgz",
+      "sha256": "a13adf5fddeb769655edce551e81fbb11904b9c9be76d95e41da8c4c499d4edc",
+      "bytes": 4496,
+      "mtime_ns": 1791448122900152684
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-inputs-20261008/auxiliary-downloads-r1/13cebf193d7ada5ee347b9ae819b96f5e6da21f9b53e7f268c7703b686158595.tgz",
+      "sha256": "aff3730d91b7b1e143822956d14608f563163cf11b9d0ae602df1fe1e430fdfb",
+      "bytes": 1676,
+      "mtime_ns": 1791448123478573603
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/sdk-installed-integrity-20261008/network-retry/registry/8023b8bb9921fbbc831b0eed7c2f88acc3a3054d3a79c84f3460f7b984265cdd.tgz",
+      "sha256": "8e8874d92e1805e62ae3e17846521c70c68eaf16d2c977ba9c8d3e2cebbd8931",
+      "bytes": 8734,
+      "mtime_ns": 1791444775525102659
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/sdk-installed-integrity-20261008/registry/6390bf853aed627edd1fc017f5dc4771098786a93330a9fdd12060b62475b446.tgz",
+      "sha256": "89c1ac9c946ee8905a875837114528e97eeae35e03be3190584b2216af43e4a7",
+      "bytes": 13449,
+      "mtime_ns": 1791444597135693934
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/sdk-installed-integrity-20261008/registry/2083576c5af8054927640b4788059806d07e250a26066c9ccb2d928394fb9226.tgz",
+      "sha256": "f6616e15e530ed552f9daa2d3ce71963947c6bc7c98c9b64fd3e673fd02622c6",
+      "bytes": 2967,
+      "mtime_ns": 1791444601089763209
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/sdk-installed-integrity-20261008/registry/21a5f319b81ce9138bc9ffa317b6538bbb480265afa24c53b64570ad12086378.tgz",
+      "sha256": "adf493660d1efc7c69540b579f6c317070ba8e9f5d73d2b9067127ad3fe346b7",
+      "bytes": 4365,
+      "mtime_ns": 1791444627028556981
+    }
+  ],
+  "product_source_changes": false,
+  "downloaded_package_or_native_code_executed": false,
+  "dependencies_installed": false,
+  "host_default_toolchain_changed": false,
+  "sdk_rebuilt": false,
+  "bundle_transform_comparison": "NOT_RUN",
+  "SDK_FULL_PACKAGE_INTEGRITY_IDENTITY": "OPEN",
+  "SDK_EMBEDDED_COMPOSITION": "PARTIAL",
+  "EMBED_INLINE_BYTES": "PARTIAL",
+  "checker_inline_function_bytes": "NOT_VERIFIED",
+  "top_level_gates_new_pass": 0,
+  "distribution": "BLOCKED",
+  "release_ready": false,
+  "osv_requeried": false,
+  "commit_push_pr_merge_publish_deploy": false
+}

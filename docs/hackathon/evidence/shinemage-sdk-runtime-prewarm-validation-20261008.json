@@ -1,0 +1,136 @@
+{
+  "schema": "shinemage-sdk-runtime-prewarm/v1",
+  "status": "EXACT_RUNTIME_PREWARM_AND_OFFLINE_VERSION_PASS",
+  "release_ready": false,
+  "runtime_scope": [
+    "node@runtime:26.10.0",
+    "node@runtime:24.6.0"
+  ],
+  "manager": "pnpm 12.7.0 exact official darwin-arm64 native",
+  "online_prewarms_passed": 2,
+  "offline_version_checks_passed": 2,
+  "different_home_readonly_offline_checks_passed": 2,
+  "runtime_identity_file": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/runtime-identities.json",
+  "runtime_environment_file": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/offline-environment.json",
+  "signature_cache": [
+    {
+      "version": "26.10.0",
+      "shasums_path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/cache/v11/runtime-shasums/verified/nodejs.org/download/release/v26.10.0/SHASUMS256.txt",
+      "shasums_sha256": "60588158620d74dd4b130f7ad972ad535571c476cdc4b17fcfd9c4155d3ed2e3",
+      "matches_earlier_official_tls_body": true,
+      "signature_path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/cache/v11/runtime-shasums/verified/nodejs.org/download/release/v26.10.0/SHASUMS256.txt.sig",
+      "signature_sha256": "d53dd059ef2acbe7abf7523d508bce2154dcb936195bde7153988229c7cfbeea",
+      "scope": "Native pnpm verified-signature resolver completed; not a separate revocation/SDK native audit"
+    },
+    {
+      "version": "24.6.0",
+      "shasums_path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/cache/v11/runtime-shasums/verified/nodejs.org/download/release/v24.6.0/SHASUMS256.txt",
+      "shasums_sha256": "03a16e3c48e24c9f6f98d2284f21b9585db77d31cde4766c065b86c3089ab475",
+      "matches_earlier_official_tls_body": true,
+      "signature_path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/cache/v11/runtime-shasums/verified/nodejs.org/download/release/v24.6.0/SHASUMS256.txt.sig",
+      "signature_sha256": "0d74183dbd4ca4cf5f65d4a2ac6cdb132d8863112d59581765441663e7ddc81c",
+      "scope": "Native pnpm verified-signature resolver completed; not a separate revocation/SDK native audit"
+    }
+  ],
+  "baseline_manifest": {
+    "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/runtime-baseline-manifest.json",
+    "sha256": "5d561d4500457043e0ef5f7b7a578ec444f72db7176aa3892e11968d5f6994b4",
+    "regular_files": 6461,
+    "symlinks": 8
+  },
+  "readonly_comparison": {
+    "file_count": 6461,
+    "added": [],
+    "removed": [],
+    "changed": [],
+    "all_versions_pass": true
+  },
+  "transfer_conditions": [
+    "Managed slot key contains absolute store/v11/links path; moving or copying to a new root is not proven equivalent.",
+    "Exact existing state/store/cache can be consumed in place under a different isolated HOME; readonly and network-denied version checks passed.",
+    "Baseline is a digest snapshot, not filesystem immutability; subsequent coordinated single-writer dependency imports require preserving this snapshot and rechecking runtime members.",
+    "Do not share state/store writes concurrently or fake native manifests/index rows/receipts."
+  ],
+  "operations_not_run": [
+    "source install",
+    "source build",
+    "bundle byte comparison",
+    "SDK distribution gates",
+    "independent revocation audit",
+    "candidate/journal updates"
+  ],
+  "raw_evidence": [
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/environment.json",
+      "sha256": "fff1ebca1a2b62f802fc69941ffd4d08736cd87794c298569499b124263f715e"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/manager-lock-exception.json",
+      "sha256": "047f320452026583bf7ac00caa7ee0ee54b52973a1b52cb928b64f7c95cec804"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/offline-check.py",
+      "sha256": "9a7800cd430e2c6d11941aac7b6c16ff13e344f794f60b88b31403683c11e787"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/offline-environment.json",
+      "sha256": "593f825ad99e0ed9d2bd5e478a775fceef2dd55c43351cc86a894ec2e03f596d"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/offline.sb",
+      "sha256": "83f55b5a8e4c26182da275389e216d7be14edf4f883eeb6ba3117ede80f45b1b"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/online.sb",
+      "sha256": "1dbc3a86e86b7fc2118758e203da90b7eb7de54927eb4cd01e222a5bf7c3166e"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/prewarm.py",
+      "sha256": "ef2451bb64d0c4a7da02f2f67fd2fa449d38732f174e58f66a6d81567b97d47d"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/readonly-consumer-check.py",
+      "sha256": "7cd2b22219e2c64614ef163be3e63d6cda94d261dbb36d610d7edaee93f7912d"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/readonly-consumer-validation.json",
+      "sha256": "30b9a17bbac4947e74f50e4e892339cbbe1813b232e833f2cc1f1815d4155011"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/runtime-baseline-manifest.json",
+      "sha256": "5d561d4500457043e0ef5f7b7a578ec444f72db7176aa3892e11968d5f6994b4"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/runtime-identities.json",
+      "sha256": "9767d5b6d1022f96aa190f0e480b5955a984712db5a6ec0e01918783fe3f4fae"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/seal-baseline.py",
+      "sha256": "43cb220475c944e2d3ce7188dc3785cea34b59fe325a4dec2d47540c34e4be22"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/logs/offline-24.6.0-r1.json",
+      "sha256": "55fa9f1ac09b1e5e4f5c8bc9de38810a5681bc82cc540889ce7b359e013591fa"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/logs/offline-26.10.0-r1.json",
+      "sha256": "12c6ba5fb46729bcd448c371449d963783f57a4e8dc915750944b9dbb8287c28"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/logs/prewarm-24.6.0-r1.json",
+      "sha256": "8b719669d3abbb62cc0ddfa1568bdf222180a2e7692285362abae1f84603cfac"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/logs/prewarm-26.10.0-r1.json",
+      "sha256": "82467b714b48987a2df8a69ec0590cb4b7f9598285f98ed48ce6bc625d4e66c7"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/logs/readonly-24.6.0-r1.json",
+      "sha256": "34044419ae3473f14bfa568f4457200698cb5b1be8104d583c3ca5037200e84c"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-runtime-prewarm-20261008/logs/readonly-26.10.0-r1.json",
+      "sha256": "beb6cac7247359a1dc2d2abfd6c6013cb79a2f668bc4f4f897776a5c7df6114b"
+    }
+  ]
+}

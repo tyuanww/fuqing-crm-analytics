@@ -1,0 +1,380 @@
+{
+  "schema": "shinemage-existing-closeout-progress/v1",
+  "head": "8aabaaeb8d0e22a351088e1daefc164a5c0a2d09",
+  "sdk": {
+    "raw_maps_equal": 2,
+    "compiled_lib_sources_equal": 15,
+    "content_bearing_store_entries": 2594,
+    "store_evidence_classes": {
+      "physical_file": 2473,
+      "external_map_sources_content": 111,
+      "inline_map_sources_content": 10
+    },
+    "remaining_null_sources": 86,
+    "remaining_null_packages": 11,
+    "EMBED_INLINE_BYTES": "PARTIAL",
+    "default_product_fields": "NOT_VERIFIED",
+    "distribution": "BLOCKED",
+    "top_level_gates_new_pass": 0
+  },
+  "html": {
+    "package_members": 8,
+    "same_byte_and_mode_members": 7,
+    "runtime_js_same": 5,
+    "manifest_delta": "remove four dev scripts",
+    "current_source_files": 576,
+    "author_files": 581,
+    "received_members": 8,
+    "original_pure_input_guard": "PASS",
+    "new_headed": "NOT_RUN",
+    "formal_receipt_created": false
+  },
+  "stop_go": {
+    "status": "EVIDENCE_INCOMPLETE_NO_FORMAL_GO_DECISION",
+    "lead_time_p95": null,
+    "weekly_human_minutes": null,
+    "named_primary_backup_owners": "NOT_CONFIRMED",
+    "details": "shinemage-stop-go-closeout-validation-20261008.json"
+  },
+  "target": {
+    "scope": "local read-only virtualization inventory; no target executed",
+    "host": "Darwin arm64",
+    "commands": [
+      {
+        "argv": [
+          "docker",
+          "context",
+          "ls",
+          "--format",
+          "{{.Name}} {{.DockerEndpoint}} {{.Current}}"
+        ],
+        "exit_code": 0,
+        "result": [
+          {
+            "name": "default",
+            "endpoint": "unix:///var/run/docker.sock",
+            "current": false
+          },
+          {
+            "name": "desktop-linux",
+            "endpoint": "unix:///Users/hutou/.docker/run/docker.sock",
+            "current": true
+          }
+        ]
+      },
+      {
+        "argv": [
+          "podman",
+          "machine",
+          "list",
+          "--format",
+          "json"
+        ],
+        "exit_code": 0,
+        "result": {
+          "name": "podman-machine-default",
+          "running": false,
+          "starting": false
+        }
+      },
+      {
+        "argv": [
+          "colima",
+          "list",
+          "--json"
+        ],
+        "exit_code": 0,
+        "result": []
+      },
+      {
+        "argv": [
+          "limactl",
+          "list",
+          "--json"
+        ],
+        "exit_code": 0,
+        "result": "No instance found"
+      },
+      {
+        "argv": [
+          "docker",
+          "--host",
+          "unix:///Users/hutou/.docker/run/docker.sock",
+          "info",
+          "--format",
+          "{{json .}}"
+        ],
+        "exit_code": 0,
+        "selected_result": {
+          "OSType": "linux",
+          "Architecture": "aarch64",
+          "OperatingSystem": "Docker Desktop",
+          "ServerVersion": "29.8.0",
+          "ContainersRunning": 0
+        }
+      },
+      {
+        "argv": [
+          "docker",
+          "--host",
+          "unix:///Users/hutou/.docker/run/docker.sock",
+          "image",
+          "ls",
+          "--format",
+          "{{.ID}} {{.Repository}}:{{.Tag}}"
+        ],
+        "exit_code": 0,
+        "result_scope": "7 existing CRM/WeKnora/infrastructure image references; no approved standalone target base; not started or inspected internally"
+      }
+    ],
+    "image_pulled": false,
+    "container_started": false,
+    "vm_started": false,
+    "remote_connected": false,
+    "formal_target_result": "NOT_RUN",
+    "release_ready": false,
+    "required_target": {
+      "scope": "actual-wsl2-synthetic-package-http",
+      "system": "Linux",
+      "machine": "x86_64",
+      "kernel_contains": [
+        "microsoft",
+        "wsl2"
+      ],
+      "uid": 65534,
+      "python_contract": "3.14.x",
+      "prepared_input_python": "3.14.4",
+      "docker_emulation_equivalent": false
+    },
+    "requirement_sources": [
+      {
+        "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/scripts/release/source-target-evidence.mjs",
+        "sha256": "2de8b252bdaf01ebae8d5434728964d2070532fe77927e51dfbc3d406ab93745"
+      },
+      {
+        "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/scripts/release/terminal-host-evidence.mjs",
+        "sha256": "5418333999627db2f54a8678f824e1a8dd3045217957a9b76d129213f5d99b43"
+      },
+      {
+        "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/scripts/release/test-fixtures/terminal-target-20261007.py.txt",
+        "sha256": "bc1b021a1b7a689e717f4fa77ae016283ff46fe0a934c60c9878aecdfb70b75f"
+      }
+    ],
+    "result": "BLOCKED_NO_AVAILABLE_AUTHORIZED_WSL2_TARGET"
+  },
+  "ci": {
+    "scope": "cached origin/main merge-base to current committed HEAD; no fetch",
+    "changed_paths": 618,
+    "original_plan_only_exit": 0,
+    "actual_ci": "NOT_RUN"
+  },
+  "review": {
+    "sdk": "independent read-only review; 0 findings in checked scope",
+    "sdk_review_inputs": 31,
+    "compiled_lib_independently_compared": 15,
+    "secondary_sources_samples": {
+      "external_map": 1,
+      "inline_map": 1
+    },
+    "html": "main independently compared 8 tar members and manifest parsed fields; reviewed preparation/validation records",
+    "external_probe_ocr": "NOT_CLOSED_NO_RETRY"
+  },
+  "protected_state": {
+    "head": "8aabaaeb8d0e22a351088e1daefc164a5c0a2d09",
+    "branch": "",
+    "saved_ref": "8aabaaeb8d0e22a351088e1daefc164a5c0a2d09",
+    "protected_trees": [
+      {
+        "path": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics",
+        "head_equal": true,
+        "status_equal": true,
+        "file_count": 14,
+        "hashes_equal": true
+      },
+      {
+        "path": "/Users/hutou/.codex/worktrees/grok-sdk-trust-closeout/fuqing-crm-analytics",
+        "head_equal": true,
+        "status_equal": true,
+        "file_count": 37,
+        "hashes_equal": true
+      },
+      {
+        "path": "/Users/hutou/.codex/worktrees/shinemage-t14-html-ocr/fuqing-crm-analytics",
+        "head_equal": true,
+        "status_equal": true,
+        "file_count": 35,
+        "hashes_equal": true
+      },
+      {
+        "path": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics",
+        "head_equal": true,
+        "status_equal": true,
+        "file_count": 8,
+        "hashes_equal": true
+      },
+      {
+        "path": "/Users/hutou/.codex/worktrees/grok-html-ui-acceptance/fuqing-crm-analytics",
+        "head_equal": true,
+        "status_equal": true,
+        "file_count": 10,
+        "hashes_equal": true
+      },
+      {
+        "path": "/Users/hutou/.codex/worktrees/grok-sdk-trust-evidence/fuqing-crm-analytics",
+        "head_equal": true,
+        "status_equal": true,
+        "file_count": 1,
+        "hashes_equal": true
+      }
+    ],
+    "candidate_files": [
+      {
+        "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/candidate/candidate.json",
+        "sha256": "e57173990a0a7b2c836492159b87e36d17c97a9afe78284d1daf9eaadc131fe6",
+        "unchanged": true
+      },
+      {
+        "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/candidate/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+        "sha256": "b75d90e98167fea507e8ab3304beda98c6706d7130eb8eb4e6359209ad0fff1b",
+        "unchanged": true
+      },
+      {
+        "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/plugin-state.json",
+        "sha256": "018bf8a055af8e2315c7071d54aa73bc9ab604c2cb8c2288d1ff2cd2b947ef6c",
+        "unchanged": true
+      }
+    ],
+    "upstream": {
+      "head_equal": true,
+      "status_equal": true,
+      "index_equal": true,
+      "lock_equal": true
+    },
+    "version": "0.20.0.0",
+    "journal_seq": 3,
+    "release_ready": false
+  },
+  "archive": {
+    "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/archives/shinemage-final-closeout-20261008/evidence.tar.gz",
+    "file_count": 3572,
+    "input_bytes": 99216193,
+    "archive_bytes": 21650776,
+    "sha256": "825705a6a41fe236c7e7c15736dbd6e8cbee37b5a46a7fe056f6f41531191743",
+    "manifest_sha256": "cab681770787eb39375de6f4a0d987c5edc72a7833c249cb95b4cfc6f4a35c7a",
+    "member_verification": "PASS",
+    "document_reference_checks": [
+      {
+        "document": "shinemage-stop-go-closeout-validation-20261008.json",
+        "reference_count": 30
+      },
+      {
+        "document": "shinemage-sdk-embedded-gap-closeout-validation-20261008.json",
+        "reference_count": 12
+      },
+      {
+        "document": "shinemage-html-candidate-gap-20261008-validation.json",
+        "reference_count": 18
+      },
+      {
+        "document": "shinemage-html-candidate-inputs-20261008-validation.json",
+        "reference_count": 12
+      }
+    ]
+  },
+  "references": [
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/docs/hackathon/evidence/shinemage-stop-go-closeout-validation-20261008.json",
+      "sha256": "f56c61791d9efaa00a534564b61693f4757a3033780ab4d18d63822a237aceb5",
+      "bytes": 41172
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/docs/hackathon/evidence/shinemage-sdk-embedded-gap-closeout-validation-20261008.json",
+      "sha256": "fe44d16d87ce3b736fdca3ac29ab5628816b1b1bf38cb50ab3a06044f64fef52",
+      "bytes": 7244
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/docs/hackathon/evidence/shinemage-html-candidate-gap-20261008-validation.json",
+      "sha256": "568a1ec34b6c6dd100cbf3a1dd3f2eed5f9bad73af8f168fc7d1ce158ac5b847",
+      "bytes": 37050
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/docs/hackathon/evidence/shinemage-html-candidate-inputs-20261008-validation.json",
+      "sha256": "f8ad2079047705cdee6e2302f33b23f48acb04040c07fcff2e5dc9cbb2d62f86",
+      "bytes": 6551
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-embedded-gap-review-20261008/review.md",
+      "sha256": "44c35988122f64114b55e5a27cca724c4e4d00d2da23fc69b74b05347dee63e4",
+      "bytes": 2769
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-embedded-gap-review-20261008/summary.json",
+      "sha256": "1bbe12c223882557f2e19597f528c90b1355d639896704760a24a0e427996331",
+      "bytes": 19995
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-final-closeout-20261008/before.json",
+      "sha256": "7c69eef6cd195965f952e333eb7beecf01a5e84d2bcf65f147e35a3f0f0265b7",
+      "bytes": 6086
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-final-closeout-20261008/local-target-inventory.json",
+      "sha256": "8df86f141341f87d83cff6a08a6d1b398c202da1a7e4935c17ccb50caca3f008",
+      "bytes": 3273
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-final-closeout-20261008/archive.json",
+      "sha256": "ec675279fac0b01e5ea7578857d5acd0cbae8932eb48ae3b4e130cf460494af0",
+      "bytes": 950
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-final-closeout-20261008/ci-plan.stdout",
+      "sha256": "6be04740ea4faf77a482a19b7ce86c7237054030b9c7cb2ebf86829bd9c24838",
+      "bytes": 35913
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-final-closeout-20261008/protected-after.json",
+      "sha256": "66a0865ec0b70a601a73b1e77212ae40a21af82f97c55c35fd865bec72612dcd",
+      "bytes": 2517
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-final-closeout-20261008/html-independent.json",
+      "sha256": "9dc814a5dd9e6382fedda854790f81025ad081dbce12766158f80f656016e0b1",
+      "bytes": 1179
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-final-closeout-20261008/ci-plan.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-final-closeout-20261008/ci-readiness.json",
+      "sha256": "79a9b61854971a4fbb371541c8cc44e7a246091d59808a6abe3a43eb7cbf3266",
+      "bytes": 40878
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-final-closeout-20261008/ci-source-paths.txt",
+      "sha256": "acd231993015fd1d571b69212a59e8b1d562dd5eff4e20ceeaa60ea176bda5aa",
+      "bytes": 32706
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-final-closeout-20261008/final-check.json",
+      "sha256": "4c15e361a3b2d7a361075ed8aaad686a6ee7bf9362dc4f29125f49d21994d8bb"
+    }
+  ],
+  "product_code_modified": false,
+  "new_commit": false,
+  "push_pr_merge_release_deploy": false,
+  "release_ready": false,
+  "final_check": {
+    "git_visible_files": 38,
+    "prior_evidence_files_preserved": 24,
+    "new_evidence_files": 10,
+    "all_changes_documentation_only": true,
+    "json_files_parsed": 17,
+    "broken_links": [],
+    "diff_check": "PASS",
+    "head_unchanged": true,
+    "index_staged_empty": true
+  }
+}

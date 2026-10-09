@@ -1,0 +1,55 @@
+{
+  "schema": "shinemage-native-ui-route-check/v1",
+  "status": "BLOCKED_ISOLATED_NATIVE_WINDOW_ROUTE",
+  "release_ready": false,
+  "scope": "preflight only; no host started",
+  "documented_methods": [
+    "cua.rewriteDocumentation()",
+    "cua.createBrowserTab(\"chrome\",\"about:blank\",{sessionName:\"🧪 HTML准入路由\"})",
+    "cua.getApp(\"Google Chrome\")",
+    "routeTab.close()"
+  ],
+  "task_tab": {
+    "id": "199372801",
+    "browser_id": "1",
+    "browser_type": "extension",
+    "url": "about:blank",
+    "created": true,
+    "closed": true,
+    "precisely_bound_tab": true
+  },
+  "session_name_semantics_observed": "tab group in existing user Chrome window; not a separate profile or window",
+  "native_app_route": "macOS name/path/bundle ID only; getApp returns existing user window",
+  "missing_documented_api": [
+    "macOS PID/window-ID binding",
+    "createBrowserTab profile/user-data-dir selection",
+    "createBrowserTab dedicated native window selection"
+  ],
+  "ui_inputs": {
+    "menu_clicks": 0,
+    "zoom_changes": 0,
+    "tab_key_presses": 0
+  },
+  "service_launches": 0,
+  "chrome_process_launches": 0,
+  "native_view_menu": "NOT_RUN",
+  "native_200_keyboard_focus": "NOT_RUN",
+  "screenshots": [],
+  "no_personal_tab_interaction": true,
+  "personal_content_archived": false,
+  "note": "getApp automatically returned existing active window AX. No personal content copied to evidence and no actions sent to old tabs.",
+  "ports": {
+    "4328": {
+      "exit": 1,
+      "stdout": ""
+    },
+    "4329": {
+      "exit": 1,
+      "stdout": ""
+    }
+  },
+  "historical_evidence_unchanged": {
+    "shinemage-html-remaining-20261008.md": "fe87afc4af0923c40780e05ebc4b94a6d2cda8884ecdb0d4fa8c34a0f1a97e82",
+    "shinemage-html-remaining-20261008.json": "423fe073de06e4d79844d2c3ab128dbd06e76e3a18f6c68717a94cea57252f0f"
+  }
+}

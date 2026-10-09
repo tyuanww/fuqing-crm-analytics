@@ -1,0 +1,175 @@
+{
+  "schema_version": "shinemage-current-browser-target-validation/v1",
+  "status": "TARGET_BROWSER_PASS_FORMAL_JOURNAL_SEQ6_VERIFIED_BY_MAIN",
+  "release_ready": false,
+  "raw_directory": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/current-browser-target-20261008",
+  "handoff": {
+    "name": "handoff.json",
+    "sha256": "59baa1e869789f9e53efee59232e06ac68c5fb8937987902660fe115580c1884"
+  },
+  "archive_manifest": {
+    "name": "archive-manifest.json",
+    "sha256": "64cb135b733a2ae4326ea7bc3e148eb6562074fdd660d86fb96f496e835c67bd",
+    "file_count": 747
+  },
+  "checks": {
+    "original_runner_exit_0": true,
+    "pytest_1_pass": true,
+    "five_browser_scenarios": true,
+    "source_receipt_current": true,
+    "sealed_510_unchanged": true,
+    "archive_inventory_exact_set": true,
+    "all_result_member_hashes_match": true,
+    "cleanup_original_script_exit_0": true,
+    "formal_journal_this_agent": "NOT_RUN"
+  },
+  "raw_refs": {
+    "authorized-parent.json": {
+      "bytes": 491,
+      "sha256": "fe29dcd1f95e995896c4bdf9ba40e85cfba743a05f9af01823e13b777e70f1ab"
+    },
+    "preparation.json": {
+      "bytes": 6556,
+      "sha256": "76dcf04be636a006fa5239cf72da03f9d1f3d6d1fb77cf2f5927940237ae2438"
+    },
+    "transfer-meta.json": {
+      "bytes": 938,
+      "sha256": "1ee98c09b9651a6c8ccf66b3741d69cb4a32ea344c7396b39b9e423eb54ad33c"
+    },
+    "transfer/input-seal.json": {
+      "bytes": 94182,
+      "sha256": "9d381e7b7107dec3f668192a842f074b540ceb5f7641aebec041e82715b3aa26"
+    },
+    "transfer/controller/sources.json": {
+      "bytes": 31310,
+      "sha256": "994440c35f50957ae5d0af108dab454c10f6a3e48a636c1618647863ca510149"
+    },
+    "run.py": {
+      "bytes": 5054,
+      "sha256": "0bc2426fd23c52da35d2bf57c4c72d0e84e9afe3489edce7ef87252aab2d6d27"
+    },
+    "remote-launch.py": {
+      "bytes": 1826,
+      "sha256": "b6b67853ab79408a0886b2045c317b75492c9be50721a2bda9e3501de09f4bf2"
+    },
+    "remote-launch.result.json": {
+      "bytes": 521,
+      "sha256": "582b6b59101dba3e50ad844d430cac9b09116b4aa186bbe56fe81442de38e22a"
+    },
+    "remote-launch.stdout": {
+      "bytes": 401,
+      "sha256": "406d7b67e64d525aadef14447c42f4dd81e1e8441d21f40d4d440d792a6567eb"
+    },
+    "remote-launch.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "remote-assets.result.json": {
+      "bytes": 1011,
+      "sha256": "2d3b3946f7ece5a23c9bb282ee82368a71b6f77c8a03dadad02e0033ddf4dae6"
+    },
+    "remote-inputs.result.json": {
+      "bytes": 776,
+      "sha256": "8ff2bdc7a202429889bf6db9bc4af84136ff72f21d9e6a70cb054a81541b103f"
+    },
+    "chrome.zip.download.json": {
+      "bytes": 1127,
+      "sha256": "bfa14ed99b3cdd4ea621a386d2b56fba146ee21cef370f09b097253d3035fb52"
+    },
+    "chrome-contract-download.py": {
+      "bytes": 1228,
+      "sha256": "c65db6266f35ddf498e875ee1810c68fc344bafa3b61b938eb81390b6ca04652"
+    },
+    "remote-collect.py": {
+      "bytes": 3462,
+      "sha256": "ebe2dfff5a04ec1e9f6c3a896de3c814aa78803cb6e7760fa72e22e858d0850a"
+    },
+    "remote-collect.py.result.json": {
+      "bytes": 453,
+      "sha256": "03b8d01ca6edbe8782e4fbff5387254106f9242e0bce75953a7970f4ee677436"
+    },
+    "results.tar.gz": {
+      "bytes": 717009,
+      "sha256": "7e273c3835dddc0171c1de06f5c0c4b0eb22678d60d289ae44a7daee46c2f356"
+    },
+    "retrieval-verification.json": {
+      "bytes": 210,
+      "sha256": "d88379c9ac47b1f64f4049d94ac62c65c8322536d4b5271acab24fb11a3762dc"
+    },
+    "retrieved/results-inventory.json": {
+      "bytes": 32404,
+      "sha256": "1b90cfa4c84ff9c6b9f51ebfde2271b4b66b869b64cb974dee26d86de53a1959"
+    },
+    "retrieved/cleanup-check.json": {
+      "bytes": 267,
+      "sha256": "2e27ea02dd86a14db017f7f772cde054f344b1a8c532ab2acfb7f928291bdf4e"
+    },
+    "retrieved/run-result.json": {
+      "bytes": 392,
+      "sha256": "ec22a0cfc42eca9e03f09dd2bc96f496586c87cee3406cc4f84e30c353649eb8"
+    },
+    "retrieved/browser-result/receipt.json": {
+      "bytes": 1336,
+      "sha256": "66e294b2d5feac787cab8c9c851147e51b13ed4be80d0529b7d7e1df5799dba5"
+    },
+    "retrieved/browser-result/pytest.stdout": {
+      "bytes": 1040,
+      "sha256": "6d4d07032da01b718fef78f6ab42d6dca9dea2cc038036919803a361b9a9a568"
+    },
+    "retrieved/browser-result/pytest.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "retrieved/payload/input-v5.json": {
+      "bytes": 1228,
+      "sha256": "5da28721f0464bd756ba7a76a01081e194b18ce5c86aab1dc8781b90952a594e"
+    },
+    "retrieved/payload/platform-receipt.json": {
+      "bytes": 9978,
+      "sha256": "b14f12b485d692985200dbdb0a4891c31d9dce5602446455b4e13959abb1a21c"
+    },
+    "retrieved/browser-font-receipt.json": {
+      "bytes": 1515,
+      "sha256": "2119d9058e6b3e164ef0f05120d3baa381f440565e189286643633895ef57845"
+    },
+    "retrieved/browser-library-receipt.json": {
+      "bytes": 604,
+      "sha256": "ce7b40e64e171989583cd7e3e8ec44a75ef5bcb45a51111bcd51e70a98e56f96"
+    },
+    "retrieved/browser-result/tests/test_official_host_crm_query_s0/official-host/browser-observations.json": {
+      "bytes": 398,
+      "sha256": "0b46abee1095b4cdb2ea376abd47a68bf7fd541222baea8995bcd1a244bdcc0b"
+    },
+    "retrieved/browser-result/tests/test_official_host_crm_query_s0/official-host/http-observations.json": {
+      "bytes": 16234,
+      "sha256": "1331d5fcfb1a605dca98a43b548dcbc6d13a208f7136100e856ad3b983c19748"
+    },
+    "remote-cleanup.py": {
+      "bytes": 1218,
+      "sha256": "319d1212cb209416becc44de09e69afb8269f43e6deb86595bbb9f8baf65ce84"
+    },
+    "remote-cleanup.py.result.json": {
+      "bytes": 165,
+      "sha256": "4f3b2b938bec2b4855d411c92016aa97dcb5eac3ccadc619ff737041253432e2"
+    },
+    "retrieved/browser-result/tests/test_official_host_crm_query_s0/official-host/browser-last.png": {
+      "bytes": 72846,
+      "sha256": "9e5d61fe92090941b67218d32ce70b4354ae13882cdf1cb436acf64bb294e104"
+    },
+    "retrieved/browser-result/tests/test_official_host_crm_query_s0/official-host/browser-native.png": {
+      "bytes": 72846,
+      "sha256": "9e5d61fe92090941b67218d32ce70b4354ae13882cdf1cb436acf64bb294e104"
+    },
+    "retrieved/browser-result/tests/test_official_host_crm_query_s0/official-host/browser-saved.png": {
+      "bytes": 151802,
+      "sha256": "e9958bb2b285f7505a915fbf72dc49d3cbf836f9051c3386799a0662368812e5"
+    }
+  },
+  "main_formal_event": {
+    "seq": 6,
+    "digest": "d36af3d53c2e1932916bfe4fe677c42aa0f73e124c01cd57be8b40f765d74b3f",
+    "status": "CANDIDATE_BROWSER_HOST_OBSERVED",
+    "state_sha256": "3316e90211410975b44b2ff02e84a7e29965a831f4e00abb5f437e06acedfbee",
+    "verified_read_only_by_this_agent": true
+  }
+}

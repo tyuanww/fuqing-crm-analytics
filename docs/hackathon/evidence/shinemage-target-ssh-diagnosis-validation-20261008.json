@@ -1,0 +1,25 @@
+{
+  "schema": "single-target-ssh-auth-root-cause/v1",
+  "target": "100.93.46.46",
+  "ssh_user": "hutou (effective local default, remote account not confirmed)",
+  "network": "TCP_TO_SSH_ESTABLISHED",
+  "server": "OpenSSH_9.6p1 Ubuntu-3ubuntu13.19",
+  "host_key": "KNOWN_MATCH",
+  "server_allowed_auth": "publickey",
+  "agent_identities": 0,
+  "configured_default_identity_files": "all absent",
+  "offered_public_keys": 0,
+  "root_cause": "NO_USABLE_CLIENT_IDENTITY_FOR_EFFECTIVE_SSH_CONFIG",
+  "remote_commands_executed": false,
+  "ssh_exit": 255,
+  "tailscale_restart_needed_for_this_error": false,
+  "remote_wsl_architecture_verified": false,
+  "configuration_changed": false,
+  "next_input": "target SSH username and authorized existing identity, or provision a dedicated target public key; do not disclose private keys/passwords",
+  "files": {
+    "ssh-debug.log": "e385a754e01898619cb25be9e777b6a6267286dc33db9684c4733931909a0f74",
+    "command-result.json": "f7e3252afe191bcfa8583361ec30100ec26567cd16f32627786480042493a8f0",
+    "effective.json": "f7ea33259c146d458b61852649efd1021aa40a0cc30a9bbadb2d15362aed0c3b",
+    "agent-identities.json": "0a33c2fcf5a89e6c4d4e134d740ee3ef3ce15235646eff2323ccaf224c436f92"
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "schema": "candidate-target-single-address-preflight/v1",
+  "target": "100.114.157.0",
+  "ssh_effective": {
+    "user": "hutou",
+    "hostname": "100.114.157.0",
+    "port": "22",
+    "addressfamily": "any",
+    "canonicalizehostname": "false"
+  },
+  "single_ssh_attempt": {
+    "exit_code": 255,
+    "seconds": 0.081,
+    "stdout": "",
+    "stderr": "No ED25519 host key is known for 100.114.157.0 and you have requested strict checking.\nHost key verification failed.\n",
+    "remote_acceptance": "NOT_RUN",
+    "remote_mutation": false
+  },
+  "tailscale_single_target": {
+    "source": "local Tailscale daemon status, filtered to exact user target; no peer network scanning",
+    "target": "100.114.157.0",
+    "matches": [
+      {
+        "relation": "Self",
+        "target": "100.114.157.0",
+        "HostName": "hutou的MacBook Air",
+        "DNSName": "hutoumacbook-air.tail789f50.ts.net.",
+        "OS": "macOS",
+        "Online": true,
+        "Active": false,
+        "Expired": null
+      }
+    ]
+  },
+  "conclusion": "CURRENT_MACOS_SELF_NOT_WSL2_TARGET",
+  "remote_identity_commands_executed": false,
+  "remote_mutation": false,
+  "candidate_journal_mutation": false,
+  "acceptance": "NOT_RUN",
+  "next_input": "Actual nonproduction WSL2 Linux x86_64 target address, SSH identity, trusted host-key basis and allowed owned directory; current Mac address cannot satisfy unchanged target gate.",
+  "no_retry": true,
+  "sources": [
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-target-connection-20261008/check.py",
+      "sha256": "c26478febe18fceb05a34ce0f367ba7de48c11819475527634f40e3ed89f7838",
+      "bytes": 2674
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-target-connection-20261008/ssh-effective.json",
+      "sha256": "6c43037ee95a010c0fb642145ec82c7ca2db4902ec27b06da0e259676cf816cb",
+      "bytes": 130
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-target-connection-20261008/ssh-command.json",
+      "sha256": "cbc54743aae4e6585f6675d630bb211e8fddfe294a72f8b785e02dd60a002939",
+      "bytes": 787
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-target-connection-20261008/ssh-result.json",
+      "sha256": "d4f3f577ba6ba129b81a95b75549e94d526585a223de25888ac7639ac5a62ee9",
+      "bytes": 256
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-target-connection-20261008/tailscale-target.json",
+      "sha256": "a7aa5c7b4f06bf2cc8de1243421919a3edf9a1a9b660b35c18f14782af470d48",
+      "bytes": 155
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-target-connection-20261008/tailscale-target-status.json",
+      "sha256": "452866a47195eb2df8201b2257a7ffd952dab43b3dead0ce2602f7b533df5f8d",
+      "bytes": 413
+    }
+  ]
+}

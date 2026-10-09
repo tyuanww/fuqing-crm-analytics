@@ -1,0 +1,969 @@
+{
+  "schema": "shinemage-stop-go-evidence-closeout/v1",
+  "scope": "read-only-existing-local-evidence-extraction",
+  "new_tests_run": false,
+  "release_ready": false,
+  "stop_go": "EVIDENCE_INCOMPLETE_NO_FORMAL_GO_DECISION",
+  "gate_decision": "Four indicators remain partial or missing; formal human stop/go not performed; no numeric SLO or owner invented.",
+  "current_candidate": {
+    "source": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/candidate/candidate.json",
+    "candidate_digest": "993daf31daa79137c22ce8d16c84b61892117386a9b7b8c5119fa0be62abefb0",
+    "source_sha": "bd647352d02402c679b04172855e40ec8f2d96a5",
+    "profile_id": "first-purchase-source-http-local",
+    "profile_digest": "be3948850fc414ce1524226a544783de1ecb3253514cc7f1d8f3280280b3d0af",
+    "pack": {
+      "name": "shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+      "sha256": "b75d90e98167fea507e8ab3304beda98c6706d7130eb8eb4e6359209ad0fff1b",
+      "bytes": 438511
+    },
+    "service_binding": {
+      "schema_version": "dsh-service-binding/v1",
+      "service_id": "analytics-first-purchase",
+      "source_sha": "f9726f682fc0d1d4c6aef6f07e6932c2c600c3d6",
+      "api_version": "1.0.0",
+      "state": {
+        "owner": "analysis-service",
+        "application_id": 1397572502,
+        "schema_version": 1,
+        "contract": "analytics-first-purchase-saved-provenance/v1"
+      },
+      "access": "read-write",
+      "lifecycle": "external",
+      "rollback": "preserve-service-and-state",
+      "evidence_sha256": "9a6a4a7a28e0ffc69441394c18030b0a51eb2a881c4d00566b535931f3b391b0"
+    },
+    "activation": "NOT_RUN",
+    "rollback": {
+      "status": "NOT_RUN",
+      "reason": "host activation is a separate gate"
+    },
+    "profile_diff": {
+      "status": "NOT_RUN",
+      "reason": "no --previous-profile supplied",
+      "added": [],
+      "removed": [],
+      "reordered": false
+    }
+  },
+  "current_journal": {
+    "source": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/plugin-state.json",
+    "seq": 3,
+    "events": [
+      {
+        "seq": 1,
+        "at": "2026-10-08T07:53:14.894Z",
+        "status": "CANDIDATE_INTENT",
+        "candidate_digest": "993daf31daa79137c22ce8d16c84b61892117386a9b7b8c5119fa0be62abefb0",
+        "pack_sha256": "b75d90e98167fea507e8ab3304beda98c6706d7130eb8eb4e6359209ad0fff1b",
+        "digest": "ddbc51aad875ddd24b8e0fc554ced25a0685cbffd4a41c2e84eb6b01db64d92f"
+      },
+      {
+        "seq": 2,
+        "at": "2026-10-08T07:53:14.908Z",
+        "status": "CANDIDATE_PREPARED",
+        "candidate_digest": "993daf31daa79137c22ce8d16c84b61892117386a9b7b8c5119fa0be62abefb0",
+        "pack_sha256": "b75d90e98167fea507e8ab3304beda98c6706d7130eb8eb4e6359209ad0fff1b",
+        "digest": "c98045005e1f7e5e687dbff7f05b35b5217c18b502cb9480c3b3b59b76fe31cc"
+      },
+      {
+        "seq": 3,
+        "at": "2026-10-08T08:10:01.070Z",
+        "status": "CANDIDATE_SERVICE_ARTIFACTS_VERIFIED",
+        "candidate_digest": "993daf31daa79137c22ce8d16c84b61892117386a9b7b8c5119fa0be62abefb0",
+        "pack_sha256": "b75d90e98167fea507e8ab3304beda98c6706d7130eb8eb4e6359209ad0fff1b",
+        "digest": "8a1a5ba1b511389250f0cf28f7333820e64ce6d19136148a6fdcf5ac83bfda13"
+      }
+    ],
+    "matching_candidate_pack_all_events": true,
+    "intent_to_prepared_observation_ms": 14,
+    "timing_warning": "14 ms is only two journal writes, not build/pack/rollback-ready lead time."
+  },
+  "metrics": {
+    "lead_time_p95": {
+      "status": "NOT_ESTABLISHED",
+      "plan_source": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/docs/plans/shinemage-plugin-platform-split.md:204",
+      "candidate_lead_time_ms": null,
+      "candidate_lead_time_p95_ms": null,
+      "baseline_ms": null,
+      "approved_target_ms": null,
+      "raw_source": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/summary.json",
+      "observed_pack_ms": 908,
+      "scenario_elapsed_min_ms": 4236,
+      "scenario_elapsed_max_ms": 6136,
+      "trial_envelope_ms": 50806,
+      "gap": "Ten heterogeneous scenarios after one package preparation are not ten same-boundary change-to-rollback-ready candidate trials. Reading, dependency setup and human investigation are outside these timings; cold/warm baseline, agreed target and comparable P95 absent."
+    },
+    "bounded_failure_recovery": {
+      "status": "LOCAL_SCENARIO_EVIDENCE_PARTIAL_STOP_GO",
+      "raw_record_sources": [
+        "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/03-interrupt-before-ready/record.json",
+        "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/04-digest-mismatch-restore/record.json",
+        "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/06-inflight-kill-wal/record.json",
+        "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/07-save-unknown-replay/record.json",
+        "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/08-prepare-reject-restore-old/record.json",
+        "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/10-profile-rollback-keeps-data/record.json"
+      ],
+      "recovery_ms": [
+        {
+          "scenario": "03-interrupt-before-ready",
+          "value": 783
+        },
+        {
+          "scenario": "04-digest-mismatch-restore",
+          "value": 791
+        },
+        {
+          "scenario": "06-inflight-kill-wal",
+          "value": 734
+        },
+        {
+          "scenario": "08-prepare-reject-restore-old",
+          "value": 734
+        }
+      ],
+      "recovery_timing_boundary": "One openSession call after the failure/kill completed; includes preparation, launch and synthetic prompt/session validation. Does not include earlier stop/failure or final pointer write.",
+      "profile_rollback_ms": 731,
+      "unknown_save_replay_ms": 359,
+      "configured_retry_limit": null,
+      "observed_recovery_attempts_per_recovery_branch": 1,
+      "attempt_evidence": "Runner has one direct openSession call in each recovery branch, not a retry loop; not an operational retry policy.",
+      "cancellation": [
+        {
+          "signal": "SIGINT",
+          "runner_pid": 51770,
+          "observed_dsh_pid": 52039,
+          "exit_code": 2,
+          "overall": "INTERRUPTED",
+          "interrupt": "SIGINT",
+          "runs": [
+            {
+              "scenario": "01-controlled-update",
+              "status": "INTERRUPTED"
+            }
+          ],
+          "not_started": [
+            {
+              "scenario": "02-same-digest-replay",
+              "status": "NOT_RUN"
+            },
+            {
+              "scenario": "03-interrupt-before-ready",
+              "status": "NOT_RUN"
+            },
+            {
+              "scenario": "04-digest-mismatch-restore",
+              "status": "NOT_RUN"
+            },
+            {
+              "scenario": "05-host-restart-required",
+              "status": "NOT_RUN"
+            },
+            {
+              "scenario": "06-inflight-kill-wal",
+              "status": "NOT_RUN"
+            },
+            {
+              "scenario": "07-save-unknown-replay",
+              "status": "NOT_RUN"
+            },
+            {
+              "scenario": "08-prepare-reject-restore-old",
+              "status": "NOT_RUN"
+            },
+            {
+              "scenario": "09-native-fallback-then-new",
+              "status": "NOT_RUN"
+            },
+            {
+              "scenario": "10-profile-rollback-keeps-data",
+              "status": "NOT_RUN"
+            }
+          ],
+          "cleanup_failed": false,
+          "host_gone": true,
+          "seconds_to_exit": 0.404,
+          "protected_ports_unchanged": true
+        },
+        {
+          "signal": "SIGTERM",
+          "runner_pid": 52114,
+          "observed_dsh_pid": 52387,
+          "exit_code": 2,
+          "overall": "INTERRUPTED",
+          "interrupt": "SIGTERM",
+          "runs": [
+            {
+              "scenario": "01-controlled-update",
+              "status": "INTERRUPTED"
+            }
+          ],
+          "not_started": [
+            {
+              "scenario": "02-same-digest-replay",
+              "status": "NOT_RUN"
+            },
+            {
+              "scenario": "03-interrupt-before-ready",
+              "status": "NOT_RUN"
+            },
+            {
+              "scenario": "04-digest-mismatch-restore",
+              "status": "NOT_RUN"
+            },
+            {
+              "scenario": "05-host-restart-required",
+              "status": "NOT_RUN"
+            },
+            {
+              "scenario": "06-inflight-kill-wal",
+              "status": "NOT_RUN"
+            },
+            {
+              "scenario": "07-save-unknown-replay",
+              "status": "NOT_RUN"
+            },
+            {
+              "scenario": "08-prepare-reject-restore-old",
+              "status": "NOT_RUN"
+            },
+            {
+              "scenario": "09-native-fallback-then-new",
+              "status": "NOT_RUN"
+            },
+            {
+              "scenario": "10-profile-rollback-keeps-data",
+              "status": "NOT_RUN"
+            }
+          ],
+          "cleanup_failed": false,
+          "host_gone": true,
+          "seconds_to_exit": 0.398,
+          "protected_ports_unchanged": true
+        }
+      ],
+      "cancellation_timing_boundary": "From immediately before sending signal to after child wait, summary read and host PID absence check; 20 s child.wait timeout is a probe bound, not approved recovery SLO.",
+      "gap": "No current candidate target rollback receipt or agreed numeric recovery/retry SLO; old process can stop during process-restart recovery, so pointer retention is not uninterrupted old-profile availability."
+    },
+    "native_recovery_and_fault_isolation": {
+      "status": "LOCAL_SYNTHETIC_PARTIAL",
+      "historical_host_source": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-closeout-20261008-r1/runtime-failure-r2/evidence.json",
+      "host_scope": "owned-loopback-real-host-synthetic-model-and-session",
+      "historical_packages": {
+        "crm-knowledge": {
+          "name": "shine-mage-dsh-crm-knowledge-0.0.0-crm.1.tgz",
+          "bytes": 234944,
+          "sha256": "295b234a951a989ff74c137dfe20ce5e466b6b8d67cbe3669afbaea83e709bc1",
+          "source_sha": "cb6f723c66df4a66117ef5edbf9aacd4a94d2065",
+          "package_name": "@shine-mage/dsh-crm-knowledge",
+          "package_version": "0.0.0-crm.1"
+        },
+        "knowledge": {
+          "name": "shine-mage-dsh-knowledge-0.0.0-candidate.1.tgz",
+          "bytes": 14461,
+          "sha256": "fb1b4d9e1e626d8ba858bb0ea849d022eed29a3e5385da5a884a0397be96d7a0",
+          "source_sha": "1737adc3cffeb9db5fbbcee222fb044526324d40",
+          "package_name": "@shine-mage/dsh-knowledge",
+          "package_version": "0.0.0-candidate.1"
+        }
+      },
+      "rows": [
+        {
+          "id": "profile-load",
+          "status": "PASS",
+          "at": "2026-10-08T04:39:46.990Z",
+          "pid": 55094
+        },
+        {
+          "id": "loaded-composition-reconcile",
+          "status": "PASS",
+          "at": "2026-10-08T04:39:46.991Z"
+        },
+        {
+          "id": "domain-tools",
+          "status": "PASS",
+          "at": "2026-10-08T04:39:47.020Z"
+        },
+        {
+          "id": "native-loop-and-durable-session",
+          "status": "PASS",
+          "at": "2026-10-08T04:39:47.100Z",
+          "count": 17,
+          "prefix_digest": "71f795589add7f2941f8ed836e6b8bbb8b463fe9a1d998646c698ddaa4a3fa6b"
+        },
+        {
+          "id": "controlled-restart-session-replay",
+          "status": "PASS",
+          "at": "2026-10-08T04:39:47.844Z",
+          "pid": 55118,
+          "count": 27,
+          "prefix_digest": "71f795589add7f2941f8ed836e6b8bbb8b463fe9a1d998646c698ddaa4a3fa6b"
+        },
+        {
+          "id": "retired-preset-retains-live-session",
+          "status": "PASS",
+          "at": "2026-10-08T04:39:47.850Z",
+          "action": "HOST_RESTART_REQUIRED"
+        },
+        {
+          "id": "inflight-crash-durable-prefix-replay",
+          "status": "PASS",
+          "at": "2026-10-08T04:39:48.733Z",
+          "pid": 55132,
+          "count": 44,
+          "committed_prefix": 32,
+          "prefix_digest": "852d964bb7860f68d96c3e34734dd121446db645cedb8e71e227a9ab154d379a"
+        },
+        {
+          "id": "blocking-plugin-requires-process-restart",
+          "status": "PASS",
+          "at": "2026-10-08T04:39:49.092Z",
+          "action": "HOST_RESTART_REQUIRED",
+          "in_process_containment": "UNSUPPORTED"
+        },
+        {
+          "id": "native-fallback-restart",
+          "status": "PASS",
+          "at": "2026-10-08T04:39:49.790Z",
+          "pid": 55144,
+          "count": 55,
+          "prefix_digest": "24c1416956ca68701d6ed100625d07374b4087daf732fcc40e15094ef1300931",
+          "tools": [],
+          "selected": {
+            "profile": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-closeout-20261008-r1/runtime-failure-r2/native-fallback.patch.yml",
+            "sha256": "ee8d24eebfb39624db9c3baa84c5dd0dac02a7db2d095110c2b7a8728f07f7e9",
+            "reason": "disable-plugins-and-restart",
+            "service_data": "UNCHANGED"
+          }
+        },
+        {
+          "id": "restore-previous-pinned-profile",
+          "status": "PASS",
+          "at": "2026-10-08T04:39:50.526Z",
+          "pid": 55156,
+          "count": 66,
+          "prefix_digest": "72a25ab60322e56ae03415768fe30ca55a5b21ac403a951be17e4a4e601e83c2",
+          "tools": [
+            "query_crm_dashboard_snapshot",
+            "query_crm_dashboard_gsv",
+            "query_crm_dashboard_purchases",
+            "query_crm_metrics_v1",
+            "query_crm_dashboard_readiness",
+            "query_crm_dashboard_membership",
+            "query_crm_dashboard_net_gsv",
+            "crm_metrics_capabilities",
+            "crm_service_health",
+            "crm_knowledge_explain"
+          ]
+        }
+      ],
+      "historical_trial_native_restart_ms": 723,
+      "historical_trial_restore_new_ms": 730,
+      "current_candidate_local_source": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-admission-20261008/local-v4/test_official_host_crm_query_s0/official-host/recovery-observations.json",
+      "current_candidate_local_observations": [
+        {
+          "stage": "current-candidate-inflight-crash",
+          "status": "PASS",
+          "killed_pid": 6009,
+          "resumed_pid": 6028,
+          "signal": "SIGKILL",
+          "crm_relogin_required": true
+        },
+        {
+          "stage": "native-fallback-after-inflight-crash",
+          "status": "PASS"
+        }
+      ],
+      "current_candidate_committed_prefix": 50,
+      "in_process_containment": "UNSUPPORTED",
+      "gap": "Historical CRM/knowledge pair differs from current workbench b75d90; native process restart/recovery is proven only in these local synthetic scopes. Not arbitrary in-process hot-plug, WSL target, real model or production."
+    },
+    "maintenance_cost_and_owner": {
+      "status": "NOT_ESTABLISHED",
+      "weekly_upgrade_review_release_human_minutes": null,
+      "weekly_baseline_minutes": null,
+      "weekly_target_minutes": null,
+      "owner_log": null,
+      "logical_owners_source": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/config/shinemage-plugin-boundaries.v1.json",
+      "logical_command_owners": [
+        {
+          "entry": "scripts/dsh.mjs",
+          "owner": "release-control",
+          "scope": "User CLI dispatch; local/release scopes and explicit state."
+        },
+        {
+          "entry": "scripts/release/preflight.mjs",
+          "owner": "release-control",
+          "scope": "Pinned candidate orchestration; no production activation."
+        },
+        {
+          "entry": "scripts/release/plugin-pack.mjs",
+          "owner": "release-control",
+          "scope": "Verified immutable plugin package only."
+        },
+        {
+          "entry": "scripts/release/plugin-candidate.mjs",
+          "owner": "release-control",
+          "scope": "PARTIAL profile/pack/journal receipt; no host activation."
+        },
+        {
+          "entry": "scripts/dsh-b0/pipeline.mjs",
+          "owner": "build-tooling",
+          "scope": "Shared local/CI prepare/audit/check."
+        },
+        {
+          "entry": "scripts/dsh-b0/plugin-boundaries.mjs",
+          "owner": "architecture-maintainer",
+          "scope": "Static ownership/import/route inventory and drift gate."
+        },
+        {
+          "entry": "scripts/dsh-dev/cli.mjs",
+          "owner": "host-dev-adapter",
+          "scope": "Explicit isolated host lifecycle; never an implicit test side effect."
+        },
+        {
+          "entry": "deploy/wsl/install-release.sh",
+          "owner": "deploy-owner",
+          "scope": "Explicit immutable remote install; separate authorization."
+        },
+        {
+          "entry": "scripts/crm-calibration/package-service.mjs",
+          "owner": "release-control",
+          "scope": "Allowlisted synthetic service application artifact and digest only; no dependency install, production release or activation."
+        },
+        {
+          "entry": "scripts/crm-calibration/service-entry.py",
+          "owner": "backend-services",
+          "scope": "Verify one service artifact and exact dependencies; explicit loopback-only owned process. CRM/knowledge owner comes from its manifest."
+        }
+      ],
+      "primary_backup_raci": {
+        "build": {
+          "primary": null,
+          "backup": null
+        },
+        "receive": {
+          "primary": null,
+          "backup": null
+        },
+        "UAT": {
+          "primary": null,
+          "backup": null
+        },
+        "cutover": {
+          "primary": null,
+          "backup": null
+        },
+        "rollback": {
+          "primary": null,
+          "backup": null
+        },
+        "cleanup": {
+          "primary": null,
+          "backup": null
+        }
+      },
+      "bounded_search_sources": [
+        "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/docs/plans/shinemage-plugin-platform-split.md",
+        "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/config/shinemage-plugin-boundaries.v1.json",
+        "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/docs/architecture/shinemage-plugin-boundaries.md",
+        "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/docs/architecture/shinemage-plugin-platform.md",
+        "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/docs/operating/dsh-plugin-author-quickstart.md"
+      ],
+      "gap": "Listed current documents define logical ownership, explicitly not named on-site primary/backup RACI. No human minutes or weekly cost baseline found in this bounded set; no personal logs searched."
+    }
+  },
+  "ten_scenario_raw_records": [
+    {
+      "source": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/01-controlled-update/record.json",
+      "scenario": "01-controlled-update",
+      "status": "PASS",
+      "started_at": "2026-10-08T04:33:21.086Z",
+      "finished_at": "2026-10-08T04:33:26.593Z",
+      "elapsed_ms": 5507,
+      "timings_ms": {
+        "baseline_stop": 67,
+        "baseline_stop_wait": 67,
+        "update_and_restart": 783,
+        "restart": 682
+      },
+      "owned_process_count": 2,
+      "owned_pids_alive": [],
+      "fixed_components_unchanged": true,
+      "wal_prefix_preserved": true,
+      "data_counts_before": {
+        "analyses": 1,
+        "idempotency": 1
+      },
+      "data_counts_after": {
+        "analyses": 1,
+        "idempotency": 1
+      }
+    },
+    {
+      "source": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/02-same-digest-replay/record.json",
+      "scenario": "02-same-digest-replay",
+      "status": "PASS",
+      "started_at": "2026-10-08T04:33:26.595Z",
+      "finished_at": "2026-10-08T04:33:32.731Z",
+      "elapsed_ms": 6136,
+      "timings_ms": {
+        "baseline_stop": 71,
+        "baseline_stop_wait": 71,
+        "idempotent_restart": 749
+      },
+      "owned_process_count": 3,
+      "owned_pids_alive": [],
+      "fixed_components_unchanged": true,
+      "wal_prefix_preserved": true,
+      "data_counts_before": {
+        "analyses": 1,
+        "idempotency": 1
+      },
+      "data_counts_after": {
+        "analyses": 1,
+        "idempotency": 1
+      }
+    },
+    {
+      "source": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/03-interrupt-before-ready/record.json",
+      "scenario": "03-interrupt-before-ready",
+      "status": "UNKNOWN_RECOVERED",
+      "started_at": "2026-10-08T04:33:32.732Z",
+      "finished_at": "2026-10-08T04:33:37.166Z",
+      "elapsed_ms": 4434,
+      "timings_ms": {
+        "baseline_stop": 72,
+        "baseline_stop_wait": 72,
+        "interrupt": 1,
+        "recovery": 783
+      },
+      "owned_process_count": 3,
+      "owned_pids_alive": [],
+      "fixed_components_unchanged": true,
+      "wal_prefix_preserved": true,
+      "data_counts_before": {
+        "analyses": 1,
+        "idempotency": 1
+      },
+      "data_counts_after": {
+        "analyses": 1,
+        "idempotency": 1
+      }
+    },
+    {
+      "source": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/04-digest-mismatch-restore/record.json",
+      "scenario": "04-digest-mismatch-restore",
+      "status": "REJECTED_OLD_RETAINED",
+      "started_at": "2026-10-08T04:33:37.167Z",
+      "finished_at": "2026-10-08T04:33:41.806Z",
+      "elapsed_ms": 4639,
+      "timings_ms": {
+        "baseline_stop": 65,
+        "baseline_stop_wait": 65,
+        "reject": 1,
+        "recovery": 791
+      },
+      "owned_process_count": 2,
+      "owned_pids_alive": [],
+      "fixed_components_unchanged": true,
+      "wal_prefix_preserved": true,
+      "data_counts_before": {
+        "analyses": 1,
+        "idempotency": 1
+      },
+      "data_counts_after": {
+        "analyses": 1,
+        "idempotency": 1
+      }
+    },
+    {
+      "source": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/05-host-restart-required/record.json",
+      "scenario": "05-host-restart-required",
+      "status": "HOST_RESTART_REQUIRED_THEN_PASS",
+      "started_at": "2026-10-08T04:33:41.807Z",
+      "finished_at": "2026-10-08T04:33:46.234Z",
+      "elapsed_ms": 4427,
+      "timings_ms": {
+        "restart": 732
+      },
+      "owned_process_count": 2,
+      "owned_pids_alive": [],
+      "fixed_components_unchanged": true,
+      "wal_prefix_preserved": true,
+      "data_counts_before": {
+        "analyses": 1,
+        "idempotency": 1
+      },
+      "data_counts_after": {
+        "analyses": 1,
+        "idempotency": 1
+      }
+    },
+    {
+      "source": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/06-inflight-kill-wal/record.json",
+      "scenario": "06-inflight-kill-wal",
+      "status": "WAL_PREFIX_RECOVERED",
+      "started_at": "2026-10-08T04:33:46.235Z",
+      "finished_at": "2026-10-08T04:33:51.259Z",
+      "elapsed_ms": 5024,
+      "timings_ms": {
+        "interrupt": 28,
+        "recovery": 734
+      },
+      "owned_process_count": 3,
+      "owned_pids_alive": [],
+      "fixed_components_unchanged": true,
+      "wal_prefix_preserved": true,
+      "data_counts_before": {
+        "analyses": 1,
+        "idempotency": 1
+      },
+      "data_counts_after": {
+        "analyses": 1,
+        "idempotency": 1
+      }
+    },
+    {
+      "source": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/07-save-unknown-replay/record.json",
+      "scenario": "07-save-unknown-replay",
+      "status": "UNKNOWN_REPLAYED",
+      "started_at": "2026-10-08T04:33:51.260Z",
+      "finished_at": "2026-10-08T04:33:57.271Z",
+      "elapsed_ms": 6011,
+      "timings_ms": {
+        "baseline_stop": 67,
+        "baseline_stop_wait": 67,
+        "unknown_kill": 320,
+        "replay": 359
+      },
+      "owned_process_count": 2,
+      "owned_pids_alive": [],
+      "fixed_components_unchanged": true,
+      "wal_prefix_preserved": true,
+      "data_counts_before": {
+        "analyses": 1,
+        "idempotency": 1
+      },
+      "data_counts_after": {
+        "analyses": 2,
+        "idempotency": 2
+      }
+    },
+    {
+      "source": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/08-prepare-reject-restore-old/record.json",
+      "scenario": "08-prepare-reject-restore-old",
+      "status": "FAILED_OLD_RESTORED",
+      "started_at": "2026-10-08T04:33:57.272Z",
+      "finished_at": "2026-10-08T04:34:01.508Z",
+      "elapsed_ms": 4236,
+      "timings_ms": {
+        "baseline_stop": 68,
+        "baseline_stop_wait": 68,
+        "failed_start": 1,
+        "recovery": 734
+      },
+      "owned_process_count": 2,
+      "owned_pids_alive": [],
+      "fixed_components_unchanged": true,
+      "wal_prefix_preserved": true,
+      "data_counts_before": {
+        "analyses": 1,
+        "idempotency": 1
+      },
+      "data_counts_after": {
+        "analyses": 1,
+        "idempotency": 1
+      }
+    },
+    {
+      "source": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/09-native-fallback-then-new/record.json",
+      "scenario": "09-native-fallback-then-new",
+      "status": "PASS",
+      "started_at": "2026-10-08T04:34:01.509Z",
+      "finished_at": "2026-10-08T04:34:06.480Z",
+      "elapsed_ms": 4971,
+      "timings_ms": {
+        "baseline_stop": 64,
+        "baseline_stop_wait": 64,
+        "native_restart": 723,
+        "restore_new": 730
+      },
+      "owned_process_count": 3,
+      "owned_pids_alive": [],
+      "fixed_components_unchanged": true,
+      "wal_prefix_preserved": true,
+      "data_counts_before": {
+        "analyses": 1,
+        "idempotency": 1
+      },
+      "data_counts_after": {
+        "analyses": 1,
+        "idempotency": 1
+      }
+    },
+    {
+      "source": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/10-profile-rollback-keeps-data/record.json",
+      "scenario": "10-profile-rollback-keeps-data",
+      "status": "PASS",
+      "started_at": "2026-10-08T04:34:06.481Z",
+      "finished_at": "2026-10-08T04:34:11.514Z",
+      "elapsed_ms": 5033,
+      "timings_ms": {
+        "baseline_stop": 67,
+        "baseline_stop_wait": 67,
+        "update_and_restart": 734,
+        "restart": 650,
+        "rollback": 731
+      },
+      "owned_process_count": 3,
+      "owned_pids_alive": [],
+      "fixed_components_unchanged": true,
+      "wal_prefix_preserved": true,
+      "data_counts_before": {
+        "analyses": 1,
+        "idempotency": 1
+      },
+      "data_counts_after": {
+        "analyses": 1,
+        "idempotency": 1
+      }
+    }
+  ],
+  "target_handoff": {
+    "source": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-target-preflight-20261008/commands-not-run-r2.json",
+    "execution": "NOT_RUN",
+    "platform": "actual WSL2 Linux x86_64 uid65534 Python3.14; Docker linux/amd64 emulation is not accepted",
+    "requirements": {
+      "system": "Linux",
+      "machine": "x86_64",
+      "kernel": "actual WSL2 (microsoft+wsl2)",
+      "uid": 65534,
+      "python": "3.14.4 isolated; /usr/local/bin/python3.14 used by fixed terminal runner",
+      "node": "24.x matching fixed runtime requirements; old target was 24.21.0, not inferred present",
+      "tools": [
+        "zstd",
+        "available offline hashed Linux wheelhouse"
+      ],
+      "ports": [
+        4335,
+        4336,
+        4337
+      ],
+      "owned_directory_pattern": "/tmp/owned-fp-terminal-<fresh-id>",
+      "authorization": "target execution not authorized",
+      "ownership_marker": {
+        "file": ".owned",
+        "exact_bytes_utf8": "synthetic-first-purchase-terminal/20261007\n",
+        "meaning": "fixed historical runner protocol marker, not a claim of historical execution; target root must be newly owned"
+      }
+    },
+    "source_argv": [
+      "/usr/local/bin/python3.14",
+      "-I",
+      "-B",
+      "<OWNED_ROOT>/source/input/helpers/first-purchase-source-target.probe.py",
+      "run-wsl",
+      "<OWNED_ROOT>/source/input",
+      "ccc21047f6525e9a07f4ed9406b178e06d1d9b1996815d73cc96089b06d0c69b"
+    ],
+    "combined_terminal_argv": [
+      "/usr/local/bin/python3.14",
+      "-I",
+      "-B",
+      "<OWNED_ROOT>/runner.py",
+      "<OWNED_ROOT>"
+    ],
+    "mode": "Choose source-only OR combined terminal; combined runner source HTTP success generates fresh platform receipt and input-v5 before terminal. Never reuse old receipt.",
+    "browser": {
+      "runner_source": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/checks/first-purchase-current-browser-20261007/retrieved/run.py",
+      "source_sha256": "428ae1571c4a6829cfe45375ad5f60250b5587d024ffffc1d021e19b350a595d",
+      "normalized_runner_sha256": "7a74101a608953e6d8d37f46c019aff40a8370125dc6c9f263ec956fc06482d4",
+      "template_first_line": "P='<FRESH_OWNED_ROOT>'",
+      "do_not_execute_historical_embedded_root": true,
+      "fixed_browser": "Chrome Linux x86_64 151.0.7922.34",
+      "fixed_playwright": "1.62.1",
+      "inventory_file": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-target-preflight-20261008/browser-input-inventory.json",
+      "status": "NOT_RUN",
+      "required_new_inputs": [
+        "new candidate source-HTTP platform receipt",
+        "new candidate terminal_host_event seq+digest",
+        "new browser input seal using new candidate and platform receipt",
+        "actual compatible target browser/libraries/fonts and UID65534 platform checks",
+        "actual result inventory/archive and owned-directory completion evidence"
+      ],
+      "input_v5_written": false,
+      "old_target_receipts_may_be_reused": false
+    },
+    "gate_sources": {
+      "source-target-evidence.mjs": "101,107-111",
+      "terminal-host-evidence.mjs": "60-61,107-109",
+      "terminal-target-20261007.py.txt": "4",
+      "first-purchase-source-target.probe.py": "141-142"
+    },
+    "missing": "No newly provided authorized WSL2 target, no new current-candidate platform receipt/input-v5, no resulting terminal/browser journal parents. Do not inspect or run old CRM/WeKnora images."
+  },
+  "ci_preparation": {
+    "source": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-final-closeout-20261008/ci-readiness.json",
+    "formal_ci": "NOT_RUN",
+    "actual_checks_run": false,
+    "meaning": "Plan-only selector preparation is not CI execution or pass."
+  },
+  "unchanged_boundaries": [
+    "SDK distribution BLOCKED; release_ready=false",
+    "Do not mark T10/T15/T16/T19 complete from this extraction",
+    "Physical split/catalog/independent release/DSH upgrade await existing stop/go",
+    "No new execution, journal mutation, test, SSH, service or commit"
+  ],
+  "sources": [
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/candidate/candidate.json",
+      "sha256": "e57173990a0a7b2c836492159b87e36d17c97a9afe78284d1daf9eaadc131fe6",
+      "bytes": 47946
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/plugin-state.json",
+      "sha256": "018bf8a055af8e2315c7071d54aa73bc9ab604c2cb8c2288d1ff2cd2b947ef6c",
+      "bytes": 15712
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/summary.json",
+      "sha256": "b3d46e41e56f3613800428d0cd21f60be3b33ddd28e10dee96c5d03379e53c85",
+      "bytes": 4587
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/01-controlled-update/record.json",
+      "sha256": "b72c349190590625bd1043ea0b99e944bf0825cd3c1a45d1fd456093a1fe9064",
+      "bytes": 4578
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/02-same-digest-replay/record.json",
+      "sha256": "4d033cbe0961732983fbba41e57eb96be726bb1059d9346c05e50829206ef151",
+      "bytes": 4411
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/03-interrupt-before-ready/record.json",
+      "sha256": "2a3c9c1518ea0d59764932b53477f67c778e366c6c8ec76dcd0ac512cf9cdee3",
+      "bytes": 4667
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/04-digest-mismatch-restore/record.json",
+      "sha256": "4ee80d9e3a1f86cdac975d4f1b5d1c36d3a734034a518c4ad77ef43f3d358224",
+      "bytes": 4520
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/05-host-restart-required/record.json",
+      "sha256": "9bde5dfd5d4a4b1b8f3bdbf7994fe87f27b856ae3cbe6fb18c496282a489b68a",
+      "bytes": 4546
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/06-inflight-kill-wal/record.json",
+      "sha256": "82d5ab1a82073800a93e5d88ce23f2cde026473d93accec982e0ea996c9c1e56",
+      "bytes": 4504
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/07-save-unknown-replay/record.json",
+      "sha256": "21e8050eac652a6adfa723a1e1bf4df7fda307b29756259f103392e825b25339",
+      "bytes": 4548
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/08-prepare-reject-restore-old/record.json",
+      "sha256": "f0a66b1fa52ca103a3716c6f154f4585b8b56f5aa8d2ed99c2e71f316cf0dfd2",
+      "bytes": 5309
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/09-native-fallback-then-new/record.json",
+      "sha256": "71553fd6a31d3d64c127c0de305e887be4246d10ece6367f3df2d214e70e78d7",
+      "bytes": 4808
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/ten-scenarios/runs/10-profile-rollback-keeps-data/record.json",
+      "sha256": "05708e042604c009693f1bb2f8278b1faf63bf26a7e211bc1e0ddc567856db36",
+      "bytes": 4890
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/real-host-cancellation.json",
+      "sha256": "1b4466f2852464ec915924281f2a23fccb96b16962abe9d458b26a59c66169ed",
+      "bytes": 2547
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-followup-20261008-r1/cancel-real-host.py",
+      "sha256": "0adcdc791902eac43e9355b722ce2d330963c503eef569399322f5ba956a4337",
+      "bytes": 3156
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/scripts/dsh-b0/plugin-update-trial.mjs",
+      "sha256": "c33d210a137744ee58ed82cdb063e5717986120a5178d47b755c269fbd8f87a4",
+      "bytes": 65483
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-closeout-20261008-r1/runtime-failure-r2/evidence.json",
+      "sha256": "a882877a5f28ef78841b370786ab7a4f92722345bec64e8ef82e8617f167dc18",
+      "bytes": 27167
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-admission-20261008/local-v4/test_official_host_crm_query_s0/official-host/recovery-observations.json",
+      "sha256": "9f1754a9eda7a7d4d4c9c0266638aeb0485e5acb0f3e9419ef09de9e8fec18ac",
+      "bytes": 22817
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/config/shinemage-plugin-boundaries.v1.json",
+      "sha256": "9eccb368cffe35c56bebbbb502808a0d9cd6a0424a04f22d1e59215ba2546f04",
+      "bytes": 12854
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/docs/plans/shinemage-plugin-platform-split.md",
+      "sha256": "9e22c3cdf9b03a24e52cbcd23525c7fe05f0f397287776152a8c2eec4815b668",
+      "bytes": 304708
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/docs/architecture/shinemage-plugin-boundaries.md",
+      "sha256": "e262dfef0364f2a5033dfdc82f80eccfde7a3f838d4b49dee6826fa79373cf3b",
+      "bytes": 11172
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/docs/architecture/shinemage-plugin-platform.md",
+      "sha256": "d096691dd65569827f2c9f00f47ee35fda248138460daebf6555540a2453b2cd",
+      "bytes": 7504
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/docs/operating/dsh-plugin-author-quickstart.md",
+      "sha256": "2da7f7c93d4393f2b58359bf5bb8690127b53eaa220839ddfb2764b590e33134",
+      "bytes": 14925
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/docs/hackathon/evidence/shinemage-input-unblock-20261008.md",
+      "sha256": "5029b7626317fb3ec30b330042b701bbc496b6b78d61de70a5fbf966faace50c",
+      "bytes": 10201
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-target-preflight-20261008/commands-not-run-r2.json",
+      "sha256": "9933f205afbb793a425dee9ef7a4ab902c4aacfe465d7534438f666b2cd128e0",
+      "bytes": 5884
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/scripts/release/source-target-evidence.mjs",
+      "sha256": "2de8b252bdaf01ebae8d5434728964d2070532fe77927e51dfbc3d406ab93745",
+      "bytes": 20498
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/scripts/release/terminal-host-evidence.mjs",
+      "sha256": "5418333999627db2f54a8678f824e1a8dd3045217957a9b76d129213f5d99b43",
+      "bytes": 14492
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/scripts/release/test-fixtures/terminal-target-20261007.py.txt",
+      "sha256": "bc1b021a1b7a689e717f4fa77ae016283ff46fe0a934c60c9878aecdfb70b75f",
+      "bytes": 4101
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-target-preflight-20261008/source/input/helpers/first-purchase-source-target.probe.py",
+      "sha256": "37b4c835d9cf66f1114bbf56fc51895c0ee214f2382cb8aecef3954b20b212d9",
+      "bytes": 27212
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-final-closeout-20261008/ci-readiness.json",
+      "sha256": "79a9b61854971a4fbb371541c8cc44e7a246091d59808a6abe3a43eb7cbf3266",
+      "bytes": 40878
+    }
+  ]
+}

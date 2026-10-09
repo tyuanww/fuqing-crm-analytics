@@ -1,0 +1,49 @@
+{
+  "schema": "candidate-target-authentication-preflight/v1",
+  "target": "100.93.46.46",
+  "tailscale": {
+    "source": "local Tailscale daemon status filtered to exact target only",
+    "target": "100.93.46.46",
+    "matches": [
+      {
+        "relation": "Peer",
+        "target": "100.93.46.46",
+        "HostName": "DESKTOP-FAEJK8S",
+        "DNSName": "desktop-faejk8s.tail789f50.ts.net.",
+        "OS": "linux",
+        "Online": true,
+        "Active": false,
+        "Expired": null
+      }
+    ]
+  },
+  "ssh_effective": {
+    "user": "hutou",
+    "hostname": "100.93.46.46",
+    "port": "22",
+    "addressfamily": "any",
+    "canonicalizehostname": "false"
+  },
+  "ssh_result": {
+    "exit_code": 255,
+    "seconds": 1.304,
+    "stdout": "",
+    "stderr": "hutou@100.93.46.46: Permission denied (publickey).\n",
+    "remote_acceptance": "NOT_RUN",
+    "remote_mutation": false
+  },
+  "remote_commands_executed": false,
+  "wsl2_architecture_python_verified": false,
+  "target_acceptance": "NOT_RUN",
+  "reason": "SSH_PUBLICKEY_AUTHENTICATION_DENIED",
+  "next_input": "correct SSH username or existing successful SSH command/alias; never password/private key",
+  "candidate_journal_changed": false,
+  "release_ready": false,
+  "raw_files": {
+    "tailscale-target-status.json": "6550703a1976ce51b57a8fa50f1223a02f1f558f82131c5a785511efcc8047b0",
+    "ssh-result.json": "713f3ff266080ab83c22284652ab37432ab721cbd476024f63a9378565557332",
+    "ssh-effective.json": "3c21e5bcfac11b5355f82768d2ce4f11bc427222a3a220e7913e054dffa15715",
+    "ssh-once.py": "5a03fff3076c6b986f25baa3e36e459fb388c9ecd4195eb8eac3402f5b863829",
+    "ssh-command.json": "8e03e3f147f12218b2dab79c539bd0a116a05c289f450b4a41bce1fd4a12c46f"
+  }
+}

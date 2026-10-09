@@ -1,0 +1,157 @@
+{
+  "schema": "shinemage-sdk-embedded-gap-closeout/v1",
+  "head": "8aabaaeb8d0e22a351088e1daefc164a5c0a2d09",
+  "scope": "read-only byte comparison of existing maps/compiled outputs/store files; no build/download/native execution",
+  "newly_closed_atoms": {
+    "actual_build_maps_raw_equal": [
+      {
+        "map": "pnpm.mjs.map",
+        "official": "/Users/hutou/.codex/worktrees/grok-sdk-trust-closeout/fuqing-crm-analytics/.context/checks/sdk-trust-closeout-20261008/extracted/pnpm.mjs.map",
+        "built": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/work/pnpm/pnpm/pnpm11/pnpm/dist/pnpm.mjs.map",
+        "official_sha256": "4865d30c95de064d49e60dae5599de0a657d7f59c16856462fa43d4b44fd2a07",
+        "built_sha256": "4865d30c95de064d49e60dae5599de0a657d7f59c16856462fa43d4b44fd2a07",
+        "bytes": 27140211,
+        "raw_equal": true
+      },
+      {
+        "map": "worker.js.map",
+        "official": "/Users/hutou/.codex/worktrees/grok-sdk-trust-closeout/fuqing-crm-analytics/.context/checks/sdk-trust-closeout-20261008/extracted/worker.js.map",
+        "built": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/work/pnpm/pnpm/pnpm11/pnpm/dist/worker.js.map",
+        "official_sha256": "1384a64fa469e5f5d4b41aa77a4208eed9e88e3b6b6795e679e7a288d66aa55d",
+        "built_sha256": "1384a64fa469e5f5d4b41aa77a4208eed9e88e3b6b6795e679e7a288d66aa55d",
+        "bytes": 1220912,
+        "raw_equal": true
+      }
+    ],
+    "compiled_lib_unique15": {
+      "count": 15,
+      "status": "BYTE_MATCH_ACTUAL_RECIPE_OUTPUT"
+    },
+    "historical_store_buckets": {
+      "TARBALL_NOT_IN_PRIOR_28": {
+        "DIRECT_STORE_FILE_BYTES_MATCH": 2404,
+        "PACKAGED_MAP_SOURCE_CONTENT_BYTES_MATCH": 69,
+        "PACKAGED_INLINE_MAP_SOURCE_CONTENT_BYTES_MATCH": 10
+      },
+      "PRIOR_MATCH": {
+        "DIRECT_STORE_FILE_BYTES_MATCH": 68
+      },
+      "PRIOR_BYTES_MISMATCH": {
+        "DIRECT_STORE_FILE_BYTES_MATCH": 1
+      },
+      "PRIOR_PATH_ABSENT": {
+        "PACKAGED_MAP_SOURCE_CONTENT_BYTES_MATCH": 42
+      }
+    }
+  },
+  "unique_store_all_content_bearing": {
+    "count": 2594,
+    "direct_physical_file": 2473,
+    "packaged_external_map_content": 111,
+    "packaged_inline_map_content": 10,
+    "not_claimed": "physical existence of all TS sources or complete package/tarball integrity"
+  },
+  "package_bindings": {
+    "exact_fixed_lock_sri_and_existing_manager_index": 421,
+    "fresh_full_package_audit": false
+  },
+  "remaining_null": {
+    "count": 86,
+    "status": "OPEN",
+    "by_package": {
+      "smart-buffer@4.2.0": 2,
+      "socks@2.8.10": 6,
+      "safe-execa@0.3.0": 1,
+      "table@6.9.0": 33,
+      "render-help@2.0.0": 1,
+      "semver-range-intersect@0.3.1": 4,
+      "@zkochan/table@2.0.1": 33,
+      "agent-base@7.1.4": 2,
+      "http-proxy-agent@7.0.2": 1,
+      "https-proxy-agent@7.0.6": 2,
+      "socks-proxy-agent@8.0.5": 1
+    },
+    "required": "Exact-version source bytes and commit/archive binding, connected to the packaged JS/map; all86 remain null in original and reproduced top-level maps and absent physical sources"
+  },
+  "protected_input_files_verified_unchanged": 2895,
+  "counts_do_not_sum": "15 compiled libs,86 null paths,and historical store buckets are separate classifications;2594 store sum includes prior68 and excludes null86, not a new test total",
+  "prior_stages_untouched": true,
+  "top_level_gates_unchanged": true,
+  "EMBED_INLINE_BYTES": "PARTIAL",
+  "embedded_components_product_default": "NOT_VERIFIED",
+  "inline_function_bytes_product_default": "NOT_VERIFIED",
+  "sdk_distribution": "BLOCKED",
+  "release_ready": false,
+  "not_run": [
+    "rebuild",
+    "download",
+    "OSV refresh",
+    "native execution",
+    "B0",
+    "cold install",
+    "headed acceptance",
+    "product checker changes"
+  ],
+  "evidence": [
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-embedded-gap-map-20261008/map-gaps.py",
+      "bytes": 3953,
+      "sha256": "27381889b58c985f5572039ad922e1c62f74e0f0ab87fdec55a9f31bc76ddaaf"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-embedded-gap-map-20261008/map-gaps.log",
+      "bytes": 1827,
+      "sha256": "4938aeb179985e615e99f82b7bbc10358edafab99cafdd6cefd82bdc18f751b2"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-embedded-gap-map-20261008/inventory.json",
+      "bytes": 4138114,
+      "sha256": "1f8317f7f25b2827b3cc47d7cc12162978b4ba7904ecba86694c4c9527541500"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-embedded-gap-map-20261008/map-secondary.py",
+      "bytes": 4541,
+      "sha256": "793871b977893f8d8158e675ce5d687278e66353d4ce90779d5f9124e7f1cbfe"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-embedded-gap-map-20261008/map-secondary.log",
+      "bytes": 1077,
+      "sha256": "0179285b8d33e798dbb50378bbad34999701737c714bc0a258e83abf83953232"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-embedded-gap-map-20261008/mapping.json",
+      "bytes": 5481929,
+      "sha256": "db475793472994557d1c33fde151eed6f3850fa0940604177da16f54258bc863"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-embedded-gap-map-20261008/close-inline.py",
+      "bytes": 3583,
+      "sha256": "bdb1d02c18d98420444729c8a54831cb18fc463d8f52ee4c7fe00271f96c5e8d"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-embedded-gap-map-20261008/close-inline.log",
+      "bytes": 2001,
+      "sha256": "8395a1a36ad798f8d93007a254b695de041398e9f61eeb752e1de7d9b7c25bbf"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-embedded-gap-map-20261008/mapping-final.json",
+      "bytes": 5512954,
+      "sha256": "2291316c59d15ddb1cf01904dad8114c4a11387e7eb7695aad9deb7d788dfbfc"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-embedded-gap-map-20261008/compiled-lib-15.json",
+      "bytes": 14235,
+      "sha256": "2b7f03f244cab1aa69d877de374373128a21b5c5500912deb2b916c749bb31d8"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-embedded-gap-map-20261008/null-source-open.json",
+      "bytes": 138318,
+      "sha256": "1a92961310c8b5dda4aaa405b54ca774bd5aad3b9b4da360fd83485a5d9f4096"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-embedded-gap-map-20261008/protected-after.json",
+      "bytes": 1224563,
+      "sha256": "9f8205996de2bd802c660858987719de5027adc3e6d67fa23f8bf85d56a5db5f"
+    }
+  ]
+}

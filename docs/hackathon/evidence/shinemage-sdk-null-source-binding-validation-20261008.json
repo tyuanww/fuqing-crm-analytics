@@ -1,0 +1,1328 @@
+{
+  "schema": "shinemage-sdk-null-source-binding/v1",
+  "date": "2026-10-08",
+  "head": "8aabaaeb8d0e22a351088e1daefc164a5c0a2d09",
+  "worktree": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics",
+  "interpreter": {
+    "python": "/Users/hutou/homebrew/opt/python@3.14/bin/python3.14",
+    "python_version": "3.14.4"
+  },
+  "commands": [
+    {
+      "argv": [
+        "/Users/hutou/homebrew/opt/python@3.14/bin/python3.14",
+        ".context/checks/sdk-null-source-binding-20261008/bind.py"
+      ],
+      "cwd": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics",
+      "exit_code": 0,
+      "scope": "11 exact registry version documents, 11 attestation lookups, 4 api.github.com commit lookups"
+    },
+    {
+      "argv": [
+        "/Users/hutou/homebrew/opt/python@3.14/bin/python3.14",
+        "bind-archives.py"
+      ],
+      "cwd": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-null-source-binding-20261008",
+      "exit_code": 0,
+      "scope": "5 codeload archives for registry gitHead values; api.github.com not called"
+    }
+  ],
+  "counts": {
+    "packages": 11,
+    "paths": 86,
+    "source_and_publish_bound_transform_open": 76,
+    "generated_file_absent_from_pinned_commit": 2,
+    "stopped_no_pinned_commit": 8
+  },
+  "packages": [
+    {
+      "identity": "smart-buffer@4.2.0",
+      "paths": 2,
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "files_obtained": 2,
+      "git_head": "2ce01c95312343325997b19e52daa166dc227930",
+      "repository": "JoshGlazebrook/smart-buffer",
+      "archive_bytes": 58072,
+      "archive_sha256": "70ef032b30de3581aed153a4f25afc6cd856b40e50bc16ae27b66788df55984b",
+      "lock_integrity_equals_registry": true,
+      "attestation_http_status": 404,
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "transform_missing_inputs": [
+        "exact TypeScript version; publish metadata has no exact typescript devDependency"
+      ],
+      "typescript_declared": "^3.2.1",
+      "tsconfig_in_pinned_tree": true
+    },
+    {
+      "identity": "socks@2.8.10",
+      "paths": 6,
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "files_obtained": 6,
+      "git_head": "ff3347684f29e68eb67d04e23d1ed466e7e55c76",
+      "repository": "JoshGlazebrook/socks",
+      "archive_bytes": 44438,
+      "archive_sha256": "dce82acf8c046e7aa97326ad890ae06d67dccc0bf8431ff5967a4b966edd00fc",
+      "lock_integrity_equals_registry": true,
+      "attestation_http_status": 404,
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "transform_missing_inputs": [
+        "exact TypeScript version; publish metadata has no exact typescript devDependency"
+      ],
+      "typescript_declared": "^5.3.3",
+      "tsconfig_in_pinned_tree": true,
+      "additional_transform_missing_inputs": [
+        "exact prettier version; published devDependency is ^3.2.5 and the build script runs prettier --write before tsc",
+        ".prettierrc.yaml is in the pinned archive but prettier was not run"
+      ]
+    },
+    {
+      "identity": "safe-execa@0.3.0",
+      "paths": 1,
+      "disposition": "STOPPED_NO_PINNED_COMMIT",
+      "files_obtained": 0,
+      "git_head": null,
+      "repository": "https://github.com/zkochan/packages/tree/main/safe-execa",
+      "repository_directory": "safe-execa",
+      "url_ref_not_used": "main",
+      "lock_integrity_equals_registry": true,
+      "registry_http_status": 200,
+      "attestation_http_status": 404,
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": [
+        "40-hex gitHead in the exact registry version document, or a signature-verified provenance commit; tag/branch/latest was not used"
+      ]
+    },
+    {
+      "identity": "table@6.9.0",
+      "paths": 33,
+      "disposition": "SOURCE_BOUND_EXCEPT_GENERATED_VALIDATORS",
+      "files_obtained": 32,
+      "git_head": "8b85bc8f7e5202c2fcea295bd59d4e7d25519c7a",
+      "repository": "gajus/table",
+      "archive_bytes": 1409881,
+      "archive_sha256": "e146667c39ed183e93c51cc708275286c890449be33ce920c339275268e20bfe",
+      "lock_integrity_equals_registry": true,
+      "attestation_http_status": 404,
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "transform_missing_inputs": [
+        "bytes of typescript@4.5.2 and its toolchain; declared in publish metadata, not downloaded, compiler not run",
+        "exact ajv-cli, ajv-keywords, and js-beautify versions plus schema inputs; ranges were not resolved and the generator was not run"
+      ],
+      "typescript_declared": "4.5.2",
+      "tsconfig_in_pinned_tree": true,
+      "absent_path": "src/generated/validators.js",
+      "schemas_present_in_archive": [
+        "src/schemas/config.json",
+        "src/schemas/shared.json",
+        "src/schemas/streamConfig.json"
+      ],
+      "generator_ranges_not_resolved": {
+        "ajv-cli": "^5.0.0",
+        "ajv-keywords": "^5.0.0",
+        "js-beautify": "^1.14.0",
+        "mkdirp": "^1.0.4"
+      }
+    },
+    {
+      "identity": "render-help@2.0.0",
+      "paths": 1,
+      "disposition": "STOPPED_NO_PINNED_COMMIT",
+      "files_obtained": 0,
+      "git_head": null,
+      "repository": "https://github.com/zkochan/packages/tree/main/render-help",
+      "repository_directory": "render-help",
+      "url_ref_not_used": "main",
+      "lock_integrity_equals_registry": true,
+      "registry_http_status": 200,
+      "attestation_http_status": 404,
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": [
+        "40-hex gitHead in the exact registry version document, or a signature-verified provenance commit; tag/branch/latest was not used"
+      ]
+    },
+    {
+      "identity": "semver-range-intersect@0.3.1",
+      "paths": 4,
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "files_obtained": 4,
+      "git_head": "5323289d783b9be34a8108ec417b192560d809bf",
+      "repository": "sounisi5011/semver-range-intersect",
+      "archive_bytes": 72784,
+      "archive_sha256": "f8b604803717cc128ac32cae2e77c71a966031384f7a1ab924d7f338b836931c",
+      "lock_integrity_equals_registry": true,
+      "attestation_http_status": 404,
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "transform_missing_inputs": [
+        "bytes of typescript@3.5.3 and its toolchain; declared in publish metadata, not downloaded, compiler not run"
+      ],
+      "typescript_declared": "3.5.3",
+      "tsconfig_in_pinned_tree": true
+    },
+    {
+      "identity": "@zkochan/table@2.0.1",
+      "paths": 33,
+      "disposition": "SOURCE_BOUND_EXCEPT_GENERATED_VALIDATORS",
+      "files_obtained": 32,
+      "git_head": "379f775bd320c39e236bee2080c57715b51c494a",
+      "repository": "gajus/table",
+      "archive_bytes": 1409767,
+      "archive_sha256": "24ecaa95bb80034a904b9f08cd2691f78d70e77191ea8cf53ddc4a8f19f060e3",
+      "lock_integrity_equals_registry": true,
+      "attestation_http_status": 404,
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "transform_missing_inputs": [
+        "bytes of typescript@4.5.2 and its toolchain; declared in publish metadata, not downloaded, compiler not run",
+        "exact ajv-cli, ajv-keywords, and js-beautify versions plus schema inputs; ranges were not resolved and the generator was not run"
+      ],
+      "typescript_declared": "4.5.2",
+      "tsconfig_in_pinned_tree": true,
+      "absent_path": "src/generated/validators.js",
+      "schemas_present_in_archive": [
+        "src/schemas/config.json",
+        "src/schemas/shared.json",
+        "src/schemas/streamConfig.json"
+      ],
+      "generator_ranges_not_resolved": {
+        "ajv-cli": "^5.0.0",
+        "ajv-keywords": "^5.0.0",
+        "js-beautify": "^1.14.0",
+        "mkdirp": "^1.0.4"
+      }
+    },
+    {
+      "identity": "agent-base@7.1.4",
+      "paths": 2,
+      "disposition": "STOPPED_NO_PINNED_COMMIT",
+      "files_obtained": 0,
+      "git_head": null,
+      "repository": "https://github.com/TooTallNate/proxy-agents.git",
+      "repository_directory": "packages/agent-base",
+      "url_ref_not_used": null,
+      "lock_integrity_equals_registry": true,
+      "registry_http_status": 200,
+      "attestation_http_status": 404,
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": [
+        "40-hex gitHead in the exact registry version document, or a signature-verified provenance commit; tag/branch/latest was not used"
+      ]
+    },
+    {
+      "identity": "http-proxy-agent@7.0.2",
+      "paths": 1,
+      "disposition": "STOPPED_NO_PINNED_COMMIT",
+      "files_obtained": 0,
+      "git_head": null,
+      "repository": "https://github.com/TooTallNate/proxy-agents.git",
+      "repository_directory": "packages/http-proxy-agent",
+      "url_ref_not_used": null,
+      "lock_integrity_equals_registry": true,
+      "registry_http_status": 200,
+      "attestation_http_status": 404,
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": [
+        "40-hex gitHead in the exact registry version document, or a signature-verified provenance commit; tag/branch/latest was not used"
+      ]
+    },
+    {
+      "identity": "https-proxy-agent@7.0.6",
+      "paths": 2,
+      "disposition": "STOPPED_NO_PINNED_COMMIT",
+      "files_obtained": 0,
+      "git_head": null,
+      "repository": "https://github.com/TooTallNate/proxy-agents.git",
+      "repository_directory": "packages/https-proxy-agent",
+      "url_ref_not_used": null,
+      "lock_integrity_equals_registry": true,
+      "registry_http_status": 200,
+      "attestation_http_status": 404,
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": [
+        "40-hex gitHead in the exact registry version document, or a signature-verified provenance commit; tag/branch/latest was not used"
+      ]
+    },
+    {
+      "identity": "socks-proxy-agent@8.0.5",
+      "paths": 1,
+      "disposition": "STOPPED_NO_PINNED_COMMIT",
+      "files_obtained": 0,
+      "git_head": null,
+      "repository": "https://github.com/TooTallNate/proxy-agents.git",
+      "repository_directory": "packages/socks-proxy-agent",
+      "url_ref_not_used": null,
+      "lock_integrity_equals_registry": true,
+      "registry_http_status": 200,
+      "attestation_http_status": 404,
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": [
+        "40-hex gitHead in the exact registry version document, or a signature-verified provenance commit; tag/branch/latest was not used"
+      ]
+    }
+  ],
+  "paths": [
+    {
+      "index": 913,
+      "package": "smart-buffer@4.2.0",
+      "path": "src/utils.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 4467,
+      "sha256": "4e4d09e61c1da93de9352649149073072f3ca519070a503700f15b02c5d2876e",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 914,
+      "package": "smart-buffer@4.2.0",
+      "path": "src/smartbuffer.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 43970,
+      "sha256": "536693008c91603856c46389bac0f1a72bd1deb65942c16642609d16b6759e13",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 915,
+      "package": "socks@2.8.10",
+      "path": "src/common/constants.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 8305,
+      "sha256": "a3a6a745ab9ba9b629a33fd9387cef3a541299832633d362dff1d1dba5ab5175",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 916,
+      "package": "socks@2.8.10",
+      "path": "src/common/util.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 599,
+      "sha256": "dd6a8b4961885ed4e04245b06db9a13be10dbe50c9c0eddfcfabc364f06a587b",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 926,
+      "package": "socks@2.8.10",
+      "path": "src/common/helpers.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 6574,
+      "sha256": "20e6feac435e00cea4424fe729987eb2b97451add86ee892d6c9ad78c309d8a1",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 927,
+      "package": "socks@2.8.10",
+      "path": "src/common/receivebuffer.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 1481,
+      "sha256": "b8d55a61deb89b330caecaaf1ff1ba82d8b63891fa3b172c518294e06b3c474a",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 928,
+      "package": "socks@2.8.10",
+      "path": "src/client/socksclient.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 32139,
+      "sha256": "7ff41a32d22ebd6b21ea1705ec69fafcaf879ad1d299b4143c0c85c3b647e0e0",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 929,
+      "package": "socks@2.8.10",
+      "path": "src/index.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 38,
+      "sha256": "8ef8425c7726a1bd5ab733fb1c8f682b5c116f7b1cf0a1a20bfaf6e6e368b459",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1499,
+      "package": "safe-execa@0.3.0",
+      "path": "src/index.ts",
+      "disposition": "STOPPED_NO_PINNED_COMMIT",
+      "bytes": null,
+      "sha256": null,
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": [
+        "40-hex gitHead on the exact registry version document, or a signature-verified provenance commit"
+      ]
+    },
+    {
+      "index": 1801,
+      "package": "table@6.9.0",
+      "path": "src/getBorderCharacters.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 2327,
+      "sha256": "9167b34ebd860da0f3f2d591d7a6a5df39a48b43e22b7393ea7dbb5313cab2bb",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1802,
+      "package": "table@6.9.0",
+      "path": "src/utils.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 3695,
+      "sha256": "377267c1798c043d1c6edd132e151b45f11c39236797fbe2d9bb559346864571",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1803,
+      "package": "table@6.9.0",
+      "path": "src/alignString.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 1967,
+      "sha256": "ad52b3e516f30b5aac7217f26992a4a9c921ba217cdc008e2222791e11325b06",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1804,
+      "package": "table@6.9.0",
+      "path": "src/alignTableData.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 590,
+      "sha256": "f6c21baf887e3d9af04841441825de4bbf08ad4d5efdcb9cf05732a7eae55c1e",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1805,
+      "package": "table@6.9.0",
+      "path": "src/wrapString.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 668,
+      "sha256": "eb7cc5556c69bc8d51f3cf0ce6c4808db9b4839488e5913ad0c06aaa0e8d76d4",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1806,
+      "package": "table@6.9.0",
+      "path": "src/wrapWord.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 1243,
+      "sha256": "15767288d86c648b6f52e989347a79d1d1dfd4343acacd2242eb57dc55cd3aca",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1807,
+      "package": "table@6.9.0",
+      "path": "src/wrapCell.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 996,
+      "sha256": "56407093c8d5a47e13ff08fb81c002366080c2bfc5ee77f9c5cb185e64c62fa1",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1808,
+      "package": "table@6.9.0",
+      "path": "src/calculateCellHeight.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 298,
+      "sha256": "3549ed61fe9d220947ec743e2f3a7976c9ac9443733a9ee3b4587989ebee3686",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1809,
+      "package": "table@6.9.0",
+      "path": "src/calculateRowHeights.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 1830,
+      "sha256": "660d18a20b27673dd36b3adbe3d5dc3fbedf6a0a661fe701c686b4f3d5ae9751",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1810,
+      "package": "table@6.9.0",
+      "path": "src/drawContent.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 2419,
+      "sha256": "a01ac308699ef3ae8ecd5675c88b22752d94561a75e2e9823620d68258b8a53a",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1811,
+      "package": "table@6.9.0",
+      "path": "src/drawBorder.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 7803,
+      "sha256": "faee557ba21e699d4d099f19110cd4e3d8612305ddc6047e2710323f8e6b86fa",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1812,
+      "package": "table@6.9.0",
+      "path": "src/drawRow.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 941,
+      "sha256": "775663f7dce1f8a3232e1f449af0f05b2c96b9d9843133eb3b560edfd069eac8",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1814,
+      "package": "table@6.9.0",
+      "path": "src/generated/validators.js",
+      "disposition": "STOPPED_GENERATED_FILE_ABSENT_FROM_PINNED_COMMIT",
+      "bytes": null,
+      "sha256": null,
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": [
+        "src/generated/validators.js bytes in the pinned commit",
+        "exact ajv-cli, ajv-keywords, js-beautify, and mkdirp versions; published ranges were not resolved"
+      ]
+    },
+    {
+      "index": 1815,
+      "package": "table@6.9.0",
+      "path": "src/validateConfig.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 853,
+      "sha256": "4aa840324146de03dabaac053f66748288942195d8bf7830ec0f486e90ee9557",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1816,
+      "package": "table@6.9.0",
+      "path": "src/makeStreamConfig.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 1490,
+      "sha256": "f79a04c88584535781fed33fde534412251c06f095811b18964ae9eb5197b2d3",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1817,
+      "package": "table@6.9.0",
+      "path": "src/mapDataUsingRowHeights.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 2075,
+      "sha256": "82710d76379dbdf3d4b625dc108778661d2460e9f16c911bbd29c9d5a28064ac",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1818,
+      "package": "table@6.9.0",
+      "path": "src/padTableData.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 730,
+      "sha256": "429cdc3d7884c7467965f5c1ec210a00096cbcacce5253697dce8d0ac01ea6e1",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1819,
+      "package": "table@6.9.0",
+      "path": "src/stringifyTableData.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 308,
+      "sha256": "7e2e8ef77eee6aee67a3c10721d1a2489bf47947093e217ddd875ec4d959c679",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1821,
+      "package": "table@6.9.0",
+      "path": "src/truncateTableData.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 504,
+      "sha256": "e82f0f6bc690ee84ccfcc4a7b3a139d72992e47f2eb3c83abfd1d121d5f0204b",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1822,
+      "package": "table@6.9.0",
+      "path": "src/createStream.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 2690,
+      "sha256": "14ff26e9624c5ddcaa70ca6db93e93e11f415304ad0a45bf0ba1fbb026e4363c",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1823,
+      "package": "table@6.9.0",
+      "path": "src/calculateOutputColumnWidths.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 244,
+      "sha256": "f5596f32e0caf05f3100d273ecf300fa90f4d4d84935a9ac0b1bf5e8923c41cc",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1824,
+      "package": "table@6.9.0",
+      "path": "src/drawTable.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 1124,
+      "sha256": "b356d7d93b6d38947bc124778453be604802d8b4705e38fdb7cad05d9310c5dd",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1825,
+      "package": "table@6.9.0",
+      "path": "src/injectHeaderConfig.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 926,
+      "sha256": "e7388e9c87df079f8092143f383eec63033cebaa0980e9d4254b880f1b944259",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1826,
+      "package": "table@6.9.0",
+      "path": "src/calculateMaximumColumnWidths.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 1248,
+      "sha256": "975ddada6cc7a4cc63f6d3f11a56c2b9e976b5c7394acea6bc86c0d72b056d7d",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1827,
+      "package": "table@6.9.0",
+      "path": "src/alignSpanningCell.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 2143,
+      "sha256": "87c595e4931cde32a8db26668925beb963fe33d89d4202c00e5fdb31e737d3e1",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1828,
+      "package": "table@6.9.0",
+      "path": "src/calculateSpanningCellWidth.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 1263,
+      "sha256": "a56066d96dfb78ba407702d73f2e7d2e946d48a5a73a0141134e712062d06a88",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1829,
+      "package": "table@6.9.0",
+      "path": "src/makeRangeConfig.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 687,
+      "sha256": "a3251f27f509e56053eddf8b13fada5039a19d31705e372aa632f9c5899a0529",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1830,
+      "package": "table@6.9.0",
+      "path": "src/spanningCellManager.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 4672,
+      "sha256": "548e835959bcd23d89e05d22f3e9eb77c12bc71588ccc9f84592d4fcb5c82c18",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1831,
+      "package": "table@6.9.0",
+      "path": "src/validateSpanningCellConfig.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 2105,
+      "sha256": "868ef60c6cf14cf7ef91c7f2f43e766c88a641b2764e497aab05e27cb24d89cc",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1832,
+      "package": "table@6.9.0",
+      "path": "src/makeTableConfig.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 2368,
+      "sha256": "16a82f14a098023e8f7ac2ee5e51c60ceb59ba04f858693be3cc8bd1e02129bb",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1833,
+      "package": "table@6.9.0",
+      "path": "src/validateTableData.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 972,
+      "sha256": "1bc3a7d622f9d887aed51cc0962baf582182d9409a4e641d9093fcf7ff83080a",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1834,
+      "package": "table@6.9.0",
+      "path": "src/table.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 1640,
+      "sha256": "d655fdbd5a6394360b47b257da568b04c348c3d1e0b0adb69f0bc0479fee20d9",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1836,
+      "package": "table@6.9.0",
+      "path": "src/index.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 241,
+      "sha256": "e9bf58d7c0d023a74c8549832d75bbe50be136959f61adef558d1983095a3559",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 1837,
+      "package": "render-help@2.0.0",
+      "path": "src/index.ts",
+      "disposition": "STOPPED_NO_PINNED_COMMIT",
+      "bytes": null,
+      "sha256": null,
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": [
+        "40-hex gitHead on the exact registry version document, or a signature-verified provenance commit"
+      ]
+    },
+    {
+      "index": 2073,
+      "package": "semver-range-intersect@0.3.1",
+      "path": "src/utils.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 12375,
+      "sha256": "d4c810ccb4752fef54b91f56a9b7c390a5296aa9a579aff3f4baa4a6db7b55ae",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2074,
+      "package": "semver-range-intersect@0.3.1",
+      "path": "src/single-range.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 10509,
+      "sha256": "1d0189520af7e8b2277ba61a3e56e7380cbbd1333c74bacb363d1b3e443b8222",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2075,
+      "package": "semver-range-intersect@0.3.1",
+      "path": "src/multi-range.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 4297,
+      "sha256": "78a1c0f0bec2e402f1084d19fc2d53a833cc049f4e71efae8c8718299692ea12",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2076,
+      "package": "semver-range-intersect@0.3.1",
+      "path": "src/index.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 778,
+      "sha256": "2ad57634245e2d87bffebf1170bd6e18dc978bca2d10a28231884a3172ba35db",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2854,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/getBorderCharacters.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 2327,
+      "sha256": "9167b34ebd860da0f3f2d591d7a6a5df39a48b43e22b7393ea7dbb5313cab2bb",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2855,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/utils.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 4003,
+      "sha256": "9963ead62c90bfe6f2129a344f5a6b5cb4835d73b351151d56d482ca0975c0e5",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2856,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/alignString.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 1967,
+      "sha256": "ad52b3e516f30b5aac7217f26992a4a9c921ba217cdc008e2222791e11325b06",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2857,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/alignTableData.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 590,
+      "sha256": "f6c21baf887e3d9af04841441825de4bbf08ad4d5efdcb9cf05732a7eae55c1e",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2858,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/wrapString.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 668,
+      "sha256": "eb7cc5556c69bc8d51f3cf0ce6c4808db9b4839488e5913ad0c06aaa0e8d76d4",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2859,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/wrapWord.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 1243,
+      "sha256": "15767288d86c648b6f52e989347a79d1d1dfd4343acacd2242eb57dc55cd3aca",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2860,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/wrapCell.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 996,
+      "sha256": "56407093c8d5a47e13ff08fb81c002366080c2bfc5ee77f9c5cb185e64c62fa1",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2861,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/calculateCellHeight.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 298,
+      "sha256": "3549ed61fe9d220947ec743e2f3a7976c9ac9443733a9ee3b4587989ebee3686",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2862,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/calculateRowHeights.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 1830,
+      "sha256": "660d18a20b27673dd36b3adbe3d5dc3fbedf6a0a661fe701c686b4f3d5ae9751",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2863,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/drawContent.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 2419,
+      "sha256": "a01ac308699ef3ae8ecd5675c88b22752d94561a75e2e9823620d68258b8a53a",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2864,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/drawBorder.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 7803,
+      "sha256": "faee557ba21e699d4d099f19110cd4e3d8612305ddc6047e2710323f8e6b86fa",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2865,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/drawRow.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 941,
+      "sha256": "775663f7dce1f8a3232e1f449af0f05b2c96b9d9843133eb3b560edfd069eac8",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2866,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/generated/validators.js",
+      "disposition": "STOPPED_GENERATED_FILE_ABSENT_FROM_PINNED_COMMIT",
+      "bytes": null,
+      "sha256": null,
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": [
+        "src/generated/validators.js bytes in the pinned commit",
+        "exact ajv-cli, ajv-keywords, js-beautify, and mkdirp versions; published ranges were not resolved"
+      ]
+    },
+    {
+      "index": 2867,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/validateConfig.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 853,
+      "sha256": "4aa840324146de03dabaac053f66748288942195d8bf7830ec0f486e90ee9557",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2868,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/makeStreamConfig.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 1490,
+      "sha256": "f79a04c88584535781fed33fde534412251c06f095811b18964ae9eb5197b2d3",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2869,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/mapDataUsingRowHeights.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 2075,
+      "sha256": "82710d76379dbdf3d4b625dc108778661d2460e9f16c911bbd29c9d5a28064ac",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2870,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/padTableData.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 730,
+      "sha256": "429cdc3d7884c7467965f5c1ec210a00096cbcacce5253697dce8d0ac01ea6e1",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2871,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/stringifyTableData.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 286,
+      "sha256": "9d02c11d878fb0a482ffb3deaf33ab30f2ecf344f133a0622b4f0ad8355db230",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2872,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/truncateTableData.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 504,
+      "sha256": "e82f0f6bc690ee84ccfcc4a7b3a139d72992e47f2eb3c83abfd1d121d5f0204b",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2873,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/createStream.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 2690,
+      "sha256": "14ff26e9624c5ddcaa70ca6db93e93e11f415304ad0a45bf0ba1fbb026e4363c",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2874,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/calculateOutputColumnWidths.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 244,
+      "sha256": "f5596f32e0caf05f3100d273ecf300fa90f4d4d84935a9ac0b1bf5e8923c41cc",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2875,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/drawTable.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 1124,
+      "sha256": "b356d7d93b6d38947bc124778453be604802d8b4705e38fdb7cad05d9310c5dd",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2876,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/injectHeaderConfig.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 926,
+      "sha256": "e7388e9c87df079f8092143f383eec63033cebaa0980e9d4254b880f1b944259",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2877,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/calculateMaximumColumnWidths.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 1248,
+      "sha256": "975ddada6cc7a4cc63f6d3f11a56c2b9e976b5c7394acea6bc86c0d72b056d7d",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2878,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/alignSpanningCell.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 2143,
+      "sha256": "87c595e4931cde32a8db26668925beb963fe33d89d4202c00e5fdb31e737d3e1",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2879,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/calculateSpanningCellWidth.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 1263,
+      "sha256": "a56066d96dfb78ba407702d73f2e7d2e946d48a5a73a0141134e712062d06a88",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2880,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/makeRangeConfig.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 687,
+      "sha256": "a3251f27f509e56053eddf8b13fada5039a19d31705e372aa632f9c5899a0529",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2881,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/spanningCellManager.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 4332,
+      "sha256": "c9c9d4576bc79d2edc7e6e3ec81cfb727bda0773e56519acd8bed2a7009aba21",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2882,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/validateSpanningCellConfig.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 2105,
+      "sha256": "868ef60c6cf14cf7ef91c7f2f43e766c88a641b2764e497aab05e27cb24d89cc",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2883,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/makeTableConfig.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 2368,
+      "sha256": "16a82f14a098023e8f7ac2ee5e51c60ceb59ba04f858693be3cc8bd1e02129bb",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2884,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/validateTableData.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 950,
+      "sha256": "043f6ede93fd0197326571ccba0f2a81882ccc6c13b31a73fcd25433baf5df0d",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2885,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/table.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 1557,
+      "sha256": "955c21ac7f5ee6de043bcb4d00058639041afc8fcab6a6cba21343cdf252ced4",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 2887,
+      "package": "@zkochan/table@2.0.1",
+      "path": "src/index.ts",
+      "disposition": "SOURCE_AND_PUBLISH_BOUND_TRANSFORM_OPEN",
+      "bytes": 241,
+      "sha256": "e9bf58d7c0d023a74c8549832d75bbe50be136959f61adef558d1983095a3559",
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": []
+    },
+    {
+      "index": 3314,
+      "package": "agent-base@7.1.4",
+      "path": "src/helpers.ts",
+      "disposition": "STOPPED_NO_PINNED_COMMIT",
+      "bytes": null,
+      "sha256": null,
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": [
+        "40-hex gitHead on the exact registry version document, or a signature-verified provenance commit"
+      ]
+    },
+    {
+      "index": 3315,
+      "package": "agent-base@7.1.4",
+      "path": "src/index.ts",
+      "disposition": "STOPPED_NO_PINNED_COMMIT",
+      "bytes": null,
+      "sha256": null,
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": [
+        "40-hex gitHead on the exact registry version document, or a signature-verified provenance commit"
+      ]
+    },
+    {
+      "index": 3316,
+      "package": "http-proxy-agent@7.0.2",
+      "path": "src/index.ts",
+      "disposition": "STOPPED_NO_PINNED_COMMIT",
+      "bytes": null,
+      "sha256": null,
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": [
+        "40-hex gitHead on the exact registry version document, or a signature-verified provenance commit"
+      ]
+    },
+    {
+      "index": 3317,
+      "package": "https-proxy-agent@7.0.6",
+      "path": "src/parse-proxy-response.ts",
+      "disposition": "STOPPED_NO_PINNED_COMMIT",
+      "bytes": null,
+      "sha256": null,
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": [
+        "40-hex gitHead on the exact registry version document, or a signature-verified provenance commit"
+      ]
+    },
+    {
+      "index": 3318,
+      "package": "https-proxy-agent@7.0.6",
+      "path": "src/index.ts",
+      "disposition": "STOPPED_NO_PINNED_COMMIT",
+      "bytes": null,
+      "sha256": null,
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": [
+        "40-hex gitHead on the exact registry version document, or a signature-verified provenance commit"
+      ]
+    },
+    {
+      "index": 3319,
+      "package": "socks-proxy-agent@8.0.5",
+      "path": "src/index.ts",
+      "disposition": "STOPPED_NO_PINNED_COMMIT",
+      "bytes": null,
+      "sha256": null,
+      "null_map_sources_content": "REMAINS_NULL",
+      "transform_to_packaged_js": "NOT_PROVEN",
+      "missing": [
+        "40-hex gitHead on the exact registry version document, or a signature-verified provenance commit"
+      ]
+    }
+  ],
+  "table_commit_file_comparison": {
+    "table@6.9.0": "8b85bc8f7e5202c2fcea295bd59d4e7d25519c7a",
+    "@zkochan/table@2.0.1": "379f775bd320c39e236bee2080c57715b51c494a",
+    "shared_obtained_paths": 32,
+    "same_bytes": 27,
+    "different_bytes": [
+      "src/spanningCellManager.ts",
+      "src/stringifyTableData.ts",
+      "src/table.ts",
+      "src/utils.ts",
+      "src/validateTableData.ts"
+    ]
+  },
+  "first_pass_preserved": {
+    "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-null-source-binding-20261008/binding.json",
+    "sha256": "b9a6019464f6840e6c27134d5e8d4c9b00808b4317d17e9b5f46d514d88b8033",
+    "note": "api.github.com returned 403 rate limit for 4 commits. That file classified the 403 as commit absence and missed @zkochan/table repository because the scoped store path was wrong. Those HTTP responses stay. Final dispositions use the registry documents and codeload archives."
+  },
+  "closed_subclaims": [
+    "76 paths: exact-version source bytes retrieved from the commit named by registry gitHead",
+    "76 paths: publish association is lock integrity equal to registry dist.integrity in the same version document that carries gitHead, then the codeload archive of that commit and the map-relative path"
+  ],
+  "open_atoms": [
+    "86 paths: map sourcesContent remains null",
+    "86 paths: transform from the named source to the packaged JS is NOT_PROVEN",
+    "2 paths: src/generated/validators.js bytes absent from the pinned commit",
+    "8 paths: no pinned commit in registry metadata and attestation HTTP 404",
+    "EMBED_INLINE_BYTES remains PARTIAL",
+    "embedded_components and inline_function_bytes product defaults remain NOT_VERIFIED",
+    "SDK distribution remains BLOCKED",
+    "release_ready remains false"
+  ],
+  "not_run": [
+    "compile",
+    "package install",
+    "native execution",
+    "tarball redownload",
+    "OSV refresh",
+    "product checker edits",
+    "B0",
+    "cold install",
+    "headed acceptance",
+    "api.github.com retry"
+  ],
+  "protected": {
+    "null_source_open_sha256": "1a92961310c8b5dda4aaa405b54ca774bd5aad3b9b4da360fd83485a5d9f4096",
+    "official_lock_sha256": "0dd3e839cb46139f376e0345ba6ea492a70cc9196caf6b74ae07703d0e485b94",
+    "head_unchanged": true
+  },
+  "evidence": [
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-null-source-binding-20261008/bind.py",
+      "sha256": "d88f2b07d7491e4774575dc7f4e94b052e55afef3aa4d8f0691b7b3dac55b01c"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-null-source-binding-20261008/bind-archives.py",
+      "sha256": "e5ca16a7edd3e6f1d1d8298340eb1c47d459aaabed47a668966959bc21241e9c"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-null-source-binding-20261008/binding.json",
+      "sha256": "b9a6019464f6840e6c27134d5e8d4c9b00808b4317d17e9b5f46d514d88b8033"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-null-source-binding-20261008/archive-binding.json",
+      "sha256": "3fa98385875b250ded0c0622ff3a3f623cfca8af5d5e16240123173c43a6fe07"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-null-source-binding-20261008/archives/smart-buffer@4.2.0.tar.gz",
+      "sha256": "70ef032b30de3581aed153a4f25afc6cd856b40e50bc16ae27b66788df55984b",
+      "bytes": 58072
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-null-source-binding-20261008/archives/socks@2.8.10.tar.gz",
+      "sha256": "dce82acf8c046e7aa97326ad890ae06d67dccc0bf8431ff5967a4b966edd00fc",
+      "bytes": 44438
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-null-source-binding-20261008/archives/table@6.9.0.tar.gz",
+      "sha256": "e146667c39ed183e93c51cc708275286c890449be33ce920c339275268e20bfe",
+      "bytes": 1409881
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-null-source-binding-20261008/archives/semver-range-intersect@0.3.1.tar.gz",
+      "sha256": "f8b604803717cc128ac32cae2e77c71a966031384f7a1ab924d7f338b836931c",
+      "bytes": 72784
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-null-source-binding-20261008/archives/@zkochan__table@2.0.1.tar.gz",
+      "sha256": "24ecaa95bb80034a904b9f08cd2691f78d70e77191ea8cf53ddc4a8f19f060e3",
+      "bytes": 1409767
+    }
+  ],
+  "sdk_distribution": "BLOCKED",
+  "release_ready": false,
+  "EMBED_INLINE_BYTES": "PARTIAL",
+  "top_level_gates_new_pass": 0,
+  "commit_push_pr_merge_publish_deploy": false
+}

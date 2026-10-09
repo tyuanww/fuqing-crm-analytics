@@ -1,0 +1,127 @@
+{
+  "schema": "shinemage-current-candidate-wsl-closeout/v1",
+  "head": "8aabaaeb8d0e22a351088e1daefc164a5c0a2d09",
+  "candidate_digest": "993daf31daa79137c22ce8d16c84b61892117386a9b7b8c5119fa0be62abefb0",
+  "pack_sha256": "b75d90e98167fea507e8ab3304beda98c6706d7130eb8eb4e6359209ad0fff1b",
+  "target": "100.93.46.46",
+  "ssh_user": "root",
+  "execution_uid": 65534,
+  "platform": {
+    "system": "Linux",
+    "machine": "x86_64",
+    "kernel": "6.18.33.2-microsoft-standard-WSL2",
+    "python": "3.14.4",
+    "uid": 65534
+  },
+  "target_node": "24.21.0",
+  "local_node": "24.19.0",
+  "source_http_pass": 10,
+  "terminal": {
+    "pass": 1,
+    "fail": 0,
+    "skip": 0,
+    "warnings": 2,
+    "http_scenarios": 23,
+    "recovery_scenarios": 2,
+    "runner_exit": 0,
+    "runner_seconds": 89.21
+  },
+  "browser": {
+    "pass": 1,
+    "fail": 0,
+    "skip": 0,
+    "warnings": 2,
+    "scenarios": 5,
+    "headless": true,
+    "runner_exit": 0,
+    "runner_seconds": 79.216,
+    "version": "151.0.7922.34"
+  },
+  "formal_journal": {
+    "seq": 6,
+    "sha256": "3316e90211410975b44b2ff02e84a7e29965a831f4e00abb5f437e06acedfbee",
+    "prior_three_events_preserved": true,
+    "new_events": [
+      {
+        "seq": 4,
+        "status": "CANDIDATE_SERVICE_TARGET_OBSERVED",
+        "digest": "5d19421763e441523cdf9b2515ef2dbfc157a7935b56721cc571e77125b0d4bb"
+      },
+      {
+        "seq": 5,
+        "status": "CANDIDATE_TERMINAL_HOST_OBSERVED",
+        "digest": "2dd9dbdeaec697731146d99c19811a1403e3ca3c772d5bf7c9a695e3575eaae8"
+      },
+      {
+        "seq": 6,
+        "status": "CANDIDATE_BROWSER_HOST_OBSERVED",
+        "digest": "d36af3d53c2e1932916bfe4fe677c42aa0f73e124c01cd57be8b40f765d74b3f"
+      }
+    ]
+  },
+  "formal_commands": {
+    "service": {
+      "exit": 0,
+      "seconds": 1.301,
+      "old_seq": 3,
+      "new_seq": 4,
+      "old_sha256": "018bf8a055af8e2315c7071d54aa73bc9ab604c2cb8c2288d1ff2cd2b947ef6c",
+      "new_sha256": "2b54e39380546e4efe8812fc5a466c99ffb86b797fc37c71110d8c76fc3c8527",
+      "prior_events_preserved": true
+    },
+    "terminal": {
+      "exit": 0,
+      "seconds": 2.435,
+      "old_seq": 4,
+      "new_seq": 5,
+      "old_sha256": "2b54e39380546e4efe8812fc5a466c99ffb86b797fc37c71110d8c76fc3c8527",
+      "new_sha256": "803c4b28f83b8fa4412fd2e8d96967457e1954024eef6f51f38b5e6cdb98044e",
+      "prior_events_preserved": true
+    },
+    "browser": {
+      "exit": 0,
+      "seconds": 2.767,
+      "old_seq": 5,
+      "new_seq": 6,
+      "old_sha256": "803c4b28f83b8fa4412fd2e8d96967457e1954024eef6f51f38b5e6cdb98044e",
+      "new_sha256": "3316e90211410975b44b2ff02e84a7e29965a831f4e00abb5f437e06acedfbee",
+      "prior_events_preserved": true
+    }
+  },
+  "cleanup": {
+    "terminal_owned_processes": 0,
+    "terminal_evidence_root": "PRESERVED",
+    "browser_owned_root_removed": true,
+    "test_ports_closed": true,
+    "original_five_protected_listeners_unchanged": true,
+    "current_metadata_unchanged": true,
+    "initial_cleanup_false": "PRESERVED; original collector semantics restored, no runner rerun",
+    "unprotected_18098_pid_change": "OBSERVED, NO ACTION"
+  },
+  "release_ready": false,
+  "sdk_distribution": "BLOCKED",
+  "sdk_embedded_inline_ledger": "PARTIAL",
+  "sdk_product_default": "NOT_VERIFIED",
+  "formal_ci": "NOT_RUN",
+  "new_ui_fix_in_candidate": false,
+  "real_model_business_production": "NOT_RUN",
+  "evidence_authenticity": "UNATTESTED_OPERATOR_OBSERVATION",
+  "context_root": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/target-root-connected-20261008",
+  "independent_review": {
+    "source_terminal_findings": 0,
+    "browser_findings": 0,
+    "browser_inputs_checked": 510,
+    "browser_records_checked": 193,
+    "browser_archive_members_checked": 194
+  },
+  "archive": {
+    "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/archives/current-candidate-wsl-20261008/evidence.tar.gz",
+    "sha256": "8f46ff8274f1c5626b45b990cc87b697252af45551462d0224ce44587a361d13",
+    "bytes": 735379615,
+    "raw_bytes": 764057869,
+    "files": 1498,
+    "all_members_rehashed": true,
+    "seconds": 10.26,
+    "manifest_sha256": "232ebdc168390ee8c2adf533680a62fcef663ad98e0df22c685a2e94f57b3a18"
+  }
+}

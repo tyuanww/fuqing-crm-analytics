@@ -1,0 +1,164 @@
+{
+  "schema": "shinemage-sdk-table-transform/v1",
+  "packages": [
+    {
+      "identity": "table@6.9.0",
+      "git_head_claim": "8b85bc8f7e5202c2fcea295bd59d4e7d25519c7a",
+      "archive_sha256": "e146667c39ed183e93c51cc708275286c890449be33ce920c339275268e20bfe",
+      "lock_sha256": "070a70c3ce2c2ff0f56364e4e2231c563fba442367a10c34412978b8532854e5",
+      "archived_manifest_version": "1.0.0",
+      "typescript_paths": 32,
+      "typescript_paths_raw_js_equal": 32,
+      "generated_validator_paths": 1,
+      "generated_validator_raw_js_equal": 1,
+      "published_dist_src_js_total": 35,
+      "published_dist_src_js_equal": 35,
+      "source_files_verified": 123,
+      "source_file_changes": [],
+      "lock_unchanged": true,
+      "build_exit": 0,
+      "build_seconds": 2.0568769578821957,
+      "versions": {
+        "typescript": "4.5.2",
+        "ajv-cli": "5.0.0",
+        "ajv": "8.8.1",
+        "ajv-keywords": "5.1.0",
+        "js-beautify": "1.14.0",
+        "mkdirp": "1.0.4"
+      }
+    },
+    {
+      "identity": "@zkochan/table@2.0.1",
+      "git_head_claim": "379f775bd320c39e236bee2080c57715b51c494a",
+      "archive_sha256": "24ecaa95bb80034a904b9f08cd2691f78d70e77191ea8cf53ddc4a8f19f060e3",
+      "lock_sha256": "b22c08a98c4f36f40ef302a679b0acaf636b0298541f44fc8a97917a98000543",
+      "archived_manifest_version": "2.0.1",
+      "typescript_paths": 32,
+      "typescript_paths_raw_js_equal": 32,
+      "generated_validator_paths": 1,
+      "generated_validator_raw_js_equal": 1,
+      "published_dist_src_js_total": 35,
+      "published_dist_src_js_equal": 35,
+      "source_files_verified": 123,
+      "source_file_changes": [],
+      "lock_unchanged": true,
+      "build_exit": 0,
+      "build_seconds": 1.8743586658965796,
+      "versions": {
+        "typescript": "4.5.2",
+        "ajv-cli": "5.0.0",
+        "ajv": "8.12.0",
+        "ajv-keywords": "5.1.0",
+        "js-beautify": "1.14.0",
+        "mkdirp": "1.0.4"
+      }
+    }
+  ],
+  "dependencies": {
+    "unique_tarballs": 97,
+    "original_lock_sri_pass": 97,
+    "original_sri_algorithms": {
+      "sha512": 79,
+      "sha1": 18
+    },
+    "materialization": [
+      {
+        "identity": "table@6.9.0",
+        "entries": 85,
+        "members": 2505,
+        "bins": 13
+      },
+      {
+        "identity": "@zkochan/table@2.0.1",
+        "entries": 94,
+        "members": 2641,
+        "bins": 17
+      }
+    ],
+    "method": "fixed-lock tar materialization, not npm ci; no install lifecycle executed"
+  },
+  "actual_execution": {
+    "node": "24.19.0",
+    "npm": "11.17.0 (existing bundled script runner only)",
+    "python": "3.14.4",
+    "network": "sandbox-exec deny network*; probe real denies recorded",
+    "write_boundary": "only new task directory and /dev/null",
+    "original_prebuild_and_build": true,
+    "post_processing": false,
+    "test_execution": false,
+    "published_js_raw_equal": 70,
+    "historical_null_paths_with_reproduced_transform": 66
+  },
+  "preserved_failures": [
+    {
+      "phase": "download r1",
+      "details": "8 TLS connect timeout curl28/HTTP000, exact URLs one bounded retry; old logs retained"
+    },
+    {
+      "phase": "npm version config probe",
+      "details": "same empty file for user/global caused double-loading; separate own empty config fixed"
+    },
+    {
+      "phase": "build r1",
+      "details": "both exit1 from omitted declared-bin executable mode, ajv permission denied; original logs/empty generated output retained; 8 own declared-bin targets exec modes corrected, bytes unchanged"
+    }
+  ],
+  "evidence": {
+    "plan.json": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-table-transform-20261008/plan.json",
+      "sha256": "658ee4a559db79e9aea3a8e75abb0c42480a63b5e0182ae99e729fc4e7a7cc03"
+    },
+    "downloads-final.json": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-table-transform-20261008/downloads-final.json",
+      "sha256": "8d0cceaede494c4edc469bed3b9a7c9a62e6493ee598c85cf01e810ce70f86f8"
+    },
+    "materialization-summary.json": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-table-transform-20261008/materialization-summary.json",
+      "sha256": "506ceb4b6be32fca1a208ebdf7ecd9a247c03e33d6ccf1ce6c9ebdae6cc98a98"
+    },
+    "sandbox-and-versions.json": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-table-transform-20261008/sandbox-and-versions.json",
+      "sha256": "63ebbe2d84984a16d5ae5dc9928637f9e1131403f841eb3af378332ae55e3f53"
+    },
+    "npm-version-r2.json": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-table-transform-20261008/npm-version-r2.json",
+      "sha256": "4accdf6678d95e019b95f0a182748a2ec016a7d8c30029cd5405a1d9a472c96a"
+    },
+    "bin-mode-correction.json": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-table-transform-20261008/bin-mode-correction.json",
+      "sha256": "6023512ba6cf994a531c8f693ada5f31bb47ae0af3a4739a78e15e2d2d6d0611"
+    },
+    "execution-results.json": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-table-transform-20261008/execution-results.json",
+      "sha256": "447a5dbd6270a00966236cd05923bcdd57336e608186db6d15f79e9a69553a05"
+    },
+    "execution-results-r2.json": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-table-transform-20261008/execution-results-r2.json",
+      "sha256": "fb5507f860e778af1800e3601362d5440f66d2574a42f380e804933edcc2845a"
+    },
+    "comparison.json": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-table-transform-20261008/comparison.json",
+      "sha256": "0a628d6b3a21a4ed8552a8ae45f9c9cbdecc474fc93094fecdf08abc79804cc7"
+    },
+    "null-path-transform-mapping.json": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-table-transform-20261008/null-path-transform-mapping.json",
+      "sha256": "2119dced176e4f52072274e4ae661fb95c3d06afd85c2c55995714c9fb23313c"
+    },
+    "protected-inputs-after.json": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-table-transform-20261008/protected-inputs-after.json",
+      "sha256": "864da9fc0753e126624b51e4e681c4cb97df7a6a14a2260ca4cd6073f73205bb"
+    }
+  },
+  "limitations": [
+    "registry gitHead is version metadata claim, not signed provenance or unique source identity",
+    "archived table manifest is 1.0.0; preserved unchanged under registry 6.9.0 gitHead association",
+    "generated source is newly produced; unavailable original source bytes are not claimed equal",
+    "original sourcesContent remains null; no map rewriting",
+    "full package identity not passed; other six no-commit packages not revisited",
+    "no full SDK rebuild, pnpm double bundle rerun, B0, OSV or native distribution safety audit"
+  ],
+  "sdk_distribution": "BLOCKED",
+  "EMBED_INLINE_BYTES": "PARTIAL",
+  "eight_top_level_gates_changed": false,
+  "release_ready": false
+}

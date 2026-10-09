@@ -1,0 +1,363 @@
+{
+  "schema": "shine-brand-local-git/v1",
+  "main_head": "f8db3949a7323c1e058c4d57f6287d4dbf54451d",
+  "source_repo": "/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand",
+  "clone_repo": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand",
+  "branch": "codex/shine-brand-independent",
+  "commits": [
+    {
+      "sha": "506b1a3e18ffd6dfb1e10f9826608f5b27449223",
+      "subject": "feat(shine-brand): establish standalone plugin repository"
+    },
+    {
+      "sha": "981c27015a93ce8fe20db594eb887914c766379a",
+      "subject": "chore(ci): add pinned standalone plugin checks"
+    }
+  ],
+  "source_clean": true,
+  "clone_clean": true,
+  "source_remote_count": 0,
+  "clone_origin": "/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand",
+  "initial_clone": {
+    "head": "981c27015a93ce8fe20db594eb887914c766379a",
+    "tree": "ab9fd1eca7df32c34d89d6d885089ebcd6c44c98",
+    "source": "/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand",
+    "clone": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand",
+    "source_status": "",
+    "source_remotes": "",
+    "clone_status": "",
+    "node_modules_exists": false,
+    "lib_exists": false,
+    "files": {
+      ".github/workflows/ci.yml": "52b149da653400e2af5ea427295c72909fd90c7b25f30dd959f6dffd3f7cd49b",
+      ".gitignore": "d216a762daf78395b9bd83dda3d45c9aef69781fc6326344bc151617e639d7d4",
+      ".npmrc": "367f6ef97f7b5737f180e3bc618b06155948292c03056aab6c84f7711d57a449",
+      "DEVELOPMENT.md": "d76fdabb7be1172db741cadd3d34dc6ad82e13c52d64e383c8e56c92af5bc290",
+      "README.md": "8186616884863508704226ca32f646e61c7c23650a007e6584f372819ba2b25d",
+      "inputs/package-inputs/README.md": "f92f4331a67027c9a73a324473e8264c768edfae18e540ef90ef18eca46b79b2",
+      "package.json": "0dc04679485fe6634ff4fbed1f1c25632f904d0f8af0b3dcd004c79ae326018a",
+      "plugin/README.md": "13732641cacfcf6f9024de47f0ffa1c30db8e9f4aac718dadc549860dfb90b6d",
+      "plugin/build.mjs": "9b639edf4ed356f903421697d4d23b5a05f4073c50e1b8045f872acf5bbf544b",
+      "plugin/contracts/content-theme.v1.json": "d59cebc56829e87c01cde7c63284be0e9bc6e43fe0ff42d6145297e3e49e8a74",
+      "plugin/cordis.patch.yml": "70dd510cf8f34ec8493bb257ad051ed4e6cabb00631640adc4fb497c44274c79",
+      "plugin/package.json": "5baa3cca089cdeb33819274723b60c5c86c109f8b994025ed9b556629822e0f8",
+      "plugin/src/brand-surface.mjs": "07e0c8c91d3a740ea4d65bc8fbb90688ab548f03fc10577130f6771a51f414fe",
+      "plugin/src/brand-surface.test.mjs": "3672f5df084c71c205fb960e015a354204a54188604d07094ad8db1f349cb622",
+      "plugin/src/client-lifecycle.test.mjs": "4e01ceb3052788d50fc45b0e292e98d8d11f4a918e0c56507e6a9b44114d244b",
+      "plugin/src/client.tsx": "f6d5c87a665a2ecd5e9bc87fce2df580814589a2ca953674ca66a7b643940dc1",
+      "plugin/src/index.ts": "a7c57969602c3294a76469548544d4c780fcc9b6cd38785a00ace5ce9e8e8b50",
+      "pnpm-lock.yaml": "3a0b5caad655452bc55b7131b998db78822a31d83953939acd89b85a4b907fb2",
+      "scripts/build-input.test.mjs": "8785053baae563204c9e29c36eb0ac0ace4ceaa7646c93b789c37ec253ad1b58",
+      "scripts/check-inputs.mjs": "d92022cae2aa8df029f24dfc477c8c5e049d032c1e8c96bcdd4174b70ec85161",
+      "scripts/pinned-pnpm.mjs": "228d58156e0fbd428a561ce76e0247f2881595ead0695254b9d533a7f68dfd9b",
+      "scripts/pinned-pnpm.test.mjs": "9289f418ec9ff0f9b60289aff14fa220f8f010fcbdab4b2f7826c16e2d42e3b2",
+      "scripts/verify-pack.mjs": "dcd37894761e3e16e6500721496f6048101f9f2d6a18d920745c585d39b12a7e",
+      "vendor/KIT-SHA256": "837a7c4156b82a5076124a3d138e01086701428c66948065a6232fad78518ca4",
+      "vendor/README.md": "c5d108bf192457065e5f37b1ae294a05654e3b49143d036f2a8fa225d9c48e67",
+      "vendor/dsh-plugin-kit-0.1.0.tgz": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901"
+    }
+  },
+  "checks": {
+    "pack": {
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/clone-sandbox.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "scripts/verify-pack.mjs"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand",
+      "env": {
+        "PATH": "/Users/hutou/homebrew/opt/node@24/bin:/usr/bin:/bin",
+        "HOME": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand/.home",
+        "TMPDIR": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand/tmp",
+        "CI": "true",
+        "COREPACK_ENABLE_NETWORK": "0",
+        "COREPACK_ENABLE_AUTO_PIN": "0",
+        "SHINE_BRAND_PNPM_ENTRY": "/Users/hutou/Library/pnpm/store/v11/links/@/pnpm/11.28.2/122be7a2eef9b52155dfbfddf4de8df482b45bc92b37ac10394fd3c370cb5af3/node_modules/pnpm/bin/pnpm.mjs",
+        "B0_BUILD_UPSTREAM": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2",
+        "B0_BUILD_TOOLS": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/build-tools",
+        "DSH_PACKAGE_INPUTS": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand/inputs/package-inputs"
+      },
+      "exit_code": 0,
+      "seconds": 0.41237974166870117,
+      "stdout_sha256": "bcac6e4001ff48dedf9f6264d8e4f7aaa45ac11eddea808741c9b2e18892d3d1",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "boundaries": {
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/clone-sandbox.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "-e",
+        "const fs=require('node:fs'); for(const p of [\"/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand/package.json\",\"/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/package.json\",\"/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/dsh-plugins/shine-query/package.json\"]){try{fs.readFileSync(p);throw new Error('Unexpected readable '+p)}catch(e){if(!['EPERM','EACCES'].includes(e.code))throw e; console.log(e.code,p)}}"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand",
+      "env": {
+        "PATH": "/Users/hutou/homebrew/opt/node@24/bin:/usr/bin:/bin",
+        "HOME": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand/.home",
+        "TMPDIR": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand/tmp",
+        "CI": "true",
+        "COREPACK_ENABLE_NETWORK": "0",
+        "COREPACK_ENABLE_AUTO_PIN": "0",
+        "SHINE_BRAND_PNPM_ENTRY": "/Users/hutou/Library/pnpm/store/v11/links/@/pnpm/11.28.2/122be7a2eef9b52155dfbfddf4de8df482b45bc92b37ac10394fd3c370cb5af3/node_modules/pnpm/bin/pnpm.mjs",
+        "B0_BUILD_UPSTREAM": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2",
+        "B0_BUILD_TOOLS": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/build-tools",
+        "DSH_PACKAGE_INPUTS": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand/inputs/package-inputs"
+      },
+      "exit_code": 0,
+      "seconds": 0.03569173812866211,
+      "stdout_sha256": "be007ca2a0ee345282dba340de43fe53da8eff88138245cb3da5d50831b39ed8",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "guards": {
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/clone-sandbox.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--test",
+        "--test-reporter=tap",
+        "scripts/build-input.test.mjs",
+        "scripts/pinned-pnpm.test.mjs"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand",
+      "env": {
+        "PATH": "/Users/hutou/homebrew/opt/node@24/bin:/usr/bin:/bin",
+        "HOME": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand/.home",
+        "TMPDIR": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand/tmp",
+        "CI": "true",
+        "COREPACK_ENABLE_NETWORK": "0",
+        "COREPACK_ENABLE_AUTO_PIN": "0",
+        "SHINE_BRAND_PNPM_ENTRY": "/Users/hutou/Library/pnpm/store/v11/links/@/pnpm/11.28.2/122be7a2eef9b52155dfbfddf4de8df482b45bc92b37ac10394fd3c370cb5af3/node_modules/pnpm/bin/pnpm.mjs",
+        "B0_BUILD_UPSTREAM": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2",
+        "B0_BUILD_TOOLS": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/build-tools",
+        "DSH_PACKAGE_INPUTS": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand/inputs/package-inputs"
+      },
+      "exit_code": 0,
+      "seconds": 0.5147290229797363,
+      "stdout_sha256": "1a4c0921cadb78ea4cb7f95346585ffa3b9db139d7ab68984c4348bdc5ccef35",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "behavior": {
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/clone-sandbox.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--test",
+        "--test-reporter=tap",
+        "plugin/src/brand-surface.test.mjs",
+        "plugin/src/client-lifecycle.test.mjs"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand",
+      "env": {
+        "PATH": "/Users/hutou/homebrew/opt/node@24/bin:/usr/bin:/bin",
+        "HOME": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand/.home",
+        "TMPDIR": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand/tmp",
+        "CI": "true",
+        "COREPACK_ENABLE_NETWORK": "0",
+        "COREPACK_ENABLE_AUTO_PIN": "0",
+        "SHINE_BRAND_PNPM_ENTRY": "/Users/hutou/Library/pnpm/store/v11/links/@/pnpm/11.28.2/122be7a2eef9b52155dfbfddf4de8df482b45bc92b37ac10394fd3c370cb5af3/node_modules/pnpm/bin/pnpm.mjs",
+        "B0_BUILD_UPSTREAM": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2",
+        "B0_BUILD_TOOLS": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/build-tools",
+        "DSH_PACKAGE_INPUTS": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand/inputs/package-inputs"
+      },
+      "exit_code": 0,
+      "seconds": 0.06984186172485352,
+      "stdout_sha256": "7d2ffe1561d83951e478c179cc0731dbe7b3ffed5edb66d49d1e719452b070d2",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "inputs": {
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/clone-sandbox.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "scripts/check-inputs.mjs"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand",
+      "env": {
+        "PATH": "/Users/hutou/homebrew/opt/node@24/bin:/usr/bin:/bin",
+        "HOME": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand/.home",
+        "TMPDIR": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand/tmp",
+        "CI": "true",
+        "COREPACK_ENABLE_NETWORK": "0",
+        "COREPACK_ENABLE_AUTO_PIN": "0",
+        "SHINE_BRAND_PNPM_ENTRY": "/Users/hutou/Library/pnpm/store/v11/links/@/pnpm/11.28.2/122be7a2eef9b52155dfbfddf4de8df482b45bc92b37ac10394fd3c370cb5af3/node_modules/pnpm/bin/pnpm.mjs",
+        "B0_BUILD_UPSTREAM": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2",
+        "B0_BUILD_TOOLS": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/build-tools",
+        "DSH_PACKAGE_INPUTS": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand/inputs/package-inputs"
+      },
+      "exit_code": 0,
+      "seconds": 0.2807190418243408,
+      "stdout_sha256": "bf0171a354524478f7f3f94552e2e0f86952b031fb61287ae6f1aa87b381677a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "manager": {
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/clone-sandbox.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "scripts/pinned-pnpm.mjs",
+        "--version"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand",
+      "env": {
+        "PATH": "/Users/hutou/homebrew/opt/node@24/bin:/usr/bin:/bin",
+        "HOME": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand/.home",
+        "TMPDIR": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand/tmp",
+        "CI": "true",
+        "COREPACK_ENABLE_NETWORK": "0",
+        "COREPACK_ENABLE_AUTO_PIN": "0",
+        "SHINE_BRAND_PNPM_ENTRY": "/Users/hutou/Library/pnpm/store/v11/links/@/pnpm/11.28.2/122be7a2eef9b52155dfbfddf4de8df482b45bc92b37ac10394fd3c370cb5af3/node_modules/pnpm/bin/pnpm.mjs",
+        "B0_BUILD_UPSTREAM": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2",
+        "B0_BUILD_TOOLS": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/build-tools",
+        "DSH_PACKAGE_INPUTS": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand/inputs/package-inputs"
+      },
+      "exit_code": 0,
+      "seconds": 0.4864788055419922,
+      "stdout_sha256": "ca919a2ba39d59b83ac525f2414a0043cdf0a413aa997ce43247649e449ce6c2",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "install": {
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/clone-sandbox.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "scripts/pinned-pnpm.mjs",
+        "install",
+        "--frozen-lockfile",
+        "--ignore-scripts",
+        "--offline"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand",
+      "env": {
+        "PATH": "/Users/hutou/homebrew/opt/node@24/bin:/usr/bin:/bin",
+        "HOME": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand/.home",
+        "TMPDIR": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand/tmp",
+        "CI": "true",
+        "COREPACK_ENABLE_NETWORK": "0",
+        "COREPACK_ENABLE_AUTO_PIN": "0",
+        "SHINE_BRAND_PNPM_ENTRY": "/Users/hutou/Library/pnpm/store/v11/links/@/pnpm/11.28.2/122be7a2eef9b52155dfbfddf4de8df482b45bc92b37ac10394fd3c370cb5af3/node_modules/pnpm/bin/pnpm.mjs",
+        "B0_BUILD_UPSTREAM": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2",
+        "B0_BUILD_TOOLS": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/build-tools",
+        "DSH_PACKAGE_INPUTS": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand/inputs/package-inputs"
+      },
+      "exit_code": 0,
+      "seconds": 0.4729619026184082,
+      "stdout_sha256": "cb8e6fa09cff076e4cd6013ac7f69d37b0c0c6c39f9331f5336881098b9e5d6c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "build": {
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/clone-sandbox.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "plugin/build.mjs",
+        "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2",
+        "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/build-tools"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand",
+      "env": {
+        "PATH": "/Users/hutou/homebrew/opt/node@24/bin:/usr/bin:/bin",
+        "HOME": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand/.home",
+        "TMPDIR": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand/tmp",
+        "CI": "true",
+        "COREPACK_ENABLE_NETWORK": "0",
+        "COREPACK_ENABLE_AUTO_PIN": "0",
+        "SHINE_BRAND_PNPM_ENTRY": "/Users/hutou/Library/pnpm/store/v11/links/@/pnpm/11.28.2/122be7a2eef9b52155dfbfddf4de8df482b45bc92b37ac10394fd3c370cb5af3/node_modules/pnpm/bin/pnpm.mjs",
+        "B0_BUILD_UPSTREAM": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2",
+        "B0_BUILD_TOOLS": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/build-tools",
+        "DSH_PACKAGE_INPUTS": "/Users/hutou/.codex/tasks/shinemage-shine-brand-clone-20261008/dsh-shine-brand/inputs/package-inputs"
+      },
+      "exit_code": 0,
+      "seconds": 0.18125009536743164,
+      "stdout_sha256": "29fa030d38a4ccd1df6927a6be5510433ab883aa4f37acd847225a381dbf11a6",
+      "stderr_sha256": "851d94d0212434ba56cc9acf902ca8dbd9fd32aac6d0505bd1f37a984ea94d72"
+    }
+  },
+  "tests": {
+    "input_and_command": {
+      "pass": 20,
+      "fail": 0,
+      "skip": 0
+    },
+    "brand_behavior": {
+      "pass": 7,
+      "fail": 0,
+      "skip": 0
+    }
+  },
+  "runtime_js_sha256": {
+    "index.js": "8b1f89bd6318f9a27bb0e34ae68fa3626496a7b02dedabf6bdfd2f0c2dab70f0",
+    "client.js": "03ed4e2a291e06cdbd4d16cc0ee5d7c53266849dc9f2269c043f551d00c8877e"
+  },
+  "content_pack": {
+    "schema_version": "shine-brand-content-pack/v1",
+    "formal_pack_plugin": "NOT_RUN",
+    "reason": "main-repo packPlugin was not invoked; content pack is not a formal candidate",
+    "release_ready": false,
+    "members": [
+      "package/README.md",
+      "package/cordis.patch.yml",
+      "package/lib/client.js",
+      "package/lib/index.js",
+      "package/package.json"
+    ],
+    "bytes": 2676,
+    "sha256": "9ccaa2ead44a0c9b8a5a3917ec7b78928a60921009d113c62c847eeed63dec7b"
+  },
+  "dependency_symlinks": {
+    "plugin/node_modules/react-dom": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom",
+    "plugin/node_modules/antd": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/build-tools/node_modules/.pnpm/antd@5.29.3_patch_hash=b9a69e8e39c4b3d9f19e88ef0127b5dd761bdb22502afaf3ab021e50a95231a8_5b423e95f7db63495baa107d0b053b70/node_modules/antd",
+    "plugin/node_modules/react": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/node_modules/.pnpm/react@18.3.1/node_modules/react",
+    "plugin/node_modules/@types/react-dom": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/build-tools/node_modules/.pnpm/@types+react-dom@18.3.7_@types+react@18.3.31/node_modules/@types/react-dom",
+    "plugin/node_modules/@types/node": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/node_modules/.pnpm/@types+node@22.20.0/node_modules/@types/node",
+    "plugin/node_modules/@types/react": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/node_modules/.pnpm/@types+react@18.3.31/node_modules/@types/react",
+    "plugin/node_modules/@deepseek-ai/dsh-util-values": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/util/values",
+    "plugin/node_modules/@deepseek-ai/dsh-client-ui-conversation": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/client/ui-conversation",
+    "plugin/node_modules/@deepseek-ai/dsh-client-ui-sidebar-right": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/client/ui-sidebar-right",
+    "plugin/node_modules/@deepseek-ai/dsh-client-ui-workspace": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/client/ui-workspace",
+    "plugin/node_modules/@deepseek-ai/dsh-client-ui-primitives": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/client/ui-primitives",
+    "plugin/node_modules/@deepseek-ai/dsh-client-ui-tool": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/client/ui-tool",
+    "plugin/node_modules/@deepseek-ai/dsh-api-session-controller": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/api/session-controller",
+    "plugin/node_modules/@deepseek-ai/dsh-client-ui-layout": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/client/ui-layout",
+    "plugin/node_modules/@deepseek-ai/dsh-client-ui-sidebar": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/client/ui-sidebar",
+    "plugin/node_modules/@deepseek-ai/dsh-session": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/core/session",
+    "plugin/node_modules/@deepseek-ai/dsh-client-ui-renderer": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/client/ui-renderer",
+    "plugin/node_modules/@deepseek-ai/dsh-client-ui-settings": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/client/ui-settings",
+    "plugin/node_modules/@deepseek-ai/dsh-client-connection": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/client/connection",
+    "plugin/node_modules/@deepseek-ai/dsh-client-ui-theme": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/client/ui-theme",
+    "plugin/node_modules/@deepseek-ai/dsh-tools": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/core/tools",
+    "plugin/node_modules/@deepseek-ai/dsh-session-query": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/session-query/session-query",
+    "plugin/node_modules/@deepseek-ai/dsh-host-webserver": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/host/webserver",
+    "plugin/node_modules/@deepseek-ai/dsh-skill": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/skill/skill",
+    "plugin/node_modules/@deepseek-ai/dsh-client-store": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/client/store",
+    "plugin/node_modules/@deepseek-ai/cordis": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/vendor/cordis",
+    "plugin/node_modules/@deepseek-ai/dsh-api-workspace-controller": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/api/workspace-controller",
+    "plugin/node_modules/@deepseek-ai/dsh-client-locale": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/client/locale",
+    "plugin/node_modules/@deepseek-ai/dsh-commands": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/interaction/commands",
+    "plugin/node_modules/@deepseek-ai/dsh-agent": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/core/agent",
+    "plugin/node_modules/@deepseek-ai/dsh-llm": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/llm/llm",
+    "plugin/node_modules/@deepseek-ai/dsh-client-ui-slots": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/client/ui-slots"
+  },
+  "upstream_status_after": "",
+  "inherited_main_files_unchanged_before_docs": 90,
+  "review": {
+    "native_p1": 0,
+    "native_p2": 1,
+    "resolved_p2": 1,
+    "automated_logger": "UNAVAILABLE_UNBORN_FINGERPRINT",
+    "external_review": "NOT_RUN"
+  },
+  "remote_repository": "NOT_CREATED",
+  "remote_ci": "NOT_RUN",
+  "npm_only_author": "NOT_VERIFIED",
+  "sdk_distribution": "BLOCKED",
+  "release_ready": false
+}

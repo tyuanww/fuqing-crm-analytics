@@ -1,0 +1,133 @@
+{
+  "schema": "shinemage-html-candidate-input-preparation-evidence/v1",
+  "status": "CURRENT_INPUT_PREPARED_AND_CHECKED",
+  "release_ready": false,
+  "original_executable_input_schema": "html-host-input-audit/v1",
+  "input": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-inputs-20261008/input.json",
+  "input_sha256": "6edbb79b5faff4eeb2c3ea2f9fa165fc2cc02d1e89025fc0d63eb2cd7541bf42",
+  "candidate_digest": "993daf31daa79137c22ce8d16c84b61892117386a9b7b8c5119fa0be62abefb0",
+  "package_source_sha": "bd647352d02402c679b04172855e40ec8f2d96a5",
+  "archive_sha256": "b75d90e98167fea507e8ab3304beda98c6706d7130eb8eb4e6359209ad0fff1b",
+  "counts": {
+    "source": 576,
+    "author": 581,
+    "received_members": 8
+  },
+  "existing_guard_result": {
+    "status": "PASS",
+    "scope": "existing pure input/member guards only; no headed observation",
+    "node": "24.19.0",
+    "options": {
+      "input": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-inputs-20261008/input.json",
+      "output": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-inputs-20261008/headed-not-run",
+      "python": "/Users/hutou/homebrew/opt/python@3.14/bin/python3.14",
+      "playwright": "/Users/hutou/.gstack/repos/gstack/node_modules/playwright/index.mjs",
+      "port": 4328,
+      "check": true,
+      "run": false
+    },
+    "source_count": 576,
+    "input_sha256": "6edbb79b5faff4eeb2c3ea2f9fa165fc2cc02d1e89025fc0d63eb2cd7541bf42",
+    "archive_sha256": "b75d90e98167fea507e8ab3304beda98c6706d7130eb8eb4e6359209ad0fff1b",
+    "runner_sha256": "de75f75c222b72199b577298bf2bd28ebef79a082fcf680a144a464e54937d38",
+    "member_count": 8,
+    "head": "8aabaaeb8d0e22a351088e1daefc164a5c0a2d09",
+    "planned_runtime_output_created": false,
+    "browser": "NOT_RUN",
+    "dsh": "NOT_RUN",
+    "real_model": "NOT_RUN",
+    "release_ready": false
+  },
+  "command_observation": {
+    "argv": [
+      "/Users/hutou/homebrew/opt/node@24/bin/node",
+      "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-inputs-20261008/validate.mjs"
+    ],
+    "cwd": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics",
+    "exit_code": 0,
+    "source": "actual exec_command result and validator-generated validation.json"
+  },
+  "previous_custom_input_missing_fields": [
+    "schema",
+    "head",
+    "author_plugin",
+    "source_files",
+    "upstream_sha",
+    "cli_sha256",
+    "pin_sha256"
+  ],
+  "previous_gap_report_preserved": true,
+  "source_snapshot_origin": "576 explicit current plugin source files; prevalidated equal to integration snapshot",
+  "built_members_origin": "5 lib files read from unchanged b75 tgz; no build",
+  "new_candidate_headed": "NOT_RUN",
+  "formal_receipt_created": false,
+  "journal_modified": false,
+  "runtime_started": false,
+  "raw_references": [
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-inputs-20261008/prepare.py",
+      "sha256": "023c76b9e8ddc35db3f4163ae49d9f38890cb481ab14f04a94e39b88f16cb9ea",
+      "bytes": 3792
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-inputs-20261008/validate.mjs",
+      "sha256": "790f34268e02fcfc6756454e44cf2aaaa7159c6c3c09b9e2c957cfe96a35c381",
+      "bytes": 1883
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-inputs-20261008/input.json",
+      "sha256": "6edbb79b5faff4eeb2c3ea2f9fa165fc2cc02d1e89025fc0d63eb2cd7541bf42",
+      "bytes": 66657
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-inputs-20261008/preparation.json",
+      "sha256": "4fa9c95c2fd63eaa83fe276bb770f745d13e31d26d18647e10875412648c2ffb",
+      "bytes": 137500
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-inputs-20261008/validation.json",
+      "sha256": "99ca0c2f0809c616e2468ac840b49c5ecfbdde5227be46138c1449fda2b0e897",
+      "bytes": 1157
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-remaining-20261008/input.json",
+      "sha256": "5f2900dec24a0b4226ba460064158c922bfaf60847f252bd4bce1783e106643a",
+      "bytes": 1383
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-gap-20261008/comparison.json",
+      "sha256": "9142bac9a575498dfd187e82f91eefe40acc1bc87bfa2b4737358e1bb6232e3f",
+      "bytes": 28539
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-candidate-gap-20261008/current-source-digests.json",
+      "sha256": "61a9e1231fc6f69901e08c72af96c0a3a85564db2d0149712d3dba76a4722bf6",
+      "bytes": 63483
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/scripts/dsh-b0/html-host-browser-inputs.mjs",
+      "sha256": "7a426fe87c70e23f8b854dcc603e7fbc76320f7e6e3460a4277126fda44fbe6b",
+      "bytes": 10011
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/scripts/dsh-b0/html-host-browser-ui.probe.mjs",
+      "sha256": "de75f75c222b72199b577298bf2bd28ebef79a082fcf680a144a464e54937d38",
+      "bytes": 45145
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/docs/hackathon/evidence/shinemage-html-candidate-gap-20261008.md",
+      "sha256": "7bf26c079c58b3ca8f93db5acd5d1a4dab8d0f6637a5239e274925d3c7a39ade",
+      "bytes": 4757
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/docs/hackathon/evidence/shinemage-html-candidate-gap-20261008-validation.json",
+      "sha256": "568a1ec34b6c6dd100cbf3a1dd3f2eed5f9bad73af8f168fc7d1ce158ac5b847",
+      "bytes": 37050
+    }
+  ],
+  "evidence_document": {
+    "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/docs/hackathon/evidence/shinemage-html-candidate-inputs-20261008.md",
+    "sha256": "2e397dee1edaeb66cbaed5fc0b3931b82d4819aa34d5cbbdd1c53abdc4adb2da",
+    "bytes": 3131
+  }
+}

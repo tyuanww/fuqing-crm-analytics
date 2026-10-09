@@ -1,0 +1,139 @@
+{
+  "schema": "shinemage-grok-handoff-transform-integration/v1",
+  "head": "8aabaaeb8d0e22a351088e1daefc164a5c0a2d09",
+  "product_source_changed": false,
+  "sdk_transforms": {
+    "packages": [
+      {
+        "name": "smart-buffer@4.2.0",
+        "build_exit": 0,
+        "js_matched": 2,
+        "null_paths_covered": 2
+      },
+      {
+        "name": "socks@2.8.10",
+        "build_exit": 0,
+        "js_matched": 6,
+        "null_paths_covered": 6,
+        "declarations_equal": false
+      },
+      {
+        "name": "semver-range-intersect@0.3.1",
+        "build_exit": 0,
+        "js_matched": 4,
+        "null_paths_covered": 4
+      },
+      {
+        "name": "table@6.9.0",
+        "build_exit": 0,
+        "js_matched": 35,
+        "null_paths_covered": 33,
+        "source_manifest_version": "1.0.0"
+      },
+      {
+        "name": "@zkochan/table@2.0.1",
+        "build_exit": 0,
+        "js_matched": 35,
+        "null_paths_covered": 33,
+        "source_manifest_version": "2.0.1",
+        "lock_root_version": "2.0.0"
+      }
+    ],
+    "js_raw_matched": 82,
+    "null_paths_transform_covered": 78,
+    "null_paths_without_fixed_source_binding": 8,
+    "official_map_null_contents_unchanged": 86,
+    "main_independent_raw_comparison": true,
+    "signed_provenance_verified": false,
+    "complete_package_identity_verified": false
+  },
+  "headed": {
+    "candidate": "993daf31daa79137c22ce8d16c84b61892117386a9b7b8c5119fa0be62abefb0",
+    "package_sha256": "b75d90e98167fea507e8ab3304beda98c6706d7130eb8eb4e6359209ad0fff1b",
+    "pass": 25,
+    "fail": 0,
+    "executed_by": "Grok previous handoff; current turn independently reviewed only",
+    "top_level_exit_0": "reported in handoff, independent raw exit log absent",
+    "owned_cleanup": "raw result verifies owned processes and port 4328",
+    "screenshots": 12,
+    "native_zoom_or_windows_contrast_pass": false,
+    "saved_notice_accuracy": "existing ambiguity observed; not covered by 25 assertions"
+  },
+  "reviews": [
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/sdk-three-package-transform-review-20261008/review.json",
+      "sha256": "11c8e0f383e91a030c3c1a4929f3c3bcb8890457ca5e8b4e35f4b0407a6ee15e",
+      "scope": "independent read-only recipe, fixed inputs and raw output review; no build rerun",
+      "findings": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-table-transform-review-20261008/summary.json",
+      "sha256": "6da82bf59e2392f6f483d924be9eef83b6f536af0cc951640407736dca42364e",
+      "scope": "independent read-only recipe, fixed inputs and raw output review; no build rerun",
+      "findings": 0
+    }
+  ],
+  "archive": {
+    "archive": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/archives/shinemage-grok-transform-20261008/evidence.tar.gz",
+    "sha256": "0d6c633a7ff27d67e2eb1d1c028dfd05a73b9b627f5127fef6244369a8919ec4",
+    "archive_bytes": 39879710,
+    "manifest": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/archives/shinemage-grok-transform-20261008/manifest.json",
+    "manifest_sha256": "9dabfcfb80d5324818b5b145673b4a25e402d46c5b4bac3652ac53426b947171",
+    "file_count": 977,
+    "input_bytes": 45342236,
+    "all_members_rehashed": true
+  },
+  "protection": {
+    "protected": [
+      {
+        "root": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics",
+        "head_status_unchanged": true,
+        "preserved_dirty_files": 14
+      },
+      {
+        "root": "/Users/hutou/.codex/worktrees/grok-sdk-trust-closeout/fuqing-crm-analytics",
+        "head_status_unchanged": true,
+        "preserved_dirty_files": 37
+      },
+      {
+        "root": "/Users/hutou/.codex/worktrees/shinemage-t14-html-ocr/fuqing-crm-analytics",
+        "head_status_unchanged": true,
+        "preserved_dirty_files": 35
+      },
+      {
+        "root": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics",
+        "head_status_unchanged": true,
+        "preserved_dirty_files": 8
+      },
+      {
+        "root": "/Users/hutou/.codex/worktrees/grok-html-ui-acceptance/fuqing-crm-analytics",
+        "head_status_unchanged": true,
+        "preserved_dirty_files": 10
+      },
+      {
+        "root": "/Users/hutou/.codex/worktrees/grok-sdk-trust-evidence/fuqing-crm-analytics",
+        "head_status_unchanged": true,
+        "preserved_dirty_files": 1
+      }
+    ],
+    "candidate_files_unchanged": {
+      "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/candidate/candidate.json": "e57173990a0a7b2c836492159b87e36d17c97a9afe78284d1daf9eaadc131fe6",
+      "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/candidate/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz": "b75d90e98167fea507e8ab3304beda98c6706d7130eb8eb4e6359209ad0fff1b",
+      "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/plugin-state.json": "018bf8a055af8e2315c7071d54aa73bc9ab604c2cb8c2288d1ff2cd2b947ef6c"
+    },
+    "upstream_head_index_lock_status_unchanged": true,
+    "starting_main_evidence_files_unchanged": 34,
+    "head_unchanged": "8aabaaeb8d0e22a351088e1daefc164a5c0a2d09",
+    "tracked_product_diff": ""
+  },
+  "journal_seq": 3,
+  "formal_target": "NOT_RUN_MISSING_REAL_AUTHORIZED_WSL2_ACCESS_AND_OWNED_DIRECTORY",
+  "formal_ci": "NOT_RUN",
+  "sdk_distribution": "BLOCKED",
+  "EMBED_INLINE_BYTES": "PARTIAL",
+  "product_checker_defaults": "NOT_VERIFIED",
+  "top_level_gates_new_pass": 0,
+  "release_ready": false,
+  "new_commit": false,
+  "push_pr_merge_publish_deploy": false
+}

@@ -1,0 +1,238 @@
+{
+  "schema_version": "shine-brand-public-build/v1",
+  "source_repo": "/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand",
+  "source_commit": "d695266affb438a6978414a362a6ab6f6fa19417",
+  "source_tree": "8a6156c17f6d500343e63a5c89969afb0a0e28a3",
+  "branch": "codex/shine-brand-independent",
+  "source_clean": true,
+  "remote_created": false,
+  "public_build": "PASS",
+  "scope": "this leaf public compiler, not strict SDK typecheck or host acceptance",
+  "validated_input_snapshot": "source-inputs.json",
+  "committed_implementation_equals_validation": true,
+  "documentation_updated_after_validation": [
+    "README.md",
+    "DEVELOPMENT.md"
+  ],
+  "node": "24.19.0",
+  "npm": "11.17.0",
+  "esbuild": "0.25.12",
+  "pnpm": "11.28.2",
+  "installed_registry_packages": 3,
+  "install_network": "ENABLED_TLS_VERIFIED",
+  "build_test_pack_network": "DENIED",
+  "source_and_upstream_reads": "DENIED_BY_SANDBOX",
+  "tests": {
+    "pass": 32,
+    "fail": 0,
+    "skip": 0,
+    "parts": {
+      "legacy_input_guards": 11,
+      "pnpm_guards": 9,
+      "public_build_boundaries": 5,
+      "brand_behaviors": 7
+    }
+  },
+  "commands": {
+    "pack": {
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/build.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "scripts/verify-pack.mjs"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/checkout",
+      "env": {
+        "PATH": "/Users/hutou/homebrew/opt/node@24/bin:/usr/bin:/bin",
+        "HOME": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/home",
+        "TMPDIR": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/tmp",
+        "CI": "true",
+        "COREPACK_ENABLE_NETWORK": "0",
+        "COREPACK_ENABLE_AUTO_PIN": "0",
+        "npm_config_cache": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/cache",
+        "npm_config_userconfig": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/user.npmrc",
+        "NODE_EXTRA_CA_CERTS": "/Users/hutou/homebrew/etc/ca-certificates/cert.pem",
+        "SHINE_BRAND_PNPM_ENTRY": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/checkout/npm-author/node_modules/pnpm/bin/pnpm.mjs"
+      },
+      "exit_code": 0,
+      "seconds": 0.5308678150177002,
+      "stdout_sha256": "bcac6e4001ff48dedf9f6264d8e4f7aaa45ac11eddea808741c9b2e18892d3d1",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "boundaries": {
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/build.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "-e",
+        "const fs=require('node:fs');for(const p of [\"/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/package.json\", \"/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/build-tools/package.json\", \"/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand/package.json\"]){try{fs.readFileSync(p);throw Error('unexpected readable '+p)}catch(e){if(!['EPERM','EACCES'].includes(e.code))throw e;console.log(e.code,p)}}"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/checkout",
+      "env": {
+        "PATH": "/Users/hutou/homebrew/opt/node@24/bin:/usr/bin:/bin",
+        "HOME": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/home",
+        "TMPDIR": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/tmp",
+        "CI": "true",
+        "COREPACK_ENABLE_NETWORK": "0",
+        "COREPACK_ENABLE_AUTO_PIN": "0",
+        "npm_config_cache": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/cache",
+        "npm_config_userconfig": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/user.npmrc",
+        "NODE_EXTRA_CA_CERTS": "/Users/hutou/homebrew/etc/ca-certificates/cert.pem",
+        "SHINE_BRAND_PNPM_ENTRY": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/checkout/npm-author/node_modules/pnpm/bin/pnpm.mjs"
+      },
+      "exit_code": 0,
+      "seconds": 0.032570838928222656,
+      "stdout_sha256": "8a69823f14751ab4184d82fd2086b38f1897c608770e86ab6dafe35efe6ce494",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "tests": {
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/build.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--test",
+        "--test-reporter=tap",
+        "scripts/build-input.test.mjs",
+        "scripts/pinned-pnpm.test.mjs",
+        "npm-author/build.test.mjs",
+        "plugin/src/brand-surface.test.mjs",
+        "plugin/src/client-lifecycle.test.mjs"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/checkout",
+      "env": {
+        "PATH": "/Users/hutou/homebrew/opt/node@24/bin:/usr/bin:/bin",
+        "HOME": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/home",
+        "TMPDIR": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/tmp",
+        "CI": "true",
+        "COREPACK_ENABLE_NETWORK": "0",
+        "COREPACK_ENABLE_AUTO_PIN": "0",
+        "npm_config_cache": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/cache",
+        "npm_config_userconfig": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/user.npmrc",
+        "NODE_EXTRA_CA_CERTS": "/Users/hutou/homebrew/etc/ca-certificates/cert.pem",
+        "SHINE_BRAND_PNPM_ENTRY": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/checkout/npm-author/node_modules/pnpm/bin/pnpm.mjs"
+      },
+      "exit_code": 0,
+      "seconds": 0.6138591766357422,
+      "stdout_sha256": "c99f73f92118adb91f48ca7b29dd416ce11f87584be494fc63398fdcc52e3cb6",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "install": {
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/install.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "/Users/hutou/homebrew/opt/node@24/lib/node_modules/npm/bin/npm-cli.js",
+        "ci",
+        "--prefix",
+        "npm-author",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/checkout",
+      "env": {
+        "PATH": "/Users/hutou/homebrew/opt/node@24/bin:/usr/bin:/bin",
+        "HOME": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/home",
+        "TMPDIR": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/tmp",
+        "CI": "true",
+        "COREPACK_ENABLE_NETWORK": "0",
+        "COREPACK_ENABLE_AUTO_PIN": "0",
+        "npm_config_cache": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/cache",
+        "npm_config_userconfig": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/user.npmrc",
+        "NODE_EXTRA_CA_CERTS": "/Users/hutou/homebrew/etc/ca-certificates/cert.pem",
+        "SHINE_BRAND_PNPM_ENTRY": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/checkout/npm-author/node_modules/pnpm/bin/pnpm.mjs"
+      },
+      "exit_code": 0,
+      "seconds": 2.367344856262207,
+      "stdout_sha256": "c59541a7d8bfc9987c0aa47adf2cdd2858be8b66de5abc0331d5a6484ae63ab6",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "build": {
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/build.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "npm-author/build.mjs"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/checkout",
+      "env": {
+        "PATH": "/Users/hutou/homebrew/opt/node@24/bin:/usr/bin:/bin",
+        "HOME": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/home",
+        "TMPDIR": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/tmp",
+        "CI": "true",
+        "COREPACK_ENABLE_NETWORK": "0",
+        "COREPACK_ENABLE_AUTO_PIN": "0",
+        "npm_config_cache": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/cache",
+        "npm_config_userconfig": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/user.npmrc",
+        "NODE_EXTRA_CA_CERTS": "/Users/hutou/homebrew/etc/ca-certificates/cert.pem",
+        "SHINE_BRAND_PNPM_ENTRY": "/Users/hutou/.codex/tasks/shinemage-shine-brand-public-build-20261008/checkout/npm-author/node_modules/pnpm/bin/pnpm.mjs"
+      },
+      "exit_code": 0,
+      "seconds": 2.8363120555877686,
+      "stdout_sha256": "7706dc073d320f784f7fff4a2443d051d0cbc290741bd4d3d916791661e67c0f",
+      "stderr_sha256": "86a5a7b7a58793116cfad69d6fb445f070e58d8e8039e6809654766b42776c68"
+    }
+  },
+  "runtime_js": {
+    "index.js": "8b1f89bd6318f9a27bb0e34ae68fa3626496a7b02dedabf6bdfd2f0c2dab70f0",
+    "client.js": "03ed4e2a291e06cdbd4d16cc0ee5d7c53266849dc9f2269c043f551d00c8877e"
+  },
+  "content_pack": {
+    "schema_version": "shine-brand-content-pack/v1",
+    "formal_pack_plugin": "NOT_RUN",
+    "reason": "main-repo packPlugin was not invoked; content pack is not a formal candidate",
+    "release_ready": false,
+    "members": [
+      "package/README.md",
+      "package/cordis.patch.yml",
+      "package/lib/client.js",
+      "package/lib/index.js",
+      "package/package.json"
+    ],
+    "bytes": 2676,
+    "sha256": "9ccaa2ead44a0c9b8a5a3917ec7b78928a60921009d113c62c847eeed63dec7b"
+  },
+  "legacy_build": {
+    "command": [
+      "/usr/bin/sandbox-exec",
+      "-f",
+      "/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/evidence/sandbox.sb",
+      "/Users/hutou/homebrew/opt/node@24/bin/node",
+      "plugin/build.mjs",
+      "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2",
+      "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/build-tools"
+    ],
+    "cwd": "/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand",
+    "env": {
+      "PATH": "/Users/hutou/homebrew/opt/node@24/bin:/usr/bin:/bin",
+      "HOME": "/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand/.home",
+      "TMPDIR": "/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand/tmp",
+      "CI": "true",
+      "COREPACK_ENABLE_NETWORK": "0",
+      "COREPACK_ENABLE_AUTO_PIN": "0",
+      "SHINE_BRAND_PNPM_ENTRY": "/Users/hutou/Library/pnpm/store/v11/links/@/pnpm/11.28.2/122be7a2eef9b52155dfbfddf4de8df482b45bc92b37ac10394fd3c370cb5af3/node_modules/pnpm/bin/pnpm.mjs",
+      "B0_BUILD_UPSTREAM": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2",
+      "B0_BUILD_TOOLS": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/build-tools",
+      "DSH_PACKAGE_INPUTS": "/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand/inputs/package-inputs"
+    },
+    "exit_code": 0,
+    "seconds": 0.21410107612609863
+  },
+  "runtime_equal_previous": true,
+  "package_equal_previous": true,
+  "review": {
+    "parent": "no unresolved P1/P2",
+    "native": "no credible P1/P2",
+    "external": "NOT_RUN"
+  },
+  "remote_ci": "NOT_RUN",
+  "linux_build": "NOT_RUN",
+  "strict_sdk_typecheck": "NOT_RUN",
+  "sdk_distribution": "BLOCKED",
+  "release_ready": false
+}

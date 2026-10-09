@@ -1,0 +1,282 @@
+{
+  "schema": "shinemage-input-unblock-integration/v1",
+  "head": "8aabaaeb8d0e22a351088e1daefc164a5c0a2d09",
+  "scope": "existing admission inputs and explicitly authorized isolated recipe reproduction",
+  "candidate_target": {
+    "source_members_checked": 43,
+    "terminal_members_checked": 349,
+    "target_execution": "NOT_RUN",
+    "journal_seq": 3,
+    "journal_unchanged": true
+  },
+  "html": {
+    "native_route": "UNAVAILABLE_FOR_ISOLATED_WINDOW",
+    "menu_and_focus": "NOT_RUN",
+    "standalone": "NOT_RUN",
+    "external_probe_review": "TIMEOUT_NO_THIRD_RETRY"
+  },
+  "sdk_recipe": {
+    "exact_raw_bundle_reproduction": true,
+    "bundle_count": 2,
+    "source_blobs": 8027,
+    "source_changes": 0,
+    "source_install_exit_code": 0,
+    "build_exit_code": 0,
+    "network_denied": true,
+    "output_postprocessing": false,
+    "r1_raw_mismatch_preserved": true,
+    "source_report": "shinemage-sdk-recipe-reproduction-validation-20261008.json",
+    "main_independent_raw_comparison": {
+      "scope": "main independent raw byte comparison; no normalization",
+      "results": [
+        {
+          "file": "pnpm.mjs",
+          "built_path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/work/pnpm/pnpm/pnpm11/pnpm/dist/pnpm.mjs",
+          "sealed_path": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/checks/kit-sdk-v2-distribution-20261007/received-r3/corepack/v1/pnpm/11.28.2/dist/pnpm.mjs",
+          "built_sha256": "00805e99c795e7067b0f459846393ca3f6a701ca9ae267fd48b99d11ecd423a8",
+          "sealed_sha256": "00805e99c795e7067b0f459846393ca3f6a701ca9ae267fd48b99d11ecd423a8",
+          "bytes": 15457230,
+          "raw_bytes_equal": true
+        },
+        {
+          "file": "worker.js",
+          "built_path": "/Users/hutou/.codex/worktrees/shinemage-sdk-evidence/fuqing-crm-analytics/.context/checks/sdk-recipe-reproduction-20261008/layout-r2/work/pnpm/pnpm/pnpm11/pnpm/dist/worker.js",
+          "sealed_path": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/checks/kit-sdk-v2-distribution-20261007/received-r3/corepack/v1/pnpm/11.28.2/dist/worker.js",
+          "built_sha256": "9834d944929dba7566e230a084fff0ecdb1da1be777c72ecb5f00a41a04843a4",
+          "sealed_sha256": "9834d944929dba7566e230a084fff0ecdb1da1be777c72ecb5f00a41a04843a4",
+          "bytes": 613034,
+          "raw_bytes_equal": true
+        }
+      ],
+      "release_ready": false
+    }
+  },
+  "review": {
+    "kind": "local independent read-only review, not external OCR",
+    "final_raw_review_findings": 0,
+    "raw_review_materials": 43,
+    "preparation_corrections": [
+      "v5 generation timing wording",
+      "root Node26.10 devEngines runtime requirement",
+      "774 registry plus 1 git checksum wording"
+    ],
+    "prior_static_cargo_cache_assumption_corrected": true
+  },
+  "execution_raw_reference_checks": {
+    "copied": [
+      {
+        "path": "docs/hackathon/evidence/shinemage-sdk-recipe-reproduction-20261008.md",
+        "sha256": "eae94f087d43d60ea7f40f4ae1900bb8fb3c6484afbee1204c372f17a5f33fda"
+      },
+      {
+        "path": "docs/hackathon/evidence/shinemage-sdk-recipe-reproduction-validation-20261008.json",
+        "sha256": "b222df7dbcba49baaef7c4f6c5e4f4982422e6967914700816fc29e115c2b36d"
+      }
+    ],
+    "results": [
+      {
+        "document": "shinemage-sdk-recipe-toolchain-validation-20261008.json",
+        "raw_hashes_checked": 37,
+        "mismatches": 0
+      },
+      {
+        "document": "shinemage-sdk-runtime-prewarm-validation-20261008.json",
+        "raw_hashes_checked": 18,
+        "mismatches": 0
+      },
+      {
+        "document": "shinemage-sdk-cargo-inputs-20261008-validation.json",
+        "raw_hashes_checked": 18,
+        "mismatches": 0
+      },
+      {
+        "document": "shinemage-sdk-recipe-reproduction-validation-20261008.json",
+        "raw_hashes_checked": 21,
+        "mismatches": 0
+      }
+    ]
+  },
+  "protected_state": {
+    "protected_trees": [
+      {
+        "path": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics",
+        "head_equal": true,
+        "status_equal": true,
+        "file_count": 14,
+        "file_hashes_equal": true
+      },
+      {
+        "path": "/Users/hutou/.codex/worktrees/grok-sdk-trust-closeout/fuqing-crm-analytics",
+        "head_equal": true,
+        "status_equal": true,
+        "file_count": 37,
+        "file_hashes_equal": true
+      },
+      {
+        "path": "/Users/hutou/.codex/worktrees/shinemage-t14-html-ocr/fuqing-crm-analytics",
+        "head_equal": true,
+        "status_equal": true,
+        "file_count": 35,
+        "file_hashes_equal": true
+      },
+      {
+        "path": "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics",
+        "head_equal": true,
+        "status_equal": true,
+        "file_count": 8,
+        "file_hashes_equal": true
+      },
+      {
+        "path": "/Users/hutou/.codex/worktrees/grok-html-ui-acceptance/fuqing-crm-analytics",
+        "head_equal": true,
+        "status_equal": true,
+        "file_count": 10,
+        "file_hashes_equal": true
+      },
+      {
+        "path": "/Users/hutou/.codex/worktrees/grok-sdk-trust-evidence/fuqing-crm-analytics",
+        "head_equal": true,
+        "status_equal": true,
+        "file_count": 1,
+        "file_hashes_equal": true
+      }
+    ],
+    "candidate_files": [
+      {
+        "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/candidate/candidate.json",
+        "sha256": "e57173990a0a7b2c836492159b87e36d17c97a9afe78284d1daf9eaadc131fe6",
+        "equal": true
+      },
+      {
+        "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/candidate/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+        "sha256": "b75d90e98167fea507e8ab3304beda98c6706d7130eb8eb4e6359209ad0fff1b",
+        "equal": true
+      },
+      {
+        "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/plugin-state.json",
+        "sha256": "018bf8a055af8e2315c7071d54aa73bc9ab604c2cb8c2288d1ff2cd2b947ef6c",
+        "equal": true
+      }
+    ],
+    "upstream": {
+      "head_equal": true,
+      "status_equal": true,
+      "index_equal": true,
+      "lock_equal": true
+    },
+    "integration_head_equal": true,
+    "integration_branch": "",
+    "saved_ref": "8aabaaeb8d0e22a351088e1daefc164a5c0a2d09",
+    "release_ready": false
+  },
+  "archives": {
+    "static_inputs": {
+      "scope": "static input preparation before isolated recipe execution",
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/archives/shinemage-input-unblock-20261008/evidence.tar.gz",
+      "files": 134,
+      "bytes": 29669016,
+      "sha256": "479cd8b83fe39c3e4873e2e198fd0faf6d2403dd39126a3864e5ccea27a4d3f6",
+      "manifest_sha256": "241a9358fe7ea151b8a919edaef96338eabbadee647200e826983283a1a7109d",
+      "member_hashes": "PASS"
+    },
+    "execution": {
+      "directory": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/archives/shinemage-recipe-reproduction-20261008",
+      "file_count": 794,
+      "input_bytes": 193986193,
+      "all_archive_members_verified": true,
+      "archive_bytes": 144778747,
+      "archive_sha256": "3221cfaada002549682d5675b3c4afe075d9a21bafd59e9e02096c40dc875b91",
+      "manifest_sha256": "4400fbb36090b56f0927e4c5b32601e492c67f9c02068f8fd697d6a925dd5734"
+    }
+  },
+  "gates": {
+    "sdk_distribution": "BLOCKED",
+    "release_ready": false,
+    "embed_inline_bytes_ledger": "PARTIAL",
+    "embedded_components_default_product": "NOT_VERIFIED",
+    "inline_function_bytes_default_product": "NOT_VERIFIED",
+    "top_level_new_pass": 0,
+    "formal_ci": "NOT_RUN",
+    "real_business_production": "NOT_RUN"
+  },
+  "product_code_changed": false,
+  "commit_created": false,
+  "references": [
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-raw-review-20261008/summary.json",
+      "sha256": "aa4b722804f0061874948a3905972c5d608433b5223fdcd5f09ef7038074b43d",
+      "bytes": 16084
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/sdk-recipe-raw-review-20261008/review.md",
+      "sha256": "05863aa7930b961f6dc52d6488433639e542825f43d62689a8d724ed87a3a6ae",
+      "bytes": 3222
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-input-unblock-20261008/before.json",
+      "sha256": "aefbd271e8faaca9762a321af305dc7e587f8e602a27317be8ee187603e299cb",
+      "bytes": 25616
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-input-unblock-20261008/static-archive.json",
+      "sha256": "288eb60bb440ee92b4b5035f0e2bedc6dd6f7672c8c4b0b9cd5575ca4ab8d799",
+      "bytes": 465
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-input-unblock-20261008/protected-after.json",
+      "sha256": "6ba6601ed565a489fd08176935c5858063b018b803f0bd1bc550054600aeb751",
+      "bytes": 2482
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-input-unblock-20261008/recipe-authorization.json",
+      "sha256": "aee9ebb2e55f65999345d05c82a9fc9b13d3ca06875c19d419fa5bd0c9039c49",
+      "bytes": 676
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-input-unblock-20261008/execution-archive.json",
+      "sha256": "cc171b1e93e723940b6a8b4c38227343fb7621d7f4842d0fb8ffb9863d0f2161",
+      "bytes": 451
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-input-unblock-20261008/execution-refs-verification.json",
+      "sha256": "e184ace459b28a17a9c7e4ae692560fccc6f4b7b88344982e2477d1e56f0e66b",
+      "bytes": 993
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-input-unblock-20261008/sdk-materials-verification.json",
+      "sha256": "161ad80634f8940d234db00631e1de9e99017ff0bd510d85edf0d2600a7dd5ba",
+      "bytes": 339
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-input-unblock-20261008/candidate-members-verification.json",
+      "sha256": "90f36e7e751cf6fb96eb8d7a56ad805b5d0095a3e7bdb615d75ac7e4882e63bf",
+      "bytes": 165
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-input-unblock-20261008/raw-bundle-independent.json",
+      "sha256": "46180349e47090d8b307bd35fd41aa81b10ab29397741ce02a4c1798a735c9b3",
+      "bytes": 1458
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-input-unblock-20261008/final-doc-check.json",
+      "sha256": "abff38754579e10b64255f57e4b83df192d3b497ea18cc145b1ff94dbcca2459",
+      "bytes": 659
+    }
+  ],
+  "final_doc_check": {
+    "git_visible_files": 28,
+    "all_changes_docs_only": true,
+    "json_files_parsed": 12,
+    "broken_links": [],
+    "preexisting_untracked_docs_preserved": 8,
+    "static_archive": {
+      "scope": "static input preparation before isolated recipe execution",
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/archives/shinemage-input-unblock-20261008/evidence.tar.gz",
+      "files": 134,
+      "bytes": 29669016,
+      "sha256": "479cd8b83fe39c3e4873e2e198fd0faf6d2403dd39126a3864e5ccea27a4d3f6",
+      "manifest_sha256": "241a9358fe7ea151b8a919edaef96338eabbadee647200e826983283a1a7109d",
+      "member_hashes": "PASS"
+    }
+  }
+}

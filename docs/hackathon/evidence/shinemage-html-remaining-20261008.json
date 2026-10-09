@@ -1,0 +1,87 @@
+{
+  "schema": "shinemage-html-remaining-observation/v1",
+  "status": "BLOCKED_NATIVE_INSTANCE_CONTROL",
+  "release_ready": false,
+  "source_head": "8aabaaeb8d0e22a351088e1daefc164a5c0a2d09",
+  "candidate_digest": "993daf31daa79137c22ce8d16c84b61892117386a9b7b8c5119fa0be62abefb0",
+  "package_source_sha": "bd647352d02402c679b04172855e40ec8f2d96a5",
+  "archive": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/candidate/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+  "archive_sha256": "b75d90e98167fea507e8ab3304beda98c6706d7130eb8eb4e6359209ad0fff1b",
+  "archive_rechecked_sha256": "b75d90e98167fea507e8ab3304beda98c6706d7130eb8eb4e6359209ad0fff1b",
+  "package_files": {
+    "package/lib/client.js": "584e98f41290e25677009b6811e59fe15f9606fbf71c2b193d4a7923ebc4dc72",
+    "package/lib/index.js": "f1b97a4457ad65d868c83eb6209ae4c14a9598415caf4376a5c6151ef962fd58",
+    "package/lib/page-tools.js": "28b07f12a5aaff8096c604d9c53eef293a91be55ae82d48b069ab8c0e8fa5c70",
+    "package/lib/skills.js": "c4b870b64626b5d8f7ed898c6cf2edd613fc7cabb39bd49490eb9b3bcf29c8b1",
+    "package/lib/tool.js": "e854349cb5187e2b045f280f8330f19da0e7d0acbe0ff4f07e8c747f710a4924",
+    "package/bundled-dependencies.json": "957ba54ce606fc735cc11c051b9d60c3703ab8bf0bc94dd00aac696b28afa06b",
+    "package/package.json": "33cbe7f5a527be520717b2559aeb3a213d9451da78028b02cda8b087356dc6f3",
+    "package/cordis.patch.yml": "901c01fe1237b5d1b25f60ce58252553053125519ae73fe356ff6e4365425b3f"
+  },
+  "upstream": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2",
+  "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+  "node": "24.19.0",
+  "python": "3.14.4",
+  "browser": "Chrome/154.0.8037.98",
+  "run_r1": "REJECTED_BEFORE_START_PORT_ALLOWLIST",
+  "run_r2": "OWNED_SYNTHETIC_HOST_READY_UI_NOT_OPERATED",
+  "native_view_menu": "NOT_RUN",
+  "native_200_keyboard_focus": "NOT_RUN",
+  "new_candidate_headed": "NOT_RUN",
+  "screenshots": [],
+  "native_input_actions": 0,
+  "js_focus_or_style_injection": false,
+  "emulation_cdp": "NOT_SENT",
+  "native_instance_lookup": {
+    "tool": "mcp__cua_repl",
+    "methods": [
+      "getApp by display name",
+      "getApp by full application path",
+      "listApps",
+      "getState"
+    ],
+    "result": "Only pre-existing personal Chrome app and extension tabs exposed; isolated owned Chrome not targetable through documented API. No input sent to personal app.",
+    "raw_tool_trace": "Current C-line agent tool transcript; no unrelated personal browser content archived."
+  },
+  "read_only_cdp_snapshot": {
+    "requested": "owned-window-initial",
+    "result": "NOT_PRODUCED",
+    "diagnostic": "owned debug /json/list later returned empty; controller waiting on snapshot, no screenshot or metrics received"
+  },
+  "preserved_not_run": [
+    "screen_reader",
+    "touch_or_mobile_hardware",
+    "windows_high_contrast",
+    "standalone_example",
+    "real_model",
+    "production"
+  ],
+  "review_probe_retried": false,
+  "owned_pids": [
+    5202,
+    5227,
+    5270
+  ],
+  "controller_pid": 5161,
+  "pids_remaining": [],
+  "listeners_remaining": {
+    "4328": "",
+    "4329": ""
+  },
+  "evidence_files": {
+    "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-remaining-20261008/input.json": "5f2900dec24a0b4226ba460064158c922bfaf60847f252bd4bce1783e106643a",
+    "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-remaining-20261008/controller.mjs": "d7c0ff5c3d7ad8c849d836f1ff11927accbaea41f6a3b756342600b46596c6f2",
+    "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-remaining-20261008/controller-r2.mjs": "f5b686f500e177c67e047e9fbd8bc9362fafa21980553e54087a590fcdac76fd",
+    "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-remaining-20261008/controller.log": "f8e82f172547da0bcbcc2ac293bd01b95ec27d1a09064a179353d3104af01d22",
+    "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-remaining-20261008/controller-r2.log": "e92f4ff76470ab63fd993eb224a31e2b3336f3e1056b045ceb9bbd3c0c3da7db",
+    "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-remaining-20261008/run-r1/result.json": "da4d19a85a0cd3cd99c01d92cb3a2b6a12443f35a0e909b07d32ae557a999119",
+    "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-remaining-20261008/run-r2/ready.json": "1c773f86c169084174ec8bbbda65cba6145930e0bd2782955634e6a013b94f71",
+    "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/.context/checks/html-remaining-20261008/run-r2/cleanup-manual.json": "2467943d6b08eccc3423a7897ae7b5e77b2b8bd275486e9c71145dd5292e839b"
+  },
+  "read_only_inputs": {
+    "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/scripts/dsh-b0/html-host-browser-http.fixture.py": "18b1278116d8fcae3d1405fcb4f5f37f6223153eb8c552b5b79ff2fa26f2e46c",
+    "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/scripts/dsh-b0/html-host-browser-host.fixture.mjs": "ec92d03f26e27fab18bde3dd28a6bdc12cb3782201670a917165244bc58a788a",
+    "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/scripts/release/secure-unpack.py": "8d8b34497382302ace6a434180f72a6d418d5879cc682102964a13b5c1e96d50",
+    "/Users/hutou/.codex/worktrees/shinemage-html-remaining/fuqing-crm-analytics/scripts/dsh-b0/html-host-browser-inputs.mjs": "7a426fe87c70e23f8b854dcc603e7fbc76320f7e6e3460a4277126fda44fbe6b"
+  }
+}

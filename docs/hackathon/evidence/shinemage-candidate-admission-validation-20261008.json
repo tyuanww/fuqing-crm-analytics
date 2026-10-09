@@ -1,0 +1,289 @@
+{
+  "schema_version": "shinemage-candidate-admission-closeout/v1",
+  "source_sha": "8aabaaeb8d0e22a351088e1daefc164a5c0a2d09",
+  "candidate_digest": "993daf31daa79137c22ce8d16c84b61892117386a9b7b8c5119fa0be62abefb0",
+  "plugin_source_sha": "bd647352d02402c679b04172855e40ec8f2d96a5",
+  "plugin_archive_sha256": "b75d90e98167fea507e8ab3304beda98c6706d7130eb8eb4e6359209ad0fff1b",
+  "service_source_sha": "f9726f682fc0d1d4c6aef6f07e6932c2c600c3d6",
+  "service_archive_sha256": "ee4908c40c7c8d127cec1c25b4bfae83ec6b0997d006bc7bf9615e8ee23f0ac7",
+  "query_archive_sha256": "109251614197e515a34a4824206e93ef53c0185e5c09a24a7906f9f7a967b8b7",
+  "crm_archive_sha256": "d682081d8754d68cb34acff59fb7655d84dd7e4b0dd65caaed1499f5a76aafe7",
+  "static_service_verification": {
+    "service": {
+      "status": "LOCAL_SERVICE_ARTIFACTS_VERIFIED",
+      "scope": "local-posix-synthetic-service-artifacts-http",
+      "service_evidence_sha256": "59a20d3c57831e8caeb40f25a9969deff0c7a97e56d8633f2366bdf4af33ba26",
+      "source_evidence_sha256": "9a6a4a7a28e0ffc69441394c18030b0a51eb2a881c4d00566b535931f3b391b0",
+      "binding": {
+        "schema_version": "dsh-service-binding/v1",
+        "service_id": "analytics-first-purchase",
+        "source_sha": "f9726f682fc0d1d4c6aef6f07e6932c2c600c3d6",
+        "api_version": "1.0.0",
+        "state": {
+          "owner": "analysis-service",
+          "application_id": 1397572502,
+          "schema_version": 1,
+          "contract": "analytics-first-purchase-saved-provenance/v1"
+        },
+        "access": "read-write",
+        "lifecycle": "external",
+        "rollback": "preserve-service-and-state",
+        "evidence_sha256": "9a6a4a7a28e0ffc69441394c18030b0a51eb2a881c4d00566b535931f3b391b0"
+      },
+      "artifacts": {
+        "baseline": {
+          "source_sha": "56198c32a52d9822c7a3338d92b0fa077d1c61bc",
+          "version": "0.0.0rc1",
+          "sha256": "9b06811fd68f74a8a5e669f608dceaa5bfb70b27a0fd5faf773254e7545b6bc1",
+          "manifest_sha256": "b537f77415857d266650b8f27f58a6a345f3a3803d84d262abb6fb69ad0d12a0",
+          "dependency_observation_sha256": "670bcc1f2dd3dd47f33fea8144110c268574e8165810bd3733ab2a1e1a889546",
+          "packaging_source": {
+            "commit": "f9726f682fc0d1d4c6aef6f07e6932c2c600c3d6",
+            "worktree_dirty": false,
+            "inputs_manifest": "services/analytics-first-purchase/compatibility-baseline.json",
+            "inputs_sha256": "7e6b860fc35b25dfa92951ee22e448d9c0c1d27068693d8d80991886251757ae"
+          }
+        },
+        "candidate": {
+          "source_sha": "f9726f682fc0d1d4c6aef6f07e6932c2c600c3d6",
+          "version": "0.1.0rc1",
+          "sha256": "ee4908c40c7c8d127cec1c25b4bfae83ec6b0997d006bc7bf9615e8ee23f0ac7",
+          "manifest_sha256": "44719e57755a151bc64bf5c9e5075271e301dd26952a9b808181242a0c857a9a",
+          "dependency_observation_sha256": "670bcc1f2dd3dd47f33fea8144110c268574e8165810bd3733ab2a1e1a889546",
+          "packaging_source": {
+            "commit": "f9726f682fc0d1d4c6aef6f07e6932c2c600c3d6",
+            "worktree_dirty": false,
+            "inputs_manifest": "services/analytics-first-purchase/package.json",
+            "inputs_sha256": "d5ed982fb0a988ac170f3517268dc58dcc97ded7b22adbb6ec3a00db94716730"
+          }
+        }
+      },
+      "platform": {
+        "system": "Darwin",
+        "machine": "arm64"
+      },
+      "scenario_count": 9,
+      "release_ready": false,
+      "activation": "BLOCKED_TARGET_HOST_AND_SUPPLY_CHAIN_REQUIRED",
+      "target_host": "NOT_RUN",
+      "supply_chain": "NOT_RUN",
+      "candidate_digest": "993daf31daa79137c22ce8d16c84b61892117386a9b7b8c5119fa0be62abefb0",
+      "journal_seq": 3,
+      "journal_digest": "4f927c8ceaf9c581d30e263d901554e00966cfde42ba953d34e6344712a700bb"
+    },
+    "retrySame": true,
+    "journalUnchangedAfterRetryAndRejection": true,
+    "rejected": [
+      {
+        "kind": "old-target",
+        "message": "SERVICE_SOURCE_TARGET_CANDIDATE_BINDING\n+ actual - expected\n\n+ 'a490457c3e867b3fb0d03fa8daeb04886f7b8657da0b1cf2fbadb30917e7887c'\n- '993daf31daa79137c22ce8d16c84b61892117386a9b7b8c5119fa0be62abefb0'\n"
+      },
+      {
+        "kind": "old-host",
+        "message": "PLUGIN_HOST_TERMINAL_PARENT"
+      }
+    ],
+    "protectedUnchanged": true,
+    "parameters": {
+      "candidatePath": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-local-candidate-20261008/candidate/candidate.json",
+      "evidencePath": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/checks/first-purchase-source-packages-20261007/pair-r2/receipt.json",
+      "statePath": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-admission-20261008/journal-copy.json",
+      "targetEvidencePath": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/checks/first-purchase-terminal-candidate-20261007/retrieved/source/result/receipt.json",
+      "targetInputPath": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/checks/first-purchase-terminal-candidate-20261007/retrieved/source/input/input.json"
+    },
+    "formalJournalWritten": false,
+    "release_ready": false
+  },
+  "local_host": {
+    "status": "PASS",
+    "test_count": 1,
+    "warnings": 1,
+    "seconds_pytest": 13.13,
+    "scope": "local-artifacts-with-query-source-http",
+    "recovery": "FAILED_SLOT_RELEASED",
+    "committed_prefix_count": 50,
+    "committed_prefix_sha256": "ff28f958c58c926738e0b3e1d1d0a97e0c9caef9554721ef083102a2080131c7",
+    "worker_count": 1,
+    "analysis_count": 1,
+    "browser": "NOT_RUN",
+    "wsl": "NOT_RUN",
+    "production": "NOT_RUN",
+    "journal_host_event": "NOT_WRITTEN"
+  },
+  "cleanup": {
+    "owned_pids": [
+      5909,
+      5918,
+      5948,
+      5981,
+      5992,
+      6005,
+      6009,
+      6028
+    ],
+    "alive": [],
+    "process_receipts": [
+      {
+        "pid": 5918,
+        "port": 4335,
+        "exit_code": 0,
+        "cleanup_ok": true
+      },
+      {
+        "pid": 5992,
+        "port": 4335,
+        "exit_code": 0,
+        "cleanup_ok": true
+      },
+      {
+        "pid": 6005,
+        "port": 4335,
+        "exit_code": 0,
+        "cleanup_ok": true
+      },
+      {
+        "pid": 5909,
+        "port": 52873,
+        "exit_code": -15,
+        "cleanup_ok": true
+      },
+      {
+        "pid": 5981,
+        "port": 52873,
+        "exit_code": -15,
+        "cleanup_ok": true
+      }
+    ],
+    "listeners_after": {
+      "4335": {
+        "exit": 1,
+        "stdout": ""
+      },
+      "4336": {
+        "exit": 1,
+        "stdout": ""
+      },
+      "4337": {
+        "exit": 1,
+        "stdout": ""
+      }
+    }
+  },
+  "protected_inputs_unchanged_except_main_owned_journal": true,
+  "formal_journal": {
+    "owner": "main-agent",
+    "seq": 3,
+    "status": "CANDIDATE_SERVICE_ARTIFACTS_VERIFIED",
+    "sha256": "018bf8a055af8e2315c7071d54aa73bc9ab604c2cb8c2288d1ff2cd2b947ef6c",
+    "written_by_this_agent": false
+  },
+  "raw_evidence": [
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-admission-20261008/verify.mjs",
+      "bytes": 2842,
+      "sha256": "a8cb6ea0c092b5859d0a4bb48ac5cc0818bd3d996f7cf29a05c70deb012f0bd0"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-admission-20261008/verify.log",
+      "bytes": 4356,
+      "sha256": "69507caaed638d21c2e77eae4283b30b3b63d2f086670d90f64828e8be6a8998"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-admission-20261008/before.json",
+      "bytes": 1965,
+      "sha256": "177c7241a5d1c3c3089d9e19c9e57962d40916868da8b1c404d759006dd1b6ee"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-admission-20261008/result.json",
+      "bytes": 4356,
+      "sha256": "69507caaed638d21c2e77eae4283b30b3b63d2f086670d90f64828e8be6a8998"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-admission-20261008/service-result.json",
+      "bytes": 2763,
+      "sha256": "45b9b7a0d60d5fd456b2a23273c2650e49956a4c4f920e84c1428415dc1c6c2b"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-admission-20261008/journal-copy.json",
+      "bytes": 15712,
+      "sha256": "03bf4e04e047adb44a5db8a2d9d1365d46a032120223285457e7e9e4b74331bd"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-admission-20261008/run-local.py",
+      "bytes": 3464,
+      "sha256": "337271b22b8e84fa999cc84183d870a0d50182c68407a6db35ac4297fd0d0e36"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-admission-20261008/input-v4.json",
+      "bytes": 1144,
+      "sha256": "3056757e4eb04e9a859820180198731d2b620a1a6790da60225d6704f5dffabb"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-admission-20261008/input-delta.json",
+      "bytes": 565,
+      "sha256": "067efbbec187063b8377b71e61ceafb2652afb7a45c3896d2567c7ebee7e6af6"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-admission-20261008/local-command.json",
+      "bytes": 2020,
+      "sha256": "e41d4006d428f19686a66eaa1fa062b981da2e3b59f183f2e27fb179fd14dfec"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-admission-20261008/local-result.json",
+      "bytes": 147,
+      "sha256": "5f2ab065d1c072297ae23af51954d9f4a51d25b5082d067e000521fdc9bb4ae6"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-admission-20261008/local-v4.log",
+      "bytes": 110,
+      "sha256": "872e4bd04786be55c2374f2c73a611622bca77acaaa63bb05ec5fc74a7c4aecd"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-admission-20261008/listeners-before.json",
+      "bytes": 204,
+      "sha256": "f0e5a3650c2fdb14f3951118358e7e25cf3f4ee54ae965ede71177843636296c"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-admission-20261008/local-v4/test_official_host_crm_query_s0/plugin-artifacts/packages.json",
+      "bytes": 10269,
+      "sha256": "e4c0a13fda39ec40616600a2ed0d473c5aa2594cc5b68f60eb35c57a4c7954bf"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-admission-20261008/local-v4/test_official_host_crm_query_s0/official-host/recovery-observations.json",
+      "bytes": 22817,
+      "sha256": "9f1754a9eda7a7d4d4c9c0266638aeb0485e5acb0f3e9419ef09de9e8fec18ac"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-admission-20261008/local-v4/test_official_host_crm_query_s0/official-host/http-observations.json",
+      "bytes": 13499,
+      "sha256": "ea42b18dec728b94c9c01426904ff0ac9e9f07e80d1b41b8c7e0ed0ccd14f20a"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-admission-20261008/local-v4/test_official_host_crm_query_s0/interrupted-run.json",
+      "bytes": 1223,
+      "sha256": "a4abcac3517029d1313b1fc41d779a2f62f3e76e4657e3f8b6b5cbaa7be77577"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-admission-20261008/local-v4/test_official_host_crm_query_s0/source-boundary.json",
+      "bytes": 268,
+      "sha256": "18f1cc2fcf798678218ea21d46b12d57c551069e87706beedf8c818af9b7b463"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-admission-20261008/local-v4/test_official_host_crm_query_s0/kernel-processes/processes.json",
+      "bytes": 31607,
+      "sha256": "e10cabc432f844c926a5ce0a194cbd1d8f2f005daaacded7968d0deebfb44358"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-candidate-admission/fuqing-crm-analytics/.context/checks/candidate-admission-20261008/local-v4/test_official_host_crm_query_s0/save-owner/service-processes/processes.json",
+      "bytes": 7808,
+      "sha256": "3de5bbf0bdf5b7f8232f553cfd2135024fc89c497af89c7133c93865aca06168"
+    }
+  ],
+  "release_ready": false,
+  "remaining": {
+    "new_candidate_target_source_http": "NOT_RUN",
+    "new_candidate_target_terminal_host": "NOT_RUN",
+    "formal_ci": "NOT_RUN",
+    "sdk_distribution": "BLOCKED"
+  }
+}
