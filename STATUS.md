@@ -1,6 +1,10 @@
 # 项目状态 (Project Status)
 > 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。本页是当前运行与交付边界的 SSOT。
 
+## 杭州生产恢复与 UI 热补丁（2026-10-09）
+
+按用户明确授权恢复生产并修复品牌、知识库入口。杭州 current 仍为 `dsh-0.20.0.0-r3` / VERSION `0.20.0.0`，本地 A/B/C 候选未部署。已隔离失效 supervisor 锁、恢复 DSH 与登录入口辅助服务；通过独立 systemd drop-in 和插件 patch 恢复原品牌标识，并接入固定 `@wxg-prc-cpg/dsh-weknora@0.1.0` 的“知识库问答”模式。15:34（北京时间）生产认证页面与品牌资源均 200，原生四模式及知识库模式注册正常；浏览器实际可见品牌与入口，原有两库元数据读取成功，15:37 服务无自动重启。未执行真实模型问答，产品仍 PARTIAL。补丁、验证范围与回退见[现场记录](docs/operating/hangzhou-production-hotfix-20261009.md)。
+
 ## A/B/C 集成接续（2026-10-08，本地候选已准备）
 
 已按授权本地提交集成成果 `bd647352`，正常钩子通过；沿用原字节 `first-purchase-source-http-local` 和固定服务绑定生成新 candidate `993daf31…` / 新包 `b75d90e9…`，新 journal seq 2 / `CANDIDATE_PREPARED`。只关闭本地候选关联，服务/宿主新组合、正式 CI、激活与生产仍未通过；SDK BLOCKED / release_ready=false。本轮固定环境专项 17 PASS，未重跑完整 B0；见[候选证据](docs/hackathon/evidence/shinemage-abc-local-candidate-20261008.md)。以下为候选准备之前各阶段的记录。
