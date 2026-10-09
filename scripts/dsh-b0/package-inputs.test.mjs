@@ -59,8 +59,8 @@ test('domain-only build is reproducible and the same tarball is pinned by all co
   const again = join(independent, 'second-output');
   run(process.execPath, [join(producer, 'build.mjs'), again], independent);
   if (process.env.DSH_PACKAGE_INPUTS) {
-    const rebuilt = await readPackagedLibrary(generatedArtifact, entry);
-    const repeated = await readPackagedLibrary(join(again, entry.tarball), entry);
+    const rebuilt = await readPackagedLibrary(generatedArtifact);
+    const repeated = await readPackagedLibrary(join(again, entry.tarball));
     const locked = await readPackagedLibrary(artifact, entry);
     assert.deepEqual([...rebuilt.files.entries()], [...repeated.files.entries()]);
     assert.deepEqual([...rebuilt.files.entries()], [...locked.files.entries()]);
