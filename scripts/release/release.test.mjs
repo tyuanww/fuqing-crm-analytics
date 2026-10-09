@@ -298,6 +298,9 @@ test('release preflight builds the runtime before protected tag creation', async
   assert.doesNotMatch(source, /runtime-bundle\.mjs[\s\S]*--online/);
   assert.match(source, /scripts\/dsh\.mjs', 'test'/);
   assert.match(source, /requireUpstream: checkOnly/);
+  assert.match(source, /const packageInputs = join\(root, '\.context\/dsh-b0\/package-inputs'\)/);
+  assert.match(source, /board-components\/build\.mjs', packageInputs/);
+  assert.match(source, /DSH_PACKAGE_INPUTS: packageInputs/);
 });
 test('release preflight does not leak the read-only upstream override into prepare', async () => {
   const source = await readFile(join(process.cwd(), 'scripts/release/preflight.mjs'), 'utf8');

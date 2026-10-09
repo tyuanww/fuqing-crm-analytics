@@ -20,6 +20,7 @@ import { prepareServiceCompatibility } from './service-compatibility.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const upstream = resolve(process.env.DSH_UPSTREAM_CHECKOUT || join(root, `.context/dsh-b0/upstream-${DSH_SDK_VERSION}`));
+const packageInputs = join(root, '.context/dsh-b0/package-inputs');
 const pin = UPSTREAM_SHA;
 
 function option(name, fallback = null) {
@@ -151,10 +152,10 @@ try {
   assert.equal(execFileSync('git', ['-C', upstream, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), pin, 'PREFLIGHT_UPSTREAM_SHA_MISMATCH');
   await stage('build', async () => {
     await linkWorkspaceKit(join(root, 'dsh-plugins/board-components'), join(root, 'dsh-plugins/plugin-kit'));
-    run(process.execPath, ['dsh-plugins/board-components/build.mjs']);
+    run(process.execPath, ['dsh-plugins/board-components/build.mjs', packageInputs], root, { DSH_PACKAGE_INPUTS: packageInputs });
     for (const plugin of plugins) {
       await linkWorkspaceKit(join(root, plugin), join(root, 'dsh-plugins/plugin-kit'));
-      run(process.execPath, [`${plugin}/build.mjs`, upstream]);
+      run(process.execPath, [`${plugin}/build.mjs`, upstream], root, { DSH_PACKAGE_INPUTS: packageInputs });
     }
   });
   // Prepare is the only stage that may hydrate the pinned checkout. Once it
