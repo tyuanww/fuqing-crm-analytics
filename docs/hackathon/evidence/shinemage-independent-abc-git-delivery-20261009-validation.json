@@ -1,0 +1,246 @@
+{
+  "schema": "shinemage-independent-abc-git-delivery/v1",
+  "date": "2026-10-09",
+  "main_head": "f8db3949a7323c1e058c4d57f6287d4dbf54451d",
+  "main_branch": "DETACHED",
+  "main_remote": "https://github.com/tyuanww/fuqing-crm-analytics.git",
+  "main_index_empty": true,
+  "main_committed_this_round": false,
+  "baseline_dirty_items_before_summary": 98,
+  "product": "PARTIAL",
+  "release_ready": false,
+  "sdk_distribution": "BLOCKED",
+  "public_strict_compile": "NOT_VERIFIED",
+  "remote_repository": "NONE",
+  "push": "NOT_RUN",
+  "pull_request": "NOT_RUN",
+  "merge": "NOT_RUN",
+  "publish": "NOT_RUN",
+  "deploy": "NOT_RUN",
+  "github_actions": "NOT_RUN",
+  "formal_pack_plugin": "NOT_RUN",
+  "formal_candidate": "NOT_RUN",
+  "full_b0": "NOT_RUN",
+  "headed": "NOT_RUN",
+  "wsl": "NOT_RUN",
+  "counts_are_per_repository": true,
+  "r1_and_r2_counts_are_separate": true,
+  "node": {
+    "path": "/Users/hutou/homebrew/opt/node@24/bin/node",
+    "version": "24.19.0"
+  },
+  "pnpm": {
+    "version": "11.28.2",
+    "entry": "/Users/hutou/Library/pnpm/store/v11/links/@/pnpm/11.28.2/122be7a2eef9b52155dfbfddf4de8df482b45bc92b37ac10394fd3c370cb5af3/node_modules/pnpm/bin/pnpm.mjs"
+  },
+  "upstream": {
+    "path": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2",
+    "sha": "477b4f420553e8a52c2fbccc464d7561b239c443"
+  },
+  "kit_sha256": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901",
+  "workbench_domain_sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182",
+  "repositories": {
+    "workbench": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/dsh-analytics-workbench",
+      "branch": "codex/analytics-workbench-independent",
+      "commit": "cc1dd6a972c85bb0ef0d7f7131edd72e62335dc1",
+      "tree": "8877b255e8b882607c0c51d9118d604c52f7bb8f",
+      "parents": 0,
+      "files": 609,
+      "tracked_dirty": 0,
+      "remote": "NONE",
+      "package": "@shine-mage/dsh-analytics-workbench-b0@0.0.0-b0",
+      "message": "feat(workbench): add independent plugin author repository",
+      "clone_command": "git clone --no-local",
+      "clone_path": "/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/clones/r2",
+      "clone_commit": "cc1dd6a972c85bb0ef0d7f7131edd72e62335dc1",
+      "alternates": false,
+      "evidence": "/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/evidence/git-delivery-20261009-r2",
+      "r1_evidence_kept": "/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/evidence/git-delivery-20261009",
+      "build_tools": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/build-tools",
+      "package_inputs": "/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/clones/r2/inputs/package-inputs",
+      "network": "deny",
+      "steps": {
+        "probe-before": 0,
+        "install": 0,
+        "check-inputs": 0,
+        "build": 0,
+        "package-tests": 0,
+        "verify-pack": 0,
+        "verify-pack-again": 1
+      },
+      "package_tests": {
+        "files": 23,
+        "pass": 193,
+        "fail": 0,
+        "skipped": 0
+      },
+      "boundary_tests_rerun": false,
+      "typecheck": "B0 host full typecheck passed; B0 client full typecheck passed",
+      "content_pack": {
+        "sha256": "74321fa09edb178e6cb7c781811cf3923643cfbda944211c36d2642974b9423e",
+        "bytes": 438782,
+        "members": [
+          "package/bundled-dependencies.json",
+          "package/cordis.patch.yml",
+          "package/lib/client.js",
+          "package/lib/index.js",
+          "package/lib/page-tools.js",
+          "package/lib/skills.js",
+          "package/lib/tool.js",
+          "package/package.json"
+        ],
+        "second_write": "EEXIST",
+        "formal_pack_plugin": "NOT_RUN"
+      },
+      "hosted_ci": "Workflow installs public pnpm 11.28.2, installs the vendored kit offline, and runs source-boundary plus build-input tests. It stops before build, typecheck, package tests, and content pack because hosted runners do not have the fixed upstream checkout or installed build-tools."
+    },
+    "crm": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/dsh-crm-knowledge",
+      "branch": "codex/crm-knowledge-independent",
+      "main_ref": false,
+      "commit": "12b8259351d7e64429336faca96a175aad77d517",
+      "tree": "64a9e3bff6405ac03ef281f8569b20fec1f9adcd",
+      "parents": 0,
+      "files": 65,
+      "tracked_dirty": 0,
+      "remote": "NONE",
+      "package": "@shine-mage/dsh-crm-knowledge@0.0.0-crm.1",
+      "cordis_peer": "4.0.2",
+      "cordis_peer_widened": false,
+      "upstream_cordis": "4.0.4",
+      "board_tools": ["status", "execution", "reason"],
+      "message": "feat(crm): add independent plugin author repository",
+      "clone_command": "git clone --no-local",
+      "clone_path": "/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/clones/r2",
+      "clone_commit": "12b8259351d7e64429336faca96a175aad77d517",
+      "alternates": false,
+      "evidence": "/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/evidence/git-delivery-20261009-r2",
+      "r1_evidence_kept": "/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/evidence/git-delivery-20261009",
+      "build_tools": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/build-tools",
+      "package_inputs": "/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/clones/r2/inputs/package-inputs",
+      "network": "localhost-only",
+      "steps": {
+        "probe-before": 0,
+        "install": 0,
+        "check-inputs": 0,
+        "build": 0,
+        "package-tests": 0,
+        "verify-pack": 0,
+        "verify-pack-again": 1
+      },
+      "package_tests": {
+        "pass": 103,
+        "fail": 0,
+        "skipped": 0
+      },
+      "guards_rerun": false,
+      "typecheck": "CRM candidate typecheck and pinned build passed",
+      "content_pack": {
+        "sha256": "39c3bd893f4535167d90adb57773ad96b72136b64086685603fc3b0937812914",
+        "bytes": 242766,
+        "members": [
+          "package/README.md",
+          "package/cordis.patch.yml",
+          "package/lib/client.js",
+          "package/lib/host.js",
+          "package/lib/index.js",
+          "package/package.json"
+        ],
+        "second_write": "EEXIST",
+        "formal_pack_plugin": "NOT_RUN",
+        "candidate": "NOT_RUN"
+      },
+      "hosted_ci": "ubuntu-24.04 job maps vars.CRM_BUILD_UPSTREAM, vars.CRM_BUILD_TOOLS, and vars.CRM_PNPM_ENTRY, then stops at test -d and test -f when those paths are absent. The variables do not create the checkout, installed build-tools, or pnpm entry, and the job does not download DSH. Typecheck, build, test, and pack gates remain in the workflow."
+    },
+    "knowledge": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-knowledge-independent-20261008/dsh-knowledge",
+      "branch": "codex/knowledge-independent",
+      "main_ref": false,
+      "commit": "d9e26776905cc00f57c550dd08318e37ee1d1b21",
+      "tree": "12f0f760d45dd0b1524a55ea2ff9841abafa53a5",
+      "parents": 0,
+      "files": 40,
+      "tracked_dirty": 0,
+      "remote": "NONE",
+      "package": "@shine-mage/dsh-knowledge@0.0.0-candidate.1",
+      "peers": {
+        "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
+        "@deepseek-ai/cordis": "4.0.2"
+      },
+      "access_contract": "shinemage-knowledge-access/v1",
+      "fixes_included_in_first_commit": [
+        "scripts/isolate-verify.sh",
+        "scripts/author-boundary.test.mjs",
+        "plugin/test/identity-lease.test.mjs"
+      ],
+      "message": "feat(knowledge): add independent plugin author repository",
+      "clone_command": "git clone --no-local",
+      "clone_path": "/Users/hutou/.codex/tasks/shinemage-knowledge-independent-20261008/clones/r2",
+      "clone_commit": "d9e26776905cc00f57c550dd08318e37ee1d1b21",
+      "alternates": false,
+      "evidence": "/Users/hutou/.codex/tasks/shinemage-knowledge-independent-20261008/evidence/git-delivery-20261009-r2",
+      "r1_evidence_kept": "/Users/hutou/.codex/tasks/shinemage-knowledge-independent-20261008/evidence/git-delivery-20261009",
+      "build_tools": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/dsh-plugins/plugin-kit/build-tools",
+      "also_readable_build_tools": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/build-tools",
+      "package_inputs": "/Users/hutou/.codex/tasks/shinemage-knowledge-independent-20261008/clones/r2/inputs/package-inputs",
+      "network": "localhost-only",
+      "live_weknora": "NOT_RUN",
+      "live_neo4j": "NOT_RUN",
+      "steps": {
+        "probe-before": 0,
+        "install": 0,
+        "check-inputs": 0,
+        "build": 0,
+        "graph": 0,
+        "service-client": 0,
+        "package": 0,
+        "identity": 0,
+        "author-boundary": 0,
+        "verify-pack": 0,
+        "verify-pack-again": 1
+      },
+      "package_tests_by_file": {
+        "graph": {"pass": 22, "fail": 0, "skipped": 0},
+        "service-client": {"pass": 5, "fail": 0, "skipped": 0},
+        "package": {"pass": 5, "fail": 0, "skipped": 0},
+        "identity": {"pass": 12, "fail": 0, "skipped": 0},
+        "author-boundary": {"pass": 5, "fail": 0, "skipped": 0}
+      },
+      "typecheck": "Knowledge candidate typecheck and pinned build passed",
+      "content_pack": {
+        "sha256": "74ded7db78008b146e825b0620e14e70775630b34205050670c25718d1b6ce2c",
+        "bytes": 16844,
+        "members": [
+          "package/README.md",
+          "package/cordis.patch.yml",
+          "package/lib/graph-tools.js",
+          "package/lib/index.js",
+          "package/package.json"
+        ],
+        "second_write": "EEXIST",
+        "formal_pack_plugin": "NOT_RUN",
+        "historical_tarball_reconstructed": false
+      },
+      "hosted_ci": "workflow_dispatch on ubuntu-24.04 calls scripts/check-runner-inputs.mjs. Missing B0_BUILD_UPSTREAM, B0_BUILD_TOOLS, or KNOWLEDGE_PNPM_ENTRY prints FIXED_SDK_INPUTS_NOT_CONFIGURED and exits 2 before install. The script does not fetch DSH or skip typecheck."
+    }
+  },
+  "r2_probe_eperm": [
+    "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/STATUS.md",
+    "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/dsh-plugins/knowledge/package.json",
+    "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/dsh-plugins/crm-knowledge/package.json",
+    "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/dsh-plugins/analytics-workbench/package.json",
+    "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/dsh-plugins/shine-board/package.json",
+    "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/dsh-plugins/plugin-kit/toolchain.mjs",
+    "/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/dsh-analytics-workbench/package.json",
+    "/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/dsh-crm-knowledge/package.json",
+    "/Users/hutou/.codex/tasks/shinemage-knowledge-independent-20261008/dsh-knowledge/package.json"
+  ],
+  "r2_probe_read": [
+    "own clones/r2/package.json",
+    "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/package.json",
+    "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/build-tools/package.json"
+  ],
+  "r2_sandbox_scope": "Denies file content under all .codex/worktrees, Desktop/ai-engineering, the three author repositories, and the three r1 clones, then re-allows the owning r2 clone, its evidence directory, the pinned upstream checkout, and the applicable build-tools read-only. It is not a whole-home deny-default sandbox.",
+  "r1_isolation": "Kept. Profiles leave the other author repositories readable, and the saved r1 probes did not include those paths. r1 is not the isolation-complete run."
+}

@@ -1,0 +1,101 @@
+{
+  "schema": "shinemage-independent-de-git-and-ci/v1",
+  "date": "2026-10-09",
+  "main_head": "f8db3949a7323c1e058c4d57f6287d4dbf54451d",
+  "main_committed_this_round": false,
+  "baseline_dirty_items_before_summary": 102,
+  "product": "PARTIAL",
+  "release_ready": false,
+  "sdk_distribution": "BLOCKED",
+  "remote_repository": "NONE",
+  "github_actions": "NOT_RUN",
+  "ubuntu": "NOT_RUN",
+  "current_build_typecheck": "NOT_IN_CURRENT_BUILD",
+  "counts_are_per_repository_and_file": true,
+  "repositories": {
+    "shine-query": {
+      "commit": "258a34490ec09c47397b55cf9d4e7c2a5bd04743",
+      "branch": "codex/shine-query-independent",
+      "files": 27,
+      "clone": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/clones/shine-query-r1",
+      "evidence": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/evidence/git-delivery-20261009/shine-query",
+      "tests": {"client-lifecycle": 2, "author-boundary": 5},
+      "content_pack_sha256": "f19fc60ce50f4a963367282031d7c2071258ba75e9bd5649de6530d605bae98d",
+      "content_pack_bytes": 1431,
+      "second_write_exit": 1
+    },
+    "shine-board": {
+      "commit": "49b00e0871c16f489f99f0c8ed42d3378d1b2240",
+      "branch": "codex/shine-board-independent",
+      "files": 27,
+      "clone": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/clones/shine-board-r1",
+      "first_check_inputs_exit": 1,
+      "first_failure_kept": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/evidence/git-delivery-20261009/shine-board/steps/check-inputs.stderr",
+      "successful_evidence": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/evidence/git-delivery-20261009/shine-board/profile-r2",
+      "tests": {"client-lifecycle": 2, "author-boundary": 5},
+      "content_pack_sha256": "0bcf6ed8310f97e65771df56a5940eb4d418a4d43a38a25c0eae05705173115c",
+      "content_pack_bytes": 1514,
+      "second_write_exit": 1
+    },
+    "shine-crowd-action": {
+      "commit": "51f8088d798a0ce0f146e270fbc4dba4c3aec6ef",
+      "branch": "codex/shine-crowd-action-independent",
+      "files": 27,
+      "clone": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/clones/shine-crowd-action-r1",
+      "evidence": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/evidence/git-delivery-20261009/shine-crowd-action",
+      "tests": {"client-lifecycle": 2, "author-boundary": 5},
+      "content_pack_sha256": "dfbd9279394853aa8afca82391327b21c7e769d894b734c4860c509ad6918d94",
+      "content_pack_bytes": 1600,
+      "second_write_exit": 1,
+      "other_readable_source_copies": [
+        "/tmp/dsh-release-tag.tfu2qR/dsh-plugins/shine-crowd-action",
+        "/tmp/fuqing-prod-build-r3/dsh-plugins/shine-crowd-action",
+        "/tmp/dsh-release-r1.NRXFFY/dsh-plugins/shine-crowd-action"
+      ]
+    },
+    "shine-funnel": {
+      "commit": "1c71c04bf2a5738ca3a00bb7e52d8b17cdd7218b",
+      "branch": "codex/shine-funnel-independent",
+      "files": 29,
+      "clone": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/clones/funnel-r1",
+      "evidence": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/evidence/git-delivery-20261009/funnel",
+      "tests": {"funnel": 2, "client-lifecycle": 1, "author-boundary": 7},
+      "d_mts_matches_domain": true,
+      "content_pack_sha256": "ba1f9cd941d67447ee19e29eaf1810c27dfb6ac738da366584aab2a28148105d",
+      "content_pack_bytes": 2409,
+      "second_write_exit": 2
+    },
+    "shine-waterfall": {
+      "commit": "632867cb2ca1481ceae0a5f51ed8c95659d5ac7c",
+      "branch": "codex/shine-waterfall-independent",
+      "files": 29,
+      "clone": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/clones/waterfall-r1",
+      "first_check_inputs_exit": 1,
+      "first_failure_kept": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/evidence/git-delivery-20261009/waterfall/sandbox-profile-realpath-fail",
+      "evidence": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/evidence/git-delivery-20261009/waterfall",
+      "tests": {"waterfall": 1, "client-lifecycle": 1, "author-boundary": 7},
+      "d_mts_matches_domain": true,
+      "content_pack_sha256": "d98ee03ea678aacec87d1e6f39aecac43f741f728a90da5de1c5c0541fe021f9",
+      "content_pack_bytes": 2871,
+      "second_write_exit": 2
+    }
+  },
+  "ci_inputs": {
+    "task_dir": "/Users/hutou/.codex/tasks/shinemage-ci-inputs-20261009",
+    "consumer_commit": "cc1dd6a972c85bb0ef0d7f7131edd72e62335dc1",
+    "applied_to_author_repo": false,
+    "committed": false,
+    "source_only_exit": 1,
+    "source_only_stop": "vite/package.json MODULE_NOT_FOUND",
+    "prepared_platform": "darwin/arm64",
+    "prepared_steps_status_0": ["boundary", "install", "check-inputs", "build", "package-tests", "check-links", "content-pack"],
+    "package_tests": {"files": 23, "pass": 193, "fail": 0, "skipped": 0},
+    "typecheck": "B0 host full typecheck passed; B0 client full typecheck passed",
+    "content_pack_sha256": "74321fa09edb178e6cb7c781811cf3923643cfbda944211c36d2642974b9423e",
+    "content_pack_bytes": 438782,
+    "patch": "patches/ci-prepared-runner.yml",
+    "prepared_runner_root": "/opt/shinemage/inputs/477b4f420553e8a52c2fbccc464d7561b239c443",
+    "fresh_hosted_runner": "NOT_AUTOMATIC",
+    "ubuntu": "NOT_RUN"
+  }
+}

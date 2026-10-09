@@ -1,0 +1,94 @@
+{
+  "schema": "shinemage-independent-de-git-ci-review/v1",
+  "date": "2026-10-09",
+  "main_head": "f8db3949a7323c1e058c4d57f6287d4dbf54451d",
+  "baseline_status_items": 104,
+  "main_changed_existing": [
+    "STATUS.md",
+    "docs/operating/verification.md"
+  ],
+  "main_other_inherited_bytes_unchanged": true,
+  "main_index_empty": true,
+  "five_repository_git_delivery": "VERIFIED_FROM_ORIGINALS",
+  "new_p1_p2_in_five_repositories": [],
+  "ci": {
+    "consumer_commit": "cc1dd6a972c85bb0ef0d7f7131edd72e62335dc1",
+    "consumer_tracked_matches": 609,
+    "official_tarball_integrities_match": 36,
+    "sdk_main_types_bindings_match": 26,
+    "full_transitive_closure": "NOT_VERIFIED",
+    "source_only_observed_exit": 1,
+    "source_only_first_missing": "vite/package.json",
+    "prepared_full_chain": "EXISTING_DARWIN_ARM64_EVIDENCE_VERIFIED",
+    "fresh_platform_materialization": "NOT_IMPLEMENTED",
+    "ubuntu": "NOT_RUN",
+    "github_actions": "NOT_RUN",
+    "workflow_finding": {
+      "id": "CI-PREPARED-HOSTED-MISMATCH",
+      "priority": "P2",
+      "status": "OPEN",
+      "path": "/Users/hutou/.codex/tasks/shinemage-ci-inputs-20261009/patches/ci-prepared-runner.yml",
+      "reason": "runs-on ubuntu-24.04 supplies no prepared /opt tree and workflow has no materialization step; not a ready prepared runner workflow"
+    },
+    "script_log_overwrite": "FIXED",
+    "new_cli_fixture_checks": 24,
+    "syntax_checks": 2,
+    "new_real_full_chain_run": false
+  },
+  "evidence": [
+    {
+      "path": ".context/checks/independent-de-git-ci-review-20261009/leaf/review.md",
+      "sha256": "3717fde871f1ebe66d7ddb8ae8a8782ca9337f3b8f7de504b09ced20aa90b5cf"
+    },
+    {
+      "path": ".context/checks/independent-de-git-ci-review-20261009/leaf/machine.json",
+      "sha256": "48f5cc780bc6a3c0ec8d97a8a08f7e71509ac2530b7d7858a4dab57f71a39cb8"
+    },
+    {
+      "path": ".context/checks/independent-de-git-ci-review-20261009/chart/review.md",
+      "sha256": "a6e06286ee9f69508649d07b8d53e563204b92c521fd388dcb97c08a4c28b3c9"
+    },
+    {
+      "path": ".context/checks/independent-de-git-ci-review-20261009/chart/machine.json",
+      "sha256": "93ceaa093906230bdfe329a908909936e7080df36fc2576e35f53c9a1e9ec2eb"
+    },
+    {
+      "path": ".context/checks/independent-de-git-ci-review-20261009/ci/review.md",
+      "sha256": "6316fb009e666cdec0cf738e5d6818645b52320d8cb5427836d39d7cfed86236"
+    },
+    {
+      "path": ".context/checks/independent-de-git-ci-review-20261009/ci/machine.json",
+      "sha256": "b299dea8c875a31230a8971336d6c63c4fd6c255ac99cc0d807e2eb928801112"
+    },
+    {
+      "path": ".context/checks/independent-de-git-ci-review-20261009/ci-script/result.json",
+      "sha256": "b4ae2275cd680ac024bf0ce6bb6cb68c9137b62b50576a343cf0827f64d7577a"
+    },
+    {
+      "path": ".context/checks/independent-de-git-ci-review-20261009/ci-script/guard-validation.json",
+      "sha256": "264465dc1830b10fa665b26145d36719480ffb55c0d0ce8eac981ca652943644"
+    },
+    {
+      "path": ".context/checks/independent-de-git-ci-review-20261009/ci-script/product-delta.patch",
+      "sha256": "fc3b57f253c6355b5b0a6617c86c5d990d058468b8c094e0316a603335fc7b2e"
+    },
+    {
+      "path": ".context/checks/independent-de-git-ci-review-20261009/de-archive-manifest.json",
+      "sha256": "72bb00cc94f3ae063c8727fa6d373b6991e1b81388010bdded86f9c833c82b54"
+    },
+    {
+      "path": ".context/checks/independent-de-git-ci-review-20261009/ci-archive-manifest.json",
+      "sha256": "50fb680ab52925119b038ac12221524fc7c815a2c357ce567e45128a04279da3"
+    }
+  ],
+  "archives": {
+    "files": 399,
+    "bytes": 879223,
+    "all_source_and_archive_hashes_unchanged": true
+  },
+  "protected_journal_sha256": "f6d9848baf1da0a857819bbcf3367f18a9db67db9e0337e1198b8fce4b98e348",
+  "product": "PARTIAL",
+  "sdk_distribution": "BLOCKED",
+  "release_ready": false,
+  "commit_push_pr_merge_release_deploy": "NOT_RUN_THIS_TURN"
+}

@@ -1,0 +1,375 @@
+{
+  "schema": "shinemage-main-repo-delivery/v1",
+  "captured_at": "2026-10-09T03:28:54Z",
+  "evidence_markdown": "docs/hackathon/evidence/shinemage-main-repo-delivery-20261009.md",
+  "evidence_sha256": "178eaeabc7492cadbb80e1ecfa83e021d8f802a6ca3f3714a2d71f88ff5b4014",
+  "evidence_bytes": 4606,
+  "head": "f8db3949a7323c1e058c4d57f6287d4dbf54451d",
+  "head_detached": true,
+  "saved_ref": "codex/shinemage-html-save-status-fix",
+  "origin_main": "fcbd1324ac5a4b7367d9d7d2bb9bbebdbf32ba25",
+  "ahead": 76,
+  "behind": 0,
+  "rev_list_left_right": "0\t76",
+  "committed_paths_vs_origin_main": 622,
+  "start_porcelain": 112,
+  "staged_empty": true,
+  "version": "0.20.0.0",
+  "version_diff_empty": true,
+  "commit": "NOT_RUN",
+  "push": "NOT_RUN",
+  "pull_request": "NOT_RUN",
+  "merge": "NOT_RUN",
+  "release_ready": false,
+  "product": "PARTIAL",
+  "sdk_distribution": "BLOCKED",
+  "source_review": "NO_NEW_CODE_CHANGE",
+  "assembly_review": "NO_NEW_ASSEMBLY_CODE",
+  "named_source_mismatch_count": 0,
+  "named_source_files": [
+    {
+      "path": "dsh-plugins/crm-knowledge/build.mjs",
+      "bytes": 3275,
+      "sha256": "efad744736faf54c7fd4888f5e33b623cc200dd541885c898406bd9221625e06",
+      "matches_field_start": true
+    },
+    {
+      "path": "dsh-plugins/crm-knowledge/src/index.ts",
+      "bytes": 12456,
+      "sha256": "b916d6df9e92800afffc064645fc3585731ce16a1d7eebdf01b28442da1632e6",
+      "matches_field_start": true
+    },
+    {
+      "path": "dsh-plugins/crm-knowledge/test/package.test.mjs",
+      "bytes": 11626,
+      "sha256": "3721bfd0dffde24696d2ae5fe03851169455e08d02a00f082258f6a1436b9bcb",
+      "matches_field_start": true
+    },
+    {
+      "path": "dsh-plugins/crm-knowledge/test/service-http.integration.mjs",
+      "bytes": 1145,
+      "sha256": "36b75d774700cc8e8de75e2d6b6c4a5da05b01a6a9a2db21883be7bb3edc771b",
+      "matches_field_start": true
+    },
+    {
+      "path": "dsh-plugins/crm-knowledge/test/tools.test.mjs",
+      "bytes": 3005,
+      "sha256": "6256dee86d840aae5dc26d6ed0b078636c98324e6d91231d4d5cfde395056010",
+      "matches_field_start": true
+    },
+    {
+      "path": "dsh-plugins/crm-knowledge/test/knowledge-http.mjs",
+      "bytes": 2179,
+      "sha256": "193b23defbfb22b7f90b3727ed81784122ca999827217c47b6d98ce3f4eab457",
+      "matches_field_start": true
+    },
+    {
+      "path": "dsh-plugins/crm-knowledge/test/knowledge-http.test.mjs",
+      "bytes": 3632,
+      "sha256": "ec124bc9c0d14d3ac7ebd6c282458d9d046e393bfc7caaa812459008bc228ae2",
+      "matches_field_start": true
+    },
+    {
+      "path": "dsh-plugins/knowledge/build.mjs",
+      "bytes": 1866,
+      "sha256": "cdf8f28073707730f544dbded94b74c8ed4aa7b92321e6fc850c85dd1448101a",
+      "matches_field_start": true
+    },
+    {
+      "path": "dsh-plugins/knowledge/test/graph.test.mjs",
+      "bytes": 17267,
+      "sha256": "2206b1846c0fe2d0a54104b28d76b0ff8174b76160c6e6942102781c88d4c50d",
+      "matches_field_start": true
+    },
+    {
+      "path": "dsh-plugins/knowledge/test/package.test.mjs",
+      "bytes": 6416,
+      "sha256": "d15d7768c129ffd86c5c223bd0fb35efbd623b5955101d06c88dad5009d57586",
+      "matches_field_start": true
+    },
+    {
+      "path": "dsh-plugins/shine-board/build.mjs",
+      "bytes": 1792,
+      "sha256": "200cb906066e0138d713f671cf65b72186f52dba5b7c0c0a9153cb9319e6aea4",
+      "matches_field_start": true
+    },
+    {
+      "path": "dsh-plugins/shine-board/src/client-lifecycle.test.mjs",
+      "bytes": 1730,
+      "sha256": "823a4867d180225e3ffe0325f48d8981e5cb2692d23453448f31636a26d692b3",
+      "matches_field_start": true
+    },
+    {
+      "path": "scripts/dsh-b0/pipeline.mjs",
+      "bytes": 26359,
+      "sha256": "eff8fb83f6549e4f3e3a19e12365deb8650743112941da1f12e4d5f743a82d3b",
+      "matches_field_start": true
+    },
+    {
+      "path": "scripts/dsh-b0/plugin-isolation.test.mjs",
+      "bytes": 6023,
+      "sha256": "859d0878409a8a9e404317ab5eff4895ce2a8d52abbeee6b6ae811e24e95f031",
+      "matches_field_start": true
+    },
+    {
+      "path": "scripts/crm-calibration/graph-ledger.test.mjs",
+      "bytes": 2264,
+      "sha256": "04123302dbea28f894fb5646424e595446830ece25157b17700e2366cfb3fcae",
+      "matches_field_start": true
+    }
+  ],
+  "historical_evidence_bytes_unchanged": true,
+  "reused_logs": [
+    {
+      "entry": "scripts/dsh-b0/plugin-isolation.test.mjs",
+      "rerun_this_round": false,
+      "reason": "15 source/test files match field-start sha256 and are not newer than the log",
+      "node": "/Users/hutou/homebrew/opt/node@24/bin/node",
+      "exit_code": 0,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "skipped": 0,
+      "duration_ms": 6994.022291,
+      "stdout": ".context/checks/plugin-independence-integration-20261008/review-c/integration/logs/isolated-after.stdout",
+      "stdout_sha256": "29c892b16c39583690e4fe3a5b09195647c86d7e9453e663fc0352b20779d098",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "inner": {
+        "shine-brand": {
+          "phase": "source",
+          "tests": 7,
+          "fail": 0,
+          "skipped": 0
+        },
+        "shine-query": {
+          "phase": "source",
+          "tests": 1,
+          "fail": 0,
+          "skipped": 0
+        },
+        "crm-knowledge": {
+          "source": 8,
+          "installed": 8,
+          "fail": 0,
+          "skipped": 0
+        },
+        "knowledge": {
+          "source": 5,
+          "installed": 5,
+          "fail": 0,
+          "skipped": 0
+        }
+      },
+      "production_activation": "NOT_RUN",
+      "not_a_full_b0": true
+    },
+    {
+      "entry": "dsh-plugins/crm-knowledge/test/knowledge-http.test.mjs + scripts/crm-calibration/graph-ledger.test.mjs",
+      "rerun_this_round": false,
+      "exit_code": 0,
+      "tests": 9,
+      "pass": 9,
+      "fail": 0,
+      "skipped": 0,
+      "duration_ms": 380.339916,
+      "stdout": ".context/checks/plugin-independence-integration-20261008/review-c/integration/logs/helper-owner.stdout",
+      "stdout_sha256": "65e9dc5aff8ae5a20df489c260dbcdb9f23b28bb982db15e6c45ce45bc861d0d",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "plugin_repos": [
+    {
+      "name": "dsh-shine-brand",
+      "visibility": "private",
+      "default_main": "506b1a3e18ffd6dfb1e10f9826608f5b27449223",
+      "pr": 1,
+      "pr_state": "open",
+      "merged": false,
+      "pr_head": "2d7c17c2afa8050fc2d6b5def6af34fcaf821667",
+      "pack_type": "content-pack",
+      "formal_pack_plugin": "NOT_RUN",
+      "formal_candidate": false,
+      "github_release": false,
+      "tarball_sha256": "513b1c1867ac11bc4a45060cb75ef373e343f1069aadb98420e5e5fd718e152d",
+      "tarball_bytes": 2742,
+      "members": 5,
+      "ci_run_ids": [
+        37802176213
+      ],
+      "ci_conclusion_recorded": "success",
+      "typecheck": "strict_sdk_typecheck_NOT_RUN"
+    },
+    {
+      "name": "dsh-analytics-workbench",
+      "visibility": "private",
+      "default_main": "cc1dd6a972c85bb0ef0d7f7131edd72e62335dc1",
+      "pr": 1,
+      "pr_state": "open",
+      "merged": false,
+      "pr_head": "76d00f277506317ea241aa0174c108822ed225a1",
+      "pack_type": "content-pack",
+      "formal_pack_plugin": "NOT_RUN",
+      "formal_candidate": false,
+      "github_release": false,
+      "tarball_sha256": "920183d4172d33915a00fab01af710296e8f6d0716971007fb4c1044f0e95c37",
+      "tarball_bytes": 441102,
+      "members": 8,
+      "ci_run_ids": [
+        37875348316,
+        37875348273
+      ],
+      "ci_conclusion_recorded": "success",
+      "typecheck": "strict_host_and_client_build_in_ci"
+    },
+    {
+      "name": "dsh-crm-knowledge",
+      "visibility": "private",
+      "default_main": "12b8259351d7e64429336faca96a175aad77d517",
+      "pr": 1,
+      "pr_state": "open",
+      "merged": false,
+      "pr_head": "22bd8099883c5f7e6e9e11c92dfa56d5363a5392",
+      "pack_type": "content-pack",
+      "formal_pack_plugin": "NOT_RUN",
+      "formal_candidate": false,
+      "github_release": false,
+      "tarball_sha256": "53c6ecd71ae2aafc7f56565b0a399126e98dd7bac0e8feee6acd979cb76362ec",
+      "tarball_bytes": 244181,
+      "members": 6,
+      "ci_run_ids": [
+        37875375168
+      ],
+      "ci_conclusion_recorded": "success",
+      "typecheck": "strict_build_job_present_cordis_peer_4_0_2_input_4_0_4_not_host_compat"
+    },
+    {
+      "name": "dsh-knowledge",
+      "visibility": "private",
+      "default_main": "d9e26776905cc00f57c550dd08318e37ee1d1b21",
+      "pr": 1,
+      "pr_state": "open",
+      "merged": false,
+      "pr_head": "9b7c60c33441c3a243399081fa2b5a0f845c8604",
+      "pack_type": "content-pack",
+      "formal_pack_plugin": "NOT_RUN",
+      "formal_candidate": false,
+      "github_release": false,
+      "tarball_sha256": "5bb2e8f4e0996f0b57c903e50f08f2573c57b9b9229c41bf9f20ad4cf88fa7be",
+      "tarball_bytes": 17140,
+      "members": 5,
+      "ci_run_ids": [
+        37875378986
+      ],
+      "ci_conclusion_recorded": "success",
+      "typecheck": "strict_build_job_present_cordis_peer_4_0_2_input_4_0_4_not_host_compat"
+    },
+    {
+      "name": "dsh-shine-query",
+      "visibility": "private",
+      "default_main": "258a34490ec09c47397b55cf9d4e7c2a5bd04743",
+      "pr": 1,
+      "pr_state": "open",
+      "merged": false,
+      "pr_head": "5d92be4e3bc2bf153dbd07fb109c4af0e1ebdcae",
+      "pack_type": "content-pack",
+      "formal_pack_plugin": "NOT_RUN",
+      "formal_candidate": false,
+      "github_release": false,
+      "tarball_sha256": "b141df60cea6a892eb5d8bb974b64d726af26d60e8d8c0016ead4739a868f626",
+      "tarball_bytes": 1446,
+      "members": 5,
+      "ci_run_ids": [
+        37875384134
+      ],
+      "ci_conclusion_recorded": "success",
+      "typecheck": "NOT_IN_CURRENT_BUILD"
+    },
+    {
+      "name": "dsh-shine-board",
+      "visibility": "private",
+      "default_main": "49b00e0871c16f489f99f0c8ed42d3378d1b2240",
+      "pr": 1,
+      "pr_state": "open",
+      "merged": false,
+      "pr_head": "4f248e6cdd026d43b24293c4bceb540ea7813135",
+      "pack_type": "content-pack",
+      "formal_pack_plugin": "NOT_RUN",
+      "formal_candidate": false,
+      "github_release": false,
+      "tarball_sha256": "da091814cc64bc7126e4224749c21d0bdea3814aa225beaada948f7dd19e0838",
+      "tarball_bytes": 1538,
+      "members": 5,
+      "ci_run_ids": [
+        37875386821
+      ],
+      "ci_conclusion_recorded": "success",
+      "typecheck": "NOT_IN_CURRENT_BUILD"
+    },
+    {
+      "name": "dsh-shine-crowd-action",
+      "visibility": "private",
+      "default_main": "51f8088d798a0ce0f146e270fbc4dba4c3aec6ef",
+      "pr": 1,
+      "pr_state": "open",
+      "merged": false,
+      "pr_head": "68398dc59d7161b349ad8868d08c2189f4807102",
+      "pack_type": "content-pack",
+      "formal_pack_plugin": "NOT_RUN",
+      "formal_candidate": false,
+      "github_release": false,
+      "tarball_sha256": "6a855bdce76502f3d1874c8fd519b3dbfe82bf3dc090f37370aeb4f96cec5714",
+      "tarball_bytes": 1622,
+      "members": 5,
+      "ci_run_ids": [
+        37875390716
+      ],
+      "ci_conclusion_recorded": "success",
+      "typecheck": "NOT_IN_CURRENT_BUILD"
+    },
+    {
+      "name": "dsh-shine-funnel",
+      "visibility": "private",
+      "default_main": "1c71c04bf2a5738ca3a00bb7e52d8b17cdd7218b",
+      "pr": 1,
+      "pr_state": "open",
+      "merged": false,
+      "pr_head": "ab924632563e9d5aa6fbf9d7514fbda15fecc7b2",
+      "pack_type": "content-pack",
+      "formal_pack_plugin": "NOT_RUN",
+      "formal_candidate": false,
+      "github_release": false,
+      "tarball_sha256": "c27fda09ad760e465a75051c443685bce214f48a8cf8239623257126c3f8ac15",
+      "tarball_bytes": 2429,
+      "members": 8,
+      "ci_run_ids": [
+        37875393112
+      ],
+      "ci_conclusion_recorded": "success",
+      "typecheck": "NOT_IN_CURRENT_BUILD"
+    },
+    {
+      "name": "dsh-shine-waterfall",
+      "visibility": "private",
+      "default_main": "632867cb2ca1481ceae0a5f51ed8c95659d5ac7c",
+      "pr": 1,
+      "pr_state": "open",
+      "merged": false,
+      "pr_head": "c4b7b1aec37953f4505905f8eb8c8fc5d6e818e6",
+      "pack_type": "content-pack",
+      "formal_pack_plugin": "NOT_RUN",
+      "formal_candidate": false,
+      "github_release": false,
+      "tarball_sha256": "ab7b8be91dec9c04bfe0f964237176a802efaf482f5c9a5ebf365b25582ef11e",
+      "tarball_bytes": 2924,
+      "members": 8,
+      "ci_run_ids": [
+        37875394817
+      ],
+      "ci_conclusion_recorded": "success",
+      "typecheck": "NOT_IN_CURRENT_BUILD"
+    }
+  ],
+  "candidate_new": "NOT_RUN",
+  "journal": "UNCHANGED",
+  "old_seq6_not_transferred": true
+}

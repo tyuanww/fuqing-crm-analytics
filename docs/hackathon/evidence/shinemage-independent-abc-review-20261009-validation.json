@@ -1,0 +1,140 @@
+{
+  "schema": "shinemage-independent-abc-review/v1",
+  "date": "2026-10-09",
+  "main_head": "f8db3949a7323c1e058c4d57f6287d4dbf54451d",
+  "main_branch": "",
+  "baseline_dirty_items": 96,
+  "inherited_changed_only": [
+    "STATUS.md",
+    "docs/architecture/shinemage-plugin-platform.md",
+    "docs/hackathon/TODOS.md",
+    "docs/operating/dsh-plugin-author-quickstart.md",
+    "docs/operating/verification.md"
+  ],
+  "inherited_others_byte_unchanged": true,
+  "main_index_empty": true,
+  "repositories": {
+    "workbench": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/dsh-analytics-workbench",
+      "branch": "codex/analytics-workbench-independent",
+      "commits": 0,
+      "remote": "NONE",
+      "clone": "NOT_RUN",
+      "remote_ci": "NOT_RUN",
+      "review_changed_files": [
+        {
+          "path": "DEVELOPMENT.md",
+          "sha256": "f0bf501203d86d6076d4c0351f46b53a94cd6412143de584cf6df4dcc52ba49a"
+        },
+        {
+          "path": "README.md",
+          "sha256": "23203eeb956d5746880c3c7a17c86c966c01bc7a65311e51d1ce7c02b99b90c4"
+        }
+      ]
+    },
+    "crm": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/dsh-crm-knowledge",
+      "branch": "main",
+      "commits": 0,
+      "remote": "NONE",
+      "clone": "NOT_RUN",
+      "remote_ci": "NOT_RUN",
+      "review_changed_files": [
+        {
+          "path": "DEVELOPMENT.md",
+          "sha256": "beead1b3b99061f9cf6369459457202b88f576efcbd096f0c61ce43815f8ebfa"
+        }
+      ]
+    },
+    "knowledge": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-knowledge-independent-20261008/dsh-knowledge",
+      "branch": "main",
+      "commits": 0,
+      "remote": "NONE",
+      "clone": "NOT_RUN",
+      "remote_ci": "NOT_RUN",
+      "review_changed_files": [
+        {
+          "path": "plugin/test/identity-lease.test.mjs",
+          "sha256": "f3590813853b7a184fe976bcaff19634e4ade28939e54aae71829c02bfbda94b"
+        },
+        {
+          "path": "scripts/author-boundary.test.mjs",
+          "sha256": "6beeb5669a2a32942da7f9c18e4e215671087868a01a30031cb8890331c55328"
+        },
+        {
+          "path": "scripts/isolate-verify.sh",
+          "sha256": "e627a581c68804da7c4c83250db1ae7970b621b427eb1acffd29863fa982f6b4"
+        }
+      ]
+    }
+  },
+  "review_evidence": [
+    {
+      "path": ".context/checks/independent-abc-review-20261009/workbench/summary.json",
+      "sha256": "517a5626df341d1ba117f7ea187b2b032508cc24a74088fceb3bbc589e1454bd"
+    },
+    {
+      "path": ".context/checks/independent-abc-review-20261009/workbench/documentation-fix.json",
+      "sha256": "db5efcc573b10de00dd9cbcf69baf5137c7fb9746afe2208698a24b8cda77c92"
+    },
+    {
+      "path": ".context/checks/independent-abc-review-20261009/crm/validation.json",
+      "sha256": "aa0923d1af5dd37e68e5161013dc07eeafdc2a15fb024f26e34b9c20bbc788a0"
+    },
+    {
+      "path": ".context/checks/independent-abc-review-20261009/crm/documentation-delta.json",
+      "sha256": "0dbdd78950bd6f2e2bde721e39f0b9323bac0435b92ded39c74c566e2adbc729"
+    },
+    {
+      "path": ".context/checks/independent-abc-review-20261009/knowledge/review-validation.json",
+      "sha256": "eb2207e0c8f9ff533425892dde3268ef988bc1797b98bde479e1412a1516420e"
+    },
+    {
+      "path": ".context/checks/independent-abc-review-20261009/knowledge/fix-validation-r1/validation.json",
+      "sha256": "111e660fff9c0decc2af3e2e2f793ed75d57980f4e6833f1dae1a998f11a8993"
+    },
+    {
+      "path": ".context/checks/independent-abc-review-20261009/knowledge/historical-evidence-preservation.json",
+      "sha256": "36da039e510da9487c75a6b86bbacd8254c0c51500d9c393b9962d6a11459293"
+    },
+    {
+      "path": ".context/checks/independent-abc-review-20261009/archive-manifest.json",
+      "sha256": "f782cd694451cc4c859515e0072799e7f09f02486285125f6ec8e6ee76f38336"
+    },
+    {
+      "path": ".context/checks/independent-abc-review-20261009/main-document-delta.patch",
+      "sha256": "19f1aa5db3f0b8f6d1905162d7ac8f8baf047083d6277d760ac203e8c09c5072"
+    }
+  ],
+  "historical_archive": {
+    "files": 169,
+    "source_and_copy_sha256_equal": true
+  },
+  "new_tests": {
+    "knowledge_boundary": {
+      "pass": 5,
+      "fail": 0,
+      "skip": 0
+    },
+    "knowledge_identity": {
+      "pass": 12,
+      "fail": 0,
+      "skip": 0
+    },
+    "shell_syntax_exit": 0,
+    "scope": "author-only targeted tests, not isolated build"
+  },
+  "open": {
+    "crm_full_ci_input_supply": "OPEN_P2",
+    "knowledge_full_ci_input_supply": "NOT_READY",
+    "workbench_ci": "guards only; full build NOT_RUN",
+    "public_strict_sdk_build": "NOT_VERIFIED",
+    "real_weknora": "NOT_RUN",
+    "three_repository_git_delivery": "NOT_RUN"
+  },
+  "protected_journal_sha256": "f6d9848baf1da0a857819bbcf3367f18a9db67db9e0337e1198b8fce4b98e348",
+  "sdk_distribution": "BLOCKED",
+  "product": "PARTIAL",
+  "release_ready": false
+}

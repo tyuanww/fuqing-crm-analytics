@@ -1,0 +1,339 @@
+{
+  "schema": "shinemage-independent-de-and-git-review/v1",
+  "date": "2026-10-09",
+  "baseline": {
+    "head": "f8db3949a7323c1e058c4d57f6287d4dbf54451d",
+    "status_sha256": "fa1658616c0a4486b4f279d83943890509a5515164a4421f0bed905f05b50e01",
+    "status_bytes": 6818,
+    "status_items": 100,
+    "index": ""
+  },
+  "main_changed_existing": [
+    "STATUS.md",
+    "docs/architecture/shinemage-plugin-platform.md",
+    "docs/hackathon/TODOS.md",
+    "docs/operating/dsh-plugin-author-quickstart.md",
+    "docs/operating/verification.md"
+  ],
+  "main_other_inherited_bytes_unchanged": true,
+  "main_index_empty": true,
+  "repositories": [
+    {
+      "plugin": "dsh-analytics-workbench",
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/dsh-analytics-workbench",
+      "head": "cc1dd6a972c85bb0ef0d7f7131edd72e62335dc1",
+      "branch": "codex/analytics-workbench-independent",
+      "status": "CLEAN",
+      "remote": "NONE",
+      "local_clone": "VERIFIED_R2",
+      "full_remote_ci": "NOT_RUN"
+    },
+    {
+      "plugin": "dsh-crm-knowledge",
+      "path": "/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/dsh-crm-knowledge",
+      "head": "12b8259351d7e64429336faca96a175aad77d517",
+      "branch": "codex/crm-knowledge-independent",
+      "status": "CLEAN",
+      "remote": "NONE",
+      "local_clone": "VERIFIED_R2",
+      "full_remote_ci": "NOT_RUN"
+    },
+    {
+      "plugin": "dsh-knowledge",
+      "path": "/Users/hutou/.codex/tasks/shinemage-knowledge-independent-20261008/dsh-knowledge",
+      "head": "d9e26776905cc00f57c550dd08318e37ee1d1b21",
+      "branch": "codex/knowledge-independent",
+      "status": "CLEAN",
+      "remote": "NONE",
+      "local_clone": "VERIFIED_R2",
+      "full_remote_ci": "NOT_RUN"
+    },
+    {
+      "plugin": "shine-query",
+      "path": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-query",
+      "head": null,
+      "branch": "main",
+      "status": "UNBORN_UNCOMMITTED",
+      "remote": "NONE",
+      "local_clone": "NOT_RUN",
+      "full_remote_ci": "NOT_RUN",
+      "current_build_typecheck": "NOT_IN_CURRENT_BUILD",
+      "review_changed": [
+        {
+          "path": "scripts/verify-pack.mjs",
+          "sha256": "3e7e5ea1e2be7f22c678a9b582712542fb2409dfed3118bbe48d3362eef9c024"
+        },
+        {
+          "path": "inputs/provenance.json",
+          "sha256": "aed3c0f371828875968aabd8a70bbfbdaba196e85c3ea8dac59be22fce63f87d"
+        }
+      ]
+    },
+    {
+      "plugin": "shine-board",
+      "path": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-board",
+      "head": null,
+      "branch": "main",
+      "status": "UNBORN_UNCOMMITTED",
+      "remote": "NONE",
+      "local_clone": "NOT_RUN",
+      "full_remote_ci": "NOT_RUN",
+      "current_build_typecheck": "NOT_IN_CURRENT_BUILD",
+      "review_changed": [
+        {
+          "path": "scripts/verify-pack.mjs",
+          "sha256": "0e4703486a4bf9c4d02bdaa941f160aea4740ac5787384179b636f0fc0816549"
+        },
+        {
+          "path": "inputs/provenance.json",
+          "sha256": "a1d863403b0131b2e50754c2ba4dad12f4499abe4cb0e602d93ed7d134fd273e"
+        }
+      ]
+    },
+    {
+      "plugin": "shine-crowd-action",
+      "path": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-crowd-action",
+      "head": null,
+      "branch": "main",
+      "status": "UNBORN_UNCOMMITTED",
+      "remote": "NONE",
+      "local_clone": "NOT_RUN",
+      "full_remote_ci": "NOT_RUN",
+      "current_build_typecheck": "NOT_IN_CURRENT_BUILD",
+      "review_changed": [
+        {
+          "path": "scripts/verify-pack.mjs",
+          "sha256": "30069580ace164121b0ed85449449e3a17d54d46f2e7c5729589fda027908f6d"
+        },
+        {
+          "path": "inputs/provenance.json",
+          "sha256": "cd969d0832e0c128a2965b9508e87d1d939e6ccbd4760846265092f9ea9a3b53"
+        }
+      ]
+    },
+    {
+      "plugin": "shine-funnel",
+      "path": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/dsh-shine-funnel",
+      "head": null,
+      "branch": "main",
+      "status": "UNBORN_UNCOMMITTED",
+      "remote": "NONE",
+      "local_clone": "NOT_RUN",
+      "full_remote_ci": "NOT_RUN",
+      "current_build_typecheck": "NOT_IN_CURRENT_BUILD",
+      "review_changed": [
+        {
+          "path": "scripts/verify-pack.mjs",
+          "sha256": "ecf8ec8612280ce94dde22a1521609f1cc32d6bb0d7f660a6e1e67e6d52ac2d0"
+        }
+      ]
+    },
+    {
+      "plugin": "shine-waterfall",
+      "path": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/dsh-shine-waterfall",
+      "head": null,
+      "branch": "main",
+      "status": "UNBORN_UNCOMMITTED",
+      "remote": "NONE",
+      "local_clone": "NOT_RUN",
+      "full_remote_ci": "NOT_RUN",
+      "current_build_typecheck": "NOT_IN_CURRENT_BUILD",
+      "review_changed": [
+        {
+          "path": "scripts/verify-pack.mjs",
+          "sha256": "8b34ca0b0939a96a539cf31ac9aac8d6a4479aeea0727e131d3f69c6ed432844"
+        }
+      ]
+    }
+  ],
+  "retained_content_packages_rehashed": [
+    {
+      "source": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/evidence/shine-board/isolate/shine-mage-dsh-shine-board-0.0.0-b0.tgz",
+      "sha256": "0bcf6ed8310f97e65771df56a5940eb4d418a4d43a38a25c0eae05705173115c",
+      "bytes": 1514,
+      "members": [
+        "package/lib/client.js",
+        "package/lib/index.js",
+        "package/package.json",
+        "package/README.md",
+        "package/cordis.patch.yml"
+      ]
+    },
+    {
+      "source": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/evidence/shine-crowd-action/isolate/shine-mage-dsh-shine-crowd-action-0.0.0-b0.tgz",
+      "sha256": "dfbd9279394853aa8afca82391327b21c7e769d894b734c4860c509ad6918d94",
+      "bytes": 1600,
+      "members": [
+        "package/lib/client.js",
+        "package/lib/index.js",
+        "package/package.json",
+        "package/README.md",
+        "package/cordis.patch.yml"
+      ]
+    },
+    {
+      "source": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/evidence/shine-query/isolate/shine-mage-dsh-shine-query-0.0.0-b0.tgz",
+      "sha256": "f19fc60ce50f4a963367282031d7c2071258ba75e9bd5649de6530d605bae98d",
+      "bytes": 1431,
+      "members": [
+        "package/lib/client.js",
+        "package/lib/index.js",
+        "package/package.json",
+        "package/README.md",
+        "package/cordis.patch.yml"
+      ]
+    },
+    {
+      "source": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/evidence/funnel/isolate/content-pack.tgz",
+      "sha256": "ba1f9cd941d67447ee19e29eaf1810c27dfb6ac738da366584aab2a28148105d",
+      "bytes": 2409,
+      "members": [
+        "package/lib/client.js",
+        "package/lib/index.js",
+        "package/bundled-dependencies.json",
+        "package/package.json",
+        "package/README.md",
+        "package/lib/funnel.mjs",
+        "package/lib/funnel.d.mts",
+        "package/cordis.patch.yml"
+      ]
+    },
+    {
+      "source": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/evidence/waterfall/isolate/content-pack.tgz",
+      "sha256": "d98ee03ea678aacec87d1e6f39aecac43f741f728a90da5de1c5c0541fe021f9",
+      "bytes": 2871,
+      "members": [
+        "package/lib/client.js",
+        "package/lib/index.js",
+        "package/bundled-dependencies.json",
+        "package/package.json",
+        "package/README.md",
+        "package/lib/waterfall.mjs",
+        "package/lib/waterfall.d.mts",
+        "package/cordis.patch.yml"
+      ]
+    },
+    {
+      "source": "/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/evidence/git-delivery-20261009-r2/pack/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+      "sha256": "74321fa09edb178e6cb7c781811cf3923643cfbda944211c36d2642974b9423e",
+      "bytes": 438782,
+      "members": [
+        "package/lib/client.js",
+        "package/lib/index.js",
+        "package/lib/page-tools.js",
+        "package/lib/skills.js",
+        "package/lib/tool.js",
+        "package/bundled-dependencies.json",
+        "package/package.json",
+        "package/cordis.patch.yml"
+      ]
+    },
+    {
+      "source": "/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/evidence/git-delivery-20261009-r2/pack/shine-mage-dsh-crm-knowledge-0.0.0-crm.1.tgz",
+      "sha256": "39c3bd893f4535167d90adb57773ad96b72136b64086685603fc3b0937812914",
+      "bytes": 242766,
+      "members": [
+        "package/lib/client.js",
+        "package/lib/host.js",
+        "package/lib/index.js",
+        "package/package.json",
+        "package/README.md",
+        "package/cordis.patch.yml"
+      ]
+    },
+    {
+      "source": "/Users/hutou/.codex/tasks/shinemage-knowledge-independent-20261008/evidence/git-delivery-20261009-r2/pack/shine-mage-dsh-knowledge-0.0.0-candidate.1.tgz",
+      "sha256": "74ded7db78008b146e825b0620e14e70775630b34205050670c25718d1b6ce2c",
+      "bytes": 16844,
+      "members": [
+        "package/lib/graph-tools.js",
+        "package/lib/index.js",
+        "package/package.json",
+        "package/README.md",
+        "package/cordis.patch.yml"
+      ]
+    }
+  ],
+  "review_files": [
+    {
+      "path": ".context/checks/independent-de-and-git-review-20261009/leaf/review.md",
+      "sha256": "05437767a8c4a8edcaa20b9a0ef6a66b05ef7b52784bb620f7df603fceda06f5"
+    },
+    {
+      "path": ".context/checks/independent-de-and-git-review-20261009/leaf/machine.json",
+      "sha256": "b378c9eab2b0272c93b83bcf0e3dcc450115f83f5154b647d94e8ed80face638"
+    },
+    {
+      "path": ".context/checks/independent-de-and-git-review-20261009/leaf/pack-repeat-r1/result.json",
+      "sha256": "e49ca542e441a0cb824aa7a57001c5b064e6a605b842892f42e101cbfda68629"
+    },
+    {
+      "path": ".context/checks/independent-de-and-git-review-20261009/chart/review.md",
+      "sha256": "6b1ca6331ca44b487db816ee81e7ce32599b6b4c0142e5c818879f00dc87f4aa"
+    },
+    {
+      "path": ".context/checks/independent-de-and-git-review-20261009/chart/machine.json",
+      "sha256": "2eb36e221c43e47aeae4545a876825ff8d941f0fe11aaeeca9c9998591ca64d1"
+    },
+    {
+      "path": ".context/checks/independent-de-and-git-review-20261009/chart/pack-fix-verification/results.json",
+      "sha256": "21912ab84d473736bfeec8ecaa43f276098f2bf1b6c9e94aa97fb32341347790"
+    },
+    {
+      "path": ".context/checks/independent-de-and-git-review-20261009/git-delivery/review.md",
+      "sha256": "39701aa4975691537aae722bc6df286dd4e91efdfcf4fef2350588efed8b4ef7"
+    },
+    {
+      "path": ".context/checks/independent-de-and-git-review-20261009/git-delivery/machine.json",
+      "sha256": "149586335eea32edb82c2f56249bd01327c8f709d0683beefbf0f0a60dd1c7d3"
+    },
+    {
+      "path": ".context/checks/independent-de-and-git-review-20261009/archive-manifest.json",
+      "sha256": "dd62b3d24cd0f2a772da79ae5e22082038d681e58d51a7bf2ffdb259d454ad77"
+    }
+  ],
+  "archive": {
+    "files": 355,
+    "bytes": 966431,
+    "source_and_copy_unchanged": true
+  },
+  "new_validation": {
+    "leaf": {
+      "scope": "real pack using retained lib, no install/build",
+      "each_repository": [
+        "first save exit 0",
+        "repeat exit 1 EEXIST",
+        "old bytes unchanged"
+      ]
+    },
+    "chart": {
+      "scope": "real pack using retained lib, no install/build",
+      "each_repository": [
+        "before-race exit 0 demonstrates overwrite",
+        "after-first exit 0",
+        "after-repeat exit 2 preserves archive",
+        "after-race exit 1 EEXIST preserves sentinel"
+      ]
+    }
+  },
+  "review_findings": {
+    "leaf_save_overwrite": "FIXED",
+    "chart_save_race": "FIXED",
+    "three_committed_repos_new_p1_p2": [],
+    "complete_remote_ci_inputs": "OPEN"
+  },
+  "protected_journal_sha256": "f6d9848baf1da0a857819bbcf3367f18a9db67db9e0337e1198b8fce4b98e348",
+  "sdk_distribution": "BLOCKED",
+  "product": "PARTIAL",
+  "release_ready": false,
+  "not_run_this_turn": [
+    "full build",
+    "full B0",
+    "host/headed/WSL",
+    "formal packPlugin/candidate",
+    "live business/WeKnora/Neo4j",
+    "remote CI",
+    "SDK audit",
+    "commit/push/PR/merge/release/deploy"
+  ]
+}

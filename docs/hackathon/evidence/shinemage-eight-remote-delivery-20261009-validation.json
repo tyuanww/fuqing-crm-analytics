@@ -1,0 +1,1426 @@
+{
+  "schema": "shinemage-eight-remote-delivery/v1",
+  "main_head": "f8db3949a7323c1e058c4d57f6287d4dbf54451d",
+  "main_initial_dirty_count": 110,
+  "main_commit": "NOT_RUN",
+  "repos": [
+    {
+      "name": "analytics-workbench",
+      "head": "76d00f277506317ea241aa0174c108822ed225a1",
+      "pr_url": "https://github.com/tyuanww/dsh-analytics-workbench/pull/1",
+      "run_id": 37875348316,
+      "run_url": "https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/37875348316",
+      "event": "pull_request",
+      "conclusion": "success",
+      "prepared_inputs": {
+        "status": "FIXED_INPUTS_PREPARED",
+        "runtime": {
+          "version": "v24.19.0",
+          "platform": "linux",
+          "arch": "x64"
+        },
+        "python": "3.14.4",
+        "upstream": {
+          "url": "https://github.com/deepseek-ai/deepseek-harness.git",
+          "sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+          "tree": "e3e63253d1d35ad07f785273235c40813cb6c8bd",
+          "lock_sha256": "5d3980bcd2a0113101815aabfeb4f8a875d556a333521539b7f11d790f4a50aa",
+          "package_manager": "pnpm@11.7.0"
+        },
+        "tracked_upstream_unchanged": true,
+        "source_local": null,
+        "preparation_network": "registry metadata and locked package downloads allowed",
+        "sdk_distribution": "BLOCKED",
+        "consumer_build": "NOT_RUN_BY_PREPARATION",
+        "release_ready": false
+      },
+      "artifact_verification": [
+        {
+          "id": 11592196949,
+          "digest": "sha256:40a7219e2f376afac88f40397cb0a428691f45bca0560dddf325a6d7aea5a59f",
+          "matching_downloads": [
+            "ci-evidence/analytics-workbench/run-37875348316-attempt-1/artifact-11592196949.zip"
+          ]
+        }
+      ],
+      "tarball": "ci-evidence/analytics-workbench/run-37875348316-attempt-1/artifact-11592196949/workbench-content-pack/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+      "tarball_sha256": "920183d4172d33915a00fab01af710296e8f6d0716971007fb4c1044f0e95c37",
+      "bytes": 441102,
+      "members": {
+        "package/lib/client.js": {
+          "bytes": 1176352,
+          "sha256": "d50bb6272a18de3a892687192d95b52019bd8af2f959f5593dae1283b8043c03"
+        },
+        "package/lib/index.js": {
+          "bytes": 143276,
+          "sha256": "f1b97a4457ad65d868c83eb6209ae4c14a9598415caf4376a5c6151ef962fd58"
+        },
+        "package/lib/page-tools.js": {
+          "bytes": 14160,
+          "sha256": "28b07f12a5aaff8096c604d9c53eef293a91be55ae82d48b069ab8c0e8fa5c70"
+        },
+        "package/lib/skills.js": {
+          "bytes": 107570,
+          "sha256": "c4b870b64626b5d8f7ed898c6cf2edd613fc7cabb39bd49490eb9b3bcf29c8b1"
+        },
+        "package/lib/tool.js": {
+          "bytes": 38843,
+          "sha256": "e854349cb5187e2b045f280f8330f19da0e7d0acbe0ff4f07e8c747f710a4924"
+        },
+        "package/bundled-dependencies.json": {
+          "bytes": 306,
+          "sha256": "957ba54ce606fc735cc11c051b9d60c3703ab8bf0bc94dd00aac696b28afa06b"
+        },
+        "package/package.json": {
+          "bytes": 2436,
+          "sha256": "a500b4154b951ec2917b57dfc5c20ffea56462aa2a695acfb09592f29093b206"
+        },
+        "package/cordis.patch.yml": {
+          "bytes": 584,
+          "sha256": "901c01fe1237b5d1b25f60ce58252553053125519ae73fe356ff6e4365425b3f"
+        }
+      },
+      "matches_previous_linux_archive": true,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Initialize fixed input paths",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Prepare locked source, platform dependencies and official SDK outputs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify input integrity and evidence preservation guards",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install vendored author kit",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify author boundaries and fixed inputs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Strict host and client build",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Package behavior and dependency links",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Content pack",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain preparation evidence and content pack",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "base_initial_feature_commit": "cc1dd6a972c85bb0ef0d7f7131edd72e62335dc1",
+      "ci_recipe_commit": "aa56dbeb56b4ffc8216c9b01d394981226c28960",
+      "fix_commit": "76d00f277506317ea241aa0174c108822ed225a1",
+      "actual_checkout": {
+        "name": "analytics-workbench",
+        "checkout": "02823020de0a4acbe9765c152aac877073a6e134",
+        "head": "76d00f277506317ea241aa0174c108822ed225a1",
+        "tree": "03607eabd7d865b76faba04f38ff02e2a5f0b469",
+        "tree_matches": true,
+        "parents_match": true
+      },
+      "private": true,
+      "default_branch": "main",
+      "pr_state": "OPEN",
+      "merged": false,
+      "local_status": "clean",
+      "test_groups": "本包 193；边界 5",
+      "typecheck": "PASS"
+    },
+    {
+      "name": "crm-knowledge",
+      "head": "22bd8099883c5f7e6e9e11c92dfa56d5363a5392",
+      "pr_url": "https://github.com/tyuanww/dsh-crm-knowledge/pull/1",
+      "run_id": 37875375168,
+      "run_url": "https://github.com/tyuanww/dsh-crm-knowledge/actions/runs/37875375168",
+      "event": "pull_request",
+      "conclusion": "success",
+      "prepared_inputs": {
+        "status": "FIXED_INPUTS_PREPARED",
+        "runtime": {
+          "version": "v24.19.0",
+          "platform": "linux",
+          "arch": "x64"
+        },
+        "python": "3.14.4",
+        "upstream": {
+          "url": "https://github.com/deepseek-ai/deepseek-harness.git",
+          "sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+          "tree": "e3e63253d1d35ad07f785273235c40813cb6c8bd",
+          "lock_sha256": "5d3980bcd2a0113101815aabfeb4f8a875d556a333521539b7f11d790f4a50aa",
+          "package_manager": "pnpm@11.7.0"
+        },
+        "tracked_upstream_unchanged": true,
+        "source_local": null,
+        "preparation_network": "registry metadata and locked package downloads allowed",
+        "sdk_distribution": "BLOCKED",
+        "consumer_build": "NOT_RUN_BY_PREPARATION",
+        "release_ready": false
+      },
+      "artifact_verification": [
+        {
+          "id": 11591963815,
+          "digest": "sha256:9e0183fe785a2e5d6fc6c437b79b5873bca6bf86c0359e9d230444ed3e2c9bfe",
+          "matching_downloads": [
+            "ci-evidence/crm-knowledge/run-37875375168-attempt-1/artifact-11591963815.zip"
+          ]
+        }
+      ],
+      "tarball": "ci-evidence/crm-knowledge/run-37875375168-attempt-1/artifact-11591963815/crm-knowledge-content-pack/shine-mage-dsh-crm-knowledge-0.0.0-crm.1.tgz",
+      "tarball_sha256": "53c6ecd71ae2aafc7f56565b0a399126e98dd7bac0e8feee6acd979cb76362ec",
+      "bytes": 244181,
+      "members": {
+        "package/lib/client.js": {
+          "bytes": 640064,
+          "sha256": "72bbd7d715ec5ab8e5d2bd7fce29a74dc7a32ad9e6fae8df86278de27c17eab3"
+        },
+        "package/lib/host.js": {
+          "bytes": 74553,
+          "sha256": "5149a148257b794c3b7bff939173fdc003d9f5d38382d8cc23fe58310c979d64"
+        },
+        "package/lib/index.js": {
+          "bytes": 69956,
+          "sha256": "a31542e7f3d77a7f9fd49af3f5428917f99a9a1e16d416ac29eab4a99237da63"
+        },
+        "package/package.json": {
+          "bytes": 1312,
+          "sha256": "dff9441c4f0c013b65936376324b2c8c15b2f825c5b1ce79dc62afac582da67c"
+        },
+        "package/README.md": {
+          "bytes": 15924,
+          "sha256": "dc577906bd58938691bf05840ad4206a31430d5d4b92b47ad0ce3d4f0427cd0c"
+        },
+        "package/cordis.patch.yml": {
+          "bytes": 253,
+          "sha256": "9b20b6350ace9ee49ebfc6dadc6aed5a4f357f0d3f36900c75831e254886400c"
+        }
+      },
+      "matches_previous_linux_archive": true,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Initialize fixed input paths",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Prepare locked source, platform dependencies and official SDK outputs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify input integrity and evidence preservation guards",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install vendored author kit",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify author boundaries and fixed inputs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Strict host and client build",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Package behavior",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Content pack",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain preparation evidence and content pack",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "base_initial_feature_commit": "12b8259351d7e64429336faca96a175aad77d517",
+      "ci_recipe_commit": "73efd8bc229ea6c9e4f5715fda347fdf9e065869",
+      "fix_commit": "22bd8099883c5f7e6e9e11c92dfa56d5363a5392",
+      "actual_checkout": {
+        "name": "crm-knowledge",
+        "checkout": "337bbd10fda88526262a0a361dc5fececf4f4408",
+        "head": "22bd8099883c5f7e6e9e11c92dfa56d5363a5392",
+        "tree": "d9d0f811f8ecb71e59635025c61336fb7d11f75b",
+        "tree_matches": true,
+        "parents_match": true
+      },
+      "private": true,
+      "default_branch": "main",
+      "pr_state": "OPEN",
+      "merged": false,
+      "local_status": "clean",
+      "test_groups": "本包 103；边界 11",
+      "typecheck": "PASS"
+    },
+    {
+      "name": "knowledge",
+      "head": "9b7c60c33441c3a243399081fa2b5a0f845c8604",
+      "pr_url": "https://github.com/tyuanww/dsh-knowledge/pull/1",
+      "run_id": 37875378986,
+      "run_url": "https://github.com/tyuanww/dsh-knowledge/actions/runs/37875378986",
+      "event": "pull_request",
+      "conclusion": "success",
+      "prepared_inputs": {
+        "status": "FIXED_INPUTS_PREPARED",
+        "runtime": {
+          "version": "v24.19.0",
+          "platform": "linux",
+          "arch": "x64"
+        },
+        "python": "3.14.4",
+        "upstream": {
+          "url": "https://github.com/deepseek-ai/deepseek-harness.git",
+          "sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+          "tree": "e3e63253d1d35ad07f785273235c40813cb6c8bd",
+          "lock_sha256": "5d3980bcd2a0113101815aabfeb4f8a875d556a333521539b7f11d790f4a50aa",
+          "package_manager": "pnpm@11.7.0"
+        },
+        "tracked_upstream_unchanged": true,
+        "source_local": null,
+        "preparation_network": "registry metadata and locked package downloads allowed",
+        "sdk_distribution": "BLOCKED",
+        "consumer_build": "NOT_RUN_BY_PREPARATION",
+        "release_ready": false
+      },
+      "artifact_verification": [
+        {
+          "id": 11592246603,
+          "digest": "sha256:db2ca90fd659afe0a9db4407a092acf5eeac36c47da850d3a76763abcdd4a977",
+          "matching_downloads": [
+            "ci-evidence/knowledge/run-37875378986-attempt-1/artifact-20261009T024233Z.zip"
+          ]
+        }
+      ],
+      "tarball": "ci-evidence/knowledge/run-37875378986-attempt-1/artifact-11592246603/knowledge-content-pack/shine-mage-dsh-knowledge-0.0.0-candidate.1.tgz",
+      "tarball_sha256": "5bb2e8f4e0996f0b57c903e50f08f2573c57b9b9229c41bf9f20ad4cf88fa7be",
+      "bytes": 17140,
+      "members": {
+        "package/lib/graph-tools.js": {
+          "bytes": 38773,
+          "sha256": "425e876ef85dbfb8524080340b42e29d12b5eb0799ca79a35a3f5d8cf9e6b864"
+        },
+        "package/lib/index.js": {
+          "bytes": 15253,
+          "sha256": "e04d90e8e4a51fcebf14c1666ace8796847c2ac13737805f933655c9b196180e"
+        },
+        "package/package.json": {
+          "bytes": 1024,
+          "sha256": "f4d501c0ea85bcc75a3a2965ba2b2f5e2f6b2921189c2a795c0f357108046024"
+        },
+        "package/README.md": {
+          "bytes": 3939,
+          "sha256": "c2eadbae33fc3aee0529bc849d8f63c51846432d241b3c4be5a21f8a3d962021"
+        },
+        "package/cordis.patch.yml": {
+          "bytes": 80,
+          "sha256": "2528e5e3e70cc995c01aa479433962b2ce8cf68edb6b4df128373a05dca2a776"
+        }
+      },
+      "matches_previous_linux_archive": true,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Initialize fixed input paths",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Prepare locked source, platform dependencies and official SDK outputs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify input integrity and evidence preservation guards",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install vendored author kit",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify author boundaries and fixed inputs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Strict knowledge typecheck and build",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Synthetic package behavior, one file at a time",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Content pack",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain preparation evidence and content pack",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "base_initial_feature_commit": "d9e26776905cc00f57c550dd08318e37ee1d1b21",
+      "ci_recipe_commit": "5c4a775a54086370ef5b2c12a86ad5a32b4abd8f",
+      "fix_commit": "9b7c60c33441c3a243399081fa2b5a0f845c8604",
+      "actual_checkout": {
+        "name": "knowledge",
+        "checkout": "f46ab1e784c299d293376a1326ad9b3d054cde86",
+        "head": "9b7c60c33441c3a243399081fa2b5a0f845c8604",
+        "tree": "08984ca806723aa997aa50e0db89ffb4781e3119",
+        "tree_matches": true,
+        "parents_match": true
+      },
+      "private": true,
+      "default_branch": "main",
+      "pr_state": "OPEN",
+      "merged": false,
+      "local_status": "clean",
+      "test_groups": "graph 22、service-client 5、package 5、identity 12、author-boundary 5",
+      "typecheck": "PASS"
+    },
+    {
+      "name": "shine-query",
+      "head": "5d92be4e3bc2bf153dbd07fb109c4af0e1ebdcae",
+      "pr_url": "https://github.com/tyuanww/dsh-shine-query/pull/1",
+      "run_id": 37875384134,
+      "run_url": "https://github.com/tyuanww/dsh-shine-query/actions/runs/37875384134",
+      "event": "pull_request",
+      "conclusion": "success",
+      "prepared_inputs": {
+        "status": "FIXED_INPUTS_PREPARED",
+        "runtime": {
+          "version": "v24.19.0",
+          "platform": "linux",
+          "arch": "x64"
+        },
+        "python": "3.14.4",
+        "upstream": {
+          "url": "https://github.com/deepseek-ai/deepseek-harness.git",
+          "sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+          "tree": "e3e63253d1d35ad07f785273235c40813cb6c8bd",
+          "lock_sha256": "5d3980bcd2a0113101815aabfeb4f8a875d556a333521539b7f11d790f4a50aa",
+          "package_manager": "pnpm@11.7.0"
+        },
+        "tracked_upstream_unchanged": true,
+        "source_local": null,
+        "preparation_network": "registry metadata and locked package downloads allowed",
+        "sdk_distribution": "BLOCKED",
+        "consumer_build": "NOT_RUN_BY_PREPARATION",
+        "release_ready": false
+      },
+      "artifact_verification": [
+        {
+          "id": 11591809432,
+          "digest": "sha256:d99bdf7f213e845dc65475df5912d49f2a4ebfae0b88b597f3c16b5042f270ac",
+          "matching_downloads": [
+            "ci-evidence/shine-query/run-37875384134-attempt-1/artifact-20261009T024233Z.zip"
+          ]
+        }
+      ],
+      "tarball": "ci-evidence/shine-query/run-37875384134-attempt-1/artifact-11591809432/shine-query-content-pack/shine-mage-dsh-shine-query-0.0.0-b0.tgz",
+      "tarball_sha256": "b141df60cea6a892eb5d8bb974b64d726af26d60e8d8c0016ead4739a868f626",
+      "bytes": 1446,
+      "members": {
+        "package/lib/client.js": {
+          "bytes": 719,
+          "sha256": "6d9dc0b432e7f8532ec7ad082becde14f2436184d496397301de3c0b1940fd8a"
+        },
+        "package/lib/index.js": {
+          "bytes": 119,
+          "sha256": "ac79df38a4f9f68e0558953472c383e0ca57e9266f9bc2427d45e4dd0e1dd186"
+        },
+        "package/package.json": {
+          "bytes": 1027,
+          "sha256": "b0f81b71905f349269f2895f2d682a907ef55b96693f7053e71f80e8df99c517"
+        },
+        "package/README.md": {
+          "bytes": 365,
+          "sha256": "a61c7f66f61e020f1adfc11eb04e39bb8d26cb0bb28f28b77383320ea778ffcd"
+        },
+        "package/cordis.patch.yml": {
+          "bytes": 148,
+          "sha256": "258f652d9447e8ee6d45730cf920823dcce936b84ea2cddf8af80910e39ba7a4"
+        }
+      },
+      "matches_previous_linux_archive": true,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Initialize fixed input paths",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Prepare locked source, platform dependencies and official SDK outputs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify input integrity and evidence preservation guards",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install vendored author kit",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify fixed inputs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build with the existing pinned toolchain",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Package tests and author boundaries",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Content pack",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain preparation evidence and content pack",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "base_initial_feature_commit": "258a34490ec09c47397b55cf9d4e7c2a5bd04743",
+      "ci_recipe_commit": "7220fa65993cf579a87f5611a64fd5965ddd1a7b",
+      "fix_commit": "5d92be4e3bc2bf153dbd07fb109c4af0e1ebdcae",
+      "actual_checkout": {
+        "name": "shine-query",
+        "checkout": "0de3b89926b49f876f1774fe96bd2b949f486ece",
+        "head": "5d92be4e3bc2bf153dbd07fb109c4af0e1ebdcae",
+        "tree": "9e9565e135ccd9a7b153b6902eb506cdf35b696e",
+        "tree_matches": true,
+        "parents_match": true
+      },
+      "private": true,
+      "default_branch": "main",
+      "pr_state": "OPEN",
+      "merged": false,
+      "local_status": "clean",
+      "test_groups": "lifecycle 2；boundary 5",
+      "typecheck": "NOT_IN_CURRENT_BUILD"
+    },
+    {
+      "name": "shine-board",
+      "head": "4f248e6cdd026d43b24293c4bceb540ea7813135",
+      "pr_url": "https://github.com/tyuanww/dsh-shine-board/pull/1",
+      "run_id": 37875386821,
+      "run_url": "https://github.com/tyuanww/dsh-shine-board/actions/runs/37875386821",
+      "event": "pull_request",
+      "conclusion": "success",
+      "prepared_inputs": {
+        "status": "FIXED_INPUTS_PREPARED",
+        "runtime": {
+          "version": "v24.19.0",
+          "platform": "linux",
+          "arch": "x64"
+        },
+        "python": "3.14.4",
+        "upstream": {
+          "url": "https://github.com/deepseek-ai/deepseek-harness.git",
+          "sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+          "tree": "e3e63253d1d35ad07f785273235c40813cb6c8bd",
+          "lock_sha256": "5d3980bcd2a0113101815aabfeb4f8a875d556a333521539b7f11d790f4a50aa",
+          "package_manager": "pnpm@11.7.0"
+        },
+        "tracked_upstream_unchanged": true,
+        "source_local": null,
+        "preparation_network": "registry metadata and locked package downloads allowed",
+        "sdk_distribution": "BLOCKED",
+        "consumer_build": "NOT_RUN_BY_PREPARATION",
+        "release_ready": false
+      },
+      "artifact_verification": [
+        {
+          "id": 11592535181,
+          "digest": "sha256:95a7ce8396725daa3ee96180c4a8d12e9cbb6b794f90c45ee605d22d678da6d7",
+          "matching_downloads": [
+            "ci-evidence/shine-board/run-37875386821-attempt-1/artifact-11592535181-retry-024259-1.zip"
+          ]
+        }
+      ],
+      "tarball": "ci-evidence/shine-board/run-37875386821-attempt-1/artifact-11592535181/shine-board-content-pack/shine-mage-dsh-shine-board-0.0.0-b0.tgz",
+      "tarball_sha256": "da091814cc64bc7126e4224749c21d0bdea3814aa225beaada948f7dd19e0838",
+      "bytes": 1538,
+      "members": {
+        "package/lib/client.js": {
+          "bytes": 719,
+          "sha256": "983851980fab7951da805ebb77106af2b38ffc3045330bb18799bc0283946323"
+        },
+        "package/lib/index.js": {
+          "bytes": 119,
+          "sha256": "b5706ed0b58c023d6f207ce92d1cf3ad157c599b75a65d6c45380cbd193559ae"
+        },
+        "package/package.json": {
+          "bytes": 1044,
+          "sha256": "d57f091252eeb5415ddbbec9a904dedf12167cca0a7a54608857a97228550888"
+        },
+        "package/README.md": {
+          "bytes": 426,
+          "sha256": "34542e002e65d3f24a0436eb88938e9f4797e79a5fb146cf189dd46cf91671b6"
+        },
+        "package/cordis.patch.yml": {
+          "bytes": 158,
+          "sha256": "54a6bd0eba5e0ba6b1fdd02316e7997e607ea27bb144f7e633b85f2eb91b7ec0"
+        }
+      },
+      "matches_previous_linux_archive": true,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Initialize fixed input paths",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Prepare locked source, platform dependencies and official SDK outputs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify input integrity and evidence preservation guards",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install vendored author kit",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify fixed inputs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build with the existing pinned toolchain",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Package tests and author boundaries",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Content pack",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain preparation evidence and content pack",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "base_initial_feature_commit": "49b00e0871c16f489f99f0c8ed42d3378d1b2240",
+      "ci_recipe_commit": "613ba48fb64471b4d8204b0c582e20f3fb039f0b",
+      "fix_commit": "4f248e6cdd026d43b24293c4bceb540ea7813135",
+      "actual_checkout": {
+        "checkout": "acb3f62d70bafb370b5f1cd898917d57a5fed059",
+        "tree": "63356a00756b621c8580fd788ef6e799a54f1c61",
+        "tree_matches": true
+      },
+      "private": true,
+      "default_branch": "main",
+      "pr_state": "OPEN",
+      "merged": false,
+      "local_status": "clean",
+      "test_groups": "lifecycle 2；boundary 5",
+      "typecheck": "NOT_IN_CURRENT_BUILD"
+    },
+    {
+      "name": "shine-crowd-action",
+      "head": "68398dc59d7161b349ad8868d08c2189f4807102",
+      "pr_url": "https://github.com/tyuanww/dsh-shine-crowd-action/pull/1",
+      "run_id": 37875390716,
+      "run_url": "https://github.com/tyuanww/dsh-shine-crowd-action/actions/runs/37875390716",
+      "event": "pull_request",
+      "conclusion": "success",
+      "prepared_inputs": {
+        "status": "FIXED_INPUTS_PREPARED",
+        "runtime": {
+          "version": "v24.19.0",
+          "platform": "linux",
+          "arch": "x64"
+        },
+        "python": "3.14.4",
+        "upstream": {
+          "url": "https://github.com/deepseek-ai/deepseek-harness.git",
+          "sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+          "tree": "e3e63253d1d35ad07f785273235c40813cb6c8bd",
+          "lock_sha256": "5d3980bcd2a0113101815aabfeb4f8a875d556a333521539b7f11d790f4a50aa",
+          "package_manager": "pnpm@11.7.0"
+        },
+        "tracked_upstream_unchanged": true,
+        "source_local": null,
+        "preparation_network": "registry metadata and locked package downloads allowed",
+        "sdk_distribution": "BLOCKED",
+        "consumer_build": "NOT_RUN_BY_PREPARATION",
+        "release_ready": false
+      },
+      "artifact_verification": [
+        {
+          "id": 11591599861,
+          "digest": "sha256:9b5d391d9c221e8800a671065a18f7b73412347b767aae6aa5e53119f6fc025f",
+          "matching_downloads": [
+            "ci-evidence/shine-crowd-action/run-37875390716-attempt-1/artifact-11591599861-retry-024258-1.zip"
+          ]
+        }
+      ],
+      "tarball": "ci-evidence/shine-crowd-action/run-37875390716-attempt-1/artifact-11591599861/shine-crowd-action-content-pack/shine-mage-dsh-shine-crowd-action-0.0.0-b0.tgz",
+      "tarball_sha256": "6a855bdce76502f3d1874c8fd519b3dbfe82bf3dc090f37370aeb4f96cec5714",
+      "bytes": 1622,
+      "members": {
+        "package/lib/client.js": {
+          "bytes": 733,
+          "sha256": "27758f2b267209c14c53ca1b056efeb41c58a9fac3e6f546d65f26f3177c9e67"
+        },
+        "package/lib/index.js": {
+          "bytes": 126,
+          "sha256": "e63f51cf877e6eaf87373a7fd98b964c02ccfef7c200f9b64314cfd813d7d9a9"
+        },
+        "package/package.json": {
+          "bytes": 1061,
+          "sha256": "504116eee2b4b2d464d3cd487d81def8ef9339f3f9554ce9dc89af1a8b1ee925"
+        },
+        "package/README.md": {
+          "bytes": 604,
+          "sha256": "b4548ff9b26f8f146a4e91c6f549fd587a6d9ce78baac19d8da24482d5510b6c"
+        },
+        "package/cordis.patch.yml": {
+          "bytes": 168,
+          "sha256": "d98da5679243d4eb51b773bc8fd960ce41beb37730923cc44de407e6c0e90c80"
+        }
+      },
+      "matches_previous_linux_archive": true,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Initialize fixed input paths",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Prepare locked source, platform dependencies and official SDK outputs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify input integrity and evidence preservation guards",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install vendored author kit",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify fixed inputs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build with the existing pinned toolchain",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Package tests and author boundaries",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Content pack",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain preparation evidence and content pack",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "base_initial_feature_commit": "51f8088d798a0ce0f146e270fbc4dba4c3aec6ef",
+      "ci_recipe_commit": "680f01c2f4befc989de050e3c7ed0bf3b94bd96c",
+      "fix_commit": "68398dc59d7161b349ad8868d08c2189f4807102",
+      "actual_checkout": {
+        "checkout": "b2d2a7e10fa97f7ab173803e21263c9b86a1ee82",
+        "tree": "abfef5fe708a520f0cceb01b475025aacc8c2d3a",
+        "tree_matches": true
+      },
+      "private": true,
+      "default_branch": "main",
+      "pr_state": "OPEN",
+      "merged": false,
+      "local_status": "clean",
+      "test_groups": "lifecycle 2；boundary 5",
+      "typecheck": "NOT_IN_CURRENT_BUILD"
+    },
+    {
+      "name": "shine-funnel",
+      "head": "ab924632563e9d5aa6fbf9d7514fbda15fecc7b2",
+      "pr_url": "https://github.com/tyuanww/dsh-shine-funnel/pull/1",
+      "run_id": 37875393112,
+      "run_url": "https://github.com/tyuanww/dsh-shine-funnel/actions/runs/37875393112",
+      "event": "pull_request",
+      "conclusion": "success",
+      "prepared_inputs": {
+        "status": "FIXED_INPUTS_PREPARED",
+        "runtime": {
+          "version": "v24.19.0",
+          "platform": "linux",
+          "arch": "x64"
+        },
+        "python": "3.14.4",
+        "upstream": {
+          "url": "https://github.com/deepseek-ai/deepseek-harness.git",
+          "sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+          "tree": "e3e63253d1d35ad07f785273235c40813cb6c8bd",
+          "lock_sha256": "5d3980bcd2a0113101815aabfeb4f8a875d556a333521539b7f11d790f4a50aa",
+          "package_manager": "pnpm@11.7.0"
+        },
+        "tracked_upstream_unchanged": true,
+        "source_local": null,
+        "preparation_network": "registry metadata and locked package downloads allowed",
+        "sdk_distribution": "BLOCKED",
+        "consumer_build": "NOT_RUN_BY_PREPARATION",
+        "release_ready": false
+      },
+      "artifact_verification": [
+        {
+          "id": 11591674731,
+          "digest": "sha256:fd2534daeb97025c69f55cc727b961d451477898392b4d4bc4a27f9cd3742c31",
+          "matching_downloads": [
+            "ci-evidence/shine-funnel/run-37875393112-attempt-1/artifact-11591674731-retry-024305-2.zip"
+          ]
+        }
+      ],
+      "tarball": "ci-evidence/shine-funnel/run-37875393112-attempt-1/artifact-11591674731/shine-funnel-content-pack/shine-mage-dsh-shine-funnel-0.0.0-b0.tgz",
+      "tarball_sha256": "c27fda09ad760e465a75051c443685bce214f48a8cf8239623257126c3f8ac15",
+      "bytes": 2429,
+      "members": {
+        "package/lib/client.js": {
+          "bytes": 721,
+          "sha256": "a7b105fcd1703c6bf93f5a3bde531fd3f3d3522ba650e7bc709da34b3d8532cf"
+        },
+        "package/lib/index.js": {
+          "bytes": 120,
+          "sha256": "6d7c1a184cb2a60eb0d25eb4136638fb5777e3afe98bac13da87b3586fb84b79"
+        },
+        "package/bundled-dependencies.json": {
+          "bytes": 306,
+          "sha256": "957ba54ce606fc735cc11c051b9d60c3703ab8bf0bc94dd00aac696b28afa06b"
+        },
+        "package/package.json": {
+          "bytes": 1342,
+          "sha256": "036b8f8daa7aec3ffbf99c5c911c73923f4d218efc5bebdbd701871f02506a92"
+        },
+        "package/README.md": {
+          "bytes": 388,
+          "sha256": "b2fad4380667f1e897483bdbf6699140f9fd7ee96fb6c62a17b964b2d02ad486"
+        },
+        "package/lib/funnel.mjs": {
+          "bytes": 1324,
+          "sha256": "12f56de58baa8834cfd86d3ca78ab77faf018dbfb3b6c935591aece962fce8cc"
+        },
+        "package/lib/funnel.d.mts": {
+          "bytes": 239,
+          "sha256": "30c157c4cefc1ad5f8182e65af5777f39fcfd473987e1eabc47553f2f3d3c455"
+        },
+        "package/cordis.patch.yml": {
+          "bytes": 159,
+          "sha256": "a786a225effef72c8153580989a7cfb58eee50d289204e2f95188edb83c2b1f5"
+        }
+      },
+      "matches_previous_linux_archive": true,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Initialize fixed input paths",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Prepare locked source, platform dependencies and official SDK outputs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify input integrity and evidence preservation guards",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install vendored author kit",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify fixed inputs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build with the existing pinned toolchain",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Package tests and author boundaries",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Content pack",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain preparation evidence and content pack",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "base_initial_feature_commit": "1c71c04bf2a5738ca3a00bb7e52d8b17cdd7218b",
+      "ci_recipe_commit": "e3f6a04b11a11837d9c5083cfd8997c39b83eb02",
+      "fix_commit": "ab924632563e9d5aa6fbf9d7514fbda15fecc7b2",
+      "actual_checkout": {
+        "checkout": "f19287969e279b6208a6b90a340e5b58581486c3",
+        "tree": "604c4ab51a1b0258b26f65f7c055d1bc8066f5a9",
+        "tree_matches": true
+      },
+      "private": true,
+      "default_branch": "main",
+      "pr_state": "OPEN",
+      "merged": false,
+      "local_status": "clean",
+      "test_groups": "计算 2；lifecycle 1；boundary 7",
+      "typecheck": "NOT_IN_CURRENT_BUILD"
+    },
+    {
+      "name": "shine-waterfall",
+      "head": "c4b7b1aec37953f4505905f8eb8c8fc5d6e818e6",
+      "pr_url": "https://github.com/tyuanww/dsh-shine-waterfall/pull/1",
+      "run_id": 37875394817,
+      "run_url": "https://github.com/tyuanww/dsh-shine-waterfall/actions/runs/37875394817",
+      "event": "pull_request",
+      "conclusion": "success",
+      "prepared_inputs": {
+        "status": "FIXED_INPUTS_PREPARED",
+        "runtime": {
+          "version": "v24.19.0",
+          "platform": "linux",
+          "arch": "x64"
+        },
+        "python": "3.14.4",
+        "upstream": {
+          "url": "https://github.com/deepseek-ai/deepseek-harness.git",
+          "sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+          "tree": "e3e63253d1d35ad07f785273235c40813cb6c8bd",
+          "lock_sha256": "5d3980bcd2a0113101815aabfeb4f8a875d556a333521539b7f11d790f4a50aa",
+          "package_manager": "pnpm@11.7.0"
+        },
+        "tracked_upstream_unchanged": true,
+        "source_local": null,
+        "preparation_network": "registry metadata and locked package downloads allowed",
+        "sdk_distribution": "BLOCKED",
+        "consumer_build": "NOT_RUN_BY_PREPARATION",
+        "release_ready": false
+      },
+      "artifact_verification": [
+        {
+          "id": 11592510211,
+          "digest": "sha256:313df92b71ac48c07a700ba4df2fcd52953adabb6915dbb2ec337060062688f8",
+          "matching_downloads": [
+            "ci-evidence/shine-waterfall/run-37875394817-attempt-1/artifact-11592510211-retry-024255-1.zip"
+          ]
+        }
+      ],
+      "tarball": "ci-evidence/shine-waterfall/run-37875394817-attempt-1/artifact-11592510211/shine-waterfall-content-pack/shine-mage-dsh-shine-waterfall-0.0.0-b0.tgz",
+      "tarball_sha256": "ab7b8be91dec9c04bfe0f964237176a802efaf482f5c9a5ebf365b25582ef11e",
+      "bytes": 2924,
+      "members": {
+        "package/lib/client.js": {
+          "bytes": 727,
+          "sha256": "fa56fa6ac360a03d09d8eee8e7800fcf8d6bf28e5a4ff3d129735743ea0c0b3f"
+        },
+        "package/lib/index.js": {
+          "bytes": 123,
+          "sha256": "8d5816bb1e16ed8b82be7e921bf9be111662b8131855859205925aed73548294"
+        },
+        "package/bundled-dependencies.json": {
+          "bytes": 306,
+          "sha256": "957ba54ce606fc735cc11c051b9d60c3703ab8bf0bc94dd00aac696b28afa06b"
+        },
+        "package/package.json": {
+          "bytes": 1384,
+          "sha256": "e712d3c58ebc72b83d059e803b8945f981e4df035ca0a788ea8e317d5716c764"
+        },
+        "package/README.md": {
+          "bytes": 759,
+          "sha256": "59c76be4bc7a2d07b367722c0b4baf2e3ab87d9d8a7ece1a69fbe991002d6f1d"
+        },
+        "package/lib/waterfall.mjs": {
+          "bytes": 1921,
+          "sha256": "1ffe8061b1ddfe28b8310fa520910f75c7e8f2fb1f53fb33ba029ac528dd2329"
+        },
+        "package/lib/waterfall.d.mts": {
+          "bytes": 341,
+          "sha256": "34b0be969c2f73b3dd1a7633b2e953c74bd5b12c80ed978ac3be0d51ee4a2210"
+        },
+        "package/cordis.patch.yml": {
+          "bytes": 168,
+          "sha256": "ce8387a2c5b07fa336c700a9f3acb6d32ce0cc81dd60e477ef6d6bce22362781"
+        }
+      },
+      "matches_previous_linux_archive": true,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Initialize fixed input paths",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Prepare locked source, platform dependencies and official SDK outputs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify input integrity and evidence preservation guards",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install vendored author kit",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify fixed inputs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build with the existing pinned toolchain",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Package tests and author boundaries",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Content pack",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain preparation evidence and content pack",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "base_initial_feature_commit": "632867cb2ca1481ceae0a5f51ed8c95659d5ac7c",
+      "ci_recipe_commit": "8110c61f568f9d9067ceea4a36fcc6b6529d93a3",
+      "fix_commit": "c4b7b1aec37953f4505905f8eb8c8fc5d6e818e6",
+      "actual_checkout": {
+        "checkout": "b3360cf8941dc18fccc822b53908b8a7bf83f565",
+        "tree": "83716f17ef4dd4e5559d07ce5eba76668575414c",
+        "tree_matches": true
+      },
+      "private": true,
+      "default_branch": "main",
+      "pr_state": "OPEN",
+      "merged": false,
+      "local_status": "clean",
+      "test_groups": "计算 1；lifecycle 1；boundary 7",
+      "typecheck": "NOT_IN_CURRENT_BUILD"
+    }
+  ],
+  "review": {
+    "core": "completed; no unresolved findings",
+    "native": "completed; no unresolved findings",
+    "fixed_findings": [
+      "job env runner context unavailable",
+      "artifact empty path after failed initialization"
+    ],
+    "external_ocr_claude": "NOT_RUN"
+  },
+  "scope": "independent plugin author PR build CI; not formal packPlugin/candidate/host/real business acceptance",
+  "sdk_distribution": "BLOCKED",
+  "product": "PARTIAL",
+  "release_ready": false,
+  "merge_release_deploy": "NOT_RUN",
+  "archive": {
+    "manifest": ".context/checks/eight-remote-delivery-20261009/archive-manifest.json",
+    "sha256": "e7e29e839fe687bef1bf23efe303e68119953c11d698da62c24640ac89d2cc1c",
+    "files": 1099,
+    "bytes": 9350161,
+    "signed_url_query_redacted_copies": 2,
+    "originals_retained": true
+  }
+}

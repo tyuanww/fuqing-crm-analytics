@@ -1,0 +1,396 @@
+{
+  "schema": "shinemage-independent-ci-closeout/v1",
+  "main_head": "f8db3949a7323c1e058c4d57f6287d4dbf54451d",
+  "main_initial_dirty_count": 108,
+  "main_commit": "NOT_RUN",
+  "local_author_commits": [
+    {
+      "name": "analytics-workbench",
+      "repo": "/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/dsh-analytics-workbench",
+      "sha": "aa56dbeb56b4ffc8216c9b01d394981226c28960",
+      "parent": "cc1dd6a972c85bb0ef0d7f7131edd72e62335dc1",
+      "tree": "32b40d33b6bb5a71ac7368234f4b8a545cfbc241",
+      "subject": "chore(ci): prepare fixed Linux inputs for workbench",
+      "clone": "/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/clones/ci-aa56dbe",
+      "status": "",
+      "remote": "",
+      "product_unchanged": true,
+      "review": "core + native adversarial; no unresolved findings",
+      "external_review": "NOT_RUN",
+      "remote_ci": "NOT_RUN"
+    },
+    {
+      "name": "crm-knowledge",
+      "repo": "/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/dsh-crm-knowledge",
+      "sha": "73efd8bc229ea6c9e4f5715fda347fdf9e065869",
+      "parent": "12b8259351d7e64429336faca96a175aad77d517",
+      "tree": "c1330a9fb577447af356602aedc547e0a4144649",
+      "subject": "chore(ci): prepare fixed inputs for crm knowledge",
+      "status": "",
+      "remote": "",
+      "clone": "/Users/hutou/.codex/tasks/shinemage-independent-ci-integration-20261009/clones/crm",
+      "clone_matches_reviewed_files": true,
+      "remote_mutations": false,
+      "product_unchanged": true,
+      "review": "core + native adversarial; no unresolved findings",
+      "external_review": "NOT_RUN",
+      "remote_ci": "NOT_RUN"
+    },
+    {
+      "name": "knowledge",
+      "repo": "/Users/hutou/.codex/tasks/shinemage-knowledge-independent-20261008/dsh-knowledge",
+      "sha": "5c4a775a54086370ef5b2c12a86ad5a32b4abd8f",
+      "parent": "d9e26776905cc00f57c550dd08318e37ee1d1b21",
+      "tree": "40f7dcfeeda5634e8487cea2868ae8f555371f0f",
+      "subject": "chore(ci): prepare fixed inputs for knowledge",
+      "status": "",
+      "remote": "",
+      "clone": "/Users/hutou/.codex/tasks/shinemage-independent-ci-integration-20261009/clones/knowledge",
+      "clone_matches_reviewed_files": true,
+      "remote_mutations": false,
+      "product_unchanged": true,
+      "review": "core + native adversarial; no unresolved findings",
+      "external_review": "NOT_RUN",
+      "remote_ci": "NOT_RUN"
+    },
+    {
+      "name": "shine-query",
+      "repo": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-query",
+      "sha": "7220fa65993cf579a87f5611a64fd5965ddd1a7b",
+      "parent": "258a34490ec09c47397b55cf9d4e7c2a5bd04743",
+      "tree": "817456765098333fb6071dc35c1d06a1e89a471a",
+      "subject": "chore(ci): prepare fixed inputs for shine query",
+      "status": "",
+      "remote": "",
+      "clone": "/Users/hutou/.codex/tasks/shinemage-independent-ci-integration-20261009/clones/query",
+      "clone_matches_reviewed_files": true,
+      "remote_mutations": false,
+      "product_unchanged": true,
+      "review": "core + native adversarial; no unresolved findings",
+      "external_review": "NOT_RUN",
+      "remote_ci": "NOT_RUN"
+    },
+    {
+      "name": "shine-board",
+      "repo": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-board",
+      "sha": "613ba48fb64471b4d8204b0c582e20f3fb039f0b",
+      "parent": "49b00e0871c16f489f99f0c8ed42d3378d1b2240",
+      "tree": "40a8f0e6ec0ca334aaad048bf842ae95c64b671f",
+      "subject": "chore(ci): prepare fixed inputs for shine board",
+      "status": "",
+      "remote": "",
+      "clone": "/Users/hutou/.codex/tasks/shinemage-independent-ci-integration-20261009/clones/board",
+      "clone_matches_reviewed_files": true,
+      "remote_mutations": false,
+      "product_unchanged": true,
+      "review": "core + native adversarial; no unresolved findings",
+      "external_review": "NOT_RUN",
+      "remote_ci": "NOT_RUN"
+    },
+    {
+      "name": "shine-crowd-action",
+      "repo": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-crowd-action",
+      "sha": "680f01c2f4befc989de050e3c7ed0bf3b94bd96c",
+      "parent": "51f8088d798a0ce0f146e270fbc4dba4c3aec6ef",
+      "tree": "bd34411a8850ed29a9748337e5f55c593ea75966",
+      "subject": "chore(ci): prepare fixed inputs for shine crowd-action",
+      "status": "",
+      "remote": "",
+      "clone": "/Users/hutou/.codex/tasks/shinemage-independent-ci-integration-20261009/clones/crowd-action",
+      "clone_matches_reviewed_files": true,
+      "remote_mutations": false,
+      "product_unchanged": true,
+      "review": "core + native adversarial; no unresolved findings",
+      "external_review": "NOT_RUN",
+      "remote_ci": "NOT_RUN"
+    },
+    {
+      "name": "shine-funnel",
+      "repo": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/dsh-shine-funnel",
+      "sha": "e3f6a04b11a11837d9c5083cfd8997c39b83eb02",
+      "parent": "1c71c04bf2a5738ca3a00bb7e52d8b17cdd7218b",
+      "tree": "283642ae3b238fa902f090da0d6049dffdefc29c",
+      "subject": "chore(ci): prepare fixed inputs for shine funnel",
+      "status": "",
+      "remote": "",
+      "clone": "/Users/hutou/.codex/tasks/shinemage-independent-ci-integration-20261009/clones/funnel",
+      "clone_matches_reviewed_files": true,
+      "remote_mutations": false,
+      "product_unchanged": true,
+      "review": "core + native adversarial; no unresolved findings",
+      "external_review": "NOT_RUN",
+      "remote_ci": "NOT_RUN"
+    },
+    {
+      "name": "shine-waterfall",
+      "repo": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/dsh-shine-waterfall",
+      "sha": "8110c61f568f9d9067ceea4a36fcc6b6529d93a3",
+      "parent": "632867cb2ca1481ceae0a5f51ed8c95659d5ac7c",
+      "tree": "fb2e6964674bfe1dfa0b3397381e7f1db31b19fd",
+      "subject": "chore(ci): prepare fixed inputs for shine waterfall",
+      "status": "",
+      "remote": "",
+      "clone": "/Users/hutou/.codex/tasks/shinemage-independent-ci-integration-20261009/clones/waterfall",
+      "clone_matches_reviewed_files": true,
+      "remote_mutations": false,
+      "product_unchanged": true,
+      "review": "core + native adversarial; no unresolved findings",
+      "external_review": "NOT_RUN",
+      "remote_ci": "NOT_RUN"
+    }
+  ],
+  "workbench_tests": {
+    "existing_full_chain": "same product and locked inputs; 193 PASS evidence reused, not rerun",
+    "new_process_group": 3,
+    "preparation_guards": 6
+  },
+  "crm_knowledge": {
+    "repos": [
+      {
+        "name": "crm",
+        "repo": "/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/dsh-crm-knowledge",
+        "evidence": "/Users/hutou/.codex/tasks/shinemage-crm-ci-20261009/evidence/validation.json",
+        "evidence_sha256": "cb44ef091183176748d40ee161990d15010ad633ac623b0b18aaada4b3ff7fef",
+        "files_verified": 11,
+        "product_unchanged": true,
+        "artifact_sha256": "53c6ecd71ae2aafc7f56565b0a399126e98dd7bac0e8feee6acd979cb76362ec",
+        "members_verified": 6,
+        "test_results": {
+          "package": {
+            "pass": 103,
+            "fail": 0,
+            "skip": 0
+          },
+          "author_boundary": {
+            "pass": 11,
+            "fail": 0,
+            "skip": 0
+          },
+          "preparation_guards": {
+            "pass": 6,
+            "fail": 0,
+            "skip": 0
+          },
+          "process_group": {
+            "pass": 3,
+            "fail": 0,
+            "skip": 0
+          }
+        },
+        "full_cold_prepare": "NOT_RUN_FOR_THIS_REPO",
+        "remote_ci": "NOT_RUN"
+      },
+      {
+        "name": "knowledge",
+        "repo": "/Users/hutou/.codex/tasks/shinemage-knowledge-independent-20261008/dsh-knowledge",
+        "evidence": "/Users/hutou/.codex/tasks/shinemage-knowledge-ci-closeout-20261009/evidence/validation-r2.json",
+        "evidence_sha256": "1e586cfbaa44d936dea0a52518691f43e94bda532b6f4c331a37420455b8c320",
+        "files_verified": 12,
+        "product_unchanged": true,
+        "artifact_sha256": "5bb2e8f4e0996f0b57c903e50f08f2573c57b9b9229c41bf9f20ad4cf88fa7be",
+        "members_verified": 5,
+        "test_results": {
+          "graph-r3": {
+            "tests": 22,
+            "pass": 22,
+            "fail": 0,
+            "skipped": 0
+          },
+          "service-client-r3": {
+            "tests": 5,
+            "pass": 5,
+            "fail": 0,
+            "skipped": 0
+          },
+          "fresh-package-r3": {
+            "tests": 5,
+            "pass": 5,
+            "fail": 0,
+            "skipped": 0
+          },
+          "identity-r3": {
+            "tests": 12,
+            "pass": 12,
+            "fail": 0,
+            "skipped": 0
+          },
+          "author-boundary-r3": {
+            "tests": 5,
+            "pass": 5,
+            "fail": 0,
+            "skipped": 0
+          }
+        },
+        "full_cold_prepare": "NOT_RUN_FOR_THIS_REPO",
+        "remote_ci": "NOT_RUN"
+      }
+    ],
+    "extra_official_packages": [
+      {
+        "name": "@deepseek-ai/dsh-agent-loop",
+        "sha256": "1f5ee5e938655ca0f501daa491c5c09f810ae1c0b71a86fcdd32b5462a8563c8",
+        "members": 10
+      },
+      {
+        "name": "@deepseek-ai/dsh-agent-loop-testkit",
+        "sha256": "e0c477a4031d91ec65598cd68de9e367af206a47474e42157219ec2e9cb40df7",
+        "members": 3
+      }
+    ]
+  },
+  "de": [
+    {
+      "kind": "query",
+      "files": 12,
+      "common_files_match": true,
+      "product_unchanged": true,
+      "artifact_matches_built_members": true,
+      "tests": {
+        "lifecycle": {
+          "tests": 2,
+          "pass": 2,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "author-boundary": {
+          "tests": 5,
+          "pass": 5,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        }
+      }
+    },
+    {
+      "kind": "board",
+      "files": 12,
+      "common_files_match": true,
+      "product_unchanged": true,
+      "artifact_matches_built_members": true,
+      "tests": {
+        "lifecycle": {
+          "tests": 2,
+          "pass": 2,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "author-boundary": {
+          "tests": 5,
+          "pass": 5,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        }
+      }
+    },
+    {
+      "kind": "crowd-action",
+      "files": 12,
+      "common_files_match": true,
+      "product_unchanged": true,
+      "artifact_matches_built_members": true,
+      "tests": {
+        "lifecycle": {
+          "tests": 2,
+          "pass": 2,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "author-boundary": {
+          "tests": 5,
+          "pass": 5,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        }
+      }
+    },
+    {
+      "kind": "funnel",
+      "files": 12,
+      "common_files_match": true,
+      "product_unchanged": true,
+      "artifact_matches_built_members": true,
+      "tests": {
+        "lifecycle": {
+          "tests": 1,
+          "pass": 1,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "author-boundary": {
+          "tests": 7,
+          "pass": 7,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "calculation": {
+          "tests": 2,
+          "pass": 2,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        }
+      }
+    },
+    {
+      "kind": "waterfall",
+      "files": 12,
+      "common_files_match": true,
+      "product_unchanged": true,
+      "artifact_matches_built_members": true,
+      "tests": {
+        "lifecycle": {
+          "tests": 1,
+          "pass": 1,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "author-boundary": {
+          "tests": 7,
+          "pass": 7,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "calculation": {
+          "tests": 1,
+          "pass": 1,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        }
+      }
+    }
+  ],
+  "full_cold_preparation": "Workbench prior recipe-r3 verified with fixed archives/stores; other 7 reuse shared recipe and verify own consumers. Per-repo empty-cache preparation NOT_RUN.",
+  "platform": "local Docker Debian bookworm Linux x64 emulation; Node24.19.0 Python3.14.4",
+  "ubuntu_github_actions": "NOT_RUN",
+  "remote_creation_push_pr_merge_release_deploy": "NOT_RUN",
+  "sdk_distribution": "BLOCKED",
+  "product": "PARTIAL",
+  "release_ready": false,
+  "archive": {
+    "files": 431,
+    "bytes": 3744674,
+    "manifest_sha256": "c8fd0fd060a1a6bbdcd0edd242e0e13cbe848b58e180ba8942db020658e2e692"
+  }
+}

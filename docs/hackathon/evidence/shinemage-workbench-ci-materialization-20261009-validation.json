@@ -1,0 +1,353 @@
+{
+  "schema": "shinemage-workbench-ci-materialization/v1",
+  "date": "2026-10-09",
+  "main_head": "f8db3949a7323c1e058c4d57f6287d4dbf54451d",
+  "main_baseline_status_items": 106,
+  "consumer_commit": "cc1dd6a972c85bb0ef0d7f7131edd72e62335dc1",
+  "scope": "Workbench compilation inputs; no business implementation change",
+  "task_root": "/Users/hutou/.codex/tasks/shinemage-ci-materialization-20261009",
+  "platform": {
+    "execution": "local Docker linux/x64 emulation on macOS",
+    "distribution": "Debian bookworm",
+    "node": "24.19.0",
+    "python": "3.14.4",
+    "node_image": "sha256:4196d66a565c6f195728d9952f161f4adfe2ad753052a08b7ec7f1c5a6bda42b",
+    "python_image": "sha256:786d12398a4b61918e68bc30d93d0bd679a95136bbbd1dbe4d96f116636516bc",
+    "recipe_image": "sha256:29ab51a7570bea532a3ddb18839dae2522ca0aa99fc36ad9201bedef705204c2"
+  },
+  "inputs": {
+    "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+    "upstream_pnpm": "11.7.0",
+    "plugin_pnpm": "11.28.2",
+    "official_public_sdk_packages": 106,
+    "official_lib_files": 1482,
+    "source_tracked_unchanged": true,
+    "dependency_lifecycle_scripts": "NOT_RUN",
+    "dsh_build": "NOT_RUN",
+    "copied_installed_legacy_sdk": false,
+    "kit_changed": false,
+    "upstream_checkout_still_required": true,
+    "build_tools_still_required": true,
+    "preparation_network": "allowed with frozen locks and default policy/TLS checks",
+    "consumer_build_network": "none"
+  },
+  "manual_steps": [
+    {
+      "name": "boundary",
+      "exit_code": 0,
+      "seconds": 2.094982862472534,
+      "platform": "linux/x64 under local Docker emulation",
+      "github_actions": "NOT_RUN",
+      "sdk_distribution": "BLOCKED"
+    },
+    {
+      "name": "build",
+      "exit_code": 1,
+      "seconds": 15.836795806884766,
+      "platform": "linux/x64 under local Docker emulation",
+      "github_actions": "NOT_RUN",
+      "sdk_distribution": "BLOCKED"
+    },
+    {
+      "name": "build-r2",
+      "exit_code": 1,
+      "seconds": 18.803956985473633,
+      "platform": "linux/x64 under local Docker emulation",
+      "github_actions": "NOT_RUN",
+      "sdk_distribution": "BLOCKED"
+    },
+    {
+      "name": "build-r3",
+      "exit_code": 0,
+      "seconds": 18.787904977798462,
+      "platform": "linux/x64 under local Docker emulation",
+      "github_actions": "NOT_RUN",
+      "sdk_distribution": "BLOCKED"
+    },
+    {
+      "name": "check-inputs",
+      "exit_code": 0,
+      "seconds": 4.68637490272522,
+      "platform": "linux/x64 under local Docker emulation",
+      "github_actions": "NOT_RUN",
+      "sdk_distribution": "BLOCKED"
+    },
+    {
+      "name": "check-links",
+      "exit_code": 0,
+      "seconds": 1.2479662895202637,
+      "platform": "linux/x64 under local Docker emulation",
+      "github_actions": "NOT_RUN",
+      "sdk_distribution": "BLOCKED"
+    },
+    {
+      "name": "content-pack",
+      "exit_code": 0,
+      "seconds": 2.6821742057800293,
+      "platform": "linux/x64 under local Docker emulation",
+      "github_actions": "NOT_RUN",
+      "sdk_distribution": "BLOCKED"
+    },
+    {
+      "name": "install-build-tools",
+      "exit_code": 0,
+      "seconds": 91.48379874229431,
+      "platform": "linux/x64 under local Docker emulation",
+      "github_actions": "NOT_RUN",
+      "sdk_distribution": "BLOCKED"
+    },
+    {
+      "name": "install-consumer",
+      "exit_code": 0,
+      "seconds": 3.329310894012451,
+      "platform": "linux/x64 under local Docker emulation",
+      "github_actions": "NOT_RUN",
+      "sdk_distribution": "BLOCKED"
+    },
+    {
+      "name": "install-upstream",
+      "exit_code": 0,
+      "seconds": 94.1616723537445,
+      "platform": "linux/x64 under local Docker emulation",
+      "github_actions": "NOT_RUN",
+      "sdk_distribution": "BLOCKED"
+    },
+    {
+      "name": "package-tests",
+      "exit_code": 0,
+      "seconds": 20.721071243286133,
+      "platform": "linux/x64 under local Docker emulation",
+      "github_actions": "NOT_RUN",
+      "sdk_distribution": "BLOCKED"
+    },
+    {
+      "name": "runtime",
+      "exit_code": 0,
+      "seconds": 0.6281371116638184,
+      "platform": "linux/x64 under local Docker emulation",
+      "github_actions": "NOT_RUN",
+      "sdk_distribution": "BLOCKED"
+    }
+  ],
+  "recipe_steps": [
+    {
+      "name": "recipe-boundary",
+      "exit_code": 0,
+      "seconds": 3.1792032718658447,
+      "platform": "linux/x64 under local Docker emulation",
+      "github_actions": "NOT_RUN",
+      "sdk_distribution": "BLOCKED"
+    },
+    {
+      "name": "recipe-build",
+      "exit_code": 0,
+      "seconds": 20.717958211898804,
+      "platform": "linux/x64 under local Docker emulation",
+      "github_actions": "NOT_RUN",
+      "sdk_distribution": "BLOCKED"
+    },
+    {
+      "name": "recipe-check-inputs",
+      "exit_code": 0,
+      "seconds": 2.042656660079956,
+      "platform": "linux/x64 under local Docker emulation",
+      "github_actions": "NOT_RUN",
+      "sdk_distribution": "BLOCKED"
+    },
+    {
+      "name": "recipe-check-links",
+      "exit_code": 0,
+      "seconds": 0.44106602668762207,
+      "platform": "linux/x64 under local Docker emulation",
+      "github_actions": "NOT_RUN",
+      "sdk_distribution": "BLOCKED"
+    },
+    {
+      "name": "recipe-content-pack",
+      "exit_code": 0,
+      "seconds": 2.451231002807617,
+      "platform": "linux/x64 under local Docker emulation",
+      "github_actions": "NOT_RUN",
+      "sdk_distribution": "BLOCKED"
+    },
+    {
+      "name": "recipe-guards",
+      "exit_code": 0,
+      "seconds": 7.767300128936768,
+      "platform": "linux/x64 under local Docker emulation",
+      "github_actions": "NOT_RUN",
+      "sdk_distribution": "BLOCKED"
+    },
+    {
+      "name": "recipe-install",
+      "exit_code": 0,
+      "seconds": 3.719604969024658,
+      "platform": "linux/x64 under local Docker emulation",
+      "github_actions": "NOT_RUN",
+      "sdk_distribution": "BLOCKED"
+    },
+    {
+      "name": "recipe-package-tests",
+      "exit_code": 0,
+      "seconds": 13.141562223434448,
+      "platform": "linux/x64 under local Docker emulation",
+      "github_actions": "NOT_RUN",
+      "sdk_distribution": "BLOCKED"
+    },
+    {
+      "name": "recipe-prepare",
+      "exit_code": 137,
+      "seconds": 202.90932202339172,
+      "platform": "linux/x64 under local Docker emulation",
+      "github_actions": "NOT_RUN",
+      "sdk_distribution": "BLOCKED"
+    },
+    {
+      "name": "recipe-prepare-r2",
+      "exit_code": 1,
+      "seconds": 96.8124589920044,
+      "platform": "linux/x64 under local Docker emulation",
+      "github_actions": "NOT_RUN",
+      "sdk_distribution": "BLOCKED"
+    },
+    {
+      "name": "recipe-prepare-r3",
+      "exit_code": 0,
+      "seconds": 71.31239891052246,
+      "platform": "linux/x64 under local Docker emulation",
+      "github_actions": "NOT_RUN",
+      "sdk_distribution": "BLOCKED"
+    }
+  ],
+  "final_results": {
+    "preparation_r3": "PASS",
+    "host_typecheck": "PASS",
+    "client_typecheck": "PASS",
+    "skipLibCheck": false,
+    "package_tests": {
+      "files": 23,
+      "pass": 193,
+      "fail": 0,
+      "skip": 0
+    },
+    "author_boundary": {
+      "pass": 5,
+      "fail": 0,
+      "skip": 0
+    },
+    "preparation_guards": {
+      "pass": 6,
+      "fail": 0
+    },
+    "counts_not_added_across_runs": true,
+    "link_escapes": 0,
+    "content_pack": "PASS"
+  },
+  "artifact": {
+    "sha256": "920183d4172d33915a00fab01af710296e8f6d0716971007fb4c1044f0e95c37",
+    "bytes": 441102,
+    "members": 8,
+    "equals_first_linux_pack": true,
+    "members_equal_prior_macos_pack": true,
+    "prior_macos_pack_sha256": "74321fa09edb178e6cb7c781811cf3923643cfbda944211c36d2642974b9423e",
+    "formal_pack_plugin": "NOT_RUN"
+  },
+  "patch": {
+    "patch_sha256": "29b2ac4aff3eeb8ea6f85dadec94049ab9b24e99a07fb51a2c74533b4c92ac5c",
+    "files": [
+      {
+        "path": ".github/workflows/ci-full.yml",
+        "sha256": "a78d044c2a08f3cf3e40badd2e594376e6c28a6f89e13baa450ae6ae52d36d6a",
+        "bytes": 2402
+      },
+      {
+        "path": "inputs/ci/README.md",
+        "sha256": "26239377cc587d8fdc8a012285787f0a31f4de75f3ab8f66e46f2665b703d9fa",
+        "bytes": 2246
+      },
+      {
+        "path": "inputs/ci/identity.json",
+        "sha256": "8e68a2f22baa80e850937f0700a72c0fa26e61e464d03fbd33efc171104a2472",
+        "bytes": 5142
+      },
+      {
+        "path": "inputs/ci/pnpm-inputs.lock.json",
+        "sha256": "816e792861c2f697ced572f33b865b660bb4474c6308aeb3c6c09637c2f0b5c8",
+        "bytes": 771
+      },
+      {
+        "path": "inputs/ci/public-sdk-libs.lock.json",
+        "sha256": "05644a06e4eacd0aa83515b8d573fe879a078073f570362a58542f008a4d5d50",
+        "bytes": 296168
+      },
+      {
+        "path": "scripts/ci/materialize-public-libs.py",
+        "sha256": "71af3727c0ac68b52a7d6d6a40eec03694fb4d3b8027a73374a5bca6ae9f3e4b",
+        "bytes": 8091
+      },
+      {
+        "path": "scripts/ci/preparation-guards.test.py",
+        "sha256": "1efc19f5e4eebfb42831b4dd40e0c38edc8c6101140930c0f66aed1bb7a92339",
+        "bytes": 4262
+      },
+      {
+        "path": "scripts/ci/prepare-fixed-inputs.py",
+        "sha256": "dd784ccc4d71e3fe3e17a3c949a93a557226d03d41d366e783c35f9021b00e07",
+        "bytes": 7760
+      }
+    ]
+  },
+  "apply_check": {
+    "cwd": "/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/dsh-analytics-workbench",
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "head": "cc1dd6a972c85bb0ef0d7f7131edd72e62335dc1",
+    "status": ""
+  },
+  "ci_prepared_hosted_mismatch": "replacement recipe implemented, locally validated and applied to Workbench author; commit and remote execution pending",
+  "ubuntu_github_actions": "NOT_RUN",
+  "remote_repository_push_pr": "NOT_RUN_THIS_TURN",
+  "business_host_candidate_checks": "NOT_RUN_THIS_TURN",
+  "sdk_distribution": "BLOCKED",
+  "product": "PARTIAL",
+  "release_ready": false,
+  "archive": {
+    "directory": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/ci-materialization-20261009",
+    "files": 181,
+    "bytes": 2759537
+  },
+  "author_integration": {
+    "head": "cc1dd6a972c85bb0ef0d7f7131edd72e62335dc1",
+    "branch": "codex/analytics-workbench-independent",
+    "new_files": [
+      ".github/workflows/ci-full.yml",
+      "inputs/ci/README.md",
+      "inputs/ci/identity.json",
+      "inputs/ci/pnpm-inputs.lock.json",
+      "inputs/ci/public-sdk-libs.lock.json",
+      "scripts/ci/materialize-public-libs.py",
+      "scripts/ci/preparation-guards.test.py",
+      "scripts/ci/prepare-fixed-inputs.py"
+    ],
+    "applied_files_match_tested_patch": true,
+    "original_tracked_files_unchanged": true,
+    "index_empty": true,
+    "remote": "",
+    "commit": "NOT_RUN",
+    "status": "?? .github/workflows/ci-full.yml\n?? inputs/ci/README.md\n?? inputs/ci/identity.json\n?? inputs/ci/pnpm-inputs.lock.json\n?? inputs/ci/public-sdk-libs.lock.json\n?? scripts/ci/materialize-public-libs.py\n?? scripts/ci/preparation-guards.test.py\n?? scripts/ci/prepare-fixed-inputs.py\n"
+  },
+  "main_protection": {
+    "other_inherited_bytes_unchanged": true,
+    "changed_existing_files": [
+      "STATUS.md",
+      "docs/architecture/shinemage-plugin-platform.md",
+      "docs/hackathon/TODOS.md",
+      "docs/operating/dsh-plugin-author-quickstart.md",
+      "docs/operating/verification.md"
+    ],
+    "head": "f8db3949a7323c1e058c4d57f6287d4dbf54451d",
+    "index_empty": true,
+    "journal_sha256": "f6d9848baf1da0a857819bbcf3367f18a9db67db9e0337e1198b8fce4b98e348"
+  }
+}
