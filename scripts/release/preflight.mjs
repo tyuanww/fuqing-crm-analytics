@@ -152,10 +152,12 @@ try {
   assert.equal(execFileSync('git', ['-C', upstream, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), pin, 'PREFLIGHT_UPSTREAM_SHA_MISMATCH');
   await stage('build', async () => {
     await linkWorkspaceKit(join(root, 'dsh-plugins/board-components'), join(root, 'dsh-plugins/plugin-kit'));
-    run(process.execPath, ['dsh-plugins/board-components/build.mjs', packageInputs], root, { DSH_PACKAGE_INPUTS: packageInputs });
+    const rebuiltInputs = join(runDir, 'board-package-input-build');
+    run(process.execPath, ['dsh-plugins/board-components/build.mjs', rebuiltInputs], { DSH_PACKAGE_INPUTS: packageInputs });
+    run(process.execPath, ['scripts/dsh-b0/package-inputs.mjs', packageInputs], { DSH_PACKAGE_INPUTS: packageInputs });
     for (const plugin of plugins) {
       await linkWorkspaceKit(join(root, plugin), join(root, 'dsh-plugins/plugin-kit'));
-      run(process.execPath, [`${plugin}/build.mjs`, upstream], root, { DSH_PACKAGE_INPUTS: packageInputs });
+      run(process.execPath, [`${plugin}/build.mjs`, upstream], { DSH_PACKAGE_INPUTS: packageInputs });
     }
   });
   // Prepare is the only stage that may hydrate the pinned checkout. Once it

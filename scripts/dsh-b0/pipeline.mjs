@@ -4,7 +4,7 @@
  */
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { readFile, writeFile, mkdir, lstat, readdir } from 'node:fs/promises';
+import { copyFile, readFile, writeFile, mkdir, lstat, readdir, rm, mkdtemp } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -24,6 +24,9 @@ const shineQuery = join(root, 'dsh-plugins/shine-query');
 const shineBoard = join(root, 'dsh-plugins/shine-board');
 const shineFunnel = join(root, 'dsh-plugins/shine-funnel');
 const b0 = join(root, '.context/dsh-b0');
+const packageInputs = join(b0, 'package-inputs');
+const fixedBoardInput = join(root, 'vendor/dsh-package-inputs/shine-mage-board-components-0.1.0.tgz');
+const fixedBoardInputSha256 = '22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182';
 const kit = join(root, 'dsh-plugins/plugin-kit');
 const buildTools = join(kit, 'build-tools');
 const USAGE = 'Usage: node scripts/dsh-b0/pipeline.mjs --prepare|--audit|--check --python /absolute/python3.14';
@@ -50,7 +53,7 @@ let env = {
   PYTHONPATH: root, PYTHONNOUSERSITE: '1', PYTHON_DOTENV_DISABLED: '1',
   PYTHONDONTWRITEBYTECODE: '1', PYTHONUNBUFFERED: '1',
   B0_BUILD_UPSTREAM: upstream,
-  DSH_PACKAGE_INPUTS: join(b0, 'package-inputs'),
+  DSH_PACKAGE_INPUTS: packageInputs,
   COREPACK_ENABLE_DOWNLOAD_PROMPT: '0', LEFTHOOK: '0', CI: '1',
   // Every nested build/version probe must remain offline in check mode,
   // including the board-components build before preparePackageManager runs.
@@ -90,6 +93,18 @@ async function preparePackageManager() {
 if (mode === '--check') env = await archiveToolEnv(env);
 await mkdir(b0, { recursive: true, mode: 0o700 });
 if (mode === '--prepare') {
+  const fixedInput = await readFile(fixedBoardInput);
+  assert.equal(createHash('sha256').update(fixedInput).digest('hex'), fixedBoardInputSha256, 'B0_FIXED_PACKAGE_INPUT_DRIFT');
+  await mkdir(packageInputs, { recursive: true, mode: 0o700 });
+  const targetInput = join(packageInputs, 'shine-mage-board-components-0.1.0.tgz');
+  try {
+    const targetInfo = await lstat(targetInput);
+    assert.ok(targetInfo.isFile() && !targetInfo.isSymbolicLink(), 'B0_PACKAGE_INPUT_FILE_INVALID');
+    assert.deepEqual(await readFile(targetInput), fixedInput, 'B0_PACKAGE_INPUT_DRIFT');
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+    await copyFile(fixedBoardInput, targetInput);
+  }
   let exists = true;
   try { await lstat(upstream); } catch (error) { if (error.code !== 'ENOENT') throw error; exists = false; }
   if (!exists) {
@@ -130,7 +145,12 @@ if (mode === '--prepare') {
   for (const name of ['board-components', 'analytics-workbench', 'crm-knowledge', 'knowledge', 'shine-brand', 'shine-waterfall', 'shine-crowd-action', 'shine-query', 'shine-board', 'shine-funnel']) {
     await linkWorkspaceKit(join(root, 'dsh-plugins', name), kit);
   }
-  run(process.execPath, ['dsh-plugins/board-components/build.mjs', env.DSH_PACKAGE_INPUTS]);
+  const rebuiltInputs = await mkdtemp(join(b0, 'package-inputs-rebuild-'));
+  try {
+    run(process.execPath, ['dsh-plugins/board-components/build.mjs', rebuiltInputs]);
+  } finally {
+    await rm(rebuiltInputs, { recursive: true, force: true });
+  }
   // Bind packed libraries before source-level consumer tests.
   run(process.execPath, ['scripts/dsh-b0/package-inputs.mjs', env.DSH_PACKAGE_INPUTS]);
   run(process.execPath, ['scripts/dsh-b0/content-theme-contract.mjs', '--check']);
