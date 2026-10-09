@@ -10,8 +10,8 @@ import { startB0MockProvider } from './mock-provider.mjs';
 import { startRecoveryModelGate } from './recovery-model-gate.mjs';
 import { firstPurchaseMockScript } from './first-purchase-scenario.mjs';
 import { DSH_UPSTREAM_SHA } from '../release/toolchain.mjs';
-import { createSaveController } from '../../dsh-plugins/analytics-workbench/src/first-purchase-save-client.mjs';
-import { firstPurchaseCommandEnvelope } from '../../dsh-plugins/analytics-workbench/src/first-purchase-command-client.mjs';
+import { acceptPublicSaveHttp, publicCommandExecuteEnvelope, readCommandExecuteBody, readSaveHttpBody,
+  PUBLIC_HTTP_ADMISSION, PUBLIC_SAVE_CONTROLLER, PUBLIC_SAVE_EVIDENCE, WORKSPACE_HTTP_ADMISSION } from './first-purchase-host-protocol.mjs';
 import { prepareFirstPurchaseArtifacts, verifyFirstPurchaseInstalledArtifacts } from './first-purchase-artifacts.mjs';
 
 const repository = fileURLToPath(new URL('../..', import.meta.url));
@@ -209,11 +209,10 @@ try {
     }
     if (command.operation === 'command') {
       const rpcId = `owned-${observations.length}`;
-      const response = await post('/api/commands/execute', firstPurchaseCommandEnvelope(input.session_id, command.line, rpcId));
-      assert.equal(response.status, 200); assert.equal(response.value.rpcId, rpcId);
-      assert.equal(response.value.result.ok, true);
-      const value = response.value.result.value;
-      assert.ok(['success', 'error'].includes(value.result.kind));
+      // Workspace keeps the source envelope. Packed mode must not load that module.
+      const envelope = packed ? publicCommandExecuteEnvelope(input.session_id, command.line, rpcId)
+        : (await import('./first-purchase-workspace-save.mjs')).firstPurchaseCommandEnvelope(input.session_id, command.line, rpcId);
+      const value = readCommandExecuteBody(await post('/api/commands/execute', envelope), rpcId);
       record({ stage: 'official-native-command', command: command.line.split(' ')[0], kind: value.result.kind });
       send(value); continue;
     }
@@ -235,32 +234,33 @@ try {
     if (command.operation === 'replay-save') {
       assert.equal(typeof replaySaved, 'function');
       await replaySaved();
-      record({ stage: 'same-save-intent-after-independent-service-restart', status: 'PASS' });
-      send({ ok: true, replayed: true }); continue;
+      record(packed ? { stage: 'public-save-http-same-intent-after-service-restart', status: 'PASS', controller: PUBLIC_SAVE_CONTROLLER }
+        : { stage: 'same-save-intent-after-independent-service-restart', status: 'PASS' });
+      send(packed ? { ok: true, replayed: true, controller: PUBLIC_SAVE_CONTROLLER } : { ok: true, replayed: true }); continue;
     }
     assert.equal(command.operation, 'save');
     const target = { session_id: input.session_id, run_id: command.run_id, call_id: command.call_id };
-    const values = new Map(), storage = { getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value) };
-    let writes = 0, original;
-    const transport = async (_target, operation, payload) => {
-      const response = await post('/api/analytics-first-purchase/save', { operation, target, payload }, { 'x-first-purchase-ui': '1' });
-      assert.equal(response.status, 200); return response.value;
-    };
-    const request = async (...args) => {
-      const value = await transport(...args);
-      if (args[1] === 'save') { writes++; original = args[2]; assert.equal(value.value.status, 'SAVED'); throw Error('controlled ACK loss'); }
-      return value;
-    };
-    const first = createSaveController({ target, storage, request, onChange() {} }); controllers.push(first);
-    await first.start(); assert.equal(first.getState().phase, 'ready');
-    assert.equal(first.getState().result.provenance.permission_scope.owner_id, 'crm-owner');
-    await first.save('官方宿主合成首购'); assert.equal(first.getState().phase, 'unknown'); first.dispose();
-    const reopened = createSaveController({ target, storage, request, onChange() {} }); controllers.push(reopened);
-    await reopened.start(); assert.equal(reopened.getState().phase, 'saved'); assert.equal(writes, 1);
-    assert.deepEqual((await transport(target, 'save', original)).value, reopened.getState().receipt);
-    replaySaved = async () => assert.deepEqual((await transport(target, 'save', original)).value, reopened.getState().receipt);
-    record({ stage: 'official-fetch-save-ack-loss-reconcile-replay', status: 'PASS' });
-    send({ ok: true, saved: true, writes });
+    if (packed) {
+      // Public HTTP only. createSaveController stays in its own unit and browser tests.
+      const accepted = await acceptPublicSaveHttp({
+        call: async (operation, payload) => readSaveHttpBody(await post('/api/analytics-first-purchase/save',
+          { operation, target, payload }, { 'x-first-purchase-ui': '1' })),
+        target, candidateDigest, title: '官方宿主合成首购', expectedOwner: 'crm-owner' });
+      replaySaved = accepted.replay;
+      record({ stage: 'public-save-http-ack-loss-reconcile-replay', status: 'PASS', controller: PUBLIC_SAVE_CONTROLLER });
+      send({ ok: true, saved: true, writes: accepted.writes_before_reconcile, evidence: accepted.evidence, controller: accepted.controller });
+    } else {
+      const { runWorkspaceSaveAcceptance } = await import('./first-purchase-workspace-save.mjs');
+      const values = new Map(), storage = { getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value) };
+      const request = async (_target, operation, payload) => {
+        const response = await post('/api/analytics-first-purchase/save', { operation, target, payload }, { 'x-first-purchase-ui': '1' });
+        assert.equal(response.status, 200); return response.value;
+      };
+      const accepted = await runWorkspaceSaveAcceptance({ target, storage, request, title: '官方宿主合成首购', controllers });
+      replaySaved = accepted.replay;
+      record({ stage: 'official-fetch-save-ack-loss-reconcile-replay', status: 'PASS' });
+      send({ ok: true, saved: true, writes: accepted.writes });
+    }
   }
 } finally {
   controllers.forEach(controller => controller.dispose());
@@ -275,7 +275,9 @@ try {
     cleanup_ok: cleanup.every(item => item.status === 'fulfilled'), browser: browserResult ?? 'NOT_RUN',
     candidate_digest: candidateDigest, artifacts: packed?.evidence ?? 'WORKSPACE_COMPILED_OUTPUT',
     package_integrity: packageIntegrity,
-    admission: browserResult ? 'official native composer slash command in Chrome' : 'official commands/execute HTTP; browser rendering NOT_RUN' });
+    admission: browserResult ? 'official native composer slash command in Chrome'
+      : (packed ? PUBLIC_HTTP_ADMISSION : WORKSPACE_HTTP_ADMISSION),
+    ...packed ? { save_controller: PUBLIC_SAVE_CONTROLLER, save_evidence: PUBLIC_SAVE_EVIDENCE } : {} });
   if (recoveryEnabled) await write(join(root, 'recovery-observations.json'), {
     schema_version: 'first-purchase-owned-recovery/v1', candidate_digest: candidateDigest,
     expected_business_recovery: process.env.B0_NATIVE_CRM_RECOVERY === 'terminal' ? 'FAILED_SLOT_RELEASED' : 'LEGACY_UNKNOWN',

@@ -142,6 +142,7 @@ if (mode === '--prepare') {
   run(process.execPath, ['--test', 'scripts/dsh-b0/plugin-boundaries.test.mjs']);
   // Guard tests fail before process startup. The real-host drill remains opt-in.
   run(process.execPath, ['--test', 'scripts/dsh-b0/pinned-host-acceptance.test.mjs']);
+  run(process.execPath, ['--test', 'scripts/dsh-b0/first-purchase-crm-host-protocol.test.mjs']);
   run(process.execPath, ['--test', '--test-concurrency=1',
     'scripts/dsh-b0/plugin-update-trial.test.mjs', 'scripts/dsh-b0/plugin-update-trial-cancel.test.mjs'], root, { FQ_B0_PYTHON: python });
   run(process.execPath, ['--test', 'scripts/dsh-b0/first-purchase-kernel-artifacts.test.mjs']);
