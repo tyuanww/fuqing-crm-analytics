@@ -1,6 +1,6 @@
 # 交接说明（短表）
 
-> **最后更新**: 2026-10-10。当前产品 VERSION、公开 `main`、DSH pin 和未关闭门禁只看 [STATUS.md](STATUS.md)；PR #111、#112、#113、#114、#115 已合并，本次清理文档的合并提交为 `4ac2b7ef`，post-merge CI 见[最新远端事实记录](docs/hackathon/evidence/shinemage-remote-repository-postmerge-r2-20261010.md)。本地历史候选已完成归档和清理，恢复清单见[本次清理证据](docs/hackathon/evidence/shinemage-local-cleanup-20261010.md)。下方杭州入口与运行路径保留为 2026-09-29 的历史快照，不代表当前生产切换或候选已激活。
+> **最后更新**: 2026-10-10。当前产品 VERSION、公开 `main`、DSH pin 和未关闭门禁只看 [STATUS.md](STATUS.md)；PR #111–#116 已合并，当前远端 `main` 为 `c0a417b7`，post-merge CI 见[最新远端事实记录](docs/hackathon/evidence/shinemage-remote-repository-postmerge-r2-20261010.md)。本地历史候选已完成归档和清理，恢复清单见[本次清理证据](docs/hackathon/evidence/shinemage-local-cleanup-20261010.md)。下方杭州入口与运行路径保留为 2026-09-29 的历史快照，不代表当前生产切换或候选已激活。
 > 细节以代码与下列 SSOT 为准，**不要**在本文件堆 sprint 日记。
 
 ## 历史运行入口快照（2026-09-29）
