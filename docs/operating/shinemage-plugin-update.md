@@ -84,6 +84,19 @@ gh pr checks --watch
 
 提交只包含一个完整目的。CI 通过后，在 PR 描述中写清固定输入、包摘要、测试范围和未执行项。当前独立仓的 fixed-inputs CI 只证明各自声明的构建链；它不等于主仓组合验收、正式 DSH candidate 或生产发布。合并插件 PR 需要另行授权。
 
+#### 目录发现与安装通道另行放行
+
+[DSH Plugin Hub](https://github.com/dshplugin/dsh-plugin-hub) 可作为目录字段和安装通道的参考，但不能替代本项目的来源锁定、正式 pack 或宿主验收。其当前收录流程要求公开仓库和 `dsh-plugin` topic，并要求 README 给出实际可执行的安装信息；安装器优先使用 npm 包，其次使用绑定固定 tag 的 GitHub Release `.tgz`。目录中的 `verified` 也不等于本项目的 `release_ready=true`。
+
+当前九个 ShineMage 作者仓都是私有仓，没有许可证、topic、tag 或 GitHub Release；仓库根 `package.json` 是开发 wrapper，真实插件清单位于 `plugin/`。因此：
+
+- 状态保持 `PRIVATE / NOT_PUBLISHED / NOT_LISTED`，不加目录徽章，也不宣称市场可安装。
+- 不提供 `git+https` 源码直装命令。未来优先发布经过审查的 npm 插件包；若使用 GitHub Release，则只引用固定 tag、固定资产名和已记录摘要的 `.tgz`。
+- 许可证、公开化、repository topic、包元数据和目录提交分别决策；不能为了被目录发现而放宽 peer、固定输入或来源检查。
+- 插件更新需要重启时继续记录 `HOST_RESTART_REQUIRED`；不复制第三方市场对热加载的概括来扩大本项目的已验证能力。
+
+这些约束来自 2026-10-11 对 Hub 固定源码与[收录说明](https://dsh-plugin.org/zh/submit)的只读核对。Hub 或目录规则变化时重新核验，不能把本段当作永久协议。
+
 ### 5. 只有组合确实变化时才改主仓
 
 只有插件路径、ID、顺序、DSH pin 或 service binding 等组合选择发生变化时，才在主仓 feature 分支更新对应 profile/allowlist；仅包版本或字节摘要变化时，更新正式 pack/candidate 输入和兼容记录即可。当前 profile 只选择插件路径、ID、顺序和 DSH pin，不保存 tarball SHA。只改一个插件，不重建 DSH，不迁移数据库，也不重复 SDK 全量审计。没有组合变化的插件文档或测试修复，不要为了“同步”改主仓 profile。
