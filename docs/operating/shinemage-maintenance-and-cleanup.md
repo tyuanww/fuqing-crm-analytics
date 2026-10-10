@@ -98,6 +98,6 @@ DSH 升级不能简化为“从官网 `npm install latest` 后插入”。正确
 
 ## 开发者体验检查结果
 
-2026-10-10 对公开 GitHub 首页、本地 CLI 和 branches API 做了只读复核：PR #114 已合并，当前主线和 CI 见[最新 post-merge 事实记录](../hackathon/evidence/shinemage-remote-repository-postmerge-r2-20261010.md)；三个已合并候选远程分支已删除，剩余 stale `origin/*` tracking 引用和已归档本地分支仍需单独处理。`pnpm dsh --help`、`doctor --help`、`plugin candidate --help` 能给出入口、退出码和证据边界；缺少候选输出目录时返回 `DSH_ERROR OUTPUT-DIR_REQUIRED`。当前主要摩擦是 README 顶部和 STATUS/TODOS 在合并后容易过期、插件流程仍需维护者从多份历史文档拼接、以及未使用固定 Node 入口时 pnpm 会显示 Node 25 的 engine warning。新维护者应优先读本手册、Quickstart、STATUS 和验证入口。
+2026-10-10 对公开 GitHub 首页、本地 CLI 和 branches API 做了只读复核：PR #115 已合并，合并提交为 `4ac2b7ef`，相关 CI 通过；三个已合并候选远程分支已删除，剩余 stale `origin/*` tracking 引用和已归档本地分支仍需单独处理。`pnpm dsh --help`、`doctor --help`、`plugin candidate --help` 能给出入口、退出码和证据边界；缺少候选输出目录时返回 `DSH_ERROR OUTPUT-DIR_REQUIRED`。当前主要摩擦是 README 顶部和 STATUS/TODOS 在合并后容易过期、插件流程仍需维护者从多份历史文档拼接、以及未使用固定 Node 入口时 pnpm 会显示 Node 25 的 engine warning。新维护者应优先读本手册、Quickstart、STATUS 和验证入口。
 
 这次浏览截图和 CLI 输出属于开发者体验证据，不是产品或生产验收。它们保存在本地 `.context/checks/devex-review-20261010/`，不进入运行包。
