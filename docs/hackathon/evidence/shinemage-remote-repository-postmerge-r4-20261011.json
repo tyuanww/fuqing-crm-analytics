@@ -1,0 +1,48 @@
+{
+  "schema": "shinemage-remote-repository-postmerge/v1",
+  "observed_at": "2026-10-10T16:42:50Z",
+  "repository": "https://github.com/tyuanww/fuqing-crm-analytics",
+  "default_branch": "main",
+  "main_head": "4859d13663284b7eb5ecf8614db9275d77061d27",
+  "supersedes": "shinemage-remote-repository-postmerge-r3-20261010",
+  "merged_pull_requests": [
+    {
+      "number": 118,
+      "merge_commit": "4859d13663284b7eb5ecf8614db9275d77061d27",
+      "merged_at": "2026-10-10T16:08:41Z",
+      "status": "merged",
+      "title": "docs: sync post-merge main facts after PR 117"
+    }
+  ],
+  "ci": {
+    "post_merge_main": {
+      "run_id": 38066459376,
+      "event": "push",
+      "workflow": "CI",
+      "conclusion": "success",
+      "head_sha": "4859d13663284b7eb5ecf8614db9275d77061d27",
+      "jobs": {
+        "changes": "success",
+        "test": "success",
+        "lint": "success",
+        "merge_gate": "success",
+        "path_scoped_jobs": "skipped"
+      }
+    }
+  },
+  "open_pull_requests": {
+    "range": "101-110",
+    "kind": "dependabot",
+    "shine_mage_integration": "none"
+  },
+  "independent_plugin_repositories": {
+    "count": 9,
+    "pr_1": "open",
+    "latest_fixed_input_ci": "success",
+    "github_release": "none"
+  },
+  "scope_note": "read-only post-merge fact update; no production, release, candidate, journal, or deployment mutation",
+  "release_ready": false,
+  "product_status": "PARTIAL",
+  "sdk_distribution": "BLOCKED"
+}
