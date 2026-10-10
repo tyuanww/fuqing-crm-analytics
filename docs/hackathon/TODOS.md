@@ -6,9 +6,11 @@
 
 2026-09-13 用户确认“核心版本优先交付、扩库完善后置”。目标是问数后 AI 优先使用定制组件自由组板，板内按选定范围修改；首批六类不是最终上限。M1／产品仍 PARTIAL；原全量 App Goal 保持 PAUSED。本节承接原本地施工记录，不把旧冻结实现反推成最终需求。
 
-### 2026-10-10 主仓 PR 收尾接续
+### 2026-10-10 主仓合并后接续
 
-当前集成分支 `codex/shinemage-abc-local-candidate` 的 HEAD 为 `55e268af`，远程候选分支 `codex/shinemage-final` 与其同 SHA，PR #111 保持 OPEN、未合并。PR preflight、B0、全量测试、前端、lint、依赖审计、合同检查、Docker smoke 和 merge-gate 均通过；`ground-truth-lint` 按既定条件跳过。`open-code-review-delegate` 已覆盖 403/403 个可审文件，2 个 High 与 1 个 Medium 已修复。SDK 分发仍 BLOCKED，产品仍 PARTIAL，release_ready=false；合并、发布、部署仍未执行。
+PR [#111](https://github.com/tyuanww/fuqing-crm-analytics/pull/111) 已合并到远端 `main`，merge commit 为 `1855477afa346617662ea4ff6e292e5b52f22206`；`codex/shinemage-final` 暂保留为已合并候选分支。最终 preflight、B0、全量测试、前端、lint、依赖审计、合同检查、Docker smoke 和 merge-gate 均通过，`ground-truth-lint` 按既定条件跳过。`open-code-review-delegate` 已覆盖 403/403 个可审文件，发现的 2 个 High 与 1 个 Medium 已修复并复验。SDK 分发仍 BLOCKED，产品仍 PARTIAL，release_ready=false；发布、部署和正式分发仍未执行。
+
+主仓现在作为 DSH 集成仓，九个插件已有独立远程仓（见[远程仓盘查](evidence/shinemage-remote-repository-inventory-20261010.md)）；主仓副本清理与正式物理分仓仍未收口。单插件更新、DSH 版本升级、证据留存与本机/远程清理见[维护、清理与升级手册](../operating/shinemage-maintenance-and-cleanup.md)。清理盘查已完成但证据目录和远程候选分支删除尚未执行，历史证据和未提交任务树继续按原路径保留。
 
 ### 2026-10-08 ShineMage A/B/C 集成本地接续
 

@@ -1,6 +1,6 @@
 # ShineMage 插件平台边界
 
-本设计落实[已批准的拆分计划](../plans/shinemage-plugin-platform-split.md)，不是重新选型。目标是官方 DSH 底座、独立 CRM/知识库服务、各自版本化的插件和一个组合 profile。当前先在 workspace 证明边界；物理分仓、私有 catalog 和生产切换尚未执行。
+本设计落实[已批准的拆分计划](../plans/shinemage-plugin-platform-split.md)，不是重新选型。目标是官方 DSH 底座、独立 CRM/知识库服务、各自版本化的插件和一个组合 profile。首批插件已经形成独立远程仓，当前远程清单见[远程仓盘查](../hackathon/evidence/shinemage-remote-repository-inventory-20261010.md)；主仓继续保留平台合同、组合验证、历史 `dsh-plugins/` 和候选账本，主仓副本清理与正式物理分仓尚未收口，正式 `dsh-plugin-pack/v1`/`dsh-plugin-candidate/v1` 分发与生产切换仍按门禁执行。
 
 ## 四类升级各有归属
 
@@ -19,7 +19,7 @@
 
 `toolchain.json`、build-tools manifest/lock/补丁现在位于 kit；release、B0 pipeline、开发入口和合同生成器读取同一份 pin。不能为了让一个包构建成功，静默从相邻历史仓库找依赖。已准备的第三方依赖可以复用，但须与 kit 锁定输入一致。
 
-当前事实见[机器清单与依赖说明](./shinemage-plugin-boundaries.md)。首批 leaf 已能脱离 workbench 构建；CRM 原 5 条 workbench 私有引用全部解除，合成 Python 查询/知识解释也改为显式配置的独立服务 HTTP API 1.0.0。插件不再发现主仓路径或启动 Python。两项服务已各自产出[独立应用候选包](../operating/crm-service-packages.md)，资源与依赖按领域锁定；知识服务不再加载指标引擎或 DuckDB。源码仍在 workspace，尚未物理分仓。源码/服务边界进展不等于完整宿主故障隔离。
+当前事实见[机器清单与依赖说明](./shinemage-plugin-boundaries.md)。首批 leaf 已能脱离 workbench 构建；CRM 原 5 条 workbench 私有引用全部解除，合成 Python 查询/知识解释也改为显式配置的独立服务 HTTP API 1.0.0。插件不再发现主仓路径或启动 Python。两项服务已各自产出[独立应用候选包](../operating/crm-service-packages.md)，资源与依赖按领域锁定；知识服务不再加载指标引擎或 DuckDB。九个插件已有独立远程仓和 CI，但主仓仍保留集成副本、适配和历史证据；主仓副本清理、正式分发与完整宿主故障隔离仍未关闭。
 
 CRM 与知识插件也已拆成两个独立候选包：CRM 保留旧包 ID，知识使用 `@shine-mage/dsh-knowledge`；profile v3 按包分别选择、分别记录指纹。双方只共享领域 owner 维护的公开合同生成物；私有知识通过可撤销会话 lease 获取身份，不读取 CRM 实现或凭据。公开解释可独立运行，私有教材当前仍需要 CRM Host 作为身份提供方。迁移需要新 profile 和对应新 Host，不能宣称原地热替换已验证，详见[服务与插件边界](../operating/crm-plugin-service-boundary.md)。
 
@@ -45,6 +45,6 @@ profile 回退不回滚已写入 CRM/SQLite 的记录。D15 是否启用 durable
 1. T1 固化 owner、实际依赖和边界检查；T15 先证明 dev kit 与低耦合 leaf 包。
 2. board-components 已拥有公开计算/类型，workbench 的 6 条图表源码引用已改为固定 tarball，独立 build/pack 与消费者回归已有本地证据。CRM 的 slot/主题改为领域版本化生成合同，页面工具由 profile 装配公开入口，原 5 条 workbench 内部引用全部解除；单包构建/测试/pack 通过。细目在机器清单，每解除一条就删除对应临时例外；不把源码解耦当作生命周期验收。
 3. T2/T17 固定宿主证据与 T3/T7 保存矩阵通过后，完成 D15 workbench 包的独立 candidate、canary 和回退证据。
-4. 保留批准的签名、SBOM/CVE、来源、权限、灰度和责任门禁；首期 stop/go 之后再按 DAG 物理分仓、建立多生产者 catalog。
+4. 保留批准的签名、SBOM/CVE、来源、权限、灰度和责任门禁；独立远程仓已建立，后续只在对应门禁关闭后收口正式分发、清理主仓历史副本和建立多生产者 catalog。
 
 打包成功不代表发布就绪。GitHub 发布、杭州 receive/activate、WSL/路由操作和真实数据迁移仍按各自授权及现场门禁执行。开发与 CI 可以生成验证包；生产只接收已审查 SHA 的不可变 artifact，大包由杭州直接下载，Tailscale 负责控制与探针。
