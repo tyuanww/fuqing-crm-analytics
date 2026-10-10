@@ -6,6 +6,10 @@
 
 2026-09-13 用户确认“核心版本优先交付、扩库完善后置”。目标是问数后 AI 优先使用定制组件自由组板，板内按选定范围修改；首批六类不是最终上限。M1／产品仍 PARTIAL；原全量 App Goal 保持 PAUSED。本节承接原本地施工记录，不把旧冻结实现反推成最终需求。
 
+### 2026-10-10 主仓 PR 收尾接续
+
+当前集成分支 `codex/shinemage-abc-local-candidate` 的 HEAD 为 `850976f2`，远程候选分支 `codex/shinemage-final` 与其同 SHA，PR #111 保持 OPEN、未合并。PR preflight、B0、全量测试、前端、lint、依赖审计和合同检查通过；Docker smoke 四次重试均因 Docker Hub `auth.docker.io` 返回 504 失败，merge-gate 因此失败。该失败是外部镜像授权服务阻塞，不能改写成产品测试通过。`open-code-review-delegate` 已覆盖 403/403 个可审文件，2 个 High 与 1 个 Medium 已修复。SDK 分发仍 BLOCKED，产品仍 PARTIAL，release_ready=false；合并、发布、部署继续等待单独授权与外部 Docker 检查恢复。
+
 ### 2026-10-08 ShineMage A/B/C 集成本地接续
 
 最新：集成源码已本地提交 `bd647352`，新 candidate `993daf31…` / journal seq 2 已通过身份及摘要链核对，状态 **CANDIDATE_PREPARED**。只关闭此前 NOT_LINKED 的本地准备子项；针对新候选的服务/宿主、正式 CI 与激活仍未关闭，SDK BLOCKED / release_ready=false；不勾完父任务。见[本次证据](evidence/shinemage-abc-local-candidate-20261008.md)。下文保留候选准备前的执行阶段。

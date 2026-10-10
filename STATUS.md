@@ -9,17 +9,17 @@
 
 | 项 | 状态 |
 |---|---|
-| Git | 当前集成分支 codex/shinemage-abc-local-candidate，本地 HEAD 67445f18；相对 origin/main 领先 84、落后 0。未跟踪的 security-audit-skill/ 是独立目录，不纳入提交。 |
+| Git | 当前集成分支 codex/shinemage-abc-local-candidate，本地 HEAD `850976f2`；相对 origin/main 领先 92、落后 0。候选远程分支 `codex/shinemage-final` 同一 SHA，PR #111 仍 OPEN、未合并。未跟踪的 security-audit-skill/ 是独立目录，不纳入提交。 |
 | 插件解耦 | 插件构建要求显式绝对上游、build-tools 和输入包；已移除主仓 .context 回退。CRM/看板/知识与 Workbench 的边界证据保持独立记录。 |
 | 本地验证 | 固定 Node 24、Python 3.14；定向 release/protocol/SDK/map/HTML 与边界检查已通过。完整推送前矩阵按正常 hook 执行，真实跳过原因保留。 |
 | 产品 | PARTIAL；SDK 分发 BLOCKED；release_ready=false。 |
-| 真实验收 | 真实 WSL2/terminal/browser、真实模型/业务、生产切换、standalone 页面包和正式分发仍按各自输入保持 NOT_RUN。 |
+| 真实验收 | 真实 WSL2/terminal/browser、真实模型/业务、生产切换、standalone 页面包和正式分发仍按各自输入保持 NOT_RUN。PR preflight、B0、全量测试和前端检查通过；Docker smoke 因 Docker Hub 授权接口连续 504 失败，merge-gate 随之失败。 |
 
 ## 本轮施工计划
 
-1. 从当前 HEAD 建候选远程分支并打开 PR；不直接合并本地 main，不改写历史。
-2. 在 PR 上运行远程 CI 与 delegated code review；发现问题按目的拆分提交并复验。
-3. CI、审查和本地状态均清楚后，停在合并 PR 之前；合并、发布、部署另行授权。
+1. 候选远程分支和 PR #111 已建立；不直接合并本地 main，不改写历史。
+2. PR 远程 preflight、B0、全量测试、前端、lint、依赖和合同检查已通过；Docker smoke 仍受 Docker Hub 504 外部阻塞。
+3. delegated code review 已覆盖 403/403 个可审文件，发现的 2 个 High 与 1 个 Medium 已修复并复验；当前停在合并 PR 之前。
 4. 保持 DSH 上游 477b4f420553e8a52c2fbccc464d7561b239c443、VERSION、SDK BLOCKED、产品 PARTIAL 和所有未执行门禁原样。
 
 ## 当前边界
