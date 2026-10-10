@@ -85,7 +85,7 @@ DSH 升级不能简化为“从官网 `npm install latest` 后插入”。正确
 ### 远程仓整理
 
 - 保留受保护的 `main`、仍在使用的 Dependabot 分支和未完成的候选/修复分支。
-- PR #111–#116 已合并到 `main`；当前完整 SHA 和合并时间见[最新 post-merge 远端事实](../hackathon/evidence/shinemage-remote-repository-postmerge-r2-20261010.md)。`codex/shinemage-final`、`codex/docs-maintenance-closeout` 和 `codex/docs-postmerge-20261010` 已完成各自使命，归档和恢复路径核对后已删除远程引用；本地旧分支与 stale `origin/*` tracking 引用仍单独整理。
+- PR #111–#117 已合并到 `main`；当前完整 SHA 和合并时间见[最新 post-merge 远端事实](../hackathon/evidence/shinemage-remote-repository-postmerge-r3-20261010.md)。`codex/shinemage-final`、`codex/docs-maintenance-closeout` 和 `codex/docs-postmerge-20261010` 已完成各自使命，归档和恢复路径核对后已删除远程引用；本地旧分支与 stale `origin/*` tracking 引用仍单独整理。
 - `dsh-rc2-candidate`、`fix-dependabot-fastapi141` 等旧分支先做用途核对，不因为 PR 关闭就直接删除。
 - Release 和 tag 是发布审计历史，不随分支清理删除。清理前用 GitHub 页面和相关 release 文档核对当前版本，不能用分支名推断发布状态。
 - 独立插件远程仓及其 CI 继续各自维护，九仓当前均有开放 PR #1、最近 fixed-inputs CI 成功且暂无 GitHub Release；详见[远程仓收口复核](../hackathon/evidence/shinemage-plugin-remote-closeout-20261010.md)。不把它们合并回主仓，也不把普通 content pack 写成正式 DSH candidate。
@@ -98,6 +98,6 @@ DSH 升级不能简化为“从官网 `npm install latest` 后插入”。正确
 
 ## 开发者体验检查结果
 
-2026-10-10 对公开 GitHub 首页、本地 CLI 和 branches API 做了只读复核：PR #116 已合并，当前主线为 `c0a417b7`，相关 CI 通过；三个已合并候选远程分支已删除，剩余 stale `origin/*` tracking 引用和已归档本地分支仍需单独处理。九个独立插件仓的最新 PR/CI/Release 状态见[远程仓收口复核](../hackathon/evidence/shinemage-plugin-remote-closeout-20261010.md)。`pnpm dsh --help`、`doctor --help`、`plugin candidate --help` 能给出入口、退出码和证据边界；缺少候选输出目录时返回 `DSH_ERROR OUTPUT-DIR_REQUIRED`。当前主要摩擦是 README 顶部和 STATUS/TODOS 在合并后容易过期、插件流程仍需维护者从多份历史文档拼接、以及未使用固定 Node 入口时 pnpm 会显示 Node 25 的 engine warning。新维护者应优先读本手册、Quickstart、STATUS 和验证入口。
+2026-10-10 对公开 GitHub 首页、本地 CLI 和 branches API 做了只读复核：PR #117 已合并，当前主线为 `93d18c77`，相关 CI 通过；三个已合并候选远程分支已删除，剩余 stale `origin/*` tracking 引用和已归档本地分支仍需单独处理。九个独立插件仓的最新 PR/CI/Release 状态见[远程仓收口复核](../hackathon/evidence/shinemage-plugin-remote-closeout-20261010.md)。`pnpm dsh --help`、`doctor --help`、`plugin candidate --help` 能给出入口、退出码和证据边界；缺少候选输出目录时返回 `DSH_ERROR OUTPUT-DIR_REQUIRED`。当前主要摩擦是 README 顶部和 STATUS/TODOS 在合并后容易过期、插件流程仍需维护者从多份历史文档拼接、以及未使用固定 Node 入口时 pnpm 会显示 Node 25 的 engine warning。新维护者应优先读本手册、Quickstart、STATUS 和验证入口。
 
 这次浏览截图和 CLI 输出属于开发者体验证据，不是产品或生产验收。它们保存在本地 `.context/checks/devex-review-20261010/`，不进入运行包。
