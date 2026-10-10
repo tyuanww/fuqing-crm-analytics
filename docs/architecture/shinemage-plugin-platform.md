@@ -1,6 +1,6 @@
 # ShineMage 插件平台边界
 
-本设计落实[已批准的拆分计划](../plans/shinemage-plugin-platform-split.md)，不是重新选型。目标是官方 DSH 底座、独立 CRM/知识库服务、各自版本化的插件和一个组合 profile。首批插件已经形成独立远程仓，当前远程清单见[远程仓盘查](../hackathon/evidence/shinemage-remote-repository-inventory-20261010.md)，主线短 SHA 见 STATUS，完整 SHA、合并时间和 CI 事实见[最新 post-merge 记录](../hackathon/evidence/shinemage-remote-repository-postmerge-r2-20261010.md)；主仓继续保留平台合同、组合验证、历史 `dsh-plugins/` 和候选账本，主仓副本清理与正式物理分仓尚未收口，正式 `dsh-plugin-pack/v1`/`dsh-plugin-candidate/v1` 分发与生产切换仍按门禁执行。
+本设计落实[已批准的拆分计划](../plans/shinemage-plugin-platform-split.md)，不是重新选型。目标是官方 DSH 底座、独立 CRM/知识库服务、各自版本化的插件和一个组合 profile。首批插件已经形成独立远程仓，当前远程清单见[远程仓盘查](../hackathon/evidence/shinemage-remote-repository-inventory-20261010.md)，主线短 SHA 见 STATUS，完整 SHA、合并时间和 CI 事实见[最新 post-merge 记录](../hackathon/evidence/shinemage-remote-repository-postmerge-r3-20261010.md)；主仓继续保留平台合同、组合验证、历史 `dsh-plugins/` 和候选账本，主仓副本清理与正式物理分仓尚未收口，正式 `dsh-plugin-pack/v1`/`dsh-plugin-candidate/v1` 分发与生产切换仍按门禁执行。
 
 ## 四类升级各有归属
 
