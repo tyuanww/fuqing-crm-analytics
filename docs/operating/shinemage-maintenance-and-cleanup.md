@@ -85,7 +85,7 @@ DSH 升级不能简化为“从官网 `npm install latest` 后插入”。正确
 ### 远程仓整理
 
 - 保留受保护的 `main`、仍在使用的 Dependabot 分支和未完成的候选/修复分支。
-- PR #111、#112 已合并到 `main`；当前完整 SHA 和合并时间见[post-merge 远端事实](../hackathon/evidence/shinemage-remote-repository-postmerge-20261010.md)。`codex/shinemage-final` 和 `codex/docs-maintenance-closeout` 已完成各自使命，可列为删除候选；删除前确认没有文档或回滚流程需要它，并单独取得远程分支删除授权。
+- PR #111、#112、#113 已合并到 `main`；当前完整 SHA 和合并时间见[最新 post-merge 远端事实](../hackathon/evidence/shinemage-remote-repository-postmerge-r2-20261010.md)。`codex/shinemage-final` 和 `codex/docs-maintenance-closeout` 已完成各自使命，可列为删除候选；删除前确认没有文档或回滚流程需要它，并单独取得远程分支删除授权。
 - `dsh-rc2-candidate`、`fix-dependabot-fastapi141` 等旧分支先做用途核对，不因为 PR 关闭就直接删除。
 - Release 和 tag 是发布审计历史，不随分支清理删除。清理前用 GitHub 页面和相关 release 文档核对当前版本，不能用分支名推断发布状态。
 - 独立插件远程仓及其 CI 继续各自维护，当前仓名和只读核对结果见[远程仓盘查](../hackathon/evidence/shinemage-remote-repository-inventory-20261010.md)；不把它们合并回主仓，也不把普通 content pack 写成正式 DSH candidate。
@@ -98,6 +98,6 @@ DSH 升级不能简化为“从官网 `npm install latest` 后插入”。正确
 
 ## 开发者体验检查结果
 
-2026-10-10 对公开 GitHub 首页和本地 CLI 做了只读检查：PR #112 已合并，当前主线和 CI 见[post-merge 事实记录](../hackathon/evidence/shinemage-remote-repository-postmerge-20261010.md)；本次 branches API 查询因 TLS handshake timeout 未形成新的分支数量快照。TLS 恢复后可重跑 `gh api repos/tyuanww/fuqing-crm-analytics/branches --paginate`，再对照早先盘查更新带日期证据，不把超时写成删除或保留结论。`pnpm dsh --help`、`doctor --help`、`plugin candidate --help` 能给出入口、退出码和证据边界；缺少候选输出目录时返回 `DSH_ERROR OUTPUT-DIR_REQUIRED`。当前主要摩擦是 README 顶部和 STATUS/TODOS 在合并后容易过期、插件流程仍需维护者从多份历史文档拼接、以及未使用固定 Node 入口时 pnpm 会显示 Node 25 的 engine warning。新维护者应优先读本手册、Quickstart、STATUS 和验证入口。
+2026-10-10 对公开 GitHub 首页和本地 CLI 做了只读检查：PR #113 已合并，当前主线和 CI 见[最新 post-merge 事实记录](../hackathon/evidence/shinemage-remote-repository-postmerge-r2-20261010.md)；本轮没有重新请求 branches API，早先 TLS handshake timeout 仍按 `NOT_RECHECKED_TLS` 保留。TLS 恢复后可重跑 `gh api repos/tyuanww/fuqing-crm-analytics/branches --paginate`，再对照早先盘查更新带日期证据，不把超时写成删除或保留结论。`pnpm dsh --help`、`doctor --help`、`plugin candidate --help` 能给出入口、退出码和证据边界；缺少候选输出目录时返回 `DSH_ERROR OUTPUT-DIR_REQUIRED`。当前主要摩擦是 README 顶部和 STATUS/TODOS 在合并后容易过期、插件流程仍需维护者从多份历史文档拼接、以及未使用固定 Node 入口时 pnpm 会显示 Node 25 的 engine warning。新维护者应优先读本手册、Quickstart、STATUS 和验证入口。
 
 这次浏览截图和 CLI 输出属于开发者体验证据，不是产品或生产验收。它们保存在本地 `.context/checks/devex-review-20261010/`，不进入运行包。

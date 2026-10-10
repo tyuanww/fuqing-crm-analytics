@@ -1,0 +1,49 @@
+{
+  "schema": "shinemage-remote-repository-postmerge/v1",
+  "observed_at": "2026-10-10T09:41:37Z",
+  "repository": "https://github.com/tyuanww/fuqing-crm-analytics",
+  "default_branch": "main",
+  "main_head": "61d8672fb7ea79030a6517aeb6e58fc393500fd6",
+  "merged_pull_requests": [
+    {
+      "number": 111,
+      "merge_commit": "1855477afa346617662ea4ff6e292e5b52f22206",
+      "status": "merged"
+    },
+    {
+      "number": 112,
+      "merge_commit": "0e1eb8e8a00bcdc6c2aaca3b1457f95973dd7061",
+      "status": "merged"
+    },
+    {
+      "number": 113,
+      "merged_at": "2026-10-10T09:40:29Z",
+      "merge_commit": "61d8672fb7ea79030a6517aeb6e58fc393500fd6",
+      "status": "merged"
+    }
+  ],
+  "ci": {
+    "pr_113": {
+      "run_id": 38041836253,
+      "event": "pull_request",
+      "workflow": "CI",
+      "conclusion": "success"
+    },
+    "post_merge_main": {
+      "run_id": 38042222893,
+      "event": "push",
+      "workflow": "CI",
+      "conclusion": "success"
+    }
+  },
+  "open_pull_requests": {
+    "range": "101-110",
+    "kind": "dependabot",
+    "shine_mage_integration": "none"
+  },
+  "branch_inventory": "NOT_RECHECKED_TLS",
+  "plugin_repository_inventory": "see shinemage-remote-repository-inventory-20261010.json",
+  "deletion": "NOT_RUN",
+  "latest_release": "dsh-0.20.0.0-r3",
+  "release_ready": false
+}
