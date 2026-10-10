@@ -85,15 +85,19 @@ DSH 升级不能简化为“从官网 `npm install latest` 后插入”。正确
 ### 远程仓整理
 
 - 保留受保护的 `main`、仍在使用的 Dependabot 分支和未完成的候选/修复分支。
-- PR #111 已合并到 `main`（merge commit `1855477afa346617662ea4ff6e292e5b52f22206`）。`codex/shinemage-final` 已完成使命，可列为删除候选；删除前确认没有文档或回滚流程需要它，并单独取得远程分支删除授权。
+- PR #111、#112 已合并到 `main`；当前完整 SHA 和合并时间见[post-merge 远端事实](../hackathon/evidence/shinemage-remote-repository-postmerge-20261010.md)。`codex/shinemage-final` 和 `codex/docs-maintenance-closeout` 已完成各自使命，可列为删除候选；删除前确认没有文档或回滚流程需要它，并单独取得远程分支删除授权。
 - `dsh-rc2-candidate`、`fix-dependabot-fastapi141` 等旧分支先做用途核对，不因为 PR 关闭就直接删除。
 - Release 和 tag 是发布审计历史，不随分支清理删除。清理前用 GitHub 页面和相关 release 文档核对当前版本，不能用分支名推断发布状态。
 - 独立插件远程仓及其 CI 继续各自维护，当前仓名和只读核对结果见[远程仓盘查](../hackathon/evidence/shinemage-remote-repository-inventory-20261010.md)；不把它们合并回主仓，也不把普通 content pack 写成正式 DSH candidate。
+
+合并后同步当前事实时，至少检查这份清单：`STATUS.md` 的 Git 行和施工计划、README 顶部收口段、`docs/README.md` 横幅、`HANDOVER.md` 头部和入口快照日期、`docs/hackathon/TODOS.md` 当前接续、`docs/architecture/shinemage-plugin-platform.md` 首段、本手册远程仓段，以及带日期的远端证据 JSON/Markdown。完整的主仓 `main` SHA 只留在证据层，STATUS 放短 SHA，其他入口引用 STATUS，避免下一次合并后出现多份旧值；固定 DSH pin 可以在入口中重复，当前主线 SHA 与生产状态仍以 STATUS/证据为准；证据 JSON/Markdown 必须随本次文档提交。`docs/hackathon/README.md` 和 `docs/hackathon/PRODUCT-READINESS-2026-09-10.md` 是历史档案，只有其当前段落发生变化时才加入同一轮事实同步；`docs/operating/maintainer-map.md` 与 `docs/operating/verification.md` 是当前运行入口，目录、端口或验证矩阵变化时必须同轮同步。
+
+带日期的远端证据使用 `<topic>-YYYYMMDD.md` 与 `.json` 成对保存；JSON 顶层至少保留 `schema`、`observed_at`、`main_head` 和 `ci`，失败、超时和 `NOT_RUN` 也按原事实记录，不用新结果覆盖旧快照。
 
 任何删除动作都应先输出清单、目标、可恢复方式和影响，再执行。生产目录、真实 DuckDB、杭州/6677、旧 CRM、WeKnora 和含凭据的目录不属于这套清理范围。
 
 ## 开发者体验检查结果
 
-2026-10-10 对公开 GitHub 首页和本地 CLI 做了只读检查：仓库首页能看到 `main`、14 个分支、18 个 tag、PR #111 合并提交和 README；`pnpm dsh --help`、`doctor --help`、`plugin candidate --help` 能给出入口、退出码和证据边界；缺少候选输出目录时返回 `DSH_ERROR OUTPUT-DIR_REQUIRED`。当前主要摩擦是 README 顶部和 STATUS/TODOS 在合并后容易过期、插件流程仍需维护者从多份历史文档拼接、以及未使用固定 Node 入口时 pnpm 会显示 Node 25 的 engine warning。新维护者应优先读本手册、Quickstart、STATUS 和验证入口。
+2026-10-10 对公开 GitHub 首页和本地 CLI 做了只读检查：PR #112 已合并，当前主线和 CI 见[post-merge 事实记录](../hackathon/evidence/shinemage-remote-repository-postmerge-20261010.md)；本次 branches API 查询因 TLS handshake timeout 未形成新的分支数量快照。TLS 恢复后可重跑 `gh api repos/tyuanww/fuqing-crm-analytics/branches --paginate`，再对照早先盘查更新带日期证据，不把超时写成删除或保留结论。`pnpm dsh --help`、`doctor --help`、`plugin candidate --help` 能给出入口、退出码和证据边界；缺少候选输出目录时返回 `DSH_ERROR OUTPUT-DIR_REQUIRED`。当前主要摩擦是 README 顶部和 STATUS/TODOS 在合并后容易过期、插件流程仍需维护者从多份历史文档拼接、以及未使用固定 Node 入口时 pnpm 会显示 Node 25 的 engine warning。新维护者应优先读本手册、Quickstart、STATUS 和验证入口。
 
 这次浏览截图和 CLI 输出属于开发者体验证据，不是产品或生产验收。它们保存在本地 `.context/checks/devex-review-20261010/`，不进入运行包。
