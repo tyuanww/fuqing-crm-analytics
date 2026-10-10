@@ -9,10 +9,10 @@
 
 | 项 | 状态 |
 |---|---|
-| Git | 远端 `main` 已在 PR #111 合并后指向 `1855477a`；`codex/shinemage-final` 保留为已合并候选分支。当前文档工作分支从该 `main` 建立，原集成树的 `security-audit-skill/` 是独立目录，不纳入主仓。 |
+| Git | 远端 `main` 已在 PR #111 合并后指向 `1855477a`；`codex/shinemage-final` 保留为已合并候选分支。本轮文档收口分支从该 `main` 建立，原集成树的 `security-audit-skill/` 是独立目录，不纳入主仓。 |
 | 插件解耦 | 插件构建要求显式绝对上游、build-tools 和输入包；已移除主仓 .context 回退。CRM/看板/知识与 Workbench 的边界证据保持独立记录。 |
 | 独立仓 | 九个插件已有独立远程仓；八个最近可读 CI 回执成功，`dsh-shine-crowd-action` 本轮因 TLS 查询超时未重查，详见[远程仓盘查](docs/hackathon/evidence/shinemage-remote-repository-inventory-20261010.md)。主仓继续维护 DSH 集成合同、profile、组合验证和历史副本，主仓副本清理与正式物理分仓仍未收口。普通 content pack 不等于正式 dsh-plugin-pack/candidate。 |
-| 本地验证 | 固定 Node 24、Python 3.14；定向 release/protocol/SDK/map/HTML 与边界检查已通过。完整推送前矩阵按正常 hook 执行，真实跳过原因保留。 |
+| 本地验证 | 固定 Node 24、Python 3.14；定向 release/protocol/SDK/map/HTML 与边界检查已通过。推送钩子按路径计划执行适用检查，真实跳过原因保留。 |
 | 产品 | PARTIAL；SDK 分发 BLOCKED；release_ready=false。 |
 | 真实验收 | 真实 WSL2/terminal/browser、真实模型/业务、生产切换、standalone 页面包和正式分发仍按各自输入保持 NOT_RUN。PR #111 最终 preflight、B0、全量测试、前端、lint、依赖、合同、Docker smoke 和 merge-gate 均通过；`ground-truth-lint` 按既定条件跳过。 |
 | 清理 | 已完成只读盘查并形成[维护、清理与升级手册](docs/operating/shinemage-maintenance-and-cleanup.md)；失效 worktree 元数据已清理，历史证据目录和远程候选分支分开处理，当前没有删除证据或远程分支。 |
