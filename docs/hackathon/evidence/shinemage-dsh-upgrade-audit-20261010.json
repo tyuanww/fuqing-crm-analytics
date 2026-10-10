@@ -1,0 +1,246 @@
+{
+  "schema": "dsh-upgrade-audit/v1",
+  "observed_at": "2026-10-10T22:00:00+08:00",
+  "read_only": true,
+  "baseline": {
+    "baseline_version": "0.1.7-rc.2",
+    "baseline_sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+    "baseline_lock_sha256": "5d3980bcd2a0113101815aabfeb4f8a875d556a333521539b7f11d790f4a50aa",
+    "product_version": "0.20.0.0",
+    "source": "STATUS.md; dsh-plugins/plugin-kit/toolchain.json; docs/hackathon/evidence/dsh-g0-sdk-upgrade-candidate-20261008.md"
+  },
+  "public_candidates": [
+    {
+      "tag": "dsh-v0.2.1-alpha.2",
+      "version": "0.2.1-alpha.2",
+      "sha": "d743267388641bc76f17c45ce8b4c231aed1d32c",
+      "tree_sha": "75a3d23c8b6db770a000081918c4b975912a9c39",
+      "published_at": "2026-10-09T11:09:26Z",
+      "release_author": "07akioni",
+      "commit_verified": false,
+      "commit_verification_reason": "unsigned",
+      "release_body_highlights": [
+        "- 新增实验性插件的 Session 状态记录接口，供插件写入和读取自己的会话记录。 @tianyicui",
+        "- 新增 working_directory 工具，并为 TypeScript/Python SDK 提供会话工作目录的读取和切换接口。 @tianyicui",
+        "- Python PTC 接入 Session 文件沙箱策略；自定义组合需提供 sandbox 和 sandboxPolicy 服务。 @tianyicui",
+        "- Agent Team 消息改为直接投递目标 Inbox，移除独立 outbox、自动重试和重发去重；相关配置与结果字段需迁移。 @Dudu-0223",
+        "- Add Session state-record APIs for experimental plugins to write and read their own session records. by @tianyicui",
+        "- Add the working_directory tool and TypeScript/Python SDK APIs for reading and changing a session’s working directory. by @tianyicui",
+        "- Add standalone executable SSH helper runtimes supporting remote file operations, processes, terminals, sandboxing, and Node PTC. by @LegGasai",
+        "- Apply Session filesystem sandbox policies to Python PTC; custom compositions require sandbox and sandboxPolicy services. by @tianyicui",
+        "- Deliver Agent Team messages directly to the target Inbox, removing the separate outbox, automatic retries, and resend deduplication. Migrate affected configuration and result fields. by @Dudu-0223"
+      ]
+    },
+    {
+      "tag": "dsh-v0.2.1-alpha.1",
+      "version": "0.2.1-alpha.1",
+      "sha": "5badb15009ae1756c3afe0ae0cef1faafc290ccc",
+      "tree_sha": "a9d30743edbe97adac9c8cb0811b648a0d9f6660",
+      "published_at": "2026-10-03T06:42:19Z",
+      "release_author": "tianyicui",
+      "commit_verified": false,
+      "commit_verification_reason": "unsigned",
+      "release_body_highlights": [
+        "- 破坏性变更：移除运行时 invariant 插件及各包的 `./invariant` 导出；依赖这些诊断入口的扩展和自定义 profile 需要调整。 @turtle2099",
+        "- 输入区统计扩展拆为 `activity` 和 `usage` 两个独立入口；覆盖旧 `stats` 整行的插件需要更新注册 ID。 @turtle1999",
+        "- Breaking change: remove runtime invariant plugins and package `./invariant` exports. Extensions and custom profiles using these diagnostic entry points must be updated. by @turtle2099",
+        "- Split composer statistics into separate `activity` and `usage` extension entries. Plugins replacing the former `stats` row must update their registered IDs. by @turtle1999"
+      ]
+    },
+    {
+      "tag": "dsh-v0.2.0-rc.2",
+      "version": "0.2.0-rc.2",
+      "sha": "639ed015397290b3745d163aafe02ffee4aa3f84",
+      "tree_sha": "ac66a6a3e77f6fa396509ddfecc7beacf0cf642a",
+      "published_at": "2026-09-29T09:42:36Z",
+      "release_author": "imccyu",
+      "commit_verified": false,
+      "commit_verification_reason": "unsigned",
+      "release_body_highlights": [
+        "- Combine Windows sandbox permission diagnosis and repair in one authorized run, retaining pre-change backups and recovery commands. by @Elevator14B"
+      ]
+    }
+  ],
+  "npm": [
+    {
+      "package": "@deepseek-ai/dsh",
+      "dist_tags": {
+        "latest": "0.2.0-rc.2",
+        "next": "0.2.0-rc.2",
+        "alpha": "0.2.1-alpha.2"
+      },
+      "alpha2_published_at": "2026-10-09T08:18:00.501Z",
+      "maintainers": [
+        {
+          "name": "imccyu",
+          "email": "imccyu@gmail.com"
+        },
+        {
+          "name": "tianyicui-deepseek",
+          "email": "tianyi@deepseek.com"
+        }
+      ],
+      "alpha2_integrity": "sha512-CkRE0uAOg2ldL2VpfF4cNRsl178CH5nM+8YklPrlMZl5ln0KhVfd42dJuRlgOXZmkpizCRvrVS8LAL+GKfgk0w==",
+      "alpha2_shasum": "7acc898e09c4cd0678ab8bf5ee1029ee9c25a026",
+      "alpha2_signatures": 2
+    },
+    {
+      "package": "@deepseek-ai/dsh-tools",
+      "dist_tags": {
+        "latest": "0.0.1-rc.1",
+        "next": "0.2.0-rc.2",
+        "alpha": "0.2.1-alpha.2"
+      },
+      "alpha2_published_at": "2026-10-09T08:00:24.373Z",
+      "maintainers": [
+        {
+          "name": "imccyu",
+          "email": "imccyu@gmail.com"
+        },
+        {
+          "name": "tianyicui-deepseek",
+          "email": "tianyi@deepseek.com"
+        }
+      ],
+      "alpha2_integrity": "sha512-IbWShKABOi3ezvICVZsrG7w/mdQBmkHn0AGM4CkkYJxK38OIUELGiFa/JE6PEYO71oZQgm40xZM6kknTbss6vg==",
+      "alpha2_shasum": "b70eefd803f39e5118e0d5e0544b949d56383a56",
+      "alpha2_signatures": 2
+    }
+  ],
+  "plugin_matrix": [
+    {
+      "path": "dsh-plugins/analytics-workbench/package.json",
+      "name": "@shine-mage/dsh-analytics-workbench-b0",
+      "version": "0.0.0-b0",
+      "dsh_tools_peer": "0.1.7-rc.2",
+      "cordis_peer": null,
+      "status": "BLOCKED until candidate SDK/build/host tests"
+    },
+    {
+      "path": "dsh-plugins/board-components/package.json",
+      "name": "@shine-mage/board-components",
+      "version": "0.1.0",
+      "dsh_tools_peer": null,
+      "cordis_peer": null,
+      "status": "BLOCKED until candidate SDK/build/host tests"
+    },
+    {
+      "path": "dsh-plugins/crm-knowledge/package.json",
+      "name": "@shine-mage/dsh-crm-knowledge",
+      "version": "0.0.0-crm.1",
+      "dsh_tools_peer": "0.1.7-rc.2",
+      "cordis_peer": "4.0.2",
+      "status": "BLOCKED until candidate SDK/build/host tests"
+    },
+    {
+      "path": "dsh-plugins/knowledge/package.json",
+      "name": "@shine-mage/dsh-knowledge",
+      "version": "0.0.0-candidate.1",
+      "dsh_tools_peer": "0.1.7-rc.2",
+      "cordis_peer": "4.0.2",
+      "status": "BLOCKED until candidate SDK/build/host tests"
+    },
+    {
+      "path": "dsh-plugins/plugin-kit/package.json",
+      "name": "@shine-mage/dsh-plugin-kit",
+      "version": "0.1.0",
+      "dsh_tools_peer": null,
+      "cordis_peer": null,
+      "status": "BLOCKED until candidate SDK/build/host tests"
+    },
+    {
+      "path": "dsh-plugins/shine-board/package.json",
+      "name": "@shine-mage/dsh-shine-board",
+      "version": "0.0.0-b0",
+      "dsh_tools_peer": "0.1.7-rc.2",
+      "cordis_peer": null,
+      "status": "BLOCKED until candidate SDK/build/host tests"
+    },
+    {
+      "path": "dsh-plugins/shine-brand/package.json",
+      "name": "@shine-mage/dsh-shine-brand",
+      "version": "0.0.0-b0",
+      "dsh_tools_peer": "0.1.7-rc.2",
+      "cordis_peer": null,
+      "status": "BLOCKED until candidate SDK/build/host tests"
+    },
+    {
+      "path": "dsh-plugins/shine-crowd-action/package.json",
+      "name": "@shine-mage/dsh-shine-crowd-action",
+      "version": "0.0.0-b0",
+      "dsh_tools_peer": "0.1.7-rc.2",
+      "cordis_peer": null,
+      "status": "BLOCKED until candidate SDK/build/host tests"
+    },
+    {
+      "path": "dsh-plugins/shine-funnel/package.json",
+      "name": "@shine-mage/dsh-shine-funnel",
+      "version": "0.0.0-b0",
+      "dsh_tools_peer": "0.1.7-rc.2",
+      "cordis_peer": null,
+      "status": "BLOCKED until candidate SDK/build/host tests"
+    },
+    {
+      "path": "dsh-plugins/shine-query/package.json",
+      "name": "@shine-mage/dsh-shine-query",
+      "version": "0.0.0-b0",
+      "dsh_tools_peer": "0.1.7-rc.2",
+      "cordis_peer": null,
+      "status": "BLOCKED until candidate SDK/build/host tests"
+    },
+    {
+      "path": "dsh-plugins/shine-waterfall/package.json",
+      "name": "@shine-mage/dsh-shine-waterfall",
+      "version": "0.0.0-b0",
+      "dsh_tools_peer": "0.1.7-rc.2",
+      "cordis_peer": null,
+      "status": "BLOCKED until candidate SDK/build/host tests"
+    }
+  ],
+  "differences": {
+    "from_baseline_to_0.2.0-rc.2": [
+      "minor release line; prior static scan SUPPORTED only",
+      "not drop-in: profile pin, exact plugin peers, lock and SDK closure remain 0.1.7-rc.2",
+      "existing evidence reports no runtime host/session/WAL/browser acceptance"
+    ],
+    "from_baseline_to_0.2.1-alpha.1": [
+      "breaking: remove runtime invariant plugins and ./invariant exports",
+      "composer stats split from stats row into activity and usage",
+      "subpath plugin display manifest behavior changed",
+      "cordis/bindings and lock versions require fresh SDK closure"
+    ],
+    "from_baseline_to_0.2.1-alpha.2": [
+      "adds experimental session state-record APIs, working_directory tool and SDK APIs",
+      "changes Agent Team delivery (direct Inbox; outbox/retry/dedupe removed)",
+      "Python PTC requires session filesystem sandbox services",
+      "removes mixed tool-presentation mode; custom configs need migration",
+      "updates runtime/MCP/image/client dependencies; still prerelease and unsigned Git commits"
+    ],
+    "from_prior_20261008_evidence": [
+      "new public candidate 0.2.1-alpha.2 published 2026-10-09; prior report stopped at alpha.1",
+      "alpha npm dist-tags now alpha=0.2.1-alpha.2; latest/next remain 0.2.0-rc.2",
+      "prior report author/build identity conditions remain open; npm signatures are package integrity signatures, not author attestation"
+    ]
+  },
+  "compatibility_checks": {
+    "static_source_and_lock": "NOT_RUN for alpha.2; only prior alpha.1 static matrix exists",
+    "plugin_peer_range": "FAIL/blocked: all 9 peer declarations pin 0.1.7-rc.2; crm/knowledge also cordis 4.0.2",
+    "profile_pin": "EXPECTED_FAIL if alpha.2 substituted: existing validator enforces exact DSH pin",
+    "sdk_bindings": "NOT_RUN for alpha.2; prior alpha.1 covered 26/26 paths but semantics not proven",
+    "slots_lifecycle": "NOT_RUN for alpha.2; prior evidence had 12 slot names static only",
+    "build_install": "NOT_RUN; no registry install, no floating latest, no candidate checkout",
+    "host_browser_session_wal": "NOT_RUN",
+    "supply_chain_identity": "OPEN: alpha.2 commit GitHub API says unsigned; npm package signatures present, author/build provenance not closed"
+  },
+  "missing_inputs": [
+    "fixed full commit and original lock digest recorded for alpha.2 (lock was not downloaded into this read-only audit)",
+    "fresh owned candidate workspace with Node24/Corepack and candidate-specific SDK/build-tools",
+    "candidate SDK closure plus npm/source manifest and provenance/signature evidence",
+    "updated plugin peer declarations or documented compatibility ranges for all 9 plugins",
+    "compiled consumer results for 26 bindings and generated types/contracts",
+    "runtime checks for slots, lifecycle, cancellation/timeouts, session/WAL recovery, plugin unload and profile loading",
+    "browser/host/WSL target evidence and manual/UAT authorization",
+    "security/OSV scan against complete candidate lock; release/activation authorization"
+  ],
+  "conclusion": "0.2.1-alpha.2 is the newest public DSH candidate and is a research candidate only. Keep 0.1.7-rc.2 active; do not change pin or install until the missing inputs and gates are completed."
+}

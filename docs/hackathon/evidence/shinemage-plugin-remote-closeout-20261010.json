@@ -1,0 +1,739 @@
+{
+  "schema": "shinemage-plugin-remote-closeout/v1",
+  "checked_at": "2026-10-10T13:47:20.212725+00:00",
+  "organization": "tyuanww",
+  "repositories": [
+    {
+      "name": "dsh-analytics-workbench",
+      "url": "https://github.com/tyuanww/dsh-analytics-workbench",
+      "meta": {
+        "full_name": "tyuanww/dsh-analytics-workbench",
+        "private": true,
+        "default_branch": "main",
+        "visibility": "private",
+        "html_url": "https://github.com/tyuanww/dsh-analytics-workbench",
+        "updated_at": "2026-10-09T02:17:35Z",
+        "pushed_at": "2026-10-09T02:36:02Z"
+      },
+      "open_prs": [
+        {
+          "number": 1,
+          "title": "chore(ci): prepare fixed Linux inputs for workbench",
+          "state": "open",
+          "html_url": "https://github.com/tyuanww/dsh-analytics-workbench/pull/1",
+          "created_at": "2026-10-09T02:17:39Z",
+          "updated_at": "2026-10-09T02:42:56Z",
+          "draft": false,
+          "head_branch": "codex/analytics-workbench-independent",
+          "head_sha": "76d00f277506317ea241aa0174c108822ed225a1",
+          "base_branch": "main"
+        }
+      ],
+      "recent_ci": [
+        {
+          "id": 37875348316,
+          "name": "analytics-workbench-fixed-inputs",
+          "display_title": "chore(ci): prepare fixed Linux inputs for workbench",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "codex/analytics-workbench-independent",
+          "head_sha": "76d00f277506317ea241aa0174c108822ed225a1",
+          "run_number": 3,
+          "created_at": "2026-10-09T02:36:07Z",
+          "updated_at": "2026-10-09T02:38:09Z",
+          "html_url": "https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/37875348316"
+        },
+        {
+          "id": 37875348273,
+          "name": "analytics-workbench",
+          "display_title": "chore(ci): prepare fixed Linux inputs for workbench",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "codex/analytics-workbench-independent",
+          "head_sha": "76d00f277506317ea241aa0174c108822ed225a1",
+          "run_number": 5,
+          "created_at": "2026-10-09T02:36:07Z",
+          "updated_at": "2026-10-09T02:36:26Z",
+          "html_url": "https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/37875348273"
+        },
+        {
+          "id": 37875344690,
+          "name": "analytics-workbench",
+          "display_title": "fix(ci): initialize runner paths within a step",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "codex/analytics-workbench-independent",
+          "head_sha": "76d00f277506317ea241aa0174c108822ed225a1",
+          "run_number": 4,
+          "created_at": "2026-10-09T02:36:04Z",
+          "updated_at": "2026-10-09T02:36:24Z",
+          "html_url": "https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/37875344690"
+        },
+        {
+          "id": 37875344533,
+          "name": "analytics-workbench-fixed-inputs",
+          "display_title": "fix(ci): initialize runner paths within a step",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "codex/analytics-workbench-independent",
+          "head_sha": "76d00f277506317ea241aa0174c108822ed225a1",
+          "run_number": 2,
+          "created_at": "2026-10-09T02:36:04Z",
+          "updated_at": "2026-10-09T02:38:14Z",
+          "html_url": "https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/37875344533"
+        },
+        {
+          "id": 37873884736,
+          "name": "analytics-workbench",
+          "display_title": "chore(ci): prepare fixed Linux inputs for workbench",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "codex/analytics-workbench-independent",
+          "head_sha": "aa56dbeb56b4ffc8216c9b01d394981226c28960",
+          "run_number": 3,
+          "created_at": "2026-10-09T02:17:42Z",
+          "updated_at": "2026-10-09T02:18:03Z",
+          "html_url": "https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/37873884736"
+        },
+        {
+          "id": 37873879297,
+          "name": "analytics-workbench",
+          "display_title": "chore(ci): prepare fixed Linux inputs for workbench",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "codex/analytics-workbench-independent",
+          "head_sha": "aa56dbeb56b4ffc8216c9b01d394981226c28960",
+          "run_number": 2,
+          "created_at": "2026-10-09T02:17:38Z",
+          "updated_at": "2026-10-09T02:17:55Z",
+          "html_url": "https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/37873879297"
+        },
+        {
+          "id": 37873878346,
+          "name": ".github/workflows/ci-full.yml",
+          "display_title": "chore(ci): prepare fixed Linux inputs for workbench",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "failure",
+          "head_branch": "codex/analytics-workbench-independent",
+          "head_sha": "aa56dbeb56b4ffc8216c9b01d394981226c28960",
+          "run_number": 1,
+          "created_at": "2026-10-09T02:17:37Z",
+          "updated_at": "2026-10-09T02:17:37Z",
+          "html_url": "https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/37873878346"
+        },
+        {
+          "id": 37873873460,
+          "name": "analytics-workbench",
+          "display_title": "feat(workbench): add independent plugin author repository",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "main",
+          "head_sha": "cc1dd6a972c85bb0ef0d7f7131edd72e62335dc1",
+          "run_number": 1,
+          "created_at": "2026-10-09T02:17:34Z",
+          "updated_at": "2026-10-09T02:17:54Z",
+          "html_url": "https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/37873873460"
+        }
+      ],
+      "releases": []
+    },
+    {
+      "name": "dsh-crm-knowledge",
+      "url": "https://github.com/tyuanww/dsh-crm-knowledge",
+      "meta": {
+        "full_name": "tyuanww/dsh-crm-knowledge",
+        "private": true,
+        "default_branch": "main",
+        "visibility": "private",
+        "html_url": "https://github.com/tyuanww/dsh-crm-knowledge",
+        "updated_at": "2026-10-09T02:16:46Z",
+        "pushed_at": "2026-10-09T02:36:22Z"
+      },
+      "open_prs": [
+        {
+          "number": 1,
+          "title": "chore(ci): prepare fixed inputs for crm knowledge",
+          "state": "open",
+          "html_url": "https://github.com/tyuanww/dsh-crm-knowledge/pull/1",
+          "created_at": "2026-10-09T02:16:50Z",
+          "updated_at": "2026-10-09T02:42:58Z",
+          "draft": false,
+          "head_branch": "codex/crm-knowledge-independent",
+          "head_sha": "22bd8099883c5f7e6e9e11c92dfa56d5363a5392",
+          "base_branch": "main"
+        }
+      ],
+      "recent_ci": [
+        {
+          "id": 37875375168,
+          "name": "crm-knowledge-fixed-inputs",
+          "display_title": "chore(ci): prepare fixed inputs for crm knowledge",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "codex/crm-knowledge-independent",
+          "head_sha": "22bd8099883c5f7e6e9e11c92dfa56d5363a5392",
+          "run_number": 3,
+          "created_at": "2026-10-09T02:36:27Z",
+          "updated_at": "2026-10-09T02:38:31Z",
+          "html_url": "https://github.com/tyuanww/dsh-crm-knowledge/actions/runs/37875375168"
+        },
+        {
+          "id": 37875373681,
+          "name": "crm-knowledge-fixed-inputs",
+          "display_title": "fix(ci): initialize runner paths within a step",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "codex/crm-knowledge-independent",
+          "head_sha": "22bd8099883c5f7e6e9e11c92dfa56d5363a5392",
+          "run_number": 2,
+          "created_at": "2026-10-09T02:36:26Z",
+          "updated_at": "2026-10-09T02:38:25Z",
+          "html_url": "https://github.com/tyuanww/dsh-crm-knowledge/actions/runs/37875373681"
+        },
+        {
+          "id": 37873814782,
+          "name": ".github/workflows/ci.yml",
+          "display_title": "chore(ci): prepare fixed inputs for crm knowledge",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "failure",
+          "head_branch": "codex/crm-knowledge-independent",
+          "head_sha": "73efd8bc229ea6c9e4f5715fda347fdf9e065869",
+          "run_number": 1,
+          "created_at": "2026-10-09T02:16:50Z",
+          "updated_at": "2026-10-09T02:16:50Z",
+          "html_url": "https://github.com/tyuanww/dsh-crm-knowledge/actions/runs/37873814782"
+        }
+      ],
+      "releases": []
+    },
+    {
+      "name": "dsh-knowledge",
+      "url": "https://github.com/tyuanww/dsh-knowledge",
+      "meta": {
+        "full_name": "tyuanww/dsh-knowledge",
+        "private": true,
+        "default_branch": "main",
+        "visibility": "private",
+        "html_url": "https://github.com/tyuanww/dsh-knowledge",
+        "updated_at": "2026-10-09T02:18:57Z",
+        "pushed_at": "2026-10-09T02:36:25Z"
+      },
+      "open_prs": [
+        {
+          "number": 1,
+          "title": "chore(ci): prepare fixed inputs for knowledge",
+          "state": "open",
+          "html_url": "https://github.com/tyuanww/dsh-knowledge/pull/1",
+          "created_at": "2026-10-09T02:19:00Z",
+          "updated_at": "2026-10-09T02:43:01Z",
+          "draft": false,
+          "head_branch": "codex/knowledge-independent",
+          "head_sha": "9b7c60c33441c3a243399081fa2b5a0f845c8604",
+          "base_branch": "main"
+        }
+      ],
+      "recent_ci": [
+        {
+          "id": 37875378986,
+          "name": "knowledge-fixed-inputs",
+          "display_title": "chore(ci): prepare fixed inputs for knowledge",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "codex/knowledge-independent",
+          "head_sha": "9b7c60c33441c3a243399081fa2b5a0f845c8604",
+          "run_number": 3,
+          "created_at": "2026-10-09T02:36:30Z",
+          "updated_at": "2026-10-09T02:38:17Z",
+          "html_url": "https://github.com/tyuanww/dsh-knowledge/actions/runs/37875378986"
+        },
+        {
+          "id": 37875378097,
+          "name": "knowledge-fixed-inputs",
+          "display_title": "fix(ci): initialize runner paths within a step",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "codex/knowledge-independent",
+          "head_sha": "9b7c60c33441c3a243399081fa2b5a0f845c8604",
+          "run_number": 2,
+          "created_at": "2026-10-09T02:36:29Z",
+          "updated_at": "2026-10-09T02:39:21Z",
+          "html_url": "https://github.com/tyuanww/dsh-knowledge/actions/runs/37875378097"
+        },
+        {
+          "id": 37873985987,
+          "name": ".github/workflows/ci.yml",
+          "display_title": "chore(ci): prepare fixed inputs for knowledge",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "failure",
+          "head_branch": "codex/knowledge-independent",
+          "head_sha": "5c4a775a54086370ef5b2c12a86ad5a32b4abd8f",
+          "run_number": 1,
+          "created_at": "2026-10-09T02:19:00Z",
+          "updated_at": "2026-10-09T02:19:00Z",
+          "html_url": "https://github.com/tyuanww/dsh-knowledge/actions/runs/37873985987"
+        }
+      ],
+      "releases": []
+    },
+    {
+      "name": "dsh-shine-board",
+      "url": "https://github.com/tyuanww/dsh-shine-board",
+      "meta": {
+        "full_name": "tyuanww/dsh-shine-board",
+        "private": true,
+        "default_branch": "main",
+        "visibility": "private",
+        "html_url": "https://github.com/tyuanww/dsh-shine-board",
+        "updated_at": "2026-10-09T02:22:48Z",
+        "pushed_at": "2026-10-09T02:36:31Z"
+      },
+      "open_prs": [
+        {
+          "number": 1,
+          "title": "chore(ci): prepare fixed inputs for shine board",
+          "state": "open",
+          "html_url": "https://github.com/tyuanww/dsh-shine-board/pull/1",
+          "created_at": "2026-10-09T02:23:48Z",
+          "updated_at": "2026-10-09T02:43:03Z",
+          "draft": false,
+          "head_branch": "codex/shine-board-independent",
+          "head_sha": "4f248e6cdd026d43b24293c4bceb540ea7813135",
+          "base_branch": "main"
+        }
+      ],
+      "recent_ci": [
+        {
+          "id": 37875386821,
+          "name": "dsh-shine-board-fixed-inputs",
+          "display_title": "chore(ci): prepare fixed inputs for shine board",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "codex/shine-board-independent",
+          "head_sha": "4f248e6cdd026d43b24293c4bceb540ea7813135",
+          "run_number": 3,
+          "created_at": "2026-10-09T02:36:36Z",
+          "updated_at": "2026-10-09T02:38:16Z",
+          "html_url": "https://github.com/tyuanww/dsh-shine-board/actions/runs/37875386821"
+        },
+        {
+          "id": 37875386330,
+          "name": "dsh-shine-board-fixed-inputs",
+          "display_title": "fix(ci): initialize runner paths within a step",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "codex/shine-board-independent",
+          "head_sha": "4f248e6cdd026d43b24293c4bceb540ea7813135",
+          "run_number": 2,
+          "created_at": "2026-10-09T02:36:36Z",
+          "updated_at": "2026-10-09T02:38:15Z",
+          "html_url": "https://github.com/tyuanww/dsh-shine-board/actions/runs/37875386330"
+        },
+        {
+          "id": 37874295691,
+          "name": ".github/workflows/ci-full.yml",
+          "display_title": "chore(ci): prepare fixed inputs for shine board",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "failure",
+          "head_branch": "codex/shine-board-independent",
+          "head_sha": "613ba48fb64471b4d8204b0c582e20f3fb039f0b",
+          "run_number": 1,
+          "created_at": "2026-10-09T02:22:51Z",
+          "updated_at": "2026-10-09T02:22:51Z",
+          "html_url": "https://github.com/tyuanww/dsh-shine-board/actions/runs/37874295691"
+        }
+      ],
+      "releases": []
+    },
+    {
+      "name": "dsh-shine-brand",
+      "url": "https://github.com/tyuanww/dsh-shine-brand",
+      "meta": {
+        "full_name": "tyuanww/dsh-shine-brand",
+        "private": true,
+        "default_branch": "main",
+        "visibility": "private",
+        "html_url": "https://github.com/tyuanww/dsh-shine-brand",
+        "updated_at": "2026-10-08T15:29:06Z",
+        "pushed_at": "2026-10-08T15:36:33Z"
+      },
+      "open_prs": [
+        {
+          "number": 1,
+          "title": "feat(build): enable standalone brand builds with public tools",
+          "state": "open",
+          "html_url": "https://github.com/tyuanww/dsh-shine-brand/pull/1",
+          "created_at": "2026-10-08T15:29:24Z",
+          "updated_at": "2026-10-08T15:41:55Z",
+          "draft": false,
+          "head_branch": "codex/shine-brand-independent",
+          "head_sha": "2d7c17c2afa8050fc2d6b5def6af34fcaf821667",
+          "base_branch": "main"
+        }
+      ],
+      "recent_ci": [
+        {
+          "id": 37802176213,
+          "name": "shine-brand",
+          "display_title": "feat(build): enable standalone brand builds with public tools",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "codex/shine-brand-independent",
+          "head_sha": "2d7c17c2afa8050fc2d6b5def6af34fcaf821667",
+          "run_number": 4,
+          "created_at": "2026-10-08T15:36:39Z",
+          "updated_at": "2026-10-08T15:37:11Z",
+          "html_url": "https://github.com/tyuanww/dsh-shine-brand/actions/runs/37802176213"
+        },
+        {
+          "id": 37802167524,
+          "name": "shine-brand",
+          "display_title": "test(pack): verify and report packed member bytes",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "codex/shine-brand-independent",
+          "head_sha": "2d7c17c2afa8050fc2d6b5def6af34fcaf821667",
+          "run_number": 3,
+          "created_at": "2026-10-08T15:36:35Z",
+          "updated_at": "2026-10-08T15:37:07Z",
+          "html_url": "https://github.com/tyuanww/dsh-shine-brand/actions/runs/37802167524"
+        },
+        {
+          "id": 37801189284,
+          "name": "shine-brand",
+          "display_title": "feat(build): enable standalone brand builds with public tools",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "codex/shine-brand-independent",
+          "head_sha": "d695266affb438a6978414a362a6ab6f6fa19417",
+          "run_number": 2,
+          "created_at": "2026-10-08T15:29:31Z",
+          "updated_at": "2026-10-08T15:29:51Z",
+          "html_url": "https://github.com/tyuanww/dsh-shine-brand/actions/runs/37801189284"
+        },
+        {
+          "id": 37801181608,
+          "name": "shine-brand",
+          "display_title": "feat(build): build shine-brand with locked public tools",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "codex/shine-brand-independent",
+          "head_sha": "d695266affb438a6978414a362a6ab6f6fa19417",
+          "run_number": 1,
+          "created_at": "2026-10-08T15:29:27Z",
+          "updated_at": "2026-10-08T15:29:48Z",
+          "html_url": "https://github.com/tyuanww/dsh-shine-brand/actions/runs/37801181608"
+        }
+      ],
+      "releases": []
+    },
+    {
+      "name": "dsh-shine-crowd-action",
+      "url": "https://github.com/tyuanww/dsh-shine-crowd-action",
+      "meta": {
+        "full_name": "tyuanww/dsh-shine-crowd-action",
+        "private": true,
+        "default_branch": "main",
+        "visibility": "private",
+        "html_url": "https://github.com/tyuanww/dsh-shine-crowd-action",
+        "updated_at": "2026-10-09T02:24:24Z",
+        "pushed_at": "2026-10-09T02:36:33Z"
+      },
+      "open_prs": [
+        {
+          "number": 1,
+          "title": "chore(ci): prepare fixed inputs for shine crowd-action",
+          "state": "open",
+          "html_url": "https://github.com/tyuanww/dsh-shine-crowd-action/pull/1",
+          "created_at": "2026-10-09T02:26:44Z",
+          "updated_at": "2026-10-09T02:43:04Z",
+          "draft": false,
+          "head_branch": "codex/shine-crowd-action-independent",
+          "head_sha": "68398dc59d7161b349ad8868d08c2189f4807102",
+          "base_branch": "main"
+        }
+      ],
+      "recent_ci": [
+        {
+          "id": 37875390716,
+          "name": "dsh-shine-crowd-action-fixed-inputs",
+          "display_title": "chore(ci): prepare fixed inputs for shine crowd-action",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "codex/shine-crowd-action-independent",
+          "head_sha": "68398dc59d7161b349ad8868d08c2189f4807102",
+          "run_number": 3,
+          "created_at": "2026-10-09T02:36:39Z",
+          "updated_at": "2026-10-09T02:38:42Z",
+          "html_url": "https://github.com/tyuanww/dsh-shine-crowd-action/actions/runs/37875390716"
+        },
+        {
+          "id": 37875388952,
+          "name": "dsh-shine-crowd-action-fixed-inputs",
+          "display_title": "fix(ci): initialize runner paths within a step",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "codex/shine-crowd-action-independent",
+          "head_sha": "68398dc59d7161b349ad8868d08c2189f4807102",
+          "run_number": 2,
+          "created_at": "2026-10-09T02:36:38Z",
+          "updated_at": "2026-10-09T02:38:13Z",
+          "html_url": "https://github.com/tyuanww/dsh-shine-crowd-action/actions/runs/37875388952"
+        },
+        {
+          "id": 37874557800,
+          "name": ".github/workflows/ci-full.yml",
+          "display_title": "chore(ci): prepare fixed inputs for shine crowd-action",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "failure",
+          "head_branch": "codex/shine-crowd-action-independent",
+          "head_sha": "680f01c2f4befc989de050e3c7ed0bf3b94bd96c",
+          "run_number": 1,
+          "created_at": "2026-10-09T02:26:07Z",
+          "updated_at": "2026-10-09T02:26:07Z",
+          "html_url": "https://github.com/tyuanww/dsh-shine-crowd-action/actions/runs/37874557800"
+        }
+      ],
+      "releases": []
+    },
+    {
+      "name": "dsh-shine-funnel",
+      "url": "https://github.com/tyuanww/dsh-shine-funnel",
+      "meta": {
+        "full_name": "tyuanww/dsh-shine-funnel",
+        "private": true,
+        "default_branch": "main",
+        "visibility": "private",
+        "html_url": "https://github.com/tyuanww/dsh-shine-funnel",
+        "updated_at": "2026-10-09T02:20:15Z",
+        "pushed_at": "2026-10-09T02:36:35Z"
+      },
+      "open_prs": [
+        {
+          "number": 1,
+          "title": "chore(ci): prepare fixed inputs for shine funnel",
+          "state": "open",
+          "html_url": "https://github.com/tyuanww/dsh-shine-funnel/pull/1",
+          "created_at": "2026-10-09T02:22:43Z",
+          "updated_at": "2026-10-09T02:43:06Z",
+          "draft": false,
+          "head_branch": "codex/shine-funnel-independent",
+          "head_sha": "ab924632563e9d5aa6fbf9d7514fbda15fecc7b2",
+          "base_branch": "main"
+        }
+      ],
+      "recent_ci": [
+        {
+          "id": 37875393112,
+          "name": "dsh-shine-funnel-fixed-inputs",
+          "display_title": "chore(ci): prepare fixed inputs for shine funnel",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "codex/shine-funnel-independent",
+          "head_sha": "ab924632563e9d5aa6fbf9d7514fbda15fecc7b2",
+          "run_number": 3,
+          "created_at": "2026-10-09T02:36:41Z",
+          "updated_at": "2026-10-09T02:38:30Z",
+          "html_url": "https://github.com/tyuanww/dsh-shine-funnel/actions/runs/37875393112"
+        },
+        {
+          "id": 37875391662,
+          "name": "dsh-shine-funnel-fixed-inputs",
+          "display_title": "fix(ci): initialize runner paths within a step",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "codex/shine-funnel-independent",
+          "head_sha": "ab924632563e9d5aa6fbf9d7514fbda15fecc7b2",
+          "run_number": 2,
+          "created_at": "2026-10-09T02:36:40Z",
+          "updated_at": "2026-10-09T02:38:18Z",
+          "html_url": "https://github.com/tyuanww/dsh-shine-funnel/actions/runs/37875391662"
+        },
+        {
+          "id": 37874286291,
+          "name": ".github/workflows/ci-full.yml",
+          "display_title": "chore(ci): prepare fixed inputs for shine funnel",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "failure",
+          "head_branch": "codex/shine-funnel-independent",
+          "head_sha": "e3f6a04b11a11837d9c5083cfd8997c39b83eb02",
+          "run_number": 1,
+          "created_at": "2026-10-09T02:22:44Z",
+          "updated_at": "2026-10-09T02:22:44Z",
+          "html_url": "https://github.com/tyuanww/dsh-shine-funnel/actions/runs/37874286291"
+        }
+      ],
+      "releases": []
+    },
+    {
+      "name": "dsh-shine-query",
+      "url": "https://github.com/tyuanww/dsh-shine-query",
+      "meta": {
+        "full_name": "tyuanww/dsh-shine-query",
+        "private": true,
+        "default_branch": "main",
+        "visibility": "private",
+        "html_url": "https://github.com/tyuanww/dsh-shine-query",
+        "updated_at": "2026-10-09T02:17:37Z",
+        "pushed_at": "2026-10-09T02:36:29Z"
+      },
+      "open_prs": [
+        {
+          "number": 1,
+          "title": "chore(ci): prepare fixed inputs for shine query",
+          "state": "open",
+          "html_url": "https://github.com/tyuanww/dsh-shine-query/pull/1",
+          "created_at": "2026-10-09T02:17:52Z",
+          "updated_at": "2026-10-09T02:43:02Z",
+          "draft": false,
+          "head_branch": "codex/shine-query-independent",
+          "head_sha": "5d92be4e3bc2bf153dbd07fb109c4af0e1ebdcae",
+          "base_branch": "main"
+        }
+      ],
+      "recent_ci": [
+        {
+          "id": 37875384134,
+          "name": "dsh-shine-query-fixed-inputs",
+          "display_title": "chore(ci): prepare fixed inputs for shine query",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "codex/shine-query-independent",
+          "head_sha": "5d92be4e3bc2bf153dbd07fb109c4af0e1ebdcae",
+          "run_number": 3,
+          "created_at": "2026-10-09T02:36:34Z",
+          "updated_at": "2026-10-09T02:38:18Z",
+          "html_url": "https://github.com/tyuanww/dsh-shine-query/actions/runs/37875384134"
+        },
+        {
+          "id": 37875383035,
+          "name": "dsh-shine-query-fixed-inputs",
+          "display_title": "fix(ci): initialize runner paths within a step",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "codex/shine-query-independent",
+          "head_sha": "5d92be4e3bc2bf153dbd07fb109c4af0e1ebdcae",
+          "run_number": 2,
+          "created_at": "2026-10-09T02:36:33Z",
+          "updated_at": "2026-10-09T02:38:12Z",
+          "html_url": "https://github.com/tyuanww/dsh-shine-query/actions/runs/37875383035"
+        },
+        {
+          "id": 37873896718,
+          "name": ".github/workflows/ci-full.yml",
+          "display_title": "chore(ci): prepare fixed inputs for shine query",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "failure",
+          "head_branch": "codex/shine-query-independent",
+          "head_sha": "7220fa65993cf579a87f5611a64fd5965ddd1a7b",
+          "run_number": 1,
+          "created_at": "2026-10-09T02:17:51Z",
+          "updated_at": "2026-10-09T02:17:51Z",
+          "html_url": "https://github.com/tyuanww/dsh-shine-query/actions/runs/37873896718"
+        }
+      ],
+      "releases": []
+    },
+    {
+      "name": "dsh-shine-waterfall",
+      "url": "https://github.com/tyuanww/dsh-shine-waterfall",
+      "meta": {
+        "full_name": "tyuanww/dsh-shine-waterfall",
+        "private": true,
+        "default_branch": "main",
+        "visibility": "private",
+        "html_url": "https://github.com/tyuanww/dsh-shine-waterfall",
+        "updated_at": "2026-10-09T02:19:30Z",
+        "pushed_at": "2026-10-09T02:36:37Z"
+      },
+      "open_prs": [
+        {
+          "number": 1,
+          "title": "chore(ci): prepare fixed inputs for shine waterfall",
+          "state": "open",
+          "html_url": "https://github.com/tyuanww/dsh-shine-waterfall/pull/1",
+          "created_at": "2026-10-09T02:19:32Z",
+          "updated_at": "2026-10-09T02:43:07Z",
+          "draft": false,
+          "head_branch": "codex/shine-waterfall-independent",
+          "head_sha": "c4b7b1aec37953f4505905f8eb8c8fc5d6e818e6",
+          "base_branch": "main"
+        }
+      ],
+      "recent_ci": [
+        {
+          "id": 37875394817,
+          "name": "dsh-shine-waterfall-fixed-inputs",
+          "display_title": "chore(ci): prepare fixed inputs for shine waterfall",
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "codex/shine-waterfall-independent",
+          "head_sha": "c4b7b1aec37953f4505905f8eb8c8fc5d6e818e6",
+          "run_number": 3,
+          "created_at": "2026-10-09T02:36:42Z",
+          "updated_at": "2026-10-09T02:38:22Z",
+          "html_url": "https://github.com/tyuanww/dsh-shine-waterfall/actions/runs/37875394817"
+        },
+        {
+          "id": 37875394218,
+          "name": "dsh-shine-waterfall-fixed-inputs",
+          "display_title": "fix(ci): initialize runner paths within a step",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "head_branch": "codex/shine-waterfall-independent",
+          "head_sha": "c4b7b1aec37953f4505905f8eb8c8fc5d6e818e6",
+          "run_number": 2,
+          "created_at": "2026-10-09T02:36:42Z",
+          "updated_at": "2026-10-09T02:38:23Z",
+          "html_url": "https://github.com/tyuanww/dsh-shine-waterfall/actions/runs/37875394218"
+        },
+        {
+          "id": 37874029813,
+          "name": ".github/workflows/ci-full.yml",
+          "display_title": "chore(ci): prepare fixed inputs for shine waterfall",
+          "event": "push",
+          "status": "completed",
+          "conclusion": "failure",
+          "head_branch": "codex/shine-waterfall-independent",
+          "head_sha": "8110c61f568f9d9067ceea4a36fcc6b6529d93a3",
+          "run_number": 1,
+          "created_at": "2026-10-09T02:19:33Z",
+          "updated_at": "2026-10-09T02:19:33Z",
+          "html_url": "https://github.com/tyuanww/dsh-shine-waterfall/actions/runs/37874029813"
+        }
+      ],
+      "releases": []
+    }
+  ]
+}

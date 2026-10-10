@@ -1,0 +1,255 @@
+{
+  "schema": "shinemage-sdk-gate-closeout/2026-10-10/v1",
+  "generated_at": "2026-10-10T13:47:45.491541+00:00",
+  "scope": {
+    "mode": "READ_ONLY_EVIDENCE_RECONCILIATION",
+    "network": "NOT_USED",
+    "sdk_supply_chain_execution": "NOT_RUN",
+    "osv_full_version_query": "NOT_RUN",
+    "repo_files_modified": false,
+    "repo_files_written": [],
+    "output_files": [
+      "docs/hackathon/evidence/shinemage-sdk-gate-closeout-20261010.json",
+      "docs/hackathon/evidence/shinemage-sdk-gate-closeout-20261010.md"
+    ],
+    "purpose": "将当前 STATUS/TODOS 与已跟踪 SDK 证据收敛为最小阻塞矩阵；不关闭任何门禁。"
+  },
+  "repository": {
+    "path": ".",
+    "branch": "codex/shinemage-abc-local-candidate",
+    "head": "c0a417b7cc84888f16513725289f1dc8c4920519",
+    "porcelain": [
+      "?? security-audit-skill/"
+    ],
+    "sdk_supply_chain_diff_clean": true,
+    "sdk_supply_chain_sha256": "690034dea4f9a823ede52dc298b50bb44b0a29feb68a6aaf24f17eb81d947fba",
+    "unrelated_untracked_left_untouched": [
+      "security-audit-skill/"
+    ]
+  },
+  "facts": {
+    "status_snapshot": "2026-10-10",
+    "dsh_pin": "477b4f420553e8a52c2fbccc464d7561b239c443",
+    "product": "PARTIAL",
+    "distribution": "BLOCKED",
+    "release_ready": false,
+    "todos_remaining_line": "T15 SDK 分发剩余项仍未勾选；见 docs/hackathon/TODOS.md:387",
+    "known_vulnerability_scope": "7 个受影响版本 / 29 条公告（已有证据，未重新查询）",
+    "closure_sha256": "37ce5d661418c0fb2468592bd3bb54f9376f8f0b728dfacb972d9b68cddc14b4"
+  },
+  "gate_matrix": [
+    {
+      "id": "SDK-UPSTREAM-ADVISORIES",
+      "status": "BLOCKED_UPSTREAM_RELEASE",
+      "evidence": "固定 DSH 仍有 7 个受影响版本/29 条公告；已有候选查询但未安装/编译。",
+      "references": [
+        "docs/hackathon/evidence/grok-sdk-trust-closeout-20261008.md:116-116",
+        "docs/hackathon/evidence/dsh-g0-sdk-upstream-trust-20261008.md:80-94"
+      ],
+      "blocking_material": "需要官方 upstream replacement release/commit，以及候选的身份、依赖和兼容核验。",
+      "required_external": "官方 upstream 发布物（外部）；随后本地候选安装/编译。",
+      "parallel_local": "可先准备候选核验清单和兼容矩阵；不能在旧 pin 上伪造修复。"
+    },
+    {
+      "id": "SDK-EMBEDDED-COMPOSITION",
+      "status": "PARTIAL",
+      "evidence": "官方 map 位置一致性、883 个仓库源 blob 和部分 store 源已核对；父门禁仍 PARTIAL。",
+      "references": [
+        "docs/hackathon/evidence/grok-sdk-trust-closeout-20261008.md:113-114",
+        "docs/hackathon/evidence/grok-sdk-trust-integration-20261008.md:13-16"
+      ],
+      "blocking_material": "需要实际 bundle recipe、完整 resolved build lock、每个保留嵌入组件及变换后字节。",
+      "required_external": "若缺少原始 bundle/build 输入，需要 SDK 原始归档或可复现构建环境；不是用户确认即可关闭。",
+      "parallel_local": "可离线维护组成/来源缺口清单；不要接入 pipeline 或放宽默认 coverage。"
+    },
+    {
+      "id": "SDK-FULL-PACKAGE-INTEGRITY-IDENTITY",
+      "status": "OPEN",
+      "evidence": "212 条 installed-package 仅有 lock sha512 声明；195/196 唯一 tarball 摘要匹配，仍有缺失、重复路径和网络失败分类。",
+      "references": [
+        "docs/hackathon/evidence/grok-sdk-trust-closeout-20261008.md:115-115",
+        "docs/hackathon/evidence/grok-sdk-trust-integration-20261008.md:5-5"
+      ],
+      "blocking_material": "需要剩余包的可验证 tarball/来源字节、120 个 workspace 源的来源边界处理，以及 1 个未在 lock 中的嵌套清单处置。",
+      "required_external": "剩余 registry/source archive（外部或历史封存材料）；不应重跑完整 OSV/整版本查询。",
+      "parallel_local": "可先把已知缺失 7 条、重复成员 2 条、超时 1 条固定成阻塞清单；不改解包规则。"
+    },
+    {
+      "id": "SDK-REVOCATION",
+      "status": "OPEN",
+      "evidence": "现有 trust verifier 在撤销/允许名单到位前 fail-closed。",
+      "references": [
+        "docs/hackathon/evidence/grok-sdk-trust-closeout-20261008.md:117-117"
+      ],
+      "blocking_material": "签名撤销/允许名单、回滚语义和 fail-closed 刷新测试。",
+      "required_external": "签名服务/发布者治理材料（外部），并需授权策略。",
+      "parallel_local": "可先定义回滚/过期/撤销证据字段和负测矩阵；不能凭本地时间戳替代。"
+    },
+    {
+      "id": "SDK-NATIVE-EXECUTION-SAFETY",
+      "status": "OPEN",
+      "evidence": "4 个 PE 仅做静态 header/证书表检查且未执行；既有 Mach-O 签名结论未重跑。",
+      "references": [
+        "docs/hackathon/evidence/grok-sdk-trust-closeout-20261008.md:118-118",
+        "docs/hackathon/evidence/dsh-g0-sdk-trust-remaining-20261008.md:43-49"
+      ],
+      "blocking_material": "作者签名、源码/构建映射、各目标平台预期行为和受控执行证据。",
+      "required_external": "签名材料与目标平台/干净环境（外部）；执行不能在当前只读盘查替代。",
+      "parallel_local": "可离线整理 17 项 opaque 文件路径、摘要和待验证属性。"
+    },
+    {
+      "id": "SDK-ASSET-PARSER-SAFETY",
+      "status": "PARTIAL",
+      "evidence": "既有 Pillow/FreeType 的有限格式检查；浏览器侧解析、资源限制和恶意输入仍未完成。",
+      "references": [
+        "docs/hackathon/evidence/grok-sdk-trust-closeout-20261008.md:119-119",
+        "docs/hackathon/evidence/dsh-g0-sdk-trust-remaining-20261008.md:43-49"
+      ],
+      "blocking_material": "浏览器解析器/资源限制的受控夹具和目标运行时结果。",
+      "required_external": "若只使用已封存输入可本地进行；完整目标浏览器/平台证据仍需相应环境。",
+      "parallel_local": "可先列资源边界、截断/超限负测及证据字段；当前不升级状态。"
+    },
+    {
+      "id": "SDK-COMPLETE-PREPARATION-AND-CLEAN-HOST",
+      "status": "OPEN",
+      "evidence": "同平台 Mac 与目标 WSL 开发 SDK 子项已完成，但明确不是整台全新机器/生产验收。",
+      "references": [
+        "docs/hackathon/evidence/grok-sdk-trust-closeout-20261008.md:120-120",
+        "docs/hackathon/TODOS.md:381-381"
+      ],
+      "blocking_material": "独立干净主机上的完整 SDK prepare、闭包安装和保护复核。",
+      "required_external": "全新机器/隔离环境（外部运行条件）；不能用当前工作树替代。",
+      "parallel_local": "可准备干净主机执行清单与回收/失败判定，不启动服务。"
+    },
+    {
+      "id": "SDK-FINAL-DISTRIBUTION-SIGNATURE",
+      "status": "OPEN",
+      "evidence": "最终 SDK 的发布者 attestation、配方与 SBOM 签名尚未执行。",
+      "references": [
+        "docs/hackathon/evidence/grok-sdk-trust-closeout-20261008.md:121-122",
+        "docs/hackathon/TODOS.md:394-394"
+      ],
+      "blocking_material": "授权发布者对最终 SDK 摘要、配方和完整 SBOM 的签名/attestation。",
+      "required_external": "签名密钥/发布者材料与授权发布动作（外部）；本轮不得发布。",
+      "parallel_local": "可离线固定最终签名输入清单和摘要绑定格式；不能生成伪签名。"
+    }
+  ],
+  "local_reconciliation": {
+    "checks": [
+      {
+        "id": "STATUS_PRODUCT_STATE",
+        "result": "PASS",
+        "detail": "STATUS 明确保留 PARTIAL / SDK 分发 BLOCKED / release_ready=false。",
+        "reference": "STATUS.md:15-17"
+      },
+      {
+        "id": "TODOS_OPEN_ITEM",
+        "result": "PASS",
+        "detail": "T15 SDK 分发剩余项仍为未勾选，且明确不重复整版本 OSV 查询或 SDK prepare。",
+        "reference": "docs/hackathon/TODOS.md:387-387"
+      },
+      {
+        "id": "SOURCE_FAIL_CLOSED",
+        "result": "PASS",
+        "detail": "sdk-supply-chain.mjs 保留 PARTIAL/BLOCKED 输出、各 coverage 未验证和 release_ready=false。",
+        "reference": "scripts/release/sdk-supply-chain.mjs:158-166"
+      },
+      {
+        "id": "SOURCE_UNMODIFIED",
+        "result": "PASS",
+        "detail": "当前工作树相对 HEAD 没有该脚本差异。",
+        "reference": "git diff --quiet -- scripts/release/sdk-supply-chain.mjs"
+      },
+      {
+        "id": "EVIDENCE_STATUS_CONSISTENCY",
+        "result": "PASS",
+        "detail": "已跟踪 closeout/integration/remaining/upstream 文档均维持 distribution BLOCKED、父门禁 PARTIAL/OPEN 或 BLOCKED_UPSTREAM_RELEASE，没有把局部证据写成发布通过。",
+        "reference": "docs/hackathon/evidence/grok-sdk-trust-closeout-20261008.md:111-124"
+      },
+      {
+        "id": "RAW_ARTIFACT_AVAILABILITY",
+        "result": "INFO",
+        "detail": "历史报告引用的三个 SDK 原始证据目录在当前 checkout 不存在；本次未复制、恢复或重跑。",
+        "reference": ".context/checks/sdk-trust-remaining-20261008-r1, .context/checks/sdk-trust-closeout-20261008, .context/checks/kit-sdk-v2-distribution-20261007"
+      }
+    ],
+    "source_anchor_results": {
+      "status_partial_or_blocked": true,
+      "coverage_not_verified": true,
+      "registry_not_verified": true,
+      "publisher_not_verified": true,
+      "opaque_not_reviewed": true,
+      "revocation_not_verified": true,
+      "release_false": true
+    }
+  },
+  "minimal_work_completed": [
+    "读取并定位 STATUS、T15 开放项和四份最新 SDK 证据索引。",
+    "静态确认 sdk-supply-chain.mjs 未改且保持 fail-closed coverage/release_ready。",
+    "将 8 条顶层 SDK 门禁按现有证据、缺失材料和可并行动作整理成矩阵。",
+    "确认没有执行 OSV 整版本查询、SDK prepare、网络请求、安装、native/PE 执行、签名或发布。"
+  ],
+  "external_dependencies": {
+    "upstream_release_or_commit": [
+      "官方修复受影响依赖并提供可核验身份/依赖/兼容材料"
+    ],
+    "clean_machine": [
+      "完整 SDK prepare 与保护复核需独立干净主机/隔离环境"
+    ],
+    "signing_materials": [
+      "最终 SDK 摘要/recipe/SBOM 的授权发布者 attestation、撤销/允许名单和回滚策略"
+    ],
+    "target_platforms": [
+      "native/PE 受控行为与浏览器资产解析需要相应目标平台/运行时"
+    ],
+    "remaining_archives": [
+      "剩余 registry/source tarball 或受信历史封存材料，不能凭 lock integrity 补齐字节"
+    ]
+  },
+  "parallelizable_without_user_input": [
+    "维护候选升级兼容矩阵和输入清单（不安装、不改现用 pin）。",
+    "整理 212 条 package integrity 缺口分类（7 缺文件、2 重复成员路径、1 网络失败、120 workspace 来源边界、1 未锁嵌套清单）。",
+    "准备 revocation、native、asset parser、clean-host、final-signature 的证据字段/负测矩阵模板。",
+    "在获得原始归档或指定干净环境后，按既有 stop/go 执行定向核对；当前不启动。"
+  ],
+  "cannot_close_locally_now": [
+    "官方 upstream 尚未发布可接受替代版本，不能在固定旧 pin 上宣称公告已修复。",
+    "最终发布签名、撤销治理和发布者身份缺授权材料。",
+    "干净主机、目标平台 native/PE 与浏览器行为证据尚未发生。",
+    "完整变换 bundle 字节、其余来源 tarball 和最终 SBOM 仍缺可核验输入。"
+  ],
+  "source_files": {
+    "STATUS.md": {
+      "sha256": "468b973054caa74ee1a0585b86804d5196c4e215aad15d929078f8653c302be1",
+      "exists": true
+    },
+    "docs/hackathon/TODOS.md": {
+      "sha256": "781d89d5782e0871c076c434e57c4cbc1ccf702da83b43f14b052f3af7fe6b72",
+      "exists": true
+    },
+    "docs/hackathon/evidence/grok-sdk-trust-closeout-20261008.md": {
+      "sha256": "87008ca535473ee41123208a1e88c2225dbf803b25d7a9ed9e631cab8ee4a352",
+      "exists": true
+    },
+    "docs/hackathon/evidence/dsh-g0-sdk-trust-remaining-20261008.md": {
+      "sha256": "e9f0f438b99aa5a4eff221c068bd9e36c146f622cc2e97b5be1bfda85f079088",
+      "exists": true
+    },
+    "docs/hackathon/evidence/dsh-g0-sdk-upstream-trust-20261008.md": {
+      "sha256": "3fcf1c4c93a4949cc18e87e7920cf424e92da427a7cd068fe48fb4ae09f1eb1e",
+      "exists": true
+    },
+    "docs/hackathon/evidence/grok-sdk-trust-integration-20261008.md": {
+      "sha256": "6001e04ec9594d7c1209019e09054f146dfaaef2711a59ac864ae43ed314e14f",
+      "exists": true
+    },
+    "docs/hackathon/evidence/dsh-g0-kit-sdk-v2-distribution-20261007.md": {
+      "sha256": "9eb0711e28a69ec6dd3029852a9aa43287ca6fb7fabc8d5ad207b1e615541ee0",
+      "exists": true
+    },
+    "scripts/release/sdk-supply-chain.mjs": {
+      "sha256": "690034dea4f9a823ede52dc298b50bb44b0a29feb68a6aaf24f17eb81d947fba",
+      "exists": true
+    }
+  }
+}
