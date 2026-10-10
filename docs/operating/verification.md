@@ -2,11 +2,23 @@
 
 适用于成果工作树的本地补丁；是否已集成，以该工作树 Git 状态和远端证据为准。授权见 [AGENTS](../../AGENTS.md)。当前施工与缺口看根 [STATUS.md](../../STATUS.md) 和 [TODOS 的 M1 核心交付](../hackathon/TODOS.md#m1-核心交付)。黑客松入口与 [治理实施记录](../hackathon/WORKFLOW-GOVERNANCE-2026-09-06.md) 是历史证据链，不是本轮任务卡。
 
+合并后先刷新主线事实，再选择验证范围：
+
+```bash
+gh api repos/tyuanww/fuqing-crm-analytics/git/ref/heads/main
+gh run list --repo tyuanww/fuqing-crm-analytics --branch main --limit 5
+git fetch origin main
+git merge-base origin/main HEAD
+git diff --name-status "$(git merge-base origin/main HEAD)" HEAD
+```
+
+`origin/main` 是远端主线快照，当前本地 feature 分支的 `HEAD` 可能只是它的祖先；不要把本地 `HEAD` 当成已合并主线。远端 CI 的 `success`、插件仓的 fixed-inputs CI、主仓的合并检查、candidate journal 和目标宿主回执分别记账；一个层级的绿色结果不能替代另一个层级。
+
 ## 先按变更类型选验证
 
 | 变更 | 先跑什么 | 不自动扩大到什么 |
 |---|---|---|
-| 一个独立插件 | 插件仓自己的 frozen install、build、包级测试、内容摘要和边界负测；主仓只跑受影响合同 | 不重建 DSH、不迁移数据库、不把插件测试写成生产或全量 SDK 通过 |
+| 一个独立插件 | 插件仓自己的 frozen install、build、包级测试、内容摘要和边界负测；主仓只跑受影响合同，并核对 profile/allowlist → pack SHA → candidate/journal 链 | 不重建 DSH、不迁移数据库、不把插件测试写成生产或全量 SDK 通过 |
 | DSH pin、host、profile 或跨插件合同 | 固定上游的 B0、host/合同矩阵、candidate 输入和相应 CI | 不继承旧包、旧 WSL/浏览器回执或浮动 `latest` |
 | 服务/API/权限合同 | 服务包与兼容窗口、权限/幂等/回放和受影响插件组合 | 不读取真实 DuckDB、不连接杭州或 WeKnora 生产 |
 | 仅文档/证据 | 差异、链接、当前 SHA 和未执行项检查 | 不用旧 PASS 数替代当前运行 |

@@ -2,7 +2,9 @@
 
 这条路径只验证一个插件包。DSH、CRM 服务、知识库和真实业务数据不随插件构建；插件失败时保留 DSH 原生对话是 T17 宿主验收目标，当前 pack/candidate 尚不能证明进程隔离。插件包默认不得覆盖原生标题、侧栏、会话或工具合同，未接通的 capability 必须显示 `NOT_AVAILABLE` 及原因。
 
-主仓与插件仓的长期职责、清理规则和 DSH 升级路径见[维护、清理与升级手册](./shinemage-maintenance-and-cleanup.md)。日常只改一个插件时，不重建 DSH、不迁移数据库，也不从官网安装浮动 `latest`；使用主仓记录的固定 DSH/kit 输入，在插件自己的远程仓和 CI 产出带摘要的包，再由主仓 profile 按 digest 组合。
+主仓与插件仓的长期职责、清理规则和 DSH 升级路径见[维护、清理与升级手册](./shinemage-maintenance-and-cleanup.md)。面向第一次执行的逐步路径见[How to 更新一个 ShineMage 插件](./shinemage-plugin-update.md)。日常只改一个插件时，不重建 DSH、不迁移数据库，也不从官网安装浮动 `latest`；使用主仓记录的固定 DSH/kit 输入，在插件自己的远程仓和 CI 产出带摘要的包，再由主仓 profile 选择组合；candidate 另外绑定 profile 快照摘要与 pack SHA。
+
+在接入主仓前，先刷新远端事实：`git fetch origin main`，再运行 `gh api repos/tyuanww/fuqing-crm-analytics/git/ref/heads/main`、`gh run list --repo tyuanww/fuqing-crm-analytics --branch main`，并用 `git merge-base origin/main HEAD` 区分本地 feature 分支和已合并主线。远端 CI 通过只说明对应工作流通过；它不授予候选生成、正式分发或生产激活权限。
 
 单插件更新十场、整次取消和 HTML headed 探针的现有命令、输入范围及实际结果见[A/B/C 集成验收](../hackathon/evidence/shinemage-abc-integration-20261008.md)。这些是隔离验收入口，不是安装到现役环境的命令；进程级恢复通过不等于支持热插拔。
 
@@ -99,7 +101,7 @@ pnpm dsh plugin candidate \
 cat "$candidate_root/pack/candidate.json"
 ```
 
-候选目录携带原字节 `profile.json` 快照；回执绑定插件 source SHA、包 SHA-256、profile digest、固定 DSH pin、capability 和 `CANDIDATE_PREPARED` journal。`canary`、`rollback` 和远端 receive 在当前首期显示 `NOT_RUN`/`NOT_AVAILABLE`，这不是发布成功；不能把 tarball 直接放进杭州 current。
+候选目录携带原字节 `profile.json` 快照；回执绑定插件 source SHA、包 SHA-256、profile digest、固定 DSH pin、capability 和 `CANDIDATE_PREPARED` journal。profile digest 表示组合快照，pack SHA 表示单个 tarball；profile 本身不保存 tarball SHA。`canary`、`rollback` 和远端 receive 在当前首期显示 `NOT_RUN`/`NOT_AVAILABLE`，这不是发布成功；不能把 tarball 直接放进杭州 current。新包必须沿着“pack → profile snapshot → candidate → journal”形成新身份链，不能向旧 journal 追加或继承旧包的目标验收。
 
 最终 tarball 在私有临时目录安全解包，核对 `exports`（含条件分支）、`main`/`module` 和 `dsh.bundle.patch` 指向的文件，再执行敏感文件/secret scan；通过后才发布包与回执。源码映射、敏感文件或缺失入口均阻断，内容校验失败不发布 tarball；通过校验后若回执落盘失败，已验证包仍保留，需核对输出后使用新的候选目录重试。通配 exports 暂不支持，须列出明确入口。
 

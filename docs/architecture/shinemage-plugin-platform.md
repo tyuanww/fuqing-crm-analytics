@@ -1,6 +1,6 @@
 # ShineMage 插件平台边界
 
-本设计落实[已批准的拆分计划](../plans/shinemage-plugin-platform-split.md)，不是重新选型。目标是官方 DSH 底座、独立 CRM/知识库服务、各自版本化的插件和一个组合 profile。首批插件已经形成独立远程仓，当前远程清单见[远程仓盘查](../hackathon/evidence/shinemage-remote-repository-inventory-20261010.md)，主线短 SHA 见 STATUS，完整 SHA、合并时间和 CI 事实见[最新 post-merge 记录](../hackathon/evidence/shinemage-remote-repository-postmerge-r3-20261010.md)；主仓继续保留平台合同、组合验证、历史 `dsh-plugins/` 和候选账本，主仓副本清理与正式物理分仓尚未收口，正式 `dsh-plugin-pack/v1`/`dsh-plugin-candidate/v1` 分发与生产切换仍按门禁执行。
+本设计落实[已批准的拆分计划](../plans/shinemage-plugin-platform-split.md)，不是重新选型。目标是官方 DSH 底座、独立 CRM/知识库服务、各自版本化的插件和一个组合 profile。首批插件已经形成独立远程仓，当前远程清单见[远程仓盘查](../hackathon/evidence/shinemage-remote-repository-inventory-20261010.md)，主线短 SHA 见 STATUS，完整 SHA、合并时间和 CI 事实见[最新 post-merge 记录](../hackathon/evidence/shinemage-remote-repository-postmerge-r4-20261011.md)；主仓继续保留平台合同、组合验证、历史 `dsh-plugins/` 和候选账本，部分历史副本已经按授权清理，剩余副本、正式物理分仓、正式 `dsh-plugin-pack/v1`/`dsh-plugin-candidate/v1` 分发与生产切换仍按各自门禁执行。普通插件更新的具体操作见[插件更新指南](../operating/shinemage-plugin-update.md)。
 
 ## 四类升级各有归属
 
@@ -32,7 +32,7 @@ CRM 与知识插件也已拆成两个独立候选包：CRM 保留旧包 ID，知
 
 ## 安装、故障与保存边界
 
-首期包身份保持现有 `@shine-mage/dsh-analytics-workbench-b0`；不能把目标仓库名称当成已获授权的 npm 包重命名。profile 只引用固定包及 digest。每次候选记录来源 SHA、生成合同摘要、DSH pin、capability 和 journal，不能用工作区目录作为发布身份。
+首期包身份保持现有 `@shine-mage/dsh-analytics-workbench-b0`；不能把目标仓库名称当成已获授权的 npm 包重命名。profile 只选择固定包组合，candidate 再记录单包 pack digest 与 profile snapshot digest。每次候选记录来源 SHA、生成合同摘要、DSH pin、capability 和 journal，不能用工作区目录作为发布身份。
 
 同进程插件挂死或部分注册不能靠静态分析证明可隔离。T17 必须在命令拥有的临时 profile/home/WAL/PID/端口中验证固定 DSH 的实际行为；不支持安全卸载时明确 `HOST_RESTART_REQUIRED`，按已验证的原生回退与受控重启处理。当前不宣称热插拔或无重启回退。
 
