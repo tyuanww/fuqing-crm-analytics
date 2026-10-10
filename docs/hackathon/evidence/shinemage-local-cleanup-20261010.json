@@ -1,0 +1,39 @@
+{
+  "schema": "shinemage-local-cleanup/v1",
+  "observed_at": "2026-10-10",
+  "main_head": "eb76413a8369fa9503653ab46f7ec60a974c9152",
+  "authorization": "授权删除已归档的本地候选目录；授权删除远程分支 codex/shinemage-final、codex/docs-maintenance-closeout、codex/docs-postmerge-20261010",
+  "local_deleted_source_count": 11,
+  "local_removed_worktree_count": 11,
+  "archive_sha256_reverified": true,
+  "remote_deleted_branches": [
+    "codex/shinemage-final",
+    "codex/docs-maintenance-closeout",
+    "codex/docs-postmerge-20261010"
+  ],
+  "remote_related_prs": {
+    "codex/shinemage-final": [111],
+    "codex/docs-maintenance-closeout": [112],
+    "codex/docs-postmerge-20261010": [113, 114]
+  },
+  "preserved": [
+    "main",
+    "codex/dsh-rc2-candidate",
+    "codex/fix-dependabot-fastapi141",
+    "shinemage-t14-html-ocr",
+    "security-audit-skill/"
+  ],
+  "remaining_local_ref_cleanup": {
+    "stale_remote_tracking": [
+      "origin/codex/shinemage-final",
+      "origin/codex/docs-maintenance-closeout",
+      "origin/codex/docs-postmerge-20261010"
+    ],
+    "requires_separate_authorization": true
+  },
+  "release_state": {
+    "product": "PARTIAL",
+    "sdk_distribution": "BLOCKED",
+    "release_ready": false
+  }
+}
