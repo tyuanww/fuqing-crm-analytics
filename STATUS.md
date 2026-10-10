@@ -9,7 +9,7 @@
 
 | 项 | 状态 |
 |---|---|
-| Git | 当前集成分支 codex/shinemage-abc-local-candidate，本地 HEAD `850976f2`；相对 origin/main 领先 92、落后 0。候选远程分支 `codex/shinemage-final` 同一 SHA，PR #111 仍 OPEN、未合并。未跟踪的 security-audit-skill/ 是独立目录，不纳入提交。 |
+| Git | 当前集成分支 codex/shinemage-abc-local-candidate，本地 HEAD `55e268af`；相对 origin/main 领先 93、落后 0。候选远程分支 `codex/shinemage-final` 同一 SHA，PR #111 仍 OPEN、未合并。未跟踪的 security-audit-skill/ 是独立目录，不纳入提交。 |
 | 插件解耦 | 插件构建要求显式绝对上游、build-tools 和输入包；已移除主仓 .context 回退。CRM/看板/知识与 Workbench 的边界证据保持独立记录。 |
 | 本地验证 | 固定 Node 24、Python 3.14；定向 release/protocol/SDK/map/HTML 与边界检查已通过。完整推送前矩阵按正常 hook 执行，真实跳过原因保留。 |
 | 产品 | PARTIAL；SDK 分发 BLOCKED；release_ready=false。 |
