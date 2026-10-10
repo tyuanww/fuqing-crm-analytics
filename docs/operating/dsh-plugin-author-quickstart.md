@@ -2,6 +2,8 @@
 
 这条路径只验证一个插件包。DSH、CRM 服务、知识库和真实业务数据不随插件构建；插件失败时保留 DSH 原生对话是 T17 宿主验收目标，当前 pack/candidate 尚不能证明进程隔离。插件包默认不得覆盖原生标题、侧栏、会话或工具合同，未接通的 capability 必须显示 `NOT_AVAILABLE` 及原因。
 
+主仓与插件仓的长期职责、清理规则和 DSH 升级路径见[维护、清理与升级手册](./shinemage-maintenance-and-cleanup.md)。日常只改一个插件时，不重建 DSH、不迁移数据库，也不从官网安装浮动 `latest`；使用主仓记录的固定 DSH/kit 输入，在插件自己的远程仓和 CI 产出带摘要的包，再由主仓 profile 按 digest 组合。
+
 单插件更新十场、整次取消和 HTML headed 探针的现有命令、输入范围及实际结果见[A/B/C 集成验收](../hackathon/evidence/shinemage-abc-integration-20261008.md)。这些是隔离验收入口，不是安装到现役环境的命令；进程级恢复通过不等于支持热插拔。
 
 ## 前置条件
@@ -72,15 +74,19 @@ kit可复用标准pnpm虚拟store中已安装的领域包：先验证原锁tar�
 
 ## 三步本地路径
 
+下面是主仓 workspace 适配器的本地回归路径。独立插件作者仓应优先使用其仓库自己的 README/CI 和显式绝对输入；不要把下面的相邻 workspace 路径复制为独立仓依赖。
+
 ```bash
 # 1. 只读检查当前 profile、工具链和本地合同
 pnpm dsh doctor
 pnpm dsh verify --scope local
 
-# 2. 在插件目录构建和测试（upstream 路径必须是固定 checkout）
+# 2. 在插件目录构建和测试（upstream/build-tools 必须是固定绝对路径）
+export B0_BUILD_UPSTREAM=/absolute/pinned-dsh-checkout
+export B0_BUILD_TOOLS=/absolute/reviewed-build-tools
 node scripts/dsh-b0/plugin-kit-link.mjs "$PWD/dsh-plugins/shine-brand" "$PWD/dsh-plugins/plugin-kit"
 cd dsh-plugins/shine-brand
-pnpm build "$PWD/../../.context/dsh-b0/upstream-0.1.7-rc.2"
+pnpm build "$B0_BUILD_UPSTREAM" "$B0_BUILD_TOOLS"
 pnpm test
 
 # 3. 回到仓库根目录生成独立 candidate receipt

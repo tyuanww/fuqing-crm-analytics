@@ -2,6 +2,17 @@
 
 适用于成果工作树的本地补丁；是否已集成，以该工作树 Git 状态和远端证据为准。授权见 [AGENTS](../../AGENTS.md)。当前施工与缺口看根 [STATUS.md](../../STATUS.md) 和 [TODOS 的 M1 核心交付](../hackathon/TODOS.md#m1-核心交付)。黑客松入口与 [治理实施记录](../hackathon/WORKFLOW-GOVERNANCE-2026-09-06.md) 是历史证据链，不是本轮任务卡。
 
+## 先按变更类型选验证
+
+| 变更 | 先跑什么 | 不自动扩大到什么 |
+|---|---|---|
+| 一个独立插件 | 插件仓自己的 frozen install、build、包级测试、内容摘要和边界负测；主仓只跑受影响合同 | 不重建 DSH、不迁移数据库、不把插件测试写成生产或全量 SDK 通过 |
+| DSH pin、host、profile 或跨插件合同 | 固定上游的 B0、host/合同矩阵、candidate 输入和相应 CI | 不继承旧包、旧 WSL/浏览器回执或浮动 `latest` |
+| 服务/API/权限合同 | 服务包与兼容窗口、权限/幂等/回放和受影响插件组合 | 不读取真实 DuckDB、不连接杭州或 WeKnora 生产 |
+| 仅文档/证据 | 差异、链接、当前 SHA 和未执行项检查 | 不用旧 PASS 数替代当前运行 |
+
+插件日常更新和 DSH 升级是两条变更轴，完整顺序见[维护、清理与升级手册](./shinemage-maintenance-and-cleanup.md)。SDK 分发审计只在实际触及 SDK 分发或适用发布门禁时执行，不作为每次单插件更新的前置条件。
+
 ## 单一检查定义
 
 `scripts/ci/pre_push_path_class.py:verification_plan` 定义互相独立的 backend/B0/frontend/tooling/dependencies/deployment 维度，依赖审计细分为 python_dependencies/frontend_dependencies，另有 ground_truth 与 filterbuilder 触发轴；`scripts/ci/run_checks.py` 生成并执行命令。本地 pre-push、PR 的 Python/Vue/B0 检查共用它；PR CI 只通过 `lint.yml` 调用一次 `check-plan.yml`。`dsh-b0.yml` 仅 `workflow_dispatch` 做空机器 `--prepare`。B0 的本地与 CI 构建始终调用既有 `scripts/dsh-b0/pipeline.mjs`。`merge-gate` 在路径计划失败或已选 job 失败/取消时阻断；skip 不算失败。分支保护属于远端配置；2026-09-09 核验已包含 `b0-contract-build` 和 `merge-gate`，本轮不调整必需检查。

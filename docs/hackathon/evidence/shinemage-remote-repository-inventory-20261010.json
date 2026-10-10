@@ -1,0 +1,34 @@
+{
+  "schema": "shinemage-remote-repository-inventory/v1",
+  "date": "2026-10-10",
+  "repository": "https://github.com/tyuanww/fuqing-crm-analytics",
+  "main": {
+    "head": "1855477afa346617662ea4ff6e292e5b52f22206",
+    "protected": true,
+    "merged_pull_request": 111,
+    "candidate_branch": {
+      "name": "codex/shinemage-final",
+      "head": "650552e7bde94a682772ffd2218904187460ac69",
+      "status": "retained"
+    },
+    "final_ci": "success",
+    "post_merge_push_ci": "success"
+  },
+  "plugin_repositories": [
+    {"name": "dsh-analytics-workbench", "private": true, "default_branch": "main", "remote_present": true},
+    {"name": "dsh-crm-knowledge", "private": true, "default_branch": "main", "remote_present": true},
+    {"name": "dsh-knowledge", "private": true, "default_branch": "main", "remote_present": true},
+    {"name": "dsh-shine-board", "private": true, "default_branch": "main", "remote_present": true},
+    {"name": "dsh-shine-brand", "private": true, "default_branch": "main", "remote_present": true},
+    {"name": "dsh-shine-crowd-action", "private": true, "default_branch": "main", "remote_present": true},
+    {"name": "dsh-shine-funnel", "private": true, "default_branch": "main", "remote_present": true},
+    {"name": "dsh-shine-query", "private": true, "default_branch": "main", "remote_present": true},
+    {"name": "dsh-shine-waterfall", "private": true, "default_branch": "main", "remote_present": true}
+  ],
+  "plugin_ci_observation": {
+    "readable_success_count": 8,
+    "not_rechecked": ["dsh-shine-crowd-action"],
+    "reason": "single gh run-list request ended with TLS handshake timeout"
+  },
+  "deletion": "NOT_RUN"
+}

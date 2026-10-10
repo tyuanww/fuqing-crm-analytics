@@ -2,9 +2,11 @@
 
 当前提交、版本和现役见 [STATUS](./STATUS.md)。目录、端口和检索见 [维护地图](./docs/operating/maintainer-map.md)。对话生成 HTML 的步骤见 [从对话生成 HTML 驾驶舱](./docs/operating/cockpit-native-html.md)。产品仍 PARTIAL。
 
-> 最近生产记录（[STATUS](./STATUS.md) 的 2026-10-07 核验）：产品 VERSION `0.20.0.0`，DSH `0.1.7-rc.2`，固定 upstream `477b4f42`；杭州 current 为 `dsh-0.20.0.0-r3`。本轮未复查或切换生产，新的插件候选未激活。产品仍 PARTIAL；局部合成验证不能替代真实模型、完整业务 UAT、生产准入及回退证据。后续发布必须从 clean reviewed commit 生成新的 immutable artifact，禁止 `git pull` 或现场编译。
+> 最近生产记录（[STATUS](./STATUS.md) 的 2026-10-09 现场记录）：产品 VERSION `0.20.0.0`，DSH `0.1.7-rc.2`，固定 upstream `477b4f42`；杭州 current 仍为 `dsh-0.20.0.0-r3`。本地 A/B/C 候选没有部署，新的插件候选未激活。产品仍 PARTIAL；局部合成验证不能替代真实模型、完整业务 UAT、生产准入及回退证据。后续发布必须从 clean reviewed commit 生成新的 immutable artifact，禁止 `git pull` 或现场编译。
 
-> 当前 A/B/C 集成（2026-10-08）：单插件更新与取消、固定宿主进程级恢复、HTML headed 验收和 SDK 信任盘查见[本轮集成验收](./docs/hackathon/evidence/shinemage-abc-integration-20261008.md)。全量 B0、SDK 分发与生产门禁仍有开放项；这份本地集成记录不代表新 Release。
+> 主仓收口（2026-10-10）：PR [#111](https://github.com/tyuanww/fuqing-crm-analytics/pull/111) 已合并到远端 `main`，merge commit `1855477a`。主仓现在承担 DSH pin、profile、跨插件合同、组合验证和交付文档；CRM、知识、看板和其他业务能力由独立插件仓维护。插件日常更新、主仓同步和 DSH 升级的边界见[维护、清理与升级手册](./docs/operating/shinemage-maintenance-and-cleanup.md)。SDK 分发仍 BLOCKED，产品仍 PARTIAL，未授权的生产/发布门禁仍保持未执行。
+
+> A/B/C 集成记录（2026-10-08）是历史证据：单插件更新与取消、固定宿主进程级恢复、HTML headed 验收和 SDK 信任盘查见[本轮集成验收](./docs/hackathon/evidence/shinemage-abc-integration-20261008.md)。它不替代当前主仓合并状态，也不代表新的 Release。
 
 下方9月5–10日的决策、端口和候选追加保留为历史记录，不作为当前服务或Git HEAD。
 
@@ -12,7 +14,7 @@
 
 > **历史价值定稿（2026-09-05）**：已确认让老板拍板一个有边界的天猫内部跨渠道客户增长试点，主线是“渠道 × 首购商品 × 后续购买”。见 [CEO 价值与首版决策方案](./docs/hackathon/CEO-VALUE-PLAN.md)。本段保留当时决策语境；当前运行和公网事实以 STATUS/HANDOVER 为准。
 
-> **当前交付（2026-09-10）**：competition 集成 #112 和 7 项审查修复 #114 已合入 main `788b5b1`；PR 与合并后的主线 CI 均通过。独立合成浏览器已验证连续成板、失败重试、保存布局重开及行动草稿 v2，见 [修复 QA](./docs/hackathon/COMPETITION-REPAIR-QA-2026-09-10.md)。当前按 [产品验收与发布准备账本](./docs/hackathon/PRODUCT-READINESS-2026-09-10.md) 推进；[单位来源修复](./docs/hackathon/COMPUTED-UNITS-DELIVERY-2026-09-10.md)已完成本地验证、五库恢复、候选切换和局部真实复测。T13 已有真实 DeepSeek 有界实测，T15 待本人验收，T16 仅合成单用户基线，T17 PARTIAL，整产品仍 PARTIAL。约千万行、10 人使用仍是规划输入，公网尚未部署。
+> **历史交付（2026-09-10）**：competition 集成 #112 和 7 项审查修复 #114 已合入 main `788b5b1`；PR 与合并后的主线 CI 均通过。独立合成浏览器已验证连续成板、失败重试、保存布局重开及行动草稿 v2，见 [修复 QA](./docs/hackathon/COMPETITION-REPAIR-QA-2026-09-10.md)。当时按 [产品验收与发布准备账本](./docs/hackathon/PRODUCT-READINESS-2026-09-10.md) 记录；[单位来源修复](./docs/hackathon/COMPUTED-UNITS-DELIVERY-2026-09-10.md)已完成本地验证、五库恢复、候选切换和局部真实复测。后续验收与关闭状态以带日期的 STATUS/TODOS 和证据为准。
 
 > **候选追加**：4325/18083 均为 `84b0ac8`，模型配置和原资产保持，现有 2 块板、10 条结果、原草稿 v2；单位/标识/自动保存表述在本次真实用例通过，完整 T13 及 B0 404 仍开放，见[当前记录](./docs/hackathon/COMPUTED-UNITS-CANDIDATE-2026-09-10.md)。
 
@@ -50,7 +52,7 @@
 
 ### rc2 稳定交付入口
 
-插件作者若只修改一个独立包，先看 [DSH 插件作者 Quickstart](./docs/operating/dsh-plugin-author-quickstart.md)，不要重复执行整仓发布。
+插件作者若只修改一个独立包，先看 [DSH 插件作者 Quickstart](./docs/operating/dsh-plugin-author-quickstart.md) 和[维护、清理与升级手册](./docs/operating/shinemage-maintenance-and-cleanup.md)，不要重复执行整仓发布。
 
 在候选提交上先运行本地合同；已有固定 runtime bundle 时再做只读发布检查。首次候选没有 runtime 时，直接运行正式 preflight，由它生成同一份 immutable artifact：
 
@@ -100,7 +102,7 @@ PYTHONPATH="$(pwd)" /Users/yourname/homebrew/bin/python3 scripts/run_etl.py --up
 #### 3. 即席查询 CLI（`/ad-hoc-query` skill, Sprint 171 v2.0）
 
 ```bash
-# 10 个子命令: daily-gsv / yoy-battle / channel-slice /
+# 10 个面向用户的子命令（skill 另有 18 个工具入口）: daily-gsv / yoy-battle / channel-slice /
 #   two-year-overview / new-old-customer / rfm-repurchase /
 #   top-n / export-excel / dq-report / ask NL 路由
 PYTHONPATH="$(pwd)" python3 scripts/ad_hoc_query.py <cmd> [args]
@@ -129,6 +131,7 @@ cd frontend-vue3 && npx playwright test                   # E2E
 | **版本变更** | [`CHANGELOG.md`](./CHANGELOG.md) · 老条目 `docs/history/CHANGELOG_HISTORY.md` |
 | **AI 行为规则** | [`AGENTS.md`](./AGENTS.md)（唯一正文；CLAUDE 仅导入）；旧 CRM L4 细则按主题查阅 |
 | **当前交付 / 整洁** | [Mac 开发到杭州生产链路](./docs/operating/mac-hangzhou-git-workflow.md)；历史协作参考 [`team-workflow-v1.md`](./docs/operating/team-workflow-v1.md) · [`project-hygiene.md`](./docs/operating/project-hygiene.md) |
+| **插件维护 / 本机与远程清理** | [`维护、清理与升级手册`](./docs/operating/shinemage-maintenance-and-cleanup.md) |
 | **AI 增长董事会** | [`docs/hackathon/README.md`](./docs/hackathon/README.md) · [`MISSION-API.md`](./docs/hackathon/MISSION-API.md) |
 | **视觉与交互基线** | [`DESIGN.md`](./DESIGN.md) |
 
@@ -143,6 +146,7 @@ cd frontend-vue3 && npx playwright test                   # E2E
 | [`AGENTS.md`](./AGENTS.md) | **AI 行为规则 / 授权 / 架构 / 分级验证** |
 | [`docs/operating/ship.md`](./docs/operating/ship.md) | 历史交付记录；当前 Git 动作按 AGENTS.md |
 | [`docs/operating/dsh-rc2-quickstart.md`](./docs/operating/dsh-rc2-quickstart.md) | rc2 artifact 准备教程 |
+| [`docs/operating/shinemage-maintenance-and-cleanup.md`](./docs/operating/shinemage-maintenance-and-cleanup.md) | 插件更新、DSH 升级、证据留存与本机/远程清理 |
 | [`docs/reference/dsh-rc2-release-artifact.md`](./docs/reference/dsh-rc2-release-artifact.md) | dsh release/receive/verify 命令与 artifact 合同 |
 | [`docs/architecture/dsh-release-trust.md`](./docs/architecture/dsh-release-trust.md) | immutable artifact、allowlist 和回退设计说明 |
 | [`docs/operating/automation.md`](./docs/operating/automation.md) | 当前本地 hooks/Skills 边界与历史自动化记录 |
