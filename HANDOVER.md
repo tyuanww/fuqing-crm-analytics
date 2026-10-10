@@ -1,9 +1,11 @@
 # 交接说明（短表）
 
-> **最后更新**: 2026-09-29。当前 release 分支产品 VERSION **0.19.0.0**，DSH 固定为 0.1.7-rc.2；GitHub Release、杭州 artifact 安装与切换尚未执行。杭州现役仍是 DSH 0.1.7-rc.1 的旧 checkout，候选未切换。见 [STATUS.md](STATUS.md)。
+> **最后更新**: 2026-10-10。当前产品 VERSION、公开 `main`、DSH pin 和未关闭门禁只看 [STATUS.md](STATUS.md)；PR #111、#112 已合并，当前 `main` 的完整 SHA 及 post-merge CI 见[远端事实记录](docs/hackathon/evidence/shinemage-remote-repository-postmerge-20261010.md)。下方杭州入口与运行路径保留为 2026-09-29 的历史快照，不代表当前生产切换或候选已激活。
 > 细节以代码与下列 SSOT 为准，**不要**在本文件堆 sprint 日记。
 
-## 现役入口
+## 历史运行入口快照（2026-09-29）
+
+以下表格只描述 2026-09-29 当时的入口和运行归属；当前 Git、版本、候选和生产边界以 [STATUS.md](STATUS.md) 的带日期记录为准。
 
 | 入口 | 结果/职责 |
 |---|---|
