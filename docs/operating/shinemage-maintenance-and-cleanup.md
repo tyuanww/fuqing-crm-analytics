@@ -19,10 +19,10 @@
 
 这是默认路径。它不重建 DSH、不迁移数据库，也不重复 SDK 全量审计。
 
-1. 在目标插件的独立仓库创建分支，确认版本、peer 和变更说明。
-2. 使用已审查的固定 kit、上游 checkout、build-tools 和领域输入。所有路径使用绝对路径，缺输入就停止；不从相邻 worktree 或 `.context` 回退。
+1. 从目标插件已审查的分支和完整 SHA 创建更新分支，确认对应 CI、版本和 peer；PR #1 未合并时，默认 `main` 不能代替该产品基线。具体核验命令见[插件更新指南](./shinemage-plugin-update.md)。
+2. 按该仓选择构建路径：shine-brand 默认使用自身 `npm-author` 锁定的公开编译工具，不需要上游 checkout 或 SDK；其他八仓的固定 SDK 路径使用已审查的 kit、上游 checkout、build-tools 和领域输入。固定输入路径使用绝对路径，缺输入就停止；不从相邻 worktree 或 `.context` 回退。
 3. 在插件仓运行自己的 frozen install、build、测试、包内容检查和边界负测。记录包摘要、输入摘要、测试范围和未执行项。
-4. 通过插件仓 CI 后生成不可变 content pack。普通 content pack 不自动等于 `dsh-plugin-pack/v1` 或 `dsh-plugin-candidate/v1`。
+4. 分开记录 CI/内容校验回执与实际保留的 content pack。shine-brand 的 `verify-pack.mjs` 校验后删除临时 tarball，不能把日志当作已留存的包；需要交付时另走保留产物的步骤。普通 content pack 不自动等于 `dsh-plugin-pack/v1` 或 `dsh-plugin-candidate/v1`。
 5. 在主仓只有组合选择发生变化时才更新 profile；插件版本/字节变化由正式 pack/candidate 回执记录，并同步兼容记录，再跑受影响的组合合同。插件失败时应显示 `disabled`/`NOT_AVAILABLE` 和原因，并保留 DSH 原生回退。
 6. 只有在适用的 host、服务、目标平台和发布门禁都有新证据时，才进入 candidate、journal、receive 或 activate。没有这些输入就保持 `NOT_RUN`，不借用旧包的 PASS。
 

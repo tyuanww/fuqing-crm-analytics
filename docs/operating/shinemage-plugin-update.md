@@ -10,7 +10,7 @@
 插件仓库分支
     │  frozen install / build / test / pack
     ▼
-不可变 content pack + source/input/digest 记录
+内容校验回执 + source/input/digest 记录（保留包时另记 tarball 路径）
     │  插件仓 CI 与 PR
     ▼
 主仓 profile（仅在组合变化时更新）
@@ -24,7 +24,8 @@
 ## 前置条件
 
 - 目标插件的独立远程仓及其 README/CI 已确定。当前九个仓的远程状态见[远程插件收口复核](../hackathon/evidence/shinemage-plugin-remote-closeout-20261010.md)。
-- Node `24.19.0`、pnpm `11.28.2`、固定 DSH 上游 `477b4f420553e8a52c2fbccc464d7561b239c443` 和审核过的 build-tools/kit 输入已准备。路径必须是绝对路径。
+- Node `24.19.0` 已准备。shine-brand 的默认公开编译路径使用 npm `11.17.0` 安装 `npm-author/package-lock.json` 中的精确依赖，打包使用其中的 pnpm `11.28.2`，不需要上游 checkout、build-tools 或 kit。它只做语法转换，不代表严格 SDK 类型检查或宿主兼容。
+- 其余八仓的固定 SDK 路径，以及 shine-brand 保留的兼容入口，需要 pnpm `11.28.2`、固定 DSH 上游 `477b4f420553e8a52c2fbccc464d7561b239c443` 和审核过的 build-tools/kit 输入；路径必须是绝对路径。首次准备与已有输入复用分别按目标仓的 `DEVELOPMENT.md` 和 CI 执行。
 - 图表插件还需要版本与 SHA 已锁定的 `@shine-mage/board-components` tarball；CRM/知识插件使用各自声明的服务合同输入。
 - 目标目录是新的、由本次运行独占的目录。失败输出保留，不覆盖旧 candidate、旧 journal 或旧证据。
 
@@ -32,14 +33,25 @@
 
 ### 1. 在插件仓建立干净分支
 
+先选定已审查的产品分支、完整 SHA 和对应 CI 回执。2026-10-11 复核时九仓的 PR #1 均未合并，默认 `main` 仍是初始提交，不能直接从默认 clone 的 HEAD 开始更新。下面只示范 shine-brand 已核验的产品基线；其他插件不能只替换仓库名，必须同时替换分支、SHA 和后续构建入口。远端分支前移导致 SHA 不符时停止，先审查新基线。
+
 ```bash
-plugin_repo="dsh-shine-brand"     # 替换为目标独立仓库名
-topic="update-revenue-label"      # 替换为本次完整变化的主题
-git clone "https://github.com/tyuanww/${plugin_repo}.git"
+set -euo pipefail
+plugin_repo="dsh-shine-brand"
+reviewed_branch="codex/shine-brand-independent"
+reviewed_sha="2d7c17c2afa8050fc2d6b5def6af34fcaf821667"
+topic="update-brand-label"       # 本次完整变化的主题
+pr_base="$reviewed_branch"       # PR #1 未合并时，新 PR 以产品分支为 base
+git clone --no-checkout --single-branch --branch "$reviewed_branch" \
+  "https://github.com/tyuanww/${plugin_repo}.git"
 cd "$plugin_repo"
-git switch -c "codex/${topic}"
+git fetch origin "refs/heads/${reviewed_branch}"
+test "$(git rev-parse --verify 'FETCH_HEAD^{commit}')" = "$reviewed_sha"
+git switch -c "codex/${topic}" "$reviewed_sha"
 git status --short --branch
 ```
+
+该产品基线的[PR #1](https://github.com/tyuanww/dsh-shine-brand/pull/1)与[CI 回执](https://github.com/tyuanww/dsh-shine-brand/actions/runs/37802176213)不包含后续本地文档提交。相关 PR 合并后，改用已核验的 `main` SHA，并将 `reviewed_branch`、`pr_base` 改为 `main`；不要沿用旧 SHA 推断新主线已通过。
 
 确认只在这个插件仓工作。不要把主仓的 `dsh-plugins/`、相邻 worktree、`node_modules` 或主仓 `.context` 复制进来。先读插件自己的 `README.md` 和 `AGENTS.md`（若存在），确认包名、版本、peer、输入摘要和本仓的 CI 入口。
 
@@ -48,26 +60,41 @@ git status --short --branch
 ```bash
 export COREPACK_ENABLE_NETWORK=0
 export COREPACK_ENABLE_AUTO_PIN=0
-export B0_BUILD_UPSTREAM=/absolute/pinned-dsh-checkout
-export B0_BUILD_TOOLS=/absolute/reviewed-build-tools
-export DSH_PACKAGE_INPUTS=/absolute/locked-domain-inputs   # 需要领域包时
 ```
 
-独立作者仓通常用仓库内的 `author-inputs.mjs` 或 `check-inputs` 创建新的开发目录；以插件 README 的实际命令为准。输入缺失、摘要不符、相对路径、额外文件或既有输出目录应当失败。不要关闭 TLS、放宽版本检查或改用 `latest`。
+shine-brand 的公开编译路径直接进入下一步，在自己的 `npm-author/` 安装锁定工具。只有选择固定 SDK 路径时才配置以下目录，并按该仓说明设置它自己的 pnpm JS 入口变量：
+
+```bash
+export B0_BUILD_UPSTREAM=/absolute/pinned-dsh-checkout
+export B0_BUILD_TOOLS=/absolute/reviewed-build-tools
+export DSH_PACKAGE_INPUTS="$PWD/inputs/package-inputs"   # 没有领域包时也保留本仓声明的空输入目录
+```
+
+当前独立仓已经带有自己的开发根、锁、vendor 与输入说明，不需要复制主仓的 `author-inputs.mjs` 流程。已有固定输入由 `check-inputs` 核验；首次准备使用本仓 CI/开发说明中的入口。输入缺失、摘要不符、相对路径、额外文件或既有输出目录应当失败。不要关闭 TLS、放宽版本检查或改用 `latest`。
 
 ### 3. 构建、测试并检查内容
 
-在插件仓运行其声明的 frozen install、build、包级测试和内容检查。常见形状如下，命令名以目标仓为准：
+下面命令只适用于步骤 1 的 shine-brand 基线，在作者仓根运行，与该基线的 `DEVELOPMENT.md` 和 `.github/workflows/ci.yml` 一致。首次安装需要 npm registry；未修改锁和依赖的后续源码迭代可复用本仓已安装工具：
 
 ```bash
-pnpm install --frozen-lockfile --offline
-pnpm build "$B0_BUILD_UPSTREAM" "$B0_BUILD_TOOLS"
-pnpm test
-pnpm pack --pack-destination /absolute/new-pack-directory
-sha256sum /absolute/new-pack-directory/*.tgz
+set -euo pipefail
+test "$(node --version)" = v24.19.0
+test "$(npm --version)" = 11.17.0
+npm ci --prefix npm-author --ignore-scripts --no-audit --no-fund
+node npm-author/build.mjs
+node --test scripts/build-input.test.mjs scripts/pinned-pnpm.test.mjs npm-author/build.test.mjs plugin/src/brand-surface.test.mjs plugin/src/client-lifecycle.test.mjs
+export SHINE_BRAND_PNPM_ENTRY="$PWD/npm-author/node_modules/pnpm/bin/pnpm.mjs"
+evidence_dir="$(mktemp -d "${TMPDIR:-/tmp}/shine-brand-content-check.XXXXXX")"
+node scripts/verify-pack.mjs > "$evidence_dir/content-pack.log" 2>&1
+cat "$evidence_dir/content-pack.log"
+printf '内容校验日志：%s\n' "$evidence_dir/content-pack.log"
 git diff --check
 git status --short
 ```
+
+shine-brand 的 `verify-pack.mjs` 在临时 staging 中打包，校验五个成员及其摘要，输出内容回执后删除临时 tarball；上例保存的是日志，不能声称该日志目录里已有可安装包。需要留存/交付包时，按该仓实际支持的保留产物流程处理；正式 candidate 则走步骤 6，并为实际保留的包重新记录路径和摘要。
+
+其他八仓按选定 SHA 中的 `DEVELOPMENT.md` 和完整构建 workflow 执行各自的安装、输入预检、构建、包级测试及 `scripts/verify-pack.mjs`。这些仓的 pnpm 入口变量、测试集合、输出目录和是否保留 tarball 不完全相同，不能套用上面的 shine-brand 命令。九仓根 `package.json` 都是开发 wrapper，没有通用 `build/test` scripts；实际插件在 `plugin/`。不要在根目录直接运行 `pnpm build`、`pnpm test` 或 `pnpm pack`，也不要用根开发工程包替代插件内容包。
 
 记录以下事实：提交 SHA、包名/版本、tarball SHA-256、输入摘要、测试命令和退出码。检查 tarball 只含声明的运行时文件、入口和合同；不应包含 `src/`、测试、`node_modules`、kit、开发锁或 source map。包通过不代表宿主、服务、真实模型或生产通过。
 
@@ -78,11 +105,11 @@ reviewed_files=(plugin/package.json plugin/build.mjs)  # 按仓库实际审查�
 git add -- "${reviewed_files[@]}"
 git commit -m "feat(plugin): describe one complete change"
 git push -u origin "codex/${topic}"
-gh pr create --fill
+gh pr create --base "$pr_base" --fill
 gh pr checks --watch
 ```
 
-提交只包含一个完整目的。CI 通过后，在 PR 描述中写清固定输入、包摘要、测试范围和未执行项。当前独立仓的 fixed-inputs CI 只证明各自声明的构建链；它不等于主仓组合验收、正式 DSH candidate 或生产发布。合并插件 PR 需要另行授权。
+提交只包含一个完整目的。CI 通过后，在 PR 描述中写清固定输入、包摘要、测试范围和未执行项；只有拿到实际保留的 tarball 才登记可交付包路径。PR #1 尚未合并时，说明新 PR 对该产品分支的依赖，不把继承的整段历史当作这次单插件变化。当前独立仓的 CI 只证明各自声明的构建链；它不等于主仓组合验收、正式 DSH candidate 或生产发布。合并插件 PR 需要另行授权。
 
 #### 目录发现与安装通道另行放行
 
@@ -172,6 +199,6 @@ CRM/知识组合必须把上例的 profile 换成 `config/dsh-profile.crm-knowle
 
 ## 你现在拥有的结果
 
-完成本指南后，你拥有一个可复现的插件提交、一个经过 CI 的普通 content pack，以及（若从同一干净提交重新生成正式 pack 并明确准备组合输入）一条可审查的 candidate 身份链。普通包与正式 pack 的摘要分别记录，不能互相替代。DSH 主仓仍可独立升级，插件也可单独迭代；两者不会因为一次普通插件更新被隐式捆绑。
+完成本指南后，你拥有一个可复现的插件提交和对应 CI/内容校验回执；只有执行并核验了保留产物的步骤，才拥有可交付的普通 content pack。若从同一干净提交重新生成正式 pack 并明确准备组合输入，还可建立一条可审查的 candidate 身份链。普通包与正式 pack 的摘要分别记录，不能互相替代。DSH 主仓仍可独立升级，插件也可单独迭代；两者不会因为一次普通插件更新被隐式捆绑。
 
 相关入口：[维护、清理与升级手册](./shinemage-maintenance-and-cleanup.md) · [DSH 插件作者 Quickstart](./dsh-plugin-author-quickstart.md) · [当前验证入口](./verification.md) · [插件平台边界](../architecture/shinemage-plugin-platform.md)

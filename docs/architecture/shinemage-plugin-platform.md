@@ -15,7 +15,7 @@
 
 ## 开发工具与运行时分开
 
-`dsh-plugins/plugin-kit` 只拥有固定工具链、依赖锁与构建绑定；它不导入业务插件、不读取服务状态、不进入插件 tarball。插件自己的类型检查、测试、生成物与业务行为由插件维护。10 个构建消费者已使用精确开发依赖及 kit 公开导出；仓库内由显式 workspace 适配器连接，独立作者工程消费已核对的 kit tarball，见[作者入口](../operating/dsh-plugin-author-quickstart.md)。这不代表 kit 已在 registry 发布或 SDK 已获准分发。
+`dsh-plugins/plugin-kit` 只拥有固定工具链、依赖锁与构建绑定；它不导入业务插件、不读取服务状态、不进入插件 tarball。插件自己的类型检查、测试、生成物与业务行为由插件维护。10 个固定 SDK 构建消费者已使用精确开发依赖及 kit 公开导出；仓库内由显式 workspace 适配器连接，采用该路径的独立作者工程消费已核对的 kit tarball。shine-brand 独立仓另有默认公开编译路径，使用自身 `npm-author` 锁，不读取上游 checkout 或 SDK，只做语法转换；它不取代严格 SDK 类型检查与宿主验收。具体路径见[作者入口](../operating/dsh-plugin-author-quickstart.md)。这不代表 kit 已在 registry 发布或 SDK 已获准分发。
 
 `toolchain.json`、build-tools manifest/lock/补丁现在位于 kit；release、B0 pipeline、开发入口和合同生成器读取同一份 pin。不能为了让一个包构建成功，静默从相邻历史仓库找依赖。已准备的第三方依赖可以复用，但须与 kit 锁定输入一致。
 

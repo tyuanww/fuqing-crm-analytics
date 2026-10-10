@@ -10,7 +10,7 @@
 | 项 | 状态 |
 |---|---|
 | Git | PR #111–#118 均已合并；当前远端 `main` 为 `4859d136`，PR #118 是 PR #117 后的主线事实同步。合并后的 `main` CI run `38066459376` 通过；实时主线以远端 `main` 和 GitHub CI 为准。三个已合并候选远程分支已按授权删除，本地旧分支引用和 stale `origin/*` tracking 引用仍单独保留待整理。原集成树的 `security-audit-skill/` 是独立目录，不纳入主仓。详见[最新 post-merge 远端事实](docs/hackathon/evidence/shinemage-remote-repository-postmerge-r4-20261011.md)和[本次清理证据](docs/hackathon/evidence/shinemage-local-cleanup-20261010.md)。 |
-| 插件解耦 | 插件构建要求显式绝对上游、build-tools 和输入包；已移除主仓 .context 回退。CRM/看板/知识与 Workbench 的边界证据保持独立记录。 |
+| 插件解耦 | 固定 SDK 构建路径要求显式绝对上游、build-tools 和输入包，已移除主仓 .context 回退；shine-brand 独立仓的默认公开编译路径使用自身 npm 锁，不读取上游或 SDK，且不代表严格 SDK 类型检查。CRM/看板/知识与 Workbench 的边界证据保持独立记录。 |
 | 独立仓 | 九个插件已有独立私有远程仓；本次复核显示九仓各有一个开放 PR #1、最近 fixed-inputs CI 成功、均无 GitHub Release；`dsh-shine-crowd-action` 另保留较早 full CI 失败。详见[远程仓收口复核](docs/hackathon/evidence/shinemage-plugin-remote-closeout-20261010.md)。主仓继续维护 DSH 集成合同、profile、组合验证和历史副本，正式物理分仓仍按 stop/go 约束推进。普通 content pack 不等于正式 dsh-plugin-pack/candidate。 |
 | 本地验证 | 固定 Node 24、Python 3.14；定向 release/protocol/SDK/map/HTML 与边界检查已通过。推送钩子按路径计划执行适用检查，真实跳过原因保留。 |
 | 产品 | PARTIAL；SDK 分发 BLOCKED；release_ready=false。 |
