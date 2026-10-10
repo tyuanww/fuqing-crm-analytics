@@ -86,7 +86,7 @@ gh pr checks --watch
 
 #### 目录发现与安装通道另行放行
 
-[DSH Plugin Hub](https://github.com/dshplugin/dsh-plugin-hub) 可作为目录字段和安装通道的参考，但不能替代本项目的来源锁定、正式 pack 或宿主验收。其当前收录流程要求公开仓库和 `dsh-plugin` topic，并要求 README 给出实际可执行的安装信息；安装器优先使用 npm 包，其次使用绑定固定 tag 的 GitHub Release `.tgz`。目录中的 `verified` 也不等于本项目的 `release_ready=true`。
+[第三方社区 DSH Plugin Hub](https://github.com/dshplugin/dsh-plugin-hub) 可作为目录字段和安装通道的参考，但不能替代本项目的来源锁定、正式 pack 或宿主验收。其当前收录流程要求公开仓库和 `dsh-plugin` topic，并要求 README 给出实际可执行的安装信息；安装器优先使用 npm 包，其次使用目录给出的、符合 `releases/download/<tag>/<asset>.tgz` URL 形状的 GitHub Release 资产。Hub 的这层检查不证明 tag 不可移动，也不核验资产摘要；目录中的 `verified` 同样不等于本项目的 `release_ready=true`。
 
 当前九个 ShineMage 作者仓都是私有仓，没有许可证、topic、tag 或 GitHub Release；仓库根 `package.json` 是开发 wrapper，真实插件清单位于 `plugin/`。因此：
 
@@ -95,7 +95,7 @@ gh pr checks --watch
 - 许可证、公开化、repository topic、包元数据和目录提交分别决策；不能为了被目录发现而放宽 peer、固定输入或来源检查。
 - 插件更新需要重启时继续记录 `HOST_RESTART_REQUIRED`；不复制第三方市场对热加载的概括来扩大本项目的已验证能力。
 
-这些约束来自 2026-10-11 对 Hub 固定源码与[收录说明](https://dsh-plugin.org/zh/submit)的只读核对。Hub 或目录规则变化时重新核验，不能把本段当作永久协议。
+这些约束来自 2026-10-11 对 Hub 固定源码 `0fc6caba44e1d6c6674162ade0f1ef83d412b97d` 的[安装通道选择](https://github.com/dshplugin/dsh-plugin-hub/blob/0fc6caba44e1d6c6674162ade0f1ef83d412b97d/src/client/logic/install-command.ts)、[Release URL 校验](https://github.com/dshplugin/dsh-plugin-hub/blob/0fc6caba44e1d6c6674162ade0f1ef83d412b97d/src/server/services/install/release-target.ts)与[当前收录说明](https://dsh-plugin.org/zh/submit)的只读核对。Hub 或目录规则变化时重新核验，不能把本段当作永久协议。
 
 ### 5. 只有组合确实变化时才改主仓
 

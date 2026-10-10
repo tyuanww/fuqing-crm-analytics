@@ -11,7 +11,7 @@
 | CRM/知识库服务 | API、权限、领域 schema、持久化与迁移协议 | API 兼容窗口、权限、幂等/回放、状态 forward-fix | DSH shell 与其他服务的数据 |
 | profile/部署 | 固定包的有序清单、host pin、来源、digest、回执与回退指针 | 来源信任、同一 artifact、canary、受控激活和恢复 | 构建工具、源代码仓库、现场编译流程 |
 
-不需要先 fork DSH 才能维护插件。当前不修改上游源码，也不自动追随 latest；下一代 DSH 在独立 candidate 中适配后单独升级。[DSH Plugin Hub](https://github.com/dshplugin/dsh-plugin-hub) 只能作为发现/安装参考，不能替代本项目锁定来源和兼容证据；当前私有作者仓也不满足市场收录与正式发布条件，安装通道见[插件更新指南](../operating/shinemage-plugin-update.md#目录发现与安装通道另行放行)。
+不需要先 fork DSH 才能维护插件。当前不修改上游源码，也不自动追随 latest；下一代 DSH 在独立 candidate 中适配后单独升级。[第三方社区 DSH Plugin Hub](https://github.com/dshplugin/dsh-plugin-hub) 只能作为发现/安装参考，不能替代本项目锁定来源和兼容证据；当前私有作者仓也不满足市场收录与正式发布条件，安装通道见[插件更新指南](../operating/shinemage-plugin-update.md#目录发现与安装通道另行放行)。
 
 ## 开发工具与运行时分开
 
