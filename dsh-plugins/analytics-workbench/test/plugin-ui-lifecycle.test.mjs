@@ -102,6 +102,7 @@ function loadClient(hostWindow) {
   let factoryRow;
   view.__ModuleLoader__ = { load: row => { factoryRow = row; } };
   vm.runInNewContext(source, {
+    AbortController,
     window: view,
     localStorage: storage,
     document: view.document,

@@ -2,17 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import { readFile } from 'node:fs/promises';
-import { createRequire } from 'node:module';
+import { upstream, sdk } from './helpers/sdk-inputs.mjs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, resolve, join } from 'node:path';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? resolve(root, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
 
 test('built Host root requires isolated capabilities; tool fails closed without native context', async () => {
   const ui = await import(pathToFileURL(join(root, 'lib/index.js')).href);
   assert.throws(() => ui.apply({}), /explicit isolated capabilities/);
-  assert.deepEqual(ui.inject, ['agents', 'sessions', 'sessionController', 'tools']);
+  assert.deepEqual(ui.inject, ['agents', 'sessions', 'sessionController', 'sessionQuery', 'tools']);
   const host = await import(pathToFileURL(join(root, 'lib/tool.js')).href);
   const registered = [];
   host.apply({ tools: { register: tool => { registered.push(tool); } } });
@@ -25,7 +24,7 @@ test('built Host root requires isolated capabilities; tool fails closed without 
 });
 
 test('built browser factory requires only platform modules and registers shared-root entries', async () => {
-  const webRequire = createRequire(join(upstream, 'apps/web/package.json'));
+  const webRequire = sdk.loadBrowserModule;
   const stores = await import(pathToFileURL(join(upstream, 'packages/client/store/lib/index.js')).href);
   const seed = new Map([
     ['react', webRequire('react')],

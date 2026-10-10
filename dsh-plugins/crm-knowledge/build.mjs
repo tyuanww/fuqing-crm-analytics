@@ -1,50 +1,24 @@
-/** Bind only this plugin to the existing pinned SDK; never install or edit upstream. */
+/** Bind this plugin through the dev-only kit; never install or edit upstream. */
 import assert from 'node:assert/strict';
-import { readFile, mkdir, symlink, realpath } from 'node:fs/promises';
-import { createHash } from 'node:crypto';
-import { createRequire } from 'node:module';
-import { execFileSync } from 'node:child_process';
-import { dirname, resolve, join, relative } from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { dirname, isAbsolute, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const root = dirname(fileURLToPath(import.meta.url));
-const upstream = resolve(process.argv[2] ?? process.env.B0_BUILD_UPSTREAM ?? join(root, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
-const pin = JSON.parse(await readFile(join(root, '../analytics-workbench/toolchain.json')));
-assert.equal(Number(process.versions.node.split('.')[0]), pin.node_major);
-assert.equal(execFileSync('git', ['-C', upstream, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), pin.upstream_sha);
-assert.equal(execFileSync('git', ['-C', upstream, 'status', '--porcelain', '--untracked-files=no'], { encoding: 'utf8' }).trim(), '');
-assert.equal(createHash('sha256').update(await readFile(join(upstream, 'pnpm-lock.yaml'))).digest('hex'), pin.upstream_lock_sha256);
-const req = createRequire(join(upstream, 'package.json'));
-const web = createRequire(join(upstream, 'apps/web/package.json'));
-const vite = createRequire(web.resolve('vite/package.json'));
-const esbuild = vite('esbuild'); assert.equal(esbuild.version, pin.esbuild);
-const ts = req('typescript'); assert.equal(ts.version, pin.typescript);
-const buildTools = resolve(process.argv[3] ?? process.env.B0_BUILD_TOOLS ?? join(root, '../analytics-workbench/build-tools'));
-for (const file of ['package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml', 'patches/antd@5.29.3.patch', 'patches/rc-picker@4.11.3.patch']) {
-  assert.deepEqual(await readFile(join(buildTools, file)), await readFile(join(root, '../analytics-workbench/build-tools', file)));
+const upstreamInput = process.argv[2] ?? process.env.B0_BUILD_UPSTREAM;
+if (!upstreamInput || !isAbsolute(upstreamInput)) {
+  console.error('UPSTREAM_NOT_CONFIGURED: pass the pinned DeepSeek Harness checkout as the first argument or B0_BUILD_UPSTREAM. This build does not search the main repository.');
+  process.exit(2);
 }
-const business = createRequire(join(buildTools, 'package.json'));
-const businessManifest = JSON.parse(await readFile(join(buildTools, 'package.json')));
-const conversation = createRequire(join(upstream, 'packages/client/ui-conversation/package.json'));
-const dependencies = Object.entries(pin.sdk_bindings).map(([name, path]) => [name, join(upstream, path)]);
-dependencies.push(['@deepseek-ai/dsh-api-workspace-controller', join(upstream, 'packages/api/workspace-controller')]);
-dependencies.push(['@deepseek-ai/dsh-host-webserver', join(upstream, 'packages/host/webserver')]);
-for (const [name, resolver, version] of [
-  ['react', web, pin.react], ['react-dom', web, pin.react], ['@types/react', conversation, pin.react_types],
-  ['@types/node', req, pin.node_types], ['antd', business, businessManifest.dependencies.antd],
-  ['@types/react-dom', business, businessManifest.dependencies['@types/react-dom']],
-]) {
-  const path = resolver.resolve(`${name}/package.json`);
-  assert.equal(JSON.parse(await readFile(path)).version, version);
-  dependencies.push([name, dirname(path)]);
+const upstream = resolve(upstreamInput);
+const { bindToolchain } = await import('@shine-mage/dsh-plugin-kit/toolchain');
+const toolsInput = process.argv[3] ?? process.env.B0_BUILD_TOOLS;
+if (toolsInput && !isAbsolute(toolsInput)) {
+  console.error('BUILD_TOOLS_NOT_CONFIGURED: pass an absolute build-tools directory as the third argument or B0_BUILD_TOOLS.');
+  process.exit(2);
 }
-for (const [name, target] of dependencies) {
-  if (name.startsWith('@deepseek-ai/dsh-')) assert.equal(JSON.parse(await readFile(join(target, 'package.json'))).version, pin.sdk_version);
-  const link = join(root, 'node_modules', name); await mkdir(dirname(link), { recursive: true });
-  try { assert.equal(await realpath(link), await realpath(target)); }
-  catch (error) { if (error.code !== 'ENOENT') throw error; await symlink(relative(dirname(link), target), link, 'dir'); }
-}
+const { compiler: ts, build } = await bindToolchain(root, upstream, toolsInput ? resolve(toolsInput) : undefined);
 for (const [entries, types] of [
-  [['src/index.ts', 'src/host.ts', 'src/graph-tools.ts', 'test/contract.typecheck.ts'], ['node']],
+  [['src/index.ts', 'src/host.ts', 'test/contract.typecheck.ts'], ['node']],
   [['src/client/index.tsx'], ['react']],
 ]) {
 const program = ts.createProgram(entries.map(file => join(root, file)), {
@@ -59,9 +33,9 @@ const program = ts.createProgram(entries.map(file => join(root, file)), {
 const errors = ts.getPreEmitDiagnostics(program);
 assert.equal(errors.length, 0, ts.formatDiagnosticsWithColorAndContext(errors, { getCanonicalFileName: x => x, getCurrentDirectory: () => root, getNewLine: () => '\n' }));
 }
-await esbuild.build({ absWorkingDir: root, entryPoints: ['src/index.ts', 'src/host.ts', 'src/graph-tools.ts'], outdir: 'lib', bundle: true, platform: 'node', target: 'node24', format: 'esm', external: ['@deepseek-ai/*'] });
+await build({ absWorkingDir: root, entryPoints: ['src/index.ts', 'src/host.ts'], outdir: 'lib', bundle: true, platform: 'node', target: 'node24', format: 'esm', external: ['@deepseek-ai/*'] });
 const manifest = JSON.parse(await readFile(join(root, 'package.json')));
-const client = await esbuild.build({ absWorkingDir: root, entryPoints: ['src/client/index.tsx'], outfile: 'lib/client.js',
+const client = await build({ absWorkingDir: root, entryPoints: ['src/client/index.tsx'], outfile: 'lib/client.js',
   bundle: true, platform: 'browser', target: 'es2022', format: 'cjs', jsx: 'automatic', minify: true, metafile: true,
   external: ['react', 'react/jsx-runtime', 'react-dom', 'react-dom/client', '@deepseek-ai/*'],
   define: { 'process.env.NODE_ENV': JSON.stringify('production') },

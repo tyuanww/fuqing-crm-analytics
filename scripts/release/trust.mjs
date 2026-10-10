@@ -3,6 +3,7 @@ import { execFile as execFileCallback } from 'node:child_process';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import { assertSchema } from './schema.mjs';
+import { sha256 } from './artifact.mjs';
 
 const TAG = /^dsh-[A-Za-z0-9._-]+$/;
 const SHA40 = /^[0-9a-f]{40}$/;
@@ -21,19 +22,34 @@ export async function verifyReviewedCommit({ sourceSha, reviewedSha, provenanceP
 }
 
 /** Verify a GitHub artifact-attestation bundle without trusting sidecar text. */
-export async function verifyAttestationBundle({ artifactPath, bundlePath, repository, sourceRef, signerWorkflow = null, gh = 'gh' } = {}) {
+export async function verifyAttestationBundle({ artifactPath, bundlePath, repository, sourceRef, sourceSha, signerWorkflow = null, gh = 'gh' } = {}) {
   if (typeof artifactPath !== 'string' || !artifactPath || typeof bundlePath !== 'string' || !bundlePath || typeof repository !== 'string' || !/^[^/\s]+\/[^/\s]+$/.test(repository)) return { status: 'NOT_AVAILABLE', reason: 'artifact, bundle and repository are required' };
   if (typeof sourceRef !== 'string' || !sourceRef) return { status: 'NOT_AVAILABLE', reason: 'source_ref is required' };
   if (typeof signerWorkflow !== 'string' || !signerWorkflow) return { status: 'NOT_AVAILABLE', reason: 'signer_workflow is required' };
-  const args = ['attestation', 'verify', artifactPath, '--bundle', bundlePath, '--repo', repository, '--source-ref', sourceRef, '--format', 'json'];
+  if (typeof sourceSha !== 'string' || !SHA40.test(sourceSha)) return { status: 'NOT_AVAILABLE', code: 'TRUST_SOURCE_SHA_REQUIRED', reason: 'exact source_sha is required' };
+  // A tag name alone can refer to a different commit over time. gh checks
+  // --source-digest against the certificate, not workflow-supplied predicate text.
+  const predicateType = 'https://slsa.dev/provenance/v1';
+  const args = ['attestation', 'verify', artifactPath, '--bundle', bundlePath, '--repo', repository,
+    '--source-ref', sourceRef, '--source-digest', sourceSha, '--predicate-type', predicateType, '--format', 'json'];
   args.push('--signer-workflow', signerWorkflow);
   try {
-    const { stdout } = await execFile(gh, args, { maxBuffer: 4 * 1024 * 1024, windowsHide: true });
+    const digest = await sha256(artifactPath);
+    const { stdout } = await execFile(gh, args, { maxBuffer: 4 * 1024 * 1024, windowsHide: true, timeout: 60000, killSignal: 'SIGKILL' });
     const result = JSON.parse(stdout);
-    if (!Array.isArray(result) || result.length === 0) return { status: 'NOT_AVAILABLE', reason: 'attestation verification returned no records' };
-    return { status: 'VERIFIED', repository, source_ref: sourceRef, signer_workflow: signerWorkflow, attestation_count: result.length };
-  } catch (error) {
-    return { status: 'NOT_AVAILABLE', reason: 'attestation verification failed', detail: String(error?.message ?? error).slice(0, 240) };
+    const valid = Array.isArray(result) && result.length > 0 && result.every(record => {
+      const statement = record?.verificationResult?.statement;
+      return statement?.predicateType === predicateType && Array.isArray(statement.subject)
+        && statement.subject.some(subject => subject?.digest?.sha256 === digest);
+    });
+    if (!valid) return { status: 'NOT_AVAILABLE', code: 'TRUST_ATTESTATION_OUTPUT_INVALID', reason: 'verified output does not bind the artifact and provenance type' };
+    if (await sha256(artifactPath) !== digest) return { status: 'NOT_AVAILABLE', code: 'TRUST_ARTIFACT_CHANGED', reason: 'artifact changed during verification' };
+    return { status: 'VERIFIED', repository, source_ref: sourceRef, source_sha: sourceSha, artifact_sha256: digest,
+      signer_workflow: signerWorkflow, attestation_count: result.length };
+  } catch {
+    // execFile's error.message includes the command and child stderr. Neither
+    // belongs in a portable receipt (local paths, signed URLs, tokens).
+    return { status: 'NOT_AVAILABLE', code: 'TRUST_ATTESTATION_VERIFY_FAILED', reason: 'attestation verification failed' };
   }
 }
 

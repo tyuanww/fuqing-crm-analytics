@@ -73,7 +73,7 @@ def execute(steps, run=subprocess.run) -> int:
 def preflight(plan: dict, only: str | None, run=subprocess.run) -> int:
     selected = only is None or only in {'b0', 'frontend'}
     if selected and ((plan['b0'] and only != 'frontend') or (plan['frontend'] and only != 'b0')):
-        expected = json.loads((ROOT / 'dsh-plugins/analytics-workbench/toolchain.json').read_text())['node_major']
+        expected = json.loads((ROOT / 'dsh-plugins/plugin-kit/toolchain.json').read_text())['node_major']
         try:
             result = run(['node', '--version'], capture_output=True, text=True, timeout=5)
         except (FileNotFoundError, subprocess.TimeoutExpired):

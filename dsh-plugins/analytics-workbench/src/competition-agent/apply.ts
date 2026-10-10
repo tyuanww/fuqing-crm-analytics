@@ -10,8 +10,6 @@ import {
 import { createCompetitionToolBoundary } from './boundary.mjs';
 import { liveDiagnosisCall } from './tools.mjs';
 import { BOARD_TOOL_PARAMETERS, executeBoardTool } from './board-tools.mjs';
-import { PAGE_GENERATE_TOOL_NAME } from './page-family.mjs';
-import { PAGE_TOOL_PARAMETERS, executePageTool } from './page-tools.mjs';
 import { boardPackEnabled, queryPackEnabled } from '../feature-pack-gate.mjs';
 
 export const name = 'analytics-workbench-competition-growth';
@@ -109,19 +107,5 @@ export function apply(ctx: Context, packInput: { manifest: object; contents: Rec
   }
 }
 
-/** Native HTML delivery. The model authors the page; the browser workbench saves it into the cockpit. */
-export function registerFreeHtmlPageTool(ctx: Context) {
-  ctx.tools.register(defineTool({
-    name: PAGE_GENERATE_TOOL_NAME,
-    description: '用户要生成 HTML 或驾驶舱时，把你在本回复里写好的自由 HTML 页面交出来。request_id 必须逐字复制用户消息中的 page-gen 标识；消息里没有时，填写一个 page-gen- 开头的新标识。不要写本地文件，不要改成 BoardSpec。本工具只交付源码包，保存由工作台完成。',
-    parameters: PAGE_TOOL_PARAMETERS[PAGE_GENERATE_TOOL_NAME] as never,
-    output: {
-      schema: { type: 'object', additionalProperties: true },
-      render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }],
-      presentationMeta: (_args, value) => value,
-    },
-    timeoutMs: 6000,
-    isConcurrencySafe: () => false,
-    execute: async (args, execution) => executePageTool(PAGE_GENERATE_TOOL_NAME, args as Record<string, unknown>, execution) as never,
-  }));
-}
+// Compatibility export; the public adapter owns this registration.
+export { apply as registerFreeHtmlPageTool } from '../page-tools.ts';

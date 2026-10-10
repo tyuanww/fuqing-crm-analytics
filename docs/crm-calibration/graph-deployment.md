@@ -1,6 +1,6 @@
 # CRM 教材图谱查询与本机部署
 
-公开主线为 `64eb6e06`（v0.13.0.0）。本轮在已合图谱查询上补质量账本、原文版本绑定和 CRM 账号文档权限，并入 `codex/crm-analysis-board`（v0.14.0.0 候选，未切 6677）。不修改 DSH 上游，不读 CRM 归档库，不扩大到未授权知识库。Neo4j 自动抽图、受限查询工具、真实模型调用、全图语义审核是分开验收；局部通过不能宣称全图完成。
+2026-10-04 本地拆分候选：图谱工具现由独立[知识插件](../../dsh-plugins/knowledge/README.md)拥有，CRM Host 只提供版本化的会话身份能力。当前 Git 与带日期的杭州事实看 [STATUS](../../STATUS.md)。下方 2026-09-21 图谱数量及账号核验是历史现场证据，不替代新插件宿主验收。不修改 DSH 上游，不读 CRM 归档库，不扩大到未授权知识库。Neo4j 自动抽图、受限查询工具、真实模型调用、全图语义审核分开验收。
 
 ## 查询和权限
 
@@ -26,7 +26,7 @@ Neo4j 连接仅限 HTTP 回环地址。当前社区版部署使用本机既有�
 
 ## 配置与复现
 
-使用现有固定 Node 24、Python 3.14+，以及 analytics-workbench `toolchain.json` 钉住的候选 DSH 0.1.7-rc.2。杭州现役 6677 仍加载 RC1；候选切换未执行，旧 alpha2 checkout 仅用于回退。先按[插件说明](../../dsh-plugins/crm-knowledge/README.md)构建和验证，再准备私有配置。以下是结构示例，ID和路径须使用实际部署值；不把凭据写入工具参数或公开仓库：
+插件使用 Node 24，以及 `plugin-kit/toolchain.json` 钉住的 DSH 0.1.7-rc.2；Python 3.14 只用于合成服务/验证。先按[插件说明](../../dsh-plugins/crm-knowledge/README.md)分别构建和验证，再准备私有配置。本轮未操作杭州；现役版本沿用 STATUS 的现场快照。以下是结构示例，ID和路径须使用实际部署值；不把凭据写入工具参数或公开仓库：
 
 ```json
 {
@@ -60,15 +60,15 @@ node scripts/crm-calibration/graph-ledger.mjs \
 node scripts/crm-calibration/prepare-profile.mjs \
   --output /absolute/new-private-output \
   --plugin /absolute/repository/dsh-plugins/crm-knowledge \
-  --python /absolute/python3.14 \
+  --knowledge-plugin /absolute/repository/dsh-plugins/knowledge \
   --graph-settings /private/graph-settings.json
 ```
 
-此命令只写新的输出目录，拒绝覆盖；不会修改现有 profile 或启停服务。输出 `host.patch.yml`、`preset/` 和带文件哈希的 manifest。模块 URL 带构建哈希，避免长期宿主复用旧模块；Python 显式传给该 preset，不再改整个进程的环境变量。输出目录和插件 checkout 是运行依赖，不能随意移动或清理。
+此命令只写新的输出目录，拒绝覆盖；不会修改现有 profile 或启停服务。输出 `host.patch.yml`、官方 preset 声明入口 `preset.patch.yml`、可检查的 `preset/preset.yml` / `preset/agent.cordis.yml` 和带文件/独立包指纹的 `crm-profile-assets/v3` manifest。上例只配置在线图谱，公开合成查询/知识解释保持 NOT_AVAILABLE。需要这两项能力时分别传 `--metrics-origin` 和 `--knowledge-origin`，详见[独立服务边界](../operating/crm-plugin-service-boundary.md)。输出目录和已安装插件目录是运行依赖，不能随意移动或清理。
 
-部署时先备份目标 preset 的三个文件，核对已有 host 入口。如果尚无 CRM host，将生成的具体 `file:///.../lib/host.js` 插入一次；固定 DSH 版不能通过包子入口稳定发现登录 client。已有 `crm-knowledge-live-host` 时不重复插入，也不覆盖其他 profile 项。将 `preset/` 中三个文件放入所选 harness 的 `.agent-presets/crm-knowledge/`，保留生成目录中的 tools 模块。新建会话选择“CRM 知识与指标”。教材检索/引用展开走本插件的 `query_crm_knowledge_sources` 与 `expand_crm_knowledge_citation`，须已连接 CRM。若同一宿主仍加载 dsh-weknora 的共享 retrieve 工具，那不是本轮账号隔离；本插件不修改 DSH 上游，也不把它当作 ACL 完成。本生成器不迁移模型、凭据或其它知识库。
+部署前保留旧 profile 与旧包并核对 Host 入口。在新隔离 profile 中安装两个固定候选包，并让官方 CLI 显式加载 `--patch <output>/host.patch.yml --patch <output>/preset.patch.yml`。rc2 不扫描上述 preset 目录，复制两个描述文件不会注册工具。v3 不再使用聚合 `tools.mjs`，不能向旧合包会话追加新知识工具。已有 `crm-knowledge-live-host` 或 `preset-shinemage-crm-knowledge` 时应由部署 owner 更新该条目的精确候选入口，不能再次插入同名条目，也不能覆盖其他 profile 项；生成补丁适用于新 profile，不能盲目重复应用。教材检索/引用展开走知识插件的 `query_crm_knowledge_sources` 与 `expand_crm_knowledge_citation`，当前身份提供方仍要求连接 CRM。本生成器不迁移模型、凭据或其它知识库。
 
-首次本机接入只更新 preset，现有 host、登录与会话保持原进程；新会话加载新工具，已经运行的会话仍可能持有旧模块。切换到主仓后，若旧实例依赖待清理工作树，须保留原 runtime 受控重启 DSH，并重新验证登录与查询后再清理；对话历史保留，内存中的 CRM 登录须重新绑定。撤回时恢复三个 preset 备份并验证；不清空 runtime，不删图数据卷。
+新增身份能力要求新的 CRM Host；仅替换 preset 无法让旧 Host 提供该能力。精确 rc2 profile 加载、受控重启、原生会话/WAL 和回退已在本机隔离候选[验证](../hackathon/evidence/dsh-g0-pinned-host-20261004.md)，未包含在线图谱、浏览器、WSL 或现场切换。移除声明后旧会话仍持有原工具，整体切换按 `HOST_RESTART_REQUIRED` 处理。重启后重新连接 CRM；回退恢复对应的旧 profile 与旧包，不声称登录内存或服务数据能够自动回滚。禁止据此清空 runtime 或删除图数据卷。共享 `weknora_search` 不具备本合同的账号隔离，原生工具 guard 仅是选中图谱模块时的补充限制，不代替服务端权限。
 
 ## 验证层级
 

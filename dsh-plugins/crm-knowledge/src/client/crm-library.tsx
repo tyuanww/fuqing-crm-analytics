@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Button, Card, ConfigProvider, Descriptions, Input, Modal, Space, Tabs, Tag, Typography, theme } from 'antd';
 import type { components } from '../dashboard-contract.generated.js';
-import { antdSeedToken } from '../../../analytics-workbench/src/client/competition-shell/tokens';
+import { antdSeedToken } from './content-theme.generated';
 import { CrmBoardCanvas, CrmBoardCard, CrmBoardEditor } from './crm-board';
 
 type Snapshot = components['schemas']['CrmSnapshot'];

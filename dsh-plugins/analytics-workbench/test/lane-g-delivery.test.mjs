@@ -1,16 +1,13 @@
+import { upstream, sdk } from './helpers/sdk-inputs.mjs';
 /** Lane G: native page-package delivery tool to workbench generate. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import { execFileSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { resolve, join } from 'node:path';
+import { join } from 'node:path';
 
 const plugin = fileURLToPath(new URL('..', import.meta.url));
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
-const pin = JSON.parse(await readFile(join(plugin, 'toolchain.json'), 'utf8'));
-assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], { cwd: upstream, encoding: 'utf8' }).trim(), pin.upstream_sha);
 const { PAGE_GENERATE_TOOL_NAME, PAGE_REQUEST_ID_PATTERN, PAGE_TOOL_RESULT_SCHEMA } = await import(pathToFileURL(join(plugin, 'src/competition-agent/page-family.mjs')));
 const { executePageTool, PAGE_TOOL_PARAMETERS } = await import(pathToFileURL(join(plugin, 'src/competition-agent/page-tools.mjs')));
 const { createNativePageGenerate, createPagePackageWaiter, extractPagePackage } = await import(pathToFileURL(join(plugin, 'src/client/free-html-library/native-generate.mjs')));
@@ -129,7 +126,7 @@ test('waiter times out a lost delivery and rejects the generate', async () => {
 test('tool card registration wires the delivery intake (compiled client)', {
   skip: existsSync(join(plugin, 'lib/client.js')) ? false : 'plugin lib/client.js is built later in pipeline --check',
 }, async () => {
-  const webRequire = (await import('node:module')).createRequire(join(upstream, 'apps/web/package.json'));
+  const webRequire = sdk.loadBrowserModule;
   const stores = await import(pathToFileURL(join(upstream, 'packages/client/store/lib/index.js')).href);
   const source = await readFile(join(plugin, 'lib/client.js'), 'utf8');
   assert.match(source, /free_html_page_generate/);
@@ -140,7 +137,7 @@ test('tool card registration wires the delivery intake (compiled client)', {
     __ModuleLoader__: { load: row => { factoryRow = row; } },
   };
   const vm = await import('node:vm');
-  vm.runInNewContext(source, { window: browser, __SHINE_QUERY__: true, __SHINE_BOARD__: true }, { filename: 'analytics-b0-client.js', timeout: 1000 });
+  vm.runInNewContext(source, { window: browser, AbortController, __SHINE_QUERY__: true, __SHINE_BOARD__: true }, { filename: 'analytics-b0-client.js', timeout: 1000 });
   const client = factoryRow.factory(spec => {
     assert.ok(['react', 'react-dom', 'react/jsx-runtime', '@deepseek-ai/dsh-client-store'].includes(spec), `unexpected browser require: ${spec}`);
     return spec === '@deepseek-ai/dsh-client-store' ? stores : webRequire(spec);

@@ -69,8 +69,7 @@ def _skip_raw_block(html: str, start: int) -> int | None:
     if opening is None:
         return None
     closing = re.search(rf"</{opening.group(1)}\s*>", html[tag_end + 1:], re.I)
-    return (len(html) if closing is None else
-            tag_end + 1 + closing.start() + closing.end())
+    return len(html) if closing is None else tag_end + 1 + closing.end()
 
 
 def _annotate_generic_html(html: str) -> tuple[str, list[dict]]:

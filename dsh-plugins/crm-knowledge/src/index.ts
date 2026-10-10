@@ -1,18 +1,26 @@
 import type { Context } from '@deepseek-ai/cordis';
 import { defineTool } from '@deepseek-ai/dsh-tools';
 import { schemas } from './contract.generated.js';
-import { runCrmCliAsync } from './run.mjs';
-import { CHANNELS, CHANNEL_QUERY_DESCRIPTION, dashboardCapabilities, dashboardKnowledgeContext, queryDashboardGsv, queryDashboardPurchases,
+import { createMetricsService, unavailableSchema } from './service-client.mjs';
+import { CHANNELS, CHANNEL_QUERY_DESCRIPTION, dashboardCapabilities, queryDashboardGsv, queryDashboardPurchases,
   queryDashboardReadiness, queryDashboardMembership, queryDashboardNetGsv } from './dashboard.mjs';
-import { executePageTool, PAGE_TOOL_PARAMETERS } from '../../analytics-workbench/src/competition-agent/page-tools.mjs';
-import { PAGE_GENERATE_TOOL_NAME } from '../../analytics-workbench/src/competition-agent/page-family.mjs';
 import type {} from './dashboard-service.js';
 
 export const name = 'crm-knowledge-candidate';
 export const inject = ['tools'];
 
-export function apply(ctx: Context, config: { python?: string } = {}): void {
-  const run = (payload: unknown, signal?: AbortSignal) => runCrmCliAsync(payload, signal, config.python);
+export function apply(ctx: Context, config: { metricsOrigin?: string } = {}): void {
+  const services = createMetricsService(config);
+  const lifetime = new AbortController();
+  ctx.effect(() => () => lifetime.abort(), 'crm: cancel owned tool requests');
+  async function owned<T>(caller: AbortSignal, action: (signal: AbortSignal) => Promise<T>): Promise<T> {
+    const signal = AbortSignal.any([caller, lifetime.signal]);
+    signal.throwIfAborted();
+    const value = await action(signal);
+    // A provider may finish after disposal even if it ignores cancellation.
+    signal.throwIfAborted();
+    return value;
+  }
   ctx.tools.register(defineTool({
     name: 'query_crm_dashboard_snapshot',
     description: '查询看板 GSV、AOV、AUS 及覆盖，并由 CRM 服务保存不可变的结果快照，供用户稍后保存分析、加入驾驶舱。仅接受日期/渠道/剔除低价；不接受模型提供的数字。需要当前对话 CRM 登录和独立快照存储；失败不回退合成资料。保存分析和驾驶舱引用由用户在 CRM 分析窗口确认。',
@@ -24,13 +32,13 @@ export function apply(ctx: Context, config: { python?: string } = {}): void {
     },
     output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
     timeoutMs: 30000, isConcurrencySafe: () => false,
-    execute: async (args, exec) => {
+    execute: async (args, exec) => owned(exec.signal, async signal => {
       const access = ctx.get('crmDashboard');
-      const result = typeof access?.querySnapshot === 'function' ? await access.querySnapshot(exec.agent?.session.id, args, exec.signal)
+      const result = typeof access?.querySnapshot === 'function' ? await access.querySnapshot(exec.agent?.session.id, args, signal)
         : { ok: false, code: 'HOST_UPGRADE_REQUIRED', message: '当前宿主尚未加载 CRM 快照能力，请在维护窗口更新后重试。' };
       return { ok: result.ok, snapshot: 'value' in result ? result.value ?? null : null,
         code: 'code' in result ? result.code ?? null : null, message: 'message' in result ? result.message ?? null : null };
-    },
+    }),
   }));
   ctx.tools.register(defineTool({
     name: 'query_crm_dashboard_gsv',
@@ -43,11 +51,11 @@ export function apply(ctx: Context, config: { python?: string } = {}): void {
     },
     output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
     timeoutMs: 30000, isConcurrencySafe: () => false,
-    execute: async (args, exec) => {
+    execute: async (args, exec) => owned(exec.signal, async signal => {
       const access = ctx.get('crmDashboard');
-      return access ? access.query(exec.agent?.session.id, args, exec.signal)
-        : queryDashboardGsv(args, { sessionId: exec.agent?.session.id, signal: exec.signal });
-    },
+      return access ? access.query(exec.agent?.session.id, args, signal)
+        : queryDashboardGsv(args, { sessionId: exec.agent?.session.id, signal });
+    }),
   }));
   ctx.tools.register(defineTool({
     name: 'query_crm_dashboard_purchases',
@@ -60,54 +68,19 @@ export function apply(ctx: Context, config: { python?: string } = {}): void {
     },
     output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
     timeoutMs: 30000, isConcurrencySafe: () => false,
-    execute: async (args, exec) => {
+    execute: async (args, exec) => owned(exec.signal, async signal => {
       const access = ctx.get('crmDashboard');
-      return access ? access.queryPurchases(exec.agent?.session.id, args, exec.signal)
-        : queryDashboardPurchases(args, { sessionId: exec.agent?.session.id, signal: exec.signal });
-    },
+      return access ? access.queryPurchases(exec.agent?.session.id, args, signal)
+        : queryDashboardPurchases(args, { sessionId: exec.agent?.session.id, signal });
+    }),
   }));
   ctx.tools.register(defineTool({
     name: 'query_crm_metrics_v1',
     description: '查询 CRM 合成候选资料的销售表现、老客回购和派样后复购。金额为 CNY 分；保留未知和不可用原因，不能当作真实业务结果。',
     parameters: { request: { ...schemas.request, required: true } },
-    output: { schema: schemas.output, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
+    output: { schema: { oneOf: [schemas.output, unavailableSchema] }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
     timeoutMs: 35000, isConcurrencySafe: () => true,
-    execute: async (args, exec) => run({ action: 'query', request: args.request }, exec.signal),
-  }));
-  ctx.tools.register(defineTool({
-    name: 'crm_knowledge_explain',
-    description: '读取本地 CRM 知识包的已确认指标定义、决议、教材出处和离线依赖关系。区分目标口径与合成验证；此工具不查询在线图谱，也不代表其他指标已经完成真实业务验收。',
-    parameters: { topic: { type: 'string', required: true } },
-    output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
-    timeoutMs: 35000, isConcurrencySafe: () => true,
-    execute: async (args, exec) => {
-      const target = await run({ action: 'explain', topic: args.topic }, exec.signal);
-      if (/\baus\b|\baov\b|客单价|每单金额/i.test(args.topic)) {
-        target.preferred_operational_definition = {
-          decision: '用户2026-09-20确认：真实AUS、AOV沿用当前看板GSV，扣退款净额版单列。',
-          aus: '当前看板GSV / 同范围去重有效购买人数', aov: '当前看板GSV / 同范围去重有效订单数',
-          buyer_count_status: 'query_crm_dashboard_purchases_returns_coverage_requires_backend_deployment',
-          warning: '不能用旧avg_order_value明细行均值当作AOV，也不能用缺少未知身份的新客+老客人数替代完整购买人数。',
-          real_business_acceptance: false,
-          target_candidate_note: '本结果其余definition/formula为单列的crm-metrics/v1净额候选，不替换此运营默认。',
-        };
-      }
-      if (/会员溢价|member.?premium/i.test(args.topic)) {
-        target.preferred_operational_definition = {
-          formula: '成交时会员AUS / 非会员AUS', tool: 'query_crm_dashboard_membership',
-          warning: '不能用当前 is_member 倒推历史；缺成交时快照或入会/退会事件时返回不可用。',
-        };
-      }
-      if (/净额|net.?gsv|实际退款/i.test(args.topic)) {
-        target.preferred_operational_definition = {
-          formula: '有效实付 − 截止日前成功退款', tool: 'query_crm_dashboard_net_gsv',
-          warning: '与看板GSV分列；不能对看板结果再扣退款。缺退款事件时不可用。',
-        };
-      }
-      if (!/gsv|退款|实收|实付|净额/i.test(args.topic)) return target;
-      return { preferred_real_gsv: dashboardKnowledgeContext(), target_candidate: target,
-        instruction: '真实看板 GSV 采用 preferred_real_gsv；target_candidate 是单列净额候选，不能静默替换。' };
-    },
+    execute: async (args, exec) => owned(exec.signal, signal => services.query(args.request, signal)),
   }));
   ctx.tools.register(defineTool({
     name: 'query_crm_dashboard_readiness',
@@ -115,11 +88,11 @@ export function apply(ctx: Context, config: { python?: string } = {}): void {
     parameters: {},
     output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
     timeoutMs: 30000, isConcurrencySafe: () => false,
-    execute: async (args, exec) => {
+    execute: async (args, exec) => owned(exec.signal, async signal => {
       const access = ctx.get('crmDashboard');
-      return access ? access.queryReadiness(exec.agent?.session.id, args, exec.signal)
-        : queryDashboardReadiness(args, { sessionId: exec.agent?.session.id, signal: exec.signal });
-    },
+      return access ? access.queryReadiness(exec.agent?.session.id, args, signal)
+        : queryDashboardReadiness(args, { sessionId: exec.agent?.session.id, signal });
+    }),
   }));
   ctx.tools.register(defineTool({
     name: 'query_crm_dashboard_membership',
@@ -132,11 +105,11 @@ export function apply(ctx: Context, config: { python?: string } = {}): void {
     },
     output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
     timeoutMs: 30000, isConcurrencySafe: () => false,
-    execute: async (args, exec) => {
+    execute: async (args, exec) => owned(exec.signal, async signal => {
       const access = ctx.get('crmDashboard');
-      return access ? access.queryMembership(exec.agent?.session.id, args, exec.signal)
-        : queryDashboardMembership(args, { sessionId: exec.agent?.session.id, signal: exec.signal });
-    },
+      return access ? access.queryMembership(exec.agent?.session.id, args, signal)
+        : queryDashboardMembership(args, { sessionId: exec.agent?.session.id, signal });
+    }),
   }));
   ctx.tools.register(defineTool({
     name: 'query_crm_dashboard_net_gsv',
@@ -150,47 +123,51 @@ export function apply(ctx: Context, config: { python?: string } = {}): void {
     },
     output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
     timeoutMs: 30000, isConcurrencySafe: () => false,
-    execute: async (args, exec) => {
+    execute: async (args, exec) => owned(exec.signal, async signal => {
       const access = ctx.get('crmDashboard');
-      return access ? access.queryNetGsv(exec.agent?.session.id, args, exec.signal)
-        : queryDashboardNetGsv(args, { sessionId: exec.agent?.session.id, signal: exec.signal });
-    },
+      return access ? access.queryNetGsv(exec.agent?.session.id, args, signal)
+        : queryDashboardNetGsv(args, { sessionId: exec.agent?.session.id, signal });
+    }),
   }));
   ctx.tools.register(defineTool({
     name: 'crm_metrics_capabilities',
     description: '列出当前可执行的 CRM 查询。purchases_backend_contract 只是合同名，不是故障。未调用的工具状态是 unknown，不能写成后端不可用。',
     parameters: {},
     output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
-    execute: async (_args, exec) => ({
-      synthetic_candidate: await run({ action: 'capabilities' }, exec.signal),
+    execute: async (_args, exec) => owned(exec.signal, async signal => ({
+      synthetic_candidate: await services.capabilities(signal),
       dashboard: ctx.get('crmDashboard')?.capabilities(exec.agent?.session.id) ?? dashboardCapabilities(),
-    }),
+    })),
   }));
   ctx.tools.register(defineTool({
     name: 'crm_service_health',
     description: '查看当前对话是否已连接 CRM，以及 Purchases、快照、知识库、驾驶舱工具各自的真实状态。没有调用结果时保持 unknown。知识库在 18092，不提供 GSV 或驾驶舱接口。',
     parameters: {},
     output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }] },
-    execute: async (_args, exec) => {
+    execute: async (_args, exec) => owned(exec.signal, async () => {
       const dashboard = ctx.get('crmDashboard')?.capabilities(exec.agent?.session.id) ?? dashboardCapabilities();
-      const boardConfigured = Boolean(process.env.COMPETITION_HTTP_BASE && process.env.COMPETITION_HTTP_TOKEN);
+      const pageTool = ctx.tools.get('free_html_page_generate', exec.agent);
+      const boardTool = ctx.tools.get('competition_board_catalog', exec.agent);
       return {
         crm_login: typeof dashboard.connection_state === 'string' ? dashboard.connection_state : 'NOT_CONNECTED',
         gsv: 'unknown_until_query_crm_dashboard_gsv_is_called',
         purchases: 'unknown_until_query_crm_dashboard_purchases_is_called',
         snapshot: 'unknown_until_query_crm_dashboard_snapshot_is_called',
-        knowledge_base: 'weknora_http_18092',
-        board_tools: boardConfigured ? 'competition_board_tools_can_register' : 'not_configured',
+        knowledge_base: ctx.tools.get('query_crm_knowledge_sources', exec.agent)
+          ? { status: 'AVAILABLE', execution: 'NOT_RUN', reason: null }
+          : { status: 'NOT_AVAILABLE', execution: 'NOT_RUN', reason: 'KNOWLEDGE_PLUGIN_NOT_INSTALLED_OR_NOT_VISIBLE' },
+        synthetic_services: services.availability(),
+        knowledge_explanation: ctx.tools.get('crm_knowledge_explain', exec.agent)
+          ? { status: 'AVAILABLE', execution: 'NOT_RUN', reason: null }
+          : { status: 'NOT_AVAILABLE', execution: 'NOT_RUN', reason: 'KNOWLEDGE_PLUGIN_NOT_INSTALLED_OR_NOT_VISIBLE' },
+        page_delivery: pageTool
+          ? { status: 'AVAILABLE', execution: 'NOT_RUN', reason: null }
+          : { status: 'NOT_AVAILABLE', execution: 'NOT_RUN', reason: 'PAGE_PROVIDER_NOT_INSTALLED_OR_NOT_VISIBLE' },
+        board_tools: boardTool
+          ? { status: 'AVAILABLE', execution: 'NOT_RUN', reason: null }
+          : { status: 'NOT_AVAILABLE', execution: 'NOT_RUN', reason: 'BOARD_PLUGIN_NOT_INSTALLED_OR_NOT_VISIBLE' },
         absent_names: ['copyright'],
       };
-    },
-  }));
-  ctx.tools.register(defineTool({
-    name: PAGE_GENERATE_TOOL_NAME,
-    description: '用户要生成 HTML 或驾驶舱时，把你在本回复里写好的自由 HTML 页面交出来。request_id 必须逐字复制用户消息中的 page-gen 标识；消息里没有时，填写一个 page-gen- 开头的新标识。不要写本地文件，不要改成 BoardSpec。本工具只交付源码包，保存由工作台完成。',
-    parameters: PAGE_TOOL_PARAMETERS[PAGE_GENERATE_TOOL_NAME] as never,
-    output: { schema: { type: 'json' }, render: (_args, value) => [{ type: 'text', text: JSON.stringify(value) }], presentationMeta: (_args, value) => value },
-    timeoutMs: 6000, isConcurrencySafe: () => false,
-    execute: async (args, exec) => executePageTool(PAGE_GENERATE_TOOL_NAME, args as Record<string, unknown>, exec) as never,
+    }),
   }));
 }

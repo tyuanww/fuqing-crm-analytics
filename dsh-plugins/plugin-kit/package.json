@@ -1,0 +1,20 @@
+{
+  "name": "@shine-mage/dsh-plugin-kit",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.28.2",
+  "engines": { "node": "24.x" },
+  "type": "module",
+  "exports": {
+    "./toolchain": "./toolchain.mjs",
+    "./prepare": "./prepare.mjs",
+    "./pin": "./toolchain.json",
+    "./packaged-dependencies": "./packaged-dependencies.mjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "toolchain.json", "toolchain.mjs", "prepare.mjs", "sdk-archive.py", "package-manager.mjs", "sdk-inputs.mjs", "sdk-closure.mjs", "check.mjs", "packaged-dependencies.mjs", "README.md",
+    "build-tools/package.json", "build-tools/pnpm-lock.yaml", "build-tools/pnpm-workspace.yaml", "build-tools/patches"
+  ],
+  "description": "Dev-only shared toolchain binding for independently built ShineMage DSH plugins"
+}

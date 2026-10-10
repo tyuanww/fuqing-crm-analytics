@@ -88,6 +88,29 @@
         "title": "FirstPurchaseAnalysisCreateRequest",
         "type": "object"
       },
+      "FirstPurchaseAnalysisRef": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]+$",
+            "title": "Analysis Id",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "analysis_id",
+          "version"
+        ],
+        "title": "FirstPurchaseAnalysisRef",
+        "type": "object"
+      },
       "FirstPurchaseAnalysisTitleRequest": {
         "additionalProperties": false,
         "properties": {
@@ -203,6 +226,115 @@
         "title": "FirstPurchaseFixedWindow",
         "type": "object"
       },
+      "FirstPurchaseFreshness": {
+        "additionalProperties": false,
+        "description": "NOT_CHECKED records an explicit server policy, never a fresh-time claim.",
+        "properties": {
+          "expires_after_ms": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires After Ms"
+          },
+          "freshness_checked_at": {
+            "format": "date-time",
+            "title": "Freshness Checked At",
+            "type": "string"
+          },
+          "freshness_expires_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Freshness Expires At"
+          },
+          "freshness_stale_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Freshness Stale At"
+          },
+          "freshness_state": {
+            "enum": [
+              "FRESH",
+              "STALE",
+              "EXPIRED",
+              "UNKNOWN",
+              "NOT_CHECKED"
+            ],
+            "title": "Freshness State",
+            "type": "string"
+          },
+          "max_age_ms": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Age Ms"
+          },
+          "policy_version": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "pattern": "^[A-Za-z0-9_.:-]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Version"
+          },
+          "reason": {
+            "enum": [
+              "WITHIN_WINDOW",
+              "MAX_AGE_REACHED",
+              "EXPIRED",
+              "POLICY_NOT_CONFIGURED",
+              "GENERATION_TIME_UNAVAILABLE",
+              "CLOCK_BEFORE_GENERATION",
+              "DISABLED_BY_POLICY"
+            ],
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "freshness_state",
+          "freshness_checked_at",
+          "freshness_stale_at",
+          "freshness_expires_at",
+          "policy_version",
+          "max_age_ms",
+          "expires_after_ms",
+          "reason"
+        ],
+        "title": "FirstPurchaseFreshness",
+        "type": "object"
+      },
       "FirstPurchaseMetricRef": {
         "additionalProperties": false,
         "properties": {
@@ -220,6 +352,39 @@
           }
         },
         "title": "FirstPurchaseMetricRef",
+        "type": "object"
+      },
+      "FirstPurchasePermissionScope": {
+        "additionalProperties": false,
+        "properties": {
+          "can_read": {
+            "title": "Can Read",
+            "type": "boolean"
+          },
+          "can_save": {
+            "title": "Can Save",
+            "type": "boolean"
+          },
+          "data_scope": {
+            "const": "first-purchase-fixture",
+            "default": "first-purchase-fixture",
+            "title": "Data Scope",
+            "type": "string"
+          },
+          "owner_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]+$",
+            "title": "Owner Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "owner_id",
+          "can_read",
+          "can_save"
+        ],
+        "title": "FirstPurchasePermissionScope",
         "type": "object"
       },
       "FirstPurchaseProductRow": {
@@ -299,6 +464,73 @@
           "finished_conversion_count"
         ],
         "title": "FirstPurchaseProductRow",
+        "type": "object"
+      },
+      "FirstPurchaseProvenanceSourceRefs": {
+        "additionalProperties": false,
+        "properties": {
+          "created_from_run_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]+$",
+            "title": "Created From Run Id",
+            "type": "string"
+          },
+          "data_scope": {
+            "const": "first-purchase-fixture",
+            "default": "first-purchase-fixture",
+            "title": "Data Scope",
+            "type": "string"
+          },
+          "evidence_digest": {
+            "maxLength": 64,
+            "minLength": 64,
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Evidence Digest",
+            "type": "string"
+          },
+          "method_package_digest": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 64,
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Method Package Digest"
+          },
+          "primary_result_ref": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "pattern": "^[A-Za-z0-9_.:-]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primary Result Ref"
+          },
+          "service_owner": {
+            "const": "analytics-first-purchase",
+            "default": "analytics-first-purchase",
+            "title": "Service Owner",
+            "type": "string"
+          }
+        },
+        "required": [
+          "created_from_run_id",
+          "evidence_digest",
+          "primary_result_ref",
+          "method_package_digest"
+        ],
+        "title": "FirstPurchaseProvenanceSourceRefs",
         "type": "object"
       },
       "FirstPurchaseQueryRef": {
@@ -570,6 +802,434 @@
         "title": "FirstPurchaseResolvedFilters",
         "type": "object"
       },
+      "FirstPurchaseResult": {
+        "additionalProperties": false,
+        "properties": {
+          "answer_mode": {
+            "const": "DETERMINISTIC_TOOL",
+            "default": "DETERMINISTIC_TOOL",
+            "title": "Answer Mode",
+            "type": "string"
+          },
+          "as_of": {
+            "title": "As Of",
+            "type": "string"
+          },
+          "contains_real_data": {
+            "const": false,
+            "default": false,
+            "title": "Contains Real Data",
+            "type": "boolean"
+          },
+          "data_snapshot_ref": {
+            "const": "synthetic-first-purchase-v1",
+            "default": "synthetic-first-purchase-v1",
+            "title": "Data Snapshot Ref",
+            "type": "string"
+          },
+          "data_source": {
+            "const": "SYNTHETIC_SNAPSHOT",
+            "default": "SYNTHETIC_SNAPSHOT",
+            "title": "Data Source",
+            "type": "string"
+          },
+          "data_version": {
+            "const": "synthetic-first-purchase-data/v1",
+            "default": "synthetic-first-purchase-data/v1",
+            "title": "Data Version",
+            "type": "string"
+          },
+          "facts": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FirstPurchaseFacts"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "filter_hash": {
+            "maxLength": 64,
+            "minLength": 64,
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Filter Hash",
+            "type": "string"
+          },
+          "hash_version": {
+            "const": "first-purchase-path-filter-hash/v1",
+            "default": "first-purchase-path-filter-hash/v1",
+            "title": "Hash Version",
+            "type": "string"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Limitations",
+            "type": "array"
+          },
+          "metric_id": {
+            "const": "first_purchase_product_n_day_finished",
+            "default": "first_purchase_product_n_day_finished",
+            "title": "Metric Id",
+            "type": "string"
+          },
+          "metric_version": {
+            "const": "first-purchase-path-metric/v1",
+            "default": "first-purchase-path-metric/v1",
+            "title": "Metric Version",
+            "type": "string"
+          },
+          "missing_product_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Missing Product Ids",
+            "type": "array"
+          },
+          "query_id": {
+            "const": "first_purchase_product_path",
+            "default": "first_purchase_product_path",
+            "title": "Query Id",
+            "type": "string"
+          },
+          "query_version": {
+            "const": "first-purchase-path-query/v1",
+            "default": "first-purchase-path-query/v1",
+            "title": "Query Version",
+            "type": "string"
+          },
+          "reason_code": {
+            "anyOf": [
+              {
+                "const": "MISSING_PRODUCT_ROLE",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason Code"
+          },
+          "resolved_filters": {
+            "$ref": "#/components/schemas/FirstPurchaseResolvedFilters"
+          },
+          "schema_version": {
+            "const": "analytics-first-purchase-path/v1",
+            "default": "analytics-first-purchase-path/v1",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "OK",
+              "REJECTED"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "as_of",
+          "resolved_filters",
+          "filter_hash",
+          "status",
+          "limitations"
+        ],
+        "title": "FirstPurchaseResult",
+        "type": "object"
+      },
+      "FirstPurchaseSaveCommand": {
+        "additionalProperties": false,
+        "properties": {
+          "created_from_run_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]+$",
+            "title": "Created From Run Id",
+            "type": "string"
+          },
+          "evidence_digest": {
+            "maxLength": 64,
+            "minLength": 64,
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Evidence Digest",
+            "type": "string"
+          },
+          "identity": {
+            "$ref": "#/components/schemas/FirstPurchaseSaveIdentity"
+          },
+          "schema_version": {
+            "const": "analytics-first-purchase-save-command/v1",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          },
+          "visual_spec": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FirstPurchaseVisualSpec"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "created_from_run_id",
+          "title",
+          "schema_version",
+          "identity",
+          "evidence_digest"
+        ],
+        "title": "FirstPurchaseSaveCommand",
+        "type": "object"
+      },
+      "FirstPurchaseSaveIdentity": {
+        "additionalProperties": false,
+        "description": "Correlation, not authorization or proof that a candidate is approved.",
+        "properties": {
+          "action_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]+$",
+            "title": "Action Id",
+            "type": "string"
+          },
+          "candidate_digest": {
+            "maxLength": 64,
+            "minLength": 64,
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Candidate Digest",
+            "type": "string"
+          },
+          "correlation_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]+$",
+            "title": "Correlation Id",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "analytics-first-purchase-save-identity/v1",
+            "title": "Schema Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_version",
+          "action_id",
+          "candidate_digest",
+          "correlation_id"
+        ],
+        "title": "FirstPurchaseSaveIdentity",
+        "type": "object"
+      },
+      "FirstPurchaseSaveInspectRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "created_from_run_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]+$",
+            "title": "Created From Run Id",
+            "type": "string"
+          },
+          "identity": {
+            "$ref": "#/components/schemas/FirstPurchaseSaveIdentity"
+          },
+          "schema_version": {
+            "const": "analytics-first-purchase-save-inspect/v1",
+            "title": "Schema Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_version",
+          "identity",
+          "created_from_run_id"
+        ],
+        "title": "FirstPurchaseSaveInspectRequest",
+        "type": "object"
+      },
+      "FirstPurchaseSaveProvenance": {
+        "additionalProperties": false,
+        "properties": {
+          "candidate_digest": {
+            "maxLength": 64,
+            "minLength": 64,
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Candidate Digest",
+            "type": "string"
+          },
+          "data_time_window": {
+            "$ref": "#/components/schemas/FirstPurchaseFixedWindow"
+          },
+          "environment": {
+            "const": "synthetic",
+            "default": "synthetic",
+            "title": "Environment",
+            "type": "string"
+          },
+          "freshness": {
+            "$ref": "#/components/schemas/FirstPurchaseFreshness"
+          },
+          "generated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generated At"
+          },
+          "permission_scope": {
+            "$ref": "#/components/schemas/FirstPurchasePermissionScope"
+          },
+          "query_scope": {
+            "$ref": "#/components/schemas/FirstPurchaseResolvedFilters"
+          },
+          "source_refs": {
+            "$ref": "#/components/schemas/FirstPurchaseProvenanceSourceRefs"
+          }
+        },
+        "required": [
+          "data_time_window",
+          "query_scope",
+          "permission_scope",
+          "source_refs",
+          "candidate_digest",
+          "generated_at",
+          "freshness"
+        ],
+        "title": "FirstPurchaseSaveProvenance",
+        "type": "object"
+      },
+      "FirstPurchaseSaveResult": {
+        "additionalProperties": false,
+        "description": "Separate envelope; native receipt/v1 and cockpit PINNED keep their meaning.",
+        "properties": {
+          "api_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Api Version",
+            "type": "string"
+          },
+          "finite_mock": {
+            "const": true,
+            "default": true,
+            "title": "Finite Mock",
+            "type": "boolean"
+          },
+          "identity": {
+            "$ref": "#/components/schemas/FirstPurchaseSaveIdentity"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/FirstPurchaseSaveProvenance"
+          },
+          "result": {
+            "$ref": "#/components/schemas/FirstPurchaseResult"
+          },
+          "result_state": {
+            "enum": [
+              "SUCCESS_UNSAVED",
+              "SAVED",
+              "PARTIAL"
+            ],
+            "title": "Result State",
+            "type": "string"
+          },
+          "save_eligible": {
+            "title": "Save Eligible",
+            "type": "boolean"
+          },
+          "save_ineligible_reason": {
+            "anyOf": [
+              {
+                "enum": [
+                  "ALREADY_SAVED",
+                  "PROVENANCE_INCOMPLETE",
+                  "PERMISSION_DENIED",
+                  "CANDIDATE_NOT_ADMITTED",
+                  "POLICY_NOT_CONFIGURED",
+                  "RESULT_STALE",
+                  "RESULT_EXPIRED",
+                  "FRESHNESS_UNKNOWN"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Save Ineligible Reason"
+          },
+          "schema_version": {
+            "const": "analytics-first-purchase-save-result/v1",
+            "default": "analytics-first-purchase-save-result/v1",
+            "title": "Schema Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "identity",
+          "result_state",
+          "result",
+          "provenance",
+          "save_eligible",
+          "save_ineligible_reason"
+        ],
+        "title": "FirstPurchaseSaveResult",
+        "type": "object"
+      },
+      "FirstPurchaseSaveSourceRef": {
+        "additionalProperties": false,
+        "properties": {
+          "created_from_run_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]+$",
+            "title": "Created From Run Id",
+            "type": "string"
+          },
+          "data_scope": {
+            "const": "first-purchase-fixture",
+            "default": "first-purchase-fixture",
+            "title": "Data Scope",
+            "type": "string"
+          },
+          "evidence_digest": {
+            "maxLength": 64,
+            "minLength": 64,
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Evidence Digest",
+            "type": "string"
+          },
+          "service_owner": {
+            "const": "analytics-first-purchase",
+            "default": "analytics-first-purchase",
+            "title": "Service Owner",
+            "type": "string"
+          }
+        },
+        "required": [
+          "created_from_run_id",
+          "evidence_digest"
+        ],
+        "title": "FirstPurchaseSaveSourceRef",
+        "type": "object"
+      },
       "FirstPurchaseSavedAnalysis": {
         "additionalProperties": false,
         "properties": {
@@ -811,6 +1471,132 @@
         "title": "FirstPurchaseSavedAnalysisListItem",
         "type": "object"
       },
+      "FirstPurchaseSavedProvenance": {
+        "additionalProperties": false,
+        "description": "Immutable evidence at save time, not a fresh authorization to save again.",
+        "properties": {
+          "analysis_ref": {
+            "$ref": "#/components/schemas/FirstPurchaseAnalysisRef"
+          },
+          "api_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Api Version",
+            "type": "string"
+          },
+          "finite_mock": {
+            "const": true,
+            "default": true,
+            "title": "Finite Mock",
+            "type": "boolean"
+          },
+          "identity": {
+            "$ref": "#/components/schemas/FirstPurchaseSaveIdentity"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/FirstPurchaseSaveProvenance"
+          },
+          "schema_version": {
+            "const": "analytics-first-purchase-saved-provenance/v1",
+            "default": "analytics-first-purchase-saved-provenance/v1",
+            "title": "Schema Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "analysis_ref",
+          "identity",
+          "provenance"
+        ],
+        "title": "FirstPurchaseSavedProvenance",
+        "type": "object"
+      },
+      "FirstPurchaseSavedReceipt": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_ref": {
+            "$ref": "#/components/schemas/FirstPurchaseAnalysisRef"
+          },
+          "api_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Api Version",
+            "type": "string"
+          },
+          "durable_state_key": {
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Durable State Key",
+            "type": "string"
+          },
+          "finite_mock": {
+            "const": true,
+            "default": true,
+            "title": "Finite Mock",
+            "type": "boolean"
+          },
+          "idempotency_key": {
+            "maxLength": 200,
+            "minLength": 1,
+            "pattern": "^[!-~]+$",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "identity": {
+            "$ref": "#/components/schemas/FirstPurchaseSaveIdentity"
+          },
+          "owner_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]+$",
+            "title": "Owner Id",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "null"
+          },
+          "schema_version": {
+            "const": "analytics-first-purchase-save-receipt/v1",
+            "default": "analytics-first-purchase-save-receipt/v1",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "service_owner": {
+            "const": "analytics-first-purchase",
+            "default": "analytics-first-purchase",
+            "title": "Service Owner",
+            "type": "string"
+          },
+          "source_ref": {
+            "$ref": "#/components/schemas/FirstPurchaseSaveSourceRef"
+          },
+          "state_schema_version": {
+            "const": 1,
+            "default": 1,
+            "title": "State Schema Version",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SAVED"
+            ],
+            "description": "discriminator enum property added by openapi-typescript"
+          }
+        },
+        "required": [
+          "identity",
+          "idempotency_key",
+          "owner_id",
+          "analysis_ref",
+          "source_ref",
+          "durable_state_key",
+          "status"
+        ],
+        "title": "FirstPurchaseSavedReceipt",
+        "type": "object"
+      },
       "FirstPurchaseSavedSnapshot": {
         "additionalProperties": false,
         "properties": {
@@ -851,6 +1637,134 @@
         "title": "FirstPurchaseSavedSnapshot",
         "type": "object"
       },
+      "FirstPurchaseSessionIdentity": {
+        "additionalProperties": false,
+        "properties": {
+          "data_scope": {
+            "const": "first-purchase-fixture",
+            "default": "first-purchase-fixture",
+            "title": "Data Scope",
+            "type": "string"
+          },
+          "owner_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]+$",
+            "title": "Owner Id",
+            "type": "string"
+          },
+          "query_access": {
+            "const": "GRANTED",
+            "default": "GRANTED",
+            "title": "Query Access",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "first-purchase-session-identity/v1",
+            "default": "first-purchase-session-identity/v1",
+            "title": "Schema Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "owner_id"
+        ],
+        "title": "FirstPurchaseSessionIdentity",
+        "type": "object"
+      },
+      "FirstPurchaseSessionIdentityRequest": {
+        "additionalProperties": false,
+        "description": "Empty: session and actor come from trusted host/authentication, never input.",
+        "properties": {},
+        "title": "FirstPurchaseSessionIdentityRequest",
+        "type": "object"
+      },
+      "FirstPurchaseUnknownSaveReceipt": {
+        "additionalProperties": false,
+        "description": "No committed receipt visible; never proof that a request was not received.",
+        "properties": {
+          "analysis_ref": {
+            "title": "Analysis Ref",
+            "type": "null"
+          },
+          "api_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Api Version",
+            "type": "string"
+          },
+          "durable_state_key": {
+            "title": "Durable State Key",
+            "type": "null"
+          },
+          "finite_mock": {
+            "const": true,
+            "default": true,
+            "title": "Finite Mock",
+            "type": "boolean"
+          },
+          "idempotency_key": {
+            "maxLength": 200,
+            "minLength": 1,
+            "pattern": "^[!-~]+$",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "identity": {
+            "$ref": "#/components/schemas/FirstPurchaseSaveIdentity"
+          },
+          "owner_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]+$",
+            "title": "Owner Id",
+            "type": "string"
+          },
+          "reason": {
+            "const": "RECEIPT_NOT_FOUND",
+            "default": "RECEIPT_NOT_FOUND",
+            "title": "Reason",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "analytics-first-purchase-save-receipt/v1",
+            "default": "analytics-first-purchase-save-receipt/v1",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "service_owner": {
+            "const": "analytics-first-purchase",
+            "default": "analytics-first-purchase",
+            "title": "Service Owner",
+            "type": "string"
+          },
+          "source_ref": {
+            "title": "Source Ref",
+            "type": "null"
+          },
+          "state_schema_version": {
+            "const": 1,
+            "default": 1,
+            "title": "State Schema Version",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SAVE_UNKNOWN"
+            ],
+            "description": "discriminator enum property added by openapi-typescript"
+          }
+        },
+        "required": [
+          "identity",
+          "idempotency_key",
+          "owner_id",
+          "status"
+        ],
+        "title": "FirstPurchaseUnknownSaveReceipt",
+        "type": "object"
+      },
       "FirstPurchaseVisualSpec": {
         "additionalProperties": false,
         "properties": {
@@ -873,7 +1787,7 @@
     },
     "securitySchemes": {
       "AnalysisBearer": {
-        "description": "Explicit local first-purchase analysis identity; not CRM auth.",
+        "description": "Explicit service-owned first-purchase identity; a provider may verify an existing CRM session.",
         "scheme": "bearer",
         "type": "http"
       }
@@ -1158,7 +2072,8 @@
             "description": "Service Unavailable"
           }
         },
-        "summary": "Create Analysis"
+        "summary": "Create Analysis",
+        "x-legacy-b0-identity-only": true
       }
     },
     "/api/v1/analytics-first-purchase/analyses/{analysis_id}": {
@@ -1314,6 +2229,161 @@
           }
         },
         "summary": "Get Analysis"
+      }
+    },
+    "/api/v1/analytics-first-purchase/analyses/{analysis_id}/provenance": {
+      "get": {
+        "operationId": "analytics_first_purchase_saved_provenance_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "analysis_id",
+            "required": true,
+            "schema": {
+              "title": "Analysis Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "version",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Version"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirstPurchaseSavedProvenance"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Gone"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "428": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Precondition Required"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Get Saved Provenance"
       }
     },
     "/api/v1/analytics-first-purchase/analyses/{analysis_id}/versions": {
@@ -1483,6 +2553,614 @@
         },
         "summary": "Publish Title"
       }
+    },
+    "/api/v1/analytics-first-purchase/save-receipts": {
+      "post": {
+        "operationId": "analytics_first_purchase_save_receipt_create",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FirstPurchaseSaveCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirstPurchaseSavedReceipt"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Gone"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "428": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Precondition Required"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Save Result",
+        "x-explicit-save-policy-required": true
+      }
+    },
+    "/api/v1/analytics-first-purchase/save-receipts/reconcile": {
+      "post": {
+        "operationId": "analytics_first_purchase_save_receipt_reconcile",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FirstPurchaseSaveIdentity"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "discriminator": {
+                    "mapping": {
+                      "SAVED": "#/components/schemas/FirstPurchaseSavedReceipt",
+                      "SAVE_UNKNOWN": "#/components/schemas/FirstPurchaseUnknownSaveReceipt"
+                    },
+                    "propertyName": "status"
+                  },
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/FirstPurchaseSavedReceipt"
+                    },
+                    {
+                      "$ref": "#/components/schemas/FirstPurchaseUnknownSaveReceipt"
+                    }
+                  ],
+                  "title": "Response Analytics First Purchase Save Receipt Reconcile"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Gone"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "428": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Precondition Required"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Reconcile Save Receipt",
+        "x-read-only": true
+      }
+    },
+    "/api/v1/analytics-first-purchase/save-results/inspect": {
+      "post": {
+        "operationId": "analytics_first_purchase_save_result_inspect",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FirstPurchaseSaveInspectRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirstPurchaseSaveResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Gone"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "428": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Precondition Required"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Inspect Save Result",
+        "x-read-only": true
+      }
+    },
+    "/api/v1/analytics-first-purchase/session-identity": {
+      "post": {
+        "operationId": "analytics_first_purchase_session_identity",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FirstPurchaseSessionIdentityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirstPurchaseSessionIdentity"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Gone"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "428": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Precondition Required"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Session Identity",
+        "x-query-grant-required": true,
+        "x-read-only": true
+      }
     }
   },
   "security": [
@@ -1490,10 +3168,11 @@
       "AnalysisBearer": []
     }
   ],
+  "x-d15-save-policy": "explicit-server-admission-required",
   "x-first-purchase-saved-analysis-http": true,
   "x-not-b0-run-kernel": true,
   "x-query-session-fence": false,
   "x-saved-analysis-http": true,
   "x-shared-succeeded-source": true,
-  "x-schema-sha256": "f913d2a669597d8e493b0d85e86b34b411aa35d67ceb3a6bec6382ddcc837d40"
+  "x-schema-sha256": "fd51367e1f530302bd6211fb227020254f2ff0e0e63e56285a84104e09627204"
 }

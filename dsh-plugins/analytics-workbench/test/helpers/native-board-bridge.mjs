@@ -1,24 +1,20 @@
+import { upstream, sdk } from './sdk-inputs.mjs';
 /** Isolated real HTTP + pinned Connection fixture. Credentials exist only in memory. */
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { once } from 'node:events';
 import { createRequire } from 'node:module';
 import { readFile } from 'node:fs/promises';
-import { execFileSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { resolve, join } from 'node:path';
+import { join } from 'node:path';
 import { callBoardConnection } from '../../src/board-spec/connection-call.mjs';
 
 const plugin = fileURLToPath(new URL('../..', import.meta.url));
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
-const pin = JSON.parse(await readFile(join(plugin, 'toolchain.json'), 'utf8'));
-assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], { cwd: upstream, encoding: 'utf8' }).trim(), pin.upstream_sha);
 const { Context } = createRequire(join(plugin, 'package.json'))('@deepseek-ai/cordis');
 const connection = await import(pathToFileURL(join(upstream, 'packages/client/connection/lib/index.js')).href);
 
 export async function mountNativeBoardBridge({ indexHtml = 'synthetic index', assets = {}, isolatedBrowserEntry = false } = {}) {
-  const webRequire = createRequire(join(upstream, 'apps/web/package.json'));
-  const esbuild = createRequire(webRequire.resolve('vite/package.json'))('esbuild');
+  const esbuild = sdk.loadBundler();
   const outfile = join(plugin, 'lib/test-native-board-api.mjs');
   await esbuild.build({ absWorkingDir: plugin, entryPoints: ['src/board-browser-api.ts'], outfile,
     bundle: true, format: 'esm', platform: 'node', target: 'node24', external: ['@deepseek-ai/*'], logLevel: 'silent' });

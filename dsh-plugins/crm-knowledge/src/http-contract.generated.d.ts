@@ -16,23 +16,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/crm-metrics/explain": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Explain */
-        post: operations["explain_api_v1_crm_metrics_explain_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/crm-metrics/query": {
         parameters: {
             query?: never;
@@ -54,22 +37,6 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** ExplainRequest */
-        ExplainRequest: {
-            /**
-             * Metric Version
-             * @default crm-metrics/v1
-             * @constant
-             */
-            metric_version: "crm-metrics/v1";
-            /** Topic */
-            topic: string;
-        };
-        /** HTTPValidationError */
-        HTTPValidationError: {
-            /** Detail */
-            detail?: components["schemas"]["ValidationError"][];
-        };
         /** Limitation */
         Limitation: {
             /** Code */
@@ -261,18 +228,20 @@ export interface components {
             /** Yoy Period Start */
             yoy_period_start?: string | null;
         };
-        /** ValidationError */
-        ValidationError: {
-            /** Context */
-            ctx?: Record<string, never>;
-            /** Input */
-            input?: unknown;
-            /** Location */
-            loc: (string | number)[];
+        /**
+         * ServiceError
+         * @description Sanitized wire errors shared by the two public synthetic transports.
+         */
+        ServiceError: {
+            /** Code */
+            code: string;
             /** Message */
-            msg: string;
-            /** Error Type */
-            type: string;
+            message?: string | null;
+            /**
+             * Status
+             * @constant
+             */
+            status: "UNAVAILABLE";
         };
     };
     responses: never;
@@ -286,7 +255,10 @@ export interface operations {
     capabilities_api_v1_crm_metrics_capabilities_get: {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                /** @description Exact public synthetic service API identity; not an authentication credential. */
+                "X-ShineMage-Contract": "crm-metrics-service/1.0.0";
+            };
             path?: never;
             cookie?: never;
         };
@@ -301,37 +273,40 @@ export interface operations {
                     "application/json": unknown;
                 };
             };
-        };
-    };
-    explain_api_v1_crm_metrics_explain_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ExplainRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
+            /** @description Metric contract or synthetic source rejected */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["ServiceError"];
                 };
             };
-            /** @description Validation Error */
+            /** @description Browser Origin rejected */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServiceError"];
+                };
+            };
+            /** @description Service API identity mismatch */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServiceError"];
+                };
+            };
+            /** @description Invalid request; input details are not echoed */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/json": components["schemas"]["ServiceError"];
                 };
             };
         };
@@ -339,7 +314,10 @@ export interface operations {
     query_api_v1_crm_metrics_query_post: {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                /** @description Exact public synthetic service API identity; not an authentication credential. */
+                "X-ShineMage-Contract": "crm-metrics-service/1.0.0";
+            };
             path?: never;
             cookie?: never;
         };
@@ -358,13 +336,40 @@ export interface operations {
                     "application/json": components["schemas"]["MetricResult"];
                 };
             };
-            /** @description Validation Error */
+            /** @description Metric contract or synthetic source rejected */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServiceError"];
+                };
+            };
+            /** @description Browser Origin rejected */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServiceError"];
+                };
+            };
+            /** @description Service API identity mismatch */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServiceError"];
+                };
+            };
+            /** @description Invalid request; input details are not echoed */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/json": components["schemas"]["ServiceError"];
                 };
             };
         };

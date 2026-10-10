@@ -1,8 +1,9 @@
+import { upstream } from '../../../test/helpers/sdk-inputs.mjs';
 /**
  * T22 / T27 (D41, D46) — the real host leave seam.
  *
  * This drives the **actual** `LayoutController` from the pinned DSH
- * 0.1.7-rc.1 checkout (`46a7f68b`), not a hand-written fake, so the seam
+ * 0.1.7-rc.2 SDK (`477b4f42`), not a hand-written fake, so the seam
  * claims in the lane report are checkable rather than asserted:
  *
  *   - `selectPanel(id)` is a synchronous setter with no pre-navigation approval
@@ -25,37 +26,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { execFileSync } from 'node:child_process';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-import { join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { join } from 'node:path';
 import { createLeaveCoordinator } from './leave-coordinator.mjs';
 import { createHostLeaveAdapter, OWNED_ENTRIES } from './host-leave-adapter.mjs';
 import { createLibraryBoardClient } from '../library-board-client.mjs';
 import { librarySnapshot as snap, libraryPreview as draft, ok, failed, listOf } from '../../../test/helpers/library-board-fixtures.mjs';
-
-const plugin = fileURLToPath(new URL('../../..', import.meta.url));
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream'));
-const pin = JSON.parse(await readFile(join(plugin, 'toolchain.json'), 'utf8'));
-
-function git(args) {
-  const bins = ['/usr/bin/git', '/opt/homebrew/bin/git', 'git'];
-  let last;
-  for (const bin of bins) {
-    try {
-      return execFileSync(bin, args, { cwd: upstream, encoding: 'utf8' }).trim();
-    } catch (error) {
-      last = error;
-      if (error && error.code !== 'ENOENT') throw error;
-    }
-  }
-  throw last;
-}
-
-/** The pinned checkout must be the one the toolchain declares, unmodified. */
-assert.equal(git(['rev-parse', 'HEAD']), pin.upstream_sha,
-  'the host seam must be exercised against the pinned upstream');
-assert.equal(git(['status', '--porcelain', '--untracked-files=no']), '',
-  'the pinned upstream must not carry local edits');
 
 const { LayoutController } = await import(pathToFileURL(join(upstream, 'packages/client/ui-layout/lib/types/client/service.js')).href);
 

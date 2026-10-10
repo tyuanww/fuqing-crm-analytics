@@ -1,0 +1,180 @@
+{
+  "schema": "shinemage-abc-integration-validation/v1",
+  "date": "2026-10-08",
+  "integration_root": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics",
+  "base_sha": "cb6f723c66df4a66117ef5edbf9aacd4a94d2065",
+  "git_state": "detached HEAD; uncommitted",
+  "release_ready": false,
+  "source_preservation": {
+    "A": {
+      "unchanged": true
+    },
+    "B": {
+      "unchanged": true
+    },
+    "C": {
+      "unchanged": true
+    },
+    "main": {
+      "files_unchanged": true,
+      "status_unchanged": true
+    }
+  },
+  "runtime_failure": {
+    "status": "PASS",
+    "scope": "owned-loopback-real-host-synthetic-model-and-session",
+    "started_at": "2026-10-08T04:39:45.289Z",
+    "finished_at": "2026-10-08T04:39:50.571Z",
+    "rows": [
+      {
+        "name": "profile-load",
+        "status": "PASS"
+      },
+      {
+        "name": "loaded-composition-reconcile",
+        "status": "PASS"
+      },
+      {
+        "name": "domain-tools",
+        "status": "PASS"
+      },
+      {
+        "name": "native-loop-and-durable-session",
+        "status": "PASS"
+      },
+      {
+        "name": "controlled-restart-session-replay",
+        "status": "PASS"
+      },
+      {
+        "name": "retired-preset-retains-live-session",
+        "status": "PASS"
+      },
+      {
+        "name": "inflight-crash-durable-prefix-replay",
+        "status": "PASS"
+      },
+      {
+        "name": "blocking-plugin-requires-process-restart",
+        "status": "PASS"
+      },
+      {
+        "name": "native-fallback-restart",
+        "status": "PASS"
+      },
+      {
+        "name": "restore-previous-pinned-profile",
+        "status": "PASS"
+      }
+    ],
+    "inputs": {
+      "scripts/dsh-b0/pinned-host-acceptance.mjs": "66b091fc19d498439a067e169a1441d214e5ceab56b1506391ceb2708699740d",
+      "scripts/dsh-b0/pinned-host-observer.mjs": "60d7c90f54c64b35b420dd43f28e1dd6e4d0d5cc9ef4e679ebf3212b9c1175cf",
+      "scripts/crm-calibration/prepare-profile.mjs": "0f46976e81216188609b7bfdefde6839b92913d257065780b8494d3557e53a45",
+      "scripts/release/secure-unpack.py": "8d8b34497382302ace6a434180f72a6d418d5879cc682102964a13b5c1e96d50",
+      "scripts/release/plugin-host-evidence.mjs": "5566cc2af1490501656f22c8802309be6525e6eda4a23b0c619f4ab0dac59db4"
+    },
+    "packages": {
+      "crm-knowledge": {
+        "name": "shine-mage-dsh-crm-knowledge-0.0.0-crm.1.tgz",
+        "bytes": 234944,
+        "sha256": "295b234a951a989ff74c137dfe20ce5e466b6b8d67cbe3669afbaea83e709bc1",
+        "source_sha": "cb6f723c66df4a66117ef5edbf9aacd4a94d2065",
+        "package_name": "@shine-mage/dsh-crm-knowledge",
+        "package_version": "0.0.0-crm.1"
+      },
+      "knowledge": {
+        "name": "shine-mage-dsh-knowledge-0.0.0-candidate.1.tgz",
+        "bytes": 14461,
+        "sha256": "fb1b4d9e1e626d8ba858bb0ea849d022eed29a3e5385da5a884a0397be96d7a0",
+        "source_sha": "1737adc3cffeb9db5fbbcee222fb044526324d40",
+        "package_name": "@shine-mage/dsh-knowledge",
+        "package_version": "0.0.0-candidate.1"
+      }
+    },
+    "cleanup": {
+      "before": {
+        "6677": [],
+        "8000": [],
+        "15173": [
+          50629
+        ],
+        "17687": [],
+        "18090": [],
+        "18091": [],
+        "18092": [],
+        "18093": []
+      },
+      "after": {
+        "6677": [],
+        "8000": [],
+        "15173": [
+          50629
+        ],
+        "17687": [],
+        "18090": [],
+        "18091": [],
+        "18092": [],
+        "18093": []
+      },
+      "unchanged": true,
+      "observed_host_pids": [
+        55094,
+        55118,
+        55132,
+        55144,
+        55156
+      ],
+      "all_gone": true
+    },
+    "limitations": [
+      "No real model, real business data, browser, Windows/WSL or production deployment.",
+      "Profile rollback does not roll back service data; in-process arbitrary plugin isolation is not promised.",
+      "No rc1-to-rc2 migration, torn-frame recovery, signed runtime artifact or production journal activation is certified."
+    ]
+  },
+  "integration_tests": {
+    "first": {
+      "pass": 78,
+      "fail": 1,
+      "skip": 8,
+      "reason": "BOUNDARY_INVENTORY_DRIFT"
+    },
+    "after_inventory_refresh": {
+      "pass": 79,
+      "fail": 0,
+      "skip": 8
+    },
+    "host_tests_with_explicit_upstream": {
+      "pass": 25,
+      "fail": 0,
+      "skip": 3,
+      "skip_reason": "existing service pair / Python / wheelhouse inputs required"
+    },
+    "combined_unique_after_supplement": {
+      "pass": 84,
+      "fail": 0,
+      "skip": 3
+    }
+  },
+  "full_pipeline": {
+    "status": "BLOCKED",
+    "first_failure": "Corepack pnpm 11.28.2 cache missing; attempted download failed TLS issuer validation",
+    "offline_recheck": "Corepack network disabled; same missing cached manager rejected before builds",
+    "local_exact_pnpm_component_build": "PASS; does not certify full pipeline"
+  },
+  "formal_ci": "NOT_RUN",
+  "journal": "NOT_WRITTEN",
+  "ocr": "PARTIAL; B six external review tasks did not complete; manually reviewed",
+  "sdk_distribution": "BLOCKED",
+  "raw_evidence_sha256": {
+    "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-closeout-20261008-r1/runtime-failure-r2/evidence.json": "a882877a5f28ef78841b370786ab7a4f92722345bec64e8ef82e8617f167dc18",
+    "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-closeout-20261008-r1/invocation-r2.json": "e3fe179cede514c190dcc3782072525101f529184fe827d4518956a32c0ec98d",
+    "/Users/hutou/.codex/worktrees/grok-plugin-update-trial/fuqing-crm-analytics/.context/checks/abc-closeout-20261008-r1/protected-after.json": "86c680093630a0be7e98eff41b1ddfc038b54e16c97d42a59a6c9df7a3ebe3c7",
+    "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-integration-20261008/targeted-tests-r2.log": "0227890f2a4ae7da393fa1790b9382c9928746f9e988e646754ed61bdfa715b7",
+    "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-integration-20261008/pinned-tests-with-upstream.log": "44219f612e26ed71a1329fd19ed0b87721f8ccdbf539ea2ea46602f24f3a5536",
+    "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-integration-20261008/b0-full-check.log": "d7281a16d76042b54e134c3ca90507ec221f0c711e6af1382036dcca38956492",
+    "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-integration-20261008/b0-full-check-r2.log": "6e0179b180e77fb4de7678bb38c927726667e480f844fc9b8d52e95cc1269d20",
+    "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-integration-20261008/board-local-pack.log": "8d38d58c85fb682b7631e13a75adb45045a085be4daf73054bd6d47e768d129d"
+  }
+}

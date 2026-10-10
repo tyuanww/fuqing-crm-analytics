@@ -142,6 +142,7 @@ function Shell({ Overlay, actionsRef, QueryCard, themeSource }) {
 async function mountShell(fetchImpl, options = {}) {
   let factory;
   const context = {
+    AbortController,
     window: Object.assign(globalThis.window, { __ModuleLoader__: { load: row => { factory = row; } }, fetch: fetchImpl }),
     document: globalThis.document,
     getComputedStyle: globalThis.window.getComputedStyle.bind(globalThis.window),
@@ -719,6 +720,7 @@ function dualBoardFetch(boardA, boardB) {
 async function mountDualOverlays(fetchImpl) {
   let factory;
   const context = {
+    AbortController,
     window: Object.assign(globalThis.window, { __ModuleLoader__: { load: row => { factory = row; } }, fetch: fetchImpl }),
     document: globalThis.document,
     getComputedStyle: globalThis.window.getComputedStyle.bind(globalThis.window),

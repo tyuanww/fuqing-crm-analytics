@@ -1,0 +1,11 @@
+{
+  "schema_version": "shinemage-bundled-dependencies/v1",
+  "packages": [
+    {
+      "name": "@shine-mage/board-components",
+      "version": "0.1.0",
+      "tarball": "shine-mage-board-components-0.1.0.tgz",
+      "sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182"
+    }
+  ]
+}

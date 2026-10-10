@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdtemp, readFile, writeFile, symlink } from 'node:fs/promises';
+import { mkdtemp, open, readFile, rm, writeFile, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { spawn } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import test from 'node:test';
-import { clearStaleLock, idempotent, readState, reconcileState, recordEvent, resume, transition } from './state.mjs';
+import { clearStaleLock, idempotent, MAX_STATE_BYTES, readState, reconcileState, recordEvent, resume, transition } from './state.mjs';
 import { reconcileRemote } from './reconcile.mjs';
 
 const fixture = () => mkdtemp(join(tmpdir(), 'dsh-state-'));
@@ -62,6 +62,41 @@ test('reconcile decision is durable and never silently adopts remote state', asy
   assert.equal(state.journal.at(-1).status, 'RECONCILED');
 });
 
+test('publication identity is promoted into state and missing identity stays unknown', async () => {
+  const root = await fixture(); const path = join(root, 'state.json');
+  await transition(path, 'BUILD', { release_tag: 'dsh-identity-test', source_sha: 'a'.repeat(40) });
+  await transition(path, 'CREATE_DRAFT_RELEASE');
+  await transition(path, 'UPLOAD_TARBALLS', { artifact_sha256: 'b'.repeat(64), manifest_sha256: 'c'.repeat(64) });
+  const state = await readState(path);
+  assert.equal(state.source_sha, 'a'.repeat(40));
+  assert.equal(state.artifact_sha256, 'b'.repeat(64));
+  assert.equal(state.manifest_sha256, 'c'.repeat(64));
+  assert.equal(reconcileRemote({
+    local: state,
+    remote: { release_tag: 'dsh-identity-test', phase: 'UPLOAD_TARBALLS', status: 'UPLOADED', source_sha: 'a'.repeat(40), artifact_sha256: 'b'.repeat(64), manifest_sha256: 'c'.repeat(64) },
+  }).status, 'RECONCILED');
+  assert.equal(reconcileRemote({
+    local: { release_tag: 'dsh-identity-test', phase: 'UPLOAD_TARBALLS' },
+    remote: { release_tag: 'dsh-identity-test', phase: 'UPLOAD_TARBALLS', status: 'UPLOADED' },
+  }).status, 'UNKNOWN');
+  await assert.rejects(() => recordEvent(path, { artifact_sha256: 'd'.repeat(64) }), /RELEASE_STATE_IDENTITY_CONFLICT artifact_sha256/);
+});
+
+test('host tag changes clear old identity while the journal retains both releases', async () => {
+  const path = join(await fixture(), 'host-state.json');
+  await recordEvent(path, { release_tag: 'dsh-old', source_sha: 'a'.repeat(40), artifact_sha256: 'b'.repeat(64), manifest_sha256: 'c'.repeat(64), assets: [{ name: 'old' }] });
+  await recordEvent(path, { release_tag: 'dsh-new', source_sha: 'd'.repeat(40), status: 'PREPARE_INTENT' }, { allowTagChange: true });
+  const state = await readState(path);
+  assert.equal(state.release_tag, 'dsh-new');
+  assert.equal(state.source_sha, 'd'.repeat(40));
+  assert.equal(state.artifact_sha256, undefined);
+  assert.equal(state.manifest_sha256, undefined);
+  assert.equal(state.assets, undefined);
+  assert.equal(state.journal[0].artifact_sha256, 'b'.repeat(64));
+  await recordEvent(path, { release_tag: 'dsh-new', artifact_sha256: 'e'.repeat(64) });
+  assert.equal((await readState(path)).artifact_sha256, 'e'.repeat(64));
+});
+
 test('a killed idempotent worker leaves a resumable unknown operation', async () => {
   const root = await fixture(); const path = join(root, 'crash-state.json');
   const moduleUrl = new URL('./state.mjs', import.meta.url).href;
@@ -101,4 +136,45 @@ test('stale-lock recovery refuses a live or unreadable owner', async () => {
   const linkPath = join(root, 'symlink-state.json');
   await symlink(`${path}.lock`, `${linkPath}.lock`);
   await assert.rejects(() => clearStaleLock(linkPath, { confirm: true }), /RELEASE_LOCK_INVALID/);
+});
+
+test('recordEvent retains an exact prerequisite across unrelated appends and checks it again on retry', async t => {
+  const root = await fixture(), path = join(root, 'journal.json');
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const prepared = await recordEvent(path, { status: 'CANDIDATE_PREPARED' }, { idempotencyKey: 'prepared-fixture' });
+  const data = { status: 'VERIFIED' }, options = { idempotencyKey: 'verified-fixture',
+    requiredEvent: { seq: prepared.seq, digest: prepared.digest } };
+  const first = await recordEvent(path, data, options);
+  await recordEvent(path, { status: 'UNRELATED_OBSERVATION' });
+  assert.deepEqual(await recordEvent(path, data, options), first);
+  const state = await readState(path); state.journal = []; state.updated_at = null;
+  const changed = JSON.stringify(state); await writeFile(path, changed);
+  await assert.rejects(recordEvent(path, data, options), /RELEASE_EVENT_PREREQUISITE_CHANGED/);
+  assert.equal(await readFile(path, 'utf8'), changed);
+  await assert.rejects(recordEvent(path, data, { requiredEvent: { seq: 0, digest: prepared.digest } }), /RELEASE_EVENT_PREREQUISITE_INVALID/);
+});
+
+test('recordEvent never replays a cache result different from its journal entry', async t => {
+  const root = await fixture(), path = join(root, 'journal.json');
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const data = { status: 'VERIFIED' }, options = { idempotencyKey: 'verified-fixture' };
+  await recordEvent(path, data, options);
+  const state = await readState(path);
+  state.idempotency['verified-fixture'].result.status = 'WRONG_RECEIPT';
+  const changed = JSON.stringify(state); await writeFile(path, changed);
+  await assert.rejects(recordEvent(path, data, options), /RELEASE_EVENT_RECEIPT_INVALID/);
+  assert.equal(await readFile(path, 'utf8'), changed);
+});
+
+test('state reads reject links, FIFO and oversized sparse files without blocking', async t => {
+  const root = await fixture(), path = join(root, 'journal.json');
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await recordEvent(path, { status: 'READY' });
+  const link = join(root, 'link'); await symlink(path, link);
+  await assert.rejects(readState(link), { code: 'ELOOP' });
+  const fifo = join(root, 'fifo'); execFileSync('mkfifo', [fifo], { cwd: root });
+  await assert.rejects(readState(fifo), /RELEASE_STATE_FILE_INVALID/);
+  const huge = join(root, 'huge'), handle = await open(huge, 'wx');
+  try { await handle.truncate(MAX_STATE_BYTES + 1); } finally { await handle.close(); }
+  await assert.rejects(readState(huge), /RELEASE_STATE_FILE_INVALID/);
 });

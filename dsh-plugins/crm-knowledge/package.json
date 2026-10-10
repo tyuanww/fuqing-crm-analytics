@@ -1,9 +1,9 @@
 {
   "name": "@shine-mage/dsh-crm-knowledge",
-  "version": "0.0.0-candidate",
+  "version": "0.0.0-crm.1",
   "private": true,
   "type": "module",
-  "description": "Independent CRM metrics, knowledge and private analysis assets with an optional cockpit UI slot.",
+  "description": "CRM dashboard, metrics and private analysis assets; knowledge tools are a separately installed optional plugin.",
   "engines": {
     "node": "24.x"
   },
@@ -19,22 +19,33 @@
   "exports": {
     ".": "./lib/index.js",
     "./host": "./lib/host.js",
-    "./graph-tools": "./lib/graph-tools.js",
     "./client": "./lib/client.js",
     "./package.json": "./package.json",
     "./cordis.patch.yml": "./cordis.patch.yml"
   },
   "files": [
-    "lib",
+    "lib/index.js",
+    "lib/host.js",
+    "lib/client.js",
     "cordis.patch.yml"
   ],
   "dsh": {
     "client": {
       "platform": "web",
-      "inject": ["@deepseek-ai/dsh-client-ui-conversation", "@deepseek-ai/dsh-client-ui-renderer", "@deepseek-ai/dsh-api-session-controller"]
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-api-session-controller"
+      ]
     },
     "bundle": {
       "patch": "./cordis.patch.yml"
     }
-  }
+  },
+  "packageManager": "pnpm@11.28.2",
+  "shinemage": {
+    "plugin_domain": "crm",
+    "composition_contract": "crm-knowledge-split/v1"
+  },
+  "devDependencies": { "@shine-mage/dsh-plugin-kit": "0.1.0" }
 }

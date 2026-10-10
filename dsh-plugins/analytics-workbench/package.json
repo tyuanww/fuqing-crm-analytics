@@ -2,9 +2,13 @@
   "name": "@shine-mage/dsh-analytics-workbench-b0",
   "version": "0.0.0-b0",
   "private": true,
-  "packageManager": "pnpm@11.7.0",
-  "engines": { "node": "24.x" },
-  "peerDependencies": { "@deepseek-ai/dsh-tools": "0.1.7-rc.2" },
+  "packageManager": "pnpm@11.28.2",
+  "engines": {
+    "node": "24.x"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-tools": "0.1.7-rc.2"
+  },
   "type": "module",
   "description": "B0 only: native DSH integration backed by the isolated FastAPI run kernel",
   "exports": {
@@ -12,14 +16,17 @@
     "./tool": "./lib/tool.js",
     "./client": "./lib/client.js",
     "./cordis.patch.yml": "./cordis.patch.yml",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./page-tools": "./lib/page-tools.js"
   },
   "files": [
     "lib/index.js",
     "lib/tool.js",
     "lib/skills.js",
+    "lib/page-tools.js",
     "lib/client.js",
-    "cordis.patch.yml"
+    "cordis.patch.yml",
+    "bundled-dependencies.json"
   ],
   "dsh": {
     "client": {
@@ -45,7 +52,11 @@
   "scripts": {
     "build": "node build.mjs",
     "test": "node --test test/model.test.mjs test/initial-session.test.mjs test/native-evidence.test.mjs test/run-view.test.mjs && pnpm test:html-edit",
-    "test:html-edit": "node --test src/free-page/resource/package-normalize.test.mjs src/client/free-html-library/html-import.test.mjs src/client/html-selection-bridge.test.mjs src/client/free-html-library/store.test.mjs src/client/free-html-library/p12-live-adapters.test.mjs src/client/free-html-library/source-draft.test.mjs src/client/cockpit-ai-client.test.mjs src/free-page/edit/intent-router.test.mjs src/free-page/edit/selection-context.test.mjs test/dynamic-chart-browser-seam.test.mjs",
+    "test:html-edit": "node --test src/free-page/resource/package-normalize.test.mjs src/client/free-html-library/html-import.test.mjs src/client/html-selection-bridge.test.mjs src/client/free-html-library/store.test.mjs src/client/free-html-library/p12-live-adapters.test.mjs src/client/free-html-library/source-draft.test.mjs test/cockpit-ai-client.test.mjs src/free-page/edit/intent-router.test.mjs src/free-page/edit/selection-context.test.mjs test/dynamic-chart-browser-seam.test.mjs test/draft-save-regression.test.mjs test/canvas-input-regression.test.mjs test/open-native-html-artifact.test.mjs src/free-page/preview/srcdoc-builder.test.mjs",
     "test:built": "node --test test/built.test.mjs"
+  },
+  "devDependencies": {
+    "@shine-mage/dsh-plugin-kit": "0.1.0",
+    "@shine-mage/board-components": "0.1.0"
   }
 }

@@ -1,0 +1,334 @@
+{
+  "schema_version": "shinemage-plugin-boundary-policy/v1",
+  "inspection_baseline_sha": "d4261aa338ff4ed5543866b8c63cdba627e49518",
+  "owners": {
+    "plugin-kit": {
+      "domain": "build-tooling",
+      "target_repository": "shinemage-dsh-plugin-kit",
+      "kind": "dev-tool"
+    },
+    "analytics-workbench": {
+      "domain": "analysis/pages/cockpit",
+      "target_repository": "shinemage-dsh-analytics-workbench",
+      "kind": "plugin"
+    },
+    "crm-knowledge": {
+      "domain": "crm-adapter",
+      "target_repository": "shinemage-dsh-crm",
+      "kind": "plugin"
+    },
+    "shine-brand": {
+      "domain": "plugin-theme",
+      "target_repository": "shinemage-dsh-brand",
+      "kind": "plugin"
+    },
+    "shine-funnel": {
+      "domain": "board-components",
+      "target_repository": "shinemage-dsh-board-components",
+      "kind": "plugin"
+    },
+    "shine-waterfall": {
+      "domain": "board-components",
+      "target_repository": "shinemage-dsh-board-components",
+      "kind": "plugin"
+    },
+    "shine-query": {
+      "domain": "query",
+      "target_repository": "shinemage-dsh-query",
+      "kind": "plugin"
+    },
+    "shine-board": {
+      "domain": "board",
+      "target_repository": "shinemage-dsh-board",
+      "kind": "plugin"
+    },
+    "shine-crowd-action": {
+      "domain": "board-marker",
+      "target_repository": "shinemage-dsh-board",
+      "kind": "plugin"
+    },
+    "board-components": {
+      "domain": "board-components",
+      "target_repository": "shinemage-dsh-board-components",
+      "kind": "domain-library"
+    },
+    "knowledge": {
+      "domain": "knowledge",
+      "target_repository": "shinemage-dsh-knowledge",
+      "kind": "plugin"
+    }
+  },
+  "allowed_runtime_edges": [],
+  "command_owners": [
+    {
+      "entry": "scripts/dsh.mjs",
+      "owner": "release-control",
+      "scope": "User CLI dispatch; local/release scopes and explicit state."
+    },
+    {
+      "entry": "scripts/release/preflight.mjs",
+      "owner": "release-control",
+      "scope": "Pinned candidate orchestration; no production activation."
+    },
+    {
+      "entry": "scripts/release/plugin-pack.mjs",
+      "owner": "release-control",
+      "scope": "Verified immutable plugin package only."
+    },
+    {
+      "entry": "scripts/release/plugin-candidate.mjs",
+      "owner": "release-control",
+      "scope": "PARTIAL profile/pack/journal receipt; no host activation."
+    },
+    {
+      "entry": "scripts/dsh-b0/pipeline.mjs",
+      "owner": "build-tooling",
+      "scope": "Shared local/CI prepare/audit/check."
+    },
+    {
+      "entry": "scripts/dsh-b0/plugin-boundaries.mjs",
+      "owner": "architecture-maintainer",
+      "scope": "Static ownership/import/route inventory and drift gate."
+    },
+    {
+      "entry": "scripts/dsh-dev/cli.mjs",
+      "owner": "host-dev-adapter",
+      "scope": "Explicit isolated host lifecycle; never an implicit test side effect."
+    },
+    {
+      "entry": "deploy/wsl/install-release.sh",
+      "owner": "deploy-owner",
+      "scope": "Explicit immutable remote install; separate authorization."
+    },
+    {
+      "entry": "scripts/crm-calibration/package-service.mjs",
+      "owner": "release-control",
+      "scope": "Allowlisted synthetic service application artifact and digest only; no dependency install, production release or activation."
+    },
+    {
+      "entry": "scripts/crm-calibration/service-entry.py",
+      "owner": "backend-services",
+      "scope": "Verify one service artifact and exact dependencies; explicit loopback-only owned process. CRM/knowledge owner comes from its manifest."
+    }
+  ],
+  "contracts": [
+    {
+      "id": "pinned-dsh-sdk",
+      "owner": "official-dsh",
+      "source": "dsh-plugins/plugin-kit/toolchain.json",
+      "generator": null,
+      "consumers": [
+        "all-plugins",
+        "release-control"
+      ],
+      "compatibility": "Exact SHA/SDK/lock; upgrade only in isolated candidate; source pin is not runtime proof.",
+      "status": "PINNED_UPSTREAM"
+    },
+    {
+      "id": "crm-metrics",
+      "owner": "crm-service",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
+      "generator": "scripts/crm-calibration/generate_types.mjs",
+      "consumers": [
+        "crm-knowledge"
+      ],
+      "compatibility": "CRM owns schemas and permissions; consumer tests; no database bundled.",
+      "status": "GENERATED_DOMAIN_V1"
+    },
+    {
+      "id": "crm-metrics-tool-schema",
+      "owner": "crm-service",
+      "source": "dsh-plugins/crm-knowledge/src/contract.generated.ts",
+      "generator": "scripts/crm-calibration/generate_contract.py",
+      "consumers": [
+        "crm-knowledge"
+      ],
+      "compatibility": "Generated request/output tool schema for synthetic CRM metrics; knowledge contracts remain separately owned and are not defined by this file.",
+      "status": "GENERATED_DOMAIN_V1"
+    },
+    {
+      "id": "first-purchase",
+      "owner": "analysis-service",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-contract.generated.d.ts",
+      "generator": "scripts/dsh-b0/first-purchase-contract.mjs",
+      "consumers": [
+        "analytics-workbench"
+      ],
+      "compatibility": "B0 ratios 0-1; T3 freezes public compatibility window before physical extraction.",
+      "status": "GENERATED_DOMAIN_V1"
+    },
+    {
+      "id": "saved-analysis",
+      "owner": "analysis-service",
+      "source": "dsh-plugins/analytics-workbench/src/analysis-contract.generated.d.ts",
+      "generator": "scripts/dsh-b0/analysis-contract.mjs",
+      "consumers": [
+        "analytics-workbench"
+      ],
+      "compatibility": "Service owns durable records; profile rollback is not data rollback; D4-C gate.",
+      "status": "GENERATED_DOMAIN_V1"
+    },
+    {
+      "id": "board-spec",
+      "owner": "board-domain",
+      "source": "dsh-plugins/analytics-workbench/src/board-spec-contract.generated.d.ts",
+      "generator": "scripts/dsh-b0/board-spec-contract.mjs",
+      "consumers": [
+        "analytics-workbench",
+        "board-components"
+      ],
+      "compatibility": "Preserve semantic and geometry consumer tests; move domain schema with domain owner.",
+      "status": "GENERATED_DOMAIN_V1"
+    },
+    {
+      "id": "crm-cockpit-slot",
+      "owner": "analysis-workbench",
+      "source": "dsh-plugins/analytics-workbench/contracts/cockpit-slot.v1.json",
+      "generator": "scripts/dsh-b0/cockpit-slot-contract.mjs",
+      "consumers": [
+        "analytics-workbench",
+        "crm-knowledge"
+      ],
+      "compatibility": "Frozen v1 optional single/root slot; generated consumer copies checked for drift; no host activation or service permission implied.",
+      "status": "DOMAIN_V1"
+    },
+    {
+      "id": "page-generation-tool",
+      "owner": "page-domain",
+      "source": "dsh-plugins/analytics-workbench/src/page-tools.ts",
+      "generator": null,
+      "consumers": [
+        "analytics-workbench",
+        "crm-profile-composer"
+      ],
+      "compatibility": "Page domain owns the optional tools-only public ./page-tools entry. Profile explicitly selects its built package; CRM ships no page parser or registration.",
+      "status": "DOMAIN_V1"
+    },
+    {
+      "id": "board-funnel-geometry-v1",
+      "owner": "board-components",
+      "source": "dsh-plugins/board-components/src/funnel.d.mts",
+      "generator": null,
+      "consumers": [
+        "analytics-workbench",
+        "shine-funnel"
+      ],
+      "compatibility": "SemVer library exports; exact tarball digest and bundled dependency lock per consumer.",
+      "status": "DOMAIN_V1"
+    },
+    {
+      "id": "board-waterfall-geometry-v1",
+      "owner": "board-components",
+      "source": "dsh-plugins/board-components/src/waterfall.d.mts",
+      "generator": null,
+      "consumers": [
+        "analytics-workbench",
+        "shine-waterfall"
+      ],
+      "compatibility": "SemVer library exports; exact tarball digest and bundled dependency lock per consumer.",
+      "status": "DOMAIN_V1"
+    },
+    {
+      "id": "plugin-content-theme-v1",
+      "owner": "shine-brand",
+      "source": "dsh-plugins/shine-brand/contracts/content-theme.v1.json",
+      "generator": "scripts/dsh-b0/content-theme-contract.mjs",
+      "consumers": [
+        "analytics-workbench",
+        "crm-knowledge"
+      ],
+      "compatibility": "Brand-owned content tokens; generated copies with source digest, no runtime brand activation or native chrome changes.",
+      "status": "DOMAIN_V1"
+    },
+    {
+      "id": "crm-metrics-service-api",
+      "owner": "crm-service",
+      "source": "backend/contracts/crm-metrics-service.v1.json",
+      "generator": "scripts/crm-calibration/generate_contract.py",
+      "consumers": [
+        "crm-knowledge"
+      ],
+      "compatibility": "Exact API 1.0.0 per request; independent configured loopback origin; no Python/repository fallback. Synthetic fixtures only; no durable save.",
+      "status": "DOMAIN_V1"
+    },
+    {
+      "id": "crm-knowledge-service-api",
+      "owner": "knowledge-service",
+      "source": "backend/contracts/crm-knowledge-service.v1.json",
+      "generator": "scripts/crm-calibration/generate_contract.py",
+      "consumers": [
+        "knowledge"
+      ],
+      "compatibility": "Exact API 1.0.0 per request; independent configured loopback origin; no Python/repository fallback. Synthetic fixtures only; no durable save.",
+      "status": "DOMAIN_V1"
+    },
+    {
+      "id": "crm-knowledge-access-v1",
+      "owner": "crm-service",
+      "source": "dsh-plugins/crm-knowledge/contracts/knowledge-access.v1.ts",
+      "generator": "scripts/crm-calibration/generate_contract.py",
+      "consumers": [
+        "crm-knowledge",
+        "knowledge"
+      ],
+      "compatibility": "Optional exact v1 service; credential-free, revocable per-login lease and fenced citation sink. No runtime CRM import.",
+      "status": "DOMAIN_V1"
+    },
+    {
+      "id": "crm-dashboard-definition-v1",
+      "owner": "crm-service",
+      "source": "dsh-plugins/crm-knowledge/contracts/dashboard-definition.v1.mjs",
+      "generator": "scripts/crm-calibration/generate_contract.py",
+      "consumers": [
+        "crm-knowledge",
+        "knowledge"
+      ],
+      "compatibility": "CRM owns operational meaning; byte-identical generated consumers, no account data or sibling runtime import.",
+      "status": "DOMAIN_V1"
+    },
+    {
+      "id": "first-purchase-save-receipt",
+      "owner": "analysis-service",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
+      "generator": "scripts/dsh-b0/first-purchase-analysis-contract.mjs",
+      "consumers": [
+        "analytics-workbench"
+      ],
+      "compatibility": "Receipt API 1.0.0 binds action/candidate/correlation and durable state. Read-only reconcile survives admission revocation. New writes require explicit service policy; legacy saved-analysis/cockpit v1 and SQLite schema 1 remain unchanged.",
+      "status": "GENERATED_DOMAIN_V1"
+    },
+    {
+      "id": "first-purchase-save-result",
+      "owner": "analysis-service",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
+      "generator": "scripts/dsh-b0/first-purchase-analysis-contract.mjs",
+      "consumers": [
+        "analytics-workbench"
+      ],
+      "compatibility": "Independent D15 result/provenance API 1.0.0 with service-owned freshness and exact candidate admission. Strict consumer decoder; immutable saved provenance shares the existing transaction. No production defaults or unversioned PINNED reinterpretation.",
+      "status": "GENERATED_DOMAIN_V1"
+    },
+    {
+      "id": "first-purchase-session-identity",
+      "owner": "analysis-service",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
+      "generator": "scripts/dsh-b0/first-purchase-analysis-contract.mjs",
+      "consumers": [
+        "analytics-workbench"
+      ],
+      "compatibility": "Additive read-only identity/v1; fresh explicit synthetic query grant via the CRM-owned credential lease. No client actor, cached credentials, owner alias or implicit production admission.",
+      "status": "GENERATED_DOMAIN_V1"
+    },
+    {
+      "id": "crm-first-purchase-access-v1",
+      "owner": "crm-knowledge",
+      "source": "dsh-plugins/crm-knowledge/contracts/first-purchase-access.v1.ts",
+      "generator": "scripts/crm-calibration/generate_contract.py",
+      "consumers": [
+        "analytics-workbench"
+      ],
+      "compatibility": "Optional revocable per-session CRM lease; finite loopback identity/inspect/save/reconcile only, no credentials exported; query identity is additive and requires an explicit service grant. Independent service owns authorization, candidate policy and durable state.",
+      "status": "DOMAIN_V1"
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import { dashboardDefinition } from './dashboard-definition.generated.mjs';
 /** Read the accepted dashboard through its authenticated API. No DB/SQL fallback. */
 export const LEAF_CHANNELS = Object.freeze(['货架', '达播', '直播', '淘客', '微博', 'U先派样', '百补派样', '赠品&0.01', '其他']);
 export const CHANNELS = Object.freeze(['全店', '纯派样', ...LEAF_CHANNELS]);
@@ -44,18 +45,7 @@ class DashboardError extends Error {
 }
 const fail = code => { throw new DashboardError(code); };
 
-export function dashboardKnowledgeContext() {
-  return {
-    metric_version: VERSION,
-    default_for_real_gsv: 'query_crm_dashboard_gsv',
-    definition: '复用现有人群看板：按支付日汇总 actual_amount，排除购物金、交易关闭及 is_refund=TRUE 的明细，再应用相同渠道和剔除低价筛选。',
-    accepted_baseline: '用户已确认现有看板 GSV 为接入基准；此处不公开私有业务金额。',
-    difference_from_target: 'crm-metrics/v1 的扣实际退款净额仍是单列候选。现看板会排除被标记退款的明细，不能将两者等同，不能对看板结果再扣退款。',
-    refund_as_of_supported: false,
-    other_metrics_calibrated: false,
-    source_refs: ['backend/semantic/calculations.py', 'backend/services/metrics/overview.py', 'docs/crm-calibration/public-release.md'],
-  };
-}
+export function dashboardKnowledgeContext() { return structuredClone(dashboardDefinition); }
 
 export function dashboardCapabilities(connectionState = 'NOT_CONNECTED') {
   return {

@@ -1,8 +1,6 @@
+import { loadCoordinatorFixture } from '../fixture-loader.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import fixture from './fixture.json' with { type: 'json' };
 import {
   parsePageDocument, parsePagePackage, parseBridgeMessage, parseBindingManifest,
@@ -12,9 +10,7 @@ import {
 } from './schema.mjs';
 import { sourceHash } from '../presentation/model.mjs';
 
-const here = dirname(fileURLToPath(import.meta.url));
-const frozen = JSON.parse(readFileSync(join(here,
-  '../../../../../docs/hackathon/free-html-cockpit/fixtures/frozen-contract-v0.json'), 'utf8'));
+const frozen = loadCoordinatorFixture('frozen-contract-v0.json');
 
 const sampleDoc = {
   schema_version: 'free-page/v1',
@@ -254,8 +250,8 @@ test('edit contract rejects illegal fields, unknown operations, and silent byte 
   assert.equal(parseEditOperation({ ...editOperation(), capabilities: [] }).error.code, 'INVALID_EDIT');
 });
 
-test('published OpenAPI edit enums match the runtime contract', () => {
-  const openapi = JSON.parse(readFileSync(join(here, '../../../../../backend/contracts/analytics-page.openapi.json'), 'utf8'));
+test('pinned published OpenAPI edit enums match the runtime contract', () => {
+  const openapi = loadCoordinatorFixture('analytics-page.openapi.json');
   assert.deepEqual(openapi['x-edit-channels'], EDIT_CHANNEL_VALUES);
   assert.deepEqual(openapi['x-edit-actions'], EDIT_ACTION_VALUES);
   assert.equal(openapi['x-edit-presentation'], 'overlay');

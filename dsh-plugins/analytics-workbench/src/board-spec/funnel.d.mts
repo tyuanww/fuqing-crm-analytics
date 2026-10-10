@@ -1,1 +1,1 @@
-export { funnelGeometry, type FunnelGeometry } from '../../../shine-funnel/src/funnel.d.mts';
+export { funnelGeometry, type FunnelGeometry } from '@shine-mage/board-components/funnel';

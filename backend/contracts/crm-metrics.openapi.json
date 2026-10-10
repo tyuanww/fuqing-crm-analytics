@@ -9,12 +9,73 @@
       "get": {
         "summary": "Capabilities",
         "operationId": "capabilities_api_v1_crm_metrics_capabilities_get",
+        "parameters": [
+          {
+            "name": "X-ShineMage-Contract",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Exact public synthetic service API identity; not an authentication credential.",
+              "const": "crm-metrics-service/1.0.0",
+              "title": "X-Shinemage-Contract"
+            },
+            "description": "Exact public synthetic service API identity; not an authentication credential."
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "403": {
+            "description": "Browser Origin rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Service API identity mismatch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid request; input details are not echoed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Metric contract or synthetic source rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
               }
             }
           }
@@ -25,15 +86,36 @@
       "post": {
         "summary": "Query",
         "operationId": "query_api_v1_crm_metrics_query_post",
+        "parameters": [
+          {
+            "name": "X-ShineMage-Contract",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Exact public synthetic service API identity; not an authentication credential.",
+              "const": "crm-metrics-service/1.0.0",
+              "title": "X-Shinemage-Contract"
+            },
+            "description": "Exact public synthetic service API identity; not an authentication credential."
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/MetricRequest"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -46,12 +128,42 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "403": {
+            "description": "Browser Origin rejected",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Service API identity mismatch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid request; input details are not echoed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Metric contract or synthetic source rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
                 }
               }
             }
@@ -63,15 +175,36 @@
       "post": {
         "summary": "Explain",
         "operationId": "explain_api_v1_crm_metrics_explain_post",
+        "parameters": [
+          {
+            "name": "X-ShineMage-Contract",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Exact public synthetic service API identity; not an authentication credential.",
+              "const": "crm-metrics-service/1.0.0",
+              "title": "X-Shinemage-Contract"
+            },
+            "description": "Exact public synthetic service API identity; not an authentication credential."
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ExplainRequest"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -82,12 +215,42 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "403": {
+            "description": "Browser Origin rejected",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Service API identity mismatch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid request; input details are not echoed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Metric contract or synthetic source rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceError"
                 }
               }
             }
@@ -117,19 +280,6 @@
           "topic"
         ],
         "title": "ExplainRequest"
-      },
-      "HTTPValidationError": {
-        "properties": {
-          "detail": {
-            "items": {
-              "$ref": "#/components/schemas/ValidationError"
-            },
-            "type": "array",
-            "title": "Detail"
-          }
-        },
-        "type": "object",
-        "title": "HTTPValidationError"
       },
       "Limitation": {
         "properties": {
@@ -656,45 +806,37 @@
         ],
         "title": "ResolvedFilters"
       },
-      "ValidationError": {
+      "ServiceError": {
         "properties": {
-          "loc": {
-            "items": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Location"
-          },
-          "msg": {
+          "status": {
             "type": "string",
+            "const": "UNAVAILABLE",
+            "title": "Status"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Message"
-          },
-          "type": {
-            "type": "string",
-            "title": "Error Type"
-          },
-          "input": {
-            "title": "Input"
-          },
-          "ctx": {
-            "type": "object",
-            "title": "Context"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
-          "loc",
-          "msg",
-          "type"
+          "status",
+          "code"
         ],
-        "title": "ValidationError"
+        "title": "ServiceError",
+        "description": "Sanitized wire errors shared by the two public synthetic transports."
       }
     }
   }

@@ -102,6 +102,11 @@ jobs:
           cache: 'pip'
           cache-dependency-path: requirements-lock.txt
       - run: pip install -r requirements-lock.txt
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24.19.0"
+      - name: Ensure standalone service artifact tools
+        run: sudo apt-get install -y zstd
       - name: Run the same Python plan as local pre-push
         env:
           CHECK_PLAN: ${{ needs.changes.outputs.plan }}
@@ -192,7 +197,14 @@ jobs:
           lfs: true
       - name: Backend Dockerfile build (no push)
         run: |
-          docker build -t fuqing-crm-backend:ci -f Dockerfile .
+          set -euo pipefail
+          for delay in 0 30 60 120; do
+            if docker build -t fuqing-crm-backend:ci -f Dockerfile .; then
+              exit 0
+            fi
+            if [ "$delay" -gt 0 ]; then sleep "$delay"; fi
+          done
+          exit 1
       - name: Generate ephemeral test credentials (masked)
         # P0: 禁止 workflow 固定密码；每次 run 随机生成并 ::add-mask::
         run: |
@@ -225,7 +237,14 @@ jobs:
           chmod 0666 "$DB_DIR/fuqing_crm.duckdb"
       - name: Frontend Dockerfile build (no push)
         run: |
-          docker build -t fuqing-crm-frontend:ci -f frontend-vue3/Dockerfile frontend-vue3
+          set -euo pipefail
+          for delay in 0 30 60 120; do
+            if docker build -t fuqing-crm-frontend:ci -f frontend-vue3/Dockerfile frontend-vue3; then
+              exit 0
+            fi
+            if [ "$delay" -gt 0 ]; then sleep "$delay"; fi
+          done
+          exit 1
       - name: Run backend and frontend container smoke
         run: |
           set -euo pipefail
@@ -293,6 +312,8 @@ jobs:
       # the Node 24 runtime selected for our own build and verification below.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
+          # Host evidence verifies controller bytes against a fixed prior commit.
+          fetch-depth: 0
           persist-credentials: false
           clean: false
           lfs: true
@@ -300,6 +321,12 @@ jobs:
         with:
           node-version: '24.19.0'
           package-manager-cache: false
+      - name: Activate the pinned package manager
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack install
+          test "$(pnpm --version)" = "11.28.2"
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         id: python
         with:

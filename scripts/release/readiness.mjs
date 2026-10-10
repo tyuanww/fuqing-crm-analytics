@@ -2,17 +2,9 @@ import { access, constants as fsConstants, lstat, readFile, stat, statfs } from 
 import { execFileSync } from 'node:child_process';
 import { basename, dirname, join, resolve } from 'node:path';
 import { DSH_SDK_VERSION, DSH_UPSTREAM_SHA, NODE_MAJOR, PNPM_VERSION } from './toolchain.mjs';
+import { loadReleaseProfile } from './profile.mjs';
 
 export { DSH_UPSTREAM_SHA };
-export const RELEASE_PLUGINS = [
-  'dsh-plugins/analytics-workbench',
-  'dsh-plugins/shine-brand',
-  'dsh-plugins/shine-waterfall',
-  'dsh-plugins/shine-crowd-action',
-  'dsh-plugins/shine-query',
-  'dsh-plugins/shine-board',
-  'dsh-plugins/shine-funnel',
-];
 
 function commandOutput(command, args) {
   try {
@@ -30,8 +22,27 @@ function commandOutput(command, args) {
   catch { return null; }
 }
 
+const REMEDY_REFS = Object.freeze({
+  NODE_TOOLCHAIN_REQUIRED: 'docs/operating/dsh-rc2-quickstart.md#dsh-quickstart-toolchain',
+  PNPM_VERSION_REQUIRED: 'docs/operating/dsh-rc2-quickstart.md#dsh-quickstart-toolchain',
+  PYTHON314_REQUIRED: 'docs/operating/dsh-rc2-quickstart.md#dsh-quickstart-toolchain',
+  RELEASE_BLOCKED_DIRTY_WORKTREE: 'docs/operating/dsh-rc2-quickstart.md#dsh-quickstart-clean-tree',
+  ZSTD_REQUIRED: 'docs/operating/dsh-rc2-quickstart.md#dsh-quickstart-artifact',
+  PREFLIGHT_UPSTREAM_SHA_MISMATCH: 'docs/operating/dsh-rc2-quickstart.md#dsh-quickstart-upstream',
+  PROFILE_MANIFEST_INVALID: 'docs/architecture/dsh-profile-manifest.md#dsh-profile-contract',
+  PREFLIGHT_PLUGIN_ENTRYPOINT_MISSING: 'docs/operating/dsh-plugin-author-quickstart.md#plugin-contract',
+  RELEASE_UPSTREAM_RUNTIME_REQUIRED: 'docs/operating/dsh-rc2-quickstart.md#dsh-quickstart-runtime',
+  RELEASE_EVIDENCE_DIR_UNWRITABLE: 'docs/operating/dsh-rc2-quickstart.md#dsh-quickstart-artifact',
+  PREFLIGHT_DISK_SPACE_LOW: 'docs/operating/dsh-rc2-quickstart.md#dsh-quickstart-artifact',
+  PREFLIGHT_OUTPUT_DIR_INVALID: 'docs/operating/dsh-rc2-quickstart.md#dsh-quickstart-artifact',
+});
+
+export function remedyReference(code) {
+  return REMEDY_REFS[code] ?? 'docs/operating/dsh-rc2-quickstart.md#dsh-quickstart-troubleshooting';
+}
+
 function add(checks, name, ok, value, code, remedy) {
-  checks.push({ name, ok: Boolean(ok), value: String(value), code: ok ? null : code, remedy: ok ? null : remedy });
+  checks.push({ name, ok: Boolean(ok), value: String(value), code: ok ? null : code, remedy: ok ? null : remedy, ref: ok ? null : remedyReference(code) });
 }
 
 async function writablePath(path, { allowCreate = false } = {}) {
@@ -98,6 +109,7 @@ export async function collectReleaseReadiness({
   requireRuntime = true,
   requireOutput = false,
   requireUpstream = true,
+  profileManifest = process.env.DSH_PROFILE_MANIFEST ?? null,
 } = {}) {
   const repo = resolve(root);
   const checks = [];
@@ -131,12 +143,23 @@ export async function collectReleaseReadiness({
   const upstreamReady = upstreamSha === DSH_UPSTREAM_SHA || (!requireUpstream && upstreamSha === null);
   add(checks, 'upstream-sha', upstreamReady, upstreamSha ?? `${upstream}:missing`, 'PREFLIGHT_UPSTREAM_SHA_MISMATCH', `checkout ${DSH_UPSTREAM_SHA}`);
 
-  const missingPlugins = [];
-  for (const plugin of RELEASE_PLUGINS) {
-    try { const info = await stat(join(repo, plugin, 'build.mjs')); if (!info.isFile()) missingPlugins.push(plugin); }
-    catch { missingPlugins.push(plugin); }
+  let profile = null;
+  let profileFailure = null;
+  try {
+    profile = await loadReleaseProfile({ root: repo, manifestPath: profileManifest });
+    add(checks, 'profile-manifest', true, `${profile.profile.profile_id}:${profile.digest}`, 'PROFILE_MANIFEST_INVALID', 'fix the versioned profile manifest and DSH pin');
+  } catch (error) {
+    profileFailure = String(error?.message ?? error);
+    add(checks, 'profile-manifest', false, profileFailure, 'PROFILE_MANIFEST_INVALID', 'fix the versioned profile manifest and DSH pin');
   }
-  add(checks, 'plugin-entrypoints', missingPlugins.length === 0, missingPlugins.length === 0 ? `${RELEASE_PLUGINS.length} build.mjs` : missingPlugins.join(','), 'PREFLIGHT_PLUGIN_ENTRYPOINT_MISSING', 'restore the pinned plugin source before preflight');
+  const configuredPlugins = profile?.plugins ?? [];
+  const missingPlugins = [];
+  for (const plugin of configuredPlugins) {
+    try { const info = await stat(join(repo, plugin.path, plugin.build)); if (!info.isFile()) missingPlugins.push(plugin.path); }
+    catch { missingPlugins.push(plugin.path); }
+  }
+  const pluginValue = profileFailure ? 'profile-unavailable' : (missingPlugins.length === 0 ? `${configuredPlugins.length} build.mjs` : missingPlugins.join(','));
+  add(checks, 'plugin-entrypoints', !profileFailure && missingPlugins.length === 0, pluginValue, 'PREFLIGHT_PLUGIN_ENTRYPOINT_MISSING', 'restore the profile-selected plugin source before preflight');
 
   if (requireRuntime) {
     const runtime = await runtimeReady(runtimeBundle);
@@ -167,14 +190,21 @@ export async function collectReleaseReadiness({
     add(checks, 'output-dir', parent.ok && !exists, exists ? `${target}:already-exists` : `${target}:create-on-release`, 'PREFLIGHT_OUTPUT_DIR_INVALID', 'use a new output directory path');
   }
 
-  return { checks, ok: checks.every(check => check.ok), upstream, runtimeBundle: runtimeBundle ? resolve(runtimeBundle) : null };
+  return { checks, ok: checks.every(check => check.ok), upstream, runtimeBundle: runtimeBundle ? resolve(runtimeBundle) : null, profile };
 }
 
 export function printReadiness(result, prefix = 'DSH_DOCTOR_RELEASE') {
+  const blockers = [];
   for (const check of result.checks) {
     const state = check.ok ? 'PASS' : 'FAIL';
-    const suffix = check.ok ? '' : ` code=${check.code} remedy=${check.remedy}`;
+    const suffix = check.ok ? '' : ` code=${check.code} remedy=${check.remedy} ref=${check.ref}`;
     console.log(`${prefix} ${state} ${check.name}=${check.value}${suffix}`);
+    if (!check.ok) blockers.push(check);
   }
+  if (blockers.length) {
+    const codes = [...new Set(blockers.map(check => check.code))];
+    const refs = [...new Set(blockers.map(check => check.ref))];
+    console.log(`${prefix}_BLOCKERS count=${blockers.length} codes=${codes.join(',')} refs=${refs.join(',')}`);
+  } else console.log(`${prefix}_BLOCKERS count=0`);
   return result.ok;
 }

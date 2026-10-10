@@ -511,7 +511,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
       });
     },
     setReplacementText(value, original = state.textDraft?.original ?? '') {
-      if (state.busy || state.preview || state.confirmationUncertain || !state.selection?.ok || !state.selection.node_id) return;
+      if (state.busy || state.preview || state.confirmationUncertain || state.sourceDraft?.changed || !state.selection?.ok || !state.selection.node_id) return;
       const changed = value !== original;
       const textDrafts = { ...(state.textDrafts ?? {}) };
       const textDraftNodes = { ...(state.textDraftNodes ?? {}) };
@@ -587,7 +587,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
       const restored = state.current ? { ...state.current,
         package: clone(state.current.savedPackage ?? state.current.package), dirty: false } : null;
       if (restored) bound.assets.put(restored);
-      emit({ current: restored, textDraft: null, sourceDraft: null, overlay: null, pendingLeaveIntent: null });
+      emit({ current: restored, textDraft: null, textDrafts: {}, textDraftNodes: {}, sourceDraft: null, overlay: null, pendingLeaveIntent: null });
       return { ok: !hasUnsavedChanges() };
     },
     async saveAndLeave() {
@@ -613,6 +613,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
     },
     selectLocatable(request) {
       if (state.mode !== 'edit' || state.busy || state.confirmationUncertain || state.preview) return;
+      if (state.sourceDraft?.changed) { emit({ message: '请先预览或放弃当前源码修改' }); return; }
       const textDrafts = { ...(state.textDrafts ?? {}) };
       const textDraftNodes = { ...(state.textDraftNodes ?? {}) };
       if (state.textDraft?.changed && state.selection?.node_id) {
@@ -713,7 +714,8 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
       emit({ silentCommit: true });
       try {
         await this.previewCompiled(pkg);
-        if (state.preview) await this.confirmPatch();
+        if (!state.preview) return false;
+        await this.confirmPatch();
       } finally {
         if (state.silentCommit) emit({ silentCommit: false });
       }
@@ -1043,7 +1045,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
       });
     },
     setSourceText(file, value) {
-      if (!state.current || state.busy || state.preview || state.confirmationUncertain || state.textDraft?.changed) return;
+      if (!state.current || state.busy || state.preview || state.confirmationUncertain || state.textDraft?.changed || Object.keys(state.textDrafts ?? {}).length > 0) return;
       if (state.current.dirty) { emit({ message: '请先处理当前页面草稿，再进入源码编辑。' }); return; }
       if (!['html', 'css', 'js'].includes(file) || typeof value !== 'string') return;
       if (state.current.binding_manifest?.result_refs?.length && file !== 'css') {

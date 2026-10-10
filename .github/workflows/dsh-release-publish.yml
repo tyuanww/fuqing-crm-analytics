@@ -164,8 +164,8 @@ jobs:
           SOURCE_ARTIFACT=$(find "$RUNNER_TEMP/dsh-evidence" -type f -name "$RELEASE_TAG.tar.zst" -print -quit)
           RUNTIME_ARTIFACT=$(find "$RUNNER_TEMP/dsh-evidence" -type f -name 'shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst' -print -quit)
           test -n "$SOURCE_ARTIFACT" && test -n "$RUNTIME_ARTIFACT"
-          gh attestation verify "$SOURCE_ARTIFACT" --repo "$GITHUB_REPOSITORY" --source-ref "refs/tags/$RELEASE_TAG" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/dsh-release-evidence.yml" --format json
-          gh attestation verify "$RUNTIME_ARTIFACT" --repo "$GITHUB_REPOSITORY" --source-ref "refs/tags/$RELEASE_TAG" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/dsh-release-evidence.yml" --format json
+          gh attestation verify "$SOURCE_ARTIFACT" --repo "$GITHUB_REPOSITORY" --source-ref "refs/tags/$RELEASE_TAG" --source-digest "$REVIEWED_SHA" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/dsh-release-evidence.yml" --format json
+          gh attestation verify "$RUNTIME_ARTIFACT" --repo "$GITHUB_REPOSITORY" --source-ref "refs/tags/$RELEASE_TAG" --source-digest "$REVIEWED_SHA" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/dsh-release-evidence.yml" --format json
 
       - name: Upload matching assets without clobbering or duplicating them
         env:

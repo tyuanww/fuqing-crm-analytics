@@ -72,8 +72,7 @@ if (!schema.components?.schemas?.AnalyticsCockpitAddOp) throw new Error('C0 must
 function resolveBuildRequire() {
   const candidates = [
     process.env.B0_PLUGIN_BUILD_TOOLS,
-    join(root, 'dsh-plugins/analytics-workbench/build-tools/package.json'),
-    resolve(root, '../../fuqing-crm-analytics/dsh-plugins/analytics-workbench/build-tools/package.json'),
+    join(root, 'dsh-plugins/plugin-kit/build-tools/package.json'),
   ].filter(Boolean);
   for (const pkg of candidates) {
     if (!existsSync(pkg)) continue;
@@ -85,7 +84,7 @@ function resolveBuildRequire() {
       continue;
     }
   }
-  throw new Error('openapi-typescript 7.13.0 not found; reuse main-repo build-tools, do not pnpm install');
+  throw new Error('openapi-typescript 7.13.0 not found; prepare the pinned plugin-kit/build-tools with the B0 pipeline');
 }
 
 const buildRequire = resolveBuildRequire();
@@ -135,6 +134,15 @@ const manifest = { ...bundle.manifest, contract_hash: contractHash, openapi_sha2
 const manifestRel = 'docs/hackathon/parallel-competition-2026-09-09/contracts/C0-MANIFEST.json';
 const manifestText = JSON.stringify(manifest, null, 2) + '\n';
 await syncArtifacts(new Map([[manifestRel, manifestText]]));
+
+// Keep the embedded fixture's provenance in the same generation/check step.
+// The contract hash includes this generator, so tooling-only edits also need
+// a new stamp even when the schema and every fixture value are unchanged.
+const fixtureRel = 'dsh-plugins/analytics-workbench/src/client/competition-board/c0-fixtures.mjs';
+const fixtureSource = await readFile(join(root, fixtureRel), 'utf8');
+const hashDeclaration = /^export const C0_CONTRACT_HASH = '[a-f0-9]{64}';$/m;
+if (!hashDeclaration.test(fixtureSource)) throw new Error('C0 fixture hash declaration missing');
+await syncArtifacts(new Map([[fixtureRel, fixtureSource.replace(hashDeclaration, `export const C0_CONTRACT_HASH = '${contractHash}';`)]]));
 
 const typecheck = join(root, 'docs/hackathon/parallel-competition-2026-09-09/contracts/competition-c0-contract.typecheck.ts');
 const generated = join(root, 'dsh-plugins/analytics-workbench/src/competition-c0-contract.generated.d.ts');

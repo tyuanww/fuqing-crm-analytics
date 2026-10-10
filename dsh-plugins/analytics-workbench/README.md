@@ -1,6 +1,6 @@
 # DSH Analytics Workbench · B0 only
 
-固定上游：`deepseek-ai/deepseek-harness@477b4f420553e8a52c2fbccc464d7561b239c443`（sdk `0.1.7-rc.2`，见 `toolchain.json`）。本候选插件按 rc2 构建；杭州现役 6677 仍加载旧 RC1 checkout，切换未执行，旧 alpha2 checkout 保留用于回退。私有本地验证包，不发布 npm，不包含模型密钥或真实数据。2026-09-06 已接独立 FastAPI B0 任务内核、固定方法包与当前权限接缝；完整 B0 仍为 PARTIAL，见[当前收口报告](../../docs/hackathon/B0-LOCAL-CLOSEOUT-2026-09-06.md)。
+固定上游：`deepseek-ai/deepseek-harness@477b4f420553e8a52c2fbccc464d7561b239c443`（sdk `0.1.7-rc.2`，见 [`../plugin-kit/toolchain.json`](../plugin-kit/toolchain.json)）。本插件按 rc2 构建；运行与发布状态以根 [STATUS](../../STATUS.md) 的带日期现场快照为准。私有本地验证包，不发布 npm，不包含模型密钥或真实数据。2026-09-06 已接独立 FastAPI B0 任务内核、固定方法包与当前权限接缝；完整 B0 仍为 PARTIAL，见[当前收口报告](../../docs/hackathon/B0-LOCAL-CLOSEOUT-2026-09-06.md)。
 
 > 当前交付（2026-09-26）：Artifact Inbox、原生 HTML 接收、候选预览/确认保存、局部 patch 已随公共 main 合入；杭州现役 checkout 仍为 `47f49616`，公共 main 当前合并 commit 为 `00823ff5`，两者分别表示运行 checkout 与合并后的源代码。杭州生产仍运行 DSH RC1，rc2 候选尚未切换。Mac 负责开发与测试，合成浏览器旅程已通过，生产 DSH shell 旅程与本人 UAT 仍需单独验收。下方标注“候选／PR待创建”的段落属于历史记录，不代表当前 Git 状态。
 
@@ -260,7 +260,7 @@ FQ_B0_PYTHON=/Users/hutou/homebrew/opt/python@3.14/bin/python3.14 node dsh-plugi
 
 ## 固定构建与验证
 
-从工作树根运行，使用 Node 24 与显式 Python 3.14+ 路径。版本闭包在 `toolchain.json`、`build-tools/pnpm-lock.yaml` 和 `scripts/dsh-b0/requirements.lock` 冻结。下面的 `--check` 不安装依赖，不启动 CRM 或模型；真实 Loader 测试默认短暂监听私有 4326，supervisor 测试选择空闲 4328/4329 并自行关闭。端口冲突直接失败，不终止别人。
+从工作树根运行，使用 Node 24 与显式 Python 3.14+ 路径。版本闭包在 `../plugin-kit/toolchain.json`、`../plugin-kit/build-tools/pnpm-lock.yaml` 和 `scripts/dsh-b0/requirements.lock` 冻结。下面的 `--check` 不安装依赖，不启动 CRM 或模型；真实 Loader 测试默认短暂监听私有 4326，supervisor 测试选择空闲 4328/4329 并自行关闭。端口冲突直接失败，不终止别人。
 
 ```bash
 node scripts/dsh-b0/pipeline.mjs --check --python /ABSOLUTE/PYTHON3.14
@@ -268,7 +268,9 @@ node scripts/dsh-b0/pipeline.mjs --check --python /ABSOLUTE/PYTHON3.14
 
 首次准备须明确执行 `pipeline.mjs --prepare --python /ABSOLUTE/PYTHON3.14`：只在缺失时拉固定公共 DSH SHA；已有 checkout 必须干净且 SHA/锁文件匹配，不切换或 reset。冻结安装后只重建指定原生依赖和官方 profile；不运行 Git hook 安装器、不改全局配置、不更新上游源码。Python 依赖需预先装在专用环境中，本脚本不会全局安装。
 
-本插件 SDK/React 通过可重建的相对依赖链接绑定固定上游；产物保留标准包导入，无本机绝对 file URL。Host、client 均执行完整 TypeScript 检查（`skipLibCheck: false`），再构建。流水线比较独立干净目录的四个 JS 产物逐字节一致，并分别通过真实 Cordis Loader + 合成服务及原生 Skill/compaction 组件测试。它不是可脱离固定 SDK 运行或已发布的 npm 包。
+图表几何通过 `@shine-mage/board-components` 的公开导出消费固定 tarball，`bundled-dependencies.json` 记录输入 SHA；B0 自动准备，单独 build 前运行 `node dsh-plugins/board-components/build.mjs`，独立 checkout 用 `DSH_PACKAGE_INPUTS` 指定包目录。干净重建不再复制图表插件源码。
+
+本插件 SDK/React 通过可重建的相对依赖链接绑定固定上游；产物保留标准包导入，无本机绝对 file URL。Host、client 均执行完整 TypeScript 检查（`skipLibCheck: false`），再构建。流水线比较独立干净目录的六个 JS 产物逐字节一致，并分别通过真实 Cordis Loader + 合成服务及原生 Skill/compaction 组件测试。它不是可脱离固定 SDK 运行或已发布的 npm 包。
 
 Browser 编译为 CJS 工厂：`window.__ModuleLoader__.load({id: packageName, factory: require => { ...; return module.exports }})`。仅外置固定上游 `PLATFORM_MODULES` 的八项：React/JSX/ReactDOM/client、Cordis、client-store、ui-slots、ui-primitives；owner 包仅作 `import type`，不被运行时 `require`。不需要 `dsh.client.external` 额外声明。上游 `makeRequire` 按 seed → 已物化模块 → 已注册工厂查找，末尾 `/client` 会映射 package id；不存在通用 Node require。
 

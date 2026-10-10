@@ -1,0 +1,9 @@
+{
+  "contract": "crm-knowledge-service",
+  "api_version": "1.0.0",
+  "base_path": "/api/v1/crm-knowledge",
+  "owner": "knowledge-service",
+  "scope": "public_synthetic_pack_only",
+  "compatibility": "exact_api_version",
+  "operations": ["capabilities", "explain"]
+}

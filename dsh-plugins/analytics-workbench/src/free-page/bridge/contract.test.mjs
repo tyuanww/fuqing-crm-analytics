@@ -1,17 +1,12 @@
+import { loadCoordinatorFixture } from '../fixture-loader.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import {
   BINDING_STATES, ERRORS, FORBIDDEN_OPS, HANDSHAKE_FIELDS, HOST_TO_PAGE_EVENTS,
   MAX_CUMULATIVE_ROWS, MAX_RESPONSE_BYTES, PAGE_TO_HOST_OPS, PROTOCOL, SUMMARY_FIELDS, TRANSPORT,
 } from './contract.mjs';
 
-const frozen = JSON.parse(readFileSync(join(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../../../../docs/hackathon/free-html-cockpit/fixtures/frozen-contract-v0.json',
-), 'utf8'));
+const frozen = loadCoordinatorFixture('frozen-contract-v0.json');
 
 test('bridge constants match frozen-contract-v0.json', () => {
   assert.equal(frozen.approved_plan_sha256,

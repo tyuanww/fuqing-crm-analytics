@@ -1,0 +1,1087 @@
+{
+  "schema": "shinemage-abc-resume-validation/v1",
+  "date": "2026-10-08",
+  "base_sha": "e577f41b9247e3ac56052e21f84daed9dd32f163",
+  "checkout": "detached HEAD; local uncommitted fixes",
+  "release_ready": false,
+  "full_b0": {
+    "status": "PASS",
+    "result": {
+      "argv": [
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "scripts/dsh-b0/pipeline.mjs",
+        "--check",
+        "--python",
+        "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/b0-venv/bin/python"
+      ],
+      "env": {
+        "HOME": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/home",
+        "PATH": "/Users/hutou/homebrew/opt/node@24/bin:/Users/hutou/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+        "B0_BUILD_UPSTREAM": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2",
+        "CI": "1",
+        "COREPACK_ENABLE_NETWORK": "0",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "exit": 0,
+      "seconds": 246.967,
+      "source_preserved": true
+    },
+    "build": {
+      "schema_version": "dsh-b0-build-evidence/v1",
+      "at": "2026-10-08T05:29:13.328Z",
+      "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+      "upstream_lock_sha256": "5d3980bcd2a0113101815aabfeb4f8a875d556a333521539b7f11d790f4a50aa",
+      "node": "v24.19.0",
+      "python": "Python 3.14.4",
+      "clean_plugin": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/dsh-b0/clean-build-6gNpI8/analytics-workbench",
+      "clean_removed": true,
+      "bundled_inputs": [
+        {
+          "name": "@shine-mage/board-components",
+          "version": "0.1.0",
+          "tarball": "shine-mage-board-components-0.1.0.tgz",
+          "sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182"
+        }
+      ],
+      "sibling_sources_present": false,
+      "clean_source_files": 592,
+      "clean_source_bytes": 3814061,
+      "stages": [
+        "contract",
+        "python-unit",
+        "ruff",
+        "node-unit",
+        "host-types",
+        "client-types",
+        "build",
+        "real-cordis-loader-synthetic-services",
+        "clean-rebuild"
+      ],
+      "artifact_sha256": {
+        "index.js": "f1b97a4457ad65d868c83eb6209ae4c14a9598415caf4376a5c6151ef962fd58",
+        "tool.js": "e854349cb5187e2b045f280f8330f19da0e7d0acbe0ff4f07e8c747f710a4924",
+        "skills.js": "c4b870b64626b5d8f7ed898c6cf2edd613fc7cabb39bd49490eb9b3bcf29c8b1",
+        "page-tools.js": "28b07f12a5aaff8096c604d9c53eef293a91be55ae82d48b069ab8c0e8fa5c70",
+        "client.js": "584e98f41290e25677009b6811e59fe15f9606fbf71c2b193d4a7923ebc4dc72",
+        "views/saved-analysis-view.js": "012f6c752aa0294f8472a33d65619eacfb6ced8bc1d6d2c33e43250aa1aaff39",
+        "views/cockpit-view.js": "62c7f0640221be4523f2073f4ae3017cdc5663dd229a5fc145ad21bb49538712"
+      },
+      "isolated_pack": {
+        "schema_version": "dsh-plugin-pack/v1",
+        "package_name": "@shine-mage/dsh-analytics-workbench-b0",
+        "package_version": "0.0.0-b0",
+        "dsh_pin": "0.1.7-rc.2",
+        "source_sha": "d8ec3c1dec191129c09854e88d0d8323294768b0",
+        "source_dirty": false,
+        "tarball": {
+          "name": "shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+          "bytes": 438511,
+          "sha256": "b75d90e98167fea507e8ab3304beda98c6706d7130eb8eb4e6359209ad0fff1b"
+        },
+        "entries": [
+          "bundled-dependencies.json",
+          "cordis.patch.yml",
+          "lib/client.js",
+          "lib/index.js",
+          "lib/page-tools.js",
+          "lib/skills.js",
+          "lib/tool.js",
+          "package.json"
+        ],
+        "activation": "NOT_RUN",
+        "state_path": "NOT_APPLICABLE_PLUGIN_PACK_ONLY",
+        "fixture_only": true
+      },
+      "remote_ci_executed": false,
+      "native_dsh_profile_e2e": "separate evidence required"
+    },
+    "log_summary": {
+      "node_groups": [
+        {
+          "tests": 3,
+          "pass": 3,
+          "fail": 0,
+          "skip": 0
+        },
+        {
+          "tests": 4,
+          "pass": 4,
+          "fail": 0,
+          "skip": 0
+        },
+        {
+          "tests": 54,
+          "pass": 54,
+          "fail": 0,
+          "skip": 0
+        },
+        {
+          "tests": 12,
+          "pass": 12,
+          "fail": 0,
+          "skip": 0
+        },
+        {
+          "tests": 28,
+          "pass": 25,
+          "fail": 0,
+          "skip": 3
+        },
+        {
+          "tests": 26,
+          "pass": 26,
+          "fail": 0,
+          "skip": 0
+        },
+        {
+          "tests": 3,
+          "pass": 2,
+          "fail": 0,
+          "skip": 1
+        },
+        {
+          "tests": 21,
+          "pass": 21,
+          "fail": 0,
+          "skip": 0
+        },
+        {
+          "tests": 87,
+          "pass": 87,
+          "fail": 0,
+          "skip": 0
+        },
+        {
+          "tests": 702,
+          "pass": 699,
+          "fail": 0,
+          "skip": 3
+        },
+        {
+          "tests": 31,
+          "pass": 31,
+          "fail": 0,
+          "skip": 0
+        },
+        {
+          "tests": 30,
+          "pass": 30,
+          "fail": 0,
+          "skip": 0
+        },
+        {
+          "tests": 7,
+          "pass": 7,
+          "fail": 0,
+          "skip": 0
+        },
+        {
+          "tests": 2,
+          "pass": 2,
+          "fail": 0,
+          "skip": 0
+        },
+        {
+          "tests": 1,
+          "pass": 1,
+          "fail": 0,
+          "skip": 0
+        },
+        {
+          "tests": 1,
+          "pass": 1,
+          "fail": 0,
+          "skip": 0
+        },
+        {
+          "tests": 1,
+          "pass": 1,
+          "fail": 0,
+          "skip": 0
+        },
+        {
+          "tests": 3,
+          "pass": 3,
+          "fail": 0,
+          "skip": 0
+        },
+        {
+          "tests": 2,
+          "pass": 2,
+          "fail": 0,
+          "skip": 0
+        },
+        {
+          "tests": 4,
+          "pass": 4,
+          "fail": 0,
+          "skip": 0
+        },
+        {
+          "tests": 86,
+          "pass": 86,
+          "fail": 0,
+          "skip": 0
+        },
+        {
+          "tests": 746,
+          "pass": 745,
+          "fail": 0,
+          "skip": 1
+        },
+        {
+          "tests": 86,
+          "pass": 86,
+          "fail": 0,
+          "skip": 0
+        }
+      ],
+      "skips": [
+        "﹣ saved-analysis composition rejects a changed pair receipt before installation (0.0295ms) # Explicit existing service pair/Python/wheelhouse required.",
+        "﹣ saved-analysis composition rejects same-name wheels with different immutable bytes (0.029792ms) # Explicit existing service pair/Python/wheelhouse required.",
+        "﹣ saved-analysis cold install checks exact closure, exclusive output and bootstrap integrity (0.020458ms) # Explicit existing service pair/Python/wheelhouse required.",
+        "﹣ actual query archive cold install, immutable checks, and dependency closure (0.094583ms) # explicit query receipt/Python/wheels required",
+        "﹣ outer timeout reclaims owned official command groups and retains a failed receipt (0.1605ms) # NOT_RUN: explicit pinned upstream and exclusive evidence path required",
+        "﹣ parent SIGTERM interrupts the owned probe while still draining every observed group (0.045ms) # NOT_RUN: explicit pinned upstream and exclusive evidence path required",
+        "﹣ fixed official modules execute all synthetic shell and tool union cases and join owned commands (0.037458ms) # NOT_RUN: explicit pinned upstream and exclusive evidence path required",
+        "﹣ real standalone example keeps filters, chart and edited KPI label (0.170416ms) # SKIP"
+      ],
+      "python": [
+        "855 passed, 22 warnings, 41 subtests passed in 114.77s (0:01:54)"
+      ]
+    },
+    "default_skip_count": 8,
+    "supplemented_service_skips": 3,
+    "remaining_default_skips_not_run_this_turn": 5
+  },
+  "service_supplement": {
+    "status": "PASS",
+    "pass": 28,
+    "fail": 0,
+    "skip": 0,
+    "scope": "current guards/fixed historical v4 service pair",
+    "inputs_unchanged": true
+  },
+  "archive": [
+    {
+      "manifest": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/archives/shinemage-abc-20261008/manifest.json",
+      "manifest_sha256": "b0b4cdf5a14f77cb9e049d30f3127597d0632a5dd34bd7c0d7d694092d7b8263",
+      "archive": {
+        "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/archives/shinemage-abc-20261008/raw-evidence.tar.gz",
+        "bytes": 36420630,
+        "sha256": "945e495ba7e3e9979206a001f33666b7b4dcccab80d1295e88f3d462a388808c"
+      },
+      "regular_files": 2273
+    },
+    {
+      "manifest": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/archives/shinemage-abc-20261008/fixed-inputs-manifest.json",
+      "manifest_sha256": "06ff04d008d317d61ce526ffdba58aa6c44b2831c3a13ab81a15ea80ace6b85d",
+      "archive": {
+        "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/archives/shinemage-abc-20261008/fixed-inputs.tar.gz",
+        "bytes": 4034933,
+        "sha256": "6924e3c80902e1d11cdfe68c05e969365a773bdd44491d50bfcbee3376b07084"
+      },
+      "regular_files": 30
+    },
+    {
+      "manifest": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/archives/shinemage-abc-20261008/verification-logs-manifest.json",
+      "manifest_sha256": "b42e62e25479f4da36f70b2eee7479ff98314700cfdbb3eb64fe23999b9d6a75",
+      "archive": {
+        "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/archives/shinemage-abc-20261008/verification-logs.tar.gz",
+        "bytes": 264278,
+        "sha256": "e2b977059276fd2ca0470566c2b857e21362f2913c1b318d287942ea0cae3117"
+      },
+      "regular_files": 60
+    }
+  ],
+  "journal_audit": {
+    "schema": "shinemage-abc-journal-readonly-audit/v1",
+    "candidate_digest": "a490457c3e867b3fb0d03fa8daeb04886f7b8657da0b1cf2fbadb30917e7887c",
+    "source_sha": "3ffbd2a2e5a6c3179aecec09c63522ff1bb2d268",
+    "pack": {
+      "name": "shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+      "sha256": "c9770d111102791bcc34a0db9a41b23b7e43b3385a9c3909a620617f413ec64b",
+      "bytes": 437176
+    },
+    "candidate_path": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/checks/first-purchase-terminal-candidate-20261007/plugin-candidate/candidate.json",
+    "candidate_sha256": "cb5a24e0183a41af75cc09bdbb9dd44be4c38ae2fecd185166de83e3f4787833",
+    "journal_path": "/Users/hutou/.codex/worktrees/plugin-boundary-review/fuqing-crm-analytics/.context/checks/first-purchase-terminal-candidate-20261007/plugin-state.json",
+    "journal_sha256": "b9ef9b1730abf2f9acfe0ba48473323e8aece9a4b8d85e79783932c9fe7f0149",
+    "journal_integrity": "PASS",
+    "journal_unchanged": true,
+    "events": [
+      {
+        "seq": 1,
+        "status": "CANDIDATE_INTENT",
+        "digest": "b5f1e84fcd9100848abfe83b4896be38156e445f7bd7f97802a972c7784370bc",
+        "pack_sha256": "c9770d111102791bcc34a0db9a41b23b7e43b3385a9c3909a620617f413ec64b"
+      },
+      {
+        "seq": 2,
+        "status": "CANDIDATE_PREPARED",
+        "digest": "9fb7fe4c7bc2345faff8b57f7ad012c71b25ef4cb5000a450538a618efdc5749",
+        "pack_sha256": "c9770d111102791bcc34a0db9a41b23b7e43b3385a9c3909a620617f413ec64b"
+      },
+      {
+        "seq": 3,
+        "status": "CANDIDATE_SERVICE_ARTIFACTS_VERIFIED",
+        "digest": "b2e2123ab42a7b2986ff6b6d887d9aa143d66fe80043eff538859ea23bdcbf4c",
+        "pack_sha256": "c9770d111102791bcc34a0db9a41b23b7e43b3385a9c3909a620617f413ec64b"
+      },
+      {
+        "seq": 4,
+        "status": "CANDIDATE_SERVICE_TARGET_OBSERVED",
+        "digest": "931b50cec3946cd9c053898c6b7cc066c7bf6c20a3cfbd9dbeeed721da52c576",
+        "pack_sha256": "c9770d111102791bcc34a0db9a41b23b7e43b3385a9c3909a620617f413ec64b"
+      },
+      {
+        "seq": 5,
+        "status": "CANDIDATE_TERMINAL_HOST_OBSERVED",
+        "digest": "cc5a043969492736aae4cedec6698271785fecf7248849e2b40f9818e2ea9b03",
+        "pack_sha256": "c9770d111102791bcc34a0db9a41b23b7e43b3385a9c3909a620617f413ec64b"
+      },
+      {
+        "seq": 6,
+        "status": "CANDIDATE_BROWSER_HOST_OBSERVED",
+        "digest": "062f271051788a815b40aae8fb1410ab9897a6018749c86198b2b1fa92e014b1",
+        "pack_sha256": "c9770d111102791bcc34a0db9a41b23b7e43b3385a9c3909a620617f413ec64b"
+      }
+    ],
+    "current_html_pack_sha256": "ecaa86ddd41a88e563ae411be08897aeadb3a2ef408c00377f2b905dfaecae42",
+    "current_html_matches_candidate": false,
+    "abc_formal_journal": "NOT_LINKED",
+    "reason": "Existing six-event journal belongs to a different workbench artifact and source; historical A/B observations cannot be appended as this candidate acceptance.",
+    "formal_ci": "NOT_RUN",
+    "release_ready": false
+  },
+  "sdk": {
+    "distribution": "BLOCKED",
+    "embedded_composition": "PARTIAL",
+    "inline_function_bytes": "NOT_VERIFIED",
+    "advisory_lookup_this_turn": "NOT_RUN",
+    "existing_affected_versions": 7,
+    "existing_advisories": 29
+  },
+  "formal_ci": "NOT_RUN",
+  "current_abc_journal": "NOT_LINKED",
+  "real_model_business_production": "NOT_RUN",
+  "external_ocr_B_six": "INCOMPLETE",
+  "git_actions": "no commit/push/PR/merge/release/deploy",
+  "logs": {
+    "b0-full-r1": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/b0-full-r1.log",
+      "sha256": "52f1173e21379863b56126ee81e950670978cc07550836d45a6d32ebd89fbc7b",
+      "summary": {
+        "node_groups": [
+          {
+            "tests": 3,
+            "pass": 3,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 4,
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 54,
+            "pass": 54,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 12,
+            "pass": 12,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 28,
+            "pass": 25,
+            "fail": 0,
+            "skip": 3
+          },
+          {
+            "tests": 26,
+            "pass": 26,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 3,
+            "pass": 2,
+            "fail": 0,
+            "skip": 1
+          },
+          {
+            "tests": 21,
+            "pass": 21,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 87,
+            "pass": 87,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 702,
+            "pass": 697,
+            "fail": 2,
+            "skip": 3
+          }
+        ],
+        "skips": [
+          "﹣ saved-analysis composition rejects a changed pair receipt before installation (0.017334ms) # Explicit existing service pair/Python/wheelhouse required.",
+          "﹣ saved-analysis composition rejects same-name wheels with different immutable bytes (0.013333ms) # Explicit existing service pair/Python/wheelhouse required.",
+          "﹣ saved-analysis cold install checks exact closure, exclusive output and bootstrap integrity (0.015916ms) # Explicit existing service pair/Python/wheelhouse required.",
+          "﹣ actual query archive cold install, immutable checks, and dependency closure (0.073708ms) # explicit query receipt/Python/wheels required",
+          "﹣ outer timeout reclaims owned official command groups and retains a failed receipt (0.108125ms) # NOT_RUN: explicit pinned upstream and exclusive evidence path required",
+          "﹣ parent SIGTERM interrupts the owned probe while still draining every observed group (0.029291ms) # NOT_RUN: explicit pinned upstream and exclusive evidence path required",
+          "﹣ fixed official modules execute all synthetic shell and tool union cases and join owned commands (0.024583ms) # NOT_RUN: explicit pinned upstream and exclusive evidence path required"
+        ],
+        "python": [
+          "855 passed, 22 warnings, 41 subtests passed in 146.55s (0:02:26)"
+        ]
+      }
+    },
+    "b0-full-r2": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/b0-full-r2.log",
+      "sha256": "cdf3e0c046fa6daa013a32f77e3afefe8a9397a3de596c73c8dccadb2026bd3e",
+      "summary": {
+        "node_groups": [
+          {
+            "tests": 3,
+            "pass": 3,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 4,
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 54,
+            "pass": 54,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 12,
+            "pass": 12,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 28,
+            "pass": 25,
+            "fail": 0,
+            "skip": 3
+          },
+          {
+            "tests": 26,
+            "pass": 26,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 3,
+            "pass": 2,
+            "fail": 0,
+            "skip": 1
+          },
+          {
+            "tests": 21,
+            "pass": 21,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 87,
+            "pass": 87,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 702,
+            "pass": 699,
+            "fail": 0,
+            "skip": 3
+          },
+          {
+            "tests": 31,
+            "pass": 31,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 30,
+            "pass": 30,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 7,
+            "pass": 7,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 2,
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 1,
+            "pass": 1,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 1,
+            "pass": 1,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 1,
+            "pass": 1,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 3,
+            "pass": 3,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 2,
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 4,
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 72,
+            "pass": 64,
+            "fail": 8,
+            "skip": 0
+          }
+        ],
+        "skips": [
+          "﹣ saved-analysis composition rejects a changed pair receipt before installation (0.017333ms) # Explicit existing service pair/Python/wheelhouse required.",
+          "﹣ saved-analysis composition rejects same-name wheels with different immutable bytes (0.013333ms) # Explicit existing service pair/Python/wheelhouse required.",
+          "﹣ saved-analysis cold install checks exact closure, exclusive output and bootstrap integrity (0.016375ms) # Explicit existing service pair/Python/wheelhouse required.",
+          "﹣ actual query archive cold install, immutable checks, and dependency closure (0.069292ms) # explicit query receipt/Python/wheels required",
+          "﹣ outer timeout reclaims owned official command groups and retains a failed receipt (0.211166ms) # NOT_RUN: explicit pinned upstream and exclusive evidence path required",
+          "﹣ parent SIGTERM interrupts the owned probe while still draining every observed group (0.069083ms) # NOT_RUN: explicit pinned upstream and exclusive evidence path required",
+          "﹣ fixed official modules execute all synthetic shell and tool union cases and join owned commands (0.041875ms) # NOT_RUN: explicit pinned upstream and exclusive evidence path required"
+        ],
+        "python": [
+          "855 passed, 23 warnings, 41 subtests passed in 117.10s (0:01:57)"
+        ]
+      }
+    },
+    "b0-full-r3": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/b0-full-r3.log",
+      "sha256": "e0f8b45d196cfbbdb5054a923f7bfae16ed19e3e7312761686542a975a38f063",
+      "summary": {
+        "node_groups": [
+          {
+            "tests": 3,
+            "pass": 3,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 4,
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 54,
+            "pass": 54,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 12,
+            "pass": 12,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 28,
+            "pass": 25,
+            "fail": 0,
+            "skip": 3
+          },
+          {
+            "tests": 26,
+            "pass": 26,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 3,
+            "pass": 2,
+            "fail": 0,
+            "skip": 1
+          },
+          {
+            "tests": 21,
+            "pass": 21,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 87,
+            "pass": 87,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 702,
+            "pass": 699,
+            "fail": 0,
+            "skip": 3
+          },
+          {
+            "tests": 31,
+            "pass": 31,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 30,
+            "pass": 30,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 7,
+            "pass": 7,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 2,
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 1,
+            "pass": 1,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 1,
+            "pass": 1,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 1,
+            "pass": 1,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 3,
+            "pass": 3,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 2,
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 4,
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 86,
+            "pass": 86,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 746,
+            "pass": 745,
+            "fail": 0,
+            "skip": 1
+          },
+          {
+            "tests": 69,
+            "pass": 64,
+            "fail": 5,
+            "skip": 0
+          }
+        ],
+        "skips": [
+          "﹣ saved-analysis composition rejects a changed pair receipt before installation (0.019791ms) # Explicit existing service pair/Python/wheelhouse required.",
+          "﹣ saved-analysis composition rejects same-name wheels with different immutable bytes (0.0135ms) # Explicit existing service pair/Python/wheelhouse required.",
+          "﹣ saved-analysis cold install checks exact closure, exclusive output and bootstrap integrity (0.012125ms) # Explicit existing service pair/Python/wheelhouse required.",
+          "﹣ actual query archive cold install, immutable checks, and dependency closure (0.069334ms) # explicit query receipt/Python/wheels required",
+          "﹣ outer timeout reclaims owned official command groups and retains a failed receipt (0.364667ms) # NOT_RUN: explicit pinned upstream and exclusive evidence path required",
+          "﹣ parent SIGTERM interrupts the owned probe while still draining every observed group (0.089041ms) # NOT_RUN: explicit pinned upstream and exclusive evidence path required",
+          "﹣ fixed official modules execute all synthetic shell and tool union cases and join owned commands (0.056125ms) # NOT_RUN: explicit pinned upstream and exclusive evidence path required",
+          "﹣ real standalone example keeps filters, chart and edited KPI label (0.111583ms) # SKIP"
+        ],
+        "python": [
+          "855 passed, 23 warnings, 41 subtests passed in 130.95s (0:02:10)"
+        ]
+      }
+    },
+    "b0-full-r4": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/b0-full-r4.log",
+      "sha256": "6de5c8b19425ef65bc83a53b0d7845cf9dbc3eeafa6be0dbe0780505a8ac326f",
+      "summary": {
+        "node_groups": [
+          {
+            "tests": 3,
+            "pass": 3,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 4,
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 54,
+            "pass": 54,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 12,
+            "pass": 12,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 28,
+            "pass": 25,
+            "fail": 0,
+            "skip": 3
+          },
+          {
+            "tests": 26,
+            "pass": 26,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 3,
+            "pass": 2,
+            "fail": 0,
+            "skip": 1
+          },
+          {
+            "tests": 21,
+            "pass": 21,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 87,
+            "pass": 87,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 702,
+            "pass": 699,
+            "fail": 0,
+            "skip": 3
+          },
+          {
+            "tests": 31,
+            "pass": 31,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 30,
+            "pass": 30,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 7,
+            "pass": 7,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 2,
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 1,
+            "pass": 1,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 1,
+            "pass": 1,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 1,
+            "pass": 1,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 3,
+            "pass": 3,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 2,
+            "pass": 2,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 4,
+            "pass": 4,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 86,
+            "pass": 86,
+            "fail": 0,
+            "skip": 0
+          },
+          {
+            "tests": 746,
+            "pass": 745,
+            "fail": 0,
+            "skip": 1
+          },
+          {
+            "tests": 86,
+            "pass": 86,
+            "fail": 0,
+            "skip": 0
+          }
+        ],
+        "skips": [
+          "﹣ saved-analysis composition rejects a changed pair receipt before installation (0.0295ms) # Explicit existing service pair/Python/wheelhouse required.",
+          "﹣ saved-analysis composition rejects same-name wheels with different immutable bytes (0.029792ms) # Explicit existing service pair/Python/wheelhouse required.",
+          "﹣ saved-analysis cold install checks exact closure, exclusive output and bootstrap integrity (0.020458ms) # Explicit existing service pair/Python/wheelhouse required.",
+          "﹣ actual query archive cold install, immutable checks, and dependency closure (0.094583ms) # explicit query receipt/Python/wheels required",
+          "﹣ outer timeout reclaims owned official command groups and retains a failed receipt (0.1605ms) # NOT_RUN: explicit pinned upstream and exclusive evidence path required",
+          "﹣ parent SIGTERM interrupts the owned probe while still draining every observed group (0.045ms) # NOT_RUN: explicit pinned upstream and exclusive evidence path required",
+          "﹣ fixed official modules execute all synthetic shell and tool union cases and join owned commands (0.037458ms) # NOT_RUN: explicit pinned upstream and exclusive evidence path required",
+          "﹣ real standalone example keeps filters, chart and edited KPI label (0.170416ms) # SKIP"
+        ],
+        "python": [
+          "855 passed, 22 warnings, 41 subtests passed in 114.77s (0:01:54)"
+        ]
+      }
+    },
+    "service-guards": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/service-guards.log",
+      "sha256": "6c149fcdcd2f09c900d19109950bff3a1f3594dd90f5c545c4021560cad499ea",
+      "summary": {
+        "node_groups": [
+          {
+            "tests": 28,
+            "pass": 26,
+            "fail": 2,
+            "skip": 0
+          }
+        ],
+        "skips": [],
+        "python": []
+      }
+    },
+    "service-guards-r2": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/service-guards-r2.log",
+      "sha256": "5a3d15c8c48486691443395394864952e0c2e00f7a281440078e5383e6f14b7a",
+      "summary": {
+        "node_groups": [
+          {
+            "tests": 28,
+            "pass": 28,
+            "fail": 0,
+            "skip": 0
+          }
+        ],
+        "skips": [],
+        "python": []
+      }
+    },
+    "kit-r2": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/kit-r2.log",
+      "sha256": "4b5ed370ad9fa3abc62fd3a72ec59527477d1d3d30e31f610d5a4f44111abb83",
+      "summary": {
+        "node_groups": [
+          {
+            "tests": 20,
+            "pass": 20,
+            "fail": 0,
+            "skip": 0
+          }
+        ],
+        "skips": [],
+        "python": []
+      }
+    },
+    "compiled-vm-r1": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/compiled-vm-r1.log",
+      "sha256": "f2772b163e78734da764947272a4476b0d411ff69a13ed44a670fc722b81e099",
+      "summary": {
+        "node_groups": [
+          {
+            "tests": 39,
+            "pass": 2,
+            "fail": 37,
+            "skip": 0
+          }
+        ],
+        "skips": [],
+        "python": []
+      }
+    },
+    "compiled-vm-r2": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/compiled-vm-r2.log",
+      "sha256": "1371aea3e36e7b180eb58f3298235e7b55d79d5e757eafe5380b18d9cde98d1d",
+      "summary": {
+        "node_groups": [
+          {
+            "tests": 46,
+            "pass": 46,
+            "fail": 0,
+            "skip": 0
+          }
+        ],
+        "skips": [],
+        "python": []
+      }
+    },
+    "all-built-r3": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/all-built-r3.log",
+      "sha256": "30decfda6b0cb2f185c0f9f53326d2cfd47fad233d6ae7c549821e7efca1adb3",
+      "summary": {
+        "node_groups": [
+          {
+            "tests": 86,
+            "pass": 85,
+            "fail": 1,
+            "skip": 0
+          }
+        ],
+        "skips": [],
+        "python": []
+      }
+    },
+    "all-built-r4": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/all-built-r4.log",
+      "sha256": "b70fe8ad4ddb567a4a5dc9e058771c0e420eae341ff4992b99952624a9a34616",
+      "summary": {
+        "node_groups": [
+          {
+            "tests": 86,
+            "pass": 86,
+            "fail": 0,
+            "skip": 0
+          }
+        ],
+        "skips": [],
+        "python": []
+      }
+    },
+    "competition-r3": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/competition-r3.log",
+      "sha256": "768c63b0dfb9d0f0638687380844a9fdb568d5de4ab2c23181f1166d1a82b967",
+      "summary": {
+        "node_groups": [
+          {
+            "tests": 746,
+            "pass": 745,
+            "fail": 0,
+            "skip": 1
+          }
+        ],
+        "skips": [
+          "﹣ real standalone example keeps filters, chart and edited KPI label (0.141042ms) # SKIP"
+        ],
+        "python": []
+      }
+    },
+    "independent-r4": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/independent-r4.log",
+      "sha256": "acfd9d4e81b467f3d248291a0480c9de357116515ac36e3297650ede9efe4c69",
+      "summary": {
+        "node_groups": [
+          {
+            "tests": 32,
+            "pass": 32,
+            "fail": 0,
+            "skip": 0
+          }
+        ],
+        "skips": [],
+        "python": []
+      }
+    },
+    "fixture-metadata-final": {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/abc-resume-20261008/fixture-metadata-final.log",
+      "sha256": "5b3d05a23bda798154534f8c8ffd2ccd6c816ce2d2f114468c4f94b28d5c8f57",
+      "summary": {
+        "node_groups": [
+          {
+            "tests": 12,
+            "pass": 12,
+            "fail": 0,
+            "skip": 0
+          }
+        ],
+        "skips": [],
+        "python": []
+      }
+    }
+  },
+  "final_protection": {
+    "head": "e577f41b9247e3ac56052e21f84daed9dd32f163",
+    "branch": "detached HEAD",
+    "saved_ref": "e577f41b9247e3ac56052e21f84daed9dd32f163",
+    "original_main_dirty_files_unchanged": 14,
+    "upstream_unchanged": true,
+    "historical_raw_hashes_unchanged": 8,
+    "fixture_metadata_only_after_full_b0": "contract_version corrected to actual analytics-first-purchase-path/v1; package-inputs 12 PASS; raw fixture bytes unchanged"
+  }
+}

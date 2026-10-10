@@ -1,20 +1,6 @@
-/** Deterministic page packages for D48. Consumes coordinator fixtures; does not rewrite them. */
-import { readFileSync, existsSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-function repoRoot() {
-  let dir = dirname(fileURLToPath(import.meta.url));
-  while (dir !== dirname(dir)) {
-    if (existsSync(join(dir, 'AGENTS.md')) && existsSync(join(dir, 'dsh-plugins'))) return dir;
-    dir = dirname(dir);
-  }
-  throw new Error('repository root not found');
-}
-
-export function loadCoordinatorFixture(name) {
-  return JSON.parse(readFileSync(resolve(repoRoot(), 'docs/hackathon/free-html-cockpit/fixtures', name), 'utf8'));
-}
+/** Deterministic page packages for D48; frozen fixtures travel with this plugin. */
+import { loadCoordinatorFixture } from '../fixture-loader.mjs';
+export { loadCoordinatorFixture } from '../fixture-loader.mjs';
 
 export const FROZEN_CONTRACT = loadCoordinatorFixture('frozen-contract-v0.json');
 export const D48_CASES = loadCoordinatorFixture('d48-scope.fixture.json');

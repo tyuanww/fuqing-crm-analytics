@@ -6,6 +6,7 @@
  * publishes, touches a production host, or reads business data.
  */
 import assert from 'node:assert/strict';
+import { linkWorkspaceKit } from '../dsh-b0/plugin-kit-link.mjs';
 import { execFileSync } from 'node:child_process';
 import { copyFile, lstat, mkdir, mkdtemp, rename, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -13,13 +14,14 @@ import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { receiveArtifact } from './artifact.mjs';
 import { releaseAssetNames, summarizePreflight, verifyPreflight, UPSTREAM_SHA } from './preflight-bundle.mjs';
-import { collectReleaseReadiness, printReadiness, RELEASE_PLUGINS } from './readiness.mjs';
+import { collectReleaseReadiness, printReadiness } from './readiness.mjs';
 import { DSH_SDK_VERSION } from './toolchain.mjs';
+import { prepareServiceCompatibility } from './service-compatibility.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const upstream = resolve(process.env.DSH_UPSTREAM_CHECKOUT || join(root, `.context/dsh-b0/upstream-${DSH_SDK_VERSION}`));
+const packageInputs = join(root, '.context/dsh-b0/package-inputs');
 const pin = UPSTREAM_SHA;
-const plugins = RELEASE_PLUGINS;
 
 function option(name, fallback = null) {
   const index = process.argv.indexOf(name);
@@ -30,12 +32,21 @@ function option(name, fallback = null) {
 }
 
 if (process.argv.includes('--help') || process.argv.includes('-h')) {
-  console.log('Usage: node scripts/release/preflight.mjs [--check] --python /absolute/python3.14 --tag TAG [--source-sha SHA] [--output-dir PATH]');
+  console.log('Usage: node scripts/release/preflight.mjs [--check] --python /absolute/python3.14 --tag TAG [--source-sha SHA] [--output-dir PATH] [--service-evidence /absolute/receipt.json]');
   console.log('--check is read-only: it validates toolchain, clean tree, pinned upstream, runtime bundle, plugins, zstd and output paths without network/build/artifact side effects.');
   process.exit(0);
 }
 
 const checkOnly = process.argv.includes('--check');
+if (process.argv.filter(value => value === '--service-evidence').length > 1) {
+  console.error('SERVICE_EVIDENCE_AMBIGUOUS'); process.exit(2);
+}
+const serviceEvidenceIndex = process.argv.indexOf('--service-evidence');
+const serviceEvidenceValue = serviceEvidenceIndex < 0 ? null : process.argv[serviceEvidenceIndex + 1];
+if (serviceEvidenceIndex >= 0 && (!serviceEvidenceValue || serviceEvidenceValue.startsWith('--'))) {
+  console.error('SERVICE_EVIDENCE_REQUIRED'); process.exit(2);
+}
+const serviceEvidencePath = serviceEvidenceValue ? resolve(serviceEvidenceValue) : null;
 const pythonValue = option('--python');
 const tag = option('--tag');
 assert.ok(pythonValue && isAbsolute(pythonValue), 'ABSOLUTE_PYTHON_REQUIRED');
@@ -60,6 +71,19 @@ if (currentSourceSha !== sourceSha) {
 // prepare stage.  The read-only check must still require that checkout, while
 // the build path may start on a clean runner where it does not exist yet.
 const readiness = await collectReleaseReadiness({ root, pythonPath: python, upstreamPath: upstream, outputDir, requireClean: true, requireRuntime: checkOnly, requireOutput: true, requireUpstream: checkOnly });
+// Validate before prepare/build/network work; release validates the same bytes
+// again. A local service PASS never overrides runtime or production gates.
+if (readiness.profile) {
+  try {
+    const gate = await prepareServiceCompatibility(readiness.profile.profile.service_binding, serviceEvidencePath);
+    readiness.checks.push({ name: 'service-compatibility', ok: true, value: gate?.status ?? 'NOT_REQUIRED' });
+  } catch (error) {
+    const code = String(error?.message ?? '').match(/SERVICE_[A-Z0-9_]+/)?.[0] ?? 'SERVICE_EVIDENCE_INVALID';
+    readiness.checks.push({ name: 'service-compatibility', ok: false, value: 'unverified', code,
+      remedy: 'supply --service-evidence with the receipt bound to the selected profile',
+      ref: 'docs/architecture/first-purchase-service-compatibility.md' });
+  }
+}
 const evidenceExists = await lstat(evidenceDir).then(() => true, error => { if (error.code === 'ENOENT') return false; throw error; });
 if (evidenceExists) readiness.checks.push({ name: 'tag-evidence', ok: false, value: evidenceDir, code: 'PREFLIGHT_EVIDENCE_EXISTS', remedy: 'inspect prior evidence and use a fresh tag for a new run' });
 readiness.ok = readiness.checks.every(check => check.ok);
@@ -72,6 +96,8 @@ if (checkOnly) {
   console.log(`DSH_PREFLIGHT_CHECK_STATUS PASS tag=${tag} output=${outputDir}`);
   process.exit(0);
 }
+
+const plugins = readiness.profile.plugins.map(item => item.path);
 
 assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(), sourceSha, 'PREFLIGHT_SOURCE_SHA_MISMATCH');
 
@@ -119,10 +145,28 @@ const runtimeOutput = join(runDir, releaseAssetNames(tag).find(name => name.star
 const bundleDir = join(runDir, 'bundle');
 try {
   await stage('prepare', () => run(process.execPath, ['scripts/dsh-b0/pipeline.mjs', '--prepare', '--python', python], { B0_BUILD_UPSTREAM: null, DSH_UPSTREAM_CHECKOUT: upstream }));
+  // Advisory lookup is network-dependent and intentionally separate from
+  // preparation. If the registry is unavailable, the prepared checkout is
+  // retained and the next attempt can retry only this fail-closed stage.
+  await stage('audit', () => run(process.execPath, ['scripts/dsh-b0/pipeline.mjs', '--audit', '--python', python], { B0_BUILD_UPSTREAM: null, DSH_UPSTREAM_CHECKOUT: upstream }));
   assert.equal(execFileSync('git', ['-C', upstream, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), pin, 'PREFLIGHT_UPSTREAM_SHA_MISMATCH');
-  await stage('build', () => { for (const plugin of plugins) run(process.execPath, [`${plugin}/build.mjs`, upstream]); });
-  await stage('runtime', () => run(process.execPath, ['scripts/release/runtime-bundle.mjs', '--upstream', upstream, '--output', runtimeOutput, '--online']));
-  await stage('release', () => run(process.execPath, ['scripts/dsh.mjs', 'release', '--offline', '--tag', tag], { DSH_UPSTREAM_RUNTIME_BUNDLE: runtimeOutput }));
+  await stage('build', async () => {
+    await linkWorkspaceKit(join(root, 'dsh-plugins/board-components'), join(root, 'dsh-plugins/plugin-kit'));
+    const rebuiltInputs = join(runDir, 'board-package-input-build');
+    run(process.execPath, ['dsh-plugins/board-components/build.mjs', rebuiltInputs], { DSH_PACKAGE_INPUTS: packageInputs });
+    run(process.execPath, ['scripts/dsh-b0/package-inputs.mjs', packageInputs], { DSH_PACKAGE_INPUTS: packageInputs });
+    for (const plugin of plugins) {
+      await linkWorkspaceKit(join(root, plugin), join(root, 'dsh-plugins/plugin-kit'));
+      run(process.execPath, [`${plugin}/build.mjs`, upstream], { DSH_PACKAGE_INPUTS: packageInputs });
+    }
+  });
+  // Prepare is the only stage that may hydrate the pinned checkout. Once it
+  // succeeds, package that exact pnpm store offline so a transient registry
+  // or CDN outage cannot invalidate an otherwise ready candidate.
+  await stage('runtime', () => run(process.execPath, ['scripts/release/runtime-bundle.mjs', '--upstream', upstream, '--output', runtimeOutput]));
+  await stage('release', () => run(process.execPath, ['scripts/dsh.mjs', 'release', '--offline', '--tag', tag,
+    ...(serviceEvidencePath ? ['--service-evidence', serviceEvidencePath] : [])],
+  { DSH_UPSTREAM_RUNTIME_BUNDLE: runtimeOutput, RELEASE_STATE_PATH: join(runDir, 'release-state.json') }));
   await stage('test', () => run(process.execPath, ['scripts/dsh.mjs', 'test']));
   const scratch = await mkdtemp(join(tmpdir(), 'release-preflight-receive-'));
   try {

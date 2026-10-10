@@ -59,9 +59,7 @@ if (schema.components.schemas.BoardDocument) throw new Error('free-page contract
 function resolveBuildRequire() {
   const candidates = [
     process.env.B0_PLUGIN_BUILD_TOOLS,
-    join(root, 'dsh-plugins/analytics-workbench/build-tools/package.json'),
-    resolve(root, '../fuqing-crm-analytics/dsh-plugins/analytics-workbench/build-tools/package.json'),
-    resolve(root, '../../fuqing-crm-analytics/dsh-plugins/analytics-workbench/build-tools/package.json'),
+    join(root, 'dsh-plugins/plugin-kit/build-tools/package.json'),
   ].filter(Boolean);
   for (const pkg of candidates) {
     if (!existsSync(pkg)) continue;
@@ -74,7 +72,7 @@ function resolveBuildRequire() {
       continue;
     }
   }
-  throw new Error('openapi-typescript 7.13.0 not found; reuse pinned build-tools, do not pnpm install');
+  throw new Error('openapi-typescript 7.13.0 not found; prepare the pinned plugin-kit/build-tools with the B0 pipeline');
 }
 const req = resolveBuildRequire();
 assert.equal(req('openapi-typescript/package.json').version, '7.13.0');

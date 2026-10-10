@@ -1,0 +1,152 @@
+{
+  "schema_version": "shinemage-service-inputs/v1",
+  "domain": "metrics",
+  "name": "shinemage-crm-metrics-service",
+  "version": "0.1.0rc1",
+  "api_version": "1.0.0",
+  "owner": "crm-service",
+  "scope": "synthetic_only",
+  "python": "3.14",
+  "dependencies": {
+    "annotated-doc": "0.0.5",
+    "annotated-types": "0.8.0",
+    "anyio": "4.15.1",
+    "click": "8.5.0",
+    "duckdb": "1.5.6",
+    "fastapi": "0.141.1",
+    "h11": "0.16.0",
+    "idna": "3.19",
+    "pydantic": "2.13.5",
+    "pydantic-core": "2.46.5",
+    "starlette": "1.6.0",
+    "typing-extensions": "4.16.0",
+    "typing-inspection": "0.4.4",
+    "uvicorn": "0.47.0"
+  },
+  "files": {
+    "backend/__init__.py": {
+      "source": "scripts/crm-calibration/service-namespace.py",
+      "role": "bootstrap"
+    },
+    "backend/contracts/__init__.py": {
+      "source": "scripts/crm-calibration/service-namespace.py",
+      "role": "bootstrap"
+    },
+    "backend/contracts/crm-metrics-service.v1.json": {
+      "source": "backend/contracts/crm-metrics-service.v1.json",
+      "role": "resource"
+    },
+    "backend/contracts/crm_metrics_v1.py": {
+      "source": "backend/contracts/crm_metrics_v1.py",
+      "role": "code"
+    },
+    "backend/crm_metrics_app.py": {
+      "source": "backend/crm_metrics_app.py",
+      "role": "code"
+    },
+    "backend/crm_service_contracts.py": {
+      "source": "backend/crm_service_contracts.py",
+      "role": "code"
+    },
+    "backend/semantic/__init__.py": {
+      "source": "scripts/crm-calibration/service-namespace.py",
+      "role": "bootstrap"
+    },
+    "backend/semantic/calculations.py": {
+      "source": "backend/semantic/calculations.py",
+      "role": "code"
+    },
+    "backend/semantic/crm_metrics_compose.py": {
+      "source": "backend/semantic/crm_metrics_compose.py",
+      "role": "code"
+    },
+    "backend/semantic/crm_metrics_v1.py": {
+      "source": "backend/semantic/crm_metrics_v1.py",
+      "role": "code"
+    },
+    "backend/semantic/time.py": {
+      "source": "backend/semantic/time.py",
+      "role": "code"
+    },
+    "backend/services/__init__.py": {
+      "source": "scripts/crm-calibration/service-namespace.py",
+      "role": "bootstrap"
+    },
+    "backend/services/crm_readonly/__init__.py": {
+      "source": "backend/services/crm_readonly/__init__.py",
+      "role": "code"
+    },
+    "backend/services/crm_readonly/adapter.py": {
+      "source": "backend/services/crm_readonly/adapter.py",
+      "role": "code"
+    },
+    "backend/services/crm_readonly/cache.py": {
+      "source": "backend/services/crm_readonly/cache.py",
+      "role": "code"
+    },
+    "backend/services/crm_readonly/connection.py": {
+      "source": "backend/services/crm_readonly/connection.py",
+      "role": "code"
+    },
+    "backend/services/crm_readonly/errors.py": {
+      "source": "backend/services/crm_readonly/errors.py",
+      "role": "code"
+    },
+    "backend/services/crm_readonly/fs.py": {
+      "source": "backend/services/crm_readonly/fs.py",
+      "role": "code"
+    },
+    "backend/services/crm_readonly/mapping.py": {
+      "source": "backend/services/crm_readonly/mapping.py",
+      "role": "code"
+    },
+    "backend/services/crm_readonly/normalize.py": {
+      "source": "backend/services/crm_readonly/normalize.py",
+      "role": "code"
+    },
+    "backend/services/crm_readonly/permissions.py": {
+      "source": "backend/services/crm_readonly/permissions.py",
+      "role": "code"
+    },
+    "backend/services/crm_readonly/queries.py": {
+      "source": "backend/services/crm_readonly/queries.py",
+      "role": "code"
+    },
+    "backend/services/crm_readonly/registry.py": {
+      "source": "backend/services/crm_readonly/registry.py",
+      "role": "code"
+    },
+    "backend/services/crm_readonly/resources.py": {
+      "source": "backend/services/crm_readonly/resources.py",
+      "role": "code"
+    },
+    "backend/services/crm_readonly/runtime.py": {
+      "source": "backend/services/crm_readonly/runtime.py",
+      "role": "code"
+    },
+    "backend/services/crm_readonly/schema.py": {
+      "source": "backend/services/crm_readonly/schema.py",
+      "role": "code"
+    },
+    "backend/services/crm_readonly/synthetic.py": {
+      "source": "backend/services/crm_readonly/synthetic.py",
+      "role": "code"
+    },
+    "backend/services/crm_readonly/versions.py": {
+      "source": "backend/services/crm_readonly/versions.py",
+      "role": "code"
+    },
+    "openapi.json": {
+      "source": "backend/contracts/crm-metrics-service.openapi.json",
+      "role": "resource"
+    },
+    "resources/synthetic-store-v1.json": {
+      "source": "backend/tests/fixtures/crm_metrics_v1/synthetic-store-v1.json",
+      "role": "resource"
+    },
+    "service.py": {
+      "source": "scripts/crm-calibration/service-entry.py",
+      "role": "bootstrap"
+    }
+  }
+}

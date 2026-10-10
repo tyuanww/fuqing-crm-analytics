@@ -1,0 +1,17 @@
+{
+  "schema_version": "dsh-profile/v1",
+  "profile_id": "dsh-rc2",
+  "dsh": {
+    "sdk_version": "0.1.7-rc.2",
+    "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443"
+  },
+  "plugins": [
+    { "path": "dsh-plugins/analytics-workbench", "id": "@shine-mage/dsh-analytics-workbench-b0", "build": "build.mjs", "enabled": true },
+    { "path": "dsh-plugins/shine-brand", "id": "@shine-mage/dsh-shine-brand", "build": "build.mjs", "enabled": true },
+    { "path": "dsh-plugins/shine-waterfall", "id": "@shine-mage/dsh-shine-waterfall", "build": "build.mjs", "enabled": true },
+    { "path": "dsh-plugins/shine-crowd-action", "id": "@shine-mage/dsh-shine-crowd-action", "build": "build.mjs", "enabled": true },
+    { "path": "dsh-plugins/shine-query", "id": "@shine-mage/dsh-shine-query", "build": "build.mjs", "enabled": true },
+    { "path": "dsh-plugins/shine-board", "id": "@shine-mage/dsh-shine-board", "build": "build.mjs", "enabled": true },
+    { "path": "dsh-plugins/shine-funnel", "id": "@shine-mage/dsh-shine-funnel", "build": "build.mjs", "enabled": true }
+  ]
+}

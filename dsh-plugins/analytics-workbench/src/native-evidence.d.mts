@@ -14,7 +14,10 @@ export function requestIdOf(message: unknown): string | undefined;
 export function emptyJournal(): NativeJournalState;
 export function applyJournal(state: NativeJournalState, event: SessionEvent): NativeJournalState;
 export function journalFromEvents(events: readonly SessionEvent[]): NativeJournalState;
-export function nativeJournal(ctx: Context): { of(session: Session): NativeJournalState };
+export function nativeJournal(ctx: Context): {
+  of(session: Session): NativeJournalState;
+  ready(session: Session): Promise<NativeJournalState>;
+};
 export function summarizeJournal(state: NativeJournalState, requestId: string): NativeSummary;
 export function requestForStep(events: readonly SessionEvent[], messages: readonly unknown[], turn: number): string | undefined;
 export function requestForStepIn(state: NativeJournalState, messages: readonly unknown[], turn: number): string | undefined;

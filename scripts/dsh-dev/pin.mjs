@@ -5,9 +5,10 @@ import { createHash } from 'node:crypto';
 import { readFile, access } from 'node:fs/promises';
 import { join } from 'node:path';
 import { PINNED_SHA, NODE_MAJOR } from './constants.mjs';
+import { managerVersions } from '../../dsh-plugins/plugin-kit/package-manager.mjs';
 
 export async function readToolchain(repoRoot) {
-  const pin = JSON.parse(await readFile(join(repoRoot, 'dsh-plugins/analytics-workbench/toolchain.json'), 'utf8'));
+  const pin = JSON.parse(await readFile(join(repoRoot, 'dsh-plugins/plugin-kit/toolchain.json'), 'utf8'));
   assert.equal(pin.upstream_sha, PINNED_SHA, 'toolchain.json drifted from the fixed upstream SHA');
   assert.equal(pin.node_major, NODE_MAJOR);
   return pin;
@@ -20,6 +21,7 @@ function git(upstream, args) {
 }
 
 export async function verifyUpstream(upstream, pin) {
+  const managers = managerVersions(pin);
   assert.equal(Number(process.versions.node.split('.')[0]), NODE_MAJOR, `Use Node ${NODE_MAJOR}`);
   // A production runtime is the immutable pnpm deploy output shipped beside
   // release-marker.json. It has no .git checkout or pnpm lockfile, so bind it
@@ -41,7 +43,7 @@ export async function verifyUpstream(upstream, pin) {
     return {
       upstream_sha: pin.upstream_sha,
       upstream_lock_sha256: pin.upstream_lock_sha256,
-      pnpm: pin.pnpm,
+      pnpm: managers.upstream,
       node: process.version,
       runtime_bundle: true,
     };
@@ -52,11 +54,11 @@ export async function verifyUpstream(upstream, pin) {
   assert.equal(git(upstream, ['status', '--porcelain', '--untracked-files=no']), '', 'Refusing locally modified upstream');
   const lock = createHash('sha256').update(await readFile(join(upstream, 'pnpm-lock.yaml'))).digest('hex');
   assert.equal(lock, pin.upstream_lock_sha256, 'Pinned upstream lockfile SHA-256 mismatch');
-  assert.equal(JSON.parse(await readFile(join(upstream, 'package.json'), 'utf8')).packageManager, `pnpm@${pin.pnpm}`);
+  assert.equal(JSON.parse(await readFile(join(upstream, 'package.json'), 'utf8')).packageManager, `pnpm@${managers.upstream}`);
   return {
     upstream_sha: pin.upstream_sha,
     upstream_lock_sha256: pin.upstream_lock_sha256,
-    pnpm: pin.pnpm,
+    pnpm: managers.upstream,
     node: process.version,
   };
 }

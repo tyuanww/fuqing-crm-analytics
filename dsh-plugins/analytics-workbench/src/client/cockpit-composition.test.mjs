@@ -1,20 +1,17 @@
+import { upstream, sdk } from '../../test/helpers/sdk-inputs.mjs';
 /** Geometry/session/DOM ownership tests; not native browser acceptance. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { join, resolve } from 'node:path';
+import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
 import { COMPOSITION_PIN, compositionGeometry, createCockpitComposition, nativeCompositionTarget, leaseNativeComposition, leaseCompactNavigation } from './cockpit-composition.mjs';
 const plugin = fileURLToPath(new URL('../..', import.meta.url));
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
 const { JSDOM } = createRequire(join(upstream, 'node_modules/jsdom/package.json'))('jsdom');
 
 test('composition is pinned and sizes continuous split, collapsed and narrow views without squeezing either minimum', () => {
-  assert.equal(COMPOSITION_PIN, JSON.parse(readFileSync(join(plugin, 'toolchain.json'))).upstream_sha);
-  assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], { cwd: upstream, encoding: 'utf8' }).trim(), COMPOSITION_PIN,
-    'composition tests must run against the exact pinned checkout');
+  assert.equal(COMPOSITION_PIN, sdk.pin.upstream_sha);
   assert.deepEqual(compositionGeometry(1160), { mode: 'split', canvas: 712, chat: 440 });
   assert.deepEqual(compositionGeometry(968, 900), { mode: 'split', canvas: 560, chat: 400 });
   assert.deepEqual(compositionGeometry(334), { mode: 'canvas', canvas: 334, chat: 0 });

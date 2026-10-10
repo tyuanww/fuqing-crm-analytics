@@ -1,7 +1,7 @@
 # Docs 索引
 
 > 按 lifecycle 分层，新人约 5 分钟找到入口。  
-> **最后更新**: 2026-09-30。当前提交、运行和交付事实以根目录 [STATUS.md](../STATUS.md) 和 [HANDOVER.md](../HANDOVER.md) 为准。Mac 负责开发/测试，杭州 Windows + WSL 只运行批准 SHA。候选 DSH 钉 **0.1.7-rc.2**（`477b4f42`），不可变 Release `dsh-0.19.0.0-r3` 已在杭州 current 运行；产品仍 PARTIAL，黑客松与校准记录是档案，不是默认入口。
+> **最后更新**: 2026-10-03。当前提交、运行和交付事实以根目录 [STATUS.md](../STATUS.md) 和 [HANDOVER.md](../HANDOVER.md) 为准。Mac 负责开发/测试，杭州 Windows + WSL 只运行批准 SHA。候选 DSH 钉 **0.1.7-rc.2**（`477b4f42`），`dsh-0.20.0.0-r1` 已发布但杭州 current 仍是上一份运行版本；产品仍 PARTIAL，黑客松与校准记录是档案，不是默认入口。
 
 ## 黑客松当前实现
 
@@ -23,7 +23,10 @@
 | [`operating/cockpit-native-html.md`](./operating/cockpit-native-html.md) | 从对话点「生成驾驶舱」或说生成 HTML，到可编辑驾驶舱和右侧产物 |
 | [`operating/cockpit-ai-edit.md`](./operating/cockpit-ai-edit.md) | 产物组织、全屏、静态 HTML 手动 / AI 选区编辑与 HTTP 合同 |
 | [`operating/dsh-rc2-quickstart.md`](./operating/dsh-rc2-quickstart.md) | rc2 artifact 准备教程 |
+| [`operating/dsh-plugin-author-quickstart.md`](./operating/dsh-plugin-author-quickstart.md) | 独立插件作者三步构建、测试和 candidate handoff |
 | [`./reference/dsh-rc2-release-artifact.md`](./reference/dsh-rc2-release-artifact.md) | release/receive/verify 命令与 artifact 合同 |
+| [`architecture/shinemage-plugin-platform.md`](./architecture/shinemage-plugin-platform.md) | 官方 DSH、独立插件/服务、profile 与部署边界 |
+| [`architecture/shinemage-plugin-boundaries.md`](./architecture/shinemage-plugin-boundaries.md) | 当前包 owner、机器依赖 DAG、临时源码引用与检查入口 |
 | [`architecture/dsh-release-trust.md`](./architecture/dsh-release-trust.md) | immutable artifact、allowlist 和回退设计说明 |
 | [`hackathon/S3-ACCEPTANCE-2026-09-15.md`](./hackathon/S3-ACCEPTANCE-2026-09-15.md) | 9-15 指定 Figma 矩阵与正式壳 B3 代表路径（PARTIAL，不升版本） |
 | [`hackathon/S3-CROSS-MATRIX-2026-09-15.md`](./hackathon/S3-CROSS-MATRIX-2026-09-15.md) | 9-15 正式壳核心分支双视口交叉；v14 账本，v15 为 SETUP_FAILED |

@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from 'node:crypto';
-import { mkdir, readFile, rename, rm, open, lstat } from 'node:fs/promises';
+import { constants } from 'node:fs';
+import { mkdir, rename, rm, open, lstat } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { reconcileJournal } from './reconcile.mjs';
 
@@ -17,8 +18,10 @@ export const PHASES = [
 ];
 
 const STATE_SCHEMA = 'release-state/v2';
+export const MAX_STATE_BYTES = 64 * 1024 * 1024;
 const KEY = /^[A-Za-z0-9][A-Za-z0-9._:-]{7,199}$/;
 const TERMINAL = new Set(['RECEIPT']);
+const IDENTITY_FIELDS = ['source_sha', 'manifest_sha256', 'artifact_sha256', 'sha256sums_sha256', 'evidence_index_sha256', 'assets'];
 
 function own(object, key) { return Object.prototype.hasOwnProperty.call(object, key); }
 function now() { return new Date().toISOString(); }
@@ -50,9 +53,26 @@ function validateState(state) {
   return state;
 }
 
+async function readJsonFile(path, max, code) {
+  const handle = await open(path, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
+  try {
+    const info = await handle.stat();
+    if (!info.isFile() || info.size < 1 || info.size > max) throw new Error(code);
+    const bytes = Buffer.alloc(info.size + 1);
+    let offset = 0;
+    while (offset < bytes.length) {
+      const read = await handle.read(bytes, offset, bytes.length - offset, offset);
+      if (!read.bytesRead) break;
+      offset += read.bytesRead;
+    }
+    if (offset !== info.size) throw new Error(code);
+    return JSON.parse(bytes.subarray(0, offset).toString('utf8'));
+  } finally { await handle.close(); }
+}
+
 async function load(path) {
   try {
-    const state = JSON.parse(await readFile(path, 'utf8'));
+    const state = await readJsonFile(path, MAX_STATE_BYTES, 'RELEASE_STATE_FILE_INVALID');
     // v1 state has no integrity chain; accepting it would make resume unsafe.
     return validateState(state);
   } catch (error) {
@@ -63,10 +83,12 @@ async function load(path) {
 
 async function save(path, state) {
   validateState(state);
+  const contents = `${JSON.stringify(state, null, 2)}\n`;
+  if (Buffer.byteLength(contents) > MAX_STATE_BYTES) throw new Error('RELEASE_STATE_FILE_INVALID');
   const tmp = `${path}.tmp-${process.pid}-${Date.now()}`;
   await mkdir(dirname(path), { recursive: true, mode: 0o700 });
   const handle = await open(tmp, 'wx', 0o600);
-  try { await handle.writeFile(`${JSON.stringify(state, null, 2)}\n`); await handle.sync(); } finally { await handle.close(); }
+  try { await handle.writeFile(contents); await handle.sync(); } finally { await handle.close(); }
   try {
     await rename(tmp, path);
     const directory = await open(dirname(path), 'r');
@@ -88,7 +110,7 @@ async function withLock(path, fn) {
     // A recovery operator may have removed a stale file only after this
     // process died. Never delete a replacement lock owned by another worker.
     try {
-      const current = JSON.parse(await readFile(lock, 'utf8'));
+      const current = await readJsonFile(lock, 4096, 'RELEASE_LOCK_INVALID');
       if (current.nonce !== nonce) throw new Error('RELEASE_LOCK_OWNERSHIP_LOST');
       await rm(lock);
     } catch (error) { if (error.code !== 'ENOENT') throw error; }
@@ -101,6 +123,16 @@ function appendJournal(state, value) {
   entry.digest = digest(entry);
   state.journal.push(entry); state.updated_at = entry.at;
   return entry;
+}
+
+function promoteIdentity(state, data, { allowChange = false } = {}) {
+  for (const key of IDENTITY_FIELDS) {
+    if (!own(data, key)) continue;
+    if (!allowChange && state[key] !== undefined && state[key] !== null && digest(state[key]) !== digest(data[key])) {
+      throw new Error(`RELEASE_STATE_IDENTITY_CONFLICT ${key}`);
+    }
+    state[key] = data[key];
+  }
 }
 
 /** Record an ordered phase transition. Skips and regressions fail closed. */
@@ -117,6 +149,7 @@ export async function transition(path, phase, data = {}) {
       if (state.release_tag !== null && state.release_tag !== data.release_tag) throw new Error('RELEASE_STATE_TAG_CONFLICT');
       state.release_tag = data.release_tag;
     }
+    promoteIdentity(state, data);
     const entry = appendJournal(state, { phase, event: 'PHASE', status: 'COMMITTED', ...data });
     state.phase = phase; state.phase_status = 'COMMITTED'; await save(path, state); return entry;
   });
@@ -130,10 +163,30 @@ export async function transition(path, phase, data = {}) {
  * must record an ordered sequence such as rc1 -> rc2 -> rollback -> rc2.
  * Promotion is the only caller allowed to opt into that controlled change.
  */
-export async function recordEvent(path, data = {}, { allowTagChange = false } = {}) {
+export async function recordEvent(path, data = {}, { allowTagChange = false, allowIdentityChange = false, idempotencyKey = null, requiredEvent = null } = {}) {
   if (!data || typeof data !== 'object' || Array.isArray(data) || ['phase', 'event'].some(key => own(data, key))) throw new Error('RELEASE_EVENT_INVALID');
+  if (idempotencyKey !== null && !KEY.test(idempotencyKey)) throw new Error('IDEMPOTENCY_KEY_INVALID');
+  if (requiredEvent !== null && (!requiredEvent || Object.keys(requiredEvent).sort().join(',') !== 'digest,seq'
+    || !Number.isSafeInteger(requiredEvent.seq) || requiredEvent.seq < 1
+    || !/^[a-f0-9]{64}$/.test(requiredEvent.digest ?? ''))) throw new Error('RELEASE_EVENT_PREREQUISITE_INVALID');
+  const prerequisite = requiredEvent === null ? null : { ...requiredEvent };
+  const fingerprint = idempotencyKey === null ? null : digest(data);
   return withLock(path, async () => {
     const state = await load(path);
+    // Check after acquiring the same write lock, including idempotent retries.
+    // Unrelated appended observations are allowed; a replaced history is not.
+    if (prerequisite && state.journal[prerequisite.seq - 1]?.digest !== prerequisite.digest) {
+      throw new Error('RELEASE_EVENT_PREREQUISITE_CHANGED');
+    }
+    if (idempotencyKey !== null && own(state.idempotency, idempotencyKey)) {
+      const prior = state.idempotency[idempotencyKey];
+      if (prior.fingerprint !== fingerprint) throw new Error('RELEASE_EVENT_CONFLICT');
+      if (prior.status !== 'COMMITTED') throw new Error('RELEASE_EVENT_UNKNOWN');
+      const result = prior.result;
+      if (!Number.isSafeInteger(result?.seq) || result.seq < 1 || !state.journal[result.seq - 1]
+        || digest(result) !== digest(state.journal[result.seq - 1])) throw new Error('RELEASE_EVENT_RECEIPT_INVALID');
+      return prior.result;
+    }
     const previousReleaseTag = state.release_tag;
     const releaseTagChanged = data.release_tag !== undefined && state.release_tag !== null && state.release_tag !== data.release_tag;
     if (data.release_tag !== undefined) {
@@ -141,8 +194,14 @@ export async function recordEvent(path, data = {}, { allowTagChange = false } = 
       if (releaseTagChanged && allowTagChange !== true) throw new Error('RELEASE_STATE_TAG_CONFLICT');
       state.release_tag = data.release_tag;
     }
+    // A host journal spans releases, but an identity never spans tags. Missing
+    // fields for the new tag must remain unknown instead of inheriting old bytes.
+    if (releaseTagChanged) for (const key of IDENTITY_FIELDS) delete state[key];
+    promoteIdentity(state, data, { allowChange: allowIdentityChange || allowTagChange });
     const event = releaseTagChanged ? { release_tag_previous: previousReleaseTag } : {};
-    const entry = appendJournal(state, { phase: state.phase, event: 'OBSERVATION', ...data, ...event }); await save(path, state); return entry;
+    const entry = appendJournal(state, { phase: state.phase, event: 'OBSERVATION', ...data, ...event });
+    if (idempotencyKey !== null) state.idempotency[idempotencyKey] = { status: 'COMMITTED', fingerprint, result: entry, completed_at: entry.at };
+    await save(path, state); return entry;
   });
 }
 
@@ -179,6 +238,15 @@ export async function idempotent(path, idempotencyKey, operation, options = {}) 
     if (own(state.idempotency, idempotencyKey)) {
       const prior = state.idempotency[idempotencyKey];
       if (prior.fingerprint !== fingerprint) return { replay: true, status: 'CONFLICT', idempotency_key: idempotencyKey };
+      if (['IN_PROGRESS', 'UNKNOWN'].includes(prior.status) && options.reconcile) {
+        const recovered = await options.reconcile();
+        if (recovered !== undefined) {
+          state.idempotency[idempotencyKey] = { ...prior, status: 'COMMITTED', result: recovered, completed_at: now() };
+          appendJournal(state, { phase: state.phase, event: 'IDEMPOTENCY', idempotency_key: idempotencyKey, status: 'COMMITTED', fingerprint, reconciled: true, result: recovered });
+          await save(path, state);
+          return { replay: true, status: 'COMMITTED', result: recovered, idempotency_key: idempotencyKey };
+        }
+      }
       if (prior.status === 'IN_PROGRESS') return { replay: true, status: 'UNKNOWN', reason: 'prior_operation_may_have_committed', idempotency_key: idempotencyKey };
       if (prior.status === 'UNKNOWN') return { replay: true, status: 'UNKNOWN', reason: 'reconcile_required', idempotency_key: idempotencyKey };
       if (prior.status === 'FAILED') return { replay: true, status: 'FAILED', error: prior.error, idempotency_key: idempotencyKey };
@@ -230,7 +298,7 @@ export async function clearStaleLock(path, { confirm = false } = {}) {
   const before = await lstat(lock);
   if (!before.isFile() || before.isSymbolicLink()) throw new Error('RELEASE_LOCK_INVALID');
   let owner;
-  try { owner = JSON.parse(await readFile(lock, 'utf8')); } catch { throw new Error('RELEASE_LOCK_OWNER_UNKNOWN'); }
+  try { owner = await readJsonFile(lock, 4096, 'RELEASE_LOCK_INVALID'); } catch { throw new Error('RELEASE_LOCK_OWNER_UNKNOWN'); }
   if (!Number.isSafeInteger(owner.pid) || owner.pid <= 0 || typeof owner.nonce !== 'string' || !/^[0-9a-f]{32}$/.test(owner.nonce)) throw new Error('RELEASE_LOCK_OWNER_UNKNOWN');
   try {
     process.kill(owner.pid, 0);

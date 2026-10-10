@@ -2,7 +2,9 @@
 
 当前提交、版本和现役见 [STATUS](./STATUS.md)。目录、端口和检索见 [维护地图](./docs/operating/maintainer-map.md)。对话生成 HTML 的步骤见 [从对话生成 HTML 驾驶舱](./docs/operating/cockpit-native-html.md)。产品仍 PARTIAL。
 
-> 当前事实（2026-09-30）：产品 VERSION `0.19.0.0`，DSH `0.1.7-rc.2`，固定 upstream `477b4f42`；不可变 Release `dsh-0.19.0.0-r3` 已发布，杭州 `current` 已指向 r3 并完成 loopback smoke。产品仍是 PARTIAL；浏览器/真实模型、WAL、operator gate、10x backpressure、真实业务 UAT 和回退演练仍按 [STATUS](./STATUS.md) 保持未关闭。后续发布必须从 clean reviewed commit 生成新的 immutable artifact，禁止 `git pull` 或现场编译。
+> 最近生产记录（[STATUS](./STATUS.md) 的 2026-10-07 核验）：产品 VERSION `0.20.0.0`，DSH `0.1.7-rc.2`，固定 upstream `477b4f42`；杭州 current 为 `dsh-0.20.0.0-r3`。本轮未复查或切换生产，新的插件候选未激活。产品仍 PARTIAL；局部合成验证不能替代真实模型、完整业务 UAT、生产准入及回退证据。后续发布必须从 clean reviewed commit 生成新的 immutable artifact，禁止 `git pull` 或现场编译。
+
+> 当前 A/B/C 集成（2026-10-08）：单插件更新与取消、固定宿主进程级恢复、HTML headed 验收和 SDK 信任盘查见[本轮集成验收](./docs/hackathon/evidence/shinemage-abc-integration-20261008.md)。全量 B0、SDK 分发与生产门禁仍有开放项；这份本地集成记录不代表新 Release。
 
 下方9月5–10日的决策、端口和候选追加保留为历史记录，不作为当前服务或Git HEAD。
 
@@ -47,6 +49,8 @@
 4. 驾驶舱怎么生成 HTML，见 [操作说明](./docs/operating/cockpit-native-html.md)。验证范围见 [当前验证入口](./docs/operating/verification.md)。完整 B0 检查命令是 `node scripts/dsh-b0/pipeline.mjs --check --python /absolute/python3.14`。
 
 ### rc2 稳定交付入口
+
+插件作者若只修改一个独立包，先看 [DSH 插件作者 Quickstart](./docs/operating/dsh-plugin-author-quickstart.md)，不要重复执行整仓发布。
 
 在候选提交上先运行本地合同；已有固定 runtime bundle 时再做只读发布检查。首次候选没有 runtime 时，直接运行正式 preflight，由它生成同一份 immutable artifact：
 

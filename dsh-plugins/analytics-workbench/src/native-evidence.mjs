@@ -1,4 +1,5 @@
 /** Projection of the pinned native journal, NOT another run state machine. */
+import { isDeepStrictEqual } from 'node:util';
 
 export function requestIdOf(message) {
   return message?.source?.kind === 'user' ? message.source.rpcId : undefined;
@@ -101,19 +102,87 @@ export function nativeJournal(ctx) {
   let api = journals.get(ctx);
   if (api) return api;
   if (typeof ctx?.on !== 'function') {
-    api = { of() { return emptyJournal(); } };
+    api = { of() { return emptyJournal(); }, async ready() { throw Error('NATIVE_JOURNAL_UNAVAILABLE'); } };
     journals.set(ctx, api);
     return api;
   }
   const bySession = new WeakMap();
-  ctx.on('session/created', (session) => { bySession.set(session, emptyJournal()); }, { global: true });
+  const disposed = new WeakSet();
+  let active = true;
+  const available = session => active && !disposed.has(session) && ctx.sessions?.get(session.id) === session;
+  function entryFor(session) {
+    let entry = bySession.get(session);
+    if (!entry) {
+      // Only a genuinely empty live session needs no baseline. This also
+      // handles a plugin attached after session/created was already emitted.
+      entry = { state: emptyJournal(), nextSeq: 0, ready: session.seq === 0, pending: [], loading: undefined };
+      bySession.set(session, entry);
+    }
+    return entry;
+  }
+  ctx.on('session/created', session => { entryFor(session); }, { global: true });
   ctx.on('session/event', (session, event) => {
-    bySession.set(session, applyJournal(bySession.get(session) ?? emptyJournal(), event));
+    if (!active || disposed.has(session)) return;
+    const entry = entryFor(session);
+    if (entry.ready && event.seq === entry.nextSeq) {
+      entry.state = applyJournal(entry.state, event); entry.nextSeq++;
+    } else {
+      // A gap invalidates the whole projection, never just the missing turn.
+      entry.ready = false;
+      if (entry.loading) entry.pending.push(event);
+    }
   }, { global: true });
-  ctx.on('session/disposed', (session) => { bySession.delete(session); }, { global: true });
+  ctx.on('session/disposed', session => { disposed.add(session); bySession.delete(session); }, { global: true });
+  ctx.effect(() => () => { active = false; }, 'native journal: invalidate pending reads on unload');
   api = {
     of(session) {
-      return bySession.get(session) ?? emptyJournal();
+      const entry = bySession.get(session);
+      return available(session) && entry?.ready && entry.nextSeq === session.seq ? entry.state : emptyJournal();
+    },
+    async ready(session) {
+      if (!available(session)) throw Error('NATIVE_JOURNAL_UNAVAILABLE');
+      const entry = entryFor(session);
+      if (entry.ready && entry.nextSeq === session.seq) return entry.state;
+      if (!entry.loading) {
+        entry.ready = false;
+        entry.pending = [];
+        const requiredSeq = session.seq;
+        entry.loading = Promise.resolve().then(async () => {
+          try {
+            // Official async query API includes the restored seed and the
+            // constructor's unpublished marker; no deprecated sync snapshots.
+            const query = ctx.get('sessionQuery');
+            if (!query) throw Error('NATIVE_JOURNAL_UNAVAILABLE');
+            const snapshot = await query.readSession(session.id);
+            if (!available(session) || bySession.get(session) !== entry
+              || snapshot.session?.id !== session.id || !Array.isArray(snapshot.events)
+              || !Number.isSafeInteger(requiredSeq) || snapshot.events.length < requiredSeq) {
+              throw Error('NATIVE_JOURNAL_UNAVAILABLE');
+            }
+            let state = emptyJournal(), nextSeq = 0;
+            for (const event of snapshot.events) {
+              if (event.seq !== nextSeq) throw Error('NATIVE_JOURNAL_SEQUENCE');
+              state = applyJournal(state, event); nextSeq++;
+            }
+            // Live events may fall on either side of the async snapshot cut.
+            // Verify overlaps, then fold only its contiguous, newer suffix.
+            for (const event of entry.pending) {
+              if (event.seq < snapshot.events.length) {
+                if (!isDeepStrictEqual(event, snapshot.events[event.seq])) throw Error('NATIVE_JOURNAL_CONFLICT');
+              } else {
+                if (event.seq !== nextSeq) throw Error('NATIVE_JOURNAL_SEQUENCE');
+                state = applyJournal(state, event); nextSeq++;
+              }
+            }
+            if (nextSeq !== session.seq) throw Error('NATIVE_JOURNAL_SEQUENCE');
+            entry.state = state; entry.nextSeq = nextSeq; entry.ready = true;
+            return state;
+          } finally {
+            entry.pending = []; entry.loading = undefined;
+          }
+        });
+      }
+      return entry.loading;
     },
   };
   journals.set(ctx, api);

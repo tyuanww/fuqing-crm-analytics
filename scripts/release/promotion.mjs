@@ -8,6 +8,7 @@ import { assertDeploymentTrust, verifyAttestationBundle, verifyGitHubEnvironment
 import { fileURLToPath } from 'node:url';
 import { execFile as execFileCallback } from 'node:child_process';
 import { promisify } from 'node:util';
+import { assertServicePromotion, validateServiceGate } from './service-compatibility.mjs';
 
 const TAG = /^dsh-[A-Za-z0-9._-]+$/;
 const OWNER = /^[A-Za-z0-9._:-]{3,128}$/;
@@ -32,6 +33,18 @@ async function readJson(path) { return JSON.parse(await readFile(path, 'utf8'));
 async function journalHas(path, predicate) {
   const state = await readState(path);
   return state.journal.some(predicate);
+}
+function serviceEventData(value) {
+  return Object.hasOwn(value, 'service_compatibility') ? { service_binding: value.service_compatibility.binding } : {};
+}
+
+async function checkServiceTransition(marker, currentTarget, root, journalPath) {
+  let currentMarker = null;
+  if (currentTarget) {
+    if (!resolve(currentTarget).startsWith(resolve(root, 'releases') + '/')) throw new Error('ROLLBACK_TARGET_INVALID');
+    currentMarker = await readJson(join(currentTarget, 'release-marker.json'));
+  }
+  await assertServicePromotion({ marker, currentMarker, journal: await readState(journalPath) });
 }
 
 function processIsAlive(pid) {
@@ -174,6 +187,7 @@ export async function installRelease({ artifact, upstreamRuntimeArtifact = null,
   if (!OWNER.test(owner) || !OWNER.test(restartDependency)) throw new Error('RELEASE_OWNER_INVALID');
   await mkdir(releases, { recursive: true, mode: 0o700 });
   const manifest = await readJson(manifestPath);
+  if (Object.hasOwn(manifest, 'service_compatibility')) await validateServiceGate(manifest.service_compatibility);
   if (manifest.release_tag !== tag) throw new Error('RELEASE_TAG_MANIFEST_MISMATCH');
   if (manifest.upstream_runtime && manifest.upstream_runtime.upstream_sha !== manifest.dsh_upstream_sha) throw new Error('RELEASE_UPSTREAM_RUNTIME_SHA_MISMATCH');
   if (manifest.upstream_runtime && !upstreamRuntimeArtifact) throw new Error('RELEASE_UPSTREAM_RUNTIME_REQUIRED');
@@ -203,8 +217,10 @@ export async function installRelease({ artifact, upstreamRuntimeArtifact = null,
     assertPublicationAssets(publication, requiredAssetDigests);
     const approval = await verifyGitHubEnvironmentApproval({ repository, approvalRef: publication.approval_ref, releaseTag: tag, sourceSha: manifest.source_sha, gh });
     if (approval.status !== 'VERIFIED') throw new Error('RELEASE_APPROVAL_NOT_VERIFIED');
-    const attestation = await verifyAttestationBundle({ artifactPath: artifact, bundlePath: attestationBundlePath, repository, sourceRef, signerWorkflow, gh });
-    const runtimeAttestation = manifest.upstream_runtime ? await verifyAttestationBundle({ artifactPath: upstreamRuntimeArtifact, bundlePath: runtimeAttestationBundlePath, repository, sourceRef, signerWorkflow, gh }) : null;
+    const attestation = await verifyAttestationBundle({ artifactPath: artifact, bundlePath: attestationBundlePath, repository, sourceRef, sourceSha: manifest.source_sha, signerWorkflow, gh });
+    // This certificate identifies our packaging workflow's source commit;
+    // the DSH upstream SHA remains separately bound by the runtime manifest.
+    const runtimeAttestation = manifest.upstream_runtime ? await verifyAttestationBundle({ artifactPath: upstreamRuntimeArtifact, bundlePath: runtimeAttestationBundlePath, repository, sourceRef, sourceSha: manifest.source_sha, signerWorkflow, gh }) : null;
     if (sourceRef !== `refs/tags/${tag}`) throw new Error('RELEASE_SOURCE_REF_MISMATCH');
     const liveAssets = [
       { name: basename(artifact), sha256: manifest.artifact_sha256, size: (await stat(artifact)).size },
@@ -220,11 +236,14 @@ export async function installRelease({ artifact, upstreamRuntimeArtifact = null,
   }
   if (await access(target).then(() => true, () => false)) {
     const marker = await readJson(join(target, 'release-marker.json')).catch(() => null);
+    if (JSON.stringify(marker?.service_compatibility ?? null) !== JSON.stringify(manifest.service_compatibility ?? null)) {
+      throw new Error('SERVICE_INSTALLED_GATE_MISMATCH');
+    }
     const pending = marker?.tag === tag && marker?.source_sha === manifest.source_sha
       && await journalHas(journalPath, entry => entry.status === 'PREPARE_INTENT' && entry.release_tag === tag && entry.source_sha === manifest.source_sha)
       && !await journalHas(journalPath, entry => entry.status === 'PREPARED' && entry.release_tag === tag && entry.source_sha === manifest.source_sha);
     if (pending) {
-      await recordEvent(journalPath, { release_tag: tag, status: 'PREPARED', path: target, source_sha: manifest.source_sha, upstream_runtime_sha256: manifest.upstream_runtime?.sha256 ?? null, reconciled: true }, { allowTagChange: true });
+      await recordEvent(journalPath, { release_tag: tag, status: 'PREPARED', path: target, source_sha: manifest.source_sha, upstream_runtime_sha256: manifest.upstream_runtime?.sha256 ?? null, ...serviceEventData(manifest), reconciled: true }, { allowTagChange: true });
       return { status: 'PREPARED', tag, path: target, sourceSha: manifest.source_sha, idempotent: true };
     }
     throw new Error('RELEASE_EXISTS');
@@ -235,12 +254,13 @@ export async function installRelease({ artifact, upstreamRuntimeArtifact = null,
     let runtimeReceipt = null;
     if (manifest.upstream_runtime) runtimeReceipt = await receiveRuntimeArtifact({ artifact: upstreamRuntimeArtifact, destination: join(staging, 'upstream') });
     const pluginPeerLinks = manifest.upstream_runtime ? await materializePluginPeerLinks(staging) : null;
-    await writeMarker(staging, { tag, source_sha: manifest.source_sha, artifact_sha256: received.sha256, upstream_runtime: manifest.upstream_runtime ?? null, upstream_path: manifest.upstream_runtime ? 'upstream' : null, runtime_unpack: runtimeReceipt, plugin_peer_links: pluginPeerLinks, owner, restart_dependency: restartDependency, publication_status: trust?.status ?? 'NOT_CHECKED', provenance_status: trust?.provenance_status ?? 'NOT_AVAILABLE', state: 'PREPARED', prepared_at: new Date().toISOString() });
+    await writeMarker(staging, { tag, source_sha: manifest.source_sha, artifact_sha256: received.sha256, upstream_runtime: manifest.upstream_runtime ?? null, upstream_path: manifest.upstream_runtime ? 'upstream' : null, runtime_unpack: runtimeReceipt, plugin_peer_links: pluginPeerLinks, owner, restart_dependency: restartDependency, publication_status: trust?.status ?? 'NOT_CHECKED', provenance_status: trust?.provenance_status ?? 'NOT_AVAILABLE', state: 'PREPARED', prepared_at: new Date().toISOString(),
+      ...(Object.hasOwn(manifest, 'service_compatibility') ? { service_compatibility: manifest.service_compatibility } : {}) });
     await fsyncDir(staging);
-    await recordEvent(journalPath, { release_tag: tag, status: 'PREPARE_INTENT', path: target, source_sha: manifest.source_sha, upstream_runtime_sha256: manifest.upstream_runtime?.sha256 ?? null }, { allowTagChange: true });
+    await recordEvent(journalPath, { release_tag: tag, status: 'PREPARE_INTENT', path: target, source_sha: manifest.source_sha, upstream_runtime_sha256: manifest.upstream_runtime?.sha256 ?? null, ...serviceEventData(manifest) }, { allowTagChange: true });
     // Rename is exclusive: never remove or replace an existing release.
     await rename(staging, target); await fsyncDir(releases);
-    await recordEvent(journalPath, { release_tag: tag, status: 'PREPARED', path: target, source_sha: manifest.source_sha, upstream_runtime_sha256: manifest.upstream_runtime?.sha256 ?? null }, { allowTagChange: true });
+    await recordEvent(journalPath, { release_tag: tag, status: 'PREPARED', path: target, source_sha: manifest.source_sha, upstream_runtime_sha256: manifest.upstream_runtime?.sha256 ?? null, ...serviceEventData(manifest) }, { allowTagChange: true });
     return { status: 'PREPARED', tag, path: target, sourceSha: manifest.source_sha };
   } catch (error) { await rm(staging, { recursive: true, force: true }); throw error; }
 }
@@ -268,6 +288,7 @@ export async function activateRelease({ releaseRoot, tag, sourceSha, statePath, 
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
   }
+  await checkServiceTransition(marker, previous, root, journalPath);
     try {
       const currentStat = await lstat(current);
       if (currentStat.isSymbolicLink()) {
@@ -276,7 +297,7 @@ export async function activateRelease({ releaseRoot, tag, sourceSha, statePath, 
         const committed = await journalHas(journalPath, entry => entry.status === 'ACTIVE' && entry.release_tag === tag && entry.source_sha === sourceSha);
         const pending = !committed && await journalHas(journalPath, entry => entry.status === 'ACTIVE_INTENT' && entry.release_tag === tag && entry.source_sha === sourceSha);
         if (pending) {
-          await recordEvent(journalPath, { release_tag: tag, status: 'ACTIVE', previous, source_sha: sourceSha, reconciled: true }, { allowTagChange: true });
+          await recordEvent(journalPath, { release_tag: tag, status: 'ACTIVE', previous, source_sha: sourceSha, ...serviceEventData(marker), reconciled: true }, { allowTagChange: true });
           return { status: 'ACTIVE', tag, previous, current: target, idempotent: true, reconciled: true };
         }
         if (committed) return { status: 'ACTIVE', tag, previous, current: target, idempotent: true };
@@ -289,12 +310,12 @@ export async function activateRelease({ releaseRoot, tag, sourceSha, statePath, 
     if (!prevResolved.startsWith(`${releases}/`)) throw new Error('ROLLBACK_TARGET_INVALID');
     await writeFileAtomic(join(root, 'rollback-target.json'), JSON.stringify({ target: prevResolved, recorded_at: new Date().toISOString() }, null, 2) + '\n');
   }
-  await recordEvent(journalPath, { release_tag: tag, status: 'ACTIVE_INTENT', previous, source_sha: sourceSha }, { allowTagChange: true });
+  await recordEvent(journalPath, { release_tag: tag, status: 'ACTIVE_INTENT', previous, source_sha: sourceSha, ...serviceEventData(marker) }, { allowTagChange: true });
   await replaceSymlink(current, target); await writeFileAtomic(join(root, 'current-target'), `${target}\n`);
   const completedAt = new Date().toISOString();
   await writeFileAtomic(join(target, 'active.json'), JSON.stringify({ tag, source_sha: sourceSha, activated_at: completedAt }, null, 2) + '\n');
   await writeReceipt(root, { schema_version: 'promotion-receipt/v1', release_tag: tag, status: 'ACTIVE', source_sha: sourceSha, started_at: completedAt, completed_at: completedAt });
-  await recordEvent(journalPath, { release_tag: tag, status: 'ACTIVE', previous, source_sha: sourceSha }, { allowTagChange: true });
+  await recordEvent(journalPath, { release_tag: tag, status: 'ACTIVE', previous, source_sha: sourceSha, ...serviceEventData(marker) }, { allowTagChange: true });
   return { status: 'ACTIVE', tag, previous, current: target };
   });
 }
@@ -324,21 +345,22 @@ export async function rollbackRelease({ releaseRoot, statePath, expectedOwner = 
   if (!OWNER.test(marker.owner ?? '') || !OWNER.test(marker.restart_dependency ?? '')) throw new Error('RELEASE_OWNER_MISSING');
   if (expectedOwner !== null && marker.owner !== expectedOwner) throw new Error('RELEASE_OWNER_MISMATCH');
   if (expectedRestartDependency !== null && marker.restart_dependency !== expectedRestartDependency) throw new Error('RELEASE_RESTART_DEPENDENCY_MISMATCH');
+  await checkServiceTransition(marker, currentTarget, root, journalPath);
   if (currentTarget === target) {
     const committed = await journalHas(journalPath, entry => entry.status === 'ROLLED_BACK' && entry.release_tag === marker.tag && entry.source_sha === marker.source_sha);
     const pending = !committed && await journalHas(journalPath, entry => entry.status === 'ROLLBACK_INTENT' && entry.release_tag === marker.tag && entry.source_sha === marker.source_sha);
     if (pending) {
-      await recordEvent(journalPath, { release_tag: marker.tag, status: 'ROLLED_BACK', target, source_sha: marker.source_sha, reconciled: true }, { allowTagChange: true });
+      await recordEvent(journalPath, { release_tag: marker.tag, status: 'ROLLED_BACK', target, source_sha: marker.source_sha, ...serviceEventData(marker), reconciled: true }, { allowTagChange: true });
       return { status: 'ROLLED_BACK', target, idempotent: true, releaseTag: marker.tag, reconciled: true };
     }
     if (committed) return { status: 'ROLLED_BACK', target, idempotent: true, releaseTag: marker.tag };
     throw new Error('RELEASE_ROLLBACK_STATE_MISSING');
   }
-  await recordEvent(journalPath, { release_tag: marker.tag, status: 'ROLLBACK_INTENT', target, source_sha: marker.source_sha }, { allowTagChange: true });
+  await recordEvent(journalPath, { release_tag: marker.tag, status: 'ROLLBACK_INTENT', target, source_sha: marker.source_sha, ...serviceEventData(marker) }, { allowTagChange: true });
   await replaceSymlink(current, target); await writeFileAtomic(join(root, 'current-target'), `${target}\n`);
   const completedAt = new Date().toISOString();
   await writeReceipt(root, { schema_version: 'promotion-receipt/v1', release_tag: marker.tag, status: 'ROLLED_BACK', source_sha: marker.source_sha, started_at: completedAt, completed_at: completedAt });
-  await recordEvent(journalPath, { release_tag: marker.tag, status: 'ROLLED_BACK', target, source_sha: marker.source_sha }, { allowTagChange: true });
+  await recordEvent(journalPath, { release_tag: marker.tag, status: 'ROLLED_BACK', target, source_sha: marker.source_sha, ...serviceEventData(marker) }, { allowTagChange: true });
   return { status: 'ROLLED_BACK', target };
   });
 }

@@ -1,3 +1,5 @@
+import { competitionColor, competitionFont, competitionMaterial, lightColor, lightMaterial, antdSeedToken, antdTheme, lightAntdTheme } from './content-theme.generated.ts';
+export { competitionColor, competitionFont, competitionMaterial, antdSeedToken, antdTheme } from './content-theme.generated.ts';
 /** DESIGN.md brand tokens mapped to Ant Design seed names. Not a Vue theme.ts import. */
 
 export const PRODUCT_NAME = '伸美 AI 增长董事会';
@@ -21,83 +23,10 @@ export const BRAND_DIGESTS = Object.freeze({
   notoSansSc: null,
 });
 
-export const competitionColor = Object.freeze({
-  background: '#09050D',
-  backgroundTop: '#0F0B17',
-  backgroundMiddle: '#120D1D',
-  backgroundBottom: '#0A0711',
-  brandPrimary: '#805D9D',
-  brandPrimaryHover: '#9877B1',
-  brandPrimaryPressed: '#674482',
-  brandSecondary: '#D3C3E8',
-  brandAccent: '#F2FFDC',
-  ink: '#FEFCFF',
-  inkOnAccent: '#201426',
-  copyStrong: '#ECE5F0',
-  copy: '#C4B8CB',
-  muted: '#9A8BA4',
-  faint: '#6F6078',
-  danger: '#FF7D91',
-  success: '#10B981',
-  warning: '#F59E0B',
-});
-
-/**
- * D37 declared stacks. Noto Sans SC is the Chinese default name; PuHuiTi is a
- * candidate only and is not an active default until license/file/load/distribution
- * are verified. A declared family is not proof the file loaded.
- */
-export const competitionFont = Object.freeze({
-  body: "'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif",
-  display: "'Outfit', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif",
-  mono: "'SFMono-Regular', 'SF Mono', Menlo, Monaco, Consolas, monospace",
-  candidateChinese: "'Alibaba PuHuiTi 3.0', 'Alibaba PuHuiTi'",
-});
-
-export const competitionMaterial = Object.freeze({
-  line: 'rgba(211, 195, 232, 0.12)',
-  lineStrong: 'rgba(211, 195, 232, 0.24)',
-  glass: 'rgba(255, 255, 255, 0.03)',
-  overlay: 'rgba(5, 2, 8, 0.72)',
-  nav: 'rgba(9, 5, 13, 0.90)',
-  navActive: 'rgba(211, 195, 232, 0.12)',
-  dangerSoft: 'rgba(255, 125, 145, 0.08)',
-  purpleSoft: 'rgba(128, 93, 157, 0.12)',
-});
-
 export const competitionMotion = Object.freeze({
   focusBreath: '2400ms ease-in-out',
   fast: '160ms cubic-bezier(0.2, 0.8, 0.2, 1)',
   standard: '240ms cubic-bezier(0.2, 0.8, 0.2, 1)',
-});
-
-/** Ant Design 5 seed tokens; algorithms are applied by the React provider. */
-export const antdSeedToken = Object.freeze({
-  colorPrimary: competitionColor.brandPrimary,
-  colorSuccess: competitionColor.brandAccent,
-  colorError: competitionColor.danger,
-  colorWarning: competitionColor.warning,
-  colorInfo: competitionColor.brandSecondary,
-  colorText: competitionColor.ink,
-  colorTextSecondary: competitionColor.brandSecondary,
-  colorTextTertiary: competitionColor.muted,
-  colorBgBase: competitionColor.background,
-  colorBgLayout: competitionColor.background,
-  colorBgContainer: competitionMaterial.glass,
-  colorBgElevated: competitionColor.backgroundMiddle,
-  colorBorder: competitionMaterial.lineStrong,
-  colorSplit: competitionMaterial.line,
-  fontFamily: competitionFont.body,
-  fontFamilyCode: competitionFont.mono,
-  borderRadius: 12,
-  controlHeight: 44,
-  lineWidth: 1,
-});
-
-export const antdTheme = Object.freeze({
-  cssVar: { prefix: 'sm', key: 'competition' },
-  hashed: true,
-  token: antdSeedToken,
 });
 
 export const competitionCssVars = Object.freeze({
@@ -181,28 +110,6 @@ export const LIBRARY_THEME_MAP = Object.freeze({
 
 export type CompetitionColorScheme = 'light' | 'dark';
 
-const lightColor = Object.freeze({
-  ...competitionColor,
-  background: competitionColor.ink,
-  backgroundTop: '#F7F2FA',
-  backgroundMiddle: '#F0E8F5',
-  backgroundBottom: competitionColor.ink,
-  ink: competitionColor.background,
-  brandSecondary: '#674482',
-  copyStrong: '#33273C',
-  copy: '#51415D',
-  muted: '#675471',
-  faint: '#81708C',
-  danger: '#AB2944',
-});
-const lightMaterial = Object.freeze({
-  ...competitionMaterial,
-  line: 'rgba(103, 68, 130, 0.16)',
-  lineStrong: 'rgba(103, 68, 130, 0.32)',
-  glass: 'rgba(128, 93, 157, 0.04)',
-  nav: 'rgba(254, 252, 255, 0.96)',
-  navActive: 'rgba(128, 93, 157, 0.10)',
-});
 const lightCompetitionTokens = Object.freeze({
   ...competitionTokens, color: lightColor, material: lightMaterial,
   cssVars: Object.freeze({
@@ -216,16 +123,7 @@ const lightCompetitionTokens = Object.freeze({
     '--sm-filter-brand-inverse': 'none',
     '--sm-focus': lightColor.brandSecondary,
   }),
-  antd: Object.freeze({
-    ...antdTheme, cssVar: { prefix: 'sm', key: 'competition-light' },
-    token: Object.freeze({
-      ...antdSeedToken, colorText: lightColor.ink, colorTextSecondary: lightColor.copy,
-      colorTextTertiary: lightColor.muted, colorBgBase: lightColor.background,
-      colorBgLayout: lightColor.background, colorBgContainer: lightColor.background,
-      colorBgElevated: lightColor.background, colorBorder: lightMaterial.lineStrong,
-      colorSplit: lightMaterial.line, colorError: lightColor.danger,
-    }),
-  }),
+  antd: lightAntdTheme,
 });
 
 export function competitionThemeFor(scheme: CompetitionColorScheme) {

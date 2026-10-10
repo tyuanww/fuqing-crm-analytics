@@ -25,12 +25,14 @@ def offline_only(event, args):
         raise RuntimeError('offline generation cannot open state or external services')
 sys.addaudithook(offline_only)
 from backend.analytics_first_purchase_analysis_app import create_first_purchase_analysis_app
+from backend.analytics_first_purchase_source_app import create_first_purchase_source_app
 schema = create_first_purchase_analysis_app().openapi()
 if schema.get('x-first-purchase-saved-analysis-http') is not True:
     raise SystemExit('first-purchase saved-analysis OpenAPI must declare x-first-purchase-saved-analysis-http')
 if schema.get('x-shared-succeeded-source') is not True:
     raise SystemExit('shared source must be declared true')
-print(json.dumps(schema, sort_keys=True, ensure_ascii=False, allow_nan=False))
+print(json.dumps({'analysis': schema, 'source': create_first_purchase_source_app().openapi()},
+                 sort_keys=True, ensure_ascii=False, allow_nan=False))
 `;
 const result = spawnSync(python, ['-c', generate], {
   cwd: root, encoding: 'utf8', timeout: 15000, maxBuffer: 2 * 1024 * 1024,
@@ -42,18 +44,27 @@ const result = spawnSync(python, ['-c', generate], {
 if (result.error || result.status !== 0) {
   throw new Error(`Offline first-purchase saved-analysis schema generation failed: ${result.error?.message ?? result.stderr}`);
 }
-const schema = JSON.parse(result.stdout);
+const { analysis: schema, source: sourceSchema } = JSON.parse(result.stdout);
 function assertLocalRefs(value) {
   if (!value || typeof value !== 'object') return;
   if ('$ref' in value && !value.$ref.startsWith('#/')) throw new Error('External contract references are forbidden');
   Object.values(value).forEach(assertLocalRefs);
 }
 assertLocalRefs(schema);
+assertLocalRefs(sourceSchema);
+if (sourceSchema['x-query-owned-frozen-source'] !== 'first-purchase-frozen-source/v1'
+  || sourceSchema.paths?.['/api/v1/analytics-first-purchase/sources/resolve']?.post?.['x-read-only'] !== true) {
+  throw new Error('query-owned source must declare its versioned read-only contract');
+}
 if (!schema.paths?.['/api/v1/analytics-first-purchase/analyses']) throw new Error('missing first-purchase analyses collection path');
 if (schema.paths['/api/v1/analytics/analyses']) throw new Error('first-purchase analysis contract must not publish channel analysis routes');
 if (schema.paths['/api/v1/analytics-query/runs/{run_id}']) throw new Error('first-purchase analysis contract must not publish query session routes');
+if (schema.paths['/api/v1/analytics-first-purchase/save-receipts']?.post?.['x-explicit-save-policy-required'] !== true
+  || schema.paths['/api/v1/analytics-first-purchase/save-results/inspect']?.post?.['x-read-only'] !== true) {
+  throw new Error('D15 must expose explicit admission and read-only inspection, not internal native routes');
+}
 const digest = createHash('sha256').update(JSON.stringify(schema)).digest('hex');
-const toolsPackage = process.env.B0_OPENAPI_TOOLS || join(root, 'dsh-plugins/analytics-workbench/build-tools/package.json');
+const toolsPackage = process.env.B0_OPENAPI_TOOLS || join(root, 'dsh-plugins/plugin-kit/build-tools/package.json');
 if (!isAbsolute(toolsPackage)) throw new Error('B0_OPENAPI_TOOLS must be an absolute package.json path');
 const buildRequire = createRequire(toolsPackage);
 const { default: openapiTS, astToString } = buildRequire('openapi-typescript');
@@ -67,6 +78,11 @@ const typed = `/** Generated first-purchase saved-analysis HTTP contract; do not
 const artifacts = new Map([
   ['backend/contracts/analytics-first-purchase-analysis.openapi.json', JSON.stringify({ ...schema, 'x-schema-sha256': digest }, null, 2) + '\n'],
   ['dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts', typed],
+  // Service-to-service only: both Python endpoints consume the same domain
+  // Pydantic model. No new browser/DSH API or generated plugin type is exposed.
+  ['backend/contracts/analytics-first-purchase-source.openapi.json', JSON.stringify({
+    ...sourceSchema, 'x-schema-sha256': createHash('sha256').update(JSON.stringify(sourceSchema)).digest('hex'),
+  }, null, 2) + '\n'],
 ]);
 for (const [relative, content] of artifacts) {
   const path = join(root, relative);

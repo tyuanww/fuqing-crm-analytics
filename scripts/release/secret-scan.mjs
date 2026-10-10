@@ -9,7 +9,7 @@ const SECRET_PATTERNS = [
   /(?:^|[^A-Z0-9])AKIA[0-9A-Z]{16}(?![0-9A-Z])/,
 ];
 const DENY_NAMES = /(^|\/)(?:\.env(?:\.|$)|\.npmrc(?:$|\/)|credentials?(?:[-_.]|$)|private[-_]?key(?:[-_.]|$)|cookie(?:[-_.]|$)|node_modules(?:\/|$)|__pycache__(?:\/|$)|.*\.wal$|.*\.duckdb(?:$|\.)|.*\.sqlite(?:$|\.)|.*\.log$)/i;
-const SYNTHETIC_MARKER = /(?:synthetic|test[-_]?only|\btest\b|isolated|not[-_]?a[-_]?live[-_]?secret|not[-_]?a[-_]?real|not[-_]?in[-_]?json|fixture|example|placeholder|fake|b0-|a9-|do[-_]?not[-_]?log|private[-_]?server|forwarded[-_]?|globals[-_]?|existing[-_]?valid|competition[-_]http|page[-_]documents|result[-_]page|32(?:chars?|ch)|minimum)/i;
+const SYNTHETIC_MARKER = /(?:synthetic|test[-_]?only|\btest\b|isolated|not[-_]?a[-_]?live[-_]?secret|not[-_]?a[-_]?real|not[-_]?in[-_]?json|fixture|example|placeholder|fake|b0-|a9-|do[-_]?not[-_]?log|private[-_]?server|forwarded[-_]?|globals[-_]?|existing[-_]?valid|competition[-_]http|page[-_]documents|result[-_]page|credential[-_]?never[-_]?echo|unexpected(?:[-_]|$)|not[-_]?sent|32(?:chars?|ch)|minimum)/i;
 // These are protocol identifiers observed in pinned third-party bundles, not a
 // general exemption for identifier-shaped values. Keep the list explicit so
 // a real credential assignment still fails closed.
@@ -27,19 +27,19 @@ const BENIGN_PROTOCOL_LITERAL = new Set([
   'impersonated-placeholder',
 ]);
 
-export function scanText(text, name = '<input>', { scanAssignments = true } = {}) {
+export function scanText(text, name = '<input>', { scanAssignments = true, allowSyntheticFixtures = true } = {}) {
   const findings = SECRET_PATTERNS.some(pattern => pattern.test(text)) ? [`SECRET_PATTERN ${name}`] : [];
   if (!scanAssignments) return [...new Set(findings)];
   for (const match of text.matchAll(ASSIGNMENT)) {
     // Synthetic values are exempt only inside explicitly named fixtures/tests;
     // a production/config file containing the same marker must still fail closed.
-    const syntheticFixture = /(?:fixture|test|spec)/i.test(name) && SYNTHETIC_MARKER.test(match[1]);
+    const syntheticFixture = allowSyntheticFixtures && /(?:fixture|test|spec|probe)/i.test(name) && SYNTHETIC_MARKER.test(match[1]);
     if (!syntheticFixture && !BENIGN_PROTOCOL_LITERAL.has(match[1])) findings.push(`SECRET_PATTERN ${name}`);
   }
   return [...new Set(findings)];
 }
 
-export async function scanTree(root, { maxBytes = 20 * 1024 * 1024, include = () => true } = {}) {
+export async function scanTree(root, { maxBytes = 20 * 1024 * 1024, include = () => true, allowSyntheticFixtures = true } = {}) {
   const findings = [];
   let bytes = 0;
   async function visit(dir) {
@@ -54,7 +54,7 @@ export async function scanTree(root, { maxBytes = 20 * 1024 * 1024, include = ()
         if (bytes > maxBytes) throw new Error(`SCAN_SIZE_LIMIT ${maxBytes}`);
         // Large files are rejected rather than silently omitted: a secret scan must be complete.
         if (info.size > 2 * 1024 * 1024) throw new Error(`SCAN_FILE_LIMIT ${path}`);
-        findings.push(...scanText(await readFile(path, 'utf8'), path));
+        findings.push(...scanText(await readFile(path, 'utf8'), rel, { allowSyntheticFixtures }));
       }
     }
   }

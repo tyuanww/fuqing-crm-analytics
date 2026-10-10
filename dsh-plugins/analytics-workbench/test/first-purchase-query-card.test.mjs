@@ -1,28 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { loadCoordinatorFixture } from '../src/free-page/fixture-loader.mjs';
 import { FIRST_PURCHASE_RECEIPT_SCHEMA, FIRST_PURCHASE_TOOL_NAME } from '../src/first-purchase-query-model.mjs';
 
-function findRepoFixture(name) {
-  const starts = [dirname(fileURLToPath(import.meta.url)), process.cwd()];
-  for (const start of starts) {
-    let dir = start;
-    for (let i = 0; i < 8; i++) {
-      const candidate = join(dir, 'backend/tests/fixtures', name);
-      if (existsSync(candidate)) return candidate;
-      const parent = dirname(dir);
-      if (parent === dir) break;
-      dir = parent;
-    }
-  }
-  throw new Error(`missing first-purchase fixture ${name}`);
-}
-
-const expected = JSON.parse(await readFile(findRepoFixture('analytics_first_purchase_v1_expected.json'), 'utf8'));
-const missing = JSON.parse(await readFile(findRepoFixture('analytics_first_purchase_v1_missing_role_expected.json'), 'utf8'));
+const expected = loadCoordinatorFixture('analytics_first_purchase_v1_expected.json');
+const missing = loadCoordinatorFixture('analytics_first_purchase_v1_missing_role_expected.json');
 
 function block(meta, extra = {}) {
   return {

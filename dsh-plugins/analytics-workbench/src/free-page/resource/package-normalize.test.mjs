@@ -1,19 +1,15 @@
+import { loadCoordinatorFixture } from '../fixture-loader.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { annotateHostMappings, normalizePagePackage } from './package-normalize.mjs';
 import { sha256Hex, utf8Bytes } from './bytes.mjs';
 import {
   INTERACTIVE_CHART_PACKAGE, LEAK_ATTEMPT_PACKAGE, MAGAZINE_PACKAGE, SAVED_COMPLEX_PACKAGE,
 } from '../runtime/fixtures.mjs';
 
-const here = dirname(fileURLToPath(import.meta.url));
-const fixturePath = resolve(here, '../../../../../docs/hackathon/free-html-cockpit/fixtures/frozen-contract-v0.json');
 
 test('frozen unbound sample and three complex pages round-trip without dropping CSS/JS/SVG/Canvas', async () => {
-  const frozen = JSON.parse(await readFile(fixturePath, 'utf8'));
+  const frozen = loadCoordinatorFixture('frozen-contract-v0.json');
   const base = await normalizePagePackage(frozen.asset.package);
   assert.equal(base.ok, true, JSON.stringify(base.error));
   assert.match(base.value.html, /data-shine-node="n_title"/);

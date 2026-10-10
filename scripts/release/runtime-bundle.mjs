@@ -2,13 +2,15 @@
 
 /** Build the immutable, production-only DSH runtime closure from a pinned checkout. */
 import assert from 'node:assert/strict';
-import { access, cp, lstat, mkdir, mkdtemp, readdir, readFile, readlink, rm, stat, symlink } from 'node:fs/promises';
+import { access, cp, lstat, mkdir, mkdtemp, readdir, readFile, readlink, realpath, rm, stat, symlink, writeFile } from 'node:fs/promises';
 import { execFile as execFileCallback } from 'node:child_process';
 import { promisify } from 'node:util';
 import { dirname, join, relative, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
 import { scanText } from './secret-scan.mjs';
 import { DSH_UPSTREAM_SHA as PIN } from './toolchain.mjs';
+import { bindRuntimeInputs, prepareRuntimeInputs, runtimeDeployArgs, stageRuntimeWorkspace, verifyRuntimePreparation } from './runtime-inputs.mjs';
 
 const execFile = promisify(execFileCallback);
 const REQUIRED = [
@@ -229,7 +231,7 @@ function option(name) {
   return resolve(process.argv[index + 1]);
 }
 
-const upstream = option('--upstream');
+const upstream = await realpath(option('--upstream'));
 const output = option('--output');
 const online = process.argv.includes('--online');
 assert.equal(process.argv.filter(arg => arg.startsWith('--')).length, online ? 3 : 2, 'RUNTIME_BUNDLE_OPTION_UNKNOWN');
@@ -238,6 +240,7 @@ const upstreamSha = (await execFile('git', ['-C', upstream, 'rev-parse', 'HEAD']
 assert.equal(upstreamSha, PIN, 'UPSTREAM_SHA_MISMATCH');
 const upstreamStatus = (await execFile('git', ['-C', upstream, 'status', '--porcelain', '--untracked-files=no'])).stdout.trim();
 assert.equal(upstreamStatus, '', `UPSTREAM_CHECKOUT_DIRTY ${upstreamStatus}`);
+if (!online) await verifyRuntimePreparation(upstream);
 const outputInfo = await stat(output).catch(error => {
   if (error.code === 'ENOENT') return null;
   throw error;
@@ -245,18 +248,34 @@ const outputInfo = await stat(output).catch(error => {
 assert.equal(outputInfo, null, 'RUNTIME_BUNDLE_OUTPUT_EXISTS');
 await mkdir(resolve(output, '..'), { recursive: true });
 
-const work = await mkdtemp(join(tmpdir(), 'dsh-runtime-bundle-'));
+// macOS /var is a symlink; pnpm must use one canonical workspace/deploy root.
+const work = await realpath(await mkdtemp(join(tmpdir(), 'dsh-runtime-bundle-')));
 const deployed = join(work, 'dsh');
 try {
-  const deployArgs = ['pnpm', 'deploy', '--legacy'];
-  if (!online) deployArgs.push('--offline');
-  deployArgs.push('--filter', '@deepseek-ai/dsh', '--prod', deployed);
-  await execFile('corepack', deployArgs, {
-    cwd: upstream,
-    env: { ...process.env, COREPACK_ENABLE_DOWNLOAD_PROMPT: '0', CI: '1' },
+  if (online) await prepareRuntimeInputs(upstream);
+  const workspace = await stageRuntimeWorkspace(upstream, join(work, 'workspace'));
+  const restoreStagedMetadata = await bindRuntimeInputs(upstream, workspace, work);
+  // A production runtime must never execute upstream lifecycle hooks in the
+  // temporary deploy directory. Preparation already hydrated and built the
+  // pinned checkout; deploy only materializes those verified files.
+  // The modern shared-lockfile deploy converts link: workspace importers into
+  // directory snapshots and installs the derived closure frozen. Legacy
+  // deploy deliberately re-resolves semver ranges, even with --offline.
+  // Select this only in the private stage; upstream configuration stays intact.
+  // pnpm explicitly supports trusting a lock already verified by preparation.
+  // The receipt above binds the exact original lock, policy, pin and tools;
+  // cached direct tarballs retain their original integrity. Online audit stays
+  // a separate required preflight stage. Missing proof never disables policy.
+  await execFile('corepack', runtimeDeployArgs(deployed, { online }), {
+    cwd: workspace,
+    env: { ...process.env, COREPACK_ENABLE_DOWNLOAD_PROMPT: '0', CI: '1',
+      ...(!online ? { NODE_OPTIONS: `--require ${JSON.stringify(fileURLToPath(new URL('./runtime-offline.cjs', import.meta.url)))}`, npm_config_fetch_retries: '0' } : {}),
+    },
+    timeout: 900000,
     maxBuffer: 4 * 1024 * 1024,
   });
-  const materialized = await materializeExternalSymlinks(deployed, upstream, upstreamSha);
+  await restoreStagedMetadata();
+  const materialized = await materializeExternalSymlinks(deployed, workspace, upstreamSha);
   for (const path of REQUIRED) await access(join(deployed, path));
   await execFile('tar', ['--zstd', '--no-xattrs', '--no-acls', '-cf', output, '-C', deployed, '.'], { maxBuffer: 4 * 1024 * 1024 });
   const info = await stat(output);

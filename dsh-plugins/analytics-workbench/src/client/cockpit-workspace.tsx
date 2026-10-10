@@ -512,11 +512,12 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
           <div className="sm-library-pathbar" data-testid="library-pathbar"><div><h2 title={title}>{title}</h2></div>
             <span className={'cockpit-badge' + (dirty() ? ' pending' : '')}>{uncertain ? '保存待核对' : dirty() ? '有未保存修改' : version ? '版本 ' + version + (officeEditing ? ' · 编辑中' : '') : selected ? '只读预览' : '请选择产物'}</span></div>
           {message ? <p className="cockpit-live" role="status" data-testid="library-message">{message}</p> : null}
+          {savedHtml && page.liveStatus ? <p className="cockpit-live" role="status" aria-live="polite" data-testid="library-live">{page.liveStatus}</p> : null}
           {aiClient && !boardVisible ? <CockpitAIPanel client={aiClient} state={ai} blocked={Boolean(library.hasUnsavedChanges() || pageStore?.hasUnsavedChanges() || fileClient?.hasUnsavedChanges())} /> : null}
           {file.error ? <p className="cockpit-error" role="alert">{file.error} <button onClick={() => selected && void open(selected)}>重试读取</button></p> : null}
           {width < 760 && (editing || Boolean(page.contextPanel)) ? <div className="cockpit-mobile-context" aria-label="工作区视图">
-            <button aria-pressed={!mobileInspector} onClick={() => setMobileInspector(false)}>画布预览</button>
-            <button aria-pressed={mobileInspector} onClick={() => setMobileInspector(true)}>编辑设置</button>
+            <button aria-pressed={!mobileInspector} onClick={() => setMobileInspector(false)}>{mobileInspector ? '画布预览' : '画布预览 · 当前'}</button>
+            <button aria-pressed={mobileInspector} onClick={() => setMobileInspector(true)}>{mobileInspector ? '编辑设置 · 当前' : '编辑设置'}</button>
           </div> : null}
           <div className="cockpit-content">
             {!boardVisible && (ai.html || ai.viewer) ? <CockpitAIPreview state={ai} /> : boardVisible ? <div className="cockpit-editor-layout"><div className="cockpit-editor-canvas">
@@ -542,6 +543,7 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
               </div> : null}
             </CockpitSidebar></div>
             : savedHtml && pageStore ? <CockpitPageEditor store={pageStore} aiMode={htmlAIMode} onInspect={() => setMobileInspector(true)}
+              onExitEdit={() => guard(() => pageStore.exitEdit())}
               onSourceFallback={() => { pageStore.openContext('source'); setMobileInspector(true); setNotice('绑定页面的 HTML/JavaScript 和数据源保持保护，只允许在源码入口调整 CSS。'); }}
               onWholeAI={aiClient ? () => void guard(beginAI) : undefined}
               onAI={aiClient ? async (scope, instruction) => {

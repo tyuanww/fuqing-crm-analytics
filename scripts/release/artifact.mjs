@@ -1,11 +1,13 @@
 import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
-import { access, mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
-import { join, relative, resolve, sep } from 'node:path';
+import { access, lstat, mkdir, mkdtemp, readdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
+import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { assertSchema, readSchema, validateSchema } from './schema.mjs';
 import { assertClean, scanTree } from './secret-scan.mjs';
+import { validateServiceGate } from './service-compatibility.mjs';
+import { validateProfile } from './profile.mjs';
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const scripts = join(root, 'scripts/release');
@@ -87,37 +89,100 @@ export async function packArtifact({ rootDir = root, allowlist, output }) {
   return { path: output, bytes: (await stat(output)).size, sha256: await sha256(output) };
 }
 
-export async function receiveArtifact({ artifact, manifestPath, destination, maxEntries = 10000, maxBytes = 512 * 1024 * 1024 }) {
+async function receiveManifest(artifact, manifestPath) {
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
   await assertSchema(manifest, join(schemaDir, 'release-manifest.v1.schema.json'));
+  if (Object.hasOwn(manifest, 'service_compatibility')) {
+    if (!manifest.profile_snapshot) throw new Error('SERVICE_PROFILE_SNAPSHOT_REQUIRED');
+    await validateServiceGate(manifest.service_compatibility);
+  }
   if (!Array.isArray(manifest.archive_allowlist) || manifest.archive_allowlist.length === 0) throw new Error('ALLOWLIST_EMPTY');
   const safeManifestPath = value => typeof value === 'string' && value.length > 0 && !value.startsWith('/') && !value.includes('\\') && !value.split('/').some(part => part === '' || part === '.' || part === '..');
   if (new Set(manifest.archive_allowlist).size !== manifest.archive_allowlist.length || manifest.archive_allowlist.some(value => !safeManifestPath(value))) throw new Error('ALLOWLIST_PATH_INVALID');
   if (!Array.isArray(manifest.payload) || manifest.payload.length === 0 || new Set(manifest.payload.map(item => item.path)).size !== manifest.payload.length || manifest.payload.some(item => !safeManifestPath(item.path))) throw new Error('PAYLOAD_EMPTY_OR_PATH_INVALID');
   const artifactInfo = await stat(artifact);
   if (artifactInfo.size !== manifest.artifact_bytes || await sha256(artifact) !== manifest.artifact_sha256) throw new Error('ARTIFACT_DIGEST_MISMATCH');
-  if (await access(destination).then(() => true, () => false)) throw new Error('DESTINATION_MUST_NOT_EXIST');
-  await run('python3', [join(scripts, 'secure-unpack.py'), artifact, destination, '--max-entries', String(maxEntries), '--max-bytes', String(maxBytes)]);
-  const files = await collectAllowlist(destination, { allowlist: manifest.archive_allowlist });
+  return manifest;
+}
+
+async function verifyReceivedTree(manifest, destination, { maxEntries, maxBytes }) {
+  const rootInfo = await lstat(destination);
+  if (!rootInfo.isDirectory() || rootInfo.isSymbolicLink()) throw new Error('RECEIVE_DESTINATION_INVALID');
+  const files = await collectAllowlist(destination, { allowlist: manifest.archive_allowlist, maxFiles: maxEntries });
   const all = await listFiles(destination);
+  if (all.length > maxEntries) throw new Error('ARCHIVE_ENTRY_LIMIT');
   const unexpected = all.filter(path => !allowed(path, manifest.archive_allowlist));
   if (unexpected.length) throw new Error(`ALLOWLIST_VIOLATION ${unexpected.join(',')}`);
   const payloadPaths = manifest.payload.map(item => item.path).sort();
-  const actualPaths = all.filter(path => !path.endsWith('/')).sort();
-  if (payloadPaths.length !== actualPaths.length || payloadPaths.some((p, i) => p !== actualPaths[i])) throw new Error('PAYLOAD_PATHS_MISMATCH');
+  if (payloadPaths.length !== all.length || payloadPaths.some((p, i) => p !== all[i])) throw new Error('PAYLOAD_PATHS_MISMATCH');
+  let bytes = 0;
   for (const item of manifest.payload) {
     const path = join(destination, item.path);
-    const info = await stat(path);
-    if (info.size !== item.bytes || await sha256(path) !== item.sha256) throw new Error(`PAYLOAD_DIGEST_MISMATCH ${item.path}`);
+    const info = await lstat(path);
+    bytes += info.size;
+    if (bytes > maxBytes) throw new Error('ARCHIVE_SIZE_LIMIT');
+    if (!info.isFile() || info.isSymbolicLink() || info.size !== item.bytes || await sha256(path) !== item.sha256) throw new Error(`PAYLOAD_DIGEST_MISMATCH ${item.path}`);
   }
-  const findings = await scanTree(destination, { maxBytes });
-  assertClean(findings);
+  assertClean(await scanTree(destination, { maxBytes }));
+  await verifyProfileBinding(manifest, destination);
   if (manifest.toolchain) {
     for (const required of ['package.json', 'pnpm-lock.yaml', 'scripts/dsh.mjs', 'deploy/wsl/install-release.sh']) {
-      if (!actualPaths.includes(required)) throw new Error(`RUNTIME_ENTRYPOINT_MISSING ${required}`);
+      if (!all.includes(required)) throw new Error(`RUNTIME_ENTRYPOINT_MISSING ${required}`);
     }
   }
   return { manifest, entries: files.length, sha256: manifest.artifact_sha256 };
+}
+
+async function verifyProfileBinding(manifest, directory) {
+  if (!manifest.profile_snapshot) {
+    if (Object.hasOwn(manifest, 'service_compatibility')) throw new Error('SERVICE_PROFILE_SNAPSHOT_REQUIRED');
+    return; // Historical releases have no D15 service declaration.
+  }
+  const snapshot = manifest.profile_snapshot;
+  if (typeof snapshot.path !== 'string' || !snapshot.path || snapshot.path.startsWith('/')
+      || snapshot.path.includes('\\') || snapshot.path.split('/').some(part => !part || part === '.' || part === '..')) {
+    throw new Error('SERVICE_PROFILE_PATH_INVALID');
+  }
+  const entry = manifest.payload.find(row => row.path === snapshot.path);
+  if (!entry || entry.sha256 !== snapshot.sha256 || entry.bytes > 256 * 1024) throw new Error('SERVICE_PROFILE_PAYLOAD_MISMATCH');
+  const bytes = await readFile(join(directory, snapshot.path));
+  if (createHash('sha256').update(bytes).digest('hex') !== snapshot.sha256) throw new Error('SERVICE_PROFILE_DIGEST_MISMATCH');
+  const profile = JSON.parse(bytes); validateProfile(profile);
+  if (Object.hasOwn(profile, 'service_binding')) {
+    await validateServiceGate(manifest.service_compatibility, profile.service_binding);
+  } else if (Object.hasOwn(manifest, 'service_compatibility')) {
+    throw new Error('SERVICE_PROFILE_BINDING_MISMATCH');
+  }
+}
+
+/** Reconcile only by verifying the exact installed bytes; never overwrite. */
+export async function verifyReceivedArtifact({ artifact, manifestPath, destination, maxEntries = 10000, maxBytes = 512 * 1024 * 1024 }) {
+  const manifest = await receiveManifest(artifact, manifestPath);
+  return verifyReceivedTree(manifest, resolve(destination), { maxEntries, maxBytes });
+}
+
+export async function receiveArtifact({ artifact, manifestPath, destination, maxEntries = 10000, maxBytes = 512 * 1024 * 1024 }) {
+  const finalDestination = resolve(destination);
+  const manifest = await receiveManifest(artifact, manifestPath);
+  const destinationInfo = await lstat(finalDestination).catch(error => {
+    if (error.code === 'ENOENT') return null;
+    throw error;
+  });
+  if (destinationInfo) throw new Error('DESTINATION_MUST_NOT_EXIST');
+  await mkdir(dirname(finalDestination), { recursive: true, mode: 0o700 });
+  const stageRoot = await mkdtemp(join(dirname(finalDestination), `.dsh-receive-${basename(finalDestination)}-`));
+  const stagingDestination = join(stageRoot, 'payload');
+  try {
+    // Keep the unpacked tree private until every allowlist, payload digest,
+    // secret scan and runtime-entrypoint check passes. A failed validation must
+    // never leave an unverified directory at the caller's destination.
+    await run('python3', [join(scripts, 'secure-unpack.py'), artifact, stagingDestination, '--max-entries', String(maxEntries), '--max-bytes', String(maxBytes)]);
+    const result = await verifyReceivedTree(manifest, stagingDestination, { maxEntries, maxBytes });
+    await rename(stagingDestination, finalDestination);
+    return result;
+  } finally {
+    await rm(stageRoot, { recursive: true, force: true });
+  }
 }
 
 async function listFiles(dir) {
@@ -126,6 +191,7 @@ async function listFiles(dir) {
     for (const entry of await readdir(current, { withFileTypes: true })) {
       const path = join(current, entry.name);
       const rel = relative(dir, path).split(sep).join('/');
+      if (entry.isSymbolicLink() || (!entry.isDirectory() && !entry.isFile())) throw new Error(`RECEIVE_SPECIAL_FILE ${rel}`);
       if (entry.isDirectory()) await walk(path);
       else output.push(rel);
     }
@@ -137,6 +203,7 @@ async function listFiles(dir) {
 export async function verifyPayload(manifestPath, payloadDir) {
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
   await assertSchema(manifest, join(schemaDir, 'release-manifest.v1.schema.json'));
+  await verifyProfileBinding(manifest, payloadDir);
   for (const item of manifest.payload) {
     if (!item.path || item.path.startsWith('/') || item.path.split('/').includes('..') || item.path.includes('\\')) throw new Error(`PAYLOAD_PATH_INVALID ${item.path}`);
     const path = join(payloadDir, item.path);

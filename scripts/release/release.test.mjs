@@ -1,11 +1,13 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdir, mkdtemp, readFile, readlink, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readlink, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 import test from 'node:test';
 import { collectAllowlist, packArtifact, receiveArtifact } from './artifact.mjs';
+import { receiveRelease } from './receive.mjs';
+import { readState, resume } from './state.mjs';
 import { issueToken, consumeToken, tokenExchangeResponse } from './auth-contract.mjs';
 import { assertPublicationAssets, assertReleaseInputs, installRelease as installReleaseRaw, activateRelease as activateReleaseRaw, materializePluginPeerLinks, rollbackRelease as rollbackReleaseRaw } from './promotion.mjs';
 import { beginAction, finishAction, receipt } from './action-contract.mjs';
@@ -15,6 +17,7 @@ import { evaluateSli } from './operator-gate.mjs';
 import { pageGuard } from './page-policy.mjs';
 import { scanText } from './secret-scan.mjs';
 import { releaseAssetNames, summarizePreflight, verifyPreflight, UPSTREAM_SHA } from './preflight-bundle.mjs';
+import { serviceFixture } from './test-fixtures/service-compatibility.mjs';
 
 const fixture = () => mkdtemp(join(tmpdir(), 'dsh-release-'));
 const testStatePath = releaseRoot => join(dirname(releaseRoot), 'release-state.json');
@@ -40,7 +43,78 @@ async function manifest(root, archive, tag='dsh-test', payloadData={'VERSION':'0
   const path=join(root,'manifest.json'); await writeFile(path,JSON.stringify(m)); return path;
 }
 
-test('receiver binds archive digest and extracted payload exactly', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); const out=join(root,'out'); const got=await receiveArtifact({artifact:archive,manifestPath:m,destination:out}); assert.equal(got.entries,1); });
+test('artifact receive/install binds profile and service evidence, but local evidence cannot activate', async t => {
+  const root = await fixture(), archive = join(root, 'with-service.tar.gz');
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const { binding, gate } = await serviceFixture();
+  const profile = { schema_version: 'dsh-profile/v1', profile_id: 'service-test',
+    dsh: { sdk_version: '0.1.7-rc.2', upstream_sha: UPSTREAM_SHA },
+    plugins: [{ path: 'plugin', id: '@shine-mage/test-plugin', build: 'build.mjs', enabled: true }],
+    service_binding: binding };
+  const profileBytes = JSON.stringify(profile), profilePath = 'config/profile.json';
+  archiveWithEntries(archive, [{ name: 'VERSION', data: '0.18.0.1\n' }, { name: profilePath, data: profileBytes }]);
+  const manifestPath = await manifest(root, archive, 'dsh-service', { VERSION: '0.18.0.1\n', [profilePath]: profileBytes });
+  const original = JSON.parse(await readFile(manifestPath));
+  original.profile_snapshot = { path: profilePath, sha256: sha(profileBytes) };
+  original.service_compatibility = gate;
+  await writeFile(manifestPath, JSON.stringify(original));
+  const releaseRoot = join(root, 'host'), statePath = join(root, 'journal.json');
+  const input = { artifact: archive, manifestPath, releaseRoot, tag: 'dsh-service', statePath, offline: true };
+  const installed = await installRelease(input);
+  assert.deepEqual(JSON.parse(await readFile(join(installed.path, 'release-marker.json'))).service_compatibility, gate);
+  const journal = await readFile(statePath, 'utf8');
+  await assert.rejects(() => activateRelease({ ...input, sourceSha: 'a'.repeat(40) }), /SERVICE_ACTIVATION_EVIDENCE_INCOMPLETE/);
+  assert.equal(await readFile(statePath, 'utf8'), journal);
+  await assert.rejects(() => readlink(join(releaseRoot, 'current')), { code: 'ENOENT' });
+  const markerPath = join(installed.path, 'release-marker.json');
+  const marker = JSON.parse(await readFile(markerPath));
+  marker.service_compatibility = { ...gate, binding: { ...binding, access: 'read-only' } };
+  await writeFile(markerPath, JSON.stringify(marker));
+  await assert.rejects(() => activateRelease({ ...input, sourceSha: 'a'.repeat(40) }), /SERVICE_JOURNAL_BINDING_MISMATCH/);
+  assert.equal(await readFile(statePath, 'utf8'), journal);
+  delete marker.service_compatibility;
+  await writeFile(markerPath, JSON.stringify(marker));
+  await assert.rejects(() => activateRelease({ ...input, sourceSha: 'a'.repeat(40) }), /SERVICE_BINDING_REMOVAL_FORBIDDEN/);
+  assert.equal(await readFile(statePath, 'utf8'), journal);
+  await assert.rejects(() => readlink(join(releaseRoot, 'current')), { code: 'ENOENT' });
+  for (const [name, change, expected] of [
+    ['removed-proof', v => { delete v.service_compatibility; }, /SERVICE_GATE_SHAPE/],
+    ['changed-proof', v => { v.service_compatibility.evidence_json += ' '; }, /SERVICE_EVIDENCE_DIGEST_MISMATCH/],
+    ['removed-profile', v => { delete v.profile_snapshot; }, /SERVICE_PROFILE_SNAPSHOT_REQUIRED/],
+    ['wrong-profile', v => { v.profile_snapshot.sha256 = '0'.repeat(64); }, /SERVICE_PROFILE_PAYLOAD_MISMATCH/],
+    ['unknown-field', v => { v.service_compatibility.bypass = true; }, /SCHEMA_INVALID/],
+  ]) {
+    const changed = structuredClone(original); change(changed); await writeFile(manifestPath, JSON.stringify(changed));
+    await assert.rejects(() => receiveArtifact({ artifact: archive, manifestPath, destination: join(root, name) }), expected);
+  }
+});
+
+test('receiver binds archive digest and extracted payload exactly', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); const out=join(root,'nested','out'); const got=await receiveArtifact({artifact:archive,manifestPath:m,destination:out}); assert.equal(got.entries,1); });
+test('receive failure stays UNKNOWN and verifies installed bytes before recovering a lost receipt', async () => {
+  const root = await fixture(), artifact = join(root, 'a.tar.gz');
+  tar(artifact);
+  const manifestPath = await manifest(root, artifact);
+  const bytes = await readFile(artifact);
+  const input = { artifact, manifestPath, destination: join(root, 'installed'), statePath: join(root, 'state.json') };
+  await writeFile(artifact, 'corrupt');
+  await assert.rejects(() => receiveRelease(input), /ARTIFACT_DIGEST_MISMATCH/);
+  assert.equal((await resume(input.statePath)).action_required, true);
+  await writeFile(artifact, bytes);
+  await assert.rejects(() => receiveRelease(input), /RECEIVE_UNKNOWN/);
+  // Recreate the extraction-committed/receipt-lost boundary using real bytes.
+  await receiveArtifact(input);
+  await writeFile(join(input.destination, 'VERSION'), 'wrong');
+  await assert.rejects(() => receiveRelease(input), /RECEIVE_UNKNOWN/);
+  assert.equal((await resume(input.statePath)).action_required, true);
+  await writeFile(join(input.destination, 'VERSION'), '0.18.0.1\n');
+  const recovered = await receiveRelease(input);
+  assert.equal(recovered.status, 'RECEIVED');
+  assert.equal((await resume(input.statePath)).action_required, false);
+  assert.deepEqual(await receiveRelease(input), recovered);
+  const second = await receiveRelease({ ...input, destination: join(root, 'second') });
+  assert.notEqual(second.destination_sha256, recovered.destination_sha256);
+  assert.equal(Object.keys((await readState(input.statePath)).idempotency).length, 2);
+});
 test('artifact allowlist omits source maps from runtime payloads', async () => {
   const root = await fixture();
   await writeFile(join(root, 'VERSION'), '0.18.0.1\n');
@@ -67,8 +141,8 @@ test('receiver enforces expanded archive size and rejects links', async () => {
   const linkArchive=join(root,'link.tar.gz'); archiveWithEntries(linkArchive,[{name:'VERSION',data:'0.18.0.1\n'},{name:'link',type:'symlink',linkname:'VERSION'}]); const linkManifest=await manifest(root,linkArchive,'dsh-link',{'VERSION':'0.18.0.1\n','link':'0.18.0.1\n'}); await assert.rejects(()=>receiveArtifact({artifact:linkArchive,manifestPath:linkManifest,destination:join(root,'link-out')}), /ARCHIVE_LINK_OR_DEVICE/);
 });
 test('receiver scans final extracted content and deny names', async () => {
-  const root=await fixture(), secretArchive=join(root,'secret.tar.gz'); const secretValue=['live','token-value-1234567890'].join('-'); const secret=`TOKEN = '${secretValue}'`; archiveWithEntries(secretArchive,[{name:'VERSION',data:'0.18.0.1\n'},{name:'config.txt',data:secret}]); const secretManifest=await manifest(root,secretArchive,'dsh-secret',{'VERSION':'0.18.0.1\n','config.txt':secret}); await assert.rejects(()=>receiveArtifact({artifact:secretArchive,manifestPath:secretManifest,destination:join(root,'secret-out')}), /SECRET_SCAN_FAILED/);
-  const denyArchive=join(root,'deny.tar.gz'); archiveWithEntries(denyArchive,[{name:'VERSION',data:'0.18.0.1\n'},{name:'.env',data:'synthetic'}]); const denyManifest=await manifest(root,denyArchive,'dsh-deny',{'VERSION':'0.18.0.1\n','.env':'synthetic'}); await assert.rejects(()=>receiveArtifact({artifact:denyArchive,manifestPath:denyManifest,destination:join(root,'deny-out')}), /SECRET_SCAN_FAILED/);
+  const root=await fixture(), secretArchive=join(root,'secret.tar.gz'); const secretValue=['live','token-value-1234567890'].join('-'); const secret=`TOKEN = '${secretValue}'`; archiveWithEntries(secretArchive,[{name:'VERSION',data:'0.18.0.1\n'},{name:'config.txt',data:secret}]); const secretManifest=await manifest(root,secretArchive,'dsh-secret',{'VERSION':'0.18.0.1\n','config.txt':secret}); const secretOut=join(root,'secret-out'); await assert.rejects(()=>receiveArtifact({artifact:secretArchive,manifestPath:secretManifest,destination:secretOut}), /SECRET_SCAN_FAILED/); await assert.rejects(() => stat(secretOut), { code: 'ENOENT' });
+  const denyArchive=join(root,'deny.tar.gz'); archiveWithEntries(denyArchive,[{name:'VERSION',data:'0.18.0.1\n'},{name:'.env',data:'synthetic'}]); const denyManifest=await manifest(root,denyArchive,'dsh-deny',{'VERSION':'0.18.0.1\n','.env':'synthetic'}); const denyOut=join(root,'deny-out'); await assert.rejects(()=>receiveArtifact({artifact:denyArchive,manifestPath:denyManifest,destination:denyOut}), /SECRET_SCAN_FAILED/); await assert.rejects(() => stat(denyOut), { code: 'ENOENT' });
 });
 test('secret scan distinguishes explicit synthetic fixtures from real assignments', () => {
   const live = ['live', 'token-value-1234567890'].join('-');
@@ -78,6 +152,8 @@ test('secret scan distinguishes explicit synthetic fixtures from real assignment
   const privateHeader = ['-----BEGIN ', 'PRIVATE KEY-----'].join('');
   const privateFooter = ['-----END ', 'PRIVATE KEY-----'].join('');
   assert.deepEqual(scanText("TOKEN = 'test-only-synthetic-token'", 'fixture.test.mjs'), []);
+  assert.deepEqual(scanText("TOKEN = 'credential-never-echo'", 'probe.probe.mjs'), []);
+  assert.deepEqual(scanText("TOKEN = 'unexpected-top-level-token'", 'probe.test.mjs'), []);
   assert.deepEqual(scanText("TOKEN = 'test-only-synthetic-token'", 'config/runtime.env'), ['SECRET_PATTERN config/runtime.env']);
   assert.deepEqual(scanText(`TOKEN = '${live}'`, 'fixture.test.mjs'), ['SECRET_PATTERN fixture.test.mjs']);
   assert.deepEqual(scanText("token = 'x-cos-security-token'", 'sdk/base.js'), []);
@@ -173,7 +249,7 @@ test('promotion receives and records the pinned upstream runtime bundle', async 
 });
 test('install rejects the unverified default path', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); await assert.rejects(() => installRelease({artifact:archive,manifestPath:m,releaseRoot:join(root,'release-root'),tag:'dsh-test'}), /RELEASE_TRUST_INPUTS_REQUIRED/); });
 test('release evidence workflow accepts a candidate descendant of main', async () => { const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-evidence.yml'), 'utf8'); assert.match(workflow, /git merge-base --is-ancestor origin\/main "\$REVIEWED_SHA"/); });
-test('release preflight workflow permits the pinned runtime dependency fetch', async () => { const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-preflight.yml'), 'utf8'); const source = await readFile(join(process.cwd(), 'scripts/release/preflight.mjs'), 'utf8'); assert.match(source, /runtime-bundle\.mjs[\s\S]*--online/); assert.match(workflow, /scripts\/dsh\.mjs preflight/); });
+test('release preflight separates the online audit from preparation and packages runtime offline', async () => { const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-preflight.yml'), 'utf8'); const source = await readFile(join(process.cwd(), 'scripts/release/preflight.mjs'), 'utf8'); const pipeline = await readFile(join(process.cwd(), 'scripts/dsh-b0/pipeline.mjs'), 'utf8'); assert.match(source, /stage\('prepare'[\s\S]*pipeline\.mjs/); assert.match(source, /stage\('audit'[\s\S]*--audit/); assert.match(pipeline, /--prepare\|--audit\|--check/); assert.match(pipeline, /mode === '--audit'/); assert.match(source, /runtime-bundle\.mjs[\s\S]*--output/); assert.doesNotMatch(source, /runtime-bundle\.mjs[\s\S]*--online/); assert.match(workflow, /scripts\/dsh\.mjs preflight/); });
 test('preflight bundle summary binds every release asset to the manifest', async () => {
   const root = await fixture();
   const tag = 'dsh-test-preflight';
@@ -212,13 +288,21 @@ test('release preflight builds the runtime before protected tag creation', async
   assert.match(workflow, /reviewed_sha/);
   assert.match(workflow, /pull_request\.base\.sha/);
   assert.match(workflow, /git merge-base --is-ancestor "\$BASE_SHA" "\$REVIEWED_SHA"/);
-  assert.match(workflow, /corepack install --global pnpm@11\.7\.0/);
+  assert.match(workflow, /corepack install\s*\n/);
+  assert.match(workflow, /import \{ PNPM_VERSION \} from '\.\/scripts\/release\/toolchain\.mjs'/);
+  assert.match(workflow, /test "\$\(pnpm --version\)" = "\$plugin_pnpm"/);
+  assert.doesNotMatch(workflow, /corepack install --global|pnpm@\d/);
+  assert.match(workflow, /'dsh-plugins\/plugin-kit\/\*\*'/);
+  assert.doesNotMatch(workflow, /'dsh-plugins\/\*\*'/, 'ordinary plugin changes must not trigger full runtime preparation');
   assert.match(workflow, /scripts\/dsh\.mjs preflight/);
   assert.match(workflow, /dsh-rc2-preflight-/);
   assert.match(source, /runtime-bundle\.mjs/);
-  assert.match(source, /--online/);
+  assert.doesNotMatch(source, /runtime-bundle\.mjs[\s\S]*--online/);
   assert.match(source, /scripts\/dsh\.mjs', 'test'/);
   assert.match(source, /requireUpstream: checkOnly/);
+  assert.match(source, /const packageInputs = join\(root, '\.context\/dsh-b0\/package-inputs'\)/);
+  assert.match(source, /board-components\/build\.mjs', rebuiltInputs/);
+  assert.match(source, /DSH_PACKAGE_INPUTS: packageInputs/);
 });
 test('release preflight does not leak the read-only upstream override into prepare', async () => {
   const source = await readFile(join(process.cwd(), 'scripts/release/preflight.mjs'), 'utf8');
@@ -238,6 +322,9 @@ test('release publish workflow binds the exact evidence run and protected tag', 
   assert.match(workflow, /TAG_TARGET_CHANGED_AFTER_PUBLISH/);
   assert.match(workflow, /TAG_TARGET_CHANGED_FINAL/);
   assert.match(workflow, /gh attestation verify/);
+  const attestations = workflow.split('\n').filter(line => line.trim().startsWith('gh attestation verify'));
+  assert.equal(attestations.length, 2, 'application and runtime both need attestation');
+  for (const command of attestations) assert.match(command, /--source-digest "\$REVIEWED_SHA"/);
 });
 test('release publish workflow is idempotent and emits a verified publication sidecar', async () => {
   const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-publish.yml'), 'utf8');
@@ -258,6 +345,9 @@ test('runtime bundle enforces production pruning, secret scan and peer collision
   assert.match(source, /MAX_TEXT_SCAN_BYTES/);
   assert.match(source, /RUNTIME_PEER_ALIAS_COLLISION/);
   assert.match(source, /\['cordis', 'cosmokit'\]/);
+  assert.match(source, /runtimeDeployArgs\(deployed, \{ online \}\)/);
+  assert.match(source, /stageRuntimeWorkspace/);
+  assert.match(source, /cwd: workspace/);
   assert.doesNotMatch(source, /scanAssignments:\s*!\/\(\^\|\\\/\)node_modules/);
 });
 test('runtime artifact allowlist carries the release evidence workflow', async () => {

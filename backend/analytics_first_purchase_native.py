@@ -29,6 +29,7 @@ from backend.contracts.analytics_first_purchase_kernel import (
 )
 from backend.services.analytics.access import AnalyticsError, AnalyticsPrincipal, B0IdentityRegistry
 from backend.services.analytics.first_purchase.cockpit import FirstPurchaseCockpitStore
+from backend.services.analytics.first_purchase.native_identity import NativeSessionIdentityResolver, QUERY_CAPABILITIES
 from backend.services.analytics.first_purchase.runtime import FirstPurchaseRuntime
 from backend.services.analytics.first_purchase.saved import FirstPurchaseSavedAnalysisStore
 from backend.services.analytics.jobs import RunStore, validate_key
@@ -36,7 +37,6 @@ from backend.services.analytics.resource_profile import B0ResourceProfile, B0_SM
 from backend.services.analytics.runtime import HostBridge, RunDispatcher, execute_native_first_purchase
 from backend.services.analytics.worker import WorkerManager
 
-QUERY_CAPABILITIES = frozenset({"run:create", "run:read", "run:cancel"})
 ASSET_CAPABILITIES = frozenset({
     "analysis:save", "analysis:read", "dashboard:read", "dashboard:update",
 })
@@ -112,7 +112,7 @@ def _attach_first_purchase_assets(app, config, run_store, registry) -> None:
     app.state.cockpit_store = cockpit_store
 
 
-def create_first_purchase_native_app(config, *, bridge=None):
+def create_first_purchase_native_app(config, *, bridge=None, source_identities=None):
     runtime_token, gateway_token = config["runtime_token"], config["gateway_token"]
     if len(runtime_token) < 32 or len(gateway_token) < 32 or runtime_token == gateway_token:
         raise ValueError("separate explicit local capabilities required")
@@ -124,31 +124,44 @@ def create_first_purchase_native_app(config, *, bridge=None):
     if not isinstance(method_digest, str) or len(method_digest) != 64:
         raise ValueError("explicit method package digest required")
     state_dir = Path(config["state_dir"])
-    registry = B0IdentityRegistry()
-    actor = AnalyticsPrincipal(
-        "synthetic-demo",
-        _first_purchase_capabilities(config),
-        frozenset({"first-purchase-fixture"}),
-    )
-    registry.grant(gateway_token, actor)
+    host_bridge = bridge if bridge is not None else HostBridge(bridge_origin(config), runtime_token)
+    identity_mode = config.get("identity_mode", "synthetic")
+    if identity_mode not in {"synthetic", "crm-session"}:
+        raise ValueError("explicit supported first-purchase identity mode required")
+    if identity_mode == "crm-session":
+        if config.get("asset_capabilities") is not None:
+            raise ValueError("CRM mode uses the separate public save service, never legacy assets")
+        registry = NativeSessionIdentityResolver(host_bridge, session_id, gateway_token)
+    else:
+        registry = B0IdentityRegistry()
+        actor = AnalyticsPrincipal(
+            "synthetic-demo", _first_purchase_capabilities(config), frozenset({"first-purchase-fixture"}),
+        )
+        registry.grant(gateway_token, actor)
 
     def resolve_actor(owner):
         try:
             current = registry.resolve("Bearer " + gateway_token)
             return current if current.actor_id == owner else None
-        except AnalyticsError:
-            return None
+        except AnalyticsError as error:
+            if error.status in (401, 403):
+                return None
+            raise
 
     fixture = create_first_purchase_fixture(snapshot)
     store = RunStore(state_dir, B0ResourceProfile(**B0_SMALL_FIXTURE_PROFILE), family="first_purchase")
-    conv = store.create_conversation(
-        actor, "native-first-purchase", FirstPurchaseConversationRequest(),
-        runtime_session_id=session_id,
-    )
+    def conversation(principal):
+        return store.create_conversation(
+            principal, "native-first-purchase", FirstPurchaseConversationRequest(),
+            runtime_session_id=session_id,
+        )
+
+    if identity_mode == "synthetic":
+        conversation(actor)
     descriptor = fixture.binding_descriptor()
     workers = WorkerManager(store, resolve_actor, fixture)
     dispatcher = RunDispatcher(
-        store, resolve_actor, bridge or HostBridge(bridge_origin(config), runtime_token),
+        store, resolve_actor, host_bridge,
         workers=workers,
     )
     runtime = FirstPurchaseRuntime(store, fixture, resolve_actor)
@@ -192,8 +205,9 @@ def create_first_purchase_native_app(config, *, bridge=None):
     @app.get("/internal/native/context", include_in_schema=False)
     def context(request: Request):
         principal = gateway_actor(request)
+        conv = store.get_native_conversation(principal, session_id)
         return {
-            "conversation": store.get_conversation(principal, conv.conversation_id).model_dump(mode="json"),
+            "conversation": conv.model_dump(mode="json") if conv is not None else None,
             "session_id": session_id,
             "ready": dispatcher.ready,
             "family": "first_purchase",
@@ -204,6 +218,7 @@ def create_first_purchase_native_app(config, *, bridge=None):
         principal = gateway_actor(request)
         if payload.sessionId != session_id:
             raise AnalyticsError(404, "NOT_FOUND", "原生会话不存在或不可见。")
+        conv = conversation(principal)
         run = FirstPurchaseKernelRequest(question=payload.content[0].text)
         return store.accept(
             principal, conv.conversation_id, payload.requestId, run,
@@ -227,6 +242,9 @@ def create_first_purchase_native_app(config, *, bridge=None):
     @app.post("/internal/native/first-purchase/cancel", include_in_schema=False)
     def native_cancel(payload: dict, request: Request):
         principal = gateway_actor(request)
+        conv = store.get_native_conversation(principal, session_id)
+        if conv is None:
+            raise AnalyticsError(409, "NO_ACTIVE_RUN", "没有可取消的活动任务；未声明已停止。")
         run_id = payload.get("run_id") if isinstance(payload, dict) else None
         request_id = payload.get("request_id") if isinstance(payload, dict) else None
         matches = []
@@ -252,4 +270,9 @@ def create_first_purchase_native_app(config, *, bridge=None):
 
     if config.get("asset_capabilities") is not None:
         _attach_first_purchase_assets(app, config, store, registry)
+    if source_identities is not None:
+        # Service owner opts in; neither browser input nor a profile digest
+        # configures credentials. The query owner alone retains the RunStore.
+        from backend.analytics_first_purchase_source_app import create_first_purchase_source_app
+        app.router.routes.extend(create_first_purchase_source_app(store, source_identities).router.routes)
     return app

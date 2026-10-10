@@ -140,7 +140,7 @@ export function apply(ctx: Context): void {
       if (!token || !agent || !isRegisteredSession(agent.id)) throw new Error('query tool has no bound execution context');
       const request = decodeQueryRequest(args);
       if (!request) throw new Error('query tool rejected invalid parameters');
-      const requestId = requestForToolIn(nativeJournal(ctx).of(agent.session), exec.callId);
+      const requestId = requestForToolIn(await nativeJournal(ctx).ready(agent.session), exec.callId);
       if (!requestId) throw new Error('query tool has no journal-correlated native request');
       const response = await fetch(kernelUrl('/internal/native/channel-followup'), {
         method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },

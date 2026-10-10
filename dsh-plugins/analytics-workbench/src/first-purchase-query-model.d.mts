@@ -105,6 +105,8 @@ export type FirstPurchaseNativeReceipt = {
 };
 
 export function decodeFirstPurchaseRequest(value: unknown): FirstPurchaseQueryRequest | null;
+export function decodeFirstPurchaseResult(value: unknown): FirstPurchaseResult | null;
+export function decodeFirstPurchaseResolvedFilters(value: unknown): FirstPurchaseResolvedFilters | null;
 export function decodeFirstPurchaseReceipt(value: unknown): FirstPurchaseNativeReceipt | null;
 export function receiptMatchesRequest(
   receipt: FirstPurchaseNativeReceipt | null,

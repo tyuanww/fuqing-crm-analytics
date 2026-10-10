@@ -27,7 +27,7 @@ print(json.dumps(board_spec_openapi()))
 assert.equal(run.status, 0, run.error?.message ?? run.stderr);
 const schema = JSON.parse(run.stdout);
 const req = createRequire(process.env.B0_PLUGIN_BUILD_TOOLS
-  ?? join(root, 'dsh-plugins/analytics-workbench/build-tools/package.json'));
+  ?? join(root, 'dsh-plugins/plugin-kit/build-tools/package.json'));
 assert.equal(req('openapi-typescript/package.json').version, '7.13.0');
 assert.equal(req('typescript/package.json').version, '6.0.3');
 const { default: openapiTS, astToString } = req('openapi-typescript');

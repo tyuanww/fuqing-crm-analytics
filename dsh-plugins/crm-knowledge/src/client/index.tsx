@@ -7,9 +7,9 @@ import type {} from '@deepseek-ai/dsh-api-session-controller/remote';
 import type {} from '@deepseek-ai/dsh-api-workspace-controller/remote';
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots';
 import { Alert, Button, ConfigProvider, Input, Modal, Space, Typography } from 'antd';
-import { competitionFont, competitionThemeFor } from '../../../analytics-workbench/src/client/competition-shell/tokens';
+import { competitionFont, lightAntdTheme } from './content-theme.generated';
 import { CrmLibraryButton } from './crm-library';
-import type { CrmCockpitSlot } from '../../../analytics-workbench/src/client/cockpit-extension';
+import type { CrmCockpitSlot } from './cockpit-slot-contract.generated';
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface SlotMap { 'cockpit.crm': CrmCockpitSlot }
 }
@@ -25,8 +25,7 @@ const FAILURES: Record<string, string> = {
 };
 type ConnectionState = { connected: boolean; username: string | null; expires_at: string | null };
 const EMPTY: ConnectionState = { connected: false, username: null, expires_at: null };
-const CRM_UI_TOKENS = competitionThemeFor('light');
-const CRM_UI_THEME = CRM_UI_TOKENS.antd;
+const CRM_UI_THEME = lightAntdTheme;
 const CRM_UI_CSS = `.sm-crm-connection-dock{box-sizing:border-box;width:min(100% - 2 * var(--dsh-composer-side-clearance, 16px), var(--dsh-composer-card-max-width, 100%));margin-inline:auto;padding:0;color:#111 !important;font-size:14px;font-weight:600}.sm-crm-connection-dock .ant-typography,.sm-crm-connection-dock .ant-btn{color:#111 !important}.sm-crm-connection-dock .ant-btn{border-color:#111 !important;background:#fff !important;font-weight:600 !important;box-shadow:none !important}.sm-crm-analysis-icon{display:block}`;
 const dockControl = { color: '#111111', fontWeight: 600 } as const;
 const dockButton = { ...dockControl, borderColor: '#111111', background: '#ffffff' };

@@ -42,7 +42,11 @@ export async function runLocalVerification() {
       concurrency: 10,
       synthetic: true,
       evidenceScope: 'synthetic-loopback-http',
-      task: async () => ({ status: (await fetch(url)).status }),
+      task: async () => {
+        const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
+        await response.text();
+        return { status: response.status };
+      },
     });
     if (!backpressure.results.every(result => result.status === 200)) backpressure.status = 'FAIL';
     return { compatibility, backpressure };

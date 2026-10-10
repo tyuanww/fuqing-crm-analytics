@@ -1,0 +1,2142 @@
+{
+  "schema": "shinemage-sdk-byte-evidence-closeout/v1",
+  "date": "2026-10-08",
+  "source_scope": "fixed received-r3 installed-package inventory; excludes 120 workspace sources, prior 26 deployed pnpm modules and pnpm manager",
+  "installed_records": 212,
+  "unique_tarballs": 196,
+  "tarball_integrity_verified": 195,
+  "first_attempt": {
+    "comparison_success": 171,
+    "network_failed": 23,
+    "normalized_duplicate_rejected": 2
+  },
+  "network_retry_once": {
+    "attempted": 23,
+    "recovered": 22,
+    "remaining": 1
+  },
+  "ordinary_file_records_exact": 200,
+  "ordinary_file_records_match_after_pinned_patch": 2,
+  "records_with_missing_files": 7,
+  "missing_file_count": 305,
+  "normalized_duplicate_records": [
+    {
+      "identity": "agent-base@7.1.4",
+      "status": "BLOCKED_NORMALIZED_DUPLICATE_PATH",
+      "members": {
+        "package/dist/index.js": [
+          {
+            "member": "package/./dist/index.js",
+            "sha256": "c6503bd5e007db8b73fedf07b6eaaf4a94d5541953f0d06c8a17d1644c29a0c5"
+          },
+          {
+            "member": "package/dist/index.js",
+            "sha256": "c6503bd5e007db8b73fedf07b6eaaf4a94d5541953f0d06c8a17d1644c29a0c5"
+          }
+        ]
+      },
+      "note": "duplicate members have equal bytes; initial rejection retained, no extraction or normalization policy relaxed"
+    },
+    {
+      "identity": "https-proxy-agent@7.0.6",
+      "status": "BLOCKED_NORMALIZED_DUPLICATE_PATH",
+      "members": {
+        "package/dist/index.js": [
+          {
+            "member": "package/./dist/index.js",
+            "sha256": "30165586fac3becbc9dbf2b7b5bdaa802a77ac34af9926208f6e94a3bd87ef31"
+          },
+          {
+            "member": "package/dist/index.js",
+            "sha256": "30165586fac3becbc9dbf2b7b5bdaa802a77ac34af9926208f6e94a3bd87ef31"
+          }
+        ]
+      },
+      "note": "duplicate members have equal bytes; initial rejection retained, no extraction or normalization policy relaxed"
+    }
+  ],
+  "network_unverified": [
+    {
+      "identity": "rc-field-form@2.7.1",
+      "status": "NOT_VERIFIED_NETWORK_FAILURE",
+      "error": "<urlopen error [Errno 60] Operation timed out>"
+    }
+  ],
+  "missing_records": [
+    {
+      "identity": "@js-temporal/polyfill@0.5.1",
+      "manifest_path": "upstream/node_modules/.pnpm/@js-temporal+polyfill@0.5.1/node_modules/@js-temporal/polyfill/package.json",
+      "missing_files": [
+        "dist/index.cjs",
+        "dist/index.esm.js",
+        "dist/index.umd.js",
+        "dist/index.cjs.map",
+        "dist/index.esm.js.map",
+        "dist/index.umd.js.map",
+        "CHANGELOG.md",
+        "README.md",
+        "lib/assert.ts",
+        "lib/bigintmath.ts",
+        "lib/calendar.ts",
+        "lib/debug.ts",
+        "lib/duration.ts",
+        "lib/ecmascript.ts",
+        "lib/index.ts",
+        "lib/init.ts",
+        "lib/instant.ts",
+        "lib/intl.ts",
+        "lib/intrinsicclass.ts",
+        "lib/legacydate.ts",
+        "lib/math.ts",
+        "lib/now.ts",
+        "lib/plaindate.ts",
+        "lib/plaindatetime.ts",
+        "lib/plainmonthday.ts",
+        "lib/plaintime.ts",
+        "lib/plainyearmonth.ts",
+        "lib/regex.ts",
+        "lib/slots.ts",
+        "lib/temporal.ts",
+        "lib/timeduration.ts",
+        "lib/zoneddatetime.ts"
+      ],
+      "mismatched_files": [],
+      "links": []
+    },
+    {
+      "identity": "@types/mdast@4.0.4",
+      "manifest_path": "upstream/node_modules/.pnpm/@types+mdast@4.0.4/node_modules/@types/mdast/package.json",
+      "missing_files": [
+        "README.md"
+      ],
+      "mismatched_files": [],
+      "links": []
+    },
+    {
+      "identity": "@types/unist@3.0.3",
+      "manifest_path": "upstream/node_modules/.pnpm/@types+unist@3.0.3/node_modules/@types/unist/package.json",
+      "missing_files": [
+        "README.md"
+      ],
+      "mismatched_files": [],
+      "links": []
+    },
+    {
+      "identity": "commander@15.0.0",
+      "manifest_path": "upstream/node_modules/.pnpm/commander@15.0.0/node_modules/commander/package.json",
+      "missing_files": [
+        "lib/argument.js",
+        "lib/command.js",
+        "lib/error.js",
+        "lib/help.js",
+        "index.js",
+        "lib/option.js",
+        "lib/suggestSimilar.js",
+        "package-support.json",
+        "Readme.md"
+      ],
+      "mismatched_files": [],
+      "links": []
+    },
+    {
+      "identity": "katex@0.16.47",
+      "manifest_path": "upstream/node_modules/.pnpm/katex@0.16.47/node_modules/katex/package.json",
+      "missing_files": [
+        "src/fonts/makeBlacker",
+        "src/fonts/makeFF",
+        "src/fonts/Makefile",
+        "src/fonts/default.cfg",
+        "dist/katex-swap.css",
+        "dist/katex-swap.min.css",
+        "dist/katex.css",
+        "dist/katex.min.css",
+        "contrib/auto-render/index.html",
+        "contrib/copy-tex/index.html",
+        "dist/contrib/auto-render.js",
+        "dist/contrib/auto-render.min.js",
+        "cli.js",
+        "dist/contrib/copy-tex.js",
+        "dist/contrib/copy-tex.min.js",
+        "src/fontMetricsData.js",
+        "dist/katex.js",
+        "dist/katex.min.js",
+        "contrib/mathtex-script-type/mathtex-script-type.js",
+        "dist/contrib/mathtex-script-type.js",
+        "dist/contrib/mathtex-script-type.min.js",
+        "contrib/mhchem/mhchem.js",
+        "dist/contrib/mhchem.js",
+        "dist/contrib/mhchem.min.js",
+        "dist/contrib/render-a11y-string.js",
+        "dist/contrib/render-a11y-string.min.js",
+        "src/unicodeAccents.js",
+        "src/unicodeSymbols.js",
+        "contrib/auto-render/README.md",
+        "contrib/copy-tex/README.md",
+        "contrib/mathtex-script-type/README.md",
+        "contrib/mhchem/README.md",
+        "dist/README.md",
+        "README.md",
+        "src/metrics/README.md",
+        "src/fonts/xbbold.mf",
+        "dist/contrib/auto-render.mjs",
+        "dist/contrib/copy-tex.mjs",
+        "dist/katex.mjs",
+        "dist/contrib/mathtex-script-type.mjs",
+        "dist/contrib/mhchem.mjs",
+        "dist/contrib/render-a11y-string.mjs",
+        "src/fonts/lib/Extra.otf",
+        "src/metrics/mapping.pl",
+        "src/metrics/extract_tfms.py",
+        "src/metrics/extract_ttfs.py",
+        "src/metrics/format_json.py",
+        "src/fonts/generate_fonts.py",
+        "src/metrics/parse_tfm.py",
+        "src/styles/fonts.scss",
+        "src/styles/katex-swap.scss",
+        "src/styles/katex.scss",
+        "src/functions/accent.ts",
+        "src/functions/accentunder.ts",
+        "src/environments/array.ts",
+        "src/functions/arrow.ts",
+        "src/functions/utils/assembleSupSub.ts",
+        "src/atoms.ts",
+        "contrib/auto-render/test/auto-render-spec.ts",
+        "contrib/auto-render/auto-render.ts",
+        "src/buildCommon.ts",
+        "src/buildHTML.ts",
+        "src/buildMathML.ts",
+        "src/buildTree.ts",
+        "src/environments/cd.ts",
+        "src/functions/char.ts",
+        "src/functions/color.ts",
+        "contrib/copy-tex/copy-tex.ts",
+        "src/functions/cr.ts",
+        "src/functions/def.ts",
+        "src/defineEnvironment.ts",
+        "src/defineFunction.ts",
+        "src/defineMacro.ts",
+        "src/delimiter.ts",
+        "src/functions/delimsizing.ts",
+        "src/domTree.ts",
+        "src/functions/enclose.ts",
+        "src/functions/environment.ts",
+        "src/environments.ts",
+        "src/functions/font.ts",
+        "src/fontMetrics.ts",
+        "src/types/fonts.ts",
+        "src/functions.ts",
+        "src/functions/genfrac.ts",
+        "src/functions/hbox.ts",
+        "src/functions/horizBrace.ts",
+        "src/functions/href.ts",
+        "src/functions/html.ts",
+        "src/functions/htmlmathml.ts",
+        "src/functions/includegraphics.ts",
+        "src/types/index.ts",
+        "katex.ts",
+        "contrib/copy-tex/katex2tex.ts",
+        "src/functions/kern.ts",
+        "src/functions/lap.ts",
+        "src/Lexer.ts",
+        "src/MacroExpander.ts",
+        "src/macros.ts",
+        "src/functions/math.ts",
+        "src/functions/mathchoice.ts",
+        "src/mathMLTree.ts",
+        "src/functions/mclass.ts",
+        "src/Namespace.ts",
+        "src/functions/op.ts",
+        "src/functions/operatorname.ts",
+        "src/Options.ts",
+        "src/functions/ordgroup.ts",
+        "src/functions/overline.ts",
+        "src/ParseError.ts",
+        "src/parseNode.ts",
+        "src/Parser.ts",
+        "src/parseTree.ts",
+        "src/functions/phantom.ts",
+        "src/functions/pmb.ts",
+        "src/functions/raisebox.ts",
+        "src/functions/relax.ts",
+        "contrib/render-a11y-string/test/render-a11y-string-spec.ts",
+        "contrib/render-a11y-string/render-a11y-string.ts",
+        "src/functions/rule.ts",
+        "src/Settings.ts",
+        "src/functions/sizing.ts",
+        "src/functions/smash.ts",
+        "src/SourceLocation.ts",
+        "src/spacingData.ts",
+        "contrib/auto-render/splitAtDelimiters.ts",
+        "src/functions/sqrt.ts",
+        "src/stretchy.ts",
+        "src/Style.ts",
+        "src/functions/styling.ts",
+        "src/functions/supsub.ts",
+        "src/svgGeometry.ts",
+        "src/symbols.ts",
+        "src/functions/symbolsOp.ts",
+        "src/functions/symbolsOrd.ts",
+        "src/functions/symbolsSpacing.ts",
+        "src/functions/tag.ts",
+        "src/functions/text.ts",
+        "src/Token.ts",
+        "src/tree.ts",
+        "src/functions/underline.ts",
+        "src/unicodeScripts.ts",
+        "src/unicodeSupOrSub.ts",
+        "src/units.ts",
+        "src/utils.ts",
+        "src/functions/vcenter.ts",
+        "src/functions/verb.ts",
+        "src/wide-character.ts",
+        "dist/fonts/KaTeX_AMS-Regular.ttf",
+        "dist/fonts/KaTeX_Caligraphic-Bold.ttf",
+        "dist/fonts/KaTeX_Caligraphic-Regular.ttf",
+        "dist/fonts/KaTeX_Fraktur-Bold.ttf",
+        "dist/fonts/KaTeX_Fraktur-Regular.ttf",
+        "dist/fonts/KaTeX_Main-Bold.ttf",
+        "dist/fonts/KaTeX_Main-BoldItalic.ttf",
+        "dist/fonts/KaTeX_Main-Italic.ttf",
+        "dist/fonts/KaTeX_Main-Regular.ttf",
+        "dist/fonts/KaTeX_Math-BoldItalic.ttf",
+        "dist/fonts/KaTeX_Math-Italic.ttf",
+        "dist/fonts/KaTeX_SansSerif-Bold.ttf",
+        "dist/fonts/KaTeX_SansSerif-Italic.ttf",
+        "dist/fonts/KaTeX_SansSerif-Regular.ttf",
+        "dist/fonts/KaTeX_Script-Regular.ttf",
+        "dist/fonts/KaTeX_Size1-Regular.ttf",
+        "dist/fonts/KaTeX_Size2-Regular.ttf",
+        "dist/fonts/KaTeX_Size3-Regular.ttf",
+        "dist/fonts/KaTeX_Size4-Regular.ttf",
+        "dist/fonts/KaTeX_Typewriter-Regular.ttf",
+        "src/fonts/lib/Space.ttx",
+        "dist/fonts/KaTeX_AMS-Regular.woff",
+        "dist/fonts/KaTeX_Caligraphic-Bold.woff",
+        "dist/fonts/KaTeX_Caligraphic-Regular.woff",
+        "dist/fonts/KaTeX_Fraktur-Bold.woff",
+        "dist/fonts/KaTeX_Fraktur-Regular.woff",
+        "dist/fonts/KaTeX_Main-Bold.woff",
+        "dist/fonts/KaTeX_Main-BoldItalic.woff",
+        "dist/fonts/KaTeX_Main-Italic.woff",
+        "dist/fonts/KaTeX_Main-Regular.woff",
+        "dist/fonts/KaTeX_Math-BoldItalic.woff",
+        "dist/fonts/KaTeX_Math-Italic.woff",
+        "dist/fonts/KaTeX_SansSerif-Bold.woff",
+        "dist/fonts/KaTeX_SansSerif-Italic.woff",
+        "dist/fonts/KaTeX_SansSerif-Regular.woff",
+        "dist/fonts/KaTeX_Script-Regular.woff",
+        "dist/fonts/KaTeX_Size1-Regular.woff",
+        "dist/fonts/KaTeX_Size2-Regular.woff",
+        "dist/fonts/KaTeX_Size3-Regular.woff",
+        "dist/fonts/KaTeX_Size4-Regular.woff",
+        "dist/fonts/KaTeX_Typewriter-Regular.woff",
+        "dist/fonts/KaTeX_AMS-Regular.woff2",
+        "dist/fonts/KaTeX_Caligraphic-Bold.woff2",
+        "dist/fonts/KaTeX_Caligraphic-Regular.woff2",
+        "dist/fonts/KaTeX_Fraktur-Bold.woff2",
+        "dist/fonts/KaTeX_Fraktur-Regular.woff2",
+        "dist/fonts/KaTeX_Main-Bold.woff2",
+        "dist/fonts/KaTeX_Main-BoldItalic.woff2",
+        "dist/fonts/KaTeX_Main-Italic.woff2",
+        "dist/fonts/KaTeX_Main-Regular.woff2",
+        "dist/fonts/KaTeX_Math-BoldItalic.woff2",
+        "dist/fonts/KaTeX_Math-Italic.woff2",
+        "dist/fonts/KaTeX_SansSerif-Bold.woff2",
+        "dist/fonts/KaTeX_SansSerif-Italic.woff2",
+        "dist/fonts/KaTeX_SansSerif-Regular.woff2",
+        "dist/fonts/KaTeX_Script-Regular.woff2",
+        "dist/fonts/KaTeX_Size1-Regular.woff2",
+        "dist/fonts/KaTeX_Size2-Regular.woff2",
+        "dist/fonts/KaTeX_Size3-Regular.woff2",
+        "dist/fonts/KaTeX_Size4-Regular.woff2",
+        "dist/fonts/KaTeX_Typewriter-Regular.woff2"
+      ],
+      "mismatched_files": [],
+      "links": []
+    },
+    {
+      "identity": "lexical@0.49.0",
+      "manifest_path": "upstream/node_modules/.pnpm/lexical@0.49.0_typescript@6.0.3/node_modules/lexical/package.json",
+      "missing_files": [
+        "dist/Lexical.js.flow",
+        "dist/Lexical.dev.js",
+        "dist/Lexical.js",
+        "dist/Lexical.prod.js",
+        "README.md",
+        "dist/Lexical.dev.mjs",
+        "dist/Lexical.mjs",
+        "dist/Lexical.node.mjs",
+        "dist/Lexical.prod.mjs",
+        "src/nodes/ArtificialNode.ts",
+        "src/utils/classNames.ts",
+        "src/extension-core/defineExtension.ts",
+        "src/environment.ts",
+        "src/extension-core/index.ts",
+        "src/index.ts",
+        "src/extension-core/internal.ts",
+        "src/caret/LexicalCaret.ts",
+        "src/caret/LexicalCaretUtils.ts",
+        "src/LexicalCommands.ts",
+        "src/LexicalConstants.ts",
+        "src/nodes/LexicalDecoratorNode.ts",
+        "src/LexicalDequeSet.ts",
+        "src/LexicalDOMSlot.ts",
+        "src/LexicalEditor.ts",
+        "src/LexicalEditorState.ts",
+        "src/nodes/LexicalElementNode.ts",
+        "src/LexicalEvents.ts",
+        "src/LexicalGC.ts",
+        "src/LexicalGenMap.ts",
+        "src/nodes/LexicalLineBreakNode.ts",
+        "src/LexicalMutations.ts",
+        "src/LexicalNode.ts",
+        "src/LexicalNodeState.ts",
+        "src/LexicalNormalization.ts",
+        "src/nodes/LexicalParagraphNode.ts",
+        "src/LexicalReconciler.ts",
+        "src/LexicalRefCountedRegistry.ts",
+        "src/nodes/LexicalRootNode.ts",
+        "src/LexicalSelection.ts",
+        "src/LexicalSlot.ts",
+        "src/nodes/LexicalTabNode.ts",
+        "src/nodes/LexicalTextNode.ts",
+        "src/LexicalUpdates.ts",
+        "src/LexicalUpdateTags.ts",
+        "src/LexicalUtils.ts",
+        "src/utils/mergeRegister.ts",
+        "src/utils/registerEventListener.ts",
+        "src/utils/registerEventListeners.ts",
+        "src/extension-core/safeCast.ts",
+        "src/utils/setDOMStyle.ts",
+        "src/extension-core/shallowMergeConfig.ts",
+        "src/extension-core/types.ts"
+      ],
+      "mismatched_files": [],
+      "links": []
+    },
+    {
+      "identity": "micromark-util-types@2.0.2",
+      "manifest_path": "upstream/node_modules/.pnpm/micromark-util-types@2.0.2/node_modules/micromark-util-types/package.json",
+      "missing_files": [
+        "index.js",
+        "readme.md"
+      ],
+      "mismatched_files": [],
+      "links": []
+    }
+  ],
+  "comparisons": [
+    {
+      "identity": "@ant-design/colors@7.2.1",
+      "manifest_path": "build-tools/node_modules/.pnpm/@ant-design+colors@7.2.1/node_modules/@ant-design/colors/package.json",
+      "status": "EXACT",
+      "matched_files": 27,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@ant-design/cssinjs-utils@1.1.3",
+      "manifest_path": "build-tools/node_modules/.pnpm/@ant-design+cssinjs-utils@1.1.3_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/@ant-design/cssinjs-utils/package.json",
+      "status": "EXACT",
+      "matched_files": 71,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@ant-design/cssinjs@1.23.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/@ant-design+cssinjs@1.23.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/@ant-design/cssinjs/package.json",
+      "status": "EXACT",
+      "matched_files": 152,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@ant-design/fast-color@2.0.6",
+      "manifest_path": "build-tools/node_modules/.pnpm/@ant-design+fast-color@2.0.6/node_modules/@ant-design/fast-color/package.json",
+      "status": "EXACT",
+      "matched_files": 15,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@ant-design/icons-svg@4.6.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/@ant-design+icons-svg@4.6.0/node_modules/@ant-design/icons-svg/package.json",
+      "status": "EXACT",
+      "matched_files": 5102,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@ant-design/icons@5.6.1",
+      "manifest_path": "build-tools/node_modules/.pnpm/@ant-design+icons@5.6.1_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/@ant-design/icons/package.json",
+      "status": "EXACT",
+      "matched_files": 4206,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@ant-design/react-slick@1.1.2",
+      "manifest_path": "build-tools/node_modules/.pnpm/@ant-design+react-slick@1.1.2_react@18.3.1/node_modules/@ant-design/react-slick/package.json",
+      "status": "EXACT",
+      "matched_files": 26,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@babel/code-frame@7.29.7",
+      "manifest_path": "build-tools/node_modules/.pnpm/@babel+code-frame@7.29.7/node_modules/@babel/code-frame/package.json",
+      "status": "EXACT",
+      "matched_files": 5,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@babel/code-frame@7.29.7",
+      "manifest_path": "upstream/node_modules/.pnpm/@babel+code-frame@7.29.7/node_modules/@babel/code-frame/package.json",
+      "status": "EXACT",
+      "matched_files": 5,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@babel/helper-validator-identifier@7.29.7",
+      "manifest_path": "build-tools/node_modules/.pnpm/@babel+helper-validator-identifier@7.29.7/node_modules/@babel/helper-validator-identifier/package.json",
+      "status": "EXACT",
+      "matched_files": 9,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@babel/helper-validator-identifier@7.29.7",
+      "manifest_path": "upstream/node_modules/.pnpm/@babel+helper-validator-identifier@7.29.7/node_modules/@babel/helper-validator-identifier/package.json",
+      "status": "EXACT",
+      "matched_files": 9,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@babel/runtime@7.29.7",
+      "manifest_path": "build-tools/node_modules/.pnpm/@babel+runtime@7.29.7/node_modules/@babel/runtime/package.json",
+      "status": "EXACT",
+      "matched_files": 249,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@emotion/hash@0.8.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/@emotion+hash@0.8.0/node_modules/@emotion/hash/package.json",
+      "status": "EXACT",
+      "matched_files": 16,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@emotion/unitless@0.7.5",
+      "manifest_path": "build-tools/node_modules/.pnpm/@emotion+unitless@0.7.5/node_modules/@emotion/unitless/package.json",
+      "status": "EXACT",
+      "matched_files": 12,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@rc-component/async-validator@5.1.2",
+      "manifest_path": "build-tools/node_modules/.pnpm/@rc-component+async-validator@5.1.2/node_modules/@rc-component/async-validator/package.json",
+      "status": "EXACT",
+      "matched_files": 115,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@rc-component/color-picker@2.0.1",
+      "manifest_path": "build-tools/node_modules/.pnpm/@rc-component+color-picker@2.0.1_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/@rc-component/color-picker/package.json",
+      "status": "EXACT",
+      "matched_files": 66,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@rc-component/context@1.4.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/@rc-component+context@1.4.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/@rc-component/context/package.json",
+      "status": "EXACT",
+      "matched_files": 15,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@rc-component/mini-decimal@1.1.4",
+      "manifest_path": "build-tools/node_modules/.pnpm/@rc-component+mini-decimal@1.1.4/node_modules/@rc-component/mini-decimal/package.json",
+      "status": "EXACT",
+      "matched_files": 31,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@rc-component/mutate-observer@1.1.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/@rc-component+mutate-observer@1.1.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/@rc-component/mutate-observer/package.json",
+      "status": "EXACT",
+      "matched_files": 23,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@rc-component/portal@1.0.0-8",
+      "manifest_path": "build-tools/node_modules/.pnpm/@rc-component+portal@1.0.0-8_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/@rc-component/portal/package.json",
+      "status": "EXACT",
+      "matched_files": 31,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@rc-component/portal@1.0.0-9",
+      "manifest_path": "build-tools/node_modules/.pnpm/@rc-component+portal@1.0.0-9_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/@rc-component/portal/package.json",
+      "status": "EXACT",
+      "matched_files": 31,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@rc-component/portal@1.0.2",
+      "manifest_path": "build-tools/node_modules/.pnpm/@rc-component+portal@1.0.2_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/@rc-component/portal/package.json",
+      "status": "EXACT",
+      "matched_files": 31,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@rc-component/portal@1.1.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/@rc-component+portal@1.1.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/@rc-component/portal/package.json",
+      "status": "EXACT",
+      "matched_files": 31,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@rc-component/portal@1.1.1",
+      "manifest_path": "build-tools/node_modules/.pnpm/@rc-component+portal@1.1.1_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/@rc-component/portal/package.json",
+      "status": "EXACT",
+      "matched_files": 31,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@rc-component/qrcode@1.1.3",
+      "manifest_path": "build-tools/node_modules/.pnpm/@rc-component+qrcode@1.1.3_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/@rc-component/qrcode/package.json",
+      "status": "EXACT",
+      "matched_files": 35,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@rc-component/tour@1.15.1",
+      "manifest_path": "build-tools/node_modules/.pnpm/@rc-component+tour@1.15.1_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/@rc-component/tour/package.json",
+      "status": "EXACT",
+      "matched_files": 43,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@rc-component/trigger@2.3.1",
+      "manifest_path": "build-tools/node_modules/.pnpm/@rc-component+trigger@2.3.1_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/@rc-component/trigger/package.json",
+      "status": "EXACT",
+      "matched_files": 63,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@redocly/ajv@8.11.2",
+      "manifest_path": "build-tools/node_modules/.pnpm/@redocly+ajv@8.11.2/node_modules/@redocly/ajv/package.json",
+      "status": "EXACT",
+      "matched_files": 466,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@redocly/config@0.22.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/@redocly+config@0.22.0/node_modules/@redocly/config/package.json",
+      "status": "EXACT",
+      "matched_files": 79,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@redocly/openapi-core@1.34.19",
+      "manifest_path": "build-tools/node_modules/.pnpm/@redocly+openapi-core@1.34.19_supports-color@10.2.2/node_modules/@redocly/openapi-core/package.json",
+      "status": "EXACT",
+      "matched_files": 687,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@types/prop-types@15.7.15",
+      "manifest_path": "build-tools/node_modules/.pnpm/@types+prop-types@15.7.15/node_modules/@types/prop-types/package.json",
+      "status": "EXACT",
+      "matched_files": 4,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@types/prop-types@15.7.15",
+      "manifest_path": "upstream/node_modules/.pnpm/@types+prop-types@15.7.15/node_modules/@types/prop-types/package.json",
+      "status": "EXACT",
+      "matched_files": 4,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@types/react-dom@18.3.7",
+      "manifest_path": "build-tools/node_modules/.pnpm/@types+react-dom@18.3.7_@types+react@18.3.31/node_modules/@types/react-dom/package.json",
+      "status": "EXACT",
+      "matched_files": 9,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@types/react@18.3.31",
+      "manifest_path": "build-tools/node_modules/.pnpm/@types+react@18.3.31/node_modules/@types/react/package.json",
+      "status": "EXACT",
+      "matched_files": 15,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@types/react@18.3.31",
+      "manifest_path": "upstream/node_modules/.pnpm/@types+react@18.3.31/node_modules/@types/react/package.json",
+      "status": "EXACT",
+      "matched_files": 15,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "ansi-colors@4.1.3",
+      "manifest_path": "build-tools/node_modules/.pnpm/ansi-colors@4.1.3/node_modules/ansi-colors/package.json",
+      "status": "EXACT",
+      "matched_files": 6,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "antd@5.29.3",
+      "manifest_path": "build-tools/node_modules/.pnpm/antd@5.29.3_patch_hash=b9a69e8e39c4b3d9f19e88ef0127b5dd761bdb22502afaf3ab021e50a95231a8_5b423e95f7db63495baa107d0b053b70/node_modules/antd/package.json",
+      "status": "MATCH_AFTER_PINNED_PATCH",
+      "matched_files": 3753,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 2
+    },
+    {
+      "identity": "argparse@2.0.1",
+      "manifest_path": "build-tools/node_modules/.pnpm/argparse@2.0.1/node_modules/argparse/package.json",
+      "status": "EXACT",
+      "matched_files": 7,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "argparse@2.0.1",
+      "manifest_path": "upstream/node_modules/.pnpm/argparse@2.0.1/node_modules/argparse/package.json",
+      "status": "EXACT",
+      "matched_files": 7,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "balanced-match@1.0.2",
+      "manifest_path": "build-tools/node_modules/.pnpm/balanced-match@1.0.2/node_modules/balanced-match/package.json",
+      "status": "EXACT",
+      "matched_files": 5,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "brace-expansion@2.1.7",
+      "manifest_path": "build-tools/node_modules/.pnpm/brace-expansion@2.1.7/node_modules/brace-expansion/package.json",
+      "status": "EXACT",
+      "matched_files": 5,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "change-case@5.4.4",
+      "manifest_path": "build-tools/node_modules/.pnpm/change-case@5.4.4/node_modules/change-case/package.json",
+      "status": "EXACT",
+      "matched_files": 8,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "classnames@2.5.1",
+      "manifest_path": "build-tools/node_modules/.pnpm/classnames@2.5.1/node_modules/classnames/package.json",
+      "status": "EXACT",
+      "matched_files": 10,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "colorette@1.4.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/colorette@1.4.0/node_modules/colorette/package.json",
+      "status": "EXACT",
+      "matched_files": 6,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "compute-scroll-into-view@3.1.1",
+      "manifest_path": "build-tools/node_modules/.pnpm/compute-scroll-into-view@3.1.1/node_modules/compute-scroll-into-view/package.json",
+      "status": "EXACT",
+      "matched_files": 9,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "copy-to-clipboard@3.3.3",
+      "manifest_path": "build-tools/node_modules/.pnpm/copy-to-clipboard@3.3.3/node_modules/copy-to-clipboard/package.json",
+      "status": "EXACT",
+      "matched_files": 8,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "csstype@3.2.3",
+      "manifest_path": "build-tools/node_modules/.pnpm/csstype@3.2.3/node_modules/csstype/package.json",
+      "status": "EXACT",
+      "matched_files": 5,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "csstype@3.2.3",
+      "manifest_path": "upstream/node_modules/.pnpm/csstype@3.2.3/node_modules/csstype/package.json",
+      "status": "EXACT",
+      "matched_files": 5,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "dayjs@1.11.23",
+      "manifest_path": "build-tools/node_modules/.pnpm/dayjs@1.11.23/node_modules/dayjs/package.json",
+      "status": "EXACT",
+      "matched_files": 451,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "debug@4.4.3",
+      "manifest_path": "build-tools/node_modules/.pnpm/debug@4.4.3_supports-color@10.2.2/node_modules/debug/package.json",
+      "status": "EXACT",
+      "matched_files": 7,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "fast-deep-equal@3.1.3",
+      "manifest_path": "build-tools/node_modules/.pnpm/fast-deep-equal@3.1.3/node_modules/fast-deep-equal/package.json",
+      "status": "EXACT",
+      "matched_files": 11,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "fast-deep-equal@3.1.3",
+      "manifest_path": "upstream/node_modules/.pnpm/fast-deep-equal@3.1.3/node_modules/fast-deep-equal/package.json",
+      "status": "EXACT",
+      "matched_files": 11,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "index-to-position@1.2.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/index-to-position@1.2.0/node_modules/index-to-position/package.json",
+      "status": "EXACT",
+      "matched_files": 5,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "js-levenshtein@1.1.6",
+      "manifest_path": "build-tools/node_modules/.pnpm/js-levenshtein@1.1.6/node_modules/js-levenshtein/package.json",
+      "status": "EXACT",
+      "matched_files": 4,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "js-tokens@4.0.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/js-tokens@4.0.0/node_modules/js-tokens/package.json",
+      "status": "EXACT",
+      "matched_files": 5,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "js-tokens@4.0.0",
+      "manifest_path": "upstream/node_modules/.pnpm/js-tokens@4.0.0/node_modules/js-tokens/package.json",
+      "status": "EXACT",
+      "matched_files": 5,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "js-yaml@4.3.2",
+      "manifest_path": "build-tools/node_modules/.pnpm/js-yaml@4.3.2/node_modules/js-yaml/package.json",
+      "status": "EXACT",
+      "matched_files": 36,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "json-schema-traverse@1.0.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/json-schema-traverse@1.0.0/node_modules/json-schema-traverse/package.json",
+      "status": "EXACT",
+      "matched_files": 12,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "json-schema-traverse@1.0.0",
+      "manifest_path": "upstream/node_modules/.pnpm/json-schema-traverse@1.0.0/node_modules/json-schema-traverse/package.json",
+      "status": "EXACT",
+      "matched_files": 12,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "json2mq@0.2.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/json2mq@0.2.0/node_modules/json2mq/package.json",
+      "status": "EXACT",
+      "matched_files": 6,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "loose-envify@1.4.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/loose-envify@1.4.0/node_modules/loose-envify/package.json",
+      "status": "EXACT",
+      "matched_files": 8,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "loose-envify@1.4.0",
+      "manifest_path": "upstream/node_modules/.pnpm/loose-envify@1.4.0/node_modules/loose-envify/package.json",
+      "status": "EXACT",
+      "matched_files": 8,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "minimatch@5.1.9",
+      "manifest_path": "build-tools/node_modules/.pnpm/minimatch@5.1.9/node_modules/minimatch/package.json",
+      "status": "EXACT",
+      "matched_files": 6,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "ms@2.1.3",
+      "manifest_path": "build-tools/node_modules/.pnpm/ms@2.1.3/node_modules/ms/package.json",
+      "status": "EXACT",
+      "matched_files": 4,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "openapi-typescript@7.13.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/openapi-typescript@7.13.0_typescript@6.0.3/node_modules/openapi-typescript/package.json",
+      "status": "EXACT",
+      "matched_files": 105,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "parse-json@8.3.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/parse-json@8.3.0/node_modules/parse-json/package.json",
+      "status": "EXACT",
+      "matched_files": 5,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "picocolors@1.1.1",
+      "manifest_path": "build-tools/node_modules/.pnpm/picocolors@1.1.1/node_modules/picocolors/package.json",
+      "status": "EXACT",
+      "matched_files": 7,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "picocolors@1.1.1",
+      "manifest_path": "upstream/node_modules/.pnpm/picocolors@1.1.1/node_modules/picocolors/package.json",
+      "status": "EXACT",
+      "matched_files": 7,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "pluralize@8.0.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/pluralize@8.0.0/node_modules/pluralize/package.json",
+      "status": "EXACT",
+      "matched_files": 4,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-cascader@3.34.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-cascader@3.34.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-cascader/package.json",
+      "status": "EXACT",
+      "matched_files": 95,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-checkbox@3.5.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-checkbox@3.5.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-checkbox/package.json",
+      "status": "EXACT",
+      "matched_files": 8,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-collapse@3.9.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-collapse@3.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-collapse/package.json",
+      "status": "EXACT",
+      "matched_files": 28,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-dialog@9.6.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-dialog@9.6.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-dialog/package.json",
+      "status": "EXACT",
+      "matched_files": 45,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-drawer@7.3.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-drawer@7.3.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-drawer/package.json",
+      "status": "EXACT",
+      "matched_files": 32,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-dropdown@4.2.1",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-dropdown@4.2.1_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-dropdown/package.json",
+      "status": "EXACT",
+      "matched_files": 24,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-image@7.12.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-image@7.12.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-image/package.json",
+      "status": "EXACT",
+      "matched_files": 72,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-input-number@9.5.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-input-number@9.5.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-input-number/package.json",
+      "status": "EXACT",
+      "matched_files": 28,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-input@1.8.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-input@1.8.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-input/package.json",
+      "status": "EXACT",
+      "matched_files": 33,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-mentions@2.20.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-mentions@2.20.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-mentions/package.json",
+      "status": "EXACT",
+      "matched_files": 35,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-menu@9.16.1",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-menu@9.16.1_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-menu/package.json",
+      "status": "EXACT",
+      "matched_files": 114,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-motion@2.9.5",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-motion@2.9.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-motion/package.json",
+      "status": "EXACT",
+      "matched_files": 55,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-notification@5.6.4",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-notification@5.6.4_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-notification/package.json",
+      "status": "EXACT",
+      "matched_files": 37,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-overflow@1.5.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-overflow@1.5.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-overflow/package.json",
+      "status": "EXACT",
+      "matched_files": 32,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-pagination@5.1.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-pagination@5.1.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-pagination/package.json",
+      "status": "EXACT",
+      "matched_files": 309,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-picker@4.11.3",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-picker@4.11.3_patch_hash=32a1444d988718291c6fadfe265b5f6f4d16d5f4b3518e3d582e689697d_961f6735c816d82f75e0e4d72b38691a/node_modules/rc-picker/package.json",
+      "status": "MATCH_AFTER_PINNED_PATCH",
+      "matched_files": 567,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 2
+    },
+    {
+      "identity": "rc-progress@4.0.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-progress@4.0.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-progress/package.json",
+      "status": "EXACT",
+      "matched_files": 35,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-rate@2.13.1",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-rate@2.13.1_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-rate/package.json",
+      "status": "EXACT",
+      "matched_files": 24,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-resize-observer@1.4.3",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-resize-observer@1.4.3_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-resize-observer/package.json",
+      "status": "EXACT",
+      "matched_files": 25,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-segmented@2.7.1",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-segmented@2.7.1_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-segmented/package.json",
+      "status": "EXACT",
+      "matched_files": 14,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-select@14.16.8",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-select@14.16.8_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-select/package.json",
+      "status": "EXACT",
+      "matched_files": 137,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-slider@11.1.9",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-slider@11.1.9_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-slider/package.json",
+      "status": "EXACT",
+      "matched_files": 68,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-steps@6.0.1",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-steps@6.0.1_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-steps/package.json",
+      "status": "EXACT",
+      "matched_files": 20,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-switch@4.1.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-switch@4.1.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-switch/package.json",
+      "status": "EXACT",
+      "matched_files": 8,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-table@7.54.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-table@7.54.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-table/package.json",
+      "status": "EXACT",
+      "matched_files": 200,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-tabs@15.7.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-tabs@15.7.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-tabs/package.json",
+      "status": "EXACT",
+      "matched_files": 84,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-textarea@1.10.2",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-textarea@1.10.2_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-textarea/package.json",
+      "status": "EXACT",
+      "matched_files": 25,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-tooltip@6.4.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-tooltip@6.4.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-tooltip/package.json",
+      "status": "EXACT",
+      "matched_files": 23,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-tree-select@5.27.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-tree-select@5.27.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-tree-select/package.json",
+      "status": "EXACT",
+      "matched_files": 77,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-tree@5.13.1",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-tree@5.13.1_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-tree/package.json",
+      "status": "EXACT",
+      "matched_files": 68,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-upload@4.11.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-upload@4.11.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-upload/package.json",
+      "status": "EXACT",
+      "matched_files": 35,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-util@5.44.4",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-util@5.44.4_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-util/package.json",
+      "status": "EXACT",
+      "matched_files": 189,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "rc-virtual-list@3.19.2",
+      "manifest_path": "build-tools/node_modules/.pnpm/rc-virtual-list@3.19.2_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/rc-virtual-list/package.json",
+      "status": "EXACT",
+      "matched_files": 87,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "react-dom@18.3.1",
+      "manifest_path": "build-tools/node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/package.json",
+      "status": "EXACT",
+      "matched_files": 32,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "react-dom@18.3.1",
+      "manifest_path": "upstream/node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/package.json",
+      "status": "EXACT",
+      "matched_files": 32,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "react-is@18.2.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/react-is@18.2.0/node_modules/react-is/package.json",
+      "status": "EXACT",
+      "matched_files": 8,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "react@18.3.1",
+      "manifest_path": "build-tools/node_modules/.pnpm/react@18.3.1/node_modules/react/package.json",
+      "status": "EXACT",
+      "matched_files": 20,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "react@18.3.1",
+      "manifest_path": "upstream/node_modules/.pnpm/react@18.3.1/node_modules/react/package.json",
+      "status": "EXACT",
+      "matched_files": 20,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "require-from-string@2.0.2",
+      "manifest_path": "build-tools/node_modules/.pnpm/require-from-string@2.0.2/node_modules/require-from-string/package.json",
+      "status": "EXACT",
+      "matched_files": 4,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "require-from-string@2.0.2",
+      "manifest_path": "upstream/node_modules/.pnpm/require-from-string@2.0.2/node_modules/require-from-string/package.json",
+      "status": "EXACT",
+      "matched_files": 4,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "resize-observer-polyfill@1.5.1",
+      "manifest_path": "build-tools/node_modules/.pnpm/resize-observer-polyfill@1.5.1/node_modules/resize-observer-polyfill/package.json",
+      "status": "EXACT",
+      "matched_files": 23,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "scheduler@0.23.2",
+      "manifest_path": "build-tools/node_modules/.pnpm/scheduler@0.23.2/node_modules/scheduler/package.json",
+      "status": "EXACT",
+      "matched_files": 17,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "scheduler@0.23.2",
+      "manifest_path": "upstream/node_modules/.pnpm/scheduler@0.23.2/node_modules/scheduler/package.json",
+      "status": "EXACT",
+      "matched_files": 17,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "scroll-into-view-if-needed@3.1.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/scroll-into-view-if-needed@3.1.0/node_modules/scroll-into-view-if-needed/package.json",
+      "status": "EXACT",
+      "matched_files": 10,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "string-convert@0.2.1",
+      "manifest_path": "build-tools/node_modules/.pnpm/string-convert@0.2.1/node_modules/string-convert/package.json",
+      "status": "EXACT",
+      "matched_files": 10,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "stylis@4.4.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/stylis@4.4.0/node_modules/stylis/package.json",
+      "status": "EXACT",
+      "matched_files": 16,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "supports-color@10.2.2",
+      "manifest_path": "build-tools/node_modules/.pnpm/supports-color@10.2.2/node_modules/supports-color/package.json",
+      "status": "EXACT",
+      "matched_files": 7,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "throttle-debounce@5.0.2",
+      "manifest_path": "build-tools/node_modules/.pnpm/throttle-debounce@5.0.2/node_modules/throttle-debounce/package.json",
+      "status": "EXACT",
+      "matched_files": 13,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "toggle-selection@1.0.6",
+      "manifest_path": "build-tools/node_modules/.pnpm/toggle-selection@1.0.6/node_modules/toggle-selection/package.json",
+      "status": "EXACT",
+      "matched_files": 6,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "type-fest@4.41.0",
+      "manifest_path": "build-tools/node_modules/.pnpm/type-fest@4.41.0/node_modules/type-fest/package.json",
+      "status": "EXACT",
+      "matched_files": 170,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "typescript@6.0.3",
+      "manifest_path": "build-tools/node_modules/.pnpm/typescript@6.0.3/node_modules/typescript/package.json",
+      "status": "EXACT",
+      "matched_files": 140,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "typescript@6.0.3",
+      "manifest_path": "upstream/node_modules/.pnpm/typescript@6.0.3/node_modules/typescript/package.json",
+      "status": "EXACT",
+      "matched_files": 140,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "uri-js-replace@1.0.1",
+      "manifest_path": "build-tools/node_modules/.pnpm/uri-js-replace@1.0.1/node_modules/uri-js-replace/package.json",
+      "status": "EXACT",
+      "matched_files": 10,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "yaml-ast-parser@0.0.43",
+      "manifest_path": "build-tools/node_modules/.pnpm/yaml-ast-parser@0.0.43/node_modules/yaml-ast-parser/package.json",
+      "status": "EXACT",
+      "matched_files": 158,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "yargs-parser@21.1.1",
+      "manifest_path": "build-tools/node_modules/.pnpm/yargs-parser@21.1.1/node_modules/yargs-parser/package.json",
+      "status": "EXACT",
+      "matched_files": 11,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@asamuzakjp/css-color@5.1.11",
+      "manifest_path": "upstream/node_modules/.pnpm/@asamuzakjp+css-color@5.1.11/node_modules/@asamuzakjp/css-color/package.json",
+      "status": "EXACT",
+      "matched_files": 53,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@asamuzakjp/dom-selector@7.1.1",
+      "manifest_path": "upstream/node_modules/.pnpm/@asamuzakjp+dom-selector@7.1.1/node_modules/@asamuzakjp/dom-selector/package.json",
+      "status": "EXACT",
+      "matched_files": 15,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@asamuzakjp/generational-cache@1.0.1",
+      "manifest_path": "upstream/node_modules/.pnpm/@asamuzakjp+generational-cache@1.0.1/node_modules/@asamuzakjp/generational-cache/package.json",
+      "status": "EXACT",
+      "matched_files": 5,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@asamuzakjp/nwsapi@2.3.9",
+      "manifest_path": "upstream/node_modules/.pnpm/@asamuzakjp+nwsapi@2.3.9/node_modules/@asamuzakjp/nwsapi/package.json",
+      "status": "EXACT",
+      "matched_files": 4,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@bramus/specificity@2.4.2",
+      "manifest_path": "upstream/node_modules/.pnpm/@bramus+specificity@2.4.2/node_modules/@bramus/specificity/package.json",
+      "status": "EXACT",
+      "matched_files": 16,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@csstools/color-helpers@6.1.0",
+      "manifest_path": "upstream/node_modules/.pnpm/@csstools+color-helpers@6.1.0/node_modules/@csstools/color-helpers/package.json",
+      "status": "EXACT",
+      "matched_files": 6,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@csstools/css-calc@3.2.1",
+      "manifest_path": "upstream/node_modules/.pnpm/@csstools+css-calc@3.2.1_@csstools+css-parser-algorithms@4.0.0_@csstools+css-tokenizer@_3b33f237655dfa7a35d4b0433ee15cf1/node_modules/@csstools/css-calc/package.json",
+      "status": "EXACT",
+      "matched_files": 6,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@csstools/css-color-parser@4.1.9",
+      "manifest_path": "upstream/node_modules/.pnpm/@csstools+css-color-parser@4.1.9_@csstools+css-parser-algorithms@4.0.0_@csstools+css-to_c6dc0ff88668e614025a4cbfb943c01a/node_modules/@csstools/css-color-parser/package.json",
+      "status": "EXACT",
+      "matched_files": 6,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@csstools/css-parser-algorithms@4.0.0",
+      "manifest_path": "upstream/node_modules/.pnpm/@csstools+css-parser-algorithms@4.0.0_@csstools+css-tokenizer@4.0.0/node_modules/@csstools/css-parser-algorithms/package.json",
+      "status": "EXACT",
+      "matched_files": 6,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@csstools/css-syntax-patches-for-csstree@1.1.6",
+      "manifest_path": "upstream/node_modules/.pnpm/@csstools+css-syntax-patches-for-csstree@1.1.6_css-tree@3.2.1/node_modules/@csstools/css-syntax-patches-for-csstree/package.json",
+      "status": "EXACT",
+      "matched_files": 6,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@csstools/css-tokenizer@4.0.0",
+      "manifest_path": "upstream/node_modules/.pnpm/@csstools+css-tokenizer@4.0.0/node_modules/@csstools/css-tokenizer/package.json",
+      "status": "EXACT",
+      "matched_files": 6,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@esbuild/darwin-arm64@0.25.12",
+      "manifest_path": "upstream/node_modules/.pnpm/@esbuild+darwin-arm64@0.25.12/node_modules/@esbuild/darwin-arm64/package.json",
+      "status": "EXACT",
+      "matched_files": 3,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@eslint-community/regexpp@4.12.2",
+      "manifest_path": "upstream/node_modules/.pnpm/@eslint-community+regexpp@4.12.2/node_modules/@eslint-community/regexpp/package.json",
+      "status": "EXACT",
+      "matched_files": 8,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@exodus/bytes@1.15.1",
+      "manifest_path": "upstream/node_modules/.pnpm/@exodus+bytes@1.15.1_@noble+hashes@2.3.0/node_modules/@exodus/bytes/package.json",
+      "status": "EXACT",
+      "matched_files": 75,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@js-temporal/polyfill@0.5.1",
+      "manifest_path": "upstream/node_modules/.pnpm/@js-temporal+polyfill@0.5.1/node_modules/@js-temporal/polyfill/package.json",
+      "status": "PARTIAL",
+      "matched_files": 6,
+      "missing_count": 32,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@noble/hashes@2.3.0",
+      "manifest_path": "upstream/node_modules/.pnpm/@noble+hashes@2.3.0/node_modules/@noble/hashes/package.json",
+      "status": "EXACT",
+      "matched_files": 60,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@standard-schema/spec@1.1.0",
+      "manifest_path": "upstream/node_modules/.pnpm/@standard-schema+spec@1.1.0/node_modules/@standard-schema/spec/package.json",
+      "status": "EXACT",
+      "matched_files": 7,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@types/mdast@4.0.4",
+      "manifest_path": "upstream/node_modules/.pnpm/@types+mdast@4.0.4/node_modules/@types/mdast/package.json",
+      "status": "PARTIAL",
+      "matched_files": 3,
+      "missing_count": 1,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@types/node@22.20.0",
+      "manifest_path": "upstream/node_modules/.pnpm/@types+node@22.20.0/node_modules/@types/node/package.json",
+      "status": "EXACT",
+      "matched_files": 74,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "@types/unist@3.0.3",
+      "manifest_path": "upstream/node_modules/.pnpm/@types+unist@3.0.3/node_modules/@types/unist/package.json",
+      "status": "PARTIAL",
+      "matched_files": 3,
+      "missing_count": 1,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "ajv@8.20.0",
+      "manifest_path": "upstream/node_modules/.pnpm/ajv@8.20.0/node_modules/ajv/package.json",
+      "status": "EXACT",
+      "matched_files": 466,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "bidi-js@1.0.3",
+      "manifest_path": "upstream/node_modules/.pnpm/bidi-js@1.0.3/node_modules/bidi-js/package.json",
+      "status": "EXACT",
+      "matched_files": 17,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "bytes@3.1.2",
+      "manifest_path": "upstream/node_modules/.pnpm/bytes@3.1.2/node_modules/bytes/package.json",
+      "status": "EXACT",
+      "matched_files": 5,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "chokidar@4.0.3",
+      "manifest_path": "upstream/node_modules/.pnpm/chokidar@4.0.3/node_modules/chokidar/package.json",
+      "status": "EXACT",
+      "matched_files": 12,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "commander@15.0.0",
+      "manifest_path": "upstream/node_modules/.pnpm/commander@15.0.0/node_modules/commander/package.json",
+      "status": "PARTIAL",
+      "matched_files": 3,
+      "missing_count": 9,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "compressible@2.0.18",
+      "manifest_path": "upstream/node_modules/.pnpm/compressible@2.0.18/node_modules/compressible/package.json",
+      "status": "EXACT",
+      "matched_files": 5,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "compression@1.8.2",
+      "manifest_path": "upstream/node_modules/.pnpm/compression@1.8.2_supports-color@9.4.0/node_modules/compression/package.json",
+      "status": "EXACT",
+      "matched_files": 4,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "content-type@2.1.0",
+      "manifest_path": "upstream/node_modules/.pnpm/content-type@2.1.0/node_modules/content-type/package.json",
+      "status": "EXACT",
+      "matched_files": 6,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "css-tree@3.2.1",
+      "manifest_path": "upstream/node_modules/.pnpm/css-tree@3.2.1/node_modules/css-tree/package.json",
+      "status": "EXACT",
+      "matched_files": 278,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "data-urls@7.0.0",
+      "manifest_path": "upstream/node_modules/.pnpm/data-urls@7.0.0_@noble+hashes@2.3.0/node_modules/data-urls/package.json",
+      "status": "EXACT",
+      "matched_files": 5,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "debug@2.6.9",
+      "manifest_path": "upstream/node_modules/.pnpm/debug@2.6.9_supports-color@9.4.0/node_modules/debug/package.json",
+      "status": "EXACT",
+      "matched_files": 17,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "decimal.js@10.6.0",
+      "manifest_path": "upstream/node_modules/.pnpm/decimal.js@10.6.0/node_modules/decimal.js/package.json",
+      "status": "EXACT",
+      "matched_files": 6,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "destroy@1.2.0",
+      "manifest_path": "upstream/node_modules/.pnpm/destroy@1.2.0/node_modules/destroy/package.json",
+      "status": "EXACT",
+      "matched_files": 4,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "entities@8.0.0",
+      "manifest_path": "upstream/node_modules/.pnpm/entities@8.0.0/node_modules/entities/package.json",
+      "status": "EXACT",
+      "matched_files": 58,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "esbuild@0.25.12",
+      "manifest_path": "upstream/node_modules/.pnpm/esbuild@0.25.12/node_modules/esbuild/package.json",
+      "status": "EXACT",
+      "matched_files": 7,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "fast-uri@3.1.3",
+      "manifest_path": "upstream/node_modules/.pnpm/fast-uri@3.1.3/node_modules/fast-uri/package.json",
+      "status": "EXACT",
+      "matched_files": 34,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "html-encoding-sniffer@6.0.0",
+      "manifest_path": "upstream/node_modules/.pnpm/html-encoding-sniffer@6.0.0_@noble+hashes@2.3.0/node_modules/html-encoding-sniffer/package.json",
+      "status": "EXACT",
+      "matched_files": 4,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "immer@10.2.0",
+      "manifest_path": "upstream/node_modules/.pnpm/immer@10.2.0/node_modules/immer/package.json",
+      "status": "EXACT",
+      "matched_files": 33,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "is-potential-custom-element-name@1.0.1",
+      "manifest_path": "upstream/node_modules/.pnpm/is-potential-custom-element-name@1.0.1/node_modules/is-potential-custom-element-name/package.json",
+      "status": "EXACT",
+      "matched_files": 4,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "js-yaml@4.2.0",
+      "manifest_path": "upstream/node_modules/.pnpm/js-yaml@4.2.0/node_modules/js-yaml/package.json",
+      "status": "EXACT",
+      "matched_files": 36,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "js-yaml@4.3.1",
+      "manifest_path": "upstream/node_modules/.pnpm/js-yaml@4.3.1/node_modules/js-yaml/package.json",
+      "status": "EXACT",
+      "matched_files": 36,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "jsdom@29.1.1",
+      "manifest_path": "upstream/node_modules/.pnpm/jsdom@29.1.1_@noble+hashes@2.3.0/node_modules/jsdom/package.json",
+      "status": "EXACT",
+      "matched_files": 652,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "katex@0.16.47",
+      "manifest_path": "upstream/node_modules/.pnpm/katex@0.16.47/node_modules/katex/package.json",
+      "status": "PARTIAL",
+      "matched_files": 4,
+      "missing_count": 208,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "lexical@0.49.0",
+      "manifest_path": "upstream/node_modules/.pnpm/lexical@0.49.0_typescript@6.0.3/node_modules/lexical/package.json",
+      "status": "PARTIAL",
+      "matched_files": 46,
+      "missing_count": 52,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "lru-cache@11.5.1",
+      "manifest_path": "upstream/node_modules/.pnpm/lru-cache@11.5.1/node_modules/lru-cache/package.json",
+      "status": "EXACT",
+      "matched_files": 89,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "mdn-data@2.27.1",
+      "manifest_path": "upstream/node_modules/.pnpm/mdn-data@2.27.1/node_modules/mdn-data/package.json",
+      "status": "EXACT",
+      "matched_files": 25,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "micromark-util-types@2.0.2",
+      "manifest_path": "upstream/node_modules/.pnpm/micromark-util-types@2.0.2/node_modules/micromark-util-types/package.json",
+      "status": "PARTIAL",
+      "matched_files": 3,
+      "missing_count": 2,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "mime-db@1.54.0",
+      "manifest_path": "upstream/node_modules/.pnpm/mime-db@1.54.0/node_modules/mime-db/package.json",
+      "status": "EXACT",
+      "matched_files": 6,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "mime-types@3.0.2",
+      "manifest_path": "upstream/node_modules/.pnpm/mime-types@3.0.2/node_modules/mime-types/package.json",
+      "status": "EXACT",
+      "matched_files": 6,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "ms@2.0.0",
+      "manifest_path": "upstream/node_modules/.pnpm/ms@2.0.0/node_modules/ms/package.json",
+      "status": "EXACT",
+      "matched_files": 4,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "negotiator@0.6.4",
+      "manifest_path": "upstream/node_modules/.pnpm/negotiator@0.6.4/node_modules/negotiator/package.json",
+      "status": "EXACT",
+      "matched_files": 9,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "negotiator@1.1.0",
+      "manifest_path": "upstream/node_modules/.pnpm/negotiator@1.1.0/node_modules/negotiator/package.json",
+      "status": "EXACT",
+      "matched_files": 9,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "node-addon-native-custom-loader@0.1.6",
+      "manifest_path": "upstream/node_modules/.pnpm/node-addon-native-custom-loader@0.1.6/node_modules/node-addon-native-custom-loader/package.json",
+      "status": "EXACT",
+      "matched_files": 5,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "node-addon-require-builtin-darwin-arm64@0.1.6",
+      "manifest_path": "upstream/node_modules/.pnpm/node-addon-require-builtin-darwin-arm64@0.1.6/node_modules/node-addon-require-builtin-darwin-arm64/package.json",
+      "status": "EXACT",
+      "matched_files": 6,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "node-addon-require-builtin@0.1.6",
+      "manifest_path": "upstream/node_modules/.pnpm/node-addon-require-builtin@0.1.6/node_modules/node-addon-require-builtin/package.json",
+      "status": "EXACT",
+      "matched_files": 5,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "on-headers@1.1.0",
+      "manifest_path": "upstream/node_modules/.pnpm/on-headers@1.1.0/node_modules/on-headers/package.json",
+      "status": "EXACT",
+      "matched_files": 5,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "parse5@8.0.1",
+      "manifest_path": "upstream/node_modules/.pnpm/parse5@8.0.1/node_modules/parse5/package.json",
+      "status": "EXACT",
+      "matched_files": 33,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "picomatch@4.0.4",
+      "manifest_path": "upstream/node_modules/.pnpm/picomatch@4.0.4/node_modules/picomatch/package.json",
+      "status": "EXACT",
+      "matched_files": 10,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "punycode@2.3.1",
+      "manifest_path": "upstream/node_modules/.pnpm/punycode@2.3.1/node_modules/punycode/package.json",
+      "status": "EXACT",
+      "matched_files": 5,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "readdirp@4.1.2",
+      "manifest_path": "upstream/node_modules/.pnpm/readdirp@4.1.2/node_modules/readdirp/package.json",
+      "status": "EXACT",
+      "matched_files": 8,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "resolve.exports@2.0.3",
+      "manifest_path": "upstream/node_modules/.pnpm/resolve.exports@2.0.3/node_modules/resolve.exports/package.json",
+      "status": "EXACT",
+      "matched_files": 6,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "safe-buffer@5.2.1",
+      "manifest_path": "upstream/node_modules/.pnpm/safe-buffer@5.2.1/node_modules/safe-buffer/package.json",
+      "status": "EXACT",
+      "matched_files": 5,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "saxes@6.0.0",
+      "manifest_path": "upstream/node_modules/.pnpm/saxes@6.0.0/node_modules/saxes/package.json",
+      "status": "EXACT",
+      "matched_files": 5,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "semver@7.8.5",
+      "manifest_path": "upstream/node_modules/.pnpm/semver@7.8.5/node_modules/semver/package.json",
+      "status": "EXACT",
+      "matched_files": 53,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "source-map-js@1.2.1",
+      "manifest_path": "upstream/node_modules/.pnpm/source-map-js@1.2.1/node_modules/source-map-js/package.json",
+      "status": "EXACT",
+      "matched_files": 18,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "symbol-tree@3.2.4",
+      "manifest_path": "upstream/node_modules/.pnpm/symbol-tree@3.2.4/node_modules/symbol-tree/package.json",
+      "status": "EXACT",
+      "matched_files": 7,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "tldts-core@7.4.5",
+      "manifest_path": "upstream/node_modules/.pnpm/tldts-core@7.4.5/node_modules/tldts-core/package.json",
+      "status": "EXACT",
+      "matched_files": 77,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "tldts@7.4.5",
+      "manifest_path": "upstream/node_modules/.pnpm/tldts@7.4.5/node_modules/tldts/package.json",
+      "status": "EXACT",
+      "matched_files": 30,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "tough-cookie@6.0.1",
+      "manifest_path": "upstream/node_modules/.pnpm/tough-cookie@6.0.1/node_modules/tough-cookie/package.json",
+      "status": "EXACT",
+      "matched_files": 9,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "tr46@6.0.0",
+      "manifest_path": "upstream/node_modules/.pnpm/tr46@6.0.0/node_modules/tr46/package.json",
+      "status": "EXACT",
+      "matched_files": 7,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "undici-types@6.21.0",
+      "manifest_path": "upstream/node_modules/.pnpm/undici-types@6.21.0/node_modules/undici-types/package.json",
+      "status": "EXACT",
+      "matched_files": 41,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "undici@7.28.0",
+      "manifest_path": "upstream/node_modules/.pnpm/undici@7.28.0/node_modules/undici/package.json",
+      "status": "EXACT",
+      "matched_files": 210,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "undici@8.10.0",
+      "manifest_path": "upstream/node_modules/.pnpm/undici@8.10.0/node_modules/undici/package.json",
+      "status": "EXACT",
+      "matched_files": 214,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "use-sync-external-store@1.2.0",
+      "manifest_path": "upstream/node_modules/.pnpm/use-sync-external-store@1.2.0_react@18.3.1/node_modules/use-sync-external-store/package.json",
+      "status": "EXACT",
+      "matched_files": 18,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "vary@1.1.2",
+      "manifest_path": "upstream/node_modules/.pnpm/vary@1.1.2/node_modules/vary/package.json",
+      "status": "EXACT",
+      "matched_files": 5,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "w3c-xmlserializer@5.0.0",
+      "manifest_path": "upstream/node_modules/.pnpm/w3c-xmlserializer@5.0.0/node_modules/w3c-xmlserializer/package.json",
+      "status": "EXACT",
+      "matched_files": 6,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "webidl-conversions@8.0.1",
+      "manifest_path": "upstream/node_modules/.pnpm/webidl-conversions@8.0.1/node_modules/webidl-conversions/package.json",
+      "status": "EXACT",
+      "matched_files": 4,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "whatwg-mimetype@5.0.0",
+      "manifest_path": "upstream/node_modules/.pnpm/whatwg-mimetype@5.0.0/node_modules/whatwg-mimetype/package.json",
+      "status": "EXACT",
+      "matched_files": 10,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "whatwg-url@16.0.1",
+      "manifest_path": "upstream/node_modules/.pnpm/whatwg-url@16.0.1_@noble+hashes@2.3.0/node_modules/whatwg-url/package.json",
+      "status": "EXACT",
+      "matched_files": 17,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "ws@8.21.0",
+      "manifest_path": "upstream/node_modules/.pnpm/ws@8.21.0/node_modules/ws/package.json",
+      "status": "EXACT",
+      "matched_files": 19,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "xml-name-validator@5.0.0",
+      "manifest_path": "upstream/node_modules/.pnpm/xml-name-validator@5.0.0/node_modules/xml-name-validator/package.json",
+      "status": "EXACT",
+      "matched_files": 4,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "xmlchars@2.2.0",
+      "manifest_path": "upstream/node_modules/.pnpm/xmlchars@2.2.0/node_modules/xmlchars/package.json",
+      "status": "EXACT",
+      "matched_files": 18,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "yaml@2.9.0",
+      "manifest_path": "upstream/node_modules/.pnpm/yaml@2.9.0/node_modules/yaml/package.json",
+      "status": "EXACT",
+      "matched_files": 233,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "zod@4.4.3",
+      "manifest_path": "upstream/node_modules/.pnpm/zod@4.4.3/node_modules/zod/package.json",
+      "status": "EXACT",
+      "matched_files": 718,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    },
+    {
+      "identity": "zustand@4.4.7",
+      "manifest_path": "upstream/node_modules/.pnpm/zustand@4.4.7_@types+react@18.3.31_immer@10.2.0_react@18.3.1/node_modules/zustand/package.json",
+      "status": "EXACT",
+      "matched_files": 141,
+      "missing_count": 0,
+      "mismatch_count_before_patch": 0
+    }
+  ],
+  "graceful_fs_patch_replay": "PASS",
+  "graceful_fs_result_sha256": "2144ae476409c6248c7681abe2f14c81d35fce687a52fbb3c46ac0a1ffdbe3ff",
+  "source_inputs_unchanged": true,
+  "new_tests_or_b0": false,
+  "package_or_native_code_executed": false,
+  "dependencies_installed": false,
+  "runtime_bundle_changed": false,
+  "osv_requeried": false,
+  "publisher_identity": "NOT_VERIFIED",
+  "sdk_full_package_integrity_identity_gate": "OPEN",
+  "EMBED-INLINE-BYTES": "PARTIAL",
+  "checker_inline_function_bytes": "NOT_VERIFIED",
+  "distribution": "BLOCKED",
+  "release_ready": false,
+  "raw_evidence": [
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/sdk-installed-integrity-20261008/input.json",
+      "sha256": "2d132359f33f858e4ed6bc9700a7a11810aa2ad465159d9bc114dbcad1a1b309"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/sdk-installed-integrity-20261008/result.json",
+      "sha256": "f6e8fb04461ea439f99abe32a12d67c68d7bfa937b9b6c67ba97480c5bcf93df"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/sdk-installed-integrity-20261008/network-retry/result.json",
+      "sha256": "3d3c73bee1f0924fd98c684c5f5d34c4f5a8e163924d6f23ffe68ec7807aae55"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/sdk-installed-integrity-20261008/antd-patch/result.json",
+      "sha256": "2108659e711ab99855608c068de31522d1ac5737e949f1b186cf5d60f7aa7fc4"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/sdk-installed-integrity-20261008/rc-picker-patch/result.json",
+      "sha256": "4563f46d23486b89be23700ca1372afc9d2b957bfc6bcae467265d8067b5a38d"
+    },
+    {
+      "path": "/Users/hutou/.codex/worktrees/shinemage-abc-integration/fuqing-crm-analytics/.context/checks/sdk-graceful-patch-replay-20261008/r2/result.json",
+      "sha256": "2144ae476409c6248c7681abe2f14c81d35fce687a52fbb3c46ac0a1ffdbe3ff"
+    }
+  ]
+}

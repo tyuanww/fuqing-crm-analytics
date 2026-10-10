@@ -15,6 +15,7 @@ import { ensurePersistentRuntime } from './persist-runtime.mjs';
 import { randomBytes } from 'node:crypto';
 import { bootHost, dumpConfig, installProfilePlugin, isolatedEnv, parseServeArgs, prepareRuntime, readCurrent, runOwnedSupervisor, stopOwned, watchOwnedStart } from './serve.mjs';
 import { diagnose, printDiagnose } from './diagnose.mjs';
+import { linkRepositoryKit } from '../dsh-b0/plugin-kit-link.mjs';
 
 const USAGE = `Usage: node scripts/dsh-dev/cli.mjs <check|dump-config|start|stop|status|diagnose|reload|open>
   --upstream /absolute/pinned/dsh
@@ -234,7 +235,8 @@ async function runOpen() {
   await openLaunchUrl(current.runtime);
 }
 
-function buildLocalPlugin(dir) {
+async function buildLocalPlugin(dir) {
+  await linkRepositoryKit(dir, repoRoot);
   const built = spawnSync(process.execPath, [join(dir, 'build.mjs')], {
     cwd: dir, stdio: 'inherit', env: process.env, timeout: 180000,
   });
@@ -269,24 +271,24 @@ function reloadStartArgs(options, runtime) {
 async function runReload(options) {
   assert.equal(Number(process.versions.node.split('.')[0]), NODE_MAJOR, `Use Node ${NODE_MAJOR}`);
   const runtime = await ensurePersistentRuntime({ dest: options.runtime ?? defaultRuntimeRoot() });
-  buildLocalPlugin(options.pluginPath ?? defaultPluginPath());
+  await buildLocalPlugin(options.pluginPath ?? defaultPluginPath());
   if (pluginEnabled(options.plugin || 'on') && pluginEnabled(options.shineBrand ?? 'off')) {
-    buildLocalPlugin(options.shineBrandPath ?? defaultShineBrandPath());
+    await buildLocalPlugin(options.shineBrandPath ?? defaultShineBrandPath());
   }
   if (pluginEnabled(options.plugin || 'on') && pluginEnabled(options.shineWaterfall ?? 'on')) {
-    buildLocalPlugin(options.shineWaterfallPath ?? defaultShineWaterfallPath());
+    await buildLocalPlugin(options.shineWaterfallPath ?? defaultShineWaterfallPath());
   }
   if (pluginEnabled(options.plugin || 'on') && pluginEnabled(options.shineCrowdAction ?? 'on')) {
-    buildLocalPlugin(options.shineCrowdActionPath ?? defaultShineCrowdActionPath());
+    await buildLocalPlugin(options.shineCrowdActionPath ?? defaultShineCrowdActionPath());
   }
   if (pluginEnabled(options.plugin || 'on') && pluginEnabled(options.shineQuery ?? 'on')) {
-    buildLocalPlugin(options.shineQueryPath ?? defaultShineQueryPath());
+    await buildLocalPlugin(options.shineQueryPath ?? defaultShineQueryPath());
   }
   if (pluginEnabled(options.plugin || 'on') && pluginEnabled(options.shineBoard ?? 'on')) {
-    buildLocalPlugin(options.shineBoardPath ?? defaultShineBoardPath());
+    await buildLocalPlugin(options.shineBoardPath ?? defaultShineBoardPath());
   }
   if (pluginEnabled(options.plugin || 'on') && pluginEnabled(options.shineFunnel ?? 'on')) {
-    buildLocalPlugin(options.shineFunnelPath ?? defaultShineFunnelPath());
+    await buildLocalPlugin(options.shineFunnelPath ?? defaultShineFunnelPath());
   }
   await stopOwned();
   const startId = randomBytes(16).toString('hex');

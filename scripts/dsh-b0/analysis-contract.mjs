@@ -50,7 +50,7 @@ assertLocalRefs(schema);
 if (!schema.paths?.['/api/v1/analytics/analyses']) throw new Error('missing analyses collection path');
 if (schema.paths['/api/v1/analytics-query/runs/{run_id}']) throw new Error('saved-analysis contract must not publish query session routes');
 const digest = createHash('sha256').update(JSON.stringify(schema)).digest('hex');
-const buildRequire = createRequire(join(root, 'dsh-plugins/analytics-workbench/build-tools/package.json'));
+const buildRequire = createRequire(join(root, 'dsh-plugins/plugin-kit/build-tools/package.json'));
 const { default: openapiTS, astToString } = buildRequire('openapi-typescript');
 const ts = buildRequire('typescript');
 const generatorVersion = JSON.parse(await readFile(buildRequire.resolve('openapi-typescript/package.json'), 'utf8')).version;

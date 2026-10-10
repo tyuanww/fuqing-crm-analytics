@@ -1,0 +1,40 @@
+{
+  "name": "@shine-mage/dsh-knowledge",
+  "version": "0.0.0-candidate.1",
+  "private": true,
+  "type": "module",
+  "description": "Independent public knowledge definitions and optional account-authorized textbook retrieval; no CRM implementation or credentials.",
+  "engines": {
+    "node": "24.x"
+  },
+  "packageManager": "pnpm@11.28.2",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
+    "@deepseek-ai/cordis": "4.0.2"
+  },
+  "exports": {
+    ".": "./lib/index.js",
+    "./graph-tools": "./lib/graph-tools.js",
+    "./package.json": "./package.json",
+    "./cordis.patch.yml": "./cordis.patch.yml"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/graph-tools.js",
+    "cordis.patch.yml"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "shinemage": {
+    "plugin_domain": "knowledge",
+    "composition_contract": "crm-knowledge-split/v1"
+  },
+  "devDependencies": { "@shine-mage/dsh-plugin-kit": "0.1.0" }
+}
