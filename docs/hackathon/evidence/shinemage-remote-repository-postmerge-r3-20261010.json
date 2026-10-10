@@ -1,0 +1,40 @@
+{
+  "schema": "shinemage-remote-repository-postmerge/v1",
+  "observed_at": "2026-10-10T14:12:37Z",
+  "repository": "https://github.com/tyuanww/fuqing-crm-analytics",
+  "default_branch": "main",
+  "main_head": "93d18c77323953fe911f2b898939d6c892cf5063",
+  "supersedes": "shinemage-remote-repository-postmerge-r2-20261010",
+  "merged_pull_requests": [
+    {
+      "number": 117,
+      "merge_commit": "93d18c77323953fe911f2b898939d6c892cf5063",
+      "merged_at": "2026-10-10T14:11:27Z",
+      "status": "merged",
+      "title": "docs: record parallel closeout audits"
+    }
+  ],
+  "ci": {
+    "pr_117": {
+      "run_id": 38058515350,
+      "event": "pull_request",
+      "workflow": "CI",
+      "conclusion": "success",
+      "head_sha": "46e48fdf18e25be8ccea05c902b09b90e683a81f"
+    },
+    "post_merge_main": {
+      "run_id": 38058629203,
+      "event": "push",
+      "workflow": "CI",
+      "conclusion": "success",
+      "head_sha": "93d18c77323953fe911f2b898939d6c892cf5063"
+    }
+  },
+  "open_pull_requests": {
+    "range": "101-110",
+    "kind": "dependabot",
+    "shine_mage_integration": "none"
+  },
+  "scope_note": "read-only post-merge fact update; no production, release, candidate, journal, or deployment mutation",
+  "release_ready": false
+}
