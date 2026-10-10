@@ -25,7 +25,7 @@
     "naive-ui": "^2.45.3",
     "pinia": "^4.0.3",
     "vue": "^3.5.43",
-    "vue-echarts": "^8.3.0",
+    "vue-echarts": "^8.3.1",
     "vue-router": "^5.3.1",
     "xlsx-js-style": "^1.2.0"
   },
