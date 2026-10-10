@@ -4,7 +4,7 @@
 
 > 最近生产记录（[STATUS](./STATUS.md) 的 2026-10-09 现场记录）：产品 VERSION 见 STATUS，DSH `0.1.7-rc.2`，固定 upstream `477b4f42`；杭州 current 以 STATUS 的带日期现场记录为准，HANDOVER 只保留历史入口快照。该记录中的本地 A/B/C 候选没有部署，新的插件候选未激活。产品仍 PARTIAL；局部合成验证不能替代真实模型、完整业务 UAT、生产准入及回退证据。后续发布必须从 clean reviewed commit 生成新的 immutable artifact，禁止 `git pull` 或现场编译。
 
-> 主仓收口（2026-10-10）：PR [#111](https://github.com/tyuanww/fuqing-crm-analytics/pull/111)–[#117](https://github.com/tyuanww/fuqing-crm-analytics/pull/117) 均已合并；主线短 SHA 见 [STATUS](./STATUS.md)，完整 SHA 与合并时间见[最新 post-merge 事实记录](./docs/hackathon/evidence/shinemage-remote-repository-postmerge-r3-20261010.md)。主仓现在承担 DSH pin、profile、跨插件合同、组合验证和交付文档；CRM、知识、看板和其他业务能力由独立插件仓维护。插件日常更新、主仓同步和 DSH 升级的边界见[维护、清理与升级手册](./docs/operating/shinemage-maintenance-and-cleanup.md)。SDK 分发仍 BLOCKED，产品仍 PARTIAL，未授权的生产/发布门禁仍保持未执行。
+> 主仓收口（2026-10-11）：PR [#111](https://github.com/tyuanww/fuqing-crm-analytics/pull/111)–[#118](https://github.com/tyuanww/fuqing-crm-analytics/pull/118) 均已合并；当前远端 `main` 为 `4859d136`，完整 SHA、合并时间与主线 CI 见[最新 post-merge 事实记录](./docs/hackathon/evidence/shinemage-remote-repository-postmerge-r4-20261011.md)。主仓现在承担 DSH pin、profile、跨插件合同、组合验证和交付文档；CRM、知识、看板和其他业务能力由独立插件仓维护。单插件的实际更新步骤见[插件更新指南](./docs/operating/shinemage-plugin-update.md)，职责、清理和 DSH 升级边界见[维护、清理与升级手册](./docs/operating/shinemage-maintenance-and-cleanup.md)。SDK 分发仍 BLOCKED，产品仍 PARTIAL，未授权的生产/发布门禁仍保持未执行。
 
 > A/B/C 集成记录（2026-10-08）是历史证据：单插件更新与取消、固定宿主进程级恢复、HTML headed 验收和 SDK 信任盘查见[本轮集成验收](./docs/hackathon/evidence/shinemage-abc-integration-20261008.md)。它不替代当前主仓合并状态，也不代表新的 Release。
 
@@ -53,6 +53,8 @@
 ### rc2 稳定交付入口
 
 插件作者若只修改一个独立包，先看 [DSH 插件作者 Quickstart](./docs/operating/dsh-plugin-author-quickstart.md) 和[维护、清理与升级手册](./docs/operating/shinemage-maintenance-and-cleanup.md)，不要重复执行整仓发布。
+
+只更新一个插件时，按[插件更新指南](./docs/operating/shinemage-plugin-update.md)走“插件仓 build/test/pack → 插件 CI → 主仓组合合同 → 新 candidate 身份链”的顺序；没有对应输入就保持 `NOT_RUN`，不借用旧回执。
 
 在候选提交上先运行本地合同；已有固定 runtime bundle 时再做只读发布检查。首次候选没有 runtime 时，直接运行正式 preflight，由它生成同一份 immutable artifact：
 
@@ -147,6 +149,7 @@ cd frontend-vue3 && npx playwright test                   # E2E
 | [`docs/operating/ship.md`](./docs/operating/ship.md) | 历史交付记录；当前 Git 动作按 AGENTS.md |
 | [`docs/operating/dsh-rc2-quickstart.md`](./docs/operating/dsh-rc2-quickstart.md) | rc2 artifact 准备教程 |
 | [`docs/operating/shinemage-maintenance-and-cleanup.md`](./docs/operating/shinemage-maintenance-and-cleanup.md) | 插件更新、DSH 升级、证据留存与本机/远程清理 |
+| [`docs/operating/shinemage-plugin-update.md`](./docs/operating/shinemage-plugin-update.md) | How to 只更新一个插件并把摘要接入主仓 |
 | [`docs/reference/dsh-rc2-release-artifact.md`](./docs/reference/dsh-rc2-release-artifact.md) | dsh release/receive/verify 命令与 artifact 合同 |
 | [`docs/architecture/dsh-release-trust.md`](./docs/architecture/dsh-release-trust.md) | immutable artifact、allowlist 和回退设计说明 |
 | [`docs/operating/automation.md`](./docs/operating/automation.md) | 当前本地 hooks/Skills 边界与历史自动化记录 |

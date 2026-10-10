@@ -1,7 +1,7 @@
 # Docs 索引
 
 > 按 lifecycle 分层，新人约 5 分钟找到入口。  
-> **最后更新**: 2026-10-10。当前提交、运行和交付事实以根目录 [STATUS.md](../STATUS.md) 为准；[HANDOVER.md](../HANDOVER.md) 的运行入口段是带日期的历史快照。Mac 负责开发/测试，杭州 Windows + WSL 只运行批准 SHA。当前 DSH 钉 **0.1.7-rc.2**（`477b4f42`）；PR #111–#117 已合并到远端 `main`，主线短 SHA 见 STATUS，完整 SHA、CI 与远端复核见[最新 post-merge 事实记录](./hackathon/evidence/shinemage-remote-repository-postmerge-r3-20261010.md)，清理结果见[本次清理证据](./hackathon/evidence/shinemage-local-cleanup-20261010.md)，插件独立仓和主仓集成边界见[维护、清理与升级手册](./operating/shinemage-maintenance-and-cleanup.md)。产品仍 PARTIAL，黑客松与校准记录是档案，不是默认入口。
+> **最后更新**: 2026-10-11。当前提交、运行和交付事实以根目录 [STATUS.md](../STATUS.md) 为准；[HANDOVER.md](../HANDOVER.md) 的运行入口段是带日期的历史快照。Mac 负责开发/测试，杭州 Windows + WSL 只运行批准 SHA。当前 DSH 钉 **0.1.7-rc.2**（`477b4f42`）；PR #111–#118 已合并到远端 `main`，主线短 SHA 见 STATUS，完整 SHA、CI 与远端复核见[最新 post-merge 事实记录](./hackathon/evidence/shinemage-remote-repository-postmerge-r4-20261011.md)，清理结果见[本次清理证据](./hackathon/evidence/shinemage-local-cleanup-20261010.md)，插件独立仓和主仓集成边界见[维护、清理与升级手册](./operating/shinemage-maintenance-and-cleanup.md)，单插件操作步骤见[插件更新指南](./operating/shinemage-plugin-update.md)。产品仍 PARTIAL，黑客松与校准记录是档案，不是默认入口。
 
 ## 黑客松当前实现
 
@@ -24,6 +24,7 @@
 | [`operating/cockpit-ai-edit.md`](./operating/cockpit-ai-edit.md) | 产物组织、全屏、静态 HTML 手动 / AI 选区编辑与 HTTP 合同 |
 | [`operating/dsh-rc2-quickstart.md`](./operating/dsh-rc2-quickstart.md) | rc2 artifact 准备教程 |
 | [`operating/dsh-plugin-author-quickstart.md`](./operating/dsh-plugin-author-quickstart.md) | 独立插件作者三步构建、测试和 candidate handoff |
+| [`operating/shinemage-plugin-update.md`](./operating/shinemage-plugin-update.md) | 单插件更新、摘要绑定、主仓组合和失败处理 |
 | [`operating/shinemage-maintenance-and-cleanup.md`](./operating/shinemage-maintenance-and-cleanup.md) | 主仓/插件仓职责、插件更新、DSH 升级、证据留存与清理顺序 |
 | [`./reference/dsh-rc2-release-artifact.md`](./reference/dsh-rc2-release-artifact.md) | release/receive/verify 命令与 artifact 合同 |
 | [`architecture/shinemage-plugin-platform.md`](./architecture/shinemage-plugin-platform.md) | 官方 DSH、独立插件/服务、profile 与部署边界 |
@@ -83,6 +84,7 @@ fuqing-crm-analytics/docs/
 │
 ├── operating/                         怎么运维 / 协作
 │   ├── shinemage-maintenance-and-cleanup.md  主仓/插件仓职责、升级与清理
+│   ├── shinemage-plugin-update.md       单插件更新与主仓摘要接入
 │   ├── team-workflow-v1.md            可合并定义 · 角色
 │   ├── supply-chain.md                依赖 SSOT / audit（PR5）
 │   ├── docker-ports-and-images.md     端口 / healthcheck / 镜像 pin
