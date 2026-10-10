@@ -8,9 +8,9 @@
 
 ### 2026-10-10 主仓合并后接续
 
-PR [#111](https://github.com/tyuanww/fuqing-crm-analytics/pull/111) 与文档收口 PR [#112](https://github.com/tyuanww/fuqing-crm-analytics/pull/112) 均已合并；远端主线短 SHA 见 [STATUS.md](../../STATUS.md)，完整 SHA 和 post-merge CI 见[远端事实记录](evidence/shinemage-remote-repository-postmerge-20261010.md)。**PR #111 的**最终 preflight、B0、全量测试、前端、lint、依赖审计、合同检查、Docker smoke 和 merge-gate 均通过，`ground-truth-lint` 按既定条件跳过；PR #112 CI 和合并后 `main` push CI 也成功。`open-code-review-delegate` 对应 PR #111，已覆盖 403/403 个可审文件，发现的 2 个 High 与 1 个 Medium 已修复并复验。SDK 分发仍 BLOCKED，产品仍 PARTIAL，release_ready=false；发布、部署和正式分发仍未执行。
+PR [#111](https://github.com/tyuanww/fuqing-crm-analytics/pull/111)、文档收口 PR [#112](https://github.com/tyuanww/fuqing-crm-analytics/pull/112) 和 post-merge 文档 PR [#113](https://github.com/tyuanww/fuqing-crm-analytics/pull/113) 均已合并；远端主线短 SHA 见 [STATUS.md](../../STATUS.md)，完整 SHA 和最新 post-merge CI 见[远端事实记录](evidence/shinemage-remote-repository-postmerge-r2-20261010.md)。**PR #111 的**最终 preflight、B0、全量测试、前端、lint、依赖审计、合同检查、Docker smoke 和 merge-gate 均通过，`ground-truth-lint` 按既定条件跳过；PR #112、#113 CI 和各自合并后的 `main` push CI 也成功。`open-code-review-delegate` 对应 PR #111，已覆盖 403/403 个可审文件，发现的 2 个 High 与 1 个 Medium 已修复并复验。SDK 分发仍 BLOCKED，产品仍 PARTIAL，release_ready=false；发布、部署和正式分发仍未执行。
 
-主仓现在作为 DSH 集成仓，九个插件已有独立远程仓（见[远程仓盘查](evidence/shinemage-remote-repository-inventory-20261010.md)）；主仓副本清理与正式物理分仓仍未收口。当前主线事实和 branches API 超时记录见[post-merge 远端事实](evidence/shinemage-remote-repository-postmerge-20261010.md)。单插件更新、DSH 版本升级、证据留存与本机/远程清理见[维护、清理与升级手册](../operating/shinemage-maintenance-and-cleanup.md)。清理盘查已完成但证据目录和远程候选分支删除尚未执行，历史证据和未提交任务树继续按原路径保留。
+主仓现在作为 DSH 集成仓，九个插件已有独立远程仓（见[远程仓盘查](evidence/shinemage-remote-repository-inventory-20261010.md)）；主仓副本清理与正式物理分仓仍未收口。当前主线事实和 branches API 超时记录见[最新 post-merge 远端事实](evidence/shinemage-remote-repository-postmerge-r2-20261010.md)。单插件更新、DSH 版本升级、证据留存与本机/远程清理见[维护、清理与升级手册](../operating/shinemage-maintenance-and-cleanup.md)。清理盘查已完成但证据目录和远程候选分支删除尚未执行，历史证据和未提交任务树继续按原路径保留。
 
 ### 2026-10-08 ShineMage A/B/C 集成本地接续
 
