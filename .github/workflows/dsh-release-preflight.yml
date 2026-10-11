@@ -171,6 +171,8 @@ jobs:
           DSH_PYTHON: ${{ steps.python.outputs.python-path }}
         run: |
           set -euo pipefail
+          printf 'Preflight checkout status before runtime preparation:\n'
+          git status --porcelain --untracked-files=all
           export DSH_PROFILE_PACK_INPUTS="$CRM_COMPOSITION_PAGE_INPUTS"
           node scripts/dsh.mjs preflight \
             --python "$B0_PYTHON" \
