@@ -129,6 +129,7 @@ test('formal pack reader preserves exact bytes and needs neither Git sources nor
   assert.deepEqual(received.receipt, input.receipt);
   assert.deepEqual(received.archive, original);
   assert.equal(hash(received.manifestBytes), input.expectedSha256);
+  assert.deepEqual(received.manifest, JSON.parse((await exec('tar', ['-xOf', join(input.outputDir, input.receipt.tarball.name), 'package/package.json'])).stdout));
 });
 
 test('formal pack reader rejects an unpinned or changed receipt and changed archive', async t => {

@@ -4,7 +4,13 @@ import { mkdir, readFile, writeFile, lstat } from 'node:fs/promises';
 import { isAbsolute, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
+import { installProfilePacks, loadProfilePacks } from '../release/profile-packs.mjs';
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
+const domains = Object.freeze({
+  '@shine-mage/dsh-crm-knowledge': { key: 'plugin', name: 'crm', entries: { '.': 'lib/index.js', './host': 'lib/host.js', './client': 'lib/client.js' } },
+  '@shine-mage/dsh-knowledge': { key: 'knowledgePlugin', name: 'knowledge', entries: { '.': 'lib/index.js', './graph-tools': 'lib/graph-tools.js' } },
+  '@shine-mage/dsh-analytics-workbench-b0': { key: 'pageToolsPlugin', entries: { './page-tools': 'lib/page-tools.js' }, prefix: 'PAGE_PROVIDER' },
+});
 
 function bindings({ metricsOrigin, knowledgeOrigin, python, plugin, knowledgePlugin, graphSettingsFile }) {
   assert.equal(python, undefined, 'CRM_PROFILE_PYTHON_REMOVED');
@@ -66,10 +72,7 @@ async function boundedFile(path, max) {
   assert.equal(bytes.length, info.size, 'CRM_PROFILE_PACKAGE_CHANGED');
   return bytes;
 }
-async function inspectPlugin(root, name, entries, domain, prefix = 'CRM_PROFILE') {
-  assert.ok(isAbsolute(root), prefix + '_PATH_INVALID');
-  const bytes = await boundedFile(join(root, 'package.json'), 128 * 1024);
-  const manifest = JSON.parse(bytes);
+export function inspectDeclaredPlugin(manifest, name, entries, domain, prefix = 'CRM_PROFILE') {
   assert.equal(manifest.name, name, prefix + '_IDENTITY');
   assert.equal(manifest.peerDependencies?.['@deepseek-ai/dsh-tools'], '0.1.7-rc.2', prefix + '_DSH_PIN');
   // Split CRM/knowledge packages declare Cordis directly. The existing page
@@ -82,30 +85,59 @@ async function inspectPlugin(root, name, entries, domain, prefix = 'CRM_PROFILE'
     assert.equal(manifest.shinemage?.plugin_domain, domain, 'CRM_PROFILE_SPLIT_PACKAGE_REQUIRED');
     assert.equal(manifest.shinemage?.composition_contract, 'crm-knowledge-split/v1', 'CRM_PROFILE_COMPOSITION_CONTRACT_MISMATCH');
   }
-  const hashes = { 'package.json': digest(bytes) };
   for (const [key, entry] of Object.entries(entries)) {
     assert.equal(manifest.exports?.[key], './' + entry, prefix + '_PUBLIC_EXPORT_REQUIRED');
     assert.ok(Array.isArray(manifest.files) && manifest.files.includes(entry), prefix + '_EXPORT_NOT_PACKED');
+  }
+}
+async function inspectPlugin(root, name, entries, domain, prefix = 'CRM_PROFILE') {
+  assert.ok(isAbsolute(root), prefix + '_PATH_INVALID');
+  const bytes = await boundedFile(join(root, 'package.json'), 128 * 1024);
+  const manifest = JSON.parse(bytes);
+  inspectDeclaredPlugin(manifest, name, entries, domain, prefix);
+  const hashes = { 'package.json': digest(bytes) };
+  for (const entry of Object.values(entries)) {
     hashes[entry] = digest(await boundedFile(join(root, entry), 16 * 1024 * 1024));
   }
   return { root, name: manifest.name, version: manifest.version, sha256: digest(JSON.stringify(hashes)), entries: hashes };
 }
 
 export async function prepareProfile(options) {
-  const { output, plugin, knowledgePlugin, graphSettingsFile, pageToolsPlugin } = options;
+  const { output, graphSettingsFile, packInputs } = options;
   assert.ok(isAbsolute(output), 'output must be absolute');
+  let packs;
+  if (packInputs !== undefined) {
+    assert.ok(!options.plugin && !options.knowledgePlugin && !options.pageToolsPlugin, 'CRM_PROFILE_PACK_INPUTS_AMBIGUOUS');
+    packs = await loadProfilePacks({ inputsPath: packInputs });
+    assert.equal(packs.profile.service_binding, undefined, 'CRM_PROFILE_PACK_SERVICE_BINDING_REQUIRES_CANDIDATE');
+    const selected = {};
+    for (const [index, item] of packs.plugins.entries()) {
+      const domain = Object.hasOwn(domains, item.id) ? domains[item.id] : null;
+      assert.ok(domain, 'CRM_PROFILE_PACK_SELECTION_INVALID');
+      inspectDeclaredPlugin(item.manifest, item.id, domain.entries, domain.name, domain.prefix);
+      selected[domain.key] = join(output, 'packages', String(index), 'unpacked', 'package');
+    }
+    options = { ...options, ...selected };
+  }
+  const { plugin, knowledgePlugin, pageToolsPlugin } = options;
   const services = bindings(options);
+  if (graphSettingsFile) {
+    assert.ok(isAbsolute(graphSettingsFile), 'plugin/settings paths must be absolute');
+    const info = await lstat(graphSettingsFile);
+    assert.ok(info.isFile() && !info.isSymbolicLink() && !(info.mode & 0o077), 'CRM_PROFILE_GRAPH_SETTINGS_PRIVATE_REQUIRED');
+  }
+  let packageInputs;
+  if (packs) {
+    await mkdir(output, { mode: 0o700 });
+    packageInputs = await installProfilePacks({ packs, output: join(output, 'packages') });
+  }
   const packages = {};
   if (plugin) packages.crm = await inspectPlugin(plugin, '@shine-mage/dsh-crm-knowledge', { '.': 'lib/index.js', './host': 'lib/host.js', './client': 'lib/client.js' }, 'crm');
   if (knowledgePlugin) packages.knowledge = await inspectPlugin(knowledgePlugin, '@shine-mage/dsh-knowledge', { '.': 'lib/index.js', './graph-tools': 'lib/graph-tools.js' }, 'knowledge');
   const pageTools = pageToolsPlugin ? await inspectPlugin(pageToolsPlugin, '@shine-mage/dsh-analytics-workbench-b0', { './page-tools': 'lib/page-tools.js' }, undefined, 'PAGE_PROVIDER') : undefined;
   const revision = digest(JSON.stringify({ packages, pageTools, services, graph: graphSettingsFile ?? null }));
   const files = renderProfile({ ...options, revision, packages, pageTools });
-  if (graphSettingsFile) {
-    const info = await lstat(graphSettingsFile);
-    assert.ok(info.isFile() && !info.isSymbolicLink() && !(info.mode & 0o077), 'CRM_PROFILE_GRAPH_SETTINGS_PRIVATE_REQUIRED');
-  }
-  await mkdir(output, { mode: 0o700 });
+  if (!packs) await mkdir(output, { mode: 0o700 });
   await mkdir(join(output, 'preset'), { mode: 0o700 });
   for (const [name, content] of Object.entries(files)) await writeFile(join(output, name), content, { mode: 0o600, flag: 'wx' });
   const receipt = { schema: 'crm-profile-assets/v3', revision, packages, graph_configured: Boolean(graphSettingsFile),
@@ -116,7 +148,8 @@ export async function prepareProfile(options) {
       : { status: 'NOT_AVAILABLE', reason: 'SERVICE_NOT_CONFIGURED' }])),
     page_delivery: pageTools ? { status: 'CONFIGURED_NOT_RUN', ...pageTools } : { status: 'NOT_AVAILABLE', reason: 'PAGE_PROVIDER_NOT_SELECTED' },
     writes: Object.keys(files), sha256: Object.fromEntries(Object.entries(files).map(([name, content]) => [name, digest(content)])),
-    existing_profile_changed: false, service_started_or_restarted: false };
+    existing_profile_changed: false, service_started_or_restarted: false,
+    ...(packageInputs ? { package_inputs: packageInputs } : {}) };
   await writeFile(join(output, 'manifest.json'), JSON.stringify(receipt, null, 2) + '\n', { mode: 0o600, flag: 'wx' });
   return receipt;
 }
@@ -124,14 +157,15 @@ export async function prepareProfile(options) {
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   try {
     const args = process.argv.slice(2); const options = {};
-    const names = { '--output': 'output', '--plugin': 'plugin', '--knowledge-plugin': 'knowledgePlugin', '--python': 'python', '--metrics-origin': 'metricsOrigin', '--knowledge-origin': 'knowledgeOrigin', '--graph-settings': 'graphSettingsFile', '--page-tools-plugin': 'pageToolsPlugin' };
+    const names = { '--output': 'output', '--plugin': 'plugin', '--knowledge-plugin': 'knowledgePlugin', '--pack-inputs': 'packInputs', '--python': 'python', '--metrics-origin': 'metricsOrigin', '--knowledge-origin': 'knowledgeOrigin', '--graph-settings': 'graphSettingsFile', '--page-tools-plugin': 'pageToolsPlugin' };
     for (let i = 0; i < args.length; i += 2) {
-      assert.ok(names[args[i]] && args[i + 1] && !options[names[args[i]]], 'Use --output /new/private/directory [--plugin /absolute/crm] [--knowledge-plugin /absolute/knowledge] [--metrics-origin http://127.0.0.1:PORT] [--knowledge-origin http://127.0.0.1:PORT] [--graph-settings /private/settings.json] [--page-tools-plugin /absolute/workbench]');
+      assert.ok(names[args[i]] && args[i + 1] && !options[names[args[i]]], 'Use --output /new/private/directory [--pack-inputs /absolute/inputs.json | --plugin /absolute/crm --knowledge-plugin /absolute/knowledge --page-tools-plugin /absolute/workbench] [--metrics-origin http://127.0.0.1:PORT] [--knowledge-origin http://127.0.0.1:PORT] [--graph-settings /private/settings.json]');
       options[names[args[i]]] = args[i + 1];
     }
     console.log(JSON.stringify(await prepareProfile(options), null, 2));
   } catch (error) {
-    const code = String(error.message).match(/(?:CRM_PROFILE|PAGE_PROVIDER)_[A-Z_]+/)?.[0];
+    const code = String(error.message).match(/(?:CRM_PROFILE|PAGE_PROVIDER|PROFILE_PACK|PLUGIN_PACK|SERVICE_ARTIFACT)_[A-Z_]+/)?.[0]
+      ?? (['EEXIST', 'ENOENT'].includes(error.code) ? error.code : undefined);
     console.error((code ?? 'CRM_PROFILE_PREPARATION_FAILED') + ': select explicit split plugin packages and service origins; use a new private output directory.');
     process.exitCode = 1;
   }

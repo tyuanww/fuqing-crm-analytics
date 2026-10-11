@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
-import { mkdtemp, rm, symlink } from 'node:fs/promises';
+import { mkdtemp, mkdir, rm, symlink, writeFile, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -13,9 +13,9 @@ import {
 } from './constants.mjs';
 import { findReadyUrl, redactLaunchLog } from './launch-url.mjs';
 import { assertNoB0Disables, buildPluginDisable, buildPluginOverlay, buildShineBrandDisable, buildShineWaterfallDisable, buildShineCrowdActionDisable, buildShineQueryDisable, buildShineBoardDisable, buildShineFunnelDisable, pluginEnabled, pluginRowState } from './overlay.mjs';
-import { defaultShineBrandPath, defaultShineWaterfallPath, defaultShineCrowdActionPath, defaultShineQueryPath, defaultShineBoardPath, defaultShineFunnelPath } from './paths.mjs';
+import { reloadStartArgs } from './cli.mjs';
 import { assertOwnedHost, assertOwnedPort } from './ports.mjs';
-import { isolatedEnv, parseServeArgs, profileInstallPaths, profilePluginAddArgs, resolveShineBrandPath, resolveShineWaterfallPath, resolveShineCrowdActionPath, resolveShineQueryPath, resolveShineBoardPath, resolveShineFunnelPath } from './serve.mjs';
+import { installProfilePlugin, isolatedEnv, parseServeArgs, profileInstallPaths, profilePluginAddArgs, resolvePluginInputs, resolveShineBrandPath, resolveShineWaterfallPath, resolveShineCrowdActionPath, resolveShineQueryPath, resolveShineBoardPath, resolveShineFunnelPath } from './serve.mjs';
 
 const execFileAsync = promisify(execFile);
 
@@ -83,12 +83,35 @@ test('plugin-on install is dsh plugin add of the absolute workbench path', () =>
   assert.throws(() => profilePluginAddArgs(cli, 'dsh-plugin'), /absolute/);
 });
 
-test('shine-brand path is the repo package, not a sibling of --plugin-path', () => {
+test('official install uses the prepared PATH manager and rejects a wrong version before DSH runs', async () => {
+  const temp = await mkdtemp(join(tmpdir(), 'dsh-fixed-manager-'));
+  const priorPath = process.env.PATH;
+  try {
+    const bin = join(temp, 'bin'), workspace = join(temp, 'workspace'), runtime = join(temp, 'runtime');
+    await mkdir(bin); await mkdir(workspace); await mkdir(join(runtime, 'tmp'), { recursive: true });
+    const manager = join(bin, 'pnpm'), cli = join(temp, 'cli.mjs'), marker = join(runtime, 'tmp/cli.json');
+    await writeFile(cli, "import {writeFileSync} from 'node:fs';import {join} from 'node:path';writeFileSync(join(process.env.TMPDIR,'cli.json'),JSON.stringify({argv:process.argv.slice(2),network:process.env.COREPACK_ENABLE_NETWORK,node:process.execPath}));\n");
+    process.env.PATH = `${bin}:${dirname(process.execPath)}:/usr/bin:/bin`;
+    const prepared = { enabled: true, runtime, home: join(runtime, 'harness'), workspace, cli,
+      pluginPath: join(temp, 'package'), pin: { pnpm: '11.28.2' } };
+    await writeFile(manager, '#!/bin/sh\nprintf "11.28.1\\n"\n', { mode: 0o700 });
+    assert.throws(() => installProfilePlugin(prepared), /DSH_DEV_PNPM_VERSION/);
+    await assert.rejects(() => readFile(marker), { code: 'ENOENT' });
+    await writeFile(manager, '#!/bin/sh\nprintf "11.28.2\\n"\n', { mode: 0o700 });
+    installProfilePlugin(prepared);
+    const actual = JSON.parse(await readFile(marker, 'utf8'));
+    assert.deepEqual(actual.argv, ['plugin', '--profile', 'web', 'add', prepared.pluginPath]);
+    assert.equal(actual.network, '0');
+    assert.equal(actual.node, process.execPath);
+  } finally {
+    if (priorPath === undefined) delete process.env.PATH; else process.env.PATH = priorPath;
+    await rm(temp, { recursive: true, force: true });
+  }
+});
+
+test('shine-brand requires its own explicit path; no repository or sibling fallback', () => {
   const isolatedWorkbench = '/tmp/clean-build-workbench';
-  assert.equal(
-    resolveShineBrandPath({ plugin: 'on', shineBrand: 'on', pluginPath: isolatedWorkbench }),
-    defaultShineBrandPath(),
-  );
+  assert.throws(() => resolveShineBrandPath({ plugin: 'on', shineBrand: 'on', pluginPath: isolatedWorkbench }), /DSH_DEV_PLUGIN_INPUT_REQUIRED/);
   assert.equal(resolveShineBrandPath({ plugin: 'on', shineBrand: 'off', pluginPath: isolatedWorkbench }), null);
   assert.equal(resolveShineBrandPath({ plugin: 'off', shineBrand: 'on' }), null);
   const explicit = '/abs/dsh-plugins/shine-brand';
@@ -100,12 +123,8 @@ test('shine-brand path is the repo package, not a sibling of --plugin-path', () 
 
 test('plugin-on install order is brand, waterfall, crowd-action, query, board, then workbench', () => {
   const workbench = '/abs/dsh-plugins/analytics-workbench';
-  const brand = defaultShineBrandPath();
-  const waterfall = defaultShineWaterfallPath();
-  const crowd = defaultShineCrowdActionPath();
-  const query = defaultShineQueryPath();
-  const board = defaultShineBoardPath();
-  const funnel = defaultShineFunnelPath();
+  const brand = '/abs/brand', waterfall = '/abs/waterfall', crowd = '/abs/crowd';
+  const query = '/abs/query', board = '/abs/board', funnel = '/abs/funnel';
   assert.deepEqual(profileInstallPaths({
     pluginPath: workbench, shineBrandPath: brand, shineWaterfallPath: waterfall,
     shineCrowdActionPath: crowd, shineQueryPath: query, shineBoardPath: board, shineFunnelPath: funnel,
@@ -116,22 +135,18 @@ test('plugin-on install order is brand, waterfall, crowd-action, query, board, t
   }), [workbench]);
 });
 
-test('waterfall path is the repo package, not a sibling of --plugin-path', () => {
+test('waterfall requires an explicit path or can be disabled', () => {
   const isolatedWorkbench = '/tmp/clean-build-workbench';
-  assert.equal(
-    resolveShineWaterfallPath({ plugin: 'on', shineWaterfall: 'on', pluginPath: isolatedWorkbench }),
-    defaultShineWaterfallPath(),
-  );
+  assert.throws(() => resolveShineWaterfallPath({ plugin: 'on', shineWaterfall: 'on', pluginPath: isolatedWorkbench }), /DSH_DEV_PLUGIN_INPUT_REQUIRED/);
+  assert.equal(resolveShineWaterfallPath({ plugin: 'on', shineWaterfallPath: '/abs/waterfall' }), '/abs/waterfall');
   assert.equal(resolveShineWaterfallPath({ plugin: 'on', shineWaterfall: 'off', pluginPath: isolatedWorkbench }), null);
   assert.equal(resolveShineWaterfallPath({ plugin: 'off', shineWaterfall: 'on' }), null);
 });
 
-test('crowd-action path is the repo package, not a sibling of --plugin-path', () => {
+test('crowd-action requires an explicit path or can be disabled', () => {
   const isolatedWorkbench = '/tmp/clean-build-workbench';
-  assert.equal(
-    resolveShineCrowdActionPath({ plugin: 'on', shineCrowdAction: 'on', pluginPath: isolatedWorkbench }),
-    defaultShineCrowdActionPath(),
-  );
+  assert.throws(() => resolveShineCrowdActionPath({ plugin: 'on', shineCrowdAction: 'on', pluginPath: isolatedWorkbench }), /DSH_DEV_PLUGIN_INPUT_REQUIRED/);
+  assert.equal(resolveShineCrowdActionPath({ plugin: 'on', shineCrowdActionPath: '/abs/crowd' }), '/abs/crowd');
   assert.equal(resolveShineCrowdActionPath({ plugin: 'on', shineCrowdAction: 'off', pluginPath: isolatedWorkbench }), null);
   assert.equal(resolveShineCrowdActionPath({ plugin: 'off', shineCrowdAction: 'on' }), null);
 });
@@ -171,14 +186,17 @@ test('crowd-action-off overlay disables leftover crowd-action without touching w
   assertNoB0Disables(patch);
 });
 
-test('query and board paths are repo packages; off omits them', () => {
-  assert.equal(resolveShineQueryPath({ plugin: 'on', shineQuery: 'on' }), defaultShineQueryPath());
+test('query, board and funnel require explicit paths; off omits them', () => {
+  assert.throws(() => resolveShineQueryPath({ plugin: 'on', shineQuery: 'on' }), /DSH_DEV_PLUGIN_INPUT_REQUIRED/);
+  assert.equal(resolveShineQueryPath({ plugin: 'on', shineQueryPath: '/abs/query' }), '/abs/query');
   assert.equal(resolveShineQueryPath({ plugin: 'on', shineQuery: 'off' }), null);
-  assert.equal(resolveShineBoardPath({ plugin: 'on', shineBoard: 'on' }), defaultShineBoardPath());
+  assert.throws(() => resolveShineBoardPath({ plugin: 'on', shineBoard: 'on' }), /DSH_DEV_PLUGIN_INPUT_REQUIRED/);
+  assert.equal(resolveShineBoardPath({ plugin: 'on', shineBoardPath: '/abs/board' }), '/abs/board');
   assert.equal(resolveShineBoardPath({ plugin: 'on', shineBoard: 'off' }), null);
   assert.deepEqual(buildShineQueryDisable(), [{ id: SHINE_QUERY_UI_ID, disabled: true }]);
   assert.deepEqual(buildShineBoardDisable(), [{ id: SHINE_BOARD_UI_ID, disabled: true }]);
-  assert.equal(resolveShineFunnelPath({ plugin: 'on', shineFunnel: 'on' }), defaultShineFunnelPath());
+  assert.throws(() => resolveShineFunnelPath({ plugin: 'on', shineFunnel: 'on' }), /DSH_DEV_PLUGIN_INPUT_REQUIRED/);
+  assert.equal(resolveShineFunnelPath({ plugin: 'on', shineFunnelPath: '/abs/funnel' }), '/abs/funnel');
   assert.equal(resolveShineFunnelPath({ plugin: 'on', shineFunnel: 'off' }), null);
   assert.deepEqual(buildShineFunnelDisable(), [{ id: SHINE_FUNNEL_UI_ID, disabled: true }]);
 });
@@ -264,8 +282,33 @@ test('pinned SHA matches toolchain contract constant', () => {
 
 
 test('value-taking flags cannot silently fall back after a missing argument', () => {
-  for (const flag of ['--upstream', '--plugin-path', '--shine-brand', '--shine-brand-path', '--waterfall', '--waterfall-path', '--crowd-action', '--crowd-action-path', '--query', '--query-path', '--board', '--board-path', '--funnel', '--funnel-path', '--runtime', '--extra-patch', '--web-port']) {
+  for (const flag of ['--upstream', '--plugin-path', '--pack-inputs', '--shine-brand', '--shine-brand-path', '--waterfall', '--waterfall-path', '--crowd-action', '--crowd-action-path', '--query', '--query-path', '--board', '--board-path', '--funnel', '--funnel-path', '--runtime', '--extra-patch', '--web-port']) {
     assert.throws(() => parseServeArgs([flag]), /missing value/);
     assert.throws(() => parseServeArgs([flag, '--fresh']), /missing value/);
   }
+});
+
+test('reload forwards pinned inputs, feature switches and extra patches to its owned child', () => {
+  const options = parseServeArgs(['--plugin', 'on', '--pack-inputs', '/abs/inputs.json', '--upstream', '/abs/dsh',
+    '--shine-brand', 'on', '--waterfall', 'off', '--crowd-action', 'off', '--query', 'off', '--board', 'off', '--funnel', 'off',
+    '--extra-patch', '/abs/first.json', '--extra-patch', '/abs/second.json', '--page-http', 'on', '--page-http-port', '54321', '--web-port', '4328']);
+  const [, command, ...args] = reloadStartArgs(options, '/abs/runtime');
+  assert.equal(command, 'start');
+  assert.deepEqual(parseServeArgs(args), { ...options, runtime: '/abs/runtime' });
+  assert.throws(() => parseServeArgs(['--pack-inputs', 'relative.json']), /absolute/);
+});
+
+test('native fallback does not read missing package inputs', async () => {
+  const options = parseServeArgs(['--plugin', 'off', '--pack-inputs', '/not-present/inputs.json']);
+  assert.equal((await resolvePluginInputs(options)).packs, null);
+});
+
+test('reload with missing plugin inputs fails before creating a runtime or stopping a host', async t => {
+  const temp = await mkdtemp(join(tmpdir(), 'dsh-reload-input-'));
+  t.after(() => rm(temp, { recursive: true, force: true }));
+  const runtime = join(temp, 'must-not-exist');
+  const cli = fileURLToPath(new URL('./cli.mjs', import.meta.url));
+  await assert.rejects(() => execFileAsync(process.execPath, [cli, 'reload', '--plugin', 'on', '--runtime', runtime]),
+    error => error.code === 1 && /DSH_DEV_PLUGIN_INPUT_REQUIRED/.test(error.stderr));
+  assert.equal(existsSync(runtime), false);
 });

@@ -12,7 +12,8 @@ import { findReadyUrl, originOf, redactLaunchLog } from './launch-url.mjs';
 import { assertNoB0Disables, assertPluginRoot, buildPluginDisable, buildPluginOverlay, buildShineBrandDisable, buildShineWaterfallDisable, buildShineCrowdActionDisable, buildShineQueryDisable, buildShineBoardDisable, buildShineFunnelDisable, pluginEnabled } from './overlay.mjs';
 import { readToolchain, verifyUpstream } from './pin.mjs';
 import { assertOwnedHost, assertOwnedPort, assertFree } from './ports.mjs';
-import { assertCli, contextRoot, currentPath, defaultPluginPath, defaultShineBrandPath, defaultShineWaterfallPath, defaultShineCrowdActionPath, defaultShineQueryPath, defaultShineBoardPath, defaultShineFunnelPath, defaultRuntimeRoot, ensureDir, repoRoot, resolveUpstream } from './paths.mjs';
+import { assertCli, contextRoot, currentPath, defaultRuntimeRoot, ensureDir, repoRoot, resolveUpstream } from './paths.mjs';
+import { installProfilePacks, loadProfilePacks } from '../release/profile-packs.mjs';
 
 function writeJson(path, value) {
   return writeFile(path, JSON.stringify(value, null, 2) + '\n', { mode: 0o600 });
@@ -38,7 +39,7 @@ export function parseServeArgs(argv) {
   while (args.length) {
     const flag = args.shift();
     const valueFlags = [
-      '--upstream', '--plugin', '--plugin-path', '--shine-brand', '--shine-brand-path',
+      '--upstream', '--plugin', '--plugin-path', '--pack-inputs', '--shine-brand', '--shine-brand-path',
       '--waterfall', '--waterfall-path', '--crowd-action', '--crowd-action-path',
       '--query', '--query-path', '--board', '--board-path', '--funnel', '--funnel-path',
       '--extra-patch', '--runtime', '--web-port', '--host', '--page-http', '--page-http-port',
@@ -47,6 +48,7 @@ export function parseServeArgs(argv) {
     if (flag === '--upstream') options.upstream = args.shift();
     else if (flag === '--plugin') options.plugin = args.shift();
     else if (flag === '--plugin-path') options.pluginPath = args.shift();
+    else if (flag === '--pack-inputs') options.packInputs = args.shift();
     else if (flag === '--shine-brand') options.shineBrand = args.shift();
     else if (flag === '--shine-brand-path') options.shineBrandPath = args.shift();
     else if (flag === '--waterfall') options.shineWaterfall = args.shift();
@@ -77,6 +79,7 @@ export function parseServeArgs(argv) {
   pluginEnabled(options.shineBoard);
   pluginEnabled(options.shineFunnel);
   if (options.pluginPath) assert.ok(options.pluginPath.startsWith('/'), '--plugin-path must be an absolute path');
+  if (options.packInputs) assert.ok(isAbsolute(options.packInputs), '--pack-inputs must be an absolute path');
   if (options.shineBrandPath) {
     assert.ok(options.shineBrandPath.startsWith('/'), '--shine-brand-path must be an absolute path');
     assert.equal(pluginEnabled(options.shineBrand), true, '--shine-brand-path requires --shine-brand on');
@@ -118,41 +121,79 @@ export function parseServeArgs(argv) {
   return options;
 }
 
-/** Repo shine-brand path, or null when `--shine-brand off`. Never dirname(--plugin-path). */
+function explicitPluginPath(path, flag) {
+  assert.ok(typeof path === 'string' && isAbsolute(path), `DSH_DEV_PLUGIN_INPUT_REQUIRED: use --pack-inputs or ${flag} /absolute/built/package`);
+  return path;
+}
+
+/** Explicit compiled package path, or null when the feature is off. */
 export function resolveShineBrandPath(options) {
   if (!pluginEnabled(options.plugin)) return null;
   if (!pluginEnabled(options.shineBrand ?? 'off')) return null;
-  return options.shineBrandPath ?? defaultShineBrandPath();
+  return explicitPluginPath(options.shineBrandPath, '--shine-brand-path');
 }
 
 export function resolveShineWaterfallPath(options) {
   if (!pluginEnabled(options.plugin)) return null;
   if (!pluginEnabled(options.shineWaterfall ?? 'on')) return null;
-  return options.shineWaterfallPath ?? defaultShineWaterfallPath();
+  return explicitPluginPath(options.shineWaterfallPath, '--waterfall-path');
 }
 
 export function resolveShineCrowdActionPath(options) {
   if (!pluginEnabled(options.plugin)) return null;
   if (!pluginEnabled(options.shineCrowdAction ?? 'on')) return null;
-  return options.shineCrowdActionPath ?? defaultShineCrowdActionPath();
+  return explicitPluginPath(options.shineCrowdActionPath, '--crowd-action-path');
 }
 
 export function resolveShineQueryPath(options) {
   if (!pluginEnabled(options.plugin)) return null;
   if (!pluginEnabled(options.shineQuery ?? 'on')) return null;
-  return options.shineQueryPath ?? defaultShineQueryPath();
+  return explicitPluginPath(options.shineQueryPath, '--query-path');
 }
 
 export function resolveShineBoardPath(options) {
   if (!pluginEnabled(options.plugin)) return null;
   if (!pluginEnabled(options.shineBoard ?? 'on')) return null;
-  return options.shineBoardPath ?? defaultShineBoardPath();
+  return explicitPluginPath(options.shineBoardPath, '--board-path');
 }
 
 export function resolveShineFunnelPath(options) {
   if (!pluginEnabled(options.plugin)) return null;
   if (!pluginEnabled(options.shineFunnel ?? 'on')) return null;
-  return options.shineFunnelPath ?? defaultShineFunnelPath();
+  return explicitPluginPath(options.shineFunnelPath, '--funnel-path');
+}
+
+/** Read-only preflight shared by prepare and reload, before touching a runtime. */
+export async function resolvePluginInputs(options) {
+  if (!pluginEnabled(options.plugin)) return { options, packs: null };
+  if (options.packInputs) {
+    for (const key of ['pluginPath', 'shineBrandPath', 'shineWaterfallPath', 'shineCrowdActionPath', 'shineQueryPath', 'shineBoardPath', 'shineFunnelPath']) {
+      assert.equal(options[key], undefined, 'DSH_DEV_PLUGIN_INPUT_CONFLICT');
+    }
+    const packs = await loadProfilePacks({ inputsPath: options.packInputs });
+    assert.equal(packs.profile.service_binding, undefined, 'DSH_DEV_SERVICE_PROFILE_USE_CANDIDATE_HARNESS');
+    const selected = {
+      pluginPath: '@shine-mage/dsh-analytics-workbench-b0',
+      ...(pluginEnabled(options.shineBrand ?? 'off') ? { shineBrandPath: '@shine-mage/dsh-shine-brand' } : {}),
+      ...(pluginEnabled(options.shineWaterfall ?? 'on') ? { shineWaterfallPath: '@shine-mage/dsh-shine-waterfall' } : {}),
+      ...(pluginEnabled(options.shineCrowdAction ?? 'on') ? { shineCrowdActionPath: '@shine-mage/dsh-shine-crowd-action' } : {}),
+      ...(pluginEnabled(options.shineQuery ?? 'on') ? { shineQueryPath: '@shine-mage/dsh-shine-query' } : {}),
+      ...(pluginEnabled(options.shineBoard ?? 'on') ? { shineBoardPath: '@shine-mage/dsh-shine-board' } : {}),
+      ...(pluginEnabled(options.shineFunnel ?? 'on') ? { shineFunnelPath: '@shine-mage/dsh-shine-funnel' } : {}),
+    };
+    for (const id of Object.values(selected)) assert.ok(packs.plugins.some(item => item.id === id), 'DSH_DEV_PROFILE_PLUGIN_MISSING ' + id);
+    const supported = ['@shine-mage/dsh-analytics-workbench-b0', '@shine-mage/dsh-shine-brand',
+      '@shine-mage/dsh-shine-waterfall', '@shine-mage/dsh-shine-crowd-action', '@shine-mage/dsh-shine-query',
+      '@shine-mage/dsh-shine-board', '@shine-mage/dsh-shine-funnel'];
+    assert.ok(packs.plugins.every(item => supported.includes(item.id)), 'DSH_DEV_PROFILE_PLUGIN_UNSUPPORTED');
+    return { options, packs, selected };
+  }
+  const explicit = { ...options, pluginPath: explicitPluginPath(options.pluginPath, '--plugin-path'),
+    shineBrandPath: resolveShineBrandPath(options), shineWaterfallPath: resolveShineWaterfallPath(options),
+    shineCrowdActionPath: resolveShineCrowdActionPath(options), shineQueryPath: resolveShineQueryPath(options),
+    shineBoardPath: resolveShineBoardPath(options), shineFunnelPath: resolveShineFunnelPath(options) };
+  for (const path of profileInstallPaths(explicit)) await assertPluginRoot(path);
+  return { options: explicit, packs: null };
 }
 
 export function profileInstallPaths(prepared) {
@@ -233,12 +274,28 @@ export function isolatedEnv(runtime, home, extra = {}) {
   };
 }
 
-export async function prepareRuntime(options) {
+export async function validateRuntimeInputs(options, { packageInstall = false } = {}) {
   assert.equal(Number(process.versions.node.split('.')[0]), NODE_MAJOR, `Use Node ${NODE_MAJOR}`);
+  const input = await resolvePluginInputs(options);
+  options = input.options;
   const pin = await readToolchain(repoRoot);
   const upstream = resolveUpstream(options.upstream);
   const verified = await verifyUpstream(upstream, pin);
   const cli = await assertCli(upstream);
+  for (const extra of options.extraPatch ?? []) {
+    assertNoB0Disables(JSON.parse(await readFile(extra, 'utf8')));
+  }
+  if (packageInstall && pluginEnabled(options.plugin)) {
+    verifyPluginPackageManager(pin, pluginInstallEnv(options.runtime ?? defaultRuntimeRoot(),
+      join(options.runtime ?? defaultRuntimeRoot(), 'harness')), repoRoot);
+  }
+  return { ...input, pin, upstream, verified, cli };
+}
+
+export async function prepareRuntime(options) {
+  const input = await validateRuntimeInputs(options);
+  options = input.options;
+  const { pin, upstream, verified, cli } = input;
   const enabled = pluginEnabled(options.plugin);
   let pluginPath = null;
   let overlayPath = null;
@@ -252,6 +309,13 @@ export async function prepareRuntime(options) {
   for (const path of [home, workspace, join(runtime, 'tmp'), join(home, 'agents')]) {
     await mkdir(path, { recursive: true, mode: 0o700 });
   }
+  let packInstall = null;
+  if (input.packs) {
+    const owned = await mkdtemp(join(runtime, 'plugin-packs-'));
+    packInstall = await installProfilePacks({ packs: input.packs, output: join(owned, 'installed') });
+    options = { ...options, ...Object.fromEntries(Object.entries(input.selected).map(([key, id]) =>
+      [key, packInstall.plugins.find(item => item.id === id).root])) };
+  }
   const patches = [];
   let shineBrandPath = null;
   let shineWaterfallPath = null;
@@ -260,7 +324,7 @@ export async function prepareRuntime(options) {
   let shineBoardPath = null;
   let shineFunnelPath = null;
   if (enabled) {
-    pluginPath = await assertPluginRoot(options.pluginPath ?? defaultPluginPath());
+    pluginPath = await assertPluginRoot(options.pluginPath);
     const brandCandidate = resolveShineBrandPath({ ...options, plugin: 'on' });
     if (brandCandidate) shineBrandPath = await assertPluginRoot(brandCandidate);
     const waterfallCandidate = resolveShineWaterfallPath({ ...options, plugin: 'on' });
@@ -288,7 +352,7 @@ export async function prepareRuntime(options) {
     await writeJson(overlayPath, buildPluginDisable());
     patches.push(overlayPath);
   }
-  for (const extra of options.extraPatch) {
+  for (const extra of options.extraPatch ?? []) {
     await access(extra);
     patches.push(extra);
   }
@@ -301,7 +365,7 @@ export async function prepareRuntime(options) {
   }
   return {
     pin, upstream, verified, cli, enabled, pluginPath, shineBrandPath, shineWaterfallPath, shineCrowdActionPath, shineQueryPath, shineBoardPath, shineFunnelPath, overlayPath, patches,
-    runtime, home, workspace, host: options.host, webPort: options.webPort,
+    runtime, home, workspace, host: options.host, webPort: options.webPort, packInstall,
   };
 }
 
@@ -314,8 +378,17 @@ export function profilePluginAddArgs(cli, pluginPath) {
 
 function pluginInstallEnv(runtime, home) {
   const env = isolatedEnv(runtime, home);
-  const parts = [dirname(process.execPath), process.env.PATH, env.PATH].filter(Boolean);
-  return { ...env, PATH: parts.join(':') };
+  // Respect an explicitly prepared manager before Node's Corepack shim.
+  // DSH itself still runs with process.execPath, not PATH's node.
+  const parts = [process.env.PATH, dirname(process.execPath), env.PATH].filter(Boolean);
+  return { ...env, PATH: parts.join(':'), COREPACK_ENABLE_NETWORK: '0', COREPACK_ENABLE_DOWNLOAD_PROMPT: '0' };
+}
+
+function verifyPluginPackageManager(pin, env, cwd) {
+  const version = spawnSync('pnpm', ['--version'], { cwd, env, encoding: 'utf8', timeout: 15000, maxBuffer: 64 * 1024 });
+  assert.ok(!version.error && version.status === 0,
+    'DSH_DEV_PNPM_UNAVAILABLE: prepare the fixed manager on PATH; Corepack network is disabled');
+  assert.equal(version.stdout.trim(), pin.pnpm, 'DSH_DEV_PNPM_VERSION');
 }
 
 function runtimeEnv(prepared) {
@@ -336,11 +409,13 @@ function runtimeEnv(prepared) {
  */
 export function installProfilePlugin(prepared) {
   assert.equal(prepared.enabled, true, 'installProfilePlugin is plugin-on only');
+  const env = pluginInstallEnv(prepared.runtime, prepared.home);
+  verifyPluginPackageManager(prepared.pin, env, prepared.workspace);
   for (const pluginPath of profileInstallPaths(prepared)) {
     const args = profilePluginAddArgs(prepared.cli, pluginPath).slice(1);
     const result = spawnSync(process.execPath, [prepared.cli, ...args], {
       cwd: prepared.workspace,
-      env: pluginInstallEnv(prepared.runtime, prepared.home),
+      env,
       encoding: 'utf8',
       timeout: 180000,
       maxBuffer: 8 * 1024 * 1024,
