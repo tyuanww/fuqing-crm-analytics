@@ -159,7 +159,7 @@ process.exit(1);
   const cli = fileURLToPath(new URL('./composition-pack-inputs.mjs', import.meta.url));
   await assert.rejects(exec(process.execPath, [cli, '--repository', 'tyuanww/dsh-analytics-workbench',
     '--artifact-id', '123', '--artifact-sha256', 'a'.repeat(64), '--output', f.output], {
-    cwd: f.root, env: { ...process.env, GH_TOKEN: 'owned-mock-command-only', PATH: `${bin}:/usr/bin:/bin` },
+    cwd: f.root, env: { ...process.env, GH_TOKEN: 'synthetic-gh-test', PATH: `${bin}:/usr/bin:/bin` },
   }), /CI_COMPOSITION_ARTIFACT_FETCH_FAILED/);
   const record = JSON.parse(await readFile(observed));
   assert.equal(dirname(dirname(record.state)), record.config);

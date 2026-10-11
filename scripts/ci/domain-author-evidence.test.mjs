@@ -160,7 +160,7 @@ async function remoteFixture(t, { badSource = false, badDigest = false } = {}) {
   const output = join(directory, 'received'), githubEnv = join(directory, 'github.env');
   const invoke = () => execFileSync(process.execPath, [join(root, 'scripts/ci/domain-author-evidence.mjs'),
     '--output', output, '--python', python, '--github-env', githubEnv], {
-    env: { ...process.env, PATH: `${bin}:/usr/bin:/bin`, GH_TOKEN: 'owned-mock-command-only' }, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 15000,
+    env: { ...process.env, PATH: `${bin}:/usr/bin:/bin`, GH_TOKEN: 'synthetic-gh-test' }, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 15000,
   });
   return { directory, output, githubEnv, invoke };
 }

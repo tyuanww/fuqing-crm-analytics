@@ -149,7 +149,7 @@ async function mountShell(fetchImpl, options = {}) {
     cancelAnimationFrame: globalThis.window.cancelAnimationFrame,
     ...(options.competitionHttp ? {
       COMPETITION_HTTP_BASE: 'http://127.0.0.1:18084',
-      COMPETITION_HTTP_TOKEN: 'test-only-synthetic-token',
+      COMPETITION_HTTP_TOKEN: 'test-only-token',
     } : {}),
     __SHINE_QUERY__: true,
     __SHINE_BOARD__: true,
