@@ -494,18 +494,24 @@ def policy():
         return FirstPurchaseSavePolicy("no-age-v1", frozenset({"a"*64}), None, None, check_freshness=False)
     return FirstPurchaseSavePolicy("test-policy-v1", frozenset({"a"*64}), 1000, 2000)
 original = saved.remember
+def crash():
+    os.kill(os.getpid(), signal.SIGKILL)
+    # A worker thread can resume before macOS terminates the process. Keep
+    # the fault at this boundary instead of allowing it to commit afterward.
+    while True:
+        signal.pause()
 def interrupted(con, actor, op, *args):
     if op == saved.SAVE_PROVENANCE_OPERATION and operation == "before-provenance":
-        os.kill(os.getpid(), signal.SIGKILL)
+        crash()
     original(con, actor, op, *args)
     if op == saved.SAVE_PROVENANCE_OPERATION and operation == "after-provenance":
-        os.kill(os.getpid(), signal.SIGKILL)
+        crash()
 saved.remember = interrupted
 with TestClient(create_first_purchase_analysis_app(runs, store, make_registry(), save_policy=policy)) as api:
     response = api.post(RECEIPT_PREFIX, json=command, headers=headers(key="save-1"))
     assert response.status_code == 201, response.text
     if operation == "after-commit":
-        os.kill(os.getpid(), signal.SIGKILL)
+        crash()
     print(response.text, flush=True)
 """
 
