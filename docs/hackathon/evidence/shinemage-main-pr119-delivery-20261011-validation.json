@@ -1,0 +1,170 @@
+{
+  "schema_version": "shinemage-main-pr119-delivery/v1",
+  "observed_at": "2026-10-11T13:34:04.508375+00:00",
+  "repository": "tyuanww/fuqing-crm-analytics",
+  "pr": 119,
+  "pr_state": "OPEN",
+  "main_sha": "4859d13663284b7eb5ecf8614db9275d77061d27",
+  "source_fix_sha": "de196938b6039bbd97b32f62563032772a63f31b",
+  "source_head_before_documentation": "3cee76f08b8e55ad7c3971ce53a0d6b509ebb9f7",
+  "feature_branch": "codex/shinemage-abc-local-candidate",
+  "feature_ancestry_merge": {
+    "observed_at": "2026-10-11T13:23:01.474954+00:00",
+    "head": "de196938b6039bbd97b32f62563032772a63f31b",
+    "main": "4859d13663284b7eb5ecf8614db9275d77061d27",
+    "tree": "416501ff9d5f31519c31bf89b9f86c3b5829c422",
+    "merge_tree": "416501ff9d5f31519c31bf89b9f86c3b5829c422",
+    "qa": "zero-content-delta; affected tests and normal push hook passed at same tree",
+    "authorization": "user approved this specific feature ancestry merge and push; not PR merge",
+    "merge_commit": "3cee76f08b8e55ad7c3971ce53a0d6b509ebb9f7",
+    "parents": [
+      "de196938b6039bbd97b32f62563032772a63f31b",
+      "4859d13663284b7eb5ecf8614db9275d77061d27"
+    ],
+    "tree_unchanged": true,
+    "merge_exit": 0,
+    "push": "PASS: push-r5-result.json"
+  },
+  "normal_push_results": {
+    "push-r3": {
+      "exit": 0,
+      "started": 1791723245.368276,
+      "ended": 1791723833.393304,
+      "head": "28c7fde215a05b6dd38d1db6492321aecdc2a7f5",
+      "hook_bypass": false
+    },
+    "push-r4": {
+      "exit": 0,
+      "started": 1791724575.899771,
+      "ended": 1791724939.859034,
+      "head": "de196938b6039bbd97b32f62563032772a63f31b",
+      "hook_bypass": false
+    },
+    "push-r5": {
+      "exit": 0,
+      "head": "3cee76f08b8e55ad7c3971ce53a0d6b509ebb9f7",
+      "started": 1791724996.6564338,
+      "ended": 1791725467.7886562,
+      "hook_bypass": false
+    }
+  },
+  "current_full_backend": {
+    "observed_at": "2026-10-11T13:31:52.978042+00:00",
+    "head": "3cee76f08b8e55ad7c3971ce53a0d6b509ebb9f7",
+    "report_directory": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/checks/20261011T132318766683Z",
+    "junit_files": 12,
+    "unique_testcases": 3315,
+    "pass": 3237,
+    "skip": 78,
+    "fail": 0,
+    "duplicates": 0,
+    "scope": "synthetic-not-slow",
+    "exit": 0,
+    "duration_seconds": 448.424
+  },
+  "worker_targeted": {
+    "files": 6,
+    "pass": 129,
+    "fail": 0,
+    "skip": 0,
+    "regression": "real exited child + transient result write contention reproduced before fix and passed after fix; revocation/persistent lock/non-contention error guards",
+    "ubuntu_original_failure": "not claimed closed until fresh remote backend result"
+  },
+  "local_b0_check": {
+    "head": "de196938b6039bbd97b32f62563032772a63f31b",
+    "exit": 0,
+    "author_core_attribution": "fixed independent author CI",
+    "host_and_release": "NOT_RUN"
+  },
+  "frontend_at_28c7fde2": {
+    "build_exit": 0,
+    "files": 29,
+    "pass": 223,
+    "current_frontend_bytes": "unchanged; not counted as new frontend execution at 3cee76f0"
+  },
+  "private_staging": {
+    "observed_at": "2026-10-11T13:25:56.032139+00:00",
+    "repository": "tyuanww/dsh-analytics-workbench",
+    "run_id": 38143033361,
+    "run_url": "https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/38143033361",
+    "head_sha": "531dff4839c0355a031dd1b06be9bbeaa377aede",
+    "conclusion": "success",
+    "artifact_id": 11704150412,
+    "artifact_name": "shinemage-sealed-composition-20261011",
+    "artifact_bytes": 704355,
+    "artifact_sha256": "a98624139eb9dca81bc97ec02bdb9a7eeb756c27863e35634f68fc1dcc266371",
+    "expires_at": "2026-10-25T13:24:26Z",
+    "expired": false,
+    "exact_payload_members": 18,
+    "payload_rebuilt": false,
+    "main_receiver": "PASS",
+    "release_ready": false,
+    "main_receiver_receipt": "ci-staging-received-r1/preparation.json",
+    "receiver_scope": "9 original formal packs/2 existing profiles; no runtime/host/candidate/release"
+  },
+  "main_variables": [
+    {
+      "name": "SHINEMAGE_PACK_ARTIFACT_ID",
+      "value": "11704150412"
+    },
+    {
+      "name": "SHINEMAGE_PACK_ARTIFACT_REPOSITORY",
+      "value": "tyuanww/dsh-analytics-workbench"
+    },
+    {
+      "name": "SHINEMAGE_PACK_ARTIFACT_SHA256",
+      "value": "a98624139eb9dca81bc97ec02bdb9a7eeb756c27863e35634f68fc1dcc266371"
+    }
+  ],
+  "dedicated_read_secret": {
+    "name": "SHINEMAGE_PLUGIN_READ_TOKEN",
+    "configured": false,
+    "value_read_or_set": false,
+    "required_repositories": [
+      "tyuanww/dsh-analytics-workbench",
+      "tyuanww/dsh-crm-knowledge",
+      "tyuanww/dsh-shine-brand",
+      "tyuanww/shinemage-board-components"
+    ],
+    "permissions": [
+      "Actions: read",
+      "Contents: read"
+    ]
+  },
+  "remote_at_source_merge": {
+    "ci_run": 38143499513,
+    "ci_conclusion": "IN_PROGRESS_AT_OBSERVATION",
+    "preflight_run": 38143499305,
+    "preflight_conclusion": "FAIL",
+    "reviewed_source_ancestry_step": "PASS",
+    "author_evidence_step": "FAIL: WORKBENCH_AUTHOR_AUTH_REQUIRED",
+    "subsequent_b0_and_release_steps": "NOT_RUN"
+  },
+  "ocr_before_docs": {
+    "total_files": 216,
+    "reviewed_files": 216,
+    "reviewable_files": 153,
+    "skipped_files": 0,
+    "coverage_rate": 1,
+    "open_code_findings": 0,
+    "external_llm": "NOT_RUN"
+  },
+  "preserved": {
+    "historical_evidence_files": 92,
+    "version": "0.20.0.0",
+    "dsh": "0.1.7-rc.2",
+    "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+    "peer_changed": false,
+    "author_pr_head_unchanged": "6c5adc9faa04f692d5d4b3028af4f945ab49dfe4",
+    "task_external_untracked": "security-audit-skill/"
+  },
+  "new_candidate": "NOT_RUN",
+  "new_journal": "NOT_RUN",
+  "pr_merge": "NOT_RUN",
+  "release": "NOT_RUN",
+  "deployment": "NOT_RUN",
+  "product": "PARTIAL",
+  "sdk_distribution": "BLOCKED_WHERE_APPLICABLE",
+  "release_ready": false,
+  "raw_evidence_directory": "/Users/hutou/.codex/tasks/shinemage-main-pr-delivery-20261011-5rn503ab"
+}

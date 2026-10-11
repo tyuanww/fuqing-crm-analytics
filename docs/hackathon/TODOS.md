@@ -7,6 +7,14 @@
 2026-09-13 用户确认“核心版本优先交付、扩库完善后置”。目标是问数后 AI 优先使用定制组件自由组板，板内按选定范围修改；首批六类不是最终上限。M1／产品仍 PARTIAL；原全量 App Goal 保持 PAUSED。本节承接原本地施工记录，不把旧冻结实现反推成最终需求。
 
 
+### 2026-10-11 PR #119 与私有 CI 输入接续
+
+本轮分组交付及追加修复已正常推送。`de196938` 修复结果事务的瞬时 SQLite 争用；指定 main `4859d136` 已以 `3cee76f0` 合入 feature，文件树相同，PR #119 仍 OPEN。最新完整后端 3237 PASS / 78 SKIP / 0 FAIL、12 JUnit 无重复；受影响六文件 129 PASS 与完整主仓 B0 `--check` exit 0 单列，作者私有 core 继续按自己的固定 CI 记账。OCR 当前源码 216/216 已核对，没有外部 LLM 审查；不累计历史 PASS。
+
+私有上传 CI 已 SUCCESS，正式工件 `11704150412` 的 API digest／下载字节／18 成员一致，主仓九包／两 profile receiver 通过；三项非敏感变量已配置。仍缺用户在 GitHub 直接设置 `SHINEMAGE_PLUGIN_READ_TOKEN`。新 preflight 已越过 ancestry 检查，随后因该 secret 缺失失败；新 hosted CI 不能报总体通过。见[本轮交付与操作记录](evidence/shinemage-main-pr119-delivery-20261011.md)。下一步只配置专用四仓 Actions/Contents read secret，再按实际 PR head 重跑被阻断的检查，不复制个人 gh 登录或跳过门禁。
+
+新 worker 服务字节不能继承旧 candidate／服务／headed／WSL2／journal；peer 校准、正式组合／目标、真实 CRM／WeKnora／模型、SDK 分发和独立 DSH 升级保持原 stop/go。T1/T15/T19/T21 不勾完，产品 PARTIAL、release_ready=false。以下本地分组段保留推送前时点，旧“未推送／未运行”不覆盖本节。
+
 ### 2026-10-11 主仓本地分组交付
 
 本轮本地 Git 子项已完成：104 个代码／配置／测试路径按 12 个完整目的提交，边界清单另 1 笔、94 份证据另 1 笔，当前 5 份说明最后 1 笔；不压扁为一个大提交。源码与边界 `d36c567e`、证据 `39774244`，目的和逐组结果见[本地交付索引](evidence/shinemage-main-local-commit-closeout-20261011.md)。原有 92 份证据和失败同字节留存，其他任务目录不混入。

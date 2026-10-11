@@ -3,7 +3,7 @@
 适用于成果工作树的本地补丁；是否已集成，以该工作树 Git 状态和远端证据为准。授权见 [AGENTS](../../AGENTS.md)。当前施工与缺口看根 [STATUS.md](../../STATUS.md) 和 [TODOS 的 M1 核心交付](../hackathon/TODOS.md#m1-核心交付)。黑客松入口与 [治理实施记录](../hackathon/WORKFLOW-GOVERNANCE-2026-09-06.md) 是历史证据链，不是本轮任务卡。
 
 
-## 当前本地交付检查（2026-10-11）
+## 当前 PR 交付检查（2026-10-11）
 
 本轮代码、测试、CI 接线与证据已按目的分组提交，当前说明最后同步；逐组提交、原始输入及检查范围见[本地交付索引](../hackathon/evidence/shinemage-main-local-commit-closeout-20261011.md)与[机器记录](../hackathon/evidence/shinemage-main-local-commit-closeout-20261011-validation.json)。代码／边界 HEAD `d36c567e`、证据提交 `39774244`；Workbench `6c5adc9f`／`0af61dab…`、CRM `c4b1c91e`／`4663cce0…` 为当前正式包来源。下方“未提交”“两锁未应用”和历史 B0 计数保留当时范围。
 
@@ -16,9 +16,11 @@
 | CI 接线与路径选择 | 实际 pipeline 坏输入 28 项、共享路径 pytest 34 项分别通过 | 非全量 pipeline，也不是远端 CI |
 | 静态边界 | 既有生成器核对通过、12 项边界测试通过 | 不代表运行时全面无源码依赖 |
 
-各组计数不相加。作者私有覆盖仍归固定作者 CI，工具默认排除的文件已人工补查；OCR delegate 不调用外部模型。本轮没有最终 15 笔提交序列的新完整 B0／hosted CI、当前组合 candidate/journal、同对象目标／真实业务或模型验收。此前成功与失败按原输入留存，不抵扣这些未执行项。
+各组计数不相加。上述表保留分组源码检查范围，追加 worker 修复另按六文件 129 PASS、正常 hooks 当前完整后端 3237 PASS / 78 SKIP / 0 FAIL 记账；12 JUnit 没有重复。`de196938` 完整主仓 B0 `--check` exit 0，作者私有 core 归固定作者 CI，OCR 不调用外部模型。主仓已推送到 PR #119、main 祖先同步已完成；新的 hosted CI 因专用 read secret 缺失不能报总体通过，当前组合 candidate/journal、目标／真实业务与模型验收仍未执行。最新实际输入和失败见[本轮交付](../hackathon/evidence/shinemage-main-pr119-delivery-20261011.md)，此前成功与失败按原对象留存。
 
 本地 Git 交付先检查任务范围和暂存区；任务外 `security-audit-skill/` 不检查、不纳入提交，允许其独立留存。随后按实际授权推送 feature 分支、更新对应 PR，利用现有共享路径选择执行适用 CI；PR 审查修复以追加提交交付，获合并授权后完成适用 QA 和实际门禁。不要用旧文档 PR 的绿色结果替代新源码检查，也不要为“清洁”删除证据或改写共享历史。
+
+私有正式组合工件已由实际上传 CI 生成，ID `11704150412`／SHA-256 `a98624139eb9dca81bc97ec02bdb9a7eeb756c27863e35634f68fc1dcc266371`；18 成员与原输入一致，真实 receiver 核对九包／两 profile，主仓三项 artifact variables 已配置。用户仍需在主仓 Actions Secrets 直接配置专用 `SHINEMAGE_PLUGIN_READ_TOKEN`，只读 Workbench／CRM／shine-brand／board-components 的 Actions 与 Contents；不把 token 交给聊天或复制个人 gh 凭据。source merge 的 preflight ancestry 已 PASS，读取作者证据时因缺凭据失败，后续步骤 NOT_RUN。工件 10 月 25 日到期，之后须真实上传、核验新 ID/digest，再改变量，不能用过期 ID 或本机 ZIP 替代。
 
 此前三路径应用时点（保留原记录）：
 
