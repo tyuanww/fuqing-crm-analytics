@@ -36,7 +36,7 @@ before(async () => {
       : { '.': './lib/index.js', './graph-tools': './lib/graph-tools.js' };
     await json(join(root, 'package.json'), { name: '@shine-mage/dsh-' + domain, version: '0.1.0',
       type: 'module', packageManager: `pnpm@${PNPM_VERSION}`, exports, files: [...Object.values(exports).map(p => p.slice(2)), 'lib/data.json', 'lib/empty.txt'],
-      peerDependencies: { '@deepseek-ai/dsh-tools': DSH_SDK_VERSION, '@deepseek-ai/cordis': '4.0.2' },
+      peerDependencies: { '@deepseek-ai/dsh-tools': DSH_SDK_VERSION, '@deepseek-ai/cordis': '4.0.4' },
       shinemage: { plugin_domain: crm ? 'crm' : 'knowledge', composition_contract: 'crm-knowledge-split/v1' } });
     for (const name of Object.values(exports)) await writeFile(join(root, name), '// Contract fixture; never started.\nexport {};\n');
     await writeFile(join(root, 'lib/data.json'), '{"fixture":true}\n');
