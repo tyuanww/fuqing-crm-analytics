@@ -3,7 +3,29 @@
 适用于成果工作树的本地补丁；是否已集成，以该工作树 Git 状态和远端证据为准。授权见 [AGENTS](../../AGENTS.md)。当前施工与缺口看根 [STATUS.md](../../STATUS.md) 和 [TODOS 的 M1 核心交付](../hackathon/TODOS.md#m1-核心交付)。黑客松入口与 [治理实施记录](../hackathon/WORKFLOW-GOVERNANCE-2026-09-06.md) 是历史证据链，不是本轮任务卡。
 
 
-## 当前 PR 交付检查（2026-10-11）
+## 当前 PR #120 与 Cordis 对接验证（2026-10-12）
+
+本节核验对象是已正常推送的代码 head `bd96af9a`，不是后续文档提交的 HEAD。[PR #120](https://github.com/tyuanww/fuqing-crm-analytics/pull/120) 在捕获时 OPEN、MERGEABLE、CLEAN，尚未合并；最新 HEAD、PR 计数及对应 CI 以实际 Git／PR 为准，以下结果不抵扣后续 head。该对象的[实际主 CI](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38162446612)和[rc2 preflight](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38162446076)均 SUCCESS；六个适用 checks 成功、五个路径未选 job SKIPPED。本轮 Ubuntu 后端 3235 PASS／80 SKIP／0 FAIL／0 ERROR，12 JUnit／3315 testcase 无重复；B0 Python 862 PASS／41 subtests PASS，23 warnings 保留，opt-in/platform 跳过不计通过。本机正常 pre-push 的后端为 3237 PASS／78 SKIP、完整 B0 exit 0；当前 hosted Python 3.14.8 与本机固定 3.14.4 分别记账。
+
+本轮旧正向 host verifier 夹具只校准为精确 Cordis `4.0.4`，原拒绝和 journal 断言未改。五文件同次命令：`node --test --test-concurrency=1 scripts/release/plugin-host-evidence.test.mjs scripts/crm-calibration/profile.test.mjs scripts/crm-calibration/profile-packs.test.mjs scripts/crm-calibration/composition-inputs.test.mjs scripts/ci/composition-pack-inputs.test.mjs`，68 PASS／0 FAIL／0 SKIP；不与此前四文件 42 或作者测试相加。核心及本机独立审查无发现，外部 Claude/OCR NOT_RUN。
+
+组合 archive 由私有暂存 `8f44bb64` 的[真实上传 CI](https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/38160012202)生成，ID `11710265230`、SHA-256 `fbef740af07cafc5bfd92bcc310bd9427d7e59eaed644114a0632a244df601f4`；18 成员、九包／两 profile 验证通过。三项非敏感变量已更新，read Secret 未改，有效期至 `2026-10-25T17:31:36Z`。使用实际 archive 或 GitHub ID／digest，禁止用本机自制 ZIP 冒充 CI 工件；所有消费输出须用新独占目录，不复用前两轮失败输出。正常推送须分别满足 backend 与 B0 的依赖锁，不能只核对 Python 版本。原始日志、JUnit 去重、GitHub 合成 checkout 两父提交和工件摘要见[本轮记录](../hackathon/evidence/shinemage-cordis-pr120-ci-delivery-20261012.md)与[机器证据](../hackathon/evidence/shinemage-cordis-pr120-ci-delivery-20261012-validation.json)。
+
+当前两份 profile 均无 `service_binding`；完整服务／目标／terminal／browser／恢复仍需当前组合的新正式输入和回执。绿色 PR/preflight 不证明已合入 main、真实业务或 SDK 分发通过；文档接续的 Git 交付状态另外按实际 HEAD／PR 核验。下节保留本地应用／提交时点，旧“未推送／工件未上传”不覆盖本节。
+
+## PR #119 合并与 Cordis 本地对接（2026-10-12，历史时点）
+
+主仓 PR #119 已合并到 `5943d4be`，[main CI](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38151751342) SUCCESS：后端 3235 PASS / 80 SKIP / 0 FAIL / 0 ERROR、12 JUnit 无重复，B0 Python 862 PASS / 41 subtests PASS。主仓 CI Python 为 3.14.8；本轮本地固定 Python 仍为 3.14.4。合并前 QA 的三个影响组单列，不能与 main 或作者 CI 相加。详细记录见[本轮证据](../hackathon/evidence/shinemage-cordis-formal-cutover-proposal-20261012.md)。
+
+CRM `ceeff996`、Knowledge `22daa108` 的新 Ubuntu CI 完成严格类型检查、构建、本包测试和内容打包。两份普通 CI 包外层摘要不同于本地包，成员字节一致；当前正式 pack 由新 CI lib 与干净固定提交的 manifest/声明资产通过原 producer 生成，reader 读回成功，重复输出拒绝，未重编 SDK。正式回执 `4be65420…` / `1ce746b6…` 与精确 `4.0.4` 守卫/组合锁一致对接，不继承旧 candidate/journal、headed 或 WSL 回执。
+
+受影响入口：`node --test --test-concurrency=1 --test-reporter=tap scripts/crm-calibration/profile.test.mjs scripts/crm-calibration/profile-packs.test.mjs scripts/crm-calibration/composition-inputs.test.mjs scripts/ci/composition-pack-inputs.test.mjs`。13 路径授权应用后在实际主仓同次 42 PASS / 0 FAIL / 0 SKIP；九包/两份原 profile 实际准备 exit 0，19 项指定源码负对照 EPERM，重复输出 EEXIST 且首次字节不变。固定 pnpm 11.28.2 与 Python 3.14.4 必须可达，结果根不得复用。该组只验证受影响守卫和包装配，不是最新完整 B0 或新 hosted CI；隔离提案的同数结果保留，不累计。
+
+当前正式 CRM/Knowledge 两包另在官方 npm 宿主完成三进程、18 项断言，exit 0：原生鉴权、CRM/Knowledge preset 的未运行合成会话、服务未配置的 CRM 状态、官方卸载后原生壳保留会话且路由 404、重新注册后的路由和 preset 恢复。七项主仓／作者／旧安装包／合成凭据夹具负对照 EPERM，仅 localhost 网络，实例与 4328 端口均回收。复用既有官方 npm 安装的 26544 个文件／符号链接同字节副本，剔除旧插件，再用官方 `dsh plugin --profile web add link:<已验证正式包解包根>` 注册；实际解析 dsh-tools `0.1.7-rc.2`、Cordis `4.0.4`。任意目录仅解包不能替代注册；缺注册的 r1/r2 启动失败、旧包遮蔽及 CLI／记录器错误原样保留，成功轮为 r7。它不是新 npm 冷安装、完整九包运行组合、browser 或正式 candidate/journal 回执。具体命令、输入和失败见[本轮证据](../hackathon/evidence/shinemage-cordis-formal-cutover-proposal-20261012.md)。
+
+本次主仓代码／组合锁已本地提交为 `2b98baaa`（8 路径），5 份说明／证据随独立 docs 提交交付；未推送。旧主仓汇总 artifact 不包含新两包；新 hosted CI 前须真实上传并核验汇总工件，不能改变量指向本机 ZIP。当前正式组合服务/目标/terminal/browser/恢复与真实业务仍未关闭；上述未连接宿主恢复不抵扣带服务的正式恢复链。SDK 分发 BLOCKED、PARTIAL、release_ready=false。
+
+## PR #119 合并前交付检查（2026-10-11，历史）
 
 本轮代码、测试、CI 接线与证据已按目的分组提交，当前说明最后同步；逐组提交、原始输入及检查范围见[本地交付索引](../hackathon/evidence/shinemage-main-local-commit-closeout-20261011.md)与[机器记录](../hackathon/evidence/shinemage-main-local-commit-closeout-20261011-validation.json)。代码／边界 HEAD `d36c567e`、证据提交 `39774244`；Workbench `6c5adc9f`／`0af61dab…`、CRM `c4b1c91e`／`4663cce0…` 为当前正式包来源。下方“未提交”“两锁未应用”和历史 B0 计数保留当时范围。
 

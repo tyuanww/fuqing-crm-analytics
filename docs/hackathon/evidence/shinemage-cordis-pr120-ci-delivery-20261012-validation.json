@@ -1,0 +1,347 @@
+{
+  "schema": "shinemage-cordis-pr120-ci-delivery/v1",
+  "captured_at": "2026-10-11T18:28:47.523039+00:00",
+  "source_head": "bd96af9aa8d7c5172e8d10fcc9060277f53650e5",
+  "branch": "codex/shinemage-abc-local-candidate",
+  "public_main": "5943d4be8ee2f0061c57a4afdb980dfae9a8dc88",
+  "pr": {
+    "number": 120,
+    "url": "https://github.com/tyuanww/fuqing-crm-analytics/pull/120",
+    "state": "OPEN",
+    "headRefOid": "bd96af9aa8d7c5172e8d10fcc9060277f53650e5",
+    "baseRefOid": "5943d4be8ee2f0061c57a4afdb980dfae9a8dc88",
+    "mergeStateStatus": "CLEAN",
+    "mergeable": "MERGEABLE",
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-11T18:07:04Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38162446612/job/114538016256",
+        "name": "changes / changes",
+        "startedAt": "2026-10-11T18:06:58Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-11T18:12:19Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38162446076/job/114538014794",
+        "name": "preflight",
+        "startedAt": "2026-10-11T18:06:57Z",
+        "status": "COMPLETED",
+        "workflowName": "DSH rc2 release preflight"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-11T18:07:22Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38162446612/job/114538048236",
+        "name": "lint",
+        "startedAt": "2026-10-11T18:07:07Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-11T18:07:04Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38162446612/job/114538049240",
+        "name": "ground-truth-lint",
+        "startedAt": "2026-10-11T18:07:05Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-11T18:07:04Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38162446612/job/114538049669",
+        "name": "contract-filterbuilder-lint",
+        "startedAt": "2026-10-11T18:07:05Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-11T18:20:54Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38162446612/job/114538048175",
+        "name": "test",
+        "startedAt": "2026-10-11T18:07:07Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-11T18:07:04Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38162446612/job/114538049237",
+        "name": "frontend",
+        "startedAt": "2026-10-11T18:07:05Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-11T18:07:04Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38162446612/job/114538049602",
+        "name": "dependency-audit",
+        "startedAt": "2026-10-11T18:07:05Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-11T18:07:04Z",
+        "conclusion": "SKIPPED",
+        "detailsUrl": "https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38162446612/job/114538049820",
+        "name": "docker-smoke",
+        "startedAt": "2026-10-11T18:07:05Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-11T18:19:25Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38162446612/job/114538048222",
+        "name": "b0-contract-build",
+        "startedAt": "2026-10-11T18:07:07Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-11T18:20:59Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38162446612/job/114540921109",
+        "name": "merge-gate",
+        "startedAt": "2026-10-11T18:20:57Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      }
+    ]
+  },
+  "staging": {
+    "head": "8f44bb6484fe534d2adbafd4fe230b1d33e15f57",
+    "run_id": 38160012202,
+    "conclusion": "success",
+    "changed_paths": 5
+  },
+  "composition_artifact": {
+    "repository": "tyuanww/dsh-analytics-workbench",
+    "id": 11710265230,
+    "sha256": "fbef740af07cafc5bfd92bcc310bd9427d7e59eaed644114a0632a244df601f4",
+    "expires_at": "2026-10-25T17:31:36Z",
+    "bytes": 704352,
+    "members": 18,
+    "packs": 9,
+    "profiles": 2,
+    "receiver": "PASS"
+  },
+  "composition_lock_sha256": "f95632d0070c785177ffe9f744f3f6bcea4c9de171790d1b58b84728a7391bd4",
+  "plugins": [
+    {
+      "id": "@shine-mage/dsh-analytics-workbench-b0",
+      "source_sha": "6c5adc9faa04f692d5d4b3028af4f945ab49dfe4",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "0af61dabbab9a2205fb1d9ff3a2eec7e8194800d9af3f9043b0a5587a81edc12",
+      "pack_sha256": "e41df9f5a8f7031c092319222543c8d723ca644c0c9d69b2ae53f13257e9b79e"
+    },
+    {
+      "id": "@shine-mage/dsh-crm-knowledge",
+      "source_sha": "ceeff9965509a545cc1761091bca604b31c02285",
+      "version": "0.0.0-crm.1",
+      "manifest_sha256": "4be65420f929fface899fd48928dde4e444289bc428d46adeb3497a6bb5d9abc",
+      "pack_sha256": "5803819e9eb36bacd5b237eacff928133ff6eb361c1f111eedd3f1ecf60aeb05"
+    },
+    {
+      "id": "@shine-mage/dsh-knowledge",
+      "source_sha": "22daa108bcf72cc80af28156ba1f6601fcfc00dc",
+      "version": "0.0.0-candidate.1",
+      "manifest_sha256": "1ce746b6593892f176fe7c259a8e3fbc52ca91ceb3e6a855a61589e43ce9ca49",
+      "pack_sha256": "870fdeeadc07bf7187d475ba4a77fe0d417b915a72473b8712c004f7079b4090"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-board",
+      "source_sha": "76601df755ec8ef8c9726ea770ec488b745efd71",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "671acb9502969f08e5db6b83369afa3ea1dec1699a7a9fc5a1680abfa9aa39cf",
+      "pack_sha256": "e1348dd7739778a5ec2d676420e86290ca49f69cdf045959fd82441232a30c1a"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-crowd-action",
+      "source_sha": "5c39e21c27565397383b009725634ea66e9c1525",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "d3998ed96530db66b3aa53f263c93848e7078846a8a0f612a1c099202bfa406f",
+      "pack_sha256": "3fb9d88d228e3af4a9c965961c035650b65365392a9caccb4c14f336b003b2ca"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-query",
+      "source_sha": "1f1e19d280923ebe7aac964f8b5825d497434db8",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "13433c1c4687cd33f0b314b60a38c76fb8390ee52375755320d4ca5a6f378fae",
+      "pack_sha256": "774c6ae63e0fb170a81a9e9fb9551d55d40724faae5966c1d95bb32624fb89ce"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-funnel",
+      "source_sha": "dbfaede0961586d773c708e833a4ac1c9f2515dc",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "1e631c02c1fa6903b1f76953edc4e7da3fc85b1b96c1292567f8561a78a8eefb",
+      "pack_sha256": "581ba069aa8af4598f553e4b11b57216ac2205d71baebbafc267367cb3814ba6"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-waterfall",
+      "source_sha": "d123ac1d0e7bad3e5de45169b3e72c38623b858a",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "43a9c673ada75b763c1867e6bb6fd66c75da393cd6c2fd2fd669aadbe73c6af5",
+      "pack_sha256": "73a1d4ba2b085c1f9f2a1eff410aca239cf9775de952ba70aafdaa78ec5ac35d"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-brand",
+      "source_sha": "57ebcf38278068394a4feb42125c30c195fd912a",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "d5039166969023075253e65e31c4d7dba910ae6ea10b9b40bf7f147bdb5efd24",
+      "pack_sha256": "4b867bf5b4e08d9aa1f45f20b20b78cbd9e11c236194ffafaa5188d8d173bd13"
+    }
+  ],
+  "main_variables": "THREE_UPDATED_AND_READ_BACK; secret not modified",
+  "local_backend": {
+    "tests": 3315,
+    "passed": 3237,
+    "skipped": 78,
+    "failures": 0,
+    "errors": 0
+  },
+  "local_python": "3.14.4",
+  "node": "24.19.0",
+  "local_full_b0": "PASS_EXIT_0_WITH_EXISTING_OPT_IN_PLATFORM_SKIPS",
+  "hosted_backend": {
+    "counts": {
+      "tests": 3315,
+      "passed": 3235,
+      "skipped": 80,
+      "failures": 0,
+      "errors": 0
+    },
+    "unique_testcases": 3315,
+    "no_duplicates": true,
+    "python": "3.14.8 (main, Oct  1 2026, 02:38:33) [GCC 13.3.0]",
+    "artifact_id": 11711176564,
+    "artifact_sha256": "709aaec0df98334f0f00ca49789e3582b716f1651477179e80bbb5d385ee457c",
+    "checkout_sha": "bbee6ed3a70164daa43213858c5a9a825c971c68",
+    "checkout_parents": {
+      "parents": [
+        "5943d4be8ee2f0061c57a4afdb980dfae9a8dc88",
+        "bd96af9aa8d7c5172e8d10fcc9060277f53650e5"
+      ],
+      "sha": "bbee6ed3a70164daa43213858c5a9a825c971c68"
+    }
+  },
+  "hosted_b0": {
+    "at": "2026-10-11T18:21:39.695275+00:00",
+    "run_id": 38162446612,
+    "head_sha": "bd96af9aa8d7c5172e8d10fcc9060277f53650e5",
+    "job_id": 114538048222,
+    "conclusion": "success",
+    "log_sha256": "8003bb8013d9db146379272365e1ae5d4e2bf74ec14bc32be0aed4ead4cb65d8",
+    "bytes": 891351,
+    "actual_markers": [
+      "2026-10-11T18:12:39.2886462Z B0 exact Python closure verified",
+      "2026-10-11T18:18:06.3418991Z 862 passed, 23 warnings, 41 subtests passed in 306.28s (0:05:06)",
+      "2026-10-11T18:19:23.2773155Z B0 main checks passed; Workbench core remains attributed to its fixed author CI."
+    ],
+    "terminal_escape_handling": "raw bytes redirected only to owned file; markers sanitized before output",
+    "scope": "Actual hosted B0 job only; not real business/target/production readiness"
+  },
+  "commit_review": {
+    "sha": "bd96af9aa8d7c5172e8d10fcc9060277f53650e5",
+    "changed_paths": 1,
+    "regression": "68 PASS / 0 FAIL / 0 SKIP; one actual run",
+    "core_native_review": "COMPLETE_0_FINDINGS",
+    "outside_review": "NOT_RUN"
+  },
+  "raw_evidence": [
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/remote-delivery-r1/remote-delivery-validation-r2.json",
+      "sha256": "8b6563de4045bb543c082dfac451110a4589da2aab576a355b1bc6e8ac720232",
+      "bytes": 7783
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/remote-delivery-r1/actual-artifact-verification-r1.json",
+      "sha256": "0b525a93daa669b9eae79fcdf8a4928bf45a284d7649fb4632f686a717f6d6ee",
+      "bytes": 5311
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/remote-delivery-r1/local-backend-verified-r3.json",
+      "sha256": "a9f91dcc900c70d77690976f283812d24ff7203bb34112c2be57bda05a57a1da",
+      "bytes": 4689
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/remote-delivery-r1/main-push-execution-r3.json",
+      "sha256": "f46a6842bc724087b42e02d5c3735161c8a44a03b2bcb3ebd5b0e6ea4fe625d7",
+      "bytes": 427
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/remote-delivery-r1/main-push-r3.stdout",
+      "sha256": "ff23f783a261cfbc96f43698205b8445568d1de040409067ccf16e1d545fd4e1",
+      "bytes": 124644
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/remote-delivery-r1/main-push-r3.stderr",
+      "sha256": "e6ca2b9375e4f07be8f306b48253aa9b1ec4142972dd8c6eb8bf836a89008056",
+      "bytes": 122
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/remote-delivery-r1/hosted-ci-r2/38162446612-final.json",
+      "sha256": "21e6dd621aedad2dbfe71ee3e1355d0811664f6b8c25178dd5693afd994e027d",
+      "bytes": 16975
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/remote-delivery-r1/hosted-ci-r2/38162446076-final.json",
+      "sha256": "b4e4b83e0c7ffc7c8e3f33dc979ef82d9d7293c1ca1f7aa975f51bee41f7e4e1",
+      "bytes": 5113
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/remote-delivery-r1/hosted-ci-r2/backend-artifact-verification-r1.json",
+      "sha256": "b689de105f14dd7080baccda10eb89ad890d5fab44d0f775937390b9917951dd",
+      "bytes": 4055
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/remote-delivery-r1/hosted-ci-r2/b0-job-verification-r2.json",
+      "sha256": "f025bb6fba5dde2b4ec316b11cccd3e00f8a7a31ca87548490f33f9aa720ddb6",
+      "bytes": 792
+    }
+  ],
+  "admission_inputs": {
+    "profiles": [
+      {
+        "path": "config/dsh-profile.crm-knowledge.rc2.json",
+        "sha256": "7ca3511663ab2ea5d1bb8f839c83b29f5bbd6655238450ad08a04510642191ba",
+        "service_binding": "ABSENT_NOT_CONFIGURED"
+      },
+      {
+        "path": "config/dsh-profile.rc2.json",
+        "sha256": "c8c9df8c36f11060ad8fbcce68cb2ebf28d783c5eb5759d1b71ff5463782c981",
+        "service_binding": "ABSENT_NOT_CONFIGURED"
+      }
+    ],
+    "current_combo_candidate_journal": "NOT_GENERATED_UNCHANGED",
+    "current_services_target_terminal_browser_recovery": "NOT_RUN_NOT_BOUND_TO_CURRENT_COMBINATION",
+    "two_package_npm_host_smoke": "EXISTING_18_ASSERTIONS_PASS_UNCONNECTED_NOT_FULL_COMBINATION",
+    "old_candidate": "DO_NOT_INHERIT_B75_OR_A0D5DD08_RESULTS"
+  },
+  "remaining": {
+    "pr120_merge_and_actual_new_main_ci": "NOT_RUN_NOT_AUTHORIZED",
+    "real_crm_weknora_models_uat": "NOT_RUN_NO_NEW_AUTHORIZED_INPUTS",
+    "standalone": "NOT_RUN_MISSING_EXISTING_PAGE_PACKAGE",
+    "sdk_distribution": "BLOCKED_NO_NEW_DISTRIBUTION_PROOF",
+    "dsh_upgrade": "NOT_RUN_NO_NEW_PIN_OR_CANDIDATE"
+  },
+  "captured_doc_git_delivery": "LOCAL_DRAFT_NOT_COMMITTED_NOT_PUSHED",
+  "product": "PARTIAL",
+  "release_ready": false
+}

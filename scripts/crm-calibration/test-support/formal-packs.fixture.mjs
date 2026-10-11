@@ -33,7 +33,7 @@ export async function fixture(t, selected = ['crm', 'knowledge', 'page'], mutate
     await mkdir(directory, { recursive: true });
     const manifest = { name: spec.id, type: 'module', version: '0.0.0-fixture', exports: structuredClone(spec.exports),
       files: [...new Set(exportFiles(spec.exports))],
-      peerDependencies: { '@deepseek-ai/dsh-tools': '0.1.7-rc.2', ...(domain === 'page' || spec.leaf ? {} : { '@deepseek-ai/cordis': '4.0.2' }) },
+      peerDependencies: { '@deepseek-ai/dsh-tools': '0.1.7-rc.2', ...(domain === 'page' || spec.leaf ? {} : { '@deepseek-ai/cordis': '4.0.4' }) },
       ...(spec.leaf || domain === 'page' ? { dsh: { client: { platform: 'web', inject: [] } } } : {}),
       ...(domain === 'page' || spec.leaf ? {} : { shinemage: { plugin_domain: domain, composition_contract: 'crm-knowledge-split/v1' } }) };
     mutate(manifest, domain);

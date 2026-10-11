@@ -24,7 +24,9 @@ test('composition binds the two independent packs and a separately selected publ
 
 for (const [name, selected, mutate, code] of [
   ['missing knowledge', ['crm'], () => {}, /CRM_COMPOSITION_SELECTION/],
-  ['relaxed Cordis peer', ['crm', 'knowledge'], m => { m.peerDependencies['@deepseek-ai/cordis'] = '4.0.4'; }, /CRM_COMPOSITION_CORDIS_PIN/],
+  ['legacy Cordis peer', ['crm', 'knowledge'], m => { m.peerDependencies['@deepseek-ai/cordis'] = '4.0.2'; }, /CRM_COMPOSITION_CORDIS_PIN/],
+  ['Cordis range', ['crm', 'knowledge'], m => { m.peerDependencies['@deepseek-ai/cordis'] = '^4.0.4'; }, /CRM_COMPOSITION_CORDIS_PIN/],
+  ['another Cordis patch', ['crm', 'knowledge'], m => { m.peerDependencies['@deepseek-ai/cordis'] = '4.0.5'; }, /CRM_COMPOSITION_CORDIS_PIN/],
   ['missing SDK peer', ['crm', 'knowledge'], m => { delete m.peerDependencies['@deepseek-ai/dsh-tools']; }, /PLUGIN_PACK_DSH_PEER_INVALID/],
   ['private graph entry', ['crm', 'knowledge'], (m, domain) => { if (domain === 'knowledge') { m.exports['./graph-tools'] = './lib/private.js'; m.files.push('lib/private.js'); } }, /CRM_COMPOSITION_PUBLIC_EXPORT/],
   ['another domain under the CRM identity', ['crm', 'knowledge'], m => { m.shinemage.plugin_domain = 'other'; }, /CRM_PROFILE_SPLIT_PACKAGE_REQUIRED/],

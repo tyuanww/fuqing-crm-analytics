@@ -78,7 +78,7 @@ export function inspectDeclaredPlugin(manifest, name, entries, domain, prefix = 
   // Split CRM/knowledge packages declare Cordis directly. The existing page
   // provider consumes only the pinned DSH tools peer and does not declare it.
   if (domain || manifest.peerDependencies?.['@deepseek-ai/cordis'] !== undefined) {
-    assert.equal(manifest.peerDependencies?.['@deepseek-ai/cordis'], '4.0.2', prefix + '_CORDIS_PIN');
+    assert.equal(manifest.peerDependencies?.['@deepseek-ai/cordis'], '4.0.4', prefix + '_CORDIS_PIN');
   }
   assert.match(manifest.version ?? '', /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/, prefix + '_VERSION');
   if (domain) {
