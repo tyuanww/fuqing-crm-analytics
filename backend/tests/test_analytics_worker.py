@@ -508,3 +508,111 @@ def test_worker_state_read_does_not_retry_other_database_errors(tmp_path, monkey
     with pytest.raises(sqlite3.DatabaseError):
         manager._worker_record("exec_" + "a" * 32, metrics)
     assert len(calls) == 1 and metrics == {}
+
+
+@pytest.mark.parametrize("revoke_after_busy", [False, True])
+def test_exited_worker_result_commit_retries_busy_without_repeating_query(tmp_path, monkeypatch, revoke_after_busy):
+    store, _, intent, step, fixture = setup_worker(tmp_path)
+    exited, lock_ready, busy_seen, lock_released = (threading.Event() for _ in range(4))
+    revoked = threading.Event()
+    original_complete = store.complete_step
+    attempts = []
+
+    def complete(*args, **kwargs):
+        attempts.append(1)
+        try:
+            return original_complete(*args, **kwargs)
+        except AnalyticsError as failure:
+            if failure.status == 503 and failure.code == "STATE_UNAVAILABLE":
+                busy_seen.set()
+                assert lock_released.wait(5)
+            raise
+
+    def hook(point):
+        if point == "worker-exit:after_commit" and not exited.is_set():
+            exited.set()
+            assert lock_ready.wait(5)
+
+    monkeypatch.setattr(store, "complete_step", complete)
+    store.fault_hook = hook
+    manager = WorkerManager(store, lambda _: None if revoked.is_set() else actor(), fixture)
+    with ThreadPoolExecutor(1) as pool:
+        result = pool.submit(manager.execute, actor(), intent, step)
+        try:
+            assert exited.wait(5), "worker did not prove its independent exit"
+            with sqlite_connection(store.path) as writer:
+                writer.execute("BEGIN IMMEDIATE")
+                lock_ready.set()
+                assert busy_seen.wait(5), "result commit did not encounter the real write lock"
+                if revoke_after_busy:
+                    revoked.set()
+                writer.rollback()
+            lock_released.set()
+            if revoke_after_busy:
+                with pytest.raises(AnalyticsError, match="PERMISSION_REVOKED"):
+                    result.result(timeout=5)
+            else:
+                assert result.result(timeout=5) == fixture_result()
+        finally:
+            lock_ready.set()
+            lock_released.set()
+    records = store.worker_records(active_only=False)
+    assert len(records) == 1 and records[0]["state"] == "EXITED"
+    assert records[0]["exit_code"] == 0 and records[0]["error_code"] is None
+    snapshot = store.get(actor(), intent.run_id)
+    assert snapshot.diagnostics.tool_steps_used == 1 and snapshot.diagnostics.dispatch_attempts == 1
+    if revoke_after_busy:
+        assert len(attempts) == 1
+        assert snapshot.status == "CANCELLING" and snapshot.diagnostics.error_code == "PERMISSION_REVOKED"
+        with pytest.raises(AnalyticsError):
+            store.step_result(actor(), intent.run_id, intent.attempt_id, step.step_id)
+    else:
+        assert len(attempts) == 2
+        assert snapshot.status == "RUNNING" and snapshot.diagnostics.error_code is None
+        assert store.step_result(actor(), intent.run_id, intent.attempt_id, step.step_id) == fixture_result()
+
+
+def test_result_write_retry_remains_bounded_for_persistent_lock(tmp_path, monkeypatch):
+    store, _, intent, step, fixture = setup_worker(tmp_path)
+    manager = WorkerManager(store, lambda _: actor(), fixture)
+    original_complete = store.complete_step
+    attempts = []
+
+    def complete(*args, **kwargs):
+        attempts.append(1)
+        return original_complete(*args, **kwargs)
+
+    monkeypatch.setattr(store, "complete_step", complete)
+    with sqlite_connection(store.path) as writer:
+        writer.execute("BEGIN IMMEDIATE")
+        with pytest.raises(AnalyticsError, match="STATE_UNAVAILABLE"):
+            manager._complete_step(actor(), intent, step, fixture_result())
+    assert len(attempts) == 3
+    assert store.worker_records(active_only=False) == []
+    with pytest.raises(AnalyticsError):
+        store.step_result(actor(), intent.run_id, intent.attempt_id, step.step_id)
+    snapshot = store.get(actor(), intent.run_id)
+    assert snapshot.status == "RUNNING" and snapshot.diagnostics.tool_steps_used == 1
+
+
+@pytest.mark.parametrize("error_kind", ["io_error", "no_code", "database", "no_cause"])
+def test_result_write_does_not_retry_unidentified_or_non_busy_errors(tmp_path, monkeypatch, error_kind):
+    store, _, intent, step, fixture = setup_worker(tmp_path)
+    manager = WorkerManager(store, lambda _: actor(), fixture)
+    calls = []
+
+    def broken_complete(*_args, **_kwargs):
+        calls.append(1)
+        failure = AnalyticsError(503, "STATE_UNAVAILABLE", "controlled state failure", retryable=True)
+        if error_kind == "no_cause":
+            raise failure
+        cause = (sqlite3.DatabaseError("controlled unreadable state") if error_kind == "database"
+                 else sqlite3.OperationalError("controlled unreadable state"))
+        if error_kind == "io_error":
+            cause.sqlite_errorcode = sqlite3.SQLITE_IOERR
+        raise failure from cause
+
+    monkeypatch.setattr(store, "complete_step", broken_complete)
+    with pytest.raises(AnalyticsError, match="STATE_UNAVAILABLE"):
+        manager._complete_step(actor(), intent, step, fixture_result())
+    assert len(calls) == 1

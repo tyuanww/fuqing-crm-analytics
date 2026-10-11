@@ -390,7 +390,12 @@ def test_http_state_busy_keeps_original_call_and_recovers_without_duplicate_work
             assert busy.json()["error"]["retryable"] is True
             writer.rollback()
         completed = settled_native_step(client, payload)
-        assert completed.status_code == 200, completed.text
+        if completed.status_code != 200:
+            pytest.fail(
+                f"{completed.text}; run diagnostics: "
+                f"{app.state.store.get(fp_actor(), run_id).diagnostics.model_dump()}; "
+                f"worker records: {app.state.store.worker_records(active_only=False)}"
+            )
         assert completed.json()["run_id"] == run_id
         assert completed.json()["result"]["facts"] == EXPECTED["result"]["facts"]
         replay = settled_native_step(client, payload)

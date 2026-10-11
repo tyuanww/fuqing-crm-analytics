@@ -158,6 +158,28 @@ class WorkerManager:
             return "EXECUTION_UNKNOWN"
         return None
 
+    def _complete_step(self, principal, intent, step, result):
+        # The child has already exited. Retry only the result transaction,
+        # never the query, while retaining its original identity and deadline.
+        for attempt in range(3):
+            current = self.resolve_actor(principal.actor_id)
+            if current is None:
+                raise AnalyticsError(403, "PERMISSION_REVOKED", "当前任务权限已撤销。")
+            try:
+                self.store.complete_step(current, intent.run_id, intent.attempt_id, step.step_id, result)
+                return
+            except AnalyticsError as failure:
+                cause = failure.__cause__
+                code = getattr(cause, "sqlite_errorcode", None)
+                if (failure.status != 503 or failure.code != "STATE_UNAVAILABLE" or not failure.retryable
+                        or not isinstance(cause, sqlite3.OperationalError) or not isinstance(code, int)
+                        or code & 0xFF not in {sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED} or attempt == 2):
+                    raise
+                self._hook("worker:result-write-retry", {
+                    "run_id": intent.run_id, "attempt_id": intent.attempt_id, "step_id": step.step_id,
+                })
+                time.sleep(0.01)
+
     def _child_config(self, principal, intent, step, binding, fd, temporary):
         config = {"binding": binding, "profile": self.store.profile.model_dump(), "profile_hash": self.store.profile.digest,
                   "fixture": asdict(self.fixture), "lease_fd": fd, "temp_dir": str(temporary)}
@@ -323,10 +345,7 @@ class WorkerManager:
             if error:
                 raise AnalyticsError(409, error, "合成查询已停止或失败；原任务状态可继续查询。")
             try:
-                current = self.resolve_actor(principal.actor_id)
-                if current is None:
-                    raise AnalyticsError(403, "PERMISSION_REVOKED", "当前任务权限已撤销。")
-                self.store.complete_step(current, intent.run_id, intent.attempt_id, step.step_id, result)
+                self._complete_step(principal, intent, step, result)
             except AnalyticsError as failure:
                 reason = {"QUERY_TIMEOUT": "TIMEOUT", "PERMISSION_REVOKED": "PERMISSION_REVOKED",
                           "FORBIDDEN": "PERMISSION_REVOKED"}.get(failure.code, "TOOL_FAILED")
