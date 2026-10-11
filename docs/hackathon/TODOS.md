@@ -7,6 +7,14 @@
 2026-09-13 用户确认“核心版本优先交付、扩库完善后置”。目标是问数后 AI 优先使用定制组件自由组板，板内按选定范围修改；首批六类不是最终上限。M1／产品仍 PARTIAL；原全量 App Goal 保持 PAUSED。本节承接原本地施工记录，不把旧冻结实现反推成最终需求。
 
 
+### 2026-10-11 Secret 实跑与 CLI 状态接续
+
+专用 `SHINEMAGE_PLUGIN_READ_TOKEN` 已配置，真实四类私有 receiver 均 PASS；`fc46b243` 主 CI attempt 2 已 SUCCESS，B0/merge-gate PASS。`4c28df71` 路径诊断和 `f1f1d500` SIGKILL 测试修正已正常推送，本地完整后端、前端和 B0 分别通过；不累计作者或历史计数。
+
+`f1f1d500` preflight 的后续失败已定位为 gh 写入 `.local/state/gh/device-id`。`f861a895` 已本地绑定现有独占临时状态目录，回归旧实现失败、修复后固定输入单次合跑 59 PASS / 0 FAIL / 0 SKIP；原干净工作区门禁保持。下一步核对追加提交后的实际 CI/preflight，再按单独合并授权走适用 QA 与门禁。见[本轮接续与失败留存](evidence/shinemage-pr119-ci-secret-reconnect-20261011.md)。无需重复配置已接通的 Secret。
+
+产品 PARTIAL、release_ready=false，原 peer/正式组合/真实业务/SDK stop/go 不变。以下缺 Secret 的描述保留此前准备时点，不覆盖本节。
+
 ### 2026-10-11 PR #119 与私有 CI 输入接续
 
 本轮分组交付及追加修复已正常推送。`de196938` 修复结果事务的瞬时 SQLite 争用；指定 main `4859d136` 已以 `3cee76f0` 合入 feature，文件树相同，PR #119 仍 OPEN。最新完整后端 3237 PASS / 78 SKIP / 0 FAIL、12 JUnit 无重复；受影响六文件 129 PASS 与完整主仓 B0 `--check` exit 0 单列，作者私有 core 继续按自己的固定 CI 记账。OCR 当前源码 216/216 已核对，没有外部 LLM 审查；不累计历史 PASS。
