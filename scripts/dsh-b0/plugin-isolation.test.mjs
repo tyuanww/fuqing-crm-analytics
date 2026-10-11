@@ -1,77 +1,78 @@
-/** Actual source-only package proof; no DSH host, registry install or release candidate. */
+/** Receive fixed independent author archives; no source build, SDK link or host boot. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { lstat, mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+import { isAbsolute, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
-import { copyPluginKitSources, copyTreeBounded } from './clean-build.mjs';
-import { packPlugin } from '../release/plugin-pack.mjs';
-import { linkWorkspaceKit } from './plugin-kit-link.mjs';
+import { readCompositionInputs } from '../crm-calibration/composition-inputs.mjs';
+import { insideArtifact } from '../release/service-artifact-evidence.mjs';
 
-const exec = promisify(execFile);
-const repository = fileURLToPath(new URL('../..', import.meta.url));
-const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(repository, '.context/dsh-b0/upstream-0.1.7-rc.2'));
-const buildTools = join(repository, 'dsh-plugins/plugin-kit/build-tools');
-const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
+const exec = promisify(execFile), hash = bytes => createHash('sha256').update(bytes).digest('hex');
+const { packs, pages } = await readCompositionInputs({ inputsPath: process.env.CRM_COMPOSITION_PACK_INPUTS,
+  pageInputsPath: process.env.CRM_COMPOSITION_PAGE_INPUTS });
+assert.ok(pages, 'PACKAGE_ISOLATION_PAGE_INPUTS_REQUIRED');
+const names = ['shine-brand', 'shine-query', 'crm-knowledge', 'knowledge'];
+const selected = names.map(name => {
+  const id = `@shine-mage/dsh-${name}`, matches = [...packs.plugins, ...pages.plugins].filter(row => row.id === id);
+  assert.equal(matches.length, 1, `PACKAGE_ISOLATION_SELECTION ${id}`);
+  return { name, packed: matches[0] };
+});
+const base = process.env.CRM_COMPOSITION_OUTPUT;
+assert.ok(isAbsolute(base ?? ''), 'PACKAGE_ISOLATION_OUTPUT_REQUIRED');
+const parent = await lstat(base);
+assert.ok(parent.isDirectory() && !parent.isSymbolicLink(), 'PACKAGE_ISOLATION_OUTPUT_REQUIRED');
+const output = join(base, 'package-isolation');
+await mkdir(output, { mode: 0o700 });
+const results = [];
 
-for (const name of ['shine-brand', 'shine-query', 'crm-knowledge', 'knowledge']) {
-  test(`${name} builds, tests and packs with only its own source and the dev kit`, { timeout: 240000 }, async t => {
-    const root = await mkdtemp(join(tmpdir(), 'dsh-independent-plugin-'));
-    t.after(() => rm(root, { recursive: true, force: true }));
-    const plugin = join(root, 'dsh-plugins', name);
-    const source = join(repository, 'dsh-plugins', name);
-    const options = { destinationRoot: root, budget: { bytes: 0, files: 0 } };
-    await copyPluginKitSources(join(repository, 'dsh-plugins/plugin-kit'), join(root, 'dsh-plugins/plugin-kit'), options);
-    for (const item of ['package.json', 'build.mjs', 'src', 'cordis.patch.yml']) {
-      await copyTreeBounded(join(source, item), join(plugin, item), options);
+for (const { name, packed } of selected) {
+  test(`${name} receives only its sealed own runtime files without source or build inputs`, async () => {
+    const directory = join(output, name), unpacked = join(directory, 'unpacked');
+    await mkdir(directory, { mode: 0o700 });
+    // Hold and recheck exactly the bytes validated by the existing formal reader.
+    assert.equal(hash(packed.manifestBytes), packed.manifestSha256, 'PACKAGE_ISOLATION_MANIFEST_CHANGED');
+    assert.deepEqual(JSON.parse(packed.manifestBytes), packed.receipt, 'PACKAGE_ISOLATION_RECEIPT_CHANGED');
+    assert.equal(hash(packed.archive), packed.receipt.tarball.sha256, 'PACKAGE_ISOLATION_ARCHIVE_CHANGED');
+    const archive = join(directory, 'input.tgz');
+    await writeFile(archive, packed.archive, { flag: 'wx', mode: 0o600 });
+    await writeFile(join(directory, 'plugin-pack.json'), packed.manifestBytes, { flag: 'wx', mode: 0o600 });
+    await exec(process.env.FQ_B0_PYTHON ?? 'python3', ['-I', fileURLToPath(new URL('../release/secure-unpack.py', import.meta.url)),
+      archive, unpacked, '--max-entries', '10000', '--max-bytes', String(20 * 1024 * 1024)],
+    { cwd: directory, timeout: 30000, maxBuffer: 256 * 1024 });
+    assert.deepEqual(await readdir(unpacked), ['package'], 'PACKAGE_ISOLATION_ARCHIVE_ROOT');
+    const root = join(unpacked, 'package'), files = [];
+    for (const entry of await readdir(root, { recursive: true, withFileTypes: true })) {
+      assert.ok(!entry.isSymbolicLink(), 'PACKAGE_ISOLATION_SYMLINK');
+      if (entry.isDirectory()) continue;
+      assert.ok(entry.isFile(), 'PACKAGE_ISOLATION_SPECIAL_FILE');
+      const path = relative(root, join(entry.parentPath, entry.name)).replaceAll('\\', '/');
+      assert.doesNotMatch(path, /(?:^|\/)(?:src|test|tests|node_modules|\.git)(?:\/|$)|\.map$/, 'PACKAGE_ISOLATION_DEVELOPMENT_FILE');
+      files.push(path);
     }
-    if (['crm-knowledge', 'knowledge'].includes(name)) {
-      // This test has no Python fixture or workbench source dependency.
-      for (const file of ['contract.typecheck.ts', 'package.test.mjs']) {
-        await copyTreeBounded(join(source, 'test', file), join(plugin, 'test', file), options);
-      }
-    }
-    assert.deepEqual((await readdir(join(root, 'dsh-plugins'))).sort(), ['plugin-kit', name].sort());
-    const command = (file, args, cwd = root, environment = {}) => exec(file, args, { cwd, timeout: 180000, maxBuffer: 2 * 1024 * 1024,
-      env: { ...process.env, B0_BUILD_UPSTREAM: upstream, ...environment } });
-    // This throwaway test commit supplies pack's real provenance check. It is
-    // never pushed, nor used as a reviewed product/release source identity.
-    await writeFile(join(root, '.gitignore'), 'node_modules/\nlib/\nout/\n');
-    await command('git', ['init', '-q']);
-    await command('git', ['add', '.']);
-    await command('git', ['-c', 'user.name=isolated-fixture', '-c', 'user.email=fixture@example.invalid',
-      '-c', 'commit.gpgsign=false', '-c', 'core.hooksPath=/dev/null', 'commit', '-qm', 'synthetic independent package fixture']);
-    await linkWorkspaceKit(plugin, join(root, 'dsh-plugins/plugin-kit'));
-    await command(process.execPath, [join(plugin, 'build.mjs'), upstream, buildTools]);
-    const tests = ['crm-knowledge', 'knowledge'].includes(name) ? ['test/package.test.mjs']
-      : (await readdir(join(plugin, 'src'))).filter(file => file.endsWith('.test.mjs')).sort().map(file => `src/${file}`);
-    assert.ok(tests.length, 'ISOLATED_PACKAGE_TESTS_REQUIRED');
-    await command(process.execPath, ['--test', ...tests.map(file => join(plugin, file))], plugin);
-    const receipt = await packPlugin({ plugin, outputDir: join(root, 'out') });
-    assert.equal(receipt.activation, 'NOT_RUN');
-    assert.equal(receipt.dsh_pin, '0.1.7-rc.2');
-    const artifacts = JSON.parse(await readFile(join(plugin, 'package.json'))).files.filter(file => file.startsWith('lib/'));
-    assert.deepEqual(receipt.entries.sort(), ['cordis.patch.yml', ...artifacts, 'package.json'].sort());
-    if (['crm-knowledge', 'knowledge'].includes(name)) {
-      // Exercise the actual verified archive, not the nearby build directory.
-      // Only pinned SDK peers are supplied by this synthetic host fixture.
-      const installed = join(root, 'installed/package');
-      await command('python3', [join(repository, 'scripts/release/secure-unpack.py'),
-        join(root, 'out', receipt.tarball.name), join(root, 'installed'), '--max-entries', '100', '--max-bytes', '4194304']);
-      assert.deepEqual((await readdir(installed)).sort(), ['cordis.patch.yml', 'lib', 'package.json']);
-      await symlink(join(plugin, 'node_modules'), join(installed, 'node_modules'), 'dir');
-      await command(process.execPath, ['--test', join(plugin, 'test/package.test.mjs')], installed, { CRM_TEST_PLUGIN_ROOT: installed, KNOWLEDGE_TEST_PLUGIN_ROOT: installed });
-    }
-    const outputs = {};
-    for (const file of artifacts) {
-      outputs[file] = sha256(await readFile(join(plugin, file)));
-    }
-    t.diagnostic(JSON.stringify({ scope: 'isolated-package-build-test-pack', package: name, fixture_only: true,
-      production_activation: 'NOT_RUN', source_manifest_sha256: sha256(await readFile(join(source, 'package.json'))),
-      tarball: receipt.tarball, outputs, test_files: tests, copied_inputs: options.budget }));
+    assert.deepEqual(files.sort(), [...packed.receipt.entries].sort(), 'PACKAGE_ISOLATION_ENTRIES');
+    const manifest = JSON.parse(await insideArtifact(root, 'package.json', 256 * 1024));
+    assert.deepEqual(manifest, packed.manifest, 'PACKAGE_ISOLATION_MANIFEST_BYTES');
+    assert.equal(manifest.name, packed.id, 'PACKAGE_ISOLATION_ID');
+    assert.equal(manifest.version, packed.receipt.package_version, 'PACKAGE_ISOLATION_VERSION');
+    assert.equal(packed.receipt.activation, 'NOT_RUN');
+    const fileHashes = {};
+    for (const path of files) fileHashes[path] = hash(await insideArtifact(root, path, 20 * 1024 * 1024));
+    results.push({ id: packed.id, source_sha: packed.receipt.source_sha, manifest_sha256: packed.manifestSha256,
+      tarball: packed.receipt.tarball, root, files: fileHashes, entrypoints: manifest.exports });
   });
 }
+
+test.after(async () => {
+  if (results.length !== selected.length) return;
+  await writeFile(join(output, 'runtime-inputs.json'), JSON.stringify({
+    schema: 'shinemage-fixed-pack-isolation/v1', crm_inputs_sha256: packs.inputsSha256,
+    page_inputs_sha256: pages.inputsSha256, packages: results,
+    scope: 'four exact published archives, independently unpacked own runtime files',
+    source_build_and_private_tests: 'NOT_RUN_AUTHOR_OWNED', sdk_resolution: 'NOT_RUN',
+    public_behavior: 'SEPARATE_FIXED_PACK_CONSUMERS', host: 'NOT_RUN', candidate: 'NOT_RUN',
+    real_business: 'NOT_RUN', release_ready: false,
+  }, null, 2) + '\n', { flag: 'wx', mode: 0o600 });
+});
