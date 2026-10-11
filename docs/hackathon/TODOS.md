@@ -7,6 +7,18 @@
 2026-09-13 用户确认“核心版本优先交付、扩库完善后置”。目标是问数后 AI 优先使用定制组件自由组板，板内按选定范围修改；首批六类不是最终上限。M1／产品仍 PARTIAL；原全量 App Goal 保持 PAUSED。本节承接原本地施工记录，不把旧冻结实现反推成最终需求。
 
 
+### 2026-10-12 PR #119 合并与精确 Cordis 对接
+
+PR #119 已普通 merge 到 `5943d4be`，实际 main CI `38151751342` SUCCESS。后端 3235 PASS / 80 SKIP / 0 FAIL / 0 ERROR、12 JUnit 无重复；B0 Python 862 PASS / 41 subtests PASS 单列。旧 preflight 与扫描失败按原字节保留，不用这些结果覆盖本次增量。
+
+CRM `ceeff996`、Knowledge `22daa108` 已各自提交并推送精确 Cordis `4.0.4` 校准，新 Ubuntu push/PR CI 均成功，作者 PR #1 仍开放。主仓 13 路径已按授权本地应用，组合锁对接新正式回执 `4be65420…` / `1ce746b6…`，守卫保持精确版本。实际主仓四文件 42 PASS / 0 FAIL / 0 SKIP，九包/两 profile 准备成功，19 项指定源码负对照 EPERM，重复写入 EEXIST；不与隔离提案或历史结果相加。见[原始输入与实测](evidence/shinemage-cordis-formal-cutover-proposal-20261012.md)。
+
+当前正式两包使用同字节官方 npm 依赖副本，经原生 `dsh plugin --profile web add link:<已验证解包目录>` 注册后，开启／官方卸载回退／重新注册恢复三进程、18 项断言 PASS，实际 peer 解析为 dsh-tools `0.1.7-rc.2`、Cordis `4.0.4`。新 home、会话保留、CRM 未连接状态、原生壳路由 404 和恢复后 200 均核对；七项来源负对照 EPERM，自有进程与端口已回收。缺注册的启动失败、旧包遮蔽和记录器错误保留；这不是新 npm 冷安装、真实服务或完整候选验收。
+
+主仓 8 个代码／组合锁路径已本地提交为 `2b98baaa`，本节及相关说明／证据作为独立 docs 提交交付；未推送、新 hosted CI 未跑。旧汇总 artifact 不包含这两包，须在对应远端动作获授权后真实上传并核验。正式服务/目标/terminal/browser/恢复、真实 CRM/WeKnora/模型/UAT、standalone、SDK 分发及 DSH 升级仍开放；T1/T15/T19/T21 不勾完，PARTIAL、release_ready=false。
+
+以下段落保留更早施工时点；旧 PR OPEN、缺 Secret、peer 4.0.2 和 CI NOT_RUN 不能覆盖本节当前事实。
+
 ### 2026-10-11 Secret 实跑与 CLI 状态接续
 
 专用 `SHINEMAGE_PLUGIN_READ_TOKEN` 已配置，真实四类私有 receiver 均 PASS；`fc46b243` 主 CI attempt 2 已 SUCCESS，B0/merge-gate PASS。`4c28df71` 路径诊断和 `f1f1d500` SIGKILL 测试修正已正常推送，本地完整后端、前端和 B0 分别通过；不累计作者或历史计数。

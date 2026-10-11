@@ -1,0 +1,371 @@
+{
+  "schema": "shinemage-cordis-formal-main-proposal-evidence/v1",
+  "stage": "LOCALLY_APPLIED_CURRENT_FORMAL_TWO_PACKAGE_HOST_SMOKE_PASS",
+  "main_source": "5943d4be8ee2f0061c57a4afdb980dfae9a8dc88",
+  "formal_pack_proof": {
+    "schema": "shinemage-cordis-formal-proposal/v1",
+    "at": "2026-10-11T16:17:03.394554+00:00",
+    "owners": [
+      {
+        "owner": "crm",
+        "source_sha": "ceeff9965509a545cc1761091bca604b31c02285",
+        "ci_run": 38153846752,
+        "ci_artifact": 11707682181,
+        "receipt_path": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/formal-packs/crm/plugin-pack.json",
+        "receipt_sha256": "4be65420f929fface899fd48928dde4e444289bc428d46adeb3497a6bb5d9abc",
+        "receipt": {
+          "schema_version": "dsh-plugin-pack/v1",
+          "package_name": "@shine-mage/dsh-crm-knowledge",
+          "package_version": "0.0.0-crm.1",
+          "dsh_pin": "0.1.7-rc.2",
+          "source_sha": "ceeff9965509a545cc1761091bca604b31c02285",
+          "source_dirty": false,
+          "tarball": {
+            "name": "shine-mage-dsh-crm-knowledge-0.0.0-crm.1.tgz",
+            "bytes": 234901,
+            "sha256": "5803819e9eb36bacd5b237eacff928133ff6eb361c1f111eedd3f1ecf60aeb05"
+          },
+          "entries": [
+            "cordis.patch.yml",
+            "lib/client.js",
+            "lib/host.js",
+            "lib/index.js",
+            "package.json"
+          ],
+          "activation": "NOT_RUN",
+          "state_path": "NOT_APPLICABLE_PLUGIN_PACK_ONLY"
+        },
+        "member_comparisons": {
+          "lib/client.js": {
+            "sha256": "72bbd7d715ec5ab8e5d2bd7fce29a74dc7a32ad9e6fae8df86278de27c17eab3",
+            "comparison": "exact new CI content member bytes"
+          },
+          "lib/host.js": {
+            "sha256": "5149a148257b794c3b7bff939173fdc003d9f5d38382d8cc23fe58310c979d64",
+            "comparison": "exact new CI content member bytes"
+          },
+          "lib/index.js": {
+            "sha256": "a31542e7f3d77a7f9fd49af3f5428917f99a9a1e16d416ac29eab4a99237da63",
+            "comparison": "exact new CI content member bytes"
+          },
+          "package.json": {
+            "sha256": "28d9ade0350a7244dc9dd8fef3de6bd477e75c24b29ea4bcac90e69ae63ae32c",
+            "comparison": "manifest JSON unchanged except existing producer removes scripts"
+          },
+          "cordis.patch.yml": {
+            "sha256": "9b20b6350ace9ee49ebfc6dadc6aed5a4f357f0d3f36900c75831e254886400c",
+            "comparison": "exact new CI content member bytes"
+          }
+        },
+        "clone": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/clones/crm",
+        "clone_clean": true,
+        "sdk_install_build": "NOT_RUN",
+        "pack_exit": 0,
+        "reader_exit": 0,
+        "repeat_exit": 2,
+        "main_cutover": "NOT_APPLIED",
+        "host_service_candidate_journal": "NOT_RUN",
+        "release_ready": false
+      },
+      {
+        "owner": "knowledge",
+        "source_sha": "22daa108bcf72cc80af28156ba1f6601fcfc00dc",
+        "ci_run": 38153849607,
+        "ci_artifact": 11707329123,
+        "receipt_path": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/formal-packs/knowledge/plugin-pack.json",
+        "receipt_sha256": "1ce746b6593892f176fe7c259a8e3fbc52ca91ceb3e6a855a61589e43ce9ca49",
+        "receipt": {
+          "schema_version": "dsh-plugin-pack/v1",
+          "package_name": "@shine-mage/dsh-knowledge",
+          "package_version": "0.0.0-candidate.1",
+          "dsh_pin": "0.1.7-rc.2",
+          "source_sha": "22daa108bcf72cc80af28156ba1f6601fcfc00dc",
+          "source_dirty": false,
+          "tarball": {
+            "name": "shine-mage-dsh-knowledge-0.0.0-candidate.1.tgz",
+            "bytes": 14476,
+            "sha256": "870fdeeadc07bf7187d475ba4a77fe0d417b915a72473b8712c004f7079b4090"
+          },
+          "entries": [
+            "cordis.patch.yml",
+            "lib/graph-tools.js",
+            "lib/index.js",
+            "package.json"
+          ],
+          "activation": "NOT_RUN",
+          "state_path": "NOT_APPLICABLE_PLUGIN_PACK_ONLY"
+        },
+        "member_comparisons": {
+          "lib/graph-tools.js": {
+            "sha256": "425e876ef85dbfb8524080340b42e29d12b5eb0799ca79a35a3f5d8cf9e6b864",
+            "comparison": "exact new CI content member bytes"
+          },
+          "lib/index.js": {
+            "sha256": "e04d90e8e4a51fcebf14c1666ace8796847c2ac13737805f933655c9b196180e",
+            "comparison": "exact new CI content member bytes"
+          },
+          "package.json": {
+            "sha256": "de27d73b80c145fd801404685563ca621c5e95286244d812c4c25e734e0a1c98",
+            "comparison": "manifest JSON unchanged except existing producer removes scripts"
+          },
+          "cordis.patch.yml": {
+            "sha256": "2528e5e3e70cc995c01aa479433962b2ce8cf68edb6b4df128373a05dca2a776",
+            "comparison": "exact new CI content member bytes"
+          }
+        },
+        "clone": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/clones/knowledge",
+        "clone_clean": true,
+        "sdk_install_build": "NOT_RUN",
+        "pack_exit": 0,
+        "reader_exit": 0,
+        "repeat_exit": 2,
+        "main_cutover": "NOT_APPLIED",
+        "host_service_candidate_journal": "NOT_RUN",
+        "release_ready": false
+      }
+    ],
+    "producer_files": {
+      "scripts/release/secure-unpack.py": {
+        "sha256": "8d8b34497382302ace6a434180f72a6d418d5879cc682102964a13b5c1e96d50",
+        "bytes": 5960
+      },
+      "scripts/release/plugin-pack.mjs": {
+        "sha256": "a30af40abbfcab8be1971d696cde7bd431a8654c1c008356113b0c91211f1c59",
+        "bytes": 18153
+      },
+      "scripts/release/service-artifact-evidence.mjs": {
+        "sha256": "f92d006759f620b2d303bcfe90f9c04f3726a4624d1597f77dcdc61f0abba187",
+        "bytes": 15373
+      },
+      "scripts/release/service-compatibility.mjs": {
+        "sha256": "844aa39a9540c5a68a142b6a2a2f25931f7a27d0a7120938d42ea05936204953",
+        "bytes": 11199
+      },
+      "scripts/release/secret-scan.mjs": {
+        "sha256": "477f7b83691137d83fcbb8dd65cb3144363bf08d37c94189fb7eafd8e517d7a7",
+        "bytes": 3793
+      },
+      "scripts/release/toolchain.mjs": {
+        "sha256": "04d15e35e8d3161b5fa7bddc53399273c7bdbd2d7ee0905f9615fdccd24badb8",
+        "bytes": 884
+      },
+      "dsh-plugins/plugin-kit/package-manager.mjs": {
+        "sha256": "4605cfa766428733ad4202cf267d103762202e447119d6855c45049241759c6b",
+        "bytes": 3152
+      },
+      "dsh-plugins/plugin-kit/toolchain.json": {
+        "sha256": "8f1eaf0b2b7ea1392cd45674bfbdd7498b2df6bb642db63f75d002df776511fe",
+        "bytes": 2282
+      }
+    },
+    "denied_source_probes": 12,
+    "main_unchanged": true,
+    "sdk_distribution": "BLOCKED",
+    "product": "PARTIAL",
+    "release_ready": false
+  },
+  "guard_tests": {
+    "files": 4,
+    "pass": 42,
+    "fail": 0,
+    "skip": 0
+  },
+  "profiles": 2,
+  "packages": 9,
+  "main_apply": "LOCALLY_APPLIED_13_AUTHORIZED_PATHS",
+  "main_commit_push": "NOT_RUN",
+  "new_combo_host_ci": "NOT_RUN",
+  "original_proof_directory": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x",
+  "sdk_distribution": "BLOCKED",
+  "product": "PARTIAL",
+  "release_ready": false,
+  "proposal_stage": "ISOLATED_PROPOSAL_NOT_APPLIED",
+  "formal_pack_proof_scope": "ISOLATED_PRODUCER_ORIGINAL_EVIDENCE_NOT_CURRENT_MAIN_STATUS",
+  "guard_tests_scope": "ISOLATED_PROPOSAL_RESULT_PRESERVED_NOT_ADDED_TO_CURRENT_MAIN_RESULT",
+  "local_application": {
+    "root": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics",
+    "head": "1ca738f773a393bb71ed7e3431439901d4075480",
+    "paths": 13,
+    "applied_patch_sha256": "5ece32ea3dc5b6b21394e8c453e7edc51e8d3056086aad2173b14171aae25834",
+    "actual_main_guard_tests": {
+      "tests": 42,
+      "pass": 42,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "packages": 9,
+    "profiles": 2,
+    "source_negative_probes": 19,
+    "repeat_exit": 1,
+    "repeat_reason": "EEXIST",
+    "original_output_unchanged": true,
+    "protected_inputs_unchanged": {
+      "config/workbench-author-evidence.lock.json": "01ad824b89cf9f26b74351f4bc5fae5c709ecb29dd18bb5dbcdbdba3c2354934",
+      "config/domain-author-evidence.lock.json": "5c5919362309b3c6837d6cb6fd1499437d9b383d8fc0e358a1a08f9049f8283d",
+      "config/public-contract-inputs.lock.json": "9d9e8bbf5b135657f3583e0525a77de4afb68c123b41c6ea20a3d90e77c9a996",
+      "dsh-plugins/plugin-kit/toolchain.json": "8f1eaf0b2b7ea1392cd45674bfbdd7498b2df6bb642db63f75d002df776511fe",
+      "VERSION": "4aece39fdd0c6fcb843bdf6430b8972be279a24d81bb3f4fbf3f3f6f06b8107a"
+    },
+    "index_empty": true,
+    "evidence": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/main-application-r1/application-validation-r1.json",
+    "evidence_sha256": "1099344a539420be924b56a2aed3dddbad8b7fe2436c4da3b4a49b505ac5e2ea"
+  },
+  "current_formal_two_package_host": {
+    "schema": "shinemage-current-formal-host-closeout/v1",
+    "status": "PASS",
+    "exit": 0,
+    "processes": 3,
+    "assertions": 18,
+    "assertion_scope": "synthetic idle preset; native cookie; CRM unconfigured route; official remove/readd; session retention",
+    "formal_receipts": {
+      "crm": {
+        "root": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/current-formal-host-r1/assets-r1/packages/0/unpacked/package",
+        "manifest_sha256": "28d9ade0350a7244dc9dd8fef3de6bd477e75c24b29ea4bcac90e69ae63ae32c",
+        "source_sha": "ceeff9965509a545cc1761091bca604b31c02285",
+        "receipt_sha256": "4be65420f929fface899fd48928dde4e444289bc428d46adeb3497a6bb5d9abc",
+        "tarball_sha256": "5803819e9eb36bacd5b237eacff928133ff6eb361c1f111eedd3f1ecf60aeb05",
+        "tarball_bytes": 234901
+      },
+      "knowledge": {
+        "root": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/current-formal-host-r1/assets-r1/packages/1/unpacked/package",
+        "manifest_sha256": "de27d73b80c145fd801404685563ca621c5e95286244d812c4c25e734e0a1c98",
+        "source_sha": "22daa108bcf72cc80af28156ba1f6601fcfc00dc",
+        "receipt_sha256": "1ce746b6593892f176fe7c259a8e3fbc52ca91ceb3e6a855a61589e43ce9ca49",
+        "tarball_sha256": "870fdeeadc07bf7187d475ba4a77fe0d417b915a72473b8712c004f7079b4090",
+        "tarball_bytes": 14476
+      }
+    },
+    "runtime_mode": "EXACT_PREVIOUS_OFFICIAL_NPM_MEMBER_COPY_EXCLUDING_OLD_PLUGINS; NOT_FRESH_NPM_INSTALL",
+    "denied_probes": 7,
+    "formal_members_unchanged": true,
+    "npm_lock_unchanged": true,
+    "owned_port_released": true,
+    "failed_runs_preserved": {
+      "host-r1/r2": "unregistered out-of-profile roots: ERR_MODULE_NOT_FOUND and agent-preset/invalid",
+      "plugin-register-r3": "unsupported pnpm userconfig/globalconfig CLI options",
+      "plugin-register-r4": "old ordinary installed plugin shadowed formal package; EPERM negative control",
+      "host-r5": "unsupported pnpm remove offline/ignore-scripts CLI flags",
+      "host-r6": "test recorder did not handle omitted empty dependencies; official remove succeeded"
+    },
+    "real_services": "NOT_CONFIGURED_NOT_RUN",
+    "model_calls": 0,
+    "full_current_candidate_target_terminal_browser": "NOT_RUN",
+    "fresh_npm_cold_install": "NOT_RUN",
+    "upstream_changes": false,
+    "candidate_journal": "UNCHANGED",
+    "sdk_distribution": "BLOCKED",
+    "product": "PARTIAL",
+    "release_ready": false,
+    "phase_assertions": [
+      {
+        "name": "enabled-r7",
+        "assertions": [
+          "official-npm-host-ready",
+          "native-authenticated-root",
+          "native-cookie-required",
+          "crm-knowledge-preset-session-created",
+          "crm-unconfigured-status"
+        ],
+        "cleanup": {
+          "pid": 56277,
+          "terminal": {
+            "code": 0,
+            "signal": null
+          },
+          "port_released": true
+        }
+      },
+      {
+        "name": "native-r7",
+        "assertions": [
+          "official-npm-host-ready",
+          "native-authenticated-root",
+          "native-shell-retains-synthetic-session",
+          "native-shell-has-no-crm-host-route"
+        ],
+        "cleanup": {
+          "pid": 56288,
+          "terminal": {
+            "code": 0,
+            "signal": null
+          },
+          "port_released": true
+        }
+      },
+      {
+        "name": "restored-r7",
+        "assertions": [
+          "official-npm-host-ready",
+          "native-authenticated-root",
+          "restored-preset-and-synthetic-session",
+          "restored-crm-host-route-unconfigured"
+        ],
+        "cleanup": {
+          "pid": 56298,
+          "terminal": {
+            "code": 0,
+            "signal": null
+          },
+          "port_released": true
+        }
+      }
+    ],
+    "evidence": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/current-formal-host-r1/closeout-r7.json",
+    "evidence_sha256": "6a4ed54fdd9fe62fb9ae7aadebad17a8f8a7eb23d00e5424371c6f4fa4b93fcf",
+    "proofs": {
+      "execution-inputs-r7.json": {
+        "path": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/current-formal-host-r1/execution-inputs-r7.json",
+        "sha256": "f0301aa251a8ebb746ca9759d5b96ce83c82c07ee20da7410c999a6bd565a9ab",
+        "bytes": 8071
+      },
+      "plugin-register-r7-execution.json": {
+        "path": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/current-formal-host-r1/plugin-register-r7-execution.json",
+        "sha256": "9a193cb1f16009179bb449b88186776a691316151ed212959717f1385dd71e7d",
+        "bytes": 1532
+      },
+      "execution-r7.json": {
+        "path": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/current-formal-host-r1/execution-r7.json",
+        "sha256": "81cb878f9064cf04a3e9bacc6e5f6f4bb9f6ebad02466aef3902cf451f759065",
+        "bytes": 657
+      },
+      "host-result-r7.json": {
+        "path": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/current-formal-host-r1/host-result-r7.json",
+        "sha256": "d4bcf2cab2fb3d02637b12330e4d7951200758f3b2575a2466022c64e7d3d1bb",
+        "bytes": 16198
+      },
+      "official-runtime-copy-r5.json": {
+        "path": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/current-formal-host-r1/official-runtime-copy-r5.json",
+        "sha256": "e643362061ccbb3462be695d1ee343a22ae2e022f4a511df58545dfe1b6aed56",
+        "bytes": 5412962
+      },
+      "post-host-integrity-r7.json": {
+        "path": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/current-formal-host-r1/post-host-integrity-r7.json",
+        "sha256": "dbd3f0c0b12d03e773299af4d1391f55fd81b305988da61ba9edb87cc03112e9",
+        "bytes": 219
+      },
+      "diagnose-import-r7.json": {
+        "path": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/current-formal-host-r1/diagnose-import-r7.json",
+        "sha256": "20eb6024d817ec9af1a9b4f1cfe36dc833bb494d616e51136cea3f553c8eb441",
+        "bytes": 1898
+      }
+    }
+  },
+  "current_formal_full_combo_candidate_target_terminal_browser": "NOT_RUN",
+  "candidate_journal": "UNCHANGED",
+  "remote_staging_delivery": "PREPARED_5_PATH_PROPOSAL_NOT_APPLIED_NOT_PUSHED",
+  "remote_artifact_variables": "UNCHANGED_OLD_COMBINATION",
+  "local_git_delivery": {
+    "authority": "Human authorized two local commits",
+    "code_commit": "2b98baaac876973e1b9f3758fe8e3fc0fe69a5aa",
+    "code_paths": 8,
+    "code_bytes": "MATCH_ORIGINAL_REVIEWED_PLAN",
+    "normal_hooks": "PASS",
+    "documentation_commit": "PREPARED_FOR_AUTHORIZED_SEPARATE_DOCS_COMMIT",
+    "documentation_paths": 5,
+    "application_validation_head": "1ca738f773a393bb71ed7e3431439901d4075480",
+    "historical_records": "Original application/host/proposal Git fields describe capture time; they are not rewritten to claim later remote delivery",
+    "main_push_pr_merge_remote_vars": "NOT_RUN_NOT_AUTHORIZED",
+    "code_execution_record": "/Users/hutou/.codex/tasks/shinemage-cordis-formal-proposal-20261012-pv41ov3x/git-delivery-r1/code-commit-execution.json"
+  }
+}
