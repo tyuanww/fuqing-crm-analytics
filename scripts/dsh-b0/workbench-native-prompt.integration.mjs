@@ -1,0 +1,492 @@
+/** Published client + actual pinned Cordis. Remote/session services are synthetic. */
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import { readFile, writeFile } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
+import { join } from 'node:path';
+import { loadWorkbenchClient } from './workbench-client-pack-inputs.mjs';
+
+const runtime = await loadWorkbenchClient({ scope: 'workbench-native-prompt' });
+const { source, stores, webRequire } = runtime;
+const upstream = process.env.B0_BUILD_UPSTREAM;
+const cordisPath = join(upstream, 'vendor/cordis/lib/index.js');
+const cordisManifest = JSON.parse(await readFile(join(upstream, 'vendor/cordis/package.json'), 'utf8'));
+assert.equal(cordisManifest.version, '4.0.4', 'WORKBENCH_NATIVE_PROMPT_CORDIS_PIN');
+const { Context, Service } = await import(pathToFileURL(cordisPath).href);
+// Synthetic envelope retained from the original fixture, not a service decoder.
+const ok = value => ({ ok: true, value: structuredClone(value) });
+await writeFile(join(runtime.output, 'native-context-inputs.json'), JSON.stringify({
+  schema_version: 'shinemage-workbench-native-prompt-consumer/v1',
+  status: 'INPUTS_PREPARED', cordis: { version: cordisManifest.version, entry: cordisPath },
+  client: runtime.receipt, full_host: 'NOT_RUN', real_session: 'NOT_RUN',
+  service: 'synthetic RPC/fetch', real_model: 'NOT_RUN', release_ready: false,
+}, null, 2) + '\n', { flag: 'wx', mode: 0o600 });
+
+/** R1 compiled inject: top-level remote only. Kept as the nested-inject failure. */
+const R1_INJECT = ['slots', 'sessions', 'theme', 'layout', 'remote'];
+
+class ClientRemoteLike extends Service {
+  constructor(ctx) {
+    super(ctx, 'remote');
+  }
+}
+
+class RemoteSessionLike extends Service {
+  constructor(ctx, promptImpl) {
+    super(ctx, 'remote.session');
+    this.prompt = promptImpl;
+  }
+}
+
+class RemoteWorkspaceLike extends Service {
+  constructor(ctx, calls) {
+    super(ctx, 'remote.workspaceFiles');
+    this.list = async (sessionId, path) => {
+      calls.push({ method: 'list', sessionId, path });
+      return { ok: true, value: { path: '', entries: [{ name: 'delivered.html', type: 'file' }], truncated: false } };
+    };
+    this.read = async (sessionId, path) => {
+      calls.push({ method: 'read', sessionId, path });
+      return { ok: true, value: { text: '<h1>真实注入边界</h1>', lines: 1, eof: true } };
+    };
+  }
+}
+
+function loadClient() {
+  const seed = new Map([
+    ['react', webRequire('react')],
+    ['react-dom', webRequire('react-dom')],
+    ['react/jsx-runtime', webRequire('react/jsx-runtime')],
+    ['@deepseek-ai/dsh-client-store', stores],
+  ]);
+  let factoryRow;
+  const previousWindow = globalThis.window;
+  globalThis.window = {
+    localStorage: { getItem: () => null }, crypto,
+    __ModuleLoader__: { load: row => { factoryRow = row; } },
+  };
+  // Preserve the original callback realm: assert.deepStrictEqual must still
+  // compare actual objects, not JSON-normalized substitutes. Source/network
+  // access is bounded by the outer process sandbox, not by this VM call.
+  try { vm.runInThisContext(source, { timeout: 2000 }); }
+  finally {
+    if (previousWindow === undefined) delete globalThis.window;
+    else globalThis.window = previousWindow;
+  }
+  assert.equal(factoryRow?.id, '@shine-mage/dsh-analytics-workbench-b0');
+  return factoryRow.factory(spec => {
+    assert.ok(seed.has(spec), `unexpected browser require: ${spec}`);
+    return seed.get(spec);
+  });
+}
+
+const SESSION_ID = 'native_session';
+
+async function boot(t, {
+  inject: injectOverride,
+  provideRemote = true,
+  hideRemoteBehindIsolate = false,
+  hostLikeRemote = true,
+  accept = true,
+  createSession,
+  adoptionDelay = 0,
+  saved = {
+    spec: {
+      schema_version: 'board-spec/v1',
+      board_id: 'board_test',
+      version: 1,
+      title: '合成经营看板',
+      session_id: SESSION_ID,
+      blocks: [{
+        block_id: 'note',
+        title: '说明',
+        kind: 'TEXT',
+        library_version: 'board-components/v1',
+        props: {
+          content: '初始说明', align: 'start', text_style: 'body',
+          subtitle: '', tone: 'neutral', density: 'comfortable',
+        },
+        layout: { x: 0, y: 0, w: 6, h: 5 },
+        source_result_id: null,
+      }],
+    },
+    facts_by_result_id: {},
+  },
+} = {}) {
+  const client = loadClient();
+  const root = new Context();
+  const ctx = hostLikeRemote
+    ? root.isolate('remote').isolate('remote.session').isolate('remote.workspaceFiles')
+    : root.isolate('remote');
+  const entries = [];
+  const prompts = [];
+  const workspaceCalls = [], openedResources = [];
+  const slotDisposers = [];
+  const snapshot = {
+    phase: 'ready',
+    ids: [SESSION_ID],
+    byId: { [SESSION_ID]: { id: SESSION_ID, retainedBy: { mainView: 1 } } },
+  };
+  const promptImpl = async (payload) => {
+    prompts.push(payload);
+    return { ok: true, value: { accepted: accept } };
+  };
+  const remotePlain = { session: { prompt: promptImpl } };
+  ctx.provide('slots', {
+    inject(_name, callback) {
+      const dispose = callback();
+      if (typeof dispose === 'function') slotDisposers.push(dispose);
+    },
+    register(options, component) {
+      entries.push({ options, component });
+      return () => {
+        const index = entries.findIndex(row => row.options === options);
+        if (index >= 0) entries.splice(index, 1);
+      };
+    },
+  });
+  ctx.provide('sessions', {
+    list: { getSnapshot: () => snapshot, subscribe: () => () => {} },
+    retain(id) {
+      snapshot.byId = { ...snapshot.byId, [id]: { id, retainedBy: { mainView: 1 } } };
+      return { sessionId: id, release() {} };
+    },
+    create(options) { if (createSession) return createSession(options); throw new Error('native prompt inject test must not create a session'); },
+  });
+  ctx.provide('theme', {
+    overrideTokens: () => () => {},
+    getTheme: () => ({ active: { colorScheme: 'dark' } }),
+  });
+  let mountedSession = SESSION_ID;
+  const mountedListeners = new Set(), mountingTimers = [];
+  t.after(() => { for (const timer of mountingTimers) clearTimeout(timer); });
+  ctx.provide('uiWorkspace', { openSession(id) {
+    snapshot.byId = Object.fromEntries(snapshot.ids.map(key => [key, { id: key, retainedBy: { mainView: key === id ? 1 : 0 } }]));
+    mountingTimers.push(setTimeout(() => { mountedSession = id; for (const listener of [...mountedListeners]) listener(); }, adoptionDelay));
+  } });
+  ctx.provide('layout', { selectPanel() {} });
+  ctx.provide('sidebarRight', {
+    mounted: {
+      getSnapshot: () => mountedSession,
+      subscribe(listener) { mountedListeners.add(listener); return () => mountedListeners.delete(listener); },
+    },
+    openResource: address => openedResources.push(address.startsWith('dsh-resource://cockpit-ai/')
+      ? { sessionId: mountedSession, address } : address),
+    // A fresh adopted/mounted native seat legitimately owns no tab yet.
+    tabsIn: () => [],
+    openResourceIn: () => { throw new Error('internal sidebar face must not open HTML artifacts'); },
+  });
+  ctx.provide('sidebarRightTabs', { register: () => () => {} });
+  await ctx.plugin({ name: 'remote.workspaceFiles', apply: c => { new RemoteWorkspaceLike(c, workspaceCalls); } }).await();
+  if (hostLikeRemote) {
+    if (hideRemoteBehindIsolate) {
+      await root.plugin({
+        name: 'client-remote-like',
+        apply: (c) => { new ClientRemoteLike(c); },
+      }).await();
+      await root.plugin({
+        name: 'remote.session',
+        apply: (c) => { new RemoteSessionLike(c, promptImpl); },
+      }).await();
+    } else if (provideRemote) {
+      await ctx.plugin({
+        name: 'client-remote-like',
+        apply: (c) => { new ClientRemoteLike(c); },
+      }).await();
+      await ctx.plugin({
+        name: 'remote.session',
+        apply: (c) => { new RemoteSessionLike(c, promptImpl); },
+      }).await();
+    }
+  } else if (hideRemoteBehindIsolate) {
+    root.provide('remote', remotePlain);
+  } else if (provideRemote) {
+    ctx.provide('remote', remotePlain);
+  }
+  let currentEdit = null;
+  ctx.provide('connection', {
+    rpc: {
+      async call(path, endpoint, body) {
+        if (endpoint === 'shine-mage-deliveries') return ok({ files: [], examined: 0, totalSessions: 0, nextCursor: null, failures: [], unsupportedPaths: 0 });
+        const operation = body?.operation;
+        const payload = body?.payload ?? {};
+        if (path !== '/api' || endpoint !== 'shine-mage-board') {
+          throw new Error(`unexpected rpc ${JSON.stringify({ path, endpoint, body })}`);
+        }
+        if (operation === 'list') return ok({ items: [{
+          board_id: saved.spec.board_id, session_id: saved.spec.session_id,
+          title: saved.spec.title, version: saved.spec.version,
+        }] });
+        if (operation === 'get') return { ok: true, value: JSON.parse(JSON.stringify(saved)) };
+        if (operation === 'current_edit') return ok(currentEdit);
+        if (operation === 'select_edit') {
+          currentEdit = {
+            schema_version: 'board-edit-context/v1',
+            edit_context_id: 'edit_' + 'a'.repeat(32),
+            board_id: saved.spec.board_id, base_version: saved.spec.version,
+            block_id: payload.block_id, session_id: saved.spec.session_id,
+            status: 'OPEN', preview_id: null, expires_at_ms: Date.now() + 10000,
+            block: saved.spec.blocks.find(block => block.block_id === payload.block_id),
+            facts_by_result_id: saved.facts_by_result_id,
+          };
+          return ok(currentEdit);
+        }
+        throw new Error(operation);
+      },
+    },
+  });
+  const fiber = ctx.plugin({
+    name: client.name,
+    inject: injectOverride ?? [...client.inject],
+    apply: client.apply,
+  });
+  await fiber.await();
+  const disposeSlots = () => {
+    while (slotDisposers.length) slotDisposers.pop()();
+  };
+  t.after(async () => {
+    await fiber.dispose();
+    disposeSlots();
+  });
+  return { client, ctx, entries, prompts, fiber, saved, disposeSlots, workspaceCalls, openedResources,
+    mountedWaiterCount: () => mountedListeners.size,
+    publishMounted(id) { mountedSession = id; for (const listener of [...mountedListeners]) listener(); },
+    currentEdit: () => currentEdit };
+}
+
+function generateDirect(entries) {
+  const dock = entries.find(row => row.options.id === 'shine-mage.analytics-b0.generate-cockpit');
+  assert.ok(dock, 'generate dock was not registered');
+  const generate = dock.options.inject().generateDirect;
+  assert.equal(typeof generate, 'function');
+  return generate;
+}
+
+function pagePackageWaiter(entries) {
+  const card = entries.find(row => row.options.key === 'free_html_page_generate');
+  assert.ok(card, 'free_html_page_generate card was not registered');
+  return card.options.inject().pagePackageWaiter;
+}
+
+async function submitGenerate(entries, prompts) {
+  const before = prompts.length;
+  const pending = generateDirect(entries)(SESSION_ID);
+  const settled = pending.then(
+    value => ({ status: 'resolved', value }),
+    error => ({ status: 'rejected', error }),
+  );
+  const prompted = new Promise(resolve => {
+    const timer = setInterval(() => {
+      if (prompts.length > before) {
+        clearInterval(timer);
+        resolve({ status: 'prompt' });
+      }
+    }, 5);
+    setTimeout(() => {
+      clearInterval(timer);
+      resolve({ status: 'timeout' });
+    }, 2000);
+  });
+  const outcome = await Promise.race([settled, prompted]);
+  if (outcome.status === 'rejected') throw outcome.error;
+  if (outcome.status !== 'prompt') throw new Error('generateDirect neither prompted nor rejected');
+  const text = prompts.at(-1).content[0].text;
+  const requestId = text.match(/page-gen-[0-9a-f-]{36}/)?.[0];
+  assert.ok(requestId, text);
+  pagePackageWaiter(entries).deliver(requestId, {
+    html: '<main><p data-page-field="body">交付</p></main>',
+    css: '', js: '', resources: [], node_map: [],
+  });
+  await assert.rejects(pending, /页面未能写入驾驶舱/);
+}
+
+function libraryOf(entries) {
+  const dock = entries.find(row => row.options.id === 'shine-mage.analytics-b0.generate-cockpit');
+  assert.ok(dock, 'generate dock was not registered');
+  return dock.options.inject().library;
+}
+
+function clientInjectWithout(inject, names) {
+  const drop = new Set(Array.isArray(names) ? names : [names]);
+  const next = inject.filter(item => !drop.has(item));
+  assert.ok(next.length < inject.length);
+  return next;
+}
+
+test('undeclared remote is rejected by the real Cordis loader even when provided', async t => {
+  const { entries } = await boot(t, {
+    inject: clientInjectWithout(loadClient().inject, ['remote', 'remote.session']),
+    provideRemote: false,
+    hideRemoteBehindIsolate: true,
+    hostLikeRemote: false,
+  });
+  await assert.rejects(
+    generateDirect(entries)(SESSION_ID),
+    /cannot get property "remote" without inject/,
+  );
+});
+
+test('plain remote object does not enforce nested session inject (R1 miss)', async t => {
+  const { entries, prompts } = await boot(t, {
+    inject: R1_INJECT,
+    hostLikeRemote: false,
+    provideRemote: true,
+  });
+  await submitGenerate(entries, prompts);
+  assert.equal(prompts.length, 1);
+  assert.equal(prompts[0].mode, 'queue');
+  assert.match(prompts[0].content[0].text, /free_html_page_generate/);
+});
+
+test('R1 inject fails remote.session under host-like Service registration', async t => {
+  const { entries, prompts, saved } = await boot(t, { inject: R1_INJECT, hostLikeRemote: true });
+  assert.equal(loadClient().inject.includes('remote'), true);
+  await assert.rejects(
+    generateDirect(entries)(SESSION_ID),
+    /cannot get property "remote.session" without inject/,
+  );
+  assert.equal(prompts.length, 0);
+  const library = libraryOf(entries);
+  await library.openBoard(saved.spec.board_id);
+  const before = structuredClone(library.getSnapshot().saved);
+  await library.beginEdit('note');
+  assert.match(library.getSnapshot().message, /cannot get property "remote.session" without inject/);
+  assert.deepEqual(library.getSnapshot().saved, before);
+  assert.equal(library.getSnapshot().editContext.status, 'OPEN');
+  assert.equal(prompts.length, 0);
+});
+
+test('declared remote and remote.session let generateDirect and editNative submit one queued prompt on the same session', async t => {
+  const { client, ctx, entries, prompts, saved } = await boot(t);
+  assert.ok(client.inject.includes('remote'));
+  assert.ok(client.inject.includes('remote.session'));
+  assert.equal(client.inject.includes('slots'), true);
+  assert.ok(ctx.reflect.props.remote);
+  assert.ok(ctx.reflect.props['remote.session']);
+  await submitGenerate(entries, prompts);
+  assert.equal(prompts.length, 1);
+  assert.equal(prompts[0].sessionId, SESSION_ID);
+  assert.equal(prompts[0].mode, 'queue');
+  assert.equal(prompts[0].content[0].type, 'text');
+  assert.match(prompts[0].content[0].text, /free_html_page_generate/);
+  assert.match(prompts[0].content[0].text, /page-gen-[0-9a-f-]{36}/);
+  assert.match(prompts[0].content[0].text, /不要使用 BoardSpec/);
+  assert.equal(/competition_board_generate/.test(prompts[0].content[0].text), false);
+
+  const library = libraryOf(entries);
+  assert.ok(library);
+  await library.openBoard(saved.spec.board_id);
+  assert.equal(library.getSnapshot().message, '');
+  assert.ok(library.getSnapshot().saved);
+  const before = structuredClone(library.getSnapshot().saved);
+  await library.beginEdit('note');
+  assert.equal(prompts.length, 2);
+  assert.equal(prompts[1].sessionId, SESSION_ID);
+  assert.equal(prompts[1].mode, 'queue');
+  assert.match(prompts[1].content[0].text, /edit_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/);
+  assert.match(prompts[1].content[0].text, /不授权你自行改变内容|不自动保存/);
+  assert.deepEqual(library.getSnapshot().saved, before);
+  assert.equal(library.getSnapshot().editContext.status, 'OPEN');
+});
+
+test('rejected native prompt is visible and does not mutate the saved board or drop the edit context', async t => {
+  const { entries, prompts, saved } = await boot(t, { accept: false });
+  await assert.rejects(generateDirect(entries)(SESSION_ID), /未接受|not accepted/);
+  assert.equal(prompts.length, 1);
+  const library = libraryOf(entries);
+  await library.openBoard(saved.spec.board_id);
+  assert.ok(library.getSnapshot().saved, library.getSnapshot().message);
+  const before = structuredClone(library.getSnapshot().saved);
+  await library.beginEdit('note');
+  assert.match(library.getSnapshot().message, /未接受|选中目标保留/);
+  assert.deepEqual(library.getSnapshot().saved, before);
+  assert.equal(library.getSnapshot().editContext.status, 'OPEN');
+  assert.equal(prompts.length, 2);
+});
+
+test('dispose and reload do not leave a second generate dock or cross-session prompt', async t => {
+  const first = await boot(t);
+  assert.equal(first.entries.filter(row => row.options.id === 'shine-mage.analytics-b0.generate-cockpit').length, 1);
+  await first.fiber.dispose();
+  first.disposeSlots();
+  assert.equal(first.entries.filter(row => row.options.id === 'shine-mage.analytics-b0.generate-cockpit').length, 0);
+  const second = await boot(t);
+  assert.equal(second.entries.filter(row => row.options.id === 'shine-mage.analytics-b0.generate-cockpit').length, 1);
+  await submitGenerate(second.entries, second.prompts);
+  assert.deepEqual(second.prompts.map(row => row.sessionId), [SESSION_ID]);
+  second.saved.spec.session_id = 'other-session';
+  const library = libraryOf(second.entries);
+  await library.openBoard(second.saved.spec.board_id);
+  assert.ok(library.getSnapshot().saved, library.getSnapshot().message);
+  await library.beginEdit('note');
+  assert.match(library.getSnapshot().message, /原生会话当前不可用/);
+  assert.equal(second.prompts.length, 1);
+  assert.deepEqual(library.getSnapshot().saved.spec.session_id, 'other-session');
+});
+
+test('production Cordis injection scans, reads and opens files through the real nested services', async t => {
+  const { entries, workspaceCalls, openedResources } = await boot(t);
+  const props = entries.find(row => row.options.name === 'main' && row.options.key === 'cockpit').options.inject();
+  const result = await props.delivery.refresh();
+  assert.equal(result.status, 'ready');
+  assert.deepEqual(result.files.map(file => file.path), ['delivered.html']);
+  assert.equal(await props.readWorkspaceFile(result.files[0]), '<h1>真实注入边界</h1>');
+  props.openWorkspaceFile(result.files[0]);
+  assert.equal(workspaceCalls.length, 2);
+  assert.deepEqual(openedResources, ['dsh-resource://file/session/native_session/delivered.html']);
+});
+
+test('missing nested workspace injection reproduces the original empty cabinet without issuing a file RPC', async t => {
+  const { entries, workspaceCalls } = await boot(t, { inject: clientInjectWithout(loadClient().inject, 'remote.workspaceFiles') });
+  const props = entries.find(row => row.options.name === 'main' && row.options.key === 'cockpit').options.inject();
+  const result = await props.delivery.refresh();
+  assert.equal(result.status, 'error');
+  assert.equal(result.error, 'list-failed');
+  assert.deepEqual(workspaceCalls, []);
+});
+
+test('inline HTML request uses native prompt and opens only its adopted session artifact, even while the old seat remains', async t => {
+  const previous = process.env.PAGE_DOCUMENTS_HTTP_BASE;
+  process.env.PAGE_DOCUMENTS_HTTP_BASE = 'http://127.0.0.1:18888';
+  t.after(() => { if (previous === undefined) delete process.env.PAGE_DOCUMENTS_HTTP_BASE; else process.env.PAGE_DOCUMENTS_HTTP_BASE = previous; });
+  let job, created;
+  t.mock.method(globalThis, 'fetch', async (url, init) => {
+    assert.equal(url, 'http://127.0.0.1:18888/api/v1/analytics/cockpit-ai');
+    const body = JSON.parse(init.body);
+    job = { ...body, status: 'WAITING', workspace: '/synthetic/owned', session_id: 'session-cockpit-ai-test', title: 'standalone.html', filename: 'standalone.json' };
+    return new Response(JSON.stringify(job));
+  });
+  const { entries, prompts, openedResources } = await boot(t, { adoptionDelay: 2, createSession: async options => { created = options; return options.sessionId; } });
+  const { aiClient } = entries.find(row => row.options.name === 'main' && row.options.key === 'cockpit').options.inject();
+  const selection = { start: 0, end: 25, html_hash: 'a'.repeat(64) };
+  assert.equal(await aiClient.begin('page', 'page_test', 3, selection, '卡片标题改成季度收入'), true);
+  assert.deepEqual(created, { cwd: '/synthetic/owned', sessionId: job.session_id });
+  assert.equal(prompts.length, 1);
+  assert.equal(prompts[0].requestId, 'artifact-' + job.id);
+  assert.match(prompts[0].content[0].text, /卡片标题改成季度收入/);
+  assert.deepEqual(openedResources, [{ sessionId: job.session_id, address: 'dsh-resource://cockpit-ai/' + job.id }]);
+});
+
+test('disposing the real client plugin prevents a delayed HTML mount from opening a tab', async t => {
+  const previous = process.env.PAGE_DOCUMENTS_HTTP_BASE;
+  process.env.PAGE_DOCUMENTS_HTTP_BASE = 'http://127.0.0.1:18888';
+  t.after(() => { if (previous === undefined) delete process.env.PAGE_DOCUMENTS_HTTP_BASE; else process.env.PAGE_DOCUMENTS_HTTP_BASE = previous; });
+  let job;
+  t.mock.method(globalThis, 'fetch', async (_url, init) => {
+    job = { ...JSON.parse(init.body), status: 'WAITING', workspace: '/synthetic/owned',
+      session_id: 'session-cockpit-ai-delayed', title: 'standalone.html' };
+    return new Response(JSON.stringify(job));
+  });
+  const runtime = await boot(t, { adoptionDelay: 10000, createSession: async options => options.sessionId });
+  const { aiClient } = runtime.entries.find(row => row.options.name === 'main' && row.options.key === 'cockpit').options.inject();
+  const pending = aiClient.begin('page', 'page_test', 3, null, '等待中的 HTML 修改');
+  const deadline = Date.now() + 1000;
+  while (!runtime.mountedWaiterCount() && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 1));
+  assert.equal(runtime.mountedWaiterCount(), 1);
+  await runtime.fiber.dispose();
+  assert.equal(await pending, false);
+  assert.equal(runtime.mountedWaiterCount(), 0);
+  runtime.publishMounted(job.session_id);
+  assert.deepEqual(runtime.openedResources, []);
+});
