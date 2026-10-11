@@ -150,7 +150,10 @@ async function receiveGitHubArtifact({ repository, id, sha256, output, python })
   assert.ok(process.env.GH_TOKEN, 'CI_COMPOSITION_ARTIFACT_AUTH_REQUIRED: NOT_RUN without explicit read access');
   const work = await mkdtemp(join(tmpdir(), 'composition-pack-download-'));
   try {
-    const env = { PATH: process.env.PATH, GH_TOKEN: process.env.GH_TOKEN, GH_CONFIG_DIR: work, GH_PROMPT_DISABLED: '1' };
+    // gh's state directory is independent of GH_CONFIG_DIR; without HOME it
+    // otherwise writes a relative .local/state directory in the checkout.
+    const env = { PATH: process.env.PATH, GH_TOKEN: process.env.GH_TOKEN,
+      GH_CONFIG_DIR: work, XDG_STATE_HOME: work, GH_PROMPT_DISABLED: '1' };
     const api = async (route, binary = false) => {
       try {
         return (await exec('gh', ['api', route], { env, encoding: binary ? 'buffer' : 'utf8', timeout: 180000,

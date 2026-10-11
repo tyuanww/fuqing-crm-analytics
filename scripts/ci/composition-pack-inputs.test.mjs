@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { access, cp, mkdir, readFile, symlink, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import { fixture } from '../crm-calibration/test-support/formal-packs.fixture.mjs';
@@ -139,5 +139,31 @@ test('hosted preparation without explicit read authorization never invokes gh or
   await assert.rejects(exec(process.execPath, [cli, '--repository', 'tyuanww/dsh-analytics-workbench', '--artifact-id', '123',
     '--artifact-sha256', 'a'.repeat(64), '--output', f.output], { env: { ...process.env, GH_TOKEN: '', PATH: '/nonexistent' } }),
   /CI_COMPOSITION_ARTIFACT_AUTH_REQUIRED/);
+  await assert.rejects(access(f.output), { code: 'ENOENT' });
+});
+
+test('GitHub acquisition confines CLI state to its owned temporary directory', async t => {
+  const f = await inputs(t), bin = join(f.root, 'bin'), observed = join(f.root, 'gh-state.json');
+  await mkdir(bin);
+  const command = `#!${process.execPath}\n` + `
+import { mkdir, writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
+const base = process.env.XDG_STATE_HOME || join(process.env.HOME || '.', '.local', 'state');
+const state = join(base, 'gh', 'device-id');
+await mkdir(dirname(state), { recursive: true });
+await writeFile(state, 'owned synthetic device identity');
+await writeFile(${JSON.stringify(observed)}, JSON.stringify({ state, config: process.env.GH_CONFIG_DIR }));
+process.exit(1);
+`;
+  await writeFile(join(bin, 'gh'), command, { mode: 0o700 });
+  const cli = fileURLToPath(new URL('./composition-pack-inputs.mjs', import.meta.url));
+  await assert.rejects(exec(process.execPath, [cli, '--repository', 'tyuanww/dsh-analytics-workbench',
+    '--artifact-id', '123', '--artifact-sha256', 'a'.repeat(64), '--output', f.output], {
+    cwd: f.root, env: { ...process.env, GH_TOKEN: 'owned-mock-command-only', PATH: `${bin}:/usr/bin:/bin` },
+  }), /CI_COMPOSITION_ARTIFACT_FETCH_FAILED/);
+  const record = JSON.parse(await readFile(observed));
+  assert.equal(dirname(dirname(record.state)), record.config);
+  await assert.rejects(access(join(f.root, '.local')), { code: 'ENOENT' });
+  await assert.rejects(access(record.config), { code: 'ENOENT' });
   await assert.rejects(access(f.output), { code: 'ENOENT' });
 });
