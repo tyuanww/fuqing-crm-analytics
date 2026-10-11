@@ -1,0 +1,320 @@
+{
+  "schema_version": "shinemage-crm-knowledge-host-compat-closeout/v1",
+  "recorded_at": "2026-10-10T23:29:14.413087+00:00",
+  "scope": "local fixed built official DSH install/import/host/preset smoke only; not new npm DSH installation or candidate admission",
+  "main": {
+    "root": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics",
+    "head": "5390667cc990fa558b0445aa455b086d325a6c77",
+    "branch": "codex/shinemage-abc-local-candidate",
+    "product_bytes_changed": false,
+    "commit": "NOT_RUN",
+    "push": "NOT_RUN"
+  },
+  "inputs": {
+    "dsh": {
+      "version": "0.1.7-rc.2",
+      "source_sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+      "runtime": "existing pinned built official CLI",
+      "new_npm_host_install": "NOT_RUN"
+    },
+    "profile_id": "crm-knowledge-rc2",
+    "profile_sha256": "7ca3511663ab2ea5d1bb8f839c83b29f5bbd6655238450ad08a04510642191ba",
+    "pack_inputs_sha256": "540b1a746fcfedc3d36ea1ab5e935549f598e38db49053e13bb828f1babb3f98",
+    "plugins": [
+      {
+        "id": "@shine-mage/dsh-crm-knowledge",
+        "source_sha": "5a839fa86de2240cf661a9034c58e0ead2d4b4ef",
+        "version": "0.0.0-crm.1",
+        "manifest_sha256": "0fbacc88fccc8085618b518a51afab5db1c045838c0cb47d6e94a8af5f600a49",
+        "pack_sha256": "0da9f8edd40b17a92377aa4b35d219229c8461b942060a7dd0e12265343500fd"
+      },
+      {
+        "id": "@shine-mage/dsh-knowledge",
+        "source_sha": "94ef29fa6c39d3dc506fbc5ef734f0a7ea9eb2b0",
+        "version": "0.0.0-candidate.1",
+        "manifest_sha256": "a674a2da0dcd317839c4f8d7766da62ced58eca9021222c6e3a238f80aa7df79",
+        "pack_sha256": "ed7888204d5cefe7d383632a75319d3427fec9a735863f4e123b8ea17387ef67"
+      }
+    ],
+    "node": "24.19.0",
+    "pnpm": "11.28.2",
+    "platform": "darwin",
+    "corepack_network": false,
+    "install_mode": "official plugin add local unpacked linked package"
+  },
+  "compatibility": {
+    "status": "PARTIAL",
+    "declared_cordis": "4.0.2",
+    "actual_cordis": "4.0.4",
+    "declaration_changed": false,
+    "version_waiver": false,
+    "linked_peer_warning_retained": true,
+    "closed_subitems": [
+      "fixed two-pack official linked install",
+      "profile resolver import",
+      "host/preset initialization"
+    ],
+    "open_subitems": [
+      "correctness of exact peer declaration",
+      "actual Cordis 4.0.2 runtime",
+      "independent file or registry installation",
+      "all runtime interfaces and business compatibility"
+    ]
+  },
+  "executions": {
+    "r1": {
+      "status": "FAIL",
+      "exit_code": 1,
+      "exit_code_basis": "previous terminal exec observation and retained script process.exitCode=1 branch",
+      "error": {
+        "name": "TypeError",
+        "code": null,
+        "message": "ctx.dispose is not a function"
+      },
+      "host_started": false,
+      "successful_substeps": [
+        {
+          "label": "prepare-fixed-formal-profile",
+          "status": "PASS",
+          "packages": 2
+        },
+        {
+          "label": "official-plugin-add",
+          "id": "@shine-mage/dsh-crm-knowledge",
+          "exit_code": 0,
+          "command": [
+            "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/apps/cli/lib/bin.js",
+            "plugin",
+            "--profile",
+            "web",
+            "add",
+            "/Users/hutou/.codex/tasks/shinemage-crm-knowledge-host-compat-20261011-032z5hxt/assets-r1/packages/0/unpacked/package"
+          ]
+        },
+        {
+          "label": "official-plugin-add",
+          "id": "@shine-mage/dsh-knowledge",
+          "exit_code": 0,
+          "command": [
+            "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/apps/cli/lib/bin.js",
+            "plugin",
+            "--profile",
+            "web",
+            "add",
+            "/Users/hutou/.codex/tasks/shinemage-crm-knowledge-host-compat-20261011-032z5hxt/assets-r1/packages/1/unpacked/package"
+          ]
+        },
+        {
+          "label": "official-profile-import",
+          "id": "@shine-mage/dsh-crm-knowledge",
+          "status": "PASS",
+          "declared_cordis": "4.0.2",
+          "actual_cordis": "4.0.4"
+        },
+        {
+          "label": "official-profile-import",
+          "id": "@shine-mage/dsh-knowledge",
+          "status": "PASS",
+          "declared_cordis": "4.0.2",
+          "actual_cordis": "4.0.4"
+        }
+      ],
+      "started_at": "2026-10-10T23:20:31.306Z",
+      "ended_at": "2026-10-10T23:20:32.908Z",
+      "failure_preserved": true
+    },
+    "r2": {
+      "status": "PASS",
+      "exit_code": 0,
+      "exit_code_basis": "previous terminal exec observation and complete retained success result",
+      "checks": [
+        {
+          "label": "dump-config",
+          "status": "PASS",
+          "sha256": "4e8d58e839a09aade9f84f8f43a9750bd594990b93dd086b1e980a06f6cedbb7",
+          "bytes": 47897
+        },
+        {
+          "label": "official-host-start",
+          "status": "PASS",
+          "import_failures": 0,
+          "boot_sha256": "ceb8d0289c7153e2a903615b365fb90531403c5b62d5ecae1521b5dabd7ed9ad"
+        },
+        {
+          "label": "native-cookie-required",
+          "status": "PASS",
+          "http_status": 401
+        },
+        {
+          "label": "native-authenticated-root",
+          "status": "PASS",
+          "http_status": 200
+        },
+        {
+          "label": "crm-knowledge-preset-session-create",
+          "status": "PASS",
+          "session_id": "session-crm-knowledge-compat-849f1a7bbeb6d740",
+          "agent_preset": "crm-knowledge",
+          "running": false
+        },
+        {
+          "label": "crm-unconfigured-status",
+          "status": "PASS",
+          "http_status": 200,
+          "connected": false,
+          "username": null,
+          "expires_at": null
+        }
+      ],
+      "check_count": 6,
+      "started_at": "2026-10-10T23:21:44.099Z",
+      "ended_at": "2026-10-10T23:21:46.036Z",
+      "reinstalled_packages": false,
+      "preceding_failure_rewritten": false
+    }
+  },
+  "isolation": {
+    "source_negative_controls": [
+      {
+        "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/crm-knowledge/src/index.ts",
+        "code": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/knowledge/src/graph.mjs",
+        "code": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/dsh-crm-knowledge/plugin/package.json",
+        "code": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/.codex/tasks/shinemage-knowledge-independent-20261008/dsh-knowledge/plugin/package.json",
+        "code": "EPERM"
+      }
+    ],
+    "scope": "specified business/author paths denied; not whole-machine deny-default",
+    "network": "localhost only",
+    "home": "new owned DSH_HOME and workspace; default process HOME unchanged",
+    "services": "NOT_CONFIGURED_NOT_RUN",
+    "models_called": 0,
+    "browser": "NOT_RUN",
+    "real_business": "NOT_RUN",
+    "production": "NOT_RUN",
+    "launch_credentials": "memory/private runtime only; excluded from Git and this record"
+  },
+  "cleanup": {
+    "owned_host_pid": 86805,
+    "owned_host_exit": {
+      "code": 0,
+      "signal": null
+    },
+    "port_released_at_execution": true,
+    "readback": {
+      "recorded_at": "2026-10-10T23:29:14.412544+00:00",
+      "main_product_unchanged": 61,
+      "main_inherited_unchanged": 84,
+      "main_changed_current_documents": [
+        "STATUS.md",
+        "docs/architecture/shinemage-plugin-platform.md",
+        "docs/hackathon/TODOS.md",
+        "docs/operating/verification.md"
+      ],
+      "workbench_author_unchanged": 8,
+      "protected_inputs_unchanged": 46,
+      "heads_unchanged": true,
+      "indexes_empty": true,
+      "upstream_tracked_clean": true,
+      "owned_pid": 86805,
+      "owned_pid_status": "ABSENT",
+      "owned_port": 4328,
+      "owned_port_status": "FREE_BIND_SUCCEEDED",
+      "processes_stopped_this_readback": 0
+    }
+  },
+  "protected": {
+    "count": 46,
+    "all_unchanged": true,
+    "snapshot_sha256": "8331d9efb1c24fb2e15e03d667ca332f8fdaf189e48701b2194c3392f5d9e7b5",
+    "candidate_journal": "UNCHANGED"
+  },
+  "raw_evidence": {
+    "root": "/Users/hutou/.codex/tasks/shinemage-crm-knowledge-host-compat-20261011-032z5hxt",
+    "files": {
+      "compat-r1.mjs": {
+        "sha256": "0ded944823c04a876d71bca1d6f3993dc639ef23aca43655d1f1bea2b96743dd",
+        "bytes": 9256
+      },
+      "compat-r1.json": {
+        "sha256": "84d198c8e98c8102f9af8354fe33ce6e5fe72d31bcd697ce23ebb53256bb75ab",
+        "bytes": 4899
+      },
+      "host-r2.mjs": {
+        "sha256": "aedfab330385ee5ca41e3c895ee248cf4b8955fc0dbca830b06e8b0498ae6d5a",
+        "bytes": 6016
+      },
+      "host-r2.json": {
+        "sha256": "827ade7d21fb915383e84591633b3bb30e7ebce2de10749494e52c9572f3b495",
+        "bytes": 3280
+      },
+      "source-deny-loopback-r1.sb": {
+        "sha256": "3c9dd375c86f097e7bca9536d6f1396a4ced4931f3301cdfcccbb7cbd48f8508",
+        "bytes": 2888
+      },
+      "config-r2.txt": {
+        "sha256": "4e8d58e839a09aade9f84f8f43a9750bd594990b93dd086b1e980a06f6cedbb7",
+        "bytes": 47897
+      },
+      "logs/compat-r1.stdout": {
+        "sha256": "cc7d9b5405ff78b7790cc51f584aba5644ad7ece903b475933c7a326a82b2654",
+        "bytes": 571
+      },
+      "logs/compat-r1.stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "logs/host-r2.stdout": {
+        "sha256": "65249a2aaf38ebb15a272aed94124c270e0e405194882871305fd9e779706f17",
+        "bytes": 809
+      },
+      "logs/host-r2.stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "logs/host-r2.boot.log": {
+        "sha256": "ceb8d0289c7153e2a903615b365fb90531403c5b62d5ecae1521b5dabd7ed9ad",
+        "bytes": 49
+      },
+      "logs/install-crm-r1.log": {
+        "sha256": "0cd369ede3ae53d344600a15fdced685d2d81ed3c2d9eba8bc3e5a9e30f20d8f",
+        "bytes": 751
+      },
+      "logs/install-knowledge-r1.log": {
+        "sha256": "ec87453fc32906fe8850973b6c1ec5aa1ca5790c5083d7e9910b3369861fe930",
+        "bytes": 668
+      },
+      "readback-before-closure-r1.json": {
+        "sha256": "235a5ceef14e09da2041eefbff18130ebbaba6e5c8342aac33bf898c68e70108",
+        "bytes": 623
+      }
+    },
+    "private_browser_launch_excluded": true
+  },
+  "document": {
+    "path": "docs/hackathon/evidence/shinemage-crm-knowledge-host-compat-20261011.md",
+    "sha256": "ac978bc652b49f6b91c471c3de693eae77ae74dbececbd56805499c3157f588d",
+    "bytes": 4616
+  },
+  "remaining": [
+    "Workbench clean fixed commit and new formal pack",
+    "current candidate same-pack service/target/browser/recovery admission",
+    "remaining main source producers and source builds migration",
+    "new hosted CI artifact inputs and authorization",
+    "real models/CRM/WeKnora/UAT",
+    "independent version release/install/rollback",
+    "official DSH upgrade and applicable SDK distribution gates"
+  ],
+  "product": "PARTIAL",
+  "sdk_distribution": "BLOCKED",
+  "release_ready": false,
+  "version": "0.20.0.0"
+}

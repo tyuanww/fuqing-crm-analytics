@@ -1,20 +1,20 @@
 /** Old public subpaths must work with only their published JS/types present. */
-import test from 'node:test';
+import test, { after } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createRequire } from 'node:module';
 import { copyFile, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { loadLeafComposition } from './leaf-pack-inputs.mjs';
 
-const repository = fileURLToPath(new URL('../..', import.meta.url));
-const ts = createRequire(join(repository, 'dsh-plugins/plugin-kit/build-tools/package.json'))('typescript');
+const runtime = await loadLeafComposition({ scope: 'geometry', types: true });
+after(() => runtime.dispose());
+const { ts } = runtime;
 for (const name of ['funnel', 'waterfall']) {
   test(`legacy ${name} export remains usable by ESM, Node require and TypeScript`, async t => {
     const root = await mkdtemp(join(tmpdir(), 'legacy-geometry-exports-'));
     t.after(() => rm(root, { recursive: true, force: true }));
-    const source = join(repository, 'dsh-plugins', `shine-${name}`);
+    const source = runtime.packages.get(`@shine-mage/dsh-shine-${name}`).root;
     const plugin = join(root, 'node_modules/@shine-mage', `dsh-shine-${name}`);
     await mkdir(join(plugin, 'lib'), { recursive: true });
     for (const file of ['package.json', `lib/${name}.mjs`, `lib/${name}.d.mts`]) await copyFile(join(source, file), join(plugin, file));

@@ -1,0 +1,180 @@
+{
+  "schema": "shinemage-fixed-pack-composition-validation/v1",
+  "date": "2026-10-11",
+  "base_sha": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "raw_evidence_root": "/Users/hutou/.codex/tasks/shinemage-composition-pack-20261011-j1s05ib2",
+  "runtime": {
+    "node": "24.19.0",
+    "python": "3.14.4",
+    "dsh": "0.1.7-rc.2",
+    "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+    "cordis_declared": "4.0.2",
+    "cordis_actual": "4.0.4"
+  },
+  "results": {
+    "composition": {
+      "log": "logs/composition-r3.log",
+      "exit_code": 0,
+      "tests": 9,
+      "pass": 9,
+      "fail": 0,
+      "skipped": 0,
+      "scope": "fixed independent packs / public contract / synthetic owned HTTP"
+    },
+    "inputs": {
+      "log": "logs/contracts-r3.log",
+      "exit_code": 0,
+      "tests": 47,
+      "pass": 47,
+      "fail": 0,
+      "skipped": 0,
+      "scope": "composition input, profile and pack guards"
+    },
+    "legacy_fixture_compatibility": {
+      "log": "logs/fixture-compat-r1.log",
+      "exit_code": 0,
+      "tests": 78,
+      "pass": 78,
+      "fail": 0,
+      "skipped": 0,
+      "scope": "existing main-source consumers after fixture move; not independent-pack acceptance"
+    }
+  },
+  "failures_preserved": [
+    "logs/contracts-r1.log"
+  ],
+  "earlier_runs_preserved": [
+    "logs/composition-r1.log",
+    "logs/composition-r2.log",
+    "logs/contracts-r2.log"
+  ],
+  "profile": {
+    "id": "crm-knowledge-rc2",
+    "sha256": "7ca3511663ab2ea5d1bb8f839c83b29f5bbd6655238450ad08a04510642191ba",
+    "inputs_sha256": "540b1a746fcfedc3d36ea1ab5e935549f598e38db49053e13bb828f1babb3f98"
+  },
+  "packages": [
+    {
+      "id": "@shine-mage/dsh-crm-knowledge",
+      "root": "/Users/hutou/.codex/tasks/shinemage-composition-pack-20261011-j1s05ib2/runs-r3/knowledge/home/profiles/web/verified/0/unpacked/package",
+      "source_sha": "5a839fa86de2240cf661a9034c58e0ead2d4b4ef",
+      "version": "0.0.0-crm.1",
+      "manifest_sha256": "0fbacc88fccc8085618b518a51afab5db1c045838c0cb47d6e94a8af5f600a49",
+      "pack_sha256": "0da9f8edd40b17a92377aa4b35d219229c8461b942060a7dd0e12265343500fd"
+    },
+    {
+      "id": "@shine-mage/dsh-knowledge",
+      "root": "/Users/hutou/.codex/tasks/shinemage-composition-pack-20261011-j1s05ib2/runs-r3/knowledge/home/profiles/web/verified/1/unpacked/package",
+      "source_sha": "94ef29fa6c39d3dc506fbc5ef734f0a7ea9eb2b0",
+      "version": "0.0.0-candidate.1",
+      "manifest_sha256": "a674a2da0dcd317839c4f8d7766da62ced58eca9021222c6e3a238f80aa7df79",
+      "pack_sha256": "ed7888204d5cefe7d383632a75319d3427fec9a735863f4e123b8ea17387ef67"
+    }
+  ],
+  "page_profile": {
+    "id": "dsh-rc2",
+    "sha256": "c8c9df8c36f11060ad8fbcce68cb2ebf28d783c5eb5759d1b71ff5463782c981",
+    "consumed_public_export": "@shine-mage/dsh-analytics-workbench-b0/page-tools",
+    "package": {
+      "id": "@shine-mage/dsh-analytics-workbench-b0",
+      "root": "/Users/hutou/.codex/tasks/shinemage-composition-pack-20261011-j1s05ib2/runs-r3/page/home/profiles/web/pages/0/unpacked/package",
+      "source_sha": "92dfa171cf8ea298bdceee5634b418269e711a37",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "9f518393e544099b5a31fde6073c2b0e321649f7e1134829d0dcd5bc608801f4",
+      "pack_sha256": "a0d5dd08c5e97237fc38033f929eec33627ac42efa594a5ca5c87a0ee311d6b2"
+    },
+    "other_selected_packs": "unpacked but NOT_ACTIVATED"
+  },
+  "body_preservation": {
+    "knowledge-composition.integration.mjs": true,
+    "page-composition.integration.mjs": true
+  },
+  "negative_proof": {
+    "path": "negative-proof-r2.json",
+    "observations": 9,
+    "scope": "five source EPERM controls; missing/relative/bad manifest input before output; EEXIST without overwrite"
+  },
+  "cleanup": {
+    "path": "cleanup-r3.json",
+    "owned_servers": 12,
+    "closed": true,
+    "ports_bindable_after_exit": true
+  },
+  "protected_inputs": {
+    "path": "protected-inputs-r1.json",
+    "all_22_fixed_files_unchanged": true,
+    "candidate": "UNCHANGED",
+    "journal_seq": 3
+  },
+  "admission": {
+    "public_contract_cordis_4_0_4": "PASS",
+    "overall_cordis_compatibility": "PARTIAL",
+    "official_plugin_add": "NOT_RUN",
+    "full_host": "NOT_RUN",
+    "live_cli_reload": "NOT_RUN",
+    "current_candidate_target_service_browser": "NOT_RUN",
+    "full_b0": "NOT_RUN",
+    "new_remote_ci": "NOT_RUN",
+    "real_models_business_weknora_uat": "NOT_RUN",
+    "sdk_distribution": "BLOCKED",
+    "product": "PARTIAL",
+    "release_ready": false
+  },
+  "raw_artifacts": [
+    {
+      "path": "composition-r3.json",
+      "sha256": "a4ced810731a4165f5f922d016cf5e1750a15281ee5e6dcc0ebcb9150cc75aad",
+      "bytes": 1796
+    },
+    {
+      "path": "contracts-r3.json",
+      "sha256": "d21285e40b7207348f6a639b8ba2df275a82e0229c6d1df53a819d34bdc4a7a1",
+      "bytes": 856
+    },
+    {
+      "path": "fixture-compat-r1.json",
+      "sha256": "3e6b7e8c7d138417af3528a10d3f744cc499e18c00c4f62379a4230357474f74",
+      "bytes": 1044
+    },
+    {
+      "path": "negative-proof-r2.json",
+      "sha256": "18bba4b4575d502050a8364690f1a38bb333137849f2fc908c39f571de8a3713",
+      "bytes": 1902
+    },
+    {
+      "path": "cleanup-r3.json",
+      "sha256": "dffc93ed3ed94d21f77e8470002612ea3780db49786d5db3551e92333487fd07",
+      "bytes": 3802
+    },
+    {
+      "path": "protected-inputs-r1.json",
+      "sha256": "5aa9a6cef70e6cd6e46cb9f4a8963601acaf05c0a0600cc827818d0a72dbca0a",
+      "bytes": 551
+    },
+    {
+      "path": "runs-r3/knowledge/runtime-inputs.json",
+      "sha256": "df0462a203e1ff348fbad8fab431850f74cce3d07c13bafcacfb7ce4499be2f4",
+      "bytes": 3142
+    },
+    {
+      "path": "runs-r3/page/runtime-inputs.json",
+      "sha256": "abf05a32adf1fd1bfe2af4144c31f9e82be9d391bfed0aaa0b6e240634013d1b",
+      "bytes": 7477
+    },
+    {
+      "path": "logs/composition-r3.log",
+      "sha256": "3529cd18ed450298b1ab87bd26b866e77c05c7e3e8f2ed3c37e89506d83797e6",
+      "bytes": 965
+    },
+    {
+      "path": "logs/contracts-r3.log",
+      "sha256": "491e91b1d38f434aa2d488e29523b7c0ad52a966d81e56dcd7e3b2358ef6d01f",
+      "bytes": 4236
+    },
+    {
+      "path": "logs/fixture-compat-r1.log",
+      "sha256": "178408a09656dfd0eb1aa196083f213f746e07580126c5fc0a6a3f13c364a582",
+      "bytes": 5744
+    }
+  ]
+}

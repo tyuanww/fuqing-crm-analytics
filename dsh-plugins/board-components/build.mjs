@@ -1,7 +1,7 @@
 /** Local immutable build input, not a signed or reviewed release candidate. */
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { copyFile, link, lstat, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { copyFile, link, lstat, mkdir, mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readPackagedLibrary } from '@shine-mage/dsh-plugin-kit/packaged-dependencies';
@@ -24,16 +24,30 @@ const packed = { ...manifest }; delete packed.scripts; delete packed.devDependen
 await mkdir(output, { recursive: true });
 assert.ok(!(await lstat(output)).isSymbolicLink(), 'PACKAGE_OUTPUT_SYMLINK');
 const staging = await mkdtemp(join(output, '.board-components-'));
+let localOutput;
 try {
   await mkdir(join(staging, 'lib'));
   await mkdir(join(root, 'lib'), { recursive: true });
   assert.ok(!(await lstat(join(root, 'lib'))).isSymbolicLink(), 'PACKAGE_BUILD_SYMLINK');
+  const sources = [];
   for (const entry of manifest.files) {
     const source = join(root, 'src', entry.slice(4));
     const info = await lstat(source);
     assert.ok(info.isFile() && !info.isSymbolicLink() && info.size < 65536, 'PACKAGE_SOURCE_INVALID');
+    const destination = await lstat(join(root, entry)).catch(error => {
+      if (error.code === 'ENOENT') return null;
+      throw error;
+    });
+    assert.ok(!destination || (destination.isFile() && !destination.isSymbolicLink()), 'PACKAGE_BUILD_FILE_SYMLINK');
+    sources.push({ entry, source });
+  }
+  localOutput = await mkdtemp(join(root, 'lib', '.board-build-'));
+  for (const { entry, source } of sources) {
     await copyFile(source, join(staging, entry));
-    await copyFile(source, join(root, entry));
+    await copyFile(source, join(localOutput, entry.slice(4)));
+  }
+  for (const { entry } of sources) {
+    await rename(join(localOutput, entry.slice(4)), join(root, entry));
   }
   await writeFile(join(staging, 'package.json'), JSON.stringify(packed, null, 2) + '\n');
   execFileSync('pnpm', ['pack', '--pack-destination', staging], { cwd: staging, timeout: 30000, stdio: 'pipe' });
@@ -47,4 +61,7 @@ try {
   }
   console.log(JSON.stringify({ scope: 'local-package-input', package: manifest.name, version: manifest.version,
     tarball: target, sha256: verified.sha256, entries: [...verified.files.keys()].sort(), release_approval: 'NOT_RUN' }));
-} finally { await rm(staging, { recursive: true, force: true }); }
+} finally {
+  if (localOutput) await rm(localOutput, { recursive: true, force: true });
+  await rm(staging, { recursive: true, force: true });
+}

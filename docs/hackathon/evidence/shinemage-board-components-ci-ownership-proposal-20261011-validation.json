@@ -1,0 +1,283 @@
+{
+  "schema": "shinemage-domain-ci-ownership-proposal/v1",
+  "date": "2026-10-11",
+  "main_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "author_base": "d5aacdb464ff35b5dbb1aa46bf89717b31f131d0",
+  "proposal_root": "/Users/hutou/.codex/tasks/shinemage-domain-ci-ownership-proposal-20261011-2a8b1o72",
+  "plan": {
+    "schema": "shinemage-domain-author-coverage-local-delivery-plan/v1",
+    "base_head": "d5aacdb464ff35b5dbb1aa46bf89717b31f131d0",
+    "author_path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/board-components",
+    "proposal_path": "/Users/hutou/.codex/tasks/shinemage-domain-ci-ownership-proposal-20261011-2a8b1o72/author",
+    "paths": [
+      {
+        "path": ".github/workflows/ci.yml",
+        "sha256": "22de7ea97743a82e84404d9371350b340a0a48bc152e07360c7d27683000453b",
+        "bytes": 3260
+      },
+      {
+        "path": "DEVELOPMENT.md",
+        "sha256": "f8e8cb219385dcb7cfaeb799d9753f4a80fbccedebe28e2fcf02829ae0a25628",
+        "bytes": 4587
+      },
+      {
+        "path": "README.md",
+        "sha256": "e070f946c8f27ec2a311ac559334981a73c87420a14c7d74ea316b4eb1e3a15b",
+        "bytes": 2549
+      },
+      {
+        "path": "scripts/run-author-tests.mjs",
+        "sha256": "9a71b4c74240395a44f0c123435c3e6978ac80a76dd9724245d310d168ab0194",
+        "bytes": 8085
+      },
+      {
+        "path": "scripts/run-author-tests.test.mjs",
+        "sha256": "4a304dc0483c06ecfe5af625f963198cfb3f9d6c92404ade2daeae02aebb0308",
+        "bytes": 5219
+      }
+    ],
+    "purpose": "actual owner execution coverage and sealed public input in CI artifact",
+    "commit_message": "test(board-components): record actual owner coverage and sealed inputs",
+    "patch": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-ci-ownership-proposal-20261011-2a8b1o72/product-delta-r1.patch",
+      "sha256": "46db3bc6a123715a47681af48fa05f80e62b2b9ace73a1805f48849bb3d607bb"
+    },
+    "apply_check_exit_code": 0,
+    "local_verification": {
+      "guard_tests": [
+        5,
+        0,
+        0
+      ],
+      "geometry": [
+        28,
+        0,
+        0
+      ],
+      "producer_inputs": [
+        6,
+        0,
+        0
+      ],
+      "scope": "LOCAL_PROPOSAL, not remote CI"
+    },
+    "authorization": "PENDING; no apply to original owner, commit, push or main cutover",
+    "not_in_scope": [
+      "runtime function/type changes",
+      "library version/lock changes",
+      "merge",
+      "release",
+      "deploy",
+      "main producer selection"
+    ]
+  },
+  "local_execution": {
+    "scope": "LOCAL_PROPOSAL",
+    "source_clean": false,
+    "guard_tests": {
+      "pass": 5,
+      "fail": 0,
+      "skip": 0
+    },
+    "groups": [
+      {
+        "name": "geometry",
+        "counts": {
+          "tests": 28,
+          "pass": 28,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        }
+      },
+      {
+        "name": "producer-inputs",
+        "counts": {
+          "tests": 6,
+          "pass": 6,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        }
+      }
+    ],
+    "reference": {
+      "schema": "shinemage-domain-reference/v1",
+      "source_repository": "https://github.com/tyuanww/fuqing-crm-analytics",
+      "source_sha": "5390667cc990fa558b0445aa455b086d325a6c77",
+      "package": "@shine-mage/board-components",
+      "version": "0.1.0",
+      "tarball": "shine-mage-board-components-0.1.0.tgz",
+      "sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182",
+      "bytes": 1955,
+      "role": "existing sealed member/identity regression input; not newly released artifact",
+      "path": "reference/shine-mage-board-components-0.1.0.tgz"
+    },
+    "source_denied_probes": 12,
+    "access_policy": "listed old source roots denied file-read-data/file-write and all network denied; allow-default for unrelated machine paths, not whole machine deny-default"
+  },
+  "negative_controls": [
+    {
+      "name": "reused-output",
+      "exit_code": 1,
+      "error_code": "DOMAIN_AUTHOR_OUTPUT_EXISTS",
+      "output_created": true
+    },
+    {
+      "name": "dirty-source-no-proposal",
+      "exit_code": 1,
+      "error_code": "DOMAIN_AUTHOR_SOURCE_DIRTY",
+      "output_created": false
+    },
+    {
+      "name": "proposal-in-ci",
+      "exit_code": 1,
+      "error_code": "DOMAIN_AUTHOR_PROPOSAL_NOT_CI",
+      "output_created": false
+    }
+  ],
+  "review": {
+    "schema": "shinemage-domain-author-coverage-proposal-review/v1",
+    "method": "open-code-review-delegate; deterministic preview/rules plus actual host review",
+    "total_files": 3,
+    "reviewed_files": 3,
+    "skipped_files": 0,
+    "coverage_rate": 1,
+    "files": [
+      {
+        "path": ".github/workflows/ci.yml",
+        "status": "modified",
+        "reviewed": true
+      },
+      {
+        "path": "scripts/run-author-tests.mjs",
+        "status": "added",
+        "reviewed": true
+      },
+      {
+        "path": "scripts/run-author-tests.test.mjs",
+        "status": "added",
+        "reviewed": true
+      }
+    ],
+    "manual_docs": [
+      "README.md",
+      "DEVELOPMENT.md"
+    ],
+    "findings": [],
+    "verified": [
+      "true TAP from exact child commands, failure/skip/cancel/todo/zero/incomplete summaries rejected",
+      "owned new output rejects parent source alias and directory reuse",
+      "dirty proposal cannot claim CI and normal mode refuses dirty source",
+      "all reviewed tracked source and actual selected test hashes bound before and after execution",
+      "actual failure and source-changing passing fixtures never generate passed receipt",
+      "canonical CLI realpath fix exercised by macOS tmpdir subprocess tests",
+      "workflow checks out exact PR head with read-only permissions, pinned actions, no secrets expansion or publishing",
+      "both CI generated tarball and sealed original input preserved as distinct objects"
+    ],
+    "unit_guard_tests": {
+      "pass": 5,
+      "fail": 0,
+      "skip": 0
+    },
+    "owner_groups": [
+      {
+        "name": "geometry",
+        "counts": {
+          "tests": 28,
+          "pass": 28,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        }
+      },
+      {
+        "name": "producer-inputs",
+        "counts": {
+          "tests": 6,
+          "pass": 6,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        }
+      }
+    ],
+    "remote_CI_new_proposal": "NOT_RUN",
+    "external_endpoint": "NOT_RUN",
+    "release_ready": false
+  },
+  "failed_iteration": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-domain-ci-ownership-proposal-20261011-2a8b1o72/record-guards-r2.stdout",
+    "result": "3 PASS / 2 FAIL; macOS /var to /private canonical CLI mismatch; preserved, corrected in r3"
+  },
+  "workflow_validation": {
+    "YAML_parse": "PASS",
+    "bash_syntax": "PASS",
+    "actionlint": "NOT_RUN_UNAVAILABLE",
+    "new_remote_CI": "NOT_RUN"
+  },
+  "raw": [
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-ci-ownership-proposal-20261011-2a8b1o72/record-guards-r2.stdout",
+      "sha256": "4f8ba09ddddf62f9943717bc111ddad714a0f0507560cac13367724d877b3ae6",
+      "bytes": 2021
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-ci-ownership-proposal-20261011-2a8b1o72/record-guards-r3.stdout",
+      "sha256": "c9a77b7c4f26599c9f8bd4dacd38e9b453aab072643b2c7622c1e0632bc6f722",
+      "bytes": 601
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-ci-ownership-proposal-20261011-2a8b1o72/actual-owner-record-r3.stdout",
+      "sha256": "826148c95ec4e9215e8d553c523e8e9696875b29186b430543d8a42397e39ecb",
+      "bytes": 5797
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-ci-ownership-proposal-20261011-2a8b1o72/actual-owner-record-r3/author-tests.json",
+      "sha256": "1b6712722d9f90244604b88f70ebb0d453c103c857b60ab2ca94a7b36cb95803",
+      "bytes": 8264
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-ci-ownership-proposal-20261011-2a8b1o72/negative-controls-r1.json",
+      "sha256": "aecebb2bacd2b42d458c12afc122c5a05ec80f500559d07d353eb1c6cc57c513",
+      "bytes": 420
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-ci-ownership-proposal-20261011-2a8b1o72/access-probes-r1.json",
+      "sha256": "e013b78e5c96e8bb7f6fb235610d47061f63a494120a85fd796f345e9b01f242",
+      "bytes": 1617
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-ci-ownership-proposal-20261011-2a8b1o72/review-r1.json",
+      "sha256": "d10d7652bd64b2ce6b6e35b6bbc33aff32a239a49c5ed01c80c0767f555d454c",
+      "bytes": 1997
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-ci-ownership-proposal-20261011-2a8b1o72/author-local-commit-plan-r1.json",
+      "sha256": "f6dc99b4a1da03445a91954310dcca9a017ae82384f9b9b73dfe78e3b6bf4568",
+      "bytes": 2097
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-ci-ownership-proposal-20261011-2a8b1o72/product-delta-r1.patch",
+      "sha256": "46db3bc6a123715a47681af48fa05f80e62b2b9ace73a1805f48849bb3d607bb",
+      "bytes": 19766
+    }
+  ],
+  "not_run": [
+    "apply to original author",
+    "commit",
+    "push",
+    "new CI",
+    "main producer cutover",
+    "merge",
+    "release",
+    "deploy"
+  ],
+  "SDK_distribution": "BLOCKED",
+  "product": "PARTIAL",
+  "release_ready": false
+}

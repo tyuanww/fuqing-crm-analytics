@@ -1,0 +1,76 @@
+{
+  "schema": "shinemage-workbench-author-evidence/v1",
+  "package": "@shine-mage/dsh-analytics-workbench-b0",
+  "source_sha": "6c5adc9faa04f692d5d4b3028af4f945ab49dfe4",
+  "formal_manifest_sha256": "0af61dabbab9a2205fb1d9ff3a2eec7e8194800d9af3f9043b0a5587a81edc12",
+  "formal_tarball_sha256": "e41df9f5a8f7031c092319222543c8d723ca644c0c9d69b2ae53f13257e9b79e",
+  "archive": {
+    "repository": "tyuanww/dsh-analytics-workbench",
+    "run_id": 38126014921,
+    "event": "pull_request",
+    "artifact_id": 11697212818,
+    "sha256": "46322d14d6190edc4a2649aa667948df6b8e3c5f2f077f58894ab6c90b9d07e6",
+    "bytes": 546708
+  },
+  "files": {
+    "plan": {
+      "path": "workbench-author-tests-38126014921-1/plan.json",
+      "sha256": "a0f601c952b72259e14b471e9cabe99827f1594abbed3debf58048a1fff12ab3",
+      "bytes": 8029
+    },
+    "result": {
+      "path": "workbench-author-tests-38126014921-1/result.json",
+      "sha256": "410cf3633a5078f9872784c840735316cf65b51e9a9260355e14d873f3b9883e",
+      "bytes": 1060
+    },
+    "content_pack": {
+      "path": "workbench-content-pack/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+      "sha256": "f5e9dfe41859b0ae3254cbaddf12a128e89cd3c53bde82b84f366beef03ae5d7",
+      "bytes": 441127
+    }
+  },
+  "core": {
+    "files": 155,
+    "tests": 1086,
+    "pass": 1086,
+    "fail": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "todo": 0,
+    "status": 0
+  },
+  "main_owned_checks": [
+    {
+      "file": "scripts/dsh-b0/competition-offline-eval.test.mjs",
+      "patterns": [
+        "offline python eval suite"
+      ],
+      "expected_pass": 1
+    },
+    {
+      "file": "dsh-plugins/analytics-workbench/src/client/competition-board/computed-result.test.mjs",
+      "patterns": [
+        "v1-v5 judge the period difference by the same four-decimal rounding as its subtraction"
+      ],
+      "expected_pass": 1
+    },
+    {
+      "file": "dsh-plugins/analytics-workbench/test/query-fault.test.mjs",
+      "patterns": [
+        "cancel A does not rewrite peer B; SUCCEEDED survives a later cancel",
+        "historical three supervisor exits stay UNKNOWN and are not closed by EPIPE",
+        "fail-card markers never include channel facts"
+      ],
+      "expected_pass": 3
+    }
+  ],
+  "not_covered": [
+    "browser",
+    "standalone",
+    "formal_service",
+    "WSL2",
+    "model",
+    "real_business"
+  ],
+  "release_ready": false
+}

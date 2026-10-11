@@ -294,15 +294,18 @@ test('release preflight builds the runtime before protected tag creation', async
   assert.doesNotMatch(workflow, /corepack install --global|pnpm@\d/);
   assert.match(workflow, /'dsh-plugins\/plugin-kit\/\*\*'/);
   assert.doesNotMatch(workflow, /'dsh-plugins\/\*\*'/, 'ordinary plugin changes must not trigger full runtime preparation');
+  assert.doesNotMatch(workflow, /^\s+- ['"]config\/(?:shinemage-composition-packs|workbench-author-evidence)\.lock\.json['"]/m,
+    'ordinary fixed plugin input updates use B0 consumers, not full DSH prepare/audit');
   assert.match(workflow, /scripts\/dsh\.mjs preflight/);
   assert.match(workflow, /dsh-rc2-preflight-/);
   assert.match(source, /runtime-bundle\.mjs/);
   assert.doesNotMatch(source, /runtime-bundle\.mjs[\s\S]*--online/);
   assert.match(source, /scripts\/dsh\.mjs', 'test'/);
   assert.match(source, /requireUpstream: checkOnly/);
-  assert.match(source, /const packageInputs = join\(root, '\.context\/dsh-b0\/package-inputs'\)/);
-  assert.match(source, /board-components\/build\.mjs', rebuiltInputs/);
-  assert.match(source, /DSH_PACKAGE_INPUTS: packageInputs/);
+  assert.match(source, /DSH_PROFILE_PACK_INPUTS/);
+  assert.match(source, /PREFLIGHT_PACK_INPUTS_CHANGED/);
+  assert.doesNotMatch(source, /linkWorkspaceKit|board-components\/build\.mjs|\$\{plugin\}\/build\.mjs/);
+  assert.match(workflow, /export DSH_PROFILE_PACK_INPUTS="\$CRM_COMPOSITION_PAGE_INPUTS"/);
 });
 test('release preflight does not leak the read-only upstream override into prepare', async () => {
   const source = await readFile(join(process.cwd(), 'scripts/release/preflight.mjs'), 'utf8');

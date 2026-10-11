@@ -1,0 +1,581 @@
+{
+  "schema": "shinemage-main-contract-local-cutover/v1",
+  "at": "2026-10-11T09:56:19.266173+00:00",
+  "main_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "branch": "codex/shinemage-abc-local-candidate",
+  "baseline": "HEAD + preserved working bytes",
+  "authorization": "corrected user reply: 发错了，是授权; local 12-path apply/necessary verification/current docs only",
+  "paths": [
+    {
+      "path": ".github/workflows/dsh-b0.yml",
+      "before_sha256": "0a0f7b90cfebade14aea72a2b4842081532e7c76ec95fcce84ca81c79cfa02f4",
+      "after_sha256": "61dc145beff229b7dcf1db9b401264bef8ecf4c384b5578c4cf08a0145a0356d",
+      "after_bytes": 3998,
+      "final_sha256": "61dc145beff229b7dcf1db9b401264bef8ecf4c384b5578c4cf08a0145a0356d",
+      "final_bytes": 3998,
+      "integration_fix": false
+    },
+    {
+      "path": ".github/workflows/dsh-release-preflight.yml",
+      "before_sha256": "5cfdf6dd338e535b087c9743887fe5df1f520e782055d2213201954acc69e280",
+      "after_sha256": "559e1751034891602f112e49edc89d6cceb06d30cd0597942539eed5ae59ab54",
+      "after_bytes": 9891,
+      "final_sha256": "559e1751034891602f112e49edc89d6cceb06d30cd0597942539eed5ae59ab54",
+      "final_bytes": 9891,
+      "integration_fix": false
+    },
+    {
+      "path": ".github/workflows/lint.yml",
+      "before_sha256": "9fd1c057266375a03cc45ca9c0e5b4fb528b1ca14a1539aecc0b9f61901c2da4",
+      "after_sha256": "cc5906ff6f7a55fefcd40a96ae1ca46390da8b4e7474e900f7a6128042c39af5",
+      "after_bytes": 17481,
+      "final_sha256": "cc5906ff6f7a55fefcd40a96ae1ca46390da8b4e7474e900f7a6128042c39af5",
+      "final_bytes": 17481,
+      "integration_fix": false
+    },
+    {
+      "path": "backend/tests/test_pre_push_smart_path.py",
+      "before_sha256": "0a04a8f539db332b7f9b766e3717c9f55e406b9730b7f344cc2f046b7287e608",
+      "after_sha256": "6094e43641402f717643cf8634451ab77a8f11ca5b1057d9d18fe4b411d08cfc",
+      "after_bytes": 13221,
+      "final_sha256": "6094e43641402f717643cf8634451ab77a8f11ca5b1057d9d18fe4b411d08cfc",
+      "final_bytes": 13221,
+      "integration_fix": false
+    },
+    {
+      "path": "config/public-contract-inputs.lock.json",
+      "before_sha256": null,
+      "after_sha256": "9d9e8bbf5b135657f3583e0525a77de4afb68c123b41c6ea20a3d90e77c9a996",
+      "after_bytes": 28677,
+      "final_sha256": "9d9e8bbf5b135657f3583e0525a77de4afb68c123b41c6ea20a3d90e77c9a996",
+      "final_bytes": 28677,
+      "integration_fix": false
+    },
+    {
+      "path": "scripts/ci/pre_push_path_class.py",
+      "before_sha256": "05f29c1f6661422092af07606084e9252f9ddf176eb824f00cecdba381511bcb",
+      "after_sha256": "64cd2e54e6379f1e2068ed2a6934d9e69733e13f72ef0f10b01c4dc238ac81a1",
+      "after_bytes": 13219,
+      "final_sha256": "64cd2e54e6379f1e2068ed2a6934d9e69733e13f72ef0f10b01c4dc238ac81a1",
+      "final_bytes": 13219,
+      "integration_fix": false
+    },
+    {
+      "path": "scripts/ci/public-contract-inputs.mjs",
+      "before_sha256": null,
+      "after_sha256": "71f8abe81d84d28e89c4b39a2103c3bd2afdea4860b24ba10f5e2914d68bb15f",
+      "after_bytes": 16957,
+      "final_sha256": "71f8abe81d84d28e89c4b39a2103c3bd2afdea4860b24ba10f5e2914d68bb15f",
+      "final_bytes": 16957,
+      "integration_fix": false
+    },
+    {
+      "path": "scripts/ci/public-contract-inputs.test.mjs",
+      "before_sha256": null,
+      "after_sha256": "d74c8802ae0af32c627b5867114c45187f4bd9daea8a4305dbc1976486832371",
+      "after_bytes": 8649,
+      "final_sha256": "d74c8802ae0af32c627b5867114c45187f4bd9daea8a4305dbc1976486832371",
+      "final_bytes": 8649,
+      "integration_fix": false
+    },
+    {
+      "path": "scripts/ci/read-public-contract-inputs.py",
+      "before_sha256": null,
+      "after_sha256": "ed85f08487e252a2d868e4138c5b76977b017635c0732778063191bf081c3062",
+      "after_bytes": 2285,
+      "final_sha256": "ed85f08487e252a2d868e4138c5b76977b017635c0732778063191bf081c3062",
+      "final_bytes": 2285,
+      "integration_fix": false
+    },
+    {
+      "path": "scripts/dsh-b0/fixed-contract-checks.mjs",
+      "before_sha256": null,
+      "after_sha256": "753527244bbb50206699d231ae916a8823cc39d9587971fc32cb9812e8cacf45",
+      "after_bytes": 9239,
+      "final_sha256": "f21e6cd308ee590df7a478d08ff8d7e0bd33e45fac568165e54b65a070de10f7",
+      "final_bytes": 9383,
+      "integration_fix": true
+    },
+    {
+      "path": "scripts/dsh-b0/fixed-contract-checks.test.mjs",
+      "before_sha256": null,
+      "after_sha256": "ee0994a9a7b8868389a6f721d6d9356ca396c640f0f3e9de28662787b70fab98",
+      "after_bytes": 4198,
+      "final_sha256": "adda5e1dd5031a9f08413674d945029900eaba4138dbcb39dd737b958908c2a1",
+      "final_bytes": 4740,
+      "integration_fix": true
+    },
+    {
+      "path": "scripts/dsh-b0/pipeline.mjs",
+      "before_sha256": "68d7504dc9bfec24186dc3b0bd5f8038a5995774702e40a7b5487b9196f5c9be",
+      "after_sha256": "e8483622d94be08a683749554b5e33d11e013f52a0add2d00fc1ed86d801f228",
+      "after_bytes": 25009,
+      "final_sha256": "e8483622d94be08a683749554b5e33d11e013f52a0add2d00fc1ed86d801f228",
+      "final_bytes": 25009,
+      "integration_fix": false
+    }
+  ],
+  "application": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/application-r1.json",
+    "sha256": "6d173b45ca4357d14eca52c15d1e4292a84d0322b7eebbc3f23090d33e01a616",
+    "bytes": 3601
+  },
+  "integration_fix": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/integration-fix-r1.patch",
+    "sha256": "457dff3867ae505a61f81c703cb6e594a43c784f9eb735e12b5ad62aecc84542",
+    "bytes": 3026
+  },
+  "full_b0": {
+    "command": [
+      "/usr/bin/sandbox-exec",
+      "-f",
+      "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/full-b0-offline-r1.sb",
+      "/Users/hutou/homebrew/opt/node@24/bin/node",
+      "scripts/dsh-b0/pipeline.mjs",
+      "--check",
+      "--python",
+      "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/python-r3/bin/python3.14"
+    ],
+    "cwd": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/full-main-qa-r1",
+    "exit_code": 0,
+    "started_at": "2026-10-11T09:46:24.507137+00:00",
+    "finished_at": "2026-10-11T09:51:58.301902+00:00",
+    "python_summary": [
+      "855 passed, 23 warnings, 41 subtests passed in 205.15s (0:03:25)"
+    ],
+    "node_groups": [
+      {
+        "group": 1,
+        "tests": 4,
+        "passed": 4,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "group": 2,
+        "tests": 2,
+        "passed": 2,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "group": 3,
+        "tests": 28,
+        "passed": 28,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "group": 4,
+        "tests": 9,
+        "passed": 9,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "group": 5,
+        "tests": 4,
+        "passed": 4,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "group": 6,
+        "tests": 15,
+        "passed": 15,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "group": 7,
+        "tests": 9,
+        "passed": 9,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "group": 8,
+        "tests": 13,
+        "passed": 13,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "group": 9,
+        "tests": 28,
+        "passed": 28,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "group": 10,
+        "tests": 12,
+        "passed": 12,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "group": 11,
+        "tests": 28,
+        "passed": 25,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 3,
+        "todo": 0
+      },
+      {
+        "group": 12,
+        "tests": 11,
+        "passed": 9,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 2,
+        "todo": 0
+      },
+      {
+        "group": 13,
+        "tests": 26,
+        "passed": 26,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "group": 14,
+        "tests": 3,
+        "passed": 2,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 1,
+        "todo": 0
+      },
+      {
+        "group": 15,
+        "tests": 21,
+        "passed": 21,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "group": 16,
+        "tests": 91,
+        "passed": 91,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "group": 17,
+        "tests": 525,
+        "passed": 522,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 3,
+        "todo": 0
+      },
+      {
+        "group": 18,
+        "tests": 2,
+        "passed": 2,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "group": 19,
+        "tests": 11,
+        "passed": 11,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "group": 20,
+        "tests": 14,
+        "passed": 14,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "group": 21,
+        "tests": 18,
+        "passed": 18,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "group": 22,
+        "tests": 2,
+        "passed": 2,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "group": 23,
+        "tests": 66,
+        "passed": 66,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "group": 24,
+        "tests": 4,
+        "passed": 4,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "group": 25,
+        "tests": 1,
+        "passed": 1,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "group": 26,
+        "tests": 1,
+        "passed": 1,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "group": 27,
+        "tests": 3,
+        "passed": 3,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      }
+    ],
+    "node_group_count": 27,
+    "node_skips": 9,
+    "scope": "exact current main product mirrored to 2934 allowlisted source files; prepared read-only fixed upstream/build-tools; offline except synthetic localhost",
+    "evidence": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/full-main-qa-r1/.context/dsh-b0/build-evidence.json",
+      "sha256": "84368cda49da166c30f24b0cb1de229fff9591d654cc2443f0c5b1bc5ff8164f",
+      "bytes": 67018
+    }
+  },
+  "public_contracts": {
+    "generators": 15,
+    "slot_pass": 4,
+    "theme_negative_drift_pass": 2,
+    "stage_inputs": 193,
+    "stage_unchanged": true,
+    "c0_contract_hash": "317110700f6043bf0cab5f3a505775c11f437f34742d02be40e52f446a11b25d"
+  },
+  "targeted": {
+    "guards_pass": 28,
+    "path_pytest_pass": 34,
+    "workflow_yaml_count": 3,
+    "workflow_ci": "NOT_RUN",
+    "source_exact_paths_eperm": 34
+  },
+  "review": {
+    "reviewable": 11,
+    "manual_excluded": 1,
+    "open_findings": [],
+    "external_model": "NOT_RUN",
+    "source": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/review-integration-r1/host-review.json",
+      "sha256": "fa23bedaf44aafda2e50508bc1e9beaafa0dd67bf58d58b352ee881ae32097e4",
+      "bytes": 4821
+    }
+  },
+  "runtime_pack_locks": "NOT_REBOUND: workbench e9223289, CRM 5a839fa8",
+  "raw": {
+    "authorization-r1.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/authorization-r1.json",
+      "sha256": "23d7086432a6077f42d7fa0f6aa3e6528ab4a7002dad3e144a137e6a8ce1ad3d",
+      "bytes": 329
+    },
+    "application-r1.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/application-r1.json",
+      "sha256": "6d173b45ca4357d14eca52c15d1e4292a84d0322b7eebbc3f23090d33e01a616",
+      "bytes": 3601
+    },
+    "applied-product-final-r2.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/applied-product-final-r2.json",
+      "sha256": "d1cd16f6519d8ab7ea39ccab75901307d63fe638d44054a18132a0b0515ad9a0",
+      "bytes": 5308
+    },
+    "integration-fix-r1.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/integration-fix-r1.json",
+      "sha256": "3fe3098744a5380a9adb5a7379de05ddd17f8bbc4d55bf5a7be29fa263203216",
+      "bytes": 877
+    },
+    "integration-fix-r1.patch": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/integration-fix-r1.patch",
+      "sha256": "457dff3867ae505a61f81c703cb6e594a43c784f9eb735e12b5ad62aecc84542",
+      "bytes": 3026
+    },
+    "process-group-diagnosis-r1.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/process-group-diagnosis-r1.json",
+      "sha256": "53885a43c8557e57add14e835777587b531e57e544024da5078e79b35c7ad5cc",
+      "bytes": 2721
+    },
+    "process-group-diagnosis-r2.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/process-group-diagnosis-r2.json",
+      "sha256": "8d1a2b3f9da506e41399c55e5b473c3668334aea926eab4ce0dc9e63e50a66cd",
+      "bytes": 1889
+    },
+    "guard-tests-r2.stdout": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/guard-tests-r2.stdout",
+      "sha256": "3e67c78cf5b826018b8152edb613e6ca2a66981a5afc458f4c2ca358ebe0002e",
+      "bytes": 5503
+    },
+    "guard-tests-r2-execution.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/guard-tests-r2-execution.json",
+      "sha256": "cd79be57ce23b365de37eee3177e3ae71c87bb46c263251299a978ec17daaf7a",
+      "bytes": 730
+    },
+    "path-tests-r1.stdout": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/path-tests-r1.stdout",
+      "sha256": "9694705b680c680e9f8177599de92b98d2e8c7af26f34d2d3b523d351b6df501",
+      "bytes": 1387
+    },
+    "path-tests-r2.stdout": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/path-tests-r2.stdout",
+      "sha256": "816586d391ea09382c4fd0ba26bd91025c5d31c5f636327a30359d34e8eaad6d",
+      "bytes": 99
+    },
+    "path-tests-r2-execution.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/path-tests-r2-execution.json",
+      "sha256": "1dd6d1abe0a092bd1e556e5cba2cb747cad663d131b92e4b3e1e4ef2614cdfb2",
+      "bytes": 764
+    },
+    "source-negative-r1.stdout": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/source-negative-r1.stdout",
+      "sha256": "db1f9bdf31580057fec11edd68c39a61aa1ea2c14eaa29c0848bce992d021aa5",
+      "bytes": 6615
+    },
+    "source-negative-r1-execution.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/source-negative-r1-execution.json",
+      "sha256": "726d952483a7db8979213faab477de45e0a002530f08ac72e1c71049559ab1f5",
+      "bytes": 6558
+    },
+    "contracts-stage-r1/checks.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/contracts-stage-r1/checks.json",
+      "sha256": "ce927aa72f07286f097acde6568752050bf89b2450ae9d8956f06aba0e163aa9",
+      "bytes": 44315
+    },
+    "contracts-stage-r1-execution.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/contracts-stage-r1-execution.json",
+      "sha256": "09d42d30cf2b3fb63069a38a7e163be5fb018051b081c1bb20de6dbf2b765cf3",
+      "bytes": 1129
+    },
+    "full-b0-r1-execution.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/full-b0-r1-execution.json",
+      "sha256": "3ecd49d9400a66066933f20765526106ad47fa65b10b69515deb6b7d56ede3fa",
+      "bytes": 2390
+    },
+    "full-b0-r1.stdout": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/full-b0-r1.stdout",
+      "sha256": "6eca0be7fd4bf16950047010fbbcb5fd3505cda34a41fe5727ed8f8ba440d166",
+      "bytes": 6781
+    },
+    "full-b0-r1.stderr": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/full-b0-r1.stderr",
+      "sha256": "46c707fc7e6ea3e29e17d4650c44c727813dba00aa6b5b7d7e022ea3ac8361ef",
+      "bytes": 722
+    },
+    "full-b0-r2-execution.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/full-b0-r2-execution.json",
+      "sha256": "d5fec79839bdb2d17b472f7aa86c657787c54ee7459f6e185edfa0d55d8e7d44",
+      "bytes": 2376
+    },
+    "full-b0-r2.stdout": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/full-b0-r2.stdout",
+      "sha256": "9f704f9b5b31de25f8de13af088762e6122d8a119ad1c354fc8249d6abef4d50",
+      "bytes": 92336
+    },
+    "full-b0-r2.stderr": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/full-b0-r2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "full-b0-parsed-summary-r2.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/full-b0-parsed-summary-r2.json",
+      "sha256": "4dfe30131219eccb0bfc0798f98f43e6324d8cea3a4414ddbded35221cd2774d",
+      "bytes": 4152
+    },
+    "qa-byte-proof-r2.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/qa-byte-proof-r2.json",
+      "sha256": "423a247161894a6ab8c1962b693c054a0c921547b22bf27ffc00d9afa4c96afd",
+      "bytes": 559632
+    },
+    "review-integration-r1/preview.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/review-integration-r1/preview.json",
+      "sha256": "5aec74de3dbf12f1a0ddf965aa2fd52266c0324f557d623460fc7cd837b12cd5",
+      "bytes": 2061
+    },
+    "review-integration-r1/rules.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/review-integration-r1/rules.json",
+      "sha256": "6efe68a9cf5b849d6b091c679ef487d1be770630450860a7cd5720e2fbcc6276",
+      "bytes": 15391
+    },
+    "review-integration-r1/host-review.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/review-integration-r1/host-review.json",
+      "sha256": "fa23bedaf44aafda2e50508bc1e9beaafa0dd67bf58d58b352ee881ae32097e4",
+      "bytes": 4821
+    },
+    "ad-hoc-guard-command-failure-r1.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-apply-20261011-hr6_6va9/ad-hoc-guard-command-failure-r1.json",
+      "sha256": "6a7b859dd65ce96a8cdd147693ae8f8de98d37f86491f11cb11136d524913b0f",
+      "bytes": 397
+    }
+  },
+  "retained_failures": [
+    "path-tests-r1: py_compile wrote protected main cache; fixed wrapper external cache only",
+    "full-b0-r1: repeated successful group kill EPERM masked output limit; integration fix in two approved paths",
+    "ad-hoc guard command: omitted explicit input environment, output in conversation and failure note"
+  ],
+  "main_ci": "NOT_RUN_FOR_CURRENT_WORKING_DELTA",
+  "candidate_journal_host_service_business": "NOT_RUN_BY_THIS_TASK",
+  "git_commit_push_pr_merge_release_deploy": "NOT_RUN",
+  "old_sources_deleted": false,
+  "product": "PARTIAL",
+  "sdk_distribution": "BLOCKED",
+  "release_ready": false
+}

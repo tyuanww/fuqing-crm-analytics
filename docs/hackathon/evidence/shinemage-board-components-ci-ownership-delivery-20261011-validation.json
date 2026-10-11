@@ -1,0 +1,314 @@
+{
+  "schema": "shinemage-domain-ci-ownership-delivery/v1",
+  "date": "2026-10-11",
+  "main_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "authorization": "apply reviewed five paths, one local commit, push existing feature branch and run/check PR #1 CI; no main cutover/merge/release/deploy",
+  "actual": {
+    "schema": "shinemage-domain-actual-ci-ownership-delivery/v1",
+    "repository": "tyuanww/shinemage-board-components",
+    "head": "e78e040e14792c89f99a2e3181004dbdaefd9bf6",
+    "parent": "d5aacdb464ff35b5dbb1aa46bf89717b31f131d0",
+    "commit_paths": [
+      ".github/workflows/ci.yml",
+      "DEVELOPMENT.md",
+      "README.md",
+      "scripts/run-author-tests.mjs",
+      "scripts/run-author-tests.test.mjs"
+    ],
+    "owner_clean": true,
+    "pr": {
+      "baseRefName": "main",
+      "headRefName": "codex/board-components-independent",
+      "headRefOid": "e78e040e14792c89f99a2e3181004dbdaefd9bf6",
+      "state": "OPEN",
+      "statusCheckRollup": [
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-10-11T07:22:57Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/tyuanww/shinemage-board-components/actions/runs/38121126913/job/114415907140",
+          "name": "domain-build",
+          "startedAt": "2026-10-11T07:22:10Z",
+          "status": "COMPLETED",
+          "workflowName": "board-components-owner"
+        },
+        {
+          "__typename": "CheckRun",
+          "completedAt": "2026-10-11T07:22:55Z",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/tyuanww/shinemage-board-components/actions/runs/38121124144/job/114415898863",
+          "name": "domain-build",
+          "startedAt": "2026-10-11T07:22:07Z",
+          "status": "COMPLETED",
+          "workflowName": "board-components-owner"
+        }
+      ],
+      "url": "https://github.com/tyuanww/shinemage-board-components/pull/1"
+    },
+    "ci": {
+      "run_id": 38121126913,
+      "attempt": 1,
+      "url": "https://github.com/tyuanww/shinemage-board-components/actions/runs/38121126913",
+      "event": "pull_request",
+      "conclusion": "success",
+      "source_head": "e78e040e14792c89f99a2e3181004dbdaefd9bf6",
+      "job_id": 114415907140,
+      "job_conclusion": "success",
+      "node": "24.19.0",
+      "python": "3.14.4",
+      "pnpm": "11.28.2",
+      "source_files_revalidated": 30,
+      "groups": [
+        {
+          "name": "geometry",
+          "command": [
+            "--test",
+            "--test-reporter=tap",
+            "--test-concurrency=1",
+            "library/test/geometry.test.mjs"
+          ],
+          "files": [
+            {
+              "path": "library/test/geometry.test.mjs",
+              "bytes": 2142,
+              "sha256": "32cbeedd833193821299cee4419b7f28403e524af25a985f52c1c3c35c913b73"
+            }
+          ],
+          "exit_code": 0,
+          "counts": {
+            "tests": 28,
+            "pass": 28,
+            "fail": 0,
+            "cancelled": 0,
+            "skipped": 0,
+            "todo": 0
+          },
+          "logs": {
+            "stdout": {
+              "path": "geometry.stdout.log",
+              "bytes": 3802,
+              "sha256": "2bc0a66945b9f369e64b6f93650e038c16727969671c8514918f80aac980c2cd"
+            },
+            "stderr": {
+              "path": "geometry.stderr.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          }
+        },
+        {
+          "name": "producer-inputs",
+          "command": [
+            "--test",
+            "--test-reporter=tap",
+            "--test-concurrency=1",
+            "scripts/producer.test.mjs",
+            "scripts/build-input.test.mjs"
+          ],
+          "files": [
+            {
+              "path": "scripts/producer.test.mjs",
+              "bytes": 5806,
+              "sha256": "3e40099f84549ee5bb770e1e6e59a52642cbce4ed8721059465979c2272673d5"
+            },
+            {
+              "path": "scripts/build-input.test.mjs",
+              "bytes": 1570,
+              "sha256": "0371134757c24a731df1292b632ec6b491ee57af93af58de496d101035f29c43"
+            }
+          ],
+          "exit_code": 0,
+          "counts": {
+            "tests": 6,
+            "pass": 6,
+            "fail": 0,
+            "cancelled": 0,
+            "skipped": 0,
+            "todo": 0
+          },
+          "logs": {
+            "stdout": {
+              "path": "producer-inputs.stdout.log",
+              "bytes": 1698,
+              "sha256": "d8f94c9387ca082590eca6fa04034eb06ff2d06a4c33e4ef5356c1c8e133430a"
+            },
+            "stderr": {
+              "path": "producer-inputs.stderr.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          }
+        }
+      ],
+      "guards": {
+        "tests": 5,
+        "pass": 5,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "preparation_guards": {
+        "tests": 4,
+        "result": "OK"
+      },
+      "counts_are_separate": true,
+      "artifact": {
+        "schema": "shinemage-domain-ci-artifact-download/v1",
+        "repository": "tyuanww/shinemage-board-components",
+        "run_id": 38121126913,
+        "head_sha": "e78e040e14792c89f99a2e3181004dbdaefd9bf6",
+        "artifact": {
+          "id": 11694947955,
+          "node_id": "MDg6QXJ0aWZhY3QxMTY5NDk0Nzk1NQ==",
+          "name": "board-components-ci-evidence-38121126913-1",
+          "size_in_bytes": 11356,
+          "url": "https://api.github.com/repos/tyuanww/shinemage-board-components/actions/artifacts/11694947955",
+          "archive_download_url": "https://api.github.com/repos/tyuanww/shinemage-board-components/actions/artifacts/11694947955/zip",
+          "expired": false,
+          "digest": "sha256:5207d0adac1a449fe1be36913d0d8214c1f4d8ecc3e137f7368bd27e6c4f28ee",
+          "created_at": "2026-10-11T07:22:54Z",
+          "updated_at": "2026-10-11T07:22:54Z",
+          "expires_at": "2026-10-25T07:22:54Z",
+          "workflow_run": {
+            "id": 38121126913,
+            "repository_id": 1414031624,
+            "head_repository_id": 1414031624,
+            "head_branch": "codex/board-components-independent",
+            "head_sha": "e78e040e14792c89f99a2e3181004dbdaefd9bf6"
+          }
+        },
+        "archive": {
+          "path": "/Users/hutou/.codex/tasks/shinemage-domain-ci-ownership-proposal-20261011-2a8b1o72/remote-ci-artifact-r1.zip",
+          "sha256": "5207d0adac1a449fe1be36913d0d8214c1f4d8ecc3e137f7368bd27e6c4f28ee",
+          "bytes": 11356
+        },
+        "members": [
+          {
+            "path": "board-manager-38121126913-1/evidence/download-command.json",
+            "bytes": 392,
+            "sha256": "c2e3c9a54bb9eb9b560824e00b7882a87bb348fe1dca4cdf4692497670514b25"
+          },
+          {
+            "path": "board-manager-38121126913-1/evidence/download.stderr",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "board-manager-38121126913-1/evidence/download.stdout",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "board-manager-38121126913-1/evidence/inputs.json",
+            "bytes": 477,
+            "sha256": "d0c6e25ebbe9622ae91e6730bb92b2a48df816e04ab3c4969818eb57a7576f88"
+          },
+          {
+            "path": "board-manager-38121126913-1/evidence/result.json",
+            "bytes": 436,
+            "sha256": "f4445b266a093ce3752755a2869f104e87e300250e7d0c954cbb246644dd61de"
+          },
+          {
+            "path": "board-output-38121126913-1/shine-mage-board-components-0.1.0.tgz",
+            "bytes": 1951,
+            "sha256": "66d53381095e93f38dbaa7385780f20b677f68ca2692702cb270849f3392853e"
+          },
+          {
+            "path": "board-author-38121126913-1/author-tests.json",
+            "bytes": 8419,
+            "sha256": "25b59ea139528ea165243f3375b9671d578bd2bee4d4b1757f030122e26aed0d"
+          },
+          {
+            "path": "board-author-38121126913-1/geometry.stderr.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "board-author-38121126913-1/geometry.stdout.log",
+            "bytes": 3802,
+            "sha256": "2bc0a66945b9f369e64b6f93650e038c16727969671c8514918f80aac980c2cd"
+          },
+          {
+            "path": "board-author-38121126913-1/producer-inputs.stderr.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "board-author-38121126913-1/producer-inputs.stdout.log",
+            "bytes": 1698,
+            "sha256": "d8f94c9387ca082590eca6fa04034eb06ff2d06a4c33e4ef5356c1c8e133430a"
+          },
+          {
+            "path": "board-author-38121126913-1/reference/shine-mage-board-components-0.1.0.tgz",
+            "bytes": 1955,
+            "sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182"
+          }
+        ],
+        "safe_extraction": true
+      },
+      "owner_receipt": {
+        "path": "/Users/hutou/.codex/tasks/shinemage-domain-ci-ownership-proposal-20261011-2a8b1o72/remote-ci-artifact-r1/board-author-38121126913-1/author-tests.json",
+        "bytes": 8419,
+        "sha256": "25b59ea139528ea165243f3375b9671d578bd2bee4d4b1757f030122e26aed0d"
+      },
+      "owner_receipt_scope": "AUTHOR_TESTS",
+      "owner_receipt_ci_status_preserved": "NOT_VERIFIED_BY_JOB",
+      "workflow_success_verified_independently": "GitHub run/jobs API"
+    },
+    "sealed_reference": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-ci-ownership-proposal-20261011-2a8b1o72/remote-ci-artifact-r1/board-author-38121126913-1/reference/shine-mage-board-components-0.1.0.tgz",
+      "bytes": 1955,
+      "sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182"
+    },
+    "generated_content_pack": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-ci-ownership-proposal-20261011-2a8b1o72/remote-ci-artifact-r1/board-output-38121126913-1/shine-mage-board-components-0.1.0.tgz",
+      "bytes": 1951,
+      "sha256": "66d53381095e93f38dbaa7385780f20b677f68ca2692702cb270849f3392853e"
+    },
+    "members_equal": true,
+    "member_records": {
+      "package/package.json": {
+        "bytes": 576,
+        "sha256": "2683aecb604706742a0b2bb38c2f3a35b5de6646767d3e4d4d20484f80aad3ba"
+      },
+      "package/lib/funnel.mjs": {
+        "bytes": 1660,
+        "sha256": "aebd9f3cdecc93a30b21d18cd554d5e01adfc17cdedc93e7a188ac0f48244dec"
+      },
+      "package/lib/waterfall.mjs": {
+        "bytes": 2308,
+        "sha256": "63aa6dc6010bd7cfe906f5184c395be0771568d40d471bf3184fe0d9ded53b98"
+      },
+      "package/lib/funnel.d.mts": {
+        "bytes": 239,
+        "sha256": "30c157c4cefc1ad5f8182e65af5777f39fcfd473987e1eabc47553f2f3d3c455"
+      },
+      "package/lib/waterfall.d.mts": {
+        "bytes": 341,
+        "sha256": "34b0be969c2f73b3dd1a7633b2e953c74bd5b12c80ed978ac3be0d51ee4a2210"
+      }
+    },
+    "warnings_preserved": [
+      "actions/upload-artifact Node 20 deprecated, forced Node 24 warning"
+    ],
+    "main_cutover": "NOT_RUN",
+    "main_full_b0_new_ci_current_candidate": "NOT_RUN",
+    "independent_tsc": "NOT_IN_CURRENT_BUILD",
+    "product": "PARTIAL",
+    "sdk_distribution": "BLOCKED",
+    "release_ready": false,
+    "merge_release_deploy": "NOT_RUN"
+  },
+  "raw_summary": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-domain-ci-ownership-proposal-20261011-2a8b1o72/actual-ci-ownership-delivery-r1.json",
+    "sha256": "5a1c07d62db98519f71ad38d4eb359b51c9e26a706023a07ff1c824483b661cc",
+    "bytes": 10814
+  },
+  "prior_proposal": "shinemage-board-components-ci-ownership-proposal-20261011.md",
+  "current_main_product_locks_candidate_journal": "UNCHANGED_THIS_TURN",
+  "main_full_b0_main_ci_current_admission": "NOT_RUN",
+  "product": "PARTIAL",
+  "sdk_distribution": "BLOCKED",
+  "release_ready": false
+}

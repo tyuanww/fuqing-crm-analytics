@@ -1,0 +1,1657 @@
+{
+  "schema_version": "shinemage-cordis-exact-proposal-evidence/v1",
+  "date": "2026-10-11",
+  "scope": "isolated exact peer correction, author build/tests, main guards, ordinary npm resolution/install/import",
+  "root": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693",
+  "main_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "author_heads": {
+    "crm": "5a839fa86de2240cf661a9034c58e0ead2d4b4ef",
+    "knowledge": "94ef29fa6c39d3dc506fbc5ef734f0a7ea9eb2b0"
+  },
+  "node": "24.19.0",
+  "python": "3.14.4",
+  "pnpm": "11.28.2",
+  "npm": "11.17.0",
+  "dsh_pin": "0.1.7-rc.2",
+  "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+  "original_peers": "4.0.2",
+  "proposal_peer": "4.0.4",
+  "proposal_applied": false,
+  "patches": [
+    {
+      "owner": "crm",
+      "patch": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/patches/crm-cordis-exact-r1.patch",
+      "sha256": "7f69c15cc0bda4005d52178d6fcd69b78e5a4d4cae63701821f879bac7c2fc36",
+      "bytes": 10915,
+      "paths": [
+        "DEVELOPMENT.md",
+        "README.md",
+        "inputs/ci/README.md",
+        "plugin/package.json",
+        "scripts/check-inputs.mjs",
+        "scripts/pinned-pnpm.test.mjs",
+        "scripts/verify-pack.mjs"
+      ],
+      "original_apply_check_exit": 0,
+      "applied": false
+    },
+    {
+      "owner": "knowledge",
+      "patch": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/patches/knowledge-cordis-exact-r1.patch",
+      "sha256": "9b2ac976b3f931d02a79f69cad9aac5c98c35171c0fa8cd393d4d9f96fbdd5b6",
+      "bytes": 11316,
+      "paths": [
+        "DEVELOPMENT.md",
+        "README.md",
+        "inputs/ci/README.md",
+        "plugin/package.json",
+        "scripts/author-boundary.test.mjs",
+        "scripts/check-inputs.mjs",
+        "scripts/verify-pack.mjs"
+      ],
+      "original_apply_check_exit": 0,
+      "applied": false
+    },
+    {
+      "owner": "main",
+      "patch": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/patches/main-cordis-exact-r2.patch",
+      "sha256": "f39d754e4248927e6944ec01eeefae854e0290c305a882455980babf36684d7f",
+      "bytes": 9219,
+      "paths": [
+        "scripts/ci/composition-pack-inputs.test.mjs",
+        "scripts/crm-calibration/composition-inputs.mjs",
+        "scripts/crm-calibration/composition-inputs.test.mjs",
+        "scripts/crm-calibration/prepare-profile.mjs",
+        "scripts/crm-calibration/profile-packs.test.mjs",
+        "scripts/crm-calibration/profile.test.mjs",
+        "scripts/crm-calibration/test-support/formal-packs.fixture.mjs"
+      ],
+      "original_apply_check_exit": 0,
+      "applied": false
+    }
+  ],
+  "tests": [
+    {
+      "log": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-author-guards-r2.stdout",
+      "tests": 15,
+      "pass": 15,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    {
+      "log": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-package-tests-r2.stdout",
+      "tests": 103,
+      "pass": 103,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    {
+      "log": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-author-guards-r2.stdout",
+      "tests": 9,
+      "pass": 9,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    {
+      "log": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-graph-tests-r2.stdout",
+      "tests": 22,
+      "pass": 22,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    {
+      "log": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-service-client-tests-r2.stdout",
+      "tests": 5,
+      "pass": 5,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    {
+      "log": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-package-tests-r2.stdout",
+      "tests": 5,
+      "pass": 5,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    {
+      "log": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-identity-lease-tests-r2.stdout",
+      "tests": 12,
+      "pass": 12,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    {
+      "log": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/main-contracts-r2.stdout",
+      "tests": 41,
+      "pass": 41,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    }
+  ],
+  "author_execution": [
+    {
+      "owner": "crm",
+      "step": "boundary-probe",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/crm-isolation-r2.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--input-type=module",
+        "-e",
+        "import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';const targets=[\"/Users/hutou/Desktop/ai-engineering/\\u5386\\u53f2\\u9879\\u76ee/fuqin-date/fuqing-crm-analytics/dsh-plugins/crm-knowledge/package.json\", \"/Users/hutou/Desktop/ai-engineering/\\u5386\\u53f2\\u9879\\u76ee/fuqin-date/fuqing-crm-analytics/dsh-plugins/knowledge/package.json\", \"/Users/hutou/Desktop/ai-engineering/\\u5386\\u53f2\\u9879\\u76ee/fuqin-date/fuqing-crm-analytics/scripts/crm-calibration/prepare-profile.mjs\", \"/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/dsh-analytics-workbench/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/dsh-crm-knowledge/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-knowledge-independent-20261008/dsh-knowledge/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-query/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-board/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-crowd-action/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/dsh-shine-funnel/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/dsh-shine-waterfall/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge/plugin/package.json\"];const rows=[];for(const path of targets){assert.throws(()=>readFileSync(path),{code:'EPERM'},path);rows.push({path,error:'EPERM'});}for(const path of [\"/Users/hutou/Desktop/ai-engineering/\\u5386\\u53f2\\u9879\\u76ee/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/package.json\", \"/Users/hutou/Desktop/ai-engineering/\\u5386\\u53f2\\u9879\\u76ee/fuqin-date/fuqing-crm-analytics/dsh-plugins/plugin-kit/build-tools/package.json\", \"/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/crm/plugin/package.json\"]){assert.ok(readFileSync(path).length);rows.push({path,result:'READ'});}console.log(JSON.stringify(rows,null,2));"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/crm",
+      "exit": 0,
+      "seconds": 0.084,
+      "stdout": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-boundary-probe-r2.stdout",
+      "stderr": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-boundary-probe-r2.stderr",
+      "stdout_sha256": "32924ed367398eb8147ebce1a6c082f387434ec5417a6c64a00b9d8aa8f68534",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "owner": "crm",
+      "step": "install",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/crm-isolation-r2.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "scripts/pinned-pnpm.mjs",
+        "install",
+        "--frozen-lockfile",
+        "--ignore-scripts",
+        "--offline",
+        "--store-dir",
+        "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/stores/crm"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/crm",
+      "exit": 0,
+      "seconds": 0.492,
+      "stdout": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-install-r2.stdout",
+      "stderr": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-install-r2.stderr",
+      "stdout_sha256": "d52878fe64706ae05c6e009095bf1aeb11af5aa2f49dc1f0f4f4fa49ecd8e500",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "owner": "crm",
+      "step": "check-inputs",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/crm-isolation-r2.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "scripts/check-inputs.mjs"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/crm",
+      "exit": 0,
+      "seconds": 0.307,
+      "stdout": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-check-inputs-r2.stdout",
+      "stderr": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-check-inputs-r2.stderr",
+      "stdout_sha256": "6f51efff3afa6cac0a599dfafb0269eb4de189c8e481c12a74a0f32f5c0b5065",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "owner": "crm",
+      "step": "build",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/crm-isolation-r2.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "scripts/build.mjs"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/crm",
+      "exit": 0,
+      "seconds": 3.987,
+      "stdout": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-build-r2.stdout",
+      "stderr": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-build-r2.stderr",
+      "stdout_sha256": "9000309e6027b0f606b6709449fad6eec90b56de59c9f57e3aac16e2bfe3357a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "owner": "crm",
+      "step": "author-guards",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/crm-isolation-r2.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--test",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "scripts/pinned-pnpm.test.mjs",
+        "scripts/source-boundary.test.mjs"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/crm",
+      "exit": 0,
+      "seconds": 0.733,
+      "stdout": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-author-guards-r2.stdout",
+      "stderr": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-author-guards-r2.stderr",
+      "stdout_sha256": "d52e258f1b142dbcb77b414376f47804d8c7bec1d10231104606a1b15d4b133b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "owner": "crm",
+      "step": "package-tests",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/crm-isolation-r2.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "scripts/run-package-tests.mjs"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/crm",
+      "exit": 0,
+      "seconds": 2.968,
+      "stdout": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-package-tests-r2.stdout",
+      "stderr": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-package-tests-r2.stderr",
+      "stdout_sha256": "553e4e57ba23cd2f9d5e856c140360f62a5150a8d5bd24b880370b2841353163",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "owner": "crm",
+      "step": "content-pack",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/crm-isolation-r2.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "scripts/verify-pack.mjs"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/crm",
+      "exit": 0,
+      "seconds": 0.472,
+      "stdout": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-content-pack-r2.stdout",
+      "stderr": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-content-pack-r2.stderr",
+      "stdout_sha256": "6ad1aa0b5eb26223031c3107f43ad2aa4385362ec3f48298826e442539cef5eb",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "owner": "knowledge",
+      "step": "boundary-probe",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge-isolation-r2.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--input-type=module",
+        "-e",
+        "import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';const targets=[\"/Users/hutou/Desktop/ai-engineering/\\u5386\\u53f2\\u9879\\u76ee/fuqin-date/fuqing-crm-analytics/dsh-plugins/crm-knowledge/package.json\", \"/Users/hutou/Desktop/ai-engineering/\\u5386\\u53f2\\u9879\\u76ee/fuqin-date/fuqing-crm-analytics/dsh-plugins/knowledge/package.json\", \"/Users/hutou/Desktop/ai-engineering/\\u5386\\u53f2\\u9879\\u76ee/fuqin-date/fuqing-crm-analytics/scripts/crm-calibration/prepare-profile.mjs\", \"/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/dsh-analytics-workbench/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/dsh-crm-knowledge/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-knowledge-independent-20261008/dsh-knowledge/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-query/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-board/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-crowd-action/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/dsh-shine-funnel/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/dsh-shine-waterfall/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/crm/plugin/package.json\"];const rows=[];for(const path of targets){assert.throws(()=>readFileSync(path),{code:'EPERM'},path);rows.push({path,error:'EPERM'});}for(const path of [\"/Users/hutou/Desktop/ai-engineering/\\u5386\\u53f2\\u9879\\u76ee/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/package.json\", \"/Users/hutou/Desktop/ai-engineering/\\u5386\\u53f2\\u9879\\u76ee/fuqin-date/fuqing-crm-analytics/dsh-plugins/plugin-kit/build-tools/package.json\", \"/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge/plugin/package.json\"]){assert.ok(readFileSync(path).length);rows.push({path,result:'READ'});}console.log(JSON.stringify(rows,null,2));"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge",
+      "exit": 0,
+      "seconds": 0.041,
+      "stdout": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-boundary-probe-r2.stdout",
+      "stderr": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-boundary-probe-r2.stderr",
+      "stdout_sha256": "9077455488ef0804da3c3b137d32bb5cb9df1999cabefc0da49af61c58a6e89f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "owner": "knowledge",
+      "step": "install",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge-isolation-r2.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "scripts/pinned-pnpm.mjs",
+        "install",
+        "--frozen-lockfile",
+        "--ignore-scripts",
+        "--offline",
+        "--store-dir",
+        "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/stores/knowledge"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge",
+      "exit": 0,
+      "seconds": 0.493,
+      "stdout": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-install-r2.stdout",
+      "stderr": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-install-r2.stderr",
+      "stdout_sha256": "fb7ea2ef5f97f8c99d8aaf060d514f1b6e26a89b99209fc9193794a3d089f000",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "owner": "knowledge",
+      "step": "check-inputs",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge-isolation-r2.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "scripts/check-inputs.mjs"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge",
+      "exit": 0,
+      "seconds": 0.264,
+      "stdout": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-check-inputs-r2.stdout",
+      "stderr": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-check-inputs-r2.stderr",
+      "stdout_sha256": "2c43e3959935470e3536ab62303363ece6754e8342caadea54727316be492a74",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "owner": "knowledge",
+      "step": "build",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge-isolation-r2.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "scripts/build.mjs"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge",
+      "exit": 0,
+      "seconds": 0.958,
+      "stdout": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-build-r2.stdout",
+      "stderr": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-build-r2.stderr",
+      "stdout_sha256": "05f3ec0199e1311fb1f17b84bc5a808c2497b3cddc76aa80c5da11848ce2ec61",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "owner": "knowledge",
+      "step": "graph-tests",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge-isolation-r2.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--test",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "plugin/test/graph.test.mjs"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge",
+      "exit": 0,
+      "seconds": 0.706,
+      "stdout": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-graph-tests-r2.stdout",
+      "stderr": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-graph-tests-r2.stderr",
+      "stdout_sha256": "e5a3505d2495e162a8eb91c33ed253a24c488d045238645767adfc09c02867cc",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "owner": "knowledge",
+      "step": "service-client-tests",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge-isolation-r2.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--test",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "plugin/test/service-client.test.mjs"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge",
+      "exit": 0,
+      "seconds": 0.202,
+      "stdout": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-service-client-tests-r2.stdout",
+      "stderr": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-service-client-tests-r2.stderr",
+      "stdout_sha256": "b6f64879ab545e054c15fe454c70c9c8d16da37a7cb8bcf2e4372ea543de318b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "owner": "knowledge",
+      "step": "package-tests",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge-isolation-r2.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--test",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "plugin/test/package.test.mjs"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge",
+      "exit": 0,
+      "seconds": 0.189,
+      "stdout": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-package-tests-r2.stdout",
+      "stderr": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-package-tests-r2.stderr",
+      "stdout_sha256": "c7cc8b773035fe49f52fd33990c7cd78a0f91b87f15f9bf8c8fa22add0d63f46",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "owner": "knowledge",
+      "step": "identity-lease-tests",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge-isolation-r2.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--test",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "plugin/test/identity-lease.test.mjs"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge",
+      "exit": 0,
+      "seconds": 0.858,
+      "stdout": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-identity-lease-tests-r2.stdout",
+      "stderr": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-identity-lease-tests-r2.stderr",
+      "stdout_sha256": "4407185e7078ce1aeddf67f817378449b9b7de7d147a0a98bec88f7ef7ab2080",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "owner": "knowledge",
+      "step": "author-guards",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge-isolation-r2.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--test",
+        "--test-concurrency=1",
+        "--test-reporter=tap",
+        "scripts/author-boundary.test.mjs"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge",
+      "exit": 0,
+      "seconds": 0.439,
+      "stdout": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-author-guards-r2.stdout",
+      "stderr": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-author-guards-r2.stderr",
+      "stdout_sha256": "c44293e2582273892fc4d740144437bcdb51bdc9cb55d4cac0c1ffd462d8dec2",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "owner": "knowledge",
+      "step": "content-pack",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge-isolation-r2.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "scripts/verify-pack.mjs"
+      ],
+      "cwd": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge",
+      "exit": 0,
+      "seconds": 0.425,
+      "stdout": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-content-pack-r2.stdout",
+      "stderr": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-content-pack-r2.stderr",
+      "stdout_sha256": "9bb1475485ba6fbeb7fc6471e83e70f816ebf3984806a1d196159b1db5c00eb3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "strict_lock": {
+    "command": [
+      "/Users/hutou/homebrew/opt/node@24/bin/node",
+      "--use-system-ca",
+      "/Users/hutou/homebrew/opt/node@24/lib/node_modules/npm/bin/npm-cli.js",
+      "install",
+      "--package-lock-only",
+      "--ignore-scripts",
+      "--strict-peer-deps",
+      "--strict-ssl=true",
+      "--no-audit",
+      "--no-fund",
+      "--update-notifier=false",
+      "--registry=https://registry.npmjs.org/",
+      "--userconfig=/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/npm-config-r1/user.npmrc",
+      "--globalconfig=/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/npm-config-r1/global.npmrc",
+      "--cache=/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/npm-cache-r1",
+      "--fetch-retries=0",
+      "--fetch-timeout=20000"
+    ],
+    "cwd": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1",
+    "exit": 0,
+    "seconds": 51.124,
+    "input_packages": {
+      "@shine-mage/dsh-crm-knowledge": {
+        "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/content-packs-r2/crm/shine-mage-dsh-crm-knowledge-0.0.0-crm.1.tgz",
+        "sha256": "c275ed7515338c9cfec676f9c818603203f0080c79eb78a3f523cddce5b3d521",
+        "bytes": 236798,
+        "version": "0.0.0-crm.1",
+        "peer": {
+          "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
+          "@deepseek-ai/cordis": "4.0.4"
+        }
+      },
+      "@shine-mage/dsh-knowledge": {
+        "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/content-packs-r2/knowledge/shine-mage-dsh-knowledge-0.0.0-candidate.1.tgz",
+        "sha256": "46cfc722ec8732b2edd473ab69bb73fa83a36665ffb57e57d9439d955e233d7f",
+        "bytes": 16144,
+        "version": "0.0.0-candidate.1",
+        "peer": {
+          "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
+          "@deepseek-ai/cordis": "4.0.4"
+        }
+      }
+    },
+    "official_sdk_metadata": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-peer-compat-20261011-56yp2373/registry-dsh-tools-rc2.json",
+      "sha256": "f34e1eee4d31b6b0c0cb178ffab90915d1e281b89611e44a24afd189d411850c"
+    },
+    "tls_strict": true,
+    "system_ca_sha256": "9dae8d76e55cb08991f2b672d58999ea15560d910759c16b544f843bdffbb994",
+    "ignore_scripts": true,
+    "package_lock_only": true,
+    "runtime_install": "NOT_RUN",
+    "host": "NOT_RUN",
+    "formal_pack": "NOT_RUN",
+    "release_ready": false,
+    "lock": {
+      "sha256": "e7b5d62b7ef76a19195b619024e5c9a13f9e63da3cd18bef0ca2f7ac50477e56",
+      "bytes": 378338,
+      "package_count": 613,
+      "lockfileVersion": 3
+    },
+    "resolution": "PASS_LOCK_RESOLUTION_ONLY"
+  },
+  "strict_install": {
+    "command": [
+      "/Users/hutou/homebrew/opt/node@24/bin/node",
+      "--use-system-ca",
+      "/Users/hutou/homebrew/opt/node@24/lib/node_modules/npm/bin/npm-cli.js",
+      "ci",
+      "--ignore-scripts",
+      "--strict-peer-deps",
+      "--strict-ssl=true",
+      "--no-audit",
+      "--no-fund",
+      "--update-notifier=false",
+      "--registry=https://registry.npmjs.org/",
+      "--userconfig=/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/npm-config-r1/user.npmrc",
+      "--globalconfig=/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/npm-config-r1/global.npmrc",
+      "--cache=/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/npm-cache-r1",
+      "--fetch-retries=0",
+      "--fetch-timeout=20000"
+    ],
+    "cwd": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1",
+    "exit": 0,
+    "seconds": 14.914,
+    "input_lock_sha256": "e7b5d62b7ef76a19195b619024e5c9a13f9e63da3cd18bef0ca2f7ac50477e56",
+    "output_lock_sha256": "e7b5d62b7ef76a19195b619024e5c9a13f9e63da3cd18bef0ca2f7ac50477e56",
+    "ignore_scripts": true,
+    "strict_peer_deps": true,
+    "strict_tls": true,
+    "host": "NOT_RUN",
+    "formal_pack": "NOT_RUN",
+    "candidate": "NOT_RUN",
+    "release_ready": false,
+    "installed_packages": {
+      "@deepseek-ai/dsh": {
+        "version": "0.1.7-rc.2",
+        "manifest_sha256": "b6a8e28158f1bc67862e5d0c671430bfa4867a57be864e6007524877644555aa",
+        "peerDependencies": null
+      },
+      "@deepseek-ai/dsh-tools": {
+        "version": "0.1.7-rc.2",
+        "manifest_sha256": "12bda14a4753f2c2202d607e2bcf77236817bc6f17a827421c7f353ac2d917e5",
+        "peerDependencies": {
+          "@deepseek-ai/cordis": "~4.0.4",
+          "@deepseek-ai/dsh-agent": "0.1.7-rc.2",
+          "@deepseek-ai/dsh-ptc-runtime": "0.1.7-rc.2",
+          "@deepseek-ai/dsh-invariants": "0.1.7-rc.2",
+          "@deepseek-ai/dsh-llm": "0.1.7-rc.2",
+          "@deepseek-ai/dsh-scope": "0.1.7-rc.2",
+          "@deepseek-ai/dsh-system-prompt": "0.1.7-rc.2",
+          "@deepseek-ai/dsh-user-approval": "0.1.7-rc.2",
+          "@deepseek-ai/dsh-sandbox": "0.1.7-rc.2",
+          "@deepseek-ai/dsh-sandbox-policy": "0.1.7-rc.2",
+          "@deepseek-ai/dsh-session": "0.1.7-rc.2"
+        }
+      },
+      "@deepseek-ai/cordis": {
+        "version": "4.0.4",
+        "manifest_sha256": "41c9dee4715a89ef94f227384460c8445857c8faf33493eb545604a948828649",
+        "peerDependencies": {
+          "@deepseek-ai/cordis-plugin-include": "~1.0.9",
+          "@deepseek-ai/cordis-plugin-loader": "~1.0.5"
+        }
+      },
+      "@shine-mage/dsh-crm-knowledge": {
+        "version": "0.0.0-crm.1",
+        "manifest_sha256": "b53c4cfc5e17fe1505a03d2b944bcd80e62710e342a328ed5b0ee5ef10991581",
+        "peerDependencies": {
+          "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
+          "@deepseek-ai/cordis": "4.0.4"
+        }
+      },
+      "@shine-mage/dsh-knowledge": {
+        "version": "0.0.0-candidate.1",
+        "manifest_sha256": "a43b4f7403439bcf0c2889a3e9d5a0d9c23211a2d01fba3b8284ac15a9293ed4",
+        "peerDependencies": {
+          "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
+          "@deepseek-ai/cordis": "4.0.4"
+        }
+      }
+    },
+    "resolution": "PASS_ORDINARY_STRICT_INSTALL_IGNORE_SCRIPTS"
+  },
+  "ordinary_imports": {
+    "scope": "ordinary npm installed-package import",
+    "rows": [
+      {
+        "name": "@shine-mage/dsh-crm-knowledge",
+        "entry": "lib/index.js",
+        "sha256": "a31542e7f3d77a7f9fd49af3f5428917f99a9a1e16d416ac29eab4a99237da63",
+        "exports": [
+          "apply",
+          "inject",
+          "name"
+        ],
+        "dependencies": {
+          "@deepseek-ai/cordis": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/node_modules/@deepseek-ai/cordis/lib/index.js",
+          "@deepseek-ai/dsh-tools": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/node_modules/@deepseek-ai/dsh-tools/lib/index.js"
+        },
+        "imported": true
+      },
+      {
+        "name": "@shine-mage/dsh-crm-knowledge",
+        "entry": "lib/host.js",
+        "sha256": "5149a148257b794c3b7bff939173fdc003d9f5d38382d8cc23fe58310c979d64",
+        "exports": [
+          "apply",
+          "inject",
+          "name"
+        ],
+        "dependencies": {
+          "@deepseek-ai/cordis": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/node_modules/@deepseek-ai/cordis/lib/index.js",
+          "@deepseek-ai/dsh-tools": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/node_modules/@deepseek-ai/dsh-tools/lib/index.js"
+        },
+        "imported": true
+      },
+      {
+        "name": "@shine-mage/dsh-knowledge",
+        "entry": "lib/index.js",
+        "sha256": "e04d90e8e4a51fcebf14c1666ace8796847c2ac13737805f933655c9b196180e",
+        "exports": [
+          "apply",
+          "inject",
+          "name"
+        ],
+        "dependencies": {
+          "@deepseek-ai/cordis": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/node_modules/@deepseek-ai/cordis/lib/index.js",
+          "@deepseek-ai/dsh-tools": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/node_modules/@deepseek-ai/dsh-tools/lib/index.js"
+        },
+        "imported": true
+      },
+      {
+        "name": "@shine-mage/dsh-knowledge",
+        "entry": "lib/graph-tools.js",
+        "sha256": "425e876ef85dbfb8524080340b42e29d12b5eb0799ca79a35a3f5d8cf9e6b864",
+        "exports": [
+          "apply",
+          "inject",
+          "name"
+        ],
+        "dependencies": {
+          "@deepseek-ai/cordis": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/node_modules/@deepseek-ai/cordis/lib/index.js",
+          "@deepseek-ai/dsh-tools": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/node_modules/@deepseek-ai/dsh-tools/lib/index.js"
+        },
+        "imported": true
+      }
+    ],
+    "host_started": false,
+    "service_started": false,
+    "model_called": false,
+    "formal_pack": "NOT_RUN",
+    "candidate_admission": "NOT_RUN",
+    "release_ready": false
+  },
+  "payload_comparison": [
+    {
+      "owner": "crm",
+      "member": "package/lib/client.js",
+      "sha256": "72bbd7d715ec5ab8e5d2bd7fce29a74dc7a32ad9e6fae8df86278de27c17eab3",
+      "bytes": 640064,
+      "old_formal_payload_equal": true
+    },
+    {
+      "owner": "crm",
+      "member": "package/lib/host.js",
+      "sha256": "5149a148257b794c3b7bff939173fdc003d9f5d38382d8cc23fe58310c979d64",
+      "bytes": 74553,
+      "old_formal_payload_equal": true
+    },
+    {
+      "owner": "crm",
+      "member": "package/lib/index.js",
+      "sha256": "a31542e7f3d77a7f9fd49af3f5428917f99a9a1e16d416ac29eab4a99237da63",
+      "bytes": 69956,
+      "old_formal_payload_equal": true
+    },
+    {
+      "owner": "crm",
+      "manifest_delta_against_old_formal": {
+        "peerDependencies": {
+          "old": {
+            "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
+            "@deepseek-ai/cordis": "4.0.2"
+          },
+          "new": {
+            "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
+            "@deepseek-ai/cordis": "4.0.4"
+          }
+        },
+        "scripts": {
+          "old": null,
+          "new": {
+            "test": "node --test test/*.test.mjs",
+            "build": "node build.mjs",
+            "test:host": "node --test test/host.integration.mjs"
+          }
+        }
+      },
+      "ordinary_content_pack_only": true
+    },
+    {
+      "owner": "knowledge",
+      "member": "package/lib/graph-tools.js",
+      "sha256": "425e876ef85dbfb8524080340b42e29d12b5eb0799ca79a35a3f5d8cf9e6b864",
+      "bytes": 38773,
+      "old_formal_payload_equal": true
+    },
+    {
+      "owner": "knowledge",
+      "member": "package/lib/index.js",
+      "sha256": "e04d90e8e4a51fcebf14c1666ace8796847c2ac13737805f933655c9b196180e",
+      "bytes": 15253,
+      "old_formal_payload_equal": true
+    },
+    {
+      "owner": "knowledge",
+      "manifest_delta_against_old_formal": {
+        "peerDependencies": {
+          "old": {
+            "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
+            "@deepseek-ai/cordis": "4.0.2"
+          },
+          "new": {
+            "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
+            "@deepseek-ai/cordis": "4.0.4"
+          }
+        },
+        "scripts": {
+          "old": null,
+          "new": {
+            "build": "node build.mjs",
+            "test": "node --test test/*.test.mjs"
+          }
+        }
+      },
+      "ordinary_content_pack_only": true
+    }
+  ],
+  "review": {
+    "method": "open-code-review-delegate deterministic preview/rules + main Agent review",
+    "external_llm": false,
+    "subagents": false,
+    "summary": {
+      "total_files": 15,
+      "reviewed_files": 15,
+      "skipped_files": 0,
+      "coverage_rate": 1.0,
+      "manual_markdown_files": 6
+    },
+    "files": [
+      {
+        "owner": "crm",
+        "path": "plugin/package.json",
+        "status": "modified",
+        "review": "reviewed",
+        "sha256": "c5889488b676681cedc388ba4a68717028f15516fd1f0cec6b8f484fdb290d20",
+        "scope": "isolated exact-Cordis delta against current baseline; inherited main changes excluded"
+      },
+      {
+        "owner": "crm",
+        "path": "scripts/check-inputs.mjs",
+        "status": "modified",
+        "review": "reviewed",
+        "sha256": "4a50487b87b1a473ffb968cea8ef953719952175a0f280d78a54930aa259b19c",
+        "scope": "isolated exact-Cordis delta against current baseline; inherited main changes excluded"
+      },
+      {
+        "owner": "crm",
+        "path": "scripts/pinned-pnpm.test.mjs",
+        "status": "modified",
+        "review": "reviewed",
+        "sha256": "d6a25039bd9af658362aa2255140e72f362ea4f3ed8669282082c7029f857d11",
+        "scope": "isolated exact-Cordis delta against current baseline; inherited main changes excluded"
+      },
+      {
+        "owner": "crm",
+        "path": "scripts/verify-pack.mjs",
+        "status": "modified",
+        "review": "reviewed",
+        "sha256": "028305db502a05cb01a8d9049f39a8ea3b17a0a645e4eef303c69ab7a3d912aa",
+        "scope": "isolated exact-Cordis delta against current baseline; inherited main changes excluded"
+      },
+      {
+        "owner": "knowledge",
+        "path": "plugin/package.json",
+        "status": "modified",
+        "review": "reviewed",
+        "sha256": "3428901eafe33470cfdbbc27dd720610e1e55bf9aa9138777d1c32d347a7c19a",
+        "scope": "isolated exact-Cordis delta against current baseline; inherited main changes excluded"
+      },
+      {
+        "owner": "knowledge",
+        "path": "scripts/author-boundary.test.mjs",
+        "status": "modified",
+        "review": "reviewed",
+        "sha256": "7f2c0be59e58d23d04de9f73d2a3e3948f15703e90974cc94d6bcc717dc6472a",
+        "scope": "isolated exact-Cordis delta against current baseline; inherited main changes excluded"
+      },
+      {
+        "owner": "knowledge",
+        "path": "scripts/check-inputs.mjs",
+        "status": "modified",
+        "review": "reviewed",
+        "sha256": "402af7e1236fe99adb77db7493744a96c610a127f8ac381c9bb4429e8a32b6fb",
+        "scope": "isolated exact-Cordis delta against current baseline; inherited main changes excluded"
+      },
+      {
+        "owner": "knowledge",
+        "path": "scripts/verify-pack.mjs",
+        "status": "modified",
+        "review": "reviewed",
+        "sha256": "4d3923aad64622b1f6bbb68bdf1361bb74d4ed8e687637ee174694c725185071",
+        "scope": "isolated exact-Cordis delta against current baseline; inherited main changes excluded"
+      },
+      {
+        "owner": "main",
+        "path": "scripts/crm-calibration/prepare-profile.mjs",
+        "status": "modified",
+        "review": "reviewed",
+        "sha256": "0c8bfcfb0456a2c9ebbcb18084eb7410437c4fb85308b2d78b41a64ee4bf99f1",
+        "scope": "isolated exact-Cordis delta against current baseline; inherited main changes excluded"
+      },
+      {
+        "owner": "main",
+        "path": "scripts/ci/composition-pack-inputs.test.mjs",
+        "status": "added",
+        "review": "reviewed",
+        "sha256": "c90e5958ab7249a5ca04bb72140fdbfbab346143b998e73b5d64fa08892784ce",
+        "scope": "isolated exact-Cordis delta against current baseline; inherited main changes excluded"
+      },
+      {
+        "owner": "main",
+        "path": "scripts/crm-calibration/composition-inputs.mjs",
+        "status": "added",
+        "review": "reviewed",
+        "sha256": "f287d58b2c5204d9fab302794455ef3cbb233c4af4b34803683160a197ab64ea",
+        "scope": "isolated exact-Cordis delta against current baseline; inherited main changes excluded"
+      },
+      {
+        "owner": "main",
+        "path": "scripts/crm-calibration/composition-inputs.test.mjs",
+        "status": "added",
+        "review": "reviewed",
+        "sha256": "24c10127982d125fc3af1542775121d6d9d888cf056a3ef522aaeafbee607153",
+        "scope": "isolated exact-Cordis delta against current baseline; inherited main changes excluded"
+      },
+      {
+        "owner": "main",
+        "path": "scripts/crm-calibration/profile-packs.test.mjs",
+        "status": "added",
+        "review": "reviewed",
+        "sha256": "ee430ba3694583294a7960e5021ba45282672bff20e456616e03f5d4e2f7be7b",
+        "scope": "isolated exact-Cordis delta against current baseline; inherited main changes excluded"
+      },
+      {
+        "owner": "main",
+        "path": "scripts/crm-calibration/profile.test.mjs",
+        "status": "added",
+        "review": "reviewed",
+        "sha256": "8db3703079376eac07d9e6b365a57fd65c2d54aa3731e03ad34ffd4e8e50560c",
+        "scope": "isolated exact-Cordis delta against current baseline; inherited main changes excluded"
+      },
+      {
+        "owner": "main",
+        "path": "scripts/crm-calibration/test-support/formal-packs.fixture.mjs",
+        "status": "added",
+        "review": "reviewed",
+        "sha256": "6d31299adfcf7bdc4339a8a5c8b9912f3f5c79076df7752ff3887723d0e3e0a5",
+        "scope": "isolated exact-Cordis delta against current baseline; inherited main changes excluded"
+      }
+    ],
+    "manual_docs": [
+      {
+        "owner": "crm",
+        "path": "DEVELOPMENT.md",
+        "review": "reviewed_manually",
+        "sha256": "95695cd0fa1cb8bacc0483d55050788df39d43036059ae9ce13098c9a7ceaee5",
+        "checks": "new exact declaration separated from old product CI; no inherited formal receipt or release claim"
+      },
+      {
+        "owner": "crm",
+        "path": "README.md",
+        "review": "reviewed_manually",
+        "sha256": "a0837d7356c334aae4e83a2696b6d4da98eb21cb379314722ef4f347ba07b2f7",
+        "checks": "new exact declaration separated from old product CI; no inherited formal receipt or release claim"
+      },
+      {
+        "owner": "crm",
+        "path": "inputs/ci/README.md",
+        "review": "reviewed_manually",
+        "sha256": "1f1f371b3390dcfb839653e622e0b6c6e465c2a9638dd5cbea415f4222c4db55",
+        "checks": "new exact declaration separated from old product CI; no inherited formal receipt or release claim"
+      },
+      {
+        "owner": "knowledge",
+        "path": "DEVELOPMENT.md",
+        "review": "reviewed_manually",
+        "sha256": "a2055ccfecfac992471cabcd935e257d66f3b54e35d570dd57b20691a7a38a1c",
+        "checks": "new exact declaration separated from old product CI; no inherited formal receipt or release claim"
+      },
+      {
+        "owner": "knowledge",
+        "path": "README.md",
+        "review": "reviewed_manually",
+        "sha256": "088e3ceec4706161842f38771849054709310a79f2801ae80a2b2b4bef42cc58",
+        "checks": "new exact declaration separated from old product CI; no inherited formal receipt or release claim"
+      },
+      {
+        "owner": "knowledge",
+        "path": "inputs/ci/README.md",
+        "review": "reviewed_manually",
+        "sha256": "cc09551935afa328b05fae82bcd68f7aa523c2792f0c5a6533e1f26bfa110d3a",
+        "checks": "new exact declaration separated from old product CI; no inherited formal receipt or release claim"
+      }
+    ],
+    "findings": [],
+    "review_notes": [
+      "Exact 4.0.4 replaces exact 4.0.2; ranges and other patch versions still rejected.",
+      "Manifest checks happen before SDK evaluation. Negative fixtures copy real current entry points, never mutate originals.",
+      "Runtime JS, package IDs/versions, exports, pin, kit locks, peers other than Cordis and existing CI workflows unchanged.",
+      "Pack checks validate both source and tarball peers; ordinary content pack not formal pack/candidate.",
+      "Main guards and receipt updated together in proposal; public selection, source/digest/service binding and permission checks retained.",
+      "npm strict lock/ci use official registry, system CA, no forced install, no peer exemptions, ignore lifecycle scripts."
+    ],
+    "application_prerequisites": [
+      "Original handoff requires 4.0.2 retained: owner must authorize applying this exact contract correction to author repos.",
+      "Original main formal input lock still binds old 4.0.2 packs: do not apply main guard proposal alone.",
+      "Create clean new author commits under commit authorization, validate their new CI, create new formal packs and update exact input identities before main integration.",
+      "New content packs and npm import proof cannot inherit previous candidate/journal/host/service/browser/WSL/recovery results."
+    ],
+    "product": "PARTIAL",
+    "sdk_distribution": "BLOCKED",
+    "release_ready": false
+  },
+  "failures_preserved": [
+    {
+      "scope": "boundary-probe-r1",
+      "exit": 1,
+      "reason": "seatbelt path string used JSON Unicode escapes; Chinese path deny did not match; r2 uses literal Unicode and actual EPERM negative probes"
+    },
+    {
+      "scope": "main-contracts-r1",
+      "exit": 0,
+      "reason": "Python selector not explicitly bound; authoritative r2 uses fixed Python 3.14.4; counts not added"
+    },
+    {
+      "scope": "main-patch-generation-r1",
+      "exit": 1,
+      "reason": "absolute diff header normalization left invalid Users path; r1 patch retained; only main r2 is applicable"
+    }
+  ],
+  "protection_before_docs": {
+    "main": 104,
+    "workbench": 8,
+    "other_authors": 8,
+    "protected": 46,
+    "unchanged": true
+  },
+  "not_run": [
+    "apply original peer contract changes",
+    "new product commits/push/PR/merge",
+    "new hosted CI",
+    "new formal pack",
+    "new candidate/journal",
+    "full DSH host/service/browser/WSL/recovery for new packages",
+    "real model/CRM/WeKnora/UAT",
+    "full B0 on proposed peer contract",
+    "new SDK audit",
+    "release/deploy",
+    "remote artifact/configuration",
+    "deletion"
+  ],
+  "raw_evidence": [
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/add-guard-tests.py",
+      "bytes": 3488,
+      "sha256": "9455d2cf0cb29242ba278aeabc27284b10512511b11c6a6d558723e048adc65b"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/content-packs-r2/crm/shine-mage-dsh-crm-knowledge-0.0.0-crm.1.tgz",
+      "bytes": 236798,
+      "sha256": "c275ed7515338c9cfec676f9c818603203f0080c79eb78a3f523cddce5b3d521"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/content-packs-r2/knowledge/shine-mage-dsh-knowledge-0.0.0-candidate.1.tgz",
+      "bytes": 16144,
+      "sha256": "46cfc722ec8732b2edd473ab69bb73fa83a36665ffb57e57d9439d955e233d7f"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/crm-isolation-r1.sb",
+      "bytes": 3473,
+      "sha256": "b14cc13469fe89a9f52cc46bbeb6279785237420d114ae744070f71591d4886f"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/crm-isolation-r2.sb",
+      "bytes": 3377,
+      "sha256": "0b39635c47dcbb2a2f7e046ff90f1a78c46c6b8771db7c311b5f8273174eabd3"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/execution-r1.json",
+      "bytes": 3225,
+      "sha256": "91a1f8f98124ce3efb85e1b03892513dd8083e854e99ba259d8468328abd8b12"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/execution-r2.json",
+      "bytes": 20839,
+      "sha256": "bd0588ef044f8a27f1692b611e5475e3e95aa01c9e727128f579d8e7b06733bf"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge-isolation-r2.sb",
+      "bytes": 3371,
+      "sha256": "2849e5e385d03f907530bdb86fc0fc1203a5547c315e4b64be3767c5c5732407"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-author-guards-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-author-guards-r2.stdout",
+      "bytes": 3038,
+      "sha256": "d52e258f1b142dbcb77b414376f47804d8c7bec1d10231104606a1b15d4b133b"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-boundary-probe-r1.stderr",
+      "bytes": 758,
+      "sha256": "91f0b66ab6c259da16689f0280b4517c425f09d62c9013f73e5dd4c30d611936"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-boundary-probe-r1.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-boundary-probe-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-boundary-probe-r2.stdout",
+      "bytes": 2475,
+      "sha256": "32924ed367398eb8147ebce1a6c082f387434ec5417a6c64a00b9d8aa8f68534"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-build-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-build-r2.stdout",
+      "bytes": 48,
+      "sha256": "9000309e6027b0f606b6709449fad6eec90b56de59c9f57e3aac16e2bfe3357a"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-check-inputs-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-check-inputs-r2.stdout",
+      "bytes": 792,
+      "sha256": "6f51efff3afa6cac0a599dfafb0269eb4de189c8e481c12a74a0f32f5c0b5065"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-clone-r1.stderr",
+      "bytes": 101,
+      "sha256": "1a7fd3573d7d6bcabf2ee82c7d6af98a7c95a82a6f8dbfae8dfd6e469fc094a5"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-clone-r1.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-content-pack-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-content-pack-r2.stdout",
+      "bytes": 1852,
+      "sha256": "6ad1aa0b5eb26223031c3107f43ad2aa4385362ec3f48298826e442539cef5eb"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-install-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-install-r2.stdout",
+      "bytes": 588,
+      "sha256": "d52878fe64706ae05c6e009095bf1aeb11af5aa2f49dc1f0f4f4fa49ecd8e500"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-package-tests-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/crm-package-tests-r2.stdout",
+      "bytes": 25949,
+      "sha256": "553e4e57ba23cd2f9d5e856c140360f62a5150a8d5bd24b880370b2841353163"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-author-guards-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-author-guards-r2.stdout",
+      "bytes": 1851,
+      "sha256": "c44293e2582273892fc4d740144437bcdb51bdc9cb55d4cac0c1ffd462d8dec2"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-boundary-probe-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-boundary-probe-r2.stdout",
+      "bytes": 2475,
+      "sha256": "9077455488ef0804da3c3b137d32bb5cb9df1999cabefc0da49af61c58a6e89f"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-build-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-build-r2.stdout",
+      "bytes": 54,
+      "sha256": "05f3ec0199e1311fb1f17b84bc5a808c2497b3cddc76aa80c5da11848ce2ec61"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-check-inputs-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-check-inputs-r2.stdout",
+      "bytes": 766,
+      "sha256": "2c43e3959935470e3536ab62303363ece6754e8342caadea54727316be492a74"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-clone-r1.stderr",
+      "bytes": 107,
+      "sha256": "ecf8127269c40cfc2b488fc33b35faa5a806b84c326d31ff8d82f2882686f1d5"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-clone-r1.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-content-pack-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-content-pack-r2.stdout",
+      "bytes": 1550,
+      "sha256": "9bb1475485ba6fbeb7fc6471e83e70f816ebf3984806a1d196159b1db5c00eb3"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-graph-tests-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-graph-tests-r2.stdout",
+      "bytes": 4576,
+      "sha256": "e5a3505d2495e162a8eb91c33ed253a24c488d045238645767adfc09c02867cc"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-identity-lease-tests-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-identity-lease-tests-r2.stdout",
+      "bytes": 2714,
+      "sha256": "4407185e7078ce1aeddf67f817378449b9b7de7d147a0a98bec88f7ef7ab2080"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-install-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-install-r2.stdout",
+      "bytes": 594,
+      "sha256": "fb7ea2ef5f97f8c99d8aaf060d514f1b6e26a89b99209fc9193794a3d089f000"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-package-tests-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-package-tests-r2.stdout",
+      "bytes": 1262,
+      "sha256": "c7cc8b773035fe49f52fd33990c7cd78a0f91b87f15f9bf8c8fa22add0d63f46"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-service-client-tests-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/knowledge-service-client-tests-r2.stdout",
+      "bytes": 1207,
+      "sha256": "b6f64879ab545e054c15fe454c70c9c8d16da37a7cb8bcf2e4372ea543de318b"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/main-contracts-r1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/main-contracts-r1.stdout",
+      "bytes": 8897,
+      "sha256": "37dd80fd12de2bad0d6eabd5577a062c6d5bab311b134e2065a7cf48f64d4b6c"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/main-contracts-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/main-contracts-r2.stdout",
+      "bytes": 8896,
+      "sha256": "afa2bcb88a55f9a06f8c1eb3c174a69151650a8d8c9cddb29b2cc9abd5ad440a"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/ocr-crm-preview-r1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/ocr-crm-preview-r1.stdout",
+      "bytes": 1312,
+      "sha256": "a5735f88652e9562b73e4129d54efdbb70d073b44091a18080a080655724c065"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/ocr-crm-rules-r1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/ocr-crm-rules-r1.stdout",
+      "bytes": 5203,
+      "sha256": "c0c1066232c3f0375ec8eb8f2052e51da8fe3c9a20412260d6c10130ee863b44"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/ocr-knowledge-preview-r1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/ocr-knowledge-preview-r1.stdout",
+      "bytes": 1323,
+      "sha256": "b50ed3e43d2e1126afdca5ebdd345c2086a4b95e75819e1b6f5b25f328209ac9"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/ocr-knowledge-rules-r1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/ocr-knowledge-rules-r1.stdout",
+      "bytes": 5207,
+      "sha256": "a039afd69cab92f137c249136b54a0739881f9c54b3f945bd4c310bb107a40f8"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/ocr-main-preview-r1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/ocr-main-preview-r1.stdout",
+      "bytes": 20791,
+      "sha256": "785f3c73457036979e8037401e8151ac3fedcdf942a374383d9c5c59d48e0358"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/ocr-main-rules-r1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/ocr-main-rules-r1.stdout",
+      "bytes": 3913,
+      "sha256": "156088ec0a96250f51df3c4058943191674a6bc9424d59e55c5707f367027018"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/strict-corrected-r1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/strict-corrected-r1.stdout",
+      "bytes": 19,
+      "sha256": "6b4d2b45ff420966acf5e7e9d8391ad74c7e567ea80b03b34bcc72cc14d9eeb3"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/strict-import-r1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/strict-import-r1.stdout",
+      "bytes": 2924,
+      "sha256": "be5ee814a681c62b95b23692d7507ec5897be8c4b11ff35acafa48e0b6fcc987"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/strict-install-r1.stderr",
+      "bytes": 93,
+      "sha256": "9c06cf1a9709d4e19ec0a9b7488f4d9a8ea575baf77ab26cfe28e8c863cc376c"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/logs/strict-install-r1.stdout",
+      "bytes": 27,
+      "sha256": "171efff49587b9bb381e0c82701ebcaf24e3adb4f3c987b65c6d1a7dc7a121f2"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/main-inputs-r1.json",
+      "bytes": 57060,
+      "sha256": "cc9166cc74e36e3a4175d4faaa7d2e57cc5433c714f005b53445ea41ddf9165e"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/ocr-review-r1.json",
+      "bytes": 8564,
+      "sha256": "a50b2565a48c82eacae7b5ceab51d8dc2ad3de701a07bb0fb20471137f712634"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/patch-generation-failure-r1.json",
+      "bytes": 411,
+      "sha256": "90b88c9180e7b1b9e5ae4f5cbd817409d8e1b4b98b1e5da82c6b4754c65b8a3d"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/patch-manifest-r2.json",
+      "bytes": 1846,
+      "sha256": "02c962ff606dbfd83a83c192be1228a0e4753bba798766f8e2e2eb9839246413"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/patches/crm-cordis-exact-r1.patch",
+      "bytes": 10915,
+      "sha256": "7f69c15cc0bda4005d52178d6fcd69b78e5a4d4cae63701821f879bac7c2fc36"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/patches/knowledge-cordis-exact-r1.patch",
+      "bytes": 11316,
+      "sha256": "9b2ac976b3f931d02a79f69cad9aac5c98c35171c0fa8cd393d4d9f96fbdd5b6"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/patches/main-cordis-exact-r1.patch",
+      "bytes": 11795,
+      "sha256": "fac38fd0fdbc1b9daf7a61e3c2402158dc777e3681525562cd42ae7f1324fb77"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/patches/main-cordis-exact-r2.patch",
+      "bytes": 9219,
+      "sha256": "f39d754e4248927e6944ec01eeefae854e0290c305a882455980babf36684d7f"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/payload-comparison-r1.json",
+      "bytes": 2226,
+      "sha256": "abf682e0efb66ecb216934acd3f718ec0bc1f92d38de7b1ac6bdbadeceb0ac0e"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/prepare-proposals.py",
+      "bytes": 10082,
+      "sha256": "87126121f346e3a266249ec2ff3524574a71a729d4ca333e03d696e2c377b1d2"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/protection-before-docs-r1.json",
+      "bytes": 98,
+      "sha256": "2c8ec7a6d510ad3580e174ffe6ff59fbe5ba3c7398a105cfeb81d9d945769d54"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/record-review-r1.py",
+      "bytes": 3655,
+      "sha256": "49b8746baa029c943682ede5e14bf9c6bfeb428e9fe0fb7fbaed119c4175cc18"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/run-proposals-r2.py",
+      "bytes": 6111,
+      "sha256": "7c6037fcf41d3045344eef28e45bbbd50e13c0ce7895b9ef9c6f2126aecc4635"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/run-proposals.py",
+      "bytes": 6116,
+      "sha256": "6be6c3a06545d31814348b1bf3dee5967740ddd4af525fd0629abc4d83b87f97"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/snapshot-r1.json",
+      "bytes": 26580,
+      "sha256": "ef0a42e0fd5422ba286365ef30d9ab2fbe02a880ead366f46b58d45bb99e90f6"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-install-r1.py",
+      "bytes": 2631,
+      "sha256": "5eba0ab51df7275349cf45f5218acf9bbba8026d46bd0d45259245206f877b0f"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-lock-r1.py",
+      "bytes": 4606,
+      "sha256": "02f5e0f8e191c5068ca9be19f4eb91f3b430f42f2ba1cc66e227351b58a33914"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/import-check.mjs",
+      "bytes": 1775,
+      "sha256": "3a48c03ced213b812e23cd551b49634b6ee4935e99c5f839545189c75d87dc38"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/package-lock.json",
+      "bytes": 378338,
+      "sha256": "e7b5d62b7ef76a19195b619024e5c9a13f9e63da3cd18bef0ca2f7ac50477e56"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/package.json",
+      "bytes": 1105,
+      "sha256": "8aff13928af8d59d3dc4e926f0f52469b6f870cf4bdfd9ee7b06a42ee6e653da"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-result-r1.json",
+      "bytes": 2631,
+      "sha256": "f60f0b304b43a30c930bcbf1fc43317eb228b84fa155b35ee17ab107ad2c1332"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-install-result-r1.json",
+      "bytes": 3216,
+      "sha256": "a704a03e2b4b4617969120b7668ccf9486e07d495a6db3a878baf68a0f644492"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/write-evidence-r1.py",
+      "bytes": 13849,
+      "sha256": "3a0786f1ed07481a92d488386ef1a7116458eccf7da1bff4982098e97a49dad5"
+    }
+  ],
+  "sdk_distribution": "BLOCKED",
+  "product": "PARTIAL",
+  "release_ready": false,
+  "isolation_probes": {
+    "crm": {
+      "denied_count": 13,
+      "read_allowed_count": 3,
+      "rows": [
+        {
+          "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/crm-knowledge/package.json",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/knowledge/package.json",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/scripts/crm-calibration/prepare-profile.mjs",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/dsh-analytics-workbench/plugin/package.json",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/dsh-crm-knowledge/plugin/package.json",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-knowledge-independent-20261008/dsh-knowledge/plugin/package.json",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand/plugin/package.json",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-query/plugin/package.json",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-board/plugin/package.json",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-crowd-action/plugin/package.json",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/dsh-shine-funnel/plugin/package.json",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/dsh-shine-waterfall/plugin/package.json",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge/plugin/package.json",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/package.json",
+          "result": "READ"
+        },
+        {
+          "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/plugin-kit/build-tools/package.json",
+          "result": "READ"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/crm/plugin/package.json",
+          "result": "READ"
+        }
+      ]
+    },
+    "knowledge": {
+      "denied_count": 13,
+      "read_allowed_count": 3,
+      "rows": [
+        {
+          "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/crm-knowledge/package.json",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/knowledge/package.json",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/scripts/crm-calibration/prepare-profile.mjs",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/dsh-analytics-workbench/plugin/package.json",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/dsh-crm-knowledge/plugin/package.json",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-knowledge-independent-20261008/dsh-knowledge/plugin/package.json",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand/plugin/package.json",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-query/plugin/package.json",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-board/plugin/package.json",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-crowd-action/plugin/package.json",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/dsh-shine-funnel/plugin/package.json",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/dsh-shine-waterfall/plugin/package.json",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/crm/plugin/package.json",
+          "error": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/package.json",
+          "result": "READ"
+        },
+        {
+          "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/plugin-kit/build-tools/package.json",
+          "result": "READ"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/knowledge/plugin/package.json",
+          "result": "READ"
+        }
+      ]
+    }
+  },
+  "ordinary_import_command": {
+    "argv": [
+      "/usr/bin/sandbox-exec",
+      "-f",
+      "../crm-isolation-r2.sb",
+      "/Users/hutou/homebrew/opt/node@24/bin/node",
+      "import-check.mjs"
+    ],
+    "cwd": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1",
+    "exit": 0
+  },
+  "main_contract_command": {
+    "argv": [
+      "/Users/hutou/homebrew/opt/node@24/bin/node",
+      "--test",
+      "--test-reporter=tap",
+      "--test-concurrency=1",
+      "scripts/crm-calibration/profile.test.mjs",
+      "scripts/crm-calibration/profile-packs.test.mjs",
+      "scripts/crm-calibration/composition-inputs.test.mjs",
+      "scripts/ci/composition-pack-inputs.test.mjs"
+    ],
+    "cwd": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/main-proposal",
+    "env": {
+      "FQ_B0_PYTHON": "/Users/hutou/homebrew/opt/python@3.14/bin/python3.14"
+    },
+    "exit": 0
+  }
+}

@@ -694,16 +694,6 @@
     },
     {
       "consumer": "crm-knowledge",
-      "provider": "knowledge",
-      "phase": "test",
-      "source": "dsh-plugins/crm-knowledge/test/knowledge-composition.integration.mjs",
-      "target": "dsh-plugins/knowledge/test/graph.fixture.mjs",
-      "specifier": "../../knowledge/test/graph.fixture.mjs",
-      "access": "source",
-      "type_only": false
-    },
-    {
-      "consumer": "crm-knowledge",
       "provider": "plugin-kit",
       "phase": "build",
       "source": "dsh-plugins/crm-knowledge/build.mjs",
@@ -846,6 +836,18 @@
     {
       "consumer": "analytics-workbench",
       "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/first-purchase-query-card.test.mjs",
+      "target": "scripts/dsh-b0/workbench-first-purchase-card.integration.mjs"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/first-purchase-save-dom.test.mjs",
+      "target": "scripts/dsh-b0/workbench-first-purchase-save.integration.mjs"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/native-composition-browser-probe.mjs",
       "target": "scripts/dsh-dev/ports.mjs"
     },
@@ -858,8 +860,44 @@
     {
       "consumer": "analytics-workbench",
       "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/native-prompt-inject.test.mjs",
+      "target": "scripts/dsh-b0/workbench-native-prompt.integration.mjs"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/plugin-ui-lifecycle.test.mjs",
+      "target": "scripts/dsh-b0/workbench-client-pack.integration.mjs"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/query-card-cancel.test.mjs",
+      "target": "scripts/dsh-b0/workbench-query-cancel.integration.mjs"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/query-card-save.test.mjs",
+      "target": "scripts/dsh-b0/workbench-query-save.integration.mjs"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/query-fault.test.mjs",
       "target": "scripts/dsh-b0/native-query-fault-scenario.mjs"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/tool-card-dom.test.mjs",
+      "target": "scripts/dsh-b0/workbench-tool-cards.integration.mjs"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/dashboard.fixture.mjs",
+      "target": "scripts/crm-calibration/test-support/dashboard.fixture.mjs"
     },
     {
       "consumer": "crm-knowledge",
@@ -870,8 +908,32 @@
     {
       "consumer": "crm-knowledge",
       "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/knowledge-composition.integration.mjs",
+      "target": "scripts/crm-calibration/knowledge-composition.integration.mjs"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/login-native.fixture.mjs",
+      "target": "scripts/crm-calibration/test-support/login-native.fixture.mjs"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/page-composition.integration.mjs",
+      "target": "scripts/crm-calibration/page-composition.integration.mjs"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/profile.test.mjs",
-      "target": "scripts/crm-calibration/prepare-profile.mjs"
+      "target": "scripts/crm-calibration/profile.test.mjs"
+    },
+    {
+      "consumer": "knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/knowledge/test/graph.fixture.mjs",
+      "target": "scripts/crm-calibration/test-support/graph.fixture.mjs"
     }
   ],
   "literal_endpoints": [
@@ -1592,62 +1654,6 @@
     {
       "consumer": "analytics-workbench",
       "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/asset-overlay.test.mjs",
-      "route": "/b0/analyses",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/asset-overlay.test.mjs",
-      "route": "/b0/assets",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/asset-overlay.test.mjs",
-      "route": "/b0/dashboards",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/asset-overlay.test.mjs",
-      "route": "/b0/dashboards/{parameter}",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/asset-overlay.test.mjs",
-      "route": "/b0/dashboards/{parameter}/",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/asset-overlay.test.mjs",
-      "route": "/b0/dashboards/{parameter}/preview",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/asset-overlay.test.mjs",
-      "route": "/b0/dashboards/{parameter}/versions",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/asset-overlay.test.mjs",
-      "route": "/b0/dashboards/dashboard_1/preview",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/cockpit-ai-client.test.mjs",
       "route": "/api/v1/analytics/cockpit-ai",
       "contract": "OBSERVED_NOT_FROZEN"
@@ -1753,20 +1759,6 @@
     {
       "consumer": "analytics-workbench",
       "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/first-purchase-save-dom.test.mjs",
-      "route": "/api/analytics-first-purchase/save",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/first-purchase-save-dom.test.mjs",
-      "route": "/api/commands/execute",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/first-purchase-save-http.probe.mjs",
       "route": "/api/analytics-first-purchase/save",
       "contract": "OBSERVED_NOT_FROZEN"
@@ -1825,48 +1817,6 @@
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/loader.test.mjs",
       "route": "/api/shine-mage-deliveries",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/native-prompt-inject.test.mjs",
-      "route": "/api/v1/analytics/cockpit-ai",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/query-card-save.test.mjs",
-      "route": "/b0/analyses",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/query-card-save.test.mjs",
-      "route": "/b0/assets",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/query-card-save.test.mjs",
-      "route": "/b0/dashboards",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/query-card-save.test.mjs",
-      "route": "/b0/dashboards/dashboard_1",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/query-card-save.test.mjs",
-      "route": "/b0/dashboards/dashboard_1/versions",
       "contract": "OBSERVED_NOT_FROZEN"
     },
     {
@@ -2194,41 +2144,6 @@
     {
       "consumer": "crm-knowledge",
       "phase": "test",
-      "source": "dsh-plugins/crm-knowledge/test/dashboard.fixture.mjs",
-      "route": "/api/v1/auth/login",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "test",
-      "source": "dsh-plugins/crm-knowledge/test/dashboard.fixture.mjs",
-      "route": "/api/v1/auth/me",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "test",
-      "source": "dsh-plugins/crm-knowledge/test/dashboard.fixture.mjs",
-      "route": "/api/v1/metrics/cutoff",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "test",
-      "source": "dsh-plugins/crm-knowledge/test/dashboard.fixture.mjs",
-      "route": "/api/v1/metrics/overview",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "test",
-      "source": "dsh-plugins/crm-knowledge/test/dashboard.fixture.mjs",
-      "route": "/api/v1/metrics/trend",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/dashboard.test.mjs",
       "route": "/api/v1/auth/me",
       "contract": "OBSERVED_NOT_FROZEN"
@@ -2364,34 +2279,6 @@
       "phase": "runtime",
       "source": "dsh-plugins/knowledge/src/service-contract.generated.mjs",
       "route": "/api/v1/crm-knowledge",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "knowledge",
-      "phase": "test",
-      "source": "dsh-plugins/knowledge/test/graph.fixture.mjs",
-      "route": "/api/v1/",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "knowledge",
-      "phase": "test",
-      "source": "dsh-plugins/knowledge/test/graph.fixture.mjs",
-      "route": "/api/v1/chunks/by-id/",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "knowledge",
-      "phase": "test",
-      "source": "dsh-plugins/knowledge/test/graph.fixture.mjs",
-      "route": "/api/v1/knowledge-search",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "knowledge",
-      "phase": "test",
-      "source": "dsh-plugins/knowledge/test/graph.fixture.mjs",
-      "route": "/api/v1/knowledge/",
       "contract": "OBSERVED_NOT_FROZEN"
     },
     {
@@ -2537,32 +2424,14 @@
     {
       "consumer": "analytics-workbench",
       "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/asset-overlay.test.mjs",
-      "line": 21
+      "source": "dsh-plugins/analytics-workbench/test/built.test.mjs",
+      "line": 10
     },
     {
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/built.test.mjs",
-      "line": 12
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/built.test.mjs",
-      "line": 15
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/built.test.mjs",
-      "line": 28
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/first-purchase-save-dom.test.mjs",
-      "line": 18
+      "line": 13
     },
     {
       "consumer": "analytics-workbench",
@@ -2693,32 +2562,8 @@
     {
       "consumer": "analytics-workbench",
       "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/native-prompt-inject.test.mjs",
-      "line": 14
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/native-slot-ownership.test.mjs",
       "line": 10
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/plugin-ui-lifecycle.test.mjs",
-      "line": 13
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/query-card-cancel.test.mjs",
-      "line": 20
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/query-card-save.test.mjs",
-      "line": 20
     },
     {
       "consumer": "analytics-workbench",
@@ -2795,26 +2640,20 @@
     {
       "consumer": "crm-knowledge",
       "phase": "test",
-      "source": "dsh-plugins/crm-knowledge/test/knowledge-composition.integration.mjs",
-      "line": 12
+      "source": "dsh-plugins/crm-knowledge/test/login-native.fixture.mjs",
+      "line": 10
     },
     {
       "consumer": "crm-knowledge",
       "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/login-native.fixture.mjs",
-      "line": 12
+      "line": 15
     },
     {
       "consumer": "crm-knowledge",
       "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/login-native.fixture.mjs",
-      "line": 17
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "test",
-      "source": "dsh-plugins/crm-knowledge/test/login-native.fixture.mjs",
-      "line": 18
+      "line": 16
     },
     {
       "consumer": "crm-knowledge",
@@ -2839,30 +2678,6 @@
       "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/package.test.mjs",
       "line": 19
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "test",
-      "source": "dsh-plugins/crm-knowledge/test/page-composition.integration.mjs",
-      "line": 10
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "test",
-      "source": "dsh-plugins/crm-knowledge/test/page-composition.integration.mjs",
-      "line": 11
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "test",
-      "source": "dsh-plugins/crm-knowledge/test/page-composition.integration.mjs",
-      "line": 12
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "test",
-      "source": "dsh-plugins/crm-knowledge/test/page-composition.integration.mjs",
-      "line": 9
     },
     {
       "consumer": "knowledge",
@@ -3539,11 +3354,6 @@
       "consumer": "knowledge",
       "phase": "test",
       "specifier": "node:http"
-    },
-    {
-      "consumer": "knowledge",
-      "phase": "test",
-      "specifier": "node:os"
     },
     {
       "consumer": "knowledge",

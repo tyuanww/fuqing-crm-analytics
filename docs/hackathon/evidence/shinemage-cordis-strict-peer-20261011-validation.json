@@ -1,0 +1,750 @@
+{
+  "schema_version": "shinemage-cordis-strict-peer-validation/v1",
+  "main_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "author_head": "92dfa171cf8ea298bdceee5634b418269e711a37",
+  "raw_root": "/Users/hutou/.codex/tasks/shinemage-cordis-peer-compat-20261011-56yp2373",
+  "evidence_sha256": "fbd28575b76653e55c6f66433c5458b940d8a2fa565da4c8d2ecca1abcbc893e",
+  "registry_exact_inputs": [
+    {
+      "name": "@deepseek-ai/dsh",
+      "url": "https://registry.npmjs.org/@deepseek-ai%2fdsh/0.1.7-rc.2",
+      "exit_code": 0,
+      "sha256": "584aef10d556cab908955f0bb1b25c0de7c13e716074199b94faa49bea60c9d8",
+      "bytes": 7850,
+      "version": "0.1.7-rc.2",
+      "dependencies": {
+        "js-yaml": "^4.2.0",
+        "commander": "^15.0.0",
+        "@deepseek-ai/cordis": "~4.0.4",
+        "@deepseek-ai/dsh-hmr": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-base": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-goal": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-skill": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-acp-app": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-cmdline": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-persona": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-sdk-app": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-tool-fs": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-web-app": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-webhook": "0.1.7-rc.2",
+        "@deepseek-ai/schemastery": "~3.18.4",
+        "@deepseek-ai/dsh-app-boot": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-fs-local": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-headless": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-schedule": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-terminal": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-tool-web": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-plan-mode": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-tool-bash": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-tool-goal": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-tool-jobs": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-tool-pwsh": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-tool-todo": "0.1.7-rc.2",
+        "node-addon-require-builtin": "^0.1.6",
+        "@deepseek-ai/dsh-home-paths": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-http-proxy": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-jobs-local": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-mcp-client": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-pwsh-local": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-tool-ralph": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-tool-skill": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-hooks-codex": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-sdk-minimal": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-token-meter": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-tool-cordis": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-agent-preset": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-atomic-write": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-command-goal": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-pwsh-sandbox": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-skill-office": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-time-context": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-tmux-context": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-tool-present": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-workflow-ptc": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-mcp-resources": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-terminal-bash": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-tool-ask-user": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-tool-subagent": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-tool-workflow": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-plugin-manager": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-tool-fs-search": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-webhook-github": "0.1.7-rc.2",
+        "@deepseek-ai/cordis-plugin-timer": "~1.1.6",
+        "@deepseek-ai/dsh-command-compact": "0.1.7-rc.2",
+        "@deepseek-ai/cordis-plugin-loader": "~1.0.5",
+        "@deepseek-ai/dsh-client-ui-cordis": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-compaction-basic": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-skill-filesystem": "0.1.7-rc.2",
+        "@deepseek-ai/cordis-plugin-include": "~1.0.9",
+        "@deepseek-ai/dsh-goal-round-driver": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-hooks-claude-code": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-session-reference": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-agent-instructions": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-launch-environment": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-session-projection": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-cordis-client-runner": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-tool-bash-persistent": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-tool-pwsh-persistent": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-tool-subagent-control": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-client-ui-agent-preset": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-agent-tool-presentation": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-tool-str-replace-editor": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-experimental-auto-review": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-tool-workspace-dependencies": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-compaction-tool-result-pruner": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-experimental-agent-team-profile": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-experimental-voice-input-bundle": "0.1.7-rc.2"
+      },
+      "peerDependencies": null,
+      "dist": {
+        "shasum": "2078409337e9934df3366535d873494e601f90d0",
+        "tarball": "https://registry.npmjs.org/@deepseek-ai/dsh/-/dsh-0.1.7-rc.2.tgz",
+        "fileCount": 20,
+        "integrity": "sha512-SQFhriLvza8GnFApnC5/32AgpcyKxrWnYXhvwDOLJdgWpkCX2EexyR9c8kCkMITJXnFLEN3Qb2CEh0W36vkLyw==",
+        "signatures": [
+          {
+            "sig": "MEQCIBHGALhGc+Widf0+uXEO+Q95EwYzkV4kGsDrUKedkRKgAiA1nsuBF9NwKI6FkS6/bMgRHMbpcTJKezBV12mYHlAzDw==",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          },
+          {
+            "sig": "MEUCIBLRExHrLYlNuYGqTFAcYYUAjzACis3mI2fgeHrRsdsiAiEAooCiHzWF3Rnp80iBPkYpL9HmZAgInj+8fxgQgUpYxko=",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "unpackedSize": 69869
+      }
+    },
+    {
+      "name": "@deepseek-ai/dsh-tools",
+      "url": "https://registry.npmjs.org/@deepseek-ai%2fdsh-tools/0.1.7-rc.2",
+      "exit_code": 0,
+      "sha256": "f34e1eee4d31b6b0c0cb178ffab90915d1e281b89611e44a24afd189d411850c",
+      "bytes": 3509,
+      "version": "0.1.7-rc.2",
+      "dependencies": {
+        "@deepseek-ai/dsh-brand": "0.1.7-rc.2",
+        "@deepseek-ai/schemastery": "~3.18.4",
+        "@deepseek-ai/dsh-util-values": "0.1.7-rc.2"
+      },
+      "peerDependencies": {
+        "@deepseek-ai/cordis": "~4.0.4",
+        "@deepseek-ai/dsh-llm": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-agent": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-scope": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-sandbox": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-session": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-invariants": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-ptc-runtime": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-system-prompt": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-user-approval": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-sandbox-policy": "0.1.7-rc.2"
+      },
+      "dist": {
+        "shasum": "ab3b28f1842215102a5be88b08391057ef54bd08",
+        "tarball": "https://registry.npmjs.org/@deepseek-ai/dsh-tools/-/dsh-tools-0.1.7-rc.2.tgz",
+        "fileCount": 27,
+        "integrity": "sha512-c3dTdKnslKxVTgjjPLwMKLqGUMwnZH5P8RUsucMQlWn2GViyFW/+5AIUuZHBjjE6Y7NAYl+lVVE/R4LgTp5KWA==",
+        "signatures": [
+          {
+            "sig": "MEUCIQDCnUGg+yb5jKJ2mr/2bQmP5oxyPxH9mKaJG4Q14ShhMAIgLDcQBdFpYTfXPFgE8jX1bfhPgGwcRkg3gagxtRqo6o8=",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          },
+          {
+            "sig": "MEYCIQDAGCeK/ZmEq4s2dhuU7b0nAYlgWPFXdwj3Ma5JTps/WwIhAOp66CLOsfYBECVVwCqddIMxbvwOMgtsQPV1F2Q6rhhS",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "unpackedSize": 514806
+      }
+    }
+  ],
+  "cordis_inputs": [
+    {
+      "version": "4.0.2",
+      "url": "https://registry.npmjs.org/@deepseek-ai%2fcordis/4.0.2",
+      "command": [
+        "/usr/bin/curl",
+        "--fail",
+        "--show-error",
+        "--silent",
+        "--proto",
+        "=https",
+        "--max-time",
+        "25",
+        "https://registry.npmjs.org/@deepseek-ai%2fcordis/4.0.2"
+      ],
+      "exit_code": 0,
+      "bytes": 2301,
+      "sha256": "95a8ba1230b0bd8faf809d94fcee269ff5ea98970afe9126c4ac9f686f4c4e98",
+      "time": "2026-10-11T00:25:32.915863+00:00",
+      "name": "@deepseek-ai/cordis",
+      "dist": {
+        "shasum": "ddffbc3b366dd71fe5f0a61c483cbe0c72df5103",
+        "tarball": "https://registry.npmjs.org/@deepseek-ai/cordis/-/cordis-4.0.2.tgz",
+        "fileCount": 32,
+        "integrity": "sha512-asOnXP1TzFSFQlHb1iegDZp0z/8WD1c7YNrwJR/Tx2bzNuMXfcekE/I67Iv6SQXeLB4csxqCngzQKANP7gdw0g==",
+        "signatures": [
+          {
+            "sig": "MEQCIGCi3+M5ipxi/u8u+jR6sVhjSagha7/xxEiVrXts870HAiBQN9bMPN9ttsF/uqSswYRZm2/umX3j7yHGxAOMX6XFPA==",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "unpackedSize": 239076
+      },
+      "dependencies": {
+        "@deepseek-ai/cosmokit": "^1.8.3",
+        "@standard-schema/spec": "^1.1.0"
+      },
+      "peerDependencies": {
+        "@deepseek-ai/cordis-plugin-loader": "^1.0.3",
+        "@deepseek-ai/cordis-plugin-include": "^1.0.7"
+      },
+      "exports": {
+        ".": {
+          "types": "./lib/types/index.d.ts",
+          "default": "./lib/index.js"
+        },
+        "./src/*": "./src/*",
+        "./package.json": "./package.json"
+      },
+      "engines": null,
+      "gitHead": null
+    },
+    {
+      "version": "4.0.4",
+      "url": "https://registry.npmjs.org/@deepseek-ai%2fcordis/4.0.4",
+      "command": [
+        "/usr/bin/curl",
+        "--fail",
+        "--show-error",
+        "--silent",
+        "--proto",
+        "=https",
+        "--max-time",
+        "25",
+        "https://registry.npmjs.org/@deepseek-ai%2fcordis/4.0.4"
+      ],
+      "exit_code": 0,
+      "bytes": 2469,
+      "sha256": "20462a15ba15266db81a2935df1acf5d80286e033e407288ec2464948a148538",
+      "time": "2026-10-11T00:25:32.913634+00:00",
+      "name": "@deepseek-ai/cordis",
+      "dist": {
+        "shasum": "d9e9d2bd306c151a226f40025e4c28d39b502132",
+        "tarball": "https://registry.npmjs.org/@deepseek-ai/cordis/-/cordis-4.0.4.tgz",
+        "fileCount": 32,
+        "integrity": "sha512-obgyxqWAmFn3Re8kvsuUnyW+ihrz6eJCnJO4fh1cQzDtmPYz/zzVeUkH9R94I0OwSVOocK67Kgakm04j/oQXzg==",
+        "signatures": [
+          {
+            "sig": "MEYCIQD7wfx8C0kam1U2S5vXbPe2CMLwEHkx7JjFgirxJ0gFawIhAIDvi7rIoFzh7LX8wnJ4vGRwfWGa8UDmso0jA7fpR1MU",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          },
+          {
+            "sig": "MEYCIQCtj0MMmeYzsegFz1gG0OTmywidKOiR0xqaeYTVwEDOOQIhAPnYaFW0TdbOzLb7LyQ8x8HwI7APtYt+F/q/P8gAviGK",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "unpackedSize": 239620
+      },
+      "dependencies": {
+        "@deepseek-ai/cosmokit": "~1.8.5",
+        "@standard-schema/spec": "^1.1.0"
+      },
+      "peerDependencies": {
+        "@deepseek-ai/cordis-plugin-loader": "~1.0.5",
+        "@deepseek-ai/cordis-plugin-include": "~1.0.9"
+      },
+      "exports": {
+        ".": {
+          "types": "./lib/types/index.d.ts",
+          "default": "./lib/index.js"
+        },
+        "./src/*": "./src/*",
+        "./package.json": "./package.json"
+      },
+      "engines": null,
+      "gitHead": null
+    }
+  ],
+  "archive": {
+    "name": "@deepseek-ai/cordis",
+    "version": "4.0.2",
+    "url": "https://registry.npmjs.org/@deepseek-ai/cordis/-/cordis-4.0.2.tgz",
+    "registry_integrity": "sha512-asOnXP1TzFSFQlHb1iegDZp0z/8WD1c7YNrwJR/Tx2bzNuMXfcekE/I67Iv6SQXeLB4csxqCngzQKANP7gdw0g==",
+    "integrity_match": true,
+    "sha256": "686ca44fc6e8d217804de9062b716b7c72755dde09c2a433dd07045eea3c6a97",
+    "bytes": 55443,
+    "members": 32,
+    "extracted_to": "/Users/hutou/.codex/tasks/shinemage-cordis-peer-compat-20261011-56yp2373/cordis-4.0.2",
+    "package_executed": false
+  },
+  "r1": {
+    "r1_classification": "INCONCLUSIVE_TLS_METADATA_MISSING",
+    "reason": "npm debug logs contain UNABLE_TO_GET_ISSUER_CERT_LOCALLY and Found cordis@undefined; ERESOLVE alone is not a verified peer conflict",
+    "executions": [
+      {
+        "label": "declared",
+        "exit_code": 1,
+        "expected_peer_rejection_verified": false
+      },
+      {
+        "label": "host",
+        "exit_code": 1,
+        "expected_peer_rejection_verified": false
+      }
+    ],
+    "r1_logs_preserved": true,
+    "tls_verification_disabled": false,
+    "package_peer_changed": false
+  },
+  "r2": {
+    "schema_version": "shinemage-cordis-strict-peer-readback/v1",
+    "executions": [
+      {
+        "label": "declared",
+        "exit_code": 1,
+        "resolved_cordis": "4.0.2",
+        "conflicting_peer_owner": "@deepseek-ai/dsh-tools",
+        "required_cordis": "~4.0.4",
+        "result": "STRICT_PEER_RESOLUTION_REJECTED",
+        "runtime_install": false,
+        "lifecycle_scripts": false,
+        "debug_path": "/Users/hutou/.codex/tasks/shinemage-cordis-peer-compat-20261011-56yp2373/npm-cache-declared/_logs/2026-10-11T00_29_30_749Z-debug-0.log",
+        "debug_sha256": "5fbb6ed4737a027f2d724ef739e84986796ffb8ea723084c28f8c3c5cdf110c9",
+        "stderr_sha256": "399e9b11fef882e5c0d0565541938020a7dd39040bd47d1da531a1ed52d0f9cc"
+      },
+      {
+        "label": "crm-host",
+        "exit_code": 1,
+        "resolved_cordis": "4.0.4",
+        "conflicting_peer_owner": "@shine-mage/dsh-crm-knowledge",
+        "required_cordis": "4.0.2",
+        "result": "STRICT_PEER_RESOLUTION_REJECTED",
+        "runtime_install": false,
+        "lifecycle_scripts": false,
+        "debug_path": "/Users/hutou/.codex/tasks/shinemage-cordis-peer-compat-20261011-56yp2373/npm-cache-crm-host/_logs/2026-10-11T00_29_30_749Z-debug-0.log",
+        "debug_sha256": "64c50d7c13cf808fcdffbe8a8559b7280e3a0abef9a428c29fa0086827342de7",
+        "stderr_sha256": "3bc323b2abf2ef97efeebc2948b90321260d8be891424730e32d845d9ceb615e"
+      },
+      {
+        "label": "knowledge-host",
+        "exit_code": 1,
+        "resolved_cordis": "4.0.4",
+        "conflicting_peer_owner": "@shine-mage/dsh-knowledge",
+        "required_cordis": "4.0.2",
+        "result": "STRICT_PEER_RESOLUTION_REJECTED",
+        "runtime_install": false,
+        "lifecycle_scripts": false,
+        "debug_path": "/Users/hutou/.codex/tasks/shinemage-cordis-peer-compat-20261011-56yp2373/npm-cache-knowledge-host/_logs/2026-10-11T00_29_32_639Z-debug-0.log",
+        "debug_sha256": "c2eb22b169ee25171311a67023c1d97d9ff1626a23834c5074880ff5d05d978c",
+        "stderr_sha256": "054e3893d69827e6f35e18435cea869a9f690ffd62571563fd997eb237da1ac4"
+      }
+    ],
+    "r1_result": "INCONCLUSIVE_TLS_METADATA_MISSING",
+    "r2_harness_exit_code": 1,
+    "r2_harness_error": "declared result predicate scanned old r1 TLS logs in shared evidence cache; this readback selects the actual per-execution debug log named by npm",
+    "readback_exit_code": 0,
+    "reexecution": false,
+    "npm": "11.17.0",
+    "node": "24.19.0",
+    "tls_verification_disabled": false,
+    "peer_declarations_changed": false,
+    "official_host_changed": false,
+    "runtime_compatibility": "PARTIAL_PREVIOUS_LAYER_ONLY",
+    "strict_ordinary_package_resolution": "REJECTED",
+    "release_ready": false
+  },
+  "raw_files": {
+    "phase-input-r1.json": {
+      "sha256": "5488ff0abadb2f38cfea774fc357557243b88e55b7060c0d1c6186c6d0915d9b",
+      "bytes": 325
+    },
+    "registry-cordis-4.0.2.json": {
+      "sha256": "95a8ba1230b0bd8faf809d94fcee269ff5ea98970afe9126c4ac9f686f4c4e98",
+      "bytes": 2301
+    },
+    "registry-cordis-4.0.4.json": {
+      "sha256": "20462a15ba15266db81a2935df1acf5d80286e033e407288ec2464948a148538",
+      "bytes": 2469
+    },
+    "registry-metadata-r1.json": {
+      "sha256": "07fe9bb8bf3b41c3a3c3a98881cdf73423e24d0bfb4d8cc53460d36f93a3f206",
+      "bytes": 3409
+    },
+    "registry-dsh-rc2.json": {
+      "sha256": "584aef10d556cab908955f0bb1b25c0de7c13e716074199b94faa49bea60c9d8",
+      "bytes": 7850
+    },
+    "registry-dsh-tools-rc2.json": {
+      "sha256": "f34e1eee4d31b6b0c0cb178ffab90915d1e281b89611e44a24afd189d411850c",
+      "bytes": 3509
+    },
+    "official-host-metadata-r1.json": {
+      "sha256": "2a1612e280df5bd439f45a5d5e89aae0444f9f7e45646a6df2f6a646b1c98944",
+      "bytes": 7212
+    },
+    "cordis-4.0.2.tgz": {
+      "sha256": "686ca44fc6e8d217804de9062b716b7c72755dde09c2a433dd07045eea3c6a97",
+      "bytes": 55443
+    },
+    "cordis-archive-r1.json": {
+      "sha256": "cdc3eae4cb236ff1144a6959aad0f53c5c754c937d02ab246631aa0b10c16f36",
+      "bytes": 537
+    },
+    "strict-installs-r1.py": {
+      "sha256": "e017eb55bbdc002958d62c8d7fd1d19b51359dcdf6c1483ad464bcf8ce85f355",
+      "bytes": 3594
+    },
+    "strict-installs-r2.py": {
+      "sha256": "4d7326c7b96c9d65cb4f01eb80feed4917a3263204cc009040ca1652225681f6",
+      "bytes": 4086
+    },
+    "strict-readback-r2.py": {
+      "sha256": "82c9ce5494cf5a760a13143ab1c159f97b10f42fb28df471641f26e588f09bad",
+      "bytes": 2928
+    },
+    "strict-resolution-r1.json": {
+      "sha256": "a65e004eb563109b61b064c1deff932d96d35cc92219c33d50119de7a57957f2",
+      "bytes": 4884
+    },
+    "strict-resolution-r2.json": {
+      "sha256": "f84f9e05a3ea87d06c0829ae79f5465d8652fe270febcd555dcaba39acee0820",
+      "bytes": 8820
+    },
+    "strict-r1-readback-correction.json": {
+      "sha256": "d9ad13d365459159e8646106f9122dd817932257658238c0e6b90dd6a9371535",
+      "bytes": 548
+    },
+    "strict-r2-readback.json": {
+      "sha256": "bd8e857b5c4128a7c90d6c54b667589604fb51211711597e08f9d40974908b0b",
+      "bytes": 2631
+    },
+    "ca-preflight-r1.json": {
+      "sha256": "34dcd3f5927328580efc4b875e1631545b7c9d924942641e2044c38c79a34cae",
+      "bytes": 902
+    },
+    "brand-guide-input-r1.json": {
+      "sha256": "c22a9d5dfebee94269db6578d73550292f54625d68acb8512798dbfcc47bd87f",
+      "bytes": 474
+    },
+    "logs/ca-preflight-r1.stdout": {
+      "sha256": "d5f96dd16cec9808831351411ba7a03d35a1f5d5f4fd06154d3fce9a642284f8",
+      "bytes": 37
+    },
+    "logs/strict-declared-r1.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "logs/registry-4.0.2.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "logs/strict-host-r1.stderr": {
+      "sha256": "fea1a564f282a7e7fe2d677c66bf805f09c98e28b6cee69d3785afdffad3cee8",
+      "bytes": 1310
+    },
+    "logs/strict-host-r1.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "logs/strict-declared-r1.stderr": {
+      "sha256": "200890c0c9fb69d8b681a3e1f3593bea70c0c129b7713fc041b24bd76d1888f6",
+      "bytes": 1322
+    },
+    "logs/ca-preflight-r1.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "logs/registry-4.0.4.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "logs/strict-knowledge-host-r2.stderr": {
+      "sha256": "054e3893d69827e6f35e18435cea869a9f690ffd62571563fd997eb237da1ac4",
+      "bytes": 1637
+    },
+    "logs/strict-crm-host-r2.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "logs/registry-dsh-tools-rc2.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "logs/strict-declared-r2.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "logs/cordis-tar-download-r1.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "logs/strict-declared-r2.stderr": {
+      "sha256": "399e9b11fef882e5c0d0565541938020a7dd39040bd47d1da531a1ed52d0f9cc",
+      "bytes": 1163
+    },
+    "logs/strict-crm-host-r2.stderr": {
+      "sha256": "3bc323b2abf2ef97efeebc2948b90321260d8be891424730e32d845d9ceb615e",
+      "bytes": 1627
+    },
+    "logs/registry-dsh-rc2.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "logs/strict-knowledge-host-r2.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "npm-cache-declared/_logs/2026-10-11T00_29_30_749Z-debug-0.log": {
+      "sha256": "5fbb6ed4737a027f2d724ef739e84986796ffb8ea723084c28f8c3c5cdf110c9",
+      "bytes": 7245
+    },
+    "npm-cache-crm-host/_logs/2026-10-11T00_29_30_749Z-debug-0.log": {
+      "sha256": "64c50d7c13cf808fcdffbe8a8559b7280e3a0abef9a428c29fa0086827342de7",
+      "bytes": 14767
+    },
+    "npm-cache-knowledge-host/_logs/2026-10-11T00_29_32_639Z-debug-0.log": {
+      "sha256": "c2eb22b169ee25171311a67023c1d97d9ff1626a23834c5074880ff5d05d978c",
+      "bytes": 14801
+    },
+    "plugin-inputs-r1.json": {
+      "sha256": "cf4fe19552e19389ffb112226c2cd6b5df46f44c94c489a1b93be4993b1f0492",
+      "bytes": 4748
+    },
+    "empty-user.npmrc": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "empty-global.npmrc": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "strict-declared-r1.json": {
+      "sha256": "48f9519a386fbd6fb05130763783a1aaf117c5a860403afdeb26e64f97b12c93",
+      "bytes": 2223
+    },
+    "strict-declared-r1/package.json": {
+      "sha256": "289bc90f4f39ac245fcc31760e5b994f9733eb72b9ae45254895cd7f153d3d5e",
+      "bytes": 566
+    },
+    "strict-host-r1.json": {
+      "sha256": "55db9360574b3e2b4165379a87844e70f15ffe2036f6f9bac8e6805ef3160bd5",
+      "bytes": 2198
+    },
+    "strict-host-r1/package.json": {
+      "sha256": "90ffdc9eae745cdde2dfbebeba5313f71e70c776c45023ec8c7d223b5238b5db",
+      "bytes": 562
+    },
+    "strict-declared-r2.json": {
+      "sha256": "b3c67fa0d355dc7dab4dbdf133bf11ffe8c56845292ff318d63a2b9711f829cf",
+      "bytes": 2448
+    },
+    "strict-declared-r2/package.json": {
+      "sha256": "87fb021b29363e0734d0c17ee45b0595a35ebb5fd727e3ed4b125a87ecf6007f",
+      "bytes": 202
+    },
+    "strict-crm-host-r2.json": {
+      "sha256": "c281f66f361912b56e39bcfccf4df558f36ff43a58aae9c00cd35ccf30b98c01",
+      "bytes": 2795
+    },
+    "strict-crm-host-r2/package.json": {
+      "sha256": "f0625db2b8bab6700df9f078cfa12cd8f1f4eeecb0dda4cdd95e34d3e096c211",
+      "bytes": 387
+    },
+    "strict-knowledge-host-r2.json": {
+      "sha256": "db6821015d17b80233ddb66d2f03e05d25bb9dacbe0ae3020bdb09904b02329b",
+      "bytes": 2833
+    },
+    "strict-knowledge-host-r2/package.json": {
+      "sha256": "bde5c2ada6ef71b9fb5b6fe5d0ff40f6c100ca53988c447778f80a0659e96ae2",
+      "bytes": 387
+    },
+    "npm-cache-declared/_logs/2026-10-11T00_29_30_749Z-eresolve-report.txt": {
+      "sha256": "312ad0f83d15cda004206a1c835d47c42232d2d15e812216b52caeda6099e3e6",
+      "bytes": 752
+    },
+    "npm-cache-crm-host/_logs/2026-10-11T00_29_30_749Z-eresolve-report.txt": {
+      "sha256": "3a3937d21eda68b8748aa163d188f4018d91181cf7860320eea91165b54f69e6",
+      "bytes": 1596
+    },
+    "npm-cache-knowledge-host/_logs/2026-10-11T00_29_32_639Z-eresolve-report.txt": {
+      "sha256": "df8a1ed150c791e8c4f359bbc582d2737187d28a775cca66e85f035b3e742216",
+      "bytes": 1600
+    }
+  },
+  "brand_clone_guide_input": {
+    "repo": "tyuanww/dsh-shine-brand",
+    "head": "57ebcf38278068394a4feb42125c30c195fd912a",
+    "pr": 1,
+    "state": "OPEN",
+    "checks": [
+      {
+        "run": 38076180876,
+        "job": 114283478825,
+        "conclusion": "SUCCESS"
+      },
+      {
+        "run": 38076176342,
+        "job": 114283466048,
+        "conclusion": "SUCCESS"
+      }
+    ],
+    "source": "gh pr view 1 --repo tyuanww/dsh-shine-brand --json url,headRefOid,state,statusCheckRollup; actual tool output this goal turn"
+  },
+  "peer_declarations_changed": false,
+  "official_host_changed": false,
+  "runtime_install": false,
+  "services_models_browser": "NOT_RUN",
+  "candidate_journal": "UNCHANGED",
+  "remote_actions": "NONE",
+  "git_actions": "NONE",
+  "SDK_distribution": "BLOCKED",
+  "product": "PARTIAL",
+  "release_ready": false,
+  "plugin_inputs": [
+    {
+      "formal_manifest_path": "/Users/hutou/.codex/tasks/shinemage-full-closeout-20261011-p6m85w3u/formal-packs/crm-knowledge/plugin-pack.json",
+      "formal_manifest_sha256": "0fbacc88fccc8085618b518a51afab5db1c045838c0cb47d6e94a8af5f600a49",
+      "formal_manifest": {
+        "schema_version": "dsh-plugin-pack/v1",
+        "package_name": "@shine-mage/dsh-crm-knowledge",
+        "package_version": "0.0.0-crm.1",
+        "dsh_pin": "0.1.7-rc.2",
+        "source_sha": "5a839fa86de2240cf661a9034c58e0ead2d4b4ef",
+        "source_dirty": false,
+        "tarball": {
+          "name": "shine-mage-dsh-crm-knowledge-0.0.0-crm.1.tgz",
+          "bytes": 234901,
+          "sha256": "0da9f8edd40b17a92377aa4b35d219229c8461b942060a7dd0e12265343500fd"
+        },
+        "entries": [
+          "cordis.patch.yml",
+          "lib/client.js",
+          "lib/host.js",
+          "lib/index.js",
+          "package.json"
+        ],
+        "activation": "NOT_RUN",
+        "state_path": "NOT_APPLICABLE_PLUGIN_PACK_ONLY"
+      },
+      "tarball_path": "/Users/hutou/.codex/tasks/shinemage-full-closeout-20261011-p6m85w3u/formal-packs/crm-knowledge/shine-mage-dsh-crm-knowledge-0.0.0-crm.1.tgz",
+      "package_manifest": {
+        "name": "@shine-mage/dsh-crm-knowledge",
+        "version": "0.0.0-crm.1",
+        "private": true,
+        "type": "module",
+        "description": "CRM dashboard, metrics and private analysis assets; knowledge tools are a separately installed optional plugin.",
+        "engines": {
+          "node": "24.x"
+        },
+        "peerDependencies": {
+          "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
+          "@deepseek-ai/cordis": "4.0.2"
+        },
+        "exports": {
+          ".": "./lib/index.js",
+          "./host": "./lib/host.js",
+          "./client": "./lib/client.js",
+          "./package.json": "./package.json",
+          "./cordis.patch.yml": "./cordis.patch.yml"
+        },
+        "files": [
+          "lib/index.js",
+          "lib/host.js",
+          "lib/client.js",
+          "cordis.patch.yml"
+        ],
+        "dsh": {
+          "client": {
+            "platform": "web",
+            "inject": [
+              "@deepseek-ai/dsh-client-ui-conversation",
+              "@deepseek-ai/dsh-client-ui-renderer",
+              "@deepseek-ai/dsh-api-session-controller"
+            ]
+          },
+          "bundle": {
+            "patch": "./cordis.patch.yml"
+          }
+        },
+        "shinemage": {
+          "plugin_domain": "crm",
+          "composition_contract": "crm-knowledge-split/v1"
+        },
+        "devDependencies": {
+          "@shine-mage/dsh-plugin-kit": "0.1.0"
+        }
+      }
+    },
+    {
+      "formal_manifest_path": "/Users/hutou/.codex/tasks/shinemage-full-closeout-20261011-p6m85w3u/formal-packs/knowledge/plugin-pack.json",
+      "formal_manifest_sha256": "a674a2da0dcd317839c4f8d7766da62ced58eca9021222c6e3a238f80aa7df79",
+      "formal_manifest": {
+        "schema_version": "dsh-plugin-pack/v1",
+        "package_name": "@shine-mage/dsh-knowledge",
+        "package_version": "0.0.0-candidate.1",
+        "dsh_pin": "0.1.7-rc.2",
+        "source_sha": "94ef29fa6c39d3dc506fbc5ef734f0a7ea9eb2b0",
+        "source_dirty": false,
+        "tarball": {
+          "name": "shine-mage-dsh-knowledge-0.0.0-candidate.1.tgz",
+          "bytes": 14476,
+          "sha256": "ed7888204d5cefe7d383632a75319d3427fec9a735863f4e123b8ea17387ef67"
+        },
+        "entries": [
+          "cordis.patch.yml",
+          "lib/graph-tools.js",
+          "lib/index.js",
+          "package.json"
+        ],
+        "activation": "NOT_RUN",
+        "state_path": "NOT_APPLICABLE_PLUGIN_PACK_ONLY"
+      },
+      "tarball_path": "/Users/hutou/.codex/tasks/shinemage-full-closeout-20261011-p6m85w3u/formal-packs/knowledge/shine-mage-dsh-knowledge-0.0.0-candidate.1.tgz",
+      "package_manifest": {
+        "name": "@shine-mage/dsh-knowledge",
+        "version": "0.0.0-candidate.1",
+        "private": true,
+        "type": "module",
+        "description": "Independent public knowledge definitions and optional account-authorized textbook retrieval; no CRM implementation or credentials.",
+        "engines": {
+          "node": "24.x"
+        },
+        "peerDependencies": {
+          "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
+          "@deepseek-ai/cordis": "4.0.2"
+        },
+        "exports": {
+          ".": "./lib/index.js",
+          "./graph-tools": "./lib/graph-tools.js",
+          "./package.json": "./package.json",
+          "./cordis.patch.yml": "./cordis.patch.yml"
+        },
+        "files": [
+          "lib/index.js",
+          "lib/graph-tools.js",
+          "cordis.patch.yml"
+        ],
+        "dsh": {
+          "bundle": {
+            "patch": "./cordis.patch.yml"
+          }
+        },
+        "shinemage": {
+          "plugin_domain": "knowledge",
+          "composition_contract": "crm-knowledge-split/v1"
+        },
+        "devDependencies": {
+          "@shine-mage/dsh-plugin-kit": "0.1.0"
+        }
+      }
+    }
+  ],
+  "source_scope": {
+    "official_metadata_queries": 4,
+    "fresh_SDK_audit": false,
+    "OSV_requery": false,
+    "upstream_build": false,
+    "exact_upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443"
+  }
+}

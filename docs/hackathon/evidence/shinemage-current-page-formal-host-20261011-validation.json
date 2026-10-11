@@ -1,0 +1,1137 @@
+{
+  "schema": "shinemage-current-page-formal-npm-host-closeout/v1",
+  "observed_at": "2026-10-11T10:57:07.950922+08:00",
+  "main_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "main_branch": "codex/shinemage-abc-local-candidate",
+  "tooling": "current byte-bound validation closure; official npm CLI and cached published runtime",
+  "official_cli": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/node_modules/@deepseek-ai/dsh/lib/bin.js",
+  "official_DSH": "0.1.7-rc.2",
+  "runtime": {
+    "Node": "24.19.0",
+    "Python": "3.14.4",
+    "pnpm": "11.28.2"
+  },
+  "page_inputs": {
+    "schema": "shinemage-current-page-formal-host-inputs/v1",
+    "root": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0",
+    "node": "/Users/hutou/homebrew/opt/node@24/bin/node",
+    "python": "/Users/hutou/homebrew/opt/python@3.14/bin/python3.14",
+    "manager": "/Users/hutou/.cache/node/corepack/v1/pnpm/11.28.2/bin/pnpm.cjs",
+    "npm_root": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1",
+    "npm_lock": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/package-lock.json",
+      "sha256": "e7b5d62b7ef76a19195b619024e5c9a13f9e63da3cd18bef0ca2f7ac50477e56"
+    },
+    "page_inputs": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/canonical-composition-r2/page-inputs.json",
+    "page_inputs_sha256": "19cfda92f0f755a352924f630cfa0d0e2c85d0bcd6a076c40379a245c15ef5d0",
+    "current_main_composition_lock_sha256": "598b62ea0ae00c2f57474c8666e2787202658b57488612cb1d1ea4c40edd571b",
+    "port": 4328,
+    "peer_versions": {
+      "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
+      "@deepseek-ai/dsh-client-connection": "0.1.7-rc.2",
+      "@deepseek-ai/dsh-llm": "0.1.7-rc.2"
+    },
+    "fresh_home_and_workspace": true,
+    "services": "NOT_CONFIGURED_NOT_RUN",
+    "candidate_journal": "UNCHANGED",
+    "release_ready": false,
+    "home_path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/home-r2",
+    "workspace_path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/workspace-r2",
+    "port_base": 4325,
+    "bridge_port": 4326,
+    "bridge_capability": "fresh synthetic session id plus in-memory random runtime token; no service binding"
+  },
+  "current_workbench": {
+    "id": "@shine-mage/dsh-analytics-workbench-b0",
+    "root": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/installed-r2/0/unpacked/package",
+    "source_sha": "fd46b34d04ddf143811fd1eba7ef2ff6c3ca230b",
+    "version": "0.0.0-b0",
+    "manifest_sha256": "a9463faa7c3299cc5d24179708dc7c5ae5ecf0f124ce97dfa904145398b65910",
+    "pack_sha256": "e41df9f5a8f7031c092319222543c8d723ca644c0c9d69b2ae53f13257e9b79e"
+  },
+  "official_install": {
+    "round": "r2",
+    "packages": 7,
+    "commands": 7,
+    "exit_code": 0,
+    "network": "LOOPBACK_ONLY; offline plugin manager; ignore-scripts",
+    "manifest_modified": false,
+    "manual_peer_links_added": false
+  },
+  "host": {
+    "schema": "shinemage-current-page-formal-npm-host/v1",
+    "started_at": "2026-10-11T02:54:14.730Z",
+    "scope": "current formal page packs in an owned official npm DSH web profile; HTTP/RPC plus three separate process boots",
+    "source_inputs": [
+      {
+        "id": "@shine-mage/dsh-analytics-workbench-b0",
+        "root": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/installed-r2/0/unpacked/package",
+        "source_sha": "fd46b34d04ddf143811fd1eba7ef2ff6c3ca230b",
+        "version": "0.0.0-b0",
+        "manifest_sha256": "a9463faa7c3299cc5d24179708dc7c5ae5ecf0f124ce97dfa904145398b65910",
+        "pack_sha256": "e41df9f5a8f7031c092319222543c8d723ca644c0c9d69b2ae53f13257e9b79e"
+      },
+      {
+        "id": "@shine-mage/dsh-shine-brand",
+        "root": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/installed-r2/1/unpacked/package",
+        "source_sha": "57ebcf38278068394a4feb42125c30c195fd912a",
+        "version": "0.0.0-b0",
+        "manifest_sha256": "d5039166969023075253e65e31c4d7dba910ae6ea10b9b40bf7f147bdb5efd24",
+        "pack_sha256": "4b867bf5b4e08d9aa1f45f20b20b78cbd9e11c236194ffafaa5188d8d173bd13"
+      },
+      {
+        "id": "@shine-mage/dsh-shine-waterfall",
+        "root": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/installed-r2/2/unpacked/package",
+        "source_sha": "d123ac1d0e7bad3e5de45169b3e72c38623b858a",
+        "version": "0.0.0-b0",
+        "manifest_sha256": "43a9c673ada75b763c1867e6bb6fd66c75da393cd6c2fd2fd669aadbe73c6af5",
+        "pack_sha256": "73a1d4ba2b085c1f9f2a1eff410aca239cf9775de952ba70aafdaa78ec5ac35d"
+      },
+      {
+        "id": "@shine-mage/dsh-shine-crowd-action",
+        "root": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/installed-r2/3/unpacked/package",
+        "source_sha": "5c39e21c27565397383b009725634ea66e9c1525",
+        "version": "0.0.0-b0",
+        "manifest_sha256": "d3998ed96530db66b3aa53f263c93848e7078846a8a0f612a1c099202bfa406f",
+        "pack_sha256": "3fb9d88d228e3af4a9c965961c035650b65365392a9caccb4c14f336b003b2ca"
+      },
+      {
+        "id": "@shine-mage/dsh-shine-query",
+        "root": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/installed-r2/4/unpacked/package",
+        "source_sha": "1f1e19d280923ebe7aac964f8b5825d497434db8",
+        "version": "0.0.0-b0",
+        "manifest_sha256": "13433c1c4687cd33f0b314b60a38c76fb8390ee52375755320d4ca5a6f378fae",
+        "pack_sha256": "774c6ae63e0fb170a81a9e9fb9551d55d40724faae5966c1d95bb32624fb89ce"
+      },
+      {
+        "id": "@shine-mage/dsh-shine-board",
+        "root": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/installed-r2/5/unpacked/package",
+        "source_sha": "76601df755ec8ef8c9726ea770ec488b745efd71",
+        "version": "0.0.0-b0",
+        "manifest_sha256": "671acb9502969f08e5db6b83369afa3ea1dec1699a7a9fc5a1680abfa9aa39cf",
+        "pack_sha256": "e1348dd7739778a5ec2d676420e86290ca49f69cdf045959fd82441232a30c1a"
+      },
+      {
+        "id": "@shine-mage/dsh-shine-funnel",
+        "root": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/installed-r2/6/unpacked/package",
+        "source_sha": "dbfaede0961586d773c708e833a4ac1c9f2515dc",
+        "version": "0.0.0-b0",
+        "manifest_sha256": "1e631c02c1fa6903b1f76953edc4e7da3fc85b1b96c1292567f8561a78a8eefb",
+        "pack_sha256": "581ba069aa8af4598f553e4b11b57216ac2205d71baebbafc267367cb3814ba6"
+      }
+    ],
+    "official_cli": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/node_modules/@deepseek-ai/dsh/lib/bin.js",
+    "official_DSH": "0.1.7-rc.2",
+    "network": "LOOPBACK_ONLY",
+    "HOME_changed": false,
+    "phases": [
+      {
+        "name": "enabled",
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/source-deny-loopback-r2.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/node_modules/@deepseek-ai/dsh/lib/bin.js",
+          "--profile",
+          "web",
+          "--host",
+          "127.0.0.1",
+          "--port",
+          "4328",
+          "--trusted-host",
+          "app.tyuan.chat",
+          "--no-open"
+        ],
+        "rows": [
+          {
+            "id": "analytics-workbench-ui",
+            "present": true,
+            "disabled": false
+          },
+          {
+            "id": "shine-brand-ui",
+            "present": true,
+            "disabled": false
+          },
+          {
+            "id": "shine-waterfall-ui",
+            "present": true,
+            "disabled": false
+          },
+          {
+            "id": "shine-crowd-action-ui",
+            "present": true,
+            "disabled": false
+          },
+          {
+            "id": "shine-query-ui",
+            "present": true,
+            "disabled": false
+          },
+          {
+            "id": "shine-board-ui",
+            "present": true,
+            "disabled": false
+          },
+          {
+            "id": "shine-funnel-ui",
+            "present": true,
+            "disabled": false
+          }
+        ],
+        "rpc_methods": [
+          "workspace/create",
+          "session/create",
+          "session/rename",
+          "session/list",
+          "session/projections"
+        ],
+        "pid": 21169,
+        "plugin_import_failures": 0,
+        "unauthenticated_root": 401,
+        "authenticated_root": 200,
+        "root_HTML_sha256": "fc76a4e1211b240dc9ac1c5e993fa2cc58f4422c68522e99e286db0396afc281",
+        "bridge": {
+          "mounted": true,
+          "unauthenticated_status": 401,
+          "authenticated_status": 200,
+          "health": {
+            "ready": false
+          },
+          "service_admission": "NOT_RUN"
+        },
+        "session": {
+          "sessionId": "session-current-e41-a427a2ab6c7f2643",
+          "title": "独立正式包 · 合成重启会话",
+          "asOfSeq": 3,
+          "workspaceId": "068506fd-51ba-45e2-b2a5-92c2c830978b",
+          "running": false
+        },
+        "status": "PASS",
+        "cleanup": {
+          "pid": 21169,
+          "terminal": {
+            "code": 0,
+            "signal": null
+          },
+          "port_released": true,
+          "bridge_port_released": true
+        }
+      },
+      {
+        "name": "native",
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/source-deny-loopback-r2.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/node_modules/@deepseek-ai/dsh/lib/bin.js",
+          "--profile",
+          "web",
+          "--patch",
+          "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/off.patch.yml",
+          "--host",
+          "127.0.0.1",
+          "--port",
+          "4328",
+          "--trusted-host",
+          "app.tyuan.chat",
+          "--no-open"
+        ],
+        "rows": [
+          {
+            "id": "analytics-workbench-ui",
+            "present": true,
+            "disabled": true
+          },
+          {
+            "id": "shine-brand-ui",
+            "present": true,
+            "disabled": true
+          },
+          {
+            "id": "shine-waterfall-ui",
+            "present": true,
+            "disabled": true
+          },
+          {
+            "id": "shine-crowd-action-ui",
+            "present": true,
+            "disabled": true
+          },
+          {
+            "id": "shine-query-ui",
+            "present": true,
+            "disabled": true
+          },
+          {
+            "id": "shine-board-ui",
+            "present": true,
+            "disabled": true
+          },
+          {
+            "id": "shine-funnel-ui",
+            "present": true,
+            "disabled": true
+          }
+        ],
+        "rpc_methods": [
+          "session/list",
+          "session/projections"
+        ],
+        "pid": 21178,
+        "plugin_import_failures": 0,
+        "unauthenticated_root": 401,
+        "authenticated_root": 200,
+        "root_HTML_sha256": "327fb8f144b67fafa32bb16cd4a650711162631972acddddfa5a003119bfd65a",
+        "bridge": {
+          "mounted": false,
+          "port_free": true
+        },
+        "session": {
+          "sessionId": "session-current-e41-a427a2ab6c7f2643",
+          "title": "独立正式包 · 合成重启会话",
+          "asOfSeq": 3,
+          "workspaceId": "068506fd-51ba-45e2-b2a5-92c2c830978b",
+          "running": false
+        },
+        "status": "PASS",
+        "cleanup": {
+          "pid": 21178,
+          "terminal": {
+            "code": 0,
+            "signal": null
+          },
+          "port_released": true,
+          "bridge_port_released": true
+        }
+      },
+      {
+        "name": "restored",
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/source-deny-loopback-r2.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/node_modules/@deepseek-ai/dsh/lib/bin.js",
+          "--profile",
+          "web",
+          "--host",
+          "127.0.0.1",
+          "--port",
+          "4328",
+          "--trusted-host",
+          "app.tyuan.chat",
+          "--no-open"
+        ],
+        "rows": [
+          {
+            "id": "analytics-workbench-ui",
+            "present": true,
+            "disabled": false
+          },
+          {
+            "id": "shine-brand-ui",
+            "present": true,
+            "disabled": false
+          },
+          {
+            "id": "shine-waterfall-ui",
+            "present": true,
+            "disabled": false
+          },
+          {
+            "id": "shine-crowd-action-ui",
+            "present": true,
+            "disabled": false
+          },
+          {
+            "id": "shine-query-ui",
+            "present": true,
+            "disabled": false
+          },
+          {
+            "id": "shine-board-ui",
+            "present": true,
+            "disabled": false
+          },
+          {
+            "id": "shine-funnel-ui",
+            "present": true,
+            "disabled": false
+          }
+        ],
+        "rpc_methods": [
+          "session/list",
+          "session/projections"
+        ],
+        "pid": 21180,
+        "plugin_import_failures": 0,
+        "unauthenticated_root": 401,
+        "authenticated_root": 200,
+        "root_HTML_sha256": "fc76a4e1211b240dc9ac1c5e993fa2cc58f4422c68522e99e286db0396afc281",
+        "bridge": {
+          "mounted": true,
+          "unauthenticated_status": 401,
+          "authenticated_status": 200,
+          "health": {
+            "ready": false
+          },
+          "service_admission": "NOT_RUN"
+        },
+        "session": {
+          "sessionId": "session-current-e41-a427a2ab6c7f2643",
+          "title": "独立正式包 · 合成重启会话",
+          "asOfSeq": 3,
+          "workspaceId": "068506fd-51ba-45e2-b2a5-92c2c830978b",
+          "running": false
+        },
+        "status": "PASS",
+        "cleanup": {
+          "pid": 21180,
+          "terminal": {
+            "code": 0,
+            "signal": null
+          },
+          "port_released": true,
+          "bridge_port_released": true
+        }
+      }
+    ],
+    "negative_sources": [
+      {
+        "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/package.json",
+        "code": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/dsh-analytics-workbench/plugin/package.json",
+        "code": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/dsh-crm-knowledge/plugin/package.json",
+        "code": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/.codex/tasks/shinemage-knowledge-independent-20261008/dsh-knowledge/plugin/package.json",
+        "code": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand/plugin/package.json",
+        "code": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-board/plugin/package.json",
+        "code": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-crowd-action/plugin/package.json",
+        "code": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-query/plugin/package.json",
+        "code": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/dsh-shine-funnel/plugin/package.json",
+        "code": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/dsh-shine-waterfall/plugin/package.json",
+        "code": "EPERM"
+      }
+    ],
+    "agent_prompt_requests": 0,
+    "model_acceptance": "NOT_RUN",
+    "real_data": false,
+    "services": "NOT_CONFIGURED_NOT_RUN",
+    "browser": "NOT_RUN",
+    "WSL2": "NOT_RUN",
+    "formal_candidate_admission": "NOT_RUN",
+    "journal": "UNCHANGED",
+    "live_hot_reload": "NOT_RUN",
+    "release_ready": false,
+    "bridge_capability": {
+      "session_id": "session-current-e41-a427a2ab6c7f2643",
+      "token_sha256": "53540327e37c7584722ea9eb34f4ee44bcc389c154f885c1494252b798745c3c",
+      "port_base": 4325,
+      "bridge_port": 4326,
+      "services": "NOT_CONFIGURED_NOT_RUN"
+    },
+    "status": "PASS",
+    "final_port_released": true,
+    "final_bridge_port_released": true,
+    "npm_lock_unchanged": true,
+    "ended_at": "2026-10-11T02:54:17.351Z"
+  },
+  "integrity_cleanup": {
+    "schema": "shinemage-current-page-package-cleanup-integrity/v1",
+    "packages": [
+      {
+        "id": "@shine-mage/dsh-analytics-workbench-b0",
+        "manifest_sha256": "a9463faa7c3299cc5d24179708dc7c5ae5ecf0f124ce97dfa904145398b65910",
+        "pack_sha256": "e41df9f5a8f7031c092319222543c8d723ca644c0c9d69b2ae53f13257e9b79e",
+        "extracted_members": [
+          {
+            "path": "lib/client.js",
+            "sha256": "d50bb6272a18de3a892687192d95b52019bd8af2f959f5593dae1283b8043c03",
+            "bytes": 1176352
+          },
+          {
+            "path": "lib/index.js",
+            "sha256": "f1b97a4457ad65d868c83eb6209ae4c14a9598415caf4376a5c6151ef962fd58",
+            "bytes": 143276
+          },
+          {
+            "path": "lib/page-tools.js",
+            "sha256": "28b07f12a5aaff8096c604d9c53eef293a91be55ae82d48b069ab8c0e8fa5c70",
+            "bytes": 14160
+          },
+          {
+            "path": "lib/skills.js",
+            "sha256": "c4b870b64626b5d8f7ed898c6cf2edd613fc7cabb39bd49490eb9b3bcf29c8b1",
+            "bytes": 107570
+          },
+          {
+            "path": "lib/tool.js",
+            "sha256": "e854349cb5187e2b045f280f8330f19da0e7d0acbe0ff4f07e8c747f710a4924",
+            "bytes": 38843
+          },
+          {
+            "path": "bundled-dependencies.json",
+            "sha256": "957ba54ce606fc735cc11c051b9d60c3703ab8bf0bc94dd00aac696b28afa06b",
+            "bytes": 306
+          },
+          {
+            "path": "package.json",
+            "sha256": "d9a3a2d2d7b5e18b85bbfb141845c42934301c518f13f24d5211b3ba921ebf3a",
+            "bytes": 1627
+          },
+          {
+            "path": "cordis.patch.yml",
+            "sha256": "901c01fe1237b5d1b25f60ce58252553053125519ae73fe356ff6e4365425b3f",
+            "bytes": 584
+          }
+        ],
+        "after_install_and_three_host_boots": "BYTE_EQUAL"
+      },
+      {
+        "id": "@shine-mage/dsh-shine-brand",
+        "manifest_sha256": "d5039166969023075253e65e31c4d7dba910ae6ea10b9b40bf7f147bdb5efd24",
+        "pack_sha256": "4b867bf5b4e08d9aa1f45f20b20b78cbd9e11c236194ffafaa5188d8d173bd13",
+        "extracted_members": [
+          {
+            "path": "lib/client.js",
+            "sha256": "03ed4e2a291e06cdbd4d16cc0ee5d7c53266849dc9f2269c043f551d00c8877e",
+            "bytes": 2463
+          },
+          {
+            "path": "lib/index.js",
+            "sha256": "8b1f89bd6318f9a27bb0e34ae68fa3626496a7b02dedabf6bdfd2f0c2dab70f0",
+            "bytes": 119
+          },
+          {
+            "path": "package.json",
+            "sha256": "e43f27667cc77a82fff2589b176028a0e8e311cf3fe1d404ffd8833e9db83380",
+            "bytes": 879
+          },
+          {
+            "path": "cordis.patch.yml",
+            "sha256": "70dd510cf8f34ec8493bb257ad051ed4e6cabb00631640adc4fb497c44274c79",
+            "bytes": 145
+          }
+        ],
+        "after_install_and_three_host_boots": "BYTE_EQUAL"
+      },
+      {
+        "id": "@shine-mage/dsh-shine-waterfall",
+        "manifest_sha256": "43a9c673ada75b763c1867e6bb6fd66c75da393cd6c2fd2fd669aadbe73c6af5",
+        "pack_sha256": "73a1d4ba2b085c1f9f2a1eff410aca239cf9775de952ba70aafdaa78ec5ac35d",
+        "extracted_members": [
+          {
+            "path": "lib/client.js",
+            "sha256": "fa56fa6ac360a03d09d8eee8e7800fcf8d6bf28e5a4ff3d129735743ea0c0b3f",
+            "bytes": 727
+          },
+          {
+            "path": "lib/index.js",
+            "sha256": "8d5816bb1e16ed8b82be7e921bf9be111662b8131855859205925aed73548294",
+            "bytes": 123
+          },
+          {
+            "path": "bundled-dependencies.json",
+            "sha256": "957ba54ce606fc735cc11c051b9d60c3703ab8bf0bc94dd00aac696b28afa06b",
+            "bytes": 306
+          },
+          {
+            "path": "package.json",
+            "sha256": "75cf7d353bb182c039faf2db03aa1e65382738a362d32ce217b52af5e1255970",
+            "bytes": 1254
+          },
+          {
+            "path": "lib/waterfall.mjs",
+            "sha256": "1ffe8061b1ddfe28b8310fa520910f75c7e8f2fb1f53fb33ba029ac528dd2329",
+            "bytes": 1921
+          },
+          {
+            "path": "lib/waterfall.d.mts",
+            "sha256": "34b0be969c2f73b3dd1a7633b2e953c74bd5b12c80ed978ac3be0d51ee4a2210",
+            "bytes": 341
+          },
+          {
+            "path": "cordis.patch.yml",
+            "sha256": "ce8387a2c5b07fa336c700a9f3acb6d32ce0cc81dd60e477ef6d6bce22362781",
+            "bytes": 168
+          }
+        ],
+        "after_install_and_three_host_boots": "BYTE_EQUAL"
+      },
+      {
+        "id": "@shine-mage/dsh-shine-crowd-action",
+        "manifest_sha256": "d3998ed96530db66b3aa53f263c93848e7078846a8a0f612a1c099202bfa406f",
+        "pack_sha256": "3fb9d88d228e3af4a9c965961c035650b65365392a9caccb4c14f336b003b2ca",
+        "extracted_members": [
+          {
+            "path": "lib/client.js",
+            "sha256": "27758f2b267209c14c53ca1b056efeb41c58a9fac3e6f546d65f26f3177c9e67",
+            "bytes": 733
+          },
+          {
+            "path": "lib/index.js",
+            "sha256": "e63f51cf877e6eaf87373a7fd98b964c02ccfef7c200f9b64314cfd813d7d9a9",
+            "bytes": 126
+          },
+          {
+            "path": "package.json",
+            "sha256": "68faef72505a26a0d4c5431af638b754e2843e1750c0f5513d5ada970af283cd",
+            "bytes": 954
+          },
+          {
+            "path": "cordis.patch.yml",
+            "sha256": "d98da5679243d4eb51b773bc8fd960ce41beb37730923cc44de407e6c0e90c80",
+            "bytes": 168
+          }
+        ],
+        "after_install_and_three_host_boots": "BYTE_EQUAL"
+      },
+      {
+        "id": "@shine-mage/dsh-shine-query",
+        "manifest_sha256": "13433c1c4687cd33f0b314b60a38c76fb8390ee52375755320d4ca5a6f378fae",
+        "pack_sha256": "774c6ae63e0fb170a81a9e9fb9551d55d40724faae5966c1d95bb32624fb89ce",
+        "extracted_members": [
+          {
+            "path": "lib/client.js",
+            "sha256": "6d9dc0b432e7f8532ec7ad082becde14f2436184d496397301de3c0b1940fd8a",
+            "bytes": 719
+          },
+          {
+            "path": "lib/index.js",
+            "sha256": "ac79df38a4f9f68e0558953472c383e0ca57e9266f9bc2427d45e4dd0e1dd186",
+            "bytes": 119
+          },
+          {
+            "path": "package.json",
+            "sha256": "8027a77df5e773c5669617252502f234306a19e3dd8bed2823f0e67ee79c582c",
+            "bytes": 920
+          },
+          {
+            "path": "cordis.patch.yml",
+            "sha256": "258f652d9447e8ee6d45730cf920823dcce936b84ea2cddf8af80910e39ba7a4",
+            "bytes": 148
+          }
+        ],
+        "after_install_and_three_host_boots": "BYTE_EQUAL"
+      },
+      {
+        "id": "@shine-mage/dsh-shine-board",
+        "manifest_sha256": "671acb9502969f08e5db6b83369afa3ea1dec1699a7a9fc5a1680abfa9aa39cf",
+        "pack_sha256": "e1348dd7739778a5ec2d676420e86290ca49f69cdf045959fd82441232a30c1a",
+        "extracted_members": [
+          {
+            "path": "lib/client.js",
+            "sha256": "983851980fab7951da805ebb77106af2b38ffc3045330bb18799bc0283946323",
+            "bytes": 719
+          },
+          {
+            "path": "lib/index.js",
+            "sha256": "b5706ed0b58c023d6f207ce92d1cf3ad157c599b75a65d6c45380cbd193559ae",
+            "bytes": 119
+          },
+          {
+            "path": "package.json",
+            "sha256": "6f9ebd8e786dd08b9fc8e675d6fe022cd23476f3163a00537c6ad4618fac31ba",
+            "bytes": 937
+          },
+          {
+            "path": "cordis.patch.yml",
+            "sha256": "54a6bd0eba5e0ba6b1fdd02316e7997e607ea27bb144f7e633b85f2eb91b7ec0",
+            "bytes": 158
+          }
+        ],
+        "after_install_and_three_host_boots": "BYTE_EQUAL"
+      },
+      {
+        "id": "@shine-mage/dsh-shine-funnel",
+        "manifest_sha256": "1e631c02c1fa6903b1f76953edc4e7da3fc85b1b96c1292567f8561a78a8eefb",
+        "pack_sha256": "581ba069aa8af4598f553e4b11b57216ac2205d71baebbafc267367cb3814ba6",
+        "extracted_members": [
+          {
+            "path": "lib/client.js",
+            "sha256": "a7b105fcd1703c6bf93f5a3bde531fd3f3d3522ba650e7bc709da34b3d8532cf",
+            "bytes": 721
+          },
+          {
+            "path": "lib/index.js",
+            "sha256": "6d7c1a184cb2a60eb0d25eb4136638fb5777e3afe98bac13da87b3586fb84b79",
+            "bytes": 120
+          },
+          {
+            "path": "bundled-dependencies.json",
+            "sha256": "957ba54ce606fc735cc11c051b9d60c3703ab8bf0bc94dd00aac696b28afa06b",
+            "bytes": 306
+          },
+          {
+            "path": "package.json",
+            "sha256": "d9ef34d1cc2e06254bbd53e1cc1ceb48daacc64a406a2115c1d239ee8baeb8c6",
+            "bytes": 1215
+          },
+          {
+            "path": "lib/funnel.mjs",
+            "sha256": "12f56de58baa8834cfd86d3ca78ab77faf018dbfb3b6c935591aece962fce8cc",
+            "bytes": 1324
+          },
+          {
+            "path": "lib/funnel.d.mts",
+            "sha256": "30c157c4cefc1ad5f8182e65af5777f39fcfd473987e1eabc47553f2f3d3c455",
+            "bytes": 239
+          },
+          {
+            "path": "cordis.patch.yml",
+            "sha256": "a786a225effef72c8153580989a7cfb58eee50d289204e2f95188edb83c2b1f5",
+            "bytes": 159
+          }
+        ],
+        "after_install_and_three_host_boots": "BYTE_EQUAL"
+      }
+    ],
+    "owned_host_pids_gone": [
+      21169,
+      21178,
+      21180
+    ],
+    "ports_released": [
+      4326,
+      4328
+    ],
+    "all_owned_host_exits": 0,
+    "original_npm_runtime_bound_files_unchanged": 6,
+    "old_protected_files_unchanged": 46,
+    "formal_pack_receipts_unchanged": true,
+    "release_ready": false,
+    "launch_URLs_redacted": true,
+    "runtime_token_recorded_only_as_sha256_in_result": true
+  },
+  "failure_history": {
+    "round": "r1",
+    "status": "FAIL",
+    "code": "HOST_PLUGIN_ACTIVATION_FAILED",
+    "reason": "B0 session/runtime capability input omitted; actual package reported requires explicit isolated capabilities",
+    "ready_URL_is_not_plugin_acceptance": true,
+    "preserved": true,
+    "correction": "r2 supplies existing capability contract, fresh home/workspace and allowed port block; no UI-only bypass"
+  },
+  "acceptance_scope": "macOS official npm seven-page-pack install/activation, native authentication and synthetic metadata/session process fallback/recovery; not formal service admission or platform target receipt",
+  "formal_admission": {
+    "service": "NOT_RUN",
+    "new_candidate": "NOT_RUN",
+    "journal": "UNCHANGED",
+    "WSL2": "NOT_RUN",
+    "browser": "NOT_RUN",
+    "Agent_prompt_model": "NOT_RUN",
+    "real_CRM_WeKnora_UAT": "NOT_RUN",
+    "live_hot_reload": "NOT_RUN"
+  },
+  "expanded_author_proposal": "NOT_APPLIED",
+  "Cordis_owner_proposal": "NOT_APPLIED",
+  "git_actions": "NO_NEW_COMMIT_PUSH_PR_MERGE",
+  "VERSION": "0.20.0.0",
+  "SDK_distribution": "BLOCKED",
+  "product": "PARTIAL",
+  "release_ready": false,
+  "raw_bindings": [
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/snapshot-r1.json",
+      "sha256": "510d2c3c1c9c3da6ec7f4b02d10ca19f4d43e7d48656c2dbe9e5c896c3c97703",
+      "bytes": 65183
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/tooling-bindings-r1.json",
+      "sha256": "6ebecdd0ac4de1c5d07b3c6ea422181a230d2ef12a0affc45af45e5acff2bac7",
+      "bytes": 2811
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/tooling-bindings-r2.json",
+      "sha256": "80de3aa3c8467f12296315251433155b38e6cee1f457b73b231eadb2aa45db3d",
+      "bytes": 3309
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/execution-inputs-r1.json",
+      "sha256": "cc6a9acd6ce6e4c6b262c9691256976d2156d2cb03a354ab1d8135cad6befad4",
+      "bytes": 1370
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/execution-inputs-r2.json",
+      "sha256": "267db9a96a71f47909a11535fb4610dda1b0da8a09ecfc0ee02a4cd743594ce2",
+      "bytes": 1739
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/source-deny-loopback-r1.sb",
+      "sha256": "942e10123e7cb2a2d499671c3673d7ec45efd25f427852a8bc10584e31214ce1",
+      "bytes": 3285
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/source-deny-loopback-r2.sb",
+      "sha256": "91462373ad315cb92a7d80f24236605a5cfde4e616af1526b31ff3ec90b4e8ec",
+      "bytes": 3400
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/off.patch.yml",
+      "sha256": "3b1f50697a79c344d5eba09477d728aa4e97b73fc969ce1b94c4c0a0be2538a2",
+      "bytes": 429
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/install-r1.mjs",
+      "sha256": "5c9dccbce5c19cf6ed83af7201b420e0adc0e1ad8a8fdc53f6ccc1e1167e94c7",
+      "bytes": 5516
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/install-r1.stdout",
+      "sha256": "f8fd3a7df03758ef3ed8c0291f286c9f67d0fc2b9c47e052cf7c88d0473647b9",
+      "bytes": 251
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/install-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/install-result-r1.json",
+      "sha256": "aca1489735f729ca0733ea64e75aa575324936a1f73af5914cde38625bd11bb7",
+      "bytes": 10512
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/host-r1.mjs",
+      "sha256": "faea4197e194f0aff01d68a72b4b47a8577c10c1aee21506acabcd6407cb22ad",
+      "bytes": 10638
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/host-r1.stdout",
+      "sha256": "59c791fd861888e3c664263dfc819e30dac16e5f943cbb089613648c8ab7b351",
+      "bytes": 283
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/host-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/host-result-r1.json",
+      "sha256": "8548f7501ab724d2f4b7dccc71b0fee75c50abcbf15a66b56466428475c6189b",
+      "bytes": 7573
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/phase-enabled-r1.json",
+      "sha256": "edfae4732437355b6eb2a1be20ec9cd22e5a44e43e05d488c40da6aedb884b1f",
+      "bytes": 1451
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/enabled-r1.boot.log",
+      "sha256": "f73e59c66ec21d8bcfbf3eb190b1904775992bd882d83bc38a0a61f1527e5e9c",
+      "bytes": 1288
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/install-r2.mjs",
+      "sha256": "a041ff7c90667aa455ac577d942d8ea05d63d955e6eac80c8552523c3228c3d5",
+      "bytes": 5519
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/install-r2.stdout",
+      "sha256": "f8fd3a7df03758ef3ed8c0291f286c9f67d0fc2b9c47e052cf7c88d0473647b9",
+      "bytes": 251
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/install-r2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/install-result-r2.json",
+      "sha256": "74bbf0f06ea7b1a54a87f6687471caf14de520d471195f632b83e20d930a1eeb",
+      "bytes": 10512
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/host-r2.mjs",
+      "sha256": "da1b2106256b21c84f46495edb36f396abd80279f95f7f63f1e6359eeb6e2532",
+      "bytes": 12225
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/host-r2.stdout",
+      "sha256": "522fd3e4855d8119ab6c984363624c3fee3670ac2c7ceed1fe071492cb9101ab",
+      "bytes": 524
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/host-r2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/host-result-r2.json",
+      "sha256": "118ef94f9c692374288bfe9f21ea1a5bb5820960847211760f43501dde2a51d0",
+      "bytes": 13363
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/phase-enabled-r2.json",
+      "sha256": "9033ba0f745cbfbd1b6f925a1467182691f8d63c4c4ea9b6971dc15e4bd1cc5b",
+      "bytes": 2134
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/phase-native-r2.json",
+      "sha256": "174dde0aa7d1bcb2bc22a0ce76a5b2f4f533bc99f97cf280374f488d7e0b6f79",
+      "bytes": 2047
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/phase-restored-r2.json",
+      "sha256": "58084b7a036a14d0b4238c82b6942eba87fe97d00fd3b2b1be5fe809271304c1",
+      "bytes": 2067
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/enabled-r2.boot.log",
+      "sha256": "ceb8d0289c7153e2a903615b365fb90531403c5b62d5ecae1521b5dabd7ed9ad",
+      "bytes": 49
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/native-r2.boot.log",
+      "sha256": "ceb8d0289c7153e2a903615b365fb90531403c5b62d5ecae1521b5dabd7ed9ad",
+      "bytes": 49
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/restored-r2.boot.log",
+      "sha256": "ceb8d0289c7153e2a903615b365fb90531403c5b62d5ecae1521b5dabd7ed9ad",
+      "bytes": 49
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/enabled-r2.config.txt",
+      "sha256": "aa6927bcb8c5a5d27c890dcec3547294d58942c3098c86511b0a92b0f45f868e",
+      "bytes": 45775
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/native-r2.config.txt",
+      "sha256": "776a897ddd7150b78a9ac180b2d109872359c8a99b345533f8dd72505896218b",
+      "bytes": 46615
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/restored-r2.config.txt",
+      "sha256": "aa6927bcb8c5a5d27c890dcec3547294d58942c3098c86511b0a92b0f45f868e",
+      "bytes": 45775
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/harness-change-r2.json",
+      "sha256": "06c733d0ecb96171e6e25f531d5a48afa96fb4d1ed1e1281109b5e70b14412d8",
+      "bytes": 314
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/execution-r1.json",
+      "sha256": "da084b93559e399ea6862f8c13271dac4c4547e2ce7353bed7c9cd765ea6f444",
+      "bytes": 1614
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/execution-r2.json",
+      "sha256": "78bab102b82ef7b1d7060404fe66a56f72e539d350a3c3501d99626fecccc9b4",
+      "bytes": 1614
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/integrity-cleanup-r1.json",
+      "sha256": "19fb9a5a1e83d54f37dee083d16ac129bd6bd3f57da475e869476b7c57e38530",
+      "bytes": 9251
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-0-r1.stdout",
+      "sha256": "c9a5904ef484ca2ddc086f170c3580ca09107ac4a66052b7e0913e305fb3dedb",
+      "bytes": 669
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-0-r1.stderr",
+      "sha256": "1b8db0a3a729d34254dc9844ab8f2518726931a0528ba01b476a539e73fddc74",
+      "bytes": 127
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-1-r1.stdout",
+      "sha256": "ab61c1955819dece51152f91780982ec77f25f58fcadf842ae7b3d19321a63a9",
+      "bytes": 622
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-1-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-2-r1.stdout",
+      "sha256": "bdc80191be225711f5f58227f1300a0d8d30a6549f3c8a7b47afdb9d8ff8750b",
+      "bytes": 630
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-2-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-3-r1.stdout",
+      "sha256": "a5b1a2ef86d60e2c50aa54aef14b281469efeb9c433ee3ba773f3085277f702a",
+      "bytes": 636
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-3-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-4-r1.stdout",
+      "sha256": "6d954dac7269a680ac86ddd41fdb479381de7b5b0f7a9bf081cbc90365c1de04",
+      "bytes": 622
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-4-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-5-r1.stdout",
+      "sha256": "6e05f17631da361553379d3c42def75f83e5b369743238556405acca829fdd29",
+      "bytes": 622
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-5-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-6-r1.stdout",
+      "sha256": "2321dc8e8f5603672f7ac3a035a5934fa856f8be385b0b22d6ce556df1e6d6c7",
+      "bytes": 624
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-6-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-0-r2.stdout",
+      "sha256": "61c9058e1703934f319ae499342b32e5b8e485396c3b3e8794d4f53dcf68f6bf",
+      "bytes": 669
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-0-r2.stderr",
+      "sha256": "4cbd5946656843470ad44f01f95ecfcf4abb180f95a2a4922de5696b9f8f48fd",
+      "bytes": 130
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-1-r2.stdout",
+      "sha256": "1df999b1fd9bbc61b0c09a14e48594a480d01eaeb1c34cd17f2a7fbb3bec02ba",
+      "bytes": 622
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-1-r2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-2-r2.stdout",
+      "sha256": "b5b955d07b25030655279ffe432c0bb941962ab857d741826cfb81d5d540f630",
+      "bytes": 630
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-2-r2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-3-r2.stdout",
+      "sha256": "4aaeebf64214cff12526b9fac0b9e2badecce7e46e2f4d900a68e995f38ce842",
+      "bytes": 636
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-3-r2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-4-r2.stdout",
+      "sha256": "a1db9cac21799c01e2c1dfbd7c192dfa03cb4f2d14325b4658808d46ac86e0a9",
+      "bytes": 622
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-4-r2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-5-r2.stdout",
+      "sha256": "c1cd5e598c0f8148fcbbb169050fa159f0364278fca161e8075b90c520791302",
+      "bytes": 622
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-5-r2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-6-r2.stdout",
+      "sha256": "48f4ac35f17c47752459515d5fc604fda6afc270a31acdbe6d9fae68f9603293",
+      "bytes": 624
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/logs/install-6-r2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  ],
+  "evidence_markdown": {
+    "path": "docs/hackathon/evidence/shinemage-current-page-formal-host-20261011.md",
+    "sha256": "743db09b4844c5d74157c5925f7338aabcceb6593c70b07050d25a1ab3679206",
+    "bytes": 5941
+  },
+  "summary_binding": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/summary-r1.json",
+    "sha256": "a51d518b1c7289cfd1d5266fbeb10d34662a12e9cb45227107244ef8dba0fb44"
+  },
+  "final_invariants": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/final-invariants-r1.json",
+    "sha256": "caa32594271fe8fc5f1c10bad233c9a2ca8b82ec419883b86311814e8e0a0389"
+  },
+  "local_review": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-current-page-pack-host-20261011-sse_49o0/review-r1.json",
+    "sha256": "b899927a3c11a3bddf55a82c59b92a22f368f45a7e43034c50070f635f44263e"
+  },
+  "current_main_docs": [
+    {
+      "path": "STATUS.md",
+      "sha256": "fa8e6998693dd20d6d969cad3663755bcc9f15c95766019f5a56da83e98857b2"
+    },
+    {
+      "path": "docs/hackathon/TODOS.md",
+      "sha256": "19295d10930e8036bed445aaec7612fb17ef9d42d4142879a092e5ad59c56f7c"
+    },
+    {
+      "path": "docs/architecture/shinemage-plugin-platform.md",
+      "sha256": "416bdabf686ec5f71db5b8a70a470e8f1f439c339ae64c48452a726e2612c504"
+    },
+    {
+      "path": "docs/operating/verification.md",
+      "sha256": "7c8535d389fe5c1eee2d25873db0f3bce098f607e8538788f846efcdee4b75e7"
+    },
+    {
+      "path": "docs/operating/shinemage-plugin-update.md",
+      "sha256": "f80059f44e223f14917edba927c880116e6c9407bcdf1e5f195bcdcff72c023e"
+    }
+  ]
+}

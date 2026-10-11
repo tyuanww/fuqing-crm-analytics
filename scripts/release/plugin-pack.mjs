@@ -190,7 +190,7 @@ export async function readPluginPack({ manifestPath, expectedSha256 }) {
     assert.ok((await collectFiles(packageRoot, declared)).some(file => file.startsWith('lib/')), 'PLUGIN_PACK_BUILD_OUTPUT_REQUIRED');
     verifyEntrypoints(manifest, entries);
     assertClean(await scanTree(packageRoot, { maxBytes: MAX_PACK_BYTES, allowSyntheticFixtures: false }));
-    return { receipt, manifestBytes, archive };
+    return { receipt, manifestBytes, archive, manifest };
   } finally {
     await rm(work, { recursive: true, force: true });
   }

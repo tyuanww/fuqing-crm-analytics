@@ -1,0 +1,565 @@
+{
+  "schema": "shinemage-public-contract-inputs-lock/v1",
+  "owners": {
+    "workbench": {
+      "source_sha": "6c5adc9faa04f692d5d4b3028af4f945ab49dfe4",
+      "package": "@shine-mage/dsh-analytics-workbench-b0",
+      "version": "0.0.0-b0",
+      "archive": {
+        "repository": "tyuanww/dsh-analytics-workbench",
+        "run_id": 38126014921,
+        "attempt": 1,
+        "event": "pull_request",
+        "conclusion": "success",
+        "artifact_id": 11697481756,
+        "name": "public-contracts-38126014921-1",
+        "sha256": "74e7af647128fea315f3953e609c00bb986b4656e1a03eeb3112cfcfc2c3dfaf",
+        "bytes": 65662
+      },
+      "manifest": {
+        "sha256": "85f17db0fa3d2eb8d0ccf10e990f8ee2dd85ffc878420c490c245f5d17b9afba",
+        "bytes": 11551
+      },
+      "producer_sha256": "2d9ab9fc7998359601bce6caef63945697aa16030cbf47e98de41085726b8350",
+      "recipe_sha256": "326adb35d8b94347749118fbb06658cc2ca699a7bea00b685a49dc5f38ca8799",
+      "package_manifest_sha256": "49335c824e8082b6b842d0c5d9b19869e85cbcddddee370523ed668d8e75e82f",
+      "ci_job_sha": "7bfa7814f014c2a9dc5129c615e4153d442f3c8d",
+      "files": [
+        {
+          "source_path": "plugin/contracts/cockpit-slot.v1.json",
+          "main_path": "dsh-plugins/analytics-workbench/contracts/cockpit-slot.v1.json",
+          "kind": "schema",
+          "sha256": "246b79f09de2cd3132775c3869b170f9a14ce2723f72e670694ae486fcbcc941",
+          "bytes": 211,
+          "git_blob": "be2e2b955eda13c774b45e0bf5fb86187a798659"
+        },
+        {
+          "source_path": "plugin/src/analysis-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/analysis-contract.generated.d.ts",
+          "kind": "generated_type",
+          "sha256": "7511c14bc92e15a59342413878341a76bf1557175adaf853fe8ab74c60df3172",
+          "bytes": 33929,
+          "git_blob": "bd5735bb8efc19a381d08956244e2babe7e85b22"
+        },
+        {
+          "source_path": "plugin/src/board-spec-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/board-spec-contract.generated.d.ts",
+          "kind": "generated_type",
+          "sha256": "1b518cdcdfdd66a598fe95eff29c7ddeec2d4aebb29ece504c9a6fd710c245a0",
+          "bytes": 24897,
+          "git_blob": "4c9d58915a63f7ee3ee562a29bd65780d7bf4e4b"
+        },
+        {
+          "source_path": "plugin/src/client/cockpit-slot-contract.generated.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/client/cockpit-slot-contract.generated.ts",
+          "kind": "generated_constant",
+          "sha256": "24eae62433d7e366cfb432cbdca2606811c26d4743d611c89dbabfd328c5c4f0",
+          "bytes": 349,
+          "git_blob": "1237f26d884dd5b7fc2c650b1d380bfe30ed73c3"
+        },
+        {
+          "source_path": "plugin/src/client/competition-board/c0-fixtures.mjs",
+          "main_path": "dsh-plugins/analytics-workbench/src/client/competition-board/c0-fixtures.mjs",
+          "kind": "frozen_fixture",
+          "sha256": "fd1dfbdabf8a5dff5e9c3ef34bf48dc3f3043ecdf90bc5e76d0f9c87bdfae984",
+          "bytes": 14243,
+          "git_blob": "816bdabb7e705c3c911e236db7f82e272be21718"
+        },
+        {
+          "source_path": "plugin/src/client/competition-shell/content-theme.generated.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/client/competition-shell/content-theme.generated.ts",
+          "kind": "generated_constant",
+          "sha256": "43c30a33663c5936f1113703fcc75657631093b1bb4780e698b030f90a69ef43",
+          "bytes": 3903,
+          "git_blob": "fcd6078c0c6a70d312734fd43da421641008f1de"
+        },
+        {
+          "source_path": "plugin/src/cockpit-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/cockpit-contract.generated.d.ts",
+          "kind": "generated_type",
+          "sha256": "961646df6f64ed859cfb836be2913bfe23b445857a812d6597dd290269ca7fc9",
+          "bytes": 39702,
+          "git_blob": "c41e967b677a8239fa201793e262a2361370d9c4"
+        },
+        {
+          "source_path": "plugin/src/competition-c0-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/competition-c0-contract.generated.d.ts",
+          "kind": "generated_type",
+          "sha256": "994845c41d85a8e6360dcfcf54f5c500efbe92bb936a1e61ac292da2f0fe3435",
+          "bytes": 32682,
+          "git_blob": "ef3df88f4cf5df36ab94bac2eaad8dc42953714a"
+        },
+        {
+          "source_path": "plugin/src/competition-chart-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/competition-chart-contract.generated.d.ts",
+          "kind": "generated_type",
+          "sha256": "899bc4e74cdf6c7953ca9ab29bf7f69f8fc23dd9266a0839ff3a69657a4941f2",
+          "bytes": 1343,
+          "git_blob": "e530ee59b7bbefc7ee91a6fba71dffa9c97a3b30"
+        },
+        {
+          "source_path": "plugin/src/competition-computed-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/competition-computed-contract.generated.d.ts",
+          "kind": "generated_type",
+          "sha256": "4af43be88ad76c4d3d5a001607a16c5e0381da1115ddbd877268c5e6236607ce",
+          "bytes": 19924,
+          "git_blob": "1e1254fd79a7b507ff4b598e1b3434421170329a"
+        },
+        {
+          "source_path": "plugin/src/first-purchase-analysis-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
+          "kind": "generated_type",
+          "sha256": "2a8f460e6169f09957f58f9452b876092c76e60091d916bfef4f6f52a77646e6",
+          "bytes": 71022,
+          "git_blob": "9c271514bda0062166ddfd26b2fa5cd3665165a1"
+        },
+        {
+          "source_path": "plugin/src/first-purchase-cockpit-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/first-purchase-cockpit-contract.generated.d.ts",
+          "kind": "generated_type",
+          "sha256": "4b8250b4b6ebf52f7ae769e8b0cb5ec76c01c33a9c35849e19580b3e59eb0a0b",
+          "bytes": 38999,
+          "git_blob": "c613082c74d31606550131c1e2bd8b16bb0b059d"
+        },
+        {
+          "source_path": "plugin/src/first-purchase-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/first-purchase-contract.generated.d.ts",
+          "kind": "generated_type",
+          "sha256": "f348e3e9ef2742194f13d552a3bb30f903f88fbbc09fab42de12aba016d14a08",
+          "bytes": 28625,
+          "git_blob": "22e416b3aaca8dc19850b4282ed003340f2357ff"
+        },
+        {
+          "source_path": "plugin/src/free-page/contract/page-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.generated.d.ts",
+          "kind": "generated_type",
+          "sha256": "f0d455dba8d02cf9789da65b5afb9b624eb5d8a3eaf29e18ab2cef450beef2b4",
+          "bytes": 31101,
+          "git_blob": "0ff100c417f01bf8be7133907a269a6546b39ef7"
+        },
+        {
+          "source_path": "plugin/src/free-page/contract/page-contract.typecheck.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.typecheck.ts",
+          "kind": "compiler_assertion",
+          "sha256": "65c7a698712c536f1cb79962c73fea180f3a875527694bd682af7feacaea184b",
+          "bytes": 2124,
+          "git_blob": "8d0403eb85ecac7c55f5256df6c5bd7b4ff06a00"
+        },
+        {
+          "source_path": "plugin/src/query-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/query-contract.generated.d.ts",
+          "kind": "generated_type",
+          "sha256": "6d8567f7744d4280350d04eb2efc7b468d3526abdf1ae10a3cac0c003a70f74f",
+          "bytes": 16357,
+          "git_blob": "e9115cfdb3406f6a83fe085efe4daf552113abc5"
+        },
+        {
+          "source_path": "plugin/src/query-run-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/query-run-contract.generated.d.ts",
+          "kind": "generated_type",
+          "sha256": "90c23a7ddd3a9175e126a6669aab69a66b8745920c91aa3be64b9ee030938c90",
+          "bytes": 18693,
+          "git_blob": "0e2288b74f19881769d6d640f70d8ed405615949"
+        },
+        {
+          "source_path": "plugin/src/run-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/run-contract.generated.d.ts",
+          "kind": "generated_type",
+          "sha256": "abb3fa6189d0aed8abbc29237aadbad91bca65be82af89d494e4bf0cb5d05667",
+          "bytes": 36274,
+          "git_blob": "0ab2e3eb2e09e4d38d9a27e0be9076bf2f41a2fa"
+        },
+        {
+          "source_path": "plugin/test/analysis-contract.typecheck.ts",
+          "main_path": "dsh-plugins/analytics-workbench/test/analysis-contract.typecheck.ts",
+          "kind": "compiler_assertion",
+          "sha256": "c32508de80c6d2688191ad2a365ed9f9115dc50a85efc8c21e2d6f863cfc31c6",
+          "bytes": 1380,
+          "git_blob": "12e39f974f2cc2fb71a59f612473fa3dac5a6245"
+        },
+        {
+          "source_path": "plugin/test/cockpit-contract.typecheck.ts",
+          "main_path": "dsh-plugins/analytics-workbench/test/cockpit-contract.typecheck.ts",
+          "kind": "compiler_assertion",
+          "sha256": "927b24d65b355c76b95a6c6cbd0fc65baab1afb9ab7e522467d9e496eb8cd000",
+          "bytes": 1593,
+          "git_blob": "f4bd6aa3fa0b9eb8e0f89689525782d67e7ae40c"
+        },
+        {
+          "source_path": "plugin/test/first-purchase-analysis-contract.typecheck.ts",
+          "main_path": "dsh-plugins/analytics-workbench/test/first-purchase-analysis-contract.typecheck.ts",
+          "kind": "compiler_assertion",
+          "sha256": "2ff552bb873620490872b26a8afd6d1b1a76030d98ef2161a1e1818b458a511a",
+          "bytes": 3706,
+          "git_blob": "c4bb8a2ec4f0a6fbd61f1c8f389f0e8c77010ced"
+        },
+        {
+          "source_path": "plugin/test/first-purchase-cockpit-contract.typecheck.ts",
+          "main_path": "dsh-plugins/analytics-workbench/test/first-purchase-cockpit-contract.typecheck.ts",
+          "kind": "compiler_assertion",
+          "sha256": "2ac5a109885305efefd109188faff64bf6a2bf2bd2d68691a89e71d6c9664350",
+          "bytes": 1675,
+          "git_blob": "d03b972e37b7ff5789d4692da8a3fb39659c6eb9"
+        },
+        {
+          "source_path": "plugin/test/first-purchase-contract.typecheck.ts",
+          "main_path": "dsh-plugins/analytics-workbench/test/first-purchase-contract.typecheck.ts",
+          "kind": "compiler_assertion",
+          "sha256": "c2f5ca6c1b04b74d32150fcc6b90d174dc146e79400bca0385124a47b36834fb",
+          "bytes": 372,
+          "git_blob": "c28e2eed001cf87453921e6dd4dcf0129f93d36e"
+        },
+        {
+          "source_path": "plugin/test/query-contract.typecheck.ts",
+          "main_path": "dsh-plugins/analytics-workbench/test/query-contract.typecheck.ts",
+          "kind": "compiler_assertion",
+          "sha256": "f9f5162faf139d1232fa595363a5378f0adda81acb15e67ef1409f4dad383976",
+          "bytes": 4072,
+          "git_blob": "54fc03d4ffa24898bf6cc7e4feb2aee268aba39c"
+        },
+        {
+          "source_path": "plugin/test/query-run-contract.typecheck.ts",
+          "main_path": "dsh-plugins/analytics-workbench/test/query-run-contract.typecheck.ts",
+          "kind": "compiler_assertion",
+          "sha256": "87295d9cf9eca50328df25818d0f9f53aa74cbb93cc67adfec54e2bd9a58e5ee",
+          "bytes": 2830,
+          "git_blob": "49292de117cd838f9b9ef95e030f9e65e8051328"
+        },
+        {
+          "source_path": "plugin/test/run-contract.typecheck.ts",
+          "main_path": "dsh-plugins/analytics-workbench/test/run-contract.typecheck.ts",
+          "kind": "compiler_assertion",
+          "sha256": "4f9cd1fc41b6ec5e0ca016ce9cf4a65f1a0a9393409880a336de465077239748",
+          "bytes": 1538,
+          "git_blob": "5f0fde337199c84eb1417e819fc1830d69dba14c"
+        },
+        {
+          "source_path": "plugin/src/first-purchase-save-model.d.mts",
+          "main_path": "dsh-plugins/analytics-workbench/src/first-purchase-save-model.d.mts",
+          "kind": "api_declaration",
+          "sha256": "e308b9f38567933e124b050c97e1d91d67bdcbe5b2cbf2e1e811e99f7dc15d40",
+          "bytes": 519,
+          "git_blob": "102495fde97d5069c1062471e4dde88346c55c21"
+        },
+        {
+          "source_path": "plugin/src/board-spec/component-catalog.json",
+          "main_path": "dsh-plugins/analytics-workbench/src/board-spec/component-catalog.json",
+          "kind": "catalog",
+          "sha256": "8e2161fa54855bd23cef7b54a966486dc5daeb8fe3f427a17b52f033de666bab",
+          "bytes": 7014,
+          "git_blob": "69137f072e28911e5809892d8f17448c7c36e343"
+        }
+      ],
+      "input_bytes": 439077,
+      "owned_increment_tests": 12
+    },
+    "crm": {
+      "source_sha": "c4b1c91eaa4fa645deb7951614c1937eb76db143",
+      "package": "@shine-mage/dsh-crm-knowledge",
+      "version": "0.0.0-crm.1",
+      "archive": {
+        "repository": "tyuanww/dsh-crm-knowledge",
+        "run_id": 38126019403,
+        "attempt": 1,
+        "event": "pull_request",
+        "conclusion": "success",
+        "artifact_id": 11696962431,
+        "name": "public-contracts-38126019403-1",
+        "sha256": "e839c07440ebca9910364ea8951734d49e88a451c9d7a177374c38f0a80ed21c",
+        "bytes": 2816
+      },
+      "manifest": {
+        "sha256": "57bb531d0ceb45258c0e9b974ede02ba590b06a9d882427fa6dcd970da60273c",
+        "bytes": 1627
+      },
+      "producer_sha256": "2d9ab9fc7998359601bce6caef63945697aa16030cbf47e98de41085726b8350",
+      "recipe_sha256": "fff85531879c559337c84435213af10799418046a778f4ad087c90842c284f9b",
+      "package_manifest_sha256": "4c0d3557fcd06f019201df21a4e5eba17c85689a46ac987747dbd02da3151243",
+      "ci_job_sha": "d7029a3bbcfa3c4f39ffe1d94079041ac9f517b5",
+      "files": [
+        {
+          "source_path": "plugin/src/client/cockpit-slot-contract.generated.ts",
+          "main_path": "dsh-plugins/crm-knowledge/src/client/cockpit-slot-contract.generated.ts",
+          "kind": "generated_constant",
+          "sha256": "24eae62433d7e366cfb432cbdca2606811c26d4743d611c89dbabfd328c5c4f0",
+          "bytes": 349,
+          "git_blob": "1237f26d884dd5b7fc2c650b1d380bfe30ed73c3"
+        },
+        {
+          "source_path": "plugin/src/client/content-theme.generated.ts",
+          "main_path": "dsh-plugins/crm-knowledge/src/client/content-theme.generated.ts",
+          "kind": "generated_constant",
+          "sha256": "43c30a33663c5936f1113703fcc75657631093b1bb4780e698b030f90a69ef43",
+          "bytes": 3903,
+          "git_blob": "fcd6078c0c6a70d312734fd43da421641008f1de"
+        }
+      ],
+      "input_bytes": 4252,
+      "owned_increment_tests": 12
+    },
+    "brand": {
+      "source_sha": "0b8c8a793b585c22c980b9d3afe8b9839d7632ec",
+      "package": "@shine-mage/dsh-shine-brand",
+      "version": "0.0.0-b0",
+      "archive": {
+        "repository": "tyuanww/dsh-shine-brand",
+        "run_id": 38125655260,
+        "attempt": 1,
+        "event": "pull_request",
+        "conclusion": "success",
+        "artifact_id": 11697365923,
+        "name": "public-contracts-38125655260-1",
+        "sha256": "7fe83711a958f5801598f8f798a1d0727c0ba5bde96750cd62deaa161972c93b",
+        "bytes": 1766
+      },
+      "manifest": {
+        "sha256": "4a3d28229b23d48209ec43cdce67e488b65f264235936e192a22bdb16d6b3c77",
+        "bytes": 1209
+      },
+      "producer_sha256": "2d9ab9fc7998359601bce6caef63945697aa16030cbf47e98de41085726b8350",
+      "recipe_sha256": "7307d30dd41d7956bf2a6894c6f3a8fee71e57175fdc6c77b83e95e4ebc3e1ea",
+      "package_manifest_sha256": "5baa3cca089cdeb33819274723b60c5c86c109f8b994025ed9b556629822e0f8",
+      "ci_job_sha": "b89477c735924240f8fb6d1de82a324220955d2d",
+      "files": [
+        {
+          "source_path": "plugin/contracts/content-theme.v1.json",
+          "main_path": "dsh-plugins/shine-brand/contracts/content-theme.v1.json",
+          "kind": "schema",
+          "sha256": "d59cebc56829e87c01cde7c63284be0e9bc6e43fe0ff42d6145297e3e49e8a74",
+          "bytes": 1973,
+          "git_blob": "e264b6658a292c03e58970db735631fa6addee8f"
+        }
+      ],
+      "input_bytes": 1973,
+      "owned_increment_tests": 9
+    }
+  },
+  "generators": [
+    {
+      "path": "scripts/dsh-b0/content-theme-contract.mjs",
+      "sha256": "f857215ce8ddaf130af1edfca300f5f5db90ab1298dbddb8249235e28c93e7d0"
+    },
+    {
+      "path": "scripts/dsh-b0/cockpit-slot-contract.mjs",
+      "sha256": "5d79756f86df667b140079bcc52e0c077bcdea7a5addfe5eb0cecaefe203b3f7"
+    },
+    {
+      "path": "scripts/dsh-b0/run-kernel-contract.mjs",
+      "sha256": "846dd5bf65d7c3c809e8786338c8e25cc49a05f25060d90367c8dab4afd945e6"
+    },
+    {
+      "path": "scripts/dsh-b0/query-contract.mjs",
+      "sha256": "81f2974d1bc66428fc39de274f96d6ba0502265e49fa58ce8fa883ad8738b24d"
+    },
+    {
+      "path": "scripts/dsh-b0/query-run-contract.mjs",
+      "sha256": "deed87aa31088f5b6fd2e00fcc2fb2ac9ad51e9010f92831d4a3d996401f7ebc"
+    },
+    {
+      "path": "scripts/dsh-b0/analysis-contract.mjs",
+      "sha256": "c8b5ac1fb9a3894b71e947b80acc1fdeedb19980315997f246ba6bf3cfc7f492"
+    },
+    {
+      "path": "scripts/dsh-b0/cockpit-contract.mjs",
+      "sha256": "eaf023fc4c93727bc11298a7ca1d794c000cd988d74381f2cd60b64d5afc65bc"
+    },
+    {
+      "path": "scripts/dsh-b0/first-purchase-contract.mjs",
+      "sha256": "595ccb1508b91c7107da93e0992859259aef97ed16a3517c4004672e2fd1d789"
+    },
+    {
+      "path": "scripts/dsh-b0/first-purchase-analysis-contract.mjs",
+      "sha256": "509b10429c6c7f6e61af470088c07f43635ee09612197c24b85619fad26c702b"
+    },
+    {
+      "path": "scripts/dsh-b0/first-purchase-cockpit-contract.mjs",
+      "sha256": "35c21ef67397eebc61a99ab7d97f575997bf5ac900faedf673535aea6cc10f63"
+    },
+    {
+      "path": "scripts/dsh-b0/competition-c0-contract.mjs",
+      "sha256": "a159cc1ac583cfa2c5de9e2d975d69f7ae4b9a2b9ee6b521f86d61653107389f"
+    },
+    {
+      "path": "scripts/dsh-b0/competition-chart-contract.mjs",
+      "sha256": "88296dac7d0e0ef3a8d8e6bef2dbb1a633795df000e9ec5417dc317ff9b61502"
+    },
+    {
+      "path": "scripts/dsh-b0/competition-computed-contract.mjs",
+      "sha256": "7ebdd662d71d3fa48cc01ece131e323554e6ee1928525c2754e6a526730c391f"
+    },
+    {
+      "path": "scripts/dsh-b0/board-spec-contract.mjs",
+      "sha256": "750c2f696698e911720321831b53b06bbfdfdf8de9f2acc1a8f5a5d2ee9d1869"
+    },
+    {
+      "path": "scripts/dsh-b0/page-contract.mjs",
+      "sha256": "dc21bd7fb4a81d4bf5cfff0816c80b1caff79a6bf515369907eeb0325cf2de56"
+    }
+  ],
+  "canonical_sources": [
+    "backend/__init__.py",
+    "backend/analytics_analysis_app.py",
+    "backend/analytics_app.py",
+    "backend/analytics_cockpit_app.py",
+    "backend/analytics_first_purchase_analysis_app.py",
+    "backend/analytics_first_purchase_app.py",
+    "backend/analytics_first_purchase_cockpit_app.py",
+    "backend/analytics_first_purchase_fixture.py",
+    "backend/analytics_first_purchase_source_app.py",
+    "backend/analytics_fixture.py",
+    "backend/analytics_query_fixture.py",
+    "backend/contracts/__init__.py",
+    "backend/contracts/analytics-analysis.openapi.json",
+    "backend/contracts/analytics-board-spec.openapi.json",
+    "backend/contracts/analytics-cockpit.openapi.json",
+    "backend/contracts/analytics-competition-c0.openapi.json",
+    "backend/contracts/analytics-competition-chart.openapi.json",
+    "backend/contracts/analytics-competition-computed.openapi.json",
+    "backend/contracts/analytics-first-purchase-analysis.openapi.json",
+    "backend/contracts/analytics-first-purchase-cockpit.openapi.json",
+    "backend/contracts/analytics-first-purchase-service.v1.json",
+    "backend/contracts/analytics-first-purchase-source.openapi.json",
+    "backend/contracts/analytics-first-purchase.openapi.json",
+    "backend/contracts/analytics-page.openapi.json",
+    "backend/contracts/analytics-query-run.openapi.json",
+    "backend/contracts/analytics-query.openapi.json",
+    "backend/contracts/analytics-run.openapi.json",
+    "backend/contracts/analytics.py",
+    "backend/contracts/analytics_analysis.py",
+    "backend/contracts/analytics_cockpit.py",
+    "backend/contracts/analytics_first_purchase.py",
+    "backend/contracts/analytics_first_purchase_analysis.py",
+    "backend/contracts/analytics_first_purchase_cockpit.py",
+    "backend/contracts/analytics_first_purchase_kernel.py",
+    "backend/contracts/analytics_first_purchase_run.py",
+    "backend/contracts/analytics_first_purchase_source.py",
+    "backend/contracts/analytics_query.py",
+    "backend/contracts/analytics_query_run.py",
+    "backend/contracts/asset.py",
+    "backend/contracts/audience.py",
+    "backend/contracts/board_spec.py",
+    "backend/contracts/category.py",
+    "backend/contracts/common.py",
+    "backend/contracts/competition_c0.py",
+    "backend/contracts/competition_chart.py",
+    "backend/contracts/competition_computed.py",
+    "backend/contracts/crm-dashboard.openapi.json",
+    "backend/contracts/crm-knowledge-service.v1.json",
+    "backend/contracts/crm-knowledge.openapi.json",
+    "backend/contracts/crm-metrics-service.openapi.json",
+    "backend/contracts/crm-metrics-service.v1.json",
+    "backend/contracts/crm-metrics.openapi.json",
+    "backend/contracts/flow.py",
+    "backend/contracts/health.py",
+    "backend/contracts/metrics.py",
+    "backend/contracts/mission.py",
+    "backend/contracts/page_documents.py",
+    "backend/contracts/rfm.py",
+    "backend/contracts/rfm_segments.py",
+    "backend/contracts/sampling.py",
+    "backend/contracts/schemas.py",
+    "backend/contracts/tests/test_competition_c0.py",
+    "backend/contracts/types.py",
+    "backend/contracts/visitor.py",
+    "backend/semantic/__init__.py",
+    "backend/semantic/analytics_b0.py",
+    "backend/semantic/analytics_channel_followup.py",
+    "backend/semantic/calculations.py",
+    "backend/semantic/channels.py",
+    "backend/semantic/dimensions.py",
+    "backend/semantic/filters.py",
+    "backend/semantic/metrics.py",
+    "backend/semantic/segments.py",
+    "backend/semantic/time.py",
+    "backend/services/__init__.py",
+    "backend/services/analytics/__init__.py",
+    "backend/services/analytics/access.py",
+    "backend/services/analytics/analysis_source.py",
+    "backend/services/analytics/catalog.py",
+    "backend/services/analytics/cockpit.py",
+    "backend/services/analytics/cockpit_source.py",
+    "backend/services/analytics/execution_lease.py",
+    "backend/services/analytics/first_purchase/__init__.py",
+    "backend/services/analytics/first_purchase/adapter.py",
+    "backend/services/analytics/first_purchase/asset_state.py",
+    "backend/services/analytics/first_purchase/cockpit.py",
+    "backend/services/analytics/first_purchase/cockpit_source.py",
+    "backend/services/analytics/first_purchase/compute.py",
+    "backend/services/analytics/first_purchase/identity.py",
+    "backend/services/analytics/first_purchase/runtime.py",
+    "backend/services/analytics/first_purchase/save_policy.py",
+    "backend/services/analytics/first_purchase/saved.py",
+    "backend/services/analytics/first_purchase/source.py",
+    "backend/services/analytics/jobs.py",
+    "backend/services/analytics/query_codecs.py",
+    "backend/services/analytics/resource_profile.py",
+    "backend/services/analytics/saved_analyses.py",
+    "backend/services/analytics/worker.py",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/C0-MANIFEST.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/competition-c0-contract.typecheck.ts",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/defaults.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fields/action.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fields/batch.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fields/batch_receipt.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fields/board.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fields/candidates.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fields/capability.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fields/cohort.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fields/condition.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fields/error.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fields/frontend_port.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fields/patch.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fields/resolved_condition.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fields/result.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/audience/conflict_409.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/audience/empty.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/audience/param_error.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/audience/partial_success.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/audience/permission_denied.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/audience/success.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/board/conflict_409.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/board/empty.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/board/param_error.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/board/partial_success.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/board/permission_denied.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/board/success.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/capabilities/empty.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/capabilities/param_error.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/capabilities/permission_denied.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/capabilities/success.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/condition/empty.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/condition/param_error.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/condition/permission_denied.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/condition/success.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/error/empty.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/error/param_error.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/error/permission_denied.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/error/success.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/result/empty.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/result/param_error.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/result/permission_denied.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures/result/success.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/frontend_ports.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/mapping.json",
+    "docs/hackathon/parallel-competition-2026-09-09/contracts/support_matrix.json",
+    "scripts/dsh-b0/analysis-contract.mjs",
+    "scripts/dsh-b0/board-spec-contract.mjs",
+    "scripts/dsh-b0/cockpit-contract.mjs",
+    "scripts/dsh-b0/cockpit-slot-contract.mjs",
+    "scripts/dsh-b0/cockpit-slot-contract.test.mjs",
+    "scripts/dsh-b0/competition-c0-contract.mjs",
+    "scripts/dsh-b0/competition-chart-contract.mjs",
+    "scripts/dsh-b0/competition-computed-contract.mjs",
+    "scripts/dsh-b0/content-theme-contract.mjs",
+    "scripts/dsh-b0/content-theme-contract.test.mjs",
+    "scripts/dsh-b0/first-purchase-analysis-contract.mjs",
+    "scripts/dsh-b0/first-purchase-cockpit-contract.mjs",
+    "scripts/dsh-b0/first-purchase-contract.mjs",
+    "scripts/dsh-b0/page-contract.mjs",
+    "scripts/dsh-b0/query-contract.mjs",
+    "scripts/dsh-b0/query-run-contract.mjs",
+    "scripts/dsh-b0/run-kernel-contract.mjs"
+  ],
+  "main_contract_cutover": "PUBLIC_MATERIAL_CONSUMPTION_ONLY",
+  "release_ready": false
+}

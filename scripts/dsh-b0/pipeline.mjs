@@ -4,25 +4,24 @@
  */
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { copyFile, readFile, writeFile, mkdir, lstat, readdir, rm, mkdtemp } from 'node:fs/promises';
+import { copyFile, readFile, writeFile, mkdir, lstat, readdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { packageManagerEnv, packageNetworkEnv, dependencyCommands, archiveToolEnv } from './package-manager-env.mjs';
-import { copyPluginKitSources, copyTreeBounded, createCleanRoot, reapStaleCleanRoots, removeCleanRoot } from './clean-build.mjs';
 import { linkWorkspaceKit } from './plugin-kit-link.mjs';
 import { prepareRuntimeInputs, recordRuntimePreparation } from '../release/runtime-inputs.mjs';
-import { packPlugin } from '../release/plugin-pack.mjs';
+import { CRM_COMPOSITION_SCOPES, readCompositionInputs } from '../crm-calibration/composition-inputs.mjs';
+import { readLeafPackInputs } from './leaf-pack-inputs.mjs';
+import { WORKBENCH_CLIENT_SCOPES, readWorkbenchClientInputs } from './workbench-client-pack-inputs.mjs';
+import { bindWorkbenchAuthorEvidence, readWorkbenchAuthorEvidence } from '../ci/workbench-author-evidence.mjs';
+import { bindDomainPackageInput, readDomainAuthorEvidence } from '../ci/domain-author-evidence.mjs';
+import { runWorkbenchMainContracts } from './workbench-main-contracts.mjs';
+import { readPublicContractInputs } from '../ci/public-contract-inputs.mjs';
+import { runFixedContractChecks } from './fixed-contract-checks.mjs';
 import { managerVersions } from '../../dsh-plugins/plugin-kit/package-manager.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const plugin = join(root, 'dsh-plugins/analytics-workbench');
-const shineBrand = join(root, 'dsh-plugins/shine-brand');
-const shineWaterfall = join(root, 'dsh-plugins/shine-waterfall');
-const shineCrowdAction = join(root, 'dsh-plugins/shine-crowd-action');
-const shineQuery = join(root, 'dsh-plugins/shine-query');
-const shineBoard = join(root, 'dsh-plugins/shine-board');
-const shineFunnel = join(root, 'dsh-plugins/shine-funnel');
 const b0 = join(root, '.context/dsh-b0');
 const packageInputs = join(b0, 'package-inputs');
 const fixedBoardInput = join(root, 'vendor/dsh-package-inputs/shine-mage-board-components-0.1.0.tgz');
@@ -48,15 +47,18 @@ const pin = JSON.parse(await readFile(join(kit, 'toolchain.json'), 'utf8'));
 const managers = managerVersions(pin);
 assert.equal(Number(process.versions.node.split('.')[0]), pin.node_major);
 let env = {
-  ...Object.fromEntries(Object.entries(process.env).filter(([key]) => ['HOME', 'CI', 'SYSTEMROOT'].includes(key))),
+  ...Object.fromEntries(Object.entries(process.env).filter(([key]) => ['HOME', 'CI', 'SYSTEMROOT',
+    ...(mode === '--check' ? ['CRM_COMPOSITION_PACK_INPUTS', 'CRM_COMPOSITION_PAGE_INPUTS', 'CRM_COMPOSITION_OUTPUT', 'WORKBENCH_AUTHOR_CI_ARCHIVE', 'DOMAIN_AUTHOR_CI_ARCHIVE', 'PUBLIC_CONTRACT_INPUTS'] : [])].includes(key))),
   PATH: `${dirname(process.execPath)}:${dirname(python)}:/usr/bin:/bin:/usr/sbin:/sbin`,
   PYTHONPATH: root, PYTHONNOUSERSITE: '1', PYTHON_DOTENV_DISABLED: '1',
   PYTHONDONTWRITEBYTECODE: '1', PYTHONUNBUFFERED: '1',
   B0_BUILD_UPSTREAM: upstream,
+  B0_BUILD_TOOLS: buildTools,
+  FQ_B0_PYTHON: python, PUBLIC_CONTRACT_SOURCE_ROOT: root,
   DSH_PACKAGE_INPUTS: packageInputs,
   COREPACK_ENABLE_DOWNLOAD_PROMPT: '0', LEFTHOOK: '0', CI: '1',
   // Every nested build/version probe must remain offline in check mode,
-  // including the board-components build before preparePackageManager runs.
+  // including fixed input checks before preparePackageManager runs.
   ...(mode === '--check' ? { COREPACK_ENABLE_NETWORK: '0' } : {}),
 };
 // Do not put proxy settings in the shared build/test environment. Only the
@@ -90,7 +92,32 @@ async function preparePackageManager() {
   assert.equal(JSON.parse(await readFile(join(buildTools, 'package.json'))).packageManager, `pnpm@${managers.plugins}`);
   assert.equal(output('corepack', ['pnpm', '--version'], buildTools, transport), managers.plugins);
 }
-if (mode === '--check') env = await archiveToolEnv(env);
+let workbenchAuthorEvidence, domainAuthorEvidence, publicContractEvidence;
+if (mode === '--check') {
+  // Independent-pack input errors must fail before any source build or service.
+  assert.ok(isAbsolute(env.CRM_COMPOSITION_OUTPUT ?? ''), 'CRM_COMPOSITION_OUTPUT_REQUIRED');
+  const compositionOutput = await lstat(env.CRM_COMPOSITION_OUTPUT);
+  assert.ok(compositionOutput.isDirectory() && !compositionOutput.isSymbolicLink(), 'CRM_COMPOSITION_OUTPUT_REQUIRED');
+  await readCompositionInputs({ inputsPath: env.CRM_COMPOSITION_PACK_INPUTS, pageInputsPath: env.CRM_COMPOSITION_PAGE_INPUTS });
+  assert.ok(isAbsolute(env.CRM_COMPOSITION_PAGE_INPUTS ?? ''), 'CRM_COMPOSITION_PAGE_INPUTS_REQUIRED');
+  await readLeafPackInputs(env.CRM_COMPOSITION_PAGE_INPUTS);
+  const pagePacks = await readWorkbenchClientInputs(env.CRM_COMPOSITION_PAGE_INPUTS);
+  for (const scope of [...CRM_COMPOSITION_SCOPES, 'leaf', 'geometry', 'contracts', 'installed-kit-packs', 'package-isolation', ...WORKBENCH_CLIENT_SCOPES]) {
+    const exists = await lstat(join(env.CRM_COMPOSITION_OUTPUT, scope)).catch(error => {
+      if (error.code === 'ENOENT') return null;
+      throw error;
+    });
+    assert.ok(!exists, 'CRM_COMPOSITION_OUTPUT_EXISTS');
+  }
+  workbenchAuthorEvidence = bindWorkbenchAuthorEvidence(await readWorkbenchAuthorEvidence({
+    archivePath: env.WORKBENCH_AUTHOR_CI_ARCHIVE, python,
+  }), pagePacks);
+  domainAuthorEvidence = await bindDomainPackageInput(await readDomainAuthorEvidence({
+    archivePath: env.DOMAIN_AUTHOR_CI_ARCHIVE, python,
+  }), join(env.DSH_PACKAGE_INPUTS, 'shine-mage-board-components-0.1.0.tgz'));
+  publicContractEvidence = await readPublicContractInputs({ inputsPath: env.PUBLIC_CONTRACT_INPUTS, python });
+  env = await archiveToolEnv(env);
+}
 await mkdir(b0, { recursive: true, mode: 0o700 });
 if (mode === '--prepare') {
   const fixedInput = await readFile(fixedBoardInput);
@@ -142,23 +169,26 @@ if (mode === '--prepare') {
   console.log('B0 dependency audit complete; run --check next.');
 } else {
   await verifySource();
-  for (const name of ['board-components', 'analytics-workbench', 'crm-knowledge', 'knowledge', 'shine-brand', 'shine-waterfall', 'shine-crowd-action', 'shine-query', 'shine-board', 'shine-funnel']) {
+  // Explicit plugin missing-input build guards still
+  // need the kit binding. The fixed-package consumers do not use these source
+  // trees; removing guard inputs now would turn real failures into skips.
+  for (const name of ['analytics-workbench', 'crm-knowledge', 'knowledge', 'shine-brand', 'shine-waterfall', 'shine-crowd-action', 'shine-query', 'shine-board', 'shine-funnel']) {
     await linkWorkspaceKit(join(root, 'dsh-plugins', name), kit);
   }
-  const rebuiltInputs = await mkdtemp(join(b0, 'package-inputs-rebuild-'));
-  try {
-    run(process.execPath, ['dsh-plugins/board-components/build.mjs', rebuiltInputs]);
-  } finally {
-    await rm(rebuiltInputs, { recursive: true, force: true });
-  }
-  // Bind packed libraries before source-level consumer tests.
+  // Domain producer/private geometry belong to the fixed independent owner CI.
+  // Keep the three published consumer locks and public install/type contracts here.
   run(process.execPath, ['scripts/dsh-b0/package-inputs.mjs', env.DSH_PACKAGE_INPUTS]);
-  run(process.execPath, ['scripts/dsh-b0/content-theme-contract.mjs', '--check']);
-  run(process.execPath, ['--test', 'scripts/dsh-b0/content-theme-contract.test.mjs']);
-  run(process.execPath, ['scripts/dsh-b0/cockpit-slot-contract.mjs', '--check']);
-  run(process.execPath, ['--test', 'scripts/dsh-b0/cockpit-slot-contract.test.mjs']);
-  run(process.execPath, ['--test', 'scripts/dsh-b0/package-inputs.test.mjs', 'dsh-plugins/board-components/test/geometry.test.mjs', 'scripts/dsh-b0/geometry-composition.test.mjs']);
-  run(process.execPath, ['--test', 'scripts/dsh-b0/explicit-build-inputs.test.mjs']);
+  // Keep all original generators/schema and compiler assertions; consume sealed
+  // independent materials in an owned stage instead of the legacy source tree.
+  const publicContractChecks = await runFixedContractChecks({ inputsPath: env.PUBLIC_CONTRACT_INPUTS,
+    output: join(env.CRM_COMPOSITION_OUTPUT, 'contracts'), python, buildTools });
+  run(process.execPath, ['--test', '--test-concurrency=1', 'scripts/ci/public-contract-inputs.test.mjs', 'scripts/dsh-b0/fixed-contract-checks.test.mjs']);
+  run(process.execPath, ['--test', 'scripts/dsh-b0/package-inputs.test.mjs', 'scripts/dsh-b0/geometry-composition.test.mjs']);
+  run(process.execPath, ['--test', 'scripts/dsh-b0/explicit-build-inputs.test.mjs', 'scripts/dsh-b0/workbench-author-contracts.test.mjs']);
+  run(process.execPath, ['--test', 'scripts/ci/domain-author-evidence.test.mjs']);
+  run(process.execPath, ['--test', 'scripts/ci/composition-pack-inputs.test.mjs']);
+  run(process.execPath, ['--test', 'scripts/ci/workbench-author-evidence.test.mjs']);
+  run(process.execPath, ['--test', 'scripts/dsh-b0/leaf-pack-inputs.test.mjs', 'scripts/dsh-b0/workbench-client-pack-inputs.test.mjs']);
   run(process.execPath, ['scripts/dsh-b0/plugin-boundaries.mjs', '--check']);
   run(process.execPath, ['--test', 'scripts/dsh-b0/plugin-boundaries.test.mjs']);
   // Guard tests fail before process startup. The real-host drill remains opt-in.
@@ -185,19 +215,6 @@ print('B0 exact Python closure verified')
 `]);
   console.log('DSH dev supervisor unit checks (separate from native compatibility acceptance)');
   run(process.execPath, ['--test', ...(await readdir(join(root, 'scripts/dsh-dev'))).filter(n => n.endsWith('.test.mjs')).map(n => join(root, 'scripts/dsh-dev', n))], root, { DSH_DEV_UPSTREAM: upstream });
-  run(process.execPath, ['scripts/dsh-b0/run-kernel-contract.mjs', '--check', '--python', python]);
-  run(process.execPath, ['scripts/dsh-b0/query-contract.mjs', '--check', '--python', python]);
-  run(process.execPath, ['scripts/dsh-b0/query-run-contract.mjs', '--check', '--python', python]);
-  run(process.execPath, ['scripts/dsh-b0/analysis-contract.mjs', '--check', '--python', python]);
-  run(process.execPath, ['scripts/dsh-b0/cockpit-contract.mjs', '--check', '--python', python]);
-  run(process.execPath, ['scripts/dsh-b0/first-purchase-contract.mjs', '--check', '--python', python]);
-  run(process.execPath, ['scripts/dsh-b0/first-purchase-analysis-contract.mjs', '--check', '--python', python]);
-  run(process.execPath, ['scripts/dsh-b0/first-purchase-cockpit-contract.mjs', '--check', '--python', python]);
-  run(process.execPath, ['scripts/dsh-b0/competition-c0-contract.mjs', '--check', '--python', python]);
-  run(process.execPath, ['scripts/dsh-b0/competition-chart-contract.mjs', '--check', '--python', python]);
-  run(process.execPath, ['scripts/dsh-b0/competition-computed-contract.mjs', '--check', '--python', python]);
-  run(process.execPath, ['scripts/dsh-b0/board-spec-contract.mjs', '--check', '--python', python]);
-  run(process.execPath, ['scripts/dsh-b0/page-contract.mjs', '--check', '--python', python]);
   const pyTests = ['jobs', 'access', 'run_contracts', 'run_resources', 'native_runtime', 'worker', 'context', 'native_probe', 'query_contracts', 'channel_followup', 'query_jobs', 'query_run_contracts', 'query_worker', 'query_runtime', 'query_native_fault', 'saved_analyses', 'analysis_http', 'cockpit', 'cockpit_http', 'query_assets_runtime', 'first_purchase', 'first_purchase_http', 'first_purchase_kernel', 'first_purchase_analysis', 'first_purchase_save_recovery', 'first_purchase_save_receipts', 'first_purchase_save_api', 'first_purchase_save_ui', 'first_purchase_crm_identity', 'first_purchase_source', 'first_purchase_native', 'customer_features_w4', 'feature_publication_w5', 'runtime_ports'].map(name => `backend/tests/test_analytics_${name}.py`);
   // HTTP/computation tests import the archived CRM dependency closure and run
   // under the shared bounded backend profile, not the minimal B0 interpreter.
@@ -231,9 +248,9 @@ print('B0 exact Python closure verified')
     'backend/tests/analytics_run_fault_probe.py', 'backend/tests/analytics_worker_probe.py',
     'backend/tests/analytics_query_worker_probe.py',
     'backend/tests/analytics_native_probe.py', 'backend/tests/analytics_query_native_fault_probe.py', ...pyTests]);
-  const builtTests = ['built.test.mjs', 'loader.test.mjs', 'skills-loader.test.mjs', 'tool-card-dom.test.mjs', 'query-skills-loader.test.mjs', 'sessionless-view-dom.test.mjs', 'query-card-fault.test.mjs', 'query-card-cancel.test.mjs', 'query-card-save.test.mjs', 'asset-overlay.test.mjs', 'first-purchase-query-card.test.mjs', 'first-purchase-save-dom.test.mjs', 'plugin-ui-lifecycle.test.mjs', 'native-prompt-inject.test.mjs', 'native-board-auth.test.mjs', 'lane-g-delivery.test.mjs'];
-  const sourceTests = (await readdir(join(plugin, 'test'))).filter(name => name.endsWith('.test.mjs') && !builtTests.includes(name));
-  run(process.execPath, ['--test', ...sourceTests.map(name => join(plugin, 'test', name)),
+  // Workbench core/build/private loader checks run in its pinned author CI.
+  // Main keeps its orchestration units and the original backend/query checks.
+  run(process.execPath, ['--test',
     'scripts/dsh-b0/gateway-policy.test.mjs', 'scripts/dsh-b0/transport-safety.test.mjs', 'scripts/dsh-b0/mock-provider.test.mjs',
     'scripts/dsh-b0/recovery-model-gate.test.mjs', 'scripts/dsh-b0/session-recovery.test.mjs',
     'scripts/dsh-b0/shell-tool-contract.test.mjs',
@@ -243,7 +260,9 @@ print('B0 exact Python closure verified')
     'scripts/dsh-b0/lifecycle-observer.test.mjs', 'scripts/dsh-b0/host-feasibility.test.mjs', 'scripts/dsh-b0/compatibility-matrix.test.mjs', 'scripts/dsh-b0/permission-fence.test.mjs', 'scripts/dsh-b0/ui-seams.test.mjs',
     'scripts/dsh-b0/package-manager-env.test.mjs', 'scripts/dsh-b0/diagnostic-sink.test.mjs',
     'scripts/release/plugin-pack.test.mjs', 'scripts/release/plugin-candidate.test.mjs', 'scripts/release/plugin-host-evidence.test.mjs', 'scripts/release/profile.test.mjs', 'scripts/release/plugin-boundary.test.mjs', 'scripts/release/supply-chain.test.mjs',
-    'scripts/release/runtime-host-evidence.test.mjs',
+    'scripts/release/runtime-host-evidence.test.mjs', 'scripts/release/profile-packs.test.mjs', 'scripts/release/release-profile-packs.test.mjs',
+    'scripts/crm-calibration/profile-packs.test.mjs',
+    'scripts/crm-calibration/composition-inputs.test.mjs',
     'scripts/release/backpressure.test.mjs',
     'scripts/release/terminal-host-evidence.test.mjs',
     'scripts/release/browser-host-evidence.test.mjs', 'scripts/release/browser-host-v2.test.mjs',
@@ -255,97 +274,47 @@ print('B0 exact Python closure verified')
     'scripts/dsh-b0/native-state-smoke.test.mjs', 'scripts/dsh-b0/native-query-smoke.test.mjs',
     'scripts/dsh-b0/native-query-fault-smoke.test.mjs', 'scripts/dsh-b0/native-query-assets-smoke.test.mjs',
     'scripts/dsh-b0/asset-routes.test.mjs']);
-  run(process.execPath, [join(plugin, 'build.mjs'), upstream]);
-  run(process.execPath, ['dsh-plugins/crm-knowledge/build.mjs', upstream]);
-  run(process.execPath, ['dsh-plugins/knowledge/build.mjs', upstream]);
-  run(process.execPath, ['--test', 'dsh-plugins/knowledge/test/package.test.mjs', 'dsh-plugins/knowledge/test/service-client.test.mjs', 'dsh-plugins/knowledge/test/graph.test.mjs']);
-  run(process.execPath, ['--test', 'dsh-plugins/crm-knowledge/test/package.test.mjs', 'dsh-plugins/crm-knowledge/test/first-purchase-relay.test.mjs', 'dsh-plugins/crm-knowledge/test/page-composition.integration.mjs', 'dsh-plugins/crm-knowledge/test/knowledge-composition.integration.mjs', 'dsh-plugins/crm-knowledge/test/profile.test.mjs', 'dsh-plugins/crm-knowledge/test/service-client.test.mjs']);
-  run(process.execPath, [join(shineBrand, 'build.mjs'), upstream]);
-  run(process.execPath, [join(shineWaterfall, 'build.mjs'), upstream]);
-  run(process.execPath, [join(shineCrowdAction, 'build.mjs'), upstream]);
-  run(process.execPath, [join(shineQuery, 'build.mjs'), upstream]);
-  run(process.execPath, [join(shineBoard, 'build.mjs'), upstream]);
-  run(process.execPath, [join(shineFunnel, 'build.mjs'), upstream]);
-  run(process.execPath, ['--test',
-    join(shineBrand, 'src/brand-surface.test.mjs'),
-    join(shineBrand, 'src/client-lifecycle.test.mjs')], root, { B0_BUILD_UPSTREAM: upstream });
-  run(process.execPath, ['--test',
-    join(shineWaterfall, 'src/waterfall.test.mjs'),
-    join(shineWaterfall, 'src/client-lifecycle.test.mjs')], root, { B0_BUILD_UPSTREAM: upstream });
-  run(process.execPath, ['--test',
-    join(shineCrowdAction, 'src/client-lifecycle.test.mjs')], root, { B0_BUILD_UPSTREAM: upstream });
-  run(process.execPath, ['--test',
-    join(shineQuery, 'src/client-lifecycle.test.mjs')], root, { B0_BUILD_UPSTREAM: upstream });
-  run(process.execPath, ['--test',
-    join(shineBoard, 'src/client-lifecycle.test.mjs')], root, { B0_BUILD_UPSTREAM: upstream });
-  run(process.execPath, ['--test',
-    join(shineFunnel, 'src/funnel.test.mjs'),
-    join(shineFunnel, 'src/client-lifecycle.test.mjs')], root, { B0_BUILD_UPSTREAM: upstream });
+  // Current kit packaging/compiler checks and published author declarations;
+  // the preserved ten-source fixture is explicit legacy evidence, not default.
+  run(process.execPath, ['--test', 'scripts/dsh-b0/installed-kit-packs.integration.mjs']);
+  // CRM/knowledge source builds and private transport/graph tests belong to
+  // their independent author repositories. Keep the public package behavior
+  // here, with verified formal inputs and separate non-reusable output scopes.
+  run(process.execPath, ['--test', '--test-concurrency=1',
+    'scripts/crm-calibration/crm-package.integration.mjs',
+    'scripts/crm-calibration/knowledge-package.integration.mjs']);
+  run(process.execPath, ['--test', 'scripts/crm-calibration/page-composition.integration.mjs',
+    'scripts/crm-calibration/knowledge-composition.integration.mjs', 'scripts/crm-calibration/profile.test.mjs']);
+  // Runtime consumers read the independent packages, never rebuild six sibling
+  // plugins. Producer missing-input guards remain above in explicit-build-inputs;
+  // the separate archive isolation below consumes the same fixed inputs.
+  run(process.execPath, ['--test', 'scripts/dsh-b0/leaf-pack-composition.integration.mjs'], root);
   run(process.execPath, ['--test', 'scripts/dsh-b0/legacy-geometry-exports.test.mjs'], root);
-  run(process.execPath, ['--test', 'scripts/dsh-b0/plugin-isolation.test.mjs'], root, { B0_BUILD_UPSTREAM: upstream });
-  run(process.execPath, ['--test', ...builtTests.map(file => join(plugin, 'test', file))], root, { B0_BUILD_UPSTREAM: upstream });
-
-  const competitionTests = [];
-  for (const directory of ['src/board-spec', 'src/client', 'src/competition-agent', 'src/free-page', 'tests']) {
-    const base = join(plugin, directory);
-    for (const entry of await readdir(base, { recursive: true })) {
-      if (entry.endsWith('.test.mjs')) competitionTests.push(join(base, entry));
-    }
-  }
-  run(process.execPath, ['--test', ...competitionTests], root, { B0_BUILD_UPSTREAM: upstream });
-
-  const cleanOwner = b0;
-  await reapStaleCleanRoots(cleanOwner);
-  const { cleanRoot } = await createCleanRoot(cleanOwner);
-  const clean = join(cleanRoot, 'analytics-workbench');
-  let cleanRemoved = false;
-  let report;
-  try {
-    // No source symlinks or existing output/node_modules in the clean copy.
-    // Domain inputs are locked tarballs only; no sibling plugin/library sources.
-    const budget = { bytes: 0, files: 0 };
-    for (const item of ['package.json', 'bundled-dependencies.json', 'cordis.patch.yml', 'toolchain.mjs', 'build.mjs', 'pack-skills.mjs', 'skill-package.lock.json', 'query-skill-package.lock.json', 'first-purchase-query-skill-package.lock.json', 'skills', 'src', 'test']) {
-      await copyTreeBounded(join(plugin, item), join(clean, item), { destinationRoot: cleanRoot, budget });
-    }
-    await copyPluginKitSources(kit, join(cleanRoot, 'plugin-kit'), { destinationRoot: cleanRoot, budget });
-    assert.deepEqual((await readdir(cleanRoot)).sort(), ['.dsh-b0-clean-build', 'analytics-workbench', 'plugin-kit']);
-    // Provenance for this isolated pack is deliberately a synthetic Git
-    // fixture, never the reviewed product commit required by a release.
-    await writeFile(join(cleanRoot, '.gitignore'), 'node_modules/\nlib/\npacked/\n');
-    run('git', ['init', '-q'], cleanRoot);
-    run('git', ['add', '.'], cleanRoot);
-    run('git', ['-c', 'user.name=isolated-fixture', '-c', 'user.email=fixture@example.invalid',
-      '-c', 'commit.gpgsign=false', '-c', 'core.hooksPath=/dev/null', 'commit', '-qm', 'synthetic workbench package fixture'], cleanRoot);
-    await linkWorkspaceKit(clean, join(cleanRoot, 'plugin-kit'));
-    run(process.execPath, [join(clean, 'build.mjs'), upstream, buildTools]);
-    run(process.execPath, ['--test', ...builtTests.map(file => join(clean, 'test', file))], clean, { B0_BUILD_UPSTREAM: upstream, B0_BUILD_TOOLS: buildTools });
-    const hashes = {};
-    for (const item of ['index.js', 'tool.js', 'skills.js', 'page-tools.js', 'client.js', 'views/saved-analysis-view.js', 'views/cockpit-view.js']) {
-      const original = await readFile(join(plugin, 'lib', item));
-      const rebuilt = await readFile(join(clean, 'lib', item));
-      assert.deepEqual(original, rebuilt, `Clean build output mismatch: ${item}`);
-      assert.ok(!/file:\/\/\/|\/Users\/|\/home\/runner\//.test(rebuilt.toString()), `Machine path in artifact: ${item}`);
-      hashes[item] = createHash('sha256').update(rebuilt).digest('hex');
-    }
-    const packed = await packPlugin({ plugin: clean, outputDir: join(cleanRoot, 'packed') });
-    assert.equal(packed.activation, 'NOT_RUN');
-    assert.ok(packed.entries.includes('bundled-dependencies.json'));
-    report = { schema_version: 'dsh-b0-build-evidence/v1', at: new Date().toISOString(),
-      upstream_sha: pin.upstream_sha, upstream_lock_sha256: pin.upstream_lock_sha256,
-      node: process.version, python: output(python, ['--version']), clean_plugin: clean,
-      // The evidence is written only after the clean build and its output
-      // comparisons have completed. The owning finally block removes the
-      // directory before the pipeline returns, so this is an asserted result.
-      clean_removed: false, bundled_inputs: JSON.parse(await readFile(join(clean, 'bundled-dependencies.json'), 'utf8')).packages, sibling_sources_present: false, clean_source_files: budget.files, clean_source_bytes: budget.bytes,
-      stages: ['contract', 'python-unit', 'ruff', 'node-unit', 'host-types', 'client-types', 'build', 'real-cordis-loader-synthetic-services', 'clean-rebuild'],
-      artifact_sha256: hashes, isolated_pack: { ...packed, fixture_only: true },
-      remote_ci_executed: false, native_dsh_profile_e2e: 'separate evidence required' };
-    console.log(`B0 clean rebuild passed; source files=${budget.files}, source bytes=${budget.bytes}`);
-  } finally {
-    await removeCleanRoot(cleanOwner, cleanRoot);
-    cleanRemoved = true;
-  }
-  assert.equal(cleanRemoved, true, 'Clean build directory was not removed');
-  report.clean_removed = true;
+  run(process.execPath, ['--test', '--test-concurrency=1', 'scripts/dsh-b0/workbench-client-pack.integration.mjs',
+    ...['workbench-tool-cards', 'workbench-query-cancel', 'workbench-query-save', 'workbench-asset-overlay',
+      'workbench-first-purchase-card', 'workbench-first-purchase-save', 'workbench-query-fault', 'workbench-native-prompt'].map(name => `scripts/dsh-b0/${name}.integration.mjs`)], root);
+  run(process.execPath, ['--test', 'scripts/dsh-b0/plugin-isolation.test.mjs'], root);
+  const mainContracts = await runWorkbenchMainContracts({ environment: env });
+  const report = { schema_version: 'dsh-b0-build-evidence/v2', at: new Date().toISOString(),
+    upstream_sha: pin.upstream_sha, upstream_lock_sha256: pin.upstream_lock_sha256,
+    node: process.version, python: output(python, ['--version']),
+    stages: ['contract', 'python-unit', 'ruff', 'main-node-unit', 'independent-pack-consumers', 'main-workbench-contracts'],
+    workbench_author: workbenchAuthorEvidence, main_workbench_contracts: mainContracts,
+    public_contract_inputs: publicContractEvidence, public_contract_checks: publicContractChecks,
+    workbench_source_build_here: 'NOT_RUN_AUTHOR_OWNED',
+    workbench_private_loader_here: 'NOT_RUN_AUTHOR_OWNED',
+    workbench_clean_rebuild_here: 'NOT_RUN_AUTHOR_OWNED',
+    installed_kit_business_sources: 'NOT_RUN_AUTHOR_OWNED',
+    legacy_installed_kit_source_fixture: 'NOT_RUN_EXPLICIT_LEGACY_ONLY',
+    legacy_plugin_source_isolation: 'NOT_RUN_EXPLICIT_LEGACY_ONLY',
+    fixed_pack_isolation: 'four published archives, no source builds or peer installation',
+    domain_author: domainAuthorEvidence,
+    domain_source_build_here: 'NOT_RUN_AUTHOR_OWNED',
+    domain_private_geometry_here: 'NOT_RUN_AUTHOR_OWNED',
+    legacy_domain_source_fixture: 'NOT_RUN_EXPLICIT_LEGACY_ONLY',
+    remaining_source_producers: [],
+    remaining_source_contracts: ['explicit plugin build-input guards', 'Workbench/coordinator main contracts'],
+    native_dsh_profile_e2e: 'separate evidence required', release_ready: false };
   await writeFile(join(b0, 'build-evidence.json'), JSON.stringify(report, null, 2) + '\n', { mode: 0o600 });
+  console.log('B0 main checks passed; Workbench core remains attributed to its fixed author CI.');
 }

@@ -1,0 +1,179 @@
+{
+  "schema": "shinemage-domain-author-evidence/v1",
+  "package": "@shine-mage/board-components",
+  "version": "0.1.0",
+  "source_sha": "e78e040e14792c89f99a2e3181004dbdaefd9bf6",
+  "source_files": 30,
+  "source_inventory_sha256": "49b2f2b183b79119420614f62015adb203ae64440373218b71a3a1dcf27bb107",
+  "archive": {
+    "repository": "tyuanww/shinemage-board-components",
+    "run_id": 38121126913,
+    "attempt": 1,
+    "event": "pull_request",
+    "conclusion": "success",
+    "artifact_id": 11694947955,
+    "sha256": "5207d0adac1a449fe1be36913d0d8214c1f4d8ecc3e137f7368bd27e6c4f28ee",
+    "bytes": 11356
+  },
+  "files": {
+    "receipt": {
+      "path": "board-author-38121126913-1/author-tests.json",
+      "bytes": 8419,
+      "sha256": "25b59ea139528ea165243f3375b9671d578bd2bee4d4b1757f030122e26aed0d"
+    },
+    "geometry_stdout": {
+      "path": "board-author-38121126913-1/geometry.stdout.log",
+      "bytes": 3802,
+      "sha256": "2bc0a66945b9f369e64b6f93650e038c16727969671c8514918f80aac980c2cd"
+    },
+    "geometry_stderr": {
+      "path": "board-author-38121126913-1/geometry.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "producer_stdout": {
+      "path": "board-author-38121126913-1/producer-inputs.stdout.log",
+      "bytes": 1698,
+      "sha256": "d8f94c9387ca082590eca6fa04034eb06ff2d06a4c33e4ef5356c1c8e133430a"
+    },
+    "producer_stderr": {
+      "path": "board-author-38121126913-1/producer-inputs.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "reference": {
+      "path": "board-author-38121126913-1/reference/shine-mage-board-components-0.1.0.tgz",
+      "bytes": 1955,
+      "sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182"
+    },
+    "content_pack": {
+      "path": "board-output-38121126913-1/shine-mage-board-components-0.1.0.tgz",
+      "bytes": 1951,
+      "sha256": "66d53381095e93f38dbaa7385780f20b677f68ca2692702cb270849f3392853e"
+    }
+  },
+  "groups": [
+    {
+      "name": "geometry",
+      "command": [
+        "--test",
+        "--test-reporter=tap",
+        "--test-concurrency=1",
+        "library/test/geometry.test.mjs"
+      ],
+      "files": [
+        {
+          "path": "library/test/geometry.test.mjs",
+          "bytes": 2142,
+          "sha256": "32cbeedd833193821299cee4419b7f28403e524af25a985f52c1c3c35c913b73"
+        }
+      ],
+      "exit_code": 0,
+      "counts": {
+        "tests": 28,
+        "pass": 28,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "logs": {
+        "stdout": {
+          "path": "geometry.stdout.log",
+          "bytes": 3802,
+          "sha256": "2bc0a66945b9f369e64b6f93650e038c16727969671c8514918f80aac980c2cd"
+        },
+        "stderr": {
+          "path": "geometry.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "name": "producer-inputs",
+      "command": [
+        "--test",
+        "--test-reporter=tap",
+        "--test-concurrency=1",
+        "scripts/producer.test.mjs",
+        "scripts/build-input.test.mjs"
+      ],
+      "files": [
+        {
+          "path": "scripts/producer.test.mjs",
+          "bytes": 5806,
+          "sha256": "3e40099f84549ee5bb770e1e6e59a52642cbce4ed8721059465979c2272673d5"
+        },
+        {
+          "path": "scripts/build-input.test.mjs",
+          "bytes": 1570,
+          "sha256": "0371134757c24a731df1292b632ec6b491ee57af93af58de496d101035f29c43"
+        }
+      ],
+      "exit_code": 0,
+      "counts": {
+        "tests": 6,
+        "pass": 6,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "logs": {
+        "stdout": {
+          "path": "producer-inputs.stdout.log",
+          "bytes": 1698,
+          "sha256": "d8f94c9387ca082590eca6fa04034eb06ff2d06a4c33e4ef5356c1c8e133430a"
+        },
+        "stderr": {
+          "path": "producer-inputs.stderr.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    }
+  ],
+  "reference": {
+    "schema": "shinemage-domain-reference/v1",
+    "source_repository": "https://github.com/tyuanww/fuqing-crm-analytics",
+    "source_sha": "5390667cc990fa558b0445aa455b086d325a6c77",
+    "package": "@shine-mage/board-components",
+    "version": "0.1.0",
+    "tarball": "shine-mage-board-components-0.1.0.tgz",
+    "sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182",
+    "bytes": 1955,
+    "role": "existing sealed member/identity regression input; not newly released artifact"
+  },
+  "members": {
+    "package/package.json": {
+      "bytes": 576,
+      "sha256": "2683aecb604706742a0b2bb38c2f3a35b5de6646767d3e4d4d20484f80aad3ba"
+    },
+    "package/lib/funnel.mjs": {
+      "bytes": 1660,
+      "sha256": "aebd9f3cdecc93a30b21d18cd554d5e01adfc17cdedc93e7a188ac0f48244dec"
+    },
+    "package/lib/waterfall.mjs": {
+      "bytes": 2308,
+      "sha256": "63aa6dc6010bd7cfe906f5184c395be0771568d40d471bf3184fe0d9ded53b98"
+    },
+    "package/lib/funnel.d.mts": {
+      "bytes": 239,
+      "sha256": "30c157c4cefc1ad5f8182e65af5777f39fcfd473987e1eabc47553f2f3d3c455"
+    },
+    "package/lib/waterfall.d.mts": {
+      "bytes": 341,
+      "sha256": "34b0be969c2f73b3dd1a7633b2e953c74bd5b12c80ed978ac3be0d51ee4a2210"
+    }
+  },
+  "independent_tsc": "NOT_IN_CURRENT_BUILD",
+  "not_covered": [
+    "full-main-b0",
+    "current-candidate",
+    "host-service-admission",
+    "model",
+    "real-business"
+  ],
+  "release_ready": false
+}

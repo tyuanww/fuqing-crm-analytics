@@ -1,39 +1,34 @@
 # 项目状态（Project Status）
-> 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。本页是当前运行与交付边界的 SSOT。
 
-## 杭州生产恢复与 UI 热补丁（2026-10-09）
+> 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。历史 PASS、NOT_RUN 与版本只属于原验收对象，本页是当前运行与交付边界的 SSOT。
 
-杭州 current 仍为 VERSION 0.20.0.0；本地 A/B/C 候选未部署。生产恢复、品牌与知识库入口修复的范围、回退和未完成真实模型验收见[现场记录](docs/operating/hangzhou-production-hotfix-20261009.md)。不得把该现场记录当作本次插件候选验收。
+## 当前快照（2026-10-11）
 
-## 当前快照（2026-10-10，DSH 0.1.7-rc.2 / VERSION 0.20.0.0）
-
-| 项 | 状态 |
+| 项 | 当前状态与证据 |
 |---|---|
-| Git | PR #111–#117 均已合并；当前远端 `main` 为 `93d18c77`，PR #117 是并行收口审计文档。实时主线以远端 `main` 和 GitHub CI 为准。三个已合并候选远程分支已按授权删除，本地旧分支引用和 stale `origin/*` tracking 引用仍单独保留待整理。原集成树的 `security-audit-skill/` 是独立目录，不纳入主仓。详见[最新 post-merge 远端事实](docs/hackathon/evidence/shinemage-remote-repository-postmerge-r3-20261010.md)和[本次清理证据](docs/hackathon/evidence/shinemage-local-cleanup-20261010.md)。 |
-| 插件解耦 | 插件构建要求显式绝对上游、build-tools 和输入包；已移除主仓 .context 回退。CRM/看板/知识与 Workbench 的边界证据保持独立记录。 |
-| 独立仓 | 九个插件已有独立私有远程仓；本次复核显示九仓各有一个开放 PR #1、最近 fixed-inputs CI 成功、均无 GitHub Release；`dsh-shine-crowd-action` 另保留较早 full CI 失败。详见[远程仓收口复核](docs/hackathon/evidence/shinemage-plugin-remote-closeout-20261010.md)。主仓继续维护 DSH 集成合同、profile、组合验证和历史副本，正式物理分仓仍按 stop/go 约束推进。普通 content pack 不等于正式 dsh-plugin-pack/candidate。 |
-| 本地验证 | 固定 Node 24、Python 3.14；定向 release/protocol/SDK/map/HTML 与边界检查已通过。推送钩子按路径计划执行适用检查，真实跳过原因保留。 |
-| 产品 | PARTIAL；SDK 分发 BLOCKED；release_ready=false。 |
-| 真实验收 | 真实 WSL2/terminal/browser、真实模型/业务、生产切换、standalone 页面包和正式分发仍按各自输入保持 NOT_RUN；当前 candidate 的逐项缺口见[正式准入预检](docs/hackathon/evidence/shinemage-formal-admission-preflight-20261010.md)。PR #111 的最终 preflight、B0、全量测试、前端、lint、依赖、合同、Docker smoke 和 merge-gate 均通过；`ground-truth-lint` 按既定条件跳过。 |
-| 合并检查 | PR #115、#116、#117 的 `CI`、`merge-gate`（适用时）和各自合并后的 `main` `CI` push workflow 均成功；这只是文档/代码合并检查，不是真实业务、生产或正式分发验收。PR #117 的 run ID 见[最新 post-merge 远端事实](docs/hackathon/evidence/shinemage-remote-repository-postmerge-r3-20261010.md)。 |
-| 清理 | 11 个已归档候选源目录及其 worktree 已按授权删除，11 个归档包和 SHA-256 清单保留；三个已合并远程候选分支已删除。T14、RC2、公共 main、SDK/证据归档和 `security-audit-skill/` 保持不动。详见[本次清理证据](docs/hackathon/evidence/shinemage-local-cleanup-20261010.md)。 |
+| 产品与固定底座 | VERSION `0.20.0.0`；DSH `0.1.7-rc.2` / upstream `477b4f42`，未改上游。产品 PARTIAL，`release_ready=false`；SDK 分发按适用门禁 BLOCKED。 |
+| 公开主线 | PR #111–#118 已合并；远端 `main` 为 `4859d136`，其 CI 见[post-merge r4](docs/hackathon/evidence/shinemage-remote-repository-postmerge-r4-20261011.md)，不抵扣本次新提交检查。 |
+| 本地交付与 PR | 15 笔分组交付及追加修复均已推送到 [PR #119](https://github.com/tyuanww/fuqing-crm-analytics/pull/119)；结果提交争用修复 `de196938`，main `4859d136` 已以 `3cee76f0` 合入 feature，文件树未变。PR OPEN，未合并；最新文档 SHA 看 `git log -1`。见[本轮交付](docs/hackathon/evidence/shinemage-main-pr119-delivery-20261011.md)。 |
+| 独立作者仓 | 九个插件与 board-components 领域库分别维护源码、版本和 CI；完整看板在 analytics-workbench，shine-board 只是能力标记；合成知识服务不是真实 WeKnora。作者覆盖按[验证入口](docs/operating/verification.md)及固定作者证据锁记账。 |
+| 当前包绑定 | Workbench source `6c5adc9f` / 正式回执 `0af61dab…`、CRM `c4b1c91e` / `4663cce0…`；九包与两份现有 profile 的准备已通过，不继承旧 candidate/journal 或宿主验收。 |
+| 主仓职责 | profile、公共合同、组合消费及 release 包装配使用固定正式包/公开合同/作者 CI 证据；backend、平台合同、静态边界、保留源码守卫和两组旧 Workbench 私有断言仍在主仓，旧 `dsh-plugins/` 不删。主仓是集成仓，尚不是只有 DSH 的仓库。 |
+| 已完成验证 | `f1f1d500` 正常 hooks：完整后端 3237 PASS / 78 SKIP / 0 FAIL、12 JUnit 无重复；前端 build / 29 文件 / 223 单测、完整主仓 B0 exit 0。SIGKILL 故障注入测试 71 PASS 单列；作者 core 归固定作者 CI，OCR 增量逐字节审查，无外部 LLM。 |
+| 本次推送检查 | `f861a895` CLI 状态修复已正常推送；`fe7cc54d` hosted preflight 的 git-clean、上游准备和 runtime 打包实际 PASS，随后扫描三处模拟值失败。`5102d7ad` 仅修正测试值，相关 83 PASS / 0 FAIL / 0 SKIP，扫描规则不变；最新 head 的 CI/preflight 看 [PR #119 checks](https://github.com/tyuanww/fuqing-crm-analytics/pull/119/checks)，不写为发布通过。 |
+| 新 hosted CI 输入 | 专用 read Secret 已配置，真实四类私有 receiver 均 PASS；`fc46b243` 主 CI attempt 2 SUCCESS，不抵扣后续 head。gh 状态与测试扫描两轮实际失败、修复见[本次接续](docs/hackathon/evidence/shinemage-pr119-ci-secret-reconnect-20261011.md)。原 artifact/三变量不变，工件 10 月 25 日到期。 |
+| 兼容门禁 | CRM/Knowledge 的精确 Cordis peer `4.0.2` 与固定运行输入 `4.0.4` 仍待 owner 校准；隔离提案见[证据](docs/hackathon/evidence/shinemage-cordis-exact-proposal-20261011.md)。不改 peer，不用构建通过抵扣兼容。D/E 五仓无独立 tsc。 |
+| 真实验收 | 当前组合的正式服务/目标/terminal/browser/恢复、真实模型/CRM/WeKnora/UAT、standalone 页面包和正式分发仍按各自材料保持未关闭；旧 WSL/宿主结果不继承，见[准入预检](docs/hackathon/evidence/shinemage-formal-admission-preflight-20261010.md)。 |
+| 生产与清理 | 杭州 `current` 的带日期恢复/热补丁事实见[2026-10-09 现场记录](docs/operating/hangzhou-production-hotfix-20261009.md)，本地候选未部署。11 份候选目录及三个远端分支已按授权清理，归档与摘要保留，见[清理记录](docs/hackathon/evidence/shinemage-local-cleanup-20261010.md)。 |
+| 任务外内容 | `security-audit-skill/` 不纳入提交或清理；任务范围干净不等于整仓无未提交内容。92 份历史证据同字节保留。 |
 
 ## 本轮施工计划
 
-1. PR #111–#117 已合并到远端 `main`；当前主线为 `93d18c77`，PR #117 是并行收口审计文档。三个已合并候选远程分支已完成归档、恢复路径核对和单独授权后的删除；本地分支引用的后续整理仍单独记账。
-2. **PR #111 的** preflight、B0、全量测试、前端、lint、依赖和合同检查在最终提交上通过；`ground-truth-lint` 按既定条件跳过。本轮沿用 PR #111 的合并回执，未重跑这些检查；旧失败运行保留为历史，不改写为当前失败。
-3. 主仓与九个独立插件仓的职责、单插件更新路径、DSH 升级路径和清理顺序已写入维护手册；最新插件远程状态、DSH 升级候选和 SDK 门禁分别见[远程仓复核](docs/hackathon/evidence/shinemage-plugin-remote-closeout-20261010.md)、[DSH 升级盘查](docs/hackathon/evidence/shinemage-dsh-upgrade-audit-20261010.md)和[SDK 门禁矩阵](docs/hackathon/evidence/shinemage-sdk-gate-closeout-20261010.md)。源码副本、candidate、正式分发和生产激活仍按各自门禁记账。
-4. 保持 DSH 上游 `477b4f420553e8a52c2fbccc464d7561b239c443`、VERSION、SDK BLOCKED、产品 PARTIAL 和所有未执行门禁原样。
+1. 已完成本轮源码、正常推送和祖先同步；以[最新交付](docs/hackathon/evidence/shinemage-main-pr119-delivery-20261011.md)及实际 PR head 核对 CI，历史失败与逐组提交保留。
+2. Secret 与四类私有输入已接通，CLI 状态副作用已在 hosted 验证关闭；核对追加测试值修复的新 head CI/preflight，以真实结果关闭对应子项，不重复索要已配置的凭据，不跳过门禁。
+3. PR 审查和适用验证完成后，按单独合并授权走 `/qa` 与实际远端门禁；不先在本地把 feature 合进 main，不自动发布或部署。
+4. peer 校准、当前组合准入、真实业务/WeKnora/模型、SDK 正式分发和独立 DSH 升级沿原 stop/go 分别收尾，不扩展功能。
 
-## 当前边界
+## 维护入口与边界
 
-Mac 公共 checkout 负责开发、测试和 PR；杭州 Windows + WSL 只运行批准 SHA。真实 DuckDB、WeKnora 数据卷和密钥不进入 Git。旧候选、失败证据和历史状态只作证据，不能代替当前验收。
-
-以下自动统计块保留为历史抓取，不作为本轮 PR 全量测试计数；当前合并检查结果以本节上方、PR #111–#117 以及最新 post-merge `main` 的 CI 回执为准。
-
-<!-- STATUS-AUTO-START -->
-| pytest collected | **3036** | Sprint 59 自动抓 |
-| pytest skipped | **0** | Sprint 59 自动抓 |
-| 当前债数 | **?** | Sprint 59 自动抓 |
-| 最近 sprint | **?** | Sprint 59 自动抓 |
-<!-- STATUS-AUTO-END -->
+- 单插件日常更新见[插件更新指南](docs/operating/shinemage-plugin-update.md)；仓库职责、升级和清理见[维护手册](docs/operating/shinemage-maintenance-and-cleanup.md)，任务接续见[TODOS](docs/hackathon/TODOS.md#m1-核心交付)。插件变更不默认重建 DSH、迁移数据库或重复 SDK 全量审计。
+- 本机用于开发、合成验证与 PR；杭州/6677、旧 CRM、真实业务 DuckDB、WeKnora 数据卷和凭据不在本轮操作范围。临时验证只回收本次拥有的实例。
+- 历史候选、失败日志、原始包与截图保留；迁移各轮的数字、旧来源和未执行结论见[历史快照](docs/history/STATUS-HISTORY.md#shinemage-pr119-before-push-20261011)，不能当作当前准入或生产事实。

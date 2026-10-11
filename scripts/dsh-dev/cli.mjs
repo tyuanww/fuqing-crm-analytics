@@ -5,21 +5,20 @@ import { spawn } from 'node:child_process';
 import { writeFile, mkdir, readFile } from 'node:fs/promises';
 import { realpathSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { ALLOWED_WEB_PORTS, COMPETITION_VITE_PORT, COMPETITION_WEB_PORT, DEV_WEB_PORT, NATIVE_WEB_IDS, NODE_MAJOR, PLUGIN_UI_ID, SHINE_BRAND_UI_ID, SHINE_WATERFALL_UI_ID, SHINE_CROWD_ACTION_UI_ID, SHINE_QUERY_UI_ID, SHINE_BOARD_UI_ID, SHINE_FUNNEL_UI_ID } from './constants.mjs';
-import { pluginEnabled, pluginRowState } from './overlay.mjs';
-import { repoRoot, contextRoot, currentPath, defaultPluginPath, defaultShineBrandPath, defaultShineWaterfallPath, defaultShineCrowdActionPath, defaultShineQueryPath, defaultShineBoardPath, defaultShineFunnelPath, defaultRuntimeRoot } from './paths.mjs';
+import { pluginRowState } from './overlay.mjs';
+import { repoRoot, contextRoot, currentPath, defaultRuntimeRoot } from './paths.mjs';
 import { PAGE_HTTP_DEFAULT_PORT, startPageHttp, writePageHttpState } from './page-http.mjs';
 import { ensurePersistentRuntime } from './persist-runtime.mjs';
 import { randomBytes } from 'node:crypto';
-import { bootHost, dumpConfig, installProfilePlugin, isolatedEnv, parseServeArgs, prepareRuntime, readCurrent, runOwnedSupervisor, stopOwned, watchOwnedStart } from './serve.mjs';
+import { bootHost, dumpConfig, installProfilePlugin, isolatedEnv, parseServeArgs, prepareRuntime, readCurrent, validateRuntimeInputs, runOwnedSupervisor, stopOwned, watchOwnedStart } from './serve.mjs';
 import { diagnose, printDiagnose } from './diagnose.mjs';
-import { linkRepositoryKit } from '../dsh-b0/plugin-kit-link.mjs';
 
 const USAGE = `Usage: node scripts/dsh-dev/cli.mjs <check|dump-config|start|stop|status|diagnose|reload|open>
   --upstream /absolute/pinned/dsh
   --plugin on|off
+  --pack-inputs /absolute/profile-pack-inputs.json
   --plugin-path /absolute/workbench
   --shine-brand on|off
   --shine-brand-path /absolute/shine-brand
@@ -40,10 +39,10 @@ const USAGE = `Usage: node scripts/dsh-dev/cli.mjs <check|dump-config|start|stop
   --page-http on|off   start the isolated page-documents/result-access HTTP (default ${PAGE_HTTP_DEFAULT_PORT}, never 6677) and inject PAGE_* into the web host
   --page-http-port N   custom loopback port for that listener
   --detach          start only
-  --fresh           NEW empty runtime (wipes API keys and extra plugins). Daily plugin rebuilds must use reload, not --fresh.
+  --fresh           NEW empty runtime. Daily package updates use reload to preserve the existing runtime.
 
---plugin on installs workbench and the feature packs from repo paths (not siblings of --plugin-path). --query off / --board off drop session query tools or cockpit generate independently. --plugin off disables every shine UI id.
-reload  builds workbench and the enabled feature packs, restarts 6677 on the durable runtime, and opens the launch URL without printing the token.
+--plugin on consumes pinned formal packages selected by --pack-inputs. Explicit built-package paths remain available for author testing; every enabled feature requires its own path. Missing inputs never fall back to repository sources. --plugin off disables every shine UI id.
+reload validates the package inputs and pinned host, installs the selected packages with the official plugin add command, restarts only the owned host on the durable runtime, and opens the launch URL without printing the token. It does not build plugins or DSH, migrate databases or audit the SDK.
 --page-http on boots an isolated page-documents/result-access HTTP on 127.0.0.1:${PAGE_HTTP_DEFAULT_PORT} (small SQLite, explicit page_state_dir, never 6677) and forwards PAGE_* env so the browser bundle configures its page store; without it generation/saves stay http_not_configured instead of silently targeting 6677.
 
 Node 24 required for check/start/reload. diagnose is read-only: it never binds ports or signals PIDs.
@@ -235,21 +234,15 @@ async function runOpen() {
   await openLaunchUrl(current.runtime);
 }
 
-async function buildLocalPlugin(dir) {
-  await linkRepositoryKit(dir, repoRoot);
-  const built = spawnSync(process.execPath, [join(dir, 'build.mjs')], {
-    cwd: dir, stdio: 'inherit', env: process.env, timeout: 180000,
-  });
-  assert.equal(built.status, 0, `plugin build.mjs failed (${dir})`);
-}
-
-function reloadStartArgs(options, runtime) {
+export function reloadStartArgs(options, runtime) {
   const args = [
     join(repoRoot, 'scripts/dsh-dev/cli.mjs'), 'start',
     '--plugin', options.plugin || 'on',
     '--web-port', String(options.webPort || DEV_WEB_PORT),
     '--runtime', runtime,
   ];
+  if (options.upstream) args.push('--upstream', options.upstream);
+  if (options.packInputs) args.push('--pack-inputs', options.packInputs);
   if (options.pluginPath) args.push('--plugin-path', options.pluginPath);
   if (options.shineBrand) args.push('--shine-brand', options.shineBrand);
   if (options.shineBrandPath) args.push('--shine-brand-path', options.shineBrandPath);
@@ -265,31 +258,16 @@ function reloadStartArgs(options, runtime) {
   if (options.shineFunnelPath) args.push('--funnel-path', options.shineFunnelPath);
   if (options.pageHttp) args.push('--page-http', options.pageHttp);
   if (options.pageHttpPort !== undefined) args.push('--page-http-port', String(options.pageHttpPort));
+  for (const patch of options.extraPatch ?? []) args.push('--extra-patch', patch);
   return args;
 }
 
 async function runReload(options) {
   assert.equal(Number(process.versions.node.split('.')[0]), NODE_MAJOR, `Use Node ${NODE_MAJOR}`);
+  // Validate before creating the durable runtime or stopping its current host.
+  // Package updates are already built in their independent author repositories.
+  await validateRuntimeInputs(options, { packageInstall: true });
   const runtime = await ensurePersistentRuntime({ dest: options.runtime ?? defaultRuntimeRoot() });
-  await buildLocalPlugin(options.pluginPath ?? defaultPluginPath());
-  if (pluginEnabled(options.plugin || 'on') && pluginEnabled(options.shineBrand ?? 'off')) {
-    await buildLocalPlugin(options.shineBrandPath ?? defaultShineBrandPath());
-  }
-  if (pluginEnabled(options.plugin || 'on') && pluginEnabled(options.shineWaterfall ?? 'on')) {
-    await buildLocalPlugin(options.shineWaterfallPath ?? defaultShineWaterfallPath());
-  }
-  if (pluginEnabled(options.plugin || 'on') && pluginEnabled(options.shineCrowdAction ?? 'on')) {
-    await buildLocalPlugin(options.shineCrowdActionPath ?? defaultShineCrowdActionPath());
-  }
-  if (pluginEnabled(options.plugin || 'on') && pluginEnabled(options.shineQuery ?? 'on')) {
-    await buildLocalPlugin(options.shineQueryPath ?? defaultShineQueryPath());
-  }
-  if (pluginEnabled(options.plugin || 'on') && pluginEnabled(options.shineBoard ?? 'on')) {
-    await buildLocalPlugin(options.shineBoardPath ?? defaultShineBoardPath());
-  }
-  if (pluginEnabled(options.plugin || 'on') && pluginEnabled(options.shineFunnel ?? 'on')) {
-    await buildLocalPlugin(options.shineFunnelPath ?? defaultShineFunnelPath());
-  }
   await stopOwned();
   const startId = randomBytes(16).toString('hex');
   const child = spawn(process.execPath, reloadStartArgs(options, runtime), {

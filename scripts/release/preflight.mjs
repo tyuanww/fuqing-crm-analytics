@@ -6,7 +6,6 @@
  * publishes, touches a production host, or reads business data.
  */
 import assert from 'node:assert/strict';
-import { linkWorkspaceKit } from '../dsh-b0/plugin-kit-link.mjs';
 import { execFileSync } from 'node:child_process';
 import { copyFile, lstat, mkdir, mkdtemp, rename, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -17,10 +16,10 @@ import { releaseAssetNames, summarizePreflight, verifyPreflight, UPSTREAM_SHA } 
 import { collectReleaseReadiness, printReadiness } from './readiness.mjs';
 import { DSH_SDK_VERSION } from './toolchain.mjs';
 import { prepareServiceCompatibility } from './service-compatibility.mjs';
+import { loadReleasePacks } from './release-profile-packs.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const upstream = resolve(process.env.DSH_UPSTREAM_CHECKOUT || join(root, `.context/dsh-b0/upstream-${DSH_SDK_VERSION}`));
-const packageInputs = join(root, '.context/dsh-b0/package-inputs');
 const pin = UPSTREAM_SHA;
 
 function option(name, fallback = null) {
@@ -33,7 +32,7 @@ function option(name, fallback = null) {
 
 if (process.argv.includes('--help') || process.argv.includes('-h')) {
   console.log('Usage: node scripts/release/preflight.mjs [--check] --python /absolute/python3.14 --tag TAG [--source-sha SHA] [--output-dir PATH] [--service-evidence /absolute/receipt.json]');
-  console.log('--check is read-only: it validates toolchain, clean tree, pinned upstream, runtime bundle, plugins, zstd and output paths without network/build/artifact side effects.');
+  console.log('--check is read-only: it validates toolchain, clean tree, pinned upstream, runtime bundle, DSH_PROFILE_PACK_INPUTS, zstd and output paths without network/build/artifact side effects.');
   process.exit(0);
 }
 
@@ -97,8 +96,6 @@ if (checkOnly) {
   process.exit(0);
 }
 
-const plugins = readiness.profile.plugins.map(item => item.path);
-
 assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(), sourceSha, 'PREFLIGHT_SOURCE_SHA_MISMATCH');
 
 const stageTimings = [];
@@ -151,14 +148,12 @@ try {
   await stage('audit', () => run(process.execPath, ['scripts/dsh-b0/pipeline.mjs', '--audit', '--python', python], { B0_BUILD_UPSTREAM: null, DSH_UPSTREAM_CHECKOUT: upstream }));
   assert.equal(execFileSync('git', ['-C', upstream, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), pin, 'PREFLIGHT_UPSTREAM_SHA_MISMATCH');
   await stage('build', async () => {
-    await linkWorkspaceKit(join(root, 'dsh-plugins/board-components'), join(root, 'dsh-plugins/plugin-kit'));
-    const rebuiltInputs = join(runDir, 'board-package-input-build');
-    run(process.execPath, ['dsh-plugins/board-components/build.mjs', rebuiltInputs], { DSH_PACKAGE_INPUTS: packageInputs });
-    run(process.execPath, ['scripts/dsh-b0/package-inputs.mjs', packageInputs], { DSH_PACKAGE_INPUTS: packageInputs });
-    for (const plugin of plugins) {
-      await linkWorkspaceKit(join(root, plugin), join(root, 'dsh-plugins/plugin-kit'));
-      run(process.execPath, [`${plugin}/build.mjs`, upstream], { DSH_PACKAGE_INPUTS: packageInputs });
-    }
+    // The historical stage name stays in the preflight contract. Runtime bytes
+    // are built by the independent author CI; this stage revalidates fixed packs.
+    const packs = await loadReleasePacks({ root, inputsPath: process.env.DSH_PROFILE_PACK_INPUTS,
+      manifestPath: process.env.DSH_PROFILE_MANIFEST });
+    assert.equal(packs.inputsSha256, readiness.pluginPacks.inputsSha256, 'PREFLIGHT_PACK_INPUTS_CHANGED');
+    console.log(`DSH_PREFLIGHT_PLUGIN_INPUTS mode=fixed-pack count=${packs.plugins.length} digest=${packs.inputsSha256}`);
   });
   // Prepare is the only stage that may hydrate the pinned checkout. Once it
   // succeeds, package that exact pnpm store offline so a transient registry
@@ -166,7 +161,8 @@ try {
   await stage('runtime', () => run(process.execPath, ['scripts/release/runtime-bundle.mjs', '--upstream', upstream, '--output', runtimeOutput]));
   await stage('release', () => run(process.execPath, ['scripts/dsh.mjs', 'release', '--offline', '--tag', tag,
     ...(serviceEvidencePath ? ['--service-evidence', serviceEvidencePath] : [])],
-  { DSH_UPSTREAM_RUNTIME_BUNDLE: runtimeOutput, RELEASE_STATE_PATH: join(runDir, 'release-state.json') }));
+  { DSH_UPSTREAM_RUNTIME_BUNDLE: runtimeOutput, RELEASE_STATE_PATH: join(runDir, 'release-state.json'),
+    DSH_RELEASE_PACK_INPUTS_SHA256: readiness.pluginPacks.inputsSha256, DSH_PYTHON: python }));
   await stage('test', () => run(process.execPath, ['scripts/dsh.mjs', 'test']));
   const scratch = await mkdtemp(join(tmpdir(), 'release-preflight-receive-'));
   try {

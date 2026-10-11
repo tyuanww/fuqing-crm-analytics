@@ -142,6 +142,25 @@ class TestPathClassify:
             ["backend/tests/test_analytics_query_native_fault.py"]
         ) == "scoped"
 
+    @pytest.mark.parametrize("lock", [
+        "config/shinemage-composition-packs.lock.json",
+        "config/workbench-author-evidence.lock.json",
+        "config/domain-author-evidence.lock.json",
+        "config/public-contract-inputs.lock.json",
+        "scripts/ci/public-contract-inputs.mjs",
+        "scripts/ci/public-contract-inputs.test.mjs",
+        "scripts/ci/read-public-contract-inputs.py",
+    ])
+    def test_fixed_plugin_input_lock_selects_b0_consumers(self, path_class, lock):
+        plan = path_class.verification_plan([lock])
+        assert plan["b0"] is True
+        assert plan["backend"] == "none"
+        assert plan["frontend"] is False
+        assert plan["dependencies"] is False
+        mixed = path_class.verification_plan([lock, "backend/services/churn.py"])
+        assert mixed["b0"] is True
+        assert mixed["backend"] == "full"
+
     def test_analytics_probe_and_fixture_expand_backend(self, path_class):
         probe = path_class.verification_plan(
             ["backend/tests/analytics_query_native_fault_probe.py"]

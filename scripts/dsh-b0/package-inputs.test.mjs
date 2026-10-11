@@ -1,42 +1,29 @@
-/** Real npm tarball, Node import, TypeScript and isolated build boundary proofs. */
+/** Actual fixed library/consumer archives, public types and offline installation. No private producer source. */
 import test, { before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
-import { copyFile, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, isAbsolute, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { bindPackagedDependencies, readPackagedLibrary, validatePackageLock, DEV_KIT_NAME } from '../../dsh-plugins/plugin-kit/packaged-dependencies.mjs';
-import { copyPluginKitSources, copyTreeBounded } from './clean-build.mjs';
-import { linkWorkspaceKit } from './plugin-kit-link.mjs';
+import { readDomainComposition } from './domain-package-inputs.mjs';
 
 const repository = fileURLToPath(new URL('../..', import.meta.url));
-const tools = createRequire(join(repository, 'dsh-plugins/plugin-kit/build-tools/package.json'));
-const lockSource = JSON.parse(await readFile(join(repository, 'dsh-plugins/analytics-workbench/bundled-dependencies.json'), 'utf8'));
-const entry = lockSource.packages[0];
+const buildTools = process.env.B0_BUILD_TOOLS;
+assert.ok(isAbsolute(buildTools ?? ''), 'DOMAIN_PUBLIC_TYPE_TOOLS_REQUIRED');
+const tools = createRequire(join(buildTools, 'package.json'));
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const run = (command, args, cwd) => execFileSync(command, args, { cwd, timeout: 60000, maxBuffer: 2 * 1024 * 1024, encoding: 'utf8', stdio: 'pipe' });
-let independent, producer, inputs, artifact, generatedArtifact;
+let independent, inputs, artifact, lockSource, entry, evidence;
 before(async () => {
-  independent = await mkdtemp(join(tmpdir(), 'board-components-independent-'));
-  producer = join(independent, 'board-components');
-  const generatedInputs = join(independent, 'inputs');
-  generatedArtifact = join(generatedInputs, entry.tarball);
-  inputs = process.env.DSH_PACKAGE_INPUTS ? resolve(process.env.DSH_PACKAGE_INPUTS) : join(independent, 'inputs');
-  const options = { destinationRoot: independent };
-  for (const part of ['package.json', 'build.mjs', 'src', 'test']) {
-    await copyTreeBounded(join(repository, 'dsh-plugins/board-components', part), join(producer, part), options);
-  }
-  await copyPluginKitSources(join(repository, 'dsh-plugins/plugin-kit'), join(independent, 'plugin-kit'), options);
-  await linkWorkspaceKit(producer, join(independent, 'plugin-kit'));
-  run(process.execPath, [join(producer, 'build.mjs'), generatedInputs], independent);
-  // A platform-specific pnpm pack may differ in gzip metadata even when the
-  // archive members are byte-identical. Consumers must use the explicitly
-  // locked input when the pipeline supplies one; the local rebuild remains
-  // checked below for member-level reproducibility.
-  artifact = process.env.DSH_PACKAGE_INPUTS ? join(inputs, entry.tarball) : generatedArtifact;
+  independent = await mkdtemp(join(tmpdir(), 'domain-public-consumer-'));
+  const result = await readDomainComposition({ archivePath: process.env.DOMAIN_AUTHOR_CI_ARCHIVE,
+    packageInputs: process.env.DSH_PACKAGE_INPUTS, pageInputsPath: process.env.CRM_COMPOSITION_PAGE_INPUTS,
+    python: process.env.FQ_B0_PYTHON, output: join(independent, 'published') });
+  ({ inputs, artifact, lockSource, entry, evidence } = result);
 });
 after(async () => { if (independent) await rm(independent, { recursive: true, force: true }); });
 
@@ -53,26 +40,12 @@ async function consumer(t) {
   await save(); return { root, manifest, lock, save };
 }
 
-test('domain-only build is reproducible and the same tarball is pinned by all consumers', async t => {
-  assert.deepEqual((await readdir(independent)).sort(), ['board-components', 'inputs', 'plugin-kit']);
-  run(process.execPath, ['--test', join(producer, 'test/geometry.test.mjs')], producer);
-  const again = join(independent, 'second-output');
-  run(process.execPath, [join(producer, 'build.mjs'), again], independent);
-  if (process.env.DSH_PACKAGE_INPUTS) {
-    const rebuilt = await readPackagedLibrary(generatedArtifact);
-    const repeated = await readPackagedLibrary(join(again, entry.tarball));
-    const locked = await readPackagedLibrary(artifact, entry);
-    assert.deepEqual([...rebuilt.files.entries()], [...repeated.files.entries()]);
-    assert.deepEqual([...rebuilt.files.entries()], [...locked.files.entries()]);
-  } else {
-    assert.deepEqual(await readFile(artifact), await readFile(join(again, entry.tarball)));
-  }
+test('the fixed owner CI and three actual published consumer locks bind the same original library input', async () => {
   const pack = await readPackagedLibrary(artifact, entry);
   assert.deepEqual([...pack.files.keys()].sort(), ['lib/funnel.d.mts', 'lib/funnel.mjs', 'lib/waterfall.d.mts', 'lib/waterfall.mjs', 'package.json']);
-  for (const name of ['analytics-workbench', 'shine-funnel', 'shine-waterfall']) {
-    assert.deepEqual(JSON.parse(await readFile(join(repository, 'dsh-plugins', name, 'bundled-dependencies.json'), 'utf8')), lockSource);
-  }
-  t.diagnostic(JSON.stringify({ scope: 'isolated-domain-package', package: pack.manifest.name, sha256: pack.sha256, bytes: (await readFile(artifact)).length, sibling_plugin_sources: false, release_approval: 'NOT_RUN' }));
+  assert.equal(evidence.source_execution_here, 'NOT_RUN_AUTHOR_OWNED');
+  assert.deepEqual(evidence.groups.map(row => row.counts.pass), [28, 6]);
+  assert.equal(evidence.release_ready, false);
 });
 
 test('packed public exports run and typecheck without any provider source tree', async t => {
@@ -89,6 +62,7 @@ if (waterfall) waterfall.bars[0].imaginary;
 console.log(JSON.stringify([funnel, waterfall]));`;
   await writeFile(join(f.root, 'consumer.mts'), sample);
   const ts = tools('typescript');
+  assert.equal(ts.version, '6.0.3', 'DOMAIN_PUBLIC_TYPESCRIPT_PIN');
   const program = ts.createProgram([join(f.root, 'consumer.mts')], { strict: true, noEmit: true, skipLibCheck: false,
     module: ts.ModuleKind.NodeNext, moduleResolution: ts.ModuleResolutionKind.NodeNext, target: ts.ScriptTarget.ES2023, types: [] });
   assert.equal(ts.getPreEmitDiagnostics(program).length, 0, ts.formatDiagnostics(ts.getPreEmitDiagnostics(program), {
@@ -138,9 +112,11 @@ test('installed input drift and unrelated dependency bindings are never silently
   assert.equal(await readFile(source, 'utf8'), 'export const changed = true;');
   const g = await consumer(t);
   await mkdir(join(g.root, 'node_modules/@shine-mage'), { recursive: true });
-  await symlink(producer, join(g.root, 'node_modules/@shine-mage/board-components'));
+  const foreign = join(g.root, 'foreign'); await mkdir(foreign);
+  await writeFile(join(foreign, 'package.json'), JSON.stringify({ name: entry.name }));
+  await symlink(foreign, join(g.root, 'node_modules/@shine-mage/board-components'));
   await assert.rejects(() => bindPackagedDependencies(g.root, inputs), /PACKAGE_BINDING_FOREIGN/);
-  assert.equal(JSON.parse(await readFile(join(producer, 'package.json'))).name, entry.name);
+  assert.equal(JSON.parse(await readFile(join(foreign, 'package.json'))).name, entry.name);
 });
 
 async function mutated(t, change) {
@@ -165,48 +141,10 @@ test('missing export types, native hooks and archive symlinks are rejected', asy
   await assert.rejects(() => readPackagedLibrary(linked), /PACKAGE_INPUT_SPECIAL/);
 });
 
-test('same-version changed output cannot replace the original immutable tarball', async t => {
-  const root = await mkdtemp(join(tmpdir(), 'board-components-conflict-'));
-  t.after(() => rm(root, { recursive: true, force: true }));
-  const output = join(root, 'inputs'); await mkdir(output);
-  await copyFile(artifact, join(output, entry.tarball));
-  // This producer is a command-owned fixture. No repository source is mutated.
-  const fixture = join(root, 'board-components');
-  for (const part of ['package.json', 'build.mjs', 'src']) await copyTreeBounded(join(producer, part), join(fixture, part), { destinationRoot: root });
-  await copyTreeBounded(join(independent, 'plugin-kit'), join(root, 'plugin-kit'), { destinationRoot: root });
-  await linkWorkspaceKit(fixture, join(root, 'plugin-kit'));
-  await writeFile(join(fixture, 'src/funnel.mjs'), 'export const funnelGeometry = () => null;\n');
-  assert.throws(() => run(process.execPath, [join(fixture, 'build.mjs'), output], root), /PACKAGE_OUTPUT_CONFLICT/);
-  assert.equal(digest(await readFile(join(output, entry.tarball))), entry.sha256);
-});
-
-test('producer rejects a floating declaration and a mismatched actual manager before writing output', async t => {
-  const root = await mkdtemp(join(tmpdir(), 'board-components-manager-'));
-  t.after(() => rm(root, { recursive: true, force: true }));
-  const fixture = join(root, 'producer'), output = join(root, 'output'), bin = join(root, 'bin');
-  for (const part of ['package.json', 'build.mjs', 'src']) {
-    await copyTreeBounded(join(producer, part), join(fixture, part), { destinationRoot: root });
-  }
-  await linkWorkspaceKit(fixture, join(independent, 'plugin-kit'));
-  await mkdir(bin);
-  await writeFile(join(bin, 'pnpm'), '#!/bin/sh\necho 0.0.0\n', { mode: 0o700 });
-  const manifest = JSON.parse(await readFile(join(fixture, 'package.json')));
-  const build = () => execFileSync(process.execPath, [join(fixture, 'build.mjs'), output], {
-    cwd: root, env: { PATH: `${bin}:${dirname(process.execPath)}:/usr/bin:/bin`, HOME: root },
-    timeout: 10000, stdio: 'pipe',
-  });
-  for (const [version, code] of [['latest', /PACKAGE_MANAGER_EXACT/], ['11.28.2', /Use the package-declared pnpm version/]]) {
-    manifest.packageManager = `pnpm@${version}`;
-    await writeFile(join(fixture, 'package.json'), JSON.stringify(manifest));
-    assert.throws(build, code);
-    await assert.rejects(readdir(output), { code: 'ENOENT' });
-  }
-});
-
 test('real offline frozen pnpm tarball installation is reused unchanged and all drift fails closed', async t => {
   const f = await consumer(t);
   f.manifest.private = true;
-  f.manifest.packageManager = JSON.parse(await readFile(join(producer, 'package.json'))).packageManager;
+  f.manifest.packageManager = 'pnpm@11.28.2';
   await f.save();
   await writeFile(join(f.root, 'pnpm-workspace.yaml'), `packages:\n  - '.'\nautoInstallPeers: false\noverrides:\n  '${entry.name}': ${JSON.stringify(`file:${artifact}`)}\n`);
   const env = { ...process.env, CI: '', COREPACK_ENABLE_NETWORK: '0', COREPACK_ENABLE_AUTO_PIN: '0',
@@ -248,69 +186,4 @@ test('real offline frozen pnpm tarball installation is reused unchanged and all 
   for (const [name, content] of pristine.files) assert.deepEqual(await readFile(join(target, name)), content);
   assert.equal(digest(await readFile(artifact)), entry.sha256);
   t.diagnostic('real pnpm offline lock creation + frozen installation; original link, all bytes and lock preserved; file/manifest/extra/symlink/FIFO/wrong tar rejected');
-});
-
-test('independent workbench fixtures match their tracked contract owners byte for byte', async () => {
-  const fixtures = join(repository, 'dsh-plugins/analytics-workbench/test/fixtures/coordinator');
-  const provenance = JSON.parse(await readFile(join(fixtures, 'provenance.json')));
-  assert.equal(provenance.schema_version, 'plugin-test-contract-fixtures/v1');
-  const sources = {
-    'analytics_first_purchase_v1_expected.json': 'backend/tests/fixtures/analytics_first_purchase_v1_expected.json',
-    'analytics_first_purchase_v1_missing_role_expected.json': 'backend/tests/fixtures/analytics_first_purchase_v1_missing_role_expected.json',
-    'frozen-contract-v0.json': 'docs/hackathon/free-html-cockpit/fixtures/frozen-contract-v0.json',
-    'd48-scope.fixture.json': 'docs/hackathon/free-html-cockpit/fixtures/d48-scope.fixture.json',
-    'analytics-page.openapi.json': 'backend/contracts/analytics-page.openapi.json',
-  };
-  assert.deepEqual(provenance.files.map(item => item.name).sort(), Object.keys(sources).sort());
-  for (const record of provenance.files) {
-    assert.equal(record.source_path, sources[record.name]);
-    const expected = await readFile(join(repository, record.source_path));
-    const actual = await readFile(join(fixtures, record.name));
-    assert.equal(digest(actual), record.sha256, `fixture provenance digest: ${record.name}`);
-    assert.deepEqual(actual, expected, `update the reviewed independent fixture with its owner: ${record.source_path}`);
-  }
-});
-
-test('author destination resolves parent aliases before writes and allows outside aliases', async t => {
-  const root = await mkdtemp(join(tmpdir(), 'plugin-author-destination-'));
-  t.after(() => rm(root, { recursive: true, force: true }));
-  const source = join(root, 'source'), sourceDirectory = join(source, 'src');
-  await mkdir(sourceDirectory, { recursive: true });
-  const author = await readFile(join(repository, 'dsh-plugins/analytics-workbench/author-inputs.mjs'));
-  await writeFile(join(source, 'author-inputs.mjs'), author);
-  await writeFile(join(source, 'package.json'), JSON.stringify({ packageManager: 'pnpm@11.28.2' }));
-  await writeFile(join(sourceDirectory, 'original.txt'), 'source must stay unchanged');
-  const kit = join(root, 'kit.tgz'), domain = join(root, 'domain'), preload = join(root, 'stop-before-install.cjs');
-  const bytes = Buffer.from('guard-only fixture: stopped before package manager execution');
-  await writeFile(kit, bytes); await mkdir(domain);
-  await writeFile(preload, "require('node:child_process').execFileSync = () => { throw new Error('AUTHOR_TEST_STOP_BEFORE_PACKAGE_MANAGER'); }; require('node:module').syncBuiltinESMExports();\n");
-  const invoke = destination => {
-    try {
-      execFileSync(process.execPath, ['--require', preload, join(source, 'author-inputs.mjs'),
-        '--destination', destination, '--kit', kit, '--kit-sha256', digest(bytes), '--package-inputs', domain],
-      { cwd: root, env: { COREPACK_HOME: root }, encoding: 'utf8', stdio: 'pipe', timeout: 10000 });
-      assert.fail('guard probe unexpectedly completed');
-    } catch (error) {
-      assert.equal(error.status, 1);
-      return String(error.stderr);
-    }
-  };
-  const insideAlias = join(root, 'inside-alias'); await symlink(sourceDirectory, insideAlias, 'dir');
-  const rejected = invoke(join(insideAlias, 'new-author'));
-  t.diagnostic(JSON.stringify({ author_sha256: digest(author), source_was_written: (await readdir(sourceDirectory)).includes('new-author'),
-    destination_guard_rejected: rejected.includes('AUTHOR_DESTINATION_OUTSIDE_SOURCE') }));
-  assert.match(rejected, /AUTHOR_DESTINATION_OUTSIDE_SOURCE/);
-  assert.deepEqual(await readdir(sourceDirectory), ['original.txt']);
-  assert.deepEqual((await readdir(source)).sort(), ['author-inputs.mjs', 'package.json', 'src']);
-  assert.equal(await readFile(join(sourceDirectory, 'original.txt'), 'utf8'), 'source must stay unchanged');
-  const outside = join(root, 'outside'), outsideAlias = join(root, 'outside-alias');
-  await mkdir(outside); await symlink(outside, outsideAlias, 'dir');
-  // The plain tmpdir path also covers macOS /var -> /private canonicalization.
-  for (const [parent, name] of [[root, 'plain-author'], [outsideAlias, 'aliased-author']]) {
-    const destination = join(parent, name);
-    assert.match(invoke(destination), /AUTHOR_TEST_STOP_BEFORE_PACKAGE_MANAGER/);
-    assert.deepEqual(await readFile(join(destination, 'inputs/kit.tgz')), bytes);
-    assert.match(invoke(destination), /EEXIST/);
-  }
-  assert.deepEqual(await readdir(sourceDirectory), ['original.txt']);
 });

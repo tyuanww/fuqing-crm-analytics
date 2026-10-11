@@ -2,11 +2,116 @@
 
 适用于成果工作树的本地补丁；是否已集成，以该工作树 Git 状态和远端证据为准。授权见 [AGENTS](../../AGENTS.md)。当前施工与缺口看根 [STATUS.md](../../STATUS.md) 和 [TODOS 的 M1 核心交付](../hackathon/TODOS.md#m1-核心交付)。黑客松入口与 [治理实施记录](../hackathon/WORKFLOW-GOVERNANCE-2026-09-06.md) 是历史证据链，不是本轮任务卡。
 
+
+## 当前 PR 交付检查（2026-10-11）
+
+本轮代码、测试、CI 接线与证据已按目的分组提交，当前说明最后同步；逐组提交、原始输入及检查范围见[本地交付索引](../hackathon/evidence/shinemage-main-local-commit-closeout-20261011.md)与[机器记录](../hackathon/evidence/shinemage-main-local-commit-closeout-20261011-validation.json)。代码／边界 HEAD `d36c567e`、证据提交 `39774244`；Workbench `6c5adc9f`／`0af61dab…`、CRM `c4b1c91e`／`4663cce0…` 为当前正式包来源。下方“未提交”“两锁未应用”和历史 B0 计数保留当时范围。
+
+| 当前检查对象 | 本轮实际检查 | 证据边界 |
+|---|---|---|
+| profile／CRM／知识／Workbench／叶子包 | 当前公开包与 HTTP／React／JSDOM 消费、来源拒读和缺输入守卫分别通过 | 合成消费，不是完整宿主／浏览器或真实服务验收 |
+| 公共合同读取与执行 | 守卫 28 PASS；当前代码另实际执行 17 个生成器／测试组，全部 exit 0 | 固定三仓合同输入；旧正向证据因代码不同未复用 |
+| 正式 release 包装配／接收／服务门禁 | 53 项合成回归通过；对应 workflow 断言 1 项单列 | 没有实际发布、生产激活或新 candidate |
+| 组合准备 | 9 项准备守卫；实际九正式包／两 profile 在新独占输出中 exit 0 | 只复制已验证运行字节，不执行包代码 |
+| CI 接线与路径选择 | 实际 pipeline 坏输入 28 项、共享路径 pytest 34 项分别通过 | 非全量 pipeline，也不是远端 CI |
+| 静态边界 | 既有生成器核对通过、12 项边界测试通过 | 不代表运行时全面无源码依赖 |
+
+各组计数不相加。上述表保留分组源码检查范围，追加 worker 修复另按六文件 129 PASS、正常 hooks 当前完整后端 3237 PASS / 78 SKIP / 0 FAIL 记账；12 JUnit 没有重复。`de196938` 完整主仓 B0 `--check` exit 0，作者私有 core 归固定作者 CI，OCR 不调用外部模型。主仓已推送到 PR #119、main 祖先同步已完成；专用 Secret 实跑与四类私有 receiver 已通过，`fc46b243` 主 CI attempt 2 SUCCESS。后续 `f1f1d500` preflight 因 gh 的相对状态文件 FAIL；`f861a895` 修复后，`fe7cc54d` hosted 的 git-clean、上游准备与 runtime 创建实际 PASS，随后扫描三处模拟值失败。`5102d7ad` 只修正测试值，相关单次合跑 83 PASS / 0 FAIL / 0 SKIP，scanner 不变；新 head 的 hosted 结果按实际 PR checks 核对。当前组合 candidate/journal、目标／真实业务与模型验收仍未执行。最新输入、修复和失败见[本轮接续](../hackathon/evidence/shinemage-pr119-ci-secret-reconnect-20261011.md)，此前成功与失败按原对象留存。
+
+本地 Git 交付先检查任务范围和暂存区；任务外 `security-audit-skill/` 不检查、不纳入提交，允许其独立留存。随后按实际授权推送 feature 分支、更新对应 PR，利用现有共享路径选择执行适用 CI；PR 审查修复以追加提交交付，获合并授权后完成适用 QA 和实际门禁。不要用旧文档 PR 的绿色结果替代新源码检查，也不要为“清洁”删除证据或改写共享历史。
+
+私有正式组合工件已由实际上传 CI 生成，ID `11704150412`／SHA-256 `a98624139eb9dca81bc97ec02bdb9a7eeb756c27863e35634f68fc1dcc266371`；18 成员与原输入一致，真实 receiver 核对九包／两 profile，主仓三项 artifact variables 已配置。主仓专用 `SHINEMAGE_PLUGIN_READ_TOKEN` 已由用户保存，四仓输入在真实 runner 上读取成功；不读取 Token 值或复制个人 gh 登录。组合接收器的 gh 子进程保持受限环境，配置与状态都使用本次独占临时目录，避免 `.local/state/gh/device-id` 污染 checkout。相关固定输入回归入口为 `composition-pack-inputs.test.mjs`、`workbench-author-evidence.test.mjs`、`domain-author-evidence.test.mjs`、`public-contract-inputs.test.mjs`，须沿 pipeline 提供对应的固定 archive/合同/Python 输入，裸跑不代表完整覆盖。工件 10 月 25 日到期，之后须真实上传、核验新 ID/digest，再改变量，不能用过期 ID 或本机 ZIP 替代。
+
+此前三路径应用时点（保留原记录）：
+
+2026-10-11 三路径审修后已应用：当前锁绑定 Workbench `6c5adc9f` / `0af61dab…`、CRM `c4b1c91e` / `4663cce0…`。应用后实际主仓的 `workbench-author-evidence.test.mjs` 为 13 PASS；`competition-offline-eval.test.mjs` 为 1 个 Node 测试内 30/30 合成用例；`workbench-main-contracts.mjs` 三组分别 1/1/3 PASS，后两组仍读取旧源码。9 包/2 profile 准备及同来源 CI 绑定 exit 0，三个指定来源拒读 EPERM；空集和错误 planner 的拒绝负测留存。155/1086 是固定作者 CI 回执读取，不是本轮重跑；本轮完整 B0、新 CI、当前 candidate/宿主/业务未执行。实际固定命令、输入、沙箱范围与日志见[本轮记录](../hackathon/evidence/shinemage-three-path-main-application-20261011.md)；下方“两锁未应用”只指先前准备时点。
+
+合并后先刷新主线事实，再选择验证范围：
+
+```bash
+gh api repos/tyuanww/fuqing-crm-analytics/git/ref/heads/main
+gh run list --repo tyuanww/fuqing-crm-analytics --branch main --limit 5
+git fetch origin main
+git merge-base origin/main HEAD
+git diff --name-status "$(git merge-base origin/main HEAD)" HEAD
+```
+
+`origin/main` 是远端主线快照，当前本地 feature 分支的 `HEAD` 可能只是它的祖先；不要把本地 `HEAD` 当成已合并主线。远端 CI 的 `success`、插件仓的 fixed-inputs CI、主仓的合并检查、candidate journal 和目标宿主回执分别记账；一个层级的绿色结果不能替代另一个层级。
+
 ## 先按变更类型选验证
+
+以下迁移进度为本轮分组提交前各步记录；当前检查状态见本页“当前本地交付检查”。后续命令仍按变更类型与输入选择，不因历史全量通过就跳过新的受影响检查。
+
+主仓公共合同入口已按授权应用 12 路径，并修复重复终止进程组造成的错误覆盖；新入口隔离完整 B0 r2 exit 0：Python 855 PASS / 41 subtests PASS、23 warnings 保留，Node 27 组各自 0 FAIL / 9 次跳过。原 15 个生成器和 C0 hash 未改，主仓实际字节的守卫 28、路径 pytest 34、槽位 4、主题负测／漂移 2 分别通过，OCR 可审 11/11 与排除测试人工 1/1 已审，无开放发现。旧失败保留，主仓未提交，新 hosted CI 和当前组合准入未执行。见[本轮应用与实测](../hackathon/evidence/shinemage-public-contract-main-cutover-20261011.md)。
+
+最新作者 Workbench 6c5adc9f、CRM c4b1c91e 的正式 pack 已在隔离目录生成、读取并逐成员核对；回执分别为 0af61dab…、4663cce0…。主仓运行包／作者证据锁仍是原绑定，9 包／2 profile 的两锁前移提案已经验证但未应用；不继承旧 candidate/journal 或宿主验收。见[最新来源正式包及下一提案](../hackathon/evidence/shinemage-current-author-formal-packs-20261011.md)。产品 PARTIAL，SDK 分发 BLOCKED，release_ready=false。
+
+最新来源正式包的原公共组合已实际运行：9 PASS / 0 FAIL / 0 SKIP，18 个指定来源负对照 EPERM，运行前后 198 个受保护文件未变、自有进程组已退出；合成 HTTP 和官方 resolver 层级，不代表严格 peer／完整宿主或正式准入。两锁提案 OCR delegate 2/2 已审，无开放发现，主仓 apply --check exit 0，但仍未应用。主仓 PR #119 的已有 B0 是 SKIPPED，当前 dirty CI 未执行；见[本轮组合与两锁审查](../hackathon/evidence/shinemage-latest-formal-combination-20261011.md)。
+
+此前合同入口隔离提案准备时点（保留原记录）：
+
+主仓公共合同消费者已形成 12 路径隔离提案，尚未应用：固定三仓真实 CI 的 31 份材料，保留原 15 个生成器与 C0 hash；原生成器 15 次 exit 0，槽位 4 项、主题负测／漂移 2 项、守卫 28 项、路径 pytest 34 项分别通过，34 个指定来源负对照 EPERM。OCR 可审 11/11 与排除测试人工 1/1 已审，失败保留；提案对当前 dirty 基线 apply --check 通过。新主仓入口完整 B0／CI、candidate 与业务准入仍 NOT_RUN，旧副本及保留源码守卫不删。见[提案与真实日志](../hackathon/evidence/shinemage-public-contract-main-cutover-proposal-20261011.md)。
+
+此前合同作者交付时点（保留原记录）：
+
+三个作者仓的合同导出已提交推送，当前真实 Ubuntu PR CI 和 31 份工件来源均核对通过；Workbench/CRM 的 CI 字节码污染由单路径修复关闭，失败保留。原 15 个生成器在旧插件资料拒读下 15/15 exit 0，原槽位 4 项与主题负测/漂移 2 项各自通过，私有行为保留在作者检查。主仓新合同入口和锁尚未切换，旧副本与静态边界继续保留；不继承正式包、candidate/journal 或真实业务准入，PARTIAL / SDK 分发 BLOCKED / release_ready=false。 见[合同材料的实际作者交付](../hackathon/evidence/shinemage-generated-contracts-owner-delivery-20261011.md)。
+
+主仓领域默认入口已按授权应用完整 r2（18 路径）：以领域作者 `e78e040e` / 真实 Ubuntu PR CI `38121126913` 核对来源和实际覆盖，保留三份显式 legacy，不再在此阶段重建领域源码或执行私有几何。已应用 r2 的隔离完整 B0 r4 exit 0，Python 855 PASS / 41 subtests PASS（23 warnings 保留）；Node 26 组各自无失败，9 次跳过保留原因。前三轮缺输入与预检 PATH 失败原样保留；随后仅清理两份文件末尾空行，语法和差异检查通过。主仓还有 15 个源码合同生成入口、保留合同/缺输入守卫及静态边界扫描，旧副本不删；新主仓 CI、当前候选/真实业务未执行，代码文档未提交，PARTIAL / SDK 分发 BLOCKED / release_ready=false。见[本轮应用与完整验证](../hackathon/evidence/shinemage-board-components-main-cutover-20261011.md)。
+
+此前 Workbench 几何对接时点（保留原记录）：
+
+私有几何 `e9223289` 的实际 CI（155 文件 / 1086 PASS）已关联到新正式回执 `871fd3bb…`；当前两锁和三路径已本地应用。应用后当前 reader 13 PASS、几何 1 PASS，九包准备 CLI 和来源/回执/tar/CI 实际绑定 exit 0；20 项列明源码负对照 EPERM，旧 CI 和漏几何重封存夹具被拒绝。这些是定向验证，不是本轮新完整 B0、主仓 hosted CI 或组合准入；外部审查及历史失败状态未改。见[实际命令与输入](../hackathon/evidence/shinemage-workbench-geometry-main-bind-20261011.md)。
+
+
+上一轮领域作者交付与迁移提案准备时点（保留原记录）：
+
+领域作者本次真实 Ubuntu PR CI `38121126913` 绑定干净提交 `e78e040e`：准备守卫 4 tests/OK、记录守卫 5 PASS、几何 28 PASS、producer/输入 6 PASS，分组各自 0 FAIL / 0 SKIP。实际 artifact 的 API digest、30 个 Git 来源文件、回执命令与 4 个原日志、原封存 `22245ab9…` 和本次构建 `66d53381…` 分别核对通过。来源回执保留 job 内 NOT_VERIFIED_BY_JOB，由独立 run/jobs API 确认 SUCCESS；主仓入口迁移/新完整 B0/主仓 CI 未执行。见[当前命令和原始输入](../hackathon/evidence/shinemage-board-components-ci-ownership-delivery-20261011.md)，[本地提案及失败](../hackathon/evidence/shinemage-board-components-ci-ownership-proposal-20261011.md)保留。 下一步已形成[18 路径完整隔离提案](../hackathon/evidence/shinemage-board-components-main-cutover-proposal-20261011.md)：公开消费 8 项、证据守卫 15 项、保留合同 2 项和路径参数 3 项各自通过，21 个指定来源负对照 EPERM；OCR 可审 17/17 与排除测试的人工审查完成。r2 补丁对当前主仓 --check 通过，尚未应用，完整 B0/新主仓 CI 未执行；此前四路径读取提案保留准备时点，不叠加。
+
+board-components 本次真实 Ubuntu PR CI `38119670295` 绑定 source `d5aacdb4`：Node 24.19.0、Python 3.14.4、pnpm 11.28.2，几何 28 PASS / 0 FAIL / 0 SKIP、producer/输入 6 PASS / 0 FAIL / 0 SKIP、准备守卫 4 tests / OK。下载 artifact zip 与 API digest 相等，1951 字节领域包 `66d53381…` 的五个成员等于原封存；不累计本地 clone、push CI 或旧几何数字。主仓旧生产者另跑受影响 `package-inputs`：13 PASS / 0 FAIL / 0 SKIP，四输出符号链接拒绝回归包含其中，OCR delegate 2/2 已审。主仓源码仍未提交，完整 B0/新 CI、领域入口迁移及组合准入未执行；独立 tsc 仍 NOT_IN_CURRENT_BUILD。见[CI 原始回执](../hackathon/evidence/shinemage-board-components-remote-ci-20261011.md)、[防覆盖验证](../hackathon/evidence/shinemage-board-components-main-output-guard-20261011.md)。
+
+上一轮领域本地 Git/clone 交付时点（保留原记录）：
+
+board-components 现已从首次提交 `3855db80` 做真实 `--no-local` clone 并实跑本地配方：producer/输入 6 PASS、几何 28 PASS、准备守卫 4 tests，各自 exit 0；冻结离线安装、固定输入、build 与 5 成员核对均 exit 0。17 项列明源码负对照为 EPERM，包仍为 1955 字节 `22245ab9…`；安装链接只指向 clone 内。Ubuntu/GitHub CI、主仓迁移及独立 tsc 未运行。精确命令与日志见[领域 Git/clone 验证](../hackathon/evidence/shinemage-board-components-owner-git-delivery-20261011.md)。
+
+上一轮领域提案准备时点（保留原记录）：
+
+board-components 的本地 CI 配方在列明源码与网络拒绝条件下复核：几何 28 PASS、producer/输入 5 PASS，最终准备守卫 4 tests 无失败；28 产品路径中原八份 manifest/代码/类型/夹具未变。包 1955 字节、5 成员、`22245ab9…` 同字节；准备只下载固定 pnpm，之后离线，不构建 DSH/SDK。Ubuntu CI、Git clone、主仓迁移和独立 tsc 未执行。入口、精确命令及坏输入保留见[领域验证记录](../hackathon/evidence/shinemage-board-components-owner-proposal-20261011.md)。
+
+四插件隔离当前已消费固定正式归档：九份业务源码、九个作者仓、上游与 build-tools 拒读时 4 PASS / 0 FAIL / 0 SKIP，20 项负对照均 EPERM。公共包行为另跑 29 PASS / 0 FAIL / 0 SKIP，保留 SDK 和合成 HTTP 的明确范围；六项坏输入及 pipeline 目录复用拒绝另记，不累计。当前命令见[固定包隔离验证](#固定包隔离验证2026-10-11)，失败沙箱和当前 r2 证据见[本轮记录](../hackathon/evidence/shinemage-fixed-pack-isolation-20261011.md)。最新完整 B0、主仓 CI、宿主/candidate 和真实业务仍未运行。
+
+上一轮执行记录（installed-kit 默认迁移；历史隔离当时尚未关闭）：
+
+installed-kit 默认入口已迁到当前 kit 和固定正式包：列明九份主仓业务源码及九个原作者仓拒读条件下，两入口同次 13 PASS / 0 FAIL / 0 SKIP；实际离线安装、严格合成编译、九包开发声明及三份领域锁都执行。相邻合同另跑 24 PASS，五项坏输入拒绝及 pipeline 已有结果目录拒绝单列，不累计测试数。当前命令见[kit 与固定包验证](#当前-kit-与固定包验证2026-10-11)，原始命令、失败和边界见[本轮记录](../hackathon/evidence/shinemage-installed-kit-pack-ownership-20261011.md)。本轮完整 B0、新 CI、宿主/candidate/真实业务均未运行。
+
+上一轮执行记录（正式 preflight 包装配；下列验证只覆盖该轮字节）：
+
+正式 preflight 与 release 已改为验证固定正式包输入；当前七包源码拒读装配通过；接收端绑定由合成实际打包/接收测试验证。release 测试入口实际 539 PASS；随后仅 workflow 触发修订的 41 PASS、路径/runner 的 82 PASS 分开记录。实际只读 `preflight --check` 的 plugin-packs 通过，整体 exit 2 / BLOCKED：工作树未提交且 runtime bundle 缺失，不把此结果报整条 preflight PASS。完整 preflight、本轮最新完整 B0、新 hosted CI、当前 candidate/服务/目标/browser 仍 NOT_RUN。具体输入步骤见[正式 preflight 的固定包输入](./shinemage-plugin-update.md#正式-preflight-与-release-的固定包输入)，原始命令与失败留存见[本轮证据](../hackathon/evidence/shinemage-formal-preflight-pack-assembly-20261011.md)。
+
+上一轮执行记录（Workbench core 归属迁移；其完整 B0 只覆盖当时字节）：
+
+Workbench `d038f357` 的成功完整 CI 各自为 154 文件 / 1072 PASS，已用于生成正式回执 `9d7f6bf3…`；tarball `e41df9f5…` 与前轮同字节，当前组合锁 `89e2b2ea…`。主仓本地 B0 已改为校验固定作者 core archive、正式包身份及公开消费者，三组原业务检查分别 1/1/3；r3 exit 0，Python 855 PASS / 41 subtests PASS、Node 24 组无失败、9 次 opt-in 跳过。22 条 Python warnings 和 stderr SQLite finalization 警告原样保留；路径/runner/workflow 82 PASS、archive 守卫 13 PASS 分层记账。r1/r2 失败与最后元数据/CI 选择调整分别记录；新 hosted CI、formal preflight 源码迁移、当前 candidate/服务/目标/browser 仍未关闭。前轮 tarball 宿主结果不重标新身份。实际命令、输入和边界见[本轮证据](../hackathon/evidence/shinemage-workbench-core-formal-main-ownership-20261011.md)。
+
+以下接续段保留较早执行时点；其中旧来源、未执行和未提交结论按各自证据对象理解，当前入口与身份以本节最前面的最新记录为准。
+
+精确 Cordis `4.0.4` 的隔离修订普通包现已通过官方 npm 宿主的开启、原生关闭、恢复三进程验证：原生鉴权、合成会话保留、关闭时 CRM 路由 404、恢复后 200 且未连接。新 home/workspace、localhost 沙箱及自有进程清理均核对；旧正式包、原作者仓和 candidate/journal 不变，不能抵扣真实服务/模型或正式准入。r4 同次 16 项断言 exit 0，r3 不相加。输入、实际 CLI 命令、两轮 harness 失败及清理见[本轮记录](../hackathon/evidence/shinemage-corrected-npm-host-20261011.md)。
+
+Cordis 精确 `4.0.4` 的隔离修订现有实际严格 npm 锁解析、`npm ci --ignore-scripts --strict-peer-deps --strict-ssl=true` 和四个普通 Node 入口导入回执，三条可用补丁均 apply-check 通过。作者构建/各组测试和主仓配套合同 41 项分别记录；原仓、封存包与正式准入不变。命令、输入摘要、沙箱失败留存、OCR delegate 审查范围及应用前置条件见[提案证据](../hackathon/evidence/shinemage-cordis-exact-proposal-20261011.md)。
+
+当前 Cordis 严格解析补查使用独占根 manifest 和 npm `11.17.0` 的 `install --package-lock-only --ignore-scripts --strict-peer-deps --strict-ssl=true`，三个 r2 命令均 exit 1 / ERESOLVE，分别核对实际 Found 与冲突 peer owner；未执行实际安装。官方固定 DSH/dsh-tools 要求 `~4.0.4`，CRM/Knowledge 声明精确 `4.0.2`，不能用 linked 初始化关闭这一层。r1 证书失败与 r2 包装日志分类问题保留，readback 只读当次 debug；命令、摘要及 CA 来源见[证据](../hackathon/evidence/shinemage-cordis-strict-peer-20261011.md)。
+
+当前迁移字节的完整本地 B0 已在独立 Python 3.14.4 上执行 `node scripts/dsh-b0/pipeline.mjs --check --python /absolute/b0-python3.14`：r2 exit 0，Python 855 PASS/41 subtests PASS，Node 23 组均 0 FAIL；十次 opt-in/standalone 跳过逐条留存，不计为通过。三项 CRM_COMPOSITION 固定输入及新的输出根沿用下述准备器；上游 TypeScript/Vite 与固定 build-tools 已准备，Corepack 版本检查禁网通过。Python 必须满足 `scripts/dsh-b0/requirements.lock` 的 25 个精确版本，不能用其他服务环境替代；本次未改系统依赖。r1 的 inventory drift 失败、生成器差异、实际命令/日志和清理范围见[回执](../hackathon/evidence/shinemage-current-b0-closeout-20261011.md)。这不覆盖 --audit、新 hosted CI、正式候选或真实模型/业务；较早阶段的 B0 NOT_RUN 保留为历史。
+
+主仓 profile 生成器测试现维护于 `scripts/crm-calibration/profile.test.mjs`。默认 B0 对应组为 `node --test scripts/crm-calibration/page-composition.integration.mjs scripts/crm-calibration/knowledge-composition.integration.mjs scripts/crm-calibration/profile.test.mjs`；需下述固定两包/七包输入和新的独占输出根。源码拒读下 14 PASS / 0 FAIL / 0 SKIP，其中五项为原 profile 断言；旧 `dsh-plugins/crm-knowledge/test/profile.test.mjs` 仍可转发，兼容重跑的五项不计新增覆盖。历史命令按运行时路径保留。原始日志、断言摘要及未执行项见[测试迁移记录](../hackathon/evidence/shinemage-main-profile-test-ownership-20261011.md)；完整 B0 和新 CI 未跑。
+
+CRM/Knowledge 的包消费入口是 `scripts/crm-calibration/crm-package.integration.mjs` 与 `knowledge-package.integration.mjs`，使用同一固定两包输入和新的 `CRM_COMPOSITION_OUTPUT`。原公开断言正文保留，源码拒读下同次 11 PASS；包/profile 守卫 67 PASS、原知识/page 公共组合 9 PASS 分别通过。默认 B0 不再重建这两份本仓源码或运行作者私有 transport/graph/relay；这些文件与作者仓同字节，仍在各自 CI。缺输入、防复用、首次夹具失败及未执行范围见[迁移记录](../hackathon/evidence/shinemage-crm-knowledge-package-consumers-20261011.md)。Workbench 源码阶段和完整 B0/新 hosted CI 尚未关闭。
+
+固定 CRM/Knowledge 两包的官方安装与初始化现有本机补查：沿用 `crm-knowledge-rc2` 和正式包，官方 CLI 两次 add 均 exit 0，resolver 两次导入成功，后续宿主/preset 六项检查通过。实际 Cordis `4.0.4`，声明仍 `4.0.2`，linked peer 警告保留；r1 因错误调用 Context 清理 API 退出 1，r2 只接续宿主，不重跑安装。明确范围及原始命令见[补查记录](../hackathon/evidence/shinemage-crm-knowledge-host-compat-20261011.md)，不能抵扣完整兼容、真实服务/模型或 candidate 准入。
+
+Workbench 的内部 Host/skills、未发布视图、原生通道授权和页面交付检查在作者仓执行：固定绝对上游、build-tools、领域输入及 pnpm 入口准备好后，在该仓根运行 `node scripts/check-inputs.mjs`、`node plugin/build.mjs "$B0_BUILD_UPSTREAM" "$B0_BUILD_TOOLS"`、`node scripts/run-package-tests.mjs`。当前入口纳入六个既有作者文件；隔离 Linux 完整入口同次 30 文件、212 PASS / 0 FAIL / 0 SKIP，已包含新两文件的 8 项，边界 5 PASS 另记。SDK 输入沿用前轮锁与本地已准备闭包，不能写成全新 SDK 安装或远端 CI。主仓仍保留七个旧生产者入口，作者提交和 CI 交付后再迁移重复执行；当前见[作者测试补齐](../hackathon/evidence/shinemage-workbench-author-tests-closeout-20261011.md)，前轮 204、输入保护与锁扩展见[历史记录](../hackathon/evidence/shinemage-workbench-producer-ownership-20261011.md)。
 
 | 变更 | 先跑什么 | 不自动扩大到什么 |
 |---|---|---|
-| 一个独立插件 | 插件仓自己的 frozen install、build、包级测试、内容摘要和边界负测；主仓只跑受影响合同 | 不重建 DSH、不迁移数据库、不把插件测试写成生产或全量 SDK 通过 |
+| 一个独立插件 | 插件仓自己的 frozen install、build、包级测试、内容摘要和边界负测；主仓只跑受影响合同，并核对 profile/allowlist → pack SHA → candidate/journal 链 | 不重建 DSH、不迁移数据库、不把插件测试写成生产或全量 SDK 通过 |
 | DSH pin、host、profile 或跨插件合同 | 固定上游的 B0、host/合同矩阵、candidate 输入和相应 CI | 不继承旧包、旧 WSL/浏览器回执或浮动 `latest` |
 | 服务/API/权限合同 | 服务包与兼容窗口、权限/幂等/回放和受影响插件组合 | 不读取真实 DuckDB、不连接杭州或 WeKnora 生产 |
 | 仅文档/证据 | 差异、链接、当前 SHA 和未执行项检查 | 不用旧 PASS 数替代当前运行 |
@@ -15,7 +120,30 @@
 
 ## 单一检查定义
 
+2026-10-11 的本地 CRM/知识 profile 包输入迁移使用 `node --test --test-concurrency=1 scripts/crm-calibration/profile-packs.test.mjs dsh-plugins/crm-knowledge/test/profile.test.mjs scripts/release/profile-packs.test.mjs`，38 PASS / 0 FAIL / 0 SKIP；release 的 pack/candidate/host 结构回归另有 58 PASS，不相加为总体通过。真实两包的配置准备在禁网、主仓业务源码与原作者仓拒读条件下通过，未启动服务/宿主，没有新的 candidate 或 journal。命令、失败留存和输入摘要见[本轮证据](../hackathon/evidence/shinemage-crm-profile-pack-migration-20261011.md)。新测试已登记到 B0 pipeline；本轮完整 B0 与新字节的远端 CI 未运行。
+
 `scripts/ci/pre_push_path_class.py:verification_plan` 定义互相独立的 backend/B0/frontend/tooling/dependencies/deployment 维度，依赖审计细分为 python_dependencies/frontend_dependencies，另有 ground_truth 与 filterbuilder 触发轴；`scripts/ci/run_checks.py` 生成并执行命令。本地 pre-push、PR 的 Python/Vue/B0 检查共用它；PR CI 只通过 `lint.yml` 调用一次 `check-plan.yml`。`dsh-b0.yml` 仅 `workflow_dispatch` 做空机器 `--prepare`。B0 的本地与 CI 构建始终调用既有 `scripts/dsh-b0/pipeline.mjs`。`merge-gate` 在路径计划失败或已选 job 失败/取消时阻断；skip 不算失败。分支保护属于远端配置；2026-09-09 核验已包含 `b0-contract-build` 和 `merge-gate`，本轮不调整必需检查。
+
+本地固定包供应使用 `node scripts/ci/composition-pack-inputs.mjs --archive /absolute/composition-packs.zip --output /new/private/composition --python /absolute/python3.14`，随后使用回执中三项环境变量跑公共合同组合或 B0。缺输入、旧结果目录和摘要漂移在源码构建前失败。新准备器的坏输入/归档/权限守卫已登记到 pipeline；本轮五文件合同检查 54 PASS、tooling 路径轴 189 PASS、准备后公共合同组合 9 PASS 分开记账。三个 hosted workflow 已接线，但尚无固定 artifact 和专用读取权限配置，未报 hosted CI 或完整 B0 PASS。命令及原始日志见[CI 包输入证据](../hackathon/evidence/shinemage-ci-pack-inputs-20261011.md)。
+
+Workbench 工具卡/取消/保存/首购/资产弹层及原生 prompt 注入的客户端消费组现在可运行：
+
+```bash
+node --test --test-concurrency=1 scripts/dsh-b0/workbench-client-pack.integration.mjs \
+  scripts/dsh-b0/workbench-tool-cards.integration.mjs scripts/dsh-b0/workbench-query-cancel.integration.mjs \
+  scripts/dsh-b0/workbench-query-save.integration.mjs scripts/dsh-b0/workbench-asset-overlay.integration.mjs \
+  scripts/dsh-b0/workbench-first-purchase-card.integration.mjs scripts/dsh-b0/workbench-first-purchase-save.integration.mjs \
+  scripts/dsh-b0/workbench-query-fault.integration.mjs \
+  scripts/dsh-b0/workbench-native-prompt.integration.mjs
+```
+
+沿用上述固定 page 包输入、绝对上游/Python 和新的结果根。九个消费 scope 均不可复用，pipeline 预检覆盖全部目录；新增 `workbench-native-prompt` 使用实际固定 Cordis `4.0.4`。九入口同次实跑 66/0/0，输入/九 scope 守卫 18/0/0 分开记账。前轮八入口 56、相关回归 105 和源码检查 4 保留在[历史接续](../hackathon/evidence/shinemage-workbench-consumer-contracts-20261011.md)，不重复相加。SSR/JSDOM/合成 RPC/fake fetch 不属于完整宿主、Chrome、真实会话或正式服务；来源、原断言和失败修复见[原生 prompt 消费记录](../hackathon/evidence/shinemage-workbench-native-prompt-pack-20261011.md)。
+
+Workbench 发布客户端消费入口为 `node --test --test-concurrency=1 scripts/dsh-b0/workbench-client-pack.integration.mjs`。复用上述准备回执的 `CRM_COMPOSITION_PAGE_INPUTS`，设置新的绝对 `CRM_COMPOSITION_OUTPUT`、`B0_BUILD_UPSTREAM` 和 `FQ_B0_PYTHON`；`workbench-client` 子目录不得复用。12 项原 factory/生命周期检查在列明源码拒读条件下通过，9 项新增守卫及既有回归 97 PASS 分开记账。Host 入口仍在源码阶段；不代表 Chrome、原生 Settings、完整宿主或 candidate 验收。见[本轮证据](../hackathon/evidence/shinemage-workbench-client-pack-migration-20261011.md)。
+
+叶子包消费入口为 `node --test --test-concurrency=1 scripts/dsh-b0/leaf-pack-composition.integration.mjs scripts/dsh-b0/legacy-geometry-exports.test.mjs`。使用上述准备回执的 `CRM_COMPOSITION_PAGE_INPUTS`，设置新的 `CRM_COMPOSITION_OUTPUT`、绝对 `B0_BUILD_UPSTREAM`、`B0_BUILD_TOOLS` 和 `FQ_B0_PYTHON`；固定 TypeScript 仅用于主仓消费公开声明。`leaf`、`geometry` 结果子目录不可复用；默认 pipeline 已检查这两个子目录并登记入口。在列明业务/作者源码拒读条件下 20 PASS / 0 FAIL / 0 SKIP，输入及既有回归 88 PASS 分开记账，负对照和失败留存见[本轮记录](../hackathon/evidence/shinemage-leaf-pack-migration-20261011.md)。这不关闭原生浏览器、完整宿主、candidate 或默认 B0 的剩余源码阶段。
+
+同批路径矩阵的本地续跑：前端构建和 29 文件 223 单测通过，release source/archive 回归 41 PASS；backend 用既有 bounded runner 覆盖全部 298 个 synthetic-not-slow 目标，互不重叠成功组的唯一 JUnit 用例为 3223 PASS / 78 SKIP / 0 FAIL / 0 ERROR。失败组不计入成功统计。backend 运行后 ZIP helper 的 assert 改成明确拒绝，另跑最新 54 项守卫（含 `-O`）和 Ruff；backend 源码/测试未改。三次环境失败和隔离 Python 的固定 wheel 安装记录均保留。依赖审计与 Docker 是单独 CI job，本地 shared runner 不执行它们，本批仍 NOT_RUN；完整 B0 和 hosted CI 也未执行。
 
 | 改动 | 选择与边界 |
 |---|---|
@@ -71,9 +199,52 @@ python3 scripts/run_backend_tests_bounded.py backend/tests/test_local_demo_acces
 
 包含 B0/Vue 的检查会先核对 Node 24，再运行耗时步骤；手工入口可用 `--node /absolute/node` 选择已有解释器。Git hook 继承调用 shell 的 PATH，需要在该次操作中选用已有 Node 24，不自动安装或修改全局版本。已验证 `package-manager-env.test.mjs` 的工具定位和拒绝行为，B0 `--check` 还需现有 zstd：从调用方 PATH 定位，验证版本后将其解析后的工具目录附加到精简环境，缺失/不可运行时提前返回 `B0_ZSTD_REQUIRED`；不继承其他环境变量、不自动安装。ruff 锁 `0.16.9`（以 `requirements-lock.txt` 为准），`pyproject.toml` 的 `lint.select` 为 `E4/E7/E9/F`（0.15 默认集）；不要用无 select 的 `ruff check .` 去套 0.16 的 413 条默认规则。
 
-DSH 本地开发可直接用 `./scripts/dsh-dev/run.sh diagnose`、`check` 和 `probe`；包装器读取 `.nvmrc` 约定并自动选择 Node 24.19.0，不修改系统 Node。没有标准 Homebrew 路径时设置 `DSH_DEV_NODE=/absolute/node24`。
+DSH 本地开发包装器读取 `.nvmrc` 并选择 Node 24.19.0，不修改系统 Node；非标准安装可设置 `DSH_DEV_NODE=/absolute/node24`。`diagnose` 只读。当前本地迁移要求 `check` / `start` / `reload` 在启用插件时传入 `--pack-inputs /absolute/inputs.json`，或为每个启用功能显式传入已构建目录；没有主仓插件源码回退。安装和 reload 预检还需 PATH 上已有固定 pnpm `11.28.2`，禁止 Corepack 联网。输入合同见[插件更新指南](./shinemage-plugin-update.md#开发入口消费固定包2026-10-11-本地迁移)和[准备阶段证据](../hackathon/evidence/shinemage-profile-pack-migration-20261011.md)。最新[宿主依赖修复记录](../hackathon/evidence/shinemage-official-pack-host-closeout-20261011.md)分别记录原正式包安装成功/激活失败、修改 manifest 的隔离重启诊断、Workbench 本地 Linux 严格构建及主仓 114 项定向回归；这些结果不属于 PR #119、正式 candidate 或完整 B0。live CLI reload 仍未执行。
 
-B0 独立入口：`node scripts/dsh-b0/pipeline.mjs --check --python /absolute/python3.14`；不带参数或传 `--help` 会打印用法，不启动任何服务。`--prepare` 会下载固定上游、先用锁文件完整预热 pnpm store，再安装构建依赖；`--audit` 只对已准备的 build-tools 闭包执行在线高危审计；二者属于明确动作，preflight 会把审计作为独立 fail-closed 阶段记录，网络异常时可单独重试。插件 `package.json` 的 `test` 是部分源测试便捷入口，`test:built` 也只有一个子集，均不能作为完整 B0 通过声明。原生查询资产需显式 `node scripts/dsh-b0/serve.mjs --python /absolute/python3.14 --native-query-assets`，不替代默认 `--native-query`。离线分析/驾驶舱合同用 `scripts/dsh-b0/analysis-contract.mjs` 与 `cockpit-contract.mjs`，不启动旧 CRM。旧 Vue 的依赖由 `frontend-vue3/package-lock.json` 管理，B0 的固定版本由 toolchain/自身锁管理，旧后端由 requirements-lock 管理；此轮未升级依赖。
+本轮独立包组合入口：`node --test --test-concurrency=1 scripts/crm-calibration/knowledge-composition.integration.mjs scripts/crm-calibration/page-composition.integration.mjs`，需绝对 `B0_BUILD_UPSTREAM`、`FQ_B0_PYTHON`、`CRM_COMPOSITION_PACK_INPUTS`、`CRM_COMPOSITION_PAGE_INPUTS` 和新的 `CRM_COMPOSITION_OUTPUT`。实际固定包公共合同 9 PASS / 0 FAIL / 0 SKIP；输入/profile/包守卫 47 PASS，迁移夹具的旧源码兼容 78 PASS，各自记账。运行身份、Cordis 解析、源码 EPERM、12 个自有端口回收及失败记录见[组合证据](../hackathon/evidence/shinemage-fixed-pack-composition-20261011.md)。缺输入不静默跳过，旧兼容测试入口现在也要求这些固定包输入。默认 pipeline 的其他源码装配与 CI 输入接通仍开放，未执行本批完整 B0；运行组合通过不等于官方完整宿主、浏览器或 candidate 准入通过。
+
+## B0 固定包和作者证据输入
+
+完整 `--check` 要求组合包、Workbench 作者 CI、领域作者 CI 和公共合同输入四类固定材料。路径必须是绝对路径且材料已准备；主仓不以旧测试摘要、作者目录或源码回退补齐。
+
+| 输入 | 实际绑定 |
+|---|---|
+| `CRM_COMPOSITION_PACK_INPUTS` / `CRM_COMPOSITION_PAGE_INPUTS` | `config/shinemage-composition-packs.lock.json` 的九份正式包及两 profile |
+| `WORKBENCH_AUTHOR_CI_ARCHIVE` | `config/workbench-author-evidence.lock.json`，当前来源 `6c5adc9f`，实际作者 core 155 文件／1086 PASS，与 page 正式包来源一致 |
+| `DOMAIN_AUTHOR_CI_ARCHIVE` | `config/domain-author-evidence.lock.json`，来源 `e78e040e`、参考领域 tarball `22245ab9…`，并与主仓固定领域输入同字节 |
+| `PUBLIC_CONTRACT_INPUTS` | `config/public-contract-inputs.lock.json` 的 Workbench／CRM／Brand 三份归档与 31 份公共材料；JSON 合同为 `shinemage-public-contract-inputs/v1` |
+
+组合准备回执提供两份输入 JSON。公共合同输入 JSON 的 `archives` 分别使用 `workbench`、`crm`、`brand` 键，值为对应固定 ZIP 的绝对路径。作者归档、合同材料与运行 tarball 是不同对象，各自按锁核对；不要把 CI 普通 content pack 替代正式包回执。
+
+已封存输入可离线复用。准备本次拥有、已创建且为空的绝对输出根；Python 3.14.4 环境须满足 `scripts/dsh-b0/requirements.lock`，主仓 kit 的固定 build-tools、上游 checkout、pnpm 缓存、zstd 及 `.context/dsh-b0/package-inputs/` 的原领域 tarball 也须已准备。现有流水线内部绑定 kit build-tools 与该领域输入目录，不从其他作者仓搜索缺项。
+
+```bash
+export B0_BUILD_UPSTREAM=/absolute/pinned-dsh-checkout
+export CRM_COMPOSITION_PACK_INPUTS=/absolute/prepared/crm-inputs.json
+export CRM_COMPOSITION_PAGE_INPUTS=/absolute/prepared/page-inputs.json
+export CRM_COMPOSITION_OUTPUT=/absolute/new-empty-owned-output
+export WORKBENCH_AUTHOR_CI_ARCHIVE=/absolute/sealed/workbench-author-ci.zip
+export DOMAIN_AUTHOR_CI_ARCHIVE=/absolute/sealed/domain-author-ci.zip
+export PUBLIC_CONTRACT_INPUTS=/absolute/sealed/public-contracts/inputs.json
+node scripts/dsh-b0/pipeline.mjs --check --python /absolute/locked-python3.14
+```
+
+缺归档、摘要／来源不符、core 失败／跳过、领域输入不匹配或已有结果 scope 均在构建或服务执行前失败；作者私有几何须在实际 plan 中出现。主仓不重复运行作者 core／领域私有几何，公共合同在独占暂存目录执行原 15 个生成器及两个测试组；另两组旧 Workbench 断言、保留守卫和静态扫描仍读取源码，不能据此宣称整条 B0 已无源码依赖。
+
+需要从 GitHub 重新取得这些锁定归档时，调用方先提供具有各选定私有仓 Actions 读取权限的 `GH_TOKEN`，再在获准的联网输入准备步骤使用三个独立的新输出根：
+
+```bash
+node scripts/ci/workbench-author-evidence.mjs \
+  --output /absolute/new-workbench-input-root --python /absolute/python3.14
+node scripts/ci/domain-author-evidence.mjs \
+  --output /absolute/new-domain-input-root --python /absolute/python3.14
+node scripts/ci/public-contract-inputs.mjs \
+  --output /absolute/new-contract-input-root --python /absolute/python3.14
+```
+
+分别使用前两项输出中的 `author-ci.zip` 和第三项的 `inputs.json` 设置环境变量。三个准备器均支持 `--github-env "$GITHUB_ENV"` 供已有 CI 接线使用；它们不启动宿主，`--check` 本身不下载输入。当前日期不能沿用旧 Workbench 归档的到期时间；联网准备以实际 API 的成功 run、digest 和未过期状态为准。本轮只验证封存材料读取、当前绑定及守卫，新获取 CLI／主仓 hosted CI 未执行。artifact 临时保留不是长期分发，长期使用仍需持久输入及授权。
+
+B0 独立入口：上述 `node scripts/dsh-b0/pipeline.mjs --check --python /absolute/python3.14` 使用完整固定输入；不带参数或传 `--help` 会打印用法，不启动任何服务。`--prepare` 会下载固定上游、先用锁文件完整预热 pnpm store，再安装构建依赖；`--audit` 只对已准备的 build-tools 闭包执行在线高危审计；二者属于明确动作，preflight 会把审计作为独立 fail-closed 阶段记录，网络异常时可单独重试。插件 `package.json` 的 `test` 是部分源测试便捷入口，`test:built` 也只有一个子集，均不能作为完整 B0 通过声明。原生查询资产需显式 `node scripts/dsh-b0/serve.mjs --python /absolute/python3.14 --native-query-assets`，不替代默认 `--native-query`。离线分析/驾驶舱合同用 `scripts/dsh-b0/analysis-contract.mjs` 与 `cockpit-contract.mjs`，不启动旧 CRM。旧 Vue 的依赖由 `frontend-vue3/package-lock.json` 管理，B0 的固定版本由 toolchain/自身锁管理，旧后端由 requirements-lock 管理；此轮未升级依赖。
 
 已有固定版本工具链可通过环境变量 `B0_BUILD_UPSTREAM=/absolute/prepared/upstream` 供 `--check` 只读复用。仍强制验证上游 SHA、锁文件、SDK 与类型版本；不下载、不升级。上游 Git 核对禁用 optional locks、fsmonitor 和调用方全局/系统配置，避免只读输入的 index 被刷新。该覆盖不允许用于 `--prepare`。固定缓存准备、当前集成完整 B0 与 opt-in 服务补跑的实际结果见[2026-10-08 接续记录](../hackathon/evidence/shinemage-abc-resume-20261008.md)，不使用历史测试数替代。
 
@@ -177,7 +348,7 @@ node scripts/dsh-dev/cockpit-ai-eval.mjs \
 
 入口复用所指实例当前模型，不读取或复制模型密钥，不启动、重启或切换服务。它创建临时合成目录和唯一原生 preset，限制文件工具与路径；分别跑三项修改和两项越界拒绝，使用真实 `TASK.md`、原生双轮提示、`present`、产品收取/确认及独立连接读回。失败立即停止后续场景，只取消自己创建的会话；临时 preset 结束时清理，失败与候选证据保留在报告所指目录。当前费用未知时记 `null`，有用量则记录实际 token，不伪造费用。这个门禁不自动加入 CI，也不替代完整宿主浏览器或用户真实文件 UAT。纯合成的评估器回归为 `backend/tests/test_cockpit_ai_eval.py` 和 `scripts/dsh-dev/cockpit-ai-eval-guard.test.mjs`，不调用模型。
 
-`DSH_DEV_UPSTREAM=/absolute/pinned/upstream node --test scripts/dsh-dev/*.test.mjs` 检查开发入口及 supervisor 失败清理，需 4325/4327 空闲；不停止现有监听。原生 UI-only 开关使用 `scripts/dsh-dev/cli.mjs start --plugin on|off`，与 B0 pipeline 分层。
+`FQ_B0_PYTHON=/absolute/python3.14 DSH_DEV_UPSTREAM=/absolute/pinned/upstream node --test scripts/dsh-dev/*.test.mjs scripts/release/profile-packs.test.mjs` 检查开发入口、包合同和 supervisor 失败清理；PATH 要包含实际 Python 3.14 与 `lsof`，不停止现有监听。开启插件时，原生 UI-only 入口还需 `--pack-inputs` 或完整显式目录。`native-composition-browser-probe.mjs` 现在要求绝对 `DSH_DEV_PACK_INPUTS`，没有该输入时在启动合成服务之前拒绝；本轮没有运行该浏览器探针。上述检查与完整 B0、正式 candidate/host/target 验收分别记账。
 
 B0 `serve.mjs --python /absolute/python3.14 --port-base 4335 --native-first-purchase` 使用 4335–4339；gateway 与 rpc 从同工作树 `current.json` 读取端口，三者均在隔离 worktree 执行。`B0_BUILD_UPSTREAM` 可只读复用固定 checkout。Loader 测试默认使用独立 4326，支持 `B0_PORT_BASE=4335` 选择 4336；端口忙直接失败，不停止用户演示。完整基座 Settings 的插件清单为只读，启停在启动配置层验证。
 
@@ -255,6 +426,54 @@ T3/T7 的 `backend/tests/test_analytics_first_purchase_save_recovery.py` 纳入�
 兼容门禁回归由 `pnpm dsh test` 统一执行；定向入口为 `node --test scripts/release/service-compatibility.test.mjs scripts/release/plugin-candidate.test.mjs scripts/release/release.test.mjs scripts/release/promotion-retry.test.mjs`。这些测试使用自有临时目录，实际走 pack/receive/install/activate/rollback 与 journal，验证错误版本、旧 writer、篡改/缺证据、特殊文件、绑定丢失和幂等重试；验证器测试夹具不冒充真实兼容回执。真实源码对观测需另运行上段命令，本次结果见[门禁证据](../hackathon/evidence/dsh-g0-service-gate-20261004.md)。
 
 ### 插件开发 kit 验证
+
+#### 当前 kit 与固定包验证（2026-10-11）
+
+当前 `plugin-kit.test.mjs` 真实打包并离线安装 kit，再通过已安装的公共 `bindToolchain` 严格编译自有合成领域消费者；它不读取九个业务插件源码，也不重跑各作者仓私有测试。`installed-kit-packs.integration.mjs` 消费既有准备回执的两包与七包输入，核对九包开发 kit 声明及 Workbench/funnel/waterfall 的领域锁。输入必须来自已审的正式包；只设置路径不等于材料已准备。
+
+```bash
+export B0_BUILD_UPSTREAM=/absolute/pinned-rc2-checkout
+export B0_BUILD_TOOLS=/absolute/reviewed-build-tools
+export DSH_PACKAGE_INPUTS=/absolute/fixed-domain-inputs
+export COREPACK_HOME=/absolute/prepared-corepack-cache
+export COREPACK_ENABLE_NETWORK=0
+export COREPACK_ENABLE_AUTO_PIN=0
+export FQ_B0_PYTHON=/absolute/python3.14
+export CRM_COMPOSITION_PACK_INPUTS=/absolute/prepared/crm-inputs.json
+export CRM_COMPOSITION_PAGE_INPUTS=/absolute/prepared/page-inputs.json
+export CRM_COMPOSITION_OUTPUT="$(mktemp -d "${TMPDIR:-/tmp}/shinemage-kit-consumers.XXXXXX")"
+node --test --test-concurrency=1 \
+  scripts/dsh-b0/plugin-kit.test.mjs \
+  scripts/dsh-b0/installed-kit-packs.integration.mjs
+```
+
+使用固定 Node 24.19.0、Python 3.14.4、pnpm 11.28.2 和上游 `477b4f42`；领域 tarball 必须匹配既有 `22245ab9…` 摘要。`CRM_COMPOSITION_OUTPUT` 是实际新建且非 symlink 的目录，`installed-kit-packs` 子目录不得复用；该子目录也纳入 pipeline 的启动前拒绝检查。缺 SDK 时 kit 合成编译会明确 SKIP/NOT_RUN，缺正式包则消费者失败，均不能报同次全部通过。最新实际 source-denied r2 为 13 PASS / 0 FAIL / 0 SKIP，五项坏输入和 pipeline 复用拒绝另记；相邻三个合同入口为 24 PASS，不相加。
+
+以下十消费者、冷准备与版本试验描述保留较早执行时点。它们原来的十源码函数体已逐字节转存到 `scripts/dsh-b0/plugin-kit-source-fixture.legacy.mjs`；如需复现该历史夹具，使用显式 `node --test scripts/dsh-b0/plugin-kit-source-fixture.legacy.mjs` 和对应的完整固定输入，不能再把旧命令中的 `plugin-kit.test.mjs` 当作十消费者入口。本轮 legacy、缩减 SDK 路径、包管理器候选试验及完整 B0 均未运行。原记录不改写为本轮通过，当前证据见[kit 归属迁移](../hackathon/evidence/shinemage-installed-kit-pack-ownership-20261011.md)。
+
+#### 固定包隔离验证（2026-10-11）
+
+沿用上述已审的 `CRM_COMPOSITION_PACK_INPUTS`、`CRM_COMPOSITION_PAGE_INPUTS` 和固定 Python；另建实际、非 symlink 的结果根。包接收本身无需上游或 build-tools，不执行 peer 安装。四份归档分别写入 `package-isolation/<plugin>/`，成员和字节来自原正式 tarball；完整回执仅在四项都完成后生成。
+
+```bash
+export CRM_COMPOSITION_OUTPUT="$(mktemp -d "${TMPDIR:-/tmp}/shinemage-pack-isolation.XXXXXX")"
+node --test scripts/dsh-b0/plugin-isolation.test.mjs
+```
+
+当前源码和 SDK/build-tools 拒读 r2 为 4 PASS / 0 FAIL / 0 SKIP。原源码构建与私有测试归作者仓，不由这四项替代；其实际运行记录按独立作者证据查阅。继续验证包的公开行为时，准备同样的显式固定 `B0_BUILD_UPSTREAM`、`B0_BUILD_TOOLS`，使用既有入口：
+
+```bash
+node --test --test-concurrency=1 \
+  scripts/dsh-b0/leaf-pack-composition.integration.mjs \
+  scripts/crm-calibration/crm-package.integration.mjs \
+  scripts/crm-calibration/knowledge-package.integration.mjs
+```
+
+该组需要固定 SDK 可读；本轮在九份业务源码与九个作者仓拒读、仅 localhost 网络放行条件下为 29 PASS / 0 FAIL / 0 SKIP，HTTP/DOM 是合成夹具，不属于完整宿主、浏览器或严格 npm peer 安装。`leaf`、`crm-package`、`knowledge-package` 与 `package-isolation` 结果子目录均不得复用，后续完整 pipeline 必须另建新的结果根。六项坏输入和启动前复用拒绝见[原始证据](../hackathon/evidence/shinemage-fixed-pack-isolation-20261011.md)。
+
+#### 较早开发 kit 执行记录
+
+其中 `plugin-isolation.test.mjs` 的四源码构建描述也属于历史：原体逐字节转存到 `plugin-source-isolation.legacy.mjs`，只能通过显式 `node --test scripts/dsh-b0/plugin-source-isolation.legacy.mjs` 复现；当前同名测试只接收正式归档。本轮没有运行该 legacy 入口，不能把下面旧源码测试结果归给新包或当前完整 B0。
 
 当前工具链 `dsh-b0-toolchain/v2` 区分 `upstream_pnpm`（官方固定源码构建）与 `pnpm`（自有插件/kit/build-tools）；必须是两个精确声明，旧 schema 不隐式推断。Node 24 下运行 `package-manager-env.test.mjs` 验证同一 shim 按 cwd 使用两套实际版本、13 个自有清单与冻结安装行为；调用 PATH 须能定位已安装 zstd，Corepack 缓存须预先含两个固定版本。SDK 首次准备记录两者，生产 runtime 的 provenance 仍记录上游版本。
 

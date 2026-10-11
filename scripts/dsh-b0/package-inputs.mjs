@@ -1,13 +1,13 @@
-/** Bind declared immutable library inputs for source tests; never build a sibling. */
-import { readdir } from 'node:fs/promises';
-import { resolve, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { bindPackagedDependencies } from '../../dsh-plugins/plugin-kit/packaged-dependencies.mjs';
-
-const root = fileURLToPath(new URL('../..', import.meta.url));
-const inputs = resolve(process.argv[2] ?? process.env.DSH_PACKAGE_INPUTS ?? join(root, '.context/dsh-b0/package-inputs'));
-for (const entry of await readdir(join(root, 'dsh-plugins'), { withFileTypes: true })) {
-  if (!entry.isDirectory()) continue;
-  const bound = await bindPackagedDependencies(join(root, 'dsh-plugins', entry.name), inputs);
-  if (bound.length) console.log(JSON.stringify({ consumer: entry.name, scope: 'packed-build-input', packages: bound }));
-}
+/** Public fixed-package input check; the old source-wide binder is explicit legacy. */
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { readDomainComposition } from './domain-package-inputs.mjs';
+const owned = await mkdtemp(join(tmpdir(), 'domain-public-inputs-'));
+try {
+  const result = await readDomainComposition({ archivePath: process.env.DOMAIN_AUTHOR_CI_ARCHIVE,
+    packageInputs: process.argv[2] ?? process.env.DSH_PACKAGE_INPUTS,
+    pageInputsPath: process.env.CRM_COMPOSITION_PAGE_INPUTS, python: process.env.FQ_B0_PYTHON, output: join(owned, 'published') });
+  console.log(JSON.stringify({ scope: 'actual-formal-consumer-inputs', source: result.evidence.source_sha,
+    packages: result.lockSource.packages, private_source_execution: 'NOT_RUN_AUTHOR_OWNED', release_ready: false }));
+} finally { await rm(owned, { recursive: true, force: true }); }

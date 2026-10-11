@@ -1,0 +1,308 @@
+{
+  "schema_version": "shinemage-crm-profile-pack-migration/v1",
+  "at": "2026-10-10T20:27:25.268925+00:00",
+  "main": {
+    "head": "5390667cc990fa558b0445aa455b086d325a6c77",
+    "branch": "codex/shinemage-abc-local-candidate",
+    "commit": "NOT_RUN",
+    "push": "NOT_RUN",
+    "staged": ""
+  },
+  "scope": "formal-pack-bound-profile-preparation",
+  "inputs": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-crm-profile-pack-20261011-53qebpgs/fixed-inputs.json",
+    "bytes": 2128,
+    "sha256": "648761d4203f589a910e5786273e15345784444a288282d3d396f97ec293a570"
+  },
+  "profile_source_sha256": "7ca3511663ab2ea5d1bb8f839c83b29f5bbd6655238450ad08a04510642191ba",
+  "proof": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-crm-profile-pack-20261011-53qebpgs/profile-proof-r1.json",
+    "bytes": 6754,
+    "sha256": "04ec75b3445a684edfeb43c3186312589f6bfc38366128413797b17c4a100cba"
+  },
+  "negative_and_preparation_rows": [
+    {
+      "label": "deny-main-crm",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-crm-profile-pack-20261011-53qebpgs/source-deny.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--input-type=module",
+        "-e",
+        "import fs from 'node:fs';try{fs.readFileSync(\"/Users/hutou/Desktop/ai-engineering/\\u5386\\u53f2\\u9879\\u76ee/fuqin-date/fuqing-crm-analytics/dsh-plugins/crm-knowledge/src/index.ts\");process.exitCode=7;}catch(e){console.log(e.code);if(e.code!=='EPERM')process.exitCode=8;}"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "status": "PASS"
+    },
+    {
+      "label": "deny-main-knowledge",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-crm-profile-pack-20261011-53qebpgs/source-deny.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--input-type=module",
+        "-e",
+        "import fs from 'node:fs';try{fs.readFileSync(\"/Users/hutou/Desktop/ai-engineering/\\u5386\\u53f2\\u9879\\u76ee/fuqin-date/fuqing-crm-analytics/dsh-plugins/knowledge/src/graph.mjs\");process.exitCode=7;}catch(e){console.log(e.code);if(e.code!=='EPERM')process.exitCode=8;}"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "status": "PASS"
+    },
+    {
+      "label": "deny-author-crm",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-crm-profile-pack-20261011-53qebpgs/source-deny.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--input-type=module",
+        "-e",
+        "import fs from 'node:fs';try{fs.readFileSync(\"/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/dsh-crm-knowledge/plugin/package.json\");process.exitCode=7;}catch(e){console.log(e.code);if(e.code!=='EPERM')process.exitCode=8;}"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "status": "PASS"
+    },
+    {
+      "label": "prepare-r1",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-crm-profile-pack-20261011-53qebpgs/source-deny.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/scripts/crm-calibration/prepare-profile.mjs",
+        "--output",
+        "/Users/hutou/.codex/tasks/shinemage-crm-profile-pack-20261011-53qebpgs/assets-r1",
+        "--pack-inputs",
+        "/Users/hutou/.codex/tasks/shinemage-crm-profile-pack-20261011-53qebpgs/fixed-inputs/inputs.json"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "status": "PASS"
+    },
+    {
+      "label": "existing-output-r1",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-crm-profile-pack-20261011-53qebpgs/source-deny.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/scripts/crm-calibration/prepare-profile.mjs",
+        "--output",
+        "/Users/hutou/.codex/tasks/shinemage-crm-profile-pack-20261011-53qebpgs/assets-r1",
+        "--pack-inputs",
+        "/Users/hutou/.codex/tasks/shinemage-crm-profile-pack-20261011-53qebpgs/fixed-inputs/inputs.json"
+      ],
+      "exit": 1,
+      "expected_exit": 1,
+      "status": "PASS"
+    },
+    {
+      "label": "mixed-root-r1",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-crm-profile-pack-20261011-53qebpgs/source-deny.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/scripts/crm-calibration/prepare-profile.mjs",
+        "--output",
+        "/Users/hutou/.codex/tasks/shinemage-crm-profile-pack-20261011-53qebpgs/mixed-output",
+        "--pack-inputs",
+        "/Users/hutou/.codex/tasks/shinemage-crm-profile-pack-20261011-53qebpgs/fixed-inputs/inputs.json",
+        "--plugin",
+        "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/crm-knowledge"
+      ],
+      "exit": 1,
+      "expected_exit": 1,
+      "status": "PASS"
+    },
+    {
+      "label": "bad-manifest-r1",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-crm-profile-pack-20261011-53qebpgs/source-deny.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/scripts/crm-calibration/prepare-profile.mjs",
+        "--output",
+        "/Users/hutou/.codex/tasks/shinemage-crm-profile-pack-20261011-53qebpgs/bad-output",
+        "--pack-inputs",
+        "/Users/hutou/.codex/tasks/shinemage-crm-profile-pack-20261011-53qebpgs/bad-inputs/inputs.json"
+      ],
+      "exit": 1,
+      "expected_exit": 1,
+      "status": "PASS"
+    },
+    {
+      "label": "missing-input-r1",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-crm-profile-pack-20261011-53qebpgs/source-deny.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/scripts/crm-calibration/prepare-profile.mjs",
+        "--output",
+        "/Users/hutou/.codex/tasks/shinemage-crm-profile-pack-20261011-53qebpgs/missing-output",
+        "--pack-inputs",
+        "/Users/hutou/.codex/tasks/shinemage-crm-profile-pack-20261011-53qebpgs/missing.json"
+      ],
+      "exit": 1,
+      "expected_exit": 1,
+      "status": "PASS"
+    }
+  ],
+  "logs": [
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-crm-profile-pack-20261011-53qebpgs/contracts-r1.log",
+      "bytes": 7566,
+      "sha256": "47efbbf147475f99a95e95e8f50df9ea9c0285708de5c0e390015c2b7722ba79",
+      "exit_code": 1,
+      "counts": {
+        "tests": 37,
+        "pass": 35,
+        "fail": 2,
+        "skipped": 0
+      }
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-crm-profile-pack-20261011-53qebpgs/contracts-r2.log",
+      "bytes": 3302,
+      "sha256": "31dffb65bb8d591a1d573adf038a82f386538f489b9e85d68e3a42a8d2e5bb71",
+      "exit_code": 0,
+      "counts": {
+        "tests": 37,
+        "pass": 37,
+        "fail": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-crm-profile-pack-20261011-53qebpgs/contracts-r3.log",
+      "bytes": 3398,
+      "sha256": "d8f1231a061b06593891abc103343d5130aeb7dceb76b18474d4ff45a513adec",
+      "exit_code": 0,
+      "counts": {
+        "tests": 38,
+        "pass": 38,
+        "fail": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-crm-profile-pack-20261011-53qebpgs/release-regression-r1.log",
+      "bytes": 5176,
+      "sha256": "3db1025396cff7bba3e9ce0d33becc1efd2c467b8f42ea32ac41686ff01bf5ce",
+      "exit_code": 0,
+      "counts": {
+        "tests": 58,
+        "pass": 58,
+        "fail": 0,
+        "skipped": 0
+      }
+    }
+  ],
+  "source_code": [
+    {
+      "path": "scripts/crm-calibration/prepare-profile.mjs",
+      "sha256": "0747f10a5d2e7775560df5b39ea88424435c7009e924fa195ae89af43e182f7d"
+    },
+    {
+      "path": "scripts/crm-calibration/profile-packs.test.mjs",
+      "sha256": "bd90dd58286eba030479551c86adb0c8b7059c490689e0c611ccd9a1be506dbf"
+    },
+    {
+      "path": "scripts/release/plugin-pack.mjs",
+      "sha256": "a30af40abbfcab8be1971d696cde7bd431a8654c1c008356113b0c91211f1c59"
+    },
+    {
+      "path": "scripts/release/plugin-pack.test.mjs",
+      "sha256": "a1ce5171f76047614ccc4326cedc6c22b1c1c7e1b87895c7c5327ff832fb7ebd"
+    },
+    {
+      "path": "scripts/dsh-b0/pipeline.mjs",
+      "sha256": "8b15daa1f0f5fc7db4a0afb947990b0a719610396e8e1111b1a76559f95a6934"
+    }
+  ],
+  "inherited_preserved": [
+    {
+      "path": "dsh-plugins/analytics-workbench/test/native-composition-browser-probe.mjs",
+      "sha256": "f1683557632bcf1d378199f656aa354721ced82f11bcbf7aa0cfe4c4c65ac8b5"
+    },
+    {
+      "path": "scripts/dsh-dev/cli.mjs",
+      "sha256": "a1e39dc2e55a68289f31d9d264165980eb8247b85fffe1c7c45b6e92414d21b5"
+    },
+    {
+      "path": "scripts/dsh-dev/cli.test.mjs",
+      "sha256": "0fff44275360f72b3bd28620abb2f793b6b05d9ffedf774a6e9b8f9fd3deef7c"
+    },
+    {
+      "path": "scripts/dsh-dev/serve.mjs",
+      "sha256": "92844883623edac16a9311e79b316c152c025cf8f8c5b90ee81f31419de5eb37"
+    },
+    {
+      "path": "docs/hackathon/evidence/shinemage-official-pack-host-closeout-20261011-validation.json",
+      "sha256": "90cbe94202a3aedb4ea52c1deb99fa6b519a74b306759b3c025d1c424dc929d2"
+    },
+    {
+      "path": "docs/hackathon/evidence/shinemage-official-pack-host-closeout-20261011.md",
+      "sha256": "38eac1a2170d770f98fda304463671ae020c6b06ac78ffba3e2cc080ee50b344"
+    },
+    {
+      "path": "docs/hackathon/evidence/shinemage-profile-pack-migration-20261011-validation.json",
+      "sha256": "cfc8ee650123218ab1d534369fab8f55842fb7863e95d5f28f2f9c07451e80d0"
+    },
+    {
+      "path": "docs/hackathon/evidence/shinemage-profile-pack-migration-20261011.md",
+      "sha256": "bef5202f03c1351018e4c9561705c5ecb5a11d213257eb3680b58c841666e1a7"
+    },
+    {
+      "path": "scripts/release/profile-packs.mjs",
+      "sha256": "7dae0a1781d72b9eca5948d0b3c363469829ec01e8a486ea53a13598930e4587"
+    },
+    {
+      "path": "scripts/release/profile-packs.test.mjs",
+      "sha256": "1ce73ae3abcce0d1e5e81702d2c0c16e2d9277019bd988b22bb6093e8d6a1d95"
+    }
+  ],
+  "package_inputs": [
+    {
+      "id": "@shine-mage/dsh-crm-knowledge",
+      "source_sha": "5a839fa86de2240cf661a9034c58e0ead2d4b4ef",
+      "manifest_sha256": "0fbacc88fccc8085618b518a51afab5db1c045838c0cb47d6e94a8af5f600a49",
+      "pack_sha256": "0da9f8edd40b17a92377aa4b35d219229c8461b942060a7dd0e12265343500fd"
+    },
+    {
+      "id": "@shine-mage/dsh-knowledge",
+      "source_sha": "94ef29fa6c39d3dc506fbc5ef734f0a7ea9eb2b0",
+      "manifest_sha256": "a674a2da0dcd317839c4f8d7766da62ced58eca9021222c6e3a238f80aa7df79",
+      "pack_sha256": "ed7888204d5cefe7d383632a75319d3427fec9a735863f4e123b8ea17387ef67"
+    }
+  ],
+  "host": "NOT_RUN",
+  "services": "NOT_RUN",
+  "browser": "NOT_RUN",
+  "model": "NOT_RUN",
+  "wsl2": "NOT_RUN",
+  "runtime_cordis_compatibility": "NOT_RUN",
+  "full_b0": "NOT_RUN",
+  "ci_for_new_bytes": "NOT_RUN",
+  "sdk_distribution": "BLOCKED",
+  "product": "PARTIAL",
+  "release_ready": false,
+  "candidate_records_unchanged": [
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-candidate-20261011-b4vbymq7/candidate/candidate.json",
+      "bytes": 47946,
+      "sha256": "31b88bcdc40de1ac84b75f961ebbcaac8dc6859cbe5a4fec93173fe11559e7e2"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-candidate-20261011-b4vbymq7/plugin-state.json",
+      "bytes": 15712,
+      "sha256": "234cfb4443d5b0b3a4ad23bb90e8311e97eb3f6d5a924f344a35c6860960ce61"
+    }
+  ]
+}

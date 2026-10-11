@@ -1,0 +1,638 @@
+{
+  "schema": "shinemage-formal-preflight-pack-assembly-validation/v1",
+  "observed_at": "2026-10-11T04:19:41.500601+00:00",
+  "main": {
+    "HEAD": "5390667cc990fa558b0445aa455b086d325a6c77",
+    "branch": "codex/shinemage-abc-local-candidate",
+    "input": "HEAD plus exact inherited task snapshot and this product delta; current docs updated after assembly",
+    "starting_task_dirty": 127,
+    "expected_current_task_dirty": 136,
+    "index": "EMPTY",
+    "VERSION": "0.20.0.0",
+    "new_commit_push_PR_merge_release_deploy": "NOT_RUN"
+  },
+  "product_delta": [
+    {
+      "path": "scripts/release/readiness.mjs",
+      "before": {
+        "sha256": "05f5cf5cbcb6fc1c2eaf014dd6d950f3563eb2853df74e2acd58e3175fb4e5d1",
+        "bytes": 11149
+      },
+      "after": {
+        "sha256": "989830271718ee20b7c20daa4e8a36aa8e42b29dd8a9fb3c726d50b81e496c61",
+        "bytes": 11326
+      }
+    },
+    {
+      "path": "scripts/release/preflight.mjs",
+      "before": {
+        "sha256": "7e8aba838f4dff1a8d48c8377abaa0f1ec9c69a35f807b63b410a1724602a131",
+        "bytes": 12364
+      },
+      "after": {
+        "sha256": "5a2451bd5a107e781e7ae6cf0306bb73e29e827fc141b605e70800eb73b66833",
+        "bytes": 12226
+      }
+    },
+    {
+      "path": "scripts/dsh.mjs",
+      "before": {
+        "sha256": "096f96f1951edd03eb33a9404f11ccbf6baee56fd650a12cb918a9512f7599ad",
+        "bytes": 26672
+      },
+      "after": {
+        "sha256": "cefed597de2f59b4b7242f174d6f52680127203f06effef4eb477852b5991d13",
+        "bytes": 27507
+      }
+    },
+    {
+      "path": "scripts/release/artifact.mjs",
+      "before": {
+        "sha256": "9990a435aa4c606aacfb1cc6acc6499a72f6bcc0b2a75735b883d72624b5697b",
+        "bytes": 13238
+      },
+      "after": {
+        "sha256": "971e5cec7d965fde705d49c5a3f1d6ecea8a4e7ef237585b268e1c82570fc50d",
+        "bytes": 13813
+      }
+    },
+    {
+      "path": "scripts/release/schemas/release-manifest.v1.schema.json",
+      "before": {
+        "sha256": "af15b8a75d66543b5dec43e9d293df18e098ac88b3d688e1946b8113d6b25189",
+        "bytes": 3767
+      },
+      "after": {
+        "sha256": "b9478ab7f5fafbc41e7b6f6310a83038e19c98708fc6e77623d78224fdce30a8",
+        "bytes": 4088
+      }
+    },
+    {
+      "path": "scripts/release/release.test.mjs",
+      "before": {
+        "sha256": "ea9e77bb2f93f10888494d66b86be912341fad27d067b24997f4f466bf4701e3",
+        "bytes": 41092
+      },
+      "after": {
+        "sha256": "bd63be491ff5643fd63e83ee1db5bc0f12c92394d3501daf1fd6220be1499615",
+        "bytes": 41382
+      }
+    },
+    {
+      "path": ".github/workflows/dsh-release-preflight.yml",
+      "before": {
+        "sha256": "7545e1058685f967cea21b54eb307bb3ef354fe5a6e92cadb2868287fa9b7221",
+        "bytes": 8774
+      },
+      "after": {
+        "sha256": "7c014a1c4f42da3168c188c26511c52172a43a5e77056f15ad2eb6941962e363",
+        "bytes": 8800
+      }
+    },
+    {
+      "path": "scripts/dsh-b0/pipeline.mjs",
+      "before": {
+        "sha256": "e1a9d3e86ad77a98ae5fd8e9fa8b0d3e2f69400aa56882a337645a382121d993",
+        "bytes": 24659
+      },
+      "after": {
+        "sha256": "77d51b16ae6c1f3fcfed817502ab9bfe7b17f52f36da578b66ee5fa899405ad0",
+        "bytes": 24709
+      }
+    },
+    {
+      "path": "scripts/release/release-profile-packs.mjs",
+      "before": null,
+      "after": {
+        "sha256": "f41d4b3cd525b9cef5fcc037de1f9ba7dbffe73c53ed66c3af030490f938d091",
+        "bytes": 7774
+      }
+    },
+    {
+      "path": "scripts/release/release-profile-packs.test.mjs",
+      "before": null,
+      "after": {
+        "sha256": "1dcd78ba9a583b51a3d080b5f98f76c99ee63742d8fc1b4c0dd174e7c3a26f3e",
+        "bytes": 12384
+      }
+    }
+  ],
+  "current_seven_pack_assembly": {
+    "schema": "shinemage-current-seven-pack-release-assembly/v1",
+    "negative_controls": [
+      {
+        "name": "analytics-workbench",
+        "code": "EPERM"
+      },
+      {
+        "name": "crm-knowledge",
+        "code": "EPERM"
+      },
+      {
+        "name": "knowledge",
+        "code": "EPERM"
+      },
+      {
+        "name": "shine-brand",
+        "code": "EPERM"
+      },
+      {
+        "name": "shine-board",
+        "code": "EPERM"
+      },
+      {
+        "name": "shine-crowd-action",
+        "code": "EPERM"
+      },
+      {
+        "name": "shine-query",
+        "code": "EPERM"
+      },
+      {
+        "name": "shine-funnel",
+        "code": "EPERM"
+      },
+      {
+        "name": "shine-waterfall",
+        "code": "EPERM"
+      },
+      {
+        "name": "author:analytics-workbench",
+        "code": "EPERM"
+      },
+      {
+        "name": "author:crm-knowledge",
+        "code": "EPERM"
+      },
+      {
+        "name": "author:knowledge",
+        "code": "EPERM"
+      },
+      {
+        "name": "author:shine-brand",
+        "code": "EPERM"
+      },
+      {
+        "name": "author:shine-board",
+        "code": "EPERM"
+      },
+      {
+        "name": "author:shine-crowd-action",
+        "code": "EPERM"
+      },
+      {
+        "name": "author:shine-query",
+        "code": "EPERM"
+      },
+      {
+        "name": "author:shine-funnel",
+        "code": "EPERM"
+      },
+      {
+        "name": "author:shine-waterfall",
+        "code": "EPERM"
+      },
+      {
+        "name": "upstream",
+        "code": "EPERM"
+      },
+      {
+        "name": "build-tools",
+        "code": "EPERM"
+      }
+    ],
+    "main_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+    "main_input": "HEAD plus exact current dirty snapshot",
+    "inputsPath": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/canonical-composition-r1/page-inputs.json",
+    "input_sha256": "66af13c06ab9241e531a87f4b3d410859676ceb4233fe9a6bbfb0fafce42a888",
+    "profile_sha256": "c8c9df8c36f11060ad8fbcce68cb2ebf28d783c5eb5759d1b71ff5463782c981",
+    "payload": {
+      "root": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/actual-payload-r2",
+      "profile_path": "config/dsh-profile.rc2.json",
+      "inputs_sha256": "66af13c06ab9241e531a87f4b3d410859676ceb4233fe9a6bbfb0fafce42a888",
+      "profile_pack_snapshot": {
+        "path": "shinemage-release-pack-inputs.json",
+        "sha256": "45b2f8905dca70d6bd3f5bf3ce7257a724ca37a57d3cdfde17b51137f483ef12"
+      },
+      "files": 1461,
+      "bytes": 28146002,
+      "plugins": [
+        {
+          "id": "@shine-mage/dsh-analytics-workbench-b0",
+          "source_sha": "d038f3577efec91e75fcf711a60b1fb868d7bcd5",
+          "version": "0.0.0-b0",
+          "manifest_sha256": "9d7f6bf363f86d53f39ad77353a531fda6a5607c3b14be5869841dc5b6432647",
+          "pack_sha256": "e41df9f5a8f7031c092319222543c8d723ca644c0c9d69b2ae53f13257e9b79e"
+        },
+        {
+          "id": "@shine-mage/dsh-shine-brand",
+          "source_sha": "57ebcf38278068394a4feb42125c30c195fd912a",
+          "version": "0.0.0-b0",
+          "manifest_sha256": "d5039166969023075253e65e31c4d7dba910ae6ea10b9b40bf7f147bdb5efd24",
+          "pack_sha256": "4b867bf5b4e08d9aa1f45f20b20b78cbd9e11c236194ffafaa5188d8d173bd13"
+        },
+        {
+          "id": "@shine-mage/dsh-shine-waterfall",
+          "source_sha": "d123ac1d0e7bad3e5de45169b3e72c38623b858a",
+          "version": "0.0.0-b0",
+          "manifest_sha256": "43a9c673ada75b763c1867e6bb6fd66c75da393cd6c2fd2fd669aadbe73c6af5",
+          "pack_sha256": "73a1d4ba2b085c1f9f2a1eff410aca239cf9775de952ba70aafdaa78ec5ac35d"
+        },
+        {
+          "id": "@shine-mage/dsh-shine-crowd-action",
+          "source_sha": "5c39e21c27565397383b009725634ea66e9c1525",
+          "version": "0.0.0-b0",
+          "manifest_sha256": "d3998ed96530db66b3aa53f263c93848e7078846a8a0f612a1c099202bfa406f",
+          "pack_sha256": "3fb9d88d228e3af4a9c965961c035650b65365392a9caccb4c14f336b003b2ca"
+        },
+        {
+          "id": "@shine-mage/dsh-shine-query",
+          "source_sha": "1f1e19d280923ebe7aac964f8b5825d497434db8",
+          "version": "0.0.0-b0",
+          "manifest_sha256": "13433c1c4687cd33f0b314b60a38c76fb8390ee52375755320d4ca5a6f378fae",
+          "pack_sha256": "774c6ae63e0fb170a81a9e9fb9551d55d40724faae5966c1d95bb32624fb89ce"
+        },
+        {
+          "id": "@shine-mage/dsh-shine-board",
+          "source_sha": "76601df755ec8ef8c9726ea770ec488b745efd71",
+          "version": "0.0.0-b0",
+          "manifest_sha256": "671acb9502969f08e5db6b83369afa3ea1dec1699a7a9fc5a1680abfa9aa39cf",
+          "pack_sha256": "e1348dd7739778a5ec2d676420e86290ca49f69cdf045959fd82441232a30c1a"
+        },
+        {
+          "id": "@shine-mage/dsh-shine-funnel",
+          "source_sha": "dbfaede0961586d773c708e833a4ac1c9f2515dc",
+          "version": "0.0.0-b0",
+          "manifest_sha256": "1e631c02c1fa6903b1f76953edc4e7da3fc85b1b96c1292567f8561a78a8eefb",
+          "pack_sha256": "581ba069aa8af4598f553e4b11b57216ac2205d71baebbafc267367cb3814ba6"
+        }
+      ],
+      "activation": "NOT_RUN",
+      "release_ready": false
+    },
+    "verification": {
+      "plugins": 7,
+      "status": "PACK_BYTES_VERIFIED",
+      "activation": "NOT_RUN",
+      "release_ready": false
+    },
+    "repeat": "EEXIST",
+    "host_service_model": "NOT_RUN",
+    "formal_preflight": "NOT_RUN",
+    "candidate_journal": "NOT_RUN",
+    "release_ready": false
+  },
+  "test_executions": {
+    "targeted_r3": {
+      "pass": 90,
+      "fail": 0,
+      "skip": 0,
+      "exit_code": 0
+    },
+    "release_suite_r1": {
+      "pass": 539,
+      "fail": 0,
+      "skip": 0,
+      "exit_code": 0,
+      "after_last_workflow_change": "NOT_RERUN; final workflow regression separately recorded"
+    },
+    "last_workflow_regression_r1": {
+      "pass": 41,
+      "fail": 0,
+      "skip": 0,
+      "exit_code": 0
+    },
+    "path_workflow_r2": {
+      "pass": 82,
+      "fail": 0,
+      "skip": 0,
+      "exit_code": 0,
+      "noconftest": true
+    },
+    "actual_assembly_r2": {
+      "exit_code": 0,
+      "negative_controls": 20,
+      "result": "PACK_BYTES_VERIFIED",
+      "repeat": "EEXIST"
+    },
+    "read_only_preflight_r1": {
+      "exit_code": 2,
+      "plugin_packs": "PASS",
+      "overall": "BLOCKED_DIRTY_AND_RUNTIME_MISSING",
+      "prepare_build_network": "NOT_RUN"
+    },
+    "generator_check": {
+      "exit_code": 0,
+      "packages": 11,
+      "edges": 27,
+      "source_files": 653,
+      "dynamic_imports": 63
+    }
+  },
+  "failed_attempts_preserved": [
+    {
+      "name": "unit_r1",
+      "result": "collector inspected excluded source aliases",
+      "raw": "tail only, not complete stdout"
+    },
+    {
+      "name": "actual_r1",
+      "exit_code": 1,
+      "result": "bad Unicode path escaping; negative probe not denied; no payload"
+    },
+    {
+      "name": "path_workflow_r1",
+      "exit_code": 4,
+      "result": "unrelated backend conftest imports unavailable duckdb; no DB accessed"
+    }
+  ],
+  "preservation_requirements": {
+    "inherited_main_files_unchanged": 119,
+    "old_protected_files_unchanged": 46,
+    "npm_runtime_files_unchanged": 6,
+    "prior_raw_bindings_unchanged": 55,
+    "nine_authors": [
+      {
+        "name": "analytics-workbench",
+        "head": "d038f3577efec91e75fcf711a60b1fb868d7bcd5",
+        "clean": true
+      },
+      {
+        "name": "crm-knowledge",
+        "head": "5a839fa86de2240cf661a9034c58e0ead2d4b4ef",
+        "clean": true
+      },
+      {
+        "name": "knowledge",
+        "head": "94ef29fa6c39d3dc506fbc5ef734f0a7ea9eb2b0",
+        "clean": true
+      },
+      {
+        "name": "shine-brand",
+        "head": "57ebcf38278068394a4feb42125c30c195fd912a",
+        "clean": true
+      },
+      {
+        "name": "shine-board",
+        "head": "76601df755ec8ef8c9726ea770ec488b745efd71",
+        "clean": true
+      },
+      {
+        "name": "shine-crowd-action",
+        "head": "5c39e21c27565397383b009725634ea66e9c1525",
+        "clean": true
+      },
+      {
+        "name": "shine-query",
+        "head": "1f1e19d280923ebe7aac964f8b5825d497434db8",
+        "clean": true
+      },
+      {
+        "name": "shine-funnel",
+        "head": "dbfaede0961586d773c708e833a4ac1c9f2515dc",
+        "clean": true
+      },
+      {
+        "name": "shine-waterfall",
+        "head": "d123ac1d0e7bad3e5de45169b3e72c38623b858a",
+        "clean": true
+      }
+    ]
+  },
+  "raw_bindings": [
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/snapshot-r1.json",
+      "sha256": "0a568eb796fb67820c78c7d23fc99dd0f355f9bede2e5ccad6f880db8d3e4b93",
+      "bytes": 23035
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/product-delta-files-r1.json",
+      "sha256": "037a19782685e3c40314c20932ce1f970eb9fcb692077b4bfbc5ce0665fc7d88",
+      "bytes": 3401
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/product-delta-r1.patch",
+      "sha256": "74c62bbd5220cee34c2a1d74116e25a6ada24cdf33519c99573a03ecc8b9a6b1",
+      "bytes": 42523
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/local-review-r1.json",
+      "sha256": "b4aea2282496f3dd8fdc2e611013fa97681dbaf876ad0689a8d9f351042e9584",
+      "bytes": 4841
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/patch-check-r1.json",
+      "sha256": "6ea28550db0c2f3535031591b5bd7992d1fcca70eb81e86c9851d841dfdc1d8d",
+      "bytes": 307
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/patch-check-r1.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/patch-check-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/actual-assembly-r2.json",
+      "sha256": "713870641dcb0601a0c4cd78ba367356aa6e73876cbbbb35ea7e5af4f665e0cc",
+      "bytes": 5186
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/actual-execution-r1.json",
+      "sha256": "1211653fa5e3c2885546bdd8b480e5acbc9069cafdba49b19ade02c12527aabb",
+      "bytes": 907
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/actual-execution-r2.json",
+      "sha256": "697f65adb5f6e52754cfc1b204d2599a4567af64f5955d769d4ae071f21424b6",
+      "bytes": 907
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/actual-assembly-r1.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/actual-assembly-r1.stderr",
+      "sha256": "b2efe15b1cb93e230f29b59a685e57644b184159f1cc0fad8185db6c7185d307",
+      "bytes": 452
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/actual-assembly-r2.stdout",
+      "sha256": "674d56d5b90ee9c8b1bb8057863dbcf868fb46726312192ab352ced7ec525b5b",
+      "bytes": 138
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/actual-assembly-r2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/source-denied-r1.sb",
+      "sha256": "d8d4c8bcf3ba52623c58a2da9dd706d24c911e3d1b8a94d7a7d609558b33655f",
+      "bytes": 2931
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/source-denied-r2.sb",
+      "sha256": "173b30557b5b25701d6d150c1bcb6ea5bc74e3284b434b78b1627e53493aa19b",
+      "bytes": 2787
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/run-actual-assembly-r1.mjs",
+      "sha256": "bcb61383eb3e2dc42e634c3e8e817afef06a21b51daad50fead0912c16d339b9",
+      "bytes": 5569
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/run-actual-assembly-r2.mjs",
+      "sha256": "8a8e1d9f662e5c3e55832b31be850687ba6d184885167753371deb42f9f28046",
+      "bytes": 5569
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/unit-r1-failure-tail.log",
+      "sha256": "d781abc83ff1f1dd11d957b79df8f95b20b6b2096c96cea437384172b9af9888",
+      "bytes": 8937
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/targeted-r2.json",
+      "sha256": "80d95c5c5d441f1ad7587334dee58e84114c4b662a75ffe40c97a8d04a934be8",
+      "bytes": 529
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/targeted-r2.stdout",
+      "sha256": "ec97df2812b6bac0b0d4cfa367d356cbf6fd6f7b0070bcbb6029554f4cd38672",
+      "bytes": 7744
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/targeted-r2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/targeted-r3.json",
+      "sha256": "139f9104611cf39df8d16e8c1d393ff7c68ccbd888d1939107058520c1b9665e",
+      "bytes": 529
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/targeted-r3.stdout",
+      "sha256": "b9aa8b0882f0dee8f96d173fd1a2239ff53764187a3c58555bde493e0b52b912",
+      "bytes": 7857
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/targeted-r3.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/release-suite-r1.json",
+      "sha256": "02db5886baaac06142a388fe60a775c905bc0fd1fc91c989c7401756a1871ae1",
+      "bytes": 306
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/release-suite-r1.stdout",
+      "sha256": "eb82ac0737b196aff6aab609b360d985f6fb10245a87cd12b3d399e7722db198",
+      "bytes": 45021
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/release-suite-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/workflow-regression-r1.json",
+      "sha256": "2ece1c2f114a09e0cc3e66da68c29d5f848e508bb0a9f9a34af4ce7930cac46e",
+      "bytes": 272
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/workflow-regression-r1.stdout",
+      "sha256": "13688dab930e9a43ac4f0f19687390cde47cef0ed7d1034fb7b071d1643b2f80",
+      "bytes": 3582
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/workflow-regression-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/path-workflow-r1.json",
+      "sha256": "e4722046a377fb9681bbc1ac6da2a6b2f10ecaa6153db944d5e04f271dd6629c",
+      "bytes": 460
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/path-workflow-r1.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/path-workflow-r1.stderr",
+      "sha256": "d3bf04f475a951e8e15da01dc0d4509af5376472ab3251e02dac76c7d15bcd64",
+      "bytes": 255
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/path-workflow-r2.json",
+      "sha256": "4266b5e58148a20284f0a8759074f3b658f87f04e59a7b65fba392881a1c8212",
+      "bytes": 567
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/path-workflow-r2.stdout",
+      "sha256": "cf7ba02049dbe4102b46ed846d8368c1ef22bbe299c5e72fc2a8f36beffe8d8c",
+      "bytes": 179
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/path-workflow-r2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/preflight-check-r1.json",
+      "sha256": "f5eba51dd11de88c164c7a5b4144a99e4523cfde38b3c862aa02a94571089e74",
+      "bytes": 1236
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/preflight-check-r1.stdout",
+      "sha256": "a09ba94c0e272b9c19b4b523839372a9f1f68420ac8c32bda2c76fa6fd8e1058",
+      "bytes": 1722
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/preflight-check-r1.stderr",
+      "sha256": "05697cb340107e77cbc248118caf476a882df4d23097def2f2c4e74e8fe8de39",
+      "bytes": 71
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/preservation-before-evidence-r1.json",
+      "sha256": "ca9328e8890aee1481d0e3a8e2752c7aac74e2dfa257d6f75fb119accf442030",
+      "bytes": 1281
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/final-preservation-r1.py",
+      "sha256": "ea909b50f8cbad60a2a32ce5b20b61762eff0f75a3f89770f7203a00e5c7a5bc",
+      "bytes": 7049
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/canonical-composition-r1/page-inputs.json",
+      "sha256": "66af13c06ab9241e531a87f4b3d410859676ceb4233fe9a6bbfb0fafce42a888",
+      "bytes": 1624
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-formal-pack-assembly-r2-20261011-ef2gl0wm/actual-payload-r2/shinemage-release-pack-inputs.json",
+      "sha256": "45b2f8905dca70d6bd3f5bf3ce7257a724ca37a57d3cdfde17b51137f483ef12",
+      "bytes": 1709
+    }
+  ],
+  "local_primary_review": "COMPLETE_ZERO_UNRESOLVED",
+  "external_model_OCR_review": "NOT_RUN",
+  "open": {
+    "latest_full_B0": "NOT_RUN",
+    "full_formal_preflight": "NOT_RUN",
+    "new_hosted_CI": "NOT_RUN",
+    "new_candidate_journal": "NOT_RUN",
+    "host_service_target_browser_real_business": "NOT_RUN",
+    "SDK_distribution": "BLOCKED",
+    "installed_kit_and_legacy_source_fixtures": "OPEN",
+    "release_ready": false
+  },
+  "product": "PARTIAL",
+  "release_ready": false
+}

@@ -1,6 +1,5 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { access } from 'node:fs/promises';
 import { readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -47,25 +46,5 @@ test('unknown version, extra fields, and tool errors classify without leaking ch
   for (const row of [unknown, extra, failed, running]) {
     assert.equal(textLeaksQueryFacts(row.copy), false);
     assert.ok(Object.values(QUERY_FAULT_COPY).includes(row.copy));
-  }
-});
-
-test('compiled query fault cards hide channel digits when lib/client.js is present', async (t) => {
-  const lib = join(here, '../lib/client.js');
-  try { await access(lib); } catch { t.skip('compiled client not built'); return; }
-  const { loadCardHarness } = await import('./tool-card-harness.mjs');
-  const harness = await loadCardHarness();
-  for (const [id, block, expected, fault] of [
-    ['unknown', unknownBlock, '版本不支持', 'unknown-version'],
-    ['extra', extraBlock, '无法识别', 'malformed'],
-    ['error', errorBlock, '查询工具失败', 'tool-error'],
-    ['running', queryCall, '合成查询运行中', 'running'],
-  ]) {
-    const html = harness.renderQuery(block);
-    assert.ok(html.includes(expected), id);
-    assert.ok(html.includes(`data-query-fault="${fault}"`), id);
-    assert.equal(html.includes('data-testid="analytics-query-tool-result"'), false, id);
-    assert.equal(html.includes('data-testid="analytics-query-cancel"'), id === 'running');
-    assert.doesNotMatch(html, /N=30|1100\.00 元|result_ref|25%|SENSITIVE|onerror=/i);
   }
 });

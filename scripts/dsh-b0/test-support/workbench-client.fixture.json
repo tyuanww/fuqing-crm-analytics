@@ -1,0 +1,295 @@
+{
+  "schema_version": "shinemage-workbench-consumer-fixture/v1",
+  "synthetic_only": true,
+  "source_sha": "92dfa171cf8ea298bdceee5634b418269e711a37",
+  "source_files": {
+    "src/model.mjs": "76865bd8f7df0a008dfc968870ff1146f6b1011629ca3ab7ea33eb6a7f992e6b",
+    "src/query-cancel.mjs": "518bbe45269d807dce4b80de209d953f38265be4e2d31d7ad4b00aed350b95d1",
+    "src/query-model.mjs": "0cd35a3dfa654be96c576355fdeb0693e31fd3afcdec1a606e92c00cdcca7121",
+    "src/first-purchase-query-model.mjs": "29e0ebe989582bf1cadebda83c82e25df1ee585f85ac3d178444e72fc5edb447",
+    "test/first-purchase-save.fixture.mjs": "676d26e46a9990bbf69157ea8ed3206f0d903aa8c48ec90d568b634b9e33de62"
+  },
+  "TOOL_NAME": "analytics_b0_query",
+  "FIXTURE": {
+    "schema_version": "analytics-b0/v1",
+    "answer_mode": "STUB",
+    "data_source": "SYNTHETIC_FIXTURE",
+    "fixture_id": "b0-channel-repeat-2026-09-01",
+    "data_as_of": "2026-09-01",
+    "channel": "合成渠道 A",
+    "customers": 100,
+    "repeat_customers": 25,
+    "repeat_rate": 0.25
+  },
+  "QUERY_TOOL_NAME": "analytics_channel_followup_query",
+  "QUERY_CANCEL_COPY": {
+    "submitting": "正在提交取消…",
+    "accepted": "取消请求已受理",
+    "error": "取消未完成，可重试"
+  },
+  "FIRST_PURCHASE_TOOL_NAME": "analytics_first_purchase_query",
+  "FIRST_PURCHASE_RECEIPT_SCHEMA": "analytics-run-first-purchase-native-receipt/v1",
+  "editor": {
+    "title": "渠道复购 · 合成样例",
+    "draft": "渠道复购 · 合成样例",
+    "revision": 0,
+    "preview": null
+  },
+  "first_purchase_save": {
+    "target": {
+      "session_id": "fixture-session",
+      "run_id": "fixture-run",
+      "call_id": "fixture-call"
+    },
+    "owner": "fixture-user",
+    "candidate": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "identity": {
+      "schema_version": "analytics-first-purchase-save-identity/v1",
+      "action_id": "fp-save-dfdc7371a8bb8b6ac962aa87f576d827beedd55ab76348340c6deae869f4509b",
+      "candidate_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "correlation_id": "fp-ui-dfdc7371a8bb8b6ac962aa87f576d827beedd55ab76348340c6deae869f4509b"
+    },
+    "inspected": {
+      "schema_version": "analytics-first-purchase-save-result/v1",
+      "api_version": "1.0.0",
+      "identity": {
+        "schema_version": "analytics-first-purchase-save-identity/v1",
+        "action_id": "fp-save-dfdc7371a8bb8b6ac962aa87f576d827beedd55ab76348340c6deae869f4509b",
+        "candidate_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "correlation_id": "fp-ui-dfdc7371a8bb8b6ac962aa87f576d827beedd55ab76348340c6deae869f4509b"
+      },
+      "result_state": "SUCCESS_UNSAVED",
+      "result": {
+        "schema_version": "analytics-first-purchase-path/v1",
+        "answer_mode": "DETERMINISTIC_TOOL",
+        "query_id": "first_purchase_product_path",
+        "query_version": "first-purchase-path-query/v1",
+        "metric_id": "first_purchase_product_n_day_finished",
+        "metric_version": "first-purchase-path-metric/v1",
+        "data_version": "synthetic-first-purchase-data/v1",
+        "hash_version": "first-purchase-path-filter-hash/v1",
+        "contains_real_data": false,
+        "data_source": "SYNTHETIC_SNAPSHOT",
+        "data_snapshot_ref": "synthetic-first-purchase-v1",
+        "as_of": "2026-08-31T16:00:00.000000+00:00",
+        "resolved_filters": {
+          "schema_version": "analytics-first-purchase-path/v1",
+          "query_id": "first_purchase_product_path",
+          "query_version": "first-purchase-path-query/v1",
+          "metric_id": "first_purchase_product_n_day_finished",
+          "metric_version": "first-purchase-path-metric/v1",
+          "data_version": "synthetic-first-purchase-data/v1",
+          "hash_version": "first-purchase-path-filter-hash/v1",
+          "cohort_window_kind": "FIXED",
+          "resolved_cohort_start": "2026-05-31T16:00:00.000000+00:00",
+          "resolved_cohort_end": "2026-08-31T16:00:00.000000+00:00",
+          "observation_days": 30,
+          "data_snapshot_ref": "synthetic-first-purchase-v1",
+          "as_of": "2026-08-31T16:00:00.000000+00:00",
+          "timezone": "Asia/Shanghai",
+          "channel_ids": [
+            "A",
+            "B"
+          ],
+          "cohort_ref": null,
+          "product_ids": [],
+          "exclude_low_price": false,
+          "comparison": null,
+          "permission_scope": "synthetic-demo",
+          "data_digest": "147bf33c1966faef1ca6935663616b9ac376c5bb374bf842780487989477ae9b",
+          "filter_hash": "4720204f2c7d4a9157fbef1cda1c50f71c6cbd3b51742efd79d23e7b91ce09d2"
+        },
+        "filter_hash": "4720204f2c7d4a9157fbef1cda1c50f71c6cbd3b51742efd79d23e7b91ce09d2",
+        "status": "OK",
+        "reason_code": null,
+        "missing_product_ids": [],
+        "facts": {
+          "display_name": "首购商品路径 / N日正装转化",
+          "currency": "CNY",
+          "amount_unit": "minor",
+          "amount_precision": "integer_fen",
+          "observation_days": 30,
+          "cohort_enrolled_count": 10,
+          "cohort_mature_count": 9,
+          "cohort_immature_count": 1,
+          "products": [
+            {
+              "product_id": "sku-f1",
+              "role": "finished",
+              "enrolled_count": 1,
+              "mature_count": 1,
+              "immature_count": 0,
+              "finished_conversion_count": 0,
+              "finished_conversion_ratio": 0,
+              "empty_reason": null
+            },
+            {
+              "product_id": "sku-s1",
+              "role": "sample",
+              "enrolled_count": 6,
+              "mature_count": 5,
+              "immature_count": 1,
+              "finished_conversion_count": 3,
+              "finished_conversion_ratio": 0.6,
+              "empty_reason": null
+            },
+            {
+              "product_id": "sku-s2",
+              "role": "sample",
+              "enrolled_count": 3,
+              "mature_count": 3,
+              "immature_count": 0,
+              "finished_conversion_count": 1,
+              "finished_conversion_ratio": 0.3333333333333333,
+              "empty_reason": null
+            }
+          ]
+        },
+        "limitations": [
+          "synthetic 候选口径：首购商品路径 / N日正装转化，不是真实获客、终身复购或会计批准。",
+          "每用户按全历史最早有效订单入组一次；本族按该首单去重商品行展开，展开行之和不是独立人数。",
+          "正装转化只计观察窗内、排序晚于首单的另一有效订单上的 finished 角色 SKU，不含首单同篮。",
+          "商品角色映射缺失时整单拒绝（MISSING_PRODUCT_ROLE），facts 为 null，不得输出转化率。",
+          "空成熟分母的比例为 null + EMPTY_MATURE_COHORT，不得写 0。",
+          "filter_hash 只证明规范化 payload 自洽，不是权限凭证。",
+          "整数 wire 字段上限 9007199254740991 是 JSON/JS 安全整数传输约束，不是经营阈值。"
+        ]
+      },
+      "finite_mock": true,
+      "save_eligible": true,
+      "save_ineligible_reason": null,
+      "provenance": {
+        "environment": "synthetic",
+        "candidate_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "generated_at": "2026-10-06T00:00:00Z",
+        "data_time_window": {
+          "kind": "FIXED",
+          "start_date": "2026-06-01",
+          "end_date": "2026-09-01"
+        },
+        "query_scope": {
+          "schema_version": "analytics-first-purchase-path/v1",
+          "query_id": "first_purchase_product_path",
+          "query_version": "first-purchase-path-query/v1",
+          "metric_id": "first_purchase_product_n_day_finished",
+          "metric_version": "first-purchase-path-metric/v1",
+          "data_version": "synthetic-first-purchase-data/v1",
+          "hash_version": "first-purchase-path-filter-hash/v1",
+          "cohort_window_kind": "FIXED",
+          "resolved_cohort_start": "2026-05-31T16:00:00.000000+00:00",
+          "resolved_cohort_end": "2026-08-31T16:00:00.000000+00:00",
+          "observation_days": 30,
+          "data_snapshot_ref": "synthetic-first-purchase-v1",
+          "as_of": "2026-08-31T16:00:00.000000+00:00",
+          "timezone": "Asia/Shanghai",
+          "channel_ids": [
+            "A",
+            "B"
+          ],
+          "cohort_ref": null,
+          "product_ids": [],
+          "exclude_low_price": false,
+          "comparison": null,
+          "permission_scope": "synthetic-demo",
+          "data_digest": "147bf33c1966faef1ca6935663616b9ac376c5bb374bf842780487989477ae9b",
+          "filter_hash": "4720204f2c7d4a9157fbef1cda1c50f71c6cbd3b51742efd79d23e7b91ce09d2"
+        },
+        "permission_scope": {
+          "owner_id": "fixture-user",
+          "data_scope": "first-purchase-fixture",
+          "can_read": true,
+          "can_save": true
+        },
+        "source_refs": {
+          "service_owner": "analytics-first-purchase",
+          "data_scope": "first-purchase-fixture",
+          "created_from_run_id": "fixture-run",
+          "evidence_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "primary_result_ref": "fixture-result",
+          "method_package_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        },
+        "freshness": {
+          "freshness_state": "NOT_CHECKED",
+          "freshness_checked_at": "2026-10-06T00:00:00Z",
+          "freshness_stale_at": null,
+          "freshness_expires_at": null,
+          "policy_version": "fixture-policy",
+          "max_age_ms": null,
+          "expires_after_ms": null,
+          "reason": "DISABLED_BY_POLICY"
+        }
+      }
+    },
+    "command": {
+      "schema_version": "analytics-first-purchase-save-command/v1",
+      "identity": {
+        "schema_version": "analytics-first-purchase-save-identity/v1",
+        "action_id": "fp-save-dfdc7371a8bb8b6ac962aa87f576d827beedd55ab76348340c6deae869f4509b",
+        "candidate_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "correlation_id": "fp-ui-dfdc7371a8bb8b6ac962aa87f576d827beedd55ab76348340c6deae869f4509b"
+      },
+      "created_from_run_id": "fixture-run",
+      "title": "合成首购分析",
+      "evidence_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    "unknown": {
+      "schema_version": "analytics-first-purchase-save-receipt/v1",
+      "api_version": "1.0.0",
+      "service_owner": "analytics-first-purchase",
+      "state_schema_version": 1,
+      "identity": {
+        "schema_version": "analytics-first-purchase-save-identity/v1",
+        "action_id": "fp-save-dfdc7371a8bb8b6ac962aa87f576d827beedd55ab76348340c6deae869f4509b",
+        "candidate_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "correlation_id": "fp-ui-dfdc7371a8bb8b6ac962aa87f576d827beedd55ab76348340c6deae869f4509b"
+      },
+      "idempotency_key": "fp-save-dfdc7371a8bb8b6ac962aa87f576d827beedd55ab76348340c6deae869f4509b",
+      "owner_id": "fixture-user",
+      "finite_mock": true,
+      "status": "SAVE_UNKNOWN",
+      "analysis_ref": null,
+      "source_ref": null,
+      "durable_state_key": null,
+      "reason": "RECEIPT_NOT_FOUND"
+    },
+    "saved": {
+      "schema_version": "analytics-first-purchase-save-receipt/v1",
+      "api_version": "1.0.0",
+      "service_owner": "analytics-first-purchase",
+      "state_schema_version": 1,
+      "identity": {
+        "schema_version": "analytics-first-purchase-save-identity/v1",
+        "action_id": "fp-save-dfdc7371a8bb8b6ac962aa87f576d827beedd55ab76348340c6deae869f4509b",
+        "candidate_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "correlation_id": "fp-ui-dfdc7371a8bb8b6ac962aa87f576d827beedd55ab76348340c6deae869f4509b"
+      },
+      "idempotency_key": "fp-save-dfdc7371a8bb8b6ac962aa87f576d827beedd55ab76348340c6deae869f4509b",
+      "owner_id": "fixture-user",
+      "finite_mock": true,
+      "status": "SAVED",
+      "analysis_ref": {
+        "analysis_id": "analysis-fixture",
+        "version": 1
+      },
+      "source_ref": {
+        "service_owner": "analytics-first-purchase",
+        "data_scope": "first-purchase-fixture",
+        "created_from_run_id": "fixture-run",
+        "evidence_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "durable_state_key": "first-purchase-analysis:analysis-fixture:1",
+      "reason": null
+    },
+    "status": {
+      "schema_version": "shinemage-first-purchase-ui/v1",
+      "ok": true,
+      "owner": "fixture-user",
+      "identity": {
+        "schema_version": "analytics-first-purchase-save-identity/v1",
+        "action_id": "fp-save-dfdc7371a8bb8b6ac962aa87f576d827beedd55ab76348340c6deae869f4509b",
+        "candidate_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "correlation_id": "fp-ui-dfdc7371a8bb8b6ac962aa87f576d827beedd55ab76348340c6deae869f4509b"
+      }
+    }
+  }
+}

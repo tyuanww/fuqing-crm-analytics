@@ -1,0 +1,399 @@
+{
+  "schema": "shinemage-workbench-geometry-git-delivery/v1",
+  "observed_at": "2026-10-11T05:33:08.260820+00:00",
+  "commit": {
+    "schema": "shinemage-workbench-geometry-local-commit/v1",
+    "observed_at": "2026-10-11T05:31:02.137327+00:00",
+    "author_path": "/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/dsh-analytics-workbench",
+    "head": "e922328906a7bf7a7251c26198683f67fa3afd39",
+    "parent": "d038f3577efec91e75fcf711a60b1fb868d7bcd5",
+    "branch": "codex/analytics-workbench-independent",
+    "message": "test(workbench): own private geometry composition assertions",
+    "files": [
+      {
+        "path": "plugin/src/board-spec/geometry-composition.test.mjs",
+        "before_sha256": null,
+        "before_bytes": null,
+        "after_sha256": "1c6a9a9c728af51e2ec8dff3b96a4783b0648581576c2efc30b77a8f4cee8a20",
+        "after_bytes": 1881
+      },
+      {
+        "path": "inputs/test-contracts/geometry/waterfall-cases.json",
+        "before_sha256": null,
+        "before_bytes": null,
+        "after_sha256": "660951cac597064a367c9f5cec8127c4da0204842bdee04f81beceeabb488c1c",
+        "after_bytes": 2355
+      },
+      {
+        "path": "inputs/test-contracts/lock.json",
+        "before_sha256": "c6b13830552af573d3f77dde4720ede8dba6570c20b1e710d74aa3e285970ef3",
+        "before_bytes": 4782,
+        "after_sha256": "59887bbc9da7f578bd03c7a5fc4bb3d76e53ab85c079b2a0d70af383cc6d389c",
+        "after_bytes": 5047
+      },
+      {
+        "path": "inputs/test-contracts/README.md",
+        "before_sha256": "951c02cdd565ea8f0479f7cbe9855a3c62d522b78cd4967dbd01c5f7d3b609a0",
+        "before_bytes": 773,
+        "after_sha256": "7cdaa9368034282b685259a41d9a753c753f07e3dd2df7295a6becff5e121106",
+        "after_bytes": 1145
+      },
+      {
+        "path": "DEVELOPMENT.md",
+        "before_sha256": "456d48991203a48d5cd5940d66288e70768e62ab2437cab92467088f957aa7ae",
+        "before_bytes": 10968,
+        "after_sha256": "cb45071dc01dd23b5c99e79357eda4d1e64fc7aeaa5b72834c0f9dbb52a06b77",
+        "after_bytes": 13391
+      }
+    ],
+    "paths": [
+      "DEVELOPMENT.md",
+      "inputs/test-contracts/README.md",
+      "inputs/test-contracts/geometry/waterfall-cases.json",
+      "inputs/test-contracts/lock.json",
+      "plugin/src/board-spec/geometry-composition.test.mjs"
+    ],
+    "working_tree": "CLEAN",
+    "index": "EMPTY",
+    "push": "NOT_AUTHORIZED_NOT_RUN",
+    "new_hosted_ci": "NOT_RUN",
+    "main_counterpart": "NOT_APPLIED",
+    "release_ready": false
+  },
+  "validation": {
+    "local_core": {
+      "files": 155,
+      "pass": 1086,
+      "fail": 0,
+      "skip": 0,
+      "policy": "same-run existing isolated evidence reused, not rerun/not added"
+    },
+    "direct_geometry": 14,
+    "input_guards": 8,
+    "qa_verdict": "pass",
+    "outside": "UNVERIFIED_MISSING_CANONICAL_TAGS",
+    "new_remote_ci": "NOT_RUN"
+  },
+  "raw_bindings": [
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-commit-command-r1.json",
+      "sha256": "56110630c9eb3b7d999dc6354769311ff11b52bcb124430edac9f5f775c895e7",
+      "bytes": 625
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-commit-r1.json",
+      "sha256": "21004ed13a04fa54ae0d27827838e6318ce3206881f350e675b5bb03dbb87d75",
+      "bytes": 2280
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-final-review-r1.json",
+      "sha256": "4efab4ca4f8969294bbb55042ccb1183881fbcb0c88d2a102f007e8301a9a584",
+      "bytes": 2683
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-hooks-preflight-r1.json",
+      "sha256": "35d554f30a3fde5de291b7d067bc9892f2e55bb97e942ddec4675fe5de58a234",
+      "bytes": 765
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-local-commit-plan-r1.json",
+      "sha256": "0f4898e71611501bbb3ff541731608f605e6596bc5ce8d39ca3afa52ee850c03",
+      "bytes": 2318
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-local-commit-plan-r3.json",
+      "sha256": "4d2677574f3d80ff78c3b6291592f59b0ae387d949472ad2c61c64d0001e6eb2",
+      "bytes": 2527
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-postcommit-lineage-r1.json",
+      "sha256": "381f75082af4b63f047246853c60dc5a6867550b9c22e97cd91ae44db5c33af6",
+      "bytes": 1074
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-preparation-r1/build.stderr",
+      "sha256": "d8e1ee9e7277ca9ba214137b9fceb150d7dee75bd60e004397d118548456abf0",
+      "bytes": 1108
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-preparation-r1/receipt.json",
+      "sha256": "7bfbd36a45fbcaa055aaa94fdc77e2cd0c7b01384a68065480235896592aa38f",
+      "bytes": 845
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-preparation-r2/build.stderr",
+      "sha256": "28200ed8f26ec3620bf14e0b65dfd715f06a4fec764c79d1b1fba2e1db0858c4",
+      "bytes": 1013
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-preparation-r2/build.stdout",
+      "sha256": "5e25dfea9ca05f64d686bff5a59bf7cdb9af155b1d0a37681554a4a0b38f444d",
+      "bytes": 209
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-preparation-r2/install.stdout",
+      "sha256": "67f4ebeef827571af4fd06caef446f482e9dc3be827319727a352d2f5247793b",
+      "bytes": 530
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-preparation-r2/receipt.json",
+      "sha256": "49882003f323755ec6f746339e78660a1af440a9b678163a67c8d05df4505460",
+      "bytes": 1475
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-product-delta-r3.patch",
+      "sha256": "1851a4bc522ebc5bd7c7d3dc86fc94dad4251be71554a1a1d38965166b27429d",
+      "bytes": 16871
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-fix-r1.json",
+      "sha256": "aefd0ff6837a282d4f279bb3063b2e43d9b8cd87b930ee97c2f94f835af33069",
+      "bytes": 429
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-fix-r2.json",
+      "sha256": "0505ef8f30de50352a19d61d07bc8cc6df068276ce936796f3e96e17f6754edc",
+      "bytes": 663
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-freshness-r2.json",
+      "sha256": "7bbdd6cd9b87acd6369a92dc312bacf3e4668b46b1be0f40ccb85424abaf3b2e",
+      "bytes": 1932
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-outside-r1/result.json",
+      "sha256": "7fa6fb4f9ebcc98645d6d4222e8820f33a3e1c97c8e9fcc1d7e61e1968e1a7e4",
+      "bytes": 7936
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-outside-r2/result.json",
+      "sha256": "f699435981cc58d2d605b343e767cf237a4628e29de9dd32a4caff351c0d5757",
+      "bytes": 2746
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-outside-r2/text.md",
+      "sha256": "a65699acbe494f82bd9d5c4b3d0a91b0605d454a79bdcb01007954d8ff7afffb",
+      "bytes": 1739
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r1/.qa-evidence/001/observation.json",
+      "sha256": "fc99f41fed33388779958ff19da5ba68281e0553c0ad13ad643dc90f2fdcb83a",
+      "bytes": 1522
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r1/.qa-evidence/001/receipt.json",
+      "sha256": "7d1795a551ffbd9338cabfd9797bdac4da3a80e3b64fd851382db5e740ba69f9",
+      "bytes": 1484
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r1/.qa-evidence/001/stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r1/.qa-evidence/001/stdout",
+      "sha256": "c287c2bb01ac420decb9fe426e55a26b26f4d6dfd571d53a2e5a4304d7dd7a82",
+      "bytes": 1485
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r1/.qa-evidence/002/observation.json",
+      "sha256": "7b3a9e099b8c67134dab38be703cda1924e0836e99e7d006b568ca62d1dfe0bf",
+      "bytes": 8262
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r1/.qa-evidence/002/receipt.json",
+      "sha256": "85d896fd09a4df145cf27a89c0c9f0319492199f360b5cdfaa285f518bc577b7",
+      "bytes": 1462
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r1/.qa-evidence/002/stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r1/.qa-evidence/002/stdout",
+      "sha256": "7b3a9e099b8c67134dab38be703cda1924e0836e99e7d006b568ca62d1dfe0bf",
+      "bytes": 8262
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r1/.qa-evidence/004/observation.json",
+      "sha256": "049aaaa7cc84cc467dc10a3f603c5b9729cc3d57fd9c5818f31cbbd06ad82bac",
+      "bytes": 560
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r1/.qa-evidence/004/receipt.json",
+      "sha256": "7ae9721b21191419bee1ea3d480991ccb43d509be09dd4aae6c17a1e356a0851",
+      "bytes": 1465
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r1/.qa-evidence/004/stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r1/.qa-evidence/004/stdout",
+      "sha256": "0632d5d039c526e8236f3eccbbe2e8d649e8032277763f37d9ded335f066611a",
+      "bytes": 541
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r1/.qa-evidence/005/observation.json",
+      "sha256": "7f80ece419cd1acea13f476358bcbf6b7d1aed3e8d9edb3089b0fe4035335601",
+      "bytes": 1142
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r1/.qa-evidence/005/receipt.json",
+      "sha256": "30899878e677559d85eb068b2d5d85b6749c526ad7c644f74baea748203f1ecf",
+      "bytes": 1490
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r1/.qa-evidence/005/stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r1/.qa-evidence/005/stdout",
+      "sha256": "ba9c33600c9750acc91df266c155ab4f42e7151caebaeb6560de03c068a03c27",
+      "bytes": 1117
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r1/REPORT.md",
+      "sha256": "b58f20480f91626acd8f64fb61f37a6778b460a48cd100cdf8bf59faf57ccd3a",
+      "bytes": 1739
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r1/evidence.json",
+      "sha256": "7a511fd83ba01666f72be0c9922223ae325fe2f661541663ce931a9f17c10a2a",
+      "bytes": 16653
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r1/exploration-002.json",
+      "sha256": "af209191fc4a0888e20376c009008984f235d3603f60606ba843348c42dbdb71",
+      "bytes": 2109
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r1/exploration-004.json",
+      "sha256": "7bfa7bdedd3aa7f8b140b97258166591ac5c2f680abf4750d770875990685db4",
+      "bytes": 9139
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r1/exploration-005.json",
+      "sha256": "36f9d31008c78b699da9d5447581897171557e0f712cf51e4962848229a3e884",
+      "bytes": 1163
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r2/.qa-evidence/001/observation.json",
+      "sha256": "d7b10e9e8ea7a54121ef86ad5bc7b51ba3984b55ff127da1db9768c03bcc04e4",
+      "bytes": 1152
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r2/.qa-evidence/001/receipt.json",
+      "sha256": "9f817eab9b2f8fe6c3877b93d0486ffbb4a696c5d54db05acce09b2f1a99688d",
+      "bytes": 1484
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r2/.qa-evidence/001/stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r2/.qa-evidence/001/stdout",
+      "sha256": "0176eca0dfd37db553c90ff23991cc46b7728a2e18384d0da66a5212c5b15bcb",
+      "bytes": 1127
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r2/.qa-evidence/002/observation.json",
+      "sha256": "96a74640808e90c8c5d4cfe6667a4d0f832d6cad10b84b98ab6d944d2c785926",
+      "bytes": 555
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r2/.qa-evidence/002/receipt.json",
+      "sha256": "28e8eee3f26f9d1afe5cfba77938f16521748854c9887954d5ddd83e6d97bfac",
+      "bytes": 1465
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r2/.qa-evidence/002/stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r2/.qa-evidence/002/stdout",
+      "sha256": "eb42465fd692396050c2b770571d70da356e599782f8a143127101333a9778bc",
+      "bytes": 536
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r2/.qa-evidence/003/observation.json",
+      "sha256": "7b3a9e099b8c67134dab38be703cda1924e0836e99e7d006b568ca62d1dfe0bf",
+      "bytes": 8262
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r2/.qa-evidence/003/receipt.json",
+      "sha256": "42294ed0331851699cbc85b7a44565e36d9f4d7275916bd848b361b8981570dc",
+      "bytes": 1462
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r2/.qa-evidence/003/stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r2/.qa-evidence/003/stdout",
+      "sha256": "7b3a9e099b8c67134dab38be703cda1924e0836e99e7d006b568ca62d1dfe0bf",
+      "bytes": 8262
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r2/REPORT.md",
+      "sha256": "09302a4ef96bbb5bc7326811ea6e3af6588a7b27bf39ebad32bd4d4c21bc513b",
+      "bytes": 1708
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r2/evidence.json",
+      "sha256": "390c5a842d4602d503397c810880e1533b6143951c411754f163e4956dee16ca",
+      "bytes": 13905
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r2/exploration-002.json",
+      "sha256": "d7e88656550415530386f3a3572b04b6f8656ab0a9808f64dc270e411e2d4c4e",
+      "bytes": 1669
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-review-qa-r2/exploration-003.json",
+      "sha256": "40a1dd79b77f3006d06bde9b02bd5571a5ea8552272f7d960d6f8ac6bf1caba5",
+      "bytes": 1073
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-stage-r1.json",
+      "sha256": "0e72c465cdb6cb71f3829bcea3a72525fcd809456f2618a43a570826bbfd4f6e",
+      "bytes": 1414
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/content-comparison-r1.json",
+      "sha256": "89c02e881b89bd0de5f4ba044dab2e812441b5139b1c1f8420e24251207b379f",
+      "bytes": 3343
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/core-r1.json",
+      "sha256": "cef233e2ae6d31936971b40619fd76cb419822fe256dbd69cad98bc9fc3e98a1",
+      "bytes": 351
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/core-r2/result.json",
+      "sha256": "410cf3633a5078f9872784c840735316cf65b51e9a9260355e14d873f3b9883e",
+      "bytes": 1060
+    }
+  ],
+  "evidence_page": {
+    "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/docs/hackathon/evidence/shinemage-workbench-geometry-git-delivery-20261011.md",
+    "sha256": "d85030202dd5584989f1aed0f7d911dfd41906e06e0bd2753feae9c5bf18b0a5",
+    "bytes": 4296
+  },
+  "main_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "main_counterpart": "NOT_APPLIED",
+  "SDK_distribution": "BLOCKED",
+  "product": "PARTIAL",
+  "release_ready": false,
+  "postcommit_preservation": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/author-postcommit-preservation-r2.json",
+    "sha256": "dfbb6830fb5e9018bd759f2a009317b406489203ee27f58b781600c07fa6bf9b",
+    "bytes": 620
+  }
+}

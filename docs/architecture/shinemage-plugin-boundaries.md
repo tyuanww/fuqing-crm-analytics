@@ -1,6 +1,6 @@
 # ShineMage 当前包边界与依赖清单
 
-本页是 T1 的实现说明；目标架构见[平台边界](./shinemage-plugin-platform.md)，T1 原始验证见[盘点证据](../hackathon/evidence/dsh-g0-boundaries-20261003.md)，图表拆分增量见[本轮证据](../hackathon/evidence/dsh-g0-board-components-20261003.md)。当前代码处于 workspace，未创建新的远端仓库、重命名包或改变生产 profile。
+本页维护主仓历史插件副本的静态边界说明；目标架构见[平台边界](./shinemage-plugin-platform.md)。九个插件已有各自独立作者仓和私有远程仓，当前交付状态以 [STATUS](../../STATUS.md) 及其远端回执为准；这里扫描的 workspace 副本不代表独立仓最新源码，也不代表默认 B0 已完全脱离源码。T1 原始验证见[盘点证据](../hackathon/evidence/dsh-g0-boundaries-20261003.md)，图表拆分历史增量见[拆分证据](../hackathon/evidence/dsh-g0-board-components-20261003.md)。包 ID、生产 profile 和 DSH pin 未因本次清单同步改变。
 
 ## 唯一机器入口
 
@@ -20,21 +20,25 @@ node --test scripts/dsh-b0/plugin-boundaries.test.mjs
 
 全部 10 个构建消费者通过精确 devDependency 使用 kit 公开导出；测试通过 `./pin` 读取固定版本。边界检查拒绝构建入口回退到相邻 kit 源码，运行时仍禁止 kit。图表插件的跨工作台组合测试移到仓库级 `scripts/dsh-b0/geometry-composition.test.mjs`，领域 JSON 全矩阵继续归 board-components。该静态边界不证明 SDK/构建工具已可脱离固定 checkout 分发。
 
-## 实际包与目标归属
+## 实际包与维护归属
 
-| 当前包目录 | 领域 | 目标仓库（尚未迁移） | 现状 |
+下表列出当前插件作者仓。policy 中的 `target_repository` 保留 T1 开始盘点时的目标名称，用于历史职责记录，不是远程仓地址；本次未修改 policy 或增加源码豁免。
+
+| 主仓历史包目录 | 领域 | 当前独立作者仓／维护归属 | 能力边界 |
 |---|---|---|---|
-| `plugin-kit` | 纯开发工具 | `shinemage-dsh-plugin-kit` | pin、lock、补丁与构建绑定归 kit；无业务源码依赖 |
-| `shine-brand` | 受控主题 | `shinemage-dsh-brand` | 单包隔离 build/test/pack 已验证；默认不覆盖原生壳 |
-| `shine-query` | query marker/未来问数领域 | `shinemage-dsh-query` | 单包隔离 build/test/pack 已验证；不代表完整问数产品验收 |
-| `board-components` | 纯图表计算/类型 | `shinemage-dsh-board-components` | 独立 tarball、精确版本/digest、公开 exports；不注册 DSH 能力 |
-| `shine-funnel` / `shine-waterfall` | DSH 图表插件适配 | `shinemage-dsh-board-components` | 保留 ID/原有导出，构建时消费领域包并打入产物 |
-| `shine-board` / `shine-crowd-action` | board/marker | `shinemage-dsh-board` | 先组合，未证明独立生命周期前不额外拆仓 |
-| `analytics-workbench` | 分析、页面、驾驶舱 | `shinemage-dsh-analytics-workbench` | 首期 D15 载体；现有 artifact 包名保持不变 |
-| `crm-knowledge` | CRM 登录/指标/分析 adapter | `shinemage-dsh-crm` | 保留包 ID，版本 `0.0.0-crm.1`；已移出知识工具，无兄弟插件业务源码依赖 |
-| `knowledge` | 公开解释/教材检索/图谱 | `shinemage-dsh-knowledge` | 新独立包；公开解释无 CRM 依赖，私有教材消费可选身份能力合同 |
+| `plugin-kit` | 开发工具 | 主仓的固定 kit 输入；本轮不声明独立远程分发 | pin、lock、补丁与构建绑定，不进入运行包 |
+| `board-components` | 图表计算／类型 | [shinemage-board-components](https://github.com/tyuanww/shinemage-board-components)；主仓消费固定领域输入 | producer／私有几何由作者 CI 负责；公开计算和类型不注册宿主能力 |
+| `shine-brand` | 受控主题 | [dsh-shine-brand](https://github.com/tyuanww/dsh-shine-brand) | 默认不覆盖原生壳；公开编译路径不等于严格 SDK 类型检查 |
+| `shine-query` | query marker | [dsh-shine-query](https://github.com/tyuanww/dsh-shine-query) | 标记与生命周期，不是完整问数产品验收 |
+| `shine-funnel` | 漏斗适配 | [dsh-shine-funnel](https://github.com/tyuanww/dsh-shine-funnel) | 消费固定领域包；现有 build 无独立 tsc |
+| `shine-waterfall` | 瀑布适配 | [dsh-shine-waterfall](https://github.com/tyuanww/dsh-shine-waterfall) | 消费固定领域包；现有 build 无独立 tsc |
+| `shine-board` | board marker | [dsh-shine-board](https://github.com/tyuanww/dsh-shine-board) | 能力标记；完整驾驶舱在 Workbench |
+| `shine-crowd-action` | 人群行动 marker | [dsh-shine-crowd-action](https://github.com/tyuanww/dsh-shine-crowd-action) | 本包行为，不是完整业务验收 |
+| `analytics-workbench` | 分析、页面、驾驶舱 | [dsh-analytics-workbench](https://github.com/tyuanww/dsh-analytics-workbench) | 保持既有包 ID；主仓固定正式包及作者证据锁绑定 `6c5adc9f`，不继承旧 candidate 验收 |
+| `crm-knowledge` | CRM 登录／指标／分析 adapter | [dsh-crm-knowledge](https://github.com/tyuanww/dsh-crm-knowledge) | CRM 包 ID 保留，知识实现已分离；真实服务另验 |
+| `knowledge` | 公开解释／教材／图谱接入 | [dsh-knowledge](https://github.com/tyuanww/dsh-knowledge) | 合成接入验证不等于真实 WeKnora 验收 |
 
-扫描覆盖 11 个包、626 个 JS/TS 源码文件。30 条跨包引用中：10 条为构建到 kit，10 条为已锁定领域包公开导出，10 条只用于测试；生产源码例外为 0。另有 6 条仓库测试引用；71 处非字面动态导入均在测试中，不作为运行时兼容证据。
+2026-10-11 本地重新生成的清单扫描 11 个包、653 个 JS/TS 文件。27 条跨包引用按 phase 分为 runtime 10、build 11、test 6；10 条 runtime 引用全部是已锁定 board-components 的公开导出，生产源码例外为 0。另有 17 条仓库引用，均为测试，包含兼容入口转发；63 处非字面动态导入也全部位于测试。这些是当前静态清单的数值，不是插件宿主兼容或完整 B0 的通过计数；历史扫描数留在原证据。
 
 构建 DAG：`plugin-kit` → `board-components`、`crm-knowledge`、`knowledge` 与四个无需图表输入的 leaf → `analytics-workbench`/`shine-funnel`/`shine-waterfall`。箭头表示构建依赖，不是宿主 bundle 激活顺序；本地 profile v3 分别选择 CRM、知识与页面模块，生产 profile 未改变。
 
@@ -54,7 +58,7 @@ node --test scripts/dsh-b0/plugin-boundaries.test.mjs
 
 服务不在插件包内：`backend/analytics_*` 与 `backend/services/analytics/` 拥有 B0 分析及持久化；CRM 的 `backend/crm_metrics_app.py`、`backend/routers/metrics.py` 与领域合同拥有指标/权限；知识库服务及其数据拥有独立生命周期。插件通过 adapter 调用，不拥有生产 DuckDB、凭据或服务数据迁移。
 
-当前提取 `/api/`、`/internal/`、`/b0/` 字面路径及模板路径，共 206 处声明、124 种路径；包括测试夹具和 gateway 资源路径，**不是 124 个已经接通的公开 API**。清单标明来源与 phase，去掉 origin 和 query 值。内部路径标为 `INTERNAL_NOT_PUBLIC`，其他路径标为 `OBSERVED_NOT_FROZEN`。
+当前提取 `/api/`、`/internal/`、`/b0/` 字面路径及模板路径，共 198 处声明、128 种路径；包括测试夹具和 gateway 资源路径，**不是 128 个已经接通的公开 API**。清单标明来源与 phase，去掉 origin 和 query 值。内部路径标为 `INTERNAL_NOT_PUBLIC`，其他路径标为 `OBSERVED_NOT_FROZEN`。
 
 当前 17 条重要合同包括 DSH pin、领域 schema/slot/主题/图表、两项服务 API 1.0.0、可撤销知识身份能力 v1、公开 GSV 定义 v1，以及 analysis-service 的首购保存回执、独立结果/provenance v1；每条有 owner、消费者、生成器、源 SHA-256 与兼容政策。身份/GSV 由 CRM 领域维护并生成双方本地副本，不是共享业务运行时。回执支持只读 reconcile；新写入由服务端显式候选/freshness 策略控制，存储身份本身不授予资格；旧 saved-analysis/cockpit v1 和 SQLite schema 1 不变。页面交付仍由 workbench 的公开 `./page-tools` 入口拥有。新服务仅支持精确 API 1.0.0，见[服务边界](../operating/crm-plugin-service-boundary.md)；D15 本地结果/freshness 和受控保存 adapter 已通过验证，见[接口边界](../operating/first-purchase-save-admission.md)；真实服务版本窗口、生产策略与 UI/现场门禁仍未完成。
 

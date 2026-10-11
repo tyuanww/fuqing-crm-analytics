@@ -1,0 +1,278 @@
+{
+  "schema": "shinemage-workbench-geometry-ci-delivery/v1",
+  "observed_at": "2026-10-11T06:03:12.766967+00:00",
+  "head": "e922328906a7bf7a7251c26198683f67fa3afd39",
+  "author_branch": "codex/analytics-workbench-independent",
+  "PR": "https://github.com/tyuanww/dsh-analytics-workbench/pull/1",
+  "authorized": "PUSH_E922_EXISTING_PR_AND_CI_ONLY",
+  "push_exit_code": 0,
+  "CI": {
+    "schema": "shinemage-workbench-geometry-remote-ci/v1",
+    "head": "e922328906a7bf7a7251c26198683f67fa3afd39",
+    "runs": [
+      {
+        "id": 38116124494,
+        "event": "pull_request",
+        "head_sha": "e922328906a7bf7a7251c26198683f67fa3afd39",
+        "status": "completed",
+        "conclusion": "success",
+        "run_attempt": 1,
+        "html_url": "https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/38116124494",
+        "created_at": "2026-10-11T05:51:02Z",
+        "updated_at": "2026-10-11T05:53:45Z"
+      },
+      {
+        "id": 38116124493,
+        "event": "pull_request",
+        "head_sha": "e922328906a7bf7a7251c26198683f67fa3afd39",
+        "status": "completed",
+        "conclusion": "success",
+        "run_attempt": 1,
+        "html_url": "https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/38116124493",
+        "created_at": "2026-10-11T05:51:02Z",
+        "updated_at": "2026-10-11T05:51:23Z"
+      },
+      {
+        "id": 38116121887,
+        "event": "push",
+        "head_sha": "e922328906a7bf7a7251c26198683f67fa3afd39",
+        "status": "completed",
+        "conclusion": "success",
+        "run_attempt": 1,
+        "html_url": "https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/38116121887",
+        "created_at": "2026-10-11T05:50:59Z",
+        "updated_at": "2026-10-11T05:54:10Z"
+      },
+      {
+        "id": 38116121878,
+        "event": "push",
+        "head_sha": "e922328906a7bf7a7251c26198683f67fa3afd39",
+        "status": "completed",
+        "conclusion": "success",
+        "run_attempt": 1,
+        "html_url": "https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/38116121878",
+        "created_at": "2026-10-11T05:50:59Z",
+        "updated_at": "2026-10-11T05:51:22Z"
+      }
+    ],
+    "artifact": {
+      "id": 11693279047,
+      "node_id": "MDg6QXJ0aWZhY3QxMTY5MzI3OTA0Nw==",
+      "name": "workbench-ci-evidence-38116124494-1",
+      "size_in_bytes": 546706,
+      "url": "https://api.github.com/repos/tyuanww/dsh-analytics-workbench/actions/artifacts/11693279047",
+      "archive_download_url": "https://api.github.com/repos/tyuanww/dsh-analytics-workbench/actions/artifacts/11693279047/zip",
+      "expired": false,
+      "digest": "sha256:20639168b2c5f5300424800f6b55faa3a3765162f98847632aa9e0c926d0439f",
+      "created_at": "2026-10-11T05:53:30Z",
+      "updated_at": "2026-10-11T05:53:30Z",
+      "expires_at": "2026-10-25T05:53:29Z",
+      "workflow_run": {
+        "id": 38116124494,
+        "repository_id": 1411170547,
+        "head_repository_id": 1411170547,
+        "head_branch": "codex/analytics-workbench-independent",
+        "head_sha": "e922328906a7bf7a7251c26198683f67fa3afd39"
+      }
+    },
+    "archive": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/ci-evidence.zip",
+      "sha256": "20639168b2c5f5300424800f6b55faa3a3765162f98847632aa9e0c926d0439f",
+      "bytes": 546706
+    },
+    "release_ready": false,
+    "core": {
+      "files": 155,
+      "tests": 1086,
+      "pass": 1086,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "status": 0,
+      "release_ready": false,
+      "result_member": "workbench-author-tests-38116124494-1/result.json",
+      "plan_member": "workbench-author-tests-38116124494-1/plan.json",
+      "geometry_file_present": true,
+      "geometry_file_count": 1,
+      "geometry_plan_path": "src/board-spec/geometry-composition.test.mjs",
+      "contract_input_files": 16,
+      "push_full_log_confirms_same_counts": true,
+      "counts_combined": false
+    },
+    "content_pack": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/ci-content-pack/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+      "sha256": "f5e9dfe41859b0ae3254cbaddf12a128e89cd3c53bde82b84f366beef03ae5d7",
+      "bytes": 441127,
+      "member_count": 8,
+      "members": {
+        "package/lib/client.js": {
+          "bytes": 1176352,
+          "sha256": "d50bb6272a18de3a892687192d95b52019bd8af2f959f5593dae1283b8043c03"
+        },
+        "package/lib/index.js": {
+          "bytes": 143276,
+          "sha256": "f1b97a4457ad65d868c83eb6209ae4c14a9598415caf4376a5c6151ef962fd58"
+        },
+        "package/lib/page-tools.js": {
+          "bytes": 14160,
+          "sha256": "28b07f12a5aaff8096c604d9c53eef293a91be55ae82d48b069ab8c0e8fa5c70"
+        },
+        "package/lib/skills.js": {
+          "bytes": 107570,
+          "sha256": "c4b870b64626b5d8f7ed898c6cf2edd613fc7cabb39bd49490eb9b3bcf29c8b1"
+        },
+        "package/lib/tool.js": {
+          "bytes": 38843,
+          "sha256": "e854349cb5187e2b045f280f8330f19da0e7d0acbe0ff4f07e8c747f710a4924"
+        },
+        "package/bundled-dependencies.json": {
+          "bytes": 306,
+          "sha256": "957ba54ce606fc735cc11c051b9d60c3703ab8bf0bc94dd00aac696b28afa06b"
+        },
+        "package/package.json": {
+          "bytes": 2569,
+          "sha256": "b4363c75d509e0c7f8f30a028d76b271dbebf9035719a399387bea7836bca6f0"
+        },
+        "package/cordis.patch.yml": {
+          "bytes": 584,
+          "sha256": "901c01fe1237b5d1b25f60ce58252553053125519ae73fe356ff6e4365425b3f"
+        }
+      },
+      "members_same_as_prior_CI": true,
+      "archive_same_as_prior_CI": true,
+      "formal_pack_plugin": "NOT_RUN",
+      "candidate": "NOT_RUN"
+    }
+  },
+  "main_cutover": "NOT_APPLIED",
+  "main_three_path_proposal": "NOT_APPLIED",
+  "current_formal_source_sha": "d038f3577efec91e75fcf711a60b1fb868d7bcd5",
+  "new_formal_pack": "NOT_RUN",
+  "candidate_journal": "UNCHANGED",
+  "merge_release_deploy": "NOT_RUN",
+  "SDK_distribution": "BLOCKED",
+  "product": "PARTIAL",
+  "release_ready": false,
+  "raw_bindings": [
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/artifacts.json",
+      "bytes": 790,
+      "sha256": "0ecaca0af9e47100b50b5ef9e4e19d336b050eb5b909ec1ee009e7fa3edaab68"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/ci-content-pack/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+      "bytes": 441127,
+      "sha256": "f5e9dfe41859b0ae3254cbaddf12a128e89cd3c53bde82b84f366beef03ae5d7"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/ci-evidence.zip",
+      "bytes": 546706,
+      "sha256": "20639168b2c5f5300424800f6b55faa3a3765162f98847632aa9e0c926d0439f"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/ci-receipt.json",
+      "bytes": 2895,
+      "sha256": "222093d3de49e1206736d3da57a9c46dffc541f48eada5a5401cb5e9b9869c58"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/ci-validation-initial-failures.json",
+      "bytes": 414,
+      "sha256": "7ec28d807b355eaa6c990d87ff07234e4d5a58be9aabee9a0d600dd33654bcc5"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/pr-after-edit.json",
+      "bytes": 4286,
+      "sha256": "3037224c387810188d7c98acdb2908b1188e18dbeb313305d832561eeb497859"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/pr-before-edit.json",
+      "bytes": 4436,
+      "sha256": "fe7ddaaa43c20ae35f526324e9ffc034b1744ebbab877a0a7234989d389d0769"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/pr-body-e922.md",
+      "bytes": 2754,
+      "sha256": "942e1e618e868dc01656b029686ee903bd36726e2bff0b92533aa50a24b59f18"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/pr-edit-command.json",
+      "bytes": 361,
+      "sha256": "a4da306fa80f2f3d0cd415ba889ad74c330cb48583889459f06977e64a50764b"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/pr-edit.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/pr-edit.stdout",
+      "bytes": 58,
+      "sha256": "9afb932c447e4553e5380e698ad82df5b3acff4be68a78bb26a94ba6500fb512"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/preflight-r0-failed.json",
+      "bytes": 191,
+      "sha256": "b297cfbfc8e99e97e1583261ac749a5593cdc6425a3bc9281c521fc50fcd93aa"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/preflight.json",
+      "bytes": 2156,
+      "sha256": "d33914248b372e973e82f9c9822281db4d9f7293c82a885955f30531151d3935"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/push-command.json",
+      "bytes": 442,
+      "sha256": "8215dc7f44cf247d94438641ea22330b7c99fcb1a8cd1b9f8ccdefa6cf60336a"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/push.stderr",
+      "bytes": 161,
+      "sha256": "ea119c1c9847991ce2a0489ce77fe6c78c372b58b716d058b79be41df2f433fb"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/push.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/run-38116121878.json",
+      "bytes": 14161,
+      "sha256": "bc739e1b07a76d28fb2463ea3e0a4642030e019320c3705f9107ebbc56c15718"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/run-38116121887.json",
+      "bytes": 14179,
+      "sha256": "3046972702687fa425c19310aea675fc3d912abe5fc8cf3ec38ac2cac617b9e1"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/run-38116121887.log",
+      "bytes": 322583,
+      "sha256": "acde1e679cfb651820a245948eac77f9f4e4fd695e761d2fe0c27d6c38152764"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/run-38116124493.json",
+      "bytes": 14177,
+      "sha256": "b7e1558f43cc2846f6f2939ea66871e9f6f0dd7026d47ec34afcce6de94e65cd"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/run-38116124494.json",
+      "bytes": 14195,
+      "sha256": "3d2695f2580a88e77f68ed38a47785d8d60a7f7a1e678def95fd4923c2b5b380"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/run-38116124494.log",
+      "bytes": 323877,
+      "sha256": "ef99e3269286ddf9e30e754ddc0343827b4c4885ee118acf823ebe0add1d282b"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/validated-ci-receipt.json",
+      "bytes": 5185,
+      "sha256": "38cbdcd6812b635b533dbf95632d45f36b4ca3016e4bbfb9f009bd4161484d53"
+    }
+  ],
+  "post_document_preservation": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-workbench-geometry-owner-proposal-20261011-4zvnzwh6/remote-push-r1-_djmd2re/final-preservation-r1.json",
+    "sha256": "b64aa89252fd1d45a58227bbad2e72153d4db8a6cd46203efab397a0b5478d30",
+    "bytes": 1832
+  }
+}

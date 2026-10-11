@@ -1,0 +1,261 @@
+{
+  "schema_version": "shinemage-leaf-pack-migration-validation/v1",
+  "baseline_sha": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "branch": "codex/shinemage-abc-local-candidate",
+  "scope": "six independent leaf package consumers in default B0; remaining source stages stay open",
+  "evidence_root": "/Users/hutou/.codex/tasks/shinemage-leaf-pack-migration-20261011-mzjlgkh0",
+  "handoff": {
+    "path": "docs/hackathon/evidence/shinemage-leaf-pack-migration-20261011.md",
+    "sha256": "ea713556896a4dc2af6de1622d97a9e659c21929d61f7b907179b34337672860"
+  },
+  "product_files": [
+    {
+      "path": "scripts/dsh-b0/legacy-geometry-exports.test.mjs",
+      "sha256": "8a7b4126eca61e38cc05b4812a87d9ccfeb3955a636d58c8141920f1dffcedc0"
+    },
+    {
+      "path": "scripts/dsh-b0/pipeline.mjs",
+      "sha256": "2c0e0314243915949316aaeb16639fc3b3bb0ee756bb28e9ec74a982305cca3b"
+    },
+    {
+      "path": "scripts/crm-calibration/test-support/formal-packs.fixture.mjs",
+      "sha256": "384c59dbc352ffab5d6a98486e676b384369a5646bda07de892d9b1bd42b0533"
+    },
+    {
+      "path": "scripts/dsh-b0/leaf-pack-composition.integration.mjs",
+      "sha256": "4bdf0ed676a5ada462997f4d8d7994efbc413dece686b3c9044f5461ac1ae25c"
+    },
+    {
+      "path": "scripts/dsh-b0/leaf-pack-inputs.mjs",
+      "sha256": "f44c5f6fa2bdc3dc237264e4cb324fefed8ba4d1449f467843e84bbf5fae4648"
+    },
+    {
+      "path": "scripts/dsh-b0/leaf-pack-inputs.test.mjs",
+      "sha256": "8b36c5906c9aa0545f7e83c83c4b40eff06a2503d3762d55104356f0f783077d"
+    }
+  ],
+  "inputs": {
+    "schema_version": "shinemage-ci-composition-preparation/v1",
+    "lock_sha256": "39596a6ae4ae81fe60c49d32ebcef32e8fadb313329bd9f49b4864dff0faa6a3",
+    "profiles": [
+      {
+        "name": "crm",
+        "path": "config/dsh-profile.crm-knowledge.rc2.json",
+        "sha256": "7ca3511663ab2ea5d1bb8f839c83b29f5bbd6655238450ad08a04510642191ba"
+      },
+      {
+        "name": "page",
+        "path": "config/dsh-profile.rc2.json",
+        "sha256": "c8c9df8c36f11060ad8fbcce68cb2ebf28d783c5eb5759d1b71ff5463782c981"
+      }
+    ],
+    "plugins": [
+      {
+        "id": "@shine-mage/dsh-analytics-workbench-b0",
+        "source_sha": "92dfa171cf8ea298bdceee5634b418269e711a37",
+        "version": "0.0.0-b0",
+        "manifest_sha256": "9f518393e544099b5a31fde6073c2b0e321649f7e1134829d0dcd5bc608801f4",
+        "pack_sha256": "a0d5dd08c5e97237fc38033f929eec33627ac42efa594a5ca5c87a0ee311d6b2"
+      },
+      {
+        "id": "@shine-mage/dsh-crm-knowledge",
+        "source_sha": "5a839fa86de2240cf661a9034c58e0ead2d4b4ef",
+        "version": "0.0.0-crm.1",
+        "manifest_sha256": "0fbacc88fccc8085618b518a51afab5db1c045838c0cb47d6e94a8af5f600a49",
+        "pack_sha256": "0da9f8edd40b17a92377aa4b35d219229c8461b942060a7dd0e12265343500fd"
+      },
+      {
+        "id": "@shine-mage/dsh-knowledge",
+        "source_sha": "94ef29fa6c39d3dc506fbc5ef734f0a7ea9eb2b0",
+        "version": "0.0.0-candidate.1",
+        "manifest_sha256": "a674a2da0dcd317839c4f8d7766da62ced58eca9021222c6e3a238f80aa7df79",
+        "pack_sha256": "ed7888204d5cefe7d383632a75319d3427fec9a735863f4e123b8ea17387ef67"
+      },
+      {
+        "id": "@shine-mage/dsh-shine-board",
+        "source_sha": "76601df755ec8ef8c9726ea770ec488b745efd71",
+        "version": "0.0.0-b0",
+        "manifest_sha256": "671acb9502969f08e5db6b83369afa3ea1dec1699a7a9fc5a1680abfa9aa39cf",
+        "pack_sha256": "e1348dd7739778a5ec2d676420e86290ca49f69cdf045959fd82441232a30c1a"
+      },
+      {
+        "id": "@shine-mage/dsh-shine-crowd-action",
+        "source_sha": "5c39e21c27565397383b009725634ea66e9c1525",
+        "version": "0.0.0-b0",
+        "manifest_sha256": "d3998ed96530db66b3aa53f263c93848e7078846a8a0f612a1c099202bfa406f",
+        "pack_sha256": "3fb9d88d228e3af4a9c965961c035650b65365392a9caccb4c14f336b003b2ca"
+      },
+      {
+        "id": "@shine-mage/dsh-shine-query",
+        "source_sha": "1f1e19d280923ebe7aac964f8b5825d497434db8",
+        "version": "0.0.0-b0",
+        "manifest_sha256": "13433c1c4687cd33f0b314b60a38c76fb8390ee52375755320d4ca5a6f378fae",
+        "pack_sha256": "774c6ae63e0fb170a81a9e9fb9551d55d40724faae5966c1d95bb32624fb89ce"
+      },
+      {
+        "id": "@shine-mage/dsh-shine-funnel",
+        "source_sha": "dbfaede0961586d773c708e833a4ac1c9f2515dc",
+        "version": "0.0.0-b0",
+        "manifest_sha256": "1e631c02c1fa6903b1f76953edc4e7da3fc85b1b96c1292567f8561a78a8eefb",
+        "pack_sha256": "581ba069aa8af4598f553e4b11b57216ac2205d71baebbafc267367cb3814ba6"
+      },
+      {
+        "id": "@shine-mage/dsh-shine-waterfall",
+        "source_sha": "d123ac1d0e7bad3e5de45169b3e72c38623b858a",
+        "version": "0.0.0-b0",
+        "manifest_sha256": "43a9c673ada75b763c1867e6bb6fd66c75da393cd6c2fd2fd669aadbe73c6af5",
+        "pack_sha256": "73a1d4ba2b085c1f9f2a1eff410aca239cf9775de952ba70aafdaa78ec5ac35d"
+      },
+      {
+        "id": "@shine-mage/dsh-shine-brand",
+        "source_sha": "57ebcf38278068394a4feb42125c30c195fd912a",
+        "version": "0.0.0-b0",
+        "manifest_sha256": "d5039166969023075253e65e31c4d7dba910ae6ea10b9b40bf7f147bdb5efd24",
+        "pack_sha256": "4b867bf5b4e08d9aa1f45f20b20b78cbd9e11c236194ffafaa5188d8d173bd13"
+      }
+    ],
+    "env": {
+      "CRM_COMPOSITION_PACK_INPUTS": "/Users/hutou/.codex/tasks/shinemage-leaf-pack-migration-20261011-mzjlgkh0/prepared-r1/crm-inputs.json",
+      "CRM_COMPOSITION_PAGE_INPUTS": "/Users/hutou/.codex/tasks/shinemage-leaf-pack-migration-20261011-mzjlgkh0/prepared-r1/page-inputs.json",
+      "CRM_COMPOSITION_OUTPUT": "/Users/hutou/.codex/tasks/shinemage-leaf-pack-migration-20261011-mzjlgkh0/prepared-r1/runs"
+    },
+    "host": "NOT_RUN",
+    "remote_ci": "NOT_RUN",
+    "release_ready": false
+  },
+  "verification": [
+    {
+      "name": "contracts-r2",
+      "log": "contracts-r2.log",
+      "log_sha256": "9f2699000022fc0f7e55d4df143a575d6a35be84bda8a0ee72241ba17eeb720a",
+      "exit_code": 0,
+      "counts": {
+        "pass": 88,
+        "fail": 0,
+        "skip": 0
+      }
+    },
+    {
+      "name": "consumer-r2",
+      "log": "consumer-r2.log",
+      "log_sha256": "c3e34d4cd92879585024c1bac95f7d807a1f60d39562f601a9d5ae3681a3c317",
+      "exit_code": 0,
+      "counts": {
+        "pass": 20,
+        "fail": 0,
+        "skip": 0
+      }
+    },
+    {
+      "name": "guards-r1",
+      "log": "guards-r1.log",
+      "log_sha256": "662dac379f7cf98833d1ef30399e68fde7c298532e9db8ecee6ccb40643c8f2a",
+      "exit_code": 1,
+      "counts": {
+        "pass": 7,
+        "fail": 2,
+        "skip": 0
+      }
+    },
+    {
+      "name": "consumer-r1",
+      "log": "consumer-r1.log",
+      "log_sha256": "8ff2e68f4f69f40d9069ac60321535eab2fb5d32e86a95ad1567fa12cefbc728",
+      "exit_code": 1,
+      "counts": {
+        "pass": 14,
+        "fail": 6,
+        "skip": 0
+      }
+    }
+  ],
+  "consumer_command": [
+    "/usr/bin/sandbox-exec",
+    "-f",
+    "/Users/hutou/.codex/tasks/shinemage-leaf-pack-migration-20261011-mzjlgkh0/source-deny-loopback.sb",
+    "/Users/hutou/homebrew/opt/node@24/bin/node",
+    "--test",
+    "--test-concurrency=1",
+    "scripts/dsh-b0/leaf-pack-composition.integration.mjs",
+    "scripts/dsh-b0/legacy-geometry-exports.test.mjs"
+  ],
+  "environment": {
+    "PATH": "/Users/hutou/homebrew/opt/node@24/bin:/Users/hutou/homebrew/opt/python@3.14/bin:/Users/hutou/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+    "HOME": "/Users/hutou/.codex/tasks/shinemage-leaf-pack-migration-20261011-mzjlgkh0/home",
+    "TMPDIR": "/Users/hutou/.codex/tasks/shinemage-leaf-pack-migration-20261011-mzjlgkh0/tmp",
+    "B0_BUILD_UPSTREAM": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2",
+    "B0_BUILD_TOOLS": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/plugin-kit/build-tools",
+    "FQ_B0_PYTHON": "/Users/hutou/homebrew/opt/python@3.14/bin/python3.14",
+    "CRM_COMPOSITION_PACK_INPUTS": "/Users/hutou/.codex/tasks/shinemage-leaf-pack-migration-20261011-mzjlgkh0/prepared-r1/crm-inputs.json",
+    "CRM_COMPOSITION_PAGE_INPUTS": "/Users/hutou/.codex/tasks/shinemage-leaf-pack-migration-20261011-mzjlgkh0/prepared-r1/page-inputs.json",
+    "CRM_COMPOSITION_OUTPUT": "/Users/hutou/.codex/tasks/shinemage-leaf-pack-migration-20261011-mzjlgkh0/runs-r2"
+  },
+  "boundary_probe": {
+    "record": "boundary-probe-r1.json",
+    "sha256": "07e10cac540ccc57281487f25c24c146a1e0a1b1d55750486f3bc0fa8056b2de",
+    "denied": 21,
+    "allowed": 3,
+    "whole_machine_denied": false
+  },
+  "reused_output": {
+    "command": [
+      "/usr/bin/sandbox-exec",
+      "-f",
+      "/Users/hutou/.codex/tasks/shinemage-leaf-pack-migration-20261011-mzjlgkh0/source-deny-loopback.sb",
+      "/Users/hutou/homebrew/opt/node@24/bin/node",
+      "--test",
+      "--test-concurrency=1",
+      "scripts/dsh-b0/leaf-pack-composition.integration.mjs",
+      "scripts/dsh-b0/legacy-geometry-exports.test.mjs"
+    ],
+    "exit_code": 1,
+    "expected_rejection": "EEXIST",
+    "same_receipts": true,
+    "receipts": {
+      "/Users/hutou/.codex/tasks/shinemage-leaf-pack-migration-20261011-mzjlgkh0/runs-r2/leaf/runtime-inputs.json": "4af18c7ae11876a82a951c48967048d5fdeb55fac75175e3dea148f9c3b5f4bd",
+      "/Users/hutou/.codex/tasks/shinemage-leaf-pack-migration-20261011-mzjlgkh0/runs-r2/geometry/runtime-inputs.json": "7fc3ef43d6989433a86016982296bacc3c7c78c2b842349cdcfe794ab597e18c"
+    },
+    "log": "/Users/hutou/.codex/tasks/shinemage-leaf-pack-migration-20261011-mzjlgkh0/consumer-r3-existing.log"
+  },
+  "tooling": {
+    "record": "tooling-r2.json",
+    "status": "NOT_APPLICABLE_TO_SELECTED_AXIS",
+    "exit_code": 0,
+    "executed_tests": 0
+  },
+  "readback": {
+    "record": "readback-r1.json",
+    "sha256": "2d7f5230b9e0b0778086805ce6542e76bd29d45b99330cc03a493cc87550c303",
+    "inherited_unchanged": 40,
+    "inherited_changed": 7,
+    "sealed_files_same": 18,
+    "candidate_same": true
+  },
+  "remaining": [
+    "historical source input/isolation probes",
+    "Workbench/CRM/knowledge source build and private-source consumers",
+    "full B0 and new hosted CI",
+    "clean peer-fixed Workbench commit and new formal pack/candidate",
+    "same-package complete host/service/target/browser/recovery acceptance",
+    "real model/CRM/WeKnora/UAT",
+    "independent releases and DSH upgrade"
+  ],
+  "commit": "NOT_RUN",
+  "push": "NOT_RUN",
+  "merge": "NOT_RUN",
+  "release": "NOT_RUN",
+  "deployment": "NOT_RUN",
+  "full_host": "NOT_RUN",
+  "browser": "NOT_RUN",
+  "candidate_journal_sequence": 3,
+  "product": "PARTIAL",
+  "sdk_distribution": "BLOCKED",
+  "release_ready": false,
+  "version": "0.20.0.0",
+  "platform": {
+    "os": "darwin",
+    "arch": "arm64",
+    "ubuntu": "NOT_RUN",
+    "hosted_ci": "NOT_RUN"
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "schema_version": "shinemage-workbench-native-prompt-consumer-evidence/v1",
+  "baseline_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "raw_root": "/Users/hutou/.codex/tasks/shinemage-workbench-native-prompt-pack-20261011-0bsktmwm",
+  "document_sha256": "44793bc23ef18a94d0ad83cc7e3ad7fe3f6af2e7115380125f4c402208beac96",
+  "node": "24.19.0",
+  "python": "3.14.4",
+  "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+  "cordis_runtime": "4.0.4",
+  "products": {
+    "dsh-plugins/analytics-workbench/test/native-prompt-inject.test.mjs": "816dd562d7f0715c9cc72603fa7c737bf0ea720207aba66b8ff6fb9bea247570",
+    "scripts/dsh-b0/workbench-client-pack-inputs.mjs": "491097e202f9b952a16892290faff93a2fe4c713769abf76f205d20ddbd2a525",
+    "scripts/dsh-b0/pipeline.mjs": "b69f4b4e7a3f5bdf1fc580a88d1cd52e1b546ac157094d8439608b55778800b7",
+    "scripts/dsh-b0/plugin-kit.test.mjs": "58e53d3e01af0cda93cab531aff76a133a6eb4d3cfed62d13b3972349ea7c29e",
+    "scripts/dsh-b0/workbench-native-prompt.integration.mjs": "8f699aadb2d932a8143acf9c2d48d2c356f243e812dd1380efc643943630883a"
+  },
+  "results": {
+    "consumer-r1": {
+      "counts": {
+        "tests": 10,
+        "pass": 2,
+        "fail": 8,
+        "cancelled": 0,
+        "skipped": 0
+      },
+      "exit_code": 1
+    },
+    "consumer-r2": {
+      "counts": {
+        "tests": 10,
+        "pass": 10,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      },
+      "exit_code": 0
+    },
+    "consumer-r3": {
+      "counts": {
+        "tests": 66,
+        "pass": 66,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      },
+      "exit_code": 0
+    },
+    "guards-r1": {
+      "counts": {
+        "tests": 18,
+        "pass": 18,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      },
+      "exit_code": 0
+    }
+  },
+  "body_retention": "identical original boot/test bodies",
+  "boundary": {
+    "denied": 21,
+    "allowed": 3,
+    "whole_machine_deny_default": false
+  },
+  "existing_output": {
+    "expected_rejections": 1,
+    "exit_code": 0,
+    "receipts_unchanged": true
+  },
+  "full_b0": "NOT_RUN",
+  "full_host": "NOT_RUN",
+  "real_session": "NOT_RUN",
+  "browser": "NOT_RUN",
+  "hosted_ci": "NOT_RUN",
+  "real_model": "NOT_RUN",
+  "business_service": "synthetic RPC/fetch",
+  "candidate_changed": false,
+  "journal_changed": false,
+  "product": "PARTIAL",
+  "release_ready": false,
+  "sdk_distribution": "BLOCKED",
+  "git_actions": "NOT_RUN",
+  "inheritance": {
+    "files": 80,
+    "unchanged": 72,
+    "changed": [
+      "STATUS.md",
+      "docs/architecture/shinemage-plugin-platform.md",
+      "docs/hackathon/TODOS.md",
+      "docs/operating/shinemage-plugin-update.md",
+      "docs/operating/verification.md",
+      "scripts/dsh-b0/pipeline.mjs",
+      "scripts/dsh-b0/plugin-kit.test.mjs",
+      "scripts/dsh-b0/workbench-client-pack-inputs.mjs"
+    ],
+    "unexpected": []
+  },
+  "raw_files_sha256": {
+    "consumer-r3.json": "6f7c88423d10b1eb3657a022e22e7466cd690277b22a1825eba1073f64cdcd58",
+    "consumer-r2.json": "40b43372b92bb16e9083a6ec9b13810b81d5524dd222ffe1d8153094189da9d1",
+    "consumer-r1.json": "17e62cb6b59e9b95f69239a4926c69c1c66493c0fa37b1ffc6b14814b84653bc",
+    "consumer-r2.log": "948d40d3e0936fe10774361f0574be3a3bf67a508c65bb441a1d59c900a6101f",
+    "consumer-r3.log": "87e5d9e1043988a5f890d9950d870fb842b7b88639dc20092a4ab57aca384724",
+    "consumer-r1.log": "d60b562e969b1f9501abaf5a7de90834de9f86cbc3a7cbc40ef54a7208aad257",
+    "guards-r1.json": "e5a80fd84d30f7f6bd292a016a2f9b7defd1a6ddc8b84ff99b6a56bf4d10e624",
+    "guards-r1.log": "de004c155e86864be746390cfa9df96364c2c3fd0ed74c97745b4c6ca5b5453a",
+    "boundary-probe-r1.json": "4fe386b670c01d853ad7262aef704bad3ca3416ba017d1d926daf4ebc2730aea",
+    "existing-output-r1.json": "1267de35bccf71f062dcb1f71fc0697ec772e9ff0fe5945e7787af46f6a9ea63",
+    "assertion-retention-r1.json": "dee2ab47c23da59e5fdbb582f2d628cda9263526da9942f8a5e22c5fd32383d8",
+    "readback-r1.json": "f8d2659b4d3c7a8d4a4433aa2af37f07c161f940ee776614e6d5465124978d04"
+  }
+}

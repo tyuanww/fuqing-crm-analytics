@@ -1,0 +1,1327 @@
+{
+  "schema": "shinemage-workbench-core-formal-main-ownership/v1",
+  "observed_at": "2026-10-11T03:51:07.187434+00:00",
+  "main_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "main_branch": "codex/shinemage-abc-local-candidate",
+  "author_head": "d038f3577efec91e75fcf711a60b1fb868d7bcd5",
+  "formal_production": {
+    "schema": "shinemage-current-core-formal-production/v1",
+    "observed_at": "2026-10-11T03:19:36.235532+00:00",
+    "command": [
+      "/usr/bin/sandbox-exec",
+      "-f",
+      "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/formal-pack-isolation-r1.sb",
+      "/Users/hutou/homebrew/opt/node@24/bin/node",
+      "/Users/hutou/.codex/tasks/shinemage-full-closeout-20261011-p6m85w3u/main-qa/scripts/release/plugin-pack.mjs",
+      "--plugin",
+      "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/ci-pack-inputs/analytics-workbench/source/plugin",
+      "--output-dir",
+      "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/formal-pack-r1",
+      "--manifest",
+      "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/formal-pack-r1/plugin-pack.json"
+    ],
+    "cwd": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/ci-pack-inputs/analytics-workbench/source",
+    "exit_code": 0,
+    "input": {
+      "name": "analytics-workbench",
+      "repo": "tyuanww/dsh-analytics-workbench",
+      "source_sha": "d038f3577efec91e75fcf711a60b1fb868d7bcd5",
+      "status": "READY_FOR_FORMAL_PACK",
+      "ci_run": 38107479575,
+      "ci_event": "pull_request",
+      "artifact_id": 11689909409,
+      "artifact_zip_sha256": "2e2f2cd677582ebef0620549edc7f4044300537fdf8e44c6916d869e8e870031",
+      "content_pack": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/ci-pack-inputs/analytics-workbench/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+      "content_pack_sha256": "f5e9dfe41859b0ae3254cbaddf12a128e89cd3c53bde82b84f366beef03ae5d7",
+      "clone": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/ci-pack-inputs/analytics-workbench/source",
+      "member_hashes": {
+        "lib/client.js": {
+          "bytes": 1176352,
+          "sha256": "d50bb6272a18de3a892687192d95b52019bd8af2f959f5593dae1283b8043c03"
+        },
+        "lib/index.js": {
+          "bytes": 143276,
+          "sha256": "f1b97a4457ad65d868c83eb6209ae4c14a9598415caf4376a5c6151ef962fd58"
+        },
+        "lib/page-tools.js": {
+          "bytes": 14160,
+          "sha256": "28b07f12a5aaff8096c604d9c53eef293a91be55ae82d48b069ab8c0e8fa5c70"
+        },
+        "lib/skills.js": {
+          "bytes": 107570,
+          "sha256": "c4b870b64626b5d8f7ed898c6cf2edd613fc7cabb39bd49490eb9b3bcf29c8b1"
+        },
+        "lib/tool.js": {
+          "bytes": 38843,
+          "sha256": "e854349cb5187e2b045f280f8330f19da0e7d0acbe0ff4f07e8c747f710a4924"
+        },
+        "bundled-dependencies.json": {
+          "bytes": 306,
+          "sha256": "957ba54ce606fc735cc11c051b9d60c3703ab8bf0bc94dd00aac696b28afa06b"
+        },
+        "package.json": {
+          "bytes": 2569,
+          "sha256": "b4363c75d509e0c7f8f30a028d76b271dbebf9035719a399387bea7836bca6f0"
+        },
+        "cordis.patch.yml": {
+          "bytes": 584,
+          "sha256": "901c01fe1237b5d1b25f60ce58252553053125519ae73fe356ff6e4365425b3f"
+        }
+      },
+      "scope": "compiled runtime bytes imported from exact-head successful CI; no SDK redistributed",
+      "host_acceptance": "NOT_RUN",
+      "activation": "NOT_RUN",
+      "release_ready": false
+    },
+    "producer_tooling": {
+      "source_sha": "5390667cc990fa558b0445aa455b086d325a6c77",
+      "path": "/Users/hutou/.codex/tasks/shinemage-full-closeout-20261011-p6m85w3u/main-qa",
+      "files": {
+        "scripts/release/secure-unpack.py": {
+          "sha256": "8d8b34497382302ace6a434180f72a6d418d5879cc682102964a13b5c1e96d50",
+          "bytes": 5960
+        },
+        "scripts/release/plugin-pack.mjs": {
+          "sha256": "61d3365ff38f89077040246290874c768ea16e1b17f013f63c9b29604ef8898a",
+          "bytes": 18143
+        },
+        "scripts/release/service-artifact-evidence.mjs": {
+          "sha256": "f92d006759f620b2d303bcfe90f9c04f3726a4624d1597f77dcdc61f0abba187",
+          "bytes": 15373
+        },
+        "scripts/release/service-compatibility.mjs": {
+          "sha256": "844aa39a9540c5a68a142b6a2a2f25931f7a27d0a7120938d42ea05936204953",
+          "bytes": 11199
+        },
+        "scripts/release/secret-scan.mjs": {
+          "sha256": "477f7b83691137d83fcbb8dd65cb3144363bf08d37c94189fb7eafd8e517d7a7",
+          "bytes": 3793
+        },
+        "scripts/release/toolchain.mjs": {
+          "sha256": "04d15e35e8d3161b5fa7bddc53399273c7bdbd2d7ee0905f9615fdccd24badb8",
+          "bytes": 884
+        },
+        "dsh-plugins/plugin-kit/package-manager.mjs": {
+          "sha256": "4605cfa766428733ad4202cf267d103762202e447119d6855c45049241759c6b",
+          "bytes": 3152
+        },
+        "dsh-plugins/plugin-kit/toolchain.json": {
+          "sha256": "8f1eaf0b2b7ea1392cd45674bfbdd7498b2df6bb642db63f75d002df776511fe",
+          "bytes": 2282
+        }
+      },
+      "git_blob_binding": true
+    },
+    "activation": "NOT_RUN",
+    "candidate_journal": "NOT_RUN",
+    "release_ready": false,
+    "receipt": {
+      "schema_version": "dsh-plugin-pack/v1",
+      "package_name": "@shine-mage/dsh-analytics-workbench-b0",
+      "package_version": "0.0.0-b0",
+      "dsh_pin": "0.1.7-rc.2",
+      "source_sha": "d038f3577efec91e75fcf711a60b1fb868d7bcd5",
+      "source_dirty": false,
+      "tarball": {
+        "name": "shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+        "bytes": 438499,
+        "sha256": "e41df9f5a8f7031c092319222543c8d723ca644c0c9d69b2ae53f13257e9b79e"
+      },
+      "entries": [
+        "bundled-dependencies.json",
+        "cordis.patch.yml",
+        "lib/client.js",
+        "lib/index.js",
+        "lib/page-tools.js",
+        "lib/skills.js",
+        "lib/tool.js",
+        "package.json"
+      ],
+      "activation": "NOT_RUN",
+      "state_path": "NOT_APPLICABLE_PLUGIN_PACK_ONLY"
+    },
+    "receipt_sha256": "9d7f6bf363f86d53f39ad77353a531fda6a5607c3b14be5869841dc5b6432647"
+  },
+  "lock_update": {
+    "before_sha256": "598b62ea0ae00c2f57474c8666e2787202658b57488612cb1d1ea4c40edd571b",
+    "after_sha256": "89e2b2ea946cb1dfda1a2776651e63a851dcad466183a394ac5af722a625a6d5",
+    "changes": [
+      [
+        {
+          "directory": "analytics-workbench",
+          "id": "@shine-mage/dsh-analytics-workbench-b0",
+          "source_sha": "fd46b34d04ddf143811fd1eba7ef2ff6c3ca230b",
+          "version": "0.0.0-b0",
+          "manifest_sha256": "a9463faa7c3299cc5d24179708dc7c5ae5ecf0f124ce97dfa904145398b65910"
+        },
+        {
+          "directory": "analytics-workbench",
+          "id": "@shine-mage/dsh-analytics-workbench-b0",
+          "source_sha": "d038f3577efec91e75fcf711a60b1fb868d7bcd5",
+          "version": "0.0.0-b0",
+          "manifest_sha256": "9d7f6bf363f86d53f39ad77353a531fda6a5607c3b14be5869841dc5b6432647"
+        }
+      ]
+    ],
+    "other_eight_rows": "UNCHANGED",
+    "profiles": "UNCHANGED",
+    "candidate_journal": "UNCHANGED",
+    "commit_push": "NOT_RUN"
+  },
+  "actual_author_binding": {
+    "evidence": {
+      "schema": "shinemage-workbench-author-validation/v1",
+      "source_sha": "d038f3577efec91e75fcf711a60b1fb868d7bcd5",
+      "formal_manifest_sha256": "9d7f6bf363f86d53f39ad77353a531fda6a5607c3b14be5869841dc5b6432647",
+      "formal_tarball_sha256": "e41df9f5a8f7031c092319222543c8d723ca644c0c9d69b2ae53f13257e9b79e",
+      "archive": {
+        "repository": "tyuanww/dsh-analytics-workbench",
+        "run_id": 38107479575,
+        "event": "pull_request",
+        "artifact_id": 11689909409,
+        "sha256": "2e2f2cd677582ebef0620549edc7f4044300537fdf8e44c6916d869e8e870031",
+        "bytes": 546711,
+        "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/ci-pack-inputs/analytics-workbench/ci-evidence.zip"
+      },
+      "core": {
+        "files": 154,
+        "tests": 1072,
+        "pass": 1072,
+        "fail": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "todo": 0,
+        "status": 0
+      },
+      "main_owned_checks": [
+        {
+          "file": "dsh-plugins/analytics-workbench/src/competition-agent/competition-agent.test.mjs",
+          "patterns": [
+            "offline python eval suite"
+          ],
+          "expected_pass": 1
+        },
+        {
+          "file": "dsh-plugins/analytics-workbench/src/client/competition-board/computed-result.test.mjs",
+          "patterns": [
+            "v1-v5 judge the period difference by the same four-decimal rounding as its subtraction"
+          ],
+          "expected_pass": 1
+        },
+        {
+          "file": "dsh-plugins/analytics-workbench/test/query-fault.test.mjs",
+          "patterns": [
+            "cancel A does not rewrite peer B; SUCCEEDED survives a later cancel",
+            "historical three supervisor exits stay UNKNOWN and are not closed by EPIPE",
+            "fail-card markers never include channel facts"
+          ],
+          "expected_pass": 3
+        }
+      ],
+      "remaining_stages": [
+        {
+          "stage": "browser",
+          "status": "NOT_RUN_BY_THIS_COMMAND"
+        },
+        {
+          "stage": "standalone",
+          "status": "NOT_RUN_BY_THIS_COMMAND"
+        }
+      ],
+      "acquisition": "fixed GitHub CI archive, exact SHA-256 and member digests",
+      "source_execution_here": "NOT_RUN_AUTHOR_OWNED",
+      "host_service_admission": "NOT_RUN",
+      "release_ready": false
+    },
+    "negative_controls": [
+      {
+        "name": "analytics-workbench",
+        "result": "EPERM"
+      },
+      {
+        "name": "crm-knowledge",
+        "result": "EPERM"
+      },
+      {
+        "name": "knowledge",
+        "result": "EPERM"
+      },
+      {
+        "name": "shine-brand",
+        "result": "EPERM"
+      },
+      {
+        "name": "shine-board",
+        "result": "EPERM"
+      },
+      {
+        "name": "shine-crowd-action",
+        "result": "EPERM"
+      },
+      {
+        "name": "shine-query",
+        "result": "EPERM"
+      },
+      {
+        "name": "shine-funnel",
+        "result": "EPERM"
+      },
+      {
+        "name": "shine-waterfall",
+        "result": "EPERM"
+      }
+    ],
+    "main_source": "EPERM",
+    "host_service": "NOT_RUN",
+    "release_ready": false
+  },
+  "local_checks": {
+    "archive_guards": {
+      "pass": 13,
+      "fail": 0,
+      "skip": 0,
+      "exit_code": 0
+    },
+    "main_contracts": {
+      "groups": [
+        1,
+        1,
+        3
+      ],
+      "fail": 0,
+      "skip": 0,
+      "exit_code": 0
+    },
+    "main_b0": {
+      "schema": "shinemage-workbench-main-b0-summary/v1",
+      "execution": {
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/b0-offline-r1.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "scripts/dsh-b0/pipeline.mjs",
+          "--check",
+          "--python",
+          "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/python-r3/bin/python3.14"
+        ],
+        "cwd": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/main-qa-r1",
+        "environment": {
+          "HOME": "/Users/hutou",
+          "PATH": "/Users/hutou/homebrew/opt/node@24/bin:/Users/hutou/homebrew/bin:/usr/bin:/bin",
+          "TMPDIR": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/b0-tmp-r3",
+          "COREPACK_ENABLE_NETWORK": "0",
+          "COREPACK_ENABLE_DOWNLOAD_PROMPT": "0",
+          "B0_BUILD_UPSTREAM": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2",
+          "FQ_B0_PYTHON": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/python-r3/bin/python3.14",
+          "WORKBENCH_AUTHOR_CI_ARCHIVE": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/ci-pack-inputs/analytics-workbench/ci-evidence.zip",
+          "CRM_COMPOSITION_PACK_INPUTS": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/canonical-composition-r1/crm-inputs.json",
+          "CRM_COMPOSITION_PAGE_INPUTS": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/canonical-composition-r1/page-inputs.json",
+          "CRM_COMPOSITION_OUTPUT": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/b0-output-r3"
+        },
+        "started_at": "2026-10-11T03:40:22.778484+00:00",
+        "finished_at": "2026-10-11T03:44:13.998290+00:00",
+        "exit_code": 0,
+        "scope": "current main local B0, with fixed author evidence and public package consumers; no live host/candidate/model/business/remote CI admission",
+        "release_ready": false
+      },
+      "python_summary": [
+        "855 passed, 22 warnings, 41 subtests passed in 124.51s (0:02:04)"
+      ],
+      "node_groups": [
+        {
+          "tests": 3,
+          "suites": 0,
+          "pass": 3,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 62.5095
+        },
+        {
+          "tests": 4,
+          "suites": 0,
+          "pass": 4,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 503.343792
+        },
+        {
+          "tests": 54,
+          "suites": 0,
+          "pass": 54,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 3676.267875
+        },
+        {
+          "tests": 3,
+          "suites": 0,
+          "pass": 3,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 739.163375
+        },
+        {
+          "tests": 9,
+          "suites": 0,
+          "pass": 9,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 1310.588
+        },
+        {
+          "tests": 13,
+          "suites": 0,
+          "pass": 13,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 899.933042
+        },
+        {
+          "tests": 28,
+          "suites": 0,
+          "pass": 28,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 10907.698834
+        },
+        {
+          "tests": 12,
+          "suites": 0,
+          "pass": 12,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 497.096792
+        },
+        {
+          "tests": 28,
+          "suites": 0,
+          "pass": 25,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 3,
+          "todo": 0,
+          "duration_ms": 1021.34
+        },
+        {
+          "tests": 11,
+          "suites": 0,
+          "pass": 9,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 2,
+          "todo": 0,
+          "duration_ms": 75.69275
+        },
+        {
+          "tests": 26,
+          "suites": 0,
+          "pass": 26,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 3238.694167
+        },
+        {
+          "tests": 3,
+          "suites": 0,
+          "pass": 2,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 1,
+          "todo": 0,
+          "duration_ms": 44.763708
+        },
+        {
+          "tests": 21,
+          "suites": 0,
+          "pass": 21,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 65.870042
+        },
+        {
+          "tests": 91,
+          "suites": 0,
+          "pass": 91,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 18704.51675
+        },
+        {
+          "tests": 521,
+          "suites": 0,
+          "pass": 518,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 3,
+          "todo": 0,
+          "duration_ms": 24026.71475
+        },
+        {
+          "tests": 11,
+          "suites": 0,
+          "pass": 11,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 966.525833
+        },
+        {
+          "tests": 14,
+          "suites": 0,
+          "pass": 14,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 1019.999625
+        },
+        {
+          "tests": 18,
+          "suites": 0,
+          "pass": 18,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 791.152292
+        },
+        {
+          "tests": 2,
+          "suites": 0,
+          "pass": 2,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 1713.080416
+        },
+        {
+          "tests": 66,
+          "suites": 0,
+          "pass": 66,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 13704.057375
+        },
+        {
+          "tests": 4,
+          "suites": 0,
+          "pass": 4,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 7252.616583
+        },
+        {
+          "tests": 1,
+          "suites": 0,
+          "pass": 1,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 260.200833
+        },
+        {
+          "tests": 1,
+          "suites": 0,
+          "pass": 1,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 218.345
+        },
+        {
+          "tests": 3,
+          "suites": 0,
+          "pass": 3,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 37.435959
+        }
+      ],
+      "node_groups_count": 24,
+      "node_skips_per_execution": 9,
+      "node_skip_lines": [
+        "﹣ saved-analysis composition rejects a changed pair receipt before installation (0.018084ms) # Explicit existing service pair/Python/wheelhouse required.",
+        "﹣ saved-analysis composition rejects same-name wheels with different immutable bytes (0.013584ms) # Explicit existing service pair/Python/wheelhouse required.",
+        "﹣ saved-analysis cold install checks exact closure, exclusive output and bootstrap integrity (0.01325ms) # Explicit existing service pair/Python/wheelhouse required.",
+        "﹣ sandboxed packed handshake cannot read denied source and resolves only the bound install (0.081625ms) # NOT_RUN: SHINEMAGE_PROBE_FIXED_BINDING is unset; fixed-package sandbox handshake was not run",
+        "﹣ sandboxed packed mode fails closed on missing, invalid, and schema input without source fallback (0.027125ms) # NOT_RUN: SHINEMAGE_PROBE_FIXED_BINDING is unset; fixed-package sandbox handshake was not run",
+        "﹣ actual query archive cold install, immutable checks, and dependency closure (0.071667ms) # explicit query receipt/Python/wheels required",
+        "﹣ outer timeout reclaims owned official command groups and retains a failed receipt (0.100917ms) # NOT_RUN: explicit pinned upstream and exclusive evidence path required",
+        "﹣ parent SIGTERM interrupts the owned probe while still draining every observed group (0.024083ms) # NOT_RUN: explicit pinned upstream and exclusive evidence path required",
+        "﹣ fixed official modules execute all synthetic shell and tool union cases and join owned commands (0.020375ms) # NOT_RUN: explicit pinned upstream and exclusive evidence path required"
+      ],
+      "workbench_author_counting": "154/1072 belongs to existing successful PR CI; no author core execution in this local B0",
+      "report": {
+        "schema_version": "dsh-b0-build-evidence/v2",
+        "at": "2026-10-11T03:44:13.950Z",
+        "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+        "upstream_lock_sha256": "5d3980bcd2a0113101815aabfeb4f8a875d556a333521539b7f11d790f4a50aa",
+        "node": "v24.19.0",
+        "python": "Python 3.14.4",
+        "stages": [
+          "contract",
+          "python-unit",
+          "ruff",
+          "main-node-unit",
+          "independent-pack-consumers",
+          "main-workbench-contracts"
+        ],
+        "workbench_author": {
+          "schema": "shinemage-workbench-author-validation/v1",
+          "source_sha": "d038f3577efec91e75fcf711a60b1fb868d7bcd5",
+          "formal_manifest_sha256": "9d7f6bf363f86d53f39ad77353a531fda6a5607c3b14be5869841dc5b6432647",
+          "formal_tarball_sha256": "e41df9f5a8f7031c092319222543c8d723ca644c0c9d69b2ae53f13257e9b79e",
+          "archive": {
+            "repository": "tyuanww/dsh-analytics-workbench",
+            "run_id": 38107479575,
+            "event": "pull_request",
+            "artifact_id": 11689909409,
+            "sha256": "2e2f2cd677582ebef0620549edc7f4044300537fdf8e44c6916d869e8e870031",
+            "bytes": 546711,
+            "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/ci-pack-inputs/analytics-workbench/ci-evidence.zip"
+          },
+          "core": {
+            "files": 154,
+            "tests": 1072,
+            "pass": 1072,
+            "fail": 0,
+            "skipped": 0,
+            "cancelled": 0,
+            "todo": 0,
+            "status": 0
+          },
+          "main_owned_checks": [
+            {
+              "file": "dsh-plugins/analytics-workbench/src/competition-agent/competition-agent.test.mjs",
+              "patterns": [
+                "offline python eval suite"
+              ],
+              "expected_pass": 1
+            },
+            {
+              "file": "dsh-plugins/analytics-workbench/src/client/competition-board/computed-result.test.mjs",
+              "patterns": [
+                "v1-v5 judge the period difference by the same four-decimal rounding as its subtraction"
+              ],
+              "expected_pass": 1
+            },
+            {
+              "file": "dsh-plugins/analytics-workbench/test/query-fault.test.mjs",
+              "patterns": [
+                "cancel A does not rewrite peer B; SUCCEEDED survives a later cancel",
+                "historical three supervisor exits stay UNKNOWN and are not closed by EPIPE",
+                "fail-card markers never include channel facts"
+              ],
+              "expected_pass": 3
+            }
+          ],
+          "remaining_stages": [
+            {
+              "stage": "browser",
+              "status": "NOT_RUN_BY_THIS_COMMAND"
+            },
+            {
+              "stage": "standalone",
+              "status": "NOT_RUN_BY_THIS_COMMAND"
+            }
+          ],
+          "acquisition": "fixed GitHub CI archive, exact SHA-256 and member digests",
+          "source_execution_here": "NOT_RUN_AUTHOR_OWNED",
+          "host_service_admission": "NOT_RUN",
+          "release_ready": false
+        },
+        "main_workbench_contracts": {
+          "schema": "shinemage-workbench-main-contracts/v1",
+          "groups": [
+            {
+              "file": "dsh-plugins/analytics-workbench/src/competition-agent/competition-agent.test.mjs",
+              "patterns": [
+                "offline python eval suite"
+              ],
+              "tests": 1,
+              "pass": 1,
+              "fail": 0,
+              "cancelled": 0,
+              "skipped": 0,
+              "todo": 0,
+              "exit_code": 0,
+              "filtered_tests_owner": "independent Workbench core CI; filtering is not local execution of those tests"
+            },
+            {
+              "file": "dsh-plugins/analytics-workbench/src/client/competition-board/computed-result.test.mjs",
+              "patterns": [
+                "v1-v5 judge the period difference by the same four-decimal rounding as its subtraction"
+              ],
+              "tests": 1,
+              "pass": 1,
+              "fail": 0,
+              "cancelled": 0,
+              "skipped": 0,
+              "todo": 0,
+              "exit_code": 0,
+              "filtered_tests_owner": "independent Workbench core CI; filtering is not local execution of those tests"
+            },
+            {
+              "file": "dsh-plugins/analytics-workbench/test/query-fault.test.mjs",
+              "patterns": [
+                "cancel A does not rewrite peer B; SUCCEEDED survives a later cancel",
+                "historical three supervisor exits stay UNKNOWN and are not closed by EPIPE",
+                "fail-card markers never include channel facts"
+              ],
+              "tests": 3,
+              "pass": 3,
+              "fail": 0,
+              "cancelled": 0,
+              "skipped": 0,
+              "todo": 0,
+              "exit_code": 0,
+              "filtered_tests_owner": "independent Workbench core CI; filtering is not local execution of those tests"
+            }
+          ],
+          "source_retirement": "three original contract test files still retained",
+          "real_model": "NOT_RUN",
+          "release_ready": false
+        },
+        "workbench_source_build_here": "NOT_RUN_AUTHOR_OWNED",
+        "workbench_private_loader_here": "NOT_RUN_AUTHOR_OWNED",
+        "workbench_clean_rebuild_here": "NOT_RUN_AUTHOR_OWNED",
+        "remaining_source_producers": [
+          "board-components",
+          "historical four-plugin isolation fixture"
+        ],
+        "native_dsh_profile_e2e": "separate evidence required",
+        "release_ready": false
+      },
+      "runtime_counts_not_aggregated": true,
+      "scope_metadata_fix_after_run": {
+        "change": "add the existing installed-kit multi-plugin fixture to remaining source producers; no stage, check or branch logic change",
+        "executed_pipeline_sha256": "13aa961305a7b2d089cb218778eae6ce552dd2976cc2f1d88ea1170ed1afc49b",
+        "current_pipeline_sha256": "e1a9d3e86ad77a98ae5fd8e9fa8b0d3e2f69400aa56882a337645a382121d993"
+      },
+      "release_ready": false
+    },
+    "path_runner_workflow": {
+      "pass": 82,
+      "fail": 0,
+      "skip": 0,
+      "exit_code": 0
+    },
+    "ruff_exit": 0,
+    "primary_review": {
+      "scope": [
+        "config/shinemage-composition-packs.lock.json",
+        "scripts/dsh-b0/pipeline.mjs",
+        ".github/workflows/lint.yml",
+        ".github/workflows/dsh-b0.yml",
+        ".github/workflows/dsh-release-preflight.yml",
+        "config/workbench-author-evidence.lock.json",
+        "scripts/ci/read-workbench-author-evidence.py",
+        "scripts/ci/workbench-author-evidence.mjs",
+        "scripts/ci/workbench-author-evidence.test.mjs",
+        "scripts/dsh-b0/workbench-main-contracts.mjs",
+        "scripts/ci/pre_push_path_class.py",
+        "backend/tests/test_pre_push_smart_path.py"
+      ],
+      "method": "primary agent review of actual before/after ownership, strict identity binding, bounded archive reader, explicit acquisition and retained main assertions",
+      "reviewed_at": "2026-10-11T03:46:32.592047+00:00",
+      "checks": [
+        "core belongs to independent CI, no local PASS relabeling",
+        "current formal source/manifest/tarball all bound, no old receipt inheritance",
+        "missing/invalid archives fail before source/service work",
+        "ZIP size/path/special member checks remain active under Python -O",
+        "public package consumers and original 1/1/3 business assertions retained",
+        "legacy installed-kit fixture still source-owned and explicitly open",
+        "same ordinary package bytes not misrepresented as candidate/service admission",
+        "CI token only in explicit acquisition step, check environment remains offline",
+        "two fixed lock paths select B0 on their own; mixed backend changes retain backend coverage",
+        "preflight filters cover the new guard and lock inputs; action/permission gates unchanged"
+      ],
+      "unresolved_findings": [],
+      "external_model_review": "NOT_RUN",
+      "nine_authors_clean_same_head": true,
+      "release_ready": false,
+      "validation": {
+        "path_runner_workflow": {
+          "pass": 82,
+          "fail": 0,
+          "skip": 0,
+          "exit_code": 0
+        },
+        "ruff_exit": 0,
+        "CI_yaml_parser": "actual yaml library from existing locked runtime, then existing workflow tests"
+      }
+    }
+  },
+  "remaining_main_source": [
+    "three unchanged Workbench backend/query test files",
+    "installed-kit multi-plugin source fixture",
+    "board-components producer",
+    "historical four-plugin source-isolation fixture",
+    "producer missing-input guards",
+    "formal preflight source-based build path"
+  ],
+  "artifact_expiry": "2026-10-25T03:11:57Z",
+  "archive_distribution_boundary": "GitHub CI artifact can expire; retained local SHA-bound input is usable, durable hosted locator and read token still required; no Release created",
+  "PR_update": {
+    "status": "PASS",
+    "title": "feat(workbench): deliver independent plugin and full core validation",
+    "head": "d038f3577efec91e75fcf711a60b1fb868d7bcd5",
+    "state": "OPEN",
+    "body_sha256": "8b752ad999fbc60de4f8b4e706182a3bdaacd85fbb74ec8c358ccadd1e18c23f",
+    "edit_exit_code": 0,
+    "merge": "NOT_RUN"
+  },
+  "preservation_before_docs": {
+    "observed_at": "2026-10-11T03:45:34.618619+00:00",
+    "unchanged_inherited_main_files": 113,
+    "protected_unchanged": 46,
+    "npm_runtime_unchanged": 6,
+    "main_index_empty": true,
+    "VERSION": "0.20.0.0",
+    "own_parent_groups": [
+      {
+        "run": "r1",
+        "pgid": 70724,
+        "pgrep_exit": 1,
+        "processes": []
+      },
+      {
+        "run": "r2",
+        "pgid": 73473,
+        "pgrep_exit": 1,
+        "processes": []
+      },
+      {
+        "run": "r3",
+        "pgid": 77319,
+        "pgrep_exit": 1,
+        "processes": []
+      }
+    ],
+    "unrelated_ports_processes": "not inspected or stopped",
+    "archive_source_no_deletion": true
+  },
+  "product_delta": {
+    "schema": "shinemage-main-author-core-delta/v1",
+    "base": "5390667cc990fa558b0445aa455b086d325a6c77",
+    "base_kind": "HEAD plus exact 118 dirty files from snapshot-r1.json",
+    "files": [
+      {
+        "path": "config/shinemage-composition-packs.lock.json",
+        "before": {
+          "sha256": "598b62ea0ae00c2f57474c8666e2787202658b57488612cb1d1ea4c40edd571b",
+          "bytes": 2969
+        },
+        "after": {
+          "sha256": "89e2b2ea946cb1dfda1a2776651e63a851dcad466183a394ac5af722a625a6d5",
+          "bytes": 2969
+        }
+      },
+      {
+        "path": "scripts/dsh-b0/pipeline.mjs",
+        "before": {
+          "sha256": "b4bab4815d8987acbd825ebf0f80c8de4b4e9d70f09e7ac04da6bf48492fdbef",
+          "bytes": 28598
+        },
+        "after": {
+          "sha256": "e1a9d3e86ad77a98ae5fd8e9fa8b0d3e2f69400aa56882a337645a382121d993",
+          "bytes": 24659
+        }
+      },
+      {
+        "path": ".github/workflows/lint.yml",
+        "before": {
+          "sha256": "4ddd9144d01619eb3c688c83a5d932d8591356a3a051c8cf7bbbd892891a79ec",
+          "bytes": 16246
+        },
+        "after": {
+          "sha256": "b013023289036b4bb584269982c18d5caeafff8d3ca7a629927cddc07230adac",
+          "bytes": 16660
+        }
+      },
+      {
+        "path": ".github/workflows/dsh-b0.yml",
+        "before": {
+          "sha256": "71c618aa137cbbdff0701f38dc791034cdac296b99b0cfeb8c898fc4f9a6b011",
+          "bytes": 2763
+        },
+        "after": {
+          "sha256": "925fdfd7847b07dd412346f8894e7ae80a36ec4cb68e70a767fa59ea498f5799",
+          "bytes": 3177
+        }
+      },
+      {
+        "path": ".github/workflows/dsh-release-preflight.yml",
+        "before": {
+          "sha256": "306cc3d1d914e39fe8eeecbc76505439c4db1e22c504ac2e0106994610488057",
+          "bytes": 8171
+        },
+        "after": {
+          "sha256": "7545e1058685f967cea21b54eb307bb3ef354fe5a6e92cadb2868287fa9b7221",
+          "bytes": 8774
+        }
+      },
+      {
+        "path": "config/workbench-author-evidence.lock.json",
+        "before": null,
+        "after": {
+          "sha256": "e64b8cc41f62d6f01745480b36e8307ba9d63df8a8e3ba1bcbdeb4052c760afe",
+          "bytes": 2417
+        }
+      },
+      {
+        "path": "scripts/ci/read-workbench-author-evidence.py",
+        "before": null,
+        "after": {
+          "sha256": "5a9078cda8c890012b522fe2d4c9a1c0c8361b371eff10c633c6bbcf8b3f32e8",
+          "bytes": 1879
+        }
+      },
+      {
+        "path": "scripts/ci/workbench-author-evidence.mjs",
+        "before": null,
+        "after": {
+          "sha256": "5632ef75bf19ad1aa22c4ea51251e2263bba29e3a070d2f83e573abd2210387b",
+          "bytes": 8720
+        }
+      },
+      {
+        "path": "scripts/ci/workbench-author-evidence.test.mjs",
+        "before": null,
+        "after": {
+          "sha256": "3fcb25751f2dce4c5319bdd82999ae24bd456ee17dee93efad388b9e62e0d151",
+          "bytes": 8053
+        }
+      },
+      {
+        "path": "scripts/dsh-b0/workbench-main-contracts.mjs",
+        "before": null,
+        "after": {
+          "sha256": "0304f93dac2e38fbbbad36ac77f9ff588f7061ed9a3ed0c1db4ccdc7b7ae27cc",
+          "bytes": 2249
+        }
+      },
+      {
+        "path": "scripts/ci/pre_push_path_class.py",
+        "before": {
+          "sha256": "9b71cb60a4c3810c60835e384c98a47b63a88bf9cfdf4b53a12ce68787d23ee8",
+          "bytes": 12871
+        },
+        "after": {
+          "sha256": "9208f68d3a86fd1c41c7f415941b716655690d49239bcd42250a468faa940b58",
+          "bytes": 12977
+        }
+      },
+      {
+        "path": "backend/tests/test_pre_push_smart_path.py",
+        "before": {
+          "sha256": "581909a2601b1fefe52bb8bb82f7da00e52bb51d5b769a682cdab151ced60904",
+          "bytes": 12351
+        },
+        "after": {
+          "sha256": "d66b45c9c25dd29ba8cf7e4db11e28e436adfda86787496871809ffc1caa6c73",
+          "bytes": 12963
+        }
+      }
+    ],
+    "not_committed": true
+  },
+  "raw_bindings": [
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/snapshot-r1.json",
+      "sha256": "0e8e3c9e2a17871c59eb4c43cc70063faec7dde5847163049bb1a8c2a8c597bd",
+      "bytes": 36569
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/ci-pack-inputs-r1.json",
+      "sha256": "301286dd8ea88297c200303dcd91a15118094b2661df494bb56eb44fbe8da566",
+      "bytes": 2066
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/formal-pack-result-r1.json",
+      "sha256": "0478057ec248ba11be77ce8cdee6c7c3921cfb7ef2b0fb591471ccfef693a697",
+      "bytes": 5683
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/formal-pack-r1/plugin-pack.json",
+      "sha256": "9d7f6bf363f86d53f39ad77353a531fda6a5607c3b14be5869841dc5b6432647",
+      "bytes": 718
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/formal-pack-r1/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+      "sha256": "e41df9f5a8f7031c092319222543c8d723ca644c0c9d69b2ae53f13257e9b79e",
+      "bytes": 438499
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/ci-pack-inputs/analytics-workbench/artifact-api.json",
+      "sha256": "da2bfe25aa7e03995d458535bc533a152ed99160dcb3029edcd38c71186c2381",
+      "bytes": 841
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/ci-pack-inputs/analytics-workbench/workflow.json",
+      "sha256": "a47c51e883860fefb9dee6078c15357e31b36ad8c0ab4ac405dd108052276229",
+      "bytes": 15294
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/ci-pack-inputs/analytics-workbench/ci-evidence.zip",
+      "sha256": "2e2f2cd677582ebef0620549edc7f4044300537fdf8e44c6916d869e8e870031",
+      "bytes": 546711
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/ci-pack-inputs/analytics-workbench/input-verification.json",
+      "sha256": "301286dd8ea88297c200303dcd91a15118094b2661df494bb56eb44fbe8da566",
+      "bytes": 2066
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/verification-r1.json",
+      "sha256": "b19fadb41639dfe2487131e29597bde6d241b33e1c486de6504dad1d765a799f",
+      "bytes": 860
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/formal-pack-readback-r1.json",
+      "sha256": "ec0767ab340f4fd5862c35f496fb150f6ad7896c3ec867bffefe851321c05547",
+      "bytes": 2482
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/composition-lock-before-r1.json",
+      "sha256": "598b62ea0ae00c2f57474c8666e2787202658b57488612cb1d1ea4c40edd571b",
+      "bytes": 2969
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/composition-lock-update-r1.json",
+      "sha256": "f14fa1395b31abe749355dfec363e0157ae1db3426c215af4841c62a098e6060",
+      "bytes": 949
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/canonical-preparation-r1.json",
+      "sha256": "cdbdef85cceaeb2d7411b6c0ec30c29bbe2401e0c1f0b6913996d441bba897a2",
+      "bytes": 770
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/canonical-composition-r1/preparation.json",
+      "sha256": "85c24da53e8e413f9c5ec56323613c4d325988fcf946d0bf632d3eefd80baeed",
+      "bytes": 4072
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/actual-author-binding-r1.json",
+      "sha256": "006591cfef1effa062e8a94dd770e318b0a4cb43afb9f301ea087140a489886d",
+      "bytes": 2118
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/actual-author-bind-denied-r1.json",
+      "sha256": "201d4d556e5e2aba393963d9674dc112aa08e6201dea38107417005e42ac3de6",
+      "bytes": 2986
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/actual-author-bind-denied-r1.mjs",
+      "sha256": "75c53e9301b2d8fdc7e8fdf59370c2d6aaa8953dbd4aad1b430978f1d706499b",
+      "bytes": 1475
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/composition-source-denied-r1.sb",
+      "sha256": "b5bd5b5604fe948cda88a4590c75e875b785ecc94fe915cefccc169aa2f2f24f",
+      "bytes": 5107
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/author-evidence-tests-r1.log",
+      "sha256": "5747a9a7c10c218540a62e52ebd2bd120ce618a7c0a95f2cf73a630f1fb9ce26",
+      "bytes": 2538
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/main-contracts-r1.log",
+      "sha256": "517a41ddfc86d59ffdec94651101e6c839c138a6f29e3c9c68f8a16bb60859f7",
+      "bytes": 2061
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/missing-author-r1.json",
+      "sha256": "c12765839d4aa60bbf89ef71be4e2a882564bd73d9d5df07cb536f0cf774a57c",
+      "bytes": 496
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/missing-author-r1.stderr",
+      "sha256": "6f4eb7923e6539b07e49b27b8e6b8b2bb67cafd139134c898f3fa1dc66408ce4",
+      "bytes": 596
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/main-b0-r1.json",
+      "sha256": "4639a11a9041f516f05ba4b222c608361775e2af24a51cf1aa056e96e6063553",
+      "bytes": 1963
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/main-b0-r1.stdout",
+      "sha256": "a084903fdd9c2dc592c3ec0bd0f6d59bf569426af91a4b10e4a89453a6c557e6",
+      "bytes": 50008
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/main-b0-r1.stderr",
+      "sha256": "bcf0d2b7c595653baf0c1eb61f903b09ac54cd62ad0f9ba728e8f1afd70658fc",
+      "bytes": 700
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/main-b0-r2.json",
+      "sha256": "7002828dc37857c6f12160dd5190fef7a631010912030afebec7081bdd369212",
+      "bytes": 1963
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/main-b0-r2.stdout",
+      "sha256": "8378435c2f9baf2269a5c6bab2e539bdc04cfd185a93081e421e93e20b6a2d5f",
+      "bytes": 20069
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/main-b0-r2.stderr",
+      "sha256": "32f58425935bfdaed546b85a61df9ffab722f0f169137f25d09cc2dbd3c0190f",
+      "bytes": 653
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/main-b0-r3.json",
+      "sha256": "e3b139184e84c4aee2a309c7d6770aaa178d09720d52c518210837bd1be5ee1c",
+      "bytes": 1991
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/main-b0-r3.stdout",
+      "sha256": "6cd3bdf2778d07d136a50e1bbeceaaa861b7b7c037e6f516cf1bc2d1743f24c0",
+      "bytes": 94286
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/main-b0-r3.stderr",
+      "sha256": "11f7cb7727eefbaa7dd30393b4a1b6d3ae8513f5bc9c1651ab473a8976108658",
+      "bytes": 689
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/main-b0-build-evidence-r3.json",
+      "sha256": "d0119d98a329258758418b2e3c43e9849b83d5ef14e56a664dcc1c683c3cfa1f",
+      "bytes": 4906
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/main-b0-summary-r3.json",
+      "sha256": "9b0eaa48fc758fc6a3bf08ebb7596ad4585b4e22f5537b17ec7c523bb1037cff",
+      "bytes": 13942
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/pipeline-guard-order-fix-r2.json",
+      "sha256": "5bacc6238b6b9f71bd17777a553650d3bcf3fc6a03e70f84b070efbec4f001db",
+      "bytes": 335
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/b0-offline-r1.sb",
+      "sha256": "1c085ad08748dbc2bbf4734752a438d82f0da7eb929d0209fd1efd900b682518",
+      "bytes": 629
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/qa-product-inputs-r1.json",
+      "sha256": "cca21e6618b52f59b83b81c98aefb7311cc1ec7e946eab2d32be3ea877935300",
+      "bytes": 13135
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/python-r3-preparation.json",
+      "sha256": "f1076fef7fa0c38746903b4b5982a45089f1fd5965a65ac4752a27a8a9c242ff",
+      "bytes": 5382
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/tool-python-r1-preparation.json",
+      "sha256": "f2bf45a8230400390d691486e61966f1dd33f5a8ba3cada9ca39af4e72935716",
+      "bytes": 1765
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/tool-psutil-r1.stdout",
+      "sha256": "73b4efb1ba25fef88e177077df6c4b9c5ca28df07f70800f4564a8861a7b2c02",
+      "bytes": 300
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/path-selection-tests-r1.stdout",
+      "sha256": "0124e6e4c204997d638a0044282dc2c594310955c04902ca97067d92bda7ea90",
+      "bytes": 1047
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/path-selection-tests-r2.stdout",
+      "sha256": "f3d56391ae61072f4b00b84b864624ef7811bd8084813f7e22fa50d85e98c9c0",
+      "bytes": 732
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/path-selection-tests-r3.stdout",
+      "sha256": "60fd03645a2fa0e9085e4823d5b2015611874f3513749341750def737ffa429e",
+      "bytes": 1130
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/path-selection-tests-r4.stdout",
+      "sha256": "810dab6ee165bfc39b32217666483042a4839246e52b897539c49a9e1e11fc7c",
+      "bytes": 179
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/path-selection-tests-r4.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/product-delta-files-r2.json",
+      "sha256": "6c82d4b82031f06aacb90ef2383bdbcd61bb429b7d3455efd6fdca21381a6070",
+      "bytes": 3709
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/local-review-r2.json",
+      "sha256": "c445938d1c194897bb16dbb3d82fea9399186cab57c3ad001ffd85daf56096fc",
+      "bytes": 2005
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/preservation-before-docs-r1.json",
+      "sha256": "c0bccfe8025e3f44a8c624ab18286e11ed64e8e6a45b37ee0aae0a788a83efd5",
+      "bytes": 629
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/pr-update-r2.json",
+      "sha256": "d3feb1c457c7a2524bde87151a7bb3b154ba0198dbe6061030e98a5085b76fa0",
+      "bytes": 309
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/workbench-pr-readback-r1.json",
+      "sha256": "3f0fab2685e298985d985bb54cd824ebf00f51eca86eaf403efdf58529b53006",
+      "bytes": 2852
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/workbench-pr-readback-r2.json",
+      "sha256": "b01ed7f1387ae127e43e4b125997682f94fdc708021b3428434d5b6b9f57453b",
+      "bytes": 3074
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/workbench-pr-body-r2.md",
+      "sha256": "8b752ad999fbc60de4f8b4e706182a3bdaacd85fbb74ec8c358ccadd1e18c23f",
+      "bytes": 2824
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/pr-edit-r2.stdout",
+      "sha256": "9afb932c447e4553e5380e698ad82df5b3acff4be68a78bb26a94ba6500fb512",
+      "bytes": 58
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/pr-edit-r2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/final-preservation-r1.json",
+      "sha256": "b2757cdc96169b9915744c1430b17ec33140d996f96631af314a4cd986d05bda",
+      "bytes": 50356
+    }
+  ],
+  "not_run": [
+    "main commit/push/PR update for this new delta",
+    "new main hosted CI",
+    "new formal candidate/journal/service/WSL2/browser/recovery",
+    "current real model/CRM/WeKnora UAT",
+    "merge of main or plugin PRs",
+    "publish/release/deploy",
+    "SDK distribution audit/admission",
+    "Cordis owner proposal application",
+    "source-copy deletion"
+  ],
+  "product": "PARTIAL",
+  "SDK_distribution": "BLOCKED",
+  "release_ready": false,
+  "final_verification": {
+    "schema": "shinemage-workbench-current-preservation/v1",
+    "observed_at": "2026-10-11T03:56:50.639667+00:00",
+    "main_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+    "main_branch": "codex/shinemage-abc-local-candidate",
+    "main_index_empty": true,
+    "VERSION": "0.20.0.0",
+    "AGENTS_unchanged": true,
+    "inherited_main_files_unchanged": 108,
+    "current_product_files_match_review": 12,
+    "old_protected_files_unchanged": 46,
+    "npm_runtime_files_unchanged": 6,
+    "raw_bindings_verified": 54,
+    "nine_authors": [
+      {
+        "name": "analytics-workbench",
+        "head": "d038f3577efec91e75fcf711a60b1fb868d7bcd5",
+        "clean": true
+      },
+      {
+        "name": "crm-knowledge",
+        "head": "5a839fa86de2240cf661a9034c58e0ead2d4b4ef",
+        "clean": true
+      },
+      {
+        "name": "knowledge",
+        "head": "94ef29fa6c39d3dc506fbc5ef734f0a7ea9eb2b0",
+        "clean": true
+      },
+      {
+        "name": "shine-brand",
+        "head": "57ebcf38278068394a4feb42125c30c195fd912a",
+        "clean": true
+      },
+      {
+        "name": "shine-board",
+        "head": "76601df755ec8ef8c9726ea770ec488b745efd71",
+        "clean": true
+      },
+      {
+        "name": "shine-crowd-action",
+        "head": "5c39e21c27565397383b009725634ea66e9c1525",
+        "clean": true
+      },
+      {
+        "name": "shine-query",
+        "head": "1f1e19d280923ebe7aac964f8b5825d497434db8",
+        "clean": true
+      },
+      {
+        "name": "shine-funnel",
+        "head": "dbfaede0961586d773c708e833a4ac1c9f2515dc",
+        "clean": true
+      },
+      {
+        "name": "shine-waterfall",
+        "head": "d123ac1d0e7bad3e5de45169b3e72c38623b858a",
+        "clean": true
+      }
+    ],
+    "original_main_tests_unchanged": {
+      "dsh-plugins/analytics-workbench/src/competition-agent/competition-agent.test.mjs": "af3f14f0405acbf454133741b873d70598cd9fc6d4daad36560e1880bd93cd76",
+      "dsh-plugins/analytics-workbench/src/client/competition-board/computed-result.test.mjs": "0b3b9ef1f1b9331cf782a10ce0fc1d776bda91433281d8d33a43c1e7a04619b7",
+      "dsh-plugins/analytics-workbench/test/query-fault.test.mjs": "1593b019c3bcc5c23e5aabf4ebc2a1a7adff6169b552397593b6cb849bbeabfa"
+    },
+    "markdown_local_links_verified": 361,
+    "syntax_json_diff_checks": "PASS",
+    "main_task_dirty_count": 127,
+    "main_product_dirty_count": 72,
+    "main_docs_dirty_count": 55,
+    "unrelated_path": "security-audit-skill excluded, no contents read",
+    "new_main_commit_push_merge": "NOT_RUN",
+    "release_ready": false
+  }
+}

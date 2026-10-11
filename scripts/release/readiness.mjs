@@ -2,7 +2,8 @@ import { access, constants as fsConstants, lstat, readFile, stat, statfs } from 
 import { execFileSync } from 'node:child_process';
 import { basename, dirname, join, resolve } from 'node:path';
 import { DSH_SDK_VERSION, DSH_UPSTREAM_SHA, NODE_MAJOR, PNPM_VERSION } from './toolchain.mjs';
-import { loadReleaseProfile } from './profile.mjs';
+import { loadProfileSnapshot } from './profile.mjs';
+import { loadReleasePacks } from './release-profile-packs.mjs';
 
 export { DSH_UPSTREAM_SHA };
 
@@ -31,6 +32,7 @@ const REMEDY_REFS = Object.freeze({
   PREFLIGHT_UPSTREAM_SHA_MISMATCH: 'docs/operating/dsh-rc2-quickstart.md#dsh-quickstart-upstream',
   PROFILE_MANIFEST_INVALID: 'docs/architecture/dsh-profile-manifest.md#dsh-profile-contract',
   PREFLIGHT_PLUGIN_ENTRYPOINT_MISSING: 'docs/operating/dsh-plugin-author-quickstart.md#plugin-contract',
+  PREFLIGHT_PLUGIN_PACKS_INVALID: 'docs/operating/shinemage-plugin-update.md#开发入口消费固定包2026-10-11-本地迁移',
   RELEASE_UPSTREAM_RUNTIME_REQUIRED: 'docs/operating/dsh-rc2-quickstart.md#dsh-quickstart-runtime',
   RELEASE_EVIDENCE_DIR_UNWRITABLE: 'docs/operating/dsh-rc2-quickstart.md#dsh-quickstart-artifact',
   PREFLIGHT_DISK_SPACE_LOW: 'docs/operating/dsh-rc2-quickstart.md#dsh-quickstart-artifact',
@@ -110,6 +112,7 @@ export async function collectReleaseReadiness({
   requireOutput = false,
   requireUpstream = true,
   profileManifest = process.env.DSH_PROFILE_MANIFEST ?? null,
+  profilePackInputs = process.env.DSH_PROFILE_PACK_INPUTS ?? null,
 } = {}) {
   const repo = resolve(root);
   const checks = [];
@@ -146,20 +149,21 @@ export async function collectReleaseReadiness({
   let profile = null;
   let profileFailure = null;
   try {
-    profile = await loadReleaseProfile({ root: repo, manifestPath: profileManifest });
+    profile = await loadProfileSnapshot({ root: repo, manifestPath: profileManifest });
     add(checks, 'profile-manifest', true, `${profile.profile.profile_id}:${profile.digest}`, 'PROFILE_MANIFEST_INVALID', 'fix the versioned profile manifest and DSH pin');
   } catch (error) {
     profileFailure = String(error?.message ?? error);
     add(checks, 'profile-manifest', false, profileFailure, 'PROFILE_MANIFEST_INVALID', 'fix the versioned profile manifest and DSH pin');
   }
-  const configuredPlugins = profile?.plugins ?? [];
-  const missingPlugins = [];
-  for (const plugin of configuredPlugins) {
-    try { const info = await stat(join(repo, plugin.path, plugin.build)); if (!info.isFile()) missingPlugins.push(plugin.path); }
-    catch { missingPlugins.push(plugin.path); }
+  let pluginPacks = null;
+  try {
+    pluginPacks = await loadReleasePacks({ root: repo, manifestPath: profileManifest, inputsPath: profilePackInputs });
+    add(checks, 'plugin-packs', true, `${pluginPacks.plugins.length} fixed packs:${pluginPacks.inputsSha256}`,
+      'PREFLIGHT_PLUGIN_PACKS_INVALID', 'supply DSH_PROFILE_PACK_INPUTS bound to the selected profile');
+  } catch (error) {
+    add(checks, 'plugin-packs', false, String(error?.message ?? error), 'PREFLIGHT_PLUGIN_PACKS_INVALID',
+      'supply DSH_PROFILE_PACK_INPUTS bound to the selected profile');
   }
-  const pluginValue = profileFailure ? 'profile-unavailable' : (missingPlugins.length === 0 ? `${configuredPlugins.length} build.mjs` : missingPlugins.join(','));
-  add(checks, 'plugin-entrypoints', !profileFailure && missingPlugins.length === 0, pluginValue, 'PREFLIGHT_PLUGIN_ENTRYPOINT_MISSING', 'restore the profile-selected plugin source before preflight');
 
   if (requireRuntime) {
     const runtime = await runtimeReady(runtimeBundle);
@@ -190,7 +194,7 @@ export async function collectReleaseReadiness({
     add(checks, 'output-dir', parent.ok && !exists, exists ? `${target}:already-exists` : `${target}:create-on-release`, 'PREFLIGHT_OUTPUT_DIR_INVALID', 'use a new output directory path');
   }
 
-  return { checks, ok: checks.every(check => check.ok), upstream, runtimeBundle: runtimeBundle ? resolve(runtimeBundle) : null, profile };
+  return { checks, ok: checks.every(check => check.ok), upstream, runtimeBundle: runtimeBundle ? resolve(runtimeBundle) : null, profile, pluginPacks };
 }
 
 export function printReadiness(result, prefix = 'DSH_DOCTOR_RELEASE') {

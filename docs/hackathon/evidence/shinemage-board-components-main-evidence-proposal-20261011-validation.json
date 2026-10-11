@@ -1,0 +1,275 @@
+{
+  "schema": "shinemage-domain-main-evidence-proposal/v1",
+  "date": "2026-10-11",
+  "main_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "proposal_root": "/Users/hutou/.codex/tasks/shinemage-domain-main-evidence-proposal-20261011-k62g10wq",
+  "plan": {
+    "schema": "shinemage-domain-main-fixed-evidence-proposal/v1",
+    "main_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+    "main_input": "HEAD + existing dirty bytes preserved",
+    "purpose": "bounded reader for actual independent domain CI plus exact original library input; preparatory input, no pipeline cutover",
+    "paths": [
+      {
+        "path": "config/domain-author-evidence.lock.json",
+        "bytes": 5703,
+        "sha256": "5c5919362309b3c6837d6cb6fd1499437d9b383d8fc0e358a1a08f9049f8283d"
+      },
+      {
+        "path": "scripts/ci/domain-author-evidence.mjs",
+        "bytes": 9909,
+        "sha256": "6573ae70eba25cc4810920992161258eff71766123bb10bd5b08ae68963b3468"
+      },
+      {
+        "path": "scripts/ci/domain-author-evidence.test.mjs",
+        "bytes": 8264,
+        "sha256": "ecb9ef3ff81e45fb2b60a7e94d40fe50edafe6533b364399e260b50f8f67738a"
+      },
+      {
+        "path": "scripts/ci/read-domain-author-evidence.py",
+        "bytes": 3054,
+        "sha256": "eb91bed9c5007ce629b561fa5baa42f08ba0c786469ff346c702b458a75f0057"
+      }
+    ],
+    "patch": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-evidence-proposal-20261011-k62g10wq/product-delta-r1.patch",
+      "sha256": "c910d8261693e8ae3b2879f37e02c184fd62bae9f66cd44462263fd95313d144"
+    },
+    "apply_check_exit_code": 0,
+    "main_applied": false,
+    "main_product_commit_push": "NOT_RUN",
+    "pipeline_source_retirement": "NOT_RUN",
+    "not_in_scope": [
+      "source producer deletion",
+      "pipeline/default tests migration",
+      "consumer lock changes",
+      "merge",
+      "release",
+      "deploy"
+    ],
+    "release_ready": false
+  },
+  "review": {
+    "schema": "shinemage-domain-main-evidence-proposal-review/v1",
+    "method": "open-code-review-delegate deterministic preview/rules; actual host review",
+    "total_files": 4,
+    "reviewed_files": 4,
+    "skipped_files": 0,
+    "coverage_rate": 1,
+    "files": [
+      {
+        "path": "config/domain-author-evidence.lock.json",
+        "status": "added",
+        "reviewed": true,
+        "sha256": "5c5919362309b3c6837d6cb6fd1499437d9b383d8fc0e358a1a08f9049f8283d"
+      },
+      {
+        "path": "scripts/ci/domain-author-evidence.mjs",
+        "status": "added",
+        "reviewed": true,
+        "sha256": "6573ae70eba25cc4810920992161258eff71766123bb10bd5b08ae68963b3468"
+      },
+      {
+        "path": "scripts/ci/domain-author-evidence.test.mjs",
+        "status": "added",
+        "reviewed": true,
+        "sha256": "ecb9ef3ff81e45fb2b60a7e94d40fe50edafe6533b364399e260b50f8f67738a"
+      },
+      {
+        "path": "scripts/ci/read-domain-author-evidence.py",
+        "status": "added",
+        "reviewed": true,
+        "sha256": "eb91bed9c5007ce629b561fa5baa42f08ba0c786469ff346c702b458a75f0057"
+      }
+    ],
+    "findings": [],
+    "resolved": [
+      {
+        "path": "scripts/ci/domain-author-evidence.test.mjs",
+        "category": "test",
+        "content": "initial r1 instrumentation replaced cat with await inside synchronous assert.throws callback, syntax failure preserved; moved readFile await before callback and r2 actual tests pass"
+      }
+    ],
+    "verified": [
+      "lock and CI receipt bind clean source SHA, source inventory, exact run/attempt/platform and unchanged boundaries",
+      "each raw TAP file digest/bytes/counts checked against actual execution metadata",
+      "reference and new content archive each digest/member checked; no raw archive substitution",
+      "bounded ZIP and tar parser does not extract or execute; runtime guards survive Python -O",
+      "specific resealed dirty/local/source/run/coverage/failure/release receipts rejected",
+      "source-denied actual reader and pinned input bind tested; no host/service launch"
+    ],
+    "no_external_endpoint": true,
+    "release_ready": false
+  },
+  "verification": {
+    "opt_in": "DOMAIN_AUTHOR_CI_ARCHIVE fixed actual run 38121126913",
+    "source_denied_tests": {
+      "pass": 12,
+      "fail": 0,
+      "skipped": 0,
+      "log": "/Users/hutou/.codex/tasks/shinemage-domain-main-evidence-proposal-20261011-k62g10wq/source-denied-tests-r2.stdout"
+    },
+    "no_opt_in": {
+      "pass": 4,
+      "fail": 0,
+      "skipped": 8,
+      "skip_reason": "NOT_RUN: fixed DOMAIN_AUTHOR_CI_ARCHIVE not supplied",
+      "log": "/Users/hutou/.codex/tasks/shinemage-domain-main-evidence-proposal-20261011-k62g10wq/no-opt-in-tests-r1.stdout"
+    },
+    "negative_source_probes": 12,
+    "policy": "main, worktrees, listed domain/nine author roots denied file-read-data/file-write and network denied; unrelated machine paths allow-default",
+    "actual_fixed_input_bind": {
+      "schema": "shinemage-domain-author-validation/v1",
+      "package": "@shine-mage/board-components",
+      "version": "0.1.0",
+      "source_sha": "e78e040e14792c89f99a2e3181004dbdaefd9bf6",
+      "source_files": 30,
+      "archive": {
+        "repository": "tyuanww/shinemage-board-components",
+        "run_id": 38121126913,
+        "attempt": 1,
+        "event": "pull_request",
+        "conclusion": "success",
+        "artifact_id": 11694947955,
+        "sha256": "5207d0adac1a449fe1be36913d0d8214c1f4d8ecc3e137f7368bd27e6c4f28ee",
+        "bytes": 11356,
+        "path": "/Users/hutou/.codex/tasks/shinemage-domain-ci-ownership-proposal-20261011-2a8b1o72/remote-ci-artifact-r1.zip"
+      },
+      "groups": [
+        {
+          "name": "geometry",
+          "command": [
+            "--test",
+            "--test-reporter=tap",
+            "--test-concurrency=1",
+            "library/test/geometry.test.mjs"
+          ],
+          "files": [
+            {
+              "path": "library/test/geometry.test.mjs",
+              "bytes": 2142,
+              "sha256": "32cbeedd833193821299cee4419b7f28403e524af25a985f52c1c3c35c913b73"
+            }
+          ],
+          "exit_code": 0,
+          "counts": {
+            "tests": 28,
+            "pass": 28,
+            "fail": 0,
+            "cancelled": 0,
+            "skipped": 0,
+            "todo": 0
+          },
+          "logs": {
+            "stdout": {
+              "path": "geometry.stdout.log",
+              "bytes": 3802,
+              "sha256": "2bc0a66945b9f369e64b6f93650e038c16727969671c8514918f80aac980c2cd"
+            },
+            "stderr": {
+              "path": "geometry.stderr.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          }
+        },
+        {
+          "name": "producer-inputs",
+          "command": [
+            "--test",
+            "--test-reporter=tap",
+            "--test-concurrency=1",
+            "scripts/producer.test.mjs",
+            "scripts/build-input.test.mjs"
+          ],
+          "files": [
+            {
+              "path": "scripts/producer.test.mjs",
+              "bytes": 5806,
+              "sha256": "3e40099f84549ee5bb770e1e6e59a52642cbce4ed8721059465979c2272673d5"
+            },
+            {
+              "path": "scripts/build-input.test.mjs",
+              "bytes": 1570,
+              "sha256": "0371134757c24a731df1292b632ec6b491ee57af93af58de496d101035f29c43"
+            }
+          ],
+          "exit_code": 0,
+          "counts": {
+            "tests": 6,
+            "pass": 6,
+            "fail": 0,
+            "cancelled": 0,
+            "skipped": 0,
+            "todo": 0
+          },
+          "logs": {
+            "stdout": {
+              "path": "producer-inputs.stdout.log",
+              "bytes": 1698,
+              "sha256": "d8f94c9387ca082590eca6fa04034eb06ff2d06a4c33e4ef5356c1c8e133430a"
+            },
+            "stderr": {
+              "path": "producer-inputs.stderr.log",
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          }
+        }
+      ],
+      "reference": {
+        "schema": "shinemage-domain-reference/v1",
+        "source_repository": "https://github.com/tyuanww/fuqing-crm-analytics",
+        "source_sha": "5390667cc990fa558b0445aa455b086d325a6c77",
+        "package": "@shine-mage/board-components",
+        "version": "0.1.0",
+        "tarball": "shine-mage-board-components-0.1.0.tgz",
+        "sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182",
+        "bytes": 1955,
+        "role": "existing sealed member/identity regression input; not newly released artifact"
+      },
+      "members": {
+        "package/package.json": {
+          "bytes": 576,
+          "sha256": "2683aecb604706742a0b2bb38c2f3a35b5de6646767d3e4d4d20484f80aad3ba"
+        },
+        "package/lib/funnel.mjs": {
+          "bytes": 1660,
+          "sha256": "aebd9f3cdecc93a30b21d18cd554d5e01adfc17cdedc93e7a188ac0f48244dec"
+        },
+        "package/lib/waterfall.mjs": {
+          "bytes": 2308,
+          "sha256": "63aa6dc6010bd7cfe906f5184c395be0771568d40d471bf3184fe0d9ded53b98"
+        },
+        "package/lib/funnel.d.mts": {
+          "bytes": 239,
+          "sha256": "30c157c4cefc1ad5f8182e65af5777f39fcfd473987e1eabc47553f2f3d3c455"
+        },
+        "package/lib/waterfall.d.mts": {
+          "bytes": 341,
+          "sha256": "34b0be969c2f73b3dd1a7633b2e953c74bd5b12c80ed978ac3be0d51ee4a2210"
+        }
+      },
+      "source_execution_here": "NOT_RUN_AUTHOR_OWNED",
+      "independent_tsc": "NOT_IN_CURRENT_BUILD",
+      "current_candidate_host_service_admission": "NOT_RUN",
+      "release_ready": false,
+      "package_input": {
+        "path": "/Users/hutou/.codex/tasks/shinemage-domain-ci-ownership-proposal-20261011-2a8b1o72/remote-ci-artifact-r1/board-author-38121126913-1/reference/shine-mage-board-components-0.1.0.tgz",
+        "sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182",
+        "bytes": 1955
+      }
+    },
+    "failure_retained": {
+      "log": "/Users/hutou/.codex/tasks/shinemage-domain-main-evidence-proposal-20261011-k62g10wq/source-denied-tests-r1.stdout",
+      "exit_code": 1,
+      "reason": "proposal test helper instrumentation placed await in synchronous assert.throws callback; fixed by reading bytes before callback; r2 pass"
+    }
+  },
+  "main_applied": false,
+  "producer_default_migration": "NOT_RUN",
+  "source_copies_deleted": false,
+  "main_full_b0_hosted_ci_candidate": "NOT_RUN",
+  "sdk_distribution": "BLOCKED",
+  "product": "PARTIAL",
+  "release_ready": false
+}

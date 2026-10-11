@@ -1,0 +1,785 @@
+{
+  "schema": "shinemage-fixed-pack-isolation-validation/v1",
+  "observed_at": "2026-10-11T04:54:16.198480+00:00",
+  "main_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "main_branch": "codex/shinemage-abc-local-candidate",
+  "index": "EMPTY",
+  "task_root": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1",
+  "fixed_environment": {
+    "node": "24.19.0",
+    "python": "3.14.4",
+    "DSH": "0.1.7-rc.2",
+    "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443"
+  },
+  "product_delta": {
+    "schema": "shinemage-local-product-delta/v1",
+    "files": [
+      {
+        "path": "scripts/dsh-b0/plugin-isolation.test.mjs",
+        "before": {
+          "sha256": "379094d98be81d6170c249b81c16c17af7845e6c1c73c25ed31f7fa0ad4d7273",
+          "bytes": 5330
+        },
+        "after": {
+          "sha256": "ff6ed45da9c3193af2a627662ed243b3465997beb05fc6c057727af25db8599e",
+          "bytes": 5065
+        }
+      },
+      {
+        "path": "scripts/dsh-b0/plugin-source-isolation.legacy.mjs",
+        "before": null,
+        "after": {
+          "sha256": "372c4e1e3ba89d4d31516e4060ae43b61cd66a1baa21908ee978db652cee6134",
+          "bytes": 5647
+        }
+      },
+      {
+        "path": "scripts/dsh-b0/pipeline.mjs",
+        "before": {
+          "sha256": "6a740abe80d4548c122b00eee242f51e6907c0a9b3a10f5032fc6fd58c734949",
+          "bytes": 25076
+        },
+        "after": {
+          "sha256": "80587080ea63335f16e2beca174029a1afc655a35e60c8556ecdbb029681f1cc",
+          "bytes": 25173
+        }
+      }
+    ],
+    "new_git_actions": "NOT_RUN"
+  },
+  "product_patch": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/product-delta-r1.patch",
+    "sha256": "e9fc252096cb35f871f13ae59c5ef064fe536b7c77f159c4440d294388f72308",
+    "bytes": 20205
+  },
+  "archive_execution": {
+    "argv": [
+      "/usr/bin/sandbox-exec",
+      "-f",
+      "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/archive-source-denied-r2.sb",
+      "/Users/hutou/homebrew/opt/node@24/bin/node",
+      "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/run-archive-r2.mjs"
+    ],
+    "started_at": "2026-10-11T04:48:12.398443+00:00",
+    "finished_at": "2026-10-11T04:48:13.091266+00:00",
+    "exit_code": 0,
+    "scope": "four sealed packs with business sources, author repositories, upstream and build-tools unreadable",
+    "release_ready": false
+  },
+  "archive_tests": {
+    "tests": 4,
+    "pass": 4,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "archive_controls": [
+    {
+      "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/analytics-workbench/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/crm-knowledge/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/knowledge/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/shine-brand/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/shine-board/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/shine-crowd-action/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/shine-query/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/shine-funnel/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/shine-waterfall/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/dsh-analytics-workbench/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/dsh-crm-knowledge/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-knowledge-independent-20261008/dsh-knowledge/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-board/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-crowd-action/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-query/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/dsh-shine-funnel/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/dsh-shine-waterfall/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/plugin-kit/build-tools/package.json",
+      "code": "EPERM"
+    }
+  ],
+  "archive_sandbox": "network denied; nine main business source trees + nine original author repositories + upstream + build-tools contents denied; not whole-machine deny-default",
+  "public_execution": {
+    "argv": [
+      "/usr/bin/sandbox-exec",
+      "-f",
+      "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/public-source-denied-r1.sb",
+      "/Users/hutou/homebrew/opt/node@24/bin/node",
+      "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/run-public-r1.mjs"
+    ],
+    "started_at": "2026-10-11T04:49:08.884700+00:00",
+    "finished_at": "2026-10-11T04:49:11.018187+00:00",
+    "exit_code": 0,
+    "scope": "existing published public consumers; 18 source negative controls; explicit fixed SDK readable; synthetic localhost HTTP only",
+    "release_ready": false
+  },
+  "public_tests": {
+    "tests": 29,
+    "pass": 29,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "public_controls": [
+    {
+      "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/analytics-workbench/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/crm-knowledge/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/knowledge/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/shine-brand/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/shine-board/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/shine-crowd-action/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/shine-query/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/shine-funnel/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/shine-waterfall/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/dsh-analytics-workbench/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/dsh-crm-knowledge/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-knowledge-independent-20261008/dsh-knowledge/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-board/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-crowd-action/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-query/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/dsh-shine-funnel/package.json",
+      "code": "EPERM"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/dsh-shine-waterfall/package.json",
+      "code": "EPERM"
+    }
+  ],
+  "public_sandbox": "nine source trees + nine original authors contents denied; fixed SDK readable; localhost-only network; original CRM/Knowledge peer declarations unchanged",
+  "formal_runtime_inputs": {
+    "schema": "shinemage-fixed-pack-isolation/v1",
+    "crm_inputs_sha256": "13ddc63e9422a94e33bddad615600828c5bfdef0f7f83da08b5ce6bdfaf34667",
+    "page_inputs_sha256": "66af13c06ab9241e531a87f4b3d410859676ceb4233fe9a6bbfb0fafce42a888",
+    "packages": [
+      {
+        "id": "@shine-mage/dsh-shine-brand",
+        "source_sha": "57ebcf38278068394a4feb42125c30c195fd912a",
+        "manifest_sha256": "d5039166969023075253e65e31c4d7dba910ae6ea10b9b40bf7f147bdb5efd24",
+        "tarball": {
+          "name": "shine-mage-dsh-shine-brand-0.0.0-b0.tgz",
+          "bytes": 1883,
+          "sha256": "4b867bf5b4e08d9aa1f45f20b20b78cbd9e11c236194ffafaa5188d8d173bd13"
+        },
+        "root": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/runs-r2/package-isolation/shine-brand/unpacked/package",
+        "files": {
+          "cordis.patch.yml": "70dd510cf8f34ec8493bb257ad051ed4e6cabb00631640adc4fb497c44274c79",
+          "lib/client.js": "03ed4e2a291e06cdbd4d16cc0ee5d7c53266849dc9f2269c043f551d00c8877e",
+          "lib/index.js": "8b1f89bd6318f9a27bb0e34ae68fa3626496a7b02dedabf6bdfd2f0c2dab70f0",
+          "package.json": "e43f27667cc77a82fff2589b176028a0e8e311cf3fe1d404ffd8833e9db83380"
+        },
+        "entrypoints": {
+          ".": "./lib/index.js",
+          "./client": "./lib/client.js",
+          "./cordis.patch.yml": "./cordis.patch.yml",
+          "./package.json": "./package.json"
+        }
+      },
+      {
+        "id": "@shine-mage/dsh-shine-query",
+        "source_sha": "1f1e19d280923ebe7aac964f8b5825d497434db8",
+        "manifest_sha256": "13433c1c4687cd33f0b314b60a38c76fb8390ee52375755320d4ca5a6f378fae",
+        "tarball": {
+          "name": "shine-mage-dsh-shine-query-0.0.0-b0.tgz",
+          "bytes": 1060,
+          "sha256": "774c6ae63e0fb170a81a9e9fb9551d55d40724faae5966c1d95bb32624fb89ce"
+        },
+        "root": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/runs-r2/package-isolation/shine-query/unpacked/package",
+        "files": {
+          "cordis.patch.yml": "258f652d9447e8ee6d45730cf920823dcce936b84ea2cddf8af80910e39ba7a4",
+          "lib/client.js": "6d9dc0b432e7f8532ec7ad082becde14f2436184d496397301de3c0b1940fd8a",
+          "lib/index.js": "ac79df38a4f9f68e0558953472c383e0ca57e9266f9bc2427d45e4dd0e1dd186",
+          "package.json": "8027a77df5e773c5669617252502f234306a19e3dd8bed2823f0e67ee79c582c"
+        },
+        "entrypoints": {
+          ".": "./lib/index.js",
+          "./client": "./lib/client.js",
+          "./cordis.patch.yml": "./cordis.patch.yml",
+          "./package.json": "./package.json"
+        }
+      },
+      {
+        "id": "@shine-mage/dsh-crm-knowledge",
+        "source_sha": "5a839fa86de2240cf661a9034c58e0ead2d4b4ef",
+        "manifest_sha256": "0fbacc88fccc8085618b518a51afab5db1c045838c0cb47d6e94a8af5f600a49",
+        "tarball": {
+          "name": "shine-mage-dsh-crm-knowledge-0.0.0-crm.1.tgz",
+          "bytes": 234901,
+          "sha256": "0da9f8edd40b17a92377aa4b35d219229c8461b942060a7dd0e12265343500fd"
+        },
+        "root": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/runs-r2/package-isolation/crm-knowledge/unpacked/package",
+        "files": {
+          "cordis.patch.yml": "9b20b6350ace9ee49ebfc6dadc6aed5a4f357f0d3f36900c75831e254886400c",
+          "lib/client.js": "72bbd7d715ec5ab8e5d2bd7fce29a74dc7a32ad9e6fae8df86278de27c17eab3",
+          "lib/host.js": "5149a148257b794c3b7bff939173fdc003d9f5d38382d8cc23fe58310c979d64",
+          "lib/index.js": "a31542e7f3d77a7f9fd49af3f5428917f99a9a1e16d416ac29eab4a99237da63",
+          "package.json": "a4ed4892d2a24b74850f73604db725d4d8796114a2a633daf654078b0ac3ed47"
+        },
+        "entrypoints": {
+          ".": "./lib/index.js",
+          "./host": "./lib/host.js",
+          "./client": "./lib/client.js",
+          "./package.json": "./package.json",
+          "./cordis.patch.yml": "./cordis.patch.yml"
+        }
+      },
+      {
+        "id": "@shine-mage/dsh-knowledge",
+        "source_sha": "94ef29fa6c39d3dc506fbc5ef734f0a7ea9eb2b0",
+        "manifest_sha256": "a674a2da0dcd317839c4f8d7766da62ced58eca9021222c6e3a238f80aa7df79",
+        "tarball": {
+          "name": "shine-mage-dsh-knowledge-0.0.0-candidate.1.tgz",
+          "bytes": 14476,
+          "sha256": "ed7888204d5cefe7d383632a75319d3427fec9a735863f4e123b8ea17387ef67"
+        },
+        "root": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/runs-r2/package-isolation/knowledge/unpacked/package",
+        "files": {
+          "cordis.patch.yml": "2528e5e3e70cc995c01aa479433962b2ce8cf68edb6b4df128373a05dca2a776",
+          "lib/graph-tools.js": "425e876ef85dbfb8524080340b42e29d12b5eb0799ca79a35a3f5d8cf9e6b864",
+          "lib/index.js": "e04d90e8e4a51fcebf14c1666ace8796847c2ac13737805f933655c9b196180e",
+          "package.json": "8b423de17e89a897a4ac326f470796ff45b5be766cd9e0b8fd6db7ca8e7fbef2"
+        },
+        "entrypoints": {
+          ".": "./lib/index.js",
+          "./graph-tools": "./lib/graph-tools.js",
+          "./package.json": "./package.json",
+          "./cordis.patch.yml": "./cordis.patch.yml"
+        }
+      }
+    ],
+    "scope": "four exact published archives, independently unpacked own runtime files",
+    "source_build_and_private_tests": "NOT_RUN_AUTHOR_OWNED",
+    "sdk_resolution": "NOT_RUN",
+    "public_behavior": "SEPARATE_FIXED_PACK_CONSUMERS",
+    "host": "NOT_RUN",
+    "candidate": "NOT_RUN",
+    "real_business": "NOT_RUN",
+    "release_ready": false
+  },
+  "negative_inputs": {
+    "checks": [
+      {
+        "name": "repeat-r2",
+        "argv": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/archive-source-denied-r2.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "--test",
+          "scripts/dsh-b0/plugin-isolation.test.mjs"
+        ],
+        "exit_code": 1,
+        "reason": "EEXIST",
+        "output_created": true
+      },
+      {
+        "name": "missing-crm-r1",
+        "argv": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/archive-source-denied-r2.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "--test",
+          "scripts/dsh-b0/plugin-isolation.test.mjs"
+        ],
+        "exit_code": 1,
+        "reason": "PROFILE_PACK_INPUTS_REQUIRED",
+        "output_created": false
+      },
+      {
+        "name": "relative-page-r1",
+        "argv": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/archive-source-denied-r2.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "--test",
+          "scripts/dsh-b0/plugin-isolation.test.mjs"
+        ],
+        "exit_code": 1,
+        "reason": "PROFILE_PACK_INPUTS_REQUIRED",
+        "output_created": false
+      },
+      {
+        "name": "bad-profile-r1",
+        "argv": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/archive-source-denied-r2.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "--test",
+          "scripts/dsh-b0/plugin-isolation.test.mjs"
+        ],
+        "exit_code": 1,
+        "reason": "PROFILE_PACK_PROFILE_DIGEST",
+        "output_created": false
+      },
+      {
+        "name": "missing-query-r1",
+        "argv": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/archive-source-denied-r2.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "--test",
+          "scripts/dsh-b0/plugin-isolation.test.mjs"
+        ],
+        "exit_code": 1,
+        "reason": "PACKAGE_ISOLATION_SELECTION",
+        "output_created": false
+      },
+      {
+        "name": "alias-output-r1",
+        "argv": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/archive-source-denied-r2.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "--test",
+          "scripts/dsh-b0/plugin-isolation.test.mjs"
+        ],
+        "exit_code": 1,
+        "reason": "PACKAGE_ISOLATION_OUTPUT_REQUIRED",
+        "output_created": false
+      }
+    ],
+    "original_receipt_sha256": "5b7a71909ad1a71922eab0f09f50bfccb196fe3765c1b62b44d500c2e22cc084",
+    "unchanged_after_repeat": true,
+    "negative_profile": "owned derived fixture only; original sources/receipts/tars unchanged",
+    "release_ready": false
+  },
+  "pipeline_scope_reject": {
+    "argv": [
+      "/usr/bin/sandbox-exec",
+      "-f",
+      "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/archive-source-denied-r2.sb",
+      "/Users/hutou/homebrew/opt/node@24/bin/node",
+      "scripts/dsh-b0/pipeline.mjs",
+      "--check",
+      "--python",
+      "/Users/hutou/homebrew/opt/python@3.14/bin/python3.14"
+    ],
+    "exit_code": 1,
+    "reason": "CRM_COMPOSITION_OUTPUT_EXISTS",
+    "selected_scope": "package-isolation",
+    "source_service_start": "NOT_RUN",
+    "release_ready": false
+  },
+  "failed_sandbox_r1": {
+    "reason": "sandbox Scheme string does not decode JSON ASCII Unicode escapes; appended SDK denial used escaped Chinese path",
+    "execution_exit_code": 1,
+    "negative_control_rejected_test": true,
+    "product_test": "NOT_RUN",
+    "fixed_in_r2": "write real UTF-8 path literals using ensure_ascii=false",
+    "r1_logs_preserved": true
+  },
+  "legacy_body": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/before/scripts/dsh-b0/plugin-isolation.test.mjs",
+    "sha256": "379094d98be81d6170c249b81c16c17af7845e6c1c73c25ed31f7fa0ad4d7273",
+    "bytes": 5330
+  },
+  "legacy_execution": "NOT_RUN_EXPLICIT_LEGACY_ONLY",
+  "primary_review": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/primary-review-r1.json",
+    "sha256": "9763056118869192bee063d02cd20765e4b876148ca180bce8768f3551b11941",
+    "bytes": 1739
+  },
+  "boundaries": {
+    "status": "PASS",
+    "packages": 11,
+    "edges": 27,
+    "source_files": 653,
+    "dynamic_imports": 63,
+    "manifest": "docs/architecture/shinemage-plugin-boundaries.json"
+  },
+  "raw_bindings": [
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/alias-output-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/alias-output-r1.stdout",
+      "sha256": "0d720e43f540f31bfcac226ab7e4491c481ff1f29478df5ea911a4b9bced14e1",
+      "bytes": 770
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/archive-execution-r1.json",
+      "sha256": "5887642056a9cee6fe36517e1921d5f2edb58e2445ca4d44e3fcb055e35de299",
+      "bytes": 594
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/archive-execution-r1.stderr",
+      "sha256": "41c81c1220e6efb8e6840f002c83f000e6a95b765b54a942cde99fc4f3f86f7e",
+      "bytes": 429
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/archive-execution-r1.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/archive-execution-r2.json",
+      "sha256": "b6a0defb1fddb1efcecf6f85488018b2c8a3d8814677d8087398cb706cc1df3d",
+      "bytes": 594
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/archive-execution-r2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/archive-execution-r2.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/archive-isolation-r2.json",
+      "sha256": "9b0deaf778ca57ab1e33d8f37fda0cfdd291be3d76b7d274e4b6840ad4819c38",
+      "bytes": 3478
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/archive-isolation-r2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/archive-isolation-r2.stdout",
+      "sha256": "0f4f144a1b1c428d890e9a146ce860d5d42dae84df74f54704ab612dd4f209c4",
+      "bytes": 529
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/archive-source-denied-r1.sb",
+      "sha256": "158771eb0fe611b670f9dae70edce41c09601eb865a1dd0750e5ffe1cfb4fd6d",
+      "bytes": 4091
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/archive-source-denied-r2.sb",
+      "sha256": "fe433d736d042c9d309ff5102b728af45c9b5934d49e4e759f82b7cac76a96c5",
+      "bytes": 4067
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/bad-profile-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/bad-profile-r1.stdout",
+      "sha256": "767267e32a4881f458bdecf0de376ceb666075e2d288c25f4201b58477a0b30b",
+      "bytes": 1445
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/boundaries-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/boundaries-r1.stdout",
+      "sha256": "8f94c628aeff2c539e6b051921cb080123efa30f853dc8b1c201225540830552",
+      "bytes": 147
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/missing-crm-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/missing-crm-r1.stdout",
+      "sha256": "51e84141f3155194c08c8db145739d32189fb9151446f90a4e5e1f2829379ea7",
+      "bytes": 1136
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/missing-query-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/missing-query-r1.stdout",
+      "sha256": "079112cb42efc5c7367709649f325c305579bc72eb13a44cc2c1161427553308",
+      "bytes": 1004
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/negative-inputs-r1.json",
+      "sha256": "05e179de1072599b86afee5bf88b8fb343c470e9aaa82a0b8d84f7cd6eed0ee1",
+      "bytes": 3018
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/pipeline-scope-reject-r1.json",
+      "sha256": "7158135b5c5938706be3d2bd82deacee4fc931197217e612a4696c7aea9b7c62",
+      "bytes": 518
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/pipeline-scope-reject-r1.stderr",
+      "sha256": "e0ba6dc7ec5003d65c16748ac3799683f7d7b6e80bedeb9ffe4b9208a916e502",
+      "bytes": 432
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/pipeline-scope-reject-r1.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/primary-review-r1.json",
+      "sha256": "9763056118869192bee063d02cd20765e4b876148ca180bce8768f3551b11941",
+      "bytes": 1739
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/product-delta-files-r1.json",
+      "sha256": "747f7e08ecbabf47b1703c9d135bac23493685b3c28afd8a47675d7aaf428be4",
+      "bytes": 1002
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/product-delta-r1.patch",
+      "sha256": "e9fc252096cb35f871f13ae59c5ef064fe536b7c77f159c4440d294388f72308",
+      "bytes": 20205
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/public-consumers-r1.json",
+      "sha256": "169d241a4a6a87c5441c0e64a0ae3931803256d07268dd3c80d0d922c44d6ebd",
+      "bytes": 3251
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/public-consumers-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/public-consumers-r1.stdout",
+      "sha256": "ec8f9d74ef940d9696b1cf642763cb9be523027396dd43ffb280e8bf28b290f1",
+      "bytes": 2769
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/public-execution-r1.json",
+      "sha256": "6ae093dea095772583f35a5467c9862edbb3f654ce8bc16abbe4a8d985ae0700",
+      "bytes": 619
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/public-execution-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/public-execution-r1.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/public-source-denied-r1.sb",
+      "sha256": "60d36a50018aa5e8775f5aed6ac51108ffb890a3460c3f167f44b372670b35a0",
+      "bytes": 3856
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/relative-page-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/relative-page-r1.stdout",
+      "sha256": "d6345458a48211da6b7b17fadac8d7570c8158e5640eb8f2ea7de482bc11365c",
+      "bytes": 1147
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/repeat-r2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/repeat-r2.stdout",
+      "sha256": "f08f2362aa6e1e3e15f406453c7790b94253ac8cce98cbbef93c62e3a521b8fc",
+      "bytes": 973
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/run-archive-r1.mjs",
+      "sha256": "9dafa3c94dfb5c0fcd1a66def7a4ba9432e8fa5000c74a6826b57a5460d468f8",
+      "bytes": 3605
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/run-archive-r2.mjs",
+      "sha256": "407d4ae0d1a5081fead67641507962e531149a988dd60159c6717e968bb2d11a",
+      "bytes": 3605
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/run-public-r1.mjs",
+      "sha256": "b33f17fb95824db5916aae6da8a9f89b02beeabe84a4404cdbe3bf1353c1e0cf",
+      "bytes": 3443
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/sandbox-r1-failure.json",
+      "sha256": "be80134a62a5363cc69e7d608fa3ec9bba3297b92b58f21855e34f6a86a1ce24",
+      "bytes": 334
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/snapshot-r1.json",
+      "sha256": "c00d119754cba18f4a8bf5039755967615b5e7a4a9831a539b7bf48b375ecc6e",
+      "bytes": 25343
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/runs-r2/package-isolation/runtime-inputs.json",
+      "sha256": "5b7a71909ad1a71922eab0f09f50bfccb196fe3765c1b62b44d500c2e22cc084",
+      "bytes": 5369
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/public-r1/leaf/runtime-inputs.json",
+      "sha256": "0c3221cc0d4e3a6ea630f25716993bd5afb18a3fa2245177ae1f7a049fc4919d",
+      "bytes": 6594
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/public-r1/crm-package/runtime-inputs.json",
+      "sha256": "0bb84f39f74dc8311c84a5988748da124107ba1010dfbd5bf6fb1c753bdf5299",
+      "bytes": 3174
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/public-r1/knowledge-package/runtime-inputs.json",
+      "sha256": "3157ee29efd0467225dc931803a0010ec91d63a933c94adbc4b7fb20b1c0b5cb",
+      "bytes": 3192
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/before/scripts/dsh-b0/plugin-isolation.test.mjs",
+      "sha256": "379094d98be81d6170c249b81c16c17af7845e6c1c73c25ed31f7fa0ad4d7273",
+      "bytes": 5330
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-package-isolation-ownership-20261011-2_hcqsm1/before/scripts/dsh-b0/pipeline.mjs",
+      "sha256": "6a740abe80d4548c122b00eee242f51e6907c0a9b3a10f5032fc6fd58c734949",
+      "bytes": 25076
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/canonical-composition-r1/crm-inputs.json",
+      "sha256": "13ddc63e9422a94e33bddad615600828c5bfdef0f7f83da08b5ce6bdfaf34667",
+      "bytes": 620
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/canonical-composition-r1/page-inputs.json",
+      "sha256": "66af13c06ab9241e531a87f4b3d410859676ceb4233fe9a6bbfb0fafce42a888",
+      "bytes": 1624
+    }
+  ],
+  "cleanup": "public synthetic HTTP servers closed by original t.after hooks, resolver contexts disposed; subprocess returned 0; no complete host/service daemon launched",
+  "remaining_sources": [
+    "board-components producer",
+    "package-inputs producer-lock contracts",
+    "geometry-composition private Workbench projection",
+    "explicit missing-input producer guards",
+    "three retained main business assertions"
+  ],
+  "not_run": [
+    "latest full B0",
+    "new main hosted CI",
+    "legacy four-source build/test/pack",
+    "official whole host/browser/WSL/current candidate/journal/model/real business",
+    "strict npm peer compatibility of original CRM/Knowledge",
+    "SDK audit/cold prepare/distribution",
+    "commit/push/PR/merge/release/deploy"
+  ],
+  "VERSION": "0.20.0.0",
+  "sdk_distribution": "BLOCKED",
+  "product": "PARTIAL",
+  "release_ready": false
+}

@@ -7,12 +7,15 @@ import { mkdtemp, mkdir, writeFile } from 'node:fs/promises';
 import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
-import { prepareRuntime, installProfilePlugin, bootHost, terminateChild } from '../../../scripts/dsh-dev/serve.mjs';
+import { prepareRuntime, resolvePluginInputs, installProfilePlugin, bootHost, terminateChild } from '../../../scripts/dsh-dev/serve.mjs';
 import { assertFree } from '../../../scripts/dsh-dev/ports.mjs';
 
 const root = fileURLToPath(new URL('../../..', import.meta.url));
 const python = process.env.FQ_B0_PYTHON;
 assert.ok(python?.startsWith('/'), 'FQ_B0_PYTHON must identify the authorized absolute interpreter');
+const packInputs = process.env.DSH_DEV_PACK_INPUTS;
+assert.ok(packInputs?.startsWith('/'), 'DSH_DEV_PACK_INPUTS must identify the fixed profile package inputs');
+await resolvePluginInputs({ plugin: 'on', packInputs });
 const port = Number(process.env.COMPOSITION_WEB_PORT ?? 4328);
 assert.notEqual(port, 4327, 'Never reuse the existing user demo');
 await assertFree(port);
@@ -40,9 +43,9 @@ try {
     name: new URL('./helpers/native-composition-diagnostic.mjs', import.meta.url).href },
   { id: 'composition-fixture-history', name: new URL('./helpers/native-composition-history.mjs', import.meta.url).href }] }]), { mode: 0o600 });
   let pluginMode = 'on';
-  let prepared = await prepareRuntime({ plugin: pluginMode, runtime, extraPatch: [diagnosticPatch], host: '127.0.0.1', webPort: port });
+  let prepared = await prepareRuntime({ plugin: pluginMode, packInputs, runtime, extraPatch: [diagnosticPatch], host: '127.0.0.1', webPort: port });
   await writeFile(join(prepared.workspace, 'composition-proof.md'), '# 原生侧栏合成验收\n\n本文件只用于检查文件预览与驾驶舱共存。不含真实业务数据，没有调用模型。\n', { mode: 0o600 });
-  console.log(JSON.stringify({ stage: 'install-local-plugin', runtime, model_calls: 0 }));
+  console.log(JSON.stringify({ stage: 'install-fixed-plugin-pack', runtime, model_calls: 0 }));
   installProfilePlugin(prepared);
   host = await bootHost(prepared);
   const auth = await fetch(host.launchUrl, { redirect: 'manual', signal: AbortSignal.timeout(5000) });
@@ -99,7 +102,7 @@ try {
       await terminateChild(host.child, host.childExit);
       if (command.value !== 'restart') {
         pluginMode = command.value === 'plugin-on' ? 'on' : 'off';
-        prepared = await prepareRuntime({ plugin: pluginMode, runtime, extraPatch: [diagnosticPatch], host: '127.0.0.1', webPort: port });
+        prepared = await prepareRuntime({ plugin: pluginMode, packInputs, runtime, extraPatch: [diagnosticPatch], host: '127.0.0.1', webPort: port });
         if (pluginMode === 'on') installProfilePlugin(prepared);
       }
       host = await bootHost(prepared);

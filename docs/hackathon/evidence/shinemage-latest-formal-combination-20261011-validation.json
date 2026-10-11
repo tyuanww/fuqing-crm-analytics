@@ -1,0 +1,337 @@
+{
+  "schema": "shinemage-latest-formal-synthetic-combination/v1",
+  "at": "2026-10-11T10:10:08.576821+00:00",
+  "main_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "branch": "codex/shinemage-abc-local-candidate",
+  "baseline": "HEAD + preserved current working bytes",
+  "actual_command": [
+    "/usr/bin/sandbox-exec",
+    "-f",
+    "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/source-localhost-only-r1.sb",
+    "/Users/hutou/homebrew/opt/node@24/bin/node",
+    "--test",
+    "--test-reporter=tap",
+    "--test-concurrency=1",
+    "scripts/crm-calibration/knowledge-composition.integration.mjs",
+    "scripts/crm-calibration/page-composition.integration.mjs"
+  ],
+  "cwd": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics",
+  "started_at": "2026-10-11T10:02:23.252254+00:00",
+  "finished_at": "2026-10-11T10:02:25.808909+00:00",
+  "exit_code": 0,
+  "counts": {
+    "tests": 9,
+    "pass": 9,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "inputs": {
+    "workbench": {
+      "source_sha": "6c5adc9faa04f692d5d4b3028af4f945ab49dfe4",
+      "source_dirty": false,
+      "formal_receipt": {
+        "path": "/Users/hutou/.codex/tasks/shinemage-current-author-formal-pack-20261011-_zy2t9yo/formal-packs/workbench/plugin-pack.json",
+        "sha256": "0af61dabbab9a2205fb1d9ff3a2eec7e8194800d9af3f9043b0a5587a81edc12",
+        "bytes": 718
+      },
+      "tarball": {
+        "name": "shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+        "bytes": 438499,
+        "sha256": "e41df9f5a8f7031c092319222543c8d723ca644c0c9d69b2ae53f13257e9b79e"
+      }
+    },
+    "crm": {
+      "source_sha": "c4b1c91eaa4fa645deb7951614c1937eb76db143",
+      "source_dirty": false,
+      "formal_receipt": {
+        "path": "/Users/hutou/.codex/tasks/shinemage-current-author-formal-pack-20261011-_zy2t9yo/formal-packs/crm/plugin-pack.json",
+        "sha256": "4663cce02776fa68913a41829d8ca0712fa44bf1c7642844326d80de40af2158",
+        "bytes": 627
+      },
+      "tarball": {
+        "name": "shine-mage-dsh-crm-knowledge-0.0.0-crm.1.tgz",
+        "bytes": 234901,
+        "sha256": "0da9f8edd40b17a92377aa4b35d219229c8461b942060a7dd0e12265343500fd"
+      }
+    }
+  },
+  "prepared_pack_count": 9,
+  "profile_count": 2,
+  "scope": "public contract composition using actual formal packs, official resolver and synthetic localhost HTTP fixtures",
+  "runtime_receipts": {
+    "knowledge": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/runs/knowledge/runtime-inputs.json",
+      "sha256": "342644c008afa521fa51de4e8a08d9587b559c774efe258be7b589cccbc6dadb",
+      "bytes": 3154
+    },
+    "page": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/runs/page/runtime-inputs.json",
+      "sha256": "c2f851c415217064acfd72202a6cccfc6963e332feae25b93707d2efda1017f8",
+      "bytes": 7531
+    }
+  },
+  "source_negative": {
+    "exact_paths_eperm": 18,
+    "whole_machine_isolation": false
+  },
+  "process_cleanup": {
+    "owned_pgid": 38361,
+    "remaining_owned_group": [],
+    "observed_listeners": [],
+    "port_ownership_attestation": "NOT_OBSERVED: sampling did not capture ephemeral listeners; no full port attestation claimed",
+    "unrelated_processes_stopped": false
+  },
+  "protected_files_unchanged_during_execution": 198,
+  "review": {
+    "mode": "open-code-review-delegate host review",
+    "reviewed": 2,
+    "skipped": 0,
+    "open_findings": [],
+    "external_model": "NOT_RUN"
+  },
+  "remote_readonly": {
+    "at": "2026-10-11T10:03:09.616102+00:00",
+    "rows": [
+      {
+        "repo": "tyuanww/fuqing-crm-analytics",
+        "pr": "119",
+        "state": "OPEN",
+        "head": "5390667cc990fa558b0445aa455b086d325a6c77",
+        "merge_state": "CLEAN",
+        "checks": [
+          {
+            "name": "changes / changes",
+            "conclusion": "SUCCESS"
+          },
+          {
+            "name": "lint",
+            "conclusion": "SUCCESS"
+          },
+          {
+            "name": "ground-truth-lint",
+            "conclusion": "SKIPPED"
+          },
+          {
+            "name": "contract-filterbuilder-lint",
+            "conclusion": "SKIPPED"
+          },
+          {
+            "name": "test",
+            "conclusion": "SUCCESS"
+          },
+          {
+            "name": "frontend",
+            "conclusion": "SKIPPED"
+          },
+          {
+            "name": "dependency-audit",
+            "conclusion": "SKIPPED"
+          },
+          {
+            "name": "docker-smoke",
+            "conclusion": "SKIPPED"
+          },
+          {
+            "name": "b0-contract-build",
+            "conclusion": "SKIPPED"
+          },
+          {
+            "name": "merge-gate",
+            "conclusion": "SUCCESS"
+          }
+        ]
+      },
+      {
+        "repo": "tyuanww/dsh-analytics-workbench",
+        "pr": "1",
+        "state": "OPEN",
+        "head": "6c5adc9faa04f692d5d4b3028af4f945ab49dfe4",
+        "merge_state": "CLEAN",
+        "checks": [
+          {
+            "name": "repo-inputs",
+            "conclusion": "SUCCESS"
+          },
+          {
+            "name": "repo-inputs",
+            "conclusion": "SUCCESS"
+          },
+          {
+            "name": "strict-build",
+            "conclusion": "SUCCESS"
+          },
+          {
+            "name": "strict-build",
+            "conclusion": "SUCCESS"
+          }
+        ]
+      },
+      {
+        "repo": "tyuanww/dsh-crm-knowledge",
+        "pr": "1",
+        "state": "OPEN",
+        "head": "c4b1c91eaa4fa645deb7951614c1937eb76db143",
+        "merge_state": "CLEAN",
+        "checks": [
+          {
+            "name": "strict-build",
+            "conclusion": "SUCCESS"
+          },
+          {
+            "name": "strict-build",
+            "conclusion": "SUCCESS"
+          }
+        ]
+      }
+    ],
+    "remote_mutations": "NOT_RUN"
+  },
+  "next_two_lock_plan": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/main-local-binding-plan-r3.json",
+    "sha256": "a488b9ae504cfe95b4a1da950ca79b846f163c61633e4a7c3f6c1f253300ddb9",
+    "bytes": 3239
+  },
+  "next_patch": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-current-author-formal-pack-20261011-_zy2t9yo/next-main-binding-proposal-r2/product-delta-r2.patch",
+    "sha256": "aa8de80b31ce0f564752f46861bddd299c2e9150dd1c090c1c47f5c9aa6a41bf",
+    "bytes": 2684
+  },
+  "main_locks": {
+    "applied": false,
+    "current_bindings": "Workbench e9223289 / CRM 5a839fa8",
+    "proposed_bindings": "Workbench 6c5adc9f / CRM c4b1c91e",
+    "apply_check_exit": 0,
+    "authorization": "PENDING_FOR_THESE_TWO_PATHS"
+  },
+  "cordis": {
+    "declared": "4.0.2",
+    "resolved_runtime": "4.0.4",
+    "strict_peer_install": "OPEN; not executed here"
+  },
+  "full_host": "NOT_RUN",
+  "official_plugin_add": "NOT_RUN",
+  "candidate_journal_service_target_recovery": "NOT_RUN",
+  "real_model_business_weknora": "NOT_RUN",
+  "main_ci_for_working_delta": "NOT_RUN",
+  "main_remote_b0_check": "SKIPPED_ON_5390667",
+  "full_b0": "NOT_RERUN: previous contract cutover B0 retains its own input identity",
+  "retained_failure": "First wrapper had a parse-only SyntaxError before execution; raw wrapper and note preserved. Corrected wrapper produced the first actual combination run.",
+  "raw": {
+    "main-before-r1.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/main-before-r1.json",
+      "sha256": "3cdda22e798195e2deb52558bdb53eb085594b1bfd2cca5274b52f583c4e03e3",
+      "bytes": 55138
+    },
+    "combination-r1-execution.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/combination-r1-execution.json",
+      "sha256": "b9693027773ace5059a2231f2d6d1d7338d848545d7c8636fdf56c86e3442564",
+      "bytes": 2062
+    },
+    "combination-r1.stdout": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/combination-r1.stdout",
+      "sha256": "d80a977ed1e4f270e5f0ad2f55f58086450df8a2d469e06bc95cec12e995bc51",
+      "bytes": 2131
+    },
+    "combination-r1.stderr": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/combination-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "combination-final-r1.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/combination-final-r1.json",
+      "sha256": "afcfb57c2006a0ae808aa28483c1ceb8362b2746d2cb6cfd1ec317681f50b0c7",
+      "bytes": 12117
+    },
+    "source-localhost-only-r1.sb": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/source-localhost-only-r1.sb",
+      "sha256": "987321ae2253584eb5586d674f6a59e9d9fa423c5052366aaf1e8f71c4c21ea5",
+      "bytes": 4612
+    },
+    "source-negative-r1.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/source-negative-r1.json",
+      "sha256": "95b5be6e404f7b956a5a553cd13a575a51d79c6155dc431dfef35083e0e9a40b",
+      "bytes": 3242
+    },
+    "source-negative-r1.stdout": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/source-negative-r1.stdout",
+      "sha256": "f56129068fe2ea0523f9c1a7d385673e674515d654bc49738743cbc6a9303020",
+      "bytes": 2758
+    },
+    "owned-process-cleanup-r1.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/owned-process-cleanup-r1.json",
+      "sha256": "d679bdadb3a3842c34eafc2e51f0fc462b880bd8133adb88256e019574bb834e",
+      "bytes": 2026
+    },
+    "pr-readonly-summary-r1.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/pr-readonly-summary-r1.json",
+      "sha256": "8461779e87da0e8295d3b31e04d3e2d882072e9f895c648c27229a585d3f6ff7",
+      "bytes": 2167
+    },
+    "main-pr-readonly-r1.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/main-pr-readonly-r1.json",
+      "sha256": "e950528aefb0925138782c3a9758720aecae768dbfd6a920d7db00feaa5aba3d",
+      "bytes": 3195
+    },
+    "workbench-pr-readonly-r1.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/workbench-pr-readonly-r1.json",
+      "sha256": "a33055053a59562a77570889b6cbdb3d7f9c8fe4ddd838f531aa09bc3ec51847",
+      "bytes": 1548
+    },
+    "crm-pr-readonly-r1.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/crm-pr-readonly-r1.json",
+      "sha256": "e147a8fe137b3ee1a8a4cb044f92b75d69983c06822d1ba6d79fc1f44ae03715",
+      "bytes": 876
+    },
+    "author-local-readonly-r1.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/author-local-readonly-r1.json",
+      "sha256": "e7bcf8b50e8ae1d2c96e52424598f31f00e0ad578e0b9679dd8e2f396de58f0f",
+      "bytes": 414
+    },
+    "review-two-lock-r1/preview.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/review-two-lock-r1/preview.json",
+      "sha256": "d2000203318b2383c3aaa44784108877a450dc775833087c84edd23a656b16c2",
+      "bytes": 633
+    },
+    "review-two-lock-r1/rules.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/review-two-lock-r1/rules.json",
+      "sha256": "f9796e1796c9f8e79b1f3a43b2c19b4764e46f15486763c1728035261db3e79d",
+      "bytes": 381
+    },
+    "review-two-lock-r1/semantic-check-r1.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/review-two-lock-r1/semantic-check-r1.json",
+      "sha256": "186c81ae5a7e3e988e6caf46d5b5dbddfa35136be7c5764d50de10769e274a55",
+      "bytes": 383
+    },
+    "review-two-lock-r1/host-review.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/review-two-lock-r1/host-review.json",
+      "sha256": "f84e0d44cf6b196cecc825293becd39af05c2ed1a2c3bd33deb4e73383dac811",
+      "bytes": 2378
+    },
+    "main-apply-check-r1.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/main-apply-check-r1.json",
+      "sha256": "b2160b0e7d227eab0f1e48975f667bd94618e29ffe05f55e9dcf9bd7aa1744df",
+      "bytes": 651
+    },
+    "main-local-binding-plan-r3.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/main-local-binding-plan-r3.json",
+      "sha256": "a488b9ae504cfe95b4a1da950ca79b846f163c61633e4a7c3f6c1f253300ddb9",
+      "bytes": 3239
+    },
+    "wrapper-syntax-failure-r1.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-latest-formal-combination-20261011-lxx9zyru/wrapper-syntax-failure-r1.json",
+      "sha256": "f0ca4061881a5d4f1c103a0a6795574770a01652678a22c3fae6512ee25738e5",
+      "bytes": 173
+    }
+  },
+  "prepared_identity_validation": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-current-author-formal-pack-20261011-_zy2t9yo/next-main-binding-proposal-r2/binding-validation-r3.json",
+    "sha256": "c4b11f3079a4e84440cf21082b6599fe3869554414a8aa54da2d2d9487171a5f",
+    "bytes": 4117
+  },
+  "commit_push_pr_merge_release_deploy_delete": "NOT_RUN",
+  "product": "PARTIAL",
+  "sdk_distribution": "BLOCKED",
+  "release_ready": false
+}

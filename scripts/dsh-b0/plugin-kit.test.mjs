@@ -6,9 +6,9 @@ import { dirname, isAbsolute, join } from 'node:path';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
-import { readPackagedLibrary, validatePackageLock } from '../../dsh-plugins/plugin-kit/packaged-dependencies.mjs';
+import { readPackagedLibrary } from '../../dsh-plugins/plugin-kit/packaged-dependencies.mjs';
 import { inspectSdkPackage } from '../../dsh-plugins/plugin-kit/sdk-inputs.mjs';
-import { copyPluginKitSources, copyTreeBounded } from './clean-build.mjs';
+import { copyPluginKitSources } from './clean-build.mjs';
 import { linkWorkspaceKit, linkRepositoryKit } from './plugin-kit-link.mjs';
 
 const exec = promisify(execFile);
@@ -23,26 +23,18 @@ function managerTrial(declared, candidate) {
     version: candidate ?? declared.slice('pnpm@'.length) };
 }
 
-// Explicit domain artifacts retain their release-byte identity. A rebuild is
-// compared separately and must never become another consumer's input.
+// The producer-owned fixed artifact is authoritative; business consumer locks
+// are read from formal packages by installed-kit-packs.integration.mjs.
 async function immutableDomainInput(directory) {
   if (directory === undefined) return null;
   assert.ok(typeof directory === 'string' && isAbsolute(directory), 'KIT_TEST_DOMAIN_INPUT_ABSOLUTE');
   const info = await lstat(directory);
   assert.ok(info.isDirectory() && !info.isSymbolicLink(), 'KIT_TEST_DOMAIN_INPUT_DIRECTORY');
-  const locks = [];
-  let entry;
-  for (const name of ['shine-funnel', 'shine-waterfall', 'analytics-workbench']) {
-    const consumer = join(repository, 'dsh-plugins', name), path = join(consumer, 'bundled-dependencies.json');
-    const bytes = await readFile(path);
-    const lock = validatePackageLock(JSON.parse(bytes), JSON.parse(await readFile(join(consumer, 'package.json'))));
-    const candidate = lock.packages.find(item => item.name === '@shine-mage/board-components');
-    assert.ok(candidate, 'KIT_TEST_DOMAIN_LOCK_REQUIRED');
-    if (entry) assert.deepEqual(candidate, entry, 'KIT_TEST_DOMAIN_LOCK_DISAGREEMENT');
-    entry = candidate; locks.push({ path, bytes });
-  }
+  const entry = { name: '@shine-mage/board-components', version: '0.1.0',
+    tarball: 'shine-mage-board-components-0.1.0.tgz',
+    sha256: '22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182' };
   const path = join(directory, entry.tarball);
-  return { directory, path, entry, locks, ...await readPackagedLibrary(path, entry) };
+  return { directory, path, entry, ...await readPackagedLibrary(path, entry) };
 }
 
 test('candidate manager selection rejects floating versions without changing the default declaration', () => {
@@ -164,12 +156,16 @@ test('real kit tarball contains only declared source/locks and exposes its publi
         `KIT_TEST_CANDIDATE_INPUT_REQUIRED ${key}`);
     }
   }
+  if (process.env.B0_BUILD_UPSTREAM !== undefined) {
+    for (const key of ['B0_BUILD_UPSTREAM', 'B0_BUILD_TOOLS', 'DSH_PACKAGE_INPUTS']) {
+      assert.ok(typeof process.env[key] === 'string' && isAbsolute(process.env[key]), `KIT_TEST_COMPILE_INPUT_REQUIRED ${key}`);
+    }
+  }
   const immutable = await immutableDomainInput(process.env.DSH_PACKAGE_INPUTS);
   if (immutable) t.after(async () => {
     const after = await readPackagedLibrary(immutable.path, immutable.entry);
     assert.equal(after.sha256, immutable.sha256, 'consumer validation changed the immutable domain input');
-    for (const lock of immutable.locks) assert.deepEqual(await readFile(lock.path), lock.bytes, 'consumer validation changed a domain lock');
-    t.diagnostic(`immutable domain input before ${immutable.sha256}; after ${after.sha256}; all three consumer locks unchanged`);
+    t.diagnostic(`immutable domain input before ${immutable.sha256}; after ${after.sha256}; no author locks read`);
   });
   const root = await owned(t), source = join(root, 'kit-source');
   await copyPluginKitSources(kit, source, { destinationRoot: root });
@@ -225,14 +221,10 @@ test('real kit tarball contains only declared source/locks and exposes its publi
   const result = await exec(process.execPath, ['--input-type=module', '-e',
     "const m = await import('@shine-mage/dsh-plugin-kit/toolchain'); if(typeof m.inspectToolchain !== 'function'||typeof m.bindToolchain !== 'function') process.exit(1);"], { cwd: join(root, 'consumer'), env });
   assert.equal(result.stderr, '');
-  // Build one consumer at a time in the same empty slot: no neighboring
-  // plugin or kit source can satisfy an accidental relative import.
-  const names = ['board-components', 'shine-brand', 'shine-query', 'shine-board', 'shine-crowd-action',
-    'shine-funnel', 'shine-waterfall', 'crm-knowledge', 'knowledge', 'analytics-workbench'];
-  const plugin = join(consumer, 'plugin'), domainOutput = join(root, 'domain-inputs');
-  const inputs = immutable?.directory ?? domainOutput;
-  const upstream = process.env.B0_BUILD_UPSTREAM, tools = process.env.B0_BUILD_TOOLS ?? join(kit, 'build-tools');
-  const buildEnv = { ...env, ...(upstream ? { B0_BUILD_UPSTREAM: upstream } : {}), B0_BUILD_TOOLS: tools, DSH_PACKAGE_INPUTS: inputs };
+  // A kit consumer fixture validates the public binder/compiler and immutable
+  // domain input. Product code and behavior belong to independent author CI
+  // and the fixed-package consumers; no legacy plugin sources are copied here.
+  const upstream = process.env.B0_BUILD_UPSTREAM, tools = process.env.B0_BUILD_TOOLS;
   const inputRecord = upstream ? (process.env.DSH_SDK_CLOSURE_SHA256 ? join(dirname(upstream), 'sdk-closure.json') : join(upstream, '.git/index')) : null;
   const upstreamIndex = inputRecord ? await readFile(inputRecord) : null;
   if (upstream) {
@@ -241,62 +233,58 @@ test('real kit tarball contains only declared source/locks and exposes its publi
     assert.equal(JSON.parse(check.stdout).status, 'READY');
     assert.deepEqual(await readFile(inputRecord), before, 'read-only preflight changed SDK identity record');
   }
-  for (const name of names) {
-    await t.test(`${name} consumes the installed kit without sibling source`, { skip: name !== 'board-components' && !upstream }, async () => {
-      const source = join(repository, 'dsh-plugins', name);
-      const items = ['package.json', 'build.mjs', 'src'];
-      if (name === 'board-components') items.push('test');
-      else items.push('cordis.patch.yml');
-      if (['shine-funnel', 'shine-waterfall', 'analytics-workbench'].includes(name)) items.push('bundled-dependencies.json');
-      if (name === 'analytics-workbench') items.push('toolchain.mjs', 'pack-skills.mjs', 'skills', 'test',
-        ...(await readdir(source)).filter(file => file.endsWith('skill-package.lock.json')));
-      if (['crm-knowledge', 'knowledge'].includes(name)) items.push('test/contract.typecheck.ts', 'test/package.test.mjs');
-      try {
-        for (const item of items) await copyTreeBounded(join(source, item), join(plugin, item), { destinationRoot: root });
-        if (process.env.B0_TEST_PNPM_VERSION !== undefined) {
-          // All mutations here are to the owned fixture. Nested pnpm invocations
-          // must select the same real candidate, without version-check bypasses.
-          const manifest = JSON.parse(await readFile(join(plugin, 'package.json')));
-          manifest.packageManager = declaration;
-          await writeFile(join(plugin, 'package.json'), JSON.stringify(manifest));
-        }
-        await assert.rejects(lstat(join(consumer, 'plugin-kit')), { code: 'ENOENT' });
-        const args = name === 'board-components' ? [domainOutput] : [upstream, tools];
-        const result = await exec(process.execPath, [join(plugin, 'build.mjs'), ...args], { cwd: root, env: buildEnv, timeout: 120000, maxBuffer: 2 * 1024 * 1024 });
-        if (name === 'board-components') {
-          const receipt = JSON.parse(result.stdout);
-          if (immutable) {
-            const rebuilt = await readPackagedLibrary(join(domainOutput, immutable.entry.tarball));
-            assert.equal(receipt.sha256, rebuilt.sha256, 'domain rebuild receipt mismatch');
-            assert.deepEqual(rebuilt.manifest, immutable.manifest, 'domain rebuild manifest drift');
-            assert.deepEqual(rebuilt.files, immutable.files, 'domain rebuild content drift');
-            t.diagnostic(`domain original sha ${immutable.sha256}; rebuilt sha ${rebuilt.sha256}; ${rebuilt.files.size} files and manifest identical; consumers retain original artifact`);
-          } else {
-            const lock = JSON.parse(await readFile(join(repository, 'dsh-plugins/shine-funnel/bundled-dependencies.json')));
-            assert.equal(receipt.sha256, lock.packages[0].sha256, 'dev kit migration changed the immutable domain tarball');
-            t.diagnostic(`domain sha ${receipt.sha256}; original consumer locks unchanged`);
-          }
-        } else assert.ok((await readFile(join(plugin, 'lib/index.js'))).length > 0);
-        const tests = name === 'board-components' ? ['test/geometry.test.mjs']
-          : name === 'analytics-workbench' ? ['test/built.test.mjs', 'test/native-board-auth.test.mjs', 'test/native-prompt-inject.test.mjs', 'test/lane-g-delivery.test.mjs',
-            'test/native-slot-ownership.test.mjs', 'test/native-fixture-client-boundary.test.mjs',
-            'test/first-purchase-query-model.test.mjs', 'test/first-purchase-query-card.test.mjs', 'test/first-purchase-save-dom.test.mjs',
-            'src/client/leave/host-leave-adapter.test.mjs', 'src/client/cockpit-composition.test.mjs']
-          : ['crm-knowledge', 'knowledge'].includes(name) ? ['test/package.test.mjs']
-          : (await readdir(join(plugin, 'src'))).filter(file => file.endsWith('.test.mjs')).map(file => `src/${file}`);
-        await exec(process.execPath, ['--test', ...tests.map(file => join(plugin, file))], { cwd: plugin, env: buildEnv, timeout: 60000, maxBuffer: 2 * 1024 * 1024 });
-        if (name === 'shine-brand') {
-          const artifact = await readFile(join(plugin, 'lib/index.js'));
-          const manifest = JSON.parse(await readFile(join(plugin, 'package.json')));
-          manifest.devDependencies['@shine-mage/dsh-plugin-kit'] = '0.2.0';
-          await writeFile(join(plugin, 'package.json'), JSON.stringify(manifest));
-          await assert.rejects(exec(process.execPath, [join(plugin, 'build.mjs'), upstream, tools], { cwd: root, env: buildEnv, timeout: 30000 }), /KIT_VERSION_MISMATCH/);
-          assert.deepEqual(await readFile(join(plugin, 'lib/index.js')), artifact);
-        }
-        t.diagnostic(`${name}: installed kit build and ${tests.length} existing test file(s) PASS`);
-      } finally { await rm(plugin, { recursive: true, force: true }); }
-    });
-  }
+  await t.test('installed kit binds and strictly compiles an owned synthetic domain consumer', {
+    skip: upstream ? false : 'NOT_RUN: fixed absolute SDK/build-tools inputs are not configured',
+  }, async () => {
+    assert.ok(immutable, 'KIT_TEST_DOMAIN_INPUT_REQUIRED');
+    const plugin = join(consumer, 'plugin');
+    await mkdir(join(plugin, 'src'), { recursive: true });
+    const fixtureManifest = { name: '@shine-mage/synthetic-kit-consumer', version: '0.0.0', private: true,
+      type: 'module', packageManager: declaration, files: ['lib/', 'bundled-dependencies.json'],
+      devDependencies: { '@shine-mage/dsh-plugin-kit': pkg.version, '@shine-mage/board-components': immutable.entry.version } };
+    await writeFile(join(plugin, 'package.json'), JSON.stringify(fixtureManifest));
+    await writeFile(join(plugin, 'bundled-dependencies.json'), JSON.stringify({
+      schema_version: 'shinemage-bundled-dependencies/v1', packages: [immutable.entry],
+    }));
+    const fixtureSource = "import { funnelGeometry } from '@shine-mage/board-components/funnel';\n"
+      + "export const result = funnelGeometry({ unit: '人', cohort_label: 'synthetic kit', counting_rule: 'same cohort', stages: [{ label: 'one', count: 4 }, { label: 'two', count: 2 }] });\n";
+    await writeFile(join(plugin, 'src/index.ts'), fixtureSource);
+    const builder = [
+      "import assert from 'node:assert/strict';",
+      "import { dirname, join } from 'node:path';",
+      "import { fileURLToPath, pathToFileURL } from 'node:url';",
+      "import { bindToolchain } from '@shine-mage/dsh-plugin-kit/toolchain';",
+      "const root = dirname(fileURLToPath(import.meta.url));",
+      "const { pin, compiler: ts, build } = await bindToolchain(root, process.argv[2], process.argv[3]);",
+      "const options = { strict: true, skipLibCheck: false, noEmit: true, types: [], module: ts.ModuleKind.NodeNext, moduleResolution: ts.ModuleResolutionKind.NodeNext, target: ts.ScriptTarget.ES2022 };",
+      "const program = ts.createProgram([join(root, 'src/index.ts')], options);",
+      "const diagnostics = ts.getPreEmitDiagnostics(program);",
+      "if (diagnostics.length) { console.error(ts.formatDiagnostics(diagnostics, { getCanonicalFileName: x => x, getCurrentDirectory: () => root, getNewLine: () => '\\n' })); throw new Error('KIT_SYNTHETIC_TYPECHECK'); }",
+      "await build({ absWorkingDir: root, entryPoints: ['src/index.ts'], outfile: 'lib/index.mjs', platform: 'node', target: 'node24', format: 'esm', bundle: true, logLevel: 'silent' });",
+      "const module = await import(pathToFileURL(join(root, 'lib/index.mjs')).href);",
+      "console.log(JSON.stringify({ typescript: ts.version, expected_typescript: pin.typescript, result: module.result }));",
+    ].join('\n') + '\n';
+    await writeFile(join(plugin, 'build.mjs'), builder);
+    const buildEnv = { ...env, B0_BUILD_UPSTREAM: upstream, B0_BUILD_TOOLS: tools, DSH_PACKAGE_INPUTS: immutable.directory };
+    const args = [join(plugin, 'build.mjs'), upstream, tools];
+    const result = JSON.parse((await exec(process.execPath, args, { cwd: plugin, env: buildEnv, timeout: 60000 })).stdout);
+    assert.equal(result.typescript, result.expected_typescript);
+    assert.deepEqual(result.result.stages.map(row => row.first_ratio), [1, .5]);
+    assert.deepEqual(result.result.stages.map(row => row.previous_ratio), [null, .5]);
+    const artifact = await readFile(join(plugin, 'lib/index.mjs'));
+    const bound = await readFile(join(plugin, 'node_modules/@shine-mage/board-components/lib/funnel.mjs'));
+    assert.deepEqual(bound, immutable.files.get('lib/funnel.mjs'));
+    // Both failures occur before replacing already produced bytes.
+    await writeFile(join(plugin, 'src/index.ts'), fixtureSource + "export const syntheticTypeError: number = 'invalid';\n");
+    await assert.rejects(exec(process.execPath, args, { cwd: plugin, env: buildEnv, timeout: 30000 }), /KIT_SYNTHETIC_TYPECHECK/);
+    assert.deepEqual(await readFile(join(plugin, 'lib/index.mjs')), artifact);
+    await writeFile(join(plugin, 'src/index.ts'), fixtureSource);
+    fixtureManifest.devDependencies['@shine-mage/dsh-plugin-kit'] = '0.2.0';
+    await writeFile(join(plugin, 'package.json'), JSON.stringify(fixtureManifest));
+    await assert.rejects(exec(process.execPath, args, { cwd: plugin, env: buildEnv, timeout: 30000 }), /KIT_VERSION_MISMATCH/);
+    assert.deepEqual(await readFile(join(plugin, 'lib/index.mjs')), artifact);
+    t.diagnostic('installed current kit: strict TypeScript, fixed domain binding, compiled public function and reject-before-overwrite guards PASS');
+  });
   if (upstreamIndex) assert.deepEqual(await readFile(inputRecord), upstreamIndex,
     'consumer build/test changed the pinned SDK identity record');
   assert.deepEqual(await readFile(join(kit, 'package.json')), repositoryManifest, 'manager trial changed repository kit');
