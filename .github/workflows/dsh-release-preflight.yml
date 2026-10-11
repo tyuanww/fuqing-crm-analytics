@@ -7,6 +7,14 @@ on:
       - 'scripts/release/**'
       - 'scripts/dsh.mjs'
       - 'scripts/dsh-b0/**'
+      - 'config/domain-author-evidence.lock.json'
+      - 'config/public-contract-inputs.lock.json'
+      - 'scripts/ci/public-contract-inputs*.mjs'
+      - 'scripts/ci/read-public-contract-inputs.py'
+      - 'scripts/ci/domain-author-evidence*.mjs'
+      - 'scripts/ci/read-domain-author-evidence.py'
+      - 'scripts/ci/workbench-author-evidence*.mjs'
+      - 'scripts/ci/read-workbench-author-evidence.py'
       - 'dsh-plugins/plugin-kit/**'
       - 'package.json'
   workflow_dispatch:
@@ -123,11 +131,47 @@ jobs:
           mkdir -p "$(dirname "$asset_rel")"
           mv "$asset_tmp" "$asset_rel"
           node --input-type=module -e "import { brandAssets } from './scripts/dsh-b0/brand-assets.mjs'; await brandAssets(process.cwd());"
+      - name: Receive fixed Workbench author core evidence
+        env:
+          GH_TOKEN: ${{ secrets.SHINEMAGE_PLUGIN_READ_TOKEN }}
+        run: |
+          node scripts/ci/workbench-author-evidence.mjs \
+            --output "$RUNNER_TEMP/workbench-author-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" \
+            --python "${{ steps.python.outputs.python-path }}" --github-env "$GITHUB_ENV"
+      - name: Receive fixed domain owner tests and original library input
+        env:
+          GH_TOKEN: ${{ secrets.SHINEMAGE_PLUGIN_READ_TOKEN }}
+        run: |
+          node scripts/ci/domain-author-evidence.mjs \
+            --output "$RUNNER_TEMP/domain-author-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" \
+            --python "${{ steps.python.outputs.python-path }}" --github-env "$GITHUB_ENV"
+      - name: Receive fixed independent public compiler contracts
+        env:
+          GH_TOKEN: ${{ secrets.SHINEMAGE_PLUGIN_READ_TOKEN }}
+        run: |
+          node scripts/ci/public-contract-inputs.mjs \
+            --output "$RUNNER_TEMP/public-contracts-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" \
+            --python "${{ steps.python.outputs.python-path }}" --github-env "$GITHUB_ENV"
+      - name: Prepare sealed independent plugin packs for composition checks
+        env:
+          GH_TOKEN: ${{ secrets.SHINEMAGE_PLUGIN_READ_TOKEN }}
+          PACK_REPOSITORY: ${{ vars.SHINEMAGE_PACK_ARTIFACT_REPOSITORY }}
+          PACK_ARTIFACT_ID: ${{ vars.SHINEMAGE_PACK_ARTIFACT_ID }}
+          PACK_ARTIFACT_SHA256: ${{ vars.SHINEMAGE_PACK_ARTIFACT_SHA256 }}
+        run: |
+          node scripts/ci/composition-pack-inputs.mjs \
+            --repository "$PACK_REPOSITORY" --artifact-id "$PACK_ARTIFACT_ID" \
+            --artifact-sha256 "$PACK_ARTIFACT_SHA256" \
+            --output "$RUNNER_TEMP/shinemage-composition-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" \
+            --python "${{ steps.python.outputs.python-path }}" \
+            --github-env "$GITHUB_ENV"
       - name: Build the exact pinned runtime before tag creation
         env:
           B0_PYTHON: ${{ steps.python.outputs.python-path }}
+          DSH_PYTHON: ${{ steps.python.outputs.python-path }}
         run: |
           set -euo pipefail
+          export DSH_PROFILE_PACK_INPUTS="$CRM_COMPOSITION_PAGE_INPUTS"
           node scripts/dsh.mjs preflight \
             --python "$B0_PYTHON" \
             --source-sha "$REVIEWED_SHA" \
