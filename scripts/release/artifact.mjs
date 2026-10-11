@@ -8,11 +8,12 @@ import { assertSchema, readSchema, validateSchema } from './schema.mjs';
 import { assertClean, scanTree } from './secret-scan.mjs';
 import { validateServiceGate } from './service-compatibility.mjs';
 import { validateProfile } from './profile.mjs';
+import { verifyReleasePackBinding } from './release-profile-packs.mjs';
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const scripts = join(root, 'scripts/release');
 const schemaDir = join(scripts, 'schemas');
-export const DEFAULT_ALLOWLIST = ['VERSION', 'package.json', 'pnpm-lock.yaml', 'scripts/dsh.mjs', 'README.md', 'CHANGELOG.md', 'AGENTS.md', 'DESIGN.md', 'Dockerfile', '.github/workflows/dsh-release-evidence.yml', 'backend/', 'frontend-vue3/', 'config/', 'knowledge/', 'mcp_servers/', 'dsh-plugins/', 'scripts/dsh-b0/', 'scripts/dsh-dev/', 'scripts/release/', 'deploy/wsl/', 'docs/release/', 'docs/operating/'];
+export const DEFAULT_ALLOWLIST = ['VERSION', 'package.json', 'pnpm-lock.yaml', 'shinemage-release-pack-inputs.json', 'scripts/dsh.mjs', 'README.md', 'CHANGELOG.md', 'AGENTS.md', 'DESIGN.md', 'Dockerfile', '.github/workflows/dsh-release-evidence.yml', 'backend/', 'frontend-vue3/', 'config/', 'knowledge/', 'mcp_servers/', 'dsh-plugins/', 'scripts/dsh-b0/', 'scripts/dsh-dev/', 'scripts/release/', 'scripts/ci/', 'scripts/crm-calibration/', 'deploy/wsl/', 'docs/release/', 'docs/operating/'];
 export const DENYLIST_VERSION = 'release-denylist/v1';
 const DENY = /(^|\/)(?:\.env(?:\.|$)|\.npmrc(?:$|\/)|credentials?(?:[-_.]|$)|private[-_]?key(?:[-_.]|$)|cookie(?:[-_.]|$)|node_modules(?:\/|$)|__pycache__(?:\/|$)|\.pytest_cache(?:\/|$)|\.ruff_cache(?:\/|$)|\.git(?:\/|$)|.*\.duckdb(?:\.wal)?$|.*\.sqlite(?:-wal|-shm)?$|.*\.log$)/i;
 
@@ -34,6 +35,9 @@ export async function collectAllowlist(rootDir, { allowlist = DEFAULT_ALLOWLIST,
       const path = join(dir, entry.name);
       const rel = relative(rootDir, path).split(sep).join('/');
       if (DENY.test(rel)) continue;
+      // Omitted source trees are outside the payload boundary. Do not inspect
+      // their entries (including aliases) while collecting a narrower allowlist.
+      if (!allowed(rel, allowlist) && !allowlist.some(prefix => prefix.startsWith(`${rel}/`))) continue;
       if (entry.isSymbolicLink()) throw new Error(`ALLOWLIST_SYMLINK ${rel}`);
       if (entry.isDirectory()) {
         const dirPrefix = `${rel}/`;
@@ -134,6 +138,9 @@ async function verifyReceivedTree(manifest, destination, { maxEntries, maxBytes 
 }
 
 async function verifyProfileBinding(manifest, directory) {
+  if (Object.hasOwn(manifest, 'profile_pack_snapshot')) {
+    await verifyReleasePackBinding({ directory, snapshot: manifest.profile_pack_snapshot, profileSnapshot: manifest.profile_snapshot });
+  }
   if (!manifest.profile_snapshot) {
     if (Object.hasOwn(manifest, 'service_compatibility')) throw new Error('SERVICE_PROFILE_SNAPSHOT_REQUIRED');
     return; // Historical releases have no D15 service declaration.
