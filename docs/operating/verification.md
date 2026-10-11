@@ -16,7 +16,7 @@
 | CI 接线与路径选择 | 实际 pipeline 坏输入 28 项、共享路径 pytest 34 项分别通过 | 非全量 pipeline，也不是远端 CI |
 | 静态边界 | 既有生成器核对通过、12 项边界测试通过 | 不代表运行时全面无源码依赖 |
 
-各组计数不相加。上述表保留分组源码检查范围，追加 worker 修复另按六文件 129 PASS、正常 hooks 当前完整后端 3237 PASS / 78 SKIP / 0 FAIL 记账；12 JUnit 没有重复。`de196938` 完整主仓 B0 `--check` exit 0，作者私有 core 归固定作者 CI，OCR 不调用外部模型。主仓已推送到 PR #119、main 祖先同步已完成；专用 Secret 实跑与四类私有 receiver 已通过，`fc46b243` 主 CI attempt 2 SUCCESS。后续 `f1f1d500` preflight 因 gh 的相对状态文件 FAIL，`f861a895` 修复定向 59 PASS；新 head 的 hosted 结果按实际 PR checks 核对。当前组合 candidate/journal、目标／真实业务与模型验收仍未执行。最新输入、修复和失败见[本轮接续](../hackathon/evidence/shinemage-pr119-ci-secret-reconnect-20261011.md)，此前成功与失败按原对象留存。
+各组计数不相加。上述表保留分组源码检查范围，追加 worker 修复另按六文件 129 PASS、正常 hooks 当前完整后端 3237 PASS / 78 SKIP / 0 FAIL 记账；12 JUnit 没有重复。`de196938` 完整主仓 B0 `--check` exit 0，作者私有 core 归固定作者 CI，OCR 不调用外部模型。主仓已推送到 PR #119、main 祖先同步已完成；专用 Secret 实跑与四类私有 receiver 已通过，`fc46b243` 主 CI attempt 2 SUCCESS。后续 `f1f1d500` preflight 因 gh 的相对状态文件 FAIL；`f861a895` 修复后，`fe7cc54d` hosted 的 git-clean、上游准备与 runtime 创建实际 PASS，随后扫描三处模拟值失败。`5102d7ad` 只修正测试值，相关单次合跑 83 PASS / 0 FAIL / 0 SKIP，scanner 不变；新 head 的 hosted 结果按实际 PR checks 核对。当前组合 candidate/journal、目标／真实业务与模型验收仍未执行。最新输入、修复和失败见[本轮接续](../hackathon/evidence/shinemage-pr119-ci-secret-reconnect-20261011.md)，此前成功与失败按原对象留存。
 
 本地 Git 交付先检查任务范围和暂存区；任务外 `security-audit-skill/` 不检查、不纳入提交，允许其独立留存。随后按实际授权推送 feature 分支、更新对应 PR，利用现有共享路径选择执行适用 CI；PR 审查修复以追加提交交付，获合并授权后完成适用 QA 和实际门禁。不要用旧文档 PR 的绿色结果替代新源码检查，也不要为“清洁”删除证据或改写共享历史。
 

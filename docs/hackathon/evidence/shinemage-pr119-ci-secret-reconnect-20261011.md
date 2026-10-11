@@ -22,6 +22,14 @@
 
 首次重试的完整后端与前端已通过，但因本轮遗漏创建 B0 独占输出根目录而被拒绝；这份 ENOENT 日志保留。补齐新的空目录与五份固定输入后，正常 push exit 0，无 hook 绕过；`4c28df71` 与 `f1f1d500` 已推送。该 head 完整后端 3237 PASS / 78 SKIP / 0 FAIL、12 JUnit 无重复；前端 build 与 29 文件 / 223 单测、完整本地 B0 `--check` 分别通过。作者 core 仍归固定作者 CI，不累计为本轮源实现测试。
 
+## 新 hosted 检查与测试值修正
+
+[preflight 38148388881](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38148388881) 对 `fe7cc54d` 实际输出 `git-clean=clean`，四类 receiver、上游准备、audit、固定包核对与离线 runtime 创建分别通过。CLI 状态副作用在该真实 runner 上已关闭。随后 release 扫描拒绝 composition/domain receiver 测试的两个 mock 值，以及 `workbench-asset-overlay.integration.mjs` 的模拟 HTTP 值，exit 2；没有正式 preflight 成功摘要，runtime 建好不等于发布通过。
+
+`5102d7ad` 只将这三处改成明确的短合成值。两份 gh 测试执行自有命令替身，overlay 使用 mock fetch；未使用真实 Token，也不改变生产凭据校验。原 scanner 与 allowlist 未修改，三个源文件在默认及严格 `scanText` 下均零命中；旧字节的三处命中保留。composition/domain receiver、模拟 overlay 和 release 测试单次合跑 83 PASS / 0 FAIL / 0 SKIP，包括真实密钥拒绝与副作用检查。新 head 的远端结果仍按实际 checks 核对，不继承 `fe7cc54d` 其他 CI 轴。
+
+原始 preflight 全日志为 `preflight-fe-secret-fixtures-failed-r1.log`；逐文件前后扫描、测试日志和主 Agent OCR delegate 审查分别为 `fixture-secret-scan-before-after-r1.json`、`fixture-secret-scan-tests-r1.log`、`ocr-fixture-secret-host-review-r1.json`。前三份新失败对象与旧失败均保留。
+
 ## 后续边界与留存
 
 真实组合 artifact `11704150412` 及其 SHA-256 未改，到期为 `2026-10-25T13:24:26Z`；Token 无到期不会延长 Actions artifact 的期限。到期后沿原流程实际上传固定输入、验证新 ID/digest，再更新变量。

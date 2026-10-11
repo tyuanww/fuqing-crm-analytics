@@ -11,7 +11,7 @@
 
 专用 `SHINEMAGE_PLUGIN_READ_TOKEN` 已配置，真实四类私有 receiver 均 PASS；`fc46b243` 主 CI attempt 2 已 SUCCESS，B0/merge-gate PASS。`4c28df71` 路径诊断和 `f1f1d500` SIGKILL 测试修正已正常推送，本地完整后端、前端和 B0 分别通过；不累计作者或历史计数。
 
-`f1f1d500` preflight 的后续失败已定位为 gh 写入 `.local/state/gh/device-id`。`f861a895` 已本地绑定现有独占临时状态目录，回归旧实现失败、修复后固定输入单次合跑 59 PASS / 0 FAIL / 0 SKIP；原干净工作区门禁保持。下一步核对追加提交后的实际 CI/preflight，再按单独合并授权走适用 QA 与门禁。见[本轮接续与失败留存](evidence/shinemage-pr119-ci-secret-reconnect-20261011.md)。无需重复配置已接通的 Secret。
+`f1f1d500` preflight 的后续失败已定位为 gh 写入 `.local/state/gh/device-id`。`f861a895` 绑定现有独占临时状态目录后，`fe7cc54d` hosted 的 git-clean、上游准备和 runtime 打包实际 PASS；随后密钥扫描拒绝三处测试模拟值。`5102d7ad` 只修正这些值，receiver／模拟 HTTP／release 单次合跑 83 PASS / 0 FAIL / 0 SKIP；扫描规则、权限与原断言未改，旧 59 项不累计。下一步核对新提交的实际 CI/preflight，再按单独合并授权走适用 QA 与门禁。见[本轮接续与失败留存](evidence/shinemage-pr119-ci-secret-reconnect-20261011.md)。无需重复配置已接通的 Secret。
 
 产品 PARTIAL、release_ready=false，原 peer/正式组合/真实业务/SDK stop/go 不变。以下缺 Secret 的描述保留此前准备时点，不覆盖本节。
 
