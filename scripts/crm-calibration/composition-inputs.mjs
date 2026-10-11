@@ -84,7 +84,7 @@ export async function loadComposition({ scope, page = false } = {}) {
       if (id !== PAGE) assert.equal(runtimeCordis?.version, cordis.version, 'CRM_COMPOSITION_CORDIS_RESOLUTION');
       return { id, tools: { version: tools.version, dir: tools.dir }, cordis: runtimeCordis ? { version: runtimeCordis.version, dir: runtimeCordis.dir } : null };
     });
-    const receipt = { schema: 'shinemage-pack-composition-inputs/v1', scope, verified, cordis: { declared: '4.0.2', runtime: cordis.version },
+    const receipt = { schema: 'shinemage-pack-composition-inputs/v1', scope, verified, cordis: { declared: '4.0.4', runtime: cordis.version },
       packages: installed, page_packages: installedPages ?? null, bindings,
       coverage: 'public contract composition with official resolver and synthetic HTTP fixtures',
       official_plugin_add: 'NOT_RUN', full_host: 'NOT_RUN', candidate_admission: 'NOT_RUN', real_business: 'NOT_RUN', release_ready: false };

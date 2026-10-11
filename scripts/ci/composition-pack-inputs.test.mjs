@@ -70,7 +70,7 @@ test('a valid pack cannot substitute another source SHA or version', async t => 
 
 test('profile drift and invalid domain peers fail before outputs or runtime startup', async t => {
   const f = await inputs(t, (manifest, domain) => {
-    if (domain === 'crm') manifest.peerDependencies['@deepseek-ai/cordis'] = '4.0.4';
+    if (domain === 'crm') manifest.peerDependencies['@deepseek-ai/cordis'] = '4.0.2';
   });
   await assert.rejects(prepareCompositionPacks(f), /CRM_COMPOSITION_CORDIS_PIN/);
   await assert.rejects(access(f.output), { code: 'ENOENT' });

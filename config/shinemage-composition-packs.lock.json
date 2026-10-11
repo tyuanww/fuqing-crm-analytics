@@ -23,16 +23,16 @@
     {
       "directory": "crm-knowledge",
       "id": "@shine-mage/dsh-crm-knowledge",
-      "source_sha": "c4b1c91eaa4fa645deb7951614c1937eb76db143",
+      "source_sha": "ceeff9965509a545cc1761091bca604b31c02285",
       "version": "0.0.0-crm.1",
-      "manifest_sha256": "4663cce02776fa68913a41829d8ca0712fa44bf1c7642844326d80de40af2158"
+      "manifest_sha256": "4be65420f929fface899fd48928dde4e444289bc428d46adeb3497a6bb5d9abc"
     },
     {
       "directory": "knowledge",
       "id": "@shine-mage/dsh-knowledge",
-      "source_sha": "94ef29fa6c39d3dc506fbc5ef734f0a7ea9eb2b0",
+      "source_sha": "22daa108bcf72cc80af28156ba1f6601fcfc00dc",
       "version": "0.0.0-candidate.1",
-      "manifest_sha256": "a674a2da0dcd317839c4f8d7766da62ced58eca9021222c6e3a238f80aa7df79"
+      "manifest_sha256": "1ce746b6593892f176fe7c259a8e3fbc52ca91ceb3e6a855a61589e43ce9ca49"
     },
     {
       "directory": "shine-board",
