@@ -6,7 +6,105 @@
 
 2026-09-13 用户确认“核心版本优先交付、扩库完善后置”。目标是问数后 AI 优先使用定制组件自由组板，板内按选定范围修改；首批六类不是最终上限。M1／产品仍 PARTIAL；原全量 App Goal 保持 PAUSED。本节承接原本地施工记录，不把旧冻结实现反推成最终需求。
 
+
+### 2026-10-11 主仓本地分组交付
+
+本轮本地 Git 子项已完成：104 个代码／配置／测试路径按 12 个完整目的提交，边界清单另 1 笔、94 份证据另 1 笔，当前 5 份说明最后 1 笔；不压扁为一个大提交。源码与边界 `d36c567e`、证据 `39774244`，目的和逐组结果见[本地交付索引](evidence/shinemage-main-local-commit-closeout-20261011.md)。原有 92 份证据和失败同字节留存，其他任务目录不混入。
+
+当前两锁已绑定 Workbench `6c5adc9f` 与 CRM `c4b1c91e`；默认固定包、公开合同、领域及作者 CI 消费和路径接线已提交。主仓保留平台合同／backend、组合与来源守卫、另两组旧 Workbench 断言及静态扫描，不删除旧副本。必要的当前字节检查逐组通过，本轮最终提交序列的全量 B0、新主仓 CI 和新 candidate/journal 未执行；不累计作者或历史计数。
+
+下一步是获实际授权后推送、更新对应 PR、执行受影响 CI，再按 PR 审查／合并前 QA 流程交付。精确 peer 校准、正式组合和目标验收、真实 CRM／WeKnora／模型、SDK 分发与独立 DSH 升级继续按原门禁；T1/T15/T19/T21 父任务不勾完，产品 PARTIAL、release_ready=false。
+
 ### 2026-10-11 主仓合并后接续
+
+以下段落保留本轮分组提交前各次施工状态；未提交／未应用结论不覆盖前一节当前本地交付。
+
+本轮三路径审修后已按授权应用：两个运行/作者锁绑定 Workbench `6c5adc9f`、CRM `c4b1c91e`，离线 eval 转由主仓执行并拒绝空集。OCR 3/3，无开放发现；实际 reader 13 PASS、三组 1/1/3 PASS 和 9 包/2 profile 准备各自通过，计数不相加。另两组仍依赖旧 Workbench；peer 校准、Git 交付、当前 candidate 与真实业务继续开放，不勾父任务。本轮未跑完整 B0/新 CI。见[审修及本地应用记录](evidence/shinemage-three-path-main-application-20261011.md)；下方未应用提案保留准备时点。
+
+主仓公共合同入口已按授权应用 12 路径，并修复重复终止进程组造成的错误覆盖；新入口隔离完整 B0 r2 exit 0：Python 855 PASS / 41 subtests PASS、23 warnings 保留，Node 27 组各自 0 FAIL / 9 次跳过。原 15 个生成器和 C0 hash 未改，主仓实际字节的守卫 28、路径 pytest 34、槽位 4、主题负测／漂移 2 分别通过，OCR 可审 11/11 与排除测试人工 1/1 已审，无开放发现。旧失败保留，主仓未提交，新 hosted CI 和当前组合准入未执行。见[本轮应用与实测](evidence/shinemage-public-contract-main-cutover-20261011.md)。
+
+最新作者 Workbench 6c5adc9f、CRM c4b1c91e 的正式 pack 已在隔离目录生成、读取并逐成员核对；回执分别为 0af61dab…、4663cce0…。主仓运行包／作者证据锁仍是原绑定，9 包／2 profile 的两锁前移提案已经验证但未应用；不继承旧 candidate/journal 或宿主验收。见[最新来源正式包及下一提案](evidence/shinemage-current-author-formal-packs-20261011.md)。产品 PARTIAL，SDK 分发 BLOCKED，release_ready=false。
+
+最新来源正式包的原公共组合已实际运行：9 PASS / 0 FAIL / 0 SKIP，18 个指定来源负对照 EPERM，运行前后 198 个受保护文件未变、自有进程组已退出；合成 HTTP 和官方 resolver 层级，不代表严格 peer／完整宿主或正式准入。两锁提案 OCR delegate 2/2 已审，无开放发现，主仓 apply --check exit 0，但仍未应用。主仓 PR #119 的已有 B0 是 SKIPPED，当前 dirty CI 未执行；见[本轮组合与两锁审查](evidence/shinemage-latest-formal-combination-20261011.md)。
+
+此前合同入口隔离提案准备时点（保留原记录）：
+
+主仓公共合同消费者已形成 12 路径隔离提案，尚未应用：固定三仓真实 CI 的 31 份材料，保留原 15 个生成器与 C0 hash；原生成器 15 次 exit 0，槽位 4 项、主题负测／漂移 2 项、守卫 28 项、路径 pytest 34 项分别通过，34 个指定来源负对照 EPERM。OCR 可审 11/11 与排除测试人工 1/1 已审，失败保留；提案对当前 dirty 基线 apply --check 通过。新主仓入口完整 B0／CI、candidate 与业务准入仍 NOT_RUN，旧副本及保留源码守卫不删。见[提案与真实日志](evidence/shinemage-public-contract-main-cutover-proposal-20261011.md)。
+
+此前合同作者交付时点（保留原记录）：
+
+三个作者仓的合同导出已提交推送，当前真实 Ubuntu PR CI 和 31 份工件来源均核对通过；Workbench/CRM 的 CI 字节码污染由单路径修复关闭，失败保留。原 15 个生成器在旧插件资料拒读下 15/15 exit 0，原槽位 4 项与主题负测/漂移 2 项各自通过，私有行为保留在作者检查。主仓新合同入口和锁尚未切换，旧副本与静态边界继续保留；不继承正式包、candidate/journal 或真实业务准入，PARTIAL / SDK 分发 BLOCKED / release_ready=false。 见[合同材料的实际作者交付](evidence/shinemage-generated-contracts-owner-delivery-20261011.md)。
+
+主仓领域默认入口已按授权应用完整 r2（18 路径）：以领域作者 `e78e040e` / 真实 Ubuntu PR CI `38121126913` 核对来源和实际覆盖，保留三份显式 legacy，不再在此阶段重建领域源码或执行私有几何。已应用 r2 的隔离完整 B0 r4 exit 0，Python 855 PASS / 41 subtests PASS（23 warnings 保留）；Node 26 组各自无失败，9 次跳过保留原因。前三轮缺输入与预检 PATH 失败原样保留；随后仅清理两份文件末尾空行，语法和差异检查通过。主仓还有 15 个源码合同生成入口、保留合同/缺输入守卫及静态边界扫描，旧副本不删；新主仓 CI、当前候选/真实业务未执行，代码文档未提交，PARTIAL / SDK 分发 BLOCKED / release_ready=false。见[本轮应用与完整验证](evidence/shinemage-board-components-main-cutover-20261011.md)。
+
+此前 Workbench 几何对接时点（保留原记录）：
+
+Workbench 几何接续的正式输入与三路径已本地完成：`e9223289` → 真实 CI 155 文件 / 1086 PASS → 新正式回执 `871fd3bb…` → 两份当前锁 → 主仓作者覆盖入口。应用后 reader 13 项、几何 1 项分别通过，九包准备和实际绑定 exit 0；旧身份/CI及漏几何重封存负测被拒绝。只关闭该本地对接子项，不勾父任务；领域生产者、剩余源码合同、最新完整 B0/主仓 CI、当前候选与真实业务仍开放，主仓未提交。见[本轮对接](evidence/shinemage-workbench-geometry-main-bind-20261011.md)。
+
+
+上一轮领域作者交付与迁移提案准备时点（保留原记录）：
+
+主仓领域生产者迁移前置的作者 CI 回执已交付：五路径提交 `e78e040e`、PR #1 当前 Ubuntu CI `38121126913` SUCCESS，守卫 5/几何 28/producer 6/准备 4 分别通过；实际 artifact 来源与原封存输入已绑定。主仓旧 producer/私有测试尚未迁移，锁保持，不勾父任务。见[实际归属交付](evidence/shinemage-board-components-ci-ownership-delivery-20261011.md)，[此前提案](evidence/shinemage-board-components-ci-ownership-proposal-20261011.md)保留时点。 下一步已形成[18 路径完整隔离提案](evidence/shinemage-board-components-main-cutover-proposal-20261011.md)：公开消费 8 项、证据守卫 15 项、保留合同 2 项和路径参数 3 项各自通过，21 个指定来源负对照 EPERM；OCR 可审 17/17 与排除测试的人工审查完成。r2 补丁对当前主仓 --check 通过，尚未应用，完整 B0/新主仓 CI 未执行；此前四路径读取提案保留准备时点，不叠加。
+
+board-components 远端 Git/CI 子项已交付：私有仓默认 main 为 `3855db80`，文档提交 `d5aacdb4` 的 PR #1 OPEN；真实 Ubuntu PR CI `38119670295` SUCCESS，几何 28、producer/输入 6、准备守卫 4 分别通过。下载包 1951 字节 `66d53381…` 与原封存五个成员相同，但外层摘要不同；主仓锁不改。旧生产者防覆盖的两源码增量本地 13 PASS、OCR delegate 2/2 已审，尚未提交。主仓生产者迁移、合并和正式组合准入仍开放，不勾父任务。见[远端交付](evidence/shinemage-board-components-remote-ci-20261011.md)、[本地守卫修复](evidence/shinemage-board-components-main-output-guard-20261011.md)。
+
+上一轮领域本地 Git/clone 交付时点（保留原记录）：
+
+board-components 本地 Git/clone 子项已完成：首次提交 `3855db80` 正好 28 路径，真实 clone 的离线安装、构建和普通内容包通过；producer/输入 6、几何 28、准备守卫 4 各自记账，17 项负对照 EPERM。远程仓/CI 与主仓领域生产者迁移仍开放，不勾父任务、不把普通内容包当正式插件准入。见[领域 Git 交付](evidence/shinemage-board-components-owner-git-delivery-20261011.md)。
+
+上一轮领域提案准备时点（保留原记录）：
+
+board-components 本地 owner 提案已准备：28 产品路径、原计算/类型/夹具保持，28 项几何与 5 项 producer/输入各自通过，最终包管理器准备守卫 4 项通过；1955 字节输出仍为 `22245ab9…`。Git/clone/远端 CI、主仓领域生产者迁移未执行，NOT_IN_CURRENT_BUILD 的 tsc 不改口径。见[领域提案](evidence/shinemage-board-components-owner-proposal-20261011.md)，不关闭整个 T15/T19。
+
+默认四插件源码隔离已本地迁为固定正式归档的独立接收。业务源码、作者仓、固定上游/build-tools 不可读时 4 PASS / 0 FAIL / 0 SKIP，20 项负对照 EPERM；既有公共包行为另跑 29 PASS / 0 FAIL / 0 SKIP，固定 SDK 和合成 HTTP 的范围单列，不相加、不抵扣 Cordis 严格 npm 冲突。六项坏输入与 pipeline 已有输出拒绝通过原始结果核对。原四源码夹具逐字节保留为显式 legacy，本轮 NOT_RUN；领域生产者、私有几何投影、其余源码合同、最新完整 B0/CI、当前 candidate/journal、目标/真实业务与发布仍开放，不勾父任务、不删除旧副本。见[本轮隔离迁移](evidence/shinemage-fixed-pack-isolation-20261011.md)。
+
+上一轮执行记录（installed-kit 默认迁移；历史隔离当时尚未关闭）：
+
+installed-kit 默认十源码构建已本地迁到真实 kit 安装、自有严格编译夹具和固定正式包消费者；九份主仓源码及九个作者仓拒读条件下同次 13 PASS / 0 FAIL / 0 SKIP，18 个负对照均 EPERM。相邻合同 24 PASS 另记，五项坏输入及 pipeline 已有结果目录拒绝均保留原日志。原十源码夹具逐字节留为显式历史入口，本轮 NOT_RUN；领域生产者、历史隔离及剩余源码合同和旧副本继续开放，不勾父任务。本轮完整 B0、新 hosted CI、当前 candidate/journal、服务/目标/browser/真实业务与发布未执行，主仓改动未提交，SDK BLOCKED / PARTIAL / release_ready=false。见[本轮 kit 迁移](evidence/shinemage-installed-kit-pack-ownership-20261011.md)。
+
+上一轮执行记录（正式 preflight 包装配；下列验证只覆盖该轮字节）：
+
+正式 preflight/release 的插件装配子项已本地迁到固定正式包；七包实际装配、20 项源码拒读负对照通过。release 539 PASS、最终 workflow 41 PASS、路径/runner 82 PASS 按执行分别记账，不能累加。只读 preflight 的包输入通过，整体仍被未提交工作树及缺 runtime bundle 阻断；完整 preflight、本轮最新完整 B0、新 CI、当前 candidate/服务/目标/browser/真实业务与发布仍开放。installed-kit 及历史源码夹具和旧副本未删，不勾父任务；SDK BLOCKED / PARTIAL / release_ready=false。见[本轮包装配记录](evidence/shinemage-formal-preflight-pack-assembly-20261011.md)。
+
+上一轮执行记录（Workbench core 归属迁移；其完整 B0 只覆盖当时字节）：
+
+Workbench `d038f357` 完整 core Git/CI 已交付，并生成自己来源的正式 pack 回执 `9d7f6bf3…`；tarball `e41df9f5…` 与前轮同字节，组合锁 `89e2b2ea…` 只前移 Workbench 行。主仓常规 core/构建/私有 loader/clean rebuild 已消费固定作者 CI 证据，原三组业务合同仍维护；新完整本地 B0 r3 exit 0，Python 855 PASS / 41 subtests PASS、Node 24 组无失败，9 次 opt-in 跳过和 warnings 保留；路径/runner/workflow 82 PASS 单独记录。主仓改动未提交，新 hosted CI、installed-kit 与 formal preflight 源码路径、当前 candidate/journal、服务/目标/browser/真实业务及发布仍开放，不勾父任务。见[本轮接续](evidence/shinemage-workbench-core-formal-main-ownership-20261011.md)。
+
+以下接续段保留较早执行时点；其中旧来源、未执行和未提交结论按各自证据对象理解，当前入口与身份以本节最前面的最新记录为准。
+
+精确 Cordis `4.0.4` 的隔离修订普通包现已通过官方 npm 宿主的开启、原生关闭、恢复三进程验证：原生鉴权、合成会话保留、关闭时 CRM 路由 404、恢复后 200 且未连接。新 home/workspace、localhost 沙箱及自有进程清理均核对；旧正式包、原作者仓和 candidate/journal 不变，不能抵扣真实服务/模型或正式准入。不勾父任务；见[修订包宿主证据](evidence/shinemage-corrected-npm-host-20261011.md)。
+
+精确 Cordis 校准提案已在隔离副本验证：CRM/Knowledge `4.0.4` 的作者严格构建和本包测试、主仓配套守卫 41 项、普通 npm 严格锁/实际安装及四入口导入通过。原作者仓/正式包/输入锁仍未改，提案未应用，不勾父任务；先按 owner 授权校准并交付干净新提交/包，再接主仓守卫。见[本轮提案](evidence/shinemage-cordis-exact-proposal-20261011.md)。
+
+Cordis 兼容子项进一步定位为严格声明冲突：官方固定 DSH/dsh-tools 要求 `~4.0.4`，两份独立正式包要求精确 `4.0.2`，三个 npm 锁解析均 ERESOLVE 拒绝。linked 初始化不抵扣严格普通安装；r1 TLS 失败和 r2 包装分类错误保留，原日志 readback 核对后不重跑。原 peer 未改，不勾父任务；后续需 owner 合同修订、新干净提交与同包验收，见[当前证据](evidence/shinemage-cordis-strict-peer-20261011.md)。
+
+当前迁移字节的完整本地 B0 已实际跑到结束：r2 exit 0，Python 855 PASS、41 subtests PASS；Node 23 组无失败、十次跳过按本次执行原因保留，不抵扣真实验收。r1 生成清单过期失败留存，既有生成器同步清单/说明后通过，不放宽 policy。独立 B0 Python 按原锁准备，系统环境、作者八文件和封存包/candidate/journal不改。只关闭当前本地 B0 验证子项，不勾父任务；源码阶段迁移、新 hosted CI、当前候选与真实业务仍开放，本轮未提交，见[回执](evidence/shinemage-current-b0-closeout-20261011.md)。下方此前步骤的 NOT_RUN 保留为当时事实。
+
+主仓 profile 测试归属已迁到 `scripts/crm-calibration/profile.test.mjs`，原五项断言正文同字节，CRM 旧入口只做兼容转发。默认 B0 的实际三入口组合在源码拒读下 14 PASS，已含五项 profile；兼容入口同样五项另记，五份负对照 EPERM，不重复累加、不勾父任务。未改作者仓、正式包或 candidate/journal，本轮未提交；完整 B0、新 CI、Workbench 源码阶段及历史副本仍开放，见[本轮记录](evidence/shinemage-main-profile-test-ownership-20261011.md)。
+
+CRM/Knowledge 的默认两项源码构建已本地迁为正式包公开行为消费：原断言不变，源码拒读下 11 PASS；相关守卫 67 PASS、原公共组合 9 PASS，分层记账。作者私有 transport/graph/relay 四文件与独立仓同字节并归作者 CI；原历史入口和缺输入守卫不删。坏输入/复用六项及源码负对照六项通过，首次夹具布局失败保留；本轮未提交，不勾父任务。完整 B0、新 CI、Workbench 源码阶段和当前 candidate 仍开放，见[本轮记录](evidence/shinemage-crm-knowledge-package-consumers-20261011.md)。
+
+CRM/Knowledge 两份固定正式包已完成官方 add、实际 `4.0.4` 解析导入和宿主/preset 初始化补查，宿主接续六项通过；peer `4.0.2` 未改，linked 警告与 r1 清理错误保留。这里只关闭安装/初始化子项，声明正确性、完整运行兼容、当前 candidate 与真实业务仍开放，不勾父任务。产品/包/journal 无新字节，文档未提交；见[本轮证据](evidence/shinemage-crm-knowledge-host-compat-20261011.md)。
+
+Workbench 的六个既有作者入口已接入独立仓包测试：在 loader/skills/query-skills/独立视图后补入 native-board-auth 和 lane-g。完整作者入口同次 30 文件、212 PASS / 0 FAIL / 0 SKIP，已包含新两文件的 8 项，边界 5 PASS 另记；原测试与 helper 未改，固定输入沿用前轮锁。未运行新 hosted CI，也未提交。主仓七个旧生产者入口仍保留，后续按作者仓干净提交和 CI 交付切走重复执行，不勾父任务、不删副本、不抵扣正式候选或真实业务；当前见[作者测试补齐](evidence/shinemage-workbench-author-tests-closeout-20261011.md)，此前 204 项保留在[历史四入口](evidence/shinemage-workbench-producer-ownership-20261011.md)。
+
+原生 prompt 严格注入消费已迁到正式包，10 项原检查源码拒读通过；九入口一次实跑 66 PASS，输入/九 scope 守卫 18 PASS，分层记账不勾父任务。原正文与断言保留，剩余 compiled producer 为七入口，完整 B0/宿主及旧副本清理仍开放；本轮未提交，见[消费记录](evidence/shinemage-workbench-native-prompt-pack-20261011.md)。
+
+编译客户端运行检查继续迁到正式包，八入口共 56 PASS，含前轮 12；相关输入与回归 105 PASS，源码专用四项另行通过。原断言保留，合成数据不复制业务 decoder/gateway。Host/私有视图及剩余源码阶段仍开放，不勾父任务、不清理旧副本；本轮实现和证据未提交，见[接续记录](evidence/shinemage-workbench-consumer-contracts-20261011.md)。
+
+Workbench 发布客户端的 12 项 factory/生命周期检查已迁到主仓固定包消费入口，源码拒读下全部通过；新增 9 项守卫及既有回归共 97 PASS，分别记账，不勾父任务。原 Host 入口正文保留；其余私有源码阶段、正式候选、远端新 CI 和旧副本清理仍开放。代码与证据未提交；见[客户端消费证据](evidence/shinemage-workbench-client-pack-migration-20261011.md)。
+
+最新迁移：六个叶子插件的默认常规构建/消费已转为独立正式包。主仓消费原包的品牌/槽位、能力标记、几何和公开类型，在源码拒读条件下 20 PASS / 0 FAIL / 0 SKIP；输入及既有回归 88 PASS，分别记账。历史作者输入守卫、源码隔离夹具和 Workbench/CRM/知识源码阶段仍在，默认 B0 并未完全迁移；完整 B0、远端新 CI、当前候选验收和旧副本清理仍开放。代码/证据未提交，不勾父任务；见[叶子包迁移](evidence/shinemage-leaf-pack-migration-20261011.md)。
+
+当前补充：主仓固定包准备入口和三个 CI 工作流已接线；实际九份包的目录/ZIP 准备和三项输入导出通过，准备后的公共合同组合 9 PASS，包/profile/输入守卫 54 PASS，tooling 189 PASS，分别记账。专用读取 secret 和三项 artifact 定位变量仍缺，ZIP 未上传、新 hosted CI 与完整 B0 未跑；不勾完父任务、不删除旧副本。见[本轮接续](evidence/shinemage-ci-pack-inputs-20261011.md)。
+
+检查续跑：ZIP 普通/`-O` 拒绝行为已验证；前端构建与 223 项单测、release 回归 41 项通过。backend 的 298 个既有 synthetic 目标由互不重叠成功组覆盖，唯一用例 3223 PASS / 78 SKIP / 0 FAIL；三次环境失败保留，服务隔离 Python 按原 pin 准备，不改包/SDK。该结果不关闭完整 B0、远端 CI、依赖/Docker 或候选门禁，不勾父任务；实现、证据及当前说明仍未提交。
+
+最新补充：九项 CRM／知识/page tools 公共合同组合已用独立正式包在源码拒读、localhost 环境通过，实际 Cordis `4.0.4`，peer 声明不改；47 项守卫和 78 项旧夹具兼容分别通过。组合测试维护正文与合成夹具已移到主仓验收目录；旧入口保留兼容。这里只关闭公共合同子项，完整官方宿主、候选准入、默认源码 pipeline、CI 输入接通和其他组合入口仍开放。代码/证据未提交，见[固定包组合记录](evidence/shinemage-fixed-pack-composition-20261011.md)。
+
+补充接续：CRM/知识 profile 生成器已本地支持固定正式包输入，并用现有 `crm-knowledge-rc2` profile、独立仓 CRM/知识两包完成源码拒读、禁网和防覆盖实测；38 项合同回归及 58 项 release 回归分别通过。只关闭配置准备子项，完整运行组合、整体 Cordis 兼容、正式 candidate/目标/浏览器及旧副本清理仍开放，不勾完父任务。见[本轮包输入记录](evidence/shinemage-crm-profile-pack-migration-20261011.md)。本轮新增实现和证据尚未提交。
+
+当前本地接续：PR #119 与九个插件 PR #1 的远端当前提交适用 CI 已成功，仍待合并。主仓 HEAD `5390667c` 上的固定包开发入口迁移和 pnpm 选择修复，以及 Workbench 作者仓的两个缺失运行 peer 与构建守卫，均未提交。原七包官方安装/配置生成通过，原 Workbench 宿主导入失败；补齐 peer 后的独立诊断完成开启、原生关闭、恢复及合成会话持久化，不抵扣正式候选验收。Workbench 本地 Linux 严格构建及 196 项包测试、主仓 114 项定向开发回归通过。下一步先审查并按授权提交修复，再从干净新提交生成新的正式包和身份链；live CLI reload、默认源码 pipeline、CRM/Knowledge 完整组合、当前候选服务/目标/浏览器/正式回退及真实业务仍未关闭。candidate `591134e8…` / journal seq 3 未改。见[宿主修复证据](evidence/shinemage-official-pack-host-closeout-20261011.md)及[此前准备证据](evidence/shinemage-profile-pack-migration-20261011.md)，不勾完父任务，不删除旧副本，SDK BLOCKED / PARTIAL / release_ready=false 保持。
 
 PR [#111](https://github.com/tyuanww/fuqing-crm-analytics/pull/111)、文档收口 PR [#112](https://github.com/tyuanww/fuqing-crm-analytics/pull/112)、post-merge 文档 PR [#113](https://github.com/tyuanww/fuqing-crm-analytics/pull/113)、post-merge r2 文档 PR [#114](https://github.com/tyuanww/fuqing-crm-analytics/pull/114)、清理状态文档 PR [#115](https://github.com/tyuanww/fuqing-crm-analytics/pull/115)、事实修订 PR [#116](https://github.com/tyuanww/fuqing-crm-analytics/pull/116)、并行收口审计 PR [#117](https://github.com/tyuanww/fuqing-crm-analytics/pull/117) 和主线事实同步 PR [#118](https://github.com/tyuanww/fuqing-crm-analytics/pull/118) 均已合并；当前远端主线为 `4859d136`，完整 SHA 和最新 post-merge CI 见[远端事实记录](evidence/shinemage-remote-repository-postmerge-r4-20261011.md)。PR #118 合并后的 `main` CI run `38066459376` 中 `changes`、`test`、`lint` 和 `merge-gate` 通过，不适用路径保持 skipped。**PR #111 的**最终 preflight、B0、全量测试、前端、lint、依赖审计、合同检查、Docker smoke 和 merge-gate 均通过，`ground-truth-lint` 按既定条件跳过；`open-code-review-delegate` 对应 PR #111，已覆盖 403/403 个可审文件，发现的 2 个 High 与 1 个 Medium 已修复并复验。SDK 分发仍 BLOCKED，产品仍 PARTIAL，release_ready=false；发布、部署和正式分发仍未执行。
 
