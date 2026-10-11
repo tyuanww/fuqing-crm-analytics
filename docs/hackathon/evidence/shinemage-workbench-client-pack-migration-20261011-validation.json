@@ -1,0 +1,133 @@
+{
+  "schema_version": "shinemage-workbench-client-pack-migration-evidence/v1",
+  "baseline_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "raw_root": "/Users/hutou/.codex/tasks/shinemage-workbench-client-pack-20261011-93e6if5u",
+  "platform": "darwin/arm64",
+  "node": "24.19.0",
+  "python": "3.14.4",
+  "dsh": "0.1.7-rc.2",
+  "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+  "document_sha256": "7b9f7685c99578012cd43c50bf79bda012145f3282b389d2b04846448c093123",
+  "product_files": {
+    "scripts/dsh-b0/workbench-client-pack-inputs.mjs": "bd78dde9bab615e5396312b7d353e81f20c269ebc014cb51498677462fb8d152",
+    "scripts/dsh-b0/workbench-client-pack-inputs.test.mjs": "0bda1ac3686f747beed902f07c0c468f2cf56cce086eb4d2772ffe4c6e580b6c",
+    "scripts/dsh-b0/workbench-client-pack.integration.mjs": "d18c10eb3013917bc63f5f0484b2403eed0d770be04f46d82e62030198e66e19",
+    "scripts/dsh-b0/pipeline.mjs": "089de83ab15e5a0e9be0a339dfa28a8925a77aeb502126f603a01eee080fda13",
+    "scripts/crm-calibration/test-support/formal-packs.fixture.mjs": "70138e15bce00f10b855e25834406ce4ef5336aabc244110b7c283c2c3c23ef1",
+    "dsh-plugins/analytics-workbench/test/built.test.mjs": "27d23bc8837289f9a6f3dbcdd60e58621fa2fd65db4ce20db54b57e73d38c19a",
+    "dsh-plugins/analytics-workbench/test/plugin-ui-lifecycle.test.mjs": "9408fece215f1f97f9e18b6fc5df24bee8d3fe39312544ed68aaddc5c5ff9b84"
+  },
+  "consumer": {
+    "command": [
+      "/usr/bin/sandbox-exec",
+      "-f",
+      "/Users/hutou/.codex/tasks/shinemage-workbench-client-pack-20261011-93e6if5u/source-deny-loopback.sb",
+      "/Users/hutou/homebrew/opt/node@24/bin/node",
+      "--test",
+      "--test-concurrency=1",
+      "scripts/dsh-b0/workbench-client-pack.integration.mjs"
+    ],
+    "exit_code": 0,
+    "seconds": 1.3279420412145555,
+    "env": {
+      "PATH": "/Users/hutou/homebrew/opt/node@24/bin:/Users/hutou/homebrew/opt/python@3.14/bin:/Users/hutou/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+      "HOME": "/Users/hutou/.codex/tasks/shinemage-workbench-client-pack-20261011-93e6if5u/home",
+      "TMPDIR": "/Users/hutou/.codex/tasks/shinemage-workbench-client-pack-20261011-93e6if5u/tmp",
+      "B0_BUILD_UPSTREAM": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2",
+      "B0_BUILD_TOOLS": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/plugin-kit/build-tools",
+      "FQ_B0_PYTHON": "/Users/hutou/homebrew/opt/python@3.14/bin/python3.14",
+      "CRM_COMPOSITION_PACK_INPUTS": "/Users/hutou/.codex/tasks/shinemage-leaf-pack-migration-20261011-mzjlgkh0/prepared-r1/crm-inputs.json",
+      "CRM_COMPOSITION_PAGE_INPUTS": "/Users/hutou/.codex/tasks/shinemage-leaf-pack-migration-20261011-mzjlgkh0/prepared-r1/page-inputs.json",
+      "CRM_COMPOSITION_OUTPUT": "/Users/hutou/.codex/tasks/shinemage-workbench-client-pack-20261011-93e6if5u/runs-r1"
+    },
+    "log": "/Users/hutou/.codex/tasks/shinemage-workbench-client-pack-20261011-93e6if5u/consumer-r1.log"
+  },
+  "results": {
+    "published_client": {
+      "pass": 12,
+      "fail": 0,
+      "skip": 0,
+      "exit": 0
+    },
+    "contracts": {
+      "pass": 97,
+      "fail": 0,
+      "skip": 0,
+      "exit": 0,
+      "includes_previous_88": true,
+      "new_guards": 9
+    },
+    "boundary": {
+      "denied": 21,
+      "allowed": 3,
+      "exit": 0
+    },
+    "existing_output": {
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-workbench-client-pack-20261011-93e6if5u/source-deny-loopback.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "--test",
+        "--test-concurrency=1",
+        "scripts/dsh-b0/workbench-client-pack.integration.mjs"
+      ],
+      "exit_code": 1,
+      "reason": "EEXIST",
+      "receipt_sha256_before": "097f0cbe2d8eb06684df367a67f10ba5c2f01d5e33b1f9cc53b98feb647bc34f",
+      "receipt_sha256_after": "097f0cbe2d8eb06684df367a67f10ba5c2f01d5e33b1f9cc53b98feb647bc34f"
+    },
+    "assertion_retention": {
+      "producer_host_test_body_unchanged": true,
+      "lifecycle_test_bodies_preserved": true,
+      "lifecycle_tests": 11,
+      "browser_factory_tests": 1,
+      "added_factory_id_guard": true,
+      "added_jsdom_close": true
+    },
+    "first_guard_failure": {
+      "pass": 8,
+      "fail": 1,
+      "exit": 1,
+      "reason": "wrong expected error code; real pack reader correctly refused SDK drift"
+    }
+  },
+  "runtime_receipt_sha256": "097f0cbe2d8eb06684df367a67f10ba5c2f01d5e33b1f9cc53b98feb647bc34f",
+  "candidate_changed": false,
+  "journal_changed": false,
+  "full_b0": "NOT_RUN",
+  "full_host": "NOT_RUN",
+  "browser": "NOT_RUN",
+  "hosted_ci": "NOT_RUN",
+  "real_business": "NOT_RUN",
+  "sdk_distribution": "BLOCKED",
+  "product_status": "PARTIAL",
+  "release_ready": false,
+  "git_actions": [],
+  "raw_files_sha256": {
+    "consumer-r1.log": "a0ade9b896aed79ad13e2742ffbe652321d2e8053f9d5e5212869d6668bfae69",
+    "consumer-r1.json": "e3bb9dd4740726602031f0e6047ed84013e51b902e48267e44a5844c5a7b2a97",
+    "guards-r1.log": "0f015b764f4b3ccc7739f9986c1df40e3d4a858974011bd6c4a927a304582c45",
+    "contracts-r2.log": "a3823ad9845d777c8013f48c0f930f6b2753f4835fc08d967436a5063bfa70a7",
+    "boundary-probe-r1.json": "07e10cac540ccc57281487f25c24c146a1e0a1b1d55750486f3bc0fa8056b2de",
+    "consumer-r2-existing.log": "f5d0c85d5bf91cb76a30256b33167e555dd3a3eae6a1f9f9c83944106e76b2fb",
+    "consumer-r2-existing.json": "938fee58f573f1170e69015a6255e985363e72ffd74992dbb54eda11468d48ab",
+    "assertion-retention-r1.json": "af4b2d97773b73ff743139601d5983d21c2c036f6f0324b778735a83d045b832",
+    "readback-r1.json": "194c90f218aa8f6f1f1bdcc9690dcfad3cd074d14c84fc8d9c281d76b10fc478",
+    "document-links-r1.json": "4906b7639f454a7430b10e0dd35f4ac51c02e44c2cae2fb33fa3373ab54d0abb"
+  },
+  "inheritance": {
+    "files": 53,
+    "unchanged": 46,
+    "changed": [
+      "STATUS.md",
+      "docs/architecture/shinemage-plugin-platform.md",
+      "docs/hackathon/TODOS.md",
+      "docs/operating/shinemage-plugin-update.md",
+      "docs/operating/verification.md",
+      "scripts/dsh-b0/pipeline.mjs",
+      "scripts/crm-calibration/test-support/formal-packs.fixture.mjs"
+    ],
+    "unexpected_changes": []
+  }
+}

@@ -1,0 +1,650 @@
+{
+  "schema": "shinemage-board-components-owner-proposal/v1",
+  "created_at": "2026-10-11T05:56:02.090124+00:00",
+  "source_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "author": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/board-components",
+  "files": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "bytes": 2976,
+      "sha256": "45eb708b00ee5ccc3e0078a103a14b0f4518ed8a14375fe4ecc9f2c425f2bbbd"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 50,
+      "sha256": "3c61acf2d6a76ccb1f0749f1b7d22b4eb096b9ed6c8759851e743dda3cbb6f86"
+    },
+    {
+      "path": "DEVELOPMENT.md",
+      "bytes": 2450,
+      "sha256": "a7f246c8440a8e1d42d20ebb06fae46c7f314bdfe10b58c59a8ea35896108e06"
+    },
+    {
+      "path": "README.md",
+      "bytes": 1424,
+      "sha256": "648ca54abbd51f4cd472d76e373168941923d1ef206459f323de3997ccccae4e"
+    },
+    {
+      "path": "inputs/ci/pnpm-input.lock.json",
+      "bytes": 342,
+      "sha256": "cb323815899a0cc91197eeeb78784851fe8e5c85e390ddb7ba2b80434b802f9b"
+    },
+    {
+      "path": "inputs/reference/lock.json",
+      "bytes": 491,
+      "sha256": "47d92f4e401b42b69371666decc3e3ef8116fce6342cbfe220b17f826bf31704"
+    },
+    {
+      "path": "inputs/reference/shine-mage-board-components-0.1.0.tgz",
+      "bytes": 1955,
+      "sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182"
+    },
+    {
+      "path": "library/build.mjs",
+      "bytes": 3283,
+      "sha256": "cc527902abe712bef9529d7e71ba672afcc038e19c3d6fcdfa63fe7a800ab500"
+    },
+    {
+      "path": "library/package.json",
+      "bytes": 702,
+      "sha256": "c82cc3af5ee76e88a80846ff0108dd2758dfd0c77c81205530e834897d8464d8"
+    },
+    {
+      "path": "library/src/funnel.d.mts",
+      "bytes": 239,
+      "sha256": "30c157c4cefc1ad5f8182e65af5777f39fcfd473987e1eabc47553f2f3d3c455"
+    },
+    {
+      "path": "library/src/funnel.mjs",
+      "bytes": 1660,
+      "sha256": "aebd9f3cdecc93a30b21d18cd554d5e01adfc17cdedc93e7a188ac0f48244dec"
+    },
+    {
+      "path": "library/src/waterfall.d.mts",
+      "bytes": 341,
+      "sha256": "34b0be969c2f73b3dd1a7633b2e953c74bd5b12c80ed978ac3be0d51ee4a2210"
+    },
+    {
+      "path": "library/src/waterfall.mjs",
+      "bytes": 2308,
+      "sha256": "63aa6dc6010bd7cfe906f5184c395be0771568d40d471bf3184fe0d9ded53b98"
+    },
+    {
+      "path": "library/test/funnel-cases.json",
+      "bytes": 887,
+      "sha256": "f0ccf562b7a8531290b3328abc57f37b882fcec50a287606c45f80c1b830092f"
+    },
+    {
+      "path": "library/test/geometry.test.mjs",
+      "bytes": 2142,
+      "sha256": "32cbeedd833193821299cee4419b7f28403e524af25a985f52c1c3c35c913b73"
+    },
+    {
+      "path": "library/test/waterfall-cases.json",
+      "bytes": 2355,
+      "sha256": "660951cac597064a367c9f5cec8127c4da0204842bdee04f81beceeabb488c1c"
+    },
+    {
+      "path": "package.json",
+      "bytes": 416,
+      "sha256": "9c5517a548dae3d89e2ca65f34fc4a163af7ef84bd7cb7f1aa825a4e2aab3e63"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "bytes": 661,
+      "sha256": "3a0b5caad655452bc55b7131b998db78822a31d83953939acd89b85a4b907fb2"
+    },
+    {
+      "path": "scripts/build-input.test.mjs",
+      "bytes": 1570,
+      "sha256": "0371134757c24a731df1292b632ec6b491ee57af93af58de496d101035f29c43"
+    },
+    {
+      "path": "scripts/check-inputs.mjs",
+      "bytes": 1593,
+      "sha256": "370319e91bad873a9722693888c0422c661faa362ce7f8b17e0aa303a4d1d52f"
+    },
+    {
+      "path": "scripts/ci/preparation-guards.test.py",
+      "bytes": 3298,
+      "sha256": "b919bd4e1c3f5295af6f6eea4c43d4f8045ad159bdd6f11562d2787d11923ad5"
+    },
+    {
+      "path": "scripts/ci/prepare-pnpm.py",
+      "bytes": 4011,
+      "sha256": "6b7923bdfbab85e8871b6346f9e152f8198e2e67450b4f9cacf0f5ff1bdac0ef"
+    },
+    {
+      "path": "scripts/pinned-pnpm.mjs",
+      "bytes": 2017,
+      "sha256": "bb9984f82fd34a7e120f101efa2d6eabc88c4109c873aefa0dc6c60fe6920f3a"
+    },
+    {
+      "path": "scripts/producer.test.mjs",
+      "bytes": 5024,
+      "sha256": "530f34d3fff678ccd7b95a82e1e331109a9282b8a00a4f380be3d1b676c60d0a"
+    },
+    {
+      "path": "scripts/verify-pack.mjs",
+      "bytes": 1448,
+      "sha256": "08abdc388dc8db89383bc600ba4fff1554acd6cb73d4a2aeff4dba282d007e81"
+    },
+    {
+      "path": "vendor/KIT-SHA256",
+      "bytes": 65,
+      "sha256": "b29f36a186efb6af5179bf9b2915ea748b3dee52aa7f8e88307b23536219d593"
+    },
+    {
+      "path": "vendor/PROVENANCE.json",
+      "bytes": 2387,
+      "sha256": "49dc3ea6291b260b7183780c78cf24f3433cef3f9a914bf1717f933887d8130c"
+    },
+    {
+      "path": "vendor/dsh-plugin-kit-0.1.0.tgz",
+      "bytes": 43944,
+      "sha256": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901"
+    }
+  ],
+  "original_inputs": [
+    {
+      "path": "library/package.json",
+      "source": "dsh-plugins/board-components/package.json",
+      "sha256": "c82cc3af5ee76e88a80846ff0108dd2758dfd0c77c81205530e834897d8464d8",
+      "bytes": 702,
+      "author_sha256": "c82cc3af5ee76e88a80846ff0108dd2758dfd0c77c81205530e834897d8464d8",
+      "author_bytes": 702,
+      "unchanged": true
+    },
+    {
+      "path": "library/build.mjs",
+      "source": "dsh-plugins/board-components/build.mjs",
+      "sha256": "4a3ff0c14c645ad8164332b49572978eeecd3a8907a8aa41227ab64c2ba05550",
+      "bytes": 3356,
+      "author_sha256": "cc527902abe712bef9529d7e71ba672afcc038e19c3d6fcdfa63fe7a800ab500",
+      "author_bytes": 3283,
+      "unchanged": false
+    },
+    {
+      "path": "library/src/funnel.mjs",
+      "source": "dsh-plugins/board-components/src/funnel.mjs",
+      "sha256": "aebd9f3cdecc93a30b21d18cd554d5e01adfc17cdedc93e7a188ac0f48244dec",
+      "bytes": 1660,
+      "author_sha256": "aebd9f3cdecc93a30b21d18cd554d5e01adfc17cdedc93e7a188ac0f48244dec",
+      "author_bytes": 1660,
+      "unchanged": true
+    },
+    {
+      "path": "library/src/funnel.d.mts",
+      "source": "dsh-plugins/board-components/src/funnel.d.mts",
+      "sha256": "30c157c4cefc1ad5f8182e65af5777f39fcfd473987e1eabc47553f2f3d3c455",
+      "bytes": 239,
+      "author_sha256": "30c157c4cefc1ad5f8182e65af5777f39fcfd473987e1eabc47553f2f3d3c455",
+      "author_bytes": 239,
+      "unchanged": true
+    },
+    {
+      "path": "library/src/waterfall.mjs",
+      "source": "dsh-plugins/board-components/src/waterfall.mjs",
+      "sha256": "63aa6dc6010bd7cfe906f5184c395be0771568d40d471bf3184fe0d9ded53b98",
+      "bytes": 2308,
+      "author_sha256": "63aa6dc6010bd7cfe906f5184c395be0771568d40d471bf3184fe0d9ded53b98",
+      "author_bytes": 2308,
+      "unchanged": true
+    },
+    {
+      "path": "library/src/waterfall.d.mts",
+      "source": "dsh-plugins/board-components/src/waterfall.d.mts",
+      "sha256": "34b0be969c2f73b3dd1a7633b2e953c74bd5b12c80ed978ac3be0d51ee4a2210",
+      "bytes": 341,
+      "author_sha256": "34b0be969c2f73b3dd1a7633b2e953c74bd5b12c80ed978ac3be0d51ee4a2210",
+      "author_bytes": 341,
+      "unchanged": true
+    },
+    {
+      "path": "library/test/geometry.test.mjs",
+      "source": "dsh-plugins/board-components/test/geometry.test.mjs",
+      "sha256": "32cbeedd833193821299cee4419b7f28403e524af25a985f52c1c3c35c913b73",
+      "bytes": 2142,
+      "author_sha256": "32cbeedd833193821299cee4419b7f28403e524af25a985f52c1c3c35c913b73",
+      "author_bytes": 2142,
+      "unchanged": true
+    },
+    {
+      "path": "library/test/funnel-cases.json",
+      "source": "dsh-plugins/board-components/test/funnel-cases.json",
+      "sha256": "f0ccf562b7a8531290b3328abc57f37b882fcec50a287606c45f80c1b830092f",
+      "bytes": 887,
+      "author_sha256": "f0ccf562b7a8531290b3328abc57f37b882fcec50a287606c45f80c1b830092f",
+      "author_bytes": 887,
+      "unchanged": true
+    },
+    {
+      "path": "library/test/waterfall-cases.json",
+      "source": "dsh-plugins/board-components/test/waterfall-cases.json",
+      "sha256": "660951cac597064a367c9f5cec8127c4da0204842bdee04f81beceeabb488c1c",
+      "bytes": 2355,
+      "author_sha256": "660951cac597064a367c9f5cec8127c4da0204842bdee04f81beceeabb488c1c",
+      "author_bytes": 2355,
+      "unchanged": true
+    }
+  ],
+  "preserved_original_count": 8,
+  "changed_original_paths": [
+    "library/build.mjs"
+  ],
+  "build_change": "explicit integrity-prepared pnpm JS entry, no PATH or Corepack source fallback",
+  "tests": {
+    "geometry": {
+      "pass": 28,
+      "fail": 0,
+      "skip": 0,
+      "receipt": "execution-r2.json"
+    },
+    "producer_and_inputs": {
+      "pass": 5,
+      "fail": 0,
+      "skip": 0,
+      "receipt": "execution-r2.json"
+    },
+    "final_preparation": {
+      "tests": 4,
+      "fail": 0,
+      "skip": 0,
+      "receipt": "execution-r3.json",
+      "Python_optimized_bad_path_and_integrity": "REJECTED"
+    }
+  },
+  "negative_controls": {
+    "scope": "source-denial",
+    "rows": [
+      {
+        "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/board-components/src/funnel.mjs",
+        "status": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/analytics-workbench/src/board-spec/component-view.mjs",
+        "status": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/package.json",
+        "status": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/plugin-kit/build-tools/package.json",
+        "status": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/board-components/library/src/waterfall.mjs",
+        "status": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/dsh-analytics-workbench/plugin/package.json",
+        "status": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/dsh-crm-knowledge/plugin/package.json",
+        "status": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/.codex/tasks/shinemage-knowledge-independent-20261008/dsh-knowledge/plugin/package.json",
+        "status": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand/plugin/package.json",
+        "status": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-board/plugin/package.json",
+        "status": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-crowd-action/plugin/package.json",
+        "status": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-query/plugin/package.json",
+        "status": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/dsh-shine-funnel/plugin/package.json",
+        "status": "EPERM"
+      },
+      {
+        "path": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/dsh-shine-waterfall/plugin/package.json",
+        "status": "EPERM"
+      }
+    ]
+  },
+  "sandbox": "allow-default Seatbelt; network and specified original source contents/writes denied; metadata and other history remain readable; not whole-machine deny-default",
+  "manager": {
+    "exit_code": 0,
+    "scope": "board-components-ci-manager",
+    "pnpm_entry": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/manager-r3/manager/package/bin/pnpm.mjs",
+    "pnpm": "11.28.2",
+    "sha256": "30d4099fa03b9ba1124d81527808b1e4d8e719aeb0ddfe169426df3c4a038a5f",
+    "integrity": "sha512-dVzi/jwFv9e7QStCr/PFxVzTjFKcbsqBBHVJeuNnRsVx5LbhgU5ufkuX1+6GS4oORGc8Oyl6UOCsKHccXOFdJw==",
+    "SDK_preparation": "NOT_RUN",
+    "release_ready": false
+  },
+  "archive": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/output-r2/shine-mage-board-components-0.1.0.tgz",
+    "bytes": 1955,
+    "sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182",
+    "members": [
+      {
+        "path": "package/package.json",
+        "bytes": 576,
+        "sha256": "2683aecb604706742a0b2bb38c2f3a35b5de6646767d3e4d4d20484f80aad3ba"
+      },
+      {
+        "path": "package/lib/funnel.mjs",
+        "bytes": 1660,
+        "sha256": "aebd9f3cdecc93a30b21d18cd554d5e01adfc17cdedc93e7a188ac0f48244dec"
+      },
+      {
+        "path": "package/lib/waterfall.mjs",
+        "bytes": 2308,
+        "sha256": "63aa6dc6010bd7cfe906f5184c395be0771568d40d471bf3184fe0d9ded53b98"
+      },
+      {
+        "path": "package/lib/funnel.d.mts",
+        "bytes": 239,
+        "sha256": "30c157c4cefc1ad5f8182e65af5777f39fcfd473987e1eabc47553f2f3d3c455"
+      },
+      {
+        "path": "package/lib/waterfall.d.mts",
+        "bytes": 341,
+        "sha256": "34b0be969c2f73b3dd1a7633b2e953c74bd5b12c80ed978ac3be0d51ee4a2210"
+      }
+    ],
+    "same_bytes_as_old_sealed_input": true,
+    "signed_release": "NOT_RUN",
+    "DSH_plugin": false
+  },
+  "workflow": "LOCAL_RECIPE_VALIDATED_UBUNTU_GITHUB_NOT_RUN",
+  "Git": {
+    "init": "NOT_RUN",
+    "commit": "NOT_RUN",
+    "real_clone": "NOT_RUN",
+    "remote": "NOT_RUN",
+    "remote_ci": "NOT_RUN"
+  },
+  "independent_tsc": "NOT_IN_CURRENT_BUILD",
+  "main_cutover": "NOT_APPLIED",
+  "main_cross_consumer_contracts": "KEEP_CURRENT_STAGES",
+  "review": {
+    "primary_read": "COMPLETE_ZERO_UNRESOLVED",
+    "precommit_skill_review": "NOT_RUN_NO_COMMIT_AUTHORIZED",
+    "OCR_delegate": "NOT_RUN"
+  },
+  "SDK_distribution": "BLOCKED",
+  "product": "PARTIAL",
+  "release_ready": false,
+  "raw_bindings": [
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/HANDOFF.md",
+      "bytes": 3039,
+      "sha256": "931f6943c60930c0a3ac3016fe808b6cc64d30ab363d4c1f88f85474396b8d48"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/author-local-commit-plan-r1.json",
+      "bytes": 5166,
+      "sha256": "2ac715838f45d6c611bb144d27ecdeb51c6e12f5a3d21e26b5c3920b9ae84375"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r1/build.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r1/build.stdout",
+      "bytes": 447,
+      "sha256": "3b82c9de09da84904e6a47c3c0c94458f150c0bcd8e4cfa13bac87e3975e4496"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r1/check-inputs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r1/check-inputs.stdout",
+      "bytes": 361,
+      "sha256": "2c7b9f3130843a78fcd6e4b2fbbb0b75c3a1acbe2a7e8bfc14c755b635d73962"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r1/geometry.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r1/geometry.stdout",
+      "bytes": 1449,
+      "sha256": "c51402101bb51d89074365e5f72c010b153347dbd0ccaee585ee49a010eb98c3"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r1/install.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r1/install.stdout",
+      "bytes": 620,
+      "sha256": "a0b33a4793d391192c63747520e0c865f7e0a9f499416ffb1bfab5df30804607"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r1/negative-controls.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r1/negative-controls.stdout",
+      "bytes": 2007,
+      "sha256": "df2b8f14eaf06bd5aac60fe522371ec1934991f6f90500251d8ebdbd62dd8d78"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r1/pack-members.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r1/pack-members.stdout",
+      "bytes": 455,
+      "sha256": "0c040b08a83b91a741cb7abb07e393d024c666f4a87c22573d69be30e9b8a085"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r1/producer-guards.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r1/producer-guards.stdout",
+      "bytes": 850,
+      "sha256": "3c6c4f1b6cdbbbfbcb3cdccae47e68d3a707dda5b63595fad41e02f0f5adbd08"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r2/build.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r2/build.stdout",
+      "bytes": 447,
+      "sha256": "4754b1cb279e01cfdecbd8b5c20ba45735157a2d188bffa3e196f2d6af3ceeac"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r2/check-inputs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r2/check-inputs.stdout",
+      "bytes": 361,
+      "sha256": "2c7b9f3130843a78fcd6e4b2fbbb0b75c3a1acbe2a7e8bfc14c755b635d73962"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r2/geometry.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r2/geometry.stdout",
+      "bytes": 1451,
+      "sha256": "c84e0268506f12cf3d2f88c2800140db618b0c9c0ea9b936455acc85f67367d5"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r2/install.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r2/install.stdout",
+      "bytes": 623,
+      "sha256": "f6c73a09ff1f17d8cc772ad991451241004b45c5f432488fb3a6a7b986dcb522"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r2/negative-controls.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r2/negative-controls.stdout",
+      "bytes": 2007,
+      "sha256": "df2b8f14eaf06bd5aac60fe522371ec1934991f6f90500251d8ebdbd62dd8d78"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r2/pack-members.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r2/pack-members.stdout",
+      "bytes": 455,
+      "sha256": "0c040b08a83b91a741cb7abb07e393d024c666f4a87c22573d69be30e9b8a085"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r2/preparation-guards.stderr",
+      "bytes": 101,
+      "sha256": "65a6cc5126fce4af26973e9efea030caac3cd9abd8c04f8c5f4acc625b1af0f4"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r2/preparation-guards.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r2/prepare-manager.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r2/prepare-manager.stdout",
+      "bytes": 447,
+      "sha256": "7df19a3479dc12e1c4bfc8312ffa97e71d7c5dc39a7f276423714495c2377938"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r2/producer-guards.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r2/producer-guards.stdout",
+      "bytes": 855,
+      "sha256": "64353c42756d274a49c1d981480e957edca65cd3f44c7f219607722a9abbf195"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r2/workflow-structure.json",
+      "bytes": 1078,
+      "sha256": "6b0f36ce0a19ada25da7f44e1b260d41fcbc6ea11242a56803fc2c5f1976837f"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r3/preparation-guards.stderr",
+      "bytes": 102,
+      "sha256": "82843543658fb075cb5785a6ea089fc8c098633b6ffab74f1cf2038841f48506"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r3/preparation-guards.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r3/prepare-manager-offline.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/evidence-r3/prepare-manager-offline.stdout",
+      "bytes": 447,
+      "sha256": "46c3028ab65b97ff422ad856a989a9c84fd2abbe2dfc34860e6af6417d241899"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/execution-r1.json",
+      "bytes": 6946,
+      "sha256": "dfcd13a1e1bea2cbd08432b61efd406a78bd3e930448e3252978e29599af82fe"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/execution-r2.json",
+      "bytes": 8038,
+      "sha256": "e49ae38cb0cbc75385ff3090157946602f6a3d71691d9c9e2701d38ab0845ec4"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/execution-r3.json",
+      "bytes": 1411,
+      "sha256": "aa154e0837b095689c40e60bcf9aaa8177c6808e874a382cf1f7c4767b2873b8"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/manager-r2/evidence/download-command.json",
+      "bytes": 437,
+      "sha256": "dbf6c9820bf0181a0882c73fb4e6acec7742958bd2291de6d9681b6adce8d2f4"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/manager-r2/evidence/download.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/manager-r2/evidence/download.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/manager-r2/evidence/inputs.json",
+      "bytes": 477,
+      "sha256": "d0c6e25ebbe9622ae91e6730bb92b2a48df816e04ab3c4969818eb57a7576f88"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/manager-r2/evidence/result.json",
+      "bytes": 481,
+      "sha256": "5e2db95b0ad6ccd246340011e63374c2539af8cfb20aa5bb40b6117e716eed2a"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/manager-r3/evidence/inputs.json",
+      "bytes": 588,
+      "sha256": "e47f22dd23b4d2e43b7e26bc1492c9b49149642a0382f01dfe7b4b7e0a85206a"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/manager-r3/evidence/result.json",
+      "bytes": 481,
+      "sha256": "f6fdd5b0d8767ba7796188b35224040e3baaf695ea71c3bb26a82d3b3d78924b"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/snapshot-r1.json",
+      "bytes": 29080,
+      "sha256": "a613eb589811f788d3bce337cf2c88f6be7f9903fdf1ea6e0c94fbda4913ff8c"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/source-denied-r1.sb",
+      "bytes": 2732,
+      "sha256": "b4e3d10a75a4187725fbf788607c0a7b769ff4f0d6a7a03c42d367496c2ef525"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/summary-r1.json",
+      "bytes": 13780,
+      "sha256": "3752eb250fdbb313a0cca7d391715c88997a0d8ad6a8a8a69a45085f0f0f993a"
+    }
+  ],
+  "post_document_preservation": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/post-document-preservation-r1.json",
+    "sha256": "b64aa89252fd1d45a58227bbad2e72153d4db8a6cd46203efab397a0b5478d30",
+    "bytes": 1832
+  }
+}

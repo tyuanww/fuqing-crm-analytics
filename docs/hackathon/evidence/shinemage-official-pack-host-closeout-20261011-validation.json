@@ -1,0 +1,178 @@
+{
+  "schema": "shinemage-official-pack-host-closeout/v1",
+  "base_sha": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "producer_base_sha": "92dfa171cf8ea298bdceee5634b418269e711a37",
+  "uncommitted": true,
+  "evidence_root": "/Users/hutou/.codex/tasks/shinemage-official-pack-host-20261011-o2mozyxq",
+  "original_formal_packs": {
+    "packages": 7,
+    "official_install": "PASS",
+    "config_dump": "PASS",
+    "workbench_activation": "FAIL_MISSING_RUNTIME_PEERS",
+    "formal_host_acceptance": "NOT_PASSED"
+  },
+  "producer_fix": {
+    "runtime_peers": {
+      "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
+      "@deepseek-ai/dsh-client-connection": "0.1.7-rc.2",
+      "@deepseek-ai/dsh-llm": "0.1.7-rc.2"
+    },
+    "linux_platform": "local Docker Linux x64 emulation",
+    "strict_host_typecheck": "PASS",
+    "strict_client_typecheck": "PASS",
+    "package_tests": {
+      "files": 24,
+      "pass": 196,
+      "fail": 0,
+      "skip": 0,
+      "exit": 0
+    },
+    "content_pack_sha256": "f5e9dfe41859b0ae3254cbaddf12a128e89cd3c53bde82b84f366beef03ae5d7",
+    "content_pack_bytes": 441127,
+    "formal_pack": "NOT_RUN_FOR_NEW_FIX",
+    "remote_ci": "NOT_RUN_FOR_NEW_FIX"
+  },
+  "manifest_diagnostic": {
+    "record": "host-r4.json",
+    "network": "LOOPBACK_ONLY",
+    "source_negative_controls": 2,
+    "phases": [
+      {
+        "name": "on",
+        "status": "PASS",
+        "pid": 42707,
+        "title_projection_as_of_seq": 3,
+        "port_released": true
+      },
+      {
+        "name": "native",
+        "status": "PASS",
+        "pid": 42724,
+        "title_projection_as_of_seq": 3,
+        "port_released": true
+      },
+      {
+        "name": "restored",
+        "status": "PASS",
+        "pid": 42733,
+        "title_projection_as_of_seq": 3,
+        "port_released": true
+      }
+    ],
+    "manifest_modified": true,
+    "original_formal_pack_acceptance": "NOT_CLAIMED",
+    "candidate_journal": "UNCHANGED",
+    "model_calls": 0,
+    "browser": "NOT_RUN",
+    "live_cli_reload": "NOT_RUN"
+  },
+  "main_regression": {
+    "files": 13,
+    "pass": 114,
+    "fail": 0,
+    "skip": 0,
+    "exit": 0,
+    "record": "dev-regression-r6.json",
+    "scope": "dev/package/profile contracts, not full B0"
+  },
+  "reload_wrong_manager_negative": "PASS_BEFORE_RUNTIME_OR_STOP",
+  "candidate_unchanged": {
+    "digest": "591134e8e4d45913d95d17caf6c4281fcc5b09e96ac11eeb3fe53b4401c1f0d1",
+    "candidate_file_sha256": "31b88bcdc40de1ac84b75f961ebbcaac8dc6859cbe5a4fec93173fe11559e7e2",
+    "journal_seq": 3,
+    "journal_file_sha256": "234cfb4443d5b0b3a4ad23bb90e8311e97eb3f6d5a924f344a35c6860960ce61"
+  },
+  "review": {
+    "record": "ocr-review-fixes-r1.json",
+    "sha256": "c516282b454e8e87d9d98ee78f72bdff6da9923fd0ca0dadac7d3c5a41c0f400",
+    "main_files": 8,
+    "producer_files": 4,
+    "external_llm": "NOT_RUN"
+  },
+  "evidence_files": [
+    {
+      "path": "install-r1.json",
+      "sha256": "034b22ff3a256fcf4e153f6e86b126727357bb1f706cd4aafe561ebfcb2a8b1c"
+    },
+    {
+      "path": "install-r2.json",
+      "sha256": "07674e968c37b2ea22439918dd489b71efceaabbf806c7de409de3a41f46bd68"
+    },
+    {
+      "path": "import-diagnostic-r3.json",
+      "sha256": "6e83cc59ce0b2f1413796ff45b70a361da09e33aac34072c7a644f7cef9ea037"
+    },
+    {
+      "path": "install-diagnostic-r3.json",
+      "sha256": "92645aded7fbbb02cba05ff3e3d603af045e408e6059c9533712198d5de08093"
+    },
+    {
+      "path": "host-r1.json",
+      "sha256": "a224d24520213865361bcf8aafc5642f38b10e0fd8c46fcb52b306eeadac36cb"
+    },
+    {
+      "path": "host-r2.json",
+      "sha256": "30c27dda8b7d144c9580ad65d5630078705a5f29bae53e2c281dbeab191a7907"
+    },
+    {
+      "path": "host-r3.json",
+      "sha256": "d3dd90cf7edac30b28ceba6f9ce2068ede9cc7b77ca819209bdcc6647c42ee1e"
+    },
+    {
+      "path": "host-r4.json",
+      "sha256": "519619e6f51d52614db195e12dcf13a3b3b94a3482dcd00b790e78f8a9519275"
+    },
+    {
+      "path": "dev-regression-r5.json",
+      "sha256": "218c6b1aefb4cbe4ccf1c48fbb5998b585456f2ee99ebec8e1d3232a00e9bef2"
+    },
+    {
+      "path": "dev-regression-r6.json",
+      "sha256": "8c8244dfcc357abddbff090c1e2d9e54a2baf596e6f1159c2553ce5718730d1d"
+    },
+    {
+      "path": "reload-negative-r1/result.json",
+      "sha256": "c0605940716cc594b37f4f67e654deb2aa0a2b882ee006fd635059fbfead068a"
+    },
+    {
+      "path": "linux-workbench-r1/result.json",
+      "sha256": "f60bdcac1dd01806607a4b5e27c48b7e2b8efe4ea1b1ad7fa6cb62f78b438485"
+    },
+    {
+      "path": "linux-workbench-r1/ownership-probe.log",
+      "sha256": "d63ce56acde31c75d459aa378f0209a171794b83e9bc1f30521b743bfb8f171c"
+    },
+    {
+      "path": "linux-workbench-r2/input.json",
+      "sha256": "076ff42d31b6d0e94d1cf26b177ce2ac06e8d71a96ed2ccc746ea5602c174ac5"
+    },
+    {
+      "path": "linux-workbench-r2/result.json",
+      "sha256": "27562b6ba67d91a7cc97b68bf17e80220004b9c01bc863058e065077e465bd53"
+    },
+    {
+      "path": "linux-workbench-r2/payload-comparison.json",
+      "sha256": "1b1a8cca6fd88a64e5b193974e5c66cc85f7dc1a76b28008dcbccb8f8822a2ac"
+    },
+    {
+      "path": "ocr-review-fixes-r1.json",
+      "sha256": "c516282b454e8e87d9d98ee78f72bdff6da9923fd0ca0dadac7d3c5a41c0f400"
+    }
+  ],
+  "open": [
+    "authorized commit/push for current code",
+    "main #119 and nine plugin #1 merge authorization and post-merge CI",
+    "new clean-source formal pack/candidate after producer fix",
+    "current formal candidate service/host/target/browser/recovery admission",
+    "live CLI reload",
+    "default source pipeline and CRM/Knowledge combination migration",
+    "Cordis 4.0.2/4.0.4 runtime compatibility",
+    "real model/CRM/WeKnora/UAT inputs",
+    "plugin releases and independent DSH upgrade / applicable SDK gates"
+  ],
+  "full_b0": "NOT_RUN_THIS_CHANGE",
+  "sdk_distribution": "BLOCKED",
+  "product": "PARTIAL",
+  "release_ready": false,
+  "version": "0.20.0.0"
+}

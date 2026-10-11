@@ -1,0 +1,95 @@
+{
+  "schema": "shinemage-dev-pack-migration-validation/v1",
+  "base_sha": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "branch": "codex/shinemage-abc-local-candidate",
+  "committed": false,
+  "evidence_root": "/Users/hutou/.codex/tasks/shinemage-profile-pack-migration-20261011-4Ssg4AuN",
+  "node": "24.19.0",
+  "python": "3.14.4",
+  "tests": {
+    "tests": 113,
+    "pass": 112,
+    "fail": 0,
+    "skipped": 1,
+    "exit": 0,
+    "command_record": "dev-regression-r4.json",
+    "log": "dev-regression-r4.log",
+    "scope": "dev/package/profile contracts, not full B0",
+    "skip_reason": "fixed native tool registry requires explicit B0_BUILD_UPSTREAM"
+  },
+  "runtime_preparation": {
+    "record": "runtime-validation-r3.json",
+    "sha256": "d56288359d1adb3a5e619928a624b25549f397925b135489c0de7f3a7bff7504",
+    "packages": 7,
+    "source_negative_controls": "2 EPERM",
+    "network": "DENIED",
+    "host": "NOT_RUN",
+    "native_fallback_preparation": "PASS",
+    "invalid_patch": "REJECTED"
+  },
+  "review": {
+    "record": "ocr-review-final-r2.json",
+    "sha256": "bb8ec66f4130871b15ace3de4b500809453396580f80269f5273032c5fe8c9bc",
+    "reviewed_files": 8,
+    "skipped_files": 0,
+    "coverage_rate": 1,
+    "fixed_medium": 2,
+    "open_findings": 0,
+    "external_llm": "NOT_RUN",
+    "code_files": 7,
+    "evidence_json_files": 1
+  },
+  "candidate_unchanged": "591134e8e4d45913d95d17caf6c4281fcc5b09e96ac11eeb3fe53b4401c1f0d1",
+  "journal_unchanged": {
+    "seq": 3,
+    "sha256": "234cfb4443d5b0b3a4ad23bb90e8311e97eb3f6d5a924f344a35c6860960ce61"
+  },
+  "syntax": [
+    {
+      "path": "dsh-plugins/analytics-workbench/test/native-composition-browser-probe.mjs",
+      "exit": 0
+    },
+    {
+      "path": "scripts/dsh-b0/pipeline.mjs",
+      "exit": 0
+    },
+    {
+      "path": "scripts/dsh-dev/cli.mjs",
+      "exit": 0
+    },
+    {
+      "path": "scripts/dsh-dev/cli.test.mjs",
+      "exit": 0
+    },
+    {
+      "path": "scripts/dsh-dev/serve.mjs",
+      "exit": 0
+    },
+    {
+      "path": "scripts/release/profile-packs.mjs",
+      "exit": 0
+    },
+    {
+      "path": "scripts/release/profile-packs.test.mjs",
+      "exit": 0
+    }
+  ],
+  "full_b0": "NOT_RUN_THIS_CHANGE",
+  "live_reload": "NOT_RUN",
+  "current_combination_host": "NOT_RUN",
+  "target": "NOT_RUN",
+  "current_combination_rollback": "NOT_RUN",
+  "default_source_pipeline_migration": "INCOMPLETE",
+  "crm_knowledge_runtime_peer_compatibility": "NOT_VERIFIED",
+  "sdk_distribution": "BLOCKED",
+  "product": "PARTIAL",
+  "release_ready": false,
+  "document_sha256": "bef5202f03c1351018e4c9561705c5ecb5a11d213257eb3680b58c841666e1a7",
+  "required_push_checks": {
+    "backend": "full",
+    "b0": true,
+    "tooling": true,
+    "execution": "NOT_RUN_THIS_CHANGE",
+    "record": "required-check-plan.json"
+  }
+}

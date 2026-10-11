@@ -1,0 +1,471 @@
+{
+  "schema": "shinemage-ci-pack-inputs-validation/v1",
+  "date": "2026-10-11",
+  "base_sha": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "raw_evidence_root": "/Users/hutou/.codex/tasks/shinemage-ci-pack-inputs-20261011-tsopw7c5",
+  "runtime": {
+    "node": "24.19.0",
+    "python": "3.14.4",
+    "dsh": "0.1.7-rc.2",
+    "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443"
+  },
+  "lock": {
+    "path": "config/shinemage-composition-packs.lock.json",
+    "sha256": "39596a6ae4ae81fe60c49d32ebcef32e8fadb313329bd9f49b4864dff0faa6a3"
+  },
+  "local_input_zip": {
+    "path": "composition-packs-r1.zip",
+    "bytes": 703989,
+    "sha256": "228fdabbdf2c22900c874a1fa61dc700338b128495fd38c6e0d200b86a421ea7",
+    "files": 18,
+    "github_artifact": "NOT_UPLOADED"
+  },
+  "profiles": [
+    {
+      "name": "crm",
+      "path": "config/dsh-profile.crm-knowledge.rc2.json",
+      "sha256": "7ca3511663ab2ea5d1bb8f839c83b29f5bbd6655238450ad08a04510642191ba"
+    },
+    {
+      "name": "page",
+      "path": "config/dsh-profile.rc2.json",
+      "sha256": "c8c9df8c36f11060ad8fbcce68cb2ebf28d783c5eb5759d1b71ff5463782c981"
+    }
+  ],
+  "plugins": [
+    {
+      "id": "@shine-mage/dsh-analytics-workbench-b0",
+      "source_sha": "92dfa171cf8ea298bdceee5634b418269e711a37",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "9f518393e544099b5a31fde6073c2b0e321649f7e1134829d0dcd5bc608801f4",
+      "pack_sha256": "a0d5dd08c5e97237fc38033f929eec33627ac42efa594a5ca5c87a0ee311d6b2"
+    },
+    {
+      "id": "@shine-mage/dsh-crm-knowledge",
+      "source_sha": "5a839fa86de2240cf661a9034c58e0ead2d4b4ef",
+      "version": "0.0.0-crm.1",
+      "manifest_sha256": "0fbacc88fccc8085618b518a51afab5db1c045838c0cb47d6e94a8af5f600a49",
+      "pack_sha256": "0da9f8edd40b17a92377aa4b35d219229c8461b942060a7dd0e12265343500fd"
+    },
+    {
+      "id": "@shine-mage/dsh-knowledge",
+      "source_sha": "94ef29fa6c39d3dc506fbc5ef734f0a7ea9eb2b0",
+      "version": "0.0.0-candidate.1",
+      "manifest_sha256": "a674a2da0dcd317839c4f8d7766da62ced58eca9021222c6e3a238f80aa7df79",
+      "pack_sha256": "ed7888204d5cefe7d383632a75319d3427fec9a735863f4e123b8ea17387ef67"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-board",
+      "source_sha": "76601df755ec8ef8c9726ea770ec488b745efd71",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "671acb9502969f08e5db6b83369afa3ea1dec1699a7a9fc5a1680abfa9aa39cf",
+      "pack_sha256": "e1348dd7739778a5ec2d676420e86290ca49f69cdf045959fd82441232a30c1a"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-crowd-action",
+      "source_sha": "5c39e21c27565397383b009725634ea66e9c1525",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "d3998ed96530db66b3aa53f263c93848e7078846a8a0f612a1c099202bfa406f",
+      "pack_sha256": "3fb9d88d228e3af4a9c965961c035650b65365392a9caccb4c14f336b003b2ca"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-query",
+      "source_sha": "1f1e19d280923ebe7aac964f8b5825d497434db8",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "13433c1c4687cd33f0b314b60a38c76fb8390ee52375755320d4ca5a6f378fae",
+      "pack_sha256": "774c6ae63e0fb170a81a9e9fb9551d55d40724faae5966c1d95bb32624fb89ce"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-funnel",
+      "source_sha": "dbfaede0961586d773c708e833a4ac1c9f2515dc",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "1e631c02c1fa6903b1f76953edc4e7da3fc85b1b96c1292567f8561a78a8eefb",
+      "pack_sha256": "581ba069aa8af4598f553e4b11b57216ac2205d71baebbafc267367cb3814ba6"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-waterfall",
+      "source_sha": "d123ac1d0e7bad3e5de45169b3e72c38623b858a",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "43a9c673ada75b763c1867e6bb6fd66c75da393cd6c2fd2fd669aadbe73c6af5",
+      "pack_sha256": "73a1d4ba2b085c1f9f2a1eff410aca239cf9775de952ba70aafdaa78ec5ac35d"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-brand",
+      "source_sha": "57ebcf38278068394a4feb42125c30c195fd912a",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "d5039166969023075253e65e31c4d7dba910ae6ea10b9b40bf7f147bdb5efd24",
+      "pack_sha256": "4b867bf5b4e08d9aa1f45f20b20b78cbd9e11c236194ffafaa5188d8d173bd13"
+    }
+  ],
+  "results": {
+    "pack_profile_guards": {
+      "command_record": "contracts-r3.json",
+      "exit_code": 0,
+      "tests": 54,
+      "passed": 54,
+      "failed": 0,
+      "skipped": 0
+    },
+    "public_composition": {
+      "child_exit_codes": [
+        0,
+        0
+      ],
+      "tests": 9,
+      "pass": 9,
+      "fail": 0,
+      "skipped": 0,
+      "scope": "real prepared sealed packs / public contract / synthetic localhost",
+      "wrapper_failure_preserved": true
+    },
+    "tooling": {
+      "command_record": "tooling-r1.json",
+      "exit_code": 0,
+      "passed": 189,
+      "scope": "shared tooling axis; independent of backend/composition counts"
+    },
+    "workflow_followup": {
+      "command_record": "workflow-tooling-r2.json",
+      "exit_code": 0,
+      "passed": 61,
+      "scope": "overlapping subset of tooling; not added to 189"
+    },
+    "frontend": {
+      "command_record": "frontend-r1.json",
+      "exit_code": 0,
+      "build": "PASS",
+      "test_files": 29,
+      "passed": 223,
+      "scope": "existing Vue build and unit test axis"
+    },
+    "release": {
+      "command_record": "release-r1.json",
+      "exit_code": 0,
+      "tests": 41,
+      "passed": 41,
+      "failed": 0,
+      "skipped": 0,
+      "scope": "actual source archive / release regression, not release authorization"
+    },
+    "backend": {
+      "coverage_record": "backend-coverage-r1.json",
+      "targets": 298,
+      "counts": {
+        "passed": 3223,
+        "skipped": 78,
+        "failed": 0,
+        "errors": 0
+      },
+      "successful_groups": 12,
+      "scope": "complete existing bounded synthetic-not-slow target selection",
+      "after_run_change": {
+        "path": "scripts/ci/unpack-composition-inputs.py",
+        "sha256": "a7685ff258140fca6646b721391887a0255d0544ef061a2e724344a721db7ef0",
+        "description": "assert validation replaced by explicit failure; separately verified by contracts-r3 (including -O) and helper ruff; backend source/tests unchanged"
+      }
+    },
+    "archive_preparation": {
+      "command_record": "archive-r3.json",
+      "exit_code": 0,
+      "sealed_files_equal": 18,
+      "github_env_entries": 3
+    },
+    "workflow_structure": [
+      {
+        "path": ".github/workflows/lint.yml",
+        "parsed": true,
+        "prepare_before_pipeline": true,
+        "token_scoped_to_prepare_step": true
+      },
+      {
+        "path": ".github/workflows/dsh-b0.yml",
+        "parsed": true,
+        "prepare_before_pipeline": true,
+        "token_scoped_to_prepare_step": true
+      },
+      {
+        "path": ".github/workflows/dsh-release-preflight.yml",
+        "parsed": true,
+        "prepare_before_pipeline": true,
+        "token_scoped_to_prepare_step": true
+      }
+    ],
+    "pipeline_preflight_only": [
+      {
+        "command": [
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "scripts/dsh-b0/pipeline.mjs",
+          "--check",
+          "--python",
+          "/Users/hutou/homebrew/opt/python@3.14/bin/python3.14"
+        ],
+        "exit_code": 1,
+        "error": "CRM_COMPOSITION_OUTPUT_REQUIRED",
+        "scope": "preflight only; no source build/service"
+      },
+      {
+        "name": "used-output",
+        "command": [
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "scripts/dsh-b0/pipeline.mjs",
+          "--check",
+          "--python",
+          "/Users/hutou/homebrew/opt/python@3.14/bin/python3.14"
+        ],
+        "exit_code": 1,
+        "error": "CRM_COMPOSITION_OUTPUT_EXISTS",
+        "scope": "preflight only; no source rebuild or service"
+      },
+      {
+        "name": "not-directory",
+        "command": [
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "scripts/dsh-b0/pipeline.mjs",
+          "--check",
+          "--python",
+          "/Users/hutou/homebrew/opt/python@3.14/bin/python3.14"
+        ],
+        "exit_code": 1,
+        "error": "CRM_COMPOSITION_OUTPUT_REQUIRED",
+        "scope": "preflight only; no source rebuild or service"
+      }
+    ]
+  },
+  "logs": [
+    {
+      "path": "logs/contracts-r3.log",
+      "sha256": "35b57575ec78748e4e989d28da0aa79fc8b0a25bd9474949a67aa4da3b251ec4"
+    },
+    {
+      "path": "logs/composition-r1.log",
+      "sha256": "6f2fcbfda66ab08a15cbc5fd3622522d72a0f11752177d7ae4d4341023462e50"
+    },
+    {
+      "path": "logs/tooling-r1.log",
+      "sha256": "d072fbe03d016e0b7128f7e90584cdf926725cf5d5bc8e0df48a82b23233e3f2"
+    },
+    {
+      "path": "logs/frontend-r1.log",
+      "sha256": "0e9e4cd30236ee1ddc4176cda2d7a4ff1ec514c4ff4868b6c10851a9a070c9f2"
+    },
+    {
+      "path": "logs/release-r1.log",
+      "sha256": "57c6f8e3e9b5d38132baa10849b21ddd5bef5cc14db91a43bf85efdc361327bb"
+    },
+    {
+      "path": "logs/workflow-tooling-r2.log",
+      "sha256": "e1613dd9d76584a4c47f70cbb6b15485b855786680c0826dbe6876807e93287d"
+    },
+    {
+      "path": "logs/backend-r1.log",
+      "sha256": "e644ce8a03457590d1333385af93665b93c130a1003616fa04c05ce1632e23ae"
+    },
+    {
+      "path": "logs/backend-r2.log",
+      "sha256": "d563017758744bae53e3a0b337d08ae3367ba6bebc430e9a7ab0e9216596e10a"
+    },
+    {
+      "path": "logs/backend-r3.log",
+      "sha256": "6b5d8bee7363f9349ca181e3e5cd63dd8b7280ddda08e5be87d16220d230c05b"
+    },
+    {
+      "path": "logs/backend-r4.log",
+      "sha256": "51958bfd8e22462a8da04b19839c8c0b78bc14ec268d642cf972d945a94dab9b"
+    },
+    {
+      "path": "logs/archive-r3.log",
+      "sha256": "0058e3288590b81f61459aff146939a5a1be63ffbe46dc00f229f313a7331fb4"
+    },
+    {
+      "path": "logs/service-test-prepare-r2.log",
+      "sha256": "e0dd09cefd333dff1133682e9d175c699c7c0aa2b427cb3c445106cf3a69eab1"
+    }
+  ],
+  "isolated_service_python": {
+    "record": "service-python-r2.json",
+    "packages": 15,
+    "description": "14 existing service pins plus B0 psutil 7.2.2; hashed offline install; base Python unchanged"
+  },
+  "failure_evidence_preserved": [
+    "backend-r1.json",
+    "backend-r2.json",
+    "backend-r3.json",
+    "cleanup-wrapper-failure-r1.json"
+  ],
+  "cleanup": {
+    "processes": [
+      {
+        "pid": 83110,
+        "exit_code": 0,
+        "servers": [
+          {
+            "address": "127.0.0.1",
+            "family": "IPv4",
+            "port": 55036,
+            "closed": true
+          },
+          {
+            "address": "127.0.0.1",
+            "family": "IPv4",
+            "port": 55037,
+            "closed": true
+          },
+          {
+            "address": "127.0.0.1",
+            "family": "IPv4",
+            "port": 55038,
+            "closed": true
+          },
+          {
+            "address": "127.0.0.1",
+            "family": "IPv4",
+            "port": 55045,
+            "closed": true
+          },
+          {
+            "address": "127.0.0.1",
+            "family": "IPv4",
+            "port": 55046,
+            "closed": true
+          },
+          {
+            "address": "127.0.0.1",
+            "family": "IPv4",
+            "port": 55047,
+            "closed": true
+          },
+          {
+            "address": "127.0.0.1",
+            "family": "IPv4",
+            "port": 55053,
+            "closed": true
+          },
+          {
+            "address": "127.0.0.1",
+            "family": "IPv4",
+            "port": 55054,
+            "closed": true
+          },
+          {
+            "address": "127.0.0.1",
+            "family": "IPv4",
+            "port": 55055,
+            "closed": true
+          },
+          {
+            "address": "127.0.0.1",
+            "family": "IPv4",
+            "port": 55061,
+            "closed": true
+          },
+          {
+            "address": "127.0.0.1",
+            "family": "IPv4",
+            "port": 55062,
+            "closed": true
+          },
+          {
+            "address": "127.0.0.1",
+            "family": "IPv4",
+            "port": 55063,
+            "closed": true
+          }
+        ]
+      },
+      {
+        "pid": 83127,
+        "exit_code": 0,
+        "servers": []
+      }
+    ],
+    "owned_servers": 12,
+    "closed": true,
+    "plain_ports_bindable_after_exit": true,
+    "earlier_failure": "cleanup-wrapper-failure-r1.json"
+  },
+  "protected_inputs": {
+    "fixed_pack_files": 18,
+    "all_four_copies_match": true,
+    "candidate_state_sha256": {
+      "/Users/hutou/.codex/tasks/shinemage-package-candidate-20261011-b4vbymq7/candidate/candidate.json": "31b88bcdc40de1ac84b75f961ebbcaac8dc6859cbe5a4fec93173fe11559e7e2",
+      "/Users/hutou/.codex/tasks/shinemage-package-candidate-20261011-b4vbymq7/plugin-state.json": "234cfb4443d5b0b3a4ad23bb90e8311e97eb3f6d5a924f344a35c6860960ce61"
+    },
+    "candidate_journal": "UNCHANGED seq 3",
+    "upstream_tracked_clean": true
+  },
+  "source_archive": {
+    "entries": 2146,
+    "required": [
+      {
+        "path": "scripts/ci/composition-pack-inputs.mjs",
+        "included": true
+      },
+      {
+        "path": "scripts/ci/unpack-composition-inputs.py",
+        "included": true
+      },
+      {
+        "path": "scripts/crm-calibration/composition-inputs.mjs",
+        "included": true
+      },
+      {
+        "path": "scripts/crm-calibration/prepare-profile.mjs",
+        "included": true
+      },
+      {
+        "path": "scripts/crm-calibration/test-support/formal-packs.fixture.mjs",
+        "included": true
+      },
+      {
+        "path": "config/shinemage-composition-packs.lock.json",
+        "included": true
+      }
+    ],
+    "private_pack_payloads_added": false
+  },
+  "remote_configuration": {
+    "scope": "names only / read-only",
+    "results": [
+      {
+        "command": [
+          "gh",
+          "api",
+          "repos/tyuanww/fuqing-crm-analytics/actions/variables",
+          "--jq",
+          "[.variables[] | select(.name | startswith(\"SHINEMAGE_PACK_\")) | .name]"
+        ],
+        "exit_code": 0,
+        "names": []
+      },
+      {
+        "command": [
+          "gh",
+          "api",
+          "repos/tyuanww/fuqing-crm-analytics/actions/secrets",
+          "--jq",
+          "[.secrets[] | select(.name == \"SHINEMAGE_PLUGIN_READ_TOKEN\") | .name]"
+        ],
+        "exit_code": 0,
+        "names": []
+      }
+    ]
+  },
+  "review": {
+    "method": "open-code-review-delegate / host-agent review",
+    "raw_report": "ocr-review-r1.json",
+    "external_llm": "NOT_RUN"
+  },
+  "not_run": [
+    "complete B0 pipeline",
+    "current dirty bytes hosted CI",
+    "artifact upload/secret or variable configuration",
+    "new fixed-pack host activation/candidate admission",
+    "new journal event",
+    "WSL2/browser/real model/business",
+    "commit/push/PR/merge/release/deploy",
+    "dependency audit and Docker smoke"
+  ],
+  "sdk_distribution": "BLOCKED",
+  "product": "PARTIAL",
+  "release_ready": false
+}

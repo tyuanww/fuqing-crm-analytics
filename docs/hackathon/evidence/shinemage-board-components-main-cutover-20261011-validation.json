@@ -1,0 +1,1068 @@
+{
+  "schema": "shinemage-domain-main-cutover/v1",
+  "at": "2026-10-11T08:11:50.059082+00:00",
+  "main_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "main_branch": "codex/shinemage-abc-local-candidate",
+  "baseline": "HEAD + existing working bytes",
+  "authorization": "local apply/verification/current docs only",
+  "application": {
+    "schema": "shinemage-main-domain-application/v1",
+    "authorization": "user authorized local application/verification/current docs; no Git delivery or deletion",
+    "applied_at": "2026-10-11T07:59:29.403619+00:00",
+    "main_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+    "main_branch": "codex/shinemage-abc-local-candidate",
+    "index_empty": true,
+    "patch": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/product-delta-r2.patch",
+      "sha256": "5d08d71940fce931f000ec42da01a028c1a8d7f101d6167670ed89a1b8c0bef0",
+      "bytes": 105351
+    },
+    "apply_exit": 0,
+    "product_paths_verified": 18,
+    "inherited_outside_delta_unchanged": 164,
+    "version": "0.20.0.0",
+    "full_b0": "PENDING_RETRY_AFTER_QA_INPUT_FIX",
+    "hosted_ci": "NOT_RUN",
+    "candidate_journal": "UNCHANGED",
+    "commit_push_merge_release_deploy": "NOT_RUN",
+    "product": "PARTIAL",
+    "release_ready": false
+  },
+  "paths": [
+    {
+      "path": ".github/workflows/dsh-b0.yml",
+      "status": "modified",
+      "before_sha256": "925fdfd7847b07dd412346f8894e7ae80a36ec4cb68e70a767fa59ea498f5799",
+      "after_sha256": "0a0f7b90cfebade14aea72a2b4842081532e7c76ec95fcce84ca81c79cfa02f4",
+      "bytes": 3590,
+      "mode": "0o644"
+    },
+    {
+      "path": ".github/workflows/dsh-release-preflight.yml",
+      "status": "modified",
+      "before_sha256": "7c014a1c4f42da3168c188c26511c52172a43a5e77056f15ad2eb6941962e363",
+      "after_sha256": "5cfdf6dd338e535b087c9743887fe5df1f520e782055d2213201954acc69e280",
+      "bytes": 9348,
+      "mode": "0o644"
+    },
+    {
+      "path": ".github/workflows/lint.yml",
+      "status": "modified",
+      "before_sha256": "b013023289036b4bb584269982c18d5caeafff8d3ca7a629927cddc07230adac",
+      "after_sha256": "9fd1c057266375a03cc45ca9c0e5b4fb528b1ca14a1539aecc0b9f61901c2da4",
+      "bytes": 17073,
+      "mode": "0o644"
+    },
+    {
+      "path": "backend/tests/test_pre_push_smart_path.py",
+      "status": "modified",
+      "before_sha256": "d66b45c9c25dd29ba8cf7e4db11e28e436adfda86787496871809ffc1caa6c73",
+      "after_sha256": "0a04a8f539db332b7f9b766e3717c9f55e406b9730b7f344cc2f046b7287e608",
+      "bytes": 13014,
+      "mode": "0o644"
+    },
+    {
+      "path": "config/domain-author-evidence.lock.json",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "5c5919362309b3c6837d6cb6fd1499437d9b383d8fc0e358a1a08f9049f8283d",
+      "bytes": 5703,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/ci/domain-author-evidence.mjs",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "2c1ad263f1d2dee3afac990a52a0c46ebdd3cb7664316b75f7812c2baa086f7d",
+      "bytes": 14602,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/ci/domain-author-evidence.test.mjs",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "d84b26386d038b234d2409ec66b8f96c9d0e80cb351d6ae5e47dd11743fa4dc4",
+      "bytes": 11617,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/ci/pre_push_path_class.py",
+      "status": "modified",
+      "before_sha256": "9208f68d3a86fd1c41c7f415941b716655690d49239bcd42250a468faa940b58",
+      "after_sha256": "05f29c1f6661422092af07606084e9252f9ddf176eb824f00cecdba381511bcb",
+      "bytes": 13020,
+      "mode": "0o755"
+    },
+    {
+      "path": "scripts/ci/read-domain-author-evidence.py",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "148e7bab30f93759c93ad6938dd85fa43172eaab476b81f7f253a34cfe07a294",
+      "bytes": 3197,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/domain-package-inputs.mjs",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "52a84f5dbe6b3fd54f12d4a1525177517195eddbdeacd91d0300b9f61f7b7eb2",
+      "bytes": 2143,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/explicit-build-inputs-source.legacy.mjs",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "51dd69a130e3b9e12ac365fde8e34db2d8c84c62ea7ddf18c98510fbcb1928ba",
+      "bytes": 2058,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/explicit-build-inputs.test.mjs",
+      "status": "modified",
+      "before_sha256": "51dd69a130e3b9e12ac365fde8e34db2d8c84c62ea7ddf18c98510fbcb1928ba",
+      "after_sha256": "57c32399bf6c12d9d0e95f4ec54c174933eb33c09ef7c5f575ae6b3d7520613d",
+      "bytes": 1585,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/package-inputs-source-binding.legacy.mjs",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "2b70c08a9d966d444fbcac27cff3c76322b3eb93e4dda803d0df7031fb284aa3",
+      "bytes": 847,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/package-inputs-source-fixture.legacy.mjs",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "3f67e35baa862b660afbb32b025d903466a7f2db3425ac06c4990b878640be0c",
+      "bytes": 23273,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/package-inputs.mjs",
+      "status": "modified",
+      "before_sha256": "2b70c08a9d966d444fbcac27cff3c76322b3eb93e4dda803d0df7031fb284aa3",
+      "after_sha256": "1d4e6718640ddbbd36895f3babb5c7b829998cd6c3739c70a00e3bfa5c2bd594",
+      "bytes": 939,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/package-inputs.test.mjs",
+      "status": "modified",
+      "before_sha256": "3f67e35baa862b660afbb32b025d903466a7f2db3425ac06c4990b878640be0c",
+      "after_sha256": "6c480e4378b749c44bd54095507b4e35e91a48845122427b04d467619500b1a8",
+      "bytes": 13084,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/pipeline.mjs",
+      "status": "modified",
+      "before_sha256": "80587080ea63335f16e2beca174029a1afc655a35e60c8556ecdbb029681f1cc",
+      "after_sha256": "68d7504dc9bfec24186dc3b0bd5f8038a5995774702e40a7b5487b9196f5c9be",
+      "bytes": 25725,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/workbench-author-contracts.test.mjs",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "291312d6cc2b8c301a5df745f5132d5e69586cae6a5912d56986fd4e43acc244",
+      "bytes": 5216,
+      "mode": "0o644"
+    }
+  ],
+  "full_b0": {
+    "execution": "actual isolated clone of applied main r2 bytes, before 2-path EOF-only formatting; no complete rerun after formatting",
+    "command": [
+      "/usr/bin/sandbox-exec",
+      "-f",
+      "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-b0-offline-r1.sb",
+      "/Users/hutou/homebrew/opt/node@24/bin/node",
+      "scripts/dsh-b0/pipeline.mjs",
+      "--check",
+      "--python",
+      "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/python-r3/bin/python3.14"
+    ],
+    "cwd": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-main-qa-r1",
+    "exit_code": 0,
+    "started_at": "2026-10-11T08:07:47.504226+00:00",
+    "finished_at": "2026-10-11T08:11:15.846492+00:00",
+    "python_summary": "855 passed, 23 warnings, 41 subtests passed in 113.43s (0:01:53)",
+    "node_groups": [
+      {
+        "tests": 3,
+        "suites": 0,
+        "pass": 3,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "group": 1
+      },
+      {
+        "tests": 4,
+        "suites": 0,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "group": 2
+      },
+      {
+        "tests": 9,
+        "suites": 0,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "group": 3
+      },
+      {
+        "tests": 4,
+        "suites": 0,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "group": 4
+      },
+      {
+        "tests": 15,
+        "suites": 0,
+        "pass": 15,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "group": 5
+      },
+      {
+        "tests": 9,
+        "suites": 0,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "group": 6
+      },
+      {
+        "tests": 13,
+        "suites": 0,
+        "pass": 13,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "group": 7
+      },
+      {
+        "tests": 28,
+        "suites": 0,
+        "pass": 28,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "group": 8
+      },
+      {
+        "tests": 12,
+        "suites": 0,
+        "pass": 12,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "group": 9
+      },
+      {
+        "tests": 28,
+        "suites": 0,
+        "pass": 25,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 3,
+        "todo": 0,
+        "group": 10
+      },
+      {
+        "tests": 11,
+        "suites": 0,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 2,
+        "todo": 0,
+        "group": 11
+      },
+      {
+        "tests": 26,
+        "suites": 0,
+        "pass": 26,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "group": 12
+      },
+      {
+        "tests": 3,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 1,
+        "todo": 0,
+        "group": 13
+      },
+      {
+        "tests": 21,
+        "suites": 0,
+        "pass": 21,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "group": 14
+      },
+      {
+        "tests": 91,
+        "suites": 0,
+        "pass": 91,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "group": 15
+      },
+      {
+        "tests": 525,
+        "suites": 0,
+        "pass": 522,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 3,
+        "todo": 0,
+        "group": 16
+      },
+      {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "group": 17
+      },
+      {
+        "tests": 11,
+        "suites": 0,
+        "pass": 11,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "group": 18
+      },
+      {
+        "tests": 14,
+        "suites": 0,
+        "pass": 14,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "group": 19
+      },
+      {
+        "tests": 18,
+        "suites": 0,
+        "pass": 18,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "group": 20
+      },
+      {
+        "tests": 2,
+        "suites": 0,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "group": 21
+      },
+      {
+        "tests": 66,
+        "suites": 0,
+        "pass": 66,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "group": 22
+      },
+      {
+        "tests": 4,
+        "suites": 0,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "group": 23
+      },
+      {
+        "tests": 1,
+        "suites": 0,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "group": 24
+      },
+      {
+        "tests": 1,
+        "suites": 0,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "group": 25
+      },
+      {
+        "tests": 3,
+        "suites": 0,
+        "pass": 3,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "group": 26
+      }
+    ],
+    "node_group_count": 26,
+    "node_skips": 9,
+    "warnings_retained": true,
+    "pipeline_evidence": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-main-qa-r1/.context/dsh-b0/build-evidence.json",
+    "pipeline_evidence_sha256": "550f4df9ea724518d8023ac2ae8dc64b8f0f830c7c213230e578318817d5e5e1",
+    "skip_lines": [
+      "﹣ saved-analysis composition rejects a changed pair receipt before installation (0.018042ms) # Explicit existing service pair/Python/wheelhouse required.",
+      "﹣ saved-analysis composition rejects same-name wheels with different immutable bytes (0.019917ms) # Explicit existing service pair/Python/wheelhouse required.",
+      "﹣ saved-analysis cold install checks exact closure, exclusive output and bootstrap integrity (0.015042ms) # Explicit existing service pair/Python/wheelhouse required.",
+      "﹣ sandboxed packed handshake cannot read denied source and resolves only the bound install (0.080083ms) # NOT_RUN: SHINEMAGE_PROBE_FIXED_BINDING is unset; fixed-package sandbox handshake was not run",
+      "﹣ sandboxed packed mode fails closed on missing, invalid, and schema input without source fallback (0.026167ms) # NOT_RUN: SHINEMAGE_PROBE_FIXED_BINDING is unset; fixed-package sandbox handshake was not run",
+      "﹣ actual query archive cold install, immutable checks, and dependency closure (0.087334ms) # explicit query receipt/Python/wheels required",
+      "﹣ outer timeout reclaims owned official command groups and retains a failed receipt (0.092625ms) # NOT_RUN: explicit pinned upstream and exclusive evidence path required",
+      "﹣ parent SIGTERM interrupts the owned probe while still draining every observed group (0.024416ms) # NOT_RUN: explicit pinned upstream and exclusive evidence path required",
+      "﹣ fixed official modules execute all synthetic shell and tool union cases and join owned commands (0.023041ms) # NOT_RUN: explicit pinned upstream and exclusive evidence path required"
+    ]
+  },
+  "review": {
+    "skill": "/Users/hutou/.agents/skills/open-code-review-delegate/SKILL.md",
+    "ocr_reviewable": 17,
+    "ocr_reviewed": 17,
+    "excluded_manual_reviewed": 1,
+    "unresolved_findings": 0,
+    "external_model": "NOT_RUN"
+  },
+  "remaining_source_inventory": {
+    "raw": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/remaining-source-contracts-r3.json",
+    "default_contract_generators": 15,
+    "source_boundaries_scanner": true,
+    "other_contracts": [
+      {
+        "entry": "scripts/dsh-b0/explicit-build-inputs.test.mjs",
+        "role": "eight original plugin build CLI input failure guards",
+        "remains_after_domain_proposal": true,
+        "source_free": false
+      },
+      {
+        "entry": "scripts/dsh-b0/workbench-author-contracts.test.mjs",
+        "role": "two unchanged author destination/coordinator fixture contracts; proposed file",
+        "remains_after_domain_proposal": true,
+        "source_free": false
+      },
+      {
+        "entry": "dsh-plugins/analytics-workbench/src/competition-agent/competition-agent.test.mjs",
+        "role": "main-owned backend/query contract",
+        "expected_pass": 1,
+        "patterns": [
+          "offline python eval suite"
+        ],
+        "remains_after_domain_proposal": true,
+        "source_free": false
+      },
+      {
+        "entry": "dsh-plugins/analytics-workbench/src/client/competition-board/computed-result.test.mjs",
+        "role": "main-owned backend/query contract",
+        "expected_pass": 1,
+        "patterns": [
+          "v1-v5 judge the period difference by the same four-decimal rounding as its subtraction"
+        ],
+        "remains_after_domain_proposal": true,
+        "source_free": false
+      },
+      {
+        "entry": "dsh-plugins/analytics-workbench/test/query-fault.test.mjs",
+        "role": "main-owned backend/query contract",
+        "expected_pass": 3,
+        "patterns": [
+          "cancel A does not rewrite peer B; SUCCEEDED survives a later cancel",
+          "historical three supervisor exits stay UNKNOWN and are not closed by EPIPE",
+          "fail-card markers never include channel facts"
+        ],
+        "remains_after_domain_proposal": true,
+        "source_free": false
+      },
+      {
+        "entry": "backend/tests/test_board_funnel.py",
+        "role": "separate Python geometry/cross-implementation regression; not in default B0 pyTests list",
+        "remaining_data_source_refs": [
+          "dsh-plugins/analytics-workbench/tests/competition-computed/waterfall-results.json",
+          "dsh-plugins/board-components/test/funnel-cases.json"
+        ]
+      },
+      {
+        "entry": "backend/tests/test_board_waterfall.py",
+        "role": "separate Python geometry fixture regression; not in default B0 pyTests list",
+        "remaining_data_source_refs": [
+          "dsh-plugins/board-components/test/waterfall-cases.json"
+        ]
+      },
+      {
+        "entry": "scripts/dsh-b0/plugin-boundaries.mjs",
+        "role": "default static source inventory walks all dsh-plugins package source and hashes nineteen owned contracts",
+        "remains_after_domain_proposal": true,
+        "source_free": false,
+        "deletion_requires_existing_boundary_policy_and_inventory_migration": true
+      }
+    ],
+    "remaining_source_producers_empty_is_not_all_source_free": true
+  },
+  "raw": {
+    "main-application-r2.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/main-application-r2.json",
+      "sha256": "d0cab181b64fe360f8b70c5bbc4ce280a1bbb05f18f08f5ec6a28a40d63e1c26",
+      "bytes": 927
+    },
+    "full-qa-main-byte-proof-r3.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-qa-main-byte-proof-r3.json",
+      "sha256": "b4c73e8a011e568ce79cbd0c5fecd64234d01be1286ff60d1c08ec693e9a6ead",
+      "bytes": 562384
+    },
+    "full-b0-run-r4.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-b0-run-r4.json",
+      "sha256": "39da1eeee9de30c236b0760115d6060b0f4b8658df5114a55b0e42cd72a85093",
+      "bytes": 2260
+    },
+    "full-b0-run-r4.stdout": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-b0-run-r4.stdout",
+      "sha256": "06dba50b0e3cebe1760f65378ef51e392098eb1cb60b70047089aea74e585c40",
+      "bytes": 89296
+    },
+    "full-b0-run-r4.stderr": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-b0-run-r4.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "full-b0-inputs-r5.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-b0-inputs-r5.json",
+      "sha256": "540f0ec7a819d6843b25026519409e2bf06092b6a440f941477ee7ca15272fef",
+      "bytes": 2068
+    },
+    "full-b0-run-r3.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-b0-run-r3.json",
+      "sha256": "cb89d967462b6503da683f5985360bbedce5a9a86a3f2fb9a17bf6eacf643e47",
+      "bytes": 2258
+    },
+    "full-b0-run-r3.stdout": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-b0-run-r3.stdout",
+      "sha256": "4c66b929dd8c13786deb91c5f88b5c35533fcebb7d8c930bee5fb4bb108814b2",
+      "bytes": 37576
+    },
+    "full-b0-run-r3.stderr": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-b0-run-r3.stderr",
+      "sha256": "ff21382dbe5cb64103a30ae5edba8ebbd5b8e8551424d53c5a57b055f9954b8e",
+      "bytes": 3817
+    },
+    "full-qa-additional-service-inputs-r4.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-qa-additional-service-inputs-r4.json",
+      "sha256": "a766a22365ae8b54c3868c1f08c7c5b83c9ff879ab05b668542fd8a2d70e65fa",
+      "bytes": 1201
+    },
+    "full-qa-service-check-r4.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-qa-service-check-r4.json",
+      "sha256": "5d93ded782ddd16825a0926f2a8074336367a7329d4bcf957954f8025ce260ba",
+      "bytes": 743
+    },
+    "full-qa-service-check-r4.stdout": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-qa-service-check-r4.stdout",
+      "sha256": "d9cc10d93a37ea97a326550ae64a1acf3d400e86b23b64a9ed8c67a024484342",
+      "bytes": 124
+    },
+    "full-qa-python-input-r1.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-qa-python-input-r1.json",
+      "sha256": "eb09ed51b0e0367ce076f807714a300eac4d01849b0174cad4b9e52de69da445",
+      "bytes": 850
+    },
+    "full-b0-run-r1.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-b0-run-r1.json",
+      "sha256": "d852a02328ec832c8d5d9c6daaa7e17c5305b42eda733028c08168b3e4b085da",
+      "bytes": 2237
+    },
+    "full-b0-run-r1.stderr": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-b0-run-r1.stderr",
+      "sha256": "c750968385be49f06868951798c3f5a11ce26344976a101726cb1287d6284c63",
+      "bytes": 857
+    },
+    "full-b0-run-r2.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-b0-run-r2.json",
+      "sha256": "0bcab3ee55426aa5194dfc712ad635dbfcb0f8eea01e92196028b1a6286c4a42",
+      "bytes": 2242
+    },
+    "full-b0-run-r2.stdout": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-b0-run-r2.stdout",
+      "sha256": "f772d1f41fa9ae93f862f26106954087b1d7983f90d21b57c16bc7074384ea80",
+      "bytes": 31562
+    },
+    "full-qa-assets-check-r3.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-qa-assets-check-r3.json",
+      "sha256": "f7249fcde34139b82e75815edcfb1a346bff54a8151850dec06914f52dc88d54",
+      "bytes": 613
+    },
+    "full-qa-assets-check-r3.stdout": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-qa-assets-check-r3.stdout",
+      "sha256": "542214909bca6f52ef94cec0e0813438d6282fc69b540f3a3a0f3dd7b43c8ad2",
+      "bytes": 1303
+    },
+    "full-qa-assets-check-r4.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-qa-assets-check-r4.json",
+      "sha256": "5219c66b9a2cdc4598564c8526e657e1622644a299e62955992b2c68c6fe1a33",
+      "bytes": 717
+    },
+    "full-qa-assets-check-r4.stdout": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-qa-assets-check-r4.stdout",
+      "sha256": "6783b0785b0427fc1ec5d09b721e26def4343c5ee3756c1f0df1be2476b3d469",
+      "bytes": 539
+    },
+    "full-qa-additional-boundary-inputs-r2.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-qa-additional-boundary-inputs-r2.json",
+      "sha256": "174c73ebeeb78cb6dbc11c19e561aabf5b7c948e82dc26869120d76be05239ac",
+      "bytes": 336
+    },
+    "full-qa-additional-assets-inputs-r3.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-qa-additional-assets-inputs-r3.json",
+      "sha256": "254d62d5acf906316c27cd4055e15238ea65cdbec3ccf13df41be8f507d810ca",
+      "bytes": 504
+    },
+    "remaining-source-contracts-r2.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/remaining-source-contracts-r2.json",
+      "sha256": "28beded86c8f24b3af3edaa5a1b2ebb07a44d095ea02d0066e412d1a66607ad7",
+      "bytes": 20932
+    },
+    "remaining-source-contracts-r3.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/remaining-source-contracts-r3.json",
+      "sha256": "6193a0892afe3c68db2db33618a161aca84b12da688e0e2c1549777375c86637",
+      "bytes": 21208
+    },
+    "review-r2.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/review-r2.json",
+      "sha256": "92f6c1761b58fb1ad02a04e2a5184158c2246d177e076805bc99400382568586",
+      "bytes": 6705
+    },
+    "post-application-format-r3.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/post-application-format-r3.json",
+      "sha256": "ab7d5fdb2f00e4f2297466ee796d819caab90dceadd85fe26230b6f67212b55c",
+      "bytes": 1533
+    },
+    "product-formatting-r3.patch": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/product-formatting-r3.patch",
+      "sha256": "e309e69568a6c538fb1197d66887d94c3e371beaf4584f7ce6e5d3f364cdbfc6",
+      "bytes": 573
+    },
+    "applied-diff-check-before-format-r3.stdout": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/applied-diff-check-before-format-r3.stdout",
+      "sha256": "13abcafa0ca893385e6fa1ba5542d6cc19f25eb2fd51407cc044660bb127b984",
+      "bytes": 140
+    },
+    "main-application-final-audit-r1.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/main-application-final-audit-r1.json",
+      "sha256": "0d3aee094b50b4a4e1ec10250ed14cd8ecf5e73fb35f5dfb86b659d339649548",
+      "bytes": 838
+    },
+    "all-owned-b0-process-audit-r2.json": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/all-owned-b0-process-audit-r2.json",
+      "sha256": "01f2408127ebce2ccae1992591759504a24ce4d79755a302bc483ed1e6f04824",
+      "bytes": 217
+    }
+  },
+  "actual_pipeline_domain_author": {
+    "schema": "shinemage-domain-author-validation/v1",
+    "package": "@shine-mage/board-components",
+    "version": "0.1.0",
+    "source_sha": "e78e040e14792c89f99a2e3181004dbdaefd9bf6",
+    "source_files": 30,
+    "archive": {
+      "repository": "tyuanww/shinemage-board-components",
+      "run_id": 38121126913,
+      "attempt": 1,
+      "event": "pull_request",
+      "conclusion": "success",
+      "artifact_id": 11694947955,
+      "sha256": "5207d0adac1a449fe1be36913d0d8214c1f4d8ecc3e137f7368bd27e6c4f28ee",
+      "bytes": 11356,
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-ci-ownership-proposal-20261011-2a8b1o72/remote-ci-artifact-r1.zip"
+    },
+    "groups": [
+      {
+        "name": "geometry",
+        "command": [
+          "--test",
+          "--test-reporter=tap",
+          "--test-concurrency=1",
+          "library/test/geometry.test.mjs"
+        ],
+        "files": [
+          {
+            "path": "library/test/geometry.test.mjs",
+            "bytes": 2142,
+            "sha256": "32cbeedd833193821299cee4419b7f28403e524af25a985f52c1c3c35c913b73"
+          }
+        ],
+        "exit_code": 0,
+        "counts": {
+          "tests": 28,
+          "pass": 28,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "logs": {
+          "stdout": {
+            "path": "geometry.stdout.log",
+            "bytes": 3802,
+            "sha256": "2bc0a66945b9f369e64b6f93650e038c16727969671c8514918f80aac980c2cd"
+          },
+          "stderr": {
+            "path": "geometry.stderr.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      },
+      {
+        "name": "producer-inputs",
+        "command": [
+          "--test",
+          "--test-reporter=tap",
+          "--test-concurrency=1",
+          "scripts/producer.test.mjs",
+          "scripts/build-input.test.mjs"
+        ],
+        "files": [
+          {
+            "path": "scripts/producer.test.mjs",
+            "bytes": 5806,
+            "sha256": "3e40099f84549ee5bb770e1e6e59a52642cbce4ed8721059465979c2272673d5"
+          },
+          {
+            "path": "scripts/build-input.test.mjs",
+            "bytes": 1570,
+            "sha256": "0371134757c24a731df1292b632ec6b491ee57af93af58de496d101035f29c43"
+          }
+        ],
+        "exit_code": 0,
+        "counts": {
+          "tests": 6,
+          "pass": 6,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "logs": {
+          "stdout": {
+            "path": "producer-inputs.stdout.log",
+            "bytes": 1698,
+            "sha256": "d8f94c9387ca082590eca6fa04034eb06ff2d06a4c33e4ef5356c1c8e133430a"
+          },
+          "stderr": {
+            "path": "producer-inputs.stderr.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      }
+    ],
+    "reference": {
+      "schema": "shinemage-domain-reference/v1",
+      "source_repository": "https://github.com/tyuanww/fuqing-crm-analytics",
+      "source_sha": "5390667cc990fa558b0445aa455b086d325a6c77",
+      "package": "@shine-mage/board-components",
+      "version": "0.1.0",
+      "tarball": "shine-mage-board-components-0.1.0.tgz",
+      "sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182",
+      "bytes": 1955,
+      "role": "existing sealed member/identity regression input; not newly released artifact"
+    },
+    "members": {
+      "package/package.json": {
+        "bytes": 576,
+        "sha256": "2683aecb604706742a0b2bb38c2f3a35b5de6646767d3e4d4d20484f80aad3ba"
+      },
+      "package/lib/funnel.mjs": {
+        "bytes": 1660,
+        "sha256": "aebd9f3cdecc93a30b21d18cd554d5e01adfc17cdedc93e7a188ac0f48244dec"
+      },
+      "package/lib/waterfall.mjs": {
+        "bytes": 2308,
+        "sha256": "63aa6dc6010bd7cfe906f5184c395be0771568d40d471bf3184fe0d9ded53b98"
+      },
+      "package/lib/funnel.d.mts": {
+        "bytes": 239,
+        "sha256": "30c157c4cefc1ad5f8182e65af5777f39fcfd473987e1eabc47553f2f3d3c455"
+      },
+      "package/lib/waterfall.d.mts": {
+        "bytes": 341,
+        "sha256": "34b0be969c2f73b3dd1a7633b2e953c74bd5b12c80ed978ac3be0d51ee4a2210"
+      }
+    },
+    "source_execution_here": "NOT_RUN_AUTHOR_OWNED",
+    "independent_tsc": "NOT_IN_CURRENT_BUILD",
+    "current_candidate_host_service_admission": "NOT_RUN",
+    "release_ready": false,
+    "package_input": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/full-main-qa-r1/.context/dsh-b0/package-inputs/shine-mage-board-components-0.1.0.tgz",
+      "sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182",
+      "bytes": 1955
+    }
+  },
+  "unchanged": "other packs/profiles/candidate/journal/VERSION/DSH pin",
+  "hosted_ci": "NOT_RUN_FOR_THIS_MAIN_WORKING_DELTA",
+  "new_reader_live_remote_acquisition": "NOT_RUN; owned mocks and retained actual CI/API binding are distinct",
+  "commit_push_pr_merge_release_deploy": "NOT_RUN",
+  "old_sources_deleted": false,
+  "product": "PARTIAL",
+  "sdk_distribution": "BLOCKED",
+  "release_ready": false,
+  "post_application_formatting": {
+    "schema": "shinemage-main-domain-post-application-format/v1",
+    "at": "2026-10-11T08:12:45.368115+00:00",
+    "paths": [
+      {
+        "path": "scripts/dsh-b0/explicit-build-inputs.test.mjs",
+        "before_sha256": "57c32399bf6c12d9d0e95f4ec54c174933eb33c09ef7c5f575ae6b3d7520613d",
+        "after_sha256": "72213c09d270788a21fa953f10bba7576fddfae48cf9a28ec6c46715a60231b0",
+        "before_bytes": 1585,
+        "after_bytes": 1584,
+        "change": "remove exactly one empty final line; no other bytes changed",
+        "syntax_exit": 0
+      },
+      {
+        "path": "scripts/dsh-b0/package-inputs.test.mjs",
+        "before_sha256": "6c480e4378b749c44bd54095507b4e35e91a48845122427b04d467619500b1a8",
+        "after_sha256": "53cbe2a58fa195e1216fe6ec34109554d2907d6975acdd1569711c523e18f9e8",
+        "before_bytes": 13084,
+        "after_bytes": 13083,
+        "change": "remove exactly one empty final line; no other bytes changed",
+        "syntax_exit": 0
+      }
+    ],
+    "before_diff_check_exit": 2,
+    "after_diff_check_exit": 0,
+    "review": "host reviewed exact 2-path diff: one EOF blank line removed each; no tokens/logic change",
+    "full_b0_reference": "full-b0-run-r4.json (successful r2 before EOF normalization)",
+    "full_b0_repeated_after_whitespace": "NOT_RUN; no behavior changes",
+    "patch": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/product-formatting-r3.patch",
+      "sha256": "e309e69568a6c538fb1197d66887d94c3e371beaf4584f7ce6e5d3f364cdbfc6"
+    },
+    "commit_push_merge": "NOT_RUN"
+  },
+  "current_product_paths": [
+    {
+      "path": ".github/workflows/dsh-b0.yml",
+      "status": "modified",
+      "before_sha256": "925fdfd7847b07dd412346f8894e7ae80a36ec4cb68e70a767fa59ea498f5799",
+      "after_sha256": "0a0f7b90cfebade14aea72a2b4842081532e7c76ec95fcce84ca81c79cfa02f4",
+      "bytes": 3590,
+      "mode": "0o644"
+    },
+    {
+      "path": ".github/workflows/dsh-release-preflight.yml",
+      "status": "modified",
+      "before_sha256": "7c014a1c4f42da3168c188c26511c52172a43a5e77056f15ad2eb6941962e363",
+      "after_sha256": "5cfdf6dd338e535b087c9743887fe5df1f520e782055d2213201954acc69e280",
+      "bytes": 9348,
+      "mode": "0o644"
+    },
+    {
+      "path": ".github/workflows/lint.yml",
+      "status": "modified",
+      "before_sha256": "b013023289036b4bb584269982c18d5caeafff8d3ca7a629927cddc07230adac",
+      "after_sha256": "9fd1c057266375a03cc45ca9c0e5b4fb528b1ca14a1539aecc0b9f61901c2da4",
+      "bytes": 17073,
+      "mode": "0o644"
+    },
+    {
+      "path": "backend/tests/test_pre_push_smart_path.py",
+      "status": "modified",
+      "before_sha256": "d66b45c9c25dd29ba8cf7e4db11e28e436adfda86787496871809ffc1caa6c73",
+      "after_sha256": "0a04a8f539db332b7f9b766e3717c9f55e406b9730b7f344cc2f046b7287e608",
+      "bytes": 13014,
+      "mode": "0o644"
+    },
+    {
+      "path": "config/domain-author-evidence.lock.json",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "5c5919362309b3c6837d6cb6fd1499437d9b383d8fc0e358a1a08f9049f8283d",
+      "bytes": 5703,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/ci/domain-author-evidence.mjs",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "2c1ad263f1d2dee3afac990a52a0c46ebdd3cb7664316b75f7812c2baa086f7d",
+      "bytes": 14602,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/ci/domain-author-evidence.test.mjs",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "d84b26386d038b234d2409ec66b8f96c9d0e80cb351d6ae5e47dd11743fa4dc4",
+      "bytes": 11617,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/ci/pre_push_path_class.py",
+      "status": "modified",
+      "before_sha256": "9208f68d3a86fd1c41c7f415941b716655690d49239bcd42250a468faa940b58",
+      "after_sha256": "05f29c1f6661422092af07606084e9252f9ddf176eb824f00cecdba381511bcb",
+      "bytes": 13020,
+      "mode": "0o755"
+    },
+    {
+      "path": "scripts/ci/read-domain-author-evidence.py",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "148e7bab30f93759c93ad6938dd85fa43172eaab476b81f7f253a34cfe07a294",
+      "bytes": 3197,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/domain-package-inputs.mjs",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "52a84f5dbe6b3fd54f12d4a1525177517195eddbdeacd91d0300b9f61f7b7eb2",
+      "bytes": 2143,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/explicit-build-inputs-source.legacy.mjs",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "51dd69a130e3b9e12ac365fde8e34db2d8c84c62ea7ddf18c98510fbcb1928ba",
+      "bytes": 2058,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/explicit-build-inputs.test.mjs",
+      "status": "modified",
+      "before_sha256": "51dd69a130e3b9e12ac365fde8e34db2d8c84c62ea7ddf18c98510fbcb1928ba",
+      "after_sha256": "72213c09d270788a21fa953f10bba7576fddfae48cf9a28ec6c46715a60231b0",
+      "bytes": 1584,
+      "mode": "0o644",
+      "post_r2_change": "one trailing empty line removed"
+    },
+    {
+      "path": "scripts/dsh-b0/package-inputs-source-binding.legacy.mjs",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "2b70c08a9d966d444fbcac27cff3c76322b3eb93e4dda803d0df7031fb284aa3",
+      "bytes": 847,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/package-inputs-source-fixture.legacy.mjs",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "3f67e35baa862b660afbb32b025d903466a7f2db3425ac06c4990b878640be0c",
+      "bytes": 23273,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/package-inputs.mjs",
+      "status": "modified",
+      "before_sha256": "2b70c08a9d966d444fbcac27cff3c76322b3eb93e4dda803d0df7031fb284aa3",
+      "after_sha256": "1d4e6718640ddbbd36895f3babb5c7b829998cd6c3739c70a00e3bfa5c2bd594",
+      "bytes": 939,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/package-inputs.test.mjs",
+      "status": "modified",
+      "before_sha256": "3f67e35baa862b660afbb32b025d903466a7f2db3425ac06c4990b878640be0c",
+      "after_sha256": "53cbe2a58fa195e1216fe6ec34109554d2907d6975acdd1569711c523e18f9e8",
+      "bytes": 13083,
+      "mode": "0o644",
+      "post_r2_change": "one trailing empty line removed"
+    },
+    {
+      "path": "scripts/dsh-b0/pipeline.mjs",
+      "status": "modified",
+      "before_sha256": "80587080ea63335f16e2beca174029a1afc655a35e60c8556ecdbb029681f1cc",
+      "after_sha256": "68d7504dc9bfec24186dc3b0bd5f8038a5995774702e40a7b5487b9196f5c9be",
+      "bytes": 25725,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/workbench-author-contracts.test.mjs",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "291312d6cc2b8c301a5df745f5132d5e69586cae6a5912d56986fd4e43acc244",
+      "bytes": 5216,
+      "mode": "0o644"
+    }
+  ],
+  "final_preservation_audit": {
+    "schema": "shinemage-domain-main-application-final-audit/v1",
+    "at": "2026-10-11T08:15:06.813322+00:00",
+    "main_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+    "main_branch": "codex/shinemage-abc-local-candidate",
+    "index_empty": true,
+    "product_paths_verified": 18,
+    "paths_exact_r2": 16,
+    "post_r2_eof_only_paths": 2,
+    "inherited_outside_product_docs_unchanged": 160,
+    "local_link_targets_checked": 387,
+    "broken_links": [],
+    "diff_check_exit": 0,
+    "owner_head": "e78e040e14792c89f99a2e3181004dbdaefd9bf6",
+    "owner_clean": true,
+    "version": "0.20.0.0",
+    "compact_status_records_including_unrelated": 180,
+    "expanded_status_records_including_unrelated": 185,
+    "main_git_delivery": "NOT_RUN",
+    "old_source_deletion": "NOT_RUN",
+    "product": "PARTIAL",
+    "sdk_distribution": "BLOCKED",
+    "release_ready": false
+  }
+}

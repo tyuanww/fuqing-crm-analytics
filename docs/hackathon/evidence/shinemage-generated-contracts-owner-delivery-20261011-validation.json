@@ -1,0 +1,595 @@
+{
+  "schema": "shinemage-generated-contract-owner-delivery/v1",
+  "main_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "recorded_at": "2026-10-11T08:53:46.625756+00:00",
+  "author_commits": [
+    {
+      "owner": "workbench",
+      "root": "/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/dsh-analytics-workbench",
+      "head": "a0d979f356c012fda0421c232f81d109c7ffd756",
+      "parent": "e922328906a7bf7a7251c26198683f67fa3afd39",
+      "branch": "codex/analytics-workbench-independent",
+      "paths": 8,
+      "clean": true,
+      "push": "NOT_RUN",
+      "remote_ci": "NOT_RUN",
+      "main_cutover": "NOT_APPLIED",
+      "release_ready": false
+    },
+    {
+      "owner": "crm",
+      "root": "/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/dsh-crm-knowledge",
+      "head": "dcb864a497547ef1701441cb0470ebc487698835",
+      "parent": "5a839fa86de2240cf661a9034c58e0ead2d4b4ef",
+      "branch": "codex/crm-knowledge-independent",
+      "paths": 8,
+      "clean": true,
+      "push": "NOT_RUN",
+      "remote_ci": "NOT_RUN",
+      "main_cutover": "NOT_APPLIED",
+      "release_ready": false
+    },
+    {
+      "owner": "brand",
+      "root": "/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand",
+      "head": "0b8c8a793b585c22c980b9d3afe8b9839d7632ec",
+      "parent": "57ebcf38278068394a4feb42125c30c195fd912a",
+      "branch": "codex/shine-brand-independent",
+      "paths": 6,
+      "clean": true,
+      "push": "NOT_RUN",
+      "remote_ci": "NOT_RUN",
+      "main_cutover": "NOT_APPLIED",
+      "release_ready": false
+    }
+  ],
+  "current_author_deliveries": [
+    {
+      "owner": "workbench",
+      "root": "/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/dsh-analytics-workbench",
+      "head": "6c5adc9faa04f692d5d4b3028af4f945ab49dfe4",
+      "parent": "e922328906a7bf7a7251c26198683f67fa3afd39",
+      "branch": "codex/analytics-workbench-independent",
+      "paths": 8,
+      "clean": true,
+      "push": "PASS",
+      "remote_ci": "SUCCESS",
+      "main_cutover": "NOT_APPLIED",
+      "release_ready": false,
+      "repository": "tyuanww/dsh-analytics-workbench",
+      "push_exit": 0,
+      "pr": "https://github.com/tyuanww/dsh-analytics-workbench/pull/1",
+      "started_at": "2026-10-11T08:40:32.364551+00:00",
+      "finished_at": "2026-10-11T08:40:36.350813+00:00",
+      "previous_contract_commit": "a0d979f356c012fda0421c232f81d109c7ffd756",
+      "cache_fix_commit": "6c5adc9faa04f692d5d4b3028af4f945ab49dfe4",
+      "index_empty": true,
+      "pr_state": "OPEN",
+      "commits": [
+        "6c5adc9faa04f692d5d4b3028af4f945ab49dfe4",
+        "a0d979f356c012fda0421c232f81d109c7ffd756"
+      ],
+      "commit_paths": {
+        "6c5adc9faa04f692d5d4b3028af4f945ab49dfe4": [
+          ".github/workflows/ci-full.yml"
+        ],
+        "a0d979f356c012fda0421c232f81d109c7ffd756": [
+          ".github/workflows/ci-full.yml",
+          "CONTRACT-INPUTS.md",
+          "README.md",
+          "config/contract-artifact-inputs.json",
+          "inputs/public-contracts/consumer-expectations.json",
+          "scripts/contract-consumer.test.mjs",
+          "scripts/export-contract-inputs.mjs",
+          "scripts/export-contract-inputs.test.mjs"
+        ]
+      },
+      "verified_at": "2026-10-11T08:52:34.940911+00:00",
+      "checks": [
+        {
+          "name": "repo-inputs",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/38126014985/job/114430416056"
+        },
+        {
+          "name": "repo-inputs",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/38126012047/job/114430407886"
+        },
+        {
+          "name": "strict-build",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/38126014921/job/114430416327"
+        },
+        {
+          "name": "strict-build",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/38126012103/job/114430408117"
+        }
+      ]
+    },
+    {
+      "owner": "crm",
+      "root": "/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/dsh-crm-knowledge",
+      "head": "c4b1c91eaa4fa645deb7951614c1937eb76db143",
+      "parent": "5a839fa86de2240cf661a9034c58e0ead2d4b4ef",
+      "branch": "codex/crm-knowledge-independent",
+      "paths": 8,
+      "clean": true,
+      "push": "PASS",
+      "remote_ci": "SUCCESS",
+      "main_cutover": "NOT_APPLIED",
+      "release_ready": false,
+      "repository": "tyuanww/dsh-crm-knowledge",
+      "push_exit": 0,
+      "pr": "https://github.com/tyuanww/dsh-crm-knowledge/pull/1",
+      "started_at": "2026-10-11T08:40:37.602013+00:00",
+      "finished_at": "2026-10-11T08:40:41.519877+00:00",
+      "previous_contract_commit": "dcb864a497547ef1701441cb0470ebc487698835",
+      "cache_fix_commit": "c4b1c91eaa4fa645deb7951614c1937eb76db143",
+      "index_empty": true,
+      "pr_state": "OPEN",
+      "commits": [
+        "c4b1c91eaa4fa645deb7951614c1937eb76db143",
+        "dcb864a497547ef1701441cb0470ebc487698835"
+      ],
+      "commit_paths": {
+        "c4b1c91eaa4fa645deb7951614c1937eb76db143": [
+          ".github/workflows/ci.yml"
+        ],
+        "dcb864a497547ef1701441cb0470ebc487698835": [
+          ".github/workflows/ci.yml",
+          "CONTRACT-INPUTS.md",
+          "README.md",
+          "config/contract-artifact-inputs.json",
+          "inputs/public-contracts/consumer-expectations.json",
+          "scripts/contract-consumer.test.mjs",
+          "scripts/export-contract-inputs.mjs",
+          "scripts/export-contract-inputs.test.mjs"
+        ]
+      },
+      "verified_at": "2026-10-11T08:52:37.200523+00:00",
+      "checks": [
+        {
+          "name": "strict-build",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/tyuanww/dsh-crm-knowledge/actions/runs/38126019403/job/114430430045"
+        },
+        {
+          "name": "strict-build",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/tyuanww/dsh-crm-knowledge/actions/runs/38126016298/job/114430419911"
+        }
+      ]
+    },
+    {
+      "owner": "brand",
+      "root": "/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand",
+      "head": "0b8c8a793b585c22c980b9d3afe8b9839d7632ec",
+      "parent": "57ebcf38278068394a4feb42125c30c195fd912a",
+      "branch": "codex/shine-brand-independent",
+      "paths": 6,
+      "clean": true,
+      "push": "PASS",
+      "remote_ci": "SUCCESS",
+      "main_cutover": "NOT_APPLIED",
+      "release_ready": false,
+      "repository": "tyuanww/dsh-shine-brand",
+      "push_exit": 0,
+      "pr": "https://github.com/tyuanww/dsh-shine-brand/pull/1",
+      "started_at": "2026-10-11T08:40:42.814153+00:00",
+      "finished_at": "2026-10-11T08:40:46.786038+00:00",
+      "index_empty": true,
+      "pr_state": "OPEN",
+      "commits": [
+        "0b8c8a793b585c22c980b9d3afe8b9839d7632ec"
+      ],
+      "commit_paths": {
+        "0b8c8a793b585c22c980b9d3afe8b9839d7632ec": [
+          ".github/workflows/ci.yml",
+          "CONTRACT-INPUTS.md",
+          "README.md",
+          "config/contract-artifact-inputs.json",
+          "scripts/export-contract-inputs.mjs",
+          "scripts/export-contract-inputs.test.mjs"
+        ]
+      },
+      "verified_at": "2026-10-11T08:52:39.599383+00:00",
+      "checks": [
+        {
+          "name": "public-compiler",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/tyuanww/dsh-shine-brand/actions/runs/38125655260/job/114429370621"
+        },
+        {
+          "name": "public-compiler",
+          "conclusion": "SUCCESS",
+          "detailsUrl": "https://github.com/tyuanww/dsh-shine-brand/actions/runs/38125652924/job/114429364053"
+        }
+      ]
+    }
+  ],
+  "actual_ci_bindings": [
+    {
+      "owner": "workbench",
+      "repository": "tyuanww/dsh-analytics-workbench",
+      "source_sha": "6c5adc9faa04f692d5d4b3028af4f945ab49dfe4",
+      "run_id": 38126014921,
+      "run_url": "https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/38126014921",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "artifact_binding": "VERIFIED",
+      "artifact_id": 11697481756,
+      "artifact_name": "public-contracts-38126014921-1",
+      "archive_sha256": "74e7af647128fea315f3953e609c00bb986b4656e1a03eeb3112cfcfc2c3dfaf",
+      "archive_bytes": 65662,
+      "expires_at": "2026-10-25T08:49:52Z",
+      "manifest_sha256": "85f17db0fa3d2eb8d0ccf10e990f8ee2dd85ffc878420c490c245f5d17b9afba",
+      "materials": 28,
+      "input_bytes": 439077,
+      "owned_increment_tests": 12,
+      "job_sha": "7bfa7814f014c2a9dc5129c615e4153d442f3c8d",
+      "main_cutover": "NOT_APPLIED",
+      "release_ready": false,
+      "observed_at": "2026-10-11T08:53:01.242074+00:00"
+    },
+    {
+      "owner": "crm",
+      "repository": "tyuanww/dsh-crm-knowledge",
+      "source_sha": "c4b1c91eaa4fa645deb7951614c1937eb76db143",
+      "run_id": 38126019403,
+      "run_url": "https://github.com/tyuanww/dsh-crm-knowledge/actions/runs/38126019403",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "artifact_binding": "VERIFIED",
+      "artifact_id": 11696962431,
+      "artifact_name": "public-contracts-38126019403-1",
+      "archive_sha256": "e839c07440ebca9910364ea8951734d49e88a451c9d7a177374c38f0a80ed21c",
+      "archive_bytes": 2816,
+      "expires_at": "2026-10-25T08:48:50Z",
+      "manifest_sha256": "57bb531d0ceb45258c0e9b974ede02ba590b06a9d882427fa6dcd970da60273c",
+      "materials": 2,
+      "input_bytes": 4252,
+      "owned_increment_tests": 12,
+      "job_sha": "d7029a3bbcfa3c4f39ffe1d94079041ac9f517b5",
+      "main_cutover": "NOT_APPLIED",
+      "release_ready": false,
+      "observed_at": "2026-10-11T08:53:10.229680+00:00"
+    },
+    {
+      "owner": "brand",
+      "repository": "tyuanww/dsh-shine-brand",
+      "source_sha": "0b8c8a793b585c22c980b9d3afe8b9839d7632ec",
+      "run_id": 38125655260,
+      "run_url": "https://github.com/tyuanww/dsh-shine-brand/actions/runs/38125655260",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "artifact_binding": "VERIFIED",
+      "artifact_id": 11697365923,
+      "artifact_name": "public-contracts-38125655260-1",
+      "archive_sha256": "7fe83711a958f5801598f8f798a1d0727c0ba5bde96750cd62deaa161972c93b",
+      "archive_bytes": 1766,
+      "expires_at": "2026-10-25T08:41:08Z",
+      "manifest_sha256": "4a3d28229b23d48209ec43cdce67e488b65f264235936e192a22bdb16d6b3c77",
+      "materials": 1,
+      "input_bytes": 1973,
+      "owned_increment_tests": 9,
+      "job_sha": "b89477c735924240f8fb6d1de82a324220955d2d",
+      "main_cutover": "NOT_APPLIED",
+      "release_ready": false,
+      "observed_at": "2026-10-11T08:47:42.881126+00:00"
+    }
+  ],
+  "public_materials": {
+    "files": 31,
+    "bytes": 445302,
+    "runtime_implementation_included": false
+  },
+  "original_generators": {
+    "unchanged_entries": 15,
+    "exit_0": 15,
+    "original_slot_tests": 4,
+    "original_theme_negative_tests": 2
+  },
+  "main_contract_cutover": "NOT_APPLIED",
+  "new_main_ci": "NOT_RUN",
+  "new_candidate_journal": "NOT_RUN",
+  "main_index_empty": true,
+  "main_commit": "NOT_RUN",
+  "merge_release_deploy": "NOT_RUN",
+  "sdk_distribution": "BLOCKED",
+  "product": "PARTIAL",
+  "release_ready": false,
+  "description_sha256": "e84e20c0d5813c230fe8223c91903015fa11b444966da253bf82dee7ba70238c",
+  "raw_bindings": [
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/owner-contract-inventory-r1.json",
+      "sha256": "a1800b995af0c6d0e6d9a4dab7da7ccf50b12e41db1041e0487f3836d82f0faf"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/public-stage-inputs-r3.json",
+      "sha256": "dc6097a479cde5a475e5ef35fef1655f8fff1d94b24beff6bb4a77eb2a6c8596"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/public-stage-summary-r3.json",
+      "sha256": "164d1ed583a17cd8efd69d2957f1c4882b533aecebf54f5d0997b0fb51a6083d"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/public-stage-execution-r3.json",
+      "sha256": "af4a73937c29a0ea1abc1435cf91c2848901adf6aa1226a7c43efa1a2321980d"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/export-r4-execution.json",
+      "sha256": "62142b05aa764cb6b163d3288d19ef43aa65e29df07f232b145d2b6e5200b27c"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/author-tests-execution-r2.json",
+      "sha256": "cce59475eaa30daf72d36ce582212a034da761608b689e4c4ba41b28253bb1f0"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/review-r2/host-review.json",
+      "sha256": "fa7303d1643d35256c74d32aef0fc6cb448078b03641be678c90ceb410f9143c"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/author-review-final-r3.json",
+      "sha256": "bb4ac00070c50eecf3bd4a122f181f33019bd8647b7353d8a9a07171ebb0251a"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/authorized-author-commits-r1.json",
+      "sha256": "a616740c4f7afd34f701232d278ff88ebe902f5bd33d5348cd12aae1fb55fbf4"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/authorized-git-execution-r1.json",
+      "sha256": "276c9f8c9a3a7974bab887c55cb797147ab9433ff462959e2919b401979a4f3d"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/authorized-author-pushes-r2.json",
+      "sha256": "0ab6f113296d9dc4e6e9dca7fd09323a5c1a17804162c4f354c4816a5b573cf9"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/authorized-author-delivery-final-r3.json",
+      "sha256": "8924bc29a67d6cedccc354c9ebdc84d9feb60d4f698c9853749b9361f768e490"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-cache-fix-r1/delivery.json",
+      "sha256": "ad0c62e8ac948968ecccba13237124b85678cfba992d48dbe40ffc5c49bc426e"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/cache-ci-proof-r1/summary-r2.json",
+      "sha256": "cbf1906de612a567df7f431d2fbfab9491ef74d3238ce77bf5b2ba4f68d3a7c9"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r3/summary.json",
+      "sha256": "6fa0f84889e99fad0c96bd3f135dc8cd3e159530f721e7f7d2880f14c479cbfd"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r4/network-failure.json",
+      "sha256": "546951d534d15532023c98edcfae0f5a3543f7e51e52c380765b764492ff65d7"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/summary.json",
+      "sha256": "2277acba1058d9cf35f6f86b4f658c20a4cd6a12621d148adff6f0ab2f70f5d2"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-stage-material-identity-r1.json",
+      "sha256": "81f0866ffdb5bbbe25a02661cb17d1b7d152a1408c0f3204bb93811a79e44d17"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/stage-policy-failure-r1.json",
+      "sha256": "c30f775ee7b4d217b4f372914e341b5b2b5e45e09e842b4e916a51cf8917056d"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/observed-stage-failure-r2.json",
+      "sha256": "2eb92865d0e16dd3a314afe39562458ca5efd8692abbc4ddedb59bc4938f58c7"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/cache-ci-proof-r1/missing-local-preparation-input-r1.json",
+      "sha256": "9a0dee22981f4e471ae5fc7061e07fd3187b7d00ebed772a8318a447df197a09"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/workbench/artifacts.json",
+      "sha256": "1b286be67b6c5776a1d223b997b5e1e51a53bea6c411419214dbf61ffc90dd79"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/workbench/artifacts.json.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/workbench/job-commit.json",
+      "sha256": "a9076731f01a7c72dd7733ab3ff95a8154e7d21c875501baaf5fd37b0d285bf5"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/workbench/job-commit.json.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/workbench/jobs.json",
+      "sha256": "f8a49fa8ec1d796b0eba55c7d4aba7ffd68d597bba0504622f18338683b4b3f5"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/workbench/jobs.json.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/workbench/manifest.json",
+      "sha256": "85f17db0fa3d2eb8d0ccf10e990f8ee2dd85ffc878420c490c245f5d17b9afba"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/workbench/owned-contract-step.log",
+      "sha256": "4058f80103187eb1f0da071c75f219d3cfcdc20f52040010788d4869728c4def"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/workbench/public-contracts.zip",
+      "sha256": "74e7af647128fea315f3953e609c00bb986b4656e1a03eeb3112cfcfc2c3dfaf"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/workbench/public-contracts.zip.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/workbench/run-log.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/workbench/run-log.stdout",
+      "sha256": "96c52e77113761fc9e997443522b9422a89be9d1f5997832e516c4fdbc4d79fd"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/workbench/run.json",
+      "sha256": "f3e5e2588d17bc5692be6e092794c4dedaad0cf2f511f44fbcd7c6bc85a4d787"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/workbench/run.json.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/workbench/runs.json",
+      "sha256": "dbfa16cf012895082f98dfe7aa67419954b341930e364e133610790ad91f6409"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/workbench/runs.json.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/crm/artifacts.json",
+      "sha256": "2fb1f95241c3bd9636e45e36df84468215643564d6ef227c88d847111c599450"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/crm/artifacts.json.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/crm/job-commit.json",
+      "sha256": "eefdaf223adbbf75270630418ab6e234d7f349afe259f14b54e287c7ee0fb65a"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/crm/job-commit.json.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/crm/jobs.json",
+      "sha256": "bd8a92b26baafe15436e43915247d5d7bc3ca72d54605d98b1043b826db3bb17"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/crm/jobs.json.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/crm/manifest.json",
+      "sha256": "57bb531d0ceb45258c0e9b974ede02ba590b06a9d882427fa6dcd970da60273c"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/crm/owned-contract-step.log",
+      "sha256": "cd469346d8082b9141122e3a30f7ba294cc33f725ac23dae755fdb21e2d0d8bd"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/crm/public-contracts.zip",
+      "sha256": "e839c07440ebca9910364ea8951734d49e88a451c9d7a177374c38f0a80ed21c"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/crm/public-contracts.zip.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/crm/run-log.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/crm/run-log.stdout",
+      "sha256": "6327a8bd9f35c5adeeb5a2af6d3b80de22834ad9aaef73160d1d72860ac0d0ae"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/crm/run.json",
+      "sha256": "76bd0128d5972252c2c904192ee1cf22bbbcb3aff0665c81b039a6a854139424"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/crm/run.json.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/crm/runs.json",
+      "sha256": "eb46fca3c4fbb4f5a2eaf1433ba0b054b3dc35cf1a160ddd3849e3d7bf12c45a"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/crm/runs.json.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r3/brand/artifacts.json",
+      "sha256": "1eaf9150f671c4dcb4aafe04cb9cb625d2e7f1138b3a6b554c209e2840e81642"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r3/brand/artifacts.json.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r3/brand/job-commit.json",
+      "sha256": "1c9ee4548b2965037936b8bb1cf3f8ff40e33601a8eb23c3ead0a7cd96d51f5d"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r3/brand/job-commit.json.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r3/brand/jobs.json",
+      "sha256": "df5e3de5ed871591085ee8c79ac47c41724aaa666f8480b3695c00089fd78058"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r3/brand/jobs.json.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r3/brand/manifest.json",
+      "sha256": "4a3d28229b23d48209ec43cdce67e488b65f264235936e192a22bdb16d6b3c77"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r3/brand/owned-contract-step.log",
+      "sha256": "75ff6db3c408bf044468f6eb7de934f1c9d8010f46fb2870e9931aeee9245778"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r3/brand/public-contracts.zip",
+      "sha256": "7fe83711a958f5801598f8f798a1d0727c0ba5bde96750cd62deaa161972c93b"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r3/brand/public-contracts.zip.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r3/brand/run-log.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r3/brand/run-log.stdout",
+      "sha256": "fa20c70f741716df0c54c1b2cc7d67aafa5dfe3d3a4ed58559d4e48dde07eef0"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r3/brand/run.json",
+      "sha256": "66eb126c6834a62b809fcb16be9eeca40ed9f721d73c38ec6daff49352b9f2f4"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r3/brand/run.json.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r3/brand/runs.json",
+      "sha256": "6c207fbae64fc31354a7d454c4f9192a65278b984c241a4fe1669dffd810170e"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r3/brand/runs.json.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/main-delivery-final-audit-r1.json",
+      "sha256": "07904102cdd4a3afd34db8d10b9ed5c573f418c8666418c995b153bc6f17f671"
+    }
+  ],
+  "main_final_audit": {
+    "inherited_files_unchanged": 180,
+    "local_link_targets_verified": 381,
+    "unexpected_changed_paths": [],
+    "main_contract_cutover": "NOT_APPLIED"
+  }
+}

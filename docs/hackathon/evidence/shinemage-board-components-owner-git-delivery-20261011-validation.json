@@ -1,0 +1,299 @@
+{
+  "schema": "shinemage-board-components-owner-git-delivery/v1",
+  "date": "2026-10-11",
+  "main_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "main_branch": "codex/shinemage-abc-local-candidate",
+  "authorization": "local initialization, exact 28-path r2 first commit, staged incremental review, real clone isolation validation only",
+  "owner": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/board-components",
+    "branch": "codex/board-components-independent",
+    "head": "3855db80f380856e21d5e034070d5e76cb127b8f",
+    "tree": "f8d3e1f858637ffe3e7c1d1632284a88feaafb2e",
+    "first_commit": true,
+    "parents": [],
+    "paths": 28,
+    "git_clean": true,
+    "remote": null,
+    "message": "feat(board-components): add independent domain library author repository",
+    "exit_code": 0
+  },
+  "clone": {
+    "schema": "shinemage-domain-author-true-clone/v1",
+    "clone": "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/clones/r1",
+    "source_commit": "3855db80f380856e21d5e034070d5e76cb127b8f",
+    "clone_exit_code": 0,
+    "no_local": true,
+    "alternates": false,
+    "initial_lib": false,
+    "initial_node_modules": false,
+    "all_28_files_match_r2_plan": true,
+    "git_clean_after_checks": true
+  },
+  "review": {
+    "skill": "/Users/hutou/.agents/skills/open-code-review-delegate/SKILL.md",
+    "mode": "workspace staged empty-tree diff",
+    "reviewable_files": 19,
+    "reviewed_files": 19,
+    "skipped_files": 0,
+    "coverage_rate": 1,
+    "findings": [],
+    "supplemental_excluded_text_files": 7,
+    "sealed_archives_inspected": 2,
+    "independent_external_review": "NOT_RUN",
+    "PR_base_branch_review": "NOT_APPLICABLE_UNBORN_REPOSITORY",
+    "record": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/ocr-staged-review-r1.json",
+      "bytes": 13534,
+      "sha256": "df1762ea317764829e9699ec02d462bd2c94855b1b98fda3157850eb5d0617cc"
+    }
+  },
+  "fixed_bug": {
+    "path": "library/build.mjs",
+    "scope": "domain owner only; original main producer unchanged",
+    "reason": "existing ignored lib output symlink followed by copyFile rewrote another owned fixture marker",
+    "proof": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/reproduction-r1.json",
+      "bytes": 273,
+      "sha256": "cf3b6746d48a8dd274f339bdfc8107785b449a0d5294d6e030d697041db26a65"
+    },
+    "negative_old_build": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/regression-old-build-r1.json",
+      "bytes": 732,
+      "sha256": "584e5721de3b6b3f5049ac4c09011496aa8c6b5573326720cdb1f15d7ba970aa"
+    },
+    "repair": "preflight four lib outputs; own temporary output; rename without following final file link; finally cleanup"
+  },
+  "verification": {
+    "geometry": {
+      "pass": 28,
+      "fail": 0,
+      "skip": 0
+    },
+    "producer_and_input": {
+      "pass": 6,
+      "fail": 0,
+      "skip": 0
+    },
+    "preparation_guards": {
+      "tests": 4,
+      "fail": 0
+    },
+    "source_negative_controls": 17,
+    "negative_control_result": "all EPERM",
+    "separately_counted": true,
+    "installed_symlinks_within_clone": true,
+    "stages": [
+      {
+        "stage": "negative-controls",
+        "argv": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/source-denied-clone-r1.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "-e",
+          "const fs=require('node:fs'); const paths=[\"/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/board-components/src/funnel.mjs\", \"/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/analytics-workbench/src/board-spec/component-view.mjs\", \"/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/package.json\", \"/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/plugin-kit/build-tools/package.json\", \"/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/board-components/library/src/waterfall.mjs\", \"/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/dsh-analytics-workbench/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/dsh-crm-knowledge/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-knowledge-independent-20261008/dsh-knowledge/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-board/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-crowd-action/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-query/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/dsh-shine-funnel/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/dsh-shine-waterfall/plugin/package.json\", \"/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/repro-author-r1/library/src/funnel.mjs\", \"/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/verify-author-r2/library/src/funnel.mjs\", \"/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/regression-old-build-r1/library/src/funnel.mjs\"]; const rows=paths.map(path=>{try{fs.readFileSync(path);return{path,status:'READ'}}catch(e){return{path,status:e.code}}});console.log(JSON.stringify({scope:'exact-source-denial',rows}));if(rows.some(x=>x.status!=='EPERM'))process.exit(1);"
+        ],
+        "cwd": "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/clones/r1",
+        "started_at": "2026-10-11T06:37:35.652158+00:00",
+        "ended_at": "2026-10-11T06:37:35.696498+00:00",
+        "exit_code": 0,
+        "counts": {}
+      },
+      {
+        "stage": "install",
+        "argv": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/source-denied-clone-r1.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "scripts/pinned-pnpm.mjs",
+          "install",
+          "--frozen-lockfile",
+          "--ignore-scripts",
+          "--offline",
+          "--store-dir",
+          "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/clone-store-r1"
+        ],
+        "cwd": "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/clones/r1",
+        "started_at": "2026-10-11T06:37:35.696738+00:00",
+        "ended_at": "2026-10-11T06:37:36.309364+00:00",
+        "exit_code": 0,
+        "counts": {}
+      },
+      {
+        "stage": "check-inputs",
+        "argv": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/source-denied-clone-r1.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "scripts/check-inputs.mjs"
+        ],
+        "cwd": "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/clones/r1",
+        "started_at": "2026-10-11T06:37:36.309527+00:00",
+        "ended_at": "2026-10-11T06:37:36.528040+00:00",
+        "exit_code": 0,
+        "counts": {}
+      },
+      {
+        "stage": "preparation-guards",
+        "argv": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/source-denied-clone-r1.sb",
+          "/Users/hutou/homebrew/opt/python@3.14/bin/python3.14",
+          "-I",
+          "-B",
+          "scripts/ci/preparation-guards.test.py"
+        ],
+        "cwd": "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/clones/r1",
+        "started_at": "2026-10-11T06:37:36.528264+00:00",
+        "ended_at": "2026-10-11T06:37:36.859030+00:00",
+        "exit_code": 0,
+        "counts": {}
+      },
+      {
+        "stage": "producer-tests",
+        "argv": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/source-denied-clone-r1.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "--test",
+          "scripts/producer.test.mjs",
+          "scripts/build-input.test.mjs"
+        ],
+        "cwd": "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/clones/r1",
+        "started_at": "2026-10-11T06:37:36.859232+00:00",
+        "ended_at": "2026-10-11T06:37:39.596910+00:00",
+        "exit_code": 0,
+        "counts": {
+          "tests": 6,
+          "pass": 6,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        }
+      },
+      {
+        "stage": "geometry-tests",
+        "argv": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/source-denied-clone-r1.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "--test",
+          "library/test/geometry.test.mjs"
+        ],
+        "cwd": "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/clones/r1",
+        "started_at": "2026-10-11T06:37:39.597124+00:00",
+        "ended_at": "2026-10-11T06:37:39.670308+00:00",
+        "exit_code": 0,
+        "counts": {
+          "tests": 28,
+          "pass": 28,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        }
+      },
+      {
+        "stage": "build",
+        "argv": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/source-denied-clone-r1.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "library/build.mjs",
+          "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/clone-content-output-r1"
+        ],
+        "cwd": "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/clones/r1",
+        "started_at": "2026-10-11T06:37:39.670508+00:00",
+        "ended_at": "2026-10-11T06:37:40.087388+00:00",
+        "exit_code": 0,
+        "counts": {}
+      },
+      {
+        "stage": "verify-pack",
+        "argv": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/source-denied-clone-r1.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "scripts/verify-pack.mjs",
+          "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/clone-content-output-r1/shine-mage-board-components-0.1.0.tgz"
+        ],
+        "cwd": "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/clones/r1",
+        "started_at": "2026-10-11T06:37:40.087593+00:00",
+        "ended_at": "2026-10-11T06:37:40.151330+00:00",
+        "exit_code": 0,
+        "counts": {}
+      },
+      {
+        "stage": "prepare-manager-offline",
+        "argv": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/source-denied-clone-r1.sb",
+          "/Users/hutou/homebrew/opt/python@3.14/bin/python3.14",
+          "-I",
+          "-B",
+          "scripts/ci/prepare-pnpm.py",
+          "--root",
+          "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/clone-manager-r1",
+          "--archive",
+          "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/manager-r2/pnpm-11.28.2.tgz"
+        ],
+        "cwd": "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/clones/r1",
+        "started_at": "2026-10-11T06:39:17.420303+00:00",
+        "ended_at": "2026-10-11T06:39:17.873564+00:00",
+        "exit_code": 0,
+        "counts": {}
+      }
+    ]
+  },
+  "archive": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf/clone-content-output-r1/shine-mage-board-components-0.1.0.tgz",
+    "bytes": 1955,
+    "sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182",
+    "members": 5,
+    "sealed_reference_members_equal": true,
+    "archive_bytes_equal": true,
+    "kind": "ordinary pure domain content pack; not DSH plugin-pack/candidate or signed release"
+  },
+  "inputs": {
+    "Node": "24.19.0",
+    "Python": "3.14.4",
+    "pnpm": "11.28.2",
+    "kit_sha256": "251383e18a76fe345ac837d8767f6c325c4616c027e2ea250d2dcec45b22c901",
+    "DSH_checkout_required": false,
+    "build_tools_required": false,
+    "network_during_clone_validation": "DENIED",
+    "independent_tsc": "NOT_IN_CURRENT_BUILD"
+  },
+  "scope_limit": "Seatbelt denies listed product/owner/old validation source content and writes; metadata lstat permitted; not entire-machine deny-default sandbox",
+  "not_run": [
+    "remote repository creation",
+    "push",
+    "PR",
+    "Ubuntu/GitHub Actions CI",
+    "main producer or input cutover",
+    "new full B0",
+    "new main CI",
+    "candidate/journal/host/service/WSL2/real-business acceptance",
+    "release/deploy",
+    "new SDK distribution audit"
+  ],
+  "owner_docs": "README/DEVELOPMENT retained exact approved r2 preparation snapshot; current Git/clone is this dated handoff, not their earlier no-commit sentence",
+  "source_plan": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/author-local-commit-plan-r2.json",
+    "bytes": 6750,
+    "sha256": "98fa01d1bd7304f3be63598535a38201127a4ecd0e15c9659b67297d6bb09277"
+  },
+  "raw_review_root": "/Users/hutou/.codex/tasks/shinemage-domain-owner-review-20261011-2w2ynmaf",
+  "SDK_distribution": "BLOCKED",
+  "product": "PARTIAL",
+  "release_ready": false
+}

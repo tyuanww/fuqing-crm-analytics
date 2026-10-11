@@ -1,0 +1,921 @@
+{
+  "schema": "shinemage-current-workbench-formal-pack-closeout/v1",
+  "observed_at": "2026-10-11T10:43:43.491225+08:00",
+  "main_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "main_branch": "codex/shinemage-abc-local-candidate",
+  "runtime": {
+    "Node": "24.19.0",
+    "Python": "3.14.4",
+    "pnpm": "11.28.2",
+    "DSH": "0.1.7-rc.2",
+    "upstream": "477b4f420553e8a52c2fbccc464d7561b239c443"
+  },
+  "source": {
+    "name": "analytics-workbench",
+    "repo": "tyuanww/dsh-analytics-workbench",
+    "source_sha": "fd46b34d04ddf143811fd1eba7ef2ff6c3ca230b",
+    "status": "READY_FOR_FORMAL_PACK",
+    "ci_run": 38104163773,
+    "ci_event": "pull_request",
+    "artifact_id": 11689087774,
+    "artifact_zip_sha256": "69260065f6848fe6e9374be008209f3b318e9c1995d0fbe32f2685d7b4fe6252",
+    "content_pack": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/ci-pack-inputs/analytics-workbench/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+    "content_pack_sha256": "f5e9dfe41859b0ae3254cbaddf12a128e89cd3c53bde82b84f366beef03ae5d7",
+    "clone": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/ci-pack-inputs/analytics-workbench/source",
+    "member_hashes": {
+      "lib/client.js": {
+        "bytes": 1176352,
+        "sha256": "d50bb6272a18de3a892687192d95b52019bd8af2f959f5593dae1283b8043c03"
+      },
+      "lib/index.js": {
+        "bytes": 143276,
+        "sha256": "f1b97a4457ad65d868c83eb6209ae4c14a9598415caf4376a5c6151ef962fd58"
+      },
+      "lib/page-tools.js": {
+        "bytes": 14160,
+        "sha256": "28b07f12a5aaff8096c604d9c53eef293a91be55ae82d48b069ab8c0e8fa5c70"
+      },
+      "lib/skills.js": {
+        "bytes": 107570,
+        "sha256": "c4b870b64626b5d8f7ed898c6cf2edd613fc7cabb39bd49490eb9b3bcf29c8b1"
+      },
+      "lib/tool.js": {
+        "bytes": 38843,
+        "sha256": "e854349cb5187e2b045f280f8330f19da0e7d0acbe0ff4f07e8c747f710a4924"
+      },
+      "bundled-dependencies.json": {
+        "bytes": 306,
+        "sha256": "957ba54ce606fc735cc11c051b9d60c3703ab8bf0bc94dd00aac696b28afa06b"
+      },
+      "package.json": {
+        "bytes": 2569,
+        "sha256": "b4363c75d509e0c7f8f30a028d76b271dbebf9035719a399387bea7836bca6f0"
+      },
+      "cordis.patch.yml": {
+        "bytes": 584,
+        "sha256": "901c01fe1237b5d1b25f60ce58252553053125519ae73fe356ff6e4365425b3f"
+      }
+    },
+    "scope": "compiled runtime bytes imported from exact-head successful CI; no SDK redistributed",
+    "host_acceptance": "NOT_RUN",
+    "activation": "NOT_RUN",
+    "release_ready": false
+  },
+  "formal_pack": {
+    "schema_version": "dsh-plugin-pack/v1",
+    "package_name": "@shine-mage/dsh-analytics-workbench-b0",
+    "package_version": "0.0.0-b0",
+    "dsh_pin": "0.1.7-rc.2",
+    "source_sha": "fd46b34d04ddf143811fd1eba7ef2ff6c3ca230b",
+    "source_dirty": false,
+    "tarball": {
+      "name": "shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+      "bytes": 438499,
+      "sha256": "e41df9f5a8f7031c092319222543c8d723ca644c0c9d69b2ae53f13257e9b79e"
+    },
+    "entries": [
+      "bundled-dependencies.json",
+      "cordis.patch.yml",
+      "lib/client.js",
+      "lib/index.js",
+      "lib/page-tools.js",
+      "lib/skills.js",
+      "lib/tool.js",
+      "package.json"
+    ],
+    "activation": "NOT_RUN",
+    "state_path": "NOT_APPLICABLE_PLUGIN_PACK_ONLY"
+  },
+  "receipt_sha256": "a9463faa7c3299cc5d24179708dc7c5ae5ecf0f124ce97dfa904145398b65910",
+  "producer_tooling": {
+    "source_sha": "5390667cc990fa558b0445aa455b086d325a6c77",
+    "path": "/Users/hutou/.codex/tasks/shinemage-full-closeout-20261011-p6m85w3u/main-qa",
+    "files": {
+      "scripts/release/secure-unpack.py": {
+        "sha256": "8d8b34497382302ace6a434180f72a6d418d5879cc682102964a13b5c1e96d50",
+        "bytes": 5960
+      },
+      "scripts/release/plugin-pack.mjs": {
+        "sha256": "61d3365ff38f89077040246290874c768ea16e1b17f013f63c9b29604ef8898a",
+        "bytes": 18143
+      },
+      "scripts/release/service-artifact-evidence.mjs": {
+        "sha256": "f92d006759f620b2d303bcfe90f9c04f3726a4624d1597f77dcdc61f0abba187",
+        "bytes": 15373
+      },
+      "scripts/release/service-compatibility.mjs": {
+        "sha256": "844aa39a9540c5a68a142b6a2a2f25931f7a27d0a7120938d42ea05936204953",
+        "bytes": 11199
+      },
+      "scripts/release/secret-scan.mjs": {
+        "sha256": "477f7b83691137d83fcbb8dd65cb3144363bf08d37c94189fb7eafd8e517d7a7",
+        "bytes": 3793
+      },
+      "scripts/release/toolchain.mjs": {
+        "sha256": "04d15e35e8d3161b5fa7bddc53399273c7bdbd2d7ee0905f9615fdccd24badb8",
+        "bytes": 884
+      },
+      "dsh-plugins/plugin-kit/package-manager.mjs": {
+        "sha256": "4605cfa766428733ad4202cf267d103762202e447119d6855c45049241759c6b",
+        "bytes": 3152
+      },
+      "dsh-plugins/plugin-kit/toolchain.json": {
+        "sha256": "8f1eaf0b2b7ea1392cd45674bfbdd7498b2df6bb642db63f75d002df776511fe",
+        "bytes": 2282
+      }
+    },
+    "git_blob_binding": true
+  },
+  "strict_reader_tooling": {
+    "source": "actual main working-tree bytes",
+    "base_commit": "5390667cc990fa558b0445aa455b086d325a6c77",
+    "directory": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/tooling-current-r2",
+    "files": {
+      "scripts/release/secure-unpack.py": {
+        "sha256": "8d8b34497382302ace6a434180f72a6d418d5879cc682102964a13b5c1e96d50",
+        "bytes": 5960,
+        "equals_base_commit": true
+      },
+      "scripts/release/plugin-pack.mjs": {
+        "sha256": "a30af40abbfcab8be1971d696cde7bd431a8654c1c008356113b0c91211f1c59",
+        "bytes": 18153,
+        "equals_base_commit": false
+      },
+      "scripts/release/service-artifact-evidence.mjs": {
+        "sha256": "f92d006759f620b2d303bcfe90f9c04f3726a4624d1597f77dcdc61f0abba187",
+        "bytes": 15373,
+        "equals_base_commit": true
+      },
+      "scripts/release/service-compatibility.mjs": {
+        "sha256": "844aa39a9540c5a68a142b6a2a2f25931f7a27d0a7120938d42ea05936204953",
+        "bytes": 11199,
+        "equals_base_commit": true
+      },
+      "scripts/release/secret-scan.mjs": {
+        "sha256": "477f7b83691137d83fcbb8dd65cb3144363bf08d37c94189fb7eafd8e517d7a7",
+        "bytes": 3793,
+        "equals_base_commit": true
+      },
+      "scripts/release/toolchain.mjs": {
+        "sha256": "04d15e35e8d3161b5fa7bddc53399273c7bdbd2d7ee0905f9615fdccd24badb8",
+        "bytes": 884,
+        "equals_base_commit": true
+      },
+      "dsh-plugins/plugin-kit/package-manager.mjs": {
+        "sha256": "4605cfa766428733ad4202cf267d103762202e447119d6855c45049241759c6b",
+        "bytes": 3152,
+        "equals_base_commit": true
+      },
+      "dsh-plugins/plugin-kit/toolchain.json": {
+        "sha256": "8f1eaf0b2b7ea1392cd45674bfbdd7498b2df6bb642db63f75d002df776511fe",
+        "bytes": 2282,
+        "equals_base_commit": true
+      }
+    },
+    "original_product_code": "UNCHANGED"
+  },
+  "current_main_lock_update": {
+    "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/config/shinemage-composition-packs.lock.json",
+    "before_sha256": "39596a6ae4ae81fe60c49d32ebcef32e8fadb313329bd9f49b4864dff0faa6a3",
+    "after_sha256": "598b62ea0ae00c2f57474c8666e2787202658b57488612cb1d1ea4c40edd571b",
+    "changed_rows": [
+      {
+        "before": {
+          "directory": "analytics-workbench",
+          "id": "@shine-mage/dsh-analytics-workbench-b0",
+          "source_sha": "92dfa171cf8ea298bdceee5634b418269e711a37",
+          "version": "0.0.0-b0",
+          "manifest_sha256": "9f518393e544099b5a31fde6073c2b0e321649f7e1134829d0dcd5bc608801f4"
+        },
+        "after": {
+          "directory": "analytics-workbench",
+          "id": "@shine-mage/dsh-analytics-workbench-b0",
+          "source_sha": "fd46b34d04ddf143811fd1eba7ef2ff6c3ca230b",
+          "version": "0.0.0-b0",
+          "manifest_sha256": "a9463faa7c3299cc5d24179708dc7c5ae5ecf0f124ce97dfa904145398b65910"
+        }
+      }
+    ],
+    "profiles_unchanged": true,
+    "other_eight_plugin_rows_unchanged": true,
+    "candidate_journal": "UNCHANGED",
+    "commit_push_PR": "NOT_RUN"
+  },
+  "comparison": {
+    "old_source": "92dfa171cf8ea298bdceee5634b418269e711a37",
+    "new_source": "fd46b34d04ddf143811fd1eba7ef2ff6c3ca230b",
+    "old_tarball": {
+      "name": "shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+      "bytes": 438480,
+      "sha256": "a0d5dd08c5e97237fc38033f929eec33627ac42efa594a5ca5c87a0ee311d6b2"
+    },
+    "new_tarball": {
+      "name": "shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+      "bytes": 438499,
+      "sha256": "e41df9f5a8f7031c092319222543c8d723ca644c0c9d69b2ae53f13257e9b79e"
+    },
+    "members": [
+      {
+        "path": "package/bundled-dependencies.json",
+        "equal": true,
+        "old_sha256": "957ba54ce606fc735cc11c051b9d60c3703ab8bf0bc94dd00aac696b28afa06b",
+        "new_sha256": "957ba54ce606fc735cc11c051b9d60c3703ab8bf0bc94dd00aac696b28afa06b",
+        "bytes": 306
+      },
+      {
+        "path": "package/cordis.patch.yml",
+        "equal": true,
+        "old_sha256": "901c01fe1237b5d1b25f60ce58252553053125519ae73fe356ff6e4365425b3f",
+        "new_sha256": "901c01fe1237b5d1b25f60ce58252553053125519ae73fe356ff6e4365425b3f",
+        "bytes": 584
+      },
+      {
+        "path": "package/lib/client.js",
+        "equal": true,
+        "old_sha256": "d50bb6272a18de3a892687192d95b52019bd8af2f959f5593dae1283b8043c03",
+        "new_sha256": "d50bb6272a18de3a892687192d95b52019bd8af2f959f5593dae1283b8043c03",
+        "bytes": 1176352
+      },
+      {
+        "path": "package/lib/index.js",
+        "equal": true,
+        "old_sha256": "f1b97a4457ad65d868c83eb6209ae4c14a9598415caf4376a5c6151ef962fd58",
+        "new_sha256": "f1b97a4457ad65d868c83eb6209ae4c14a9598415caf4376a5c6151ef962fd58",
+        "bytes": 143276
+      },
+      {
+        "path": "package/lib/page-tools.js",
+        "equal": true,
+        "old_sha256": "28b07f12a5aaff8096c604d9c53eef293a91be55ae82d48b069ab8c0e8fa5c70",
+        "new_sha256": "28b07f12a5aaff8096c604d9c53eef293a91be55ae82d48b069ab8c0e8fa5c70",
+        "bytes": 14160
+      },
+      {
+        "path": "package/lib/skills.js",
+        "equal": true,
+        "old_sha256": "c4b870b64626b5d8f7ed898c6cf2edd613fc7cabb39bd49490eb9b3bcf29c8b1",
+        "new_sha256": "c4b870b64626b5d8f7ed898c6cf2edd613fc7cabb39bd49490eb9b3bcf29c8b1",
+        "bytes": 107570
+      },
+      {
+        "path": "package/lib/tool.js",
+        "equal": true,
+        "old_sha256": "e854349cb5187e2b045f280f8330f19da0e7d0acbe0ff4f07e8c747f710a4924",
+        "new_sha256": "e854349cb5187e2b045f280f8330f19da0e7d0acbe0ff4f07e8c747f710a4924",
+        "bytes": 38843
+      },
+      {
+        "path": "package/package.json",
+        "equal": false,
+        "old_sha256": "33cbe7f5a527be520717b2559aeb3a213d9451da78028b02cda8b087356dc6f3",
+        "new_sha256": "d9a3a2d2d7b5e18b85bbfb141845c42934301c518f13f24d5211b3ba921ebf3a",
+        "bytes": 1627
+      }
+    ],
+    "changed_manifest_fields": {
+      "peerDependencies": {
+        "before": {
+          "@deepseek-ai/dsh-tools": "0.1.7-rc.2"
+        },
+        "after": {
+          "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
+          "@deepseek-ai/dsh-client-connection": "0.1.7-rc.2",
+          "@deepseek-ai/dsh-llm": "0.1.7-rc.2"
+        }
+      }
+    },
+    "runtime_members_equal": 7,
+    "old_acceptance_inherited": false,
+    "release_ready": false
+  },
+  "checks": {
+    "strict_current_reader": {
+      "schema": "shinemage-current-workbench-pack-readback/v1",
+      "source": "fd46b34d04ddf143811fd1eba7ef2ff6c3ca230b",
+      "manifest_sha256": "a9463faa7c3299cc5d24179708dc7c5ae5ecf0f124ce97dfa904145398b65910",
+      "tarball": {
+        "name": "shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+        "bytes": 438499,
+        "sha256": "e41df9f5a8f7031c092319222543c8d723ca644c0c9d69b2ae53f13257e9b79e"
+      },
+      "entries": [
+        "bundled-dependencies.json",
+        "cordis.patch.yml",
+        "lib/client.js",
+        "lib/index.js",
+        "lib/page-tools.js",
+        "lib/skills.js",
+        "lib/tool.js",
+        "package.json"
+      ],
+      "runtime_peers": {
+        "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-client-connection": "0.1.7-rc.2",
+        "@deepseek-ai/dsh-llm": "0.1.7-rc.2"
+      },
+      "wrong_digest": "REJECTED",
+      "negative_sources": [
+        {
+          "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/analytics-workbench/package.json",
+          "result": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/dsh-analytics-workbench/plugin/package.json",
+          "result": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/dsh-crm-knowledge/plugin/package.json",
+          "result": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-knowledge-independent-20261008/dsh-knowledge/plugin/package.json",
+          "result": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-shine-brand-independent-20261008/dsh-shine-brand/plugin/package.json",
+          "result": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-board/plugin/package.json",
+          "result": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-crowd-action/plugin/package.json",
+          "result": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-leaf-independent-20261009/dsh-shine-query/plugin/package.json",
+          "result": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/dsh-shine-funnel/plugin/package.json",
+          "result": "EPERM"
+        },
+        {
+          "path": "/Users/hutou/.codex/tasks/shinemage-chart-independent-20261009/dsh-shine-waterfall/plugin/package.json",
+          "result": "EPERM"
+        }
+      ],
+      "host": "NOT_RUN",
+      "candidate": "NOT_RUN",
+      "release_ready": false
+    },
+    "public_consumers": {
+      "tests": 66,
+      "pass": 66,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "composition_guards": {
+      "tests": 37,
+      "pass": 37,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "canonical_preparation": {
+      "step": "canonical-preparation-r2",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/composition-source-denied-r1.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/scripts/ci/composition-pack-inputs.mjs",
+        "--input-dir",
+        "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/proposed-inputs-r1",
+        "--output",
+        "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/canonical-composition-r2",
+        "--python",
+        "/Users/hutou/homebrew/opt/python@3.14/bin/python3.14"
+      ],
+      "cwd": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics",
+      "exit_code": 0,
+      "seconds": 0.836,
+      "stdout_sha256": "bbc4df3c4f50d33b7dd10607fc7423931893035ade40bfdf040c67c3f06d1988",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "local_archive_receive": {
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/composition-source-denied-r1.sb",
+        "/Users/hutou/homebrew/opt/node@24/bin/node",
+        "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/scripts/ci/composition-pack-inputs.mjs",
+        "--archive",
+        "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/shinemage-composition-packs-fd46b34d-r2.zip",
+        "--output",
+        "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/archive-received-r2",
+        "--python",
+        "/Users/hutou/homebrew/opt/python@3.14/bin/python3.14"
+      ],
+      "cwd": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics",
+      "exit_code": 0,
+      "seconds": 0.809,
+      "archive_sha256": "1e255055ee0fdd846df660d94dd68018e93cd4ffd5a41b9571a0feeb618c1bce",
+      "stdout_sha256": "77ae903b25b25fc41b0b69fa3fcdafcb884bd94fb3db15af716e447e3aaaec7c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hosted_CI": "NOT_RUN",
+      "release_ready": false
+    },
+    "archive_canonical_equivalence": {
+      "plugins_equal": true,
+      "profiles_equal": true,
+      "lock_sha256": "598b62ea0ae00c2f57474c8666e2787202658b57488612cb1d1ea4c40edd571b",
+      "different_owned_output_paths_expected": true
+    },
+    "repeat_output_rejected": "PLUGIN_PACK_OUTPUT_EXISTS, exit 2"
+  },
+  "local_sealed_archive": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/shinemage-composition-packs-fd46b34d-r2.zip",
+    "sha256": "1e255055ee0fdd846df660d94dd68018e93cd4ffd5a41b9571a0feeb618c1bce",
+    "bytes": 704010,
+    "members": [
+      {
+        "path": "packs/analytics-workbench/plugin-pack.json",
+        "bytes": 718,
+        "sha256": "a9463faa7c3299cc5d24179708dc7c5ae5ecf0f124ce97dfa904145398b65910"
+      },
+      {
+        "path": "packs/analytics-workbench/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+        "bytes": 438499,
+        "sha256": "e41df9f5a8f7031c092319222543c8d723ca644c0c9d69b2ae53f13257e9b79e"
+      },
+      {
+        "path": "packs/crm-knowledge/plugin-pack.json",
+        "bytes": 627,
+        "sha256": "0fbacc88fccc8085618b518a51afab5db1c045838c0cb47d6e94a8af5f600a49"
+      },
+      {
+        "path": "packs/crm-knowledge/shine-mage-dsh-crm-knowledge-0.0.0-crm.1.tgz",
+        "bytes": 234901,
+        "sha256": "0da9f8edd40b17a92377aa4b35d219229c8461b942060a7dd0e12265343500fd"
+      },
+      {
+        "path": "packs/knowledge/plugin-pack.json",
+        "bytes": 616,
+        "sha256": "a674a2da0dcd317839c4f8d7766da62ced58eca9021222c6e3a238f80aa7df79"
+      },
+      {
+        "path": "packs/knowledge/shine-mage-dsh-knowledge-0.0.0-candidate.1.tgz",
+        "bytes": 14476,
+        "sha256": "ed7888204d5cefe7d383632a75319d3427fec9a735863f4e123b8ea17387ef67"
+      },
+      {
+        "path": "packs/shine-board/plugin-pack.json",
+        "bytes": 596,
+        "sha256": "671acb9502969f08e5db6b83369afa3ea1dec1699a7a9fc5a1680abfa9aa39cf"
+      },
+      {
+        "path": "packs/shine-board/shine-mage-dsh-shine-board-0.0.0-b0.tgz",
+        "bytes": 1073,
+        "sha256": "e1348dd7739778a5ec2d676420e86290ca49f69cdf045959fd82441232a30c1a"
+      },
+      {
+        "path": "packs/shine-brand/plugin-pack.json",
+        "bytes": 596,
+        "sha256": "d5039166969023075253e65e31c4d7dba910ae6ea10b9b40bf7f147bdb5efd24"
+      },
+      {
+        "path": "packs/shine-brand/shine-mage-dsh-shine-brand-0.0.0-b0.tgz",
+        "bytes": 1883,
+        "sha256": "4b867bf5b4e08d9aa1f45f20b20b78cbd9e11c236194ffafaa5188d8d173bd13"
+      },
+      {
+        "path": "packs/shine-crowd-action/plugin-pack.json",
+        "bytes": 610,
+        "sha256": "d3998ed96530db66b3aa53f263c93848e7078846a8a0f612a1c099202bfa406f"
+      },
+      {
+        "path": "packs/shine-crowd-action/shine-mage-dsh-shine-crowd-action-0.0.0-b0.tgz",
+        "bytes": 1122,
+        "sha256": "3fb9d88d228e3af4a9c965961c035650b65365392a9caccb4c14f336b003b2ca"
+      },
+      {
+        "path": "packs/shine-funnel/plugin-pack.json",
+        "bytes": 677,
+        "sha256": "1e631c02c1fa6903b1f76953edc4e7da3fc85b1b96c1292567f8561a78a8eefb"
+      },
+      {
+        "path": "packs/shine-funnel/shine-mage-dsh-shine-funnel-0.0.0-b0.tgz",
+        "bytes": 2006,
+        "sha256": "581ba069aa8af4598f553e4b11b57216ac2205d71baebbafc267367cb3814ba6"
+      },
+      {
+        "path": "packs/shine-query/plugin-pack.json",
+        "bytes": 596,
+        "sha256": "13433c1c4687cd33f0b314b60a38c76fb8390ee52375755320d4ca5a6f378fae"
+      },
+      {
+        "path": "packs/shine-query/shine-mage-dsh-shine-query-0.0.0-b0.tgz",
+        "bytes": 1060,
+        "sha256": "774c6ae63e0fb170a81a9e9fb9551d55d40724faae5966c1d95bb32624fb89ce"
+      },
+      {
+        "path": "packs/shine-waterfall/plugin-pack.json",
+        "bytes": 689,
+        "sha256": "43a9c673ada75b763c1867e6bb6fd66c75da393cd6c2fd2fd669aadbe73c6af5"
+      },
+      {
+        "path": "packs/shine-waterfall/shine-mage-dsh-shine-waterfall-0.0.0-b0.tgz",
+        "bytes": 2248,
+        "sha256": "73a1d4ba2b085c1f9f2a1eff410aca239cf9775de952ba70aafdaa78ec5ac35d"
+      }
+    ],
+    "profiles": "Read from the existing canonical main repository, not from this archive",
+    "uploaded": false
+  },
+  "failure_history": [
+    {
+      "file": "verification-execution-r1.json",
+      "scope": "Test harness assumed an API field absent in fixed 5390667 readPluginPack; formal producer had already succeeded",
+      "preserved": true,
+      "pack_regenerated": false
+    },
+    {
+      "file": "archive-receive-r1.json",
+      "exit_code": 1,
+      "code": "CI_COMPOSITION_ARCHIVE_PATH",
+      "reason": "The first ZIP included profile files; the real bounded reader permits packs only",
+      "preserved": true,
+      "checker_relaxed": false
+    }
+  ],
+  "protected_inputs": {
+    "count": 46,
+    "unchanged": true
+  },
+  "new_combo": {
+    "service_binding": "Existing CRM/page composition profiles do not have service_binding; no formal service profile invented",
+    "candidate": "NOT_RUN",
+    "journal": "UNCHANGED",
+    "host": "NOT_RUN",
+    "service": "NOT_RUN",
+    "target_WSL2": "NOT_RUN",
+    "headed_browser": "NOT_RUN",
+    "recovery": "NOT_RUN",
+    "full_B0_after_lock_update": "NOT_RUN",
+    "hosted_CI_with_current_main_lock": "NOT_RUN"
+  },
+  "expanded_author_40_path_proposal": "NOT_APPLIED, pending local commit authorization",
+  "Cordis_owner_proposal": "NOT_APPLIED, pending owner authorization",
+  "new_git_actions": {
+    "commit": "NOT_RUN",
+    "push": "NOT_RUN",
+    "PR": "NOT_RUN",
+    "merge": "NOT_RUN"
+  },
+  "distribution": {
+    "archive_uploaded": false,
+    "GitHub_Release": "NOT_RUN",
+    "SDK_distribution": "BLOCKED"
+  },
+  "VERSION": "0.20.0.0",
+  "product": "PARTIAL",
+  "release_ready": false,
+  "raw_bindings": [
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/snapshot-r1.json",
+      "sha256": "234ce4e7988673cf1b8322afc0be08ef8f122fc19d904e00e62acb57ca99af63",
+      "bytes": 43208
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/preparation-provenance.json",
+      "sha256": "9165246fe4ad30229f7b133e8ba48fc996650841ebb315979c987fcdde7b64d5",
+      "bytes": 388
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/prepare-inputs-r1.py",
+      "sha256": "9de53655d3abb9e6bab60e3f4d2c8886352da8ce8257e8135b665d2246c15504",
+      "bytes": 7199
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/preparation-r1.stdout",
+      "sha256": "4ac7fff8f007d332ec89cd39366d78c8814aea3de43ba31982836d8ecf6526bd",
+      "bytes": 196
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/preparation-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/ci-pack-inputs-r1.json",
+      "sha256": "7a01a663d78f8d3ca72ac61c61b7208c1f58e943948c98e5e6da81b248be8ea9",
+      "bytes": 2072
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/tooling-bindings-r1.json",
+      "sha256": "73c34d4f2f742844a68f909cb68575fea215e915773c524d7bc942aaf367cfd9",
+      "bytes": 1455
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/tooling-current-bindings-r2.json",
+      "sha256": "b602452a2a48f4d9d3e5f4a155b941cb960b068aa186a89ae47974f366a0fa9c",
+      "bytes": 1814
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/formal-pack-r1/plugin-pack.json",
+      "sha256": "a9463faa7c3299cc5d24179708dc7c5ae5ecf0f124ce97dfa904145398b65910",
+      "bytes": 718
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/formal-pack-r1/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+      "sha256": "e41df9f5a8f7031c092319222543c8d723ca644c0c9d69b2ae53f13257e9b79e",
+      "bytes": 438499
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/formal-pack-result-r1.json",
+      "sha256": "01a907fb80f907bac953422a81a28c94ccdf676423f0d22b4d602ab5ec6b981d",
+      "bytes": 4100
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/formal-pack-r1.stdout",
+      "sha256": "a9463faa7c3299cc5d24179708dc7c5ae5ecf0f124ce97dfa904145398b65910",
+      "bytes": 718
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/formal-pack-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/formal-pack-readback-r1.mjs",
+      "sha256": "59e619ebbabcdcb748797e075f35e164432d9df6a063d67d59266a4890ceb2a9",
+      "bytes": 2691
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/formal-readback-r1.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/formal-readback-r1.stderr",
+      "sha256": "10ef6caa0567b46ee5959796c75d0d31475cdadf0909e9de1c28fdd55d7e6f77",
+      "bytes": 402
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/readback-failure-r1.json",
+      "sha256": "e8469d0b5281b0de06446d4064b3a00f32559ef37dc24fa7b7fd9af79eb7cd19",
+      "bytes": 350
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/verification-execution-r1.json",
+      "sha256": "3d02b2dda5234da91cf02ea5226fc711b6dddd34ce8cc8010076c12b080a8c02",
+      "bytes": 952
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/formal-pack-readback-r2.mjs",
+      "sha256": "c86be52f089b80e8c4db0e10fe75fc8c49ddb279a9a520c944ca20b1c36c7df2",
+      "bytes": 2713
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/formal-pack-readback-r2.json",
+      "sha256": "6a49f93b0ef9eef619dc954408755a8a2455c635adb1b7ef1e15e3c7e0170e2f",
+      "bytes": 2482
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/formal-readback-r2.stdout",
+      "sha256": "7debcabe7ef91fd69fdcbf89dcec3308574aed1d86130bc2b19c7152904ca2ec",
+      "bytes": 2089
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/formal-readback-r2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/formal-repeat-r2.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/formal-repeat-r2.stderr",
+      "sha256": "afd5a126d038fa131e4662b1a188d9c7b9dd7ffdb4435bd12c48205daac6f26a",
+      "bytes": 26
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/verification-execution-r2.json",
+      "sha256": "c51e24939fcde0e77287398380aadccece1bfa25481658d717e7a38f012709fd",
+      "bytes": 5527
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/formal-pack-comparison-r1.json",
+      "sha256": "fb30ec5986e3e318589d783217df5ea9faf87ffb9fcb04db659905308d507440",
+      "bytes": 3114
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/composition-source-denied-r1.sb",
+      "sha256": "b5bd5b5604fe948cda88a4590c75e875b785ecc94fe915cefccc169aa2f2f24f",
+      "bytes": 5107
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/formal-pack-isolation-r1.sb",
+      "sha256": "741fa6e15c184121be3cd23764f77e536ee1b865e5e97e2f9ad0ee220182f1d2",
+      "bytes": 2746
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/prepared-composition-readback-r1.json",
+      "sha256": "868cb5e45ec4a36ae82c5b31e402c9a084e29a25c83f056f8843f1eb81e67c7a",
+      "bytes": 7115
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/prepared-composition-r1/preparation.json",
+      "sha256": "f78d94d015276f82935d42a6d87f7e9004483fe434a7a5474a03e74c819d0e7a",
+      "bytes": 4078
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/public-consumers-r2.stdout",
+      "sha256": "e4b4a0b3f7c5a227dfe3e6b4e42592dae478f673f8e0709ff2f80e3d41b15d47",
+      "bytes": 6002
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/public-consumers-r2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/main-composition-lock-before-r1.json",
+      "sha256": "39596a6ae4ae81fe60c49d32ebcef32e8fadb313329bd9f49b4864dff0faa6a3",
+      "bytes": 2969
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/main-composition-lock-update-r1.json",
+      "sha256": "27b33937fc0ff75836c89c6c8773f2c8059bbc7b80586a122f007bd718c614f5",
+      "bytes": 1128
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/canonical-composition-r2/preparation.json",
+      "sha256": "8a9ac927e8894b94d74f9d6522c525474246630243c52b1e389fb088aef489ab",
+      "bytes": 4081
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/canonical-verification-r2.json",
+      "sha256": "831103c2ef423cf2fc09d3b1310268abf75988918b1cdf4d610f7d59789484f5",
+      "bytes": 1892
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/canonical-preparation-r2.stdout",
+      "sha256": "bbc4df3c4f50d33b7dd10607fc7423931893035ade40bfdf040c67c3f06d1988",
+      "bytes": 4082
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/canonical-preparation-r2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/composition-guards-r2.stdout",
+      "sha256": "d4c613ed60b45974bcc3c59855ba46f21163c50f16cde6460188b51b1f3806c5",
+      "bytes": 3539
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/composition-guards-r2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/composition-archive-r1.json",
+      "sha256": "5c32f2a2f20ec87b3be9ca5dfb62421f23a560ea70658c9f279cf1765cdb2a3e",
+      "bytes": 4100
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/shinemage-composition-packs-fd46b34d-r1.zip",
+      "sha256": "2d658da5b3a75ca567e844aa3af4a7f3fc840959025d2558b42790dfe9190cbe",
+      "bytes": 704813
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/archive-receive-r1.json",
+      "sha256": "1ebce31c0ea58a68e1ff7c996c0aba8187eb60bfd8f39c60876c4bf5fef84175",
+      "bytes": 1146
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/archive-receive-r1.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/archive-receive-r1.stderr",
+      "sha256": "173d85a4732cbd5a96cafe727bf399cd6719df7ed8c48bb3865ef5f511e5348f",
+      "bytes": 1248
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/composition-archive-r2.json",
+      "sha256": "d4412555dac6ff6252ab0baad024580667538ef930d71acc5c8d182c02a55f48",
+      "bytes": 3687
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/shinemage-composition-packs-fd46b34d-r2.zip",
+      "sha256": "1e255055ee0fdd846df660d94dd68018e93cd4ffd5a41b9571a0feeb618c1bce",
+      "bytes": 704010
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/archive-receive-r2.json",
+      "sha256": "5b0781f5ac5616d6d2ab70d45b89b5b99db0e813bb6ca52c5f411222ee25d84f",
+      "bytes": 1170
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/archive-receive-r2.stdout",
+      "sha256": "77ae903b25b25fc41b0b69fa3fcdafcb884bd94fb3db15af716e447e3aaaec7c",
+      "bytes": 4067
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/archive-receive-r2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/archive-canonical-equivalence-r2.json",
+      "sha256": "e3c8529b112f4200c952a5e8681e9d0113903dae8d871c9aa7ede2b54467d218",
+      "bytes": 188
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/archive-received-r2/preparation.json",
+      "sha256": "543c9624889c3e6f206d77e5c66a94ece2728540422e74f5ca008f59808438da",
+      "bytes": 4066
+    }
+  ],
+  "evidence_markdown": {
+    "path": "docs/hackathon/evidence/shinemage-workbench-current-formal-pack-20261011.md",
+    "sha256": "f18b7c67d953fd60677da480614a90058492aaea9c9b9d8f346dd1732f7e8973",
+    "bytes": 6300
+  },
+  "summary_binding": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/summary-r1.json",
+    "sha256": "e15fe1edfd105a473b7119b935fc4c15922bf75d28ea901a1327252a3cf88cf7"
+  },
+  "final_invariants": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/final-invariants-r1.json",
+    "sha256": "4d1ec2c391f8616e5f608e94713315ae157a6cc77159586ad9f2b221d6d01652"
+  },
+  "local_review": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/review-r1.json",
+    "sha256": "f6b4e81fbd4d81ebbbdf02af94bd4f6e2f8c73195dfe2ad4d3bb30f8e5504e2f"
+  },
+  "current_main_docs": [
+    {
+      "path": "STATUS.md",
+      "sha256": "bc92ab278512c990f9a81d82637336be317c4a4f715ae625ed77a41743c9ab57"
+    },
+    {
+      "path": "docs/hackathon/TODOS.md",
+      "sha256": "f8f32bf68804d274443298b534ec065cf696bba973904fc72c1705c112d6d674"
+    },
+    {
+      "path": "docs/architecture/shinemage-plugin-platform.md",
+      "sha256": "cf0a0a32991be3935823092483b6f06edf713c956574cc20371c2720c2c31a29"
+    },
+    {
+      "path": "docs/operating/verification.md",
+      "sha256": "8838c2c440e5d0c1f1c760ecf6cd648ed3d1222cf547c66e15fa32d7908038a2"
+    },
+    {
+      "path": "docs/operating/shinemage-plugin-update.md",
+      "sha256": "a3e74235629c4933ea898d4c9396e20e56da124cb5bede21d7183012d1f4b7e2"
+    }
+  ],
+  "remote_PR_recheck": {
+    "command": [
+      "/Users/hutou/homebrew/bin/gh",
+      "pr",
+      "view",
+      "1",
+      "--repo",
+      "tyuanww/dsh-analytics-workbench",
+      "--json",
+      "number,state,url,headRefOid,statusCheckRollup"
+    ],
+    "exit_code": 0,
+    "head": "fd46b34d04ddf143811fd1eba7ef2ff6c3ca230b",
+    "state": "OPEN",
+    "url": "https://github.com/tyuanww/dsh-analytics-workbench/pull/1",
+    "checks": [
+      {
+        "name": "repo-inputs",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/38104163836/job/114366011525"
+      },
+      {
+        "name": "repo-inputs",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/38104161545/job/114366004443"
+      },
+      {
+        "name": "strict-build",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/38104163773/job/114366011338"
+      },
+      {
+        "name": "strict-build",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS",
+        "url": "https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/38104161742/job/114366005500"
+      }
+    ],
+    "stdout_sha256": "a7be03e867826810069686142e142646e8c2b08bea612061b42235a2e39e0eee",
+    "raw_path": "/Users/hutou/.codex/tasks/shinemage-workbench-current-formal-20261011-1uesb6bc/remote-pr-final-r1.stdout.json"
+  }
+}

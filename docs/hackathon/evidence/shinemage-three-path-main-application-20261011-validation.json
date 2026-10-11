@@ -1,0 +1,401 @@
+{
+  "schema": "shinemage-three-path-main-application-validation/v1",
+  "verified_at": "2026-10-11T11:13:06.200582+00:00",
+  "authorization": "human review and repair, then three-path local application/validation/current docs only",
+  "main_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "main_branch": "codex/shinemage-abc-local-candidate",
+  "main_applied": true,
+  "product_paths": [
+    {
+      "path": "config/shinemage-composition-packs.lock.json",
+      "before_exists": true,
+      "before_sha256": "8bd6adfb5dacc52f402946b58e6e9517292215a524fc730dacad4ff35716d1ad",
+      "after_sha256": "677b8cef5f830c1529373446902795603ab72a6fb0fd4a861d61e3f87d85da63",
+      "after_bytes": 2969
+    },
+    {
+      "path": "config/workbench-author-evidence.lock.json",
+      "before_exists": true,
+      "before_sha256": "3ae61a28057a3bdd376958cebcb9d6a86cedef7f5ddab27383b4c717874133ed",
+      "after_sha256": "01ad824b89cf9f26b74351f4bc5fae5c709ecb29dd18bb5dbcdbdba3c2354934",
+      "after_bytes": 2385
+    },
+    {
+      "path": "scripts/dsh-b0/competition-offline-eval.test.mjs",
+      "before_exists": false,
+      "before_sha256": null,
+      "after_sha256": "0f44af9780323391f7971df0dcb947e659a0962c95a594d56e5e119aaa7403c5",
+      "after_bytes": 1150
+    }
+  ],
+  "applied_patch": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/product-delta-reviewed-r1.patch",
+    "sha256": "d36c9ae7da0804efa752c951086c681bd6a9828bdba8e69cf74c40e9a075bfa0"
+  },
+  "review": {
+    "total_files": 3,
+    "reviewed_files": 3,
+    "skipped_files": 0,
+    "coverage_rate": 1.0,
+    "medium_fixed": 1,
+    "open_findings": 0,
+    "external_model": "NOT_RUN"
+  },
+  "actual_main_validation": {
+    "package_preparation": {
+      "exit_code": 0,
+      "packages": 9,
+      "profiles": 2
+    },
+    "author_reader": {
+      "exit_code": 0,
+      "pass": 13,
+      "fail": 0,
+      "skip": 0
+    },
+    "offline": {
+      "exit_code": 0,
+      "node_tests": 1,
+      "synthetic_python_cases": 30,
+      "planner": "OFFLINE_STUB",
+      "real_model": "NOT_RUN"
+    },
+    "main_owned_groups": [
+      {
+        "file": "scripts/dsh-b0/competition-offline-eval.test.mjs",
+        "patterns": [
+          "offline python eval suite"
+        ],
+        "tests": 1,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "exit_code": 0,
+        "filtered_tests_owner": "independent Workbench core CI; filtering is not local execution of those tests"
+      },
+      {
+        "file": "dsh-plugins/analytics-workbench/src/client/competition-board/computed-result.test.mjs",
+        "patterns": [
+          "v1-v5 judge the period difference by the same four-decimal rounding as its subtraction"
+        ],
+        "tests": 1,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "exit_code": 0,
+        "filtered_tests_owner": "independent Workbench core CI; filtering is not local execution of those tests"
+      },
+      {
+        "file": "dsh-plugins/analytics-workbench/test/query-fault.test.mjs",
+        "patterns": [
+          "cancel A does not rewrite peer B; SUCCEEDED survives a later cancel",
+          "historical three supervisor exits stay UNKNOWN and are not closed by EPIPE",
+          "fail-card markers never include channel facts"
+        ],
+        "tests": 3,
+        "pass": 3,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "exit_code": 0,
+        "filtered_tests_owner": "independent Workbench core CI; filtering is not local execution of those tests"
+      }
+    ],
+    "empty_and_wrong_planner_rejected": 2,
+    "specified_source_paths_eperm": 3
+  },
+  "existing_author_ci": {
+    "files": 155,
+    "pass": 1086,
+    "execution_here": "NOT_RUN_READ_EXISTING_ARCHIVE"
+  },
+  "source_retirement": "offline check is main-owned; two retained groups still read actual old Workbench files",
+  "inherited_unmodified_protected_files": 194,
+  "original_authors_unchanged": [
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-workbench-independent-20261008/dsh-analytics-workbench",
+      "head": "6c5adc9faa04f692d5d4b3028af4f945ab49dfe4",
+      "clean": true
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-crm-independent-20261008/dsh-crm-knowledge",
+      "head": "c4b1c91eaa4fa645deb7951614c1937eb76db143",
+      "clean": true
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-knowledge-independent-20261008/dsh-knowledge",
+      "head": "94ef29fa6c39d3dc506fbc5ef734f0a7ea9eb2b0",
+      "clean": true
+    }
+  ],
+  "local_document_link_targets_checked": 198,
+  "documents": [
+    {
+      "path": "STATUS.md",
+      "sha256": "fddb17d3db5148181056399dad1392d2cea29f50db6c9ecec671f13a8e929a09"
+    },
+    {
+      "path": "docs/hackathon/TODOS.md",
+      "sha256": "2355b1ab4150d489f1a98d1fd35c1c1d36c5596c9582e4b28d5a56dd7c08aa48"
+    },
+    {
+      "path": "docs/architecture/shinemage-plugin-platform.md",
+      "sha256": "7909ea33585470a76207fdc7f9744410bd640fbe0dc1f0317899be73403f8653"
+    },
+    {
+      "path": "docs/operating/verification.md",
+      "sha256": "6c1163b812174fb5350c8a405876c09cbe45e0fd662a1a1296447152153d22bf"
+    },
+    {
+      "path": "docs/hackathon/evidence/shinemage-three-path-main-application-20261011.md",
+      "sha256": "9d6093bc660446694fefade64d1fd2797c91f91bf1b52f9017c741e05561dfb0"
+    }
+  ],
+  "raw_records": [
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/binding-main-r1-execution.json",
+      "sha256": "338a61f6419e63030c664a2e4f1767bec2f83e957a4900374c140b15435e2d4f",
+      "bytes": 624
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/binding-main-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/binding-main-r1.stdout",
+      "sha256": "722ad5485d980c53f469116b98b6f4905cba3d2d05c0771a81320f99b87cfc1c",
+      "bytes": 4671
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/docs-wrapper-failure-r1.json",
+      "sha256": "04a224e97e683fc6d055c9aae804936f4a0117f45448d9df8f2206f76338fce9",
+      "bytes": 384
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/empty-after-fix-r1-execution.json",
+      "sha256": "8218638555fe24fcfb5dca7eba1cd45f8c3c955a0fdc47580511dfb76a0c3567",
+      "bytes": 570
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/empty-after-fix-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/empty-after-fix-r1.stdout",
+      "sha256": "b59249669a3beeeca0822c7669833ea6ede2d5ecf60fed850e9db14b0ec63ed6",
+      "bytes": 970
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/empty-before-fix-r1-execution.json",
+      "sha256": "2e3f1161768d501522450e50019e5dd614592939dd6d608ec97eafe29dd1d1df",
+      "bytes": 542
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/empty-before-fix-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/empty-before-fix-r1.stdout",
+      "sha256": "49380dd5e445fd3d7ac8dfbc729d08e1af7d4c63a2bff80c08da9417b9a5d822",
+      "bytes": 249
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/main-apply-r1-execution.json",
+      "sha256": "4d283aea6c748207dcbfd41f70ec5b1e91e2de25bffe6b8da8e80a01c4fc1a4f",
+      "bytes": 362
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/main-apply-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/main-apply-r1.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/main-reviewed-apply-check-r1-execution.json",
+      "sha256": "b6ac77558903b63cca5616c3d3fc2a77105839c1981650a94efa2510fe1bb382",
+      "bytes": 472
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/main-reviewed-apply-check-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/main-reviewed-apply-check-r1.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/ocr-preview-after-r1-execution.json",
+      "sha256": "a6efde748ef479d02e9b4924962d5af61236eba385e5d468ad1038ee85f8c37e",
+      "bytes": 532
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/ocr-preview-after-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/ocr-preview-after-r1.stdout",
+      "sha256": "46fdce2c1e32f9aeb3d5e1d8439a5eb7bb36ce13f0f1cb758859672709ca7cdb",
+      "bytes": 789
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/ocr-preview-before-r1-execution.json",
+      "sha256": "3c848d0ca8d8cab347b3c7abebdb4cd1e402eb4ea467910d07b4eae283c1b31d",
+      "bytes": 327
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/ocr-preview-before-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/ocr-preview-before-r1.stdout",
+      "sha256": "04f5dee167d6fc626f60e108ef19a05b40857cab49b02a64a4f43bf6514baadc",
+      "bytes": 761
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/ocr-rules-after-r1-execution.json",
+      "sha256": "7328eb16ae55486847d8ca562355d6910b2d329cff06c13e49aa05b1016703d4",
+      "bytes": 687
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/ocr-rules-after-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/ocr-rules-after-r1.stdout",
+      "sha256": "a5e125f10a35b1b8e6026e5222aa056f284a1e3eee5b933ee38217aafac07c1b",
+      "bytes": 3894
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/ocr-rules-r1-execution.json",
+      "sha256": "6064fe00d0b2cbdb66825a2b52c20f08ca5d9a23c20297559edeac06ad70e6f4",
+      "bytes": 482
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/ocr-rules-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/ocr-rules-r1.stdout",
+      "sha256": "a5e125f10a35b1b8e6026e5222aa056f284a1e3eee5b933ee38217aafac07c1b",
+      "bytes": 3894
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/offline-main-r1-execution.json",
+      "sha256": "8fb35859a29a615b4b5c5f3179825e57e7755665f7fcc85dc067e89282f36067",
+      "bytes": 621
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/offline-main-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/offline-main-r1.stdout",
+      "sha256": "377c3656ee96c20407374fb55372a3c56e8b1c483666a432bddcb072f661111d",
+      "bytes": 253
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/reader-main-r1-execution.json",
+      "sha256": "785a913a3eb7b46dd3ce8d004f050516f1b3ee25c4922ab1e8d7d84817f51077",
+      "bytes": 618
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/reader-main-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/reader-main-r1.stdout",
+      "sha256": "931617f4e6f3044f0bd875a956b45010c3384a38029bae284da3fd4a53f5bb4f",
+      "bytes": 2534
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/review-git-init-r1-execution.json",
+      "sha256": "196ec42ea6a76503b58f34a9a52209c64372fa8ef0ed5cfca9bc3f5e8610f4cd",
+      "bytes": 464
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/review-git-init-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/review-git-init-r1.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/selector-main-r1-execution.json",
+      "sha256": "72462c2f80b9c135ab2acc0afdb3d42dda5b6e2635720cbf2b1db1a0794c25b3",
+      "bytes": 511
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/selector-main-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/selector-main-r1.stdout",
+      "sha256": "2d61b0d438d6e73ec417e2bddfe20c652aa5bad20a0d79223b74f24261201379",
+      "bytes": 2121
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/source-denial-main-r1-execution.json",
+      "sha256": "e2f83e9f7e2e899bd62671585261b7dca1b69d53410fe48c9cd5018250184046",
+      "bytes": 1203
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/source-denial-main-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/source-denial-main-r1.stdout",
+      "sha256": "a88de9db7f0e7289a15578d750a5d3556e2ce984f73eb20509dffa18c8b90b2f",
+      "bytes": 422
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/wrong-planner-after-fix-r1-execution.json",
+      "sha256": "8cb60aecf4d396e181a34344e9418b7392acffb08754f2dd314a23424a3548e5",
+      "bytes": 570
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/wrong-planner-after-fix-r1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/wrong-planner-after-fix-r1.stdout",
+      "sha256": "bb10e087ce7c1db2fe658ba0ada3aff02603afc91e7a5f4c0f8170d29895c68c",
+      "bytes": 1054
+    }
+  ],
+  "owned_command_groups_remaining": 0,
+  "services_started": false,
+  "browser_started": false,
+  "index_empty": true,
+  "version": "0.20.0.0",
+  "commit_push_pr_merge_peer_candidate_journal_release_deploy": "NOT_RUN",
+  "full_b0_new_hosted_ci_current_candidate_real_business": "NOT_RUN_THIS_APPLICATION",
+  "product": "PARTIAL",
+  "sdk_distribution": "BLOCKED",
+  "release_ready": false
+}

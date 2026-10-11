@@ -1,0 +1,256 @@
+{
+  "schema": "shinemage-domain-main-cutover-proposal/v1",
+  "main_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "baseline": "HEAD + existing uncommitted working bytes",
+  "proposal": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji",
+  "product_delta": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/product-delta-r2.patch",
+    "sha256": "5d08d71940fce931f000ec42da01a028c1a8d7f101d6167670ed89a1b8c0bef0",
+    "bytes": 105351
+  },
+  "product_paths": [
+    {
+      "path": ".github/workflows/dsh-b0.yml",
+      "status": "modified",
+      "before_sha256": "925fdfd7847b07dd412346f8894e7ae80a36ec4cb68e70a767fa59ea498f5799",
+      "after_sha256": "0a0f7b90cfebade14aea72a2b4842081532e7c76ec95fcce84ca81c79cfa02f4",
+      "bytes": 3590,
+      "mode": "0o644"
+    },
+    {
+      "path": ".github/workflows/dsh-release-preflight.yml",
+      "status": "modified",
+      "before_sha256": "7c014a1c4f42da3168c188c26511c52172a43a5e77056f15ad2eb6941962e363",
+      "after_sha256": "5cfdf6dd338e535b087c9743887fe5df1f520e782055d2213201954acc69e280",
+      "bytes": 9348,
+      "mode": "0o644"
+    },
+    {
+      "path": ".github/workflows/lint.yml",
+      "status": "modified",
+      "before_sha256": "b013023289036b4bb584269982c18d5caeafff8d3ca7a629927cddc07230adac",
+      "after_sha256": "9fd1c057266375a03cc45ca9c0e5b4fb528b1ca14a1539aecc0b9f61901c2da4",
+      "bytes": 17073,
+      "mode": "0o644"
+    },
+    {
+      "path": "backend/tests/test_pre_push_smart_path.py",
+      "status": "modified",
+      "before_sha256": "d66b45c9c25dd29ba8cf7e4db11e28e436adfda86787496871809ffc1caa6c73",
+      "after_sha256": "0a04a8f539db332b7f9b766e3717c9f55e406b9730b7f344cc2f046b7287e608",
+      "bytes": 13014,
+      "mode": "0o644"
+    },
+    {
+      "path": "config/domain-author-evidence.lock.json",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "5c5919362309b3c6837d6cb6fd1499437d9b383d8fc0e358a1a08f9049f8283d",
+      "bytes": 5703,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/ci/domain-author-evidence.mjs",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "2c1ad263f1d2dee3afac990a52a0c46ebdd3cb7664316b75f7812c2baa086f7d",
+      "bytes": 14602,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/ci/domain-author-evidence.test.mjs",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "d84b26386d038b234d2409ec66b8f96c9d0e80cb351d6ae5e47dd11743fa4dc4",
+      "bytes": 11617,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/ci/pre_push_path_class.py",
+      "status": "modified",
+      "before_sha256": "9208f68d3a86fd1c41c7f415941b716655690d49239bcd42250a468faa940b58",
+      "after_sha256": "05f29c1f6661422092af07606084e9252f9ddf176eb824f00cecdba381511bcb",
+      "bytes": 13020,
+      "mode": "0o755"
+    },
+    {
+      "path": "scripts/ci/read-domain-author-evidence.py",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "148e7bab30f93759c93ad6938dd85fa43172eaab476b81f7f253a34cfe07a294",
+      "bytes": 3197,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/domain-package-inputs.mjs",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "52a84f5dbe6b3fd54f12d4a1525177517195eddbdeacd91d0300b9f61f7b7eb2",
+      "bytes": 2143,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/explicit-build-inputs-source.legacy.mjs",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "51dd69a130e3b9e12ac365fde8e34db2d8c84c62ea7ddf18c98510fbcb1928ba",
+      "bytes": 2058,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/explicit-build-inputs.test.mjs",
+      "status": "modified",
+      "before_sha256": "51dd69a130e3b9e12ac365fde8e34db2d8c84c62ea7ddf18c98510fbcb1928ba",
+      "after_sha256": "57c32399bf6c12d9d0e95f4ec54c174933eb33c09ef7c5f575ae6b3d7520613d",
+      "bytes": 1585,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/package-inputs-source-binding.legacy.mjs",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "2b70c08a9d966d444fbcac27cff3c76322b3eb93e4dda803d0df7031fb284aa3",
+      "bytes": 847,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/package-inputs-source-fixture.legacy.mjs",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "3f67e35baa862b660afbb32b025d903466a7f2db3425ac06c4990b878640be0c",
+      "bytes": 23273,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/package-inputs.mjs",
+      "status": "modified",
+      "before_sha256": "2b70c08a9d966d444fbcac27cff3c76322b3eb93e4dda803d0df7031fb284aa3",
+      "after_sha256": "1d4e6718640ddbbd36895f3babb5c7b829998cd6c3739c70a00e3bfa5c2bd594",
+      "bytes": 939,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/package-inputs.test.mjs",
+      "status": "modified",
+      "before_sha256": "3f67e35baa862b660afbb32b025d903466a7f2db3425ac06c4990b878640be0c",
+      "after_sha256": "6c480e4378b749c44bd54095507b4e35e91a48845122427b04d467619500b1a8",
+      "bytes": 13084,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/pipeline.mjs",
+      "status": "modified",
+      "before_sha256": "80587080ea63335f16e2beca174029a1afc655a35e60c8556ecdbb029681f1cc",
+      "after_sha256": "68d7504dc9bfec24186dc3b0bd5f8038a5995774702e40a7b5487b9196f5c9be",
+      "bytes": 25725,
+      "mode": "0o644"
+    },
+    {
+      "path": "scripts/dsh-b0/workbench-author-contracts.test.mjs",
+      "status": "added",
+      "before_sha256": null,
+      "after_sha256": "291312d6cc2b8c301a5df745f5132d5e69586cae6a5912d56986fd4e43acc244",
+      "bytes": 5216,
+      "mode": "0o644"
+    }
+  ],
+  "review": {
+    "ocr_reviewed": 17,
+    "ocr_reviewable": 17,
+    "excluded_manual_reviewed": 1,
+    "unresolved_findings": 0,
+    "receipt": "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/review-r2.json",
+    "external_model": "NOT_RUN"
+  },
+  "actual_checks": {
+    "public_consumer_tests": 8,
+    "input_receipt_guard_tests": 15,
+    "retained_workbench_contract_tests": 2,
+    "path_matrix_parameters_passed": 3,
+    "path_matrix_deselected": 27,
+    "workflow_new_bash_steps_syntax": 3,
+    "new_module_live_download": "NOT_RUN; download guards use owned mock plus separately retained real API/ZIP binding",
+    "full_main_b0": "NOT_RUN",
+    "main_hosted_ci": "NOT_RUN",
+    "candidate_host_service_admission": "NOT_RUN",
+    "release_ready": false,
+    "source_negative_eperm": 21
+  },
+  "fixed_owner_ci": {
+    "owner_source": "e78e040e14792c89f99a2e3181004dbdaefd9bf6",
+    "run": 38121126913,
+    "artifact": 11694947955,
+    "zip_sha256": "5207d0adac1a449fe1be36913d0d8214c1f4d8ecc3e137f7368bd27e6c4f28ee",
+    "expires_at": "2026-10-25T07:22:54Z",
+    "reference_sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182",
+    "built_content_pack_not_replacement": "66d53381095e93f38dbaa7385780f20b677f68ca2692702cb270849f3392853e"
+  },
+  "main_apply_check": {
+    "exit_code": 0,
+    "stderr_bytes": 0
+  },
+  "scratch_applied_only": {
+    "paths_matched": 18,
+    "main_applied": false
+  },
+  "logs": {
+    "public-domain-consumers-r1.stdout": {
+      "sha256": "4314ac248a274e9a7fe09a47957ad84948e779a7c03be44ceac92d7d84e0cd9a",
+      "counts": {
+        "tests": 8,
+        "pass": 8,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "execution": "actual isolated source-denied"
+    },
+    "domain-evidence-guards-r2.stdout": {
+      "sha256": "52198648759ceaec0a5713005223f1943cb1b2105943091587672412105833dd",
+      "counts": {
+        "tests": 15,
+        "pass": 15,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "execution": "actual isolated source-denied"
+    },
+    "workbench-retained-contracts-r1.stdout": {
+      "sha256": "f8ee3cb3c6ce26504f8642f5119093bba32ff2d6dfb51f87ee48fbf69ebdd560",
+      "counts": {
+        "tests": 2,
+        "pass": 2,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "execution": "actual retained main/source contract; not part of source-denied public result"
+    }
+  },
+  "raw_other_results": [
+    "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/public-domain-cli-r1.json",
+    "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/source-negative-probes-r1.json",
+    "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/domain-lock-path-matrix-r1.stdout",
+    "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/workflow-domain-steps-r1.json",
+    "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/retained-api-binding-r1.json",
+    "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/observed-guards-initial-r1.json",
+    "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/observed-main-apply-check-r1.json",
+    "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/legacy-byte-preservation-r1.json",
+    "/Users/hutou/.codex/tasks/shinemage-domain-main-cutover-proposal-20261011-yk072kji/scratch-apply-bytes-r2.json"
+  ],
+  "remaining_source_contracts": [
+    "eight plugin build input failure guards",
+    "Workbench author destination/coordinator contract fixtures",
+    "three main-owned Workbench backend/query contract groups"
+  ],
+  "protected_inputs": "current packs/profiles/candidate/journal/version unchanged",
+  "main_applied": false,
+  "main_git_delivery": "NOT_RUN",
+  "product": "PARTIAL",
+  "sdk_distribution": "BLOCKED",
+  "release_ready": false
+}

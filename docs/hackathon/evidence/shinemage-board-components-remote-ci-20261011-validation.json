@@ -1,0 +1,190 @@
+{
+  "schema": "shinemage-domain-remote-ci-delivery/v1",
+  "date": "2026-10-11",
+  "main_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "authorization": "two reviewed docs local commit, private repository, initialize main from 3855db80, feature push, PR and CI; no merge/release/deploy/main cutover",
+  "owner": {
+    "path": "/Users/hutou/.codex/tasks/shinemage-board-components-owner-proposal-20261011-fcjs02kq/board-components",
+    "repository": "https://github.com/tyuanww/shinemage-board-components",
+    "private": true,
+    "branch": "codex/board-components-independent",
+    "main": "3855db80f380856e21d5e034070d5e76cb127b8f",
+    "head": "d5aacdb464ff35b5dbb1aa46bf89717b31f131d0",
+    "docs_commit": "d5aacdb464ff35b5dbb1aa46bf89717b31f131d0",
+    "docs_commit_paths": [
+      "DEVELOPMENT.md",
+      "README.md"
+    ],
+    "git_clean": true
+  },
+  "pr": {
+    "url": "https://github.com/tyuanww/shinemage-board-components/pull/1",
+    "number": 1,
+    "state": "OPEN",
+    "base": "3855db80f380856e21d5e034070d5e76cb127b8f",
+    "head": "d5aacdb464ff35b5dbb1aa46bf89717b31f131d0"
+  },
+  "ci": {
+    "schema": "shinemage-domain-ubuntu-ci-artifact/v1",
+    "repository": "tyuanww/shinemage-board-components",
+    "run_id": 38119670295,
+    "url": "https://github.com/tyuanww/shinemage-board-components/actions/runs/38119670295",
+    "event": "pull_request",
+    "head_sha": "d5aacdb464ff35b5dbb1aa46bf89717b31f131d0",
+    "status": "completed",
+    "conclusion": "success",
+    "attempt": 1,
+    "artifact": {
+      "id": 11693814256,
+      "name": "board-components-ci-evidence-38119670295-1",
+      "api_digest": "sha256:10635ccff9df3e93711a325afe984c3feb3e8f6813ca1e543c1a2a14eb34ce69",
+      "zip_sha256": "10635ccff9df3e93711a325afe984c3feb3e8f6813ca1e543c1a2a14eb34ce69",
+      "zip_bytes": 4076,
+      "zip_path": "/Users/hutou/.codex/tasks/shinemage-domain-delivery-preflight-20261011-8dnlp38u/domain-ci-artifact-r1.zip"
+    },
+    "content_pack": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-delivery-preflight-20261011-8dnlp38u/domain-ci-artifact-r1/board-output-38119670295-1/shine-mage-board-components-0.1.0.tgz",
+      "sha256": "66d53381095e93f38dbaa7385780f20b677f68ca2692702cb270849f3392853e",
+      "bytes": 1951,
+      "sealed_reference_sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182",
+      "members_equal": true,
+      "members": {
+        "package/package.json": {
+          "bytes": 576,
+          "sha256": "2683aecb604706742a0b2bb38c2f3a35b5de6646767d3e4d4d20484f80aad3ba"
+        },
+        "package/lib/funnel.mjs": {
+          "bytes": 1660,
+          "sha256": "aebd9f3cdecc93a30b21d18cd554d5e01adfc17cdedc93e7a188ac0f48244dec"
+        },
+        "package/lib/waterfall.mjs": {
+          "bytes": 2308,
+          "sha256": "63aa6dc6010bd7cfe906f5184c395be0771568d40d471bf3184fe0d9ded53b98"
+        },
+        "package/lib/funnel.d.mts": {
+          "bytes": 239,
+          "sha256": "30c157c4cefc1ad5f8182e65af5777f39fcfd473987e1eabc47553f2f3d3c455"
+        },
+        "package/lib/waterfall.d.mts": {
+          "bytes": 341,
+          "sha256": "34b0be969c2f73b3dd1a7633b2e953c74bd5b12c80ed978ac3be0d51ee4a2210"
+        }
+      }
+    },
+    "formal_dsh_pack": "NOT_RUN",
+    "main_producer_cutover": "NOT_RUN",
+    "merge_release_deploy": "NOT_RUN",
+    "release_ready": false,
+    "counts": [
+      {
+        "command": "node --test library/test/geometry.test.mjs",
+        "pass": 28,
+        "fail": 0,
+        "skip": 0
+      },
+      {
+        "command": "node --test scripts/producer.test.mjs scripts/build-input.test.mjs",
+        "pass": 6,
+        "fail": 0,
+        "skip": 0
+      },
+      {
+        "command": "python scripts/ci/preparation-guards.test.py",
+        "tests": 4,
+        "result": "OK"
+      }
+    ],
+    "counts_are_separate": true,
+    "node": "24.19.0",
+    "python": "3.14.4",
+    "pnpm": "11.28.2",
+    "platform": "ubuntu-24.04",
+    "independent_tsc": "NOT_IN_CURRENT_BUILD"
+  },
+  "other_runs": [
+    {
+      "conclusion": "success",
+      "databaseId": 38119670295,
+      "event": "pull_request",
+      "headSha": "d5aacdb464ff35b5dbb1aa46bf89717b31f131d0",
+      "status": "completed",
+      "url": "https://github.com/tyuanww/shinemage-board-components/actions/runs/38119670295",
+      "workflowName": "board-components-owner"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 38119621286,
+      "event": "push",
+      "headSha": "d5aacdb464ff35b5dbb1aa46bf89717b31f131d0",
+      "status": "completed",
+      "url": "https://github.com/tyuanww/shinemage-board-components/actions/runs/38119621286",
+      "workflowName": "board-components-owner"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 38119620988,
+      "event": "push",
+      "headSha": "3855db80f380856e21d5e034070d5e76cb127b8f",
+      "status": "completed",
+      "url": "https://github.com/tyuanww/shinemage-board-components/actions/runs/38119620988",
+      "workflowName": "board-components-owner"
+    }
+  ],
+  "docs_review": "two Markdown files manually reviewed; OCR preview excludes unsupported extension, not a code review PASS count",
+  "raw_root": "/Users/hutou/.codex/tasks/shinemage-domain-delivery-preflight-20261011-8dnlp38u",
+  "raw_binding": [
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-delivery-preflight-20261011-8dnlp38u/domain-docs-delivery-r1.json",
+      "sha256": "b2afd8901dd719a78c5dce4cf353e8c0db25bc214ed7b00a7108fae00e3c6920",
+      "bytes": 1317
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-delivery-preflight-20261011-8dnlp38u/domain-push-r1.json",
+      "sha256": "c07402f1bb85ce5ac04604e34eaae9c38980597b454453ab7cc4db39ec9667da",
+      "bytes": 676
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-delivery-preflight-20261011-8dnlp38u/domain-pr-r1.json",
+      "sha256": "5f5a55d549e884132fe53bf73f0e0f938e19fcc579ad489f44be6a0017448335",
+      "bytes": 850
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-delivery-preflight-20261011-8dnlp38u/domain-remote-refs-r1.json",
+      "sha256": "3026ff29084595459be5ec0e6edf22a4bc9969fdd79848e62aeaeb5496bc8091",
+      "bytes": 161
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-delivery-preflight-20261011-8dnlp38u/domain-ubuntu-ci-artifact-r1.json",
+      "sha256": "a6e26df06055d70d58c2b995cc33f1d8b27c3e54888630b2c1c43187f1feaa18",
+      "bytes": 2157
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-delivery-preflight-20261011-8dnlp38u/domain-ci-log-coverage-r1.json",
+      "sha256": "8b9271945a44439f4833ebccdb2e34d56ebea24cf4e01e2a9ad540a94d181ee1",
+      "bytes": 1097
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-domain-delivery-preflight-20261011-8dnlp38u/domain-ci-log-r1.stdout",
+      "sha256": "67d61ee0646b0c7c5602de016e963cb014e8ca79988bcbda1c73b120c832776d",
+      "bytes": 73453
+    }
+  ],
+  "scope_limit": [
+    "pure domain library, not tenth DSH plugin",
+    "CI content pack is 1951 bytes, 66d53381; sealed reference remains 1955 bytes, 22245ab9; raw archives not interchangeable",
+    "all five public member bytes equal the sealed reference",
+    "main library locks/input and producer selection unchanged",
+    "formal DSH pack/candidate/host/business acceptance not covered"
+  ],
+  "not_run": [
+    "merge",
+    "release",
+    "deployment",
+    "main producer cutover",
+    "current combined admission",
+    "real model/business acceptance"
+  ],
+  "SDK_distribution": "BLOCKED",
+  "product": "PARTIAL",
+  "release_ready": false
+}

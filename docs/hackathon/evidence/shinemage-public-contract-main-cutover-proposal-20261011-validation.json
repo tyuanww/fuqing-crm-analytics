@@ -1,0 +1,714 @@
+{
+  "schema": "shinemage-public-contract-main-cutover-proposal/v1",
+  "recorded_at": "2026-10-11T09:24:50.092908+00:00",
+  "main_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+  "main_product_entry": "NOT_APPLIED",
+  "main_index": "EMPTY",
+  "version": "0.20.0.0",
+  "isolated_proposal": {
+    "product_paths": 12,
+    "files": [
+      {
+        "path": ".github/workflows/dsh-b0.yml",
+        "before_sha256": "0a0f7b90cfebade14aea72a2b4842081532e7c76ec95fcce84ca81c79cfa02f4",
+        "after_sha256": "61dc145beff229b7dcf1db9b401264bef8ecf4c384b5578c4cf08a0145a0356d",
+        "after_bytes": 3998
+      },
+      {
+        "path": ".github/workflows/dsh-release-preflight.yml",
+        "before_sha256": "5cfdf6dd338e535b087c9743887fe5df1f520e782055d2213201954acc69e280",
+        "after_sha256": "559e1751034891602f112e49edc89d6cceb06d30cd0597942539eed5ae59ab54",
+        "after_bytes": 9891
+      },
+      {
+        "path": ".github/workflows/lint.yml",
+        "before_sha256": "9fd1c057266375a03cc45ca9c0e5b4fb528b1ca14a1539aecc0b9f61901c2da4",
+        "after_sha256": "cc5906ff6f7a55fefcd40a96ae1ca46390da8b4e7474e900f7a6128042c39af5",
+        "after_bytes": 17481
+      },
+      {
+        "path": "backend/tests/test_pre_push_smart_path.py",
+        "before_sha256": "0a04a8f539db332b7f9b766e3717c9f55e406b9730b7f344cc2f046b7287e608",
+        "after_sha256": "6094e43641402f717643cf8634451ab77a8f11ca5b1057d9d18fe4b411d08cfc",
+        "after_bytes": 13221
+      },
+      {
+        "path": "config/public-contract-inputs.lock.json",
+        "before_sha256": null,
+        "after_sha256": "9d9e8bbf5b135657f3583e0525a77de4afb68c123b41c6ea20a3d90e77c9a996",
+        "after_bytes": 28677
+      },
+      {
+        "path": "scripts/ci/pre_push_path_class.py",
+        "before_sha256": "05f29c1f6661422092af07606084e9252f9ddf176eb824f00cecdba381511bcb",
+        "after_sha256": "64cd2e54e6379f1e2068ed2a6934d9e69733e13f72ef0f10b01c4dc238ac81a1",
+        "after_bytes": 13219
+      },
+      {
+        "path": "scripts/ci/public-contract-inputs.mjs",
+        "before_sha256": null,
+        "after_sha256": "71f8abe81d84d28e89c4b39a2103c3bd2afdea4860b24ba10f5e2914d68bb15f",
+        "after_bytes": 16957
+      },
+      {
+        "path": "scripts/ci/public-contract-inputs.test.mjs",
+        "before_sha256": null,
+        "after_sha256": "d74c8802ae0af32c627b5867114c45187f4bd9daea8a4305dbc1976486832371",
+        "after_bytes": 8649
+      },
+      {
+        "path": "scripts/ci/read-public-contract-inputs.py",
+        "before_sha256": null,
+        "after_sha256": "ed85f08487e252a2d868e4138c5b76977b017635c0732778063191bf081c3062",
+        "after_bytes": 2285
+      },
+      {
+        "path": "scripts/dsh-b0/fixed-contract-checks.mjs",
+        "before_sha256": null,
+        "after_sha256": "753527244bbb50206699d231ae916a8823cc39d9587971fc32cb9812e8cacf45",
+        "after_bytes": 9239
+      },
+      {
+        "path": "scripts/dsh-b0/fixed-contract-checks.test.mjs",
+        "before_sha256": null,
+        "after_sha256": "ee0994a9a7b8868389a6f721d6d9356ca396c640f0f3e9de28662787b70fab98",
+        "after_bytes": 4198
+      },
+      {
+        "path": "scripts/dsh-b0/pipeline.mjs",
+        "before_sha256": "68d7504dc9bfec24186dc3b0bd5f8038a5995774702e40a7b5487b9196f5c9be",
+        "after_sha256": "e8483622d94be08a683749554b5e33d11e013f52a0add2d00fc1ed86d801f228",
+        "after_bytes": 25009
+      }
+    ],
+    "patch": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/product-delta-r1.patch",
+      "sha256": "47f2aa8b1c9c51f08c381fda0106ab2c3b37b0f18800a6e13def283bbe14668e",
+      "bytes": 86591
+    },
+    "git_apply_check_exit": 0
+  },
+  "locked_author_inputs": {
+    "workbench": {
+      "source_sha": "6c5adc9faa04f692d5d4b3028af4f945ab49dfe4",
+      "run_id": 38126014921,
+      "artifact_id": 11697481756,
+      "archive_sha256": "74e7af647128fea315f3953e609c00bb986b4656e1a03eeb3112cfcfc2c3dfaf",
+      "ci_conclusion": "SUCCESS_API_VERIFIED_IN_OWNER_DELIVERY",
+      "compiler_files": 28
+    },
+    "crm": {
+      "source_sha": "c4b1c91eaa4fa645deb7951614c1937eb76db143",
+      "run_id": 38126019403,
+      "artifact_id": 11696962431,
+      "archive_sha256": "e839c07440ebca9910364ea8951734d49e88a451c9d7a177374c38f0a80ed21c",
+      "ci_conclusion": "SUCCESS_API_VERIFIED_IN_OWNER_DELIVERY",
+      "compiler_files": 2
+    },
+    "brand": {
+      "source_sha": "0b8c8a793b585c22c980b9d3afe8b9839d7632ec",
+      "run_id": 38125655260,
+      "artifact_id": 11697365923,
+      "archive_sha256": "7fe83711a958f5801598f8f798a1d0727c0ba5bde96750cd62deaa161972c93b",
+      "ci_conclusion": "SUCCESS_API_VERIFIED_IN_OWNER_DELIVERY",
+      "compiler_files": 1
+    }
+  },
+  "checks": {
+    "guard_tests": {
+      "pass": 28,
+      "fail": 0,
+      "skip": 0,
+      "exit_code": 0
+    },
+    "path_selection_pytest": {
+      "pass": 34,
+      "exit_code": 0
+    },
+    "original_generators": {
+      "commands": 15,
+      "all_exit_code_0": true,
+      "original_bytes_unchanged": true
+    },
+    "slot": {
+      "pass": 4,
+      "fail": 0,
+      "skip": 0
+    },
+    "theme_rejection_and_drift": {
+      "pass": 2,
+      "fail": 0,
+      "skip": 0
+    },
+    "source_negative": {
+      "paths": 34,
+      "result": "EPERM",
+      "whole_machine_deny_default": false
+    },
+    "canonical_files": 162,
+    "compiler_materials": 31,
+    "stage_unchanged": true,
+    "reviewable_files": 11,
+    "excluded_test_manual_review": 1
+  },
+  "main_pr119": {
+    "head": "5390667cc990fa558b0445aa455b086d325a6c77",
+    "state": "OPEN",
+    "merge_state": "CLEAN",
+    "successful_checks": 4,
+    "skipped_checks": 6,
+    "b0": "SKIPPED",
+    "covers_current_uncommitted_or_proposal": "NO"
+  },
+  "failure_preservation": {
+    "first_guard": "19 PASS / 2 FAIL; fixture copy fixed; logs kept",
+    "isolated_guard_final_r1": "27 PASS / 1 FAIL; duplicate ZIP subprocess timeout; async pipe mitigation; timeout unchanged",
+    "timeout_root_cause": "NOT_PROVEN; direct synchronous reproduction 6 expected rejects",
+    "stage_r2": "missing canonical C0 provenance test; fixed explicit input list, not original generator/hash",
+    "stage_r4": "bad wrapper python-r4; stderr kept; original execution JSON not retained due to wrapper filename reuse",
+    "stage_r5_record": "original r4-named JSON describes r5; kept unchanged and copied under explicit r5-recovered name",
+    "harnesses": "prelaunch syntax and OCR Markdown/JSON wrapper failures kept"
+  },
+  "not_run": [
+    "main_local_cutover",
+    "full_B0_with_new_entry",
+    "new_main_CI",
+    "new_preparation_network_path",
+    "new_formal_pack",
+    "new_candidate",
+    "new_journal",
+    "runtime_host_service",
+    "real_model_business_UAT"
+  ],
+  "remaining": [
+    "direct standalone original generator entrypoints remain legacy-source based",
+    "retained missing-input/main contract guards and static boundary scan still consume old source",
+    "old dsh-plugins copies not deleted",
+    "Cordis declared 4.0.2 versus fixed 4.0.4 compatibility remains OPEN"
+  ],
+  "sdk_distribution": "BLOCKED",
+  "product": "PARTIAL",
+  "release_ready": false,
+  "raw_bindings": [
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/main-before-r1.json",
+      "bytes": 35052,
+      "sha256": "198845ec08f7577c702a606790d5ba514c49920aadc4c04b3bb4e92038c50905"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/main-local-cutover-plan-r1.json",
+      "bytes": 4876,
+      "sha256": "1278424bb73e45f0fbf9d89778f1a8c57092bee907afebcb61ccfb0dceeb9cbe"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/product-delta-r1.patch",
+      "bytes": 86591,
+      "sha256": "47f2aa8b1c9c51f08c381fda0106ab2c3b37b0f18800a6e13def283bbe14668e"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/patch-check-r1.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/patch-check-r1.stderr",
+      "bytes": 76,
+      "sha256": "e46e6f3ad6ad9dc5ce0827dd086da685c96ae54cb18b68affe442d37f4895804"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/review-final-r1/preview.json",
+      "bytes": 2066,
+      "sha256": "078af92dfeeef710233f00bb30ee5ffead18edd44274047e58da5cd893cb4839"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/review-final-r1/rules-r2.json",
+      "bytes": 15391,
+      "sha256": "6efe68a9cf5b849d6b091c679ef487d1be770630450860a7cd5720e2fbcc6276"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/review-final-r1/host-review.json",
+      "bytes": 4192,
+      "sha256": "cccf269038568bae188d9f938cb86899daca92a5303af5db979956b865175e32"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/source-denied-r5.sb",
+      "bytes": 1152,
+      "sha256": "87272c0bebee9e9dfa604492fb379e6f764dda4d9a566cb2807a0cbf55b2e426"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/source-negative-final-r2.stdout",
+      "bytes": 6660,
+      "sha256": "4ec3257622b9fbce635fa61a5142f09ee2dd06787e34315666f463ae61f26424"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/source-negative-final-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/source-negative-final-r2-execution.json",
+      "bytes": 1883,
+      "sha256": "d79ca6c00ee1fac45c3dc0bd4f650cfe45572f0be65e8c5c93744f039d6e4727"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/guard-tests-isolated-final-r2.stdout",
+      "bytes": 5494,
+      "sha256": "4ec4b046cc0d1c886a82816235c05fdd87cc79006c28b158339be6ef1e573383"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/guard-tests-isolated-final-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/guard-tests-isolated-final-r2-execution.json",
+      "bytes": 650,
+      "sha256": "d3bf08866bfc84264b117690dfa3ae39f71aa81d6bb24d8b167c607d4b4cb127"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/stage-positive-final-r2.stdout",
+      "bytes": 3198,
+      "sha256": "015fb1b1ede4d04f52b23d4b82755afa00ea08399c57d43b6588b0a925b64232"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/stage-positive-final-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/stage-positive-final-r2-execution.json",
+      "bytes": 1490,
+      "sha256": "344eb661847dcc9e34d5bbbf7fa4b76db3b794efb6e053a8ba791014425cb4b6"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/checks.json",
+      "bytes": 44315,
+      "sha256": "6ad24741adeceed998c0c135882323e136c7cc2a69b2dc711259e53f04ed7dd8"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/path-checks-r1.stdout",
+      "bytes": 99,
+      "sha256": "1f8b2fa90f26e5f308fea0704b073c2b1bbdb1e1ab77a4f968c8ce8d03d30048"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/path-checks-r1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/workflow-path-validation-r1.json",
+      "bytes": 784,
+      "sha256": "be1f1804e7cde2f6cb6afb98945039b26e1e3d4f399d2adb75621def211e8344"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/inputs/input.json",
+      "bytes": 432,
+      "sha256": "c3f7f2087a44836971b79c9403ead5344369315f17ca905ad8cbe17249f3d39e"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/main-pr119-observation-r1.json",
+      "bytes": 3175,
+      "sha256": "39c7c7fd9bcd579d977b7a3f16511f8922d18897369f8832ccf79da308a23c6a"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/guard-tests-isolated-final-r1.stdout",
+      "bytes": 11583,
+      "sha256": "e629d8475f6799d97978ebd682683248c98a1b2858ed5ddd1efd60882dfd0f08"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/guard-tests-isolated-final-r1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/guard-tests-isolated-final-r1-execution.json",
+      "bytes": 650,
+      "sha256": "9d8f7da63ef177f9321a7918a94b9589fe0a62204cdbaf2e10c816da959b6397"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/guard-tests-r1.stdout",
+      "bytes": 11677,
+      "sha256": "7c5b5dc3310deb70a9cfeb5ab77e22de8f0172e7c6fd016d7e4afd95b2f2f354"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/guard-tests-r1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/stage-positive-r2.stdout",
+      "bytes": 1235,
+      "sha256": "0428c8b5f2194e63251dab68f8a13564a274683001855bf183df962e3cbb8d65"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/stage-positive-r2.stderr",
+      "bytes": 1536,
+      "sha256": "82923992b698f26db95ff277e071110c10bf98b074f6e238ba8711e2ad5cb133"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/stage-positive-execution-r2.json",
+      "bytes": 1488,
+      "sha256": "8f85b3b86c210ede0fe740662f5426aa1493c43af1297c33e52f33e0bcafee01"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/stage-positive-r4.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/stage-positive-r4.stderr",
+      "bytes": 11535,
+      "sha256": "46a8b03c4cb076bc43a539cee67d308499e61e801224a35076a9b656979acace"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/historical-execution-name-note-r1.json",
+      "bytes": 771,
+      "sha256": "cec7a2f66f4d4cfc77d2a5b76725bbbc3be8258941b5898ce72de501c95bf88e"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/stage-positive-execution-r5-recovered-r1.json",
+      "bytes": 1488,
+      "sha256": "0187167bcf3aeed03c509fd8225805a5d0a11d8553b36acbe7b905f1f185a504"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/stage-harness-failure-r1.json",
+      "bytes": 160,
+      "sha256": "3e3f91bdb4dde4c9d7f64acd14ebeae7355f3bcc21b6a7abe9803b1156d48485"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/duplicate-communication-r1.stdout",
+      "bytes": 355,
+      "sha256": "46f6b9ff685b58e0d87075c9c64092f6e02f35d7ce8cab48aaed4a4a3e8115eb"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/duplicate-communication-r1.stderr",
+      "bytes": 5898,
+      "sha256": "ffb6fecccb4996ec419d3c816b5dde86e93e546a288e4f703260cd433f19c9f0"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/seal-harness-failure-r1.json",
+      "bytes": 283,
+      "sha256": "76bbb479720676b16417339985a65c55187de2449603a50e46f0a16f62c00460"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/inputs/workbench.zip",
+      "bytes": 65662,
+      "sha256": "74e7af647128fea315f3953e609c00bb986b4656e1a03eeb3112cfcfc2c3dfaf"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/inputs/crm.zip",
+      "bytes": 2816,
+      "sha256": "e839c07440ebca9910364ea8951734d49e88a451c9d7a177374c38f0a80ed21c"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/inputs/brand.zip",
+      "bytes": 1766,
+      "sha256": "7fe83711a958f5801598f8f798a1d0727c0ba5bde96750cd62deaa161972c93b"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/proposal/.github/workflows/dsh-b0.yml",
+      "bytes": 3998,
+      "sha256": "61dc145beff229b7dcf1db9b401264bef8ecf4c384b5578c4cf08a0145a0356d"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/proposal/.github/workflows/dsh-release-preflight.yml",
+      "bytes": 9891,
+      "sha256": "559e1751034891602f112e49edc89d6cceb06d30cd0597942539eed5ae59ab54"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/proposal/.github/workflows/lint.yml",
+      "bytes": 17481,
+      "sha256": "cc5906ff6f7a55fefcd40a96ae1ca46390da8b4e7474e900f7a6128042c39af5"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/proposal/backend/tests/test_pre_push_smart_path.py",
+      "bytes": 13221,
+      "sha256": "6094e43641402f717643cf8634451ab77a8f11ca5b1057d9d18fe4b411d08cfc"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/proposal/config/public-contract-inputs.lock.json",
+      "bytes": 28677,
+      "sha256": "9d9e8bbf5b135657f3583e0525a77de4afb68c123b41c6ea20a3d90e77c9a996"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/proposal/scripts/ci/pre_push_path_class.py",
+      "bytes": 13219,
+      "sha256": "64cd2e54e6379f1e2068ed2a6934d9e69733e13f72ef0f10b01c4dc238ac81a1"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/proposal/scripts/ci/public-contract-inputs.mjs",
+      "bytes": 16957,
+      "sha256": "71f8abe81d84d28e89c4b39a2103c3bd2afdea4860b24ba10f5e2914d68bb15f"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/proposal/scripts/ci/public-contract-inputs.test.mjs",
+      "bytes": 8649,
+      "sha256": "d74c8802ae0af32c627b5867114c45187f4bd9daea8a4305dbc1976486832371"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/proposal/scripts/ci/read-public-contract-inputs.py",
+      "bytes": 2285,
+      "sha256": "ed85f08487e252a2d868e4138c5b76977b017635c0732778063191bf081c3062"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/proposal/scripts/dsh-b0/fixed-contract-checks.mjs",
+      "bytes": 9239,
+      "sha256": "753527244bbb50206699d231ae916a8823cc39d9587971fc32cb9812e8cacf45"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/proposal/scripts/dsh-b0/fixed-contract-checks.test.mjs",
+      "bytes": 4198,
+      "sha256": "ee0994a9a7b8868389a6f721d6d9356ca396c640f0f3e9de28662787b70fab98"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/proposal/scripts/dsh-b0/pipeline.mjs",
+      "bytes": 25009,
+      "sha256": "e8483622d94be08a683749554b5e33d11e013f52a0add2d00fc1ed86d801f228"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/workbench/run.json",
+      "bytes": 13989,
+      "sha256": "f3e5e2588d17bc5692be6e092794c4dedaad0cf2f511f44fbcd7c6bc85a4d787"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/workbench/jobs.json",
+      "bytes": 4744,
+      "sha256": "f8a49fa8ec1d796b0eba55c7d4aba7ffd68d597bba0504622f18338683b4b3f5"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/workbench/artifacts.json",
+      "bytes": 1543,
+      "sha256": "1b286be67b6c5776a1d223b997b5e1e51a53bea6c411419214dbf61ffc90dd79"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/workbench/job-commit.json",
+      "bytes": 2686,
+      "sha256": "a9076731f01a7c72dd7733ab3ff95a8154e7d21c875501baaf5fd37b0d285bf5"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/workbench/manifest.json",
+      "bytes": 11551,
+      "sha256": "85f17db0fa3d2eb8d0ccf10e990f8ee2dd85ffc878420c490c245f5d17b9afba"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/crm/run.json",
+      "bytes": 13370,
+      "sha256": "76bd0128d5972252c2c904192ee1cf22bbbcb3aff0665c81b039a6a854139424"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/crm/jobs.json",
+      "bytes": 4687,
+      "sha256": "bd8a92b26baafe15436e43915247d5d7bc3ca72d54605d98b1043b826db3bb17"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/crm/artifacts.json",
+      "bytes": 1510,
+      "sha256": "2fb1f95241c3bd9636e45e36df84468215643564d6ef227c88d847111c599450"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/crm/job-commit.json",
+      "bytes": 2644,
+      "sha256": "eefdaf223adbbf75270630418ab6e234d7f349afe259f14b54e287c7ee0fb65a"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r5/crm/manifest.json",
+      "bytes": 1627,
+      "sha256": "57bb531d0ceb45258c0e9b974ede02ba590b06a9d882427fa6dcd970da60273c"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r3/brand/run.json",
+      "bytes": 13319,
+      "sha256": "66eb126c6834a62b809fcb16be9eeca40ed9f721d73c38ec6daff49352b9f2f4"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r3/brand/jobs.json",
+      "bytes": 3406,
+      "sha256": "df5e3de5ed871591085ee8c79ac47c41724aaa666f8480b3695c00089fd78058"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r3/brand/artifacts.json",
+      "bytes": 759,
+      "sha256": "1eaf9150f671c4dcb4aafe04cb9cb625d2e7f1138b3a6b554c209e2840e81642"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r3/brand/job-commit.json",
+      "bytes": 2630,
+      "sha256": "1c9ee4548b2965037936b8bb1cf3f8ff40e33601a8eb23c3ead0a7cd96d51f5d"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-generated-contracts-proposal-20261011-ec1mo2ki/ci-evidence-r3/brand/manifest.json",
+      "bytes": 1209,
+      "sha256": "4a3d28229b23d48209ec43cdce67e488b65f264235936e192a22bdb16d6b3c77"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/content-theme-contract.mjs.stdout",
+      "bytes": 72,
+      "sha256": "d37870a08d163186be815ec62dafaf0dbdd1d998b034485ed7696366f48ac1e8"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/content-theme-contract.mjs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/cockpit-slot-contract.mjs.stdout",
+      "bytes": 71,
+      "sha256": "591aecc2f4727c356eff2078c734569c6159269252e4b3f0e0a93d8212b75302"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/cockpit-slot-contract.mjs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/run-kernel-contract.mjs.stdout",
+      "bytes": 120,
+      "sha256": "e74a52f9bd424503bbd0f832723fcd8a6f2aadff55a5f0c910f0298697512e88"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/run-kernel-contract.mjs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/query-contract.mjs.stdout",
+      "bytes": 140,
+      "sha256": "1710b445c4c7d2bdc20f1cccac11e0d131a00c81770af6ece000ada8f6e26f61"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/query-contract.mjs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/query-run-contract.mjs.stdout",
+      "bytes": 156,
+      "sha256": "f4ca67b17923be2137446fbd65a70f3d1b42e56b097c45f144ff2816f92a9dd5"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/query-run-contract.mjs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/analysis-contract.mjs.stdout",
+      "bytes": 132,
+      "sha256": "10b337af1b40f806cec38d34286a39360b214b1bb8ae21e3ee0707aede4fbd90"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/analysis-contract.mjs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/cockpit-contract.mjs.stdout",
+      "bytes": 125,
+      "sha256": "49472418070b1c3e9546123220fbcabecec0e5b59cb076eb8d9a01b4c6ca0532"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/cockpit-contract.mjs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/first-purchase-contract.mjs.stdout",
+      "bytes": 132,
+      "sha256": "ab645fa4cec6629453f781a4d2d2e729c78ddb2d63b541e648b5b13608775257"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/first-purchase-contract.mjs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/first-purchase-analysis-contract.mjs.stdout",
+      "bytes": 147,
+      "sha256": "cca0bd4a268cb6cc075f3752b68772596504b46ffcc18792dc1f78e9c7d93501"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/first-purchase-analysis-contract.mjs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/first-purchase-cockpit-contract.mjs.stdout",
+      "bytes": 140,
+      "sha256": "7ca057f7833768f4fc254301c19d151eee494843bb8ef6ffa517e7eaea009a30"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/first-purchase-cockpit-contract.mjs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/competition-c0-contract.mjs.stdout",
+      "bytes": 212,
+      "sha256": "049382a517bf5c47e54b7265128e3bf4fd972bc9f42a7d234f95d1a69c2a3a2b"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/competition-c0-contract.mjs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/competition-chart-contract.mjs.stdout",
+      "bytes": 48,
+      "sha256": "fb498f5fd2cae99482084a04ba62b580978119498e3c5f77af11a9044d6dced4"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/competition-chart-contract.mjs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/competition-computed-contract.mjs.stdout",
+      "bytes": 51,
+      "sha256": "062d5e2fecf48445064fae1b9a883db6e6f5af59e1a77793cbd7732bcd89e4af"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/competition-computed-contract.mjs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/board-spec-contract.mjs.stdout",
+      "bytes": 40,
+      "sha256": "ac3b0eab31c43d80c446d7cd2ee9934ff22c8c960da3fc0952dbee8c1e456e1e"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/board-spec-contract.mjs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/page-contract.mjs.stdout",
+      "bytes": 105,
+      "sha256": "fe006101e14339ce460a822581c7fc85fdd02750240e093e1011a6a0c2b93a8c"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/page-contract.mjs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/public-slot-contract.stdout",
+      "bytes": 972,
+      "sha256": "7f9984085d531aeff6141c41ad68cf3264bb1cc43c578e633164f281cde52199"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/public-slot-contract.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/public-theme-rejection-and-drift.stdout",
+      "bytes": 535,
+      "sha256": "f4dc90d09c3fc033c2530cb797387fffb182a8c5e083e3d80f844f7cb6c1111d"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-contract-main-cutover-proposal-20261011-b4muxq9k/verify-stage-final-r2/logs/public-theme-rejection-and-drift.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

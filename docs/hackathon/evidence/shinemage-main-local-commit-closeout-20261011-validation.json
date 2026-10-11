@@ -1,0 +1,916 @@
+{
+  "schema_version": "shinemage-main-local-commit-closeout/v1",
+  "at": "2026-10-11T12:07:10.414180+00:00",
+  "main": {
+    "root": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics",
+    "branch": "codex/shinemage-abc-local-candidate",
+    "starting_head": "5390667cc990fa558b0445aa455b086d325a6c77",
+    "code_and_boundary_head": "d36c567e831145b52365176ca3f90f6c3dfc510a",
+    "index_empty": true
+  },
+  "scope": "authorized local event commits, review and affected checks; evidence and current docs committed next, not new remote or release acceptance",
+  "groups": [
+    {
+      "id": "01",
+      "message": "refactor(profiles): assemble explicit independent plugin packs",
+      "commit": "24381f0ca74e7b9b9f2e6315dea471845d6884aa",
+      "parent": "5390667cc990fa558b0445aa455b086d325a6c77",
+      "paths": [
+        "scripts/release/plugin-pack.mjs",
+        "scripts/release/plugin-pack.test.mjs",
+        "scripts/release/profile-packs.mjs",
+        "scripts/release/profile-packs.test.mjs",
+        "scripts/crm-calibration/prepare-profile.mjs",
+        "scripts/crm-calibration/profile-packs.test.mjs",
+        "scripts/crm-calibration/test-support/formal-packs.fixture.mjs",
+        "scripts/dsh-dev/cli.mjs",
+        "scripts/dsh-dev/cli.test.mjs",
+        "scripts/dsh-dev/serve.mjs",
+        "dsh-plugins/analytics-workbench/test/native-composition-browser-probe.mjs"
+      ],
+      "reviewed_files": 11,
+      "skipped_files": 0,
+      "external_model": "NOT_RUN",
+      "verification": {
+        "command": [
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "--test",
+          "--test-concurrency=1",
+          "scripts/release/plugin-pack.test.mjs",
+          "scripts/release/profile-packs.test.mjs",
+          "scripts/crm-calibration/profile-packs.test.mjs",
+          "scripts/dsh-dev/cli.test.mjs"
+        ],
+        "cwd": "/Users/hutou/.codex/tasks/shinemage-main-commit-closeout-20261011-ogm1vxo5/group-01/validated-tree",
+        "started_unix": 1791718279.151362,
+        "ended_unix": 1791718288.922189,
+        "exit": 0,
+        "scope": "HEAD plus exactly group 01; no later uncommitted dependencies",
+        "stdout_sha256": "fa5b4a0359c8ae75684208e122f67bcf22f52300928c0393bdffdc927cb72c56",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "review_sha256": "5a7505a28b4f08316cbb21be5c7be2a312db1266531c239ca5e4015a90049688",
+      "commit_receipt_sha256": "24106894edf3ffad882a26567bcb81e5eeaddc92dd5aa8764901de5f9baee83e"
+    },
+    {
+      "id": "02",
+      "message": "test(crm): consume fixed packages through main-owned public contracts",
+      "commit": "caa48b3acd41157ad64dc1464c2ecb413143d8ca",
+      "parent": "24381f0ca74e7b9b9f2e6315dea471845d6884aa",
+      "paths": [
+        "scripts/crm-calibration/composition-inputs.mjs",
+        "scripts/crm-calibration/composition-inputs.test.mjs",
+        "scripts/crm-calibration/crm-package.integration.mjs",
+        "scripts/crm-calibration/knowledge-package.integration.mjs",
+        "scripts/crm-calibration/knowledge-composition.integration.mjs",
+        "scripts/crm-calibration/page-composition.integration.mjs",
+        "scripts/crm-calibration/profile.test.mjs",
+        "scripts/crm-calibration/test-support/dashboard.fixture.mjs",
+        "scripts/crm-calibration/test-support/graph.fixture.mjs",
+        "scripts/crm-calibration/test-support/login-native.fixture.mjs",
+        "dsh-plugins/crm-knowledge/test/dashboard.fixture.mjs",
+        "dsh-plugins/crm-knowledge/test/knowledge-composition.integration.mjs",
+        "dsh-plugins/crm-knowledge/test/login-native.fixture.mjs",
+        "dsh-plugins/crm-knowledge/test/page-composition.integration.mjs",
+        "dsh-plugins/crm-knowledge/test/profile.test.mjs",
+        "dsh-plugins/knowledge/test/graph.fixture.mjs"
+      ],
+      "reviewed_files": 16,
+      "skipped_files": 0,
+      "external_model": "NOT_RUN",
+      "verification": {
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-main-commit-closeout-20261011-ogm1vxo5/group-02/source-denial-r2.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "--test",
+          "--test-concurrency=1",
+          "--test-timeout=30000",
+          "scripts/crm-calibration/composition-inputs.test.mjs",
+          "scripts/crm-calibration/profile.test.mjs",
+          "scripts/crm-calibration/crm-package.integration.mjs",
+          "scripts/crm-calibration/knowledge-package.integration.mjs",
+          "scripts/crm-calibration/knowledge-composition.integration.mjs",
+          "scripts/crm-calibration/page-composition.integration.mjs"
+        ],
+        "cwd": "/Users/hutou/.codex/tasks/shinemage-main-commit-closeout-20261011-ogm1vxo5/group-02/validated-tree",
+        "started_unix": 1791718560.1350021,
+        "ended_unix": 1791718563.630816,
+        "pid": 70706,
+        "exit": 0,
+        "environment": {
+          "CRM_COMPOSITION_PACK_INPUTS": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/prepared-current-main-r1/crm-inputs.json",
+          "CRM_COMPOSITION_PAGE_INPUTS": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/prepared-current-main-r1/page-inputs.json",
+          "CRM_COMPOSITION_OUTPUT": "/Users/hutou/.codex/tasks/shinemage-main-commit-closeout-20261011-ogm1vxo5/group-02/runtime-output-r2",
+          "B0_BUILD_UPSTREAM": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2",
+          "FQ_B0_PYTHON": "/Users/hutou/homebrew/opt/python@3.14/bin/python3.14"
+        },
+        "fixed_input_identities": [
+          {
+            "id": "@shine-mage/dsh-analytics-workbench-b0",
+            "source_sha": "6c5adc9faa04f692d5d4b3028af4f945ab49dfe4",
+            "version": "0.0.0-b0",
+            "manifest_sha256": "0af61dabbab9a2205fb1d9ff3a2eec7e8194800d9af3f9043b0a5587a81edc12",
+            "pack_sha256": "e41df9f5a8f7031c092319222543c8d723ca644c0c9d69b2ae53f13257e9b79e"
+          },
+          {
+            "id": "@shine-mage/dsh-crm-knowledge",
+            "source_sha": "c4b1c91eaa4fa645deb7951614c1937eb76db143",
+            "version": "0.0.0-crm.1",
+            "manifest_sha256": "4663cce02776fa68913a41829d8ca0712fa44bf1c7642844326d80de40af2158",
+            "pack_sha256": "0da9f8edd40b17a92377aa4b35d219229c8461b942060a7dd0e12265343500fd"
+          },
+          {
+            "id": "@shine-mage/dsh-knowledge",
+            "source_sha": "94ef29fa6c39d3dc506fbc5ef734f0a7ea9eb2b0",
+            "version": "0.0.0-candidate.1",
+            "manifest_sha256": "a674a2da0dcd317839c4f8d7766da62ced58eca9021222c6e3a238f80aa7df79",
+            "pack_sha256": "ed7888204d5cefe7d383632a75319d3427fec9a735863f4e123b8ea17387ef67"
+          },
+          {
+            "id": "@shine-mage/dsh-shine-board",
+            "source_sha": "76601df755ec8ef8c9726ea770ec488b745efd71",
+            "version": "0.0.0-b0",
+            "manifest_sha256": "671acb9502969f08e5db6b83369afa3ea1dec1699a7a9fc5a1680abfa9aa39cf",
+            "pack_sha256": "e1348dd7739778a5ec2d676420e86290ca49f69cdf045959fd82441232a30c1a"
+          },
+          {
+            "id": "@shine-mage/dsh-shine-crowd-action",
+            "source_sha": "5c39e21c27565397383b009725634ea66e9c1525",
+            "version": "0.0.0-b0",
+            "manifest_sha256": "d3998ed96530db66b3aa53f263c93848e7078846a8a0f612a1c099202bfa406f",
+            "pack_sha256": "3fb9d88d228e3af4a9c965961c035650b65365392a9caccb4c14f336b003b2ca"
+          },
+          {
+            "id": "@shine-mage/dsh-shine-query",
+            "source_sha": "1f1e19d280923ebe7aac964f8b5825d497434db8",
+            "version": "0.0.0-b0",
+            "manifest_sha256": "13433c1c4687cd33f0b314b60a38c76fb8390ee52375755320d4ca5a6f378fae",
+            "pack_sha256": "774c6ae63e0fb170a81a9e9fb9551d55d40724faae5966c1d95bb32624fb89ce"
+          },
+          {
+            "id": "@shine-mage/dsh-shine-funnel",
+            "source_sha": "dbfaede0961586d773c708e833a4ac1c9f2515dc",
+            "version": "0.0.0-b0",
+            "manifest_sha256": "1e631c02c1fa6903b1f76953edc4e7da3fc85b1b96c1292567f8561a78a8eefb",
+            "pack_sha256": "581ba069aa8af4598f553e4b11b57216ac2205d71baebbafc267367cb3814ba6"
+          },
+          {
+            "id": "@shine-mage/dsh-shine-waterfall",
+            "source_sha": "d123ac1d0e7bad3e5de45169b3e72c38623b858a",
+            "version": "0.0.0-b0",
+            "manifest_sha256": "43a9c673ada75b763c1867e6bb6fd66c75da393cd6c2fd2fd669aadbe73c6af5",
+            "pack_sha256": "73a1d4ba2b085c1f9f2a1eff410aca239cf9775de952ba70aafdaa78ec5ac35d"
+          },
+          {
+            "id": "@shine-mage/dsh-shine-brand",
+            "source_sha": "57ebcf38278068394a4feb42125c30c195fd912a",
+            "version": "0.0.0-b0",
+            "manifest_sha256": "d5039166969023075253e65e31c4d7dba910ae6ea10b9b40bf7f147bdb5efd24",
+            "pack_sha256": "4b867bf5b4e08d9aa1f45f20b20b78cbd9e11c236194ffafaa5188d8d173bd13"
+          }
+        ],
+        "counts": {
+          "tests": 35,
+          "pass": 35,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "scope": "current HEAD plus group02 only; synthetic owned loopback HTTP and official resolver",
+        "stdout_sha256": "5909f33956458a08685d3e627ca578fb54af4962ec38c8d998fcefc93df2b77c",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "review_sha256": "f91339cbd31727d1c158c355495db5b9e4d90b8093ad7fea0b8f94af9c7e6361",
+      "commit_receipt_sha256": "260610829da893e21fb3ebe97e78f4710b0c84dfbe3be91c8fe7fd0a64e1c62a"
+    },
+    {
+      "id": "03",
+      "message": "test(plugins): verify fixed leaf package composition",
+      "commit": "40c7a1f9c3010d5d67eba66850e9f947bfd44408",
+      "parent": "caa48b3acd41157ad64dc1464c2ecb413143d8ca",
+      "paths": [
+        "scripts/dsh-b0/leaf-pack-inputs.mjs",
+        "scripts/dsh-b0/leaf-pack-composition.integration.mjs",
+        "scripts/dsh-b0/legacy-geometry-exports.test.mjs"
+      ],
+      "reviewed_files": 3,
+      "skipped_files": 0,
+      "external_model": "NOT_RUN",
+      "verification": {
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-main-commit-closeout-20261011-ogm1vxo5/group-03/source-denial.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "--test",
+          "--test-concurrency=1",
+          "--test-timeout=30000",
+          "scripts/dsh-b0/leaf-pack-composition.integration.mjs",
+          "scripts/dsh-b0/legacy-geometry-exports.test.mjs"
+        ],
+        "cwd": "/Users/hutou/.codex/tasks/shinemage-main-commit-closeout-20261011-ogm1vxo5/group-03/validated-tree",
+        "started_unix": 1791718811.462972,
+        "ended_unix": 1791718814.081145,
+        "pid": 77178,
+        "exit": 0,
+        "environment": {
+          "CRM_COMPOSITION_PACK_INPUTS": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/prepared-current-main-r1/crm-inputs.json",
+          "CRM_COMPOSITION_PAGE_INPUTS": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/prepared-current-main-r1/page-inputs.json",
+          "CRM_COMPOSITION_OUTPUT": "/Users/hutou/.codex/tasks/shinemage-main-commit-closeout-20261011-ogm1vxo5/group-03/runtime-output",
+          "B0_BUILD_UPSTREAM": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2",
+          "FQ_B0_PYTHON": "/Users/hutou/homebrew/opt/python@3.14/bin/python3.14",
+          "B0_BUILD_TOOLS": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/plugin-kit/build-tools"
+        },
+        "fixed_input_identities": [
+          {
+            "id": "@shine-mage/dsh-analytics-workbench-b0",
+            "source_sha": "6c5adc9faa04f692d5d4b3028af4f945ab49dfe4",
+            "version": "0.0.0-b0",
+            "manifest_sha256": "0af61dabbab9a2205fb1d9ff3a2eec7e8194800d9af3f9043b0a5587a81edc12",
+            "pack_sha256": "e41df9f5a8f7031c092319222543c8d723ca644c0c9d69b2ae53f13257e9b79e"
+          },
+          {
+            "id": "@shine-mage/dsh-crm-knowledge",
+            "source_sha": "c4b1c91eaa4fa645deb7951614c1937eb76db143",
+            "version": "0.0.0-crm.1",
+            "manifest_sha256": "4663cce02776fa68913a41829d8ca0712fa44bf1c7642844326d80de40af2158",
+            "pack_sha256": "0da9f8edd40b17a92377aa4b35d219229c8461b942060a7dd0e12265343500fd"
+          },
+          {
+            "id": "@shine-mage/dsh-knowledge",
+            "source_sha": "94ef29fa6c39d3dc506fbc5ef734f0a7ea9eb2b0",
+            "version": "0.0.0-candidate.1",
+            "manifest_sha256": "a674a2da0dcd317839c4f8d7766da62ced58eca9021222c6e3a238f80aa7df79",
+            "pack_sha256": "ed7888204d5cefe7d383632a75319d3427fec9a735863f4e123b8ea17387ef67"
+          },
+          {
+            "id": "@shine-mage/dsh-shine-board",
+            "source_sha": "76601df755ec8ef8c9726ea770ec488b745efd71",
+            "version": "0.0.0-b0",
+            "manifest_sha256": "671acb9502969f08e5db6b83369afa3ea1dec1699a7a9fc5a1680abfa9aa39cf",
+            "pack_sha256": "e1348dd7739778a5ec2d676420e86290ca49f69cdf045959fd82441232a30c1a"
+          },
+          {
+            "id": "@shine-mage/dsh-shine-crowd-action",
+            "source_sha": "5c39e21c27565397383b009725634ea66e9c1525",
+            "version": "0.0.0-b0",
+            "manifest_sha256": "d3998ed96530db66b3aa53f263c93848e7078846a8a0f612a1c099202bfa406f",
+            "pack_sha256": "3fb9d88d228e3af4a9c965961c035650b65365392a9caccb4c14f336b003b2ca"
+          },
+          {
+            "id": "@shine-mage/dsh-shine-query",
+            "source_sha": "1f1e19d280923ebe7aac964f8b5825d497434db8",
+            "version": "0.0.0-b0",
+            "manifest_sha256": "13433c1c4687cd33f0b314b60a38c76fb8390ee52375755320d4ca5a6f378fae",
+            "pack_sha256": "774c6ae63e0fb170a81a9e9fb9551d55d40724faae5966c1d95bb32624fb89ce"
+          },
+          {
+            "id": "@shine-mage/dsh-shine-funnel",
+            "source_sha": "dbfaede0961586d773c708e833a4ac1c9f2515dc",
+            "version": "0.0.0-b0",
+            "manifest_sha256": "1e631c02c1fa6903b1f76953edc4e7da3fc85b1b96c1292567f8561a78a8eefb",
+            "pack_sha256": "581ba069aa8af4598f553e4b11b57216ac2205d71baebbafc267367cb3814ba6"
+          },
+          {
+            "id": "@shine-mage/dsh-shine-waterfall",
+            "source_sha": "d123ac1d0e7bad3e5de45169b3e72c38623b858a",
+            "version": "0.0.0-b0",
+            "manifest_sha256": "43a9c673ada75b763c1867e6bb6fd66c75da393cd6c2fd2fd669aadbe73c6af5",
+            "pack_sha256": "73a1d4ba2b085c1f9f2a1eff410aca239cf9775de952ba70aafdaa78ec5ac35d"
+          },
+          {
+            "id": "@shine-mage/dsh-shine-brand",
+            "source_sha": "57ebcf38278068394a4feb42125c30c195fd912a",
+            "version": "0.0.0-b0",
+            "manifest_sha256": "d5039166969023075253e65e31c4d7dba910ae6ea10b9b40bf7f147bdb5efd24",
+            "pack_sha256": "4b867bf5b4e08d9aa1f45f20b20b78cbd9e11c236194ffafaa5188d8d173bd13"
+          }
+        ],
+        "counts": {
+          "tests": 20,
+          "pass": 20,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "scope": "HEAD plus group03 only; exact published leaf entries and synthetic DOM/geometry consumer surfaces; legacy .d.mts consumer compile with pinned TypeScript, not producer tsc",
+        "stdout_sha256": "6418f39795c762fca4489c0073820095b9493dee5e65a7d36bfd4541ba8d4852",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "review_sha256": "e516a84fc3b80732dc31d0204c5d71eadffeab1cd04fa778477dcebb3ef5a3ab",
+      "commit_receipt_sha256": "e288d2c1f411c62365068c37c2f7a5ddcec94996da5c1991d0176013ffb3dc35"
+    },
+    {
+      "id": "04",
+      "message": "test(workbench): move public package behavior consumers to main",
+      "commit": "902690c2e6806cdb8a0951bfb1e2cac5ac4d2d99",
+      "parent": "40c7a1f9c3010d5d67eba66850e9f947bfd44408",
+      "paths": [
+        "scripts/dsh-b0/workbench-client-pack-inputs.mjs",
+        "scripts/dsh-b0/workbench-client-pack.integration.mjs",
+        "scripts/dsh-b0/workbench-asset-overlay.integration.mjs",
+        "scripts/dsh-b0/workbench-first-purchase-card.integration.mjs",
+        "scripts/dsh-b0/workbench-first-purchase-save.integration.mjs",
+        "scripts/dsh-b0/workbench-native-prompt.integration.mjs",
+        "scripts/dsh-b0/workbench-query-cancel.integration.mjs",
+        "scripts/dsh-b0/workbench-query-fault.integration.mjs",
+        "scripts/dsh-b0/workbench-query-save.integration.mjs",
+        "scripts/dsh-b0/workbench-tool-cards.integration.mjs",
+        "scripts/dsh-b0/test-support/workbench-card-harness.mjs",
+        "scripts/dsh-b0/test-support/workbench-client.fixture.json",
+        "scripts/dsh-b0/test-support/workbench-client.fixture.mjs",
+        "dsh-plugins/analytics-workbench/test/asset-overlay.test.mjs",
+        "dsh-plugins/analytics-workbench/test/first-purchase-query-card.test.mjs",
+        "dsh-plugins/analytics-workbench/test/first-purchase-save-dom.test.mjs",
+        "dsh-plugins/analytics-workbench/test/native-prompt-inject.test.mjs",
+        "dsh-plugins/analytics-workbench/test/plugin-ui-lifecycle.test.mjs",
+        "dsh-plugins/analytics-workbench/test/query-card-cancel.test.mjs",
+        "dsh-plugins/analytics-workbench/test/query-card-fault.test.mjs",
+        "dsh-plugins/analytics-workbench/test/query-card-save.test.mjs",
+        "dsh-plugins/analytics-workbench/test/tool-card-dom.test.mjs"
+      ],
+      "reviewed_files": 22,
+      "skipped_files": 0,
+      "external_model": "NOT_RUN",
+      "verification": {
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-main-commit-closeout-20261011-ogm1vxo5/group-04/source-denial.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "--test",
+          "--test-concurrency=1",
+          "--test-timeout=30000",
+          "scripts/dsh-b0/workbench-client-pack.integration.mjs",
+          "scripts/dsh-b0/workbench-asset-overlay.integration.mjs",
+          "scripts/dsh-b0/workbench-first-purchase-card.integration.mjs",
+          "scripts/dsh-b0/workbench-first-purchase-save.integration.mjs",
+          "scripts/dsh-b0/workbench-native-prompt.integration.mjs",
+          "scripts/dsh-b0/workbench-query-cancel.integration.mjs",
+          "scripts/dsh-b0/workbench-query-fault.integration.mjs",
+          "scripts/dsh-b0/workbench-query-save.integration.mjs",
+          "scripts/dsh-b0/workbench-tool-cards.integration.mjs"
+        ],
+        "cwd": "/Users/hutou/.codex/tasks/shinemage-main-commit-closeout-20261011-ogm1vxo5/group-04/validated-tree",
+        "pid": 88308,
+        "exit": 0,
+        "environment": {
+          "CRM_COMPOSITION_PACK_INPUTS": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/prepared-current-main-r1/crm-inputs.json",
+          "CRM_COMPOSITION_PAGE_INPUTS": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/prepared-current-main-r1/page-inputs.json",
+          "CRM_COMPOSITION_OUTPUT": "/Users/hutou/.codex/tasks/shinemage-main-commit-closeout-20261011-ogm1vxo5/group-04/runtime-output-r2",
+          "B0_BUILD_UPSTREAM": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2",
+          "FQ_B0_PYTHON": "/Users/hutou/homebrew/opt/python@3.14/bin/python3.14",
+          "B0_BUILD_TOOLS": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/plugin-kit/build-tools"
+        },
+        "started_unix": 1791719157.160414,
+        "ended_unix": 1791719174.856089,
+        "counts": {
+          "tests": 66,
+          "pass": 66,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "scope": "HEAD plus group04 only; sealed public Workbench client, synthetic React/SSR/JSDOM, actual fixed Cordis for synthetic prompt services; no live browser or full host",
+        "stdout_sha256": "c1baeff377b6e1462dfd207e0bfe44c26797c6850783478008bc15b100cd43c4",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "r1_failure": "harness omitted caller-owned output root; ENOENT before package execution, original logs preserved; product bytes unchanged"
+      },
+      "review_sha256": "091510612b454413bb9290a6170ef573c5931adfd4e786b86b7d92a5f2ab4bdd",
+      "commit_receipt_sha256": "a6f359699fad8a8339f54c469a61b2634981d3fb88a3591c776ee64ecc77c85c"
+    },
+    {
+      "id": "05",
+      "message": "test(workbench): bind author CI and main-owned contract checks",
+      "commit": "a789b108b7021d6a292984010cd0598af5d1c13e",
+      "parent": "902690c2e6806cdb8a0951bfb1e2cac5ac4d2d99",
+      "paths": [
+        "config/workbench-author-evidence.lock.json",
+        "scripts/ci/workbench-author-evidence.mjs",
+        "scripts/ci/workbench-author-evidence.test.mjs",
+        "scripts/ci/read-workbench-author-evidence.py",
+        "scripts/dsh-b0/workbench-author-contracts.test.mjs",
+        "scripts/dsh-b0/workbench-main-contracts.mjs",
+        "scripts/dsh-b0/competition-offline-eval.test.mjs",
+        "scripts/dsh-b0/geometry-composition.test.mjs",
+        "dsh-plugins/analytics-workbench/test/built.test.mjs"
+      ],
+      "reviewed_files": 9,
+      "skipped_files": 0,
+      "external_model": "NOT_RUN",
+      "verification": {
+        "exit": 0,
+        "command": [
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "--test",
+          "--test-concurrency=1",
+          "--test-timeout=30000",
+          "scripts/dsh-b0/workbench-author-contracts.test.mjs",
+          "scripts/dsh-b0/geometry-composition.test.mjs"
+        ],
+        "counts": {
+          "tests": 3,
+          "pass": 3,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "started_unix": 1791719285.961961,
+        "ended_unix": 1791719286.274473,
+        "scope": "two retained author fixture/destination contracts and actual fixed author geometry evidence; source access explicitly retained for author guards",
+        "python": "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/python-r3/bin/python3.14",
+        "archive": "/Users/hutou/.codex/tasks/shinemage-current-author-formal-pack-20261011-_zy2t9yo/inputs/workbench/ci-evidence.zip",
+        "prior_same_byte_validation": [
+          {
+            "scope": "reader",
+            "execution": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/reader-main-r1-execution.json",
+            "stdout": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/reader-main-r1.stdout",
+            "stdout_sha256": "931617f4e6f3044f0bd875a956b45010c3384a38029bae284da3fd4a53f5bb4f",
+            "reused_without_rerun": true
+          },
+          {
+            "scope": "selector",
+            "execution": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/selector-main-r1-execution.json",
+            "stdout": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/selector-main-r1.stdout",
+            "stdout_sha256": "2d61b0d438d6e73ec417e2bddfe20c652aa5bad20a0d79223b74f24261201379",
+            "reused_without_rerun": true
+          },
+          {
+            "scope": "offline",
+            "execution": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/offline-main-r1-execution.json",
+            "stdout": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/logs/offline-main-r1.stdout",
+            "stdout_sha256": "377c3656ee96c20407374fb55372a3c56e8b1c483666a432bddcb072f661111d",
+            "reused_without_rerun": true
+          }
+        ],
+        "prior_reviewed_bindings": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/ocr-host-review-r1.json"
+      },
+      "review_sha256": "87afeb9a9b0b91d55ad3c05825d9adb67b7b065af34a35d1e0c9ef59e1d9472b",
+      "commit_receipt_sha256": "b90e6487a1bdc79c3d5944b901529a8a07c1c0703b8c5f283e529757aa854cf3"
+    },
+    {
+      "id": "06",
+      "message": "test(plugins): isolate installed kit and formal package ownership",
+      "commit": "3e7ed6ac0a31eb9a9cdf753138fccec8b9820299",
+      "parent": "a789b108b7021d6a292984010cd0598af5d1c13e",
+      "paths": [
+        "scripts/dsh-b0/installed-kit-packs.integration.mjs",
+        "scripts/dsh-b0/plugin-kit.test.mjs",
+        "scripts/dsh-b0/plugin-kit-source-fixture.legacy.mjs",
+        "scripts/dsh-b0/plugin-isolation.test.mjs",
+        "scripts/dsh-b0/plugin-source-isolation.legacy.mjs"
+      ],
+      "reviewed_files": 5,
+      "skipped_files": 0,
+      "external_model": "NOT_RUN",
+      "verification": {
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-main-commit-closeout-20261011-ogm1vxo5/group-06/source-denial.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "--test",
+          "--test-concurrency=1",
+          "--test-timeout=90000",
+          "scripts/dsh-b0/plugin-isolation.test.mjs",
+          "scripts/dsh-b0/installed-kit-packs.integration.mjs"
+        ],
+        "cwd": "/Users/hutou/.codex/tasks/shinemage-main-commit-closeout-20261011-ogm1vxo5/group-06/validated-tree",
+        "exit": 0,
+        "counts": {
+          "tests": 6,
+          "pass": 6,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "r1_failure": "projection omitted committed prepare-profile dependency; failing consumers did not execute; product bytes unchanged",
+        "additional_kit_verification": {
+          "log": "contracts-r1.stdout",
+          "scope": "plugin-kit.test.mjs only",
+          "tests": 11,
+          "pass": 11,
+          "fail": 0,
+          "skipped": 0
+        },
+        "scope": "two formerly blocked fixed-package consumers only; no source build or host evaluation"
+      },
+      "review_sha256": "94fb815432303e03810d23efd72037dc25a3ddbe2dd887e4e933afff9da4b423",
+      "commit_receipt_sha256": "91208f06ca7e957e6198e655dd25988c9ab2d9a4d7023a35bc60e4677d747035"
+    },
+    {
+      "id": "07a",
+      "message": "fix(domain): reject aliased producer output files",
+      "commit": "dfab39510290e8d648ea8c3558f6e7b6986b0461",
+      "parent": "3e7ed6ac0a31eb9a9cdf753138fccec8b9820299",
+      "paths": [
+        "dsh-plugins/board-components/build.mjs",
+        "scripts/dsh-b0/package-inputs-source-fixture.legacy.mjs"
+      ],
+      "reviewed_files": 2,
+      "skipped_files": 0,
+      "external_model": "NOT_RUN",
+      "verification": {
+        "command": [
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "--test",
+          "--test-concurrency=1",
+          "--test-name-pattern=^existing producer build-file symlinks",
+          "scripts/dsh-b0/package-inputs-source-fixture.legacy.mjs"
+        ],
+        "exit": 0,
+        "counts": {
+          "tests": 1,
+          "pass": 1,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "scope": "one new output guard test across four existing declared members, explicit legacy producer fixtures only; other legacy cases NOT_RUN"
+      },
+      "review_sha256": "43e3b35bad41ee253b34ce7a68a84ce4c77b176f3271af8dda056cf4b1e41fd4",
+      "commit_receipt_sha256": "e2b70d62b599cc35ef0be99ce3174d12351cb2f213d942d73335a2d32c8df68c"
+    },
+    {
+      "id": "07",
+      "message": "refactor(domain): consume sealed author inputs and preserve legacy producers",
+      "commit": "7b95d6d7e1f5ab27dad50e66c6b6612ed219bc2d",
+      "parent": "dfab39510290e8d648ea8c3558f6e7b6986b0461",
+      "paths": [
+        "config/domain-author-evidence.lock.json",
+        "scripts/ci/domain-author-evidence.mjs",
+        "scripts/ci/domain-author-evidence.test.mjs",
+        "scripts/ci/read-domain-author-evidence.py",
+        "scripts/dsh-b0/domain-package-inputs.mjs",
+        "scripts/dsh-b0/package-inputs.mjs",
+        "scripts/dsh-b0/package-inputs.test.mjs",
+        "scripts/dsh-b0/package-inputs-source-binding.legacy.mjs",
+        "scripts/dsh-b0/explicit-build-inputs.test.mjs",
+        "scripts/dsh-b0/explicit-build-inputs-source.legacy.mjs"
+      ],
+      "reviewed_files": 10,
+      "skipped_files": 0,
+      "external_model": "NOT_RUN",
+      "verification": {
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-main-commit-closeout-20261011-ogm1vxo5/group-07/source-denial.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "--test",
+          "--test-concurrency=1",
+          "--test-timeout=60000",
+          "scripts/ci/domain-author-evidence.test.mjs",
+          "scripts/dsh-b0/package-inputs.test.mjs"
+        ],
+        "cwd": "/Users/hutou/.codex/tasks/shinemage-main-commit-closeout-20261011-ogm1vxo5/group-07/validated-tree",
+        "exit": 0,
+        "counts": {
+          "tests": 23,
+          "pass": 23,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "environment": {
+          "CRM_COMPOSITION_PACK_INPUTS": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/prepared-current-main-r1/crm-inputs.json",
+          "CRM_COMPOSITION_PAGE_INPUTS": "/Users/hutou/.codex/tasks/shinemage-main-three-path-ready-20261011-46__pej3/local-review-apply-ijms4w7q/prepared-current-main-r1/page-inputs.json",
+          "CRM_COMPOSITION_OUTPUT": "/Users/hutou/.codex/tasks/shinemage-main-commit-closeout-20261011-ogm1vxo5/group-07/runtime-output",
+          "B0_BUILD_UPSTREAM": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2",
+          "FQ_B0_PYTHON": "/Users/hutou/homebrew/opt/python@3.14/bin/python3.14",
+          "B0_BUILD_TOOLS": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/dsh-plugins/plugin-kit/build-tools",
+          "B0_TEST_PNPM_VERSION": "11.28.2",
+          "COREPACK_HOME": "/Users/hutou/.cache/node/corepack",
+          "DSH_PACKAGE_INPUTS": "/Users/hutou/.codex/tasks/shinemage-main-commit-closeout-20261011-ogm1vxo5/group-07/validated-tree/vendor/dsh-package-inputs",
+          "DOMAIN_AUTHOR_CI_ARCHIVE": "/Users/hutou/.codex/tasks/shinemage-domain-ci-ownership-proposal-20261011-2a8b1o72/remote-ci-artifact-r1.zip"
+        },
+        "started_unix": 1791719532.8646002,
+        "ended_unix": 1791719537.833463,
+        "scope": "HEAD plus group07 only; actual fixed domain author archive and original locked library, public formal package consumers; gh calls are owned mocks, no new remote acquisition"
+      },
+      "review_sha256": "efccb2eba4cb3cee5f646e030eabbc491eba4b4646c9a1ee3c18b6f38a6e9eb4",
+      "commit_receipt_sha256": "3b7175c074ba45431d3e481d5b192eae3b070c9a92e5eb872e373e2bd45bedba"
+    },
+    {
+      "id": "08",
+      "message": "refactor(contracts): verify sealed public author exports",
+      "commit": "7452e775dc46b7842c12912da839aefc195342bf",
+      "parent": "7b95d6d7e1f5ab27dad50e66c6b6612ed219bc2d",
+      "paths": [
+        "config/public-contract-inputs.lock.json",
+        "scripts/ci/public-contract-inputs.mjs",
+        "scripts/ci/public-contract-inputs.test.mjs",
+        "scripts/ci/read-public-contract-inputs.py",
+        "scripts/dsh-b0/fixed-contract-checks.mjs",
+        "scripts/dsh-b0/fixed-contract-checks.test.mjs"
+      ],
+      "reviewed_files": 6,
+      "skipped_files": 0,
+      "external_model": "NOT_RUN",
+      "verification": {
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-main-commit-closeout-20261011-ogm1vxo5/group-08/source-denial.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "--test",
+          "--test-concurrency=1",
+          "--test-timeout=30000",
+          "scripts/ci/public-contract-inputs.test.mjs",
+          "scripts/dsh-b0/fixed-contract-checks.test.mjs"
+        ],
+        "cwd": "/Users/hutou/.codex/tasks/shinemage-main-commit-closeout-20261011-ogm1vxo5/group-08/validated-tree",
+        "exit": 0,
+        "counts": {
+          "tests": 28,
+          "pass": 28,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "scope": "HEAD plus group08, exact three sealed author contract archives, bounded readers, rejected source fallback and owned compiler process lifecycle; no new API acquisition"
+      },
+      "review_sha256": "13ee62aac968af80eddfa30d9a6230045303bc672037ebe35fde471f7dbe4998",
+      "commit_receipt_sha256": "146246baaedc11e342e0f19b8677fcfa2ce935ae31e2ad99e708a4cb0f8ba364"
+    },
+    {
+      "id": "09",
+      "message": "refactor(release): consume formal packs in release preflight",
+      "commit": "0a28dab4909a0c71c20063b72b589eb76c4ab786",
+      "parent": "7452e775dc46b7842c12912da839aefc195342bf",
+      "paths": [
+        "scripts/dsh.mjs",
+        "scripts/release/artifact.mjs",
+        "scripts/release/preflight.mjs",
+        "scripts/release/readiness.mjs",
+        "scripts/release/release-profile-packs.mjs",
+        "scripts/release/release-profile-packs.test.mjs",
+        "scripts/release/release.test.mjs",
+        "scripts/release/schemas/release-manifest.v1.schema.json"
+      ],
+      "reviewed_files": 8,
+      "skipped_files": 0,
+      "external_model": "NOT_RUN",
+      "verification": {
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-main-commit-closeout-20261011-ogm1vxo5/group-09/source-denial.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "--test",
+          "--test-concurrency=1",
+          "--test-timeout=60000",
+          "--test-skip-pattern=^release preflight builds the runtime before protected tag creation$",
+          "scripts/release/release-profile-packs.test.mjs",
+          "scripts/release/release.test.mjs"
+        ],
+        "exit": 0,
+        "counts": {
+          "tests": 53,
+          "pass": 53,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "scope": "HEAD plus group09 only; synthetic immutable release pack/payload/readiness and existing release contract regression. One workflow wiring assertion deferred to group11; no release preflight build, actual activation or remote publication",
+        "owned_process_group": 17670,
+        "started_unix": 1791719930.511353,
+        "ended_unix": 1791719937.955816
+      },
+      "review_sha256": "5f08d97faf832814d53546cf51db27b438c9d9f447420593f88c5e7babbca34e",
+      "commit_receipt_sha256": "d978c6884789e9247e29575bec91b52510d5f4a5ea4a9d5c928d18b2299ed511"
+    },
+    {
+      "id": "10",
+      "message": "chore(inputs): prepare pinned composition packs for local and CI consumers",
+      "commit": "ac9abcd7e77c2332394550bc5e2aafd1b6015305",
+      "parent": "0a28dab4909a0c71c20063b72b589eb76c4ab786",
+      "paths": [
+        "config/shinemage-composition-packs.lock.json",
+        "scripts/ci/composition-pack-inputs.mjs",
+        "scripts/ci/composition-pack-inputs.test.mjs",
+        "scripts/ci/unpack-composition-inputs.py"
+      ],
+      "reviewed_files": 4,
+      "skipped_files": 0,
+      "external_model": "NOT_RUN",
+      "verification": {
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-main-commit-closeout-20261011-ogm1vxo5/group-10/source-denial.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "--test",
+          "--test-concurrency=1",
+          "--test-timeout=60000",
+          "scripts/ci/composition-pack-inputs.test.mjs"
+        ],
+        "exit": 0,
+        "counts": {
+          "tests": 9,
+          "pass": 9,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "scope": "exact HEAD plus four group10 paths, composition input/ZIP/identity/authorization rejection tests, no remote fetch",
+        "owned_process_group": 22022,
+        "started_unix": 1791719987.5273778,
+        "ended_unix": 1791719989.468918
+      },
+      "review_sha256": "e9c0a9cde5369f44dc969a9765016676cb5200cc3f646f64410ee84fee1d7ea3",
+      "commit_receipt_sha256": "d2b25cc852954bcc5cdbebe2e782920c127edee2fc8153f38ac231199ca9502e"
+    },
+    {
+      "id": "11",
+      "message": "chore(ci): select and run migrated package validation stages",
+      "commit": "619693abe70814f91c1cd79e256342208a21f9cc",
+      "parent": "ac9abcd7e77c2332394550bc5e2aafd1b6015305",
+      "paths": [
+        ".github/workflows/dsh-b0.yml",
+        ".github/workflows/dsh-release-preflight.yml",
+        ".github/workflows/lint.yml",
+        "backend/tests/test_pre_push_smart_path.py",
+        "scripts/ci/pre_push_path_class.py",
+        "scripts/dsh-b0/pipeline.mjs",
+        "scripts/dsh-b0/leaf-pack-inputs.test.mjs",
+        "scripts/dsh-b0/workbench-client-pack-inputs.test.mjs"
+      ],
+      "reviewed_files": 8,
+      "skipped_files": 0,
+      "external_model": "NOT_RUN",
+      "verification": {
+        "exit": 0,
+        "groups": [
+          {
+            "command": [
+              "/usr/bin/sandbox-exec",
+              "-f",
+              "/Users/hutou/.codex/tasks/shinemage-main-commit-closeout-20261011-ogm1vxo5/group-11/source-denial.sb",
+              "/Users/hutou/homebrew/opt/node@24/bin/node",
+              "--test",
+              "--test-concurrency=1",
+              "--test-timeout=60000",
+              "scripts/dsh-b0/leaf-pack-inputs.test.mjs",
+              "scripts/dsh-b0/workbench-client-pack-inputs.test.mjs"
+            ],
+            "exit": 0,
+            "counts": {
+              "tests": 28,
+              "pass": 28,
+              "fail": 0,
+              "cancelled": 0,
+              "skipped": 0,
+              "todo": 0
+            },
+            "owned_process_group": 28278,
+            "started_unix": 1791720119.834769,
+            "ended_unix": 1791720137.415172
+          },
+          {
+            "command": [
+              "/usr/bin/sandbox-exec",
+              "-f",
+              "/Users/hutou/.codex/tasks/shinemage-main-commit-closeout-20261011-ogm1vxo5/group-11/source-denial.sb",
+              "/Users/hutou/homebrew/opt/node@24/bin/node",
+              "--test",
+              "--test-name-pattern=^release preflight builds the runtime before protected tag creation$",
+              "scripts/release/release.test.mjs"
+            ],
+            "exit": 0,
+            "counts": {
+              "tests": 1,
+              "pass": 1,
+              "fail": 0,
+              "cancelled": 0,
+              "skipped": 0,
+              "todo": 0
+            },
+            "owned_process_group": 29919,
+            "started_unix": 1791720137.4154172,
+            "ended_unix": 1791720137.538199
+          },
+          {
+            "command": [
+              "/usr/bin/sandbox-exec",
+              "-f",
+              "/Users/hutou/.codex/tasks/shinemage-main-commit-closeout-20261011-ogm1vxo5/group-11/source-denial.sb",
+              "/Users/hutou/.codex/tasks/shinemage-workbench-core-formal-20261011-o04gdj_e/python-r3/bin/python3.14",
+              "-I",
+              "-B",
+              "-m",
+              "pytest",
+              "--noconftest",
+              "-q",
+              "backend/tests/test_pre_push_smart_path.py"
+            ],
+            "exit": 0,
+            "counts": {},
+            "owned_process_group": 29923,
+            "started_unix": 1791720137.538392,
+            "ended_unix": 1791720137.989343
+          }
+        ],
+        "scope": "exact HEAD plus group11 CI/pipeline integration; actual fail-before-startup guards and workflow/changed path tests; no full B0 rerun or hosted CI"
+      },
+      "review_sha256": "9ba368a7f9c1dcb93bcc309a9e30d23af1bbb2b25cee796f616851775e69a7ca",
+      "commit_receipt_sha256": "8f73c1c656ff579bec2a7c7ba020d0b99b0eebdb570040ad37fc36567c2d6eed"
+    },
+    {
+      "id": "12",
+      "message": "chore(boundaries): refresh generated plugin ownership inventory",
+      "commit": "d36c567e831145b52365176ca3f90f6c3dfc510a",
+      "parent": "619693abe70814f91c1cd79e256342208a21f9cc",
+      "paths": [
+        "docs/architecture/shinemage-plugin-boundaries.json",
+        "docs/architecture/shinemage-plugin-boundaries.md"
+      ],
+      "reviewed_files": 2,
+      "skipped_files": 0,
+      "external_model": "NOT_RUN",
+      "verification": {
+        "exit": 0,
+        "command": [
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "--test",
+          "--test-concurrency=1",
+          "scripts/dsh-b0/plugin-boundaries.test.mjs"
+        ],
+        "counts": {
+          "tests": 12,
+          "pass": 12,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        "generated_check": {
+          "command": [
+            "/Users/hutou/homebrew/opt/node@24/bin/node",
+            "scripts/dsh-b0/plugin-boundaries.mjs",
+            "--check"
+          ],
+          "exit": 0,
+          "result": {
+            "packages": 11,
+            "edges": 27,
+            "source_files": 653,
+            "dynamic_imports": 63
+          },
+          "receipt_capture": "prior tool result in this turn; regenerated AST equality check, not hand-edited JSON"
+        },
+        "scope": "historical workspace AST inventory only; no runtime or plugin compatibility claim"
+      },
+      "review_sha256": "bfeef4100e449eadefc18d0700e0566c61744db2f556a5cd64711cd9f6fc85ca",
+      "commit_receipt_sha256": "cd8341816cb717162d9a452b6bead7ef2023dc9aa0bba224cf5efa812c9df8fb"
+    }
+  ],
+  "historical_evidence": {
+    "files": 92,
+    "markdown": 46,
+    "json": 46,
+    "initial_snapshot_equal": true,
+    "local_links_checked": 169,
+    "raw_reference_hash_checks": 1178,
+    "all_checked_raw_references_match": true,
+    "integrity_receipt_sha256": "fdd94af65a8b3ec1f83ac3d929b4d9361a9b0fc3cafe631cd2eb849ec8efd58e"
+  },
+  "review_mode": "open-code-review-delegate; deterministic OCR file/rule selection with host review; excluded tests separately reviewed",
+  "raw_directory": "/Users/hutou/.codex/tasks/shinemage-main-commit-closeout-20261011-ogm1vxo5",
+  "failures_preserved": [
+    "group02 sandbox policy initially lacked localhost listener allowance",
+    "group03 supplemental bad export fixture hit an earlier package guard",
+    "group04 output root missing in first validation harness",
+    "group06 validation projection omitted a committed helper directory",
+    "group08 prior positive stage byte-reuse rejected, actual current stage rerun passed",
+    "group08 first commit message preparation missing; hooks passed but commit refused; own staged bytes checked before retry",
+    "group11 missing B0 path concern rejected after inspecting existing generic rule; only own redundant patch reversed"
+  ],
+  "not_run": [
+    "fresh full B0 for the final commit series",
+    "new hosted CI for current main branch",
+    "new candidate/journal and same-object target/service/browser/recovery acceptance",
+    "original CRM/Knowledge peer contract correction",
+    "real model/CRM/WeKnora/UAT",
+    "SDK distribution admission",
+    "push/PR/merge/release/deploy",
+    "old source deletion",
+    "unrelated security-audit-skill inspection or submission"
+  ],
+  "product": "PARTIAL",
+  "SDK_distribution": "BLOCKED",
+  "release_ready": false,
+  "version": "0.20.0.0"
+}

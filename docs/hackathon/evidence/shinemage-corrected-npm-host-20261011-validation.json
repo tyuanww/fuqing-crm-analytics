@@ -1,0 +1,775 @@
+{
+  "schema": "shinemage-corrected-npm-host-evidence/v1",
+  "status": "PASS_DIAGNOSTIC_ONLY",
+  "node": "24.19.0",
+  "official_dsh": "0.1.7-rc.2",
+  "actual_cordis": "4.0.4",
+  "original_cordis": "4.0.2_UNCHANGED",
+  "ordinary_package_tarballs": [
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/content-packs-r2/crm/shine-mage-dsh-crm-knowledge-0.0.0-crm.1.tgz",
+      "bytes": 236798,
+      "sha256": "c275ed7515338c9cfec676f9c818603203f0080c79eb78a3f523cddce5b3d521"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/content-packs-r2/knowledge/shine-mage-dsh-knowledge-0.0.0-candidate.1.tgz",
+      "bytes": 16144,
+      "sha256": "46cfc722ec8732b2edd473ab69bb73fa83a36665ffb57e57d9439d955e233d7f"
+    }
+  ],
+  "official_install_inputs": [
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/node_modules/@deepseek-ai/dsh/lib/bin.js",
+      "bytes": 11237,
+      "sha256": "935e95d05f4dc70a8a013eea59da80028946b5c139e45c6351dcaf2810ca00a1"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/node_modules/@deepseek-ai/dsh/package.json",
+      "bytes": 7266,
+      "sha256": "b6a8e28158f1bc67862e5d0c671430bfa4867a57be864e6007524877644555aa"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/node_modules/@deepseek-ai/cordis/package.json",
+      "bytes": 1241,
+      "sha256": "41c9dee4715a89ef94f227384460c8445857c8faf33493eb545604a948828649"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/package-lock.json",
+      "bytes": 378338,
+      "sha256": "e7b5d62b7ef76a19195b619024e5c9a13f9e63da3cd18bef0ca2f7ac50477e56"
+    }
+  ],
+  "execution": {
+    "command": [
+      "/Users/hutou/homebrew/opt/node@24/bin/node",
+      "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/host-r4.mjs"
+    ],
+    "cwd": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f",
+    "exit_code": 0,
+    "elapsed_seconds": 2.412,
+    "new_assertions": [
+      "native CRM route absent",
+      "restored CRM route present and disconnected"
+    ],
+    "fresh_home_and_workspace": true
+  },
+  "diagnostic_result": {
+    "schema": "shinemage-corrected-official-npm-host/v1",
+    "started_at": "2026-10-11T01:11:53.780Z",
+    "scope": "isolated ordinary npm packages with exact Cordis 4.0.4; official npm CLI; synthetic sessions only",
+    "status": "PASS",
+    "steps": [
+      {
+        "label": "same-installed-package-inputs",
+        "status": "PASS"
+      },
+      {
+        "label": "source-and-synthetic-state-fixture-denied",
+        "status": "PASS",
+        "denied": 3
+      },
+      {
+        "label": "official-npm-config-dump",
+        "status": "PASS",
+        "sha256": "f230c8a8ab72cff5e892e6dff720fefcb45cf06e6ff00b274091b176256970c0"
+      }
+    ],
+    "phases": [
+      {
+        "name": "enabled-r4",
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/host-loopback-r3.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/node_modules/@deepseek-ai/dsh/lib/bin.js",
+          "--profile",
+          "web",
+          "--patch",
+          "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/assets-r4/host.patch.yml",
+          "--patch",
+          "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/assets-r4/preset.patch.yml",
+          "--host",
+          "127.0.0.1",
+          "--port",
+          "4328",
+          "--trusted-host",
+          "app.tyuan.chat",
+          "--no-open"
+        ],
+        "steps": [
+          {
+            "label": "official-npm-host-ready",
+            "status": "PASS",
+            "pid": 51459,
+            "origin": "http://127.0.0.1:4328"
+          },
+          {
+            "label": "native-authenticated-root",
+            "status": "PASS",
+            "http_status": 200
+          },
+          {
+            "label": "native-cookie-required",
+            "status": "PASS",
+            "http_status": 401
+          },
+          {
+            "label": "crm-knowledge-preset-session-created",
+            "status": "PASS",
+            "session_id": "session-cordis-corrected-d6b80fa2f7f319d1",
+            "running": false
+          },
+          {
+            "label": "crm-unconfigured-status",
+            "status": "PASS",
+            "http_status": 200,
+            "connected": false,
+            "username": null,
+            "expires_at": null
+          }
+        ],
+        "cleanup": {
+          "pid": 51459,
+          "terminal": {
+            "code": 0,
+            "signal": null
+          },
+          "port_released": true
+        }
+      },
+      {
+        "name": "native-r4",
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/host-loopback-r3.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/node_modules/@deepseek-ai/dsh/lib/bin.js",
+          "--profile",
+          "web",
+          "--host",
+          "127.0.0.1",
+          "--port",
+          "4328",
+          "--trusted-host",
+          "app.tyuan.chat",
+          "--no-open"
+        ],
+        "steps": [
+          {
+            "label": "official-npm-host-ready",
+            "status": "PASS",
+            "pid": 51461,
+            "origin": "http://127.0.0.1:4328"
+          },
+          {
+            "label": "native-authenticated-root",
+            "status": "PASS",
+            "http_status": 200
+          },
+          {
+            "label": "native-shell-retains-synthetic-session",
+            "status": "PASS",
+            "session_id": "session-cordis-corrected-d6b80fa2f7f319d1"
+          },
+          {
+            "label": "native-shell-has-no-crm-host-route",
+            "status": "PASS",
+            "http_status": 404
+          }
+        ],
+        "cleanup": {
+          "pid": 51461,
+          "terminal": {
+            "code": 0,
+            "signal": null
+          },
+          "port_released": true
+        }
+      },
+      {
+        "name": "restored-r4",
+        "command": [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/host-loopback-r3.sb",
+          "/Users/hutou/homebrew/opt/node@24/bin/node",
+          "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/node_modules/@deepseek-ai/dsh/lib/bin.js",
+          "--profile",
+          "web",
+          "--patch",
+          "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/assets-r4/host.patch.yml",
+          "--patch",
+          "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/assets-r4/preset.patch.yml",
+          "--host",
+          "127.0.0.1",
+          "--port",
+          "4328",
+          "--trusted-host",
+          "app.tyuan.chat",
+          "--no-open"
+        ],
+        "steps": [
+          {
+            "label": "official-npm-host-ready",
+            "status": "PASS",
+            "pid": 51469,
+            "origin": "http://127.0.0.1:4328"
+          },
+          {
+            "label": "native-authenticated-root",
+            "status": "PASS",
+            "http_status": 200
+          },
+          {
+            "label": "restored-preset-and-synthetic-session",
+            "status": "PASS",
+            "recovered_session_id": "session-cordis-corrected-d6b80fa2f7f319d1"
+          },
+          {
+            "label": "restored-crm-host-route-unconfigured",
+            "status": "PASS",
+            "http_status": 200,
+            "connected": false
+          }
+        ],
+        "cleanup": {
+          "pid": 51469,
+          "terminal": {
+            "code": 0,
+            "signal": null
+          },
+          "port_released": true
+        }
+      }
+    ],
+    "package_inputs": {
+      "crm": {
+        "root": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/node_modules/@shine-mage/dsh-crm-knowledge",
+        "manifest": {
+          "name": "@shine-mage/dsh-crm-knowledge",
+          "version": "0.0.0-crm.1",
+          "private": true,
+          "type": "module",
+          "description": "CRM dashboard, metrics and private analysis assets; knowledge tools are a separately installed optional plugin.",
+          "engines": {
+            "node": "24.x"
+          },
+          "peerDependencies": {
+            "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
+            "@deepseek-ai/cordis": "4.0.4"
+          },
+          "exports": {
+            ".": "./lib/index.js",
+            "./host": "./lib/host.js",
+            "./client": "./lib/client.js",
+            "./package.json": "./package.json",
+            "./cordis.patch.yml": "./cordis.patch.yml"
+          },
+          "files": [
+            "lib/index.js",
+            "lib/host.js",
+            "lib/client.js",
+            "cordis.patch.yml"
+          ],
+          "dsh": {
+            "client": {
+              "platform": "web",
+              "inject": [
+                "@deepseek-ai/dsh-client-ui-conversation",
+                "@deepseek-ai/dsh-client-ui-renderer",
+                "@deepseek-ai/dsh-api-session-controller"
+              ]
+            },
+            "bundle": {
+              "patch": "./cordis.patch.yml"
+            }
+          },
+          "shinemage": {
+            "plugin_domain": "crm",
+            "composition_contract": "crm-knowledge-split/v1"
+          },
+          "devDependencies": {
+            "@shine-mage/dsh-plugin-kit": "0.1.0"
+          },
+          "scripts": {
+            "test": "node --test test/*.test.mjs",
+            "build": "node build.mjs",
+            "test:host": "node --test test/host.integration.mjs"
+          }
+        },
+        "sha256": {
+          "package.json": "b53c4cfc5e17fe1505a03d2b944bcd80e62710e342a328ed5b0ee5ef10991581",
+          "lib/index.js": "a31542e7f3d77a7f9fd49af3f5428917f99a9a1e16d416ac29eab4a99237da63",
+          "lib/host.js": "5149a148257b794c3b7bff939173fdc003d9f5d38382d8cc23fe58310c979d64",
+          "lib/client.js": "72bbd7d715ec5ab8e5d2bd7fce29a74dc7a32ad9e6fae8df86278de27c17eab3"
+        }
+      },
+      "knowledge": {
+        "root": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/node_modules/@shine-mage/dsh-knowledge",
+        "manifest": {
+          "name": "@shine-mage/dsh-knowledge",
+          "version": "0.0.0-candidate.1",
+          "private": true,
+          "type": "module",
+          "description": "Independent public knowledge definitions and optional account-authorized textbook retrieval; no CRM implementation or credentials.",
+          "engines": {
+            "node": "24.x"
+          },
+          "peerDependencies": {
+            "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
+            "@deepseek-ai/cordis": "4.0.4"
+          },
+          "exports": {
+            ".": "./lib/index.js",
+            "./graph-tools": "./lib/graph-tools.js",
+            "./package.json": "./package.json",
+            "./cordis.patch.yml": "./cordis.patch.yml"
+          },
+          "files": [
+            "lib/index.js",
+            "lib/graph-tools.js",
+            "cordis.patch.yml"
+          ],
+          "dsh": {
+            "bundle": {
+              "patch": "./cordis.patch.yml"
+            }
+          },
+          "shinemage": {
+            "plugin_domain": "knowledge",
+            "composition_contract": "crm-knowledge-split/v1"
+          },
+          "devDependencies": {
+            "@shine-mage/dsh-plugin-kit": "0.1.0"
+          },
+          "scripts": {
+            "build": "node build.mjs",
+            "test": "node --test test/*.test.mjs"
+          }
+        },
+        "sha256": {
+          "package.json": "a43b4f7403439bcf0c2889a3e9d5a0d9c23211a2d01fba3b8284ac15a9293ed4",
+          "lib/index.js": "e04d90e8e4a51fcebf14c1666ace8796847c2ac13737805f933655c9b196180e",
+          "lib/graph-tools.js": "425e876ef85dbfb8524080340b42e29d12b5eb0799ca79a35a3f5d8cf9e6b864"
+        }
+      }
+    },
+    "npm_lock": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-cordis-contract-proposal-20261011-xm0wt693/strict-corrected-r1/package-lock.json",
+      "sha256": "e7b5d62b7ef76a19195b619024e5c9a13f9e63da3cd18bef0ca2f7ac50477e56"
+    },
+    "official_dsh": "0.1.7-rc.2",
+    "cordis": "4.0.4",
+    "services": "NOT_CONFIGURED_NOT_RUN",
+    "models_called": 0,
+    "browser": "NOT_RUN",
+    "formal_candidate": "NOT_RUN",
+    "original_author_changes": false,
+    "candidate_journal": "UNCHANGED",
+    "release_ready": false,
+    "generated_assets": {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/assets-r4",
+      "revision": "b98a2ba82c7fc86f4b2d21c77fb5c25f43cc64e3d142475fd8b5811c7ac5726e",
+      "sha256": {
+        "host.patch.yml": "47603861e87b158f3db63d88d87bcce22ae2d1febcdc2bb30a44005cbb1eda0b",
+        "preset.patch.yml": "066005308bba776a54cf609d166bfffac2ae5aa46d6fa2af64cde3afef577c6a",
+        "preset/preset.yml": "a2ffb3228188b1fdc02346938d08c911a93ec53b7759cd83e2e7954e958a603c",
+        "preset/agent.cordis.yml": "f0ff0f60ac7d16766bd667ee5c54e69d087b1dc9ccbcf8d0d25e900ff6513365"
+      },
+      "diagnostic_only": true,
+      "existing_profile_changed": false
+    },
+    "final_port_released": true,
+    "npm_lock_unchanged": true,
+    "ended_at": "2026-10-11T01:11:56.126Z"
+  },
+  "protection_cleanup_before_docs": {
+    "original_main_and_all_authors_unchanged": true,
+    "main_task_dirty_count": 106,
+    "workbench_dirty_count": 8,
+    "other_authors_clean": 8,
+    "protected_unchanged": 46,
+    "upstream_tracked_clean": true,
+    "owned_pids": [
+      51100,
+      51108,
+      51119,
+      51459,
+      51461,
+      51469
+    ],
+    "pids_no_longer_live": true,
+    "port_released": 4328,
+    "version": "0.20.0.0",
+    "npm_lock_unchanged": true,
+    "git_actions": "NONE",
+    "release_ready": false
+  },
+  "review": {
+    "method": "open-code-review-delegate deterministic file preview and rules; main Agent review of actual harness and input record",
+    "external_llm": false,
+    "subagents": false,
+    "summary": {
+      "total_files": 2,
+      "reviewed_files": 2,
+      "skipped_files": 0,
+      "coverage_rate": 1.0
+    },
+    "files": [
+      {
+        "path": "execution-inputs-r1.json",
+        "status": "added",
+        "review": "reviewed",
+        "sha256": "2edcf9e7989e41895c8b40426669ab5976a88b355360ac86aeee9246dbf8cf61"
+      },
+      {
+        "path": "harness/host-r4.mjs",
+        "status": "added",
+        "review": "reviewed",
+        "sha256": "433bdcc9e11a6a69d44a2eca48f0750e8cfebca1466dd5b75854549e84f41f43"
+      }
+    ],
+    "manual_policy_review": {
+      "path": "host-loopback-r3.sb",
+      "review": "reviewed",
+      "sha256": "33f1445ed005713d80b06d2768c5091d4ae77be3caaa59c078c97c4d9c17bb47"
+    },
+    "findings": [],
+    "review_notes": [
+      "Official installed npm DSH CLI is used; exact installed manifests, five compiled entries and lock are bound before execution.",
+      "Only explicit safe child environment is passed: task DSH_HOME, telemetry disabled, offline Corepack; HOME and inherited credentials are not repurposed or passed.",
+      "Existing profile renderer is reused only for diagnostic package paths; it does not generate a formal pack, candidate or service binding.",
+      "Host children are network-sandboxed to localhost and denied main/original-author source and personal state contents; negative control uses existing code and an owned synthetic state file.",
+      "Tokens/cookies stay in memory. Persisted launch logs redact launch tokens, and evidence files use exclusive writes and private modes.",
+      "Each boot gets an exit handle before readiness polling; only its owned PID is signalled, then the exact allowed port is checked.",
+      "Route status, native authentication and persisted synthetic session assertions cover all three restarted phases; no model command, CRM login, service or browser action is invoked.",
+      "r1 helper-import and r2 missing-file negative-control failures are retained. r4 uses a fresh DSH_HOME/workspace and adds two route assertions; r3 and r4 counts are not summed."
+    ],
+    "product": "PARTIAL",
+    "sdk_distribution": "BLOCKED",
+    "release_ready": false
+  },
+  "raw_evidence": [
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/execution-inputs-r1.json",
+      "bytes": 5464,
+      "sha256": "2edcf9e7989e41895c8b40426669ab5976a88b355360ac86aeee9246dbf8cf61"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/snapshot-r1.json",
+      "bytes": 35077,
+      "sha256": "4b53b2d4d9e98ae5a374d9ae7e45e5e17e7529c94e12c3acc59cee092731960e"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/wrapper-failure-r1.json",
+      "bytes": 543,
+      "sha256": "f86ef8ba914d3e9ee3a312b7ef012a42839fff65c4c8c42d5df81545a7d008e4"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/host-r1.mjs",
+      "bytes": 13067,
+      "sha256": "2bfe6154d2c54d45515b3096cf22fd37537e388a4e6c50f0f0820345020842eb"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/host-r2.mjs",
+      "bytes": 13398,
+      "sha256": "aa40b6977368c45244d2ffd82599c1099e5d9ef852bbc8a7ea21964a42c8b890"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/host-r3.mjs",
+      "bytes": 13423,
+      "sha256": "af4bfbf560a0c0c1f382634ea0ed174a5e45dd0e5786e89c5c2ac604d5a29b88"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/host-r4.mjs",
+      "bytes": 14608,
+      "sha256": "433bdcc9e11a6a69d44a2eca48f0750e8cfebca1466dd5b75854549e84f41f43"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/host-loopback-r1.sb",
+      "bytes": 3268,
+      "sha256": "6c15cc127a19a9d72c9bd2e3f737d8eff713a85eedca9200fcb2f64d9f244516"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/host-loopback-r3.sb",
+      "bytes": 3398,
+      "sha256": "33f1445ed005713d80b06d2768c5091d4ae77be3caaa59c078c97c4d9c17bb47"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/execution-r2.json",
+      "bytes": 295,
+      "sha256": "5b2958d07307375d51a6cdd47197f42a79a2ef8a76c710d1866105004eac2340"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/execution-r3.json",
+      "bytes": 295,
+      "sha256": "6ac35e2a2ed56b611ebf27e6606cd910c19dc29345de83fa5e78f98bf826e502"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/execution-r4.json",
+      "bytes": 439,
+      "sha256": "4b0ab116606ae98b0c4e2f625b0e3d39ed227cd6deefaecad16b470e38116892"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/host-result-r2.json",
+      "bytes": 5797,
+      "sha256": "27d916981ec16bcac269188a6d534558fd1cb8be7c0901e21a3bbccd838a0742"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/host-result-r3.json",
+      "bytes": 10583,
+      "sha256": "1496bb5c2c4b073bd57fc896eb82baf83cb561fd341c09af01937bab7edd80a1"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/host-result-r4.json",
+      "bytes": 10885,
+      "sha256": "82ff1e17942506c7217d93ea578af7e9b92896cc176580d8578213be2a5b31d1"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/protection-cleanup-r1.json",
+      "bytes": 457,
+      "sha256": "2b43193cc2dcec8ab222c5fc78913c23bc9f6d7c9acb67d65ed05c610da7508d"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/ocr-commands-r1.json",
+      "bytes": 437,
+      "sha256": "0ba4cc3e74bb8c3aa72959516883ce063cdcb179a18d60a9a4c43e5074b58d4b"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/ocr-review-r1.json",
+      "bytes": 2280,
+      "sha256": "782d072b7250cd049cb68d2cdb856bb09070a89ff990334cb05eb9cf025e0bf5"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/boundary-r2.stderr",
+      "bytes": 1682,
+      "sha256": "7f7bec64087a70bb522d77acb84eb535fb1b00242f068f90341c50aa8e6bf98b"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/boundary-r2.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/boundary-r3.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/boundary-r3.stdout",
+      "bytes": 29,
+      "sha256": "c26bda314c9c06c2b669f7c12a1801c21e55f9881c614d404fbebb7662dd3a8e"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/boundary-r4.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/boundary-r4.stdout",
+      "bytes": 29,
+      "sha256": "c26bda314c9c06c2b669f7c12a1801c21e55f9881c614d404fbebb7662dd3a8e"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/dump-r3.stderr",
+      "bytes": 155,
+      "sha256": "b1ddf5cacf7af78ed807af59cc671ae9d24f00e7b0a149017b11a408c43b68ae"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/dump-r3.stdout",
+      "bytes": 47706,
+      "sha256": "8d47bc40c9024445ab410db77bfdb0f398dc80626b87dffe83f7dfc0db6b55af"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/dump-r4.stderr",
+      "bytes": 155,
+      "sha256": "3fc707ab5d64456b1dc754a5844b699ceee2debfb95f8dce31cdb84017c4a7f7"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/dump-r4.stdout",
+      "bytes": 47706,
+      "sha256": "f230c8a8ab72cff5e892e6dff720fefcb45cf06e6ff00b274091b176256970c0"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/enabled-r3.boot.log",
+      "bytes": 49,
+      "sha256": "ceb8d0289c7153e2a903615b365fb90531403c5b62d5ecae1521b5dabd7ed9ad"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/enabled-r4.boot.log",
+      "bytes": 49,
+      "sha256": "ceb8d0289c7153e2a903615b365fb90531403c5b62d5ecae1521b5dabd7ed9ad"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/execution-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/execution-r2.stdout",
+      "bytes": 296,
+      "sha256": "8c11ba7ca22adb35f923114685bb303c2ca8e55660b9a20da8185b07ffd9d355"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/execution-r3.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/execution-r3.stdout",
+      "bytes": 3530,
+      "sha256": "6539fff6d564e614e73ccf49d3e4dad6301a5e9d84a19d7249617644f2689024"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/execution-r4.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/execution-r4.stdout",
+      "bytes": 3712,
+      "sha256": "c7c5cc006b1ff93adc1cefa1cc4c3a7c7de06a7a8e459743e02bb0f5169877a3"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/native-r3.boot.log",
+      "bytes": 49,
+      "sha256": "ceb8d0289c7153e2a903615b365fb90531403c5b62d5ecae1521b5dabd7ed9ad"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/native-r4.boot.log",
+      "bytes": 49,
+      "sha256": "ceb8d0289c7153e2a903615b365fb90531403c5b62d5ecae1521b5dabd7ed9ad"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/ocr-preview-r1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/ocr-preview-r1.stdout",
+      "bytes": 577,
+      "sha256": "7500dc42b647089c55ad964dd13a3bd11cfa88d00cee4ffb98ed070c3ed75f23"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/ocr-rules-r1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/ocr-rules-r1.stdout",
+      "bytes": 3791,
+      "sha256": "75fccf54794be1986311e588f2a259cebd60abb1a272900506171a4e86b75c8a"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/restored-r3.boot.log",
+      "bytes": 49,
+      "sha256": "ceb8d0289c7153e2a903615b365fb90531403c5b62d5ecae1521b5dabd7ed9ad"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/logs/restored-r4.boot.log",
+      "bytes": 49,
+      "sha256": "ceb8d0289c7153e2a903615b365fb90531403c5b62d5ecae1521b5dabd7ed9ad"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/assets-r4/host.patch.yml",
+      "bytes": 409,
+      "sha256": "47603861e87b158f3db63d88d87bcce22ae2d1febcdc2bb30a44005cbb1eda0b"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/assets-r4/manifest.json",
+      "bytes": 2664,
+      "sha256": "fbb60557b9946ca0d94e9a6a4d0d9fb3665d8ce0ea240cc3be2fa7ec02c7d0a6"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/assets-r4/preset/agent.cordis.yml",
+      "bytes": 1923,
+      "sha256": "f0ff0f60ac7d16766bd667ee5c54e69d087b1dc9ccbcf8d0d25e900ff6513365"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/assets-r4/preset/preset.yml",
+      "bytes": 90,
+      "sha256": "a2ffb3228188b1fdc02346938d08c911a93ec53b7759cd83e2e7954e958a603c"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/assets-r4/preset.patch.yml",
+      "bytes": 2465,
+      "sha256": "066005308bba776a54cf609d166bfffac2ae5aa46d6fa2af64cde3afef577c6a"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/helpers/launch-url.mjs",
+      "bytes": 1053,
+      "sha256": "40376686712bafb2722843d6c6c309542d84069fa548b2365e4dd5e44f8e31d1"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/helpers/ports.mjs",
+      "bytes": 1499,
+      "sha256": "869e0f885ced6daf2fd312a371177a367dd42027d254bf4440d27ec627cb71a4"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/helpers/constants.mjs",
+      "bytes": 3697,
+      "sha256": "14694214f20f034d8c60987c848aee656032c0d9b5039d75192e5a13f6b27d01"
+    },
+    {
+      "path": "/Users/hutou/.codex/tasks/shinemage-corrected-npm-host-20261011-u4z_rd2f/write-evidence-r1.py",
+      "bytes": 11173,
+      "sha256": "505f5bfb34642a5a1e0630785671458f567d40d0ec1acff94a24fcae9334d681"
+    }
+  ],
+  "current_doc_updates": [
+    {
+      "path": "STATUS.md",
+      "before_sha256": "0be6018ed7ad64355b57c2dd2614d80ed51a3c8ce9dda6668bd994f7e92a6cd7",
+      "after_sha256": "41b289bbfc7bd15721f2f51161de88b7ff31ee65dcb4c296b2dec3206816fcf2"
+    },
+    {
+      "path": "docs/hackathon/TODOS.md",
+      "before_sha256": "9c9329029fb4f2c4eef91397ba47b545d0f038f91b26089d9eda749e19ff3c2a",
+      "after_sha256": "df3e7700ec76f90d33c7b5cd91b9c370044c50800e09c1ac02625195d2179064"
+    },
+    {
+      "path": "docs/architecture/shinemage-plugin-platform.md",
+      "before_sha256": "ded09e97de6e6c733c72dabf4d2f1034bae477bf260e7d6de4bb5cc3a747b4a7",
+      "after_sha256": "6e1fa2496ccecfe1af96cf6c3b218188a0ce6d0790a9249a0a42ac6a95c21509"
+    },
+    {
+      "path": "docs/operating/verification.md",
+      "before_sha256": "252c57986fea845a1a7210b63fd7db6b8058958b3467e80dbeb43e07eec58ab2",
+      "after_sha256": "ca1fa05fc1a78a3dcd813d718a1bcff8cc1c48eeee3e23f1b051a0b060f8ad94"
+    },
+    {
+      "path": "docs/operating/shinemage-plugin-update.md",
+      "before_sha256": "bd730db9bb7665243a0e7b4dae7c59fd16abcf02344b1fc3102f9143952d7852",
+      "after_sha256": "86696c11c85ff3f9e16a2a006221130f175ebfa8bfa08b2c9d6d1f48aab0f291"
+    }
+  ],
+  "evidence_markdown": {
+    "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/docs/hackathon/evidence/shinemage-corrected-npm-host-20261011.md",
+    "bytes": 5309,
+    "sha256": "46e6011c8346cf31d358067ca4538cd1ffae97cf38bab4d8f99f44870eeb1b72"
+  },
+  "not_run": [
+    "formal_pack",
+    "new_candidate",
+    "formal_journal_admission",
+    "current_service_pair",
+    "target_terminal_browser",
+    "WSL",
+    "live_reload",
+    "real_model",
+    "real_CRM",
+    "real_WeKnora",
+    "UAT",
+    "new_hosted_CI",
+    "Git_Release",
+    "npm_distribution",
+    "independent_DSH_upgrade"
+  ],
+  "git_actions": "NONE",
+  "sdk_distribution": "BLOCKED",
+  "product": "PARTIAL",
+  "release_ready": false,
+  "version": "0.20.0.0"
+}
