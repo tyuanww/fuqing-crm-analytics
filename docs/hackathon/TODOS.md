@@ -30,7 +30,7 @@
 | M2-07 | SDK 供应链门禁 | `BLOCKED` | 最终候选 artifact 和发布者身份 | SBOM、发布者身份、最终签名、验签、撤销验证、干净机器安装和回退均通过 | 当前检查器复核仍为 fail-closed，覆盖项未验证、`release_ready=false`；供应链改动单独走 OCR，详见 `docs(acceptance): record SDK gate recheck` |
 | M2-08 | release / activation / canary / rollback | `NOT_RUN` | M2-04 至 M2-07 关闭，且取得发布授权 | immutable artifact、CI、release review、目标接收、生产激活、canary 和 rollback 全部有同一版本证据 | 当前前置审计仍 fail-closed，`release_ready=false`、`activation=NOT_RUN`；详见 `docs(release): record candidate release gate`；不自动部署 |
 | M2-09 | 独立 DSH 升级候选 | `DEFERRED` | 新官方 DSH 版本/commit 和隔离 runtime | 新旧 runtime、SDK、插件适配、兼容矩阵、恢复矩阵和回退条件齐全；授权后再切换 | 当前 pin 与杭州 current/candidate 仍为 rc2，未发现新的升级 runtime；详见 `docs(acceptance): record DSH upgrade deferred recheck`；不混入当前发布候选 |
-| M2-10 | 证据与状态收口 | `OPEN` | 每张已执行任务卡的原始回执和本地提交 | 更新 `STATUS.md`、本节和相关验证入口；每张卡的 `PASS/NOT_RUN/BLOCKED` 与文件摘要可追溯 | `docs(status): close acceptance task card` |
+| M2-10 | 证据与状态收口 | `PASS / RELEASE_GATES_REMAIN_OPEN` | 每张已执行任务卡的原始回执和本地提交 | 十张任务卡均有状态、证据、下一步和本地提交可追溯；产品仍 `PARTIAL`，未完成门禁保持原状态 | `docs(status): close acceptance task card` |
 
 每张任务卡完成后都要记录：输入身份、实际命令、退出码、原始证据位置、未执行项、风险边界和本地 commit。卡片没有完成时，不勾选下一张依赖卡；产品仍保持 `PARTIAL`、`release_ready=false`。
 

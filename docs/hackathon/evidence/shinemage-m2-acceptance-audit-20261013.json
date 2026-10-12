@@ -124,11 +124,12 @@
     },
     {
       "id": "M2-10",
-      "status": "OPEN",
+      "status": "PASS / RELEASE_GATES_REMAIN_OPEN",
       "evidence": [
-        "this audit matrix"
+        "this audit matrix",
+        "M2 status closeout"
       ],
-      "next": "repeat after each card closes; final release decision remains separate"
+      "next": "final release decision remains separate; refresh this matrix when new external gates change"
     }
   ],
   "global": {
