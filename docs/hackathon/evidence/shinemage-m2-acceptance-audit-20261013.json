@@ -83,13 +83,14 @@
     },
     {
       "id": "M2-06",
-      "status": "CANDIDATE_BOOT_PASS / ASIDE_LOGIN_PENDING",
+      "status": "CANDIDATE_BOOT_PASS / ASIDE_SESSION_NOT_BOUND",
       "evidence": [
         "real business UAT preflight",
         "real business UAT run",
-        "candidate peer repair and boot"
+        "candidate peer repair and boot",
+        "candidate Aside session boundary"
       ],
-      "next": "用户完成隔离 Aside 登录后，重新验证真实模型/CRM/WeKnora；再补保存/权限/恢复/人工 UAT"
+      "next": "用户在 127.0.0.1:4332 建立可观察登录或模型订阅后，重新验证真实模型/CRM/WeKnora；再补保存/权限/恢复/人工 UAT"
     },
     {
       "id": "M2-07",
