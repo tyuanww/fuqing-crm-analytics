@@ -108,7 +108,9 @@
     {
       "id": "M2-08",
       "status": "NOT_RUN",
-      "evidence": [],
+      "evidence": [
+        "release gate audit"
+      ],
       "next": "M2-04 through M2-07 plus explicit release authorization"
     },
     {
