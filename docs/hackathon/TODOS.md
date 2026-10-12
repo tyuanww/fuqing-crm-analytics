@@ -21,8 +21,8 @@
 
 | ID | 任务 | 当前状态 | 前置条件 | 完成标准 | 提交边界 |
 |---|---|---|---|---|---|
-| M2-01 | 九包组合 candidate 合同 | `CONTRACT_READY / CANDIDATE_NOT_RUN` | M2-02 提供服务 binding/evidence 后才能生成正式身份 | `dsh-plugin-candidate/v1` 组合合同、CLI、两 profile/九 pack 摘要绑定和缺服务 fail-closed 已通过；正式 candidate 仍等待 M2-02 | `feat(release): add composition candidate contract` |
-| M2-02 | 服务绑定与兼容回执 | `BLOCKED` | 真实、可核验的服务来源和兼容证据 | 两份正式 profile 的 `service_binding` 与服务回执、source SHA、API/state 合同一致；旧服务写入者被拒绝 | `feat(release): bind composition service evidence` |
+| M2-01 | 九包组合 candidate 合同 | `ISOLATED_CANDIDATE_PREPARED / MAIN_NOT_REGISTERED` | 主仓正式 profile/journal 注册仍需单独授权和当前准入链 | `dsh-composition-candidate/v1`、CLI、两 profile/九 pack 摘要绑定和 fail-closed 已通过；隔离 candidate digest 与 journal seq 2 已留证 | `feat(release): add composition candidate contract` + `fix(release): import composition writer path helper` |
+| M2-02 | 服务绑定与兼容回执 | `ISOLATED_EVIDENCE_BOUND / MAIN_PROFILE_UNBOUND` | 主仓两份 profile 仍未写入 service binding | 隔离组合已绑定 `analytics-first-purchase` service gate、source SHA 和兼容回执；主仓正式 profile/journal 不变 | 后续取得授权后单独提交主仓接线 |
 | M2-03 | 非生产 WSL2 目标 | `BLOCKED` | 新的 Linux x86_64 / WSL2 目标；不得使用 `100.93.46.46` | 目标身份、Node/Python/zstd/DSH runtime、权限和临时目录均核验通过 | `docs(acceptance): record non-production target preflight` |
 | M2-04 | source HTTP → terminal → browser → recovery | `NOT_RUN` | M2-01、M2-02、M2-03 | 同一新 candidate 在同一目标完成四段链路；每段 receipt 绑定 candidate，重试幂等、失败可恢复、临时资源回收 | 每个阶段一个目的，代码变更按 OCR 审查后分别提交 |
 | M2-05 | 真实页面与浏览器验收 | `NOT_RUN` | 真实 `COCKPIT_EXAMPLE_PACKAGE` 和可用目标 | headed 桌面、移动视口、读屏、键盘焦点、高对比度和 standalone 页面均有真实证据 | `docs(acceptance): record browser and standalone evidence` |
