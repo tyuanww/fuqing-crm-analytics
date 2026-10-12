@@ -26,7 +26,7 @@
 | M2-03 | WSL2 目标（当前按测试+生产授权） | `TARGET_PREFLIGHT_PASS / USER_AUTHORIZED_TEST_PROD` | 当前 candidate 仍保留隔离 journal；正式注册、激活和发布另按门禁授权；云服务器迁移另行 | Linux x86_64 / WSL2、Python 3.14.4、Node/zstd、权限和精确 13-wheel preflight 已通过；现役服务 stale lock 已受保护修复；用户已确认当前目标同时承担测试与生产验收 | `docs(acceptance): record production target authorization` |
 | M2-04 | source HTTP → terminal → browser → recovery | `TERMINAL_PASS / BROWSER_NOT_RUN` | M2-01、M2-02、M2-03 | 同一新 candidate 在同一目标完成四段链路；每段 receipt 绑定 candidate，重试幂等、失败可恢复、临时资源回收 | source 子阶段见 `docs(acceptance): record composition source target`；terminal 子阶段见 `docs(acceptance): record composition terminal target`；browser 仍待真实页面证据 |
 | M2-05 | 真实页面与浏览器验收 | `PARTIAL_LIVE_BROWSER_PASS / CANDIDATE_BROWSER_STANDALONE_NOT_RUN` | 真实 `COCKPIT_EXAMPLE_PACKAGE` 和可用目标 | headed 桌面、移动视口、读屏、键盘焦点、高对比度和 standalone 页面均有真实证据 | live 入口 bundle 约 15 秒后加载并完成三种 viewport 截图；candidate-bound browser、读屏、键盘焦点、高对比度和 standalone 仍需 `docs(acceptance): record browser and standalone evidence` |
-| M2-06 | 真实模型/CRM/WeKnora/UAT | `PARTIAL_REAL_UAT / CRM_TOOL_NOT_EXPOSED` | 当前目标与用户登录已具备；需要把 `crm-knowledge` provider、service profile 和 `query_crm_dashboard_gsv` 从正确 DSH runtime tool surface 暴露到会话，并补保存/权限/恢复/人工 UAT | 真实模型、WeKnora 来源引用和 CRM 只读看板已有实跑证据；当前只观察到 UI 组件，模型直连 CRM provider 缺失，写入与人工 UAT仍未运行 | `docs(acceptance): record CRM tool exposure diagnosis` |
+| M2-06 | 真实模型/CRM/WeKnora/UAT | `CANDIDATE_BOOT_PASS / ASIDE_LOGIN_PENDING` | 候选 peer 图已修正；等待用户在隔离 Aside 标签页登录，再验证 `crm-knowledge` provider、真实模型、CRM 只读工具和 WeKnora 来源 | 候选 session/UI 宿主已无导入失败并完成隔离启动；真实模型、CRM 登录/查询、WeKnora 引用、保存/权限失败/恢复和人工 UAT仍未运行 | `docs(acceptance): record corrected CRM candidate boot` |
 | M2-07 | SDK 供应链门禁 | `BLOCKED` | 最终候选 artifact 和发布者身份 | SBOM、发布者身份、最终签名、验签、撤销验证、干净机器安装和回退均通过 | 供应链改动单独走 OCR；`chore(supply-chain): close distribution gates` |
 | M2-08 | release / activation / canary / rollback | `NOT_RUN` | M2-04 至 M2-07 关闭，且取得发布授权 | immutable artifact、CI、release review、目标接收、生产激活、canary 和 rollback 全部有同一版本证据 | `docs(release): record candidate release gate`；不自动部署 |
 | M2-09 | 独立 DSH 升级候选 | `DEFERRED` | 新官方 DSH 版本/commit 和隔离 runtime | 新旧 runtime、SDK、插件适配、兼容矩阵、恢复矩阵和回退条件齐全；授权后再切换 | `feat(toolchain): prepare dsh upgrade candidate`；不混入当前发布候选 |
@@ -53,6 +53,8 @@ source HTTP 子阶段随后已在同一目标用当前 candidate 完成 10/10 PA
 用户随后再次确认当前杭州入口同时作为测试与生产目标，云服务器迁移后置。该决定解除目标环境缺口，不改变 candidate-bound browser、standalone、真实业务 UAT、SDK、activation、canary、rollback 或 `release_ready=false` 的独立门禁。详见[当前测试与生产目标授权记录](evidence/shinemage-production-target-authorization-20261013.md)。
 
 随后用户在 Aside 完成登录并运行真实业务 UAT：DeepSeek-V41-Flash 对 WeKnora 的只读检索与来源引用通过，`board.tyuan.chat/audience` 的真实 CRM 聚合看板在重试 503 后加载通过；新建标准模式会话没有暴露 `query_crm_dashboard_gsv`，模型拒绝编造调用；插件详情只显示 UI 组件运行中，没有 CRM provider tool surface，保存/权限失败/恢复/人工业务复核仍未运行。M2-06 更新为 `PARTIAL_REAL_UAT / CRM_TOOL_NOT_EXPOSED`，详见[真实模型、WeKnora 与 CRM UAT 实跑](evidence/shinemage-real-business-uat-20261013.md)。
+
+本轮在同一授权目标按 release marker 修正了 CRM candidate 的 peer 图：候选插件改用 `upstream/node_modules/.pnpm/node_modules/@deepseek-ai` 闭包，session-controller 与 UI 不再 pending；隔离候选在 `4332` 启动，私有 B0 bridge 在 `4336` 启动，live `4328` 未动。Aside 候选标签页已打开登录入口，登录及后续真实 UAT 等待用户操作，当前不把启动通过写成业务验收通过。详见[候选 peer 图修复与启动证据](evidence/shinemage-m2-06-candidate-peer-repair-20261013.md)。
 
 
 2026-09-13 用户确认“核心版本优先交付、扩库完善后置”。目标是问数后 AI 优先使用定制组件自由组板，板内按选定范围修改；首批六类不是最终上限。M1／产品仍 PARTIAL；原全量 App Goal 保持 PAUSED。本节承接原本地施工记录，不把旧冻结实现反推成最终需求。

@@ -83,12 +83,13 @@
     },
     {
       "id": "M2-06",
-      "status": "PARTIAL_REAL_UAT / CRM_TOOL_NOT_EXPOSED",
+      "status": "CANDIDATE_BOOT_PASS / ASIDE_LOGIN_PENDING",
       "evidence": [
         "real business UAT preflight",
-        "real business UAT run"
+        "real business UAT run",
+        "candidate peer repair and boot"
       ],
-      "next": "expose query_crm_dashboard_gsv；补保存/权限/恢复/人工 UAT"
+      "next": "用户完成隔离 Aside 登录后，重新验证真实模型/CRM/WeKnora；再补保存/权限/恢复/人工 UAT"
     },
     {
       "id": "M2-07",
