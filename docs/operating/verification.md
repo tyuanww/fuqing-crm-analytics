@@ -3,6 +3,12 @@
 适用于成果工作树的本地补丁；是否已集成，以该工作树 Git 状态和远端证据为准。授权见 [AGENTS](../../AGENTS.md)。当前施工与缺口看根 [STATUS.md](../../STATUS.md) 和 [TODOS 的 M1 核心交付](../hackathon/TODOS.md#m1-核心交付)。黑客松入口与 [治理实施记录](../hackathon/WORKFLOW-GOVERNANCE-2026-09-06.md) 是历史证据链，不是本轮任务卡。
 
 
+## 独立作者仓合并与正式目标前置（2026-10-12）
+
+十个独立作者仓 PR #1 已普通 merge，各自 main CI 均 SUCCESS；完整 SHA、CI run 和范围见[合并与候选前置核验](../hackathon/evidence/shinemage-author-merge-and-candidate-preflight-20261012.md)。隔离任务目录以当前 Workbench formal pack 与既有服务绑定生成 candidate `facb83f3…` / journal seq 2，主仓 profile/journal 未变。
+
+正式目标仍为 `NOT_RUN`：`100.93.46.46` 在当前运维文档中是生产入口，用户没有可用的第二台非生产 x86_64 WSL2。不得把该生产入口用于 synthetic source/terminal/browser/recovery。提供独立非生产目标后，才按既有 runner 生成本次 candidate 的新回执。
+
 ## 当前 PR #121 合并后与 Cordis 对接验证（2026-10-12）
 
 本节先记录 PR #121 合并后的当前事实，再保留 PR #120 等合并前门禁作为历史对象。[PR #121](https://github.com/tyuanww/fuqing-crm-analytics/pull/121) 已普通 merge 到 `b47cf9baf328921041dfaff3e289a2af4323e1d0`；[合并后 main CI](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38224409545) SUCCESS。四个适用 job 成功，五个路径矩阵 job SKIPPED；B0 862 PASS／41 subtests PASS，23 warnings 保留。合并提交、feature head、artifact digest 与本地工作树边界见[PR #121 合并后证据](../hackathon/evidence/shinemage-pr121-postmerge-20261012.md)。

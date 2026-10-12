@@ -4,6 +4,11 @@
 
 ## M1 核心交付
 
+### 2026-10-12 独立作者仓合并与目标前置阻塞
+
+十个独立作者仓 PR #1 已普通 merge，合并后的各自 main CI 全部 SUCCESS，详情见[合并快照](evidence/shinemage-author-merge-and-candidate-preflight-20261012.md)。隔离目录已基于当前 Workbench formal pack 和既有 `first-purchase-source-http-local` 服务绑定准备 candidate `facb83f3…` / journal seq 2；主仓 profile 与正式 journal 未写入。唯一可连接的 `100.93.46.46` 属于生产入口，用户确认没有另一台非生产 WSL2，所以 source／terminal／browser／recovery 保持 NOT_RUN。产品 PARTIAL、SDK BLOCKED、`release_ready=false`。
+
+
 2026-09-13 用户确认“核心版本优先交付、扩库完善后置”。目标是问数后 AI 优先使用定制组件自由组板，板内按选定范围修改；首批六类不是最终上限。M1／产品仍 PARTIAL；原全量 App Goal 保持 PAUSED。本节承接原本地施工记录，不把旧冻结实现反推成最终需求。
 
 
