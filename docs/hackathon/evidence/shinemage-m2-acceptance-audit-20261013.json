@@ -77,7 +77,8 @@
       "evidence": [
         "live browser loaded after bundle wait",
         "desktop/tablet/mobile screenshots",
-        "keyboard focus partial"
+        "keyboard focus partial",
+        "standalone package preflight"
       ],
       "next": "COCKPIT_EXAMPLE_PACKAGE、candidate-bound browser、screen reader、full keyboard focus、high contrast"
     },

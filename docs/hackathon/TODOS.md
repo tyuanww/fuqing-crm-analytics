@@ -25,7 +25,7 @@
 | M2-02 | 服务绑定与兼容回执 | `ISOLATED_EVIDENCE_BOUND / MAIN_PROFILE_UNBOUND` | 主仓两份 profile 仍未写入 service binding | 隔离组合已绑定 `analytics-first-purchase` service gate、source SHA 和兼容回执；主仓正式 profile/journal 不变 | 后续取得授权后单独提交主仓接线 |
 | M2-03 | WSL2 目标（当前按测试+生产授权） | `TARGET_PREFLIGHT_PASS / USER_AUTHORIZED_TEST_PROD` | 当前 candidate 仍保留隔离 journal；正式注册、激活和发布另按门禁授权；云服务器迁移另行 | Linux x86_64 / WSL2、Python 3.14.4、Node/zstd、权限和精确 13-wheel preflight 已通过；现役服务 stale lock 已受保护修复；用户已确认当前目标同时承担测试与生产验收 | `docs(acceptance): record production target authorization` |
 | M2-04 | source HTTP → terminal → browser → recovery | `TERMINAL_PASS / BROWSER_NOT_RUN` | M2-01、M2-02、M2-03 | 同一新 candidate 在同一目标完成四段链路；每段 receipt 绑定 candidate，重试幂等、失败可恢复、临时资源回收 | source 子阶段见 `docs(acceptance): record composition source target`；terminal 子阶段见 `docs(acceptance): record composition terminal target`；browser 仍待真实页面证据 |
-| M2-05 | 真实页面与浏览器验收 | `PARTIAL_LIVE_BROWSER_PASS / CANDIDATE_BROWSER_STANDALONE_NOT_RUN` | 真实 `COCKPIT_EXAMPLE_PACKAGE` 和可用目标 | headed 桌面、移动视口、读屏、键盘焦点、高对比度和 standalone 页面均有真实证据 | live 入口 bundle 约 15 秒后加载并完成三种 viewport 截图；candidate-bound browser、读屏、键盘焦点、高对比度和 standalone 仍需 `docs(acceptance): record browser and standalone evidence` |
+| M2-05 | 真实页面与浏览器验收 | `PARTIAL_LIVE_BROWSER_PASS / CANDIDATE_BROWSER_STANDALONE_NOT_RUN` | 真实 `COCKPIT_EXAMPLE_PACKAGE` 和可用目标 | headed 桌面、移动视口、读屏、键盘焦点、高对比度和 standalone 页面均有真实证据 | live 入口 bundle 约 15 秒后加载并完成三种 viewport 截图；本轮再次核实 `COCKPIT_EXAMPLE_PACKAGE=UNSET`、页面包路径不存在；candidate-bound browser、读屏、键盘焦点、高对比度和 standalone 仍需真实输入，详见 `docs(acceptance): record standalone package preflight` |
 | M2-06 | 真实模型/CRM/WeKnora/UAT | `PARTIAL_REAL_UAT / LIVE_TOOL_SURFACE_EMPTY / CANDIDATE_MODEL_MISSING_CREDENTIAL` | 候选 peer 图和 candidate 登录已通过；candidate 的 DeepSeek provider 仍缺受控 credentials service 的 API key，需补凭据后重跑真实只读查询 | live 模型在工具缺失时没有编造；candidate 登录与只读模式可见，但模型在 provider 调用前以 `MISSING_CREDENTIAL` 失败；CRM/WeKnora 查询、保存/权限失败/恢复和人工 UAT仍未运行 | `docs(acceptance): record candidate model credential gate` |
 | M2-07 | SDK 供应链门禁 | `BLOCKED` | 最终候选 artifact 和发布者身份 | SBOM、发布者身份、最终签名、验签、撤销验证、干净机器安装和回退均通过 | 供应链改动单独走 OCR；`chore(supply-chain): close distribution gates` |
 | M2-08 | release / activation / canary / rollback | `NOT_RUN` | M2-04 至 M2-07 关闭，且取得发布授权 | immutable artifact、CI、release review、目标接收、生产激活、canary 和 rollback 全部有同一版本证据 | `docs(release): record candidate release gate`；不自动部署 |
@@ -47,6 +47,8 @@ source HTTP 子阶段随后已在同一目标用当前 candidate 完成 10/10 PA
 随后在同一目标使用九包组合 candidate 完成 terminal drill：roster/工具加载、合成原生对话、受控重启和进程丢失后的 durable session 恢复共 5/5 PASS，组合 journal seq 4 已追加。该回执只覆盖 synthetic model 与临时 profile/runtime；browser、真实模型/CRM/WeKnora/UAT、供应链、activation、canary、rollback 和 release gate 仍未关闭。详见[当前组合 terminal 目标验收](evidence/shinemage-composition-terminal-target-20261013.md)。
 
 随后对用户授权的真实入口 `https://app.tyuan.chat/` 做了只读 headed browser 观察：组合 bundle 约 15 秒后加载完成，桌面、平板和移动 viewport 均显示真实工作台导航与工作区内容，控制台错误为空。该结果只关闭 live browser 子项，不接入 candidate journal，也不替代 standalone、读屏、键盘焦点、高对比度或 candidate-bound browser 验收。详见[授权生产入口 live browser 观察](evidence/shinemage-live-browser-20261013.md)。
+
+随后复核 M2-05 的 standalone 输入：本地 `COCKPIT_EXAMPLE_PACKAGE` 未设置，路径不存在；定向检索仅命中合同、测试夹具和历史说明，没有真实页面包。本轮不生成替代页面，standalone、读屏、完整键盘焦点和高对比度继续保持 `NOT_RUN`。详见[standalone 页面包 preflight](evidence/shinemage-m2-05-standalone-package-preflight-20261013.md)。
 
 随后对 DSH、page、CRM 和 WeKnora loopback 入口做了只读状态码前置核验：认证入口返回 401，page 根路径返回 404，WeKnora Web shell 返回 200；没有调用真实模型、读取 CRM/WeKnora 数据或执行 UAT。详见[真实业务 UAT 前置核验](evidence/shinemage-real-business-uat-preflight-20261013.md)。
 
