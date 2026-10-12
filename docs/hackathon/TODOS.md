@@ -4,6 +4,36 @@
 
 ## M1 核心交付
 
+## M2 收尾任务卡与维修规则
+
+以下任务卡只覆盖 M1 之后仍开放的验收、供应链和发布门禁。每张卡独立推进、独立验证、独立本地提交；没有满足前置条件时保持 `NOT_RUN` 或 `BLOCKED`，不使用历史回执补齐当前证据。
+
+### 维修原则
+
+- **边界清楚**：领域规则留在领域层，服务、宿主、文件和网络通过明确的端口/适配器接入；不把发布控制、业务逻辑和验收脚本揉成一个入口。
+- **依赖向内**：组合、candidate 和 journal 依赖稳定合同，具体 DSH、服务和目标适配器依赖合同；不让业务插件反向依赖主仓内部路径或真实数据。
+- **一个原因一个改动**：每张卡只解决一个完整目的，不为假设需求增加抽象，不通过复制旧实现绕过缺口。
+- **先证据后结论**：输入、来源、摘要、测试范围、未执行项和失败原因都要留证；合成、隔离和历史结果不能写成真实业务或生产通过。
+- **小步本地提交**：代码、合同、证据和入口文档按职责拆分；提交格式使用 `type(scope): description`。默认只做本地 commit，不自动 push、部署、切换或删除。
+- **代码卡强制审查**：任何卡一旦修改代码、脚本、配置合同或测试，完成实现后必须运行 `ocr delegate preview`、`ocr delegate rule` 和逐文件审查；High/Critical 必须修复或明确阻塞，审查覆盖全部 reviewable files 后才能本地提交。纯文档卡不触发代码 OCR，但仍需链接、格式和事实核验。
+
+### 任务卡
+
+| ID | 任务 | 当前状态 | 前置条件 | 完成标准 | 提交边界 |
+|---|---|---|---|---|---|
+| M2-01 | 九包组合 candidate 合同 | `NOT_RUN` | 明确组合 candidate 的受支持 schema 和产出入口；当前 CLI 只有单插件 candidate | 能从九包正式 pack、两份 profile 和固定输入生成可验证的组合身份，不拼接手写 JSON | `feat(release): add composition candidate contract` 或记录为阻塞证据 |
+| M2-02 | 服务绑定与兼容回执 | `BLOCKED` | 真实、可核验的服务来源和兼容证据 | 两份正式 profile 的 `service_binding` 与服务回执、source SHA、API/state 合同一致；旧服务写入者被拒绝 | `feat(release): bind composition service evidence` |
+| M2-03 | 非生产 WSL2 目标 | `BLOCKED` | 新的 Linux x86_64 / WSL2 目标；不得使用 `100.93.46.46` | 目标身份、Node/Python/zstd/DSH runtime、权限和临时目录均核验通过 | `docs(acceptance): record non-production target preflight` |
+| M2-04 | source HTTP → terminal → browser → recovery | `NOT_RUN` | M2-01、M2-02、M2-03 | 同一新 candidate 在同一目标完成四段链路；每段 receipt 绑定 candidate，重试幂等、失败可恢复、临时资源回收 | 每个阶段一个目的，代码变更按 OCR 审查后分别提交 |
+| M2-05 | 真实页面与浏览器验收 | `NOT_RUN` | 真实 `COCKPIT_EXAMPLE_PACKAGE` 和可用目标 | headed 桌面、移动视口、读屏、键盘焦点、高对比度和 standalone 页面均有真实证据 | `docs(acceptance): record browser and standalone evidence` |
+| M2-06 | 真实模型/CRM/WeKnora/UAT | `NOT_RUN` | 真实环境授权、账号权限和业务验收窗口 | 查询、引用、保存、驾驶舱、权限失败、恢复和人工 UAT 均记录实际对象与边界 | `docs(acceptance): record real business UAT` |
+| M2-07 | SDK 供应链门禁 | `BLOCKED` | 最终候选 artifact 和发布者身份 | SBOM、发布者身份、最终签名、验签、撤销验证、干净机器安装和回退均通过 | 供应链改动单独走 OCR；`chore(supply-chain): close distribution gates` |
+| M2-08 | release / activation / canary / rollback | `NOT_RUN` | M2-04 至 M2-07 关闭，且取得发布授权 | immutable artifact、CI、release review、目标接收、生产激活、canary 和 rollback 全部有同一版本证据 | `docs(release): record candidate release gate`；不自动部署 |
+| M2-09 | 独立 DSH 升级候选 | `DEFERRED` | 新官方 DSH 版本/commit 和隔离 runtime | 新旧 runtime、SDK、插件适配、兼容矩阵、恢复矩阵和回退条件齐全；授权后再切换 | `feat(toolchain): prepare dsh upgrade candidate`；不混入当前发布候选 |
+| M2-10 | 证据与状态收口 | `OPEN` | 每张已执行任务卡的原始回执和本地提交 | 更新 `STATUS.md`、本节和相关验证入口；每张卡的 `PASS/NOT_RUN/BLOCKED` 与文件摘要可追溯 | `docs(status): close acceptance task card` |
+
+每张任务卡完成后都要记录：输入身份、实际命令、退出码、原始证据位置、未执行项、风险边界和本地 commit。卡片没有完成时，不勾选下一张依赖卡；产品仍保持 `PARTIAL`、`release_ready=false`。
+
 ### 2026-10-12 独立作者仓合并与目标前置阻塞
 
 十个独立作者仓 PR #1 已普通 merge，合并后的各自 main CI 全部 SUCCESS，详情见[合并快照](evidence/shinemage-author-merge-and-candidate-preflight-20261012.md)。隔离目录已基于当前 Workbench formal pack 和既有 `first-purchase-source-http-local` 服务绑定准备 candidate `facb83f3…` / journal seq 2；主仓 profile 与正式 journal 未写入。唯一可连接的 `100.93.46.46` 属于生产入口，用户确认没有另一台非生产 WSL2，所以 source／terminal／browser／recovery 保持 NOT_RUN。产品 PARTIAL、SDK BLOCKED、`release_ready=false`。
