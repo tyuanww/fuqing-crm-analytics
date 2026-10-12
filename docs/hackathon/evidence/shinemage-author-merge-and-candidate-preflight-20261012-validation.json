@@ -1,0 +1,188 @@
+{
+  "schema": "shinemage-independent-author-merge-and-candidate-preflight/v1",
+  "observed_at": "2026-10-12",
+  "author_repositories": [
+    {
+      "repository": "tyuanww/dsh-analytics-workbench",
+      "pr": 1,
+      "state": "MERGED",
+      "merge_commit": "865fe2e6fbb77bb7d37be2c77c6f895f4f0641d4",
+      "ci": [
+        {
+          "run_id": 38238031994,
+          "workflow": "analytics-workbench",
+          "conclusion": "success"
+        },
+        {
+          "run_id": 38238032009,
+          "workflow": "analytics-workbench-fixed-inputs",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "repository": "tyuanww/dsh-crm-knowledge",
+      "pr": 1,
+      "state": "MERGED",
+      "merge_commit": "78eb9f7dd2156f9d32e7892da072bd0bd96bffa6",
+      "ci": [
+        {
+          "run_id": 38238039351,
+          "workflow": "crm-knowledge-fixed-inputs",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "repository": "tyuanww/dsh-knowledge",
+      "pr": 1,
+      "state": "MERGED",
+      "merge_commit": "ef8960ededd5f4214d9f3e77a8b61a761a046d3d",
+      "ci": [
+        {
+          "run_id": 38238045394,
+          "workflow": "knowledge-fixed-inputs",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "repository": "tyuanww/dsh-shine-brand",
+      "pr": 1,
+      "state": "MERGED",
+      "merge_commit": "6754f37075ad00d1b17478c9ed42e901419bda0f",
+      "ci": [
+        {
+          "run_id": 38238051696,
+          "workflow": "shine-brand",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "repository": "tyuanww/shinemage-board-components",
+      "pr": 1,
+      "state": "MERGED",
+      "merge_commit": "68abb1ead321a4772f337ad8fa12e4246e0d3db7",
+      "ci": [
+        {
+          "run_id": 38238058171,
+          "workflow": "board-components-owner",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "repository": "tyuanww/dsh-shine-funnel",
+      "pr": 1,
+      "state": "MERGED",
+      "merge_commit": "c37326170258764d394c708f25535cf34685c5af",
+      "ci": [
+        {
+          "run_id": 38238065194,
+          "workflow": "dsh-shine-funnel-fixed-inputs",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "repository": "tyuanww/dsh-shine-query",
+      "pr": 1,
+      "state": "MERGED",
+      "merge_commit": "37c853bba5fc92edf9158aba51b3b0c25c8e6313",
+      "ci": [
+        {
+          "run_id": 38238071327,
+          "workflow": "dsh-shine-query-fixed-inputs",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "repository": "tyuanww/dsh-shine-crowd-action",
+      "pr": 1,
+      "state": "MERGED",
+      "merge_commit": "d709e80f10a948bf4007c51fed5a4da3753fbeaa",
+      "ci": [
+        {
+          "run_id": 38238077762,
+          "workflow": "dsh-shine-crowd-action-fixed-inputs",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "repository": "tyuanww/dsh-shine-board",
+      "pr": 1,
+      "state": "MERGED",
+      "merge_commit": "75eced472d4d1af55efe51648115545a68c60ef4",
+      "ci": [
+        {
+          "run_id": 38238087532,
+          "workflow": "dsh-shine-board-fixed-inputs",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "repository": "tyuanww/dsh-shine-waterfall",
+      "pr": 1,
+      "state": "MERGED",
+      "merge_commit": "cd0a4996e1df1cb64a2717434052919c7f0b1679",
+      "ci": [
+        {
+          "run_id": 38238095509,
+          "workflow": "dsh-shine-waterfall-fixed-inputs",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "author_merge_scope": "10 independent PR #1 merges (9 plugins plus board-components); ordinary merge; remote branches retained",
+  "candidate_preparation": {
+    "status": "CANDIDATE_PREPARED",
+    "candidate_digest": "facb83f36ec76769cfdd5e9c2489f2aea4055afc1bfb31748f75a355bf03f27d",
+    "profile_id": "first-purchase-source-http-local",
+    "profile_digest": "be3948850fc414ce1524226a544783de1ecb3253514cc7f1d8f3280280b3d0af",
+    "source_sha": "3030e3f21263f6ec65cb01c7aeacd4c80e2eb711",
+    "pack_sha256": "b75a5c900b94b333a2749a8b35d5ea106f5aea158667a6e338baa240b886b088",
+    "pack_manifest_sha256": "900004009437e68052e957610e618090a1e7d69d485376a53afea6eb008fed85",
+    "service_source_sha": "f9726f682fc0d1d4c6aef6f07e6932c2c600c3d6",
+    "service_evidence_sha256": "9a6a4a7a28e0ffc69441394c18030b0a51eb2a881c4d00566b535931f3b391b0",
+    "journal_sequence": 2,
+    "task_dir": "/Users/hutou/.codex/tasks/shinemage-current-candidate-20261012-r2",
+    "scope": "isolated Workbench candidate preparation; not registered in the main repo profile or journal"
+  },
+  "target": {
+    "status": "BLOCKED_NO_NON_PRODUCTION_TARGET",
+    "address": "100.93.46.46",
+    "classification": "production entry according to docs/operating/dsh-production-access.md and hangzhou production records",
+    "observed_platform": "Linux x86_64 WSL2, Python 3.14.4, Node 24.21.0, zstd 1.5.5",
+    "ssh": "read-only verification succeeded with existing id_ed25519_pc2; no remote directory or service was changed",
+    "reason": "user confirmed no other non-production x86_64 WSL2 target is available; production target is excluded by project boundary",
+    "source_terminal_browser": "NOT_RUN"
+  },
+  "main_repo": {
+    "head": "223f90027c789177c4eafc8233a41d58db3ee8b0",
+    "branch": "codex/shinemage-abc-local-candidate",
+    "version": "0.20.0.0",
+    "protected_untracked": [
+      "security-audit-skill/"
+    ],
+    "release_ready": false,
+    "sdk_distribution": "BLOCKED",
+    "product": "PARTIAL"
+  },
+  "not_run": [
+    "new formal current-profile candidate/journal registration",
+    "WSL2 source/terminal/browser/recovery",
+    "standalone page package",
+    "real model/business/WeKnora/UAT",
+    "SDK distribution",
+    "DSH upgrade"
+  ],
+  "sha256": {
+    "markdown": "eca129ed294621a4ca19477cd52d9922278e1498677c735414f23cc8e8435745",
+    "validation_without_sha256": "708d932724f029a8088178fdee7bf0abacbc55d76b347531f424d3ea9f34ea6d"
+  }
+}
