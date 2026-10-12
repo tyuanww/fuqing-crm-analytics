@@ -46,6 +46,25 @@
     "model_reported_missing_from_tool_list": true,
     "fallback_to_terminal_or_repo": false
   },
+  "plugin_assembly": {
+    "status": "UI_ONLY_COMPONENTS_OBSERVED",
+    "state_changed": false,
+    "plugins": [
+      {
+        "id": "@shine-mage/dsh-analytics-workbench-b0",
+        "version": "v0.0.0-b0",
+        "component": "analytics-workbench-ui",
+        "running": true
+      },
+      {
+        "id": "@shine-mage/dsh-shine-query",
+        "version": "v0.0.0-b0",
+        "component": "shine-query-ui",
+        "running": true
+      }
+    ],
+    "crm_provider_exposed": false
+  },
   "remaining": {
     "save_or_cockpit_mutation": "NOT_RUN_READ_ONLY_SCOPE",
     "permission_failure": "NOT_RUN",

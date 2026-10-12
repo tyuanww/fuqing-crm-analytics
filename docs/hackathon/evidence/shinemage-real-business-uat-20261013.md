@@ -25,9 +25,11 @@
 
 在新建标准模式会话中明确要求直接调用 `query_crm_dashboard_gsv`。模型返回“该工具不在当前会话的工具清单里”，并列出当前可见工具只有页面生成、bash、read/write/edit、glob/grep、web 和团队工具；没有执行 CRM 查询，也没有用终端或仓库文件替代。
 
+随后只读查看 Aside 的插件详情：`@shine-mage/dsh-analytics-workbench-b0` 与 `@shine-mage/dsh-shine-query` 都是 `v0.0.0-b0`，各自只有 `analytics-workbench-ui` / `shine-query-ui` 组件显示运行中。没有切换开关、卸载插件、重启服务或修改配置；这说明当前工作台会话拿到的是 UI 组件装配，不能据此证明目标 DSH runtime 已向 agent 暴露 CRM provider。
+
 因此：
 
-- `CRM_TOOL_EXPOSURE`：`BLOCKED_TOOL_NOT_EXPOSED`；需要把 CRM 工具接入当前目标会话或确认正确的数字员工运行时。
+- `CRM_TOOL_EXPOSURE`：`BLOCKED_TOOL_NOT_EXPOSED`；需要把 CRM provider 接入当前目标会话或确认带工具面的数字员工/DSH runtime，而不是只启用 UI 组件。
 - 保存/驾驶舱写入：`NOT_RUN_READ_ONLY_SCOPE`。
 - 权限失败、会话恢复和人工业务代表复核：`NOT_RUN`。
 - standalone、candidate-bound browser、读屏、键盘完整焦点和高对比度仍由 M2-05/M2-04 独立负责。

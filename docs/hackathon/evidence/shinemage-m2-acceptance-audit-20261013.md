@@ -19,4 +19,4 @@
 
 用户已确认杭州入口同时承担当前测试与生产验收，云服务器迁移后置；该决定解除 M2-03 的目标环境阻塞，但不改变真实业务、供应链和正式发布门禁。详见[当前测试与生产目标授权记录](shinemage-production-target-authorization-20261013.md)。
 
-真实 UAT 已有部分实跑：真实模型/WeKnora 来源引用 PASS，CRM 只读看板在 503 重试后加载 PASS；工作台标准模式工具清单缺少 `query_crm_dashboard_gsv`，模型未执行替代调用，保存、权限失败、恢复和人工业务复核保持 `NOT_RUN`。详见[真实模型、WeKnora 与 CRM UAT 实跑](shinemage-real-business-uat-20261013.md)。
+真实 UAT 已有部分实跑：真实模型/WeKnora 来源引用 PASS，CRM 只读看板在 503 重试后加载 PASS；工作台标准模式工具清单缺少 `query_crm_dashboard_gsv`，插件详情只显示 UI 组件运行中，模型未执行替代调用，保存、权限失败、恢复和人工业务复核保持 `NOT_RUN`。详见[真实模型、WeKnora 与 CRM UAT 实跑](shinemage-real-business-uat-20261013.md)。
