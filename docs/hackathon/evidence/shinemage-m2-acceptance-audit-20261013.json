@@ -83,14 +83,15 @@
     },
     {
       "id": "M2-06",
-      "status": "CANDIDATE_BOOT_PASS / ASIDE_SESSION_NOT_BOUND",
+      "status": "PARTIAL_REAL_UAT / CRM_TOOL_NOT_EXPOSED",
       "evidence": [
         "real business UAT preflight",
         "real business UAT run",
         "candidate peer repair and boot",
-        "candidate Aside session boundary"
+        "candidate Aside session boundary",
+        "live read-only UAT tool boundary"
       ],
-      "next": "用户在 127.0.0.1:4332 建立可观察登录或模型订阅后，重新验证真实模型/CRM/WeKnora；再补保存/权限/恢复/人工 UAT"
+      "next": "在加载 crm-knowledge provider 和 WeKnora 工具的正确宿主会话中重跑真实只读查询；再补保存/权限/恢复/人工 UAT"
     },
     {
       "id": "M2-07",
