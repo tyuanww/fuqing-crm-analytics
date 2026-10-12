@@ -1,0 +1,44 @@
+{
+  "schema": "shinemage-pr121-formal-pack-delivery/v1",
+  "observed_at": "2026-10-12",
+  "pull_request": {
+    "number": 121,
+    "head_sha": "ad5630174ae086abf135b8fbdb9319623ef09b4d",
+    "state": "OPEN",
+    "mergeable": "MERGEABLE",
+    "merge_state_status": "CLEAN",
+    "ci_run_id": 38217097817,
+    "ci_attempt": 2,
+    "ci_conclusion": "success"
+  },
+  "staging": {
+    "repository": "tyuanww/dsh-analytics-workbench",
+    "branch": "codex/ci-composition-inputs-20261011",
+    "source_sha": "e9bfc77653019f656ada2b679c56d4d525fb0dd5",
+    "run_id": 38218001878,
+    "artifact_id": 11732716479,
+    "artifact_sha256": "552aa4d122aa84418c6874798fef7c6024f5052ee8c331535036d5f85a5ea486",
+    "artifact_bytes": 704587,
+    "expires_at": "2026-10-26T07:29:17Z"
+  },
+  "composition": {
+    "plugin_count": 9,
+    "profile_count": 2,
+    "lock_sha256": "be215557e46c78c6c15b738e1a15dd22281770bee438f30960fbf0de3f4437eb",
+    "host": "NOT_RUN",
+    "remote_ci": "NOT_RUN",
+    "release_ready": false
+  },
+  "checks": {
+    "b0_contract_build": "success",
+    "b0_passed": 862,
+    "b0_warnings": 23,
+    "b0_subtests_passed": 41,
+    "test": "success",
+    "lint": "success",
+    "changes": "success",
+    "merge_gate": "success",
+    "skipped_jobs": 5
+  },
+  "first_attempt_failure": "CI_COMPOSITION_MANIFEST_DIGEST_OLD_ARTIFACT"
+}

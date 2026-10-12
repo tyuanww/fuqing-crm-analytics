@@ -11,7 +11,7 @@
 
 本节记录 [PR #120](https://github.com/tyuanww/fuqing-crm-analytics/pull/120) 已普通 merge 后的事实：合并提交为 `e04caca7`，父提交为 `5943d4be` 与 `8800ebd8`，远端 main 已完成新的实际 CI。合并后证据与工件摘要见[核验记录](evidence/shinemage-postmerge-pr120-20261012.md)。feature 工作树仍停在 `codex/shinemage-abc-local-candidate`，不会自动切换到 main。
 
-私有暂存 `8f44bb64` 的上传 CI 成功，新 artifact `11710265230`／digest `fbef740a…` 实际下载与 receiver 核对 18 成员、九包／两 profile。三项非敏感变量已配置并回读，专用只读 Secret 已配置且值不入库；工件有效期至 `2026-10-25T17:31:36Z`。输入对应当前 PR 组合，旧 artifact 不再代表新两包。
+PR #121 使用暂存提交 `e9bfc776` 的上传 CI `38218001878`，新 artifact `11732716479`／digest `552aa4d1…`／704587 bytes 已实际下载并由 receiver 核对 18 成员、九包／两 profile。三项非敏感变量已更新并回读，专用只读 Secret 已配置且值不入库；工件有效期至 `2026-10-26T07:29:17Z`。PR #121 attempt 2 的 B0、test、lint、changes、merge-gate 全部 SUCCESS；首次 attempt 因旧 artifact manifest 摘要失败，失败证据保留。
 
 [合并后 main CI 38167688143](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38167688143) SUCCESS：12 个 JUnit 文件、3315 个唯一 testcase，0 failure／0 error／80 skipped；B0 862 PASS／41 subtests PASS，23 warnings 保留。合并前六个适用 checks、rc2 preflight、两轮本地 push 失败与夹具回归仍按[原始证据](evidence/shinemage-cordis-pr120-ci-delivery-20261012.md)留存，不与合并后数字相加。
 
@@ -26,6 +26,8 @@ Workbench、CRM、Knowledge 作者仓已分别加入正式 `dsh-plugin-pack/v1` 
 ### 2026-10-12 当前组合输入预检
 
 基于上述三份真实 PR CI formal pack 和组合锁中的六份既有包，`scripts/ci/composition-pack-inputs.mjs` 已在固定 Node 24.19.0 / Python 3.14.4 下生成九包、两 profile 的固定输入回执，命令 exit 0。回执锁摘要为 `be215557…`，原始回执 SHA-256 为 `4a7b9cf9…`，见[预检记录](evidence/shinemage-composition-preflight-20261012.md)及机器摘要。该步骤只关闭包身份和输入准备，profile 仍没有 `service_binding`；宿主、服务/目标、terminal/browser/recovery、candidate/journal、真实业务、standalone、SDK 分发和 DSH 升级继续保持 NOT_RUN/BLOCKED，不能据此生成 candidate 或发布。
+
+PR #121 的 hosted B0 已用新的组合 artifact 实际重跑成功，记录在[正式组合交付](evidence/shinemage-pr121-formal-pack-delivery-20261012.md)；这只关闭当前 GitHub CI 输入链，不改变上述 service binding、candidate/journal、宿主和发布边界。
 
 以下保留应用／本地提交时点；其中“未推送、新 hosted CI 未跑、工件未上传”不覆盖本节。
 
