@@ -83,16 +83,17 @@
     },
     {
       "id": "M2-06",
-      "status": "PARTIAL_REAL_UAT / CRM_TOOL_NOT_EXPOSED",
+      "status": "PARTIAL_REAL_UAT / LIVE_TOOL_SURFACE_EMPTY / CANDIDATE_MODEL_MISSING_CREDENTIAL",
       "evidence": [
         "real business UAT preflight",
         "real business UAT run",
         "candidate peer repair and boot",
         "candidate Aside session boundary",
         "live read-only UAT tool boundary",
-        "candidate CRM host route probe"
+        "candidate CRM host route probe",
+        "candidate model credential gate"
       ],
-      "next": "在加载 crm-knowledge provider 和 WeKnora 工具的正确宿主会话中重跑真实只读查询；再补保存/权限/恢复/人工 UAT"
+      "next": "在 candidate credentials service 配置受控 provider 凭据后重跑真实只读查询；再补 CRM/WeKnora、保存/权限/恢复/人工 UAT"
     },
     {
       "id": "M2-07",
