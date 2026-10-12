@@ -19,7 +19,7 @@
     "tablet": "PASS_SCREEN_CAPTURE_ONLY",
     "mobile": "PASS_SCREEN_CAPTURE_ONLY",
     "screen_reader": "NOT_RUN",
-    "keyboard_focus": "NOT_RUN",
+    "keyboard_focus": "PARTIAL_MODAL_FOCUS_TRAP_OBSERVED",
     "high_contrast": "NOT_RUN",
     "mutations": "NONE",
     "production_data": "NOT_USED",
@@ -30,7 +30,57 @@
       "bare_/plugins/": "HTTP_404_EXPECTED_WITHOUT_BUNDLE_QUERY",
       "/api/plugins": "HTTP_404_EXPECTED_UNKNOWN_ROUTE"
     },
-    "diagnosis": "LIVE_SHELL_AND_PLUGIN_BUNDLE_LOADED_AFTER_WAIT"
+    "diagnosis": "LIVE_SHELL_AND_PLUGIN_BUNDLE_LOADED_AFTER_WAIT",
+    "keyboard_focus_sequence": [
+      {
+        "tag": "BUTTON",
+        "text": "继续"
+      },
+      {
+        "tag": "BUTTON",
+        "text": "继续"
+      },
+      {
+        "tag": "BUTTON",
+        "text": "继续"
+      },
+      {
+        "tag": "BUTTON",
+        "text": "继续"
+      },
+      {
+        "tag": "BUTTON",
+        "text": "继续"
+      },
+      {
+        "tag": "BUTTON",
+        "text": "继续"
+      },
+      {
+        "tag": "BUTTON",
+        "text": "继续"
+      },
+      {
+        "tag": "BUTTON",
+        "text": "继续"
+      },
+      {
+        "tag": "BUTTON",
+        "text": "继续"
+      },
+      {
+        "tag": "BUTTON",
+        "text": "继续"
+      },
+      {
+        "tag": "BUTTON",
+        "text": "继续"
+      },
+      {
+        "tag": "BUTTON",
+        "text": "继续"
+      }
+    ]
   },
   "screenshots": {
     "live-desktop.jpg": {
@@ -63,6 +113,7 @@
     "初次 6-8 秒仍显示 Loading plugins；完整 bundle 约 15 秒后加载完成，出现真实工作台导航与工作区内容。",
     "valid plugin bundle route 返回 200；裸 `/plugins/` 404 是没有组合查询参数的预期行为，不作为生产故障。",
     "未将此 live UI 观察接入 composition candidate journal；candidate-bound browser 仍未运行。",
-    "真实 COCKPIT_EXAMPLE_PACKAGE 仍未提供，standalone 页面、读屏、人工键盘焦点和 Windows 高对比度仍未验收。"
+    "真实 COCKPIT_EXAMPLE_PACKAGE 仍未提供，standalone 页面、读屏、人工键盘焦点和 Windows 高对比度仍未验收。",
+    "12 次 Tab 均停留在内测声明的“继续”按钮；这是当前未登录 live shell 的 modal 焦点观察，不代表完整工作台键盘验收。"
   ]
 }

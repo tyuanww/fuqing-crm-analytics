@@ -24,7 +24,7 @@ Loading plugins…
 | mobile 375×812 | 页面加载完成后截图，真实工作台导航可见 |
 | console errors | `[]` |
 | screen reader | `NOT_RUN` |
-| keyboard focus | `NOT_RUN` |
+| keyboard focus | 12 次 Tab 均停留在内测声明“继续”按钮，`PARTIAL_MODAL_FOCUS_TRAP_OBSERVED` |
 | Windows high contrast | `NOT_RUN` |
 | candidate-bound browser | `NOT_RUN` |
 | standalone | `NOT_RUN_REAL_COCKPIT_EXAMPLE_PACKAGE` |
