@@ -23,6 +23,10 @@ Workbench、CRM、Knowledge 作者仓已分别加入正式 `dsh-plugin-pack/v1` 
 
 组合锁和 Workbench 作者证据锁已由 `865cda89` 同步到当前回执。正式包 CI 已关闭作者产物这一项，仍不等于 candidate/journal、服务/目标/terminal/browser/recovery、真实 CRM/WeKnora/UAT、standalone、SDK 分发或 DSH 升级通过；`release_ready=false`。
 
+### 2026-10-12 当前组合输入预检
+
+基于上述三份真实 PR CI formal pack 和组合锁中的六份既有包，`scripts/ci/composition-pack-inputs.mjs` 已在固定 Node 24.19.0 / Python 3.14.4 下生成九包、两 profile 的固定输入回执，命令 exit 0。回执锁摘要为 `be215557…`，原始回执 SHA-256 为 `4a7b9cf9…`，见[预检记录](evidence/shinemage-composition-preflight-20261012.md)及机器摘要。该步骤只关闭包身份和输入准备，profile 仍没有 `service_binding`；宿主、服务/目标、terminal/browser/recovery、candidate/journal、真实业务、standalone、SDK 分发和 DSH 升级继续保持 NOT_RUN/BLOCKED，不能据此生成 candidate 或发布。
+
 以下保留应用／本地提交时点；其中“未推送、新 hosted CI 未跑、工件未上传”不覆盖本节。
 
 ### 2026-10-12 PR #119 合并与精确 Cordis 对接（本地提交时点）

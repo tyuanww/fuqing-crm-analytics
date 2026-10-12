@@ -9,7 +9,7 @@
 
 主仓仍负责 backend、平台合同、profile、组合消费、来源与权限门禁、保留合同守卫和静态扫描。另两组私有数值／查询断言继续读取旧 Workbench，历史 `dsh-plugins/` 因这些用途暂留；本地源码迁移没有证明全面源码退场，也没有改变运行时边界。完整看板仍在 analytics-workbench，shine-board 是能力标记；合成知识服务不能当作真实 WeKnora。
 
-单插件日常变更按自己的作者检查与受影响主仓消费者验证，不重建 DSH、迁移业务数据库或重复 SDK 全量审计。DSH 升级仍是独立固定候选及兼容验收。作者仓、主仓守卫与正式包组合现已精确使用 Cordis `4.0.4`；D/E 五仓无独立 tsc，SDK 正式分发 BLOCKED，产品 PARTIAL、release_ready=false。PR #120 已合入 main，合并后主 CI 与工件摘要见[合并后核验](../hackathon/evidence/shinemage-postmerge-pr120-20261012.md)。当前组合 candidate/journal、目标／真实业务及发布不据此通过；新服务字节需自己的组合验收。当前 backend worker 的结果事务争用修复只影响服务处理，不改变插件归属。
+单插件日常变更按自己的作者检查与受影响主仓消费者验证，不重建 DSH、迁移业务数据库或重复 SDK 全量审计。DSH 升级仍是独立固定候选及兼容验收。作者仓、主仓守卫与正式包组合现已精确使用 Cordis `4.0.4`；D/E 五仓无独立 tsc，SDK 正式分发 BLOCKED，产品 PARTIAL、release_ready=false。PR #120 已合入 main，合并后主 CI 与工件摘要见[合并后核验](../hackathon/evidence/shinemage-postmerge-pr120-20261012.md)。当前九包输入预检已成功生成固定回执，见[组合输入预检](../hackathon/evidence/shinemage-composition-preflight-20261012.md)；candidate/journal、目标／真实业务及发布不据此通过，新服务字节需自己的组合验收。当前 backend worker 的结果事务争用修复只影响服务处理，不改变插件归属。
 
 此前三路径应用时点（保留原记录）：
 

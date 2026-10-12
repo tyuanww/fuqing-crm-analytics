@@ -9,6 +9,8 @@
 
 本轮旧正向 host verifier 夹具只校准为精确 Cordis `4.0.4`，原拒绝和 journal 断言未改。五文件同次命令：`node --test --test-concurrency=1 scripts/release/plugin-host-evidence.test.mjs scripts/crm-calibration/profile.test.mjs scripts/crm-calibration/profile-packs.test.mjs scripts/crm-calibration/composition-inputs.test.mjs scripts/ci/composition-pack-inputs.test.mjs`，68 PASS／0 FAIL／0 SKIP；不与此前四文件 42 或作者测试相加。核心及本机独立审查无发现，外部 Claude/OCR NOT_RUN。
 
+当前三份作者仓 formal pack 已绑定到组合锁后，可用 `node scripts/ci/composition-pack-inputs.mjs --input-dir /absolute/input-dir --output /new/private/composition --python /absolute/python3.14` 生成九包、两 profile 的固定输入。2026-10-12 的实际回执 exit 0，锁摘要 `be215557…`，原始证据见[当前正式组合输入预检](../hackathon/evidence/shinemage-composition-preflight-20261012.md)。该命令只验证输入身份和摘要，不启动宿主或业务服务；当前 profile 无 `service_binding` 时不得继续生成 candidate/journal。
+
 组合 archive 由私有暂存 `8f44bb64` 的[真实上传 CI](https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/38160012202)生成，ID `11710265230`、SHA-256 `fbef740af07cafc5bfd92bcc310bd9427d7e59eaed644114a0632a244df601f4`；18 成员、九包／两 profile 验证通过。三项非敏感变量已更新并回读，专用只读 Secret 已配置且值不入库，有效期至 `2026-10-25T17:31:36Z`。使用实际 archive 或 GitHub ID／digest，禁止用本机自制 ZIP 冒充 CI 工件；所有消费输出须用新独占目录，不复用前两轮失败输出。正常推送须分别满足 backend 与 B0 的依赖锁，不能只核对 Python 版本。原始日志、JUnit 去重、GitHub 合成 checkout 两父提交和工件摘要见[本轮记录](../hackathon/evidence/shinemage-cordis-pr120-ci-delivery-20261012.md)与[机器证据](../hackathon/evidence/shinemage-cordis-pr120-ci-delivery-20261012-validation.json)。
 
 当前两份 profile 均无 `service_binding`；完整服务／目标／terminal／browser／恢复仍需当前组合的新正式输入和回执。绿色 PR/preflight 与 main CI 已证明对应 Git/CI 检查通过，不证明真实业务或 SDK 分发通过；本地 feature 工作树仍与 main 分开，具体状态以 STATUS 和合并后证据为准。下节保留合并前本地应用／提交时点。
