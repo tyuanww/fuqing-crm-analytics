@@ -13,6 +13,8 @@
 
 `100.93.46.46` 已只读核验为 Linux x86_64 / WSL2，Python `3.14.4`、Node `v24.21.0`、zstd `1.5.5` 和临时目录权限满足目标合同。现役 DSH 的陈旧 `supervisor.lock` 在确认空目录且无 supervisor owner 后受保护移除，systemd 随后恢复 `active/running`。当前 service manifest 的精确 13-wheel preflight 返回 `SERVICE_TARGET_PREFLIGHT_PASS`；cold install、source HTTP、terminal、browser、recovery、身份状态和 activation 仍按 candidate 身份单独验收。现役 release source 与隔离 candidate 不同，不能继承旧结果。
 
+当前 composition candidate `125c8e53…` 已在同一目标完成 `source-http-target-observation/v2`：10 个 source HTTP / service recovery 场景 PASS，target receipt SHA `40a59cfe…`，输入 SHA `b1c5de00…`，并追加隔离 journal seq 3。该回执只覆盖 synthetic service archive、保存幂等、SIGKILL durable replay、备份冷恢复和清理；terminal、browser、真实模型/身份/UAT 与 activation 仍需各自 receipt。详见[当前组合 source HTTP 目标验收](../hackathon/evidence/shinemage-composition-source-http-target-20261013.md)。
+
 ## 当前 PR #121 合并后与 Cordis 对接验证（2026-10-12）
 
 本节先记录 PR #121 合并后的当前事实，再保留 PR #120 等合并前门禁作为历史对象。[PR #121](https://github.com/tyuanww/fuqing-crm-analytics/pull/121) 已普通 merge 到 `b47cf9baf328921041dfaff3e289a2af4323e1d0`；[合并后 main CI](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38224409545) SUCCESS。四个适用 job 成功，五个路径矩阵 job SKIPPED；B0 862 PASS／41 subtests PASS，23 warnings 保留。合并提交、feature head、artifact digest 与本地工作树边界见[PR #121 合并后证据](../hackathon/evidence/shinemage-pr121-postmerge-20261012.md)。

@@ -1,0 +1,43 @@
+{
+  "schema_version": "shinemage-composition-source-http-target/v1",
+  "recorded_at": "2026-10-13T00:35:36+08:00",
+  "target": {
+    "address": "100.93.46.46",
+    "role": "authorized-test-and-production",
+    "platform": {
+      "system": "Linux",
+      "machine": "x86_64",
+      "kernel": "6.18.33.2-microsoft-standard-WSL2",
+      "python": "3.14.4",
+      "uid": 65534
+    }
+  },
+  "candidate": {
+    "digest": "125c8e538816835cad212048b8fd0302d98588d704b09de559789df9bf6e6bdb",
+    "service_source_sha": "f9726f682fc0d1d4c6aef6f07e6932c2c600c3d6",
+    "journal_seq": 3,
+    "journal_event": "COMPOSITION_SOURCE_HTTP_TARGET_OBSERVED",
+    "journal_digest": "b4fe1e63132f0911f9905cff4dd74b70e1cf348b5eb6792b13db2ca815a44f35"
+  },
+  "target_observation": {
+    "schema_version": "source-http-target-observation/v2",
+    "status": "PASS",
+    "scope": "actual-wsl2-synthetic-package-http",
+    "target_evidence_sha256": "40a59cfe2b5d5bb852d543d4dc83d7f33e5387d29cb8767727d1748df2009cf3",
+    "target_input_sha256": "b1c5de00bec17cde54ac53ebc9ef8ee273dd678683ea7a470d8e81ee137c4d96",
+    "scenario_count": 10,
+    "source_http": "PASS",
+    "service_recovery": "PASS_WITHIN_SOURCE_DRILL",
+    "terminal": "NOT_RUN",
+    "browser": "NOT_RUN",
+    "dsh_host": "NOT_RUN",
+    "activation": "BLOCKED",
+    "release_ready": false,
+    "cleanup": "OWNED_PROCESSES_AND_INSTALLS_REMOVED"
+  },
+  "boundaries": [
+    "Synthetic service archives and fixture data only.",
+    "No real model, CRM, WeKnora or production business data.",
+    "The current DSH host was not replaced or activated; terminal and browser need separate receipts."
+  ]
+}
