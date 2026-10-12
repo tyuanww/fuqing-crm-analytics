@@ -1,0 +1,61 @@
+{
+  "schema_version": "shinemage-real-business-uat/v1",
+  "recorded_on": "2026-10-13",
+  "target": {
+    "address": "100.93.46.46",
+    "role": "authorized-test-and-production",
+    "public_entry": "https://app.tyuan.chat/",
+    "business_entry": "https://board.tyuan.chat/audience"
+  },
+  "user_session": {
+    "aside_login": "USER_COMPLETED",
+    "board_authentication": "PASS",
+    "workbench_account_label": "未登录",
+    "note": "board 与 workbench 的登录状态由各自入口管理；不把其中一个入口的状态继承给另一个。"
+  },
+  "real_model": {
+    "model": "DeepSeek-V41-Flash",
+    "reasoning": "High",
+    "preset": "知识库问答",
+    "status": "PASS",
+    "writes": "NOT_RUN",
+    "tool_calls_observed": ["weknora_search", "weknora_read_document"],
+    "source_titles_returned": 4
+  },
+  "weknora": {
+    "status": "PASS",
+    "citation_scope": "source_titles_and_passages",
+    "business_data_read": false,
+    "writes": "NOT_RUN"
+  },
+  "crm_board": {
+    "status": "PASS_READ_ONLY",
+    "first_request": "503_RETRIED",
+    "date_range": ["2026-01-01", "2026-10-12"],
+    "channel": "全店",
+    "period": "YTD",
+    "aggregate_cards_loaded": true,
+    "raw_metric_values_recorded": false,
+    "customer_identifiers_recorded": false,
+    "writes": "NOT_RUN"
+  },
+  "crm_agent_tool": {
+    "requested_tool": "query_crm_dashboard_gsv",
+    "status": "BLOCKED_TOOL_NOT_EXPOSED",
+    "tool_invoked": false,
+    "model_reported_missing_from_tool_list": true,
+    "fallback_to_terminal_or_repo": false
+  },
+  "remaining": {
+    "save_or_cockpit_mutation": "NOT_RUN_READ_ONLY_SCOPE",
+    "permission_failure": "NOT_RUN",
+    "session_recovery": "NOT_RUN",
+    "human_business_representative": "NOT_RUN",
+    "release_ready": false
+  },
+  "boundaries": [
+    "只记录入口、工具名、来源标题和聚合页面状态，不记录真实指标数值、客户标识、名单或凭据。",
+    "没有生成或保存驾驶舱，没有修改生产数据，没有激活 candidate。",
+    "模型工具清单缺少 query_crm_dashboard_gsv 时保持 fail-closed，不用仓库读取或终端结果冒充真实 CRM 工具调用。"
+  ]
+}

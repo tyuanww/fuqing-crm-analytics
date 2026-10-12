@@ -55,11 +55,12 @@
     },
     {
       "id": "M2-03",
-      "status": "TARGET_PREFLIGHT_PASS / CANDIDATE_NOT_ATTACHED",
+      "status": "TARGET_PREFLIGHT_PASS / USER_AUTHORIZED_TEST_PROD",
       "evidence": [
-        "production target preflight"
+        "production target preflight",
+        "production target authorization"
       ],
-      "next": "candidate 未附着现役目标"
+      "next": "candidate-bound browser receipt；正式注册/激活另按门禁授权"
     },
     {
       "id": "M2-04",
@@ -78,15 +79,16 @@
         "desktop/tablet/mobile screenshots",
         "keyboard focus partial"
       ],
-      "next": "COCKPIT_EXAMPLE_PACKAGE、candidate-bound browser、screen reader、high contrast"
+      "next": "COCKPIT_EXAMPLE_PACKAGE、candidate-bound browser、screen reader、full keyboard focus、high contrast"
     },
     {
       "id": "M2-06",
-      "status": "NOT_RUN_PRECONDITIONS_MISSING",
+      "status": "PARTIAL_REAL_UAT / CRM_TOOL_NOT_EXPOSED",
       "evidence": [
-        "real business UAT preflight"
+        "real business UAT preflight",
+        "real business UAT run"
       ],
-      "next": "user-led login, real model/CRM/WeKnora permissions and human UAT"
+      "next": "expose query_crm_dashboard_gsv；补保存/权限/恢复/人工 UAT"
     },
     {
       "id": "M2-07",

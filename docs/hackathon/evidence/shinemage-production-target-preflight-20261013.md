@@ -35,4 +35,4 @@
 
 ## 当前边界
 
-M2-03 的目标环境前置已达到 `TARGET_PREFLIGHT_PASS`。M2-04 仍需把 candidate `125c8e53…` 以同一输入和摘要接入目标，再执行 source HTTP → terminal → browser → recovery；本次没有把现役 release 的结果继承给新 candidate，也没有执行生产激活或发布。
+在本记录形成时，M2-03 的目标环境前置已达到 `TARGET_PREFLIGHT_PASS`；当时 M2-04 尚未接入 candidate。随后同一 candidate 已在该目标取得 source HTTP journal seq 3 和 terminal/recovery journal seq 4，browser 仍由独立门禁负责。本记录没有把现役 release 的结果继承给新 candidate，也没有执行生产激活或发布。

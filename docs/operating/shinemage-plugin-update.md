@@ -290,7 +290,7 @@ ZIP 的路径、类型、重复成员和大小检查即使在 Python `-O` 模式
 
 当前 Workbench formal pack 已包含固定运行 peer，并由作者 CI 与主仓 reader 核对通过；九包 terminal 与进程恢复已在授权目标的临时 profile/runtime 中通过，live CLI reload、浏览器和候选服务/目标激活仍未运行，不承诺热插拔、激活原子性或新候选正式回退通过。原失败与详细范围见[当前正式包 CI 收口](../hackathon/evidence/shinemage-formal-plugin-ci-20261012.md)和[当前组合 terminal 目标验收](../hackathon/evidence/shinemage-composition-terminal-target-20261013.md)。
 
-带 `service_binding` 的正式 profile 必须继续使用已有 candidate/service/host 准入链；开发入口返回 `DSH_DEV_SERVICE_PROFILE_USE_CANDIDATE_HARNESS`，不会丢弃服务绑定来启动。当前两份正式 profile 仍没有 `service_binding`，所以主仓正式 profile/journal 未注册；隔离 candidate 的 source HTTP、terminal 和进程恢复已分别追加到 journal seq 3/4，browser 和正式发布链仍保持 `NOT_RUN`。当前证据见[后续组合预检](../hackathon/evidence/shinemage-composition-next-preflight-20261012.md)、[当前组合 source HTTP 目标验收](../hackathon/evidence/shinemage-composition-source-http-target-20261013.md)和[当前组合 terminal 目标验收](../hackathon/evidence/shinemage-composition-terminal-target-20261013.md)。
+带 `service_binding` 的正式 profile 必须继续使用已有 candidate/service/host 准入链；开发入口返回 `DSH_DEV_SERVICE_PROFILE_USE_CANDIDATE_HARNESS`，不会丢弃服务绑定来启动。当前两份主仓正式 profile 仍没有 `service_binding`，所以主仓正式 profile/journal 未注册；隔离 candidate `125c8e53…` 已有 service gate、journal seq 1–4，以及 source HTTP、terminal 和进程恢复 target receipts，browser 和正式发布链仍保持 `NOT_RUN`。当前证据见[后续组合预检](../hackathon/evidence/shinemage-composition-next-preflight-20261012.md)、[当前组合 source HTTP 目标验收](../hackathon/evidence/shinemage-composition-source-http-target-20261013.md)和[当前组合 terminal 目标验收](../hackathon/evidence/shinemage-composition-terminal-target-20261013.md)。
 
 ### 6. 需要候选时建立新的身份链
 
