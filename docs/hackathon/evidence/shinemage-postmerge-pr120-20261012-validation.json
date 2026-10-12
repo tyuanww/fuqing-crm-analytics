@@ -1,0 +1,61 @@
+{
+  "schema": "shinemage-postmerge-pr120/v1",
+  "repository": "tyuanww/fuqing-crm-analytics",
+  "pull_request": {
+    "number": 120,
+    "state": "MERGED",
+    "merge_method": "merge",
+    "head": "8800ebd802b3e04656ccea5391c61617d1924932",
+    "merge_commit": "e04caca7e7e3ce37e990ac820cebd7dda5615585",
+    "parents": [
+      "5943d4be8ee2f0061c57a4afdb980dfae9a8dc88",
+      "8800ebd802b3e04656ccea5391c61617d1924932"
+    ]
+  },
+  "main_ci": {
+    "run_id": 38167688143,
+    "head_sha": "e04caca7e7e3ce37e990ac820cebd7dda5615585",
+    "conclusion": "success",
+    "url": "https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38167688143",
+    "success_jobs": [
+      "changes / changes",
+      "lint",
+      "test",
+      "b0-contract-build",
+      "merge-gate"
+    ],
+    "skipped_jobs": [
+      "dependency-audit",
+      "ground-truth-lint",
+      "docker-smoke",
+      "frontend",
+      "contract-filterbuilder-lint"
+    ]
+  },
+  "test_artifact": {
+    "id": 11712444898,
+    "name": "backend-check-evidence",
+    "size_bytes": 83340,
+    "api_digest": "sha256:f973825eeb8662867e8882f59e7f23d1370e837bbd36ab922b3d80c076b0aeed",
+    "downloaded_sha256": "f973825eeb8662867e8882f59e7f23d1370e837bbd36ab922b3d80c076b0aeed",
+    "junit_files": 12,
+    "unique_testcases": 3315,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 80
+  },
+  "b0": {
+    "passed": 862,
+    "warnings": 23,
+    "subtests_passed": 41,
+    "marker": "B0 main checks passed"
+  },
+  "local_checkout": {
+    "branch": "codex/shinemage-abc-local-candidate",
+    "head": "8800ebd802b3e04656ccea5391c61617d1924932",
+    "index_empty": true,
+    "preserved_untracked": [
+      "security-audit-skill/"
+    ]
+  }
+}
