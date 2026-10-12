@@ -3,9 +3,9 @@
 适用于成果工作树的本地补丁；是否已集成，以该工作树 Git 状态和远端证据为准。授权见 [AGENTS](../../AGENTS.md)。当前施工与缺口看根 [STATUS.md](../../STATUS.md) 和 [TODOS 的 M1 核心交付](../hackathon/TODOS.md#m1-核心交付)。黑客松入口与 [治理实施记录](../hackathon/WORKFLOW-GOVERNANCE-2026-09-06.md) 是历史证据链，不是本轮任务卡。
 
 
-## 当前 PR #120 合并后与 Cordis 对接验证（2026-10-12）
+## 当前 PR #121 合并后与 Cordis 对接验证（2026-10-12）
 
-本节先记录 PR #120 合并后的当前事实，再保留合并前门禁作为历史对象。[PR #120](https://github.com/tyuanww/fuqing-crm-analytics/pull/120) 已普通 merge 到 `e04caca7`；[合并后 main CI](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38167688143) SUCCESS。五个适用 job 成功，五个路径矩阵 job SKIPPED；12 个 JUnit 文件包含 3315 个唯一 testcase，0 failure／0 error／80 skipped；B0 862 PASS／41 subtests PASS，23 warnings 保留。合并提交、父提交、artifact digest 与本地 feature 工作树边界见[合并后证据](../hackathon/evidence/shinemage-postmerge-pr120-20261012.md)。
+本节先记录 PR #121 合并后的当前事实，再保留 PR #120 等合并前门禁作为历史对象。[PR #121](https://github.com/tyuanww/fuqing-crm-analytics/pull/121) 已普通 merge 到 `b47cf9baf328921041dfaff3e289a2af4323e1d0`；[合并后 main CI](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38224409545) SUCCESS。四个适用 job 成功，五个路径矩阵 job SKIPPED；B0 862 PASS／41 subtests PASS，23 warnings 保留。合并提交、feature head、artifact digest 与本地工作树边界见[PR #121 合并后证据](../hackathon/evidence/shinemage-pr121-postmerge-20261012.md)。
 
 本轮旧正向 host verifier 夹具只校准为精确 Cordis `4.0.4`，原拒绝和 journal 断言未改。五文件同次命令：`node --test --test-concurrency=1 scripts/release/plugin-host-evidence.test.mjs scripts/crm-calibration/profile.test.mjs scripts/crm-calibration/profile-packs.test.mjs scripts/crm-calibration/composition-inputs.test.mjs scripts/ci/composition-pack-inputs.test.mjs`，68 PASS／0 FAIL／0 SKIP；不与此前四文件 42 或作者测试相加。核心及本机独立审查无发现，外部 Claude/OCR NOT_RUN。
 

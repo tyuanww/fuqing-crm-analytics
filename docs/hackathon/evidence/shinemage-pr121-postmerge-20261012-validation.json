@@ -1,0 +1,30 @@
+{
+  "schema": "shinemage-pr121-postmerge/v1",
+  "observed_at": "2026-10-12",
+  "pull_request": {
+    "number": 121,
+    "state": "MERGED",
+    "merged_at": "2026-10-12T08:34:36Z",
+    "pre_merge_head_sha": "d46debbd5dc86e354d9b365750b4960865f68a2f",
+    "merge_commit_sha": "b47cf9baf328921041dfaff3e289a2af4323e1d0"
+  },
+  "main_ci": {
+    "run_id": 38224409545,
+    "head_sha": "b47cf9baf328921041dfaff3e289a2af4323e1d0",
+    "conclusion": "success",
+    "success_jobs": ["changes / changes", "lint", "test", "b0-contract-build"],
+    "skipped_jobs": ["dependency-audit", "ground-truth-lint", "docker-smoke", "contract-filterbuilder-lint", "frontend"],
+    "b0_passed": 862,
+    "b0_subtests_passed": 41,
+    "b0_warnings": 23
+  },
+  "admission": {
+    "service_binding": "MISSING",
+    "candidate_journal": "NOT_RUN",
+    "target_terminal_browser_recovery": "NOT_RUN",
+    "real_business_uat": "NOT_RUN",
+    "sdk_distribution": "BLOCKED",
+    "release_ready": false
+  },
+  "protected_untracked": ["security-audit-skill/"]
+}

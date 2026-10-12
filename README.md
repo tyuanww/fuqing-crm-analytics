@@ -4,7 +4,7 @@
 
 > 最近生产记录（[STATUS](./STATUS.md) 的 2026-10-09 现场记录）：产品 VERSION 见 STATUS，DSH `0.1.7-rc.2`，固定 upstream `477b4f42`；杭州 current 以 STATUS 的带日期现场记录为准，HANDOVER 只保留历史入口快照。该记录中的本地 A/B/C 候选没有部署，新的插件候选未激活。产品仍 PARTIAL；局部合成验证不能替代真实模型、完整业务 UAT、生产准入及回退证据。后续发布必须从 clean reviewed commit 生成新的 immutable artifact，禁止 `git pull` 或现场编译。
 
-> 主仓收口（2026-10-11）：PR [#111](https://github.com/tyuanww/fuqing-crm-analytics/pull/111)–[#118](https://github.com/tyuanww/fuqing-crm-analytics/pull/118) 均已合并；当前远端 `main` 为 `4859d136`，完整 SHA、合并时间与主线 CI 见[最新 post-merge 事实记录](./docs/hackathon/evidence/shinemage-remote-repository-postmerge-r4-20261011.md)。主仓现在承担 DSH pin、profile、跨插件合同、组合验证和交付文档；CRM、知识、看板和其他业务能力由独立插件仓维护。单插件的实际更新步骤见[插件更新指南](./docs/operating/shinemage-plugin-update.md)，职责、清理和 DSH 升级边界见[维护、清理与升级手册](./docs/operating/shinemage-maintenance-and-cleanup.md)。SDK 分发仍 BLOCKED，产品仍 PARTIAL，未授权的生产/发布门禁仍保持未执行。
+> 主仓收口（2026-10-12）：PR [#111](https://github.com/tyuanww/fuqing-crm-analytics/pull/111)–[#121](https://github.com/tyuanww/fuqing-crm-analytics/pull/121) 均已合并；当前远端 `main` 为 `b47cf9ba`，完整 SHA、合并时间与主线 CI 见[PR #121 合并后事实记录](./docs/hackathon/evidence/shinemage-pr121-postmerge-20261012.md)。主仓现在承担 DSH pin、profile、跨插件合同、组合验证和交付文档；CRM、知识、看板和其他业务能力由独立插件仓维护。单插件的实际更新步骤见[插件更新指南](./docs/operating/shinemage-plugin-update.md)，职责、清理和 DSH 升级边界见[维护、清理与升级手册](./docs/operating/shinemage-maintenance-and-cleanup.md)。SDK 分发仍 BLOCKED，产品仍 PARTIAL，未授权的生产/发布门禁仍保持未执行。
 
 > A/B/C 集成记录（2026-10-08）是历史证据：单插件更新与取消、固定宿主进程级恢复、HTML headed 验收和 SDK 信任盘查见[本轮集成验收](./docs/hackathon/evidence/shinemage-abc-integration-20261008.md)。它不替代当前主仓合并状态，也不代表新的 Release。
 

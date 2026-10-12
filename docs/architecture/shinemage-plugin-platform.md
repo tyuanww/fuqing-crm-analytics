@@ -3,13 +3,13 @@
 本设计落实[已批准的拆分计划](../plans/shinemage-plugin-platform-split.md)，不是重新选型。目标是官方 DSH 底座、独立 CRM/知识库服务、各自版本化的插件和一个组合 profile。首批插件已经形成独立远程仓，当前远程清单见[远程仓盘查](../hackathon/evidence/shinemage-remote-repository-inventory-20261010.md)，主线短 SHA 见 STATUS，完整 SHA、合并时间和 CI 事实见[最新 post-merge 记录](../hackathon/evidence/shinemage-remote-repository-postmerge-r4-20261011.md)；主仓继续保留平台合同、组合验证、历史 `dsh-plugins/` 和候选账本，部分历史副本已经按授权清理，剩余副本、正式物理分仓、正式 `dsh-plugin-pack/v1`/`dsh-plugin-candidate/v1` 分发与生产切换仍按各自门禁执行。普通插件更新的具体操作见[插件更新指南](../operating/shinemage-plugin-update.md)。
 
 
-## 当前维护边界（2026-10-12 PR #120 合并后）
+## 当前维护边界（2026-10-12 PR #121 合并后）
 
-本轮实现与测试迁移已分组提交并经 PR #120 普通 merge，合并后 main CI 见[核验记录](../hackathon/evidence/shinemage-postmerge-pr120-20261012.md)。九个插件各自维护源码／版本／测试；board-components 仍是独立领域库，不是第十个插件。主仓装配锁绑定 Workbench `3030e3f`、CRM `dac0539`、Knowledge `f623c22` 及其真实 PR CI 产出的 `dsh-plugin-pack/v1` 回执；默认开发／preflight 装配消费固定包，公开合同阶段核对封存作者导出，领域与私有 core 覆盖核对作者来源和实际 CI。当前回执与 artifact 摘要见[正式包 CI 收口](../hackathon/evidence/shinemage-formal-plugin-ci-20261012.md)。
+本轮实现与测试迁移已分组提交并经 PR #121 普通 merge，合并后 main CI 见[核验记录](../hackathon/evidence/shinemage-pr121-postmerge-20261012.md)。九个插件各自维护源码／版本／测试；board-components 仍是独立领域库，不是第十个插件。主仓装配锁绑定 Workbench `3030e3f`、CRM `dac0539`、Knowledge `f623c22` 及其真实 PR CI 产出的 `dsh-plugin-pack/v1` 回执；默认开发／preflight 装配消费固定包，公开合同阶段核对封存作者导出，领域与私有 core 覆盖核对作者来源和实际 CI。当前回执与 artifact 摘要见[正式包 CI 收口](../hackathon/evidence/shinemage-formal-plugin-ci-20261012.md)。
 
 主仓仍负责 backend、平台合同、profile、组合消费、来源与权限门禁、保留合同守卫和静态扫描。另两组私有数值／查询断言继续读取旧 Workbench，历史 `dsh-plugins/` 因这些用途暂留；本地源码迁移没有证明全面源码退场，也没有改变运行时边界。完整看板仍在 analytics-workbench，shine-board 是能力标记；合成知识服务不能当作真实 WeKnora。
 
-单插件日常变更按自己的作者检查与受影响主仓消费者验证，不重建 DSH、迁移业务数据库或重复 SDK 全量审计。DSH 升级仍是独立固定候选及兼容验收。作者仓、主仓守卫与正式包组合现已精确使用 Cordis `4.0.4`；D/E 五仓无独立 tsc，SDK 正式分发 BLOCKED，产品 PARTIAL、release_ready=false。PR #120 已合入 main，合并后主 CI 与工件摘要见[合并后核验](../hackathon/evidence/shinemage-postmerge-pr120-20261012.md)。当前九包输入预检已成功生成固定回执，见[组合输入预检](../hackathon/evidence/shinemage-composition-preflight-20261012.md)；candidate/journal、目标／真实业务及发布不据此通过，新服务字节需自己的组合验收。当前 backend worker 的结果事务争用修复只影响服务处理，不改变插件归属。
+单插件日常变更按自己的作者检查与受影响主仓消费者验证，不重建 DSH、迁移业务数据库或重复 SDK 全量审计。DSH 升级仍是独立固定候选及兼容验收。作者仓、主仓守卫与正式包组合现已精确使用 Cordis `4.0.4`；D/E 五仓无独立 tsc，SDK 正式分发 BLOCKED，产品 PARTIAL、release_ready=false。PR #121 已合入 main，合并后主 CI 与工件摘要见[合并后核验](../hackathon/evidence/shinemage-pr121-postmerge-20261012.md)。当前九包输入预检已成功生成固定回执，见[组合输入预检](../hackathon/evidence/shinemage-composition-preflight-20261012.md)；candidate/journal、目标／真实业务及发布不据此通过，新服务字节需自己的组合验收。当前 backend worker 的结果事务争用修复只影响服务处理，不改变插件归属。
 
 此前三路径应用时点（保留原记录）：
 

@@ -7,8 +7,8 @@
 | 项 | 当前状态与证据 |
 |---|---|
 | 产品与固定底座 | VERSION `0.20.0.0`；DSH `0.1.7-rc.2` / upstream `477b4f42`，未改上游。产品 PARTIAL，`release_ready=false`；SDK 分发按适用门禁 BLOCKED。 |
-| 公开主线 | PR #120 已普通 merge；远端 `main` 为 `e04caca7`，其[实际 main CI](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38167688143) SUCCESS。五个适用 job 成功，五个路径矩阵 job SKIPPED，具体结果见[合并后核验](docs/hackathon/evidence/shinemage-postmerge-pr120-20261012.md)。 |
-| 本地交付与 PR | PR #119、#120 已合并，PR #121 当前 OPEN，最近一次完整 CI run `38220822016` SUCCESS；本机仍在 `codex/shinemage-abc-local-candidate`，最近一次正式 CI 文档快照为 `a0772679`，当前本地 HEAD 以 Git 实查为准，没有自动切到 main。合并提交、父提交、工件摘要和保留的 `security-audit-skill/` 见[合并后核验](docs/hackathon/evidence/shinemage-postmerge-pr120-20261012.md)。三个作者 PR #1 当前 head 为 Workbench `3030e3f`、CRM `dac0539`、Knowledge `f623c22`，正式包 CI 均成功，仍未合并。PR #121 的组合 artifact 与两轮成功 CI 见[正式组合交付](docs/hackathon/evidence/shinemage-pr121-formal-pack-delivery-20261012.md)。 |
+| 公开主线 | PR #121 已普通 merge；远端 `main` 为 `b47cf9ba`，其[实际 main CI](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38224409545) SUCCESS。四个适用 job 成功，五个路径矩阵 job SKIPPED，具体结果见[PR #121 合并后核验](docs/hackathon/evidence/shinemage-pr121-postmerge-20261012.md)。 |
+| 本地交付与 PR | PR #119、#120、#121 已合并；PR #121 合并前 feature head 为 `d46debbd`，本机仍在 `codex/shinemage-abc-local-candidate`，当前本地 HEAD 以 Git 实查为准，没有自动切到 main。合并提交、CI、工件摘要和保留的 `security-audit-skill/` 见[PR #121 合并后核验](docs/hackathon/evidence/shinemage-pr121-postmerge-20261012.md)。三个作者 PR #1 当前 head 为 Workbench `3030e3f`、CRM `dac0539`、Knowledge `f623c22`，正式包 CI 均成功，仍未合并。PR #121 的组合 artifact 与两轮成功 CI 见[正式组合交付](docs/hackathon/evidence/shinemage-pr121-formal-pack-delivery-20261012.md)。 |
 | 独立作者仓 | 九个插件与 board-components 领域库分别维护源码、版本和 CI；完整看板在 analytics-workbench，shine-board 只是能力标记；合成知识服务不是真实 WeKnora。作者覆盖按[验证入口](docs/operating/verification.md)及固定作者证据锁记账。 |
 | 当前包绑定 | Workbench `3030e3f` / `90000400…`、CRM `dac0539` / `4ee58ec3…`、Knowledge `f623c22` / `feb1187c…` 已写入组合锁，并由真实 PR CI 产出 `dsh-plugin-pack/v1` 回执；其余六包及两份现有 profile 不变。回执与 source_sha 是新身份，不继承旧 candidate/journal 或宿主验收。见[当前正式包 CI 收口](docs/hackathon/evidence/shinemage-formal-plugin-ci-20261012.md)。 |
 | 当前正式包 CI | 三个作者仓的 full CI 均 SUCCESS：Workbench run `38204944592`、CRM `38204944092`、Knowledge `38205510926`；formal artifact 下载后由主仓 `readPluginPack` 复核，`source_dirty=false`、`activation=NOT_RUN`。Workbench 作者 core 为 155 files / 1086 PASS / 0 FAIL / 0 SKIP；browser/standalone 仍 `NOT_RUN_BY_THIS_COMMAND`。 |
@@ -26,7 +26,7 @@
 
 1. PR #119 合并和实际 main CI 已完成。作者 peer 修复各自保留 fix 提交，两个作者 PR #1 仍开放，不自动合并。
 2. 精确 Cordis 守卫、新正式包组合锁和两包未连接宿主验证已完成；三个作者仓现在有真实 `dsh-plugin-pack/v1` CI 产出，主仓锁已绑定当前 source/manifest 摘要。两笔原提交、祖先同步及追加夹具修复已交付 PR #120，新汇总 artifact 和 `bd96af9a` 的 CI／preflight 成功。本轮只接续文档，不重跑未变化的业务检查。
-3. PR #120 已按普通 merge 合入 `e04caca7`，实际 main CI `38167688143` 已核对成功；合并后证据已归档。commit 前 /review、正常 push 钩子继续保留，不改 VERSION，不自动发布或部署。
+3. PR #120、#121 已按普通 merge 合入 main；PR #121 的合并提交为 `b47cf9ba`，实际 main CI `38224409545` 已核对成功，合并后证据已归档。commit 前 /review、正常 push 钩子继续保留，不改 VERSION，不自动发布或部署。
 4. 当前组合正式服务/目标/terminal/browser/恢复、真实 CRM/WeKnora/模型/UAT、standalone、SDK 分发和独立 DSH 升级沿原 stop/go 分别收尾，不扩展功能，不继承旧 candidate。
 
 ## 维护入口与边界

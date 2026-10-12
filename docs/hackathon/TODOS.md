@@ -7,6 +7,12 @@
 2026-09-13 用户确认“核心版本优先交付、扩库完善后置”。目标是问数后 AI 优先使用定制组件自由组板，板内按选定范围修改；首批六类不是最终上限。M1／产品仍 PARTIAL；原全量 App Goal 保持 PAUSED。本节承接原本地施工记录，不把旧冻结实现反推成最终需求。
 
 
+### 2026-10-12 PR #121 合并后 main CI 与正式组合缺口
+
+PR [#121](https://github.com/tyuanww/fuqing-crm-analytics/pull/121) 已普通 merge，合并提交为 `b47cf9baf328921041dfaff3e289a2af4323e1d0`；实际 [main CI 38224409545](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38224409545) SUCCESS。四个适用 job 成功，五个路径矩阵 job SKIPPED；B0 为 862 PASS／41 subtests PASS／23 warnings。合并后证据见[PR #121 合并后核验](evidence/shinemage-pr121-postmerge-20261012.md)。feature 工作树仍停在 `codex/shinemage-abc-local-candidate`，不会自动切换到 main。
+
+当前九包的两份 profile 没有 `service_binding`，还没有对应新 candidate、服务／platform／terminal／browser／恢复链与 journal。真实 CRM／WeKnora／模型／UAT、standalone、SDK 分发及独立 DSH 升级保持原 stop/go，T1/T15/T19/T21 不勾完，PARTIAL、`release_ready=false`。
+
 ### 2026-10-12 PR #120 合并后 main CI 与正式组合缺口
 
 本节记录 [PR #120](https://github.com/tyuanww/fuqing-crm-analytics/pull/120) 已普通 merge 后的事实：合并提交为 `e04caca7`，父提交为 `5943d4be` 与 `8800ebd8`，远端 main 已完成新的实际 CI。合并后证据与工件摘要见[核验记录](evidence/shinemage-postmerge-pr120-20261012.md)。feature 工作树仍停在 `codex/shinemage-abc-local-candidate`，不会自动切换到 main。
