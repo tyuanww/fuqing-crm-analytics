@@ -26,7 +26,7 @@
 | M2-03 | WSL2 目标（当前按测试+生产授权） | `TARGET_PREFLIGHT_PASS / CANDIDATE_NOT_ATTACHED` | 当前 candidate 仍需接入已授权目标；后续云服务器迁移另行 | Linux x86_64 / WSL2、Python 3.14.4、Node/zstd、权限和精确 13-wheel preflight 已通过；现役服务 stale lock 已受保护修复 | `docs(acceptance): record authorized production target preflight` |
 | M2-04 | source HTTP → terminal → browser → recovery | `TERMINAL_PASS / BROWSER_NOT_RUN` | M2-01、M2-02、M2-03 | 同一新 candidate 在同一目标完成四段链路；每段 receipt 绑定 candidate，重试幂等、失败可恢复、临时资源回收 | source 子阶段见 `docs(acceptance): record composition source target`；terminal 子阶段见 `docs(acceptance): record composition terminal target`；browser 仍待真实页面证据 |
 | M2-05 | 真实页面与浏览器验收 | `PARTIAL_LIVE_BROWSER_PASS / CANDIDATE_BROWSER_STANDALONE_NOT_RUN` | 真实 `COCKPIT_EXAMPLE_PACKAGE` 和可用目标 | headed 桌面、移动视口、读屏、键盘焦点、高对比度和 standalone 页面均有真实证据 | live 入口 bundle 约 15 秒后加载并完成三种 viewport 截图；candidate-bound browser、读屏、键盘焦点、高对比度和 standalone 仍需 `docs(acceptance): record browser and standalone evidence` |
-| M2-06 | 真实模型/CRM/WeKnora/UAT | `NOT_RUN` | 真实环境授权、账号权限和业务验收窗口 | 查询、引用、保存、驾驶舱、权限失败、恢复和人工 UAT 均记录实际对象与边界 | `docs(acceptance): record real business UAT` |
+| M2-06 | 真实模型/CRM/WeKnora/UAT | `NOT_RUN_PRECONDITIONS_MISSING` | 真实环境授权、账号权限和业务验收窗口 | 查询、引用、保存、驾驶舱、权限失败、恢复和人工 UAT 均记录实际对象与边界 | `docs(acceptance): record real business UAT` |
 | M2-07 | SDK 供应链门禁 | `BLOCKED` | 最终候选 artifact 和发布者身份 | SBOM、发布者身份、最终签名、验签、撤销验证、干净机器安装和回退均通过 | 供应链改动单独走 OCR；`chore(supply-chain): close distribution gates` |
 | M2-08 | release / activation / canary / rollback | `NOT_RUN` | M2-04 至 M2-07 关闭，且取得发布授权 | immutable artifact、CI、release review、目标接收、生产激活、canary 和 rollback 全部有同一版本证据 | `docs(release): record candidate release gate`；不自动部署 |
 | M2-09 | 独立 DSH 升级候选 | `DEFERRED` | 新官方 DSH 版本/commit 和隔离 runtime | 新旧 runtime、SDK、插件适配、兼容矩阵、恢复矩阵和回退条件齐全；授权后再切换 | `feat(toolchain): prepare dsh upgrade candidate`；不混入当前发布候选 |
@@ -47,6 +47,8 @@ source HTTP 子阶段随后已在同一目标用当前 candidate 完成 10/10 PA
 随后在同一目标使用九包组合 candidate 完成 terminal drill：roster/工具加载、合成原生对话、受控重启和进程丢失后的 durable session 恢复共 5/5 PASS，组合 journal seq 4 已追加。该回执只覆盖 synthetic model 与临时 profile/runtime；browser、真实模型/CRM/WeKnora/UAT、供应链、activation、canary、rollback 和 release gate 仍未关闭。详见[当前组合 terminal 目标验收](evidence/shinemage-composition-terminal-target-20261013.md)。
 
 随后对用户授权的真实入口 `https://app.tyuan.chat/` 做了只读 headed browser 观察：组合 bundle 约 15 秒后加载完成，桌面、平板和移动 viewport 均显示真实工作台导航与工作区内容，控制台错误为空。该结果只关闭 live browser 子项，不接入 candidate journal，也不替代 standalone、读屏、键盘焦点、高对比度或 candidate-bound browser 验收。详见[授权生产入口 live browser 观察](evidence/shinemage-live-browser-20261013.md)。
+
+随后对 DSH、page、CRM 和 WeKnora loopback 入口做了只读状态码前置核验：认证入口返回 401，page 根路径返回 404，WeKnora Web shell 返回 200；没有调用真实模型、读取 CRM/WeKnora 数据或执行 UAT。详见[真实业务 UAT 前置核验](evidence/shinemage-real-business-uat-preflight-20261013.md)。
 
 
 2026-09-13 用户确认“核心版本优先交付、扩库完善后置”。目标是问数后 AI 优先使用定制组件自由组板，板内按选定范围修改；首批六类不是最终上限。M1／产品仍 PARTIAL；原全量 App Goal 保持 PAUSED。本节承接原本地施工记录，不把旧冻结实现反推成最终需求。
