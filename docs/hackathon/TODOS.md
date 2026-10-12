@@ -24,7 +24,7 @@
 | M2-01 | 九包组合 candidate 合同 | `ISOLATED_CANDIDATE_PREPARED / MAIN_NOT_REGISTERED` | 主仓正式 profile/journal 注册仍需单独授权和当前准入链 | `dsh-composition-candidate/v1`、CLI、两 profile/九 pack 摘要绑定和 fail-closed 已通过；隔离 candidate digest 与 journal seq 2 已留证 | `feat(release): add composition candidate contract` + `fix(release): import composition writer path helper` |
 | M2-02 | 服务绑定与兼容回执 | `ISOLATED_EVIDENCE_BOUND / MAIN_PROFILE_UNBOUND` | 主仓两份 profile 仍未写入 service binding | 隔离组合已绑定 `analytics-first-purchase` service gate、source SHA 和兼容回执；主仓正式 profile/journal 不变 | 后续取得授权后单独提交主仓接线 |
 | M2-03 | WSL2 目标（当前按测试+生产授权） | `TARGET_PREFLIGHT_PASS / CANDIDATE_NOT_ATTACHED` | 当前 candidate 仍需接入已授权目标；后续云服务器迁移另行 | Linux x86_64 / WSL2、Python 3.14.4、Node/zstd、权限和精确 13-wheel preflight 已通过；现役服务 stale lock 已受保护修复 | `docs(acceptance): record authorized production target preflight` |
-| M2-04 | source HTTP → terminal → browser → recovery | `PARTIAL_SOURCE_HTTP_PASS / TERMINAL_BROWSER_NOT_RUN` | M2-01、M2-02、M2-03 | 同一新 candidate 在同一目标完成四段链路；每段 receipt 绑定 candidate，重试幂等、失败可恢复、临时资源回收 | source 子阶段见 `docs(acceptance): record composition source target`; 后续阶段独立提交 |
+| M2-04 | source HTTP → terminal → browser → recovery | `TERMINAL_PASS / BROWSER_NOT_RUN` | M2-01、M2-02、M2-03 | 同一新 candidate 在同一目标完成四段链路；每段 receipt 绑定 candidate，重试幂等、失败可恢复、临时资源回收 | source 子阶段见 `docs(acceptance): record composition source target`；terminal 子阶段见 `docs(acceptance): record composition terminal target`；browser 仍待真实页面证据 |
 | M2-05 | 真实页面与浏览器验收 | `NOT_RUN` | 真实 `COCKPIT_EXAMPLE_PACKAGE` 和可用目标 | headed 桌面、移动视口、读屏、键盘焦点、高对比度和 standalone 页面均有真实证据 | `docs(acceptance): record browser and standalone evidence` |
 | M2-06 | 真实模型/CRM/WeKnora/UAT | `NOT_RUN` | 真实环境授权、账号权限和业务验收窗口 | 查询、引用、保存、驾驶舱、权限失败、恢复和人工 UAT 均记录实际对象与边界 | `docs(acceptance): record real business UAT` |
 | M2-07 | SDK 供应链门禁 | `BLOCKED` | 最终候选 artifact 和发布者身份 | SBOM、发布者身份、最终签名、验签、撤销验证、干净机器安装和回退均通过 | 供应链改动单独走 OCR；`chore(supply-chain): close distribution gates` |
@@ -42,7 +42,9 @@
 
 用户明确授权杭州生产入口同时承担当前测试与生产目标，后续再迁移云服务器。目标前置回执 `SERVICE_TARGET_PREFLIGHT_PASS`，现役服务陈旧 supervisor lock 已在无 owner 条件下受保护清理并恢复 `active/running`；在目标前置阶段，当前 composition candidate 尚未接入，terminal、browser、recovery 和 activation 保持 `NOT_RUN/BLOCKED`。详见[授权生产目标前置预检](evidence/shinemage-production-target-preflight-20261013.md)。
 
-source HTTP 子阶段随后已在同一目标用当前 candidate 完成 10/10 PASS，服务内 SIGKILL/冷恢复、输入和临时资源清理均有 candidate-bound receipt，隔离 journal seq 3；terminal/browser 仍未运行。详见[当前组合 source HTTP 目标验收](evidence/shinemage-composition-source-http-target-20261013.md)。
+source HTTP 子阶段随后已在同一目标用当前 candidate 完成 10/10 PASS，服务内 SIGKILL/冷恢复、输入和临时资源清理均有 candidate-bound receipt，隔离 journal seq 3；该回执本身不覆盖 terminal/browser。详见[当前组合 source HTTP 目标验收](evidence/shinemage-composition-source-http-target-20261013.md)。
+
+随后在同一目标使用九包组合 candidate 完成 terminal drill：roster/工具加载、合成原生对话、受控重启和进程丢失后的 durable session 恢复共 5/5 PASS，组合 journal seq 4 已追加。该回执只覆盖 synthetic model 与临时 profile/runtime；browser、真实模型/CRM/WeKnora/UAT、供应链、activation、canary、rollback 和 release gate 仍未关闭。详见[当前组合 terminal 目标验收](evidence/shinemage-composition-terminal-target-20261013.md)。
 
 
 2026-09-13 用户确认“核心版本优先交付、扩库完善后置”。目标是问数后 AI 优先使用定制组件自由组板，板内按选定范围修改；首批六类不是最终上限。M1／产品仍 PARTIAL；原全量 App Goal 保持 PAUSED。本节承接原本地施工记录，不把旧冻结实现反推成最终需求。

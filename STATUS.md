@@ -2,7 +2,7 @@
 
 > 当前短表；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。历史 PASS、NOT_RUN 与版本只属于原验收对象，本页是当前运行与交付边界的 SSOT。
 
-## 当前快照（2026-10-12）
+## 当前快照（2026-10-13）
 
 | 项 | 当前状态与证据 |
 |---|---|
@@ -12,13 +12,13 @@
 | 独立作者仓 | 九个插件与 board-components 领域库分别维护源码、版本和 CI；完整看板在 analytics-workbench，shine-board 只是能力标记；合成知识服务不是真实 WeKnora。作者覆盖按[验证入口](docs/operating/verification.md)及固定作者证据锁记账。 |
 | 当前包绑定 | Workbench `3030e3f` / `90000400…`、CRM `dac0539` / `4ee58ec3…`、Knowledge `f623c22` / `feb1187c…` 已写入组合锁，并由真实 PR CI 产出 `dsh-plugin-pack/v1` 回执；其余六包及两份现有 profile 不变。回执与 source_sha 是新身份，不继承旧 candidate/journal 或宿主验收。见[当前正式包 CI 收口](docs/hackathon/evidence/shinemage-formal-plugin-ci-20261012.md)。 |
 | 当前正式包 CI | 三个作者仓的 full CI 均 SUCCESS：Workbench run `38204944592`、CRM `38204944092`、Knowledge `38205510926`；formal artifact 下载后由主仓 `readPluginPack` 复核，`source_dirty=false`、`activation=NOT_RUN`。Workbench 作者 core 为 155 files / 1086 PASS / 0 FAIL / 0 SKIP；browser/standalone 仍 `NOT_RUN_BY_THIS_COMMAND`。 |
-| 当前组合输入预检 | 九份正式包、两份固定 profile 和组合锁已由 `composition-pack-inputs.mjs` 生成固定输入回执，exit 0；锁摘要 `be215557…`。九包组合 candidate 合同与 `pnpm dsh plugin composition-candidate` 入口已加入并通过 68 项相关回归；隔离目录已用 service gate 生成 candidate digest `125c8e53…`、journal seq 2，page profile 快照带绑定且摘要与写出字节一致，但主仓 profile/journal 未注册，PR #121 attempt 2 的 hosted B0 已 SUCCESS，宿主与正式准入仍为 `NOT_RUN`。详情见[当前正式组合输入预检](docs/hackathon/evidence/shinemage-composition-preflight-20261012.md)、[后续组合预检](docs/hackathon/evidence/shinemage-composition-next-preflight-20261012.md)、[组合 candidate 合同证据](docs/hackathon/evidence/shinemage-composition-candidate-contract-20261012.md)、[隔离组合 candidate 接线证据](docs/hackathon/evidence/shinemage-composition-candidate-prepared-20261012.md)和[PR #121 正式组合交付](docs/hackathon/evidence/shinemage-pr121-formal-pack-delivery-20261012.md)。 |
+| 当前组合输入预检 | 九份正式包、两份固定 profile 和组合锁已由 `composition-pack-inputs.mjs` 生成固定输入回执，exit 0；锁摘要 `be215557…`。九包组合 candidate 合同与 `pnpm dsh plugin composition-candidate` 入口已加入并通过 68 项相关回归；隔离目录已用 service gate 生成 candidate digest `125c8e53…`、journal seq 2，page profile 快照带绑定且摘要与写出字节一致，但主仓 profile/journal 未注册。PR #121 attempt 2 的 hosted B0 已 SUCCESS；source HTTP、terminal 和进程恢复已在授权目标分别取得 candidate-bound receipt，browser 与正式准入仍未关闭。详情见[当前正式组合输入预检](docs/hackathon/evidence/shinemage-composition-preflight-20261012.md)、[后续组合预检](docs/hackathon/evidence/shinemage-composition-next-preflight-20261012.md)、[组合 candidate 合同证据](docs/hackathon/evidence/shinemage-composition-candidate-contract-20261012.md)、[隔离组合 candidate 接线证据](docs/hackathon/evidence/shinemage-composition-candidate-prepared-20261012.md)和[PR #121 正式组合交付](docs/hackathon/evidence/shinemage-pr121-formal-pack-delivery-20261012.md)。 |
 | 主仓职责 | profile、公共合同、组合消费及 release 包装配使用固定正式包/公开合同/作者 CI 证据；backend、平台合同、静态边界、保留源码守卫和两组旧 Workbench 私有断言仍在主仓，旧 `dsh-plugins/` 不删。主仓是集成仓，尚不是只有 DSH 的仓库。 |
 | 已完成验证 | PR #120 合并后的[实际 main CI](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38167688143) SUCCESS：12 JUnit／3315 testcase，0 failure／0 error／80 skipped；B0 862 PASS / 41 subtests PASS，23 warnings 保留。工件下载摘要与 API digest 一致，见[合并后核验](docs/hackathon/evidence/shinemage-postmerge-pr120-20261012-validation.json)。平台与历史数字不相加；当前两包既有三进程／18 项未连接宿主断言仍单列。 |
 | 本次推送检查 | 正常 push 第三轮 exit 0，原后端／工具／B0 钩子通过；两轮失败留存。正向 host verifier 夹具只改精确 peer，五文件同次 68 PASS / 0 FAIL / 0 SKIP，核心与本机独立审查无发现，外部 Claude/OCR NOT_RUN。PR #120 六个适用 checks SUCCESS、五个路径未选 job SKIPPED；[rc2 preflight](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38162446076)成功，仅生成 head 绑定 CI 工件，不是 Release 或生产准入。 |
 | 新 hosted CI 输入 | 暂存提交 `e9bfc776` 的[上传 CI](https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/38218001878) SUCCESS。当前 artifact `11732716479`／704587 字节／digest `552aa4d1…`，下载与 receiver 核对 18 成员、九包／两 profile；三项非敏感变量已更新并回读，专用只读 Secret 已配置，值不入库。输入对应 PR #121；有效期至 `2026-10-26T07:29:17Z`，到期须核验新真实工件。 |
 | 兼容门禁 | CRM/Knowledge 作者仓与本地主仓消费守卫均精确使用 Cordis `4.0.4`，拒绝旧 `4.0.2`、范围及其他 patch。当前正式两包经官方 CLI 在隔离 profile 注册，开启／卸载到原生壳／重装恢复三阶段 exit 0；实际 peer 为 dsh-tools `0.1.7-rc.2`、Cordis `4.0.4`。复用官方 npm 依赖的同字节副本，不是新冷安装或完整九包组合验收；此前启动与记录器失败保留。D/E 五仓无独立 tsc 沿用作者边界记录，本轮没有重验这五仓。见[本轮范围](docs/hackathon/evidence/shinemage-cordis-formal-cutover-proposal-20261012.md)。 |
-| 真实验收 | 主仓两份 profile 仍无 `service_binding`。隔离任务目录已用当前九包组合输入与既有服务绑定准备 candidate `125c8e53…`；page profile 快照带绑定，但仍未注册到主仓正式 profile/journal。经用户授权，`100.93.46.46` 已完成 Linux x86_64 / WSL2、Python 3.14.4 与 13 个精确 wheel 的目标前置预检；陈旧 supervisor lock 已在无 owner 条件下受保护移除，现役 DSH 恢复 `active/running`。当前 candidate 的 source HTTP / service recovery 已在同一目标完成 10 场景 PASS，并追加隔离 journal seq 3；现役 DSH source `fcbd1324…` 与 candidate 不同，terminal/browser 仍未运行。真实模型／CRM／WeKnora／UAT、standalone 页面包和正式分发未关闭；证据见[授权生产目标前置预检](docs/hackathon/evidence/shinemage-production-target-preflight-20261013.md)和[当前组合 source HTTP 目标验收](docs/hackathon/evidence/shinemage-composition-source-http-target-20261013.md)。 |
+| 真实验收 | 主仓两份 profile 仍无 `service_binding`。隔离任务目录已用当前九包组合输入与既有服务绑定准备 candidate `125c8e53…`；page profile 快照带绑定，但仍未注册到主仓正式 profile/journal。经用户授权，`100.93.46.46` 已完成 Linux x86_64 / WSL2、Python 3.14.4 与 13 个精确 wheel 的目标前置预检；陈旧 supervisor lock 已在无 owner 条件下受保护移除，现役 DSH 恢复 `active/running`。当前 candidate 的 source HTTP / service recovery 已在同一目标完成 10 场景 PASS 并追加隔离 journal seq 3；九包 terminal / 进程丢失恢复再完成 5 场景 PASS 并追加 seq 4。现役 DSH source `fcbd1324…` 与 candidate 不同，browser 仍未运行。真实模型／CRM／WeKnora／UAT、standalone 页面包和正式分发未关闭；证据见[授权生产目标前置预检](docs/hackathon/evidence/shinemage-production-target-preflight-20261013.md)、[当前组合 source HTTP 目标验收](docs/hackathon/evidence/shinemage-composition-source-http-target-20261013.md)和[当前组合 terminal 目标验收](docs/hackathon/evidence/shinemage-composition-terminal-target-20261013.md)。 |
 | 生产与清理 | 杭州 `current` 的带日期恢复/热补丁事实见[2026-10-09 现场记录](docs/operating/hangzhou-production-hotfix-20261009.md)，本地候选未部署。11 份候选目录及三个远端分支已按授权清理，归档与摘要保留，见[清理记录](docs/hackathon/evidence/shinemage-local-cleanup-20261010.md)。 |
 | 任务外内容 | `security-audit-skill/` 不纳入提交或清理；任务范围干净不等于整仓无未提交内容。92 份历史证据同字节保留。 |
 
@@ -27,7 +27,7 @@
 1. PR #119、#120、#121 与十个独立作者仓 PR #1 均已合并并核对各自 CI。作者 peer 修复各自保留 fix 提交。
 2. 精确 Cordis 守卫、新正式包组合锁和两包未连接宿主验证已完成；三个作者仓现在有真实 `dsh-plugin-pack/v1` CI 产出，主仓锁已绑定当前 source/manifest 摘要。两笔原提交、祖先同步及追加夹具修复已交付 PR #120，新汇总 artifact 和 `bd96af9a` 的 CI／preflight 成功。本轮只接续文档，不重跑未变化的业务检查。
 3. PR #120、#121 已按普通 merge 合入 main；PR #121 的合并提交为 `b47cf9ba`，实际 main CI `38224409545` 已核对成功，合并后证据已归档。commit 前 /review、正常 push 钩子继续保留，不改 VERSION，不自动发布或部署。
-4. 当前组合正式服务/目标/terminal/browser/恢复、真实 CRM/WeKnora/模型/UAT、standalone、SDK 分发和独立 DSH 升级沿原 stop/go 分别收尾，不扩展功能，不继承旧 candidate。
+4. 当前组合正式服务/目标/source HTTP/terminal 已按独立 receipt 收口；browser、真实 CRM/WeKnora/模型/UAT、standalone、SDK 分发和独立 DSH 升级沿原 stop/go 分别收尾，不扩展功能，不继承旧 candidate。
 
 ## 维护入口与边界
 
