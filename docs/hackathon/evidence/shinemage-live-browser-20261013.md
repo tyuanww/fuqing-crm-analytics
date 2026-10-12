@@ -18,6 +18,9 @@ Loading plugins…
 | desktop 1440×900 | 截图完成，页面仍 Loading plugins |
 | tablet 768×1024 | 截图完成，页面仍 Loading plugins |
 | mobile 375×812 | 截图完成，页面仍 Loading plugins |
+| root `/` | `HTTP 200` |
+| `/plugins/` | `HTTP 404` |
+| `/api/plugins` | `HTTP 404` |
 | console errors | `[]` |
 | screen reader | `NOT_RUN` |
 | keyboard focus | `NOT_RUN` |

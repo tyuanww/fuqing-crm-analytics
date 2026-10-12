@@ -23,7 +23,13 @@
     "high_contrast": "NOT_RUN",
     "mutations": "NONE",
     "production_data": "NOT_USED",
-    "release_ready": false
+    "release_ready": false,
+    "endpoint_checks": {
+      "/": "HTTP_200",
+      "/plugins/": "HTTP_404",
+      "/api/plugins": "HTTP_404"
+    },
+    "diagnosis": "LIVE_SHELL_200_PLUGIN_ENDPOINTS_404"
   },
   "screenshots": {
     "live-desktop.jpg": {
@@ -43,6 +49,7 @@
     "只打开用户已授权的真实公开入口，没有点击、提交、保存、删除或修改设置。",
     "三种 viewport 均停在 HARNESS Loading plugins，不能证明工作台或 standalone 页面可用。",
     "未将此 live UI 观察接入 composition candidate journal；candidate-bound browser 仍未运行。",
-    "真实 COCKPIT_EXAMPLE_PACKAGE 仍未提供，不能生成 standalone 页面验收。"
+    "真实 COCKPIT_EXAMPLE_PACKAGE 仍未提供，不能生成 standalone 页面验收。",
+    "同一 headed 浏览器会话下根页面返回 200，但插件资源入口 `/plugins/` 与 `/api/plugins` 均返回 404；目标机 DSH 主进程和 4328/18091 监听保持正常，尚未修改生产路由。"
   ]
 }
