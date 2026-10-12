@@ -100,7 +100,8 @@
       "id": "M2-07",
       "status": "BLOCKED",
       "evidence": [
-        "SDK gate closeout matrix"
+        "SDK gate closeout matrix",
+        "SDK gate recheck"
       ],
       "next": "upstream replacement, source archives, publisher attestation, SBOM/signature/revocation, clean host"
     },
