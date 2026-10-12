@@ -5,7 +5,7 @@
 
 ## 当前维护边界（2026-10-12 PR #120 合并后）
 
-本轮实现与测试迁移已分组提交并经 PR #120 普通 merge，合并后 main CI 见[核验记录](../hackathon/evidence/shinemage-postmerge-pr120-20261012.md)。九个插件各自维护源码／版本／测试；board-components 仍是独立领域库，不是第十个插件。主仓装配锁绑定 Workbench `6c5adc9f`、CRM `ceeff996`、Knowledge `22daa108` 及其正式回执与作者 CI；默认开发／preflight 装配消费固定包，公开合同阶段核对封存作者导出，领域与私有 core 覆盖核对作者来源和实际 CI。
+本轮实现与测试迁移已分组提交并经 PR #120 普通 merge，合并后 main CI 见[核验记录](../hackathon/evidence/shinemage-postmerge-pr120-20261012.md)。九个插件各自维护源码／版本／测试；board-components 仍是独立领域库，不是第十个插件。主仓装配锁绑定 Workbench `3030e3f`、CRM `dac0539`、Knowledge `f623c22` 及其真实 PR CI 产出的 `dsh-plugin-pack/v1` 回执；默认开发／preflight 装配消费固定包，公开合同阶段核对封存作者导出，领域与私有 core 覆盖核对作者来源和实际 CI。当前回执与 artifact 摘要见[正式包 CI 收口](../hackathon/evidence/shinemage-formal-plugin-ci-20261012.md)。
 
 主仓仍负责 backend、平台合同、profile、组合消费、来源与权限门禁、保留合同守卫和静态扫描。另两组私有数值／查询断言继续读取旧 Workbench，历史 `dsh-plugins/` 因这些用途暂留；本地源码迁移没有证明全面源码退场，也没有改变运行时边界。完整看板仍在 analytics-workbench，shine-board 是能力标记；合成知识服务不能当作真实 WeKnora。
 

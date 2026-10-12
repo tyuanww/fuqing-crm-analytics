@@ -17,6 +17,12 @@
 
 当前九包的两份 profile 没有 service_binding，还没有对应新 candidate、服务／platform／terminal／browser／恢复链与 journal。旧两包未连接宿主、旧 headed／WSL 不能抵扣。真实 CRM／WeKnora／模型／UAT、standalone、SDK 分发及独立 DSH 升级保持原 stop/go，T1/T15/T19/T21 不勾完，PARTIAL、release_ready=false。
 
+### 2026-10-12 三仓正式插件包 CI 收口
+
+Workbench、CRM、Knowledge 作者仓已分别加入正式 `dsh-plugin-pack/v1` 生成与独立 artifact 上传。当前 PR head 为 `3030e3f`、`dac0539`、`f623c22`，对应 CI run `38204944592`、`38204944092`、`38205510926` 全部 SUCCESS；主仓下载后逐份用 `readPluginPack` 核对 source SHA、manifest digest、tarball digest、`source_dirty=false` 与 `activation=NOT_RUN`。Knowledge 额外修复了 checkout 必须绑定 PR head，旧 run `38204944846` 的来源 `7037e0af…` 不使用。
+
+组合锁和 Workbench 作者证据锁已由 `865cda89` 同步到当前回执。正式包 CI 已关闭作者产物这一项，仍不等于 candidate/journal、服务/目标/terminal/browser/recovery、真实 CRM/WeKnora/UAT、standalone、SDK 分发或 DSH 升级通过；`release_ready=false`。
+
 以下保留应用／本地提交时点；其中“未推送、新 hosted CI 未跑、工件未上传”不覆盖本节。
 
 ### 2026-10-12 PR #119 合并与精确 Cordis 对接（本地提交时点）

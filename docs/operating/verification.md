@@ -232,11 +232,11 @@ DSH 本地开发包装器读取 `.nvmrc` 并选择 Node 24.19.0，不修改系�
 | 输入 | 实际绑定 |
 |---|---|
 | `CRM_COMPOSITION_PACK_INPUTS` / `CRM_COMPOSITION_PAGE_INPUTS` | `config/shinemage-composition-packs.lock.json` 的九份正式包及两 profile |
-| `WORKBENCH_AUTHOR_CI_ARCHIVE` | `config/workbench-author-evidence.lock.json`，当前来源 `6c5adc9f`，实际作者 core 155 文件／1086 PASS，与 page 正式包来源一致 |
+| `WORKBENCH_AUTHOR_CI_ARCHIVE` | `config/workbench-author-evidence.lock.json`，当前来源 `3030e3f`，实际作者 core 155 文件／1086 PASS，与 Workbench 正式包来源一致；CI run `38204944592` |
 | `DOMAIN_AUTHOR_CI_ARCHIVE` | `config/domain-author-evidence.lock.json`，来源 `e78e040e`、参考领域 tarball `22245ab9…`，并与主仓固定领域输入同字节 |
 | `PUBLIC_CONTRACT_INPUTS` | `config/public-contract-inputs.lock.json` 的 Workbench／CRM／Brand 三份归档与 31 份公共材料；JSON 合同为 `shinemage-public-contract-inputs/v1` |
 
-组合准备回执提供两份输入 JSON。公共合同输入 JSON 的 `archives` 分别使用 `workbench`、`crm`、`brand` 键，值为对应固定 ZIP 的绝对路径。作者归档、合同材料与运行 tarball 是不同对象，各自按锁核对；不要把 CI 普通 content pack 替代正式包回执。
+组合准备回执提供两份输入 JSON。公共合同输入 JSON 的 `archives` 分别使用 `workbench`、`crm`、`brand` 键，值为对应固定 ZIP 的绝对路径。作者归档、合同材料与运行 tarball 是不同对象，各自按锁核对；三个作者仓当前正式 `dsh-plugin-pack/v1` CI 回执与摘要见[正式包 CI 收口](../hackathon/evidence/shinemage-formal-plugin-ci-20261012.md)。不要把 CI 普通 content pack 替代正式包回执；正式包回执也不自动创建 candidate 或 journal。
 
 已封存输入可离线复用。准备本次拥有、已创建且为空的绝对输出根；Python 3.14.4 环境须满足 `scripts/dsh-b0/requirements.lock`，主仓 kit 的固定 build-tools、上游 checkout、pnpm 缓存、zstd 及 `.context/dsh-b0/package-inputs/` 的原领域 tarball 也须已准备。现有流水线内部绑定 kit build-tools 与该领域输入目录，不从其他作者仓搜索缺项。
 
