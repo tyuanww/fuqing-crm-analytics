@@ -36,7 +36,7 @@ Workbench、CRM、Knowledge 作者仓已分别加入正式 `dsh-plugin-pack/v1` 
 
 ### 2026-10-12 当前组合输入预检
 
-基于上述三份真实 PR CI formal pack 和组合锁中的六份既有包，`scripts/ci/composition-pack-inputs.mjs` 已在固定 Node 24.19.0 / Python 3.14.4 下生成九包、两 profile 的固定输入回执，命令 exit 0。回执锁摘要为 `be215557…`，原始回执 SHA-256 为 `4a7b9cf9…`，见[预检记录](evidence/shinemage-composition-preflight-20261012.md)及机器摘要。该步骤只关闭包身份和输入准备，profile 仍没有 `service_binding`；宿主、服务/目标、terminal/browser/recovery、candidate/journal、真实业务、standalone、SDK 分发和 DSH 升级继续保持 NOT_RUN/BLOCKED，不能据此生成 candidate 或发布。
+基于上述三份真实 PR CI formal pack 和组合锁中的六份既有包，`scripts/ci/composition-pack-inputs.mjs` 已在固定 Node 24.19.0 / Python 3.14.4 下生成九包、两 profile 的固定输入回执，命令 exit 0。回执锁摘要为 `be215557…`，原始回执 SHA-256 为 `4a7b9cf9…`，见[预检记录](evidence/shinemage-composition-preflight-20261012.md)及机器摘要。后续隔离复核再次确认静态 composition contract 通过，但两份 profile 的 `service_binding` 仍缺失，见[后续组合预检](evidence/shinemage-composition-next-preflight-20261012.md)。该步骤只关闭包身份和输入准备，profile 仍没有 `service_binding`；宿主、服务/目标、terminal/browser/recovery、candidate/journal、真实业务、standalone、SDK 分发和 DSH 升级继续保持 NOT_RUN/BLOCKED，不能据此生成 candidate 或发布。
 
 PR #121 的 hosted B0 已用新的组合 artifact 实际重跑成功，记录在[正式组合交付](evidence/shinemage-pr121-formal-pack-delivery-20261012.md)；这只关闭当前 GitHub CI 输入链，不改变上述 service binding、candidate/journal、宿主和发布边界。
 

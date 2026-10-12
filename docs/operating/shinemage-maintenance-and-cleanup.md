@@ -19,7 +19,7 @@
 
 这是默认路径。它不重建 DSH、不迁移数据库，也不重复 SDK 全量审计。
 
-1. 从目标插件已审查的分支和完整 SHA 创建更新分支，确认对应 CI、版本和 peer；PR #1 未合并时，默认 `main` 不能代替该产品基线。具体核验命令见[插件更新指南](./shinemage-plugin-update.md)。
+1. 从目标插件已审查的分支和完整 SHA 创建更新分支，确认对应 CI、版本和 peer；当前十个作者仓 PR #1 已合并，后续更新应从已核对的 `main` SHA 开始。具体核验命令见[插件更新指南](./shinemage-plugin-update.md)。
 2. 按该仓选择构建路径：shine-brand 默认使用自身 `npm-author` 锁定的公开编译工具，不需要上游 checkout 或 SDK；其他八仓的固定 SDK 路径使用已审查的 kit、上游 checkout、build-tools 和领域输入。固定输入路径使用绝对路径，缺输入就停止；不从相邻 worktree 或 `.context` 回退。
 3. 在插件仓运行自己的 frozen install、build、测试、包内容检查和边界负测。记录包摘要、输入摘要、测试范围和未执行项。
 4. 分开记录 CI/内容校验回执与实际保留的 content pack。shine-brand 的 `verify-pack.mjs` 校验后删除临时 tarball，不能把日志当作已留存的包；需要交付时另走保留产物的步骤。普通 content pack 不自动等于 `dsh-plugin-pack/v1` 或 `dsh-plugin-candidate/v1`。
@@ -60,7 +60,7 @@ DSH 升级不能简化为“从官网 `npm install latest` 后插入”。正确
 
 ## 本机清理顺序
 
-清理分为“可自动做”和“必须确认”两类。当前盘查（2026-10-10）已完成 11 个历史候选的压缩归档、SHA-256 复核、worktree 移除和源目录清理；归档包与清单保留。三个已合并远程候选分支也已按单独授权删除，T14、RC2、公共 main、SDK/证据归档和 `security-audit-skill/` 保持不动。PR #118 随后已合并，当前远端主线为 `4859d136`；本次事实同步见[post-merge r4](../hackathon/evidence/shinemage-remote-repository-postmerge-r4-20261011.md)。
+清理分为“可自动做”和“必须确认”两类。当前盘查（2026-10-10）已完成 11 个历史候选的压缩归档、SHA-256 复核、worktree 移除和源目录清理；归档包与清单保留。三个已合并远程候选分支也已按单独授权删除，T14、RC2、公共 main、SDK/证据归档和 `security-audit-skill/` 保持不动。PR #121 及后续文档收口已合并，当前主线短 SHA、CI 和作者仓合并事实以 [STATUS.md](../../STATUS.md) 与[作者合并与候选前置核验](../hackathon/evidence/shinemage-author-merge-and-candidate-preflight-20261012.md)为准。
 
 ### 可以先做的低风险步骤
 
@@ -85,10 +85,10 @@ DSH 升级不能简化为“从官网 `npm install latest` 后插入”。正确
 ### 远程仓整理
 
 - 保留受保护的 `main`、仍在使用的 Dependabot 分支和未完成的候选/修复分支。
-- PR #111–#118 已合并到 `main`；当前完整 SHA 和合并时间见[最新 post-merge 远端事实](../hackathon/evidence/shinemage-remote-repository-postmerge-r4-20261011.md)。`codex/shinemage-final`、`codex/docs-maintenance-closeout` 和 `codex/docs-postmerge-20261010` 已完成各自使命，归档和恢复路径核对后已删除远程引用；本地旧分支与 stale `origin/*` tracking 引用仍单独整理。
+- PR #121 及后续文档交付已合并到 `main`；当前完整事实见 [STATUS.md](../../STATUS.md) 与[PR #121 合并后核验](../hackathon/evidence/shinemage-pr121-postmerge-20261012.md)。`codex/shinemage-final`、`codex/docs-maintenance-closeout` 和 `codex/docs-postmerge-20261010` 已完成各自使命，归档和恢复路径核对后已删除远程引用；本地旧分支与 stale `origin/*` tracking 引用仍单独整理。
 - `dsh-rc2-candidate`、`fix-dependabot-fastapi141` 等旧分支先做用途核对，不因为 PR 关闭就直接删除。
 - Release 和 tag 是发布审计历史，不随分支清理删除。清理前用 GitHub 页面和相关 release 文档核对当前版本，不能用分支名推断发布状态。
-- 独立插件远程仓及其 CI 继续各自维护，九仓当前均有开放 PR #1、最近 fixed-inputs CI 成功且暂无 GitHub Release；详见[远程仓收口复核](../hackathon/evidence/shinemage-plugin-remote-closeout-20261010.md)。不把它们合并回主仓，也不把普通 content pack 写成正式 DSH candidate。
+- 独立插件远程仓及其 CI 继续各自维护，九个插件仓与 board-components 的 PR #1 均已普通 merge，各自 main CI 均 SUCCESS；完整合并对象见[作者合并与候选前置核验](../hackathon/evidence/shinemage-author-merge-and-candidate-preflight-20261012.md)。不把它们合并回主仓，也不把普通 content pack 写成正式 DSH candidate。
 
 合并后同步当前事实时，至少检查这份清单：`STATUS.md` 的 Git 行和施工计划、README 顶部收口段、`docs/README.md` 横幅、`HANDOVER.md` 头部和入口快照日期、`docs/hackathon/TODOS.md` 当前接续、`docs/architecture/shinemage-plugin-platform.md` 首段、本手册远程仓段，以及带日期的远端证据 JSON/Markdown。先运行 `git fetch origin main`，再运行 `gh api repos/tyuanww/fuqing-crm-analytics/git/ref/heads/main` 和 `gh run list --repo tyuanww/fuqing-crm-analytics --branch main`，把远端 `main` SHA、合并 PR 和最新 CI run 与文档逐项对齐；本地分支用 `git merge-base origin/main HEAD` 判断差异，不能把旧 feature 分支的 HEAD 当成已合并主线。完整的主仓 `main` SHA 只留在证据层，STATUS 放短 SHA，其他入口引用 STATUS，避免下一次合并后出现多份旧值；固定 DSH pin 可以在入口中重复，当前主线 SHA 与生产状态仍以 STATUS/证据为准；证据 JSON/Markdown 必须随本次文档提交。`docs/hackathon/README.md` 和 `docs/hackathon/PRODUCT-READINESS-2026-09-10.md` 是历史档案，只有其当前段落发生变化时才加入同一轮事实同步；`docs/operating/maintainer-map.md` 与 `docs/operating/verification.md` 是当前运行入口，目录、端口或验证矩阵变化时必须同轮同步。
 
@@ -98,6 +98,6 @@ DSH 升级不能简化为“从官网 `npm install latest` 后插入”。正确
 
 ## 开发者体验检查结果
 
-2026-10-11 对公开 GitHub 首页、本地 CLI 和 branches API 做了只读复核：PR #118 已合并，当前主线为 `4859d136`，合并后的 `main` CI run `38066459376` 通过；三个已合并候选远程分支已删除，剩余 stale `origin/*` tracking 引用和已归档本地分支仍需单独处理。九个独立插件仓的最新 PR/CI/Release 状态见[远程仓收口复核](../hackathon/evidence/shinemage-plugin-remote-closeout-20261010.md)。`pnpm dsh --help`、`doctor --help`、`plugin candidate --help` 能给出入口、退出码和证据边界；缺少候选输出目录时返回 `DSH_ERROR OUTPUT-DIR_REQUIRED`，未知命令返回 `DSH_COMMAND_UNKNOWN`。当前主要摩擦是 README 顶部和 STATUS/TODOS 在合并后容易过期、插件流程仍需维护者从多份历史文档拼接、以及未使用固定 Node 入口时 pnpm 会显示 Node 25 的 engine warning。新维护者应优先读[插件更新指南](./shinemage-plugin-update.md)、本手册、Quickstart、STATUS 和验证入口。
+2026-10-12 对公开 GitHub 首页、本地 CLI 和 branches API 做了只读复核：PR #121 已合并，当前主线短 SHA 和 main CI 以 [STATUS.md](../../STATUS.md) 为准；十个独立作者仓 PR #1 也已合并，各自 main CI SUCCESS。三个已合并候选远程分支已删除，剩余 stale `origin/*` tracking 引用和已归档本地分支仍需单独处理。作者仓合并与当前目标阻塞见[作者合并与候选前置核验](../hackathon/evidence/shinemage-author-merge-and-candidate-preflight-20261012.md)。`pnpm dsh --help`、`doctor --help`、`plugin candidate --help` 能给出入口、退出码和证据边界；缺少候选输出目录时返回 `DSH_ERROR OUTPUT-DIR_REQUIRED`，未知命令返回 `DSH_COMMAND_UNKNOWN`。当前主要摩擦仍是 README、STATUS/TODOS 和插件流程入口容易在合并后过期，以及未使用固定 Node 入口时 pnpm 会显示 Node 25 的 engine warning。新维护者应优先读[插件更新指南](./shinemage-plugin-update.md)、本手册、Quickstart、STATUS 和验证入口。
 
 这次浏览截图和 CLI 输出属于开发者体验证据，不是产品或生产验收。它们保存在本地 `.context/checks/devex-review-20261011/`；此前日期目录的截图保留为历史，不进入运行包。
