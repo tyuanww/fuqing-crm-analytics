@@ -117,7 +117,8 @@
       "id": "M2-09",
       "status": "DEFERRED",
       "evidence": [
-        "DSH pin remains 0.1.7-rc.2"
+        "DSH pin remains 0.1.7-rc.2",
+        "DSH upgrade deferred recheck"
       ],
       "next": "new official DSH candidate and compatibility matrix"
     },

@@ -29,7 +29,7 @@
 | M2-06 | 真实模型/CRM/WeKnora/UAT | `PARTIAL_REAL_UAT / LIVE_TOOL_SURFACE_EMPTY / CANDIDATE_MODEL_MISSING_CREDENTIAL` | 候选 peer 图和 candidate 登录已通过；candidate 的 DeepSeek provider 仍缺受控 credentials service 的 API key，需补凭据后重跑真实只读查询 | live 模型在工具缺失时没有编造；candidate 登录与只读模式可见，但模型在 provider 调用前以 `MISSING_CREDENTIAL` 失败；CRM/WeKnora 查询、保存/权限失败/恢复和人工 UAT仍未运行 | `docs(acceptance): record candidate model credential gate` |
 | M2-07 | SDK 供应链门禁 | `BLOCKED` | 最终候选 artifact 和发布者身份 | SBOM、发布者身份、最终签名、验签、撤销验证、干净机器安装和回退均通过 | 当前检查器复核仍为 fail-closed，覆盖项未验证、`release_ready=false`；供应链改动单独走 OCR，详见 `docs(acceptance): record SDK gate recheck` |
 | M2-08 | release / activation / canary / rollback | `NOT_RUN` | M2-04 至 M2-07 关闭，且取得发布授权 | immutable artifact、CI、release review、目标接收、生产激活、canary 和 rollback 全部有同一版本证据 | 当前前置审计仍 fail-closed，`release_ready=false`、`activation=NOT_RUN`；详见 `docs(release): record candidate release gate`；不自动部署 |
-| M2-09 | 独立 DSH 升级候选 | `DEFERRED` | 新官方 DSH 版本/commit 和隔离 runtime | 新旧 runtime、SDK、插件适配、兼容矩阵、恢复矩阵和回退条件齐全；授权后再切换 | `feat(toolchain): prepare dsh upgrade candidate`；不混入当前发布候选 |
+| M2-09 | 独立 DSH 升级候选 | `DEFERRED` | 新官方 DSH 版本/commit 和隔离 runtime | 新旧 runtime、SDK、插件适配、兼容矩阵、恢复矩阵和回退条件齐全；授权后再切换 | 当前 pin 与杭州 current/candidate 仍为 rc2，未发现新的升级 runtime；详见 `docs(acceptance): record DSH upgrade deferred recheck`；不混入当前发布候选 |
 | M2-10 | 证据与状态收口 | `OPEN` | 每张已执行任务卡的原始回执和本地提交 | 更新 `STATUS.md`、本节和相关验证入口；每张卡的 `PASS/NOT_RUN/BLOCKED` 与文件摘要可追溯 | `docs(status): close acceptance task card` |
 
 每张任务卡完成后都要记录：输入身份、实际命令、退出码、原始证据位置、未执行项、风险边界和本地 commit。卡片没有完成时，不勾选下一张依赖卡；产品仍保持 `PARTIAL`、`release_ready=false`。
@@ -69,6 +69,8 @@ source HTTP 子阶段随后已在同一目标用当前 candidate 完成 10/10 PA
 随后复核 M2-07 当前供应链检查器：脚本 SHA-256 仍为 `690034de…`，工作树无改动，CLI 默认离线且明确不授予 release readiness；`dependency_graph`、`embedded_components`、`registry_integrity`、`publisher_identity`、`opaque_content`、`revocation` 仍未验证。该复核没有执行 OSV、安装、签名或发布，M2-07 继续为 `BLOCKED`。详见[SDK 供应链门禁当前复核](evidence/shinemage-m2-07-supply-chain-gate-recheck-20261013.md)。
 
 随后审计 M2-08 release/activation/canary/rollback 前置链：M2-01/02 的正式 profile/service binding 未注册，M2-05/06 仍有页面、模型和业务 UAT缺口，M2-07 仍 BLOCKED，且当前记录没有正式 release/activation 授权。`release_ready=false`、`activation=NOT_RUN` 保持不变；本轮没有 push、merge、receive、激活、canary 或 rollback。详见[M2-08 release 门禁审计](evidence/shinemage-m2-08-release-gate-audit-20261013.md)。
+
+随后复核 M2-09 DSH 升级边界：本地 pin 仍为 `0.1.7-rc.2` / `477b4f42…`，杭州 `current` 仍为 `dsh-0.20.0.0-r3`，candidate 仍使用同一 rc2 上游；本轮没有新隔离升级 runtime、安装、锁变更或切换。M2-09 继续为 `DEFERRED`。详见[DSH 升级候选延后复核](evidence/shinemage-m2-09-dsh-upgrade-deferred-20261013.md)。
 
 
 2026-09-13 用户确认“核心版本优先交付、扩库完善后置”。目标是问数后 AI 优先使用定制组件自由组板，板内按选定范围修改；首批六类不是最终上限。M1／产品仍 PARTIAL；原全量 App Goal 保持 PAUSED。本节承接原本地施工记录，不把旧冻结实现反推成最终需求。
