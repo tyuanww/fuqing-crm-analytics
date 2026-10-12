@@ -60,6 +60,8 @@ source HTTP 子阶段随后已在同一目标用当前 candidate 完成 10/10 PA
 
 随后在已登录 live `app.tyuan.chat` 新建会话执行只读验收：`crm_service_health`、`query_crm_dashboard_gsv` 与 WeKnora 检索均为 `NOT_EXPOSED / NOT_RUN`，模型拒绝编造数字或来源，没有执行写操作。M2-06 更新为 `PARTIAL_REAL_UAT / CRM_TOOL_NOT_EXPOSED`，详见[live 只读模型与工具面验收](evidence/shinemage-m2-06-live-readonly-uat-20261013.md)。
 
+随后在修复后的隔离 candidate 内创建临时 workspace/session，直接检查 CRM host 路由：HTTP `200` 返回 `connected=false`，证明候选宿主已加载 CRM host，当前 session 仍未绑定 CRM 账号。该探针未发送模型 prompt、未查询业务数据、未读取凭据。详见[candidate CRM host 路由探针](evidence/shinemage-m2-06-candidate-host-probe-20261013.md)。
+
 
 2026-09-13 用户确认“核心版本优先交付、扩库完善后置”。目标是问数后 AI 优先使用定制组件自由组板，板内按选定范围修改；首批六类不是最终上限。M1／产品仍 PARTIAL；原全量 App Goal 保持 PAUSED。本节承接原本地施工记录，不把旧冻结实现反推成最终需求。
 

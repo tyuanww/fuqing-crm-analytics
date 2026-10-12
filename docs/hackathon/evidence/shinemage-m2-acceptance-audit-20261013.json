@@ -89,7 +89,8 @@
         "real business UAT run",
         "candidate peer repair and boot",
         "candidate Aside session boundary",
-        "live read-only UAT tool boundary"
+        "live read-only UAT tool boundary",
+        "candidate CRM host route probe"
       ],
       "next": "在加载 crm-knowledge provider 和 WeKnora 工具的正确宿主会话中重跑真实只读查询；再补保存/权限/恢复/人工 UAT"
     },
