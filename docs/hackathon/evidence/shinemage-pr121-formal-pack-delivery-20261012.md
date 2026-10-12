@@ -17,3 +17,5 @@ PR [#121](https://github.com/tyuanww/fuqing-crm-analytics/pull/121) head `ad5630
 第一次 attempt 因主仓三个变量仍指向旧 artifact `11710265230`，Workbench manifest `0af61dab…` 与当前锁 `900004009…` 不一致而失败；旧 artifact 未继续使用。修正暂存输入、变量后重跑通过。
 
 当前 PR 可合并状态为 `MERGEABLE` / `CLEAN`，但本页不执行合并。candidate/journal、service binding、目标 terminal/browser/recovery、真实 CRM/WeKnora/模型/UAT、standalone、SDK 分发和 DSH 升级仍按 STATUS 保持未关闭。
+
+文档 follow-up 提交 `e56c59cf018b4a417e480e25d50810dd6a48e903` 触发的最新 run [38220822016](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38220822016) 也已 SUCCESS：B0、test、lint、changes、merge-gate 成功，五个路径矩阵 job SKIPPED。前一轮 attempt 2 的失败修复和新 artifact 身份仍按上文保留。

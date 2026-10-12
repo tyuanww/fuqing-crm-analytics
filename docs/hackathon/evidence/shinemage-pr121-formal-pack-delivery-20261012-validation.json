@@ -11,6 +11,14 @@
     "ci_attempt": 2,
     "ci_conclusion": "success"
   },
+  "latest_documentation_followup_ci": {
+    "head_sha": "e56c59cf018b4a417e480e25d50810dd6a48e903",
+    "run_id": 38220822016,
+    "attempt": 1,
+    "conclusion": "success",
+    "success_jobs": ["b0-contract-build", "test", "lint", "changes / changes", "merge-gate"],
+    "skipped_jobs": 5
+  },
   "staging": {
     "repository": "tyuanww/dsh-analytics-workbench",
     "branch": "codex/ci-composition-inputs-20261011",
