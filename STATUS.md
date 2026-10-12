@@ -21,6 +21,7 @@
 | 真实验收 | 主仓两份 profile 仍无 `service_binding`。隔离任务目录已用当前九包组合输入与既有服务绑定准备 candidate `125c8e53…`；page profile 快照带绑定，但仍未注册到主仓正式 profile/journal。经用户授权，`100.93.46.46` 已完成 Linux x86_64 / WSL2、Python 3.14.4 与 13 个精确 wheel 的目标前置预检；陈旧 supervisor lock 已在无 owner 条件下受保护移除，现役 DSH 恢复 `active/running`。当前 candidate 的 source HTTP / service recovery 已在同一目标完成 10 场景 PASS 并追加隔离 journal seq 3；九包 terminal / 进程丢失恢复再完成 5 场景 PASS 并追加 seq 4。真实入口 headed live browser 在约 15 秒 bundle 加载后显示工作台导航，三种 viewport 截图完成；该观察未接入 candidate journal，candidate-bound browser、standalone、读屏、键盘焦点和高对比度仍未关闭。真实模型／CRM／WeKnora／UAT、standalone 页面包和正式分发未关闭；DSH/CRM/WeKnora 只完成认证边界状态码前置核验，未读取业务数据或调用模型；证据见[授权生产目标前置预检](docs/hackathon/evidence/shinemage-production-target-preflight-20261013.md)、[当前组合 source HTTP 目标验收](docs/hackathon/evidence/shinemage-composition-source-http-target-20261013.md)、[当前组合 terminal 目标验收](docs/hackathon/evidence/shinemage-composition-terminal-target-20261013.md)和[授权生产入口 live browser 观察](docs/hackathon/evidence/shinemage-live-browser-20261013.md)。 |
 | 生产与清理 | 杭州 `current` 的带日期恢复/热补丁事实见[2026-10-09 现场记录](docs/operating/hangzhou-production-hotfix-20261009.md)，本地候选未部署。11 份候选目录及三个远端分支已按授权清理，归档与摘要保留，见[清理记录](docs/hackathon/evidence/shinemage-local-cleanup-20261010.md)。 |
 | 任务外内容 | `security-audit-skill/` 不纳入提交或清理；任务范围干净不等于整仓无未提交内容。92 份历史证据同字节保留。 |
+| M2 状态审计 | 当前十张任务卡、隔离 journal seq 1–4、live browser 与真实业务前置状态见[M2 任务卡当前审计](docs/hackathon/evidence/shinemage-m2-acceptance-audit-20261013.md)；该矩阵不授予 release/activation。 |
 
 ## 本轮施工计划
 

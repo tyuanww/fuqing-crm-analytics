@@ -1,0 +1,129 @@
+{
+  "schema_version": "shinemage-m2-acceptance-audit/v1",
+  "recorded_at": "2026-10-13T02:20:00+08:00",
+  "repository": {
+    "branch": "codex/shinemage-abc-local-candidate",
+    "head": "fb4e580f6355cfdd87fac6f64dba652cdc90e170",
+    "push": "NOT_RUN",
+    "protected_untracked": [
+      "security-audit-skill/"
+    ]
+  },
+  "candidate": {
+    "digest": "125c8e538816835cad212048b8fd0302d98588d704b09de559789df9bf6e6bdb",
+    "service_source_sha": "f9726f682fc0d1d4c6aef6f07e6932c2c600c3d6",
+    "journal": "isolated-only"
+  },
+  "journal_events": [
+    {
+      "seq": 1,
+      "status": "COMPOSITION_CANDIDATE_INTENT"
+    },
+    {
+      "seq": 2,
+      "status": "COMPOSITION_CANDIDATE_PREPARED"
+    },
+    {
+      "seq": 3,
+      "status": "COMPOSITION_SOURCE_HTTP_TARGET_OBSERVED",
+      "result": "PASS"
+    },
+    {
+      "seq": 4,
+      "status": "COMPOSITION_TERMINAL_HOST_OBSERVED",
+      "result": "PASS"
+    }
+  ],
+  "cards": [
+    {
+      "id": "M2-01",
+      "status": "ISOLATED_CANDIDATE_PREPARED / MAIN_NOT_REGISTERED",
+      "evidence": [
+        "composition-candidate contract",
+        "journal seq 2"
+      ],
+      "next": "主仓正式 profile/journal 接线仍未授权"
+    },
+    {
+      "id": "M2-02",
+      "status": "ISOLATED_EVIDENCE_BOUND / MAIN_PROFILE_UNBOUND",
+      "evidence": [
+        "service compatibility gate",
+        "service source f9726f68"
+      ],
+      "next": "主仓 profile service_binding 仍缺失"
+    },
+    {
+      "id": "M2-03",
+      "status": "TARGET_PREFLIGHT_PASS / CANDIDATE_NOT_ATTACHED",
+      "evidence": [
+        "production target preflight"
+      ],
+      "next": "candidate 未附着现役目标"
+    },
+    {
+      "id": "M2-04",
+      "status": "TERMINAL_PASS / BROWSER_NOT_RUN",
+      "evidence": [
+        "source HTTP seq 3",
+        "terminal seq 4"
+      ],
+      "next": "candidate-bound browser receipt"
+    },
+    {
+      "id": "M2-05",
+      "status": "PARTIAL_LIVE_BROWSER_PASS / CANDIDATE_BROWSER_STANDALONE_NOT_RUN",
+      "evidence": [
+        "live browser loaded after bundle wait",
+        "desktop/tablet/mobile screenshots",
+        "keyboard focus partial"
+      ],
+      "next": "COCKPIT_EXAMPLE_PACKAGE、candidate-bound browser、screen reader、high contrast"
+    },
+    {
+      "id": "M2-06",
+      "status": "NOT_RUN_PRECONDITIONS_MISSING",
+      "evidence": [
+        "real business UAT preflight"
+      ],
+      "next": "user-led login, real model/CRM/WeKnora permissions and human UAT"
+    },
+    {
+      "id": "M2-07",
+      "status": "BLOCKED",
+      "evidence": [
+        "SDK gate closeout matrix"
+      ],
+      "next": "upstream replacement, source archives, publisher attestation, SBOM/signature/revocation, clean host"
+    },
+    {
+      "id": "M2-08",
+      "status": "NOT_RUN",
+      "evidence": [],
+      "next": "M2-04 through M2-07 plus explicit release authorization"
+    },
+    {
+      "id": "M2-09",
+      "status": "DEFERRED",
+      "evidence": [
+        "DSH pin remains 0.1.7-rc.2"
+      ],
+      "next": "new official DSH candidate and compatibility matrix"
+    },
+    {
+      "id": "M2-10",
+      "status": "OPEN",
+      "evidence": [
+        "this audit matrix"
+      ],
+      "next": "repeat after each card closes; final release decision remains separate"
+    }
+  ],
+  "global": {
+    "product": "PARTIAL",
+    "release_ready": false,
+    "activation": "NOT_RUN",
+    "production_data": "NOT_USED_IN_CURRENT_OBSERVATIONS",
+    "code_changes_this_audit": false
+  }
+}
