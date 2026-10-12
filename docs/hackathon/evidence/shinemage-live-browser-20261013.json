@@ -7,12 +7,12 @@
     "driver": "Aside headed browser"
   },
   "observation": {
-    "status": "PARTIAL_LIVE_ENTRY_BLOCKED",
-    "page_ready": "BLOCKED_PLUGINS_LOADING",
+    "status": "PARTIAL_LIVE_BROWSER_PASS",
+    "page_ready": "PASS_AFTER_BUNDLE_WAIT",
     "console_errors": [],
-    "interactive_elements": "NONE_WHILE_LOADING",
-    "body_text": "HARNESS\\nLoading plugins…",
-    "wait_seconds": 20,
+    "interactive_elements": "WORKSPACE_AND_NAVIGATION_VISIBLE",
+    "body_text": "伸美 AI 增长董事会 / 新会话 / 插件 / 驾驶舱 / 数据员工 / 工作区 / 知识库问答",
+    "wait_seconds": 15,
     "candidate_bound": "NOT_RUN",
     "standalone": "NOT_RUN_REAL_COCKPIT_EXAMPLE_PACKAGE",
     "desktop": "PASS_SCREEN_CAPTURE_ONLY",
@@ -26,10 +26,11 @@
     "release_ready": false,
     "endpoint_checks": {
       "/": "HTTP_200",
-      "/plugins/": "HTTP_404",
-      "/api/plugins": "HTTP_404"
+      "valid_plugin_bundle_route": "HTTP_200",
+      "bare_/plugins/": "HTTP_404_EXPECTED_WITHOUT_BUNDLE_QUERY",
+      "/api/plugins": "HTTP_404_EXPECTED_UNKNOWN_ROUTE"
     },
-    "diagnosis": "LIVE_SHELL_200_PLUGIN_ENDPOINTS_404"
+    "diagnosis": "LIVE_SHELL_AND_PLUGIN_BUNDLE_LOADED_AFTER_WAIT"
   },
   "screenshots": {
     "live-desktop.jpg": {
@@ -40,6 +41,18 @@
       "bytes": 4055,
       "sha256": "0877acd72cb0a8e8a8c7c04eb627554ed593cf9dd391c8912dee4ff2303959f2"
     },
+    "live-ready-desktop.jpg": {
+      "bytes": 41860,
+      "sha256": "7681774a64e27b6c0b042f3107f43545cf349802fed0d8cd8b3b650f28e6568f"
+    },
+    "live-ready-mobile.jpg": {
+      "bytes": 24577,
+      "sha256": "83b55a3d204c89f2304485b7d12e7a0e34a9441562a6f01b627713e621d56b7a"
+    },
+    "live-ready-tablet.jpg": {
+      "bytes": 30951,
+      "sha256": "1cec0c016d09c77603dcdf259c81fb6cf7a7388405ea88e49c6a110f19e4b078"
+    },
     "live-tablet.jpg": {
       "bytes": 7018,
       "sha256": "d527b51b4813d9a566a28f487dba2862196fd8717c54a3e9fdfad7ff45b73897"
@@ -47,9 +60,9 @@
   },
   "boundaries": [
     "只打开用户已授权的真实公开入口，没有点击、提交、保存、删除或修改设置。",
-    "三种 viewport 均停在 HARNESS Loading plugins，不能证明工作台或 standalone 页面可用。",
+    "初次 6-8 秒仍显示 Loading plugins；完整 bundle 约 15 秒后加载完成，出现真实工作台导航与工作区内容。",
+    "valid plugin bundle route 返回 200；裸 `/plugins/` 404 是没有组合查询参数的预期行为，不作为生产故障。",
     "未将此 live UI 观察接入 composition candidate journal；candidate-bound browser 仍未运行。",
-    "真实 COCKPIT_EXAMPLE_PACKAGE 仍未提供，不能生成 standalone 页面验收。",
-    "同一 headed 浏览器会话下根页面返回 200，但插件资源入口 `/plugins/` 与 `/api/plugins` 均返回 404；目标机 DSH 主进程和 4328/18091 监听保持正常，尚未修改生产路由。"
+    "真实 COCKPIT_EXAMPLE_PACKAGE 仍未提供，standalone 页面、读屏、人工键盘焦点和 Windows 高对比度仍未验收。"
   ]
 }
