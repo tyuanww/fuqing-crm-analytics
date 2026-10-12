@@ -21,6 +21,7 @@ export const COMPOSITION_CANDIDATE_SCHEMA = 'dsh-composition-candidate/v1';
 const HEX = /^[a-f0-9]{64}$/;
 const PACKAGE_ID = /^@shine-mage\/[a-z0-9][a-z0-9-]+$/;
 const digest = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
+const bytesDigest = value => createHash('sha256').update(value).digest('hex');
 
 function absolute(value, code) {
   assert.equal(typeof value, 'string', code);
@@ -52,11 +53,12 @@ function packRows(packs, profileName) {
   }));
 }
 
-function profileRow(packs, name) {
+function profileRow(packs, name, contents = packs.contents, sourceSha256 = packs.digest) {
   return {
     name,
     profile_id: packs.profile.profile_id,
-    sha256: packs.digest,
+    source_sha256: sourceSha256,
+    sha256: bytesDigest(contents),
     plugins: packs.plugins.map(item => item.id),
   };
 }
@@ -67,6 +69,11 @@ export function validateCompositionCandidate(candidate) {
   assert.ok(Array.isArray(candidate.profiles) && candidate.profiles.length === 2, 'COMPOSITION_CANDIDATE_PROFILES');
   assert.ok(Array.isArray(candidate.plugins) && candidate.plugins.length === 9, 'COMPOSITION_CANDIDATE_PLUGINS');
   assert.deepEqual(candidate.profiles.map(profile => profile.name), ['crm', 'page'], 'COMPOSITION_PROFILE_ORDER');
+  for (const profile of candidate.profiles) {
+    assert.match(profile.source_sha256 ?? '', HEX, 'COMPOSITION_PROFILE_SOURCE_DIGEST');
+    assert.match(profile.sha256 ?? '', HEX, 'COMPOSITION_PROFILE_DIGEST');
+    assert.ok(Array.isArray(profile.plugins), 'COMPOSITION_PROFILE_PLUGINS');
+  }
   assert.ok(candidate.service_compatibility, 'COMPOSITION_SERVICE_GATE_REQUIRED');
   assert.equal(candidate.service_compatibility.schema_version, 'dsh-service-compatibility-gate/v1', 'COMPOSITION_SERVICE_GATE_SCHEMA');
   validateServiceBinding(candidate.service_compatibility.binding);
@@ -107,12 +114,16 @@ export async function createCompositionCandidate({ crmInputsPath, pageInputsPath
   validateServiceBinding(binding);
   const serviceGate = await prepareServiceCompatibility(binding, evidencePath);
   assert.ok(serviceGate, 'COMPOSITION_SERVICE_GATE_REQUIRED');
+  const pageProfile = JSON.parse(page.contents);
+  assert.equal(pageProfile.service_binding, undefined, 'COMPOSITION_PAGE_PROFILE_ALREADY_BOUND');
+  pageProfile.service_binding = binding;
+  const boundPageContents = `${JSON.stringify(pageProfile, null, 2)}\n`;
   await access(destination).catch(async error => {
     if (error.code !== 'ENOENT') throw error;
     await mkdir(destination, { recursive: true, mode: 0o700 });
   });
   assert.equal((await readdir(destination)).length, 0, 'COMPOSITION_OUTPUT_MUST_BE_EMPTY');
-  const profiles = [profileRow(crm, 'crm'), profileRow(page, 'page')];
+  const profiles = [profileRow(crm, 'crm'), profileRow(page, 'page', boundPageContents, page.digest)];
   const plugins = [...packRows(crm, 'crm'), ...packRows(page, 'page')];
   const base = {
     schema_version: COMPOSITION_CANDIDATE_SCHEMA,
@@ -141,7 +152,7 @@ export async function createCompositionCandidate({ crmInputsPath, pageInputsPath
   await writeAtomic(join(destination, 'composition-candidate.json'), candidate);
   await mkdir(join(destination, 'profiles'), { mode: 0o700 });
   await writeFile(join(destination, 'profiles/crm.json'), crm.contents, { mode: 0o600, flag: 'wx' });
-  await writeFile(join(destination, 'profiles/page.json'), page.contents, { mode: 0o600, flag: 'wx' });
+  await writeFile(join(destination, 'profiles/page.json'), boundPageContents, { mode: 0o600, flag: 'wx' });
   await mkdir(join(destination, 'packs'), { mode: 0o700 });
   for (const item of [...crm.plugins, ...page.plugins]) {
     const directory = item.id.slice(1).replaceAll('/', '-');

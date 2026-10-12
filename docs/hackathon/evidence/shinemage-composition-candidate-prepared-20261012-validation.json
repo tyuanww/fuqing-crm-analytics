@@ -2,18 +2,18 @@
   "schema": "shinemage-composition-candidate-prepared/v1",
   "observed_at": "2026-10-12",
   "status": "ISOLATED_CANDIDATE_PREPARED",
-  "task_directory": "/Users/hutou/.codex/tasks/shinemage-composition-candidate-20261012-r2",
+  "task_directory": "/Users/hutou/.codex/tasks/shinemage-composition-candidate-20261012-r3",
   "candidate": {
     "schema_version": "dsh-composition-candidate/v1",
-    "candidate_digest": "fbf52fe52fa259c6d1af3a7a5d3a6271ff6b7ab93b118dec621ea712e85c2bc0",
-    "file_sha256": "8725c040203fc7675305d8992602b22bbc7e31f78f2d84d85b939da44680d713",
+    "candidate_digest": "125c8e538816835cad212048b8fd0302d98588d704b09de559789df9bf6e6bdb",
+    "file_sha256": "916826710c7e49124eb0d4284b8b2fe00f19c4dd46ddf181144761d566eefede",
     "profiles": 2,
     "plugins": 9,
     "activation": "NOT_RUN",
     "release_ready": false
   },
   "journal": {
-    "file_sha256": "f13780e0c731888764efaee22228d7fa4a70813a6a9065044b6abd87e569c8f7",
+    "file_sha256": "a791796e5e88e798a75b41707eade1e885d8436acb8e658114bf80f696ab6b83",
     "sequence": 2,
     "statuses": ["COMPOSITION_CANDIDATE_INTENT", "COMPOSITION_CANDIDATE_PREPARED"]
   },

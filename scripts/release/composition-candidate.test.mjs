@@ -18,8 +18,8 @@ const gate = { schema_version: 'dsh-service-compatibility-gate/v1', binding, evi
 function candidate() {
   const base = {
     schema_version: COMPOSITION_CANDIDATE_SCHEMA,
-    profiles: [{ name: 'crm', profile_id: 'crm-knowledge-rc2', sha256: '3'.repeat(64), plugins: ['@shine-mage/dsh-plugin-0', '@shine-mage/dsh-plugin-1'] },
-      { name: 'page', profile_id: 'dsh-rc2', sha256: '4'.repeat(64), plugins: Array.from({ length: 7 }, (_, i) => `@shine-mage/dsh-plugin-${i + 2}`) }],
+    profiles: [{ name: 'crm', profile_id: 'crm-knowledge-rc2', source_sha256: '5'.repeat(64), sha256: '3'.repeat(64), plugins: ['@shine-mage/dsh-plugin-0', '@shine-mage/dsh-plugin-1'] },
+      { name: 'page', profile_id: 'dsh-rc2', source_sha256: '6'.repeat(64), sha256: '4'.repeat(64), plugins: Array.from({ length: 7 }, (_, i) => `@shine-mage/dsh-plugin-${i + 2}`) }],
     plugins: Array.from({ length: 9 }, (_, i) => ({ id: `@shine-mage/dsh-plugin-${i}`, path: `dsh-plugins/plugin-${i}`, profile: i < 2 ? 'crm' : 'page', version: '0.1.0', dsh_pin: '0.1.7-rc.2', source_sha: `${i}`.repeat(40), manifest_sha256: `${i + 1}`.repeat(64), pack: { name: `shine-mage-dsh-plugin-${i}-0.1.0.tgz`, bytes: 1, sha256: `${i + 1}`.repeat(64) } })),
     service_compatibility: gate,
     capabilities: { source_http: 'NOT_RUN', terminal: 'NOT_RUN', browser: 'NOT_RUN', recovery: 'NOT_RUN' },
