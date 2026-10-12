@@ -16,23 +16,23 @@
     {
       "directory": "analytics-workbench",
       "id": "@shine-mage/dsh-analytics-workbench-b0",
-      "source_sha": "6c5adc9faa04f692d5d4b3028af4f945ab49dfe4",
+      "source_sha": "3030e3f21263f6ec65cb01c7aeacd4c80e2eb711",
       "version": "0.0.0-b0",
-      "manifest_sha256": "0af61dabbab9a2205fb1d9ff3a2eec7e8194800d9af3f9043b0a5587a81edc12"
+      "manifest_sha256": "900004009437e68052e957610e618090a1e7d69d485376a53afea6eb008fed85"
     },
     {
       "directory": "crm-knowledge",
       "id": "@shine-mage/dsh-crm-knowledge",
-      "source_sha": "ceeff9965509a545cc1761091bca604b31c02285",
+      "source_sha": "dac0539bbbe076f62ae592c35e74efcca987e568",
       "version": "0.0.0-crm.1",
-      "manifest_sha256": "4be65420f929fface899fd48928dde4e444289bc428d46adeb3497a6bb5d9abc"
+      "manifest_sha256": "4ee58ec30161aa5de22978fa01c278938a4dfd6bb152fd321e894534672fb763"
     },
     {
       "directory": "knowledge",
       "id": "@shine-mage/dsh-knowledge",
-      "source_sha": "22daa108bcf72cc80af28156ba1f6601fcfc00dc",
+      "source_sha": "f623c220fde8d511b694e7c4271e092cd3d4692b",
       "version": "0.0.0-candidate.1",
-      "manifest_sha256": "1ce746b6593892f176fe7c259a8e3fbc52ca91ceb3e6a855a61589e43ce9ca49"
+      "manifest_sha256": "feb1187c9d5ed7c491a441a83fee40f02688ccadaede57b4c7c285478d26e504"
     },
     {
       "directory": "shine-board",

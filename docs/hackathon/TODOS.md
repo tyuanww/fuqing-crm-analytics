@@ -7,15 +7,27 @@
 2026-09-13 用户确认“核心版本优先交付、扩库完善后置”。目标是问数后 AI 优先使用定制组件自由组板，板内按选定范围修改；首批六类不是最终上限。M1／产品仍 PARTIAL；原全量 App Goal 保持 PAUSED。本节承接原本地施工记录，不把旧冻结实现反推成最终需求。
 
 
-### 2026-10-12 PR #120 CI 交付与正式组合缺口
+### 2026-10-12 PR #120 合并后 main CI 与正式组合缺口
 
-本节记录代码 head `bd96af9a` 的捕获快照：已正常推送，[PR #120](https://github.com/tyuanww/fuqing-crm-analytics/pull/120) 当时 OPEN、MERGEABLE、CLEAN，未合并。四笔分别为代码／锁 `2b98baaa`、说明／证据 `528271d0`、同 tree 祖先同步 `86826129` 和单文件夹具修复 `bd96af9a`；当时 14 个路径，无关目录不在 PR。文档接续独立交付，最新 HEAD、PR 计数和 CI 须以实际 Git／PR 核对；上述 CI 不抵扣后续 head。公开 main 仍是下节的 `5943d4be`。
+本节记录 [PR #120](https://github.com/tyuanww/fuqing-crm-analytics/pull/120) 已普通 merge 后的事实：合并提交为 `e04caca7`，父提交为 `5943d4be` 与 `8800ebd8`，远端 main 已完成新的实际 CI。合并后证据与工件摘要见[核验记录](evidence/shinemage-postmerge-pr120-20261012.md)。feature 工作树仍停在 `codex/shinemage-abc-local-candidate`，不会自动切换到 main。
 
-私有暂存 `8f44bb64` 的上传 CI 成功，新 artifact `11710265230`／digest `fbef740a…` 实际下载与 receiver 核对 18 成员、九包／两 profile。三项非敏感变量已配置并回读，专用 read Secret 未改；工件有效期至 `2026-10-25T17:31:36Z`。输入对应当前 PR 组合，旧 artifact 不再代表新两包。
+PR #121 使用暂存提交 `e9bfc776` 的上传 CI `38218001878`，新 artifact `11732716479`／digest `552aa4d1…`／704587 bytes 已实际下载并由 receiver 核对 18 成员、九包／两 profile。三项非敏感变量已更新并回读，专用只读 Secret 已配置且值不入库；工件有效期至 `2026-10-26T07:29:17Z`。PR #121 attempt 2 的 B0、test、lint、changes、merge-gate 全部 SUCCESS；首次 attempt 因旧 artifact manifest 摘要失败，失败证据保留。
 
-[实际主 CI 38162446612](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38162446612)和[rc2 preflight 38162446076](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38162446076)均 SUCCESS，六个适用 checks 成功、五个路径未选 job SKIPPED。Ubuntu 后端 3235 PASS／80 SKIP／0 FAIL／0 ERROR，12 JUnit／3315 testcase 无重复；B0 Python 862 PASS／41 subtests PASS、23 warnings。实际 CI Python 3.14.8；本机正常钩子为 Python 3.14.4、后端 3237 PASS／78 SKIP 与完整 B0 exit 0。不同平台／层级不相加。两轮本地 push 失败与一行正向夹具修复、68 项同次回归和本机审查按[本轮证据](evidence/shinemage-cordis-pr120-ci-delivery-20261012.md)留存。
+[合并后 main CI 38167688143](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38167688143) SUCCESS：12 个 JUnit 文件、3315 个唯一 testcase，0 failure／0 error／80 skipped；B0 862 PASS／41 subtests PASS，23 warnings 保留。合并前六个适用 checks、rc2 preflight、两轮本地 push 失败与夹具回归仍按[原始证据](evidence/shinemage-cordis-pr120-ci-delivery-20261012.md)留存，不与合并后数字相加。
 
-文档接续按独立 docs 提交交付；获 PR #120 合并授权后做适用 QA／普通 merge／实际新 main CI。当前九包的两份 profile 没有 service_binding，还没有对应新 candidate、服务／platform／terminal／browser／恢复链与 journal。旧两包未连接宿主、旧 headed／WSL 不能抵扣。真实 CRM／WeKnora／模型／UAT、standalone、SDK 分发及独立 DSH 升级保持原 stop/go，T1/T15/T19/T21 不勾完，PARTIAL、release_ready=false。
+当前九包的两份 profile 没有 service_binding，还没有对应新 candidate、服务／platform／terminal／browser／恢复链与 journal。旧两包未连接宿主、旧 headed／WSL 不能抵扣。真实 CRM／WeKnora／模型／UAT、standalone、SDK 分发及独立 DSH 升级保持原 stop/go，T1/T15/T19/T21 不勾完，PARTIAL、release_ready=false。
+
+### 2026-10-12 三仓正式插件包 CI 收口
+
+Workbench、CRM、Knowledge 作者仓已分别加入正式 `dsh-plugin-pack/v1` 生成与独立 artifact 上传。当前 PR head 为 `3030e3f`、`dac0539`、`f623c22`，对应 CI run `38204944592`、`38204944092`、`38205510926` 全部 SUCCESS；主仓下载后逐份用 `readPluginPack` 核对 source SHA、manifest digest、tarball digest、`source_dirty=false` 与 `activation=NOT_RUN`。Knowledge 额外修复了 checkout 必须绑定 PR head，旧 run `38204944846` 的来源 `7037e0af…` 不使用。
+
+组合锁和 Workbench 作者证据锁已由 `865cda89` 同步到当前回执。正式包 CI 已关闭作者产物这一项，仍不等于 candidate/journal、服务/目标/terminal/browser/recovery、真实 CRM/WeKnora/UAT、standalone、SDK 分发或 DSH 升级通过；`release_ready=false`。
+
+### 2026-10-12 当前组合输入预检
+
+基于上述三份真实 PR CI formal pack 和组合锁中的六份既有包，`scripts/ci/composition-pack-inputs.mjs` 已在固定 Node 24.19.0 / Python 3.14.4 下生成九包、两 profile 的固定输入回执，命令 exit 0。回执锁摘要为 `be215557…`，原始回执 SHA-256 为 `4a7b9cf9…`，见[预检记录](evidence/shinemage-composition-preflight-20261012.md)及机器摘要。该步骤只关闭包身份和输入准备，profile 仍没有 `service_binding`；宿主、服务/目标、terminal/browser/recovery、candidate/journal、真实业务、standalone、SDK 分发和 DSH 升级继续保持 NOT_RUN/BLOCKED，不能据此生成 candidate 或发布。
+
+PR #121 的 hosted B0 已用新的组合 artifact 实际重跑成功，记录在[正式组合交付](evidence/shinemage-pr121-formal-pack-delivery-20261012.md)；这只关闭当前 GitHub CI 输入链，不改变上述 service binding、candidate/journal、宿主和发布边界。
 
 以下保留应用／本地提交时点；其中“未推送、新 hosted CI 未跑、工件未上传”不覆盖本节。
 

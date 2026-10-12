@@ -1,0 +1,62 @@
+{
+  "schema": "shinemage-formal-plugin-ci/v1",
+  "observed_at": "2026-10-12",
+  "main_commit": "865cda89",
+  "release_ready": false,
+  "artifacts": [
+    {
+      "repository": "tyuanww/dsh-analytics-workbench",
+      "source_sha": "3030e3f21263f6ec65cb01c7aeacd4c80e2eb711",
+      "run_id": 38204944592,
+      "formal_manifest_sha256": "900004009437e68052e957610e618090a1e7d69d485376a53afea6eb008fed85",
+      "tarball_sha256": "b75a5c900b94b333a2749a8b35d5ea106f5aea158667a6e338baa240b886b088",
+      "schema_version": "dsh-plugin-pack/v1",
+      "source_dirty": false,
+      "activation": "NOT_RUN"
+    },
+    {
+      "repository": "tyuanww/dsh-crm-knowledge",
+      "source_sha": "dac0539bbbe076f62ae592c35e74efcca987e568",
+      "run_id": 38204944092,
+      "formal_manifest_sha256": "4ee58ec30161aa5de22978fa01c278938a4dfd6bb152fd321e894534672fb763",
+      "tarball_sha256": "89e6f69cd9806b2b1b623e3060ff65942268fe848f7020a65964177f92af2136",
+      "schema_version": "dsh-plugin-pack/v1",
+      "source_dirty": false,
+      "activation": "NOT_RUN"
+    },
+    {
+      "repository": "tyuanww/dsh-knowledge",
+      "source_sha": "f623c220fde8d511b694e7c4271e092cd3d4692b",
+      "run_id": 38205510926,
+      "formal_manifest_sha256": "feb1187c9d5ed7c491a441a83fee40f02688ccadaede57b4c7c285478d26e504",
+      "tarball_sha256": "73641493765950fd3d04fa20df448951e9beb3909236600858cae2544c8602c7",
+      "schema_version": "dsh-plugin-pack/v1",
+      "source_dirty": false,
+      "activation": "NOT_RUN"
+    }
+  ],
+  "workbench_author_evidence": {
+    "artifact_id": 11727111491,
+    "archive_sha256": "ccea4987d61b47afe77e6c067f0a3805d4cabc13cd9bfa5fad5f0ddba9e77d13",
+    "archive_bytes": 546719,
+    "core_files": 155,
+    "core_pass": 1086,
+    "core_fail": 0,
+    "core_skipped": 0,
+    "browser": "NOT_RUN_BY_THIS_COMMAND",
+    "standalone": "NOT_RUN_BY_THIS_COMMAND"
+  },
+  "knowledge_checkout_fix": {
+    "corrected_run_id": 38205510926,
+    "previous_run_id": 38204944846,
+    "previous_source_sha_not_used": "7037e0af7dd7ab4709d10d06c471de6c08d1f669"
+  },
+  "not_closed": [
+    "candidate/journal",
+    "service/target/terminal/browser/recovery",
+    "real_model_crm_weknora_uat",
+    "standalone_page_package",
+    "sdk_distribution",
+    "independent_dsh_upgrade"
+  ]
+}

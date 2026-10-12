@@ -3,15 +3,17 @@
 适用于成果工作树的本地补丁；是否已集成，以该工作树 Git 状态和远端证据为准。授权见 [AGENTS](../../AGENTS.md)。当前施工与缺口看根 [STATUS.md](../../STATUS.md) 和 [TODOS 的 M1 核心交付](../hackathon/TODOS.md#m1-核心交付)。黑客松入口与 [治理实施记录](../hackathon/WORKFLOW-GOVERNANCE-2026-09-06.md) 是历史证据链，不是本轮任务卡。
 
 
-## 当前 PR #120 与 Cordis 对接验证（2026-10-12）
+## 当前 PR #120 合并后与 Cordis 对接验证（2026-10-12）
 
-本节核验对象是已正常推送的代码 head `bd96af9a`，不是后续文档提交的 HEAD。[PR #120](https://github.com/tyuanww/fuqing-crm-analytics/pull/120) 在捕获时 OPEN、MERGEABLE、CLEAN，尚未合并；最新 HEAD、PR 计数及对应 CI 以实际 Git／PR 为准，以下结果不抵扣后续 head。该对象的[实际主 CI](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38162446612)和[rc2 preflight](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38162446076)均 SUCCESS；六个适用 checks 成功、五个路径未选 job SKIPPED。本轮 Ubuntu 后端 3235 PASS／80 SKIP／0 FAIL／0 ERROR，12 JUnit／3315 testcase 无重复；B0 Python 862 PASS／41 subtests PASS，23 warnings 保留，opt-in/platform 跳过不计通过。本机正常 pre-push 的后端为 3237 PASS／78 SKIP、完整 B0 exit 0；当前 hosted Python 3.14.8 与本机固定 3.14.4 分别记账。
+本节先记录 PR #120 合并后的当前事实，再保留合并前门禁作为历史对象。[PR #120](https://github.com/tyuanww/fuqing-crm-analytics/pull/120) 已普通 merge 到 `e04caca7`；[合并后 main CI](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38167688143) SUCCESS。五个适用 job 成功，五个路径矩阵 job SKIPPED；12 个 JUnit 文件包含 3315 个唯一 testcase，0 failure／0 error／80 skipped；B0 862 PASS／41 subtests PASS，23 warnings 保留。合并提交、父提交、artifact digest 与本地 feature 工作树边界见[合并后证据](../hackathon/evidence/shinemage-postmerge-pr120-20261012.md)。
 
 本轮旧正向 host verifier 夹具只校准为精确 Cordis `4.0.4`，原拒绝和 journal 断言未改。五文件同次命令：`node --test --test-concurrency=1 scripts/release/plugin-host-evidence.test.mjs scripts/crm-calibration/profile.test.mjs scripts/crm-calibration/profile-packs.test.mjs scripts/crm-calibration/composition-inputs.test.mjs scripts/ci/composition-pack-inputs.test.mjs`，68 PASS／0 FAIL／0 SKIP；不与此前四文件 42 或作者测试相加。核心及本机独立审查无发现，外部 Claude/OCR NOT_RUN。
 
-组合 archive 由私有暂存 `8f44bb64` 的[真实上传 CI](https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/38160012202)生成，ID `11710265230`、SHA-256 `fbef740af07cafc5bfd92bcc310bd9427d7e59eaed644114a0632a244df601f4`；18 成员、九包／两 profile 验证通过。三项非敏感变量已更新，read Secret 未改，有效期至 `2026-10-25T17:31:36Z`。使用实际 archive 或 GitHub ID／digest，禁止用本机自制 ZIP 冒充 CI 工件；所有消费输出须用新独占目录，不复用前两轮失败输出。正常推送须分别满足 backend 与 B0 的依赖锁，不能只核对 Python 版本。原始日志、JUnit 去重、GitHub 合成 checkout 两父提交和工件摘要见[本轮记录](../hackathon/evidence/shinemage-cordis-pr120-ci-delivery-20261012.md)与[机器证据](../hackathon/evidence/shinemage-cordis-pr120-ci-delivery-20261012-validation.json)。
+当前三份作者仓 formal pack 已绑定到组合锁后，可用 `node scripts/ci/composition-pack-inputs.mjs --input-dir /absolute/input-dir --output /new/private/composition --python /absolute/python3.14` 生成九包、两 profile 的固定输入。2026-10-12 的实际回执 exit 0，锁摘要 `be215557…`，原始证据见[当前正式组合输入预检](../hackathon/evidence/shinemage-composition-preflight-20261012.md)。该命令只验证输入身份和摘要，不启动宿主或业务服务；当前 profile 无 `service_binding` 时不得继续生成 candidate/journal。
 
-当前两份 profile 均无 `service_binding`；完整服务／目标／terminal／browser／恢复仍需当前组合的新正式输入和回执。绿色 PR/preflight 不证明已合入 main、真实业务或 SDK 分发通过；文档接续的 Git 交付状态另外按实际 HEAD／PR 核验。下节保留本地应用／提交时点，旧“未推送／工件未上传”不覆盖本节。
+组合 archive 由暂存提交 `e9bfc776` 的[真实上传 CI](https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/38218001878)生成，ID `11732716479`、SHA-256 `552aa4d122aa84418c6874798fef7c6024f5052ee8c331535036d5f85a5ea486`、704587 bytes；18 成员、九包／两 profile 验证通过，有效期至 `2026-10-26T07:29:17Z`。三项非敏感变量已更新并回读，专用只读 Secret 已配置且值不入库。PR #121 attempt 2 的 hosted B0 实际 SUCCESS：862 passed、23 warnings、41 subtests；首次旧 artifact 摘要失败保留。使用实际 archive 或 GitHub ID／digest，禁止用本机自制 ZIP 冒充 CI 工件；所有消费输出须用新独占目录，不复用前两轮失败输出。原始日志与接收回执见[PR #121 正式组合交付](../hackathon/evidence/shinemage-pr121-formal-pack-delivery-20261012.md)。
+
+当前两份 profile 均无 `service_binding`；完整服务／目标／terminal／browser／恢复仍需当前组合的新正式输入和回执。绿色 PR/preflight 与 main CI 已证明对应 Git/CI 检查通过，不证明真实业务或 SDK 分发通过；本地 feature 工作树仍与 main 分开，具体状态以 STATUS 和合并后证据为准。下节保留合并前本地应用／提交时点。
 
 ## PR #119 合并与 Cordis 本地对接（2026-10-12，历史时点）
 
@@ -232,11 +234,11 @@ DSH 本地开发包装器读取 `.nvmrc` 并选择 Node 24.19.0，不修改系�
 | 输入 | 实际绑定 |
 |---|---|
 | `CRM_COMPOSITION_PACK_INPUTS` / `CRM_COMPOSITION_PAGE_INPUTS` | `config/shinemage-composition-packs.lock.json` 的九份正式包及两 profile |
-| `WORKBENCH_AUTHOR_CI_ARCHIVE` | `config/workbench-author-evidence.lock.json`，当前来源 `6c5adc9f`，实际作者 core 155 文件／1086 PASS，与 page 正式包来源一致 |
+| `WORKBENCH_AUTHOR_CI_ARCHIVE` | `config/workbench-author-evidence.lock.json`，当前来源 `3030e3f`，实际作者 core 155 文件／1086 PASS，与 Workbench 正式包来源一致；CI run `38204944592` |
 | `DOMAIN_AUTHOR_CI_ARCHIVE` | `config/domain-author-evidence.lock.json`，来源 `e78e040e`、参考领域 tarball `22245ab9…`，并与主仓固定领域输入同字节 |
 | `PUBLIC_CONTRACT_INPUTS` | `config/public-contract-inputs.lock.json` 的 Workbench／CRM／Brand 三份归档与 31 份公共材料；JSON 合同为 `shinemage-public-contract-inputs/v1` |
 
-组合准备回执提供两份输入 JSON。公共合同输入 JSON 的 `archives` 分别使用 `workbench`、`crm`、`brand` 键，值为对应固定 ZIP 的绝对路径。作者归档、合同材料与运行 tarball 是不同对象，各自按锁核对；不要把 CI 普通 content pack 替代正式包回执。
+组合准备回执提供两份输入 JSON。公共合同输入 JSON 的 `archives` 分别使用 `workbench`、`crm`、`brand` 键，值为对应固定 ZIP 的绝对路径。作者归档、合同材料与运行 tarball 是不同对象，各自按锁核对；三个作者仓当前正式 `dsh-plugin-pack/v1` CI 回执与摘要见[正式包 CI 收口](../hackathon/evidence/shinemage-formal-plugin-ci-20261012.md)。不要把 CI 普通 content pack 替代正式包回执；正式包回执也不自动创建 candidate 或 journal。
 
 已封存输入可离线复用。准备本次拥有、已创建且为空的绝对输出根；Python 3.14.4 环境须满足 `scripts/dsh-b0/requirements.lock`，主仓 kit 的固定 build-tools、上游 checkout、pnpm 缓存、zstd 及 `.context/dsh-b0/package-inputs/` 的原领域 tarball 也须已准备。现有流水线内部绑定 kit build-tools 与该领域输入目录，不从其他作者仓搜索缺项。
 

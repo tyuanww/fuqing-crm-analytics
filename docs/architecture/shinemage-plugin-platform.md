@@ -3,13 +3,13 @@
 本设计落实[已批准的拆分计划](../plans/shinemage-plugin-platform-split.md)，不是重新选型。目标是官方 DSH 底座、独立 CRM/知识库服务、各自版本化的插件和一个组合 profile。首批插件已经形成独立远程仓，当前远程清单见[远程仓盘查](../hackathon/evidence/shinemage-remote-repository-inventory-20261010.md)，主线短 SHA 见 STATUS，完整 SHA、合并时间和 CI 事实见[最新 post-merge 记录](../hackathon/evidence/shinemage-remote-repository-postmerge-r4-20261011.md)；主仓继续保留平台合同、组合验证、历史 `dsh-plugins/` 和候选账本，部分历史副本已经按授权清理，剩余副本、正式物理分仓、正式 `dsh-plugin-pack/v1`/`dsh-plugin-candidate/v1` 分发与生产切换仍按各自门禁执行。普通插件更新的具体操作见[插件更新指南](../operating/shinemage-plugin-update.md)。
 
 
-## 当前维护边界（2026-10-11 PR 交付）
+## 当前维护边界（2026-10-12 PR #120 合并后）
 
-本轮实现与测试迁移已分组提交，当前说明最后同步，见[本地交付索引](../hackathon/evidence/shinemage-main-local-commit-closeout-20261011.md)。九个插件各自维护源码／版本／测试；board-components 仍是独立领域库，不是第十个插件。主仓装配锁绑定 Workbench `6c5adc9f`、CRM `c4b1c91e` 及其正式回执与作者 CI；默认开发／preflight 装配消费固定包，公开合同阶段核对封存作者导出，领域与私有 core 覆盖核对作者来源和实际 CI。
+本轮实现与测试迁移已分组提交并经 PR #120 普通 merge，合并后 main CI 见[核验记录](../hackathon/evidence/shinemage-postmerge-pr120-20261012.md)。九个插件各自维护源码／版本／测试；board-components 仍是独立领域库，不是第十个插件。主仓装配锁绑定 Workbench `3030e3f`、CRM `dac0539`、Knowledge `f623c22` 及其真实 PR CI 产出的 `dsh-plugin-pack/v1` 回执；默认开发／preflight 装配消费固定包，公开合同阶段核对封存作者导出，领域与私有 core 覆盖核对作者来源和实际 CI。当前回执与 artifact 摘要见[正式包 CI 收口](../hackathon/evidence/shinemage-formal-plugin-ci-20261012.md)。
 
 主仓仍负责 backend、平台合同、profile、组合消费、来源与权限门禁、保留合同守卫和静态扫描。另两组私有数值／查询断言继续读取旧 Workbench，历史 `dsh-plugins/` 因这些用途暂留；本地源码迁移没有证明全面源码退场，也没有改变运行时边界。完整看板仍在 analytics-workbench，shine-board 是能力标记；合成知识服务不能当作真实 WeKnora。
 
-单插件日常变更按自己的作者检查与受影响主仓消费者验证，不重建 DSH、迁移业务数据库或重复 SDK 全量审计。DSH 升级仍是独立固定候选及兼容验收。精确 peer `4.0.2` 与固定实际 `4.0.4` 的差异未关闭；D/E 五仓无独立 tsc，SDK 正式分发 BLOCKED，产品 PARTIAL、release_ready=false。本轮已经正常推送到 PR #119，并完成零内容差异的 main 祖先同步；私有封存工件上传与主仓 receiver、三变量配置已完成，专用只读 secret 仍待用户直接配置。新的主仓 hosted CI、组合 candidate/journal、目标／真实业务及发布不据此通过。当前 backend worker 的结果事务争用修复只影响服务处理，不改变插件归属；新服务字节需自己的组合验收。见[本轮交付](../hackathon/evidence/shinemage-main-pr119-delivery-20261011.md)。
+单插件日常变更按自己的作者检查与受影响主仓消费者验证，不重建 DSH、迁移业务数据库或重复 SDK 全量审计。DSH 升级仍是独立固定候选及兼容验收。作者仓、主仓守卫与正式包组合现已精确使用 Cordis `4.0.4`；D/E 五仓无独立 tsc，SDK 正式分发 BLOCKED，产品 PARTIAL、release_ready=false。PR #120 已合入 main，合并后主 CI 与工件摘要见[合并后核验](../hackathon/evidence/shinemage-postmerge-pr120-20261012.md)。当前九包输入预检已成功生成固定回执，见[组合输入预检](../hackathon/evidence/shinemage-composition-preflight-20261012.md)；candidate/journal、目标／真实业务及发布不据此通过，新服务字节需自己的组合验收。当前 backend worker 的结果事务争用修复只影响服务处理，不改变插件归属。
 
 此前三路径应用时点（保留原记录）：
 
@@ -32,9 +32,9 @@
 
 主仓公共合同入口已按授权应用 12 路径，并修复重复终止进程组造成的错误覆盖；新入口隔离完整 B0 r2 exit 0：Python 855 PASS / 41 subtests PASS、23 warnings 保留，Node 27 组各自 0 FAIL / 9 次跳过。原 15 个生成器和 C0 hash 未改，主仓实际字节的守卫 28、路径 pytest 34、槽位 4、主题负测／漂移 2 分别通过，OCR 可审 11/11 与排除测试人工 1/1 已审，无开放发现。旧失败保留，主仓未提交，新 hosted CI 和当前组合准入未执行。见[本轮应用与实测](../hackathon/evidence/shinemage-public-contract-main-cutover-20261011.md)。
 
-最新作者 Workbench 6c5adc9f、CRM c4b1c91e 的正式 pack 已在隔离目录生成、读取并逐成员核对；回执分别为 0af61dab…、4663cce0…。主仓运行包／作者证据锁仍是原绑定，9 包／2 profile 的两锁前移提案已经验证但未应用；不继承旧 candidate/journal 或宿主验收。见[最新来源正式包及下一提案](../hackathon/evidence/shinemage-current-author-formal-packs-20261011.md)。产品 PARTIAL，SDK 分发 BLOCKED，release_ready=false。
+2026-10-11 提案时点：作者 Workbench `6c5adc9f`、CRM `c4b1c91e` 的正式 pack 已在隔离目录生成、读取并逐成员核对；回执分别为 `0af61dab…`、`4663cce0…`。当时主仓运行包／作者证据锁仍是原绑定，9 包／2 profile 的两锁前移提案已经验证但未应用；不继承旧 candidate/journal 或宿主验收。当前绑定以本节顶部及 STATUS 为准。见[历史来源记录](../hackathon/evidence/shinemage-current-author-formal-packs-20261011.md)。产品 PARTIAL，SDK 分发 BLOCKED，release_ready=false。
 
-最新来源正式包的原公共组合已实际运行：9 PASS / 0 FAIL / 0 SKIP，18 个指定来源负对照 EPERM，运行前后 198 个受保护文件未变、自有进程组已退出；合成 HTTP 和官方 resolver 层级，不代表严格 peer／完整宿主或正式准入。两锁提案 OCR delegate 2/2 已审，无开放发现，主仓 apply --check exit 0，但仍未应用。主仓 PR #119 的已有 B0 是 SKIPPED，当前 dirty CI 未执行；见[本轮组合与两锁审查](../hackathon/evidence/shinemage-latest-formal-combination-20261011.md)。
+2026-10-11 提案时点：来源正式包的原公共组合实际运行 9 PASS / 0 FAIL / 0 SKIP，18 个指定来源负对照 EPERM；这只是合成 HTTP 和官方 resolver 层级，不代表严格 peer／完整宿主或正式准入。两锁提案 OCR delegate 2/2 已审，主仓 apply --check exit 0；后续已由 Cordis 对接和 PR #120 取代。见[历史组合记录](../hackathon/evidence/shinemage-latest-formal-combination-20261011.md)。
 
 此前合同入口隔离提案准备时点（保留原记录）：
 

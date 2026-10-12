@@ -1,0 +1,44 @@
+{
+  "schema": "shinemage-composition-preflight/v1",
+  "observed_at": "2026-10-12",
+  "command_exit": 0,
+  "node": "24.19.0",
+  "python": "3.14.4",
+  "receipt_sha256": "4a7b9cf996ea28e07168e4ee0ef2a3fbd6152b567371bac1d919471ed7c6e400",
+  "receipt_bytes": 4024,
+  "lock_sha256": "be215557e46c78c6c15b738e1a15dd22281770bee438f30960fbf0de3f4437eb",
+  "profile_count": 2,
+  "plugin_count": 9,
+  "current_formal_plugins": [
+    {
+      "id": "@shine-mage/dsh-analytics-workbench-b0",
+      "source_sha": "3030e3f21263f6ec65cb01c7aeacd4c80e2eb711",
+      "manifest_sha256": "900004009437e68052e957610e618090a1e7d69d485376a53afea6eb008fed85",
+      "pack_sha256": "b75a5c900b94b333a2749a8b35d5ea106f5aea158667a6e338baa240b886b088"
+    },
+    {
+      "id": "@shine-mage/dsh-crm-knowledge",
+      "source_sha": "dac0539bbbe076f62ae592c35e74efcca987e568",
+      "manifest_sha256": "4ee58ec30161aa5de22978fa01c278938a4dfd6bb152fd321e894534672fb763",
+      "pack_sha256": "89e6f69cd9806b2b1b623e3060ff65942268fe848f7020a65964177f92af2136"
+    },
+    {
+      "id": "@shine-mage/dsh-knowledge",
+      "source_sha": "f623c220fde8d511b694e7c4271e092cd3d4692b",
+      "manifest_sha256": "feb1187c9d5ed7c491a441a83fee40f02688ccadaede57b4c7c285478d26e504",
+      "pack_sha256": "73641493765950fd3d04fa20df448951e9beb3909236600858cae2544c8602c7"
+    }
+  ],
+  "host": "NOT_RUN",
+  "remote_ci": "NOT_RUN",
+  "release_ready": false,
+  "not_closed": [
+    "service_binding",
+    "candidate/journal",
+    "target/terminal/browser/recovery",
+    "real_model_crm_weknora_uat",
+    "standalone_page_package",
+    "sdk_distribution",
+    "independent_dsh_upgrade"
+  ]
+}
