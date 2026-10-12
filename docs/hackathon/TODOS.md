@@ -23,7 +23,7 @@
 |---|---|---|---|---|---|
 | M2-01 | 九包组合 candidate 合同 | `ISOLATED_CANDIDATE_PREPARED / MAIN_NOT_REGISTERED` | 主仓正式 profile/journal 注册仍需单独授权和当前准入链 | `dsh-composition-candidate/v1`、CLI、两 profile/九 pack 摘要绑定和 fail-closed 已通过；隔离 candidate digest 与 journal seq 2 已留证 | `feat(release): add composition candidate contract` + `fix(release): import composition writer path helper` |
 | M2-02 | 服务绑定与兼容回执 | `ISOLATED_EVIDENCE_BOUND / MAIN_PROFILE_UNBOUND` | 主仓两份 profile 仍未写入 service binding | 隔离组合已绑定 `analytics-first-purchase` service gate、source SHA 和兼容回执；主仓正式 profile/journal 不变 | 后续取得授权后单独提交主仓接线 |
-| M2-03 | 非生产 WSL2 目标 | `BLOCKED` | 新的 Linux x86_64 / WSL2 目标；不得使用 `100.93.46.46` | 目标身份、Node/Python/zstd/DSH runtime、权限和临时目录均核验通过 | `docs(acceptance): record non-production target preflight` |
+| M2-03 | WSL2 目标（当前按测试+生产授权） | `TARGET_PREFLIGHT_PASS / CANDIDATE_NOT_ATTACHED` | 当前 candidate 仍需接入已授权目标；后续云服务器迁移另行 | Linux x86_64 / WSL2、Python 3.14.4、Node/zstd、权限和精确 13-wheel preflight 已通过；现役服务 stale lock 已受保护修复 | `docs(acceptance): record authorized production target preflight` |
 | M2-04 | source HTTP → terminal → browser → recovery | `NOT_RUN` | M2-01、M2-02、M2-03 | 同一新 candidate 在同一目标完成四段链路；每段 receipt 绑定 candidate，重试幂等、失败可恢复、临时资源回收 | 每个阶段一个目的，代码变更按 OCR 审查后分别提交 |
 | M2-05 | 真实页面与浏览器验收 | `NOT_RUN` | 真实 `COCKPIT_EXAMPLE_PACKAGE` 和可用目标 | headed 桌面、移动视口、读屏、键盘焦点、高对比度和 standalone 页面均有真实证据 | `docs(acceptance): record browser and standalone evidence` |
 | M2-06 | 真实模型/CRM/WeKnora/UAT | `NOT_RUN` | 真实环境授权、账号权限和业务验收窗口 | 查询、引用、保存、驾驶舱、权限失败、恢复和人工 UAT 均记录实际对象与边界 | `docs(acceptance): record real business UAT` |
@@ -37,6 +37,10 @@
 ### 2026-10-12 独立作者仓合并与目标前置阻塞
 
 十个独立作者仓 PR #1 已普通 merge，合并后的各自 main CI 全部 SUCCESS，详情见[合并快照](evidence/shinemage-author-merge-and-candidate-preflight-20261012.md)。隔离目录已基于当前 Workbench formal pack 和既有 `first-purchase-source-http-local` 服务绑定准备 candidate `facb83f3…` / journal seq 2；主仓 profile 与正式 journal 未写入。唯一可连接的 `100.93.46.46` 属于生产入口，用户确认没有另一台非生产 WSL2，所以 source／terminal／browser／recovery 保持 NOT_RUN。产品 PARTIAL、SDK BLOCKED、`release_ready=false`。
+
+### 2026-10-13 授权生产目标前置通过
+
+用户明确授权杭州生产入口同时承担当前测试与生产目标，后续再迁移云服务器。目标前置回执 `SERVICE_TARGET_PREFLIGHT_PASS`，现役服务陈旧 supervisor lock 已在无 owner 条件下受保护清理并恢复 `active/running`；当前 composition candidate `125c8e53…` 尚未接入目标，source HTTP、terminal、browser、recovery 和 activation 仍保持 `NOT_RUN/BLOCKED`。详见[授权生产目标前置预检](evidence/shinemage-production-target-preflight-20261013.md)。
 
 
 2026-09-13 用户确认“核心版本优先交付、扩库完善后置”。目标是问数后 AI 优先使用定制组件自由组板，板内按选定范围修改；首批六类不是最终上限。M1／产品仍 PARTIAL；原全量 App Goal 保持 PAUSED。本节承接原本地施工记录，不把旧冻结实现反推成最终需求。

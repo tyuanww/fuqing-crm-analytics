@@ -3,11 +3,15 @@
 适用于成果工作树的本地补丁；是否已集成，以该工作树 Git 状态和远端证据为准。授权见 [AGENTS](../../AGENTS.md)。当前施工与缺口看根 [STATUS.md](../../STATUS.md) 和 [TODOS 的 M1 核心交付](../hackathon/TODOS.md#m1-核心交付)。黑客松入口与 [治理实施记录](../hackathon/WORKFLOW-GOVERNANCE-2026-09-06.md) 是历史证据链，不是本轮任务卡。
 
 
-## 独立作者仓合并与正式目标前置（2026-10-12）
+## 独立作者仓合并与正式目标前置（2026-10-12，历史时点）
 
 十个独立作者仓 PR #1 已普通 merge，各自 main CI 均 SUCCESS；完整 SHA、CI run 和范围见[合并与候选前置核验](../hackathon/evidence/shinemage-author-merge-and-candidate-preflight-20261012.md)。隔离任务目录以当前 Workbench formal pack 与既有服务绑定生成 candidate `facb83f3…` / journal seq 2，主仓 profile/journal 未变。
 
-正式目标仍为 `NOT_RUN`：`100.93.46.46` 在当前运维文档中是生产入口，用户没有可用的第二台非生产 x86_64 WSL2。不得把该生产入口用于 synthetic source/terminal/browser/recovery。提供独立非生产目标后，才按既有 runner 生成本次 candidate 的新回执。
+该段只记录 2026-10-12 的历史边界：当时没有把生产入口用于本次 candidate 的 synthetic source/terminal/browser/recovery。2026-10-13 用户明确授权杭州入口同时作为当前测试和生产目标，当前目标前置结果见[授权生产目标前置预检](../hackathon/evidence/shinemage-production-target-preflight-20261013.md)；后续云服务器迁移另行处理。
+
+## 授权生产目标前置（2026-10-13）
+
+`100.93.46.46` 已只读核验为 Linux x86_64 / WSL2，Python `3.14.4`、Node `v24.21.0`、zstd `1.5.5` 和临时目录权限满足目标合同。现役 DSH 的陈旧 `supervisor.lock` 在确认空目录且无 supervisor owner 后受保护移除，systemd 随后恢复 `active/running`。当前 service manifest 的精确 13-wheel preflight 返回 `SERVICE_TARGET_PREFLIGHT_PASS`；cold install、source HTTP、terminal、browser、recovery、身份状态和 activation 仍按 candidate 身份单独验收。现役 release source 与隔离 candidate 不同，不能继承旧结果。
 
 ## 当前 PR #121 合并后与 Cordis 对接验证（2026-10-12）
 

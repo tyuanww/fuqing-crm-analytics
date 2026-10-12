@@ -1,0 +1,59 @@
+{
+  "schema_version": "shinemage-production-target-preflight/v1",
+  "recorded_at": "2026-10-13T00:21:42+08:00",
+  "target": {
+    "address": "100.93.46.46",
+    "role": "authorized-test-and-production",
+    "system": "Linux",
+    "machine": "x86_64",
+    "kernel": "6.18.33.2-microsoft-standard-WSL2",
+    "node": "v24.21.0",
+    "python": "/usr/local/bin/python3.14 3.14.4",
+    "zstd": "1.5.5",
+    "temporary_directory": {
+      "path": "/tmp",
+      "writable": true,
+      "mode": "01777"
+    }
+  },
+  "service_recovery": {
+    "lock_path": "/srv/shinemage/dsh/releases/dsh-0.20.0.0-r3/.context/dsh-dev/supervisor.lock",
+    "lock_was_empty": true,
+    "active_supervisor_pids": [],
+    "action": "guarded-rmdir-empty-stale-lock",
+    "action_exit_code": 0,
+    "post_state": {
+      "active": "active",
+      "sub_state": "running",
+      "exec_main_status": 0
+    }
+  },
+  "service_target_preflight": {
+    "schema_version": "shinemage-service-target-preflight/v1",
+    "status": "SERVICE_TARGET_PREFLIGHT_PASS",
+    "manifest_sha256": "44719e57755a151bc64bf5c9e5075271e301dd26952a9b808181242a0c857a9a",
+    "service_source_sha": "f9726f682fc0d1d4c6aef6f07e6932c2c600c3d6",
+    "service_version": "0.1.0rc1",
+    "wheel_count": 13,
+    "checks": {
+      "python": "PASS",
+      "wsl2": "PASS",
+      "wheel_tags": "PASS",
+      "wheel_python": "PASS"
+    },
+    "release_ready": false,
+    "activation": "BLOCKED"
+  },
+  "candidate_binding": {
+    "candidate_digest": "125c8e538816835cad212048b8fd0302d98588d704b09de559789df9bf6e6bdb",
+    "local_journal_seq": 2,
+    "target_release_tag": "dsh-0.20.0.0-r3",
+    "target_release_source_sha": "fcbd1324ac5a4b7367d9d7d2bb9bbebdbf32ba25",
+    "candidate_attached_to_target": false,
+    "source_http": "NOT_RUN",
+    "terminal": "NOT_RUN",
+    "browser": "NOT_RUN",
+    "recovery": "NOT_RUN",
+    "release_ready": false
+  }
+}
