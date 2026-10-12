@@ -1,0 +1,34 @@
+{
+  "schema": "shinemage-composition-candidate-contract/v1",
+  "observed_at": "2026-10-12",
+  "status": "PASS_CONTRACT_CANDIDATE_NOT_RUN",
+  "candidate_schema": "dsh-composition-candidate/v1",
+  "implementation": {
+    "module": "scripts/release/composition-candidate.mjs",
+    "cli": "pnpm dsh plugin composition-candidate",
+    "profile_count": 2,
+    "plugin_count": 9,
+    "service_gate_required": true,
+    "activation": "NOT_RUN",
+    "release_ready": false
+  },
+  "validation": {
+    "command": "node --test scripts/release/composition-candidate.test.mjs scripts/release/cli.test.mjs scripts/release/plugin-candidate.test.mjs scripts/release/profile-packs.test.mjs scripts/release/release-profile-packs.test.mjs scripts/crm-calibration/composition-inputs.test.mjs",
+    "node": "24.19.0",
+    "passed": 68,
+    "failed": 0,
+    "skipped": 0,
+    "diff_check": "PASS",
+    "ocr_review": {
+      "tool": "open-code-review delegate",
+      "reviewable_files": 3,
+      "coverage_rate": 1,
+      "findings_after_repair": 0
+    }
+  },
+  "candidate_generation": {
+    "status": "NOT_RUN",
+    "reason": "Both current profiles still lack service_binding and service evidence; the new CLI fails closed before writing output or journal events."
+  },
+  "scope": "Contract and fail-closed preparation only; no host, service, WSL2, browser, recovery, production activation or release claim"
+}

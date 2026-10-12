@@ -13,6 +13,7 @@ import { runLocalVerification } from './release/local-verify.mjs';
 import { collectReleaseReadiness, printReadiness } from './release/readiness.mjs';
 import { DSH_UPSTREAM_SHA, NODE_MAJOR, PNPM_VERSION } from './release/toolchain.mjs';
 import { createPluginCandidate } from './release/plugin-candidate.mjs';
+import { createCompositionCandidate } from './release/composition-candidate.mjs';
 import { verifyPluginHost } from './release/plugin-host-evidence.mjs';
 import { verifyPluginService } from './release/plugin-service-evidence.mjs';
 import { loadReleasePacks, prepareReleasePayload } from './release/release-profile-packs.mjs';
@@ -227,13 +228,13 @@ function serviceTargetPreflight(options) {
 }
 async function plugin(args) {
   const [subcommand, ...options] = args;
-  const usage = 'Usage:\n  pnpm dsh plugin candidate (--plugin /absolute/plugin | --pack-manifest /absolute/plugin-pack.json --pack-sha256 SHA256) --output-dir /absolute/output --state-path /absolute/state.json [--profile config/profile.json] [--previous-profile config/profile.json] [--service-evidence /absolute/receipt.json]\n  pnpm dsh plugin verify-host --candidate /absolute/candidate.json --evidence /absolute/evidence.json --state-path /absolute/state.json\n  pnpm dsh plugin verify-service --candidate /absolute/candidate.json --evidence /absolute/service-pair/receipt.json --state-path /absolute/state.json [--target-evidence /absolute/result/receipt.json --target-input /absolute/input/input-manifest.json]\nverify-host checks existing local v2 Host evidence or dsh-runtime-host-evidence/v1 (HTTP) / dsh-browser-host-evidence/v1 (headless) archived WSL receipt envelopes, then appends a scope-specific observation to the candidate journal; it does not start or activate a host. WSL HTTP envelopes require the original source-HTTP service event; browser envelopes require the same candidate runtime-Host event, sealed inputs/controller, runtime archive, result inventory and owned-directory completion. Terminal envelopes (dsh-terminal-host-evidence/v1) require the same candidate source-HTTP service event and independently verify fixed controller/runner, package/runtime digests, in-flight SIGKILL, released slot, no duplicate dispatch, session prefix and cleanup. They record CANDIDATE_TERMINAL_HOST_OBSERVED, not the old HTTP/browser event. Browser v2 (dsh-browser-host-evidence/v2) requires a terminal_host_event for the same candidate, independent plugin/service provenance, fixed runner/controller, collected result archive and cleanup evidence; v1 retains its runtime_host_event contract. They do not grant production readiness.\nverify-service checks service artifacts and optional archived WSL synthetic observations, then appends to the same journal. Both target options are required together. Known receipt scopes are the 14-case service recovery matrix (input-manifest.json) and the 10-case source-HTTP package drill (input.json); neither proves target DSH or production readiness. Production identity and supply-chain gates remain BLOCKED; local hashes are not remote attestation. It does not start or activate a service.';
+  const usage = 'Usage:\n  pnpm dsh plugin candidate (--plugin /absolute/plugin | --pack-manifest /absolute/plugin-pack.json --pack-sha256 SHA256) --output-dir /absolute/output --state-path /absolute/state.json [--profile config/profile.json] [--previous-profile config/profile.json] [--service-evidence /absolute/receipt.json]\n  pnpm dsh plugin composition-candidate --crm-inputs /absolute/crm-inputs.json --page-inputs /absolute/page-inputs.json --service-binding /absolute/service-binding.json --service-evidence /absolute/service-evidence.json --output-dir /absolute/output --state-path /absolute/state.json\n  pnpm dsh plugin verify-host --candidate /absolute/candidate.json --evidence /absolute/evidence.json --state-path /absolute/state.json\n  pnpm dsh plugin verify-service --candidate /absolute/candidate.json --evidence /absolute/service-pair/receipt.json --state-path /absolute/state.json [--target-evidence /absolute/result/receipt.json --target-input /absolute/input/input-manifest.json]\nverify-host checks existing local v2 Host evidence or dsh-runtime-host-evidence/v1 (HTTP) / dsh-browser-host-evidence/v1 (headless) archived WSL receipt envelopes, then appends a scope-specific observation to the candidate journal; it does not start or activate a host. WSL HTTP envelopes require the original source-HTTP service event; browser envelopes require the same candidate runtime-Host event, sealed inputs/controller, runtime archive, result inventory and owned-directory completion. Terminal envelopes (dsh-terminal-host-evidence/v1) require the same candidate source-HTTP service event and independently verify fixed controller/runner, package/runtime digests, in-flight SIGKILL, released slot, no duplicate dispatch, session prefix and cleanup. They record CANDIDATE_TERMINAL_HOST_OBSERVED, not the old HTTP/browser event. Browser v2 (dsh-browser-host-evidence/v2) requires a terminal_host_event for the same candidate, independent plugin/service provenance, fixed runner/controller, collected result archive and cleanup evidence; v1 retains its runtime_host_event contract. They do not grant production readiness.\nverify-service checks service artifacts and optional archived WSL synthetic observations, then appends to the same journal. Both target options are required together. Known receipt scopes are the 14-case service recovery matrix (input-manifest.json) and the 10-case source-HTTP package drill (input.json); neither proves target DSH or production readiness. Production identity and supply-chain gates remain BLOCKED; local hashes are not remote attestation. It does not start or activate a service.';
   const targetUsage = '  pnpm dsh plugin service-preflight --python /absolute/python3.14 --manifest /absolute/service-manifest.json --manifest-sha256 SHA256 --wheelhouse /absolute/wheels\nservice-preflight is read-only: checks WSL2, Python and wheel tags; never installs, starts a service or changes a journal.';
   if (!subcommand || subcommand === '--help' || subcommand === '-h') {
     console.log(usage + '\n' + targetUsage);
     return;
   }
-  if (!['candidate', 'verify-host', 'verify-service', 'service-preflight'].includes(subcommand)) throw new Error(`PLUGIN_COMMAND_UNKNOWN ${subcommand}`);
+  if (!['candidate', 'composition-candidate', 'verify-host', 'verify-service', 'service-preflight'].includes(subcommand)) throw new Error(`PLUGIN_COMMAND_UNKNOWN ${subcommand}`);
   if (options.includes('--help') || options.includes('-h')) {
     console.log(usage + '\n' + targetUsage);
     return;
@@ -241,6 +242,7 @@ async function plugin(args) {
   let allowed = new Set(['--candidate', '--evidence', '--state-path']);
   if (subcommand === 'verify-service') allowed = new Set([...allowed, '--target-evidence', '--target-input']);
   if (subcommand === 'candidate') allowed = new Set(['--plugin', '--pack-manifest', '--pack-sha256', '--output-dir', '--state-path', '--profile', '--previous-profile', '--service-evidence']);
+  if (subcommand === 'composition-candidate') allowed = new Set(['--crm-inputs', '--page-inputs', '--service-binding', '--service-evidence', '--output-dir', '--state-path']);
   if (subcommand === 'service-preflight') allowed = new Set(['--python', '--manifest', '--manifest-sha256', '--wheelhouse']);
   const seen = new Set();
   for (let index = 0; index < options.length; index += 2) {
@@ -251,6 +253,18 @@ async function plugin(args) {
     seen.add(item);
   }
   if (subcommand === 'service-preflight') return serviceTargetPreflight(options);
+  if (subcommand === 'composition-candidate') {
+    const candidate = await createCompositionCandidate({
+      crmInputsPath: requiredOption(options, '--crm-inputs'),
+      pageInputsPath: requiredOption(options, '--page-inputs'),
+      serviceBindingPath: requiredOption(options, '--service-binding'),
+      serviceEvidencePath: requiredOption(options, '--service-evidence'),
+      outputDir: requiredOption(options, '--output-dir'),
+      statePath: requiredOption(options, '--state-path'),
+    });
+    console.log(JSON.stringify(candidate, null, 2));
+    return;
+  }
   if (subcommand === 'verify-host' || subcommand === 'verify-service') {
     const verifier = subcommand === 'verify-host' ? verifyPluginHost : verifyPluginService;
     let observation;

@@ -21,7 +21,7 @@
 
 | ID | 任务 | 当前状态 | 前置条件 | 完成标准 | 提交边界 |
 |---|---|---|---|---|---|
-| M2-01 | 九包组合 candidate 合同 | `NOT_RUN` | 明确组合 candidate 的受支持 schema 和产出入口；当前 CLI 只有单插件 candidate | 能从九包正式 pack、两份 profile 和固定输入生成可验证的组合身份，不拼接手写 JSON | `feat(release): add composition candidate contract` 或记录为阻塞证据 |
+| M2-01 | 九包组合 candidate 合同 | `CONTRACT_READY / CANDIDATE_NOT_RUN` | M2-02 提供服务 binding/evidence 后才能生成正式身份 | `dsh-plugin-candidate/v1` 组合合同、CLI、两 profile/九 pack 摘要绑定和缺服务 fail-closed 已通过；正式 candidate 仍等待 M2-02 | `feat(release): add composition candidate contract` |
 | M2-02 | 服务绑定与兼容回执 | `BLOCKED` | 真实、可核验的服务来源和兼容证据 | 两份正式 profile 的 `service_binding` 与服务回执、source SHA、API/state 合同一致；旧服务写入者被拒绝 | `feat(release): bind composition service evidence` |
 | M2-03 | 非生产 WSL2 目标 | `BLOCKED` | 新的 Linux x86_64 / WSL2 目标；不得使用 `100.93.46.46` | 目标身份、Node/Python/zstd/DSH runtime、权限和临时目录均核验通过 | `docs(acceptance): record non-production target preflight` |
 | M2-04 | source HTTP → terminal → browser → recovery | `NOT_RUN` | M2-01、M2-02、M2-03 | 同一新 candidate 在同一目标完成四段链路；每段 receipt 绑定 candidate，重试幂等、失败可恢复、临时资源回收 | 每个阶段一个目的，代码变更按 OCR 审查后分别提交 |
