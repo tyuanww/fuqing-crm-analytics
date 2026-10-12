@@ -17,6 +17,8 @@
 
 同一 candidate 随后在该目标以当前 release 的临时 profile/runtime 完成九包 terminal drill：组合 roster、CRM/Knowledge 工具、synthetic native loop、受控重启和进程丢失后的 durable session 恢复 5/5 PASS；组合封套经 `verifyCompositionHostEvidence` 校验并追加 journal seq 4。目标 receipt SHA `1f4ceeea…`、输入 SHA `c2bffa80…`、runner SHA `271cc3a0…`，清理为 `OWNED_PROCESSES_AND_TEMPORARY_INSTALL_REMOVED`。该回执不证明 browser、真实模型/业务、供应链、生产身份、activation 或 release readiness；详见[当前组合 terminal 目标验收](../hackathon/evidence/shinemage-composition-terminal-target-20261013.md)。
 
+对用户授权的真实入口 `https://app.tyuan.chat/` 做了只读 headed browser 观察：Aside 在桌面、平板和移动 viewport 都能打开入口，但 20 秒后仍为 `HARNESS / Loading plugins…`，控制台错误为空且没有可操作工作台元素。该观察只记录 live shell 的可达性和当前加载阻塞，不接入 composition journal，也不替代 candidate-bound browser、standalone、读屏、键盘焦点或高对比度验收。详见[授权生产入口 live browser 观察](../hackathon/evidence/shinemage-live-browser-20261013.md)。
+
 ## 当前 PR #121 合并后与 Cordis 对接验证（2026-10-12）
 
 本节先记录 PR #121 合并后的当前事实，再保留 PR #120 等合并前门禁作为历史对象。[PR #121](https://github.com/tyuanww/fuqing-crm-analytics/pull/121) 已普通 merge 到 `b47cf9baf328921041dfaff3e289a2af4323e1d0`；[合并后 main CI](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38224409545) SUCCESS。四个适用 job 成功，五个路径矩阵 job SKIPPED；B0 862 PASS／41 subtests PASS，23 warnings 保留。合并提交、feature head、artifact digest 与本地工作树边界见[PR #121 合并后证据](../hackathon/evidence/shinemage-pr121-postmerge-20261012.md)。

@@ -1,0 +1,48 @@
+{
+  "schema_version": "shinemage-live-browser-observation/v1",
+  "recorded_at": "2026-10-13T01:33:00+08:00",
+  "target": {
+    "url": "https://app.tyuan.chat/",
+    "role": "authorized-test-and-production",
+    "driver": "Aside headed browser"
+  },
+  "observation": {
+    "status": "PARTIAL_LIVE_ENTRY_BLOCKED",
+    "page_ready": "BLOCKED_PLUGINS_LOADING",
+    "console_errors": [],
+    "interactive_elements": "NONE_WHILE_LOADING",
+    "body_text": "HARNESS\\nLoading plugins…",
+    "wait_seconds": 20,
+    "candidate_bound": "NOT_RUN",
+    "standalone": "NOT_RUN_REAL_COCKPIT_EXAMPLE_PACKAGE",
+    "desktop": "PASS_SCREEN_CAPTURE_ONLY",
+    "tablet": "PASS_SCREEN_CAPTURE_ONLY",
+    "mobile": "PASS_SCREEN_CAPTURE_ONLY",
+    "screen_reader": "NOT_RUN",
+    "keyboard_focus": "NOT_RUN",
+    "high_contrast": "NOT_RUN",
+    "mutations": "NONE",
+    "production_data": "NOT_USED",
+    "release_ready": false
+  },
+  "screenshots": {
+    "live-desktop.jpg": {
+      "bytes": 10090,
+      "sha256": "a09af951f27ec178f1d3cc196e3df85c8e5adde087d4226bd6e7a2cbc6ebc5cc"
+    },
+    "live-mobile.jpg": {
+      "bytes": 4055,
+      "sha256": "0877acd72cb0a8e8a8c7c04eb627554ed593cf9dd391c8912dee4ff2303959f2"
+    },
+    "live-tablet.jpg": {
+      "bytes": 7018,
+      "sha256": "d527b51b4813d9a566a28f487dba2862196fd8717c54a3e9fdfad7ff45b73897"
+    }
+  },
+  "boundaries": [
+    "只打开用户已授权的真实公开入口，没有点击、提交、保存、删除或修改设置。",
+    "三种 viewport 均停在 HARNESS Loading plugins，不能证明工作台或 standalone 页面可用。",
+    "未将此 live UI 观察接入 composition candidate journal；candidate-bound browser 仍未运行。",
+    "真实 COCKPIT_EXAMPLE_PACKAGE 仍未提供，不能生成 standalone 页面验收。"
+  ]
+}
