@@ -27,9 +27,11 @@
 
 随后只读查看 Aside 的插件详情：`@shine-mage/dsh-analytics-workbench-b0` 与 `@shine-mage/dsh-shine-query` 都是 `v0.0.0-b0`，各自只有 `analytics-workbench-ui` / `shine-query-ui` 组件显示运行中。没有切换开关、卸载插件、重启服务或修改配置；这说明当前工作台会话拿到的是 UI 组件装配，不能据此证明目标 DSH runtime 已向 agent 暴露 CRM provider。
 
+仓库静态注册位置也已只读核对：`dsh-plugins/crm-knowledge/src/index.ts` 定义 `query_crm_dashboard_gsv`，`dsh-plugins/shine-query/src/index.ts` 只有 `shine-query-ui` 的 UI 注入，`backend/analytics_first_purchase_app.py` 明确没有启用原生工具、CRM service 或模型。由此可定位为运行时组合/会话装配缺少 CRM provider；这不是对生产 CRM 接口健康度的新判断。
+
 因此：
 
-- `CRM_TOOL_EXPOSURE`：`BLOCKED_TOOL_NOT_EXPOSED`；需要把 CRM provider 接入当前目标会话或确认带工具面的数字员工/DSH runtime，而不是只启用 UI 组件。
+- `CRM_TOOL_EXPOSURE`：`BLOCKED_TOOL_NOT_EXPOSED`；需要把 `crm-knowledge` provider、service profile 和正确 DSH runtime 接入当前目标会话，而不是只启用 UI 组件。
 - 保存/驾驶舱写入：`NOT_RUN_READ_ONLY_SCOPE`。
 - 权限失败、会话恢复和人工业务代表复核：`NOT_RUN`。
 - standalone、candidate-bound browser、读屏、键盘完整焦点和高对比度仍由 M2-05/M2-04 独立负责。

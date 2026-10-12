@@ -65,6 +65,14 @@
     ],
     "crm_provider_exposed": false
   },
+  "static_registration": {
+    "crm_provider_source": "dsh-plugins/crm-knowledge/src/index.ts",
+    "crm_provider_tool": "query_crm_dashboard_gsv",
+    "ui_source": "dsh-plugins/shine-query/src/index.ts",
+    "ui_source_exports": ["name", "inject", "apply"],
+    "b0_app_boundary": "backend/analytics_first_purchase_app.py: no native tool, catalog selection, model, or CRM service enabled",
+    "interpretation": "runtime composition/session assembly gap; not a CRM endpoint health failure"
+  },
   "remaining": {
     "save_or_cockpit_mutation": "NOT_RUN_READ_ONLY_SCOPE",
     "permission_failure": "NOT_RUN",
