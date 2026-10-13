@@ -1,6 +1,6 @@
 # M2-10 证据与状态收口（2026-10-13）
 
-本轮核对 M2 任务卡、机器审计矩阵、STATUS/TODOS、本地提交链与 candidate 真实 UAT 证据的一致性，不改变任何运行时、profile、journal、发布或生产状态。
+本轮核对 M2 任务卡、机器审计矩阵、STATUS/TODOS、本地提交链与 candidate 真实 UAT 证据的一致性，并补记 M2-05 standalone 页面包与浏览器证据，不改变任何运行时、profile、journal、发布或生产状态。
 
 ## 一致性检查
 
@@ -10,7 +10,7 @@
 - 每张卡都有当前 `status`、`evidence` 和 `next`；
 - M2-01/02 已登记正式 candidate/profile 快照；page profile 带 service binding，CRM profile 按组合合同无绑定；
 - M2-03 保持目标前置通过；
-- M2-04/05/06/07/08/09 当前分别为 terminal/browser `PASS`、键盘焦点部分观察且 standalone 缺输入、candidate 真实模型/CRM/WeKnora 只读通过但 live 工具面为空、供应链 `BLOCKED`、release `NOT_RUN` 和 DSH `DEFERRED`；
+- M2-04/05/06/07/08/09 当前分别为 terminal/browser `PASS`、standalone 页面包与本地 Chromium 子项通过但 candidate 无障碍仍部分观察、candidate 真实模型/CRM/WeKnora 只读通过但 live 工具面为空、供应链 `BLOCKED`、release `NOT_RUN` 和 DSH `DEFERRED`；
 - M2-10 本身记录本审计矩阵，未把产品发布状态误写为通过；
 - 全局状态仍为 `product=PARTIAL`、`release_ready=false`、`activation=NOT_RUN`、`code_changes_this_audit=true`、`production_data=READ_ONLY_REDACTED / NO_MUTATION`；代码修复已完成本地审查和提交，不改变发布门禁状态。
 
@@ -21,7 +21,7 @@ jq empty docs/hackathon/evidence/shinemage-m2-acceptance-audit-20261013.json
 git diff --check
 ```
 
-两项均退出 0。代码审查覆盖 28 个可审查文件，其中 5 个代码文件和 23 个 JSON；修复后的 4 个代码文件已再次复审。Node 24 完整 release suite 为 `546 PASS / 0 FAIL / 0 SKIP`，`git diff --check` 和 pre-commit 均通过。当前本地提交链包含独立的 docs-only 收口提交和代码修复提交；本次代码门禁已完成，剩余开放项仍由 M2-05 至 M2-09 的外部验收条件决定。
+两项均退出 0。此前代码审查覆盖 28 个可审查文件，其中 5 个代码文件和 23 个 JSON；本轮新增的页面包与浏览器探针由 `open-code-review-delegate` 逐文件审查，3 个文件全部覆盖，修复后测试复验通过。页面包/合同/渲染定向测试为 `48 PASS / 0 FAIL`，standalone Chromium 探针为 `6 PASS / 0 errors`；`git diff --check` 和 pre-commit 均通过。当前本地提交链包含页面包代码提交 `91f880b5` 和独立 docs-only 收口提交；本次代码门禁已完成，剩余开放项仍由 M2-05 无障碍、M2-06 未执行写路径与 M2-07 至 M2-09 的外部验收条件决定。
 
 ## M2-10 结论
 
