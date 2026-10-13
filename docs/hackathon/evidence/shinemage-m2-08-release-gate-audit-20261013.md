@@ -29,3 +29,13 @@ activation: NOT_RUN
 ## 结论
 
 M2-08 保持 `NOT_RUN`。这不是发布失败，而是前置门禁未关闭时的 fail-closed 状态。下一步必须先关闭 M2-04 至 M2-07 的独立缺口、生成并核对同一 immutable artifact、取得明确 release/activation 授权，再按授权执行 receive → activation → canary → rollback；当前不自动部署、不推送、不切换生产。
+
+## 2026-10-13 定向回归
+
+执行：
+
+```sh
+node --test --test-concurrency=1 scripts/release/operator-gate.test.mjs
+```
+
+结果：`3 PASS / 0 FAIL / 0 SKIP`。这只证明 operator gate 的身份匹配、禁止响应和 15 分钟 SLI 规则保持 fail-closed，不产生 release、activation、canary 或 rollback 证据。
