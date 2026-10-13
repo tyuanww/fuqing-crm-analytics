@@ -1,9 +1,9 @@
 {
   "schema_version": "shinemage-m2-acceptance-audit/v1",
-  "recorded_at": "2026-10-13T02:20:00+08:00",
+  "recorded_at": "2026-10-13T10:47:27+08:00",
   "repository": {
     "branch": "codex/shinemage-abc-local-candidate",
-    "head": "fb4e580f6355cfdd87fac6f64dba652cdc90e170",
+    "head": "e7c83d0d590eebdce45f78884c0400a4700ea635",
     "push": "NOT_RUN",
     "protected_untracked": [
       "security-audit-skill/"
@@ -12,7 +12,9 @@
   "candidate": {
     "digest": "125c8e538816835cad212048b8fd0302d98588d704b09de559789df9bf6e6bdb",
     "service_source_sha": "f9726f682fc0d1d4c6aef6f07e6932c2c600c3d6",
-    "journal": "isolated-only"
+    "journal": "main-repo-registered",
+    "registration": "config/candidates/shinemage-composition-20261013/registration.json",
+    "journal_sha256": "abd088d9b6e06793b85cefe72c867bc79e6157ca35c2f56672f518eafd8f4937"
   },
   "journal_events": [
     {
@@ -37,21 +39,23 @@
   "cards": [
     {
       "id": "M2-01",
-      "status": "ISOLATED_CANDIDATE_PREPARED / MAIN_NOT_REGISTERED",
+      "status": "FORMAL_CANDIDATE_REGISTERED / RELEASE_GATES_OPEN",
       "evidence": [
         "composition-candidate contract",
-        "journal seq 2"
+        "main-repo registration",
+        "journal seq 1-4"
       ],
-      "next": "主仓正式 profile/journal 接线仍未授权"
+      "next": "candidate-bound browser and remaining release gates"
     },
     {
       "id": "M2-02",
-      "status": "ISOLATED_EVIDENCE_BOUND / MAIN_PROFILE_UNBOUND",
+      "status": "FORMAL_BINDING_REGISTERED / CRM_UNBOUND_BY_CONTRACT",
       "evidence": [
         "service compatibility gate",
-        "service source f9726f68"
+        "page profile binding",
+        "main-repo registration"
       ],
-      "next": "主仓 profile service_binding 仍缺失"
+      "next": "keep CRM profile unbound by composition contract; continue browser, UAT and release gates"
     },
     {
       "id": "M2-03",
@@ -60,7 +64,7 @@
         "production target preflight",
         "production target authorization"
       ],
-      "next": "candidate-bound browser receipt；正式注册/激活另按门禁授权"
+      "next": "candidate-bound browser receipt; activation and release remain separate gates"
     },
     {
       "id": "M2-04",
