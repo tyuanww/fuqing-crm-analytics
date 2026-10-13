@@ -64,13 +64,14 @@ export async function inspectCheckout({ id, version, checkout, expectedSha, role
     source_scan_missing: missing };
 }
 
-export async function collectCompatibilityMatrix({ checkout017 = null, checkout020 = null, sha020 = null } = {}) {
+export async function collectCompatibilityMatrix({ checkout017 = null, checkout020 = null, sha020 = null, candidate = null } = {}) {
   const rows = [
     await inspectCheckout({ id: 'dsh-0.1.7-rc.2', version: DSH_SDK_VERSION, checkout: checkout017,
       expectedSha: DSH_UPSTREAM_SHA, role: 'blocking' }),
     await inspectCheckout({ id: 'dsh-0.2.0-rc.2', version: '0.2.0-rc.2', checkout: checkout020,
       expectedSha: sha020, role: 'advisory' }),
   ];
+  if (candidate) rows.push(await inspectCheckout({ ...candidate, role: candidate.role ?? 'advisory' }));
   const overall = rows.some(row => row.status === 'BLOCKED') ? 'BLOCKED'
     : rows.some(row => ['NOT_RUN', 'DEFERRED'].includes(row.status)) ? 'PARTIAL' : 'SUPPORTED';
   return { schema_version: COMPATIBILITY_SCHEMA, generated_at: new Date().toISOString(), offline: true,
@@ -84,7 +85,16 @@ function option(name) {
 
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
   try {
-    const result = await collectCompatibilityMatrix({ checkout017: option('--checkout-017'), checkout020: option('--checkout-020'), sha020: option('--sha-020') });
+    const candidate = {
+      id: option('--candidate-id'), version: option('--candidate-version'),
+      checkout: option('--candidate-checkout'), expectedSha: option('--candidate-sha'),
+    };
+    const candidateValues = Object.values(candidate);
+    const candidateProvided = candidateValues.some(value => value !== null);
+    assert.ok(!candidateProvided || candidateValues.every(value => typeof value === 'string' && value.length > 0)
+      && absolute(candidate.checkout) && /^[0-9a-f]{40}$/.test(candidate.expectedSha), 'COMPATIBILITY_CANDIDATE_ARGUMENTS');
+    const result = await collectCompatibilityMatrix({ checkout017: option('--checkout-017'), checkout020: option('--checkout-020'), sha020: option('--sha-020'),
+      candidate: candidateProvided ? candidate : null });
     const output = option('--output');
     if (output) {
       assert.ok(absolute(output), 'COMPATIBILITY_OUTPUT_INVALID');
