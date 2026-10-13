@@ -92,6 +92,7 @@
         "source-owned free-page/v1 package fcee92a9 / sha256 e2ed8f1c…",
         "standalone package contract and rendered-text regression: 48 PASS / 0 FAIL",
         "standalone Chromium probe: 7 PASS / real_model NOT_RUN / contains_real_data false",
+        "standalone accessibility automation: 6 PASS / AX tree, keyboard, forced-colors simulation / screen_reader NOT_RUN",
         "candidate-bound headed responsive receipt",
         "keyboard focus partial: 12 Tab steps, 43 interactive DOM nodes / 42 named / 1 unnamed input",
         "candidate-keyboard-focus.json"
@@ -165,7 +166,7 @@
       "rechecked_changed_code_files": 4,
       "commit": "fcee92a9",
       "previous_commit": "91f880b5",
-      "tests": "standalone follow-up: Node 48 PASS / 0 FAIL; source-owned Chromium probe 7 PASS / 0 errors; synthetic Chromium probe 6 PASS / 0 errors; previous release suite: 546 PASS / 0 FAIL / 0 SKIP"
+      "tests": "standalone follow-up: Node 48 PASS / 0 FAIL; source-owned Chromium probe 7 PASS / 0 errors; standalone accessibility automation 6 PASS / screen_reader NOT_RUN; synthetic Chromium probe 6 PASS / 0 errors; previous release suite: 546 PASS / 0 FAIL / 0 SKIP"
     }
   }
 }

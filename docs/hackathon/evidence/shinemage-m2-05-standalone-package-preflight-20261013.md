@@ -68,4 +68,4 @@ node dsh-plugins/analytics-workbench/test/cockpit-ui-ux-browser-probe.mjs --pres
 
 命令退出码为 `0`，结果文件为 `.context/checks/cockpit-ui-ux/browser-standalone-final-20261013/results.json`，包含 7 项 PASS：保存与筛选重绘、文字选区候选、回执重试、冻结候选预览、刷新恢复、图表可见高度与 390px 移动视口无横向溢出、浏览器无未处理异常。该探针使用本地拥有的 synthetic FastAPI/SQLite 与真实 Chromium，不含真实业务数据；`full_dsh_shell=NOT_RUN`、`real_model=NOT_RUN`、`contains_real_data=false`。
 
-本 follow-up 关闭的是 standalone 页面包输入和 standalone 浏览器子项。M2-05 仍保持页面验收未完全收口：candidate headed browser 的读屏、人工完整键盘焦点和 Windows 高对比度仍未完成，故当前状态为 `PARTIAL_LIVE_BROWSER_PASS / CANDIDATE_BROWSER_PASS / STANDALONE_PACKAGE_BROWSER_PASS / ACCESSIBILITY_KEYBOARD_PARTIAL`。该结果不授予 release、activation、canary 或 rollback。
+本 follow-up 关闭的是 standalone 页面包输入和 standalone 浏览器子项；自动化 AX tree、键盘遍历、forced-colors 模拟及减少动态效果补测见[standalone 自动化无障碍补测](shinemage-m2-05-standalone-accessibility-20261013.md)。M2-05 仍保持页面验收未完全收口：candidate headed browser 的读屏、人工完整键盘焦点和 Windows 高对比度仍未完成，故当前状态为 `PARTIAL_LIVE_BROWSER_PASS / CANDIDATE_BROWSER_PASS / STANDALONE_PACKAGE_BROWSER_PASS / ACCESSIBILITY_KEYBOARD_PARTIAL`。该结果不授予 release、activation、canary 或 rollback。
