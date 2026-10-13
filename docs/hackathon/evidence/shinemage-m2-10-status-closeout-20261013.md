@@ -10,7 +10,7 @@
 - 每张卡都有当前 `status`、`evidence` 和 `next`；
 - M2-01/02 保持隔离 candidate/profile 未注册；
 - M2-03 保持目标前置通过；
-- M2-04/05/06/07/08/09 当前分别为 browser `PASS`、standalone 缺输入、`MISSING_CREDENTIAL`、供应链 `BLOCKED`、release `NOT_RUN` 和 DSH `DEFERRED`；
+- M2-04/05/06/07/08/09 当前分别为 browser `PASS`、键盘焦点部分观察且 standalone 缺输入、`MISSING_CREDENTIAL`、供应链 `BLOCKED`、release `NOT_RUN` 和 DSH `DEFERRED`；
 - M2-10 本身记录本审计矩阵，未把产品发布状态误写为通过；
 - 全局状态仍为 `product=PARTIAL`、`release_ready=false`、`activation=NOT_RUN`、`code_changes_this_audit=false`、`production_data=NOT_USED_IN_CURRENT_OBSERVATIONS`。
 

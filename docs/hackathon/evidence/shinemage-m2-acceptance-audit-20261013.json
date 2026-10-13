@@ -75,19 +75,20 @@
         "candidate browser preflight: runtime/tunnel unavailable",
         "candidate browser seq 5 and responsive receipt"
       ],
-      "next": "keep browser receipt bound to candidate; finish standalone/accessibility and remaining release gates"
+      "next": "keep browser receipt bound to candidate; finish standalone, screen-reader, full keyboard-focus, high-contrast and remaining release gates"
     },
     {
       "id": "M2-05",
-      "status": "PARTIAL_LIVE_BROWSER_PASS / CANDIDATE_BROWSER_PASS / STANDALONE_NOT_RUN",
+      "status": "PARTIAL_LIVE_BROWSER_PASS / CANDIDATE_BROWSER_PASS / ACCESSIBILITY_KEYBOARD_PARTIAL / STANDALONE_NOT_RUN",
       "evidence": [
         "live browser loaded after bundle wait",
         "desktop/tablet/mobile screenshots",
-        "keyboard focus partial",
         "standalone package preflight",
-        "candidate-bound headed responsive receipt"
+        "candidate-bound headed responsive receipt",
+        "keyboard focus partial: 12 Tab steps, 43 interactive DOM nodes / 42 named / 1 unnamed input",
+        "candidate-keyboard-focus.json"
       ],
-      "next": "COCKPIT_EXAMPLE_PACKAGE、screen reader、full keyboard focus、high contrast"
+      "next": "COCKPIT_EXAMPLE_PACKAGE、真实 screen reader、人工完整 keyboard focus、Windows high contrast"
     },
     {
       "id": "M2-06",

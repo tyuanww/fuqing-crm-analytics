@@ -22,9 +22,10 @@ Aside browser daemon: fetch failed / ConnectTimeoutError
 - 初次前置核验的 `NOT_RUN_CANDIDATE_RUNTIME_UNAVAILABLE` 仍保留为失败尝试记录；
 - 随后杭州目标的 candidate 进程恢复监听 `4332/4336`，建立临时 SSH 隧道后，真实 Aside headed 页面加载成功；
 - 生成了交互树、页面正文、console 结果和 375/768/1440 三种 viewport 截图，`console_errors=[]`，只读模式可见；
+- 在同一 headed candidate 页面执行 12 次实际 `Tab`，记录到按钮焦点序列；DOM 语义快照有 43 个可交互节点，其中 42 个有名称、1 个 `input` 未命名，`console_errors=[]`；该结果只算键盘焦点的部分观察，不替代人工完整焦点复核；
 - composition browser envelope 已通过 `validateCompositionHostEvidence`，并在候选 journal 追加 seq 5：`COMPOSITION_BROWSER_HOST_OBSERVED`；
 - M2-04 当前为 `TERMINAL_PASS / BROWSER_PASS`；terminal 阶段已有 seq 4 的进程丢失恢复证据，browser 阶段没有发起模型、CRM 或 WeKnora 请求；
-- screen reader、完整键盘焦点、Windows 高对比度、standalone 页面包仍属于 M2-05 的独立门禁。
+- screen reader、人工完整键盘焦点、Windows 高对比度、standalone 页面包仍属于 M2-05 的独立门禁；本轮只把 headed Tab 观察记录为 `ACCESSIBILITY_KEYBOARD_PARTIAL`。
 
 ## 正式回执
 
@@ -34,6 +35,7 @@ Aside browser daemon: fetch failed / ConnectTimeoutError
 - `receipt.json`：5 个浏览器场景、console 空错误集、只读模式和截图摘要；
 - `envelope.json`：`dsh-composition-host-evidence/v1` browser 阶段封套；
 - `observation.json` 与三张 JPEG：实际 Aside 页面 DOM/正文和移动、平板、桌面截图；
+- `candidate-keyboard-focus.json` 与 `candidate-keyboard-focus.jpg`：headed Tab 序列、DOM 语义快照和限制；
 - `runner.txt`：本轮 gstack/Aside 驱动说明。
 
 封套目标摘要：
@@ -46,6 +48,4 @@ runner_sha256=b7f515bd1e9e956ee6db2242aeb560a9c834479427ae86320e22cc4050dd3305
 journal_seq=5
 ```
 
-本轮只关闭 candidate-bound browser 子项；`release_ready=false`、`activation=NOT_RUN` 保持不变。
-
-本轮没有代码改动；只通过正式验证器追加 candidate journal seq 5 和对应登记摘要，未启动、重启、部署、切换 live 或读取业务数据。
+本轮关闭 candidate-bound browser 子项，并补充键盘焦点部分观察；`release_ready=false`、`activation=NOT_RUN` 保持不变。没有修改代码，也没有为该 accessibility 观察追加 journal 事件；未启动、重启、部署、切换 live 或读取业务数据。
