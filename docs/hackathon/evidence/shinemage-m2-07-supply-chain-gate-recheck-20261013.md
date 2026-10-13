@@ -45,3 +45,9 @@ node --test --test-concurrency=1 scripts/release/sdk-supply-chain.test.mjs scrip
 ```
 
 结果：`31 PASS / 0 FAIL / 0 SKIP`。这些测试只证明供应链检查器和内容审计的 fail-closed 行为保持稳定，不替代真实 SBOM、发布者身份、签名、撤销验证、干净机器安装或发布授权，因此 M2-07 状态不变。
+
+## 2026-10-13 供应链材料盘查
+
+对当前仓库与授权目标做了受限文件名盘查，未发现可绑定本候选的最终 SDK SBOM、发布者签名、sigstore/attestation、撤销名单或允许名单。仓库命中的是历史 attestation 绑定说明与审计测试；目标机命中的是 Python 依赖包自带的 CycloneDX 文件，不是本九包 DSH SDK 的最终分发 SBOM，也没有对应发布者签名或撤销证明。
+
+该盘查没有下载、生成或伪造供应链材料，M2-07 继续保持 `BLOCKED`。
