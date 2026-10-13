@@ -8,7 +8,7 @@
 |---|---|---|
 | M2-01 九包 candidate | 隔离 candidate 已准备，主仓正式 profile/journal 未注册 | 不能形成正式 immutable release identity |
 | M2-02 service binding | 隔离证据已绑定，主仓两份 profile 仍缺 `service_binding` | 不能把隔离回执升级为正式发布输入 |
-| M2-04 目标链路 | source HTTP 与 terminal/进程恢复有 candidate-bound PASS；candidate-bound browser/recovery 的完整发布链仍未关闭 | 目标接收证据不完整 |
+| M2-04 目标链路 | source HTTP、terminal/进程恢复和 candidate-bound headed browser 已有 candidate-bound PASS；screen-reader/accessibility 与发布门禁仍独立开放 | 目标接收仍受页面、模型和供应链门禁约束 |
 | M2-05 页面验收 | live headed browser 部分通过；candidate browser、standalone、读屏、完整键盘焦点、高对比度仍未运行；`COCKPIT_EXAMPLE_PACKAGE` 缺失 | 页面准入不完整 |
 | M2-06 真实业务 UAT | live 工具面为空；candidate 模型以 `MISSING_CREDENTIAL` 失败；CRM/WeKnora 只读查询、保存/权限失败/恢复和人工 UAT 未运行 | 业务准入不完整 |
 | M2-07 SDK 供应链 | `BLOCKED`；SBOM、发布者身份、最终签名、撤销/允许名单、干净主机和回退未关闭 | 供应链门禁不完整 |

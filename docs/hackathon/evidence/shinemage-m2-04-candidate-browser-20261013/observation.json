@@ -1,0 +1,37 @@
+{
+  "schema_version": "shinemage-candidate-browser-observation/v1",
+  "candidate_digest": "125c8e538816835cad212048b8fd0302d98588d704b09de559789df9bf6e6bdb",
+  "target": "http://127.0.0.1:4332/",
+  "driver": "Aside headed",
+  "headed": true,
+  "url": "http://127.0.0.1:4332/",
+  "console_errors": [],
+  "interactive_snapshot": "# note: interactive (clickable / focusable) elements only.\n- title: \"伸美 AI 增长董事会\" [url=http://127.0.0.1:4332/]\n- button \"新建会话\" [ref=e1]\n- button \"收起侧边栏\" [ref=e2]\n- button \"新建会话\" [ref=e3]: \"新会话\"\n- navigation \"全局面板\" [ref=e4]:\n  - button \"插件\" [ref=e5]\n  - button \"驾驶舱\" [ref=e6]\n  - button \"数据员工\" [ref=e7]\n- text: \"工作区\"\n- button \"搜索会话\" [ref=e8]\n- button \"视图选项\" [ref=e9]\n- button \"添加工作区\" [ref=e10]\n- tree \"会话\":\n  - treeitem \"uat-probe-workspace\" [ref=e11]\n  - treeitem \"你现在运行在非生产 candidate DS 8小时\" [ref=e12] [selected]\n- button \"hutou\" [ref=e13]\n- button \"外观：跟随系统\" [ref=e14]\n- button \"设置\" [ref=e15]\n- banner:\n  - navigation \"会话层级\" [ref=e16]: \"你现在运行在非生产 candidate DS\"\n  - button \"智能体团队\" [ref=e17]\n  - text: \"标准模式\"\n  - button \"更多操作\" [ref=e18]\n  - button \"打开右侧边栏\" [ref=e19]\n  - tablist:\n    - tab \"对话\" [ref=e20] [selected]\n    - tab \"轨迹\" [ref=e21]\n- text: \"你现在运行在非生产 candidate DSH（127.0.0.1:4332）的只读访问模式。请执行真实业务 UAT，但严格限制为只读、禁止写入或配置变更：1）先列出当前实际暴露的 CRM 与 WeKnora 工具，不要猜测；2）如果存在 crm_service_health，只读调用一次；如果存在 query_crm_dashboard_gsv，只读查询日期 2026-01-01 到 2026-01-07、channel=all、exclude_low_price=false；如果需要 CRM 登录或凭据，只说明需要我在 CRM 窗口手工输入，不要索取、代填或保存凭据；3）如果存在 WeKnora 搜索/读取工具，只读检索当前已登录 WeKnora 中与‘部署验收’相关的知识库内容，只引用工具实际返回，不得编造引用；4）禁止保存、分享、删除、激活、切换、设置或提交业务数据。最终按 CRM 工具暴露情况、CRM 健康结果、CRM 看板结果、WeKnora 工具暴露情况、WeKnora 只读结果分别报告，并明确 EXPOSED / NOT_EXPOSED / NOT_RUN / RESULT。03:50\"\n- button \"复制\" [ref=e22]\n- status: \"处理失败\"\n- button \"处理失败\" [ref=e23] [disabled]\n- status: \"本轮运行失败 llm-deepseek: no API key for provider route \\\"deepseek-official\\\"; store DEEPSEEK_API_KEY through the credentials service (the web Models page writes it), or export DEEPSEEK_API_KEY in the launching environment MISSING_CREDENTIAL\"\n- button \"返回驾驶舱\" [ref=e24]\n- textbox \"发消息或创建任务, / 调用指令, @ 文件或对话\" [ref=e25] [focused]\n- button \"添加文件或调用指令\" [ref=e26]\n- button \"访问模式，当前：仅可查看\" [ref=e27]: \"仅可查看\"\n- button \"选择模型，当前 DeepSeek-V41-Flash，推理等级 High\" [ref=e28]: \"DeepSeek-V41-Flash High\"\n- button \"打开语音输入引导\" [ref=e29]\n- button \"发送消息\" [ref=e30] [disabled]\n- text: \"1 轮 1 步\"\n- button \"生成驾驶舱\" [ref=e31]\n- status",
+  "body_text": "伸美 AI 增长董事会\n新会话\n⌥\n⌘\nN\n插件\n驾驶舱\n数据员工\n工作区\nuat-probe-workspace\n你现在运行在非生产 candidate DS\n8小时\nhutou\n设置\n你现在运行在非生产 candidate DS\n智能体团队\n标准模式\n对话\n轨迹\n你现在运行在非生产 candidate DSH（127.0.0.1:4332）的只读访问模式。请执行真实业务 UAT，但严格限制为只读、禁止写入或配置变更：1）先列出当前实际暴露的 CRM 与 WeKnora 工具，不要猜测；2）如果存在 crm_service_health，只读调用一次；如果存在 query_crm_dashboard_gsv，只读查询日期 2026-01-01 到 2026-01-07、channel=all、exclude_low_price=false；如果需要 CRM 登录或凭据，只说明需要我在 CRM 窗口手工输入，不要索取、代填或保存凭据；3）如果存在 WeKnora 搜索/读取工具，只读检索当前已登录 WeKnora 中与‘部署验收’相关的知识库内容，只引用工具实际返回，不得编造引用；4）禁止保存、分享、删除、激活、切换、设置或提交业务数据。最终按 CRM 工具暴露情况、CRM 健康结果、CRM 看板结果、WeKnora 工具暴露情况、WeKnora 只读结果分别报告，并明确 EXPOSED / NOT_EXPOSED / NOT_RUN / RESULT。\n03:50\n处理失败\n处理失败\n本轮运行失败llm-deepseek: no API key for provider route \"deepseek-official\"; store DEEPSEEK_API_KEY through the credentials service (the web Models page writes it), or export DEEPSEEK_API_KEY in the launching environment\nMISSING_CREDENTIAL\n返回驾驶舱\n发消息或创建任务, / 调用指令, @ 文件或对话\n仅可查看\nDeepSeek-V41-Flash\nHigh\n1 轮 1 步\n生成驾驶舱",
+  "captures": [
+    {
+      "name": "mobile",
+      "width": 375,
+      "height": 812,
+      "file": "candidate-mobile.jpg"
+    },
+    {
+      "name": "tablet",
+      "width": 768,
+      "height": 1024,
+      "file": "candidate-tablet.jpg"
+    },
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900,
+      "file": "candidate-desktop.jpg"
+    }
+  ],
+  "observed_at": "2026-10-13T04:25:23.407Z",
+  "limitations": [
+    "No model request was sent",
+    "No CRM or WeKnora business query was executed",
+    "Screen-reader, full keyboard-focus and Windows high-contrast gates remain separate"
+  ]
+}

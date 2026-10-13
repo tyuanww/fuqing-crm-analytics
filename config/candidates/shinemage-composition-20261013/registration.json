@@ -36,11 +36,11 @@
   },
   "journal": {
     "path": "config/candidates/shinemage-composition-20261013/journal.json",
-    "sha256": "abd088d9b6e06793b85cefe72c867bc79e6157ca35c2f56672f518eafd8f4937",
+    "sha256": "adbef8264fdd83f544d40d5c6159ff555a3e86e039ae668daa15d2e7ecebfcd9",
     "release_tag": "dsh-composition-5716227293a4d793fd779c71",
-    "sequence": 4,
-    "last_status": "COMPOSITION_TERMINAL_HOST_OBSERVED",
-    "last_digest": "e3ad59c39e619f365b2552f8bf0deba22ef26c026a1c6574ba5cb61dc5c9995c"
+    "sequence": 5,
+    "last_status": "COMPOSITION_BROWSER_HOST_OBSERVED",
+    "last_digest": "23c957d1f50f56d5af2f976da7dbfff79c66a6133312bfacbef3b27b7d3ac466"
   },
   "activation": "NOT_RUN",
   "release_ready": false

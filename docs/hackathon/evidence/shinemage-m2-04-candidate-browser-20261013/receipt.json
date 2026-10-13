@@ -1,0 +1,45 @@
+{
+  "schema_version": "shinemage-candidate-browser-receipt/v1",
+  "candidate_digest": "125c8e538816835cad212048b8fd0302d98588d704b09de559789df9bf6e6bdb",
+  "status": "PASS",
+  "scope": "candidate-bound-headed-browser-responsive",
+  "scenario_count": 5,
+  "browser": {
+    "driver": "Aside headed",
+    "headed": true,
+    "url": "http://127.0.0.1:4332/",
+    "console_errors": [],
+    "read_only_mode_visible": true,
+    "responsive_viewports": [
+      {
+        "name": "mobile",
+        "width": 375,
+        "height": 812,
+        "file": "candidate-mobile.jpg",
+        "sha256": "06ab428bb6067fb4e96df254b86f0abb266dd9f19b2dcc4a2f12b47179f2ed55"
+      },
+      {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024,
+        "file": "candidate-tablet.jpg",
+        "sha256": "e184adcc09c52c5e788015d96b469e2d230453923aa70028f8686d325cafbd4e"
+      },
+      {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900,
+        "file": "candidate-desktop.jpg",
+        "sha256": "469f72e1f100a8f62bd37f98f7ce2d4194a8c5e20cd58620fa8e6abb2238d8c4"
+      }
+    ]
+  },
+  "observation_sha256": "04d61bbc3f814261208a9504a8358b3f6480fba540c0d739d2fef24b7b1f69cc",
+  "limitations": [
+    "No model request was sent",
+    "No CRM or WeKnora business query was executed",
+    "Screen-reader, full keyboard-focus and Windows high-contrast gates remain separate"
+  ],
+  "release_ready": false,
+  "activation": "NOT_RUN"
+}

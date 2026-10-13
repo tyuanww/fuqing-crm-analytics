@@ -14,7 +14,7 @@
     "service_source_sha": "f9726f682fc0d1d4c6aef6f07e6932c2c600c3d6",
     "journal": "main-repo-registered",
     "registration": "config/candidates/shinemage-composition-20261013/registration.json",
-    "journal_sha256": "abd088d9b6e06793b85cefe72c867bc79e6157ca35c2f56672f518eafd8f4937"
+    "journal_sha256": "adbef8264fdd83f544d40d5c6159ff555a3e86e039ae668daa15d2e7ecebfcd9"
   },
   "journal_events": [
     {
@@ -64,28 +64,30 @@
         "production target preflight",
         "production target authorization"
       ],
-      "next": "candidate-bound browser receipt; activation and release remain separate gates"
+      "next": "standalone/accessibility, real UAT and remaining release gates"
     },
     {
       "id": "M2-04",
-      "status": "TERMINAL_PASS / BROWSER_NOT_RUN",
+      "status": "TERMINAL_PASS / BROWSER_PASS",
       "evidence": [
         "source HTTP seq 3",
         "terminal seq 4",
-        "candidate browser preflight: runtime/tunnel unavailable"
+        "candidate browser preflight: runtime/tunnel unavailable",
+        "candidate browser seq 5 and responsive receipt"
       ],
-      "next": "restore candidate runtime/tunnel, then produce candidate-bound browser and recovery receipts"
+      "next": "keep browser receipt bound to candidate; finish standalone/accessibility and remaining release gates"
     },
     {
       "id": "M2-05",
-      "status": "PARTIAL_LIVE_BROWSER_PASS / CANDIDATE_BROWSER_STANDALONE_NOT_RUN",
+      "status": "PARTIAL_LIVE_BROWSER_PASS / CANDIDATE_BROWSER_PASS / STANDALONE_NOT_RUN",
       "evidence": [
         "live browser loaded after bundle wait",
         "desktop/tablet/mobile screenshots",
         "keyboard focus partial",
-        "standalone package preflight"
+        "standalone package preflight",
+        "candidate-bound headed responsive receipt"
       ],
-      "next": "COCKPIT_EXAMPLE_PACKAGE、candidate-bound browser、screen reader、full keyboard focus、high contrast"
+      "next": "COCKPIT_EXAMPLE_PACKAGE、screen reader、full keyboard focus、high contrast"
     },
     {
       "id": "M2-06",

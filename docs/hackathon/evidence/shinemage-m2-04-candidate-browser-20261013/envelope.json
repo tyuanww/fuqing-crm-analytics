@@ -1,0 +1,120 @@
+{
+  "schema_version": "dsh-composition-host-evidence/v1",
+  "phase": "browser",
+  "candidate_digest": "125c8e538816835cad212048b8fd0302d98588d704b09de559789df9bf6e6bdb",
+  "service_source_sha": "f9726f682fc0d1d4c6aef6f07e6932c2c600c3d6",
+  "profile_digests": [
+    "7ca3511663ab2ea5d1bb8f839c83b29f5bbd6655238450ad08a04510642191ba",
+    "2df9934f2dfce0aca9ab7b14840fc01f2f0a989f8356f39e7899e5ed81e2f92e"
+  ],
+  "plugins": [
+    {
+      "id": "@shine-mage/dsh-crm-knowledge",
+      "source_sha": "dac0539bbbe076f62ae592c35e74efcca987e568",
+      "manifest_sha256": "4ee58ec30161aa5de22978fa01c278938a4dfd6bb152fd321e894534672fb763",
+      "pack_sha256": "89e6f69cd9806b2b1b623e3060ff65942268fe848f7020a65964177f92af2136"
+    },
+    {
+      "id": "@shine-mage/dsh-knowledge",
+      "source_sha": "f623c220fde8d511b694e7c4271e092cd3d4692b",
+      "manifest_sha256": "feb1187c9d5ed7c491a441a83fee40f02688ccadaede57b4c7c285478d26e504",
+      "pack_sha256": "73641493765950fd3d04fa20df448951e9beb3909236600858cae2544c8602c7"
+    },
+    {
+      "id": "@shine-mage/dsh-analytics-workbench-b0",
+      "source_sha": "3030e3f21263f6ec65cb01c7aeacd4c80e2eb711",
+      "manifest_sha256": "900004009437e68052e957610e618090a1e7d69d485376a53afea6eb008fed85",
+      "pack_sha256": "b75a5c900b94b333a2749a8b35d5ea106f5aea158667a6e338baa240b886b088"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-brand",
+      "source_sha": "57ebcf38278068394a4feb42125c30c195fd912a",
+      "manifest_sha256": "d5039166969023075253e65e31c4d7dba910ae6ea10b9b40bf7f147bdb5efd24",
+      "pack_sha256": "4b867bf5b4e08d9aa1f45f20b20b78cbd9e11c236194ffafaa5188d8d173bd13"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-waterfall",
+      "source_sha": "d123ac1d0e7bad3e5de45169b3e72c38623b858a",
+      "manifest_sha256": "43a9c673ada75b763c1867e6bb6fd66c75da393cd6c2fd2fd669aadbe73c6af5",
+      "pack_sha256": "73a1d4ba2b085c1f9f2a1eff410aca239cf9775de952ba70aafdaa78ec5ac35d"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-crowd-action",
+      "source_sha": "5c39e21c27565397383b009725634ea66e9c1525",
+      "manifest_sha256": "d3998ed96530db66b3aa53f263c93848e7078846a8a0f612a1c099202bfa406f",
+      "pack_sha256": "3fb9d88d228e3af4a9c965961c035650b65365392a9caccb4c14f336b003b2ca"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-query",
+      "source_sha": "1f1e19d280923ebe7aac964f8b5825d497434db8",
+      "manifest_sha256": "13433c1c4687cd33f0b314b60a38c76fb8390ee52375755320d4ca5a6f378fae",
+      "pack_sha256": "774c6ae63e0fb170a81a9e9fb9551d55d40724faae5966c1d95bb32624fb89ce"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-board",
+      "source_sha": "76601df755ec8ef8c9726ea770ec488b745efd71",
+      "manifest_sha256": "671acb9502969f08e5db6b83369afa3ea1dec1699a7a9fc5a1680abfa9aa39cf",
+      "pack_sha256": "e1348dd7739778a5ec2d676420e86290ca49f69cdf045959fd82441232a30c1a"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-funnel",
+      "source_sha": "dbfaede0961586d773c708e833a4ac1c9f2515dc",
+      "manifest_sha256": "1e631c02c1fa6903b1f76953edc4e7da3fc85b1b96c1292567f8561a78a8eefb",
+      "pack_sha256": "581ba069aa8af4598f553e4b11b57216ac2205d71baebbafc267367cb3814ba6"
+    }
+  ],
+  "target": {
+    "input_sha256": "5968561ae965be28f2e2054ab90b3df99ccffdcae26031497ac1a52edcb0454a",
+    "receipt_sha256": "d5f99386e2b550d1c5f392eeb408903f532fe1f577c328ea38b89fab553570e1",
+    "runner_sha256": "b7f515bd1e9e956ee6db2242aeb560a9c834479427ae86320e22cc4050dd3305",
+    "platform": {
+      "system": "Linux",
+      "machine": "x86_64",
+      "python": "3.14.4",
+      "kernel": "6.18.33.2-microsoft-standard-WSL2"
+    },
+    "cleanup": "OWNED_PROCESSES_AND_TEMPORARY_INSTALL_REMOVED"
+  },
+  "observation": {
+    "status": "PASS",
+    "scope": "candidate-bound-headed-browser-responsive",
+    "scenario_count": 5,
+    "cross_version_recovery": "NOT_RUN",
+    "browser": {
+      "driver": "Aside headed",
+      "headed": true,
+      "url": "http://127.0.0.1:4332/",
+      "console_errors": [],
+      "read_only_mode_visible": true,
+      "responsive_viewports": [
+        {
+          "name": "mobile",
+          "width": 375,
+          "height": 812,
+          "file": "candidate-mobile.jpg",
+          "sha256": "06ab428bb6067fb4e96df254b86f0abb266dd9f19b2dcc4a2f12b47179f2ed55"
+        },
+        {
+          "name": "tablet",
+          "width": 768,
+          "height": 1024,
+          "file": "candidate-tablet.jpg",
+          "sha256": "e184adcc09c52c5e788015d96b469e2d230453923aa70028f8686d325cafbd4e"
+        },
+        {
+          "name": "desktop",
+          "width": 1440,
+          "height": 900,
+          "file": "candidate-desktop.jpg",
+          "sha256": "469f72e1f100a8f62bd37f98f7ce2d4194a8c5e20cd58620fa8e6abb2238d8c4"
+        }
+      ]
+    },
+    "supply_chain": "NOT_VERIFIED",
+    "production_identity": "NOT_RUN",
+    "release_ready": false,
+    "activation": "NOT_RUN"
+  },
+  "release_ready": false,
+  "activation": "NOT_RUN"
+}

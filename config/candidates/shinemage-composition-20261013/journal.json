@@ -199,6 +199,92 @@
         "candidate_digest": "125c8e538816835cad212048b8fd0302d98588d704b09de559789df9bf6e6bdb"
       },
       "digest": "e3ad59c39e619f365b2552f8bf0deba22ef26c026a1c6574ba5cb61dc5c9995c"
+    },
+    {
+      "seq": 5,
+      "prev_digest": "e3ad59c39e619f365b2552f8bf0deba22ef26c026a1c6574ba5cb61dc5c9995c",
+      "at": "2026-10-13T04:30:08.966Z",
+      "phase": null,
+      "event": "OBSERVATION",
+      "release_tag": "dsh-composition-5716227293a4d793fd779c71",
+      "status": "COMPOSITION_BROWSER_HOST_OBSERVED",
+      "candidate_digest": "125c8e538816835cad212048b8fd0302d98588d704b09de559789df9bf6e6bdb",
+      "service_binding": {
+        "schema_version": "dsh-service-binding/v1",
+        "service_id": "analytics-first-purchase",
+        "source_sha": "f9726f682fc0d1d4c6aef6f07e6932c2c600c3d6",
+        "api_version": "1.0.0",
+        "state": {
+          "owner": "analysis-service",
+          "application_id": 1397572502,
+          "schema_version": 1,
+          "contract": "analytics-first-purchase-saved-provenance/v1"
+        },
+        "access": "read-write",
+        "lifecycle": "external",
+        "rollback": "preserve-service-and-state",
+        "evidence_sha256": "9a6a4a7a28e0ffc69441394c18030b0a51eb2a881c4d00566b535931f3b391b0"
+      },
+      "source_http_event": {
+        "seq": 3,
+        "digest": "b4fe1e63132f0911f9905cff4dd74b70e1cf348b5eb6792b13db2ca815a44f35"
+      },
+      "observation": {
+        "status": "PASS",
+        "scope": "candidate-bound-headed-browser-responsive",
+        "scenario_count": 5,
+        "cross_version_recovery": "NOT_RUN",
+        "browser": {
+          "driver": "Aside headed",
+          "headed": true,
+          "url": "http://127.0.0.1:4332/",
+          "console_errors": [],
+          "read_only_mode_visible": true,
+          "responsive_viewports": [
+            {
+              "name": "mobile",
+              "width": 375,
+              "height": 812,
+              "file": "candidate-mobile.jpg",
+              "sha256": "06ab428bb6067fb4e96df254b86f0abb266dd9f19b2dcc4a2f12b47179f2ed55"
+            },
+            {
+              "name": "tablet",
+              "width": 768,
+              "height": 1024,
+              "file": "candidate-tablet.jpg",
+              "sha256": "e184adcc09c52c5e788015d96b469e2d230453923aa70028f8686d325cafbd4e"
+            },
+            {
+              "name": "desktop",
+              "width": 1440,
+              "height": 900,
+              "file": "candidate-desktop.jpg",
+              "sha256": "469f72e1f100a8f62bd37f98f7ce2d4194a8c5e20cd58620fa8e6abb2238d8c4"
+            }
+          ]
+        },
+        "supply_chain": "NOT_VERIFIED",
+        "production_identity": "NOT_RUN",
+        "release_ready": false,
+        "activation": "NOT_RUN",
+        "phase": "browser",
+        "target": {
+          "input_sha256": "5968561ae965be28f2e2054ab90b3df99ccffdcae26031497ac1a52edcb0454a",
+          "receipt_sha256": "d5f99386e2b550d1c5f392eeb408903f532fe1f577c328ea38b89fab553570e1",
+          "runner_sha256": "b7f515bd1e9e956ee6db2242aeb560a9c834479427ae86320e22cc4050dd3305",
+          "platform": {
+            "system": "Linux",
+            "machine": "x86_64",
+            "python": "3.14.4",
+            "kernel": "6.18.33.2-microsoft-standard-WSL2"
+          },
+          "cleanup": "OWNED_PROCESSES_AND_TEMPORARY_INSTALL_REMOVED"
+        },
+        "evidence_authenticity": "UNATTESTED_OPERATOR_OBSERVATION",
+        "candidate_digest": "125c8e538816835cad212048b8fd0302d98588d704b09de559789df9bf6e6bdb"
+      },
+      "digest": "23c957d1f50f56d5af2f976da7dbfff79c66a6133312bfacbef3b27b7d3ac466"
     }
   ],
   "idempotency": {
@@ -417,7 +503,98 @@
         "digest": "e3ad59c39e619f365b2552f8bf0deba22ef26c026a1c6574ba5cb61dc5c9995c"
       },
       "completed_at": "2026-10-12T17:20:51.071Z"
+    },
+    "composition-host:browser:125c8e538816835cad212048b8fd0302d98588d704b09de559789df9bf6e6bdb:8dd8a59da6a01319033dd5cbf5cd198ac34cdcecb0b1c8f39dd58fb331ee7866": {
+      "status": "COMMITTED",
+      "fingerprint": "444dab6cff7424188c0b6e86a6ffe1d73412fab4a65c9839e85059da1b3530e8",
+      "result": {
+        "seq": 5,
+        "prev_digest": "e3ad59c39e619f365b2552f8bf0deba22ef26c026a1c6574ba5cb61dc5c9995c",
+        "at": "2026-10-13T04:30:08.966Z",
+        "phase": null,
+        "event": "OBSERVATION",
+        "release_tag": "dsh-composition-5716227293a4d793fd779c71",
+        "status": "COMPOSITION_BROWSER_HOST_OBSERVED",
+        "candidate_digest": "125c8e538816835cad212048b8fd0302d98588d704b09de559789df9bf6e6bdb",
+        "service_binding": {
+          "schema_version": "dsh-service-binding/v1",
+          "service_id": "analytics-first-purchase",
+          "source_sha": "f9726f682fc0d1d4c6aef6f07e6932c2c600c3d6",
+          "api_version": "1.0.0",
+          "state": {
+            "owner": "analysis-service",
+            "application_id": 1397572502,
+            "schema_version": 1,
+            "contract": "analytics-first-purchase-saved-provenance/v1"
+          },
+          "access": "read-write",
+          "lifecycle": "external",
+          "rollback": "preserve-service-and-state",
+          "evidence_sha256": "9a6a4a7a28e0ffc69441394c18030b0a51eb2a881c4d00566b535931f3b391b0"
+        },
+        "source_http_event": {
+          "seq": 3,
+          "digest": "b4fe1e63132f0911f9905cff4dd74b70e1cf348b5eb6792b13db2ca815a44f35"
+        },
+        "observation": {
+          "status": "PASS",
+          "scope": "candidate-bound-headed-browser-responsive",
+          "scenario_count": 5,
+          "cross_version_recovery": "NOT_RUN",
+          "browser": {
+            "driver": "Aside headed",
+            "headed": true,
+            "url": "http://127.0.0.1:4332/",
+            "console_errors": [],
+            "read_only_mode_visible": true,
+            "responsive_viewports": [
+              {
+                "name": "mobile",
+                "width": 375,
+                "height": 812,
+                "file": "candidate-mobile.jpg",
+                "sha256": "06ab428bb6067fb4e96df254b86f0abb266dd9f19b2dcc4a2f12b47179f2ed55"
+              },
+              {
+                "name": "tablet",
+                "width": 768,
+                "height": 1024,
+                "file": "candidate-tablet.jpg",
+                "sha256": "e184adcc09c52c5e788015d96b469e2d230453923aa70028f8686d325cafbd4e"
+              },
+              {
+                "name": "desktop",
+                "width": 1440,
+                "height": 900,
+                "file": "candidate-desktop.jpg",
+                "sha256": "469f72e1f100a8f62bd37f98f7ce2d4194a8c5e20cd58620fa8e6abb2238d8c4"
+              }
+            ]
+          },
+          "supply_chain": "NOT_VERIFIED",
+          "production_identity": "NOT_RUN",
+          "release_ready": false,
+          "activation": "NOT_RUN",
+          "phase": "browser",
+          "target": {
+            "input_sha256": "5968561ae965be28f2e2054ab90b3df99ccffdcae26031497ac1a52edcb0454a",
+            "receipt_sha256": "d5f99386e2b550d1c5f392eeb408903f532fe1f577c328ea38b89fab553570e1",
+            "runner_sha256": "b7f515bd1e9e956ee6db2242aeb560a9c834479427ae86320e22cc4050dd3305",
+            "platform": {
+              "system": "Linux",
+              "machine": "x86_64",
+              "python": "3.14.4",
+              "kernel": "6.18.33.2-microsoft-standard-WSL2"
+            },
+            "cleanup": "OWNED_PROCESSES_AND_TEMPORARY_INSTALL_REMOVED"
+          },
+          "evidence_authenticity": "UNATTESTED_OPERATOR_OBSERVATION",
+          "candidate_digest": "125c8e538816835cad212048b8fd0302d98588d704b09de559789df9bf6e6bdb"
+        },
+        "digest": "23c957d1f50f56d5af2f976da7dbfff79c66a6133312bfacbef3b27b7d3ac466"
+      },
+      "completed_at": "2026-10-13T04:30:08.966Z"
     }
   },
-  "updated_at": "2026-10-12T17:20:51.071Z"
+  "updated_at": "2026-10-13T04:30:08.966Z"
 }

@@ -7,8 +7,8 @@
 | M2-01 | `ISOLATED_CANDIDATE_PREPARED / MAIN_NOT_REGISTERED` | 主仓正式 profile/journal 接线授权 |
 | M2-02 | `ISOLATED_EVIDENCE_BOUND / MAIN_PROFILE_UNBOUND` | 主仓两份 profile 的 `service_binding` |
 | M2-03 | `TARGET_PREFLIGHT_PASS / USER_AUTHORIZED_TEST_PROD` | candidate 仍是隔离 journal；正式注册、激活和发布另按门禁授权 |
-| M2-04 | `TERMINAL_PASS / BROWSER_NOT_RUN` | 同一 candidate 的 browser receipt |
-| M2-05 | `PARTIAL_LIVE_BROWSER_PASS / CANDIDATE_BROWSER_STANDALONE_NOT_RUN` | `COCKPIT_EXAMPLE_PACKAGE`、candidate-bound browser、读屏、完整键盘焦点、高对比度 |
+| M2-04 | `TERMINAL_PASS / BROWSER_PASS` | standalone/accessibility 与剩余 release gates |
+| M2-05 | `PARTIAL_LIVE_BROWSER_PASS / CANDIDATE_BROWSER_PASS / STANDALONE_NOT_RUN` | `COCKPIT_EXAMPLE_PACKAGE`、读屏、完整键盘焦点、高对比度 |
 | M2-06 | `PARTIAL_REAL_UAT / CRM_TOOL_NOT_EXPOSED` | 暴露 `query_crm_dashboard_gsv`，再补保存/权限/恢复/人工 UAT |
 | M2-07 | `BLOCKED` | 上游替换、来源归档、发布者身份、SBOM、签名、撤销和干净机器 |
 | M2-08 | `NOT_RUN` | M2-04 至 M2-07 关闭并取得发布授权 |
