@@ -137,18 +137,19 @@
     },
     {
       "id": "M2-09",
-      "status": "CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / MAIN_PIN_UNCHANGED / CROSS_VERSION_NOT_RUN",
+      "status": "CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / MAIN_PIN_UNCHANGED / COMBINED_LIFECYCLE_NOT_RUN",
       "evidence": [
         "DSH pin remains 0.1.7-rc.2",
         "official dsh-v0.2.1-alpha.2 / d7432673 isolated checkout",
         "offline compatibility matrix: candidate SUPPORTED, overall PARTIAL",
         "isolated native/host build, 468 focused tests, and text/tool/rich persistence recovery",
         "isolated candidate workspace: nine plugin builds PASS and nine plugin test suites PASS (286 tests)",
+        "rc2 to alpha.2 text/tool/rich cross-version recovery PASS, 10 cold executions per corpus",
         "main peer matrix remains 0/9 and direct main toolchain build remains blocked by rc2 SHA pin",
-        "cross-version and combined lifecycle/browser/recovery matrix remain NOT_RUN",
+        "combined lifecycle/browser/recovery matrix and switch remain NOT_RUN",
         "DSH upgrade deferred recheck"
       ],
-      "next": "run combined lifecycle/browser/recovery and cross-version matrix; if green, prepare tracked peer/toolchain adaptation as a separate code change, run open-code-review-delegate, commit locally, then seek switch authorization"
+      "next": "run combined lifecycle/browser/recovery matrix; if green, prepare tracked peer/toolchain adaptation as a separate code change, run open-code-review-delegate, commit locally, then seek switch authorization"
     },
     {
       "id": "M2-10",
@@ -176,7 +177,8 @@
       "rechecked_changed_code_files": 6,
       "commit": "39cdb9c3",
       "previous_commit": "fcee92a9",
-      "tests": "standalone follow-up: Node 48 PASS / 0 FAIL; source-owned Chromium probe 7 PASS / 0 errors; standalone accessibility automation 6 PASS / screen_reader NOT_RUN; synthetic Chromium probe 6 PASS / 0 errors; DSH compatibility matrix 5 PASS / 0 FAIL / 0 SKIP; previous release suite: 546 PASS / 0 FAIL / 0 SKIP"
-    }
+      "tests": "standalone follow-up: Node 48 PASS / 0 FAIL; source-owned Chromium probe 7 PASS / 0 errors; standalone accessibility automation 6 PASS / screen_reader NOT_RUN; synthetic Chromium probe 6 PASS / 0 errors; DSH compatibility matrix 5 PASS / 0 FAIL / 0 SKIP; previous release suite: 546 PASS / 0 FAIL / 0 SKIP; cross-version recovery: 3 corpora PASS / 30 cold executions; candidate parameterization commit a7c895e9"
+    },
+    "upgrade_verification_commit": "a7c895e9"
   }
 }
