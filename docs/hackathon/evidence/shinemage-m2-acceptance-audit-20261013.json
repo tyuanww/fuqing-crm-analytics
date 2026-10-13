@@ -1,9 +1,9 @@
 {
   "schema_version": "shinemage-m2-acceptance-audit/v1",
-  "recorded_at": "2026-10-13T11:04:15+08:00",
+  "recorded_at": "2026-10-13T15:18:14+08:00",
   "repository": {
     "branch": "codex/shinemage-abc-local-candidate",
-    "head": "ca1a6142",
+    "head": "4919221a",
     "push": "NOT_RUN",
     "protected_untracked": [
       "security-audit-skill/"
@@ -141,7 +141,8 @@
       "status": "PASS / RELEASE_GATES_REMAIN_OPEN",
       "evidence": [
         "this audit matrix",
-        "M2 status closeout"
+        "M2 status closeout",
+        "OCR code review and local commit 4919221a"
       ],
       "next": "refresh this matrix when an external gate changes"
     }
@@ -151,6 +152,16 @@
     "release_ready": false,
     "activation": "NOT_RUN",
     "production_data": "NOT_USED_IN_CURRENT_OBSERVATIONS",
-    "code_changes_this_audit": false
+    "code_changes_this_audit": true,
+    "code_review": {
+      "status": "PASS_AFTER_FIXES",
+      "review_skill": "open-code-review-delegate",
+      "reviewed_files": 28,
+      "reviewable_code_files": 5,
+      "reviewable_json_files": 23,
+      "rechecked_changed_code_files": 4,
+      "commit": "4919221a",
+      "tests": "Node 24 release suite: 546 PASS / 0 FAIL / 0 SKIP"
+    }
   }
 }
