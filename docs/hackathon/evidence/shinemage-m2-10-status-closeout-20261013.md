@@ -21,7 +21,7 @@ jq empty docs/hackathon/evidence/shinemage-m2-acceptance-audit-20261013.json
 git diff --check
 ```
 
-两项均退出 0。此前代码审查覆盖 30 个可审查文件，其中 7 个代码文件和 23 个 JSON；页面包、浏览器探针与 DSH 兼容矩阵代码改动由 `open-code-review-delegate` 逐文件审查，最终改动文件全部覆盖，修复后测试复验通过。页面包/合同/渲染定向测试为 `48 PASS / 0 FAIL`，source-owned standalone Chromium 探针为 `7 PASS / 0 errors`，standalone AX/键盘/forced-colors 自动化补测为 `6 PASS`，默认合成分支为 `6 PASS / 0 errors`，DSH 兼容矩阵为 `5 PASS / 0 FAIL / 0 SKIP`；`git diff --check` 和 pre-commit 均通过。当前本地提交链包含页面包代码提交 `91f880b5`、探针加固提交 `fcee92a9`、DSH 兼容矩阵提交 `39cdb9c3` 和前一份 docs-only 收口提交；本轮新增的无障碍与 DSH 候选证据仍属于 docs-only，剩余开放项仍由真实读屏、人工键盘、Windows 高对比度、M2-06 未执行写路径、M2-07 供应链门禁、M2-08 发布门禁以及 M2-09 的隔离 runtime/插件适配/恢复验收决定。
+两项均退出 0。此前代码审查覆盖 30 个可审查文件，其中 7 个代码文件和 23 个 JSON；页面包、浏览器探针与 DSH 兼容矩阵代码改动由 `open-code-review-delegate` 逐文件审查，最终改动文件全部覆盖，修复后测试复验通过。页面包/合同/渲染定向测试为 `48 PASS / 0 FAIL`，source-owned standalone Chromium 探针为 `7 PASS / 0 errors`，standalone AX/键盘/forced-colors 自动化补测为 `6 PASS`，默认合成分支为 `6 PASS / 0 errors`，DSH 兼容矩阵为 `5 PASS / 0 FAIL / 0 SKIP`；本轮独立 DSH 候选完成 native/host build、14 文件 `468 PASS / 0 FAIL` 和三组候选 persistence 主行 PASS，但九包 peer/固定 toolchain 仍锁 rc2，cross-version 和组合插件适配未完成；`git diff --check` 和 pre-commit 均通过。当前本地提交链包含页面包代码提交 `91f880b5`、探针加固提交 `fcee92a9`、DSH 兼容矩阵提交 `39cdb9c3` 和前一份 docs-only 收口提交；本轮新增的无障碍与 DSH 候选证据仍属于 docs-only，剩余开放项仍由真实读屏、人工键盘、Windows 高对比度、M2-06 未执行写路径、M2-07 供应链门禁、M2-08 发布门禁以及 M2-09 的插件适配、cross-version、浏览器/业务组合验收决定。
 
 ## M2-10 结论
 

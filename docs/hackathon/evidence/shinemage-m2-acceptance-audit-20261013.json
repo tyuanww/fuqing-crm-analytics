@@ -133,14 +133,16 @@
     },
     {
       "id": "M2-09",
-      "status": "CANDIDATE_IDENTIFIED / STATIC_MATRIX_PASS / RUNTIME_NOT_RUN",
+      "status": "CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / PLUGIN_ADAPTATION_BLOCKED / CROSS_VERSION_NOT_RUN",
       "evidence": [
         "DSH pin remains 0.1.7-rc.2",
         "official dsh-v0.2.1-alpha.2 / d7432673 isolated checkout",
         "offline compatibility matrix: candidate SUPPORTED, overall PARTIAL",
+        "isolated native/host build, 468 focused tests, and text/tool/rich persistence recovery",
+        "nine plugin peers and fixed toolchain still target rc2",
         "DSH upgrade deferred recheck"
       ],
-      "next": "install/build isolated runtime, run plugin/lifecycle/recovery matrix, then seek switch authorization"
+      "next": "adapt candidate toolchain and nine plugin peers, rebuild packs, run combined lifecycle/browser/recovery/cross-version matrix, then seek switch authorization"
     },
     {
       "id": "M2-10",

@@ -33,7 +33,7 @@ candidate 与 live 均继续使用 rc2 上游；杭州目标没有新的隔离�
 
 ## 结论
 
-M2-09 更新为 `CANDIDATE_IDENTIFIED / STATIC_MATRIX_PASS / RUNTIME_NOT_RUN`。后续仍需准备隔离 runtime、安装并核对固定依赖、完成插件适配、新旧兼容矩阵、恢复矩阵和回退条件，并取得切换授权；升级不混入当前九包发布 candidate。
+M2-09 更新为 `CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / PLUGIN_ADAPTATION_BLOCKED / CROSS_VERSION_NOT_RUN`。候选自身已安装、构建并完成聚焦生命周期/session 矩阵；现有九包仍绑定 rc2，插件适配和跨版本恢复尚未完成，升级不混入当前九包发布 candidate。
 
 ## 2026-10-13 版本目录复核
 
@@ -61,3 +61,15 @@ commit=d743267388641bc76f17c45ce8b4c231aed1d32c
 | overall | `PARTIAL` | runtime、插件、恢复和真实业务尚未执行 |
 
 该 `SUPPORTED` 只表示四组 source family 文件名扫描通过，不表示 SDK/宿主运行兼容，不表示 release readiness，也不授予切换授权。
+
+## 2026-10-13 隔离 runtime 与恢复矩阵
+
+在 `.context/dsh-b0/upstream-0.2.1-alpha.2` 使用 Node `24.19.0`、pnpm `11.28.5` 和固定 lock 执行 `pnpm install --frozen-lockfile --ignore-scripts`；随后补跑候选要求的 `pnpm run build:native-system` 与 `pnpm run build:lib:host`，两项均通过。安装首次使用 corepack 时遇到本机 registry CA 校验错误，改用 `/etc/ssl/cert.pem` 的 `NODE_EXTRA_CA_CERTS` 后精确 pnpm 版本可用；该环境事实已记录在 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/runtime-compatibility-summary.json`。
+
+候选自身聚焦测试共 14 个文件、`468 PASS / 0 FAIL`，覆盖 plugin-manager、profile/loader、Agent loop resource/scope、session repair/records、Cordis lifecycle、continuable subagent 和 spawn lifecycle。候选编译 persistence API 又分别完成 text/tool/rich 三组撕裂尾只读、修复续写、冷读验证；每组主行 `PASS`、4 个冷进程执行，cross-version 行为因没有 rc1 编译模块保持 `NOT_RUN`。结果位于 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-session-recovery-{text,tool,rich}/session-recovery.json`。
+
+## 2026-10-13 插件适配前置阻塞
+
+候选 `@deepseek-ai/dsh-tools` 版本为 `0.2.1-alpha.2`，九个现有插件的 `peerDependencies.@deepseek-ai/dsh-tools` 全部仍为 `0.1.7-rc.2`，静态兼容数为 `0/9`；完整回执为 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/plugin-peer-matrix.json`。直接用候选 checkout 运行 `B0_BUILD_UPSTREAM=... node dsh-plugins/shine-brand/build.mjs` 在 `plugin-kit/toolchain.json` 的固定 upstream SHA 校验处拒绝，实际 `d7432673…`、期望 `477b4f42…`，没有写出候选插件包。
+
+因此当前 runtime 结果只证明候选自身的 build、插件管理/生命周期和 session persistence 行为；它不证明九包可加载、浏览器/业务可用或可切换。下一步必须建立独立 candidate toolchain，逐个把九包 peer/lock/SDK closure 适配到候选并重新 build，再运行组合插件生命周期、browser、recovery 和 cross-version 矩阵；完成前不申请切换授权。
