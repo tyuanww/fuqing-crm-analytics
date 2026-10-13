@@ -1,12 +1,16 @@
 {
   "schema_version": "shinemage-m2-acceptance-audit/v1",
-  "recorded_at": "2026-10-13T18:39:25+08:00",
+  "recorded_at": "2026-10-13T22:37:42+0800",
   "repository": {
     "branch": "codex/shinemage-abc-local-candidate",
-    "head": "39cdb9c3",
+    "head": "18d86e31",
     "push": "NOT_RUN",
     "protected_untracked": [
       "security-audit-skill/"
+    ],
+    "documentation_commits": [
+      "b9ab4a50",
+      "18d86e31"
     ]
   },
   "candidate": {
@@ -95,7 +99,7 @@
         "standalone accessibility automation: 6 PASS / AX tree, keyboard, forced-colors simulation / screen_reader NOT_RUN",
         "candidate-bound headed responsive receipt",
         "keyboard focus partial: 12 Tab steps, 43 interactive DOM nodes / 42 named / 1 unnamed input",
-        "candidate-keyboard-focus.json"
+        "docs/hackathon/evidence/shinemage-m2-04-candidate-browser-20261013/candidate-keyboard-focus.json"
       ],
       "next": "candidate-bound 真实 screen reader、人工完整 keyboard focus、Windows high contrast"
     },
@@ -133,16 +137,18 @@
     },
     {
       "id": "M2-09",
-      "status": "CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / PLUGIN_ADAPTATION_BLOCKED / CROSS_VERSION_NOT_RUN",
+      "status": "CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / MAIN_PIN_UNCHANGED / CROSS_VERSION_NOT_RUN",
       "evidence": [
         "DSH pin remains 0.1.7-rc.2",
         "official dsh-v0.2.1-alpha.2 / d7432673 isolated checkout",
         "offline compatibility matrix: candidate SUPPORTED, overall PARTIAL",
         "isolated native/host build, 468 focused tests, and text/tool/rich persistence recovery",
-        "nine plugin peers and fixed toolchain still target rc2",
+        "isolated candidate workspace: nine plugin builds PASS and nine plugin test suites PASS (286 tests)",
+        "main peer matrix remains 0/9 and direct main toolchain build remains blocked by rc2 SHA pin",
+        "cross-version and combined lifecycle/browser/recovery matrix remain NOT_RUN",
         "DSH upgrade deferred recheck"
       ],
-      "next": "adapt candidate toolchain and nine plugin peers, rebuild packs, run combined lifecycle/browser/recovery/cross-version matrix, then seek switch authorization"
+      "next": "run combined lifecycle/browser/recovery and cross-version matrix; if green, prepare tracked peer/toolchain adaptation as a separate code change, run open-code-review-delegate, commit locally, then seek switch authorization"
     },
     {
       "id": "M2-10",

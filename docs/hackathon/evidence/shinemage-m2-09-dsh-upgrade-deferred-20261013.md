@@ -33,7 +33,7 @@ candidate 与 live 均继续使用 rc2 上游；杭州目标没有新的隔离�
 
 ## 结论
 
-M2-09 更新为 `CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / PLUGIN_ADAPTATION_BLOCKED / CROSS_VERSION_NOT_RUN`。候选自身已安装、构建并完成聚焦生命周期/session 矩阵；现有九包仍绑定 rc2，插件适配和跨版本恢复尚未完成，升级不混入当前九包发布 candidate。
+M2-09 更新为 `CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / MAIN_PIN_UNCHANGED / CROSS_VERSION_NOT_RUN`。候选自身已安装、构建并完成聚焦生命周期/session 矩阵；九包在独立候选 toolchain 中均已构建并通过自测，但主仓 peer 与固定 toolchain 仍锁 rc2，组合运行矩阵和跨版本恢复尚未完成，升级不混入当前九包发布 candidate。
 
 ## 2026-10-13 版本目录复核
 
@@ -58,7 +58,7 @@ commit=d743267388641bc76f17c45ce8b4c231aed1d32c
 | `dsh-0.1.7-rc.2` / `477b4f42…` | `SUPPORTED` | 精确 checkout 的 source family 静态命中 |
 | `dsh-0.2.1-alpha.2` / `d7432673…` | `SUPPORTED` | 精确 checkout 的 source family 静态命中 |
 | `dsh-0.2.0-rc.2` | `DEFERRED` | 本地未提供 checkout |
-| overall | `PARTIAL` | runtime、插件、恢复和真实业务尚未执行 |
+| overall | `PARTIAL` | advisory `dsh-0.2.0-rc.2` 行为 `DEFERRED`；runtime、插件、恢复和真实业务结果由下方独立证据记账 |
 
 该 `SUPPORTED` 只表示四组 source family 文件名扫描通过，不表示 SDK/宿主运行兼容，不表示 release readiness，也不授予切换授权。
 
@@ -68,8 +68,10 @@ commit=d743267388641bc76f17c45ce8b4c231aed1d32c
 
 候选自身聚焦测试共 14 个文件、`468 PASS / 0 FAIL`，覆盖 plugin-manager、profile/loader、Agent loop resource/scope、session repair/records、Cordis lifecycle、continuable subagent 和 spawn lifecycle。候选编译 persistence API 又分别完成 text/tool/rich 三组撕裂尾只读、修复续写、冷读验证；每组主行 `PASS`、4 个冷进程执行，cross-version 行为因没有 rc1 编译模块保持 `NOT_RUN`。结果位于 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-session-recovery-{text,tool,rich}/session-recovery.json`。
 
-## 2026-10-13 插件适配前置阻塞
+## 2026-10-13 插件适配复核
 
-候选 `@deepseek-ai/dsh-tools` 版本为 `0.2.1-alpha.2`，九个现有插件的 `peerDependencies.@deepseek-ai/dsh-tools` 全部仍为 `0.1.7-rc.2`，静态兼容数为 `0/9`；完整回执为 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/plugin-peer-matrix.json`。直接用候选 checkout 运行 `B0_BUILD_UPSTREAM=... node dsh-plugins/shine-brand/build.mjs` 在 `plugin-kit/toolchain.json` 的固定 upstream SHA 校验处拒绝，实际 `d7432673…`、期望 `477b4f42…`，没有写出候选插件包。
+候选 `@deepseek-ai/dsh-tools` 版本为 `0.2.1-alpha.2`，主仓九个现有插件的 `peerDependencies.@deepseek-ai/dsh-tools` 全部仍为 `0.1.7-rc.2`，静态兼容数仍为 `0/9`；完整回执为 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/plugin-peer-matrix.json`。直接用候选 checkout 运行 `B0_BUILD_UPSTREAM=... node dsh-plugins/shine-brand/build.mjs` 仍在主仓 `plugin-kit/toolchain.json` 的固定 upstream SHA 校验处拒绝，实际 `d7432673…`、期望 `477b4f42…`；这证明主仓 pin 仍然保护当前 rc2 组合，没有改写主仓。
 
-因此当前 runtime 结果只证明候选自身的 build、插件管理/生命周期和 session persistence 行为；它不证明九包可加载、浏览器/业务可用或可切换。下一步必须建立独立 candidate toolchain，逐个把九包 peer/lock/SDK closure 适配到候选并重新 build，再运行组合插件生命周期、browser、recovery 和 cross-version 矩阵；完成前不申请切换授权。
+随后在 ignored 目录 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-plugin-workspace` 建立独立候选 toolchain，仅在副本 manifest 中把九包 peer 和 toolchain SHA 指向候选。九包隔离构建 `9/9 PASS`；九包自测 `9/9 PASS`，共 286 项，其中 CRM/Knowledge 分别为 `108/108` 与 `32/32`，浏览器 journey 也通过。CRM/Knowledge 测试使用指向仓库 synthetic 夹具的只读符号链接修正相对根路径，未复制源码、真实数据或凭据。完整汇总见 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/plugin-adaptation-summary.json`、`plugin-build-summary.json` 和 `plugin-test-summary.json`。
+
+这组结果只证明九包可以在隔离候选 toolchain 中编译并通过自身测试；组合宿主生命周期、组合 browser、组合 recovery、cross-version 以及正式包/lock/SDK closure 尚未执行。下一步应在该隔离候选上跑组合生命周期、browser、recovery 和 cross-version 矩阵，再把需要进入主仓的 peer/toolchain 适配作为独立代码变更走 `open-code-review-delegate` 和本地提交；完成前不申请切换授权。

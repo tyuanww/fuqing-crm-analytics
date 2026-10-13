@@ -19,7 +19,7 @@
 
 对用户授权的真实入口 `https://app.tyuan.chat/` 做了只读 headed browser 观察：Aside 在桌面、平板和移动 viewport 都能打开入口，等待组合 bundle 加载后显示工作台导航与工作区内容，控制台错误为空。该观察只记录 live shell 的可达性，不接入 composition journal，也不替代 candidate-bound browser、standalone、读屏、完整键盘焦点或高对比度验收；当前键盘观察只到未登录 modal 的局部焦点行为。详见[授权生产入口 live browser 观察](../hackathon/evidence/shinemage-live-browser-20261013.md)。
 
-2026-10-13 真实 UAT 已部分实跑：live Aside 的 WeKnora 只读检索与来源观察、CRM 聚合看板重试加载均有记录；工作台标准模式没有暴露 `query_crm_dashboard_gsv`，模型未执行替代调用。candidate 页面登录和只读模式可见，但 DeepSeek provider 在调用前以 `MISSING_CREDENTIAL` 失败；保存、权限失败、恢复和人工业务复核仍 `NOT_RUN`。详见[真实模型、WeKnora 与 CRM UAT 实跑](../hackathon/evidence/shinemage-real-business-uat-20261013.md)。
+2026-10-13 真实 UAT 已分层实跑：live Aside 的 WeKnora 只读检索与来源观察、CRM 聚合看板重试加载均有记录；工作台标准模式没有暴露 `query_crm_dashboard_gsv`，模型未执行替代调用。隔离 candidate 中用户手工保存 DeepSeek provider 凭据并绑定 CRM 当前对话后，真实模型、WeKnora 只读检索和 CRM GSV 7/7 日结构化查询通过；保存、权限失败、恢复和人工业务复核仍 `NOT_RUN`。详见[真实模型、WeKnora 与 CRM UAT 实跑](../hackathon/evidence/shinemage-real-business-uat-20261013.md)和[候选真实 UAT 证据](../hackathon/evidence/shinemage-m2-06-candidate-real-uat-20261013.md)。
 
 ## 当前 PR #121 合并后与 Cordis 对接验证（2026-10-12）
 

@@ -6,12 +6,12 @@
 
 普通插件更新先在插件作者仓完成受影响检查、独立产物及 PR；组合变化时，主仓才更新对应固定输入。默认包消费、installed-kit、领域作者覆盖、公开合同和 release 包装配已经迁移并提交；主仓仍保留另两组旧 Workbench 断言、合同／静态守卫及历史副本。来源变化须同时绑定正式包与作者 CI，不能仅换 ZIP 或沿用旧 candidate/journal。
 
-PR #121 及后续文档收口已合并，主仓 main CI SUCCESS；三仓正式 `dsh-plugin-pack/v1` 回执已接入组合锁，九包、两 profile 的输入预检 exit 0。用户授权的杭州目标已完成 source HTTP、terminal/进程恢复和 candidate-bound browser 的 receipt（journal seq 3–5）；真实模型/业务/WeKnora、standalone、SDK 分发及独立 DSH 升级仍分别收尾。不因此宣称任意插件无重启热插拔或已能正式发布。详细状态以[验证入口](verification.md)和根 [STATUS.md](../../STATUS.md) 为准。
+PR #121 及后续文档收口已合并，主仓 main CI SUCCESS；三仓正式 `dsh-plugin-pack/v1` 回执已接入组合锁，九包、两 profile 的输入预检 exit 0。用户授权的杭州目标已完成 source HTTP、terminal/进程恢复和 candidate-bound browser 的 receipt（journal seq 3–5）；隔离 candidate 的真实模型/CRM/WeKnora 只读 UAT 与 standalone 本地页面包/Chromium 子项已有通过证据，live 工具面、完整无障碍、SDK 分发和独立 DSH 升级仍分别收尾。不因此宣称任意插件无重启热插拔或已能正式发布。详细状态以[验证入口](verification.md)和根 [STATUS.md](../../STATUS.md) 为准。
 
 以下进度段和步骤中的验收计数保留各自执行时点；当前状态以上段及[验证入口](verification.md)为准。操作步骤中的命令仍须满足实际输入与授权，不能把历史成功改标为当前包通过。
 
 
-Workbench 当前正式来源为 `3030e3f`，对应 formal pack manifest `90000400…`；作者 core CI 为 155 files / 1086 PASS，正式包已由主仓 reader 核对，browser/standalone 仍 `NOT_RUN_BY_THIS_COMMAND`。不能只替换 ZIP 路径或继承旧候选验收；当前九包 terminal、进程恢复和 candidate-bound browser 已在授权目标完成，真实业务、standalone 和正式发布准入仍未关闭。见[当前正式包 CI 收口](../hackathon/evidence/shinemage-formal-plugin-ci-20261012.md)和[当前组合 terminal 目标验收](../hackathon/evidence/shinemage-composition-terminal-target-20261013.md)。
+Workbench 当前正式来源为 `3030e3f`，对应 formal pack manifest `90000400…`；作者 core CI 为 155 files / 1086 PASS，正式包已由主仓 reader 核对，browser/standalone 仍 `NOT_RUN_BY_THIS_COMMAND`。不能只替换 ZIP 路径或继承旧候选验收；当前九包 terminal、进程恢复和 candidate-bound browser 已在授权目标完成，candidate 只读真实业务 UAT 与 standalone 页面包/Chromium 子项已有证据，live 工具面、完整无障碍和正式发布准入仍未关闭。见[当前正式包 CI 收口](../hackathon/evidence/shinemage-formal-plugin-ci-20261012.md)和[当前组合 terminal 目标验收](../hackathon/evidence/shinemage-composition-terminal-target-20261013.md)。
 
 board-components 已有[独立私有远程仓](https://github.com/tyuanww/shinemage-board-components)；其 PR #1 已合并，main CI SUCCESS。开发只需固定 Node/pnpm、本仓 kit 与封存回归输入，无 DSH checkout/build-tools。当前领域包仍由主仓组合锁和消费者合同核验，升级函数/类型及切换输入仍需针对性验证。见[作者合并与候选前置核验](../hackathon/evidence/shinemage-author-merge-and-candidate-preflight-20261012.md)与[主仓本地守卫](../hackathon/evidence/shinemage-board-components-main-output-guard-20261011.md)。
 
@@ -288,7 +288,7 @@ ZIP 的路径、类型、重复成员和大小检查即使在 Python `-O` 模式
 
 官方 `plugin add` 需要已准备的 pnpm `11.28.2` 位于调用方 PATH；本地修复优先使用该入口，禁止 Corepack 联网，并核对版本。DSH CLI 本身仍由选定的 Node 执行。`reload` 在停止自有旧实例前检查包输入、固定宿主、额外 patch 和包管理器；错误版本提前拒绝。它不编译插件或 DSH，不迁移数据库，不执行 SDK 全量审计。官方安装命令的依赖解析仍属于安装行为，不能声称完全不安装依赖。
 
-当前 Workbench formal pack 已包含固定运行 peer，并由作者 CI 与主仓 reader 核对通过；九包 terminal、进程恢复和 candidate-bound browser 已在授权目标的临时 profile/runtime 中通过，live CLI reload、真实业务、standalone 和 candidate activation 仍未运行，不承诺热插拔、激活原子性或新候选正式回退通过。原失败与详细范围见[当前正式包 CI 收口](../hackathon/evidence/shinemage-formal-plugin-ci-20261012.md)和[当前组合 terminal 目标验收](../hackathon/evidence/shinemage-composition-terminal-target-20261013.md)。
+当前 Workbench formal pack 已包含固定运行 peer，并由作者 CI 与主仓 reader 核对通过；九包 terminal、进程恢复和 candidate-bound browser 已在授权目标的临时 profile/runtime 中通过，candidate 只读真实业务 UAT 与 standalone 页面包/Chromium 子项已有证据，live CLI reload、写路径/权限/恢复、完整无障碍和 candidate activation 仍未运行，不承诺热插拔、激活原子性或新候选正式回退通过。原失败与详细范围见[当前正式包 CI 收口](../hackathon/evidence/shinemage-formal-plugin-ci-20261012.md)和[当前组合 terminal 目标验收](../hackathon/evidence/shinemage-composition-terminal-target-20261013.md)。
 
 带 `service_binding` 的正式 profile 必须继续使用已有 candidate/service/host 准入链；开发入口返回 `DSH_DEV_SERVICE_PROFILE_USE_CANDIDATE_HARNESS`，不会丢弃服务绑定来启动。当前默认组合 profile 仍没有 `service_binding`，避免把运行时绑定反向写入源 profile；主仓已登记正式 candidate 快照，page 快照绑定 service gate，CRM 快照按组合合同无绑定，journal seq 1–5（含 browser）可回读。正式发布链仍保持 `NOT_RUN`。当前证据见[主仓正式 candidate 登记](../hackathon/evidence/shinemage-m2-01-02-formal-registration-20261013.md)、[candidate browser 目标验收](../hackathon/evidence/shinemage-m2-04-candidate-browser-preflight-20261013.md)、[当前组合 source HTTP 目标验收](../hackathon/evidence/shinemage-composition-source-http-target-20261013.md)和[当前组合 terminal 目标验收](../hackathon/evidence/shinemage-composition-terminal-target-20261013.md)。
 
