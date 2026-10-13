@@ -49,3 +49,5 @@ MISSING_CREDENTIAL
 ```
 
 本次重试没有进入 CRM 或 WeKnora 工具调用，未读取业务数据；浏览器控制台错误为空。候选模型凭据门禁仍保持 `MODEL_MISSING_CREDENTIAL`。
+
+本轮再次发送相同脱敏只读请求，页面仍返回 `MISSING_CREDENTIAL`；没有产生 CRM/WeKnora 调用、业务数据读取或写操作。该重复结果确认阻塞点在受控 provider 凭据配置，不在登录、只读模式或浏览器入口。
