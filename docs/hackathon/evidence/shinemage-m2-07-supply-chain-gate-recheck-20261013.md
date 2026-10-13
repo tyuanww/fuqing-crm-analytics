@@ -35,3 +35,13 @@ release_ready: false
 ## 结论
 
 这次复核证明检查器边界没有漂移，但不产生新的 SDK 分发通过证据。M2-07 继续保持 `BLOCKED`；完整 SBOM、发布者身份、最终签名、验签、撤销/允许名单、opaque/native 安全、干净机器安装和回退仍需要外部材料与授权动作。没有把静态 CLI 帮助、历史 SDK 消费结果或本地开发包当作正式分发证据。
+
+## 2026-10-13 定向回归
+
+执行：
+
+```sh
+node --test --test-concurrency=1 scripts/release/sdk-supply-chain.test.mjs scripts/release/sdk-content-audit.test.mjs
+```
+
+结果：`31 PASS / 0 FAIL / 0 SKIP`。这些测试只证明供应链检查器和内容审计的 fail-closed 行为保持稳定，不替代真实 SBOM、发布者身份、签名、撤销验证、干净机器安装或发布授权，因此 M2-07 状态不变。
