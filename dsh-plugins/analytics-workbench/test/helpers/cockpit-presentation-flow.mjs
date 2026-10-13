@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { sourceHash } from '../../src/free-page/presentation/model.mjs';
+import { sourceHash, targetId } from '../../src/free-page/presentation/model.mjs';
 
 export async function checkPresentationFlow({ page, origin, backend, check, shot }) {
   const packageSource = process.env.COCKPIT_EXAMPLE_PACKAGE;
@@ -23,38 +23,39 @@ export async function checkPresentationFlow({ page, origin, backend, check, shot
   const button = async name => { await page.getByRole('button', { name, exact: true }).click(); await idle(); };
   const frame = page.frameLocator('[data-testid="library-html-preview"]');
   await button('编辑');
-  const label = packageSource ? frame.locator('[data-cockpit-target]').filter({ hasText: /^峰值日$/ }).first() : frame.locator('.kpi__label span[data-cockpit-target]').first();
+  const label = packageSource ? frame.locator('[data-cockpit-target]').filter({ hasText: /^峰值日$/ }) : frame.locator('.kpi__label span[data-cockpit-target]');
   await label.waitFor(); await label.click();
   await page.getByTestId('html-replacement').fill('浏览器验收：新的卡片文案', { timeout: 5000 });
-  await page.getByTestId('cockpit-edit-btn').click(); await idle();
+  await button('保存');
   saved = (await backend(prefix + '/pages/' + saved.page_id)).spec;
   assert.equal(saved.version, 2); assert.equal(saved.package.js, pkg.js);
   if (packageSource) await frame.locator('body').evaluate(() => window.RevenueReview.setScope('weekend'));
   else await frame.locator('#switch').click();
   await frame.getByText('浏览器验收：新的卡片文案', { exact: true }).waitFor();
   check('卡片文案通过真实浏览器与 HTTP 保存，筛选重渲染后保留且原 JS 不变');
-  await page.getByTestId('cockpit-edit-btn').click(); await idle();
+  await button('编辑');
   await frame.locator('[data-cockpit-target]').filter({ hasText: /^浏览器验收：新的卡片文案$/ }).click();
   await button('用 AI 修改此选区');
-  await page.getByTestId('html-ai-composer').getByRole('textbox').fill('把这个卡片的文案改为 AI 确认文案，并加浅灰背景');
+  await page.getByTestId('html-ai-composer').getByRole('textbox').fill('把选中的文案改为 AI 确认文案，并给此选区加浅灰背景');
   await button('发送并进入对话');
   await page.getByTestId('fixture-native-chat').waitFor();
   const job = await page.evaluate(() => window.cockpitFixture.aiClient.getSnapshot().active);
   assert.ok(job.selection.rendered); assert.ok(job.instruction.includes('浅灰背景'));
   await page.getByTestId('cockpit-native-artifact').waitFor();
   await frame.getByText('浏览器验收：新的卡片文案', { exact: true }).waitFor();
-  check('页内点击自动选中整张卡片，要求持久化并进入聊天宿主桩，右栏真实组件显示同一版本');
-  const candidate = structuredClone(saved.package), record = candidate.presentation.edits[0];
+  check('页内文字选区与要求持久化并进入聊天宿主桩，右栏真实组件显示同一版本');
+  const candidate = structuredClone(saved.package);
+  const target = { anchor: job.selection.rendered.anchor, path: job.selection.rendered.path };
+  const record = candidate.presentation.edits.find(edit => targetId(edit.target) === targetId(target));
+  assert.ok(record, 'the AI candidate must update the selected saved text record');
   record.text = 'AI 确认文案';
   candidate.presentation.source_hash = sourceHash(candidate);
-  if (packageSource) record.style = { ...(record.style ?? {}), 'background-color': '#eeeeee' };
-  else candidate.presentation.edits.push({ target: { anchor: job.selection.rendered.anchor, path: job.selection.rendered.path }, text: null, style: { 'background-color': '#eeeeee' } });
+  record.style = { ...(record.style ?? {}), 'background-color': '#eeeeee' };
   assert.ok(job.workspace.includes('library-board-http-'), 'candidate writes must stay in the owned temporary fixture');
   await writeFile(join(job.workspace, job.output_name), JSON.stringify(candidate));
   await page.getByRole('button', { name: '收取修改', exact: true }).click();
   await frame.getByText('AI 确认文案', { exact: true }).waitFor();
-  const cardSelector = packageSource ? '.kpi-label' : '.kpi';
-  assert.equal(await frame.locator(cardSelector).filter({ hasText: 'AI 确认文案' }).evaluate(node => getComputedStyle(node).backgroundColor), 'rgb(238, 238, 238)');
+  assert.equal(await frame.getByText('AI 确认文案', { exact: true }).evaluate(node => getComputedStyle(node).backgroundColor), 'rgb(238, 238, 238)');
   await page.getByRole('button', { name: '预览原版本', exact: true }).click();
   await frame.getByText('浏览器验收：新的卡片文案', { exact: true }).waitFor();
   const confirmEndpoint = '**/api/v1/analytics/cockpit-ai/' + job.id + '/confirm';
@@ -82,6 +83,11 @@ export async function checkPresentationFlow({ page, origin, backend, check, shot
     await frame.locator('body').evaluate(() => window.RevenueReview.setScope('all'));
     await frame.getByText('AI 确认文案', { exact: true }).waitFor();
     assert.ok(await frame.locator('#chartBars > *').count());
+    assert.ok(await frame.locator('#chartBars > *').evaluateAll(nodes => nodes.every(node => node.getBoundingClientRect().height > 0)), 'chart bars must have visible height');
+    await page.setViewportSize({ width: 390, height: 844 });
+    assert.ok(await frame.locator('body').evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'standalone page must fit the mobile viewport');
+    await shot('presentation-mobile');
+    check('standalone 柱图具有可见高度，390px 移动视口无横向溢出');
   }
   check('刷新后右栏重载已保存候选，显示文案和图表交互继续可用；未调用真实模型');
 }
