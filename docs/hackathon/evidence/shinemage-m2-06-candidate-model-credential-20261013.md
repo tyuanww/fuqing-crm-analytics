@@ -39,3 +39,13 @@ MISSING_CREDENTIAL
 ## 2026-10-13 Aside 复核
 
 在同一 candidate headed 页面重新打开模型选择器，确认 `模型与推理等级` 菜单只显示 `DeepSeek-V41-Flash` 和 `High`；没有在浏览器中代填、读取或提交任何凭据，也没有发起新的模型、CRM 或 WeKnora 请求。当前仍需要授权人员在 candidate 的受控 credentials service / Models 页面手工录入 provider 凭据后，才能重跑同一只读 UAT。
+
+随后在同一 candidate 会话发送加强脱敏约束的只读 UAT 请求，页面时间显示约 `13:14`。结果仍为：
+
+```text
+本轮运行失败
+llm-deepseek: no API key for provider route "deepseek-official"
+MISSING_CREDENTIAL
+```
+
+本次重试没有进入 CRM 或 WeKnora 工具调用，未读取业务数据；浏览器控制台错误为空。候选模型凭据门禁仍保持 `MODEL_MISSING_CREDENTIAL`。
