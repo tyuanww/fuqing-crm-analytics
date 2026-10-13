@@ -35,3 +35,7 @@ MISSING_CREDENTIAL
 ## 门禁结论
 
 `CANDIDATE_LOGIN_PASS / READ_ONLY_MODE_PASS / MODEL_MISSING_CREDENTIAL`。要继续 candidate 真实模型/CRM/WeKnora UAT，需要在 candidate 的受控 credentials service 中由授权人员配置该 provider 的凭据，再重新执行同一只读请求；凭据不得通过聊天、仓库、环境回显或证据文件传递。当前 M2-06 仍为 `PARTIAL_REAL_UAT`，产品仍为 `PARTIAL`，`release_ready=false`。
+
+## 2026-10-13 Aside 复核
+
+在同一 candidate headed 页面重新打开模型选择器，确认 `模型与推理等级` 菜单只显示 `DeepSeek-V41-Flash` 和 `High`；没有在浏览器中代填、读取或提交任何凭据，也没有发起新的模型、CRM 或 WeKnora 请求。当前仍需要授权人员在 candidate 的受控 credentials service / Models 页面手工录入 provider 凭据后，才能重跑同一只读 UAT。
