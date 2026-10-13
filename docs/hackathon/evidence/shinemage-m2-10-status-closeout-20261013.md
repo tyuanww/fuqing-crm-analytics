@@ -21,7 +21,7 @@ jq empty docs/hackathon/evidence/shinemage-m2-acceptance-audit-20261013.json
 git diff --check
 ```
 
-两项均退出 0。此前代码审查覆盖 28 个可审查文件，其中 5 个代码文件和 23 个 JSON；本轮新增的页面包与浏览器探针由 `open-code-review-delegate` 逐文件审查，3 个文件全部覆盖，修复后测试复验通过。页面包/合同/渲染定向测试为 `48 PASS / 0 FAIL`，standalone Chromium 探针为 `6 PASS / 0 errors`；`git diff --check` 和 pre-commit 均通过。当前本地提交链包含页面包代码提交 `91f880b5` 和独立 docs-only 收口提交；本次代码门禁已完成，剩余开放项仍由 M2-05 无障碍、M2-06 未执行写路径与 M2-07 至 M2-09 的外部验收条件决定。
+两项均退出 0。此前代码审查覆盖 28 个可审查文件，其中 5 个代码文件和 23 个 JSON；本轮新增的页面包与浏览器探针由 `open-code-review-delegate` 逐文件审查，2 个最终改动文件全部覆盖，修复后测试复验通过。页面包/合同/渲染定向测试为 `48 PASS / 0 FAIL`，source-owned standalone Chromium 探针为 `7 PASS / 0 errors`，默认合成分支为 `6 PASS / 0 errors`；`git diff --check` 和 pre-commit 均通过。当前本地提交链包含页面包代码提交 `91f880b5`、探针加固提交 `fcee92a9` 和本次独立 docs-only 收口提交；本次代码门禁已完成，剩余开放项仍由 M2-05 无障碍、M2-06 未执行写路径与 M2-07 至 M2-09 的外部验收条件决定。
 
 ## M2-10 结论
 

@@ -3,7 +3,7 @@
   "recorded_at": "2026-10-13T18:39:25+08:00",
   "repository": {
     "branch": "codex/shinemage-abc-local-candidate",
-    "head": "91f880b5",
+    "head": "fcee92a9",
     "push": "NOT_RUN",
     "protected_untracked": [
       "security-audit-skill/"
@@ -89,9 +89,9 @@
       "evidence": [
         "live browser loaded after bundle wait",
         "desktop/tablet/mobile screenshots",
-        "source-owned free-page/v1 package 91f880b5 / sha256 774e2faa…",
+        "source-owned free-page/v1 package fcee92a9 / sha256 e2ed8f1c…",
         "standalone package contract and rendered-text regression: 48 PASS / 0 FAIL",
-        "standalone Chromium probe: 6 PASS / real_model NOT_RUN / contains_real_data false",
+        "standalone Chromium probe: 7 PASS / real_model NOT_RUN / contains_real_data false",
         "candidate-bound headed responsive receipt",
         "keyboard focus partial: 12 Tab steps, 43 interactive DOM nodes / 42 named / 1 unnamed input",
         "candidate-keyboard-focus.json"
@@ -145,7 +145,7 @@
       "evidence": [
         "this audit matrix",
         "M2 status closeout",
-        "OCR code review and local commits 4919221a, 91f880b5"
+        "OCR code review and local commits 4919221a, 91f880b5, fcee92a9"
       ],
       "next": "refresh this matrix when an external gate changes"
     }
@@ -163,9 +163,9 @@
       "reviewable_code_files": 5,
       "reviewable_json_files": 23,
       "rechecked_changed_code_files": 4,
-      "commit": "91f880b5",
-      "previous_commit": "4919221a",
-      "tests": "standalone follow-up: Node 48 PASS / 0 FAIL; Chromium probe 6 PASS / 0 errors; previous release suite: 546 PASS / 0 FAIL / 0 SKIP"
+      "commit": "fcee92a9",
+      "previous_commit": "91f880b5",
+      "tests": "standalone follow-up: Node 48 PASS / 0 FAIL; source-owned Chromium probe 7 PASS / 0 errors; synthetic Chromium probe 6 PASS / 0 errors; previous release suite: 546 PASS / 0 FAIL / 0 SKIP"
     }
   }
 }

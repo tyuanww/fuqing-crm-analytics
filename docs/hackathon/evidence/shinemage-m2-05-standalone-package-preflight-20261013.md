@@ -48,8 +48,8 @@ package_path=ABSENT
 
 - 文件：[examples/cockpit-example/revenue-review.package.json](../../../examples/cockpit-example/revenue-review.package.json)；说明见同目录 `README.md`；
 - 页面显式标注“示例数据 · 未绑定经营数据 · 仅用于页面验收”，不连接 CRM、模型或 WeKnora，不读取凭据，不发网络请求，不执行写操作；
-- 来源提交：`91f880b5c4a963865e71252b1a2482dbff062a6b`；
-- 页面包 SHA-256：`774e2faa453fca87de58fc66078438a8bb3bf59537594a43b88a454f24f82ed3`；
+- 来源提交：`fcee92a9`（在 `91f880b5` 页面包基础上加固浏览器保存、目标选区、图表和移动视口检查）；
+- 页面包 SHA-256：`e2ed8f1ceefd97fd1be673b710f24c5a9b90ca1f781725b785534fc1be2f23c`；
 - `parsePagePackage` 通过，`node_map=4`、`resources=0`；
 - 定向 Node 合同、预览、资源规范和渲染回归共 `48 PASS / 0 FAIL`，其中真实 standalone 测试在设置 `COCKPIT_EXAMPLE_PACKAGE` 后执行；
 - 固定上游 `0.1.7-rc.2` 的实际 Chromium 浏览器探针命令如下：
@@ -62,10 +62,10 @@ B0_BUILD_UPSTREAM="$UP" \
 FQ_B0_PYTHON=/tmp/dsh-b0-python314-0200/bin/python \
 COCKPIT_PLAYWRIGHT="$PW" \
 COCKPIT_CHROMIUM="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
-COCKPIT_EVIDENCE_DIR="$PWD/.context/checks/cockpit-ui-ux/browser-standalone-20261013" \
+COCKPIT_EVIDENCE_DIR="$PWD/.context/checks/cockpit-ui-ux/browser-standalone-final-20261013" \
 node dsh-plugins/analytics-workbench/test/cockpit-ui-ux-browser-probe.mjs --presentation
 ```
 
-命令退出码为 `0`，结果文件为 `.context/checks/cockpit-ui-ux/browser-standalone-20261013/results.json`，包含 6 项 PASS：页面文案保存、筛选重绘保持、候选收取、保存回执丢失重试、刷新恢复和浏览器无未处理异常。该探针使用本地拥有的 synthetic FastAPI/SQLite 与真实 Chromium，不含真实业务数据；`full_dsh_shell=NOT_RUN`、`real_model=NOT_RUN`、`contains_real_data=false`。
+命令退出码为 `0`，结果文件为 `.context/checks/cockpit-ui-ux/browser-standalone-final-20261013/results.json`，包含 7 项 PASS：保存与筛选重绘、文字选区候选、回执重试、冻结候选预览、刷新恢复、图表可见高度与 390px 移动视口无横向溢出、浏览器无未处理异常。该探针使用本地拥有的 synthetic FastAPI/SQLite 与真实 Chromium，不含真实业务数据；`full_dsh_shell=NOT_RUN`、`real_model=NOT_RUN`、`contains_real_data=false`。
 
 本 follow-up 关闭的是 standalone 页面包输入和 standalone 浏览器子项。M2-05 仍保持页面验收未完全收口：candidate headed browser 的读屏、人工完整键盘焦点和 Windows 高对比度仍未完成，故当前状态为 `PARTIAL_LIVE_BROWSER_PASS / CANDIDATE_BROWSER_PASS / STANDALONE_PACKAGE_BROWSER_PASS / ACCESSIBILITY_KEYBOARD_PARTIAL`。该结果不授予 release、activation、canary 或 rollback。
