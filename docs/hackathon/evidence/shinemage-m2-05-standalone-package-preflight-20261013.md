@@ -35,3 +35,9 @@ package_path=ABSENT
 - 本轮没有伪造、下载、生成或修改页面包；
 - M2-05 仍为 `PARTIAL_LIVE_BROWSER_PASS / CANDIDATE_BROWSER_STANDALONE_NOT_RUN`；
 - 下一步需要用户提供可验收的真实页面包及其来源身份，再在 candidate-bound 目标上执行 standalone、读屏、完整键盘焦点和高对比度验收。
+
+## 2026-10-13 定向包名复核
+
+本地唯一命中的 `*.zip` 是 `.context/exports/free-html-cockpit-handoff-20260918.zip`。解包清单显示它是 2026-09-18 的历史 `free-html-execution-packet/v1`，内容为批准计划、参考图片、提示词和仓库上下文，`implementation_status=NOT_STARTED`；它没有 `COCKPIT_EXAMPLE_PACKAGE` 页面运行包，不能作为本轮 standalone 输入。杭州目标同样只命中上游架构说明，没有真实页面包工件。
+
+因此本次复核加强了缺口证据，但没有改变 M2-05 状态，也没有把历史资料当作正式候选页面。
