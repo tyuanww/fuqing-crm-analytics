@@ -34,3 +34,11 @@
 
 `CANDIDATE_BOOT_PASS / ASIDE_LOGIN_PENDING`。这关闭了本轮候选依赖图与宿主启动阻塞，未关闭真实业务 UAT、保存/权限失败/恢复、standalone 页面、SDK 供应链或 release/activation 门禁。产品仍 `PARTIAL`，`release_ready=false`。
 
+
+## 2026-10-13 CRM client 接线根因与修复
+
+候选页面最初没有出现“连接 CRM”入口。诊断日志显示，把 `@shine-mage/dsh-crm-knowledge/client` 作为 host Cordis 根条目插入后，服务端启动阶段尝试执行浏览器 bundle，结果为 `ReferenceError: window is not defined`。这是加载职责错误：浏览器 client 不能作为服务端 host 插件导入。
+
+修复只作用于隔离 candidate runtime：移除该根条目，保留 CRM host 与 agent preset；由固定 DSH `@deepseek-ai/dsh-client-modules` 扫描 CRM 包的 `dsh.client` 声明和 `exports["./client"]`，通过浏览器 bundle 注入 conversation dock。重启 candidate 后 `4332/4336` 正常监听，启动日志没有 client import failure；候选对话出现“连接 CRM”入口，用户随后手工完成当前会话绑定。
+
+本次没有修改仓库代码、DSH 上游、live `4328`、主仓 profile 或 journal；该临时 runtime 接线不改变插件源码职责边界。
