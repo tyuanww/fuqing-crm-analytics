@@ -6,7 +6,7 @@
 
 - candidate 文件摘要：`916826710c7e49124eb0d4284b8b2fe00f19c4dd46ddf181144761d566eefede`；内部 candidate digest：`125c8e538816835cad212048b8fd0302d98588d704b09de559789df9bf6e6bdb`。
 - 两份候选 profile 快照：CRM `7ca35116…`，page `2df9934f…`。page 快照保留 `analytics-first-purchase` 的 `service_binding`；CRM 快照按组合合同保持无绑定。
-- journal 文件摘要：`abd088d9b6e06793b85cefe72c867bc79e6157ca35c2f56672f518eafd8f4937`，链完整到 seq 4；最后事件为 `COMPOSITION_TERMINAL_HOST_OBSERVED`，release tag 为 `dsh-composition-5716227293a4d793fd779c71`。
+- journal 文件摘要：`adbef8264fdd83f544d40d5c6159ff555a3e86e039ae668daa15d2e7ecebfcd9`，链完整到 seq 5；最后事件为 `COMPOSITION_BROWSER_HOST_OBSERVED`，release tag 为 `dsh-composition-5716227293a4d793fd779c71`。
 - service gate 仍为 `LOCAL_COMPATIBLE`，source SHA `f9726f68…`，binding/evidence 摘要与隔离 candidate 一致。
 
 ## 验证

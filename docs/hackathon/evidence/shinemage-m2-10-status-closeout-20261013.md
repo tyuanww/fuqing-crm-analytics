@@ -8,9 +8,9 @@
 
 - `cards` 共 10 张，ID 覆盖 `M2-01` 至 `M2-10`，无重复或缺失；
 - 每张卡都有当前 `status`、`evidence` 和 `next`；
-- M2-01/02 保持隔离 candidate/profile 未注册；
+- M2-01/02 已登记正式 candidate/profile 快照；page profile 带 service binding，CRM profile 按组合合同无绑定；
 - M2-03 保持目标前置通过；
-- M2-04/05/06/07/08/09 当前分别为 browser `PASS`、键盘焦点部分观察且 standalone 缺输入、`MISSING_CREDENTIAL`、供应链 `BLOCKED`、release `NOT_RUN` 和 DSH `DEFERRED`；
+- M2-04/05/06/07/08/09 当前分别为 terminal/browser `PASS`、键盘焦点部分观察且 standalone 缺输入、candidate `MISSING_CREDENTIAL` 与 live 工具面为空、供应链 `BLOCKED`、release `NOT_RUN` 和 DSH `DEFERRED`；
 - M2-10 本身记录本审计矩阵，未把产品发布状态误写为通过；
 - 全局状态仍为 `product=PARTIAL`、`release_ready=false`、`activation=NOT_RUN`、`code_changes_this_audit=false`、`production_data=NOT_USED_IN_CURRENT_OBSERVATIONS`。
 
@@ -25,4 +25,4 @@ git diff --check
 
 ## M2-10 结论
 
-M2-10 的证据与状态收口完成，状态更新为 `PASS / RELEASE_GATES_REMAIN_OPEN`。这只证明当前十张任务卡的事实、证据文件和未完成边界可追溯，不关闭 M2-01/02、M2-05/06/07/08，也不授予 release、activation、canary、rollback 或生产切换。
+M2-10 的证据与状态收口完成，状态为 `PASS / RELEASE_GATES_REMAIN_OPEN`。这只证明当前十张任务卡的事实、证据文件和未完成边界可追溯；M2-01/02 已登记，M2-05/06/07/08 的独立门禁仍开放，也不授予 release、activation、canary、rollback 或生产切换。

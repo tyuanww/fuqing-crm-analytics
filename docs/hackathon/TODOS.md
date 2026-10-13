@@ -21,7 +21,7 @@
 
 | ID | 任务 | 当前状态 | 前置条件 | 完成标准 | 提交边界 |
 |---|---|---|---|---|---|
-| M2-01 | 九包组合 candidate 合同 | `FORMAL_CANDIDATE_REGISTERED / RELEASE_GATES_OPEN` | 隔离 candidate、当前九包输入和主仓登记授权 | 主仓 `config/candidates/shinemage-composition-20261013/` 已登记 `dsh-composition-candidate/v1`、两份候选 profile、九 pack 摘要和 journal seq 1–4；candidate digest `125c8e53…` 可回读 | `chore(sprint): Sprint 120 register formal composition candidate snapshots` |
+| M2-01 | 九包组合 candidate 合同 | `FORMAL_CANDIDATE_REGISTERED / RELEASE_GATES_OPEN` | 隔离 candidate、当前九包输入和主仓登记授权 | 主仓 `config/candidates/shinemage-composition-20261013/` 已登记 `dsh-composition-candidate/v1`、两份候选 profile、九 pack 摘要和 journal seq 1–5；candidate digest `125c8e53…` 可回读 | `chore(sprint): Sprint 120 register formal composition candidate snapshots` |
 | M2-02 | 服务绑定与兼容回执 | `FORMAL_BINDING_REGISTERED / CRM_UNBOUND_BY_CONTRACT` | candidate 合同要求 page profile 绑定 service gate，CRM profile 保持组合边界 | page profile 快照已写入 `analytics-first-purchase` binding、source SHA 和 `LOCAL_COMPATIBLE` 回执；CRM profile 按组合合同保持无绑定，默认 source profile 未被污染 | 同上；登记证据见 `docs(acceptance): record formal candidate registration` |
 | M2-03 | WSL2 目标（当前按测试+生产授权） | `TARGET_PREFLIGHT_PASS / USER_AUTHORIZED_TEST_PROD` | candidate-bound browser、激活和发布仍按独立门禁；云服务器迁移另行 | Linux x86_64 / WSL2、Python 3.14.4、Node/zstd、权限和精确 13-wheel preflight 已通过；现役服务 stale lock 已受保护修复；用户已确认当前目标同时承担测试与生产验收 | `docs(acceptance): record production target authorization` |
 | M2-04 | source HTTP → terminal → browser → recovery | `TERMINAL_PASS / BROWSER_PASS` | M2-01、M2-02、M2-03 | 同一新 candidate 在同一目标完成四段链路；每段 receipt 绑定 candidate，重试幂等、失败可恢复、临时资源回收 | source 子阶段见 `docs(acceptance): record composition source target`；terminal 子阶段见 `docs(acceptance): record composition terminal target`；browser seq 5 与三种 viewport 回执见 `docs/hackathon/evidence/shinemage-m2-04-candidate-browser-preflight-20261013.md` |
@@ -44,11 +44,11 @@
 
 source HTTP 子阶段随后已在同一目标用当前 candidate 完成 10/10 PASS，服务内 SIGKILL/冷恢复、输入和临时资源清理均有 candidate-bound receipt，隔离 journal seq 3；该回执本身不覆盖 terminal/browser。详见[当前组合 source HTTP 目标验收](evidence/shinemage-composition-source-http-target-20261013.md)。
 
-随后在同一目标使用九包组合 candidate 完成 terminal drill：roster/工具加载、合成原生对话、受控重启和进程丢失后的 durable session 恢复共 5/5 PASS，组合 journal seq 4 已追加。该回执只覆盖 synthetic model 与临时 profile/runtime；browser、真实模型/CRM/WeKnora/UAT、供应链、activation、canary、rollback 和 release gate 仍未关闭。详见[当前组合 terminal 目标验收](evidence/shinemage-composition-terminal-target-20261013.md)。
+随后在同一目标使用九包组合 candidate 完成 terminal drill：roster/工具加载、合成原生对话、受控重启和进程丢失后的 durable session 恢复共 5/5 PASS，组合 journal seq 4 已追加。该回执只覆盖 synthetic model 与临时 profile/runtime；candidate-bound browser 随后以 seq 5 完成，真实模型/CRM/WeKnora/UAT、供应链、activation、canary、rollback 和 release gate 仍未关闭。详见[当前组合 terminal 目标验收](evidence/shinemage-composition-terminal-target-20261013.md)。
 
-随后对用户授权的真实入口 `https://app.tyuan.chat/` 做了只读 headed browser 观察：组合 bundle 约 15 秒后加载完成，桌面、平板和移动 viewport 均显示真实工作台导航与工作区内容，控制台错误为空。该结果只关闭 live browser 子项，不接入 candidate journal，也不替代 standalone、读屏、键盘焦点、高对比度或 candidate-bound browser 验收。详见[授权生产入口 live browser 观察](evidence/shinemage-live-browser-20261013.md)。
+随后对用户授权的真实入口 `https://app.tyuan.chat/` 做了只读 headed browser 观察：组合 bundle 约 15 秒后加载完成，桌面、平板和移动 viewport 均显示真实工作台导航与工作区内容，控制台错误为空。该结果只关闭 live browser 子项，不接入 candidate journal，也不替代 standalone、读屏、键盘焦点和高对比度验收；candidate-bound browser 另有 seq 5 回执。详见[授权生产入口 live browser 观察](evidence/shinemage-live-browser-20261013.md)。
 
-随后复核 M2-05 的 standalone 输入：本地 `COCKPIT_EXAMPLE_PACKAGE` 未设置，路径不存在；定向检索仅命中合同、测试夹具和历史说明，没有真实页面包。本轮不生成替代页面，standalone、读屏、完整键盘焦点和高对比度继续保持 `NOT_RUN`。详见[standalone 页面包 preflight](evidence/shinemage-m2-05-standalone-package-preflight-20261013.md)。
+随后复核 M2-05 的 standalone 输入：本地 `COCKPIT_EXAMPLE_PACKAGE` 未设置，路径不存在；定向检索仅命中合同、测试夹具和历史说明，没有真实页面包。本轮不生成替代页面，standalone、读屏、人工完整键盘焦点和高对比度继续保持 `NOT_RUN`；candidate-bound headed browser 的 Tab 观察仅为 partial。详见[standalone 页面包 preflight](evidence/shinemage-m2-05-standalone-package-preflight-20261013.md)。
 
 随后对 DSH、page、CRM 和 WeKnora loopback 入口做了只读状态码前置核验：认证入口返回 401，page 根路径返回 404，WeKnora Web shell 返回 200；没有调用真实模型、读取 CRM/WeKnora 数据或执行 UAT。详见[真实业务 UAT 前置核验](evidence/shinemage-real-business-uat-preflight-20261013.md)。
 
@@ -68,7 +68,7 @@ source HTTP 子阶段随后已在同一目标用当前 candidate 完成 10/10 PA
 
 随后复核 M2-07 当前供应链检查器：脚本 SHA-256 仍为 `690034de…`，工作树无改动，CLI 默认离线且明确不授予 release readiness；`dependency_graph`、`embedded_components`、`registry_integrity`、`publisher_identity`、`opaque_content`、`revocation` 仍未验证。该复核没有执行 OSV、安装、签名或发布，M2-07 继续为 `BLOCKED`。详见[SDK 供应链门禁当前复核](evidence/shinemage-m2-07-supply-chain-gate-recheck-20261013.md)。
 
-随后审计 M2-08 release/activation/canary/rollback 前置链：M2-01/02 的正式 profile/service binding 未注册，M2-05/06 仍有页面、模型和业务 UAT缺口，M2-07 仍 BLOCKED，且当前记录没有正式 release/activation 授权。`release_ready=false`、`activation=NOT_RUN` 保持不变；本轮没有 push、merge、receive、激活、canary 或 rollback。详见[M2-08 release 门禁审计](evidence/shinemage-m2-08-release-gate-audit-20261013.md)。
+随后审计 M2-08 release/activation/canary/rollback 前置链：M2-01/02 已登记正式 candidate/profile 快照（CRM 按组合合同无绑定），M2-05/06 仍有页面、模型和业务 UAT 缺口，M2-07 仍 BLOCKED，且当前记录没有正式 release/activation 授权。`release_ready=false`、`activation=NOT_RUN` 保持不变；本轮没有 push、merge、receive、激活、canary 或 rollback。详见[M2-08 release 门禁审计](evidence/shinemage-m2-08-release-gate-audit-20261013.md)。
 
 随后复核 M2-09 DSH 升级边界：本地 pin 仍为 `0.1.7-rc.2` / `477b4f42…`，杭州 `current` 仍为 `dsh-0.20.0.0-r3`，candidate 仍使用同一 rc2 上游；本轮没有新隔离升级 runtime、安装、锁变更或切换。M2-09 继续为 `DEFERRED`。详见[DSH 升级候选延后复核](evidence/shinemage-m2-09-dsh-upgrade-deferred-20261013.md)。
 
