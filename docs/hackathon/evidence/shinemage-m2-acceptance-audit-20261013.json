@@ -1,6 +1,6 @@
 {
   "schema_version": "shinemage-m2-acceptance-audit/v1",
-  "recorded_at": "2026-10-13T15:18:14+08:00",
+  "recorded_at": "2026-10-13T16:58:00+08:00",
   "repository": {
     "branch": "codex/shinemage-abc-local-candidate",
     "head": "4919221a",
@@ -98,7 +98,7 @@
     },
     {
       "id": "M2-06",
-      "status": "PARTIAL_REAL_UAT / LIVE_TOOL_SURFACE_EMPTY / CANDIDATE_MODEL_MISSING_CREDENTIAL",
+      "status": "CANDIDATE_REAL_MODEL_PASS / CRM_READONLY_PASS / WEKNORA_READONLY_PASS / LIVE_TOOL_SURFACE_EMPTY",
       "evidence": [
         "real business UAT preflight",
         "real business UAT run",
@@ -106,9 +106,10 @@
         "candidate Aside session boundary",
         "live read-only UAT tool boundary",
         "candidate CRM host route probe",
-        "candidate model credential gate"
+        "candidate model credential gate",
+        "candidate real model/CRM/WeKnora read-only UAT"
       ],
-      "next": "在 candidate credentials service 配置受控 provider 凭据后重跑真实只读查询；再补 CRM/WeKnora、保存/权限/恢复/人工 UAT"
+      "next": "补齐保存、权限失败、恢复和人工业务复核；live 标准会话工具面仍未暴露；继续 standalone、无障碍、供应链和 release gates"
     },
     {
       "id": "M2-07",
@@ -151,7 +152,7 @@
     "product": "PARTIAL",
     "release_ready": false,
     "activation": "NOT_RUN",
-    "production_data": "NOT_USED_IN_CURRENT_OBSERVATIONS",
+    "production_data": "READ_ONLY_REDACTED / NO_MUTATION",
     "code_changes_this_audit": true,
     "code_review": {
       "status": "PASS_AFTER_FIXES",

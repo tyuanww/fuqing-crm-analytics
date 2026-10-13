@@ -1,6 +1,6 @@
 # 真实模型、WeKnora 与 CRM UAT 实跑（2026-10-13）
 
-用户本人在 Aside 完成登录后，在授权杭州入口执行只读 UAT。结果是部分通过：真实模型和 WeKnora 检索完成，登录后的 CRM 人群看板加载了真实聚合数据；工作台当前会话没有暴露 `query_crm_dashboard_gsv`，模型没有编造调用，模型直连 CRM 查询保持阻塞。
+用户本人在 Aside 完成登录后，在授权杭州入口执行只读 UAT。该文件先记录 live 标准会话的结果；随后在隔离 candidate 完成了真实模型、WeKnora 和 CRM GSV 只读链路。两类运行时保持分开，不能互相代签。
 
 ## 已实际运行
 
@@ -37,3 +37,9 @@
 - standalone、candidate-bound browser、读屏、键盘完整焦点和高对比度仍由 M2-05/M2-04 独立负责。
 
 本轮没有修改生产数据、没有生成或保存驾驶舱、没有激活 candidate、没有 push；产品仍 `PARTIAL`，`release_ready=false`。
+
+## 2026-10-13 candidate follow-up
+
+在用户于 candidate Models 页面手工配置受控 provider 凭据、并在当前对话的“连接 CRM”表单手工绑定账号后，重新执行同一只读请求。candidate 页面显示 `仅可查看`、`crm_login=LOGIN_BOUND`，`query_crm_dashboard_gsv` 按 `2026-01-01` 至 `2026-01-07`、`channel=all`、`exclude_low_price=false` 调用一次。结果为真实来源、7/7 日点、日汇总一致；总额、趋势行、客户标识和原始业务行按脱敏要求未记录。
+
+结论：candidate 真实模型 PASS、WeKnora 只读检索 PASS、CRM GSV 只读 PASS。原始证据与限制见[候选真实 UAT 证据](shinemage-m2-06-candidate-real-uat-20261013.md)。candidate 只读 UAT 不覆盖 live 标准会话工具面，也不关闭保存、权限失败、恢复、人工业务复核、standalone、无障碍、供应链或 release 门禁。
