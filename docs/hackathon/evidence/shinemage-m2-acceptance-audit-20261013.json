@@ -1,9 +1,9 @@
 {
   "schema_version": "shinemage-m2-acceptance-audit/v1",
-  "recorded_at": "2026-10-13T10:47:27+08:00",
+  "recorded_at": "2026-10-13T11:04:15+08:00",
   "repository": {
     "branch": "codex/shinemage-abc-local-candidate",
-    "head": "e7c83d0d590eebdce45f78884c0400a4700ea635",
+    "head": "ca1a6142",
     "push": "NOT_RUN",
     "protected_untracked": [
       "security-audit-skill/"
@@ -71,9 +71,10 @@
       "status": "TERMINAL_PASS / BROWSER_NOT_RUN",
       "evidence": [
         "source HTTP seq 3",
-        "terminal seq 4"
+        "terminal seq 4",
+        "candidate browser preflight: runtime/tunnel unavailable"
       ],
-      "next": "candidate-bound browser receipt"
+      "next": "restore candidate runtime/tunnel, then produce candidate-bound browser and recovery receipts"
     },
     {
       "id": "M2-05",
