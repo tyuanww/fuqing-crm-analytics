@@ -3,7 +3,7 @@
   "recorded_at": "2026-10-13T18:39:25+08:00",
   "repository": {
     "branch": "codex/shinemage-abc-local-candidate",
-    "head": "fcee92a9",
+    "head": "39cdb9c3",
     "push": "NOT_RUN",
     "protected_untracked": [
       "security-audit-skill/"
@@ -133,12 +133,14 @@
     },
     {
       "id": "M2-09",
-      "status": "DEFERRED",
+      "status": "CANDIDATE_IDENTIFIED / STATIC_MATRIX_PASS / RUNTIME_NOT_RUN",
       "evidence": [
         "DSH pin remains 0.1.7-rc.2",
+        "official dsh-v0.2.1-alpha.2 / d7432673 isolated checkout",
+        "offline compatibility matrix: candidate SUPPORTED, overall PARTIAL",
         "DSH upgrade deferred recheck"
       ],
-      "next": "new official DSH candidate and compatibility matrix"
+      "next": "install/build isolated runtime, run plugin/lifecycle/recovery matrix, then seek switch authorization"
     },
     {
       "id": "M2-10",
@@ -146,7 +148,7 @@
       "evidence": [
         "this audit matrix",
         "M2 status closeout",
-        "OCR code review and local commits 4919221a, 91f880b5, fcee92a9"
+        "OCR code review and local commits 4919221a, 91f880b5, fcee92a9, 39cdb9c3"
       ],
       "next": "refresh this matrix when an external gate changes"
     }
@@ -160,13 +162,13 @@
     "code_review": {
       "status": "PASS_AFTER_FIXES",
       "review_skill": "open-code-review-delegate",
-      "reviewed_files": 28,
-      "reviewable_code_files": 5,
+      "reviewed_files": 30,
+      "reviewable_code_files": 7,
       "reviewable_json_files": 23,
-      "rechecked_changed_code_files": 4,
-      "commit": "fcee92a9",
-      "previous_commit": "91f880b5",
-      "tests": "standalone follow-up: Node 48 PASS / 0 FAIL; source-owned Chromium probe 7 PASS / 0 errors; standalone accessibility automation 6 PASS / screen_reader NOT_RUN; synthetic Chromium probe 6 PASS / 0 errors; previous release suite: 546 PASS / 0 FAIL / 0 SKIP"
+      "rechecked_changed_code_files": 6,
+      "commit": "39cdb9c3",
+      "previous_commit": "fcee92a9",
+      "tests": "standalone follow-up: Node 48 PASS / 0 FAIL; source-owned Chromium probe 7 PASS / 0 errors; standalone accessibility automation 6 PASS / screen_reader NOT_RUN; synthetic Chromium probe 6 PASS / 0 errors; DSH compatibility matrix 5 PASS / 0 FAIL / 0 SKIP; previous release suite: 546 PASS / 0 FAIL / 0 SKIP"
     }
   }
 }
