@@ -47,7 +47,9 @@ export async function readPreparedCompositionCandidate({ candidatePath, statePat
   assert.ok(source, 'COMPOSITION_HOST_SOURCE_PARENT_REQUIRED');
   assert.equal(source.service_binding?.source_sha, candidate.service_compatibility.binding.source_sha,
     'COMPOSITION_HOST_SOURCE_PARENT_MISMATCH');
-  return { candidate, candidateBytes, state, prepared, source };
+  const terminal = [...state.journal].reverse().find(row => row.status === 'COMPOSITION_TERMINAL_HOST_OBSERVED'
+    && row.candidate_digest === candidate.candidate_digest);
+  return { candidate, candidateBytes, state, prepared, source, terminal };
 }
 
 /** Validate a terminal/browser receipt before any journal mutation. */
@@ -75,6 +77,12 @@ export function validateCompositionHostEvidence({ candidate, envelope } = {}) {
   assert.equal(envelope.observation.supply_chain, 'NOT_VERIFIED', 'COMPOSITION_HOST_SUPPLY_CHAIN_CLAIM');
   assert.equal(envelope.observation.production_identity, 'NOT_RUN', 'COMPOSITION_HOST_IDENTITY_CLAIM');
   assert.equal(envelope.observation.activation, 'NOT_RUN', 'COMPOSITION_HOST_ACTIVATION_CLAIM');
+  if (envelope.phase === 'terminal') {
+    assert.equal(envelope.observation.browser, 'NOT_RUN', 'COMPOSITION_TERMINAL_BROWSER_CLAIM');
+  } else {
+    assert.ok(envelope.observation.browser && typeof envelope.observation.browser === 'object'
+      && !Array.isArray(envelope.observation.browser), 'COMPOSITION_BROWSER_OBSERVATION_REQUIRED');
+  }
   assert.equal(envelope.release_ready, false, 'COMPOSITION_HOST_FALSE_RELEASE_CLAIM');
   assert.equal(envelope.activation, 'NOT_RUN', 'COMPOSITION_HOST_ACTIVATION_CLAIM');
   assert.equal(envelope.target.platform?.system, 'Linux', 'COMPOSITION_HOST_PLATFORM');
@@ -88,17 +96,35 @@ export function validateCompositionHostEvidence({ candidate, envelope } = {}) {
 
 /** Verify and append a composition terminal/browser observation. */
 export async function verifyCompositionHostEvidence({ candidatePath, evidencePath, statePath } = {}) {
-  const { candidate, candidateBytes, prepared, source } = await readPreparedCompositionCandidate({ candidatePath, statePath });
+  const { candidate, candidateBytes, state, prepared, source, terminal } = await readPreparedCompositionCandidate({ candidatePath, statePath });
   const envelope = validateCompositionHostEvidence({ candidate, envelope: await readJson(
     absolute(evidencePath, 'COMPOSITION_HOST_EVIDENCE_PATH_REQUIRED'), 'COMPOSITION_HOST_EVIDENCE_INVALID') });
+  if (envelope.phase === 'browser') {
+    assert.ok(terminal, 'COMPOSITION_HOST_TERMINAL_PARENT_REQUIRED');
+  }
   const envelopeDigest = await digest(envelope);
+  const idempotencyKey = `composition-host:${envelope.phase}:${candidate.candidate_digest}:${envelopeDigest}`;
+  // Browser receipts written before terminal_host_event was added remain valid
+  // when the same candidate terminal event is present. Reuse that immutable
+  // historical result instead of turning a safe retry into an idempotency
+  // conflict or rewriting the journal.
+  if (envelope.phase === 'browser' && state.idempotency[idempotencyKey]?.result) {
+    const prior = state.idempotency[idempotencyKey].result;
+    assert.equal(prior.status, 'COMPOSITION_BROWSER_HOST_OBSERVED', 'COMPOSITION_BROWSER_IDEMPOTENCY_STATUS');
+    assert.equal(prior.candidate_digest, candidate.candidate_digest, 'COMPOSITION_BROWSER_IDEMPOTENCY_CANDIDATE');
+    assert.equal(state.journal[terminal.seq - 1]?.digest, terminal.digest, 'COMPOSITION_HOST_TERMINAL_PARENT_CHANGED');
+    return { ...prior.observation, terminal_host_event: { seq: terminal.seq, digest: terminal.digest },
+      candidate_bytes: candidateBytes.length, journal_seq: prior.seq, journal_digest: prior.digest };
+  }
   const status = `COMPOSITION_${envelope.phase.toUpperCase()}_HOST_OBSERVED`;
   const observation = { ...envelope.observation, phase: envelope.phase, target: envelope.target,
     evidence_authenticity: 'UNATTESTED_OPERATOR_OBSERVATION', candidate_digest: candidate.candidate_digest };
   const event = await recordEvent(statePath, { release_tag: prepared.release_tag, status,
     candidate_digest: candidate.candidate_digest, service_binding: candidate.service_compatibility.binding,
-    source_http_event: { seq: source.seq, digest: source.digest }, observation },
-  { idempotencyKey: `composition-host:${envelope.phase}:${candidate.candidate_digest}:${envelopeDigest}`,
+    source_http_event: { seq: source.seq, digest: source.digest },
+    ...(envelope.phase === 'browser' ? { terminal_host_event: { seq: terminal.seq, digest: terminal.digest } } : {}),
+    observation },
+  { idempotencyKey,
     requiredEvent: { seq: source.seq, digest: source.digest } });
   return { ...observation, candidate_bytes: candidateBytes.length, journal_seq: event.seq, journal_digest: event.digest };
 }

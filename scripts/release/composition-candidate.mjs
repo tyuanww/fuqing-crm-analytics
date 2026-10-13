@@ -88,10 +88,14 @@ export function validateCompositionCandidate(candidate) {
   assert.deepEqual(candidate.profiles.flatMap(profile => profile.plugins), ids, 'COMPOSITION_PROFILE_PLUGIN_MISMATCH');
   for (const item of candidate.plugins) {
     assert.match(item.id ?? '', PACKAGE_ID, 'COMPOSITION_PLUGIN_ID');
+    assert.ok(item.profile === 'crm' || item.profile === 'page', 'COMPOSITION_PLUGIN_PROFILE');
     assert.match(item.source_sha ?? '', /^[a-f0-9]{40}$/, 'COMPOSITION_PLUGIN_SOURCE');
     assert.match(item.manifest_sha256 ?? '', HEX, 'COMPOSITION_PLUGIN_MANIFEST');
     assert.match(item.pack?.sha256 ?? '', HEX, 'COMPOSITION_PLUGIN_PACK');
     assert.equal(item.pack.name, `${item.id.slice(1).replaceAll('/', '-')}-${item.version}.tgz`, 'COMPOSITION_PLUGIN_PACK_NAME');
+    const profile = candidate.profiles.find(row => row.plugins.includes(item.id));
+    assert.ok(profile, 'COMPOSITION_PLUGIN_PROFILE_MISSING');
+    assert.equal(item.profile, profile.name, 'COMPOSITION_PLUGIN_PROFILE_MISMATCH');
   }
   return candidate;
 }

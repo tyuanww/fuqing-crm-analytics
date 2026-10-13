@@ -43,3 +43,10 @@ test('composition candidate rejects a missing service gate before any output is 
   await assert.rejects(() => createCompositionCandidate({ crmInputsPath: join(root, 'crm.json'), pageInputsPath: join(root, 'page.json'), outputDir: join(root, 'out'), statePath: join(root, 'journal.json') }), /COMPOSITION_SERVICE_BINDING_REQUIRED/);
   await assert.rejects(() => readFile(join(root, 'out/composition-candidate.json')), { code: 'ENOENT' });
 });
+
+test('composition candidate rejects a plugin assigned to the wrong profile', () => {
+  const value = candidate();
+  value.plugins[0].profile = 'page';
+  value.candidate_digest = digest(Object.fromEntries(Object.entries(value).filter(([key]) => key !== 'candidate_digest')));
+  assert.throws(() => validateCompositionCandidate(value), /COMPOSITION_PLUGIN_PROFILE_MISMATCH/);
+});
