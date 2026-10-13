@@ -102,15 +102,15 @@ async function collectFiles(root, declared) {
   return files.sort();
 }
 
-function inspectManifest(manifest, packed = false) {
+function inspectManifest(manifest, packed = false, { sdkVersion = DSH_SDK_VERSION, pnpmVersion = PNPM_VERSION } = {}) {
   assert.match(manifest.name, /^@shine-mage\/[a-z0-9][a-z0-9-]+$/, 'PLUGIN_PACK_NAME_INVALID');
   assert.match(manifest.version, /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/, 'PLUGIN_PACK_VERSION_INVALID');
   assert.equal(manifest.type, 'module', 'PLUGIN_PACK_TYPE_INVALID');
   if (!packed || manifest.packageManager !== undefined) {
-    assert.equal(manifest.packageManager, `pnpm@${PNPM_VERSION}`, 'PLUGIN_PACK_PACKAGE_MANAGER_INVALID');
+    assert.equal(manifest.packageManager, `pnpm@${pnpmVersion}`, 'PLUGIN_PACK_PACKAGE_MANAGER_INVALID');
   }
   if (packed) assert.equal(manifest.scripts, undefined, 'PLUGIN_PACK_LIFECYCLE_FORBIDDEN');
-  assert.equal(manifest.peerDependencies?.['@deepseek-ai/dsh-tools'], DSH_SDK_VERSION, 'PLUGIN_PACK_DSH_PEER_INVALID');
+  assert.equal(manifest.peerDependencies?.['@deepseek-ai/dsh-tools'], sdkVersion, 'PLUGIN_PACK_DSH_PEER_INVALID');
   const declared = manifest.files;
   assert.ok(Array.isArray(declared) && declared.length > 0, 'PLUGIN_PACK_FILES_REQUIRED');
   assert.equal(new Set(declared).size, declared.length, 'PLUGIN_PACK_FILES_DUPLICATE');
@@ -126,16 +126,17 @@ function inspectManifest(manifest, packed = false) {
   return declared;
 }
 
-async function inspectPackage(pluginRoot) {
+async function inspectPackage(pluginRoot, compatibility = {}) {
   const manifest = JSON.parse(await readFile(join(pluginRoot, 'package.json'), 'utf8'));
-  const declared = inspectManifest(manifest);
+  const declared = inspectManifest(manifest, false, compatibility);
   const declaredFiles = await collectFiles(pluginRoot, declared);
   assert.ok(declaredFiles.some(file => file.startsWith('lib/')), 'PLUGIN_PACK_BUILD_OUTPUT_REQUIRED');
   return { manifest, declared, declaredFiles };
 }
 
 /** Consume an explicitly pinned formal pack, without source checkout or pnpm. */
-export async function readPluginPack({ manifestPath, expectedSha256 }) {
+export async function readPluginPack({ manifestPath, expectedSha256, expectedSdkVersion = DSH_SDK_VERSION,
+  expectedPnpmVersion = PNPM_VERSION } = {}) {
   const path = safeAbsolute(manifestPath, 'PLUGIN_PACK_MANIFEST_INVALID');
   assert.match(expectedSha256 ?? '', SHA256, 'PLUGIN_PACK_MANIFEST_DIGEST_REQUIRED');
   const manifestBytes = await readArtifactFile(path, 256 * 1024);
@@ -144,7 +145,7 @@ export async function readPluginPack({ manifestPath, expectedSha256 }) {
   assert.equal(receipt.schema_version, 'dsh-plugin-pack/v1', 'PLUGIN_PACK_SCHEMA');
   assert.match(receipt.package_name ?? '', /^@shine-mage\/[a-z0-9][a-z0-9-]+$/, 'PLUGIN_PACK_NAME_INVALID');
   assert.match(receipt.package_version ?? '', /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/, 'PLUGIN_PACK_VERSION_INVALID');
-  assert.equal(receipt.dsh_pin, DSH_SDK_VERSION, 'PLUGIN_PACK_DSH_PEER_INVALID');
+  assert.equal(receipt.dsh_pin, expectedSdkVersion, 'PLUGIN_PACK_DSH_PEER_INVALID');
   assert.match(receipt.source_sha ?? '', /^[a-f0-9]{40}$/, 'PLUGIN_PACK_GIT_SHA_INVALID');
   assert.equal(receipt.source_dirty, false, 'PLUGIN_PACK_SOURCE_DIRTY');
   assert.equal(receipt.activation, 'NOT_RUN', 'PLUGIN_PACK_ALREADY_ACTIVE');
@@ -171,7 +172,7 @@ export async function readPluginPack({ manifestPath, expectedSha256 }) {
     const manifest = JSON.parse(await insideArtifact(packageRoot, 'package.json', 256 * 1024));
     assert.equal(manifest.name, receipt.package_name, 'PLUGIN_PACK_PACKAGE_NAME_MISMATCH');
     assert.equal(manifest.version, receipt.package_version, 'PLUGIN_PACK_PACKAGE_VERSION_MISMATCH');
-    const declared = inspectManifest(manifest, true), entries = [];
+    const declared = inspectManifest(manifest, true, { sdkVersion: expectedSdkVersion, pnpmVersion: expectedPnpmVersion }), entries = [];
     async function walk(directory, prefix = '') {
       for (const entry of await readdir(directory, { withFileTypes: true })) {
         const rel = prefix + entry.name;
@@ -231,7 +232,8 @@ async function gitMetadata(pluginRoot) {
   }
 }
 
-export async function packPlugin({ plugin, outputDir, manifestPath }) {
+export async function packPlugin({ plugin, outputDir, manifestPath, sdkVersion = DSH_SDK_VERSION,
+  pnpmVersion = PNPM_VERSION }) {
   const pluginRoot = safeAbsolute(plugin, 'PLUGIN_PACK_ROOT_INVALID');
   const destination = safeAbsolute(outputDir, 'PLUGIN_PACK_OUTPUT_INVALID');
   const pluginInfo = await lstat(pluginRoot).catch(error => { throw new Error(`PLUGIN_PACK_ROOT_INVALID ${error.code ?? 'unavailable'}`); });
@@ -240,7 +242,8 @@ export async function packPlugin({ plugin, outputDir, manifestPath }) {
   await mkdir(destination, { recursive: true, mode: 0o700 });
   const destinationInfo = await lstat(destination);
   assert.ok(destinationInfo.isDirectory() && !destinationInfo.isSymbolicLink(), 'PLUGIN_PACK_OUTPUT_INVALID');
-  const inspected = await inspectPackage(pluginRoot);
+  const compatibility = { sdkVersion, pnpmVersion };
+  const inspected = await inspectPackage(pluginRoot, compatibility);
   const source = await gitMetadata(pluginRoot);
   const expectedName = `${inspected.manifest.name.slice(1).replaceAll('/', '-')}-${inspected.manifest.version}.tgz`;
   const tarball = join(destination, expectedName);
@@ -286,7 +289,7 @@ export async function packPlugin({ plugin, outputDir, manifestPath }) {
       schema_version: 'dsh-plugin-pack/v1',
       package_name: inspected.manifest.name,
       package_version: inspected.manifest.version,
-      dsh_pin: DSH_SDK_VERSION,
+      dsh_pin: sdkVersion,
       source_sha: source.sha,
       source_dirty: source.dirty,
       tarball: { name: basename(tarball), bytes: info.size, sha256: packDigest },

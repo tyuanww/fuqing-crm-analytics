@@ -11,6 +11,7 @@ import { loadProfileSnapshot } from '../release/profile.mjs';
 import { readPluginPack } from '../release/plugin-pack.mjs';
 import { insideArtifact, readArtifactFile } from '../release/service-artifact-evidence.mjs';
 import { readCompositionInputs, validateCompositionPacks } from '../crm-calibration/composition-inputs.mjs';
+import { readToolchainFile } from '../dsh-dev/pin.mjs';
 
 const exec = promisify(execFile), hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const root = fileURLToPath(new URL('../..', import.meta.url));
@@ -28,10 +29,12 @@ function absolute(path, code) {
 
 /** All inputs are validated before the new output directory is created. */
 export async function prepareCompositionPacks({ inputDirectory, output,
-  lockPath = join(root, 'config/shinemage-composition-packs.lock.json'), profileRoot = root } = {}) {
+  lockPath = join(root, 'config/shinemage-composition-packs.lock.json'), profileRoot = root, toolchain } = {}) {
   const source = absolute(inputDirectory, 'CI_COMPOSITION_PACK_DIRECTORY_REQUIRED');
   const destination = absolute(output, 'CI_COMPOSITION_OUTPUT_REQUIRED');
   profileRoot = absolute(profileRoot, 'CI_COMPOSITION_PROFILE_ROOT_REQUIRED');
+  const selectedToolchain = toolchain ?? (process.env.DSH_COMPOSITION_TOOLCHAIN
+    ? await readToolchainFile(process.env.DSH_COMPOSITION_TOOLCHAIN) : undefined);
   const info = await lstat(source);
   assert.ok(info.isDirectory() && !info.isSymbolicLink(), 'CI_COMPOSITION_PACK_DIRECTORY_INVALID');
   const physicalDestination = join(await realpath(dirname(destination)), basename(destination));
@@ -50,7 +53,7 @@ export async function prepareCompositionPacks({ inputDirectory, output,
     assert.match(row.sha256 ?? '', HEX, 'CI_COMPOSITION_PROFILE_DIGEST');
     const bytes = await insideArtifact(profileRoot, row.path, 256 * 1024);
     assert.equal(hash(bytes), row.sha256, 'CI_COMPOSITION_PROFILE_DIGEST');
-    const snapshot = await loadProfileSnapshot({ root: profileRoot, manifestPath: row.path });
+    const snapshot = await loadProfileSnapshot({ root: profileRoot, manifestPath: row.path, toolchain: selectedToolchain });
     assert.equal(snapshot.digest, row.sha256, 'CI_COMPOSITION_PROFILE_CHANGED');
     profiles.push({ ...row, bytes, profile: snapshot.profile });
   }
@@ -68,7 +71,8 @@ export async function prepareCompositionPacks({ inputDirectory, output,
     const manifest = `packs/${row.directory}/plugin-pack.json`;
     const bytes = await insideArtifact(source, manifest, 256 * 1024);
     assert.equal(hash(bytes), row.manifest_sha256, 'CI_COMPOSITION_MANIFEST_DIGEST');
-    const packed = await readPluginPack({ manifestPath: join(source, manifest), expectedSha256: row.manifest_sha256 });
+    const packed = await readPluginPack({ manifestPath: join(source, manifest), expectedSha256: row.manifest_sha256,
+      expectedSdkVersion: selectedToolchain?.sdk_version, expectedPnpmVersion: selectedToolchain?.pnpm });
     assert.equal(packed.receipt.package_name, row.id, 'CI_COMPOSITION_PACKAGE_ID');
     assert.equal(packed.receipt.package_version, row.version, 'CI_COMPOSITION_PACKAGE_VERSION');
     assert.equal(packed.receipt.source_sha, row.source_sha, 'CI_COMPOSITION_SOURCE_MISMATCH');
@@ -77,7 +81,8 @@ export async function prepareCompositionPacks({ inputDirectory, output,
   assert.equal(new Set(plugins.map(row => row.directory)).size, plugins.length, 'CI_COMPOSITION_DIRECTORY_DUPLICATE');
   const [packs, pages] = profiles.map(row => ({ profile: row.profile,
     plugins: row.profile.plugins.map(plugin => plugins.find(item => item.id === plugin.id)) }));
-  validateCompositionPacks({ packs, pages });
+  validateCompositionPacks({ packs, pages, toolchain: selectedToolchain,
+    cordisPeerVersion: process.env.CRM_COMPOSITION_CORDIS_PEER });
   await mkdir(destination, { mode: 0o700 });
   for (const row of plugins) {
     const directory = join(destination, 'packs', row.directory);
@@ -99,11 +104,14 @@ export async function prepareCompositionPacks({ inputDirectory, output,
     await writeFile(inputs[row.name], json(input), { flag: 'wx', mode: 0o600 });
   }
   // Apply the real domain/public-export/peer guards to the actual prepared bytes.
-  await readCompositionInputs({ inputsPath: inputs.crm, pageInputsPath: inputs.page });
+  await readCompositionInputs({ inputsPath: inputs.crm, pageInputsPath: inputs.page, toolchain: selectedToolchain });
   const runtimeOutput = join(destination, 'runs');
   await mkdir(runtimeOutput, { mode: 0o700 });
   const env = { CRM_COMPOSITION_PACK_INPUTS: inputs.crm, CRM_COMPOSITION_PAGE_INPUTS: inputs.page,
-    CRM_COMPOSITION_OUTPUT: runtimeOutput };
+    CRM_COMPOSITION_OUTPUT: runtimeOutput,
+    ...(process.env.DSH_COMPOSITION_TOOLCHAIN ? { DSH_COMPOSITION_TOOLCHAIN: process.env.DSH_COMPOSITION_TOOLCHAIN } : {}),
+    ...(process.env.CRM_COMPOSITION_CORDIS_PEER ? { CRM_COMPOSITION_CORDIS_PEER: process.env.CRM_COMPOSITION_CORDIS_PEER } : {}),
+    ...(process.env.CRM_COMPOSITION_CORDIS_RUNTIME ? { CRM_COMPOSITION_CORDIS_RUNTIME: process.env.CRM_COMPOSITION_CORDIS_RUNTIME } : {}) };
   const receipt = { schema_version: 'shinemage-ci-composition-preparation/v1', lock_sha256: hash(lockBytes),
     profiles: profiles.map(({ name, path, sha256 }) => ({ name, path, sha256 })),
     plugins: plugins.map(row => ({ id: row.id, source_sha: row.source_sha, version: row.version,

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { lstat, readFile, realpath } from 'node:fs/promises';
 import { join, relative, resolve, sep } from 'node:path';
-import { DSH_SDK_VERSION, DSH_UPSTREAM_SHA } from './toolchain.mjs';
+import { TOOLCHAIN } from './toolchain.mjs';
 import { validateServiceBinding } from './service-compatibility.mjs';
 
 export const PROFILE_SCHEMA = 'dsh-profile/v1';
@@ -27,12 +27,12 @@ async function canonicalInside(root, candidate, code) {
   return candidateReal;
 }
 
-export function validateProfile(profile) {
+export function validateProfile(profile, { toolchain = TOOLCHAIN } = {}) {
   assert.ok(profile && typeof profile === 'object' && !Array.isArray(profile), 'PROFILE_MANIFEST_INVALID');
   assert.equal(profile.schema_version, PROFILE_SCHEMA, 'PROFILE_SCHEMA_UNSUPPORTED');
   if (Object.hasOwn(profile, 'service_binding')) validateServiceBinding(profile.service_binding);
   assert.match(profile.profile_id, /^[a-z0-9][a-z0-9._-]{1,63}$/, 'PROFILE_ID_INVALID');
-  assert.deepEqual(profile.dsh, { sdk_version: DSH_SDK_VERSION, upstream_sha: DSH_UPSTREAM_SHA }, 'PROFILE_DSH_PIN_MISMATCH');
+  assert.deepEqual(profile.dsh, { sdk_version: toolchain.sdk_version, upstream_sha: toolchain.upstream_sha }, 'PROFILE_DSH_PIN_MISMATCH');
   assert.ok(Array.isArray(profile.plugins) && profile.plugins.length > 0, 'PROFILE_PLUGINS_REQUIRED');
   const paths = new Set();
   const ids = new Set();
@@ -55,7 +55,7 @@ export function validateProfile(profile) {
  * consumers bind a separately verified package; source-build callers must use
  * loadReleaseProfile below for the source/build filesystem checks as well.
  */
-export async function loadProfileSnapshot({ root, manifestPath = null } = {}) {
+export async function loadProfileSnapshot({ root, manifestPath = null, toolchain = TOOLCHAIN } = {}) {
   assert.ok(typeof root === 'string' && root, 'PROFILE_ROOT_REQUIRED');
   const selected = manifestPath || process.env.DSH_PROFILE_MANIFEST || DEFAULT_PROFILE_MANIFEST;
   assert.ok(typeof selected === 'string' && selected, 'PROFILE_MANIFEST_REQUIRED');
@@ -66,13 +66,13 @@ export async function loadProfileSnapshot({ root, manifestPath = null } = {}) {
   const bytes = await readFile(path).catch(error => { throw new Error(`PROFILE_MANIFEST_READ_FAILED ${error.code ?? 'unavailable'}`); });
   let profile;
   try { profile = JSON.parse(bytes); } catch { throw new Error('PROFILE_MANIFEST_JSON_INVALID'); }
-  validateProfile(profile);
+  validateProfile(profile, { toolchain });
   return Object.freeze({ path, contents: bytes.toString('utf8'), digest: digest(bytes), profile });
 }
 
 /** Source-build callers still require every configured source and build entry. */
 export async function loadReleaseProfile(options = {}) {
-  const { root } = options;
+  const { root, toolchain = TOOLCHAIN } = options;
   const snapshot = await loadProfileSnapshot(options);
   const { profile } = snapshot;
   const plugins = [];
@@ -88,7 +88,7 @@ export async function loadReleaseProfile(options = {}) {
     let manifest;
     try { manifest = JSON.parse(packageBytes); } catch { throw new Error(`PROFILE_PLUGIN_PACKAGE_INVALID ${item.path}`); }
     assert.equal(manifest.name, item.id, `PROFILE_PLUGIN_PACKAGE_NAME_MISMATCH ${item.path}`);
-    assert.equal(manifest.peerDependencies?.['@deepseek-ai/dsh-tools'], DSH_SDK_VERSION, `PROFILE_PLUGIN_DSH_PEER_MISMATCH ${item.path}`);
+    assert.equal(manifest.peerDependencies?.['@deepseek-ai/dsh-tools'], toolchain.sdk_version, `PROFILE_PLUGIN_DSH_PEER_MISMATCH ${item.path}`);
     const buildPath = join(pluginReal, item.build);
     const buildInfo = await lstat(buildPath).catch(() => null);
     assert.ok(buildInfo?.isFile() && !buildInfo.isSymbolicLink(), `PROFILE_PLUGIN_BUILD_MISSING ${item.path}`);

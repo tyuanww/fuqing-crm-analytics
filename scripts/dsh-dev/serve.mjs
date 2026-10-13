@@ -10,7 +10,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { API_KEY_ENV, COMPETITION_WEB_PORT, FOREIGN_PORTS, HOST, NODE_MAJOR, PINNED_SHA, PORTS, PORT_RANGE } from './constants.mjs';
 import { findReadyUrl, originOf, redactLaunchLog } from './launch-url.mjs';
 import { assertNoB0Disables, assertPluginRoot, buildPluginDisable, buildPluginOverlay, buildShineBrandDisable, buildShineWaterfallDisable, buildShineCrowdActionDisable, buildShineQueryDisable, buildShineBoardDisable, buildShineFunnelDisable, pluginEnabled } from './overlay.mjs';
-import { readToolchain, verifyUpstream } from './pin.mjs';
+import { readToolchain, readToolchainFile, verifyUpstream } from './pin.mjs';
 import { assertOwnedHost, assertOwnedPort, assertFree } from './ports.mjs';
 import { assertCli, contextRoot, currentPath, defaultRuntimeRoot, ensureDir, repoRoot, resolveUpstream } from './paths.mjs';
 import { installProfilePacks, loadProfilePacks } from '../release/profile-packs.mjs';
@@ -163,6 +163,13 @@ export function resolveShineFunnelPath(options) {
   return explicitPluginPath(options.shineFunnelPath, '--funnel-path');
 }
 
+async function runtimeToolchain() {
+  const path = process.env.DSH_DEV_TOOLCHAIN;
+  if (path === undefined) return undefined;
+  assert.ok(isAbsolute(path), 'DSH_DEV_TOOLCHAIN must be an absolute toolchain file');
+  return readToolchainFile(path);
+}
+
 /** Read-only preflight shared by prepare and reload, before touching a runtime. */
 export async function resolvePluginInputs(options) {
   if (!pluginEnabled(options.plugin)) return { options, packs: null };
@@ -170,7 +177,7 @@ export async function resolvePluginInputs(options) {
     for (const key of ['pluginPath', 'shineBrandPath', 'shineWaterfallPath', 'shineCrowdActionPath', 'shineQueryPath', 'shineBoardPath', 'shineFunnelPath']) {
       assert.equal(options[key], undefined, 'DSH_DEV_PLUGIN_INPUT_CONFLICT');
     }
-    const packs = await loadProfilePacks({ inputsPath: options.packInputs });
+    const packs = await loadProfilePacks({ inputsPath: options.packInputs, toolchain: await runtimeToolchain() });
     assert.equal(packs.profile.service_binding, undefined, 'DSH_DEV_SERVICE_PROFILE_USE_CANDIDATE_HARNESS');
     const selected = {
       pluginPath: '@shine-mage/dsh-analytics-workbench-b0',
@@ -228,6 +235,10 @@ export function isolatedEnv(runtime, home, extra = {}) {
     competition.COMPETITION_HTTP_BASE = httpBase;
     competition.COMPETITION_HTTP_TOKEN = httpToken;
   }
+  if (process.env.B0_BUILD_UPSTREAM) {
+    assert.ok(isAbsolute(process.env.B0_BUILD_UPSTREAM), 'B0_BUILD_UPSTREAM must be absolute');
+    competition.B0_BUILD_UPSTREAM = process.env.B0_BUILD_UPSTREAM;
+  }
   // Isolated page documents/result HTTP: forwarded only when explicitly
   // configured; a base containing the live web port refuses to boot.
   const pageBase = process.env.PAGE_DOCUMENTS_HTTP_BASE;
@@ -278,7 +289,8 @@ export async function validateRuntimeInputs(options, { packageInstall = false } 
   assert.equal(Number(process.versions.node.split('.')[0]), NODE_MAJOR, `Use Node ${NODE_MAJOR}`);
   const input = await resolvePluginInputs(options);
   options = input.options;
-  const pin = await readToolchain(repoRoot);
+  const pin = process.env.DSH_DEV_TOOLCHAIN === undefined
+    ? await readToolchain(repoRoot) : await runtimeToolchain();
   const upstream = resolveUpstream(options.upstream);
   const verified = await verifyUpstream(upstream, pin);
   const cli = await assertCli(upstream);
@@ -508,7 +520,7 @@ export async function writeCurrent(state, path = currentPath()) {
     childPid: state.child?.pid ?? null,
     webPort: state.webPort,
     host: state.host,
-    pinned: PINNED_SHA,
+    pinned: state.pin?.upstream_sha ?? PINNED_SHA,
     pluginEnabled: state.enabled,
     plugin: state.pluginPath,
     shineBrand: state.shineBrandPath ?? null,

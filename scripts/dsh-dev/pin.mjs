@@ -3,12 +3,27 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readFile, access } from 'node:fs/promises';
-import { join } from 'node:path';
+import { isAbsolute, join } from 'node:path';
 import { PINNED_SHA, NODE_MAJOR } from './constants.mjs';
 import { managerVersions } from '../../dsh-plugins/plugin-kit/package-manager.mjs';
 
+export function validateToolchain(pin) {
+  assert.ok(pin && typeof pin === 'object' && !Array.isArray(pin), 'TOOLCHAIN_INVALID');
+  assert.equal(pin.schema_version, 'dsh-b0-toolchain/v2', 'TOOLCHAIN_SCHEMA_INVALID');
+  assert.match(pin.upstream_sha ?? '', /^[0-9a-f]{40}$/, 'TOOLCHAIN_UPSTREAM_SHA_INVALID');
+  assert.match(pin.sdk_version ?? '', /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/, 'TOOLCHAIN_SDK_VERSION_INVALID');
+  assert.ok(Number.isInteger(pin.node_major) && pin.node_major > 0, 'TOOLCHAIN_NODE_MAJOR_INVALID');
+  managerVersions(pin);
+  return pin;
+}
+
+export async function readToolchainFile(path) {
+  assert.ok(typeof path === 'string' && isAbsolute(path), 'TOOLCHAIN_PATH_INVALID');
+  return validateToolchain(JSON.parse(await readFile(path, 'utf8')));
+}
+
 export async function readToolchain(repoRoot) {
-  const pin = JSON.parse(await readFile(join(repoRoot, 'dsh-plugins/plugin-kit/toolchain.json'), 'utf8'));
+  const pin = await readToolchainFile(join(repoRoot, 'dsh-plugins/plugin-kit/toolchain.json'));
   assert.equal(pin.upstream_sha, PINNED_SHA, 'toolchain.json drifted from the fixed upstream SHA');
   assert.equal(pin.node_major, NODE_MAJOR);
   return pin;

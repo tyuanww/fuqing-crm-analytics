@@ -72,13 +72,14 @@ async function boundedFile(path, max) {
   assert.equal(bytes.length, info.size, 'CRM_PROFILE_PACKAGE_CHANGED');
   return bytes;
 }
-export function inspectDeclaredPlugin(manifest, name, entries, domain, prefix = 'CRM_PROFILE') {
+export function inspectDeclaredPlugin(manifest, name, entries, domain, prefix = 'CRM_PROFILE',
+  { dshSdkVersion = '0.1.7-rc.2', cordisVersion = '4.0.4' } = {}) {
   assert.equal(manifest.name, name, prefix + '_IDENTITY');
-  assert.equal(manifest.peerDependencies?.['@deepseek-ai/dsh-tools'], '0.1.7-rc.2', prefix + '_DSH_PIN');
+  assert.equal(manifest.peerDependencies?.['@deepseek-ai/dsh-tools'], dshSdkVersion, prefix + '_DSH_PIN');
   // Split CRM/knowledge packages declare Cordis directly. The existing page
   // provider consumes only the pinned DSH tools peer and does not declare it.
   if (domain || manifest.peerDependencies?.['@deepseek-ai/cordis'] !== undefined) {
-    assert.equal(manifest.peerDependencies?.['@deepseek-ai/cordis'], '4.0.4', prefix + '_CORDIS_PIN');
+    assert.equal(manifest.peerDependencies?.['@deepseek-ai/cordis'], cordisVersion, prefix + '_CORDIS_PIN');
   }
   assert.match(manifest.version ?? '', /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/, prefix + '_VERSION');
   if (domain) {
