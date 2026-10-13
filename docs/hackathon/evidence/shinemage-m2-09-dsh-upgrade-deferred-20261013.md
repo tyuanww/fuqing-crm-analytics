@@ -33,7 +33,7 @@ candidate 与 live 均继续使用 rc2 上游；杭州目标没有新的隔离�
 
 ## 结论
 
-M2-09 更新为 `CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / COMBINED_BROWSER_NOT_RUN / MAIN_PIN_UNCHANGED`。候选自身已安装、构建并完成聚焦生命周期/session 矩阵；九包在独立候选 toolchain 中均已构建并通过自测，rc2 → alpha.2 的 text/tool/rich 跨版本恢复和九包组合 lifecycle 也已通过，但 alpha.2 的正式 browser probe 仍缺 candidate pack inputs，主仓 peer 与固定 toolchain 仍锁 rc2，升级不混入当前九包发布 candidate。
+M2-09 在 2026-10-13 的初始状态为 `CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / COMBINED_BROWSER_NOT_RUN / MAIN_PIN_UNCHANGED`。下方 2026-10-14 记录已补齐候选正式 pack/profile 输入和组合 browser；主仓 peer 与固定 toolchain 仍锁 rc2，升级不混入当前九包发布 candidate。
 
 ## 2026-10-13 版本目录复核
 
@@ -75,3 +75,13 @@ commit=d743267388641bc76f17c45ce8b4c231aed1d32c
 随后在 ignored 目录 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-plugin-workspace` 建立独立候选 toolchain，仅在副本 manifest 中把九包 peer 和 toolchain SHA 指向候选。九包隔离构建 `9/9 PASS`；九包自测 `9/9 PASS`，共 286 项，其中 CRM/Knowledge 分别为 `108/108` 与 `32/32`，浏览器 journey 也通过。CRM/Knowledge 测试使用指向仓库 synthetic 夹具的只读符号链接修正相对根路径，未复制源码、真实数据或凭据。完整汇总见 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/plugin-adaptation-summary.json`、`plugin-build-summary.json` 和 `plugin-test-summary.json`。
 
 这组结果证明九包可以在隔离候选 toolchain 中编译并通过自身测试，跨版本 persistence 和组合 lifecycle 已通过；alpha.2 组合 browser、正式 pack/lock/SDK closure 尚未执行。下一步应先为候选生成正式 pack inputs，再跑组合 browser/recovery 矩阵，再把需要进入主仓的 peer/toolchain 适配作为独立代码变更走 `open-code-review-delegate` 和本地提交；完成前不申请切换授权。
+
+## 2026-10-14 候选正式 pack/profile 与组合 browser 补验
+
+为解除正式组合 browser 的输入缺口，本轮新增显式候选 toolchain 适配入口，默认 rc2 路径保持不变。候选 toolchain 为 DSH `0.2.1-alpha.2` / `d743267388641bc76f17c45ce8b4c231aed1d32c`，Cordis 运行时为 `4.0.5-alpha.1`，CRM/Knowledge 包声明的候选兼容 peer 为 `4.0.2`，二者均在回执中分开记录。候选正式准备回执为 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-formal-prepared-20261014/preparation.json`：9 个正式 plugin pack、2 份 profile inputs、lock/profile/manifest/tarball 摘要均由真实读取器复核，`release_ready=false`、host/remote CI 为 `NOT_RUN`。
+
+随后在固定 Node `24.19.0`、Python `3.14.4` 下执行候选 `native-composition-browser-probe.mjs`，使用候选正式 Workbench page pack 启动 alpha2 native host，创建隔离 SQLite session，预置并读回 1 条 synthetic history，确认 synthetic board preview，随后关闭自有 runtime。结果为 `PASS`，原始摘要 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-combined-browser-20261014.json`；`model_calls=0`、`contains_real_data=false`、`console_errors=[]`，不构成真实业务、生产、发布或切换验收。
+
+本轮代码提交 `01b753e5`（`feat(verification): support explicit candidate toolchains`）已按 `open-code-review-delegate` 覆盖 8/8 文件审查；固定 Node 24 下 release/profile/composition/serve 回归共 `119 PASS / 0 FAIL / 0 SKIP`，候选 CRM/Knowledge/page 组合 `20 PASS`，候选 browser probe `PASS`。主仓 `dsh-plugins/plugin-kit/toolchain.json`、live/current、正式 profile/journal 和 release gate 均未切换。
+
+因此当前 M2-09 状态更新为：`CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_PASS / COMBINED_BROWSER_PASS / MAIN_PIN_UNCHANGED`。仍开放主仓 peer/toolchain 适配的 release-scoped 评审、正式目标 browser/recovery、切换授权以及所有 release/activation 门禁。
