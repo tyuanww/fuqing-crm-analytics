@@ -33,7 +33,7 @@ candidate 与 live 均继续使用 rc2 上游；杭州目标没有新的隔离�
 
 ## 结论
 
-M2-09 更新为 `CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / MAIN_PIN_UNCHANGED / COMBINED_LIFECYCLE_NOT_RUN`。候选自身已安装、构建并完成聚焦生命周期/session 矩阵；九包在独立候选 toolchain 中均已构建并通过自测，rc2 → alpha.2 的 text/tool/rich 跨版本恢复也已通过，但主仓 peer 与固定 toolchain 仍锁 rc2，组合运行矩阵尚未完成，升级不混入当前九包发布 candidate。
+M2-09 更新为 `CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / COMBINED_BROWSER_NOT_RUN / MAIN_PIN_UNCHANGED`。候选自身已安装、构建并完成聚焦生命周期/session 矩阵；九包在独立候选 toolchain 中均已构建并通过自测，rc2 → alpha.2 的 text/tool/rich 跨版本恢复和九包组合 lifecycle 也已通过，但 alpha.2 的正式 browser probe 仍缺 candidate pack inputs，主仓 peer 与固定 toolchain 仍锁 rc2，升级不混入当前九包发布 candidate。
 
 ## 2026-10-13 版本目录复核
 
@@ -66,7 +66,7 @@ commit=d743267388641bc76f17c45ce8b4c231aed1d32c
 
 在 `.context/dsh-b0/upstream-0.2.1-alpha.2` 使用 Node `24.19.0`、pnpm `11.28.5` 和固定 lock 执行 `pnpm install --frozen-lockfile --ignore-scripts`；随后补跑候选要求的 `pnpm run build:native-system` 与 `pnpm run build:lib:host`，两项均通过。安装首次使用 corepack 时遇到本机 registry CA 校验错误，改用 `/etc/ssl/cert.pem` 的 `NODE_EXTRA_CA_CERTS` 后精确 pnpm 版本可用；该环境事实已记录在 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/runtime-compatibility-summary.json`。
 
-候选自身聚焦测试共 14 个文件、`468 PASS / 0 FAIL`，覆盖 plugin-manager、profile/loader、Agent loop resource/scope、session repair/records、Cordis lifecycle、continuable subagent 和 spawn lifecycle。候选编译 persistence API 完成 text/tool/rich 三组撕裂尾只读、修复续写、冷读验证；随后用显式版本参数完成 rc2 → `0.2.1-alpha.2` 的三组跨版本恢复，每组 `4 PASS`、10 个冷进程执行，包含 baseline 写入、candidate 读取续写、旧 reader 读取新状态和保留回退快照。实现提交为 `a7c895e9`，汇总见 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/cross-version-recovery-summary.json` 和 `runtime-compatibility-summary.json`。
+候选自身聚焦测试共 14 个文件、`468 PASS / 0 FAIL`，覆盖 plugin-manager、profile/loader、Agent loop resource/scope、session repair/records、Cordis lifecycle、continuable subagent 和 spawn lifecycle。候选编译 persistence API 完成 text/tool/rich 三组撕裂尾只读、修复续写、冷读验证；随后用显式版本参数完成 rc2 → `0.2.1-alpha.2` 的三组跨版本恢复，每组 `4 PASS`、10 个冷进程执行，包含 baseline 写入、candidate 读取续写、旧 reader 读取新状态和保留回退快照。实现提交为 `a7c895e9`，汇总见 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/cross-version-recovery-summary.json` 和 `runtime-compatibility-summary.json`。 九包组合 lifecycle 另在 ignored harness 中完成 9 次加载与 9 次逆序卸载，最终工具数归零；回执为 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-combined-lifecycle-20261014.json`。
 
 ## 2026-10-13 插件适配复核
 
@@ -74,4 +74,4 @@ commit=d743267388641bc76f17c45ce8b4c231aed1d32c
 
 随后在 ignored 目录 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-plugin-workspace` 建立独立候选 toolchain，仅在副本 manifest 中把九包 peer 和 toolchain SHA 指向候选。九包隔离构建 `9/9 PASS`；九包自测 `9/9 PASS`，共 286 项，其中 CRM/Knowledge 分别为 `108/108` 与 `32/32`，浏览器 journey 也通过。CRM/Knowledge 测试使用指向仓库 synthetic 夹具的只读符号链接修正相对根路径，未复制源码、真实数据或凭据。完整汇总见 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/plugin-adaptation-summary.json`、`plugin-build-summary.json` 和 `plugin-test-summary.json`。
 
-这组结果证明九包可以在隔离候选 toolchain 中编译并通过自身测试，跨版本 persistence 已通过；组合宿主生命周期、组合 browser、组合 recovery 以及正式包/lock/SDK closure 尚未执行。下一步应在该隔离候选上跑组合生命周期、browser、recovery 矩阵，再把需要进入主仓的 peer/toolchain 适配作为独立代码变更走 `open-code-review-delegate` 和本地提交；完成前不申请切换授权。
+这组结果证明九包可以在隔离候选 toolchain 中编译并通过自身测试，跨版本 persistence 和组合 lifecycle 已通过；alpha.2 组合 browser、正式 pack/lock/SDK closure 尚未执行。下一步应先为候选生成正式 pack inputs，再跑组合 browser/recovery 矩阵，再把需要进入主仓的 peer/toolchain 适配作为独立代码变更走 `open-code-review-delegate` 和本地提交；完成前不申请切换授权。
