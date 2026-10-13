@@ -1,0 +1,47 @@
+{
+  "schema_version": "shinemage-composition-registration/v1",
+  "observed_at": "2026-10-13",
+  "scope": "main-repo-formal-candidate-registration",
+  "candidate": {
+    "path": "config/candidates/shinemage-composition-20261013/candidate.json",
+    "sha256": "916826710c7e49124eb0d4284b8b2fe00f19c4dd46ddf181144761d566eefede",
+    "digest": "125c8e538816835cad212048b8fd0302d98588d704b09de559789df9bf6e6bdb",
+    "profiles": 2,
+    "plugins": 9
+  },
+  "profiles": [
+    {
+      "name": "crm",
+      "path": "config/candidates/shinemage-composition-20261013/profiles/crm.json",
+      "sha256": "7ca3511663ab2ea5d1bb8f839c83b29f5bbd6655238450ad08a04510642191ba",
+      "source_path": "config/dsh-profile.crm-knowledge.rc2.json",
+      "source_sha256": "7ca3511663ab2ea5d1bb8f839c83b29f5bbd6655238450ad08a04510642191ba",
+      "service_binding": "UNBOUND_BY_COMPOSITION_CONTRACT"
+    },
+    {
+      "name": "page",
+      "path": "config/candidates/shinemage-composition-20261013/profiles/page.json",
+      "sha256": "2df9934f2dfce0aca9ab7b14840fc01f2f0a989f8356f39e7899e5ed81e2f92e",
+      "source_path": "config/dsh-profile.rc2.json",
+      "source_sha256": "c8c9df8c36f11060ad8fbcce68cb2ebf28d783c5eb5759d1b71ff5463782c981",
+      "service_binding": "BOUND"
+    }
+  ],
+  "service": {
+    "service_id": "analytics-first-purchase",
+    "source_sha": "f9726f682fc0d1d4c6aef6f07e6932c2c600c3d6",
+    "binding_sha256": "676a8b35919423bdc69ee1b48292f42894e29c3de2cc503c189e0c565084acc6",
+    "evidence_sha256": "9a6a4a7a28e0ffc69441394c18030b0a51eb2a881c4d00566b535931f3b391b0",
+    "compatibility": "LOCAL_COMPATIBLE"
+  },
+  "journal": {
+    "path": "config/candidates/shinemage-composition-20261013/journal.json",
+    "sha256": "abd088d9b6e06793b85cefe72c867bc79e6157ca35c2f56672f518eafd8f4937",
+    "release_tag": "dsh-composition-5716227293a4d793fd779c71",
+    "sequence": 4,
+    "last_status": "COMPOSITION_TERMINAL_HOST_OBSERVED",
+    "last_digest": "e3ad59c39e619f365b2552f8bf0deba22ef26c026a1c6574ba5cb61dc5c9995c"
+  },
+  "activation": "NOT_RUN",
+  "release_ready": false
+}
