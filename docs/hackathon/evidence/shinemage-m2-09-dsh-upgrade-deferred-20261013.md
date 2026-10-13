@@ -85,3 +85,12 @@ commit=d743267388641bc76f17c45ce8b4c231aed1d32c
 本轮代码提交 `01b753e5`（`feat(verification): support explicit candidate toolchains`）已按 `open-code-review-delegate` 覆盖 8/8 文件审查；固定 Node 24 下 release/profile/composition/serve 回归共 `119 PASS / 0 FAIL / 0 SKIP`，候选 CRM/Knowledge/page 组合 `20 PASS`，候选 browser probe `PASS`。主仓 `dsh-plugins/plugin-kit/toolchain.json`、live/current、正式 profile/journal 和 release gate 均未切换。
 
 因此当前 M2-09 状态更新为：`CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_PASS / COMBINED_BROWSER_PASS / MAIN_PIN_UNCHANGED`。仍开放主仓 peer/toolchain 适配的 release-scoped 评审、正式目标 browser/recovery、切换授权以及所有 release/activation 门禁。
+
+
+## 2026-10-14 授权目标 alpha2 browser/recovery 补验
+
+在用户授权的杭州目标 `100.93.46.46` 上，使用同一候选 `dsh-v0.2.1-alpha.2` / `d743267388641bc76f17c45ce8b4c231aed1d32c` 和正式 page pack 输入，创建一次性 `/tmp/shinemage-dsh-alpha2-target-20261014`。目标平台为 Linux x86_64 / WSL2、Node `24.21.0`、Python `3.14.4`。首次启动只暴露 fresh checkout 尚未执行 `build:lib:client` 的前置缺口，保留为 `BLOCKED_BUILD_INCOMPLETE`；在同一临时 checkout 补跑 `build:lib` 后，上游 tracked source 保持 clean。
+
+补建 client bundle 后，candidate 在目标临时端口 `4329` 完成正式 page pack browser：synthetic session/history/board 均通过，history seed HTTP `200`、`model_calls=0`、`contains_real_data=false`、`console_errors=[]`。随后发送 owned-host `restart`，同一 runtime 重启并返回 `restarted-owned-host`，恢复阶段 PASS。目标现役 `4328/4332/4336` 监听未修改，alpha2 临时目录和 runtime 已回收；原始回执为 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-target-browser-recovery-20261014.json`。
+
+这关闭 M2-09 的目标 browser/recovery synthetic 子项，不等于真实业务 UAT、生产激活、release、canary、rollback 或主仓 pin 切换。当前状态为：`CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_PASS / COMBINED_BROWSER_PASS / TARGET_BROWSER_PASS / TARGET_RECOVERY_PASS / MAIN_PIN_UNCHANGED`。

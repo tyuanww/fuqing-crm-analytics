@@ -10,7 +10,7 @@
 - 每张卡都有当前 `status`、`evidence` 和 `next`；
 - M2-01/02 已登记正式 candidate/profile 快照；page profile 带 service binding，CRM profile 按组合合同无绑定；
 - M2-03 保持目标前置通过；
-- M2-04/05/06/07/08/09 当前分别为 terminal/browser `PASS`、standalone 页面包与本地 Chromium 子项通过但 candidate 无障碍仍部分观察、candidate 真实模型/CRM/WeKnora 只读通过但 live 工具面为空、供应链 `BLOCKED`、release `NOT_RUN` 和 DSH `ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_PASS / COMBINED_BROWSER_PASS / MAIN_PIN_UNCHANGED`；
+- M2-04/05/06/07/08/09 当前分别为 terminal/browser `PASS`、standalone 页面包与本地 Chromium 子项通过但 candidate 无障碍仍部分观察、candidate 真实模型/CRM/WeKnora 只读通过但 live 工具面为空、供应链 `BLOCKED`、release `NOT_RUN` 和 DSH `ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_PASS / COMBINED_BROWSER_PASS / TARGET_BROWSER_PASS / TARGET_RECOVERY_PASS / MAIN_PIN_UNCHANGED`；
 - M2-10 本身记录本审计矩阵，未把产品发布状态误写为通过；
 - 全局状态仍为 `product=PARTIAL`、`release_ready=false`、`activation=NOT_RUN`、`code_changes_this_audit=true`、`production_data=READ_ONLY_REDACTED / NO_MUTATION`；代码修复已完成本地审查和提交，不改变发布门禁状态。
 
@@ -21,7 +21,7 @@ jq empty docs/hackathon/evidence/shinemage-m2-acceptance-audit-20261013.json
 git diff --check
 ```
 
-两项均退出 0。此前代码审查覆盖 30 个可审查文件，其中 7 个代码文件和 23 个 JSON；页面包、浏览器探针与 DSH 兼容矩阵代码改动由 `open-code-review-delegate` 逐文件审查，最终改动文件全部覆盖，修复后测试复验通过。页面包/合同/渲染定向测试为 `48 PASS / 0 FAIL`，source-owned standalone Chromium 探针为 `7 PASS / 0 errors`，standalone AX/键盘/forced-colors 自动化补测为 `6 PASS`，默认合成分支为 `6 PASS / 0 errors`，DSH 兼容矩阵为 `5 PASS / 0 FAIL / 0 SKIP`；本轮独立 DSH 候选完成 native/host build、14 文件 `468 PASS / 0 FAIL` 和三组候选 persistence 主行 PASS；九包在 ignored 候选 toolchain 中隔离构建 9/9、自测 9/9（286 项）通过，跨版本 persistence 三组和九包组合 lifecycle 均 PASS，但主仓 peer/固定 toolchain 仍锁 rc2，候选正式 pack/profile 与 synthetic 组合 browser 已完成，正式目标 browser/recovery 未执行；`git diff --check` 和 pre-commit 均通过。本轮候选 toolchain 适配代码提交 `01b753e5` 已完成 OCR delegate 8/8 审查并本地提交。当前本地提交链包含页面包代码提交 `91f880b5`、探针加固提交 `fcee92a9`、DSH 兼容矩阵提交 `39cdb9c3`、候选运行时证据提交 `b9ab4a50`、`18d86e31` 和跨版本参数化提交 `a7c895e9`；本轮新增的跨版本验证由代码提交 `a7c895e9` 与后续 docs-only 证据共同记录，剩余开放项仍由真实读屏、人工键盘、Windows 高对比度、M2-06 未执行写路径、M2-07 供应链门禁、M2-08 发布门禁以及 M2-09 的主仓 pin 适配、正式组合 browser/recovery 验收决定。
+两项均退出 0。此前代码审查覆盖 30 个可审查文件，其中 7 个代码文件和 23 个 JSON；页面包、浏览器探针与 DSH 兼容矩阵代码改动由 `open-code-review-delegate` 逐文件审查，最终改动文件全部覆盖，修复后测试复验通过。页面包/合同/渲染定向测试为 `48 PASS / 0 FAIL`，source-owned standalone Chromium 探针为 `7 PASS / 0 errors`，standalone AX/键盘/forced-colors 自动化补测为 `6 PASS`，默认合成分支为 `6 PASS / 0 errors`，DSH 兼容矩阵为 `5 PASS / 0 FAIL / 0 SKIP`；本轮独立 DSH 候选完成 native/host build、14 文件 `468 PASS / 0 FAIL` 和三组候选 persistence 主行 PASS；九包在 ignored 候选 toolchain 中隔离构建 9/9、自测 9/9（286 项）通过，跨版本 persistence 三组和九包组合 lifecycle 均 PASS，但主仓 peer/固定 toolchain 仍锁 rc2，候选正式 pack/profile、synthetic 组合 browser 与授权目标 browser/recovery 已完成；`git diff --check` 和 pre-commit 均通过。本轮候选 toolchain 适配代码提交 `01b753e5` 已完成 OCR delegate 8/8 审查并本地提交。当前本地提交链包含页面包代码提交 `91f880b5`、探针加固提交 `fcee92a9`、DSH 兼容矩阵提交 `39cdb9c3`、候选运行时证据提交 `b9ab4a50`、`18d86e31` 和跨版本参数化提交 `a7c895e9`；本轮新增的跨版本验证由代码提交 `a7c895e9` 与后续 docs-only 证据共同记录，剩余开放项仍由真实读屏、人工键盘、Windows 高对比度、M2-06 未执行写路径、M2-07 供应链门禁、M2-08 发布门禁以及 M2-09 的主仓 pin 适配、正式组合 browser/recovery 验收决定。
 
 ## M2-10 结论
 
@@ -31,3 +31,8 @@ M2-10 的证据与状态收口完成，状态为 `PASS / RELEASE_GATES_REMAIN_OP
 ## 2026-10-14 DSH 候选组合补验
 
 M2-09 的候选正式 pack/profile 输入和 synthetic 组合 browser 已补齐：9 个 pack、2 份 profile 输入通过真实读取器，候选 alpha2 native shell 使用正式 page pack 完成隔离 session/history/board 启动与关闭，`model_calls=0`、`contains_real_data=false`。候选 toolchain 适配代码提交 `01b753e5` 已完成 `open-code-review-delegate` 8/8 覆盖和本地提交；固定 Node 24 下相关回归 `119 PASS / 0 FAIL / 0 SKIP`。这只更新 M2-09 的候选证据，不改变 `product=PARTIAL`、`release_ready=false`、`activation=NOT_RUN`，也不授予主仓 pin/live 切换、正式目标 browser/recovery、canary 或 rollback。
+
+
+## 2026-10-14 DSH 候选目标验收补验
+
+M2-09 已在授权杭州目标完成 alpha2 正式 page pack browser 与 owned-host restart recovery。首次 fresh checkout 缺少 client build，补跑 `build:lib` 后上游 source clean，目标临时 4329 browser、synthetic history/board、restart recovery 均 PASS；目标 live 4328/4332/4336 未修改，临时目录已删除。当前仍不改变 `product=PARTIAL`、`release_ready=false`、`activation=NOT_RUN`，主仓 peer/toolchain 适配与 DSH 切换仍需独立 release-scoped 审查和授权。

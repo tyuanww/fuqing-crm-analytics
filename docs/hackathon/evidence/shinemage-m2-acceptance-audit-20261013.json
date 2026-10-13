@@ -137,7 +137,7 @@
     },
     {
       "id": "M2-09",
-      "status": "CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_PASS / COMBINED_BROWSER_PASS / MAIN_PIN_UNCHANGED",
+      "status": "CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_PASS / COMBINED_BROWSER_PASS / TARGET_BROWSER_PASS / TARGET_RECOVERY_PASS / MAIN_PIN_UNCHANGED",
       "evidence": [
         "DSH pin remains 0.1.7-rc.2",
         "official dsh-v0.2.1-alpha.2 / d7432673 isolated checkout",
@@ -150,9 +150,11 @@
         "candidate alpha2 combined browser PASS: formal page pack, synthetic session/history/board, clean close; model_calls=0 and contains_real_data=false",
         "main peer matrix remains 0/9 and direct main toolchain build remains blocked by rc2 SHA pin",
         "switch, release readiness, real business, and production activation remain NOT_RUN/BLOCKED",
-        "local candidate-toolchain adapter commit 01b753e5 passed OCR delegate review and fixed-node regression"
+        "local candidate-toolchain adapter commit 01b753e5 passed OCR delegate review and fixed-node regression",
+        "authorized target 100.93.46.46 alpha2 formal page-pack browser PASS: synthetic session/history/board, model_calls=0",
+        "authorized target alpha2 owned-host restart recovery PASS; temporary candidate directory removed and live ports untouched"
       ],
-      "next": "keep main rc2 pin/live unchanged; if upgrade remains desired, review the candidate peer/toolchain adaptation as a separate release-scoped change, then run formal target browser/recovery and obtain explicit switch authorization"
+      "next": "keep main rc2 pin/live unchanged; if upgrade remains desired, review the candidate peer/toolchain adaptation as a separate release-scoped change and obtain explicit switch authorization"
     },
     {
       "id": "M2-10",

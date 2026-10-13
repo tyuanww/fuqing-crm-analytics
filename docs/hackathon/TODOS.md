@@ -29,7 +29,7 @@
 | M2-06 | 真实模型/CRM/WeKnora/UAT | `CANDIDATE_REAL_MODEL_PASS / CRM_READONLY_PASS / WEKNORA_READONLY_PASS / LIVE_TOOL_SURFACE_EMPTY` | candidate provider 凭据已由用户在 Models 页面手工配置，CRM 当前对话已手工绑定；live 标准会话工具面仍为空 | candidate 真实模型、WeKnora 只读检索和 CRM GSV 7/7 日结构化查询已通过；保存、权限失败、恢复和人工业务复核仍未运行，live 标准会话仍 `NOT_EXPOSED / NOT_RUN` | `docs(acceptance): record candidate real business UAT` |
 | M2-07 | SDK 供应链门禁 | `BLOCKED` | 最终候选 artifact 和发布者身份 | SBOM、发布者身份、最终签名、验签、撤销验证、干净机器安装和回退均通过 | 当前检查器复核仍为 fail-closed，覆盖项未验证、`release_ready=false`；供应链改动单独走 OCR，详见 `docs(acceptance): record SDK gate recheck` |
 | M2-08 | release / activation / canary / rollback | `NOT_RUN` | M2-04 至 M2-07 关闭，且取得发布授权 | immutable artifact、CI、release review、目标接收、生产激活、canary 和 rollback 全部有同一版本证据 | 当前前置审计仍 fail-closed，`release_ready=false`、`activation=NOT_RUN`；详见 `docs(release): record candidate release gate`；不自动部署 |
-| M2-09 | 独立 DSH 升级候选 | `CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_PASS / COMBINED_BROWSER_PASS / MAIN_PIN_UNCHANGED` | 新官方 DSH 版本/commit 和隔离 runtime | 新旧 runtime、SDK、插件适配、兼容矩阵、恢复矩阵和回退条件齐全；授权后再切换 | 官方 `dsh-v0.2.1-alpha.2` / `d7432673…` 已在 ignored checkout 安装、native/host build、14 文件 468 测试和三组候选 persistence 主行恢复中通过；九包在 ignored 候选 toolchain 中隔离构建 9/9、自测 9/9（286 项）通过；rc2 → alpha.2 的 text/tool/rich 跨版本恢复三组均 PASS；候选正式 pack/profile 输入 9/2 通过，synthetic 组合 browser PASS；主仓仍声明 rc2，正式目标 browser/recovery、主仓适配和切换未执行，详见 `docs(acceptance): record DSH upgrade deferred recheck`；不混入当前发布候选 |
+| M2-09 | 独立 DSH 升级候选 | `CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_PASS / COMBINED_BROWSER_PASS / TARGET_BROWSER_PASS / TARGET_RECOVERY_PASS / MAIN_PIN_UNCHANGED` | 新官方 DSH 版本/commit 和隔离 runtime | 新旧 runtime、SDK、插件适配、兼容矩阵、恢复矩阵和回退条件齐全；授权后再切换 | 官方 `dsh-v0.2.1-alpha.2` / `d7432673…` 已在 ignored checkout 安装、native/host build、14 文件 468 测试和三组候选 persistence 主行恢复中通过；九包隔离构建 9/9、自测 9/9（286 项）通过；候选正式 pack/profile 输入 9/2、synthetic 组合 browser、授权目标 browser/recovery 均 PASS；主仓仍声明 rc2，主仓适配和切换未执行，详见 `docs(acceptance): record DSH upgrade deferred recheck`；不混入当前发布候选 |
 | M2-10 | 证据与状态收口 | `PASS / RELEASE_GATES_REMAIN_OPEN` | 每张已执行任务卡的原始回执和本地提交 | 十张任务卡均有状态、证据、下一步和本地提交可追溯；产品仍 `PARTIAL`，未完成门禁保持原状态 | `docs(status): close acceptance task card` |
 
 每张任务卡完成后都要记录：输入身份、实际命令、退出码、原始证据位置、未执行项、风险边界和本地 commit。卡片没有完成时，不勾选下一张依赖卡；产品仍保持 `PARTIAL`、`release_ready=false`。
@@ -42,6 +42,10 @@
 ### 2026-10-14 DSH 候选正式组合补验
 
 M2-09 候选已补齐正式 pack/profile 输入和 synthetic 组合 browser：9 个 plugin pack、2 份 profile inputs 由候选 toolchain 真实读取器复核；alpha2 native shell 使用正式 Workbench page pack 完成隔离 session/history/board 启动与关闭，`model_calls=0`、`contains_real_data=false`。代码适配提交 `01b753e5` 已按 `open-code-review-delegate` 审查 8/8 文件并本地提交，固定 Node 24 下相关回归 `119 PASS / 0 FAIL / 0 SKIP`。主仓 rc2 pin/live、正式 profile/journal、release/activation、正式目标 browser/recovery 均保持原状态。
+
+### 2026-10-14 DSH 候选目标 browser/recovery 补验
+
+同一授权目标完成 alpha2 正式 page pack browser 和 owned-host restart recovery：首轮 fresh checkout 缺 `build:lib:client`，在临时 checkout 补建后 source clean；目标 browser、synthetic history/board、restart recovery 全部 PASS。临时 4329/runtime 已回收，live 4328/4332/4336 未修改。M2-09 后续只剩主仓 peer/toolchain release-scoped 适配与切换授权。
 
 ### 2026-10-13 授权生产目标前置通过
 
