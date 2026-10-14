@@ -1,5 +1,7 @@
 # M2-10 证据与状态收口（2026-10-13）
 
+> 这是历史审计记录。文中早期 alpha2 target browser/recovery PASS 叙述已经被后续证据纠偏撤销；当前十张任务卡的 disposition 以[2026-10-14 M2 收口账本](shinemage-m2-closeout-20261014.md)和 `STATUS.md` 为准。历史回执保留用于追溯，不作为当前 release 或 target 验收证据。
+
 本轮核对 M2 任务卡、机器审计矩阵、STATUS/TODOS、本地提交链与 candidate 真实 UAT 证据的一致性，并补记 M2-05 standalone 页面包与浏览器证据，不改变任何运行时、profile、journal、发布或生产状态。
 
 ## 一致性检查
