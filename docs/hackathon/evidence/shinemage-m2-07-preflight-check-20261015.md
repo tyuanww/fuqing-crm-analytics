@@ -29,4 +29,19 @@ node scripts/release/preflight.mjs --check \
 
 `-r3` 的输入摘要为 `dsh-profile-pack-inputs/v1`、当前 profile SHA `c8c9df8c…`、7 个固定包，组合输入摘要为 `e21ad52d…`；runtime bundle 为 `181233274` 字节、SHA-256 `d32df7cb…`。输入只在临时目录使用，检查结束后由临时目录自动回收，没有把历史 artifact 复制进主仓或把它写成新的发布 artifact。
 
+为区分工作树状态与正式输入状态，又从当前 HEAD `86970934` 创建了临时 detached clean checkout，复用同一组已核对输入和外部固定 upstream，执行：
+
+```text
+PATH=/Users/hutou/homebrew/opt/node@24/bin:$PATH \
+DSH_PROFILE_PACK_INPUTS=/tmp/<temporary>/shinemage-release-pack-inputs.json \
+DSH_UPSTREAM_RUNTIME_BUNDLE=/absolute/rc2/shinemage-dsh-upstream-runtime-477b4f42…tar.zst \
+DSH_UPSTREAM_CHECKOUT=/absolute/rc2/upstream-0.1.7-rc.2 \
+node scripts/release/preflight.mjs --check \
+  --python /Users/hutou/homebrew/opt/python@3.14/bin/python3.14 \
+  --tag dsh-m2-07-clean-check-20261015 \
+  --output-dir /tmp/<temporary>/release-preflight/dsh-m2-07-clean-check-20261015
+```
+
+该 detached checkout 的全部 preflight checks 为 PASS，`DSH_PREFLIGHT_CHECK_STATUS PASS`，随后 checkout 和临时输入目录均回收。这个结果只证明固定输入在 clean reviewed checkout 上满足 preflight；当前主工作树仍保留受保护目录并继续被 dirty-worktree 门禁阻断，也不因此生成正式 SDK artifact、签名或 release。
+
 这次检查没有改变既有结论：本地合同测试已通过，但当前候选仍缺正式 SDK artifact、完整正式 SBOM、发布者身份、最终签名/验签、撤销验证、干净机器安装/回退和 current-SHA attestation；M2-07 继续为 `BLOCKED`，`release_ready=false`。上述 preflight 阻断也不能通过删除受保护目录、漂移 Node 或复用旧 candidate 来绕过。
