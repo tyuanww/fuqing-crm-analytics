@@ -32,6 +32,7 @@ CANDIDATE_REAL_ANALYSIS_SAVE_READBACK_PASS
 CANDIDATE_REAL_SHARE_UNKNOWN_ACCOUNT_REJECTED
 CANDIDATE_REAL_REVOKE_NOT_RUN_NO_GRANT_CREATED
 CANDIDATE_REAL_STORAGE_RECOVERY_PASS
+REAL_CLEANUP_PASS
 CANDIDATE_RUNTIME_STOPPED_AFTER_UAT
 ```
 
@@ -41,6 +42,8 @@ CANDIDATE_RUNTIME_STOPPED_AFTER_UAT
 
 在“CRM 分析”面板点击“保存分析”，标题填写为 `M2-06-CANDIDATE-20261015`。切换到“已保存分析”后，页面显示该标题及同一快照编号，完成真实 UI 保存和回读。随后尝试向不存在的账号 `m2-06-permission-negative-20261015` 分享，页面返回“找不到该 CRM 账号，未建立分享”，候选数据库 `grants` 表保持为空；由于没有成功建立 grant，本轮不把真实撤权读取拒绝记为通过，真实 revoke 保持 `NOT_RUN_NO_GRANT_CREATED`。合成/ASGI 合同仍覆盖成功分享、撤权和撤权后读取拒绝。
 
-清理阶段仅删除本轮候选产生的一个 snapshot、一个 analysis 及对应 receipts；远端候选 SQLite 的 `assets`、`grants`、`receipts`、`command_receipts` 均回到 0。刷新候选 UI 的“已保存分析”列表后显示空列表，恢复核对通过。随后停止候选 DSH、18099 storage 和本地 4333 redirect；复核确认 4328 与 18093 仍由原有 live/shared 进程监听。主仓 profile/journal、真实业务 DuckDB、凭据和生产数据未修改。
+清理阶段仅删除本轮候选产生的一个 snapshot、一个 analysis 及对应 receipts；远端候选 SQLite 的 `assets`、`grants`、`receipts`、`command_receipts` 均回到 0。刷新候选 UI 的“已保存分析”列表后显示空列表，恢复核对通过。随后停止候选 DSH、18099 storage 和本地 4332/4336 SSH tunnel；复核确认 4328 与 18093 仍由原有 live/shared 进程监听。主仓 profile/journal、真实业务 DuckDB、凭据和生产数据未修改。
+
+验收后的资源复核发现两条历史 candidate 目录 `m2-06-candidate-r4`、`m2-06-candidate-r4b` 和已退出的 `shinemage-m2-06-crm-storage-r1` 容器仍留在远端；确认没有 candidate 进程或 4332/4336/18099 监听后，按精确路径回收了这两个目录和容器。随后复核结果为：candidate 目录 `0`、storage 容器 `0`、远端 `4328=1`、`18093=1`、`4332=0`、`4336=0`、`18099=0`；本地 `4332/4336` 也为 `0`。另有两条扫描已删除 candidate 路径的旧 grep 进程已按精确 PID 结束。该补充清理不触碰 live/shared 进程或数据。
 
 因此 M2-06 的真实保存/回读、未知账号权限拒绝和候选存储恢复已关闭；真实“成功分享后撤权再读取拒绝”仍需一个可用的第二 CRM 账号，不能用不存在账号替代。
