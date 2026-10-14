@@ -4,7 +4,7 @@
 
 | 任务 | 需要提供或确认的条件 | 条件到位后执行 | 当前状态 |
 |---|---|---|---|
-| M2-05 页面无障碍 | Windows 实机/远程目标，或由用户在 macOS 上手动完成 VoiceOver 读屏；同时确认要验收的页面包来源 | 在对应目标完成真实读屏、完整键盘焦点和高对比度验收，保存截图/AX/操作回执 | `PARTIAL` |
+| M2-05 页面无障碍 | 已使用 Tailscale Windows x64 目标和 source-owned 页面包 | Windows headed、Chrome AX、Tab/Enter、高对比度和 Narrator 会话 1 已留存；远程通道没有语音录音，读屏听读回执仍待人工记录 | `WINDOWS_A11Y_PARTIAL` |
 | M2-06 真实业务 UAT | 隔离 CRM 测试账号、可回收测试数据、允许的写入范围和权限负测范围 | 只在 candidate runtime 执行 CRM 保存、权限失败、恢复和人工业务复核；不写 live 业务数据 | `READONLY_PASS / WRITE_NOT_RUN` |
 | M2-07 SDK 供应链 | 最终 immutable SDK artifact 及 SHA、完整 SBOM、publisher identity、签名与 verifier、撤销/轮换证明、干净机器 | 按最终 SHA 重做 SBOM/attestation，执行干净机器安装、升级、回退和签名验证 | `BLOCKED` |
 | M2-08 正式发布 | 正式 release/activation 批准、release reference、15 分钟 SLI 目标和 canary/rollback 窗口 | 运行 release preflight、目标接收、SLI、canary、rollback；不自动切换 live | `NOT_RUN` |
