@@ -1,6 +1,6 @@
 # M2-06 CRM 保存、回读与权限合同复核（2026-10-15）
 
-本轮继续 M2-06，但当前隔离 candidate `127.0.0.1:4332` 已停止；Aside 历史页面打开“CRM 分析”后实际返回 `Failed to fetch`，因此没有把历史会话当作新的真实业务证据，也没有重新启动 live/shared 服务。
+本文件先记录了本轮前置阻塞：旧的 Aside 历史页面在 candidate 停止后返回 `Failed to fetch`。随后按授权恢复了隔离 candidate `127.0.0.1:4332` 与独立 CRM storage `127.0.0.1:18099`，完成一次真实 CRM 快照、UI 保存/回读、分享权限负测和清理；live `4328` 与共享 `18093` 全程未修改。候选进程、存储容器和本地隧道已在验收后停止。
 
 ## 本地合同复核
 
@@ -27,9 +27,20 @@ node --test dsh-plugins/crm-knowledge/test/crm-assets.test.mjs
 ```text
 CRM_CONTRACT_SAVE_READ_SHARE_REVOKE_PASS
 CRM_SYNTHETIC_PERMISSION_NEGATIVE_PASS
-CANDIDATE_RUNTIME_CURRENTLY_NOT_RUNNING
-REAL_CRM_ANALYSIS_SAVE_READBACK_NOT_RECONFIRMED
-REAL_CRM_PERMISSION_NEGATIVE_NOT_RUN
+CANDIDATE_REAL_SNAPSHOT_WRITE_PASS
+CANDIDATE_REAL_ANALYSIS_SAVE_READBACK_PASS
+CANDIDATE_REAL_SHARE_UNKNOWN_ACCOUNT_REJECTED
+CANDIDATE_REAL_REVOKE_NOT_RUN_NO_GRANT_CREATED
+CANDIDATE_REAL_STORAGE_RECOVERY_PASS
+CANDIDATE_RUNTIME_STOPPED_AFTER_UAT
 ```
 
-仓库后端合同本身具备保存、回读、分享和撤权能力；当前阻塞来自 candidate runtime 不可达以及模型工具面只公开快照查询，不能把本地合同测试写成真实 CRM 业务验收。下一次真实补验需要恢复隔离 candidate 和独立 storage，在用户重新绑定当前 CRM 会话后，通过 CRM 分析 UI 完成一次标题保存、按 ID 回读和撤权后的读取拒绝，然后再次清理并核对 SQLite 为空。live `4328`、共享 `18093`、主仓 profile/journal 和生产数据均未修改。
+## 隔离 candidate 的真实 UI 补验
+
+候选 CRM 会话显示“CRM分析（已连接）”后，使用当前账号的 CRM 工具创建了一条真实快照：`ok=true`、`data_kind=real`、筛选为 `2025-01-01` 至 `2025-03-14`、渠道“全店”、`exclude_low_price=false`，快照编号为 `crm_s_fc61a330e2e3437f85e9905342e345f7`，结果摘要以 UI 回执为准。没有调用 workspace、SQL、知识库、分享、激活或驾驶舱引用。
+
+在“CRM 分析”面板点击“保存分析”，标题填写为 `M2-06-CANDIDATE-20261015`。切换到“已保存分析”后，页面显示该标题及同一快照编号，完成真实 UI 保存和回读。随后尝试向不存在的账号 `m2-06-permission-negative-20261015` 分享，页面返回“找不到该 CRM 账号，未建立分享”，候选数据库 `grants` 表保持为空；由于没有成功建立 grant，本轮不把真实撤权读取拒绝记为通过，真实 revoke 保持 `NOT_RUN_NO_GRANT_CREATED`。合成/ASGI 合同仍覆盖成功分享、撤权和撤权后读取拒绝。
+
+清理阶段仅删除本轮候选产生的一个 snapshot、一个 analysis 及对应 receipts；远端候选 SQLite 的 `assets`、`grants`、`receipts`、`command_receipts` 均回到 0。刷新候选 UI 的“已保存分析”列表后显示空列表，恢复核对通过。随后停止候选 DSH、18099 storage 和本地 4333 redirect；复核确认 4328 与 18093 仍由原有 live/shared 进程监听。主仓 profile/journal、真实业务 DuckDB、凭据和生产数据未修改。
+
+因此 M2-06 的真实保存/回读、未知账号权限拒绝和候选存储恢复已关闭；真实“成功分享后撤权再读取拒绝”仍需一个可用的第二 CRM 账号，不能用不存在账号替代。
