@@ -21,12 +21,12 @@ node scripts/release/preflight.mjs --check \
   --output-dir "$PWD/.context/release-preflight/dsh-m2-07-local-check-20261015-r2"
 ```
 
-固定 Node 24.19.0、Python 3.14.4、pnpm 11.28.2、zstd、rc2 upstream `477b4f42…` 和 profile manifest 均通过识别；第二次检查因以下三项阻断并以 exit 2 结束：
+固定 Node 24.19.0、Python 3.14.4、pnpm 11.28.2、zstd、rc2 upstream `477b4f42…` 和 profile manifest 均通过识别；第二次检查因三项输入尚未提供而阻断。随后又从已有 rc2 预检 artifact 临时提取了 `shinemage-release-pack-inputs.json` 与七包固定输入，并绑定已有同 SHA runtime bundle，在新的 `-r3` 只读检查中验证：包输入与 runtime bundle 均通过，只剩工作树洁净门禁，以 exit 2 结束。
 
 | code | 当前事实 | 正确处理 |
 |---|---|---|
-| `RELEASE_BLOCKED_DIRTY_WORKTREE` | 工作树含受保护的 `security-audit-skill/` 未跟踪目录 | 保留该目录；正式发布需由发布环境提供干净 reviewed checkout |
-| `PREFLIGHT_PLUGIN_PACKS_INVALID` | 未提供绑定当前 profile 的 `DSH_PROFILE_PACK_INPUTS` | 由正式候选准备阶段生成并核对九包输入 |
-| `RELEASE_UPSTREAM_RUNTIME_REQUIRED` | 未提供 rc2 upstream runtime bundle | 由正式发布准备阶段提供与 upstream SHA 绑定的 runtime bundle |
+| `RELEASE_BLOCKED_DIRTY_WORKTREE` | 当前工作树含受保护的 `security-audit-skill/` 未跟踪目录 | 保留该目录；正式发布需由发布环境提供干净 reviewed checkout |
+
+`-r3` 的输入摘要为 `dsh-profile-pack-inputs/v1`、当前 profile SHA `c8c9df8c…`、7 个固定包，组合输入摘要为 `e21ad52d…`；runtime bundle 为 `181233274` 字节、SHA-256 `d32df7cb…`。输入只在临时目录使用，检查结束后由临时目录自动回收，没有把历史 artifact 复制进主仓或把它写成新的发布 artifact。
 
 这次检查没有改变既有结论：本地合同测试已通过，但当前候选仍缺正式 SDK artifact、完整正式 SBOM、发布者身份、最终签名/验签、撤销验证、干净机器安装/回退和 current-SHA attestation；M2-07 继续为 `BLOCKED`，`release_ready=false`。上述 preflight 阻断也不能通过删除受保护目录、漂移 Node 或复用旧 candidate 来绕过。
