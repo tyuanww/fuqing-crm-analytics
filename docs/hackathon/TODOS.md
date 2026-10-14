@@ -43,9 +43,9 @@
 
 M2-09 候选已补齐正式 pack/profile 输入和 synthetic 组合 browser：9 个 plugin pack、2 份 profile inputs 由候选 toolchain 真实读取器复核；alpha2 native shell 使用正式 Workbench page pack 完成隔离 session/history/board 启动与关闭，`model_calls=0`、`contains_real_data=false`。代码适配提交 `01b753e5` 已按 `open-code-review-delegate` 审查 8/8 文件并本地提交，固定 Node 24 下相关回归 `119 PASS / 0 FAIL / 0 SKIP`。主仓 rc2 pin/live、正式 profile/journal、release/activation、正式目标 browser/recovery 均保持原状态。
 
-### 2026-10-14 DSH 候选目标 browser/recovery 补验
+### 2026-10-14 DSH 候选目标 browser/recovery 补验（已撤销历史尝试）
 
-同一授权目标完成 alpha2 正式 page pack browser 和 owned-host restart recovery：首轮 fresh checkout 缺 `build:lib:client`，在临时 checkout 补建后 source clean；目标 browser、synthetic history/board、restart recovery 全部 PASS。临时 4329/runtime 已回收，live 4328/4332/4336 未修改。M2-09 后续只剩主仓 peer/toolchain release-scoped 适配与切换授权。
+旧回执曾记录 alpha2 正式 page pack browser 和 owned-host restart recovery PASS，并保留在 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-target-browser-recovery-20261014.json`。后续证据纠偏确认该尝试复用了 synthetic backend，缺少可采纳的真实浏览器操作和重启后业务页面回读，因此不能作为正式目标证据。原始回执保留用于审计，当前 M2-09 仍保持 `TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN`；live 4328/4332/4336 未修改，主仓 pin 未切换。
 
 ### 2026-10-13 授权生产目标前置通过
 
