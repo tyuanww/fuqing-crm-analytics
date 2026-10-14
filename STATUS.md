@@ -33,7 +33,7 @@
 
 ## 2026-10-15 M2-06 写入 UAT 最新事实
 
-隔离 candidate 的 CRM tool surface 已通过临时 `CRM 写入验收` preset 修复；用户重新手工绑定 CRM 后，候选页面显示 `CRM分析（已连接）`。候选 CRM 分析面板随后明确显示“尚未配置独立的 CRM 分析存储”。candidate host 仍指向 `127.0.0.1:18093` 的真实后端，该后端容器挂载共享 `/srv/shinemage/data`，不能把它当成非生产写入数据库。为避免 candidate 写入污染共享真实数据，本轮没有启用存储或执行快照/保存/删除；M2-06 写入、权限负测和恢复保持 `NOT_RUN / WRITE_STORAGE_NOT_CONFIGURED`。详见[写入 UAT 前置阻塞](docs/hackathon/evidence/shinemage-m2-06-write-uat-auth-20261015.md)。
+隔离 candidate 的 CRM tool surface 已通过临时 `CRM 写入验收` preset 修复；模型凭据路径也已修复，候选标准会话 `Reply READY only.` 返回 `READY`。为避免共享 `18093` 后端承载 candidate 写入，已在 `127.0.0.1:18099` 建立临时独立 CRM storage 容器，健康检查 200，状态目录 owner-only，真实 DuckDB 与来源目录只读挂载。旧共享后端未启用写入。写入会话完成 CRM 绑定后，模型按 90 天上限将 2025 年拆为五个无重叠窗口，五次快照均 `ok=true`，GSV 合计 `179,409,532.85`；随后停止并重启独立容器，清除五条验收快照，库恢复为空。分析标题保存与按 ID 回读接口未暴露，权限负测保持 `NOT_RUN`；详见[写入 UAT 前置阻塞](docs/hackathon/evidence/shinemage-m2-06-write-uat-auth-20261015.md)。
 
 ## 维护入口与边界
 
