@@ -120,12 +120,13 @@
     },
     {
       "id": "M2-07",
-      "status": "BLOCKED",
+      "status": "BLOCKED / OFFLINE_INVENTORY_PARTIAL",
       "evidence": [
         "SDK gate closeout matrix",
-        "SDK gate recheck"
+        "SDK gate recheck",
+        "alpha2 offline supply-chain inventory: 364 packages, 33 module scopes, one unidentified build-tools manifest, CycloneDX 364 components; OSV not run and all release coverage gates remain unverified"
       ],
-      "next": "upstream replacement, source archives, publisher attestation, SBOM/signature/revocation, clean host"
+      "next": "obtain final candidate artifact and publisher identity, then complete SBOM, signature/verification, revocation, clean-host and rollback evidence"
     },
     {
       "id": "M2-08",
@@ -194,6 +195,6 @@
     },
     "upgrade_verification_commit": "a7c895e9",
     "combined_lifecycle_evidence": ".context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-combined-lifecycle-20261014.json",
-    "latest_documentation_evidence": "docs/hackathon/evidence/shinemage-m2-09-sdk-closure-20261014.md"
+    "latest_documentation_evidence": "docs/hackathon/evidence/shinemage-m2-07-alpha2-supply-chain-inventory-20261014.md"
   }
 }
