@@ -25,6 +25,9 @@
 - archive-bound OSV：`NO_KNOWN_ADVISORIES`
 - OSV queries：`222 requested / 222 queried / 222 completed / 5 requests`
 - OSV report：`.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-sdk-closure-supply-chain-osv-20261014-r2.json`
+- 接收后全新 HOME checker：`shinemage-kit-inputs/v1 / READY`，`dsh_pin=0.2.1-alpha.2`，`bindings=32`
+- checker 输出：`.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-sdk-closure-clean-check-20261014-r1/check.json`
+- checker 输出 SHA-256：`9a3f0e55a57d5c56a621bb5a88dafcecb2d99ea9aac2477b5fe429eb56111f18`
 
 ## 门禁边界
 
