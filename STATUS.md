@@ -33,7 +33,7 @@
 
 ## 2026-10-15 M2-06 写入 UAT 最新事实
 
-隔离 candidate 的 CRM tool surface 已通过临时 `CRM 写入验收` preset 修复；模型凭据路径也已修复，候选标准会话 `Reply READY only.` 返回 `READY`。为避免共享 `18093` 后端承载 candidate 写入，已在 `127.0.0.1:18099` 建立临时独立 CRM storage 容器，健康检查 200，状态目录 owner-only，真实 DuckDB 与来源目录只读挂载。旧共享后端未启用写入。写入会话完成 CRM 绑定后，模型按 90 天上限将 2025 年拆为五个无重叠窗口，五次快照均 `ok=true`，GSV 合计 `179,409,532.85`；随后停止并重启独立容器，清除五条验收快照，库恢复为空。分析标题保存与按 ID 回读接口未暴露，权限负测保持 `NOT_RUN`；详见[写入 UAT 前置阻塞](docs/hackathon/evidence/shinemage-m2-06-write-uat-auth-20261015.md)。
+隔离 candidate 的 CRM tool surface 已通过临时 `CRM 写入验收` preset 修复；模型凭据路径也已修复，候选标准会话 `Reply READY only.` 返回 `READY`。为避免共享 `18093` 后端承载 candidate 写入，已在 `127.0.0.1:18099` 建立临时独立 CRM storage 容器，健康检查 200，状态目录 owner-only，真实 DuckDB 与来源目录只读挂载。旧共享后端未启用写入。写入会话完成 CRM 绑定后，模型按 90 天上限将 2025 年拆为五个无重叠窗口，五次快照均 `ok=true`，GSV 合计 `179,409,532.85`；随后停止并重启独立容器，清除五条验收快照，库恢复为空。固定 rc2 的本地 CRM host、HTTP consumer 和后端状态测试本轮重新通过 `22/22 + 8/8 + 30/30`，覆盖保存、按 ID 回读、分享和撤权；这些 synthetic/ASGI 结果不替代真实 CRM UI UAT。当前 candidate `4332` 已停止，Aside CRM 分析面板实查为 `Failed to fetch`；真实 CRM 标题保存、回读和权限负测继续保持未确认/未运行，详见[写入 UAT 前置阻塞](docs/hackathon/evidence/shinemage-m2-06-write-uat-auth-20261015.md)与[CRM 保存、回读与权限合同复核](docs/hackathon/evidence/shinemage-m2-06-contract-gate-20261015.md)。
 
 ## 维护入口与边界
 
