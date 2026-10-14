@@ -137,7 +137,7 @@
     },
     {
       "id": "M2-09",
-      "status": "CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / SDK_PREPARED_PASS / FORMAL_PACK_SOURCE_PROVENANCE_PASS / PROFILE_COMPATIBILITY_PASS / COMBINED_BROWSER_PASS / CANDIDATE_RECOVERY_PASS / TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN / MAIN_PIN_ADAPTATION_DEFERRED / MAIN_PIN_UNCHANGED",
+      "status": "CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / SDK_PREPARED_PASS / SDK_CLOSURE_PASS / SDK_CONTENT_AUDIT_PARTIAL / FORMAL_PACK_SOURCE_PROVENANCE_PASS / PROFILE_COMPATIBILITY_PASS / COMBINED_BROWSER_PASS / CANDIDATE_RECOVERY_PASS / TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN / MAIN_PIN_ADAPTATION_DEFERRED / MAIN_PIN_UNCHANGED",
       "evidence": [
         "DSH pin remains 0.1.7-rc.2",
         "official dsh-v0.2.1-alpha.2 / d7432673 isolated checkout",
@@ -159,7 +159,8 @@
         "owned-host restart followed by browser reload preserved the seeded history; transient chunked encoding and WebSocket reconnect events occurred during restart and stable retry was clean",
         "board was seeded by the synthetic backend but was not claimed as browser UI readback; target browser/recovery, main pin switch, release, and activation remain not run",
         "main pin adaptation review: rc2 lock closure, default validation paths and formal Cordis contract are not an alpha2-consistent closure",
-        "alpha2 development SDK preparation: source/lock, host/client build, build-tools and source-clean PASS; check.mjs READY; supply chain and release gates remain unverified"
+        "alpha2 development SDK preparation: source/lock, host/client build, build-tools and source-clean PASS; check.mjs READY; supply chain and release gates remain unverified",
+        "alpha2 SDK archive/receive and closure projection: archive/receive LOCAL_READY; closure 30,611 entries and 335 packages; content audit 0 findings with 18 binary/native coverage gaps; supply chain remains unverified"
       ],
       "next": "generate and verify the complete alpha2 plugin consumption lock/pack closure in isolation, then review one coherent main adaptation; keep rc2 pin/live unchanged"
     },
@@ -193,6 +194,6 @@
     },
     "upgrade_verification_commit": "a7c895e9",
     "combined_lifecycle_evidence": ".context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-combined-lifecycle-20261014.json",
-    "latest_documentation_evidence": "docs/hackathon/evidence/shinemage-m2-09-sdk-preparation-20261014.md"
+    "latest_documentation_evidence": "docs/hackathon/evidence/shinemage-m2-09-sdk-closure-20261014.md"
   }
 }
