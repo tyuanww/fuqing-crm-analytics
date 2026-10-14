@@ -36,3 +36,8 @@ M2-09 的候选正式 pack/profile 输入和 synthetic 组合 browser 已补齐�
 ## 2026-10-14 DSH 候选目标验收补验
 
 M2-09 已在授权杭州目标完成 alpha2 正式 page pack browser 与 owned-host restart recovery。首次 fresh checkout 缺少 client build，补跑 `build:lib` 后上游 source clean，目标临时 4329 browser、synthetic history/board、restart recovery 均 PASS；目标 live 4328/4332/4336 未修改，临时目录已删除。当前仍不改变 `product=PARTIAL`、`release_ready=false`、`activation=NOT_RUN`，主仓 peer/toolchain 适配与 DSH 切换仍需独立 release-scoped 审查和授权。
+
+
+## 2026-10-14 M2-09 证据纠偏
+
+本轮复核撤销上一节对 alpha2 target browser/recovery 的“完成”表述：实际探针没有打开真实浏览器，也没有在重启后回读数据；候选 formal pack/profile 来自 ignored workspace，目标还复用了 synthetic backend。M2-09 当前保持候选 runtime、静态矩阵、隔离适配、跨版本和组合 lifecycle 的既有结果，但 formal pack 来源证明、组合 browser、目标 browser/recovery 重新记为 BLOCKED / NOT_RUN。修复后的来源门禁和 25 项打包回归已通过；主仓 rc2 pin/live、release/activation 状态不变。

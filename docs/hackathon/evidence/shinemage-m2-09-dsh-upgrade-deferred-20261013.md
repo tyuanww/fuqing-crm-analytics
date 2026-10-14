@@ -94,3 +94,14 @@ commit=d743267388641bc76f17c45ce8b4c231aed1d32c
 补建 client bundle 后，candidate 在目标临时端口 `4329` 完成正式 page pack browser：synthetic session/history/board 均通过，history seed HTTP `200`、`model_calls=0`、`contains_real_data=false`、`console_errors=[]`。随后发送 owned-host `restart`，同一 runtime 重启并返回 `restarted-owned-host`，恢复阶段 PASS。目标现役 `4328/4332/4336` 监听未修改，alpha2 临时目录和 runtime 已回收；原始回执为 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-target-browser-recovery-20261014.json`。
 
 这关闭 M2-09 的目标 browser/recovery synthetic 子项，不等于真实业务 UAT、生产激活、release、canary、rollback 或主仓 pin 切换。当前状态为：`CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_PASS / COMBINED_BROWSER_PASS / TARGET_BROWSER_PASS / TARGET_RECOVERY_PASS / MAIN_PIN_UNCHANGED`。
+
+
+## 2026-10-14 证据纠偏与当前门禁
+
+复核发现本文件前述 alpha2 formal pack/profile、组合 browser 和授权目标 browser/recovery 的结论过度。formal preparation 使用 ignored candidate workspace，回执的外层 source_sha 与 source_dirty=false 不能证明候选包源码来自已提交树；旧打包器没有校验 source manifest 与 HEAD 的逐字一致性。native-composition-browser-probe.mjs 只启动 HTTP backend/native host，未调用浏览器自动化 API，也没有页面导航或 console 监听；console_errors=[] 不能证明浏览器无错误。restart 只得到宿主重启响应，没有新进程中的 history/board 读回。授权目标还复用了 synthetic backend，不能作为正式目标 browser/recovery 证据。旧回执、日志和提交不删除，作为历史尝试保留。
+
+本轮已修复 scripts/release/plugin-pack.mjs 的来源门禁，并新增 clean-looking ignored manifest overlay 回归测试；固定 Node 24 下打包回归为 25 PASS / 0 FAIL / 0 SKIP，候选和宿主相关回归分别为 8 PASS 与 26 PASS。当前 M2-09 为：
+
+CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_SOURCE_PROVENANCE_BLOCKED / COMBINED_BROWSER_NOT_RUN / TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN / MAIN_PIN_UNCHANGED
+
+下一步是准备一个 tracked candidate workspace，以修复后的来源门禁重新生成 pack/profile；之后再使用真实 headed 浏览器完成页面操作，并在 owned-host 重启后回读 history/board，最后才评估主仓 peer/toolchain 适配。主仓 rc2 pin/live、正式 profile/journal、release/activation 均未切换。

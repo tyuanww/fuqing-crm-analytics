@@ -221,7 +221,15 @@ async function gitMetadata(pluginRoot) {
     const root = (await exec('git', ['-C', pluginRoot, 'rev-parse', '--show-toplevel'], { encoding: 'utf8', timeout: 3000 })).stdout.trim();
     const sha = (await exec('git', ['-C', pluginRoot, 'rev-parse', 'HEAD'], { encoding: 'utf8', timeout: 3000 })).stdout.trim();
     const physicalPluginRoot = await realpath(pluginRoot);
-    const status = (await exec('git', ['status', '--porcelain', '--', relative(root, physicalPluginRoot)], {
+    const pluginRelative = relative(root, physicalPluginRoot).split(sep).join('/');
+    assert.ok(pluginRelative && !pluginRelative.startsWith('../') && pluginRelative !== '..' && !pluginRelative.startsWith('/'), 'PLUGIN_PACK_SOURCE_OUTSIDE_REPO');
+    const manifestRelative = `${pluginRelative}/package.json`;
+    const headManifest = (await exec('git', ['--literal-pathspecs', 'show', `HEAD:${manifestRelative}`], {
+      cwd: root, encoding: 'utf8', timeout: 3000, maxBuffer: 256 * 1024,
+    })).stdout;
+    const sourceManifest = (await readFile(join(pluginRoot, 'package.json'))).toString('utf8');
+    assert.equal(sourceManifest, headManifest, 'PLUGIN_PACK_SOURCE_MANIFEST_MISMATCH');
+    const status = (await exec('git', ['status', '--porcelain', '--untracked-files=all', '--', pluginRelative], {
       cwd: root, encoding: 'utf8', timeout: 3000,
     })).stdout.trim();
     assert.match(sha, /^[0-9a-f]{40}$/, 'PLUGIN_PACK_GIT_SHA_INVALID');

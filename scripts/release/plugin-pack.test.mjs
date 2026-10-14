@@ -97,6 +97,19 @@ test('controlled plugin pack rejects workspace links', async t => {
   await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_WORKSPACE_LINK/);
 });
 
+test('controlled plugin pack rejects a clean-looking ignored manifest overlay', async t => {
+  const input = await fixture(t);
+  const manifestPath = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+  manifest.description = 'ignored overlay';
+  await writeFile(manifestPath, JSON.stringify(manifest) + '\n');
+  await exec('git', ['-C', input.root, 'update-index', '--assume-unchanged', 'plugin/package.json']);
+  const status = (await exec('git', ['-C', input.root, 'status', '--porcelain', '--untracked-files=all'], { encoding: 'utf8' })).stdout;
+  assert.equal(status, '');
+  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_SOURCE_MANIFEST_MISMATCH/);
+  assert.deepEqual(await readdir(input.outputDir), []);
+});
+
 test('controlled plugin pack rejects symlinked build output', async t => {
   const input = await fixture(t, { symlinkOutput: true });
   await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_SYMLINK/);
