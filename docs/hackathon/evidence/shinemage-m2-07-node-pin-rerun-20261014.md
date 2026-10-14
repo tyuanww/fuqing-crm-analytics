@@ -42,6 +42,8 @@ reason=Use the pinned Node major (25 !== 24)
 }
 ```
 
+同一 Node 24 环境下运行 `scripts/release/sdk-closure.test.mjs`，结果为 `14 pass / 0 fail / 0 skip`，覆盖摘要绑定、错误摘要拒绝、来源/链接漂移、权限变化、目录链和运行时/类型依赖边界。
+
 ## 结论
 
 Node 25 的拒绝是固定工具链的防漂移行为；使用 Node 24 后本地 checker 恢复 `READY`。这只修复本地复核环境，不关闭最终 artifact、发布者身份、签名、撤销、干净机器或正式 attestation 门禁，M2-07 仍保持 `BLOCKED`。
