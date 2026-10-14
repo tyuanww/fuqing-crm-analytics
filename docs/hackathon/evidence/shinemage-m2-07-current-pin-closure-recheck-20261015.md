@@ -40,6 +40,24 @@ exit=2
 
 两项检查拒绝 alpha2 closure，原因是其 source/pin identity 与当前主仓 rc2 工具链不一致。这是预期的 fail-closed 行为，不是把 alpha2 当作 rc2 的兼容证明；历史 alpha2 供应链结果仍只属于独立 DSH 升级候选。
 
+作为当前 pin 的输入边界复核，直接检查已存在的 rc2 upstream checkout 与本仓 build-tools：
+
+```text
+node dsh-plugins/plugin-kit/check.mjs \
+  --upstream .context/dsh-b0/upstream-0.1.7-rc.2 \
+  --build-tools dsh-plugins/plugin-kit/build-tools
+exit=0
+status=READY
+upstream_sha=477b4f420553e8a52c2fbccc464d7561b239c443
+sdk_packages=26
+bindings=32
+compilation=NOT_RUN
+supply_chain=NOT_VERIFIED
+release_ready=false
+```
+
+这只关闭当前 rc2 SDK 输入的来源、锁和入口可读性检查；它没有生成最终 SDK artifact，也没有完成 SBOM、签名、撤销或干净机器验收。
+
 ## 结论
 
 当前主仓没有可供 M2-07 正式发布门禁使用的、与 rc2 pin 对齐的最终 SDK artifact。必须从最终 reviewed source/ref 重新生成与其绑定的 SDK、正式 SBOM 和 provenance，再进入签名、验签、撤销与干净机器安装回退。现有 alpha2 development closure 不能抵扣这些门禁；M2-07 继续为 `BLOCKED`，`release_ready=false`。
