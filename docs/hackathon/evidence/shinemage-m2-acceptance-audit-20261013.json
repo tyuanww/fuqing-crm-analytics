@@ -105,7 +105,7 @@
     },
     {
       "id": "M2-06",
-      "status": "CANDIDATE_REAL_MODEL_PASS / CRM_READONLY_PASS / WEKNORA_READONLY_PASS / LIVE_TOOL_SURFACE_EMPTY",
+      "status": "CANDIDATE_REAL_MODEL_PASS / CRM_READONLY_PASS / WEKNORA_READONLY_PASS / SYNTHETIC_PERSISTENCE_PERMISSION_RECOVERY_PASS / LIVE_TOOL_SURFACE_EMPTY",
       "evidence": [
         "real business UAT preflight",
         "real business UAT run",
@@ -114,9 +114,10 @@
         "live read-only UAT tool boundary",
         "candidate CRM host route probe",
         "candidate model credential gate",
-        "candidate real model/CRM/WeKnora read-only UAT"
+        "candidate real model/CRM/WeKnora read-only UAT",
+        "alpha2 synthetic persistence/permission/recovery: 165 PASS / 0 FAIL / 0 SKIP (35 + 130)"
       ],
-      "next": "补齐保存、权限失败、恢复和人工业务复核；live 标准会话工具面仍未暴露；继续 standalone、无障碍、供应链和 release gates"
+      "next": "真实 CRM 保存、权限失败、恢复和人工业务复核仍未运行；live 标准会话工具面仍未暴露；继续 standalone、无障碍、供应链和 release gates"
     },
     {
       "id": "M2-07",
@@ -195,6 +196,6 @@
     },
     "upgrade_verification_commit": "a7c895e9",
     "combined_lifecycle_evidence": ".context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-combined-lifecycle-20261014.json",
-    "latest_documentation_evidence": "docs/hackathon/evidence/shinemage-m2-07-alpha2-supply-chain-inventory-20261014.md"
+    "latest_documentation_evidence": "docs/hackathon/evidence/shinemage-m2-06-synthetic-persistence-20261014.md"
   }
 }
