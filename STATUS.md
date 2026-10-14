@@ -6,7 +6,7 @@
 
 | 项 | 当前状态与证据 |
 |---|---|
-| 产品与固定底座 | VERSION `0.20.0.0`；DSH `0.1.7-rc.2` / upstream `477b4f42`，未改上游。产品 PARTIAL，`release_ready=false`；SDK 分发按适用门禁 BLOCKED。本轮固定 Node 下供应链、内容审计与 attestation 合同回归 50/50 通过，未改变外部发布门禁，详见 [M2-07 本地供应链门禁回归](docs/hackathon/evidence/shinemage-m2-07-local-gate-rerun-20261015.md)。 |
+| 产品与固定底座 | VERSION `0.20.0.0`；DSH `0.1.7-rc.2` / upstream `477b4f42`，未改上游。产品 PARTIAL，`release_ready=false`；SDK 分发按适用门禁 BLOCKED。本轮固定 Node 下供应链、内容审计与 attestation 合同回归 50/50 通过，未改变外部发布门禁；当前 rc2 pin 对历史 alpha2 closure 的 fail-closed 复核见 [M2-07 当前 pin 与 SDK closure 一致性复核](docs/hackathon/evidence/shinemage-m2-07-current-pin-closure-recheck-20261015.md)，本地回归详见 [M2-07 本地供应链门禁回归](docs/hackathon/evidence/shinemage-m2-07-local-gate-rerun-20261015.md)。 |
 | 公开主线 | PR #121 的功能与组合变更已普通 merge，功能合并提交为 `b47cf9ba`；后续文档收口已合入 main。PR #121 的[主线 CI](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/38224409545) 与后续文档 CI 均 SUCCESS；适用 job 成功，路径矩阵 job 按选择 SKIPPED，功能合并事实见[PR #121 合并后核验](docs/hackathon/evidence/shinemage-pr121-postmerge-20261012.md)。 |
 | 本地交付与 PR | 近期主仓功能与文档交付均已合并；本机仍在 `codex/shinemage-abc-local-candidate`，当前本地 HEAD 以 Git 实查为准，没有自动切到 main。功能合并提交、main CI、工件摘要和保留的 `security-audit-skill/` 见[PR #121 合并后核验](docs/hackathon/evidence/shinemage-pr121-postmerge-20261012.md)。十个独立作者仓 PR #1（九个插件与 board-components）已普通 merge；合并后的各自 main CI 均 SUCCESS。完整合并 SHA 与 CI run 见[独立作者仓合并与候选前置核验](docs/hackathon/evidence/shinemage-author-merge-and-candidate-preflight-20261012.md)。PR #121 的组合 artifact 与两轮成功 CI 见[正式组合交付](docs/hackathon/evidence/shinemage-pr121-formal-pack-delivery-20261012.md)。 |
 | 独立作者仓 | 九个插件与 board-components 领域库分别维护源码、版本和 CI；完整看板在 analytics-workbench，shine-board 只是能力标记；合成知识服务不是真实 WeKnora。作者覆盖按[验证入口](docs/operating/verification.md)及固定作者证据锁记账。 |
