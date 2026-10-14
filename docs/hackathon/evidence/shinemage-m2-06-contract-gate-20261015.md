@@ -47,4 +47,4 @@ CANDIDATE_RUNTIME_STOPPED_AFTER_UAT
 
 验收后的资源复核发现两条历史 candidate 目录 `m2-06-candidate-r4`、`m2-06-candidate-r4b` 和已退出的 `shinemage-m2-06-crm-storage-r1` 容器仍留在远端；确认没有 candidate 进程或 4332/4336/18099 监听后，按精确路径回收了这两个目录和容器。随后复核结果为：candidate 目录 `0`、storage 容器 `0`、远端 `4328=1`、`18093=1`、`4332=0`、`4336=0`、`18099=0`；本地 `4332/4336` 也为 `0`。另有两条扫描已删除 candidate 路径的旧 grep 进程已按精确 PID 结束。该补充清理不触碰 live/shared 进程或数据。
 
-因此 M2-06 的真实保存/回读、未知账号权限拒绝和候选存储恢复已关闭；截至本轮，当前会话没有第二个可用 CRM 账号的手动登录确认，真实“成功分享后撤权再读取拒绝”记为 `BLOCKED_SECOND_CRM_ACCOUNT`，不能用不存在账号替代。若后续提供第二账号，只需在新的隔离 candidate 上重跑 owner/reader 分享、撤权、拒绝读取和清理链路。
+因此 M2-06 的真实保存/回读、未知账号权限拒绝和候选存储恢复已关闭；用户已确认目前没有第二个真实 CRM 账号，真实“成功分享后撤权再读取拒绝”记为 `BLOCKED_SECOND_CRM_ACCOUNT`，不能用不存在账号替代。若后续提供第二账号，只需在新的隔离 candidate 上重跑 owner/reader 分享、撤权、拒绝读取和清理链路。
