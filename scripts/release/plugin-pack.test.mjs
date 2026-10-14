@@ -2,7 +2,7 @@ import { PNPM_VERSION } from './toolchain.mjs';
 import { createHash } from 'node:crypto';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { access, mkdtemp, mkdir, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
+import { access, cp, mkdtemp, mkdir, readFile, readdir, rename, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFile } from 'node:child_process';
@@ -97,7 +97,33 @@ test('controlled plugin pack rejects workspace links', async t => {
   await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_WORKSPACE_LINK/);
 });
 
-test('controlled plugin pack rejects a clean-looking ignored manifest overlay', async t => {
+test('controlled plugin pack supports a standalone author repository root', async t => {
+  const input = await fixture(t);
+  for (const name of await readdir(input.plugin)) {
+    await rename(join(input.plugin, name), join(input.root, name));
+  }
+  await writeFile(join(input.root, '.gitignore'), 'out/\n');
+  await commitFixture(input.root);
+  const receipt = await packPlugin({ ...input, plugin: input.root });
+  const { stdout } = await exec('git', ['-C', input.root, 'rev-parse', 'HEAD']);
+  assert.equal(receipt.source_sha, stdout.trim());
+  assert.equal(receipt.source_dirty, false);
+});
+
+test('controlled plugin pack rejects an ignored package absent from the recorded commit', async t => {
+  const input = await fixture(t);
+  await writeFile(join(input.root, '.gitignore'), 'candidate/\n');
+  await commitFixture(input.root);
+  const candidate = join(input.root, 'candidate');
+  await cp(input.plugin, candidate, { recursive: true });
+  const { stdout } = await exec('git', ['-C', input.root, 'status', '--porcelain']);
+  assert.equal(stdout, '');
+  const manifestPath = join(input.outputDir, 'plugin-pack.json');
+  await assert.rejects(() => packPlugin({ ...input, plugin: candidate, manifestPath }), /PLUGIN_PACK_GIT_METADATA_REQUIRED/);
+  assert.deepEqual(await readdir(input.outputDir), []);
+});
+
+test('controlled plugin pack rejects a manifest change hidden by assume-unchanged', async t => {
   const input = await fixture(t);
   const manifestPath = join(input.plugin, 'package.json');
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
