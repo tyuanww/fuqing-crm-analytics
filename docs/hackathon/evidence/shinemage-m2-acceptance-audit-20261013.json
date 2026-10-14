@@ -137,7 +137,7 @@
     },
     {
       "id": "M2-09",
-      "status": "CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_SOURCE_PROVENANCE_BLOCKED / COMBINED_BROWSER_NOT_RUN / TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN / MAIN_PIN_UNCHANGED",
+      "status": "CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_SOURCE_PROVENANCE_PASS / PROFILE_COMPATIBILITY_BLOCKED / COMBINED_BROWSER_NOT_RUN / TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN / MAIN_PIN_UNCHANGED",
       "evidence": [
         "DSH pin remains 0.1.7-rc.2",
         "official dsh-v0.2.1-alpha.2 / d7432673 isolated checkout",
@@ -147,13 +147,15 @@
         "rc2 to alpha.2 text/tool/rich cross-version recovery PASS, 10 cold executions per corpus",
         "isolated nine-plugin combined lifecycle PASS: 9 loads and 9 reverse unloads, final tool registry empty",
         "previous formal pack/profile and browser receipts are retained as historical attempts but invalidated for release evidence",
+        "tracked candidate commit da1b49d35a571c79cff36a69bea0e2e933fac532 generated 9/9 alpha2 packs; every receipt binds the commit and source_dirty=false",
+        "CRM/Knowledge declare Cordis 4.0.2 while alpha2 runtime is 4.0.5-alpha.1; profile compatibility remains blocked",
         "fixed local packer requires the source manifest to match HEAD and checks all untracked source paths",
         "browser probe source contains no real browser/page automation; console_errors was not observed",
         "restart probe did not read history or board after restart; target reused a synthetic backend",
         "switch, release readiness, real business, and production activation remain NOT_RUN/BLOCKED",
         "main peer matrix remains 0/9 and direct main toolchain build remains blocked by rc2 SHA pin"
       ],
-      "next": "create a tracked candidate workspace and regenerate packs/profiles with the repaired provenance gate; run real browser navigation and post-restart history/board readback before any release-scoped adaptation or switch authorization"
+      "next": "adapt and review the CRM/Knowledge Cordis peer contracts in a tracked candidate, regenerate profiles and rerun compatibility; then run real browser navigation and post-restart history/board readback before any switch authorization"
     },
     {
       "id": "M2-10",

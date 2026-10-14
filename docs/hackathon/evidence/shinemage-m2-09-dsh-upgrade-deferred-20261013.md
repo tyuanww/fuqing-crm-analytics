@@ -105,3 +105,8 @@ commit=d743267388641bc76f17c45ce8b4c231aed1d32c
 CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_SOURCE_PROVENANCE_BLOCKED / COMBINED_BROWSER_NOT_RUN / TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN / MAIN_PIN_UNCHANGED
 
 下一步是准备一个 tracked candidate workspace，以修复后的来源门禁重新生成 pack/profile；之后再使用真实 headed 浏览器完成页面操作，并在 owned-host 重启后回读 history/board，最后才评估主仓 peer/toolchain 适配。主仓 rc2 pin/live、正式 profile/journal、release/activation 均未切换。
+
+
+## 2026-10-14 tracked candidate pack
+
+已建立独立 tracked candidate workspace，提交 da1b49d35a571c79cff36a69bea0e2e933fac532。修复后的 packer 生成 9/9 个 alpha2 pack，所有 receipt 的 source_sha 均绑定该提交且 source_dirty=false；汇总回执为 .context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-tracked-packs-20261014/preparation.json。来源证明从 BLOCKED 更新为 PASS，但 CRM/Knowledge 仍声明 Cordis 4.0.2，而 alpha2 runtime 是 4.0.5-alpha.1，profile compatibility 仍 BLOCKED。browser/recovery 尚未执行，主仓 rc2 pin/live 未切换。

@@ -41,3 +41,8 @@ M2-09 已在授权杭州目标完成 alpha2 正式 page pack browser 与 owned-h
 ## 2026-10-14 M2-09 证据纠偏
 
 本轮复核撤销上一节对 alpha2 target browser/recovery 的“完成”表述：实际探针没有打开真实浏览器，也没有在重启后回读数据；候选 formal pack/profile 来自 ignored workspace，目标还复用了 synthetic backend。M2-09 当前保持候选 runtime、静态矩阵、隔离适配、跨版本和组合 lifecycle 的既有结果，但 formal pack 来源证明、组合 browser、目标 browser/recovery 重新记为 BLOCKED / NOT_RUN。修复后的来源门禁和 25 项打包回归已通过；主仓 rc2 pin/live、release/activation 状态不变。
+
+
+## 2026-10-14 tracked candidate pack
+
+tracked candidate 提交 da1b49d35a571c79cff36a69bea0e2e933fac532 已生成 9/9 alpha2 pack，来源回执均绑定同一提交且 source_dirty=false。来源门禁已关闭；CRM/Knowledge 的 Cordis 4.0.2 与 alpha2 runtime 4.0.5-alpha.1 不匹配，profile compatibility、browser/recovery 和主仓适配仍保持未关闭。

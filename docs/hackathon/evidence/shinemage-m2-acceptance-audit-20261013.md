@@ -12,7 +12,7 @@
 | M2-06 | `CANDIDATE_REAL_MODEL_PASS / CRM_READONLY_PASS / WEKNORA_READONLY_PASS / LIVE_TOOL_SURFACE_EMPTY` | 保存、权限失败、恢复和人工业务复核；live 标准会话工具面仍 `NOT_EXPOSED / NOT_RUN` |
 | M2-07 | `BLOCKED` | 上游替换、来源归档、发布者身份、SBOM、签名、撤销和干净机器 |
 | M2-08 | `NOT_RUN` | M2-04 至 M2-07 关闭并取得发布授权 |
-| M2-09 | `CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_SOURCE_PROVENANCE_BLOCKED / COMBINED_BROWSER_NOT_RUN / TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN / MAIN_PIN_UNCHANGED` | 修复来源证明后重新生成 tracked candidate pack/profile；使用真实浏览器并在重启后回读数据，再决定主仓 peer/toolchain 适配与切换 |
+| M2-09 | `CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_SOURCE_PROVENANCE_PASS / PROFILE_COMPATIBILITY_BLOCKED / COMBINED_BROWSER_NOT_RUN / TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN / MAIN_PIN_UNCHANGED` | 先修复 CRM/Knowledge 的 Cordis peer 兼容性并重新生成 profile；再使用真实浏览器并在重启后回读数据，最后决定主仓 peer/toolchain 适配与切换 |
 | M2-10 | `PASS / RELEASE_GATES_REMAIN_OPEN` | 各卡继续独立收口，外部门禁变化后刷新矩阵 |
 
 当前正式 candidate journal 已到 seq 5：candidate intent、candidate prepared、source HTTP target observation、terminal host observation 和 browser host observation。另有 headed Tab 焦点部分观察，但没有为它追加 journal 事件。主仓正式 profile/journal 已登记，`release_ready=false`、activation `NOT_RUN`。本次文档复核没有新增代码改动；此前页面包、探针和 DSH 兼容矩阵代码已分别完成审查并本地提交。本轮没有 push、没有生产切换；受保护的 `security-audit-skill/` 保持未跟踪。
@@ -25,3 +25,8 @@
 ## 2026-10-14 M2-09 证据纠偏
 
 复核发现此前记录的 alpha2 formal pack/profile、组合 browser 和授权目标 browser/recovery 不能作为正式验收证据。formal preparation 使用了被 Git 忽略的 candidate workspace，回执中的 source_dirty=false 只反映外层仓库状态，不能证明候选包来源已被当前提交树锁定；旧打包器因此被修复。native-composition-browser-probe.mjs 只启动 HTTP backend/native host 并等待 stdin，没有真实 headed 浏览器、页面导航或 console 监听；其 console_errors=[] 是未观察到，而不是浏览器实测。restart 只确认宿主返回重启响应，没有在新进程中读回 history/board。目标运行还复用了 synthetic backend，因此目标 browser/recovery 也降为 NOT_RUN。旧 JSON、日志和提交保持原样，作为历史尝试留存；本次结论以本节和修复后的来源门禁为准。
+
+
+## 2026-10-14 tracked candidate pack
+
+tracked candidate workspace 提交 da1b49d35a571c79cff36a69bea0e2e933fac532 已生成 9/9 个 alpha2 pack，回执全部绑定该提交且 source_dirty=false。来源证明已通过；CRM/Knowledge 的 Cordis peer 仍为 4.0.2，与 alpha2 runtime 4.0.5-alpha.1 不匹配，候选 profile compatibility 保持 BLOCKED。browser/recovery 尚未执行。

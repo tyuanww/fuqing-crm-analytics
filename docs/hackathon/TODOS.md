@@ -29,7 +29,7 @@
 | M2-06 | 真实模型/CRM/WeKnora/UAT | `CANDIDATE_REAL_MODEL_PASS / CRM_READONLY_PASS / WEKNORA_READONLY_PASS / LIVE_TOOL_SURFACE_EMPTY` | candidate provider 凭据已由用户在 Models 页面手工配置，CRM 当前对话已手工绑定；live 标准会话工具面仍为空 | candidate 真实模型、WeKnora 只读检索和 CRM GSV 7/7 日结构化查询已通过；保存、权限失败、恢复和人工业务复核仍未运行，live 标准会话仍 `NOT_EXPOSED / NOT_RUN` | `docs(acceptance): record candidate real business UAT` |
 | M2-07 | SDK 供应链门禁 | `BLOCKED` | 最终候选 artifact 和发布者身份 | SBOM、发布者身份、最终签名、验签、撤销验证、干净机器安装和回退均通过 | 当前检查器复核仍为 fail-closed，覆盖项未验证、`release_ready=false`；供应链改动单独走 OCR，详见 `docs(acceptance): record SDK gate recheck` |
 | M2-08 | release / activation / canary / rollback | `NOT_RUN` | M2-04 至 M2-07 关闭，且取得发布授权 | immutable artifact、CI、release review、目标接收、生产激活、canary 和 rollback 全部有同一版本证据 | 当前前置审计仍 fail-closed，`release_ready=false`、`activation=NOT_RUN`；详见 `docs(release): record candidate release gate`；不自动部署 |
-| M2-09 | 独立 DSH 升级候选 | `CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_SOURCE_PROVENANCE_BLOCKED / COMBINED_BROWSER_NOT_RUN / TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN / MAIN_PIN_UNCHANGED` | 新官方 DSH 版本/commit 和隔离 runtime | 新旧 runtime、SDK、插件适配、兼容矩阵、恢复矩阵和回退条件齐全；授权后再切换 | 官方 `dsh-v0.2.1-alpha.2` / `d7432673…` 已在 ignored checkout 安装、native/host build、14 文件 468 测试和三组候选 persistence 主行恢复中通过；九包隔离构建 9/9、自测 9/9（286 项）通过；候选正式 pack/profile、synthetic 组合 browser 和授权目标 browser/recovery 的旧回执已在 2026-10-14 纠偏记录中降级；主仓仍声明 rc2，主仓适配和切换未执行，详见 `docs(acceptance): record DSH upgrade deferred recheck`；不混入当前发布候选 |
+| M2-09 | 独立 DSH 升级候选 | `CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_SOURCE_PROVENANCE_PASS / PROFILE_COMPATIBILITY_BLOCKED / COMBINED_BROWSER_NOT_RUN / TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN / MAIN_PIN_UNCHANGED` | 新官方 DSH 版本/commit 和隔离 runtime | 新旧 runtime、SDK、插件适配、兼容矩阵、恢复矩阵和回退条件齐全；授权后再切换 | 官方 `dsh-v0.2.1-alpha.2` / `d7432673…` 已在 ignored checkout 安装、native/host build、14 文件 468 测试和三组候选 persistence 主行恢复中通过；九包隔离构建 9/9、自测 9/9（286 项）通过；候选正式 pack/profile、synthetic 组合 browser 和授权目标 browser/recovery 的旧回执已在 2026-10-14 纠偏记录中降级；主仓仍声明 rc2，主仓适配和切换未执行，详见 `docs(acceptance): record DSH upgrade deferred recheck`；不混入当前发布候选 |
 | M2-10 | 证据与状态收口 | `PASS / RELEASE_GATES_REMAIN_OPEN` | 每张已执行任务卡的原始回执和本地提交 | 十张任务卡均有状态、证据、下一步和本地提交可追溯；产品仍 `PARTIAL`，未完成门禁保持原状态 | `docs(status): close acceptance task card` |
 
 每张任务卡完成后都要记录：输入身份、实际命令、退出码、原始证据位置、未执行项、风险边界和本地 commit。卡片没有完成时，不勾选下一张依赖卡；产品仍保持 `PARTIAL`、`release_ready=false`。
@@ -648,3 +648,8 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 ## 2026-10-14 M2-09 证据纠偏
 
 复核后，上一轮 alpha2 formal pack/profile、组合 browser 和杭州目标 browser/recovery 的 PASS 不再作为正式证据：候选包来自 ignored workspace；browser probe 没有真实浏览器页面操作；restart 没有重启后的 history/board 回读；目标运行复用了 synthetic backend。修复后的打包器已要求 source manifest 与 HEAD 逐字一致，并检查完整未跟踪状态。旧回执与日志保留为历史尝试，M2-09 当前状态已降为 FORMAL_PACK_SOURCE_PROVENANCE_BLOCKED / COMBINED_BROWSER_NOT_RUN / TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN，下一步是建立 tracked candidate、重新生成 pack/profile，再进行真实浏览器和恢复回读验收。
+
+
+## 2026-10-14 M2-09 tracked candidate pack
+
+已建立 tracked candidate workspace，提交为 da1b49d35a571c79cff36a69bea0e2e933fac532。修复后的 packer 生成 9/9 个 alpha2 plugin pack，所有回执 source_sha 绑定该提交且 source_dirty=false；回执与汇总位于 .context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-tracked-packs-20261014/preparation.json。该步骤只关闭来源证明，CRM/Knowledge 仍声明 Cordis 4.0.2，候选 runtime 为 4.0.5-alpha.1，因此 profile compatibility 仍 BLOCKED；browser/recovery 仍 NOT_RUN。
