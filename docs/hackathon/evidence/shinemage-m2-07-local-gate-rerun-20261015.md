@@ -7,9 +7,10 @@
 ```text
 node --test scripts/release/sdk-supply-chain.test.mjs \
   scripts/release/sdk-closure.test.mjs \
+  scripts/release/sdk-content-audit.test.mjs \
   scripts/release/attestation-binding.test.mjs
 
-42 tests / 42 pass / 0 fail / 0 skipped
+50 tests / 50 pass / 0 fail / 0 skipped
 ```
 
 覆盖范围包括：digest-pinned closure 只读校验、依赖图与 source reader fail-closed、链接越界/循环/漂移拒绝、manifest 与资源预算边界、OSV 分页/预算/TLS/响应异常处理、错误输出脱敏、artifact 变更失效，以及 attestation 的 exact source SHA、证书来源摘要和不相关验证结果拒绝。
