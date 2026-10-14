@@ -33,7 +33,7 @@
 
 ## 2026-10-15 M2-06 写入 UAT 最新事实
 
-隔离 candidate 的 CRM tool surface 已通过临时 `CRM 写入验收` preset 修复；模型凭据路径也已修复，候选标准会话 `Reply READY only.` 返回 `READY`。为避免共享 `18093` 后端承载 candidate 写入，已在 `127.0.0.1:18099` 建立临时独立 CRM storage 容器，健康检查 200，状态目录 owner-only，真实 DuckDB 与来源目录只读挂载。旧共享后端未启用写入。写入会话完成 CRM 绑定后，真实 CRM 工具创建一条快照；在“CRM 分析”面板保存为 `M2-06-CANDIDATE-20261015`，切换到“已保存分析”后按同一快照编号回读成功。对不存在账号 `m2-06-permission-negative-20261015` 的分享返回“找不到该 CRM 账号，未建立分享”，候选 `grants` 保持为空；因此真实成功分享后的 revoke 仍 `NOT_RUN_NO_GRANT_CREATED`。本轮仅清理这一个 snapshot、一个 analysis 与 receipts，刷新 UI 后保存列表为空；候选目录、18099 storage、4332/4336 SSH 隧道均已回收，复核确认 live `4328` 与共享 `18093` 仍在监听且未修改。固定 rc2 的本地 CRM host、HTTP consumer 和后端状态测试本轮重新通过 `22/22 + 8/8 + 30/30`，覆盖合同层保存、按 ID 回读、分享和撤权；详见[CRM 保存、回读与权限合同复核](docs/hackathon/evidence/shinemage-m2-06-contract-gate-20261015.md)。
+隔离 candidate 的 CRM tool surface 已通过临时 `CRM 写入验收` preset 修复；模型凭据路径也已修复，候选标准会话 `Reply READY only.` 返回 `READY`。为避免共享 `18093` 后端承载 candidate 写入，已在 `127.0.0.1:18099` 建立临时独立 CRM storage 容器，健康检查 200，状态目录 owner-only，真实 DuckDB 与来源目录只读挂载。旧共享后端未启用写入。写入会话完成 CRM 绑定后，真实 CRM 工具创建一条快照；在“CRM 分析”面板保存为 `M2-06-CANDIDATE-20261015`，切换到“已保存分析”后按同一快照编号回读成功。对不存在账号 `m2-06-permission-negative-20261015` 的分享返回“找不到该 CRM 账号，未建立分享”，候选 `grants` 保持为空；因此真实成功分享后的 revoke 仍 `NOT_RUN_NO_GRANT_CREATED`，当前会话没有第二个可用 CRM 账号的手动登录确认，记为 `BLOCKED_SECOND_CRM_ACCOUNT`。本轮仅清理这一个 snapshot、一个 analysis 与 receipts，刷新 UI 后保存列表为空；candidate 目录、18099 storage、4332/4336 SSH 隧道均已回收，复核确认 live `4328` 与共享 `18093` 仍在监听且未修改。固定 rc2 的本地 CRM host、HTTP consumer 和后端状态测试本轮重新通过 `22/22 + 8/8 + 30/30`，覆盖合同层保存、按 ID 回读、分享和撤权；详见[CRM 保存、回读与权限合同复核](docs/hackathon/evidence/shinemage-m2-06-contract-gate-20261015.md)。
 
 ## 维护入口与边界
 
