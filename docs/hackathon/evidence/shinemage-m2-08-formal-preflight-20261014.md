@@ -29,4 +29,4 @@ evidence  PASS
 
 ## 边界
 
-这是固定 rc2 的本地内部候选，不是正式 release。`release_ready=false` 保持不变；WSL2 cold runtime/WAL、目标 host HTTP、15 分钟 SLI、最终 SDK 供应链材料、正式 release authorization、activation、canary 和 rollback 仍未执行。preflight 的 source SHA 是 reviewed commit `a148ea77…`，后续若要正式发布，必须在最终 clean reviewed commit 上重新生成同一类证据。
+这是固定 rc2 的本地内部候选，不是正式 release。`release_ready=false` 保持不变；本次 preflight 自身不覆盖目标 WSL2 cold runtime/WAL 和 host HTTP，后续已用独立 sealed synthetic 输入在授权目标补验并记录于[M2-08 WSL2 目标补验](shinemage-m2-08-wsl2-target-20261014.md)。15 分钟 SLI、最终 SDK 供应链材料、正式 release authorization、activation、canary 和 rollback 仍未执行。preflight 的 source SHA 是 reviewed commit `a148ea77…`，后续若要正式发布，必须在最终 clean reviewed commit 上重新生成同一类证据。
