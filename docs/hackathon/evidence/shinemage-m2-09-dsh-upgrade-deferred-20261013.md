@@ -110,3 +110,8 @@ CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / 
 ## 2026-10-14 tracked candidate pack
 
 已建立独立 tracked candidate workspace，提交 da1b49d35a571c79cff36a69bea0e2e933fac532。修复后的 packer 生成 9/9 个 alpha2 pack，所有 receipt 的 source_sha 均绑定该提交且 source_dirty=false；汇总回执为 .context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-tracked-packs-20261014/preparation.json。来源证明从 BLOCKED 更新为 PASS，但 CRM/Knowledge 仍声明 Cordis 4.0.2，而 alpha2 runtime 是 4.0.5-alpha.1，profile compatibility 仍 BLOCKED。browser/recovery 尚未执行，主仓 rc2 pin/live 未切换。
+
+
+## 2026-10-14 peer compatibility
+
+candidate commit 1bb2646523a7c1cd5aa04d11080617a373af7147 将 CRM/Knowledge 的 Cordis peer 对齐到 alpha2 runtime 4.0.5-alpha.1。候选 CRM 测试 108/108、Knowledge 测试 32/32；基于新 pack/profile 的 CRM/Knowledge/page 组合集成 20/20。来源证明、9/9 pack、2 份 profile 和 profile compatibility 已通过。候选 browser 与 owned-host restart 后数据回读仍 NOT_RUN，主仓 rc2 pin/live 保持不变。

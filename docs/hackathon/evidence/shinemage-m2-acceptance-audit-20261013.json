@@ -137,7 +137,7 @@
     },
     {
       "id": "M2-09",
-      "status": "CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_SOURCE_PROVENANCE_PASS / PROFILE_COMPATIBILITY_BLOCKED / COMBINED_BROWSER_NOT_RUN / TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN / MAIN_PIN_UNCHANGED",
+      "status": "CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_SOURCE_PROVENANCE_PASS / PROFILE_COMPATIBILITY_PASS / COMBINED_BROWSER_NOT_RUN / TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN / MAIN_PIN_UNCHANGED",
       "evidence": [
         "DSH pin remains 0.1.7-rc.2",
         "official dsh-v0.2.1-alpha.2 / d7432673 isolated checkout",
@@ -153,9 +153,10 @@
         "browser probe source contains no real browser/page automation; console_errors was not observed",
         "restart probe did not read history or board after restart; target reused a synthetic backend",
         "switch, release readiness, real business, and production activation remain NOT_RUN/BLOCKED",
-        "main peer matrix remains 0/9 and direct main toolchain build remains blocked by rc2 SHA pin"
+        "main peer matrix remains 0/9 and direct main toolchain build remains blocked by rc2 SHA pin",
+        "candidate commit 1bb2646523a7c1cd5aa04d11080617a373af7147 aligns CRM/Knowledge Cordis peer to 4.0.5-alpha.1; CRM 108/108, Knowledge 32/32, composition integration 20/20"
       ],
-      "next": "adapt and review the CRM/Knowledge Cordis peer contracts in a tracked candidate, regenerate profiles and rerun compatibility; then run real browser navigation and post-restart history/board readback before any switch authorization"
+      "next": "run real browser navigation and post-restart history/board readback on the candidate before evaluating main pin/toolchain adaptation or switch authorization"
     },
     {
       "id": "M2-10",

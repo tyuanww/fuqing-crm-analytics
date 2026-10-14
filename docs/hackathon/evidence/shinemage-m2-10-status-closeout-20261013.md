@@ -46,3 +46,8 @@ M2-09 已在授权杭州目标完成 alpha2 正式 page pack browser 与 owned-h
 ## 2026-10-14 tracked candidate pack
 
 tracked candidate 提交 da1b49d35a571c79cff36a69bea0e2e933fac532 已生成 9/9 alpha2 pack，来源回执均绑定同一提交且 source_dirty=false。来源门禁已关闭；CRM/Knowledge 的 Cordis 4.0.2 与 alpha2 runtime 4.0.5-alpha.1 不匹配，profile compatibility、browser/recovery 和主仓适配仍保持未关闭。
+
+
+## 2026-10-14 peer compatibility
+
+tracked candidate commit 1bb2646523a7c1cd5aa04d11080617a373af7147 完成 Cordis peer 对齐；CRM/Knowledge 候选测试 108/108、32/32，候选组合集成 20/20。M2-09 来源证明与 profile compatibility 已通过，browser/recovery、主仓适配和 release/activation 仍保持未关闭。

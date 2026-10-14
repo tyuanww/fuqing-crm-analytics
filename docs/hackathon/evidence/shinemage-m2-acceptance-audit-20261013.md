@@ -12,7 +12,7 @@
 | M2-06 | `CANDIDATE_REAL_MODEL_PASS / CRM_READONLY_PASS / WEKNORA_READONLY_PASS / LIVE_TOOL_SURFACE_EMPTY` | 保存、权限失败、恢复和人工业务复核；live 标准会话工具面仍 `NOT_EXPOSED / NOT_RUN` |
 | M2-07 | `BLOCKED` | 上游替换、来源归档、发布者身份、SBOM、签名、撤销和干净机器 |
 | M2-08 | `NOT_RUN` | M2-04 至 M2-07 关闭并取得发布授权 |
-| M2-09 | `CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_SOURCE_PROVENANCE_PASS / PROFILE_COMPATIBILITY_BLOCKED / COMBINED_BROWSER_NOT_RUN / TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN / MAIN_PIN_UNCHANGED` | 先修复 CRM/Knowledge 的 Cordis peer 兼容性并重新生成 profile；再使用真实浏览器并在重启后回读数据，最后决定主仓 peer/toolchain 适配与切换 |
+| M2-09 | `CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_SOURCE_PROVENANCE_PASS / PROFILE_COMPATIBILITY_PASS / COMBINED_BROWSER_NOT_RUN / TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN / MAIN_PIN_UNCHANGED` | 先修复 CRM/Knowledge 的 Cordis peer 兼容性并重新生成 profile；再使用真实浏览器并在重启后回读数据，最后决定主仓 peer/toolchain 适配与切换 |
 | M2-10 | `PASS / RELEASE_GATES_REMAIN_OPEN` | 各卡继续独立收口，外部门禁变化后刷新矩阵 |
 
 当前正式 candidate journal 已到 seq 5：candidate intent、candidate prepared、source HTTP target observation、terminal host observation 和 browser host observation。另有 headed Tab 焦点部分观察，但没有为它追加 journal 事件。主仓正式 profile/journal 已登记，`release_ready=false`、activation `NOT_RUN`。本次文档复核没有新增代码改动；此前页面包、探针和 DSH 兼容矩阵代码已分别完成审查并本地提交。本轮没有 push、没有生产切换；受保护的 `security-audit-skill/` 保持未跟踪。
@@ -30,3 +30,8 @@
 ## 2026-10-14 tracked candidate pack
 
 tracked candidate workspace 提交 da1b49d35a571c79cff36a69bea0e2e933fac532 已生成 9/9 个 alpha2 pack，回执全部绑定该提交且 source_dirty=false。来源证明已通过；CRM/Knowledge 的 Cordis peer 仍为 4.0.2，与 alpha2 runtime 4.0.5-alpha.1 不匹配，候选 profile compatibility 保持 BLOCKED。browser/recovery 尚未执行。
+
+
+## 2026-10-14 M2-09 peer compatibility
+
+candidate commit 1bb2646523a7c1cd5aa04d11080617a373af7147 将 CRM/Knowledge 的 Cordis peer 从 4.0.2 对齐到 4.0.5-alpha.1。候选 CRM/Knowledge 测试分别为 108/108、32/32，使用新 pack/profile 的 CRM/Knowledge/page 组合集成为 20/20。来源证明与 profile compatibility 已通过；真实 browser、owned-host recovery 和主仓 pin 切换仍未执行。
