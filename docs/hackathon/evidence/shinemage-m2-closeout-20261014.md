@@ -12,7 +12,7 @@
 | M2-04 | `PASS / TERMINAL_PASS / BROWSER_PASS` | 同一 candidate 的 source HTTP、terminal、candidate browser seq 5 和恢复回执 | 不把 M2-05、M2-06 或 M2-08 的缺口并入本卡 |
 | M2-05 | `PARTIAL` | standalone 包、本地 Chromium、candidate headed browser、AX/Tab 证据已完成；最新环境盘查见[无障碍目标环境能力盘查](shinemage-m2-05-environment-capability-20261014.md) | 外部 VoiceOver/NVDA、完整人工键盘焦点、Windows 高对比度 |
 | M2-06 | `PARTIAL / READONLY_PASS` | candidate 真实模型、WeKnora 只读、CRM GSV 7/7 通过；合成 persistence/permission/recovery 165/165 通过 | 隔离测试数据下的 CRM 写入、权限负测、恢复和人工业务复核 |
-| M2-07 | `BLOCKED` | 本地依赖图、CycloneDX projection、OSV、compact archive、opaque/native provenance、clean HOME 已完成；本地边界见[本地可关闭项复核](shinemage-m2-07-local-closure-readiness-20261014.md) | 最终 immutable artifact、完整 SBOM、publisher identity、正式签名/验签、撤销、干净机器安装回退、最终 SHA attestation |
+| M2-07 | `BLOCKED` | 本地依赖图、CycloneDX projection、OSV、compact archive、opaque/native provenance、clean HOME 和 GitHub 发布者权限前置核验已完成；本地边界见[本地可关闭项复核](shinemage-m2-07-local-closure-readiness-20261014.md)与[发布者权限前置核验](shinemage-m2-07-publisher-preflight-20261014.md) | 最终 immutable artifact、完整 SBOM、publisher identity、正式签名/验签、撤销、干净机器安装回退、最终 SHA attestation |
 | M2-08 | `NOT_RUN / RELEASE_GATES_REMAIN_OPEN` | rc2 internal preflight 和 WSL2 source HTTP 目标补验已完成 | M2-05～M2-07 关闭、15 分钟 SLI、正式 release/activation 授权、canary、rollback |
 | M2-09 | `CANDIDATE_PASS_LIMITED / TARGET_NOT_RUN / MAIN_PIN_UNCHANGED` | alpha2 tracked candidate、9/9 pack、profile compatibility、组合 lifecycle、本机 browser/recovery 已完成 | 正式目标 browser/recovery 需要隔离 alpha2 runtime 和可审计 runner；之后才评审主仓适配与切换 |
 | M2-10 | `PASS / RELEASE_GATES_REMAIN_OPEN` | 本账本、STATUS、TODOS 和证据链接已互相校验 | 外部条件变化后重新生成本账本，不把历史回执升级为当前 PASS |
