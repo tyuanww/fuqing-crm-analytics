@@ -654,6 +654,10 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 
 已建立 tracked candidate workspace，提交为 da1b49d35a571c79cff36a69bea0e2e933fac532。修复后的 packer 生成 9/9 个 alpha2 plugin pack，所有回执 source_sha 绑定该提交且 source_dirty=false；回执与汇总位于 .context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-tracked-packs-20261014/preparation.json。该步骤只关闭来源证明，CRM/Knowledge 仍声明 Cordis 4.0.2，候选 runtime 为 4.0.5-alpha.1，因此 profile compatibility 仍 BLOCKED；browser/recovery 仍 NOT_RUN。
 
+## 2026-10-15 M2-06 写入 UAT 前置阻塞
+
+隔离 candidate 已临时追加 `CRM 写入验收` preset，修复了 PTC 会话没有加载 CRM tool plugin 的问题；用户重新绑定 CRM 后页面显示 `CRM分析（已连接）`。候选 CRM 分析面板明确显示“尚未配置独立的 CRM 分析存储”，而 candidate host 指向共享真实后端并挂载共享数据目录。为保持真实数据边界，本轮没有启用共享后端存储，也没有执行快照、保存、回读、删除、权限负测或恢复。M2-06 当前为 `READONLY_PASS / WRITE_STORAGE_NOT_CONFIGURED / CRM_DATA_MUTATION_COUNT=0`；继续条件是独立非生产 CRM storage origin/database、可审计的数据隔离和回退方案。详见[写入 UAT 前置阻塞](evidence/shinemage-m2-06-write-uat-auth-20261015.md)。
+
 
 ## 2026-10-14 M2-09 peer compatibility
 

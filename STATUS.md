@@ -31,6 +31,10 @@
 3. PR #120、#121 已按普通 merge 合入 main；PR #121 的合并提交为 `b47cf9ba`，实际 main CI `38224409545` 已核对成功，合并后证据已归档。commit 前 /review、正常 push 钩子继续保留，不改 VERSION，不自动发布或部署。
 4. 当前组合正式 service/target/source HTTP/terminal/browser 已按独立 receipt 收口；source-owned standalone 页面包及本地真实 Chromium 探针已通过并留存证据，candidate 读屏、人工完整键盘焦点、高对比度、真实业务剩余 UAT、SDK 分发和独立 DSH 升级沿原 stop/go 分别收尾，不扩展功能，不继承旧 candidate。
 
+## 2026-10-15 M2-06 写入 UAT 最新事实
+
+隔离 candidate 的 CRM tool surface 已通过临时 `CRM 写入验收` preset 修复；用户重新手工绑定 CRM 后，候选页面显示 `CRM分析（已连接）`。候选 CRM 分析面板随后明确显示“尚未配置独立的 CRM 分析存储”。candidate host 仍指向 `127.0.0.1:18093` 的真实后端，该后端容器挂载共享 `/srv/shinemage/data`，不能把它当成非生产写入数据库。为避免 candidate 写入污染共享真实数据，本轮没有启用存储或执行快照/保存/删除；M2-06 写入、权限负测和恢复保持 `NOT_RUN / WRITE_STORAGE_NOT_CONFIGURED`。详见[写入 UAT 前置阻塞](docs/hackathon/evidence/shinemage-m2-06-write-uat-auth-20261015.md)。
+
 ## 维护入口与边界
 
 - 单插件日常更新见[插件更新指南](docs/operating/shinemage-plugin-update.md)；仓库职责、升级和清理见[维护手册](docs/operating/shinemage-maintenance-and-cleanup.md)，任务接续见[TODOS](docs/hackathon/TODOS.md#m1-核心交付)。插件变更不默认重建 DSH、迁移数据库或重复 SDK 全量审计。
