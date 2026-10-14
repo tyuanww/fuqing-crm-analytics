@@ -115,3 +115,12 @@ CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / 
 ## 2026-10-14 peer compatibility
 
 candidate commit 1bb2646523a7c1cd5aa04d11080617a373af7147 将 CRM/Knowledge 的 Cordis peer 对齐到 alpha2 runtime 4.0.5-alpha.1。候选 CRM 测试 108/108、Knowledge 测试 32/32；基于新 pack/profile 的 CRM/Knowledge/page 组合集成 20/20。来源证明、9/9 pack、2 份 profile 和 profile compatibility 已通过。候选 browser 与 owned-host restart 后数据回读仍 NOT_RUN，主仓 rc2 pin/live 保持不变。
+
+
+## 2026-10-14 本机隔离候选真实浏览器与恢复
+
+在 tracked candidate commit `1bb2646523a7c1cd5aa04d11080617a373af7147`、alpha2 `d7432673…` 和同一组正式 page pack/profile 输入上，先发现 `apps/web/dist/index.html` 缺失，根路径按 `frontend-static` 合同返回 `404`；在隔离 upstream checkout 执行 `pnpm --filter @deepseek-ai/dsh-web-frontend run build` 成功后，未修改主仓或 live。随后使用 gstack Chromium fallback（Aside 不可用，故不宣称 Aside 证据）实际打开 `http://127.0.0.1:53893/start`，完成 Preview Notice、延后模型配置、打开预置历史会话，并进入 Plugins 页面核对 analytics-workbench 与五个 Shine Mage 插件已加载；稳定后控制台错误为空。
+
+随后向本次自有 host 发送 `restart`，浏览器重新加载 alpha2 页面，预置历史标题和内容仍可见。重启切换瞬间记录了一次 `ERR_INCOMPLETE_CHUNKED_ENCODING` 和一次 WebSocket connection-refused 重连告警；待连接稳定后清空日志复查为无 console error、无残留网络失败。board 由隔离 synthetic backend 预置，但没有把它冒充成浏览器 UI 的 board readback。原始观察回执为 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-browser-recovery-20261014.json`。
+
+这关闭本机候选的真实页面与 owned-host history recovery 子项，仍不构成真实业务 UAT、正式目标 browser/recovery、生产激活、release、canary、rollback 或主仓 pin 切换。当前状态更新为：`CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_SOURCE_PROVENANCE_PASS / PROFILE_COMPATIBILITY_PASS / COMBINED_BROWSER_PASS / CANDIDATE_RECOVERY_PASS / TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN / MAIN_PIN_UNCHANGED`。

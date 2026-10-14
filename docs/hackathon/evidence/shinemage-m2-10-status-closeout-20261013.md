@@ -51,3 +51,10 @@ tracked candidate 提交 da1b49d35a571c79cff36a69bea0e2e933fac532 已生成 9/9 
 ## 2026-10-14 peer compatibility
 
 tracked candidate commit 1bb2646523a7c1cd5aa04d11080617a373af7147 完成 Cordis peer 对齐；CRM/Knowledge 候选测试 108/108、32/32，候选组合集成 20/20。M2-09 来源证明与 profile compatibility 已通过，browser/recovery、主仓适配和 release/activation 仍保持未关闭。
+
+
+## 2026-10-14 M2-09 本机真实浏览器与恢复
+
+tracked candidate 补齐隔离 alpha2 Web dist 后，使用 gstack Chromium fallback 实际打开候选页面，完成预置历史会话、插件页和稳定期 console 观察；owned-host 重启后重新加载页面，历史标题和内容仍可见。重启瞬间的 chunked encoding 与 WebSocket 重连告警已保留，稳定后复查无 console error。该回执只关闭本机候选 browser/history recovery 子项；board 仍是 synthetic backend 预置，未宣称浏览器 UI readback。证据为 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-browser-recovery-20261014.json`。
+
+M2-09 当前为 `CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_SOURCE_PROVENANCE_PASS / PROFILE_COMPATIBILITY_PASS / COMBINED_BROWSER_PASS / CANDIDATE_RECOVERY_PASS / TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN / MAIN_PIN_UNCHANGED`；不改变 `product=PARTIAL`、`release_ready=false`、`activation=NOT_RUN`，也不授予主仓适配、DSH 切换、release、canary 或 rollback。
