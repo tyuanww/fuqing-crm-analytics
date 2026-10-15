@@ -658,7 +658,7 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 
 隔离 candidate 已临时追加 `CRM 写入验收` preset，修复了 PTC 会话没有加载 CRM tool plugin 的问题；模型凭据路径修复后标准会话返回 `READY`。旧 host 指向共享真实后端的问题已通过临时 `127.0.0.1:18099` 独立 storage 容器隔离，真实 DuckDB 与来源目录只读挂载，状态目录独立且 owner-only，健康检查通过。写入会话完成 CRM 绑定后，模型按 90 天上限将 2025 年拆为五个无重叠窗口，五次快照均 `ok=true`，GSV 合计 `179,409,532.85`；停止并重启独立容器后五条验收快照已清除，库恢复为空。分析标题保存与按 ID 回读接口未暴露，权限负测保持 `NOT_RUN`。详见[写入 UAT 前置阻塞](evidence/shinemage-m2-06-write-uat-auth-20261015.md)。
 
-随后恢复同一隔离 candidate 并完成真实 UI 补验：创建一条 `data_kind=real` 快照，在“CRM 分析”中保存为 `M2-06-CANDIDATE-20261015`，切换“已保存分析”后按同一快照编号回读；向不存在账号分享返回“找不到该 CRM 账号，未建立分享”，未产生 grant。清理后远端 candidate SQLite 的 `assets`、`grants`、`receipts`、`command_receipts` 均为 0，刷新 UI 后保存列表为空，候选进程与独立 storage 已停止；真实成功分享后的 revoke 仍因无可用第二账号保持 `NOT_RUN_NO_GRANT_CREATED`。详见[CRM 保存、回读与权限合同复核](evidence/shinemage-m2-06-contract-gate-20261015.md)。
+随后恢复同一隔离 candidate 并完成真实 UI 补验：创建一条 `data_kind=real` 快照，在“CRM 分析”中保存为 `M2-06-CANDIDATE-20261015`，切换“已保存分析”后按同一快照编号回读；向不存在账号分享返回“找不到该 CRM 账号，未建立分享”，未产生 grant。随后在新的独立 `18099` storage candidate 中注入临时 `admin1`，完成成功分享、共享读取、owner 撤权、撤权后 `404/NOT_FOUND` 和持久化复核；清理后远端 candidate SQLite 的 `assets`、`grants`、`receipts`、`command_receipts` 均为 0，刷新 UI 后保存列表为空，候选进程与独立 storage 已停止，live `4328` 与共享 `18093` 未修改。详见[CRM 保存、回读与权限合同复核](evidence/shinemage-m2-06-contract-gate-20261015.md)与[隔离 candidate 真实分享与撤权回执](evidence/shinemage-m2-06-real-revoke-20261015.md)。
 
 
 ## 2026-10-14 M2-09 peer compatibility
