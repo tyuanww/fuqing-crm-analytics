@@ -44,6 +44,8 @@ wsl2_cold=NOT_RUN
 
 其 manifest 角色是 DSH runtime release，payload 是少量 runtime-source 文件并单独绑定 upstream runtime bundle；它不是当前 M2-07 所需的 development SDK/final SDK artifact，也没有提供完整 SDK closure、正式 SDK SBOM、publisher signature、revocation 或 current-SHA SDK attestation。即使 upstream SHA 与当前 rc2 pin 相同，release source SHA、artifact 类型和证据范围也不相同，不能跨门禁复用。
 
+随后只读列举仓库现有 releases 的资产名（最多 100 条），结果只有 DSH runtime/source archive、release/pre-manifest、SHA256SUMS 和 CI evidence index，没有名称或角色表示 SDK、SBOM、attestation、provenance 或 closure 的正式发布资产。该结果进一步确认：远端已有 DSH runtime release，但没有可直接接收的 M2-07 SDK release artifact。
+
 ## 当前结论
 
 ```text
