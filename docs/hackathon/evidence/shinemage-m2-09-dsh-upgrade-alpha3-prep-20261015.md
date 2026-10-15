@@ -47,6 +47,35 @@
 
 使用九个 pack 重新生成 alpha3 profile inputs，并由 profile reader 验收，结果为 `plugin_count=9`。随后将九个 pack 解包到新的本地 profile install 目录，安装回执保持 `host=NOT_RUN` 和 `release_ready=false`。profile inputs、安装回执和摘要位于 `.context/checks/dsh-upgrade-0.2.1-alpha.3-20261015/formal-packs-r1/`。
 
+## 官方 npm 包隔离运行检查
+
+从官方 npm registry 获取 `@deepseek-ai/dsh@0.2.1-alpha.3` tarball。文件 SHA-256 为：
+
+```text
+0b2ff7b8c9dbf4c04a3883a24a9b7a6cdccf39f36b2dc79936239a716a57c5d7
+```
+
+在新的本地 npm 前缀中执行 `npm install --ignore-scripts`。安装结果为 `609 packages`。在独立的 `HOME`、`DSH_HOME` 和 `TMPDIR` 下执行以下检查：
+
+1. `dsh --version` 返回 `0.2.1-alpha.3`。
+2. `dsh --help` 返回成功。
+3. `dsh --profile web --dump-config-schema` 返回 JSON Schema。命令报告原生校验提示，但退出成功。
+4. `dsh --profile web --dump-default-config` 返回默认 profile 配置，文件大小为 `44001` 字节。
+
+随后在另一个独立 npm 前缀安装官方 `@deepseek-ai/dsh@0.1.7-rc.2`。tarball SHA-256 为：
+
+```text
+5f2da7272d9485abc223e681075809a8d929697c5232ee445718e1b7e066bff8
+```
+
+旧版 `dsh --version` 返回 `0.1.7-rc.2`，`dsh --help` 返回成功。这个结果证明 npm 包层面的回退路径可执行。它不替代公司正式 clean machine 的安装、卸载和主仓 profile 回退验收。
+
+运行记录位于：
+
+- `.context/checks/dsh-upgrade-0.2.1-alpha.3-20261015/npm-official-r1/observation.json`
+- `.context/checks/dsh-upgrade-0.2.1-alpha.3-20261015/clean-npm-r1/runtime-check.json`
+- `.context/checks/dsh-upgrade-0.2.1-alpha.3-20261015/clean-npm-rollback-r2/runtime-check.json`
+
 这说明升级不会让旧 SDK 自动失效。升级会改变 SDK 的类型和运行时接口，插件可能需要适配、重新构建和重新验收。当前 alpha3 候选还不能替换主仓 rc2。
 
 ## 当前结论
@@ -56,7 +85,7 @@
 - `release_ready=false` 仍然有效。
 - 九个插件的 alpha3 候选构建已通过；`crm-knowledge` 和 `analytics-workbench` 各使用候选侧类型声明适配。完整正式包、上游修复判断和适配提交评审仍未完成。
 - 九个插件的候选 artifact、SHA-256、pack manifest 和 pack reader 验收已完成。SDK 完整 closure artifact、publisher identity、signature、独立 verification、revocation 和 final attestation 尚未完成。
-- 尚未在 clean machine 安装、卸载、回退并验证旧版。
+- 已完成两个独立 npm 前缀的 alpha3 安装启动检查和 rc2 npm 包回退启动检查。尚未完成正式 clean machine 的 artifact 接收、SHA 校验、SBOM closure 校验、卸载、主仓 profile 回退和旧版完整启动验收。
 - M2-07 仍不能关闭。M2-08 仍不能执行。
 
 ## 后续顺序
