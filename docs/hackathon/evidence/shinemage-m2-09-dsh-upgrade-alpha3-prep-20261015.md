@@ -30,12 +30,22 @@
    {"schema_version":"shinemage-kit-inputs/v1","status":"READY","sdk_packages":26,"bindings":32,"release_ready":false}
    ```
 
+## 插件兼容性结果
+
+已在隔离候选工作区使用 alpha3 输入执行九个业务插件的构建检查。结果如下：
+
+- `knowledge`、`shine-board`、`shine-brand`、`shine-crowd-action`、`shine-funnel`、`shine-query`、`shine-waterfall` 通过。
+- `crm-knowledge` 原始构建遇到 `TS2882: Cannot find module 'katex/dist/katex.min.css'`。加入候选侧 CSS 类型声明后通过。这个改动属于插件适配，不能直接视为官方兼容。
+- `analytics-workbench` 仍未通过。alpha3 的 `@deepseek-ai/dsh-client-ui-workspace` 类型声明引用了 `workspace.toast`，但当前声明闭包没有正确导入对应的 `ui-slots` 扩展，随后出现 `TS2344` 和多个 `TS2305` 类型错误。
+
+这说明升级不会让旧 SDK 自动失效。升级会改变 SDK 的类型和运行时接口，插件可能需要适配、重新构建和重新验收。当前 alpha3 候选还不能替换主仓 rc2。
+
 ## 当前结论
 
 - alpha3 源码、锁文件、Node 和 pnpm 已具备本机隔离构建条件。
 - alpha3 SDK 输入检查已通过本机开发检查。
 - `release_ready=false` 仍然有效。
-- 尚未完成九个业务插件的 alpha3 适配构建和测试。
+- 九个插件中，七个直接通过；`crm-knowledge` 需要候选侧类型声明适配后通过；`analytics-workbench` 仍被 alpha3 类型声明兼容问题阻塞。
 - 尚未完成 SDK artifact、SBOM、provenance、publisher identity、signature、verification、revocation 和 final attestation。
 - 尚未在 clean machine 安装、卸载、回退并验证旧版。
 - M2-07 仍不能关闭。M2-08 仍不能执行。
