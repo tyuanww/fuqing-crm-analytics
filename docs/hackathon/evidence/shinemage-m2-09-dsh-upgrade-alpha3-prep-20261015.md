@@ -41,6 +41,10 @@
 
 2026-10-15 已将两个适配写入候选分支提交 `0389c92e`。该提交没有修改 DSH 上游或主仓 rc2 toolchain。使用 alpha3 候选 toolchain 和 `DSH_PACKAGE_INPUTS` 重跑九个插件，结果为 `9/9 PASS`，摘要为 `.context/checks/dsh-upgrade-0.2.1-alpha.3-20261015/plugin-build-summary-r8.json`。rc2 toolchain 回归中的 `analytics-workbench` 和 `crm-knowledge` 也均通过构建。
 
+随后建立候选正式 pack 输入 Git 提交 `560142098cdf199c8295aebb7770ada82a180106`，生成九个插件 tarball，并使用 `readPluginPack` 逐个验收。结果为 `9/9 PASS`。每个 pack 都有 tarball SHA-256 和 pack manifest SHA-256。对应材料位于 `.context/checks/dsh-upgrade-0.2.1-alpha.3-20261015/formal-packs-r1/`。
+
+已生成 SBOM、provenance 和 attestation 输入草稿。SBOM 的依赖图仍为 `NOT_RESOLVED`，publisher identity、signature、verification、revocation 和 clean machine 仍未完成。草稿明确保持 `release_ready=false`，不能作为正式发布证明。
+
 这说明升级不会让旧 SDK 自动失效。升级会改变 SDK 的类型和运行时接口，插件可能需要适配、重新构建和重新验收。当前 alpha3 候选还不能替换主仓 rc2。
 
 ## 当前结论
@@ -49,7 +53,7 @@
 - alpha3 SDK 输入检查已通过本机开发检查。
 - `release_ready=false` 仍然有效。
 - 九个插件的 alpha3 候选构建已通过；`crm-knowledge` 和 `analytics-workbench` 各使用候选侧类型声明适配。完整正式包、上游修复判断和适配提交评审仍未完成。
-- 尚未完成 SDK artifact、SBOM、provenance、publisher identity、signature、verification、revocation 和 final attestation。
+- 九个插件的候选 artifact、SHA-256、pack manifest 和 pack reader 验收已完成。SDK 完整 closure artifact、publisher identity、signature、独立 verification、revocation 和 final attestation 尚未完成。
 - 尚未在 clean machine 安装、卸载、回退并验证旧版。
 - M2-07 仍不能关闭。M2-08 仍不能执行。
 
