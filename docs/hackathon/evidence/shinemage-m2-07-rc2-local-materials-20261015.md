@@ -110,6 +110,15 @@ OSV 结果发现公告，故不能把该 closure 提升为供应链通过。即�
 
 表中版本计数包含跨版本重复的 GHSA；去重后为 29 个唯一公告。修复路径只能是新的、经过审查的 upstream/lock 与重新生成的 artifact，或由正式发布责任方出具可验证的安全例外及残余风险接受；不能在主仓或开发 closure 中手工改版本来掩盖固定 source 身份。
 
+对固定 rc2 checkout 的 `pnpm why --recursive --offline` 复核显示，公告并非全部可以从发布闭包中安全裁掉：
+
+- `js-yaml@4.2.0` 被 `@deepseek-ai/cordis-plugin-include`、`@deepseek-ai/dsh`、`@deepseek-ai/dsh-app-boot` 和 `@deepseek-ai/dsh-session-snapshot` 的 runtime dependencies 引用；
+- `js-yaml@4.3.1` 被 `@deepseek-ai/dsh-agent-preset-registry`、`@deepseek-ai/dsh-client-test-runtime`、`@deepseek-ai/dsh-config-editor` 与 `@deepseek-ai/dsh-experimental-webworker-packer` 等路径引用；
+- `undici@8.10.0` 被 `@deepseek-ai/dsh-http-proxy` 与 `@deepseek-ai/dsh-web-fetch-http` 的 runtime dependencies 引用；
+- `fast-uri@3.1.3` 经 `ajv` 进入 `dsh-app-boot` 等路径。
+
+因此当前公告至少有运行时路径，不能通过只移除 desktop/test/website 等开发目录来宣称修复；需要固定上游提供修复版本、重新锁定并完整重建，或走正式安全例外流程。
+
 ## clean HOME 输入检查
 
 在新的临时 HOME 下对 rc2 closure 的 `check.mjs` 返回：
