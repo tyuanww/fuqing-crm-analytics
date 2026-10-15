@@ -17,14 +17,14 @@
 | Chrome AX 树 | PASS | `windows-ax.json`：RootWebArea、heading、navigation、region、button、image 均有可读名称 |
 | 键盘 Tab / Enter | PASS | `windows-keyboard.json`：`全部 → Tab → 周末`，Enter 后 `scope=weekend`、`aria-pressed=周末:true`，7 个柱图仍存在且无横向溢出 |
 | Windows 高对比度 | PASS | 交互会话 `SystemParametersInfo` 从 `dwFlags=126` 临时切换到 `127`；Chrome `forced-colors: active=true`，正文背景为黑色、按钮边框为系统高亮色；截图留存 |
-| Windows Narrator 运行时 | READY / 部分回执 | `Narrator.exe` 在会话 1 启动，真实欢迎界面出现；页面 AX 树可读。当前控制通道不录制远端音频，因此没有把语音播报冒充为已观测通过 |
+| Windows Narrator 运行时 | PASS | `Narrator.exe` 在会话 1 启动，真实欢迎界面出现；页面 AX 树可读。随后用户在同一目标完成人工听读并确认通过，详见[读屏人工听读补验](shinemage-m2-05-screen-reader-20261015.md) |
 
 高对比度测试完成后，系统设置从 `dwFlags=127` 恢复为 `126`，Chrome 回到 `forced-colors=false`；Narrator、临时计划任务、临时 Chrome、临时页面目录、SSH CDP 转发和本地 HTTP 入口均已停止或移除。没有触碰用户原有 Chrome 进程。
 
 ## M2-05 状态解释
 
-本轮关闭了 Windows headed、Windows 高对比度、Chrome AX 和 headed 键盘交互子项，并补齐了真实 Windows Narrator 启动证据。由于远程通道没有音频回执，完整“读屏器听读内容”仍保留为 `NOT_OBSERVED`；因此 M2-05 总状态更新为：
+本轮关闭了 Windows headed、Windows 高对比度、Chrome AX 和 headed 键盘交互子项，并补齐了真实 Windows Narrator 启动证据。用户已在同一目标完成人工听读并确认通过；本次人工回执没有附带远端音频文件或逐字稿，但不再保留 `NOT_OBSERVED`。因此 M2-05 总状态更新为：
 
-`WINDOWS_HEADED_PASS / WINDOWS_HIGH_CONTRAST_PASS / WINDOWS_AX_PASS / WINDOWS_KEYBOARD_PASS / SCREEN_READER_RUNTIME_READY / SCREEN_READER_AUDIO_NOT_OBSERVED`
+`WINDOWS_HEADED_PASS / WINDOWS_HIGH_CONTRAST_PASS / WINDOWS_AX_PASS / WINDOWS_KEYBOARD_PASS / SCREEN_READER_RUNTIME_READY / SCREEN_READER_AUDIO_PASS`
 
 这组证据只覆盖 M2-05 页面与无障碍验收，不改变产品 `PARTIAL`、`release_ready=false`、M2-07 供应链门禁或 M2-08 发布/激活门禁。
