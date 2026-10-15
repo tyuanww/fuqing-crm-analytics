@@ -1,8 +1,17 @@
 # 项目状态（Project Status）
 
-> 当前短表（2026-10-14）；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。历史 PASS、NOT_RUN 与版本只属于原验收对象，本页是当前运行与交付边界的 SSOT。
+> 当前短表（2026-10-15）；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。历史 PASS、NOT_RUN 与版本只属于原验收对象，本页是当前运行与交付边界的 SSOT。
 
 ## 当前快照（2026-10-13）
+
+## 2026-10-15 alpha3 候选当前事实
+
+- M2-07 的目标 SDK 为官方 `@deepseek-ai/dsh@0.2.1-alpha.3`。候选 source commit 为 `a928e9b6dc82d98d634bb4381ff52daa2bc3e106`，包含精确 `workspace.toast` 类型适配和 `katex:^0.18.7` runtime 依赖。候选九包构建、pack、SHA-256、候选 SBOM、provenance 输入和 attestation 输入已生成。
+- 主仓仍固定 DSH `0.1.7-rc.2` / upstream `477b4f420553e8a52c2fbccc464d7561b239c443`。主仓 reader 对 alpha3 输入返回预期的 `PROFILE_DSH_PIN_MISMATCH`。主仓没有 alpha3 适配。
+- 本地 clean machine 流程模拟已完成。alpha3 的 SHA、安装、version、help、入口导入、KaTeX CSS、卸载和 rc2 回退均通过。回执为 `LOCAL_SIMULATION_ONLY`，不能替代正式 clean machine 验收。
+- alpha3 正式 SBOM closure、官方 KaTeX runtime closure、8 个 moderate npm audit 项的处理结论、publisher identity、signature、independent verification、revocation、final attestation 和公司 clean machine 仍未完成。因此 M2-07 仍为 `BLOCKED`，`release_ready=false`，M2-08 仍为 `NOT_RUN`。
+- 该 alpha3 记录见 [M2-09 alpha3 升级准备](docs/hackathon/evidence/shinemage-m2-09-dsh-upgrade-alpha3-prep-20261015.md)、[M2-07 alpha3 进度页](docs/hackathon/evidence/shinemage-m2-07-alpha3-progress-20261015.html) 和 [本地 clean machine 模拟回执](.context/checks/dsh-upgrade-0.2.1-alpha.3-20261015/formal-packs-r2/clean-machine-sim-r1/receipt.json)。
+- M2-09 仍单独使用 alpha2 candidate。alpha3 候选不改变 M2-09 的主仓 pin、运行环境或验收结论。
 
 | 项 | 当前状态与证据 |
 |---|---|
