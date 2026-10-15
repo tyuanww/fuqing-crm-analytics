@@ -1,3 +1,4 @@
+/// <reference path="./dsh-alpha3-compat.d.ts" />
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar-right/client';
 import { CockpitArtifact, COCKPIT_ARTIFACT_TAB, cockpitArtifactAddress } from './cockpit-artifact.tsx';
 import { openNativeHtmlArtifact } from './open-native-html-artifact.mjs';
