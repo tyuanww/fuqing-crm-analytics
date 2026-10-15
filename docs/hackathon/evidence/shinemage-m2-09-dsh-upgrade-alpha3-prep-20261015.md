@@ -78,6 +78,8 @@
 - `.context/checks/dsh-upgrade-0.2.1-alpha.3-20261015/clean-npm-r1/runtime-check.json`
 - `.context/checks/dsh-upgrade-0.2.1-alpha.3-20261015/clean-npm-rollback-r2/runtime-check.json`
 
+随后完成了一个独立目录的本地 clean machine 流程模拟。模拟按“接收 artifact → 校验 SHA-256 → 安装 alpha3 → 版本和帮助检查 → 入口导入 → KaTeX CSS 解析 → 卸载 → 安装 rc2 → 旧版版本和帮助检查”的顺序执行，结果全部通过。回执位于 `.context/checks/dsh-upgrade-0.2.1-alpha.3-20261015/formal-packs-r2/clean-machine-sim-r1/receipt.json`，状态为 `LOCAL_SIMULATION_ONLY`。该回执不能替代公司正式 clean machine 的验收，也不能替代 SBOM closure、签名、撤销和 final attestation。
+
 这说明升级不会让旧 SDK 自动失效。升级会改变 SDK 的类型和运行时接口，插件可能需要适配、重新构建和重新验收。当前 alpha3 候选还不能替换主仓 rc2。clean npm 的 KaTeX overlay 只验证本地候选运行闭包，不能替代正式 artifact 的 SBOM closure。
 
 对 `clean-npm-r1` 执行 `npm audit --omit=dev` 得到 `8` 个 moderate 漏洞，high 和 critical 均为 `0`。直接依赖 `@deepseek-ai/dsh` 的审计项 `fixAvailable=false`。审计结果位于 `formal-packs-r2/npm-audit-alpha3-r1.json` 和 `formal-packs-r2/npm-audit-alpha3-r1-summary.json`。该结果需要发布责任方处理或书面接受，不能标记为无漏洞。
@@ -90,7 +92,7 @@
 - 九个插件的 alpha3 候选构建已通过。主仓没有 alpha3 适配；候选 source commit `a928e9b6dc82d98d634bb4381ff52daa2bc3e106` 包含精确 toast 类型适配和 `katex:^0.18.7` runtime 依赖。官方 ui-primitives 的 KaTeX closure 仍标记为 `UPSTREAM_DEFECT_DEV_ONLY`。
 - 九个插件的候选 artifact、SHA-256、pack manifest 和 pack reader 验收已完成。SDK 完整 closure artifact、publisher identity、signature、独立 verification、revocation 和 final attestation 尚未完成。
 - clean npm 根目录的锁文件包含 `680` 个条目，当前平台安装 `610` 个，`70` 个为平台可选包。依赖图只对这个本地平台根目录解析完成。npm audit 仍有 `8` 个 moderate 漏洞，官方 SDK closure 和漏洞处理意见仍未完成。
-- 已完成两个独立 npm 前缀的 alpha3 安装启动检查和 rc2 npm 包回退启动检查。尚未完成正式 clean machine 的 artifact 接收、SHA 校验、SBOM closure 校验、卸载、主仓 profile 回退和旧版完整启动验收。
+- 已完成两个独立 npm 前缀的 alpha3 安装启动检查、rc2 npm 包回退启动检查，以及一个本地 clean machine 流程模拟。正式 clean machine 的 artifact 接收、SHA 校验、SBOM closure 校验、卸载、主仓 profile 回退和旧版完整启动验收仍未完成。
 - M2-07 仍不能关闭。M2-08 仍不能执行。
 
 ## 后续顺序
