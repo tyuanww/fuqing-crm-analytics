@@ -39,6 +39,8 @@
 - `analytics-workbench` 原始构建遇到 `TS2344`，原因是 alpha3 的 `@deepseek-ai/dsh-client-ui-workspace` 类型声明引用了 `workspace.toast`，但当前声明闭包没有导入对应的 `ui-slots` 扩展。第一次候选声明又遮蔽了原模块，产生多个 `TS2305`；改为带模块导入的 declaration merge 后，host/client 类型检查和构建通过。
 - 加入两个候选侧适配后，九个插件的候选构建均通过。`analytics-workbench` 的插件测试通过：第一组 `34 pass / 1 skipped`，HTML 编辑和浏览器边界组 `130 pass`。这些适配目前只存在于隔离候选工作区，正式提交前仍需决定是否采用插件侧兼容声明，或等待上游修复。
 
+2026-10-15 已将两个适配写入候选分支提交 `0389c92e`。该提交没有修改 DSH 上游或主仓 rc2 toolchain。使用 alpha3 候选 toolchain 和 `DSH_PACKAGE_INPUTS` 重跑九个插件，结果为 `9/9 PASS`，摘要为 `.context/checks/dsh-upgrade-0.2.1-alpha.3-20261015/plugin-build-summary-r8.json`。rc2 toolchain 回归中的 `analytics-workbench` 和 `crm-knowledge` 也均通过构建。
+
 这说明升级不会让旧 SDK 自动失效。升级会改变 SDK 的类型和运行时接口，插件可能需要适配、重新构建和重新验收。当前 alpha3 候选还不能替换主仓 rc2。
 
 ## 当前结论
@@ -46,7 +48,7 @@
 - alpha3 源码、锁文件、Node 和 pnpm 已具备本机隔离构建条件。
 - alpha3 SDK 输入检查已通过本机开发检查。
 - `release_ready=false` 仍然有效。
-- 九个插件的候选构建已通过；`crm-knowledge` 和 `analytics-workbench` 各需要候选侧类型声明适配。完整正式包、上游修复判断和适配提交仍未完成。
+- 九个插件的 alpha3 候选构建已通过；`crm-knowledge` 和 `analytics-workbench` 各使用候选侧类型声明适配。完整正式包、上游修复判断和适配提交评审仍未完成。
 - 尚未完成 SDK artifact、SBOM、provenance、publisher identity、signature、verification、revocation 和 final attestation。
 - 尚未在 clean machine 安装、卸载、回退并验证旧版。
 - M2-07 仍不能关闭。M2-08 仍不能执行。
