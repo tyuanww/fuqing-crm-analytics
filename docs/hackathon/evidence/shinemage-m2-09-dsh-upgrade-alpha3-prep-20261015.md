@@ -35,17 +35,17 @@
 已在隔离候选工作区使用 alpha3 输入执行九个业务插件的构建检查。结果如下：
 
 - `knowledge`、`shine-board`、`shine-brand`、`shine-crowd-action`、`shine-funnel`、`shine-query`、`shine-waterfall` 通过。
-- `crm-knowledge` 原始构建遇到 `TS2882: Cannot find module 'katex/dist/katex.min.css'`。加入候选侧 CSS 类型声明后通过。这个改动属于插件适配，不能直接视为官方兼容。
-- `analytics-workbench` 原始构建遇到 `TS2344`，原因是 alpha3 的 `@deepseek-ai/dsh-client-ui-workspace` 类型声明引用了 `workspace.toast`，但当前声明闭包没有导入对应的 `ui-slots` 扩展。第一次候选声明又遮蔽了原模块，产生多个 `TS2305`；改为带模块导入的 declaration merge 后，host/client 类型检查和构建通过。
-- 加入两个候选侧适配后，九个插件的候选构建均通过。`analytics-workbench` 的插件测试通过：第一组 `34 pass / 1 skipped`，HTML 编辑和浏览器边界组 `130 pass`。这些适配目前只存在于隔离候选工作区，正式提交前仍需决定是否采用插件侧兼容声明，或等待上游修复。
+`crm-knowledge` 的 `TS2882: Cannot find module 'katex/dist/katex.min.css'` 根因在 alpha3 官方 `@deepseek-ai/dsh-client-ui-primitives` 包：其 `lib/index.js` 运行时导入 `katex` 和 `katex/dist/katex.min.css`，但官方 `package.json` 只在 `devDependencies` 声明 `katex:^0.18.7`。候选 source commit `a928e9b6dc82d98d634bb4381ff52daa2bc3e106` 将 `katex:^0.18.7` 加入 `crm-knowledge` 的 `dependencies`。在 clean npm 前缀加入 `katex@0.18.7` overlay 后，JS/CSS 解析通过。该证据验证候选修复，不代表官方包 closure 已修复。
+- `analytics-workbench` 原始构建遇到 `TS2344`，原因是 alpha3 的 `@deepseek-ai/dsh-client-ui-workspace` 类型声明引用了 `workspace.toast`，但 `/client` 闭包没有导入 `ui-slots` 扩展。候选适配复用上游 `RowToast`，建立精确的 `ToastKind` keyed map 和 `ToastOccurrence` factory map。未知 toast key 和错误 payload 的负测均按预期失败。它不再使用宽泛的 `Record` 类型。
+- 主仓提交 `a00aca77` 已删除 `0389c92e` 写入主仓的两个 alpha3 适配及引用。主仓继续固定 rc2。候选适配只存在于 ignored candidate formal-pack source commit `a928e9b6dc82d98d634bb4381ff52daa2bc3e106`。
 
-2026-10-15 已将两个适配写入候选分支提交 `0389c92e`。该提交没有修改 DSH 上游或主仓 rc2 toolchain。使用 alpha3 候选 toolchain 和 `DSH_PACKAGE_INPUTS` 重跑九个插件，结果为 `9/9 PASS`，摘要为 `.context/checks/dsh-upgrade-0.2.1-alpha.3-20261015/plugin-build-summary-r8.json`。rc2 toolchain 回归中的 `analytics-workbench` 和 `crm-knowledge` 也均通过构建。
+使用 alpha3 候选 toolchain 和 `DSH_PACKAGE_INPUTS` 重跑九个插件，结果为 `9/9 PASS`，摘要为 `.context/checks/dsh-upgrade-0.2.1-alpha.3-20261015/plugin-build-summary-r8.json`。`analytics-workbench` 的插件测试为 `34 pass / 1 skipped`，HTML 编辑和浏览器边界组为 `130 pass`。rc2 toolchain 回归中的 `analytics-workbench` 和 `crm-knowledge` 也均通过构建。
 
-随后建立候选正式 pack 输入 Git 提交 `560142098cdf199c8295aebb7770ada82a180106`，生成九个插件 tarball，并使用 `readPluginPack` 逐个验收。结果为 `9/9 PASS`。每个 pack 都有 tarball SHA-256 和 pack manifest SHA-256。对应材料位于 `.context/checks/dsh-upgrade-0.2.1-alpha.3-20261015/formal-packs-r1/`。
+候选正式 pack 输入 Git 提交为 `a928e9b6dc82d98d634bb4381ff52daa2bc3e106`。`formal-packs-r2/summary.json` 和 `formal-packs-r2/verification.json` 记录九个插件 tarball、tarball SHA-256、pack manifest SHA-256，结果为 `9/9 PASS`。`formal-packs-r1/` 和提交 `560142098cdf199c8295aebb7770ada82a180106` 保留为旧候选记录。
 
 已生成 SBOM、provenance 和 attestation 输入草稿。SBOM 的依赖图仍为 `NOT_RESOLVED`，publisher identity、signature、verification、revocation 和 clean machine 仍未完成。草稿明确保持 `release_ready=false`，不能作为正式发布证明。
 
-使用九个 pack 重新生成 alpha3 profile inputs，并由 profile reader 验收，结果为 `plugin_count=9`。随后将九个 pack 解包到新的本地 profile install 目录，安装回执保持 `host=NOT_RUN` 和 `release_ready=false`。profile inputs、安装回执和摘要位于 `.context/checks/dsh-upgrade-0.2.1-alpha.3-20261015/formal-packs-r1/`。
+使用九个 pack 重新生成 alpha3 profile inputs，并由 profile reader 验收，结果为 `plugin_count=9`。随后将九个 pack 解包到新的本地 profile install 目录，安装回执保持 `host=NOT_RUN` 和 `release_ready=false`。profile inputs、安装回执和摘要位于 `.context/checks/dsh-upgrade-0.2.1-alpha.3-20261015/formal-packs-r2/`，实际安装目录为 `formal-packs-r2/profile-install-r2b/`。KaTeX overlay 记录位于 `formal-packs-r2/runtime-dependency-overlay-r1.json`。
 
 ## 官方 npm 包隔离运行检查
 
@@ -55,7 +55,7 @@
 0b2ff7b8c9dbf4c04a3883a24a9b7a6cdccf39f36b2dc79936239a716a57c5d7
 ```
 
-在新的本地 npm 前缀中执行 `npm install --ignore-scripts`。安装结果为 `609 packages`。在独立的 `HOME`、`DSH_HOME` 和 `TMPDIR` 下执行以下检查：
+在新的本地 npm 前缀中执行 `npm install --ignore-scripts`。安装结果为 `609 packages`。随后在该候选根目录安装 `katex@0.18.7` overlay，并确认 `katex/dist/katex.min.css` 可以解析。在独立的 `HOME`、`DSH_HOME` 和 `TMPDIR` 下执行以下检查：
 
 1. `dsh --version` 返回 `0.2.1-alpha.3`。
 2. `dsh --help` 返回成功。
@@ -76,25 +76,24 @@
 - `.context/checks/dsh-upgrade-0.2.1-alpha.3-20261015/clean-npm-r1/runtime-check.json`
 - `.context/checks/dsh-upgrade-0.2.1-alpha.3-20261015/clean-npm-rollback-r2/runtime-check.json`
 
-这说明升级不会让旧 SDK 自动失效。升级会改变 SDK 的类型和运行时接口，插件可能需要适配、重新构建和重新验收。当前 alpha3 候选还不能替换主仓 rc2。
+这说明升级不会让旧 SDK 自动失效。升级会改变 SDK 的类型和运行时接口，插件可能需要适配、重新构建和重新验收。当前 alpha3 候选还不能替换主仓 rc2。clean npm 的 KaTeX overlay 只验证本地候选运行闭包，不能替代正式 artifact 的 SBOM closure。
 
 ## 当前结论
 
 - alpha3 源码、锁文件、Node 和 pnpm 已具备本机隔离构建条件。
 - alpha3 SDK 输入检查已通过本机开发检查。
 - `release_ready=false` 仍然有效。
-- 九个插件的 alpha3 候选构建已通过；`crm-knowledge` 和 `analytics-workbench` 各使用候选侧类型声明适配。完整正式包、上游修复判断和适配提交评审仍未完成。
+- 九个插件的 alpha3 候选构建已通过。主仓没有 alpha3 适配；候选 source commit `a928e9b6dc82d98d634bb4381ff52daa2bc3e106` 包含精确 toast 类型适配和 `katex:^0.18.7` runtime 依赖。官方 ui-primitives 的 KaTeX closure 仍标记为 `UPSTREAM_DEFECT_DEV_ONLY`。
 - 九个插件的候选 artifact、SHA-256、pack manifest 和 pack reader 验收已完成。SDK 完整 closure artifact、publisher identity、signature、独立 verification、revocation 和 final attestation 尚未完成。
 - 已完成两个独立 npm 前缀的 alpha3 安装启动检查和 rc2 npm 包回退启动检查。尚未完成正式 clean machine 的 artifact 接收、SHA 校验、SBOM closure 校验、卸载、主仓 profile 回退和旧版完整启动验收。
 - M2-07 仍不能关闭。M2-08 仍不能执行。
 
 ## 后续顺序
 
-1. 将两个候选侧适配变成可审查的插件改动，或记录上游修复后移除条件。
-2. 复制 alpha3 plugin-kit 绑定，重新构建九个业务插件和 profile。
-3. 运行插件单测、生命周期、组合集成、browser/recovery 和回退检查。
-4. 对同一个 alpha3 artifact 生成 SHA-256、SBOM、provenance 和签名材料。
-5. 由发布责任方完成 publisher identity、verification、revocation 和 final attestation。
-6. 在 clean machine 按安装、校验、卸载、回退顺序验收。
-7. 验收通过后，再评审是否把主仓 pin 从 rc2 适配到 alpha3。
+1. 审查并接纳候选 source commit `a928e9b6dc82d98d634bb4381ff52daa2bc3e106`，同时确认官方 KaTeX runtime closure 已由发布包所有者修复或明确纳入 artifact closure。
+2. 运行插件单测、生命周期、组合集成、browser/recovery 和回退检查；候选复制目录缺少仓库级 `frontend-vue3`、锁定 Python 和主仓测试支持路径时，不把测试结果记为正式通过。
+3. 对同一个 alpha3 artifact 生成 SHA-256、SBOM、provenance 和签名材料。
+4. 由发布责任方完成 publisher identity、verification、revocation 和 final attestation。
+5. 在 clean machine 按安装、校验、卸载、回退顺序验收。
+6. 验收通过后，再评审是否把主仓 pin 从 rc2 适配到 alpha3。
 

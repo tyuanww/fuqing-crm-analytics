@@ -58,7 +58,7 @@
       <path class="edge" d="M742 137 V198 H470 V137"/>
       <g transform="translate(25 54)"><rect class="node" width="163" height="88" rx="10"/><text class="node-title" x="14" y="27">官方 DSH alpha3</text><text class="node-text" x="14" y="49">SHA 2fbf4359…</text><text class="node-text" x="14" y="67">Node 24.19.0</text></g>
       <g transform="translate(245 54)"><rect class="node" width="153" height="88" rx="10"/><text class="node-title" x="14" y="27">固定工具链</text><text class="node-text" x="14" y="49">pnpm 11.28.2</text><text class="node-text" x="14" y="67">TS 6.0.3</text></g>
-      <g transform="translate(455 54)"><rect class="node" width="153" height="88" rx="10"/><text class="node-title" x="14" y="27">9 个插件</text><text class="node-text" x="14" y="49">构建 9/9 PASS</text><text class="node-text" x="14" y="67">2 个类型适配</text></g>
+      <g transform="translate(455 54)"><rect class="node" width="153" height="88" rx="10"/><text class="node-title" x="14" y="27">9 个插件</text><text class="node-text" x="14" y="49">构建 9/9 PASS</text><text class="node-text" x="14" y="67">toast 精确适配 + KaTeX overlay</text></g>
       <g transform="translate(665 54)"><rect class="node" width="153" height="88" rx="10"/><text class="node-title" x="14" y="27">正式 pack</text><text class="node-text" x="14" y="49">tarball SHA</text><text class="node-text" x="14" y="67">manifest 验收</text></g>
       <g transform="translate(875 54)"><rect class="node" width="180" height="88" rx="10"/><text class="node-title" x="14" y="27">隔离运行检查</text><text class="node-text" x="14" y="49">alpha3 PASS</text><text class="node-text" x="14" y="67">rc2 回退 PASS</text></g>
       <text x="485" y="226" fill="#cfe0ff" font-size="12">发布者身份、签名、撤销、正式 SBOM、clean machine 仍待外部发布责任方</text>
@@ -70,14 +70,14 @@
   <h2>2. 模块说明</h2>
   <details open><summary>官方 DSH SDK</summary><p>目标包是 <code>@deepseek-ai/dsh@0.2.1-alpha.3</code>。本地 tarball SHA-256 是 <code>0b2ff7b8c9dbf4c04a3883a24a9b7a6cdccf39f36b2dc79936239a716a57c5d7</code>。这个包属于 DSH 运行时和 SDK 层，不等于某个业务插件。</p></details>
   <details><summary>业务插件</summary><p>本次检查覆盖 analytics-workbench、crm-knowledge、knowledge、shine-board、shine-brand、shine-crowd-action、shine-funnel、shine-query、shine-waterfall。alpha3 下 9/9 构建通过。</p></details>
-  <details><summary>兼容适配</summary><p><code>crm-knowledge</code> 需要 KaTeX CSS 类型声明。<code>analytics-workbench</code> 需要 <code>workspace.toast</code> 的声明合并。适配已提交到 <code>0389c92e</code>，仍需评审是否长期保留。</p></details>
+  <details><summary>兼容适配</summary><p>主仓提交 <code>a00aca77</code> 已移除 <code>0389c92e</code> 的两个 alpha3 适配，主仓继续保持 rc2。候选 source commit <code>a928e9b6dc82d98d634bb4381ff52daa2bc3e106</code> 复用上游 <code>RowToast</code> 建立精确 <code>workspace.toast</code> keyed/factory 类型，并为 <code>crm-knowledge</code> 增加 <code>katex:^0.18.7</code> runtime 依赖。官方 ui-primitives 仍把 KaTeX 放在 devDependencies；候选 clean npm root overlay 的 JS/CSS 解析已通过，正式 artifact closure 仍待发布责任方修复。</p></details>
   <details><summary>发布材料</summary><p>候选 SBOM、provenance 和 attestation 输入已生成。它们明确标记为不完整。publisher identity、signature、revocation 和 final attestation 仍未验证。</p></details>
 
   <h2>3. 具体输入的数据流</h2>
   <p>输入：官方 alpha3 tarball。下面的步骤展示一个可复核的本地过程。</p>
   <ol>
     <li>接收 tarball，计算 SHA-256：<code>0b2ff7b8…a57c5d7</code>。</li>
-    <li>在独立 npm 前缀执行 <code>npm install --ignore-scripts</code>，安装 609 个包。</li>
+    <li>在独立 npm 前缀执行 <code>npm install --ignore-scripts</code>，安装 609 个包。候选根目录另外安装 <code>katex@0.18.7</code> overlay，<code>katex/dist/katex.min.css</code> 解析通过。</li>
     <li>执行 <code>dsh --version</code>，得到 <code>0.2.1-alpha.3</code>。</li>
     <li>执行 <code>--help</code>、<code>--dump-config-schema</code> 和 <code>--dump-default-config</code>。命令均退出成功，但 schema 输出 4 条 warning 和 4 条 <code>unrecognized Loader tree carrier</code> error。这只能证明命令可执行。</li>
     <li>在另一个独立前缀安装 rc2。<code>dsh --version</code> 得到 <code>0.1.7-rc.2</code>。</li>
@@ -90,11 +90,11 @@
     <tbody>
       <tr><td>源码、锁文件、Node、pnpm</td><td class="ok">PASS</td><td>固定提交、Node 24.19.0、pnpm 11.28.2/11.28.5。</td></tr>
       <tr><td>插件候选构建</td><td class="ok">PASS</td><td>9/9。测试已覆盖 analytics-workbench。</td></tr>
-      <tr><td>正式插件 pack</td><td class="ok">PASS</td><td>9/9。tarball 和 manifest SHA 已记录。</td></tr>
+      <tr><td>正式插件 pack</td><td class="ok">PASS</td><td>9/9。候选 source 为 <code>a928e9b6…</code>；tarball 和 manifest SHA 已记录在 <code>formal-packs-r2</code>。</td></tr>
       <tr><td>本地 alpha3/rc2 运行</td><td class="warn">PARTIAL</td><td>version、help、默认配置和 rc2 回退通过；schema 命令仍有 4 条 loader error。</td></tr>
-      <tr><td>正式 SBOM closure</td><td class="bad">BLOCKED</td><td>依赖图仍为 NOT_RESOLVED。</td></tr>
+      <tr><td>正式 SBOM closure</td><td class="bad">BLOCKED</td><td>依赖图仍为 NOT_RESOLVED。官方 ui-primitives 的 KaTeX 运行依赖仍是上游 dev-only 缺陷。</td></tr>
       <tr><td>publisher identity、signature、revocation</td><td class="bad">BLOCKED</td><td>需要发布责任方和签名环境。</td></tr>
-      <tr><td>clean machine 完整验收</td><td class="warn">PENDING</td><td>还需要 artifact 接收、校验、卸载、主仓回退和旧版完整启动。</td></tr>
+      <tr><td>clean machine 完整验收</td><td class="warn">PENDING</td><td>本地 clean npm overlay 已通过 CSS 解析；正式验收仍需要 artifact 接收、SBOM closure、卸载、主仓回退和旧版完整启动。</td></tr>
       <tr><td>M2-08 activation/canary</td><td class="bad">NOT_RUN</td><td>M2-07 未关闭，不能执行。</td></tr>
     </tbody>
   </table>
@@ -105,7 +105,7 @@
     <li>把这些材料交给 clean machine owner，按“接收 → SHA → SBOM closure → 安装 → import/最小功能 → 卸载 → rc2 回退 → 旧版启动”执行。</li>
     <li>材料和验收结果全部一致后，再做 M2-07 release review。M2-08 的 SLI、production activation、canary 和 rollback 放在之后。</li>
   </ol>
-  <p class="foot">证据目录：<code>.context/checks/dsh-upgrade-0.2.1-alpha.3-20261015/</code>。详细记录：<code>shinemage-m2-09-dsh-upgrade-alpha3-prep-20261015.md</code>。</p>
+  <p class="foot">证据目录：<code>.context/checks/dsh-upgrade-0.2.1-alpha.3-20261015/</code>。最新 pack 记录：<code>formal-packs-r2</code>；KaTeX 记录：<code>runtime-dependency-overlay-r1.json</code>。详细记录：<code>shinemage-m2-09-dsh-upgrade-alpha3-prep-20261015.md</code>。</p>
 </main>
 </body>
 </html>
