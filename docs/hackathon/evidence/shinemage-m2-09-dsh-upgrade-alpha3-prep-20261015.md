@@ -45,6 +45,8 @@
 
 已生成 SBOM、provenance 和 attestation 输入草稿。SBOM 的依赖图仍为 `NOT_RESOLVED`，publisher identity、signature、verification、revocation 和 clean machine 仍未完成。草稿明确保持 `release_ready=false`，不能作为正式发布证明。
 
+使用九个 pack 重新生成 alpha3 profile inputs，并由 profile reader 验收，结果为 `plugin_count=9`。随后将九个 pack 解包到新的本地 profile install 目录，安装回执保持 `host=NOT_RUN` 和 `release_ready=false`。profile inputs、安装回执和摘要位于 `.context/checks/dsh-upgrade-0.2.1-alpha.3-20261015/formal-packs-r1/`。
+
 这说明升级不会让旧 SDK 自动失效。升级会改变 SDK 的类型和运行时接口，插件可能需要适配、重新构建和重新验收。当前 alpha3 候选还不能替换主仓 rc2。
 
 ## 当前结论
