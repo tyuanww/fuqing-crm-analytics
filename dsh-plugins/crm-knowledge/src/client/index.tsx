@@ -1,4 +1,3 @@
-/// <reference path="./katex.d.ts" />
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type { FormEvent } from 'react';
 import type { Context } from '@deepseek-ai/cordis';
