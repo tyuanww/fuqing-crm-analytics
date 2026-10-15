@@ -47,6 +47,8 @@
 
 使用九个 pack 重新生成 alpha3 profile inputs，并由 profile reader 验收，结果为 `plugin_count=9`。随后将九个 pack 解包到新的本地 profile install 目录，安装回执保持 `host=NOT_RUN` 和 `release_ready=false`。profile inputs、安装回执和摘要位于 `.context/checks/dsh-upgrade-0.2.1-alpha.3-20261015/formal-packs-r2/`，实际安装目录为 `formal-packs-r2/profile-install-r2b/`。KaTeX overlay 记录位于 `formal-packs-r2/runtime-dependency-overlay-r1.json`。
 
+主仓库的 `scripts/release/profile-packs.mjs` 对 alpha3 profile inputs 返回 `PROFILE_DSH_PIN_MISMATCH`，因为主仓仍固定 rc2。这是预期的保护行为。对应记录为 `formal-packs-r2/main-reader-pin-gate.json`。alpha3 profile 只能由隔离 alpha3 candidate checkout 验收，不能使用主仓 rc2 reader 冒充通过。
+
 ## 官方 npm 包隔离运行检查
 
 从官方 npm registry 获取 `@deepseek-ai/dsh@0.2.1-alpha.3` tarball。文件 SHA-256 为：
@@ -78,6 +80,8 @@
 
 这说明升级不会让旧 SDK 自动失效。升级会改变 SDK 的类型和运行时接口，插件可能需要适配、重新构建和重新验收。当前 alpha3 候选还不能替换主仓 rc2。clean npm 的 KaTeX overlay 只验证本地候选运行闭包，不能替代正式 artifact 的 SBOM closure。
 
+对 `clean-npm-r1` 执行 `npm audit --omit=dev` 得到 `8` 个 moderate 漏洞，high 和 critical 均为 `0`。直接依赖 `@deepseek-ai/dsh` 的审计项 `fixAvailable=false`。审计结果位于 `formal-packs-r2/npm-audit-alpha3-r1.json` 和 `formal-packs-r2/npm-audit-alpha3-r1-summary.json`。该结果需要发布责任方处理或书面接受，不能标记为无漏洞。
+
 ## 当前结论
 
 - alpha3 源码、锁文件、Node 和 pnpm 已具备本机隔离构建条件。
@@ -85,15 +89,17 @@
 - `release_ready=false` 仍然有效。
 - 九个插件的 alpha3 候选构建已通过。主仓没有 alpha3 适配；候选 source commit `a928e9b6dc82d98d634bb4381ff52daa2bc3e106` 包含精确 toast 类型适配和 `katex:^0.18.7` runtime 依赖。官方 ui-primitives 的 KaTeX closure 仍标记为 `UPSTREAM_DEFECT_DEV_ONLY`。
 - 九个插件的候选 artifact、SHA-256、pack manifest 和 pack reader 验收已完成。SDK 完整 closure artifact、publisher identity、signature、独立 verification、revocation 和 final attestation 尚未完成。
+- clean npm 根目录的锁文件包含 `680` 个条目，当前平台安装 `610` 个，`70` 个为平台可选包。依赖图只对这个本地平台根目录解析完成。npm audit 仍有 `8` 个 moderate 漏洞，官方 SDK closure 和漏洞处理意见仍未完成。
 - 已完成两个独立 npm 前缀的 alpha3 安装启动检查和 rc2 npm 包回退启动检查。尚未完成正式 clean machine 的 artifact 接收、SHA 校验、SBOM closure 校验、卸载、主仓 profile 回退和旧版完整启动验收。
 - M2-07 仍不能关闭。M2-08 仍不能执行。
 
 ## 后续顺序
 
 1. 审查并接纳候选 source commit `a928e9b6dc82d98d634bb4381ff52daa2bc3e106`，同时确认官方 KaTeX runtime closure 已由发布包所有者修复或明确纳入 artifact closure。
-2. 运行插件单测、生命周期、组合集成、browser/recovery 和回退检查；候选复制目录缺少仓库级 `frontend-vue3`、锁定 Python 和主仓测试支持路径时，不把测试结果记为正式通过。
-3. 对同一个 alpha3 artifact 生成 SHA-256、SBOM、provenance 和签名材料。
-4. 由发布责任方完成 publisher identity、verification、revocation 和 final attestation。
-5. 在 clean machine 按安装、校验、卸载、回退顺序验收。
-6. 验收通过后，再评审是否把主仓 pin 从 rc2 适配到 alpha3。
+2. 处理或书面接受 npm audit 的 `8` 个 moderate 漏洞，尤其是 `@deepseek-ai/dsh` 的 `fixAvailable=false` 项。
+3. 运行插件单测、生命周期、组合集成、browser/recovery 和回退检查；候选复制目录缺少仓库级 `frontend-vue3`、锁定 Python 和主仓测试支持路径时，不把测试结果记为正式通过。
+4. 对同一个 alpha3 artifact 生成 SHA-256、SBOM、provenance 和签名材料。
+5. 由发布责任方完成 publisher identity、verification、revocation 和 final attestation。
+6. 在 clean machine 按安装、校验、卸载、回退顺序验收。
+7. 验收通过后，再评审是否把主仓 pin 从 rc2 适配到 alpha3。
 
