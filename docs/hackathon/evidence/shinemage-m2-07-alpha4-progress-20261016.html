@@ -41,7 +41,7 @@
 <details open><summary>官方 DSH SDK</summary><p>目标包是 <code>@deepseek-ai/dsh@0.2.1-alpha.4</code>。npm artifact SHA-256 是 <code>9f4fe0f4…f64c8d6</code>。源码 commit 是 <code>86a4022…</code>。</p></details>
 <details><summary>业务插件</summary><p>本次覆盖 analytics-workbench、crm-knowledge、knowledge、shine-board、shine-brand、shine-crowd-action、shine-funnel、shine-query、shine-waterfall。9 个插件构建和 pack reader 全部通过。</p></details>
 <details><summary>兼容适配</summary><p>alpha4 仍需要精确 <code>RowToast</code> keyed/factory 类型适配。crm-knowledge 仍声明 <code>katex:^0.18.7</code> runtime 依赖。官方 ui-primitives 仍把 KaTeX 放在 devDependencies。</p></details>
-<details><summary>测试边界</summary><p>analytics 为 <code>34 pass / 1 skipped</code>，HTML 测试为 <code>130 pass</code>。CRM 完整测试因候选副本缺少仓库级 <code>backend</code> 路径而记为 <code>BLOCKED_CANDIDATE_ENV</code>，原文为 <code>ModuleNotFoundError: No module named 'backend'</code>。</p></details>
+<details><summary>测试边界</summary><p>analytics 为 <code>34 pass / 1 skipped</code>，HTML 测试为 <code>130 pass</code>。CRM 全量测试已在固定 alpha4 checkout 和候选证据目录只读路径下通过：<code>108 pass / 0 fail</code>。该结果只证明候选本地环境通过，不替代公司 clean machine 验收。</p></details>
 
 <h2>3. 一个具体输入的数据流</h2>
 <p>输入：官方 alpha4 npm tarball。下面是本地模拟的实际顺序。</p>

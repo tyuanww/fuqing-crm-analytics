@@ -8,7 +8,7 @@
 
 - 官方仓库最新发布为 `v0.2.1-alpha.4`，发布提交为 `86a402200d95fecef4529d969836f1fe13c6cb0d`。M2-07 当前候选已经切换到 alpha4；alpha3 只保留为上一轮候选记录。
 - alpha4 官方 npm artifact SHA-256 为 `9f4fe0f466d7699ddd4686ee9692ec10c6d9f98a7d175fd5e55de01b2f64c8d6`。候选 source commit 为 `50d241cbd23aa2a9d188fe84c3864528a2206917`，固定 Node `24.19.0`、upstream pnpm `11.28.5`、插件 pnpm `11.28.2`。
-- alpha4 官方源码 host/client SDK 构建通过，9 个插件构建和 9 个 pack reader 验收通过。analytics-workbench 测试为 `34 pass / 1 skipped`，HTML 测试为 `130 pass`。CRM 完整测试仍因候选复制目录缺少仓库级 `backend` 路径而记为 `BLOCKED_CANDIDATE_ENV`。
+- alpha4 官方源码 host/client SDK 构建通过，9 个插件构建和 9 个 pack reader 验收通过。analytics-workbench 测试为 `34 pass / 1 skipped`，HTML 测试为 `130 pass`，CRM 全量测试为 `108 pass / 0 fail`。CRM 结果使用固定 alpha4 checkout，并在隔离证据目录补齐仓库级只读路径后取得；不替代公司 clean machine 验收。
 - alpha4 本地 runtime 检查通过：version、help、入口导入、KaTeX CSS、卸载和 rc2 回退均通过。回执为 `LOCAL_SIMULATION_ONLY`，不能替代正式 clean machine。
 - alpha4 的正式 SBOM closure、publisher identity、signature、independent verification、revocation、final attestation 和公司 clean machine 仍未完成。npm audit 仍有 8 个 moderate，直接 `@deepseek-ai/dsh` 项为 `fixAvailable=false`。因此 M2-07 仍为 `BLOCKED`，`release_ready=false`，M2-08 仍为 `NOT_RUN`。
 - 详细记录见 [M2-09 alpha4 升级准备](docs/hackathon/evidence/shinemage-m2-09-dsh-upgrade-alpha4-prep-20261016.md)、[M2-07 alpha4 进度页](docs/hackathon/evidence/shinemage-m2-07-alpha4-progress-20261016.html) 和 [alpha4 pack 证据目录](.context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/formal-packs-r2/)。

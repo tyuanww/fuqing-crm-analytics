@@ -40,7 +40,7 @@ upstream=477b4f420553e8a52c2fbccc464d7561b239c443
 4. 九个插件构建全部通过。
 5. analytics-workbench 测试为 `34 pass / 1 skipped`。
 6. analytics-workbench HTML 编辑和浏览器边界测试为 `130 pass`。
-7. CRM 完整测试未记为通过。候选复制目录缺少仓库级 `backend` 路径，服务 fixture 报原文：`ModuleNotFoundError: No module named 'backend'`。该结果是候选测试环境阻塞，不代表插件代码通过完整 CRM 测试。
+7. CRM 完整测试在补齐候选证据目录的仓库级只读路径，并设置 `B0_BUILD_UPSTREAM` 为固定 alpha4 checkout 后通过：`108 pass / 0 fail`。测试日志为 `crm-alpha4-tests-r5.log`。该结果只证明候选代码在固定本地环境通过，不替代公司 clean machine 验收。
 8. alpha4 本地运行检查通过：`version`、`help`、入口导入、`katex/dist/katex.min.css`、卸载，以及 rc2 回退。
 
 官方 kit 的重新 fetch 阶段曾遇到 `fatal: unable to access 'https://github.com/deepseek-ai/deepseek-harness.git/': Error in the HTTP2 framing layer`。本轮使用同一官方 tag 的独立 clone，已校验源码 SHA、lock SHA，并完成 host/client 构建。该网络错误保留为环境记录，不改变已校验 checkout 的内容结论。
