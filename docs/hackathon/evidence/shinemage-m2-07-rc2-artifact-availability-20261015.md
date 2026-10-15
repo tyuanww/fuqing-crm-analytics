@@ -28,6 +28,22 @@ git_status=clean
 
 本轮还对 `/tmp`、`/private/tmp` 和 `/var/folders` 做了限定文件名/大小盘查，没有找到可与当前 rc2 archive receipt 复用的临时归档。该盘查不把 alpha2 历史 archive 当作 rc2 输入；alpha2 archive 与当前 rc2 pin 的 source SHA 不同，继续拒绝复用。
 
+## GitHub release 只读核验
+
+只读取了仓库已有 release `dsh-0.20.0.0-r3` 的 `release-manifest.v1.json`、`ci-evidence-index.v1.json` 和 `SHA256SUMS`，没有下载或接收 release payload。该 release 的事实为：
+
+```text
+release_tag=dsh-0.20.0.0-r3
+release_source_sha=fcbd1324ac5a4b7367d9d7d2bb9bbebdbf32ba25
+dsh_upstream_sha=477b4f420553e8a52c2fbccc464d7561b239c443
+runtime_release_artifact_sha256=e73852babf758ec4e74c43d7a6d2aeeb2f2476196765c1b8ccf1700012af9128
+upstream_runtime_bundle_sha256=6d10be9c64ade039ebe6c90f8072b16e367bf78b120327484f05ddd18a93938c
+local_doctor=PARTIAL
+wsl2_cold=NOT_RUN
+```
+
+其 manifest 角色是 DSH runtime release，payload 是少量 runtime-source 文件并单独绑定 upstream runtime bundle；它不是当前 M2-07 所需的 development SDK/final SDK artifact，也没有提供完整 SDK closure、正式 SDK SBOM、publisher signature、revocation 或 current-SHA SDK attestation。即使 upstream SHA 与当前 rc2 pin 相同，release source SHA、artifact 类型和证据范围也不相同，不能跨门禁复用。
+
 ## 当前结论
 
 ```text
@@ -39,6 +55,7 @@ RC2_RECEIVED_CLOSURE_TREE_NOT_AVAILABLE
 FORMAL_INSTALL_NOT_RUN
 FORMAL_SIGNATURE_NOT_RUN
 FORMAL_ATTESTATION_NOT_RUN
+EXISTING_GITHUB_RUNTIME_RELEASE_NOT_M2_07_SDK_ARTIFACT
 release_ready=false
 status=BLOCKED
 ```
