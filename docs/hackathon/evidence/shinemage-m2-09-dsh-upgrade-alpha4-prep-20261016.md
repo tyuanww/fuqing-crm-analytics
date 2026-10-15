@@ -42,6 +42,7 @@ upstream=477b4f420553e8a52c2fbccc464d7561b239c443
 6. analytics-workbench HTML 编辑和浏览器边界测试为 `130 pass`。
 7. CRM 完整测试在补齐候选证据目录的仓库级只读路径，并设置 `B0_BUILD_UPSTREAM` 为固定 alpha4 checkout 后通过：`108 pass / 0 fail`。测试日志为 `crm-alpha4-tests-r5.log`。该结果只证明候选代码在固定本地环境通过，不替代公司 clean machine 验收。
 8. alpha4 本地运行检查通过：`version`、`help`、入口导入、`katex/dist/katex.min.css`、卸载，以及 rc2 回退。
+9. 本地最终预检通过：SDK artifact、upstream lock、toolchain、9 个插件包、provenance、attestation 输入和主仓 pin gate 共 9 项检查全部 `PASS`。回执为 `formal-packs-r2/local-final-preflight-r1.json`，SHA-256 为 `b2421e08c8230aaabaa74360fdea37c1898159052394aae351c3ce9b1c3f26d6`。
 
 官方 kit 的重新 fetch 阶段曾遇到 `fatal: unable to access 'https://github.com/deepseek-ai/deepseek-harness.git/': Error in the HTTP2 framing layer`。本轮使用同一官方 tag 的独立 clone，已校验源码 SHA、lock SHA，并完成 host/client 构建。该网络错误保留为环境记录，不改变已校验 checkout 的内容结论。
 
@@ -83,6 +84,8 @@ alpha4 npm audit 结果为 `8 moderate / 0 high / 0 critical`。直接依赖 `@d
 - `.context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/formal-packs-r2/sbom-alpha4-r1.json`
 - `.context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/formal-packs-r2/provenance-alpha4-r1.json`
 - `.context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/formal-packs-r2/attestation-inputs-alpha4-r1.json`
+- `.context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/formal-packs-r2/local-final-preflight-r1.json`
+- `docs/hackathon/evidence/shinemage-m2-07-alpha4-external-handoff-checklist-20261016.md`
 
 ## 下一步顺序
 
