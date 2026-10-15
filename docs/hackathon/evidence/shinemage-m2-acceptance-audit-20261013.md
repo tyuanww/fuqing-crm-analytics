@@ -42,3 +42,13 @@ candidate commit 1bb2646523a7c1cd5aa04d11080617a373af7147 将 CRM/Knowledge 的 
 本轮在 tracked alpha2 candidate 上补齐隔离 Web dist，并通过真实 gstack Chromium fallback 完成页面导航、Preview Notice、延后模型配置、预置历史会话和插件库存观察；稳定后控制台无错误。owned-host 重启后浏览器重新加载，预置历史仍可见；重启瞬间的 `ERR_INCOMPLETE_CHUNKED_ENCODING` 与一次 WebSocket 重连告警作为恢复过程证据保留，稳定后清空日志复查无错误。board 仍由 synthetic backend 预置，未把它写成浏览器 UI 的 board readback。回执见 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-browser-recovery-20261014.json`。
 
 M2-09 更新为 `CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / FORMAL_PACK_SOURCE_PROVENANCE_PASS / PROFILE_COMPATIBILITY_PASS / COMBINED_BROWSER_PASS / CANDIDATE_RECOVERY_PASS / TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN / MAIN_PIN_UNCHANGED`。正式目标 browser/recovery、真实业务 UAT、主仓 rc2 pin 适配、release/activation 仍未执行。
+
+## 2026-10-15 M2-05/M2-06/M2-07 状态覆盖
+
+上表和前文的 M2-05/M2-06 行是 2026-10-13 的基线快照，保留用于追溯；当前状态以 2026-10-15 的后续证据和[任务卡当前收口账本](shinemage-m2-closeout-20261014.md)为准：
+
+- M2-05 已完成 Windows headed、Chrome AX、Tab/Enter、高对比度、Narrator 启动和用户同一 Windows 目标人工读屏听读，当前为 `WINDOWS_HEADED_PASS / WINDOWS_HIGH_CONTRAST_PASS / WINDOWS_AX_PASS / WINDOWS_KEYBOARD_PASS / SCREEN_READER_RUNTIME_READY / SCREEN_READER_AUDIO_PASS`；见[Windows 现场验收](shinemage-m2-05-windows-20261014.md)和[读屏人工听读补验](shinemage-m2-05-screen-reader-20261015.md)。
+- M2-06 已在隔离 `18099` storage candidate 中完成真实保存/回读、临时 `admin1` 成功分享和读取、owner 撤权、撤权后 `404/NOT_FOUND`、持久化复核及清理；当前为 `REAL_SHARE_READ_PASS / REAL_REVOKE_READ_DENIED_PASS / REAL_REVOKE_PERSISTED_PASS / REAL_CLEANUP_PASS`；见[隔离 candidate 真实分享与撤权回执](shinemage-m2-06-real-revoke-20261015.md)。
+- M2-07 当前 rc2 的本地开发材料、OSV、SBOM projection、clean HOME、preflight 和 gap disposition 已完成，但正式 immutable artifact、完整正式 SBOM、发布者身份、签名/验签、撤销、干净机器回退和 current-SHA attestation 仍缺，继续 `BLOCKED / release_ready=false`；见[rc2 closure gap disposition](shinemage-m2-07-rc2-gap-disposition-20261015.md)。
+
+M2-08 的 release/activation/canary/rollback 和 M2-09 的正式目标 browser/recovery、主仓 pin 切换状态没有因上述补验改变，仍按收口账本保持 `NOT_RUN` 或 `MAIN_PIN_UNCHANGED`。
