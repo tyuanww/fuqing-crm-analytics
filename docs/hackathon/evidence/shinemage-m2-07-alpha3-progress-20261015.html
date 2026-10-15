@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>M2-07 alpha3 升级进度</title>
+  <style>
+    :root { color-scheme: light; --ink:#172033; --muted:#5d6b82; --line:#d9e0ea; --ok:#087443; --warn:#9a5b00; --bad:#a12a2a; --bg:#f5f7fb; --card:#fff; --blue:#185abc; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.6 system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    main { max-width: 1120px; margin: 0 auto; padding: 34px 20px 64px; }
+    h1, h2, h3 { line-height: 1.25; }
+    h1 { margin: 0 0 8px; font-size: 30px; }
+    h2 { margin: 28px 0 12px; font-size: 21px; }
+    h3 { margin: 0 0 8px; font-size: 17px; }
+    p { margin: 8px 0; }
+    .lead { color: var(--muted); max-width: 850px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px #1720330b; }
+    .value { font-size: 25px; font-weight: 750; margin: 4px 0; }
+    .label { color: var(--muted); font-size: 13px; }
+    .ok { color: var(--ok); } .warn { color: var(--warn); } .bad { color: var(--bad); }
+    .flow { overflow-x: auto; background: #101a2d; border-radius: 12px; padding: 10px; }
+    svg { display: block; min-width: 880px; width: 100%; height: 245px; }
+    .node { fill: #fff; stroke: #9fb2d0; stroke-width: 1.5; }
+    .node-title { fill: #172033; font-weight: 700; font-size: 14px; }
+    .node-text { fill: #5d6b82; font-size: 11px; }
+    .edge { stroke: #90b7ff; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+    details { background: var(--card); border: 1px solid var(--line); border-radius: 10px; margin: 8px 0; padding: 0 14px; }
+    summary { cursor: pointer; font-weight: 700; padding: 13px 0; }
+    details p, details ul { margin: 0 0 13px; }
+    code { background: #eef2f8; border-radius: 4px; padding: 2px 5px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+    pre { overflow-x: auto; background: #111827; color: #e6edf7; border-radius: 8px; padding: 13px; font-size: 12px; }
+    table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+    th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+    th { background: #eef2f8; font-size: 13px; }
+    tr:last-child td { border-bottom: 0; }
+    .foot { color: var(--muted); font-size: 13px; margin-top: 22px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>M2-07：DSH alpha3 升级进度</h1>
+  <p class="lead">更新时间：2026-10-15。目标版本为官方 <code>dsh-v0.2.1-alpha.3</code>。主仓仍固定在 <code>DSH=0.1.7-rc.2</code> 和 <code>upstream=477b4f420553e8a52c2fbccc464d7561b239c443</code>。</p>
+
+  <section class="grid" aria-label="状态摘要">
+    <div class="card"><div class="label">插件候选构建</div><div class="value ok">9/9 PASS</div><div class="label">alpha3 toolchain</div></div>
+    <div class="card"><div class="label">正式插件包</div><div class="value ok">9/9 PASS</div><div class="label">pack reader 与 SHA 已完成</div></div>
+    <div class="card"><div class="label">alpha3 npm 隔离启动</div><div class="value ok">PASS</div><div class="label">version、help、profile config</div></div>
+    <div class="card"><div class="label">发布状态</div><div class="value bad">BLOCKED</div><div class="label">release_ready=false</div></div>
+  </section>
+
+  <h2>1. 数据流</h2>
+  <div class="flow" role="img" aria-label="从官方源码到插件构建和验收的流程图">
+    <svg viewBox="0 0 1080 245" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#90b7ff"/></marker></defs>
+      <path class="edge" d="M188 98 H245"/><path class="edge" d="M398 98 H455"/><path class="edge" d="M608 98 H665"/><path class="edge" d="M818 98 H875"/>
+      <path class="edge" d="M742 137 V198 H470 V137"/>
+      <g transform="translate(25 54)"><rect class="node" width="163" height="88" rx="10"/><text class="node-title" x="14" y="27">官方 DSH alpha3</text><text class="node-text" x="14" y="49">SHA 2fbf4359…</text><text class="node-text" x="14" y="67">Node 24.19.0</text></g>
+      <g transform="translate(245 54)"><rect class="node" width="153" height="88" rx="10"/><text class="node-title" x="14" y="27">固定工具链</text><text class="node-text" x="14" y="49">pnpm 11.28.2</text><text class="node-text" x="14" y="67">TS 6.0.3</text></g>
+      <g transform="translate(455 54)"><rect class="node" width="153" height="88" rx="10"/><text class="node-title" x="14" y="27">9 个插件</text><text class="node-text" x="14" y="49">构建 9/9 PASS</text><text class="node-text" x="14" y="67">2 个类型适配</text></g>
+      <g transform="translate(665 54)"><rect class="node" width="153" height="88" rx="10"/><text class="node-title" x="14" y="27">正式 pack</text><text class="node-text" x="14" y="49">tarball SHA</text><text class="node-text" x="14" y="67">manifest 验收</text></g>
+      <g transform="translate(875 54)"><rect class="node" width="180" height="88" rx="10"/><text class="node-title" x="14" y="27">隔离运行检查</text><text class="node-text" x="14" y="49">alpha3 PASS</text><text class="node-text" x="14" y="67">rc2 回退 PASS</text></g>
+      <text x="485" y="226" fill="#cfe0ff" font-size="12">发布者身份、签名、撤销、正式 SBOM、clean machine 仍待外部发布责任方</text>
+    </svg>
+  </div>
+  <p>官方源码先固定提交和工具链。然后重新构建插件。插件通过后才生成 pack。最后在隔离目录检查安装、启动和回退。</p>
+  <p>图中最后一段仍未闭合。原因是正式发布材料需要发布责任方提供身份和签名。</p>
+
+  <h2>2. 模块说明</h2>
+  <details open><summary>官方 DSH SDK</summary><p>目标包是 <code>@deepseek-ai/dsh@0.2.1-alpha.3</code>。本地 tarball SHA-256 是 <code>0b2ff7b8c9dbf4c04a3883a24a9b7a6cdccf39f36b2dc79936239a716a57c5d7</code>。这个包属于 DSH 运行时和 SDK 层，不等于某个业务插件。</p></details>
+  <details><summary>业务插件</summary><p>本次检查覆盖 analytics-workbench、crm-knowledge、knowledge、shine-board、shine-brand、shine-crowd-action、shine-funnel、shine-query、shine-waterfall。alpha3 下 9/9 构建通过。</p></details>
+  <details><summary>兼容适配</summary><p><code>crm-knowledge</code> 需要 KaTeX CSS 类型声明。<code>analytics-workbench</code> 需要 <code>workspace.toast</code> 的声明合并。适配已提交到 <code>0389c92e</code>，仍需评审是否长期保留。</p></details>
+  <details><summary>发布材料</summary><p>候选 SBOM、provenance 和 attestation 输入已生成。它们明确标记为不完整。publisher identity、signature、revocation 和 final attestation 仍未验证。</p></details>
+
+  <h2>3. 具体输入的数据流</h2>
+  <p>输入：官方 alpha3 tarball。下面的步骤展示一个可复核的本地过程。</p>
+  <ol>
+    <li>接收 tarball，计算 SHA-256：<code>0b2ff7b8…a57c5d7</code>。</li>
+    <li>在独立 npm 前缀执行 <code>npm install --ignore-scripts</code>，安装 609 个包。</li>
+    <li>执行 <code>dsh --version</code>，得到 <code>0.2.1-alpha.3</code>。</li>
+    <li>执行 <code>--help</code>、<code>--dump-config-schema</code> 和 <code>--dump-default-config</code>，均返回成功。</li>
+    <li>在另一个独立前缀安装 rc2。<code>dsh --version</code> 得到 <code>0.1.7-rc.2</code>。</li>
+  </ol>
+  <pre>官方 tarball → SHA-256 → npm 安装 → alpha3 启动检查 → rc2 独立回退检查</pre>
+
+  <h2>4. 当前门禁</h2>
+  <table>
+    <thead><tr><th>项目</th><th>结果</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>源码、锁文件、Node、pnpm</td><td class="ok">PASS</td><td>固定提交、Node 24.19.0、pnpm 11.28.2/11.28.5。</td></tr>
+      <tr><td>插件候选构建</td><td class="ok">PASS</td><td>9/9。测试已覆盖 analytics-workbench。</td></tr>
+      <tr><td>正式插件 pack</td><td class="ok">PASS</td><td>9/9。tarball 和 manifest SHA 已记录。</td></tr>
+      <tr><td>本地 alpha3/rc2 运行</td><td class="ok">PASS</td><td>两个独立 npm 前缀完成启动检查。</td></tr>
+      <tr><td>正式 SBOM closure</td><td class="bad">BLOCKED</td><td>依赖图仍为 NOT_RESOLVED。</td></tr>
+      <tr><td>publisher identity、signature、revocation</td><td class="bad">BLOCKED</td><td>需要发布责任方和签名环境。</td></tr>
+      <tr><td>clean machine 完整验收</td><td class="warn">PENDING</td><td>还需要 artifact 接收、校验、卸载、主仓回退和旧版完整启动。</td></tr>
+      <tr><td>M2-08 activation/canary</td><td class="bad">NOT_RUN</td><td>M2-07 未关闭，不能执行。</td></tr>
+    </tbody>
+  </table>
+
+  <h2>5. 你后续只需要推动三件事</h2>
+  <ol>
+    <li>向发布责任方索取同一 alpha3 artifact 的正式 SBOM、provenance、publisher identity、signature、verification、revocation 和 final attestation。</li>
+    <li>把这些材料交给 clean machine owner，按“接收 → SHA → SBOM closure → 安装 → import/最小功能 → 卸载 → rc2 回退 → 旧版启动”执行。</li>
+    <li>材料和验收结果全部一致后，再做 M2-07 release review。M2-08 的 SLI、production activation、canary 和 rollback 放在之后。</li>
+  </ol>
+  <p class="foot">证据目录：<code>.context/checks/dsh-upgrade-0.2.1-alpha.3-20261015/</code>。详细记录：<code>shinemage-m2-09-dsh-upgrade-alpha3-prep-20261015.md</code>。</p>
+</main>
+</body>
+</html>
