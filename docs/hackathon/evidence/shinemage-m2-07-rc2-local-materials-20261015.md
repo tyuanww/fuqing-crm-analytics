@@ -96,6 +96,20 @@ release_ready=false
 
 OSV 结果发现公告，故不能把该 closure 提升为供应链通过。即使没有公告，17 个 binary/native 覆盖缺口、完整正式 SBOM、发布者身份、签名、撤销和干净机器回退仍需单独关闭。
 
+本轮公告对应的实际 closure 包实例如下；它们均为 `installed-package` 且进入可查询清单：
+
+| 包实例 | 公告数量（该版本返回） |
+| --- | ---: |
+| `fast-uri@3.1.3` | 8 |
+| `js-yaml@4.2.0` | 3 |
+| `js-yaml@4.3.1` | 1 |
+| `katex@0.16.47` | 1 |
+| `source-map-js@1.2.1` | 1 |
+| `undici@7.28.0` | 15 |
+| `undici@8.10.0` | 11 |
+
+表中版本计数包含跨版本重复的 GHSA；去重后为 29 个唯一公告。修复路径只能是新的、经过审查的 upstream/lock 与重新生成的 artifact，或由正式发布责任方出具可验证的安全例外及残余风险接受；不能在主仓或开发 closure 中手工改版本来掩盖固定 source 身份。
+
 ## clean HOME 输入检查
 
 在新的临时 HOME 下对 rc2 closure 的 `check.mjs` 返回：
