@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>M2-07 alpha4 升级进度</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--panel:#131c31;--line:#2d3c61;--text:#edf3ff;--muted:#aebbd7;--ok:#49d59b;--warn:#f4c96b;--bad:#ff7d8a;--accent:#7eb3ff}*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#0b1020,#111a2d 55%,#0c1427);color:var(--text);font:15px/1.65 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}main{max-width:1120px;margin:0 auto;padding:40px 22px 72px}h1{font-size:34px;line-height:1.2;margin:0 0 10px}h2{margin:34px 0 12px;font-size:22px}p{margin:8px 0;color:var(--muted)}code{color:#d9e7ff;background:#0a1223;border:1px solid #273655;border-radius:5px;padding:1px 5px}pre{background:#091121;border:1px solid var(--line);border-radius:10px;padding:14px;overflow:auto;color:#dce9ff}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}.card{background:rgba(19,28,49,.9);border:1px solid var(--line);border-radius:12px;padding:15px}.label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.value{font-size:20px;margin-top:4px}.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}.diagram{background:#0a1223;border:1px solid var(--line);border-radius:12px;padding:16px;overflow:auto}.diagram svg{width:100%;min-width:760px;height:auto}.node{fill:#172543;stroke:#5681c9;stroke-width:2}.node.bad{fill:#321c2d;stroke:#b84e6b}.node.ok{fill:#12352f;stroke:#3bba8a}.edge{stroke:#93b9ff;stroke-width:2;fill:none;marker-end:url(#arrow)}.edge.bad{stroke:#ff8794}.svgtext{fill:#edf3ff;font-size:15px}.small{fill:#b9c8e4;font-size:12px}table{width:100%;border-collapse:collapse;background:rgba(19,28,49,.8);border:1px solid var(--line);border-radius:10px;overflow:hidden}th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}th{color:#d4e3ff;background:#172543}tr:last-child td{border-bottom:0}details{background:rgba(19,28,49,.8);border:1px solid var(--line);border-radius:9px;margin:9px 0;padding:10px 13px}summary{cursor:pointer;color:#dce9ff;font-weight:600}.foot{margin-top:30px;font-size:13px;color:#91a2c7}@media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}h1{font-size:28px}}
+</style>
+</head>
+<body>
+<main>
+<h1>M2-07：DSH alpha4 升级进度</h1>
+<p>当前目标是验证官方最新 alpha4 候选。主仓仍固定 rc2。发布状态保持 <code>BLOCKED</code>。</p>
+<div class="grid">
+  <div class="card"><div class="label">官方版本</div><div class="value">0.2.1-alpha.4</div></div>
+  <div class="card"><div class="label">插件构建</div><div class="value ok">9/9 PASS</div></div>
+  <div class="card"><div class="label">npm audit</div><div class="value warn">8 moderate</div></div>
+  <div class="card"><div class="label">release_ready</div><div class="value bad">false</div></div>
+</div>
+<h2>1. 架构与门禁</h2>
+<div class="diagram">
+<svg viewBox="0 0 980 330" role="img" aria-label="alpha4 candidate release gate flow">
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L10,3 L0,6 Z" fill="#93b9ff"/></marker></defs>
+<rect class="node" x="25" y="125" width="170" height="70" rx="12"/><text class="svgtext" x="110" y="153" text-anchor="middle">官方 alpha4</text><text class="small" x="110" y="177" text-anchor="middle">86a4022…</text>
+<path class="edge" d="M195 160 H260"/>
+<rect class="node ok" x="260" y="105" width="190" height="110" rx="12"/><text class="svgtext" x="355" y="137" text-anchor="middle">隔离候选</text><text class="small" x="355" y="161" text-anchor="middle">SDK + 9 插件</text><text class="small" x="355" y="185" text-anchor="middle">9/9 pack reader</text>
+<path class="edge" d="M450 160 H515"/>
+<rect class="node" x="515" y="105" width="190" height="110" rx="12"/><text class="svgtext" x="610" y="137" text-anchor="middle">发布材料</text><text class="small" x="610" y="161" text-anchor="middle">SBOM / provenance</text><text class="small" x="610" y="185" text-anchor="middle">attestation inputs</text>
+<path class="edge bad" d="M705 160 H770"/>
+<rect class="node bad" x="770" y="105" width="180" height="110" rx="12"/><text class="svgtext" x="860" y="137" text-anchor="middle">正式门禁缺口</text><text class="small" x="860" y="161" text-anchor="middle">签名 / 撤销</text><text class="small" x="860" y="185" text-anchor="middle">clean machine</text>
+<path class="edge bad" d="M860 215 V275 H610"/>
+<rect class="node bad" x="515" y="250" width="190" height="55" rx="12"/><text class="svgtext" x="610" y="284" text-anchor="middle">M2-07 BLOCKED</text>
+<path class="edge" d="M355 215 V275 H250"/>
+<rect class="node" x="70" y="250" width="180" height="55" rx="12"/><text class="svgtext" x="160" y="284" text-anchor="middle">主仓 rc2 保持不变</text>
+</svg>
+</div>
+<p>alpha4 候选已经完成本地构建和 pack 验收。主仓 reader 会拒绝 alpha4 输入，因为主仓仍固定 rc2。正式发布材料和公司 clean machine 完成后，才可以进入 M2-07 release review。</p>
+
+<h2>2. 模块说明</h2>
+<details open><summary>官方 DSH SDK</summary><p>目标包是 <code>@deepseek-ai/dsh@0.2.1-alpha.4</code>。npm artifact SHA-256 是 <code>9f4fe0f4…f64c8d6</code>。源码 commit 是 <code>86a4022…</code>。</p></details>
+<details><summary>业务插件</summary><p>本次覆盖 analytics-workbench、crm-knowledge、knowledge、shine-board、shine-brand、shine-crowd-action、shine-funnel、shine-query、shine-waterfall。9 个插件构建和 pack reader 全部通过。</p></details>
+<details><summary>兼容适配</summary><p>alpha4 仍需要精确 <code>RowToast</code> keyed/factory 类型适配。crm-knowledge 仍声明 <code>katex:^0.18.7</code> runtime 依赖。官方 ui-primitives 仍把 KaTeX 放在 devDependencies。</p></details>
+<details><summary>测试边界</summary><p>analytics 为 <code>34 pass / 1 skipped</code>，HTML 测试为 <code>130 pass</code>。CRM 完整测试因候选副本缺少仓库级 <code>backend</code> 路径而记为 <code>BLOCKED_CANDIDATE_ENV</code>，原文为 <code>ModuleNotFoundError: No module named 'backend'</code>。</p></details>
+
+<h2>3. 一个具体输入的数据流</h2>
+<p>输入：官方 alpha4 npm tarball。下面是本地模拟的实际顺序。</p>
+<table><thead><tr><th>步骤</th><th>结果</th><th>证据</th></tr></thead><tbody>
+<tr><td>接收 artifact</td><td class="ok">PASS</td><td><code>deepseek-ai-dsh-0.2.1-alpha.4.tgz</code></td></tr>
+<tr><td>校验 SHA-256</td><td class="ok">PASS</td><td>expected = actual = <code>9f4fe0f4…f64c8d6</code></td></tr>
+<tr><td>安装 alpha4</td><td class="ok">PASS</td><td><code>dsh --version</code> 返回 <code>0.2.1-alpha.4</code></td></tr>
+<tr><td>最小功能</td><td class="ok">PASS</td><td><code>--help</code>、入口导入、<code>katex/dist/katex.min.css</code></td></tr>
+<tr><td>卸载</td><td class="ok">PASS</td><td>alpha4 和 KaTeX 均移除</td></tr>
+<tr><td>回退 rc2</td><td class="ok">PASS</td><td><code>dsh --version</code> 返回 <code>0.1.7-rc.2</code></td></tr>
+<tr><td>正式 clean machine</td><td class="warn">PENDING</td><td>本地回执为 <code>LOCAL_SIMULATION_ONLY</code></td></tr>
+</tbody></table>
+
+<h2>4. 当前门禁</h2>
+<table><thead><tr><th>项目</th><th>状态</th><th>说明</th></tr></thead><tbody>
+<tr><td>源码、锁、Node、pnpm</td><td class="ok">PASS</td><td>固定 alpha4 commit、lock SHA、Node 24.19.0、pnpm 11.28.2/11.28.5。</td></tr>
+<tr><td>官方 host/client 构建</td><td class="ok">PASS</td><td>alpha4 本地 SDK 构建通过。</td></tr>
+<tr><td>9 个插件构建与 pack reader</td><td class="ok">PASS</td><td>9/9。</td></tr>
+<tr><td>正式 SBOM closure</td><td class="bad">BLOCKED</td><td>官方依赖图未解析。KaTeX 仍是上游 dev-only closure 缺口。</td></tr>
+<tr><td>npm audit</td><td class="bad">BLOCKED</td><td>8 moderate，0 high，0 critical；直接 DSH 项为 <code>fixAvailable=false</code>。</td></tr>
+<tr><td>publisher identity / signature / revocation</td><td class="bad">BLOCKED</td><td>需要正式发布责任方和签名环境。</td></tr>
+<tr><td>公司 clean machine</td><td class="warn">PENDING</td><td>本地模拟通过，正式验收未执行。</td></tr>
+<tr><td>M2-08</td><td class="bad">NOT_RUN</td><td>M2-07 未关闭，不能 activation/canary。</td></tr>
+</tbody></table>
+
+<p class="foot">证据目录：<code>.context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/</code>。详细记录：<code>shinemage-m2-09-dsh-upgrade-alpha4-prep-20261016.md</code>。</p>
+</main>
+</body>
+</html>
