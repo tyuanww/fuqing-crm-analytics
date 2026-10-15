@@ -79,7 +79,7 @@
     <li>接收 tarball，计算 SHA-256：<code>0b2ff7b8…a57c5d7</code>。</li>
     <li>在独立 npm 前缀执行 <code>npm install --ignore-scripts</code>，安装 609 个包。</li>
     <li>执行 <code>dsh --version</code>，得到 <code>0.2.1-alpha.3</code>。</li>
-    <li>执行 <code>--help</code>、<code>--dump-config-schema</code> 和 <code>--dump-default-config</code>，均返回成功。</li>
+    <li>执行 <code>--help</code>、<code>--dump-config-schema</code> 和 <code>--dump-default-config</code>。命令均退出成功，但 schema 输出 4 条 warning 和 4 条 <code>unrecognized Loader tree carrier</code> error。这只能证明命令可执行。</li>
     <li>在另一个独立前缀安装 rc2。<code>dsh --version</code> 得到 <code>0.1.7-rc.2</code>。</li>
   </ol>
   <pre>官方 tarball → SHA-256 → npm 安装 → alpha3 启动检查 → rc2 独立回退检查</pre>
@@ -91,7 +91,7 @@
       <tr><td>源码、锁文件、Node、pnpm</td><td class="ok">PASS</td><td>固定提交、Node 24.19.0、pnpm 11.28.2/11.28.5。</td></tr>
       <tr><td>插件候选构建</td><td class="ok">PASS</td><td>9/9。测试已覆盖 analytics-workbench。</td></tr>
       <tr><td>正式插件 pack</td><td class="ok">PASS</td><td>9/9。tarball 和 manifest SHA 已记录。</td></tr>
-      <tr><td>本地 alpha3/rc2 运行</td><td class="ok">PASS</td><td>两个独立 npm 前缀完成启动检查。</td></tr>
+      <tr><td>本地 alpha3/rc2 运行</td><td class="warn">PARTIAL</td><td>version、help、默认配置和 rc2 回退通过；schema 命令仍有 4 条 loader error。</td></tr>
       <tr><td>正式 SBOM closure</td><td class="bad">BLOCKED</td><td>依赖图仍为 NOT_RESOLVED。</td></tr>
       <tr><td>publisher identity、signature、revocation</td><td class="bad">BLOCKED</td><td>需要发布责任方和签名环境。</td></tr>
       <tr><td>clean machine 完整验收</td><td class="warn">PENDING</td><td>还需要 artifact 接收、校验、卸载、主仓回退和旧版完整启动。</td></tr>

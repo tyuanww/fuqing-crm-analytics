@@ -59,7 +59,7 @@
 
 1. `dsh --version` 返回 `0.2.1-alpha.3`。
 2. `dsh --help` 返回成功。
-3. `dsh --profile web --dump-config-schema` 返回 JSON Schema。命令报告原生校验提示，但退出成功。
+3. `dsh --profile web --dump-config-schema` 返回 JSON Schema，退出码为 0，但输出 4 条原生校验 warning 和 4 条 `unrecognized Loader tree carrier; use cordis:group or cordis:include for native child collection` error。这只能证明 schema 命令可执行，不能证明 alpha3 profile 的完整运行时校验通过。
 4. `dsh --profile web --dump-default-config` 返回默认 profile 配置，文件大小为 `44001` 字节。
 
 随后在另一个独立 npm 前缀安装官方 `@deepseek-ai/dsh@0.1.7-rc.2`。tarball SHA-256 为：
