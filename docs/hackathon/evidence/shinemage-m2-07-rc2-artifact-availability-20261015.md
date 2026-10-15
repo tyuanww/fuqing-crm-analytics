@@ -46,6 +46,8 @@ wsl2_cold=NOT_RUN
 
 随后只读列举仓库现有 releases 的资产名（最多 100 条），结果只有 DSH runtime/source archive、release/pre-manifest、SHA256SUMS 和 CI evidence index，没有名称或角色表示 SDK、SBOM、attestation、provenance 或 closure 的正式发布资产。该结果进一步确认：远端已有 DSH runtime release，但没有可直接接收的 M2-07 SDK release artifact。
 
+又只读列举了仓库 Actions artifacts（API 返回的前 100 条）。资产命名只有 `dsh-rc2-preflight-*`、`dsh-rc2-evidence-*` 和 `dsh-rc2-publication-*`；其中 preflight/evidence 是 DSH rc2 runtime 验收包，publication 项是小型发布元数据包，没有 SDK archive、正式 SDK SBOM、签名包或 closure artifact。没有下载这些约 169 MB 的 runtime artifact，避免把 CI runtime bundle 当作 M2-07 SDK 输入。
+
 ## 当前结论
 
 ```text
