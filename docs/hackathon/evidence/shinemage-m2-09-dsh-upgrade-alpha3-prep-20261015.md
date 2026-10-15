@@ -36,7 +36,8 @@
 
 - `knowledge`、`shine-board`、`shine-brand`、`shine-crowd-action`、`shine-funnel`、`shine-query`、`shine-waterfall` 通过。
 - `crm-knowledge` 原始构建遇到 `TS2882: Cannot find module 'katex/dist/katex.min.css'`。加入候选侧 CSS 类型声明后通过。这个改动属于插件适配，不能直接视为官方兼容。
-- `analytics-workbench` 仍未通过。alpha3 的 `@deepseek-ai/dsh-client-ui-workspace` 类型声明引用了 `workspace.toast`，但当前声明闭包没有正确导入对应的 `ui-slots` 扩展，随后出现 `TS2344` 和多个 `TS2305` 类型错误。
+- `analytics-workbench` 原始构建遇到 `TS2344`，原因是 alpha3 的 `@deepseek-ai/dsh-client-ui-workspace` 类型声明引用了 `workspace.toast`，但当前声明闭包没有导入对应的 `ui-slots` 扩展。第一次候选声明又遮蔽了原模块，产生多个 `TS2305`；改为带模块导入的 declaration merge 后，host/client 类型检查和构建通过。
+- 加入两个候选侧适配后，九个插件的候选构建均通过。`analytics-workbench` 的插件测试通过：第一组 `34 pass / 1 skipped`，HTML 编辑和浏览器边界组 `130 pass`。这些适配目前只存在于隔离候选工作区，正式提交前仍需决定是否采用插件侧兼容声明，或等待上游修复。
 
 这说明升级不会让旧 SDK 自动失效。升级会改变 SDK 的类型和运行时接口，插件可能需要适配、重新构建和重新验收。当前 alpha3 候选还不能替换主仓 rc2。
 
@@ -45,17 +46,18 @@
 - alpha3 源码、锁文件、Node 和 pnpm 已具备本机隔离构建条件。
 - alpha3 SDK 输入检查已通过本机开发检查。
 - `release_ready=false` 仍然有效。
-- 九个插件中，七个直接通过；`crm-knowledge` 需要候选侧类型声明适配后通过；`analytics-workbench` 仍被 alpha3 类型声明兼容问题阻塞。
+- 九个插件的候选构建已通过；`crm-knowledge` 和 `analytics-workbench` 各需要候选侧类型声明适配。完整正式包、上游修复判断和适配提交仍未完成。
 - 尚未完成 SDK artifact、SBOM、provenance、publisher identity、signature、verification、revocation 和 final attestation。
 - 尚未在 clean machine 安装、卸载、回退并验证旧版。
 - M2-07 仍不能关闭。M2-08 仍不能执行。
 
 ## 后续顺序
 
-1. 复制 alpha3 plugin-kit 绑定，重新构建九个业务插件和 profile。
-2. 运行插件单测、生命周期、组合集成、browser/recovery 和回退检查。
-3. 对同一个 alpha3 artifact 生成 SHA-256、SBOM、provenance 和签名材料。
-4. 由发布责任方完成 publisher identity、verification、revocation 和 final attestation。
-5. 在 clean machine 按安装、校验、卸载、回退顺序验收。
-6. 验收通过后，再评审是否把主仓 pin 从 rc2 适配到 alpha3。
+1. 将两个候选侧适配变成可审查的插件改动，或记录上游修复后移除条件。
+2. 复制 alpha3 plugin-kit 绑定，重新构建九个业务插件和 profile。
+3. 运行插件单测、生命周期、组合集成、browser/recovery 和回退检查。
+4. 对同一个 alpha3 artifact 生成 SHA-256、SBOM、provenance 和签名材料。
+5. 由发布责任方完成 publisher identity、verification、revocation 和 final attestation。
+6. 在 clean machine 按安装、校验、卸载、回退顺序验收。
+7. 验收通过后，再评审是否把主仓 pin 从 rc2 适配到 alpha3。
 
