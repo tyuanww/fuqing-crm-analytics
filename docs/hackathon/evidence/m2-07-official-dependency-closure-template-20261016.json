@@ -19,7 +19,9 @@
     "katex_manifest_location": "devDependencies",
     "runtime_imports_katex": true,
     "runtime_imports_katex_css": true,
-    "current_local_disposition": "UPSTREAM_DEFECT_DEV_ONLY"
+    "current_local_disposition": "UPSTREAM_DEFECT_DEV_ONLY",
+    "official_dependency_policy": "BROWSER_BUILD_INPUT_DEV_ONLY",
+    "official_verifier": "verify-package-dependencies"
   },
   "closure_result": {
     "status": "PENDING",
@@ -34,17 +36,21 @@
     "sbom_file": "",
     "sbom_sha256_actual": "",
     "provenance_file": "",
-    "provenance_sha256_actual": ""
+    "provenance_sha256_actual": "",
+    "policy_check": "FAIL_DIRECT_UI_PRIMITIVES_RUNTIME_MOVE",
+    "consumer_runtime_closure": "PENDING_COMPANY_EXECUTION"
   },
   "disposition": {
     "resolution": "PENDING",
-    "recommended_resolution": "REBUILD_WITH_KATEX_RUNTIME_DEPENDENCY",
+    "recommended_resolution": "CONSUMER_RUNTIME_CLOSURE_OR_COORDINATED_BUNDLING_POLICY_FIX",
     "rebuild_required": "PENDING",
     "reason": "ui-primitives runtime code imports katex and katex/dist/katex.min.css while the official package manifest declares katex under devDependencies.",
     "new_artifact_sha256": "",
     "new_lock_sha256": "",
     "new_sbom_sha256": "",
-    "new_provenance_sha256": ""
+    "new_provenance_sha256": "",
+    "local_patch_status": "REJECTED_BY_OFFICIAL_POLICY",
+    "policy_failure_log_sha256": "fd3e0ad8827003167c43a035a2bf8986fbc99c358063fe2026fbec0a0d63e480"
   },
   "verification": {
     "independent_verifier": "",

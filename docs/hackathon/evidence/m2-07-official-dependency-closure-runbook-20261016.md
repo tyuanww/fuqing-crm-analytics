@@ -12,13 +12,13 @@
 docs/hackathon/evidence/m2-07-official-dependency-closure-template-20261016.json
 ```
 
-本地已准备最小修复 patch：
+本地曾准备一个最小修复 patch，但官方依赖策略检查已拒绝该方向：
 
 ```text
 docs/hackathon/evidence/m2-07-official-closure-katex-runtime-fix.patch
 ```
 
-修复说明见 [KaTeX runtime closure 修复候选](m2-07-official-closure-katex-runtime-fix-20261016.md)。
+失败说明见 [KaTeX runtime closure 修复候选](m2-07-official-closure-katex-runtime-fix-20261016.md) 和 [official closure policy 冲突记录](m2-07-official-closure-policy-conflict-20261016.md)。
 
 ## 固定输入
 
@@ -52,28 +52,30 @@ ui_primitives_package_json_sha256=8208a57a195c448a9932372dcfd7228f394c1abe527acf
 
 ## 当前 KaTeX 缺口的推荐处理
 
-推荐选择 `REBUILD_WITH_KATEX_RUNTIME_DEPENDENCY`：
+推荐选择 `CONSUMER_RUNTIME_CLOSURE_OR_COORDINATED_BUNDLING_POLICY_FIX`：
 
-1. 在发布源中把 `katex:^0.18.7` 从 `devDependencies` 移到 `dependencies`。
-2. 重新生成并固定 lock。
-3. 重新构建官方 SDK artifact。
-4. 重新生成 SBOM 和 provenance。
-5. 重新计算 artifact、lock、SBOM 和 provenance SHA-256。
-6. 重新生成 publisher identity、signature、verification、revocation 和 final attestation。
-7. 重新执行 clean machine 验收。
+1. 保持官方 `ui-primitives` 的 browser build policy 不变。
+2. 找出每个最终发布并执行该 UI 代码的消费者。
+3. 让这些消费者声明自己的 runtime `katex` 依赖。
+4. 对最终消费者执行正式 pack、production-only install 和 runtime import 检查。
+5. 只有正式 closure 仍然失败时，才提交同时更新 bundling、policy、verifier 和测试的官方变更。
 
-公司发布 checkout 的推荐命令：
+公司环境先在未修改的官方 checkout 执行：
 
 ```sh
-git apply docs/hackathon/evidence/m2-07-official-closure-katex-runtime-fix.patch
-corepack pnpm@11.28.5 install --lockfile-only --ignore-scripts
 corepack pnpm@11.28.5 install --frozen-lockfile --ignore-scripts
 pnpm run verify-package-dependencies
-pnpm run build:lib:host
-pnpm run build:lib:client
 ```
 
-如果公司发布流程要求不同命令，以公司批准流程为准，但必须保留同样的输入、输出和 SHA 证据。
+然后对最终插件包执行：
+
+```sh
+pnpm pack --pack-destination ./packs
+npm install --omit=dev --ignore-scripts ./packs/<final-plugin>.tgz
+node -e "import('katex'); import('katex/dist/katex.min.css')"
+```
+
+上面的 `<final-plugin>` 必须替换为实际最终发布包。公司流程如果使用其他工具，必须保留同样的输入、输出和 SHA 证据。
 
 现有 artifact 的所有发布材料不能沿用，因为重新构建会改变 subject 或 provenance。
 

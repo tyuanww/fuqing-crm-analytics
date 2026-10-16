@@ -5,7 +5,7 @@
 已准备最小修复 patch，并在固定 alpha4 checkout 上通过 `git apply --check`。没有修改官方 checkout，没有修改主仓。
 
 ```text
-status=PATCH_PREPARED_LOCAL_ONLY
+status=PATCH_REJECTED_BY_OFFICIAL_POLICY
 patch_check=PASS
 release_ready=false
 ```
@@ -59,7 +59,7 @@ official checkout modified = NO
 main rc2 pin modified = NO
 ```
 
-临时 clean checkout 的 `npm pack --dry-run --json` 通过，包元数据包含 `dependencies.katex`。该结果只验证 patch 方向，不能替代公司重建。
+临时 clean checkout 的 `npm pack --dry-run --json` 通过，包元数据包含 `dependencies.katex`。随后官方 `verify-package-dependencies` 失败，因此该 patch 不能作为当前官方仓库的最终修复。
 
 本地模拟回执：
 
@@ -83,7 +83,7 @@ pnpm run build:lib:host
 pnpm run build:lib:client
 ```
 
-然后执行正式 pack、production-only install、dependency graph、SBOM 和 runtime import 检查。
+该 patch 不应直接进入当前官方发布源。请先阅读 [official closure policy 冲突记录](m2-07-official-closure-policy-conflict-20261016.md)，再按最终消费者边界执行正式 pack、production-only install、dependency graph、SBOM 和 runtime import 检查。
 
 ## 边界
 
