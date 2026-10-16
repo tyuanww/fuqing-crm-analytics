@@ -540,7 +540,7 @@
       "manifest_sha256": "1cd7ce082f80d1088aed5d9bb7940391c0c44485e8ed5abd5a8c711bb97282ca"
     }
   ],
-  "source_files_scanned": 653,
+  "source_files_scanned": 654,
   "cross_package_edges": [
     {
       "consumer": "analytics-workbench",
