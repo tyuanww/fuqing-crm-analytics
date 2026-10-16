@@ -2,9 +2,7 @@
 
 > 当前短表（2026-10-16）；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。历史 PASS、NOT_RUN 与版本只属于原验收对象，本页是当前运行与交付边界的 SSOT。
 
-## 当前快照（2026-10-16）
-
-## 2026-10-16 alpha4 候选当前事实
+## 当前快照（2026-10-16）与 alpha4 候选当前事实
 
 - 官方仓库最新发布为 `v0.2.1-alpha.4`，发布提交为 `86a402200d95fecef4529d969836f1fe13c6cb0d`。M2-07 当前候选已经切换到 alpha4；alpha3 只保留为上一轮候选记录。
 - alpha4 官方 npm artifact SHA-256 为 `9f4fe0f466d7699ddd4686ee9692ec10c6d9f98a7d175fd5e55de01b2f64c8d6`。候选 source commit 为 `50d241cbd23aa2a9d188fe84c3864528a2206917`，固定 Node `24.19.0`、upstream pnpm `11.28.5`、插件 pnpm `11.28.2`。
