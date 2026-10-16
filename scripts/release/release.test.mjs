@@ -249,6 +249,12 @@ test('promotion receives and records the pinned upstream runtime bundle', async 
 });
 test('install rejects the unverified default path', async () => { const root=await fixture(), archive=join(root,'a.tar.gz'); tar(archive); const m=await manifest(root,archive); await assert.rejects(() => installRelease({artifact:archive,manifestPath:m,releaseRoot:join(root,'release-root'),tag:'dsh-test'}), /RELEASE_TRUST_INPUTS_REQUIRED/); });
 test('release evidence workflow accepts a candidate descendant of main', async () => { const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-evidence.yml'), 'utf8'); assert.match(workflow, /git merge-base --is-ancestor origin\/main "\$REVIEWED_SHA"/); });
+test('release workflows do not persist checkout credentials into reviewed source execution', async () => {
+  for (const name of ['dsh-release-preflight.yml', 'dsh-release-evidence.yml']) {
+    const workflow = await readFile(join(process.cwd(), '.github/workflows', name), 'utf8');
+    assert.match(workflow, /actions\/checkout@[0-9a-f]+[\s\S]{0,260}persist-credentials:\s*false/, name);
+  }
+});
 test('release preflight separates the online audit from preparation and packages runtime offline', async () => { const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-preflight.yml'), 'utf8'); const source = await readFile(join(process.cwd(), 'scripts/release/preflight.mjs'), 'utf8'); const pipeline = await readFile(join(process.cwd(), 'scripts/dsh-b0/pipeline.mjs'), 'utf8'); assert.match(source, /stage\('prepare'[\s\S]*pipeline\.mjs/); assert.match(source, /stage\('audit'[\s\S]*--audit/); assert.match(pipeline, /--prepare\|--audit\|--check/); assert.match(pipeline, /mode === '--audit'/); assert.match(source, /runtime-bundle\.mjs[\s\S]*--output/); assert.doesNotMatch(source, /runtime-bundle\.mjs[\s\S]*--online/); assert.match(workflow, /scripts\/dsh\.mjs preflight/); });
 test('preflight bundle summary binds every release asset to the manifest', async () => {
   const root = await fixture();
