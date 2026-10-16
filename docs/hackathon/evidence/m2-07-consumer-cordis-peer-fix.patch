@@ -1,0 +1,26 @@
+diff --git a/crm-knowledge/package.json b/crm-knowledge/package.json
+index b236e6a..9e8892b 100644
+--- a/crm-knowledge/package.json
++++ b/crm-knowledge/package.json
+@@ -17,7 +17,7 @@
+   },
+   "peerDependencies": {
+     "@deepseek-ai/dsh-tools": "0.2.1-alpha.4",
+-    "@deepseek-ai/cordis": "4.0.2"
++    "@deepseek-ai/cordis": "4.0.5-alpha.2"
+   },
+   "exports": {
+     ".": "./lib/index.js",
+diff --git a/knowledge/package.json b/knowledge/package.json
+index 1d41587..a64ad60 100644
+--- a/knowledge/package.json
++++ b/knowledge/package.json
+@@ -14,7 +14,7 @@
+   },
+   "peerDependencies": {
+     "@deepseek-ai/dsh-tools": "0.2.1-alpha.4",
+-    "@deepseek-ai/cordis": "4.0.2"
++    "@deepseek-ai/cordis": "4.0.5-alpha.2"
+   },
+   "exports": {
+     ".": "./lib/index.js",
