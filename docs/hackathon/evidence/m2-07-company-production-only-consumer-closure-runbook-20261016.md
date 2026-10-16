@@ -56,6 +56,7 @@ local provenance sha256=0bf6165fc9e48f9e8c60096d5a75195b6d7f4376200158bfd3f78792
 3. 使用 Node `v24.19.0`。npm 方案要求 npm 版本和 registry 记录在回执；如果公司批准使用 pnpm，记录精确 pnpm 版本和 frozen lock 行为。
 4. 使用公司批准的 registry、网络出口和缓存策略；不要把 registry token、KMS token 或私钥写入回执。
 5. 生产安装必须排除 devDependencies、脚本和本地 workspace/link 依赖。
+6. 若 registry 出现证书链错误，只能配置公司批准的 CA bundle 并记录路径/摘要；不得使用 `strict-ssl=false`、跳过 TLS 校验或把网络错误记录成依赖 closure 失败。
 
 公司 runner 先定义统一的 SHA-256 命令。优先使用 `sha256sum`，没有时才使用 `shasum -a 256`；两者都没有必须停止，不能跳过摘要核对：
 
