@@ -1,15 +1,20 @@
 /** Verify terminal/browser observations for a two-profile composition candidate. */
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { isAbsolute } from 'node:path';
+import { dirname, isAbsolute, relative, resolve, sep } from 'node:path';
 import { validateCompositionCandidate } from './composition-candidate.mjs';
-import { readArtifactFile } from './service-artifact-evidence.mjs';
+import { insideArtifact, readArtifactFile } from './service-artifact-evidence.mjs';
 import { readState, recordEvent } from './state.mjs';
 
-export const COMPOSITION_HOST_SCHEMA = 'dsh-composition-host-evidence/v1';
+// v2 binds each target digest to a bounded file path and journal parent chain.
+// v1 receipts did not carry those bindings and remain historical evidence.
+export const COMPOSITION_HOST_SCHEMA = 'dsh-composition-host-evidence/v2';
 const HEX = /^[a-f0-9]{64}$/;
 const PHASES = new Set(['terminal', 'browser']);
+const TARGET_FILES = Object.freeze(['input', 'receipt', 'runner']);
+const MAX_TARGET_FILE_BYTES = 8 * 1024 * 1024;
 const digest = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
+const bytesDigest = value => createHash('sha256').update(value).digest('hex');
 
 function exact(value, keys, code) {
   assert.ok(value && typeof value === 'object' && !Array.isArray(value), code);
@@ -19,7 +24,26 @@ function exact(value, keys, code) {
 function absolute(path, code) {
   assert.equal(typeof path, 'string', code);
   assert.ok(isAbsolute(path) && !path.includes('..'), code);
-  return path;
+  return resolve(path);
+}
+
+function validateTargetPaths(target) {
+  exact(target.paths, TARGET_FILES, 'COMPOSITION_HOST_TARGET_PATHS');
+  for (const name of TARGET_FILES) absolute(target.paths[name], 'COMPOSITION_HOST_TARGET_PATH');
+  assert.equal(new Set(TARGET_FILES.map(name => target.paths[name])).size, TARGET_FILES.length,
+    'COMPOSITION_HOST_TARGET_PATH_DUPLICATE');
+}
+
+async function verifyTargetFiles(target, evidencePath) {
+  const root = resolve(dirname(evidencePath));
+  for (const name of TARGET_FILES) {
+    const path = resolve(target.paths[name]);
+    const rel = relative(root, path);
+    assert.ok(rel && rel !== '..' && !rel.startsWith(`..${sep}`) && !isAbsolute(rel),
+      'COMPOSITION_HOST_TARGET_PATH_SCOPE');
+    const bytes = await insideArtifact(root, rel.split(sep).join('/'), MAX_TARGET_FILE_BYTES);
+    assert.equal(bytesDigest(bytes), target[`${name}_sha256`], 'COMPOSITION_HOST_TARGET_DIGEST_MISMATCH');
+  }
 }
 
 async function readJson(path, code) {
@@ -64,8 +88,12 @@ export function validateCompositionHostEvidence({ candidate, envelope } = {}) {
   assert.deepEqual(envelope.profile_digests, candidate.profiles.map(row => row.sha256),
     'COMPOSITION_HOST_PROFILE_DIGESTS');
   assert.deepEqual(envelope.plugins, packRows(candidate), 'COMPOSITION_HOST_PLUGIN_DIGESTS');
-  exact(envelope.target, ['input_sha256', 'receipt_sha256', 'runner_sha256', 'platform', 'cleanup'],
+  exact(envelope.target, ['input_sha256', 'receipt_sha256', 'runner_sha256', 'paths', 'platform', 'cleanup'],
     'COMPOSITION_HOST_TARGET_SHAPE');
+  // Hashes alone are claims. Bind each target digest to a bounded local file;
+  // verifyCompositionHostEvidence additionally constrains those files below
+  // the evidence directory before reading them.
+  validateTargetPaths(envelope.target);
   for (const key of ['input_sha256', 'receipt_sha256', 'runner_sha256']) assert.match(envelope.target[key] ?? '', HEX,
     'COMPOSITION_HOST_TARGET_DIGEST');
   exact(envelope.observation, ['status', 'scope', 'scenario_count', 'cross_version_recovery', 'browser',
@@ -97,10 +125,20 @@ export function validateCompositionHostEvidence({ candidate, envelope } = {}) {
 /** Verify and append a composition terminal/browser observation. */
 export async function verifyCompositionHostEvidence({ candidatePath, evidencePath, statePath } = {}) {
   const { candidate, candidateBytes, state, prepared, source, terminal } = await readPreparedCompositionCandidate({ candidatePath, statePath });
+  const evidenceFile = absolute(evidencePath, 'COMPOSITION_HOST_EVIDENCE_PATH_REQUIRED');
   const envelope = validateCompositionHostEvidence({ candidate, envelope: await readJson(
-    absolute(evidencePath, 'COMPOSITION_HOST_EVIDENCE_PATH_REQUIRED'), 'COMPOSITION_HOST_EVIDENCE_INVALID') });
+    evidenceFile, 'COMPOSITION_HOST_EVIDENCE_INVALID') });
+  await verifyTargetFiles(envelope.target, evidenceFile);
+  assert.equal(source.seq, prepared.seq + 1, 'COMPOSITION_HOST_SOURCE_ORDER');
+  assert.equal(source.prev_digest, prepared.digest, 'COMPOSITION_HOST_SOURCE_PARENT');
   if (envelope.phase === 'browser') {
     assert.ok(terminal, 'COMPOSITION_HOST_TERMINAL_PARENT_REQUIRED');
+    assert.equal(terminal.seq, source.seq + 1, 'COMPOSITION_HOST_TERMINAL_ORDER');
+    assert.equal(terminal.prev_digest, source.digest, 'COMPOSITION_HOST_TERMINAL_PARENT');
+    assert.deepEqual(terminal.source_http_event, { seq: source.seq, digest: source.digest },
+      'COMPOSITION_HOST_TERMINAL_SOURCE_PARENT');
+  } else {
+    assert.equal(state.journal.at(-1)?.digest, source.digest, 'COMPOSITION_HOST_SOURCE_NOT_LATEST');
   }
   const envelopeDigest = await digest(envelope);
   const idempotencyKey = `composition-host:${envelope.phase}:${candidate.candidate_digest}:${envelopeDigest}`;
@@ -116,6 +154,9 @@ export async function verifyCompositionHostEvidence({ candidatePath, evidencePat
     return { ...prior.observation, terminal_host_event: { seq: terminal.seq, digest: terminal.digest },
       candidate_bytes: candidateBytes.length, journal_seq: prior.seq, journal_digest: prior.digest };
   }
+  if (envelope.phase === 'browser') {
+    assert.equal(state.journal.at(-1)?.digest, terminal.digest, 'COMPOSITION_HOST_TERMINAL_NOT_LATEST');
+  }
   const status = `COMPOSITION_${envelope.phase.toUpperCase()}_HOST_OBSERVED`;
   const observation = { ...envelope.observation, phase: envelope.phase, target: envelope.target,
     evidence_authenticity: 'UNATTESTED_OPERATOR_OBSERVATION', candidate_digest: candidate.candidate_digest };
@@ -125,6 +166,8 @@ export async function verifyCompositionHostEvidence({ candidatePath, evidencePat
     ...(envelope.phase === 'browser' ? { terminal_host_event: { seq: terminal.seq, digest: terminal.digest } } : {}),
     observation },
   { idempotencyKey,
-    requiredEvent: { seq: source.seq, digest: source.digest } });
+    requiredEvent: envelope.phase === 'browser'
+      ? { seq: terminal.seq, digest: terminal.digest }
+      : { seq: source.seq, digest: source.digest } });
   return { ...observation, candidate_bytes: candidateBytes.length, journal_seq: event.seq, journal_digest: event.digest };
 }

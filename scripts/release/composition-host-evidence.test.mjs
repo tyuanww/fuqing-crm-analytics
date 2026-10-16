@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, writeFile, readFile, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, symlink, writeFile, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -10,6 +10,7 @@ import { validateCompositionHostEvidence, verifyCompositionHostEvidence } from '
 
 const hex = (char, length) => char.repeat(length);
 const digest = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
+const bytesDigest = value => createHash('sha256').update(value).digest('hex');
 const binding = { schema_version: 'dsh-service-binding/v1', service_id: 'analytics-first-purchase', source_sha: hex('a', 40),
   api_version: '1.0.0', state: { owner: 'analysis-service', application_id: 1397572502, schema_version: 1,
     contract: 'analytics-first-purchase-saved-provenance/v1' }, access: 'read-write', lifecycle: 'external',
@@ -28,11 +29,12 @@ function candidate() {
     activation: 'NOT_RUN', canary: 'NOT_RUN', rollback: 'NOT_RUN', release_ready: false, state_scope: 'local-explicit-journal' };
   return { ...base, candidate_digest: digest(base) };
 }
-function envelope(value) {
-  return { schema_version: 'dsh-composition-host-evidence/v1', phase: 'terminal', candidate_digest: value.candidate_digest,
+function envelope(value, target) {
+  const input = 'bounded-input/v1\n', receipt = 'bounded-receipt/v1\n', runner = 'bounded-runner/v1\n';
+  return { schema_version: 'dsh-composition-host-evidence/v2', phase: 'terminal', candidate_digest: value.candidate_digest,
     service_source_sha: binding.source_sha, profile_digests: value.profiles.map(row => row.sha256),
     plugins: value.plugins.map(item => ({ id: item.id, source_sha: item.source_sha, manifest_sha256: item.manifest_sha256, pack_sha256: item.pack.sha256 })),
-    target: { input_sha256: hex('1', 64), receipt_sha256: hex('2', 64), runner_sha256: hex('3', 64),
+    target: { input_sha256: bytesDigest(input), receipt_sha256: bytesDigest(receipt), runner_sha256: bytesDigest(runner), paths: target,
       platform: { system: 'Linux', machine: 'x86_64', python: '3.14.4', kernel: '6.18.33.2-microsoft-standard-WSL2' },
       cleanup: 'OWNED_PROCESSES_AND_TEMPORARY_INSTALL_REMOVED' },
     observation: { status: 'PASS', scope: 'actual-wsl2-synthetic-inflight-terminal-recovery', scenario_count: 23,
@@ -42,24 +44,30 @@ function envelope(value) {
 async function prepared(t, value) {
   const root = await mkdtemp(join(tmpdir(), 'composition-host-evidence-')); t.after(() => rm(root, { recursive: true, force: true }));
   const candidatePath = join(root, 'composition-candidate.json'), statePath = join(root, 'state.json'), evidencePath = join(root, 'evidence.json');
+  const targetRoot = join(root, 'target');
+  const target = { input: join(targetRoot, 'input.json'), receipt: join(targetRoot, 'receipt.json'), runner: join(targetRoot, 'runner.json') };
+  await mkdir(targetRoot, { recursive: true });
+  await writeFile(target.input, 'bounded-input/v1\n');
+  await writeFile(target.receipt, 'bounded-receipt/v1\n');
+  await writeFile(target.runner, 'bounded-runner/v1\n');
   await writeFile(candidatePath, JSON.stringify(value) + '\n');
   const intent = await recordEvent(statePath, { release_tag: 'dsh-composition-test', status: 'COMPOSITION_CANDIDATE_INTENT', candidate_digest: value.candidate_digest });
   const ready = await recordEvent(statePath, { release_tag: 'dsh-composition-test', status: 'COMPOSITION_CANDIDATE_PREPARED', candidate_digest: value.candidate_digest }, { requiredEvent: { seq: intent.seq, digest: intent.digest }, idempotencyKey: 'composition-prepared-test' });
   await recordEvent(statePath, { release_tag: 'dsh-composition-test', status: 'COMPOSITION_SOURCE_HTTP_TARGET_OBSERVED', candidate_digest: value.candidate_digest,
     service_binding: binding, observation: { status: 'PASS' } }, { requiredEvent: { seq: ready.seq, digest: ready.digest }, idempotencyKey: 'composition-source-test' });
-  return { root, candidatePath, statePath, evidencePath };
+  return { root, candidatePath, statePath, evidencePath, target };
 }
 
 test('composition host evidence validates nine packs and appends a phase event', async t => {
   const value = candidate(); validateCompositionCandidate(value); const paths = await prepared(t, value);
-  const receipt = envelope(value); await writeFile(paths.evidencePath, JSON.stringify(receipt) + '\n');
+  const receipt = envelope(value, paths.target); await writeFile(paths.evidencePath, JSON.stringify(receipt) + '\n');
   const result = await verifyCompositionHostEvidence(paths);
   assert.equal(result.candidate_digest, value.candidate_digest); assert.equal(result.journal_seq, 4);
   const state = await readState(paths.statePath); assert.equal(state.journal.at(-1).status, 'COMPOSITION_TERMINAL_HOST_OBSERVED');
 });
 
 test('composition host evidence rejects a changed pack before journal mutation', async t => {
-  const value = candidate(); const paths = await prepared(t, value); const receipt = envelope(value);
+  const value = candidate(); const paths = await prepared(t, value); const receipt = envelope(value, paths.target);
   receipt.plugins[0].pack_sha256 = hex('9', 64); await writeFile(paths.evidencePath, JSON.stringify(receipt) + '\n');
   await assert.rejects(() => verifyCompositionHostEvidence(paths), /COMPOSITION_HOST_PLUGIN_DIGESTS/);
   const state = await readState(paths.statePath); assert.equal(state.journal.length, 3);
@@ -69,7 +77,7 @@ test('composition host evidence rejects a changed pack before journal mutation',
 test('composition browser evidence requires the same candidate terminal parent', async t => {
   const value = candidate();
   const paths = await prepared(t, value);
-  const receipt = envelope(value);
+  const receipt = envelope(value, paths.target);
   receipt.phase = 'browser';
   receipt.observation.browser = { driver: 'Aside headed', headed: true };
   await writeFile(paths.evidencePath, JSON.stringify(receipt) + '\n');
@@ -88,7 +96,7 @@ test('composition browser retry reuses a legacy event once its terminal parent e
     candidate_digest: value.candidate_digest, service_binding: binding,
     source_http_event: { seq: source.seq, digest: source.digest }, observation: { status: 'PASS' },
   }, { requiredEvent: { seq: source.seq, digest: source.digest }, idempotencyKey: 'composition-terminal-legacy-test' });
-  const receipt = envelope(value);
+  const receipt = envelope(value, paths.target);
   receipt.phase = 'browser';
   receipt.observation.browser = { driver: 'Aside headed', headed: true };
   const oldObservation = { ...receipt.observation, phase: 'browser', target: receipt.target,
@@ -105,4 +113,33 @@ test('composition browser retry reuses a legacy event once its terminal parent e
   assert.equal(result.journal_seq, browser.seq);
   assert.deepEqual(result.terminal_host_event, { seq: terminal.seq, digest: terminal.digest });
   assert.equal((await readState(paths.statePath)).journal.length, 5);
+});
+
+test('composition host evidence binds target digests to bounded local files', async t => {
+  const value = candidate(); const paths = await prepared(t, value); const receipt = envelope(value, paths.target);
+  await writeFile(paths.target.input, 'tampered-input/v1\n');
+  await writeFile(paths.evidencePath, JSON.stringify(receipt) + '\n');
+  await assert.rejects(() => verifyCompositionHostEvidence(paths), /COMPOSITION_HOST_TARGET_DIGEST_MISMATCH/);
+  assert.equal((await readState(paths.statePath)).journal.length, 3);
+});
+
+test('composition host evidence rejects symlinked target files', async t => {
+  const value = candidate(); const paths = await prepared(t, value); const receipt = envelope(value, paths.target);
+  const outside = join(paths.root, 'outside.json');
+  await writeFile(outside, 'bounded-input/v1\n');
+  await rm(paths.target.input);
+  await symlink(outside, paths.target.input);
+  await writeFile(paths.evidencePath, JSON.stringify(receipt) + '\n');
+  await assert.rejects(() => verifyCompositionHostEvidence(paths), /SERVICE_ARTIFACT_SYMLINK/);
+  assert.equal((await readState(paths.statePath)).journal.length, 3);
+});
+
+test('composition host evidence rejects a broken prepared-to-source parent chain', async t => {
+  const value = candidate(); const paths = await prepared(t, value); const receipt = envelope(value, paths.target);
+  const state = await readState(paths.statePath);
+  state.journal[2].prev_digest = 'f'.repeat(64);
+  state.journal[2].digest = digest(Object.fromEntries(Object.entries(state.journal[2]).filter(([key]) => key !== 'digest')));
+  await writeFile(paths.statePath, JSON.stringify(state) + '\n');
+  await writeFile(paths.evidencePath, JSON.stringify(receipt) + '\n');
+  await assert.rejects(() => verifyCompositionHostEvidence(paths), /RELEASE_JOURNAL_CHAIN_INVALID/);
 });
