@@ -1,0 +1,73 @@
+{
+  "schema_version": "shinemage-alpha4-clean-machine-receipt/v1",
+  "status": "PENDING_COMPANY_EXECUTION",
+  "release_ready": false,
+  "scope": "COMPANY_ISOLATED_CLEAN_MACHINE",
+  "machine": {
+    "machine_id": "",
+    "os": "",
+    "arch": "",
+    "node": "",
+    "pnpm": "",
+    "home_isolated": "PENDING",
+    "cache_isolated": "PENDING"
+  },
+  "fixed_inputs": {
+    "sdk": "@deepseek-ai/dsh@0.2.1-alpha.4",
+    "artifact_sha256_expected": "9f4fe0f466d7699ddd4686ee9692ec10c6d9f98a7d175fd5e55de01b2f64c8d6",
+    "upstream_sha": "86a402200d95fecef4529d969836f1fe13c6cb0d",
+    "candidate_source_sha": "50d241cbd23aa2a9d188fe84c3864528a2206917",
+    "upstream_lock_sha256": "ee1c37b5429c535974bafa09475cb03fc473e87dded8f56d54d909ed621e1317",
+    "sbom_sha256_expected": "2adb75e23a0af0c60ce202f5e4b265549836b4761e758935111d66bbc257bfca",
+    "provenance_sha256_expected": "5e81763e0fad9ab5952fb6c7b094cf0e01d0a1b0883f469e63b2f672e8d7a0c4",
+    "signature_verification_required": true,
+    "revocation_check_required": true
+  },
+  "receipt": {
+    "artifact_sha256_actual": "",
+    "artifact_sha_match": "PENDING",
+    "sbom_sha256_actual": "",
+    "sbom_sha_match": "PENDING",
+    "provenance_sha256_actual": "",
+    "provenance_sha_match": "PENDING",
+    "signature_verification": "PENDING",
+    "revocation_check": "PENDING",
+    "sdk_install": "PENDING",
+    "alpha4_version": "PENDING",
+    "alpha4_help": "PENDING",
+    "sdk_import": "PENDING",
+    "minimal_plugin": "PENDING",
+    "katex_css": "PENDING",
+    "sdk_uninstall": "PENDING",
+    "rc2_install": "PENDING",
+    "rc2_version": "PENDING",
+    "rc2_help": "PENDING",
+    "rc2_start": "PENDING"
+  },
+  "steps": [],
+  "result": {
+    "status": "PENDING",
+    "failure_summary": "",
+    "operator": "",
+    "started_at": "",
+    "finished_at": "",
+    "raw_log_ref": ""
+  },
+  "acceptance_rules": [
+    "All expected and actual SHA-256 values match.",
+    "SBOM subject and closure pass the company verification procedure.",
+    "Provenance matches source, lock, Node, and pnpm inputs.",
+    "Signature verification passes.",
+    "Revocation check passes with no UNKNOWN or PENDING result.",
+    "alpha4 install, version, help, import, minimal plugin, KaTeX CSS, and uninstall pass.",
+    "rc2 install, version, help, and startup pass.",
+    "Every step contains command, output reference, exit code, and timestamp."
+  ],
+  "prohibited_shortcuts": [
+    "Do not reuse the local LOCAL_SIMULATION_ONLY receipt.",
+    "Do not run on a machine with prior SDK caches or a shared HOME.",
+    "Do not skip uninstall and rc2 rollback.",
+    "Do not mark PASS when a command was not run.",
+    "Do not put credentials or private keys in this receipt."
+  ]
+}

@@ -4,6 +4,8 @@
 
 本执行包用于项目负责人本人执行正式 clean machine 验收。当前本地回执仍是 `LOCAL_SIMULATION_ONLY`。执行包不能把本地机器标记为公司 clean machine。
 
+机器完成后，请填写 [clean machine 回执模板](m2-07-clean-machine-receipt-template-20261016.json)。每一步都必须保存命令、输出、退出码和时间。
+
 ## 固定输入
 
 ```text
@@ -13,6 +15,14 @@ upstream_sha=86a402200d95fecef4529d969836f1fe13c6cb0d
 Node=v24.19.0
 upstream_pnpm=11.28.5
 plugin_pnpm=11.28.2
+```
+
+固定材料也包括：
+
+```text
+sbom_sha256=2adb75e23a0af0c60ce202f5e4b265549836b4761e758935111d66bbc257bfca
+provenance_sha256=5e81763e0fad9ab5952fb6c7b094cf0e01d0a1b0883f469e63b2f672e8d7a0c4
+plugin_pack_verification_sha256=a126775bc0985d6926e9e21a70f4e5d743eb335e7fe38ee22ca876a3614c3b25
 ```
 
 ## 执行顺序
@@ -36,6 +46,8 @@ plugin_pnpm=11.28.2
 17. 执行旧版版本检查和 `--help`。
 18. 验证旧版仍可启动。
 19. 保存所有命令、输出、退出码和时间。
+
+公司环境必须使用独立 HOME、独立 npm/pnpm cache 和新建临时目录。不能复用开发机的全局包、历史 SDK 或本地模拟回执。
 
 ## 回执字段
 

@@ -12,9 +12,10 @@
     "sbom_sha256": "2adb75e23a0af0c60ce202f5e4b265549836b4761e758935111d66bbc257bfca",
     "provenance_sha256": "5e81763e0fad9ab5952fb6c7b094cf0e01d0a1b0883f469e63b2f672e8d7a0c4",
     "plugin_pack_verification_sha256": "a126775bc0985d6926e9e21a70f4e5d743eb335e7fe38ee22ca876a3614c3b25",
-    "attestation_inputs_sha256": "1092b3b89fab3cee63e0a711f964a0ea898393474da7f25b400d04d557d1a968",
+    "attestation_inputs_sha256": "8bf36bd3bb72ad7c2023c3b7af5e0dd32513dcee55630d188f3f748f09303856",
     "security_risk_acceptance_record_sha256": "6a5c3a325503a804f686a2b24707df8fbb22b6c639dbe1b71da79cb3dfd951d1",
-    "publisher_evidence_template_sha256": "05f442ae906f24d9c009bec5c17548d0f579e92d43fdd6a5544358c61c1a041d"
+    "publisher_evidence_template_sha256": "05f442ae906f24d9c009bec5c17548d0f579e92d43fdd6a5544358c61c1a041d",
+    "clean_machine_receipt_template_sha256": "e49f3735df58f4453ffe615a2025c35eda27984f16573a84706662aa1db96e00"
   },
   "toolchain": {
     "node": "v24.19.0",
@@ -43,6 +44,11 @@
     "independent_verification": "PENDING_COMPANY_EXECUTION",
     "revocation_check": "PENDING_COMPANY_EXECUTION",
     "final_attestation": "PENDING_COMPANY_EXECUTION"
+  },
+  "clean_machine_evidence": {
+    "receipt_template": "docs/hackathon/evidence/m2-07-clean-machine-receipt-template-20261016.json",
+    "run_packet": "docs/hackathon/evidence/m2-07-clean-machine-run-packet-20261016.md",
+    "status": "PENDING_COMPANY_EXECUTION"
   },
   "required_formal_evidence": [
     "official_dependency_closure",
