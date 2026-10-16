@@ -12,6 +12,14 @@
 docs/hackathon/evidence/m2-07-official-dependency-closure-template-20261016.json
 ```
 
+本地已准备最小修复 patch：
+
+```text
+docs/hackathon/evidence/m2-07-official-closure-katex-runtime-fix.patch
+```
+
+修复说明见 [KaTeX runtime closure 修复候选](m2-07-official-closure-katex-runtime-fix-20261016.md)。
+
 ## 固定输入
 
 ```text
@@ -53,6 +61,19 @@ ui_primitives_package_json_sha256=8208a57a195c448a9932372dcfd7228f394c1abe527acf
 5. 重新计算 artifact、lock、SBOM 和 provenance SHA-256。
 6. 重新生成 publisher identity、signature、verification、revocation 和 final attestation。
 7. 重新执行 clean machine 验收。
+
+公司发布 checkout 的推荐命令：
+
+```sh
+git apply docs/hackathon/evidence/m2-07-official-closure-katex-runtime-fix.patch
+corepack pnpm@11.28.5 install --lockfile-only --ignore-scripts
+corepack pnpm@11.28.5 install --frozen-lockfile --ignore-scripts
+pnpm run verify-package-dependencies
+pnpm run build:lib:host
+pnpm run build:lib:client
+```
+
+如果公司发布流程要求不同命令，以公司批准流程为准，但必须保留同样的输入、输出和 SHA 证据。
 
 现有 artifact 的所有发布材料不能沿用，因为重新构建会改变 subject 或 provenance。
 
