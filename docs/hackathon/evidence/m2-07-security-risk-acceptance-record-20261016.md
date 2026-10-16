@@ -10,7 +10,7 @@
 
 ```text
 record_type=OFFLINE_OWNER_RISK_ACCEPTANCE
-approval_status=OFFLINE_RECORD_PENDING_OWNER_CONFIRMATION
+approval_status=OFFLINE_OWNER_APPROVED
 release_ready=false
 ```
 
@@ -49,17 +49,17 @@ review_due=2026-11-16
 
 ## 决策人填写区
 
-请由项目负责人本人填写并确认以下字段：
+项目负责人已经确认以下字段：
 
 ```text
-decision_maker=
-decision_maker_role=
-security_role_same_person=yes/no
-recorded_at=
-confirmation_text=
+decision_maker=天元
+decision_maker_role=AI赋能工程师
+security_role_same_person=yes
+recorded_at=2026-10-16
+confirmation_text=同意按推荐方案执行
 ```
 
-推荐确认文字：
+确认内容：
 
 ```text
 我确认接受上述有限范围风险。该决定只允许固定 alpha4 artifact 进入隔离 clean machine 验收，不授权 production activation、canary 或正式 release。风险接受有效期为 2026-10-16 至 2026-11-16。若 dependency closure 或上游修复发生变化，必须重新构建 artifact 并重新审计。
@@ -75,4 +75,4 @@ confirmation_text=
 4. 确认文字。
 5. 如果有独立复核人，记录其姓名、角色和复核时间。
 
-在这些字段完成前，本记录不能作为正式风险接受。`release_ready` 必须保持 `false`。
+项目负责人已经完成离线确认。本记录可以作为当前项目的 owner 风险接受记录。它不等同于独立安全责任方批准。`release_ready` 必须保持 `false`。

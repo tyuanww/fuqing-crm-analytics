@@ -3,11 +3,14 @@
 ## 当前状态
 
 ```text
-status=PROPOSED_RISK_ACCEPTANCE_PENDING_APPROVAL
+status=OFFLINE_OWNER_APPROVED
 release_ready=false
 decision=PROPOSED_LIMITED_SCOPE_RISK_ACCEPTANCE
 effective_from=2026-10-16
 effective_until=2026-11-16
+decision_maker=天元
+decision_maker_role=AI赋能工程师
+approval_record=m2-07-security-risk-acceptance-record-20261016.md
 ```
 
 本文件是风险处置草稿。它不是安全责任方批准，也不是正式发布授权。
@@ -58,7 +61,7 @@ range >=0.8.0 <0.8.3
 
 ## 推荐填写结果
 
-以下内容是本轮推荐值。它们可以作为正式审批单的填写内容，但当前文件仍然不是正式批准记录。
+以下内容是本轮推荐值。项目负责人已经通过离线记录确认。该记录适用于当前项目范围；如果公司要求独立安全责任方复核，仍需补充独立记录。
 
 | 字段 | 推荐值 |
 |---|---|
@@ -104,7 +107,7 @@ production_release=DENIED
 production_activation=DENIED
 canary=DENIED
 review_due=2026-11-16
-approval_status=PENDING_FORMAL_OWNER_APPROVAL
+approval_status=OFFLINE_OWNER_APPROVED
 ```
 
 正式审批时，需要确认以下事实：
@@ -117,14 +120,14 @@ approval_status=PENDING_FORMAL_OWNER_APPROVAL
 
 ## 待确认字段
 
-- [ ] 是否接受上述有限范围风险：推荐接受，待正式确认。
-- [ ] 风险接受有效期：推荐为 `2026-10-16` 至 `2026-11-16`。
-- [ ] 责任人：推荐为项目负责人本人。
-- [ ] 复查日期：推荐为 `2026-11-16`。
-- [ ] 是否允许进入公司 clean machine 验收：推荐允许，仅限隔离验收。
-- [ ] 是否需要在正式发布前重新构建 artifact：推荐当前不需要；若 closure 或上游修复变化，则必须重建。
-- [ ] 正式安全批准记录：待项目负责人按公司流程补充。
+- [x] 是否接受上述有限范围风险：项目负责人已确认接受。
+- [x] 风险接受有效期：`2026-10-16` 至 `2026-11-16`。
+- [x] 责任人：项目负责人天元，角色为 AI赋能工程师。
+- [x] 复查日期：`2026-11-16`。
+- [x] 是否允许进入公司 clean machine 验收：允许，仅限隔离验收。
+- [x] 是否需要在正式发布前重新构建 artifact：当前不需要；若 closure 或上游修复变化，则必须重建。
+- [ ] 独立安全责任方复核记录：如果公司制度要求，待补充。
 
 ## 结论
 
-推荐值已经填入。正式安全批准记录仍未补充，因此本文件不能作为正式风险接受。`release_ready` 必须保持 `false`。
+推荐值已经填入。项目负责人天元已经通过离线记录确认。该确认只允许隔离验收，不授权正式发布。`release_ready` 必须保持 `false`。
