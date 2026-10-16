@@ -1,0 +1,148 @@
+{
+  "schema_version": "shinemage-alpha4-owner-final-attestation-local/v1",
+  "generated_at": "2026-10-16T15:45:23Z",
+  "status": "OWNER_LOCAL_FINAL_ATTESTATION_NOT_FORMAL",
+  "release_ready": false,
+  "execution": {
+    "mode": "OWNER_OPERATED",
+    "owner": "project-owner",
+    "runner_identity": "owner-operated-local-node24",
+    "formal_company_evidence": false
+  },
+  "formal_status": {
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "release_ready": false
+  },
+  "subjects": {
+    "sdk": "@deepseek-ai/dsh@0.2.1-alpha.4",
+    "sdk_artifact_sha256": "9f4fe0f466d7699ddd4686ee9692ec10c6d9f98a7d175fd5e55de01b2f64c8d6",
+    "crm_tarball_sha256": "a994167cafae37383800789127a305bc5cae0a9fa85b46ba4157cf1fe0ae634d",
+    "crm_manifest_sha256": "106c38eaf30cde9b6a3e3fc5fea98d8e42aa777f51f99faff37c00c13f55e42d",
+    "sdk_source_sha": "50d241cbd23aa2a9d188fe84c3864528a2206917",
+    "crm_source_sha": "3b5d4c0680585f8f27c84d70dffabf7c2ec930d2",
+    "upstream_sha": "86a402200d95fecef4529d969836f1fe13c6cb0d",
+    "upstream_lock_sha256": "ee1c37b5429c535974bafa09475cb03fc473e87dded8f56d54d909ed621e1317"
+  },
+  "local_evidence": [
+    {
+      "id": "owner_publisher_receipt",
+      "path": "docs/hackathon/evidence/m2-07-owner-local-publisher-signature-revocation-20261016.json",
+      "sha256": "4b552d897e0989655016bbf4e25eec387d0f9c5fbb405e392f8f92452bfd471a",
+      "status": "OWNER_LOCAL_MATERIALS_COMPLETE_FORMAL_GATES_PENDING",
+      "trust_scope": "OWNER_LOCAL_ONLY"
+    },
+    {
+      "id": "owner_attestation",
+      "path": "docs/hackathon/evidence/m2-07-owner-attestation-20261016.json",
+      "sha256": "6ee4a7fd67eb07e672cb03d41ef294bc9f07070968e495bc1a3abb06ab078c6c",
+      "status": "OWNER_ATTESTED_TECHNICAL_EVIDENCE",
+      "trust_scope": "OWNER_LOCAL_ONLY"
+    },
+    {
+      "id": "owner_final_draft",
+      "path": "docs/hackathon/evidence/m2-07-owner-final-attestation-draft-20261016.json",
+      "sha256": "dfde9c88abb9c9204c6dff2d1aa0c7bd7d38a95469a7c3989f5736771ba35788",
+      "status": "OWNER_ATTESTATION_DRAFT_NOT_FORMAL",
+      "trust_scope": "OWNER_LOCAL_ONLY"
+    },
+    {
+      "id": "local_closure_receipt",
+      "path": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/formal-packs-r3/company-closure-attempt-node24-r3/consumer-closure-receipt-local-node24-r3.json",
+      "sha256": "d7eb5d768ff2c26f4ebf0f1a8fdae9d5054484a5bc5f71a0b4927c871ea6fe45",
+      "status": "LOCAL_REPRODUCTION_ONLY",
+      "trust_scope": "LOCAL_REPRODUCTION_ONLY"
+    },
+    {
+      "id": "independent_replay_receipt",
+      "path": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/formal-packs-r3/company-closure-independent-node24-r1/independent-replay-receipt.json",
+      "sha256": "a3049e1d455247318a541beeabd5eaedf2ebdb59fc3e3596e5f3546dbc9efcc0",
+      "status": "SELF_SEPARATED_REPLAY_PASS",
+      "trust_scope": "SAME_OWNER_ONLY"
+    },
+    {
+      "id": "owner_clean_receipt",
+      "path": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/owner-clean-machine-node24-r1/owner-clean-machine-receipt.json",
+      "sha256": "e5617286ca77f03c51b9fa84ec7bfce08fb7ddb28622e745346618cc0f73b038",
+      "status": "OWNER_OPERATED_REPLAY_PASS",
+      "trust_scope": "OWNER_LOCAL_ONLY"
+    },
+    {
+      "id": "owner_binding",
+      "path": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/owner-attestation-r1/owner-binding.json",
+      "sha256": "dfd7e89d1ffa4779caff5169bb9c08ee9e5dd0b7d4caccbdffe43784b08cbdd7",
+      "status": "SIGNED_BINDING",
+      "trust_scope": "OWNER_LOCAL_ONLY"
+    },
+    {
+      "id": "owner_public_key",
+      "path": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/owner-attestation-r1/owner-public-key.pem",
+      "sha256": "234d4a8d016c65adca1fd9bdd470b92d2f82fa8a8e022bc2cd1572b813e2b908",
+      "status": "LOCAL_KEY",
+      "trust_scope": "OWNER_LOCAL_ONLY"
+    },
+    {
+      "id": "owner_signature",
+      "path": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/owner-attestation-r1/owner-binding.sig",
+      "sha256": "26f4a6ac9c116b729f27260ab40c6b5eb13b657c291df907ebf6bc75be7d1d0d",
+      "status": "LOCAL_SIGNATURE",
+      "trust_scope": "OWNER_LOCAL_ONLY"
+    }
+  ],
+  "gate_results": {
+    "publisher_identity": {
+      "local": "OWNER_IDENTITY_DECLARED_LOCAL",
+      "formal": "NOT_RUN_COMPANY_IDENTITY_UNAVAILABLE",
+      "evidence": "owner_publisher_receipt"
+    },
+    "signature": {
+      "local": "OWNER_SELF_SIGNED_LOCAL / VERIFICATION_PASS",
+      "formal": "NOT_RUN_COMPANY_SIGNER_UNAVAILABLE",
+      "evidence": "owner_publisher_receipt"
+    },
+    "revocation": {
+      "local": "NOT_RUN_NO_TRUST_SERVICE",
+      "formal": "NOT_RUN_NO_REVOCATION_SERVICE",
+      "evidence": "owner_publisher_receipt"
+    },
+    "independent_verification": {
+      "local": "SELF_SEPARATED_REPLAY_PASS",
+      "formal": "NOT_RUN_SECOND_PERSON_UNAVAILABLE",
+      "evidence": "independent_replay_receipt"
+    },
+    "final_attestation": {
+      "local": "OWNER_LOCAL_FINAL_ATTESTATION_NOT_FORMAL",
+      "formal": "FORMAL_EXCEPTION_REQUIRED",
+      "evidence": "owner_final_draft"
+    },
+    "clean_machine": {
+      "local": "OWNER_OPERATED_REPLAY_PASS",
+      "formal": "NOT_RUN_COMPANY_CLEAN_MACHINE",
+      "evidence": "owner_clean_receipt"
+    }
+  },
+  "local_replay_summary": {
+    "production_only_install": "PASS",
+    "dependency_graph": "PASS_26_PACKAGES_97_NODES_NO_PROBLEMS",
+    "runtime_imports": "PASS",
+    "sbom": "PASS_26_COMPONENTS",
+    "owner_signature_verification": "PASS_OPENSSL_PKEYUTL_RAWIN",
+    "owner_clean_machine": "PASS_ALPHA4_AND_RC2_ROLLBACK",
+    "fresh_clean_machine_r2": "NOT_RUN_MISSING_SEPARATE_RC2_TARBALL"
+  },
+  "remaining_formal_gates": [
+    "company-approved publisher identity",
+    "company-approved signature or KMS/HSM/keyless signer and transparency reference",
+    "independent verifier identity or CI job",
+    "revocation service result",
+    "formal company final attestation",
+    "formal company clean-machine receipt"
+  ],
+  "constraints": [
+    "This receipt is owner-local evidence only and is not a company release authorization.",
+    "Same-owner replay is not second-person independent verification.",
+    "No local key or signature non-revocation claim is made.",
+    "PENDING, NOT_RUN, and FORMAL_EXCEPTION_REQUIRED remain non-PASS states.",
+    "The main DSH pin remains 0.1.7-rc.2."
+  ]
+}
