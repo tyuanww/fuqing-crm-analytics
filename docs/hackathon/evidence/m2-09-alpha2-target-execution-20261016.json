@@ -1,0 +1,124 @@
+{
+  "schema_version": "shinemage-alpha2-target-execution/v1",
+  "status": "TARGET_BROWSER_NOT_RUN_PLUGIN_IMPORT_BLOCKED",
+  "release_ready": false,
+  "main_pin_unchanged": true,
+  "recorded_at_utc": "2026-10-16T07:57:53Z",
+  "candidate": {
+    "sdk": "@deepseek-ai/dsh@0.2.1-alpha.2",
+    "upstream_sha": "d743267388641bc76f17c45ce8b4c231aed1d32c",
+    "source_sha": "1bb2646523a7c1cd5aa04d11080617a373af7147",
+    "cordis_peer": "4.0.5-alpha.1",
+    "cordis_runtime": "4.0.5-alpha.1",
+    "dsh_tools": "0.2.1-alpha.2",
+    "node": "v24.21.0",
+    "target_temp_root": "/tmp/m2-09-alpha2-target-20261016T070323Z-38823",
+    "toolchain_sha256": "6772ba7529fd35ee5a40fd513ce687e20e52c46703dd968f5433b6e0a70f5a4a",
+    "pnpm_11_28_2_tar_sha256": "cfe65a5e9ec53cd5fe0aa0782eda6e0151bbc9e5fee94865bb8cf3f1f43444f4",
+    "upstream_git_tar_sha256": "6c9803beb86c4e8fc6a44db80af8ccef78cab2521a33623e90b2595f0e5ad495"
+  },
+  "target": {
+    "address": "100.93.46.46",
+    "platform": "Linux x86_64 / WSL2",
+    "python3_14": "Python 3.14.4",
+    "zstd": "1.5.5",
+    "live_port": 4328,
+    "candidate_port": 4329,
+    "candidate_page_http": "off",
+    "preflight_evidence": "docs/hackathon/evidence/m2-09-alpha2-target-preflight-20261016.json",
+    "authorization_evidence": "docs/hackathon/evidence/shinemage-production-target-authorization-20261013.json"
+  },
+  "commands": {
+    "client_build": {
+      "status": "PASS",
+      "log_sha256": "8db3e7e8b650546513dd0117410399e7b0639507200811737b96d551d73f884e",
+      "note": "build:lib:client completed after full frozen-lockfile install"
+    },
+    "web_build": {
+      "status": "PASS",
+      "log_sha256": "cea41b1b2073cc220d1e8fadedc1e7a82035bab1b168e4791ba42b529c9da617",
+      "note": "pnpm run build:web completed on target"
+    },
+    "runner_check": {
+      "status": "PASS",
+      "log_sha256": "58e0a84f2dce3d6c374a1d7e6d0293836ec6000ca77a02332d2a8465d34c7f31",
+      "profile": "dsh-alpha2",
+      "plugin_count": 7
+    }
+  },
+  "host_probe": {
+    "first_start": {
+      "status": "PASS_AFTER_WEB_BUILD",
+      "ready_log_sha256": "3dcc2d9e1f0ad9c49f18990d83f1c09e324e586fd146135ad42f8914305ec149",
+      "unauthenticated_root_http": 401,
+      "authenticated_root_http": 200,
+      "authenticated_root_bytes": 37577
+    },
+    "stable_import_warnings": [
+      "analytics-workbench-ui (@shine-mage/dsh-analytics-workbench-b0): failed to import",
+      "analytics-dev-brand-assets (scripts/dsh-dev/brand.mjs): failed to import"
+    ],
+    "boot_log_sha256": "866eaadb8fec2d01233f953e4898f8d0f923f9749a89546d2c83662404758a06"
+  },
+  "browser": {
+    "status": "NOT_RUN",
+    "driver": "local Chrome/CUA attempt",
+    "headed_navigation": "NOT_ESTABLISHED",
+    "reason": "Codex in-app browser blocked the loopback URL; native Chrome navigation did not produce a stable candidate page state",
+    "helper_http_only": true,
+    "console_errors": [],
+    "network_errors": [
+      "headed browser page state unavailable"
+    ],
+    "fixture_written": false,
+    "fixture_read_back": "NOT_RUN",
+    "evidence": [
+      "local tunnel 127.0.0.1:4329 -> target 127.0.0.1:4329 returned unauthenticated 401",
+      "authenticated curl root 200 is helper HTTP evidence only and is not a browser PASS"
+    ]
+  },
+  "recovery": {
+    "status": "HOST_RESTART_PROBE_ONLY",
+    "owned_stop": "PASS",
+    "pre_restart_candidate_port": 4329,
+    "post_restart_candidate_port": 4329,
+    "post_restart_unauthenticated_root_http": 401,
+    "post_restart_authenticated_root_http": 200,
+    "post_restart_authenticated_root_bytes": 37577,
+    "same_history_record": "NOT_RUN",
+    "same_board_record": "NOT_RUN",
+    "same_content": "NOT_RUN",
+    "evidence": [
+      "docs/hackathon/evidence/m2-09-alpha2-target-browser-recovery-runbook-20261016.md",
+      "target logs/dsh-dev-stop-recovery.log and dsh-dev-recovery.log"
+    ]
+  },
+  "cleanup": {
+    "candidate_process": "STOPPED_AFTER_RECORD",
+    "live_4328_unchanged": true,
+    "target_temp_root": "RETAINED_FOR_AUDIT",
+    "production_switched": false,
+    "release_ready": false,
+    "owned_processes_stopped": true,
+    "evidence": [
+      "dsh-dev-stop-final.log"
+    ]
+  },
+  "result": {
+    "browser_status": "TARGET_BROWSER_NOT_RUN",
+    "recovery_status": "TARGET_RECOVERY_NOT_RUN",
+    "overall": "TARGET_HOST_PROBE_ONLY",
+    "m2_09_disposition": "TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN / MAIN_PIN_UNCHANGED",
+    "m2_07_disposition": "BLOCKED",
+    "release_ready": false
+  },
+  "prohibited_shortcuts": [
+    "HELPER_ONLY_BROWSER_CLAIM",
+    "PLUGIN_IMPORT_WARNING_AS_PASS",
+    "SYNTHETIC_BACKEND_AS_REAL_BUSINESS",
+    "LIVE_PORT_OR_PROCESS_CHANGE",
+    "MAIN_PIN_EDIT",
+    "REAL_CREDENTIAL_OR_DATA",
+    "REAL_MODEL_CALL"
+  ]
+}
