@@ -41,7 +41,7 @@
 | target address | `100.93.46.46` | |
 | platform | Linux x86_64 / WSL2 | |
 | Node | `24.21.0` | |
-| Python | `3.14.4` | |
+| Python | `3.14.4`，必须调用 `python3.14` 或 `/usr/local/bin/python3.14` | |
 | zstd | `1.5.5`，如 runner 需要 | |
 | authorization evidence | `shinemage-production-target-authorization-20261013.json` | |
 | preflight evidence | `shinemage-production-target-preflight-20261013.json` | |
@@ -51,7 +51,7 @@
 | candidate port | `4329` 或新的空闲端口 | |
 | live ports observed | `4328,4332,4336`，必须原样记录 | |
 
-目标执行方必须保存 `node --version`、`python3 --version`、`uname -a`、监听端口和授权/preflight 的原始输出。
+目标执行方必须保存 `node --version`、`python3.14 --version`、`uname -a`、监听端口和授权/preflight 的原始输出。默认 `python3` 为 `3.12.3` 时不能作为 runner 解释器。
 
 ## 文件和工具输入
 

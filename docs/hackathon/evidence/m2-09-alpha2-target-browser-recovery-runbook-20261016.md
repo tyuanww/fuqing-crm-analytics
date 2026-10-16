@@ -130,10 +130,12 @@ PY
 ```bash
 set -eu
 node --version
-python3 --version
+python3.14 --version
 uname -a
 ss -ltnp | grep -E ':(4328|4329|4332|4336)\\b' || true
 ```
+
+2026-10-16 的目标实测中，默认 `python3` 为 `3.12.3`，`python3.14` 和 `/usr/local/bin/python3.14` 为 `3.14.4`。runner 必须显式使用 `python3.14`，不能把默认 `python3` 当作候选验收解释器。
 
 确认目标授权文件和 preflight 仍有效后，再创建本次唯一的临时目录：
 

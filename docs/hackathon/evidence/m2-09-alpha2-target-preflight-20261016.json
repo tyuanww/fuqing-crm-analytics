@@ -1,0 +1,50 @@
+{
+  "schema_version": "shinemage-alpha2-target-preflight/v1",
+  "status": "TARGET_PREFLIGHT_PASS_BROWSER_RECOVERY_NOT_RUN",
+  "recorded_at_utc": "2026-10-16T06:27:02Z",
+  "target": {
+    "address": "100.93.46.46",
+    "role": "authorized-test-and-production",
+    "platform": "Linux x86_64 / WSL2",
+    "kernel": "6.18.33.2-microsoft-standard-WSL2",
+    "node": "v24.21.0",
+    "python3_default": "3.12.3",
+    "python3_14": "3.14.4",
+    "python_required_for_runner": "3.14.4",
+    "zstd": "1.5.5",
+    "tmp_mode": "1777"
+  },
+  "ports": {
+    "4328": "LISTENING_LIVE_OBSERVED",
+    "4329": "NO_LISTENER_OBSERVED_CANDIDATE_PORT_AVAILABLE",
+    "4332": "NO_LISTENER_OBSERVED",
+    "4336": "NO_LISTENER_OBSERVED"
+  },
+  "candidate": {
+    "sdk": "@deepseek-ai/dsh@0.2.1-alpha.2",
+    "upstream_sha": "d743267388641bc76f17c45ce8b4c231aed1d32c",
+    "source_sha": "1bb2646523a7c1cd5aa04d11080617a373af7147",
+    "cordis": "4.0.5-alpha.1",
+    "browser": "NOT_RUN",
+    "recovery": "NOT_RUN"
+  },
+  "main_pin": {
+    "sdk_version": "0.1.7-rc.2",
+    "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+    "status": "UNCHANGED_LOCAL_CHECK"
+  },
+  "evidence": {
+    "raw_output": "m2-09-alpha2-target-preflight-20261016.txt",
+    "raw_output_sha256": "9b8fbf7c12bf3278803412adfa8e74219829283abf149f26350590326b3a0464",
+    "remote_command": "read-only node/python/uname/zstd/ss/stat probe over existing SSH key path",
+    "normalization": "strip_trailing_whitespace"
+  },
+  "boundaries": {
+    "service_started": false,
+    "service_restarted": false,
+    "live_ports_modified": false,
+    "real_data_read": false,
+    "real_model_called": false,
+    "release_ready": false
+  }
+}
