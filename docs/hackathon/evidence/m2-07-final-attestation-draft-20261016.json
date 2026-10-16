@@ -1,0 +1,50 @@
+{
+  "schema_version": "shinemage-alpha4-final-attestation-draft/v1",
+  "status": "DRAFT_NOT_FORMAL",
+  "release_ready": false,
+  "statement": "This draft records local alpha4 candidate evidence. It is not a publisher attestation and does not authorize release or activation.",
+  "subject": {
+    "sdk": "@deepseek-ai/dsh@0.2.1-alpha.4",
+    "sdk_artifact_sha256": "9f4fe0f466d7699ddd4686ee9692ec10c6d9f98a7d175fd5e55de01b2f64c8d6",
+    "upstream_sha": "86a402200d95fecef4529d969836f1fe13c6cb0d",
+    "candidate_source_sha": "50d241cbd23aa2a9d188fe84c3864528a2206917",
+    "upstream_lock_sha256": "ee1c37b5429c535974bafa09475cb03fc473e87dded8f56d54d909ed621e1317",
+    "sbom_sha256": "2adb75e23a0af0c60ce202f5e4b265549836b4761e758935111d66bbc257bfca",
+    "provenance_sha256": "5e81763e0fad9ab5952fb6c7b094cf0e01d0a1b0883f469e63b2f672e8d7a0c4",
+    "plugin_pack_verification_sha256": "a126775bc0985d6926e9e21a70f4e5d743eb335e7fe38ee22ca876a3614c3b25"
+  },
+  "toolchain": {
+    "node": "v24.19.0",
+    "upstream_pnpm": "11.28.5",
+    "plugin_pnpm": "11.28.2",
+    "typescript": "6.0.3",
+    "esbuild": "0.25.12"
+  },
+  "local_evidence": {
+    "sdk_build": "PASS",
+    "plugin_builds": "9/9 PASS",
+    "plugin_pack_reader": "9/9 PASS",
+    "analytics_tests": "34 pass / 1 skipped",
+    "analytics_html_tests": "130 pass",
+    "crm_full_tests": "108 pass / 0 fail",
+    "runtime_check": "LOCAL_SIMULATION_ONLY",
+    "rollback_rc2": "PASS",
+    "npm_audit": "8 moderate / 0 high / 0 critical",
+    "main_pin_gate": "EXPECTED_PROFILE_DSH_PIN_MISMATCH"
+  },
+  "required_formal_evidence": [
+    "official_dependency_closure",
+    "security_risk_disposition",
+    "publisher_identity",
+    "signature",
+    "independent_verification",
+    "revocation_check",
+    "company_clean_machine_receipt",
+    "final_publisher_attestation"
+  ],
+  "owner": "project-owner",
+  "main_pin": {
+    "sdk_version": "0.1.7-rc.2",
+    "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443"
+  }
+}
