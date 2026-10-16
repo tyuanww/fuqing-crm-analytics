@@ -52,7 +52,7 @@ function profileDiff(current, previous) {
   };
 }
 
-export async function createPluginCandidate({ root: candidateRoot = root, plugin, packManifest = null, packSha256 = null, outputDir, statePath, profileManifest = null, previousProfile = null, serviceEvidencePath = null } = {}) {
+export async function createPluginCandidate({ root: candidateRoot = root, plugin, packManifest = null, packSha256 = null, outputDir, statePath, profileManifest = null, previousProfile = null, serviceEvidencePath = null, builderProvenancePath = null, requireGeneratedProvenance = Boolean(builderProvenancePath) } = {}) {
   const repo = resolve(candidateRoot);
   const fromPack = packManifest !== null;
   assert.ok(fromPack ? !plugin : !packSha256, 'PLUGIN_CANDIDATE_INPUT_CONFLICT');
@@ -83,7 +83,7 @@ export async function createPluginCandidate({ root: candidateRoot = root, plugin
   const serviceGate = await prepareServiceCompatibility(profile.profile.service_binding, serviceEvidencePath);
   await access(destination).catch(async error => { if (error.code !== 'ENOENT') throw error; await mkdir(destination, { recursive: true, mode: 0o700 }); });
   assert.equal((await readdir(destination)).length, 0, 'PLUGIN_CANDIDATE_OUTPUT_MUST_BE_EMPTY');
-  const packReceipt = packed?.receipt ?? await packPlugin({ plugin: pluginReal, outputDir: destination, manifestPath: resolve(destination, 'plugin-pack.json') });
+  const packReceipt = packed?.receipt ?? await packPlugin({ plugin: pluginReal, outputDir: destination, manifestPath: resolve(destination, 'plugin-pack.json'), builderProvenancePath, requireGeneratedProvenance });
   assert.equal(packReceipt.package_name, selected.id, 'PLUGIN_CANDIDATE_PACKAGE_ID_MISMATCH');
   if (packed) {
     await writeFile(resolve(destination, packReceipt.tarball.name), packed.archive, { mode: 0o600, flag: 'wx' });
@@ -159,9 +159,9 @@ function option(name) {
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
   try {
     if (process.argv.includes('--help') || process.argv.includes('-h')) {
-      console.log('Usage: pnpm dsh plugin candidate (--plugin /absolute/plugin | --pack-manifest /absolute/plugin-pack.json --pack-sha256 SHA256) --output-dir /absolute/output --state-path /absolute/state.json [--profile /relative/profile.json] [--previous-profile /relative/profile.json] [--service-evidence /absolute/receipt.json]');
+      console.log('Usage: pnpm dsh plugin candidate (--plugin /absolute/plugin | --pack-manifest /absolute/plugin-pack.json --pack-sha256 SHA256) --output-dir /absolute/output --state-path /absolute/state.json [--profile /relative/profile.json] [--previous-profile /relative/profile.json] [--service-evidence /absolute/receipt.json] [--builder-receipt /absolute/.build-provenance.json]');
     } else {
-      const candidate = await createPluginCandidate({ plugin: option('--plugin'), packManifest: option('--pack-manifest'), packSha256: option('--pack-sha256'), outputDir: option('--output-dir'), statePath: option('--state-path'), profileManifest: option('--profile'), previousProfile: option('--previous-profile'), serviceEvidencePath: option('--service-evidence') });
+      const candidate = await createPluginCandidate({ plugin: option('--plugin'), packManifest: option('--pack-manifest'), packSha256: option('--pack-sha256'), outputDir: option('--output-dir'), statePath: option('--state-path'), profileManifest: option('--profile'), previousProfile: option('--previous-profile'), serviceEvidencePath: option('--service-evidence'), builderProvenancePath: option('--builder-receipt') });
       console.log(JSON.stringify(candidate, null, 2));
     }
   } catch (error) {

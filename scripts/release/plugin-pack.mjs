@@ -19,6 +19,8 @@ import { tmpdir } from 'node:os';
 import { DSH_SDK_VERSION, PNPM_VERSION } from './toolchain.mjs';
 import { assertClean, scanTree } from './secret-scan.mjs';
 import { readArtifactFile, insideArtifact } from './service-artifact-evidence.mjs';
+import { GENERATED_PROVENANCE_SCHEMA, assertSourceSha, assertTreeShape,
+  canonicalTreeDigest, generatedPaths, readProvenanceFile } from './generated-provenance.mjs';
 
 const exec = promisify(execFile);
 const SHA256 = /^[a-f0-9]{64}$/;
@@ -134,9 +136,52 @@ async function inspectPackage(pluginRoot, compatibility = {}) {
   return { manifest, declared, declaredFiles };
 }
 
+async function currentBuildBytes(pluginRoot, inspected) {
+  const sourceTree = await canonicalTreeDigest(pluginRoot, {
+    exclude: ['.git', 'node_modules', 'lib', 'bundled-dependencies.json', '.build-provenance.json', 'build-provenance.json'],
+    allowSymlinks: false,
+  });
+  const generatedTree = await canonicalTreeDigest(pluginRoot, {
+    include: generatedPaths(inspected.declaredFiles),
+    allowSymlinks: false,
+  });
+  return { sourceTree, generatedTree };
+}
+
+async function verifyBuilderProvenance(pluginRoot, inspected, source, builderProvenancePath, { required = false } = {}) {
+  if (!builderProvenancePath) {
+    assert.ok(!required, 'PLUGIN_PACK_BUILD_PROVENANCE_REQUIRED');
+    const current = await currentBuildBytes(pluginRoot, inspected);
+    return { status: 'NOT_VERIFIED', schema_version: GENERATED_PROVENANCE_SCHEMA,
+      source: { git_sha: source.sha, sha256: current.sourceTree.sha256, entries: current.sourceTree.entries, bytes: current.sourceTree.bytes },
+      generated_tree: { sha256: current.generatedTree.sha256, entries: current.generatedTree.entries, bytes: current.generatedTree.bytes, records: current.generatedTree.records },
+      builder: { status: 'NOT_VERIFIED', clean: false, isolated: false }, builder_receipt_sha256: null };
+  }
+  const verified = await readProvenanceFile(safeAbsolute(builderProvenancePath, 'PLUGIN_PACK_BUILD_PROVENANCE_PATH_INVALID'));
+  const proof = verified.value;
+  assert.equal(proof.schema_version, 'dsh-plugin-build/v1', 'PLUGIN_PACK_BUILD_PROVENANCE_SCHEMA');
+  assert.equal(proof.status, 'PASS', 'PLUGIN_PACK_BUILD_PROVENANCE_STATUS');
+  assertSourceSha(proof.source?.git_sha, 'PLUGIN_PACK_BUILD_SOURCE_SHA');
+  assert.equal(proof.source.git_sha, source.sha, 'PLUGIN_PACK_BUILD_SOURCE_SHA_MISMATCH');
+  assertTreeShape({ ...proof.source, sha256: proof.source.tree_sha256 }, 'PLUGIN_PACK_BUILD_SOURCE_TREE');
+  assertTreeShape(proof.generated_tree, 'PLUGIN_PACK_BUILD_GENERATED_TREE');
+  assert.equal(proof.builder?.clean, true, 'PLUGIN_PACK_BUILD_NOT_CLEAN');
+  assert.equal(proof.builder?.isolated, true, 'PLUGIN_PACK_BUILD_NOT_ISOLATED');
+  assert.equal(proof.builder?.status, 'PASS', 'PLUGIN_PACK_BUILD_BUILDER_STATUS');
+  assert.match(proof.builder?.node ?? '', /^v?\d+\.\d+\.\d+$/, 'PLUGIN_PACK_BUILD_NODE');
+  assert.equal(Number(proof.builder.node.replace(/^v/, '').split('.')[0]), 24, 'PLUGIN_PACK_BUILD_NODE_MAJOR');
+  assert.equal(proof.builder?.pnpm, PNPM_VERSION, 'PLUGIN_PACK_BUILD_PNPM');
+  const current = await currentBuildBytes(pluginRoot, inspected);
+  assert.equal(current.sourceTree.sha256, proof.source.tree_sha256, 'PLUGIN_PACK_SOURCE_TREE_MISMATCH');
+  assert.equal(current.generatedTree.sha256, proof.generated_tree.sha256, 'PLUGIN_PACK_GENERATED_TREE_MISMATCH');
+  assert.equal(current.generatedTree.entries, proof.generated_tree.entries, 'PLUGIN_PACK_GENERATED_TREE_ENTRIES');
+  assert.equal(current.generatedTree.bytes, proof.generated_tree.bytes, 'PLUGIN_PACK_GENERATED_TREE_BYTES');
+  return { ...proof, source: { ...proof.source, sha256: proof.source.tree_sha256 }, builder_receipt_sha256: verified.sha256 };
+}
+
 /** Consume an explicitly pinned formal pack, without source checkout or pnpm. */
 export async function readPluginPack({ manifestPath, expectedSha256, expectedSdkVersion = DSH_SDK_VERSION,
-  expectedPnpmVersion = PNPM_VERSION } = {}) {
+  expectedPnpmVersion = PNPM_VERSION, requireGeneratedProvenance = false } = {}) {
   const path = safeAbsolute(manifestPath, 'PLUGIN_PACK_MANIFEST_INVALID');
   assert.match(expectedSha256 ?? '', SHA256, 'PLUGIN_PACK_MANIFEST_DIGEST_REQUIRED');
   const manifestBytes = await readArtifactFile(path, 256 * 1024);
@@ -148,6 +193,23 @@ export async function readPluginPack({ manifestPath, expectedSha256, expectedSdk
   assert.equal(receipt.dsh_pin, expectedSdkVersion, 'PLUGIN_PACK_DSH_PEER_INVALID');
   assert.match(receipt.source_sha ?? '', /^[a-f0-9]{40}$/, 'PLUGIN_PACK_GIT_SHA_INVALID');
   assert.equal(receipt.source_dirty, false, 'PLUGIN_PACK_SOURCE_DIRTY');
+  const provenance = receipt.generated_bytes_provenance;
+  if (requireGeneratedProvenance) assert.ok(provenance, 'PLUGIN_PACK_BUILD_PROVENANCE_REQUIRED');
+  if (provenance) {
+    assert.equal(provenance.schema_version, GENERATED_PROVENANCE_SCHEMA, 'PLUGIN_PACK_BUILD_PROVENANCE_SCHEMA');
+    if (requireGeneratedProvenance) assert.equal(provenance.status, 'PASS', 'PLUGIN_PACK_BUILD_PROVENANCE_STATUS');
+    assertTreeShape(provenance.source, 'PLUGIN_PACK_BUILD_SOURCE_TREE');
+    assertTreeShape(provenance.generated_tree, 'PLUGIN_PACK_BUILD_GENERATED_TREE');
+    assert.ok(provenance.builder && typeof provenance.builder === 'object', 'PLUGIN_PACK_BUILD_BUILDER');
+    assert.equal(provenance.builder.clean, provenance.status === 'PASS', 'PLUGIN_PACK_BUILD_CLEAN_FLAG');
+    if (provenance.status === 'PASS') {
+      assertSourceSha(provenance.source.git_sha, 'PLUGIN_PACK_BUILD_SOURCE_SHA');
+      assert.equal(provenance.source.git_sha, receipt.source_sha, 'PLUGIN_PACK_BUILD_SOURCE_SHA_MISMATCH');
+      assert.equal(provenance.builder.isolated, true, 'PLUGIN_PACK_BUILD_NOT_ISOLATED');
+      assert.equal(provenance.builder.pnpm, expectedPnpmVersion, 'PLUGIN_PACK_BUILD_PNPM');
+      assert.match(provenance.builder_receipt_sha256 ?? '', SHA256, 'PLUGIN_PACK_BUILD_RECEIPT_DIGEST');
+    }
+  }
   assert.equal(receipt.activation, 'NOT_RUN', 'PLUGIN_PACK_ALREADY_ACTIVE');
   assert.equal(receipt.state_path, 'NOT_APPLICABLE_PLUGIN_PACK_ONLY', 'PLUGIN_PACK_STATE_SCOPE');
   const pack = receipt.tarball;
@@ -191,6 +253,12 @@ export async function readPluginPack({ manifestPath, expectedSha256, expectedSdk
     assert.ok((await collectFiles(packageRoot, declared)).some(file => file.startsWith('lib/')), 'PLUGIN_PACK_BUILD_OUTPUT_REQUIRED');
     verifyEntrypoints(manifest, entries);
     assertClean(await scanTree(packageRoot, { maxBytes: MAX_PACK_BYTES, allowSyntheticFixtures: false }));
+    if (provenance?.status === 'PASS') {
+      const generatedTree = await canonicalTreeDigest(packageRoot, { include: generatedPaths(declared), allowSymlinks: false });
+      assert.equal(generatedTree.sha256, provenance.generated_tree.sha256, 'PLUGIN_PACK_GENERATED_TREE_MISMATCH');
+      assert.equal(generatedTree.entries, provenance.generated_tree.entries, 'PLUGIN_PACK_GENERATED_TREE_ENTRIES');
+      assert.equal(generatedTree.bytes, provenance.generated_tree.bytes, 'PLUGIN_PACK_GENERATED_TREE_BYTES');
+    }
     return { receipt, manifestBytes, archive, manifest };
   } finally {
     await rm(work, { recursive: true, force: true });
@@ -241,7 +309,8 @@ async function gitMetadata(pluginRoot) {
   }
 }
 
-export async function packPlugin({ plugin, outputDir, manifestPath, sdkVersion = DSH_SDK_VERSION,
+export async function packPlugin({ plugin, outputDir, manifestPath, builderProvenancePath = null,
+  requireGeneratedProvenance = Boolean(builderProvenancePath), sdkVersion = DSH_SDK_VERSION,
   pnpmVersion = PNPM_VERSION }) {
   const pluginRoot = safeAbsolute(plugin, 'PLUGIN_PACK_ROOT_INVALID');
   const destination = safeAbsolute(outputDir, 'PLUGIN_PACK_OUTPUT_INVALID');
@@ -254,6 +323,7 @@ export async function packPlugin({ plugin, outputDir, manifestPath, sdkVersion =
   const compatibility = { sdkVersion, pnpmVersion };
   const inspected = await inspectPackage(pluginRoot, compatibility);
   const source = await gitMetadata(pluginRoot);
+  const provenance = await verifyBuilderProvenance(pluginRoot, inspected, source, builderProvenancePath, { required: requireGeneratedProvenance });
   const expectedName = `${inspected.manifest.name.slice(1).replaceAll('/', '-')}-${inspected.manifest.version}.tgz`;
   const tarball = join(destination, expectedName);
   try { await access(tarball); throw new Error('PLUGIN_PACK_OUTPUT_EXISTS'); } catch (error) {
@@ -263,6 +333,8 @@ export async function packPlugin({ plugin, outputDir, manifestPath, sdkVersion =
   const work = await mkdtemp(join(destination, '.plugin-pack-'));
   try {
     const staging = await stagePackInput(pluginRoot, inspected, join(work, 'input'));
+    const actualPnpm = (await exec('pnpm', ['--version'], { cwd: staging, encoding: 'utf8', timeout: 15000 })).stdout.trim();
+    assert.equal(actualPnpm, pnpmVersion, 'PLUGIN_PACK_PNPM_VERSION');
     await exec('pnpm', ['pack', '--pack-destination', work], { cwd: staging, encoding: 'utf8', timeout: 180000, maxBuffer: 256 * 1024 });
     const packedPath = join(work, expectedName);
     const info = await lstat(packedPath);
@@ -294,6 +366,10 @@ export async function packPlugin({ plugin, outputDir, manifestPath, sdkVersion =
     const bytes = await readFile(packedPath);
     const packDigest = digest(bytes);
     assert.match(packDigest, SHA256, 'PLUGIN_PACK_DIGEST_INVALID');
+    const generatedBytesProvenance = {
+      ...provenance,
+      tarball: { name: basename(tarball), bytes: info.size, sha256: packDigest },
+    };
     const receipt = {
       schema_version: 'dsh-plugin-pack/v1',
       package_name: inspected.manifest.name,
@@ -302,6 +378,7 @@ export async function packPlugin({ plugin, outputDir, manifestPath, sdkVersion =
       source_sha: source.sha,
       source_dirty: source.dirty,
       tarball: { name: basename(tarball), bytes: info.size, sha256: packDigest },
+      generated_bytes_provenance: generatedBytesProvenance,
       entries: packageEntries,
       activation: 'NOT_RUN',
       state_path: 'NOT_APPLICABLE_PLUGIN_PACK_ONLY',
@@ -331,7 +408,8 @@ if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) 
     const plugin = option('--plugin');
     const outputDir = option('--output-dir');
     assert.ok(plugin && outputDir, 'Usage: node plugin-pack.mjs --plugin /absolute/plugin --output-dir /absolute/output [--manifest /absolute/manifest.json]');
-    const receipt = await packPlugin({ plugin, outputDir, manifestPath: option('--manifest') });
+    const builderProvenancePath = option('--builder-receipt');
+    const receipt = await packPlugin({ plugin, outputDir, manifestPath: option('--manifest'), builderProvenancePath });
     console.log(JSON.stringify(receipt, null, 2));
   } catch (error) {
     console.error(error?.message ?? String(error));

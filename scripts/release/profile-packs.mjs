@@ -20,7 +20,7 @@ function exact(value, keys, code) {
   assert.deepEqual(Object.keys(value).sort(), [...keys].sort(), code);
 }
 
-export async function loadProfilePacks({ inputsPath, toolchain = TOOLCHAIN } = {}) {
+export async function loadProfilePacks({ inputsPath, toolchain = TOOLCHAIN, requireGeneratedProvenance = false } = {}) {
   toolchain = validateToolchain(toolchain);
   assert.ok(typeof inputsPath === 'string' && isAbsolute(inputsPath), 'PROFILE_PACK_INPUTS_REQUIRED');
   const bytes = await readArtifactFile(inputsPath, 256 * 1024), input = JSON.parse(bytes);
@@ -44,7 +44,7 @@ export async function loadProfilePacks({ inputsPath, toolchain = TOOLCHAIN } = {
     const manifestBytes = await insideArtifact(root, row.manifest, 256 * 1024);
     assert.equal(hash(manifestBytes), row.sha256, 'PROFILE_PACK_MANIFEST_DIGEST');
     const packed = await readPluginPack({ manifestPath: join(root, row.manifest), expectedSha256: row.sha256,
-      expectedSdkVersion: toolchain.sdk_version, expectedPnpmVersion: toolchain.pnpm });
+      expectedSdkVersion: toolchain.sdk_version, expectedPnpmVersion: toolchain.pnpm, requireGeneratedProvenance });
     assert.equal(packed.receipt.package_name, row.id, 'PROFILE_PACK_PACKAGE_ID');
     plugins.push({ ...snapshot.profile.plugins[index], ...packed, manifestSha256: row.sha256 });
   }
