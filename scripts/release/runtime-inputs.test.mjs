@@ -89,6 +89,9 @@ test('offline policy reuse requires a prepared receipt bound to the exact lock a
   const prepared = await verifyRuntimePreparation(f.upstream);
   assert.equal(prepared.status, 'PREPARED');
   assert.equal(prepared.pnpm, UPSTREAM_PNPM_VERSION, 'official runtime receipt must not follow plugin manager upgrades');
+  await writeFile(join(f.upstream, 'packages/credentials-local/runtime-generated.js'), 'export const generated = false;');
+  await assert.rejects(() => verifyRuntimePreparation(f.upstream), /RUNTIME_PREPARATION_MISMATCH source_tree/);
+  await rm(join(f.upstream, 'packages/credentials-local/runtime-generated.js'));
   await writeFile(join(f.upstream, 'pnpm-workspace.yaml'), 'changed policy');
   await assert.rejects(() => verifyRuntimePreparation(f.upstream), /RUNTIME_PREPARATION_MISMATCH policy_sha256/);
   await writeFile(join(f.upstream, 'pnpm-lock.yaml'), 'changed lock');

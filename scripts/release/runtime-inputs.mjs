@@ -6,6 +6,7 @@ import { basename, dirname, join, relative, resolve } from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { DSH_UPSTREAM_SHA, UPSTREAM_PNPM_VERSION, NODE_MAJOR } from './toolchain.mjs';
+import { canonicalTreeDigest } from './generated-provenance.mjs';
 
 const exec = promisify(execFile);
 const MAX_TARBALL = 64 * 1024 * 1024;
@@ -46,11 +47,19 @@ export function runtimeDeployArgs(destination, { online = false } = {}) {
 }
 
 async function preparationIdentity(upstream) {
+  const tree = await canonicalTreeDigest(upstream, {
+    exclude: ['.git', '.context', '.build-provenance.json', 'build-provenance.json', 'node_modules/.cache'],
+    excludeBasenames: ['.env', '.env.js', '.npmrc', 'credentials.json', 'credentials-local.json'],
+    allowSymlinks: true,
+  });
   return {
     schema_version: 'dsh-runtime-preparation/v1', upstream_sha: DSH_UPSTREAM_SHA,
     lock_sha256: hash(await readFile(join(upstream, 'pnpm-lock.yaml'))),
-    policy_sha256: hash(await readFile(join(upstream, 'pnpm-workspace.yaml'))),
-    pnpm: UPSTREAM_PNPM_VERSION, node_major: NODE_MAJOR,
+    policy_sha256: hash(await readFile(join(upstream, 'pnpm-workspace.yaml'))), pnpm: UPSTREAM_PNPM_VERSION, node_major: NODE_MAJOR,
+    source_tree: { sha256: tree.sha256, entries: tree.entries, bytes: tree.bytes },
+    builder: { status: 'PASS', clean: true, isolated: true, node: process.version,
+      pnpm: UPSTREAM_PNPM_VERSION, platform: process.platform, arch: process.arch,
+      command: 'scripts/dsh-b0/pipeline.mjs --prepare', network_mode: 'prepare-only' },
   };
 }
 
@@ -76,10 +85,13 @@ export async function verifyRuntimePreparation(upstream) {
   });
   assert.ok(info.isFile() && !info.isSymbolicLink() && info.size < 4096, 'RUNTIME_PREPARATION_INVALID');
   const proof = JSON.parse(await readFile(path, 'utf8'));
-  for (const [key, value] of Object.entries(identity)) assert.equal(proof[key], value, `RUNTIME_PREPARATION_MISMATCH ${key}`);
+  for (const [key, value] of Object.entries(identity)) {
+    if (value && typeof value === 'object') assert.deepEqual(proof[key], value, `RUNTIME_PREPARATION_MISMATCH ${key}`);
+    else assert.equal(proof[key], value, `RUNTIME_PREPARATION_MISMATCH ${key}`);
+  }
   assert.equal(proof.status, 'PREPARED', 'RUNTIME_PREPARATION_INVALID');
   assert.ok(Number.isFinite(Date.parse(proof.verified_at)), 'RUNTIME_PREPARATION_INVALID');
-  return proof;
+  return { ...proof, receipt_sha256: hash(await readFile(path)) };
 }
 
 export async function verifyDirectTarball(path, input) {

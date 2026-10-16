@@ -11,7 +11,7 @@ import { copyFile, lstat, mkdir, mkdtemp, rename, rm, writeFile } from 'node:fs/
 import { tmpdir } from 'node:os';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { receiveArtifact } from './artifact.mjs';
+import { receiveArtifact, sha256 } from './artifact.mjs';
 import { releaseAssetNames, summarizePreflight, verifyPreflight, UPSTREAM_SHA } from './preflight-bundle.mjs';
 import { collectReleaseReadiness, printReadiness } from './readiness.mjs';
 import { DSH_SDK_VERSION } from './toolchain.mjs';
@@ -139,6 +139,7 @@ const runsRoot = join(root, '.context/release-preflight-runs');
 await mkdir(runsRoot, { recursive: true, mode: 0o700 });
 const runDir = await mkdtemp(join(runsRoot, `${tag}-`));
 const runtimeOutput = join(runDir, releaseAssetNames(tag).find(name => name.startsWith('shinemage-dsh-upstream-runtime-')));
+const runtimeProvenance = `${runtimeOutput}.provenance.json`;
 const bundleDir = join(runDir, 'bundle');
 try {
   await stage('prepare', () => run(process.execPath, ['scripts/dsh-b0/pipeline.mjs', '--prepare', '--python', python], { B0_BUILD_UPSTREAM: null, DSH_UPSTREAM_CHECKOUT: upstream }));
@@ -158,7 +159,17 @@ try {
   // Prepare is the only stage that may hydrate the pinned checkout. Once it
   // succeeds, package that exact pnpm store offline so a transient registry
   // or CDN outage cannot invalidate an otherwise ready candidate.
-  await stage('runtime', () => run(process.execPath, ['scripts/release/runtime-bundle.mjs', '--upstream', upstream, '--output', runtimeOutput]));
+  await stage('runtime', async () => {
+    run(process.execPath, ['scripts/release/runtime-bundle.mjs', '--upstream', upstream, '--output', runtimeOutput, '--provenance', runtimeProvenance]);
+    const proofInfo = await lstat(runtimeProvenance);
+    assert.ok(proofInfo.isFile() && !proofInfo.isSymbolicLink(), 'PREFLIGHT_RUNTIME_PROVENANCE_FILE');
+    const proof = JSON.parse(await readFile(runtimeProvenance, 'utf8'));
+    assert.equal(proof.schema_version, 'dsh-generated-bytes/v1', 'PREFLIGHT_RUNTIME_PROVENANCE_SCHEMA');
+    assert.equal(proof.status, 'PASS', 'PREFLIGHT_RUNTIME_PROVENANCE_STATUS');
+    assert.equal(proof.upstream_sha, pin, 'PREFLIGHT_RUNTIME_PROVENANCE_UPSTREAM');
+    assert.equal(proof.archive.bytes, (await lstat(runtimeOutput)).size, 'PREFLIGHT_RUNTIME_PROVENANCE_BYTES');
+    assert.equal(proof.archive.sha256, await sha256(runtimeOutput), 'PREFLIGHT_RUNTIME_PROVENANCE_DIGEST');
+  });
   await stage('release', () => run(process.execPath, ['scripts/dsh.mjs', 'release', '--offline', '--tag', tag,
     ...(serviceEvidencePath ? ['--service-evidence', serviceEvidencePath] : [])],
   { DSH_UPSTREAM_RUNTIME_BUNDLE: runtimeOutput, RELEASE_STATE_PATH: join(runDir, 'release-state.json'),

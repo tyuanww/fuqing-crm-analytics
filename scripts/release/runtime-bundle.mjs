@@ -2,6 +2,7 @@
 
 /** Build the immutable, production-only DSH runtime closure from a pinned checkout. */
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { access, cp, lstat, mkdir, mkdtemp, readdir, readFile, readlink, realpath, rm, stat, symlink, writeFile } from 'node:fs/promises';
 import { execFile as execFileCallback } from 'node:child_process';
 import { promisify } from 'node:util';
@@ -11,6 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { scanText } from './secret-scan.mjs';
 import { DSH_UPSTREAM_SHA as PIN } from './toolchain.mjs';
 import { bindRuntimeInputs, prepareRuntimeInputs, runtimeDeployArgs, stageRuntimeWorkspace, verifyRuntimePreparation } from './runtime-inputs.mjs';
+import { canonicalTreeDigest, GENERATED_PROVENANCE_SCHEMA } from './generated-provenance.mjs';
 
 const execFile = promisify(execFileCallback);
 const REQUIRED = [
@@ -234,13 +236,14 @@ function option(name) {
 const upstream = await realpath(option('--upstream'));
 const output = option('--output');
 const online = process.argv.includes('--online');
-assert.equal(process.argv.filter(arg => arg.startsWith('--')).length, online ? 3 : 2, 'RUNTIME_BUNDLE_OPTION_UNKNOWN');
+const provenanceOption = process.argv.includes('--provenance') ? option('--provenance') : `${output}.provenance.json`;
+assert.equal(process.argv.filter(arg => arg.startsWith('--')).length, online ? (process.argv.includes('--provenance') ? 4 : 3) : (process.argv.includes('--provenance') ? 3 : 2), 'RUNTIME_BUNDLE_OPTION_UNKNOWN');
 assert.equal(await access(join(upstream, '.git')).then(() => true, () => false), true, 'UPSTREAM_CHECKOUT_REQUIRED');
 const upstreamSha = (await execFile('git', ['-C', upstream, 'rev-parse', 'HEAD'])).stdout.trim();
 assert.equal(upstreamSha, PIN, 'UPSTREAM_SHA_MISMATCH');
 const upstreamStatus = (await execFile('git', ['-C', upstream, 'status', '--porcelain', '--untracked-files=no'])).stdout.trim();
 assert.equal(upstreamStatus, '', `UPSTREAM_CHECKOUT_DIRTY ${upstreamStatus}`);
-if (!online) await verifyRuntimePreparation(upstream);
+const preparation = online ? null : await verifyRuntimePreparation(upstream);
 const outputInfo = await stat(output).catch(error => {
   if (error.code === 'ENOENT') return null;
   throw error;
@@ -275,12 +278,33 @@ try {
     maxBuffer: 4 * 1024 * 1024,
   });
   await restoreStagedMetadata();
+  const sourceTree = await canonicalTreeDigest(workspace, {
+    exclude: ['.git', '.context', '.build-provenance.json', 'build-provenance.json', 'node_modules/.cache'],
+    excludeBasenames: ['.env', '.env.js', '.npmrc', 'credentials.json', 'credentials-local.json'],
+    allowSymlinks: true,
+  });
+  if (preparation) assert.equal(sourceTree.sha256, preparation.source_tree.sha256, 'RUNTIME_SOURCE_TREE_MISMATCH');
   const materialized = await materializeExternalSymlinks(deployed, workspace, upstreamSha);
   for (const path of REQUIRED) await access(join(deployed, path));
   await execFile('tar', ['--zstd', '--no-xattrs', '--no-acls', '-cf', output, '-C', deployed, '.'], { maxBuffer: 4 * 1024 * 1024 });
   const info = await stat(output);
   assert.ok(info.size > 0, 'RUNTIME_BUNDLE_EMPTY');
-  console.log(JSON.stringify({ status: 'BUILT', upstream_sha: upstreamSha, network_mode: online ? 'online' : 'offline', path: output, bytes: info.size, ...materialized }));
+  const archiveBytes = await readFile(output);
+  const archiveSha256 = createHash('sha256').update(archiveBytes).digest('hex');
+  const generatedTree = await canonicalTreeDigest(deployed, { allowSymlinks: true });
+  const pnpm = (await execFile('corepack', ['pnpm', '--version'], { cwd: workspace, encoding: 'utf8', timeout: 15000 })).stdout.trim();
+  const provenance = {
+    schema_version: GENERATED_PROVENANCE_SCHEMA, status: 'PASS', upstream_sha: upstreamSha,
+    source_tree: { sha256: sourceTree.sha256, entries: sourceTree.entries, bytes: sourceTree.bytes },
+    generated_tree: { sha256: generatedTree.sha256, entries: generatedTree.entries, bytes: generatedTree.bytes },
+    builder: { status: 'PASS', clean: true, isolated: true, node: process.version, pnpm,
+      platform: process.platform, arch: process.arch, command: 'scripts/release/runtime-bundle.mjs',
+      network_mode: online ? 'online' : 'offline' },
+    preparation_receipt_sha256: preparation?.receipt_sha256 ?? null,
+    archive: { name: output.split('/').at(-1), bytes: info.size, sha256: archiveSha256 },
+  };
+  await writeFile(provenanceOption, `${JSON.stringify(provenance, null, 2)}\n`, { mode: 0o600, flag: 'wx' });
+  console.log(JSON.stringify({ status: 'BUILT', upstream_sha: upstreamSha, network_mode: online ? 'online' : 'offline', path: output, provenance: provenanceOption, bytes: info.size, sha256: archiveSha256, ...materialized }));
 } finally {
   await rm(work, { recursive: true, force: true });
 }

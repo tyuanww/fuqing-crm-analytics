@@ -356,6 +356,11 @@ test('runtime bundle enforces production pruning, secret scan and peer collision
   assert.match(source, /\['cordis', 'cosmokit'\]/);
   assert.match(source, /runtimeDeployArgs\(deployed, \{ online \}\)/);
   assert.match(source, /stageRuntimeWorkspace/);
+  assert.match(source, /GENERATED_PROVENANCE_SCHEMA/);
+  assert.match(source, /canonicalTreeDigest/);
+  assert.match(source, /provenanceOption/);
+  assert.match(source, /archiveSha256/);
+  assert.match(source, /generatedTree/);
   assert.match(source, /cwd: workspace/);
   assert.doesNotMatch(source, /scanAssignments:\s*!\/\(\^\|\\\/\)node_modules/);
 });
