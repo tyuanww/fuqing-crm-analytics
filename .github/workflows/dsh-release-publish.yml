@@ -405,7 +405,7 @@ jobs:
           PY
 
       - name: Preserve the publication sidecar as CI evidence
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: dsh-rc2-publication-${{ inputs.release_tag }}
           path: ${{ runner.temp }}/dsh-evidence/release-publication.v1.json

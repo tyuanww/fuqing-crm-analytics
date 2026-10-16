@@ -178,7 +178,7 @@ jobs:
         with:
           subject-path: .context/release-evidence/${{ inputs.release_tag }}/shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst
       - name: Upload evidence (never publish)
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: dsh-rc2-evidence-${{ inputs.release_tag }}
           path: .context/release-evidence/${{ inputs.release_tag }}/
