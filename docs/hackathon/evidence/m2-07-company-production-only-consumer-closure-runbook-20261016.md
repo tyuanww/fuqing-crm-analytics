@@ -57,6 +57,21 @@ local provenance sha256=0bf6165fc9e48f9e8c60096d5a75195b6d7f4376200158bfd3f78792
 4. 使用公司批准的 registry、网络出口和缓存策略；不要把 registry token、KMS token 或私钥写入回执。
 5. 生产安装必须排除 devDependencies、脚本和本地 workspace/link 依赖。
 
+公司 runner 先定义统一的 SHA-256 命令。优先使用 `sha256sum`，没有时才使用 `shasum -a 256`；两者都没有必须停止，不能跳过摘要核对：
+
+```sh
+sha256() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1"
+  elif command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$1"
+  else
+    echo "SHA256_TOOL_NOT_FOUND: install/use the company-approved checksum tool" >&2
+    return 127
+  fi
+}
+```
+
 ## 执行步骤
 
 ### 0. 接收和校验输入
@@ -69,11 +84,11 @@ SDK_ARTIFACT=/secure/input/deepseek-ai-dsh-0.2.1-alpha.4.tgz
 SDK_SBOM=/secure/input/sbom-alpha4-r1.json
 SDK_PROVENANCE=/secure/input/provenance-alpha4-r1.json
 
-shasum -a 256 "$ARTIFACT"
-shasum -a 256 "$PACK_MANIFEST"
-shasum -a 256 "$SDK_ARTIFACT"
-shasum -a 256 "$SDK_SBOM"
-shasum -a 256 "$SDK_PROVENANCE"
+sha256 "$ARTIFACT"
+sha256 "$PACK_MANIFEST"
+sha256 "$SDK_ARTIFACT"
+sha256 "$SDK_SBOM"
+sha256 "$SDK_PROVENANCE"
 ```
 
 只有 CRM tarball SHA 等于固定 `a994...634d`、SDK artifact SHA 等于固定 `9f4f...8d6` 的输入才可继续。将完整命令、输出和退出码写入 `commands.log`。
@@ -121,7 +136,7 @@ test "$INSTALL_EXIT" -eq 0
 
 ```sh
 cp package-lock.json receipt/package-lock.json
-shasum -a 256 package-lock.json | tee receipt/package-lock.sha256
+sha256 package-lock.json | tee receipt/package-lock.sha256
 ```
 
 随后在新空目录用同一 `package.json` 和 lockfile 执行冷复验：
@@ -142,7 +157,7 @@ npm ci --omit=dev --ignore-scripts --no-audit --no-fund 2>&1 | tee ci-install.lo
 
 ```sh
 npm ls --omit=dev --all --json > dependency-graph.json
-printf 'dependency_graph_sha256='; shasum -a 256 dependency-graph.json
+printf 'dependency_graph_sha256='; sha256 dependency-graph.json
 ```
 
 递归检查必须确认：
@@ -183,7 +198,7 @@ for (const id of ['@shine-mage/dsh-crm-knowledge', '@shine-mage/dsh-crm-knowledg
 }
 if (failed) process.exitCode = 1;
 NODE
-printf 'runtime_check_sha256='; shasum -a 256 runtime-check.log
+printf 'runtime_check_sha256='; sha256 runtime-check.log
 ```
 
 所有 runtime import 必须为 `PASS`。任何 KaTeX、CSS、CRM 或 host import 失败都不能标记 closure PASS。
@@ -194,7 +209,7 @@ printf 'runtime_check_sha256='; shasum -a 256 runtime-check.log
 
 ```sh
 npm sbom --omit=dev --sbom-format=cyclonedx > sbom-production.json
-printf 'sbom_sha256='; shasum -a 256 sbom-production.json
+printf 'sbom_sha256='; sha256 sbom-production.json
 python3 -m json.tool sbom-production.json >/dev/null
 ```
 

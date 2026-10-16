@@ -32,6 +32,7 @@
 | runner | 公司批准的 staging 或受控 CI runner；空目录、无历史 `node_modules` | 未提供 | `PENDING_COMPANY_RUNNER` |
 | Node | `v24.19.0` | `v25.8.2` | `BLOCKED_VERSION_MISMATCH` |
 | package manager | 公司批准的 npm 或 pnpm；记录版本、registry 和 frozen lock 行为 | npm `11.21.0`、pnpm `11.28.2`，无公司批准标识 | `PENDING_APPROVAL` |
+| SHA-256 命令 | 使用 `sha256sum`，否则使用 `shasum -a 256`；两者都缺失必须停止 | 本机 `sha256sum=/sbin/sha256sum`，`shasum=NOT_FOUND` | `LOCAL_FALLBACK_READY` |
 | SBOM | 公司批准的 SBOM 工具和版本 | `company-sbom`、`syft`、`cyclonedx`、`bom` 均未找到 | `NOT_FOUND` |
 | runtime checker | 公司批准的安装树检查器 | `company-runtime-check` 未找到 | `NOT_FOUND` |
 | closure verifier | 公司批准的 graph/SBOM/provenance 独立核验器 | `company-closure`、`slsa-verifier`、`cosign`、`in-toto` 未找到 | `NOT_FOUND` |
