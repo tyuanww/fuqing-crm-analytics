@@ -1,0 +1,32 @@
+{
+  "schema_version": "shinemage-production-target-authorization/v1",
+  "recorded_on": "2026-10-13",
+  "decision": {
+    "target": "100.93.46.46",
+    "role": "authorized-test-and-production",
+    "cloud_migration": "DEFERRED",
+    "authorized_by_user": true
+  },
+  "effects": {
+    "m2_03": "TARGET_PREFLIGHT_PASS / USER_AUTHORIZED_TEST_PROD",
+    "target_preflight": "SERVICE_TARGET_PREFLIGHT_PASS",
+    "source_http": "PASS_JOURNAL_SEQ_3",
+    "terminal_recovery": "PASS_JOURNAL_SEQ_4",
+    "candidate_registration": "NOT_RUN",
+    "activation": "NOT_RUN",
+    "release_ready": false
+  },
+  "remaining_gates": [
+    "candidate-bound browser receipt",
+    "standalone COCKPIT_EXAMPLE_PACKAGE and accessibility evidence",
+    "authenticated real model/CRM/WeKnora UAT",
+    "SDK supply-chain gates",
+    "activation/canary/rollback and release authorization"
+  ],
+  "boundaries": [
+    "没有写入主仓正式 profile/journal。",
+    "没有替换或激活现役 DSH。",
+    "没有读取真实业务数据或调用真实模型。",
+    "没有 push；security-audit-skill/ 保持任务外未跟踪。"
+  ]
+}

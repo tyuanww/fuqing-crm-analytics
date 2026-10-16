@@ -4,7 +4,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { isAbsolute, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { installProfilePacks, loadProfilePacks } from '../release/profile-packs.mjs';
-import { readToolchain, verifyUpstream } from '../dsh-dev/pin.mjs';
+import { readToolchain, readToolchainFile, validateToolchain, verifyUpstream } from '../dsh-dev/pin.mjs';
 import { inspectDeclaredPlugin } from './prepare-profile.mjs';
 
 const CRM = '@shine-mage/dsh-crm-knowledge', KNOWLEDGE = '@shine-mage/dsh-knowledge';
@@ -14,26 +14,35 @@ const repo = new URL('../..', import.meta.url);
 const load = path => import(pathToFileURL(path).href);
 
 /** Validate all package inputs before creating a runtime or listening on a port. */
-export async function readCompositionInputs({ inputsPath, pageInputsPath } = {}) {
-  const packs = await loadProfilePacks({ inputsPath });
-  const pages = pageInputsPath === undefined ? undefined : await loadProfilePacks({ inputsPath: pageInputsPath });
-  return validateCompositionPacks({ packs, pages });
+export async function resolveCompositionToolchain(toolchain) {
+  if (toolchain !== undefined) return validateToolchain(toolchain);
+  const candidate = process.env.DSH_COMPOSITION_TOOLCHAIN;
+  return candidate !== undefined ? readToolchainFile(candidate) : readToolchain(fileURLToPath(repo));
+}
+
+export async function readCompositionInputs({ inputsPath, pageInputsPath, toolchain, cordisPeerVersion } = {}) {
+  toolchain = await resolveCompositionToolchain(toolchain);
+  const packs = await loadProfilePacks({ inputsPath, toolchain });
+  const pages = pageInputsPath === undefined ? undefined : await loadProfilePacks({ inputsPath: pageInputsPath, toolchain });
+  return validateCompositionPacks({ packs, pages, toolchain,
+    cordisPeerVersion: cordisPeerVersion ?? process.env.CRM_COMPOSITION_CORDIS_PEER ?? '4.0.4' });
 }
 
 /** Shared preflight for already verified packages; no writes or runtime import. */
-export function validateCompositionPacks({ packs, pages }) {
+export function validateCompositionPacks({ packs, pages, toolchain, cordisPeerVersion = '4.0.4' }) {
+  const sdkVersion = toolchain?.sdk_version ?? '0.1.7-rc.2';
   assert.equal(packs.profile.service_binding, undefined, 'CRM_COMPOSITION_SERVICE_BINDING_REQUIRES_CANDIDATE');
   assert.deepEqual(packs.plugins.map(row => row.id).sort(), [CRM, KNOWLEDGE].sort(), 'CRM_COMPOSITION_SELECTION');
   const crm = packs.plugins.find(row => row.id === CRM), knowledge = packs.plugins.find(row => row.id === KNOWLEDGE);
-  inspectDeclaredPlugin(crm.manifest, CRM, { '.': 'lib/index.js', './host': 'lib/host.js', './client': 'lib/client.js' }, 'crm', 'CRM_COMPOSITION');
-  inspectDeclaredPlugin(knowledge.manifest, KNOWLEDGE, { '.': 'lib/index.js', './graph-tools': 'lib/graph-tools.js' }, 'knowledge', 'CRM_COMPOSITION');
+  inspectDeclaredPlugin(crm.manifest, CRM, { '.': 'lib/index.js', './host': 'lib/host.js', './client': 'lib/client.js' }, 'crm', 'CRM_COMPOSITION', { dshSdkVersion: sdkVersion, cordisVersion: cordisPeerVersion });
+  inspectDeclaredPlugin(knowledge.manifest, KNOWLEDGE, { '.': 'lib/index.js', './graph-tools': 'lib/graph-tools.js' }, 'knowledge', 'CRM_COMPOSITION', { dshSdkVersion: sdkVersion, cordisVersion: cordisPeerVersion });
   if (pages !== undefined) {
     assert.equal(pages.profile.service_binding, undefined, 'CRM_COMPOSITION_SERVICE_BINDING_REQUIRES_CANDIDATE');
     assert.equal(pages.profile.dsh.sdk_version, packs.profile.dsh.sdk_version, 'CRM_COMPOSITION_PAGE_SDK');
     assert.ok(pages.plugins.every(row => !packs.plugins.some(main => main.id === row.id)), 'CRM_COMPOSITION_PAGE_SELECTION_OVERLAP');
     const page = pages.plugins.find(row => row.id === PAGE);
     assert.ok(page, 'CRM_COMPOSITION_PAGE_REQUIRED');
-    inspectDeclaredPlugin(page.manifest, PAGE, { './page-tools': 'lib/page-tools.js' }, undefined, 'CRM_COMPOSITION_PAGE');
+    inspectDeclaredPlugin(page.manifest, PAGE, { './page-tools': 'lib/page-tools.js' }, undefined, 'CRM_COMPOSITION_PAGE', { dshSdkVersion: sdkVersion, cordisVersion: cordisPeerVersion });
   }
   return { packs, pages };
 }
@@ -45,15 +54,17 @@ export async function loadComposition({ scope, page = false } = {}) {
   const inputsPath = process.env.CRM_COMPOSITION_PACK_INPUTS;
   const pageInputsPath = page ? process.env.CRM_COMPOSITION_PAGE_INPUTS : undefined;
   if (page) assert.ok(pageInputsPath && isAbsolute(pageInputsPath), 'CRM_COMPOSITION_PAGE_INPUTS_REQUIRED: NOT_RUN without fixed page packs');
-  const { packs, pages } = await readCompositionInputs({ inputsPath, pageInputsPath });
+  const toolchain = await resolveCompositionToolchain();
+  const { packs, pages } = await readCompositionInputs({ inputsPath, pageInputsPath, toolchain });
   const upstream = process.env.B0_BUILD_UPSTREAM, base = process.env.CRM_COMPOSITION_OUTPUT;
   assert.ok(upstream && isAbsolute(upstream), 'CRM_COMPOSITION_UPSTREAM_REQUIRED');
   assert.ok(base && isAbsolute(base), 'CRM_COMPOSITION_OUTPUT_REQUIRED');
-  const pin = await readToolchain(fileURLToPath(repo));
+  const pin = toolchain;
   const verified = await verifyUpstream(upstream, pin);
   const anchor = join(upstream, 'apps/cli/package.json');
   const cordis = JSON.parse(await readFile(join(upstream, 'vendor/cordis/package.json'), 'utf8'));
-  assert.equal(cordis.version, '4.0.4', 'CRM_COMPOSITION_CORDIS_RUNTIME');
+  const cordisRuntimeVersion = process.env.CRM_COMPOSITION_CORDIS_RUNTIME ?? '4.0.4';
+  assert.equal(cordis.version, cordisRuntimeVersion, 'CRM_COMPOSITION_CORDIS_RUNTIME');
   assert.equal(packs.profile.dsh.sdk_version, pin.sdk_version, 'CRM_COMPOSITION_PIN');
   const output = join(base, scope), home = join(output, 'home');
   await mkdir(output, { mode: 0o700 });
@@ -84,7 +95,9 @@ export async function loadComposition({ scope, page = false } = {}) {
       if (id !== PAGE) assert.equal(runtimeCordis?.version, cordis.version, 'CRM_COMPOSITION_CORDIS_RESOLUTION');
       return { id, tools: { version: tools.version, dir: tools.dir }, cordis: runtimeCordis ? { version: runtimeCordis.version, dir: runtimeCordis.dir } : null };
     });
-    const receipt = { schema: 'shinemage-pack-composition-inputs/v1', scope, verified, cordis: { declared: '4.0.4', runtime: cordis.version },
+    const receipt = { schema: 'shinemage-pack-composition-inputs/v1', scope, verified,
+      toolchain: { sdk_version: pin.sdk_version, upstream_sha: pin.upstream_sha },
+      cordis: { declared: process.env.CRM_COMPOSITION_CORDIS_PEER ?? '4.0.4', runtime: cordis.version },
       packages: installed, page_packages: installedPages ?? null, bindings,
       coverage: 'public contract composition with official resolver and synthetic HTTP fixtures',
       official_plugin_add: 'NOT_RUN', full_host: 'NOT_RUN', candidate_admission: 'NOT_RUN', real_business: 'NOT_RUN', release_ready: false };

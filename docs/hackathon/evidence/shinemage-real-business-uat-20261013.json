@@ -1,0 +1,141 @@
+{
+  "schema_version": "shinemage-real-business-uat/v1",
+  "recorded_on": "2026-10-13",
+  "target": {
+    "address": "100.93.46.46",
+    "role": "authorized-test-and-production",
+    "public_entry": "https://app.tyuan.chat/",
+    "business_entry": "https://board.tyuan.chat/audience"
+  },
+  "user_session": {
+    "aside_login": "USER_COMPLETED",
+    "board_authentication": "PASS",
+    "workbench_account_label": "未登录",
+    "note": "board 与 workbench 的登录状态由各自入口管理；不把其中一个入口的状态继承给另一个。",
+    "candidate_login": "USER_COMPLETED",
+    "candidate_crm_binding": "LOGIN_BOUND"
+  },
+  "real_model": {
+    "model": "DeepSeek-V41-Flash",
+    "reasoning": "High",
+    "preset": "知识库问答",
+    "status": "PASS",
+    "writes": "NOT_RUN",
+    "tool_calls_observed": [
+      "weknora_search",
+      "weknora_read_document"
+    ],
+    "source_titles_returned": 4
+  },
+  "weknora": {
+    "status": "PASS",
+    "citation_scope": "source_titles_and_passages",
+    "business_data_read": false,
+    "writes": "NOT_RUN"
+  },
+  "crm_board": {
+    "status": "PASS_READ_ONLY",
+    "first_request": "503_RETRIED",
+    "date_range": [
+      "2026-01-01",
+      "2026-10-12"
+    ],
+    "channel": "全店",
+    "period": "YTD",
+    "aggregate_cards_loaded": true,
+    "raw_metric_values_recorded": false,
+    "customer_identifiers_recorded": false,
+    "writes": "NOT_RUN"
+  },
+  "crm_agent_tool": {
+    "requested_tool": "query_crm_dashboard_gsv",
+    "status": "BLOCKED_TOOL_NOT_EXPOSED",
+    "tool_invoked": false,
+    "model_reported_missing_from_tool_list": true,
+    "fallback_to_terminal_or_repo": false
+  },
+  "plugin_assembly": {
+    "status": "UI_ONLY_COMPONENTS_OBSERVED",
+    "state_changed": false,
+    "plugins": [
+      {
+        "id": "@shine-mage/dsh-analytics-workbench-b0",
+        "version": "v0.0.0-b0",
+        "component": "analytics-workbench-ui",
+        "running": true
+      },
+      {
+        "id": "@shine-mage/dsh-shine-query",
+        "version": "v0.0.0-b0",
+        "component": "shine-query-ui",
+        "running": true
+      }
+    ],
+    "crm_provider_exposed": false
+  },
+  "static_registration": {
+    "crm_provider_source": "dsh-plugins/crm-knowledge/src/index.ts",
+    "crm_provider_tool": "query_crm_dashboard_gsv",
+    "ui_source": "dsh-plugins/shine-query/src/index.ts",
+    "ui_source_exports": [
+      "name",
+      "inject",
+      "apply"
+    ],
+    "b0_app_boundary": "backend/analytics_first_purchase_app.py: no native tool, catalog selection, model, or CRM service enabled",
+    "interpretation": "runtime composition/session assembly gap; not a CRM endpoint health failure"
+  },
+  "remaining": {
+    "save_or_cockpit_mutation": "NOT_RUN_READ_ONLY_SCOPE",
+    "permission_failure": "NOT_RUN",
+    "session_recovery": "NOT_RUN",
+    "human_business_representative": "NOT_RUN",
+    "release_ready": false,
+    "live_standard_session_tool_surface": "NOT_EXPOSED / NOT_RUN",
+    "candidate_readonly_uat": "PASS"
+  },
+  "boundaries": [
+    "只记录入口、工具名、来源标题和聚合页面状态，不记录真实指标数值、客户标识、名单或凭据。",
+    "没有生成或保存驾驶舱，没有修改生产数据，没有激活 candidate。",
+    "模型工具清单缺少 query_crm_dashboard_gsv 时保持 fail-closed，不用仓库读取或终端结果冒充真实 CRM 工具调用。",
+    "候选凭据由用户在候选 Models 页面手工保存，CRM 账号由用户在当前对话的连接表单手工绑定；凭据不进入聊天、仓库、日志或证据文件。"
+  ],
+  "candidate_readonly_uat": {
+    "runtime": "m2-06-candidate-r4",
+    "web_port": 4332,
+    "bridge_port": 4336,
+    "access_mode": "仅可查看",
+    "model": "DeepSeek-V41-Flash",
+    "reasoning": "High",
+    "status": "PASS",
+    "provider_credential": "USER_SAVED_IN_CANDIDATE_MODELS_PAGE",
+    "crm_service_health": "LOGIN_BOUND",
+    "crm_gsv": {
+      "status": "PASS_READ_ONLY",
+      "tool": "query_crm_dashboard_gsv",
+      "invocations": 1,
+      "date_range": [
+        "2026-01-01",
+        "2026-01-07"
+      ],
+      "channel": "all",
+      "exclude_low_price": false,
+      "source": "authenticated_crm_metrics_service",
+      "contains_real_data": true,
+      "synthetic": false,
+      "coverage": "7/7 calendar days",
+      "daily_sum_matches": true,
+      "backend_version_verified": false,
+      "raw_values_recorded": false,
+      "customer_identifiers_recorded": false,
+      "writes": "NOT_RUN"
+    },
+    "weknora_readonly": "PASS",
+    "remaining": [
+      "save_or_cockpit_mutation",
+      "permission_failure",
+      "session_recovery",
+      "human_business_representative"
+    ]
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "schema_version": "shinemage-candidate-browser-accessibility/v1",
+  "candidate_digest": "125c8e538816835cad212048b8fd0302d98588d704b09de559789df9bf6e6bdb",
+  "status": "PARTIAL",
+  "scope": "candidate-bound-headed-browser-keyboard-accessibility",
+  "driver": "Aside headed",
+  "headed": true,
+  "target": "http://127.0.0.1:4332/",
+  "keyboard_focus": {
+    "status": "OBSERVED",
+    "steps": 12,
+    "sequence": [
+      "添加文件或调用指令",
+      "访问模式，当前：仅可查看",
+      "选择模型，当前 DeepSeek-V41-Flash，推理等级 High",
+      "打开语音输入引导",
+      "生成驾驶舱",
+      "body",
+      "新建会话",
+      "收起侧边栏",
+      "新建会话",
+      "插件",
+      "驾驶舱",
+      "数据员工"
+    ],
+    "body_focus_observed": true,
+    "console_errors": []
+  },
+  "semantic_snapshot": {
+    "interactive_count": 43,
+    "named_count": 42,
+    "unnamed_count": 1,
+    "unnamed": [
+      {
+        "tag": "input",
+        "role": "",
+        "name": ""
+      }
+    ]
+  },
+  "environment_signals": {
+    "forced_colors_active": false,
+    "prefers_reduced_motion": false
+  },
+  "screen_reader": "NOT_RUN",
+  "windows_high_contrast": "NOT_RUN",
+  "screenshot": {
+    "file": "candidate-keyboard-focus.jpg",
+    "sha256": "27f4a669a18e9fb57bbda164ff5c790cfe15568fd5a14857c5b028f8c74d6c0e"
+  },
+  "model_requests": "NOT_RUN",
+  "business_data": "NOT_USED",
+  "release_ready": false,
+  "activation": "NOT_RUN",
+  "limitations": [
+    "本轮只验证了 headed Aside 下的实际 Tab 焦点序列和 DOM 语义快照；body 获得焦点且存在 1 个无名称 input，需要人工确认是否为隐藏/装饰输入。",
+    "没有运行真实读屏器或 Windows 高对比度环境，因此不能将 M2-05 标为完整 accessibility PASS。"
+  ]
+}

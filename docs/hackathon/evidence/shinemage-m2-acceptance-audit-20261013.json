@@ -1,0 +1,202 @@
+{
+  "schema_version": "shinemage-m2-acceptance-audit/v1",
+  "recorded_at": "2026-10-13T22:37:42+0800",
+  "repository": {
+    "branch": "codex/shinemage-abc-local-candidate",
+    "head": "18d86e31",
+    "push": "NOT_RUN",
+    "protected_untracked": [
+      "security-audit-skill/"
+    ],
+    "documentation_commits": [
+      "b9ab4a50",
+      "18d86e31"
+    ]
+  },
+  "candidate": {
+    "digest": "125c8e538816835cad212048b8fd0302d98588d704b09de559789df9bf6e6bdb",
+    "service_source_sha": "f9726f682fc0d1d4c6aef6f07e6932c2c600c3d6",
+    "journal": "main-repo-registered",
+    "registration": "config/candidates/shinemage-composition-20261013/registration.json",
+    "journal_sha256": "adbef8264fdd83f544d40d5c6159ff555a3e86e039ae668daa15d2e7ecebfcd9"
+  },
+  "journal_events": [
+    {
+      "seq": 1,
+      "status": "COMPOSITION_CANDIDATE_INTENT"
+    },
+    {
+      "seq": 2,
+      "status": "COMPOSITION_CANDIDATE_PREPARED"
+    },
+    {
+      "seq": 3,
+      "status": "COMPOSITION_SOURCE_HTTP_TARGET_OBSERVED",
+      "result": "PASS"
+    },
+    {
+      "seq": 4,
+      "status": "COMPOSITION_TERMINAL_HOST_OBSERVED",
+      "result": "PASS"
+    },
+    {
+      "seq": 5,
+      "status": "COMPOSITION_BROWSER_HOST_OBSERVED",
+      "result": "PASS"
+    }
+  ],
+  "cards": [
+    {
+      "id": "M2-01",
+      "status": "FORMAL_CANDIDATE_REGISTERED / RELEASE_GATES_OPEN",
+      "evidence": [
+        "composition-candidate contract",
+        "main-repo registration",
+        "journal seq 1-5"
+      ],
+      "next": "remaining release gates after candidate-bound browser receipt"
+    },
+    {
+      "id": "M2-02",
+      "status": "FORMAL_BINDING_REGISTERED / CRM_UNBOUND_BY_CONTRACT",
+      "evidence": [
+        "service compatibility gate",
+        "page profile binding",
+        "CRM unbound by composition contract",
+        "main-repo registration"
+      ],
+      "next": "keep CRM profile unbound by composition contract; continue browser, UAT and release gates"
+    },
+    {
+      "id": "M2-03",
+      "status": "TARGET_PREFLIGHT_PASS / USER_AUTHORIZED_TEST_PROD",
+      "evidence": [
+        "production target preflight",
+        "production target authorization"
+      ],
+      "next": "standalone/accessibility, real UAT and remaining release gates"
+    },
+    {
+      "id": "M2-04",
+      "status": "TERMINAL_PASS / BROWSER_PASS",
+      "evidence": [
+        "source HTTP seq 3",
+        "terminal seq 4",
+        "candidate browser preflight: runtime/tunnel unavailable",
+        "candidate browser seq 5 and responsive receipt"
+      ],
+      "next": "keep browser receipt bound to candidate; finish standalone, screen-reader, full keyboard-focus, high-contrast and remaining release gates"
+    },
+    {
+      "id": "M2-05",
+      "status": "PARTIAL_LIVE_BROWSER_PASS / CANDIDATE_BROWSER_PASS / STANDALONE_PACKAGE_BROWSER_PASS / ACCESSIBILITY_KEYBOARD_PARTIAL",
+      "evidence": [
+        "live browser loaded after bundle wait",
+        "desktop/tablet/mobile screenshots",
+        "source-owned free-page/v1 package fcee92a9 / sha256 e2ed8f1c…",
+        "standalone package contract and rendered-text regression: 48 PASS / 0 FAIL",
+        "standalone Chromium probe: 7 PASS / real_model NOT_RUN / contains_real_data false",
+        "standalone accessibility automation: 6 PASS / AX tree, keyboard, forced-colors simulation / screen_reader NOT_RUN",
+        "candidate-bound headed responsive receipt",
+        "keyboard focus partial: 12 Tab steps, 43 interactive DOM nodes / 42 named / 1 unnamed input",
+        "docs/hackathon/evidence/shinemage-m2-04-candidate-browser-20261013/candidate-keyboard-focus.json"
+      ],
+      "next": "candidate-bound 真实 screen reader、人工完整 keyboard focus、Windows high contrast"
+    },
+    {
+      "id": "M2-06",
+      "status": "CANDIDATE_REAL_MODEL_PASS / CRM_READONLY_PASS / WEKNORA_READONLY_PASS / SYNTHETIC_PERSISTENCE_PERMISSION_RECOVERY_PASS / LIVE_TOOL_SURFACE_EMPTY",
+      "evidence": [
+        "real business UAT preflight",
+        "real business UAT run",
+        "candidate peer repair and boot",
+        "candidate Aside session boundary",
+        "live read-only UAT tool boundary",
+        "candidate CRM host route probe",
+        "candidate model credential gate",
+        "candidate real model/CRM/WeKnora read-only UAT",
+        "alpha2 synthetic persistence/permission/recovery: 165 PASS / 0 FAIL / 0 SKIP (35 + 130)"
+      ],
+      "next": "真实 CRM 保存、权限失败、恢复和人工业务复核仍未运行；live 标准会话工具面仍未暴露；继续 standalone、无障碍、供应链和 release gates"
+    },
+    {
+      "id": "M2-07",
+      "status": "BLOCKED / OFFLINE_INVENTORY_PARTIAL",
+      "evidence": [
+        "SDK gate closeout matrix",
+        "SDK gate recheck",
+        "alpha2 offline supply-chain inventory: 364 packages, 33 module scopes, one unidentified build-tools manifest, CycloneDX 364 components; OSV not run and all release coverage gates remain unverified"
+      ],
+      "next": "obtain final candidate artifact and publisher identity, then complete SBOM, signature/verification, revocation, clean-host and rollback evidence"
+    },
+    {
+      "id": "M2-08",
+      "status": "NOT_RUN",
+      "evidence": [
+        "release gate audit"
+      ],
+      "next": "M2-04 through M2-07 plus explicit release authorization"
+    },
+    {
+      "id": "M2-09",
+      "status": "CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / SDK_PREPARED_PASS / SDK_CLOSURE_PASS / SDK_CONTENT_AUDIT_PARTIAL / FORMAL_PACK_SOURCE_PROVENANCE_PASS / PROFILE_COMPATIBILITY_PASS / COMBINED_BROWSER_PASS / CANDIDATE_RECOVERY_PASS / ALPHA2_PLUGIN_CONSUMPTION_CLOSURE_PASS / TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN / MAIN_PIN_ADAPTATION_DEFERRED / MAIN_PIN_UNCHANGED",
+      "evidence": [
+        "DSH pin remains 0.1.7-rc.2",
+        "official dsh-v0.2.1-alpha.2 / d7432673 isolated checkout",
+        "offline compatibility matrix: candidate SUPPORTED, overall PARTIAL",
+        "isolated native/host build, 468 focused tests, and text/tool/rich persistence recovery",
+        "isolated candidate workspace: nine plugin builds PASS and nine plugin test suites PASS (286 tests)",
+        "rc2 to alpha.2 text/tool/rich cross-version recovery PASS, 10 cold executions per corpus",
+        "isolated nine-plugin combined lifecycle PASS: 9 loads and 9 reverse unloads, final tool registry empty",
+        "previous formal pack/profile and browser receipts are retained as historical attempts but invalidated for release evidence",
+        "tracked candidate commit da1b49d35a571c79cff36a69bea0e2e933fac532 generated 9/9 alpha2 packs; every receipt binds the commit and source_dirty=false",
+        "CRM/Knowledge declare Cordis 4.0.2 while alpha2 runtime is 4.0.5-alpha.1; profile compatibility remains blocked",
+        "fixed local packer requires the source manifest to match HEAD and checks all untracked source paths",
+        "browser probe source contains no real browser/page automation; console_errors was not observed",
+        "restart probe did not read history or board after restart; target reused a synthetic backend",
+        "switch, release readiness, real business, and production activation remain NOT_RUN/BLOCKED",
+        "main peer matrix remains 0/9 and direct main toolchain build remains blocked by rc2 SHA pin",
+        "candidate commit 1bb2646523a7c1cd5aa04d11080617a373af7147 aligns CRM/Knowledge Cordis peer to 4.0.5-alpha.1; CRM 108/108, Knowledge 32/32, composition integration 20/20",
+        "real gstack Chromium fallback opened the tracked alpha2 candidate after isolated Web dist build; seeded history and installed plugin inventory were observed with stable console_errors=[]",
+        "owned-host restart followed by browser reload preserved the seeded history; transient chunked encoding and WebSocket reconnect events occurred during restart and stable retry was clean",
+        "board was seeded by the synthetic backend but was not claimed as browser UI readback; target browser/recovery, main pin switch, release, and activation remain not run",
+        "main pin adaptation review: rc2 lock closure, default validation paths and formal Cordis contract are not an alpha2-consistent closure",
+        "alpha2 development SDK preparation: source/lock, host/client build, build-tools and source-clean PASS; check.mjs READY; supply chain and release gates remain unverified",
+        "alpha2 SDK archive/receive and closure projection: archive/receive LOCAL_READY; closure 30,611 entries and 335 packages; content audit 0 findings with 18 binary/native coverage gaps; supply chain remains unverified",
+        "alpha2 plugin consumption closure: 9/9 pack, 2 profiles, composition lock and tarball SHA/size verification PASS"
+      ],
+      "next": "保持主仓 rc2 pin/live 不变；取得独立授权后再审查可回退的主仓适配提交，目标 browser/recovery、供应链和 release gates 仍未关闭"
+    },
+    {
+      "id": "M2-10",
+      "status": "PASS / RELEASE_GATES_REMAIN_OPEN",
+      "evidence": [
+        "this audit matrix",
+        "M2 status closeout",
+        "OCR code review and local commits 4919221a, 91f880b5, fcee92a9, 39cdb9c3"
+      ],
+      "next": "refresh this matrix when an external gate changes"
+    }
+  ],
+  "global": {
+    "product": "PARTIAL",
+    "release_ready": false,
+    "activation": "NOT_RUN",
+    "production_data": "READ_ONLY_REDACTED / NO_MUTATION",
+    "code_changes_this_audit": true,
+    "code_review": {
+      "status": "PASS_AFTER_FIXES",
+      "review_skill": "open-code-review-delegate",
+      "reviewed_files": 30,
+      "reviewable_code_files": 7,
+      "reviewable_json_files": 23,
+      "rechecked_changed_code_files": 6,
+      "commit": "39cdb9c3",
+      "previous_commit": "fcee92a9",
+      "tests": "standalone follow-up: Node 48 PASS / 0 FAIL; source-owned Chromium probe 7 PASS / 0 errors; standalone accessibility automation 6 PASS / screen_reader NOT_RUN; synthetic Chromium probe 6 PASS / 0 errors; DSH compatibility matrix 5 PASS / 0 FAIL / 0 SKIP; previous release suite: 546 PASS / 0 FAIL / 0 SKIP; cross-version recovery: 3 corpora PASS / 30 cold executions; candidate parameterization commit a7c895e9"
+    },
+    "upgrade_verification_commit": "a7c895e9",
+    "combined_lifecycle_evidence": ".context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-combined-lifecycle-20261014.json",
+    "latest_documentation_evidence": "docs/hackathon/evidence/shinemage-m2-09-alpha2-consumption-closure-20261014.md"
+  }
+}

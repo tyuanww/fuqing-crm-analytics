@@ -1,0 +1,69 @@
+{
+  "schema_version": "shinemage-real-business-uat-preflight/v1",
+  "recorded_at": "2026-10-13T02:10:00+08:00",
+  "target": {
+    "address": "100.93.46.46",
+    "role": "authorized-test-and-production",
+    "platform": "Linux x86_64 / WSL2"
+  },
+  "service_preflight": [
+    {
+      "name": "dsh-root",
+      "endpoint": "http://127.0.0.1:4328/",
+      "status": 401,
+      "meaning": "AUTH_REQUIRED"
+    },
+    {
+      "name": "page-root",
+      "endpoint": "http://127.0.0.1:18091/",
+      "status": 404,
+      "meaning": "ROOT_NOT_A_PAGE_RESOURCE"
+    },
+    {
+      "name": "crm-root",
+      "endpoint": "http://127.0.0.1:18093/",
+      "status": 401,
+      "meaning": "AUTH_REQUIRED"
+    },
+    {
+      "name": "crm-health",
+      "endpoint": "http://127.0.0.1:18093/health",
+      "status": 401,
+      "meaning": "AUTH_REQUIRED"
+    },
+    {
+      "name": "weknora-root",
+      "endpoint": "http://127.0.0.1:18090/",
+      "status": 200,
+      "meaning": "WEB_SHELL_REACHABLE"
+    },
+    {
+      "name": "weknora-api-root",
+      "endpoint": "http://127.0.0.1:18092/",
+      "status": 401,
+      "meaning": "AUTH_REQUIRED"
+    }
+  ],
+  "uat": {
+    "status": "NOT_RUN_PRECONDITIONS_MISSING",
+    "real_model_calls": 0,
+    "crm_business_queries": "NOT_RUN",
+    "weknora_queries": "NOT_RUN",
+    "save_or_cockpit_mutations": "NOT_RUN",
+    "human_uat": "NOT_RUN",
+    "production_data": "NOT_READ",
+    "release_ready": false
+  },
+  "missing_inputs": [
+    "用户在 Aside 或现场浏览器完成自身登录并确认可操作会话",
+    "真实模型调用窗口与模型选择",
+    "真实 CRM 账号/权限和业务口径确认",
+    "真实 WeKnora 账号/文档权限和引用范围",
+    "人工 UAT 参与者与可接受结果"
+  ],
+  "boundaries": [
+    "本次只读取 loopback HTTP 状态码和 content-type，不读取响应正文、凭据、业务数据或文档内容。",
+    "401 是认证保护事实，不能写成服务不可用；page 根 404 不能单独作为页面资源故障。",
+    "健康/可达性预检不关闭 M2-06，也不证明真实模型、CRM、WeKnora 或保存/驾驶舱 UAT。"
+  ]
+}

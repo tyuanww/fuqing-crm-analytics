@@ -6,6 +6,7 @@ import { access, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { prepareProfile } from './prepare-profile.mjs';
 import { fixture, specs } from './test-support/formal-packs.fixture.mjs';
+import { TOOLCHAIN } from '../release/toolchain.mjs';
 
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const json = value => JSON.stringify(value, null, 2) + '\n';
@@ -20,6 +21,7 @@ test('CRM, knowledge and page profile binds only the verified packages and never
   assert.equal(receipt.package_inputs.inputs_sha256, hash(await readFile(f.packInputs)));
   assert.equal(receipt.package_inputs.host, 'NOT_RUN');
   assert.equal(receipt.package_inputs.release_ready, false);
+  assert.deepEqual(receipt.toolchain, { sdk_version: TOOLCHAIN.sdk_version, upstream_sha: TOOLCHAIN.upstream_sha });
   assert.equal(receipt.service_started_or_restarted, false);
   const rows = JSON.parse(await readFile(join(f.output, 'preset/agent.cordis.yml')));
   for (const [key, id, entry] of [['crm', 'crm-tools', 'lib/index.js'], ['knowledge', 'knowledge-tools-v1', 'lib/index.js'],

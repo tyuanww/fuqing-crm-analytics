@@ -5,6 +5,8 @@ import { isAbsolute, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
 import { installProfilePacks, loadProfilePacks } from '../release/profile-packs.mjs';
+import { TOOLCHAIN } from '../release/toolchain.mjs';
+import { readToolchainFile, validateToolchain } from '../dsh-dev/pin.mjs';
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const domains = Object.freeze({
   '@shine-mage/dsh-crm-knowledge': { key: 'plugin', name: 'crm', entries: { '.': 'lib/index.js', './host': 'lib/host.js', './client': 'lib/client.js' } },
@@ -72,13 +74,14 @@ async function boundedFile(path, max) {
   assert.equal(bytes.length, info.size, 'CRM_PROFILE_PACKAGE_CHANGED');
   return bytes;
 }
-export function inspectDeclaredPlugin(manifest, name, entries, domain, prefix = 'CRM_PROFILE') {
+export function inspectDeclaredPlugin(manifest, name, entries, domain, prefix = 'CRM_PROFILE',
+  { dshSdkVersion = '0.1.7-rc.2', cordisVersion = '4.0.4' } = {}) {
   assert.equal(manifest.name, name, prefix + '_IDENTITY');
-  assert.equal(manifest.peerDependencies?.['@deepseek-ai/dsh-tools'], '0.1.7-rc.2', prefix + '_DSH_PIN');
+  assert.equal(manifest.peerDependencies?.['@deepseek-ai/dsh-tools'], dshSdkVersion, prefix + '_DSH_PIN');
   // Split CRM/knowledge packages declare Cordis directly. The existing page
   // provider consumes only the pinned DSH tools peer and does not declare it.
   if (domain || manifest.peerDependencies?.['@deepseek-ai/cordis'] !== undefined) {
-    assert.equal(manifest.peerDependencies?.['@deepseek-ai/cordis'], '4.0.4', prefix + '_CORDIS_PIN');
+    assert.equal(manifest.peerDependencies?.['@deepseek-ai/cordis'], cordisVersion, prefix + '_CORDIS_PIN');
   }
   assert.match(manifest.version ?? '', /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/, prefix + '_VERSION');
   if (domain) {
@@ -90,11 +93,11 @@ export function inspectDeclaredPlugin(manifest, name, entries, domain, prefix = 
     assert.ok(Array.isArray(manifest.files) && manifest.files.includes(entry), prefix + '_EXPORT_NOT_PACKED');
   }
 }
-async function inspectPlugin(root, name, entries, domain, prefix = 'CRM_PROFILE') {
+async function inspectPlugin(root, name, entries, domain, prefix = 'CRM_PROFILE', compatibility = {}) {
   assert.ok(isAbsolute(root), prefix + '_PATH_INVALID');
   const bytes = await boundedFile(join(root, 'package.json'), 128 * 1024);
   const manifest = JSON.parse(bytes);
-  inspectDeclaredPlugin(manifest, name, entries, domain, prefix);
+  inspectDeclaredPlugin(manifest, name, entries, domain, prefix, compatibility);
   const hashes = { 'package.json': digest(bytes) };
   for (const entry of Object.values(entries)) {
     hashes[entry] = digest(await boundedFile(join(root, entry), 16 * 1024 * 1024));
@@ -103,18 +106,27 @@ async function inspectPlugin(root, name, entries, domain, prefix = 'CRM_PROFILE'
 }
 
 export async function prepareProfile(options) {
-  const { output, graphSettingsFile, packInputs } = options;
+  const { output, graphSettingsFile, packInputs, toolchain: requestedToolchain, toolchainPath, cordisVersion } = options;
   assert.ok(isAbsolute(output), 'output must be absolute');
+  assert.ok(!(requestedToolchain !== undefined && toolchainPath !== undefined), 'CRM_PROFILE_TOOLCHAIN_AMBIGUOUS');
+  const toolchain = requestedToolchain !== undefined
+    ? validateToolchain(requestedToolchain)
+    : toolchainPath !== undefined
+      ? await readToolchainFile(toolchainPath)
+      : process.env.DSH_COMPOSITION_TOOLCHAIN !== undefined
+        ? await readToolchainFile(process.env.DSH_COMPOSITION_TOOLCHAIN)
+        : TOOLCHAIN;
+  const compatibility = { dshSdkVersion: toolchain.sdk_version, cordisVersion: cordisVersion ?? process.env.CRM_COMPOSITION_CORDIS_PEER ?? '4.0.4' };
   let packs;
   if (packInputs !== undefined) {
     assert.ok(!options.plugin && !options.knowledgePlugin && !options.pageToolsPlugin, 'CRM_PROFILE_PACK_INPUTS_AMBIGUOUS');
-    packs = await loadProfilePacks({ inputsPath: packInputs });
+    packs = await loadProfilePacks({ inputsPath: packInputs, toolchain });
     assert.equal(packs.profile.service_binding, undefined, 'CRM_PROFILE_PACK_SERVICE_BINDING_REQUIRES_CANDIDATE');
     const selected = {};
     for (const [index, item] of packs.plugins.entries()) {
       const domain = Object.hasOwn(domains, item.id) ? domains[item.id] : null;
       assert.ok(domain, 'CRM_PROFILE_PACK_SELECTION_INVALID');
-      inspectDeclaredPlugin(item.manifest, item.id, domain.entries, domain.name, domain.prefix);
+      inspectDeclaredPlugin(item.manifest, item.id, domain.entries, domain.name, domain.prefix, compatibility);
       selected[domain.key] = join(output, 'packages', String(index), 'unpacked', 'package');
     }
     options = { ...options, ...selected };
@@ -132,15 +144,17 @@ export async function prepareProfile(options) {
     packageInputs = await installProfilePacks({ packs, output: join(output, 'packages') });
   }
   const packages = {};
-  if (plugin) packages.crm = await inspectPlugin(plugin, '@shine-mage/dsh-crm-knowledge', { '.': 'lib/index.js', './host': 'lib/host.js', './client': 'lib/client.js' }, 'crm');
-  if (knowledgePlugin) packages.knowledge = await inspectPlugin(knowledgePlugin, '@shine-mage/dsh-knowledge', { '.': 'lib/index.js', './graph-tools': 'lib/graph-tools.js' }, 'knowledge');
-  const pageTools = pageToolsPlugin ? await inspectPlugin(pageToolsPlugin, '@shine-mage/dsh-analytics-workbench-b0', { './page-tools': 'lib/page-tools.js' }, undefined, 'PAGE_PROVIDER') : undefined;
-  const revision = digest(JSON.stringify({ packages, pageTools, services, graph: graphSettingsFile ?? null }));
+  if (plugin) packages.crm = await inspectPlugin(plugin, '@shine-mage/dsh-crm-knowledge', { '.': 'lib/index.js', './host': 'lib/host.js', './client': 'lib/client.js' }, 'crm', 'CRM_PROFILE', compatibility);
+  if (knowledgePlugin) packages.knowledge = await inspectPlugin(knowledgePlugin, '@shine-mage/dsh-knowledge', { '.': 'lib/index.js', './graph-tools': 'lib/graph-tools.js' }, 'knowledge', 'CRM_PROFILE', compatibility);
+  const pageTools = pageToolsPlugin ? await inspectPlugin(pageToolsPlugin, '@shine-mage/dsh-analytics-workbench-b0', { './page-tools': 'lib/page-tools.js' }, undefined, 'PAGE_PROVIDER', compatibility) : undefined;
+  const revision = digest(JSON.stringify({ toolchain: { sdk_version: toolchain.sdk_version, upstream_sha: toolchain.upstream_sha }, cordis: compatibility.cordisVersion, packages, pageTools, services, graph: graphSettingsFile ?? null }));
   const files = renderProfile({ ...options, revision, packages, pageTools });
   if (!packs) await mkdir(output, { mode: 0o700 });
   await mkdir(join(output, 'preset'), { mode: 0o700 });
   for (const [name, content] of Object.entries(files)) await writeFile(join(output, name), content, { mode: 0o600, flag: 'wx' });
-  const receipt = { schema: 'crm-profile-assets/v3', revision, packages, graph_configured: Boolean(graphSettingsFile),
+  const receipt = { schema: 'crm-profile-assets/v3', revision,
+    toolchain: { sdk_version: toolchain.sdk_version, upstream_sha: toolchain.upstream_sha }, cordis_version: compatibility.cordisVersion,
+    packages, graph_configured: Boolean(graphSettingsFile),
     preset_loader: { contract: 'dsh-agent-preset-declaration/v1', id: 'crm-knowledge', patch: 'preset.patch.yml' },
     private_knowledge_identity: graphSettingsFile ? plugin ? 'CRM_LEASE_CONFIGURED_NOT_RUN' : 'NOT_AVAILABLE_NO_IDENTITY_PROVIDER' : 'NOT_REQUESTED',
     synthetic_services: Object.fromEntries(['metrics', 'knowledge'].map(domain => [domain, services[domain + 'Origin']
@@ -157,7 +171,7 @@ export async function prepareProfile(options) {
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   try {
     const args = process.argv.slice(2); const options = {};
-    const names = { '--output': 'output', '--plugin': 'plugin', '--knowledge-plugin': 'knowledgePlugin', '--pack-inputs': 'packInputs', '--python': 'python', '--metrics-origin': 'metricsOrigin', '--knowledge-origin': 'knowledgeOrigin', '--graph-settings': 'graphSettingsFile', '--page-tools-plugin': 'pageToolsPlugin' };
+    const names = { '--output': 'output', '--plugin': 'plugin', '--knowledge-plugin': 'knowledgePlugin', '--pack-inputs': 'packInputs', '--python': 'python', '--metrics-origin': 'metricsOrigin', '--knowledge-origin': 'knowledgeOrigin', '--graph-settings': 'graphSettingsFile', '--page-tools-plugin': 'pageToolsPlugin', '--toolchain': 'toolchainPath', '--cordis-peer': 'cordisVersion' };
     for (let i = 0; i < args.length; i += 2) {
       assert.ok(names[args[i]] && args[i + 1] && !options[names[args[i]]], 'Use --output /new/private/directory [--pack-inputs /absolute/inputs.json | --plugin /absolute/crm --knowledge-plugin /absolute/knowledge --page-tools-plugin /absolute/workbench] [--metrics-origin http://127.0.0.1:PORT] [--knowledge-origin http://127.0.0.1:PORT] [--graph-settings /private/settings.json]');
       options[names[args[i]]] = args[i + 1];

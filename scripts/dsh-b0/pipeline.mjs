@@ -48,7 +48,9 @@ const managers = managerVersions(pin);
 assert.equal(Number(process.versions.node.split('.')[0]), pin.node_major);
 let env = {
   ...Object.fromEntries(Object.entries(process.env).filter(([key]) => ['HOME', 'CI', 'SYSTEMROOT',
-    ...(mode === '--check' ? ['CRM_COMPOSITION_PACK_INPUTS', 'CRM_COMPOSITION_PAGE_INPUTS', 'CRM_COMPOSITION_OUTPUT', 'WORKBENCH_AUTHOR_CI_ARCHIVE', 'DOMAIN_AUTHOR_CI_ARCHIVE', 'PUBLIC_CONTRACT_INPUTS'] : [])].includes(key))),
+    ...(mode === '--check' ? ['CRM_COMPOSITION_PACK_INPUTS', 'CRM_COMPOSITION_PAGE_INPUTS', 'CRM_COMPOSITION_OUTPUT',
+      'DSH_COMPOSITION_TOOLCHAIN', 'CRM_COMPOSITION_CORDIS_PEER', 'CRM_COMPOSITION_CORDIS_RUNTIME',
+      'WORKBENCH_AUTHOR_CI_ARCHIVE', 'DOMAIN_AUTHOR_CI_ARCHIVE', 'PUBLIC_CONTRACT_INPUTS'] : [])].includes(key))),
   PATH: `${dirname(process.execPath)}:${dirname(python)}:/usr/bin:/bin:/usr/sbin:/sbin`,
   PYTHONPATH: root, PYTHONNOUSERSITE: '1', PYTHON_DOTENV_DISABLED: '1',
   PYTHONDONTWRITEBYTECODE: '1', PYTHONUNBUFFERED: '1',

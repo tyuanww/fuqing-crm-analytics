@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ShineMage M2 项目进度汇报 · 2026-10-15</title>
+  <style>
+    :root { color-scheme: light; --ink:#17212b; --muted:#52616b; --line:#d9e1e8; --bg:#f5f7fa; --card:#fff; --pass:#16794c; --warn:#9a5b00; --block:#a42d2d; --blue:#1559a6; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; }
+    main { width:min(1120px,calc(100% - 32px)); margin:32px auto 64px; }
+    h1 { margin:0 0 8px; font-size:clamp(26px,4vw,42px); line-height:1.2; }
+    h2 { margin:28px 0 12px; font-size:24px; }
+    h3 { margin:20px 0 8px; font-size:19px; }
+    p { margin:8px 0; }
+    .lead { color:var(--muted); font-size:18px; }
+    .meta, .grid { display:grid; gap:12px; }
+    .meta { grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); margin:20px 0; }
+    .grid { grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px; box-shadow:0 3px 12px #17212b0d; }
+    .label { color:var(--muted); font-size:13px; }
+    .value { display:block; margin-top:3px; font-weight:700; }
+    .pass { color:var(--pass); } .warn { color:var(--warn); } .block { color:var(--block); }
+    code { background:#edf1f5; border-radius:4px; padding:1px 5px; font:0.92em ui-monospace,SFMono-Regular,Menlo,monospace; overflow-wrap:anywhere; }
+    pre { background:#17212b; color:#f3f6f8; border-radius:8px; padding:14px; overflow:auto; font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace; }
+    ol, ul { padding-left:24px; }
+    li { margin:5px 0; }
+    details { background:var(--card); border:1px solid var(--line); border-radius:10px; margin:10px 0; padding:0 16px; }
+    summary { cursor:pointer; font-weight:700; padding:13px 0; }
+    details > div { padding:0 0 14px; }
+    .status { display:inline-block; border-radius:999px; padding:2px 10px; font-size:13px; font-weight:700; }
+    .status.pass { background:#def5e8; } .status.warn { background:#fff0d6; } .status.block { background:#fde2e2; }
+    .diagram { background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px; overflow:auto; }
+    svg { display:block; width:100%; min-width:760px; height:auto; }
+    a { color:var(--blue); }
+    .footer { margin-top:28px; color:var(--muted); font-size:14px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>ShineMage M2 项目进度汇报</h1>
+  <p class="lead">日期：2026-10-15。当前产品状态：<strong>PARTIAL</strong>。当前发布状态：<strong class="block">release_ready=false</strong>。</p>
+
+  <section class="meta">
+    <div class="card"><span class="label">当前分支</span><span class="value"><code>codex/shinemage-abc-local-candidate</code></span></div>
+    <div class="card"><span class="label">DSH 固定版本</span><span class="value"><code>0.1.7-rc.2 / 477b4f42…</code></span></div>
+    <div class="card"><span class="label">本轮最新提交</span><span class="value"><code>52134d23</code></span></div>
+    <div class="card"><span class="label">工作树</span><span class="value">只保留受保护目录 <code>security-audit-skill/</code></span></div>
+  </section>
+
+  <h2>结论</h2>
+  <div class="card">
+    <p>今天完成了 M2-05 和 M2-06 的验收收口复核。</p>
+    <p>今天完成了 M2-07 的本地供应链检查复核，并发现当前 source checkout 缺少已编译 SDK 输入。</p>
+    <p>M2-07 仍为 <span class="status block">BLOCKED</span>。阻塞原因是正式发布材料缺失。</p>
+    <p>M2-08 不应开始。M2-09 仍是独立的 alpha2 候选轨道。</p>
+  </div>
+
+  <h2>状态流程</h2>
+  <div class="diagram" aria-label="M2 状态流程图">
+    <svg viewBox="0 0 1080 310" role="img">
+      <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#52616b"/></marker></defs>
+      <g font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif" font-size="16">
+        <rect x="20" y="34" width="180" height="78" rx="12" fill="#def5e8" stroke="#16794c"/><text x="110" y="68" text-anchor="middle" fill="#17212b">M2-05</text><text x="110" y="94" text-anchor="middle" fill="#16794c" font-weight="700">PASS</text>
+        <rect x="250" y="34" width="180" height="78" rx="12" fill="#def5e8" stroke="#16794c"/><text x="340" y="68" text-anchor="middle" fill="#17212b">M2-06</text><text x="340" y="94" text-anchor="middle" fill="#16794c" font-weight="700">PASS</text>
+        <rect x="480" y="34" width="180" height="78" rx="12" fill="#fff0d6" stroke="#9a5b00"/><text x="570" y="68" text-anchor="middle" fill="#17212b">M2-07 本地项</text><text x="570" y="94" text-anchor="middle" fill="#9a5b00" font-weight="700">50/50 PASS</text>
+        <rect x="710" y="34" width="180" height="78" rx="12" fill="#fde2e2" stroke="#a42d2d"/><text x="800" y="68" text-anchor="middle" fill="#17212b">M2-07 正式门禁</text><text x="800" y="94" text-anchor="middle" fill="#a42d2d" font-weight="700">BLOCKED</text>
+        <line x1="200" y1="73" x2="250" y2="73" stroke="#52616b" stroke-width="2" marker-end="url(#arrow)"/><line x1="430" y1="73" x2="480" y2="73" stroke="#52616b" stroke-width="2" marker-end="url(#arrow)"/><line x1="660" y1="73" x2="710" y2="73" stroke="#52616b" stroke-width="2" marker-end="url(#arrow)"/>
+        <rect x="710" y="190" width="180" height="78" rx="12" fill="#fde2e2" stroke="#a42d2d"/><text x="800" y="224" text-anchor="middle" fill="#17212b">M2-08</text><text x="800" y="250" text-anchor="middle" fill="#a42d2d" font-weight="700">NOT_RUN</text>
+        <line x1="800" y1="112" x2="800" y2="190" stroke="#52616b" stroke-width="2" marker-end="url(#arrow)"/>
+        <text x="540" y="232" text-anchor="middle" fill="#52616b">需要正式 artifact、签名、attestation 和 release authorization</text>
+        <rect x="20" y="190" width="420" height="78" rx="12" fill="#edf4ff" stroke="#1559a6"/><text x="230" y="224" text-anchor="middle" fill="#17212b">M2-09 alpha2 候选</text><text x="230" y="250" text-anchor="middle" fill="#1559a6" font-weight="700">隔离推进，主仓 pin 不变</text>
+      </g>
+    </svg>
+  </div>
+  <p>绿色表示已完成验收。黄色表示本地检查已完成，但不代表正式发布通过。红色表示存在门禁阻塞。蓝色表示独立候选轨道。</p>
+
+  <h2>今天完成的工作</h2>
+  <div class="grid">
+    <div class="card"><h3>M2-05 页面和无障碍</h3><p>Windows headed Chrome、移动/平板/桌面视口、Chrome AX、Tab/Enter、高对比度和 Narrator 已有证据。</p><p>用户已确认读屏语音通过。对应提交：<code>295349b4</code>。</p></div>
+    <div class="card"><h3>M2-06 真实 CRM revoke</h3><p>隔离 candidate 完成真实快照保存、分享读取、owner 撤权、撤权后 <code>404/NOT_FOUND</code> 和持久化复核。</p><p>临时容器、状态目录和账号已清理。对应提交：<code>8409bc0a</code>。</p></div>
+    <div class="card"><h3>M2-07 本地供应链回归</h3><p>依赖图、closure、CycloneDX projection、OSV、clean HOME、attestation 合同和内容审计已有记录。</p><p>本次合同回归：<code>50 pass / 0 fail / 0 skipped</code>。</p></div>
+    <div class="card"><h3>证据状态修订</h3><p>当前 source checkout 复验返回 <code>KIT_INPUTS_UNAVAILABLE</code>。已和历史隔离准备目录的 <code>READY</code> 回执分开记账。</p><p>对应提交：<code>52134d23</code>。</p></div>
+  </div>
+
+  <h2>一个输入如何流过 M2-07</h2>
+  <details open><summary>输入：固定 rc2 source、lock 和工具链</summary><div><p>输入身份是 DSH <code>0.1.7-rc.2</code>，upstream SHA 是 <code>477b4f420553e8a52c2fbccc464d7561b239c443</code>。检查器要求已编译 SDK main/types 和一致的 build-tools。</p></div></details>
+  <details><summary>步骤 1：准备开发 SDK</summary><div><p>固定 Node、pnpm、source 和 lock。准备器可以在独立目录返回 <code>READY</code>。该结果只证明准备目录可读。</p></div></details>
+  <details><summary>步骤 2：生成 closure、SBOM 和 OSV 报告</summary><div><p>closure 绑定文件 SHA。CycloneDX projection 记录组件。OSV 查询只使用声明的 npm 名称和版本。当前历史 rc2 closure 发现 29 个唯一公告，并保留 17 个 binary/native coverage gaps。</p></div></details>
+  <details><summary>步骤 3：进入正式门禁</summary><div><p>正式门禁还需要 immutable artifact、完整 SBOM、publisher identity、签名、验签、撤销、干净机器安装/回退和最终 SHA attestation。缺少任一项时保持 <code>BLOCKED</code>。</p></div></details>
+
+  <h2>后续步骤</h2>
+  <ol>
+    <li>发布责任方准备与 rc2 source/lock 绑定的 immutable SDK artifact。</li>
+    <li>同时提供 artifact SHA-256、完整 SBOM、provenance、publisher identity、签名、验签和撤销材料。</li>
+    <li>在隔离 clean machine 完成接收、安装、import、最小功能、卸载和旧版本回退。</li>
+    <li>重新执行 M2-07 最终检查。只有所有材料一致且检查通过，才把 M2-07 改为可进入 release review。</li>
+    <li>取得正式 release authorization 后，再执行 M2-08 的 15 分钟 SLI、activation、canary 和 rollback。</li>
+    <li>M2-09 继续在隔离 alpha2 环境推进。不要修改主仓 rc2 pin。目标 browser/recovery 仍需独立 runner 和独立证据。</li>
+  </ol>
+
+  <h2>证据入口</h2>
+  <ul>
+    <li><a href="./shinemage-m2-07-rc2-input-repro-check-20261015.md">M2-07 rc2 输入复验</a></li>
+    <li><a href="./shinemage-m2-07-rc2-local-materials-20261015.md">M2-07 rc2 本地 SDK 材料</a></li>
+    <li><a href="./shinemage-m2-07-local-gate-rerun-20261015.md">M2-07 本地门禁回归</a></li>
+    <li><a href="../../../STATUS.md">STATUS.md</a> · <a href="../TODOS.md">TODOS.md</a></li>
+  </ul>
+
+  <p class="footer">本页是项目进度说明。它不授予 release、activation、canary、rollback 或 live 切换权限。</p>
+</main>
+</body>
+</html>

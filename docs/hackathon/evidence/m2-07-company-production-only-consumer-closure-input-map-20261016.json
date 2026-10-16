@@ -1,0 +1,112 @@
+{
+  "schema_version": "shinemage-alpha4-company-consumer-closure-input-map/v1",
+  "status": "INPUT_MAPPING_READY_COMPANY_EXECUTION_BLOCKED",
+  "release_ready": false,
+  "scope": "company-production-only-consumer-closure-preparation",
+  "generated_at": "2026-10-16",
+  "runner": {
+    "required_environment": "company-approved-staging-or-controlled-ci-runner",
+    "staging_policy": "empty-owner-only-directory-outside-repository",
+    "logical_input_root": "/secure/input",
+    "logical_work_root": "/secure/work",
+    "actual_runner_id": "",
+    "actual_ci_job_ref": "",
+    "status": "PENDING_COMPANY_RUNNER"
+  },
+  "fixed_binding": {
+    "candidate_source_sha": "3b5d4c0680585f8f27c84d70dffabf7c2ec930d2",
+    "sdk": "@deepseek-ai/dsh@0.2.1-alpha.4",
+    "sdk_artifact_sha256": "9f4fe0f466d7699ddd4686ee9692ec10c6d9f98a7d175fd5e55de01b2f64c8d6",
+    "upstream_sha": "86a402200d95fecef4529d969836f1fe13c6cb0d",
+    "upstream_lock_sha256": "ee1c37b5429c535974bafa09475cb03fc473e87dded8f56d54d909ed621e1317",
+    "node_expected": "v24.19.0",
+    "upstream_pnpm_expected": "11.28.5",
+    "plugin_pnpm_expected": "11.28.2",
+    "prohibited_legacy_input": "formal-packs-r2 CRM tarball source 50d241..."
+  },
+  "inputs": [
+    {
+      "id": "crm_tarball",
+      "local_reference": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/formal-packs-r3/crm-knowledge/shine-mage-dsh-crm-knowledge-0.0.0-crm.1.tgz",
+      "company_destination": "/secure/input/shine-mage-dsh-crm-knowledge-0.0.0-crm.1.tgz",
+      "sha256": "a994167cafae37383800789127a305bc5cae0a9fa85b46ba4157cf1fe0ae634d",
+      "bytes": 234923,
+      "company_sha256": "",
+      "company_status": "PENDING_RECEIPT"
+    },
+    {
+      "id": "crm_pack_manifest",
+      "local_reference": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/formal-packs-r3/crm-knowledge/plugin-pack.json",
+      "company_destination": "/secure/input/crm-knowledge.plugin-pack.json",
+      "sha256": "106c38eaf30cde9b6a3e3fc5fea98d8e42aa777f51f99faff37c00c13f55e42d",
+      "bytes": 630,
+      "company_sha256": "",
+      "company_status": "PENDING_RECEIPT"
+    },
+    {
+      "id": "sdk_artifact",
+      "local_reference": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/npm-official-r1/deepseek-ai-dsh-0.2.1-alpha.4.tgz",
+      "company_destination": "/secure/input/deepseek-ai-dsh-0.2.1-alpha.4.tgz",
+      "sha256": "9f4fe0f466d7699ddd4686ee9692ec10c6d9f98a7d175fd5e55de01b2f64c8d6",
+      "bytes": 25149,
+      "company_sha256": "",
+      "company_status": "PENDING_RECEIPT"
+    },
+    {
+      "id": "sdk_sbom",
+      "local_reference": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/formal-packs-r2/sbom-alpha4-r1.json",
+      "company_destination": "/secure/input/sbom-alpha4-r1.json",
+      "sha256": "2adb75e23a0af0c60ce202f5e4b265549836b4761e758935111d66bbc257bfca",
+      "bytes": 9633,
+      "company_sha256": "",
+      "company_status": "PENDING_RECEIPT"
+    },
+    {
+      "id": "sdk_provenance",
+      "local_reference": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/formal-packs-r2/provenance-alpha4-r1.json",
+      "company_destination": "/secure/input/provenance-alpha4-r1.json",
+      "sha256": "5e81763e0fad9ab5952fb6c7b094cf0e01d0a1b0883f469e63b2f672e8d7a0c4",
+      "bytes": 4756,
+      "company_sha256": "",
+      "company_status": "PENDING_RECEIPT"
+    }
+  ],
+  "toolchain_probe": {
+    "node_actual": "v25.8.2",
+    "npm_actual": "11.21.0",
+    "pnpm_actual": "11.28.2",
+    "company_package_manager": "NOT_FOUND",
+    "company_sbom": "NOT_FOUND",
+    "company_runtime_check": "NOT_FOUND",
+    "company_closure_verifier": "NOT_FOUND",
+    "syft": "NOT_FOUND",
+    "cyclonedx": "NOT_FOUND",
+    "cosign": "NOT_FOUND",
+    "in_toto": "NOT_FOUND",
+    "slsa_verifier": "NOT_FOUND"
+  },
+  "formal_outputs": {
+    "dependency_graph": "NOT_RUN_COMPANY_TOOLS_UNAVAILABLE",
+    "sbom": "NOT_RUN_COMPANY_TOOLS_UNAVAILABLE",
+    "provenance": "NOT_RUN_COMPANY_TOOLS_UNAVAILABLE",
+    "independent_verification": "NOT_RUN",
+    "company_receipt": "TEMPLATE_READY_PENDING_COMPANY_EXECUTION",
+    "release_ready": false
+  },
+  "local_reference_only": {
+    "package_lock_sha256": "01e5787072bd8126e957e88e0d4e0e1d792256c7149f6e9d5acddecda16675d1",
+    "dependency_graph_sha256": "4efd3a7aa4c9c40cbc248c230d2634044b35d6d584fe3f8b27d7852e5b712c41",
+    "runtime_log_sha256": "6656a53ba74bbc346a275bc903a89d38adf737e3577114ac128208b16b03a8d7",
+    "sbom_sha256": "ab86c9c70fad2bc455004d29fe0a7c3a7e6b3e1ab71a94f6902f9fd4e575942d",
+    "provenance_sha256": "6232d5e44ce739180d1903216d8bb978794090db8c6217815976f717d79c14f2",
+    "status": "LOCAL_REPRODUCTION_ONLY"
+  },
+  "next_required_inputs": [
+    "company runner identity and CI job reference",
+    "approved Node v24.19.0 runtime",
+    "approved package manager and registry/network policy",
+    "approved SBOM tool and version",
+    "approved runtime checker and closure verifier",
+    "independent verifier identity and workspace"
+  ]
+}

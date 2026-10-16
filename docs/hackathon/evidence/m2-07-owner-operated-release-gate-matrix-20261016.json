@@ -1,0 +1,158 @@
+{
+  "schema_version": "shinemage-alpha4-owner-operated-release-gate-matrix/v1",
+  "generated_at": "2026-10-16",
+  "status": "FORMAL_GATES_BLOCKED",
+  "release_ready": false,
+  "execution_mode": "OWNER_OPERATED",
+  "owner": "project-owner",
+  "subjects": {
+    "sdk": {
+      "sdk": "@deepseek-ai/dsh@0.2.1-alpha.4",
+      "artifact_sha256": "9f4fe0f466d7699ddd4686ee9692ec10c6d9f98a7d175fd5e55de01b2f64c8d6",
+      "source_sha": "50d241cbd23aa2a9d188fe84c3864528a2206917",
+      "upstream_sha": "86a402200d95fecef4529d969836f1fe13c6cb0d",
+      "upstream_lock_sha256": "ee1c37b5429c535974bafa09475cb03fc473e87dded8f56d54d909ed621e1317"
+    },
+    "crm_consumer": {
+      "package": "@shine-mage/dsh-crm-knowledge@0.0.0-crm.1",
+      "tarball_sha256": "a994167cafae37383800789127a305bc5cae0a9fa85b46ba4157cf1fe0ae634d",
+      "manifest_sha256": "106c38eaf30cde9b6a3e3fc5fea98d8e42aa777f51f99faff37c00c13f55e42d",
+      "source_sha": "3b5d4c0680585f8f27c84d70dffabf7c2ec930d2"
+    }
+  },
+  "gates": [
+    {
+      "id": "publisher_identity",
+      "subject": "SDK alpha4",
+      "local_status": "OWNER_IDENTITY_DECLARED_LOCAL",
+      "local_receipt": "owner-attestation.json",
+      "formal_status": "NOT_RUN_COMPANY_IDENTITY_UNAVAILABLE",
+      "remaining_gap": "公司批准 issuer/subject/key-id/certificate 或 KMS/OIDC identity",
+      "next_action": "指定公司 publisher identity 并将 issuer、subject、key ID、公钥/证书摘要写入正式回执"
+    },
+    {
+      "id": "signature",
+      "subject": "SDK alpha4",
+      "local_status": "OWNER_SELF_SIGNED_LOCAL / VERIFICATION_PASS",
+      "local_receipt": "owner-binding.sig",
+      "formal_status": "NOT_RUN_COMPANY_SIGNER_UNAVAILABLE",
+      "remaining_gap": "公司批准 KMS/HSM/keyless signer、signature bundle 和 transparency reference",
+      "next_action": "用公司签名服务对 SDK artifact 原始字节或 DSSE subject 签名，并独立验签"
+    },
+    {
+      "id": "revocation",
+      "subject": "owner local key / company publisher key",
+      "local_status": "NOT_RUN_NO_TRUST_SERVICE",
+      "local_receipt": "none",
+      "formal_status": "NOT_RUN_NO_REVOCATION_SERVICE",
+      "remaining_gap": "证书/密钥/签名状态服务和查询回执",
+      "next_action": "在公司 key registry、certificate status 或签名服务查询并记录 non-UNKNOWN 结果"
+    },
+    {
+      "id": "independent_verification",
+      "subject": "SDK + CRM r3 + attestations",
+      "local_status": "SELF_SEPARATED_REPLAY_PASS",
+      "local_receipt": "independent-replay-receipt.json",
+      "formal_status": "NOT_RUN_SECOND_PERSON_UNAVAILABLE",
+      "remaining_gap": "公司独立身份或独立 CI job，不由同一 owner 写入 PASS",
+      "next_action": "在独立 job/workspace 复验 artifact、SBOM、provenance、signature、identity 和 final attestation"
+    },
+    {
+      "id": "final_attestation",
+      "subject": "SDK + CRM r3 relationship",
+      "local_status": "OWNER_ATTESTATION_DRAFT_NOT_FORMAL",
+      "local_receipt": "m2-07-owner-final-attestation-draft-20261016.json",
+      "formal_status": "FORMAL_EXCEPTION_REQUIRED",
+      "remaining_gap": "公司格式、公司签名、publisher evidence、revocation 和 independent verification 绑定",
+      "next_action": "公司 attestation service 生成并独立验证最终 attestation"
+    },
+    {
+      "id": "clean_machine",
+      "subject": "SDK alpha4 + CRM r3 + rc2 rollback",
+      "local_status": "OWNER_OPERATED_REPLAY_PASS",
+      "local_receipt": "owner-clean-machine-receipt.json",
+      "formal_status": "NOT_RUN_COMPANY_CLEAN_MACHINE",
+      "remaining_gap": "公司 clean machine 身份、正式 signature/revocation 验证和正式回执",
+      "next_action": "在公司批准 clean machine 重跑同一序列并保存每步命令/输出/退出码/时间"
+    }
+  ],
+  "tool_probe": {
+    "cosign": "NOT_FOUND",
+    "gpg": "NOT_FOUND",
+    "gpg2": "NOT_FOUND",
+    "notation": "NOT_FOUND",
+    "in-toto-run": "NOT_FOUND",
+    "in-toto-verifier": "NOT_FOUND",
+    "slsa-verifier": "NOT_FOUND",
+    "syft": "NOT_FOUND",
+    "cyclonedx": "NOT_FOUND",
+    "bom": "NOT_FOUND",
+    "gitsign": "NOT_FOUND",
+    "crane": "NOT_FOUND",
+    "openssl": "OpenSSL 4.0.3",
+    "gh": "gh version 2.102.0",
+    "company_identity_env": "NOT_FOUND",
+    "company_signer_env": "NOT_FOUND",
+    "company_revocation_env": "NOT_FOUND"
+  },
+  "evidence_hashes": {
+    "owner_attestation": {
+      "path": "docs/hackathon/evidence/m2-07-owner-attestation-20261016.json",
+      "sha256": "6ee4a7fd67eb07e672cb03d41ef294bc9f07070968e495bc1a3abb06ab078c6c"
+    },
+    "owner_final_attestation_draft": {
+      "path": "docs/hackathon/evidence/m2-07-owner-final-attestation-draft-20261016.json",
+      "sha256": "dfde9c88abb9c9204c6dff2d1aa0c7bd7d38a95469a7c3989f5736771ba35788"
+    },
+    "owner_binding": {
+      "path": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/owner-attestation-r1/owner-binding.json",
+      "sha256": "dfd7e89d1ffa4779caff5169bb9c08ee9e5dd0b7d4caccbdffe43784b08cbdd7"
+    },
+    "owner_public_key": {
+      "path": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/owner-attestation-r1/owner-public-key.pem",
+      "sha256": "234d4a8d016c65adca1fd9bdd470b92d2f82fa8a8e022bc2cd1572b813e2b908"
+    },
+    "owner_signature": {
+      "path": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/owner-attestation-r1/owner-binding.sig",
+      "sha256": "26f4a6ac9c116b729f27260ab40c6b5eb13b657c291df907ebf6bc75be7d1d0d"
+    },
+    "local_closure_receipt": {
+      "path": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/formal-packs-r3/company-closure-attempt-node24-r3/consumer-closure-receipt-local-node24-r3.json",
+      "sha256": "d7eb5d768ff2c26f4ebf0f1a8fdae9d5054484a5bc5f71a0b4927c871ea6fe45"
+    },
+    "independent_replay_receipt": {
+      "path": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/formal-packs-r3/company-closure-independent-node24-r1/independent-replay-receipt.json",
+      "sha256": "a3049e1d455247318a541beeabd5eaedf2ebdb59fc3e3596e5f3546dbc9efcc0"
+    },
+    "owner_clean_receipt": {
+      "path": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/owner-clean-machine-node24-r1/owner-clean-machine-receipt.json",
+      "sha256": "e5617286ca77f03c51b9fa84ec7bfce08fb7ddb28622e745346618cc0f73b038"
+    },
+    "publisher_template": {
+      "path": "docs/hackathon/evidence/m2-07-publisher-evidence-template-20261016.json",
+      "sha256": "05f442ae906f24d9c009bec5c17548d0f579e92d43fdd6a5544358c61c1a041d"
+    },
+    "clean_template": {
+      "path": "docs/hackathon/evidence/m2-07-clean-machine-receipt-template-20261016.json",
+      "sha256": "e49f3735df58f4453ffe615a2025c35eda27984f16573a84706662aa1db96e00"
+    },
+    "final_draft_old": {
+      "path": "docs/hackathon/evidence/m2-07-final-attestation-draft-20261016.json",
+      "sha256": "7ed89cf996369d9f07706f03ab89724c40ca863b94f27bfec032a17f959ee581"
+    }
+  },
+  "formal_constraints": [
+    "Owner self-signature is local integrity evidence, not company publisher signature.",
+    "Same-owner replay is technical reproducibility, not second-person independent verification.",
+    "No PENDING/UNKNOWN/NOT_RUN result may be promoted to PASS.",
+    "M2-08 remains NOT_RUN until M2-07 formal gates close."
+  ],
+  "next_required_company_inputs": [
+    "company publisher identity",
+    "company signer/KMS/HSM/keyless service",
+    "independent verifier identity/job",
+    "revocation service reference",
+    "company final attestation service",
+    "company clean-machine runner and receipt"
+  ]
+}

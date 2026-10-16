@@ -1,0 +1,5 @@
+gstack browse 1.91.95.0
+Aside CLI headed target capture
+openTab(http://127.0.0.1:4332/)
+responsive viewports: 375x812, 768x1024, 1440x900
+console hook, interactive snapshot, body text and JPEG screenshots

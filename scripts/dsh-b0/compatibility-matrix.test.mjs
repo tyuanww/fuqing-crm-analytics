@@ -46,6 +46,17 @@ test('sha mismatch is a hard block and does not scan another revision', async ()
   assert.equal(row.reason, 'UPSTREAM_SHA_MISMATCH');
 });
 
+test('optional upgrade candidate is appended and remains exact-sha bound', async () => {
+  const matrix = await collectCompatibilityMatrix({ candidate: {
+    id: 'dsh-0.2.1-alpha.2', version: '0.2.1-alpha.2', checkout: repo, expectedSha: fixtureSha,
+  } });
+  const candidate = matrix.rows.at(-1);
+  assert.equal(candidate.id, 'dsh-0.2.1-alpha.2');
+  assert.equal(candidate.version, '0.2.1-alpha.2');
+  assert.equal(candidate.status, 'SUPPORTED');
+  assert.equal(candidate.actual_sha, fixtureSha);
+});
+
 test('static evidence is bound to the exact commit even if working sources differ', async () => {
   const path = join(repo, 'packages/core/contract.ts');
   const original = await readFile(path);

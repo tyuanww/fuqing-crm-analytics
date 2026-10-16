@@ -4,9 +4,84 @@
 
 ## M1 核心交付
 
+## M2 收尾任务卡与维修规则
+
+以下任务卡只覆盖 M1 之后仍开放的验收、供应链和发布门禁。每张卡独立推进、独立验证、独立本地提交；没有满足前置条件时保持 `NOT_RUN` 或 `BLOCKED`，不使用历史回执补齐当前证据。
+
+### 维修原则
+
+- **边界清楚**：领域规则留在领域层，服务、宿主、文件和网络通过明确的端口/适配器接入；不把发布控制、业务逻辑和验收脚本揉成一个入口。
+- **依赖向内**：组合、candidate 和 journal 依赖稳定合同，具体 DSH、服务和目标适配器依赖合同；不让业务插件反向依赖主仓内部路径或真实数据。
+- **一个原因一个改动**：每张卡只解决一个完整目的，不为假设需求增加抽象，不通过复制旧实现绕过缺口。
+- **先证据后结论**：输入、来源、摘要、测试范围、未执行项和失败原因都要留证；合成、隔离和历史结果不能写成真实业务或生产通过。
+- **小步本地提交**：代码、合同、证据和入口文档按职责拆分；提交格式使用 `type(scope): description`。默认只做本地 commit，不自动 push、部署、切换或删除。
+- **代码卡强制审查**：任何卡一旦修改代码、脚本、配置合同或测试，完成实现后必须运行 `ocr delegate preview`、`ocr delegate rule` 和逐文件审查；High/Critical 必须修复或明确阻塞，审查覆盖全部 reviewable files 后才能本地提交。纯文档卡不触发代码 OCR，但仍需链接、格式和事实核验。
+
+### 任务卡
+
+| ID | 任务 | 当前状态 | 前置条件 | 完成标准 | 提交边界 |
+|---|---|---|---|---|---|
+| M2-01 | 九包组合 candidate 合同 | `FORMAL_CANDIDATE_REGISTERED / RELEASE_GATES_OPEN` | 隔离 candidate、当前九包输入和主仓登记授权 | 主仓 `config/candidates/shinemage-composition-20261013/` 已登记 `dsh-composition-candidate/v1`、两份候选 profile、九 pack 摘要和 journal seq 1–5；candidate digest `125c8e53…` 可回读 | `chore(sprint): Sprint 120 register formal composition candidate snapshots` |
+| M2-02 | 服务绑定与兼容回执 | `FORMAL_BINDING_REGISTERED / CRM_UNBOUND_BY_CONTRACT` | candidate 合同要求 page profile 绑定 service gate，CRM profile 保持组合边界 | page profile 快照已写入 `analytics-first-purchase` binding、source SHA 和 `LOCAL_COMPATIBLE` 回执；CRM profile 按组合合同保持无绑定，默认 source profile 未被污染 | 同上；登记证据见 `docs(acceptance): record formal candidate registration` |
+| M2-03 | WSL2 目标（当前按测试+生产授权） | `TARGET_PREFLIGHT_PASS / USER_AUTHORIZED_TEST_PROD` | candidate-bound browser、激活和发布仍按独立门禁；云服务器迁移另行 | Linux x86_64 / WSL2、Python 3.14.4、Node/zstd、权限和精确 13-wheel preflight 已通过；现役服务 stale lock 已受保护修复；用户已确认当前目标同时承担测试与生产验收 | `docs(acceptance): record production target authorization` |
+| M2-04 | source HTTP → terminal → browser → recovery | `TERMINAL_PASS / BROWSER_PASS` | M2-01、M2-02、M2-03 | 同一新 candidate 在同一目标完成四段链路；每段 receipt 绑定 candidate，重试幂等、失败可恢复、临时资源回收 | source 子阶段见 `docs(acceptance): record composition source target`；terminal 子阶段见 `docs(acceptance): record composition terminal target`；browser seq 5 与三种 viewport 回执见 `docs/hackathon/evidence/shinemage-m2-04-candidate-browser-preflight-20261013.md` |
+| M2-05 | 真实页面与浏览器验收 | `WINDOWS_HEADED_PASS / WINDOWS_HIGH_CONTRAST_PASS / WINDOWS_AX_PASS / WINDOWS_KEYBOARD_PASS / SCREEN_READER_RUNTIME_READY / SCREEN_READER_AUDIO_PASS` | source-owned `free-page/v1` 页面包和可用目标 | headed 桌面、移动视口、AX、键盘焦点、高对比度和 standalone 页面均有真实证据；读屏运行时已启动，用户人工听读已确认通过 | 已提交 source-owned 页面包 `fcee92a9`（SHA-256 `e2ed8f1c…`）；固定上游真实 Chromium standalone 探针 7 项 PASS，自动化 AX/键盘/forced-colors 6 项 PASS；候选 headed browser 已完成桌面/平板/移动截图、console、隐藏 input 和 Aside Tab 观察；新增 Tailscale Windows x64 headed Chrome、Chrome AX、Tab/Enter、Windows 高对比度和 Narrator 会话 1 证据，详见[Windows 现场验收](evidence/shinemage-m2-05-windows-20261014.md)。用户已在同一 Windows 目标人工确认读屏语音通过；未附远端音频文件，来源见[读屏人工听读补验](evidence/shinemage-m2-05-screen-reader-20261015.md) |
+| M2-06 | 真实模型/CRM/WeKnora/UAT | `CANDIDATE_REAL_MODEL_PASS / CRM_READONLY_PASS / CRM_PURCHASES_READONLY_PASS / CRM_AOV_AUS_STRUCTURAL_PASS / WEKNORA_READONLY_PASS / CRM_SNAPSHOT_WRITE_PASS / CRM_ANALYSIS_SAVE_READBACK_PASS / CRM_REAL_SHARE_UNKNOWN_ACCOUNT_REJECTED / CRM_REAL_SHARE_READ_PASS / CRM_REAL_REVOKE_READ_DENIED_PASS / CRM_REAL_REVOKE_PERSISTED_PASS / CRM_STORAGE_RECOVERY_PASS / REAL_CLEANUP_PASS / CRM_CONTRACT_SAVE_READ_SHARE_REVOKE_PASS / CRM_SYNTHETIC_PERMISSION_NEGATIVE_PASS / CANDIDATE_RUNTIME_STOPPED_AFTER_UAT / LIVE_TOOL_SURFACE_EMPTY` | candidate provider 凭据由用户在 Models 页面手工配置，CRM 当前对话已手工绑定；live 标准会话工具面仍为空；真实第二账号门禁使用隔离 candidate 启动时注入的临时 `admin1`，不写入生产账号配置 | 隔离 candidate 已完成真实快照、UI 标题保存与“已保存分析”回读；随后在独立 `18099` storage 中以临时 `admin1` 完成成功分享、共享读取、owner 撤权、撤权后 `404/NOT_FOUND` 和持久化复核；容器、状态目录和临时账号已清理，复核 4328/18093 仍在监听且未修改。固定 rc2 的本地 host、HTTP consumer 与 SQLite 状态测试本轮重新通过 22/22、8/8、30/30。详见[CRM 保存、回读与权限合同复核](evidence/shinemage-m2-06-contract-gate-20261015.md)与[隔离 candidate 真实分享与撤权回执](evidence/shinemage-m2-06-real-revoke-20261015.md)；产品仍 `PARTIAL` | `docs(acceptance): record candidate real business UAT` |
+| M2-07 | SDK 供应链门禁 | `BLOCKED / RC2_LOCAL_MATERIALS_READY / DEPENDENCY_GRAPH_PASS / RUNTIME_GRAPH_PASS / SBOM_LOCAL_PROJECTION_PASS / CLEAN_HOME_INPUT_PASS / COMPACT_ARCHIVE_BOUND_PASS / COMPACT_CLEAN_HOME_PASS / OPAQUE_OWNER_PROVENANCE_PASS / OPAQUE_SOURCE_ARCHIVE_BINDING_PASS / REGISTRY_APPLICABILITY_PASS / NATIVE_ABI_STATIC_PASS / ATTESTATION_INFRASTRUCTURE_AVAILABLE_CURRENT_NOT_ATTESTED / ATTESTATION_DRY_RUN_BOUNDARY_RECORDED / FULL_ARCHIVE_SECRET_SCAN_BLOCKED` | 最终 immutable artifact、发布者身份和正式发布授权 | 正式 SBOM、签名/验签、撤销、干净机器安装/回退和最终 SHA attestation 均通过 | 当前主仓固定 rc2 `477b4f42…` 的开发 SDK 已完成隔离准备、归档/closure、OSV、内容审计和 clean HOME 输入检查；当前可见检查目录只有 archive/receive/closure 元数据和报告，没有可供正式接收、安装或签名的 artifact 字节；rc2 closure 为 331 packages、CycloneDX projection 360 components，OSV 查询 222/222 完成但发现 29 个唯一公告，当前 closure 的 17 个 binary/native coverage gaps 已完成逐项分组和处理定义。现有 alpha2 closure 与 rc2 pin 的 SHA drift 被 checker 正确拒绝，不能复用历史 alpha2 结果。当前 source checkout 用绝对路径复验返回 `KIT_INPUTS_UNAVAILABLE`，原因是已编译 SDK main/types 和一致的 build-tools 输入未保留；这与历史隔离准备目录的 `READY` 回执分开记账。完整 development archive 另有 70 个 secret-pattern 命中和 827 个 coverage gaps，已完成逐类 disposition，但仍继续 fail-closed。attestation dry-run、publisher preflight、preflight clean checkout 和 50/50 本地合同回归均已留证；本机没有 GPG secret key、cosign 缺失，当前 candidate 未完成正式签名、验签、撤销或 attestation。正式 artifact、完整正式 SBOM、发布者身份、签名链和干净机器回退仍未提供，`release_ready=false`。详见[rc2 本地 SDK 材料](evidence/shinemage-m2-07-rc2-local-materials-20261015.md)、[当前 pin closure 复核](evidence/shinemage-m2-07-current-pin-closure-recheck-20261015.md)、[rc2 输入复验](evidence/shinemage-m2-07-rc2-input-repro-check-20261015.md)、[rc2 artifact 可用性盘查](evidence/shinemage-m2-07-rc2-artifact-availability-20261015.md)、[rc2 closure gap disposition](evidence/shinemage-m2-07-rc2-gap-disposition-20261015.md)、[本地门禁回归](evidence/shinemage-m2-07-local-gate-rerun-20261015.md)、[preflight 只读检查](evidence/shinemage-m2-07-preflight-check-20261015.md)、[发布者身份复核](evidence/shinemage-m2-07-publisher-identity-recheck-20261015.md)、[完整 archive triage](evidence/shinemage-m2-07-full-archive-triage-20261015.md)及[完整 archive 审计](evidence/shinemage-m2-07-full-archive-secret-audit-20261014.md) |
+| M2-08 | release / activation / canary / rollback | `INTERNAL_PREFLIGHT_PASS / TARGET_WSL2_HTTP_PASS / NOT_RUN` | M2-04 至 M2-07 关闭，且取得发布授权 | immutable artifact、CI、release review、目标接收、生产激活、canary 和 rollback 全部有同一版本证据 | 在 clean reviewed commit `a148ea77…` 上完成 rc2 内部 preflight：prepare/audit/build/runtime/release/test/receive/evidence 全部通过，release contract tests `549 PASS / 0 FAIL / 0 SKIP`；随后在授权杭州 Linux x86_64 / WSL2 UID 65534 目标以 sealed synthetic 输入完成 10/10 source HTTP 冷安装、权限、SIGKILL 重放和冷恢复。仍缺 15 分钟 SLI、最终供应链门禁和正式 release authorization，因此 activation/canary/rollback 仍 `NOT_RUN`。详见[M2-08 rc2 正式 preflight](evidence/shinemage-m2-08-formal-preflight-20261014.md)、[M2-08 WSL2 目标补验](evidence/shinemage-m2-08-wsl2-target-20261014.md)与[release 门禁复核](evidence/shinemage-m2-08-release-gate-recheck-20261014.md)，不自动部署 |
+| M2-09 | 独立 DSH 升级候选 | `CANDIDATE_RUNTIME_PASS / STATIC_MATRIX_PASS / ISOLATED_PLUGIN_ADAPTATION_PASS / CROSS_VERSION_PASS / COMBINED_LIFECYCLE_PASS / SDK_PREPARED_PASS / SDK_CLOSURE_PASS / SDK_CONTENT_AUDIT_PARTIAL / FORMAL_PACK_SOURCE_PROVENANCE_PASS / PROFILE_COMPATIBILITY_PASS / COMBINED_BROWSER_PASS / CANDIDATE_RECOVERY_PASS / ALPHA2_PLUGIN_CONSUMPTION_CLOSURE_PASS / TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN / MAIN_PIN_ADAPTATION_DEFERRED / MAIN_PIN_UNCHANGED` | 新官方 DSH 版本/commit 和隔离 runtime | 新旧 runtime、SDK、插件适配、兼容矩阵、恢复矩阵和回退条件齐全；授权后再切换 | 官方 `dsh-v0.2.1-alpha.2` / `d7432673…` 已在 ignored checkout 安装、native/host build、14 文件 468 测试和三组候选 persistence 主行恢复中通过；九包隔离构建 9/9、自测 9/9（286 项）通过；tracked candidate 已完成来源锁定、Cordis peer 对齐和 20 项组合集成；9/9 pack、2 份 profile 与 composition lock 已复核为同一 commit 的完整消费闭包。本机隔离候选补齐 Web dist 后，使用真实 gstack Chromium fallback 完成页面、预置历史、插件页和 owned-host 重启后的历史回读；稳定后 console errors 为空，重启瞬间的 WebSocket 重连告警保留在证据中。alpha2 开发 SDK 在 Darwin arm64 隔离准备目录中完成固定 source/lock、host/client build、build-tools install 和 source-clean，`check.mjs` 返回 `READY`；随后完成 archive/receive 与 alpha2 缩减闭包投影：`closure_sha256=6d27be92…`、30,611 entries、335 packages，内容审计 26,222 文件、0 findings、18 个 binary/native coverage gaps。所有回执仍为 `supply_chain=NOT_VERIFIED`、`release_ready=false`。主仓适配审计确认 rc2 锁文件、默认验证入口和正式 Cordis 合同仍与 alpha2 隔离闭包分开；正式目标 browser/recovery、主仓适配、切换与 release/activation 仍未执行，详见 `docs/hackathon/evidence/shinemage-m2-09-sdk-closure-20261014.md`、`docs/hackathon/evidence/shinemage-m2-09-sdk-preparation-20261014.md`、`docs/hackathon/evidence/shinemage-m2-09-main-pin-adaptation-review-20261014.md`、`docs/hackathon/evidence/shinemage-m2-09-alpha2-consumption-closure-20261014.md` 与 `docs(acceptance): record DSH upgrade deferred recheck`；不混入当前发布候选 |
+| M2-10 | 证据与状态收口 | `PASS / RELEASE_GATES_REMAIN_OPEN` | 每张已执行任务卡的原始回执和本地提交 | 十张任务卡均有状态、证据、下一步和本地提交可追溯；产品仍 `PARTIAL`，未完成门禁保持原状态；当前 disposition 见[M2 任务卡当前收口账本](evidence/shinemage-m2-closeout-20261014.md) | `docs(status): close acceptance task card` |
+
+每张任务卡完成后都要记录：输入身份、实际命令、退出码、原始证据位置、未执行项、风险边界和本地 commit。卡片没有完成时，不勾选下一张依赖卡；产品仍保持 `PARTIAL`、`release_ready=false`。
+
 ### 2026-10-12 独立作者仓合并与目标前置阻塞
 
 十个独立作者仓 PR #1 已普通 merge，合并后的各自 main CI 全部 SUCCESS，详情见[合并快照](evidence/shinemage-author-merge-and-candidate-preflight-20261012.md)。隔离目录已基于当前 Workbench formal pack 和既有 `first-purchase-source-http-local` 服务绑定准备 candidate `facb83f3…` / journal seq 2；主仓 profile 与正式 journal 未写入。唯一可连接的 `100.93.46.46` 属于生产入口，用户确认没有另一台非生产 WSL2，所以 source／terminal／browser／recovery 保持 NOT_RUN。产品 PARTIAL、SDK BLOCKED、`release_ready=false`。
+
+
+### 2026-10-14 DSH 候选正式组合补验
+
+M2-09 候选已补齐正式 pack/profile 输入和 synthetic 组合 browser：9 个 plugin pack、2 份 profile inputs 由候选 toolchain 真实读取器复核；alpha2 native shell 使用正式 Workbench page pack 完成隔离 session/history/board 启动与关闭，`model_calls=0`、`contains_real_data=false`。代码适配提交 `01b753e5` 已按 `open-code-review-delegate` 审查 8/8 文件并本地提交，固定 Node 24 下相关回归 `119 PASS / 0 FAIL / 0 SKIP`。主仓 rc2 pin/live、正式 profile/journal、release/activation、正式目标 browser/recovery 均保持原状态。
+
+### 2026-10-14 DSH 候选目标 browser/recovery 补验（已撤销历史尝试）
+
+旧回执曾记录 alpha2 正式 page pack browser 和 owned-host restart recovery PASS，并保留在 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-target-browser-recovery-20261014.json`。后续证据纠偏确认该尝试复用了 synthetic backend，缺少可采纳的真实浏览器操作和重启后业务页面回读，因此不能作为正式目标证据。原始回执保留用于审计，当前 M2-09 仍保持 `TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN`；live 4328/4332/4336 未修改，主仓 pin 未切换。
+
+### 2026-10-13 授权生产目标前置通过
+
+用户明确授权杭州生产入口同时承担当前测试与生产目标，后续再迁移云服务器。目标前置回执 `SERVICE_TARGET_PREFLIGHT_PASS`，现役服务陈旧 supervisor lock 已在无 owner 条件下受保护清理并恢复 `active/running`；在目标前置阶段，当前 composition candidate 尚未接入，terminal、browser、recovery 和 activation 保持 `NOT_RUN/BLOCKED`。详见[授权生产目标前置预检](evidence/shinemage-production-target-preflight-20261013.md)。
+
+source HTTP 子阶段随后已在同一目标用当前 candidate 完成 10/10 PASS，服务内 SIGKILL/冷恢复、输入和临时资源清理均有 candidate-bound receipt，隔离 journal seq 3；该回执本身不覆盖 terminal/browser。详见[当前组合 source HTTP 目标验收](evidence/shinemage-composition-source-http-target-20261013.md)。
+
+随后在同一目标使用九包组合 candidate 完成 terminal drill：roster/工具加载、合成原生对话、受控重启和进程丢失后的 durable session 恢复共 5/5 PASS，组合 journal seq 4 已追加。该回执只覆盖 synthetic model 与临时 profile/runtime；candidate-bound browser 随后以 seq 5 完成，真实模型/CRM/WeKnora/UAT、供应链、activation、canary、rollback 和 release gate 仍未关闭。详见[当前组合 terminal 目标验收](evidence/shinemage-composition-terminal-target-20261013.md)。
+
+随后对用户授权的真实入口 `https://app.tyuan.chat/` 做了只读 headed browser 观察：组合 bundle 约 15 秒后加载完成，桌面、平板和移动 viewport 均显示真实工作台导航与工作区内容，控制台错误为空。该结果只关闭 live browser 子项，不接入 candidate journal，也不替代 standalone、读屏、键盘焦点和高对比度验收；candidate-bound browser 另有 seq 5 回执。详见[授权生产入口 live browser 观察](evidence/shinemage-live-browser-20261013.md)。
+
+随后复核 M2-05 的 standalone 输入：初始 `COCKPIT_EXAMPLE_PACKAGE` 未设置，路径不存在；该缺口已由本地提交 `fcee92a9` 补齐并加固 source-owned 页面包，在固定工具链的真实 Chromium 探针中完成 7 项 PASS。standalone 包与本地浏览器子项已有证据；candidate-bound headed browser 的 Tab 观察仍为 partial，读屏、人工键盘焦点和 Windows 高对比度继续保持未完成。详见[standalone 页面包 preflight 与 follow-up](evidence/shinemage-m2-05-standalone-package-preflight-20261013.md)。
+
+随后对 DSH、page、CRM 和 WeKnora loopback 入口做了只读状态码前置核验：认证入口返回 401，page 根路径返回 404，WeKnora Web shell 返回 200；没有调用真实模型、读取 CRM/WeKnora 数据或执行 UAT。详见[真实业务 UAT 前置核验](evidence/shinemage-real-business-uat-preflight-20261013.md)。
+
+用户随后再次确认当前杭州入口同时作为测试与生产目标，云服务器迁移后置。该决定解除目标环境缺口，不改变 candidate-bound browser、standalone、真实业务 UAT、SDK、activation、canary、rollback 或 `release_ready=false` 的独立门禁。详见[当前测试与生产目标授权记录](evidence/shinemage-production-target-authorization-20261013.md)。
+
+随后用户在 Aside 完成登录并运行真实业务 UAT：DeepSeek-V41-Flash 对 WeKnora 的只读检索与来源引用通过，`board.tyuan.chat/audience` 的真实 CRM 聚合看板在重试 503 后加载通过；新建标准模式会话没有暴露 `query_crm_dashboard_gsv`，模型拒绝编造调用；插件详情只显示 UI 组件运行中，没有 CRM provider tool surface，保存/权限失败/恢复/人工业务复核仍未运行。M2-06 更新为 `PARTIAL_REAL_UAT / CRM_TOOL_NOT_EXPOSED`，详见[真实模型、WeKnora 与 CRM UAT 实跑](evidence/shinemage-real-business-uat-20261013.md)。
+
+本轮在同一授权目标按 release marker 修正了 CRM candidate 的 peer 图：候选插件改用 `upstream/node_modules/.pnpm/node_modules/@deepseek-ai` 闭包，session-controller 与 UI 不再 pending；隔离候选在 `4332` 启动，私有 B0 bridge 在 `4336` 启动，live `4328` 未动。Aside 候选标签页已打开登录入口，登录及后续真实 UAT 等待用户操作，当前不把启动通过写成业务验收通过。详见[候选 peer 图修复与启动证据](evidence/shinemage-m2-06-candidate-peer-repair-20261013.md)。
+
+重新打开候选标签页后，实查确认 live `app.tyuan.chat` 的 `WEIWEI` 登录状态没有传递到 `127.0.0.1:4332`；候选页仍显示“未登录”和 API Key 配置提示。本轮不复制浏览器凭据，也不把 live 会话当作 candidate UAT。M2-06 当前为 `CANDIDATE_BOOT_PASS / ASIDE_SESSION_NOT_BOUND`，详见[候选 Aside 会话边界](evidence/shinemage-m2-06-candidate-session-boundary-20261013.md)。
+
+随后在已登录 live `app.tyuan.chat` 新建会话执行只读验收：`crm_service_health`、`query_crm_dashboard_gsv` 与 WeKnora 检索均为 `NOT_EXPOSED / NOT_RUN`，模型拒绝编造数字或来源，没有执行写操作。M2-06 更新为 `PARTIAL_REAL_UAT / CRM_TOOL_NOT_EXPOSED`，详见[live 只读模型与工具面验收](evidence/shinemage-m2-06-live-readonly-uat-20261013.md)。
+
+随后在修复后的隔离 candidate 内创建临时 workspace/session，直接检查 CRM host 路由：HTTP `200` 返回 `connected=false`，证明候选宿主已加载 CRM host，当前 session 仍未绑定 CRM 账号。该探针未发送模型 prompt、未查询业务数据、未读取凭据。详见[candidate CRM host 路由探针](evidence/shinemage-m2-06-candidate-host-probe-20261013.md)。
+
+随后在同一隔离 candidate 登录为 `hutou`，选择临时 `uat-probe-workspace` 并切换到“仅可查看”后重跑真实只读 UAT 请求。页面明确返回 `MISSING_CREDENTIAL`：`deepseek-official` provider 没有 `DEEPSEEK_API_KEY`，模型调用在工具发现前失败；没有输入、读取或记录凭据，也没有读取业务数据或执行写操作。该结果关闭了候选登录与只读模式观察，却保留真实模型、CRM/WeKnora 查询和后续 UAT 门禁。详见[candidate 真实模型凭据门禁](evidence/shinemage-m2-06-candidate-model-credential-20261013.md)。
+
+随后用户在隔离 candidate Models 页面手工保存受控 provider 凭据，并在当前对话的“连接 CRM”表单手工完成 session 绑定。candidate 以“仅可查看”重跑真实只读 UAT：`crm_service_health` 返回 `LOGIN_BOUND`，`query_crm_dashboard_gsv` 按指定 2026-01-01 至 2026-01-07、全店、`exclude_low_price=false` 调用一次，来源为真实已认证 CRM 服务，返回 7/7 日点且日汇总一致；WeKnora 只读检索与来源引用通过。总额、趋势行、客户标识和原始业务行均未写入证据。M2-06 更新为 `CANDIDATE_REAL_MODEL_PASS / CRM_READONLY_PASS / WEKNORA_READONLY_PASS / LIVE_TOOL_SURFACE_EMPTY`；保存、权限失败、恢复、人工业务复核以及 live 标准会话工具面仍保持未执行，详见[候选真实 UAT 证据](evidence/shinemage-m2-06-candidate-real-uat-20261013.md)。
+
+随后复核 M2-07 当前供应链检查器：脚本 SHA-256 仍为 `690034de…`，工作树无改动，CLI 默认离线且明确不授予 release readiness；`dependency_graph`、`embedded_components`、`registry_integrity`、`publisher_identity`、`opaque_content`、`revocation` 仍未验证。该复核没有执行 OSV、安装、签名或发布，M2-07 继续为 `BLOCKED`。详见[SDK 供应链门禁当前复核](evidence/shinemage-m2-07-supply-chain-gate-recheck-20261013.md)。
+
+随后审计 M2-08 release/activation/canary/rollback 前置链：M2-01/02 已登记正式 candidate/profile 快照（CRM 按组合合同无绑定），M2-05 仍有页面与无障碍缺口，M2-06 的 candidate 只读模型/CRM/WeKnora 已通过但 live 工具面和保存/权限/恢复/人工业务复核仍未执行，M2-07 仍 BLOCKED，且当前记录没有正式 release/activation 授权。`release_ready=false`、`activation=NOT_RUN` 保持不变；本轮没有 push、merge、receive、激活、canary 或 rollback。详见[M2-08 release 门禁审计](evidence/shinemage-m2-08-release-gate-audit-20261013.md)。
+
+随后复核 M2-09 DSH 升级边界（2026-10-13 初始记录）：本地 pin 仍为 `0.1.7-rc.2` / `477b4f42…`，杭州 `current` 仍为 `dsh-0.20.0.0-r3`，candidate 仍使用同一 rc2 上游；新官方 `dsh-v0.2.1-alpha.2` / `d7432673…` 已在本地 ignored checkout 完成安装、native/host build、聚焦生命周期/session 测试和三组候选 persistence 主行恢复，九包在 ignored 候选 toolchain 中隔离构建 9/9、自测 9/9（286 项）通过。主仓 peer/固定 toolchain 仍锁 rc2，组合 lifecycle 已在 ignored alpha.2 harness 通过；当日正式组合 browser/recovery 与切换未执行。2026-10-14 已补齐候选正式 pack/profile 与 synthetic 组合 browser，当前状态见上方 M2-09 任务卡及[DSH 升级候选延后复核](evidence/shinemage-m2-09-dsh-upgrade-deferred-20261013.md)。
 
 
 2026-09-13 用户确认“核心版本优先交付、扩库完善后置”。目标是问数后 AI 优先使用定制组件自由组板，板内按选定范围修改；首批六类不是最终上限。M1／产品仍 PARTIAL；原全量 App Goal 保持 PAUSED。本节承接原本地施工记录，不把旧冻结实现反推成最终需求。
@@ -36,7 +111,7 @@ Workbench、CRM、Knowledge 作者仓已分别加入正式 `dsh-plugin-pack/v1` 
 
 ### 2026-10-12 当前组合输入预检
 
-基于上述三份真实 PR CI formal pack 和组合锁中的六份既有包，`scripts/ci/composition-pack-inputs.mjs` 已在固定 Node 24.19.0 / Python 3.14.4 下生成九包、两 profile 的固定输入回执，命令 exit 0。回执锁摘要为 `be215557…`，原始回执 SHA-256 为 `4a7b9cf9…`，见[预检记录](evidence/shinemage-composition-preflight-20261012.md)及机器摘要。该步骤只关闭包身份和输入准备，profile 仍没有 `service_binding`；宿主、服务/目标、terminal/browser/recovery、candidate/journal、真实业务、standalone、SDK 分发和 DSH 升级继续保持 NOT_RUN/BLOCKED，不能据此生成 candidate 或发布。
+基于上述三份真实 PR CI formal pack 和组合锁中的六份既有包，`scripts/ci/composition-pack-inputs.mjs` 已在固定 Node 24.19.0 / Python 3.14.4 下生成九包、两 profile 的固定输入回执，命令 exit 0。回执锁摘要为 `be215557…`，原始回执 SHA-256 为 `4a7b9cf9…`，见[预检记录](evidence/shinemage-composition-preflight-20261012.md)及机器摘要。后续隔离复核再次确认静态 composition contract 通过，但两份 profile 的 `service_binding` 仍缺失，见[后续组合预检](evidence/shinemage-composition-next-preflight-20261012.md)。该步骤只关闭包身份和输入准备，profile 仍没有 `service_binding`；宿主、服务/目标、terminal/browser/recovery、candidate/journal、真实业务、standalone、SDK 分发和 DSH 升级继续保持 NOT_RUN/BLOCKED，不能据此生成 candidate 或发布。
 
 PR #121 的 hosted B0 已用新的组合 artifact 实际重跑成功，记录在[正式组合交付](evidence/shinemage-pr121-formal-pack-delivery-20261012.md)；这只关闭当前 GitHub CI 输入链，不改变上述 service binding、candidate/journal、宿主和发布边界。
 
@@ -568,3 +643,28 @@ M1 DONE 要求 S0–S5、G1–G6具备对应证据；U1、Git交付、M2和原�
 - [x] **DX6 / T21 (P1, IMPLEMENTED — candidate PARTIAL)** — 增加 `pnpm dsh plugin candidate`，复用现有 profile/release journal 生成本地 pack digest、DSH pin、capability、profile diff 状态、canary/rollback 状态和下一步 receive/verify 命令；不得隐式上传、重启、切换杭州或读取真实 DuckDB。候选回执已采用 intent → pending → 原子 rename → `CANDIDATE_PREPARED` 顺序，并校验 canonical plugin path；安全锁文件修复后需在 clean reviewed commit 上重新生成，canary/rollback/远端 receive 仍 `NOT_RUN/NOT_AVAILABLE`。证据：`scripts/release/plugin-candidate.mjs`、`docs/hackathon/evidence/dsh-g0-plugin-candidate-20261002.md`、`docs/hackathon/evidence/dsh-g0-open-code-review-20261002.md`。
 - [x] **DX7 / T22 (P1, IMPLEMENTED — docs PASS)** — 统一 README、STATUS、docs/README 与 rc2 Quickstart 的当前事实，并新增三步插件作者 Quickstart，明确 DSH pin、package contract、本地验证和 candidate handoff；历史段落仍标注，未宣称现场 UAT。证据：`README.md`、`docs/README.md`、`docs/operating/dsh-plugin-author-quickstart.md`、`docs/operating/dsh-rc2-quickstart.md`、`docs/hackathon/evidence/dsh-g0-dx-triage-20261002.md`。
 - [x] **DX8 / T23 (P2, IMPLEMENTED — readiness summary PASS)** — `readiness`/`doctor --release` 现在在末尾输出阻断数量、去重错误码和每个错误码的 Quickstart/reference 锚点；保留逐项 remedy、退出码和 fail-closed 门禁，不联网、不安装、不新增状态源。证据：`scripts/release/readiness.mjs`、`scripts/release/cli.test.mjs`、`docs/hackathon/evidence/dsh-g0-dx-triage-20261002.md`。
+
+
+## 2026-10-14 M2-09 证据纠偏
+
+复核后，上一轮 alpha2 formal pack/profile、组合 browser 和杭州目标 browser/recovery 的 PASS 不再作为正式证据：候选包来自 ignored workspace；browser probe 没有真实浏览器页面操作；restart 没有重启后的 history/board 回读；目标运行复用了 synthetic backend。修复后的打包器已要求 source manifest 与 HEAD 逐字一致，并检查完整未跟踪状态。旧回执与日志保留为历史尝试，M2-09 当前状态已降为 FORMAL_PACK_SOURCE_PROVENANCE_BLOCKED / COMBINED_BROWSER_NOT_RUN / TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN，下一步是建立 tracked candidate、重新生成 pack/profile，再进行真实浏览器和恢复回读验收。
+
+
+## 2026-10-14 M2-09 tracked candidate pack
+
+已建立 tracked candidate workspace，提交为 da1b49d35a571c79cff36a69bea0e2e933fac532。修复后的 packer 生成 9/9 个 alpha2 plugin pack，所有回执 source_sha 绑定该提交且 source_dirty=false；回执与汇总位于 .context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-tracked-packs-20261014/preparation.json。该步骤只关闭来源证明，CRM/Knowledge 仍声明 Cordis 4.0.2，候选 runtime 为 4.0.5-alpha.1，因此 profile compatibility 仍 BLOCKED；browser/recovery 仍 NOT_RUN。
+
+## 2026-10-15 M2-06 写入 UAT 前置阻塞
+
+隔离 candidate 已临时追加 `CRM 写入验收` preset，修复了 PTC 会话没有加载 CRM tool plugin 的问题；模型凭据路径修复后标准会话返回 `READY`。旧 host 指向共享真实后端的问题已通过临时 `127.0.0.1:18099` 独立 storage 容器隔离，真实 DuckDB 与来源目录只读挂载，状态目录独立且 owner-only，健康检查通过。写入会话完成 CRM 绑定后，模型按 90 天上限将 2025 年拆为五个无重叠窗口，五次快照均 `ok=true`，GSV 合计 `179,409,532.85`；停止并重启独立容器后五条验收快照已清除，库恢复为空。分析标题保存与按 ID 回读接口未暴露，权限负测保持 `NOT_RUN`。详见[写入 UAT 前置阻塞](evidence/shinemage-m2-06-write-uat-auth-20261015.md)。
+
+随后恢复同一隔离 candidate 并完成真实 UI 补验：创建一条 `data_kind=real` 快照，在“CRM 分析”中保存为 `M2-06-CANDIDATE-20261015`，切换“已保存分析”后按同一快照编号回读；向不存在账号分享返回“找不到该 CRM 账号，未建立分享”，未产生 grant。随后在新的独立 `18099` storage candidate 中注入临时 `admin1`，完成成功分享、共享读取、owner 撤权、撤权后 `404/NOT_FOUND` 和持久化复核；清理后远端 candidate SQLite 的 `assets`、`grants`、`receipts`、`command_receipts` 均为 0，刷新 UI 后保存列表为空，候选进程与独立 storage 已停止，live `4328` 与共享 `18093` 未修改。详见[CRM 保存、回读与权限合同复核](evidence/shinemage-m2-06-contract-gate-20261015.md)与[隔离 candidate 真实分享与撤权回执](evidence/shinemage-m2-06-real-revoke-20261015.md)。
+
+
+## 2026-10-14 M2-09 peer compatibility
+
+tracked candidate commit 1bb2646523a7c1cd5aa04d11080617a373af7147 将 CRM/Knowledge 的 Cordis peer 对齐到 4.0.5-alpha.1。候选 CRM 测试 108/108、Knowledge 测试 32/32，使用候选 profile/pack 的 CRM/Knowledge/page 组合集成 20/20；9/9 pack 与 2 份 profile 输入均由真实读取器准备。M2-09 的来源证明与 profile compatibility 已通过，browser/recovery 仍 NOT_RUN，主仓 rc2 pin/live 未切换。
+
+## 2026-10-14 M2-09 本机真实浏览器与恢复
+
+tracked candidate 补齐隔离 alpha2 Web dist 后，gstack Chromium fallback 实际打开候选页面，完成预置历史和插件页观察；owned-host 重启后重新加载，预置历史仍可见。稳定后控制台无错误；重启瞬间的 chunked encoding 与 WebSocket 重连告警保留为过程证据。board 仍是 synthetic backend 预置，未宣称浏览器 UI readback。M2-09 的本机候选 browser/history recovery 子项已关闭，正式目标 browser/recovery、主仓 pin 适配、切换和 release/activation 仍未执行。证据：`.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-browser-recovery-20261014.json`。

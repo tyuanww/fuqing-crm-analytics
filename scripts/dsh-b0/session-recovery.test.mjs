@@ -41,6 +41,27 @@ test('official rc2 cold reader/writer recovers an incomplete zstd frame', {
   } finally { await rm(root, { recursive: true }); }
 });
 
+test('candidate recovery accepts explicit candidate and baseline runtime versions', {
+  skip: (!process.env.B0_BUILD_UPSTREAM || !process.env.B0_RECOVERY_BASELINE_UPSTREAM)
+    && 'explicit built candidate and baseline checkouts required',
+}, async () => {
+  const root = await mkdtemp(join(tmpdir(), 'owned-session-candidate-'));
+  try {
+    const result = await runSessionRecoveryMatrix({
+      output: join(root, 'result'),
+      rc2Modules: join(process.env.B0_BUILD_UPSTREAM, 'apps/cli/node_modules/@deepseek-ai'),
+      rc1Modules: join(process.env.B0_RECOVERY_BASELINE_UPSTREAM, 'apps/cli/node_modules/@deepseek-ai'),
+      runtimeVersion: '0.2.1-alpha.2',
+      baselineVersion: '0.1.7-rc.2',
+    });
+    assert.deepEqual(result.runtime_versions, { candidate: '0.2.1-alpha.2', baseline: '0.1.7-rc.2' });
+    assert.equal(result.status, 'PASS');
+    assert.deepEqual(result.rows.map(row => row.status), ['PASS', 'PASS', 'PASS', 'PASS']);
+    assert.equal(result.rows[1].id, 'baseline-write-candidate-read-append');
+    assert.equal(result.rows[2].id, 'candidate-write-baseline-read');
+  } finally { await rm(root, { recursive: true }); }
+});
+
 test('unknown corpus is rejected before creating output', async () => {
   const root = await mkdtemp(join(tmpdir(), 'owned-session-corpus-guard-'));
   try {

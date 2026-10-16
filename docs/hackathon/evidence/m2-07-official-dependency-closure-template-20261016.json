@@ -1,0 +1,69 @@
+{
+  "schema_version": "shinemage-alpha4-official-dependency-closure/v1",
+  "status": "PENDING_COMPANY_EXECUTION",
+  "release_ready": false,
+  "subject": {
+    "sdk": "@deepseek-ai/dsh@0.2.1-alpha.4",
+    "artifact_sha256": "9f4fe0f466d7699ddd4686ee9692ec10c6d9f98a7d175fd5e55de01b2f64c8d6",
+    "upstream_sha": "86a402200d95fecef4529d969836f1fe13c6cb0d",
+    "candidate_source_sha": "50d241cbd23aa2a9d188fe84c3864528a2206917",
+    "upstream_lock_sha256": "ee1c37b5429c535974bafa09475cb03fc473e87dded8f56d54d909ed621e1317",
+    "sbom_sha256": "2adb75e23a0af0c60ce202f5e4b265549836b4761e758935111d66bbc257bfca",
+    "provenance_sha256": "5e81763e0fad9ab5952fb6c7b094cf0e01d0a1b0883f469e63b2f672e8d7a0c4"
+  },
+  "source_observation": {
+    "root_package_json_sha256": "8bb7e0f4693c9d68f0a3200e0503c03f25f30090bdfe373ccfc9a71b706158dc",
+    "ui_primitives_package_json_sha256": "8208a57a195c448a9932372dcfd7228f394c1abe527acf57b0848c4840e27640",
+    "ui_primitives_package": "@deepseek-ai/dsh-client-ui-primitives@0.2.1-alpha.4",
+    "katex_version": "0.18.7",
+    "katex_manifest_location": "devDependencies",
+    "runtime_imports_katex": true,
+    "runtime_imports_katex_css": true,
+    "current_local_disposition": "UPSTREAM_DEFECT_DEV_ONLY",
+    "official_dependency_policy": "BROWSER_BUILD_INPUT_DEV_ONLY",
+    "official_verifier": "verify-package-dependencies"
+  },
+  "closure_result": {
+    "status": "PENDING",
+    "dependency_graph": "PENDING",
+    "production_install_resolves_all_runtime_imports": "PENDING",
+    "sbom_subject_matches_artifact": "PENDING",
+    "sbom_covers_runtime_dependencies": "PENDING",
+    "katex_runtime_closure": "PENDING",
+    "optional_and_native_dependencies": "PENDING",
+    "closure_manifest": "",
+    "closure_sha256": "",
+    "sbom_file": "",
+    "sbom_sha256_actual": "",
+    "provenance_file": "",
+    "provenance_sha256_actual": "",
+    "policy_check": "FAIL_DIRECT_UI_PRIMITIVES_RUNTIME_MOVE",
+    "consumer_runtime_closure": "PENDING_COMPANY_EXECUTION"
+  },
+  "disposition": {
+    "resolution": "PENDING",
+    "recommended_resolution": "CONSUMER_RUNTIME_CLOSURE_OR_COORDINATED_BUNDLING_POLICY_FIX",
+    "rebuild_required": "PENDING",
+    "reason": "ui-primitives runtime code imports katex and katex/dist/katex.min.css while the official package manifest declares katex under devDependencies.",
+    "new_artifact_sha256": "",
+    "new_lock_sha256": "",
+    "new_sbom_sha256": "",
+    "new_provenance_sha256": "",
+    "local_patch_status": "REJECTED_BY_OFFICIAL_POLICY",
+    "policy_failure_log_sha256": "fd3e0ad8827003167c43a035a2bf8986fbc99c358063fe2026fbec0a0d63e480"
+  },
+  "verification": {
+    "independent_verifier": "",
+    "verified_at": "",
+    "command_or_job_ref": "",
+    "log_ref": "",
+    "status": "PENDING"
+  },
+  "prohibited_shortcuts": [
+    "Do not count a devDependency as a runtime closure.",
+    "Do not use the CRM candidate KaTeX overlay as proof of official closure.",
+    "Do not mark PASS when dependency graph or production install was not checked.",
+    "Do not reuse old SBOM, provenance, signature, or artifact hashes after a rebuild.",
+    "Do not put registry credentials or private keys in this file."
+  ]
+}

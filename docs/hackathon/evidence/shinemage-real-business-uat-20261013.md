@@ -1,0 +1,45 @@
+# 真实模型、WeKnora 与 CRM UAT 实跑（2026-10-13）
+
+用户本人在 Aside 完成登录后，在授权杭州入口执行只读 UAT。该文件先记录 live 标准会话的结果；随后在隔离 candidate 完成了真实模型、WeKnora 和 CRM GSV 只读链路。两类运行时保持分开，不能互相代签。
+
+## 已实际运行
+
+### WeKnora 与真实模型
+
+- 工作台使用真实 `DeepSeek-V41-Flash`、推理等级 `High`，代理预设为“知识库问答”。
+- 只读问题要求检索 CRM 的 GSV/GMV 口径并列出来源，不执行写入。
+- 观察到 `weknora_search` 和 `weknora_read_document` 工具调用；回答返回了来源标题，包括《CRM 指标已确认口径与接入边界-20260920》《项目数据库与数据接口使用说明》《归档 CRM 数据接口目录》和《CRM赛道快速上手CST-逐页识别文字》。
+- 回答明确区分了知识库静态口径与实时业务数据，没有声称查询了真实 CRM 数据。
+
+结论：**真实模型 PASS；WeKnora 检索与来源引用 PASS；未执行写入。**
+
+### CRM 真实看板
+
+- 用户登录后的 `board.tyuan.chat/audience` 首次请求返回 503，页面提供重试；重试后看板加载完成。
+- 实际范围为 2026-01-01 至 2026-10-12、全店、YTD；页面展示 GSV/GMV、老客/新客/会员等聚合卡片和趋势区域。
+- 本记录只记页面状态和范围，不复制真实指标数值、客户标识或名单。
+
+结论：**CRM 只读看板加载 PASS；未执行保存、导出或业务数据修改。**
+
+## 仍未关闭的集成门禁
+
+在新建标准模式会话中明确要求直接调用 `query_crm_dashboard_gsv`。模型返回“该工具不在当前会话的工具清单里”，并列出当前可见工具只有页面生成、bash、read/write/edit、glob/grep、web 和团队工具；没有执行 CRM 查询，也没有用终端或仓库文件替代。
+
+随后只读查看 Aside 的插件详情：`@shine-mage/dsh-analytics-workbench-b0` 与 `@shine-mage/dsh-shine-query` 都是 `v0.0.0-b0`，各自只有 `analytics-workbench-ui` / `shine-query-ui` 组件显示运行中。没有切换开关、卸载插件、重启服务或修改配置；这说明当前工作台会话拿到的是 UI 组件装配，不能据此证明目标 DSH runtime 已向 agent 暴露 CRM provider。
+
+仓库静态注册位置也已只读核对：`dsh-plugins/crm-knowledge/src/index.ts` 定义 `query_crm_dashboard_gsv`，`dsh-plugins/shine-query/src/index.ts` 只有 `shine-query-ui` 的 UI 注入，`backend/analytics_first_purchase_app.py` 明确没有启用原生工具、CRM service 或模型。由此可定位为运行时组合/会话装配缺少 CRM provider；这不是对生产 CRM 接口健康度的新判断。
+
+因此：
+
+- `CRM_TOOL_EXPOSURE`：`BLOCKED_TOOL_NOT_EXPOSED`；需要把 `crm-knowledge` provider、service profile 和正确 DSH runtime 接入当前目标会话，而不是只启用 UI 组件。
+- 保存/驾驶舱写入：`NOT_RUN_READ_ONLY_SCOPE`。
+- 权限失败、会话恢复和人工业务代表复核：`NOT_RUN`。
+- standalone、candidate-bound browser、读屏、键盘完整焦点和高对比度仍由 M2-05/M2-04 独立负责。
+
+本轮没有修改生产数据、没有生成或保存驾驶舱、没有激活 candidate、没有 push；产品仍 `PARTIAL`，`release_ready=false`。
+
+## 2026-10-13 candidate follow-up
+
+在用户于 candidate Models 页面手工配置受控 provider 凭据、并在当前对话的“连接 CRM”表单手工绑定账号后，重新执行同一只读请求。candidate 页面显示 `仅可查看`、`crm_login=LOGIN_BOUND`，`query_crm_dashboard_gsv` 按 `2026-01-01` 至 `2026-01-07`、`channel=all`、`exclude_low_price=false` 调用一次。结果为真实来源、7/7 日点、日汇总一致；总额、趋势行、客户标识和原始业务行按脱敏要求未记录。
+
+结论：candidate 真实模型 PASS、WeKnora 只读检索 PASS、CRM GSV 只读 PASS。原始证据与限制见[候选真实 UAT 证据](shinemage-m2-06-candidate-real-uat-20261013.md)。candidate 只读 UAT 不覆盖 live 标准会话工具面，也不关闭保存、权限失败、恢复、人工业务复核、standalone、无障碍、供应链或 release 门禁。

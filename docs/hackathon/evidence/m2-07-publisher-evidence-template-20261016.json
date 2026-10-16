@@ -1,0 +1,73 @@
+{
+  "schema_version": "shinemage-alpha4-publisher-evidence-template/v1",
+  "status": "PENDING_COMPANY_EXECUTION",
+  "release_ready": false,
+  "subject": {
+    "sdk": "@deepseek-ai/dsh@0.2.1-alpha.4",
+    "artifact_sha256": "9f4fe0f466d7699ddd4686ee9692ec10c6d9f98a7d175fd5e55de01b2f64c8d6",
+    "upstream_sha": "86a402200d95fecef4529d969836f1fe13c6cb0d",
+    "candidate_source_sha": "50d241cbd23aa2a9d188fe84c3864528a2206917",
+    "upstream_lock_sha256": "ee1c37b5429c535974bafa09475cb03fc473e87dded8f56d54d909ed621e1317",
+    "sbom_sha256": "2adb75e23a0af0c60ce202f5e4b265549836b4761e758935111d66bbc257bfca",
+    "provenance_sha256": "5e81763e0fad9ab5952fb6c7b094cf0e01d0a1b0883f469e63b2f672e8d7a0c4",
+    "plugin_pack_verification_sha256": "a126775bc0985d6926e9e21a70f4e5d743eb335e7fe38ee22ca876a3614c3b25"
+  },
+  "publisher_identity": {
+    "status": "PENDING",
+    "identity_type": "REQUIRED_IN_COMPANY_ENV",
+    "issuer": "",
+    "subject": "",
+    "key_id": "",
+    "certificate_or_public_key_sha256": "",
+    "identity_evidence_ref": ""
+  },
+  "signature": {
+    "status": "PENDING",
+    "format": "DSSE_OR_COMPANY_APPROVED_FORMAT",
+    "signature_file": "",
+    "signature_sha256": "",
+    "bundle_or_transparency_log_ref": "",
+    "bundle_sha256": ""
+  },
+  "independent_verification": {
+    "status": "PENDING",
+    "verifier_identity": "",
+    "verified_at": "",
+    "artifact_sha_match": "PENDING",
+    "sbom_subject_match": "PENDING",
+    "provenance_subject_match": "PENDING",
+    "publisher_identity_match": "PENDING",
+    "signature_valid": "PENDING",
+    "verification_command_or_job_ref": "",
+    "verification_log_ref": ""
+  },
+  "revocation": {
+    "status": "PENDING",
+    "registry_or_provider": "",
+    "checked_at": "",
+    "key_status": "PENDING",
+    "certificate_status": "PENDING",
+    "signature_status": "PENDING",
+    "revocation_evidence_ref": ""
+  },
+  "final_attestation": {
+    "status": "PENDING",
+    "attestation_format": "DSSE_IN_TOTO_OR_COMPANY_APPROVED_FORMAT",
+    "file": "",
+    "sha256": "",
+    "signed_by_key_id": "",
+    "verification_ref": ""
+  },
+  "security_constraints": {
+    "security_risk_acceptance_record": "docs/hackathon/evidence/m2-07-security-risk-acceptance-record-20261016.md",
+    "production_release": "DENIED",
+    "production_activation": "DENIED",
+    "canary": "DENIED",
+    "clean_machine": "REQUIRED_BEFORE_RELEASE_REVIEW"
+  },
+  "prohibited_inputs": [
+    "Do not put private keys in this file.",
+    "Do not put OIDC tokens, KMS credentials, registry tokens, or passwords in this file.",
+    "Do not mark PENDING fields as PASS without company evidence."
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "schema_version": "shinemage-alpha4-company-consumer-closure-runner-preflight/v1",
+  "attempt": "r2",
+  "status": "NOT_RUN_COMPANY_TOOLS_UNAVAILABLE",
+  "release_ready": false,
+  "scope": "company-production-only-consumer-closure-runner-availability",
+  "probed_at": "2026-10-16T11:03:36Z",
+  "runner_roots": {
+    "/secure": "NOT_FOUND",
+    "/secure/input": "NOT_FOUND",
+    "/secure/work": "NOT_FOUND"
+  },
+  "node_probe": {
+    "default_path": {
+      "node": "v25.8.2",
+      "npm": "11.21.0",
+      "pnpm": "11.28.2",
+      "status": "DEFAULT_PATH_VERSION_MISMATCH"
+    },
+    "explicit_node24_path": {
+      "node_path": "/Users/hutou/homebrew/opt/node@24/bin/node",
+      "node": "v24.19.0",
+      "npm_path": "/Users/hutou/homebrew/opt/node@24/bin/npm",
+      "npm": "11.17.0",
+      "pnpm": "11.28.2",
+      "status": "LOCAL_FIXED_TOOLCHAIN_AVAILABLE"
+    },
+    "company_runner_status": "NOT_FOUND"
+  },
+  "approved_tools": {
+    "company-package-manager": "NOT_FOUND",
+    "company-sbom": "NOT_FOUND",
+    "company-runtime-check": "NOT_FOUND",
+    "company-closure": "NOT_FOUND",
+    "syft": "NOT_FOUND",
+    "cyclonedx": "NOT_FOUND",
+    "bom": "NOT_FOUND",
+    "cosign": "NOT_FOUND",
+    "in-toto": "NOT_FOUND",
+    "slsa-verifier": "NOT_FOUND"
+  },
+  "r3_inputs": [
+    {
+      "id": "crm_tarball",
+      "path": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/formal-packs-r3/crm-knowledge/shine-mage-dsh-crm-knowledge-0.0.0-crm.1.tgz",
+      "sha256": "a994167cafae37383800789127a305bc5cae0a9fa85b46ba4157cf1fe0ae634d",
+      "bytes": 234923,
+      "status": "LOCAL_INPUT_HASH_PASS"
+    },
+    {
+      "id": "crm_pack_manifest",
+      "path": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/formal-packs-r3/crm-knowledge/plugin-pack.json",
+      "sha256": "106c38eaf30cde9b6a3e3fc5fea98d8e42aa777f51f99faff37c00c13f55e42d",
+      "bytes": 630,
+      "status": "LOCAL_INPUT_HASH_PASS"
+    },
+    {
+      "id": "sdk_artifact",
+      "path": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/npm-official-r1/deepseek-ai-dsh-0.2.1-alpha.4.tgz",
+      "sha256": "9f4fe0f466d7699ddd4686ee9692ec10c6d9f98a7d175fd5e55de01b2f64c8d6",
+      "bytes": 25149,
+      "status": "LOCAL_INPUT_HASH_PASS"
+    },
+    {
+      "id": "sdk_sbom",
+      "path": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/formal-packs-r2/sbom-alpha4-r1.json",
+      "sha256": "2adb75e23a0af0c60ce202f5e4b265549836b4761e758935111d66bbc257bfca",
+      "bytes": 9633,
+      "status": "LOCAL_INPUT_HASH_PASS_REFERENCE_ONLY"
+    },
+    {
+      "id": "sdk_provenance",
+      "path": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/formal-packs-r2/provenance-alpha4-r1.json",
+      "sha256": "5e81763e0fad9ab5952fb6c7b094cf0e01d0a1b0883f469e63b2f672e8d7a0c4",
+      "bytes": 4756,
+      "status": "LOCAL_INPUT_HASH_PASS_REFERENCE_ONLY"
+    }
+  ],
+  "formal_outputs": {
+    "dependency_graph": "NOT_RUN_COMPANY_TOOLS_UNAVAILABLE",
+    "sbom": "NOT_RUN_COMPANY_TOOLS_UNAVAILABLE",
+    "provenance": "NOT_RUN_COMPANY_TOOLS_UNAVAILABLE",
+    "independent_verification": "NOT_RUN",
+    "company_receipt": "PENDING_COMPANY_EXECUTION",
+    "release_ready": false
+  },
+  "blocking_reasons": [
+    "company runner identity and controlled staging path are unavailable",
+    "approved package manager, SBOM, runtime checker and closure verifier are not installed",
+    "company registry and network policy are not available",
+    "independent verifier identity and job reference are not available",
+    "local fixed Node v24.19.0 is not evidence of company runner availability"
+  ],
+  "protection": {
+    "main_dsh_pin": "0.1.7-rc.2",
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "release_ready": false,
+    "security_audit_skill_touched": false
+  }
+}

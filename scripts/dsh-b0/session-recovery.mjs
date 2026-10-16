@@ -15,9 +15,20 @@ const probe = fileURLToPath(new URL('./session-recovery.probe.mjs', import.meta.
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const encode = value => JSON.stringify(value, null, 2) + '\n';
 
-export async function runSessionRecoveryMatrix({ output, rc2Modules, rc1Modules, corpus = 'text' }) {
+export async function runSessionRecoveryMatrix({ output, rc2Modules, rc1Modules, corpus = 'text',
+  runtimeVersion = '0.1.7-rc.2', baselineVersion } = {}) {
   assert.equal(Number(process.versions.node.split('.')[0]), 24);
   assert.ok(['text', 'tool', 'rich'].includes(corpus), 'RECOVERY_CORPUS_UNSUPPORTED');
+  const exactVersion = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?$/;
+  assert.equal(typeof runtimeVersion, 'string', 'RECOVERY_RUNTIME_VERSION_REQUIRED');
+  assert.match(runtimeVersion, exactVersion, 'RECOVERY_RUNTIME_VERSION_REQUIRED');
+  assert.ok(baselineVersion === undefined || rc1Modules, 'RECOVERY_BASELINE_MODULES_REQUIRED');
+  const oldVersion = baselineVersion ?? '0.1.7-rc.1';
+  assert.equal(typeof oldVersion, 'string', 'RECOVERY_BASELINE_VERSION_REQUIRED');
+  assert.match(oldVersion, exactVersion, 'RECOVERY_BASELINE_VERSION_REQUIRED');
+  if (rc1Modules) assert.notEqual(oldVersion, runtimeVersion, 'RECOVERY_VERSIONS_MUST_DIFFER');
+  const legacy = runtimeVersion === '0.1.7-rc.2' && oldVersion === '0.1.7-rc.1';
+  const currentLabel = legacy ? 'rc2' : 'candidate', oldLabel = legacy ? 'rc1' : 'baseline';
   const counts = { text: [6, 12], tool: [TOOL_EVENTS_PER_TURN, TOOL_EVENTS_PER_TURN * 2],
     rich: [RICH_EVENTS_PER_TURN + 1, RICH_EVENTS_PER_TURN * 2 + 1] };
   const [eventCount, appendedCount] = counts[corpus];
@@ -28,6 +39,7 @@ export async function runSessionRecoveryMatrix({ output, rc2Modules, rc1Modules,
   const rows = [], executions = [];
   const schemas = { text: 'dsh-owned-session-recovery/v1', tool: 'dsh-owned-session-recovery/v2', rich: 'dsh-owned-session-recovery/v3' };
   const result = { schema_version: schemas[corpus], scope: 'compiled-official-persistence-synthetic',
+    runtime_versions: { candidate: runtimeVersion, baseline: rc1Modules ? oldVersion : null },
     rows, executions, corpus: corpus === 'tool'
       ? 'completed tool-call/result turns, success/error/meta and restored message surface; media/delegation NOT_RUN'
       : 'completed user/assistant turns with streamed text; tool/media/delegation NOT_RUN',
@@ -44,7 +56,7 @@ export async function runSessionRecoveryMatrix({ output, rc2Modules, rc1Modules,
   };
   async function run(root, operation, old = false, prefix) {
     const input = { root, operation, modules: old ? rc1Modules : rc2Modules,
-      version: old ? '0.1.7-rc.1' : '0.1.7-rc.2', prefix, corpus };
+      version: old ? oldVersion : runtimeVersion, prefix, corpus };
     const index = executions.length;
     let stdout = '', stderr = '', exitCode = 0;
     try {
@@ -90,7 +102,7 @@ export async function runSessionRecoveryMatrix({ output, rc2Modules, rc1Modules,
     assert.equal(repaired.prefix_digest, initial.digest); assert.equal(repaired.count, appendedCount);
     const cold = await run(root, 'read'); assert.equal(cold.digest, repaired.digest);
     assert.deepEqual((await readFile(path)).subarray(0, baseline.length), baseline);
-    rows.push({ id: 'rc2-torn-final-frame-recovery', status: 'PASS', committed_events: eventCount, recovered_events: appendedCount,
+    rows.push({ id: `${currentLabel}-torn-final-frame-recovery`, status: 'PASS', committed_events: eventCount, recovered_events: appendedCount,
       prefix_digest: initial.digest, injected_bytes: frame.length - 3, read_only_preserved_bytes: true,
       initial_file_sha256: hash(baseline), repaired_file_sha256: hash(await readFile(path)) });
     if (rc1Modules) {
@@ -103,7 +115,7 @@ export async function runSessionRecoveryMatrix({ output, rc2Modules, rc1Modules,
       const appended = await run(cross, 'append', false, eventCount);
       assert.equal(appended.prefix_digest, old.digest); assert.equal(appended.count, appendedCount);
       assert.equal((await run(cross, 'read')).digest, appended.digest);
-      rows.push({ id: 'rc1-write-rc2-read-append', status: 'PASS', old_format: old.format_version,
+      rows.push({ id: `${oldLabel}-write-${currentLabel}-read-append`, status: 'PASS', old_format: old.format_version,
         new_format: appended.format_version, committed_events: eventCount, recovered_events: appendedCount });
       const preRollback = await inventory(cross);
       let downgrade;
@@ -116,11 +128,12 @@ export async function runSessionRecoveryMatrix({ output, rc2Modules, rc1Modules,
         downgrade = { status: 'BLOCKED', outcome: 'RUNTIME_REFUSED', reason: error.message };
       }
       assert.deepEqual(await inventory(cross), preRollback, 'RECOVERY_OLD_READER_MUTATED_NEW_STATE');
-      rows.push({ id: 'rc2-write-rc1-read', ...downgrade, state_unchanged: true });
+      rows.push({ id: `${currentLabel}-write-${oldLabel}-read`, ...downgrade, state_unchanged: true });
       assert.equal((await run(saved, 'read', true)).digest, old.digest);
-      rows.push({ id: 'rc1-preserved-state-rollback', status: 'PASS', count: old.count,
-        boundary: 'does not contain rc2 writes; new state must be retained for forward-fix' });
-    } else rows.push({ id: 'rc1-rc2-cross-version', status: 'NOT_RUN', reason: 'explicit rc1 compiled modules required' });
+      rows.push({ id: `${oldLabel}-preserved-state-rollback`, status: 'PASS', count: old.count,
+        boundary: `does not contain ${currentLabel} writes; new state must be retained for forward-fix` });
+    } else rows.push({ id: `${oldLabel}-${currentLabel}-cross-version`, status: 'NOT_RUN',
+      reason: `explicit ${oldLabel} compiled modules required` });
     result.status = rows.every(row => row.status === 'PASS') ? 'PASS' : 'PARTIAL';
   } catch (error) { result.status = 'FAIL'; result.error = String(error.message); }
   await writeFile(join(output, 'session-recovery.json'), encode(result), { mode: 0o600, flag: 'wx' });
@@ -128,18 +141,21 @@ export async function runSessionRecoveryMatrix({ output, rc2Modules, rc1Modules,
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const args = process.argv.slice(2), positional = []; let corpus = 'text', seenCorpus = false;
+  const args = process.argv.slice(2), positional = [], options = {}, seen = new Set();
+  const flags = { '--corpus': 'corpus', '--runtime-version': 'runtimeVersion', '--baseline-version': 'baselineVersion' };
   for (let index = 0; index < args.length; index++) {
-    if (args[index] === '--corpus') {
-      assert.ok(!seenCorpus && ['text', 'tool', 'rich'].includes(args[index + 1]), 'RECOVERY_CORPUS_UNSUPPORTED');
-      seenCorpus = true; corpus = args[++index];
+    if (Object.hasOwn(flags, args[index])) {
+      const flag = args[index];
+      assert.ok(!seen.has(flag), 'RECOVERY_ARGUMENT_DUPLICATE');
+      assert.ok(args[index + 1] && !args[index + 1].startsWith('-'), 'RECOVERY_ARGUMENT_VALUE_REQUIRED');
+      seen.add(flag); options[flags[flag]] = args[++index];
     } else {
       assert.ok(!args[index].startsWith('-'), 'RECOVERY_ARGUMENT_UNSUPPORTED'); positional.push(args[index]);
     }
   }
   assert.ok(positional.length === 2 || positional.length === 3, 'RECOVERY_ARGUMENT_COUNT');
   const [output, rc2Modules, rc1Modules] = positional;
-  const result = await runSessionRecoveryMatrix({ output, rc2Modules, rc1Modules, corpus });
+  const result = await runSessionRecoveryMatrix({ output, rc2Modules, rc1Modules, ...options });
   console.log(JSON.stringify(result));
   process.exitCode = result.status === 'FAIL' ? 1 : result.status === 'PASS' ? 0 : 2;
 }

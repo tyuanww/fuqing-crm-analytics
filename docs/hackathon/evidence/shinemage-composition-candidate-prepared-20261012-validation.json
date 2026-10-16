@@ -1,0 +1,34 @@
+{
+  "schema": "shinemage-composition-candidate-prepared/v1",
+  "observed_at": "2026-10-12",
+  "status": "ISOLATED_CANDIDATE_PREPARED",
+  "task_directory": "/Users/hutou/.codex/tasks/shinemage-composition-candidate-20261012-r3",
+  "candidate": {
+    "schema_version": "dsh-composition-candidate/v1",
+    "candidate_digest": "125c8e538816835cad212048b8fd0302d98588d704b09de559789df9bf6e6bdb",
+    "file_sha256": "916826710c7e49124eb0d4284b8b2fe00f19c4dd46ddf181144761d566eefede",
+    "profiles": 2,
+    "plugins": 9,
+    "activation": "NOT_RUN",
+    "release_ready": false
+  },
+  "journal": {
+    "file_sha256": "a791796e5e88e798a75b41707eade1e885d8436acb8e658114bf80f696ab6b83",
+    "sequence": 2,
+    "statuses": ["COMPOSITION_CANDIDATE_INTENT", "COMPOSITION_CANDIDATE_PREPARED"]
+  },
+  "service": {
+    "service_id": "analytics-first-purchase",
+    "source_sha": "f9726f682fc0d1d4c6aef6f07e6932c2c600c3d6",
+    "binding_sha256": "676a8b35919423bdc69ee1b48292f42894e29c3de2cc503c189e0c565084acc6",
+    "evidence_sha256": "9a6a4a7a28e0ffc69441394c18030b0a51eb2a881c4d00566b535931f3b391b0",
+    "gate": "LOCAL_COMPATIBLE",
+    "release_ready": false
+  },
+  "main_repo": {
+    "profile_service_binding": "UNBOUND",
+    "formal_journal": "UNCHANGED",
+    "target_source_http_terminal_browser_recovery": "NOT_RUN"
+  },
+  "scope": "Isolated composition identity preparation only; no target host, production activation, canary, rollback or release claim"
+}

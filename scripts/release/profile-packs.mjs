@@ -8,6 +8,8 @@ import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import { loadProfileSnapshot } from './profile.mjs';
 import { readPluginPack } from './plugin-pack.mjs';
+import { TOOLCHAIN } from './toolchain.mjs';
+import { validateToolchain } from '../dsh-dev/pin.mjs';
 import { insideArtifact, readArtifactFile } from './service-artifact-evidence.mjs';
 
 const exec = promisify(execFile), hash = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -18,7 +20,8 @@ function exact(value, keys, code) {
   assert.deepEqual(Object.keys(value).sort(), [...keys].sort(), code);
 }
 
-export async function loadProfilePacks({ inputsPath } = {}) {
+export async function loadProfilePacks({ inputsPath, toolchain = TOOLCHAIN } = {}) {
+  toolchain = validateToolchain(toolchain);
   assert.ok(typeof inputsPath === 'string' && isAbsolute(inputsPath), 'PROFILE_PACK_INPUTS_REQUIRED');
   const bytes = await readArtifactFile(inputsPath, 256 * 1024), input = JSON.parse(bytes);
   exact(input, ['schema_version', 'profile', 'plugins'], 'PROFILE_PACK_INPUTS_SHAPE');
@@ -29,7 +32,7 @@ export async function loadProfilePacks({ inputsPath } = {}) {
   const root = dirname(inputsPath);
   const profileBytes = await insideArtifact(root, input.profile.path, 256 * 1024);
   assert.equal(hash(profileBytes), input.profile.sha256, 'PROFILE_PACK_PROFILE_DIGEST');
-  const snapshot = await loadProfileSnapshot({ root, manifestPath: input.profile.path });
+  const snapshot = await loadProfileSnapshot({ root, manifestPath: input.profile.path, toolchain });
   assert.equal(snapshot.digest, input.profile.sha256, 'PROFILE_PACK_PROFILE_CHANGED');
   assert.ok(Array.isArray(input.plugins) && input.plugins.length > 0 && input.plugins.length <= 32, 'PROFILE_PACK_PLUGINS_REQUIRED');
   assert.deepEqual(input.plugins.map(row => row?.id), snapshot.profile.plugins.map(row => row.id), 'PROFILE_PACK_SELECTION_MISMATCH');
@@ -40,7 +43,8 @@ export async function loadProfilePacks({ inputsPath } = {}) {
     assert.match(row.sha256 ?? '', HEX, 'PROFILE_PACK_MANIFEST_DIGEST');
     const manifestBytes = await insideArtifact(root, row.manifest, 256 * 1024);
     assert.equal(hash(manifestBytes), row.sha256, 'PROFILE_PACK_MANIFEST_DIGEST');
-    const packed = await readPluginPack({ manifestPath: join(root, row.manifest), expectedSha256: row.sha256 });
+    const packed = await readPluginPack({ manifestPath: join(root, row.manifest), expectedSha256: row.sha256,
+      expectedSdkVersion: toolchain.sdk_version, expectedPnpmVersion: toolchain.pnpm });
     assert.equal(packed.receipt.package_name, row.id, 'PROFILE_PACK_PACKAGE_ID');
     plugins.push({ ...snapshot.profile.plugins[index], ...packed, manifestSha256: row.sha256 });
   }

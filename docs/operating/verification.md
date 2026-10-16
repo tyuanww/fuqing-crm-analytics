@@ -3,11 +3,23 @@
 适用于成果工作树的本地补丁；是否已集成，以该工作树 Git 状态和远端证据为准。授权见 [AGENTS](../../AGENTS.md)。当前施工与缺口看根 [STATUS.md](../../STATUS.md) 和 [TODOS 的 M1 核心交付](../hackathon/TODOS.md#m1-核心交付)。黑客松入口与 [治理实施记录](../hackathon/WORKFLOW-GOVERNANCE-2026-09-06.md) 是历史证据链，不是本轮任务卡。
 
 
-## 独立作者仓合并与正式目标前置（2026-10-12）
+## 独立作者仓合并与正式目标前置（2026-10-12，历史时点）
 
 十个独立作者仓 PR #1 已普通 merge，各自 main CI 均 SUCCESS；完整 SHA、CI run 和范围见[合并与候选前置核验](../hackathon/evidence/shinemage-author-merge-and-candidate-preflight-20261012.md)。隔离任务目录以当前 Workbench formal pack 与既有服务绑定生成 candidate `facb83f3…` / journal seq 2，主仓 profile/journal 未变。
 
-正式目标仍为 `NOT_RUN`：`100.93.46.46` 在当前运维文档中是生产入口，用户没有可用的第二台非生产 x86_64 WSL2。不得把该生产入口用于 synthetic source/terminal/browser/recovery。提供独立非生产目标后，才按既有 runner 生成本次 candidate 的新回执。
+该段只记录 2026-10-12 的历史边界：当时没有把生产入口用于本次 candidate 的 synthetic source/terminal/browser/recovery。2026-10-13 用户明确授权杭州入口同时作为当前测试和生产目标，当前目标前置结果见[授权生产目标前置预检](../hackathon/evidence/shinemage-production-target-preflight-20261013.md)；后续云服务器迁移另行处理。
+
+## 授权生产目标前置（2026-10-13）
+
+`100.93.46.46` 已只读核验为 Linux x86_64 / WSL2，Python `3.14.4`、Node `v24.21.0`、zstd `1.5.5` 和临时目录权限满足目标合同。现役 DSH 的陈旧 `supervisor.lock` 在确认空目录且无 supervisor owner 后受保护移除，systemd 随后恢复 `active/running`。当前 service manifest 的精确 13-wheel preflight 返回 `SERVICE_TARGET_PREFLIGHT_PASS`；source HTTP、terminal/进程恢复和 candidate-bound browser 随 seq 3–5 已分别取得 receipt；cold install、身份状态、真实 UAT 和 activation 仍按 candidate 身份单独验收。现役 release source 与隔离 candidate 不同，不能继承旧结果。
+
+当前 composition candidate `125c8e53…` 已在同一目标完成 `source-http-target-observation/v2`：10 个 source HTTP / service recovery 场景 PASS，target receipt SHA `40a59cfe…`，输入 SHA `b1c5de00…`，并追加隔离 journal seq 3。该回执只覆盖 synthetic service archive、保存幂等、SIGKILL durable replay、备份冷恢复和清理；terminal、browser、真实模型/身份/UAT 与 activation 仍按各自 receipt 和门禁解释。详见[当前组合 source HTTP 目标验收](../hackathon/evidence/shinemage-composition-source-http-target-20261013.md)。
+
+同一 candidate 随后在该目标以当前 release 的临时 profile/runtime 完成九包 terminal drill：组合 roster、CRM/Knowledge 工具、synthetic native loop、受控重启和进程丢失后的 durable session 恢复 5/5 PASS；组合封套经 `verifyCompositionHostEvidence` 校验并追加 journal seq 4。目标 receipt SHA `1f4ceeea…`、输入 SHA `c2bffa80…`、runner SHA `271cc3a0…`，清理为 `OWNED_PROCESSES_AND_TEMPORARY_INSTALL_REMOVED`。该回执不证明真实模型/业务、供应链、生产身份、activation 或 release readiness；详见[当前组合 terminal 目标验收](../hackathon/evidence/shinemage-composition-terminal-target-20261013.md)。
+
+对用户授权的真实入口 `https://app.tyuan.chat/` 做了只读 headed browser 观察：Aside 在桌面、平板和移动 viewport 都能打开入口，等待组合 bundle 加载后显示工作台导航与工作区内容，控制台错误为空。该观察只记录 live shell 的可达性，不接入 composition journal，也不替代 candidate-bound browser、standalone、读屏、完整键盘焦点或高对比度验收；当前键盘观察只到未登录 modal 的局部焦点行为。详见[授权生产入口 live browser 观察](../hackathon/evidence/shinemage-live-browser-20261013.md)。
+
+2026-10-13 真实 UAT 已分层实跑：live Aside 的 WeKnora 只读检索与来源观察、CRM 聚合看板重试加载均有记录；工作台标准模式没有暴露 `query_crm_dashboard_gsv`，模型未执行替代调用。隔离 candidate 中用户手工保存 DeepSeek provider 凭据并绑定 CRM 当前对话后，真实模型、WeKnora 只读检索和 CRM GSV 7/7 日结构化查询通过；保存、权限失败、恢复和人工业务复核仍 `NOT_RUN`。详见[真实模型、WeKnora 与 CRM UAT 实跑](../hackathon/evidence/shinemage-real-business-uat-20261013.md)和[候选真实 UAT 证据](../hackathon/evidence/shinemage-m2-06-candidate-real-uat-20261013.md)。
 
 ## 当前 PR #121 合并后与 Cordis 对接验证（2026-10-12）
 
@@ -15,11 +27,13 @@
 
 本轮旧正向 host verifier 夹具只校准为精确 Cordis `4.0.4`，原拒绝和 journal 断言未改。五文件同次命令：`node --test --test-concurrency=1 scripts/release/plugin-host-evidence.test.mjs scripts/crm-calibration/profile.test.mjs scripts/crm-calibration/profile-packs.test.mjs scripts/crm-calibration/composition-inputs.test.mjs scripts/ci/composition-pack-inputs.test.mjs`，68 PASS／0 FAIL／0 SKIP；不与此前四文件 42 或作者测试相加。核心及本机独立审查无发现，外部 Claude/OCR NOT_RUN。
 
-当前三份作者仓 formal pack 已绑定到组合锁后，可用 `node scripts/ci/composition-pack-inputs.mjs --input-dir /absolute/input-dir --output /new/private/composition --python /absolute/python3.14` 生成九包、两 profile 的固定输入。2026-10-12 的实际回执 exit 0，锁摘要 `be215557…`，原始证据见[当前正式组合输入预检](../hackathon/evidence/shinemage-composition-preflight-20261012.md)。该命令只验证输入身份和摘要，不启动宿主或业务服务；当前 profile 无 `service_binding` 时不得继续生成 candidate/journal。
+当前三份作者仓 formal pack 已绑定到组合锁后，可用 `node scripts/ci/composition-pack-inputs.mjs --input-dir /absolute/input-dir --output /new/private/composition --python /absolute/python3.14` 生成九包、两 profile 的固定输入。2026-10-12 的实际回执 exit 0，锁摘要 `be215557…`，原始证据见[当前正式组合输入预检](../hackathon/evidence/shinemage-composition-preflight-20261012.md)。该命令只验证输入身份和摘要，不启动宿主或业务服务；candidate 生成需显式 service binding/evidence，并已在当前登记链中完成。
+
+M2-01 已增加组合 candidate 合同入口：`pnpm dsh plugin composition-candidate --crm-inputs /absolute/crm-inputs.json --page-inputs /absolute/page-inputs.json --service-binding /absolute/service-binding.json --service-evidence /absolute/service-evidence.json --output-dir /new/private/composition-candidate --state-path /absolute/composition-journal.json`。该入口只接受两份已核验 profile-pack 输入，绑定九个正式包和 service compatibility gate，并将 source HTTP、terminal、browser、recovery、activation 全部保持 `NOT_RUN`；缺 service binding/evidence 时在写 candidate 或 journal 前失败。合同和当前未执行边界见[组合 candidate 合同证据](../hackathon/evidence/shinemage-composition-candidate-contract-20261012.md)。
 
 组合 archive 由暂存提交 `e9bfc776` 的[真实上传 CI](https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/38218001878)生成，ID `11732716479`、SHA-256 `552aa4d122aa84418c6874798fef7c6024f5052ee8c331535036d5f85a5ea486`、704587 bytes；18 成员、九包／两 profile 验证通过，有效期至 `2026-10-26T07:29:17Z`。三项非敏感变量已更新并回读，专用只读 Secret 已配置且值不入库。PR #121 attempt 2 的 hosted B0 实际 SUCCESS：862 passed、23 warnings、41 subtests；首次旧 artifact 摘要失败保留。使用实际 archive 或 GitHub ID／digest，禁止用本机自制 ZIP 冒充 CI 工件；所有消费输出须用新独占目录，不复用前两轮失败输出。原始日志与接收回执见[PR #121 正式组合交付](../hackathon/evidence/shinemage-pr121-formal-pack-delivery-20261012.md)。
 
-当前两份 profile 均无 `service_binding`；完整服务／目标／terminal／browser／恢复仍需当前组合的新正式输入和回执。绿色 PR/preflight 与 main CI 已证明对应 Git/CI 检查通过，不证明真实业务或 SDK 分发通过；本地 feature 工作树仍与 main 分开，具体状态以 STATUS 和合并后证据为准。下节保留合并前本地应用／提交时点。
+默认两份源 profile 均无 `service_binding`；当前主仓已登记 page 绑定的正式 candidate 快照，CRM 快照按组合合同无绑定，journal seq 1–5 含 source HTTP、terminal 和 browser。绿色 PR/preflight 与 main CI 已证明对应 Git/CI 检查通过，不证明真实业务或 SDK 分发通过；本地 feature 工作树仍与 main 分开，具体状态以 STATUS 和合并后证据为准。下节保留合并前本地应用／提交时点。
 
 ## PR #119 合并与 Cordis 本地对接（2026-10-12，历史时点）
 

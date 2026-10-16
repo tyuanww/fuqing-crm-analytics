@@ -1,0 +1,51 @@
+{
+  "schema_version": "shinemage-alpha4-owner-operated-gate-profile/v1",
+  "status": "PROFILE_PROPOSAL_ONLY",
+  "release_ready": false,
+  "current_formal_status": {
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "release_ready": false
+  },
+  "profiles": {
+    "owner_internal_use": {
+      "required": [
+        "artifact_and_source_identity",
+        "production_only_consumer_closure",
+        "dependency_graph_and_runtime_imports",
+        "katex_js_css_and_dev_only_exclusion",
+        "alpha4_install_minimal_function_uninstall",
+        "rc2_rollback",
+        "owner_operated_clean_replay",
+        "owner_attestation_with_scope_and_rollback"
+      ],
+      "conditional": [
+        "second_person_independent_verification",
+        "company_publisher_identity",
+        "company_signature_and_transparency_log",
+        "company_revocation_service",
+        "company_final_attestation",
+        "company_formal_clean_machine"
+      ],
+      "release_ready": false
+    },
+    "external_distribution": {
+      "required": [
+        "artifact_and_source_identity",
+        "production_only_consumer_closure",
+        "dependency_graph_and_runtime_imports",
+        "katex_js_css_and_dev_only_exclusion",
+        "publisher_identity",
+        "signature",
+        "independent_verification",
+        "revocation",
+        "final_attestation",
+        "company_clean_machine",
+        "rollback"
+      ],
+      "release_ready": false
+    }
+  },
+  "decision_rule": "Do not delete conditional controls. Select the profile from the actual distribution scope and keep formal status fail-closed until the required receipts exist.",
+  "main_pin": "0.1.7-rc.2"
+}

@@ -1,0 +1,32 @@
+{
+  "schema_version": "shinemage-candidate-browser-input/v1",
+  "scope": "candidate-bound-headed-browser-observation",
+  "candidate_digest": "125c8e538816835cad212048b8fd0302d98588d704b09de559789df9bf6e6bdb",
+  "target": "http://127.0.0.1:4332/",
+  "driver": "Aside headed",
+  "headed": true,
+  "viewports": [
+    {
+      "name": "mobile",
+      "width": 375,
+      "height": 812,
+      "file": "candidate-mobile.jpg"
+    },
+    {
+      "name": "tablet",
+      "width": 768,
+      "height": 1024,
+      "file": "candidate-tablet.jpg"
+    },
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900,
+      "file": "candidate-desktop.jpg"
+    }
+  ],
+  "console_errors_expected": [],
+  "model_requests": "NOT_RUN",
+  "business_data": "NOT_USED",
+  "source": "same candidate runtime as source HTTP seq 3 and terminal seq 4"
+}

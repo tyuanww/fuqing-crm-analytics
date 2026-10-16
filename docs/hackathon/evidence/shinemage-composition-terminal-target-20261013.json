@@ -1,0 +1,80 @@
+{
+  "schema_version": "shinemage-composition-terminal-target/v1",
+  "recorded_at": "2026-10-13T01:20:05+08:00",
+  "target": {
+    "address": "100.93.46.46",
+    "role": "authorized-test-and-production",
+    "platform": {
+      "system": "Linux",
+      "machine": "x86_64",
+      "python": "3.14.4",
+      "kernel": "6.18.33.2-microsoft-standard-WSL2"
+    },
+    "uid": 0,
+    "release_tag": "dsh-0.20.0.0-r3"
+  },
+  "candidate": {
+    "digest": "125c8e538816835cad212048b8fd0302d98588d704b09de559789df9bf6e6bdb",
+    "service_source_sha": "f9726f682fc0d1d4c6aef6f07e6932c2c600c3d6",
+    "source_http_parent": {
+      "seq": 3,
+      "event": "COMPOSITION_SOURCE_HTTP_TARGET_OBSERVED",
+      "digest": "b4fe1e63132f0911f9905cff4dd74b70e1cf348b5eb6792b13db2ca815a44f35"
+    }
+  },
+  "target_observation": {
+    "schema_version": "dsh-composition-host-evidence/v1",
+    "phase": "terminal",
+    "status": "PASS",
+    "scope": "actual-wsl2-synthetic-nine-pack-composition-terminal-recovery",
+    "scenario_count": 5,
+    "terminal": "PASS",
+    "recovery": "PASS",
+    "source_http": "PASS_FROM_PARENT_EVENT",
+    "browser": "NOT_RUN",
+    "cross_version_recovery": "NOT_RUN",
+    "model": "synthetic",
+    "production_data": "NOT_USED",
+    "real_business_uat": "NOT_RUN",
+    "input_sha256": "c2bffa80db9c9f6ab5584b303d71833f0b0298c765f5aafc8f1a1aa02fa1ab22",
+    "receipt_sha256": "1f4ceeea68b6e9125dccd1315a6c5946f5170d00306e3a93b2136f44d19044f7",
+    "runner_sha256": "271cc3a080985b81c023e4b911b97f0b6d59d0c965fdb5db583a95969cea3794",
+    "cleanup": "OWNED_PROCESSES_AND_TEMPORARY_INSTALL_REMOVED",
+    "activation": "NOT_RUN",
+    "release_ready": false,
+    "evidence_authenticity": "UNATTESTED_OPERATOR_OBSERVATION"
+  },
+  "scenarios": [
+    {
+      "id": "composition-roster",
+      "status": "PASS"
+    },
+    {
+      "id": "composition-tools",
+      "status": "PASS"
+    },
+    {
+      "id": "native-loop",
+      "status": "PASS"
+    },
+    {
+      "id": "controlled-restart",
+      "status": "PASS"
+    },
+    {
+      "id": "inflight-process-loss-recovery",
+      "status": "PASS"
+    }
+  ],
+  "journal": {
+    "seq": 4,
+    "event": "COMPOSITION_TERMINAL_HOST_OBSERVED",
+    "digest": "e3ad59c39e619f365b2552f8bf0deba22ef26c026a1c6574ba5cb61dc5c9995c"
+  },
+  "boundaries": [
+    "使用当前九包 composition candidate 和两份 profile，在目标机临时 runtime 中执行；没有替换现役 DSH 或激活 candidate。",
+    "模型为合成 SSE fixture，未读取真实模型、CRM、WeKnora 或生产业务数据；真实业务 UAT 仍未运行。",
+    "terminal/recovery 已通过；browser、cross-version、supply-chain、production identity、activation 和 release gate 仍由独立门禁负责。",
+    "目标 receipt 以 root UID 运行以读取固定 release artifact；临时进程、runtime、安装和端口均已清理。"
+  ]
+}

@@ -1,19 +1,19 @@
 # How to 更新一个 ShineMage 插件
 
-## 当前输入与交付状态（2026-10-11）
+## 当前输入与交付状态（2026-10-13）
 
-当前主仓本地装配锁是 Workbench `6c5adc9f`／`0af61dab…`、CRM `c4b1c91e`／`4663cce0…`，固定作者 CI 与包来源一起核对；另七包与两份 profile 保持。实现、消费者和 CI 接线已分组提交，证据 `39774244` 单独提交，本指南随当前说明最后提交，见[本地交付索引](../hackathon/evidence/shinemage-main-local-commit-closeout-20261011.md)。不再按下方较早 `e9223289` 的时点更新锁，也不把其中“未提交”“尚未迁移”当成当前默认入口结论。
+当前主仓组合锁绑定 Workbench `3030e3f`／`90000400…`、CRM `dac0539`／`4ee58ec3…`、Knowledge `f623c22`／`feb1187c…`，另六包与两份 profile 保持。十个独立作者仓 PR #1 已普通 merge，各自 main CI 均 SUCCESS；正式包回执、组合锁和当前输入边界见[作者合并与候选前置核验](../hackathon/evidence/shinemage-author-merge-and-candidate-preflight-20261012.md)与[当前正式组合输入预检](../hackathon/evidence/shinemage-composition-preflight-20261012.md)。不再按下方较早 2026-10-11 时点更新锁，也不把其中“未提交”“尚未迁移”当成当前默认入口结论。
 
 普通插件更新先在插件作者仓完成受影响检查、独立产物及 PR；组合变化时，主仓才更新对应固定输入。默认包消费、installed-kit、领域作者覆盖、公开合同和 release 包装配已经迁移并提交；主仓仍保留另两组旧 Workbench 断言、合同／静态守卫及历史副本。来源变化须同时绑定正式包与作者 CI，不能仅换 ZIP 或沿用旧 candidate/journal。
 
-本轮分组提交及追加修复已正常推送到 PR #119；当前完整后端 3237 PASS / 78 SKIP / 0 FAIL，`de196938` 完整本地 B0 `--check` exit 0，作者私有 core 仍归固定作者 CI。main 的祖先同步无内容变化。真实私有组合工件／18 成员／九包两 profile 接收与三变量配置已完成，专用只读 secret 仍须用户直接在 GitHub 配置；新的 hosted CI 不能报总体通过。输入操作及实际失败见[本轮交付](../hackathon/evidence/shinemage-main-pr119-delivery-20261011.md)，不重复准备已上传工件。新 worker 服务字节须自己的组合验收，新 CI 与合并前 QA 按实际提交执行。CRM／Knowledge 精确 peer `4.0.2` 的校准、新组合与目标宿主、真实模型／业务／WeKnora、SDK 分发及独立 DSH 升级分别收尾；不因此宣称任意插件无重启热插拔或已能正式发布。
+PR #121 及后续文档收口已合并，主仓 main CI SUCCESS；三仓正式 `dsh-plugin-pack/v1` 回执已接入组合锁，九包、两 profile 的输入预检 exit 0。用户授权的杭州目标已完成 source HTTP、terminal/进程恢复和 candidate-bound browser 的 receipt（journal seq 3–5）；隔离 candidate 的真实模型/CRM/WeKnora 只读 UAT 与 standalone 本地页面包/Chromium 子项已有通过证据，live 工具面、完整无障碍、SDK 分发和独立 DSH 升级仍分别收尾。不因此宣称任意插件无重启热插拔或已能正式发布。详细状态以[验证入口](verification.md)和根 [STATUS.md](../../STATUS.md) 为准。
 
 以下进度段和步骤中的验收计数保留各自执行时点；当前状态以上段及[验证入口](verification.md)为准。操作步骤中的命令仍须满足实际输入与授权，不能把历史成功改标为当前包通过。
 
 
-Workbench 当前本地输入链已前移到干净 `e9223289`、真实完整 CI（155 文件 / 1086 PASS）和新正式回执 `871fd3bb…`；tarball `e41df9f5…` 运行字节保持，两份锁同时更新，主仓三路径已完成对接。作者私有几何由其 CI 负责，主仓先绑定包身份再核对精确覆盖；不能只替换 ZIP 路径或继承旧候选验收。当前只完成定向本地验证，未提交、新完整 B0/主仓 CI 和准入未执行。见[输入与操作证据](../hackathon/evidence/shinemage-workbench-geometry-main-bind-20261011.md)。
+Workbench 当前正式来源为 `3030e3f`，对应 formal pack manifest `90000400…`；作者 core CI 为 155 files / 1086 PASS，正式包已由主仓 reader 核对，browser/standalone 仍 `NOT_RUN_BY_THIS_COMMAND`。不能只替换 ZIP 路径或继承旧候选验收；当前九包 terminal、进程恢复和 candidate-bound browser 已在授权目标完成，candidate 只读真实业务 UAT 与 standalone 页面包/Chromium 子项已有证据，live 工具面、完整无障碍和正式发布准入仍未关闭。见[当前正式包 CI 收口](../hackathon/evidence/shinemage-formal-plugin-ci-20261012.md)和[当前组合 terminal 目标验收](../hackathon/evidence/shinemage-composition-terminal-target-20261013.md)。
 
-board-components 已有[独立私有远程仓](https://github.com/tyuanww/shinemage-board-components)；main `3855db80`，两份操作说明提交 `d5aacdb4` 的 PR #1 尚未合并，实际 Ubuntu CI SUCCESS。开发只需固定 Node/pnpm、本仓 kit 与封存回归输入，无 DSH checkout/build-tools。CI 归档为 1951 字节 `66d53381…`，五个成员等于原 1955 字节 `22245ab9…`；消费者仍按原锁核验，不能把两份外层归档互换。主仓旧生产者防覆盖已补本地增量，但生产者入口未切换；升级函数/类型及切换输入仍需消费者锁与针对性验证。见[领域远端交付](../hackathon/evidence/shinemage-board-components-remote-ci-20261011.md)、[主仓本地守卫](../hackathon/evidence/shinemage-board-components-main-output-guard-20261011.md)。
+board-components 已有[独立私有远程仓](https://github.com/tyuanww/shinemage-board-components)；其 PR #1 已合并，main CI SUCCESS。开发只需固定 Node/pnpm、本仓 kit 与封存回归输入，无 DSH checkout/build-tools。当前领域包仍由主仓组合锁和消费者合同核验，升级函数/类型及切换输入仍需针对性验证。见[作者合并与候选前置核验](../hackathon/evidence/shinemage-author-merge-and-candidate-preflight-20261012.md)与[主仓本地守卫](../hackathon/evidence/shinemage-board-components-main-output-guard-20261011.md)。
 
 上一轮领域本地 Git/clone 交付时点（保留原记录）：
 
@@ -78,15 +78,15 @@ Workbench 当前链为独立干净提交 `d038f357` → 成功完整 core CI →
 
 ### 1. 在插件仓建立干净分支
 
-先选定已审查的产品分支、完整 SHA 和对应 CI 回执。2026-10-11 复核时九仓的 PR #1 均未合并，默认 `main` 仍是初始提交，不能直接从默认 clone 的 HEAD 开始更新。下面只示范 shine-brand 已核验的产品基线；其他插件不能只替换仓库名，必须同时替换分支、SHA 和后续构建入口。远端分支前移导致 SHA 不符时停止，先审查新基线。
+先选定已审查的产品分支、完整 SHA 和对应 CI 回执。2026-10-12 复核时十个作者仓 PR #1 均已普通 merge，下面示范从 shine-brand 的 `main` 基线开始；其他插件不能只替换仓库名，必须同时替换分支、SHA 和后续构建入口。远端分支前移导致 SHA 不符时停止，先审查新基线。
 
 ```bash
 set -euo pipefail
 plugin_repo="dsh-shine-brand"
-reviewed_branch="codex/shine-brand-independent"
-reviewed_sha="57ebcf38278068394a4feb42125c30c195fd912a"
+reviewed_branch="main"
+reviewed_sha="6754f37075ad00d1b17478c9ed42e901419bda0f"
 topic="update-brand-label"       # 本次完整变化的主题
-pr_base="$reviewed_branch"       # PR #1 未合并时，新 PR 以产品分支为 base
+pr_base="main"
 git clone --no-checkout --single-branch --branch "$reviewed_branch" \
   "https://github.com/tyuanww/${plugin_repo}.git"
 cd "$plugin_repo"
@@ -96,7 +96,7 @@ git switch -c "codex/${topic}" "$reviewed_sha"
 git status --short --branch
 ```
 
-本次只读核验的产品 HEAD 已含此前文档交付；[PR #1](https://github.com/tyuanww/dsh-shine-brand/pull/1)仍开放，该 SHA 的[CI 回执](https://github.com/tyuanww/dsh-shine-brand/actions/runs/38076180876)成功。相关 PR 合并后，改用已核验的 `main` SHA，并将 `reviewed_branch`、`pr_base` 改为 `main`；不要沿用旧 SHA 推断新主线已通过。
+本次核验的 shine-brand `main` 合并提交为 `6754f370…`，对应 main CI `38238051696` SUCCESS。其他作者仓使用各自合并 SHA 和 main CI；不要把某个仓的 SHA 或 CI 结果套到另一个插件。
 
 确认只在这个插件仓工作。不要把主仓的 `dsh-plugins/`、相邻 worktree、`node_modules` 或主仓 `.context` 复制进来。先读插件自己的 `README.md` 和 `AGENTS.md`（若存在），确认包名、版本、peer、输入摘要和本仓的 CI 入口。
 
@@ -266,9 +266,9 @@ Workbench 的发布客户端消费另用 `node --test --test-concurrency=1 scrip
 
 ZIP 的路径、类型、重复成员和大小检查即使在 Python `-O` 模式也会执行；不依赖可关闭的 assert。最新目录/ZIP 准备只复制已经核对的运行包字节；本轮前端、backend、tooling 和 release 回归的范围与 SKIP 单独记录在接续证据，不代表当前包完整宿主或发布验收。
 
-三个 hosted CI 工作流使用同一准备器。需在主仓配置 `SHINEMAGE_PACK_ARTIFACT_REPOSITORY`、`SHINEMAGE_PACK_ARTIFACT_ID`、`SHINEMAGE_PACK_ARTIFACT_SHA256` 三项 variables，及只授予所选输入仓读取权限的 `SHINEMAGE_PLUGIN_READ_TOKEN` secret。该 artifact 的成功 run、未过期状态、API digest 与下载字节均会核对；内部每包仍须匹配上述锁及正式读取器。token 仅传给准备步骤，不传入构建或业务测试。当前这四项尚未配置，输入 ZIP 只在本地，上传/配置按相应授权处理；不要发送 token 到聊天、写进仓库，或用跳过测试代替。实测和未执行项见[CI 包输入记录](../hackathon/evidence/shinemage-ci-pack-inputs-20261011.md)。
+三个 hosted CI 工作流使用同一准备器。主仓当前已配置 `SHINEMAGE_PACK_ARTIFACT_REPOSITORY`、`SHINEMAGE_PACK_ARTIFACT_ID`、`SHINEMAGE_PACK_ARTIFACT_SHA256` 三项 variables，以及只授予所选输入仓读取权限的 `SHINEMAGE_PLUGIN_READ_TOKEN` secret。当前 artifact `11732716479`、digest `552aa4d1…`，有效期至 `2026-10-26T07:29:17Z`；成功 run、未过期状态、API digest 与下载字节均会核对。token 仅传给准备步骤，不传入构建或业务测试；不要发送 token 到聊天或写进仓库。实测和未执行项见[正式组合交付](../hackathon/evidence/shinemage-pr121-formal-pack-delivery-20261012.md)。
 
-当前本地改动为开发入口增加 `--pack-inputs /absolute/inputs.json`，不再自动读取主仓的 Workbench 或兄弟插件目录。正式包必须先通过上述 pack 流程取得；普通 content pack 不能直接传入。该改动尚未提交，不属于 PR #119 已通过的检查。
+当前开发入口支持 `--pack-inputs /absolute/inputs.json`，不再自动读取主仓的 Workbench 或兄弟插件目录。正式包必须先通过上述 pack 流程取得；普通 content pack 不能直接传入。该路径已随 PR #121 合入并由主线 CI 核对；组合输入预检仍不等于 candidate 或发布通过。
 
 输入 JSON 的 `schema_version` 为 `dsh-profile-pack-inputs/v1`，只包含三个字段：`schema_version`、`profile`、`plugins`。`profile` 是 `{ "path": "profile.json", "sha256": "原 profile 的 SHA-256" }`；每条 `plugins` 是 `{ "id": "原 allowlist 中的包 ID", "manifest": "packs/该包/plugin-pack.json", "sha256": "该 manifest 的 SHA-256" }`。所有相对路径均从输入 JSON 所在目录解析。逐项保留 profile 原有的插件 ID 和顺序，把正式 manifest 与其声明的 tarball 放在同一目录；不要把源码路径、目录链接或未核对的包替代这些输入。
 
@@ -288,9 +288,9 @@ ZIP 的路径、类型、重复成员和大小检查即使在 Python `-O` 模式
 
 官方 `plugin add` 需要已准备的 pnpm `11.28.2` 位于调用方 PATH；本地修复优先使用该入口，禁止 Corepack 联网，并核对版本。DSH CLI 本身仍由选定的 Node 执行。`reload` 在停止自有旧实例前检查包输入、固定宿主、额外 patch 和包管理器；错误版本提前拒绝。它不编译插件或 DSH，不迁移数据库，不执行 SDK 全量审计。官方安装命令的依赖解析仍属于安装行为，不能声称完全不安装依赖。
 
-本地实跑显示原七包的官方安装及配置生成通过，但 Workbench 因缺少两个运行 peer 而未激活。作者仓已补齐固定 `dsh-client-connection` / `dsh-llm` 声明和构建检查；修复后的本地 Linux 严格构建、本包测试，以及修改 manifest 的隔离开启/原生关闭/恢复诊断通过。该修复尚未提交，诊断不建立正式包或 candidate 身份；必须在干净新提交上重建正式包再验收。live CLI reload、浏览器和候选服务/目标仍未运行，不承诺热插拔、激活原子性或新候选正式回退通过。原失败与详细范围见[宿主依赖修复记录](../hackathon/evidence/shinemage-official-pack-host-closeout-20261011.md)。
+当前 Workbench formal pack 已包含固定运行 peer，并由作者 CI 与主仓 reader 核对通过；九包 terminal、进程恢复和 candidate-bound browser 已在授权目标的临时 profile/runtime 中通过，candidate 只读真实业务 UAT 与 standalone 页面包/Chromium 子项已有证据，live CLI reload、写路径/权限/恢复、完整无障碍和 candidate activation 仍未运行，不承诺热插拔、激活原子性或新候选正式回退通过。原失败与详细范围见[当前正式包 CI 收口](../hackathon/evidence/shinemage-formal-plugin-ci-20261012.md)和[当前组合 terminal 目标验收](../hackathon/evidence/shinemage-composition-terminal-target-20261013.md)。
 
-带 `service_binding` 的正式 profile 必须继续使用已有 candidate/service/host 准入链；开发入口返回 `DSH_DEV_SERVICE_PROFILE_USE_CANDIDATE_HARNESS`，不会丢弃服务绑定来启动。其他 CRM/Knowledge 组合入口与默认源码构建 pipeline 的迁移仍未完成。当前证据见[包输入迁移记录](../hackathon/evidence/shinemage-profile-pack-migration-20261011.md)。
+带 `service_binding` 的正式 profile 必须继续使用已有 candidate/service/host 准入链；开发入口返回 `DSH_DEV_SERVICE_PROFILE_USE_CANDIDATE_HARNESS`，不会丢弃服务绑定来启动。当前默认组合 profile 仍没有 `service_binding`，避免把运行时绑定反向写入源 profile；主仓已登记正式 candidate 快照，page 快照绑定 service gate，CRM 快照按组合合同无绑定，journal seq 1–5（含 browser）可回读。正式发布链仍保持 `NOT_RUN`。当前证据见[主仓正式 candidate 登记](../hackathon/evidence/shinemage-m2-01-02-formal-registration-20261013.md)、[candidate browser 目标验收](../hackathon/evidence/shinemage-m2-04-candidate-browser-preflight-20261013.md)、[当前组合 source HTTP 目标验收](../hackathon/evidence/shinemage-composition-source-http-target-20261013.md)和[当前组合 terminal 目标验收](../hackathon/evidence/shinemage-composition-terminal-target-20261013.md)。
 
 ### 6. 需要候选时建立新的身份链
 

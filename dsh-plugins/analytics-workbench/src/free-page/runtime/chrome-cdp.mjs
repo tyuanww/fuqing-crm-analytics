@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const CDP_HTTP_TIMEOUT_MS = 5000;
 
 export function chromePath() {
   return process.env.FREE_PAGE_CHROME || CHROME;
@@ -16,6 +17,38 @@ export function chromeAvailable() {
   } catch {
     return false;
   }
+}
+
+export async function fetchCdpJson(url, timeoutMs = CDP_HTTP_TIMEOUT_MS) {
+  const response = await fetch(url, { redirect: 'error', signal: AbortSignal.timeout(timeoutMs) });
+  if (!response.ok) {
+    await response.body?.cancel();
+    throw new Error(`cdp http ${response.status}`);
+  }
+  return response.json();
+}
+
+export function waitForWebSocketOpen(ws, timeoutMs = CDP_HTTP_TIMEOUT_MS) {
+  return new Promise((resolve, reject) => {
+    let timer;
+    const cleanup = () => {
+      clearTimeout(timer);
+      ws.removeEventListener('open', onOpen);
+      ws.removeEventListener('error', onError);
+      ws.removeEventListener('close', onClose);
+    };
+    const onOpen = () => { cleanup(); resolve(); };
+    const onError = () => { cleanup(); reject(new Error('cdp websocket failed to open')); };
+    const onClose = () => { cleanup(); reject(new Error('cdp websocket closed before opening')); };
+    ws.addEventListener('open', onOpen, { once: true });
+    ws.addEventListener('error', onError, { once: true });
+    ws.addEventListener('close', onClose, { once: true });
+    timer = setTimeout(() => {
+      cleanup();
+      try { ws.close(); } catch { /* ignore cleanup errors */ }
+      reject(new Error(`cdp websocket open timeout after ${timeoutMs}ms`));
+    }, timeoutMs);
+  });
 }
 
 class Cdp {
@@ -111,16 +144,16 @@ export async function launchChrome({ userDataDir, proxyPort, url }) {
   args.push(url || 'about:blank');
   const child = spawn(chromePath(), args, { stdio: ['ignore', 'pipe', 'pipe'] });
   const port = await waitForPort(child, userDataDir);
-  const version = await fetch(`http://127.0.0.1:${port}/json/version`).then((res) => res.json());
+  const version = await fetchCdpJson(`http://127.0.0.1:${port}/json/version`);
   const ws = new WebSocket(version.webSocketDebuggerUrl);
   ws.addEventListener('error', () => {});
-  await once(ws, 'open');
+  await waitForWebSocketOpen(ws);
   const browser = new Cdp(ws);
-  const pages = await fetch(`http://127.0.0.1:${port}/json/list`).then((res) => res.json());
+  const pages = await fetchCdpJson(`http://127.0.0.1:${port}/json/list`);
   const page = pages.find((row) => row.type === 'page') || pages[0];
   const pageWs = new WebSocket(page.webSocketDebuggerUrl);
   pageWs.addEventListener('error', () => {});
-  await once(pageWs, 'open');
+  await waitForWebSocketOpen(pageWs);
   const session = new Cdp(pageWs);
   await session.send('Page.enable');
   await session.send('Runtime.enable');

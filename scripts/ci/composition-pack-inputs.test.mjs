@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import { fixture } from '../crm-calibration/test-support/formal-packs.fixture.mjs';
 import { inspectGitHubArtifact, prepareCompositionPacks } from './composition-pack-inputs.mjs';
+import { TOOLCHAIN } from '../release/toolchain.mjs';
 
 const exec = promisify(execFile), hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const json = value => JSON.stringify(value, null, 2) + '\n';
@@ -45,6 +46,14 @@ test('preparation copies sealed bytes and existing profiles, without executing p
     assert.deepEqual(await readFile(join(f.output, row.manifest)), await readFile(join(f.inputDirectory, row.manifest)));
   }
   assert.deepEqual(Object.keys(proof.env), ['CRM_COMPOSITION_PACK_INPUTS', 'CRM_COMPOSITION_PAGE_INPUTS', 'CRM_COMPOSITION_OUTPUT']);
+});
+
+test('explicit toolchain is copied into the prepared inputs for downstream consumers', async t => {
+  const f = await inputs(t), toolchain = { ...TOOLCHAIN };
+  const proof = await prepareCompositionPacks({ ...f, toolchain });
+  const path = join(f.output, 'toolchain.json');
+  assert.equal(proof.env.DSH_COMPOSITION_TOOLCHAIN, path);
+  assert.deepEqual(JSON.parse(await readFile(path, 'utf8')), toolchain);
 });
 
 test('missing and digest-changed inputs fail before output creation', async t => {

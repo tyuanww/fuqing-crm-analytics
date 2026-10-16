@@ -1,0 +1,46 @@
+{
+  "schema_version": "shinemage-alpha4-owner-governance-exception/v1",
+  "status": "OWNER_EXCEPTION_RECORDED_FORMAL_COMPANY_EXCEPTION_PENDING",
+  "release_ready": false,
+  "owner": "project-owner",
+  "execution_mode": "OWNER_OPERATED",
+  "premise": "Formal closure requires a separate company runner and a second verifier.",
+  "census": {
+    "active_actors": [
+      {
+        "actor": "project-owner",
+        "roles": [
+          "operator",
+          "approver",
+          "technical_verifier"
+        ],
+        "scope": "local technical closure, owner attestation, clean replay"
+      }
+    ],
+    "other_company_actors": 0,
+    "company_publisher_identity": "NOT_PROVIDED",
+    "company_independent_verifier": "NOT_PROVIDED",
+    "company_revocation_service": "NOT_PROVIDED"
+  },
+  "decision": "Use owner-operated staging and same-owner replay for technical evidence. Keep company identity, signature, independent verification, revocation, final attestation and formal clean-machine gates pending.",
+  "accepted_local_scope": [
+    "fixed Node v24.19.0 staging",
+    "production-only consumer closure",
+    "same-owner separate-staging replay",
+    "owner-local cryptographic binding",
+    "owner-operated clean-machine replay"
+  ],
+  "not_accepted_as_formal_company_evidence": [
+    "company publisher identity",
+    "company-approved publisher signature",
+    "second-person independent verification",
+    "revocation PASS",
+    "formal company final attestation",
+    "formal company clean-machine receipt"
+  ],
+  "formal_gate_status": {
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "release_ready": false
+  }
+}

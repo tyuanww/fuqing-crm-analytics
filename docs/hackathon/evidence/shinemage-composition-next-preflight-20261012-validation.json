@@ -1,0 +1,52 @@
+{
+  "schema": "shinemage-composition-next-preflight/v1",
+  "observed_at": "2026-10-12",
+  "scope": "fresh isolated nine-pack composition input preparation and resolver preflight",
+  "input_source": "/Users/hutou/.codex/tasks/shinemage-current-composition-inputs-20261012-r2",
+  "output_directory": "/Users/hutou/.codex/tasks/shinemage-next-composition-preflight-20261012-r1",
+  "toolchain": {
+    "node": "24.19.0",
+    "python": "3.14.4",
+    "dsh_upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443"
+  },
+  "composition_preparation": {
+    "status": "PASS",
+    "lock_sha256": "be215557e46c78c6c15b738e1a15dd22281770bee438f30960fbf0de3f4437eb",
+    "preparation_sha256": "a2f486d3dc7fa32c8cd13672927975dc33a50b29328de24aeadf73d3f145c912",
+    "profiles": {
+      "crm": {
+        "profile_id": "crm-knowledge-rc2",
+        "sha256": "7ca3511663ab2ea5d1bb8f839c83b29f5bbd6655238450ad08a04510642191ba",
+        "plugin_count": 2,
+        "service_binding": "MISSING",
+        "inputs_sha256": "91beb7010d2b24a3ca9094a567588eaac8bcf658108780b489c34ef45b2e0a66"
+      },
+      "page": {
+        "profile_id": "dsh-rc2",
+        "sha256": "c8c9df8c36f11060ad8fbcce68cb2ebf28d783c5eb5759d1b71ff5463782c981",
+        "plugin_count": 7,
+        "service_binding": "MISSING",
+        "inputs_sha256": "da4c6f3b199a869991acb89528b2bb7b89b4c6af92d7290eb6d822d72246c279"
+      }
+    },
+    "plugin_count": 9,
+    "static_contract": "PASS"
+  },
+  "resolver_preflight": {
+    "status": "NOT_RUN",
+    "reason": "The fixed source checkout has no built apps/cli/lib/bin.js or runtime bundle; source checkout is not promoted to runtime evidence.",
+    "node25_attempt": "REJECTED_NODE_MAJOR",
+    "node24_attempt": "RUNTIME_BUNDLE_MISSING"
+  },
+  "candidate_journal": {
+    "status": "NOT_RUN",
+    "reason": "Both current profiles lack service_binding and the repository has no composite candidate contract; no profile or journal was synthesized."
+  },
+  "target_and_release": {
+    "wsl2": "NOT_RUN_NO_NON_PRODUCTION_TARGET",
+    "real_business_uat": "NOT_RUN",
+    "sdk_distribution": "BLOCKED",
+    "release_ready": false
+  },
+  "repository_mutation": "EVIDENCE_ONLY; no profile, journal, service, target, or release state changed"
+}
