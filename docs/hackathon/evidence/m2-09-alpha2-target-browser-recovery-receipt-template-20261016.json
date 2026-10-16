@@ -1,0 +1,173 @@
+{
+  "schema_version": "shinemage-alpha2-target-browser-recovery/v1",
+  "status": "PENDING_TARGET_EXECUTION",
+  "release_ready": false,
+  "main_pin_unchanged": "PENDING",
+  "created_at_utc": "",
+  "runner": {
+    "id": "",
+    "operator": "",
+    "run_id": "",
+    "command_bundle_sha256": ""
+  },
+  "candidate": {
+    "sdk": "@deepseek-ai/dsh@0.2.1-alpha.2",
+    "upstream_sha": "d743267388641bc76f17c45ce8b4c231aed1d32c",
+    "source_sha": "1bb2646523a7c1cd5aa04d11080617a373af7147",
+    "cordis_peer": "4.0.5-alpha.1",
+    "cordis_runtime": "4.0.5-alpha.1",
+    "dsh_tools": "0.2.1-alpha.2",
+    "node_expected": "24.21.0",
+    "preparation_path": "",
+    "preparation_sha256": "",
+    "preparation_lock_sha256": "53b85e28681e338bdab2d9817e51245af680c5f930e3b6dd79cbd8f2f4168f90"
+  },
+  "main_pin": {
+    "toolchain_path": "dsh-plugins/plugin-kit/toolchain.json",
+    "sdk_version_expected": "0.1.7-rc.2",
+    "upstream_sha_expected": "477b4f420553e8a52c2fbccc464d7561b239c443",
+    "upstream_lock_sha256_expected": "5d3980bcd2a0113101815aabfeb4f8a875d556a333521539b7f11d790f4a50aa",
+    "observed_sha256": "",
+    "observed_values": {},
+    "status": "PENDING"
+  },
+  "target": {
+    "address": "",
+    "platform": "Linux x86_64 / WSL2",
+    "node": "",
+    "python": "",
+    "zstd": "",
+    "authorization_evidence": "",
+    "preflight_evidence": "",
+    "candidate_origin": "",
+    "candidate_port": "",
+    "live_ports_observed": [],
+    "temp_root": ""
+  },
+  "inputs": {
+    "preparation_json_sha256": "",
+    "profile_files": [
+      {
+        "id": "crm-knowledge-alpha2",
+        "path": "profiles/dsh-profile.crm-knowledge.alpha2.json",
+        "sha256_expected": "f548cd19cb6b7c36e2d258bc14dbf03bbd2f5706f4a405494a71759d8204098b",
+        "sha256_observed": "",
+        "status": "PENDING"
+      },
+      {
+        "id": "dsh-alpha2",
+        "path": "profiles/dsh-profile.alpha2.json",
+        "sha256_expected": "680b2ed2cb7203f94cefb11ffbb701b998d2e487c67e4127fead8e78b29aa612",
+        "sha256_observed": "",
+        "status": "PENDING"
+      }
+    ],
+    "plugin_count_expected": 9,
+    "plugin_count_observed": 0,
+    "plugin_sha256_checks": [],
+    "source_sha_all_match": "PENDING",
+    "status": "PENDING"
+  },
+  "preflight": {
+    "authorization_valid": "PENDING",
+    "target_tools_match": "PENDING",
+    "candidate_source_match": "PENDING",
+    "candidate_versions_match": "PENDING",
+    "ports_safe": "PENDING",
+    "owned_process_plan": "PENDING",
+    "browser_driver": "",
+    "status": "PENDING"
+  },
+  "browser": {
+    "status": "PENDING",
+    "headed": true,
+    "driver": "",
+    "driver_version": "",
+    "navigation": {
+      "url": "",
+      "title": "",
+      "ready_at_utc": "",
+      "actions_log": "",
+      "screenshots": []
+    },
+    "plugin_inventory": [],
+    "profile_id": "",
+    "fixture": {
+      "record_type": "synthetic_history_or_board",
+      "record_id": "",
+      "content_sha256": "",
+      "contains_real_data": false,
+      "model_calls": 0,
+      "created_at_utc": "",
+      "read_back_at_utc": "",
+      "read_back_matches": "PENDING"
+    },
+    "console_errors": [],
+    "network_errors": [],
+    "transient_warnings": [],
+    "stable_errors": [],
+    "evidence": []
+  },
+  "recovery": {
+    "status": "PENDING",
+    "owned_process": {
+      "pre_restart_pid": "",
+      "post_restart_pid": "",
+      "process_group": "",
+      "workdir": "",
+      "start_command_ref": "",
+      "stop_command_ref": ""
+    },
+    "pre_restart": {
+      "record_id": "",
+      "content_sha256": "",
+      "page_url": "",
+      "profile_id": "",
+      "captured_at_utc": ""
+    },
+    "post_restart": {
+      "ready_at_utc": "",
+      "record_id": "",
+      "content_sha256": "",
+      "page_url": "",
+      "profile_id": "",
+      "read_back_at_utc": "",
+      "duplicate_count": null,
+      "same_record": "PENDING",
+      "same_content": "PENDING"
+    },
+    "console_errors_after_ready": [],
+    "network_errors_after_ready": [],
+    "transient_warnings": [],
+    "stable_errors": [],
+    "evidence": []
+  },
+  "cleanup": {
+    "status": "PENDING",
+    "owned_processes_stopped": "PENDING",
+    "temp_root_removed": "PENDING",
+    "live_ports_unchanged": "PENDING",
+    "formal_profile_or_journal_written": false,
+    "production_switched": false,
+    "release_ready": false,
+    "evidence": []
+  },
+  "result": {
+    "browser_status": "PENDING_TARGET_EXECUTION",
+    "recovery_status": "PENDING_TARGET_EXECUTION",
+    "overall": "PENDING_TARGET_EXECUTION",
+    "m2_09_disposition": "CANDIDATE_PASS_LIMITED / TARGET_NOT_RUN / MAIN_PIN_UNCHANGED",
+    "m2_07_disposition": "BLOCKED",
+    "release_ready": false,
+    "main_pin_unchanged": "PENDING"
+  },
+  "prohibited_shortcuts": [
+    "REUSE_OLD_PASS_RECEIPT",
+    "HELPER_ONLY_BROWSER_CLAIM",
+    "SYNTHETIC_BACKEND_AS_REAL_BUSINESS",
+    "LIVE_PORT_OR_PROCESS_CHANGE",
+    "MAIN_PIN_EDIT",
+    "REAL_CREDENTIAL_OR_DATA",
+    "REAL_MODEL_CALL"
+  ]
+}
