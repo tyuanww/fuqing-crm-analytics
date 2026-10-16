@@ -5,6 +5,9 @@
 ```text
 status=PROPOSED_RISK_ACCEPTANCE_PENDING_APPROVAL
 release_ready=false
+decision=PROPOSED_LIMITED_SCOPE_RISK_ACCEPTANCE
+effective_from=2026-10-16
+effective_until=2026-11-16
 ```
 
 本文件是风险处置草稿。它不是安全责任方批准，也不是正式发布授权。
@@ -53,6 +56,23 @@ fflate unzipSync can enter an infinite loop when parsing malformed ZIP64 archive
 range >=0.8.0 <0.8.3
 ```
 
+## 推荐填写结果
+
+以下内容是本轮推荐值。它们可以作为正式审批单的填写内容，但当前文件仍然不是正式批准记录。
+
+| 字段 | 推荐值 |
+|---|---|
+| 处置决定 | 接受有限范围风险，并执行补偿控制 |
+| 适用范围 | `@deepseek-ai/dsh@0.2.1-alpha.4`，只限固定 SHA 的隔离候选和 clean machine 验收 |
+| 不允许的范围 | production activation、canary、面向外部用户的正式 release、浮动依赖替换 |
+| 风险接受开始 | `2026-10-16` |
+| 风险接受结束 | `2026-11-16`，或上游修复并重新构建 artifact 后提前结束 |
+| 责任人 | 项目负责人本人 |
+| 安全复核人 | 项目负责人本人，按公司流程补充安全复核记录 |
+| 是否允许 clean machine | 允许，但只用于隔离验收和证据收集 |
+| 是否允许 release | 不允许。M2-07 在正式材料齐全前保持 `BLOCKED` |
+| 是否需要重新构建 | 当前先不重建。若 dependency closure 或上游修复改变，则必须重新构建并重新审计 |
+
 ## 推荐处置
 
 推荐先采用“有限范围风险接受”，原因如下：
@@ -75,15 +95,36 @@ range >=0.8.0 <0.8.3
 6. 记录 npm audit 结果和上游修复跟踪号。
 7. 在下一个 alpha 或稳定版本重新执行审计。
 
+## 推荐审批结论
+
+```text
+decision=ACCEPT_WITH_COMPENSATING_CONTROLS
+scope=ISOLATED_ALPHA4_VALIDATION_ONLY
+production_release=DENIED
+production_activation=DENIED
+canary=DENIED
+review_due=2026-11-16
+approval_status=PENDING_FORMAL_OWNER_APPROVAL
+```
+
+正式审批时，需要确认以下事实：
+
+1. artifact SHA 仍为 `9f4fe0f466d7699ddd4686ee9692ec10c6d9f98a7d175fd5e55de01b2f64c8d6`。
+2. 只使用固定 Node、pnpm、lock 和 source commit。
+3. malformed ZIP64 输入不会进入不受限的解压路径。
+4. 风险接受不会授权 production activation、canary 或正式 release。
+5. `2026-11-16` 前重新检查上游修复、dependency closure 和 npm audit。
+
 ## 待确认字段
 
-- [ ] 是否接受上述有限范围风险。
-- [ ] 风险接受有效期。
-- [ ] 责任人：项目负责人本人。
-- [ ] 复查日期。
-- [ ] 是否允许进入公司 clean machine 验收。
-- [ ] 是否需要在正式发布前重新构建 artifact。
+- [ ] 是否接受上述有限范围风险：推荐接受，待正式确认。
+- [ ] 风险接受有效期：推荐为 `2026-10-16` 至 `2026-11-16`。
+- [ ] 责任人：推荐为项目负责人本人。
+- [ ] 复查日期：推荐为 `2026-11-16`。
+- [ ] 是否允许进入公司 clean machine 验收：推荐允许，仅限隔离验收。
+- [ ] 是否需要在正式发布前重新构建 artifact：推荐当前不需要；若 closure 或上游修复变化，则必须重建。
+- [ ] 正式安全批准记录：待项目负责人按公司流程补充。
 
 ## 结论
 
-在待确认字段完成前，本草稿不能作为正式风险接受。`release_ready` 必须保持 `false`。
+推荐值已经填入。正式安全批准记录仍未补充，因此本文件不能作为正式风险接受。`release_ready` 必须保持 `false`。
