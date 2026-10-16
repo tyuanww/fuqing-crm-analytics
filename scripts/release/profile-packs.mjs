@@ -9,6 +9,7 @@ import { promisify } from 'node:util';
 import { loadProfileSnapshot } from './profile.mjs';
 import { readPluginPack } from './plugin-pack.mjs';
 import { TOOLCHAIN } from './toolchain.mjs';
+import { validateToolchain } from '../dsh-dev/pin.mjs';
 import { insideArtifact, readArtifactFile } from './service-artifact-evidence.mjs';
 
 const exec = promisify(execFile), hash = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -20,6 +21,7 @@ function exact(value, keys, code) {
 }
 
 export async function loadProfilePacks({ inputsPath, toolchain = TOOLCHAIN } = {}) {
+  toolchain = validateToolchain(toolchain);
   assert.ok(typeof inputsPath === 'string' && isAbsolute(inputsPath), 'PROFILE_PACK_INPUTS_REQUIRED');
   const bytes = await readArtifactFile(inputsPath, 256 * 1024), input = JSON.parse(bytes);
   exact(input, ['schema_version', 'profile', 'plugins'], 'PROFILE_PACK_INPUTS_SHAPE');

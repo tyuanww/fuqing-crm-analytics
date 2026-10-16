@@ -11,7 +11,7 @@ import { loadProfileSnapshot } from '../release/profile.mjs';
 import { readPluginPack } from '../release/plugin-pack.mjs';
 import { insideArtifact, readArtifactFile } from '../release/service-artifact-evidence.mjs';
 import { readCompositionInputs, validateCompositionPacks } from '../crm-calibration/composition-inputs.mjs';
-import { readToolchainFile } from '../dsh-dev/pin.mjs';
+import { readToolchainFile, validateToolchain } from '../dsh-dev/pin.mjs';
 
 const exec = promisify(execFile), hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const root = fileURLToPath(new URL('../..', import.meta.url));
@@ -29,12 +29,14 @@ function absolute(path, code) {
 
 /** All inputs are validated before the new output directory is created. */
 export async function prepareCompositionPacks({ inputDirectory, output,
-  lockPath = join(root, 'config/shinemage-composition-packs.lock.json'), profileRoot = root, toolchain } = {}) {
+  lockPath = join(root, 'config/shinemage-composition-packs.lock.json'), profileRoot = root, toolchain, cordisPeerVersion } = {}) {
   const source = absolute(inputDirectory, 'CI_COMPOSITION_PACK_DIRECTORY_REQUIRED');
   const destination = absolute(output, 'CI_COMPOSITION_OUTPUT_REQUIRED');
   profileRoot = absolute(profileRoot, 'CI_COMPOSITION_PROFILE_ROOT_REQUIRED');
-  const selectedToolchain = toolchain ?? (process.env.DSH_COMPOSITION_TOOLCHAIN
+  const explicitToolchain = toolchain !== undefined || process.env.DSH_COMPOSITION_TOOLCHAIN !== undefined;
+  const selectedToolchain = toolchain !== undefined ? validateToolchain(toolchain) : (process.env.DSH_COMPOSITION_TOOLCHAIN !== undefined
     ? await readToolchainFile(process.env.DSH_COMPOSITION_TOOLCHAIN) : undefined);
+  const selectedCordisPeer = cordisPeerVersion ?? process.env.CRM_COMPOSITION_CORDIS_PEER;
   const info = await lstat(source);
   assert.ok(info.isDirectory() && !info.isSymbolicLink(), 'CI_COMPOSITION_PACK_DIRECTORY_INVALID');
   const physicalDestination = join(await realpath(dirname(destination)), basename(destination));
@@ -82,7 +84,7 @@ export async function prepareCompositionPacks({ inputDirectory, output,
   const [packs, pages] = profiles.map(row => ({ profile: row.profile,
     plugins: row.profile.plugins.map(plugin => plugins.find(item => item.id === plugin.id)) }));
   validateCompositionPacks({ packs, pages, toolchain: selectedToolchain,
-    cordisPeerVersion: process.env.CRM_COMPOSITION_CORDIS_PEER });
+    cordisPeerVersion: selectedCordisPeer });
   await mkdir(destination, { mode: 0o700 });
   for (const row of plugins) {
     const directory = join(destination, 'packs', row.directory);
@@ -104,13 +106,16 @@ export async function prepareCompositionPacks({ inputDirectory, output,
     await writeFile(inputs[row.name], json(input), { flag: 'wx', mode: 0o600 });
   }
   // Apply the real domain/public-export/peer guards to the actual prepared bytes.
-  await readCompositionInputs({ inputsPath: inputs.crm, pageInputsPath: inputs.page, toolchain: selectedToolchain });
+  await readCompositionInputs({ inputsPath: inputs.crm, pageInputsPath: inputs.page, toolchain: selectedToolchain,
+    cordisPeerVersion: selectedCordisPeer });
   const runtimeOutput = join(destination, 'runs');
   await mkdir(runtimeOutput, { mode: 0o700 });
+  const toolchainPath = explicitToolchain ? join(destination, 'toolchain.json') : null;
+  if (toolchainPath) await writeFile(toolchainPath, json(selectedToolchain), { flag: 'wx', mode: 0o600 });
   const env = { CRM_COMPOSITION_PACK_INPUTS: inputs.crm, CRM_COMPOSITION_PAGE_INPUTS: inputs.page,
     CRM_COMPOSITION_OUTPUT: runtimeOutput,
-    ...(process.env.DSH_COMPOSITION_TOOLCHAIN ? { DSH_COMPOSITION_TOOLCHAIN: process.env.DSH_COMPOSITION_TOOLCHAIN } : {}),
-    ...(process.env.CRM_COMPOSITION_CORDIS_PEER ? { CRM_COMPOSITION_CORDIS_PEER: process.env.CRM_COMPOSITION_CORDIS_PEER } : {}),
+    ...(toolchainPath ? { DSH_COMPOSITION_TOOLCHAIN: toolchainPath } : {}),
+    ...(selectedCordisPeer ? { CRM_COMPOSITION_CORDIS_PEER: selectedCordisPeer } : {}),
     ...(process.env.CRM_COMPOSITION_CORDIS_RUNTIME ? { CRM_COMPOSITION_CORDIS_RUNTIME: process.env.CRM_COMPOSITION_CORDIS_RUNTIME } : {}) };
   const receipt = { schema_version: 'shinemage-ci-composition-preparation/v1', lock_sha256: hash(lockBytes),
     profiles: profiles.map(({ name, path, sha256 }) => ({ name, path, sha256 })),

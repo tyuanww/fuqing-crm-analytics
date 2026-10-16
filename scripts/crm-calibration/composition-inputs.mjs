@@ -4,7 +4,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { isAbsolute, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { installProfilePacks, loadProfilePacks } from '../release/profile-packs.mjs';
-import { readToolchain, readToolchainFile, verifyUpstream } from '../dsh-dev/pin.mjs';
+import { readToolchain, readToolchainFile, validateToolchain, verifyUpstream } from '../dsh-dev/pin.mjs';
 import { inspectDeclaredPlugin } from './prepare-profile.mjs';
 
 const CRM = '@shine-mage/dsh-crm-knowledge', KNOWLEDGE = '@shine-mage/dsh-knowledge';
@@ -14,18 +14,18 @@ const repo = new URL('../..', import.meta.url);
 const load = path => import(pathToFileURL(path).href);
 
 /** Validate all package inputs before creating a runtime or listening on a port. */
-async function resolveToolchain(toolchain) {
-  if (toolchain !== undefined) return toolchain;
+export async function resolveCompositionToolchain(toolchain) {
+  if (toolchain !== undefined) return validateToolchain(toolchain);
   const candidate = process.env.DSH_COMPOSITION_TOOLCHAIN;
-  return candidate ? readToolchainFile(candidate) : readToolchain(fileURLToPath(repo));
+  return candidate !== undefined ? readToolchainFile(candidate) : readToolchain(fileURLToPath(repo));
 }
 
-export async function readCompositionInputs({ inputsPath, pageInputsPath, toolchain } = {}) {
-  toolchain = await resolveToolchain(toolchain);
+export async function readCompositionInputs({ inputsPath, pageInputsPath, toolchain, cordisPeerVersion } = {}) {
+  toolchain = await resolveCompositionToolchain(toolchain);
   const packs = await loadProfilePacks({ inputsPath, toolchain });
   const pages = pageInputsPath === undefined ? undefined : await loadProfilePacks({ inputsPath: pageInputsPath, toolchain });
   return validateCompositionPacks({ packs, pages, toolchain,
-    cordisPeerVersion: process.env.CRM_COMPOSITION_CORDIS_PEER ?? '4.0.4' });
+    cordisPeerVersion: cordisPeerVersion ?? process.env.CRM_COMPOSITION_CORDIS_PEER ?? '4.0.4' });
 }
 
 /** Shared preflight for already verified packages; no writes or runtime import. */
@@ -54,7 +54,7 @@ export async function loadComposition({ scope, page = false } = {}) {
   const inputsPath = process.env.CRM_COMPOSITION_PACK_INPUTS;
   const pageInputsPath = page ? process.env.CRM_COMPOSITION_PAGE_INPUTS : undefined;
   if (page) assert.ok(pageInputsPath && isAbsolute(pageInputsPath), 'CRM_COMPOSITION_PAGE_INPUTS_REQUIRED: NOT_RUN without fixed page packs');
-  const toolchain = await resolveToolchain();
+  const toolchain = await resolveCompositionToolchain();
   const { packs, pages } = await readCompositionInputs({ inputsPath, pageInputsPath, toolchain });
   const upstream = process.env.B0_BUILD_UPSTREAM, base = process.env.CRM_COMPOSITION_OUTPUT;
   assert.ok(upstream && isAbsolute(upstream), 'CRM_COMPOSITION_UPSTREAM_REQUIRED');

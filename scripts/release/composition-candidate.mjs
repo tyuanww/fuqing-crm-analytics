@@ -15,7 +15,8 @@ import { readArtifactFile } from './service-artifact-evidence.mjs';
 import { recordEvent } from './state.mjs';
 import { prepareServiceCompatibility, validateServiceBinding } from './service-compatibility.mjs';
 import { loadProfilePacks } from './profile-packs.mjs';
-import { validateCompositionPacks } from '../crm-calibration/composition-inputs.mjs';
+import { resolveCompositionToolchain, validateCompositionPacks } from '../crm-calibration/composition-inputs.mjs';
+import { readToolchainFile } from '../dsh-dev/pin.mjs';
 
 export const COMPOSITION_CANDIDATE_SCHEMA = 'dsh-composition-candidate/v1';
 const HEX = /^[a-f0-9]{64}$/;
@@ -105,15 +106,20 @@ export function validateCompositionCandidate(candidate) {
  * The service evidence is required before any receipt or journal event is made.
  */
 export async function createCompositionCandidate({ crmInputsPath, pageInputsPath, serviceBindingPath,
-  serviceEvidencePath, outputDir, statePath } = {}) {
+  serviceEvidencePath, outputDir, statePath, toolchain, toolchainPath, cordisPeerVersion } = {}) {
   const crmPath = absolute(crmInputsPath, 'COMPOSITION_CRM_INPUTS_REQUIRED');
   const pagePath = absolute(pageInputsPath, 'COMPOSITION_PAGE_INPUTS_REQUIRED');
   const bindingPath = absolute(serviceBindingPath, 'COMPOSITION_SERVICE_BINDING_REQUIRED');
   const evidencePath = absolute(serviceEvidencePath, 'COMPOSITION_SERVICE_EVIDENCE_REQUIRED');
   const destination = absolute(outputDir, 'COMPOSITION_OUTPUT_REQUIRED');
   const journal = absolute(statePath, 'COMPOSITION_STATE_PATH_REQUIRED');
-  const [crm, page] = await Promise.all([loadProfilePacks({ inputsPath: crmPath }), loadProfilePacks({ inputsPath: pagePath })]);
-  validateCompositionPacks({ packs: crm, pages: page });
+  assert.ok(!(toolchain !== undefined && toolchainPath !== undefined), 'COMPOSITION_TOOLCHAIN_AMBIGUOUS');
+  const selectedToolchain = toolchainPath
+    ? await readToolchainFile(toolchainPath)
+    : await resolveCompositionToolchain(toolchain);
+  const selectedCordisPeer = cordisPeerVersion ?? process.env.CRM_COMPOSITION_CORDIS_PEER ?? '4.0.4';
+  const [crm, page] = await Promise.all([loadProfilePacks({ inputsPath: crmPath, toolchain: selectedToolchain }), loadProfilePacks({ inputsPath: pagePath, toolchain: selectedToolchain })]);
+  validateCompositionPacks({ packs: crm, pages: page, toolchain: selectedToolchain, cordisPeerVersion: selectedCordisPeer });
   const binding = JSON.parse((await readArtifactFile(bindingPath, 128 * 1024)).toString('utf8'));
   validateServiceBinding(binding);
   const serviceGate = await prepareServiceCompatibility(binding, evidencePath);
@@ -184,9 +190,9 @@ function option(name) {
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
   try {
     if (process.argv.includes('--help') || process.argv.includes('-h')) {
-      console.log('Usage: pnpm dsh plugin composition-candidate --crm-inputs /absolute/crm-inputs.json --page-inputs /absolute/page-inputs.json --service-binding /absolute/service-binding.json --service-evidence /absolute/service-evidence.json --output-dir /absolute/output --state-path /absolute/state.json');
+      console.log('Usage: pnpm dsh plugin composition-candidate --crm-inputs /absolute/crm-inputs.json --page-inputs /absolute/page-inputs.json --service-binding /absolute/service-binding.json --service-evidence /absolute/service-evidence.json --output-dir /absolute/output --state-path /absolute/state.json [--toolchain /absolute/toolchain.json --cordis-peer VERSION]');
     } else {
-      const candidate = await createCompositionCandidate({ crmInputsPath: option('--crm-inputs'), pageInputsPath: option('--page-inputs'), serviceBindingPath: option('--service-binding'), serviceEvidencePath: option('--service-evidence'), outputDir: option('--output-dir'), statePath: option('--state-path') });
+      const candidate = await createCompositionCandidate({ crmInputsPath: option('--crm-inputs'), pageInputsPath: option('--page-inputs'), serviceBindingPath: option('--service-binding'), serviceEvidencePath: option('--service-evidence'), outputDir: option('--output-dir'), statePath: option('--state-path'), toolchainPath: option('--toolchain'), cordisPeerVersion: option('--cordis-peer') });
       console.log(JSON.stringify(candidate, null, 2));
     }
   } catch (error) {
