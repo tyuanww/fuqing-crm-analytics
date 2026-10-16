@@ -2,6 +2,7 @@ import { dirname, isAbsolute, resolve, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { readFile } from 'node:fs/promises';
 import { bindToolchain } from '@shine-mage/dsh-plugin-kit/toolchain';
+import { writeBuildProvenance } from '../../scripts/release/generated-provenance.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const upstreamInput = process.argv[2] ?? process.env.B0_BUILD_UPSTREAM;
@@ -26,4 +27,5 @@ await build({
   banner: { js: `window.__ModuleLoader__.load({ id: ${JSON.stringify(manifest.name)}, factory: (require) => {\nvar module = { exports: {} }; var exports = module.exports;` },
   footer: { js: 'return module.exports;\n} });' },
 });
+await writeBuildProvenance({ root });
 console.log(`shine-query built. Host entry: ${pathToFileURL(join(root, 'lib/index.js')).href}`);
