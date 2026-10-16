@@ -58,6 +58,24 @@ local provenance sha256=0bf6165fc9e48f9e8c60096d5a75195b6d7f4376200158bfd3f78792
 5. 生产安装必须排除 devDependencies、脚本和本地 workspace/link 依赖。
 6. 若 registry 出现证书链错误，只能配置公司批准的 CA bundle 并记录路径/摘要；不得使用 `strict-ssl=false`、跳过 TLS 校验或把网络错误记录成依赖 closure 失败。
 
+### 单人 owner-operated 执行模式
+
+如果公司只有一名全栈开发者，`company runner` 不要求另一位员工在场。项目 owner 可以指定一台受控发布机或受控 CI job 作为 `owner-operated` runner，并在回执中填写自己的操作者和批准身份。该模式仍必须使用空 staging、固定 Node、批准的 registry/CA 和完整日志。
+
+独立核验可以由同一 owner 在同一机器上启动全新的 staging、全新的进程和无构建写权限的复验目录完成；复验必须重新执行 cold/frozen install、dependency graph、runtime import、SBOM subject/package-set 对齐和 provenance binding。它证明技术结果可重现，但不等同于第二位人员的独立批准。
+
+单人模式的回执必须额外记录：
+
+```text
+execution_mode=OWNER_OPERATED
+runner_identity=<owner-controlled machine or CI job>
+operator=<project owner>
+independent_replay=same-owner-separate-staging-and-process
+governance_status=FORMAL_EXCEPTION_REQUIRED
+```
+
+除非公司的发布政策明确接受这项 owner exception，否则不能把 `FORMAL_EXCEPTION_REQUIRED` 改成正式 closure `PASS`，也不能把 `release_ready` 改为 `true`。这一模式用于解除“没有第二位员工所以技术验证无法进行”的阻塞，不绕过治理事实。
+
 公司 runner 先定义统一的 SHA-256 命令。优先使用 `sha256sum`，没有时才使用 `shasum -a 256`；两者都没有必须停止，不能跳过摘要核对：
 
 ```sh
