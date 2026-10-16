@@ -12,7 +12,7 @@
     "sbom_sha256": "2adb75e23a0af0c60ce202f5e4b265549836b4761e758935111d66bbc257bfca",
     "provenance_sha256": "5e81763e0fad9ab5952fb6c7b094cf0e01d0a1b0883f469e63b2f672e8d7a0c4",
     "plugin_pack_verification_sha256": "a126775bc0985d6926e9e21a70f4e5d743eb335e7fe38ee22ca876a3614c3b25",
-    "attestation_inputs_sha256": "29e741fa74edea3d93e4097d28aa43d80d052ffb33de634e1ec7508aee1c95e1",
+    "attestation_inputs_sha256": "104a716c5aeda76ed6c8e1a05a48473bcfb857bf5a83241657ede572468dff9b",
     "security_risk_acceptance_record_sha256": "6a5c3a325503a804f686a2b24707df8fbb22b6c639dbe1b71da79cb3dfd951d1",
     "publisher_evidence_template_sha256": "05f442ae906f24d9c009bec5c17548d0f579e92d43fdd6a5544358c61c1a041d",
     "clean_machine_receipt_template_sha256": "e49f3735df58f4453ffe615a2025c35eda27984f16573a84706662aa1db96e00",
@@ -60,7 +60,9 @@
     "recommended_resolution": "CONSUMER_RUNTIME_CLOSURE_OR_COORDINATED_BUNDLING_POLICY_FIX",
     "local_fix_patch": "docs/hackathon/evidence/m2-07-official-closure-katex-runtime-fix.patch",
     "local_fix_patch_status": "REJECTED_BY_OFFICIAL_POLICY",
-    "policy_conflict_record": "docs/hackathon/evidence/m2-07-official-closure-policy-conflict-20261016.md"
+    "policy_conflict_record": "docs/hackathon/evidence/m2-07-official-closure-policy-conflict-20261016.md",
+    "consumer_runtime_precheck": "docs/hackathon/evidence/m2-07-consumer-runtime-closure-precheck-20261016.md",
+    "consumer_runtime_precheck_sha256": "0578f0373d0d9e5887eb3bc996688efb861f1db1581fcf0b72fb2308c497991a"
   },
   "required_formal_evidence": [
     "official_dependency_closure",
