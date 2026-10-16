@@ -1,0 +1,97 @@
+{
+  "schema_version": "shinemage-alpha4-owner-local-publisher-signature-revocation/v1",
+  "generated_at": "2026-10-16T15:39:46Z",
+  "status": "OWNER_LOCAL_MATERIALS_COMPLETE_FORMAL_GATES_PENDING",
+  "execution": {
+    "mode": "OWNER_OPERATED",
+    "owner": "project-owner",
+    "runner_identity": "owner-operated-local-node24",
+    "scope": "LOCAL_INTEGRITY_ONLY",
+    "formal_company_evidence": false
+  },
+  "formal_status": {
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "release_ready": false
+  },
+  "subjects": {
+    "sdk": "@deepseek-ai/dsh@0.2.1-alpha.4",
+    "sdk_artifact_sha256": "9f4fe0f466d7699ddd4686ee9692ec10c6d9f98a7d175fd5e55de01b2f64c8d6",
+    "sdk_source_sha": "50d241cbd23aa2a9d188fe84c3864528a2206917",
+    "upstream_sha": "86a402200d95fecef4529d969836f1fe13c6cb0d",
+    "upstream_lock_sha256": "ee1c37b5429c535974bafa09475cb03fc473e87dded8f56d54d909ed621e1317",
+    "crm_tarball_sha256": "a994167cafae37383800789127a305bc5cae0a9fa85b46ba4157cf1fe0ae634d",
+    "crm_source_sha": "3b5d4c0680585f8f27c84d70dffabf7c2ec930d2"
+  },
+  "publisher_identity": {
+    "status": "OWNER_IDENTITY_DECLARED_LOCAL",
+    "formal_status": "NOT_RUN_COMPANY_IDENTITY_UNAVAILABLE",
+    "identity_type": "LOCAL_EPHEMERAL_ED25519_PUBLIC_KEY",
+    "owner_ref": "project-owner",
+    "public_key_file": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/owner-attestation-r1/owner-public-key.pem",
+    "public_key_sha256": "234d4a8d016c65adca1fd9bdd470b92d2f82fa8a8e022bc2cd1572b813e2b908",
+    "public_key_der_sha256": "79796ecfd44e35f1e684d16cc1943ea232b3c45fb2b45943f45c5d766677ae81",
+    "public_key_raw_hex": "0d:fd:de:ca:56:09:28:0e:5b:62:c3:39:40:da:9d:86:4b:fc:85:86:62:f5:fe:b2:37:be:20:f5:ee:f6:bf:e4",
+    "identity_source": "owner-public-key.pem",
+    "company_approved": false,
+    "company_identity_evidence_ref": null
+  },
+  "signature": {
+    "status": "OWNER_SELF_SIGNED_LOCAL",
+    "formal_status": "NOT_RUN_COMPANY_SIGNER_UNAVAILABLE",
+    "format": "Ed25519-pkeyutl-detached-local",
+    "binding_file": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/owner-attestation-r1/owner-binding.json",
+    "binding_sha256": "dfd7e89d1ffa4779caff5169bb9c08ee9e5dd0b7d4caccbdffe43784b08cbdd7",
+    "signature_file": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/owner-attestation-r1/owner-binding.sig",
+    "signature_sha256": "26f4a6ac9c116b729f27260ab40c6b5eb13b657c291df907ebf6bc75be7d1d0d",
+    "verification_command": "openssl pkeyutl -verify -pubin -inkey owner-public-key.pem -sigfile owner-binding.sig -in owner-binding.json -rawin",
+    "verification_exit_code": 0,
+    "verification": "PASS",
+    "trust_scope": "OWNER_LOCAL_ONLY",
+    "company_approved": false,
+    "company_signature_evidence_ref": null
+  },
+  "revocation": {
+    "status": "NOT_RUN_NO_TRUST_SERVICE",
+    "formal_status": "NOT_RUN_NO_REVOCATION_SERVICE",
+    "checked_at": "2026-10-16T15:39:46Z",
+    "key_status": "NOT_CHECKED",
+    "certificate_status": "NOT_APPLICABLE_LOCAL_KEY",
+    "signature_status": "NOT_CHECKED",
+    "local_revocation_claim": "NOT_CLAIMED",
+    "reason": "The local key has no company registry, certificate status endpoint, transparency log, or approved signature service configured. Local key presence and local signature verification do not prove non-revocation.",
+    "tool_probe": {
+      "cosign": "NOT_FOUND",
+      "gpg": "NOT_FOUND",
+      "gpg2": "NOT_FOUND",
+      "notation": "NOT_FOUND",
+      "in-toto-verifier": "NOT_FOUND",
+      "slsa-verifier": "NOT_FOUND",
+      "company_identity_env": "NOT_FOUND",
+      "company_signer_env": "NOT_FOUND",
+      "company_revocation_env": "NOT_FOUND"
+    },
+    "company_revocation_evidence_ref": null
+  },
+  "evidence_refs": {
+    "owner_attestation": "docs/hackathon/evidence/m2-07-owner-attestation-20261016.json",
+    "owner_final_attestation_draft": "docs/hackathon/evidence/m2-07-owner-final-attestation-draft-20261016.json",
+    "owner_gate_matrix": "docs/hackathon/evidence/m2-07-owner-operated-release-gate-matrix-20261016.json",
+    "publisher_runbook": "docs/hackathon/evidence/m2-07-publisher-signing-runbook-20261016.md",
+    "owner_clean_machine_replay": "docs/hackathon/evidence/m2-07-owner-clean-machine-replay-20261016.md"
+  },
+  "remaining_formal_gates": [
+    "company-approved publisher identity",
+    "company-approved signature or KMS/HSM/keyless signer",
+    "independent verifier identity or job",
+    "revocation service result",
+    "formal final attestation",
+    "formal company clean-machine receipt"
+  ],
+  "constraints": [
+    "No private key, token, credential, or secret is stored in this receipt.",
+    "Owner self-signature is local integrity evidence only; it is not a company publisher signature.",
+    "No revocation or non-revocation claim is made for the local key.",
+    "PENDING, NOT_RUN, and FORMAL_EXCEPTION_REQUIRED remain non-PASS states."
+  ]
+}
