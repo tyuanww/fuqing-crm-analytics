@@ -20,4 +20,3 @@
 ## 结论
 
 `CANDIDATE_CRM_HOST_ROUTE_PASS / CRM_SESSION_NOT_CONNECTED`。这条探针不能替代真实 CRM 账号登录、GSV 查询、WeKnora 检索、模型调用或人工 UAT。产品仍 `PARTIAL`，`release_ready=false`。
-

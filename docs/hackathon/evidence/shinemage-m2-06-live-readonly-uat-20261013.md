@@ -23,4 +23,3 @@
 ## 结论与边界
 
 本轮真实模型行为通过了“工具缺失时不编造”的安全边界，但真实 CRM/WeKnora 数据验收没有通过，因为 provider/tool surface 没有加载到该会话。M2-06 当前为 `PARTIAL_REAL_UAT / CRM_TOOL_NOT_EXPOSED`。保存、权限失败、恢复、人工业务复核仍未执行；隔离 candidate 仍为 `CANDIDATE_BOOT_PASS / ASIDE_SESSION_NOT_BOUND`。
-

@@ -104,4 +104,3 @@
 5. 由发布责任方完成 publisher identity、verification、revocation 和 final attestation。
 6. 在 clean machine 按安装、校验、卸载、回退顺序验收。
 7. 验收通过后，再评审是否把主仓 pin 从 rc2 适配到 alpha3。
-

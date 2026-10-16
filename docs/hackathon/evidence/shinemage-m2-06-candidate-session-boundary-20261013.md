@@ -7,4 +7,3 @@
 本轮没有读取或复制 cookie、localStorage、token、密码或 API Key，也没有把 live 页面导航到 candidate。候选 DSH 进程和 peer 图仍保持通过，CRM 登录、真实模型、WeKnora 来源和只读业务查询没有执行。
 
 当前结论：`CANDIDATE_BOOT_PASS / ASIDE_SESSION_NOT_BOUND`。要继续候选 UAT，需要用户在 `127.0.0.1:4332` 这个标签页内完成可见的 Aside 登录或连接已授权的模型订阅；完成后才能继续 CRM provider 登录和只读查询。产品仍 `PARTIAL`，`release_ready=false`。
-
