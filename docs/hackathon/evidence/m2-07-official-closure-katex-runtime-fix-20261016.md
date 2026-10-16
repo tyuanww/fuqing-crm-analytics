@@ -61,6 +61,15 @@ main rc2 pin modified = NO
 
 临时 clean checkout 的 `npm pack --dry-run --json` 通过，包元数据包含 `dependencies.katex`。该结果只验证 patch 方向，不能替代公司重建。
 
+本地模拟回执：
+
+```text
+.context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/closure-fix-sim-RfuTcP/receipt.json
+receipt_sha256=9aecff0f1a74f5f561d88975fc48ae5745d1e1f17923bb7daf0f16a01aacddc7
+npm_pack_dry_run=PASS
+package=deepseek-ai-dsh-client-ui-primitives-0.2.1-alpha.4.tgz
+```
+
 ## 公司环境后续命令
 
 在公司发布 checkout 应用 patch 后执行：
