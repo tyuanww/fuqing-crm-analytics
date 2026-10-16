@@ -46,6 +46,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
+          persist-credentials: false
           # Hydrate the single allowlisted asset explicitly after checkout so
           # a runner-side LFS cache miss is observable in the verification
           # step rather than failing inside checkout's opaque post-action.

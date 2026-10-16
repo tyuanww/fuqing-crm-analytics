@@ -37,6 +37,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
+          persist-credentials: false
           # The release verifier hydrates the single allowlisted asset after
           # checkout, keeping LFS failures in a named fail-closed step.
           lfs: false
