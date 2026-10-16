@@ -1,0 +1,42 @@
+{
+  "schema_version": "shinemage-alpha4-owner-final-attestation-draft/v1",
+  "status": "OWNER_ATTESTATION_DRAFT_NOT_FORMAL",
+  "release_ready": false,
+  "statement": "Owner-operated technical evidence is reproducible, but company publisher identity/signature/revocation/independent verification and formal clean-machine acceptance are not complete.",
+  "owner_attestation": "docs/hackathon/evidence/m2-07-owner-attestation-20261016.json",
+  "subjects": {
+    "sdk_artifact_sha256": "9f4fe0f466d7699ddd4686ee9692ec10c6d9f98a7d175fd5e55de01b2f64c8d6",
+    "sdk_sbom_sha256": "2adb75e23a0af0c60ce202f5e4b265549836b4761e758935111d66bbc257bfca",
+    "sdk_provenance_sha256": "5e81763e0fad9ab5952fb6c7b094cf0e01d0a1b0883f469e63b2f672e8d7a0c4",
+    "plugin_verification_sha256": "a126775bc0985d6926e9e21a70f4e5d743eb335e7fe38ee22ca876a3614c3b25",
+    "crm_tarball_sha256": "a994167cafae37383800789127a305bc5cae0a9fa85b46ba4157cf1fe0ae634d",
+    "crm_manifest_sha256": "106c38eaf30cde9b6a3e3fc5fea98d8e42aa777f51f99faff37c00c13f55e42d",
+    "local_closure_receipt_sha256": "d7eb5d768ff2c26f4ebf0f1a8fdae9d5054484a5bc5f71a0b4927c871ea6fe45",
+    "independent_replay_receipt_sha256": "a3049e1d455247318a541beeabd5eaedf2ebdb59fc3e3596e5f3546dbc9efcc0",
+    "owner_clean_machine_receipt_sha256": "e5617286ca77f03c51b9fa84ec7bfce08fb7ddb28622e745346618cc0f73b038",
+    "sdk_source_sha": "50d241cbd23aa2a9d188fe84c3864528a2206917",
+    "crm_source_sha": "3b5d4c0680585f8f27c84d70dffabf7c2ec930d2",
+    "upstream_sha": "86a402200d95fecef4529d969836f1fe13c6cb0d",
+    "upstream_lock_sha256": "ee1c37b5429c535974bafa09475cb03fc473e87dded8f56d54d909ed621e1317"
+  },
+  "local_signature": {
+    "public_key_sha256": "234d4a8d016c65adca1fd9bdd470b92d2f82fa8a8e022bc2cd1572b813e2b908",
+    "signature_sha256": "26f4a6ac9c116b729f27260ab40c6b5eb13b657c291df907ebf6bc75be7d1d0d",
+    "verification": "PASS",
+    "trust_scope": "OWNER_LOCAL_ONLY"
+  },
+  "publisher_identity": "OWNER_IDENTITY_DECLARED_LOCAL",
+  "signature": "OWNER_SELF_SIGNED_LOCAL",
+  "independent_verification": "SAME_OWNER_REPLAY_ONLY",
+  "revocation": "NOT_RUN_NO_TRUST_SERVICE",
+  "clean_machine": "OWNER_OPERATED_REPLAY_PASS",
+  "formal_company_closure": "FORMAL_EXCEPTION_REQUIRED",
+  "required_remaining_gates": [
+    "company-approved publisher identity",
+    "company-approved signature or KMS/HSM/keyless signer",
+    "independent verifier identity/job",
+    "revocation service result",
+    "formal final attestation",
+    "formal company clean-machine receipt"
+  ]
+}
