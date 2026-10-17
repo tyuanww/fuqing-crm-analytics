@@ -372,6 +372,8 @@ test('runtime bundle enforces production pruning, secret scan and peer collision
   assert.match(source, /MAX_TEXT_SCAN_BYTES/);
   assert.match(source, /RUNTIME_PEER_ALIAS_COLLISION/);
   assert.match(source, /requiredPeerAliases/);
+  assert.match(source, /optionalDependencies/);
+  assert.match(source, /peerDependencies/);
   assert.match(source, /\['cordis', 'cosmokit'\]/);
   assert.match(source, /runtimeDeployArgs\(deployed, \{ online \}\)/);
   assert.match(source, /stageRuntimeWorkspace/);

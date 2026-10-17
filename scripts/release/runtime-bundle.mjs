@@ -96,7 +96,18 @@ async function requiredPeerAliases(root) {
   async function walk(directory) {
     for (const entry of await readdir(directory, { withFileTypes: true })) {
       const path = join(directory, entry.name);
-      if (entry.isSymbolicLink() || !entry.isDirectory()) continue;
+      if (entry.isSymbolicLink()) continue;
+      if (entry.isFile()) {
+        if (entry.name !== 'package.json') continue;
+        const packageJson = JSON.parse(await readFile(path, 'utf8'));
+        for (const section of ['dependencies', 'optionalDependencies', 'peerDependencies']) {
+          for (const name of Object.keys(packageJson[section] ?? {})) {
+            if (name.startsWith('@deepseek-ai/')) names.add(name.slice('@deepseek-ai/'.length));
+          }
+        }
+        continue;
+      }
+      if (!entry.isDirectory()) continue;
       const rel = relativePath(root, path);
       if (entry.name === '@deepseek-ai' && rel.includes('/node_modules/')) {
         for (const peer of await readdir(path, { withFileTypes: true })) {
