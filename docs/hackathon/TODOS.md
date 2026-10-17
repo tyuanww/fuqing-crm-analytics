@@ -12,7 +12,7 @@
 
 **Why:** 内部使用与 M2 正式发布分开推进。没有真实任务卡和责任人，任何运行结果都不能证明任务可行性、Stage 1 readiness 或 500 人扩展价值。
 
-**Context:** 内部环境默认目标改为 npm `latest` 的 DSH `0.2.0-rc.2`，并固定 tarball SHA、manifest、pack digest、controlled-host fresh runtime、credential deny、local-only receipt 和 owned cleanup；主仓 `0.1.7-rc.2` 只保留为兼容基线和历史证据边界。当前只允许合成/脱敏 harness smoke；OIDC、共享持久化、备份/恢复、14 天/60 次 cohort metrics 和内网 Stage 1 均保持阻塞。详见 `docs/hackathon/evidence/engineering-closeout-20261017.md` 和 `docs/designs/internal-ai-workbench-readiness.md`。
+**Context:** 内部环境目标锁定为 Harness 最新发布 `dsh-v0.2.1-rc.1` / upstream `1600d8a1e140dcde43a1a0941940a0480712c011`，并固定 tarball SHA、manifest、pack digest、controlled-host fresh runtime、credential deny、local-only receipt 和 owned cleanup；主仓 `0.1.7-rc.2` 只保留为兼容基线和历史证据边界。当前只允许合成/脱敏 harness smoke；OIDC、共享持久化、备份/恢复、14 天/60 次 cohort metrics 和内网 Stage 1 均保持阻塞。详见 `docs/hackathon/evidence/engineering-closeout-20261017.md` 和 `docs/designs/internal-ai-workbench-readiness.md`。
 
 **Effort:** S
 **Priority:** P1

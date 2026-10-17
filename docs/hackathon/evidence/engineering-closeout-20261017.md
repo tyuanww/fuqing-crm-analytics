@@ -18,29 +18,32 @@
 
 ## 最终运行时口径
 
-2026-10-17 通过 npm registry 实查得到：
+2026-10-17 通过 Git 远端 tag 和 npm registry 实查得到。最终目标采用 Harness 最新发布 tag `dsh-v0.2.1-rc.1`，不使用浮动 `latest`。
 
 | dist-tag | 版本 | 口径 |
 | --- | --- | --- |
-| `latest` | `@deepseek-ai/dsh@0.2.0-rc.2` | 最终内部环境默认目标 |
-| `next` | `@deepseek-ai/dsh@0.2.1-rc.1` | 暂不作为目标 |
+| Harness 最新发布 tag | `dsh-v0.2.1-rc.1` / `1600d8a1e140dcde43a1a0941940a0480712c011` | 最终内部环境目标 |
+| npm `latest` | `@deepseek-ai/dsh@0.2.0-rc.2` | 稳定 dist-tag，不是本项目最终目标 |
+| npm `next` | `@deepseek-ai/dsh@0.2.1-rc.1` | 与最终目标版本一致 |
 | `alpha` | `@deepseek-ai/dsh@0.2.1-alpha.5` | 候选轨道，不进入默认环境 |
 
 `latest` tarball 的本次读取摘要如下：
 
 ```text
-version=0.2.0-rc.2
-sha256=bd27847c445cd68a565ac1f91c06bbbcc7639ef93071f678bb59c5ebaff38859
-integrity=sha512-EAJ3gPNcVt/uv8X19PMm9NkVhWgT7xXNMk0UKCVm+IQ5rpSQOcsMUa0HWlnYYVybKMsccjcRB21vVVsaXQ6IdA==
+version=0.2.1-rc.1
+upstream_tag=dsh-v0.2.1-rc.1
+upstream_sha=1600d8a1e140dcde43a1a0941940a0480712c011
+sha256=6d0c6fe8ad0c21797a27d6afc0cb69a022714ea0cd7331e4cba8b07b8ce19009
+integrity=sha512-ce+4rnRuhkheK8++2EGm0CjHKVfF7IjUk4DO/NydRS8inAM8A0GFGQmX3cWKM4OzzbT+diIMyOiDuA1wYAZioA==
 ```
 
-仓库现有 `DSH 0.1.7-rc.2` 是既有主仓兼容基线和历史证据边界。它不能继续被描述成最终内部部署版本。切换到 `0.2.0-rc.2` 前只需要生成一份新的 immutable pilot manifest，并做一次针对该 manifest 的兼容性 smoke check；不需要重做已经完成的架构审查和旧证据。
+仓库现有 `DSH 0.1.7-rc.2` 是既有主仓兼容基线和历史证据边界。它不能继续被描述成最终内部部署版本。切换到 `0.2.1-rc.1` 前只需要生成一份新的 immutable pilot manifest，并做一次针对该 manifest 的兼容性 smoke check；不需要重做已经完成的架构审查和旧证据。
 
 ## 最终剩余任务
 
 这些任务是有限清单，不包含重复的 M2 解释。
 
-1. **最新 runtime manifest**。固定 `0.2.0-rc.2`、tarball SHA、插件 pack SHA、Node 和 lockfile，运行一次 manifest/plugin/runtime 兼容性 smoke check。
+1. **最新 runtime manifest**。固定 `dsh-v0.2.1-rc.1`、upstream SHA、tarball SHA、插件 pack SHA、Node 和 lockfile，运行一次 manifest/plugin/runtime 兼容性 smoke check。
 2. **Stage 0 harness**。只有要启动 1–3 名真实内部用户时才实现。它负责 fresh runtime、credential deny、digest 检查、local receipt 和 owned cleanup；没有真实任务卡时结果只能标记 `HARNESS_SMOKE_ONLY`。
 3. **真实任务卡**。只有要证明工作流价值时才补部门、岗位、用户、任务、输入输出、数据类别和频次；没有任务卡不能宣称用户可行性或 500 人 readiness。
 4. **Stage 1 基础设施**。只有要扩大到 10–20 人时才处理 OIDC、共享存储、备份恢复、日志告警、容量和支持责任。云空间或云硬盘未落地前停留在 Stage 0。

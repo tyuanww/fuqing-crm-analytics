@@ -4,7 +4,7 @@
 
 ## 当前快照（2026-10-17）与 alpha4 候选当前事实
 
-- 工程闭环与正式发布已分线。架构和本地技术闭环为 `CLOSED_FOR_ARCHITECTURE`；最终内部环境默认目标为 npm `latest` 的 `@deepseek-ai/dsh@0.2.0-rc.2`，本次读取 SHA-256 为 `bd27847c445cd68a565ac1f91c06bbbcc7639ef93071f678bb59c5ebaff38859`。现有 `0.1.7-rc.2` 只作为主仓兼容基线和历史证据边界。有限剩余任务与边界见 [工程闭环与正式发布门禁分离](docs/hackathon/evidence/engineering-closeout-20261017.md)。
+- 工程闭环与正式发布已分线。架构和本地技术闭环为 `CLOSED_FOR_ARCHITECTURE`；最终内部环境目标锁定为 Harness 最新发布 `dsh-v0.2.1-rc.1` / upstream `1600d8a1e140dcde43a1a0941940a0480712c011`，npm tarball SHA-256 为 `6d0c6fe8ad0c21797a27d6afc0cb69a022714ea0cd7331e4cba8b07b8ce19009`。现有 `0.1.7-rc.2` 只作为主仓兼容基线和历史证据边界。有限剩余任务与边界见 [工程闭环与正式发布门禁分离](docs/hackathon/evidence/engineering-closeout-20261017.md)。
 
 - 官方仓库最新发布为 `v0.2.1-alpha.4`，发布提交为 `86a402200d95fecef4529d969836f1fe13c6cb0d`。M2-07 当前候选已经切换到 alpha4；alpha3 只保留为上一轮候选记录。
 - 2026-10-17 当前公开主线已包含本轮治理与状态文档；当前 `main` SHA 以 Git 实查为准。这些合并不改变 DSH `0.1.7-rc.2` pin、M2-07/M2-08 门禁或 `release_ready=false`。
