@@ -106,6 +106,21 @@
       "detail": "rc1 MarkdownText.d.ts side-effect imports katex/dist/katex.min.css but the consumer typecheck has no CSS ambient declaration; the upstream katex file exists"
     },
     {
+      "step": "crm_knowledge_rc1_candidate_adapter_probe",
+      "result": "PASS_IN_TEMPORARY_LANE",
+      "error_code": null,
+      "detail": "a candidate-only katex CSS ambient declaration made the CRM/Knowledge consumer build pass; no main-tree code or pack was changed",
+      "provenance": {
+        "temporary_commit": "db244fe1ba37f9456dba4c328ad240446d087dd9",
+        "source_tree_sha256": "a5e9f51b79340192317ebf49c133440c96aedfd4bdc1d1b89d4a227bd4547f76",
+        "generated_tree_sha256": "25f35615906eb7ae123aae9e875f38535bbb6e256c1c21bd6ecb2ba01ec8303f",
+        "node": "24.19.0",
+        "pnpm": "11.28.2",
+        "clean": true,
+        "isolated": true
+      }
+    },
+    {
       "step": "pack_build",
       "result": "NOT_RUN",
       "detail": "pack build cannot start before rc1 upstream host/client build and isolated peer alignment"
