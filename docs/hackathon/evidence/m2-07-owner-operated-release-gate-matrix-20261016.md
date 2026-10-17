@@ -1,6 +1,6 @@
 # M2-07 owner-operated publisher 与 clean-machine 剩余门禁矩阵（2026-10-16）
 
-本矩阵将 owner-operated 模式下已经完成的本地技术证据与仍缺的正式公司门禁分开。`OWNER_SELF_SIGNED_LOCAL`、`SELF_SEPARATED_REPLAY_PASS` 和 `OWNER_OPERATED_REPLAY_PASS` 都不等于公司 publisher signature、第二人独立核验或 formal clean-machine。当前 `M2-07=BLOCKED`、`M2-08=NOT_RUN`、`release_ready=false`。
+本矩阵将 owner-operated 模式下已经完成的本地技术证据与仍缺的正式公司门禁分开。`OWNER_SELF_SIGNED_LOCAL`、`SELF_SEPARATED_REPLAY_PASS` 和 `OWNER_OPERATED_REPLAY_PASS` 都不等于公司 publisher signature、第二人独立核验或 formal clean-machine。当前治理状态为 `OWNER_EXCEPTION_ACCEPTED`，范围仅限 `INTERNAL_ONLY_OWNER_OPERATED`；对外正式门禁仍保持 `M2-07=BLOCKED`、`M2-08=NOT_RUN`、`release_ready=false`。接受回执见 [owner governance acceptance](m2-07-owner-governance-acceptance-20261017.md)。
 
 ## 两层 subject
 
@@ -33,6 +33,6 @@
 
 ## 下一步
 
-1. 如果公司接受 owner exception，需由 owner 明确记录 `governance_status=OWNER_EXCEPTION_ACCEPTED`，但仍要保留“同一 owner、无第二位 verifier”的事实。
-2. 需要公司 publisher identity、签名服务、独立 verifier、revocation service 和 formal clean-machine runner 后，逐项替换正式 `NOT_RUN` 回执。
+1. 已由 `project-owner` 接受 `OWNER_EXCEPTION_ACCEPTED`，并保留“同一 owner、无第二位 verifier”的事实；该接受仅适用于内部 owner-operated 使用。
+2. 需要公司 publisher identity、签名服务、独立 verifier、revocation service 和 formal clean-machine runner 后，才能逐项替换正式 `NOT_RUN` 回执。
 3. 在这些正式回执全部完成前，禁止把 `release_ready` 改为 `true`，禁止启动 M2-08。
