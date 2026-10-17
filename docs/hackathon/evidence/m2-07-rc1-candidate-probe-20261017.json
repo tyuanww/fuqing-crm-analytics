@@ -17,7 +17,7 @@
     "cordis": "4.0.5",
     "temporary_candidate_root": "/tmp/dsh-rc1-candidate.bMFp7P",
     "temporary_inventory": "/tmp/dsh-rc1-probe.h1nse4/rc1-input-inventory.json",
-    "temporary_inventory_sha256": "01d3f6cb914fa61a4c926ddba2015638cc6aaeacd8f0255ad2840b2d41461115"
+    "temporary_inventory_sha256": "b82ebb63debb2d70e2b2038275252def36fbd39129193879454cb2194ebe7d71"
   },
   "observations": [
     {
@@ -38,15 +38,32 @@
       "upstream_lock_sha256": "952ca2f79998660dc690b739078a5d6052bc7c5c2193714b918b9d720baaeaba"
     },
     {
+      "step": "inspect_toolchain_after_build",
+      "result": "PASS",
+      "detail": "rc1 toolchain inspection returned 32 bindings with Node24 and the isolated build-tools path"
+    },
+    {
       "step": "plugin_peer_alignment",
       "result": "TEMPORARY_PREPARED",
       "detail": "isolated probe replaced nine dsh-tools peers with 0.2.1-rc.1 and CRM/Knowledge Cordis with 4.0.5; no pack was built"
     },
     {
       "step": "profile_preflight",
-      "result": "BLOCKED",
-      "error_code": "PROFILE_DSH_PIN_MISMATCH",
-      "detail": "existing config/dsh-profile.rc2.json still binds sdk 0.1.7-rc.2 and upstream 477b4f42 while the isolated toolchain is rc1"
+      "result": "RESOLVED_IN_ISOLATION",
+      "error_code": null,
+      "detail": "new rc1 page and crm-knowledge profiles passed loadProfileSnapshot and loadReleaseProfile; old rc2 profile remains rejected",
+      "profiles": [
+        {
+          "path": "config/dsh-profile.rc1.json",
+          "digest": "e93e6f5e7975311f55bf1ee070b7aea009c938449c9a1542f3c2a503f40253fc",
+          "plugins": 7
+        },
+        {
+          "path": "config/dsh-profile.crm-knowledge.rc1.json",
+          "digest": "7ed8ba8589f76dbd656897edadd5d9a6098549962c6a2882b8827f81f02c2245",
+          "plugins": 2
+        }
+      ]
     },
     {
       "step": "pack_build",
