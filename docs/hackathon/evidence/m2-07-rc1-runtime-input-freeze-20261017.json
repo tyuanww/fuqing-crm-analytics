@@ -1,0 +1,44 @@
+{
+  "schema_version": "engineering-rc1-runtime-input-freeze/v1",
+  "recorded_at": "2026-10-17T06:50:42Z",
+  "scope": "internal-engineering-closure",
+  "status": "INPUTS_FROZEN",
+  "target": {
+    "upstream_tag": "dsh-v0.2.1-rc.1",
+    "upstream_sha": "1600d8a1e140dcde43a1a0941940a0480712c011",
+    "package": "@deepseek-ai/dsh@0.2.1-rc.1",
+    "tarball_sha256": "6d0c6fe8ad0c21797a27d6afc0cb69a022714ea0cd7331e4cba8b07b8ce19009",
+    "integrity": "sha512-ce+4rnRuhkheK8++2EGm0CjHKVfF7IjUk4DO/NydRS8inAM8A0GFGQmX3cWKM4OzzbT+diIMyOiDuA1wYAZioA==",
+    "cordis": "4.0.5",
+    "node": "24.19.0",
+    "upstream_pnpm": "11.28.5",
+    "plugin_pnpm": "11.28.2"
+  },
+  "fallback": {
+    "sdk_version": "0.1.7-rc.2",
+    "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+    "role": "main-compatibility-baseline-and-rollback"
+  },
+  "observed_environment": {
+    "node_path_version": "24.19.0",
+    "node_path": "/Users/hutou/homebrew/opt/node@24/bin/node",
+    "plugin_pnpm_version": "11.28.2",
+    "current_repo_sdk_version": "0.1.7-rc.2",
+    "current_repo_plugin_peer": "0.1.7-rc.2",
+    "current_repo_consumer_cordis": "4.0.2",
+    "candidate_lane": "NOT_RUN"
+  },
+  "required_next": [
+    "Create an isolated rc1 source checkout and lock snapshot",
+    "Align all nine plugin peer/build inputs to rc1 and Cordis 4.0.5",
+    "Rebuild nine plugin packs and bind source/tree/tarball digests",
+    "Run rc1 consumer/runtime closure and compatibility smoke",
+    "Generate immutable pilot manifest only after the bytes pass"
+  ],
+  "formal_release": {
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "m2_09": "NOT_RUN",
+    "release_ready": false
+  }
+}
