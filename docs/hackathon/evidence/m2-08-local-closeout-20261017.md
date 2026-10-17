@@ -148,3 +148,41 @@ rollback=NOT_RUN
 5. 正式 release authorization，以及后续 activation、canary、rollback 回执。
 
 本地测试没有写入生产 profile、journal、服务目录或 live 端口。
+
+### 6. rc2 preflight check（当前 checkout 复验）
+
+在后续本地文档收口提交后的当前 checkout `1b281ff6fefaf40b2e957cc31e4a8e5f853d0379` 上，重新运行只读 `preflight --check`。该命令只检查输入和输出目录，不执行 prepare/build/runtime/release，也不写入正式 release evidence。
+
+命令：
+
+```sh
+/Users/hutou/homebrew/opt/node@24/bin/node scripts/dsh.mjs preflight --check \
+  --python /Users/hutou/.local/bin/python3 \
+  --tag dsh-m2-08-local-check-20261017-r3 \
+  --source-sha 1b281ff6fefaf40b2e957cc31e4a8e5f853d0379 \
+  --output-dir /tmp/m2-08-local-check-20261017-r3
+```
+
+退出码：`2`。
+
+实际输出：
+
+```text
+DSH_PREFLIGHT_CHECK PASS node24=24.19.0:expected-24.19.0
+DSH_PREFLIGHT_CHECK PASS pnpm=11.28.2
+DSH_PREFLIGHT_CHECK PASS python314=/Users/hutou/.local/bin/python3:Python 3.14.8
+DSH_PREFLIGHT_CHECK FAIL git-clean=dirty:1 files code=RELEASE_BLOCKED_DIRTY_WORKTREE
+DSH_PREFLIGHT_CHECK PASS zstd=*** Zstandard CLI (64-bit) v1.5.7, by Yann Collet ***
+DSH_PREFLIGHT_CHECK PASS upstream-sha=477b4f420553e8a52c2fbccc464d7561b239c443
+DSH_PREFLIGHT_CHECK PASS profile-manifest=dsh-rc2:c8c9df8c36f11060ad8fbcce68cb2ebf28d783c5eb5759d1b71ff5463782c981
+DSH_PREFLIGHT_CHECK FAIL plugin-packs=PROFILE_PACK_INPUTS_REQUIRED code=PREFLIGHT_PLUGIN_PACKS_INVALID
+DSH_PREFLIGHT_CHECK FAIL runtime-bundle=missing code=RELEASE_UPSTREAM_RUNTIME_REQUIRED
+DSH_PREFLIGHT_CHECK PASS evidence-dir=/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/release-evidence
+DSH_PREFLIGHT_CHECK PASS output-dir=/tmp/m2-08-local-check-20261017-r3:create-on-release
+DSH_PREFLIGHT_CHECK PASS service-compatibility=NOT_REQUIRED
+DSH_PREFLIGHT_CHECK_BLOCKERS count=3 codes=RELEASE_BLOCKED_DIRTY_WORKTREE,PREFLIGHT_PLUGIN_PACKS_INVALID,RELEASE_UPSTREAM_RUNTIME_REQUIRED
+DSH_PREFLIGHT_CHECK_STATUS BLOCKED code=RELEASE_BLOCKED_DIRTY_WORKTREE
+EXIT_CODE=2
+```
+
+`/tmp/m2-08-local-check-20261017-r3` 在检查结束时没有生成候选输出文件；这证明 `--check` 在正式输入缺失时 fail closed，没有把本地检查伪装成 preflight 成功。
