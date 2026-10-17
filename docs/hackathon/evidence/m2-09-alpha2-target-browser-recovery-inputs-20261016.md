@@ -1,8 +1,9 @@
 # M2-09 alpha2 目标浏览器与目标恢复输入清单
 
 > 用途：给批准的目标执行方准备一次新的、可审计的 alpha2 candidate 执行。清单不授权发布、激活或主仓 pin 变更。
+> 本文件是执行前输入快照。后续 rerun 已取得 `TARGET_BROWSER_SYNTHETIC_PASS / TARGET_RECOVERY_SYNTHETIC_PASS`，正式目标证据仍为 `NOT_RUN`；当前状态以根 `STATUS.md` 和 `docs/hackathon/TODOS.md` 为准。
 
-当前固定状态：`M2-09=CANDIDATE_PASS_LIMITED / TARGET_NOT_RUN / MAIN_PIN_UNCHANGED`，`M2-07=BLOCKED`，`release_ready=false`。
+执行前快照：`M2-09=CANDIDATE_PASS_LIMITED / TARGET_NOT_RUN / MAIN_PIN_UNCHANGED`，`M2-07=BLOCKED`，`release_ready=false`。
 
 ## 固定候选身份
 

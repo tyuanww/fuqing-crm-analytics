@@ -1,5 +1,7 @@
 # M2-09 DSH 升级候选延后复核（2026-10-13）
 
+> 历史记录：本文件前半段的 `TARGET_BROWSER_PASS / TARGET_RECOVERY_PASS` 结论已在 2026-10-14 证据纠偏中撤销。以本文后续“证据纠偏”及 2026-10-16 rerun 回执为准。
+
 本轮先核对当前 DSH pin 与运行现场，随后识别官方升级候选并在 ignored 隔离目录准备精确 checkout；不修改主仓 pin、上游源码、锁文件或 live/current。
 
 ## 当前基线
