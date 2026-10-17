@@ -3,7 +3,7 @@
   "recorded_at": "2026-10-17T06:50:42Z",
   "scope": "internal-engineering-closure",
   "candidate_id": "dsh-rc1-candidate-probe-20261017",
-  "status": "BLOCKED_KIT_SDK_ENTRY_MISSING",
+  "status": "PACKS_AND_READERS_PASS_IN_TEMPORARY_LANE",
   "inputs": {
     "upstream_tag": "dsh-v0.2.1-rc.1",
     "upstream_sha": "1600d8a1e140dcde43a1a0941940a0480712c011",
@@ -155,14 +155,29 @@
     },
     {
       "step": "pack_build",
-      "result": "NOT_RUN",
-      "detail": "pack build cannot start before rc1 upstream host/client build and isolated peer alignment"
+      "result": "PASS_IN_TEMPORARY_LANE",
+      "error_code": null,
+      "detail": "all nine formal plugin packs were generated with dsh-generated-bytes/v1 PASS provenance from the unified candidate source commit",
+      "source_git_sha": "db244fe1ba37f9456dba4c328ad240446d087dd9",
+      "pack_count": 9,
+      "pack_reader_require_generated_provenance": true
+    },
+    {
+      "step": "profile_pack_inputs_and_reader",
+      "result": "PASS_IN_TEMPORARY_LANE",
+      "error_code": null,
+      "detail": "page and crm profiles were assembled from real plugin-pack manifests and read back with generated provenance required",
+      "page_profile_sha256": "e93e6f5e7975311f55bf1ee070b7aea009c938449c9a1542f3c2a503f40253fc",
+      "page_inputs_sha256": "dab88152c0e3fe041f401cdf410942b6e381ba2d9b6619ce34b97f2ce1659e58",
+      "crm_profile_sha256": "7ed8ba8589f76dbd656897edadd5d9a6098549962c6a2882b8827f81f02c2245",
+      "crm_inputs_sha256": "fc9896ebd4e9c0c76cd5b26c94ecb6b669b8420f5446fd2163b8a49fd8f83375"
     }
   ],
   "next_steps": [
-    "Create an rc1 profile and pack-input snapshot instead of reusing config/dsh-profile.rc2.json",
-    "Align nine plugin dsh-tools peers to 0.2.1-rc.1 and CRM/Knowledge Cordis to 4.0.5 in the isolated lane",
-    "Re-run plugin pack and consumer closure probes"
+    "Run fixed-SDK consumer/runtime closure against the rc1 pack and profile subject set",
+    "Run runtime import, KaTeX CSS/JS, host startup and owned cleanup checks",
+    "Run candidate history/board readback, restart readback and rc2 rollback probes",
+    "Keep browser/restart and formal release statuses separate from temporary pack-reader PASS"
   ],
   "formal_release": {
     "m2_07": "BLOCKED",
