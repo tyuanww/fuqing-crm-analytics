@@ -6,7 +6,9 @@
 
 仓库：`tyuanww/fuqing-crm-analytics`（公共仓库；以实际 remote 为准）
 
-## 1. 分支保护（`main`）
+> **2026-10-17 API 快照**：`main` 当前 required checks 是 `changes / changes` 和 `merge-gate`。required reviews 未设置。strict、enforce_admins、禁止强推和禁止删除已启用。下方勾选项保留为历史人工清单，不能替代 API 实查。
+
+## 1. 历史分支保护清单（`main`）
 
 在 **Settings → Branches → Branch protection rules → `main`**：
 
@@ -97,8 +99,8 @@ gh api repos/tyuanww/fuqing-crm-analytics/vulnerability-alerts -i || true
 
 详见 [supply-chain.md](./supply-chain.md)、[team-workflow-v1.md](./team-workflow-v1.md)。
 
-## 状态更新 (2026-07-26)
+## 历史状态更新 (2026-07-26)
 
-已通过 API 启用：main branch protection（PR + 7 个 required checks、禁止强推/删除、enforce_admins）、secret scanning + push protection、Dependabot alerts/security updates、delete_branch_on_merge、Actions workflow permissions=read。
+历史记录：曾通过 API 记录 main branch protection（PR + 7 个 required checks、禁止强推/删除、enforce_admins）以及 secret scanning、Dependabot 和 Actions 权限。当前配置以 2026-10-17 API 快照和 GitHub 实查为准。
 
 代码侧：`.github/dependabot.yml` 周更（pip/npm/github-actions）；Actions 仅 GitHub-owned 且强制完整 SHA。

@@ -3,10 +3,11 @@
 > **最后更新**: 2026-07-26
 > 历史背景为「本地即生产 + AI 协作者」；当前已归档，以下流程不是默认执行清单。
 > **2026-09-06**：行为与授权只按 [AGENTS.md](../../AGENTS.md)。本文件的 CI/协作分层供按需参考，不能覆盖当前边界或自动触发 push、merge、重启；具体 required checks 以实际配置与运行证据为准。
+> **2026-10-17 API 快照**：当前 `main` 的 required checks 是 `changes / changes` 和 `merge-gate`；required reviews 未设置；strict、enforce_admins、禁止强推和禁止删除已启用。下方 v1 门禁表是历史协作方案，不代表当前 GitHub 配置。
 
 ---
 
-## 1. 可合并定义（Definition of Done for merge）
+## 1. 历史可合并定义（Definition of Done for merge）
 
 | Check | 是否挡 merge |
 |---|---|
@@ -108,7 +109,7 @@ Escape（人拥有）：`FQ_PRE_PUSH_SKIP=1` — 须说明原因，禁止常态�
 | e2e 挡 merge | ❌ 已撤回；可选 `e2e-smoke.yml`（瘦依赖 + login 壳层）manual/nightly |
 | TECH-DEBT 短表 | ✅ 开放债表 + `docs/history/TECH-DEBT-HISTORY.md` |
 | pre-push .gitignore 等 skip | ✅ path classifier `_SKIP_EXACT` |
-| GitHub branch protection required checks | ✅ 已开 branch protection；7 个代码/审计/构建 job required，e2e 继续不挡 merge |
+| GitHub branch protection required checks | 历史记录；2026-10-17 API 实查为 `changes / changes` + `merge-gate`，required reviews 未设置 |
 | 预发环境 | 📋 未做 |
 | CLAUDE L4 表下沉 | 📋 未做 |
 | e2e 夹具能力 | ✅ `TEST_MODE` + seed 保留；全量业务 Playwright **非** PR 门禁 |

@@ -60,4 +60,4 @@
 
 ## 规则维护
 
-只修改本文件中的行为正文。`CLAUDE.md` 保持单行 `@AGENTS.md`；不运行“CLAUDE → AGENTS”覆盖生成。维护规则时同时检查当前入口、相关 Skill/hook 和 PR 模板，避免它们重新引入旧流程；不将历史记录全仓替换成新结论。
+只修改本文件中的行为正文。`CLAUDE.md` 保持单行 `@AGENTS.md`；不运行“CLAUDE → AGENTS”覆盖生成。`.claude/skills/regen-types/SKILL.md` 是可追踪入口，若存在 `.agents/skills/regen-types/SKILL.md` 镜像，两者必须保持字节一致；`scripts/sync-agents.sh --check` 会检查该约束。维护规则时同时检查当前入口、相关 Skill/hook 和 PR 模板，避免它们重新引入旧流程；不将历史记录全仓替换成新结论。
