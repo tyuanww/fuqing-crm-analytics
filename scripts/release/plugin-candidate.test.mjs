@@ -11,6 +11,7 @@ import { createPluginCandidate } from './plugin-candidate.mjs';
 import { packPlugin } from './plugin-pack.mjs';
 import { recordEvent } from './state.mjs';
 import { serviceFixture } from './test-fixtures/service-compatibility.mjs';
+import { writeBuildProvenance } from './generated-provenance.mjs';
 
 const exec = promisify(execFile);
 const SHA = '477b4f420553e8a52c2fbccc464d7561b239c443';
@@ -115,7 +116,18 @@ async function detachedPack(t) {
   const packRoot = await mkdtemp(join(tmpdir(), 'dsh-external-pack-'));
   t.after(() => rm(packRoot, { recursive: true, force: true }));
   const packManifest = join(packRoot, 'plugin-pack.json');
-  const receipt = await packPlugin({ plugin: input.plugin, outputDir: packRoot, manifestPath: packManifest });
+  const builderReceipt = join(packRoot, 'builder-provenance.json');
+  const previous = process.env.SHINEMAGE_CLEAN_BUILDER;
+  process.env.SHINEMAGE_CLEAN_BUILDER = '1';
+  try {
+    await writeBuildProvenance({ root: input.plugin, outputPath: builderReceipt,
+      command: 'synthetic fixture build', networkMode: 'offline' });
+  } finally {
+    if (previous === undefined) delete process.env.SHINEMAGE_CLEAN_BUILDER;
+    else process.env.SHINEMAGE_CLEAN_BUILDER = previous;
+  }
+  const receipt = await packPlugin({ plugin: input.plugin, outputDir: packRoot, manifestPath: packManifest,
+    builderProvenancePath: builderReceipt });
   const packSha256 = createHash('sha256').update(await readFile(packManifest)).digest('hex');
   await rm(input.plugin, { recursive: true });
   return { ...input, plugin: undefined, packManifest, packSha256, receipt, profileManifest: input.profile };
