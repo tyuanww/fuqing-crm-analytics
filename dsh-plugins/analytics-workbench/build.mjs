@@ -4,6 +4,7 @@ import { dirname, isAbsolute, resolve, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { bindToolchain, checkTypes } from './toolchain.mjs';
 import { packSkills } from './pack-skills.mjs';
+import { writeBuildProvenance } from '../../scripts/release/generated-provenance.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const upstreamInput = process.argv[2] ?? process.env.B0_BUILD_UPSTREAM;
@@ -62,4 +63,5 @@ await build({
   outdir: 'lib/views', platform: 'browser', target: 'es2022',
   format: 'esm', jsx: 'automatic', external, minify: true,
 });
+await writeBuildProvenance({ root });
 console.log(`B0 plugin built. Host entry: ${pathToFileURL(join(root, 'lib/index.js')).href}`);

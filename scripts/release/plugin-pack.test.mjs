@@ -8,6 +8,7 @@ import { join } from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { packPlugin, readPluginPack } from './plugin-pack.mjs';
+import { writeBuildProvenance } from './generated-provenance.mjs';
 
 const exec = promisify(execFile);
 
@@ -53,6 +54,40 @@ test('controlled plugin pack emits an immutable tarball receipt without runtime 
   assert.ok(receipt.entries.includes('lib/index.js'));
   assert.ok(!receipt.entries.some(entry => entry.includes('src/')));
   assert.deepEqual(JSON.parse(await readFile(manifestPath, 'utf8')), receipt);
+});
+
+test('formal pack rejects an ignored lib replacement against a clean builder receipt', async t => {
+  const input = await fixture(t);
+  await writeFile(join(input.plugin, '.gitignore'), '/lib/\n/.build-provenance.json\n');
+  await exec('git', ['-C', input.root, 'rm', '-q', '--cached', '-r', 'plugin/lib']);
+  await exec('git', ['-C', input.root, 'add', 'plugin/.gitignore']);
+  await exec('git', ['-C', input.root, 'commit', '-qm', 'ignore generated output']);
+  const previous = process.env.SHINEMAGE_CLEAN_BUILDER;
+  process.env.SHINEMAGE_CLEAN_BUILDER = '1';
+  try {
+    const proofPath = join(input.plugin, '.build-provenance.json');
+    await writeBuildProvenance({ root: input.plugin, outputPath: proofPath });
+    await writeFile(join(input.plugin, 'lib/index.js'), 'export const synthetic = false;\n');
+    await assert.rejects(() => packPlugin({ ...input, builderProvenancePath: proofPath }), /PLUGIN_PACK_GENERATED_TREE_MISMATCH/);
+    assert.deepEqual(await readdir(input.outputDir), []);
+  } finally {
+    if (previous === undefined) delete process.env.SHINEMAGE_CLEAN_BUILDER;
+    else process.env.SHINEMAGE_CLEAN_BUILDER = previous;
+  }
+});
+
+test('formal pack requires an explicit builder receipt', async t => {
+  const input = await fixture(t);
+  await assert.rejects(() => packPlugin({ ...input, requireGeneratedProvenance: true }), /PLUGIN_PACK_BUILD_PROVENANCE_REQUIRED/);
+  assert.deepEqual(await readdir(input.outputDir), []);
+});
+
+test('formal reader refuses a pack without clean-builder provenance', async t => {
+  const input = await fixture(t), packed = await packPlugin(input);
+  const manifestPath = join(input.root, 'receipt.json');
+  await writeFile(manifestPath, `${JSON.stringify(packed)}\n`);
+  const manifestSha256 = hash(await readFile(manifestPath));
+  await assert.rejects(() => readPluginPack({ manifestPath, expectedSha256: manifestSha256, requireGeneratedProvenance: true }), /PLUGIN_PACK_BUILD_PROVENANCE_STATUS/);
 });
 
 async function commitFixture(root) {

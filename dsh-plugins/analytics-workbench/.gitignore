@@ -1,4 +1,5 @@
 /lib/
+/.build-provenance.json
 /node_modules/
 /build-tools/node_modules
 /build-tools/node_modules/

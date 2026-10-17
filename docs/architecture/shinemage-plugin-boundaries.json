@@ -835,6 +835,12 @@
   "repository_edges": [
     {
       "consumer": "analytics-workbench",
+      "phase": "build",
+      "source": "dsh-plugins/analytics-workbench/build.mjs",
+      "target": "scripts/release/generated-provenance.mjs"
+    },
+    {
+      "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/first-purchase-query-card.test.mjs",
       "target": "scripts/dsh-b0/workbench-first-purchase-card.integration.mjs"
@@ -895,6 +901,12 @@
     },
     {
       "consumer": "crm-knowledge",
+      "phase": "build",
+      "source": "dsh-plugins/crm-knowledge/build.mjs",
+      "target": "scripts/release/generated-provenance.mjs"
+    },
+    {
+      "consumer": "crm-knowledge",
       "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/dashboard.fixture.mjs",
       "target": "scripts/crm-calibration/test-support/dashboard.fixture.mjs"
@@ -931,9 +943,51 @@
     },
     {
       "consumer": "knowledge",
+      "phase": "build",
+      "source": "dsh-plugins/knowledge/build.mjs",
+      "target": "scripts/release/generated-provenance.mjs"
+    },
+    {
+      "consumer": "knowledge",
       "phase": "test",
       "source": "dsh-plugins/knowledge/test/graph.fixture.mjs",
       "target": "scripts/crm-calibration/test-support/graph.fixture.mjs"
+    },
+    {
+      "consumer": "shine-board",
+      "phase": "build",
+      "source": "dsh-plugins/shine-board/build.mjs",
+      "target": "scripts/release/generated-provenance.mjs"
+    },
+    {
+      "consumer": "shine-brand",
+      "phase": "build",
+      "source": "dsh-plugins/shine-brand/build.mjs",
+      "target": "scripts/release/generated-provenance.mjs"
+    },
+    {
+      "consumer": "shine-crowd-action",
+      "phase": "build",
+      "source": "dsh-plugins/shine-crowd-action/build.mjs",
+      "target": "scripts/release/generated-provenance.mjs"
+    },
+    {
+      "consumer": "shine-funnel",
+      "phase": "build",
+      "source": "dsh-plugins/shine-funnel/build.mjs",
+      "target": "scripts/release/generated-provenance.mjs"
+    },
+    {
+      "consumer": "shine-query",
+      "phase": "build",
+      "source": "dsh-plugins/shine-query/build.mjs",
+      "target": "scripts/release/generated-provenance.mjs"
+    },
+    {
+      "consumer": "shine-waterfall",
+      "phase": "build",
+      "source": "dsh-plugins/shine-waterfall/build.mjs",
+      "target": "scripts/release/generated-provenance.mjs"
     }
   ],
   "literal_endpoints": [

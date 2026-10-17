@@ -166,7 +166,8 @@ export async function runPinnedHostAcceptance({ upstream, output, packagesFrom, 
     if (previous) assert.ok(['dsh-pinned-host-acceptance/v1', HOST_EVIDENCE_SCHEMA].includes(previous.schema), 'PINNED_HOST_PACKAGE_RECEIPT_SCHEMA');
     for (const domain of ['crm-knowledge', 'knowledge']) {
       const receipt = previous ? { tarball: previous.packages?.[domain], source_sha: previous.packages?.[domain]?.source_sha }
-        : await packPlugin({ plugin: join(repository, 'dsh-plugins', domain), outputDir: join(output, 'packs', domain) });
+      : await packPlugin({ plugin: join(repository, 'dsh-plugins', domain), outputDir: join(output, 'packs', domain),
+        builderProvenancePath: join(repository, 'dsh-plugins', domain, '.build-provenance.json') });
       assert.ok(receipt.tarball && receipt.tarball.name === basename(receipt.tarball.name), 'PINNED_HOST_PACKAGE_NAME');
       assert.match(receipt.source_sha, /^[a-f0-9]{40}$/, 'PINNED_HOST_PACKAGE_SOURCE');
       const original = join(packagesFrom ?? output, 'packs', domain, receipt.tarball.name);

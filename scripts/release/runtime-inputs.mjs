@@ -6,6 +6,7 @@ import { basename, dirname, join, relative, resolve } from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { DSH_UPSTREAM_SHA, UPSTREAM_PNPM_VERSION, NODE_MAJOR } from './toolchain.mjs';
+import { canonicalTreeDigest } from './generated-provenance.mjs';
 
 const exec = promisify(execFile);
 const MAX_TARBALL = 64 * 1024 * 1024;
@@ -37,6 +38,20 @@ export function directTarballInputs(lock) {
 
 export function runtimeInputCache(upstream) { return join(dirname(resolve(upstream)), 'runtime-inputs'); }
 
+/**
+ * Hash only the pinned checkout's source/build inputs. Installed dependencies
+ * are materialized by pnpm deploy and are bound separately by the lockfile,
+ * direct archive integrity and the final runtime/generated tree digest.
+ */
+export async function runtimeSourceTree(root) {
+  return canonicalTreeDigest(root, {
+    exclude: ['.git', '.context', 'node_modules', '.build-provenance.json', 'build-provenance.json'],
+    excludeEntry: ({ name, directory }) => !directory && omitted.test(name) && !sourceModule.test(name),
+    normalizeSymlinkTargets: true,
+    allowSymlinks: true,
+  });
+}
+
 export function runtimeDeployArgs(destination, { online = false } = {}) {
   // Modern deploy derives a frozen closure from workspace importer snapshots.
   // Legacy deploy re-resolves ranges and needs mutable registry metadata.
@@ -46,11 +61,15 @@ export function runtimeDeployArgs(destination, { online = false } = {}) {
 }
 
 async function preparationIdentity(upstream) {
+  const tree = await runtimeSourceTree(upstream);
   return {
     schema_version: 'dsh-runtime-preparation/v1', upstream_sha: DSH_UPSTREAM_SHA,
     lock_sha256: hash(await readFile(join(upstream, 'pnpm-lock.yaml'))),
-    policy_sha256: hash(await readFile(join(upstream, 'pnpm-workspace.yaml'))),
-    pnpm: UPSTREAM_PNPM_VERSION, node_major: NODE_MAJOR,
+    policy_sha256: hash(await readFile(join(upstream, 'pnpm-workspace.yaml'))), pnpm: UPSTREAM_PNPM_VERSION, node_major: NODE_MAJOR,
+    source_tree: { sha256: tree.sha256, entries: tree.entries, bytes: tree.bytes },
+    builder: { status: 'PASS', clean: true, isolated: true, node: process.version,
+      pnpm: UPSTREAM_PNPM_VERSION, platform: process.platform, arch: process.arch,
+      command: 'scripts/dsh-b0/pipeline.mjs --prepare', network_mode: 'prepare-only' },
   };
 }
 
@@ -76,10 +95,13 @@ export async function verifyRuntimePreparation(upstream) {
   });
   assert.ok(info.isFile() && !info.isSymbolicLink() && info.size < 4096, 'RUNTIME_PREPARATION_INVALID');
   const proof = JSON.parse(await readFile(path, 'utf8'));
-  for (const [key, value] of Object.entries(identity)) assert.equal(proof[key], value, `RUNTIME_PREPARATION_MISMATCH ${key}`);
+  for (const [key, value] of Object.entries(identity)) {
+    if (value && typeof value === 'object') assert.deepEqual(proof[key], value, `RUNTIME_PREPARATION_MISMATCH ${key}`);
+    else assert.equal(proof[key], value, `RUNTIME_PREPARATION_MISMATCH ${key}`);
+  }
   assert.equal(proof.status, 'PREPARED', 'RUNTIME_PREPARATION_INVALID');
   assert.ok(Number.isFinite(Date.parse(proof.verified_at)), 'RUNTIME_PREPARATION_INVALID');
-  return proof;
+  return { ...proof, receipt_sha256: hash(await readFile(path)) };
 }
 
 export async function verifyDirectTarball(path, input) {

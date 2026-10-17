@@ -154,5 +154,20 @@
     "revocation service reference",
     "company final attestation service",
     "company clean-machine runner and receipt"
-  ]
+  ],
+  "governance_status": "OWNER_EXCEPTION_ACCEPTED",
+  "accepted_at": "2026-10-17",
+  "accepted_scope": {
+    "distribution": "INTERNAL_ONLY",
+    "execution_mode": "OWNER_OPERATED",
+    "operator": "project-owner",
+    "independent_verifier": "SAME_OWNER_SEPARATE_STAGING_AND_PROCESS",
+    "external_release": "NOT_ACCEPTED"
+  },
+  "formal_gate_status": {
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "release_ready": false
+  },
+  "governance_exception_ref": "m2-07-owner-governance-acceptance-20261017.json"
 }

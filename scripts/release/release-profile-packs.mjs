@@ -22,9 +22,9 @@ function pluginPaths(profile) {
 }
 
 /** The selected main profile must be exactly the profile bound by the external input. */
-export async function loadReleasePacks({ root, inputsPath, manifestPath } = {}) {
+export async function loadReleasePacks({ root, inputsPath, manifestPath, requireGeneratedProvenance = false } = {}) {
   const snapshot = await loadProfileSnapshot({ root, manifestPath });
-  const packs = await loadProfilePacks({ inputsPath });
+  const packs = await loadProfilePacks({ inputsPath, requireGeneratedProvenance });
   assert.equal(packs.digest, snapshot.digest, 'RELEASE_PACK_PROFILE_MISMATCH');
   assert.equal(packs.contents, snapshot.contents, 'RELEASE_PACK_PROFILE_MISMATCH');
   pluginPaths(snapshot.profile);

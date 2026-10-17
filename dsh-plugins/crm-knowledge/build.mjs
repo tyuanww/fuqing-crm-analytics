@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { dirname, isAbsolute, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { writeBuildProvenance } from '../../scripts/release/generated-provenance.mjs';
 const root = dirname(fileURLToPath(import.meta.url));
 const upstreamInput = process.argv[2] ?? process.env.B0_BUILD_UPSTREAM;
 if (!upstreamInput || !isAbsolute(upstreamInput)) {
@@ -45,3 +46,4 @@ const client = await build({ absWorkingDir: root, entryPoints: ['src/client/inde
 assert.ok(Object.keys(client.metafile.inputs).every(path => !/node_modules\/(react|react-dom)\//.test(path)), 'Use platform React only');
 assert.ok(Object.keys(client.metafile.inputs).every(path => !/dashboard-access|src\/host|src\/dashboard\.mjs/.test(path)), 'Host credentials must not enter the client bundle');
 console.log('CRM candidate typecheck and pinned build passed');
+await writeBuildProvenance({ root });

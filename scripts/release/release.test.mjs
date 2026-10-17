@@ -255,7 +255,7 @@ test('release workflows do not persist checkout credentials into reviewed source
     assert.match(workflow, /actions\/checkout@[0-9a-f]+[\s\S]{0,260}persist-credentials:\s*false/, name);
   }
 });
-test('release preflight separates the online audit from preparation and packages runtime offline', async () => { const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-preflight.yml'), 'utf8'); const source = await readFile(join(process.cwd(), 'scripts/release/preflight.mjs'), 'utf8'); const pipeline = await readFile(join(process.cwd(), 'scripts/dsh-b0/pipeline.mjs'), 'utf8'); assert.match(source, /stage\('prepare'[\s\S]*pipeline\.mjs/); assert.match(source, /stage\('audit'[\s\S]*--audit/); assert.match(pipeline, /--prepare\|--audit\|--check/); assert.match(pipeline, /mode === '--audit'/); assert.match(source, /runtime-bundle\.mjs[\s\S]*--output/); assert.doesNotMatch(source, /runtime-bundle\.mjs[\s\S]*--online/); assert.match(workflow, /scripts\/dsh\.mjs preflight/); });
+test('release preflight separates the online audit from preparation and packages runtime offline', async () => { const workflow = await readFile(join(process.cwd(), '.github/workflows/dsh-release-preflight.yml'), 'utf8'); const source = await readFile(join(process.cwd(), 'scripts/release/preflight.mjs'), 'utf8'); const pipeline = await readFile(join(process.cwd(), 'scripts/dsh-b0/pipeline.mjs'), 'utf8'); assert.match(source, /import \{[^}]*readFile[^}]*\} from 'node:fs\/promises'/); assert.match(source, /stage\('prepare'[\s\S]*pipeline\.mjs/); assert.match(source, /stage\('audit'[\s\S]*--audit/); assert.match(pipeline, /--prepare\|--audit\|--check/); assert.match(pipeline, /mode === '--audit'/); assert.match(source, /runtime-bundle\.mjs[\s\S]*--output/); assert.doesNotMatch(source, /runtime-bundle\.mjs[\s\S]*--online/); assert.match(workflow, /scripts\/dsh\.mjs preflight/); });
 test('preflight bundle summary binds every release asset to the manifest', async () => {
   const root = await fixture();
   const tag = 'dsh-test-preflight';
@@ -356,6 +356,11 @@ test('runtime bundle enforces production pruning, secret scan and peer collision
   assert.match(source, /\['cordis', 'cosmokit'\]/);
   assert.match(source, /runtimeDeployArgs\(deployed, \{ online \}\)/);
   assert.match(source, /stageRuntimeWorkspace/);
+  assert.match(source, /GENERATED_PROVENANCE_SCHEMA/);
+  assert.match(source, /canonicalTreeDigest/);
+  assert.match(source, /provenanceOption/);
+  assert.match(source, /archiveSha256/);
+  assert.match(source, /generatedTree/);
   assert.match(source, /cwd: workspace/);
   assert.doesNotMatch(source, /scanAssignments:\s*!\/\(\^\|\\\/\)node_modules/);
 });

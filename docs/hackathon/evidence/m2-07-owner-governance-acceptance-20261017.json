@@ -1,0 +1,36 @@
+{
+  "schema_version": "shinemage-alpha4-owner-governance-acceptance/v1",
+  "status": "OWNER_EXCEPTION_ACCEPTED",
+  "governance_status": "OWNER_EXCEPTION_ACCEPTED",
+  "accepted_at": "2026-10-17",
+  "accepted_by": "project-owner",
+  "execution_mode": "OWNER_OPERATED",
+  "scope": "INTERNAL_ONLY_OWNER_OPERATED",
+  "distribution": "INTERNAL_ONLY",
+  "production_activation": "DENIED",
+  "operator": "project-owner",
+  "independent_verifier": "SAME_OWNER_SEPARATE_STAGING_AND_PROCESS",
+  "other_company_actors": 0,
+  "supersedes": "m2-07-owner-governance-exception-20261016.json",
+  "accepted_local_scope": [
+    "fixed Node v24.19.0 staging",
+    "production-only consumer closure",
+    "same-owner separate-staging replay",
+    "owner-local cryptographic binding",
+    "owner-operated clean-machine replay",
+    "rc2 rollback replay"
+  ],
+  "not_accepted_as_formal_company_evidence": [
+    "company publisher identity",
+    "company-approved publisher signature",
+    "second-person independent verification",
+    "revocation PASS",
+    "formal company final attestation",
+    "formal company clean-machine receipt"
+  ],
+  "formal_gate_status": {
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "release_ready": false
+  }
+}
