@@ -1,0 +1,107 @@
+{
+  "schema_version": "engineering-rc1-lifecycle-recovery/v2",
+  "captured_at": "2026-10-17T08:40:39Z",
+  "scope": "internal-engineering-closure",
+  "formal_company_evidence": false,
+  "release_ready": false,
+  "main_dsh_pin": {
+    "version": "0.1.7-rc.2",
+    "upstream": "477b4f420553e8a52c2fbccc464d7561b239c443"
+  },
+  "candidate": {
+    "sdk": "0.2.1-rc.1",
+    "upstream_sha": "1600d8a1e140dcde43a1a0941940a0480712c011",
+    "source_sha": "f4026619392c2909b449eb75be1081776b7c5507",
+    "runtime": "/tmp/dsh-rc1-browser-runtime-ec04-rerun2-20261017",
+    "candidate_port": 14327,
+    "board_service_port": 18138,
+    "board_observer_port": 18139,
+    "redirect_port": 18137,
+    "pre_restart_supervisor_pid": 70378,
+    "post_restart_supervisor_pid": 70707,
+    "candidate_stopped": true,
+    "node": "v24.19.0",
+    "pnpm": "11.28.2",
+    "peer_link_helper": "temporary runner only; no main checkout change"
+  },
+  "fixtures": {
+    "history_fixture_sha256": "f88c1317b2d94f19bc1cabce9213e03be493227945a901f638612547ef0c7084",
+    "board_fixture_sha256": "027388d1f0bccfc5769addce71ac379066b9f7b7235e3ec41b5aa3cc5fc35a37",
+    "patch_sha256": "4b5ac6109ca4cba407328cb132cde25e787da42f3e861b552086e22f86d8e1e7",
+    "board_state_sha256": "e8eb2dbd730109df0595a3fe7235ac0751e371f6c927dbe30dfcd9c9eea81646",
+    "history_file_sha256": "bb4b21158a495385a52f50dd2a2bc6e97a13ca2e2094858e5b3dcd2a065ae955",
+    "session_log_sha256": "5c42a4d6a7071316e1dc95d26bbf176e4381aeaab7b630d370c5692b8e9160d8",
+    "seed_response_sha256": "696ecff3fa49624428213694ea284177d3c13de863848dcb20569cb6f224c494"
+  },
+  "cleanup": {
+    "candidate_supervisor": "STOPPED_OWNED",
+    "board_service_18138": "STOPPED_SIGTERM_LISTENER_FREE",
+    "board_observer_18139": "STOPPED_SIGTERM_LISTENER_FREE",
+    "previous_owned_board_service_18135": "STOPPED_SIGTERM_LISTENER_FREE",
+    "previous_owned_board_observer_18136": "STOPPED_SIGTERM_LISTENER_FREE",
+    "candidate_runtime_deleted": false,
+    "temporary_evidence_retained": true
+  },
+  "pre_restart": {
+    "history_fixture_seed": "PASS",
+    "history_browser_ax": "PASS",
+    "history_deliverable": "PASS",
+    "history_board_tool_card": "PASS",
+    "native_board_preview": "BLOCKED_PAGE_LIBRARY_UNAVAILABLE",
+    "model_calls": 0,
+    "contains_real_data": false
+  },
+  "headed_browser": {
+    "browser": "Google Chrome extension headed session",
+    "tab_id": "199377351",
+    "candidate_origin": "http://127.0.0.1:14327",
+    "pre_restart_visible": [
+      "rc1 历史回读 · 候选合成",
+      "rc1 candidate-bound synthetic history; source=f4026619392c2909b449eb75be1081776b7c5507; no model, no business data.",
+      "rc1-history.html HTML",
+      "rc1 candidate synthetic board · 1 个组件 · 尚未保存"
+    ],
+    "post_restart_visible": [
+      "rc1 历史回读 · 候选合成",
+      "rc1 candidate-bound synthetic history; source=f4026619392c2909b449eb75be1081776b7c5507; no model, no business data.",
+      "rc1-history.html HTML",
+      "rc1 candidate synthetic board · 1 个组件 · 尚未保存"
+    ],
+    "native_preview_result": "项目驾驶舱；页库暂时不可用",
+    "board_observer_result": "BOARD_TRANSPORT_READBACK_PASS; static loopback observer only",
+    "preview_confirmed": false,
+    "token_recorded": false
+  },
+  "restart": {
+    "owned_stop": "PASS",
+    "owned_start": "PASS",
+    "boot_import_errors": "NONE",
+    "history_browser_reread": "PASS",
+    "history_deliverable_reread": "PASS",
+    "history_board_tool_card_reread": "PASS",
+    "board_transport_headed_observer_reread": "PASS_STATIC_TRANSPORT_ONLY",
+    "native_board_canvas_reread": "BLOCKED_PAGE_LIBRARY_UNAVAILABLE",
+    "same_session": "PASS",
+    "same_board": "PASS_STATIC_TRANSPORT_ONLY",
+    "same_source_sha": "PASS",
+    "console_errors": "NOT_RECORDED_FOR_HISTORY_UI"
+  },
+  "rollback": {
+    "scope": "SDK_CLI_ONLY",
+    "web_rollback": "NOT_RUN_RC2_PROFILE_PACK_UNAVAILABLE",
+    "receipt_path": "/tmp/ec04-rc1-20261017/rollback-rc2-rerun2/rollback-receipt.json",
+    "receipt_sha256": "da80ebee4f24f5b98ee0518eed1333331ac7c373b2811d46e5a99f4b68b873f6",
+    "artifact_sha256": "5f2da7272d9485abc223e681075809a8d929697c5232ee445718e1b7e066bff8",
+    "artifact_bytes": 23335,
+    "node": "v24.19.0",
+    "npm": "11.17.0",
+    "install_exit": 0,
+    "version_exit": 0,
+    "help_exit": 0,
+    "import_exit": 0,
+    "version": "0.1.7-rc.2",
+    "import_version": "0.1.7-rc.2"
+  },
+  "status": "HISTORY_BROWSER_PASS_BOARD_TRANSPORT_POST_RESTART_PASS_NATIVE_BOARD_CANVAS_BLOCKED_PAGE_LIBRARY_UNAVAILABLE_RESTART_PASS_ROLLBACK_SDK_CLI_PASS",
+  "formal_gate_disposition": "BLOCKED"
+}
