@@ -59,7 +59,7 @@ M2-09 候选已补齐正式 pack/profile 输入和 synthetic 组合 browser：9 
 
 ### 2026-10-14 DSH 候选目标 browser/recovery 补验（已撤销历史尝试）
 
-旧回执曾记录 alpha2 正式 page pack browser 和 owned-host restart recovery PASS，并保留在 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-target-browser-recovery-20261014.json`。后续证据纠偏确认该尝试复用了 synthetic backend，缺少可采纳的真实浏览器操作和重启后业务页面回读，因此不能作为正式目标证据。原始回执保留用于审计，当前 M2-09 仍保持 `TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN`；live 4328/4332/4336 未修改，主仓 pin 未切换。
+旧回执曾记录 alpha2 正式 page pack browser 和 owned-host restart recovery PASS，并保留在 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-target-browser-recovery-20261014.json`。后续证据纠偏确认该尝试复用了 synthetic backend，缺少可采纳的真实浏览器操作和重启后业务页面回读，因此不能作为正式目标证据。原始回执保留用于审计；当前正式目标 browser/recovery 仍为 `NOT_RUN`，本地 synthetic pass 仅属于隔离证据。live 4328/4332/4336 未修改，主仓 pin 未切换。
 
 ### 2026-10-13 授权生产目标前置通过
 
