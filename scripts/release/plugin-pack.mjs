@@ -176,7 +176,13 @@ async function verifyBuilderProvenance(pluginRoot, inspected, source, builderPro
   assert.equal(current.generatedTree.sha256, proof.generated_tree.sha256, 'PLUGIN_PACK_GENERATED_TREE_MISMATCH');
   assert.equal(current.generatedTree.entries, proof.generated_tree.entries, 'PLUGIN_PACK_GENERATED_TREE_ENTRIES');
   assert.equal(current.generatedTree.bytes, proof.generated_tree.bytes, 'PLUGIN_PACK_GENERATED_TREE_BYTES');
-  return { ...proof, source: { ...proof.source, sha256: proof.source.tree_sha256 }, builder_receipt_sha256: verified.sha256 };
+  return {
+    ...proof,
+    schema_version: GENERATED_PROVENANCE_SCHEMA,
+    source: { ...proof.source, sha256: proof.source.tree_sha256 },
+    builder_receipt_schema_version: proof.schema_version,
+    builder_receipt_sha256: verified.sha256,
+  };
 }
 
 /** Consume an explicitly pinned formal pack, without source checkout or pnpm. */
