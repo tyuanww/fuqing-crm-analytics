@@ -40,6 +40,12 @@ test('dsh exposes stable help and version output', () => {
   const hostHelp = execFileSync(process.execPath, [cli, 'plugin', 'verify-host', '--help'], { encoding: 'utf8' });
   assert.match(hostHelp, /--candidate.*--evidence.*--state-path/);
   assert.match(hostHelp, /does not start or activate a host/);
+  const verifyHelp = execFileSync(process.execPath, [cli, 'verify', '--help'], { encoding: 'utf8' });
+  assert.match(verifyHelp, /Usage: pnpm dsh verify \[--scope local\|release\]/);
+  const statusHelp = execFileSync(process.execPath, [cli, 'status', '--help'], { encoding: 'utf8' });
+  assert.match(statusHelp, /Usage: pnpm dsh status/);
+  const resumeHelp = execFileSync(process.execPath, [cli, 'resume', '--help'], { encoding: 'utf8' });
+  assert.match(resumeHelp, /Usage: pnpm dsh resume/);
 });
 
 test('plugin evidence CLI rejects ambiguous, missing and unsupported options before IO', () => {

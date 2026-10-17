@@ -181,6 +181,10 @@ function stateCommandArgs(args, { remote = false } = {}) {
   if (positional.length !== (remote ? 1 : 0)) throw new Error(remote ? 'REMOTE_RECEIPT_REQUIRED' : 'STATE_ARGUMENTS_INVALID');
   return { statePath, remotePath: positional[0] };
 }
+function stateUsage(command) {
+  console.log(`Usage: pnpm dsh ${command} [--state-path /absolute/state.json]`);
+  console.log('The state path may also be supplied as the first positional argument or RELEASE_STATE_PATH.');
+}
 function requiredOption(args, name) {
   const indexes = args.flatMap((value, index) => value === name ? [index] : []);
   if (indexes.length > 1) throw new Error(`${name.slice(2).toUpperCase()}_AMBIGUOUS`);
@@ -297,6 +301,11 @@ async function plugin(args) {
   console.log(JSON.stringify(candidate, null, 2));
 }
 async function verify(args = []) {
+  if (args.includes('--help') || args.includes('-h')) {
+    console.log('Usage: pnpm dsh verify [--scope local|release]');
+    console.log('local checks synthetic contracts; release also requires the target WSL2, host HTTP and 15-minute SLI evidence.');
+    return;
+  }
   const scopeIndex = args.indexOf('--scope');
   if (args.filter(value => value === '--scope').length > 1) throw new Error('VERIFY_SCOPE_AMBIGUOUS');
   const scope = scopeIndex >= 0 ? args[scopeIndex + 1] : 'release';
@@ -344,7 +353,12 @@ async function main() {
     if (['CONFLICT', 'UNKNOWN'].includes(result.status)) process.exitCode = 2;
     return;
   }
-  if (command === 'status' || command === 'resume') { const { statePath } = stateCommandArgs(args); console.log(JSON.stringify(await (command === 'resume' ? resume(statePath) : readState(statePath)), null, 2)); return; }
+  if (command === 'status' || command === 'resume') {
+    if (args.includes('--help') || args.includes('-h')) { stateUsage(command); return; }
+    const { statePath } = stateCommandArgs(args);
+    console.log(JSON.stringify(await (command === 'resume' ? resume(statePath) : readState(statePath)), null, 2));
+    return;
+  }
   if (command === 'why-blocked') { console.log('DSH_BLOCKED GitHub push/tag/release、杭州重启/route/切换需要单独授权；真实模型、131GB DuckDB、WSL2 冷验证为 NOT_RUN/PARTIAL'); return; }
   if (command === 'retry') { console.log('DSH_RETRY requires a durable state path and idempotency key; no remote side effect was attempted'); return; }
   if (command === 'dev') { const { spawn } = await import('node:child_process'); const child = spawn(process.execPath, [join(root, 'scripts/dsh-dev/cli.mjs'), ...args], { cwd: root, stdio: 'inherit' }); child.on('exit', code => { process.exitCode = code ?? 1; }); return; }
