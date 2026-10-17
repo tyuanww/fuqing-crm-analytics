@@ -11,6 +11,7 @@
 - rc1 临时 lane 继续暴露第二个真实接缝：6 个简单插件和 CRM/Knowledge 的临时 CSS bridge build/provenance 通过；原始 `TS2882` 记录保留，knowledge 仍未运行，所有 rc1 formal pack/reader 仍未生成。两个 adapter 只存在于临时 lane，未进入主仓。
 - rc1 临时 lane 现已完成 9/9 plugin candidate-only build/provenance PASS，见 [rc1 candidate probe](docs/hackathon/evidence/m2-07-rc1-candidate-probe-20261017.json) 和临时 inventory `45c77f1dc031ddbe3cab710f66166a87bf4b7766e6b0082ea281ce5248c4a31`。这只证明隔离编译和类型接缝；formal pack/reader、统一 subject set、consumer closure、runtime/import、browser/restart 和回退仍 `NOT_RUN`，没有把临时 adapter 或旧 pack 写成 rc1 正式候选。
 - 红队复核曾发现首批 analytics provenance 使用 `fe1a43c2…`，其余适配包使用 `db244fe1…`；这两批不能拼成一个 subject set。该问题已在临时 lane 用最终 candidate commit `db244fe1…` 重跑全部 9 包并统一，正式 pack 前仍需保留同一 source SHA 约束。
+- 红队在 formal pack probe 中发现 builder receipt `dsh-plugin-build/v1` 被错误原样写入 pack，而 reader 要求 `dsh-generated-bytes/v1`；已由 `101f2a8a fix(release): normalize plugin provenance schema` 修复，并以固定 Node24 重跑相关 release tests `67/67 PASS`。该修复只关闭 schema 转换缺口，不代表 rc1 formal packs 或公司发布门禁已通过。
 
 - 官方仓库最新发布为 `v0.2.1-alpha.4`，发布提交为 `86a402200d95fecef4529d969836f1fe13c6cb0d`。M2-07 当前候选已经切换到 alpha4；alpha3 只保留为上一轮候选记录。
 - 2026-10-17 当前公开主线已包含本轮治理与状态文档；当前 `main` SHA 以 Git 实查为准。这些合并不改变 DSH `0.1.7-rc.2` pin、M2-07/M2-08 门禁或 `release_ready=false`。
