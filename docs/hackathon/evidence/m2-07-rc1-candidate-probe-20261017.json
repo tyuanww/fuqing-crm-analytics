@@ -136,6 +136,12 @@
       }
     },
     {
+      "step": "subject_set_alignment",
+      "result": "BLOCKED",
+      "error_code": "PROVENANCE_SOURCE_SHA_SPLIT",
+      "detail": "analytics was first built at fe1a43c2 while the remaining adapters were built at db244fe1; all nine builds must be rerun from one final candidate commit before pack generation"
+    },
+    {
       "step": "pack_build",
       "result": "NOT_RUN",
       "detail": "pack build cannot start before rc1 upstream host/client build and isolated peer alignment"
