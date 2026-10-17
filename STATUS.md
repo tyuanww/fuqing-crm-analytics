@@ -45,7 +45,7 @@
 ## 本轮施工计划
 
 - 先合并候选升级、插件 pack provenance 和 CLI 入口文档，再由 clean reviewed commit 进入 release preflight；正式部署仍受 M2 门禁和批准 artifact 约束。
-- 当前 push 前 B0 仍缺与 rc2 profile lock 匹配、且带 `dsh-generated-bytes/v1` 的九包输入；历史组合 pack 被 reader 真实拒绝为 `PLUGIN_PACK_BUILD_PROVENANCE_REQUIRED`，不能复用或补写 provenance。
+- 当前 rc2 profile lock 已绑定 9 个带 `dsh-generated-bytes/v1` 的新 pack manifest；固定 Node24、双 Python 闭合、author artifact、composition inputs、B0 合同/边界/release 测试和完整 pre-push 均已真实通过。该结果只证明本地工程与输入闭环；publisher identity、签名、独立核验、撤销、final attestation、正式 clean-machine 和外部发布批准仍未完成，正式 M2-07 继续 `BLOCKED`、`release_ready=false`。
 
 ## 历史快照入口
 
