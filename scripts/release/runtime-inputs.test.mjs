@@ -112,9 +112,14 @@ test('source provenance matches the staged source after omission and symlink nor
   const f = await fixture(t);
   await mkdir(join(f.upstream, 'packages/links'), { recursive: true });
   await symlink('../credentials-local/credentials.js', join(f.upstream, 'packages/links/source.js'));
+  await mkdir(join(f.upstream, 'docs'), { recursive: true });
+  await writeFile(join(f.upstream, 'docs/credentials.md'), 'omitted documentation');
+  await symlink('../credentials-local/credentials.js', join(f.upstream, 'packages/links/cookie'));
   await recordRuntimePreparation(f.upstream);
   const source = await runtimeSourceTree(f.upstream);
   await stageRuntimeWorkspace(f.upstream, f.stage);
+  await assert.rejects(() => access(join(f.stage, 'docs/credentials.md')), { code: 'ENOENT' });
+  await assert.rejects(() => access(join(f.stage, 'packages/links/cookie')), { code: 'ENOENT' });
   const staged = await runtimeSourceTree(f.stage);
   assert.equal(staged.sha256, source.sha256);
   assert.equal(staged.entries, source.entries);
