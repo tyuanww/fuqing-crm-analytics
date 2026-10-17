@@ -27,9 +27,15 @@
     },
     {
       "step": "inspect_toolchain",
-      "result": "BLOCKED",
-      "error_code": "KIT_SDK_ENTRY_MISSING",
-      "detail": "rc1 upstream source was installed but official host/client build had not produced the required lib entry"
+      "result": "RESOLVED_IN_ISOLATION",
+      "error_code": null,
+      "detail": "after the official build:official run, rc1 host/client lib entries were present"
+    },
+    {
+      "step": "upstream_build_official",
+      "result": "PASS",
+      "detail": "build:official completed with 9/9 gates passed in 80.65s; host/client/web lib entries were present",
+      "upstream_lock_sha256": "952ca2f79998660dc690b739078a5d6052bc7c5c2193714b918b9d720baaeaba"
     },
     {
       "step": "plugin_peer_alignment",
@@ -49,8 +55,7 @@
     }
   ],
   "next_steps": [
-    "Build rc1 upstream host/client packages with the official toolchain",
-    "Re-run inspectToolchain against the built rc1 checkout",
+    "Create an rc1 profile and pack-input snapshot instead of reusing config/dsh-profile.rc2.json",
     "Align nine plugin dsh-tools peers to 0.2.1-rc.1 and CRM/Knowledge Cordis to 4.0.5 in the isolated lane",
     "Re-run plugin pack and consumer closure probes"
   ],
