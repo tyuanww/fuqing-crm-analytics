@@ -4,14 +4,15 @@
   "sdk": "0.2.1-rc.1",
   "upstream_tag": "dsh-v0.2.1-rc.1",
   "upstream_sha": "1600d8a1e140dcde43a1a0941940a0480712c011",
+  "upstream_pnpm": "11.28.5",
   "cordis": "4.0.5",
   "node": "v24.19.0",
   "plugin_pnpm": "11.28.2",
   "source_identity": {
     "kind": "subject-archive",
     "source_sha": "f4026619392c2909b449eb75be1081776b7c5507",
-    "archive_sha256": "aa144cf8b8acde1988b0eab7a46d15e161ab8c0769b9af2551f7b815531f828e",
-    "tree_sha256": "cbc222e759162bef474a8e7ccb696050196b8ea2658b7c95029656df2928ce31"
+    "archive_sha256": "20e915fc23bd6f2b7d1c7fe0b6e9bbefebbb2f283d194301f7c26e2a5d196bfc",
+    "tree_sha256": "3a4567ebdbe0053135dd33a62615f288b6cba0f3e98933154959fdda09d66c3d"
   },
   "formal_status": {
     "m2_07": "BLOCKED",

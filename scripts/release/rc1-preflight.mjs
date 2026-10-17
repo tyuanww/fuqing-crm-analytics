@@ -90,6 +90,7 @@ const subjectRoot = option('--subject-root');
 const outputDir = option('--output-dir');
 const runtimeBundle = option('--runtime-bundle', false);
 const runtimeProvenance = option('--runtime-provenance', false);
+const releaseDir = option('--release-dir', false);
 const sourceSha = option('--source-sha', false, false);
 const archiveInfo = await stat(sourceArchive);
 assert.ok(archiveInfo.isFile() && archiveInfo.size > 0, 'RC1_SOURCE_ARCHIVE_INVALID');
@@ -126,6 +127,28 @@ try {
       if (runtime.bundle_sha256 !== proof.archive?.sha256) failures.push('RC1_RUNTIME_DIGEST_MISMATCH');
     }
   } else failures.push('RC1_RUNTIME_INPUTS_MISSING');
+  const releaseAssets = { source_bundle: 'NOT_GENERATED', runtime_bundle: runtime.status === 'PASS' ? 'READY_FOR_MANIFEST' : 'BLOCKED', manifest: 'NOT_GENERATED', sha256sums: 'NOT_GENERATED', provenance: runtime.status === 'PASS' ? 'PASS' : 'BLOCKED' };
+  if (releaseDir) {
+    const required = ['release-preflight.json', 'pre-manifest.v1.json', 'release-manifest.v1.json', 'SHA256SUMS', 'ci-evidence-index.v1.json'];
+    const missing = [];
+    for (const name of required) {
+      const info = await stat(join(releaseDir, name)).catch(error => {
+        if (error.code === 'ENOENT') return null;
+        throw error;
+      });
+      if (!info?.isFile() || info.size === 0) missing.push(name);
+    }
+    if (missing.length) failures.push(`RC1_RELEASE_ASSETS_MISSING:${missing.join(',')}`);
+    else {
+      const releasePreflight = JSON.parse(await readFile(join(releaseDir, 'release-preflight.json'), 'utf8'));
+      if (releasePreflight.status !== 'PASS') failures.push('RC1_RELEASE_PREFLIGHT_INVALID');
+      releaseAssets.source_bundle = 'PASS';
+      releaseAssets.runtime_bundle = runtime.status === 'PASS' ? 'PASS' : 'BLOCKED';
+      releaseAssets.manifest = 'PASS';
+      releaseAssets.sha256sums = 'PASS';
+      releaseAssets.provenance = runtime.status === 'PASS' ? 'PASS' : 'BLOCKED';
+    }
+  }
   const report = {
     schema_version: 'shinemage-rc1-preflight/v1',
     status: failures.length ? 'BLOCKED' : 'PASS',
@@ -134,7 +157,7 @@ try {
     packs: { count: packs.length, status: failures.some(value => value.startsWith('RC1_PACK_')) ? 'BLOCKED' : 'PASS', items: packs },
     runtime,
     formal_status: lane.formal_status,
-    release_assets: { source_bundle: 'NOT_GENERATED', runtime_bundle: runtime.status === 'PASS' ? 'READY_FOR_MANIFEST' : 'BLOCKED', manifest: 'NOT_GENERATED', sha256sums: 'NOT_GENERATED', provenance: runtime.status === 'PASS' ? 'PASS' : 'BLOCKED' },
+    release_assets: releaseAssets,
     failures,
   };
   await mkdir(outputDir, { recursive: true, mode: 0o700 });

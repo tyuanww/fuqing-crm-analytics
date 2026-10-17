@@ -9,7 +9,7 @@ import { promisify } from 'node:util';
 import { dirname, join, relative, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { scanText } from './secret-scan.mjs';
+import { runtimeVendorAssignmentAllowlist, scanText } from './secret-scan.mjs';
 import { DSH_UPSTREAM_SHA as PIN } from './toolchain.mjs';
 import { bindRuntimeInputs, prepareRuntimeInputs, runtimeDeployArgs, runtimeSourceTree, stageRuntimeWorkspace, verifyRuntimePreparation } from './runtime-inputs.mjs';
 import { canonicalTreeDigest, GENERATED_PROVENANCE_SCHEMA } from './generated-provenance.mjs';
@@ -79,13 +79,37 @@ async function scanRuntimeTree(root) {
         // protocol identifiers observed in pinned third-party bundles; turning
         // assignment scanning off for an entire directory would let a real
         // API_KEY/PASSWORD value through the immutable runtime artifact.
-        findings.push(...scanText(await readFile(path, 'utf8'), rel));
+        const bytes = await readFile(path);
+        findings.push(...scanText(bytes.toString('utf8'), rel, {
+          assignmentAllowlist: runtimeVendorAssignmentAllowlist(rel, bytes),
+        }));
       }
     }
   }
   await walk(root);
   if (findings.length) throw new Error(`RUNTIME_SECRET_SCAN_FAILED ${[...new Set(findings)].sort().join(';')}`);
   return { files, scanned_bytes: scannedBytes };
+}
+
+async function requiredPeerAliases(root) {
+  const names = new Set();
+  async function walk(directory) {
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      const path = join(directory, entry.name);
+      if (entry.isSymbolicLink() || !entry.isDirectory()) continue;
+      const rel = relativePath(root, path);
+      if (entry.name === '@deepseek-ai' && rel.includes('/node_modules/')) {
+        for (const peer of await readdir(path, { withFileTypes: true })) {
+          if (peer.isDirectory() || peer.isSymbolicLink()) names.add(peer.name);
+        }
+        continue;
+      }
+      await walk(path);
+    }
+  }
+  await walk(root);
+  assert.ok(names.size > 0, 'RUNTIME_REQUIRED_PEER_ALIASES_MISSING');
+  return names;
 }
 
 async function materializeExternalSymlinks(deployed, upstream, pinnedSha) {
@@ -188,18 +212,20 @@ async function materializeExternalSymlinks(deployed, upstream, pinnedSha) {
   // `pnpm deploy --prod` does not copy workspace packages that are declared
   // only as peerDependencies. DSH's built-in plugin graph intentionally uses
   // that shape, so a production deploy can be syntactically complete while
-  // failing at boot with ERR_MODULE_NOT_FOUND for core peer packages. Seed the
-  // complete pinned peer alias directory before materializing external links.
-  // This keeps the bundle self-contained without copying the upstream checkout
-  // itself; materializeExternalSymlinks still applies the allowlist and secret
+  // failing at boot with ERR_MODULE_NOT_FOUND for core peer packages. Seed
+  // only aliases already referenced by the deployed closure. Seeding every
+  // workspace alias would pull optional browser tools and their vendor bytes
+  // into the runtime. Materialization still applies the allowlist and secret
   // denylist to every resolved target.
   const peerSourceRoot = join(upstreamRoot, 'node_modules/.pnpm/node_modules/@deepseek-ai');
   assert.equal(await access(peerSourceRoot).then(() => true, () => false), true, 'RUNTIME_PEER_ALIAS_ROOT_MISSING');
   const peerDestinationRoot = join(deployedRoot, 'node_modules/.pnpm/node_modules/@deepseek-ai');
   await mkdir(peerDestinationRoot, { recursive: true });
+  const requiredPeers = await requiredPeerAliases(deployedRoot);
   let seededPeers = 0;
   for (const entry of await readdir(peerSourceRoot, { withFileTypes: true })) {
     if (!entry.name.startsWith('dsh-') && !entry.name.startsWith('cordis-plugin-') && !['cordis', 'cosmokit'].includes(entry.name)) continue;
+    if (!requiredPeers.has(entry.name)) continue;
     const peerSource = join(peerSourceRoot, entry.name);
     const peerDestination = join(peerDestinationRoot, entry.name);
     const existing = await lstat(peerDestination).catch(error => {

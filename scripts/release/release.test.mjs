@@ -16,7 +16,7 @@ import { verifyReviewedCommit } from './trust.mjs';
 import { writeEvidence } from './evidence.mjs';
 import { evaluateSli } from './operator-gate.mjs';
 import { pageGuard } from './page-policy.mjs';
-import { scanText } from './secret-scan.mjs';
+import { runtimeVendorAssignmentAllowlist, scanText } from './secret-scan.mjs';
 import { releaseAssetNames, summarizePreflight, verifyPreflight, UPSTREAM_SHA } from './preflight-bundle.mjs';
 import { serviceFixture } from './test-fixtures/service-compatibility.mjs';
 
@@ -172,6 +172,23 @@ test('secret scan distinguishes explicit synthetic fixtures from real assignment
   assert.deepEqual(scanText(`const key = '${accessKey}'`, 'config/key.js'), ['SECRET_PATTERN config/key.js']);
   assert.deepEqual(scanText(`${privateHeader}`, 'sdk/import.js'), []);
   assert.deepEqual(scanText(`${privateHeader}\n${'A'.repeat(48)}\n${privateFooter}`, 'config/key.pem'), ['SECRET_PATTERN config/key.pem']);
+  const vendorPath = 'node_modules/.pnpm/chrome-devtools-mcp@1.9.0/node_modules/chrome-devtools-mcp/build/src/third_party/index.js';
+  const vendorHash = 'fc6ae43cb8f6007eba4b0f269290ec8fea6db7670686d17967b4812d90d2cc10';
+  const vendorAllowlist = runtimeVendorAssignmentAllowlist(vendorPath, vendorHash);
+  assert.deepEqual(scanText("API_KEY = 'AIzaSyCCSOx25vrb5z0tbedCB3_JRzzbVW6Uwgw'", vendorPath, { assignmentAllowlist: vendorAllowlist }), ['SECRET_PATTERN ' + vendorPath]);
+  assert.deepEqual(scanText("Token: 'ReportingEndpointNotToken'", vendorPath, { assignmentAllowlist: vendorAllowlist }), []);
+  assert.deepEqual(scanText("API_KEY = 'AIzaSyCCSOx25vrb5z0tbedCB3_JRzzbVW6Uwgw'", 'other/vendor.js', { assignmentAllowlist: runtimeVendorAssignmentAllowlist('other/vendor.js', vendorHash) }), ['SECRET_PATTERN other/vendor.js']);
+  assert.deepEqual(runtimeVendorAssignmentAllowlist(vendorPath, '0'.repeat(64)), new Set());
+  for (const [path, digest, value] of [
+    ['.runtime-external/packages/experimental/inspector/lib/devtools/chunks/UIFilter-CIzBruM3.js', '528cdf0454770303f151a4e9562b750a41f221b656996ffe2bc12c13fb6e8489', 'response-header-set-cookie'],
+    ['.runtime-external/packages/experimental/inspector/lib/devtools/chunks/data_grid-CZEcy7-w.js', '729fbcd17a4356d26a52007551880bd7ef88f8a97b573e40c61fca2754da61a9', 'DataGridInternalToken'],
+    ['.runtime-external/packages/experimental/inspector/lib/devtools/chunks/legacy-CJ2qLEp3.js', '1a1b731f8ed5c22d04152e49999cf706e5edefb595ec68e2ea45ca451c9a8c91', 'ReportingEndpointNotToken'],
+    ['.runtime-external/packages/experimental/inspector/lib/devtools/chunks/protocol_client-L4-X1Qrb.js', 'aecddd3577951b386a69848c3470507c6806365a8130392e57d4028adf7c1e01', 'InvalidCredentialsCookie'],
+  ]) {
+    const allowed = runtimeVendorAssignmentAllowlist(path, digest);
+    assert.deepEqual(scanText(`token: "${value}"`, path, { assignmentAllowlist: allowed }), []);
+    assert.deepEqual(scanText(`token: "${value}"`, path, { assignmentAllowlist: runtimeVendorAssignmentAllowlist(path, '0'.repeat(64)) }), [`SECRET_PATTERN ${path}`]);
+  }
 });
 test('zstd receiver enforces the bounded stream path', async () => { const root=await fixture(), raw=join(root,'a.tar'), archive=join(root,'a.tar.zst'); execFileSync('python3',['-c',`import tarfile,sys,io
 x=tarfile.TarInfo('VERSION'); b=bytes([48,46,49,56,46,48,46,49,10]); x.size=len(b); x.mode=0o600
@@ -354,6 +371,7 @@ test('runtime bundle enforces production pruning, secret scan and peer collision
   assert.match(source, /RUNTIME_LINK_BROKEN/);
   assert.match(source, /MAX_TEXT_SCAN_BYTES/);
   assert.match(source, /RUNTIME_PEER_ALIAS_COLLISION/);
+  assert.match(source, /requiredPeerAliases/);
   assert.match(source, /\['cordis', 'cosmokit'\]/);
   assert.match(source, /runtimeDeployArgs\(deployed, \{ online \}\)/);
   assert.match(source, /stageRuntimeWorkspace/);
