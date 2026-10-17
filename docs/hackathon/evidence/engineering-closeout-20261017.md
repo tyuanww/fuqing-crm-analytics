@@ -40,15 +40,18 @@ integrity=sha512-ce+4rnRuhkheK8++2EGm0CjHKVfF7IjUk4DO/NydRS8inAM8A0GFGQmX3cWKM4O
 
 仓库现有 `DSH 0.1.7-rc.2` 是既有主仓兼容基线和历史证据边界。它不能继续被描述成最终内部部署版本。rc1 的 immutable inputs、9 个 pack、两个 profile-pack inputs、四 tarball consumer closure、真实 headed history 回读、重启后 history/board transport 回读、原生 board canvas 回读和 rc2 SDK/CLI rollback 已在本地 replayable lane 生成。rc2 web rollback 仍未完成，不需要重做已经完成的架构审查和旧证据。
 
-## 最终剩余任务
+## 最终收尾清单
 
-这些任务是有限清单，不包含重复的 M2 解释。
+EC-01 至 EC-04 的本地工程闭环已经完成。下面只保留仍有边界条件的项目，不重复已经通过的构建、依赖、SBOM、浏览器和回退检查。
 
-1. **最新 runtime manifest**。固定 `dsh-v0.2.1-rc.1`、upstream SHA、tarball SHA、9 个插件 pack SHA、Node 和 lockfile；输入冻结、local replayable pack/reader、四 tarball consumer closure、headed browser history 回读、重启后 history/board transport 回读、原生 board canvas 回读和 rc2 SDK/CLI rollback 已完成。剩余是 rc2 web rollback 的 profile pack 输入，以及正式发布线。
-2. **Stage 0 harness**。只有要启动 1–3 名真实内部用户时才实现。它负责 fresh runtime、credential deny、digest 检查、local receipt 和 owned cleanup；没有真实任务卡时结果只能标记 `HARNESS_SMOKE_ONLY`。
-3. **真实任务卡**。只有要证明工作流价值时才补部门、岗位、用户、任务、输入输出、数据类别和频次；没有任务卡不能宣称用户可行性或 500 人 readiness。
-4. **Stage 1 基础设施**。只有要扩大到 10–20 人时才处理 OIDC、共享存储、备份恢复、日志告警、容量和支持责任。云空间或云硬盘未落地前停留在 Stage 0。
-5. **正式发布链**。只有要对外分发或把 `release_ready` 改为 `true` 时才处理 M2-07、M2-08、M2-09 的公司 runner、签名、独立验证、正式目标、activation、canary 和 rollback。
+| 项目 | 当前状态 | 何时继续 | 当前动作 |
+| --- | --- | --- | --- |
+| rc2 web rollback | `NOT_RUN_RC2_PROFILE_PACK_UNAVAILABLE` | 取得可消费且绑定 rc2 manifest 的 profile-pack artifact 后 | 暂停。不能把两个 rc2 配置文件当作 profile pack，也不能用 SDK/CLI rollback 冒充 web rollback。 |
+| EC-05 Stage 0 wrapper | `NOT_IMPLEMENTED` | 准备让 1–3 名真实内部用户试用，并提供真实任务卡 | 暂停。没有任务卡时最多运行 `HARNESS_SMOKE_ONLY`，不能宣称用户可行性或 500 人 readiness。 |
+| Stage 1 | `DEFERRED` | 内部试用扩大到 10–20 人 | 暂停。届时再处理 OIDC、共享存储、备份恢复、日志告警、容量和支持责任。 |
+| 正式 M2 | `DEFERRED`，正式状态仍保持门禁值 | 要对外分发、生产激活或设置 `release_ready=true` | 暂停。M2-07 继续等待公司供应链和治理回执，M2-08 等待 activation、canary、rollback 和授权，M2-09 等待正式目标 browser/recovery 和切换授权。 |
+
+当前没有需要继续修改的本地代码。没有合法 rc2 profile-pack 输入、真实 Stage 0 任务卡或正式发布授权时，不再启动新的候选、服务或重复验证。
 
 ## 不再重复的事项
 
