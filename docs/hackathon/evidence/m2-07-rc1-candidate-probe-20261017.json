@@ -7,10 +7,12 @@
   "inputs": {
     "upstream_tag": "dsh-v0.2.1-rc.1",
     "upstream_sha": "1600d8a1e140dcde43a1a0941940a0480712c011",
+    "source_tree_sha256": "afa92b3e30077481063c31bcff6c98efc7b1926c",
     "upstream_lock_sha256": "952ca2f79998660dc690b739078a5d6052bc7c5c2193714b918b9d720baaeaba",
     "sdk_tarball_sha256": "6d0c6fe8ad0c21797a27d6afc0cb69a022714ea0cd7331e4cba8b07b8ce19009",
     "node": "24.19.0",
     "upstream_pnpm": "11.28.5",
+    "upstream_pnpm_tarball_sha256": "1ef4e447a68713656064f3f174c0f44719960a043a3fe2299169d08cf1dbf8ee",
     "plugin_pnpm": "11.28.2",
     "cordis": "4.0.5",
     "temporary_candidate_root": "/tmp/dsh-rc1-candidate.bMFp7P",
