@@ -1,0 +1,41 @@
+{
+  "schema_version": "engineering-rc1-browser-entry-probe/v1",
+  "recorded_at": "2026-10-17T08:55:00Z",
+  "scope": "internal-engineering-closure",
+  "status": "BROWSER_ENTRY_PASS_HISTORY_BOARD_RECOVERY_NOT_RUN",
+  "formal_company_evidence": false,
+  "candidate_source_sha": "f4026619392c2909b449eb75be1081776b7c5507",
+  "upstream_sha": "1600d8a1e140dcde43a1a0941940a0480712c011",
+  "node": "v24.19.0",
+  "pnpm": "11.28.2",
+  "manager_input": "temporary pnpm 11.28.2 wrapper on PATH; no main checkout change",
+  "runtime": {
+    "root": "/tmp/dsh-rc1-browser-runtime-20261017",
+    "web_port": 14327,
+    "start_exit": 0,
+    "check_exit": 0,
+    "stop_exit": 0,
+    "owned_supervisor_stopped": true,
+    "live_ports_touched": [],
+    "credentials": "NOT_USED",
+    "real_data": false,
+    "model_calls": 0
+  },
+  "headed_browser": {
+    "browser": "Chrome extension headed session",
+    "url_origin": "http://127.0.0.1:14327",
+    "navigation": "PASS",
+    "preview_notice_dismissed": true,
+    "workbench_dom_and_ax_visible": true,
+    "screenshot_observed": true,
+    "token_recorded": false
+  },
+  "not_run": [
+    "synthetic history fixture injection",
+    "board fixture injection",
+    "candidate restart",
+    "history/board readback after restart",
+    "rc2 rollback"
+  ],
+  "next_gate": "EC-04 requires a candidate-bound history/board fixture and an owned restart before lifecycle PASS"
+}

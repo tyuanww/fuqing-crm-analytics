@@ -20,9 +20,9 @@ release_ready=false
 ```text
 C0_INPUT_FREEZE=PASS
 EC-01=INPUTS_FROZEN
-EC-02=PASS_IN_TEMPORARY_LANE
-EC-03=NOT_RUN
-EC-04=NOT_RUN
+EC-02=PASS_IN_LOCAL_REPLAYABLE_LANE
+EC-03=PASS_IN_LOCAL_REPLAYABLE_LANE_BROWSER_ENTRY_PENDING
+EC-04=BROWSER_ENTRY_PASS_HISTORY_BOARD_RECOVERY_NOT_RUN
 EC-05=NOT_IMPLEMENTED
 EC-06=DEFERRED
 ```
@@ -120,6 +120,10 @@ dependency graph、SBOM、provenance、runtime import receipt 和 command/exit-c
 
 `ERESOLVE`、peer 警告、缺 CSS、只在 devDependencies 存在的 runtime 包、只在本机缓存可用或 graph 与 SBOM 不一致，均为失败。
 
+**当前结果**
+
+最终 subject set 已固定到 `.context/checks/dsh-rc1-engineering-20261017/final-subject-set/`。9 个 pack 和两个 profile-pack inputs 绑定同一 source SHA `f4026619392c2909b449eb75be1081776b7c5507`，严格 provenance reader 通过。fresh consumer 只声明 SDK、dsh-tools、Cordis 和修复后的 CRM tarball；production-only install、无问题依赖图、CycloneDX SBOM、CRM/host/Cordis/dsh-tools imports 和 CRM pack 传递的 KaTeX JS/CSS 均通过。真实 Chrome headed browser 已打开并进入 rc1 工作台，但 history/board fixture、重启回读和 rollback 尚未运行，见 [browser entry probe](engineering-closeout-rc1-browser-entry-20261017.json)。
+
 ### EC-04：执行 candidate lifecycle、browser 和 recovery smoke
 
 **目标**
@@ -144,6 +148,10 @@ dependency graph、SBOM、provenance、runtime import receipt 和 command/exit-c
 **失败判定**
 
 只看 HTTP 200、只看 synthetic fixture、只看服务存活、没有重启后回读、复用了 live 凭据或停止了无关进程，均不算通过。
+
+**当前结果**
+
+固定 Node24/pnpm11.28.2 的 rc1 隔离 candidate 已在独立 14327 端口启动；真实 Chrome headed browser 打开并进入工作台，AX/页面可见，随后只停止自有 supervisor。该回执只关闭 browser entry 子项；history/board fixture、候选重启后回读和 rc2 rollback 仍未运行，见 [browser entry probe](engineering-closeout-rc1-browser-entry-20261017.json)。
 
 ### EC-05：内部 Stage 0（条件任务卡）
 

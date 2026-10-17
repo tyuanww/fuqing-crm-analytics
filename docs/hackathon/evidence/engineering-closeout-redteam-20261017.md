@@ -6,7 +6,7 @@
 
 假设一个不信任当前回执的发布审核者，目标不是证明页面能打开，而是证明当前字节、依赖、运行时、数据边界、回退和证据都没有被拼接或伪造。
 
-当前结论是 `rc1 candidate=NOT_RUN`。文档中的 rc1 版本锁定不等于 rc1 构建通过。
+当前结论是 `rc1 candidate=PACKS_AND_READERS_PASS_IN_TEMPORARY_LANE`，但 temporary source/pack 字节没有进入可重放的 immutable subject set。文档中的 rc1 版本锁定和临时 receipt 字段通过都不等于最终内部 runtime closure。
 
 ## 已复核的阻断点
 
@@ -21,14 +21,15 @@
 - `dsh-plugins/crm-knowledge/package.json:16-17`
 - `dsh-plugins/knowledge/package.json:16-17`
 
-### 2. 组合读取器默认允许缺少 generated provenance
+### 2. 低层读取器仍允许调用方显式关闭 generated provenance
 
-`loadProfilePacks()` 的 `requireGeneratedProvenance` 默认值为 `false`，并把该默认值传给 `readPluginPack()`。`readPluginPack()` 同样默认不要求 `generated_bytes_provenance`。因此某些组合路径可以读取 source-clean 但没有 builder receipt 的 pack。
+`loadProfilePacks()` 和 `readPluginPack()` 的低层 API 仍保留 `requireGeneratedProvenance=false` 以支持非发布开发夹具；本轮已把正式 runtime、preflight、readiness、candidate、composition、CRM profile 和 dsh-dev pack 消费路径显式固定为 `true`，并补负测。直接调用低层 API 或新增发布入口若漏传该参数，仍可能读取 source-clean 但没有 builder receipt 的 pack。
 
 证据：
 
 - `scripts/release/profile-packs.mjs:23,46-47`
-- `scripts/release/plugin-pack.mjs:183-210`
+- `scripts/release/plugin-pack.mjs:189-210`
+- 正式调用方的 `requireGeneratedProvenance=true` 见 `scripts/dsh.mjs`、`scripts/dsh-dev/serve.mjs`、`scripts/release/preflight.mjs`、`scripts/release/readiness.mjs`、`scripts/release/release-profile-packs.mjs`、`scripts/release/composition-candidate.mjs`、`scripts/release/plugin-candidate.mjs` 和 `scripts/crm-calibration/*`
 
 rc1 candidate 必须把 provenance 变成 candidate/load/verify 的强制条件，不能依赖调用方记得传布尔参数。
 
@@ -73,11 +74,11 @@ rc1 candidate 必须把 provenance 变成 candidate/load/verify 的强制条件�
 
 ## 必须追加的工程任务
 
-1. 在 C1 前把 generated provenance 设为 rc1 candidate 的强制输入，而不是可选参数。
-2. 为 builder receipt 增加可验证的 builder identity 或受保护重建来源，不接受单一环境变量自报。
+1. 已把正式 candidate/load/verify 调用路径的 generated provenance 设为强制输入；低层 API 的可选默认仍需后续收紧或隔离。
+2. 为 builder receipt 增加可验证的 builder identity 或受保护重建来源，不接受单一环境变量自报；当前仍是开放项。
 3. 生成 rc1 的统一 subject set，拒绝 rc2/alpha2/alpha4 receipt 混入。
 4. 重建 9 个 plugin pack 和 lock，不能复用旧 pack SHA。
-5. rc1 runtime closure 必须用 fresh production-only install 验证。
+5. rc1 runtime closure 必须用 fresh production-only install 验证；首轮已经真实暴露 CRM tarball 缺少 `katex`，修复后必须重新打包并重跑。
 6. Stage 0 只有在启动真实内部用户前实现；实现前不要声称 `HARNESS_ONLY_READY`。
 7. browser/recovery 必须绑定 rc1 candidate；alpha2 synthetic 历史结果不抵扣。
 
