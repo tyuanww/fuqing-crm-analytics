@@ -121,6 +121,21 @@
       }
     },
     {
+      "step": "knowledge_rc1_candidate_build_probe",
+      "result": "PASS_IN_TEMPORARY_LANE",
+      "error_code": null,
+      "detail": "Knowledge consumer typecheck and pinned build completed with the candidate adapters; no formal pack was emitted",
+      "provenance": {
+        "source_git_sha": "db244fe1ba37f9456dba4c328ad240446d087dd9",
+        "source_tree_sha256": "450d723d57a48611461e5b893e16504658efa6a6b34b16d59db4e899834e5683",
+        "generated_tree_sha256": "0a0fd85b00e76dfa301328c0c8ea84548df645402d04f226a49d9ac86ce65302",
+        "node": "24.19.0",
+        "pnpm": "11.28.2",
+        "clean": true,
+        "isolated": true
+      }
+    },
+    {
       "step": "pack_build",
       "result": "NOT_RUN",
       "detail": "pack build cannot start before rc1 upstream host/client build and isolated peer alignment"

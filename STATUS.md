@@ -9,6 +9,7 @@
 - C1/C3 rc1 candidate probe 已执行并保留真实阶段结果，见 [rc1 candidate probe](docs/hackathon/evidence/m2-07-rc1-candidate-probe-20261017.json)：rc1 upstream frozen install 通过，官方 `build:official` 的 9/9 gate 通过并生成 host/client/web `lib`；新建的 7-plugin page profile 和 2-plugin CRM/Knowledge profile 通过 snapshot/release profile 校验。旧 rc2 profile 仍会触发 `PROFILE_DSH_PIN_MISMATCH`；临时 peer 替换未生成 pack，profile-pack inputs、9 包、consumer closure 和 browser/recovery 仍未完成，不能写成 rc1 candidate PASS。
 - rc1 analytics build 在隔离 lane 暴露了真实 API 接缝：host typecheck 通过，client 因 `workspace.toast` 声明未由 rc1 ui-workspace client barrel 加载而触发 `TS2344`；只在临时 lane 显式加载 rc1 `toast.d.ts` 后 build 通过。该适配尚未进入主仓或 pack，不能写成 rc1 build PASS。
 - rc1 临时 lane 继续暴露第二个真实接缝：6 个简单插件和 CRM/Knowledge 的临时 CSS bridge build/provenance 通过；原始 `TS2882` 记录保留，knowledge 仍未运行，所有 rc1 formal pack/reader 仍未生成。两个 adapter 只存在于临时 lane，未进入主仓。
+- rc1 临时 lane 现已完成 9/9 plugin candidate-only build/provenance PASS，见 [rc1 candidate probe](docs/hackathon/evidence/m2-07-rc1-candidate-probe-20261017.json) 和临时 inventory `45c77f1dc031ddbe3cab710f66166a87bf4b7766e6b0082ea281ce5248c4a31`。这只证明隔离编译和类型接缝；formal pack/reader、统一 subject set、consumer closure、runtime/import、browser/restart 和回退仍 `NOT_RUN`，没有把临时 adapter 或旧 pack 写成 rc1 正式候选。
 
 - 官方仓库最新发布为 `v0.2.1-alpha.4`，发布提交为 `86a402200d95fecef4529d969836f1fe13c6cb0d`。M2-07 当前候选已经切换到 alpha4；alpha3 只保留为上一轮候选记录。
 - 2026-10-17 当前公开主线已包含本轮治理与状态文档；当前 `main` SHA 以 Git 实查为准。这些合并不改变 DSH `0.1.7-rc.2` pin、M2-07/M2-08 门禁或 `release_ready=false`。
