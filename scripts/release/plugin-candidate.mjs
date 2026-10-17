@@ -63,7 +63,8 @@ export async function createPluginCandidate({ root: candidateRoot = root, plugin
   // only source/build filesystem checks belong to the source-input path.
   const loadProfile = fromPack ? loadProfileSnapshot : loadReleaseProfile;
   const profile = await loadProfile({ root: repo, manifestPath: profileManifest });
-  const packed = fromPack ? await readPluginPack({ manifestPath: packManifest, expectedSha256: packSha256 }) : null;
+  const packed = fromPack ? await readPluginPack({ manifestPath: packManifest, expectedSha256: packSha256,
+    requireGeneratedProvenance: true }) : null;
   const pluginPath = fromPack ? null : relativePath(repo, pluginRoot, 'PLUGIN_CANDIDATE_PLUGIN_OUTSIDE_ROOT');
   const selected = profile.profile.plugins.find(item => fromPack ? item.id === packed.receipt.package_name : item.path === pluginPath);
   assert.ok(selected, 'PLUGIN_CANDIDATE_NOT_ALLOWLISTED');

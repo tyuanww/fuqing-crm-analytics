@@ -37,6 +37,11 @@ async function fixture(t, ids = ['@shine-mage/dsh-synthetic-leaf']) {
       dsh_pin: sdk.sdk_version, source_sha: '1'.repeat(40), source_dirty: false,
       activation: 'NOT_RUN', state_path: 'NOT_APPLICABLE_PLUGIN_PACK_ONLY',
       tarball: { name: tarName, bytes: archive.length, sha256: hash(archive) },
+      generated_bytes_provenance: { schema_version: 'dsh-generated-bytes/v1', status: 'PASS',
+        source: { git_sha: '1'.repeat(40), sha256: '2'.repeat(64), entries: 1, bytes: 1 },
+        generated_tree: { sha256: '0555cb12712fd53b766689033a0849967a867bb4429c0eaa1c1d38d8281d3f23', entries: 2, bytes: 31 },
+        builder: { clean: true, isolated: true, node: '24.19.0', pnpm: '11.28.2' },
+        builder_receipt_sha256: '4'.repeat(64) },
       entries: ['cordis.patch.yml', 'lib/index.js', 'package.json'] };
     const bytes = Buffer.from(json(receipt));
     await writeFile(join(directory, 'plugin-pack.json'), bytes);
@@ -163,6 +168,18 @@ test('dev package preflight binds enabled roles and rejects mixed author paths',
   assert.deepEqual(loaded.selected, { pluginPath: '@shine-mage/dsh-analytics-workbench-b0' });
   await assert.rejects(() => resolvePluginInputs({ ...options, pluginPath: '/abs/workbench' }), /DSH_DEV_PLUGIN_INPUT_CONFLICT/);
   await assert.rejects(() => resolvePluginInputs({ ...options, shineQuery: 'on' }), /DSH_DEV_PROFILE_PLUGIN_MISSING/);
+});
+
+test('dev package preflight rejects packs without generated provenance', async t => {
+  const f = await fixture(t, ['@shine-mage/dsh-analytics-workbench-b0']);
+  const manifestPath = join(f.root, f.input.plugins[0].manifest);
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+  delete manifest.generated_bytes_provenance;
+  const bytes = Buffer.from(json(manifest));
+  await writeFile(manifestPath, bytes);
+  f.input.plugins[0].sha256 = hash(bytes);
+  await writeFile(f.inputsPath, json(f.input));
+  await assert.rejects(() => resolvePluginInputs(workbenchOnly(f.inputsPath)), /PLUGIN_PACK_BUILD_PROVENANCE_REQUIRED/);
 });
 
 test('reload preflight validates upstream before any runtime writes', async t => {

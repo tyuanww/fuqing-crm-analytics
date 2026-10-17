@@ -29,6 +29,9 @@
     "lib/client.js",
     "cordis.patch.yml"
   ],
+  "dependencies": {
+    "katex": "^0.18.7"
+  },
   "dsh": {
     "client": {
       "platform": "web",

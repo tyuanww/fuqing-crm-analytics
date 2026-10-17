@@ -100,7 +100,7 @@ async function release(args) {
   const sourceSha = git(['rev-parse', 'HEAD']); const version = (await readFile(join(root, 'VERSION'), 'utf8')).trim();
   const upstreamSha = DSH_UPSTREAM_SHA;
   const profile = await loadReleasePacks({ root, inputsPath: process.env.DSH_PROFILE_PACK_INPUTS,
-    manifestPath: process.env.DSH_PROFILE_MANIFEST });
+    manifestPath: process.env.DSH_PROFILE_MANIFEST, requireGeneratedProvenance: true });
   if (process.env.DSH_RELEASE_PACK_INPUTS_SHA256 && profile.inputsSha256 !== process.env.DSH_RELEASE_PACK_INPUTS_SHA256) {
     throw new Error('RELEASE_PACK_INPUTS_CHANGED');
   }

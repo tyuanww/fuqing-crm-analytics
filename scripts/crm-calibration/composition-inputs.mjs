@@ -22,8 +22,8 @@ export async function resolveCompositionToolchain(toolchain) {
 
 export async function readCompositionInputs({ inputsPath, pageInputsPath, toolchain, cordisPeerVersion } = {}) {
   toolchain = await resolveCompositionToolchain(toolchain);
-  const packs = await loadProfilePacks({ inputsPath, toolchain });
-  const pages = pageInputsPath === undefined ? undefined : await loadProfilePacks({ inputsPath: pageInputsPath, toolchain });
+  const packs = await loadProfilePacks({ inputsPath, toolchain, requireGeneratedProvenance: true });
+  const pages = pageInputsPath === undefined ? undefined : await loadProfilePacks({ inputsPath: pageInputsPath, toolchain, requireGeneratedProvenance: true });
   return validateCompositionPacks({ packs, pages, toolchain,
     cordisPeerVersion: cordisPeerVersion ?? process.env.CRM_COMPOSITION_CORDIS_PEER ?? '4.0.4' });
 }

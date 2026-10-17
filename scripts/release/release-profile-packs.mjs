@@ -52,7 +52,7 @@ async function filesWithin(root, prefix = '', state = { count: 0 }) {
 export async function prepareReleasePayload({ root, inputsPath, manifestPath, output, python = 'python3' } = {}) {
   assert.ok(isAbsolute(root ?? ''), 'RELEASE_PACK_ROOT_REQUIRED');
   assert.ok(isAbsolute(output ?? ''), 'RELEASE_PACK_OUTPUT_REQUIRED');
-  const packs = await loadReleasePacks({ root, inputsPath, manifestPath });
+  const packs = await loadReleasePacks({ root, inputsPath, manifestPath, requireGeneratedProvenance: true });
   const { collectAllowlist, DEFAULT_ALLOWLIST } = await import('./artifact.mjs');
   const base = await collectAllowlist(root, { allowlist: DEFAULT_ALLOWLIST.filter(path => path !== 'dsh-plugins/')
     .concat('dsh-plugins/plugin-kit/'), maxFiles: MAX_FILES });
@@ -106,7 +106,7 @@ export async function verifyReleasePackBinding({ directory, snapshot, profileSna
   assert.match(snapshot.sha256 ?? '', /^[a-f0-9]{64}$/, 'RELEASE_PACK_SNAPSHOT_DIGEST');
   const input = await insideArtifact(directory, snapshot.path, 256 * 1024);
   assert.equal(hash(input), snapshot.sha256, 'RELEASE_PACK_SNAPSHOT_DIGEST');
-  const packs = await loadProfilePacks({ inputsPath: join(directory, snapshot.path) });
+  const packs = await loadProfilePacks({ inputsPath: join(directory, snapshot.path), requireGeneratedProvenance: true });
   assert.equal(packs.digest, profileSnapshot.sha256, 'RELEASE_PACK_PROFILE_MISMATCH');
   assert.equal(relative(directory, packs.path).split('\\').join('/'), profileSnapshot.path, 'RELEASE_PACK_PROFILE_MISMATCH');
   pluginPaths(packs.profile);
