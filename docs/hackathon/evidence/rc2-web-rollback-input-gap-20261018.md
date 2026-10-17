@@ -2,6 +2,8 @@
 
 本回执记录 rc2 web rollback 的真实输入缺口。它不把 rc2 SDK/CLI rollback 当成 web rollback。
 
+> 历史快照：本文件记录 2026-10-18 pack 重建前的状态。固定 rc2 pack 已在 [rc2 web rollback pack preparation](rc2-web-rollback-pack-prep-20261018.md) 中重建并由 reader 验证；后续状态以新记录为准。
+
 ## 结果
 
 - 当前只有 `config/dsh-profile.rc2.json` 和 `config/dsh-profile.crm-knowledge.rc2.json` 两份源配置。

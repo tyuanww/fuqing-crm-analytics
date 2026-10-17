@@ -1,0 +1,429 @@
+{
+  "schema_version": "dsh-rc2-web-rollback-pack-prep/v1",
+  "captured_at": "2026-10-18",
+  "candidate_scope": "OWNER_ONLY_CANDIDATE_SYNTHETIC",
+  "sdk": "@deepseek-ai/dsh@0.1.7-rc.2",
+  "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+  "upstream_checkout": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2",
+  "toolchain": {
+    "node": "v24.19.0",
+    "pnpm": "11.28.2",
+    "network_mode": "offline",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "source_task": "/Users/hutou/.codex/tasks/rc2-web-rollback-20261018/rebuilt-r2",
+  "rebuild": {
+    "status": "PASS",
+    "plugins": 9,
+    "builds_exit_code": 0,
+    "packs_exit_code": 0,
+    "source_checkouts": "/Users/hutou/.codex/tasks/shinemage-rc2-generated-pack-20261017-r3/checkouts",
+    "build_logs_dir": "/Users/hutou/.codex/tasks/rc2-web-rollback-20261018/rebuilt-r1/logs",
+    "receipt_dir": "/Users/hutou/.codex/tasks/rc2-web-rollback-20261018/rebuilt-r2/receipts",
+    "pack_dir": "/Users/hutou/.codex/tasks/rc2-web-rollback-20261018/rebuilt-r2/packs"
+  },
+  "lock": {
+    "path": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/config/shinemage-composition-packs.lock.json",
+    "sha256": "7f21afd75cfb098126a9b126e7c87a7bee811cc7df9accf4ef59e081af47821f",
+    "preparation_lock_sha256": "7f21afd75cfb098126a9b126e7c87a7bee811cc7df9accf4ef59e081af47821f"
+  },
+  "profiles": [
+    {
+      "name": "page",
+      "profile_id": "dsh-rc2",
+      "path": "/Users/hutou/.codex/tasks/rc2-web-rollback-20261018/rebuilt-r2/reader/config/dsh-profile.rc2.json",
+      "sha256": "c8c9df8c36f11060ad8fbcce68cb2ebf28d783c5eb5759d1b71ff5463782c981",
+      "inputs_path": "/Users/hutou/.codex/tasks/rc2-web-rollback-20261018/rebuilt-r2/reader/page-inputs.json",
+      "inputs_sha256": "88d23bda388bc908e2601009e1f7d3ded9fd7e348f03bab84a855af4b6dd4a7e",
+      "plugin_count": 7
+    },
+    {
+      "name": "crm",
+      "profile_id": "crm-knowledge-rc2",
+      "path": "/Users/hutou/.codex/tasks/rc2-web-rollback-20261018/rebuilt-r2/reader/config/dsh-profile.crm-knowledge.rc2.json",
+      "sha256": "7ca3511663ab2ea5d1bb8f839c83b29f5bbd6655238450ad08a04510642191ba",
+      "inputs_path": "/Users/hutou/.codex/tasks/rc2-web-rollback-20261018/rebuilt-r2/reader/crm-inputs.json",
+      "inputs_sha256": "3ef9dc670a501ef467db412751faf305d19deec5b1a3944fdf41868a667ba015",
+      "plugin_count": 2
+    }
+  ],
+  "plugins": [
+    {
+      "directory": "analytics-workbench",
+      "id": "@shine-mage/dsh-analytics-workbench-b0",
+      "source_sha": "3030e3f21263f6ec65cb01c7aeacd4c80e2eb711",
+      "manifest_sha256": "070514b3bb212c714907727c368300e2b7cd22b88946e814f9b13349d27f29ef",
+      "manifest_sha256_matches_lock": true,
+      "tarball": {
+        "name": "shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+        "bytes": 438499,
+        "sha256": "e41df9f5a8f7031c092319222543c8d723ca644c0c9d69b2ae53f13257e9b79e"
+      },
+      "generated_bytes_provenance": {
+        "schema_version": "dsh-generated-bytes/v1",
+        "status": "PASS",
+        "source_tree_sha256": "f1dc0d36dfed7dd0f3ee94ed10673210f20b1490628409e4cb6e3512fb6a7677",
+        "generated_tree_sha256": "1b6b528ecd75490675310fc5f188a5ad49460a6da0a59d87ec7aeabb09e44df5",
+        "builder_receipt_sha256": "f84a3e59be9bbc6d377c418e5d34e0ebb1d91e65e38e4d90dc05ad13ed720aff",
+        "node": "v24.19.0",
+        "pnpm": "11.28.2",
+        "clean": true,
+        "isolated": true,
+        "network_mode": "offline"
+      },
+      "builder_receipt_sha256_actual": "f84a3e59be9bbc6d377c418e5d34e0ebb1d91e65e38e4d90dc05ad13ed720aff",
+      "build_log_sha256": "fa98ae164377709f31f1b2c887cac16eecac999b4431272da04d10ff5c98d743",
+      "pack_log_sha256": "070514b3bb212c714907727c368300e2b7cd22b88946e814f9b13349d27f29ef",
+      "build_exit_code": 0,
+      "pack_exit_code": 0
+    },
+    {
+      "directory": "crm-knowledge",
+      "id": "@shine-mage/dsh-crm-knowledge",
+      "source_sha": "dac0539bbbe076f62ae592c35e74efcca987e568",
+      "manifest_sha256": "4ffed2110f9de6992ce4ffb13fa471b338fef7c0b6d2e834cf78d35f9c7f7758",
+      "manifest_sha256_matches_lock": true,
+      "tarball": {
+        "name": "shine-mage-dsh-crm-knowledge-0.0.0-crm.1.tgz",
+        "bytes": 234901,
+        "sha256": "5803819e9eb36bacd5b237eacff928133ff6eb361c1f111eedd3f1ecf60aeb05"
+      },
+      "generated_bytes_provenance": {
+        "schema_version": "dsh-generated-bytes/v1",
+        "status": "PASS",
+        "source_tree_sha256": "53c3603df38b18dcfaf456b77d2fd65b9dc6275d62a2818221b69bb8d5eaefb2",
+        "generated_tree_sha256": "25f35615906eb7ae123aae9e875f38535bbb6e256c1c21bd6ecb2ba01ec8303f",
+        "builder_receipt_sha256": "9d8aa049f657d282894f39a0bcc14480aeafe263b616490706f63e6e7215be59",
+        "node": "v24.19.0",
+        "pnpm": "11.28.2",
+        "clean": true,
+        "isolated": true,
+        "network_mode": "offline"
+      },
+      "builder_receipt_sha256_actual": "9d8aa049f657d282894f39a0bcc14480aeafe263b616490706f63e6e7215be59",
+      "build_log_sha256": "9000309e6027b0f606b6709449fad6eec90b56de59c9f57e3aac16e2bfe3357a",
+      "pack_log_sha256": "4ffed2110f9de6992ce4ffb13fa471b338fef7c0b6d2e834cf78d35f9c7f7758",
+      "build_exit_code": 0,
+      "pack_exit_code": 0
+    },
+    {
+      "directory": "knowledge",
+      "id": "@shine-mage/dsh-knowledge",
+      "source_sha": "f623c220fde8d511b694e7c4271e092cd3d4692b",
+      "manifest_sha256": "3a50fd36d2074c8117178d917711424943fc0a51458da04f5ce4582457650cbe",
+      "manifest_sha256_matches_lock": true,
+      "tarball": {
+        "name": "shine-mage-dsh-knowledge-0.0.0-candidate.1.tgz",
+        "bytes": 14476,
+        "sha256": "870fdeeadc07bf7187d475ba4a77fe0d417b915a72473b8712c004f7079b4090"
+      },
+      "generated_bytes_provenance": {
+        "schema_version": "dsh-generated-bytes/v1",
+        "status": "PASS",
+        "source_tree_sha256": "97874fc84d99bcc348bc7e2ea04d5fca1a95b6868f6561b5c95d38cef7a6e6e2",
+        "generated_tree_sha256": "0a0fd85b00e76dfa301328c0c8ea84548df645402d04f226a49d9ac86ce65302",
+        "builder_receipt_sha256": "546fb4d759b6542e92c4f131b70499aa81c57805e392cd7f977913a273ab6188",
+        "node": "v24.19.0",
+        "pnpm": "11.28.2",
+        "clean": true,
+        "isolated": true,
+        "network_mode": "offline"
+      },
+      "builder_receipt_sha256_actual": "546fb4d759b6542e92c4f131b70499aa81c57805e392cd7f977913a273ab6188",
+      "build_log_sha256": "05f3ec0199e1311fb1f17b84bc5a808c2497b3cddc76aa80c5da11848ce2ec61",
+      "pack_log_sha256": "3a50fd36d2074c8117178d917711424943fc0a51458da04f5ce4582457650cbe",
+      "build_exit_code": 0,
+      "pack_exit_code": 0
+    },
+    {
+      "directory": "shine-board",
+      "id": "@shine-mage/dsh-shine-board",
+      "source_sha": "76601df755ec8ef8c9726ea770ec488b745efd71",
+      "manifest_sha256": "a9ad7f7609f73dbed517a35d683e198110d77f89c9e527577df99d5b3f68d8d9",
+      "manifest_sha256_matches_lock": true,
+      "tarball": {
+        "name": "shine-mage-dsh-shine-board-0.0.0-b0.tgz",
+        "bytes": 1073,
+        "sha256": "e1348dd7739778a5ec2d676420e86290ca49f69cdf045959fd82441232a30c1a"
+      },
+      "generated_bytes_provenance": {
+        "schema_version": "dsh-generated-bytes/v1",
+        "status": "PASS",
+        "source_tree_sha256": "8572e97e7a2db327cf0c3cda675f17ff53df7b3f25178edb5d2fc38af526c7f5",
+        "generated_tree_sha256": "fb18cfda27ec46f3cb4779c37a7de11cc4fb73ed3913f8c49913e4df2372b517",
+        "builder_receipt_sha256": "bc9781690305092206eac0ba5c5d8705a342436cc6f44f549d99474f8ad11116",
+        "node": "v24.19.0",
+        "pnpm": "11.28.2",
+        "clean": true,
+        "isolated": true,
+        "network_mode": "offline"
+      },
+      "builder_receipt_sha256_actual": "bc9781690305092206eac0ba5c5d8705a342436cc6f44f549d99474f8ad11116",
+      "build_log_sha256": "d24af99ae9b289f18f7e2eb9dfd7bd5330f0a91edd7a9c3119ff685a46b35365",
+      "pack_log_sha256": "a9ad7f7609f73dbed517a35d683e198110d77f89c9e527577df99d5b3f68d8d9",
+      "build_exit_code": 0,
+      "pack_exit_code": 0
+    },
+    {
+      "directory": "shine-crowd-action",
+      "id": "@shine-mage/dsh-shine-crowd-action",
+      "source_sha": "5c39e21c27565397383b009725634ea66e9c1525",
+      "manifest_sha256": "89e5af1aa0a26165e3a994e58c5f457a123b24f563f6bffc71acfba15ee45f05",
+      "manifest_sha256_matches_lock": true,
+      "tarball": {
+        "name": "shine-mage-dsh-shine-crowd-action-0.0.0-b0.tgz",
+        "bytes": 1122,
+        "sha256": "3fb9d88d228e3af4a9c965961c035650b65365392a9caccb4c14f336b003b2ca"
+      },
+      "generated_bytes_provenance": {
+        "schema_version": "dsh-generated-bytes/v1",
+        "status": "PASS",
+        "source_tree_sha256": "b4133625893de4bcac19c58bb1e7ef0aec6a283b95e934f9de0df2fa1f131d89",
+        "generated_tree_sha256": "c5f8863490590788c0a06697413b3dbe33780ed6c9688555e39b96fe7e13e1f8",
+        "builder_receipt_sha256": "3ce01762c5d7148be3d44cb89c4389128bef4d8588e94a91b05432a4d7707b46",
+        "node": "v24.19.0",
+        "pnpm": "11.28.2",
+        "clean": true,
+        "isolated": true,
+        "network_mode": "offline"
+      },
+      "builder_receipt_sha256_actual": "3ce01762c5d7148be3d44cb89c4389128bef4d8588e94a91b05432a4d7707b46",
+      "build_log_sha256": "6b7836f735444192212db5d044848a8dbc822843d56b8ce92b058e87531a1a0a",
+      "pack_log_sha256": "89e5af1aa0a26165e3a994e58c5f457a123b24f563f6bffc71acfba15ee45f05",
+      "build_exit_code": 0,
+      "pack_exit_code": 0
+    },
+    {
+      "directory": "shine-query",
+      "id": "@shine-mage/dsh-shine-query",
+      "source_sha": "1f1e19d280923ebe7aac964f8b5825d497434db8",
+      "manifest_sha256": "6e7119c79014053b9b39997543c805946ee77e06e07c51866114d9f630dcc9aa",
+      "manifest_sha256_matches_lock": true,
+      "tarball": {
+        "name": "shine-mage-dsh-shine-query-0.0.0-b0.tgz",
+        "bytes": 1060,
+        "sha256": "774c6ae63e0fb170a81a9e9fb9551d55d40724faae5966c1d95bb32624fb89ce"
+      },
+      "generated_bytes_provenance": {
+        "schema_version": "dsh-generated-bytes/v1",
+        "status": "PASS",
+        "source_tree_sha256": "0ee85d8390a45b643b49f8bbb4773a0784f200814c16b87c4b1d83f864023fab",
+        "generated_tree_sha256": "2a8f6e5966e4b7bc85a3c6b4e97f59a3701dca2cb5d389c2b08928777372779e",
+        "builder_receipt_sha256": "60f7c564c8c8a4e7f9754b531a6dd817d0d904eff9825d174a614887d23e56d1",
+        "node": "v24.19.0",
+        "pnpm": "11.28.2",
+        "clean": true,
+        "isolated": true,
+        "network_mode": "offline"
+      },
+      "builder_receipt_sha256_actual": "60f7c564c8c8a4e7f9754b531a6dd817d0d904eff9825d174a614887d23e56d1",
+      "build_log_sha256": "008b7d11baae18fc61c128f4898c1fd65d6a3512438aa0eb552b5140ad91dcaf",
+      "pack_log_sha256": "6e7119c79014053b9b39997543c805946ee77e06e07c51866114d9f630dcc9aa",
+      "build_exit_code": 0,
+      "pack_exit_code": 0
+    },
+    {
+      "directory": "shine-funnel",
+      "id": "@shine-mage/dsh-shine-funnel",
+      "source_sha": "dbfaede0961586d773c708e833a4ac1c9f2515dc",
+      "manifest_sha256": "b107e17d3a0dd5e557429e319f7834375e95fca024e077fddf5f6d1294ed22a6",
+      "manifest_sha256_matches_lock": true,
+      "tarball": {
+        "name": "shine-mage-dsh-shine-funnel-0.0.0-b0.tgz",
+        "bytes": 2006,
+        "sha256": "581ba069aa8af4598f553e4b11b57216ac2205d71baebbafc267367cb3814ba6"
+      },
+      "generated_bytes_provenance": {
+        "schema_version": "dsh-generated-bytes/v1",
+        "status": "PASS",
+        "source_tree_sha256": "7fccf2e8056532acf4620da21a67635dcb7c63ad8f45ed638460f7d56d0056c1",
+        "generated_tree_sha256": "66086e09a8b6c77eecfea2a8543b420aaa6c84bc243293426eb052260f7c2e35",
+        "builder_receipt_sha256": "6d3b7915fb0996d12c8a539103289492789feb488f5954e8907a5697ed28af66",
+        "node": "v24.19.0",
+        "pnpm": "11.28.2",
+        "clean": true,
+        "isolated": true,
+        "network_mode": "offline"
+      },
+      "builder_receipt_sha256_actual": "6d3b7915fb0996d12c8a539103289492789feb488f5954e8907a5697ed28af66",
+      "build_log_sha256": "5149e80dac61cc0883174fc8926bed54d19977ab32e36407e43c06c8d325167c",
+      "pack_log_sha256": "b107e17d3a0dd5e557429e319f7834375e95fca024e077fddf5f6d1294ed22a6",
+      "build_exit_code": 0,
+      "pack_exit_code": 0
+    },
+    {
+      "directory": "shine-waterfall",
+      "id": "@shine-mage/dsh-shine-waterfall",
+      "source_sha": "d123ac1d0e7bad3e5de45169b3e72c38623b858a",
+      "manifest_sha256": "3e262a2f9d4e3eb35781374c0da20eae27196af27d7a9684cb165b4c77e9c6c5",
+      "manifest_sha256_matches_lock": true,
+      "tarball": {
+        "name": "shine-mage-dsh-shine-waterfall-0.0.0-b0.tgz",
+        "bytes": 2248,
+        "sha256": "73a1d4ba2b085c1f9f2a1eff410aca239cf9775de952ba70aafdaa78ec5ac35d"
+      },
+      "generated_bytes_provenance": {
+        "schema_version": "dsh-generated-bytes/v1",
+        "status": "PASS",
+        "source_tree_sha256": "39a67a56d060e39231b7682142c32eafda9fc360d2310690c3dbe9f7e9c6114a",
+        "generated_tree_sha256": "b1ba8e51c22ce49e2aa67a6f05da34a1ab4d15dfc5873237e21db05d76377ad0",
+        "builder_receipt_sha256": "6e7b0c325e67c52a1bf38dd981dcd976eaf01a66e2873900809ca6e3c0d32449",
+        "node": "v24.19.0",
+        "pnpm": "11.28.2",
+        "clean": true,
+        "isolated": true,
+        "network_mode": "offline"
+      },
+      "builder_receipt_sha256_actual": "6e7b0c325e67c52a1bf38dd981dcd976eaf01a66e2873900809ca6e3c0d32449",
+      "build_log_sha256": "6e9e6d8bf5d7f938842576adc6c6ec64506683532f6b5c0ce25b4ade37764117",
+      "pack_log_sha256": "3e262a2f9d4e3eb35781374c0da20eae27196af27d7a9684cb165b4c77e9c6c5",
+      "build_exit_code": 0,
+      "pack_exit_code": 0
+    },
+    {
+      "directory": "shine-brand",
+      "id": "@shine-mage/dsh-shine-brand",
+      "source_sha": "57ebcf38278068394a4feb42125c30c195fd912a",
+      "manifest_sha256": "a5d0265377542817cb1de5710e1ba7854274745a71d18c71e4e72a04b0341624",
+      "manifest_sha256_matches_lock": true,
+      "tarball": {
+        "name": "shine-mage-dsh-shine-brand-0.0.0-b0.tgz",
+        "bytes": 1883,
+        "sha256": "4b867bf5b4e08d9aa1f45f20b20b78cbd9e11c236194ffafaa5188d8d173bd13"
+      },
+      "generated_bytes_provenance": {
+        "schema_version": "dsh-generated-bytes/v1",
+        "status": "PASS",
+        "source_tree_sha256": "587ff6da173a6dfa26bdee4a7f9ae0580492f87367f4ab7742f9eb58b07a494f",
+        "generated_tree_sha256": "359ace0dd064a34f04a080081c77cb0aa893e2528584af85554cce852adaa0dd",
+        "builder_receipt_sha256": "5a893f7f8951fa07eaab1bbce3ad2f86375a28a3550c6e578e875b2161a0497e",
+        "node": "v24.19.0",
+        "pnpm": "11.28.2",
+        "clean": true,
+        "isolated": true,
+        "network_mode": "offline"
+      },
+      "builder_receipt_sha256_actual": "5a893f7f8951fa07eaab1bbce3ad2f86375a28a3550c6e578e875b2161a0497e",
+      "build_log_sha256": "bd886fa03c341db49735b4415b10bff292e772b27cb2e67435ef35ba1d8d5c05",
+      "pack_log_sha256": "a5d0265377542817cb1de5710e1ba7854274745a71d18c71e4e72a04b0341624",
+      "build_exit_code": 0,
+      "pack_exit_code": 0
+    }
+  ],
+  "preparation": {
+    "path": "/Users/hutou/.codex/tasks/rc2-web-rollback-20261018/rebuilt-r2/reader/preparation.json",
+    "sha256": "08171d1357f72087ece4ccbe094f695bb7fafa6c0431b5455fb525ceb6927eee",
+    "host": "NOT_RUN",
+    "remote_ci": "NOT_RUN",
+    "release_ready": false
+  },
+  "reader": {
+    "direct_status": "PASS_RC2_PROFILE_PACK_READER",
+    "direct_output": "/Users/hutou/.codex/tasks/rc2-web-rollback-20261018/rebuilt-r2/reader-direct.json",
+    "direct_output_sha256": "11c19d232467626cc221fe28b0ba6204b11955d321de2cd58bdae0ef2d8ee1f8",
+    "integration_status": "PASS",
+    "integration_log": "/Users/hutou/.codex/tasks/rc2-web-rollback-20261018/rebuilt-r2/integration-reader.log",
+    "integration_log_sha256": "9c90c06c4170f56678941d2d7268f0279f9e9e73ed3d473458d20c91825bbc52",
+    "integration_tests": 9,
+    "integration_pass": 9,
+    "integration_fail": 0,
+    "integration_skip": 0,
+    "runs": [
+      {
+        "scope": "knowledge",
+        "path": "/Users/hutou/.codex/tasks/rc2-web-rollback-20261018/rebuilt-r2/reader/runs/knowledge/runtime-inputs.json",
+        "sha256": "8016be59e453f76da3aa0511127945fb49b1e56430b0020c479a9450aec6b326",
+        "bindings": [
+          {
+            "id": "@shine-mage/dsh-crm-knowledge",
+            "tools": {
+              "version": "0.1.7-rc.2",
+              "dir": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/context/agent-instructions/node_modules/@deepseek-ai/dsh-tools"
+            },
+            "cordis": {
+              "version": "4.0.4",
+              "dir": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/apps/cli/node_modules/@deepseek-ai/cordis"
+            }
+          },
+          {
+            "id": "@shine-mage/dsh-knowledge",
+            "tools": {
+              "version": "0.1.7-rc.2",
+              "dir": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/context/agent-instructions/node_modules/@deepseek-ai/dsh-tools"
+            },
+            "cordis": {
+              "version": "4.0.4",
+              "dir": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/apps/cli/node_modules/@deepseek-ai/cordis"
+            }
+          }
+        ],
+        "official_plugin_add": "NOT_RUN",
+        "full_host": "NOT_RUN",
+        "candidate_admission": "NOT_RUN",
+        "real_business": "NOT_RUN",
+        "release_ready": false
+      },
+      {
+        "scope": "page",
+        "path": "/Users/hutou/.codex/tasks/rc2-web-rollback-20261018/rebuilt-r2/reader/runs/page/runtime-inputs.json",
+        "sha256": "88aab445b0b51a3b49416f1316dcea426f2debfee7004f59b0877f9525990219",
+        "bindings": [
+          {
+            "id": "@shine-mage/dsh-crm-knowledge",
+            "tools": {
+              "version": "0.1.7-rc.2",
+              "dir": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/context/agent-instructions/node_modules/@deepseek-ai/dsh-tools"
+            },
+            "cordis": {
+              "version": "4.0.4",
+              "dir": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/apps/cli/node_modules/@deepseek-ai/cordis"
+            }
+          },
+          {
+            "id": "@shine-mage/dsh-knowledge",
+            "tools": {
+              "version": "0.1.7-rc.2",
+              "dir": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/context/agent-instructions/node_modules/@deepseek-ai/dsh-tools"
+            },
+            "cordis": {
+              "version": "4.0.4",
+              "dir": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/apps/cli/node_modules/@deepseek-ai/cordis"
+            }
+          },
+          {
+            "id": "@shine-mage/dsh-analytics-workbench-b0",
+            "tools": {
+              "version": "0.1.7-rc.2",
+              "dir": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/packages/context/agent-instructions/node_modules/@deepseek-ai/dsh-tools"
+            },
+            "cordis": {
+              "version": "4.0.4",
+              "dir": "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics/.context/dsh-b0/upstream-0.1.7-rc.2/apps/cli/node_modules/@deepseek-ai/cordis"
+            }
+          }
+        ],
+        "official_plugin_add": "NOT_RUN",
+        "full_host": "NOT_RUN",
+        "candidate_admission": "NOT_RUN",
+        "real_business": "NOT_RUN",
+        "release_ready": false
+      }
+    ]
+  },
+  "web_rollback": {
+    "status": "NOT_RUN",
+    "reason": "PACK_INPUT_READER_PASS_BUT_DISPOSABLE_RC2_WEB_HOST_NOT_STARTED",
+    "headed_browser": "NOT_RUN",
+    "history_restart_readback": "NOT_RUN",
+    "board_restart_readback": "NOT_RUN",
+    "cleanup": "NOT_RUN"
+  },
+  "formal_status": {
+    "M2-07": "BLOCKED",
+    "M2-08": "NOT_RUN",
+    "M2-09": "NOT_RUN",
+    "release_ready": false
+  },
+  "boundary": "This evidence proves fixed rc2 pack rebuild, provenance, profile input generation and official resolver composition readers. It does not prove host activation, headed browser rollback, target recovery, company release gates or production readiness."
+}
