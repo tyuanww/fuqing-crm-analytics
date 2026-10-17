@@ -5,7 +5,7 @@
 ## 当前快照（2026-10-17）与 alpha4 候选当前事实
 
 - 官方仓库最新发布为 `v0.2.1-alpha.4`，发布提交为 `86a402200d95fecef4529d969836f1fe13c6cb0d`。M2-07 当前候选已经切换到 alpha4；alpha3 只保留为上一轮候选记录。
-- 2026-10-17 当前公开主线已合并 PR #128–#132，最新 `origin/main=43639f110a5afcbb10bc6befae421f2ee8b1f983`；这些合并不改变 DSH `0.1.7-rc.2` pin、M2-07/M2-08 门禁或 `release_ready=false`。
+- 2026-10-17 当前公开主线已合并 PR #128–#133，最新 `origin/main=6ca1304fdeab40f460c5d19f25a7cd42167f2398`；这些合并不改变 DSH `0.1.7-rc.2` pin、M2-07/M2-08 门禁或 `release_ready=false`。
 - alpha4 官方 npm artifact SHA-256 为 `9f4fe0f466d7699ddd4686ee9692ec10c6d9f98a7d175fd5e55de01b2f64c8d6`。候选 source commit 为 `50d241cbd23aa2a9d188fe84c3864528a2206917`，固定 Node `24.19.0`、upstream pnpm `11.28.5`、插件 pnpm `11.28.2`。
 - alpha4 官方源码 host/client SDK 构建通过，9 个插件构建和 9 个 pack reader 验收通过。analytics-workbench 测试为 `34 pass / 1 skipped`，HTML 测试为 `130 pass`，CRM 全量测试为 `108 pass / 0 fail`。CRM 结果使用固定 alpha4 checkout，并在隔离证据目录补齐仓库级只读路径后取得；不替代公司 clean machine 验收。
 - alpha4 本地 runtime 检查通过：version、help、入口导入、KaTeX CSS、卸载和 rc2 回退均通过。回执为 `LOCAL_SIMULATION_ONLY`，不能替代正式 clean machine。
