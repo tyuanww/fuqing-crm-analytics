@@ -1,0 +1,285 @@
+{
+  "schema_version": "dsh-unified-owner-candidate/v1",
+  "candidate_id": "rc1-unified-owner-20261017-r1",
+  "scope": "OWNER_ONLY_CANDIDATE",
+  "formal_status": {
+    "M2-07": "BLOCKED",
+    "M2-08": "NOT_RUN",
+    "M2-09": "NOT_RUN",
+    "release_ready": false
+  },
+  "toolchain": {
+    "sdk": "0.2.1-rc.1",
+    "upstream_sha": "1600d8a1e140dcde43a1a0941940a0480712c011",
+    "upstream_lock_sha256": "952ca2f79998660dc690b739078a5d6052bc7c5c2193714b918b9d720baaeaba",
+    "node": "v24.19.0",
+    "upstream_pnpm": "11.28.5",
+    "plugin_pnpm": "11.28.2"
+  },
+  "source": {
+    "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+    "archive": {
+      "name": "dsh-rc1-source-85a92e05.tar.zst",
+      "bytes": 22321965,
+      "sha256": "d3f6cf54b4b012b62695c184e7063813634b6fa2717770f254afb69c305a5b66"
+    },
+    "tree": {
+      "sha256": "91c564e56095d86d7d146b766265cddbf619258209c20fb50236dccc2ab93173",
+      "entries": 3698,
+      "bytes": 47875944
+    },
+    "overlay": {
+      "cli_sha256": "a292446d3d91dc2e6ceff8863f8b6e6ce5b70f8db13aca288c67b7ce47a2689d",
+      "bridge_sha256": "490ab2b8ddd5065545cd800f5607469246b24bf3253fcd45ab53dcfc39e92ffd",
+      "hydration": "git-tracked-tree-no-lfs-pointers"
+    }
+  },
+  "packs": [
+    {
+      "directory": "analytics-workbench",
+      "id": "@shine-mage/dsh-analytics-workbench-b0",
+      "version": "0.0.0-b0",
+      "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+      "manifest_sha256": "f53d384e8fb481f599d76cb10f84909a3e2ba4a5202ea23539a5dff2974e2e83",
+      "tarball": {
+        "name": "shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+        "bytes": 438512,
+        "sha256": "4f443ed5f3ddadfc01fa239dc4db4afc257b4315a1f732b43ed9c7a0cb36812c"
+      },
+      "generated_bytes_provenance_sha256": "a948144e673bf4e2e73788e88759095d53b0542badb8a58d6ed8e2d908be7933"
+    },
+    {
+      "directory": "crm-knowledge",
+      "id": "@shine-mage/dsh-crm-knowledge",
+      "version": "0.0.0-crm.1",
+      "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+      "manifest_sha256": "b91f6bf371513a6e4deeb0278196f31c0cce301d4d38a4cb1863cf75c37e5952",
+      "tarball": {
+        "name": "shine-mage-dsh-crm-knowledge-0.0.0-crm.1.tgz",
+        "bytes": 234918,
+        "sha256": "6904460b5b7315326b71d7fdb6004fd7068a13b5939fab4d7c0b246a11a61319"
+      },
+      "generated_bytes_provenance_sha256": "b5bd4f6376523e183a14437787facae6b56009e1adfe08d3ae8307c293fc6778"
+    },
+    {
+      "directory": "knowledge",
+      "id": "@shine-mage/dsh-knowledge",
+      "version": "0.0.0-candidate.1",
+      "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+      "manifest_sha256": "89aec74fdf253aa03aa651cf31e5f4dfc1655ca0c903ad8586a1ec251b67a9e4",
+      "tarball": {
+        "name": "shine-mage-dsh-knowledge-0.0.0-candidate.1.tgz",
+        "bytes": 14478,
+        "sha256": "cce561e1fad0dfac39d7e62463b38a240e3a21d384928977e194c4cca9184408"
+      },
+      "generated_bytes_provenance_sha256": "69881b77b376ad1ab13eaf7e0fdf2da9ca22e61e431f6c92806cd13a186c57dd"
+    },
+    {
+      "directory": "shine-board",
+      "id": "@shine-mage/dsh-shine-board",
+      "version": "0.0.0-b0",
+      "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+      "manifest_sha256": "fbfea11e955fd5c0b0065eb8dbe4b71c0ee262928298b2564a05ce0929f34e42",
+      "tarball": {
+        "name": "shine-mage-dsh-shine-board-0.0.0-b0.tgz",
+        "bytes": 1075,
+        "sha256": "a000bb72cfbc409ac7eea9a2a5ce8f6f978dcbf4cae021943e6923919a07cf7d"
+      },
+      "generated_bytes_provenance_sha256": "144d35052bcecb8c339027b188d97ebf01dabeab6f73ca10ca17e799d5367880"
+    },
+    {
+      "directory": "shine-brand",
+      "id": "@shine-mage/dsh-shine-brand",
+      "version": "0.0.0-b0",
+      "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+      "manifest_sha256": "3a1514dd145eb1baa98a2b2b7a1ea7df8210949a06a9332bbd0bfa7e5c35d04a",
+      "tarball": {
+        "name": "shine-mage-dsh-shine-brand-0.0.0-b0.tgz",
+        "bytes": 1884,
+        "sha256": "c254d5000a0e92b4b073945a5cd20de9a5028e9695d4e6278631346e9df635a4"
+      },
+      "generated_bytes_provenance_sha256": "659f5e8042a3e991a906cc5541b894ab72923d7644300819364a3863104969d7"
+    },
+    {
+      "directory": "shine-crowd-action",
+      "id": "@shine-mage/dsh-shine-crowd-action",
+      "version": "0.0.0-b0",
+      "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+      "manifest_sha256": "8738019bab529b7d1dc1494139026c3545c3420d92de9d385698b7d1764e739a",
+      "tarball": {
+        "name": "shine-mage-dsh-shine-crowd-action-0.0.0-b0.tgz",
+        "bytes": 1124,
+        "sha256": "767bb4c532e5491e7c99e0bdc47d9bbb745451cc814015a6da0cd3a16d17b4ed"
+      },
+      "generated_bytes_provenance_sha256": "2af546c0837f2c0a82ce7e1708e56f656c044d196ff01c05847e6c726c2e6bba"
+    },
+    {
+      "directory": "shine-funnel",
+      "id": "@shine-mage/dsh-shine-funnel",
+      "version": "0.0.0-b0",
+      "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+      "manifest_sha256": "e2214f4d702a5ee5d78355050735b2d565ad34f49dc752c33a9476d5350d3aea",
+      "tarball": {
+        "name": "shine-mage-dsh-shine-funnel-0.0.0-b0.tgz",
+        "bytes": 2006,
+        "sha256": "838f834f97187ad3aacef678a524d2db33b077c80eb985eda8ef230cfd759b53"
+      },
+      "generated_bytes_provenance_sha256": "381dcf080c6e5003c51fd339ad9cfdd4c78db7e86b0e37bca8f0cebf6c240b1e"
+    },
+    {
+      "directory": "shine-query",
+      "id": "@shine-mage/dsh-shine-query",
+      "version": "0.0.0-b0",
+      "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+      "manifest_sha256": "b23c83995c83b50399bb222914f6910bf63017d9b0d28a7d1d0c608265bac832",
+      "tarball": {
+        "name": "shine-mage-dsh-shine-query-0.0.0-b0.tgz",
+        "bytes": 1062,
+        "sha256": "e4f9b76103d0c5978e2fce9c3fcb724c3d223db74bc2fa69831e98678f8dd308"
+      },
+      "generated_bytes_provenance_sha256": "fd734863137ba7a3c7f7f01a7cc1c85837a392967ed09a9e2da9ec4b5b82a139"
+    },
+    {
+      "directory": "shine-waterfall",
+      "id": "@shine-mage/dsh-shine-waterfall",
+      "version": "0.0.0-b0",
+      "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+      "manifest_sha256": "6beb885cd8719960f91cfd8cdfccf78290b87eb7083cec8a3d356f2572b3cffb",
+      "tarball": {
+        "name": "shine-mage-dsh-shine-waterfall-0.0.0-b0.tgz",
+        "bytes": 2248,
+        "sha256": "939a9b560fa22e391678260456c117e0340ec58cff5548aa2368bdc8400a829e"
+      },
+      "generated_bytes_provenance_sha256": "a9416c372230b601ef2608314a800bdb23c8c738070f8b95a597b756d76ac697"
+    }
+  ],
+  "profiles": [
+    {
+      "name": "page",
+      "profile_sha256": "e93e6f5e7975311f55bf1ee070b7aea009c938449c9a1542f3c2a503f40253fc",
+      "inputs_sha256": "256cbe5e462dfaf12f338156edc99be3682d9eb09b82cc4e3e62927a93fe46b5",
+      "plugins": [
+        "@shine-mage/dsh-analytics-workbench-b0",
+        "@shine-mage/dsh-shine-brand",
+        "@shine-mage/dsh-shine-waterfall",
+        "@shine-mage/dsh-shine-crowd-action",
+        "@shine-mage/dsh-shine-query",
+        "@shine-mage/dsh-shine-board",
+        "@shine-mage/dsh-shine-funnel"
+      ]
+    },
+    {
+      "name": "crm",
+      "profile_sha256": "7ed8ba8589f76dbd656897edadd5d9a6098549962c6a2882b8827f81f02c2245",
+      "inputs_sha256": "2a3dcd35307ac12323da7716dae009ffe346dc77a20f3f9221d768bfb72ab88d",
+      "plugins": [
+        "@shine-mage/dsh-crm-knowledge",
+        "@shine-mage/dsh-knowledge"
+      ]
+    }
+  ],
+  "runtime": {
+    "platform": "linux",
+    "arch": "x64",
+    "archive": {
+      "name": "runtime-linux-x64-owner-r4.tar.zst",
+      "bytes": 324087944,
+      "sha256": "b92d758994a09d7c315cd81f51ea16333fec0cc8b60364b63c40ccacb12a2d7b"
+    },
+    "tree": {
+      "sha256": "c24c20be77a4e334ed8d44ddc5220722c9927bc75c360d2672e2443f154d7be7",
+      "entries": 122258,
+      "bytes": 1307812947,
+      "symlinks": 6652
+    },
+    "builder": {
+      "status": "OWNER_TARGET_OVERLAY",
+      "host": "100.93.46.46",
+      "node": "v24.21.0",
+      "python": "3.14.4",
+      "pnpm": "11.28.5",
+      "formal_linux_rebuild": "NOT_RUN"
+    },
+    "merge": {
+      "base_runtime_sha256": "8a7fb15404bcb8a63824df9a43c1bf75e0bc45e002d3406349607ee202bd28df",
+      "overlay_receipt_sha256": "decde3979ce9bc07237b123513f2124e148d3b85127ccb566414509888d5a3d5",
+      "overlay_source": "/tmp/shinemage-owner-rc1-20261017-r4/runtime/node_modules",
+      "target_import": "PASS_TARGET_RUNTIME_PROFILE_IMPORT"
+    },
+    "native_binaries": [
+      {
+        "path": "node_modules/node-addon-require-builtin-linux-x64-gnu/prebuilt/linux-x64-gnu-napi-v9.node",
+        "bytes": 295392,
+        "sha256": "40c34d27d8339e246a8f7415a06152935496cdc06555ea8fce0e052011acc70f"
+      },
+      {
+        "path": "node_modules/@deepseek-ai/node-addon-system-linux-x64/bin/glibc/system.node",
+        "bytes": 17360,
+        "sha256": "54a9c25c05186c17520f6b7a5ced5f005752c08044c3eb76524cd517287600bc"
+      },
+      {
+        "path": "node_modules/node-pty/prebuilds/linux-x64/pty.node",
+        "bytes": 75976,
+        "sha256": "123792d8f22f36d519b21dfb6f4b716f9b18b9e579085ea2840d0773d88d35fd"
+      },
+      {
+        "path": "node_modules/sherpa-onnx-linux-x64/sherpa-onnx.node",
+        "bytes": 974496,
+        "sha256": "d8f1181559e7aecaa99493e8c441c16a4d51a18a1f3fcdf48fd7884e510f3767"
+      }
+    ],
+    "negative_scan": {
+      "absolute_private_var_specifier_files": [
+        "node_modules/.modules.yaml",
+        "node_modules/.pnpm/@deepseek-ai+dsh-client-ui-sidebar-documentpreview@file++++private+var+folders+tz+wswl3_bf8ae4752f41fe130307b896ec305e74/node_modules/@deepseek-ai/dsh-client-ui-sidebar-documentpreview/package.json",
+        "node_modules/.pnpm-workspace-state-v1.json",
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "formal_portable_linux": "BLOCKED_ABSOLUTE_SPECIFIER_AND_OWNER_OVERLAY"
+    }
+  },
+  "reverification": {
+    "target": "100.93.46.46",
+    "runtime_root": "/tmp/shinemage-owner-rc1-unified-20261017-r1/runtime",
+    "ports": {
+      "web": 14327,
+      "page": 18152
+    },
+    "target_profile_install": {
+      "status": "PASS",
+      "profile_id": "dsh-rc1",
+      "profile_sha256": "e93e6f5e7975311f55bf1ee070b7aea009c938449c9a1542f3c2a503f40253fc",
+      "inputs_sha256": "256cbe5e462dfaf12f338156edc99be3682d9eb09b82cc4e3e62927a93fe46b5",
+      "plugins": 7,
+      "receipt_path": "evidence/target-profile-pack-install.json",
+      "receipt_sha256": "0c3955af8a5985d3504483540a50a75ceda69b36f006feb76c2d88baed0d09ab"
+    },
+    "http": {
+      "web_status": 401,
+      "page_status": 404,
+      "status": "PASS_AUTH_BOUNDARY"
+    },
+    "headed_browser": {
+      "status": "PASS_OWNER_CANDIDATE_HEADED_SMOKE",
+      "title": "DeepSeek Harness",
+      "url": "http://127.0.0.1:14327/",
+      "visible_plugin_count": 7,
+      "visible_plugin_ids": [
+        "@shine-mage/dsh-analytics-workbench-b0",
+        "@shine-mage/dsh-shine-board",
+        "@shine-mage/dsh-shine-brand",
+        "@shine-mage/dsh-shine-crowd-action",
+        "@shine-mage/dsh-shine-funnel",
+        "@shine-mage/dsh-shine-query",
+        "@shine-mage/dsh-shine-waterfall"
+      ],
+      "console_errors": 0,
+      "console_warnings": "connection retry warnings because no DeepSeek login/API key was configured",
+      "workspace": "fresh runtime showed expected select-workspace prompt"
+    },
+    "history_board_restart": "NOT_RUN",
+    "formal_release": "NOT_RUN"
+  },
+  "generated_at": "2026-10-17T00:00:00Z"
+}

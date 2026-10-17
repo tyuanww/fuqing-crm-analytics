@@ -1,0 +1,66 @@
+{
+  "schema_version": "dsh-profile-pack-install/v1",
+  "profile_id": "dsh-rc1",
+  "profile_sha256": "e93e6f5e7975311f55bf1ee070b7aea009c938449c9a1542f3c2a503f40253fc",
+  "inputs_sha256": "256cbe5e462dfaf12f338156edc99be3682d9eb09b82cc4e3e62927a93fe46b5",
+  "plugins": [
+    {
+      "id": "@shine-mage/dsh-analytics-workbench-b0",
+      "root": "/tmp/shinemage-owner-rc1-unified-20261017-r1/dsh-runtime-live2/plugin-packs-DZ2nSV/installed/0/unpacked/package",
+      "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "f53d384e8fb481f599d76cb10f84909a3e2ba4a5202ea23539a5dff2974e2e83",
+      "pack_sha256": "4f443ed5f3ddadfc01fa239dc4db4afc257b4315a1f732b43ed9c7a0cb36812c"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-brand",
+      "root": "/tmp/shinemage-owner-rc1-unified-20261017-r1/dsh-runtime-live2/plugin-packs-DZ2nSV/installed/1/unpacked/package",
+      "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "3a1514dd145eb1baa98a2b2b7a1ea7df8210949a06a9332bbd0bfa7e5c35d04a",
+      "pack_sha256": "c254d5000a0e92b4b073945a5cd20de9a5028e9695d4e6278631346e9df635a4"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-waterfall",
+      "root": "/tmp/shinemage-owner-rc1-unified-20261017-r1/dsh-runtime-live2/plugin-packs-DZ2nSV/installed/2/unpacked/package",
+      "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "6beb885cd8719960f91cfd8cdfccf78290b87eb7083cec8a3d356f2572b3cffb",
+      "pack_sha256": "939a9b560fa22e391678260456c117e0340ec58cff5548aa2368bdc8400a829e"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-crowd-action",
+      "root": "/tmp/shinemage-owner-rc1-unified-20261017-r1/dsh-runtime-live2/plugin-packs-DZ2nSV/installed/3/unpacked/package",
+      "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "8738019bab529b7d1dc1494139026c3545c3420d92de9d385698b7d1764e739a",
+      "pack_sha256": "767bb4c532e5491e7c99e0bdc47d9bbb745451cc814015a6da0cd3a16d17b4ed"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-query",
+      "root": "/tmp/shinemage-owner-rc1-unified-20261017-r1/dsh-runtime-live2/plugin-packs-DZ2nSV/installed/4/unpacked/package",
+      "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "b23c83995c83b50399bb222914f6910bf63017d9b0d28a7d1d0c608265bac832",
+      "pack_sha256": "e4f9b76103d0c5978e2fce9c3fcb724c3d223db74bc2fa69831e98678f8dd308"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-board",
+      "root": "/tmp/shinemage-owner-rc1-unified-20261017-r1/dsh-runtime-live2/plugin-packs-DZ2nSV/installed/5/unpacked/package",
+      "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "fbfea11e955fd5c0b0065eb8dbe4b71c0ee262928298b2564a05ce0929f34e42",
+      "pack_sha256": "a000bb72cfbc409ac7eea9a2a5ce8f6f978dcbf4cae021943e6923919a07cf7d"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-funnel",
+      "root": "/tmp/shinemage-owner-rc1-unified-20261017-r1/dsh-runtime-live2/plugin-packs-DZ2nSV/installed/6/unpacked/package",
+      "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "e2214f4d702a5ee5d78355050735b2d565ad34f49dc752c33a9476d5350d3aea",
+      "pack_sha256": "838f834f97187ad3aacef678a524d2db33b077c80eb985eda8ef230cfd759b53"
+    }
+  ],
+  "host": "NOT_RUN",
+  "release_ready": false
+}
