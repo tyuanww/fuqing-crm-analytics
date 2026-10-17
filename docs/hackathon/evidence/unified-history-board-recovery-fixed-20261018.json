@@ -1,0 +1,133 @@
+{
+  "schema_version": "dsh-rc1-unified-history-board-recovery-fixed/v1",
+  "captured_at": "2026-10-18",
+  "candidate_id": "rc1-unified-owner-20261017-r1",
+  "scope": "OWNER_ONLY_CANDIDATE_SYNTHETIC",
+  "candidate": {
+    "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+    "upstream_sha": "1600d8a1e140dcde43a1a0941940a0480712c011",
+    "sdk": "@deepseek-ai/dsh@0.2.1-rc.1",
+    "runtime": "runtime-browser-unified-r5",
+    "runtime_root": "/tmp/shinemage-owner-rc1-unified-20261017-r1/runtime-browser-unified-r5",
+    "web_port": 14327,
+    "page_http_port": 18159,
+    "live_ports_untouched": [
+      4328,
+      4329
+    ]
+  },
+  "fixture": {
+    "history_module_sha256": "a01f0eb85590699c70fb6bb5b0b70b138f0ca4f2aae1fe29511d40776c6f6b6c",
+    "history_module_path": "unified-history-fixture-resume-20261018.mjs",
+    "resume_patch_sha256": "6578f4bc6599e3f0149bc0ffa96deedb0b319ed1f94d61ef282a17b13378311",
+    "resume_patch_path": "unified-history-resume-only-patch-20261018.json",
+    "history_content_sha256": "7489f35e529a0fd117378419c46d1014c2717434b259f4c02f92b28bc5d719bf",
+    "contains_real_data": false,
+    "model_calls": 0,
+    "lifecycle_fix": "ctx.sessionController.agents.resolveAgent(sessionId)"
+  },
+  "history": {
+    "session_id": "session-57b79737-3cfe-4978-b696-1a6179322469",
+    "workspace_id": "ef4c1f00-25b5-47dc-be91-4da51791d357",
+    "seed_status_before_restart": 200,
+    "seed_status_after_restart": 200,
+    "post_seed_restored": false,
+    "post_seed_note": "The fixture route resolved an existing live Agent after restart; the source of liveness differs by restart cycle.",
+    "session_log_result": "READABLE_AFTER_OWNED_RESTART",
+    "strict_cold_restore": {
+      "status": "HOST_AUTO_RESUMED",
+      "proof": false,
+      "reason": "The workspace-attached session was already live when the fixture route ran after restart."
+    },
+    "content_path": "runtime-browser-unified-r5/workspace/rc1-unified-history.html"
+  },
+  "board": {
+    "board_id": "rc1_unified_board",
+    "session_id": "session-57b79737-3cfe-4978-b696-1a6179322469",
+    "fixture_port": 18158,
+    "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+    "record_sha256": "ef28de86f9e6ae27fb1a20b8659d8f1c3b6a4687a4dcbf253b927234dc6676ac",
+    "list_status": 200,
+    "detail_status": 200,
+    "preview_status": 200,
+    "confirm_status": 200
+  },
+  "restart_cycles": {
+    "headed_evidence_cycle": {
+      "pre_supervisor_pid": 1154955,
+      "post_supervisor_pid": 1159680,
+      "pre_child_pid": 1155351,
+      "post_child_pid": 1159936,
+      "runtime_same": true,
+      "fresh_flag": false,
+      "headed_evidence_after_restart": true,
+      "fixture_note": "The headed browser restored the workspace Agent before the fixture route."
+    },
+    "additional_cold_cycle": {
+      "pre_supervisor_pid": 1159680,
+      "post_supervisor_pid": 1160619,
+      "pre_child_pid": 1159936,
+      "post_child_pid": 1160945,
+      "runtime_same": true,
+      "fresh_flag": false,
+      "fixture_restored": false,
+      "result": "HOST_AUTO_RESUMED",
+      "headed_capture_after_this_cycle": false,
+      "fixture_note": "The host startup had already resumed the workspace-attached Agent; no headed browser capture was taken in this cycle."
+    }
+  },
+  "headed_browser": {
+    "status": "PASS_SYNTHETIC_HEADED_UI_READBACK_HOST_AUTO_RESUMED",
+    "evidence_json": "unified-headed-history-board-readback-session57-20261018.json",
+    "evidence_json_sha256": "ae7ec8cb74e8eed53f8fe9c731d4c79eb5561368bb2683fb3b3688b07fb7c0a5",
+    "screenshot": "unified-headed-history-board-readback-session57-20261018.png",
+    "screenshot_sha256": "328ae77caf12ec01ce7b6f7d77a7ef1cf3450c7c66ee61d24f055e101efe2b1f",
+    "title": "rc1 unified history reread · synthetic · session57 — DeepSeek Harness",
+    "history_visible": true,
+    "board_title_visible": true,
+    "board_preview_action_visible": true,
+    "console_errors": 0,
+    "synthetic_only": true,
+    "gate_boundary": "Synthetic headed UI only; strict cold recovery remains open."
+  },
+  "subagent_duplicate": {
+    "diagnostic": "subagent-duplicate-diagnostic-20261018.json",
+    "diagnostic_sha256": "334a8a7a5674af9f7fa266f322a01f48a21e349e33d87e0075a54cde95ae0b79",
+    "duplicate_ids": {
+      "tool-subagent": 4,
+      "tool-subagent-fork": 4
+    },
+    "candidate_only_workaround": true,
+    "upstream_changed": false,
+    "preset_hashes_after_workaround": {
+      "standard": "f23b25db87a9cc99fabb0485fbfc28e04802ca47e67d5ca4b5145e0415f1e99b",
+      "cordis": "3e709fa367769836a47e09307536bb052c09ac64cbb8baa6ee8e983efdad99cd",
+      "ptc": "901a0af127276dc41059e22c010f675dfc235260f082c60d59eea02998c73ac5"
+    },
+    "backup_hashes_before_workaround": {
+      "standard": "0d398d2a6872a73a106cb3bd19303ecccf1637e1fcad4d0bf9d8a72d2c2c68f5",
+      "cordis": "01b0fc94fd49136b332254a7ae5658e43ffe646f7248047dba65d499cfc74596",
+      "ptc": "9e355c947bf61c3d2fe9bf3214b386f83c0d99d37579ce22576d4b82cb6e1a2c"
+    },
+    "diagnostic_phase": "PRE_WORKAROUND",
+    "diagnostic_captured_before_workaround": true,
+    "diagnostic_scope_note": "Active profile links reference one pack root; this receipt does not independently prove that the loader excludes historical directories."
+  },
+  "cleanup": {
+    "owned_unified_web_port_14327": "CLOSED",
+    "owned_board_ports_18158_18156": "CLOSED",
+    "live_ports_4328_4329": "LEFT_RUNNING",
+    "evidence": "unified-owned-cleanup-20261018.txt",
+    "evidence_sha256": "13f0727d40dbb70d6b5b16d2ef1a7dd747166163359ac8665724589df64439c0",
+    "verified_at": "2026-10-18",
+    "process_check": "NO_MATCH_FOR_OWNED_PIDS",
+    "ports_check": "NO_LISTENER_14327_18158_18156"
+  },
+  "prior_failure_receipt": "unified-history-board-recovery-20261017.json",
+  "formal_status": {
+    "M2-07": "BLOCKED",
+    "M2-08": "NOT_RUN",
+    "M2-09": "NOT_RUN",
+    "release_ready": false
+  }
+}

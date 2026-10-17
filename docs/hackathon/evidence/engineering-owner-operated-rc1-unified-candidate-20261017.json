@@ -261,8 +261,16 @@
       "status": "PASS_AUTH_BOUNDARY"
     },
     "headed_browser": {
-      "status": "FAILED_BROWSER_EVIDENCE_AFTER_RESTART",
-      "title": "DeepSeek Harness",
+      "status": "PASS_SYNTHETIC_HEADED_UI_READBACK_HOST_AUTO_RESUMED",
+      "title": "rc1 unified history reread · synthetic · session57 — DeepSeek Harness",
+      "session_id": "session-57b79737-3cfe-4978-b696-1a6179322469",
+      "history_visible": true,
+      "board_title_visible": true,
+      "board_preview_action_visible": true,
+      "console_errors": 0,
+      "synthetic_only": true,
+      "evidence": "docs/hackathon/evidence/unified-headed-history-board-readback-session57-20261018.json",
+      "evidence_sha256": "ae7ec8cb74e8eed53f8fe9c731d4c79eb5561368bb2683fb3b3688b07fb7c0a5",
       "url": "http://127.0.0.1:14327/",
       "visible_plugin_count": 7,
       "visible_plugin_ids": [
@@ -274,13 +282,20 @@
         "@shine-mage/dsh-shine-query",
         "@shine-mage/dsh-shine-waterfall"
       ],
-      "console_errors": 0,
-      "console_warnings": "stable session restoration failure: tool \"subagent\" is already registered; history/board headed UI readback not proven",
-      "workspace": "fresh runtime showed expected select-workspace prompt"
+      "workspace": "workspace-attached synthetic session57",
+      "gate_boundary": "Synthetic headed UI only; strict cold recovery remains open."
     },
-    "history_board_restart": "PARTIAL_HISTORY_NATIVE_ONLY",
+    "history_board_restart": "PARTIAL_HEADED_HISTORY_BOARD_READBACK_HOST_AUTO_RESUMED",
     "formal_release": "NOT_RUN",
-    "history_board_restart_receipt": "docs/hackathon/evidence/unified-history-board-recovery-20261017.json"
+    "history_board_restart_receipt": "docs/hackathon/evidence/unified-history-board-recovery-fixed-20261018.json",
+    "prior_history_board_restart_receipt": "docs/hackathon/evidence/unified-history-board-recovery-20261017.json",
+    "strict_cold_restore": {
+      "status": "HOST_AUTO_RESUMED",
+      "proof": false,
+      "evidence": "docs/hackathon/evidence/unified-history-board-recovery-fixed-20261018.json"
+    },
+    "last_reverified_at": "2026-10-18",
+    "updated_at": "2026-10-18"
   },
   "generated_at": "2026-10-17T00:00:00Z"
 }

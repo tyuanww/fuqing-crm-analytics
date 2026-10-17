@@ -52,7 +52,7 @@
 4. 插件页显示 7 个新候选插件，7 个开关均为启用状态。
 5. console errors 为 `0`。只有未配置 DeepSeek 登录/API key 产生的 connection retry warnings。
 6. fresh runtime 显示选择工作区提示。没有伪造真实用户任务或真实业务数据。
-7. 统一 candidate 已执行一次 owned stop/start。重启后 board native transport 的 list/detail/preview/confirm 均为 `200`，同一 history session 可由 `session/list` 与 `session/follow` 读回；但 fixture 注入口返回 `404 session missing`，headed browser 又出现 `tool "subagent" is already registered`，所以 headed UI history/board recovery 仍未通过。详见 [history/board recovery](unified-history-board-recovery-20261017.md)。
+7. 统一 candidate 的 recovery 细节见 [fixed recovery receipt](unified-history-board-recovery-fixed-20261018.md)。该回执记录 native transport 通过、synthetic headed UI readback 通过，以及严格 cold fixture 仍为 `HOST_AUTO_RESUMED`。
 
 ## 正式状态
 

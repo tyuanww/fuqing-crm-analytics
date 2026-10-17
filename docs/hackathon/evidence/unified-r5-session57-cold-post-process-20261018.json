@@ -1,0 +1,9 @@
+{
+  "supervisorPid": 1160619,
+  "childPid": 1160945,
+  "webPort": 14327,
+  "pageHttpBase": "http://127.0.0.1:18159",
+  "runtime": "/tmp/shinemage-owner-rc1-unified-20261017-r1/runtime-browser-unified-r5",
+  "upstream": "/tmp/shinemage-owner-rc1-unified-20261017-r1/runtime",
+  "pinned": "1600d8a1e140dcde43a1a0941940a0480712c011"
+}
