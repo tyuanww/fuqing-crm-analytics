@@ -91,6 +91,8 @@ plugin_pnpm=11.28.2
 
 任何 pack 从 ignored workspace、旧 runtime、旧 peer 或未登记路径读取时，整卡失败，不修补 receipt。
 
+rc1 的 analytics client build 还必须证明生成声明闭包可用。当前 rc1 `ui-workspace` 的 `workspace.toast` 增量声明没有被 client barrel 自动加载；候选适配只能显式加载 rc1 的 `toast.d.ts`，不能复用 alpha3 的宽泛 shim，也不能修改官方 upstream。
+
 ### EC-03：执行 rc1 consumer/runtime closure
 
 **目标**

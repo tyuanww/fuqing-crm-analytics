@@ -66,6 +66,24 @@
       ]
     },
     {
+      "step": "analytics_plugin_build_probe",
+      "result": "BLOCKED",
+      "error_code": "KIT_PACKAGE_UNAVAILABLE",
+      "detail": "isolated candidate did not yet have the @shine-mage/dsh-plugin-kit workspace link; no plugin bytes were produced"
+    },
+    {
+      "step": "analytics_rc1_api_probe",
+      "result": "BLOCKED",
+      "error_code": "TS2344_WORKSPACE_TOAST_SLOT_CONTRACT",
+      "detail": "after isolated package binding, host typecheck passed but client typecheck failed because rc1 ui-workspace slots.d.ts references workspace.toast before its toast.d.ts module augmentation is loaded; an extra toast.d.ts root produced zero diagnostics in a read-only probe"
+    },
+    {
+      "step": "analytics_rc1_candidate_adapter_probe",
+      "result": "PASS_IN_TEMPORARY_LANE",
+      "error_code": null,
+      "detail": "a candidate-only reference to the rc1 package toast.d.ts removed the TS2344 error; host/client typechecks and analytics build completed, but no main-tree code or pack was changed"
+    },
+    {
       "step": "pack_build",
       "result": "NOT_RUN",
       "detail": "pack build cannot start before rc1 upstream host/client build and isolated peer alignment"
