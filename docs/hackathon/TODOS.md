@@ -4,6 +4,20 @@
 
 ## M1 核心交付
 
+## Internal readiness
+
+### 公司内部 AI 工作台 Stage 0 任务卡与 owner 输入
+
+**What:** 登记一个真实试点部门、岗位、用户和内容任务，补齐输入/输出、允许数据类别、每周最低频次、当前耗时，以及 IT/IdP、数据和基础设施 owner、目标日期；在这些输入齐全前，Stage 0 只运行 harness-only 验证。
+
+**Why:** 内部使用与 M2 正式发布分开推进。没有真实任务卡和责任人，任何运行结果都不能证明任务可行性、Stage 1 readiness 或 500 人扩展价值。
+
+**Context:** 内部环境默认目标改为 npm `latest` 的 DSH `0.2.0-rc.2`，并固定 tarball SHA、manifest、pack digest、controlled-host fresh runtime、credential deny、local-only receipt 和 owned cleanup；主仓 `0.1.7-rc.2` 只保留为兼容基线和历史证据边界。当前只允许合成/脱敏 harness smoke；OIDC、共享持久化、备份/恢复、14 天/60 次 cohort metrics 和内网 Stage 1 均保持阻塞。详见 `docs/hackathon/evidence/engineering-closeout-20261017.md` 和 `docs/designs/internal-ai-workbench-readiness.md`。
+
+**Effort:** S
+**Priority:** P1
+**Depends on:** 试点部门 owner、公司 IT/IdP owner、数据 owner、基础设施 owner；不改变 M2-07、M2-08、M2-09 或 `release_ready=false`。
+
 ## M2 收尾任务卡与维修规则
 
 以下任务卡只覆盖 M1 之后仍开放的验收、供应链和发布门禁。每张卡独立推进、独立验证、独立本地提交；没有满足前置条件时保持 `NOT_RUN` 或 `BLOCKED`，不使用历史回执补齐当前证据。
