@@ -38,6 +38,20 @@ export function directTarballInputs(lock) {
 
 export function runtimeInputCache(upstream) { return join(dirname(resolve(upstream)), 'runtime-inputs'); }
 
+/**
+ * Hash only the pinned checkout's source/build inputs. Installed dependencies
+ * are materialized by pnpm deploy and are bound separately by the lockfile,
+ * direct archive integrity and the final runtime/generated tree digest.
+ */
+export async function runtimeSourceTree(root) {
+  return canonicalTreeDigest(root, {
+    exclude: ['.git', '.context', 'node_modules', '.build-provenance.json', 'build-provenance.json'],
+    excludeEntry: ({ name, directory }) => !directory && omitted.test(name) && !sourceModule.test(name),
+    normalizeSymlinkTargets: true,
+    allowSymlinks: true,
+  });
+}
+
 export function runtimeDeployArgs(destination, { online = false } = {}) {
   // Modern deploy derives a frozen closure from workspace importer snapshots.
   // Legacy deploy re-resolves ranges and needs mutable registry metadata.
@@ -47,11 +61,7 @@ export function runtimeDeployArgs(destination, { online = false } = {}) {
 }
 
 async function preparationIdentity(upstream) {
-  const tree = await canonicalTreeDigest(upstream, {
-    exclude: ['.git', '.context', '.build-provenance.json', 'build-provenance.json', 'node_modules/.cache'],
-    excludeBasenames: ['.env', '.env.js', '.npmrc', 'credentials.json', 'credentials-local.json'],
-    allowSymlinks: true,
-  });
+  const tree = await runtimeSourceTree(upstream);
   return {
     schema_version: 'dsh-runtime-preparation/v1', upstream_sha: DSH_UPSTREAM_SHA,
     lock_sha256: hash(await readFile(join(upstream, 'pnpm-lock.yaml'))),

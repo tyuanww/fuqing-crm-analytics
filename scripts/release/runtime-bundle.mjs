@@ -11,7 +11,7 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { scanText } from './secret-scan.mjs';
 import { DSH_UPSTREAM_SHA as PIN } from './toolchain.mjs';
-import { bindRuntimeInputs, prepareRuntimeInputs, runtimeDeployArgs, stageRuntimeWorkspace, verifyRuntimePreparation } from './runtime-inputs.mjs';
+import { bindRuntimeInputs, prepareRuntimeInputs, runtimeDeployArgs, runtimeSourceTree, stageRuntimeWorkspace, verifyRuntimePreparation } from './runtime-inputs.mjs';
 import { canonicalTreeDigest, GENERATED_PROVENANCE_SCHEMA } from './generated-provenance.mjs';
 
 const execFile = promisify(execFileCallback);
@@ -278,11 +278,7 @@ try {
     maxBuffer: 4 * 1024 * 1024,
   });
   await restoreStagedMetadata();
-  const sourceTree = await canonicalTreeDigest(workspace, {
-    exclude: ['.git', '.context', '.build-provenance.json', 'build-provenance.json', 'node_modules/.cache'],
-    excludeBasenames: ['.env', '.env.js', '.npmrc', 'credentials.json', 'credentials-local.json'],
-    allowSymlinks: true,
-  });
+  const sourceTree = await runtimeSourceTree(workspace);
   if (preparation) assert.equal(sourceTree.sha256, preparation.source_tree.sha256, 'RUNTIME_SOURCE_TREE_MISMATCH');
   const materialized = await materializeExternalSymlinks(deployed, workspace, upstreamSha);
   for (const path of REQUIRED) await access(join(deployed, path));

@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { access, mkdir, mkdtemp, readFile, readlink, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { bindRuntimeInputs, directTarballInputs, recordRuntimePreparation, runtimeDeployArgs, runtimeInputCache, stageRuntimeWorkspace, verifyRuntimePreparation } from './runtime-inputs.mjs';
+import { bindRuntimeInputs, directTarballInputs, recordRuntimePreparation, runtimeDeployArgs, runtimeInputCache, runtimeSourceTree, stageRuntimeWorkspace, verifyRuntimePreparation } from './runtime-inputs.mjs';
 import { UPSTREAM_PNPM_VERSION } from './toolchain.mjs';
 
 async function fixture(t) {
@@ -96,6 +96,32 @@ test('offline policy reuse requires a prepared receipt bound to the exact lock a
   await assert.rejects(() => verifyRuntimePreparation(f.upstream), /RUNTIME_PREPARATION_MISMATCH policy_sha256/);
   await writeFile(join(f.upstream, 'pnpm-lock.yaml'), 'changed lock');
   await assert.rejects(() => verifyRuntimePreparation(f.upstream), /RUNTIME_PREPARATION_REQUIRED/);
+});
+
+test('source provenance excludes the materialized dependency tree but rejects source drift', async t => {
+  const f = await fixture(t);
+  await recordRuntimePreparation(f.upstream);
+  const dependency = join(f.upstream, 'node_modules/.pnpm/fixture@0.20.3/node_modules/fixture/package.json');
+  await writeFile(dependency, JSON.stringify({ name: 'fixture', version: '0.20.3', materialized: 'runtime-deploy' }));
+  await assert.doesNotReject(() => verifyRuntimePreparation(f.upstream));
+  await writeFile(join(f.upstream, 'packages/credentials-local/source-input.js'), 'export const changed = true;');
+  await assert.rejects(() => verifyRuntimePreparation(f.upstream), /RUNTIME_PREPARATION_MISMATCH source_tree/);
+});
+
+test('source provenance matches the staged source after omission and symlink normalization', async t => {
+  const f = await fixture(t);
+  await mkdir(join(f.upstream, 'packages/links'), { recursive: true });
+  await symlink('../credentials-local/credentials.js', join(f.upstream, 'packages/links/source.js'));
+  await recordRuntimePreparation(f.upstream);
+  const source = await runtimeSourceTree(f.upstream);
+  await stageRuntimeWorkspace(f.upstream, f.stage);
+  const staged = await runtimeSourceTree(f.stage);
+  assert.equal(staged.sha256, source.sha256);
+  assert.equal(staged.entries, source.entries);
+  await writeFile(join(f.upstream, 'packages/credentials-local/credentials.json'), '{"ignored":"changed"}');
+  await assert.doesNotReject(() => verifyRuntimePreparation(f.upstream));
+  await writeFile(join(f.upstream, 'packages/credentials-local/credentials.js'), 'export const controller = false;');
+  await assert.rejects(() => verifyRuntimePreparation(f.upstream), /RUNTIME_PREPARATION_MISMATCH source_tree/);
 });
 
 test('offline deployment intercepts HTTP, fetch and raw sockets before connecting', async () => {

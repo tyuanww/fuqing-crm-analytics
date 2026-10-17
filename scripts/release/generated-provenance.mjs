@@ -37,7 +37,8 @@ function selected(path, include, exclude) {
  * mtimes, uid/gid and archive metadata are deliberately excluded.
  */
 export async function canonicalTreeDigest(root, { include = [], exclude = [], allowSymlinks = false,
-  excludeBasenames = [], maxEntries = MAX_ENTRIES, maxBytes = MAX_BYTES } = {}) {
+  excludeBasenames = [], excludeEntry = null, normalizeSymlinkTargets = false,
+  maxEntries = MAX_ENTRIES, maxBytes = MAX_BYTES } = {}) {
   const physicalRoot = await realpath(resolve(root));
   const includePatterns = normalizePatterns(include);
   const excludePatterns = normalizePatterns(exclude);
@@ -50,11 +51,13 @@ export async function canonicalTreeDigest(root, { include = [], exclude = [], al
       const path = join(directory, entry.name);
       const rel = slash(prefix ? `${prefix}/${entry.name}` : entry.name);
       if (excludedNames.has(entry.name)) continue;
+      if (excludeEntry?.({ name: entry.name, path: rel, directory: entry.isDirectory(), symlink: entry.isSymbolicLink() })) continue;
       if (!selected(rel, includePatterns, excludePatterns)) continue;
       if (entry.isSymbolicLink()) {
         assert.ok(allowSymlinks, `TREE_DIGEST_SYMLINK ${rel}`);
         const target = await readlink(path);
-        records.push({ path: rel, type: 'symlink', target });
+        records.push({ path: rel, type: 'symlink', target: normalizeSymlinkTargets
+          ? slash(relative(physicalRoot, resolve(directory, target))) : target });
       } else if (entry.isDirectory()) {
         records.push({ path: rel, type: 'directory' });
         await walk(path, rel);
