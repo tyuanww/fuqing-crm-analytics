@@ -17,7 +17,7 @@
     "cordis": "4.0.5",
     "temporary_candidate_root": "/tmp/dsh-rc1-candidate.bMFp7P",
     "temporary_inventory": "/tmp/dsh-rc1-probe.h1nse4/rc1-input-inventory.json",
-    "temporary_inventory_sha256": "b82ebb63debb2d70e2b2038275252def36fbd39129193879454cb2194ebe7d71"
+    "temporary_inventory_sha256": "c2daeac6c5eccfa78214ca80210cb8713442948e1a93225c28afb4027091a076"
   },
   "observations": [
     {
@@ -140,6 +140,18 @@
       "result": "BLOCKED",
       "error_code": "PROVENANCE_SOURCE_SHA_SPLIT",
       "detail": "analytics was first built at fe1a43c2 while the remaining adapters were built at db244fe1; all nine builds must be rerun from one final candidate commit before pack generation"
+    },
+    {
+      "step": "subject_set_alignment_rerun",
+      "result": "PASS_IN_TEMPORARY_LANE",
+      "error_code": null,
+      "detail": "all nine plugin builds were rerun from the same final temporary candidate commit and every provenance receipt used the same source SHA",
+      "source_git_sha": "db244fe1ba37f9456dba4c328ad240446d087dd9",
+      "plugins": 9,
+      "node": "24.19.0",
+      "pnpm": "11.28.2",
+      "clean": true,
+      "isolated": true
     },
     {
       "step": "pack_build",
