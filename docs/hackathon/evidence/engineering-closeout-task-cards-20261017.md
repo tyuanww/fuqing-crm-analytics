@@ -22,7 +22,7 @@ C0_INPUT_FREEZE=PASS
 EC-01=INPUTS_FROZEN
 EC-02=PASS_IN_LOCAL_REPLAYABLE_LANE
 EC-03=PASS_IN_LOCAL_REPLAYABLE_LANE_BROWSER_ENTRY_PASS
-EC-04=HISTORY_BROWSER_PASS_BOARD_TRANSPORT_POST_RESTART_PASS_NATIVE_BOARD_CANVAS_BLOCKED_RESTART_PASS_ROLLBACK_SDK_CLI_PASS_WEB_ROLLBACK_NOT_RUN
+EC-04=HISTORY_BROWSER_PASS_BOARD_TRANSPORT_PASS_NATIVE_BOARD_CANVAS_PASS_PAGE_HTTP_ON_RESTART_PASS_ROLLBACK_SDK_CLI_PASS_WEB_ROLLBACK_NOT_RUN
 EC-05=NOT_IMPLEMENTED
 EC-06=DEFERRED
 ```
@@ -151,7 +151,7 @@ dependency graph、SBOM、provenance、runtime import receipt 和 command/exit-c
 
 **当前结果**
 
-固定 Node24/pnpm11.28.2 的 rc1 隔离 candidate 已在独立 14327 端口启动，并注入 candidate-bound synthetic history/board fixture。真实 Chrome headed browser 在重启前后都回读了同一 history session、交付物和 board tool card；点击 board 预览后原生 DSH 进入项目驾驶舱，但显示“页库暂时不可用”，因此 native board canvas 保持阻塞。18139 页面仅为 loopback board transport observer，不能写成 Workbench UI PASS。候选 owned stop/start、重启后 history 回读和 rc2 SDK/CLI rollback 均有真实回执；rollback 的 web 侧因没有 rc2 profile pack 保持 `NOT_RUN`。完整机器可读回执见 [rc1 lifecycle recovery](engineering-closeout-rc1-lifecycle-recovery-20261017.json)，browser entry 的历史入口回执仍保留为 [browser entry probe](engineering-closeout-rc1-browser-entry-20261017.json)。
+固定 Node24/pnpm11.28.2 的 rc1 隔离 candidate 已在独立 14327 端口启动，并注入 candidate-bound synthetic history/board fixture。上一轮的“页库暂时不可用”根因是候选没有启用 page HTTP，导致 `preferencesReady=false`。本轮用现有 `--page-http on --page-http-port 18140` 重启，并让 18142 的临时 board fixture 补齐原生 TEXT 组件公共字段。真实 Chrome headed browser 在重启前后都回读了同一 history session、交付物、board tool card 和原生 canvas。首次进入驾驶舱需要一次真实“刷新产物”来完成异步 board 列表回读；随后 AX 读到 `看板画布，可横向和纵向滚动`、标题 `候选合成说明`、版本 `1` 和同一 source SHA。预览保持 `PENDING`，没有执行 confirm。候选 owned stop/start、page HTTP preferences/pages、board RPC、重启后 history/board 回读和 rc2 SDK/CLI rollback 均有真实回执；rollback 的 web 侧因没有 rc2 profile pack 保持 `NOT_RUN`。完整机器可读回执见 [rc1 lifecycle recovery](engineering-closeout-rc1-lifecycle-recovery-20261017.json)，browser entry 的历史入口回执仍保留为 [browser entry probe](engineering-closeout-rc1-browser-entry-20261017.json)。
 
 ### EC-05：内部 Stage 0（条件任务卡）
 
