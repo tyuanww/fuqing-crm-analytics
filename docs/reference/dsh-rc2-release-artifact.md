@@ -30,6 +30,7 @@
 | `pnpm dsh plugin service-preflight --python /absolute/python3.14 --manifest /absolute/service-manifest.json --manifest-sha256 SHA256 --wheelhouse /absolute/wheels` | 安装前只读核对已核验清单、WSL2/Python、固定 wheel 闭包及平台/ABI/Requires-Python | 仅首购服务；通过退出 0，环境或输入阻断退出 2；不安装/启动/写 journal，冷安装与供应链仍 NOT_RUN |
 | `pnpm dsh verify --scope local` | 运行本地 doctor、synthetic compatibility/backpressure | 本地合同通过返回 0；不代表生产可发布 |
 | `pnpm dsh verify [--scope release]` | 运行发布级 doctor、synthetic compatibility/backpressure 并检查发布门禁 | 当前真实 WSL2/HTTP/15 分钟 SLI 未完成时退出 2 并打印 `RELEASE_BLOCKED` |
+| `pnpm dsh verify --help` / `pnpm dsh status --help` / `pnpm dsh resume --help` | 打印只读用法，不读取 state、不启动服务 | 退出 0；帮助合同与根 CLI 一致 |
 | `pnpm dsh preflight --check --python ABS --tag TAG` | 在已有 runtime bundle 时只读检查正式 preflight 的工具链、固定 upstream、插件入口、runtime bundle 和输出目录 | 检查失败在构建前退出 2，不联网、不生成 artifact；正式 `preflight` 会自行生成 runtime |
 | `pnpm dsh reconcile /absolute/state.json REMOTE` | 将远端 receipt 与 durable state 对账 | `CONFLICT`/`UNKNOWN` 退出 2；不采用远端未知状态 |
 | `pnpm dsh status /absolute/state.json` | 打印 durable state | 只读；缺少 state path 时 fail closed |
