@@ -8,6 +8,7 @@
 - C0 版本输入冻结已完成，见 [rc1 runtime input freeze](docs/hackathon/evidence/m2-07-rc1-runtime-input-freeze-20261017.json)。该回执只冻结真实版本和工具链输入；当前 `rc1_latest_candidate=PLANNED_NOT_BUILT`、`stage0_wrapper=NOT_IMPLEMENTED`，rc1 隔离 candidate、9 包重建、consumer closure 和 compatibility smoke 仍为 `NOT_RUN`，不把输入冻结写成 candidate PASS。红队阻断项见 [工程收尾红队攻击记录](docs/hackathon/evidence/engineering-closeout-redteam-20261017.md)。
 - C1/C3 rc1 candidate probe 已执行并保留真实阶段结果，见 [rc1 candidate probe](docs/hackathon/evidence/m2-07-rc1-candidate-probe-20261017.json)：rc1 upstream frozen install 通过，官方 `build:official` 的 9/9 gate 通过并生成 host/client/web `lib`；新建的 7-plugin page profile 和 2-plugin CRM/Knowledge profile 通过 snapshot/release profile 校验。旧 rc2 profile 仍会触发 `PROFILE_DSH_PIN_MISMATCH`；临时 peer 替换未生成 pack，profile-pack inputs、9 包、consumer closure 和 browser/recovery 仍未完成，不能写成 rc1 candidate PASS。
 - rc1 analytics build 在隔离 lane 暴露了真实 API 接缝：host typecheck 通过，client 因 `workspace.toast` 声明未由 rc1 ui-workspace client barrel 加载而触发 `TS2344`；只在临时 lane 显式加载 rc1 `toast.d.ts` 后 build 通过。该适配尚未进入主仓或 pack，不能写成 rc1 build PASS。
+- rc1 临时 lane 继续暴露第二个真实接缝：6 个简单插件 build/provenance 通过；CRM/Knowledge 在 rc1 `MarkdownText.d.ts` 的 KaTeX CSS side-effect import 上触发 `TS2882`。需要 candidate-only CSS ambient declaration 后再重跑，当前未生成任何 rc1 formal pack。
 
 - 官方仓库最新发布为 `v0.2.1-alpha.4`，发布提交为 `86a402200d95fecef4529d969836f1fe13c6cb0d`。M2-07 当前候选已经切换到 alpha4；alpha3 只保留为上一轮候选记录。
 - 2026-10-17 当前公开主线已包含本轮治理与状态文档；当前 `main` SHA 以 Git 实查为准。这些合并不改变 DSH `0.1.7-rc.2` pin、M2-07/M2-08 门禁或 `release_ready=false`。

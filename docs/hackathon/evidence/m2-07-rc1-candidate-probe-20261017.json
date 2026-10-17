@@ -94,6 +94,18 @@
       }
     },
     {
+      "step": "remaining_plugin_builds_probe",
+      "result": "PARTIAL_PASS_IN_TEMPORARY_LANE",
+      "error_code": null,
+      "detail": "shine-brand, shine-board, shine-crowd-action, shine-funnel, shine-query and shine-waterfall built with provenance PASS; no formal pack was emitted"
+    },
+    {
+      "step": "crm_knowledge_rc1_build_probe",
+      "result": "BLOCKED",
+      "error_code": "TS2882_KATEX_CSS_DECLARATION",
+      "detail": "rc1 MarkdownText.d.ts side-effect imports katex/dist/katex.min.css but the consumer typecheck has no CSS ambient declaration; the upstream katex file exists"
+    },
+    {
       "step": "pack_build",
       "result": "NOT_RUN",
       "detail": "pack build cannot start before rc1 upstream host/client build and isolated peer alignment"

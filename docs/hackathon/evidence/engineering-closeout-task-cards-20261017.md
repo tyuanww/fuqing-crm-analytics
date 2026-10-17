@@ -93,6 +93,8 @@ plugin_pnpm=11.28.2
 
 rc1 的 analytics client build 还必须证明生成声明闭包可用。当前 rc1 `ui-workspace` 的 `workspace.toast` 增量声明没有被 client barrel 自动加载；候选适配只能显式加载 rc1 的 `toast.d.ts`，不能复用 alpha3 的宽泛 shim，也不能修改官方 upstream。
 
+CRM/Knowledge 还必须显式验证 rc1 Markdown 类型对 `katex/dist/katex.min.css` 的 side-effect import；缺少 CSS ambient declaration 时应停在 `TS2882`，不能用跳过类型检查或打包成功掩盖。
+
 ### EC-03：执行 rc1 consumer/runtime closure
 
 **目标**
