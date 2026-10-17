@@ -61,6 +61,8 @@ plugin_pnpm=11.28.2
 
 出现浮动 `latest`、旧 rc2 peer、alpha4 peer、未绑定 SHA、dirty source 或 manifest 与实际字节不一致时，卡片失败。
 
+现有 `config/dsh-profile.rc2.json` 和旧 profile pack inputs 不能复用。rc1 必须重新生成 profile、pack inputs 和组合 subject set，否则会触发 `PROFILE_DSH_PIN_MISMATCH`。
+
 ### EC-02：建立 rc1 隔离 candidate lane
 
 **目标**

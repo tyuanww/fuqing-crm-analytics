@@ -1,0 +1,59 @@
+{
+  "schema_version": "engineering-rc1-candidate-probe/v1",
+  "recorded_at": "2026-10-17T06:50:42Z",
+  "scope": "internal-engineering-closure",
+  "candidate_id": "dsh-rc1-candidate-probe-20261017",
+  "status": "BLOCKED_KIT_SDK_ENTRY_MISSING",
+  "inputs": {
+    "upstream_tag": "dsh-v0.2.1-rc.1",
+    "upstream_sha": "1600d8a1e140dcde43a1a0941940a0480712c011",
+    "upstream_lock_sha256": "952ca2f79998660dc690b739078a5d6052bc7c5c2193714b918b9d720baaeaba",
+    "sdk_tarball_sha256": "6d0c6fe8ad0c21797a27d6afc0cb69a022714ea0cd7331e4cba8b07b8ce19009",
+    "node": "24.19.0",
+    "upstream_pnpm": "11.28.5",
+    "plugin_pnpm": "11.28.2",
+    "cordis": "4.0.5",
+    "temporary_candidate_root": "/tmp/dsh-rc1-candidate.bMFp7P"
+  },
+  "observations": [
+    {
+      "step": "upstream_frozen_install",
+      "result": "PASS",
+      "detail": "pnpm install --frozen-lockfile --ignore-scripts completed with 1725 lock entries"
+    },
+    {
+      "step": "inspect_toolchain",
+      "result": "BLOCKED",
+      "error_code": "KIT_SDK_ENTRY_MISSING",
+      "detail": "rc1 upstream source was installed but official host/client build had not produced the required lib entry"
+    },
+    {
+      "step": "plugin_peer_alignment",
+      "result": "TEMPORARY_PREPARED",
+      "detail": "isolated probe replaced nine dsh-tools peers with 0.2.1-rc.1 and CRM/Knowledge Cordis with 4.0.5; no pack was built"
+    },
+    {
+      "step": "profile_preflight",
+      "result": "BLOCKED",
+      "error_code": "PROFILE_DSH_PIN_MISMATCH",
+      "detail": "existing config/dsh-profile.rc2.json still binds sdk 0.1.7-rc.2 and upstream 477b4f42 while the isolated toolchain is rc1"
+    },
+    {
+      "step": "pack_build",
+      "result": "NOT_RUN",
+      "detail": "pack build cannot start before rc1 upstream host/client build and isolated peer alignment"
+    }
+  ],
+  "next_steps": [
+    "Build rc1 upstream host/client packages with the official toolchain",
+    "Re-run inspectToolchain against the built rc1 checkout",
+    "Align nine plugin dsh-tools peers to 0.2.1-rc.1 and CRM/Knowledge Cordis to 4.0.5 in the isolated lane",
+    "Re-run plugin pack and consumer closure probes"
+  ],
+  "formal_release": {
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "m2_09": "NOT_RUN",
+    "release_ready": false
+  }
+}
