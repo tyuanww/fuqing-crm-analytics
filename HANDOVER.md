@@ -1,6 +1,6 @@
 # 交接说明（短表）
 
-> **最后更新**: 2026-10-11。当前产品 VERSION、公开 `main`、DSH pin 和未关闭门禁只看 [STATUS.md](STATUS.md)；PR #111–#118 已合并，当前远端 `main` 为 `4859d136`，post-merge CI 见[最新远端事实记录](docs/hackathon/evidence/shinemage-remote-repository-postmerge-r4-20261011.md)。本地历史候选已完成归档和清理，恢复清单见[本次清理证据](docs/hackathon/evidence/shinemage-local-cleanup-20261010.md)。下方杭州入口与运行路径保留为 2026-09-29 的历史快照，不代表当前生产切换或候选已激活。
+> **最后更新**: 2026-10-17。当前产品 VERSION、公开 `main`、DSH pin 和未关闭门禁只看 [STATUS.md](STATUS.md)。PR #128–#132 已合并，当前远端 `main` 为 `43639f11`；合并不代表生产激活，M2-07 仍 BLOCKED、M2-08 仍 NOT_RUN、`release_ready=false`。本地历史候选已完成归档和清理，恢复清单见[本次清理证据](docs/hackathon/evidence/shinemage-local-cleanup-20261010.md)。下方入口、代码归属和运行路径是带日期的历史快照，不代表当前生产切换或候选已激活。
 > 细节以代码与下列 SSOT 为准，**不要**在本文件堆 sprint 日记。
 
 ## 历史运行入口快照（2026-09-29）
@@ -17,7 +17,7 @@
 
 所有公开入口均由 Cloudflare Tunnel 转到杭州 loopback，HTTP 强制跳转 HTTPS；HSTS 当前为六个月，未启用 preload/includeSubDomains。`learn` 额外启用 Permissions-Policy 与 CSP Report-Only，未把 Neo4j 或管理端口暴露到公网。
 
-## 代码与运行归属
+## 历史代码与运行归属快照（截至 2026-10-11）
 
 - Mac 公共 checkout：`/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics-public`，负责开发、测试、feature 分支、PR。
 - 杭州 Windows + WSL：`/srv/shinemage/src/fuqing-crm-analytics`，只检出批准 SHA 并运行生产服务；当前杭州 CRM checkout 固定 `47f49616`，现役 DSH 仍是 RC1；候选 DSH upstream 固定 `477b4f42`，未执行切换。
