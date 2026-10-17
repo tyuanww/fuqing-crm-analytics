@@ -45,6 +45,7 @@
 ## 本轮施工计划
 
 - 先合并候选升级、插件 pack provenance 和 CLI 入口文档，再由 clean reviewed commit 进入 release preflight；正式部署仍受 M2 门禁和批准 artifact 约束。
+- 当前 push 前 B0 仍缺与 rc2 profile lock 匹配、且带 `dsh-generated-bytes/v1` 的九包输入；历史组合 pack 被 reader 真实拒绝为 `PLUGIN_PACK_BUILD_PROVENANCE_REQUIRED`，不能复用或补写 provenance。
 
 ## 历史快照入口
 
