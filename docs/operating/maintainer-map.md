@@ -8,6 +8,7 @@
 2. 现在什么在跑：只看 [STATUS.md](../../STATUS.md)。
 3. 怎么生成驾驶舱 HTML：[从对话生成 HTML 驾驶舱](cockpit-native-html.md)。
 4. `docs/hackathon/` 和 `docs/history/` 是档案。里面的旧提交号不属于这个公开仓库的 `main`。
+5. Harness 升级和插件替换按[候选升级操作手册](dsh-upgrade-candidate.md)执行；它不改变主仓兼容钉。
 
 ## 三块目录
 

@@ -30,7 +30,7 @@
 
 ## DSH 升级：单独的一条变更轴
 
-DSH 升级不能简化为“从官网 `npm install latest` 后插入”。正确做法是把 DSH 版本和插件版本当成两个独立轴：
+DSH 升级不能简化为“从官网 `npm install latest` 后插入”。正确做法是把 DSH 版本和插件版本当成两个独立轴。完整的官方 tag、隔离候选、pack provenance、消费闭包、回读和回退顺序见[候选升级操作手册](./dsh-upgrade-candidate.md)：
 
 ```text
 固定 DSH SHA ──┬── 插件 A 版本

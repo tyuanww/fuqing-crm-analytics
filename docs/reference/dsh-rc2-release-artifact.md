@@ -4,7 +4,7 @@
 
 ## 命令入口
 
-根目录 `package.json` 将 `pnpm dsh` 映射到 `node scripts/dsh.mjs`。运行时要求 Node 24.x；锁文件使用 pnpm 11.7.0。
+根目录 `package.json` 将 `pnpm dsh` 映射到 `node scripts/dsh.mjs`。运行时要求 Node 24.x。上游 Harness checkout 的锁文件使用其自身要求的 pnpm（当前固定为 `11.7.0`）；插件、kit 和 build-tools 使用 `pnpm@11.28.2`。两者是不同工具链角色，升级候选时分别记录，不用 `latest` 混用。
 
 根目录 `package.json` 的 `version` 保持 npm 三段 projection（当前为 `0.20.0`），以兼容 npm 工具链；候选发布产品版本以根目录 `VERSION` 的四段值 `0.20.0.0` 为准，artifact manifest 和发布门禁均读取 `VERSION`。
 

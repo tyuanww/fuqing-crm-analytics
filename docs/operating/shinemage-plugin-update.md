@@ -1,5 +1,7 @@
 # How to 更新一个 ShineMage 插件
 
+本文保留当前插件仓的详细操作路径。若同时升级 Harness，请先读[候选升级操作手册](./dsh-upgrade-candidate.md)；它负责官方 tag、隔离 runtime、pack provenance、消费闭包、回读和回退的跨仓顺序，本文只负责单插件更新。
+
 ## 当前输入与交付状态（2026-10-13）
 
 当前主仓组合锁绑定 Workbench `3030e3f`／`90000400…`、CRM `dac0539`／`4ee58ec3…`、Knowledge `f623c22`／`feb1187c…`，另六包与两份 profile 保持。十个独立作者仓 PR #1 已普通 merge，各自 main CI 均 SUCCESS；正式包回执、组合锁和当前输入边界见[作者合并与候选前置核验](../hackathon/evidence/shinemage-author-merge-and-candidate-preflight-20261012.md)与[当前正式组合输入预检](../hackathon/evidence/shinemage-composition-preflight-20261012.md)。不再按下方较早 2026-10-11 时点更新锁，也不把其中“未提交”“尚未迁移”当成当前默认入口结论。
