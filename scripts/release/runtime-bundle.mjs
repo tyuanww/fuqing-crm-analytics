@@ -13,6 +13,7 @@ import { scanText } from './secret-scan.mjs';
 import { DSH_UPSTREAM_SHA as PIN } from './toolchain.mjs';
 import { bindRuntimeInputs, prepareRuntimeInputs, runtimeDeployArgs, runtimeSourceTree, stageRuntimeWorkspace, verifyRuntimePreparation } from './runtime-inputs.mjs';
 import { canonicalTreeDigest, GENERATED_PROVENANCE_SCHEMA } from './generated-provenance.mjs';
+import { comparablePackageBytes } from './runtime-package-identity.mjs';
 
 const execFile = promisify(execFileCallback);
 const REQUIRED = [
@@ -214,7 +215,7 @@ async function materializeExternalSymlinks(deployed, upstream, pinnedSha) {
         readFile(sourcePackage).catch(() => null),
         readFile(destinationPackage).catch(() => null),
       ]);
-      if (!sourceBytes || !destinationBytes || !sourceBytes.equals(destinationBytes)) throw new Error(`RUNTIME_PEER_ALIAS_COLLISION ${entry.name}`);
+      if (!sourceBytes || !destinationBytes || !comparablePackageBytes(sourceBytes).equals(comparablePackageBytes(destinationBytes))) throw new Error(`RUNTIME_PEER_ALIAS_COLLISION ${entry.name}`);
       continue;
     }
     await cp(peerSource, peerDestination, { recursive: true, dereference: false, force: false, errorOnExist: true });

@@ -6,6 +6,7 @@ import { basename, dirname, join, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 import test from 'node:test';
 import { collectAllowlist, packArtifact, receiveArtifact } from './artifact.mjs';
+import { comparablePackageBytes } from './runtime-package-identity.mjs';
 import { receiveRelease } from './receive.mjs';
 import { readState, resume } from './state.mjs';
 import { issueToken, consumeToken, tokenExchangeResponse } from './auth-contract.mjs';
@@ -363,6 +364,11 @@ test('runtime bundle enforces production pruning, secret scan and peer collision
   assert.match(source, /generatedTree/);
   assert.match(source, /cwd: workspace/);
   assert.doesNotMatch(source, /scanAssignments:\s*!\/\(\^\|\\\/\)node_modules/);
+});
+test('runtime peer identity ignores development-only metadata', () => {
+  const source = Buffer.from(JSON.stringify({ name: '@deepseek-ai/example', version: '1.0.0', devDependencies: { test: '1.0.0' }}));
+  const destination = Buffer.from(JSON.stringify({ name: '@deepseek-ai/example', version: '1.0.0', devDependencies: { test: '2.0.0' }}));
+  assert.deepEqual(comparablePackageBytes(source), comparablePackageBytes(destination));
 });
 test('runtime artifact allowlist carries the release evidence workflow', async () => {
   const allowlist = await collectAllowlist(process.cwd());
