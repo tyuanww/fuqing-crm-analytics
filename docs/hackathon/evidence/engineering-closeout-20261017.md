@@ -27,7 +27,7 @@
 | npm `next` | `@deepseek-ai/dsh@0.2.1-rc.1` | 与最终目标版本一致 |
 | `alpha` | `@deepseek-ai/dsh@0.2.1-alpha.5` | 候选轨道，不进入默认环境 |
 
-`latest` tarball 的本次读取摘要如下：
+目标 rc1 tarball 的本次读取摘要如下：
 
 ```text
 version=0.2.1-rc.1
