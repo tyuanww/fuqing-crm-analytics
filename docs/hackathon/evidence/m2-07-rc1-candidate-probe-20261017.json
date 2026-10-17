@@ -81,7 +81,17 @@
       "step": "analytics_rc1_candidate_adapter_probe",
       "result": "PASS_IN_TEMPORARY_LANE",
       "error_code": null,
-      "detail": "a candidate-only reference to the rc1 package toast.d.ts removed the TS2344 error; host/client typechecks and analytics build completed, but no main-tree code or pack was changed"
+      "detail": "a candidate-only reference to the rc1 package toast.d.ts removed the TS2344 error; host/client typechecks and analytics build completed, but no main-tree code or pack was changed",
+      "provenance": {
+        "source_git_sha": "fe1a43c2ddf08d2eda3a31633d7702653d083dd0",
+        "source_tree_sha256": "d3fa44ea6384eeb550fc4d59fdd1eeef16a7053f24808defabe0b6902d641794",
+        "generated_tree_sha256": "6a2e391eb442a7241c60006e425461ce175f19f2d62e344819d35b81848b65b2",
+        "node": "24.19.0",
+        "pnpm": "11.28.2",
+        "platform": "darwin-arm64",
+        "clean": true,
+        "isolated": true
+      }
     },
     {
       "step": "pack_build",
