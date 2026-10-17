@@ -1,0 +1,102 @@
+{
+  "schema_version": "dsh-rc1-unified-history-board-recovery/v1",
+  "candidate_id": "rc1-unified-owner-20261017-r1",
+  "sdk": "@deepseek-ai/dsh@0.2.1-rc.1",
+  "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+  "upstream_sha": "1600d8a1e140dcde43a1a0941940a0480712c011",
+  "target": {
+    "host": "100.93.46.46",
+    "run_root": "/tmp/shinemage-owner-rc1-unified-20261017-r1",
+    "runtime": "/tmp/shinemage-owner-rc1-unified-20261017-r1/runtime-browser-unified-r2",
+    "web_port": 14327,
+    "page_http_port": 18152,
+    "live_ports_untouched": [
+      4328,
+      4329
+    ],
+    "pre_restart": {
+      "supervisor_pid": 1131698,
+      "child_pid": 1131973,
+      "recorded_at_utc": "2026-10-17T15:55:34Z"
+    },
+    "post_restart": {
+      "supervisor_pid": 1135009,
+      "child_pid": 1135265,
+      "recorded_at_utc": "2026-10-17T15:55:49Z"
+    }
+  },
+  "fixtures": {
+    "history_fixture_sha256": "41037fb308c27c7d4a912e5269e6d577c107fe01194c35bbb89463c7c4241887",
+    "board_fixture_sha256": "9b0da42f0d52a3c199b255297c3009d322596c42428ffff804469a2ad020c81c",
+    "history_content_sha256": "7489f35e529a0fd117378419c46d1014c2717434b259f4c02f92b28bc5d719bf",
+    "contains_real_data": false,
+    "model_calls": 0
+  },
+  "history": {
+    "session_id": "session-2360bbc7-fb0b-4c93-9e5e-92792306e1c5",
+    "durable_session_log_sha256": "7f1af98b22910989b776360efedaef6813a678948d7d1140f2cf228c9300ed0b",
+    "durable_session_log_bytes": 1432,
+    "pre_restart": {
+      "seed_http_status": 200,
+      "fixture_seeded": true,
+      "session_cursor": 11,
+      "record_count": 12
+    },
+    "post_restart": {
+      "fixture_seed_http_status": 404,
+      "fixture_seed_error": "session missing",
+      "session_list_status": "PASS",
+      "session_list_blank": false,
+      "session_list_as_of_seq": 12,
+      "session_follow_status": "PASS_NATIVE_TRANSPORT",
+      "session_follow_cursor": 12,
+      "session_follow_record_count": 13,
+      "title": "rc1 unified history reread · synthetic"
+    },
+    "status": "PARTIAL_HISTORY_NATIVE_ONLY",
+    "reason": "The persisted session is readable through session/list and session/follow after restart, but the candidate fixture route is not reattached to the restored in-memory session. Headed UI history readback is therefore not proven."
+  },
+  "board": {
+    "fixture_port": 18155,
+    "board_id": "rc1_unified_board",
+    "session_id": "session-2360bbc7-fb0b-4c93-9e5e-92792306e1c5",
+    "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+    "record_sha256": "ef28de86f9e6ae27fb1a20b8659d8f1c3b6a4687a4dcbf253b927234dc6676ac",
+    "state_sha256": "853113986dc209b527a27ec525a165b6505dacd1dbd7ad01a9b081be6ff2b5c9",
+    "process_pid": 1133110,
+    "post_restart_http": {
+      "boards": 200,
+      "detail": 200,
+      "preview": 200,
+      "confirm": 200
+    },
+    "status": "PASS_NATIVE_TRANSPORT_ONLY"
+  },
+  "headed_browser": {
+    "status": "FAILED_BROWSER_EVIDENCE",
+    "tab_title": "DeepSeek Harness",
+    "url": "http://127.0.0.1:14327/",
+    "operations": [
+      "opened fresh headed tab",
+      "closed first-use dialog",
+      "opened workspace selector",
+      "clicked workspace option",
+      "reloaded after owned restart"
+    ],
+    "history_ui_readback": "NOT_RUN",
+    "board_ui_readback": "NOT_RUN",
+    "stable_errors": [
+      "initial Session restoration failed: gateway/internal: failed to create session: Error: tool \"subagent\" is already registered"
+    ],
+    "console_error_count": 0,
+    "console_warning_count": "repeated stable session restoration failure",
+    "reason": "The page shell loaded, but the restored workspace/session did not become selectable and the session restore path repeatedly failed. Native transport evidence cannot be promoted to headed UI evidence."
+  },
+  "formal_status": {
+    "M2-07": "BLOCKED",
+    "M2-08": "NOT_RUN",
+    "M2-09": "NOT_RUN",
+    "release_ready": false
+  },
+  "generated_at": "2026-10-17T16:00:50Z"
+}

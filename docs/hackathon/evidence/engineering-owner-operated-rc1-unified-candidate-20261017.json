@@ -261,7 +261,7 @@
       "status": "PASS_AUTH_BOUNDARY"
     },
     "headed_browser": {
-      "status": "PASS_OWNER_CANDIDATE_HEADED_SMOKE",
+      "status": "FAILED_BROWSER_EVIDENCE_AFTER_RESTART",
       "title": "DeepSeek Harness",
       "url": "http://127.0.0.1:14327/",
       "visible_plugin_count": 7,
@@ -275,11 +275,12 @@
         "@shine-mage/dsh-shine-waterfall"
       ],
       "console_errors": 0,
-      "console_warnings": "connection retry warnings because no DeepSeek login/API key was configured",
+      "console_warnings": "stable session restoration failure: tool \"subagent\" is already registered; history/board headed UI readback not proven",
       "workspace": "fresh runtime showed expected select-workspace prompt"
     },
-    "history_board_restart": "NOT_RUN",
-    "formal_release": "NOT_RUN"
+    "history_board_restart": "PARTIAL_HISTORY_NATIVE_ONLY",
+    "formal_release": "NOT_RUN",
+    "history_board_restart_receipt": "docs/hackathon/evidence/unified-history-board-recovery-20261017.json"
   },
   "generated_at": "2026-10-17T00:00:00Z"
 }

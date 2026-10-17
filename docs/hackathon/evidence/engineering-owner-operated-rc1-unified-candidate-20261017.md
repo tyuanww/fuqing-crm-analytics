@@ -52,7 +52,7 @@
 4. 插件页显示 7 个新候选插件，7 个开关均为启用状态。
 5. console errors 为 `0`。只有未配置 DeepSeek 登录/API key 产生的 connection retry warnings。
 6. fresh runtime 显示选择工作区提示。没有伪造真实用户任务或真实业务数据。
-7. history/board 重启回读在本轮为 `NOT_RUN`。旧 EC-04 回执继续独立保留。
+7. 统一 candidate 已执行一次 owned stop/start。重启后 board native transport 的 list/detail/preview/confirm 均为 `200`，同一 history session 可由 `session/list` 与 `session/follow` 读回；但 fixture 注入口返回 `404 session missing`，headed browser 又出现 `tool "subagent" is already registered`，所以 headed UI history/board recovery 仍未通过。详见 [history/board recovery](unified-history-board-recovery-20261017.md)。
 
 ## 正式状态
 
@@ -69,4 +69,4 @@ release_ready=false
 /Users/hutou/.codex/tasks/rc1-unified-candidate-build-20261017/
 ```
 
-机器可读摘要见同目录的 `evidence/unified-candidate.json`，合并 provenance 见 `evidence/unified-provenance.json`。这些回执保留了 formal Linux rebuild、history/board restart 和正式发布为未完成状态。
+机器可读摘要见同目录的 `evidence/unified-candidate.json`，合并 provenance 见 `evidence/unified-provenance.json`。这些回执保留了 formal Linux rebuild、headed history/board recovery 和正式发布为未完成状态。
