@@ -5,7 +5,7 @@
 ## 当前快照（2026-10-17）与 alpha4 候选当前事实
 
 - 工程闭环与正式发布已分线。架构和本地技术闭环为 `CLOSED_FOR_ARCHITECTURE`；最终内部环境目标锁定为 Harness 最新发布 `dsh-v0.2.1-rc.1` / upstream `1600d8a1e140dcde43a1a0941940a0480712c011`，npm tarball SHA-256 为 `6d0c6fe8ad0c21797a27d6afc0cb69a022714ea0cd7331e4cba8b07b8ce19009`。现有 `0.1.7-rc.2` 只作为主仓兼容基线和历史证据边界。有限剩余任务与边界见 [工程闭环与正式发布门禁分离](docs/hackathon/evidence/engineering-closeout-20261017.md)。
-- C0 版本输入冻结已完成，见 [rc1 runtime input freeze](docs/hackathon/evidence/m2-07-rc1-runtime-input-freeze-20261017.json)。该回执只冻结真实版本和工具链输入；rc1 隔离 candidate、9 包重建、consumer closure 和 compatibility smoke 仍为 `NOT_RUN`，不把输入冻结写成 candidate PASS。
+- C0 版本输入冻结已完成，见 [rc1 runtime input freeze](docs/hackathon/evidence/m2-07-rc1-runtime-input-freeze-20261017.json)。该回执只冻结真实版本和工具链输入；当前 `rc1_latest_candidate=PLANNED_NOT_BUILT`、`stage0_wrapper=NOT_IMPLEMENTED`，rc1 隔离 candidate、9 包重建、consumer closure 和 compatibility smoke 仍为 `NOT_RUN`，不把输入冻结写成 candidate PASS。红队阻断项见 [工程收尾红队攻击记录](docs/hackathon/evidence/engineering-closeout-redteam-20261017.md)。
 
 - 官方仓库最新发布为 `v0.2.1-alpha.4`，发布提交为 `86a402200d95fecef4529d969836f1fe13c6cb0d`。M2-07 当前候选已经切换到 alpha4；alpha3 只保留为上一轮候选记录。
 - 2026-10-17 当前公开主线已包含本轮治理与状态文档；当前 `main` SHA 以 Git 实查为准。这些合并不改变 DSH `0.1.7-rc.2` pin、M2-07/M2-08 门禁或 `release_ready=false`。

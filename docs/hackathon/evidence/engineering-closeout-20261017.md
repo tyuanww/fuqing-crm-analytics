@@ -9,12 +9,13 @@
 | 线路 | 当前结论 | 是否阻塞架构闭环 |
 | --- | --- | --- |
 | 架构 | `CLOSED` | 否 |
-| 本地技术闭环 | `CLOSED_FOR_ARCHITECTURE` | 否 |
-| 内部 Stage 0 | `HARNESS_ONLY_READY` | 只在要启动真实内部试点时阻塞 |
+| rc2/既有候选本地技术闭环 | `CLOSED_FOR_ARCHITECTURE` | 否 |
+| rc1 最新 candidate | `PLANNED_NOT_BUILT` | 是最终内部 runtime 的唯一当前工程缺口 |
+| 内部 Stage 0 wrapper | `NOT_IMPLEMENTED` | 只在要启动真实内部试点时触发 |
 | 内部 Stage 1 | `DEFERRED` | 是内部扩大到 10–20 人的前置项 |
 | 正式发布 | `DEFERRED` | 不阻塞内部架构建设 |
 
-已经完成的工程结论包括：单一 DSH Agent Loop、插件边界、runtime/plugin manifest、Cordis peer 合同、consumer runtime closure、fresh runtime、credential deny、local receipt、owned cleanup、history/board recovery 和 rc2 回退路径。现有本地证据仍只覆盖本地或隔离环境，不升级为公司发布证据。
+已经完成的架构结论和既有隔离证据包括：单一 DSH Agent Loop、插件边界、runtime/plugin manifest、Cordis peer 合同、consumer runtime closure、fresh runtime、credential deny、local receipt、owned cleanup、history/board recovery 和 rc2 回退路径。它们主要来自 rc2、alpha2 或 alpha4 的本地对象，不能抵扣尚未构建的 rc1 candidate，也不能升级为公司发布证据。
 
 ## 最终运行时口径
 
@@ -43,7 +44,7 @@ integrity=sha512-ce+4rnRuhkheK8++2EGm0CjHKVfF7IjUk4DO/NydRS8inAM8A0GFGQmX3cWKM4O
 
 这些任务是有限清单，不包含重复的 M2 解释。
 
-1. **最新 runtime manifest**。固定 `dsh-v0.2.1-rc.1`、upstream SHA、tarball SHA、插件 pack SHA、Node 和 lockfile，运行一次 manifest/plugin/runtime 兼容性 smoke check。
+1. **最新 runtime manifest**。固定 `dsh-v0.2.1-rc.1`、upstream SHA、tarball SHA、插件 pack SHA、Node 和 lockfile，运行一次 manifest/plugin/runtime 兼容性 smoke check。完成前状态保持 `PLANNED_NOT_BUILT`。
 2. **Stage 0 harness**。只有要启动 1–3 名真实内部用户时才实现。它负责 fresh runtime、credential deny、digest 检查、local receipt 和 owned cleanup；没有真实任务卡时结果只能标记 `HARNESS_SMOKE_ONLY`。
 3. **真实任务卡**。只有要证明工作流价值时才补部门、岗位、用户、任务、输入输出、数据类别和频次；没有任务卡不能宣称用户可行性或 500 人 readiness。
 4. **Stage 1 基础设施**。只有要扩大到 10–20 人时才处理 OIDC、共享存储、备份恢复、日志告警、容量和支持责任。云空间或云硬盘未落地前停留在 Stage 0。
@@ -67,4 +68,4 @@ M2-09=NOT_RUN
 release_ready=false
 ```
 
-这表示正式发布没有授权，不表示架构或本地工程没有完成。
+这表示正式发布没有授权，不表示架构或既有 rc2/候选架构工作没有完成。rc1 candidate 尚未构建，因此不能把最终内部 runtime 写成 ready。

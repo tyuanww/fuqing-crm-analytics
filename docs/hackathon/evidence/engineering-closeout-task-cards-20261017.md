@@ -15,6 +15,20 @@ M2-09=NOT_RUN
 release_ready=false
 ```
 
+当前真实状态是：
+
+```text
+C0_INPUT_FREEZE=PASS
+EC-01=INPUTS_FROZEN
+EC-02=NOT_RUN
+EC-03=NOT_RUN
+EC-04=NOT_RUN
+EC-05=NOT_IMPLEMENTED
+EC-06=DEFERRED
+```
+
+在 EC-02 开始前，必须先完成 provenance gate hardening、统一 rc1 subject set 和 SDK/peer 输入绑定。版本文档和输入冻结不能代替 candidate 构建。
+
 ## 主线任务卡
 
 ### EC-01：固定最终 Harness 输入
@@ -69,6 +83,8 @@ plugin_pnpm=11.28.2
 
 9/9 pack receipt、source dirty 检查、manifest digest、tarball digest、pack digest 和 provenance 能由独立脚本重算。
 
+每个 pack 都必须带 `generated_bytes_provenance`，candidate/load/verify 路径必须强制要求 builder receipt。不能依赖调用方传入可选布尔参数，也不能只用环境变量自报 clean builder。
+
 **失败判定**
 
 任何 pack 从 ignored workspace、旧 runtime、旧 peer 或未登记路径读取时，整卡失败，不修补 receipt。
@@ -84,6 +100,7 @@ plugin_pnpm=11.28.2
 - fresh staging 目录。
 - production-only install。
 - 不使用 `--legacy-peer-deps`、`--force` 或跳过 verifier。
+- SDK、`dsh-tools`、Cordis 和 CRM tarball 必须作为明确的 file/cache 输入或由锁定 integrity 的 registry 输入消费；只在 step 0 计算 SDK SHA、安装时又让 peer 从 registry 自由解析，不算绑定。
 - 生成 dependency graph。
 - 生成 SBOM。
 - 检查 CRM、Knowledge、Cordis、`dsh-tools`、KaTeX JS/CSS runtime import。
