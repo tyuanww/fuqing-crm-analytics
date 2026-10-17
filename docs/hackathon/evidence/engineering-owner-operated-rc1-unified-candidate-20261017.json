@@ -290,9 +290,14 @@
     "history_board_restart_receipt": "docs/hackathon/evidence/unified-history-board-recovery-fixed-20261018.json",
     "prior_history_board_restart_receipt": "docs/hackathon/evidence/unified-history-board-recovery-20261017.json",
     "strict_cold_restore": {
-      "status": "HOST_AUTO_RESUMED",
-      "proof": false,
-      "evidence": "docs/hackathon/evidence/unified-history-board-recovery-fixed-20261018.json"
+      "status": "PASS_STRICT_COLD_RESTORE",
+      "proof": true,
+      "synthetic_only": true,
+      "evidence": "docs/hackathon/evidence/unified-strict-cold-restore-20261018.json",
+      "session_id": "session-115d906d-8104-48b5-9d8f-e4ad20a3ae78",
+      "runtime": "runtime-browser-unified-r5",
+      "restored": true,
+      "headed_browser_separate_cycle": "HOST_AUTO_RESUMED"
     },
     "last_reverified_at": "2026-10-18",
     "updated_at": "2026-10-18"

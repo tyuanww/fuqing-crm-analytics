@@ -52,7 +52,7 @@
 4. 插件页显示 7 个新候选插件，7 个开关均为启用状态。
 5. console errors 为 `0`。只有未配置 DeepSeek 登录/API key 产生的 connection retry warnings。
 6. fresh runtime 显示选择工作区提示。没有伪造真实用户任务或真实业务数据。
-7. 统一 candidate 的 recovery 细节见 [fixed recovery receipt](unified-history-board-recovery-fixed-20261018.md)。该回执记录 native transport 通过、synthetic headed UI readback 通过，以及严格 cold fixture 仍为 `HOST_AUTO_RESUMED`。
+7. 统一 candidate 的 recovery 细节见 [fixed recovery receipt](unified-history-board-recovery-fixed-20261018.md)。session57 的 headed UI cycle 记录为 `HOST_AUTO_RESUMED`。独立的 synthetic strict cold cycle 已在同一 runtime 和同一 session 首次返回 `restored=true`，见 [strict cold receipt](unified-strict-cold-restore-20261018.md)。
 
 ## 正式状态
 

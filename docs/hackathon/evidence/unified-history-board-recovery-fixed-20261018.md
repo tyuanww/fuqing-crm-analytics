@@ -11,7 +11,7 @@
 - board list、detail、preview 和 confirm 在重启后都返回 HTTP `200`。
 - headed browser 真实显示 history HTML、board tool card 和 preview action。该结果只覆盖 synthetic UI readback。
 - headed browser console error 数为 `0`。
-- 严格 cold fixture rehydrate 仍为 `HOST_AUTO_RESUMED`。重启后 fixture 返回 `restored=false`，因为 workspace-attached session 已先由 headed browser 恢复。
+- session57 headed cycle 的 fixture 结果为 `HOST_AUTO_RESUMED`。workspace-attached session 已先由 headed browser 恢复。独立 strict cold cycle 已返回 `restored=true`，详见 [strict cold receipt](unified-strict-cold-restore-20261018.md)。
 
 ## 修复输入
 
@@ -71,7 +71,7 @@
 
 ## 状态边界
 
-这次结果重新验证了统一候选的 headed synthetic history/board readback。它没有证明严格 cold fixture 返回 `restored=true`。它没有证明真实用户任务、真实业务数据、公司发布门禁或正式 Linux portable rebuild。
+这次结果重新验证了统一候选的 headed synthetic history/board readback。严格 cold proof 由独立 session 的回执提供。它没有证明真实用户任务、真实业务数据、公司发布门禁或正式 Linux portable rebuild。
 
 ```text
 M2-07=BLOCKED

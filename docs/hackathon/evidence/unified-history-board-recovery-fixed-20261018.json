@@ -37,7 +37,9 @@
     "strict_cold_restore": {
       "status": "HOST_AUTO_RESUMED",
       "proof": false,
-      "reason": "The workspace-attached session was already live when the fixture route ran after restart."
+      "reason": "The workspace-attached session was already live when the fixture route ran after restart.",
+      "superseded_by": "unified-strict-cold-restore-20261018.json",
+      "superseded_status": "PASS_STRICT_COLD_RESTORE_IN_SEPARATE_SESSION"
     },
     "content_path": "runtime-browser-unified-r5/workspace/rc1-unified-history.html"
   },

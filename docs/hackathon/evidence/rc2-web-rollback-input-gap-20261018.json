@@ -1,0 +1,57 @@
+{
+  "schema_version": "dsh-rc2-web-rollback-input-gap/v1",
+  "captured_at": "2026-10-18",
+  "status": "NOT_RUN_RC2_PROFILE_PACK_UNAVAILABLE",
+  "expected": {
+    "sdk": "@deepseek-ai/dsh@0.1.7-rc.2",
+    "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+    "generated_provenance": "dsh-generated-bytes/v1",
+    "required_profiles": ["page", "crm-knowledge"],
+    "required_plugins": 9
+  },
+  "source_configs": {
+    "page": {
+      "path": "config/dsh-profile.rc2.json",
+      "sha256": "c8c9df8c36f11060ad8fbcce68cb2ebf28d783c5eb5759d1b71ff5463782c981"
+    },
+    "crm_knowledge": {
+      "path": "config/dsh-profile.crm-knowledge.rc2.json",
+      "sha256": "7ca3511663ab2ea5d1bb8f839c83b29f5bbd6655238450ad08a04510642191ba"
+    }
+  },
+  "available_materials": {
+    "directory": ".context/checks/m2-07-rc2-local-materials-20261015",
+    "has_profile_pack_artifact": false,
+    "has_plugin_pack_tarballs": false,
+    "has_plugin_pack_manifests": false,
+    "has_sdk_and_cli_material": true
+  },
+  "reader_probes": [
+    {
+      "inputs": "alpha4/formal-packs-r2/profile-inputs/inputs.json",
+      "actual_sdk": "@deepseek-ai/dsh@0.2.1-alpha.4",
+      "actual_upstream_sha": "86a402200d95fecef4529d969836f1fe13c6cb0d",
+      "result": "PROFILE_DSH_PIN_MISMATCH"
+    },
+    {
+      "inputs": "alpha3/profile-inputs/inputs.json",
+      "actual_sdk": "@deepseek-ai/dsh@0.2.1-alpha.3",
+      "actual_upstream_sha_prefix": "2fbf4359",
+      "result": "PROFILE_DSH_PIN_MISMATCH"
+    }
+  ],
+  "required_work": [
+    "build 9 plugins against rc2 upstream SHA",
+    "generate dsh-generated-bytes/v1 manifests and tarballs",
+    "generate page and CRM profile inputs",
+    "run loadProfilePacks with requireGeneratedProvenance=true",
+    "run disposable rc2 web rollback with the same synthetic session, history and board fixture",
+    "run headed browser readback and cleanup"
+  ],
+  "formal_status": {
+    "M2-07": "BLOCKED",
+    "M2-08": "NOT_RUN",
+    "M2-09": "NOT_RUN",
+    "release_ready": false
+  }
+}

@@ -1,0 +1,551 @@
+{
+  "capturedAt": "2026-10-17T16:46:49.107Z",
+  "origin": "http://127.0.0.1:14327",
+  "sessionId": "session-115d906d-8104-48b5-9d8f-e4ad20a3ae78",
+  "sessions": {
+    "status": 200,
+    "body": {
+      "type": "server-response",
+      "rpcId": "strictpost-1",
+      "result": {
+        "ok": true,
+        "value": {
+          "items": [
+            {
+              "sessionId": "session-115d906d-8104-48b5-9d8f-e4ad20a3ae78",
+              "updatedAt": 1792255546583,
+              "agentAvailable": true,
+              "formatStatus": "current",
+              "running": false,
+              "blank": false,
+              "cwd": "/tmp/shinemage-owner-rc1-unified-20261017-r1/runtime-browser-unified-r5/workspace/strict-cold-2",
+              "projections": {
+                "kind": "sequenced",
+                "asOfSeq": 12,
+                "values": {
+                  "title": "rc1 unified history reread · synthetic",
+                  "goal": null,
+                  "tokenUsage": {
+                    "uncachedInputTokens": 0,
+                    "outputTokens": 0,
+                    "cacheReadTokens": 0,
+                    "cacheWriteTokens": 0
+                  },
+                  "contextPressure": {},
+                  "contextBreakdown": {
+                    "systemTokens": 0,
+                    "toolsTokens": 0,
+                    "messageTokens": 67
+                  },
+                  "inbox": {
+                    "next-turn": [],
+                    "next-step": []
+                  },
+                  "sessionStats": {
+                    "turns": 1,
+                    "steps": 1,
+                    "llmMs": 1,
+                    "toolMs": 1,
+                    "ttftMs": 0,
+                    "ttftSteps": 0,
+                    "decodeMs": 0,
+                    "decodeTokens": 0
+                  },
+                  "turnOutline": [
+                    {
+                      "turn": 1,
+                      "seq": 4,
+                      "prompt": "",
+                      "response": ""
+                    }
+                  ],
+                  "agentPreset": "standard",
+                  "userQuestions": {
+                    "active": [],
+                    "settled": []
+                  },
+                  "permissions": {
+                    "currentValue": "workspace-write"
+                  },
+                  "workingDirectory": "/tmp/shinemage-owner-rc1-unified-20261017-r1/runtime-browser-unified-r5/workspace/strict-cold-2",
+                  "subagentCatalog": [],
+                  "subagentTiming": {
+                    "settledMs": 0
+                  },
+                  "subagent": null,
+                  "todos": null,
+                  "plan": {
+                    "active": false,
+                    "pending": false
+                  },
+                  "modelSelection": {
+                    "lastUsed": null,
+                    "next": null
+                  },
+                  "sessionListMetadata": {
+                    "blank": false,
+                    "lastPromptAt": null
+                  },
+                  "imageLimits": {
+                    "maxImageBytes": 20971520,
+                    "maxImagesPerMessage": 20,
+                    "maxMessageImageBytes": 209715200,
+                    "maxImagePixels": 64000000,
+                    "maxImageDimension": 8192,
+                    "mediaTypes": [
+                      "image/png",
+                      "image/jpeg",
+                      "image/webp",
+                      "image/gif"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "sessionId": "session-57b79737-3cfe-4978-b696-1a6179322469",
+              "updatedAt": 1792254039054,
+              "agentAvailable": false,
+              "formatStatus": "current",
+              "running": false,
+              "blank": false,
+              "cwd": "/tmp/shinemage-owner-rc1-unified-20261017-r1/runtime-browser-unified-r5/workspace",
+              "projections": {
+                "kind": "cached",
+                "asOfSeq": 13,
+                "values": {
+                  "title": "rc1 unified history reread · synthetic · session57",
+                  "goal": null,
+                  "tokenUsage": {
+                    "uncachedInputTokens": 0,
+                    "outputTokens": 0,
+                    "cacheReadTokens": 0,
+                    "cacheWriteTokens": 0
+                  },
+                  "contextPressure": {},
+                  "contextBreakdown": {
+                    "systemTokens": 0,
+                    "toolsTokens": 0,
+                    "messageTokens": 67
+                  },
+                  "inbox": {
+                    "next-turn": [],
+                    "next-step": []
+                  },
+                  "sessionStats": {
+                    "turns": 1,
+                    "steps": 1,
+                    "llmMs": 0,
+                    "toolMs": 1,
+                    "ttftMs": 0,
+                    "ttftSteps": 0,
+                    "decodeMs": 0,
+                    "decodeTokens": 0
+                  },
+                  "turnOutline": [
+                    {
+                      "turn": 1,
+                      "seq": 4,
+                      "prompt": "",
+                      "response": ""
+                    }
+                  ],
+                  "agentPreset": "standard",
+                  "userQuestions": {
+                    "active": [],
+                    "settled": []
+                  },
+                  "permissions": {
+                    "currentValue": "workspace-write"
+                  },
+                  "workingDirectory": "/tmp/shinemage-owner-rc1-unified-20261017-r1/runtime-browser-unified-r5/workspace",
+                  "subagentCatalog": [],
+                  "subagentTiming": {
+                    "settledMs": 0
+                  },
+                  "subagent": null,
+                  "todos": null,
+                  "plan": {
+                    "active": false,
+                    "pending": false
+                  },
+                  "modelSelection": {
+                    "lastUsed": null,
+                    "next": null
+                  },
+                  "sessionListMetadata": {
+                    "blank": false,
+                    "lastPromptAt": null
+                  },
+                  "imageLimits": {
+                    "maxImageBytes": 20971520,
+                    "maxImagesPerMessage": 20,
+                    "maxMessageImageBytes": 209715200,
+                    "maxImagePixels": 64000000,
+                    "maxImageDimension": 8192,
+                    "mediaTypes": [
+                      "image/png",
+                      "image/jpeg",
+                      "image/webp",
+                      "image/gif"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "sessionId": "session-80b7d027-4ac7-4417-b34c-212428d25906",
+              "updatedAt": 1792253816574,
+              "agentAvailable": false,
+              "formatStatus": "current",
+              "running": false,
+              "blank": false,
+              "cwd": "/tmp/shinemage-owner-rc1-unified-20261017-r1/runtime-browser-unified-r5/workspace",
+              "projections": {
+                "kind": "cached",
+                "asOfSeq": 12,
+                "values": {
+                  "title": "rc1 unified history reread · synthetic",
+                  "goal": null,
+                  "tokenUsage": {
+                    "uncachedInputTokens": 0,
+                    "outputTokens": 0,
+                    "cacheReadTokens": 0,
+                    "cacheWriteTokens": 0
+                  },
+                  "contextPressure": {},
+                  "contextBreakdown": {
+                    "systemTokens": 0,
+                    "toolsTokens": 0,
+                    "messageTokens": 67
+                  },
+                  "inbox": {
+                    "next-turn": [],
+                    "next-step": []
+                  },
+                  "sessionStats": {
+                    "turns": 1,
+                    "steps": 1,
+                    "llmMs": 0,
+                    "toolMs": 0,
+                    "ttftMs": 0,
+                    "ttftSteps": 0,
+                    "decodeMs": 0,
+                    "decodeTokens": 0
+                  },
+                  "turnOutline": [
+                    {
+                      "turn": 1,
+                      "seq": 4,
+                      "prompt": "",
+                      "response": ""
+                    }
+                  ],
+                  "agentPreset": "standard",
+                  "userQuestions": {
+                    "active": [],
+                    "settled": []
+                  },
+                  "permissions": {
+                    "currentValue": "workspace-write"
+                  },
+                  "workingDirectory": "/tmp/shinemage-owner-rc1-unified-20261017-r1/runtime-browser-unified-r5/workspace",
+                  "subagentCatalog": [],
+                  "subagentTiming": {
+                    "settledMs": 0
+                  },
+                  "subagent": null,
+                  "todos": null,
+                  "plan": {
+                    "active": false,
+                    "pending": false
+                  },
+                  "modelSelection": {
+                    "lastUsed": null,
+                    "next": null
+                  },
+                  "sessionListMetadata": {
+                    "blank": false,
+                    "lastPromptAt": null
+                  },
+                  "imageLimits": {
+                    "maxImageBytes": 20971520,
+                    "maxImagesPerMessage": 20,
+                    "maxMessageImageBytes": 209715200,
+                    "maxImagePixels": 64000000,
+                    "maxImageDimension": 8192,
+                    "mediaTypes": [
+                      "image/png",
+                      "image/jpeg",
+                      "image/webp",
+                      "image/gif"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "sessionId": "session-1c2c8d17-b447-42c3-9674-db46f493f6bd",
+              "updatedAt": 1792253789289,
+              "agentAvailable": false,
+              "formatStatus": "current",
+              "running": false,
+              "blank": true,
+              "cwd": "/tmp/shinemage-owner-rc1-unified-20261017-r1/runtime-browser-unified-r5/workspace",
+              "projections": {
+                "kind": "cached",
+                "asOfSeq": 3,
+                "values": {
+                  "title": null,
+                  "goal": null,
+                  "tokenUsage": {
+                    "uncachedInputTokens": 0,
+                    "outputTokens": 0,
+                    "cacheReadTokens": 0,
+                    "cacheWriteTokens": 0
+                  },
+                  "contextPressure": {},
+                  "contextBreakdown": {
+                    "systemTokens": 0,
+                    "toolsTokens": 0,
+                    "messageTokens": 0
+                  },
+                  "inbox": {
+                    "next-turn": [],
+                    "next-step": []
+                  },
+                  "sessionStats": {
+                    "turns": 0,
+                    "steps": 0,
+                    "llmMs": 0,
+                    "toolMs": 0,
+                    "ttftMs": 0,
+                    "ttftSteps": 0,
+                    "decodeMs": 0,
+                    "decodeTokens": 0
+                  },
+                  "turnOutline": [],
+                  "agentPreset": "standard",
+                  "userQuestions": {
+                    "active": [],
+                    "settled": []
+                  },
+                  "permissions": {
+                    "currentValue": "workspace-write"
+                  },
+                  "workingDirectory": "/tmp/shinemage-owner-rc1-unified-20261017-r1/runtime-browser-unified-r5/workspace",
+                  "subagentCatalog": [],
+                  "subagentTiming": {
+                    "settledMs": 0
+                  },
+                  "subagent": null,
+                  "todos": null,
+                  "plan": {
+                    "active": false,
+                    "pending": false
+                  },
+                  "modelSelection": {
+                    "lastUsed": null,
+                    "next": null
+                  },
+                  "sessionListMetadata": {
+                    "blank": true,
+                    "lastPromptAt": null
+                  },
+                  "imageLimits": {
+                    "maxImageBytes": 20971520,
+                    "maxImagesPerMessage": 20,
+                    "maxMessageImageBytes": 209715200,
+                    "maxImagePixels": 64000000,
+                    "maxImageDimension": 8192,
+                    "mediaTypes": [
+                      "image/png",
+                      "image/jpeg",
+                      "image/webp",
+                      "image/gif"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "sessionId": "session-9678df05-46aa-4d7a-9391-6726479d30bc",
+              "updatedAt": 1792253618980,
+              "agentAvailable": false,
+              "formatStatus": "current",
+              "running": false,
+              "blank": true,
+              "cwd": "/tmp/shinemage-owner-rc1-unified-20261017-r1/runtime-browser-unified-r5/workspace",
+              "projections": {
+                "kind": "cached",
+                "asOfSeq": 2,
+                "values": {
+                  "title": null,
+                  "goal": null,
+                  "tokenUsage": {
+                    "uncachedInputTokens": 0,
+                    "outputTokens": 0,
+                    "cacheReadTokens": 0,
+                    "cacheWriteTokens": 0
+                  },
+                  "contextPressure": {},
+                  "contextBreakdown": {
+                    "systemTokens": 0,
+                    "toolsTokens": 0,
+                    "messageTokens": 0
+                  },
+                  "inbox": {
+                    "next-turn": [],
+                    "next-step": []
+                  },
+                  "sessionStats": {
+                    "turns": 0,
+                    "steps": 0,
+                    "llmMs": 0,
+                    "toolMs": 0,
+                    "ttftMs": 0,
+                    "ttftSteps": 0,
+                    "decodeMs": 0,
+                    "decodeTokens": 0
+                  },
+                  "turnOutline": [],
+                  "agentPreset": "standard",
+                  "userQuestions": {
+                    "active": [],
+                    "settled": []
+                  },
+                  "permissions": {
+                    "currentValue": "workspace-write"
+                  },
+                  "workingDirectory": "/tmp/shinemage-owner-rc1-unified-20261017-r1/runtime-browser-unified-r5/workspace",
+                  "subagentCatalog": [],
+                  "subagentTiming": {
+                    "settledMs": 0
+                  },
+                  "subagent": null,
+                  "todos": null,
+                  "plan": {
+                    "active": false,
+                    "pending": false
+                  },
+                  "modelSelection": {
+                    "lastUsed": null,
+                    "next": null
+                  },
+                  "sessionListMetadata": {
+                    "blank": true,
+                    "lastPromptAt": null
+                  },
+                  "imageLimits": {
+                    "maxImageBytes": 20971520,
+                    "maxImagesPerMessage": 20,
+                    "maxMessageImageBytes": 209715200,
+                    "maxImagePixels": 64000000,
+                    "maxImageDimension": 8192,
+                    "mediaTypes": [
+                      "image/png",
+                      "image/jpeg",
+                      "image/webp",
+                      "image/gif"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "sessionId": "session-f42686f0-327f-4c83-85c9-0b35f992fcb9",
+              "updatedAt": 1792253536797,
+              "agentAvailable": false,
+              "formatStatus": "current",
+              "running": false,
+              "blank": false,
+              "cwd": "/tmp/shinemage-owner-rc1-unified-20261017-r1/runtime-browser-unified-r5/workspace",
+              "projections": {
+                "kind": "cached",
+                "asOfSeq": 12,
+                "values": {
+                  "title": "rc1 unified history reread · synthetic",
+                  "goal": null,
+                  "tokenUsage": {
+                    "uncachedInputTokens": 0,
+                    "outputTokens": 0,
+                    "cacheReadTokens": 0,
+                    "cacheWriteTokens": 0
+                  },
+                  "contextPressure": {},
+                  "contextBreakdown": {
+                    "systemTokens": 0,
+                    "toolsTokens": 0,
+                    "messageTokens": 67
+                  },
+                  "inbox": {
+                    "next-turn": [],
+                    "next-step": []
+                  },
+                  "sessionStats": {
+                    "turns": 1,
+                    "steps": 1,
+                    "llmMs": 1,
+                    "toolMs": 1,
+                    "ttftMs": 0,
+                    "ttftSteps": 0,
+                    "decodeMs": 0,
+                    "decodeTokens": 0
+                  },
+                  "turnOutline": [
+                    {
+                      "turn": 1,
+                      "seq": 4,
+                      "prompt": "",
+                      "response": ""
+                    }
+                  ],
+                  "agentPreset": "standard",
+                  "userQuestions": {
+                    "active": [],
+                    "settled": []
+                  },
+                  "permissions": {
+                    "currentValue": "workspace-write"
+                  },
+                  "workingDirectory": "/tmp/shinemage-owner-rc1-unified-20261017-r1/runtime-browser-unified-r5/workspace",
+                  "subagentCatalog": [],
+                  "subagentTiming": {
+                    "settledMs": 0
+                  },
+                  "subagent": null,
+                  "todos": null,
+                  "plan": {
+                    "active": false,
+                    "pending": false
+                  },
+                  "modelSelection": {
+                    "lastUsed": null,
+                    "next": null
+                  },
+                  "sessionListMetadata": {
+                    "blank": false,
+                    "lastPromptAt": null
+                  },
+                  "imageLimits": {
+                    "maxImageBytes": 20971520,
+                    "maxImagesPerMessage": 20,
+                    "maxMessageImageBytes": 209715200,
+                    "maxImagePixels": 64000000,
+                    "maxImageDimension": 8192,
+                    "mediaTypes": [
+                      "image/png",
+                      "image/jpeg",
+                      "image/webp",
+                      "image/gif"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

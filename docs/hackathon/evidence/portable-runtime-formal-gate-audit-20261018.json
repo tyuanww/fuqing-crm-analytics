@@ -1,0 +1,331 @@
+{
+  "schema_version": "shinemage-rc1-portable-runtime-and-formal-gate-audit/v1",
+  "generated_at": "2026-10-18",
+  "scope": "LOCAL_DIAGNOSTIC_ONLY",
+  "formal_status": {
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "m2_09": "NOT_RUN",
+    "release_ready": false
+  },
+  "runtime": {
+    "candidate_dir": "/Users/hutou/.codex/tasks/rc1-unified-candidate-build-20261017",
+    "archive": {
+      "path": "/Users/hutou/.codex/tasks/rc1-unified-candidate-build-20261017/runtime-linux-x64-owner-r4.tar.zst",
+      "bytes": 324087944,
+      "sha256": "b92d758994a09d7c315cd81f51ea16333fec0cc8b60364b63c40ccacb12a2d7b",
+      "zstd_test": "PASS"
+    },
+    "tree": {
+      "root": "/Users/hutou/.codex/tasks/rc1-unified-candidate-build-20261017/runtime-linux-x64-owner-r4-extracted/runtime",
+      "private_var_files": 42,
+      "private_var_occurrences": 5182,
+      "top_findings": [
+        {
+          "path": "node_modules/.pnpm/lock.yaml",
+          "occurrences": 2183,
+          "bytes": 527135
+        },
+        {
+          "path": "pnpm-lock.yaml",
+          "occurrences": 2183,
+          "bytes": 527135
+        },
+        {
+          "path": "node_modules/.modules.yaml",
+          "occurrences": 477,
+          "bytes": 168083
+        },
+        {
+          "path": "package.json",
+          "occurrences": 83,
+          "bytes": 17909
+        },
+        {
+          "path": "node_modules/.pnpm-workspace-state-v1.json",
+          "occurrences": 9,
+          "bytes": 4871
+        },
+        {
+          "path": "node_modules/.bin/js-yaml",
+          "occurrences": 7,
+          "bytes": 4625
+        },
+        {
+          "path": "node_modules/.pnpm/@deepseek-ai+cordis-plugin-include@file++++private+var+folders+tz+wswl3q3117v437rw68yd9_35d283eceffdc6fe39b39cb0bfdb014d/node_modules/@deepseek-ai/cordis-plugin-include/node_modules/.bin/js-yaml",
+          "occurrences": 7,
+          "bytes": 4679
+        },
+        {
+          "path": "node_modules/.pnpm/@deepseek-ai+dsh-agent-preset-registry@file++++private+var+folders+tz+wswl3q3117v437rw6_5e6dcb2c2240b6af63b90e02b4beefa2/node_modules/@deepseek-ai/dsh-agent-preset-registry/node_modules/.bin/js-yaml",
+          "occurrences": 7,
+          "bytes": 4679
+        },
+        {
+          "path": "node_modules/.pnpm/@deepseek-ai+dsh-app-boot@file++++private+var+folders+tz+wswl3q3117v437rw68yd90gh0000gn_31aa502c86404a29f675af7d7bcfb280/node_modules/@deepseek-ai/dsh-app-boot/node_modules/.bin/js-yaml",
+          "occurrences": 7,
+          "bytes": 4679
+        },
+        {
+          "path": "node_modules/.pnpm/@deepseek-ai+dsh-app-boot@file++++private+var+folders+tz+wswl3q3117v437rw68yd90gh0000gn_31aa502c86404a29f675af7d7bcfb280/node_modules/@deepseek-ai/dsh-app-boot/node_modules/.bin/semver",
+          "occurrences": 7,
+          "bytes": 4652
+        },
+        {
+          "path": "node_modules/.pnpm/@deepseek-ai+dsh-config-editor@file++++private+var+folders+tz+wswl3q3117v437rw68yd90gh0_83e66859e5f958a928e19ac0ddc739a1/node_modules/@deepseek-ai/dsh-config-editor/node_modules/.bin/js-yaml",
+          "occurrences": 7,
+          "bytes": 4679
+        },
+        {
+          "path": "node_modules/.pnpm/@deepseek-ai+dsh-config-editor@file++++private+var+folders+tz+wswl3q3117v437rw68yd90gh0_83e66859e5f958a928e19ac0ddc739a1/node_modules/@deepseek-ai/dsh-config-editor/node_modules/.bin/yaml",
+          "occurrences": 7,
+          "bytes": 4570
+        },
+        {
+          "path": "node_modules/.pnpm/@deepseek-ai+dsh-credentials-local@file++++private+var+folders+tz+wswl3q3117v437rw68yd9_8d9c4cc5b41cdd2dc4f380a4e5bf26a7/node_modules/@deepseek-ai/dsh-credentials-local/node_modules/.bin/yaml",
+          "occurrences": 7,
+          "bytes": 4570
+        },
+        {
+          "path": "node_modules/.pnpm/@deepseek-ai+dsh-llm-deepseek-account@file++++private+var+folders+tz+wswl3q3117v437rw68_d9ff19eaf992269e0ef3a0569dbec5fd/node_modules/@deepseek-ai/dsh-llm-deepseek-account/node_modules/.bin/semver",
+          "occurrences": 7,
+          "bytes": 4652
+        },
+        {
+          "path": "node_modules/.pnpm/@deepseek-ai+dsh-llm-pi-ai@file++++private+var+folders+tz+wswl3q3117v437rw68yd90gh0000g_149492b43787f6495e08762804f00921/node_modules/@deepseek-ai/dsh-llm-pi-ai/node_modules/.bin/pi-ai",
+          "occurrences": 7,
+          "bytes": 5961
+        },
+        {
+          "path": "node_modules/.pnpm/@deepseek-ai+dsh-office-to-pdf@file++++private+var+folders+tz+wswl3q3117v437rw68yd90gh0_ac7c6b37a87c0d69654cdae4dce78d32/node_modules/@deepseek-ai/dsh-office-to-pdf/node_modules/.bin/dsoffice",
+          "occurrences": 7,
+          "bytes": 5071
+        },
+        {
+          "path": "node_modules/.pnpm/@deepseek-ai+dsh-plugin-manager@file++++private+var+folders+tz+wswl3q3117v437rw68yd90gh_73cae3bfb376e2eb62702ef89e0b993e/node_modules/@deepseek-ai/dsh-plugin-manager/node_modules/.bin/yaml",
+          "occurrences": 7,
+          "bytes": 4570
+        },
+        {
+          "path": "node_modules/.pnpm/@deepseek-ai+dsh-plugin-market-index@file++++private+var+folders+tz+wswl3q3117v437rw68y_68c8340067fa5a5c57a3ba8cfb38f2b9/node_modules/@deepseek-ai/dsh-plugin-market-index/node_modules/.bin/semver",
+          "occurrences": 7,
+          "bytes": 4652
+        },
+        {
+          "path": "node_modules/.pnpm/@deepseek-ai+dsh-plugin-market@file++++private+var+folders+tz+wswl3q3117v437rw68yd90gh0_403abaabd1a9d1dafb5791007d5d3cec/node_modules/@deepseek-ai/dsh-plugin-market/node_modules/.bin/semver",
+          "occurrences": 7,
+          "bytes": 4652
+        },
+        {
+          "path": "node_modules/.pnpm/@deepseek-ai+dsh-sandbox-windows-acl@file++++private+var+folders+tz+wswl3q3117v437rw68y_b7605c9728294c38ed16ee7bd019271d/node_modules/@deepseek-ai/dsh-sandbox-windows-acl/node_modules/.bin/yaml",
+          "occurrences": 7,
+          "bytes": 4570
+        },
+        {
+          "path": "node_modules/.pnpm/@deepseek-ai+dsh-settings@file++++private+var+folders+tz+wswl3q3117v437rw68yd90gh0000gn_b58b8a6bbc5a2400b43bae33ad8dda21/node_modules/@deepseek-ai/dsh-settings/node_modules/.bin/yaml",
+          "occurrences": 7,
+          "bytes": 4570
+        },
+        {
+          "path": "node_modules/.pnpm/@deepseek-ai+dsh-skill-filesystem@file++++private+var+folders+tz+wswl3q3117v437rw68yd90_77683c60664a544e38bd47e1ac4f933a/node_modules/@deepseek-ai/dsh-skill-filesystem/node_modules/.bin/yaml",
+          "occurrences": 7,
+          "bytes": 4570
+        },
+        {
+          "path": "node_modules/.pnpm/@deepseek-ai+dsh-skill-office@file++++private+var+folders+tz+wswl3q3117v437rw68yd90gh00_7efa1bbf5eee80c7faca66ab4f226aa0/node_modules/@deepseek-ai/dsh-skill-office/node_modules/.bin/dsoffice",
+          "occurrences": 7,
+          "bytes": 5071
+        },
+        {
+          "path": "node_modules/.pnpm/@deepseek-ai+dsh-skill-office@file++++private+var+folders+tz+wswl3q3117v437rw68yd90gh00_7efa1bbf5eee80c7faca66ab4f226aa0/node_modules/@deepseek-ai/dsh-skill-office/node_modules/.bin/yaml",
+          "occurrences": 7,
+          "bytes": 4570
+        },
+        {
+          "path": "node_modules/.pnpm/@earendil-works+pi-ai@1.1.0_patch_hash=66eaf960054f10441b93ac3857114e96c1901f6d183713e2_73dd08dfbdc3fb586a4d49962ca3059f/node_modules/@earendil-works/pi-ai/node_modules/.bin/anthropic-ai-sdk",
+          "occurrences": 7,
+          "bytes": 4962
+        },
+        {
+          "path": "node_modules/.pnpm/cross-spawn@7.0.6/node_modules/cross-spawn/node_modules/.bin/node-which",
+          "occurrences": 7,
+          "bytes": 4621
+        },
+        {
+          "path": "node_modules/.pnpm/execa@10.0.1/node_modules/execa/node_modules/.bin/which-command",
+          "occurrences": 7,
+          "bytes": 4725
+        },
+        {
+          "path": "node_modules/.pnpm/is-inside-container@1.0.0/node_modules/is-inside-container/node_modules/.bin/is-docker",
+          "occurrences": 7,
+          "bytes": 4645
+        },
+        {
+          "path": "node_modules/.pnpm/is-wsl@3.1.1/node_modules/is-wsl/node_modules/.bin/is-inside-container",
+          "occurrences": 7,
+          "bytes": 4845
+        },
+        {
+          "path": "node_modules/.pnpm/node_modules/.bin/anthropic-ai-sdk",
+          "occurrences": 7,
+          "bytes": 4542
+        }
+      ]
+    },
+    "provenance_ref": "/Users/hutou/.codex/tasks/rc1-unified-candidate-build-20261017/evidence/unified-provenance.json",
+    "provenance_sha256": "8e78339cba58a7370ff2ad62d7190864b6aabfad1a192179c500c2d97e82dcc4",
+    "provenance_status": "OWNER_ONLY_MERGED",
+    "formal_linux_rebuild": "NOT_RUN",
+    "builder": "target owner overlay on 100.93.46.46; node v24.21.0; python 3.14.4; pnpm 11.28.5"
+  },
+  "root_cause": {
+    "source": "scripts/release/runtime-bundle.mjs",
+    "steps": [
+      "stageRuntimeWorkspace copies pinned upstream checkout to a temporary workspace",
+      "pnpm deploy --config.inject-workspace-packages=true emits absolute file:///workspace paths into deployed package.json, pnpm-lock.yaml, .modules.yaml and pnpm workspace state",
+      "materializeExternalSymlinks handles symlink targets only; it does not normalize pnpm metadata",
+      "bindRuntimeInputs rewrites direct registry tarball URLs only; it does not rewrite workspace file specifiers",
+      "tar packages the deployed tree as-is"
+    ],
+    "evidence_lines": [
+      "runtime-bundle.mjs:306-337",
+      "runtime-inputs.mjs:165-194"
+    ],
+    "impact": "runtime metadata contains macOS /private/var paths and cannot be declared portable Linux"
+  },
+  "formal_gates": {
+    "publisher_identity": {
+      "local": "OWNER_IDENTITY_DECLARED_LOCAL",
+      "formal": "NOT_RUN_COMPANY_IDENTITY_UNAVAILABLE"
+    },
+    "signature": {
+      "local": "OWNER_SELF_SIGNED_LOCAL / VERIFICATION_PASS",
+      "formal": "NOT_RUN_COMPANY_SIGNER_UNAVAILABLE"
+    },
+    "revocation": {
+      "local": "NOT_RUN_NO_TRUST_SERVICE",
+      "formal": "NOT_RUN_NO_REVOCATION_SERVICE"
+    },
+    "independent_verification": {
+      "local": "SELF_SEPARATED_REPLAY_PASS",
+      "formal": "NOT_RUN_SECOND_PERSON_UNAVAILABLE"
+    },
+    "final_attestation": {
+      "local": "OWNER_ATTESTATION_DRAFT_NOT_FORMAL",
+      "formal": "FORMAL_EXCEPTION_REQUIRED"
+    },
+    "clean_machine": {
+      "local": "OWNER_OPERATED_REPLAY_PASS",
+      "formal": "NOT_RUN_COMPANY_CLEAN_MACHINE"
+    }
+  },
+  "tool_probe": {
+    "cosign": {
+      "path": null,
+      "status": "NOT_FOUND"
+    },
+    "gpg": {
+      "path": null,
+      "status": "NOT_FOUND"
+    },
+    "gpg2": {
+      "path": null,
+      "status": "NOT_FOUND"
+    },
+    "notation": {
+      "path": null,
+      "status": "NOT_FOUND"
+    },
+    "in-toto-run": {
+      "path": null,
+      "status": "NOT_FOUND"
+    },
+    "in-toto-verifier": {
+      "path": null,
+      "status": "NOT_FOUND"
+    },
+    "slsa-verifier": {
+      "path": null,
+      "status": "NOT_FOUND"
+    },
+    "syft": {
+      "path": null,
+      "status": "NOT_FOUND"
+    },
+    "cyclonedx": {
+      "path": null,
+      "status": "NOT_FOUND"
+    },
+    "bom": {
+      "path": null,
+      "status": "NOT_FOUND"
+    },
+    "gitsign": {
+      "path": null,
+      "status": "NOT_FOUND"
+    },
+    "crane": {
+      "path": null,
+      "status": "NOT_FOUND"
+    },
+    "gh": {
+      "path": "/Users/hutou/homebrew/bin/gh",
+      "status": "FOUND"
+    },
+    "openssl": {
+      "path": "/Users/hutou/homebrew/bin/openssl",
+      "status": "FOUND"
+    },
+    "zstd": {
+      "path": "/Users/hutou/homebrew/bin/zstd",
+      "status": "FOUND"
+    },
+    "node": {
+      "path": "/Users/hutou/homebrew/bin/node",
+      "status": "FOUND"
+    },
+    "pnpm": {
+      "path": "/Users/hutou/homebrew/opt/node@24/bin/pnpm",
+      "status": "FOUND"
+    },
+    "python3": {
+      "path": "/Users/hutou/.local/bin/python3",
+      "status": "FOUND"
+    },
+    "COMPANY_PUBLISHER_ID": {
+      "status": "NOT_FOUND"
+    },
+    "COMPANY_SIGNER": {
+      "status": "NOT_FOUND"
+    },
+    "COMPANY_REVOCATION_SERVICE": {
+      "status": "NOT_FOUND"
+    },
+    "COMPANY_KMS_ENDPOINT": {
+      "status": "NOT_FOUND"
+    },
+    "OIDC_ISSUER": {
+      "status": "NOT_FOUND"
+    }
+  },
+  "local_actions_completed": [
+    "zstd -q -t runtime archive",
+    "SHA-256 archive and provenance recomputation",
+    "full extracted runtime scan for /private/var metadata",
+    "fixed Node v24.19.0/pnpm 11.28.2 owner detached signature verification (exit 0)",
+    "publisher/signer/revocation tool and input presence probe"
+  ],
+  "next_required": [
+    "run formal Linux rebuild on approved Linux runner with fixed upstream SHA and approved Node/pnpm",
+    "add fail-closed portable metadata scan after deploy and before tar; reject absolute host paths",
+    "recompute runtime archive/provenance/SBOM from rebuilt bytes",
+    "obtain company publisher identity, signer, independent verifier, revocation service, final attestation and clean-machine receipt"
+  ],
+  "constraints": [
+    "no DSH upstream change",
+    "no live 4328/4329 change",
+    "no Git commit",
+    "local evidence does not upgrade formal gates"
+  ]
+}
