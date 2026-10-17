@@ -13,7 +13,9 @@
     "upstream_pnpm": "11.28.5",
     "plugin_pnpm": "11.28.2",
     "cordis": "4.0.5",
-    "temporary_candidate_root": "/tmp/dsh-rc1-candidate.bMFp7P"
+    "temporary_candidate_root": "/tmp/dsh-rc1-candidate.bMFp7P",
+    "temporary_inventory": "/tmp/dsh-rc1-probe.h1nse4/rc1-input-inventory.json",
+    "temporary_inventory_sha256": "01d3f6cb914fa61a4c926ddba2015638cc6aaeacd8f0255ad2840b2d41461115"
   },
   "observations": [
     {
