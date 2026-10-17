@@ -93,6 +93,17 @@ async function scanRuntimeTree(root) {
 
 async function requiredPeerAliases(root) {
   const names = new Set();
+  async function collectPackageDependencies(path) {
+    const packageJson = JSON.parse(await readFile(join(path, 'package.json'), 'utf8').catch(error => {
+      if (error.code === 'ENOENT') return '{}';
+      throw error;
+    }));
+    for (const section of ['dependencies', 'optionalDependencies', 'peerDependencies']) {
+      for (const name of Object.keys(packageJson[section] ?? {})) {
+        if (name.startsWith('@deepseek-ai/')) names.add(name.slice('@deepseek-ai/'.length));
+      }
+    }
+  }
   async function walk(directory) {
     for (const entry of await readdir(directory, { withFileTypes: true })) {
       const path = join(directory, entry.name);
@@ -111,7 +122,10 @@ async function requiredPeerAliases(root) {
       const rel = relativePath(root, path);
       if (entry.name === '@deepseek-ai' && rel.includes('/node_modules/')) {
         for (const peer of await readdir(path, { withFileTypes: true })) {
-          if (peer.isDirectory() || peer.isSymbolicLink()) names.add(peer.name);
+          if (peer.isDirectory() || peer.isSymbolicLink()) {
+            names.add(peer.name);
+            await collectPackageDependencies(join(path, peer.name));
+          }
         }
         continue;
       }
