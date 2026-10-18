@@ -30,7 +30,9 @@ node scripts/release/rc1-preflight.mjs \
 
 入口会检查 source archive、source tree、LFS pointer、两份 profile、9 个 plugin pack、pack provenance、runtime archive 和 runtime provenance。任一检查失败时只写 `rc1-preflight.json`，退出码为 `2`，不生成可安装 release manifest。
 
-## 当前真实结果
+## 2026-10-17 历史本地结果
+
+本节保留 2026-10-17 的 local lane 回执。它不是当前杭州 r9 资产，也不是正式公司 release。当前 owner-operated r9 事实和正式门禁只看 [STATUS.md](../../STATUS.md) 及 2026-10-18 回执。
 
 2026-10-17 的本地回执位于 `.context/checks/dsh-rc1-release-prep-20261017/rc1-preflight/`，本地 release asset 位于 `.context/checks/dsh-rc1-release-prep-20261017/rc1-release/`：
 
@@ -51,3 +53,17 @@ node scripts/release/rc1-preflight.mjs \
 正式发布仍需把本地 asset 送入批准的 publisher、signature、revocation、independent verification、final attestation 和 clean-machine 流程，再生成可外发的 publication sidecar。当前没有执行这些外部门禁。
 
 当前状态保持：`M2-07=BLOCKED`、`M2-08=NOT_RUN`、`M2-09=NOT_RUN`、`release_ready=false`。
+
+## Linux x64 portable runtime
+
+在 Linux x64 builder 上生成可移植 runtime 时，使用 `--portable-linux`。该选项要求 Linux x64、固定上游 checkout、离线 preparation receipt 和新的输出目录：
+
+```bash
+node scripts/release/runtime-bundle.mjs \
+  --upstream /absolute/pinned/dsh-upstream \
+  --output /absolute/output/runtime-linux-x64.tar.zst \
+  --provenance /absolute/output/runtime-linux-x64.provenance.json \
+  --portable-linux
+```
+
+构建会重写 pnpm staging shim、移除不适用的 Darwin/Windows/Linux arm64 native 文件，并在打包前拒绝 host path 和 native findings。该结果仍是 owner-local 输入；publisher identity、signature、revocation、independent verification、final attestation 和 formal clean-machine 需要单独完成。
