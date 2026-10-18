@@ -1,6 +1,6 @@
 # DSH rc1 release lane
 
-这条 lane 为内部 rc1 候选准备 release 输入。它与 rc2 主兼容线分开。它不修改 `dsh-plugins/plugin-kit/toolchain.json` 的 rc2 默认值，也不切换杭州 `current`。
+这条 lane 为内部 rc1 候选准备 release 输入。它与 rc2 主兼容线分开。它不修改 `dsh-plugins/plugin-kit/toolchain.json` 的 rc2 默认值，也不负责杭州 owner-operated 的现役切换。当前杭州内部 r9 现场和正式 release 状态只看 [STATUS.md](../../STATUS.md)；本 lane 的 local asset 不等于公司正式 release。
 
 ## 固定输入
 
