@@ -93,9 +93,9 @@ fuqing-crm-analytics/docs/
 ├── operating/                         怎么运维 / 协作
 │   ├── shinemage-maintenance-and-cleanup.md  主仓/插件仓职责、升级与清理
 │   ├── shinemage-plugin-update.md       单插件更新与主仓摘要接入
-│   ├── team-workflow-v1.md            可合并定义 · 角色
+│   ├── team-workflow-v1.md            历史协作定义 · 角色
 │   ├── supply-chain.md                依赖 SSOT / audit（PR5）
-│   ├── docker-ports-and-images.md     端口 / healthcheck / 镜像 pin
+│   ├── docker-ports-and-images.md     历史端口 / healthcheck / 镜像记录
 │   ├── github-governance-checklist.md 分支保护等人工清单
 │   ├── project-hygiene.md             根目录 / 文档整洁
 │   ├── ship.md · linting.md · hooks-* · launchd-uvicorn.md
