@@ -18,13 +18,14 @@ export function decodeVlq(field) {
   for (const char of field) {
     const raw = digit.get(char);
     if (raw === undefined) return null;
-    value += (raw & 31) << shift;
+    value += (raw & 31) * 2 ** shift;
+    if (!Number.isSafeInteger(value)) return null;
     if (raw & 32) {
       shift += 5;
       if (shift > 30) return null;
     } else {
-      const negative = value & 1;
-      value >>= 1;
+      const negative = value % 2 === 1;
+      value = Math.floor(value / 2);
       const signed = negative ? -value : value;
       values.push(Object.is(signed, -0) ? 0 : signed);
       value = 0;
