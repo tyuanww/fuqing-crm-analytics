@@ -157,7 +157,8 @@ export async function collectReleaseReadiness({
   }
   let pluginPacks = null;
   try {
-    pluginPacks = await loadReleasePacks({ root: repo, manifestPath: profileManifest, inputsPath: profilePackInputs });
+    pluginPacks = await loadReleasePacks({ root: repo, manifestPath: profileManifest, inputsPath: profilePackInputs,
+      requireGeneratedProvenance: true });
     add(checks, 'plugin-packs', true, `${pluginPacks.plugins.length} fixed packs:${pluginPacks.inputsSha256}`,
       'PREFLIGHT_PLUGIN_PACKS_INVALID', 'supply DSH_PROFILE_PACK_INPUTS bound to the selected profile');
   } catch (error) {

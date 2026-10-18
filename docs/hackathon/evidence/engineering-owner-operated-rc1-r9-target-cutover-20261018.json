@@ -1,0 +1,144 @@
+{
+  "schema_version": "shinemage-owner-operated-rc1-r9-target-cutover/v1",
+  "status": "PASS_OWNER_OPERATED_CURRENT_SWITCH",
+  "executed_at": "2026-10-18T01:54:55Z",
+  "scope": "internal-owner-operated-target-cutover",
+  "target": {
+    "host": "DESKTOP-FAEJK8S",
+    "kernel": "Linux 6.18.33.2-microsoft-standard-WSL2",
+    "node": "v24.21.0",
+    "python": "3.12.3",
+    "service": "shinemage-dsh.service",
+    "promo_service": "shinemage-dsh-promo-enter.service"
+  },
+  "candidate": {
+    "release_tag": "dsh-0.2.1-rc.1-owner-r9-20261018",
+    "release_path": "/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-owner-r9-20261018",
+    "runtime_path": "/srv/shinemage/dsh/runtime-rc1-owner-r9-20261018",
+    "sdk": "@deepseek-ai/dsh@0.2.1-rc.1",
+    "upstream_sha": "1600d8a1e140dcde43a1a0941940a0480712c011",
+    "source_tree_sha256": "1da0862e853d126219dbec4b77bd7187776112f620adadc12ccda07c420c3f4a",
+    "generated_tree_sha256": "2d91073d45c2534cb27d6129545c6cc86e0ed50c9bc038a402a79152bec8335b",
+    "preparation_receipt_sha256": "2d2f00923d8bc64b5efc5369b7eb9b3177d97c59354a24fdf8e83458adc5d971",
+    "runtime_archive_sha256": "ed11ec808d939bbab292738be6227e8882c95889d3af5db1a9febbc318aa05a2",
+    "runtime_provenance_sha256": "22c710ca15e59d4659338a27b798f298d227b03b02c1c6ba912889df16e6921e",
+    "runtime_archive_bytes": 188141482,
+    "runtime_archive_path": "/srv/shinemage/dsh/staging/rc1-linux-x64-formal-r9/runtime-linux-x64-formal-r9.tar.zst",
+    "runtime_provenance_path": "/srv/shinemage/dsh/staging/rc1-linux-x64-formal-r9/runtime-linux-x64-formal-r9.provenance.json",
+    "pack_inputs_sha256": "7dc6298240bca26b6a97878e2b23ab010be26f1f83cb9576d8a491933ba504fc",
+    "profile_sha256": "e93e6f5e7975311f55bf1ee070b7aea009c938449c9a1542f3c2a503f40253fc",
+    "toolchain": {
+      "builder_node": "v24.21.0",
+      "target_node": "v24.21.0",
+      "upstream_pnpm": "11.28.5",
+      "plugin_pnpm": "11.28.2"
+    },
+    "provenance_schema": "dsh-generated-bytes/v1",
+    "portable_scan": {
+      "files": 29207,
+      "host_path_findings": 0,
+      "native_findings": 0,
+      "rewritten_path_shims": 315,
+      "removed_native_files": 40
+    }
+  },
+  "side_by_side": {
+    "web_bind": "127.0.0.1:14327",
+    "page_http_bind": "127.0.0.1:18155",
+    "initial_supervisor_pid": 1446346,
+    "initial_web_status": 401,
+    "initial_page_status": 404,
+    "initial_profile_bridge": "linked=13 plugin_roots=7",
+    "initial_pnpm": "11.28.2",
+    "stop_result": "DSH_DEV_STOPPED acknowledged by owned supervisor",
+    "stop_released_candidate_ports": true,
+    "restart_supervisor_pid": 1453657,
+    "restart_runtime": "/srv/shinemage/dsh/runtime-rc1-owner-r9-20261018",
+    "restart_status": "DSH_DEV_STATUS running",
+    "restart_profile_bridge": "linked=13 plugin_roots=7",
+    "restart_pnpm": "11.28.2",
+    "restart_candidate_ports_released_before_cutover": true
+  },
+  "headed_browser": {
+    "transport": "Chrome headed browser through owner SSH tunnel",
+    "candidate_url": "http://127.0.0.1:14327/",
+    "page_http_tunnel": "http://127.0.0.1:18155/",
+    "before_stop": {
+      "title": "伸美 AI 增长董事会",
+      "plugin_page_opened": true,
+      "enabled_plugin_count": 7,
+      "cockpit_opened": true,
+      "cockpit_heading": "项目驾驶舱"
+    },
+    "after_restart": {
+      "title": "DeepSeek Harness",
+      "plugin_page_opened": true,
+      "enabled_plugin_count": 7,
+      "enabled_plugins": [
+        "@shine-mage/dsh-analytics-workbench-b0",
+        "@shine-mage/dsh-shine-board",
+        "@shine-mage/dsh-shine-brand",
+        "@shine-mage/dsh-shine-crowd-action",
+        "@shine-mage/dsh-shine-funnel",
+        "@shine-mage/dsh-shine-query",
+        "@shine-mage/dsh-shine-waterfall"
+      ],
+      "cockpit_opened": true,
+      "cockpit_heading": "项目驾驶舱",
+      "cockpit_readback": "待处理 0；暂无产物；实时事件不可用，已启用刷新扫描",
+      "console_errors": "NOT_CAPTURED"
+    },
+    "model_call": "NOT_RUN"
+  },
+  "rollback_check": {
+    "method": "isolated copy of previous owner release and runtime; current service left running",
+    "release": "/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-owner-rollback-check-20261018",
+    "runtime": "/srv/shinemage/dsh/runtime-rc1-owner-rollback-check-20261018",
+    "supervisor_pid": 1456258,
+    "web_bind": "127.0.0.1:14327",
+    "page_http_bind": "127.0.0.1:18155",
+    "web_unauthenticated_status": 401,
+    "page_http_root_status": 404,
+    "fallback_runtime_version": "0.2.1-rc.1",
+    "current_service_during_check": "active",
+    "current_link_during_check": "/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-owner-20261018",
+    "stop_result": "DSH_DEV_STOPPED acknowledged by owned supervisor",
+    "candidate_ports_released": true
+  },
+  "cutover": {
+    "previous_current": "/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-owner-20261018",
+    "current_release": "/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-owner-r9-20261018",
+    "current_symlink": "/srv/shinemage/dsh/current",
+    "atomic_switch": true,
+    "systemd_status": "active",
+    "promo_service_status": "active",
+    "runtime_env": "/srv/shinemage/dsh/runtime-rc1-owner-r9-20261018",
+    "web_bind": "127.0.0.1:4328",
+    "page_http_bind": "127.0.0.1:18091",
+    "promo_bind": "127.0.0.1:18098",
+    "web_unauthenticated_status": 401,
+    "page_http_root_status": 404,
+    "promo_redirect_status": 302,
+    "public_promo_follow_status": 200,
+    "public_unauthenticated_root_status": 401,
+    "profile_bridge": "linked=13 plugin_roots=7",
+    "observed_pnpm": "11.28.2",
+    "ready_marker": "DSH_DEV_READY",
+    "backup_dir": "/srv/shinemage/dsh/backups/cutover-r9-20261018",
+    "promo_runtime_binding": "/srv/shinemage/dsh/runtime-rc1-owner-r9-20261018/browser-private.json",
+    "rollback_target_retained": "/srv/shinemage/dsh/releases/dsh-0.20.0.0-r3",
+    "previous_release_retained": true
+  },
+  "formal_status": {
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "m2_09": "NOT_RUN",
+    "release_ready": false,
+    "formal_company_evidence": false
+  },
+  "remaining_boundary": [
+    "publisher identity、company signature、independent verification、revocation、final attestation 和 formal clean-machine 仍未完成",
+    "本回执只证明 owner-operated side-by-side、HTTP、headed browser、stop/start、回滚检查和 current 切换",
+    "没有创建 GitHub Release、没有 push、没有把 owner-local 结果提升为正式公司 release evidence"
+  ]
+}

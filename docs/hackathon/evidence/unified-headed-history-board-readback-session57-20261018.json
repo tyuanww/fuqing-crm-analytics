@@ -1,0 +1,37 @@
+{
+  "schema_version": "shinemage-headed-history-board-readback/v1",
+  "captured_at": "2026-10-18",
+  "candidate_id": "rc1-unified-owner-20261017-r1",
+  "runtime": "/tmp/shinemage-owner-rc1-unified-20261017-r1/runtime-browser-unified-r5",
+  "web_origin": "http://127.0.0.1:14327",
+  "session_id": "session-57b79737-3cfe-4978-b696-1a6179322469",
+  "workspace_id": "ef4c1f00-25b5-47dc-be91-4da51791d357",
+  "history_fixture_sha256": "7489f35e529a0fd117378419c46d1014c2717434b259f4c02f92b28bc5d719bf",
+  "board_id": "rc1_unified_board",
+  "board_record_sha256": "ef28de86f9e6ae27fb1a20b8659d8f1c3b6a4687a4dcbf253b927234dc6676ac",
+  "restart": {
+    "pre_supervisor_pid": 1154955,
+    "post_supervisor_pid": 1159680,
+    "pre_child_pid": 1155351,
+    "post_child_pid": 1159936,
+    "page_http": "http://127.0.0.1:18159",
+    "post_fixture_restored": false,
+    "post_note": "headed browser restored session before fixture route; fixture resolved existing live Agent"
+  },
+  "headed_browser": {
+    "title": "rc1 unified history reread · synthetic · session57 — DeepSeek Harness",
+    "history_visible": true,
+    "board_title_visible": true,
+    "board_preview_action_visible": true,
+    "console_errors": 0,
+    "ax_excerpt": "Browser tab: 1, Title: \"rc1 unified history reread · synthetic · session57 — DeepSeek Harness\", URL: \"http://127.0.0.1:14327/\".\n1 AXWebArea rc1 unified history reread · synthetic · session57 — DeepSeek Harness, URL: 127.0.0.1:14327/\n\t2 container\n\t\t3 button 新建会话\n\t\t4 button 收起侧边栏\n\t\t5 button 新建会话\n\t\t6 container 全局面板\n\t\t\t7 button 插件\n\t\t\t8 button 自动化任务\n\t\t\t9 button 驾驶舱\n\t\t\t10 button 数据员工\n\t\t11 text 工作区\n\t\t12 container\n\t\t\t13 button (collapsed) Description: 搜索会话, Secondary Actions: Expand\n\t\t\t14 text field (settable)\n\t\t15 button 视图选项\n\t\t16 button 添加工作区\n\t\t17 outline 会话\n\t\t\t18 container\n\t\t\t\t19 row (expanded) workspace, Secondary Actions: Collapse\n\t\t\t\t\t20 text workspace\n\t\t\t\t21 row (selected) rc1 unified history reread · synthetic · session57 4分钟\n\t\t\t\t\t22 text rc1 unified history reread · synthetic · session57\n\t\t\t\t\t23 text 4分钟\n\t\t\t24 row (collapsed) 未分组, Secondary Actions: Expand\n\t\t\t\t25 text 未分组\n\t\t26 pop up button (collapsed) Description: 未登录, Secondary Actions: Expand\n\t\t27 pop up button (collapsed) Description: 外观：跟随系统, Secondary Actions: Expand\n\t\t28 pop up button (collapsed) Description: 账号菜单, Secondary Actions: Expand\n\t\t29 container\n\t\t\t30 container 会话层级\n\t\t\t\t31 text rc1 unified history reread · synthetic · session57\n\t\t\t32 text 标准模式\n\t\t\t33 button 用 文件管理器 打开\n\t\t\t34 pop up button (collapsed) Description: 更多操作, Secondary Actions: Expand\n\t\t\t35 button 打开右侧边栏\n\t\t\t36 tab group\n\t\t\t\t37 tab (selected, settable, boolean) 对话, Value: 1\n\t\t\t\t38 tab (selectable, settable, boolean) 轨迹, Value: 0\n\t\t39 container\n\t\t\t40 container\n\t\t\t\t41 text 已完成\n\t\t\t\t42 button (expanded) 已完成，用时 1秒, Secondary Actions: Collapse\n\t\t\t\t\t43 text 已完成，用时 \n\t\t\t\t\t44 text 1\n\t\t\t\t\t45 text 秒\n\t\t\t\t59 button (expanded) 已调用工具, Secondary Actions: Collapse\n\t\t\t\t60 container :ro:\n\t\t\t\t\t61 container\n\t\t\t\t\t\t62 text rc1 unified synthetic restart board  ·  1  个组件 · 尚未保存\n\t\t\t\t\t63 button 打开预览，检查后确认\n\t\t\t\t46 button Description: 在侧边栏预览 /tmp/shinemage-owner-rc1-unified-20261017-r1/runtime-browser-unified-r5/workspace/rc1-unified-history.html, Help: /tmp/shinemage-owner-rc1-unified-20261017-r1/runtime-browser-unified-r5/workspace/rc1-unified-history.html\n\t\t\t\t47 container\n\t\t\t\t\t48 text rc1-unified-history.html HTML\n\t\t\t\t\t49 button 显示文件位置\n\t\t\t\t\t50 pop up button (collapsed) Description: 更多打开方式, Secondary Actions: Expand\n\t\t\t51 button 返回驾驶舱\n\t\t\t52 text entry area (settable) 发消息或创建任务, / 调用指令, @ 文件或对话\n\t\t\t53 pop up button (collapsed) Description: 添加文件或调用指令, Secondary Actions: Expand\n\t\t\t54 button 访问模式，当前：工作区内修改\n\t\t\t55 pop up button (collapsed) Description: 请选择模型, Secondary Actions: Expand\n\t\t\t56 button (disabled) 发送消息\n\t\t\t57 pop up button (collapsed) Description: 1 轮 1 步, Secondary Actions: Expand\n\t\t\t58 button 生成驾驶舱\n\nThe focused UI element is 59 button (expanded) 已调用工具, Secondary Actions: Collapse"
+  },
+  "screenshot_path": "/Users/hutou/.codex/tasks/rc1-unified-candidate-build-20261017/evidence/unified-headed-history-board-readback-session57-20261018.png",
+  "screenshot_sha256": "328ae77caf12ec01ce7b6f7d77a7ef1cf3450c7c66ee61d24f055e101efe2b1f",
+  "formal_status": {
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "m2_09": "NOT_RUN",
+    "release_ready": false
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "schema_version": "shinemage-rc1-owner-r9-clean-machine-receipt/v1",
+  "generated_at": "2026-10-18T04:21:42Z",
+  "status": "OWNER_OPERATED_FRESH_EXTRACTION_PASS",
+  "formal_status": "NOT_RUN_COMPANY_CLEAN_MACHINE",
+  "formal_company_evidence": false,
+  "execution": {
+    "mode": "OWNER_OPERATED",
+    "runner_identity": "same-owner-fresh-target-extraction",
+    "target": "root@100.93.46.46",
+    "temporary_workspace_cleaned": true,
+    "network_mode": "offline archive extraction"
+  },
+  "subjects": {
+    "runtime_archive_sha256": "ed11ec808d939bbab292738be6227e8882c95889d3af5db1a9febbc318aa05a2",
+    "runtime_provenance_sha256": "22c710ca15e59d4659338a27b798f298d227b03b02c1c6ba912889df16e6921e",
+    "subject_manifest": "m2-07-owner-r9-formal-subject-manifest-20261018.json"
+  },
+  "checks": {
+    "machine": {
+      "hostname": "DESKTOP-FAEJK8S",
+      "os": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+      "arch": "x86_64",
+      "node": {
+        "exit_code": 0,
+        "stdout": "v24.21.0",
+        "stderr": ""
+      },
+      "default_pnpm": {
+        "exit_code": 0,
+        "stdout": "11.19.0",
+        "stderr": ""
+      }
+    },
+    "artifact": {
+      "path": "/srv/shinemage/dsh/staging/rc1-formal-r9-20261018/runtime-linux-x64-formal-r9.tar.zst",
+      "sha256": "ed11ec808d939bbab292738be6227e8882c95889d3af5db1a9febbc318aa05a2",
+      "expected_sha256": "ed11ec808d939bbab292738be6227e8882c95889d3af5db1a9febbc318aa05a2",
+      "sha_match": true
+    },
+    "zstd_test": {
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "archive_extract": {
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "toolchain": {
+      "upstream_pnpm": {
+        "exit_code": 0,
+        "stdout": "11.28.5",
+        "stderr": ""
+      },
+      "plugin_pnpm": {
+        "exit_code": 0,
+        "stdout": "11.28.2",
+        "stderr": ""
+      },
+      "expected_upstream": "11.28.5",
+      "expected_plugin": "11.28.2"
+    },
+    "runtime_version": {
+      "exit_code": 0,
+      "stdout": "0.2.1-rc.1",
+      "stderr": ""
+    },
+    "runtime_help": {
+      "exit_code": 0,
+      "stdout": "Usage: dsh [--profile] <name> [options] [app-args...]\n       dsh plugin --profile <name> <pnpm-args...>\n\ndsh: boot a DeepSeek Harness profile — an ordered stack of plugin-bundle patch\nlayers under your own overrides.\n\nArguments:\n  args                           arguments for the booted profile's app (see:\n                                 dsh --profile <name> --help)\n\nOptions:\n  -V, --version                  output the version number\n  --profile <name>               the profile under $DSH_HOME/profiles to boot\n  --from-default-profile <name>  replace a custom profile with a fresh copy of a\n                                 shipped profile template\n  --patch <path>                 extra patch-list overlay applied after the\n                                 profile layer (repeatable)\n  --dump-config                  print the composed profile tree and exit\n  --dump-config-schema           print JSON Schema for profile entries and\n                                 patches without mounting\n  --dump-default-config          print the profile tree without its user layer\n                                 or --patch overlays and exit\n\nExamples:\n  dsh web                                   boot the web profile (same as: dsh --profile web)\n  dsh rescue --from-default-profile web\n                                            recreate rescue from the shipped web template, then boot it\n  dsh headless \"run the tests\"              answer one task, print the result, and exit\n  dsh tui --patch ./extra.yml               boot a custom profile with one extra overlay\n  dsh tui --resume <session>                arguments after the launcher flags reach the app\n  dsh web --help                            the web app's own flags and help\n  dsh plugin --profile tui add <package>    install a plugin into the tui profile",
+      "stderr": ""
+    },
+    "runtime_import": {
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "katex_css": {
+      "status": "PASS",
+      "path": "/tmp/dsh-r9-clean-formal-umv44695/runtime/.runtime-external/node_modules/.pnpm/katex@0.18.7/node_modules/katex/dist/katex.min.css"
+    },
+    "credential_scan": {
+      "status": "PASS",
+      "matches": []
+    },
+    "rc2_rollback_reference": {
+      "release": "/srv/shinemage/dsh/releases/dsh-0.20.0.0-r3",
+      "version": {
+        "exit_code": 0,
+        "stdout": "0.1.7-rc.2",
+        "stderr": ""
+      },
+      "help": {
+        "exit_code": 0,
+        "stdout": "Usage: dsh [--profile] <name> [options] [app-args...]\n       dsh plugin --profile <name> <pnpm-args...>\n\ndsh: boot a DeepSeek Harness profile — an ordered stack of plugin-bundle patch\nlayers under your own overrides.\n\nArguments:\n  args                           arguments for the booted profile's app (see:\n                                 dsh --profile <name> --help)\n\nOptions:\n  -V, --version                  output the version number\n  --profile <name>               the profile under $DSH_HOME/profiles to boot\n  --from-default-profile <name>  initialize a new custom profile from a shipped\n                                 profile template\n  --patch <path>                 extra patch-list overlay applied after the\n                                 profile layer (repeatable)\n  --dump-config                  print the composed profile tree and exit\n  --dump-config-schema           print JSON Schema for profile entries and\n                                 patches without mounting\n  --dump-default-config          print the profile tree without its user layer\n                                 or --patch overlays and exit\n\nExamples:\n  dsh web                                   boot the web profile (same as: dsh --profile web)\n  dsh rescue --from-default-profile web\n                                            create rescue from the shipped web template, then boot it\n  dsh headless \"run the tests\"              answer one task, print the result, and exit\n  dsh tui --patch ./extra.yml               boot a custom profile with one extra overlay\n  dsh tui --resume <session>                arguments after the launcher flags reach the app\n  dsh web --help                            the web app's own flags and help\n  dsh plugin --profile tui add <package>    install a plugin into the tui profile",
+        "stderr": ""
+      }
+    }
+  },
+  "constraints": [
+    "This is same-owner fresh target extraction evidence.",
+    "It is not a company clean-machine runner receipt.",
+    "Company publisher identity, signature, revocation and final attestation remain unverified.",
+    "The target default pnpm 11.19.0 was not used; the receipt records the exact candidate upstream and plugin toolchains."
+  ],
+  "formal_gate_state": {
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "m2_09": "NOT_RUN",
+    "release_ready": false
+  }
+}

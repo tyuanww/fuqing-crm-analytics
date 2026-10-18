@@ -15,7 +15,7 @@ const load = path => import(pathToFileURL(path).href);
 
 /** Validate the existing seven-package profile before outputs or module evaluation. */
 export async function readLeafPackInputs(inputsPath) {
-  const packs = await loadProfilePacks({ inputsPath });
+  const packs = await loadProfilePacks({ inputsPath, requireGeneratedProvenance: true });
   assert.equal(packs.profile.service_binding, undefined, 'LEAF_PACK_SERVICE_BINDING_REQUIRES_CANDIDATE');
   assert.deepEqual(packs.plugins.map(row => row.id).sort(), [pageId, ...LEAF_NAMES.map(id)].sort(), 'LEAF_PACK_SELECTION');
   for (const name of LEAF_NAMES) {

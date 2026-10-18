@@ -1,0 +1,122 @@
+{
+  "schema_version": "shinemage-rc1-owner-r9-final-attestation-draft/v1",
+  "generated_at": "2026-10-18T04:22:02Z",
+  "status": "OWNER_LOCAL_FINAL_ATTESTATION_NOT_FORMAL",
+  "formal_company_evidence": false,
+  "release_authorization": false,
+  "github_release": "NOT_CREATED",
+  "execution": {
+    "mode": "OWNER_OPERATED",
+    "owner": "project-owner",
+    "scope": "INTERNAL_ONLY_OWNER_OPERATED",
+    "independent_verifier": "SAME_OWNER_SEPARATED_PROCESS"
+  },
+  "subjects": {
+    "sdk": "@deepseek-ai/dsh@0.2.1-rc.1",
+    "upstream_sha": "1600d8a1e140dcde43a1a0941940a0480712c011",
+    "source_archive_sha256": "4c2fc183e7e60fc492c13b47cce98c7d9aa2e8885cd25259da1a293011de1789",
+    "runtime_archive_sha256": "ed11ec808d939bbab292738be6227e8882c95889d3af5db1a9febbc318aa05a2",
+    "runtime_provenance_sha256": "22c710ca15e59d4659338a27b798f298d227b03b02c1c6ba912889df16e6921e",
+    "subject_set_sha256": "7053c9bea8e90a4e9c2f0de6ab822841c14deb2669ed3691b739d5c53559d8ab",
+    "manifest_sha256": "3d746c88a1166a1f18bcfe1f6c49d7a8880e8bb4b60b7bc3b98fc3ca80b9b4f4"
+  },
+  "local_evidence": [
+    {
+      "id": "subject_manifest",
+      "path": "docs/hackathon/evidence/m2-07-owner-r9-formal-subject-manifest-20261018.json",
+      "sha256": "3d746c88a1166a1f18bcfe1f6c49d7a8880e8bb4b60b7bc3b98fc3ca80b9b4f4",
+      "status": "LOCAL_FORMAL_CANDIDATE_SUBJECT_BOUND"
+    },
+    {
+      "id": "runtime_provenance",
+      "path": "docs/hackathon/evidence/m2-07-owner-linux-runtime-r9-provenance-20261018.json",
+      "sha256": "22c710ca15e59d4659338a27b798f298d227b03b02c1c6ba912889df16e6921e",
+      "status": "OWNER_LOCAL_REBUILD_PASS"
+    },
+    {
+      "id": "publisher_identity",
+      "path": "docs/hackathon/evidence/m2-07-owner-r9-formal-gates-20261018/owner-public-key.pem",
+      "sha256": "476b048df3f683d1205b3bcb6df78eb17154bc49e9b10197c3a93927f51ab492",
+      "status": "OWNER_IDENTITY_DECLARED_LOCAL"
+    },
+    {
+      "id": "owner_binding",
+      "path": "docs/hackathon/evidence/m2-07-owner-r9-formal-gates-20261018/owner-binding.json",
+      "sha256": "a50c25138bec29ffef1b1a341d94d355ef76c27128cdd1cab4f86d58eda1e79a",
+      "status": "OWNER_LOCAL_BINDING"
+    },
+    {
+      "id": "owner_signature",
+      "path": "docs/hackathon/evidence/m2-07-owner-r9-formal-gates-20261018/owner-binding.sig",
+      "sha256": "62903b7bf88f32758149822863977bb6fb00a50390d2634af63315e1043fbfcf",
+      "status": "OWNER_SELF_SIGNED_LOCAL_VERIFICATION_PASS"
+    },
+    {
+      "id": "independent_replay",
+      "path": "docs/hackathon/evidence/m2-07-owner-r9-formal-gates-20261018/owner-r9-independent-verification-20261018.json",
+      "sha256": "88c0c85ba8aa8deba57e5fdc5de2a50e76d086cc23578ee10129d71052c40d5c",
+      "status": "SAME_OWNER_SEPARATED_REPLAY_PASS"
+    },
+    {
+      "id": "clean_machine",
+      "path": "docs/hackathon/evidence/m2-07-owner-r9-formal-gates-20261018/owner-r9-clean-machine-receipt-20261018.json",
+      "sha256": "a7bb103f4f379e6387e5ca5032c4731f96b53984e2785b0dd128091f5980d8ad",
+      "status": "OWNER_OPERATED_FRESH_EXTRACTION_PASS"
+    },
+    {
+      "id": "target_cutover",
+      "path": "docs/hackathon/evidence/engineering-owner-operated-rc1-r9-target-cutover-20261018.json",
+      "sha256": "39fa26b375e39c210f7131e2978862b92e4c16af7fd1ccd56d6d9bd41cc9cbec",
+      "status": "PASS_OWNER_OPERATED_CURRENT_SWITCH"
+    }
+  ],
+  "gate_results": {
+    "publisher_identity": {
+      "local": "OWNER_IDENTITY_DECLARED_LOCAL",
+      "formal": "NOT_RUN_COMPANY_IDENTITY_UNAVAILABLE",
+      "evidence": "publisher_identity"
+    },
+    "signature": {
+      "local": "OWNER_SELF_SIGNED_LOCAL / VERIFICATION_PASS",
+      "formal": "NOT_RUN_COMPANY_SIGNER_UNAVAILABLE",
+      "evidence": "owner_signature"
+    },
+    "revocation": {
+      "local": "NOT_RUN_NO_TRUST_SERVICE",
+      "formal": "NOT_RUN_NO_REVOCATION_SERVICE",
+      "evidence": null
+    },
+    "independent_verification": {
+      "local": "SAME_OWNER_SEPARATED_REPLAY_PASS",
+      "formal": "NOT_RUN_SECOND_PERSON_UNAVAILABLE",
+      "evidence": "independent_replay"
+    },
+    "final_attestation": {
+      "local": "OWNER_LOCAL_FINAL_ATTESTATION_NOT_FORMAL",
+      "formal": "FORMAL_EXCEPTION_REQUIRED",
+      "evidence": "this_file"
+    },
+    "clean_machine": {
+      "local": "OWNER_OPERATED_FRESH_EXTRACTION_PASS",
+      "formal": "NOT_RUN_COMPANY_CLEAN_MACHINE",
+      "evidence": "clean_machine"
+    }
+  },
+  "material_findings": [
+    "The previous target release runtime.tar.zst did not match the r9 provenance archive; a separate formal-r9 staging subject was created with the exact r9 archive before this attestation draft.",
+    "Target default pnpm was 11.19.0; clean-machine replay used the embedded upstream pnpm 11.28.5 and approved plugin pnpm 11.28.2.",
+    "No company publisher identity, signer/KMS/HSM, revocation service, second-person verifier, or company clean-machine runner is configured."
+  ],
+  "constraints": [
+    "This draft is local owner evidence only.",
+    "Same-owner replay is not independent company verification.",
+    "No PENDING, UNKNOWN or NOT_RUN result is promoted to PASS.",
+    "No GitHub Release or formal production activation is authorized by this draft."
+  ],
+  "formal_status": {
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "m2_09": "NOT_RUN",
+    "release_ready": false
+  }
+}

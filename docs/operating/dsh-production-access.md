@@ -1,6 +1,6 @@
 # 杭州生产 DSH 访问
 
-杭州 DSH 由 Windows + WSL 的 `shinemage-dsh.service` 运行，内部监听 `127.0.0.1:6677`，通过 Cloudflare Tunnel 对外提供 `https://app.tyuan.chat/`。裸地址未带 cookie 返回 `401` 是预期行为，不要关闭认证。
+当前现场先看 [STATUS.md](../../STATUS.md)。2026-10-18 的 owner-operated r9 使用 DSH `4328`、页面 HTTP `18091` 和 promo helper `18098`。本页原先的 `6677` 是旧 rc2 现场入口，不能据此判断当前版本，也不能直接重启服务。裸地址未带 cookie 返回 `401` 是预期行为，不要关闭认证。
 
 在 Mac 开发端打开杭州生产 DSH：
 
@@ -8,7 +8,7 @@
 scripts/ops/open-hangzhou-dsh.sh
 ```
 
-脚本通过现有 Tailscale SSH 读取 WSL runtime 的启动链接，只把重写后的 HTTPS 地址交给 macOS 默认浏览器，不打印认证参数。可用环境变量覆盖 SSH 密钥和目标：
+脚本仍按旧 `6677` 入口读取 WSL runtime 的启动链接。使用前必须核对 STATUS 中的当前 owner bundle 和端口；脚本不会切换版本，也不会替代发布 runbook。可用环境变量覆盖 SSH 密钥和目标：
 
 ```bash
 SHINEMAGE_SSH_KEY=~/.ssh/id_ed25519_pc2 \

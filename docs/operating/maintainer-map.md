@@ -8,6 +8,7 @@
 2. 现在什么在跑：只看 [STATUS.md](../../STATUS.md)。
 3. 怎么生成驾驶舱 HTML：[从对话生成 HTML 驾驶舱](cockpit-native-html.md)。
 4. `docs/hackathon/` 和 `docs/history/` 是档案。里面的旧提交号不属于这个公开仓库的 `main`。
+5. Harness 升级和插件替换按[候选升级操作手册](dsh-upgrade-candidate.md)执行；它不改变主仓兼容钉。
 
 ## 三块目录
 
@@ -28,13 +29,14 @@
 
 | 域名 | 本机 | 作用 |
 |---|---|---|
-| `https://app.tyuan.chat` | `127.0.0.1:6677` | 驾驶舱 |
+| `https://app.tyuan.chat` | `127.0.0.1:4328` | 当前 owner-operated 驾驶舱；日期和版本以 STATUS 为准 |
 | `https://page.tyuan.chat` | `127.0.0.1:18091` | 页面接口。根路径 404 是预期 |
 | `https://board.tyuan.chat` | `127.0.0.1:18094` | 比赛看板/CRM 前端入口 |
 | `https://learn.tyuan.chat` | `127.0.0.1:18090` | WeKnora 知识库；仍由 WeKnora 自身登录保护 |
 
 | 只在本机 | 作用 |
 |---|---|
+| `127.0.0.1:6677` | 旧 rc2 兼容入口；不是当前 owner-operated 端口 |
 | `127.0.0.1:18093` | 现役 CRM 指标 API |
 | `127.0.0.1:18094` | 现役 CRM/比赛看板前端 |
 | `127.0.0.1:8000` | 旧 CRM API。不要把它当成 6677 |

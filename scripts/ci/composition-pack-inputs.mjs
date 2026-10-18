@@ -74,7 +74,8 @@ export async function prepareCompositionPacks({ inputDirectory, output,
     const bytes = await insideArtifact(source, manifest, 256 * 1024);
     assert.equal(hash(bytes), row.manifest_sha256, 'CI_COMPOSITION_MANIFEST_DIGEST');
     const packed = await readPluginPack({ manifestPath: join(source, manifest), expectedSha256: row.manifest_sha256,
-      expectedSdkVersion: selectedToolchain?.sdk_version, expectedPnpmVersion: selectedToolchain?.pnpm });
+      expectedSdkVersion: selectedToolchain?.sdk_version, expectedPnpmVersion: selectedToolchain?.pnpm,
+      requireGeneratedProvenance: true });
     assert.equal(packed.receipt.package_name, row.id, 'CI_COMPOSITION_PACKAGE_ID');
     assert.equal(packed.receipt.package_version, row.version, 'CI_COMPOSITION_PACKAGE_VERSION');
     assert.equal(packed.receipt.source_sha, row.source_sha, 'CI_COMPOSITION_SOURCE_MISMATCH');

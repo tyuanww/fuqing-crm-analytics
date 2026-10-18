@@ -1,0 +1,125 @@
+{
+  "schema_version": "shinemage-owner-operated-candidate/v2",
+  "status": "PASS_OWNER_OPERATED_CANDIDATE",
+  "candidate": {
+    "bundle": "owner-candidate-inputs-r4.tar.zst",
+    "bundle_bytes": 194696805,
+    "bundle_sha256": "bcd6345bd4e0e5c306f2a60fedd7e8a058b902f15636234d9a186dd34977e6f5",
+    "source_bundle_sha256": "4c2fc183e7e60fc492c13b47cce98c7d9aa2e8885cd25259da1a293011de1789",
+    "runtime_bundle_sha256": "8a7fb15404bcb8a63824df9a43c1bf75e0bc45e002d3406349607ee202bd28df",
+    "source_overlay_commit": "7c191391",
+    "source_overlay_files": {
+      "scripts/dsh-dev/cli.mjs": "a292446d3d91dc2e6ceff8863f8b6e6ce5b70f8db13aca288c67b7ce47a2689d",
+      "scripts/dsh-dev/owner-profile-bridge.mjs": "490ab2b8ddd5065545cd800f5607469246b24bf3253fcd45ab53dcfc39e92ffd"
+    },
+    "profile": "inputs/page/shinemage-release-pack-inputs.json"
+  },
+  "target": {
+    "host": "100.93.46.46",
+    "web_port": 14327,
+    "page_http_port": 18151,
+    "node": "v24.21.0",
+    "python": "3.14.4",
+    "wsl2_kernel": "6.18.33.2-microsoft-standard-WSL2"
+  },
+  "preflight": {
+    "dsh_dev_check": "PASS",
+    "pinned_upstream_sha": "1600d8a1e140dcde43a1a0941940a0480712c011",
+    "dump_path": "/tmp/shinemage-owner-rc1-20261017-r4/dsh-check-final/dump-config.txt",
+    "runtime_peer_alias": "PASS_TAR_AND_TARGET_IMPORT",
+    "cordis_plugin_group_in_runtime": "PASS_TAR"
+  },
+  "target_overlay_receipt": {
+    "schema_version": "shinemage-owner-operated-target-overlay/v1",
+    "status": "PASS_OWNER_ONLY",
+    "source_bundle_sha256": "4c2fc183e7e60fc492c13b47cce98c7d9aa2e8885cd25259da1a293011de1789",
+    "runtime_bundle_sha256": "8a7fb15404bcb8a63824df9a43c1bf75e0bc45e002d3406349607ee202bd28df",
+    "target": {
+      "host": "100.93.46.46",
+      "node": "v24.21.0",
+      "python": "3.14.4",
+      "kernel": "6.18.33.2-microsoft-standard-WSL2"
+    },
+    "overlay_source": "/tmp/shinemage-owner-rc1-target-bundle-20261017-r1/runtime/node_modules",
+    "copied_root_package_count": 186,
+    "copied_scope_package_count": 208,
+    "critical_binaries": [
+      {
+        "path": "node-addon-require-builtin-linux-x64-gnu/prebuilt/linux-x64-gnu-napi-v9.node",
+        "bytes": 295392,
+        "sha256": "40c34d27d8339e246a8f7415a06152935496cdc06555ea8fce0e052011acc70f"
+      },
+      {
+        "path": "@deepseek-ai/node-addon-system-linux-x64/bin/glibc/system.node",
+        "bytes": 17360,
+        "sha256": "54a9c25c05186c17520f6b7a5ced5f005752c08044c3eb76524cd517287600bc"
+      },
+      {
+        "path": "node-pty/prebuilds/linux-x64/pty.node",
+        "bytes": 75976,
+        "sha256": "123792d8f22f36d519b21dfb6f4b716f9b18b9e579085ea2840d0773d88d35fd"
+      },
+      {
+        "path": "sherpa-onnx-linux-x64/sherpa-onnx.node",
+        "bytes": 974496,
+        "sha256": "d8f1181559e7aecaa99493e8c441c16a4d51a18a1f3fcdf48fd7884e510f3767"
+      }
+    ],
+    "python_venv": {
+      "path": "/tmp/shinemage-owner-rc1-20261017-r4/b0-venv/bin/python",
+      "uvicorn": "0.47.0",
+      "fastapi": "0.136.1"
+    },
+    "operator_bridge": {
+      "cli_sha256": "a292446d3d91dc2e6ceff8863f8b6e6ce5b70f8db13aca288c67b7ce47a2689d",
+      "module_sha256": "490ab2b8ddd5065545cd800f5607469246b24bf3253fcd45ab53dcfc39e92ffd"
+    },
+    "formal_status": {
+      "m2_07": "BLOCKED",
+      "m2_08": "NOT_RUN",
+      "m2_09": "NOT_RUN",
+      "release_ready": false
+    }
+  },
+  "runtime": {
+    "supervisor_pid": 1076939,
+    "web_pid": 1077151,
+    "page_http_pid": 1077147,
+    "web_unauthenticated_http": "401",
+    "page_http_root": "404",
+    "page_http_state": "PASS"
+  },
+  "headed_browser": {
+    "initial_readback": "PASS",
+    "restart_readback": "PASS",
+    "title": "DeepSeek Harness",
+    "visible_text": [
+      "预览版",
+      "选择工作区",
+      "插件",
+      "驾驶舱",
+      "数据员工"
+    ],
+    "console_errors": 0,
+    "console_warnings_after_restart": "connection lost retry messages while no DeepSeek account/API key is configured; expected unauthenticated owner smoke behavior",
+    "screenshot": "captured in current headed tab after restart"
+  },
+  "lifecycle": {
+    "owned_stop_start": "PASS",
+    "ports_4328_4329_18150": "UNTOUCHED",
+    "systemd": "UNTOUCHED",
+    "current_symlink": "UNTOUCHED",
+    "public_switch": "NOT_RUN"
+  },
+  "formal_status": {
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "m2_09": "NOT_RUN",
+    "release_ready": false
+  },
+  "decision": "NO_SWITCH_OWNER_CANDIDATE_ONLY",
+  "evidence_paths": {
+    "owner_task_receipt": "/Users/hutou/.codex/tasks/rc1-owner-operated-20261017/owner-r4-receipt.json",
+    "target_overlay_receipt": "/Users/hutou/.codex/tasks/rc1-owner-operated-20261017/target-overlay-receipt.json"
+  }
+}

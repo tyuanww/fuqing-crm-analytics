@@ -131,7 +131,7 @@ csv (11 渠道)       parquet (列存)       orders + 规范化表    + fact_rfm
 
 ## 4. 50M scale 触发条件
 
-> 详见 [docs/architecture/50m-scale-architecture.md](50m-scale-architecture.md) (Sprint 52 留尾, 30M 触发)
+> 50M-scale benchmark 文档不在当前仓库；该历史留尾只作为背景，不作为当前实现入口。当前数据边界见 [data-layout.md](../data/data-layout.md)。
 
 ### 4.1 触发条件 (Phase 1-3 推后)
 
@@ -319,8 +319,7 @@ W4_USE_BATCH_INSERT=0 PYTHONPATH=$(pwd) python -m scripts.etl.precompute_fact_rf
 ## 关联文档
 
 - [STATUS.md](../../STATUS.md) — 项目总状态 (版本 + 测试 + debt)
-- [docs/data-layout.md](../data-layout.md) — data/ 目录布局
-- [docs/architecture/50m-scale-architecture.md](50m-scale-architecture.md) — 50M 行 benchmark
+- [docs/data-layout.md](../data/data-layout.md) — data/ 目录布局
 - [docs/architecture/AI_SAFETY_NET.md](AI_SAFETY_NET.md) — L1+L2+L3 AI typo 防御
 - [docs/architecture/TEST_INFRASTRUCTURE.md](TEST_INFRASTRUCTURE.md) — pytest fixture + race flake 治本
 - [docs/TECH-DEBT.md](../TECH-DEBT.md) — 技术债台账 (29 条已修)

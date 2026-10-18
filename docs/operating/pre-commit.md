@@ -2,6 +2,8 @@
 
 > 历史记录：本文保留当时流程与结论，不能用来安装第二套 hook 或推断当前检查。2026-09-06 起，当前命令、实际检查数量及授权边界以 [验证入口](verification.md) 和 [.githooks 清单](../../.githooks/README.md) 为准。
 
+以下安装和切换命令只用于历史回放。当前不要执行 `pip install pre-commit`、`pre-commit install` 或切换 `core.hooksPath`。
+
 
 > 在 `git commit` 之前自动跑 ground-truth-lint, 拦截 LLM / human dev 写不合规的 contract 字段.
 

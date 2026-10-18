@@ -14,6 +14,7 @@ import { ensurePersistentRuntime } from './persist-runtime.mjs';
 import { randomBytes } from 'node:crypto';
 import { bootHost, dumpConfig, installProfilePlugin, isolatedEnv, parseServeArgs, prepareRuntime, readCurrent, validateRuntimeInputs, runOwnedSupervisor, stopOwned, watchOwnedStart } from './serve.mjs';
 import { diagnose, printDiagnose } from './diagnose.mjs';
+import { applyOwnerProfileBridge } from './owner-profile-bridge.mjs';
 
 const USAGE = `Usage: node scripts/dsh-dev/cli.mjs <check|dump-config|start|stop|status|diagnose|reload|open>
   --upstream /absolute/pinned/dsh
@@ -182,7 +183,10 @@ async function runStart(options) {
         const prepared = await prepareRuntime(options);
         const tls = isolatedEnv(prepared.runtime, prepared.home).NODE_EXTRA_CA_CERTS;
         console.log(tls ? `DSH_DEV_TLS ${tls}` : 'DSH_DEV_TLS missing; Node 24 cannot verify api.deepseek.com without a CA bundle');
-        if (prepared.enabled) installProfilePlugin(prepared);
+        if (prepared.enabled) {
+          installProfilePlugin(prepared);
+          await applyOwnerProfileBridge(prepared);
+        }
         // The isolated page HTTP is supervisor-owned: it starts before the
         // web host (so PAGE_* reach the host env through isolatedEnv) and
         // stops with the supervisor. Default off; explicit --page-http on.

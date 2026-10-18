@@ -9,10 +9,12 @@ import { promisify } from 'node:util';
 import { dirname, join, relative, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { scanText } from './secret-scan.mjs';
+import { runtimeVendorAssignmentAllowlist, scanText } from './secret-scan.mjs';
 import { DSH_UPSTREAM_SHA as PIN } from './toolchain.mjs';
 import { bindRuntimeInputs, prepareRuntimeInputs, runtimeDeployArgs, runtimeSourceTree, stageRuntimeWorkspace, verifyRuntimePreparation } from './runtime-inputs.mjs';
 import { canonicalTreeDigest, GENERATED_PROVENANCE_SCHEMA } from './generated-provenance.mjs';
+import { comparablePackageBytes } from './runtime-package-identity.mjs';
+import { pruneUnsupportedLinuxNative, rewriteGeneratedPathShims, verifyPortableLinuxRuntime } from './runtime-portability.mjs';
 
 const execFile = promisify(execFileCallback);
 const REQUIRED = [
@@ -78,7 +80,10 @@ async function scanRuntimeTree(root) {
         // protocol identifiers observed in pinned third-party bundles; turning
         // assignment scanning off for an entire directory would let a real
         // API_KEY/PASSWORD value through the immutable runtime artifact.
-        findings.push(...scanText(await readFile(path, 'utf8'), rel));
+        const bytes = await readFile(path);
+        findings.push(...scanText(bytes.toString('utf8'), rel, {
+          assignmentAllowlist: runtimeVendorAssignmentAllowlist(rel, bytes),
+        }));
       }
     }
   }
@@ -87,7 +92,53 @@ async function scanRuntimeTree(root) {
   return { files, scanned_bytes: scannedBytes };
 }
 
-async function materializeExternalSymlinks(deployed, upstream, pinnedSha) {
+async function requiredPeerAliases(root) {
+  const names = new Set();
+  async function collectPackageDependencies(path) {
+    const packageJson = JSON.parse(await readFile(join(path, 'package.json'), 'utf8').catch(error => {
+      if (error.code === 'ENOENT') return '{}';
+      throw error;
+    }));
+    for (const section of ['dependencies', 'optionalDependencies', 'peerDependencies']) {
+      for (const name of Object.keys(packageJson[section] ?? {})) {
+        if (name.startsWith('@deepseek-ai/')) names.add(name.slice('@deepseek-ai/'.length));
+      }
+    }
+  }
+  async function walk(directory) {
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      const path = join(directory, entry.name);
+      if (entry.isSymbolicLink()) continue;
+      if (entry.isFile()) {
+        if (entry.name !== 'package.json') continue;
+        const packageJson = JSON.parse(await readFile(path, 'utf8'));
+        for (const section of ['dependencies', 'optionalDependencies', 'peerDependencies']) {
+          for (const name of Object.keys(packageJson[section] ?? {})) {
+            if (name.startsWith('@deepseek-ai/')) names.add(name.slice('@deepseek-ai/'.length));
+          }
+        }
+        continue;
+      }
+      if (!entry.isDirectory()) continue;
+      const rel = relativePath(root, path);
+      if (entry.name === '@deepseek-ai' && rel.includes('/node_modules/')) {
+        for (const peer of await readdir(path, { withFileTypes: true })) {
+          if (peer.isDirectory() || peer.isSymbolicLink()) {
+            names.add(peer.name);
+            await collectPackageDependencies(join(path, peer.name));
+          }
+        }
+        continue;
+      }
+      await walk(path);
+    }
+  }
+  await walk(root);
+  assert.ok(names.size > 0, 'RUNTIME_REQUIRED_PEER_ALIASES_MISSING');
+  return names;
+}
+
+async function materializeExternalSymlinks(deployed, upstream, pinnedSha, { portableLinux = false } = {}) {
   const deployedRoot = resolve(deployed);
   const upstreamRoot = resolve(upstream);
   const externalRoot = join(deployedRoot, '.runtime-external');
@@ -107,9 +158,12 @@ async function materializeExternalSymlinks(deployed, upstream, pinnedSha) {
         await mergeMissing(sourcePath, destinationPath);
       } else if (existing.isFile() && !entry.isDirectory() && !entry.isSymbolicLink()) {
         const [sourceBytes, destinationBytes] = await Promise.all([readFile(sourcePath), readFile(destinationPath)]);
-        if (!sourceBytes.equals(destinationBytes)) throw new Error(`RUNTIME_EXTERNAL_COLLISION ${destinationPath}`);
+        if (!sourceBytes.equals(destinationBytes)) throw new Error(`RUNTIME_EXTERNAL_COLLISION ${destinationPath} source=${sourcePath}`);
+      } else if (entry.isSymbolicLink() && existing.isSymbolicLink()) {
+        const [sourceLink, destinationLink] = await Promise.all([readlink(sourcePath), readlink(destinationPath)]);
+        if (sourceLink !== destinationLink) throw new Error(`RUNTIME_EXTERNAL_COLLISION ${destinationPath} source=${sourcePath} source_link=${sourceLink} existing_link=${destinationLink}`);
       } else {
-        throw new Error(`RUNTIME_EXTERNAL_COLLISION ${destinationPath}`);
+        throw new Error(`RUNTIME_EXTERNAL_COLLISION ${destinationPath} source=${sourcePath} source_kind=${entry.isDirectory() ? 'directory' : entry.isFile() ? 'file' : entry.isSymbolicLink() ? 'symlink' : 'other'} existing_kind=${existing.isDirectory() ? 'directory' : existing.isFile() ? 'file' : existing.isSymbolicLink() ? 'symlink' : 'other'}`);
       }
     }
   }
@@ -151,6 +205,10 @@ async function materializeExternalSymlinks(deployed, upstream, pinnedSha) {
         const inside = target === deployedRoot || target.startsWith(`${deployedRoot}/`);
         if (inside) continue;
         const targetInfo = await lstat(target);
+        if (portableLinux && /(^|\/)[^/]*(?:darwin-arm64|darwin-x64|win32-arm64|win32-x64|win10-arm64|win10-x64|linux-arm64)(?:\/|$)/i.test(target)) {
+          await rm(path, { force: true });
+          continue;
+        }
         const allowedRoot = target === upstreamRoot || target.startsWith(`${upstreamRoot}/`) ? upstreamRoot : await findPinnedRoot(target);
         if (!allowedRoot) throw new Error(`RUNTIME_EXTERNAL_LINK_FORBIDDEN ${path}`);
         const targetRelative = relative(allowedRoot, target).split('/').join('/');
@@ -187,18 +245,20 @@ async function materializeExternalSymlinks(deployed, upstream, pinnedSha) {
   // `pnpm deploy --prod` does not copy workspace packages that are declared
   // only as peerDependencies. DSH's built-in plugin graph intentionally uses
   // that shape, so a production deploy can be syntactically complete while
-  // failing at boot with ERR_MODULE_NOT_FOUND for core peer packages. Seed the
-  // complete pinned peer alias directory before materializing external links.
-  // This keeps the bundle self-contained without copying the upstream checkout
-  // itself; materializeExternalSymlinks still applies the allowlist and secret
+  // failing at boot with ERR_MODULE_NOT_FOUND for core peer packages. Seed
+  // only aliases already referenced by the deployed closure. Seeding every
+  // workspace alias would pull optional browser tools and their vendor bytes
+  // into the runtime. Materialization still applies the allowlist and secret
   // denylist to every resolved target.
   const peerSourceRoot = join(upstreamRoot, 'node_modules/.pnpm/node_modules/@deepseek-ai');
   assert.equal(await access(peerSourceRoot).then(() => true, () => false), true, 'RUNTIME_PEER_ALIAS_ROOT_MISSING');
   const peerDestinationRoot = join(deployedRoot, 'node_modules/.pnpm/node_modules/@deepseek-ai');
   await mkdir(peerDestinationRoot, { recursive: true });
+  const requiredPeers = await requiredPeerAliases(deployedRoot);
   let seededPeers = 0;
   for (const entry of await readdir(peerSourceRoot, { withFileTypes: true })) {
     if (!entry.name.startsWith('dsh-') && !entry.name.startsWith('cordis-plugin-') && !['cordis', 'cosmokit'].includes(entry.name)) continue;
+    if (!requiredPeers.has(entry.name)) continue;
     const peerSource = join(peerSourceRoot, entry.name);
     const peerDestination = join(peerDestinationRoot, entry.name);
     const existing = await lstat(peerDestination).catch(error => {
@@ -214,7 +274,7 @@ async function materializeExternalSymlinks(deployed, upstream, pinnedSha) {
         readFile(sourcePackage).catch(() => null),
         readFile(destinationPackage).catch(() => null),
       ]);
-      if (!sourceBytes || !destinationBytes || !sourceBytes.equals(destinationBytes)) throw new Error(`RUNTIME_PEER_ALIAS_COLLISION ${entry.name}`);
+      if (!sourceBytes || !destinationBytes || !comparablePackageBytes(sourceBytes).equals(comparablePackageBytes(destinationBytes))) throw new Error(`RUNTIME_PEER_ALIAS_COLLISION ${entry.name}`);
       continue;
     }
     await cp(peerSource, peerDestination, { recursive: true, dereference: false, force: false, errorOnExist: true });
@@ -236,8 +296,12 @@ function option(name) {
 const upstream = await realpath(option('--upstream'));
 const output = option('--output');
 const online = process.argv.includes('--online');
+const portableLinux = process.argv.includes('--portable-linux');
+if (portableLinux) assert.equal(process.platform, 'linux', 'RUNTIME_PORTABLE_LINUX_REQUIRES_LINUX_BUILDER');
+if (portableLinux) assert.equal(process.arch, 'x64', 'RUNTIME_PORTABLE_LINUX_REQUIRES_X64_BUILDER');
 const provenanceOption = process.argv.includes('--provenance') ? option('--provenance') : `${output}.provenance.json`;
-assert.equal(process.argv.filter(arg => arg.startsWith('--')).length, online ? (process.argv.includes('--provenance') ? 4 : 3) : (process.argv.includes('--provenance') ? 3 : 2), 'RUNTIME_BUNDLE_OPTION_UNKNOWN');
+const expectedOptions = (online ? 1 : 0) + (portableLinux ? 1 : 0) + (process.argv.includes('--provenance') ? 1 : 0) + 2;
+assert.equal(process.argv.filter(arg => arg.startsWith('--')).length, expectedOptions, 'RUNTIME_BUNDLE_OPTION_UNKNOWN');
 assert.equal(await access(join(upstream, '.git')).then(() => true, () => false), true, 'UPSTREAM_CHECKOUT_REQUIRED');
 const upstreamSha = (await execFile('git', ['-C', upstream, 'rev-parse', 'HEAD'])).stdout.trim();
 assert.equal(upstreamSha, PIN, 'UPSTREAM_SHA_MISMATCH');
@@ -269,7 +333,7 @@ try {
   // The receipt above binds the exact original lock, policy, pin and tools;
   // cached direct tarballs retain their original integrity. Online audit stays
   // a separate required preflight stage. Missing proof never disables policy.
-  await execFile('corepack', runtimeDeployArgs(deployed, { online }), {
+  await execFile('corepack', runtimeDeployArgs(deployed, { online, portableLinux }), {
     cwd: workspace,
     env: { ...process.env, COREPACK_ENABLE_DOWNLOAD_PROMPT: '0', CI: '1',
       ...(!online ? { NODE_OPTIONS: `--require ${JSON.stringify(fileURLToPath(new URL('./runtime-offline.cjs', import.meta.url)))}`, npm_config_fetch_retries: '0' } : {}),
@@ -280,7 +344,10 @@ try {
   await restoreStagedMetadata();
   const sourceTree = await runtimeSourceTree(workspace);
   if (preparation) assert.equal(sourceTree.sha256, preparation.source_tree.sha256, 'RUNTIME_SOURCE_TREE_MISMATCH');
-  const materialized = await materializeExternalSymlinks(deployed, workspace, upstreamSha);
+  const materialized = await materializeExternalSymlinks(deployed, workspace, upstreamSha, { portableLinux });
+  const rewrittenPathShims = portableLinux ? await rewriteGeneratedPathShims(deployed) : 0;
+  const removedNative = portableLinux ? await pruneUnsupportedLinuxNative(deployed) : [];
+  const portable = portableLinux ? await verifyPortableLinuxRuntime(deployed) : null;
   for (const path of REQUIRED) await access(join(deployed, path));
   await execFile('tar', ['--zstd', '--no-xattrs', '--no-acls', '-cf', output, '-C', deployed, '.'], { maxBuffer: 4 * 1024 * 1024 });
   const info = await stat(output);
@@ -297,10 +364,11 @@ try {
       platform: process.platform, arch: process.arch, command: 'scripts/release/runtime-bundle.mjs',
       network_mode: online ? 'online' : 'offline' },
     preparation_receipt_sha256: preparation?.receipt_sha256 ?? null,
+    portable_linux: portable ? { ...portable, rewritten_path_shims: rewrittenPathShims, removed_native: removedNative } : null,
     archive: { name: output.split('/').at(-1), bytes: info.size, sha256: archiveSha256 },
   };
   await writeFile(provenanceOption, `${JSON.stringify(provenance, null, 2)}\n`, { mode: 0o600, flag: 'wx' });
-  console.log(JSON.stringify({ status: 'BUILT', upstream_sha: upstreamSha, network_mode: online ? 'online' : 'offline', path: output, provenance: provenanceOption, bytes: info.size, sha256: archiveSha256, ...materialized }));
+  console.log(JSON.stringify({ status: 'BUILT', upstream_sha: upstreamSha, network_mode: online ? 'online' : 'offline', portable_linux: portableLinux, path: output, provenance: provenanceOption, bytes: info.size, sha256: archiveSha256, ...materialized, rewritten_path_shims: rewrittenPathShims, removed_native: removedNative }));
 } finally {
   await rm(work, { recursive: true, force: true });
 }

@@ -1,4 +1,6 @@
-# launchd uvicorn 守护（Sprint 62 P3）
+# launchd uvicorn 守护（历史方案）
+
+本文只保留历史设计。当前仓库默认冷存，禁止按本文安装 launchd、自动重启 uvicorn 或访问真实 DuckDB。当前运行和验证入口以 [AGENTS.md](../../AGENTS.md)、[STATUS.md](../../STATUS.md) 和 [验证入口](verification.md) 为准。需要恢复历史证据时，只读查看本页，不执行安装或卸载命令。
 
 > 防止 uvicorn 进程异常退出（前端触发、sleep/wake crash）后无守护。launchd `KeepAlive=true` 失败自动重启。
 

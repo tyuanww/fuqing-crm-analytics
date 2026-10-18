@@ -120,7 +120,7 @@ export async function prepareProfile(options) {
   let packs;
   if (packInputs !== undefined) {
     assert.ok(!options.plugin && !options.knowledgePlugin && !options.pageToolsPlugin, 'CRM_PROFILE_PACK_INPUTS_AMBIGUOUS');
-    packs = await loadProfilePacks({ inputsPath: packInputs, toolchain });
+    packs = await loadProfilePacks({ inputsPath: packInputs, toolchain, requireGeneratedProvenance: true });
     assert.equal(packs.profile.service_binding, undefined, 'CRM_PROFILE_PACK_SERVICE_BINDING_REQUIRES_CANDIDATE');
     const selected = {};
     for (const [index, item] of packs.plugins.entries()) {

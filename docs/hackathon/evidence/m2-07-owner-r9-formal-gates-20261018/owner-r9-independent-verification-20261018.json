@@ -1,0 +1,200 @@
+{
+  "schema_version": "shinemage-rc1-owner-r9-independent-verification/v1",
+  "generated_at": "2026-10-18T04:20:09Z",
+  "status": "SAME_OWNER_SEPARATED_REPLAY_PASS",
+  "formal_status": "NOT_RUN_SECOND_PERSON_UNAVAILABLE",
+  "formal_company_evidence": false,
+  "execution": {
+    "mode": "OWNER_OPERATED",
+    "runner_identity": "same-owner-separated-process",
+    "hostname": "hutoudeMacBook-Air.local",
+    "fresh_workdir": "/var/folders/tz/wswl3q3117v437rw68yd90gh0000gn/T/shinemage-r9-independent-te_i02si",
+    "cleanup": "PASS",
+    "network_policy": "remote target read-only hash comparison plus local signature verification"
+  },
+  "subject": {
+    "manifest_path": "docs/hackathon/evidence/m2-07-owner-r9-formal-subject-manifest-20261018.json",
+    "manifest_sha256": "3d746c88a1166a1f18bcfe1f6c49d7a8880e8bb4b60b7bc3b98fc3ca80b9b4f4",
+    "subject_set_sha256": "7053c9bea8e90a4e9c2f0de6ab822841c14deb2669ed3691b739d5c53559d8ab",
+    "remote_stage": "/srv/shinemage/dsh/staging/rc1-formal-r9-20261018",
+    "subject_count": 25
+  },
+  "signature_verification": {
+    "command": "openssl pkeyutl -verify -rawin -pubin -inkey owner-public-key.pem -sigfile owner-binding.sig -in owner-binding.json",
+    "exit_code": 0,
+    "stdout": "Signature Verified Successfully",
+    "stderr": "",
+    "status": "PASS"
+  },
+  "remote_subject_verification": {
+    "exit_code": 0,
+    "status": "PASS",
+    "result": {
+      "subject_count": 25,
+      "all_match": true,
+      "checks": [
+        {
+          "path": "inputs/page/config/dsh-profile.rc1.json",
+          "expected": "e93e6f5e7975311f55bf1ee070b7aea009c938449c9a1542f3c2a503f40253fc",
+          "actual": "e93e6f5e7975311f55bf1ee070b7aea009c938449c9a1542f3c2a503f40253fc",
+          "match": true
+        },
+        {
+          "path": "inputs/page/config-dsh-profile.rc1.json",
+          "expected": "e93e6f5e7975311f55bf1ee070b7aea009c938449c9a1542f3c2a503f40253fc",
+          "actual": "e93e6f5e7975311f55bf1ee070b7aea009c938449c9a1542f3c2a503f40253fc",
+          "match": true
+        },
+        {
+          "path": "inputs/page/packs/0/plugin-pack.json",
+          "expected": "7aa5c0960dc9aa32a198510a25e2739c7479ad130fc2a73f453414870faece3e",
+          "actual": "7aa5c0960dc9aa32a198510a25e2739c7479ad130fc2a73f453414870faece3e",
+          "match": true
+        },
+        {
+          "path": "inputs/page/packs/0/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+          "expected": "4f443ed5f3ddadfc01fa239dc4db4afc257b4315a1f732b43ed9c7a0cb36812c",
+          "actual": "4f443ed5f3ddadfc01fa239dc4db4afc257b4315a1f732b43ed9c7a0cb36812c",
+          "match": true
+        },
+        {
+          "path": "inputs/page/packs/1/plugin-pack.json",
+          "expected": "e216464612355ec3411350446ddce005d2e4f640db3c1228de9882595da99730",
+          "actual": "e216464612355ec3411350446ddce005d2e4f640db3c1228de9882595da99730",
+          "match": true
+        },
+        {
+          "path": "inputs/page/packs/1/shine-mage-dsh-shine-brand-0.0.0-b0.tgz",
+          "expected": "c254d5000a0e92b4b073945a5cd20de9a5028e9695d4e6278631346e9df635a4",
+          "actual": "c254d5000a0e92b4b073945a5cd20de9a5028e9695d4e6278631346e9df635a4",
+          "match": true
+        },
+        {
+          "path": "inputs/page/packs/2/plugin-pack.json",
+          "expected": "447b6cff9b6f056a65ff50f139c6be83cb6b203776e2ccf25e4ebf9f9e84d69b",
+          "actual": "447b6cff9b6f056a65ff50f139c6be83cb6b203776e2ccf25e4ebf9f9e84d69b",
+          "match": true
+        },
+        {
+          "path": "inputs/page/packs/2/shine-mage-dsh-shine-waterfall-0.0.0-b0.tgz",
+          "expected": "939a9b560fa22e391678260456c117e0340ec58cff5548aa2368bdc8400a829e",
+          "actual": "939a9b560fa22e391678260456c117e0340ec58cff5548aa2368bdc8400a829e",
+          "match": true
+        },
+        {
+          "path": "inputs/page/packs/3/plugin-pack.json",
+          "expected": "0d3e50c099676ff9dc441bcb5880559f3475ae6c4b03cee13e78adc4c40fad15",
+          "actual": "0d3e50c099676ff9dc441bcb5880559f3475ae6c4b03cee13e78adc4c40fad15",
+          "match": true
+        },
+        {
+          "path": "inputs/page/packs/3/shine-mage-dsh-shine-crowd-action-0.0.0-b0.tgz",
+          "expected": "767bb4c532e5491e7c99e0bdc47d9bbb745451cc814015a6da0cd3a16d17b4ed",
+          "actual": "767bb4c532e5491e7c99e0bdc47d9bbb745451cc814015a6da0cd3a16d17b4ed",
+          "match": true
+        },
+        {
+          "path": "inputs/page/packs/4/plugin-pack.json",
+          "expected": "b1562a59ef4132c4464b8eb8212adb976ccc4d183dace834c8be7df4e3fea07b",
+          "actual": "b1562a59ef4132c4464b8eb8212adb976ccc4d183dace834c8be7df4e3fea07b",
+          "match": true
+        },
+        {
+          "path": "inputs/page/packs/4/shine-mage-dsh-shine-query-0.0.0-b0.tgz",
+          "expected": "e4f9b76103d0c5978e2fce9c3fcb724c3d223db74bc2fa69831e98678f8dd308",
+          "actual": "e4f9b76103d0c5978e2fce9c3fcb724c3d223db74bc2fa69831e98678f8dd308",
+          "match": true
+        },
+        {
+          "path": "inputs/page/packs/5/plugin-pack.json",
+          "expected": "130d9f64e7265d02ad478bcf7da2faae11ef49cd029c804ecf3b7bd86137dc4c",
+          "actual": "130d9f64e7265d02ad478bcf7da2faae11ef49cd029c804ecf3b7bd86137dc4c",
+          "match": true
+        },
+        {
+          "path": "inputs/page/packs/5/shine-mage-dsh-shine-board-0.0.0-b0.tgz",
+          "expected": "a000bb72cfbc409ac7eea9a2a5ce8f6f978dcbf4cae021943e6923919a07cf7d",
+          "actual": "a000bb72cfbc409ac7eea9a2a5ce8f6f978dcbf4cae021943e6923919a07cf7d",
+          "match": true
+        },
+        {
+          "path": "inputs/page/packs/6/plugin-pack.json",
+          "expected": "f3c1c954a793abf78b5c11444ba5ce8f0189e0416be5b73330ad0f1206e16c41",
+          "actual": "f3c1c954a793abf78b5c11444ba5ce8f0189e0416be5b73330ad0f1206e16c41",
+          "match": true
+        },
+        {
+          "path": "inputs/page/packs/6/shine-mage-dsh-shine-funnel-0.0.0-b0.tgz",
+          "expected": "838f834f97187ad3aacef678a524d2db33b077c80eb985eda8ef230cfd759b53",
+          "actual": "838f834f97187ad3aacef678a524d2db33b077c80eb985eda8ef230cfd759b53",
+          "match": true
+        },
+        {
+          "path": "inputs/page/reader.exit",
+          "expected": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+          "actual": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+          "match": true
+        },
+        {
+          "path": "inputs/page/reader.stderr",
+          "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "actual": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "match": true
+        },
+        {
+          "path": "inputs/page/reader.stdout.json",
+          "expected": "680cbea2f481e786bd595bab30a0b3d6daf46d7e5692803c8130c7ca12e27655",
+          "actual": "680cbea2f481e786bd595bab30a0b3d6daf46d7e5692803c8130c7ca12e27655",
+          "match": true
+        },
+        {
+          "path": "inputs/page/shinemage-release-pack-inputs.json",
+          "expected": "7dc6298240bca26b6a97878e2b23ab010be26f1f83cb9576d8a491933ba504fc",
+          "actual": "7dc6298240bca26b6a97878e2b23ab010be26f1f83cb9576d8a491933ba504fc",
+          "match": true
+        },
+        {
+          "path": "runtime-linux-x64-formal-r9.provenance.json",
+          "expected": "22c710ca15e59d4659338a27b798f298d227b03b02c1c6ba912889df16e6921e",
+          "actual": "22c710ca15e59d4659338a27b798f298d227b03b02c1c6ba912889df16e6921e",
+          "match": true
+        },
+        {
+          "path": "runtime-linux-x64-formal-r9.tar.zst",
+          "expected": "ed11ec808d939bbab292738be6227e8882c95889d3af5db1a9febbc318aa05a2",
+          "actual": "ed11ec808d939bbab292738be6227e8882c95889d3af5db1a9febbc318aa05a2",
+          "match": true
+        },
+        {
+          "path": "source.tar.zst",
+          "expected": "4c2fc183e7e60fc492c13b47cce98c7d9aa2e8885cd25259da1a293011de1789",
+          "actual": "4c2fc183e7e60fc492c13b47cce98c7d9aa2e8885cd25259da1a293011de1789",
+          "match": true
+        },
+        {
+          "path": "toolchain-rc1.json",
+          "expected": "a4ac1287ed7d560e19d7421197c44bc9200e4d6191dd91536aaef9614a1eddc2",
+          "actual": "a4ac1287ed7d560e19d7421197c44bc9200e4d6191dd91536aaef9614a1eddc2",
+          "match": true
+        },
+        {
+          "path": "vendor/dsh-package-inputs/shine-mage-board-components-0.1.0.tgz",
+          "expected": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182",
+          "actual": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182",
+          "match": true
+        }
+      ]
+    }
+  },
+  "constraints": [
+    "This replay was executed by the same project owner in a fresh process and temporary directory.",
+    "It is not a second-person or independent company CI verification.",
+    "It does not prove company publisher identity, company signature, revocation, final attestation, or formal clean-machine approval."
+  ],
+  "formal_gate_state": {
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "m2_09": "NOT_RUN",
+    "release_ready": false
+  }
+}

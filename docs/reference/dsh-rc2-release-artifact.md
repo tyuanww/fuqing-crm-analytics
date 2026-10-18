@@ -1,10 +1,10 @@
 # DSH rc2 release artifact reference
 
-本页是 DSH rc2 发布工具的命令和输入输出参考。产品版本为 `0.20.0.0`，DSH 固定为 `0.1.7-rc.2`，上游 SHA 为 `477b4f420553e8a52c2fbccc464d7561b239c443`。离线命令段描述接收合同；`dsh-0.20.0.0-r1` 是当前 immutable Release，杭州 current 仍为上一份已运行版本，现场切换以 runbook 和最新 receipt 为准。
+本页是 DSH rc2 发布工具的命令和输入输出合同参考。产品版本为 `0.20.0.0`，DSH 固定为 `0.1.7-rc.2`，上游 SHA 为 `477b4f420553e8a52c2fbccc464d7561b239c443`。`r1`、`r3` 和杭州安装记录属于历史 release 快照；当前内部 owner-operated 版本、端口和正式门禁只看 [STATUS.md](../../STATUS.md)。现场操作按 [rc2 发布与回退 Runbook](../operating/dsh-rc2-runbook.md) 执行。
 
 ## 命令入口
 
-根目录 `package.json` 将 `pnpm dsh` 映射到 `node scripts/dsh.mjs`。运行时要求 Node 24.x；锁文件使用 pnpm 11.7.0。
+根目录 `package.json` 将 `pnpm dsh` 映射到 `node scripts/dsh.mjs`。运行时要求 Node 24.x。上游 Harness checkout 的锁文件使用其自身要求的 pnpm（当前固定为 `11.7.0`）；插件、kit 和 build-tools 使用 `pnpm@11.28.2`。两者是不同工具链角色，升级候选时分别记录，不用 `latest` 混用。
 
 根目录 `package.json` 的 `version` 保持 npm 三段 projection（当前为 `0.20.0`），以兼容 npm 工具链；候选发布产品版本以根目录 `VERSION` 的四段值 `0.20.0.0` 为准，artifact manifest 和发布门禁均读取 `VERSION`。
 
@@ -30,6 +30,7 @@
 | `pnpm dsh plugin service-preflight --python /absolute/python3.14 --manifest /absolute/service-manifest.json --manifest-sha256 SHA256 --wheelhouse /absolute/wheels` | 安装前只读核对已核验清单、WSL2/Python、固定 wheel 闭包及平台/ABI/Requires-Python | 仅首购服务；通过退出 0，环境或输入阻断退出 2；不安装/启动/写 journal，冷安装与供应链仍 NOT_RUN |
 | `pnpm dsh verify --scope local` | 运行本地 doctor、synthetic compatibility/backpressure | 本地合同通过返回 0；不代表生产可发布 |
 | `pnpm dsh verify [--scope release]` | 运行发布级 doctor、synthetic compatibility/backpressure 并检查发布门禁 | 当前真实 WSL2/HTTP/15 分钟 SLI 未完成时退出 2 并打印 `RELEASE_BLOCKED` |
+| `pnpm dsh verify --help` / `pnpm dsh status --help` / `pnpm dsh resume --help` | 打印只读用法，不读取 state、不启动服务 | 退出 0；帮助合同与根 CLI 一致 |
 | `pnpm dsh preflight --check --python ABS --tag TAG` | 在已有 runtime bundle 时只读检查正式 preflight 的工具链、固定 upstream、插件入口、runtime bundle 和输出目录 | 检查失败在构建前退出 2，不联网、不生成 artifact；正式 `preflight` 会自行生成 runtime |
 | `pnpm dsh reconcile /absolute/state.json REMOTE` | 将远端 receipt 与 durable state 对账 | `CONFLICT`/`UNKNOWN` 退出 2；不采用远端未知状态 |
 | `pnpm dsh status /absolute/state.json` | 打印 durable state | 只读；缺少 state path 时 fail closed |

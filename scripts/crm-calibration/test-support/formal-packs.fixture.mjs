@@ -5,6 +5,8 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
+import { canonicalTreeDigest, generatedPaths } from '../../release/generated-provenance.mjs';
+import { PNPM_VERSION } from '../../release/toolchain.mjs';
 const exec = promisify(execFile), hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const json = value => JSON.stringify(value, null, 2) + '\n';
 export const specs = {
@@ -45,9 +47,23 @@ export async function fixture(t, selected = ['crm', 'knowledge', 'page'], mutate
     const tarName = `${manifest.name.slice(1).replaceAll('/', '-')}-${manifest.version}.tgz`;
     await exec('tar', ['-czf', join(directory, tarName), '-C', staging, 'package'], { env: { ...process.env, COPYFILE_DISABLE: '1' } });
     const archive = await readFile(join(directory, tarName));
+    const generatedTree = await canonicalTreeDigest(join(staging, 'package'), {
+      include: generatedPaths(manifest.files), allowSymlinks: false,
+    });
+    const sourceSha = String(index + 1).repeat(40);
     const receipt = { schema_version: 'dsh-plugin-pack/v1', package_name: manifest.name, package_version: manifest.version,
-      dsh_pin: '0.1.7-rc.2', source_sha: String(index + 1).repeat(40), source_dirty: false,
+      dsh_pin: '0.1.7-rc.2', source_sha: sourceSha, source_dirty: false,
       tarball: { name: tarName, bytes: archive.length, sha256: hash(archive) },
+      generated_bytes_provenance: {
+        schema_version: 'dsh-generated-bytes/v1', status: 'PASS',
+        source: { git_sha: sourceSha, sha256: hash(Buffer.from('synthetic-fixture-source')), entries: 1, bytes: 24 },
+        generated_tree: { sha256: generatedTree.sha256, entries: generatedTree.entries,
+          bytes: generatedTree.bytes, records: generatedTree.records },
+        builder: { status: 'PASS', clean: true, isolated: true, node: 'v24.19.0', pnpm: PNPM_VERSION,
+          command: 'synthetic fixture build', network_mode: 'offline' },
+        builder_receipt_schema_version: 'dsh-plugin-build/v1',
+        builder_receipt_sha256: hash(Buffer.from('synthetic-fixture-builder-receipt')),
+      },
       entries: ['package.json', ...new Set([...manifest.files, ...exportFiles(manifest.exports)])].sort(),
       activation: 'NOT_RUN', state_path: 'NOT_APPLICABLE_PLUGIN_PACK_ONLY' };
     const receiptBytes = Buffer.from(json(receipt));

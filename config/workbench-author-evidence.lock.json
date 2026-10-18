@@ -2,8 +2,8 @@
   "schema": "shinemage-workbench-author-evidence/v1",
   "package": "@shine-mage/dsh-analytics-workbench-b0",
   "source_sha": "3030e3f21263f6ec65cb01c7aeacd4c80e2eb711",
-  "formal_manifest_sha256": "900004009437e68052e957610e618090a1e7d69d485376a53afea6eb008fed85",
-  "formal_tarball_sha256": "b75a5c900b94b333a2749a8b35d5ea106f5aea158667a6e338baa240b886b088",
+  "formal_manifest_sha256": "070514b3bb212c714907727c368300e2b7cd22b88946e814f9b13349d27f29ef",
+  "formal_tarball_sha256": "e41df9f5a8f7031c092319222543c8d723ca644c0c9d69b2ae53f13257e9b79e",
   "archive": {
     "repository": "tyuanww/dsh-analytics-workbench",
     "run_id": 38204944592,

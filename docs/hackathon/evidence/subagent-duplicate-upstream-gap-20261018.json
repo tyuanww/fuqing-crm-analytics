@@ -1,0 +1,32 @@
+{
+  "schema_version": "dsh-subagent-duplicate-upstream-gap/v1",
+  "captured_at": "2026-10-18",
+  "status": "CANDIDATE_WORKAROUND_ONLY",
+  "symptom": "tool \"subagent\" is already registered in this scope",
+  "observed_counts": {
+    "tool-subagent": 4,
+    "tool-subagent-fork": 4
+  },
+  "affected_presets": ["standard", "cordis", "ptc"],
+  "candidate_workaround": {
+    "status": "APPLIED_DISPOSABLE_RUNTIME_ONLY",
+    "action": "disable duplicate subagent and subagent-fork entries in every affected preset",
+    "upstream_modified": false
+  },
+  "upstream_fix_required": {
+    "status": "NOT_APPLIED",
+    "required_behavior": [
+      "namespace or deduplicate tool registrations across preset delegation scopes",
+      "keep one deterministic registration for each tool id during restored session activation",
+      "add a restore regression test that fails on duplicate registration"
+    ],
+    "owner": "DSH upstream maintainer",
+    "reason": "project rules prohibit modifying the fixed DSH upstream checkout"
+  },
+  "formal_status": {
+    "M2-07": "BLOCKED",
+    "M2-08": "NOT_RUN",
+    "M2-09": "NOT_RUN",
+    "release_ready": false
+  }
+}

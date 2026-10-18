@@ -1,0 +1,188 @@
+{
+  "schema_version": "engineering-rc1-candidate-probe/v1",
+  "recorded_at": "2026-10-17T06:50:42Z",
+  "scope": "internal-engineering-closure",
+  "candidate_id": "dsh-rc1-candidate-probe-20261017",
+  "status": "PACKS_AND_READERS_PASS_IN_TEMPORARY_LANE",
+  "inputs": {
+    "upstream_tag": "dsh-v0.2.1-rc.1",
+    "upstream_sha": "1600d8a1e140dcde43a1a0941940a0480712c011",
+    "source_tree_sha256": "afa92b3e30077481063c31bcff6c98efc7b1926c",
+    "upstream_lock_sha256": "952ca2f79998660dc690b739078a5d6052bc7c5c2193714b918b9d720baaeaba",
+    "sdk_tarball_sha256": "6d0c6fe8ad0c21797a27d6afc0cb69a022714ea0cd7331e4cba8b07b8ce19009",
+    "node": "24.19.0",
+    "upstream_pnpm": "11.28.5",
+    "upstream_pnpm_tarball_sha256": "1ef4e447a68713656064f3f174c0f44719960a043a3fe2299169d08cf1dbf8ee",
+    "plugin_pnpm": "11.28.2",
+    "cordis": "4.0.5",
+    "temporary_candidate_root": "/tmp/dsh-rc1-candidate.bMFp7P",
+    "temporary_inventory": "/tmp/dsh-rc1-probe.h1nse4/rc1-input-inventory.json",
+    "temporary_inventory_sha256": "c2daeac6c5eccfa78214ca80210cb8713442948e1a93225c28afb4027091a076"
+  },
+  "observations": [
+    {
+      "step": "upstream_frozen_install",
+      "result": "PASS",
+      "detail": "pnpm install --frozen-lockfile --ignore-scripts completed with 1725 lock entries"
+    },
+    {
+      "step": "inspect_toolchain",
+      "result": "RESOLVED_IN_ISOLATION",
+      "error_code": null,
+      "detail": "after the official build:official run, rc1 host/client lib entries were present"
+    },
+    {
+      "step": "upstream_build_official",
+      "result": "PASS",
+      "detail": "build:official completed with 9/9 gates passed in 80.65s; host/client/web lib entries were present",
+      "upstream_lock_sha256": "952ca2f79998660dc690b739078a5d6052bc7c5c2193714b918b9d720baaeaba"
+    },
+    {
+      "step": "inspect_toolchain_after_build",
+      "result": "PASS",
+      "detail": "rc1 toolchain inspection returned 32 bindings with Node24 and the isolated build-tools path"
+    },
+    {
+      "step": "plugin_peer_alignment",
+      "result": "TEMPORARY_PREPARED",
+      "detail": "isolated probe replaced nine dsh-tools peers with 0.2.1-rc.1 and CRM/Knowledge Cordis with 4.0.5; no pack was built"
+    },
+    {
+      "step": "profile_preflight",
+      "result": "RESOLVED_IN_ISOLATION",
+      "error_code": null,
+      "detail": "new rc1 page and crm-knowledge profiles passed loadProfileSnapshot and loadReleaseProfile; old rc2 profile remains rejected",
+      "profiles": [
+        {
+          "path": "config/dsh-profile.rc1.json",
+          "digest": "e93e6f5e7975311f55bf1ee070b7aea009c938449c9a1542f3c2a503f40253fc",
+          "plugins": 7
+        },
+        {
+          "path": "config/dsh-profile.crm-knowledge.rc1.json",
+          "digest": "7ed8ba8589f76dbd656897edadd5d9a6098549962c6a2882b8827f81f02c2245",
+          "plugins": 2
+        }
+      ]
+    },
+    {
+      "step": "analytics_plugin_build_probe",
+      "result": "BLOCKED",
+      "error_code": "KIT_PACKAGE_UNAVAILABLE",
+      "detail": "isolated candidate did not yet have the @shine-mage/dsh-plugin-kit workspace link; no plugin bytes were produced"
+    },
+    {
+      "step": "analytics_rc1_api_probe",
+      "result": "BLOCKED",
+      "error_code": "TS2344_WORKSPACE_TOAST_SLOT_CONTRACT",
+      "detail": "after isolated package binding, host typecheck passed but client typecheck failed because rc1 ui-workspace slots.d.ts references workspace.toast before its toast.d.ts module augmentation is loaded; an extra toast.d.ts root produced zero diagnostics in a read-only probe"
+    },
+    {
+      "step": "analytics_rc1_candidate_adapter_probe",
+      "result": "PASS_IN_TEMPORARY_LANE",
+      "error_code": null,
+      "detail": "a candidate-only reference to the rc1 package toast.d.ts removed the TS2344 error; host/client typechecks and analytics build completed, but no main-tree code or pack was changed",
+      "provenance": {
+        "source_git_sha": "fe1a43c2ddf08d2eda3a31633d7702653d083dd0",
+        "source_tree_sha256": "d3fa44ea6384eeb550fc4d59fdd1eeef16a7053f24808defabe0b6902d641794",
+        "generated_tree_sha256": "6a2e391eb442a7241c60006e425461ce175f19f2d62e344819d35b81848b65b2",
+        "node": "24.19.0",
+        "pnpm": "11.28.2",
+        "platform": "darwin-arm64",
+        "clean": true,
+        "isolated": true
+      }
+    },
+    {
+      "step": "remaining_plugin_builds_probe",
+      "result": "PARTIAL_PASS_IN_TEMPORARY_LANE",
+      "error_code": null,
+      "detail": "shine-brand, shine-board, shine-crowd-action, shine-funnel, shine-query and shine-waterfall built with provenance PASS; no formal pack was emitted"
+    },
+    {
+      "step": "crm_knowledge_rc1_build_probe",
+      "result": "BLOCKED",
+      "error_code": "TS2882_KATEX_CSS_DECLARATION",
+      "detail": "rc1 MarkdownText.d.ts side-effect imports katex/dist/katex.min.css but the consumer typecheck has no CSS ambient declaration; the upstream katex file exists"
+    },
+    {
+      "step": "crm_knowledge_rc1_candidate_adapter_probe",
+      "result": "PASS_IN_TEMPORARY_LANE",
+      "error_code": null,
+      "detail": "a candidate-only katex CSS ambient declaration made the CRM/Knowledge consumer build pass; no main-tree code or pack was changed",
+      "provenance": {
+        "temporary_commit": "db244fe1ba37f9456dba4c328ad240446d087dd9",
+        "source_tree_sha256": "a5e9f51b79340192317ebf49c133440c96aedfd4bdc1d1b89d4a227bd4547f76",
+        "generated_tree_sha256": "25f35615906eb7ae123aae9e875f38535bbb6e256c1c21bd6ecb2ba01ec8303f",
+        "node": "24.19.0",
+        "pnpm": "11.28.2",
+        "clean": true,
+        "isolated": true
+      }
+    },
+    {
+      "step": "knowledge_rc1_candidate_build_probe",
+      "result": "PASS_IN_TEMPORARY_LANE",
+      "error_code": null,
+      "detail": "Knowledge consumer typecheck and pinned build completed with the candidate adapters; no formal pack was emitted",
+      "provenance": {
+        "source_git_sha": "db244fe1ba37f9456dba4c328ad240446d087dd9",
+        "source_tree_sha256": "450d723d57a48611461e5b893e16504658efa6a6b34b16d59db4e899834e5683",
+        "generated_tree_sha256": "0a0fd85b00e76dfa301328c0c8ea84548df645402d04f226a49d9ac86ce65302",
+        "node": "24.19.0",
+        "pnpm": "11.28.2",
+        "clean": true,
+        "isolated": true
+      }
+    },
+    {
+      "step": "subject_set_alignment",
+      "result": "BLOCKED",
+      "error_code": "PROVENANCE_SOURCE_SHA_SPLIT",
+      "detail": "analytics was first built at fe1a43c2 while the remaining adapters were built at db244fe1; all nine builds must be rerun from one final candidate commit before pack generation"
+    },
+    {
+      "step": "subject_set_alignment_rerun",
+      "result": "PASS_IN_TEMPORARY_LANE",
+      "error_code": null,
+      "detail": "all nine plugin builds were rerun from the same final temporary candidate commit and every provenance receipt used the same source SHA",
+      "source_git_sha": "db244fe1ba37f9456dba4c328ad240446d087dd9",
+      "plugins": 9,
+      "node": "24.19.0",
+      "pnpm": "11.28.2",
+      "clean": true,
+      "isolated": true
+    },
+    {
+      "step": "pack_build",
+      "result": "PASS_IN_TEMPORARY_LANE",
+      "error_code": null,
+      "detail": "all nine formal plugin packs were generated with dsh-generated-bytes/v1 PASS provenance from the unified candidate source commit",
+      "source_git_sha": "db244fe1ba37f9456dba4c328ad240446d087dd9",
+      "pack_count": 9,
+      "pack_reader_require_generated_provenance": true
+    },
+    {
+      "step": "profile_pack_inputs_and_reader",
+      "result": "PASS_IN_TEMPORARY_LANE",
+      "error_code": null,
+      "detail": "page and crm profiles were assembled from real plugin-pack manifests and read back with generated provenance required",
+      "page_profile_sha256": "e93e6f5e7975311f55bf1ee070b7aea009c938449c9a1542f3c2a503f40253fc",
+      "page_inputs_sha256": "dab88152c0e3fe041f401cdf410942b6e381ba2d9b6619ce34b97f2ce1659e58",
+      "crm_profile_sha256": "7ed8ba8589f76dbd656897edadd5d9a6098549962c6a2882b8827f81f02c2245",
+      "crm_inputs_sha256": "fc9896ebd4e9c0c76cd5b26c94ecb6b669b8420f5446fd2163b8a49fd8f83375"
+    }
+  ],
+  "next_steps": [
+    "Run fixed-SDK consumer/runtime closure against the rc1 pack and profile subject set",
+    "Run runtime import, KaTeX CSS/JS, host startup and owned cleanup checks",
+    "Run candidate history/board readback, restart readback and rc2 rollback probes",
+    "Keep browser/restart and formal release statuses separate from temporary pack-reader PASS"
+  ],
+  "formal_release": {
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "m2_09": "NOT_RUN",
+    "release_ready": false
+  }
+}

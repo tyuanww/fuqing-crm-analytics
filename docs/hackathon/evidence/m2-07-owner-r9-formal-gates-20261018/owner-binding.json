@@ -1,0 +1,22 @@
+{
+  "schema_version": "shinemage-rc1-owner-r9-binding/v1",
+  "status": "OWNER_LOCAL_BINDING",
+  "formal_status": "FORMAL_EXCEPTION_REQUIRED",
+  "release_ready": false,
+  "execution_mode": "OWNER_OPERATED",
+  "owner": "project-owner",
+  "manifest_sha256": "3d746c88a1166a1f18bcfe1f6c49d7a8880e8bb4b60b7bc3b98fc3ca80b9b4f4",
+  "subject_set_sha256": "7053c9bea8e90a4e9c2f0de6ab822841c14deb2669ed3691b739d5c53559d8ab",
+  "publisher_identity": {
+    "type": "LOCAL_EPHEMERAL_ED25519_PUBLIC_KEY",
+    "public_key_sha256": "476b048df3f683d1205b3bcb6df78eb17154bc49e9b10197c3a93927f51ab492",
+    "company_approved": false
+  },
+  "subjects": {
+    "sdk": "@deepseek-ai/dsh@0.2.1-rc.1",
+    "upstream_sha": "1600d8a1e140dcde43a1a0941940a0480712c011",
+    "runtime_archive_sha256": "ed11ec808d939bbab292738be6227e8882c95889d3af5db1a9febbc318aa05a2",
+    "runtime_provenance_sha256": "22c710ca15e59d4659338a27b798f298d227b03b02c1c6ba912889df16e6921e"
+  },
+  "statement": "Local owner integrity binding only. It is not a company publisher identity, company signature, revocation result, independent verification, formal final attestation, or formal clean-machine approval."
+}

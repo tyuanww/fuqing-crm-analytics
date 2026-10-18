@@ -118,7 +118,8 @@ export async function createCompositionCandidate({ crmInputsPath, pageInputsPath
     ? await readToolchainFile(toolchainPath)
     : await resolveCompositionToolchain(toolchain);
   const selectedCordisPeer = cordisPeerVersion ?? process.env.CRM_COMPOSITION_CORDIS_PEER ?? '4.0.4';
-  const [crm, page] = await Promise.all([loadProfilePacks({ inputsPath: crmPath, toolchain: selectedToolchain }), loadProfilePacks({ inputsPath: pagePath, toolchain: selectedToolchain })]);
+  const [crm, page] = await Promise.all([loadProfilePacks({ inputsPath: crmPath, toolchain: selectedToolchain, requireGeneratedProvenance: true }),
+    loadProfilePacks({ inputsPath: pagePath, toolchain: selectedToolchain, requireGeneratedProvenance: true })]);
   validateCompositionPacks({ packs: crm, pages: page, toolchain: selectedToolchain, cordisPeerVersion: selectedCordisPeer });
   const binding = JSON.parse((await readArtifactFile(bindingPath, 128 * 1024)).toString('utf8'));
   validateServiceBinding(binding);

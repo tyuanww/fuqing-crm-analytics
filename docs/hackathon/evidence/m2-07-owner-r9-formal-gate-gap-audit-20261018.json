@@ -1,0 +1,111 @@
+{
+  "schema_version": "shinemage-rc1-owner-r9-formal-gate-gap-audit/v1",
+  "generated_at": "2026-10-18T05:38:46Z",
+  "status": "FORMAL_GATES_BLOCKED",
+  "release_ready": false,
+  "formal_company_evidence": false,
+  "execution": {
+    "mode": "OWNER_OPERATED",
+    "owner": "project-owner",
+    "scope": "INTERNAL_ONLY"
+  },
+  "subject": {
+    "sdk": "@deepseek-ai/dsh@0.2.1-rc.1",
+    "upstream_sha": "1600d8a1e140dcde43a1a0941940a0480712c011",
+    "subject_set_sha256": "7053c9bea8e90a4e9c2f0de6ab822841c14deb2669ed3691b739d5c53559d8ab",
+    "manifest_path": "docs/hackathon/evidence/m2-07-owner-r9-formal-subject-manifest-20261018.json",
+    "manifest_sha256": "3d746c88a1166a1f18bcfe1f6c49d7a8880e8bb4b60b7bc3b98fc3ca80b9b4f4"
+  },
+  "gates": [
+    {
+      "id": "publisher_identity",
+      "local_status": "OWNER_IDENTITY_DECLARED_LOCAL",
+      "formal_status": "NOT_RUN_COMPANY_IDENTITY_UNAVAILABLE",
+      "evidence": "m2-07-owner-r9-formal-gates-20261018/owner-public-key.pem",
+      "remaining_gap": "company approved issuer, subject, key id, certificate, OIDC or KMS identity"
+    },
+    {
+      "id": "signature",
+      "local_status": "OWNER_SELF_SIGNED_LOCAL / VERIFICATION_PASS",
+      "formal_status": "NOT_RUN_COMPANY_SIGNER_UNAVAILABLE",
+      "evidence": "m2-07-owner-r9-formal-gates-20261018/owner-binding.sig",
+      "remaining_gap": "company KMS/HSM/keyless signature bundle and transparency reference"
+    },
+    {
+      "id": "revocation",
+      "local_status": "NOT_RUN_NO_TRUST_SERVICE",
+      "formal_status": "NOT_RUN_NO_REVOCATION_SERVICE",
+      "evidence": null,
+      "remaining_gap": "company key registry, certificate status or signature service result"
+    },
+    {
+      "id": "independent_verification",
+      "local_status": "SAME_OWNER_SEPARATED_REPLAY_PASS",
+      "formal_status": "NOT_RUN_SECOND_PERSON_UNAVAILABLE",
+      "evidence": "docs/hackathon/evidence/m2-07-owner-r9-formal-gates-20261018/owner-r9-independent-verification-20261018.json",
+      "remaining_gap": "second-person identity or independent company CI job"
+    },
+    {
+      "id": "final_attestation",
+      "local_status": "OWNER_LOCAL_FINAL_ATTESTATION_NOT_FORMAL",
+      "formal_status": "FORMAL_EXCEPTION_REQUIRED",
+      "evidence": "docs/hackathon/evidence/m2-07-owner-r9-formal-gates-20261018/owner-r9-final-attestation-draft-20261018.json",
+      "remaining_gap": "company final attestation format, signature, publisher evidence, revocation and independent verification binding"
+    },
+    {
+      "id": "clean_machine",
+      "local_status": "OWNER_OPERATED_FRESH_EXTRACTION_PASS",
+      "formal_status": "NOT_RUN_COMPANY_CLEAN_MACHINE",
+      "evidence": "docs/hackathon/evidence/m2-07-owner-r9-formal-gates-20261018/owner-r9-clean-machine-receipt-20261018.json",
+      "remaining_gap": "company clean-machine runner and formal receipt"
+    }
+  ],
+  "local_evidence": {
+    "independent_verification_sha256": "88c0c85ba8aa8deba57e5fdc5de2a50e76d086cc23578ee10129d71052c40d5c",
+    "clean_machine_sha256": "a7bb103f4f379e6387e5ca5032c4731f96b53984e2785b0dd128091f5980d8ad",
+    "final_attestation_draft_sha256": "2623a1cd627bbeba4388ae064d521367f5f4c73600dcd5f3a1ca8561a2245c1c"
+  },
+  "tool_probe": {
+    "cosign": "NOT_FOUND",
+    "gpg": "NOT_FOUND",
+    "gpg2": "NOT_FOUND",
+    "notation": "NOT_FOUND",
+    "in-toto-verifier": "NOT_FOUND",
+    "slsa-verifier": "NOT_FOUND",
+    "syft": "NOT_FOUND",
+    "cyclonedx": "NOT_FOUND",
+    "gitsign": "NOT_FOUND",
+    "crane": "NOT_FOUND"
+  },
+  "github_independent_ci_probe": {
+    "command": "gh run list --workflow dsh-rc1-release-preflight.yml --limit 10",
+    "result": "HTTP 404: workflow not found on the default branch",
+    "rc1_workflow_available_on_default_branch": false,
+    "available_release_workflows_on_default_branch": [
+      "DSH rc2 release evidence",
+      "DSH rc2 release preflight",
+      "Publish DSH rc2 release assets"
+    ],
+    "company_independent_ci_receipt": "NOT_FOUND",
+    "gh_auth_is_publisher_identity": false
+  },
+  "material_findings": [
+    "The current deployed release directory runtime.tar.zst did not match r9 provenance; formal-r9 staging now contains the exact r9 runtime archive.",
+    "Target default pnpm was 11.19.0; clean-machine replay used embedded upstream pnpm 11.28.5 and approved plugin pnpm 11.28.2.",
+    "No company publisher identity, signer, revocation service, second-person verifier, company final attestation service, or company clean-machine runner is configured."
+  ],
+  "next_required_inputs": [
+    "company publisher identity",
+    "company signer/KMS/HSM/keyless service",
+    "company revocation query receipt",
+    "independent company CI or second-person verifier receipt",
+    "company final attestation",
+    "company clean-machine receipt"
+  ],
+  "formal_gate_state": {
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "m2_09": "NOT_RUN",
+    "release_ready": false
+  }
+}

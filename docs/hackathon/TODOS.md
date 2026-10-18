@@ -4,6 +4,20 @@
 
 ## M1 核心交付
 
+## Internal readiness
+
+### 公司内部 AI 工作台 Stage 0 任务卡与 owner 输入
+
+**What:** 登记一个真实试点部门、岗位、用户和内容任务，补齐输入/输出、允许数据类别、每周最低频次、当前耗时，以及 IT/IdP、数据和基础设施 owner、目标日期；在这些输入齐全前，Stage 0 只运行 harness-only 验证。
+
+**Why:** 内部使用与 M2 正式发布分开推进。没有真实任务卡和责任人，任何运行结果都不能证明任务可行性、Stage 1 readiness 或 500 人扩展价值。
+
+**Context:** 内部环境目标锁定为 Harness 最新发布 `dsh-v0.2.1-rc.1` / upstream `1600d8a1e140dcde43a1a0941940a0480712c011`，并固定 tarball SHA、manifest、pack digest、controlled-host fresh runtime、credential deny、local-only receipt 和 owned cleanup；主仓 `0.1.7-rc.2` 只保留为兼容基线和历史证据边界。当前只允许合成/脱敏 harness smoke；OIDC、共享持久化、备份/恢复、14 天/60 次 cohort metrics 和内网 Stage 1 均保持阻塞。详见 `docs/hackathon/evidence/engineering-closeout-20261017.md` 和 `docs/designs/internal-ai-workbench-readiness.md`。
+
+**Effort:** S
+**Priority:** P1
+**Depends on:** 试点部门 owner、公司 IT/IdP owner、数据 owner、基础设施 owner；不改变 M2-07、M2-08、M2-09 或 `release_ready=false`。
+
 ## M2 收尾任务卡与维修规则
 
 以下任务卡只覆盖 M1 之后仍开放的验收、供应链和发布门禁。每张卡独立推进、独立验证、独立本地提交；没有满足前置条件时保持 `NOT_RUN` 或 `BLOCKED`，不使用历史回执补齐当前证据。
@@ -45,7 +59,7 @@ M2-09 候选已补齐正式 pack/profile 输入和 synthetic 组合 browser：9 
 
 ### 2026-10-14 DSH 候选目标 browser/recovery 补验（已撤销历史尝试）
 
-旧回执曾记录 alpha2 正式 page pack browser 和 owned-host restart recovery PASS，并保留在 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-target-browser-recovery-20261014.json`。后续证据纠偏确认该尝试复用了 synthetic backend，缺少可采纳的真实浏览器操作和重启后业务页面回读，因此不能作为正式目标证据。原始回执保留用于审计，当前 M2-09 仍保持 `TARGET_BROWSER_NOT_RUN / TARGET_RECOVERY_NOT_RUN`；live 4328/4332/4336 未修改，主仓 pin 未切换。
+旧回执曾记录 alpha2 正式 page pack browser 和 owned-host restart recovery PASS，并保留在 `.context/checks/dsh-upgrade-0.2.1-alpha.2-20261013/candidate-target-browser-recovery-20261014.json`。后续证据纠偏确认该尝试复用了 synthetic backend，缺少可采纳的真实浏览器操作和重启后业务页面回读，因此不能作为正式目标证据。原始回执保留用于审计；当前正式目标 browser/recovery 仍为 `NOT_RUN`，本地 synthetic pass 仅属于隔离证据。live 4328/4332/4336 未修改，主仓 pin 未切换。
 
 ### 2026-10-13 授权生产目标前置通过
 

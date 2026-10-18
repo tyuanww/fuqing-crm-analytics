@@ -1,0 +1,201 @@
+{
+  "schema_version": "dsh-generated-bytes/v1",
+  "status": "PASS",
+  "upstream_sha": "1600d8a1e140dcde43a1a0941940a0480712c011",
+  "source_tree": {
+    "sha256": "1da0862e853d126219dbec4b77bd7187776112f620adadc12ccda07c420c3f4a",
+    "entries": 38713,
+    "bytes": 321865306
+  },
+  "generated_tree": {
+    "sha256": "2d91073d45c2534cb27d6129545c6cc86e0ed50c9bc038a402a79152bec8335b",
+    "entries": 48051,
+    "bytes": 747956143
+  },
+  "builder": {
+    "status": "PASS",
+    "clean": true,
+    "isolated": true,
+    "node": "v24.21.0",
+    "pnpm": "11.28.5",
+    "platform": "linux",
+    "arch": "x64",
+    "command": "scripts/release/runtime-bundle.mjs",
+    "network_mode": "offline"
+  },
+  "preparation_receipt_sha256": "2d2f00923d8bc64b5efc5369b7eb9b3177d97c59354a24fdf8e83458adc5d971",
+  "portable_linux": {
+    "status": "PASS",
+    "files": 29207,
+    "metadata_files": 0,
+    "findings": [],
+    "rewritten_path_shims": 315,
+    "removed_native": [
+      {
+        "path": ".runtime-external/node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/darwin-arm64/pty.node",
+        "kind": "Mach-O"
+      },
+      {
+        "path": ".runtime-external/node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/darwin-arm64/spawn-helper",
+        "kind": "Mach-O"
+      },
+      {
+        "path": ".runtime-external/node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/darwin-x64/pty.node",
+        "kind": "Mach-O"
+      },
+      {
+        "path": ".runtime-external/node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/darwin-x64/spawn-helper",
+        "kind": "Mach-O"
+      },
+      {
+        "path": ".runtime-external/node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/linux-arm64/pty.node",
+        "kind": "ELF-machine-183"
+      },
+      {
+        "path": ".runtime-external/node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/win32-arm64/conpty/OpenConsole.exe",
+        "kind": "PE"
+      },
+      {
+        "path": ".runtime-external/node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/win32-arm64/conpty/conpty.dll",
+        "kind": "PE"
+      },
+      {
+        "path": ".runtime-external/node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/win32-arm64/conpty.node",
+        "kind": "PE"
+      },
+      {
+        "path": ".runtime-external/node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/win32-arm64/conpty_console_list.node",
+        "kind": "PE"
+      },
+      {
+        "path": ".runtime-external/node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/win32-x64/conpty/OpenConsole.exe",
+        "kind": "PE"
+      },
+      {
+        "path": ".runtime-external/node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/win32-x64/conpty/conpty.dll",
+        "kind": "PE"
+      },
+      {
+        "path": ".runtime-external/node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/win32-x64/conpty.node",
+        "kind": "PE"
+      },
+      {
+        "path": ".runtime-external/node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/win32-x64/conpty_console_list.node",
+        "kind": "PE"
+      },
+      {
+        "path": ".runtime-external/node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/third_party/conpty/1.25.260303002/win10-arm64/OpenConsole.exe",
+        "kind": "PE"
+      },
+      {
+        "path": ".runtime-external/node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/third_party/conpty/1.25.260303002/win10-arm64/conpty.dll",
+        "kind": "PE"
+      },
+      {
+        "path": ".runtime-external/node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/third_party/conpty/1.25.260303002/win10-x64/OpenConsole.exe",
+        "kind": "PE"
+      },
+      {
+        "path": ".runtime-external/node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/third_party/conpty/1.25.260303002/win10-x64/conpty.dll",
+        "kind": "PE"
+      },
+      {
+        "path": ".runtime-external/node_modules/.pnpm/pnpm@11.28.5/node_modules/pnpm/dist/node_modules/@reflink/reflink-darwin-arm64/reflink.darwin-arm64.node",
+        "kind": "Mach-O"
+      },
+      {
+        "path": ".runtime-external/node_modules/.pnpm/pnpm@11.28.5/node_modules/pnpm/dist/node_modules/@reflink/reflink-darwin-x64/reflink.darwin-x64.node",
+        "kind": "Mach-O"
+      },
+      {
+        "path": ".runtime-external/node_modules/.pnpm/pnpm@11.28.5/node_modules/pnpm/dist/node_modules/@reflink/reflink-win32-arm64-msvc/reflink.win32-arm64-msvc.node",
+        "kind": "PE"
+      },
+      {
+        "path": ".runtime-external/node_modules/.pnpm/pnpm@11.28.5/node_modules/pnpm/dist/node_modules/@reflink/reflink-win32-x64-msvc/reflink.win32-x64-msvc.node",
+        "kind": "PE"
+      },
+      {
+        "path": ".runtime-external/node_modules/.pnpm/pnpm@11.28.5/node_modules/pnpm/dist/vendor/fastlist-0.3.0-x64.exe",
+        "kind": "PE"
+      },
+      {
+        "path": ".runtime-external/node_modules/.pnpm/pnpm@11.28.5/node_modules/pnpm/dist/vendor/fastlist-0.3.0-x86.exe",
+        "kind": "PE"
+      },
+      {
+        "path": "node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/darwin-arm64/pty.node",
+        "kind": "Mach-O"
+      },
+      {
+        "path": "node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/darwin-arm64/spawn-helper",
+        "kind": "Mach-O"
+      },
+      {
+        "path": "node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/darwin-x64/pty.node",
+        "kind": "Mach-O"
+      },
+      {
+        "path": "node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/darwin-x64/spawn-helper",
+        "kind": "Mach-O"
+      },
+      {
+        "path": "node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/linux-arm64/pty.node",
+        "kind": "ELF-machine-183"
+      },
+      {
+        "path": "node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/win32-arm64/conpty/OpenConsole.exe",
+        "kind": "PE"
+      },
+      {
+        "path": "node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/win32-arm64/conpty/conpty.dll",
+        "kind": "PE"
+      },
+      {
+        "path": "node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/win32-arm64/conpty.node",
+        "kind": "PE"
+      },
+      {
+        "path": "node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/win32-arm64/conpty_console_list.node",
+        "kind": "PE"
+      },
+      {
+        "path": "node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/win32-x64/conpty/OpenConsole.exe",
+        "kind": "PE"
+      },
+      {
+        "path": "node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/win32-x64/conpty/conpty.dll",
+        "kind": "PE"
+      },
+      {
+        "path": "node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/win32-x64/conpty.node",
+        "kind": "PE"
+      },
+      {
+        "path": "node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/prebuilds/win32-x64/conpty_console_list.node",
+        "kind": "PE"
+      },
+      {
+        "path": "node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/third_party/conpty/1.25.260303002/win10-arm64/OpenConsole.exe",
+        "kind": "PE"
+      },
+      {
+        "path": "node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/third_party/conpty/1.25.260303002/win10-arm64/conpty.dll",
+        "kind": "PE"
+      },
+      {
+        "path": "node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/third_party/conpty/1.25.260303002/win10-x64/OpenConsole.exe",
+        "kind": "PE"
+      },
+      {
+        "path": "node_modules/.pnpm/node-pty@1.2.0-beta.15_patch_hash=9d30053266d0f39d3debe894c675867f6782da6bcadbc94a693b3cfb9eff8ed0/node_modules/node-pty/third_party/conpty/1.25.260303002/win10-x64/conpty.dll",
+        "kind": "PE"
+      }
+    ]
+  },
+  "archive": {
+    "name": "runtime-linux-x64-formal-r9.tar.zst",
+    "bytes": 188141482,
+    "sha256": "ed11ec808d939bbab292738be6227e8882c95889d3af5db1a9febbc318aa05a2"
+  }
+}

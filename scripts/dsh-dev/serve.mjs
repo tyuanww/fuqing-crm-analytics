@@ -177,7 +177,7 @@ export async function resolvePluginInputs(options) {
     for (const key of ['pluginPath', 'shineBrandPath', 'shineWaterfallPath', 'shineCrowdActionPath', 'shineQueryPath', 'shineBoardPath', 'shineFunnelPath']) {
       assert.equal(options[key], undefined, 'DSH_DEV_PLUGIN_INPUT_CONFLICT');
     }
-    const packs = await loadProfilePacks({ inputsPath: options.packInputs, toolchain: await runtimeToolchain() });
+    const packs = await loadProfilePacks({ inputsPath: options.packInputs, toolchain: await runtimeToolchain(), requireGeneratedProvenance: true });
     assert.equal(packs.profile.service_binding, undefined, 'DSH_DEV_SERVICE_PROFILE_USE_CANDIDATE_HARNESS');
     const selected = {
       pluginPath: '@shine-mage/dsh-analytics-workbench-b0',

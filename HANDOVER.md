@@ -1,6 +1,6 @@
 # 交接说明（短表）
 
-> **最后更新**: 2026-10-17。当前产品 VERSION、公开 `main`、DSH pin 和未关闭门禁只看 [STATUS.md](STATUS.md)。当前远端 `main` 已包含本轮治理与状态文档，具体 SHA 以 Git 实查为准；合并不代表生产激活，M2-07 仍 BLOCKED、M2-08 仍 NOT_RUN、`release_ready=false`。本地历史候选已完成归档和清理，恢复清单见[本次清理证据](docs/hackathon/evidence/shinemage-local-cleanup-20261010.md)。下方入口、代码归属和运行路径是带日期的历史快照，不代表当前生产切换或候选已激活。
+> **最后更新**: 2026-10-18。当前产品 VERSION、公开 `main`、DSH pin 和未关闭门禁只看 [STATUS.md](STATUS.md)。内部 owner-operated rc1 已在杭州完成 `dsh-0.2.1-rc.1-owner-r9-20261018` 的 side-by-side 切换；这不等于正式 release，M2-07 仍 BLOCKED、M2-08/M2-09 仍 NOT_RUN、`release_ready=false`。本地历史候选已完成归档和清理，恢复清单见[本次清理证据](docs/hackathon/evidence/shinemage-local-cleanup-20261010.md)。下方入口、代码归属和运行路径仍是带日期的历史快照，当前现场事实以 STATUS 的 2026-10-18 记录为准。
 > 细节以代码与下列 SSOT 为准，**不要**在本文件堆 sprint 日记。
 
 ## 历史运行入口快照（2026-09-29）
@@ -46,11 +46,7 @@
 
 ## 启动（开发机）
 
-```bash
-cd "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics-public"
-git checkout main && git pull origin main --ff-only
-# 后端 / 前端按 README.md；hooks: bash scripts/setup-hooks.sh
-```
+开发和部署入口见 [Mac 开发到杭州生产链路](docs/operating/mac-hangzhou-git-workflow.md)。不要从本页复制 `git pull`、服务重启或 hook 安装命令。当前版本和端口先读 [STATUS.md](STATUS.md)。
 
 ## 禁止
 

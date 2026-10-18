@@ -52,10 +52,14 @@ export async function runtimeSourceTree(root) {
   });
 }
 
-export function runtimeDeployArgs(destination, { online = false } = {}) {
+export function runtimeDeployArgs(destination, { online = false, portableLinux = false } = {}) {
   // Modern deploy derives a frozen closure from workspace importer snapshots.
   // Legacy deploy re-resolves ranges and needs mutable registry metadata.
-  return ['pnpm', 'deploy', '--config.inject-workspace-packages=true', '--ignore-scripts',
+  // A Linux portable bundle must not encode the temporary workspace in its
+  // package locators. The legacy deploy emits stable relative workspace
+  // locators; the caller must run it offline after the pinned preparation
+  // receipt has been created.
+  return ['pnpm', 'deploy', ...(portableLinux ? ['--legacy'] : ['--config.inject-workspace-packages=true']), '--ignore-scripts',
     ...(!online ? ['--offline', '--trust-lockfile'] : []), '--registry=https://registry.npmjs.org',
     '--filter', '@deepseek-ai/dsh', '--prod', destination];
 }

@@ -137,7 +137,9 @@
         "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
         "@deepseek-ai/cordis": "4.0.2"
       },
-      "dependencies": {},
+      "dependencies": {
+        "katex": "^0.18.7"
+      },
       "dev_dependencies": {
         "@shine-mage/dsh-plugin-kit": "0.1.0"
       },
@@ -160,7 +162,7 @@
         "build": "node build.mjs",
         "test:host": "node --test test/host.integration.mjs"
       },
-      "manifest_sha256": "4c0d3557fcd06f019201df21a4e5eba17c85689a46ac987747dbd02da3151243"
+      "manifest_sha256": "6dbc8af2857009a34ed89d97df49483bed72dff8160f18a22b070e90c8bb70b7"
     },
     {
       "path": "dsh-plugins/knowledge",

@@ -6,6 +6,7 @@ import { basename, dirname, join, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 import test from 'node:test';
 import { collectAllowlist, packArtifact, receiveArtifact } from './artifact.mjs';
+import { comparablePackageBytes } from './runtime-package-identity.mjs';
 import { receiveRelease } from './receive.mjs';
 import { readState, resume } from './state.mjs';
 import { issueToken, consumeToken, tokenExchangeResponse } from './auth-contract.mjs';
@@ -15,7 +16,7 @@ import { verifyReviewedCommit } from './trust.mjs';
 import { writeEvidence } from './evidence.mjs';
 import { evaluateSli } from './operator-gate.mjs';
 import { pageGuard } from './page-policy.mjs';
-import { scanText } from './secret-scan.mjs';
+import { runtimeVendorAssignmentAllowlist, scanText } from './secret-scan.mjs';
 import { releaseAssetNames, summarizePreflight, verifyPreflight, UPSTREAM_SHA } from './preflight-bundle.mjs';
 import { serviceFixture } from './test-fixtures/service-compatibility.mjs';
 
@@ -149,6 +150,15 @@ test('secret scan distinguishes explicit synthetic fixtures from real assignment
   const githubPat = ['ghp_', '123456789012345678901234567890'].join('');
   const accessKey = ['AKIA', '1234567890123456'].join('');
   const realSecret = ['MY_REAL_', 'SECRET_TOKEN'].join('');
+  const devtoolsKey = ['AIzaSyCCSOx25vrb5z0tbedCB3_', 'JRzzbVW6Uwgw'].join('');
+  const cosToken = ['x-cos-security-', 'token'].join('');
+  const codeIcon = ['__DSH_CODE_ICON_', 'INSTANCE__'].join('');
+  const awsSecret = ['AWS_SECRET_', 'ACCESS_KEY'].join('');
+  const awsAuth = ['AWS_CONTAINER_AUTHORIZATION_', 'TOKEN'].join('');
+  const imdsToken = ['x-aws-ec2-metadata-', 'token'].join('');
+  const removeAuth = ['remove_authentication_', 'token'].join('');
+  const setAuth = ['set_authentication_', 'token'].join('');
+  const reportingToken = ['ReportingEndpointNot', 'Token'].join('');
   const privateHeader = ['-----BEGIN ', 'PRIVATE KEY-----'].join('');
   const privateFooter = ['-----END ', 'PRIVATE KEY-----'].join('');
   assert.deepEqual(scanText("TOKEN = 'test-only-synthetic-token'", 'fixture.test.mjs'), []);
@@ -156,13 +166,13 @@ test('secret scan distinguishes explicit synthetic fixtures from real assignment
   assert.deepEqual(scanText("TOKEN = 'unexpected-top-level-token'", 'probe.test.mjs'), []);
   assert.deepEqual(scanText("TOKEN = 'test-only-synthetic-token'", 'config/runtime.env'), ['SECRET_PATTERN config/runtime.env']);
   assert.deepEqual(scanText(`TOKEN = '${live}'`, 'fixture.test.mjs'), ['SECRET_PATTERN fixture.test.mjs']);
-  assert.deepEqual(scanText("token = 'x-cos-security-token'", 'sdk/base.js'), []);
-  assert.deepEqual(scanText("TOKEN = '__DSH_CODE_ICON_INSTANCE__'", 'ui-primitives/lib/index.js'), []);
-  assert.deepEqual(scanText("SECRET = 'AWS_SECRET_ACCESS_KEY'", 'credential-provider-env/index.js'), []);
-  assert.deepEqual(scanText("TOKEN = 'AWS_CONTAINER_AUTHORIZATION_TOKEN'", 'sdk/base.js'), []);
-  assert.deepEqual(scanText("TOKEN = 'x-aws-ec2-metadata-token'", 'credential-provider-imds/index.js'), []);
-  assert.deepEqual(scanText("TOKEN = 'remove_authentication_token'", 'semantic-conventions/experimental_attributes.js'), []);
-  assert.deepEqual(scanText("TOKEN = 'set_authentication_token'", 'semantic-conventions/experimental_attributes.js'), []);
+  assert.deepEqual(scanText(`token = '${cosToken}'`, 'sdk/base.js'), []);
+  assert.deepEqual(scanText(`TOKEN = '${codeIcon}'`, 'ui-primitives/lib/index.js'), []);
+  assert.deepEqual(scanText(`SECRET = '${awsSecret}'`, 'credential-provider-env/index.js'), []);
+  assert.deepEqual(scanText(`TOKEN = '${awsAuth}'`, 'sdk/base.js'), []);
+  assert.deepEqual(scanText(`TOKEN = '${imdsToken}'`, 'credential-provider-imds/index.js'), []);
+  assert.deepEqual(scanText(`TOKEN = '${removeAuth}'`, 'semantic-conventions/experimental_attributes.js'), []);
+  assert.deepEqual(scanText(`TOKEN = '${setAuth}'`, 'semantic-conventions/experimental_attributes.js'), []);
   assert.deepEqual(scanText("refresh_token: 'impersonated-placeholder'", 'google-auth-library/impersonated.js'), []);
   assert.deepEqual(scanText(`API_KEY = '${realSecret}'`, 'config/runtime.env'), ['SECRET_PATTERN config/runtime.env']);
   assert.deepEqual(scanText(`API_KEY = '${realSecret}'`, 'node_modules/vendor.js'), ['SECRET_PATTERN node_modules/vendor.js']);
@@ -171,6 +181,23 @@ test('secret scan distinguishes explicit synthetic fixtures from real assignment
   assert.deepEqual(scanText(`const key = '${accessKey}'`, 'config/key.js'), ['SECRET_PATTERN config/key.js']);
   assert.deepEqual(scanText(`${privateHeader}`, 'sdk/import.js'), []);
   assert.deepEqual(scanText(`${privateHeader}\n${'A'.repeat(48)}\n${privateFooter}`, 'config/key.pem'), ['SECRET_PATTERN config/key.pem']);
+  const vendorPath = 'node_modules/.pnpm/chrome-devtools-mcp@1.9.0/node_modules/chrome-devtools-mcp/build/src/third_party/index.js';
+  const vendorHash = 'fc6ae43cb8f6007eba4b0f269290ec8fea6db7670686d17967b4812d90d2cc10';
+  const vendorAllowlist = runtimeVendorAssignmentAllowlist(vendorPath, vendorHash);
+  assert.deepEqual(scanText(`API_KEY = '${devtoolsKey}'`, vendorPath, { assignmentAllowlist: vendorAllowlist }), []);
+  assert.deepEqual(scanText(`Token: '${reportingToken}'`, vendorPath, { assignmentAllowlist: vendorAllowlist }), []);
+  assert.deepEqual(scanText(`API_KEY = '${devtoolsKey}'`, 'other/vendor.js', { assignmentAllowlist: runtimeVendorAssignmentAllowlist('other/vendor.js', vendorHash) }), ['SECRET_PATTERN other/vendor.js']);
+  assert.deepEqual(runtimeVendorAssignmentAllowlist(vendorPath, '0'.repeat(64)), new Set());
+  for (const [path, digest, value] of [
+    ['.runtime-external/packages/experimental/inspector/lib/devtools/chunks/UIFilter-CIzBruM3.js', '528cdf0454770303f151a4e9562b750a41f221b656996ffe2bc12c13fb6e8489', 'response-header-set-cookie'],
+    ['.runtime-external/packages/experimental/inspector/lib/devtools/chunks/data_grid-CZEcy7-w.js', '729fbcd17a4356d26a52007551880bd7ef88f8a97b573e40c61fca2754da61a9', 'DataGridInternalToken'],
+    ['.runtime-external/packages/experimental/inspector/lib/devtools/chunks/legacy-CJ2qLEp3.js', '1a1b731f8ed5c22d04152e49999cf706e5edefb595ec68e2ea45ca451c9a8c91', 'ReportingEndpointNotToken'],
+    ['.runtime-external/packages/experimental/inspector/lib/devtools/chunks/protocol_client-L4-X1Qrb.js', 'aecddd3577951b386a69848c3470507c6806365a8130392e57d4028adf7c1e01', 'InvalidCredentialsCookie'],
+  ]) {
+    const allowed = runtimeVendorAssignmentAllowlist(path, digest);
+    assert.deepEqual(scanText(`token: "${value}"`, path, { assignmentAllowlist: allowed }), []);
+    assert.deepEqual(scanText(`token: "${value}"`, path, { assignmentAllowlist: runtimeVendorAssignmentAllowlist(path, '0'.repeat(64)) }), [`SECRET_PATTERN ${path}`]);
+  }
 });
 test('zstd receiver enforces the bounded stream path', async () => { const root=await fixture(), raw=join(root,'a.tar'), archive=join(root,'a.tar.zst'); execFileSync('python3',['-c',`import tarfile,sys,io
 x=tarfile.TarInfo('VERSION'); b=bytes([48,46,49,56,46,48,46,49,10]); x.size=len(b); x.mode=0o600
@@ -353,8 +380,11 @@ test('runtime bundle enforces production pruning, secret scan and peer collision
   assert.match(source, /RUNTIME_LINK_BROKEN/);
   assert.match(source, /MAX_TEXT_SCAN_BYTES/);
   assert.match(source, /RUNTIME_PEER_ALIAS_COLLISION/);
+  assert.match(source, /requiredPeerAliases/);
+  assert.match(source, /optionalDependencies/);
+  assert.match(source, /peerDependencies/);
   assert.match(source, /\['cordis', 'cosmokit'\]/);
-  assert.match(source, /runtimeDeployArgs\(deployed, \{ online \}\)/);
+  assert.match(source, /runtimeDeployArgs\(deployed, \{ online, portableLinux \}\)/);
   assert.match(source, /stageRuntimeWorkspace/);
   assert.match(source, /GENERATED_PROVENANCE_SCHEMA/);
   assert.match(source, /canonicalTreeDigest/);
@@ -363,6 +393,16 @@ test('runtime bundle enforces production pruning, secret scan and peer collision
   assert.match(source, /generatedTree/);
   assert.match(source, /cwd: workspace/);
   assert.doesNotMatch(source, /scanAssignments:\s*!\/\(\^\|\\\/\)node_modules/);
+});
+test('runtime peer identity ignores development-only metadata', () => {
+  const source = Buffer.from(JSON.stringify({ name: '@deepseek-ai/example', version: '1.0.0', devDependencies: { test: '1.0.0' }}));
+  const destination = Buffer.from(JSON.stringify({ name: '@deepseek-ai/example', version: '1.0.0', devDependencies: { test: '2.0.0' }}));
+  assert.deepEqual(comparablePackageBytes(source), comparablePackageBytes(destination));
+});
+test('runtime peer identity normalizes injected workspace locators', () => {
+  const source = Buffer.from(JSON.stringify({ name: '@deepseek-ai/example', version: '1.0.0', dependencies: { '@deepseek-ai/cordis': 'workspace:~' }, peerDependencies: { '@deepseek-ai/other': 'workspace:*' }}));
+  const destination = Buffer.from(JSON.stringify({ name: '@deepseek-ai/example', version: '1.0.0', dependencies: { '@deepseek-ai/cordis': '@deepseek-ai/cordis@file:///tmp/workspace/vendor/cordis' }, peerDependencies: { '@deepseek-ai/other': '@deepseek-ai/other@file:///tmp/workspace/packages/other' }}));
+  assert.deepEqual(comparablePackageBytes(source), comparablePackageBytes(destination));
 });
 test('runtime artifact allowlist carries the release evidence workflow', async () => {
   const allowlist = await collectAllowlist(process.cwd());

@@ -33,7 +33,12 @@ async function fixture(t) {
   const archive = await readFile(join(inputRoot, 'pack', tarName));
   const receipt = { schema_version: 'dsh-plugin-pack/v1', package_name: id, package_version: '0.1.0', dsh_pin: sdk.sdk_version,
     source_sha: '1'.repeat(40), source_dirty: false, activation: 'NOT_RUN', state_path: 'NOT_APPLICABLE_PLUGIN_PACK_ONLY',
-    tarball: { name: tarName, bytes: archive.length, sha256: hash(archive) }, entries: ['cordis.patch.yml','lib/index.js','package.json'] };
+    tarball: { name: tarName, bytes: archive.length, sha256: hash(archive) },
+    generated_bytes_provenance: { schema_version: 'dsh-generated-bytes/v1', status: 'PASS',
+      source: { git_sha: '1'.repeat(40), sha256: '2'.repeat(64), entries: 1, bytes: 1 },
+      generated_tree: { sha256: '0555cb12712fd53b766689033a0849967a867bb4429c0eaa1c1d38d8281d3f23', entries: 2, bytes: 31 },
+      builder: { clean: true, isolated: true, node: '24.19.0', pnpm: '11.28.2' },
+      builder_receipt_sha256: '4'.repeat(64) }, entries: ['cordis.patch.yml','lib/index.js','package.json'] };
   const receiptBytes = Buffer.from(json(receipt));
   await writeFile(join(inputRoot, 'pack/plugin-pack.json'), receiptBytes);
   const profile = { schema_version: 'dsh-profile/v1', profile_id: 'synthetic-release', dsh: sdk,

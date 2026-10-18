@@ -1,0 +1,150 @@
+{
+  "schema_version": "shinemage-alpha4-owner-formal-gate-gap-audit/v1",
+  "generated_at": "2026-10-17T11:42:53Z",
+  "execution": {
+    "mode": "OWNER_OPERATED",
+    "owner": "project-owner",
+    "scope": "LOCAL_GAP_AUDIT_ONLY",
+    "formal_company_evidence": false,
+    "release_ready": false
+  },
+  "formal_status": {
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "m2_09": "NOT_RUN",
+    "release_ready": false
+  },
+  "subjects": {
+    "sdk": {
+      "package": "@deepseek-ai/dsh@0.2.1-alpha.4",
+      "artifact_sha256": "9f4fe0f466d7699ddd4686ee9692ec10c6d9f98a7d175fd5e55de01b2f64c8d6",
+      "source_sha": "50d241cbd23aa2a9d188fe84c3864528a2206917",
+      "upstream_sha": "86a402200d95fecef4529d969836f1fe13c6cb0d",
+      "upstream_lock_sha256": "ee1c37b5429c535974bafa09475cb03fc473e87dded8f56d54d909ed621e1317"
+    },
+    "crm_consumer": {
+      "package": "@shine-mage/dsh-crm-knowledge@0.0.0-crm.1",
+      "tarball_sha256": "a994167cafae37383800789127a305bc5cae0a9fa85b46ba4157cf1fe0ae634d",
+      "manifest_sha256": "106c38eaf30cde9b6a3e3fc5fea98d8e42aa777f51f99faff37c00c13f55e42d",
+      "source_sha": "3b5d4c0680585f8f27c84d70dffabf7c2ec930d2"
+    }
+  },
+  "local_observations": {
+    "fixed_node": {
+      "path": "/Users/hutou/homebrew/Cellar/node@24/24.19.0/bin/node",
+      "version": "v24.19.0",
+      "status": "OBSERVED"
+    },
+    "pnpm": {
+      "version": "11.28.2",
+      "status": "OBSERVED"
+    },
+    "openssl": {
+      "version": "OpenSSL 4.0.3",
+      "status": "OBSERVED"
+    },
+    "owner_binding": {
+      "path": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/owner-attestation-r1/owner-binding.json",
+      "sha256": "dfd7e89d1ffa4779caff5169bb9c08ee9e5dd0b7d4caccbdffe43784b08cbdd7",
+      "status": "EXISTS"
+    },
+    "owner_public_key": {
+      "path": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/owner-attestation-r1/owner-public-key.pem",
+      "sha256": "234d4a8d016c65adca1fd9bdd470b92d2f82fa8a8e022bc2cd1572b813e2b908",
+      "status": "EXISTS"
+    },
+    "owner_signature": {
+      "path": ".context/checks/dsh-upgrade-0.2.1-alpha.4-20261016/owner-attestation-r1/owner-binding.sig",
+      "sha256": "26f4a6ac9c116b729f27260ab40c6b5eb13b657c291df907ebf6bc75be7d1d0d",
+      "verification_command": "openssl pkeyutl -verify -pubin -inkey owner-public-key.pem -sigfile owner-binding.sig -in owner-binding.json -rawin",
+      "verification_exit_code": 0,
+      "verification_output": "Signature Verified Successfully",
+      "status": "OWNER_LOCAL_VERIFICATION_PASS"
+    },
+    "tool_probe": {
+      "cosign": "NOT_FOUND",
+      "gpg": "NOT_FOUND",
+      "gpg2": "NOT_FOUND",
+      "notation": "NOT_FOUND",
+      "in-toto-verifier": "NOT_FOUND",
+      "slsa-verifier": "NOT_FOUND",
+      "syft": "NOT_FOUND",
+      "cyclonedx": "NOT_FOUND",
+      "bom": "NOT_FOUND",
+      "gitsign": "NOT_FOUND",
+      "crane": "NOT_FOUND"
+    },
+    "company_input_probe": {
+      "COMPANY_PUBLISHER_ID": "NOT_FOUND",
+      "COMPANY_SIGNER": "NOT_FOUND",
+      "COMPANY_REVOCATION_SERVICE": "NOT_FOUND",
+      "COMPANY_KMS_ENDPOINT": "NOT_FOUND",
+      "OIDC_ISSUER": "NOT_FOUND"
+    }
+  },
+  "gates": [
+    {
+      "id": "publisher_identity",
+      "local_status": "OWNER_IDENTITY_DECLARED_LOCAL",
+      "formal_status": "NOT_RUN_COMPANY_IDENTITY_UNAVAILABLE",
+      "remaining_gap": "公司批准 issuer/subject/key-id/certificate 或 KMS/OIDC identity",
+      "local_action_complete": "重新读取 owner public key 文件并核对 SHA-256"
+    },
+    {
+      "id": "signature",
+      "local_status": "OWNER_SELF_SIGNED_LOCAL / VERIFICATION_PASS",
+      "formal_status": "NOT_RUN_COMPANY_SIGNER_UNAVAILABLE",
+      "remaining_gap": "公司批准 KMS/HSM/keyless signer、signature bundle 和 transparency reference",
+      "local_action_complete": "使用 openssl pkeyutl 对既有 owner binding 做真实 detached signature 验证"
+    },
+    {
+      "id": "revocation",
+      "local_status": "NOT_RUN_NO_TRUST_SERVICE",
+      "formal_status": "NOT_RUN_NO_REVOCATION_SERVICE",
+      "remaining_gap": "证书/密钥/签名状态服务和查询回执",
+      "local_action_complete": "已探测本机工具和公司 trust-service 输入；没有服务时不作 non-revocation 推断"
+    },
+    {
+      "id": "independent_verification",
+      "local_status": "SELF_SEPARATED_REPLAY_PASS",
+      "formal_status": "NOT_RUN_SECOND_PERSON_UNAVAILABLE",
+      "remaining_gap": "公司独立身份或独立 CI job，不由同一 owner 写入 PASS",
+      "local_action_complete": "复用已有 same-owner separate staging receipt；不重标为独立公司验证"
+    },
+    {
+      "id": "final_attestation",
+      "local_status": "OWNER_ATTESTATION_DRAFT_NOT_FORMAL",
+      "formal_status": "FORMAL_EXCEPTION_REQUIRED",
+      "remaining_gap": "公司格式、公司签名、publisher evidence、revocation 和 independent verification 绑定",
+      "local_action_complete": "把现有 owner draft 和本 gap audit 绑定到固定 subject；不生成 formal attestation"
+    },
+    {
+      "id": "clean_machine",
+      "local_status": "OWNER_OPERATED_REPLAY_PASS",
+      "formal_status": "NOT_RUN_COMPANY_CLEAN_MACHINE",
+      "remaining_gap": "公司 clean machine 身份、正式 signature/revocation 验证和正式回执",
+      "local_action_complete": "保留已有 owner clean-machine replay；不把本机回放重标为公司 clean-machine"
+    }
+  ],
+  "local_completion": [
+    "owner binding、public key、detached signature 的文件存在性和摘要复核",
+    "openssl owner binding detached signature 验证",
+    "固定 Node v24.19.0、pnpm 11.28.2 和 OpenSSL 版本记录",
+    "发布工具、公司 identity/signer/revocation 输入的可用性探针",
+    "现有 owner-local、same-owner replay、clean-machine replay 的状态引用"
+  ],
+  "external_blockers": [
+    "company-approved publisher identity",
+    "company-approved signature or KMS/HSM/keyless signer",
+    "independent verifier identity or CI job",
+    "revocation service result",
+    "formal company final attestation",
+    "formal company clean-machine receipt"
+  ],
+  "constraints": [
+    "本回执只记录 owner-operated 本地 gap audit，不是公司发布授权。",
+    "OWNER_LOCAL_VERIFICATION_PASS 不等于 company signature 或 independent verification。",
+    "PENDING、NOT_RUN 和 FORMAL_EXCEPTION_REQUIRED 不得改写为 PASS。",
+    "M2-07、M2-08、M2-09 和 release_ready 按当前正式状态保持不变。"
+  ]
+}

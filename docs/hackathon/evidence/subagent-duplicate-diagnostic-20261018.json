@@ -1,0 +1,87 @@
+{
+  "schema_version": "shinemage-candidate-subagent-duplicate-diagnostic/v1",
+  "captured_at": "2026-10-18",
+  "candidate_id": "rc1-unified-owner-20261017-r1",
+  "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+  "error": "tool \"subagent\" is already registered in this scope",
+  "composition": {
+    "profile_bundles": [
+      "@deepseek-ai/dsh-base",
+      "@deepseek-ai/dsh-web-app",
+      "@shine-mage/dsh-shine-brand",
+      "@shine-mage/dsh-shine-waterfall",
+      "@shine-mage/dsh-shine-crowd-action",
+      "@shine-mage/dsh-shine-query",
+      "@shine-mage/dsh-shine-board",
+      "@shine-mage/dsh-shine-funnel",
+      "@shine-mage/dsh-analytics-workbench-b0"
+    ],
+    "active_profile_pack_link_roots": [
+      "IoIWPZ"
+    ],
+    "historical_pack_install_roots_count": 6,
+    "profile_links_count": 7
+  },
+  "duplicate_id_observation": {
+    "rows": [
+      {
+        "line": 296,
+        "id": "tool-subagent",
+        "disabled": true
+      },
+      {
+        "line": 302,
+        "id": "tool-subagent-fork",
+        "disabled": true
+      },
+      {
+        "line": 750,
+        "id": "tool-subagent",
+        "disabled": false
+      },
+      {
+        "line": 756,
+        "id": "tool-subagent-fork",
+        "disabled": false
+      },
+      {
+        "line": 914,
+        "id": "tool-subagent",
+        "disabled": false
+      },
+      {
+        "line": 920,
+        "id": "tool-subagent-fork",
+        "disabled": false
+      },
+      {
+        "line": 1177,
+        "id": "tool-subagent",
+        "disabled": false
+      },
+      {
+        "line": 1183,
+        "id": "tool-subagent-fork",
+        "disabled": false
+      }
+    ],
+    "counts": {
+      "tool-subagent": 4,
+      "tool-subagent-fork": 4
+    },
+    "enabled_rows": 6,
+    "disabled_rows": 2
+  },
+  "finding": "Pack roots are historical leftovers; profile links point to one install root. The duplicate is in repeated preset tool-subagent ids and occurs during restored session activation, not from active pack duplication.",
+  "minimum_candidate_fix": [
+    "instrument and serialize one restore per session id",
+    "for history-only recovery use a dedicated preset with subagent and subagent_fork disabled in every preset definition",
+    "rerun same-runtime stop/start with same session and board"
+  ],
+  "formal_status": {
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "m2_09": "NOT_RUN",
+    "release_ready": false
+  }
+}

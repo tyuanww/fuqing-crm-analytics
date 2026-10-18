@@ -1,0 +1,82 @@
+{
+  "schema_version": "shinemage-owner-operated-deployment/v1",
+  "mode": "OWNER_OPERATED_CANDIDATE",
+  "formal_company_evidence": false,
+  "release_ready": false,
+  "formal_status": {
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "m2_09": "NOT_RUN",
+    "release_ready": false
+  },
+  "candidate": {
+    "sdk": "@deepseek-ai/dsh@0.2.1-rc.1",
+    "upstream_sha": "1600d8a1e140dcde43a1a0941940a0480712c011",
+    "source_sha": "f4026619392c2909b449eb75be1081776b7c5507",
+    "artifact_sha256": "6d0c6fe8ad0c21797a27d6afc0cb69a022714ea0cd7331e4cba8b07b8ce19009",
+    "plugin_inputs_sha256": "7dc6298240bca26b6a97878e2b23ab010be26f1f83cb9576d8a491933ba504fc",
+    "profile_sha256": "e93e6f5e7975311f55bf1ee070b7aea009c938449c9a1542f3c2a503f40253fc"
+  },
+  "target": {
+    "address": "100.93.46.46",
+    "platform": "Linux x86_64 / WSL2",
+    "node": "v24.21.0",
+    "python3_14": "3.14.4",
+    "host_pnpm": "11.19.0",
+    "owner_pnpm": "11.28.2",
+    "candidate_port": 4329,
+    "page_http_port": 18150,
+    "live_port": 4328,
+    "service": "active",
+    "current_release": "/srv/shinemage/dsh/releases/dsh-0.20.0.0-r3"
+  },
+  "lifecycle": {
+    "candidate_initial_pid": 1005246,
+    "candidate_restart_pid": 1007025,
+    "page_initial_pid": 1005242,
+    "page_restart_pid": 1007021,
+    "live_pid_unchanged": 1933097,
+    "systemd_restarted": false,
+    "current_symlink_changed": false,
+    "production_switched": false,
+    "restart_readback": "PASS"
+  },
+  "browser": {
+    "pre_restart": "PASS",
+    "post_restart": "PASS",
+    "title": "DeepSeek Harness",
+    "console_errors": 0,
+    "console_warnings": 0,
+    "contains_real_data": false,
+    "model_calls": 0,
+    "post_restart_state": "WAITING_FOR_LOGIN / visible candidate page"
+  },
+  "page_http": {
+    "binding_status_code": 200,
+    "binding_state": "UNBOUND_SAMPLE",
+    "verified": false
+  },
+  "constraints": [
+    "candidate only; live 4328/4332/4336 untouched",
+    "systemd service not restarted",
+    "current symlink not changed",
+    "no real credentials, customer data or model call",
+    "host pnpm 11.19.0 was not used; exact 11.28.2 was installed in candidate temp root"
+  ],
+  "evidence": {
+    "local_receipt_sha256": "da90d5f2b50175341283f5c2244ddc973b837ecbf460a7926a1916b2a5fcfd32",
+    "target_run_root": "/tmp/shinemage-owner-rc1-target-20261017-r1",
+    "target_owner_receipt": "/tmp/shinemage-owner-rc1-target-20261017-r1/owner-deployment-receipt.json",
+    "target_host_log": "/tmp/shinemage-owner-rc1-target-20261017-r1/host.log",
+    "target_browser": "real headed Chrome via loopback SSH forwards 4329 and 18150"
+  },
+  "boundaries": {
+    "systemd_service_restarted": false,
+    "current_symlink_changed": false,
+    "live_port_modified": false,
+    "real_data_read": false,
+    "real_model_called": false,
+    "formal_company_evidence": false,
+    "release_ready": false
+  }
+}

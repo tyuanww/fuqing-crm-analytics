@@ -1,0 +1,153 @@
+{
+  "origin": "http://127.0.0.1:14327",
+  "session_id": "session-57b79737-3cfe-4978-b696-1a6179322469",
+  "seed_status": 200,
+  "seed": {
+    "seeded": true,
+    "restored": false,
+    "modelCalls": 0,
+    "containsRealData": false,
+    "derived": [
+      {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool-call",
+            "id": "rc1-unified-board-call",
+            "name": "competition_board_generate",
+            "arguments": "{\"title\":\"rc1 unified synthetic restart board\",\"blocks\":[{\"block_id\":\"rc1_unified_note\",\"kind\":\"TEXT\"}]}"
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "toolCallId": "rc1-unified-board-call",
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"status\":\"PREVIEW_READY\",\"title\":\"rc1 unified synthetic restart board\"}"
+          }
+        ]
+      }
+    ],
+    "sessionId": "session-57b79737-3cfe-4978-b696-1a6179322469",
+    "path": "/tmp/shinemage-owner-rc1-unified-20261017-r1/runtime-browser-unified-r5/workspace/rc1-unified-history.html",
+    "sha256": "7489f35e529a0fd117378419c46d1014c2717434b259f4c02f92b28bc5d719bf"
+  },
+  "boards": {
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "board_id": "rc1_unified_board",
+          "session_id": "session-57b79737-3cfe-4978-b696-1a6179322469",
+          "title": "rc1 unified synthetic restart board",
+          "version": 1
+        }
+      ]
+    }
+  },
+  "detail": {
+    "status": 200,
+    "body": {
+      "spec": {
+        "schema_version": "board-spec/v1",
+        "board_id": "rc1_unified_board",
+        "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+        "version": 1,
+        "title": "rc1 unified synthetic restart board",
+        "session_id": "session-57b79737-3cfe-4978-b696-1a6179322469",
+        "blocks": [
+          {
+            "block_id": "rc1_unified_note",
+            "title": "合成说明",
+            "kind": "TEXT",
+            "library_version": "board-components/v1",
+            "props": {
+              "content": "rc1 unified candidate synthetic board; source=85a92e05880d1b37b6d01491b7713d3cb23bf770; no model or real business data."
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "w": 6,
+              "h": 5
+            },
+            "source_result_id": null
+          }
+        ]
+      },
+      "facts_by_result_id": {}
+    }
+  },
+  "previews": {
+    "status": 200,
+    "body": {
+      "preview_id": "rc1_unified_preview",
+      "status": "APPLIED",
+      "operation": "GENERATE",
+      "base_version": 0,
+      "expires_at_ms": 1792254773874,
+      "snapshot": {
+        "spec": {
+          "schema_version": "board-spec/v1",
+          "board_id": "rc1_unified_board",
+          "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+          "version": 1,
+          "title": "rc1 unified synthetic restart board",
+          "session_id": "session-57b79737-3cfe-4978-b696-1a6179322469",
+          "blocks": [
+            {
+              "block_id": "rc1_unified_note",
+              "title": "合成说明",
+              "kind": "TEXT",
+              "library_version": "board-components/v1",
+              "props": {
+                "content": "rc1 unified candidate synthetic board; source=85a92e05880d1b37b6d01491b7713d3cb23bf770; no model or real business data."
+              },
+              "layout": {
+                "x": 0,
+                "y": 0,
+                "w": 6,
+                "h": 5
+              },
+              "source_result_id": null
+            }
+          ]
+        },
+        "facts_by_result_id": {}
+      }
+    }
+  },
+  "confirmed": {
+    "status": 200,
+    "body": {
+      "spec": {
+        "schema_version": "board-spec/v1",
+        "board_id": "rc1_unified_board",
+        "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+        "version": 1,
+        "title": "rc1 unified synthetic restart board",
+        "session_id": "session-57b79737-3cfe-4978-b696-1a6179322469",
+        "blocks": [
+          {
+            "block_id": "rc1_unified_note",
+            "title": "合成说明",
+            "kind": "TEXT",
+            "library_version": "board-components/v1",
+            "props": {
+              "content": "rc1 unified candidate synthetic board; source=85a92e05880d1b37b6d01491b7713d3cb23bf770; no model or real business data."
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "w": 6,
+              "h": 5
+            },
+            "source_result_id": null
+          }
+        ]
+      },
+      "facts_by_result_id": {}
+    }
+  }
+}

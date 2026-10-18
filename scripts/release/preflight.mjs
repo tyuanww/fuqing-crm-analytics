@@ -152,7 +152,7 @@ try {
     // The historical stage name stays in the preflight contract. Runtime bytes
     // are built by the independent author CI; this stage revalidates fixed packs.
     const packs = await loadReleasePacks({ root, inputsPath: process.env.DSH_PROFILE_PACK_INPUTS,
-      manifestPath: process.env.DSH_PROFILE_MANIFEST });
+      manifestPath: process.env.DSH_PROFILE_MANIFEST, requireGeneratedProvenance: true });
     assert.equal(packs.inputsSha256, readiness.pluginPacks.inputsSha256, 'PREFLIGHT_PACK_INPUTS_CHANGED');
     console.log(`DSH_PREFLIGHT_PLUGIN_INPUTS mode=fixed-pack count=${packs.plugins.length} digest=${packs.inputsSha256}`);
   });

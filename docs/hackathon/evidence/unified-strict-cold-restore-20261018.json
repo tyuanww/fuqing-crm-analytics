@@ -1,0 +1,89 @@
+{
+  "schema_version": "dsh-rc1-unified-strict-cold-restore/v1",
+  "captured_at": "2026-10-18",
+  "scope": "OWNER_ONLY_CANDIDATE_SYNTHETIC",
+  "candidate": {
+    "candidate_id": "rc1-unified-owner-20261017-r1",
+    "runtime": "runtime-browser-unified-r5",
+    "web_port": 14327,
+    "page_http_port": 18159,
+    "upstream_sha": "1600d8a1e140dcde43a1a0941940a0480712c011",
+    "source_sha": "85a92e05880d1b37b6d01491b7713d3cb23bf770",
+    "history_fixture_sha256": "a01f0eb85590699c70fb6bb5b0b70b138f0ca4f2aae1fe29511d40776c6f6b6c",
+    "history_content_sha256": "7489f35e529a0fd117378419c46d1014c2717434b259f4c02f92b28bc5d719bf",
+    "resume_patch_sha256": "6578f4bc6599e3f0149bc0ffa96deedb0b319ed1f94d61ef282a17b13378311"
+  },
+  "session": {
+    "session_id": "session-115d906d-8104-48b5-9d8f-e4ad20a3ae78",
+    "workspace_id": "b81f3891-5b9c-49ce-a77a-d4c0efc2fecf",
+    "workspace_path": "/tmp/shinemage-owner-rc1-unified-20261017-r1/runtime-browser-unified-r5/workspace/strict-cold-2",
+    "content_path": "/tmp/shinemage-owner-rc1-unified-20261017-r1/runtime-browser-unified-r5/workspace/strict-cold-2/rc1-unified-history.html",
+    "contains_real_data": false,
+    "model_calls": 0
+  },
+  "before_restart": {
+    "seed_status": 200,
+    "restored": false,
+    "supervisor_pid": 1174612,
+    "child_pid": 1174936,
+    "same_runtime": true
+  },
+  "owned_restart": {
+    "stop_http_status": 200,
+    "fresh": false,
+    "supervisor_pid_after": 1175791,
+    "child_pid_after": 1176029,
+    "same_runtime": true,
+    "same_session": true
+  },
+  "after_restart": {
+    "first_seed_status": 200,
+    "restored": true,
+    "model_calls": 0,
+    "contains_real_data": false,
+    "history_sha256": "7489f35e529a0fd117378419c46d1014c2717434b259f4c02f92b28bc5d719bf",
+    "derived_roles": [
+      "assistant",
+      "tool"
+    ],
+    "derived_tool_name": "competition_board_generate",
+    "session_list_agent_available": true,
+    "session_list_blank": false,
+    "session_list_as_of_seq": 12
+  },
+  "raw_evidence": {
+    "process_scope_note": "Raw ps captures also contain unchanged live 4328/4329 rows for context; ownership and restart assertions use only candidate PIDs 1174612/1174936/1175791/1176029.",
+    "pre_process": {
+      "path": "unified-strict-cold-20261018/pre-process.txt",
+      "sha256": "79d7e4c6239330e2b2d1cb864137b3073937847c4048f521a3d7efc38612d586"
+    },
+    "post_process": {
+      "path": "unified-strict-cold-20261018/post-process.txt",
+      "sha256": "8f408ae542c1c0e8d1287a8254944e668d8fb39eb12dfbe8a63bb899bf8ccc90"
+    },
+    "post_seed": {
+      "path": "unified-strict-cold-20261018/post-seed.json",
+      "sha256": "4a908807febaf9a0d1122584d85c3d53a9b7e5a9d655ce302a0a1ec4cee3244d"
+    },
+    "post_session_list": {
+      "path": "unified-strict-cold-20261018/post-session-list.json",
+      "sha256": "c5813c389b416463513383311f46b80aa0b2406317731c8a84025df73780295c"
+    }
+  },
+  "cleanup": {
+    "owned_web_14327": "CLOSED",
+    "owned_page_http_18159": "CLOSED",
+    "live_4328": "LEFT_RUNNING",
+    "live_4329": "LEFT_RUNNING",
+    "evidence_path": "unified-strict-cold-cleanup-20261018.txt",
+    "evidence_sha256": "841b51c241865c3d0a02246cf5e39bad51825e395ab2c2c3777e7aea23137fda"
+  },
+  "formal_boundary": {
+    "synthetic_only": true,
+    "upstream_modified": false,
+    "M2-07": "BLOCKED",
+    "M2-08": "NOT_RUN",
+    "M2-09": "NOT_RUN",
+    "release_ready": false
+  }
+}
