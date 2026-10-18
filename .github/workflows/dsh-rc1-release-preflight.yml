@@ -15,12 +15,20 @@ on:
         description: HTTPS URL for the reviewed rc1 subject-set archive
         required: true
         type: string
+      subject_archive_sha256:
+        description: SHA-256 of the reviewed rc1 subject-set archive
+        required: true
+        type: string
       source_sha:
         description: rc1 subject identity from the source and pack receipts
         required: true
         type: string
       runtime_bundle_url:
         description: HTTPS URL for the rc1 runtime bundle
+        required: true
+        type: string
+      runtime_bundle_sha256:
+        description: SHA-256 of the rc1 runtime bundle
         required: true
         type: string
       runtime_provenance_url:
@@ -51,25 +59,36 @@ jobs:
           SOURCE_URL: ${{ inputs.source_archive_url }}
           SOURCE_SHA256: ${{ inputs.source_archive_sha256 }}
           SUBJECT_URL: ${{ inputs.subject_archive_url }}
+          SUBJECT_SHA256: ${{ inputs.subject_archive_sha256 }}
           RUNTIME_URL: ${{ inputs.runtime_bundle_url }}
+          RUNTIME_SHA256: ${{ inputs.runtime_bundle_sha256 }}
           RUNTIME_PROVENANCE_URL: ${{ inputs.runtime_provenance_url }}
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/rc1/source" "$RUNNER_TEMP/rc1/subject" "$RUNNER_TEMP/rc1/runtime"
+          mkdir -p "$RUNNER_TEMP/rc1/source" "$RUNNER_TEMP/rc1/runtime" "$RUNNER_TEMP/rc1/result"
           curl --fail --location --retry 3 --retry-all-errors "$SOURCE_URL" --output "$RUNNER_TEMP/rc1/source/source.tar.zst"
-          curl --fail --location --retry 3 --retry-all-errors "$SUBJECT_URL" --output "$RUNNER_TEMP/rc1/subject/subject.tar.zst"
+          curl --fail --location --retry 3 --retry-all-errors "$SUBJECT_URL" --output "$RUNNER_TEMP/rc1/subject.tar.zst"
           curl --fail --location --retry 3 --retry-all-errors "$RUNTIME_URL" --output "$RUNNER_TEMP/rc1/runtime/runtime.tar.zst"
           curl --fail --location --retry 3 --retry-all-errors "$RUNTIME_PROVENANCE_URL" --output "$RUNNER_TEMP/rc1/runtime/runtime-provenance.json"
           test "$(sha256sum "$RUNNER_TEMP/rc1/source/source.tar.zst" | awk '{print $1}')" = "$SOURCE_SHA256"
-          tar --zstd -xf "$RUNNER_TEMP/rc1/subject/subject.tar.zst" -C "$RUNNER_TEMP/rc1/subject"
+          test "$(sha256sum "$RUNNER_TEMP/rc1/subject.tar.zst" | awk '{print $1}')" = "$SUBJECT_SHA256"
+          test "$(sha256sum "$RUNNER_TEMP/rc1/runtime/runtime.tar.zst" | awk '{print $1}')" = "$RUNTIME_SHA256"
+          python3 scripts/release/secure-unpack.py \
+            "$RUNNER_TEMP/rc1/subject.tar.zst" \
+            "$RUNNER_TEMP/rc1/subject" \
+            --max-entries 20000 \
+            --max-bytes 268435456
       - name: Run rc1 fail-closed preflight
         run: |
           set -euo pipefail
           node scripts/release/rc1-preflight.mjs \
             --source-archive "$RUNNER_TEMP/rc1/source/source.tar.zst" \
             --subject-root "$RUNNER_TEMP/rc1/subject/final-subject-set" \
+            --subject-archive "$RUNNER_TEMP/rc1/subject.tar.zst" \
+            --subject-archive-sha256 "${{ inputs.subject_archive_sha256 }}" \
             --source-sha "${{ inputs.source_sha }}" \
             --runtime-bundle "$RUNNER_TEMP/rc1/runtime/runtime.tar.zst" \
+            --runtime-bundle-sha256 "${{ inputs.runtime_bundle_sha256 }}" \
             --runtime-provenance "$RUNNER_TEMP/rc1/runtime/runtime-provenance.json" \
             --output-dir "$RUNNER_TEMP/rc1/result"
       - name: Upload rc1 preflight receipt
