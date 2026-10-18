@@ -167,6 +167,16 @@ test('public save HTTP rejects equivalent receipt and inspect contract bypasses'
   await rejectInspect('freshness state is not eligible', value => { value.provenance.freshness.freshness_state = 'STALE'; }, 'PUBLIC_SAVE_PROVENANCE');
 });
 
+test('public save HTTP rejects a session or call identity mismatch', async () => {
+  for (const key of ['session_id', 'call_id']) {
+    const target = { ...fixture.target, [key]: `${fixture.target[key]}-other` };
+    await assert.rejects(accept(async operation => {
+      if (operation === 'status') return statusBody();
+      throw new Error(`unexpected ${operation}`);
+    }, { target }), /PUBLIC_SAVE_IDENTITY/);
+  }
+});
+
 test('public save HTTP rejects weakened identity, permission, evidence and replay', async () => {
   let calls = 0;
   const counting = async () => { calls += 1; return statusBody(); };
