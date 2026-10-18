@@ -34,6 +34,13 @@ test('a column past the sealed line is rejected and still not promoted', () => {
   assert.equal(result.reason, 'SOURCEMAP_DOES_NOT_FIT_GENERATED_FILE');
 });
 
+test('a VLQ value that would wrap a 32-bit shift is rejected instead of becoming column zero', () => {
+  const result = inspectEmbeddedSourceMap({ generated: 'x', map: map('ggggggE') });
+  assert.equal(result.positions, 'REJECTED');
+  assert.equal(result.counts.outside, 1);
+  assert.equal(result.inline_function_bytes, 'NOT_VERIFIED');
+});
+
 test('an end-of-line column fits, while a real directive does not prove bytes', () => {
   const fitting = inspectEmbeddedSourceMap({ generated: 'abcdefghijklmnop', map: map('gB') });
   assert.equal(fitting.positions, 'CONSISTENT');
