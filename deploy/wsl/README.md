@@ -1,6 +1,6 @@
 # 杭州 WSL 运行层
 
-这套文件只描述单台 Windows + WSL 主机的运行层。它不迁移数据、不保存密钥、不启动服务，也不替代 DSH 上游。
+这套文件只描述单台 Windows + WSL 主机的运行层。它不迁移数据、不保存密钥、不启动服务，也不替代 DSH 上游。本文的接收和激活示例属于正式 rc2 artifact 线。当前杭州 owner-operated rc1 的 `current`、runtime、端口和回退目标以 [STATUS.md](../../STATUS.md) 与 [merged-main target cutover](../../docs/hackathon/evidence/engineering-owner-operated-rc1-main-b789-target-cutover-20261018.md) 为准。
 
 ## 目录约定
 

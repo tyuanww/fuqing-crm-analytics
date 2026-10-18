@@ -1,11 +1,11 @@
 # 交接说明（短表）
 
-> **最后更新**: 2026-10-18。当前产品 VERSION、公开 `main`、DSH pin 和未关闭门禁只看 [STATUS.md](STATUS.md)。内部 owner-operated rc1 已在杭州完成 `dsh-0.2.1-rc.1-owner-r9-20261018` 的 side-by-side 切换；这不等于正式 release，M2-07 仍 BLOCKED、M2-08/M2-09 仍 NOT_RUN、`release_ready=false`。本地历史候选已完成归档和清理，恢复清单见[本次清理证据](docs/hackathon/evidence/shinemage-local-cleanup-20261010.md)。下方入口、代码归属和运行路径仍是带日期的历史快照，当前现场事实以 STATUS 的 2026-10-18 记录为准。
+> **最后更新**: 2026-10-18。当前产品 VERSION、公开 `main`、DSH pin 和未关闭门禁只看 [STATUS.md](STATUS.md)。内部 owner-operated rc1 已在杭州完成 `dsh-0.2.1-rc.1-owner-main-b78972a0-20261018` 的 side-by-side 切换；r9 保留为回退目标。这不等于正式 release，M2-07 仍 BLOCKED、M2-08/M2-09 仍 NOT_RUN、`release_ready=false`。本地历史候选已完成归档和清理，恢复清单见[本次清理证据](docs/hackathon/evidence/shinemage-local-cleanup-20261010.md)。下方入口、代码归属和运行路径仍是带日期的历史快照，当前现场事实以 STATUS 的 2026-10-18 记录为准。
 > 细节以代码与下列 SSOT 为准，**不要**在本文件堆 sprint 日记。
 
 ## 历史运行入口快照（2026-09-29）
 
-以下表格只描述 2026-09-29 当时的入口和运行归属；当前 Git、版本、候选和生产边界以 [STATUS.md](STATUS.md) 的带日期记录为准。
+以下表格只描述 2026-09-29 当时的入口和运行归属。表中的 `6677` 不代表当前 owner-operated b789 入口。当前 Git、版本、候选和生产边界以 [STATUS.md](STATUS.md) 的带日期记录为准。
 
 | 入口 | 结果/职责 |
 |---|---|
@@ -42,7 +42,7 @@
 
 - 后端 FastAPI · 前端 Vue3 · 分析库 DuckDB（`data/processed/fuqing_crm.duckdb`，本地大文件，**不进 git**）
 - 版本号：根目录 `VERSION` + `CHANGELOG.md`
-- 开发机按本地测试脚本运行服务；杭州生产实际监听：DSH `:6677`、页面 HTTP `:18091`、WeKnora 前端/API `:18090/:18092`、CRM `:18093/:18094`，均只绑定 WSL loopback，由 Cloudflare Tunnel 代理公开入口。
+- 开发机按本地测试脚本运行服务。杭州生产历史监听快照为 DSH `:6677`、页面 HTTP `:18091`、WeKnora 前端/API `:18090/:18092`、CRM `:18093/:18094`，均只绑定 WSL loopback，由 Cloudflare Tunnel 代理公开入口。当前 DSH owner-operated 端口和 runtime 只看 [STATUS.md](STATUS.md)。
 
 ## 启动（开发机）
 

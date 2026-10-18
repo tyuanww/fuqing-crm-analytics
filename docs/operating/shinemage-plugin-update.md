@@ -31,6 +31,31 @@ board-components 的独立本地作者仓已提交为 `3855db80` 并完成真实
 
 这份指南描述一次普通的单插件更新：插件作者在自己的仓库修改、测试并生成带摘要的包，主仓只更新需要变化的组合输入。完成后，你得到的是一个可审查的插件 PR；它不会自动变成 DSH 正式 candidate，也不会触发生产部署。
 
+## 内部 owner-operated 更新入口
+
+当前杭州 WSL 使用 rc1 owner bundle。单插件更新不重建 Harness，但必须从新 pack 身份开始。输入是插件 clean commit、builder receipt、pack manifest、tarball、profile-pack inputs 和目标回退版本。输出是新的 candidate release、target receipt 和 rollback pointer。
+
+执行顺序固定为：
+
+1. 在插件仓固定 clean commit、Node `24.19.0` 和 pnpm `11.28.2`，运行该仓的 frozen install、build、test 和 verify-pack。
+2. 用 `scripts/release/plugin-pack.mjs` 生成 `dsh-generated-bytes/v1` pack。builder receipt、source SHA、generated tree digest 和 tarball SHA 必须来自同一构建目录。
+3. 只在组合选择变化时更新 profile。插件字节变化时更新 profile-pack inputs 和 candidate receipt，不复用旧 journal。
+4. 在目标机写入新的 side-by-side release。先运行 `dsh-dev check`，再运行目标 receipt 工具：
+
+```bash
+node scripts/release/owner-target-receipt.mjs \
+  --root /srv/shinemage/dsh \
+  --tag dsh-<owner-tag> \
+  --runtime /srv/shinemage/dsh/runtime-<owner-tag> \
+  --service shinemage-dsh.service \
+  --output /srv/shinemage/dsh/evidence/owner-target-receipt.json
+```
+
+5. 旁路检查 HTTP、headed browser、stop/start 和 rollback。检查失败时保留旧 current，不修改正式门禁状态。
+6. 通过后才切换 current。切换后再次运行目标 receipt。目标 receipt 仍标记 `OWNER_LOCAL_ONLY`，不等于公司正式 release。
+
+普通 content pack、profile-pack inputs、owner target receipt 和正式 release asset 是四种不同身份。不能用其中一个替代另一个。
+
 正式 preflight/release 现在消费独立正式包，所选 profile 必须与外部输入同字节；装配不会读取业务插件作者源码、构建它们或安装 peer。当前七包已完成源码拒读装配与运行文件核对，整条 preflight 仍未跑。单独插件输入锁更新继续选择适用 B0，但不自动执行整套 DSH prepare/audit；DSH 升级另行推进。installed-kit 和历史源码夹具仍开放，旧副本不删；实际证据及未执行边界见[当前包装配记录](../hackathon/evidence/shinemage-formal-preflight-pack-assembly-20261011.md)。
 
 上一轮执行记录（Workbench core 归属迁移；其完整 B0 只覆盖当时字节）：

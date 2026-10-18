@@ -1,0 +1,70 @@
+{
+  "schema_version": "engineering-owner-operated-target-cutover/v1",
+  "status": "PASS_OWNER_OPERATED",
+  "recorded_at": "2026-10-18",
+  "scope": "杭州 WSL owner-operated internal deployment",
+  "source": {
+    "merge_commit": "b78972a09ef61e6511a51ef9aa758207bc091734",
+    "tag": "dsh-0.2.1-rc.1-owner-main-b78972a0-20261018",
+    "release_root": "/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-owner-main-b78972a0-20261018",
+    "runtime": "/srv/shinemage/dsh/runtime-rc1-owner-main-b78972a0-20261018"
+  },
+  "target": {
+    "host": "DESKTOP-FAEJK8S",
+    "platform": "WSL2",
+    "current": "/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-owner-main-b78972a0-20261018",
+    "web_port": 4328,
+    "page_http_port": 18091,
+    "service": "active",
+    "promo_helper": "active"
+  },
+  "checks": {
+    "side_by_side": "PASS",
+    "http": {
+      "web_root": 401,
+      "page_http_root": 404
+    },
+    "headed_browser": {
+      "status": "PASS",
+      "installed_plugin_count": 7,
+      "cockpit_heading": "项目驾驶舱",
+      "artifact_inbox": "产物收件箱 · 待处理 0"
+    },
+    "stop_start": "PASS",
+    "rollback": {
+      "status": "PASS",
+      "rollback_target": "/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-owner-r9-20261018",
+      "rollback_http": {
+        "web_root": 401,
+        "page_http_root": 404
+      },
+      "rollback_headed_browser_installed_plugin_count": 7,
+      "reactivated_current": "/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-owner-main-b78972a0-20261018"
+    }
+  },
+  "evidence_logs": [
+    "/srv/shinemage/dsh/evidence/owner-main-b78972a0-activate-20261018.log",
+    "/srv/shinemage/dsh/evidence/owner-main-b78972a0-current-restart-20261018.log",
+    "/srv/shinemage/dsh/evidence/owner-main-b78972a0-rollback-drill-20261018.log",
+    "/srv/shinemage/dsh/evidence/owner-main-b78972a0-reactivate-20261018.log",
+    "/srv/shinemage/dsh/evidence/owner-main-b78972a0-target-receipt-20261018.json"
+  ],
+  "target_receipt": {
+    "path": "engineering-owner-operated-rc1-main-b789-target-receipt-20261018.json",
+    "runtime_tree_sha256": "0aefeb678849647ac98127f45a918aa0cbfdbaff7a03fc3ac8d0cf05eda46b24",
+    "runtime_tree_files": 29541,
+    "runtime_tree_bytes": 760816873,
+    "release_manifest": "MISSING",
+    "sha256sums": "MISSING",
+    "source_attestation": "MISSING",
+    "runtime_attestation": "MISSING"
+  },
+  "formal_status": {
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "m2_09": "NOT_RUN",
+    "release_ready": false
+  },
+  "publication": "OWNER_LOCAL_ONLY",
+  "github_release": "NOT_CREATED"
+}

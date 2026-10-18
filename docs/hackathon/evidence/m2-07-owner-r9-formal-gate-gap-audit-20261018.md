@@ -2,6 +2,8 @@
 
 本次按正式 release 顺序重新盘点当前 r9 subject。已执行能在 owner-operated 环境完成的本地核验，并重新探测公司身份、签名、撤销和独立 CI 输入。正式状态没有升级。
 
+> 事实纠偏（2026-10-18）：PR #139 合并后，`dsh-rc1-release-preflight.yml` 已存在于默认 `origin/main`。旧的 404 记录已失效。`gh run list --workflow dsh-rc1-release-preflight.yml --limit 10` 当前没有返回 run，因此不能把 workflow 存在写成正式执行通过。
+
 ## 当前状态
 
 - `M2-07=BLOCKED`
@@ -27,7 +29,7 @@
 
 1. 本机没有 `cosign`、`gpg`、`notation`、`in-toto-verifier`、`slsa-verifier`、`syft`、CycloneDX CLI、`gitsign` 或 `crane`。
 2. 环境没有 `COMPANY_*`、`OIDC_*`、`KMS_*`、`SIGN_*`、`REVOCATION_*` 或 `ATTEST_*` 输入。
-3. 远端默认分支没有 `dsh-rc1-release-preflight.yml`。真实命令 `gh run list --workflow dsh-rc1-release-preflight.yml --limit 10` 返回 `HTTP 404: workflow not found on the default branch`。
+3. 默认分支已经包含 `dsh-rc1-release-preflight.yml`，origin/main blob 为 `75ac9dbd3c3ce2f45169a18b01674f475a668735`；当前 `gh run list --workflow dsh-rc1-release-preflight.yml --limit 10` 没有返回 run，正式独立 CI 回执仍缺失。
 4. 远端当前可见的 release workflow 仍是旧 rc2 线：`DSH rc2 release evidence`、`DSH rc2 release preflight` 和 `Publish DSH rc2 release assets`。
 5. `gh` 登录只证明 GitHub 访问，不证明公司 publisher identity，也不提供 revocation 或第二人核验。
 

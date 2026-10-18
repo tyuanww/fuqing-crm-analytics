@@ -8,6 +8,8 @@ import { promisify } from 'node:util';
 import { dirname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { loadProfilePacks } from './profile-packs.mjs';
+import baseToolchain from '../../dsh-plugins/plugin-kit/toolchain.json' with { type: 'json' };
 
 const exec = promisify(execFile);
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
@@ -26,9 +28,8 @@ function option(name, required = true, asPath = true) {
 }
 
 async function extract(archive, destination) {
-  await mkdir(destination, { recursive: true, mode: 0o700 });
-  const args = archive.endsWith('.tar.zst') ? ['--zstd', '-xf', archive, '-C', destination] : ['-xzf', archive, '-C', destination];
-  await exec('tar', args, { maxBuffer: 1024 * 1024 });
+  await exec('python3', [join(root, 'scripts/release/secure-unpack.py'), archive, destination,
+    '--max-entries', '200000', '--max-bytes', String(1024 * 1024 * 1024)], { maxBuffer: 1024 * 1024 });
   const entries = await readdir(destination, { withFileTypes: true });
   const roots = entries.filter(entry => entry.isDirectory()).map(entry => join(destination, entry.name));
   assert.equal(roots.length, 1, 'RC1_SOURCE_ROOT_AMBIGUOUS');
@@ -60,21 +61,34 @@ async function countLfsPointers(directory) {
 
 async function packChecks(subjectRoot) {
   const manifests = [];
+  const toolchain = {
+    ...baseToolchain,
+    sdk_version: lane.sdk,
+    upstream_sha: lane.upstream_sha,
+    upstream_pnpm: lane.upstream_pnpm,
+    pnpm: lane.plugin_pnpm,
+  };
   for (const profile of ['page', 'crm']) {
     const input = JSON.parse(await readFile(join(subjectRoot, profile, 'shinemage-release-pack-inputs.json'), 'utf8'));
-    for (const row of input.plugins) {
-      const manifestPath = join(subjectRoot, profile, row.manifest);
-      const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
-      const archive = join(subjectRoot, profile, 'packs', row.manifest.split('/')[1], manifest.tarball.name);
-      const archiveBytes = await readFile(archive);
-      const provenance = manifest.generated_bytes_provenance;
+    const packs = await loadProfilePacks({
+      inputsPath: join(subjectRoot, profile, 'shinemage-release-pack-inputs.json'),
+      toolchain,
+      requireGeneratedProvenance: true,
+    });
+    for (const item of packs.plugins) {
+      const receipt = item.receipt;
+      const provenance = receipt.generated_bytes_provenance;
       manifests.push({
-        id: row.id,
+        id: item.id,
         profile,
-        manifest_sha256: sha256(await readFile(manifestPath)),
-        pack_sha256: sha256(archiveBytes),
-        dsh_pin: manifest.dsh_pin,
-        source_sha: manifest.source_sha,
+        profile_sha256: packs.digest,
+        inputs_sha256: packs.inputsSha256,
+        manifest_sha256: item.manifestSha256,
+        pack_sha256: receipt.tarball.sha256,
+        pack_bytes: receipt.tarball.bytes,
+        package_version: receipt.package_version,
+        dsh_pin: receipt.dsh_pin,
+        source_sha: receipt.source_sha,
         provenance_schema: provenance?.schema_version,
         provenance_status: provenance?.status,
         builder_node: provenance?.builder?.node,
@@ -87,8 +101,11 @@ async function packChecks(subjectRoot) {
 
 const sourceArchive = option('--source-archive');
 const subjectRoot = option('--subject-root');
+const subjectArchive = option('--subject-archive', false);
+const subjectArchiveSha = option('--subject-archive-sha256', false, false);
 const outputDir = option('--output-dir');
 const runtimeBundle = option('--runtime-bundle', false);
+const runtimeBundleSha = option('--runtime-bundle-sha256', false, false);
 const runtimeProvenance = option('--runtime-provenance', false);
 const releaseDir = option('--release-dir', false);
 const sourceSha = option('--source-sha', false, false);
@@ -99,6 +116,10 @@ const sourceArchiveSha = sha256(sourceBytes);
 const failures = [];
 if (sourceSha && sourceSha !== lane.source_identity.source_sha) failures.push('RC1_SOURCE_SHA_MISMATCH');
 if (sourceArchiveSha !== lane.source_identity.archive_sha256) failures.push('RC1_SOURCE_ARCHIVE_DIGEST_MISMATCH');
+if (subjectArchive || subjectArchiveSha) {
+  if (!subjectArchive || !subjectArchiveSha) failures.push('RC1_SUBJECT_ARCHIVE_INPUTS_INCOMPLETE');
+  else if (sha256(await readFile(subjectArchive)) !== subjectArchiveSha) failures.push('RC1_SUBJECT_ARCHIVE_DIGEST_MISMATCH');
+}
 
 const extraction = await mkdtemp(join(tmpdir(), 'dsh-rc1-preflight-'));
 try {
@@ -120,6 +141,7 @@ try {
     if (!runtimeBundle || !runtimeProvenance) failures.push('RC1_RUNTIME_INPUTS_INCOMPLETE');
     else {
       const runtimeBytes = await readFile(runtimeBundle);
+      if (runtimeBundleSha && sha256(runtimeBytes) !== runtimeBundleSha) failures.push('RC1_RUNTIME_BUNDLE_INPUT_DIGEST_MISMATCH');
       const proof = JSON.parse(await readFile(runtimeProvenance, 'utf8'));
       runtime = { status: proof.status, bundle_sha256: sha256(runtimeBytes), proof_archive_sha256: proof.archive?.sha256, upstream_sha: proof.upstream_sha, builder: proof.builder };
       if (proof.schema_version !== 'dsh-generated-bytes/v1' || proof.status !== 'PASS') failures.push('RC1_RUNTIME_PROVENANCE_INVALID');
@@ -153,6 +175,7 @@ try {
     schema_version: 'shinemage-rc1-preflight/v1',
     status: failures.length ? 'BLOCKED' : 'PASS',
     source: { kind: lane.source_identity.kind, source_sha: lane.source_identity.source_sha, archive: { path: sourceArchive, bytes: sourceBytes.length, sha256: sourceArchiveSha }, lfs_pointer_count: lfs.count, lfs_pointer_paths: lfs.paths.slice(0, 128), tree_sha256: lane.source_identity.tree_sha256 },
+    subject_archive: subjectArchive ? { path: subjectArchive, sha256: subjectArchiveSha } : { status: 'NOT_PROVIDED' },
     toolchain: { sdk: lane.sdk, upstream_tag: lane.upstream_tag, upstream_sha: lane.upstream_sha, cordis: lane.cordis, node: lane.node, plugin_pnpm: lane.plugin_pnpm },
     packs: { count: packs.length, status: failures.some(value => value.startsWith('RC1_PACK_')) ? 'BLOCKED' : 'PASS', items: packs },
     runtime,
