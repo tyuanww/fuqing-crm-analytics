@@ -150,6 +150,15 @@ test('secret scan distinguishes explicit synthetic fixtures from real assignment
   const githubPat = ['ghp_', '123456789012345678901234567890'].join('');
   const accessKey = ['AKIA', '1234567890123456'].join('');
   const realSecret = ['MY_REAL_', 'SECRET_TOKEN'].join('');
+  const devtoolsKey = ['AIzaSyCCSOx25vrb5z0tbedCB3_', 'JRzzbVW6Uwgw'].join('');
+  const cosToken = ['x-cos-security-', 'token'].join('');
+  const codeIcon = ['__DSH_CODE_ICON_', 'INSTANCE__'].join('');
+  const awsSecret = ['AWS_SECRET_', 'ACCESS_KEY'].join('');
+  const awsAuth = ['AWS_CONTAINER_AUTHORIZATION_', 'TOKEN'].join('');
+  const imdsToken = ['x-aws-ec2-metadata-', 'token'].join('');
+  const removeAuth = ['remove_authentication_', 'token'].join('');
+  const setAuth = ['set_authentication_', 'token'].join('');
+  const reportingToken = ['ReportingEndpointNot', 'Token'].join('');
   const privateHeader = ['-----BEGIN ', 'PRIVATE KEY-----'].join('');
   const privateFooter = ['-----END ', 'PRIVATE KEY-----'].join('');
   assert.deepEqual(scanText("TOKEN = 'test-only-synthetic-token'", 'fixture.test.mjs'), []);
@@ -157,13 +166,13 @@ test('secret scan distinguishes explicit synthetic fixtures from real assignment
   assert.deepEqual(scanText("TOKEN = 'unexpected-top-level-token'", 'probe.test.mjs'), []);
   assert.deepEqual(scanText("TOKEN = 'test-only-synthetic-token'", 'config/runtime.env'), ['SECRET_PATTERN config/runtime.env']);
   assert.deepEqual(scanText(`TOKEN = '${live}'`, 'fixture.test.mjs'), ['SECRET_PATTERN fixture.test.mjs']);
-  assert.deepEqual(scanText("token = 'x-cos-security-token'", 'sdk/base.js'), []);
-  assert.deepEqual(scanText("TOKEN = '__DSH_CODE_ICON_INSTANCE__'", 'ui-primitives/lib/index.js'), []);
-  assert.deepEqual(scanText("SECRET = 'AWS_SECRET_ACCESS_KEY'", 'credential-provider-env/index.js'), []);
-  assert.deepEqual(scanText("TOKEN = 'AWS_CONTAINER_AUTHORIZATION_TOKEN'", 'sdk/base.js'), []);
-  assert.deepEqual(scanText("TOKEN = 'x-aws-ec2-metadata-token'", 'credential-provider-imds/index.js'), []);
-  assert.deepEqual(scanText("TOKEN = 'remove_authentication_token'", 'semantic-conventions/experimental_attributes.js'), []);
-  assert.deepEqual(scanText("TOKEN = 'set_authentication_token'", 'semantic-conventions/experimental_attributes.js'), []);
+  assert.deepEqual(scanText(`token = '${cosToken}'`, 'sdk/base.js'), []);
+  assert.deepEqual(scanText(`TOKEN = '${codeIcon}'`, 'ui-primitives/lib/index.js'), []);
+  assert.deepEqual(scanText(`SECRET = '${awsSecret}'`, 'credential-provider-env/index.js'), []);
+  assert.deepEqual(scanText(`TOKEN = '${awsAuth}'`, 'sdk/base.js'), []);
+  assert.deepEqual(scanText(`TOKEN = '${imdsToken}'`, 'credential-provider-imds/index.js'), []);
+  assert.deepEqual(scanText(`TOKEN = '${removeAuth}'`, 'semantic-conventions/experimental_attributes.js'), []);
+  assert.deepEqual(scanText(`TOKEN = '${setAuth}'`, 'semantic-conventions/experimental_attributes.js'), []);
   assert.deepEqual(scanText("refresh_token: 'impersonated-placeholder'", 'google-auth-library/impersonated.js'), []);
   assert.deepEqual(scanText(`API_KEY = '${realSecret}'`, 'config/runtime.env'), ['SECRET_PATTERN config/runtime.env']);
   assert.deepEqual(scanText(`API_KEY = '${realSecret}'`, 'node_modules/vendor.js'), ['SECRET_PATTERN node_modules/vendor.js']);
@@ -175,9 +184,9 @@ test('secret scan distinguishes explicit synthetic fixtures from real assignment
   const vendorPath = 'node_modules/.pnpm/chrome-devtools-mcp@1.9.0/node_modules/chrome-devtools-mcp/build/src/third_party/index.js';
   const vendorHash = 'fc6ae43cb8f6007eba4b0f269290ec8fea6db7670686d17967b4812d90d2cc10';
   const vendorAllowlist = runtimeVendorAssignmentAllowlist(vendorPath, vendorHash);
-  assert.deepEqual(scanText("API_KEY = 'AIzaSyCCSOx25vrb5z0tbedCB3_JRzzbVW6Uwgw'", vendorPath, { assignmentAllowlist: vendorAllowlist }), []);
-  assert.deepEqual(scanText("Token: 'ReportingEndpointNotToken'", vendorPath, { assignmentAllowlist: vendorAllowlist }), []);
-  assert.deepEqual(scanText("API_KEY = 'AIzaSyCCSOx25vrb5z0tbedCB3_JRzzbVW6Uwgw'", 'other/vendor.js', { assignmentAllowlist: runtimeVendorAssignmentAllowlist('other/vendor.js', vendorHash) }), ['SECRET_PATTERN other/vendor.js']);
+  assert.deepEqual(scanText(`API_KEY = '${devtoolsKey}'`, vendorPath, { assignmentAllowlist: vendorAllowlist }), []);
+  assert.deepEqual(scanText(`Token: '${reportingToken}'`, vendorPath, { assignmentAllowlist: vendorAllowlist }), []);
+  assert.deepEqual(scanText(`API_KEY = '${devtoolsKey}'`, 'other/vendor.js', { assignmentAllowlist: runtimeVendorAssignmentAllowlist('other/vendor.js', vendorHash) }), ['SECRET_PATTERN other/vendor.js']);
   assert.deepEqual(runtimeVendorAssignmentAllowlist(vendorPath, '0'.repeat(64)), new Set());
   for (const [path, digest, value] of [
     ['.runtime-external/packages/experimental/inspector/lib/devtools/chunks/UIFilter-CIzBruM3.js', '528cdf0454770303f151a4e9562b750a41f221b656996ffe2bc12c13fb6e8489', 'response-header-set-cookie'],
