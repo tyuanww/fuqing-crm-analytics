@@ -1,0 +1,105 @@
+{
+  "schema_version": "rc2-web-rollback-headed-recovery/v1",
+  "observed_at": "2026-10-18",
+  "scope": "OWNER_ONLY_CANDIDATE_SYNTHETIC",
+  "status": "PASS_INTERNAL_SYNTHETIC_ONLY",
+  "formal_release_boundary": "NOT_FORMAL_M2",
+  "candidate": {
+    "upstream_pin": "0.1.7-rc.2",
+    "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+    "node": "v24.19.0",
+    "runtime_root": "/Users/hutou/.codex/tasks/rc2-web-rollback-20261018/runtime-r4",
+    "session_id": "session-rc2-web-rollback-r5",
+    "web_port": 4325,
+    "page_http_port": 18169,
+    "board_http_port": 18170,
+    "profile_inputs": [
+      {
+        "path": "/Users/hutou/.codex/tasks/rc2-web-rollback-20261018/rebuilt-r2/reader/page-inputs.json",
+        "sha256": "88d23bda388bc908e2601009e1f7d3ded9fd7e348f03bab84a855af4b6dd4a7e"
+      },
+      {
+        "path": "/Users/hutou/.codex/tasks/rc2-web-rollback-20261018/rebuilt-r2/reader/crm-inputs.json",
+        "sha256": "3ef9dc670a501ef467db412751faf305d19deec5b1a3944fdf41868a667ba015"
+      }
+    ]
+  },
+  "fixtures": {
+    "history_fixture_sha256": "1cb1a71427cec3f572f4d5cac80f3bc5c5a708cbad9de2cf5fee6467cc0f6977",
+    "board_fixture_sha256": "44b12c292f002bbf3990d137347b78a861eca4f6d2752856539f276cb9a25fab",
+    "extra_patch_sha256": "8826034cb115fbfecbe88fb815c1a0652b55d9e06ec53410d1a698b70d93950d"
+  },
+  "lifecycle": {
+    "pre_restart": {
+      "receipt": "/Users/hutou/.codex/tasks/rc2-web-rollback-20261018/restart-r2/pre-seed-r5.json",
+      "http_status": 200,
+      "restored": false,
+      "model_calls": 0,
+      "contains_real_data": false,
+      "derived_count": 3,
+      "history_path": "/Users/hutou/.codex/tasks/rc2-web-rollback-20261018/runtime-r4/workspace/strict-cold-4/rc2-web-history.html",
+      "history_sha256": "ff0630c9c5e34a3e2acb289be7d13f84049cdff6d7dc4dcf1c772e254c21a807"
+    },
+    "owned_stop_start": {
+      "same_runtime": true,
+      "same_session": true,
+      "fresh_flag": false,
+      "evidence": "pre-seed-r5.json followed by post-seed-r5.json; candidate processes were owned by the disposable start command"
+    },
+    "post_restart": {
+      "receipt": "/Users/hutou/.codex/tasks/rc2-web-rollback-20261018/restart-r2/post-seed-r5.json",
+      "http_status": 200,
+      "restored": true,
+      "model_calls": 0,
+      "contains_real_data": false,
+      "derived_count": 3,
+      "history_path": "/Users/hutou/.codex/tasks/rc2-web-rollback-20261018/runtime-r4/workspace/strict-cold-4/rc2-web-history.html",
+      "history_sha256": "ff0630c9c5e34a3e2acb289be7d13f84049cdff6d7dc4dcf1c772e254c21a807"
+    }
+  },
+  "headed_browser": {
+    "browser": "Chrome headed",
+    "tab_id": "199377534",
+    "history_readback": {
+      "session_title": "rc2 web rollback history reread · synthetic",
+      "user_text": "rc2 web rollback synthetic history and board readback; no model and no real business data.",
+      "artifact": "rc2-web-history.html",
+      "artifact_path": "/Users/hutou/.codex/tasks/rc2-web-rollback-20261018/runtime-r4/workspace/strict-cold-4/rc2-web-history.html"
+    },
+    "board_readback": {
+      "tool_card": "rc2 web rollback synthetic board  ·  1  个组件 · 尚未保存",
+      "refresh_required": true,
+      "product": "rc2 web rollback synthetic board",
+      "canvas_marker": "library-board-grid",
+      "canvas_marker_count": 1,
+      "accessible_text": "看板画布，可横向和纵向滚动",
+      "synthetic_text": "rc2 web rollback synthetic board; source=477b4f420553e8a52c2fbccc464d7561b239c443; no model or real business data.",
+      "no_model_or_real_business_data": true
+    },
+    "console_errors": 0
+  },
+  "board_service": {
+    "http_receipt": "/Users/hutou/.codex/tasks/rc2-web-rollback-20261018/restart-r2/board-http-r5.json",
+    "request_log": "/Users/hutou/.codex/tasks/rc2-web-rollback-20261018/restart-r2/board-requests-r5.log",
+    "request_log_sha256": "095f686194214d5a8aea6c4d2b426bf46afc42722b48ba536a9c00bc8a8e917e",
+    "request_log_summary": "/Users/hutou/.codex/tasks/rc2-web-rollback-20261018/restart-r2/board-requests-r5.json",
+    "http_statuses": [200, 200, 200, 200],
+    "board_id": "rc2_web_board",
+    "preview_id": "rc2_web_preview",
+    "session_id": "session-rc2-web-rollback-r5",
+    "source_sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+    "authorization_logged_without_token": true
+  },
+  "cleanup": {
+    "owned_ports_closed": [4325, 18169, 18170],
+    "unowned_ports_left_untouched": [4329, 14327],
+    "candidate_processes_remaining": false,
+    "verification": "lsof TCP LISTEN check after SIGINT returned CLOSED for all three disposable ports"
+  },
+  "formal_status": {
+    "M2-07": "BLOCKED",
+    "M2-08": "NOT_RUN",
+    "M2-09": "NOT_RUN",
+    "release_ready": false
+  }
+}
