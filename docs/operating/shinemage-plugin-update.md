@@ -1,6 +1,6 @@
 # How to 更新一个 ShineMage 插件
 
-本文保留当前插件仓的详细操作路径。若同时升级 Harness，请先读[候选升级操作手册](./dsh-upgrade-candidate.md)；它负责官方 tag、隔离 runtime、pack provenance、消费闭包、回读和回退的跨仓顺序，本文只负责单插件更新。
+本文保留单插件更新的详细操作路径。顶部的 2026-10-13 输入和验收是历史快照；当前版本、端口、候选和正式门禁以 [STATUS.md](../../STATUS.md) 为准。若同时升级 Harness，请先读[候选升级操作手册](./dsh-upgrade-candidate.md)；它负责官方 tag、隔离 runtime、pack provenance、消费闭包、回读和回退的跨仓顺序，本文只负责单插件更新。
 
 ## 当前输入与交付状态（2026-10-13）
 

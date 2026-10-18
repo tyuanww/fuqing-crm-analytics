@@ -46,11 +46,7 @@
 
 ## 启动（开发机）
 
-```bash
-cd "/Users/hutou/Desktop/ai-engineering/历史项目/fuqin-date/fuqing-crm-analytics-public"
-git checkout main && git pull origin main --ff-only
-# 后端 / 前端按 README.md；hooks: bash scripts/setup-hooks.sh
-```
+开发和部署入口见 [Mac 开发到杭州生产链路](docs/operating/mac-hangzhou-git-workflow.md)。不要从本页复制 `git pull`、服务重启或 hook 安装命令。当前版本和端口先读 [STATUS.md](STATUS.md)。
 
 ## 禁止
 

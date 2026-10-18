@@ -1,4 +1,6 @@
-# Docker 端口策略与基础镜像（PR5）
+# Docker 端口策略与基础镜像历史记录（PR5）
+
+本文保留旧 Docker 方案。Python 3.13、Node 22 和 `_待填_` digest 不是当前发布工具链或供应链基线。当前 Node、pnpm、runtime 和发布状态以 [STATUS.md](../../STATUS.md) 与 [验证入口](verification.md) 为准。未补齐真实 digest 前，不得把本页用于生产构建。
 
 ## 1. 端口矩阵（SSOT）
 

@@ -1,4 +1,6 @@
-# CI 0→1 实战 fix 框架(3 层防御 + 决策树)
+# CI 0→1 实战 fix 框架（历史决策树）
+
+本文是 2026-06 的历史资料。当前检查、环境和授权以 [AGENTS.md](../../AGENTS.md)、[STATUS.md](../../STATUS.md) 和 [验证入口](verification.md) 为准。文中的密码、真实库路径和旧 Sprint 命令不能直接执行。
 
 > **Sprint 42 #S42-1 沉淀**(2026-06-19)
 > 跨 sprint 复用,防 Sprint 50+ 重新激活 e2e CI blocking 时复发同类问题

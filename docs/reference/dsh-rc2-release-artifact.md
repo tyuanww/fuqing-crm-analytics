@@ -1,6 +1,6 @@
 # DSH rc2 release artifact reference
 
-本页是 DSH rc2 发布工具的命令和输入输出参考。产品版本为 `0.20.0.0`，DSH 固定为 `0.1.7-rc.2`，上游 SHA 为 `477b4f420553e8a52c2fbccc464d7561b239c443`。离线命令段描述接收合同；`dsh-0.20.0.0-r1` 是当前 immutable Release，杭州 current 仍为上一份已运行版本，现场切换以 runbook 和最新 receipt 为准。
+本页是 DSH rc2 发布工具的命令和输入输出合同参考。产品版本为 `0.20.0.0`，DSH 固定为 `0.1.7-rc.2`，上游 SHA 为 `477b4f420553e8a52c2fbccc464d7561b239c443`。`r1`、`r3` 和杭州安装记录属于历史 release 快照；当前内部 owner-operated 版本、端口和正式门禁只看 [STATUS.md](../../STATUS.md)。现场操作按 [rc2 发布与回退 Runbook](../operating/dsh-rc2-runbook.md) 执行。
 
 ## 命令入口
 

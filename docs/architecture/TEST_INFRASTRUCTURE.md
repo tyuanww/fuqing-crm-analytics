@@ -613,7 +613,7 @@ PYTHONPATH="$(pwd)" pytest backend/tests/ -x -q
 - [STATUS.md](../../STATUS.md) — 项目总状态 (749 pass / 0 debt)
 - [docs/architecture/AI_SAFETY_NET.md](AI_SAFETY_NET.md) — L1 lint + L2 AST + L3 FilterBuilder 3 层防线
 - [docs/architecture/DATA_PIPELINE.md](DATA_PIPELINE.md) — ETL 4 阶段
-- [docs/data-layout.md](../data-layout.md) — data/ 目录布局 (含 worktree DUCKDB_PATH 提示)
+- [docs/data-layout.md](../data/data-layout.md) — data/ 目录布局 (含 worktree DUCKDB_PATH 提示)
 - [docs/TECH-DEBT.md](../TECH-DEBT.md) — 技术债台账 (29 条已修含 Sprint 53 race flake 治本)
 - [docs/development/testing.md](../development/testing.md) — test 写法 (mock data, race flake 模式)
 - [CLAUDE.md](../../CLAUDE.md) — L4.3/L4.4/L4.5/L4.6 永久规则完整版

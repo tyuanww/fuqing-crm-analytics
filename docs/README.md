@@ -1,13 +1,15 @@
 # Docs 索引
 
 > 按 lifecycle 分层，新人约 5 分钟找到入口。  
-> **最后更新**: 2026-10-18。当前提交、运行和交付事实以根目录 [STATUS.md](../STATUS.md) 为准；[HANDOVER.md](../HANDOVER.md) 的运行入口段是带日期的历史快照。Mac 负责开发/测试，杭州 Windows + WSL 只运行批准 SHA。当前主仓兼容钉 **0.1.7-rc.2**（`477b4f42`）；内部 owner-operated rc1 已在杭州以 `dsh-0.2.1-rc.1-owner-r9-20261018` 运行，正式发布线仍与内部切换分开。候选构建、插件 pack、回读和回退按[候选升级操作手册](./operating/dsh-upgrade-candidate.md)执行。本轮治理与状态文档与十个独立作者仓 PR #1 已合并，最新 main SHA 以 Git 实查和 STATUS 为准；PR #121 及其证据属于历史快照，主线短 SHA、完整 SHA 和 CI 以 STATUS 及[作者合并与候选前置核验](./hackathon/evidence/shinemage-author-merge-and-candidate-preflight-20261012.md)为准；组合输入、source HTTP、terminal、live browser 和真实 UAT 观察见[当前组合输入预检](./hackathon/evidence/shinemage-composition-preflight-20261012.md)、[当前组合 source HTTP 目标验收](./hackathon/evidence/shinemage-composition-source-http-target-20261013.md)、[当前组合 terminal 目标验收](./hackathon/evidence/shinemage-composition-terminal-target-20261013.md)、[授权生产入口 live browser 观察](./hackathon/evidence/shinemage-live-browser-20261013.md)与[真实模型、WeKnora 与 CRM UAT 实跑](./hackathon/evidence/shinemage-real-business-uat-20261013.md)，当前发布缺口见[M2 任务卡审计](./hackathon/evidence/shinemage-m2-acceptance-audit-20261013.md)、[M2-08 release 门禁审计](./hackathon/evidence/shinemage-m2-08-release-gate-audit-20261013.md)和[M2-10 状态收口](./hackathon/evidence/shinemage-m2-10-status-closeout-20261013.md)。清理结果见[本次清理证据](./hackathon/evidence/shinemage-local-cleanup-20261010.md)，插件独立仓和主仓集成边界见[维护、清理与升级手册](./operating/shinemage-maintenance-and-cleanup.md)，单插件操作步骤见[插件更新指南](./operating/shinemage-plugin-update.md)。产品仍 PARTIAL，黑客松与校准记录是档案，不是默认入口。
+> **最后更新**: 2026-10-18。当前提交、运行、端口和交付事实只看根目录 [STATUS.md](../STATUS.md)。当前操作入口见下方 `operating/` 文档；历史黑客松和校准材料只用于背景与证据回放。
 
-## 黑客松当前实现
+## 历史与领域资料
+
+本节保留按日期编写的黑客松、CRM 校准和历史验收资料。它们用于理解背景和回放证据，不是当前执行清单。当前状态只看 [STATUS.md](../STATUS.md)，当前操作只看 `operating/` 下的入口文档。
 
 | 文档 | 用途 |
 |---|---|
-| [`crm-calibration/public-release.md`](./crm-calibration/public-release.md) | CRM 指标、原生登录与离线知识的公开交付及验收边界（0.12 当时边界） |
+| [`crm-calibration/public-release.md`](./crm-calibration/public-release.md) | CRM 指标、原生登录与离线知识的历史交付边界（0.12） |
 | [`crm-calibration/crm-integration-2026-09-21.md`](./crm-calibration/crm-integration-2026-09-21.md) | 0.14 三候选本地整合：组板、指标收尾、图谱 ACL |
 | [`crm-calibration/crm-analysis-board-2026-09-21.md`](./crm-calibration/crm-analysis-board-2026-09-21.md) | 分析检索/编辑/分享与独立组板 |
 | [`crm-calibration/metric-matrix.md`](./crm-calibration/metric-matrix.md) | 指标公式、来源、缺口与 A/B/C 验收 |
@@ -22,7 +24,9 @@
 | [`operating/mac-hangzhou-git-workflow.md`](./operating/mac-hangzhou-git-workflow.md) | Mac 开发、GitHub PR、杭州 WSL 生产部署的唯一链路 |
 | [`operating/cockpit-native-html.md`](./operating/cockpit-native-html.md) | 从对话点「生成驾驶舱」或说生成 HTML，到可编辑驾驶舱和右侧产物 |
 | [`operating/cockpit-ai-edit.md`](./operating/cockpit-ai-edit.md) | 产物组织、全屏、静态 HTML 手动 / AI 选区编辑与 HTTP 合同 |
+| [`operating/dsh-rc1-release-lane.md`](./operating/dsh-rc1-release-lane.md) | 内部 rc1 候选准备；不代表正式 release |
 | [`operating/dsh-rc2-quickstart.md`](./operating/dsh-rc2-quickstart.md) | rc2 artifact 准备教程 |
+| [`operating/dsh-rc2-runbook.md`](./operating/dsh-rc2-runbook.md) | rc2 现场接收、切换和回退顺序 |
 | [`operating/dsh-plugin-author-quickstart.md`](./operating/dsh-plugin-author-quickstart.md) | 独立插件作者三步构建、测试和 candidate handoff |
 | [`operating/dsh-upgrade-candidate.md`](./operating/dsh-upgrade-candidate.md) | 官方 Harness tag、隔离候选、插件 pack、回读和回退 |
 | [`tutorials/dsh-plugin-upgrade.md`](./tutorials/dsh-plugin-upgrade.md) | 从单插件构建到 pack reader 回读的最短教程 |
@@ -62,7 +66,7 @@ fuqing-crm-analytics/docs/
 │   ├── FEATURE-PACKAGES.md            伸美包装卸
 │   └── ARCHITECTURE-AND-RELEASE-AUDIT.md  架构审计与提交清单
 │
-├── crm-calibration/                   CRM 插件、指标与图谱
+├── crm-calibration/                   CRM 插件、指标与图谱历史资料
 │   ├── public-release.md             0.12 公开交付边界
 │   ├── crm-integration-2026-09-21.md 0.14 三候选整合
 │   ├── crm-analysis-board-2026-09-21.md 检索/分享/组板
