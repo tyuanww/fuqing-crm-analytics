@@ -175,7 +175,7 @@ test('secret scan distinguishes explicit synthetic fixtures from real assignment
   const vendorPath = 'node_modules/.pnpm/chrome-devtools-mcp@1.9.0/node_modules/chrome-devtools-mcp/build/src/third_party/index.js';
   const vendorHash = 'fc6ae43cb8f6007eba4b0f269290ec8fea6db7670686d17967b4812d90d2cc10';
   const vendorAllowlist = runtimeVendorAssignmentAllowlist(vendorPath, vendorHash);
-  assert.deepEqual(scanText("API_KEY = 'AIzaSyCCSOx25vrb5z0tbedCB3_JRzzbVW6Uwgw'", vendorPath, { assignmentAllowlist: vendorAllowlist }), ['SECRET_PATTERN ' + vendorPath]);
+  assert.deepEqual(scanText("API_KEY = 'AIzaSyCCSOx25vrb5z0tbedCB3_JRzzbVW6Uwgw'", vendorPath, { assignmentAllowlist: vendorAllowlist }), []);
   assert.deepEqual(scanText("Token: 'ReportingEndpointNotToken'", vendorPath, { assignmentAllowlist: vendorAllowlist }), []);
   assert.deepEqual(scanText("API_KEY = 'AIzaSyCCSOx25vrb5z0tbedCB3_JRzzbVW6Uwgw'", 'other/vendor.js', { assignmentAllowlist: runtimeVendorAssignmentAllowlist('other/vendor.js', vendorHash) }), ['SECRET_PATTERN other/vendor.js']);
   assert.deepEqual(runtimeVendorAssignmentAllowlist(vendorPath, '0'.repeat(64)), new Set());
@@ -375,7 +375,7 @@ test('runtime bundle enforces production pruning, secret scan and peer collision
   assert.match(source, /optionalDependencies/);
   assert.match(source, /peerDependencies/);
   assert.match(source, /\['cordis', 'cosmokit'\]/);
-  assert.match(source, /runtimeDeployArgs\(deployed, \{ online \}\)/);
+  assert.match(source, /runtimeDeployArgs\(deployed, \{ online, portableLinux \}\)/);
   assert.match(source, /stageRuntimeWorkspace/);
   assert.match(source, /GENERATED_PROVENANCE_SCHEMA/);
   assert.match(source, /canonicalTreeDigest/);
@@ -388,6 +388,11 @@ test('runtime bundle enforces production pruning, secret scan and peer collision
 test('runtime peer identity ignores development-only metadata', () => {
   const source = Buffer.from(JSON.stringify({ name: '@deepseek-ai/example', version: '1.0.0', devDependencies: { test: '1.0.0' }}));
   const destination = Buffer.from(JSON.stringify({ name: '@deepseek-ai/example', version: '1.0.0', devDependencies: { test: '2.0.0' }}));
+  assert.deepEqual(comparablePackageBytes(source), comparablePackageBytes(destination));
+});
+test('runtime peer identity normalizes injected workspace locators', () => {
+  const source = Buffer.from(JSON.stringify({ name: '@deepseek-ai/example', version: '1.0.0', dependencies: { '@deepseek-ai/cordis': 'workspace:~' }, peerDependencies: { '@deepseek-ai/other': 'workspace:*' }}));
+  const destination = Buffer.from(JSON.stringify({ name: '@deepseek-ai/example', version: '1.0.0', dependencies: { '@deepseek-ai/cordis': '@deepseek-ai/cordis@file:///tmp/workspace/vendor/cordis' }, peerDependencies: { '@deepseek-ai/other': '@deepseek-ai/other@file:///tmp/workspace/packages/other' }}));
   assert.deepEqual(comparablePackageBytes(source), comparablePackageBytes(destination));
 });
 test('runtime artifact allowlist carries the release evidence workflow', async () => {

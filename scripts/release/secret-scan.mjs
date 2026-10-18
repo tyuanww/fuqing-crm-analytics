@@ -32,7 +32,8 @@ const BENIGN_PROTOCOL_LITERAL = new Set([
 // like assignments. Keep each exception bound to the exact upstream bytes and
 // path suffix. A changed generated file gets no exception and fails closed.
 const RUNTIME_VENDOR_ASSIGNMENTS = Object.freeze([
-  { suffix: 'node_modules/.pnpm/chrome-devtools-mcp@1.9.0/node_modules/chrome-devtools-mcp/build/src/third_party/index.js', sha256: 'fc6ae43cb8f6007eba4b0f269290ec8fea6db7670686d17967b4812d90d2cc10', values: ['ReportingEndpointNotToken', 'InvalidCredentialsCookie'] },
+  // Chromium DevTools ships this public CrUX endpoint key in the pinned vendor bytes.
+  { suffix: 'node_modules/.pnpm/chrome-devtools-mcp@1.9.0/node_modules/chrome-devtools-mcp/build/src/third_party/index.js', sha256: 'fc6ae43cb8f6007eba4b0f269290ec8fea6db7670686d17967b4812d90d2cc10', values: ['ReportingEndpointNotToken', 'InvalidCredentialsCookie', 'AIzaSyCCSOx25vrb5z0tbedCB3_JRzzbVW6Uwgw'] },
   { suffix: 'packages/experimental/inspector/lib/devtools/chunks/UIFilter-CIzBruM3.js', sha256: '528cdf0454770303f151a4e9562b750a41f221b656996ffe2bc12c13fb6e8489', values: ['response-header-set-cookie'] },
   { suffix: 'packages/experimental/inspector/lib/devtools/chunks/data_grid-CZEcy7-w.js', sha256: '729fbcd17a4356d26a52007551880bd7ef88f8a97b573e40c61fca2754da61a9', values: ['DataGridInternalToken'] },
   { suffix: 'packages/experimental/inspector/lib/devtools/chunks/legacy-CJ2qLEp3.js', sha256: '1a1b731f8ed5c22d04152e49999cf706e5edefb595ec68e2ea45ca451c9a8c91', values: ['ReportingEndpointNotToken', 'InvalidCredentialsCookie'] },
@@ -41,6 +42,10 @@ const RUNTIME_VENDOR_ASSIGNMENTS = Object.freeze([
   { suffix: '@deepseek-ai/dsh-experimental-inspector/lib/devtools/chunks/data_grid-CZEcy7-w.js', sha256: '729fbcd17a4356d26a52007551880bd7ef88f8a97b573e40c61fca2754da61a9', values: ['DataGridInternalToken'] },
   { suffix: '@deepseek-ai/dsh-experimental-inspector/lib/devtools/chunks/legacy-CJ2qLEp3.js', sha256: '1a1b731f8ed5c22d04152e49999cf706e5edefb595ec68e2ea45ca451c9a8c91', values: ['ReportingEndpointNotToken', 'InvalidCredentialsCookie'] },
   { suffix: '@deepseek-ai/dsh-experimental-inspector/lib/devtools/chunks/protocol_client-L4-X1Qrb.js', sha256: 'aecddd3577951b386a69848c3470507c6806365a8130392e57d4028adf7c1e01', values: ['ReportingEndpointNotToken', 'InvalidCredentialsCookie'] },
+  { suffix: 'packages/experimental/inspector/lib/devtools/chunks/data_grid-D6IQ_VnC.js', sha256: '962839232d65e4d20719272db950524e9a91caa9afd356dafe7d19740c9b331b', values: ['DataGridInternalToken'] },
+  { suffix: 'packages/experimental/inspector/lib/devtools/chunks/legacy-pdu9QFsM.js', sha256: '415592c2f979bf7c201be1c6c3034dc3421048d7ffdde2a6324824ce8a9228c0', values: ['ReportingEndpointNotToken', 'InvalidCredentialsCookie'] },
+  { suffix: '@deepseek-ai/dsh-experimental-inspector/lib/devtools/chunks/data_grid-D6IQ_VnC.js', sha256: '962839232d65e4d20719272db950524e9a91caa9afd356dafe7d19740c9b331b', values: ['DataGridInternalToken'] },
+  { suffix: '@deepseek-ai/dsh-experimental-inspector/lib/devtools/chunks/legacy-pdu9QFsM.js', sha256: '415592c2f979bf7c201be1c6c3034dc3421048d7ffdde2a6324824ce8a9228c0', values: ['ReportingEndpointNotToken', 'InvalidCredentialsCookie'] },
 ]);
 
 export function runtimeVendorAssignmentAllowlist(name, bytesOrSha256) {
