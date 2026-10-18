@@ -42,6 +42,8 @@
 
 目标机回执保存在 `/srv/shinemage/dsh/evidence/`，包括 activate、current restart、rollback drill 和 reactivate 日志。
 
+新增目标一致性回执 `engineering-owner-operated-rc1-main-b789-target-receipt-20261018.json`，绑定了 current、current-target、systemd PID 命令行、drop-in/env 摘要和 runtime tree。runtime tree 为 `29541` 个文件、`760816873` bytes、SHA-256 `0aefeb678849647ac98127f45a918aa0cbfdbaff7a03fc3ac8d0cf05eda46b24`。正式 `release-manifest.v1.json`、`SHA256SUMS` 和两份 attestation 在 owner-local release 目录中仍缺失；这保持正式供应链门禁为 BLOCKED。
+
 ## 范围
 
 这是内部 owner-operated 部署证据。它不代表正式公司发布。正式状态保持：`M2-07=BLOCKED`、`M2-08=NOT_RUN`、`M2-09=NOT_RUN`、`release_ready=false`。GitHub Release 未创建。

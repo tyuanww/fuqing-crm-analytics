@@ -1,0 +1,77 @@
+{
+  "schema_version": "shinemage-owner-operated-target-receipt/v1",
+  "status": "PASS_OWNER_OPERATED",
+  "observed_at": "2026-10-18T13:34:28.210Z",
+  "tag": "dsh-0.2.1-rc.1-owner-main-b78972a0-20261018",
+  "release_root": "/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-owner-main-b78972a0-20261018",
+  "current": {
+    "resolved": "/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-owner-main-b78972a0-20261018",
+    "recorded": "/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-owner-main-b78972a0-20261018"
+  },
+  "marker": {
+    "schema_version": "shinemage-owner-operated-main-candidate/v1",
+    "tag": "dsh-0.2.1-rc.1-owner-main-b78972a0-20261018",
+    "source_sha": "b78972a09ef61e6511a51ef9aa758207bc091734",
+    "merged_main_tree": "b78972a09ef61e6511a51ef9aa758207bc091734",
+    "artifact_sha256": null,
+    "upstream_runtime": {
+      "upstream_sha": "1600d8a1e140dcde43a1a0941940a0480712c011",
+      "sdk": "0.2.1-rc.1",
+      "runtime_archive_sha256": "ed11ec808d939bbab292738be6227e8882c95889d3af5db1a9febbc318aa05a2"
+    },
+    "owner": "shinemage-dsh",
+    "restart_dependency": "shinemage-dsh.service"
+  },
+  "release_files": {
+    "release-manifest.v1.json": {
+      "status": "MISSING"
+    },
+    "SHA256SUMS": {
+      "status": "MISSING"
+    },
+    "source-attestation.jsonl": {
+      "status": "MISSING"
+    },
+    "upstream-runtime-attestation.jsonl": {
+      "status": "MISSING"
+    }
+  },
+  "runtime": {
+    "path": "/srv/shinemage/dsh/runtime-rc1-owner-main-b78972a0-20261018",
+    "tree": {
+      "sha256": "0aefeb678849647ac98127f45a918aa0cbfdbaff7a03fc3ac8d0cf05eda46b24",
+      "files": 29541,
+      "bytes": 760816873
+    }
+  },
+  "service": {
+    "active": "active",
+    "show": "MainPID=1768819\nEnvironment=DSH_RUNTIME=/srv/shinemage/dsh/runtime-rc1-owner-main-b78972a0-20261018 DSH_DEV_TOOLCHAIN=/srv/shinemage/dsh/current/toolchain-rc1.json DSH_DEV_PAGE_PYTHON=/srv/shinemage/dsh/current/b0-venv/bin/python DSH_DEV_TLS=/etc/ssl/certs/ca-certificates.crt PATH=/srv/shinemage/dsh/current/tools/bin:/usr/local/lib/node-v24.21.0-linux-x64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt\nDropInPaths=/etc/systemd/system/shinemage-dsh.service.d/50-brand-weknora.conf /etc/systemd/system/shinemage-dsh.service.d/60-owner-rc1.conf /etc/systemd/system/shinemage-dsh.service.d/70-owner-main-b78972a0.conf",
+    "unit_sha256": {
+      "status": "MISSING"
+    },
+    "env_sha256": {
+      "bytes": 461,
+      "sha256": "05d6a083c60d5011f6fd63cbfa263e1a968bdcfd83c631ce4a25087535215d2e"
+    },
+    "cmdline": "/usr/local/lib/node-v24.21.0-linux-x64/bin/node /srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-owner-main-b78972a0-20261018/scripts/dsh-dev/cli.mjs start --plugin on --pack-inputs /srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-owner-main-b78972a0-20261018/inputs/page/shinemage-release-pack-inputs.json --shine-brand on --extra-patch /srv/shinemage/dsh/hotfixes/brand-weknora-20261009/preset.patch.json --upstream /srv/shinemage/dsh/current/upstream --runtime /srv/shinemage/dsh/runtime-rc1-owner-main-b78972a0-20261018 --host 127.0.0.1 --web-port 4328 --page-http on --page-http-port 18091",
+    "environment": [
+      "DSH_NODE",
+      "DSH_REPO",
+      "DSH_DEV_TOOLCHAIN",
+      "NODE_EXTRA_CA_CERTS",
+      "DSH_DEV_PAGE_PYTHON",
+      "DSH_UPSTREAM",
+      "DSH_DEV_TLS",
+      "PATH",
+      "DSH_RUNTIME"
+    ]
+  },
+  "formal_status": {
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "m2_09": "NOT_RUN",
+    "release_ready": false
+  },
+  "publication": "OWNER_LOCAL_ONLY"
+}

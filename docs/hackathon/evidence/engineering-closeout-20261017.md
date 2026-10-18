@@ -2,6 +2,8 @@
 
 日期：2026-10-17
 
+> 事实纠偏（2026-10-18）：本文件是 2026-10-17 快照。其 `rc2 web rollback NOT_RUN` 条目已由 [rc2 web rollback headed recovery](rc2-web-rollback-headed-recovery-20261018.md) 更新为 `PASS_INTERNAL_SYNTHETIC_ONLY`。该更新不改变正式 M2-07、M2-08、M2-09 或 `release_ready=false`。
+
 ## 结论
 
 本项目的架构和本地技术验证已经闭环。剩余事项分成内部运行准备和正式发布门禁两条独立线路，不再用 M2 门禁反复描述整个工程没有完成。

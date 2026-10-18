@@ -2,6 +2,8 @@
 
 日期：2026-10-17
 
+> 事实纠偏（2026-10-18）：本文件是 2026-10-17 快照。rc2 web rollback 的当前 owner-only synthetic 结果见 [rc2 web rollback headed recovery](rc2-web-rollback-headed-recovery-20261018.md)。历史 `NOT_RUN` 文字不再触发重复验证，也不改变正式 M2 状态。
+
 ## 收尾定义
 
 工程收尾不是把正式发布门禁全部伪装成通过。工程收尾的可验证条件是：最终 Harness 版本固定，隔离 candidate 可重建，插件和 runtime 合同通过，回退路径可回放，所有结论绑定真实 artifact 和原始回执。

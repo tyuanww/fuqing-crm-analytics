@@ -46,8 +46,19 @@
     "/srv/shinemage/dsh/evidence/owner-main-b78972a0-activate-20261018.log",
     "/srv/shinemage/dsh/evidence/owner-main-b78972a0-current-restart-20261018.log",
     "/srv/shinemage/dsh/evidence/owner-main-b78972a0-rollback-drill-20261018.log",
-    "/srv/shinemage/dsh/evidence/owner-main-b78972a0-reactivate-20261018.log"
+    "/srv/shinemage/dsh/evidence/owner-main-b78972a0-reactivate-20261018.log",
+    "/srv/shinemage/dsh/evidence/owner-main-b78972a0-target-receipt-20261018.json"
   ],
+  "target_receipt": {
+    "path": "engineering-owner-operated-rc1-main-b789-target-receipt-20261018.json",
+    "runtime_tree_sha256": "0aefeb678849647ac98127f45a918aa0cbfdbaff7a03fc3ac8d0cf05eda46b24",
+    "runtime_tree_files": 29541,
+    "runtime_tree_bytes": 760816873,
+    "release_manifest": "MISSING",
+    "sha256sums": "MISSING",
+    "source_attestation": "MISSING",
+    "runtime_attestation": "MISSING"
+  },
   "formal_status": {
     "m2_07": "BLOCKED",
     "m2_08": "NOT_RUN",

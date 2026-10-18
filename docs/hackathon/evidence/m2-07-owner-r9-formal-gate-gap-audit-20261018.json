@@ -78,9 +78,11 @@
     "crane": "NOT_FOUND"
   },
   "github_independent_ci_probe": {
-    "command": "gh run list --workflow dsh-rc1-release-preflight.yml --limit 10",
-    "result": "HTTP 404: workflow not found on the default branch",
-    "rc1_workflow_available_on_default_branch": false,
+    "command": "gh workflow view dsh-rc1-release-preflight.yml --repo tyuanww/fuqing-crm-analytics --ref main --yaml; gh run list --workflow dsh-rc1-release-preflight.yml --repo tyuanww/fuqing-crm-analytics --limit 10",
+    "result": "workflow file present on origin/main; no workflow runs returned",
+    "workflow_blob_sha": "75ac9dbd3c3ce2f45169a18b01674f475a668735",
+    "rc1_workflow_available_on_default_branch": true,
+    "rc1_workflow_run_status": "NOT_FOUND",
     "available_release_workflows_on_default_branch": [
       "DSH rc2 release evidence",
       "DSH rc2 release preflight",

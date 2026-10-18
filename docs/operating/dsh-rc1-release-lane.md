@@ -48,7 +48,7 @@ node scripts/release/rc1-preflight.mjs \
 
 ## 远端 workflow
 
-`.github/workflows/dsh-rc1-release-preflight.yml` 只接受明确的 source archive URL、subject-set URL、archive SHA-256 和 source identity。它不使用当前 rc2 workflow 的 `GITHUB_SHA` 假设，也不把 `f402...` 当作 Git commit。source archive 未完成 LFS hydration 或 runtime scanner 未通过时，workflow 必须失败。
+`.github/workflows/dsh-rc1-release-preflight.yml` 只接受明确的 source archive URL、source archive SHA-256、subject-set URL、subject-set SHA-256、runtime bundle URL、runtime bundle SHA-256 和 source identity。workflow 使用 `secure-unpack.py` 的 bounded extraction，并让严格 profile pack reader 重新核对 profile、manifest、tarball bytes、包身份和 generated-bytes provenance。它不使用当前 rc2 workflow 的 `GITHUB_SHA` 假设，也不把 `f402...` 当作 Git commit。source archive 未完成 LFS hydration、subject/runtime digest 不匹配或 runtime scanner 未通过时，workflow 必须失败。
 
 正式发布仍需把本地 asset 送入批准的 publisher、signature、revocation、independent verification、final attestation 和 clean-machine 流程，再生成可外发的 publication sidecar。当前没有执行这些外部门禁。
 
