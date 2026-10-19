@@ -170,6 +170,15 @@ test('dev package preflight binds enabled roles and rejects mixed author paths',
   await assert.rejects(() => resolvePluginInputs({ ...options, shineQuery: 'on' }), /DSH_DEV_PROFILE_PLUGIN_MISSING/);
 });
 
+test('dev package preflight keeps the optional plugin-market bundle selected', async t => {
+  const f = await fixture(t, ['@shine-mage/dsh-analytics-workbench-b0', '@deepseek-ai/dsh-experimental-plugin-market-bundle']);
+  const loaded = await resolvePluginInputs(workbenchOnly(f.inputsPath));
+  assert.deepEqual(loaded.selected, {
+    pluginPath: '@shine-mage/dsh-analytics-workbench-b0',
+    pluginMarketPath: '@deepseek-ai/dsh-experimental-plugin-market-bundle',
+  });
+});
+
 test('dev package preflight rejects packs without generated provenance', async t => {
   const f = await fixture(t, ['@shine-mage/dsh-analytics-workbench-b0']);
   const manifestPath = join(f.root, f.input.plugins[0].manifest);

@@ -9,6 +9,7 @@
 | `candidate_tag` | `dsh-0.2.1-rc.1-clean-main-20261020-v4` |
 | DSH package | `@deepseek-ai/dsh@0.2.1-rc.1` |
 | upstream SHA | `1600d8a1e140dcde43a1a0941940a0480712c011` |
+| upstream lock SHA-256 | `952ca2f79998660dc690b739078a5d6052bc7c5c2193714b918b9d720baaeaba` (`pnpm-lock.yaml`) |
 | builder Node | `v24.19.0` |
 | plugin pnpm | `11.28.2` |
 | upstream pnpm | `11.28.5` |
@@ -47,6 +48,7 @@ dsh-client-ui-layout
 dsh-client-ui-renderer
 dsh-client-ui-sidebar
 dsh-client-ui-sidebar-right
+dsh-client-ui-slots
 dsh-client-ui-theme
 dsh-client-ui-tool
 dsh-client-ui-workspace

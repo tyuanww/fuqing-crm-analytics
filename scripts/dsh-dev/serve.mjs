@@ -181,6 +181,8 @@ export async function resolvePluginInputs(options) {
     assert.equal(packs.profile.service_binding, undefined, 'DSH_DEV_SERVICE_PROFILE_USE_CANDIDATE_HARNESS');
     const selected = {
       pluginPath: '@shine-mage/dsh-analytics-workbench-b0',
+      ...(packs.plugins.some(item => item.id === '@deepseek-ai/dsh-experimental-plugin-market-bundle')
+        ? { pluginMarketPath: '@deepseek-ai/dsh-experimental-plugin-market-bundle' } : {}),
       ...(pluginEnabled(options.shineBrand ?? 'off') ? { shineBrandPath: '@shine-mage/dsh-shine-brand' } : {}),
       ...(pluginEnabled(options.shineWaterfall ?? 'on') ? { shineWaterfallPath: '@shine-mage/dsh-shine-waterfall' } : {}),
       ...(pluginEnabled(options.shineCrowdAction ?? 'on') ? { shineCrowdActionPath: '@shine-mage/dsh-shine-crowd-action' } : {}),
@@ -191,7 +193,8 @@ export async function resolvePluginInputs(options) {
     for (const id of Object.values(selected)) assert.ok(packs.plugins.some(item => item.id === id), 'DSH_DEV_PROFILE_PLUGIN_MISSING ' + id);
     const supported = ['@shine-mage/dsh-analytics-workbench-b0', '@shine-mage/dsh-shine-brand',
       '@shine-mage/dsh-shine-waterfall', '@shine-mage/dsh-shine-crowd-action', '@shine-mage/dsh-shine-query',
-      '@shine-mage/dsh-shine-board', '@shine-mage/dsh-shine-funnel'];
+      '@shine-mage/dsh-shine-board', '@shine-mage/dsh-shine-funnel',
+      '@deepseek-ai/dsh-experimental-plugin-market-bundle'];
     assert.ok(packs.plugins.every(item => supported.includes(item.id)), 'DSH_DEV_PROFILE_PLUGIN_UNSUPPORTED');
     return { options, packs, selected };
   }
@@ -211,6 +214,7 @@ export function profileInstallPaths(prepared) {
   if (prepared.shineQueryPath) paths.push(prepared.shineQueryPath);
   if (prepared.shineBoardPath) paths.push(prepared.shineBoardPath);
   if (prepared.shineFunnelPath) paths.push(prepared.shineFunnelPath);
+  if (prepared.pluginMarketPath) paths.push(prepared.pluginMarketPath);
   if (prepared.pluginPath) paths.push(prepared.pluginPath);
   return paths;
 }
@@ -335,6 +339,7 @@ export async function prepareRuntime(options) {
   let shineQueryPath = null;
   let shineBoardPath = null;
   let shineFunnelPath = null;
+  let pluginMarketPath = null;
   if (enabled) {
     pluginPath = await assertPluginRoot(options.pluginPath);
     const brandCandidate = resolveShineBrandPath({ ...options, plugin: 'on' });
@@ -349,6 +354,7 @@ export async function prepareRuntime(options) {
     if (boardCandidate) shineBoardPath = await assertPluginRoot(boardCandidate);
     const funnelCandidate = resolveShineFunnelPath({ ...options, plugin: 'on' });
     if (funnelCandidate) shineFunnelPath = await assertPluginRoot(funnelCandidate);
+    if (options.pluginMarketPath) pluginMarketPath = await assertPluginRoot(options.pluginMarketPath);
     let overlay = buildPluginOverlay(pluginPath);
     if (!shineBrandPath) overlay = [...overlay, ...buildShineBrandDisable()];
     if (!shineWaterfallPath) overlay = [...overlay, ...buildShineWaterfallDisable()];
@@ -377,7 +383,7 @@ export async function prepareRuntime(options) {
   }
   return {
     pin, upstream, verified, cli, enabled, pluginPath, shineBrandPath, shineWaterfallPath, shineCrowdActionPath, shineQueryPath, shineBoardPath, shineFunnelPath, overlayPath, patches,
-    runtime, home, workspace, host: options.host, webPort: options.webPort, packInstall,
+    runtime, home, workspace, host: options.host, webPort: options.webPort, packInstall, pluginMarketPath,
   };
 }
 

@@ -6,7 +6,7 @@
 
 ## 当前 rc1 clean-main v4 候选（2026-10-20）
 
-本轮 DSH 候选使用固定 upstream `1600d8a1e140dcde43a1a0941940a0480712c011`，candidate tag 为 `dsh-0.2.1-rc.1-clean-main-20261020-v4`。runtime/profile、插件市场、peer alias 闭包和 AppleDouble 扫描的具体合同见[候选参考](../reference/dsh-rc1-clean-candidate.md)，实际顺序见[升级手册](./dsh-rc1-clean-upgrade-runbook.md)。
+本轮 DSH 候选使用固定 upstream `1600d8a1e140dcde43a1a0941940a0480712c011`，`pnpm-lock.yaml` SHA-256 为 `952ca2f79998660dc690b739078a5d6052bc7c5c2193714b918b9d720baaeaba`，candidate tag 为 `dsh-0.2.1-rc.1-clean-main-20261020-v4`。runtime/profile、插件市场、peer alias 闭包和 AppleDouble 扫描的具体合同见[候选参考](../reference/dsh-rc1-clean-candidate.md)，实际顺序见[升级手册](./dsh-rc1-clean-upgrade-runbook.md)。
 
 本轮已执行的局部检查为：固定 Node24 release tests `45 pass / 0 fail`、远程 Node24 peer 缺失负测 PASS、runtime provenance PASS、native/business boot PASS、Settings/account RPC PASS、浏览器插件页 PASS、plugin-market Discover PASS、console logs EMPTY、AppleDouble locale files `0`、v4 boot PASS。上述 peer 缺失负测已验证 fail-closed 行为。默认 Node25 下的 dsh-dev 全量失败属于环境版本不满足，不能改写为代码 PASS。
 

@@ -4,7 +4,7 @@
 
 ## 你需要什么
 
-- 本仓库干净的上游 checkout，SHA 必须是 `1600d8a1e140dcde43a1a0941940a0480712c011`。
+- 本仓库干净的上游 checkout，SHA 必须是 `1600d8a1e140dcde43a1a0941940a0480712c011`，`pnpm-lock.yaml` SHA-256 必须是 `952ca2f79998660dc690b739078a5d6052bc7c5c2193714b918b9d720baaeaba`。
 - Node `24.x`，插件 pnpm `11.28.2`，上游 pnpm `11.28.5`。
 - `--portable-linux` 这一步必须在 Linux x64 builder 上运行；Mac builder 只运行不带该选项的本机 bundle 检查。
 - 已构建的插件 pack inputs 和一个全新的 staging 目录。
@@ -18,11 +18,12 @@ export CANDIDATE=/absolute/staging/dsh-rc1-clean
 export PACK_INPUTS=/absolute/staging/profile-pack-inputs.json
 export DSH_RELEASE_LANE_CONFIG="$PWD/config/dsh-rc1-release-lane.json"
 git -C "$DSH_UPSTREAM" rev-parse HEAD
+# dsh-dev diagnose/check/start 还会拒绝 pnpm-lock.yaml 摘要漂移
 node --version
 pnpm --version
 ```
 
-输出必须显示上游 SHA 和 Node 24。插件构建使用 pnpm `11.28.2`，上游 checkout 使用 lane 配置记录的 pnpm `11.28.5`，两个角色不能用一个 `latest` 输出代替。`DSH_RELEASE_LANE_CONFIG` 只为本次 rc1 lane 覆盖 SDK/upstream 输入，不会修改 `dsh-plugins/plugin-kit/toolchain.json`。若上游 checkout 有修改，先停下来重新准备；不要用 `latest`、浮动分支或邻近 worktree 代替固定输入。
+输出必须显示上游 SHA 和 Node 24。插件构建使用 pnpm `11.28.2`，上游 checkout 使用 lane 配置记录的 pnpm `11.28.5`，两个角色不能用一个 `latest` 输出代替。`DSH_RELEASE_LANE_CONFIG` 只为本次 rc1 lane 覆盖 SDK/upstream 输入，release toolchain 和 `dsh-dev` 校验都会读取它，不会修改 `dsh-plugins/plugin-kit/toolchain.json`；只有需要另一份完整 `dsh-b0-toolchain/v2` 文件时才设置 `DSH_COMPOSITION_TOOLCHAIN`。若上游 checkout 有修改，先停下来重新准备；不要用 `latest`、浮动分支或邻近 worktree 代替固定输入。
 
 ## 第二步：生成 runtime 并运行只读检查
 

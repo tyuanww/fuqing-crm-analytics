@@ -105,7 +105,7 @@ async function collectFiles(root, declared) {
 }
 
 function inspectManifest(manifest, packed = false, { sdkVersion = DSH_SDK_VERSION, pnpmVersion = PNPM_VERSION } = {}) {
-  assert.match(manifest.name, /^@shine-mage\/[a-z0-9][a-z0-9-]+$/, 'PLUGIN_PACK_NAME_INVALID');
+  assert.match(manifest.name, /^@(shine-mage|deepseek-ai)\/[a-z0-9][a-z0-9-]+$/, 'PLUGIN_PACK_NAME_INVALID');
   assert.match(manifest.version, /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/, 'PLUGIN_PACK_VERSION_INVALID');
   assert.equal(manifest.type, 'module', 'PLUGIN_PACK_TYPE_INVALID');
   if (!packed || manifest.packageManager !== undefined) {
@@ -194,7 +194,7 @@ export async function readPluginPack({ manifestPath, expectedSha256, expectedSdk
   assert.equal(digest(manifestBytes), expectedSha256, 'PLUGIN_PACK_MANIFEST_DIGEST_MISMATCH');
   const receipt = JSON.parse(manifestBytes);
   assert.equal(receipt.schema_version, 'dsh-plugin-pack/v1', 'PLUGIN_PACK_SCHEMA');
-  assert.match(receipt.package_name ?? '', /^@shine-mage\/[a-z0-9][a-z0-9-]+$/, 'PLUGIN_PACK_NAME_INVALID');
+  assert.match(receipt.package_name ?? '', /^@(shine-mage|deepseek-ai)\/[a-z0-9][a-z0-9-]+$/, 'PLUGIN_PACK_NAME_INVALID');
   assert.match(receipt.package_version ?? '', /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/, 'PLUGIN_PACK_VERSION_INVALID');
   assert.equal(receipt.dsh_pin, expectedSdkVersion, 'PLUGIN_PACK_DSH_PEER_INVALID');
   assert.match(receipt.source_sha ?? '', /^[a-f0-9]{40}$/, 'PLUGIN_PACK_GIT_SHA_INVALID');

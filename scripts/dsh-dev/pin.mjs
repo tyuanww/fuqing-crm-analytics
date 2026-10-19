@@ -6,6 +6,7 @@ import { readFile, access } from 'node:fs/promises';
 import { isAbsolute, join } from 'node:path';
 import { PINNED_SHA, NODE_MAJOR } from './constants.mjs';
 import { managerVersions } from '../release/package-manager-contract.mjs';
+import { TOOLCHAIN } from '../release/toolchain.mjs';
 
 export function validateToolchain(pin) {
   assert.ok(pin && typeof pin === 'object' && !Array.isArray(pin), 'TOOLCHAIN_INVALID');
@@ -24,7 +25,16 @@ export async function readToolchainFile(path) {
 
 export async function readToolchain(repoRoot) {
   const configured = process.env.DSH_COMPOSITION_TOOLCHAIN ?? process.env.DSH_TOOLCHAIN_PATH;
-  const pin = await readToolchainFile(configured ?? join(repoRoot, 'dsh-plugins/plugin-kit/toolchain.json'));
+  const lanePath = process.env.DSH_RELEASE_LANE_CONFIG;
+  const pin = configured
+    ? await readToolchainFile(configured)
+    : lanePath
+      ? await readFile(lanePath, 'utf8').then(value => {
+          const lane = JSON.parse(value);
+          assert.equal(lane.schema_version, 'shinemage-rc1-release-lane/v1', 'DSH_RELEASE_LANE_SCHEMA_INVALID');
+          return validateToolchain({ ...TOOLCHAIN, upstream_sha: lane.upstream_sha, upstream_lock_sha256: lane.upstream_lock_sha256, upstream_pnpm: lane.upstream_pnpm, pnpm: lane.plugin_pnpm, sdk_version: lane.sdk });
+        })
+      : await readToolchainFile(join(repoRoot, 'dsh-plugins/plugin-kit/toolchain.json'));
   assert.equal(pin.upstream_sha, PINNED_SHA, 'toolchain.json drifted from the fixed upstream SHA');
   assert.equal(pin.node_major, NODE_MAJOR);
   return pin;

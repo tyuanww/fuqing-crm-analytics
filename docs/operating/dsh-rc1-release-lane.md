@@ -9,6 +9,7 @@
 | SDK | `@deepseek-ai/dsh@0.2.1-rc.1` |
 | 上游 tag | `dsh-v0.2.1-rc.1` |
 | 上游 SHA | `1600d8a1e140dcde43a1a0941940a0480712c011` |
+| 上游锁文件 SHA-256 | `952ca2f79998660dc690b739078a5d6052bc7c5c2193714b918b9d720baaeaba`（`pnpm-lock.yaml`） |
 | Cordis | `4.0.5` |
 | Node | `v24.19.0` |
 | plugin pnpm | `11.28.2` |

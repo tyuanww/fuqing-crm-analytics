@@ -10,7 +10,7 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { runtimeVendorAssignmentAllowlist, scanText } from './secret-scan.mjs';
-import { DSH_UPSTREAM_SHA as PIN } from './toolchain.mjs';
+import { DSH_SDK_VERSION, DSH_UPSTREAM_SHA as PIN } from './toolchain.mjs';
 import { bindRuntimeInputs, prepareRuntimeInputs, runtimeDeployArgs, runtimeSourceTree, stageRuntimeWorkspace, verifyRuntimePreparation } from './runtime-inputs.mjs';
 import { canonicalTreeDigest, GENERATED_PROVENANCE_SCHEMA } from './generated-provenance.mjs';
 import { comparablePackageBytes } from './runtime-package-identity.mjs';
@@ -45,6 +45,7 @@ const EXTERNAL_WEB_PLUGIN_PEER_ALIASES = Object.freeze([
   'dsh-client-ui-renderer',
   'dsh-client-ui-sidebar',
   'dsh-client-ui-sidebar-right',
+  'dsh-client-ui-slots',
   'dsh-client-ui-theme',
   'dsh-client-ui-tool',
   'dsh-client-ui-workspace',
@@ -158,6 +159,27 @@ async function requiredPeerAliases(root) {
   await walk(root);
   assert.ok(names.size > 0, 'RUNTIME_REQUIRED_PEER_ALIASES_MISSING');
   return names;
+}
+
+async function verifyPeerSourceEntries(root, upstreamRoot, required) {
+  const trustedRoot = await realpath(upstreamRoot);
+  for (const name of required) {
+    const entry = join(root, name);
+    const target = await realpath(entry).catch(error => {
+      if (error.code === 'ENOENT') throw new Error(`RUNTIME_EXTERNAL_WEB_PLUGIN_PEER_MISSING ${name}`);
+      throw new Error(`RUNTIME_PEER_ALIAS_UNREADABLE ${name}: ${error.message}`);
+    });
+    if (target !== trustedRoot && !target.startsWith(`${trustedRoot}/`)) {
+      throw new Error(`RUNTIME_PEER_ALIAS_OUTSIDE_UPSTREAM ${name}`);
+    }
+    const metadata = JSON.parse(await readFile(join(target, 'package.json'), 'utf8'));
+    if (metadata.name !== `@deepseek-ai/${name}`) {
+      throw new Error(`RUNTIME_PEER_ALIAS_ID_MISMATCH ${name}`);
+    }
+    if (name === 'dsh-tools' && metadata.version !== DSH_SDK_VERSION) {
+      throw new Error(`RUNTIME_PEER_ALIAS_VERSION_MISMATCH ${name}`);
+    }
+  }
 }
 
 async function materializeExternalSymlinks(deployed, upstream, pinnedSha, { portableLinux = false } = {}) {
@@ -278,7 +300,8 @@ async function materializeExternalSymlinks(deployed, upstream, pinnedSha, { port
   await mkdir(peerDestinationRoot, { recursive: true });
   const requiredPeers = await requiredPeerAliases(deployedRoot);
   const peerSourceEntries = await readdir(peerSourceRoot, { withFileTypes: true });
-  assertPeerAliasesPresent(EXTERNAL_WEB_PLUGIN_PEER_ALIASES, peerSourceEntries);
+  assertPeerAliasesPresent([...requiredPeers], peerSourceEntries);
+  await verifyPeerSourceEntries(peerSourceRoot, upstreamRoot, requiredPeers);
   let seededPeers = 0;
   for (const entry of peerSourceEntries) {
     if (!entry.name.startsWith('dsh-') && !entry.name.startsWith('cordis-plugin-') && !['cordis', 'cosmokit'].includes(entry.name)) continue;
