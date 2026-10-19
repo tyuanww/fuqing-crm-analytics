@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { sourceManifestStatus, validateSourceManifest } from './plugin-source-manifest.mjs';
 
@@ -44,4 +46,15 @@ test('rejects a ready deletion gate while external checks are not run', () => {
 
 test('rejects a lock digest mismatch before any source is accepted', () => {
   assert.throws(() => validateSourceManifest(manifest(), { lockSha256: 'c'.repeat(64) }), /SOURCE_MANIFEST_LOCK_SHA_MISMATCH/);
+});
+
+
+test('tracked source manifest matches the composition lock selection', async () => {
+  const manifest = JSON.parse(await readFile('config/shinemage-composition-pack-manifest.v1.json', 'utf8'));
+  const lockBytes = await readFile('config/shinemage-composition-packs.lock.json');
+  const lock = JSON.parse(lockBytes);
+  const lockSha256 = createHash('sha256').update(lockBytes).digest('hex');
+  validateSourceManifest(manifest, { lockSha256, expectedIds: lock.plugins.map(row => row.id) });
+  assert.equal(manifest.consumer.reviewed_sha, '4ac076dea89790379c0d142d6b35a48d9208345a');
+  assert.equal(manifest.deletion_gate.status, 'BLOCKED');
 });
