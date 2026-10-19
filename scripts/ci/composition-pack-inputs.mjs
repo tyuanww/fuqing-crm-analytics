@@ -77,6 +77,7 @@ export async function prepareCompositionPacks({ inputDirectory, output,
       const source = sourceManifestRows.get(row.id);
       assert.ok(source, 'CI_COMPOSITION_SOURCE_MANIFEST_PLUGIN_REQUIRED');
       assert.equal(source.status, 'PASS', 'CI_COMPOSITION_SOURCE_NOT_READY');
+      assert.equal(source.directory, row.directory, 'CI_COMPOSITION_SOURCE_MANIFEST_DIRECTORY');
       assert.equal(source.sha, row.source_sha, 'CI_COMPOSITION_SOURCE_MANIFEST_SHA');
       assert.equal(source.manifest_sha256, row.manifest_sha256, 'CI_COMPOSITION_SOURCE_MANIFEST_DIGEST');
     }

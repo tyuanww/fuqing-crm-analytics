@@ -7,7 +7,7 @@ export const GATE_STATUSES = new Set(['READY', 'BLOCKED']);
 
 const SHA1 = /^[a-f0-9]{40}$/;
 const SHA256 = /^[a-f0-9]{64}$/;
-const REPOSITORY = /^tyuanww\/[a-z][a-z0-9-]+$/;
+const REPOSITORY = /^tyuanww\/(?:fuqing-crm-analytics|dsh-[a-z][a-z0-9-]*|shinemage-[a-z][a-z0-9-]*)$/;
 const REF = /^(?:main|commit|refs\/tags\/[A-Za-z0-9._/-]+)$/;
 const PACKAGE_ID = /^@shine-mage\/[a-z0-9][a-z0-9-]+$/;
 const DIRECTORY = /^[a-z][a-z0-9-]*$/;
