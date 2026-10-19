@@ -179,3 +179,18 @@ external mode 的接收命令必须先校验来源清单、组合锁和 artifact
 
 - 提交 `a268127b` 将来源清单接入 `composition-pack-inputs.mjs`。传入 `--manifest` 后，输入准备会先校验 lock SHA、source SHA、manifest SHA、source 状态和 pack SHA。`NOT_RUN` 来源会在创建输出前失败。未传 `--manifest` 的旧入口保持兼容。
 - 该变更先触发了变量遮蔽回归。修复后组合输入和来源清单测试共 `18 PASS / 0 FAIL / 0 SKIP`。
+
+## 外部输入盘查结果
+
+2026-10-19 读取了独立仓的 GitHub Actions 产物索引。
+
+- `dsh-analytics-workbench` 在旧 reviewed source `3030e3f2` 有 formal pack artifact，artifact ID 为 `11727345827` 或 `11727086505`。两者都需要按 run 和 digest 重新选择，不能只凭名称选择。
+- `dsh-crm-knowledge` 的 reviewed source `dac0539b` 已有成功的 fixed-inputs run，但本次 GitHub API 查询出现 TLS 超时，artifact ID 尚未确认。
+- `dsh-knowledge` 的 reviewed source `f623c220` 有 formal pack artifact `11727570395`，也有 CI evidence artifact `11727540579`。
+- `dsh-shine-board`、`dsh-shine-query`、`dsh-shine-funnel` 和 `dsh-shine-waterfall` 的 reviewed source 当前只有 CI evidence artifact。当前索引没有 formal pack artifact。
+- `dsh-shine-brand` 的独立仓只有 `public-contracts` artifact。其回执明确记录 `formal_pack_plugin=NOT_RUN`。
+- `dsh-shine-crowd-action` 的 artifact API 查询因 TLS 超时未完成。
+- `shinemage-board-components` 是构建输入。它必须单独固定 reviewed source 和 tarball digest。
+- 旧组合 artifact 的下载请求遇到 GitHub blob TLS handshake timeout。本次没有把下载失败写成成功，也没有把旧 artifact 当作当前输入。
+
+这些结果把“独立仓存在”和“主仓可接收 sealed pack”分开。当前来源清单继续保持 `NOT_RUN` 和 `BLOCKED`。
