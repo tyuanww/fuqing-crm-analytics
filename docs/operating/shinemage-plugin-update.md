@@ -33,7 +33,7 @@ board-components 的独立本地作者仓已提交为 `3855db80` 并完成真实
 
 ## 内部 owner-operated 更新入口
 
-当前杭州 WSL 使用 rc1 owner bundle。单插件更新不重建 Harness，但必须从新 pack 身份开始。输入是插件 clean commit、builder receipt、pack manifest、tarball、profile-pack inputs 和目标回退版本。输出是新的 candidate release、target receipt 和 rollback pointer。
+当前杭州 WSL 使用 rc2 owner candidate。单插件更新不重建 Harness，但必须从新 pack 身份开始。输入是插件 clean commit、builder receipt、pack manifest、tarball、profile-pack inputs 和目标回退版本。输出是新的 candidate release、target receipt 和 rollback pointer。
 
 执行顺序固定为：
 

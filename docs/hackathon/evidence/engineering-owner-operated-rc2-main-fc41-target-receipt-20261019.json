@@ -1,0 +1,70 @@
+{
+  "schema_version": "shinemage-owner-deployment-receipt/v1",
+  "deployment_mode": "owner-operated-internal",
+  "deployed_at": "2026-10-19T16:26:41+08:00",
+  "source": {
+    "commit": "fc41e45d3f3181ee5e4e97839271af2f2de7f2de",
+    "source_archive_sha256": "568172901cc6baf3d799f47947b1e9e9f6e06414b2cce9bc19b46e594b3b82c4"
+  },
+  "runtime": {
+    "release_tag": "dsh-0.1.7-rc.2-owner-main-fc41e45d-20261019",
+    "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+    "runtime_asset_sha256": "6d10be9c64ade039ebe6c90f8072b16e367bf78b120327484f05ddd18a93938",
+    "runtime_path": "/srv/shinemage/dsh/runtime-owner-main-fc41e45d-20261019"
+  },
+  "candidate": {
+    "bundle_sha256": "6554af047a31b9046ab7683d49c047c08a441bb3717f219763f45c8d33bb143e",
+    "owner_preflight": "PASS",
+    "owner_preflight_sha256": "3985ccdbaad97bd07f6e0a3adf5ef1ceca9b97914e5126be2cf198900239a7d9",
+    "plugin_pack_count": 9,
+    "provenance": "dsh-generated-bytes/v1",
+    "marker_sha256": "46eef0d0f50953a42028c9e4059d18405d03745775a1ba9084497b5438b44792"
+  },
+  "side_by_side": {
+    "web_port": 14327,
+    "page_http_port": 18157,
+    "web_unauthenticated_http": 401,
+    "page_root_http": 404,
+    "binding_state_http": 200,
+    "binding_state": "UNBOUND_SAMPLE",
+    "stop_start": "PASS",
+    "headed_browser": "PASS_WITH_B0_AUTH_GATE",
+    "headed_browser_observations": [
+      "插件面板显示 7 个已安装插件并全部启用",
+      "项目驾驶舱可打开",
+      "page bridge 可达；未登录时显示需要本次 B0 的有效身份",
+      "没有 Failed to fetch"
+    ]
+  },
+  "cutover": {
+    "previous_current": "/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-owner-main-4ac076de-20261019",
+    "final_current": "/srv/shinemage/dsh/releases/dsh-0.1.7-rc.2-owner-main-fc41e45d-20261019",
+    "service": "active",
+    "web_port": 4328,
+    "page_http_port": 18091,
+    "final_web_unauthenticated_http": 401,
+    "final_page_root_http": 404,
+    "final_binding_state_http": 200,
+    "final_binding_state": "UNBOUND_SAMPLE"
+  },
+  "rollback": {
+    "verified": true,
+    "rollback_current": "/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-owner-main-4ac076de-20261019",
+    "rollback_runtime": "/srv/shinemage/dsh/runtime-rc1-owner-main-4ac076de-20261019",
+    "rollback_service": "active",
+    "rollback_web_unauthenticated_http": 401,
+    "rollback_page_root_http": 404,
+    "restored_final_current": true
+  },
+  "formal_status": {
+    "M2-07": "BLOCKED",
+    "M2-08": "NOT_RUN",
+    "M2-09": "NOT_RUN",
+    "release_ready": false
+  },
+  "limitations": [
+    "本次是内部 owner-operated 部署，不是正式 release。",
+    "headed browser 使用本地 SSH loopback forward；没有配置真实 B0 身份。",
+    "未将空历史列表写成业务 UAT 通过。"
+  ]
+}
