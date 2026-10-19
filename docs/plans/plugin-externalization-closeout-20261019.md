@@ -196,3 +196,5 @@ external mode 的接收命令必须先校验来源清单、组合锁和 artifact
 这些结果把“独立仓存在”和“主仓可接收 sealed pack”分开。当前来源清单继续保持 `NOT_RUN` 和 `BLOCKED`。
 
 - 提交 `d9e4262c` 增加来源目录绑定，并允许 `shinemage-*` 组合 artifact 仓。组合输入和来源清单测试仍为 `18 PASS / 0 FAIL / 0 SKIP`。
+
+- 提交 `7feabcbf` 将主仓 release toolchain 的 package manager 校验移到 `scripts/release/package-manager-contract.mjs`。`DSH_COMPOSITION_TOOLCHAIN` 或 `DSH_TOOLCHAIN_PATH` 可以提供显式外部 toolchain。旧的 `dsh-plugins/plugin-kit/toolchain.json` 只保留兼容回退。工具链测试为 `8 PASS / 0 FAIL / 1 SKIP`。跳过项是本机没有 DSH upstream checkout。
