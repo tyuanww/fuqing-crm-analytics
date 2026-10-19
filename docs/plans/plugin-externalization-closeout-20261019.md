@@ -168,3 +168,11 @@
 external mode 的接收命令必须先校验来源清单、组合锁和 artifact 回执，再创建输出目录。它必须拒绝缺少显式 toolchain 的输入。它不能从 `dsh-plugins/plugin-kit` 推断工具链，也不能从插件源码生成 pack。`--verify-remote-main` 开启后，缺少 `GH_TOKEN`、远端 ref 漂移、artifact head SHA 漂移和 artifact 过期都必须失败。
 
 这个合同的第一个实现单元是离线清单和 sealed pack 检查。远端 API 查询、artifact 下载和正式 pack 重建属于后续单元。当前没有把未完成的 pack、签名或 CI 回执写成 PASS。
+
+## 本次实际完成
+
+- 提交 `a6a61477` 增加 `plugin-source-manifest.mjs` 和六项合同测试。
+- 提交 `d7d08526` 增加当前 rc2 组合的来源清单。清单的九个 source 状态都是 `NOT_RUN`。组合 artifact 状态是 `NOT_RUN`。删除门禁是 `BLOCKED`。
+- 提交 `aa14250f` 将来源清单测试绑定到当前组合锁和 `main` SHA。
+- 六项测试通过。`git diff --check` 通过。JSON 通过 `python3 -m json.tool`。
+- 本次没有生成 plugin tarball。没有运行远端 API 校验。没有删除插件源码。没有修改正式 M2 状态。
