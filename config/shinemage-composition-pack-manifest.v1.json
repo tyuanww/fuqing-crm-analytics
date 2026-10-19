@@ -1,0 +1,131 @@
+{
+  "schema_version": "shinemage-composition-pack-manifest/v1",
+  "lock": {
+    "path": "config/shinemage-composition-packs.lock.json",
+    "sha256": "7f21afd75cfb098126a9b126e7c87a7bee811cc7df9accf4ef59e081af47821f"
+  },
+  "consumer": {
+    "repository": "tyuanww/fuqing-crm-analytics",
+    "branch": "main",
+    "reviewed_sha": "4ac076dea89790379c0d142d6b35a48d9208345a"
+  },
+  "bundle": {
+    "repository": "tyuanww/fuqing-crm-analytics",
+    "workflow": "dsh-release-preflight",
+    "branch": "main",
+    "run_id": null,
+    "artifact_id": null,
+    "artifact_sha256": null,
+    "artifact_head_sha": null,
+    "expires_at": null,
+    "status": "NOT_RUN",
+    "remote_main": "NOT_RUN"
+  },
+  "toolchain": {
+    "sdk_version": "0.1.7-rc.2",
+    "pnpm": "11.28.2",
+    "node_major": 24,
+    "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+    "upstream_lock_sha256": "5d3980bcd2a0113101815aabfeb4f8a875d556a333521539b7f11d790f4a50aa"
+  },
+  "sources": [
+    {
+      "id": "@shine-mage/dsh-analytics-workbench-b0",
+      "directory": "analytics-workbench",
+      "repository": "tyuanww/dsh-analytics-workbench",
+      "ref": "commit",
+      "sha": "3030e3f21263f6ec65cb01c7aeacd4c80e2eb711",
+      "manifest_sha256": null,
+      "pack_sha256": null,
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "@shine-mage/dsh-crm-knowledge",
+      "directory": "crm-knowledge",
+      "repository": "tyuanww/dsh-crm-knowledge",
+      "ref": "commit",
+      "sha": "dac0539bbbe076f62ae592c35e74efcca987e568",
+      "manifest_sha256": null,
+      "pack_sha256": null,
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "@shine-mage/dsh-knowledge",
+      "directory": "knowledge",
+      "repository": "tyuanww/dsh-knowledge",
+      "ref": "commit",
+      "sha": "f623c220fde8d511b694e7c4271e092cd3d4692b",
+      "manifest_sha256": null,
+      "pack_sha256": null,
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-board",
+      "directory": "shine-board",
+      "repository": "tyuanww/dsh-shine-board",
+      "ref": "commit",
+      "sha": "76601df755ec8ef8c9726ea770ec488b745efd71",
+      "manifest_sha256": null,
+      "pack_sha256": null,
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-crowd-action",
+      "directory": "shine-crowd-action",
+      "repository": "tyuanww/dsh-shine-crowd-action",
+      "ref": "commit",
+      "sha": "5c39e21c27565397383b009725634ea66e9c1525",
+      "manifest_sha256": null,
+      "pack_sha256": null,
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-query",
+      "directory": "shine-query",
+      "repository": "tyuanww/dsh-shine-query",
+      "ref": "commit",
+      "sha": "1f1e19d280923ebe7aac964f8b5825d497434db8",
+      "manifest_sha256": null,
+      "pack_sha256": null,
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-funnel",
+      "directory": "shine-funnel",
+      "repository": "tyuanww/dsh-shine-funnel",
+      "ref": "commit",
+      "sha": "dbfaede0961586d773c708e833a4ac1c9f2515dc",
+      "manifest_sha256": null,
+      "pack_sha256": null,
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-waterfall",
+      "directory": "shine-waterfall",
+      "repository": "tyuanww/dsh-shine-waterfall",
+      "ref": "commit",
+      "sha": "d123ac1d0e7bad3e5de45169b3e72c38623b858a",
+      "manifest_sha256": null,
+      "pack_sha256": null,
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "@shine-mage/dsh-shine-brand",
+      "directory": "shine-brand",
+      "repository": "tyuanww/dsh-shine-brand",
+      "ref": "commit",
+      "sha": "57ebcf38278068394a4feb42125c30c195fd912a",
+      "manifest_sha256": null,
+      "pack_sha256": null,
+      "status": "NOT_RUN"
+    }
+  ],
+  "deletion_gate": {
+    "status": "BLOCKED",
+    "blocking_reasons": [
+      "formal_pack_not_prepared",
+      "remote_main_not_verified",
+      "production_only_closure_not_recorded"
+    ]
+  }
+}
