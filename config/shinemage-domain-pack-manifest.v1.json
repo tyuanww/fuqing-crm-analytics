@@ -1,0 +1,24 @@
+{
+  "schema_version": "shinemage-domain-pack-manifest/v1",
+  "package": "@shine-mage/board-components",
+  "repository": "tyuanww/shinemage-board-components",
+  "reviewed_sha": "e78e040e14792c89f99a2e3181004dbdaefd9bf6",
+  "version": "0.1.0",
+  "manifest_sha256": "c756fb4bbfe4ca5f7bc13d7ce7fe8ff21d097615f35f5cced6b94a1a95ffc42c",
+  "pack_sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182",
+  "pack_bytes": 1955,
+  "builder": {
+    "schema_version": "dsh-generated-bytes/v1",
+    "source_tree_sha256": "08cf537ed5b9ae41ac27ef6540d98d87f52b4a92ef490bfd114f21532f693241",
+    "generated_tree_sha256": "899a25980c075e2b03359252be236f612eb43d7f38123a1031744582fd64c7d8",
+    "builder_receipt_sha256": "2f2657c4206ce2ef0246af2ceb871476f489177cdf1e82ca9f5bc9c964aec28e",
+    "node": "v24.19.0",
+    "pnpm": "11.28.2",
+    "network_mode": "offline",
+    "clean": true,
+    "isolated": true,
+    "status": "PASS"
+  },
+  "status": "PASS",
+  "release_ready": false
+}

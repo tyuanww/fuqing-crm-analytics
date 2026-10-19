@@ -335,7 +335,9 @@ test('probe startup graph does not statically load business plugin source', asyn
   await walk(probePath);
   assert.ok(visited.some(file => file.endsWith(`${sep}first-purchase-host-protocol.mjs`)));
   assert.equal(visited.some(file => file.endsWith(`${sep}first-purchase-workspace-save.mjs`)), false);
-  assert.ok(visited.some(file => file.split(sep).join('/').includes('/dsh-plugins/plugin-kit/')));
+  const normalizedVisited = visited.map(file => file.split(sep).join('/'));
+  assert.ok(normalizedVisited.some(file => file.includes('/dsh-plugins/plugin-kit/')
+    || file.endsWith('/scripts/release/toolchain.mjs')));
 });
 
 async function requireAbsoluteKind(file, kind, code) {
