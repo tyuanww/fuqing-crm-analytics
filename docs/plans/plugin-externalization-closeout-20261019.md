@@ -249,11 +249,11 @@ OCR delegation recheck 覆盖 9/9 个可审查文件，另 2 个 Markdown 文件
 
 ### 当前 artifact
 
-- archive: `/tmp/shinemage-composition-formal-artifact-20261019-fixed.tar.gz`
-- archive SHA256: `51c470836a2509997a918ea39c079ac2e84f5573265b470fa240c8579b21542a`
-- archive bytes: `725987`
-- provenance: `/tmp/shinemage-composition-formal-artifact-20261019-fixed.provenance.json`
-- source manifest SHA256: `165f850a419e73483e1436bb1b570500d5497300d10d79aa63bd5d0aa58bb87e`
+- archive: `/tmp/shinemage-composition-formal-artifact-20261019-fixed2.tar.gz`
+- archive SHA256: `b9858ffe8304df04f4a80b4866c7403f3cc2c2c5b9f02c98328299ff19ec8f18`
+- archive bytes: `726050`
+- provenance: `/tmp/shinemage-composition-formal-artifact-20261019-fixed2.provenance.json`
+- source manifest SHA256: `8b86b504e2b1770a2fd6a3251572ae9876fe6f7f8abbc72f8212234d298aa060`
 
 ### 结论
 
