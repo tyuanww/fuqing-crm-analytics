@@ -58,3 +58,22 @@ test('tracked source manifest matches the composition lock selection', async () 
   assert.equal(manifest.consumer.reviewed_sha, '4ac076dea89790379c0d142d6b35a48d9208345a');
   assert.equal(manifest.deletion_gate.status, 'BLOCKED');
 });
+
+test('composition preparation rejects a not-run source manifest before creating output', async () => {
+  const { mkdtemp, rm } = await import('node:fs/promises');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const { prepareCompositionPacks } = await import('../ci/composition-pack-inputs.mjs');
+  const root = await mkdtemp(join(tmpdir(), 'plugin-source-manifest-test-'));
+  const input = join(root, 'input');
+  const output = join(root, 'output');
+  await (await import('node:fs/promises')).mkdir(input);
+  try {
+    await assert.rejects(
+      prepareCompositionPacks({ inputDirectory: input, output, manifestPath: join(process.cwd(), 'config/shinemage-composition-pack-manifest.v1.json') }),
+      /CI_COMPOSITION_SOURCE_NOT_READY/,
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
