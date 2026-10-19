@@ -1,3 +1,20 @@
+## [0.21.0.0] - 2026-10-20
+
+### Added
+
+- 可按固定的 0.2.1-rc.1 lane 在隔离目录检查和启动 DSH，profile 会保留官方插件市场 bundle 与原生插件闭环。
+- 增加 rc1 候选的 peer 闭包、锁摘要、包身份和诊断校验，缺少依赖或 lane 漂移会在启动前失败。
+
+### Changed
+
+- dsh-dev 的 profile-pack 输入现在能显式带入插件市场包，安装顺序、Discover 入口和 side-by-side 候选边界写入同一套运行手册。
+- 诊断、runtime bundle 和 owner profile bridge 统一使用当前 release lane 与 canonical peer root，默认 Node 24 回归覆盖 110 个场景。
+
+### Fixed
+
+- 修复旧版 SDK、错误 pnpm、动态 peer alias 和 AppleDouble locale 文件混入 rc1 候选后才在运行时暴露的问题。
+- 修复诊断仍读取旧默认 pin、profile bridge 绕过 canonical peer root，以及插件市场包被 dsh-dev preflight 拒绝的问题。
+
 ## [Unreleased]
 
 ### Added
