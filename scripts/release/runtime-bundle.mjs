@@ -14,6 +14,7 @@ import { DSH_UPSTREAM_SHA as PIN } from './toolchain.mjs';
 import { bindRuntimeInputs, prepareRuntimeInputs, runtimeDeployArgs, runtimeSourceTree, stageRuntimeWorkspace, verifyRuntimePreparation } from './runtime-inputs.mjs';
 import { canonicalTreeDigest, GENERATED_PROVENANCE_SCHEMA } from './generated-provenance.mjs';
 import { comparablePackageBytes } from './runtime-package-identity.mjs';
+import { assertPeerAliasesPresent } from './runtime-peer-aliases.mjs';
 import { pruneUnsupportedLinuxNative, rewriteGeneratedPathShims, verifyPortableLinuxRuntime } from './runtime-portability.mjs';
 
 const execFile = promisify(execFileCallback);
@@ -28,6 +29,27 @@ const DEVELOPMENT_SEGMENT = /(^|\/)(?:test|tests|__tests__|stress-tests|docs|ref
 const DEVELOPMENT_FILE = /(?:^\._|\.map|\.test\.[cm]?[jt]sx?|\.spec\.[cm]?[jt]sx?|\.tsx?|\.mts|\.cts|\.md|\.mdx|\.toml|^tsconfig(?:\..*)?$|^vite\.config\..*)$/i;
 const TEXT_FILE = /\.(?:cjs|css|html|ini|json|js|mjs|mts|sh|txt|ts|tsx|yaml|yml)$/i;
 const MAX_TEXT_SCAN_BYTES = 16 * 1024 * 1024;
+
+// External web plugins declare these packages through `dsh.client.inject`.
+// They are not runtime production dependencies of the CLI, so `pnpm deploy
+// --prod` omits them even though the profile loader must resolve them from an
+// installed bundle. Keep this closure explicit and small: it makes the
+// runtime self-contained for the supported web-plugin contract without
+// pulling every optional workspace package into production.
+const EXTERNAL_WEB_PLUGIN_PEER_ALIASES = Object.freeze([
+  'dsh-api-session-controller',
+  'dsh-api-workspace-files',
+  'dsh-client-connection',
+  'dsh-client-ui-conversation',
+  'dsh-client-ui-layout',
+  'dsh-client-ui-renderer',
+  'dsh-client-ui-sidebar',
+  'dsh-client-ui-sidebar-right',
+  'dsh-client-ui-theme',
+  'dsh-client-ui-tool',
+  'dsh-client-ui-workspace',
+  'dsh-tools',
+]);
 
 function relativePath(root, path) { return relative(root, path).split('\\').join('/'); }
 
@@ -93,7 +115,7 @@ async function scanRuntimeTree(root) {
 }
 
 async function requiredPeerAliases(root) {
-  const names = new Set();
+  const names = new Set(EXTERNAL_WEB_PLUGIN_PEER_ALIASES);
   async function collectPackageDependencies(path) {
     const packageJson = JSON.parse(await readFile(join(path, 'package.json'), 'utf8').catch(error => {
       if (error.code === 'ENOENT') return '{}';
@@ -255,8 +277,10 @@ async function materializeExternalSymlinks(deployed, upstream, pinnedSha, { port
   const peerDestinationRoot = join(deployedRoot, 'node_modules/.pnpm/node_modules/@deepseek-ai');
   await mkdir(peerDestinationRoot, { recursive: true });
   const requiredPeers = await requiredPeerAliases(deployedRoot);
+  const peerSourceEntries = await readdir(peerSourceRoot, { withFileTypes: true });
+  assertPeerAliasesPresent(EXTERNAL_WEB_PLUGIN_PEER_ALIASES, peerSourceEntries);
   let seededPeers = 0;
-  for (const entry of await readdir(peerSourceRoot, { withFileTypes: true })) {
+  for (const entry of peerSourceEntries) {
     if (!entry.name.startsWith('dsh-') && !entry.name.startsWith('cordis-plugin-') && !['cordis', 'cosmokit'].includes(entry.name)) continue;
     if (!requiredPeers.has(entry.name)) continue;
     const peerSource = join(peerSourceRoot, entry.name);

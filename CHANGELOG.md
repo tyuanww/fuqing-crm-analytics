@@ -2,6 +2,8 @@
 
 ### Added
 
+- 新增 rc1 干净候选的教程、操作手册、参考和架构说明；记录 v4 runtime/profile digest、plugin-market bundle 与 Discover 入口、market index/IM artifact 阻塞和不切线上边界。
+
 - 提交前审修加固宿主验收：只读 Git 禁用仓库本地 fsmonitor/hooks；SIGINT/SIGTERM 由 runner 统一回收并写失败回执，HTTP/解释器/失败取证增加截止时间；编辑首个选区等待 iframe 桥接就绪。
 
 - 增加显式 opt-in 的当前插件包 HTML 宿主验收和官方 shell/tool 合同入口：核对固定源码、包摘要与真实输入，隔离运行后保存场景结果和自有资源清理状态；默认测试不隐式准备 SDK、连接模型或启动生产服务。
@@ -60,6 +62,8 @@
 - `pnpm dsh plugin verify-host` 将同一插件候选、profile 快照、CRM/知识组合和固定 rc2 的本机宿主证据接到既有 journal；重试幂等，不修改候选或激活服务。增加 SQLite 提交前后进程丢失、保存回放与 forward-fix 验证；这些本地结果不放行生产发布或 D15 保存门禁。
 
 ### Fixed
+
+- runtime bundle 对 web plugin peer alias 缺失改为 fail-closed，profile bridge 支持 pnpm canonical peer root，Linux x64 生成 DevTools chunk 的 secret allowlist 绑定精确路径和 SHA-256；新增对应负测。
 
 - HTML AI 修改使用官方右侧栏的公开 mounted/openResource 合同，空会话可以打开首个产物；插件卸载中止等待及后续 UI 动作，保留后端修改任务。修复后端原始 HTML 块重复累加关闭标签偏移的问题，使后续嵌套元素映射和 AI 工作区源码范围一致。
 - 完整 HTML 文档仅在预览层投影到宿主外壳，保留 head 样式、html/body 属性及资源替换，避免正常结束标签显示成文字；原始包、哈希、映射及 CSP/sandbox 保护保持，畸形文档继续沿用片段防护路径。

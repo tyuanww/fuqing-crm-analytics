@@ -2,7 +2,7 @@
 
 本地完整 DSH web 基座入口。不是 B0 合成笼，不管理 8000/5173/15173/4315–4319。
 
-候选固定上游：`deepseek-ai/deepseek-harness@477b4f420553e8a52c2fbccc464d7561b239c443`（0.1.7-rc.2，见 `toolchain.json`）。Node 24。杭州现役与候选状态以根 [STATUS](../../STATUS.md) 的带日期快照为准。后续再升版本仍改 `dsh-plugins/plugin-kit/toolchain.json`；本入口 `PINNED_SHA` 从同一配置导入，不要直接改上游源码。
+本地开发入口的上游 pin 仍由 [`dsh-plugins/plugin-kit/toolchain.json`](../../dsh-plugins/plugin-kit/toolchain.json) 管理，不能用它推断杭州线上版本。Node 24。杭州现役与候选状态以根 [STATUS](../../STATUS.md) 的带日期快照为准；当前线上 owner-operated 和 clean-main v4 staging 见 [rc1 干净候选手册](../../docs/operating/dsh-rc1-clean-upgrade-runbook.md)。后续升级应更新配置、runtime、profile 和回执，不要直接改上游源码。
 
 ## 命令
 
@@ -18,7 +18,7 @@
 `run.sh probe` 只检查当前工作树自己登记的实例：未认证请求应返回 401，启动 URL 兑换一次 cookie 后页面应返回 200。它不会打印 token，也不会探测杭州或其他工作树的端口。
 `run.sh open` 只打开当前工作树自己保存的启动 URL；没有当前实例时会明确报错，不会猜测或打开 6677。
 
-当前现役归属：6677 / 18091 仍使用 `dsh-017-rc1` 工作树代码和 RC1 上游；候选 rc2 只在 release artifact/隔离 worktree 中验证，supervisor 控制登记与 durable runtime 仍在原仓。CRM 18093 未重启。下列 `status` / `stop` / `probe` 在拥有 `current.json` 的工作树执行；默认 `reload` 会重编其所在仓库源码，不能用旧仓源码覆盖当前现役。旧 alpha2 checkout 保留用于回退。
+当前线上版本由远端 `shinemage-dsh.service` 的 `current` symlink 负责；本地 6677/14327 只代表当前工作树或隔离候选。v4 staging 不会自动接管本地实例，也不会改线上 `current`。下列 `status` / `stop` / `probe` 只在拥有 `current.json` 的工作树执行；默认 `reload` 会重编其所在仓库源码，不能用旧仓源码覆盖当前现役。
 
 ```bash
 node scripts/dsh-dev/cli.mjs --help

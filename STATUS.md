@@ -1,8 +1,17 @@
 # 项目状态（Project Status）
 
-> 当前短表（2026-10-18）；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。历史 PASS、NOT_RUN 与版本只属于原验收对象，本页是当前运行与交付边界的 SSOT。
+> 当前短表（2026-10-20）；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。历史 PASS、NOT_RUN 与版本只属于原验收对象，本页是当前运行与交付边界的 SSOT。
 
-## 当前快照（2026-10-18）与 alpha4 候选当前事实
+## 当前快照（2026-10-20）
+
+- 当前线上 `shinemage-dsh.service` 为 `active`，`/srv/shinemage/dsh/current` 指向 `dsh-0.2.1-rc.1-owner-main-4ac076de-20261019`，运行包版本为 `0.2.1-rc.1`。这是已保留回退目标的 owner-operated 版本，不等于正式公司 release。
+- 新的隔离候选为 `dsh-0.2.1-rc.1-clean-main-20261020-v4`，固定 upstream `1600d8a1e140dcde43a1a0941940a0480712c011`，runtime archive SHA-256 为 `d3d504dd39cd333fb98acf61cf4597664f6d4fda5482fb2ea970748bd2b8a94f`，web profile SHA-256 为 `c3ec7df313c2323996428b1034af0fd5eec5fffe1d06a8c618532074110503ad`。候选仍在 `/srv/shinemage/dsh/staging/rc1-clean-main-20261020`，没有替换线上 `current`。
+- 候选已通过 native/business boot、login loopback callback（状态为 `PASS_WAITING_BROWSER`，仅表示 HTTP/一次性 token 边界通过，仍需 headed browser 回读）、Settings/account RPC、浏览器插件页、plugin-market Discover、console log 采集、AppleDouble 文件检查、peer alias 缺失负测和 v4 boot。插件市场 bundle 是 `@deepseek-ai/dsh-experimental-plugin-market-bundle@0.2.1-rc.1`。
+- IM 插件包或 market index 未出现在可验证的归档输入中：`im.status=BLOCKED_MISSING_ARTIFACT`、`im.package_or_index=NOT_FOUND_IN_ARCHIVED_PLUGIN_INPUTS`。因此 `production_switch=HELD_PENDING_IM_ARTIFACT`，`release_ready=false`；没有用旧插件目录或临时补丁填充缺口。
+- 本轮代码修复集中在 runtime peer alias 闭包、profile bridge 的 pnpm canonical peer root 回退和 Linux x64 生成 DevTools chunk 的精确 secret allowlist；固定 Node 24 的 release 回归为 `45 pass / 0 fail`，远程 Node 24 的新 peer 负测通过。默认 Node 25 下的 dsh-dev 全量失败属于环境版本不满足，不改写为代码通过。
+- 当前版本核对以线上 `current`、`current/upstream/package.json` 和候选 receipt 为准；历史兼容基线、旧候选和旧回执只作为带日期的证据，不得据此判断当前线上版本。
+
+## 2026-10-18 及更早候选/alpha4 证据
 
 - 工程闭环与正式发布已分线。架构和本地技术闭环为 `CLOSED_FOR_ARCHITECTURE`；最终内部环境目标锁定为 Harness 最新发布 `dsh-v0.2.1-rc.1` / upstream `1600d8a1e140dcde43a1a0941940a0480712c011`，npm tarball SHA-256 为 `6d0c6fe8ad0c21797a27d6afc0cb69a022714ea0cd7331e4cba8b07b8ce19009`。现有 `0.1.7-rc.2` 只作为主仓兼容基线和历史证据边界。有限剩余任务与边界见 [工程闭环与正式发布门禁分离](docs/hackathon/evidence/engineering-closeout-20261017.md)。
 - 2026-10-18 当前 owner-operated 切换已完成：杭州 WSL `current` 已原子切换到 PR #139 合并提交 `b78972a09ef61e6511a51ef9aa758207bc091734` 对应的 `dsh-0.2.1-rc.1-owner-main-b78972a0-20261018`。systemd 已绑定 `runtime-rc1-owner-main-b78972a0-20261018`，web `4328` 返回 `401`，page HTTP `18091` 返回 `404`，真实 Chrome headed browser 已回读 7 个启用插件和 `项目驾驶舱`。官方 rollback 已回到 r9 并复读 HTTP/浏览器，随后重新激活 b789 current；回退目标仍保留。该事实只属于内部 owner-operated 部署，不是正式公司 release；publisher identity、signature、independent verification、revocation、final attestation 和 formal clean-machine 仍未完成。详见 [merged-main target cutover](docs/hackathon/evidence/engineering-owner-operated-rc1-main-b789-target-cutover-20261018.md)。

@@ -1,4 +1,5 @@
 import { execFile } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { mkdir, readFile, symlink, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { promisify } from 'node:util';
@@ -31,10 +32,15 @@ export async function applyOwnerProfileBridge(prepared) {
   const dependencies = { ...(packageJson.dependencies ?? {}) };
   const linked = [];
   for (const id of [...ids].sort()) {
-    const target = join(prepared.upstream, 'node_modules', ...id.split('/'));
-    try {
-      await readFile(join(target, 'package.json'));
-    } catch {
+    // Production deploys keep peer-only workspace packages under pnpm's
+    // canonical peer alias root. Prefer the normal top-level alias, then use
+    // that verified peer root; never resolve from an arbitrary host checkout.
+    const candidates = [
+      join(prepared.upstream, 'node_modules', ...id.split('/')),
+      join(prepared.upstream, 'node_modules', '.pnpm', 'node_modules', ...id.split('/')),
+    ];
+    const target = candidates.find(candidate => existsSync(join(candidate, 'package.json')));
+    if (!target) {
       continue;
     }
     dependencies[id] = `link:${target}`;
@@ -52,7 +58,12 @@ export async function applyOwnerProfileBridge(prepared) {
     const scope = join(plugin.root, 'node_modules', '@deepseek-ai');
     await mkdir(scope, { recursive: true, mode: 0o700 });
     for (const id of linked) {
-      const target = join(prepared.upstream, 'node_modules', ...id.split('/'));
+      const candidates = [
+        join(prepared.upstream, 'node_modules', ...id.split('/')),
+        join(prepared.upstream, 'node_modules', '.pnpm', 'node_modules', ...id.split('/')),
+      ];
+      const target = candidates.find(candidate => existsSync(join(candidate, 'package.json')));
+      if (!target) continue;
       const link = join(plugin.root, 'node_modules', ...id.split('/'));
       try {
         await symlink(target, link, 'junction');

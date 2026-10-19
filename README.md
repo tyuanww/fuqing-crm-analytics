@@ -2,9 +2,9 @@
 
 当前提交、版本和现役见 [STATUS](./STATUS.md)。目录、端口和检索见 [维护地图](./docs/operating/maintainer-map.md)。对话生成 HTML 的步骤见 [从对话生成 HTML 驾驶舱](./docs/operating/cockpit-native-html.md)。产品仍 PARTIAL。
 
-> 最近生产记录（[STATUS](./STATUS.md) 的 2026-10-18 现场记录）：内部 owner-operated 当前为 `dsh-0.2.1-rc.1-owner-main-b78972a0-20261018`，杭州 `current` 已完成 side-by-side 切换并保留 r9 回退；正式发布线仍以 DSH `0.1.7-rc.2` 和固定 upstream `477b4f42` 为兼容基线，`release_ready=false`。该内部切换不等于公司正式 release。产品仍 PARTIAL；局部合成验证不能替代真实模型、完整业务 UAT、生产准入及回退证据。后续发布必须从 clean reviewed commit 生成新的 immutable artifact，禁止 `git pull` 或现场编译。
+> 最近生产记录（[STATUS](./STATUS.md) 的 2026-10-20 现场记录）：线上 `current` 为 `dsh-0.2.1-rc.1-owner-main-4ac076de-20261019`，新候选 `dsh-0.2.1-rc.1-clean-main-20261020-v4` 仍在 staging。候选已装配官方 plugin-market bundle，并通过 Discover tab 入口、原生 boot、Settings、插件页和 peer/AppleDouble 检查；market index 仍未配置，IM artifact 也缺失，因此 `production_switch=HELD_PENDING_IM_ARTIFACT`、`release_ready=false`。该内部 owner-operated 版本不等于公司正式 release；局部验证不能替代真实模型、完整业务 UAT、正式发布门禁及回退证据。后续发布必须从 clean reviewed commit 生成 immutable artifact，禁止 `git pull` 或现场编译。
 
-> 主仓当前快照（2026-10-18）：本轮治理与状态文档已合并，最新 main SHA 以 Git 实查和 STATUS 为准。主仓继续承担 DSH pin、profile、跨插件合同、组合验证和交付文档；CRM、知识、看板和其他业务能力由独立插件仓维护。PR #121 的历史事实仍见[PR #121 合并后事实记录](./docs/hackathon/evidence/shinemage-pr121-postmerge-20261012.md)。单插件的实际更新步骤见[插件更新指南](./docs/operating/shinemage-plugin-update.md)，职责、清理和 DSH 升级边界见[维护、清理与升级手册](./docs/operating/shinemage-maintenance-and-cleanup.md)。正式 SDK 分发仍 BLOCKED，产品仍 PARTIAL，未授权的正式发布门禁仍保持未执行。
+> 主仓当前快照（2026-10-20）：主仓继续承担 DSH pin、profile、runtime peer closure、跨插件合同、组合验证和交付文档；CRM、知识、看板和其他业务能力由独立插件仓维护。单插件的实际更新步骤见[插件更新指南](./docs/operating/shinemage-plugin-update.md)，rc1 干净候选见[升级操作手册](./docs/operating/dsh-rc1-clean-upgrade-runbook.md)，职责、清理和 DSH 升级边界见[维护、清理与升级手册](./docs/operating/shinemage-maintenance-and-cleanup.md)。正式 SDK 分发仍 BLOCKED，产品仍 PARTIAL，未授权的正式发布门禁仍保持未执行。
 
 > A/B/C 集成记录（2026-10-08）是历史证据：单插件更新与取消、固定宿主进程级恢复、HTML headed 验收和 SDK 信任盘查见[本轮集成验收](./docs/hackathon/evidence/shinemage-abc-integration-20261008.md)。它不替代当前主仓合并状态，也不代表新的 Release。
 
@@ -150,6 +150,10 @@ cd frontend-vue3 && npx playwright test                   # E2E
 | [`docs/operating/ship.md`](./docs/operating/ship.md) | 历史交付记录；当前 Git 动作按 AGENTS.md |
 | [`docs/operating/dsh-rc2-quickstart.md`](./docs/operating/dsh-rc2-quickstart.md) | rc2 artifact 准备教程 |
 | [`docs/operating/dsh-rc1-release-lane.md`](./docs/operating/dsh-rc1-release-lane.md) | 内部 rc1 候选准备；不代表正式 release |
+| [`docs/operating/dsh-rc1-clean-upgrade-runbook.md`](./docs/operating/dsh-rc1-clean-upgrade-runbook.md) | rc1 干净重建、profile、插件市场、验证和 side-by-side 条件 |
+| [`docs/tutorials/dsh-rc1-clean-candidate.md`](./docs/tutorials/dsh-rc1-clean-candidate.md) | 从固定上游构建并观察 rc1 候选 |
+| [`docs/reference/dsh-rc1-clean-candidate.md`](./docs/reference/dsh-rc1-clean-candidate.md) | v4 候选字段、bundle、peer closure 和状态值 |
+| [`docs/architecture/dsh-rc1-clean-rebuild.md`](./docs/architecture/dsh-rc1-clean-rebuild.md) | 为什么 runtime、profile 和 IM 输入必须隔离 |
 | [`docs/operating/dsh-rc2-runbook.md`](./docs/operating/dsh-rc2-runbook.md) | rc2 现场接收、切换和回退顺序 |
 | [`docs/operating/shinemage-maintenance-and-cleanup.md`](./docs/operating/shinemage-maintenance-and-cleanup.md) | 插件更新、DSH 升级、证据留存与本机/远程清理 |
 | [`docs/operating/shinemage-plugin-update.md`](./docs/operating/shinemage-plugin-update.md) | How to 只更新一个插件并把摘要接入主仓 |
