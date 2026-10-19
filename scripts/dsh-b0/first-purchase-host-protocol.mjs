@@ -1,5 +1,6 @@
 /** Public host HTTP/RPC acceptance for a fixed install. Not createSaveController. */
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 
 const UI = 'shinemage-first-purchase-ui/v1';
 const IDENTITY = 'analytics-first-purchase-save-identity/v1';
@@ -10,6 +11,8 @@ const SERVICE = 'analytics-first-purchase';
 const DATA_SCOPE = 'first-purchase-fixture';
 const SHA = /^[a-f0-9]{64}$/;
 const OPAQUE = /^[A-Za-z0-9_.:-]{1,128}$/;
+const TARGET_SESSION = /^[A-Za-z0-9_.:-]{1,160}$/;
+const TARGET_CALL = /^[A-Za-z0-9_.:-]{1,160}$/;
 const TIMESTAMP = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,6})?(?:Z|[+-]\d\d:\d\d)$/;
 const DAY = /^\d{4}-\d\d-\d\d$/;
 export const PUBLIC_SAVE_EVIDENCE = 'public-save-http';
@@ -22,12 +25,20 @@ const exactKeys = (value, keys) => value !== null && typeof value === 'object' &
 function sameIdentity(actual, expected) {
   return exactKeys(actual, Object.keys(expected)) && Object.keys(expected).every(key => actual[key] === expected[key]);
 }
-function assertIdentity(value, candidateDigest) {
+function identityForTarget(owner, target, candidateDigest) {
+  const digest = createHash('sha256').update(JSON.stringify([
+    owner, target.session_id, target.run_id, target.call_id, candidateDigest,
+  ])).digest('hex');
+  return { schema_version: IDENTITY, action_id: `fp-save-${digest}`, candidate_digest: candidateDigest,
+    correlation_id: `fp-ui-${digest}` };
+}
+function assertIdentity(value, candidateDigest, expected) {
   assert.ok(exactKeys(value, ['schema_version', 'action_id', 'candidate_digest', 'correlation_id']), 'PUBLIC_SAVE_IDENTITY');
   assert.equal(value.schema_version, IDENTITY, 'PUBLIC_SAVE_IDENTITY');
   assert.equal(value.candidate_digest, candidateDigest, 'PUBLIC_SAVE_CANDIDATE');
   assert.match(value.action_id, /^fp-save-[a-f0-9]{64}$/, 'PUBLIC_SAVE_IDENTITY');
   assert.equal(value.correlation_id, value.action_id.replace('fp-save-', 'fp-ui-'), 'PUBLIC_SAVE_IDENTITY');
+  assert.ok(sameIdentity(value, expected), 'PUBLIC_SAVE_IDENTITY');
 }
 function assertEligibleFreshness(value, generatedAt) {
   assert.ok(exactKeys(value, ['freshness_state', 'freshness_checked_at', 'freshness_stale_at', 'freshness_expires_at',
@@ -157,9 +168,9 @@ export function readSaveHttpBody(response) {
  */
 export async function acceptPublicSaveHttp({ call, target, candidateDigest, title, expectedOwner }) {
   assert.equal(typeof call, 'function', 'PUBLIC_SAVE_CALL');
-  assert.equal(typeof target?.session_id, 'string', 'PUBLIC_SAVE_TARGET');
-  assert.equal(typeof target?.run_id, 'string', 'PUBLIC_SAVE_TARGET');
-  assert.equal(typeof target?.call_id, 'string', 'PUBLIC_SAVE_TARGET');
+  assert.match(target?.session_id ?? '', TARGET_SESSION, 'PUBLIC_SAVE_TARGET');
+  assert.match(target?.run_id ?? '', OPAQUE, 'PUBLIC_SAVE_TARGET');
+  assert.match(target?.call_id ?? '', TARGET_CALL, 'PUBLIC_SAVE_TARGET');
   assert.match(candidateDigest ?? '', SHA, 'PUBLIC_SAVE_CANDIDATE');
   assert.match(expectedOwner ?? '', /^[A-Za-z0-9_.@-]{1,64}$/, 'PUBLIC_SAVE_OWNER');
   assert.equal(typeof title, 'string', 'PUBLIC_SAVE_TITLE');
@@ -176,7 +187,8 @@ export async function acceptPublicSaveHttp({ call, target, candidateDigest, titl
   assert.equal(status?.schema_version, UI, 'PUBLIC_SAVE_SCHEMA');
   assert.equal(status.ok, true, 'PUBLIC_SAVE_SCHEMA');
   assert.equal(status.owner, expectedOwner, 'PUBLIC_SAVE_OWNER');
-  assertIdentity(status.identity, candidateDigest);
+  const expectedIdentity = identityForTarget(expectedOwner, target, candidateDigest);
+  assertIdentity(status.identity, candidateDigest, expectedIdentity);
   const owner = status.owner, identity = status.identity;
   const inspected = await invoke('inspect', null);
   assert.equal(inspected?.schema_version, UI, 'PUBLIC_SAVE_SCHEMA');

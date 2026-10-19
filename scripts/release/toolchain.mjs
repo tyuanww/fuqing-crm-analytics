@@ -1,9 +1,14 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import toolchain from '../../dsh-plugins/plugin-kit/toolchain.json' with { type: 'json' };
-import { managerVersions } from '../../dsh-plugins/plugin-kit/package-manager.mjs';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { managerVersions } from './package-manager-contract.mjs';
 
 const lanePath = process.env.DSH_RELEASE_LANE_CONFIG;
+const configuredToolchainPath = process.env.DSH_COMPOSITION_TOOLCHAIN ?? process.env.DSH_TOOLCHAIN_PATH;
+const defaultToolchainPath = join(fileURLToPath(new URL('../..', import.meta.url)), 'dsh-plugins/plugin-kit/toolchain.json');
+assert.ok(configuredToolchainPath || existsSync(defaultToolchainPath), 'TOOLCHAIN_SOURCE_REQUIRED');
+const toolchain = JSON.parse(readFileSync(configuredToolchainPath ?? defaultToolchainPath, 'utf8'));
 const lane = lanePath ? JSON.parse(readFileSync(lanePath, 'utf8')) : null;
 const effectiveToolchain = lane ? {
   ...toolchain,

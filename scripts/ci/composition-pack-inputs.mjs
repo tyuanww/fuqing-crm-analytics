@@ -9,9 +9,11 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';
 import { loadProfileSnapshot } from '../release/profile.mjs';
 import { readPluginPack } from '../release/plugin-pack.mjs';
+import { readDomainPack } from '../release/domain-pack.mjs';
 import { insideArtifact, readArtifactFile } from '../release/service-artifact-evidence.mjs';
 import { readCompositionInputs, validateCompositionPacks } from '../crm-calibration/composition-inputs.mjs';
 import { readToolchainFile, validateToolchain } from '../dsh-dev/pin.mjs';
+import { validateSourceManifest } from '../release/plugin-source-manifest.mjs';
 
 const exec = promisify(execFile), hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const root = fileURLToPath(new URL('../..', import.meta.url));
@@ -29,7 +31,7 @@ function absolute(path, code) {
 
 /** All inputs are validated before the new output directory is created. */
 export async function prepareCompositionPacks({ inputDirectory, output,
-  lockPath = join(root, 'config/shinemage-composition-packs.lock.json'), profileRoot = root, toolchain, cordisPeerVersion } = {}) {
+  lockPath = join(root, 'config/shinemage-composition-packs.lock.json'), profileRoot = root, toolchain, cordisPeerVersion, manifestPath = null } = {}) {
   const source = absolute(inputDirectory, 'CI_COMPOSITION_PACK_DIRECTORY_REQUIRED');
   const destination = absolute(output, 'CI_COMPOSITION_OUTPUT_REQUIRED');
   profileRoot = absolute(profileRoot, 'CI_COMPOSITION_PROFILE_ROOT_REQUIRED');
@@ -64,6 +66,23 @@ export async function prepareCompositionPacks({ inputDirectory, output,
   assert.equal(new Set(selected).size, selected.length, 'CI_COMPOSITION_PROFILE_OVERLAP');
   assert.ok(Array.isArray(lock.plugins) && lock.plugins.length === selected.length, 'CI_COMPOSITION_SELECTION');
   assert.deepEqual(lock.plugins.map(row => row.id).sort(), [...selected].sort(), 'CI_COMPOSITION_SELECTION');
+  let sourceManifest = null, sourceManifestSha256 = null, sourceManifestRows = new Map();
+  if (manifestPath) {
+    const manifestBytes = await readArtifactFile(absolute(manifestPath, 'CI_COMPOSITION_SOURCE_MANIFEST_REQUIRED'), 512 * 1024);
+    sourceManifestSha256 = hash(manifestBytes);
+    sourceManifest = validateSourceManifest(JSON.parse(manifestBytes), {
+      lockSha256: hash(lockBytes), expectedIds: selected,
+    });
+    sourceManifestRows = new Map(sourceManifest.sources.map(row => [row.id, row]));
+    for (const row of lock.plugins) {
+      const source = sourceManifestRows.get(row.id);
+      assert.ok(source, 'CI_COMPOSITION_SOURCE_MANIFEST_PLUGIN_REQUIRED');
+      assert.equal(source.status, 'PASS', 'CI_COMPOSITION_SOURCE_NOT_READY');
+      assert.equal(source.directory, row.directory, 'CI_COMPOSITION_SOURCE_MANIFEST_DIRECTORY');
+      assert.equal(source.sha, row.source_sha, 'CI_COMPOSITION_SOURCE_MANIFEST_SHA');
+      assert.equal(source.manifest_sha256, row.manifest_sha256, 'CI_COMPOSITION_SOURCE_MANIFEST_DIGEST');
+    }
+  }
   const plugins = [];
   for (const row of lock.plugins) {
     exact(row, ['directory', 'id', 'source_sha', 'version', 'manifest_sha256'], 'CI_COMPOSITION_PLUGIN_SHAPE');
@@ -79,9 +98,21 @@ export async function prepareCompositionPacks({ inputDirectory, output,
     assert.equal(packed.receipt.package_name, row.id, 'CI_COMPOSITION_PACKAGE_ID');
     assert.equal(packed.receipt.package_version, row.version, 'CI_COMPOSITION_PACKAGE_VERSION');
     assert.equal(packed.receipt.source_sha, row.source_sha, 'CI_COMPOSITION_SOURCE_MISMATCH');
+    const sourceBinding = sourceManifestRows.get(row.id);
+    if (sourceBinding) assert.equal(packed.receipt.tarball.sha256, sourceBinding.pack_sha256, 'CI_COMPOSITION_SOURCE_PACK_DIGEST');
     plugins.push({ ...row, manifestPath: manifest, ...packed });
   }
   assert.equal(new Set(plugins.map(row => row.directory)).size, plugins.length, 'CI_COMPOSITION_DIRECTORY_DUPLICATE');
+  const domains = [];
+  for (const row of sourceManifest?.domains ?? []) {
+    assert.equal(row.status, 'PASS', 'CI_COMPOSITION_DOMAIN_NOT_READY');
+    const manifestBytes = await insideArtifact(source, row.manifest, 256 * 1024);
+    assert.equal(hash(manifestBytes), row.manifest_sha256, 'CI_COMPOSITION_DOMAIN_MANIFEST_DIGEST');
+    const packed = await readDomainPack({ manifestPath: join(source, row.manifest), expectedSha256: row.manifest_sha256,
+      expectedSourceSha: row.sha, expectedPackage: row.package, requireGeneratedProvenance: true });
+    assert.equal(packed.receipt.tarball.sha256, row.pack_sha256, 'CI_COMPOSITION_DOMAIN_PACK_DIGEST');
+    domains.push({ ...row, ...packed });
+  }
   const [packs, pages] = profiles.map(row => ({ profile: row.profile,
     plugins: row.profile.plugins.map(plugin => plugins.find(item => item.id === plugin.id)) }));
   validateCompositionPacks({ packs, pages, toolchain: selectedToolchain,
@@ -92,6 +123,12 @@ export async function prepareCompositionPacks({ inputDirectory, output,
     await mkdir(directory, { recursive: true, mode: 0o700 });
     await writeFile(join(directory, 'plugin-pack.json'), row.manifestBytes, { flag: 'wx', mode: 0o600 });
     await writeFile(join(directory, row.receipt.tarball.name), row.archive, { flag: 'wx', mode: 0o600 });
+  }
+  for (const row of domains) {
+    const manifestPath = join(destination, row.manifest);
+    await mkdir(dirname(manifestPath), { recursive: true, mode: 0o700 });
+    await writeFile(manifestPath, row.manifestBytes, { flag: 'wx', mode: 0o600 });
+    await writeFile(join(dirname(manifestPath), row.receipt.tarball.name), row.archive, { flag: 'wx', mode: 0o600 });
   }
   const inputs = {};
   for (const row of profiles) {
@@ -119,8 +156,11 @@ export async function prepareCompositionPacks({ inputDirectory, output,
     ...(selectedCordisPeer ? { CRM_COMPOSITION_CORDIS_PEER: selectedCordisPeer } : {}),
     ...(process.env.CRM_COMPOSITION_CORDIS_RUNTIME ? { CRM_COMPOSITION_CORDIS_RUNTIME: process.env.CRM_COMPOSITION_CORDIS_RUNTIME } : {}) };
   const receipt = { schema_version: 'shinemage-ci-composition-preparation/v1', lock_sha256: hash(lockBytes),
+    source_manifest_sha256: sourceManifestSha256,
     profiles: profiles.map(({ name, path, sha256 }) => ({ name, path, sha256 })),
     plugins: plugins.map(row => ({ id: row.id, source_sha: row.source_sha, version: row.version,
+      manifest_sha256: row.manifest_sha256, pack_sha256: row.receipt.tarball.sha256 })),
+    domains: domains.map(row => ({ package: row.package, source_sha: row.sha, manifest: row.manifest,
       manifest_sha256: row.manifest_sha256, pack_sha256: row.receipt.tarball.sha256 })), env,
     host: 'NOT_RUN', remote_ci: 'NOT_RUN', release_ready: false };
   await writeFile(join(destination, 'preparation.json'), json(receipt), { flag: 'wx', mode: 0o600 });
@@ -144,7 +184,7 @@ export function inspectGitHubArtifact(artifact, { repository, id, sha256 }) {
   assert.match(artifact.workflow_run.head_sha ?? '', SHA, 'CI_COMPOSITION_ARTIFACT_RUN');
 }
 
-async function receiveArchive({ archive, output, python }) {
+async function receiveArchive({ archive, output, python, manifestPath }) {
   const work = await mkdtemp(join(tmpdir(), 'composition-pack-archive-'));
   try {
     const bytes = await readArtifactFile(absolute(archive, 'CI_COMPOSITION_ARCHIVE_REQUIRED'), MAX_ARCHIVE);
@@ -152,11 +192,11 @@ async function receiveArchive({ archive, output, python }) {
     await writeFile(input, bytes, { flag: 'wx', mode: 0o600 });
     await exec(python, ['-I', '-B', fileURLToPath(new URL('./unpack-composition-inputs.py', import.meta.url)), input, extracted],
       { timeout: 30000, maxBuffer: 256 * 1024 });
-    return await prepareCompositionPacks({ inputDirectory: extracted, output });
+    return await prepareCompositionPacks({ inputDirectory: extracted, output, manifestPath });
   } finally { await rm(work, { recursive: true, force: true }); }
 }
 
-async function receiveGitHubArtifact({ repository, id, sha256, output, python }) {
+async function receiveGitHubArtifact({ repository, id, sha256, output, python, manifestPath }) {
   // Do not silently use personal gh credentials, or assume a public repo token
   // has access to the private author repositories. The token is prepare-only.
   validateArtifactReference({ repository, id, sha256 });
@@ -186,7 +226,7 @@ async function receiveGitHubArtifact({ repository, id, sha256, output, python })
     assert.equal(hash(bytes), sha256, 'CI_COMPOSITION_ARTIFACT_DIGEST');
     const archive = join(work, 'input.zip');
     await writeFile(archive, bytes, { flag: 'wx', mode: 0o600 });
-    return await receiveArchive({ archive, output, python });
+    return await receiveArchive({ archive, output, python, manifestPath });
   } finally { await rm(work, { recursive: true, force: true }); }
 }
 
@@ -195,18 +235,18 @@ if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) 
     const args = process.argv.slice(2), options = {};
     while (args.length) {
       const key = args.shift(), value = args.shift();
-      assert.ok(['--input-dir', '--archive', '--repository', '--artifact-id', '--artifact-sha256', '--output', '--python', '--github-env'].includes(key)
+      assert.ok(['--input-dir', '--archive', '--repository', '--artifact-id', '--artifact-sha256', '--output', '--python', '--github-env', '--manifest'].includes(key)
         && value && !Object.hasOwn(options, key), 'CI_COMPOSITION_ARGUMENTS');
       options[key] = value;
     }
     const { '--input-dir': inputDirectory, '--archive': archive, '--repository': repository,
       '--artifact-id': artifactId, '--artifact-sha256': sha256, '--output': output,
-      '--python': python = 'python3', '--github-env': githubEnv } = options;
+      '--python': python = 'python3', '--github-env': githubEnv, '--manifest': manifestPath } = options;
     assert.equal([inputDirectory, archive, repository].filter(Boolean).length, 1, 'CI_COMPOSITION_INPUT_REQUIRED');
     assert.ok(repository || (!artifactId && !sha256), 'CI_COMPOSITION_ARGUMENTS');
-    const receipt = inputDirectory ? await prepareCompositionPacks({ inputDirectory, output })
-      : archive ? await receiveArchive({ archive, output, python })
-      : await receiveGitHubArtifact({ repository, id: Number(artifactId), sha256, output, python });
+    const receipt = inputDirectory ? await prepareCompositionPacks({ inputDirectory, output, manifestPath })
+      : archive ? await receiveArchive({ archive, output, python, manifestPath })
+      : await receiveGitHubArtifact({ repository, id: Number(artifactId), sha256, output, python, manifestPath });
     if (githubEnv) {
       const file = absolute(githubEnv, 'CI_COMPOSITION_GITHUB_ENV_INVALID'), info = await lstat(file);
       assert.ok(info.isFile() && !info.isSymbolicLink(), 'CI_COMPOSITION_GITHUB_ENV_INVALID');
