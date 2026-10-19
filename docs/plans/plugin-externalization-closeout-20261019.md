@@ -176,3 +176,6 @@ external mode 的接收命令必须先校验来源清单、组合锁和 artifact
 - 提交 `aa14250f` 将来源清单测试绑定到当前组合锁和 `main` SHA。
 - 六项测试通过。`git diff --check` 通过。JSON 通过 `python3 -m json.tool`。
 - 本次没有生成 plugin tarball。没有运行远端 API 校验。没有删除插件源码。没有修改正式 M2 状态。
+
+- 提交 `a268127b` 将来源清单接入 `composition-pack-inputs.mjs`。传入 `--manifest` 后，输入准备会先校验 lock SHA、source SHA、manifest SHA、source 状态和 pack SHA。`NOT_RUN` 来源会在创建输出前失败。未传 `--manifest` 的旧入口保持兼容。
+- 该变更先触发了变量遮蔽回归。修复后组合输入和来源清单测试共 `18 PASS / 0 FAIL / 0 SKIP`。
