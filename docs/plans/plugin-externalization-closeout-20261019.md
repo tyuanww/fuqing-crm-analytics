@@ -194,3 +194,5 @@ external mode 的接收命令必须先校验来源清单、组合锁和 artifact
 - 旧组合 artifact 的下载请求遇到 GitHub blob TLS handshake timeout。本次没有把下载失败写成成功，也没有把旧 artifact 当作当前输入。
 
 这些结果把“独立仓存在”和“主仓可接收 sealed pack”分开。当前来源清单继续保持 `NOT_RUN` 和 `BLOCKED`。
+
+- 提交 `d9e4262c` 增加来源目录绑定，并允许 `shinemage-*` 组合 artifact 仓。组合输入和来源清单测试仍为 `18 PASS / 0 FAIL / 0 SKIP`。
