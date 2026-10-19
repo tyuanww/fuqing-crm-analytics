@@ -11,6 +11,7 @@ const REPOSITORY = /^tyuanww\/(?:fuqing-crm-analytics|dsh-[a-z][a-z0-9-]*|shinem
 const REF = /^(?:main|commit|refs\/tags\/[A-Za-z0-9._/-]+)$/;
 const PACKAGE_ID = /^@shine-mage\/[a-z0-9][a-z0-9-]+$/;
 const DIRECTORY = /^[a-z][a-z0-9-]*$/;
+const SAFE_RELATIVE = /^(?!\/)(?!.*(?:^|\/)\.\.(?:\/|$))(?!.*\\)[^\0]+$/;
 
 function exact(value, keys, code) {
   assert.ok(value && typeof value === 'object' && !Array.isArray(value), code);
@@ -79,6 +80,23 @@ function validateSource(value) {
   }
 }
 
+function validateDomain(value) {
+  exact(value, ['package', 'directory', 'repository', 'ref', 'sha', 'manifest', 'manifest_sha256', 'pack_sha256', 'status'], 'SOURCE_MANIFEST_DOMAIN_SHAPE');
+  assert.match(value.package ?? '', PACKAGE_ID, 'SOURCE_MANIFEST_DOMAIN_PACKAGE');
+  assert.match(value.directory ?? '', DIRECTORY, 'SOURCE_MANIFEST_DOMAIN_DIRECTORY');
+  assert.match(value.repository ?? '', REPOSITORY, 'SOURCE_MANIFEST_DOMAIN_REPOSITORY');
+  assert.match(value.ref ?? '', REF, 'SOURCE_MANIFEST_DOMAIN_REF');
+  assert.match(value.sha ?? '', SHA1, 'SOURCE_MANIFEST_DOMAIN_SHA');
+  assert.ok(typeof value.manifest === 'string' && SAFE_RELATIVE.test(value.manifest), 'SOURCE_MANIFEST_DOMAIN_MANIFEST');
+  nullable(value.manifest_sha256, SHA256, 'SOURCE_MANIFEST_DOMAIN_MANIFEST_SHA');
+  nullable(value.pack_sha256, SHA256, 'SOURCE_MANIFEST_DOMAIN_PACK_SHA');
+  status(value.status, SOURCE_STATUSES, 'SOURCE_MANIFEST_DOMAIN_STATUS');
+  if (value.status === 'PASS') {
+    assert.match(value.manifest_sha256 ?? '', SHA256, 'SOURCE_MANIFEST_DOMAIN_MANIFEST_REQUIRED');
+    assert.match(value.pack_sha256 ?? '', SHA256, 'SOURCE_MANIFEST_DOMAIN_PACK_REQUIRED');
+  }
+}
+
 function validateGate(value, sources, bundle) {
   exact(value, ['status', 'blocking_reasons'], 'SOURCE_MANIFEST_GATE_SHAPE');
   status(value.status, GATE_STATUSES, 'SOURCE_MANIFEST_GATE_STATUS');
@@ -95,7 +113,7 @@ function validateGate(value, sources, bundle) {
 }
 
 export function validateSourceManifest(manifest, { lockSha256 = null, expectedIds = null } = {}) {
-  exact(manifest, ['schema_version', 'lock', 'consumer', 'bundle', 'toolchain', 'sources', 'deletion_gate'], 'SOURCE_MANIFEST_SHAPE');
+  exact(manifest, ['schema_version', 'lock', 'consumer', 'bundle', 'toolchain', 'sources', 'domains', 'deletion_gate'], 'SOURCE_MANIFEST_SHAPE');
   assert.equal(manifest.schema_version, SOURCE_MANIFEST_SCHEMA, 'SOURCE_MANIFEST_SCHEMA');
   exact(manifest.lock, ['path', 'sha256'], 'SOURCE_MANIFEST_LOCK_SHAPE');
   assert.equal(manifest.lock.path, 'config/shinemage-composition-packs.lock.json', 'SOURCE_MANIFEST_LOCK_PATH');
@@ -115,7 +133,17 @@ export function validateSourceManifest(manifest, { lockSha256 = null, expectedId
     directories.add(source.directory);
   }
   if (expectedIds) assert.deepEqual([...ids].sort(), [...expectedIds].sort(), 'SOURCE_MANIFEST_SOURCE_SELECTION');
-  validateGate(manifest.deletion_gate, manifest.sources, manifest.bundle);
+  assert.ok(Array.isArray(manifest.domains), 'SOURCE_MANIFEST_DOMAINS_REQUIRED');
+  const domainPackages = new Set();
+  const domainDirectories = new Set();
+  for (const domain of manifest.domains) {
+    validateDomain(domain);
+    assert.equal(domainPackages.has(domain.package), false, 'SOURCE_MANIFEST_DOMAIN_DUPLICATE_PACKAGE');
+    assert.equal(domainDirectories.has(domain.directory), false, 'SOURCE_MANIFEST_DOMAIN_DUPLICATE_DIRECTORY');
+    domainPackages.add(domain.package);
+    domainDirectories.add(domain.directory);
+  }
+  validateGate(manifest.deletion_gate, [...manifest.sources, ...manifest.domains.map(domain => ({ ...domain, id: domain.package }))], manifest.bundle);
   return manifest;
 }
 
@@ -124,6 +152,7 @@ export function sourceManifestStatus(manifest) {
   return {
     schema_version: SOURCE_MANIFEST_SCHEMA,
     sources: manifest.sources.map(({ id, repository, ref, sha, status }) => ({ id, repository, ref, sha, status })),
+    domains: manifest.domains.map(({ package: packageName, repository, ref, sha, status }) => ({ package: packageName, repository, ref, sha, status })),
     bundle: { status: manifest.bundle.status, remote_main: manifest.bundle.remote_main },
     deletion_gate: manifest.deletion_gate.status,
     release_ready: false,

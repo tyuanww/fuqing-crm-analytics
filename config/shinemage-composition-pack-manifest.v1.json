@@ -2,7 +2,7 @@
   "schema_version": "shinemage-composition-pack-manifest/v1",
   "lock": {
     "path": "config/shinemage-composition-packs.lock.json",
-    "sha256": "7f21afd75cfb098126a9b126e7c87a7bee811cc7df9accf4ef59e081af47821f"
+    "sha256": "050906ca30ea8bc95f2de8129f30bf293e1018ac3ca5a54a68ba0e9b485e2593"
   },
   "consumer": {
     "repository": "tyuanww/fuqing-crm-analytics",
@@ -35,9 +35,9 @@
       "repository": "tyuanww/dsh-analytics-workbench",
       "ref": "commit",
       "sha": "3030e3f21263f6ec65cb01c7aeacd4c80e2eb711",
-      "manifest_sha256": null,
-      "pack_sha256": null,
-      "status": "NOT_RUN"
+      "manifest_sha256": "d90ebc3412ec0a79adaf2861639b86f15b731ced5b82bae58361ab65ef1627de",
+      "pack_sha256": "e41df9f5a8f7031c092319222543c8d723ca644c0c9d69b2ae53f13257e9b79e",
+      "status": "PASS"
     },
     {
       "id": "@shine-mage/dsh-crm-knowledge",
@@ -45,9 +45,9 @@
       "repository": "tyuanww/dsh-crm-knowledge",
       "ref": "commit",
       "sha": "dac0539bbbe076f62ae592c35e74efcca987e568",
-      "manifest_sha256": null,
-      "pack_sha256": null,
-      "status": "NOT_RUN"
+      "manifest_sha256": "76642b79d383f5eb070ba2c7acfcc519dd1d13122a1238790c08a4e406c5147d",
+      "pack_sha256": "5803819e9eb36bacd5b237eacff928133ff6eb361c1f111eedd3f1ecf60aeb05",
+      "status": "PASS"
     },
     {
       "id": "@shine-mage/dsh-knowledge",
@@ -55,9 +55,9 @@
       "repository": "tyuanww/dsh-knowledge",
       "ref": "commit",
       "sha": "f623c220fde8d511b694e7c4271e092cd3d4692b",
-      "manifest_sha256": null,
-      "pack_sha256": null,
-      "status": "NOT_RUN"
+      "manifest_sha256": "607eca512d573c5eca8a9535e918cd2b14e265e0f378dbebf66f88fbd4afce52",
+      "pack_sha256": "870fdeeadc07bf7187d475ba4a77fe0d417b915a72473b8712c004f7079b4090",
+      "status": "PASS"
     },
     {
       "id": "@shine-mage/dsh-shine-board",
@@ -65,9 +65,9 @@
       "repository": "tyuanww/dsh-shine-board",
       "ref": "commit",
       "sha": "76601df755ec8ef8c9726ea770ec488b745efd71",
-      "manifest_sha256": null,
-      "pack_sha256": null,
-      "status": "NOT_RUN"
+      "manifest_sha256": "2d18dad6d9310020ad544eca1d553cfb2f571e15d52d0b12d1521623a5b9bd06",
+      "pack_sha256": "e1348dd7739778a5ec2d676420e86290ca49f69cdf045959fd82441232a30c1a",
+      "status": "PASS"
     },
     {
       "id": "@shine-mage/dsh-shine-crowd-action",
@@ -75,9 +75,9 @@
       "repository": "tyuanww/dsh-shine-crowd-action",
       "ref": "commit",
       "sha": "5c39e21c27565397383b009725634ea66e9c1525",
-      "manifest_sha256": null,
-      "pack_sha256": null,
-      "status": "NOT_RUN"
+      "manifest_sha256": "97ab95f7ffa6618a70dca7c4e044e187b7931046946faeaefc40e3571c7e0981",
+      "pack_sha256": "3fb9d88d228e3af4a9c965961c035650b65365392a9caccb4c14f336b003b2ca",
+      "status": "PASS"
     },
     {
       "id": "@shine-mage/dsh-shine-query",
@@ -85,9 +85,9 @@
       "repository": "tyuanww/dsh-shine-query",
       "ref": "commit",
       "sha": "1f1e19d280923ebe7aac964f8b5825d497434db8",
-      "manifest_sha256": null,
-      "pack_sha256": null,
-      "status": "NOT_RUN"
+      "manifest_sha256": "026706239da70ef391fced24a52918943c2be37fe536d4f8d1e7bd6250b83335",
+      "pack_sha256": "774c6ae63e0fb170a81a9e9fb9551d55d40724faae5966c1d95bb32624fb89ce",
+      "status": "PASS"
     },
     {
       "id": "@shine-mage/dsh-shine-funnel",
@@ -95,9 +95,9 @@
       "repository": "tyuanww/dsh-shine-funnel",
       "ref": "commit",
       "sha": "dbfaede0961586d773c708e833a4ac1c9f2515dc",
-      "manifest_sha256": null,
-      "pack_sha256": null,
-      "status": "NOT_RUN"
+      "manifest_sha256": "43781c6f2eb747a2f4e90f88eeae13805cd9b4e11e89be4bd7b8203a4f886312",
+      "pack_sha256": "581ba069aa8af4598f553e4b11b57216ac2205d71baebbafc267367cb3814ba6",
+      "status": "PASS"
     },
     {
       "id": "@shine-mage/dsh-shine-waterfall",
@@ -105,9 +105,9 @@
       "repository": "tyuanww/dsh-shine-waterfall",
       "ref": "commit",
       "sha": "d123ac1d0e7bad3e5de45169b3e72c38623b858a",
-      "manifest_sha256": null,
-      "pack_sha256": null,
-      "status": "NOT_RUN"
+      "manifest_sha256": "f136c5cdf2d4c838cff7c049e218d0536f8978cd8bf0f60680e3baab63c43db2",
+      "pack_sha256": "73a1d4ba2b085c1f9f2a1eff410aca239cf9775de952ba70aafdaa78ec5ac35d",
+      "status": "PASS"
     },
     {
       "id": "@shine-mage/dsh-shine-brand",
@@ -115,17 +115,29 @@
       "repository": "tyuanww/dsh-shine-brand",
       "ref": "commit",
       "sha": "57ebcf38278068394a4feb42125c30c195fd912a",
-      "manifest_sha256": null,
-      "pack_sha256": null,
-      "status": "NOT_RUN"
+      "manifest_sha256": "53cc4d932233202910101843a43ecbb214727dc4f13e4a8cedcdb4f38b3d086a",
+      "pack_sha256": "4b867bf5b4e08d9aa1f45f20b20b78cbd9e11c236194ffafaa5188d8d173bd13",
+      "status": "PASS"
     }
   ],
   "deletion_gate": {
     "status": "BLOCKED",
     "blocking_reasons": [
-      "formal_pack_not_prepared",
       "remote_main_not_verified",
       "production_only_closure_not_recorded"
     ]
-  }
+  },
+  "domains": [
+    {
+      "package": "@shine-mage/board-components",
+      "directory": "board-components",
+      "repository": "tyuanww/shinemage-board-components",
+      "ref": "commit",
+      "sha": "e78e040e14792c89f99a2e3181004dbdaefd9bf6",
+      "manifest": "domain/board-components-pack.json",
+      "manifest_sha256": "c756fb4bbfe4ca5f7bc13d7ce7fe8ff21d097615f35f5cced6b94a1a95ffc42c",
+      "pack_sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182",
+      "status": "PASS"
+    }
+  ]
 }

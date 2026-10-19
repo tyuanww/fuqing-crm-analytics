@@ -175,7 +175,7 @@ external mode 的接收命令必须先校验来源清单、组合锁和 artifact
 - 提交 `d7d08526` 增加当前 rc2 组合的来源清单。清单的九个 source 状态都是 `NOT_RUN`。组合 artifact 状态是 `NOT_RUN`。删除门禁是 `BLOCKED`。
 - 提交 `aa14250f` 将来源清单测试绑定到当前组合锁和 `main` SHA。
 - 六项测试通过。`git diff --check` 通过。JSON 通过 `python3 -m json.tool`。
-- 本次没有生成 plugin tarball。没有运行远端 API 校验。没有删除插件源码。没有修改正式 M2 状态。
+- （历史快照）本次没有生成 plugin tarball。没有运行远端 API 校验。没有删除插件源码。没有修改正式 M2 状态。
 
 - 提交 `a268127b` 将来源清单接入 `composition-pack-inputs.mjs`。传入 `--manifest` 后，输入准备会先校验 lock SHA、source SHA、manifest SHA、source 状态和 pack SHA。`NOT_RUN` 来源会在创建输出前失败。未传 `--manifest` 的旧入口保持兼容。
 - 该变更先触发了变量遮蔽回归。修复后组合输入和来源清单测试共 `18 PASS / 0 FAIL / 0 SKIP`。
@@ -193,8 +193,75 @@ external mode 的接收命令必须先校验来源清单、组合锁和 artifact
 - `shinemage-board-components` 是构建输入。它必须单独固定 reviewed source 和 tarball digest。
 - 旧组合 artifact 的下载请求遇到 GitHub blob TLS handshake timeout。本次没有把下载失败写成成功，也没有把旧 artifact 当作当前输入。
 
-这些结果把“独立仓存在”和“主仓可接收 sealed pack”分开。当前来源清单继续保持 `NOT_RUN` 和 `BLOCKED`。
+这些结果把“独立仓存在”和“主仓可接收 sealed pack”分开。以上盘查是 formal pack 重建前的历史快照。
 
 - 提交 `d9e4262c` 增加来源目录绑定，并允许 `shinemage-*` 组合 artifact 仓。组合输入和来源清单测试仍为 `18 PASS / 0 FAIL / 0 SKIP`。
 
 - 提交 `7feabcbf` 将主仓 release toolchain 的 package manager 校验移到 `scripts/release/package-manager-contract.mjs`。`DSH_COMPOSITION_TOOLCHAIN` 或 `DSH_TOOLCHAIN_PATH` 可以提供显式外部 toolchain。旧的 `dsh-plugins/plugin-kit/toolchain.json` 只保留兼容回退。工具链测试为 `8 PASS / 0 FAIL / 1 SKIP`。跳过项是本机没有 DSH upstream checkout。
+
+## 最新状态（2026-10-19）
+
+本次已在每个 reviewed commit 上重新构建九个插件 pack。构建使用固定 DSH `0.1.7-rc.2`、Node `v24.19.0` 和 pnpm `11.28.2`。每个 pack 都通过严格 `readPluginPack({ requireGeneratedProvenance: true })`。
+
+每个 pack 的 provenance 绑定以下内容：
+
+- reviewed source SHA；
+- source tree digest；
+- generated tree digest；
+- clean and isolated builder；
+- tarball bytes and SHA-256。
+
+`board-components` 已按独立领域包处理。它有独立的 `shinemage-domain-pack/v1` manifest、reviewed source SHA、builder provenance 和 tarball digest。其 tarball 为 1955 字节，SHA-256 为 `22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182`。
+
+主仓组合锁已更新为本次重建的九个 manifest SHA。来源清单中的九个 source 状态为 `PASS`。删除门禁仍为 `BLOCKED`，原因是 `remote_main_not_verified` 和 `production_only_closure_not_recorded`。
+
+组合准备已生成本地 artifact。它包含九个 plugin pack、board-components domain pack、两份 profile、toolchain、lock、source manifest 和 builder receipts。正式组合 artifact 的本地摘要见 [formal pack rebuild evidence](../hackathon/evidence/shinemage-formal-pack-rebuild-20261019.json)。
+
+在删除 `dsh-plugins/` 的临时 clean checkout 中，domain reader 和组合准备均通过。该结果只证明 sealed input preparation，不证明远端 CI、production-only install、杭州部署或正式 M2。
+
+下一步是用同一组合 artifact 完成 production-only consumer closure。完成前不能删除主仓 `dsh-plugins/`，不能把正式 release 或 `release_ready` 改为通过。
+## GSTACK REVIEW REPORT
+
+本轮复核对象是 domain pack 与组合 artifact 的封装边界。当前修复已覆盖上一轮发现的三个缺口。
+
+OCR delegation recheck 覆盖 9/9 个可审查文件，另 2 个 Markdown 文件由主 Agent 直接读取；没有发现新的高危、中危或低危代码问题。
+
+### 修复结果
+
+1. `scripts/release/domain-pack.mjs` 使用 `canonicalTreeDigest` 重算 `lib/` 生成树，并比较 `sha256`、`entries`、`bytes` 和 `generated_files`。
+2. `config/shinemage-composition-pack-manifest.v1.json` 增加 `domains[]`。`scripts/ci/composition-pack-inputs.mjs` 现在必须读取、校验并复制 board-components domain pack。
+3. domain archive 现在校验 package `files` 白名单、`exports` 目标、源码/测试/依赖目录和 source map 边界。
+4. `domain-pack.mjs --help` 返回用法并以 0 退出。
+
+### 真实验证
+
+| 检查 | 结果 | 证据 |
+|---|---|---|
+| 固定单测 | PASS | 29 tests，28 pass，1 skip，0 fail |
+| 9 个 plugin reader | PASS | 9/9 固定 manifest、source SHA、tarball SHA 和 generated provenance |
+| board-components reader | PASS | domain manifest、tarball、source SHA 和生成树一致 |
+| domain generated tree 变更负测 | PASS | 改写 `generated_tree.sha256` 后返回 `DOMAIN_PACK_GENERATED_TREE_MISMATCH` |
+| domain omission negative test | PASS | 不提供 `domain/board-components-pack.json` 时在创建输出前失败 |
+| domain 未声明文件负测 | PASS | archive 增加 `lib/extra.mjs` 后返回 `DOMAIN_PACK_TARBALL_UNDECLARED` |
+| clean checkout | PASS | 新临时 checkout 删除 `dsh-plugins/` 后仍完成组合准备，domain 数量为 1 |
+| remote CI | NOT_RUN | 当前未取得远端 runner 回执 |
+| production-only closure | NOT_RUN | 当前未取得公司生产环境回执 |
+
+### 当前 artifact
+
+- archive: `/tmp/shinemage-composition-formal-artifact-20261019-fixed.tar.gz`
+- archive SHA256: `51c470836a2509997a918ea39c079ac2e84f5573265b470fa240c8579b21542a`
+- archive bytes: `725987`
+- provenance: `/tmp/shinemage-composition-formal-artifact-20261019-fixed.provenance.json`
+- source manifest SHA256: `165f850a419e73483e1436bb1b570500d5497300d10d79aa63bd5d0aa58bb87e`
+
+### 结论
+
+本地 domain 与组合输入边界已闭环。远端 CI、production-only closure、publisher identity、signature、revocation、independent verification、final attestation 和 formal clean-machine 仍未完成。它们不能写成 PASS。
+
+正式状态保持：`M2-07=BLOCKED`、`M2-08=NOT_RUN`、`M2-09=NOT_RUN`、`release_ready=false`。
+
+**UNRESOLVED DECISIONS:**
+
+- 当前本地修复没有新的代码缺口。
+- 远端 CI 和 production-only closure 需要外部真实回执后才能继续正式门禁。

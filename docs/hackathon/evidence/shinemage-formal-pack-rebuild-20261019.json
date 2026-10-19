@@ -1,0 +1,196 @@
+{
+  "schema_version": "shinemage-formal-pack-rebuild-evidence/v1",
+  "generated_at": "2026-10-19T13:02:03+08:00",
+  "consumer": {
+    "repository": "tyuanww/fuqing-crm-analytics",
+    "reviewed_sha": "4ac076dea89790379c0d142d6b35a48d9208345a"
+  },
+  "toolchain": {
+    "sdk_version": "0.1.7-rc.2",
+    "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
+    "node": "v24.19.0",
+    "pnpm": "11.28.2",
+    "network_mode": "offline"
+  },
+  "plugins": [
+    {
+      "directory": "analytics-workbench",
+      "package": "@shine-mage/dsh-analytics-workbench-b0",
+      "reviewed_sha": "3030e3f21263f6ec65cb01c7aeacd4c80e2eb711",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "d90ebc3412ec0a79adaf2861639b86f15b731ced5b82bae58361ab65ef1627de",
+      "pack_sha256": "e41df9f5a8f7031c092319222543c8d723ca644c0c9d69b2ae53f13257e9b79e",
+      "pack_bytes": 438499,
+      "builder_receipt_sha256": "b5854a55694b1a811cac458713a5807d6717c7b8bff23d29caef9ac682603b82",
+      "builder_status": "PASS",
+      "network_mode": "offline",
+      "generated_tree_sha256": "1b6b528ecd75490675310fc5f188a5ad49460a6da0a59d87ec7aeabb09e44df5"
+    },
+    {
+      "directory": "crm-knowledge",
+      "package": "@shine-mage/dsh-crm-knowledge",
+      "reviewed_sha": "dac0539bbbe076f62ae592c35e74efcca987e568",
+      "version": "0.0.0-crm.1",
+      "manifest_sha256": "76642b79d383f5eb070ba2c7acfcc519dd1d13122a1238790c08a4e406c5147d",
+      "pack_sha256": "5803819e9eb36bacd5b237eacff928133ff6eb361c1f111eedd3f1ecf60aeb05",
+      "pack_bytes": 234901,
+      "builder_receipt_sha256": "08bc919e5df44947960b6a09001e0a26e36c8a9f8e0ca2da249f9c72c7e70eaf",
+      "builder_status": "PASS",
+      "network_mode": "offline",
+      "generated_tree_sha256": "25f35615906eb7ae123aae9e875f38535bbb6e256c1c21bd6ecb2ba01ec8303f"
+    },
+    {
+      "directory": "knowledge",
+      "package": "@shine-mage/dsh-knowledge",
+      "reviewed_sha": "f623c220fde8d511b694e7c4271e092cd3d4692b",
+      "version": "0.0.0-candidate.1",
+      "manifest_sha256": "607eca512d573c5eca8a9535e918cd2b14e265e0f378dbebf66f88fbd4afce52",
+      "pack_sha256": "870fdeeadc07bf7187d475ba4a77fe0d417b915a72473b8712c004f7079b4090",
+      "pack_bytes": 14476,
+      "builder_receipt_sha256": "e81fe8e0db819fa99cbca9c4a27e0afafff845a5bd4db353fefd3f42c4c7a326",
+      "builder_status": "PASS",
+      "network_mode": "offline",
+      "generated_tree_sha256": "0a0fd85b00e76dfa301328c0c8ea84548df645402d04f226a49d9ac86ce65302"
+    },
+    {
+      "directory": "shine-board",
+      "package": "@shine-mage/dsh-shine-board",
+      "reviewed_sha": "76601df755ec8ef8c9726ea770ec488b745efd71",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "2d18dad6d9310020ad544eca1d553cfb2f571e15d52d0b12d1521623a5b9bd06",
+      "pack_sha256": "e1348dd7739778a5ec2d676420e86290ca49f69cdf045959fd82441232a30c1a",
+      "pack_bytes": 1073,
+      "builder_receipt_sha256": "b1adbd3b99102975c7264ccb8636b9a9df4f102f1f1628c12f038f904820aae8",
+      "builder_status": "PASS",
+      "network_mode": "offline",
+      "generated_tree_sha256": "fb18cfda27ec46f3cb4779c37a7de11cc4fb73ed3913f8c49913e4df2372b517"
+    },
+    {
+      "directory": "shine-crowd-action",
+      "package": "@shine-mage/dsh-shine-crowd-action",
+      "reviewed_sha": "5c39e21c27565397383b009725634ea66e9c1525",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "97ab95f7ffa6618a70dca7c4e044e187b7931046946faeaefc40e3571c7e0981",
+      "pack_sha256": "3fb9d88d228e3af4a9c965961c035650b65365392a9caccb4c14f336b003b2ca",
+      "pack_bytes": 1122,
+      "builder_receipt_sha256": "5a3cf0aabe61384cf100083002aad57e906775527a224a37ec67351c3323d402",
+      "builder_status": "PASS",
+      "network_mode": "offline",
+      "generated_tree_sha256": "c5f8863490590788c0a06697413b3dbe33780ed6c9688555e39b96fe7e13e1f8"
+    },
+    {
+      "directory": "shine-query",
+      "package": "@shine-mage/dsh-shine-query",
+      "reviewed_sha": "1f1e19d280923ebe7aac964f8b5825d497434db8",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "026706239da70ef391fced24a52918943c2be37fe536d4f8d1e7bd6250b83335",
+      "pack_sha256": "774c6ae63e0fb170a81a9e9fb9551d55d40724faae5966c1d95bb32624fb89ce",
+      "pack_bytes": 1060,
+      "builder_receipt_sha256": "3aaf0d09643a48d8aabdd1ca8149c971cf730737edde2c893a6d99e16bffdefe",
+      "builder_status": "PASS",
+      "network_mode": "offline",
+      "generated_tree_sha256": "2a8f6e5966e4b7bc85a3c6b4e97f59a3701dca2cb5d389c2b08928777372779e"
+    },
+    {
+      "directory": "shine-funnel",
+      "package": "@shine-mage/dsh-shine-funnel",
+      "reviewed_sha": "dbfaede0961586d773c708e833a4ac1c9f2515dc",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "43781c6f2eb747a2f4e90f88eeae13805cd9b4e11e89be4bd7b8203a4f886312",
+      "pack_sha256": "581ba069aa8af4598f553e4b11b57216ac2205d71baebbafc267367cb3814ba6",
+      "pack_bytes": 2006,
+      "builder_receipt_sha256": "220dca8b31e9790777082dc04f4497dbc9bc076f1e924b7b1e60037421a389a1",
+      "builder_status": "PASS",
+      "network_mode": "offline",
+      "generated_tree_sha256": "66086e09a8b6c77eecfea2a8543b420aaa6c84bc243293426eb052260f7c2e35"
+    },
+    {
+      "directory": "shine-waterfall",
+      "package": "@shine-mage/dsh-shine-waterfall",
+      "reviewed_sha": "d123ac1d0e7bad3e5de45169b3e72c38623b858a",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "f136c5cdf2d4c838cff7c049e218d0536f8978cd8bf0f60680e3baab63c43db2",
+      "pack_sha256": "73a1d4ba2b085c1f9f2a1eff410aca239cf9775de952ba70aafdaa78ec5ac35d",
+      "pack_bytes": 2248,
+      "builder_receipt_sha256": "21ba88d264e3539be6b75b7c772b5f86ec000064ca0381fefcec7bd3fe2b09c6",
+      "builder_status": "PASS",
+      "network_mode": "offline",
+      "generated_tree_sha256": "b1ba8e51c22ce49e2aa67a6f05da34a1ab4d15dfc5873237e21db05d76377ad0"
+    },
+    {
+      "directory": "shine-brand",
+      "package": "@shine-mage/dsh-shine-brand",
+      "reviewed_sha": "57ebcf38278068394a4feb42125c30c195fd912a",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "53cc4d932233202910101843a43ecbb214727dc4f13e4a8cedcdb4f38b3d086a",
+      "pack_sha256": "4b867bf5b4e08d9aa1f45f20b20b78cbd9e11c236194ffafaa5188d8d173bd13",
+      "pack_bytes": 1883,
+      "builder_receipt_sha256": "9fbadac16fb4fdbbe812f405c615604aa904c9b6864df6c7be6b3bea40ebac0f",
+      "builder_status": "PASS",
+      "network_mode": "offline",
+      "generated_tree_sha256": "359ace0dd064a34f04a080081c77cb0aa893e2528584af85554cce852adaa0dd"
+    }
+  ],
+  "domain": {
+    "package": "@shine-mage/board-components",
+    "reviewed_sha": "e78e040e14792c89f99a2e3181004dbdaefd9bf6",
+    "manifest_sha256": "c756fb4bbfe4ca5f7bc13d7ce7fe8ff21d097615f35f5cced6b94a1a95ffc42c",
+    "pack_sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182",
+    "pack_bytes": 1955,
+    "builder_receipt_sha256": "2f2657c4206ce2ef0246af2ceb871476f489177cdf1e82ca9f5bc9c964aec28e",
+    "network_mode": "offline",
+    "generated_tree_sha256": "899a25980c075e2b03359252be236f612eb43d7f38123a1031744582fd64c7d8"
+  },
+  "composition_artifact": {
+    "archive_sha256": "51c470836a2509997a918ea39c079ac2e84f5573265b470fa240c8579b21542a",
+    "archive_bytes": 725987,
+    "provenance_sha256": "e64d2e205ea4d809d7b6a6572e083d0e2d885625a3ec476d2c71c08998222b39",
+    "storage": "local operator artifact; remote CI and durable publication NOT_RUN",
+    "archive_path": "/tmp/shinemage-composition-formal-artifact-20261019-fixed.tar.gz",
+    "provenance_path": "/tmp/shinemage-composition-formal-artifact-20261019-fixed.provenance.json"
+  },
+  "verification": {
+    "nine_plugin_readers": "PASS",
+    "board_components_reader": "PASS",
+    "composition_preparation": "PASS",
+    "clean_checkout_without_dsh_plugins": "PASS",
+    "formal_remote_ci": "NOT_RUN",
+    "production_only_closure": "NOT_RUN",
+    "release_ready": false,
+    "domain_omission_negative": "PASS",
+    "domain_tree_mutation_negative": "PASS"
+  },
+  "m2": {
+    "M2-07": "BLOCKED",
+    "M2-08": "NOT_RUN",
+    "M2-09": "NOT_RUN",
+    "release_ready": false
+  },
+  "blocking_reasons": [
+    "remote_main_not_verified",
+    "production_only_closure_not_recorded"
+  ],
+  "source_manifest_sha256": "165f850a419e73483e1436bb1b570500d5497300d10d79aa63bd5d0aa58bb87e",
+  "closure_repairs": [
+    {
+      "id": "domain_generated_tree_digest",
+      "status": "PASS",
+      "evidence": "canonicalTreeDigest + generated_tree sha256/entries/bytes and generated_files comparison"
+    },
+    {
+      "id": "domain_composition_binding",
+      "status": "PASS",
+      "evidence": "domains[] in source manifest; composition preparation requires and copies domain pack"
+    },
+    {
+      "id": "domain_files_allowlist",
+      "status": "PASS",
+      "evidence": "package files/exports and archive entries enforced"
+    },
+    {
+      "id": "domain_cli_help",
+      "status": "PASS",
+      "evidence": "--help returns usage with exit 0"
+    }
+  ]
+}

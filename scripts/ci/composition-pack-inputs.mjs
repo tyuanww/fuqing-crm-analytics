@@ -9,6 +9,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';
 import { loadProfileSnapshot } from '../release/profile.mjs';
 import { readPluginPack } from '../release/plugin-pack.mjs';
+import { readDomainPack } from '../release/domain-pack.mjs';
 import { insideArtifact, readArtifactFile } from '../release/service-artifact-evidence.mjs';
 import { readCompositionInputs, validateCompositionPacks } from '../crm-calibration/composition-inputs.mjs';
 import { readToolchainFile, validateToolchain } from '../dsh-dev/pin.mjs';
@@ -102,6 +103,16 @@ export async function prepareCompositionPacks({ inputDirectory, output,
     plugins.push({ ...row, manifestPath: manifest, ...packed });
   }
   assert.equal(new Set(plugins.map(row => row.directory)).size, plugins.length, 'CI_COMPOSITION_DIRECTORY_DUPLICATE');
+  const domains = [];
+  for (const row of sourceManifest?.domains ?? []) {
+    assert.equal(row.status, 'PASS', 'CI_COMPOSITION_DOMAIN_NOT_READY');
+    const manifestBytes = await insideArtifact(source, row.manifest, 256 * 1024);
+    assert.equal(hash(manifestBytes), row.manifest_sha256, 'CI_COMPOSITION_DOMAIN_MANIFEST_DIGEST');
+    const packed = await readDomainPack({ manifestPath: join(source, row.manifest), expectedSha256: row.manifest_sha256,
+      expectedSourceSha: row.sha, expectedPackage: row.package, requireGeneratedProvenance: true });
+    assert.equal(packed.receipt.tarball.sha256, row.pack_sha256, 'CI_COMPOSITION_DOMAIN_PACK_DIGEST');
+    domains.push({ ...row, ...packed });
+  }
   const [packs, pages] = profiles.map(row => ({ profile: row.profile,
     plugins: row.profile.plugins.map(plugin => plugins.find(item => item.id === plugin.id)) }));
   validateCompositionPacks({ packs, pages, toolchain: selectedToolchain,
@@ -112,6 +123,12 @@ export async function prepareCompositionPacks({ inputDirectory, output,
     await mkdir(directory, { recursive: true, mode: 0o700 });
     await writeFile(join(directory, 'plugin-pack.json'), row.manifestBytes, { flag: 'wx', mode: 0o600 });
     await writeFile(join(directory, row.receipt.tarball.name), row.archive, { flag: 'wx', mode: 0o600 });
+  }
+  for (const row of domains) {
+    const manifestPath = join(destination, row.manifest);
+    await mkdir(dirname(manifestPath), { recursive: true, mode: 0o700 });
+    await writeFile(manifestPath, row.manifestBytes, { flag: 'wx', mode: 0o600 });
+    await writeFile(join(dirname(manifestPath), row.receipt.tarball.name), row.archive, { flag: 'wx', mode: 0o600 });
   }
   const inputs = {};
   for (const row of profiles) {
@@ -142,6 +159,8 @@ export async function prepareCompositionPacks({ inputDirectory, output,
     source_manifest_sha256: sourceManifestSha256,
     profiles: profiles.map(({ name, path, sha256 }) => ({ name, path, sha256 })),
     plugins: plugins.map(row => ({ id: row.id, source_sha: row.source_sha, version: row.version,
+      manifest_sha256: row.manifest_sha256, pack_sha256: row.receipt.tarball.sha256 })),
+    domains: domains.map(row => ({ package: row.package, source_sha: row.sha, manifest: row.manifest,
       manifest_sha256: row.manifest_sha256, pack_sha256: row.receipt.tarball.sha256 })), env,
     host: 'NOT_RUN', remote_ci: 'NOT_RUN', release_ready: false };
   await writeFile(join(destination, 'preparation.json'), json(receipt), { flag: 'wx', mode: 0o600 });
