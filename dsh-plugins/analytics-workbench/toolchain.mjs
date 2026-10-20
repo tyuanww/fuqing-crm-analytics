@@ -1,13 +1,15 @@
 import { join } from 'node:path';
 export { bindToolchain } from '@shine-mage/dsh-plugin-kit/toolchain';
 
-export function checkTypes(plugin, compiler) {
+export function checkTypes(plugin, compiler, { clientEntries = [] } = {}) {
   const ts = compiler;
   for (const [face, entries, types] of [
     ['host', ['src/index.ts', 'src/tool.ts', 'src/skills.ts', 'src/page-tools.ts'], ['node']],
     ['client', ['src/client/index.tsx', 'src/client/platform.d.ts', 'src/saved-analysis-view.tsx', 'src/cockpit-view.tsx', 'src/first-purchase-saved-analysis-view.tsx', 'src/first-purchase-cockpit-view.tsx', 'test/run-contract.typecheck.ts'], ['react']],
   ]) {
-    const program = ts.createProgram(entries.map(entry => join(plugin, entry)), {
+    const rootNames = entries.map(entry => join(plugin, entry));
+    if (face === 'client') rootNames.push(...clientEntries);
+    const program = ts.createProgram(rootNames, {
       strict: true, noEmit: true, skipLibCheck: false, target: ts.ScriptTarget.ES2023,
       module: ts.ModuleKind.ESNext, moduleResolution: ts.ModuleResolutionKind.Bundler,
       jsx: ts.JsxEmit.ReactJSX, allowImportingTsExtensions: true,

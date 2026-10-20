@@ -129,11 +129,23 @@ function inspectManifest(manifest, packed = false, { sdkVersion = DSH_SDK_VERSIO
 }
 
 async function inspectPackage(pluginRoot, compatibility = {}) {
-  const manifest = JSON.parse(await readFile(join(pluginRoot, 'package.json'), 'utf8'));
+  const sourceManifest = JSON.parse(await readFile(join(pluginRoot, 'package.json'), 'utf8'));
+  let manifest = sourceManifest;
+  if (compatibility.sourceSdkVersion !== undefined) {
+    assert.equal(sourceManifest.peerDependencies?.['@deepseek-ai/dsh-tools'], compatibility.sourceSdkVersion,
+      'PLUGIN_PACK_SOURCE_DSH_PEER_INVALID');
+    manifest = {
+      ...sourceManifest,
+      peerDependencies: {
+        ...sourceManifest.peerDependencies,
+        '@deepseek-ai/dsh-tools': compatibility.sdkVersion,
+      },
+    };
+  }
   const declared = inspectManifest(manifest, false, compatibility);
   const declaredFiles = await collectFiles(pluginRoot, declared);
   assert.ok(declaredFiles.some(file => file.startsWith('lib/')), 'PLUGIN_PACK_BUILD_OUTPUT_REQUIRED');
-  return { manifest, declared, declaredFiles };
+  return { manifest, sourceManifest, declared, declaredFiles };
 }
 
 async function currentBuildBytes(pluginRoot, inspected) {
@@ -317,7 +329,7 @@ async function gitMetadata(pluginRoot) {
 
 export async function packPlugin({ plugin, outputDir, manifestPath, builderProvenancePath = null,
   requireGeneratedProvenance = Boolean(builderProvenancePath), sdkVersion = DSH_SDK_VERSION,
-  pnpmVersion = PNPM_VERSION }) {
+  pnpmVersion = PNPM_VERSION, sourceSdkVersion = null }) {
   const pluginRoot = safeAbsolute(plugin, 'PLUGIN_PACK_ROOT_INVALID');
   const destination = safeAbsolute(outputDir, 'PLUGIN_PACK_OUTPUT_INVALID');
   const pluginInfo = await lstat(pluginRoot).catch(error => { throw new Error(`PLUGIN_PACK_ROOT_INVALID ${error.code ?? 'unavailable'}`); });
@@ -326,7 +338,7 @@ export async function packPlugin({ plugin, outputDir, manifestPath, builderProve
   await mkdir(destination, { recursive: true, mode: 0o700 });
   const destinationInfo = await lstat(destination);
   assert.ok(destinationInfo.isDirectory() && !destinationInfo.isSymbolicLink(), 'PLUGIN_PACK_OUTPUT_INVALID');
-  const compatibility = { sdkVersion, pnpmVersion };
+  const compatibility = { sdkVersion, pnpmVersion, ...(sourceSdkVersion ? { sourceSdkVersion } : {}) };
   const inspected = await inspectPackage(pluginRoot, compatibility);
   const source = await gitMetadata(pluginRoot);
   const provenance = await verifyBuilderProvenance(pluginRoot, inspected, source, builderProvenancePath, { required: requireGeneratedProvenance });
@@ -381,6 +393,7 @@ export async function packPlugin({ plugin, outputDir, manifestPath, builderProve
       package_name: inspected.manifest.name,
       package_version: inspected.manifest.version,
       dsh_pin: sdkVersion,
+      source_dsh_pin: sourceSdkVersion ?? sdkVersion,
       source_sha: source.sha,
       source_dirty: source.dirty,
       tarball: { name: basename(tarball), bytes: info.size, sha256: packDigest },
@@ -415,7 +428,8 @@ if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) 
     const outputDir = option('--output-dir');
     assert.ok(plugin && outputDir, 'Usage: node plugin-pack.mjs --plugin /absolute/plugin --output-dir /absolute/output [--manifest /absolute/manifest.json]');
     const builderProvenancePath = option('--builder-receipt');
-    const receipt = await packPlugin({ plugin, outputDir, manifestPath: option('--manifest'), builderProvenancePath });
+    const sourceSdkVersion = option('--source-sdk-version') ?? DSH_SDK_VERSION;
+    const receipt = await packPlugin({ plugin, outputDir, manifestPath: option('--manifest'), builderProvenancePath, sourceSdkVersion });
     console.log(JSON.stringify(receipt, null, 2));
   } catch (error) {
     console.error(error?.message ?? String(error));
