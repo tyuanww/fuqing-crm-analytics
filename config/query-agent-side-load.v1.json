@@ -1,0 +1,19 @@
+{
+  "schema_version": "shinemage-query-agent-side-load-lock/v1",
+  "package": "@shine-mage/dsh-query-agent",
+  "version": "0.0.0-query.9",
+  "lane": "owner-operated-side-load",
+  "release_ready": false,
+  "formal_release": false,
+  "source_sha": "d860b1d46d3a33de2ae1b0e77f1f420ec25e0d0d",
+  "source_package_manifest_sha256": "d3b901ea679ee6b413cecc11fad0471a66144aaa96171235f79afa9f13a10fa8",
+  "generated_pack_manifest_sha256": "f68df1dbe45c411125080bdc203afff7669f4748c88bdc6d0c48d75ba09194e7",
+  "tarball": {
+    "name": "shine-mage-dsh-query-agent-0.0.0-query.9.tgz",
+    "bytes": 3269,
+    "sha256": "393af040437dfe7523605c718c18edee9bd8ea4b739b83f4454b18187419a4a7",
+    "integrity": "sha512-MQiuKQE4uYdy6aO9Ur9PXJpVo+1vjNQyEV2T6TyxzdSYU1DDvKNjzuToJcunOXhkpKBDKchUXiVuSc9ZMp/KVA=="
+  },
+  "build_provenance_sha256": "d54dff1aa64e1767b4fab409c7bd16102a52c6819578020ddbd1a996cdad8eff",
+  "evidence": "docs/hackathon/evidence/dsh-query9-weknora-scope-20261021.json"
+}

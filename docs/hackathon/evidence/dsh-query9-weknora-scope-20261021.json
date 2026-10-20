@@ -6,6 +6,7 @@
   "query_artifact": {
     "source_sha": "d860b1d46d3a33de2ae1b0e77f1f420ec25e0d0d",
     "version": "0.0.0-query.9",
+    "source_package_manifest_sha256": "d3b901ea679ee6b413cecc11fad0471a66144aaa96171235f79afa9f13a10fa8",
     "manifest_sha256": "f68df1dbe45c411125080bdc203afff7669f4748c88bdc6d0c48d75ba09194e7",
     "tarball": "shine-mage-dsh-query-agent-0.0.0-query.9.tgz",
     "tarball_sha256": "393af040437dfe7523605c718c18edee9bd8ea4b739b83f4454b18187419a4a7",
@@ -50,11 +51,23 @@
     "components_total": 2,
     "model": "DeepSeek-V4.1-Flash",
     "reasoning_effort": "off",
-    "visible_tools": [
+    "visible_tools_excerpt": [
       "crm_service_health",
       "weknora_search",
       "weknora_read_document",
       "free_html_page_generate"
+    ],
+    "tool_surface_enumeration": "EXCERPT_ONLY",
+    "crm_tools_registered_by_package": [
+      "query_crm_dashboard_snapshot",
+      "query_crm_dashboard_gsv",
+      "query_crm_dashboard_purchases",
+      "query_crm_metrics_v1",
+      "query_crm_dashboard_readiness",
+      "query_crm_dashboard_membership",
+      "query_crm_dashboard_net_gsv",
+      "crm_metrics_capabilities",
+      "crm_service_health"
     ],
     "absent_tools": [
       "bash",
@@ -63,7 +76,8 @@
       "weknora_list_knowledge_bases",
       "private-textbook-graph"
     ],
-    "crm_login": "NOT_CONNECTED"
+    "crm_login": "NOT_CONNECTED",
+    "side_load_lock": "config/query-agent-side-load.v1.json"
   },
   "weknora_scope": {
     "project_knowledge_base_id": "1c4627e2-dfc1-48ca-aeef-2c00b53da5f8",
@@ -111,7 +125,7 @@
     },
     "query_agent_unit_tests": {
       "command": "node --test dsh-plugins/query-agent/test/package.test.mjs",
-      "passed": 8,
+      "passed": 9,
       "failed": 0
     },
     "remote_recovery": "/srv/shinemage/dsh/recovery/weknora-production-scope-20261021/",

@@ -28,6 +28,10 @@ CRM、知识、页面和 WeKnora 是不同权限与生命周期域，保持独�
 
 先安装 CRM 领域插件和已有的 workbench bundle，再安装本 bundle。Knowledge 包可以独立安装，但未配置服务时不属于 `crm-query`。配置顺序由 profile bundle 层保证；同名 `crm-knowledge-login-host` 只覆盖配置，不重复注册插件。
 
+## side-load 身份
+
+当前 owner-operated side-load 的固定身份见 [`config/query-agent-side-load.v1.json`](../../config/query-agent-side-load.v1.json)。其中 `source_package_manifest_sha256` 是 source `package.json` 的摘要，`generated_pack_manifest_sha256` 是生成 `plugin-pack.json` 的摘要，`tarball.sha256` 是最终归档摘要；三者不能互相替代。该 lock 只描述当前现场输入，`release_ready=false`，不创建正式发布身份。
+
 ## How to：更新并验证 WeKnora 生产范围
 
 生产检索由 DSH 外部的薄 overlay 提供，第三方 `@wxg-prc-cpg/dsh-weknora@0.1.0` 包保持独立且不改写。维护源、live 文件和回滚资产的职责如下：

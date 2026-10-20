@@ -11,13 +11,16 @@
 ## query.9 artifact
 
 - source：`d860b1d46d3a33de2ae1b0e77f1f420ec25e0d0d`
-- manifest：`f68df1dbe45c411125080bdc203afff7669f4748c88bdc6d0c48d75ba09194e7`
+- source package manifest（`package.json` 字节）：`d3b901ea679ee6b413cecc11fad0471a66144aaa96171235f79afa9f13a10fa8`
+- generated pack manifest（`plugin-pack.json` 字节）：`f68df1dbe45c411125080bdc203afff7669f4748c88bdc6d0c48d75ba09194e7`
 - tarball：`shine-mage-dsh-query-agent-0.0.0-query.9.tgz`
 - tarball SHA-256：`393af040437dfe7523605c718c18edee9bd8ea4b739b83f4454b18187419a4a7`
 - tarball bytes：`3269`
 - integrity：`sha512-MQiuKQE4uYdy6aO9Ur9PXJpVo+1vjNQyEV2T6TyxzdSYU1DDvKNjzuToJcunOXhkpKBDKchUXiVuSc9ZMp/KVA==`
 - build provenance SHA-256：`d54dff1aa64e1767b4fab409c7bd16102a52c6819578020ddbd1a996cdad8eff`
 - entries：`cordis.patch.yml`、`icon.svg`、`lib/tool-policy.js`、`locale/en.json`、`locale/zh.json`、`package.json`
+
+上述两种 manifest 摘要不是同一个对象，也都不是 tarball 摘要。config-level lock 见 [`config/query-agent-side-load.v1.json`](../../../config/query-agent-side-load.v1.json)，测试会把 source `package.json` 摘要与回执中的生成包身份绑定起来。该 lock 描述 owner-operated side-load，不是正式 release 身份。
 
 包从 clean commit 的隔离 worktree 生成，并通过严格 provenance reader。Query bundle 不声明 `@deepseek-ai/dsh-tools` peer 或依赖，仅组合 CRM 指标、WeKnora 检索和可选页面交付。
 
@@ -37,8 +40,9 @@ DSH 启动时会生成新的 `runtime/plugin-packs-*` 根并重写本地 link，
 ## query.9 浏览器复测
 
 - 新会话预设选择器显示“问数智能体”。
-- 真实 schema 中 `bash`、`terminal_open`、`crm_knowledge_explain` 和私有教材图谱工具均不存在。
-- `crm_service_health`、`weknora_search`、`weknora_read_document`、`free_html_page_generate` 可见。
+- 对真实 schema 做点名观察时，`crm_service_health`、`weknora_search`、`weknora_read_document`、`free_html_page_generate` 可见；这只是 `visible_tools_excerpt`，不是完整 schema 枚举。
+- CRM 包静态注册 9 个指标工具；回执单独记录该清单，不能把四个点名工具写成完整工具面。
+- 同一点名观察中，`bash`、`terminal_open`、`crm_knowledge_explain` 和私有教材图谱工具均不存在。
 - UI 模型持久化路由显示 `DeepSeek-V4.1-Flash / Off`，对应 profile 声明 `deepseek-account / deepseek-flash / off`。
 - 项目资料库正向检索 `会员溢价率` 返回 2 条命中，searched 为 `1c4627e2-dfc1-48ca-aeef-2c00b53da5f8`。
 
@@ -74,7 +78,7 @@ DSH 启动时会生成新的 `runtime/plugin-packs-*` 根并重写本地 link，
 
 最终 tenant-wide enrichment 禁用版本下发并受控重启后，服务为 `active/running`、`NRestarts=0`，4328、18090–18094、18098 正常监听。真实只读模块探针使用 live adapter 和 `retrieve.key` 发起搜索，项目资料库查询返回 8 条 passage（searched `1c4627e2…`），网络路径只有 `/api/v1/knowledge-search`，没有 tenant-wide `/api/v1/knowledge/search`；显式部署验收库 search 和跨库 document read 均返回 `WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED`。跨库 read 的路径只有先核对元数据的 `/api/v1/knowledge/bf837310-…`，没有读取 chunk 正文。
 
-本地定向回归 `node --test scripts/ops/weknora-production-scope.test.mjs dsh-plugins/query-agent/test/package.test.mjs` 为 `18/18 PASS`；远端输入防护前 helper 备份为 `weknora-production-scope.before-input-hardening-20261021.mjs`。
+本地定向回归 `node --test dsh-plugins/query-agent/test/package.test.mjs scripts/ops/weknora-production-scope.test.mjs` 为 `19/19 PASS`，其中 query `9/9`、WeKnora scope `10/10`；远端输入防护前 helper 备份为 `weknora-production-scope.before-input-hardening-20261021.mjs`。
 
 ## 仍未完成
 

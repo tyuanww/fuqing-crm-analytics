@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict'
+import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
 
 const root = new URL('../', import.meta.url)
+const sha256 = value => createHash('sha256').update(value).digest('hex')
 
 test('query agent bundle declares one preset through the DSH bundle contract', async () => {
   const manifest = JSON.parse(await readFile(new URL('package.json', root), 'utf8'))
@@ -17,6 +19,33 @@ test('query agent bundle declares one preset through the DSH bundle contract', a
   assert.equal(manifest.dsh.bundle.patch, './cordis.patch.yml')
   assert.equal(manifest.exports['./tool-policy'], './lib/tool-policy.js')
   assert.deepEqual(manifest.files, ['cordis.patch.yml', 'lib/tool-policy.js', 'locale/*.json', 'icon.svg'])
+})
+
+test('side-load lock binds the source package manifest to the recorded pack artifact', async () => {
+  const lock = JSON.parse(await readFile(
+    new URL('../../../config/query-agent-side-load.v1.json', import.meta.url),
+    'utf8',
+  ))
+  const manifest = JSON.parse(await readFile(new URL('package.json', root), 'utf8'))
+  const evidence = JSON.parse(await readFile(
+    new URL('../../../docs/hackathon/evidence/dsh-query9-weknora-scope-20261021.json', import.meta.url),
+    'utf8',
+  ))
+
+  assert.equal(lock.schema_version, 'shinemage-query-agent-side-load-lock/v1')
+  assert.equal(lock.package, manifest.name)
+  assert.equal(lock.version, manifest.version)
+  assert.equal(lock.lane, 'owner-operated-side-load')
+  assert.equal(lock.release_ready, false)
+  assert.equal(lock.formal_release, false)
+  assert.equal(lock.source_sha, evidence.query_artifact.source_sha)
+  assert.equal(lock.source_package_manifest_sha256, sha256(await readFile(new URL('package.json', root))))
+  assert.equal(lock.generated_pack_manifest_sha256, evidence.query_artifact.manifest_sha256)
+  assert.equal(lock.tarball.name, evidence.query_artifact.tarball)
+  assert.equal(lock.tarball.bytes, evidence.query_artifact.tarball_bytes)
+  assert.equal(lock.tarball.sha256, evidence.query_artifact.tarball_sha256)
+  assert.equal(lock.tarball.integrity, evidence.query_artifact.integrity)
+  assert.equal(lock.build_provenance_sha256, evidence.query_artifact.build_provenance_sha256)
 })
 
 test('preset composes runtime-ready providers without unconfigured knowledge or shell tools', async () => {

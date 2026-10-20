@@ -22,6 +22,18 @@ The pack receipt uses `dsh-plugin-pack/v1` and contains:
 
 The archive may contain declared runtime files and `package.json`. It must not contain source files, tests, `node_modules`, source maps, symlinks, workspace links, credentials, or undeclared files.
 
+## Manifest digest names
+
+The repository uses explicit field names when one artifact has multiple manifest digests:
+
+| Field | Byte source |
+| --- | --- |
+| `source_package_manifest_sha256` | The plugin source `package.json` |
+| `generated_pack_manifest_sha256` | The generated `plugin-pack.json` receipt |
+| `tarball.sha256` | The final `.tgz` archive |
+
+These values are not interchangeable. A source manifest can stay unchanged while generated provenance changes, or a generated manifest can stay unchanged while a tarball differs. Consumers must use the named field rather than an unqualified `manifest_sha256`.
+
 ## Configuration bundles
 
 A pure configuration bundle sets `shinemage.bundle_role` to `configuration-bundle`. It may omit the `@deepseek-ai/dsh-tools` peer because it contributes DSH patch/configuration rather than tool implementation. The same package must not declare that module in `dependencies`, `optionalDependencies`, `devDependencies`, or `peerDependencies`, and packaged `.js/.mjs/.cjs` files must not import it. Runtime work still belongs in an independently installed tool plugin.
