@@ -1,6 +1,6 @@
 {
   "schema_version": "shinemage-dsh-owner-state/v1",
-  "observed_at": "2026-10-20T17:40:50Z",
+  "observed_at": "2026-10-20T19:12:27Z",
   "scope": "owner-operated-v5-side-load",
   "release_ready": false,
   "current_symlink": "/srv/shinemage/dsh/current",
@@ -12,10 +12,12 @@
     "n_restarts": 0,
     "listeners": [
       "127.0.0.1:4328",
+      "127.0.0.1:18090",
       "127.0.0.1:18091",
       "127.0.0.1:18092",
       "127.0.0.1:18093",
-      "127.0.0.1:18094"
+      "127.0.0.1:18094",
+      "127.0.0.1:18098"
     ]
   },
   "upstream": {
@@ -46,7 +48,8 @@
   },
   "actual_profile": {
     "path": "/srv/shinemage/dsh/current/runtime/harness/profiles/web/package.json",
-    "sha256": "7ec66b32e44cc69f5b4941b82e48d7f32bc1ed7fbf7b677fdc0443e0702ae43a",
+    "sha256": "6c688d2296e089920267cc4b8928416caff2ac2b3958b54f8e5ce2b7a13168a6",
+    "lock_sha256": "ed46a48f3353474681b9cad6b2d5bed2a2a438e76f65b08b3220f588651bd333",
     "plugins": {
       "@shine-mage/dsh-crm-knowledge": {
         "version": "0.0.0-crm.2",
@@ -59,9 +62,9 @@
         "sha256": "63366d0110a076e96a75811fd6870c77cb04d4559a2fafe249a1c05c1b16e752"
       },
       "@shine-mage/dsh-query-agent": {
-        "version": "0.0.0-query.8",
-        "spec": "file:/srv/shinemage/dsh/current/inputs/knowledge-query-agent-20261020/packs/shine-mage-dsh-query-agent-0.0.0-query.8.tgz",
-        "sha256": "2d8a241c6d199220d4e8d2d701e64afe956f8e224f6497aac466f26c184e670d"
+        "version": "0.0.0-query.9",
+        "spec": "file:/srv/shinemage/dsh/current/inputs/knowledge-query-agent-20261020/packs/shine-mage-dsh-query-agent-0.0.0-query.9.tgz",
+        "sha256": "393af040437dfe7523605c718c18edee9bd8ea4b739b83f4454b18187419a4a7"
       },
       "@xmanrui/dsh-im": {
         "version": "5.2.0",
@@ -80,6 +83,13 @@
     "lock": "config/dsh-im-plugin-inputs.v1.json",
     "receipt": "docs/hackathon/evidence/dsh-im-plugin-inputs-20261021.json",
     "remote_recovery": "/srv/shinemage/dsh/recovery/im-plugin-inputs-20261021/"
+  },
+  "weknora_production": {
+    "adapter_sha256": "c7695609efe2d4d0edc12361ad7a9288908cc7d47c43713611e8eda3f172720a",
+    "scope_helper_sha256": "6aebe420d9a2d6286319f97735f082769bcdc06d345caf7f9202fe179dfa2ac6",
+    "scope": "PROJECT_MATERIALS_ALLOWLIST",
+    "receipt": "docs/hackathon/evidence/dsh-query9-weknora-scope-20261021.md",
+    "remote_recovery": "/srv/shinemage/dsh/recovery/weknora-production-scope-20261021/"
   },
   "identity_assessment": {
     "status": "OWNER_OPERATED_SIDELOAD_NOT_FORMAL_RELEASE",
