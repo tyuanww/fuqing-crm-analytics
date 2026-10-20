@@ -397,14 +397,14 @@ test('runtime bundle enforces production pruning, secret scan and peer collision
   assert.match(source, /requiredPeerAliases/);
   assert.match(source, /verifyPeerSourceEntries/);
   assert.match(source, /assertPeerAliasesPresent\(\[\.\.\.requiredPeers\]/);
-  assert.match(source, /verifyPeerSourceEntries\(peerSourceRoot, upstreamRoot, requiredPeers\)/);
+  assert.match(source, /verifyPeerSourceEntries\(peerSources, \[upstreamRoot, resolve\(sourceRoot\)\], requiredPeers\)/);
   assert.match(source, /RUNTIME_PEER_ALIAS_OUTSIDE_UPSTREAM/);
   assert.match(source, /RUNTIME_PEER_ALIAS_ID_MISMATCH/);
   assert.match(source, /RUNTIME_PEER_ALIAS_VERSION_MISMATCH/);
   assert.match(source, /'dsh-client-ui-slots'/);
   assert.match(source, /optionalDependencies/);
   assert.match(source, /peerDependencies/);
-  assert.match(source, /\['cordis', 'cosmokit'\]/);
+  assert.match(source, /peerSources = new Map/);
   assert.match(source, /runtimeDeployArgs\(deployed, \{ online, portableLinux \}\)/);
   assert.match(source, /stageRuntimeWorkspace/);
   assert.match(source, /GENERATED_PROVENANCE_SCHEMA/);
