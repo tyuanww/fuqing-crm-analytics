@@ -48,7 +48,7 @@ profile 和 runtime 是两个不同的证据面：runtime 证明可启动的字�
 
 ## 当前实例
 
-v4 过渡候选 `dsh-0.2.1-rc.1-clean-main-20261020-v4` 已通过 runtime provenance、native boot、Settings/account RPC、浏览器插件页、plugin-market Discover、peer alias 未注入时的 fail-closed 负测和 AppleDouble 检查。2026-10-21 线上指向该 runtime 的 owner-operated 现场 side-load `dsh-0.2.1-rc.1-core-main-20261020-v5`；实际 profile 为 `7ec66b32…`，旧 marker 仍是 v4/PREPARED、候选 receipt 仍是 `c3ec7df3…`。IM 输入已为 `PINNED_INPUTS_VERIFIED`，但统一发布身份、签名、独立验收和切换授权仍未完成，所以 `release_ready=false`。
+v4 过渡候选 `dsh-0.2.1-rc.1-clean-main-20261020-v4` 已通过 runtime provenance、native boot、Settings/account RPC、浏览器插件页、plugin-market Discover、peer alias 未注入时的 fail-closed 负测和 AppleDouble 检查。2026-10-21 线上指向该 runtime 的 owner-operated 现场 side-load `dsh-0.2.1-rc.1-core-main-20261020-v5`；query.9 与最终 WeKnora 输入防护后的 profile 快照为 `6c688d22…`，旧 marker 仍是 v4/PREPARED、候选 receipt 仍是 `c3ec7df3…`。IM 输入已为 `PINNED_INPUTS_VERIFIED`，但统一发布身份、签名、独立验收和切换授权仍未完成，所以 `release_ready=false`。
 
 ## 相关文档
 

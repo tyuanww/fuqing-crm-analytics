@@ -1,7 +1,7 @@
 # Docs 索引
 
 > 按 lifecycle 分层，新人约 5 分钟找到入口。  
-> **最后更新**: 2026-10-20。当前提交、运行、端口和交付事实只看根目录 [STATUS.md](../STATUS.md)。当前操作入口见下方 `operating/` 文档；历史黑客松和校准材料只用于背景与证据回放。
+> **最后更新**: 2026-10-21。当前提交、运行、端口和交付事实只看根目录 [STATUS.md](../STATUS.md)。当前操作入口见下方 `operating/` 文档；历史黑客松和校准材料只用于背景与证据回放。
 
 ## 历史与领域资料
 
@@ -15,19 +15,22 @@
 | [`crm-calibration/metric-matrix.md`](./crm-calibration/metric-matrix.md) | 指标公式、来源、缺口与 A/B/C 验收 |
 | [`crm-calibration/graph-deployment.md`](./crm-calibration/graph-deployment.md) | 教材图谱查询、账本与账号文档权限 |
 | [`../dsh-plugins/crm-knowledge/README.md`](../dsh-plugins/crm-knowledge/README.md) | CRM 工具、登录边界、隔离启动与复验 |
+| [`../dsh-plugins/query-agent/README.md`](../dsh-plugins/query-agent/README.md) | “问数智能体”配置型 bundle、工具策略、WeKnora 范围与本地检查 |
 | [`../knowledge/crm/README.md`](../knowledge/crm/README.md) | 公开离线定义、依赖关系与导入限制 |
 | [`hackathon/README.md`](./hackathon/README.md) | CEO 价值、演示主链和数据边界（证据链；当前 SHA 看 STATUS） |
 | [`hackathon/PRODUCT-READINESS-2026-09-10.md`](./hackathon/PRODUCT-READINESS-2026-09-10.md) | 七阶段验收账本 |
 | [`hackathon/TODOS.md`](./hackathon/TODOS.md) | 验收缺口与延期项（不是执行授权） |
 | [`hackathon/COCKPIT-UI-UX-2026-09-20.md`](./hackathon/COCKPIT-UI-UX-2026-09-20.md) | 0.13.0.0 驾驶舱合并、6677 reload、证据归档与未验收项 |
 | [`operating/maintainer-map.md`](./operating/maintainer-map.md) | 目录职责、端口域名、CodeGraph 检索。新人先看这篇 |
+| [`operating/dsh-production-access.md`](./operating/dsh-production-access.md) | 从 Mac 只读打开当前杭州 DSH 入口，不用 6677 推断现役 |
 | [`operating/mac-hangzhou-git-workflow.md`](./operating/mac-hangzhou-git-workflow.md) | Mac 开发、GitHub PR、杭州 WSL 生产部署的唯一链路 |
 | [`operating/cockpit-native-html.md`](./operating/cockpit-native-html.md) | 从对话点「生成驾驶舱」或说生成 HTML，到可编辑驾驶舱和右侧产物 |
 | [`operating/cockpit-ai-edit.md`](./operating/cockpit-ai-edit.md) | 产物组织、全屏、静态 HTML 手动 / AI 选区编辑与 HTTP 合同 |
 | [`operating/dsh-rc1-release-lane.md`](./operating/dsh-rc1-release-lane.md) | 内部 rc1 候选准备；不代表正式 release |
 | [`operating/dsh-rc1-clean-upgrade-runbook.md`](./operating/dsh-rc1-clean-upgrade-runbook.md) | rc1 干净重建、profile、插件市场、验证和 side-by-side 条件 |
 | [`tutorials/dsh-rc1-clean-candidate.md`](./tutorials/dsh-rc1-clean-candidate.md) | 从固定上游构建并观察 rc1 候选 |
-| [`reference/dsh-rc1-clean-candidate.md`](./reference/dsh-rc1-clean-candidate.md) | v4 候选字段、bundle、peer closure 和状态值 |
+| [`reference/dsh-rc1-clean-candidate.md`](./reference/dsh-rc1-clean-candidate.md) | v4 候选与 v5 现场字段、bundle、peer closure 和状态值 |
+| [`hackathon/evidence/dsh-query9-weknora-scope-20261021.md`](./hackathon/evidence/dsh-query9-weknora-scope-20261021.md) | query.9 side-load、模型路由、工具面和 WeKnora 强制范围回执 |
 | [`architecture/dsh-rc1-clean-rebuild.md`](./architecture/dsh-rc1-clean-rebuild.md) | 为什么 runtime、profile 和 IM 输入必须隔离 |
 | [`operating/dsh-rc2-quickstart.md`](./operating/dsh-rc2-quickstart.md) | rc2 artifact 准备教程 |
 | [`operating/dsh-rc2-runbook.md`](./operating/dsh-rc2-runbook.md) | rc2 现场接收、切换和回退顺序 |
@@ -87,7 +90,7 @@ fuqing-crm-analytics/docs/
 │   └── l4_91_excel_export_ssot.md
 │
 ├── reference/                          命令与接口参考
-│   ├── dsh-rc1-clean-candidate.md       rc1 v4 候选字段与状态
+│   ├── dsh-rc1-clean-candidate.md       v4 候选与 v5 现场字段
 │   └── dsh-rc2-release-artifact.md
 │
 ├── business/                          业务口径 SSOT

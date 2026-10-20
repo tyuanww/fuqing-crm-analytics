@@ -19,7 +19,9 @@
 
 ### Added
 
-- 新增配置型包 `@shine-mage/dsh-query-agent@0.0.0-query.9`，作为“问数智能体”预设的唯一维护源：复用指标查询、WeKnora 资料和可选页面交付，不注册私有教材图谱工具，也不在未配置知识服务时暴露 `crm_knowledge_explain`；同时把新会话默认路由固定为账号 `deepseek-flash / off`，并在 Agent 创建、空白会话预设切换和切回其他模式时正确加卸 shell/终端限制。`query.8` 保留为线上已安装的前序候选；`query.9` 只修正配置包元数据，不增加 peer 依赖。原有“CRM 知识与指标”预设保持兼容。
+- 新增配置型包 `@shine-mage/dsh-query-agent@0.0.0-query.9`，作为“问数智能体”预设的唯一维护源：复用指标查询、WeKnora 资料和可选页面交付，不注册私有教材图谱工具，也不在未配置知识服务时暴露 `crm_knowledge_explain`；同时把新会话默认路由固定为 `deepseek-account / deepseek-flash / off`，并在 Agent 创建、空白会话预设切换和切回其他模式时正确加卸 shell/终端限制。`query.8` 保留为前序候选；`query.9` 已从 clean source 生成并完成线上 side-load。原有“CRM 知识与指标”预设保持兼容。
+
+- WeKnora 生产适配层的项目库配置从“默认范围”强化为强制执行：不再向 Agent 暴露知识库枚举，search 拒绝非项目库或非数组参数，read_document 要求非空文档 ID、在执行前核验归属，并在缺失 ID 或元数据不可用时 fail-closed。浏览器回归同时覆盖项目库正向检索、部署验收库搜索拒绝和跨库文档读取拒绝。历史固定输入 manifest 保持不变，另以 `weknora-production-overlay.v1.json` 记录当前适配器字节、scope helper、preset 和生效范围。
 
 - 新增 rc1 干净候选的教程、操作手册、参考和架构说明；记录 v4 runtime/profile digest、plugin-market bundle 与 Discover 入口、market index/IM artifact 阻塞和不切线上边界。
 

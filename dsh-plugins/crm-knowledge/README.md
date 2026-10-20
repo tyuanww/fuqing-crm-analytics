@@ -22,7 +22,7 @@ Python 实现和知识资源的维护源仍在 workspace；两项服务已分别
 
 `crm_knowledge_explain` 及 `query_crm_knowledge_graph/sources`、`expand_crm_knowledge_citation` 由知识包的公开入口注册，须在 profile 中另行选择。CRM 单独安装时，这些工具不注册；`crm_service_health.knowledge_base/knowledge_explanation` 明确报告未安装或不可见，原有指标工具仍可用。
 
-工具参数没有 SQL、数据库路径或凭据。合成工具的 `source_id` 仍仅允许 `synthetic-crm-metrics`，拒绝真实库；金额为分。看板工具返回元的十进制字符串和整数分，不扣退款、不返回尚未校准的旧客单价/会员溢价。未知、不可用和权限来源均保留。教材检索/图查询按 CRM 登录用户名映射到私有 grants，不把共享 retrieve key 当账号隔离。候选 preset 隔离 `weknora_search`；现役 preset 未改。
+工具参数没有 SQL、数据库路径或凭据。合成工具的 `source_id` 仍仅允许 `synthetic-crm-metrics`，拒绝真实库；金额为分。看板工具返回元的十进制字符串和整数分，不扣退款、不返回尚未校准的旧客单价/会员溢价。未知、不可用和权限来源均保留。教材检索/图查询按 CRM 登录用户名映射到私有 grants，不把共享 retrieve key 当账号隔离。独立知识插件不注册生产 WeKnora 检索；`crm-query` 的 `weknora_search` 由生产薄适配器提供，固定项目资料库 allowlist，跨库搜索和文档读取均 fail-closed。
 
 `crm_metrics_capabilities` 分为 `synthetic_candidate` 与 `dashboard` 两部分；`LOGIN_BOUND` 表示当前对话已有内存授权，每次查询仍须向 CRM 验证登录。解释 GSV/退款/实收时，`crm_knowledge_explain` 返回 `preferred_real_gsv` 与 `target_candidate`。解释 AUS/AOV 时补充 `preferred_operational_definition`：真实运营默认以当前看板GSV为金额分子，净额候选仍单列；分母覆盖及真实验收未完成时不冒称可取真实数。
 

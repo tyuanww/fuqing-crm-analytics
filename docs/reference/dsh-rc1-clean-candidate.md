@@ -1,6 +1,6 @@
 # DSH rc1 干净候选参考
 
-本页定义 clean-main v4 候选以及当前 v5 owner-operated side-load 的输入、输出和状态字段。它是事实参考，不替代[升级操作手册](../operating/dsh-rc1-clean-upgrade-runbook.md)；v5 不是新的正式 release 身份。
+本页定义 clean-main v4 候选以及当前 v5 owner-operated side-load 的输入、输出和状态字段。它是事实参考，不替代[升级操作手册](../operating/dsh-rc1-clean-upgrade-runbook.md)；v5 不是新的正式 release 身份。插件侧另见[问数智能体预设](../../dsh-plugins/query-agent/README.md)和 [query.9/WeKnora 回执](../hackathon/evidence/dsh-query9-weknora-scope-20261021.md)。
 
 ## 固定输入
 
@@ -17,7 +17,7 @@
 | lane config | `config/dsh-rc1-release-lane.json` via `DSH_RELEASE_LANE_CONFIG`; process-local override |
 | runtime archive SHA-256 | `d3d504dd39cd333fb98acf61cf4597664f6d4fda5482fb2ea970748bd2b8a94f` |
 | receipt profile SHA-256 | `c3ec7df313c2323996428b1034af0fd5eec5fffe1d06a8c618532074110503ad` |
-| actual installed profile SHA-256 | `7ec66b32e44cc69f5b4941b82e48d7f32bc1ed7fbf7b677fdc0443e0702ae43a` |
+| actual installed profile snapshot SHA-256 | `6c688d2296e089920267cc4b8928416caff2ac2b3958b54f8e5ce2b7a13168a6` |
 | plugin market | `@deepseek-ai/dsh-experimental-plugin-market-bundle@0.2.1-rc.1` |
 
 ## Profile bundles
@@ -80,7 +80,8 @@ dsh-tools
 PASS                         单项检查已在指定范围通过
 PASS_WAITING_BROWSER         HTTP 登录边界通过，等待 headed browser 回读
 PINNED_INPUTS_VERIFIED       IM 归档字节、integrity、commit 和包身份已核验；不代表 release-ready
-OWNER_OPERATED_SIDELOAD      当前目标为 owner 现场装配；marker/receipt 可能仍是旧候选身份
+OWNER_OPERATED_SIDELOAD_NOT_FORMAL_RELEASE
+                             当前目标为 owner 现场装配；marker/receipt 可能仍是旧候选身份
 NOT_RUN                      尚未执行，不可写成 PASS
 ```
 
@@ -88,7 +89,7 @@ NOT_RUN                      尚未执行，不可写成 PASS
 
 ## 线上边界
 
-2026-10-21 现场事实：`shinemage-dsh.service` 为 active/running，`/srv/shinemage/dsh/current` 指向 `/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-core-main-20261020-v5`。实际 profile SHA 为 `7ec66b32…`，`release-marker.json` 仍自报 v4/PREPARED，候选 receipt 仍为 `c3ec7df3…`；因此现场状态是 `OWNER_OPERATED_SIDELOAD_NOT_FORMAL_RELEASE`，不能把 v5 写成新的签名候选。旧兼容版本号只在历史或兼容基线文档中出现，不作为当前候选身份。
+2026-10-21 现场事实：`shinemage-dsh.service` 为 active/running，`/srv/shinemage/dsh/current` 指向 `/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-core-main-20261020-v5`。query.9 与最终 WeKnora 输入防护后的 profile 快照 SHA 为 `6c688d22…`，`release-marker.json` 仍自报 v4/PREPARED，候选 receipt 仍为 `c3ec7df3…`；因此现场状态是 `OWNER_OPERATED_SIDELOAD_NOT_FORMAL_RELEASE`，不能把 v5 写成新的签名候选。DSH 重启会生成新的 plugin-pack link 根并改写 profile，所以该摘要只代表本次现场快照。旧兼容版本号只在历史或兼容基线文档中出现，不作为当前候选身份。
 
 ## 相关文档
 

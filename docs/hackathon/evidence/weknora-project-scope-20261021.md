@@ -35,6 +35,20 @@
 - 回答仍返回项目资料文档来源；CRM 未连接时返回 `NOT_CONNECTED`
 - 独立知识插件和工具实现继续保留；面向用户的 `crm-query` 从 `0.0.0-query.8` 起移除未配置服务的 `crm_knowledge_explain` 和私有教材图谱工具，公开口径统一由 WeKnora 项目资料检索提供。当前维护源为 `0.0.0-query.9`，只修正 DSH 配置型 bundle 的元数据，不增加工具 peer
 
+## 后续强制 allowlist 修复
+
+上述原始验证只证明“未显式指定 scope 时默认检索项目资料”，不能证明参数不可越过。后续 query.9 浏览器负测发现：显式传入部署验收库 `9a4ea853-9466-4d27-8d4e-d8e8bd5a8018` 后，`weknora_search` 仍搜索该库并返回 3 篇 synthetic 文档。因此原 `ca563e88…` 适配器只完成默认收窄，未完成生产范围强制。
+
+现已用 DSH 原生工具注册的薄包装修复，第三方 WeKnora 包不变：
+
+- 不再注册 `weknora_list_knowledge_bases`。
+- `weknora_search` 只接受项目资料库 allowlist；非数组筛选、其他 ID 和无法证明归属的文档 ID 搜索直接返回 `WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED`。
+- `weknora_read_document` 要求非空文档 ID，并先查元数据核对 `knowledge_base_id`；缺失 ID、不属于项目库或元数据不可用时 fail-closed。
+- 浏览器复测中，项目库正查成功；部署验收库搜索和跨库文档读取均被拒绝。
+- 新适配器 SHA-256 为 `c7695609…720a`，最终 scope helper 为 `6aebe420…2ac6`，远端回滚副本位于 `/srv/shinemage/dsh/recovery/weknora-production-scope-20261021/`；最终输入防护前的 helper 另存为 `weknora-production-scope.before-input-hardening-20261021.mjs`。
+- 09 月/10 月早期固定输入 manifest 不覆盖后续 live overlay；现保留原字节，并新增 `weknora-production-overlay.v1.json`（`4c6ea764…f5eb`）记录当前 adapter、helper、preset、brand globals、package origin 和 scope。该 sidecar 不包含 `retrieve.key`，服务启动不依赖它。
+- 完整现场过程与 query.9 结果见 [query.9/WeKnora 强化范围回执](dsh-query9-weknora-scope-20261021.md)。
+
 ## WeKnora 全量只读复核
 
 - 三个知识库保持隔离：“项目资料”7 篇、“部署验收（合成资料）”3 篇、“权限隔离验收（空库）”0 篇；合计 10 篇文档均为 `completed/enabled`，待处理子任务与错误均为 0
@@ -45,6 +59,8 @@
 - 资源表有 194 个 active resource：9 个已绑定知识源文件，185 个页面 PNG 合计约 43.6 MB 未绑定；本轮未删除或改写资源
 - 共享空间、组织共享和数据源均为 0；本轮未扩大 WeKnora 权限
 
+组合输入中的 Knowledge source/manifest 已前进到 `ef8960ed…` / `83dca334…`，tarball 仍是 `870fdeea…`；同源 build receipt 记录 generated tree 未变，固定 Node 24 的严格 pack/profile 回归 `55/55 PASS`，因此这是“来源重绑、运行字节相同”，不是 pack 摘要漂移。
+
 ## 回滚
 
-若需回滚，只恢复上述备份文件并受控重启 DSH。回滚不会改动 WeKnora 数据。
+若需回滚，只恢复 `/srv/shinemage/dsh/recovery/weknora-production-scope-20261021/weknora.mjs` 并受控重启 DSH；该备份是强制 allowlist 修复前的 `ca563e88…` 适配器，只恢复默认收窄行为。回滚不会改动 WeKnora 数据。
