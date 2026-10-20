@@ -191,6 +191,7 @@ if (mode === '--prepare') {
   run(process.execPath, ['--test', 'scripts/ci/composition-pack-inputs.test.mjs']);
   run(process.execPath, ['--test', 'scripts/ci/workbench-author-evidence.test.mjs']);
   run(process.execPath, ['--test', '--test-concurrency=1', 'scripts/ci/pregate-runner.test.mjs']);
+  run(process.execPath, ['--test', 'scripts/ops/open-hangzhou-dsh.test.mjs']);
   run(process.execPath, ['--test', 'scripts/dsh-b0/leaf-pack-inputs.test.mjs', 'scripts/dsh-b0/workbench-client-pack-inputs.test.mjs']);
   run(process.execPath, ['scripts/dsh-b0/plugin-boundaries.mjs', '--check']);
   run(process.execPath, ['--test', 'scripts/dsh-b0/plugin-boundaries.test.mjs']);
