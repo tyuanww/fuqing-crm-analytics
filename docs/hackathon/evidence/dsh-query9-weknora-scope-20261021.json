@@ -125,7 +125,7 @@
     },
     "query_agent_unit_tests": {
       "command": "node --test dsh-plugins/query-agent/test/package.test.mjs",
-      "passed": 9,
+      "passed": 8,
       "failed": 0
     },
     "remote_recovery": "/srv/shinemage/dsh/recovery/weknora-production-scope-20261021/",

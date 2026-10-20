@@ -63,11 +63,13 @@ function verifyEntrypoints(manifest, files) {
       exportKeys(item);
     }
   }
-  function exportsTargets(value) {
+  function exportsTargets(value, wildcardKey = false) {
     if (value === null) return;
-    if (typeof value === 'string') { targets.push({ target: value, wildcard: true }); return; }
+    if (typeof value === 'string') { targets.push({ target: value, wildcard: wildcardKey }); return; }
     assert.ok(value && typeof value === 'object', 'PLUGIN_PACK_EXPORT_INVALID');
-    for (const item of Object.values(value)) exportsTargets(item);
+    for (const [key, item] of Object.entries(value)) {
+      exportsTargets(item, wildcardKey || key.includes('*'));
+    }
   }
   if (manifest.exports !== undefined) {
     exportKeys(manifest.exports);

@@ -56,6 +56,31 @@ test('controlled plugin pack emits an immutable tarball receipt without runtime 
   assert.deepEqual(JSON.parse(await readFile(manifestPath, 'utf8')), receipt);
 });
 
+test('query side-load lock binds the source package manifest to the recorded pack artifact', async () => {
+  const packageBytes = await readFile(new URL('../../dsh-plugins/query-agent/package.json', import.meta.url));
+  const manifest = JSON.parse(packageBytes);
+  const lock = JSON.parse(await readFile(new URL('../../config/query-agent-side-load.v1.json', import.meta.url), 'utf8'));
+  const evidence = JSON.parse(await readFile(
+    new URL('../../docs/hackathon/evidence/dsh-query9-weknora-scope-20261021.json', import.meta.url),
+    'utf8',
+  ));
+
+  assert.equal(lock.schema_version, 'shinemage-query-agent-side-load-lock/v1');
+  assert.equal(lock.package, manifest.name);
+  assert.equal(lock.version, manifest.version);
+  assert.equal(lock.lane, 'owner-operated-side-load');
+  assert.equal(lock.release_ready, false);
+  assert.equal(lock.formal_release, false);
+  assert.equal(lock.source_sha, evidence.query_artifact.source_sha);
+  assert.equal(lock.source_package_manifest_sha256, createHash('sha256').update(packageBytes).digest('hex'));
+  assert.equal(lock.generated_pack_manifest_sha256, evidence.query_artifact.manifest_sha256);
+  assert.equal(lock.tarball.name, evidence.query_artifact.tarball);
+  assert.equal(lock.tarball.bytes, evidence.query_artifact.tarball_bytes);
+  assert.equal(lock.tarball.sha256, evidence.query_artifact.tarball_sha256);
+  assert.equal(lock.tarball.integrity, evidence.query_artifact.integrity);
+  assert.equal(lock.build_provenance_sha256, evidence.query_artifact.build_provenance_sha256);
+});
+
 test('configuration bundle packs without a synthetic dsh-tools peer', async t => {
   const input = await fixture(t);
   const path = join(input.plugin, 'package.json');
@@ -74,6 +99,19 @@ test('configuration bundle packs without a synthetic dsh-tools peer', async t =>
   assert.equal(receipt.entries.includes('locale/en.json'), true);
   const packed = JSON.parse((await exec('tar', ['-xOf', join(input.outputDir, receipt.tarball.name), 'package/package.json'])).stdout);
   assert.equal(packed.peerDependencies, undefined);
+});
+
+test('configuration bundle rejects a wildcard export target without a wildcard key', async t => {
+  const input = await fixture(t);
+  const path = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  delete manifest.peerDependencies;
+  manifest.files = ['lib/', 'cordis.patch.yml'];
+  manifest.exports['./exact'] = './lib/*.js';
+  manifest.shinemage = { bundle_role: 'configuration-bundle' };
+  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await commitFixture(input.root);
+  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_PATTERN_INVALID/);
 });
 
 test('configuration bundle rejects a wildcard in an export directory segment', async t => {

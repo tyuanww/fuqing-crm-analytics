@@ -78,7 +78,7 @@ DSH 启动时会生成新的 `runtime/plugin-packs-*` 根并重写本地 link，
 
 最终 tenant-wide enrichment 禁用版本下发并受控重启后，服务为 `active/running`、`NRestarts=0`，4328、18090–18094、18098 正常监听。真实只读模块探针使用 live adapter 和 `retrieve.key` 发起搜索，项目资料库查询返回 8 条 passage（searched `1c4627e2…`），网络路径只有 `/api/v1/knowledge-search`，没有 tenant-wide `/api/v1/knowledge/search`；显式部署验收库 search 和跨库 document read 均返回 `WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED`。跨库 read 的路径只有先核对元数据的 `/api/v1/knowledge/bf837310-…`，没有读取 chunk 正文。
 
-本地定向回归 `node --test dsh-plugins/query-agent/test/package.test.mjs scripts/ops/weknora-production-scope.test.mjs` 为 `19/19 PASS`，其中 query `9/9`、WeKnora scope `10/10`；远端输入防护前 helper 备份为 `weknora-production-scope.before-input-hardening-20261021.mjs`。
+本地定向回归 `node --test dsh-plugins/query-agent/test/package.test.mjs scripts/ops/weknora-production-scope.test.mjs` 为 `18/18 PASS`，其中 query `8/8`、WeKnora scope `10/10`；仓库级 side-load 身份校验另由 plugin-pack 回归覆盖。远端输入防护前 helper 备份为 `weknora-production-scope.before-input-hardening-20261021.mjs`。
 
 ## 仍未完成
 
