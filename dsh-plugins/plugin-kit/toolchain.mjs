@@ -159,7 +159,7 @@ export async function bindToolchain(plugin, upstream, buildTools = defaultBuildT
       });
       if (!existing) {
         await replaceLink(link, target);
-        changes.push({ link, original: null });
+        if (process.env.DSH_RELEASE_LANE_CONFIG) changes.push({ link, original: null });
         continue;
       }
       assert.ok(existing.isSymbolicLink(), `Refusing to replace existing dependency: ${name}`);

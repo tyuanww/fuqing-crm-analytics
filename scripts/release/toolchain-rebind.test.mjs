@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises';
+import { lstat, mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, relative, resolve } from 'node:path';
 import { bindToolchain } from '../../dsh-plugins/plugin-kit/toolchain.mjs';
@@ -13,6 +13,7 @@ test('the default rc2 lane rebinds local SDK links and restores them', {
 
   const original = join(root, 'node_modules/.pnpm/original/node_modules/@deepseek-ai/dsh-tools');
   const link = join(root, 'node_modules/@deepseek-ai/dsh-tools');
+  const added = join(root, 'node_modules/@deepseek-ai/dsh-agent');
   await mkdir(original, { recursive: true });
   await mkdir(dirname(link), { recursive: true });
   await symlink(relative(dirname(link), original), link, 'dir');
@@ -33,9 +34,11 @@ test('the default rc2 lane rebinds local SDK links and restores them', {
     assert.equal(bound.pin.sdk_version, '0.1.7-rc.2');
     assert.notEqual(await realpath(link), await realpath(original));
     assert.equal(JSON.parse(await readFile(join(link, 'package.json'))).version, '0.1.7-rc.2');
+    assert.equal((await lstat(added)).isSymbolicLink(), true);
 
     await bound.restore();
     assert.equal(await realpath(link), await realpath(original));
+    assert.equal((await lstat(added)).isSymbolicLink(), true);
   } finally {
     if (lane === undefined) delete process.env.DSH_RELEASE_LANE_CONFIG;
     else process.env.DSH_RELEASE_LANE_CONFIG = lane;
