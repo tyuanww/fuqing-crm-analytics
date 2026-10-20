@@ -129,6 +129,10 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
   let state = emptyState(viewportWidth, bound);
   const importer = bound.documents ? createHtmlImporter({ documents: bound.documents }) : null;
   let openEpoch = 0;
+  const beginNavigation = (kind = 'navigation') => {
+    const epoch = ++openEpoch;
+    return Object.freeze({ epoch, kind });
+  };
 
   const emit = patch => {
     if (lifetime.signal.aborted) return;
@@ -283,6 +287,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
   return {
     subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); },
     getSnapshot: snapshot,
+    beginNavigation,
     selectCockpitAsset(id) { emit({ cockpitSelectionId: id }); },
     hasUnsavedChanges,
     hasActiveEditContext,
@@ -414,13 +419,14 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
     },
     async openPage(pageId) {
       if (state.busy || hasUnsavedChanges()) { emit({ message: '请先保存或放弃当前修改' }); return false; }
-      const epoch = ++openEpoch;
+      const ticket = beginNavigation('page');
       return perform(async () => {
         if (isLive(bound) && bound.documents?.pullPage) {
           const got = await bound.documents.pullPage(pageId);
+          if (ticket.epoch !== openEpoch) return false;
           if (!got.ok) throw new Error('页面不存在、不可用或无权限');
         }
-        if (epoch !== openEpoch) return false;
+        if (ticket.epoch !== openEpoch) return false;
         const page = bound.assets.get(pageId);
         if (!page?.package) throw new Error('页面不存在或无权限');
         emit({ view: 'workspace', current: clone(page), mode: 'browse', selection: null, overlay: null,

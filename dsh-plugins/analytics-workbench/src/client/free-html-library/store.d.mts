@@ -42,6 +42,7 @@ export type FreeHtmlLibraryState = {
 export type FreeHtmlLibraryStore = {
   subscribe(listener: () => void): () => void;
   getSnapshot(): FreeHtmlLibraryState;
+  beginNavigation(kind?: string): { epoch: number; kind: string };
   selectCockpitAsset(id: string | null): void;
   hasUnsavedChanges(): boolean;
   hasActiveEditContext(): boolean;

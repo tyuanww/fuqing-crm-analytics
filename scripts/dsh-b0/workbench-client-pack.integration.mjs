@@ -496,6 +496,7 @@ test('built browser factory requires only platform modules and registers shared-
     ['@deepseek-ai/dsh-client-store', stores],
   ]);
   let factoryRow;
+  const primary = 'session-b0-synthetic-primary';
   const browser = {
     localStorage: { getItem: () => null },
     __ModuleLoader__: { load: row => { factoryRow = row; } },
@@ -505,6 +506,7 @@ test('built browser factory requires only platform modules and registers shared-
     window: browser,
     __SHINE_QUERY__: true,
     __SHINE_BOARD__: true,
+    __SHINE_B0_SESSION_IDS__: [primary],
     // This test exercises the explicit opt-in branding path. The default
     // runtime keeps native DSH branding when this flag is absent.
     __SHINE_BRAND_OVERRIDE__: true,
@@ -516,7 +518,6 @@ test('built browser factory requires only platform modules and registers shared-
   });
   const entries = [];
   const effects = [], opened = [], selected = [];
-  const primary = 'session-b0-synthetic-primary';
   let snapshot = { phase: 'pending', ids: [primary], byId: { [primary]: { id: primary, retainedBy: {} } } };
   const listeners = new Set();
   const notify = () => { for (const listener of [...listeners]) listener(); };

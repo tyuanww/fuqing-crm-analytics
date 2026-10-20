@@ -1199,12 +1199,19 @@ test('host unmount and reentry recover the selected HTML draft from the shared s
   pageStore.setPrompt('原标题'); await pageStore.generate();
   pageStore.enterEdit(); pageStore.selectLocatable({ node_id: 'n_title', mapping: 'valid' });
   pageStore.setReplacementText('重新进入仍在', '原标题');
+  const selectedPage = 'page:' + pageStore.getSnapshot().current.page_id;
+  pageStore.selectCockpitAsset(selectedPage);
   const component = () => React.createElement(LibraryCockpitPanel, { library: client, pageStore, initialSurface: 'pages',
     themeSource: { subscribe: () => () => {}, getSnapshot: () => 'light' }, goConversation() {} });
   await ui.render(component());
   assert.equal(ui.doc.querySelector('[data-testid="html-replacement"]').value, '重新进入仍在');
+  const selected = pageStore.getSnapshot().selection;
+  assert.equal(selected?.node_id, 'n_title', 'reentry keeps the selected text target');
+  assert.equal(pageStore.getSnapshot().cockpitSelectionId, selectedPage);
   await ui.render(null); await ui.render(component());
   assert.equal(ui.doc.querySelector('[data-testid="html-replacement"]').value, '重新进入仍在');
+  assert.equal(pageStore.getSnapshot().selection?.node_id, selected?.node_id);
+  assert.equal(pageStore.getSnapshot().cockpitSelectionId, selectedPage);
   assert.equal(pageStore.hasUnsavedChanges(), true);
   assert.equal(pageStore.getSnapshot().current.version, 1);
 });
