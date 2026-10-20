@@ -6,7 +6,10 @@ import {
   createTools,
   resolveConfig,
 } from './weknora-package/dist/index.js'
-import { createScopedWeKnoraTools } from './weknora-production-scope.mjs'
+import {
+  createAllowlistedWeKnoraClient,
+  createScopedWeKnoraTools,
+} from './weknora-production-scope.mjs'
 
 export const name = 'shinemage-weknora-retrieval'
 export const inject = ['tools']
@@ -35,8 +38,12 @@ export function apply(ctx) {
     },
   })
   const client = new WeknoraClient(config)
+  const toolClient = createAllowlistedWeKnoraClient({
+    client,
+    allowedKnowledgeBaseIds: PROJECT_KNOWLEDGE_BASE_IDS,
+  })
   const definitions = createScopedWeKnoraTools({
-    definitions: createTools(client, config),
+    definitions: createTools(toolClient, config),
     client,
     allowedKnowledgeBaseIds: PROJECT_KNOWLEDGE_BASE_IDS,
   })

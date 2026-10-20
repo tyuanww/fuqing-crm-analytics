@@ -76,6 +76,20 @@ test('configuration bundle packs without a synthetic dsh-tools peer', async t =>
   assert.equal(packed.peerDependencies, undefined);
 });
 
+test('configuration bundle rejects a wildcard in an export directory segment', async t => {
+  const input = await fixture(t);
+  const path = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  delete manifest.peerDependencies;
+  manifest.exports['./nested'] = './lib/*/index.js';
+  manifest.shinemage = { bundle_role: 'configuration-bundle' };
+  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await mkdir(join(input.plugin, 'lib/nested'));
+  await writeFile(join(input.plugin, 'lib/nested/index.js'), 'export const nested = true;\n');
+  await commitFixture(input.root);
+  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_PATTERN_INVALID/);
+});
+
 test('configuration bundle cannot bypass the pinned peer through an ordinary dependency', async t => {
   const input = await fixture(t);
   const path = join(input.plugin, 'package.json');

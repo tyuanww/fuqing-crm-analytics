@@ -19,7 +19,7 @@
 - build provenance SHA-256：`d54dff1aa64e1767b4fab409c7bd16102a52c6819578020ddbd1a996cdad8eff`
 - entries：`cordis.patch.yml`、`icon.svg`、`lib/tool-policy.js`、`locale/en.json`、`locale/zh.json`、`package.json`
 
-包从 clean commit 的隔离 worktree 生成，并通过严格 provenance reader。Query bundle 不声明 `@deepseek-tools`，仅组合 CRM 指标、WeKnora 检索和可选页面交付。
+包从 clean commit 的隔离 worktree 生成，并通过严格 provenance reader。Query bundle 不声明 `@deepseek-ai/dsh-tools` peer 或依赖，仅组合 CRM 指标、WeKnora 检索和可选页面交付。
 
 ## 线上 profile
 
@@ -50,16 +50,18 @@ DSH 启动时会生成新的 `runtime/plugin-packs-*` 根并重写本地 link，
 
 - 禁用 `weknora_list_knowledge_bases`，只暴露 production search/read。
 - `weknora_search.knowledge_base_ids` 按固定 allowlist 校验；非数组、出现非项目库，或只能按 `knowledge_ids` 搜索、无法证明归属时立即返回 `WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED`。
+- 上游 `weknora_search` 默认还会调用 tenant-wide `/knowledge/search` 做文档名 enrichment。生产客户端在调用入口直接返回空 enrichment，确保普通项目库 search 不会先把其他库元数据拉进 DSH。
 - `weknora_read_document` 要求非空文档 ID，并在执行前读取元数据；只有 `knowledge_base_id` 属于项目资料库才继续，缺失 ID 或元数据失败时 fail-closed。
 - 维护源为 `scripts/ops/weknora-production.mjs` 与 `scripts/ops/weknora-production-scope.mjs`。
 
 远端文件：
 
-- `weknora.mjs`：`c7695609efe2d4d0edc12361ad7a9288908cc7d47c43713611e8eda3f172720a`
-- `weknora-production-scope.mjs`：`6aebe420d9a2d6286319f97735f082769bcdc06d345caf7f9202fe179dfa2ac6`
-- `weknora-production-overlay.v1.json`：`4c6ea764aae8cf609a0c440591af121f9023bf437fdc3f1a9bca8abe4d16f5eb`
+- `weknora.mjs`：`3cee71585582befe222de54a9063a37d0dacbf7ed1ec31eaee88922a84bf2a53`
+- `weknora-production-scope.mjs`：`6a5080213c59f0b374d9778e8111a9b280d84554a68e17140d54c15bcf3de825`
+- `weknora-production-overlay.v1.json`：`f4b1d4ecbf09cf778d41dc74b5249532e976eb9a13700c31f3acadd331a40c47`
 - 回滚副本：`/srv/shinemage/dsh/recovery/weknora-production-scope-20261021/weknora.mjs`
 - 输入防护前一版 helper：`/srv/shinemage/dsh/recovery/weknora-production-scope-20261021/weknora-production-scope.before-input-hardening-20261021.mjs`
+- tenant-wide enrichment 修复前的 adapter/helper/overlay：`weknora.mjs.before-tenant-wide-disable-20261021`、`weknora-production-scope.before-tenant-wide-disable-20261021.mjs`、`weknora-production-overlay.before-tenant-wide-disable-20261021.json`
 
 2026-10-09 的固定输入 manifest 仍为原字节（SHA-256 `e552acd8…8905`），不把后来的 adapter 和 helper 写回历史快照。新的 production overlay manifest 只记录当前 live overlay 文件、第三方 package origin、项目库 scope 和工具合同，权限为 `0600 root:root`；它不包含 `retrieve.key`，也不改变 DSH 启动路径。
 
@@ -69,9 +71,9 @@ DSH 启动时会生成新的 `runtime/plugin-packs-*` 根并重写本地 link，
 - 显式读取部署验收文档 `bf837310-9f76-4b4f-8a53-c3f39bb79f44` 被拒绝，未返回正文。
 - 项目资料库同范围正向检索仍成功，说明限制没有破坏正常问数链路。
 
-最终输入防护 helper 下发并受控重启后，同一“问数智能体”会话再次完成浏览器复测：项目资料库查询返回 2 条 passage（searched `1c4627e2…`），显式部署验收库查询返回 `WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED`；模型按钮仍显示 `DeepSeek-V4.1-Flash / Off`。
+最终 tenant-wide enrichment 禁用版本下发并受控重启后，服务为 `active/running`、`NRestarts=0`，4328、18090–18094、18098 正常监听。真实只读模块探针使用 live adapter 和 `retrieve.key` 发起搜索，项目资料库查询返回 8 条 passage（searched `1c4627e2…`），网络路径只有 `/api/v1/knowledge-search`，没有 tenant-wide `/api/v1/knowledge/search`；显式部署验收库 search 和跨库 document read 均返回 `WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED`。跨库 read 的路径只有先核对元数据的 `/api/v1/knowledge/bf837310-…`，没有读取 chunk 正文。
 
-本地定向回归 `node --test scripts/ops/weknora-production-scope.test.mjs dsh-plugins/query-agent/test/package.test.mjs` 为 `16/16 PASS`；远端输入防护前 helper 备份为 `weknora-production-scope.before-input-hardening-20261021.mjs`。
+本地定向回归 `node --test scripts/ops/weknora-production-scope.test.mjs dsh-plugins/query-agent/test/package.test.mjs` 为 `18/18 PASS`；远端输入防护前 helper 备份为 `weknora-production-scope.before-input-hardening-20261021.mjs`。
 
 ## 仍未完成
 

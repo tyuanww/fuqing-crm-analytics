@@ -39,7 +39,7 @@ CRM、知识、页面和 WeKnora 是不同权限与生命周期域，保持独�
 | Overlay 摘要 | 仓库内为 [`config/weknora-production-overlay.v1.json`](../../config/weknora-production-overlay.v1.json)，部署时复制到 live `brand-weknora/` 并与 adapter 同目录；记录当前文件 SHA-256 |
 | 第三方包 | `brand-weknora/weknora-package/`，来源与摘要见同目录 `package-origin.json` |
 | 检索凭据 | `brand-weknora/retrieve.key`，仅现场 `0600 root:root`，不进入 Git、日志或 manifest |
-| 修改边界 | 只允许固定项目库 `1c4627e2-dfc1-48ca-aeef-2c00b53da5f8`；不合并、不修改 WeKnora 数据卷 |
+| 修改边界 | 只允许固定项目库 `1c4627e2-dfc1-48ca-aeef-2c00b53da5f8`；禁用上游 tenant-wide 文档名 enrichment，不合并、不修改 WeKnora 数据卷 |
 
 ### 前置条件
 
@@ -61,7 +61,7 @@ shasum -a 256 scripts/ops/weknora-production.mjs \
   config/weknora-production-overlay.v1.json
 ```
 
-期望当前 overlay 摘要为 `c7695609…720a`（adapter）、`6aebe420…2ac6`（scope helper）和 `4c6ea764…f5eb`（overlay manifest）。摘要变化时先核对内容与 PR，不要只更新 manifest 让漂移“变绿”。
+期望当前 overlay 摘要为 `3cee7158…2a53`（adapter）、`6a508021…e825`（scope helper）和 `f4b1d4ec…0c47`（overlay manifest）。摘要变化时先核对内容与 PR，不要只更新 manifest 让漂移“变绿”。
 
 ### 更新现场
 
@@ -78,7 +78,7 @@ systemctl is-active shinemage-dsh.service
 curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:18092/
 ```
 
-服务恢复后，在“问数智能体”中做三项只读检查：项目资料正常返回带来源的结果；显式搜索非项目库返回 `WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED`；显式读取非项目库文档被拒绝且不返回正文。真实 CRM 指标查询仍要求当前用户自行完成 CRM 登录，未登录只能是 `NOT_CONNECTED`。
+服务恢复后，在“问数智能体”中做三项只读检查：项目资料正常返回带来源的结果；显式搜索非项目库返回 `WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED`；显式读取非项目库文档被拒绝且不返回正文。普通 search 仍只向项目库发起 passage 检索，但上游的 tenant-wide 文档名 enrichment 已禁用，避免在内存过滤前把其他库元数据拉入 DSH。真实 CRM 指标查询仍要求当前用户自行完成 CRM 登录，未登录只能是 `NOT_CONNECTED`。
 
 ### 常见拒绝
 

@@ -27,9 +27,20 @@ const SHA256 = /^[a-f0-9]{64}$/;
 const SAFE_RELATIVE = /^(?!\/)(?!.*(?:^|\/)\.\.(?:\/|$))(?!.*\\)[^\0]+$/;
 const MAX_PACK_BYTES = 20 * 1024 * 1024;
 
-function matchesPattern(path, pattern) {
-  assert.equal((pattern.match(/\*/g) ?? []).length, 1, `PLUGIN_PACK_PATTERN_INVALID ${pattern}`);
-  const [head, tail] = pattern.split('*');
+function matchesPattern(path, pattern, code = 'PLUGIN_PACK_PATTERN_INVALID') {
+  assert.equal((pattern.match(/\*/g) ?? []).length, 1, `${code} ${pattern}`);
+  const slash = pattern.lastIndexOf('/');
+  assert.ok(
+    slash > 0
+      && !pattern.slice(0, slash + 1).includes('*')
+      && !pattern.slice(slash + 1).includes('/'),
+    `${code} ${pattern}`,
+  );
+  const directory = pattern.slice(0, slash + 1);
+  const suffix = pattern.slice(slash + 1);
+  const star = suffix.indexOf('*');
+  const head = `${directory}${suffix.slice(0, star)}`;
+  const tail = suffix.slice(star + 1);
   return path.startsWith(head) && path.endsWith(tail)
     && !path.slice(head.length, path.length - tail.length).includes('/');
 }
@@ -112,7 +123,7 @@ async function collectFiles(root, declared) {
   for (const declaredPath of [...declared, 'package.json']) {
     if (declaredPath.includes('*')) {
       const slash = declaredPath.lastIndexOf('/');
-      assert.ok(slash > 0 && !declaredPath.slice(0, slash).includes('*'), `PLUGIN_PACK_PATTERN_SCOPE ${declaredPath}`);
+      matchesPattern('', declaredPath, 'PLUGIN_PACK_PATTERN_SCOPE');
       const directory = declaredPath.slice(0, slash);
       const directoryPath = join(root, directory);
       const directoryInfo = await lstat(directoryPath);

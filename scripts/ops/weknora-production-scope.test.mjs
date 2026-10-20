@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { createScopedWeKnoraTools } from './weknora-production-scope.mjs'
+import {
+  createAllowlistedWeKnoraClient,
+  createScopedWeKnoraTools,
+} from './weknora-production-scope.mjs'
 
 const PROJECT = '1c4627e2-dfc1-48ca-aeef-2c00b53da5f8'
 const OTHER = '9a4ea853-9466-4d27-8d4e-d8e8bd5a8018'
@@ -41,6 +44,36 @@ test('fixed scope rejects non-array knowledge base filters before search', async
     /knowledge_base_ids must be an array/,
   )
   assert.equal(called, false)
+})
+
+test('scoped tool client denies tenant-wide document lookup before network access', async () => {
+  let lookedUp = false
+  let searched = false
+  const scoped = createAllowlistedWeKnoraClient({
+    client: {
+      async findDocuments() {
+        lookedUp = true
+        return [{ knowledge_base_id: OTHER }]
+      },
+      async search() {
+        searched = true
+        return []
+      },
+    },
+    allowedKnowledgeBaseIds: [PROJECT],
+  })
+
+  assert.deepEqual(await scoped.findDocuments({ keyword: '会员', limit: 8 }), [])
+  assert.equal(lookedUp, false)
+  await scoped.search({ query: '会员', knowledgeBaseIds: [PROJECT], knowledgeIds: [] })
+  assert.equal(searched, true)
+})
+
+test('scoped tool client rejects an empty production allowlist', () => {
+  assert.throws(
+    () => createAllowlistedWeKnoraClient({ client: {}, allowedKnowledgeBaseIds: [] }),
+    /allowed knowledge base list is empty/,
+  )
 })
 
 test('fixed scope rejects knowledge-id search that cannot prove base membership', async () => {

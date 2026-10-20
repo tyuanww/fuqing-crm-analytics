@@ -13,6 +13,23 @@ function scopeMessage(knowledgeBaseIds) {
 }
 
 /**
+ * The upstream search tool enriches passage matches with a tenant-wide
+ * by-document-name lookup. Production scope cannot express that lookup, so
+ * deny it before network access while preserving the scoped passage search.
+ */
+export function createAllowlistedWeKnoraClient({ client, allowedKnowledgeBaseIds }) {
+  const allowed = new Set(allowedKnowledgeBaseIds)
+  if (allowed.size === 0) throw new Error(`${DENIED}: allowed knowledge base list is empty`)
+  return new Proxy(client, {
+    get(target, property) {
+      if (property === 'findDocuments') return async () => []
+      const value = Reflect.get(target, property, target)
+      return typeof value === 'function' ? value.bind(target) : value
+    },
+  })
+}
+
+/**
  * Wrap the upstream WeKnora tool definitions without changing the external
  * package. The upstream `knowledgeBaseIds` setting is only a default; these
  * wrappers make it an allowlist for both search and document reads.

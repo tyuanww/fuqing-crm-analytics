@@ -1,6 +1,6 @@
 {
   "schema_version": "shinemage-dsh-query9-weknora-scope/v1",
-  "observed_at": "2026-10-20T19:16:20Z",
+  "observed_at": "2026-10-20T21:10:25Z",
   "scope": "owner-operated-v5-query9-side-load",
   "release_ready": false,
   "query_artifact": {
@@ -29,7 +29,7 @@
     "active_state": "active",
     "sub_state": "running",
     "n_restarts": 0,
-    "active_enter_timestamp": "2026-10-21T03:11:27+08:00",
+    "active_enter_timestamp": "2026-10-21T05:10:25+08:00",
     "promo_enter_active": true,
     "http": {
       "4328": 401,
@@ -69,23 +69,28 @@
     "project_knowledge_base_id": "1c4627e2-dfc1-48ca-aeef-2c00b53da5f8",
     "deployment_knowledge_base_id": "9a4ea853-9466-4d27-8d4e-d8e8bd5a8018",
     "old_default_only_scope": "FAIL_OPEN_BY_ARGUMENT_OVERRIDE",
-    "enforcement": "ALLOWLIST_SEARCH_AND_DOCUMENT_METADATA_WITH_STRICT_INPUT_TYPES",
+    "enforcement": "ALLOWLIST_SEARCH_AND_DOCUMENT_METADATA_WITH_TENANT_WIDE_NAME_LOOKUP_DISABLED",
     "input_hardening": [
       "non-array knowledge_base_ids rejected",
       "non-array knowledge_ids rejected",
-      "missing or empty document id rejected"
+      "missing or empty document id rejected",
+      "tenant-wide document-name enrichment denied before network access"
     ],
-    "adapter_sha256": "c7695609efe2d4d0edc12361ad7a9288908cc7d47c43713611e8eda3f172720a",
-    "scope_helper_sha256": "6aebe420d9a2d6286319f97735f082769bcdc06d345caf7f9202fe179dfa2ac6",
+    "adapter_sha256": "3cee71585582befe222de54a9063a37d0dacbf7ed1ec31eaee88922a84bf2a53",
+    "scope_helper_sha256": "6a5080213c59f0b374d9778e8111a9b280d84554a68e17140d54c15bcf3de825",
     "overlay_manifest": {
       "path": "/srv/shinemage/dsh/current/inputs/page/brand-weknora/weknora-production-overlay.v1.json",
-      "sha256": "4c6ea764aae8cf609a0c440591af121f9023bf437fdc3f1a9bca8abe4d16f5eb",
+      "sha256": "f4b1d4ecbf09cf778d41dc74b5249532e976eb9a13700c31f3acadd331a40c47",
       "base_input_manifest_sha256": "e552acd8b0d8dfb8b0a41f19d90dae3f89dcae60e6870e54b26462ebce3a8905"
     },
     "positive_project_search": {
       "status": "PASS",
       "searched": "1c4627e2-dfc1-48ca-aeef-2c00b53da5f8",
-      "hits": 2
+      "hits": 8
+    },
+    "tenant_wide_name_lookup": {
+      "status": "DENIED",
+      "reason": "The upstream tenant-wide /knowledge/search enrichment is disabled before network access."
     },
     "negative_deployment_search": {
       "status": "DENIED",
@@ -101,7 +106,7 @@
     },
     "unit_tests": {
       "command": "node --test scripts/ops/weknora-production-scope.test.mjs",
-      "passed": 8,
+      "passed": 10,
       "failed": 0
     },
     "query_agent_unit_tests": {
@@ -109,7 +114,8 @@
       "passed": 8,
       "failed": 0
     },
-    "remote_recovery": "/srv/shinemage/dsh/recovery/weknora-production-scope-20261021/"
+    "remote_recovery": "/srv/shinemage/dsh/recovery/weknora-production-scope-20261021/",
+    "tenant_wide_disable_rollback": "/srv/shinemage/dsh/recovery/weknora-production-scope-20261021/weknora.mjs.before-tenant-wide-disable-20261021"
   },
   "limits": [
     "CRM login and real read-only metric UAT require the user to sign in.",
