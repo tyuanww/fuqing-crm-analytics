@@ -243,7 +243,7 @@
     {
       "path": "dsh-plugins/query-agent",
       "name": "@shine-mage/dsh-query-agent",
-      "version": "0.0.0-query.9",
+      "version": "0.0.0-query.10",
       "domain": "agent-preset",
       "target_repository": "shinemage-dsh-query-agent",
       "kind": "configuration-bundle",
@@ -268,7 +268,7 @@
         }
       },
       "commands": {},
-      "manifest_sha256": "d3b901ea679ee6b413cecc11fad0471a66144aaa96171235f79afa9f13a10fa8"
+      "manifest_sha256": "46db6cc8163303f4a28a07d1a60ca70767bc1b44e131a91013ae65b36e6bc89d"
     },
     {
       "path": "dsh-plugins/shine-board",

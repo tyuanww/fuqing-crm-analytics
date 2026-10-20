@@ -129,7 +129,9 @@ async function collectFiles(root, declared) {
   const files = [];
   const rootReal = await realpath(root);
   async function walk(current, prefix) {
-    for (const entry of await readdir(current, { withFileTypes: true })) {
+    const entries = (await readdir(current, { withFileTypes: true }))
+      .sort((left, right) => left.name.localeCompare(right.name));
+    for (const entry of entries) {
       const path = join(current, entry.name);
       const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
       assert.ok(!entry.isSymbolicLink(), `PLUGIN_PACK_SYMLINK ${rel}`);
@@ -155,7 +157,9 @@ async function collectFiles(root, declared) {
       assert.ok(directoryInfo.isDirectory() && !directoryInfo.isSymbolicLink(), `PLUGIN_PACK_DECLARED_MISSING ${declaredPath}`);
       await canonicalInside(rootReal, directoryPath, `PLUGIN_PACK_PATH_ESCAPE ${directory}`);
       let matched = 0;
-      for (const entry of await readdir(directoryPath, { withFileTypes: true })) {
+      const entries = (await readdir(directoryPath, { withFileTypes: true }))
+        .sort((left, right) => left.name.localeCompare(right.name));
+      for (const entry of entries) {
         const rel = `${directory}/${entry.name}`;
         if (!matchesPattern(rel, declaredPath)) continue;
         assert.ok(entry.isFile(), `PLUGIN_PACK_SPECIAL_FILE ${rel}`);

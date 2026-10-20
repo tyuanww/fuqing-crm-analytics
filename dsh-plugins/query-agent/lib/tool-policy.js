@@ -9,16 +9,21 @@
 export const name = 'query-tool-policy'
 export const inject = ['agentPresets', 'agents', 'tools']
 
-const terminalTools = new Set([
-  'bash',
-  'pwsh',
-  'terminal_open',
-  'terminal_send',
-  'terminal_read',
-  'terminal_signal',
-  'terminal_close',
-  'terminal_list',
+export const queryToolAllowlist = Object.freeze([
+  'query_crm_dashboard_snapshot',
+  'query_crm_dashboard_gsv',
+  'query_crm_dashboard_purchases',
+  'query_crm_metrics_v1',
+  'query_crm_dashboard_readiness',
+  'query_crm_dashboard_membership',
+  'query_crm_dashboard_net_gsv',
+  'crm_metrics_capabilities',
+  'crm_service_health',
+  'weknora_search',
+  'weknora_read_document',
+  'free_html_page_generate',
 ])
+const allowedTools = new Set(queryToolAllowlist)
 
 export const queryPresetId = 'crm-query'
 
@@ -40,11 +45,21 @@ export function apply(ctx) {
     }
     if (restrictions.has(agentId)) return
 
-    const deny = agent.ctx.tools.schemas()
-      .map(tool => tool.name)
-      .filter(name => terminalTools.has(name))
-    if (deny.length === 0) return
-    const dispose = agent.ctx.tools.restrict({ deny })
+    // Scoped business tools stay visible because restrict() only masks the
+    // inherited global layer. The guard then denies any future scoped or
+    // global tool that is not explicitly part of this read-mostly preset.
+    const dispose = agent.ctx.effect(() => {
+      const liftGlobalMask = agent.ctx.tools.restrict({ allow: [] })
+      const liftGuard = agent.ctx.tools.guard(execution => (
+        allowedTools.has(execution.name)
+          ? undefined
+          : `CRM_QUERY_TOOL_NOT_ALLOWED: ${execution.name}`
+      ))
+      return () => {
+        liftGuard()
+        liftGlobalMask()
+      }
+    })
     if (typeof dispose === 'function') restrictions.set(agentId, dispose)
   }
 

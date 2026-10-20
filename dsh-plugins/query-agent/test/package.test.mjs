@@ -7,7 +7,7 @@ const root = new URL('../', import.meta.url)
 test('query agent bundle declares one preset through the DSH bundle contract', async () => {
   const manifest = JSON.parse(await readFile(new URL('package.json', root), 'utf8'))
   assert.equal(manifest.name, '@shine-mage/dsh-query-agent')
-  assert.equal(manifest.version, '0.0.0-query.9')
+  assert.equal(manifest.version, '0.0.0-query.10')
   assert.equal(manifest.packageManager, 'pnpm@11.28.2')
   assert.deepEqual(manifest.engines, { node: '24.x' })
   assert.equal(manifest.peerDependencies, undefined)
@@ -42,7 +42,9 @@ test('Host policy restricts only newly created query Agents', async () => {
   assert.equal(module.default, undefined)
   const { apply } = module
   let created
-  const restricted = []
+  let restricted
+  let guard
+  let released = 0
   apply({
     agentPresets: { composedPreset: () => 'crm-query' },
     agents: { get: () => undefined },
@@ -57,25 +59,50 @@ test('Host policy restricts only newly created query Agents', async () => {
     agent: {
       id: 'session-query',
       ctx: {
+        effect: callback => callback(),
         tools: {
-          schemas: () => [
-            { name: 'crm_metrics_capabilities' },
-            { name: 'terminal_open' },
-            { name: 'terminal_send' },
-            { name: 'read' },
-          ],
-          restrict: filter => restricted.push(filter),
+          restrict: filter => {
+            restricted = filter
+            return () => { released += 1 }
+          },
+          guard: callback => {
+            guard = callback
+            return () => { released += 1 }
+          },
         },
       },
     },
   })
-  assert.deepEqual(restricted, [{ deny: ['terminal_open', 'terminal_send'] }])
+  assert.deepEqual(restricted, { allow: [] })
+  assert.equal(guard({ name: 'crm_metrics_capabilities' }), undefined)
+  assert.equal(guard({ name: 'weknora_search' }), undefined)
+  assert.match(guard({ name: 'shell' }), /CRM_QUERY_TOOL_NOT_ALLOWED: shell/)
+  assert.equal(released, 0)
+})
+
+test('Host policy allowlist names every query-domain tool exactly once', async () => {
+  const { queryToolAllowlist } = await import('../lib/tool-policy.js')
+  assert.equal(new Set(queryToolAllowlist).size, queryToolAllowlist.length)
+  assert.deepEqual(queryToolAllowlist, [
+    'query_crm_dashboard_snapshot',
+    'query_crm_dashboard_gsv',
+    'query_crm_dashboard_purchases',
+    'query_crm_metrics_v1',
+    'query_crm_dashboard_readiness',
+    'query_crm_dashboard_membership',
+    'query_crm_dashboard_net_gsv',
+    'crm_metrics_capabilities',
+    'crm_service_health',
+    'weknora_search',
+    'weknora_read_document',
+    'free_html_page_generate',
+  ])
 })
 
 test('Host policy leaves other presets unchanged', async () => {
   const { apply } = await import('../lib/tool-policy.js')
   let created
-  const restricted = []
+  let touched = false
   apply({
     agentPresets: { composedPreset: () => 'standard' },
     agents: { get: () => undefined },
@@ -89,20 +116,22 @@ test('Host policy leaves other presets unchanged', async () => {
     agent: {
       id: 'session-standard',
       ctx: {
+        effect: callback => callback(),
         tools: {
-          schemas: () => [{ name: 'terminal_open' }],
-          restrict: filter => restricted.push(filter),
+          restrict: () => { touched = true },
+          guard: () => { touched = true },
         },
       },
     },
   })
-  assert.deepEqual(restricted, [])
+  assert.equal(touched, false)
 })
 
-test('Host policy avoids an empty restriction when no shell tool is inherited', async () => {
+test('Host policy masks all inherited global tools even when the shell is absent', async () => {
   const { apply } = await import('../lib/tool-policy.js')
   let created
-  const restricted = []
+  let restricted
+  let guard
   apply({
     agentPresets: { composedPreset: () => 'crm-query' },
     agents: { get: () => undefined },
@@ -116,14 +145,17 @@ test('Host policy avoids an empty restriction when no shell tool is inherited', 
     agent: {
       id: 'session-query-without-shell',
       ctx: {
+        effect: callback => callback(),
         tools: {
-          schemas: () => [{ name: 'weknora_search' }],
-          restrict: filter => restricted.push(filter),
+          restrict: filter => { restricted = filter },
+          guard: callback => { guard = callback },
         },
       },
     },
   })
-  assert.deepEqual(restricted, [])
+  assert.deepEqual(restricted, { allow: [] })
+  assert.match(guard({ name: 'read' }), /CRM_QUERY_TOOL_NOT_ALLOWED: read/)
+  assert.equal(guard({ name: 'free_html_page_generate' }), undefined)
 })
 
 test('Host policy follows in-place preset selection and releases the restriction on switch away', async () => {
@@ -135,12 +167,19 @@ test('Host policy follows in-place preset selection and releases the restriction
     id: 'session-switched',
     ctx: {
       preset: 'crm-query',
+      effect: callback => {
+        const release = callback()
+        return () => {
+          release()
+          released += 1
+        }
+      },
       tools: {
-        schemas: () => [{ name: 'terminal_open' }, { name: 'weknora_search' }],
         restrict: filter => {
           restricted.push(filter)
-          return () => { released += 1 }
+          return () => {}
         },
+        guard: () => () => {},
       },
     },
   }
@@ -155,7 +194,7 @@ test('Host policy follows in-place preset selection and releases the restriction
   })
 
   listeners.get('agent-preset/selected')(agent.id, 'crm-query')
-  assert.deepEqual(restricted, [{ deny: ['terminal_open'] }])
+  assert.deepEqual(restricted, [{ allow: [] }])
 
   listeners.get('agent-preset/selected')(agent.id, 'crm-query')
   assert.equal(restricted.length, 1)
@@ -177,9 +216,16 @@ test('Host policy releases a session-id fallback when the Agent is disposed', as
     session: { id: 'session-without-agent-id' },
     ctx: {
       preset: 'crm-query',
+      effect: callback => {
+        const release = callback()
+        return () => {
+          release()
+          released += 1
+        }
+      },
       tools: {
-        schemas: () => [{ name: 'terminal_open' }],
-        restrict: () => () => { released += 1 },
+        restrict: () => () => {},
+        guard: () => () => {},
       },
     },
   }

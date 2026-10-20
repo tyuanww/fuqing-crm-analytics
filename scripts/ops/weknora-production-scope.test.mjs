@@ -66,24 +66,26 @@ test('fixed scope rejects non-array knowledge base filters before search', async
 test('scoped tool client denies tenant-wide document lookup before network access', async () => {
   let lookedUp = false
   let searched = false
-  const scoped = createAllowlistedWeKnoraClient({
-    client: {
-      async findDocuments() {
-        lookedUp = true
-        return [{ knowledge_base_id: OTHER }]
-      },
-      async search() {
-        searched = true
-        return []
-      },
+  const client = {
+    async findDocuments() {
+      lookedUp = true
+      return [{ knowledge_base_id: OTHER }]
     },
+    async search() {
+      searched = true
+      return this.findDocuments({ keyword: '会员', limit: 8 })
+    },
+  }
+  const scoped = createAllowlistedWeKnoraClient({
+    client,
     allowedKnowledgeBaseIds: [PROJECT],
   })
 
   assert.deepEqual(await scoped.findDocuments({ keyword: '会员', limit: 8 }), [])
   assert.equal(lookedUp, false)
-  await scoped.search({ query: '会员', knowledgeBaseIds: [PROJECT], knowledgeIds: [] })
+  assert.deepEqual(await scoped.search({ query: '会员', knowledgeBaseIds: [PROJECT], knowledgeIds: [] }), [])
   assert.equal(searched, true)
+  assert.equal(lookedUp, false)
 })
 
 test('scoped tool client rejects an empty production allowlist', () => {
@@ -91,6 +93,51 @@ test('scoped tool client rejects an empty production allowlist', () => {
     () => createAllowlistedWeKnoraClient({ client: {}, allowedKnowledgeBaseIds: [] }),
     /allowed knowledge base list is empty/,
   )
+})
+
+test('search rejects undeclared and camelCase arguments before delegating', async () => {
+  let called = false
+  const [search] = createScopedWeKnoraTools({
+    definitions: [definition('weknora_search', async () => { called = true })],
+    client: {},
+    allowedKnowledgeBaseIds: [PROJECT],
+  })
+
+  await assert.rejects(
+    search.execute({ query: '会员溢价', knowledge_base_ids: [PROJECT], knowledgeBaseIds: [PROJECT] }, {}),
+    /knowledgeBaseIds is not allowed/,
+  )
+  await assert.rejects(
+    search.execute({ query: '会员溢价', knowledge_base_id: PROJECT }, {}),
+    /knowledge_base_id is not allowed/,
+  )
+  assert.equal(called, false)
+})
+
+test('document reads reject undeclared and camelCase arguments before metadata lookup', async () => {
+  let lookedUp = false
+  let called = false
+  const [read] = createScopedWeKnoraTools({
+    definitions: [definition('weknora_read_document', async () => { called = true })],
+    client: {
+      async getDocument() {
+        lookedUp = true
+        return { knowledge_base_id: PROJECT }
+      },
+    },
+    allowedKnowledgeBaseIds: [PROJECT],
+  })
+
+  await assert.rejects(
+    read.execute({ knowledgeId: 'project-document' }, {}),
+    /knowledgeId is not allowed/,
+  )
+  await assert.rejects(
+    read.execute({ knowledge_id: 'project-document', knowledge_base_ids: [PROJECT] }, {}),
+    /knowledge_base_ids is not allowed/,
+  )
+  assert.equal(lookedUp, false)
+  assert.equal(called, false)
 })
 
 test('fixed scope rejects knowledge-id search that cannot prove base membership', async () => {

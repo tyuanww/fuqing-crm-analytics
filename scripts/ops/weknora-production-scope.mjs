@@ -2,6 +2,8 @@ import { readFileSync } from 'node:fs'
 
 const DENIED = 'WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED'
 const CHECK_FAILED = 'WEKNORA_DOCUMENT_SCOPE_CHECK_FAILED'
+const SEARCH_ARGUMENTS = new Set(['query', 'knowledge_base_ids', 'knowledge_ids', 'max_results'])
+const READ_ARGUMENTS = new Set(['knowledge_id', 'page', 'page_size'])
 
 export function readProductionWeKnoraKey(path) {
   let value
@@ -22,6 +24,17 @@ function requestedKnowledgeBaseIds(args) {
   return value
 }
 
+function assertAllowedArgumentKeys(toolName, args, allowed) {
+  if (args === null || typeof args !== 'object' || Array.isArray(args)) {
+    throw new Error(`${DENIED}: ${toolName} arguments must be an object`)
+  }
+  for (const key of Reflect.ownKeys(args)) {
+    if (typeof key !== 'string' || !allowed.has(key)) {
+      throw new Error(`${DENIED}: ${toolName} argument ${String(key)} is not allowed`)
+    }
+  }
+}
+
 function scopeMessage(knowledgeBaseIds) {
   return `${DENIED}: production retrieval is limited to: ${[...knowledgeBaseIds].join(', ')}`
 }
@@ -34,13 +47,19 @@ function scopeMessage(knowledgeBaseIds) {
 export function createAllowlistedWeKnoraClient({ client, allowedKnowledgeBaseIds }) {
   const allowed = new Set(allowedKnowledgeBaseIds)
   if (allowed.size === 0) throw new Error(`${DENIED}: allowed knowledge base list is empty`)
-  return new Proxy(client, {
-    get(target, property) {
-      if (property === 'findDocuments') return async () => []
-      const value = Reflect.get(target, property, target)
-      return typeof value === 'function' ? value.bind(target) : value
-    },
+  if (client === null || typeof client !== 'object') {
+    throw new Error(`${DENIED}: WeKnora client is unavailable`)
+  }
+  // Keep the wrapper as `this` so an upstream instance method cannot reach the
+  // tenant-wide document lookup through the original instance.
+  const scoped = Object.create(client)
+  Object.defineProperty(scoped, 'findDocuments', {
+    configurable: false,
+    enumerable: false,
+    writable: false,
+    value: async () => [],
   })
+  return scoped
 }
 
 /**
@@ -84,6 +103,7 @@ export function createScopedWeKnoraTools({
           + 'Tenant-wide document-name enrichment is disabled; results stay within the project allowlist. '
           + 'Use a returned knowledge_id with read_document for fuller context.',
         async execute(args, exec) {
+          assertAllowedArgumentKeys(searchName, args, SEARCH_ARGUMENTS)
           const requested = requestedKnowledgeBaseIds(args)
           if (requested.some(id => typeof id !== 'string' || !allowed.has(id))) {
             throw new Error(scopeMessage(allowed))
@@ -106,6 +126,7 @@ export function createScopedWeKnoraTools({
       return {
         ...definition,
         async execute(args, exec) {
+          assertAllowedArgumentKeys(readName, args, READ_ARGUMENTS)
           const knowledgeId = args?.knowledge_id
           if (typeof knowledgeId !== 'string' || knowledgeId === '') {
             throw new Error(`${CHECK_FAILED}: document id is required`)
