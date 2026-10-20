@@ -1,8 +1,8 @@
 /** Exact upstream closure. No registry install, source rewrite or absolute URL in artifacts. */
 import assert from 'node:assert/strict';
 import { bindPackagedDependencies, DEV_KIT_NAME } from './packaged-dependencies.mjs';
-import { createHash } from 'node:crypto';
-import { readFile, mkdir, symlink, lstat, realpath } from 'node:fs/promises';
+import { createHash, randomUUID } from 'node:crypto';
+import { readFile, mkdir, symlink, lstat, realpath, rename, rm } from 'node:fs/promises';
 import { dirname, join, relative } from 'node:path';
 import { inspectSdkPackage } from './sdk-inputs.mjs';
 import { verifySdkClosure } from './sdk-closure.mjs';
@@ -132,18 +132,50 @@ export async function bindToolchain(plugin, upstream, buildTools = defaultBuildT
   const compiler = loadCompiler(), esbuild = loadBundler();
   assert.equal(compiler.version, pin.typescript);
   assert.equal(esbuild.version, pin.esbuild);
-  for (const [name, target] of bindings) {
-    const link = join(plugin, 'node_modules', name);
-    await mkdir(dirname(link), { recursive: true });
+  const changes = [];
+  const replaceLink = async (link, target) => {
+    const temporary = `${link}.replace-${randomUUID()}`;
     try {
-      const existing = await lstat(link);
-      assert.ok(existing.isSymbolicLink(), `Refusing to replace existing dependency: ${name}`);
-      assert.equal(await realpath(link), await realpath(target), `Existing SDK binding differs: ${name}`);
-    } catch (error) {
-      if (error.code !== 'ENOENT') throw error;
-      await symlink(relative(dirname(link), target), link, 'dir');
+      await symlink(target, temporary, 'dir');
+      await rename(temporary, link);
+    } finally {
+      await rm(temporary, { force: true });
     }
+  };
+  const restore = async () => {
+    for (const change of changes.reverse()) {
+      if (change.original === null) await rm(change.link, { force: true });
+      else await replaceLink(change.link, change.original);
+    }
+    changes.length = 0;
+  };
+  try {
+    for (const [name, target] of bindings) {
+      const link = join(plugin, 'node_modules', name);
+      await mkdir(dirname(link), { recursive: true });
+      const existing = await lstat(link).catch(error => {
+        if (error.code === 'ENOENT') return null;
+        throw error;
+      });
+      if (!existing) {
+        await replaceLink(link, target);
+        if (process.env.DSH_RELEASE_LANE_CONFIG) changes.push({ link, original: null });
+        continue;
+      }
+      assert.ok(existing.isSymbolicLink(), `Refusing to replace existing dependency: ${name}`);
+      const existingTarget = await realpath(link), expectedTarget = await realpath(target);
+      if (existingTarget === expectedTarget) continue;
+      assert.ok(process.env.DSH_RELEASE_LANE_CONFIG, `Existing SDK binding differs: ${name}`);
+      const modules = await realpath(join(plugin, 'node_modules'));
+      const local = relative(modules, existingTarget);
+      assert.ok(local && !local.startsWith('..') && !isAbsolute(local), `Refusing to replace foreign dependency: ${name}`);
+      await replaceLink(link, target);
+      changes.push({ link, original: existingTarget });
+    }
+    await bindPackagedDependencies(plugin, process.env.DSH_PACKAGE_INPUTS);
+  } catch (error) {
+    await restore();
+    throw error;
   }
-  await bindPackagedDependencies(plugin, process.env.DSH_PACKAGE_INPUTS);
-  return { pin, compiler, build: esbuild.build };
+  return { pin, compiler, build: esbuild.build, restore };
 }
