@@ -1,0 +1,36 @@
+{
+  "schema_version": "shinemage-weknora-production-overlay/v1",
+  "observed_at": "2026-10-20T19:43:39Z",
+  "scope": "owner-operated-v5-query9-project-scope",
+  "base_input_manifest": {
+    "path": "/srv/shinemage/dsh/current/inputs/page/brand-weknora/input-manifest.json",
+    "sha256": "e552acd8b0d8dfb8b0a41f19d90dae3f89dcae60e6870e54b26462ebce3a8905",
+    "observed_date": "2026-10-09"
+  },
+  "overlay_files": {
+    "brand-globals.mjs": "f2e7db5ce4618f9054400ed5ba62c3da14df8ffdfafd727e9a6f24297987453d",
+    "package-origin.json": "19c2647bf2d8d8864dc66f65febf9808eb8c0748eac2b6103c954cc29099c925",
+    "preset.patch.json": "428c777581d74fd63ed79861bb6c915431c741e927359886ba15e48b5280f9f5",
+    "weknora-production-scope.mjs": "6aebe420d9a2d6286319f97735f082769bcdc06d345caf7f9202fe179dfa2ac6",
+    "weknora.mjs": "c7695609efe2d4d0edc12361ad7a9288908cc7d47c43713611e8eda3f172720a"
+  },
+  "secret_exclusions": {
+    "retrieve.key": "Root-only runtime credential; never copied to Git or included in a digest manifest."
+  },
+  "scope_contract": {
+    "project_knowledge_base_id": "1c4627e2-dfc1-48ca-aeef-2c00b53da5f8",
+    "exposed_tools": [
+      "weknora_search",
+      "weknora_read_document"
+    ],
+    "list_knowledge_bases": false,
+    "document_id_search": "DENIED",
+    "search_scope": "PROJECT_KNOWLEDGE_BASE_ALLOWLIST",
+    "document_read_scope": "METADATA_CHECK_BEFORE_READ"
+  },
+  "limitations": [
+    "This is an owner-operated side-load overlay, not a formal signed release.",
+    "The historical base input manifest remains unchanged.",
+    "The overlay manifest does not authorize deployment, production switch, canary or rollback."
+  ]
+}

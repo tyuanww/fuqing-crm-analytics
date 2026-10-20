@@ -77,6 +77,11 @@
     ],
     "adapter_sha256": "c7695609efe2d4d0edc12361ad7a9288908cc7d47c43713611e8eda3f172720a",
     "scope_helper_sha256": "6aebe420d9a2d6286319f97735f082769bcdc06d345caf7f9202fe179dfa2ac6",
+    "overlay_manifest": {
+      "path": "/srv/shinemage/dsh/current/inputs/page/brand-weknora/weknora-production-overlay.v1.json",
+      "sha256": "4c6ea764aae8cf609a0c440591af121f9023bf437fdc3f1a9bca8abe4d16f5eb",
+      "base_input_manifest_sha256": "e552acd8b0d8dfb8b0a41f19d90dae3f89dcae60e6870e54b26462ebce3a8905"
+    },
     "positive_project_search": {
       "status": "PASS",
       "searched": "1c4627e2-dfc1-48ca-aeef-2c00b53da5f8",
