@@ -1,6 +1,6 @@
 # DSH rc1 release lane
 
-这条 lane 为内部 rc1 候选准备 release 输入。它与 rc2 主兼容线分开。它不修改 `dsh-plugins/plugin-kit/toolchain.json` 的 rc2 默认值，也不负责杭州 owner-operated 的现役切换。当前杭州内部 r9 现场和正式 release 状态只看 [STATUS.md](../../STATUS.md)；本 lane 的 local asset 不等于公司正式 release。
+这条 lane 为内部 rc1 候选准备 release 输入。它与主仓兼容线分开。它不修改 `dsh-plugins/plugin-kit/toolchain.json` 的默认值，也不负责杭州 owner-operated 的现役切换。当前线上为 `dsh-0.2.1-rc.1-owner-main-4ac076de-20261019`；2026-10-18 的 r9 只保留为历史回退证据。正式 release 状态只看 [STATUS.md](../../STATUS.md)；本 lane 的 local asset 不等于公司正式 release。
 
 ## 固定输入
 
@@ -9,11 +9,18 @@
 | SDK | `@deepseek-ai/dsh@0.2.1-rc.1` |
 | 上游 tag | `dsh-v0.2.1-rc.1` |
 | 上游 SHA | `1600d8a1e140dcde43a1a0941940a0480712c011` |
+| 上游锁文件 SHA-256 | `952ca2f79998660dc690b739078a5d6052bc7c5c2193714b918b9d720baaeaba`（`pnpm-lock.yaml`） |
 | Cordis | `4.0.5` |
 | Node | `v24.19.0` |
 | plugin pnpm | `11.28.2` |
 | upstream pnpm | `11.28.5` |
 | source identity | `subject-archive`，`f4026619392c2909b449eb75be1081776b7c5507` |
+
+## 当前 clean-main v4 staging
+
+2026-10-20 已在独立 staging 目录生成 `dsh-0.2.1-rc.1-clean-main-20261020-v4`。它使用同一 upstream SHA，但 runtime/profile 是本次重建的新输入：runtime SHA-256 为 `d3d504dd39cd333fb98acf61cf4597664f6d4fda5482fb2ea970748bd2b8a94f`，web profile SHA-256 为 `c3ec7df313c2323996428b1034af0fd5eec5fffe1d06a8c618532074110503ad`。官方 plugin-market bundle 已加入 profile，并通过 native boot、Settings/account RPC、插件页、Discover tab、peer 缺失负测和 AppleDouble 扫描；market index 仍未配置（候选 receipt 已确认）。
+
+候选回执位于目标机 `/srv/shinemage/dsh/staging/rc1-clean-main-20261020/candidate-profile-receipt.json`。IM package/index 不在可验证的归档输入中，回执保持 `BLOCKED_MISSING_ARTIFACT`、`release_ready=false`，production switch 为 `HELD_PENDING_IM_ARTIFACT`。线上 `current` 仍指向 `dsh-0.2.1-rc.1-owner-main-4ac076de-20261019`；这条 lane 没有执行切换。
 
 ## 本地入口
 
@@ -32,7 +39,7 @@ node scripts/release/rc1-preflight.mjs \
 
 ## 2026-10-17 历史本地结果
 
-本节保留 2026-10-17 的 local lane 回执。它不是当前杭州 r9 资产，也不是正式公司 release。当前 owner-operated r9 事实和正式门禁只看 [STATUS.md](../../STATUS.md) 及 2026-10-18 回执。
+本节保留 2026-10-17 的 local lane 回执。它不是当前线上 owner-main 资产，也不是正式公司 release。2026-10-18 的 r9 只作为历史回退证据，当前 owner-operated 事实和正式门禁只看 [STATUS.md](../../STATUS.md)。
 
 2026-10-17 的本地回执位于 `.context/checks/dsh-rc1-release-prep-20261017/rc1-preflight/`，本地 release asset 位于 `.context/checks/dsh-rc1-release-prep-20261017/rc1-release/`：
 

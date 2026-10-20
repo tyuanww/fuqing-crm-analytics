@@ -4,9 +4,9 @@ Use this guide when DeepSeek Harness publishes a new tag and you want to test it
 
 ## What this flow protects
 
-The main checkout keeps its current DSH pin. The candidate uses a separate checkout, runtime directory, profile, pack inputs, and evidence directory. A successful candidate does not change the main pin or production state.
+The main checkout keeps its current DSH pin. The candidate uses a separate checkout, runtime directory, profile, pack inputs, and evidence directory. A successful candidate does not change the main pin or production state. For the current rc1 clean rebuild, follow [the dedicated runbook](./dsh-rc1-clean-upgrade-runbook.md) and use [the candidate reference](../reference/dsh-rc1-clean-candidate.md) for receipt fields.
 
-The internal engineering line and the main compatibility line are separate. At the time of writing, the internal target is `dsh-v0.2.1-rc.1`, while the main checkout remains on DSH `0.1.7-rc.2`. Read [STATUS.md](../../STATUS.md) before selecting a new tag.
+The internal engineering line and the main compatibility line are separate. The main checkout still reads its default compatibility pin from `dsh-plugins/plugin-kit/toolchain.json`; the rc1 candidate is built in an isolated lane with its own upstream, runtime, profile, and receipt. Read [STATUS.md](../../STATUS.md) before selecting a new tag; do not use the checkout's compatibility pin as the rc1 candidate identity.
 
 ## Inputs
 
@@ -62,11 +62,13 @@ The upstream lock may use a different pnpm version from the plugin toolchain. Re
 
 6. Build a new profile-pack input file. Every manifest and tarball must be consumed from the selected candidate subject set. Do not mix an old rc2, alpha2, or alpha4 pack with the new candidate.
 
+7. Keep the official plugin-market bundle in the profile. A visible market shell without its bundle or index is not a recovered plugin market.
+
 ## Run the local closure
 
 Use a fresh staging directory and an empty HOME. Install the SDK, `dsh-tools`, Cordis, and the plugin tarballs with production-only dependencies. Then generate the dependency graph, SBOM, runtime import receipt, and provenance receipt from the same manifest.
 
-The closure must have no peer resolution errors, no `--force`, no `--legacy-peer-deps`, no missing runtime CSS, and no dependency that exists only in development dependencies.
+The closure must have no peer resolution errors, no `--force`, no `--legacy-peer-deps`, no missing runtime CSS (已验证候选 runtime), and no dependency that exists only in development dependencies. The runtime builder also fails closed when an explicit web-plugin peer alias is absent; it must not defer the error to browser boot.
 
 ## Run the lifecycle smoke
 
@@ -96,6 +98,7 @@ Keep one machine-readable receipt with these fields:
 - pre-restart and post-restart browser observations;
 - owned process IDs and released ports;
 - rollback scope and every `NOT_RUN` item;
+- IM package/index status and the production switch decision;
 - `formal_company_evidence`, `release_ready`, and the formal M2 disposition.
 
 Local candidate evidence does not become company release evidence automatically. Keep `M2-07=BLOCKED`, `M2-08=NOT_RUN`, `M2-09=NOT_RUN`, and `release_ready=false` until the formal inputs and approvals exist.

@@ -2,7 +2,7 @@
 
 这份文档给维护者、插件作者和使用者一条共同的路径：主仓库负责把固定版本的 DeepSeek Harness（DSH）装配成可验收的平台，业务能力由独立插件和服务仓库维护。它也规定本机证据、Git worktree、分支和远程仓库怎样留存，避免为了“整洁”误删仍可复核的材料。
 
-正式主仓固定基线是 DSH `0.1.7-rc.2`、上游 SHA `477b4f420553e8a52c2fbccc464d7561b239c443`、产品 VERSION `0.20.0.0`。内部 owner-operated 当前为 `dsh-0.1.7-rc.2-owner-main-fc41e45d-20261019`，旧 rc1 保留为回退目标。它不改变正式主仓 pin，也不代表公司 release。上述值是本次记录的事实，不表示以后永远不升级。
+线上 owner-operated 当前为 `dsh-0.2.1-rc.1-owner-main-4ac076de-20261019`，服务仍 active；新的 clean-main v4 候选为 `dsh-0.2.1-rc.1-clean-main-20261020-v4`，仍在 staging。v4 已装配官方 plugin-market bundle 并通过 Discover tab 入口、peer/AppleDouble/profile 检查，但 market index 和 IM artifact 仍缺失，`release_ready=false`，没有切换线上。主仓兼容 pin、历史 owner receipt 和 formal release 证据各自按日期留存，不能互相替代。上述值是本次记录的事实，不表示以后永远不升级。
 
 ## 先看哪一个仓库
 
@@ -30,7 +30,7 @@
 
 ## DSH 升级：单独的一条变更轴
 
-DSH 升级不能简化为“从官网 `npm install latest` 后插入”。正确做法是把 DSH 版本和插件版本当成两个独立轴。完整的官方 tag、隔离候选、pack provenance、消费闭包、回读和回退顺序见[候选升级操作手册](./dsh-upgrade-candidate.md)：
+DSH 升级不能简化为“从官网 `npm install latest` 后插入”。正确做法是把 DSH 版本和插件版本当成两个独立轴，并把 runtime、profile 和插件市场作为同一候选输入验证。完整的官方 tag、隔离候选、pack provenance、消费闭包、回读和回退顺序见[候选升级操作手册](./dsh-upgrade-candidate.md)；本轮 v4 的实际步骤见[rc1 干净候选手册](./dsh-rc1-clean-upgrade-runbook.md)：
 
 ```text
 固定 DSH SHA ──┬── 插件 A 版本
@@ -45,6 +45,8 @@ DSH 升级不能简化为“从官网 `npm install latest` 后插入”。正确
 3. 先跑 host API、slot、生命周期、保存、权限、回退和插件合同兼容矩阵。发现合同变化时，分别在受影响插件仓修复并发布新版本。
 4. 在主仓更新 DSH pin、profile 和验证入口，重新生成只属于这次组合的 candidate/journal。旧 candidate、旧 WSL/浏览器回执不继承。
 5. 经过 CI、目标平台和必要的人工/UAT 门禁后，才允许 receive/activate。没有授权不部署、不切生产。
+
+profile bridge 只能从候选 runtime 的已验证 peer root 建 link；runtime builder 缺任一显式 web peer 就 fail-closed。插件市场必须随 profile 输入，IM 缺包则保持 staging 和 `HELD_PENDING_IM_ARTIFACT`。这三条是本轮修复后的升级门禁，不能靠现场 symlink、复制旧插件或删除 locale 文件绕过。
 
 这样，普通插件更新仍然是轻量的插件更新；只有 DSH 本身升级时，才走完整的宿主升级门禁。
 

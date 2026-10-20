@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { createServer } from 'node:net';
+import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { diagnose, inspectListener } from './diagnose.mjs';
 import { COMPETITION_VITE_PORT, FOREIGN_PORTS, PORTS } from './constants.mjs';
 import { repoRoot } from './paths.mjs';
@@ -85,4 +87,28 @@ test('diagnose classifies foreign and user-demo ports without probing them over 
   assert.equal(report.auth.mechanism.never_print_token, true);
   assert.equal(report.auth.mechanism.never_disable_auth, true);
   assert.doesNotMatch(JSON.stringify(report), /[?&](?:token|b0)=(?!\[REDACTED\])[A-Za-z0-9_-]+/);
+});
+
+test('diagnose resolves the active release lane before comparing an upstream checkout', async t => {
+  const upstream = join(repoRoot, '.context/dsh-b0/upstream-0.1.7-rc.2');
+  try {
+    await readFile(join(upstream, 'apps/cli/lib/bin.js'));
+  } catch {
+    t.skip('historical upstream checkout is unavailable');
+    return;
+  }
+  const child = spawnSync(process.execPath, ['--input-type=module', '-e', [
+    "import { diagnose } from './scripts/dsh-dev/diagnose.mjs';",
+    `const report = await diagnose({ upstream: ${JSON.stringify(upstream)} }, async () => null);`,
+    'console.log(JSON.stringify({ pin: report.upstream.pin_sha, actual: report.upstream.actual_sha, stale: report.upstream.stale_reasons }));',
+  ].join(' ')], {
+    cwd: repoRoot,
+    env: { ...process.env, DSH_RELEASE_LANE_CONFIG: join(repoRoot, 'config/dsh-rc1-release-lane.json') },
+    encoding: 'utf8',
+  });
+  assert.equal(child.status, 0, child.stderr);
+  const report = JSON.parse(child.stdout.trim());
+  assert.equal(report.pin, '1600d8a1e140dcde43a1a0941940a0480712c011');
+  assert.equal(report.actual, '477b4f420553e8a52c2fbccc464d7561b239c443');
+  assert.ok(report.stale.includes('upstream_sha_drift'));
 });

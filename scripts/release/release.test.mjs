@@ -17,6 +17,7 @@ import { writeEvidence } from './evidence.mjs';
 import { evaluateSli } from './operator-gate.mjs';
 import { pageGuard } from './page-policy.mjs';
 import { runtimeVendorAssignmentAllowlist, scanText } from './secret-scan.mjs';
+import { assertPeerAliasesPresent, missingPeerAliases } from './runtime-peer-aliases.mjs';
 import { releaseAssetNames, summarizePreflight, verifyPreflight, UPSTREAM_SHA } from './preflight-bundle.mjs';
 import { serviceFixture } from './test-fixtures/service-compatibility.mjs';
 
@@ -193,11 +194,24 @@ test('secret scan distinguishes explicit synthetic fixtures from real assignment
     ['.runtime-external/packages/experimental/inspector/lib/devtools/chunks/data_grid-CZEcy7-w.js', '729fbcd17a4356d26a52007551880bd7ef88f8a97b573e40c61fca2754da61a9', 'DataGridInternalToken'],
     ['.runtime-external/packages/experimental/inspector/lib/devtools/chunks/legacy-CJ2qLEp3.js', '1a1b731f8ed5c22d04152e49999cf706e5edefb595ec68e2ea45ca451c9a8c91', 'ReportingEndpointNotToken'],
     ['.runtime-external/packages/experimental/inspector/lib/devtools/chunks/protocol_client-L4-X1Qrb.js', 'aecddd3577951b386a69848c3470507c6806365a8130392e57d4028adf7c1e01', 'InvalidCredentialsCookie'],
+    ['.runtime-external/packages/experimental/inspector/lib/devtools/chunks/data_grid-VNFShWk1.js', '3268bccc21c8d298ba6875559005648643c7c9011693e56d4600634f406a32af', 'DataGridInternalToken'],
+    ['.runtime-external/packages/experimental/inspector/lib/devtools/chunks/legacy-CnKLfQuv.js', 'e3a45c64a5ccbe7d1a433bf568538a8d7b1a2771d79714fef969142da0f1e313', 'ReportingEndpointNotToken'],
   ]) {
     const allowed = runtimeVendorAssignmentAllowlist(path, digest);
     assert.deepEqual(scanText(`token: "${value}"`, path, { assignmentAllowlist: allowed }), []);
     assert.deepEqual(scanText(`token: "${value}"`, path, { assignmentAllowlist: runtimeVendorAssignmentAllowlist(path, '0'.repeat(64)) }), [`SECRET_PATTERN ${path}`]);
   }
+});
+test('runtime peer alias closure fails closed when an explicit web peer is absent', () => {
+  assert.deepEqual(missingPeerAliases(new Set(['dsh-client-connection', 'dsh-tools']), ['dsh-client-connection']), ['dsh-tools']);
+  assert.throws(
+    () => assertPeerAliasesPresent(new Set(['dsh-client-connection', 'dsh-tools']), [{ name: 'dsh-client-connection' }]),
+    /RUNTIME_EXTERNAL_WEB_PLUGIN_PEER_MISSING dsh-tools/,
+  );
+  assert.equal(
+    assertPeerAliasesPresent(new Set(['dsh-client-connection']), [{ name: 'dsh-client-connection' }]),
+    true,
+  );
 });
 test('zstd receiver enforces the bounded stream path', async () => { const root=await fixture(), raw=join(root,'a.tar'), archive=join(root,'a.tar.zst'); execFileSync('python3',['-c',`import tarfile,sys,io
 x=tarfile.TarInfo('VERSION'); b=bytes([48,46,49,56,46,48,46,49,10]); x.size=len(b); x.mode=0o600
@@ -381,9 +395,16 @@ test('runtime bundle enforces production pruning, secret scan and peer collision
   assert.match(source, /MAX_TEXT_SCAN_BYTES/);
   assert.match(source, /RUNTIME_PEER_ALIAS_COLLISION/);
   assert.match(source, /requiredPeerAliases/);
+  assert.match(source, /verifyPeerSourceEntries/);
+  assert.match(source, /assertPeerAliasesPresent\(\[\.\.\.requiredPeers\]/);
+  assert.match(source, /verifyPeerSourceEntries\(peerSources, \[upstreamRoot, resolve\(sourceRoot\)\], requiredPeers\)/);
+  assert.match(source, /RUNTIME_PEER_ALIAS_OUTSIDE_UPSTREAM/);
+  assert.match(source, /RUNTIME_PEER_ALIAS_ID_MISMATCH/);
+  assert.match(source, /RUNTIME_PEER_ALIAS_VERSION_MISMATCH/);
+  assert.match(source, /'dsh-client-ui-slots'/);
   assert.match(source, /optionalDependencies/);
   assert.match(source, /peerDependencies/);
-  assert.match(source, /\['cordis', 'cosmokit'\]/);
+  assert.match(source, /peerSources = new Map/);
   assert.match(source, /runtimeDeployArgs\(deployed, \{ online, portableLinux \}\)/);
   assert.match(source, /stageRuntimeWorkspace/);
   assert.match(source, /GENERATED_PROVENANCE_SCHEMA/);

@@ -1,7 +1,7 @@
 # Docs 索引
 
 > 按 lifecycle 分层，新人约 5 分钟找到入口。  
-> **最后更新**: 2026-10-18。当前提交、运行、端口和交付事实只看根目录 [STATUS.md](../STATUS.md)。当前操作入口见下方 `operating/` 文档；历史黑客松和校准材料只用于背景与证据回放。
+> **最后更新**: 2026-10-20。当前提交、运行、端口和交付事实只看根目录 [STATUS.md](../STATUS.md)。当前操作入口见下方 `operating/` 文档；历史黑客松和校准材料只用于背景与证据回放。
 
 ## 历史与领域资料
 
@@ -25,6 +25,10 @@
 | [`operating/cockpit-native-html.md`](./operating/cockpit-native-html.md) | 从对话点「生成驾驶舱」或说生成 HTML，到可编辑驾驶舱和右侧产物 |
 | [`operating/cockpit-ai-edit.md`](./operating/cockpit-ai-edit.md) | 产物组织、全屏、静态 HTML 手动 / AI 选区编辑与 HTTP 合同 |
 | [`operating/dsh-rc1-release-lane.md`](./operating/dsh-rc1-release-lane.md) | 内部 rc1 候选准备；不代表正式 release |
+| [`operating/dsh-rc1-clean-upgrade-runbook.md`](./operating/dsh-rc1-clean-upgrade-runbook.md) | rc1 干净重建、profile、插件市场、验证和 side-by-side 条件 |
+| [`tutorials/dsh-rc1-clean-candidate.md`](./tutorials/dsh-rc1-clean-candidate.md) | 从固定上游构建并观察 rc1 候选 |
+| [`reference/dsh-rc1-clean-candidate.md`](./reference/dsh-rc1-clean-candidate.md) | v4 候选字段、bundle、peer closure 和状态值 |
+| [`architecture/dsh-rc1-clean-rebuild.md`](./architecture/dsh-rc1-clean-rebuild.md) | 为什么 runtime、profile 和 IM 输入必须隔离 |
 | [`operating/dsh-rc2-quickstart.md`](./operating/dsh-rc2-quickstart.md) | rc2 artifact 准备教程 |
 | [`operating/dsh-rc2-runbook.md`](./operating/dsh-rc2-runbook.md) | rc2 现场接收、切换和回退顺序 |
 | [`operating/dsh-plugin-author-quickstart.md`](./operating/dsh-plugin-author-quickstart.md) | 独立插件作者三步构建、测试和 candidate handoff |
@@ -74,6 +78,7 @@ fuqing-crm-analytics/docs/
 │   └── graph-deployment.md           图谱账本与文档 ACL
 │
 ├── architecture/                      为什么这样设计
+│   ├── dsh-rc1-clean-rebuild.md        runtime/profile 隔离原因
 │   ├── AI_SAFETY_NET.md
 │   ├── DATA_PIPELINE.md
 │   ├── TEST_INFRASTRUCTURE.md
@@ -82,6 +87,7 @@ fuqing-crm-analytics/docs/
 │   └── l4_91_excel_export_ssot.md
 │
 ├── reference/                          命令与接口参考
+│   ├── dsh-rc1-clean-candidate.md       rc1 v4 候选字段与状态
 │   └── dsh-rc2-release-artifact.md
 │
 ├── business/                          业务口径 SSOT
@@ -91,6 +97,8 @@ fuqing-crm-analytics/docs/
 │   └── data-layout.md
 │
 ├── operating/                         怎么运维 / 协作
+│   ├── dsh-rc1-clean-upgrade-runbook.md rc1 干净重建与切换条件
+│   ├── dsh-rc1-release-lane.md          rc1 release 输入 lane
 │   ├── shinemage-maintenance-and-cleanup.md  主仓/插件仓职责、升级与清理
 │   ├── shinemage-plugin-update.md       单插件更新与主仓摘要接入
 │   ├── team-workflow-v1.md            历史协作定义 · 角色
@@ -100,6 +108,9 @@ fuqing-crm-analytics/docs/
 │   ├── project-hygiene.md             根目录 / 文档整洁
 │   ├── ship.md · linting.md · hooks-* · launchd-uvicorn.md
 │   └── ci-*.md
+
+├── tutorials/                          从零上手
+│   └── dsh-rc1-clean-candidate.md      固定上游到候选回读
 │
 ├── development/                       怎么改代码
 │   ├── testing.md · services.md · ratio-convention.md

@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('../..', import.meta.url));
 
 test('offline python eval suite', t => {
-  const run = spawnSync(process.env.PYTHON || 'python3',
+  const run = spawnSync(process.env.FQ_B0_PYTHON || process.env.PYTHON || 'python3.14',
     ['-m', 'backend.services.analytics.competition_diagnosis.eval'], {
       cwd: root,
       encoding: 'utf8',

@@ -10,10 +10,11 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { runtimeVendorAssignmentAllowlist, scanText } from './secret-scan.mjs';
-import { DSH_UPSTREAM_SHA as PIN } from './toolchain.mjs';
+import { DSH_SDK_VERSION, DSH_UPSTREAM_SHA as PIN } from './toolchain.mjs';
 import { bindRuntimeInputs, prepareRuntimeInputs, runtimeDeployArgs, runtimeSourceTree, stageRuntimeWorkspace, verifyRuntimePreparation } from './runtime-inputs.mjs';
 import { canonicalTreeDigest, GENERATED_PROVENANCE_SCHEMA } from './generated-provenance.mjs';
 import { comparablePackageBytes } from './runtime-package-identity.mjs';
+import { assertPeerAliasesPresent } from './runtime-peer-aliases.mjs';
 import { pruneUnsupportedLinuxNative, rewriteGeneratedPathShims, verifyPortableLinuxRuntime } from './runtime-portability.mjs';
 
 const execFile = promisify(execFileCallback);
@@ -28,6 +29,28 @@ const DEVELOPMENT_SEGMENT = /(^|\/)(?:test|tests|__tests__|stress-tests|docs|ref
 const DEVELOPMENT_FILE = /(?:^\._|\.map|\.test\.[cm]?[jt]sx?|\.spec\.[cm]?[jt]sx?|\.tsx?|\.mts|\.cts|\.md|\.mdx|\.toml|^tsconfig(?:\..*)?$|^vite\.config\..*)$/i;
 const TEXT_FILE = /\.(?:cjs|css|html|ini|json|js|mjs|mts|sh|txt|ts|tsx|yaml|yml)$/i;
 const MAX_TEXT_SCAN_BYTES = 16 * 1024 * 1024;
+
+// External web plugins declare these packages through `dsh.client.inject`.
+// They are not runtime production dependencies of the CLI, so `pnpm deploy
+// --prod` omits them even though the profile loader must resolve them from an
+// installed bundle. Keep this closure explicit and small: it makes the
+// runtime self-contained for the supported web-plugin contract without
+// pulling every optional workspace package into production.
+const EXTERNAL_WEB_PLUGIN_PEER_ALIASES = Object.freeze([
+  'dsh-api-session-controller',
+  'dsh-api-workspace-files',
+  'dsh-client-connection',
+  'dsh-client-ui-conversation',
+  'dsh-client-ui-layout',
+  'dsh-client-ui-renderer',
+  'dsh-client-ui-sidebar',
+  'dsh-client-ui-sidebar-right',
+  'dsh-client-ui-slots',
+  'dsh-client-ui-theme',
+  'dsh-client-ui-tool',
+  'dsh-client-ui-workspace',
+  'dsh-tools',
+]);
 
 function relativePath(root, path) { return relative(root, path).split('\\').join('/'); }
 
@@ -93,7 +116,8 @@ async function scanRuntimeTree(root) {
 }
 
 async function requiredPeerAliases(root) {
-  const names = new Set();
+  const names = new Set(EXTERNAL_WEB_PLUGIN_PEER_ALIASES);
+  const optional = new Set();
   async function collectPackageDependencies(path) {
     const packageJson = JSON.parse(await readFile(join(path, 'package.json'), 'utf8').catch(error => {
       if (error.code === 'ENOENT') return '{}';
@@ -102,6 +126,7 @@ async function requiredPeerAliases(root) {
     for (const section of ['dependencies', 'optionalDependencies', 'peerDependencies']) {
       for (const name of Object.keys(packageJson[section] ?? {})) {
         if (name.startsWith('@deepseek-ai/')) names.add(name.slice('@deepseek-ai/'.length));
+        if (section === 'optionalDependencies' && name.startsWith('@deepseek-ai/')) optional.add(name.slice('@deepseek-ai/'.length));
       }
     }
   }
@@ -115,6 +140,7 @@ async function requiredPeerAliases(root) {
         for (const section of ['dependencies', 'optionalDependencies', 'peerDependencies']) {
           for (const name of Object.keys(packageJson[section] ?? {})) {
             if (name.startsWith('@deepseek-ai/')) names.add(name.slice('@deepseek-ai/'.length));
+            if (section === 'optionalDependencies' && name.startsWith('@deepseek-ai/')) optional.add(name.slice('@deepseek-ai/'.length));
           }
         }
         continue;
@@ -135,10 +161,32 @@ async function requiredPeerAliases(root) {
   }
   await walk(root);
   assert.ok(names.size > 0, 'RUNTIME_REQUIRED_PEER_ALIASES_MISSING');
-  return names;
+  return { names, optional };
 }
 
-async function materializeExternalSymlinks(deployed, upstream, pinnedSha, { portableLinux = false } = {}) {
+async function verifyPeerSourceEntries(entries, upstreamRoots, required) {
+  const trustedRoots = [...new Set(await Promise.all(upstreamRoots.map(root => realpath(root))))];
+  for (const name of required) {
+    const entry = entries.get(name);
+    assert.ok(entry, `RUNTIME_EXTERNAL_WEB_PLUGIN_PEER_MISSING ${name}`);
+    const target = await realpath(entry.path).catch(error => {
+      if (error.code === 'ENOENT') throw new Error(`RUNTIME_EXTERNAL_WEB_PLUGIN_PEER_MISSING ${name}`);
+      throw new Error(`RUNTIME_PEER_ALIAS_UNREADABLE ${name}: ${error.message}`);
+    });
+    if (!trustedRoots.some(root => target === root || target.startsWith(`${root}/`))) {
+      throw new Error(`RUNTIME_PEER_ALIAS_OUTSIDE_UPSTREAM ${name}`);
+    }
+    const metadata = JSON.parse(await readFile(join(target, 'package.json'), 'utf8'));
+    if (metadata.name !== `@deepseek-ai/${name}`) {
+      throw new Error(`RUNTIME_PEER_ALIAS_ID_MISMATCH ${name}`);
+    }
+    if (name === 'dsh-tools' && metadata.version !== DSH_SDK_VERSION) {
+      throw new Error(`RUNTIME_PEER_ALIAS_VERSION_MISMATCH ${name}`);
+    }
+  }
+}
+
+async function materializeExternalSymlinks(deployed, upstream, pinnedSha, { portableLinux = false, sourceRoot = upstream } = {}) {
   const deployedRoot = resolve(deployed);
   const upstreamRoot = resolve(upstream);
   const externalRoot = join(deployedRoot, '.runtime-external');
@@ -250,23 +298,43 @@ async function materializeExternalSymlinks(deployed, upstream, pinnedSha, { port
   // workspace alias would pull optional browser tools and their vendor bytes
   // into the runtime. Materialization still applies the allowlist and secret
   // denylist to every resolved target.
-  const peerSourceRoot = join(upstreamRoot, 'node_modules/.pnpm/node_modules/@deepseek-ai');
-  assert.equal(await access(peerSourceRoot).then(() => true, () => false), true, 'RUNTIME_PEER_ALIAS_ROOT_MISSING');
+  const peerSourceRoots = [
+    join(upstreamRoot, 'node_modules/.pnpm/node_modules/@deepseek-ai'),
+    join(upstreamRoot, 'node_modules/@deepseek-ai'),
+    join(resolve(sourceRoot), 'node_modules/.pnpm/node_modules/@deepseek-ai'),
+    join(resolve(sourceRoot), 'node_modules/@deepseek-ai'),
+  ];
+  const existingPeerSourceRoots = [];
+  for (const root of peerSourceRoots) {
+    if (await access(root).then(() => true, () => false)) existingPeerSourceRoots.push(root);
+  }
+  assert.ok(existingPeerSourceRoots.length > 0, 'RUNTIME_PEER_ALIAS_ROOT_MISSING');
   const peerDestinationRoot = join(deployedRoot, 'node_modules/.pnpm/node_modules/@deepseek-ai');
   await mkdir(peerDestinationRoot, { recursive: true });
-  const requiredPeers = await requiredPeerAliases(deployedRoot);
+  const peerRequirements = await requiredPeerAliases(deployedRoot);
+  const requiredPeers = peerRequirements.names;
+  const peerSources = new Map();
+  for (const root of existingPeerSourceRoots) {
+    for (const entry of await readdir(root, { withFileTypes: true })) {
+      if (!peerSources.has(entry.name)) peerSources.set(entry.name, { root, entry, path: join(root, entry.name) });
+    }
+  }
+  for (const name of peerRequirements.optional) {
+    if (!peerSources.has(name)) requiredPeers.delete(name);
+  }
+  assertPeerAliasesPresent([...requiredPeers], peerSources.keys());
+  await verifyPeerSourceEntries(peerSources, [upstreamRoot, resolve(sourceRoot)], requiredPeers);
   let seededPeers = 0;
-  for (const entry of await readdir(peerSourceRoot, { withFileTypes: true })) {
-    if (!entry.name.startsWith('dsh-') && !entry.name.startsWith('cordis-plugin-') && !['cordis', 'cosmokit'].includes(entry.name)) continue;
-    if (!requiredPeers.has(entry.name)) continue;
-    const peerSource = join(peerSourceRoot, entry.name);
-    const peerDestination = join(peerDestinationRoot, entry.name);
+  for (const [name, source] of peerSources) {
+    if (!requiredPeers.has(name)) continue;
+    const peerSource = source.path;
+    const peerDestination = join(peerDestinationRoot, name);
     const existing = await lstat(peerDestination).catch(error => {
       if (error.code === 'ENOENT') return null;
       throw error;
     });
     if (existing) {
-      const sourceTarget = entry.isSymbolicLink() ? resolve(dirname(peerSource), await readlink(peerSource)) : peerSource;
+      const sourceTarget = source.entry.isSymbolicLink() ? resolve(dirname(peerSource), await readlink(peerSource)) : peerSource;
       const destinationTarget = existing.isSymbolicLink() ? resolve(dirname(peerDestination), await readlink(peerDestination)) : peerDestination;
       const sourcePackage = join(sourceTarget, 'package.json');
       const destinationPackage = join(destinationTarget, 'package.json');
@@ -274,7 +342,7 @@ async function materializeExternalSymlinks(deployed, upstream, pinnedSha, { port
         readFile(sourcePackage).catch(() => null),
         readFile(destinationPackage).catch(() => null),
       ]);
-      if (!sourceBytes || !destinationBytes || !comparablePackageBytes(sourceBytes).equals(comparablePackageBytes(destinationBytes))) throw new Error(`RUNTIME_PEER_ALIAS_COLLISION ${entry.name}`);
+      if (!sourceBytes || !destinationBytes || !comparablePackageBytes(sourceBytes).equals(comparablePackageBytes(destinationBytes))) throw new Error(`RUNTIME_PEER_ALIAS_COLLISION ${name}`);
       continue;
     }
     await cp(peerSource, peerDestination, { recursive: true, dereference: false, force: false, errorOnExist: true });
@@ -344,7 +412,7 @@ try {
   await restoreStagedMetadata();
   const sourceTree = await runtimeSourceTree(workspace);
   if (preparation) assert.equal(sourceTree.sha256, preparation.source_tree.sha256, 'RUNTIME_SOURCE_TREE_MISMATCH');
-  const materialized = await materializeExternalSymlinks(deployed, workspace, upstreamSha, { portableLinux });
+  const materialized = await materializeExternalSymlinks(deployed, workspace, upstreamSha, { portableLinux, sourceRoot: upstream });
   const rewrittenPathShims = portableLinux ? await rewriteGeneratedPathShims(deployed) : 0;
   const removedNative = portableLinux ? await pruneUnsupportedLinuxNative(deployed) : [];
   const portable = portableLinux ? await verifyPortableLinuxRuntime(deployed) : null;

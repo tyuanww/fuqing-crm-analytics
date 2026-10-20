@@ -10,6 +10,7 @@ import {
 } from './constants.mjs';
 import { defaultPluginPath, defaultShineBrandPath, defaultShineWaterfallPath, defaultShineCrowdActionPath, defaultShineQueryPath, defaultShineBoardPath, defaultShineFunnelPath, repoRoot } from './paths.mjs';
 import { DSH_SDK_VERSION } from '../release/toolchain.mjs';
+import { readToolchain } from './pin.mjs';
 import { redactLaunchLog } from './launch-url.mjs';
 import { readCurrent } from './serve.mjs';
 
@@ -178,8 +179,7 @@ async function inspectUpstream(explicit) {
   if (!upstream) {
     return { status: 'missing', tried };
   }
-  const pinPath = join(repoRoot, 'dsh-plugins/plugin-kit/toolchain.json');
-  const pin = JSON.parse(await readFile(pinPath, 'utf8'));
+  const pin = await readToolchain(repoRoot);
   const head = git(upstream, ['rev-parse', 'HEAD']);
   const dirty = git(upstream, ['status', '--porcelain', '--untracked-files=no']);
   let lockDigest = null;

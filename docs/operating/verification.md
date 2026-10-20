@@ -4,6 +4,14 @@
 
 本页带日期的候选、端口、版本和测试数字都是历史证据。当前命令从“先按变更类型选验证”开始；当前版本、运行现场和门禁仍以 STATUS 为准。不要把历史段落中的 `6677`、旧 candidate 或旧测试数当作当前结论。
 
+## 当前 rc1 clean-main v4 候选（2026-10-20）
+
+本轮 DSH 候选使用固定 upstream `1600d8a1e140dcde43a1a0941940a0480712c011`，`pnpm-lock.yaml` SHA-256 为 `952ca2f79998660dc690b739078a5d6052bc7c5c2193714b918b9d720baaeaba`，candidate tag 为 `dsh-0.2.1-rc.1-clean-main-20261020-v4`。runtime/profile、插件市场、peer alias 闭包和 AppleDouble 扫描的具体合同见[候选参考](../reference/dsh-rc1-clean-candidate.md)，实际顺序见[升级手册](./dsh-rc1-clean-upgrade-runbook.md)。
+
+本轮已执行的局部检查为：固定 Node24 release tests `45 pass / 0 fail`、远程 Node24 peer 缺失负测 PASS、runtime provenance PASS、native/business boot PASS、Settings/account RPC PASS、浏览器插件页 PASS、plugin-market Discover PASS、console logs EMPTY、AppleDouble locale files `0`、v4 boot PASS。上述 peer 缺失负测已验证 fail-closed 行为。默认 Node25 下的 dsh-dev 全量失败属于环境版本不满足，不能改写为代码 PASS。
+
+IM package/index 仍为 `BLOCKED_MISSING_ARTIFACT`，production switch 为 `HELD_PENDING_IM_ARTIFACT`；候选只在 staging，线上 `current` 不变。该段是当前局部验证，不替代真实模型、完整业务 UAT、正式 publisher/signature 或公司发布门禁。
+
 
 ## 独立作者仓合并与正式目标前置（2026-10-12，历史时点）
 

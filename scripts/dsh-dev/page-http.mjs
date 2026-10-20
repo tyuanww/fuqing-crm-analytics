@@ -36,7 +36,7 @@ export function pageHttpOrigin(port) {
 export async function startPageHttp({
   port = PAGE_HTTP_DEFAULT_PORT,
   stateDir,
-  python = process.env.DSH_DEV_PAGE_PYTHON ?? 'python3',
+  python = process.env.DSH_DEV_PAGE_PYTHON ?? 'python3.14',
   env = process.env,
   signal,
   timeoutMs = 15000,
