@@ -48,7 +48,7 @@ test('plugin registers additive business keys and does not occupy native tool na
   assert.doesNotMatch(indexSource, /name: 'conversation'(?![\w.])/);
 });
 
-test('account chrome frosts the sidebar against a tinted frame and paints chat white', () => {
+test('account chrome forwards account and Settings to the Host and keeps one visible entry', () => {
   assert.match(chromeSource, /:has\(> \[class\*="sidebarCol"\]\) \{/);
   assert.match(chromeSource, /background: #DCDCE1;/);
   assert.match(chromeSource, /rgba\(255, 255, 255, 0\.28\)/);
@@ -62,13 +62,15 @@ test('account chrome frosts the sidebar against a tinted frame and paints chat w
   assert.doesNotMatch(chromeSource, /\[class\*="sidebarCol"\]::before/);
   assert.match(chromeSource, /停止生成/);
   assert.match(chromeSource, /Stop generating/);
-  assert.match(chromeSource, /requestAnimationFrame/);
   assert.match(chromeSource, /\[class\*="footerActions"\]:has\(\.sm-login\[data-wide="0"\]\)/);
   assert.doesNotMatch(chromeSource, /\[class\*="collapsed"\] \[class\*="footerActions"\]/);
   assert.match(chromeSource, /\.sm-login\[data-wide="0"\] \.sm-login-text \{ display:none; \}/);
-  assert.match(chromeSource, /writeAccountIdentity/);
-  assert.match(chromeSource, /Canvas 86%/);
-  assert.match(chromeSource, /未登录/);
+  assert.match(chromeSource, /data-native-account-bridge="rc1"/);
+  assert.match(chromeSource, /openNativeAccountSettings/);
+  assert.match(chromeSource, /账号与设置/);
+  assert.match(chromeSource, /export function ThemeFooter\(_props: ClosedChromeProps\) \{\s+return null;/);
+  assert.match(chromeSource, /export function AccountMenu\(_props: ClosedChromeProps\) \{\s+return null;/);
+  assert.doesNotMatch(chromeSource, /localStorage|writeAccountIdentity|readAccountIdentity|未登录|登录<\/button>/);
   assert.doesNotMatch(css, /composerHero/);
   assert.doesNotMatch(css, /heroWorkspaceRow/);
 });

@@ -236,7 +236,7 @@ test('generate dock openCockpit selects sidebar.panellist id cockpit on the main
   for (const dispose of effects) if (typeof dispose === 'function') dispose();
 });
 
-test('account menu lists the competition board as a new-tab link', () => {
+test('the plugin-owned account and theme overlays render no duplicate UI', () => {
   const { entries, effects } = mount(loadClient());
   const React = webRequire('react');
   const { renderToStaticMarkup } = webRequire('react-dom/server');
@@ -248,26 +248,19 @@ test('account menu lists the competition board as a new-tab link', () => {
       themeSource: { subscribe: () => () => {}, getSnapshot: () => 'system' },
       setTheme() {},
     }));
-    assert.match(html, /比赛看板/);
-    assert.match(html, /data-testid="legacy-board-open"/);
-    assert.match(html, /href="https:\/\/board\.tyuan\.chat\/"/);
-    assert.match(html, /知识库/);
-    assert.match(html, /data-testid="knowledge-base-open"/);
-    assert.match(html, /href="https:\/\/learn\.tyuan\.chat\/"/);
-    assert.match(html, /target="_blank"/);
-    assert.match(html, /rel="noopener noreferrer"/);
-    assert.match(html, />设置</);
-    assert.match(html, /<svg /);
-    assert.match(html, />未登录</);
-    assert.match(html, /data-testid="shine-account-signin"/);
-    assert.match(html, /data-testid="shine-account-name-input"/);
-    assert.doesNotMatch(html, /data-testid="shine-account-signout"/);
+    assert.equal(html, '');
+    const theme = entries.find(item => item.options.id === 'shine-mage.account.theme');
+    assert.equal(renderToStaticMarkup(React.createElement(theme.component, {
+      wide: true, useStore: selector => selector({ menuOpen: true, themeOpen: true }),
+      actions: { closeMenu() {}, toggleMenu() {}, openMenu() {}, closeTheme() {}, toggleTheme() {}, closeAll() {} },
+      themeSource: { subscribe: () => () => {}, getSnapshot: () => 'system' }, setTheme() {},
+    })), '');
   } finally {
     for (const dispose of effects) if (typeof dispose === 'function') dispose();
   }
 });
 
-test('login footer shows 未登录 when wide and hides the label on the rail', () => {
+test('the only footer entry is an explicit bridge to official account and Settings', () => {
   const { entries, effects } = mount(loadClient());
   const React = webRequire('react');
   const { renderToStaticMarkup } = webRequire('react-dom/server');
@@ -283,11 +276,13 @@ test('login footer shows 未登录 when wide and hides the label on the rail', (
       useStore: selector => selector({ menuOpen: false, themeOpen: false }),
       actions: { closeMenu() {}, toggleMenu() {}, openMenu() {}, closeTheme() {}, toggleTheme() {}, closeAll() {} },
     }));
-    assert.match(wide, /未登录/);
+    assert.match(wide, /账号与设置/);
     assert.match(wide, /data-wide="1"/);
+    assert.match(wide, /data-native-account-bridge="rc1"/);
+    assert.match(wide, /aria-label="账号与设置"/);
     assert.match(wide, /<svg /);
     assert.match(rail, /data-wide="0"/);
-    assert.match(rail, /aria-label="未登录"/);
+    assert.match(rail, /aria-label="账号与设置"/);
     assert.match(rail, /<svg /);
     const theme = entries.find(item => item.options.id === 'shine-mage.account.theme');
     const themeRail = renderToStaticMarkup(React.createElement(theme.component, {
@@ -297,18 +292,17 @@ test('login footer shows 未登录 when wide and hides the label on the rail', (
       themeSource: { subscribe: () => () => {}, getSnapshot: () => 'system' },
       setTheme() {},
     }));
-    assert.match(themeRail, /data-wide="0"/);
-    assert.match(themeRail, /<svg /);
+    assert.equal(themeRail, '');
   } finally {
     for (const dispose of effects) if (typeof dispose === 'function') dispose();
   }
 });
 
-test('signing in writes identity on this tab and the footer shows the name', async () => {
+test('the footer delegates the sign-in gesture to the native rc1 account control', async () => {
   const React = webRequire('react');
   const { createRoot } = webRequire('react-dom/client');
   const act = typeof React.act === 'function' ? React.act : webRequire('react-dom/test-utils').act;
-  const dom = new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>', { url: 'http://127.0.0.1:4318/' });
+  const dom = new JSDOM('<!doctype html><html><body><button data-signed-out="true" aria-haspopup="menu" aria-label="账号菜单"></button><div id="root"></div></body></html>', { url: 'http://127.0.0.1:4318/' });
   const previous = {
     window: globalThis.window,
     document: globalThis.document,
@@ -320,30 +314,19 @@ test('signing in writes identity on this tab and the footer shows the name', asy
   const { entries, effects } = mount(loadClient(dom.window));
   const root = createRoot(dom.window.document.getElementById('root'));
   const actions = { closeMenu() {}, toggleMenu() {}, openMenu() {}, closeTheme() {}, toggleTheme() {}, closeAll() {} };
-  const useStore = selector => selector({ menuOpen: true, themeOpen: false });
+  const useStore = selector => selector({ menuOpen: false, themeOpen: false });
+  let nativeClicks = 0;
+  dom.window.document.querySelector('[data-signed-out="true"]').addEventListener('click', () => { nativeClicks += 1; });
   try {
     const login = entries.find(item => item.options.id === 'shine-mage.account.login');
-    const menu = entries.find(item => item.options.id === 'shine-mage.account.menu');
     await act(() => {
-      root.render(React.createElement(React.Fragment, null,
-        React.createElement(login.component, { wide: true, useStore, actions }),
-        React.createElement(menu.component, {
-          useStore, actions, setTheme() {},
-          themeSource: { subscribe: () => () => {}, getSnapshot: () => 'system' },
-        }),
-      ));
+      root.render(React.createElement(login.component, { wide: true, useStore, actions }));
     });
-    const input = dom.window.document.querySelector('[data-testid="shine-account-name-input"]');
-    assert.ok(input);
-    input.value = '王敏';
-    await act(() => { dom.window.document.querySelector('[data-testid="shine-account-signin"]').click(); });
+    await act(() => { dom.window.document.querySelector('[data-testid="shine-account-login"]').click(); });
     const footer = dom.window.document.querySelector('[data-testid="shine-account-login"]');
-    assert.match(footer.textContent, /王敏/);
-    assert.match(dom.window.document.querySelector('[data-testid="shine-account-menu"]').textContent, /飞书/);
-    assert.ok(dom.window.document.querySelector('[data-testid="shine-account-signout"]'));
-    await act(() => { dom.window.document.querySelector('[data-testid="shine-account-signout"]').click(); });
-    assert.match(footer.textContent, /未登录/);
-    assert.ok(dom.window.document.querySelector('[data-testid="shine-account-signin"]'));
+    assert.match(footer.textContent, /账号与设置/);
+    assert.equal(nativeClicks, 1);
+    assert.equal(dom.window.document.querySelector('[role="alert"]'), null);
   } finally {
     await act(() => root.unmount());
     for (const dispose of effects) if (typeof dispose === 'function') dispose();
@@ -355,7 +338,37 @@ test('signing in writes identity on this tab and the footer shows the name', asy
   }
 });
 
-test('theme menu offers day night and system icons', () => {
+test('a missing native account and Settings entry is visibly reported', async () => {
+  const React = webRequire('react');
+  const { createRoot } = webRequire('react-dom/client');
+  const act = typeof React.act === 'function' ? React.act : webRequire('react-dom/test-utils').act;
+  const dom = new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>', { url: 'http://127.0.0.1:4318/' });
+  const previous = { window: globalThis.window, document: globalThis.document, act: globalThis.IS_REACT_ACT_ENVIRONMENT };
+  globalThis.window = dom.window;
+  globalThis.document = dom.window.document;
+  globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+  const { entries, effects } = mount(loadClient(dom.window));
+  const root = createRoot(dom.window.document.getElementById('root'));
+  const actions = { closeMenu() {}, toggleMenu() {}, openMenu() {}, closeTheme() {}, toggleTheme() {}, closeAll() {} };
+  try {
+    const login = entries.find(item => item.options.id === 'shine-mage.account.login');
+    await act(() => root.render(React.createElement(login.component, {
+      wide: true, useStore: selector => selector({ menuOpen: false, themeOpen: false }), actions,
+    })));
+    await act(() => dom.window.document.querySelector('[data-testid="shine-account-login"]').click());
+    assert.match(dom.window.document.querySelector('[role="alert"]').textContent, /未找到 DSH 原生账号或设置入口/);
+  } finally {
+    await act(() => root.unmount());
+    for (const dispose of effects) if (typeof dispose === 'function') dispose();
+    if (previous.window === undefined) delete globalThis.window; else globalThis.window = previous.window;
+    if (previous.document === undefined) delete globalThis.document; else globalThis.document = previous.document;
+    if (previous.act === undefined) delete globalThis.IS_REACT_ACT_ENVIRONMENT;
+    else globalThis.IS_REACT_ACT_ENVIRONMENT = previous.act;
+    dom.window.close();
+  }
+});
+
+test('theme choices remain owned by native Settings', () => {
   const { entries, effects } = mount(loadClient());
   const React = webRequire('react');
   const { renderToStaticMarkup } = webRequire('react-dom/server');
@@ -367,14 +380,7 @@ test('theme menu offers day night and system icons', () => {
       themeSource: { subscribe: () => () => {}, getSnapshot: () => 'dark' },
       setTheme() {},
     }));
-    assert.match(html, /data-testid="shine-theme-menu"/);
-    assert.match(html, /data-testid="shine-theme-light"/);
-    assert.match(html, /data-testid="shine-theme-dark"/);
-    assert.match(html, /data-testid="shine-theme-system"/);
-    assert.match(html, /日间/);
-    assert.match(html, /夜晚/);
-    assert.match(html, /跟随系统/);
-    assert.match(html, /aria-pressed="true"/);
+    assert.equal(html, '');
   } finally {
     for (const dispose of effects) if (typeof dispose === 'function') dispose();
   }
