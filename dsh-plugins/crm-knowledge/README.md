@@ -48,6 +48,8 @@ node scripts/crm-calibration/prepare-profile.mjs \
 
 ## 看板 GSV 连接边界
 
+CRM Host 默认 `baseUrl` 为 `http://127.0.0.1:8000`，适用于 rc2 独立配置；线上 `crm-query` 配置型 bundle 会用同名 Host 条目覆盖为 `http://127.0.0.1:18093`。两种配置都只接受回环地址，模型不能覆盖。
+
 请求示例（只含业务条件）：
 
 ```json

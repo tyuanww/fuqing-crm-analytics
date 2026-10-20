@@ -36,7 +36,7 @@ CRM、知识、页面和 WeKnora 是不同权限与生命周期域，保持独�
 |---|---|
 | Adapter 源 | [`scripts/ops/weknora-production.mjs`](../../scripts/ops/weknora-production.mjs)，部署为 live `brand-weknora/weknora.mjs` |
 | Scope wrapper | [`scripts/ops/weknora-production-scope.mjs`](../../scripts/ops/weknora-production-scope.mjs)，与 adapter 同目录 |
-| Overlay 摘要 | [`config/weknora-production-overlay.v1.json`](../../config/weknora-production-overlay.v1.json)，与 adapter 同目录，记录当前文件 SHA-256 |
+| Overlay 摘要 | 仓库内为 [`config/weknora-production-overlay.v1.json`](../../config/weknora-production-overlay.v1.json)，部署时复制到 live `brand-weknora/` 并与 adapter 同目录；记录当前文件 SHA-256 |
 | 第三方包 | `brand-weknora/weknora-package/`，来源与摘要见同目录 `package-origin.json` |
 | 检索凭据 | `brand-weknora/retrieve.key`，仅现场 `0600 root:root`，不进入 Git、日志或 manifest |
 | 修改边界 | 只允许固定项目库 `1c4627e2-dfc1-48ca-aeef-2c00b53da5f8`；不合并、不修改 WeKnora 数据卷 |
@@ -46,7 +46,7 @@ CRM、知识、页面和 WeKnora 是不同权限与生命周期域，保持独�
 - 使用仓库固定 Node 24；adapter 的 `package.json` 合同是 `24.x`。
 - live overlay 目录已包含经过校验的上游 `weknora-package`，`retrieve.key` 已由授权 operator 配置。
 - 已为该维护窗口准备独立的恢复目录和旧文件摘要；不要在未授权的生产窗口改 profile、symlink 或 WeKnora 数据。
-- `preset.patch.json` 与 query.9 的 `cordis.patch.yml` 都可能引用 `weknora.mjs`；替换 adapter 会同时影响引用该文件的 Agent preset。
+- `preset.patch.yml` 与 query.9 的 `cordis.patch.yml` 都可能引用 `weknora.mjs`；替换 adapter 会同时影响引用该文件的 Agent preset。
 
 ### 本地校验
 

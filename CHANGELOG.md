@@ -23,6 +23,8 @@
 
 - WeKnora 生产适配层的项目库配置从“默认范围”强化为强制执行：不再向 Agent 暴露知识库枚举，search 拒绝非项目库或非数组参数，read_document 要求非空文档 ID、在执行前核验归属，并在缺失 ID 或元数据不可用时 fail-closed。浏览器回归同时覆盖项目库正向检索、部署验收库搜索拒绝和跨库文档读取拒绝。历史固定输入 manifest 保持不变，另以 `weknora-production-overlay.v1.json` 记录当前适配器字节、scope helper、preset 和生效范围。
 
+- IM 的两份 GitHub 插件输入现在有独立 lock、离线字节/integrity/commit/包身份校验和机器回执，可从恢复目录复验 `@xmanrui/dsh-im@5.2.0` 与 `dsh-plugin@2.0.5`；输入已验证仍不代表正式发布。
+
 - 新增 rc1 干净候选的教程、操作手册、参考和架构说明；记录 v4 runtime/profile digest、plugin-market bundle 与 Discover 入口、market index/IM artifact 阻塞和不切线上边界。
 
 - 提交前审修加固宿主验收：只读 Git 禁用仓库本地 fsmonitor/hooks；SIGINT/SIGTERM 由 runner 统一回收并写失败回执，HTTP/解释器/失败取证增加截止时间；编辑首个选区等待 iframe 桥接就绪。
