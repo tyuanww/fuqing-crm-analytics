@@ -1,0 +1,32 @@
+{
+  "schema_version": "shinemage-im-plugin-inputs/v1",
+  "release_ready": false,
+  "runtime": {
+    "dsh": "0.2.1-rc.1",
+    "cordis": "4.0.5"
+  },
+  "inputs": [
+    {
+      "package": "@xmanrui/dsh-im",
+      "version": "5.2.0",
+      "repository": "https://github.com/xmanrui/dsh-im",
+      "commit": "0b9cbc24b60a9218820a10ed1f9c8fe913aa23c5",
+      "source_url": "https://codeload.github.com/xmanrui/dsh-im/tar.gz/0b9cbc24b60a9218820a10ed1f9c8fe913aa23c5",
+      "tarball": "dsh-im-0b9cbc24b60a9218820a10ed1f9c8fe913aa23c5.tar.gz",
+      "bytes": 13227610,
+      "sha256": "8d87caa71d921e9134b3d987a66ea59878ca445500703712c8b8053d49732d6d",
+      "integrity": "sha512-aTYTCrk8qTUHH783a6YTsUqXc6cjcWSSQKHq8bkynJjfPPTw9JFe3ck2me9m4UgeM8QUWD1MBNIaWH4A9aDjqw=="
+    },
+    {
+      "package": "dsh-plugin",
+      "version": "2.0.5",
+      "repository": "https://github.com/dshplugin/dsh-plugin-hub",
+      "commit": "dfd56ec530b217f1ee7675f470b3a5ff780a2e85",
+      "source_url": "https://codeload.github.com/dshplugin/dsh-plugin-hub/tar.gz/dfd56ec530b217f1ee7675f470b3a5ff780a2e85",
+      "tarball": "dsh-plugin-hub-dfd56ec530b217f1ee7675f470b3a5ff780a2e85.tar.gz",
+      "bytes": 6955036,
+      "sha256": "af455abd4d68f3d673e5003ae62a60ef42716a63a18dc7e1c5bbe1c78f976430",
+      "integrity": "sha512-+o86el0E1eTRv4fuMQUfxNsjHMOZrAnVsHjUK+xBdOmoPKKkaHvasVCDt02dYMArMSN67qiYSovp/t0wzA+qDA=="
+    }
+  ]
+}

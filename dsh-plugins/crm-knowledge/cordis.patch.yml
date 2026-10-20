@@ -1,5 +1,11 @@
 # Isolated candidate. Do not add this bundle to the live workbench toolchain.
 - insert:
+    # A bare-package Loader row is required for DSH to discover dsh.client.
+    # It is side-effect-free; Agent tools are selected by the scoped preset.
+    - id: crm-knowledge-client
+      name: '@shine-mage/dsh-crm-knowledge'
+      config:
+        registerTools: false
     - id: crm-knowledge-login-host
       name: '@shine-mage/dsh-crm-knowledge/host'
 # Agent tools are selected by the isolated preset, not registered in Host scope.

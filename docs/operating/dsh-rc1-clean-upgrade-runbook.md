@@ -1,6 +1,6 @@
 # How to 构建并验收 DSH rc1 干净候选
 
-这份手册用于把 `dsh-v0.2.1-rc.1` 构建成隔离、可回退的候选。它完成切换前检查、profile 装配、plugin-market bundle 与 Discover 入口回读和原生回读；market index、IM artifact、正式门禁和切换授权齐全后，才进入 side-by-side promotion。
+这份手册用于把 `dsh-v0.2.1-rc.1` 构建成隔离、可回退的候选。它完成切换前检查、profile 装配、plugin-market bundle 与 Discover 入口回读和原生回读；IM 输入当前已验证，但正式身份、签名、独立验收和切换授权齐全后，才进入 side-by-side promotion。
 
 ## 前置条件
 
@@ -72,15 +72,15 @@
 
 7. 写 `candidate-profile-receipt.json`。候选回执至少记录 `candidate_tag`、`upstream_sha`、runtime/profile SHA、plugin-market bundle、每项检查、IM 状态、`release_ready`、当前线上 symlink 和候选端口。进入 promotion 前，再把 source identity、Node/pnpm、pack digests、正式 runtime provenance 和明确 fallback target 从同一 subject set / owner receipt 绑定到 activation journal；只有候选回执本身不够。
 
-8. 只有以下条件全部满足才准备 side-by-side promotion：IM package/index 已由归档输入提供；正式 publisher、signature、independent verification、revocation、final attestation 和 clean-machine 门禁齐全；候选 receipt 与 activation journal 绑定同一 digest；用户已明确授权切换。候选阶段不改线上 `current`。
+8. 只有以下条件全部满足才准备正式 side-by-side promotion：IM 的 pinned inputs 已绑定到同一候选身份；正式 publisher、signature、independent verification、revocation、final attestation 和 clean-machine 门禁齐全；候选 receipt 与 activation journal 绑定同一 digest；用户已明确授权切换。IM 输入已验证本身不等于 release-ready。
 
 9. 切换后保留旧 release，先验证 service active、`401` 认证边界、浏览器插件页、登录和原生会话，再进行真实业务 UAT。任何失败都只停候选并把 `current` 指回已验证旧 release；不要覆盖旧目录，也不要用 `git pull` 在服务器重建。
 
 ## 验证
 
-本次 v4 候选的可复核结果：candidate tag `dsh-0.2.1-rc.1-clean-main-20261020-v4`，runtime SHA-256 `d3d504dd39cd333fb98acf61cf4597664f6d4fda5482fb2ea970748bd2b8a94f`，profile SHA-256 `c3ec7df313c2323996428b1034af0fd5eec5fffe1d06a8c618532074110503ad`，plugin-market Discover、native boot、settings/account RPC、peer negative test 和 v4 boot 均通过，AppleDouble locale 文件为 `0`，控制台日志为空。
+2026-10-20 的 v4 过渡候选结果保留为：candidate tag `dsh-0.2.1-rc.1-clean-main-20261020-v4`，runtime SHA-256 `d3d504dd39cd333fb98acf61cf4597664f6d4fda5482fb2ea970748bd2b8a94f`，候选 receipt profile SHA-256 `c3ec7df313c2323996428b1034af0fd5eec5fffe1d06a8c618532074110503ad`，plugin-market Discover、native boot、settings/account RPC、peer negative test 和 v4 boot 均通过，AppleDouble locale 文件为 `0`，控制台日志为空。
 
-当前生产 symlink 仍为 `/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-owner-main-4ac076de-20261019`，服务为 active。IM 状态为 `BLOCKED_MISSING_ARTIFACT`，所以 production switch 为 `HELD_PENDING_IM_ARTIFACT`，`release_ready=false`。
+2026-10-21 现场事实：生产 symlink 指向 `/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-core-main-20261020-v5`，服务为 active/running；v5 是上述 v4 runtime 的 owner-operated 现场 side-load。实际 profile SHA 为 `7ec66b32…`，与旧候选 receipt 的 `c3ec7df3…` 不一致，marker 仍为 v4/PREPARED，因此只记现场 side-load。IM 输入状态为 `PINNED_INPUTS_VERIFIED`，但正式发布仍需统一身份、签名、独立验收和切换授权，`release_ready=false`。
 
 ## 排障
 
@@ -91,7 +91,7 @@
 | `._en.json` 或其他 AppleDouble 文件出现 | 删除 staging，确认打包输入来自干净 Linux/归档树，再重新构建。不要在已生成 bundle 上打补丁。 |
 | 插件市场页面存在但 Discover 为空 | 检查 profile 是否包含官方 market bundle 及其 index；不要把旧市场目录复制进新 runtime。 |
 | 登录后白屏 | 先看 `401 → 一次性 token → HttpOnly cookie → 200` 链路，再查候选 runtime/profile；不要关闭认证或复用旧 cookie。 |
-| IM 缺包 | 保持 `release_ready=false` 和 `HELD_PENDING_IM_ARTIFACT`，等待已归档、可校验的 IM 输入。 |
+| IM 输入已核验但未进入正式身份 | 保留 `im.inputs=PINNED_INPUTS_VERIFIED` 和 `release_ready=false`；完成统一候选身份、签名、独立验收和切换授权后才可 promotion。 |
 
 ## 相关文档
 

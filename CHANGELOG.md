@@ -19,6 +19,8 @@
 
 ### Added
 
+- 新增配置型包 `@shine-mage/dsh-query-agent@0.0.0-query.9`，作为“问数智能体”预设的唯一维护源：复用指标查询、WeKnora 资料和可选页面交付，不注册私有教材图谱工具，也不在未配置知识服务时暴露 `crm_knowledge_explain`；同时把新会话默认路由固定为账号 `deepseek-flash / off`，并在 Agent 创建、空白会话预设切换和切回其他模式时正确加卸 shell/终端限制。`query.8` 保留为线上已安装的前序候选；`query.9` 只修正配置包元数据，不增加 peer 依赖。原有“CRM 知识与指标”预设保持兼容。
+
 - 新增 rc1 干净候选的教程、操作手册、参考和架构说明；记录 v4 runtime/profile digest、plugin-market bundle 与 Discover 入口、market index/IM artifact 阻塞和不切线上边界。
 
 - 提交前审修加固宿主验收：只读 Git 禁用仓库本地 fsmonitor/hooks；SIGINT/SIGTERM 由 runner 统一回收并写失败回执，HTTP/解释器/失败取证增加截止时间；编辑首个选区等待 iframe 桥接就绪。

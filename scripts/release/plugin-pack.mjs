@@ -27,6 +27,13 @@ const SHA256 = /^[a-f0-9]{64}$/;
 const SAFE_RELATIVE = /^(?!\/)(?!.*(?:^|\/)\.\.(?:\/|$))(?!.*\\)[^\0]+$/;
 const MAX_PACK_BYTES = 20 * 1024 * 1024;
 
+function matchesPattern(path, pattern) {
+  assert.equal((pattern.match(/\*/g) ?? []).length, 1, `PLUGIN_PACK_PATTERN_INVALID ${pattern}`);
+  const [head, tail] = pattern.split('*');
+  return path.startsWith(head) && path.endsWith(tail)
+    && !path.slice(head.length, path.length - tail.length).includes('/');
+}
+
 function verifyEntrypoints(manifest, files) {
   const targets = [];
   function exportsTargets(value) {
@@ -42,9 +49,9 @@ function verifyEntrypoints(manifest, files) {
   for (const target of targets) {
     assert.equal(typeof target, 'string', 'PLUGIN_PACK_ENTRY_INVALID');
     const entry = target.replace(/^\.\//, '');
-    // Wildcard exports need an explicit expansion contract; do not guess it.
-    assert.ok(SAFE_RELATIVE.test(entry) && !entry.includes('*') && !entry.split('/').includes('.'), `PLUGIN_PACK_ENTRY_INVALID ${target}`);
-    assert.ok(files.includes(entry), `PLUGIN_PACK_ENTRY_MISSING ${target}`);
+    assert.ok(SAFE_RELATIVE.test(entry) && !entry.split('/').includes('.'), `PLUGIN_PACK_ENTRY_INVALID ${target}`);
+    const present = entry.includes('*') ? files.some(file => matchesPattern(file, entry)) : files.includes(entry);
+    assert.ok(present, `PLUGIN_PACK_ENTRY_MISSING ${target}`);
   }
 }
 
@@ -58,7 +65,21 @@ function safeAbsolute(value, code) {
 function packageFileAllowed(path, files) {
   if (path === 'package.json' || /^(?:README(?:\.[^/]+)?|LICENSE(?:\.[^/]+)?)$/.test(path)) return true;
   if (files.includes(path)) return true;
+  if (files.some(entry => entry.includes('*') && matchesPattern(path, entry))) return true;
   return files.some(entry => entry.endsWith('/') && path.startsWith(entry));
+}
+
+function isConfigurationBundle(manifest) {
+  return manifest.shinemage?.bundle_role === 'configuration-bundle';
+}
+
+async function assertConfigurationBundleRuntime(root, manifest, files) {
+  if (!isConfigurationBundle(manifest)) return;
+  const toolImport = /(?:\bfrom\s*|\bimport\s*\(\s*|\brequire\s*\(\s*|\bimport\s*)['"]@deepseek-ai\/dsh-tools(?:\/[^'"]*)?['"]/;
+  for (const file of files.filter(path => /\.[cm]?js$/.test(path))) {
+    const source = await readFile(join(root, file), 'utf8');
+    assert.doesNotMatch(source, toolImport, `PLUGIN_PACK_CONFIGURATION_BUNDLE_TOOL_IMPORT ${file}`);
+  }
 }
 
 async function canonicalInside(root, candidate, code) {
@@ -89,6 +110,26 @@ async function collectFiles(root, declared) {
   // such as build.mjs and test sources stay outside it and are intentionally
   // ignored here; the tar listing below is the final packaged truth.
   for (const declaredPath of [...declared, 'package.json']) {
+    if (declaredPath.includes('*')) {
+      const slash = declaredPath.lastIndexOf('/');
+      assert.ok(slash > 0 && !declaredPath.slice(0, slash).includes('*'), `PLUGIN_PACK_PATTERN_SCOPE ${declaredPath}`);
+      const directory = declaredPath.slice(0, slash);
+      const directoryPath = join(root, directory);
+      const directoryInfo = await lstat(directoryPath);
+      assert.ok(directoryInfo.isDirectory() && !directoryInfo.isSymbolicLink(), `PLUGIN_PACK_DECLARED_MISSING ${declaredPath}`);
+      await canonicalInside(rootReal, directoryPath, `PLUGIN_PACK_PATH_ESCAPE ${directory}`);
+      let matched = 0;
+      for (const entry of await readdir(directoryPath, { withFileTypes: true })) {
+        const rel = `${directory}/${entry.name}`;
+        if (!matchesPattern(rel, declaredPath)) continue;
+        assert.ok(entry.isFile(), `PLUGIN_PACK_SPECIAL_FILE ${rel}`);
+        await canonicalInside(rootReal, join(root, rel), `PLUGIN_PACK_PATH_ESCAPE ${rel}`);
+        files.push(rel);
+        matched += 1;
+      }
+      assert.ok(matched > 0, `PLUGIN_PACK_DECLARED_MISSING ${declaredPath}`);
+      continue;
+    }
     const clean = declaredPath.replace(/\/$/, '');
     const path = join(root, clean);
     let info;
@@ -112,7 +153,14 @@ function inspectManifest(manifest, packed = false, { sdkVersion = DSH_SDK_VERSIO
     assert.equal(manifest.packageManager, `pnpm@${pnpmVersion}`, 'PLUGIN_PACK_PACKAGE_MANAGER_INVALID');
   }
   if (packed) assert.equal(manifest.scripts, undefined, 'PLUGIN_PACK_LIFECYCLE_FORBIDDEN');
-  assert.equal(manifest.peerDependencies?.['@deepseek-ai/dsh-tools'], sdkVersion, 'PLUGIN_PACK_DSH_PEER_INVALID');
+  if (isConfigurationBundle(manifest)) {
+    for (const field of ['dependencies', 'optionalDependencies', 'devDependencies', 'peerDependencies']) {
+      assert.equal(manifest[field]?.['@deepseek-ai/dsh-tools'], undefined,
+        'PLUGIN_PACK_CONFIGURATION_BUNDLE_TOOL_DEPENDENCY');
+    }
+  } else {
+    assert.equal(manifest.peerDependencies?.['@deepseek-ai/dsh-tools'], sdkVersion, 'PLUGIN_PACK_DSH_PEER_INVALID');
+  }
   const declared = manifest.files;
   assert.ok(Array.isArray(declared) && declared.length > 0, 'PLUGIN_PACK_FILES_REQUIRED');
   assert.equal(new Set(declared).size, declared.length, 'PLUGIN_PACK_FILES_DUPLICATE');
@@ -133,6 +181,7 @@ async function inspectPackage(pluginRoot, compatibility = {}) {
   const declared = inspectManifest(manifest, false, compatibility);
   const declaredFiles = await collectFiles(pluginRoot, declared);
   assert.ok(declaredFiles.some(file => file.startsWith('lib/')), 'PLUGIN_PACK_BUILD_OUTPUT_REQUIRED');
+  await assertConfigurationBundleRuntime(pluginRoot, manifest, declaredFiles);
   return { manifest, declared, declaredFiles };
 }
 
@@ -255,6 +304,7 @@ export async function readPluginPack({ manifestPath, expectedSha256, expectedSdk
     }
     await walk(packageRoot);
     assert.deepEqual(entries.sort(), [...receipt.entries].sort(), 'PLUGIN_PACK_ENTRY_SET_MISMATCH');
+    await assertConfigurationBundleRuntime(packageRoot, manifest, entries);
     // Declared assets, exports and patches must all be present in the archive.
     assert.ok((await collectFiles(packageRoot, declared)).some(file => file.startsWith('lib/')), 'PLUGIN_PACK_BUILD_OUTPUT_REQUIRED');
     verifyEntrypoints(manifest, entries);

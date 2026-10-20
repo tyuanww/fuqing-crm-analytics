@@ -8,7 +8,7 @@
 scripts/ops/open-hangzhou-dsh.sh
 ```
 
-脚本仍按旧 `6677` 入口读取 WSL runtime 的启动链接。使用前必须核对 STATUS 中的当前 owner bundle 和端口；脚本不会切换版本，也不会替代发布 runbook。可用环境变量覆盖 SSH 密钥和目标：
+脚本从当前 owner bundle 的 `/srv/shinemage/dsh/current/runtime/browser-private.json` 读取 WSL `4328` 入口，并把认证参数改写到公开 `app.tyuan.chat`。使用前仍须核对 STATUS 中的当前 owner bundle；脚本不会切换版本，也不会替代发布 runbook。可用环境变量覆盖 SSH 密钥和目标：
 
 ```bash
 SHINEMAGE_SSH_KEY=~/.ssh/id_ed25519_pc2 \

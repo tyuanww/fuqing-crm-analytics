@@ -56,6 +56,60 @@ test('controlled plugin pack emits an immutable tarball receipt without runtime 
   assert.deepEqual(JSON.parse(await readFile(manifestPath, 'utf8')), receipt);
 });
 
+test('configuration bundle packs without a synthetic dsh-tools peer', async t => {
+  const input = await fixture(t);
+  const path = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  delete manifest.peerDependencies;
+  manifest.files = ['lib/', 'cordis.patch.yml', 'locale/*.json'];
+  manifest.exports = { './tool-policy': './lib/index.js', './locale/*.json': './locale/*.json' };
+  manifest.shinemage = { bundle_role: 'configuration-bundle' };
+  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await mkdir(join(input.plugin, 'locale'));
+  await writeFile(join(input.plugin, 'locale/en.json'), '{"meta":{"title":"Synthetic"}}\n');
+  await commitFixture(input.root);
+  const receipt = await packPlugin(input);
+  assert.equal(receipt.package_name, manifest.name);
+  assert.equal(receipt.entries.includes('cordis.patch.yml'), true);
+  assert.equal(receipt.entries.includes('locale/en.json'), true);
+  const packed = JSON.parse((await exec('tar', ['-xOf', join(input.outputDir, receipt.tarball.name), 'package/package.json'])).stdout);
+  assert.equal(packed.peerDependencies, undefined);
+});
+
+test('configuration bundle cannot bypass the pinned peer through an ordinary dependency', async t => {
+  const input = await fixture(t);
+  const path = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  delete manifest.peerDependencies;
+  manifest.dependencies = { '@deepseek-ai/dsh-tools': '0.1.7-rc.2' };
+  manifest.shinemage = { bundle_role: 'configuration-bundle' };
+  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await commitFixture(input.root);
+  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_CONFIGURATION_BUNDLE_TOOL_DEPENDENCY/);
+});
+
+test('configuration bundle cannot import dsh-tools without declaring the pinned peer', async t => {
+  const input = await fixture(t);
+  const path = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  delete manifest.peerDependencies;
+  manifest.shinemage = { bundle_role: 'configuration-bundle' };
+  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await writeFile(join(input.plugin, 'lib/index.js'), "import '@deepseek-ai/dsh-tools';\n");
+  await commitFixture(input.root);
+  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_CONFIGURATION_BUNDLE_TOOL_IMPORT/);
+});
+
+test('tool plugin still requires its exact dsh-tools peer', async t => {
+  const input = await fixture(t);
+  const path = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  delete manifest.peerDependencies;
+  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await commitFixture(input.root);
+  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_DSH_PEER_INVALID/);
+});
+
 test('formal pack rejects an ignored lib replacement against a clean builder receipt', async t => {
   const input = await fixture(t);
   await writeFile(join(input.plugin, '.gitignore'), '/lib/\n/.build-provenance.json\n');

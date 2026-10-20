@@ -4,13 +4,13 @@
 
 本页带日期的候选、端口、版本和测试数字都是历史证据。当前命令从“先按变更类型选验证”开始；当前版本、运行现场和门禁仍以 STATUS 为准。不要把历史段落中的 `6677`、旧 candidate 或旧测试数当作当前结论。
 
-## 当前 rc1 clean-main v4 候选（2026-10-20）
+## 当前 rc1 clean-main v5 现场与 v4 候选（2026-10-21）
 
-本轮 DSH 候选使用固定 upstream `1600d8a1e140dcde43a1a0941940a0480712c011`，`pnpm-lock.yaml` SHA-256 为 `952ca2f79998660dc690b739078a5d6052bc7c5c2193714b918b9d720baaeaba`，candidate tag 为 `dsh-0.2.1-rc.1-clean-main-20261020-v4`。runtime/profile、插件市场、peer alias 闭包和 AppleDouble 扫描的具体合同见[候选参考](../reference/dsh-rc1-clean-candidate.md)，实际顺序见[升级手册](./dsh-rc1-clean-upgrade-runbook.md)。
+线上 `/srv/shinemage/dsh/current` 指向 `dsh-0.2.1-rc.1-core-main-20261020-v5`，这是 v4 clean-main runtime 的 owner-operated 现场 side-load；实际安装 profile 为 `7ec66b32…`，而 `release-marker.json` 仍自报 v4/PREPARED，候选 receipt 的 profile 仍为 `c3ec7df3…`。因此 v5 只是一项带现场回执的运行事实，不是新的正式候选或签名 release。固定 upstream 仍为 `1600d8a1e140dcde43a1a0941940a0480712c011`，`pnpm-lock.yaml` SHA-256 为 `952ca2f79998660dc690b739078a5d6052bc7c5c2193714b918b9d720baaeaba`。runtime/profile、插件市场、peer alias 闭包和 AppleDouble 扫描的具体合同见[候选参考](../reference/dsh-rc1-clean-candidate.md)，实际顺序见[升级手册](./dsh-rc1-clean-upgrade-runbook.md)。
 
-本轮已执行的局部检查为：固定 Node24 release tests `45 pass / 0 fail`、远程 Node24 peer 缺失负测 PASS、runtime provenance PASS、native/business boot PASS、Settings/account RPC PASS、浏览器插件页 PASS、plugin-market Discover PASS、console logs EMPTY、AppleDouble locale files `0`、v4 boot PASS。上述 peer 缺失负测已验证 fail-closed 行为。默认 Node25 下的 dsh-dev 全量失败属于环境版本不满足，不能改写为代码 PASS。
+v4 过渡候选已执行的局部检查为：固定 Node24 release tests `45 pass / 0 fail`、远程 Node24 peer 缺失负测 PASS、runtime provenance PASS、native/business boot PASS、Settings/account RPC PASS、浏览器插件页 PASS、plugin-market Discover PASS、console logs EMPTY、AppleDouble locale files `0`、v4 boot PASS。上述 peer 缺失负测已验证 fail-closed 行为。默认 Node25 下的 dsh-dev 全量失败属于环境版本不满足，不能改写为代码 PASS。
 
-IM package/index 仍为 `BLOCKED_MISSING_ARTIFACT`，production switch 为 `HELD_PENDING_IM_ARTIFACT`；候选只在 staging，线上 `current` 不变。该段是当前局部验证，不替代真实模型、完整业务 UAT、正式 publisher/signature 或公司发布门禁。
+IM 已从归档输入缺失推进为 `PINNED_INPUTS_VERIFIED`：`@xmanrui/dsh-im@5.2.0` 与 `dsh-plugin@2.0.5` 的归档已按线上 lock 的字节摘要、integrity、commit 根目录和包身份核验并保存。该事实不表示 IM 已完成正式发布；当前仍缺统一发布身份、publisher/signature、独立验收和切换授权，所以 `release_ready=false`。Query 维护源已推进到 `0.0.0-query.9`，线上 side-load 仍为已校验的 `0.0.0-query.8`；query.9 必须从 clean commit 重新生成正式包后才能更新线上。
 
 
 ## 独立作者仓合并与正式目标前置（2026-10-12，历史时点）
