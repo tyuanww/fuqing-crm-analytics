@@ -8,6 +8,11 @@
   "upstream_pnpm": "11.28.5",
   "cordis": "4.0.5",
   "node": "v24.19.0",
+  "typescript": "6.0.3",
+  "esbuild": "0.25.12",
+  "react": "18.3.1",
+  "react_types": "18.3.31",
+  "node_types": "22.20.1",
   "plugin_pnpm": "11.28.2",
   "source_identity": {
     "kind": "subject-archive",

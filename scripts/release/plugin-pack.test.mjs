@@ -45,7 +45,7 @@ async function fixture(t, { workspaceLink = null, symlinkOutput = false, lifecyc
 
 test('controlled plugin pack emits an immutable tarball receipt without runtime state', async t => {
   const input = await fixture(t);
-  const manifestPath = join(input.root, 'receipt.json');
+  const manifestPath = join(input.outputDir, 'receipt.json');
   const receipt = await packPlugin({ ...input, manifestPath });
   assert.equal(receipt.schema_version, 'dsh-plugin-pack/v1');
   assert.equal(receipt.dsh_pin, '0.1.7-rc.2');
@@ -54,6 +54,34 @@ test('controlled plugin pack emits an immutable tarball receipt without runtime 
   assert.ok(receipt.entries.includes('lib/index.js'));
   assert.ok(!receipt.entries.some(entry => entry.includes('src/')));
   assert.deepEqual(JSON.parse(await readFile(manifestPath, 'utf8')), receipt);
+});
+
+test('release lane packs an rc1 artifact from the default rc2 source peer', async t => {
+  const input = await fixture(t);
+  const packed = await packPlugin({
+    ...input,
+    sdkVersion: '0.2.1-rc.1',
+    sourceSdkVersion: '0.1.7-rc.2',
+  });
+  assert.equal(packed.source_dsh_pin, '0.1.7-rc.2');
+  assert.equal(packed.dsh_pin, '0.2.1-rc.1');
+  const manifestPath = join(input.outputDir, 'receipt.json');
+  await writeFile(manifestPath, `${JSON.stringify(packed)}\n`);
+  const verified = await readPluginPack({
+    manifestPath,
+    expectedSha256: hash(await readFile(manifestPath)),
+    expectedSdkVersion: '0.2.1-rc.1',
+  });
+  assert.equal(verified.manifest.peerDependencies['@deepseek-ai/dsh-tools'], '0.2.1-rc.1');
+});
+
+test('release lane refuses a source manifest outside its declared compatibility line', async t => {
+  const input = await fixture(t);
+  await assert.rejects(() => packPlugin({
+    ...input,
+    sdkVersion: '0.2.1-rc.1',
+    sourceSdkVersion: '0.1.7-rc.1',
+  }), /PLUGIN_PACK_SOURCE_DSH_PEER_INVALID/);
 });
 
 test('formal pack rejects an ignored lib replacement against a clean builder receipt', async t => {
@@ -127,7 +155,7 @@ for (const [file, content, error] of [
     const input = await fixture(t);
     await writeFile(join(input.plugin, file), content);
     await commitFixture(input.root);
-    const manifestPath = join(input.root, 'receipt.json');
+    const manifestPath = join(input.outputDir, 'receipt.json');
     await assert.rejects(() => packPlugin({ ...input, manifestPath }), error);
     assert.deepEqual(await readdir(input.outputDir), []);
     await assert.rejects(() => access(manifestPath));

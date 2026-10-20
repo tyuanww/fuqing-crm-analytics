@@ -19,7 +19,7 @@ if (buildToolsInput && !isAbsolute(buildToolsInput)) {
   console.error('BUILD_TOOLS_NOT_CONFIGURED: pass an absolute build-tools directory as the third argument or B0_BUILD_TOOLS.');
   process.exit(2);
 }
-const { build, compiler } = await bindToolchain(root, upstream, buildToolsInput && resolve(buildToolsInput));
+const { build, compiler, pin } = await bindToolchain(root, upstream, buildToolsInput && resolve(buildToolsInput));
 const skillPackage = await packSkills(root);
 const querySkillPackage = await packSkills(root, 'channel_followup');
 const firstPurchaseSkillPackage = await packSkills(root, 'first_purchase');
@@ -63,5 +63,5 @@ await build({
   outdir: 'lib/views', platform: 'browser', target: 'es2022',
   format: 'esm', jsx: 'automatic', external, minify: true,
 });
-await writeBuildProvenance({ root });
+await writeBuildProvenance({ root, toolchain: pin, releaseLane: process.env.DSH_RELEASE_LANE_CONFIG ?? null });
 console.log(`B0 plugin built. Host entry: ${pathToFileURL(join(root, 'lib/index.js')).href}`);

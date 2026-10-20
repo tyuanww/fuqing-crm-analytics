@@ -57,13 +57,15 @@ test('release lane config is loaded before pin module initialization', () => {
   const child = spawnSync(process.execPath, ['--input-type=module', '-e', [
     "import { readToolchain } from './scripts/dsh-dev/pin.mjs';",
     "const pin = await readToolchain(process.cwd());",
-    "console.log(JSON.stringify({ upstream_sha: pin.upstream_sha, upstream_lock_sha256: pin.upstream_lock_sha256, sdk_version: pin.sdk_version }));",
+    "console.log(JSON.stringify({ upstream_sha: pin.upstream_sha, upstream_lock_sha256: pin.upstream_lock_sha256, sdk_version: pin.sdk_version, node_types: pin.node_types, cordis: pin.cordis }));",
   ].join(' ')], { cwd: repoRoot, env: { ...process.env, DSH_RELEASE_LANE_CONFIG: lanePath }, encoding: 'utf8' });
   assert.equal(child.status, 0, child.stderr);
   assert.deepEqual(JSON.parse(child.stdout.trim()), {
     upstream_sha: '1600d8a1e140dcde43a1a0941940a0480712c011',
     upstream_lock_sha256: '952ca2f79998660dc690b739078a5d6052bc7c5c2193714b918b9d720baaeaba',
     sdk_version: '0.2.1-rc.1',
+    node_types: '22.20.1',
+    cordis: '4.0.5',
   });
 });
 

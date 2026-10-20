@@ -10,18 +10,52 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { managerVersions } from './package-manager.mjs';
+import { isAbsolute } from 'node:path';
 
 export const toolchainRoot = dirname(fileURLToPath(import.meta.url));
 export const defaultBuildTools = join(toolchainRoot, 'build-tools');
 
+async function applyReleaseLane(pin) {
+  const path = process.env.DSH_RELEASE_LANE_CONFIG;
+  if (!path) return pin;
+  assert.ok(isAbsolute(path), 'KIT_RELEASE_LANE_PATH');
+  const lane = JSON.parse(await readFile(path, 'utf8'));
+  assert.equal(lane.schema_version, 'shinemage-rc1-release-lane/v1', 'KIT_RELEASE_LANE_SCHEMA');
+  assert.equal(lane.lane, 'rc1', 'KIT_RELEASE_LANE_ID');
+  assert.match(lane.sdk ?? '', /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/, 'KIT_RELEASE_LANE_SDK');
+  assert.match(lane.upstream_sha ?? '', /^[0-9a-f]{40}$/, 'KIT_RELEASE_LANE_UPSTREAM_SHA');
+  assert.match(lane.upstream_lock_sha256 ?? '', /^[0-9a-f]{64}$/, 'KIT_RELEASE_LANE_UPSTREAM_LOCK');
+  assert.match(lane.upstream_pnpm ?? '', /^\d+\.\d+\.\d+$/, 'KIT_RELEASE_LANE_UPSTREAM_PNPM');
+  assert.match(lane.plugin_pnpm ?? '', /^\d+\.\d+\.\d+$/, 'KIT_RELEASE_LANE_PLUGIN_PNPM');
+  for (const key of ['cordis', 'typescript', 'esbuild', 'react', 'react_types', 'node_types']) {
+    assert.match(lane[key] ?? '', /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/, `KIT_RELEASE_LANE_${key.toUpperCase()}`);
+  }
+  assert.equal(lane.node, 'v24.19.0', 'KIT_RELEASE_LANE_NODE');
+  return {
+    ...pin,
+    sdk_version: lane.sdk,
+    upstream_sha: lane.upstream_sha,
+    upstream_lock_sha256: lane.upstream_lock_sha256,
+    upstream_pnpm: lane.upstream_pnpm,
+    pnpm: lane.plugin_pnpm,
+    cordis: lane.cordis,
+    typescript: lane.typescript,
+    esbuild: lane.esbuild,
+    react: lane.react,
+    react_types: lane.react_types,
+    node_types: lane.node_types,
+  };
+}
+
 /** Check all fixed inputs without importing tool code or writing plugin links. */
 export async function inspectToolchain(upstream, buildTools = defaultBuildTools, closureSha256 = process.env.DSH_SDK_CLOSURE_SHA256) {
   const pinBytes = await readFile(join(toolchainRoot, 'toolchain.json'));
-  const pin = JSON.parse(pinBytes);
+  const pin = await applyReleaseLane(JSON.parse(pinBytes));
   const managers = managerVersions(pin);
   assert.equal(Number(process.versions.node.split('.')[0]), pin.node_major, 'Use the pinned Node major');
   const compact = closureSha256 !== undefined && closureSha256 !== null;
   if (compact) {
+    assert.equal(process.env.DSH_RELEASE_LANE_CONFIG, undefined, 'KIT_CLOSURE_LANE_AMBIGUOUS');
     const root = await realpath(dirname(upstream));
     assert.equal(await realpath(upstream), join(root, 'upstream'), 'KIT_CLOSURE_LAYOUT');
     assert.equal(await realpath(buildTools), join(root, 'build-tools'), 'KIT_CLOSURE_LAYOUT');
@@ -67,7 +101,10 @@ export async function inspectToolchain(upstream, buildTools = defaultBuildTools,
   }
   for (const [name, path] of Object.entries(pin.sdk_bindings)) {
     const target = join(upstream, path);
-    await inspectSdkPackage(target, name, name.startsWith('@deepseek-ai/dsh-') ? pin.sdk_version : undefined);
+    const expected = name === '@deepseek-ai/cordis'
+      ? pin.cordis
+      : name.startsWith('@deepseek-ai/dsh-') ? pin.sdk_version : undefined;
+    await inspectSdkPackage(target, name, expected);
     bindings.set(name, target);
   }
   for (const [name, resolver, version] of [['react', web, pin.react], ['react-dom', web, pin.react], ['@types/react', conversation, pin.react_types], ['@types/node', req, pin.node_types]]) {
