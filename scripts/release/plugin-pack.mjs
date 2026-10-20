@@ -27,7 +27,7 @@ const SHA256 = /^[a-f0-9]{64}$/;
 const SAFE_RELATIVE = /^(?!\/)(?!.*(?:^|\/)\.\.(?:\/|$))(?!.*\\)[^\0]+$/;
 const MAX_PACK_BYTES = 20 * 1024 * 1024;
 
-function matchesPattern(path, pattern, code = 'PLUGIN_PACK_PATTERN_INVALID') {
+function parsePattern(pattern, code = 'PLUGIN_PACK_PATTERN_INVALID') {
   assert.equal((pattern.match(/\*/g) ?? []).length, 1, `${code} ${pattern}`);
   const slash = pattern.lastIndexOf('/');
   assert.ok(
@@ -41,26 +41,49 @@ function matchesPattern(path, pattern, code = 'PLUGIN_PACK_PATTERN_INVALID') {
   const star = suffix.indexOf('*');
   const head = `${directory}${suffix.slice(0, star)}`;
   const tail = suffix.slice(star + 1);
+  return { head, tail };
+}
+
+function matchesPattern(path, pattern, code = 'PLUGIN_PACK_PATTERN_INVALID') {
+  const { head, tail } = parsePattern(pattern, code);
   return path.startsWith(head) && path.endsWith(tail)
     && !path.slice(head.length, path.length - tail.length).includes('/');
 }
 
 function verifyEntrypoints(manifest, files) {
   const targets = [];
+  function exportKeys(value) {
+    if (value === null || typeof value !== 'object') return;
+    for (const [key, item] of Object.entries(value)) {
+      if (key.includes('*')) {
+        const entry = key.replace(/^\.\//, '');
+        assert.ok(SAFE_RELATIVE.test(entry), `PLUGIN_PACK_PATTERN_INVALID ${key}`);
+        parsePattern(entry);
+      }
+      exportKeys(item);
+    }
+  }
   function exportsTargets(value) {
     if (value === null) return;
-    if (typeof value === 'string') { targets.push(value); return; }
+    if (typeof value === 'string') { targets.push({ target: value, wildcard: true }); return; }
     assert.ok(value && typeof value === 'object', 'PLUGIN_PACK_EXPORT_INVALID');
     for (const item of Object.values(value)) exportsTargets(item);
   }
-  if (manifest.exports !== undefined) exportsTargets(manifest.exports);
-  for (const value of [manifest.main, manifest.module, manifest.dsh?.bundle?.patch]) {
-    if (value !== undefined) targets.push(value);
+  if (manifest.exports !== undefined) {
+    exportKeys(manifest.exports);
+    exportsTargets(manifest.exports);
   }
-  for (const target of targets) {
+  for (const value of [manifest.main, manifest.module, manifest.dsh?.bundle?.patch]) {
+    if (value !== undefined) targets.push({ target: value, wildcard: false });
+  }
+  for (const { target, wildcard } of targets) {
     assert.equal(typeof target, 'string', 'PLUGIN_PACK_ENTRY_INVALID');
     const entry = target.replace(/^\.\//, '');
     assert.ok(SAFE_RELATIVE.test(entry) && !entry.split('/').includes('.'), `PLUGIN_PACK_ENTRY_INVALID ${target}`);
+    if (entry.includes('*')) {
+      assert.ok(wildcard, `PLUGIN_PACK_PATTERN_INVALID ${target}`);
+      parsePattern(entry);
+    }
     const present = entry.includes('*') ? files.some(file => matchesPattern(file, entry)) : files.includes(entry);
     assert.ok(present, `PLUGIN_PACK_ENTRY_MISSING ${target}`);
   }

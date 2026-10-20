@@ -11,7 +11,7 @@
     "brand-globals.mjs": "f2e7db5ce4618f9054400ed5ba62c3da14df8ffdfafd727e9a6f24297987453d",
     "package-origin.json": "19c2647bf2d8d8864dc66f65febf9808eb8c0748eac2b6103c954cc29099c925",
     "preset.patch.json": "428c777581d74fd63ed79861bb6c915431c741e927359886ba15e48b5280f9f5",
-    "weknora-production-scope.mjs": "6a5080213c59f0b374d9778e8111a9b280d84554a68e17140d54c15bcf3de825",
+    "weknora-production-scope.mjs": "94ee280908884918ac3c43d5be9fd71c1d2a0c1cfe0fb13eff2010b2998ee33c",
     "weknora.mjs": "3cee71585582befe222de54a9063a37d0dacbf7ed1ec31eaee88922a84bf2a53"
   },
   "secret_exclusions": {

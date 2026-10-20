@@ -16,11 +16,12 @@ function definition(name, execute) {
 test('fixed scope rejects explicit non-project knowledge base search', async () => {
   let called = false
   const [search] = createScopedWeKnoraTools({
-    definitions: [definition('weknora_search', async () => { called = true })],
+    definitions: [{ ...definition('weknora_search', async () => { called = true }), description: 'upstream' }],
     client: {},
     allowedKnowledgeBaseIds: [PROJECT],
   })
 
+  assert.match(search.description, /Tenant-wide document-name enrichment is disabled/)
   await assert.rejects(
     search.execute({ query: '会员溢价', knowledge_base_ids: [OTHER] }, {}),
     /WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED/,

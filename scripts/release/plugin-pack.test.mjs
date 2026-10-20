@@ -90,6 +90,30 @@ test('configuration bundle rejects a wildcard in an export directory segment', a
   await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_PATTERN_INVALID/);
 });
 
+test('configuration bundle rejects a wildcard export key in a directory segment', async t => {
+  const input = await fixture(t);
+  const path = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  delete manifest.peerDependencies;
+  manifest.exports['./nested/*/module'] = './lib/index.js';
+  manifest.shinemage = { bundle_role: 'configuration-bundle' };
+  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await commitFixture(input.root);
+  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_PATTERN_INVALID/);
+});
+
+test('configuration bundle rejects a wildcard main entry', async t => {
+  const input = await fixture(t);
+  const path = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  delete manifest.peerDependencies;
+  manifest.main = './lib/*.js';
+  manifest.shinemage = { bundle_role: 'configuration-bundle' };
+  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await commitFixture(input.root);
+  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_PATTERN_INVALID/);
+});
+
 test('configuration bundle cannot bypass the pinned peer through an ordinary dependency', async t => {
   const input = await fixture(t);
   const path = join(input.plugin, 'package.json');

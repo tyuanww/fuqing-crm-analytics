@@ -57,11 +57,12 @@ DSH 启动时会生成新的 `runtime/plugin-packs-*` 根并重写本地 link，
 远端文件：
 
 - `weknora.mjs`：`3cee71585582befe222de54a9063a37d0dacbf7ed1ec31eaee88922a84bf2a53`
-- `weknora-production-scope.mjs`：`6a5080213c59f0b374d9778e8111a9b280d84554a68e17140d54c15bcf3de825`
-- `weknora-production-overlay.v1.json`：`f4b1d4ecbf09cf778d41dc74b5249532e976eb9a13700c31f3acadd331a40c47`
+- `weknora-production-scope.mjs`：`94ee280908884918ac3c43d5be9fd71c1d2a0c1cfe0fb13eff2010b2998ee33c`
+- `weknora-production-overlay.v1.json`：`f40e73372b07bf6887408bf3bd6fd35026b13df6399cc61aa890ed42ac37b90e`
 - 回滚副本：`/srv/shinemage/dsh/recovery/weknora-production-scope-20261021/weknora.mjs`
 - 输入防护前一版 helper：`/srv/shinemage/dsh/recovery/weknora-production-scope-20261021/weknora-production-scope.before-input-hardening-20261021.mjs`
 - tenant-wide enrichment 修复前的 adapter/helper/overlay：`weknora.mjs.before-tenant-wide-disable-20261021`、`weknora-production-scope.before-tenant-wide-disable-20261021.mjs`、`weknora-production-overlay.before-tenant-wide-disable-20261021.json`
+- 工具说明与 live 文案对齐前的 helper/overlay：`weknora-production-scope.before-search-description-20261021.mjs`、`weknora-production-overlay.before-search-description-20261021.json`
 
 2026-10-09 的固定输入 manifest 仍为原字节（SHA-256 `e552acd8…8905`），不把后来的 adapter 和 helper 写回历史快照。新的 production overlay manifest 只记录当前 live overlay 文件、第三方 package origin、项目库 scope 和工具合同，权限为 `0600 root:root`；它不包含 `retrieve.key`，也不改变 DSH 启动路径。
 

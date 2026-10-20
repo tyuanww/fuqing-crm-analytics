@@ -49,6 +49,9 @@ export function createScopedWeKnoraTools({
     if (definition.name === searchName) {
       return {
         ...definition,
+        description: 'Search the fixed production WeKnora project knowledge base and return matching passages verbatim. '
+          + 'Tenant-wide document-name enrichment is disabled; results stay within the project allowlist. '
+          + 'Use a returned knowledge_id with read_document for fuller context.',
         async execute(args, exec) {
           const requested = requestedKnowledgeBaseIds(args)
           if (requested.some(id => typeof id !== 'string' || !allowed.has(id))) {

@@ -36,6 +36,7 @@
 - 只受控重启本轮 `shinemage-dsh.service`，完成 query.9 与 WeKnora 强制范围复测。
 - 将生产 WeKnora 薄适配层改为固定项目库 allowlist，并保留旧适配器回滚副本。
 - 独立复核后补齐非数组筛选、文档 ID 搜索和缺失文档 ID 的 fail-closed 输入防护，再次备份旧 helper、替换并受控重启。
+- 最终复核又禁用了上游 tenant-wide 文档名 enrichment；live 探针确认普通项目库 search 只请求 `/api/v1/knowledge-search`，并保留第二组 adapter/helper/overlay 回滚副本。
 
 ## 未做的事
 

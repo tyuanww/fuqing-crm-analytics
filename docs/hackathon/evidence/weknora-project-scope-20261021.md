@@ -46,8 +46,8 @@
 - 普通 `weknora_search` 禁用了上游 tenant-wide 文档名 enrichment；实测网络路径只有项目库 passage 检索 `/api/v1/knowledge-search`，不会先调用跨可见库的 `/api/v1/knowledge/search`。
 - `weknora_read_document` 要求非空文档 ID，并先查元数据核对 `knowledge_base_id`；缺失 ID、不属于项目库或元数据不可用时 fail-closed。
 - 浏览器复测中，项目库正查成功；部署验收库搜索和跨库文档读取均被拒绝。
-- 新适配器 SHA-256 为 `3cee71585582befe222de54a9063a37d0dacbf7ed1ec31eaee88922a84bf2a53`，最终 scope helper 为 `6a5080213c59f0b374d9778e8111a9b280d84554a68e17140d54c15bcf3de825`，远端回滚副本位于 `/srv/shinemage/dsh/recovery/weknora-production-scope-20261021/`；最终输入防护和 tenant-wide enrichment 修复前的文件均另存为带 `.before-*` 后缀的副本。
-- 09 月/10 月早期固定输入 manifest 不覆盖后续 live overlay；现保留原字节，并新增 `weknora-production-overlay.v1.json`（`f4b1d4ecbf09cf778d41dc74b5249532e976eb9a13700c31f3acadd331a40c47`）记录当前 adapter、helper、preset、brand globals、package origin 和 scope。该 sidecar 不包含 `retrieve.key`，服务启动不依赖它。
+- 新适配器 SHA-256 为 `3cee71585582befe222de54a9063a37d0dacbf7ed1ec31eaee88922a84bf2a53`，最终 scope helper 为 `94ee280908884918ac3c43d5be9fd71c1d2a0c1cfe0fb13eff2010b2998ee33c`，远端回滚副本位于 `/srv/shinemage/dsh/recovery/weknora-production-scope-20261021/`；最终输入防护和 tenant-wide enrichment 修复前的文件均另存为带 `.before-*` 后缀的副本。
+- 09 月/10 月早期固定输入 manifest 不覆盖后续 live overlay；现保留原字节，并新增 `weknora-production-overlay.v1.json`（`f40e73372b07bf6887408bf3bd6fd35026b13df6399cc61aa890ed42ac37b90e`）记录当前 adapter、helper、preset、brand globals、package origin 和 scope。该 sidecar 不包含 `retrieve.key`，服务启动不依赖它。
 - 完整现场过程与 query.9 结果见 [query.9/WeKnora 强化范围回执](dsh-query9-weknora-scope-20261021.md)。
 
 ## WeKnora 全量只读复核

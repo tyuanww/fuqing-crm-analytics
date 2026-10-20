@@ -10,7 +10,7 @@
 
 v4 过渡候选已执行的局部检查为：固定 Node24 release tests `45 pass / 0 fail`、远程 Node24 peer 缺失负测 PASS、runtime provenance PASS、native/business boot PASS、Settings/account RPC PASS、浏览器插件页 PASS、plugin-market Discover PASS、console logs EMPTY、AppleDouble locale files `0`、v4 boot PASS。上述 peer 缺失负测已验证 fail-closed 行为。默认 Node25 下的 dsh-dev 全量失败属于环境版本不满足，不能改写为代码 PASS。
 
-IM 已从归档输入缺失推进为 `PINNED_INPUTS_VERIFIED`：`@xmanrui/dsh-im@5.2.0` 与 `dsh-plugin@2.0.5` 的归档已按线上 lock 的字节摘要、integrity、commit 根目录和包身份核验并保存。该事实不表示 IM 已完成正式发布；当前仍缺统一发布身份、publisher/signature、独立验收和切换授权，所以 `release_ready=false`。Query `0.0.0-query.9` 已由 source `d860b1d4…` 的 clean worktree 生成并完成线上 side-load；WeKnora 生产适配层已把默认 scope 强化为强制 allowlist，修复浏览器复测发现的显式跨库参数绕过，并对非数组库筛选、文档 ID 搜索和缺失文档 ID fail-closed。状态与回执见 [query.9/WeKnora 修复回执](../hackathon/evidence/dsh-query9-weknora-scope-20261021.md)。
+IM 已从归档输入未定位推进为 `PINNED_INPUTS_VERIFIED`：`@xmanrui/dsh-im@5.2.0` 与 `dsh-plugin@2.0.5` 的归档已按线上 lock 的字节摘要、integrity、commit 根目录和包身份核验并保存。该事实不表示 IM 已完成正式发布；当前仍缺统一发布身份、publisher/signature、独立验收和切换授权，所以 `release_ready=false`。Query `0.0.0-query.9` 已由 source `d860b1d4…` 的 clean worktree 生成并完成线上 side-load；WeKnora 生产适配层已把默认 scope 强化为强制 allowlist，修复浏览器复测发现的显式跨库参数绕过，并对非数组库筛选、文档 ID 搜索和空文档 ID fail-closed。最终复核又禁用了上游 tenant-wide 文档名 enrichment，live 探针确认普通 search 不请求跨可见库的 `/api/v1/knowledge/search`。状态与回执见 [query.9/WeKnora 修复回执](../hackathon/evidence/dsh-query9-weknora-scope-20261021.md)。
 
 本轮在固定 Node `24.19.0` 和 Python `3.14.8` 下重新接收三份作者证据并执行完整 B0 `--check`：Workbench 为 155 文件／1086 PASS，领域作者为 34 PASS，公共合同为三仓 31 份材料；组合包、领域合同、插件边界、supervisor 与固定宿主负测均通过，后端为 `862 passed / 0 failed`（41 subtests passed，23 warnings）。该结果是本地提交前验证，不替代远端 CI、正式 clean machine、CRM 用户登录和真实只读 UAT。
 

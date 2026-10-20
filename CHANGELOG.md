@@ -86,7 +86,7 @@
 
 ### Fixed
 
-- 配置型 bundle 的单层通配现在只允许 `*` 位于固定目录的最后文件名段，拒绝 `lib/*/index.js` 一类目录段通配；增加打包/reader 负测，避免文档合同与实际包面继续漂移。
+- 配置型 bundle 的 `files` 与 `exports` key/value 只允许单个 `*` 位于固定目录的最后文件名段，拒绝 `lib/*/index.js` 一类目录段通配；`main`、`module` 和 `dsh.bundle.patch` 也改为只接受精确文件。增加打包/reader 负测，避免文档合同与实际包面继续漂移。
 
 - runtime bundle 对 web plugin peer alias 缺失改为 fail-closed，profile bridge 支持 pnpm canonical peer root，Linux x64 生成 DevTools chunk 的 secret allowlist 绑定精确路径和 SHA-256；新增对应负测。
 

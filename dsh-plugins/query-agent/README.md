@@ -61,7 +61,7 @@ shasum -a 256 scripts/ops/weknora-production.mjs \
   config/weknora-production-overlay.v1.json
 ```
 
-期望当前 overlay 摘要为 `3cee7158…2a53`（adapter）、`6a508021…e825`（scope helper）和 `f4b1d4ec…0c47`（overlay manifest）。摘要变化时先核对内容与 PR，不要只更新 manifest 让漂移“变绿”。
+期望当前 overlay 摘要为 `3cee7158…2a53`（adapter）、`94ee2809…e33c`（scope helper）和 `f40e7337…b90e`（overlay manifest）。摘要变化时先核对内容与 PR，不要只更新 manifest 让漂移“变绿”。
 
 ### 更新现场
 
