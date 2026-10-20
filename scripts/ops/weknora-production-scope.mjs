@@ -1,5 +1,19 @@
+import { readFileSync } from 'node:fs'
+
 const DENIED = 'WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED'
 const CHECK_FAILED = 'WEKNORA_DOCUMENT_SCOPE_CHECK_FAILED'
+
+export function readProductionWeKnoraKey(path) {
+  let value
+  try {
+    value = readFileSync(path, 'utf8')
+  } catch {
+    throw new Error('WEKNORA_RETRIEVAL_KEY_UNAVAILABLE')
+  }
+  const apiKey = value.trim()
+  if (!apiKey) throw new Error('WEKNORA_RETRIEVAL_KEY_UNAVAILABLE')
+  return apiKey
+}
 
 function requestedKnowledgeBaseIds(args) {
   const value = args?.knowledge_base_ids
@@ -40,9 +54,26 @@ export function createScopedWeKnoraTools({
   allowedKnowledgeBaseIds,
   searchName = 'weknora_search',
   readName = 'weknora_read_document',
+  requiredToolNames = [],
 }) {
   const allowed = new Set(allowedKnowledgeBaseIds)
   if (allowed.size === 0) throw new Error(`${DENIED}: allowed knowledge base list is empty`)
+  const supported = new Set([searchName, readName])
+  const names = new Set()
+  for (const definition of definitions) {
+    if (definition === null || typeof definition !== 'object' || typeof definition.name !== 'string'
+      || typeof definition.execute !== 'function') {
+      throw new Error(`${DENIED}: invalid WeKnora tool definition`)
+    }
+    if (!supported.has(definition.name)) {
+      throw new Error(`${DENIED}: tool ${definition.name} is outside the production scope wrapper`)
+    }
+    if (names.has(definition.name)) throw new Error(`${DENIED}: duplicate WeKnora tool ${definition.name}`)
+    names.add(definition.name)
+  }
+  for (const name of requiredToolNames) {
+    if (!names.has(name)) throw new Error(`${DENIED}: required WeKnora tool ${name} is unavailable`)
+  }
 
   return definitions.map(definition => {
     const execute = definition.execute
@@ -64,7 +95,10 @@ export function createScopedWeKnoraTools({
           ) {
             throw new Error(`${DENIED}: document-id search cannot prove production knowledge-base scope`)
           }
-          return execute(args, exec)
+          return execute({
+            ...args,
+            knowledge_base_ids: requested.length > 0 ? requested : [...allowed],
+          }, exec)
         },
       }
     }

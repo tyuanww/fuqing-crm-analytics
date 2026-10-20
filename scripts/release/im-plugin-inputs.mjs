@@ -4,8 +4,9 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { execFile } from 'node:child_process';
-import { lstat, readFile } from 'node:fs/promises';
+import { lstat, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { basename, join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 
@@ -56,7 +57,15 @@ function digest(buffer, algorithm, encoding = 'hex') {
   return createHash(algorithm).update(buffer).digest(encoding);
 }
 
-async function verifyArchive(input, inputDir) {
+async function verifyPython(python) {
+  const { stdout } = await exec(python, ['-I', '-B', '-c',
+    'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")'], {
+    encoding: 'utf8', timeout: 10000, maxBuffer: 1024,
+  });
+  assert.equal(stdout.trim(), '3.14', 'IM_INPUT_PYTHON_VERSION');
+}
+
+async function verifyArchive(input, inputDir, python) {
   const path = join(inputDir, input.tarball);
   const info = await lstat(path);
   assert.ok(info.isFile() && !info.isSymbolicLink(), `IM_INPUT_FILE_INVALID ${input.tarball}`);
@@ -64,12 +73,19 @@ async function verifyArchive(input, inputDir) {
   const bytes = await readFile(path);
   assert.equal(digest(bytes, 'sha256'), input.sha256, `IM_INPUT_SHA256_MISMATCH ${input.tarball}`);
   assert.equal(`sha512-${digest(bytes, 'sha512', 'base64')}`, input.integrity, `IM_INPUT_INTEGRITY_MISMATCH ${input.tarball}`);
-  const inspected = JSON.parse((await exec(process.env.IM_PLUGIN_PYTHON ?? 'python3', [INSPECTOR, path, input.commit,
-    '--max-entries', '20000', '--max-bytes', String(MAX_ARCHIVE_BYTES)], {
-    encoding: 'utf8', timeout: 30000, maxBuffer: 256 * 1024,
-  })).stdout);
-  assert.equal(inspected.package?.name, input.package, `IM_INPUT_PACKAGE_MISMATCH ${input.tarball}`);
-  assert.equal(inspected.package?.version, input.version, `IM_INPUT_VERSION_MISMATCH ${input.tarball}`);
+  const heldRoot = await mkdtemp(join(tmpdir(), 'im-plugin-held-'));
+  try {
+    const held = join(heldRoot, input.tarball);
+    await writeFile(held, bytes, { flag: 'wx', mode: 0o600 });
+    const inspected = JSON.parse((await exec(python, ['-I', '-B', INSPECTOR, held, input.commit,
+      '--max-entries', '20000', '--max-bytes', String(MAX_ARCHIVE_BYTES)], {
+      encoding: 'utf8', timeout: 30000, maxBuffer: 256 * 1024,
+    })).stdout);
+    assert.equal(inspected.package?.name, input.package, `IM_INPUT_PACKAGE_MISMATCH ${input.tarball}`);
+    assert.equal(inspected.package?.version, input.version, `IM_INPUT_VERSION_MISMATCH ${input.tarball}`);
+  } finally {
+    await rm(heldRoot, { recursive: true, force: true });
+  }
   return {
     package: input.package,
     version: input.version,
@@ -81,11 +97,13 @@ async function verifyArchive(input, inputDir) {
   };
 }
 
-export async function verifyImPluginInputs({ lockPath = DEFAULT_LOCK, inputDir } = {}) {
+export async function verifyImPluginInputs({ lockPath = DEFAULT_LOCK, inputDir,
+  python = process.env.IM_PLUGIN_PYTHON ?? process.env.FQ_B0_PYTHON ?? 'python3' } = {}) {
   assert.equal(typeof inputDir, 'string', 'IM_INPUT_DIRECTORY_REQUIRED');
+  await verifyPython(python);
   const lock = validateImPluginInputs(JSON.parse(await readFile(lockPath, 'utf8')));
   const packages = [];
-  for (const input of lock.inputs) packages.push(await verifyArchive(input, inputDir));
+  for (const input of lock.inputs) packages.push(await verifyArchive(input, inputDir, python));
   return {
     schema_version: 'shinemage-im-plugin-inputs-receipt/v1',
     status: 'PASS',
@@ -104,8 +122,9 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   try {
     const inputDir = option('--input-dir');
     const lockPath = option('--lock') ?? DEFAULT_LOCK;
+    const python = option('--python') ?? undefined;
     assert.ok(inputDir, 'Usage: node scripts/release/im-plugin-inputs.mjs --input-dir /absolute/input-dir [--lock /absolute/lock.json]');
-    console.log(JSON.stringify(await verifyImPluginInputs({ lockPath, inputDir }), null, 2));
+    console.log(JSON.stringify(await verifyImPluginInputs({ lockPath, inputDir, python }), null, 2));
   } catch (error) {
     console.error(error?.message ?? String(error));
     process.exitCode = 2;

@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 import {
@@ -9,6 +8,7 @@ import {
 import {
   createAllowlistedWeKnoraClient,
   createScopedWeKnoraTools,
+  readProductionWeKnoraKey,
 } from './weknora-production-scope.mjs'
 
 export const name = 'shinemage-weknora-retrieval'
@@ -20,8 +20,7 @@ const PROJECT_KNOWLEDGE_BASE_IDS = Object.freeze([
 
 export function apply(ctx) {
   const keyPath = fileURLToPath(new URL('./retrieve.key', import.meta.url))
-  const apiKey = readFileSync(keyPath, 'utf8').trim()
-  if (!apiKey) throw new Error('WEKNORA_RETRIEVAL_KEY_UNAVAILABLE')
+  const apiKey = readProductionWeKnoraKey(keyPath)
   const config = resolveConfig({
     baseUrl: 'http://127.0.0.1:18092/api/v1',
     apiKey,
@@ -46,6 +45,7 @@ export function apply(ctx) {
     definitions: createTools(toolClient, config),
     client,
     allowedKnowledgeBaseIds: PROJECT_KNOWLEDGE_BASE_IDS,
+    requiredToolNames: ['weknora_search', 'weknora_read_document'],
   })
   for (const definition of definitions) ctx.tools.register(definition)
 }

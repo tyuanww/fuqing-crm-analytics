@@ -5,6 +5,7 @@ import test from 'node:test'
 import {
   createAllowlistedWeKnoraClient,
   createScopedWeKnoraTools,
+  readProductionWeKnoraKey,
 } from './weknora-production-scope.mjs'
 
 const PROJECT = '1c4627e2-dfc1-48ca-aeef-2c00b53da5f8'
@@ -16,8 +17,9 @@ function definition(name, execute) {
 
 test('fixed scope rejects explicit non-project knowledge base search', async () => {
   let called = false
+  let delegated
   const [search] = createScopedWeKnoraTools({
-    definitions: [{ ...definition('weknora_search', async () => { called = true }), description: 'upstream' }],
+    definitions: [{ ...definition('weknora_search', async args => { called = true; delegated = args }), description: 'upstream' }],
     client: {},
     allowedKnowledgeBaseIds: [PROJECT],
   })
@@ -29,8 +31,21 @@ test('fixed scope rejects explicit non-project knowledge base search', async () 
   )
   assert.equal(called, false)
   await search.execute({ query: '会员溢价' }, {})
+  assert.deepEqual(delegated.knowledge_base_ids, [PROJECT])
   await search.execute({ query: '会员溢价', knowledge_base_ids: [PROJECT] }, {})
   assert.equal(called, true)
+})
+
+test('fixed scope normalizes an explicitly empty knowledge-base filter', async () => {
+  let delegated
+  const [search] = createScopedWeKnoraTools({
+    definitions: [definition('weknora_search', async args => { delegated = args })],
+    client: {},
+    allowedKnowledgeBaseIds: [PROJECT],
+  })
+
+  await search.execute({ query: '会员溢价', knowledge_base_ids: [] }, {})
+  assert.deepEqual(delegated.knowledge_base_ids, [PROJECT])
 })
 
 test('fixed scope rejects non-array knowledge base filters before search', async () => {
@@ -152,13 +167,32 @@ test('document reads reject missing or empty ids before delegating', async () =>
   assert.equal(called, false)
 })
 
-test('document metadata failures fail closed and unrelated tools stay untouched', async () => {
-  const unrelated = definition('other_tool', async () => 'ok')
-  const [read, same] = createScopedWeKnoraTools({
-    definitions: [
-      definition('weknora_read_document', async () => 'leaked'),
-      unrelated,
-    ],
+test('unknown upstream tools fail closed instead of escaping the scope wrapper', () => {
+  assert.throws(
+    () => createScopedWeKnoraTools({
+      definitions: [definition('weknora_list_knowledge_bases', async () => [])],
+      client: {},
+      allowedKnowledgeBaseIds: [PROJECT],
+    }),
+    /outside the production scope wrapper/,
+  )
+})
+
+test('required production tools must all be present', () => {
+  assert.throws(
+    () => createScopedWeKnoraTools({
+      definitions: [definition('weknora_search', async () => [])],
+      client: {},
+      allowedKnowledgeBaseIds: [PROJECT],
+      requiredToolNames: ['weknora_search', 'weknora_read_document'],
+    }),
+    /required WeKnora tool weknora_read_document is unavailable/,
+  )
+})
+
+test('document metadata failures fail closed', async () => {
+  const [read] = createScopedWeKnoraTools({
+    definitions: [definition('weknora_read_document', async () => 'leaked')],
     client: {
       async getDocument() {
         throw new Error('metadata unavailable')
@@ -171,13 +205,19 @@ test('document metadata failures fail closed and unrelated tools stay untouched'
     read.execute({ knowledge_id: 'unknown' }, { signal: new AbortController().signal }),
     /WEKNORA_DOCUMENT_SCOPE_CHECK_FAILED/,
   )
-  assert.equal(same, unrelated)
 })
 
 test('an empty production allowlist is rejected', () => {
   assert.throws(
     () => createScopedWeKnoraTools({ definitions: [], client: {}, allowedKnowledgeBaseIds: [] }),
     /allowed knowledge base list is empty/,
+  )
+})
+
+test('a missing production key uses the documented fail-closed error', () => {
+  assert.throws(
+    () => readProductionWeKnoraKey('/definitely/missing/retrieve.key'),
+    /WEKNORA_RETRIEVAL_KEY_UNAVAILABLE/,
   )
 })
 

@@ -20,6 +20,8 @@ for file in "$@"; do
 done
 
 repo_root=$(git rev-parse --show-toplevel)
+# This local gate pins the supported runtime series. The exact patch release is
+# supplied by the caller environment and retained in its evidence receipt.
 if [ "${#node_files[@]}" -gt 0 ]; then
   node_bin="${PREGATE_NODE:-${DSH_DEV_NODE:-}}"
   if [ -z "${node_bin}" ]; then
