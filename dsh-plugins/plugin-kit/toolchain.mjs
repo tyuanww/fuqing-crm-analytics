@@ -167,7 +167,9 @@ export async function bindToolchain(plugin, upstream, buildTools = defaultBuildT
       if (existingTarget === expectedTarget) continue;
       const modules = await realpath(join(plugin, 'node_modules'));
       const local = relative(modules, existingTarget);
-      assert.ok(local && !local.startsWith('..') && !isAbsolute(local), `Refusing to replace foreign dependency: ${name}`);
+      if (!local || local.startsWith('..') || isAbsolute(local)) {
+        await inspectSdkPackage(existingTarget, name);
+      }
       await replaceLink(link, target);
       changes.push({ link, original: existingTarget });
     }

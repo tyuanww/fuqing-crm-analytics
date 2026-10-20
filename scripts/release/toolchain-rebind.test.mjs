@@ -5,16 +5,28 @@ import { tmpdir } from 'node:os';
 import { dirname, join, relative, resolve } from 'node:path';
 import { bindToolchain } from '../../dsh-plugins/plugin-kit/toolchain.mjs';
 
+async function writePackage(root, name, version) {
+  await mkdir(join(root, 'lib'), { recursive: true });
+  await writeFile(join(root, 'package.json'), JSON.stringify({
+    name,
+    version,
+    main: 'lib/index.js',
+    types: 'lib/index.d.ts',
+  }));
+  await writeFile(join(root, 'lib/index.js'), 'export const version = "fixture";\n');
+  await writeFile(join(root, 'lib/index.d.ts'), 'export declare const version: string;\n');
+}
+
 test('the default rc2 lane rebinds local SDK links and restores them', {
   skip: !process.env.B0_BUILD_UPSTREAM || !process.env.B0_BUILD_TOOLS,
 }, async t => {
   const root = await mkdtemp(join(tmpdir(), 'default-toolchain-rebind-'));
   t.after(() => rm(root, { recursive: true, force: true }));
 
-  const original = join(root, 'node_modules/.pnpm/original/node_modules/@deepseek-ai/dsh-tools');
+  const original = join(root, 'previous-upstream/@deepseek-ai/dsh-tools');
   const link = join(root, 'node_modules/@deepseek-ai/dsh-tools');
   const added = join(root, 'node_modules/@deepseek-ai/dsh-agent');
-  await mkdir(original, { recursive: true });
+  await writePackage(original, '@deepseek-ai/dsh-tools', '0.1.7-rc.2');
   await mkdir(dirname(link), { recursive: true });
   await symlink(relative(dirname(link), original), link, 'dir');
 
