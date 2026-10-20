@@ -159,13 +159,12 @@ export async function bindToolchain(plugin, upstream, buildTools = defaultBuildT
       });
       if (!existing) {
         await replaceLink(link, target);
-        if (process.env.DSH_RELEASE_LANE_CONFIG) changes.push({ link, original: null });
+        changes.push({ link, original: null });
         continue;
       }
       assert.ok(existing.isSymbolicLink(), `Refusing to replace existing dependency: ${name}`);
       const existingTarget = await realpath(link), expectedTarget = await realpath(target);
       if (existingTarget === expectedTarget) continue;
-      assert.ok(process.env.DSH_RELEASE_LANE_CONFIG, `Existing SDK binding differs: ${name}`);
       const modules = await realpath(join(plugin, 'node_modules'));
       const local = relative(modules, existingTarget);
       assert.ok(local && !local.startsWith('..') && !isAbsolute(local), `Refusing to replace foreign dependency: ${name}`);
