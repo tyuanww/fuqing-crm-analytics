@@ -79,3 +79,16 @@ test('an explicit rc1 lane temporarily rebinds local SDK links and restores them
     else process.env.DSH_PACKAGE_INPUTS = inputs;
   }
 });
+
+test('an explicit rc1 pack is verified against its manifest and source commit', {
+  skip: !process.env.B0_RC1_ARTIFACT_MANIFEST,
+}, async () => {
+  const result = await inspectCockpitReleaseContract({
+    artifactManifest: resolve(process.env.B0_RC1_ARTIFACT_MANIFEST),
+  });
+  assert.equal(result.artifact.status, 'PASS');
+  assert.equal(result.artifact.target_peer, '0.2.1-rc.1');
+  assert.equal(result.artifact.source_peer, '0.1.7-rc.2');
+  assert.match(result.artifact.tarball.sha256, /^[a-f0-9]{64}$/);
+  assert.equal(result.artifact.provenance_status, 'PASS');
+});

@@ -15,10 +15,10 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';
 import { inspectToolchain } from '../../dsh-plugins/plugin-kit/toolchain.mjs';
 import { COMPOSITION_PIN } from '../../dsh-plugins/analytics-workbench/src/client/cockpit-composition.mjs';
+import { readPluginPack } from './plugin-pack.mjs';
 
 const exec = promisify(execFile);
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const DIGEST = /^[a-f0-9]{64}$/;
 const SHA = /^[a-f0-9]{40}$/;
 
 async function json(path) {
@@ -36,7 +36,8 @@ async function git(upstream, args) {
   })).stdout.trim();
 }
 
-export async function inspectCockpitReleaseContract({ root = ROOT, upstream = null, buildTools = null } = {}) {
+export async function inspectCockpitReleaseContract({ root = ROOT, upstream = null, buildTools = null,
+  artifactManifest = null } = {}) {
   const lanePath = join(root, 'config/dsh-rc1-release-lane.json');
   const lane = await json(lanePath);
   const defaultPin = await json(join(root, 'dsh-plugins/plugin-kit/toolchain.json'));
@@ -95,6 +96,37 @@ export async function inspectCockpitReleaseContract({ root = ROOT, upstream = nu
 
   assert.match(COMPOSITION_PIN, SHA);
   assert.notEqual(COMPOSITION_PIN, lane.upstream_sha);
+  let artifact = { status: 'NOT_RUN', reason: 'no candidate manifest/tarball was supplied to this read-only check' };
+  if (artifactManifest) {
+    assert.ok(isAbsolute(artifactManifest), 'RC1_CONTRACT_ARTIFACT_PATH');
+    const bytes = await readFile(artifactManifest);
+    const manifestSha256 = createHash('sha256').update(bytes).digest('hex');
+    const received = await readPluginPack({
+      manifestPath: artifactManifest,
+      expectedSha256: manifestSha256,
+      expectedSdkVersion: lane.sdk,
+      expectedPnpmVersion: lane.plugin_pnpm,
+      requireGeneratedProvenance: true,
+    });
+    const receipt = received.receipt;
+    assert.equal(receipt.source_dsh_pin, defaultPin.sdk_version);
+    assert.equal(receipt.source_sha, await git(root, ['rev-parse', 'HEAD']));
+    assert.equal(receipt.source_dirty, false);
+    assert.equal(receipt.generated_bytes_provenance.toolchain.sdk_version, lane.sdk);
+    assert.equal(receipt.generated_bytes_provenance.toolchain.upstream_sha, lane.upstream_sha);
+    artifact = {
+      status: 'PASS',
+      package_name: receipt.package_name,
+      package_version: receipt.package_version,
+      target_peer: received.manifest.peerDependencies['@deepseek-ai/dsh-tools'],
+      source_peer: receipt.source_dsh_pin,
+      source_sha: receipt.source_sha,
+      manifest_sha256: manifestSha256,
+      tarball: receipt.tarball,
+      entries: receipt.entries,
+      provenance_status: receipt.generated_bytes_provenance.status,
+    };
+  }
   return {
     schema_version: 'shinemage-cockpit-rc1-contract/v1',
     status: buildInput.status === 'PASS' ? 'PASS_LOCAL_BUILD_INPUTS' : 'PARTIAL_STATIC_ONLY',
@@ -120,7 +152,7 @@ export async function inspectCockpitReleaseContract({ root = ROOT, upstream = nu
         mechanism: 'packPlugin sdkVersion + sourceSdkVersion',
       },
     },
-    artifact: { status: 'NOT_RUN', reason: 'no candidate manifest/tarball was supplied to this read-only check' },
+    artifact,
     runtime_profile: { status: 'NOT_RUN', reason: 'runtime/profile are separate target inputs and were not supplied' },
     formal_status: lane.formal_status,
   };
@@ -129,10 +161,12 @@ export async function inspectCockpitReleaseContract({ root = ROOT, upstream = nu
 async function main() {
   const upstream = option('--upstream');
   const buildTools = option('--build-tools');
+  const artifact = option('--artifact');
   const output = option('--output');
   const result = await inspectCockpitReleaseContract({
     upstream: upstream && resolve(upstream),
     buildTools: buildTools && resolve(buildTools),
+    artifactManifest: artifact && resolve(artifact),
   });
   if (output) await writeFile(resolve(output), `${JSON.stringify(result, null, 2)}\n`, { mode: 0o600 });
   console.log(JSON.stringify(result, null, 2));
