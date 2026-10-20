@@ -54,17 +54,23 @@
       "@shine-mage/dsh-crm-knowledge": {
         "version": "0.0.0-crm.2",
         "spec": "file:/srv/shinemage/dsh/current/inputs/knowledge-query-agent-20261020/packs/shine-mage-dsh-crm-knowledge-0.0.0-crm.2.tgz",
-        "sha256": "1729e2c685241ee79be76b609953f985d55525efa8c68f5f5b4afc087d4dce1c"
+        "sha256": "1729e2c685241ee79be76b609953f985d55525efa8c68f5f5b4afc087d4dce1c",
+        "source_package_manifest_sha256": "35c3600977c311074de462b916fde4c0174ea916adaf8e1b2cd7536370c335b8",
+        "source_identity": "NOT_RECORDED_OWNER_SIDE_LOAD"
       },
       "@shine-mage/dsh-knowledge": {
         "version": "0.0.0-candidate.1",
         "spec": "file:/srv/shinemage/dsh/current/inputs/knowledge-query-agent-20261020/packs/shine-mage-dsh-knowledge-0.0.0-candidate.1.tgz",
-        "sha256": "63366d0110a076e96a75811fd6870c77cb04d4559a2fafe249a1c05c1b16e752"
+        "sha256": "63366d0110a076e96a75811fd6870c77cb04d4559a2fafe249a1c05c1b16e752",
+        "source_package_manifest_sha256": "8e32a1bf0741ff63301c7a790aa175881fef63fb38a910c5c6a7f14b24b93051",
+        "source_identity": "NOT_RECORDED_OWNER_SIDE_LOAD"
       },
       "@shine-mage/dsh-query-agent": {
         "version": "0.0.0-query.9",
         "spec": "file:/srv/shinemage/dsh/current/inputs/knowledge-query-agent-20261020/packs/shine-mage-dsh-query-agent-0.0.0-query.9.tgz",
-        "sha256": "393af040437dfe7523605c718c18edee9bd8ea4b739b83f4454b18187419a4a7"
+        "sha256": "393af040437dfe7523605c718c18edee9bd8ea4b739b83f4454b18187419a4a7",
+        "source_sha": "d860b1d46d3a33de2ae1b0e77f1f420ec25e0d0d",
+        "side_load_lock": "config/query-agent-side-load.v1.json"
       },
       "@xmanrui/dsh-im": {
         "version": "5.2.0",

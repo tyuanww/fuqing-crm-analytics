@@ -13,13 +13,15 @@
 - upstream：`0.2.1-rc.1` / `1600d8a1e140dcde43a1a0941940a0480712c011`
 - runtime archive：`d3d504dd39cd333fb98acf61cf4597664f6d4fda5482fb2ea970748bd2b8a94f`
 - actual profile 快照：`6c688d2296e089920267cc4b8928416caff2ac2b3958b54f8e5ce2b7a13168a6`
-- CRM：`0.0.0-crm.2` / `1729e2c…`
-- Knowledge：`0.0.0-candidate.1` / `63366d0…`
+- CRM：`0.0.0-crm.2` / tarball `1729e2c…` / 包内 manifest `35c3600…`；source commit 未留存
+- Knowledge：`0.0.0-candidate.1` / tarball `63366d0…` / 包内 manifest `8e32a1b…`；source commit 未留存
 - Query：`0.0.0-query.9` / `393af040…`
 - IM：`@xmanrui/dsh-im@5.2.0` / `0b9cbc24…`
 - Plugin hub：`dsh-plugin@2.0.5` / `dfd56ec5…`
 
 机器可读完整值见 [dsh-v5-owner-state-20261021.json](dsh-v5-owner-state-20261021.json)；side-load 修复、浏览器复测和 WeKnora 强制范围见 [query.9/WeKnora 回执](dsh-query9-weknora-scope-20261021.md)。
+
+CRM 和 Knowledge 的 rc1 owner side-load tarball 与 rc2 formal composer 使用相同包标签但不同字节。现有现场没有保存前两者的 source commit 或 generated pack manifest，因此只能按 tarball 与包内 `package.json` 识别。正式发布前必须从 reviewed source 重建，不能把现场 side-load 追认成正式候选。
 
 ## IM 缺口进展
 
