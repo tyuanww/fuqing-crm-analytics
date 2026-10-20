@@ -26,7 +26,13 @@ try {
   const querySkillPackage = await packSkills(root, 'channel_followup');
   const firstPurchaseSkillPackage = await packSkills(root, 'first_purchase');
   const competitionSkillPackage = await packSkills(root, 'competition_growth');
-  checkTypes(root, compiler);
+  // rc1 ships the workspace-toast module augmentation as a separate declaration
+  // file that its package entry does not import. Load that exact rc1 declaration
+  // as a root instead of weakening the typecheck with skipLibCheck.
+  const clientEntries = process.env.DSH_RELEASE_LANE_CONFIG
+    ? [join(upstream, 'packages/client/ui-workspace/lib/types/client/contract/toast.d.ts')]
+    : [];
+  checkTypes(root, compiler, { clientEntries });
 
   const external = [
     'react', 'react/jsx-runtime', 'react-dom', 'react-dom/client', '@deepseek-ai/cordis',
