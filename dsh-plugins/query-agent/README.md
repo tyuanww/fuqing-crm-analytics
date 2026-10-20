@@ -28,9 +28,76 @@ CRM、知识、页面和 WeKnora 是不同权限与生命周期域，保持独�
 
 先安装 CRM 领域插件和已有的 workbench bundle，再安装本 bundle。Knowledge 包可以独立安装，但未配置服务时不属于 `crm-query`。配置顺序由 profile bundle 层保证；同名 `crm-knowledge-login-host` 只覆盖配置，不重复注册插件。
 
+## How to：更新并验证 WeKnora 生产范围
+
+生产检索由 DSH 外部的薄 overlay 提供，第三方 `@wxg-prc-cpg/dsh-weknora@0.1.0` 包保持独立且不改写。维护源、live 文件和回滚资产的职责如下：
+
+| 项目 | 位置或约束 |
+|---|---|
+| Adapter 源 | [`scripts/ops/weknora-production.mjs`](../../scripts/ops/weknora-production.mjs)，部署为 live `brand-weknora/weknora.mjs` |
+| Scope wrapper | [`scripts/ops/weknora-production-scope.mjs`](../../scripts/ops/weknora-production-scope.mjs)，与 adapter 同目录 |
+| Overlay 摘要 | [`config/weknora-production-overlay.v1.json`](../../config/weknora-production-overlay.v1.json)，与 adapter 同目录，记录当前文件 SHA-256 |
+| 第三方包 | `brand-weknora/weknora-package/`，来源与摘要见同目录 `package-origin.json` |
+| 检索凭据 | `brand-weknora/retrieve.key`，仅现场 `0600 root:root`，不进入 Git、日志或 manifest |
+| 修改边界 | 只允许固定项目库 `1c4627e2-dfc1-48ca-aeef-2c00b53da5f8`；不合并、不修改 WeKnora 数据卷 |
+
+### 前置条件
+
+- 使用仓库固定 Node 24；adapter 的 `package.json` 合同是 `24.x`。
+- live overlay 目录已包含经过校验的上游 `weknora-package`，`retrieve.key` 已由授权 operator 配置。
+- 已为该维护窗口准备独立的恢复目录和旧文件摘要；不要在未授权的生产窗口改 profile、symlink 或 WeKnora 数据。
+- `preset.patch.json` 与 query.9 的 `cordis.patch.yml` 都可能引用 `weknora.mjs`；替换 adapter 会同时影响引用该文件的 Agent preset。
+
+### 本地校验
+
+```sh
+node --check scripts/ops/weknora-production.mjs
+node --check scripts/ops/weknora-production-scope.mjs
+node --test scripts/ops/weknora-production-scope.test.mjs \
+  dsh-plugins/query-agent/test/package.test.mjs
+jq empty config/weknora-production-overlay.v1.json
+shasum -a 256 scripts/ops/weknora-production.mjs \
+  scripts/ops/weknora-production-scope.mjs \
+  config/weknora-production-overlay.v1.json
+```
+
+期望当前 overlay 摘要为 `c7695609…720a`（adapter）、`6aebe420…2ac6`（scope helper）和 `4c6ea764…f5eb`（overlay manifest）。摘要变化时先核对内容与 PR，不要只更新 manifest 让漂移“变绿”。
+
+### 更新现场
+
+1. 在恢复目录保存即将替换的 adapter、scope helper 和旧 overlay manifest 的原字节与 SHA-256。
+2. 按精确路径复制维护源到 `brand-weknora/weknora.mjs`、`weknora-production-scope.mjs` 和 `weknora-production-overlay.v1.json`；保持 `0600 root:root`。
+3. 不复制、打印或重写 `retrieve.key`；不修改 `weknora-package/`，也不改 `package-origin.json` 的第三方身份。
+4. 在 live 目录复核三个文件的 SHA-256 和权限。仅新增或更新 overlay manifest、未改变 adapter/helper 时不需要重启。
+5. 改动 adapter 或 scope helper 后，只在明确授权下受控重启 `shinemage-dsh.service`，并保持 `shinemage-dsh-promo-enter.service` 的现有跟随关系。
+
+### 验证
+
+```sh
+systemctl is-active shinemage-dsh.service
+curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:18092/
+```
+
+服务恢复后，在“问数智能体”中做三项只读检查：项目资料正常返回带来源的结果；显式搜索非项目库返回 `WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED`；显式读取非项目库文档被拒绝且不返回正文。真实 CRM 指标查询仍要求当前用户自行完成 CRM 登录，未登录只能是 `NOT_CONNECTED`。
+
+### 常见拒绝
+
+| 错误码或现象 | 处理 |
+|---|---|
+| `WEKNORA_RETRIEVAL_KEY_UNAVAILABLE` | 检查现场 `retrieve.key` 是否存在、非空且权限为 `0600`；不要在聊天或日志中输出值 |
+| `WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED` | 这是跨库或非 allowlist 参数被拒绝；不要通过扩大 allowlist 绕过 |
+| `WEKNORA_DOCUMENT_SCOPE_CHECK_FAILED` | 文档元数据查询失败或文档 ID 为空；保持 fail-closed，先查 WeKnora API 健康与工具参数 schema |
+| `ERR_MODULE_NOT_FOUND` | 检查 adapter 是否与经过校验的 `weknora-package/` 同目录，不要从仓库临时复制源码替代固定包 |
+
+### 回滚
+
+只恢复同一次部署前保存的 adapter/helper 文件对，并再次核对 SHA-256；若这次改动了运行时文件，按授权受控重启并复测端口和日志。恢复目录中的 `weknora.mjs` 是强制 allowlist 修复前的默认收窄版本，恢复它会退化为可被显式 scope 参数绕过；安全要求高于可用性时，应移除/禁用 WeKnora 工具而不是静默回滚到旧 adapter。`weknora-production-overlay.v1.json` 只是审计 sidecar，回滚或删除它不会改变运行行为。
+
 ## 本地检查
 
 ```sh
 node --test dsh-plugins/query-agent/test/package.test.mjs
+# npm 只检查包元数据与默认发布面；正式 DSH pack 由 scripts/release/plugin-pack.mjs 生成。
+cd dsh-plugins/query-agent
 npm pack --dry-run --json
 ```
