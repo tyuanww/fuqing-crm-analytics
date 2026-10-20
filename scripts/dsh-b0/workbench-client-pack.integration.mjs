@@ -154,7 +154,7 @@ test('apply registers business slots; dispose removes them without touching nati
   assert.deepEqual(entries.map(row => row.options.name), [
     'sidebar.right.pane.tab', 'sidebar.right.pane.tab',
     'sidebar.brand.mark', 'conversation.hero.brand.mark',
-    'sidebar.footer.action', 'sidebar.footer.action', 'shell.overlay', 'shell.overlay',
+    'sidebar.footer.action', 'shell.overlay', 'shell.overlay',
     'tool.call.toolview', 'tool.call.toolview', 'tool.call.toolview', 'tool.call.toolview', 'tool.call.toolview', 'tool.call.toolview',
     'conversation.input.dock', 'conversation.input.dock', 'conversation.composer.dock',
     'sidebar.panellist', 'main',
@@ -172,11 +172,9 @@ test('apply registers business slots; dispose removes them without touching nati
   assert.deepEqual(mains.map(row => row.options.key), ['cockpit', 'staff']);
   assert.equal(entries.some(row => row.options.name === 'conversation.view'), false);
   const footers = entries.filter(row => row.options.name === 'sidebar.footer.action');
-  assert.deepEqual(footers.map(row => row.options.id),
-    ['shine-mage.account.login', 'shine-mage.account.theme']);
-  assert.deepEqual(footers.map(row => row.options.order), [10, 11]);
+  assert.deepEqual(footers.map(row => row.options.id), ['shine-mage.account.login']);
+  assert.deepEqual(footers.map(row => row.options.order), [10]);
   assert.equal(typeof footers[0].component, 'function');
-  assert.equal(typeof footers[1].component, 'function');
   assert.deepEqual(entries.filter(row => row.options.name === 'tool.call.toolview').map(row => row.options.key), [
     'analytics_b0_query', 'analytics_channel_followup_query', 'analytics_first_purchase_query', 'competition_board_generate', 'competition_board_edit', 'free_html_page_generate',
   ]);
@@ -236,25 +234,11 @@ test('generate dock openCockpit selects sidebar.panellist id cockpit on the main
   for (const dispose of effects) if (typeof dispose === 'function') dispose();
 });
 
-test('the plugin-owned account and theme overlays render no duplicate UI', () => {
+test('the plugin registers no duplicate account or theme overlays', () => {
   const { entries, effects } = mount(loadClient());
-  const React = webRequire('react');
-  const { renderToStaticMarkup } = webRequire('react-dom/server');
   try {
-    const row = entries.find(item => item.options.id === 'shine-mage.account.menu');
-    const html = renderToStaticMarkup(React.createElement(row.component, {
-      useStore: selector => selector({ menuOpen: true, themeOpen: false }),
-      actions: { closeMenu() {}, toggleMenu() {}, openMenu() {}, closeTheme() {}, toggleTheme() {}, closeAll() {} },
-      themeSource: { subscribe: () => () => {}, getSnapshot: () => 'system' },
-      setTheme() {},
-    }));
-    assert.equal(html, '');
-    const theme = entries.find(item => item.options.id === 'shine-mage.account.theme');
-    assert.equal(renderToStaticMarkup(React.createElement(theme.component, {
-      wide: true, useStore: selector => selector({ menuOpen: true, themeOpen: true }),
-      actions: { closeMenu() {}, toggleMenu() {}, openMenu() {}, closeTheme() {}, toggleTheme() {}, closeAll() {} },
-      themeSource: { subscribe: () => () => {}, getSnapshot: () => 'system' }, setTheme() {},
-    })), '');
+    assert.equal(entries.some(item => item.options.id === 'shine-mage.account.menu'), false);
+    assert.equal(entries.some(item => item.options.id === 'shine-mage.account.theme'), false);
   } finally {
     for (const dispose of effects) if (typeof dispose === 'function') dispose();
   }
@@ -266,16 +250,8 @@ test('the only footer entry is an explicit bridge to official account and Settin
   const { renderToStaticMarkup } = webRequire('react-dom/server');
   try {
     const row = entries.find(item => item.options.id === 'shine-mage.account.login');
-    const wide = renderToStaticMarkup(React.createElement(row.component, {
-      wide: true,
-      useStore: selector => selector({ menuOpen: false, themeOpen: false }),
-      actions: { closeMenu() {}, toggleMenu() {}, openMenu() {}, closeTheme() {}, toggleTheme() {}, closeAll() {} },
-    }));
-    const rail = renderToStaticMarkup(React.createElement(row.component, {
-      wide: false,
-      useStore: selector => selector({ menuOpen: false, themeOpen: false }),
-      actions: { closeMenu() {}, toggleMenu() {}, openMenu() {}, closeTheme() {}, toggleTheme() {}, closeAll() {} },
-    }));
+    const wide = renderToStaticMarkup(React.createElement(row.component, { wide: true }));
+    const rail = renderToStaticMarkup(React.createElement(row.component, { wide: false }));
     assert.match(wide, /账号与设置/);
     assert.match(wide, /data-wide="1"/);
     assert.match(wide, /data-native-account-bridge="rc1"/);
@@ -284,15 +260,6 @@ test('the only footer entry is an explicit bridge to official account and Settin
     assert.match(rail, /data-wide="0"/);
     assert.match(rail, /aria-label="账号与设置"/);
     assert.match(rail, /<svg /);
-    const theme = entries.find(item => item.options.id === 'shine-mage.account.theme');
-    const themeRail = renderToStaticMarkup(React.createElement(theme.component, {
-      wide: false,
-      useStore: selector => selector({ menuOpen: false, themeOpen: false }),
-      actions: { closeMenu() {}, toggleMenu() {}, openMenu() {}, closeTheme() {}, toggleTheme() {}, closeAll() {} },
-      themeSource: { subscribe: () => () => {}, getSnapshot: () => 'system' },
-      setTheme() {},
-    }));
-    assert.equal(themeRail, '');
   } finally {
     for (const dispose of effects) if (typeof dispose === 'function') dispose();
   }
@@ -313,14 +280,12 @@ test('the footer delegates the sign-in gesture to the native rc1 account control
   globalThis.IS_REACT_ACT_ENVIRONMENT = true;
   const { entries, effects } = mount(loadClient(dom.window));
   const root = createRoot(dom.window.document.getElementById('root'));
-  const actions = { closeMenu() {}, toggleMenu() {}, openMenu() {}, closeTheme() {}, toggleTheme() {}, closeAll() {} };
-  const useStore = selector => selector({ menuOpen: false, themeOpen: false });
   let nativeClicks = 0;
   dom.window.document.querySelector('[data-signed-out="true"]').addEventListener('click', () => { nativeClicks += 1; });
   try {
     const login = entries.find(item => item.options.id === 'shine-mage.account.login');
     await act(() => {
-      root.render(React.createElement(login.component, { wide: true, useStore, actions }));
+      root.render(React.createElement(login.component, { wide: true }));
     });
     await act(() => { dom.window.document.querySelector('[data-testid="shine-account-login"]').click(); });
     const footer = dom.window.document.querySelector('[data-testid="shine-account-login"]');
@@ -349,12 +314,9 @@ test('a missing native account and Settings entry is visibly reported', async ()
   globalThis.IS_REACT_ACT_ENVIRONMENT = true;
   const { entries, effects } = mount(loadClient(dom.window));
   const root = createRoot(dom.window.document.getElementById('root'));
-  const actions = { closeMenu() {}, toggleMenu() {}, openMenu() {}, closeTheme() {}, toggleTheme() {}, closeAll() {} };
   try {
     const login = entries.find(item => item.options.id === 'shine-mage.account.login');
-    await act(() => root.render(React.createElement(login.component, {
-      wide: true, useStore: selector => selector({ menuOpen: false, themeOpen: false }), actions,
-    })));
+    await act(() => root.render(React.createElement(login.component, { wide: true })));
     await act(() => dom.window.document.querySelector('[data-testid="shine-account-login"]').click());
     assert.match(dom.window.document.querySelector('[role="alert"]').textContent, /未找到 DSH 原生账号或设置入口/);
   } finally {
@@ -370,17 +332,9 @@ test('a missing native account and Settings entry is visibly reported', async ()
 
 test('theme choices remain owned by native Settings', () => {
   const { entries, effects } = mount(loadClient());
-  const React = webRequire('react');
-  const { renderToStaticMarkup } = webRequire('react-dom/server');
   try {
-    const row = entries.find(item => item.options.id === 'shine-mage.account.menu');
-    const html = renderToStaticMarkup(React.createElement(row.component, {
-      useStore: selector => selector({ menuOpen: false, themeOpen: true }),
-      actions: { closeMenu() {}, toggleMenu() {}, openMenu() {}, closeTheme() {}, toggleTheme() {}, closeAll() {} },
-      themeSource: { subscribe: () => () => {}, getSnapshot: () => 'dark' },
-      setTheme() {},
-    }));
-    assert.equal(html, '');
+    assert.equal(entries.some(item => item.options.id === 'shine-mage.account.menu'), false);
+    assert.equal(entries.some(item => item.options.id === 'shine-mage.account.theme'), false);
   } finally {
     for (const dispose of effects) if (typeof dispose === 'function') dispose();
   }
@@ -406,7 +360,7 @@ test('a second apply on the same fake ctx duplicates registrations; Host must no
   client.apply(ctx);
   // A second apply duplicates every registration; no identity is added or lost.
   const ids = entries.filter(row => row.options.id !== undefined).map(row => row.options.id);
-  for (const id of ['shine-mage.account.login', 'shine-mage.account.theme',
+  for (const id of ['shine-mage.account.login',
     'shine-mage.analytics-b0.generate-cockpit', 'shine-mage.analytics-b0.overlay']) {
     assert.equal(entries.filter(row => row.options.id === id).length, 2, `${id} registered twice`);
     assert.equal(ids.filter(value => value === id).length, 2, `${id} counted twice`);
@@ -569,7 +523,7 @@ test('built browser factory requires only platform modules and registers shared-
   selection.detachSelection();
   selection.restoreSelection();
   assert.equal(snapshot.byId[primary].retainedBy.mainView, 1);
-  assert.ok(login.options.store);
+  assert.equal(login.options.store, undefined);
   assert.equal(dock.options.store, undefined);
   assert.ok(dock.options.inject().board);
   const seeded = dock.options.inject().board.getSnapshot();

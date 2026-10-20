@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
-import { competitionColor, competitionFont, antdSeedToken } from './tokens.ts';
+import { competitionColor, competitionFont, antdSeedToken, competitionThemeFor } from './tokens.ts';
 
 const dir = fileURLToPath(new URL('.', import.meta.url));
 const stylesPath = join(dir, '../styles.ts');
@@ -80,4 +80,38 @@ test('layout slots include A6 mount points and do not register native DSH keys',
   assert.doesNotMatch(layout, /sidebar\.brand|tool\.call\.toolview|conversation\.input/);
   const chrome = await source('BrandChrome.tsx');
   assert.match(chrome, /模型、权限与文件设置仍走原生 DSH 入口/);
+});
+
+test('rc1 cockpit interaction states are complete in both light and dark modes', async () => {
+  const states = [
+    '--sm-surface', '--sm-surface-raised', '--sm-control-bg', '--sm-control-bg-hover',
+    '--sm-control-bg-pressed', '--sm-control-line', '--sm-control-line-hover',
+    '--sm-purple-hover', '--sm-danger', '--sm-danger-soft', '--sm-notice-bg',
+    '--sm-selected-bg', '--sm-highlight-bg', '--sm-focus', '--sm-focus-width',
+    '--sm-focus-offset', '--sm-disabled-opacity',
+  ];
+  const dark = competitionThemeFor('dark').cssVars, light = competitionThemeFor('light').cssVars;
+  for (const token of states) {
+    assert.equal(typeof dark[token], 'string', `dark ${token}`);
+    assert.equal(typeof light[token], 'string', `light ${token}`);
+    assert.notEqual(dark[token], '', `dark ${token}`);
+    assert.notEqual(light[token], '', `light ${token}`);
+  }
+  assert.notEqual(dark['--sm-bg'], light['--sm-bg']);
+  assert.notEqual(dark['--sm-ink'], light['--sm-ink']);
+  assert.notEqual(dark['--sm-control-bg'], light['--sm-control-bg']);
+
+  const workspace = await readFile(join(dir, '../cockpit-workspace-style.ts'), 'utf8');
+  const visualEditor = await readFile(join(dir, '../html-visual-editor-chrome.mjs'), 'utf8');
+  for (const css of [workspace, visualEditor]) {
+    assert.match(css, /:hover:not\(:disabled\)/);
+    assert.match(css, /:focus-visible/);
+    assert.match(css, /:disabled/);
+    assert.match(css, /var\(--sm-focus\)/);
+    assert.match(css, /var\(--sm-danger\)/);
+    assert.doesNotMatch(css, /#09050D|#805D9D|#D3C3E8|#F2FFDC|#FEFCFF|#FF7D91/i);
+  }
+  assert.match(workspace, /\.cockpit-error\s*\{[^}]*var\(--sm-danger-soft\)/s);
+  const provider = await source('ThemeProvider.tsx');
+  assert.match(provider, /data-sm-color-scheme=\{mode\}/);
 });

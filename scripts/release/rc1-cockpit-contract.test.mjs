@@ -14,8 +14,8 @@ test('the default rc2 line and rc1 release lane remain explicitly separate', asy
     sdk: '0.1.7-rc.2',
     upstream_sha: '477b4f420553e8a52c2fbccc464d7561b239c443',
     plugin_peer: '0.1.7-rc.2',
-    composition_pin: '477b4f420553e8a52c2fbccc464d7561b239c443',
-    composition_pin_role: 'rc2 DOM adapter identity; not the rc1 runtime pin',
+    shell_form: 'full_screen_main_panel',
+    shell_entry: 'main:cockpit',
   });
   assert.equal(result.rc1_release_lane.sdk, '0.2.1-rc.1');
   assert.equal(result.rc1_release_lane.upstream_sha, '1600d8a1e140dcde43a1a0941940a0480712c011');

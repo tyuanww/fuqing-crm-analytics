@@ -1,112 +1,38 @@
 import { useState } from 'react';
-import { defineStore, type PropsStore } from '@deepseek-ai/dsh-client-store';
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots';
 import { openNativeAccountSettings } from './native-account-settings.mjs';
 
-export function createAccountStore() {
-  return defineStore({
-    init: () => ({ menuOpen: false, themeOpen: false }),
-    actions: {
-      closeMenu: draft => { draft.menuOpen = false; },
-      closeTheme: draft => { draft.themeOpen = false; },
-      closeAll: draft => { draft.menuOpen = false; draft.themeOpen = false; },
-    },
-  });
-}
+type LoginProps = PropsRuntime<'sidebar.footer.action'>;
 
-type AccountStore = ReturnType<typeof createAccountStore>;
-type AccountStoreProps = PropsStore<AccountStore>;
-type LoginProps = PropsRuntime<'sidebar.footer.action'> & AccountStoreProps;
-type ClosedChromeProps =
-  | (PropsRuntime<'sidebar.footer.action'> & AccountStoreProps)
-  | (PropsRuntime<'shell.overlay'> & AccountStoreProps);
-
-const accountCss = `
-[class*="footerActions"] { display:flex; flex-direction:row; align-items:center; gap:8px; }
-[class*="footerActions"]:has(.sm-login[data-wide="0"]) {
-  flex-direction:column; align-items:center; justify-content:center; gap:6px; width:auto;
-}
-html, body { min-height: 100%; background: #DCDCE1; }
-:has(> [class*="sidebarCol"]) {
-  background: rgba(255, 255, 255, 0.28) !important;
-  backdrop-filter: blur(40px) saturate(1.15);
-  -webkit-backdrop-filter: blur(40px) saturate(1.15);
-}
-[class*="centerCol"] {
-  background: #fff !important;
-  --dsw-alias-bg-base: #fff;
-}
-[class*="centerCol"] [data-conversation-scroll],
-[class*="centerCol"] [data-composer-seat] { background: #fff; }
-[class*="sidebarCol"] {
-  background: rgba(255, 255, 255, 0.10) !important;
-  color: #111111;
-  -webkit-font-smoothing: antialiased;
-  border-right: 0.5px solid rgba(0, 0, 0, 0.06) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
-}
-button[aria-label="发送消息"],
-button[aria-label="排队发送"],
-button[aria-label="插话发送"],
-button[aria-label="停止生成"],
-button[aria-label="停止对话"],
-button[aria-label="Send message"],
-button[aria-label="Queue message"],
-button[aria-label="Steer message"],
-button[aria-label="Stop generating"],
-button[aria-label="Stop conversation"] {
-  background: var(--dsw-alias-brand-primary, CanvasText) !important;
-  color: #fff !important;
-}
-button[aria-label="发送消息"]:hover:not(:disabled),
-button[aria-label="排队发送"]:hover:not(:disabled),
-button[aria-label="插话发送"]:hover:not(:disabled),
-button[aria-label="停止生成"]:hover:not(:disabled),
-button[aria-label="停止对话"]:hover:not(:disabled),
-button[aria-label="Send message"]:hover:not(:disabled),
-button[aria-label="Queue message"]:hover:not(:disabled),
-button[aria-label="Steer message"]:hover:not(:disabled),
-button[aria-label="Stop generating"]:hover:not(:disabled),
-button[aria-label="Stop conversation"]:hover:not(:disabled) {
-  filter: brightness(1.08);
-}
-[class*="sidebarCol"] { font-weight: 500; }
-html[data-ds-dark-theme], html[data-ds-dark-theme] body,
-body[data-ds-dark-theme] { background: #2C2C2E; }
-html[data-ds-dark-theme] :has(> [class*="sidebarCol"]),
-body[data-ds-dark-theme] :has(> [class*="sidebarCol"]) { background: rgba(255, 255, 255, 0.06) !important; }
-html[data-ds-dark-theme] [class*="centerCol"],
-body[data-ds-dark-theme] [class*="centerCol"] {
-  background: #120D1D !important;
-  --dsw-alias-bg-base: #120D1D;
-}
-html[data-ds-dark-theme] [class*="centerCol"] [data-conversation-scroll],
-html[data-ds-dark-theme] [class*="centerCol"] [data-composer-seat],
-body[data-ds-dark-theme] [class*="centerCol"] [data-conversation-scroll],
-body[data-ds-dark-theme] [class*="centerCol"] [data-composer-seat] { background: #120D1D; }
-html[data-ds-dark-theme] [class*="sidebarCol"],
-body[data-ds-dark-theme] [class*="sidebarCol"] {
-  background: rgba(16, 14, 22, 0.18) !important;
-  color: #F6F3F8;
-  border-right-color: rgba(255, 255, 255, 0.12) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
+export const accountCss = `
 .sm-login {
   display:flex; align-items:center; justify-content:flex-start; gap:8px; box-sizing:border-box;
   flex:1; width:auto; height:36px; min-height:36px; padding:0 10px; border:0; border-radius:10px;
-  background:color-mix(in srgb, Canvas 22%, transparent);
+  background:color-mix(in srgb, var(--dsw-alias-bg-layer-1, Canvas) 82%, transparent);
   color:var(--dsw-alias-label-primary,CanvasText);
-  box-shadow:inset 0 0 0 0.75px color-mix(in srgb, Canvas 40%, transparent);
+  box-shadow:inset 0 0 0 0.75px var(--dsw-alias-border-l3, color-mix(in srgb, Canvas 40%, transparent));
   font:var(--dsw-font-s-14,14px/22px inherit); cursor:pointer;
+  transition:background-color 160ms ease-out, box-shadow 160ms ease-out;
 }
+.sm-login:hover:not(:disabled) {
+  background:color-mix(in srgb, var(--dsw-alias-bg-layer-2, Canvas) 88%, transparent);
+  box-shadow:inset 0 0 0 0.75px var(--dsw-alias-border-l2, CanvasText);
+}
+.sm-login:active:not(:disabled) { filter:brightness(.96); }
+.sm-login:focus-visible {
+  outline:2px solid var(--dsw-alias-brand-primary, CanvasText);
+  outline-offset:2px;
+}
+.sm-login:disabled { opacity:.45; cursor:not-allowed; }
 .sm-login[data-wide="0"] {
   width:36px; min-width:36px; flex:none; padding:0; justify-content:center; border-radius:18px; gap:0;
 }
-.sm-login[data-state="error"] { color:var(--dsw-alias-label-error,#b42318); }
+.sm-login[data-state="error"] { color:var(--dsw-alias-state-error-primary, CanvasText); }
 .sm-login-text { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 .sm-login[data-wide="0"] .sm-login-text { display:none; }
 .sm-native-account-notice {
-  color:var(--dsw-alias-label-error,#b42318);
+  max-width:100%;
+  color:var(--dsw-alias-state-error-primary, CanvasText);
   font:var(--dsw-font-s-12,12px/18px inherit);
 }
 .sm-login[data-wide="0"] + .sm-native-account-notice {
@@ -144,12 +70,4 @@ export function LoginFooter(props: LoginProps) {
     </button>
     {notice ? <span id="shine-native-account-notice" className="sm-native-account-notice" role="alert">{notice}</span> : null}
   </>;
-}
-
-export function ThemeFooter(_props: ClosedChromeProps) {
-  return null;
-}
-
-export function AccountMenu(_props: ClosedChromeProps) {
-  return null;
 }

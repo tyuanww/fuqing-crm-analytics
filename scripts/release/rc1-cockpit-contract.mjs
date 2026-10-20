@@ -9,18 +9,15 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { execFile } from 'node:child_process';
-import { readFile, writeFile } from 'node:fs/promises';
+import { access, readFile, writeFile } from 'node:fs/promises';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';
 import { inspectToolchain } from '../../dsh-plugins/plugin-kit/toolchain.mjs';
-import { COMPOSITION_PIN } from '../../dsh-plugins/analytics-workbench/src/client/cockpit-composition.mjs';
 import { readPluginPack } from './plugin-pack.mjs';
 
 const exec = promisify(execFile);
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const SHA = /^[a-f0-9]{40}$/;
-
 async function json(path) {
   return JSON.parse(await readFile(path, 'utf8'));
 }
@@ -43,6 +40,7 @@ export async function inspectCockpitReleaseContract({ root = ROOT, upstream = nu
   const defaultPin = await json(join(root, 'dsh-plugins/plugin-kit/toolchain.json'));
   const manifest = await json(join(root, 'dsh-plugins/analytics-workbench/package.json'));
   const lock = await readFile(join(root, 'dsh-plugins/analytics-workbench/pnpm-lock.yaml'), 'utf8');
+  const clientEntry = await readFile(join(root, 'dsh-plugins/analytics-workbench/src/client/index.tsx'), 'utf8');
 
   assert.equal(lane.schema_version, 'shinemage-rc1-release-lane/v1');
   assert.equal(lane.sdk, '0.2.1-rc.1');
@@ -51,7 +49,10 @@ export async function inspectCockpitReleaseContract({ root = ROOT, upstream = nu
   assert.equal(defaultPin.sdk_version, '0.1.7-rc.2');
   assert.equal(defaultPin.upstream_sha, '477b4f420553e8a52c2fbccc464d7561b239c443');
   assert.equal(manifest.peerDependencies?.['@deepseek-ai/dsh-tools'], defaultPin.sdk_version);
-  assert.equal(COMPOSITION_PIN, defaultPin.upstream_sha);
+  assert.doesNotMatch(clientEntry, /cockpit-composition/);
+  assert.equal((clientEntry.match(/name:\s*'main',\s*key:\s*COCKPIT_PANEL_ID/g) ?? []).length, 1);
+  await assert.rejects(access(join(root, 'dsh-plugins/analytics-workbench/src/client/cockpit-composition.mjs')),
+    error => error?.code === 'ENOENT');
   assert.match(lock, /['"]?@deepseek-ai\/dsh-tools['"]?:[\s\S]*specifier: 0\.1\.7-rc\.2/);
   assert.match(lock, /['"]?@shine-mage\/board-components['"]?:[\s\S]*version: link:\.\.\/board-components/);
   assert.match(lock, /['"]?@shine-mage\/dsh-plugin-kit['"]?:[\s\S]*version: link:\.\.\/plugin-kit/);
@@ -94,8 +95,6 @@ export async function inspectCockpitReleaseContract({ root = ROOT, upstream = nu
     }
   }
 
-  assert.match(COMPOSITION_PIN, SHA);
-  assert.notEqual(COMPOSITION_PIN, lane.upstream_sha);
   let artifact = { status: 'NOT_RUN', reason: 'no candidate manifest/tarball was supplied to this read-only check' };
   if (artifactManifest) {
     assert.ok(isAbsolute(artifactManifest), 'RC1_CONTRACT_ARTIFACT_PATH');
@@ -136,8 +135,8 @@ export async function inspectCockpitReleaseContract({ root = ROOT, upstream = nu
       sdk: defaultPin.sdk_version,
       upstream_sha: defaultPin.upstream_sha,
       plugin_peer: manifest.peerDependencies['@deepseek-ai/dsh-tools'],
-      composition_pin: COMPOSITION_PIN,
-      composition_pin_role: 'rc2 DOM adapter identity; not the rc1 runtime pin',
+      shell_form: 'full_screen_main_panel',
+      shell_entry: 'main:cockpit',
     },
     rc1_release_lane: {
       status: buildInput.status,
