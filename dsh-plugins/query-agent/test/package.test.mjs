@@ -7,7 +7,7 @@ const root = new URL('../', import.meta.url)
 test('query agent bundle declares one preset through the DSH bundle contract', async () => {
   const manifest = JSON.parse(await readFile(new URL('package.json', root), 'utf8'))
   assert.equal(manifest.name, '@shine-mage/dsh-query-agent')
-  assert.equal(manifest.version, '0.0.0-query.10')
+  assert.equal(manifest.version, '0.0.0-query.11')
   assert.equal(manifest.packageManager, 'pnpm@11.28.2')
   assert.deepEqual(manifest.engines, { node: '24.x' })
   assert.equal(manifest.peerDependencies, undefined)
@@ -61,6 +61,12 @@ test('Host policy restricts only newly created query Agents', async () => {
       ctx: {
         effect: callback => callback(),
         tools: {
+          schemas: () => [
+            { name: 'query_crm_dashboard_gsv' },
+            { name: 'terminal_open' },
+            { name: 'read' },
+            { name: 'list_agents' },
+          ],
           restrict: filter => {
             restricted = filter
             return () => { released += 1 }
@@ -73,7 +79,7 @@ test('Host policy restricts only newly created query Agents', async () => {
       },
     },
   })
-  assert.deepEqual(restricted, { allow: [] })
+  assert.deepEqual(restricted, { deny: ['terminal_open', 'read', 'list_agents'] })
   assert.equal(guard({ name: 'crm_metrics_capabilities' }), undefined)
   assert.equal(guard({ name: 'weknora_search' }), undefined)
   assert.match(guard({ name: 'shell' }), /CRM_QUERY_TOOL_NOT_ALLOWED: shell/)
@@ -118,6 +124,7 @@ test('Host policy leaves other presets unchanged', async () => {
       ctx: {
         effect: callback => callback(),
         tools: {
+          schemas: () => [{ name: 'terminal_open' }],
           restrict: () => { touched = true },
           guard: () => { touched = true },
         },
@@ -127,7 +134,7 @@ test('Host policy leaves other presets unchanged', async () => {
   assert.equal(touched, false)
 })
 
-test('Host policy masks all inherited global tools even when the shell is absent', async () => {
+test('Host policy installs the allowlist guard when no known inherited tool is visible', async () => {
   const { apply } = await import('../lib/tool-policy.js')
   let created
   let restricted
@@ -147,13 +154,14 @@ test('Host policy masks all inherited global tools even when the shell is absent
       ctx: {
         effect: callback => callback(),
         tools: {
+          schemas: () => [{ name: 'weknora_search' }],
           restrict: filter => { restricted = filter },
           guard: callback => { guard = callback },
         },
       },
     },
   })
-  assert.deepEqual(restricted, { allow: [] })
+  assert.equal(restricted, undefined)
   assert.match(guard({ name: 'read' }), /CRM_QUERY_TOOL_NOT_ALLOWED: read/)
   assert.equal(guard({ name: 'free_html_page_generate' }), undefined)
 })
@@ -175,6 +183,7 @@ test('Host policy follows in-place preset selection and releases the restriction
         }
       },
       tools: {
+        schemas: () => [{ name: 'query_crm_dashboard_gsv' }, { name: 'list_agents' }],
         restrict: filter => {
           restricted.push(filter)
           return () => {}
@@ -194,7 +203,7 @@ test('Host policy follows in-place preset selection and releases the restriction
   })
 
   listeners.get('agent-preset/selected')(agent.id, 'crm-query')
-  assert.deepEqual(restricted, [{ allow: [] }])
+  assert.deepEqual(restricted, [{ deny: ['list_agents'] }])
 
   listeners.get('agent-preset/selected')(agent.id, 'crm-query')
   assert.equal(restricted.length, 1)
@@ -224,6 +233,7 @@ test('Host policy releases a session-id fallback when the Agent is disposed', as
         }
       },
       tools: {
+        schemas: () => [{ name: 'terminal_open' }],
         restrict: () => () => {},
         guard: () => () => {},
       },

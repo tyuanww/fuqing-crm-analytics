@@ -1,0 +1,47 @@
+{
+  "schema_version": "shinemage-dsh-query10-allowlist/v1",
+  "observed_at": "2026-10-20T23:01:01Z",
+  "scope": "owner-operated-v5-query10-tool-mask-regression",
+  "release_ready": false,
+  "query_artifact": {
+    "source_sha": "cfa33b849f693afb8dac153cb8b08d797a44f4ca",
+    "version": "0.0.0-query.10",
+    "source_package_manifest_sha256": "46db6cc8163303f4a28a07d1a60ca70767bc1b44e131a91013ae65b36e6bc89d",
+    "manifest_sha256": "664bcaaed7ac46e4b8b0d1c06c5f7e93561a39d4cd2f977203614d02cbc5b0eb",
+    "tarball": "shine-mage-dsh-query-agent-0.0.0-query.10.tgz",
+    "tarball_sha256": "1bb88a0bed852ed896ac6b4602a4cebce65f9592964ea34a9d8bf1cd0fe6d1fc",
+    "tarball_bytes": 3514,
+    "integrity": "sha512-QzViHDLGenUggrxBjLlhAf5G3n+uKuLo3hrmBmjdGMIoIGyGlnn9qg0WY+wrlvEx4cgLNYJ714cyQJKW9fuIIw==",
+    "build_provenance_sha256": "af5e722aa07232faf060de833d1253160ec9ddc2eef87f8b02a37f044d2d01b9"
+  },
+  "tool_policy": {
+    "preset": "crm-query",
+    "inherited_global_tools": "MASKED_ALL",
+    "execution_guard": "ALLOWLIST",
+    "allowed_tools": [
+      "query_crm_dashboard_snapshot",
+      "query_crm_dashboard_gsv",
+      "query_crm_dashboard_purchases",
+      "query_crm_metrics_v1",
+      "query_crm_dashboard_readiness",
+      "query_crm_dashboard_membership",
+      "query_crm_dashboard_net_gsv",
+      "crm_metrics_capabilities",
+      "crm_service_health",
+      "weknora_search",
+      "weknora_read_document",
+      "free_html_page_generate"
+    ]
+  },
+  "side_load": {
+    "status": "ROLLED_BACK_TO_QUERY9",
+    "regression": "Visible request schema retained team tools but omitted scoped CRM, WeKnora and page tools.",
+    "browser_session": "session-9428bc59-2360-44f9-b7a1-8126af621cfc",
+    "recovery": "/srv/shinemage/dsh/recovery/query10-side-load-20261021/"
+  },
+  "limits": [
+    "The artifact itself is byte-verified, but it is not accepted for production because it hid required preset tools.",
+    "The live profile was rolled back to query.9; query.11 supersedes this attempt.",
+    "This is an owner-operated side-load, not a formal signed release."
+  ]
+}

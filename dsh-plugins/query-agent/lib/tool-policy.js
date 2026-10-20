@@ -24,6 +24,39 @@ export const queryToolAllowlist = Object.freeze([
   'free_html_page_generate',
 ])
 const allowedTools = new Set(queryToolAllowlist)
+const hiddenInheritedTools = new Set([
+  'bash',
+  'pwsh',
+  'terminal_open',
+  'terminal_send',
+  'terminal_read',
+  'terminal_signal',
+  'terminal_close',
+  'terminal_list',
+  'read',
+  'write',
+  'edit',
+  'glob',
+  'grep',
+  'read_image',
+  'web_search',
+  'web_fetch',
+  'run_code',
+  'subagent',
+  'list_subagent_models',
+  'spawn_teammate',
+  'send_message',
+  'list_agents',
+  'interrupt_agent',
+  'wait_agent',
+  'team_task_create',
+  'team_task_get',
+  'team_task_list',
+  'team_task_update',
+  'todo_write',
+  'exit_plan_mode',
+  'skill',
+])
 
 export const queryPresetId = 'crm-query'
 
@@ -45,11 +78,13 @@ export function apply(ctx) {
     }
     if (restrictions.has(agentId)) return
 
-    // Scoped business tools stay visible because restrict() only masks the
-    // inherited global layer. The guard then denies any future scoped or
-    // global tool that is not explicitly part of this read-mostly preset.
+    // Hide known inherited shell, filesystem and collaboration tools without
+    // replacing the preset's scoped business tools. The guard is the final
+    // deny-by-default boundary for any future tool that appears in schema.
+    const visibleNames = agent.ctx.tools.schemas().map(tool => tool.name)
+    const deny = visibleNames.filter(tool => hiddenInheritedTools.has(tool))
     const dispose = agent.ctx.effect(() => {
-      const liftGlobalMask = agent.ctx.tools.restrict({ allow: [] })
+      const liftMask = deny.length > 0 ? agent.ctx.tools.restrict({ deny }) : undefined
       const liftGuard = agent.ctx.tools.guard(execution => (
         allowedTools.has(execution.name)
           ? undefined
@@ -57,7 +92,7 @@ export function apply(ctx) {
       ))
       return () => {
         liftGuard()
-        liftGlobalMask()
+        liftMask?.()
       }
     })
     if (typeof dispose === 'function') restrictions.set(agentId, dispose)
