@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 
 import {
@@ -178,4 +179,21 @@ test('an empty production allowlist is rejected', () => {
     () => createScopedWeKnoraTools({ definitions: [], client: {}, allowedKnowledgeBaseIds: [] }),
     /allowed knowledge base list is empty/,
   )
+})
+
+test('production overlay records project-only scope without embedding runtime credentials', async () => {
+  const overlay = JSON.parse(await readFile(
+    new URL('../../config/weknora-production-overlay.v1.json', import.meta.url),
+    'utf8',
+  ))
+
+  assert.equal(overlay.schema_version, 'shinemage-weknora-production-overlay/v1')
+  assert.equal(overlay.scope_contract.project_knowledge_base_id, PROJECT)
+  assert.deepEqual(overlay.scope_contract.exposed_tools, ['weknora_search', 'weknora_read_document'])
+  assert.equal(overlay.scope_contract.list_knowledge_bases, false)
+  assert.equal(overlay.scope_contract.document_id_search, 'DENIED')
+  assert.equal(overlay.scope_contract.tenant_wide_document_name_lookup, 'DENIED_BEFORE_NETWORK')
+  for (const digest of Object.values(overlay.overlay_files)) assert.match(digest, /^[a-f0-9]{64}$/)
+  assert.equal(overlay.release_ready, undefined)
+  assert.doesNotMatch(JSON.stringify(overlay), /"(?:api[_-]?key|authorization|bearer)"\s*:/i)
 })

@@ -81,3 +81,16 @@ test('IM input lock rejects release claims and duplicate packages', async t => {
   f.lock.inputs[1].package = f.lock.inputs[0].package;
   assert.throws(() => validateImPluginInputs(f.lock), /IM_INPUT_REPOSITORY|IM_INPUT_DUPLICATE|IM_INPUT_PACKAGES/);
 });
+
+test('checked-in IM input lock pins the live runtime while remaining non-release', async () => {
+  const lock = JSON.parse(await readFile(
+    new URL('../../config/dsh-im-plugin-inputs.v1.json', import.meta.url),
+    'utf8',
+  ));
+  validateImPluginInputs(lock);
+  assert.equal(lock.release_ready, false);
+  assert.deepEqual(lock.inputs.map(input => [input.package, input.version, input.commit]), [
+    ['@xmanrui/dsh-im', '5.2.0', '0b9cbc24b60a9218820a10ed1f9c8fe913aa23c5'],
+    ['dsh-plugin', '2.0.5', 'dfd56ec530b217f1ee7675f470b3a5ff780a2e85'],
+  ]);
+});
