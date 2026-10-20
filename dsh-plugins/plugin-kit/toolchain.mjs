@@ -142,6 +142,13 @@ export async function bindToolchain(plugin, upstream, buildTools = defaultBuildT
       await rm(temporary, { force: true });
     }
   };
+  const inspectExistingIdentity = async (target, name) => {
+    const manifestPath = join(target, 'package.json');
+    const info = await lstat(manifestPath);
+    assert.ok(info.isFile() && info.size <= 1024 * 1024, 'KIT_EXISTING_BINDING_INVALID');
+    const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+    assert.equal(manifest.name, name, 'KIT_EXISTING_BINDING_NAME');
+  };
   const restore = async () => {
     for (const change of changes.reverse()) {
       if (change.original === null) await rm(change.link, { force: true });
@@ -168,7 +175,7 @@ export async function bindToolchain(plugin, upstream, buildTools = defaultBuildT
       const modules = await realpath(join(plugin, 'node_modules'));
       const local = relative(modules, existingTarget);
       if (!local || local.startsWith('..') || isAbsolute(local)) {
-        await inspectSdkPackage(existingTarget, name);
+        await inspectExistingIdentity(existingTarget, name);
       }
       await replaceLink(link, target);
       changes.push({ link, original: existingTarget });
