@@ -172,7 +172,8 @@ export async function bindToolchain(plugin, upstream, buildTools = defaultBuildT
       await replaceLink(link, target);
       changes.push({ link, original: existingTarget });
     }
-    await bindPackagedDependencies(plugin, process.env.DSH_PACKAGE_INPUTS);
+    await bindPackagedDependencies(plugin, process.env.DSH_PACKAGE_INPUTS,
+      (link, original) => changes.push({ link, original }));
   } catch (error) {
     await restore();
     throw error;

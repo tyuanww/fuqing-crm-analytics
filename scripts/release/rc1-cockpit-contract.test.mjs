@@ -41,21 +41,41 @@ test('an explicit rc1 lane temporarily rebinds local SDK links and restores them
   t.after(() => rm(root, { recursive: true, force: true }));
   const original = join(root, 'node_modules/.pnpm/original/node_modules/@deepseek-ai/dsh-tools');
   const link = join(root, 'node_modules/@deepseek-ai/dsh-tools');
+  const boardOriginal = join(root, 'board-components');
+  const boardLink = join(root, 'node_modules/@shine-mage/board-components');
   await mkdir(original, { recursive: true });
+  await mkdir(boardOriginal, { recursive: true });
   await mkdir(join(root, 'node_modules/@deepseek-ai'), { recursive: true });
+  await mkdir(join(root, 'node_modules/@shine-mage'), { recursive: true });
   await symlink(join('..', '.pnpm/original/node_modules/@deepseek-ai/dsh-tools'), link, 'dir');
-  await writeFile(join(root, 'package.json'), JSON.stringify({
-    devDependencies: { '@shine-mage/dsh-plugin-kit': '0.1.0' },
+  await symlink(boardOriginal, boardLink, 'dir');
+  await writeFile(join(boardOriginal, 'package.json'), JSON.stringify({
+    name: '@shine-mage/board-components',
+    version: '0.1.0',
   }));
-  const lane = process.env.DSH_RELEASE_LANE_CONFIG;
+  await writeFile(join(root, 'bundled-dependencies.json'),
+    await readFile(resolve('dsh-plugins/analytics-workbench/bundled-dependencies.json')));
+  await writeFile(join(root, 'package.json'), JSON.stringify({
+    files: ['bundled-dependencies.json'],
+    devDependencies: {
+      '@shine-mage/board-components': '0.1.0',
+      '@shine-mage/dsh-plugin-kit': '0.1.0',
+    },
+  }));
+  const lane = process.env.DSH_RELEASE_LANE_CONFIG, inputs = process.env.DSH_PACKAGE_INPUTS;
   process.env.DSH_RELEASE_LANE_CONFIG = resolve('config/dsh-rc1-release-lane.json');
+  process.env.DSH_PACKAGE_INPUTS = resolve('vendor/dsh-package-inputs');
   try {
     const bound = await bindToolchain(root, resolve(process.env.B0_RC1_UPSTREAM), resolve(process.env.B0_BUILD_TOOLS));
     assert.equal(await readFile(join(root, 'node_modules/@deepseek-ai/dsh-tools/package.json'), 'utf8').then(JSON.parse).then(value => value.version), '0.2.1-rc.1');
+    assert.match(await realpath(boardLink), /node_modules\/\.shinemage-bundled\//);
     await bound.restore();
     assert.equal(await realpath(link), await realpath(original));
+    assert.equal(await realpath(boardLink), await realpath(boardOriginal));
   } finally {
     if (lane === undefined) delete process.env.DSH_RELEASE_LANE_CONFIG;
     else process.env.DSH_RELEASE_LANE_CONFIG = lane;
+    if (inputs === undefined) delete process.env.DSH_PACKAGE_INPUTS;
+    else process.env.DSH_PACKAGE_INPUTS = inputs;
   }
 });
