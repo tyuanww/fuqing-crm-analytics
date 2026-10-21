@@ -19,7 +19,10 @@ for file in "$@"; do
   esac
 done
 
-repo_root=$(git rev-parse --show-toplevel)
+repo_root=$(git rev-parse --show-toplevel 2>/dev/null) \
+  || { echo 'PREGATE_REPOSITORY_ROOT_UNAVAILABLE' >&2; exit 2; }
+[ -n "${repo_root}" ] \
+  || { echo 'PREGATE_REPOSITORY_ROOT_UNAVAILABLE' >&2; exit 2; }
 # This local gate pins the supported runtime series. The exact patch release is
 # supplied by the caller environment and retained in its evidence receipt.
 if [ "${#node_files[@]}" -gt 0 ]; then

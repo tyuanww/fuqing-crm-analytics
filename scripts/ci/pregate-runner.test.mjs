@@ -36,9 +36,9 @@ printf 'python:%s PYTHONPATH=%s\\n' "$*" "\${PYTHONPATH:-}" >> "\${FAKE_LOG}"
   return { root, log, node, python }
 }
 
-function run(f, files, extraEnv = {}) {
+function run(f, files, extraEnv = {}, cwd = repoRoot) {
   return exec('bash', [runner, ...files], {
-    cwd: repoRoot,
+    cwd,
     env: {
       ...process.env,
       PREGATE_NODE: f.node,
@@ -86,6 +86,15 @@ test('mixed runner rejects unsupported selected files', async t => {
   await assert.rejects(
     run(f, ['notes.txt']),
     error => error.code === 1 && /unsupported pregate test file: notes\.txt/.test(error.stderr),
+  )
+  await assert.rejects(readFile(f.log, 'utf8'), error => error.code === 'ENOENT')
+})
+
+test('mixed runner fails closed outside a Git worktree', async t => {
+  const f = await fixture(t)
+  await assert.rejects(
+    run(f, ['sample.test.mjs', 'test_sample.py'], {}, f.root),
+    error => error.code === 2 && /PREGATE_REPOSITORY_ROOT_UNAVAILABLE/.test(error.stderr),
   )
   await assert.rejects(readFile(f.log, 'utf8'), error => error.code === 'ENOENT')
 })
