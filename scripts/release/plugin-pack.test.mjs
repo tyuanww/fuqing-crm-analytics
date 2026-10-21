@@ -84,6 +84,20 @@ test('release lane refuses a source manifest outside its declared compatibility 
   }), /PLUGIN_PACK_SOURCE_DSH_PEER_INVALID/);
 });
 
+test('source compatibility does not invent a peer absent from the package contract', async t => {
+  const input = await fixture(t);
+  const manifestPath = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+  delete manifest.peerDependencies;
+  await writeFile(manifestPath, `${JSON.stringify(manifest)}\n`);
+  await commitFixture(input.root);
+  await assert.rejects(() => packPlugin({
+    ...input,
+    sdkVersion: '0.2.1-rc.1',
+    sourceSdkVersion: '0.1.7-rc.2',
+  }), /PLUGIN_PACK_DSH_PEER_INVALID/);
+});
+
 test('formal pack rejects an ignored lib replacement against a clean builder receipt', async t => {
   const input = await fixture(t);
   await writeFile(join(input.plugin, '.gitignore'), '/lib/\n/.build-provenance.json\n');

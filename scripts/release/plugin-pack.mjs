@@ -131,7 +131,8 @@ function inspectManifest(manifest, packed = false, { sdkVersion = DSH_SDK_VERSIO
 async function inspectPackage(pluginRoot, compatibility = {}) {
   const sourceManifest = JSON.parse(await readFile(join(pluginRoot, 'package.json'), 'utf8'));
   let manifest = sourceManifest;
-  if (compatibility.sourceSdkVersion !== undefined) {
+  if (compatibility.sourceSdkVersion !== undefined
+    && sourceManifest.peerDependencies?.['@deepseek-ai/dsh-tools'] !== undefined) {
     assert.equal(sourceManifest.peerDependencies?.['@deepseek-ai/dsh-tools'], compatibility.sourceSdkVersion,
       'PLUGIN_PACK_SOURCE_DSH_PEER_INVALID');
     manifest = {
@@ -428,7 +429,7 @@ if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) 
     const outputDir = option('--output-dir');
     assert.ok(plugin && outputDir, 'Usage: node plugin-pack.mjs --plugin /absolute/plugin --output-dir /absolute/output [--manifest /absolute/manifest.json] [--source-sdk-version VERSION]');
     const builderProvenancePath = option('--builder-receipt');
-    const sourceSdkVersion = option('--source-sdk-version') ?? DSH_SDK_VERSION;
+    const sourceSdkVersion = option('--source-sdk-version');
     const receipt = await packPlugin({ plugin, outputDir, manifestPath: option('--manifest'), builderProvenancePath, sourceSdkVersion });
     console.log(JSON.stringify(receipt, null, 2));
   } catch (error) {
