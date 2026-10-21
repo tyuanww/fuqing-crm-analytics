@@ -529,21 +529,25 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
       if (!state.busy && !state.confirmationUncertain) emit({ textDraft: null, textDrafts: {}, textDraftNodes: {}, draftReset: (state.draftReset ?? 0) + 1 });
     },
     async loadHistory() {
+      const epoch = openEpoch;
       await perform(async () => {
         if (!state.current) return;
         const got = bound.documents?.pullHistory ? await bound.documents.pullHistory(state.current.page_id)
           : { ok: true, items: state.current.history };
+        if (epoch !== openEpoch) return;
         if (!got.ok) throw new Error('版本历史读取失败');
         emit({ historyItems: got.items, contextPanel: 'history' });
       });
     },
     async previewRollback(version) {
+      const epoch = openEpoch;
       await perform(async () => {
         assertEditable();
         if (hasUnsavedChanges()) throw new Error('请先处理当前修改');
         if (!bound.documents?.rollbackPreview) throw new Error('版本回退尚未连接');
         const got = await bound.documents.rollbackPreview({ page_id: state.current.page_id,
           base_version: state.current.version, to_version: version });
+        if (epoch !== openEpoch) return;
         if (!got.ok || !got.body?.snapshot?.spec?.package) throw new Error('无法取得回退预览');
         emit({ preview: { preview_id: got.body.preview_id, operation: 'ROLLBACK', status: 'PENDING',
           snapshot: got.body.snapshot.spec.package, base_package: state.current.package },
