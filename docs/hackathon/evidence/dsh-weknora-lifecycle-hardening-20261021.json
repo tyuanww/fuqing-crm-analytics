@@ -266,14 +266,14 @@
       "warnings": 6,
       "duration_seconds": 1811.3,
       "log_sha256": "6be369bc6cd7b3c8b78a5f389fb156b94c16ea7968d45ce4ca9ea0fff956029c",
-      "later_scope": "No backend or Python service source changed between the executed commit and dfcfd1be."
+      "later_scope": "No backend or Python service source changed between the executed commit and bad09dec."
     },
     "fixed_input_b0": {
-      "label": "full-b0-r7",
+      "label": "full-b0-r8",
       "command": "node scripts/dsh-b0/pipeline.mjs --check --python /Users/hutou/homebrew/bin/python3.14",
-      "executed_commit": "dfcfd1be97c16a6f1ab6aa00f6b49a40acadd7e3",
+      "executed_commit": "bad09decfeb652287eb282774dc0a66fb21fc26a",
       "exit": 0,
-      "duration_seconds": 372.7,
+      "duration_seconds": 304.1,
       "python": {
         "passed": 862,
         "subtests_passed": 41,
@@ -281,12 +281,12 @@
         "failed": 0
       },
       "node_main": {
-        "passed": 554,
+        "passed": 555,
         "skipped": 4,
         "failed": 0
       },
       "other_node_groups_failed": 0,
-      "log_sha256": "e7d540e11b58dec0355fe00c907864d78ef64210dc0241c896d8812cf881bad2"
+      "log_sha256": "5a47d4a2c9d114fd53d9b21bda263f9492f9fcb3add96035f802d20be73fe0e9"
     },
     "targeted_node": {
       "command": "node --test --test-concurrency=1 scripts/ops/weknora-production-scope.test.mjs dsh-plugins/query-agent/test/package.test.mjs scripts/release/plugin-pack.test.mjs scripts/ci/pregate-runner.test.mjs",
