@@ -214,14 +214,14 @@ FQ_B0_PYTHON=/Users/hutou/homebrew/opt/python@3.14/bin/python3.14 node dsh-plugi
 
 构建不再将 `COMPETITION_HTTP_BASE/TOKEN` 编译进公共 JS。带合成哨兵配置的真实构建及 JS/SourceMap 检查通过。旧 C0 overlay 仍有显式直连配置接缝，认证迁移/部署兼容待核验；不要恢复内联 token，也不要声称旧 HTTP 资产流程已由新看板集成覆盖。
 
-### 侧栏登录与比赛看板入口
+### 侧栏账号与设置入口
 
-侧栏底 `sidebar.footer.action` 现为登录（id=`shine-mage.account.login`）与主题（id=`shine-mage.account.theme`）。比赛看板在登录菜单里用锚点打开 `https://board.tyuan.chat/`。不再占用第二个 footer 按钮。
+侧栏底 `sidebar.footer.action` 只保留一个「账号与设置」入口（id=`shine-mage.account.login`）。插件不再注册主题按钮或账户 overlay，也不读取、写入或展示 `localStorage` 身份。
 
-- 未登录显示「未登录」。登录菜单可填显示名称，写入 `localStorage` 后页脚显示名字；来源为 feishu 时副标题为「飞书」。这不是飞书 OAuth。同页刷新靠 `shine-account-change`。
-- 收起侧栏后登录只留 icon，主题钮叠在 rail。选择器是 `[class*="footerActions"]:has(.sm-login[data-wide="0"])`，不用 `collapsed` 子串。
-- 比赛看板用 `target="_blank"` + `rel="noopener noreferrer"`，不用 `window.open`。`test/plugin-ui-lifecycle.test.mjs` 覆盖菜单链接；调用 `window.open` 会失败。
-- 看板仍是独立应用、独立进程与独立登录：DSH 不内嵌、不代理。菜单地址是 `https://board.tyuan.chat/`。`start-stack` 的本地前端仍听 `FQ_FRONTEND_PORT`（默认 15173）。裸 `npm run dev` 仍可能听 5173。
+- 点击入口优先打开 DSH 原生账号菜单；账户入口不可用或点击失败时，只回退一次到原生 Settings。
+- 两种原生动作都不可用时，按钮进入可观察的错误状态并记录明确错误码；不会静默假装登录、打开本地伪账户或修改宿主主题。
+- 登录、身份、主题和设置均由 DSH rc1 原生壳拥有。兼容适配层只转发用户手势，相关选择器限制在 `src/client/native-account-settings.mjs`。
+- 独立比赛看板仍是独立应用、进程和登录域，DSH 不内嵌或代理；它不再从该原生账号入口打开。
 
 ## v0.8 实际能力与边界（历史基线）
 
