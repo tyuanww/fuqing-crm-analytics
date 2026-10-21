@@ -390,6 +390,8 @@ node --test --test-concurrency=1 \
 
 当前规则只在 AGENTS；当前产品任务状态在 STATUS 与 TODOS；B0 执行清单保留历史；日期报告是不可回写的历史证据。本次治理记录单列本地补丁、旧成绩和未运行项目。Git/远端 CI/真实业务验收分别交付，不能因为本地检查通过标记产品完成。
 
+固定运行时选择器和混合文件入口见 [How to 运行固定 Node 与 Python 的前置测试](pregate-runner.md)。IM 固定归档的 lock 字段、校验命令与错误码见[DSH IM 插件固定输入参考](../reference/dsh-im-plugin-inputs.md)。
+
 ## DSH 基座兼容的独立验证
 
 驾驶舱 HTML 选区提示词、源码范围验证器、原生初始提示或评估器发生变化时，合并前另跑真实模型评估（需要用户授权模型调用）：

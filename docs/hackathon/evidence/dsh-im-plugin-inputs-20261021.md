@@ -15,7 +15,7 @@
 | `@xmanrui/dsh-im` | `5.2.0` | `0b9cbc24b60a9218820a10ed1f9c8fe913aa23c5` | 13227610 | `8d87caa71d921e9134b3d987a66ea59878ca445500703712c8b8053d49732d6d` |
 | `dsh-plugin` | `2.0.5` | `dfd56ec530b217f1ee7675f470b3a5ff780a2e85` | 6955036 | `af455abd4d68f3d673e5003ae62a60ef42716a63a18dc7e1c5bbe1c78f976430` |
 
-两份归档的 SHA-512 integrity 与线上 profile `pnpm-lock.yaml` 中的记录逐字一致。机器可读回执见 [dsh-im-plugin-inputs-20261021.json](dsh-im-plugin-inputs-20261021.json)，固定输入声明见 [config/dsh-im-plugin-inputs.v1.json](../../../config/dsh-im-plugin-inputs.v1.json)。
+两份归档的 SHA-512 integrity 与线上 profile `pnpm-lock.yaml` 中的记录逐字一致。机器可读回执见 [dsh-im-plugin-inputs-20261021.json](dsh-im-plugin-inputs-20261021.json)，固定输入声明见 [config/dsh-im-plugin-inputs.v1.json](../../../config/dsh-im-plugin-inputs.v1.json)，长期字段和错误码见[固定输入参考](../../reference/dsh-im-plugin-inputs.md)。
 
 ## 复验命令
 
