@@ -1,0 +1,95 @@
+{
+  "schema_version": "dsh-plugin-pack/v1",
+  "package_name": "@shine-mage/dsh-shine-waterfall",
+  "package_version": "0.0.0-b0",
+  "dsh_pin": "0.1.7-rc.2",
+  "source_sha": "d123ac1d0e7bad3e5de45169b3e72c38623b858a",
+  "source_dirty": false,
+  "tarball": {
+    "name": "shine-mage-dsh-shine-waterfall-0.0.0-b0.tgz",
+    "bytes": 2248,
+    "sha256": "73a1d4ba2b085c1f9f2a1eff410aca239cf9775de952ba70aafdaa78ec5ac35d"
+  },
+  "generated_bytes_provenance": {
+    "schema_version": "dsh-generated-bytes/v1",
+    "status": "PASS",
+    "source": {
+      "git_sha": "d123ac1d0e7bad3e5de45169b3e72c38623b858a",
+      "tree_sha256": "39a67a56d060e39231b7682142c32eafda9fc360d2310690c3dbe9f7e9c6114a",
+      "entries": 11,
+      "bytes": 8957,
+      "sha256": "39a67a56d060e39231b7682142c32eafda9fc360d2310690c3dbe9f7e9c6114a"
+    },
+    "generated_tree": {
+      "sha256": "b1ba8e51c22ce49e2aa67a6f05da34a1ab4d15dfc5873237e21db05d76377ad0",
+      "entries": 6,
+      "bytes": 3418
+    },
+    "generated_files": [
+      {
+        "path": "bundled-dependencies.json",
+        "type": "file",
+        "mode": 420,
+        "bytes": 306,
+        "sha256": "957ba54ce606fc735cc11c051b9d60c3703ab8bf0bc94dd00aac696b28afa06b"
+      },
+      {
+        "path": "lib/client.js",
+        "type": "file",
+        "mode": 420,
+        "bytes": 727,
+        "sha256": "fa56fa6ac360a03d09d8eee8e7800fcf8d6bf28e5a4ff3d129735743ea0c0b3f"
+      },
+      {
+        "path": "lib/index.js",
+        "type": "file",
+        "mode": 420,
+        "bytes": 123,
+        "sha256": "8d5816bb1e16ed8b82be7e921bf9be111662b8131855859205925aed73548294"
+      },
+      {
+        "path": "lib/waterfall.d.mts",
+        "type": "file",
+        "mode": 420,
+        "bytes": 341,
+        "sha256": "34b0be969c2f73b3dd1a7633b2e953c74bd5b12c80ed978ac3be0d51ee4a2210"
+      },
+      {
+        "path": "lib/waterfall.mjs",
+        "type": "file",
+        "mode": 420,
+        "bytes": 1921,
+        "sha256": "1ffe8061b1ddfe28b8310fa520910f75c7e8f2fb1f53fb33ba029ac528dd2329"
+      }
+    ],
+    "builder": {
+      "status": "PASS",
+      "clean": true,
+      "isolated": true,
+      "node": "v24.19.0",
+      "pnpm": "11.28.2",
+      "platform": "darwin",
+      "arch": "arm64",
+      "command": "node plugin/build.mjs /rc2-upstream /rc2-build-tools",
+      "network_mode": "offline"
+    },
+    "builder_receipt_schema_version": "dsh-plugin-build/v1",
+    "builder_receipt_sha256": "6e7b0c325e67c52a1bf38dd981dcd976eaf01a66e2873900809ca6e3c0d32449",
+    "tarball": {
+      "name": "shine-mage-dsh-shine-waterfall-0.0.0-b0.tgz",
+      "bytes": 2248,
+      "sha256": "73a1d4ba2b085c1f9f2a1eff410aca239cf9775de952ba70aafdaa78ec5ac35d"
+    }
+  },
+  "entries": [
+    "bundled-dependencies.json",
+    "cordis.patch.yml",
+    "lib/client.js",
+    "lib/index.js",
+    "lib/waterfall.d.mts",
+    "lib/waterfall.mjs",
+    "package.json"
+  ],
+  "activation": "NOT_RUN",
+  "state_path": "NOT_APPLICABLE_PLUGIN_PACK_ONLY"
+}

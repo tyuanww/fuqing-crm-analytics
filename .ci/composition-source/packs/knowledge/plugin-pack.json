@@ -1,0 +1,71 @@
+{
+  "schema_version": "dsh-plugin-pack/v1",
+  "package_name": "@shine-mage/dsh-knowledge",
+  "package_version": "0.0.0-candidate.1",
+  "dsh_pin": "0.1.7-rc.2",
+  "source_sha": "ef8960ededd5f4214d9f3e77a8b61a761a046d3d",
+  "source_dirty": false,
+  "tarball": {
+    "name": "shine-mage-dsh-knowledge-0.0.0-candidate.1.tgz",
+    "bytes": 14476,
+    "sha256": "870fdeeadc07bf7187d475ba4a77fe0d417b915a72473b8712c004f7079b4090"
+  },
+  "generated_bytes_provenance": {
+    "schema_version": "dsh-generated-bytes/v1",
+    "status": "PASS",
+    "source": {
+      "git_sha": "ef8960ededd5f4214d9f3e77a8b61a761a046d3d",
+      "tree_sha256": "97874fc84d99bcc348bc7e2ea04d5fca1a95b6868f6561b5c95d38cef7a6e6e2",
+      "entries": 22,
+      "bytes": 110800,
+      "sha256": "97874fc84d99bcc348bc7e2ea04d5fca1a95b6868f6561b5c95d38cef7a6e6e2"
+    },
+    "generated_tree": {
+      "sha256": "0a0fd85b00e76dfa301328c0c8ea84548df645402d04f226a49d9ac86ce65302",
+      "entries": 3,
+      "bytes": 54026
+    },
+    "generated_files": [
+      {
+        "path": "lib/graph-tools.js",
+        "type": "file",
+        "mode": 420,
+        "bytes": 38773,
+        "sha256": "425e876ef85dbfb8524080340b42e29d12b5eb0799ca79a35a3f5d8cf9e6b864"
+      },
+      {
+        "path": "lib/index.js",
+        "type": "file",
+        "mode": 420,
+        "bytes": 15253,
+        "sha256": "e04d90e8e4a51fcebf14c1666ace8796847c2ac13737805f933655c9b196180e"
+      }
+    ],
+    "builder": {
+      "status": "PASS",
+      "clean": true,
+      "isolated": true,
+      "node": "v24.19.0",
+      "pnpm": "11.28.2",
+      "platform": "darwin",
+      "arch": "arm64",
+      "command": "build.mjs",
+      "network_mode": "offline"
+    },
+    "builder_receipt_schema_version": "dsh-plugin-build/v1",
+    "builder_receipt_sha256": "ed7243a2a7932338194cd9c18faa33a620a197a378db99fa85e1105cb15a54d8",
+    "tarball": {
+      "name": "shine-mage-dsh-knowledge-0.0.0-candidate.1.tgz",
+      "bytes": 14476,
+      "sha256": "870fdeeadc07bf7187d475ba4a77fe0d417b915a72473b8712c004f7079b4090"
+    }
+  },
+  "entries": [
+    "cordis.patch.yml",
+    "lib/graph-tools.js",
+    "lib/index.js",
+    "package.json"
+  ],
+  "activation": "NOT_RUN",
+  "state_path": "NOT_APPLICABLE_PLUGIN_PACK_ONLY"
+}

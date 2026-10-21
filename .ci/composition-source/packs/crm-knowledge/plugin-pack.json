@@ -1,0 +1,79 @@
+{
+  "schema_version": "dsh-plugin-pack/v1",
+  "package_name": "@shine-mage/dsh-crm-knowledge",
+  "package_version": "0.0.0-crm.2",
+  "dsh_pin": "0.1.7-rc.2",
+  "source_sha": "5f359f5b85e41d09065587dd11d69dd57e9bdd5b",
+  "source_dirty": false,
+  "tarball": {
+    "name": "shine-mage-dsh-crm-knowledge-0.0.0-crm.2.tgz",
+    "bytes": 235016,
+    "sha256": "4b04c5a5fad52102a53c318a13baadd06ffe47753802b4a82fa2a760f3184139"
+  },
+  "generated_bytes_provenance": {
+    "schema_version": "dsh-generated-bytes/v1",
+    "status": "PASS",
+    "source": {
+      "git_sha": "5f359f5b85e41d09065587dd11d69dd57e9bdd5b",
+      "tree_sha256": "7c7699c03b87cbdd1870f3e554bf05984abb02acc68b010207c0bab275815cb2",
+      "entries": 53,
+      "bytes": 345094,
+      "sha256": "7c7699c03b87cbdd1870f3e554bf05984abb02acc68b010207c0bab275815cb2"
+    },
+    "generated_tree": {
+      "sha256": "611c0409f68c7201edfcc4259f587ee624b92fb71867e91eb2d62c9bbc313913",
+      "entries": 4,
+      "bytes": 784619
+    },
+    "generated_files": [
+      {
+        "path": "lib/client.js",
+        "type": "file",
+        "mode": 420,
+        "bytes": 640064,
+        "sha256": "72bbd7d715ec5ab8e5d2bd7fce29a74dc7a32ad9e6fae8df86278de27c17eab3"
+      },
+      {
+        "path": "lib/host.js",
+        "type": "file",
+        "mode": 420,
+        "bytes": 74553,
+        "sha256": "5149a148257b794c3b7bff939173fdc003d9f5d38382d8cc23fe58310c979d64"
+      },
+      {
+        "path": "lib/index.js",
+        "type": "file",
+        "mode": 420,
+        "bytes": 70002,
+        "sha256": "5a6bb84e616737f6fcc8c4af575549b5b230dff0cbbe0b06dd2419309f513a00"
+      }
+    ],
+    "builder": {
+      "status": "PASS",
+      "clean": true,
+      "isolated": true,
+      "node": "v24.19.0",
+      "pnpm": "11.28.2",
+      "platform": "darwin",
+      "arch": "arm64",
+      "command": "author-build.mjs",
+      "network_mode": "offline"
+    },
+    "builder_receipt_schema_version": "dsh-plugin-build/v1",
+    "builder_receipt_sha256": "4718ef69d636ea671cc7f2cf971504e367dc4f98c65696a072d43eb88dd61d47",
+    "tarball": {
+      "name": "shine-mage-dsh-crm-knowledge-0.0.0-crm.2.tgz",
+      "bytes": 235016,
+      "sha256": "4b04c5a5fad52102a53c318a13baadd06ffe47753802b4a82fa2a760f3184139"
+    }
+  },
+  "entries": [
+    "cordis.patch.yml",
+    "lib/client.js",
+    "lib/host.js",
+    "lib/index.js",
+    "package.json"
+  ],
+  "activation": "NOT_RUN",
+  "state_path": "NOT_APPLICABLE_PLUGIN_PACK_ONLY"
+}
