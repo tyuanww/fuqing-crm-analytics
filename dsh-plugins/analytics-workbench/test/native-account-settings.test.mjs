@@ -5,6 +5,7 @@ import {
   NATIVE_SETTINGS_SELECTOR,
   openNativeAccountSettings,
 } from '../src/client/native-account-settings.mjs';
+import { loadJsdom } from './helpers/jsdom-loader.mjs';
 
 function button({ click = () => {}, label = '', attributes = {} } = {}) {
   const values = { 'aria-label': label, ...attributes };
@@ -87,6 +88,19 @@ test('an asynchronously expanded native account menu is accepted without a false
     settle: () => new Promise(resolve => setTimeout(resolve, 5)),
   }), { ok: true, action: 'account' });
   assert.equal(account.clicks, 1);
+});
+
+test('a visible native account control is accepted after its document-level async expansion', async t => {
+  const JSDOM = loadJsdom();
+  const dom = new JSDOM('<!doctype html><body><button data-signed-out="true" aria-haspopup="menu" aria-expanded="false"></button></body>',
+    { url: 'http://127.0.0.1' });
+  t.after(() => dom.window.close());
+  const account = dom.window.document.querySelector('button');
+  account.getClientRects = () => [{ width: 1, height: 1 }];
+  account.addEventListener('click', () => account.setAttribute('aria-expanded', 'true'));
+
+  assert.deepEqual(await openNativeAccountSettings(dom.window.document, { settle: async () => {} }),
+    { ok: true, action: 'account' });
 });
 
 test('missing native controls return an observable failure instead of pretending success', async () => {

@@ -281,13 +281,22 @@ test('the footer delegates the sign-in gesture to the native rc1 account control
   const { entries, effects } = mount(loadClient(dom.window));
   const root = createRoot(dom.window.document.getElementById('root'));
   let nativeClicks = 0;
-  dom.window.document.querySelector('[data-signed-out="true"]').addEventListener('click', () => { nativeClicks += 1; });
+  const nativeAccount = dom.window.document.querySelector('[data-signed-out="true"]');
+  nativeAccount.setAttribute('aria-expanded', 'false');
+  nativeAccount.getClientRects = () => [{ width: 1, height: 1 }];
+  nativeAccount.addEventListener('click', () => {
+    nativeClicks += 1;
+    nativeAccount.setAttribute('aria-expanded', 'true');
+  });
   try {
     const login = entries.find(item => item.options.id === 'shine-mage.account.login');
     await act(() => {
       root.render(React.createElement(login.component, { wide: true }));
     });
-    await act(() => { dom.window.document.querySelector('[data-testid="shine-account-login"]').click(); });
+    await act(async () => {
+      dom.window.document.querySelector('[data-testid="shine-account-login"]').click();
+      await new Promise(resolve => setTimeout(resolve, 60));
+    });
     const footer = dom.window.document.querySelector('[data-testid="shine-account-login"]');
     assert.match(footer.textContent, /账号与设置/);
     assert.equal(nativeClicks, 1);
