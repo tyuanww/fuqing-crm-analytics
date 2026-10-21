@@ -1,0 +1,50 @@
+graph TB
+  subgraph NOW["现在：不能上线"]
+    direction LR
+    N1["入口错位<br/>产物柜被当成驾驶舱"]
+    N2["真值错位<br/>来源验证 ≠ 页面验证"]
+    N3["闭环断裂<br/>数据桥没有接进编辑器"]
+    N4["证据不足<br/>合成数据 / 假模型 / PARTIAL"]
+  end
+
+  subgraph TARGET["目标：一个入口，一条主线"]
+    direction LR
+    H["资料库首页<br/>唯一主入口"]
+    G["一句话生成<br/>草稿可先用样例"]
+    R["最近页面<br/>继续工作"]
+    W["页面工作区"]
+    CRM["CRM / 分析结果"]
+    T["可信数据服务<br/>权限 · 时间 · 版本"]
+    B["节点级绑定<br/>每个经营指标"]
+    O["经营驾驶舱<br/>所有指标可追溯"]
+    A["统一资产外壳<br/>版本 · 保存 · 离开"]
+    L{"P0-4 上线门禁<br/>真实模型 + 真实数据<br/>真实浏览器"}
+    GO["允许上线"]
+  end
+
+  N1 -.->|P0-1 改成唯一入口| H
+  N2 -.->|P0-2 改成节点级可信| T
+  N3 -.->|P0-3 接进真实数据| B
+  N4 -.->|P0-4 换掉合成证据| L
+
+  H --> G --> W
+  H --> R --> W
+  CRM --> T --> B --> W
+  W --> O
+  W --> A
+  O --> L
+  A --> L
+  L --> GO
+
+  classDef break fill:#FFE5E9,stroke:#B4233C,color:#5C1020,stroke-width:2px,stroke-dasharray:6 4;
+  classDef entry fill:#EAF7E4,stroke:#4F7A3F,color:#1F3517,stroke-width:2px;
+  classDef data fill:#E5F0FF,stroke:#356AA0,color:#17324D,stroke-width:2px;
+  classDef asset fill:#F1E8FA,stroke:#805D9D,color:#3E2852,stroke-width:2px;
+  classDef gate fill:#FFF1CC,stroke:#A66A00,color:#5C3B00,stroke-width:2px;
+  classDef launch fill:#DDF8D2,stroke:#3B7A2A,color:#173A10,stroke-width:3px;
+  class N1,N2,N3,N4 break;
+  class H,G,R,W entry;
+  class CRM,T,B data;
+  class O,A asset;
+  class L gate;
+  class GO launch;

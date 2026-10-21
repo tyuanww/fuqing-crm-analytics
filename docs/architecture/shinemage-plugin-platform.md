@@ -2,6 +2,22 @@
 
 本设计落实[已批准的拆分计划](../plans/shinemage-plugin-platform-split.md)，不是重新选型。目标是官方 DSH 底座、独立 CRM/知识库服务、各自版本化的插件和一个组合 profile。首批插件已经形成独立远程仓，当前远程清单见[远程仓盘查](../hackathon/evidence/shinemage-remote-repository-inventory-20261010.md)，主线短 SHA 见 STATUS，完整 SHA、合并时间和 CI 事实见[PR #121 合并后记录](../hackathon/evidence/shinemage-pr121-postmerge-20261012.md)；主仓继续保留平台合同、组合验证、历史 `dsh-plugins/` 和候选账本，部分历史副本已经按授权清理，剩余副本、正式物理分仓、正式 `dsh-plugin-pack/v1`/`dsh-plugin-candidate/v1` 分发与生产切换仍按各自门禁执行。普通插件更新的具体操作见[插件更新指南](../operating/shinemage-plugin-update.md)。
 
+## 问数组合边界（2026-10-21）
+
+“问数智能体”由配置型 `@shine-mage/dsh-query-agent` 组合已有域能力，不复制 CRM、WeKnora 或页面实现：
+
+| 组件 | 生命周期与权限 |
+|---|---|
+| `@shine-mage/dsh-query-agent` | 只声明 `crm-query` 预设、宿主工具策略、locale 和 icon；可独立升级 |
+| `@shine-mage/dsh-crm-knowledge` | CRM 登录、指标、快照和分析；用户会话凭据不进入 WeKnora 或页面包 |
+| `weknora.mjs` + scope helper | 只读项目资料库；参数 allowlist、读取前后范围校验和 effect 释放 |
+| `@shine-mage/dsh-analytics-workbench-b0/page-tools` | 可选 HTML 页面交付，缺失时明确不可用 |
+| `@deepseek-ai/dsh-agent-preset` | 官方预设合同；同一 profile 只声明一个 `crm-query` |
+
+CRM、知识、WeKnora、页面和问数预设保持独立包，是因为它们拥有不同的凭据、数据边界和故障生命周期。把它们合并成一个宿主大包会扩大升级半径，也会让某个服务不可用时拖垮整个问数入口。反过来，`tool-policy`、locale 和 preset 声明足够小且只服务于同一个产品入口，因此合并在 query 配置 bundle 内，不再拆成多个包。
+
+历史 marker 包由页面 profile 选择，不进入 `crm-query` 的最小工具面。是否继续保留这些 marker 需要按页面消费者单独判断，不能为了减少插件列表而直接删除仍被 workbench 引用的能力。架构与产品评审图见[驾驶舱最终架构](../../diagrams/cockpit-final-architecture.mmd)、[当前驾驶舱实现](../../diagrams/shine-cockpit-current.mmd)和[WorkBuddy 资料库 UX](../../diagrams/workbuddy-library-ux.mmd)。
+
 
 ## 当前维护边界（2026-10-12 PR #121 合并后）
 
