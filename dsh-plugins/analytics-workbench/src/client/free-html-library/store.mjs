@@ -233,16 +233,18 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
     return receipt;
   }
 
-  async function perform(work) {
+  async function perform(work, isCurrent = () => true) {
     if (state.busy || lifetime.signal.aborted) return;
     emit({ busy: true, message: '' });
     try { return await work(); }
     catch (error) {
-      emit({
-        message: error instanceof Error ? error.message : '操作失败，当前内容不变',
-        liveStatus: error instanceof Error ? error.message : '操作失败',
-        hostError: error?.code === 'FORBIDDEN' || error?.code === 'UNAUTHORIZED' ? '权限或会话错误，请回到原生对话重试' : state.hostError,
-      });
+      if (isCurrent()) {
+        emit({
+          message: error instanceof Error ? error.message : '操作失败，当前内容不变',
+          liveStatus: error instanceof Error ? error.message : '操作失败',
+          hostError: error?.code === 'FORBIDDEN' || error?.code === 'UNAUTHORIZED' ? '权限或会话错误，请回到原生对话重试' : state.hostError,
+        });
+      }
     }
     finally { emit({ busy: false }); }
   }
@@ -434,7 +436,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
           presentation_overlay: { ...(page.presentation_overlays ?? {}) },
           previewAlive: true, liveStatus: `已打开 ${page.title}` });
         return true;
-      });
+      }, () => ticket.epoch === openEpoch);
     },
     async previewImport(input) {
       return perform(async () => {
@@ -537,7 +539,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
         if (epoch !== openEpoch) return;
         if (!got.ok) throw new Error('版本历史读取失败');
         emit({ historyItems: got.items, contextPanel: 'history' });
-      });
+      }, () => epoch === openEpoch);
     },
     async previewRollback(version) {
       const epoch = openEpoch;
@@ -553,7 +555,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
           snapshot: got.body.snapshot.spec.package, base_package: state.current.package },
           lastIdempotencyKey: bound.nextId('rollback'), contextPanel: null, selection: null,
           liveStatus: `回退到 v${version} 的预览，确认后保存为新版本` });
-      });
+      }, () => epoch === openEpoch);
     },
     requestLeave(intent) {
       if (!hasUnsavedChanges()) {

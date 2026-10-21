@@ -94,3 +94,61 @@ test('an external native-panel switch drops a late rollback preview', async t =>
   assert.equal(f.store.getSnapshot().preview, null);
   assert.equal(f.store.getSnapshot().lastIdempotencyKey, null);
 });
+
+test('an external native-panel switch drops a late page failure', async t => {
+  let reject;
+  const response = new Promise((_, fail) => { reject = fail; });
+  const f = fixture(t, {
+    async pullPage() { return response; },
+  });
+
+  const pending = f.store.openPage('page_a');
+  await new Promise(resolve => setImmediate(resolve));
+  f.store.beginNavigation('panel');
+  reject(new Error('stale page failure'));
+  await pending;
+
+  assert.equal(f.store.getSnapshot().current, null);
+  assert.equal(f.store.getSnapshot().message, '');
+  assert.equal(f.store.getSnapshot().liveStatus, '');
+});
+
+test('an external native-panel switch drops a late history failure', async t => {
+  let reject;
+  const response = new Promise((_, fail) => { reject = fail; });
+  const f = fixture(t, {
+    async pullHistory() { return response; },
+  });
+  await f.store.openPage('page_b');
+
+  const pending = f.store.loadHistory();
+  await new Promise(resolve => setImmediate(resolve));
+  f.store.beginNavigation('panel');
+  reject(new Error('stale history failure'));
+  await pending;
+
+  assert.deepEqual(f.store.getSnapshot().historyItems, []);
+  assert.equal(f.store.getSnapshot().contextPanel, null);
+  assert.equal(f.store.getSnapshot().message, '');
+  assert.doesNotMatch(f.store.getSnapshot().liveStatus, /stale history failure/);
+});
+
+test('an external native-panel switch drops a late rollback failure', async t => {
+  let reject;
+  const response = new Promise((_, fail) => { reject = fail; });
+  const f = fixture(t, {
+    async rollbackPreview() { return response; },
+  });
+  await f.store.openPage('page_b');
+
+  const pending = f.store.previewRollback(1);
+  await new Promise(resolve => setImmediate(resolve));
+  f.store.beginNavigation('panel');
+  reject(new Error('stale rollback failure'));
+  await pending;
+
+  assert.equal(f.store.getSnapshot().preview, null);
+  assert.equal(f.store.getSnapshot().lastIdempotencyKey, null);
+  assert.equal(f.store.getSnapshot().message, '');
+  assert.doesNotMatch(f.store.getSnapshot().liveStatus, /stale rollback failure/);
+});
