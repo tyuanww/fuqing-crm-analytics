@@ -24,6 +24,13 @@ function htmlChangedNodes(index, proposedIndex) {
   return changed;
 }
 
+function withinSelectedScope(nodeRange, selectedRange) {
+  if (!nodeRange || !selectedRange) return false;
+  const enclosesSelection = nodeRange.start <= selectedRange.start && nodeRange.end >= selectedRange.end;
+  const insideSelection = nodeRange.start >= selectedRange.start && nodeRange.end <= selectedRange.end;
+  return enclosesSelection || insideSelection;
+}
+
 export function htmlOutsideSelectionUnchanged(index, located, proposedHtml) {
   if (located.scope === 'whole_package') return true;
   const range = located.node?.html_range;
@@ -134,7 +141,8 @@ export function analyzeImpact(index, located, proposedPackage) {
     && !htmlOutsideSelectionUnchanged(index, located, proposedPackage?.html ?? '');
   const foreign_html_nodes = located.scope === 'whole_package'
     ? []
-    : html_changed_nodes.filter(id => id !== selectedId);
+    : html_changed_nodes.filter(id => id !== selectedId
+      && !withinSelectedScope(index.nodes[id]?.html_range, located.node?.html_range));
   const shared_css = css_changed.some(rule => rule.shared);
   const shared_js = js.shared && js.changed;
   const expanded = located.scope === 'whole_package' ? false : (shared_css || shared_js);
