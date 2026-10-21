@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots';
 import { openNativeAccountSettings } from './native-account-settings.mjs';
 
@@ -50,21 +50,28 @@ function AccountIcon() {
 
 export function LoginFooter(props: LoginProps) {
   const [notice, setNotice] = useState('');
-  const openOfficial = () => {
-    const result = openNativeAccountSettings();
-    if (result.ok) {
-      setNotice('');
-      return;
+  const opening = useRef(false);
+  const openOfficial = async () => {
+    if (opening.current) return;
+    opening.current = true;
+    try {
+      const result = await openNativeAccountSettings();
+      if (result.ok) {
+        setNotice('');
+        return;
+      }
+      setNotice(result.message);
+      console.warn(`analytics-workbench: ${result.code}: ${result.message}`);
+    } finally {
+      opening.current = false;
     }
-    setNotice(result.message);
-    console.warn(`analytics-workbench: ${result.code}: ${result.message}`);
   };
   return <><style>{accountCss}</style>
     <button type="button" className="sm-login" data-testid="shine-account-login"
       data-native-account-bridge="rc1" data-state={notice ? 'error' : 'ready'}
       data-wide={props.wide ? '1' : '0'}
       aria-label="账号与设置" aria-describedby={notice ? 'shine-native-account-notice' : undefined}
-      title={notice || '打开 DSH 原生账号菜单（含设置）'} onClick={openOfficial}>
+      title={notice || '打开 DSH 原生账号菜单（含设置）'} onClick={() => { void openOfficial(); }}>
       <AccountIcon />
       <span className="sm-login-text">账号与设置</span>
     </button>

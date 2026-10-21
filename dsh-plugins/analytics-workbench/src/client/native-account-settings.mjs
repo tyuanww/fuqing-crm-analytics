@@ -38,13 +38,43 @@ function unavailable(node) {
   }
 }
 
+function visible(node) {
+  if (!node || node.isConnected === false || node.hidden === true) return false;
+  try {
+    const rects = node.getClientRects?.();
+    return !rects || rects.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+function evidence(root, node, kind) {
+  const selector = kind === 'account' ? '[role="menu"]' : '[role="dialog"]';
+  let visibleContainers = 0;
+  try {
+    const containers = root?.querySelectorAll?.(selector);
+    visibleContainers = containers ? [...containers].filter(visible).length : 0;
+  } catch {
+    visibleContainers = 0;
+  }
+  return { expanded: node?.getAttribute?.('aria-expanded') ?? null, visibleContainers };
+}
+
+function defaultSettle() {
+  return new Promise(resolve => setTimeout(resolve, 40));
+}
+
+function observe(before, after) {
+  if (after.expanded === 'true' && before.expanded !== 'true') return true;
+  if (after.visibleContainers > before.visibleContainers) return true;
+  if (after.expanded === 'false' && after.visibleContainers <= before.visibleContainers) return false;
+  return after.expanded === 'true' ? true : null;
+}
+
 function click(node) {
   if (unavailable(node)) return false;
-  const expanded = node.getAttribute?.('aria-expanded') ?? null;
   try {
     node.click();
-    const next = node.getAttribute?.('aria-expanded') ?? null;
-    if (expanded === 'false' && next === 'false') return false;
     return true;
   } catch {
     return false;
@@ -56,11 +86,25 @@ function click(node) {
  * account launcher is absent or refuses the gesture, fall back once to the
  * native Settings dialog trigger.
  */
-export function openNativeAccountSettings(root = globalThis.document) {
+export async function openNativeAccountSettings(root = globalThis.document, { settle = defaultSettle } = {}) {
   const account = query(root, NATIVE_ACCOUNT_SELECTOR);
   const settings = query(root, NATIVE_SETTINGS_SELECTOR);
-  if (click(account)) return Object.freeze({ ok: true, action: 'account' });
-  if (click(settings)) return Object.freeze({ ok: true, action: 'settings', fellBack: Boolean(account) });
+  for (const [node, action] of [[account, 'account'], [settings, 'settings']]) {
+    if (!node) continue;
+    const before = evidence(root, node, action);
+    if (!click(node)) continue;
+    // Native React controls update aria-expanded on a later render. Observe
+    // that render before deciding the gesture failed; fake controls without
+    // an observable state still count as an accepted click.
+    if (before.expanded === null && root?.nodeType !== 9) {
+      return Object.freeze({ ok: true, action, ...(action === 'settings' ? { fellBack: Boolean(account) } : {}) });
+    }
+    await settle();
+    const changed = observe(before, evidence(root, node, action));
+    if (changed === true) {
+      return Object.freeze({ ok: true, action, ...(action === 'settings' ? { fellBack: Boolean(account) } : {}) });
+    }
+  }
   return Object.freeze({
     ok: false,
     action: null,

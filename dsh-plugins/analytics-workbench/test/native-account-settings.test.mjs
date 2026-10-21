@@ -25,54 +25,72 @@ function root({ account = null, settings = null } = {}) {
       if (selector === NATIVE_SETTINGS_SELECTOR) return settings;
       return null;
     },
+    querySelectorAll() { return []; },
   };
 }
 
-test('the bridge forwards to the official rc1 account menu before Settings', () => {
+test('the bridge forwards to the official rc1 account menu before Settings', async () => {
   const account = button({ label: '账号菜单' });
   const settings = button({ label: '设置' });
   const doc = root({ account, settings });
-  assert.deepEqual(openNativeAccountSettings(doc), { ok: true, action: 'account' });
+  assert.deepEqual(await openNativeAccountSettings(doc), { ok: true, action: 'account' });
   assert.equal(account.clicks, 1);
   assert.equal(settings.clicks, 0);
 });
 
-test('the bridge falls back once to the official Settings trigger', () => {
+test('the bridge falls back once to the official Settings trigger', async () => {
   const settings = button({ label: '设置' });
   const doc = root({ settings });
-  assert.deepEqual(openNativeAccountSettings(doc), { ok: true, action: 'settings', fellBack: false });
+  assert.deepEqual(await openNativeAccountSettings(doc), { ok: true, action: 'settings', fellBack: false });
   assert.equal(settings.clicks, 1);
 });
 
-test('a failed account gesture can still reach official Settings', () => {
+test('a failed account gesture can still reach official Settings', async () => {
   const account = button({ click() { throw new Error('detached'); } });
   const settings = button();
-  assert.deepEqual(openNativeAccountSettings(root({ account, settings })),
+  assert.deepEqual(await openNativeAccountSettings(root({ account, settings })),
     { ok: true, action: 'settings', fellBack: true });
   assert.equal(account.clicks, 1);
   assert.equal(settings.clicks, 1);
 });
 
-test('a disabled account control falls back instead of reporting success', () => {
+test('a disabled account control falls back instead of reporting success', async () => {
   const account = button({ attributes: { 'aria-disabled': 'true' } });
   const settings = button();
-  assert.deepEqual(openNativeAccountSettings(root({ account, settings })),
+  assert.deepEqual(await openNativeAccountSettings(root({ account, settings })),
     { ok: true, action: 'settings', fellBack: true });
   assert.equal(account.clicks, 0);
   assert.equal(settings.clicks, 1);
 });
 
-test('a collapsed native control that stays closed is observable and falls back', () => {
+test('a collapsed native control that stays closed is observable and falls back', async () => {
   const account = button({ attributes: { 'aria-expanded': 'false' } });
   const settings = button();
-  assert.deepEqual(openNativeAccountSettings(root({ account, settings })),
+  assert.deepEqual(await openNativeAccountSettings(root({ account, settings }), { settle: async () => {} }),
     { ok: true, action: 'settings', fellBack: true });
   assert.equal(account.clicks, 1);
   assert.equal(settings.clicks, 1);
 });
 
-test('missing native controls return an observable failure instead of pretending success', () => {
-  assert.deepEqual(openNativeAccountSettings(root()), {
+test('an asynchronously expanded native account menu is accepted without a false error', async () => {
+  let expanded = 'false';
+  const account = {
+    clicks: 0,
+    getAttribute(name) {
+      if (name === 'aria-label') return '账号菜单';
+      if (name === 'aria-expanded') return expanded;
+      return null;
+    },
+    click() { this.clicks += 1; setTimeout(() => { expanded = 'true'; }, 0); },
+  };
+  assert.deepEqual(await openNativeAccountSettings(root({ account }), {
+    settle: () => new Promise(resolve => setTimeout(resolve, 5)),
+  }), { ok: true, action: 'account' });
+  assert.equal(account.clicks, 1);
+});
+
+test('missing native controls return an observable failure instead of pretending success', async () => {
+  assert.deepEqual(await openNativeAccountSettings(root()), {
     ok: false,
     action: null,
     code: 'NATIVE_ACCOUNT_SETTINGS_NOT_FOUND',
@@ -80,18 +98,18 @@ test('missing native controls return an observable failure instead of pretending
   });
 });
 
-test('both native gestures failing return an explicit click failure', () => {
+test('both native gestures failing return an explicit click failure', async () => {
   const account = button({ click() { throw new Error('detached'); } });
   const settings = button({ click() { throw new Error('detached'); } });
-  const result = openNativeAccountSettings(root({ account, settings }));
+  const result = await openNativeAccountSettings(root({ account, settings }));
   assert.equal(result.ok, false);
   assert.equal(result.code, 'NATIVE_ACCOUNT_CLICK_FAILED');
   assert.match(result.message, /未能打开/);
 });
 
-test('a Settings control that remains closed is reported as a click failure', () => {
+test('a Settings control that remains closed is reported as a click failure', async () => {
   const settings = button({ attributes: { 'aria-expanded': 'false' } });
-  assert.deepEqual(openNativeAccountSettings(root({ settings })), {
+  assert.deepEqual(await openNativeAccountSettings(root({ settings }), { settle: async () => {} }), {
     ok: false,
     action: null,
     code: 'NATIVE_ACCOUNT_CLICK_FAILED',
