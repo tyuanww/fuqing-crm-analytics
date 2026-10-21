@@ -21,7 +21,7 @@ CRM、知识、页面和 WeKnora 是不同权限与生命周期域，保持独�
 
 - bundle 通过 `package.json` 的 `dsh.bundle.patch` 提供 `cordis.patch.yml`。
 - Agent 通过官方 `@deepseek-ai/dsh-agent-preset` 声明，不依赖旧 `.agent-presets` 目录。
-- profile 默认模型固定为 `deepseek-account / deepseek-flash / off`，避免新会话重新启用当前不可用的 thinking 路由。
+- 安装本 bundle 会覆盖进程级 `agent-default-model`，把未显式选择模型的 Agent 默认路由设为 `deepseek-account / deepseek-flash / off`，避免新会话重新启用当前不可用的 thinking 路由。已有会话保留自己的模型选择。
 - CRM Host 配置固定为 loopback `http://127.0.0.1:18093`，数据类型为 `real`。
 - 工具策略位于 Host 配置，因为 Agent 创建监听器和预设注册表属于进程级服务。它在 `agent/created` 和 `agent-preset/selected` 时确认当前 Agent 使用 `crm-query`，然后对该 Agent scope 调用 `ctx.tools.restrict()`；切回其他预设或 Agent 销毁时释放限制，其他预设不受影响。
 - 包只导出作用域工具策略、locale 与 icon 资源，不包含业务查询实现。
@@ -34,7 +34,7 @@ CRM、知识、页面和 WeKnora 是不同权限与生命周期域，保持独�
 
 查询工具与实际浏览器边界见 [query.11 allowlist 回执](../../docs/hackathon/evidence/dsh-query11-allowlist-20261021.md)。
 
-## How to：更新并验证 WeKnora 生产范围
+## 更新并验证 WeKnora 生产范围
 
 生产检索由 DSH 外部的薄 overlay 提供，第三方 `@wxg-prc-cpg/dsh-weknora@0.1.0` 包保持独立且不改写。维护源、live 文件和回滚资产的职责如下：
 

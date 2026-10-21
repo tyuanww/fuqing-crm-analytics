@@ -1,9 +1,8 @@
 /**
- * Remove inherited terminal capabilities from Agents using the query preset.
+ * Apply the query allowlist only to Agent scopes that select `crm-query`.
  *
- * This is a Host-plane policy because agent-create listeners and the preset
- * registry are shared services. The restriction is applied to the newly
- * created Agent scope only; other presets keep their complete tool surface.
+ * Agent-create listeners and preset composition are process-wide services.
+ * The restriction and guard belong to each matching Agent scope.
  */
 
 export const name = 'query-tool-policy'
