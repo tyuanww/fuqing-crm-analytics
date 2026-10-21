@@ -11,9 +11,10 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { execFile } from 'node:child_process';
+import { builtinModules } from 'node:module';
 import { access, copyFile, link, lstat, mkdir, mkdtemp, readFile, readdir, realpath, rm, writeFile } from 'node:fs/promises';
 import { promisify } from 'node:util';
-import { basename, dirname, join, relative, resolve, sep } from 'node:path';
+import { basename, dirname, join, posix, relative, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { tmpdir } from 'node:os';
 import { DSH_SDK_VERSION, PNPM_VERSION } from './toolchain.mjs';
@@ -26,25 +27,70 @@ const exec = promisify(execFile);
 const SHA256 = /^[a-f0-9]{64}$/;
 const SAFE_RELATIVE = /^(?!\/)(?!.*(?:^|\/)\.\.(?:\/|$))(?!.*\\)[^\0]+$/;
 const MAX_PACK_BYTES = 20 * 1024 * 1024;
+const MODULE_SYNTAX_GAP = String.raw`(?:[ \t\r\n]|\/\*[\s\S]*?\*\/|\/\/[^\r\n]*(?:\r?\n|$))*`;
+
+function parsePattern(pattern, code = 'PLUGIN_PACK_PATTERN_INVALID') {
+  assert.equal((pattern.match(/\*/g) ?? []).length, 1, `${code} ${pattern}`);
+  const slash = pattern.lastIndexOf('/');
+  assert.ok(
+    slash > 0
+      && !pattern.slice(0, slash + 1).includes('*')
+      && !pattern.slice(slash + 1).includes('/'),
+    `${code} ${pattern}`,
+  );
+  const directory = pattern.slice(0, slash + 1);
+  const suffix = pattern.slice(slash + 1);
+  const star = suffix.indexOf('*');
+  return {
+    head: `${directory}${suffix.slice(0, star)}`,
+    tail: suffix.slice(star + 1),
+  };
+}
+
+function matchesPattern(path, pattern, code = 'PLUGIN_PACK_PATTERN_INVALID') {
+  const { head, tail } = parsePattern(pattern, code);
+  return path.startsWith(head) && path.endsWith(tail)
+    && !path.slice(head.length, path.length - tail.length).includes('/');
+}
 
 function verifyEntrypoints(manifest, files) {
   const targets = [];
-  function exportsTargets(value) {
+  function exportKeys(value) {
+    if (value === null || typeof value !== 'object') return;
+    for (const [key, item] of Object.entries(value)) {
+      if (key.includes('*')) {
+        const entry = key.replace(/^\.\//, '');
+        assert.ok(SAFE_RELATIVE.test(entry), `PLUGIN_PACK_PATTERN_INVALID ${key}`);
+        parsePattern(entry);
+      }
+      exportKeys(item);
+    }
+  }
+  function exportsTargets(value, wildcardKey = false) {
     if (value === null) return;
-    if (typeof value === 'string') { targets.push(value); return; }
+    if (typeof value === 'string') { targets.push({ target: value, wildcard: wildcardKey }); return; }
     assert.ok(value && typeof value === 'object', 'PLUGIN_PACK_EXPORT_INVALID');
-    for (const item of Object.values(value)) exportsTargets(item);
+    for (const [key, item] of Object.entries(value)) {
+      exportsTargets(item, wildcardKey || key.includes('*'));
+    }
   }
-  if (manifest.exports !== undefined) exportsTargets(manifest.exports);
+  if (manifest.exports !== undefined) {
+    exportKeys(manifest.exports);
+    exportsTargets(manifest.exports);
+  }
   for (const value of [manifest.main, manifest.module, manifest.dsh?.bundle?.patch]) {
-    if (value !== undefined) targets.push(value);
+    if (value !== undefined) targets.push({ target: value, wildcard: false });
   }
-  for (const target of targets) {
+  for (const { target, wildcard } of targets) {
     assert.equal(typeof target, 'string', 'PLUGIN_PACK_ENTRY_INVALID');
     const entry = target.replace(/^\.\//, '');
-    // Wildcard exports need an explicit expansion contract; do not guess it.
-    assert.ok(SAFE_RELATIVE.test(entry) && !entry.includes('*') && !entry.split('/').includes('.'), `PLUGIN_PACK_ENTRY_INVALID ${target}`);
-    assert.ok(files.includes(entry), `PLUGIN_PACK_ENTRY_MISSING ${target}`);
+    assert.ok(SAFE_RELATIVE.test(entry) && !entry.split('/').includes('.'), `PLUGIN_PACK_ENTRY_INVALID ${target}`);
+    if (entry.includes('*')) {
+      assert.ok(wildcard, `PLUGIN_PACK_PATTERN_INVALID ${target}`);
+      parsePattern(entry);
+    }
+    const present = entry.includes('*') ? files.some(file => matchesPattern(file, entry)) : files.includes(entry);
+    assert.ok(present, `PLUGIN_PACK_ENTRY_MISSING ${target}`);
   }
 }
 
@@ -58,7 +104,87 @@ function safeAbsolute(value, code) {
 function packageFileAllowed(path, files) {
   if (path === 'package.json' || /^(?:README(?:\.[^/]+)?|LICENSE(?:\.[^/]+)?)$/.test(path)) return true;
   if (files.includes(path)) return true;
+  if (files.some(entry => entry.includes('*') && matchesPattern(path, entry))) return true;
   return files.some(entry => entry.endsWith('/') && path.startsWith(entry));
+}
+
+function packageName(specifier) {
+  const parts = specifier.split('/');
+  return specifier.startsWith('@') ? parts.slice(0, 2).join('/') : parts[0];
+}
+
+function hostEntrypoints(manifest) {
+  const entries = [];
+  const rootExport = manifest.exports?.['.'];
+  if (typeof rootExport === 'string') entries.push(rootExport);
+  else if (rootExport && typeof rootExport === 'object') {
+    for (const value of Object.values(rootExport)) if (typeof value === 'string') entries.push(value);
+  }
+  if (!entries.length && typeof manifest.main === 'string') entries.push(manifest.main);
+  return [...new Set(entries.map(entry => entry.replace(/^\.\//, '')))];
+}
+
+function moduleSpecifiers(source) {
+  const specifiers = new Set();
+  const patterns = [
+    /\b(?:import|export)\s+(?:[^'"]*?\s+from\s+)?['"]([^'"]+)['"]/g,
+    /\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
+    /\brequire\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
+  ];
+  for (const pattern of patterns) {
+    for (const match of source.matchAll(pattern)) specifiers.add(match[1]);
+  }
+  return [...specifiers];
+}
+
+async function assertRuntimeImports(root, manifest, files) {
+  const declared = new Set([
+    ...Object.keys(manifest.dependencies ?? {}),
+    ...Object.keys(manifest.optionalDependencies ?? {}),
+    ...Object.keys(manifest.peerDependencies ?? {}),
+  ]);
+  const fileSet = new Set(files);
+  const seen = new Set();
+  async function inspect(entry) {
+    assert.ok(fileSet.has(entry), `PLUGIN_PACK_RUNTIME_ENTRY_MISSING ${entry}`);
+    if (seen.has(entry)) return;
+    seen.add(entry);
+    const source = await readFile(join(root, entry), 'utf8');
+    for (const specifier of moduleSpecifiers(source)) {
+      if (specifier.startsWith('.')) {
+        const resolved = posix.normalize(posix.join(posix.dirname(entry), specifier));
+        assert.ok(!resolved.startsWith('../') && !resolved.startsWith('/'),
+          `PLUGIN_PACK_RUNTIME_IMPORT_ESCAPE ${entry} ${specifier}`);
+        const candidates = [resolved, `${resolved}.js`, `${resolved}.mjs`, `${resolved}.cjs`,
+          `${resolved}.json`, `${resolved}/index.js`, `${resolved}/index.mjs`, `${resolved}/index.cjs`];
+        const target = candidates.find(candidate => fileSet.has(candidate));
+        assert.ok(target, `PLUGIN_PACK_RUNTIME_IMPORT_MISSING ${entry} ${specifier}`);
+        await inspect(target);
+        continue;
+      }
+      const rootName = specifier.startsWith('node:') ? specifier.slice(5) : packageName(specifier);
+      if (specifier.startsWith('node:') || builtinModules.includes(rootName)) continue;
+      assert.ok(declared.has(rootName), `PLUGIN_PACK_UNDECLARED_RUNTIME_IMPORT ${entry} ${specifier}`);
+    }
+  }
+  for (const entry of hostEntrypoints(manifest)) await inspect(entry);
+}
+
+function isConfigurationBundle(manifest) {
+  return manifest.shinemage?.bundle_role === 'configuration-bundle';
+}
+
+async function assertConfigurationBundleRuntime(root, manifest, files) {
+  if (!isConfigurationBundle(manifest)) return;
+  const toolImport = new RegExp(
+    String.raw`(?:\bfrom|\bimport)${MODULE_SYNTAX_GAP}['"]@deepseek-ai\/dsh-tools(?:\/[^'"]*)?['"]`,
+  );
+  const dynamicModuleLoad = new RegExp(String.raw`\b(?:import|require)${MODULE_SYNTAX_GAP}\(`);
+  for (const file of files.filter(path => /\.[cm]?js$/.test(path))) {
+    const source = await readFile(join(root, file), 'utf8');
+    assert.doesNotMatch(source, toolImport, `PLUGIN_PACK_CONFIGURATION_BUNDLE_TOOL_IMPORT ${file}`);
+    assert.doesNotMatch(source, dynamicModuleLoad, `PLUGIN_PACK_CONFIGURATION_BUNDLE_DYNAMIC_MODULE_LOAD ${file}`);
+  }
 }
 
 async function canonicalInside(root, candidate, code) {
@@ -72,7 +198,9 @@ async function collectFiles(root, declared) {
   const files = [];
   const rootReal = await realpath(root);
   async function walk(current, prefix) {
-    for (const entry of await readdir(current, { withFileTypes: true })) {
+    const entries = (await readdir(current, { withFileTypes: true }))
+      .sort((left, right) => left.name.localeCompare(right.name));
+    for (const entry of entries) {
       const path = join(current, entry.name);
       const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
       assert.ok(!entry.isSymbolicLink(), `PLUGIN_PACK_SYMLINK ${rel}`);
@@ -89,6 +217,29 @@ async function collectFiles(root, declared) {
   // such as build.mjs and test sources stay outside it and are intentionally
   // ignored here; the tar listing below is the final packaged truth.
   for (const declaredPath of [...declared, 'package.json']) {
+    if (declaredPath.includes('*')) {
+      assert.ok(SAFE_RELATIVE.test(declaredPath), `PLUGIN_PACK_FILE_PATH_INVALID ${declaredPath}`);
+      const { head } = parsePattern(declaredPath);
+      const directory = head.slice(0, head.lastIndexOf('/'));
+      const directoryPath = join(root, directory);
+      const directoryInfo = await lstat(directoryPath);
+      assert.ok(directoryInfo.isDirectory() && !directoryInfo.isSymbolicLink(),
+        `PLUGIN_PACK_DECLARED_MISSING ${declaredPath}`);
+      await canonicalInside(rootReal, directoryPath, `PLUGIN_PACK_PATH_ESCAPE ${directory}`);
+      let matched = 0;
+      const entries = (await readdir(directoryPath, { withFileTypes: true }))
+        .sort((left, right) => left.name.localeCompare(right.name));
+      for (const entry of entries) {
+        const rel = `${directory}/${entry.name}`;
+        if (!matchesPattern(rel, declaredPath)) continue;
+        assert.ok(entry.isFile(), `PLUGIN_PACK_SPECIAL_FILE ${rel}`);
+        await canonicalInside(rootReal, join(root, rel), `PLUGIN_PACK_PATH_ESCAPE ${rel}`);
+        files.push(rel);
+        matched += 1;
+      }
+      assert.ok(matched > 0, `PLUGIN_PACK_DECLARED_MISSING ${declaredPath}`);
+      continue;
+    }
     const clean = declaredPath.replace(/\/$/, '');
     const path = join(root, clean);
     let info;
@@ -101,7 +252,7 @@ async function collectFiles(root, declared) {
       files.push(clean);
     }
   }
-  return files.sort();
+  return [...new Set(files)].sort();
 }
 
 function inspectManifest(manifest, packed = false, { sdkVersion = DSH_SDK_VERSION, pnpmVersion = PNPM_VERSION } = {}) {
@@ -112,7 +263,14 @@ function inspectManifest(manifest, packed = false, { sdkVersion = DSH_SDK_VERSIO
     assert.equal(manifest.packageManager, `pnpm@${pnpmVersion}`, 'PLUGIN_PACK_PACKAGE_MANAGER_INVALID');
   }
   if (packed) assert.equal(manifest.scripts, undefined, 'PLUGIN_PACK_LIFECYCLE_FORBIDDEN');
-  assert.equal(manifest.peerDependencies?.['@deepseek-ai/dsh-tools'], sdkVersion, 'PLUGIN_PACK_DSH_PEER_INVALID');
+  if (isConfigurationBundle(manifest)) {
+    for (const field of ['dependencies', 'optionalDependencies', 'devDependencies', 'peerDependencies']) {
+      assert.equal(manifest[field]?.['@deepseek-ai/dsh-tools'], undefined,
+        'PLUGIN_PACK_CONFIGURATION_BUNDLE_TOOL_DEPENDENCY');
+    }
+  } else {
+    assert.equal(manifest.peerDependencies?.['@deepseek-ai/dsh-tools'], sdkVersion, 'PLUGIN_PACK_DSH_PEER_INVALID');
+  }
   const declared = manifest.files;
   assert.ok(Array.isArray(declared) && declared.length > 0, 'PLUGIN_PACK_FILES_REQUIRED');
   assert.equal(new Set(declared).size, declared.length, 'PLUGIN_PACK_FILES_DUPLICATE');
@@ -146,6 +304,9 @@ async function inspectPackage(pluginRoot, compatibility = {}) {
   const declared = inspectManifest(manifest, false, compatibility);
   const declaredFiles = await collectFiles(pluginRoot, declared);
   assert.ok(declaredFiles.some(file => file.startsWith('lib/')), 'PLUGIN_PACK_BUILD_OUTPUT_REQUIRED');
+  verifyEntrypoints(manifest, declaredFiles);
+  await assertConfigurationBundleRuntime(pluginRoot, manifest, declaredFiles);
+  await assertRuntimeImports(pluginRoot, manifest, declaredFiles);
   return { manifest, sourceManifest, declared, declaredFiles };
 }
 
@@ -157,6 +318,7 @@ async function currentBuildBytes(pluginRoot, inspected) {
   const generatedTree = await canonicalTreeDigest(pluginRoot, {
     include: generatedPaths(inspected.declaredFiles),
     allowSymlinks: false,
+    normalizeFileModes: true,
   });
   return { sourceTree, generatedTree };
 }
@@ -268,12 +430,18 @@ export async function readPluginPack({ manifestPath, expectedSha256, expectedSdk
     }
     await walk(packageRoot);
     assert.deepEqual(entries.sort(), [...receipt.entries].sort(), 'PLUGIN_PACK_ENTRY_SET_MISMATCH');
+    verifyEntrypoints(manifest, entries);
+    await assertConfigurationBundleRuntime(packageRoot, manifest, entries);
+    await assertRuntimeImports(packageRoot, manifest, entries);
     // Declared assets, exports and patches must all be present in the archive.
     assert.ok((await collectFiles(packageRoot, declared)).some(file => file.startsWith('lib/')), 'PLUGIN_PACK_BUILD_OUTPUT_REQUIRED');
-    verifyEntrypoints(manifest, entries);
     assertClean(await scanTree(packageRoot, { maxBytes: MAX_PACK_BYTES, allowSyntheticFixtures: false }));
     if (provenance?.status === 'PASS') {
-      const generatedTree = await canonicalTreeDigest(packageRoot, { include: generatedPaths(declared), allowSymlinks: false });
+      const generatedTree = await canonicalTreeDigest(packageRoot, {
+        include: generatedPaths(declared),
+        allowSymlinks: false,
+        normalizeFileModes: true,
+      });
       assert.equal(generatedTree.sha256, provenance.generated_tree.sha256, 'PLUGIN_PACK_GENERATED_TREE_MISMATCH');
       assert.equal(generatedTree.entries, provenance.generated_tree.entries, 'PLUGIN_PACK_GENERATED_TREE_ENTRIES');
       assert.equal(generatedTree.bytes, provenance.generated_tree.bytes, 'PLUGIN_PACK_GENERATED_TREE_BYTES');
@@ -380,7 +548,10 @@ export async function packPlugin({ plugin, outputDir, manifestPath, builderProve
     await inspectFiles(packageRoot);
     packageEntries.sort();
     assert.ok(packageEntries.includes('package.json'), 'PLUGIN_PACK_PACKAGE_JSON_MISSING');
-    verifyEntrypoints(JSON.parse(await readFile(join(packageRoot, 'package.json'), 'utf8')), packageEntries);
+    const packedManifest = JSON.parse(await readFile(join(packageRoot, 'package.json'), 'utf8'));
+    verifyEntrypoints(packedManifest, packageEntries);
+    await assertConfigurationBundleRuntime(packageRoot, packedManifest, packageEntries);
+    await assertRuntimeImports(packageRoot, packedManifest, packageEntries);
     assertClean(await scanTree(packageRoot, { maxBytes: MAX_PACK_BYTES, allowSyntheticFixtures: false }));
     const bytes = await readFile(packedPath);
     const packDigest = digest(bytes);

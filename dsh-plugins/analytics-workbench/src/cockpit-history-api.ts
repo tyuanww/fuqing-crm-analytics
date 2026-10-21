@@ -1,7 +1,7 @@
 /** Only delivery metadata crosses the native authenticated Connection fence. */
 import type { Context } from '@deepseek-ai/cordis';
-import { clientRequestSchema } from '@deepseek-ai/dsh-client-connection';
 import type {} from '@deepseek-ai/dsh-session-query';
+import { parseClientRequestEnvelope } from './client-request-envelope.mjs';
 import { readDeliveryHistory } from './cockpit-history.mjs';
 
 export const name = 'analytics-workbench-cockpit-history';
@@ -11,9 +11,9 @@ export function apply(ctx: Context): void {
     async fetch(request) {
       let input: unknown;
       try { input = await request.json(); } catch { return new Response('invalid JSON', { status: 400 }); }
-      const parsed = clientRequestSchema.safeParse(input);
-      if (!parsed.success) return new Response('invalid envelope', { status: 400 });
-      const { rpcId, method, payload } = parsed.data;
+      const request = parseClientRequestEnvelope(input);
+      if (!request) return new Response('invalid envelope', { status: 400 });
+      const { rpcId, method, payload } = request;
       let result;
       try {
         if (method !== 'shine-mage-deliveries' || !payload || typeof payload !== 'object' || Array.isArray(payload)) throw new Error('INVALID_HISTORY_REQUEST');
