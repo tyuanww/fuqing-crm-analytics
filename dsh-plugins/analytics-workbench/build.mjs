@@ -19,7 +19,7 @@ if (buildToolsInput && !isAbsolute(buildToolsInput)) {
   console.error('BUILD_TOOLS_NOT_CONFIGURED: pass an absolute build-tools directory as the third argument or B0_BUILD_TOOLS.');
   process.exit(2);
 }
-const toolchain = await bindToolchain(root, upstream, buildToolsInput && resolve(buildToolsInput));
+const toolchain = await bindToolchain(root, upstream, buildToolsInput && resolve(buildToolsInput), { allowRebind: true });
 const { build, compiler, pin } = toolchain;
 try {
   const skillPackage = await packSkills(root);

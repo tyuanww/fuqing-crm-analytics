@@ -66,7 +66,9 @@ test('an explicit rc1 lane temporarily rebinds local SDK links and restores them
   process.env.DSH_RELEASE_LANE_CONFIG = resolve('config/dsh-rc1-release-lane.json');
   process.env.DSH_PACKAGE_INPUTS = resolve('vendor/dsh-package-inputs');
   try {
-    const bound = await bindToolchain(root, resolve(process.env.B0_RC1_UPSTREAM), resolve(process.env.B0_BUILD_TOOLS));
+    const bound = await bindToolchain(root, resolve(process.env.B0_RC1_UPSTREAM), resolve(process.env.B0_BUILD_TOOLS), {
+      allowRebind: true,
+    });
     assert.equal(await readFile(join(root, 'node_modules/@deepseek-ai/dsh-tools/package.json'), 'utf8').then(JSON.parse).then(value => value.version), '0.2.1-rc.1');
     assert.match(await realpath(boardLink), /node_modules\/\.shinemage-bundled\//);
     await bound.restore();

@@ -119,8 +119,12 @@ export async function inspectToolchain(upstream, buildTools = defaultBuildTools,
     } };
 }
 
-/** Bind only after the complete input preflight succeeds. */
-export async function bindToolchain(plugin, upstream, buildTools = defaultBuildTools) {
+/**
+ * Bind only after the complete input preflight succeeds. Replacing an existing
+ * SDK link requires an explicit caller opt-in because that caller must restore it.
+ */
+export async function bindToolchain(plugin, upstream, buildTools = defaultBuildTools, { allowRebind = false } = {}) {
+  assert.equal(typeof allowRebind, 'boolean', 'KIT_REBIND_OPTION_INVALID');
   const consumer = JSON.parse(await readFile(join(plugin, 'package.json'), 'utf8'));
   const kit = JSON.parse(await readFile(join(toolchainRoot, 'package.json'), 'utf8'));
   assert.ok(![consumer.dependencies, consumer.optionalDependencies, consumer.peerDependencies]
@@ -172,6 +176,7 @@ export async function bindToolchain(plugin, upstream, buildTools = defaultBuildT
       assert.ok(existing.isSymbolicLink(), `Refusing to replace existing dependency: ${name}`);
       const existingTarget = await realpath(link), expectedTarget = await realpath(target);
       if (existingTarget === expectedTarget) continue;
+      assert.ok(allowRebind, 'KIT_EXISTING_BINDING_DIFFERS');
       const modules = await realpath(join(plugin, 'node_modules'));
       const local = relative(modules, existingTarget);
       if (!local || local.startsWith('..') || isAbsolute(local)) {

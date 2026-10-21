@@ -47,6 +47,7 @@ test('the default rc2 lane rebinds a verified upstream SDK link and restores it'
       root,
       resolve(process.env.B0_BUILD_UPSTREAM),
       resolve(process.env.B0_BUILD_TOOLS),
+      { allowRebind: true },
     );
     assert.equal(bound.pin.sdk_version, '0.1.7-rc.2');
     assert.notEqual(await realpath(link), await realpath(original));
@@ -67,8 +68,50 @@ test('a mismatched external package identity is refused', {
 }, async t => {
   const { root, original, link } = await fixture(t, '@shine-mage/not-dsh-tools');
   await assert.rejects(
-    bindToolchain(root, resolve(process.env.B0_BUILD_UPSTREAM), resolve(process.env.B0_BUILD_TOOLS)),
+    bindToolchain(root, resolve(process.env.B0_BUILD_UPSTREAM), resolve(process.env.B0_BUILD_TOOLS), {
+      allowRebind: true,
+    }),
     error => error?.code === 'ERR_ASSERTION' && /KIT_EXISTING_BINDING_NAME/.test(error.message),
   );
   assert.equal(await realpath(link), await realpath(original));
+});
+
+test('a build consumer without explicit rebind permission preserves the existing SDK link', {
+  skip: !process.env.B0_BUILD_UPSTREAM || !process.env.B0_BUILD_TOOLS,
+}, async t => {
+  const { root, original, link } = await fixture(t);
+  const lane = process.env.DSH_RELEASE_LANE_CONFIG;
+  delete process.env.DSH_RELEASE_LANE_CONFIG;
+  try {
+    await assert.rejects(
+      bindToolchain(root, resolve(process.env.B0_BUILD_UPSTREAM), resolve(process.env.B0_BUILD_TOOLS)),
+      /KIT_EXISTING_BINDING_DIFFERS/,
+    );
+    assert.equal(await realpath(link), await realpath(original));
+  } finally {
+    if (lane === undefined) delete process.env.DSH_RELEASE_LANE_CONFIG;
+    else process.env.DSH_RELEASE_LANE_CONFIG = lane;
+  }
+});
+
+test('only the cockpit build opts into temporary SDK rebinding', async () => {
+  const builds = [
+    'analytics-workbench',
+    'knowledge',
+    'crm-knowledge',
+    'shine-board',
+    'shine-brand',
+    'shine-crowd-action',
+    'shine-funnel',
+    'shine-query',
+    'shine-waterfall',
+  ];
+  for (const plugin of builds) {
+    const source = await readFile(resolve(`dsh-plugins/${plugin}/build.mjs`), 'utf8');
+    assert.equal(
+      /allowRebind\s*:\s*true/.test(source),
+      plugin === 'analytics-workbench',
+      `UNEXPECTED_REBIND_OPT_IN ${plugin}`,
+    );
+  }
 });
