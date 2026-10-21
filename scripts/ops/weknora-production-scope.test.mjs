@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 
@@ -345,10 +346,13 @@ test('a failed second registration releases tools registered by the same effect'
 })
 
 test('production overlay records project-only scope without embedding runtime credentials', async () => {
-  const overlay = JSON.parse(await readFile(
+  const overlayBytes = await readFile(
     new URL('../../config/weknora-production-overlay.v1.json', import.meta.url),
-    'utf8',
-  ))
+  )
+  const overlay = JSON.parse(overlayBytes)
+  const adapterBytes = await readFile(new URL('./weknora-production.mjs', import.meta.url))
+  const scopeBytes = await readFile(new URL('./weknora-production-scope.mjs', import.meta.url))
+  const sha256 = value => createHash('sha256').update(value).digest('hex')
 
   assert.equal(overlay.schema_version, 'shinemage-weknora-production-overlay/v1')
   assert.equal(overlay.scope_contract.project_knowledge_base_id, PROJECT)
@@ -359,6 +363,9 @@ test('production overlay records project-only scope without embedding runtime cr
   assert.equal(overlay.scope_contract.tool_lifecycle, 'EFFECT_DISPOSE_TRANSACTIONAL')
   assert.equal(overlay.scope_contract.tenant_wide_document_name_lookup, 'DENIED_BEFORE_NETWORK')
   for (const digest of Object.values(overlay.overlay_files)) assert.match(digest, /^[a-f0-9]{64}$/)
+  assert.equal(overlay.overlay_files['weknora.mjs'], sha256(adapterBytes))
+  assert.equal(overlay.overlay_files['weknora-production-scope.mjs'], sha256(scopeBytes))
+  assert.equal(sha256(overlayBytes), '8ef9c40cf859d176e815043004344da561f7253c3d9eb82d532bd2492e7373a7')
   assert.equal(overlay.release_ready, undefined)
   assert.doesNotMatch(JSON.stringify(overlay), /"(?:api[_-]?key|authorization|bearer)"\s*:/i)
 })

@@ -77,7 +77,7 @@
       "private-textbook-graph"
     ],
     "crm_login": "NOT_CONNECTED",
-    "side_load_lock": "config/query-agent-side-load.v1.json"
+    "side_load_lock": "docs/hackathon/evidence/dsh-query9-side-load-lock-20261021.json"
   },
   "weknora_scope": {
     "project_knowledge_base_id": "1c4627e2-dfc1-48ca-aeef-2c00b53da5f8",

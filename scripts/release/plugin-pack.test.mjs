@@ -94,6 +94,32 @@ test('query side-load lock binds the source package manifest to the recorded pac
   );
 });
 
+test('query.9 history uses an immutable identity snapshot instead of the live query.11 lock', async () => {
+  const query9 = JSON.parse(await readFile(
+    new URL('../../docs/hackathon/evidence/dsh-query9-weknora-scope-20261021.json', import.meta.url),
+    'utf8',
+  ));
+  const snapshot = JSON.parse(await readFile(
+    new URL('../../docs/hackathon/evidence/dsh-query9-side-load-lock-20261021.json', import.meta.url),
+    'utf8',
+  ));
+
+  assert.equal(
+    query9.browser_uat.side_load_lock,
+    'docs/hackathon/evidence/dsh-query9-side-load-lock-20261021.json',
+  );
+  assert.equal(snapshot.schema_version, 'shinemage-query-agent-side-load-history/v1');
+  assert.equal(snapshot.version, query9.query_artifact.version);
+  assert.equal(snapshot.source_sha, query9.query_artifact.source_sha);
+  assert.equal(snapshot.source_package_manifest_sha256, query9.query_artifact.source_package_manifest_sha256);
+  assert.equal(snapshot.generated_pack_manifest_sha256, query9.query_artifact.manifest_sha256);
+  assert.equal(snapshot.tarball.name, query9.query_artifact.tarball);
+  assert.equal(snapshot.tarball.bytes, query9.query_artifact.tarball_bytes);
+  assert.equal(snapshot.tarball.sha256, query9.query_artifact.tarball_sha256);
+  assert.equal(snapshot.tarball.integrity, query9.query_artifact.integrity);
+  assert.equal(snapshot.build_provenance_sha256, query9.query_artifact.build_provenance_sha256);
+});
+
 test('configuration bundle packs without a synthetic dsh-tools peer', async t => {
   const input = await fixture(t);
   const path = join(input.plugin, 'package.json');
