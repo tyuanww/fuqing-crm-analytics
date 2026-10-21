@@ -11,9 +11,9 @@ export function apply(ctx: Context): void {
     async fetch(request) {
       let input: unknown;
       try { input = await request.json(); } catch { return new Response('invalid JSON', { status: 400 }); }
-      const request = parseClientRequestEnvelope(input);
-      if (!request) return new Response('invalid envelope', { status: 400 });
-      const { rpcId, method, payload } = request;
+      const message = parseClientRequestEnvelope(input);
+      if (!message) return new Response('invalid envelope', { status: 400 });
+      const { rpcId, method, payload } = message;
       let result;
       try {
         if (method !== 'shine-mage-deliveries' || !payload || typeof payload !== 'object' || Array.isArray(payload)) throw new Error('INVALID_HISTORY_REQUEST');
