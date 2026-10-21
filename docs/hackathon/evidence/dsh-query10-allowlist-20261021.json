@@ -36,12 +36,13 @@
   "side_load": {
     "status": "ROLLED_BACK_TO_QUERY9",
     "regression": "Visible request schema retained team tools but omitted scoped CRM, WeKnora and page tools.",
-    "browser_session": "session-9428bc59-2360-44f9-b7a1-8126af621cfc",
+    "browser_trace": "session-9428bc59-2360-44f9-b7a1-8126af621cfc",
     "recovery": "/srv/shinemage/dsh/recovery/query10-side-load-20261021/"
   },
   "limits": [
     "The artifact itself is byte-verified, but it is not accepted for production because it hid required preset tools.",
     "The live profile was rolled back to query.9; query.11 supersedes this attempt.",
-    "This is an owner-operated side-load, not a formal signed release."
+    "This is an owner-operated side-load, not a formal signed release.",
+    "browser_trace is an opaque UI correlation identifier, not a credential."
   ]
 }
