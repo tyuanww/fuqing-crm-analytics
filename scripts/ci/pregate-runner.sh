@@ -4,6 +4,11 @@
 # not scale with the selected file count.
 set -uo pipefail
 
+if [ "$#" -eq 0 ]; then
+  echo 'PREGATE_FILES_REQUIRED' >&2
+  exit 2
+fi
+
 node_files=()
 python_files=()
 status=0

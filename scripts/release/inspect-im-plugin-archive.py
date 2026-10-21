@@ -62,9 +62,10 @@ def main() -> None:
                 if parts == (root, "package.json"):
                     package_member = member
 
-    if root is None or package_member is None or package_member.size > args.max_package_bytes:
-        fail("IM_ARCHIVE_PACKAGE_MISSING")
-    with tarfile.open(archive, "r:*") as source:
+        if root is None or package_member is None or package_member.size > args.max_package_bytes:
+            fail("IM_ARCHIVE_PACKAGE_MISSING")
+        # Read the package from the same open archive that passed the member
+        # checks. Reopening the path would create a check/read race.
         stream = source.extractfile(package_member)
         if stream is None:
             fail("IM_ARCHIVE_PACKAGE_MISSING")

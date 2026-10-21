@@ -48,6 +48,7 @@
 
 | 现象 | 处理 |
 |---|---|
+| `PREGATE_FILES_REQUIRED` | 调用方没有选中任何测试文件；不要把它当作空测试集通过 |
 | `PREGATE_REPOSITORY_ROOT_UNAVAILABLE` | 在 Git worktree 中运行，不要在临时目录直接执行脚本 |
 | `PREGATE_NODE_REQUIRED` / `PREGATE_NODE_VERSION` | 设置 `PREGATE_NODE` 或 `DSH_DEV_NODE`，并确认主版本为 24 |
 | `PREGATE_PYTHON_REQUIRED` / `PREGATE_PYTHON_VERSION` | 设置 `PREGATE_PYTHON` 或 `FQ_B0_PYTHON`，并确认版本为 3.14 |

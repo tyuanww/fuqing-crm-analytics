@@ -23,6 +23,9 @@
     "dsh-plugins/query-agent/cordis.patch.yml": [
       "dsh-plugins/query-agent/test/package.test.mjs"
     ],
+    "dsh-plugins/query-agent/lib/tool-policy.js": [
+      "dsh-plugins/query-agent/test/package.test.mjs"
+    ],
     "dsh-plugins/query-agent/locale/*.json": [
       "dsh-plugins/query-agent/test/package.test.mjs"
     ],
@@ -38,6 +41,24 @@
     ],
     "scripts/ops/open-hangzhou-dsh.sh": [
       "scripts/ops/open-hangzhou-dsh.test.mjs"
+    ],
+    "scripts/ops/weknora-production-scope.mjs": [
+      "scripts/ops/weknora-production-scope.test.mjs"
+    ],
+    "scripts/ops/weknora-production.mjs": [
+      "scripts/ops/weknora-production-scope.test.mjs"
+    ],
+    "scripts/release/generated-provenance.mjs": [
+      "scripts/release/plugin-pack.test.mjs"
+    ],
+    "scripts/release/im-plugin-inputs.mjs": [
+      "scripts/release/im-plugin-inputs.test.mjs"
+    ],
+    "scripts/release/inspect-im-plugin-archive.py": [
+      "scripts/release/im-plugin-inputs.test.mjs"
+    ],
+    "scripts/release/plugin-pack.mjs": [
+      "scripts/release/plugin-pack.test.mjs"
     ]
   },
   "empty_lanes": [

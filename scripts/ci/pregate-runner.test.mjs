@@ -98,3 +98,13 @@ test('mixed runner fails closed outside a Git worktree', async t => {
   )
   await assert.rejects(readFile(f.log, 'utf8'), error => error.code === 'ENOENT')
 })
+
+// Value: protects=pregate rejects an empty selection instead of reporting success; fails_when=the zero-file fail-closed guard is removed; why_new=the existing runner tests exercise only populated or invalid selections; seam=none; no_claim=test selection completeness (runner only; gstack owns discovery)
+test('mixed runner rejects an empty selection before reporting success', async t => {
+  const f = await fixture(t)
+  await assert.rejects(
+    run(f, []),
+    error => error.code === 2 && /PREGATE_FILES_REQUIRED/.test(error.stderr),
+  )
+  await assert.rejects(readFile(f.log, 'utf8'), error => error.code === 'ENOENT')
+})

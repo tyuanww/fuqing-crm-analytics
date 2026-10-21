@@ -92,7 +92,7 @@
 
 - 插件生成树 provenance 改为按固定 `0644` canonical mode 比较生成文件，避免服务账号在 `umask 077` 下把同一 tarball 字节误判为漂移；profile 和 release fixture 同步显式设置权限，完整 B0 在硬化 umask 下通过。
 
-- WeKnora 生产读取增加读取前后双重元数据范围校验，请求期间跨库变化会丢弃正文；两个检索工具通过 `ctx.effect` 注册和逆序释放，第二个注册失败时会立即清理已注册工具。配置型 pack 同时拒绝动态/拼接模块加载并去重 overlapping `files` wildcard，pre-gate 在无法解析 Git 根目录时稳定失败。
+- WeKnora 生产读取增加读取前后双重元数据范围校验，请求期间跨库变化会丢弃正文；两个检索工具通过 `ctx.effect` 注册和逆序释放，第二个注册失败时会立即清理已注册工具。配置型 pack 同时拒绝动态/拼接模块加载并去重 overlapping `files` wildcard，pre-gate 在无法解析 Git 根目录或没有测试文件时稳定失败；IM 归档在同一打开句柄上完成成员校验和根 `package.json` 读取，避免检查后重新打开路径的竞态。
 
 - 配置型 bundle 的 `files` 与 `exports` key/value 只允许单个 `*` 位于固定目录的最后文件名段，拒绝 `lib/*/index.js` 一类目录段通配；`main`、`module` 和 `dsh.bundle.patch` 也改为只接受精确文件。增加打包/reader 负测，避免文档合同与实际包面继续漂移。
 

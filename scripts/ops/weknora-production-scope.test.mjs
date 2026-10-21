@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
-import { readFile } from 'node:fs/promises'
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import test from 'node:test'
 
 import {
@@ -295,6 +297,30 @@ test('a missing production key uses the documented fail-closed error', () => {
   assert.throws(
     () => readProductionWeKnoraKey('/definitely/missing/retrieve.key'),
     /WEKNORA_RETRIEVAL_KEY_UNAVAILABLE/,
+  )
+})
+
+// Value: protects=WeKnora accepts neither a blank runtime key nor malformed/duplicate tool definitions; fails_when=credential or tool-shape guards are removed; why_new=existing tests cover missing keys and unknown/required tools only; seam=none; no_claim=filesystem permission policy (unit only; operator mode is documented separately)
+test('blank production keys and malformed tool definitions fail closed', async t => {
+  const root = await mkdtemp(join(tmpdir(), 'weknora-key-test-'))
+  t.after(() => rm(root, { recursive: true, force: true }))
+  const keyPath = join(root, 'retrieve.key')
+  await writeFile(keyPath, ' \n', { mode: 0o600 })
+  assert.throws(() => readProductionWeKnoraKey(keyPath), /WEKNORA_RETRIEVAL_KEY_UNAVAILABLE/)
+  assert.throws(
+    () => createScopedWeKnoraTools({ definitions: [null], client: {}, allowedKnowledgeBaseIds: [PROJECT] }),
+    /invalid WeKnora tool definition/,
+  )
+  assert.throws(
+    () => createScopedWeKnoraTools({
+      definitions: [
+        definition('weknora_search', async () => []),
+        definition('weknora_search', async () => []),
+      ],
+      client: {},
+      allowedKnowledgeBaseIds: [PROJECT],
+    }),
+    /duplicate WeKnora tool weknora_search/,
   )
 })
 
