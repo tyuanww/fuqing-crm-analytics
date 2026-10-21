@@ -36,7 +36,7 @@ These values are not interchangeable. A source manifest can stay unchanged while
 
 ## Configuration bundles
 
-A pure configuration bundle sets `shinemage.bundle_role` to `configuration-bundle`. It may omit the `@deepseek-ai/dsh-tools` peer because it contributes DSH patch/configuration rather than tool implementation. The same package must not declare that module in `dependencies`, `optionalDependencies`, `devDependencies`, or `peerDependencies`, and packaged `.js/.mjs/.cjs` files must not import it. Runtime work still belongs in an independently installed tool plugin.
+A pure configuration bundle sets `shinemage.bundle_role` to `configuration-bundle`. It may omit the `@deepseek-ai/dsh-tools` peer because it contributes DSH patch/configuration rather than tool implementation. The same package must not declare that module in `dependencies`, `optionalDependencies`, `devDependencies`, or `peerDependencies`, and packaged `.js/.mjs/.cjs` files must not import it through static, dynamic, concatenated, or computed module loading. Runtime work still belongs in an independently installed tool plugin.
 
 For package `files` and both sides of `exports`, one `*` may match immediate files in one fixed directory, such as `locale/*.json`. Multiple stars, a wildcard in the directory portion, recursive matching, path escape, and symlinked matches are rejected. A wildcard export target is accepted only when its containing export key also contains `*`; a wildcard value under an exact key is rejected. A wildcard must match at least one regular file before packing. `main`, `module` and `dsh.bundle.patch` must name exact files and cannot use a wildcard.
 
@@ -87,6 +87,7 @@ The packer does not build DSH, start a host, upload a package, activate a plugin
 | `PLUGIN_PACK_TARBALL_UNDECLARED` | The archive contains an undeclared file | Update the package `files` allowlist only when the file is a real runtime entry |
 | `PLUGIN_PACK_CONFIGURATION_BUNDLE_TOOL_DEPENDENCY` | A configuration bundle declares `@deepseek-ai/dsh-tools` in a dependency field | Move tool implementation to a tool plugin and remove the dependency |
 | `PLUGIN_PACK_CONFIGURATION_BUNDLE_TOOL_IMPORT` | A packaged configuration file imports `@deepseek-ai/dsh-tools` | Remove the import; configuration bundles may not carry tool implementation |
+| `PLUGIN_PACK_CONFIGURATION_BUNDLE_DYNAMIC_MODULE_LOAD` | A packaged configuration file uses `import()` or `require()` | Remove runtime module loading; configuration bundles may not carry executable module resolution |
 
 ## Scope limits
 

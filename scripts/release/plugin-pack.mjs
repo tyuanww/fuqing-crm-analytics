@@ -26,6 +26,7 @@ const exec = promisify(execFile);
 const SHA256 = /^[a-f0-9]{64}$/;
 const SAFE_RELATIVE = /^(?!\/)(?!.*(?:^|\/)\.\.(?:\/|$))(?!.*\\)[^\0]+$/;
 const MAX_PACK_BYTES = 20 * 1024 * 1024;
+const MODULE_SYNTAX_GAP = String.raw`(?:[ \t\r\n]|\/\*[\s\S]*?\*\/|\/\/[^\r\n]*(?:\r?\n|$))*`;
 
 function parsePattern(pattern, code = 'PLUGIN_PACK_PATTERN_INVALID') {
   assert.equal((pattern.match(/\*/g) ?? []).length, 1, `${code} ${pattern}`);
@@ -111,10 +112,14 @@ function isConfigurationBundle(manifest) {
 
 async function assertConfigurationBundleRuntime(root, manifest, files) {
   if (!isConfigurationBundle(manifest)) return;
-  const toolImport = /(?:\bfrom\s*|\bimport\s*\(\s*|\brequire\s*\(\s*|\bimport\s*)['"]@deepseek-ai\/dsh-tools(?:\/[^'"]*)?['"]/;
+  const toolImport = new RegExp(
+    String.raw`(?:\bfrom|\bimport)${MODULE_SYNTAX_GAP}['"]@deepseek-ai\/dsh-tools(?:\/[^'"]*)?['"]`,
+  );
+  const dynamicModuleLoad = new RegExp(String.raw`\b(?:import|require)${MODULE_SYNTAX_GAP}\(`);
   for (const file of files.filter(path => /\.[cm]?js$/.test(path))) {
     const source = await readFile(join(root, file), 'utf8');
     assert.doesNotMatch(source, toolImport, `PLUGIN_PACK_CONFIGURATION_BUNDLE_TOOL_IMPORT ${file}`);
+    assert.doesNotMatch(source, dynamicModuleLoad, `PLUGIN_PACK_CONFIGURATION_BUNDLE_DYNAMIC_MODULE_LOAD ${file}`);
   }
 }
 
@@ -182,7 +187,7 @@ async function collectFiles(root, declared) {
       files.push(clean);
     }
   }
-  return files.sort();
+  return [...new Set(files)].sort();
 }
 
 function inspectManifest(manifest, packed = false, { sdkVersion = DSH_SDK_VERSION, pnpmVersion = PNPM_VERSION } = {}) {

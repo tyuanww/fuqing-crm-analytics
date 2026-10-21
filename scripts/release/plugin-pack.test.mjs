@@ -61,7 +61,7 @@ test('query side-load lock binds the source package manifest to the recorded pac
   const manifest = JSON.parse(packageBytes);
   const lock = JSON.parse(await readFile(new URL('../../config/query-agent-side-load.v1.json', import.meta.url), 'utf8'));
   const evidence = JSON.parse(await readFile(
-    new URL('../../docs/hackathon/evidence/dsh-query9-weknora-scope-20261021.json', import.meta.url),
+    new URL('../../docs/hackathon/evidence/dsh-query11-allowlist-20261021.json', import.meta.url),
     'utf8',
   ));
 
@@ -186,6 +186,61 @@ test('configuration bundle cannot import dsh-tools without declaring the pinned 
   await writeFile(join(input.plugin, 'lib/index.js'), "import '@deepseek-ai/dsh-tools';\n");
   await commitFixture(input.root);
   await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_CONFIGURATION_BUNDLE_TOOL_IMPORT/);
+});
+
+test('configuration bundle rejects concatenated and computed dynamic module loading', async t => {
+  const input = await fixture(t);
+  const path = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  delete manifest.peerDependencies;
+  manifest.shinemage = { bundle_role: 'configuration-bundle' };
+  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await writeFile(
+    join(input.plugin, 'lib/index.js'),
+    "const moduleName = '@deepseek-ai/' + 'dsh-tools';\nexport const load = () => import(moduleName);\n",
+  );
+  await commitFixture(input.root);
+  await assert.rejects(
+    () => packPlugin(input),
+    /PLUGIN_PACK_CONFIGURATION_BUNDLE_DYNAMIC_MODULE_LOAD/,
+  );
+});
+
+test('configuration bundle checks comments between module keywords and syntax', async t => {
+  const input = await fixture(t);
+  const path = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  delete manifest.peerDependencies;
+  manifest.shinemage = { bundle_role: 'configuration-bundle' };
+  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await writeFile(
+    join(input.plugin, 'lib/index.js'),
+    "import /* pinned module */ '@deepseek-ai/dsh-tools';\nexport const load = name => import /* computed */ (name);\n",
+  );
+  await commitFixture(input.root);
+  await assert.rejects(
+    () => packPlugin(input),
+    /PLUGIN_PACK_CONFIGURATION_BUNDLE_TOOL_IMPORT/,
+  );
+  await writeFile(join(input.plugin, 'lib/index.js'), "export const load = name => require /* computed */ (name);\n");
+  await commitFixture(input.root);
+  await assert.rejects(
+    () => packPlugin(input),
+    /PLUGIN_PACK_CONFIGURATION_BUNDLE_DYNAMIC_MODULE_LOAD/,
+  );
+});
+
+test('overlapping files wildcards produce one archive entry per file', async t => {
+  const input = await fixture(t);
+  const path = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  manifest.files = ['lib/', 'cordis.patch.yml', 'lib/*.js', 'lib/index*'];
+  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await commitFixture(input.root);
+  const receipt = await packPlugin(input);
+
+  assert.equal(receipt.entries.filter(entry => entry === 'lib/index.js').length, 1);
+  assert.equal(new Set(receipt.entries).size, receipt.entries.length);
 });
 
 test('tool plugin still requires its exact dsh-tools peer', async t => {
