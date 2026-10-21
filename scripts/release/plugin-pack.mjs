@@ -426,7 +426,7 @@ if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) 
   try {
     const plugin = option('--plugin');
     const outputDir = option('--output-dir');
-    assert.ok(plugin && outputDir, 'Usage: node plugin-pack.mjs --plugin /absolute/plugin --output-dir /absolute/output [--manifest /absolute/manifest.json]');
+    assert.ok(plugin && outputDir, 'Usage: node plugin-pack.mjs --plugin /absolute/plugin --output-dir /absolute/output [--manifest /absolute/manifest.json] [--source-sdk-version VERSION]');
     const builderProvenancePath = option('--builder-receipt');
     const sourceSdkVersion = option('--source-sdk-version') ?? DSH_SDK_VERSION;
     const receipt = await packPlugin({ plugin, outputDir, manifestPath: option('--manifest'), builderProvenancePath, sourceSdkVersion });
