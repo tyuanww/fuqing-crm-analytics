@@ -55,6 +55,29 @@ async function fixture(t) {
   return { root, inputDir, lockPath, lock };
 }
 
+async function rewriteFirstArchive(f, style) {
+  const input = f.lock.inputs[0];
+  const archive = join(f.inputDir, input.tarball);
+  const root = `source-${input.package.replaceAll(/[@/]/g, '-')}-${input.commit}`;
+  const script = `import io, json, sys, tarfile
+archive, root, name, version, style = sys.argv[1:]
+payload = (json.dumps({"name": name, "version": version}) + "\\n").encode()
+names = [f"{root}/./package.json"] if style == "dot" else [f"{root}/package.json"] * 2
+with tarfile.open(archive, "w:gz") as source:
+    for member_name in names:
+        member = tarfile.TarInfo(member_name)
+        member.size = len(payload)
+        member.mode = 0o600
+        source.addfile(member, io.BytesIO(payload))
+`;
+  await exec('python3', ['-c', script, archive, root, input.package, input.version, style]);
+  const bytes = await readFile(archive);
+  input.bytes = bytes.length;
+  input.sha256 = sha(bytes, 'sha256');
+  input.integrity = `sha512-${sha(bytes, 'sha512', 'base64')}`;
+  await writeFile(f.lockPath, `${JSON.stringify(f.lock)}\n`);
+}
+
 test('pinned IM inputs verify exact bytes and package identity without claiming release readiness', async t => {
   const f = await fixture(t);
   const receipt = await verifyImPluginInputs({ lockPath: f.lockPath, inputDir: f.inputDir });
@@ -80,6 +103,17 @@ test('IM input lock rejects release claims and duplicate packages', async t => {
   f.lock.release_ready = false;
   f.lock.inputs[1].package = f.lock.inputs[0].package;
   assert.throws(() => validateImPluginInputs(f.lock), /IM_INPUT_REPOSITORY|IM_INPUT_DUPLICATE|IM_INPUT_PACKAGES/);
+});
+
+test('IM archive inspector rejects normalized dot segments and duplicate members', async t => {
+  for (const style of ['dot', 'duplicate']) {
+    const f = await fixture(t);
+    await rewriteFirstArchive(f, style);
+    await assert.rejects(
+      verifyImPluginInputs({ lockPath: f.lockPath, inputDir: f.inputDir }),
+      /IM_ARCHIVE_(?:PATH_INVALID|DUPLICATE_PATH)/,
+    );
+  }
 });
 
 test('checked-in IM input lock pins the live runtime while remaining non-release', async () => {

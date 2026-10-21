@@ -30,6 +30,7 @@ def main() -> None:
     entries = 0
     total = 0
     package_member = None
+    seen = set()
     with tarfile.open(archive, "r:*") as source:
         for member in source:
             entries += 1
@@ -38,11 +39,16 @@ def main() -> None:
             name = member.name
             if not name or "\\" in name or name.startswith("/"):
                 fail("IM_ARCHIVE_PATH_INVALID")
-            parts = pathlib.PurePosixPath(name).parts
-            if not parts or any(part in ("", ".", "..") for part in parts):
-                fail("IM_ARCHIVE_PATH_INVALID")
             if not (member.isdir() or member.isfile()):
                 fail("IM_ARCHIVE_LINK_OR_DEVICE")
+            canonical_name = name[:-1] if member.isdir() and name.endswith("/") else name
+            parts = tuple(canonical_name.split("/"))
+            if not parts or any(part in ("", ".", "..") for part in parts):
+                fail("IM_ARCHIVE_PATH_INVALID")
+            key = "/".join(parts)
+            if key in seen:
+                fail("IM_ARCHIVE_DUPLICATE_PATH")
+            seen.add(key)
             if root is None:
                 root = parts[0]
             if parts[0] != root:
