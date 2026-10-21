@@ -1,7 +1,7 @@
 {
   "schema_version": "shinemage-dsh-weknora-lifecycle-hardening/v1",
-  "observed_at": "2026-10-21T00:18:44Z",
-  "scope": "owner-operated-v5-query11-weknora-transactional-registration-cleanup",
+  "observed_at": "2026-10-21T09:46:22Z",
+  "scope": "owner-operated-v5-query11-weknora-server-key-scope",
   "release_ready": false,
   "timeline": [
     {
@@ -31,6 +31,14 @@
       "scope_helper_sha256": "e060ecd508ceaafb04dcd809078802e52ed2d0add297507013f11feb30e6d663",
       "overlay_manifest_sha256": "8ef9c40cf859d176e815043004344da561f7253c3d9eb82d532bd2492e7373a7",
       "recovery": "/srv/shinemage/dsh/recovery/weknora-registration-cleanup-20261021/"
+    },
+    {
+      "observed_at": "2026-10-21T09:46:22Z",
+      "state": "retrieval_key_server_scope_tightened",
+      "knowledge_base_ids": [
+        "1c4627e2-dfc1-48ca-aeef-2c00b53da5f8"
+      ],
+      "recovery": "/srv/shinemage/dsh/recovery/weknora-retrieval-key-scope-20261021/"
     }
   ],
   "environment": {
@@ -67,6 +75,7 @@
     "argument_keys": "ALLOWLIST",
     "search_scope": "PROJECT_KNOWLEDGE_BASE_ALLOWLIST",
     "document_read_scope": "METADATA_CHECK_BEFORE_AND_AFTER_READ",
+    "server_api_key_scope": "PROJECT_KNOWLEDGE_BASE_ALLOWLIST",
     "tenant_wide_document_name_lookup": "DENIED_BEFORE_NETWORK",
     "tool_lifecycle": "EFFECT_DISPOSE_TRANSACTIONAL"
   },
@@ -95,7 +104,9 @@
     },
     "cross_scope_read": {
       "status": "DENIED",
-      "code": "WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED",
+      "code": "WEKNORA_DOCUMENT_SCOPE_CHECK_FAILED",
+      "service_http_status": 403,
+      "service_error": "API key scope does not allow one or more knowledge bases",
       "content_returned": false
     },
     "tool_lifecycle_released": true,
@@ -244,9 +255,28 @@
       "capabilities": [
         "retrieve"
       ],
-      "allowed_knowledge_base_count": 2,
-      "includes_deployment_knowledge_base": true,
-      "adapter_enforces_single_project_scope": true
+      "allowed_knowledge_base_count": 1,
+      "allowed_knowledge_base_ids": [
+        "1c4627e2-dfc1-48ca-aeef-2c00b53da5f8"
+      ],
+      "includes_deployment_knowledge_base": false,
+      "server_enforces_single_project_scope": true,
+      "adapter_enforces_single_project_scope": true,
+      "token_changed": false,
+      "service_restarted": false,
+      "updated_at": "2026-10-21T09:46:22Z",
+      "recovery": "/srv/shinemage/dsh/recovery/weknora-retrieval-key-scope-20261021/",
+      "before_raw_sha256": "9a658ecdae8dfee8b7820bb0ffe1c5460ce5b419f21c85e4e4cc1b0905fa4e3d",
+      "after_raw_sha256": "13726db9734b0ea291b71b21b8be2e8a75d8bad321a28a5eafbe85acd2debd15",
+      "validation": {
+        "project_search_http_status": 200,
+        "project_search_count": 3,
+        "deployment_search_http_status": 403,
+        "deployment_search_error": "API key scope does not allow one or more knowledge bases",
+        "project_document_http_status": 200,
+        "deployment_document_http_status": 403,
+        "document_content_returned_for_denied_read": false
+      }
     },
     "models": {
       "embedding": "bge-m3:567m",

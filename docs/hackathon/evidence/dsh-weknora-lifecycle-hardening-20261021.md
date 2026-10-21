@@ -65,7 +65,26 @@ live 模块探针使用线上 adapter、helper 和 `retrieve.key`，没有输出
 
 容器 `WeKnora-app`、`WeKnora-docreader`、`WeKnora-postgres` 为 healthy；Redis、Neo4j 和前端容器运行中。active resource 共 194 个，其中 185 个 page PNG（约 43.6 MB）和 9 个源文件；本轮只盘点，没有删除或重分类这些资源。共享、组织、数据源和标签计数均为 `0`。
 
-retrieval key `DSH 本机只读检索` 只有 `retrieve` capability 且 `full_access=false`，但允许项目库与部署库两个知识库。因此服务端 key 不是单项目边界，必须继续由适配层 fail-closed allowlist 收窄。
+### 服务端检索 Key 范围
+
+`DSH 本机只读检索`（`tenant_api_keys.id=1`、tenant `10000`）仍使用 tenant scope，但服务端 `knowledge_base_ids` 已从项目库与部署验收库收窄为仅项目库。`capabilities` 继续只有 `retrieve`，`full_access=false`，本次更新没有改变 `api_key`、`key_hash`、token 或服务进程。
+
+2026-10-21 09:46:22Z 在一个 SQL 事务内执行受限更新；更新条件同时校验 key id、tenant、name、scope、capability、未撤销状态和原两库集合。配置保留在 `/srv/shinemage/dsh/recovery/weknora-retrieval-key-scope-20261021/`：
+
+- `api-key-1-before.raw` / `.tsv`：原两库元数据快照，SHA-256 分别为 `9a658ecd…4e3d` / `619b6e09…56`。
+- `api-key-1-after.raw` / `.tsv`：单项目库元数据快照，SHA-256 分别为 `13726db9…15d` / `7180faee…9a`。
+- `receipt.json`：只含非秘密元数据、更新条件和回滚目录，SHA-256 `74751cf8…d7`，文件和目录权限均为 owner-only。
+
+服务端权限复测使用同一 token，不输出 token 或正文：
+
+- 项目库 `/api/v1/knowledge-search`：HTTP `200`，返回 3 条结果。
+- 部署验收库同一搜索：HTTP `403`，`API key scope does not allow one or more knowledge bases`。
+- 项目库文档元数据：HTTP `200`，`knowledge_base_id` 为项目库。
+- 部署验收库文档元数据：HTTP `403`，未返回文档正文。
+
+服务端拒绝跨库元数据时，live adapter 在该前置检查处以 `WEKNORA_DOCUMENT_SCOPE_CHECK_FAILED` fail-closed，不会进入正文读取；这与允许元数据后再由 adapter 比较知识库 ID 的历史 `WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED` 结果不同，当前应以服务端 `403` 和 fail-closed 为准。
+
+回滚时从 `api-key-1-before.tsv` 恢复两个知识库 ID，不需要轮换 token。回滚后 adapter 的项目库 fail-closed allowlist 仍独立生效。
 
 ### Postgres 检索引擎显式配置
 
