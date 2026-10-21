@@ -415,6 +415,8 @@ function AnalyticsToolCard({ block }: ToolCallViewProps) {
 function PagePackageToolCard(props: ToolCallViewProps & { pagePackageWaiter?: PagePackageWaiter; openCockpit?: () => void; openDsh?: () => void; onNativePackage?: (pkg: { html: string; css?: string; js?: string; resources?: unknown[]; node_map?: unknown[] }, meta: { sessionId: string; requestId?: string; callId?: string }) => Promise<void> }) {
   const { block, pagePackageWaiter } = props;
   const delivered = useRef<string | null>(null);
+  const [handoffPending, setHandoffPending] = useState(false);
+  const [handoffError, setHandoffError] = useState('');
   useEffect(() => {
     if (!pagePackageWaiter || !('kind' in block) || block.kind !== 'tool-result') return;
     if (block.isError || typeof block.callId !== 'string') return;
@@ -435,7 +437,18 @@ function PagePackageToolCard(props: ToolCallViewProps & { pagePackageWaiter?: Pa
       }
       const sessionId = typeof meta.session_id === 'string' ? meta.session_id : '';
       const accepted = pagePackageWaiter.deliver(requestId, pkg);
-      if (!accepted && sessionId) void Promise.resolve(props.onNativePackage?.(pkg, { sessionId, requestId, callId: typeof block.callId === 'string' ? block.callId : undefined })).catch(() => { /* candidate status remains visible */ });
+      if (!accepted && sessionId && props.onNativePackage) {
+        setHandoffPending(true);
+        setHandoffError('');
+        void props.onNativePackage(pkg, { sessionId, requestId, callId: block.callId })
+          .then(() => setHandoffPending(false))
+          .catch(error => {
+            setHandoffPending(false);
+            setHandoffError(error instanceof Error ? error.message : '页面未能登记到产物收件箱。');
+          });
+      } else if (!accepted) {
+        setHandoffError('驾驶舱产物收件箱未挂载；页面源码包仍保留在本次对话中。');
+      }
       return;
     }
     const error = meta?.error as { code?: unknown } | undefined;
@@ -456,8 +469,8 @@ function PagePackageToolCard(props: ToolCallViewProps & { pagePackageWaiter?: Pa
     return <div className="analytics-b0-card" role="status">页面源码包被拒收（{code}）；请按拒绝原因修正后重试。</div>;
   }
   return <div className="analytics-b0-card" data-testid="analytics-b0-page-card">
-    <strong>自由页面源码包已交付工作台</strong>
-    <p>request_id {String(meta.request_id)} · 已登记到驾驶舱产物收件箱，请检查后确认保存；本工具不保存正式页面。</p>
+    <strong>{handoffError ? '页面源码包交接失败' : handoffPending ? '正在登记到产物收件箱…' : '自由页面源码包已交付工作台'}</strong>
+    <p>{handoffError ? `request_id ${String(meta.request_id)} · ${handoffError}` : `request_id ${String(meta.request_id)} · 请检查驾驶舱产物收件箱并确认保存；本工具不保存正式页面。`}</p>
     <div className="analytics-b0-card-actions"><button type="button" onClick={() => props.openCockpit?.()}>打开驾驶舱</button><button type="button" onClick={() => props.openDsh?.()}>在 DSH 中查看</button></div>
   </div>;
 }

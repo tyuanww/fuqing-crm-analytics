@@ -2,7 +2,7 @@
 
 这份文档给维护者、插件作者和使用者一条共同的路径：主仓库负责把固定版本的 DeepSeek Harness（DSH）装配成可验收的平台，业务能力由独立插件和服务仓库维护。它也规定本机证据、Git worktree、分支和远程仓库怎样留存，避免为了“整洁”误删仍可复核的材料。
 
-线上 owner-operated 当前为 `dsh-0.2.1-rc.1-core-main-20261020-v5`，服务仍 active/running；它是 v4 clean-main runtime 的现场 side-load。query.11 当前生效，最近重启后的 ephemeral profile 为 `27566016…`，而 release marker 仍为 v4/PREPARED、候选 receipt 仍为 `c3ec7df3…`，因此 v5 不构成新的正式发布身份。IM 输入已从缺失推进为 `PINNED_INPUTS_VERIFIED`，但统一身份、签名、独立验收和切换授权仍未完成，`release_ready=false`。主仓兼容 pin、历史 owner receipt 和 formal release 证据各自按日期留存，不能互相替代。上述值是本次记录的事实，不表示以后永远不升级。
+线上 owner-operated 当前为 `dsh-0.2.1-rc.1-core-main-20261021-cockpit-v3`，服务仍 active/running；它复用 v5 的既有持久 runtime，v2 驾驶舱候选保留，v5 是稳定回退目标。驾驶舱 pack source 为 `7c9244c9…`、manifest `cec2dbf9…`、tarball `b8808b25…`、effective client `0d653ceb…`。query.11 当前生效；v5 的 release marker 仍为 v4/PREPARED、候选 receipt 仍为 `c3ec7df3…`，因此 v3 也不构成新的正式发布身份。IM 输入已从缺失推进为 `PINNED_INPUTS_VERIFIED`，但统一身份、签名、独立验收和切换授权仍未完成，`release_ready=false`。主仓兼容 pin、历史 owner receipt 和 formal release 证据各自按日期留存，不能互相替代。上述值是本次记录的事实，不表示以后永远不升级。
 
 ## 先看哪一个仓库
 
@@ -30,7 +30,7 @@
 
 ## DSH 升级：单独的一条变更轴
 
-DSH 升级不能简化为“从官网 `npm install latest` 后插入”。正确做法是把 DSH 版本和插件版本当成两个独立轴，并把 runtime、profile 和插件市场作为同一候选输入验证。完整的官方 tag、隔离候选、pack provenance、消费闭包、回读和回退顺序见[候选升级操作手册](./dsh-upgrade-candidate.md)；本轮 v5 现场 side-load 的来源和回退边界见[rc1 干净候选手册](./dsh-rc1-clean-upgrade-runbook.md)：
+DSH 升级不能简化为“从官网 `npm install latest` 后插入”。正确做法是把 DSH 版本和插件版本当成两个独立轴，并把 runtime、profile 和插件市场作为同一候选输入验证。完整的官方 tag、隔离候选、pack provenance、消费闭包、回读和回退顺序见[候选升级操作手册](./dsh-upgrade-candidate.md)；本轮驾驶舱 v3 side-load、v5 runtime 复用和回退边界见[rc1 干净候选手册](./dsh-rc1-clean-upgrade-runbook.md)与[驾驶舱收口证据](../hackathon/evidence/cockpit-rc1-closeout-20261021.md)：
 
 ```text
 固定 DSH SHA ──┬── 插件 A 版本

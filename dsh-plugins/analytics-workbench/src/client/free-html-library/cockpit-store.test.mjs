@@ -4,6 +4,7 @@ import { createLivePageAdapters } from './live-adapters.mjs';
 import { createFreeHtmlLibraryStore } from './store.mjs';
 import { createIsolatedFetch } from './p12-http-fakes.mjs';
 import { editableTextNodes } from '../html-selection-bridge.mjs';
+import { editorPageCatalog } from '../editor-page-nodes.mjs';
 
 function fixture(t) {
   const token = 'isolated-cockpit-page-token-32chars';
@@ -59,6 +60,26 @@ test('typed text is dirty before preview; selection/close cannot lose it; leave 
   const result = await store.persistForLeave();
   assert.equal(result.ok, true); assert.equal(store.getSnapshot().current.version, 2);
   assert.match(store.getSnapshot().current.package.html, /新标题/);
+});
+test('node-graph leaf draft saves when its mapped ancestor wrapper also changes', async t => {
+  const { store } = fixture(t);
+  await store.previewImport({
+    html: '<main data-shine-node="main"><h1 data-shine-node="title">验收</h1><p data-shine-node="note">通过</p></main>',
+    path: 'nested-report.html',
+    sessionId: 'source_session',
+  });
+  await store.confirmImport();
+  store.enterEdit();
+  const graphNode = editorPageCatalog(store.getSnapshot().current.package, store.getSnapshot().current.binding_manifest, {
+    pageId: store.getSnapshot().current.page_id,
+    flag: 'on',
+  }).textNodes.find(node => node.node_id === 'title');
+  store.selectLocatable({ ...graphNode, catalog: 'node-graph' });
+  store.setReplacementText('草稿恢复', '验收');
+  assert.equal(await store.commitTextDrafts(), true);
+  assert.equal(store.getSnapshot().current.version, 2);
+  assert.match(store.getSnapshot().current.package.html, /草稿恢复/);
+  assert.equal(store.hasUnsavedChanges(), false);
 });
 test('lost PATCH confirmation locks selection and another PATCH until same-key retry settles', async t => {
   const { store, control, calls } = fixture(t); await imported(store);

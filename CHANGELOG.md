@@ -21,6 +21,9 @@
 
 ### Added
 
+- 驾驶舱在 DSH `0.2.1-rc.1` 下以全屏原生 `main:cockpit` 作为唯一生产入口，保留原生会话、Composer 和模型选择所有权；新增生成页面收件箱、可编辑页面版本历史和完整 light/dark/focus/disabled/error 主题状态。
+- 杭州 owner-operated side-load 前进到 `dsh-0.2.1-rc.1-core-main-20261021-cockpit-v3`。rc1 pack 绑定 source `7c9244c9…`、manifest `cec2dbf9…`、tarball `b8808b25…` 和 effective client `0d653ceb…`；v2 驾驶舱候选保留，v5 继续作为稳定回退目标。
+
 - “问数智能体”配置型 bundle 前进到 `0.0.0-query.11`：空白会话切到 `crm-query` 时隐藏已知终端、文件和协作工具，并对执行使用 12 工具 allowlist guard；query.10 的全工具限制会误删 CRM、WeKnora 和页面业务工具，已作为失败候选保留记录。真实会话确认模型路由为 `deepseek-account / deepseek-flash / off`，`list_agents` 虽仍由上层组合可见，实际执行返回 `CRM_QUERY_TOOL_NOT_ALLOWED`。
 
 - 历史回滚证据：中间版本 `@shine-mage/dsh-query-agent@0.0.0-query.9` 曾作为“问数智能体”预设维护源，复用指标查询、WeKnora 资料和可选页面交付，不注册私有教材图谱工具，也不在未配置知识服务时暴露 `crm_knowledge_explain`。它已由 `query.11` 取代，只保留为历史与回滚证据，不是当前新发布面。原有“CRM 知识与指标”预设保持兼容。
@@ -88,7 +91,16 @@
 
 - `pnpm dsh plugin verify-host` 将同一插件候选、profile 快照、CRM/知识组合和固定 rc2 的本机宿主证据接到既有 journal；重试幂等，不修改候选或激活服务。增加 SQLite 提交前后进程丢失、保存回放与 forward-fix 验证；这些本地结果不放行生产发布或 D15 保存门禁。
 
+### Changed
+
+- 驾驶舱账号入口改为优先使用 rc1 官方账号菜单和设置动作；本地显示名不再包装成真实登录，DOM fallback 保留在明确兼容层并对失败给出可观察结果。
+- 页面文档与结果读取都通过 `https://page.tyuan.chat`；杭州 drop-in 和 env 示例同时固定 `PAGE_DOCUMENTS_BROWSER_BASE` 与 `PAGE_RESULT_BROWSER_BASE`。新 release 只链接既有 durable runtime，不复制 SQLite、DuckDB、浏览器私有状态或凭据。
+
 ### Fixed
+
+- 修复新生成页面包在浏览器提前哈希后与服务端规范化结果不一致、导致收件箱缺摘要的问题；页面工具卡的登记和交接失败不再静默吞掉。
+- 修复叶子草稿保存时，映射父节点 outer HTML 随子节点文字正常变化却被误判为“选区外篡改”的问题。合法祖先/后代范围继续放行，祖先开闭标签、兄弟节点和未标记插入仍 fail-closed。
+- 修复进入驾驶舱后切到原生侧栏会丢失未保存草稿的问题；文本和选中目标持续保留，外部导航仍通过 epoch 丢弃迟到的页面、历史和保存读取。普通会话不会被启动逻辑改选，B0 synthetic 绑定只在显式配置存在时启用。
 
 - 插件生成树 provenance 改为按固定 `0644` canonical mode 比较生成文件，避免服务账号在 `umask 077` 下把同一 tarball 字节误判为漂移；profile 和 release fixture 同步显式设置权限，完整 B0 在硬化 umask 下通过。
 
