@@ -1,7 +1,7 @@
 {
   "schema_version": "shinemage-weknora-production-overlay/v1",
-  "observed_at": "2026-10-20T23:55:37Z",
-  "scope": "owner-operated-v5-query11-weknora-postread-scope-guard",
+  "observed_at": "2026-10-21T00:18:44Z",
+  "scope": "owner-operated-v5-query11-weknora-transactional-registration-cleanup",
   "base_input_manifest": {
     "path": "/srv/shinemage/dsh/current/inputs/page/brand-weknora/input-manifest.json",
     "sha256": "e552acd8b0d8dfb8b0a41f19d90dae3f89dcae60e6870e54b26462ebce3a8905",

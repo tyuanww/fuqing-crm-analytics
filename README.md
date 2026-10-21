@@ -2,7 +2,7 @@
 
 当前提交、版本和现役见 [STATUS](./STATUS.md)。目录、端口和检索见 [维护地图](./docs/operating/maintainer-map.md)。对话生成 HTML 的步骤见 [从对话生成 HTML 驾驶舱](./docs/operating/cockpit-native-html.md)。产品仍 PARTIAL。
 
-> 最近生产记录（[STATUS](./STATUS.md) 的 2026-10-21 现场记录）：线上 `current` 指向 `dsh-0.2.1-rc.1-core-main-20261020-v5`，它是 v4 clean-main runtime 的 owner-operated 现场 side-load；query.9 与最终 WeKnora 范围修复后的 profile 快照为 `6c688d22…`，而旧 release marker 仍自报 `v4/PREPARED`，候选 receipt 的 profile 仍为 `c3ec7df3…`，因此不追认新的正式发布身份。IM 输入已推进为 `PINNED_INPUTS_VERIFIED`，但仍缺统一发布身份、签名、独立验收和切换授权，`release_ready=false`。后续正式发布必须从 clean reviewed commit 生成 immutable artifact，禁止 `git pull` 或现场编译。
+> 最近生产记录（[STATUS](./STATUS.md) 的 2026-10-21 现场记录）：线上 `current` 指向 `dsh-0.2.1-rc.1-core-main-20261020-v5`，它是 v4 clean-main runtime 的 owner-operated 现场 side-load；query.11 当前生效，最近重启后的 ephemeral profile 为 `27566016…`，旧 release marker 仍自报 `v4/PREPARED`，候选 receipt 的 profile 仍为 `c3ec7df3…`，因此不追认新的正式发布身份。IM 输入已推进为 `PINNED_INPUTS_VERIFIED`，但仍缺统一发布身份、签名、独立验收和切换授权，`release_ready=false`。后续正式发布必须从 clean reviewed commit 生成 immutable artifact，禁止 `git pull` 或现场编译。
 
 > 主仓当前快照（2026-10-21）：主仓继续承担 DSH pin、profile、runtime peer closure、跨插件合同、组合验证和交付文档；CRM、知识、看板和其他业务能力由独立插件仓维护。单插件的实际更新步骤见[插件更新指南](./docs/operating/shinemage-plugin-update.md)，rc1 现场 side-load 与候选边界见[升级操作手册](./docs/operating/dsh-rc1-clean-upgrade-runbook.md)，职责、清理和 DSH 升级边界见[维护、清理与升级手册](./docs/operating/shinemage-maintenance-and-cleanup.md)。正式 SDK 分发仍 BLOCKED，产品仍 PARTIAL，未授权的正式发布门禁仍保持未执行。
 

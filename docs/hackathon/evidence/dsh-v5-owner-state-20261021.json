@@ -1,8 +1,18 @@
 {
   "schema_version": "shinemage-dsh-owner-state/v1",
-  "observed_at": "2026-10-20T21:15:09Z",
+  "observed_at": "2026-10-21T00:18:44Z",
   "scope": "owner-operated-v5-side-load",
   "release_ready": false,
+  "superseded_by": {
+    "query_version": "0.0.0-query.11",
+    "runtime_receipt": "docs/hackathon/evidence/dsh-weknora-lifecycle-hardening-20261021.json",
+    "supersedes_fields": [
+      "actual_profile.plugins.@shine-mage/dsh-query-agent",
+      "actual_profile.sha256",
+      "actual_profile.lock_sha256",
+      "weknora_production"
+    ]
+  },
   "current_symlink": "/srv/shinemage/dsh/current",
   "current_release_dir": "/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-core-main-20261020-v5",
   "service": {
@@ -48,8 +58,9 @@
   },
   "actual_profile": {
     "path": "/srv/shinemage/dsh/current/runtime/harness/profiles/web/package.json",
-    "sha256": "6c688d2296e089920267cc4b8928416caff2ac2b3958b54f8e5ce2b7a13168a6",
-    "lock_sha256": "ed46a48f3353474681b9cad6b2d5bed2a2a438e76f65b08b3220f588651bd333",
+    "sha256": "2756601693ed99591eae91f2bba3ecef443715e4e62ec730b2ff599380df3ac8",
+    "lock_sha256": "ea643aa0cbd3aaeeeebd591f28ca005c0ee30667ea34e47bbc9173a8f7842287",
+    "snapshot_state": "EPHEMERAL_AFTER_2026-10-21_RESTART",
     "plugins": {
       "@shine-mage/dsh-crm-knowledge": {
         "version": "0.0.0-crm.2",
@@ -66,10 +77,10 @@
         "source_identity": "NOT_RECORDED_OWNER_SIDE_LOAD"
       },
       "@shine-mage/dsh-query-agent": {
-        "version": "0.0.0-query.9",
-        "spec": "file:/srv/shinemage/dsh/current/inputs/knowledge-query-agent-20261020/packs/shine-mage-dsh-query-agent-0.0.0-query.9.tgz",
-        "sha256": "393af040437dfe7523605c718c18edee9bd8ea4b739b83f4454b18187419a4a7",
-        "source_sha": "d860b1d46d3a33de2ae1b0e77f1f420ec25e0d0d",
+        "version": "0.0.0-query.11",
+        "spec": "file:/srv/shinemage/dsh/current/inputs/knowledge-query-agent-20261020/packs/shine-mage-dsh-query-agent-0.0.0-query.11.tgz",
+        "sha256": "9046def0d68f6b89f4a4f3ea79af0f6de4109880bc3c07ba36dd0139946aad1e",
+        "source_sha": "030f4446b3b0b26f3a2859a08576d0eac860d068",
         "side_load_lock": "config/query-agent-side-load.v1.json"
       },
       "@xmanrui/dsh-im": {
@@ -91,13 +102,14 @@
     "remote_recovery": "/srv/shinemage/dsh/recovery/im-plugin-inputs-20261021/"
   },
   "weknora_production": {
-    "adapter_sha256": "3cee71585582befe222de54a9063a37d0dacbf7ed1ec31eaee88922a84bf2a53",
-    "scope_helper_sha256": "94ee280908884918ac3c43d5be9fd71c1d2a0c1cfe0fb13eff2010b2998ee33c",
-    "overlay_manifest_sha256": "f40e73372b07bf6887408bf3bd6fd35026b13df6399cc61aa890ed42ac37b90e",
-    "scope": "PROJECT_MATERIALS_ALLOWLIST_NO_TENANT_WIDE_NAME_LOOKUP",
+    "adapter_sha256": "fc9284155508e9f10e16b64ad9d15c2bf9de7f341985ab8a0c8c25eedc3b4ee8",
+    "scope_helper_sha256": "e060ecd508ceaafb04dcd809078802e52ed2d0add297507013f11feb30e6d663",
+    "overlay_manifest_sha256": "8ef9c40cf859d176e815043004344da561f7253c3d9eb82d532bd2492e7373a7",
+    "scope": "PROJECT_MATERIALS_ALLOWLIST_METADATA_CHECK_BEFORE_AND_AFTER_READ",
     "tenant_wide_document_name_lookup": "DENIED_BEFORE_NETWORK",
-    "receipt": "docs/hackathon/evidence/dsh-query9-weknora-scope-20261021.md",
-    "remote_recovery": "/srv/shinemage/dsh/recovery/weknora-production-scope-20261021/"
+    "tool_lifecycle": "EFFECT_DISPOSE_TRANSACTIONAL",
+    "receipt": "docs/hackathon/evidence/dsh-weknora-lifecycle-hardening-20261021.md",
+    "remote_recovery": "/srv/shinemage/dsh/recovery/weknora-registration-cleanup-20261021/"
   },
   "identity_assessment": {
     "status": "OWNER_OPERATED_SIDELOAD_NOT_FORMAL_RELEASE",

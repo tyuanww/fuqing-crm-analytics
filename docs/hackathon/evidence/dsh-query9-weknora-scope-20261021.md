@@ -2,6 +2,8 @@
 
 日期：2026-10-21（北京时间）。
 
+> 本页是 query.9 部署时点的历史快照；其中工具、profile 和 overlay 摘要均已被 query.11 与后续 WeKnora 生命周期修复取代。当前事实以[生命周期强化回执](dsh-weknora-lifecycle-hardening-20261021.md)为准。
+
 ## 结论
 
 线上 `shinemage-dsh.service` 已完成 `@shine-mage/dsh-query-agent@0.0.0-query.9` side-load，插件页显示版本 `0.0.0-query.9`，`query-tool-policy` 与 `preset-shinemage-crm-query` 为 `2/2 运行中`。受控重启后服务为 `active/running`，`NRestarts=0`，4328、18090–18094、18098 正常监听；根路径为 4328/18092/18093 `401`、18090/18094 `200`、18091 `404`、18098 `302`。启动日志无 error、exception、failed、fatal 或 unhandled。

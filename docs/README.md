@@ -30,7 +30,7 @@
 | [`operating/dsh-rc1-clean-upgrade-runbook.md`](./operating/dsh-rc1-clean-upgrade-runbook.md) | rc1 干净重建、profile、插件市场、验证和 side-by-side 条件 |
 | [`tutorials/dsh-rc1-clean-candidate.md`](./tutorials/dsh-rc1-clean-candidate.md) | 从固定上游构建并观察 rc1 候选 |
 | [`reference/dsh-rc1-clean-candidate.md`](./reference/dsh-rc1-clean-candidate.md) | v4 候选与 v5 现场字段、bundle、peer closure 和状态值 |
-| [`hackathon/evidence/dsh-query9-weknora-scope-20261021.md`](./hackathon/evidence/dsh-query9-weknora-scope-20261021.md) | query.9 side-load、模型路由、工具面和 WeKnora 强制范围回执 |
+| [`hackathon/evidence/dsh-weknora-lifecycle-hardening-20261021.md`](./hackathon/evidence/dsh-weknora-lifecycle-hardening-20261021.md) | query.11、模型路由、工具面、WeKnora 范围与事务释放回执 |
 | [`architecture/dsh-rc1-clean-rebuild.md`](./architecture/dsh-rc1-clean-rebuild.md) | 为什么 runtime、profile 和 IM 输入必须隔离 |
 | [`operating/dsh-rc2-quickstart.md`](./operating/dsh-rc2-quickstart.md) | rc2 artifact 准备教程 |
 | [`operating/dsh-rc2-runbook.md`](./operating/dsh-rc2-runbook.md) | rc2 现场接收、切换和回退顺序 |

@@ -30,7 +30,7 @@ CRM、知识、页面和 WeKnora 是不同权限与生命周期域，保持独�
 
 ## side-load 身份
 
-当前 owner-operated side-load 的固定身份见 [`config/query-agent-side-load.v1.json`](../../config/query-agent-side-load.v1.json)。其中 `source_package_manifest_sha256` 是 source `package.json` 的摘要，`generated_pack_manifest_sha256` 是生成 `plugin-pack.json` 的摘要，`tarball.sha256` 是最终归档摘要；三者不能互相替代。该 lock 只描述当前现场输入，`release_ready=false`，不创建正式发布身份。
+当前 owner-operated side-load 的固定身份见 [`config/query-agent-side-load.v1.json`](../../config/query-agent-side-load.v1.json)。其中 `source_package_manifest_sha256` 是 source `package.json` 的摘要，`generated_pack_manifest_sha256` 是生成 `plugin-pack.json` 的摘要，`tarball.sha256` 是最终归档摘要；三者不能互相替代。该 lock 只描述当前现场输入，`release_ready=false`，不创建正式发布身份。query.10 的 all-tools restriction 会误删域工具，已回滚；query.11 使用已知继承工具 masking 加执行 allowlist。
 
 ## How to：更新并验证 WeKnora 生产范围
 
@@ -43,14 +43,14 @@ CRM、知识、页面和 WeKnora 是不同权限与生命周期域，保持独�
 | Overlay 摘要 | 仓库内为 [`config/weknora-production-overlay.v1.json`](../../config/weknora-production-overlay.v1.json)，部署时复制到 live `brand-weknora/` 并与 adapter 同目录；记录当前文件 SHA-256 |
 | 第三方包 | `brand-weknora/weknora-package/`，来源与摘要见同目录 `package-origin.json` |
 | 检索凭据 | `brand-weknora/retrieve.key`，仅现场 `0600 root:root`，不进入 Git、日志或 manifest |
-| 修改边界 | 只允许固定项目库 `1c4627e2-dfc1-48ca-aeef-2c00b53da5f8`；禁用上游 tenant-wide 文档名 enrichment，不合并、不修改 WeKnora 数据卷 |
+| 修改边界 | 只允许固定项目库 `1c4627e2-dfc1-48ca-aeef-2c00b53da5f8`；禁用上游 tenant-wide 文档名 enrichment；读取前后核对文档元数据；工具注册随插件 effect 释放；不合并、不修改 WeKnora 数据卷 |
 
 ### 前置条件
 
 - 使用仓库固定 Node 24；adapter 的 `package.json` 合同是 `24.x`。
 - live overlay 目录已包含经过校验的上游 `weknora-package`，`retrieve.key` 已由授权 operator 配置。
 - 已为该维护窗口准备独立的恢复目录和旧文件摘要；不要在未授权的生产窗口改 profile、symlink 或 WeKnora 数据。
-- `preset.patch.yml` 与 query.9 的 `cordis.patch.yml` 都可能引用 `weknora.mjs`；替换 adapter 会同时影响引用该文件的 Agent preset。
+- `preset.patch.yml` 与 query.11 的 `cordis.patch.yml` 都可能引用 `weknora.mjs`；替换 adapter 会同时影响引用该文件的 Agent preset。
 
 ### 本地校验
 
@@ -65,7 +65,7 @@ shasum -a 256 scripts/ops/weknora-production.mjs \
   config/weknora-production-overlay.v1.json
 ```
 
-期望当前 overlay 摘要为 `3cee7158…2a53`（adapter）、`94ee2809…e33c`（scope helper）和 `f40e7337…b90e`（overlay manifest）。摘要变化时先核对内容与 PR，不要只更新 manifest 让漂移“变绿”。
+期望当前 overlay 摘要为 `fc928415…b4ee8`（adapter）、`e060ecd5…d663`（scope helper）和 `8ef9c40c…73a7`（overlay manifest）。摘要变化时先核对内容与 PR，不要只更新 manifest 让漂移“变绿”。
 
 ### 更新现场
 
@@ -82,7 +82,7 @@ systemctl is-active shinemage-dsh.service
 curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:18092/
 ```
 
-服务恢复后，在“问数智能体”中做三项只读检查：项目资料正常返回带来源的结果；显式搜索非项目库返回 `WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED`；显式读取非项目库文档被拒绝且不返回正文。普通 search 仍只向项目库发起 passage 检索，但上游的 tenant-wide 文档名 enrichment 已禁用，避免在内存过滤前把其他库元数据拉入 DSH。真实 CRM 指标查询仍要求当前用户自行完成 CRM 登录，未登录只能是 `NOT_CONNECTED`。
+服务恢复后，在“问数智能体”中做三项只读检查：项目资料正常返回带来源的结果；显式搜索非项目库返回 `WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED`；显式读取非项目库文档被拒绝且不返回正文。项目文档读取还会在返回前再次核对元数据，请求期间范围变化时丢弃结果。普通 search 仍只向项目库发起 passage 检索，但上游的 tenant-wide 文档名 enrichment 已禁用，避免在内存过滤前把其他库元数据拉入 DSH。真实 CRM 指标查询仍要求当前用户自行完成 CRM 登录，未登录只能是 `NOT_CONNECTED`。
 
 ### 常见拒绝
 
@@ -95,7 +95,7 @@ curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:18092/
 
 ### 回滚
 
-只恢复同一次部署前保存的 adapter/helper 文件对，并再次核对 SHA-256；若这次改动了运行时文件，按授权受控重启并复测端口和日志。恢复目录中的 `weknora.mjs` 是强制 allowlist 修复前的默认收窄版本，恢复它会退化为可被显式 scope 参数绕过；安全要求高于可用性时，应移除/禁用 WeKnora 工具而不是静默回滚到旧 adapter。`weknora-production-overlay.v1.json` 只是审计 sidecar，回滚或删除它不会改变运行行为。
+只恢复同一次部署前保存的 adapter/helper 文件对，并再次核对 SHA-256；若这次改动了运行时文件，按授权受控重启并复测端口和日志。当前恢复目录中的版本仍保留固定 allowlist 和读取前校验，但缺少读取后二次校验与 effect 释放；恢复会降低生命周期保护。安全要求高于可用性时，应移除/禁用 WeKnora 工具而不是静默回滚。`weknora-production-overlay.v1.json` 只是审计 sidecar，回滚或删除它不会改变运行行为。
 
 ## 本地检查
 

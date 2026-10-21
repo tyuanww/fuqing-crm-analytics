@@ -2,7 +2,7 @@
 
 这份文档给维护者、插件作者和使用者一条共同的路径：主仓库负责把固定版本的 DeepSeek Harness（DSH）装配成可验收的平台，业务能力由独立插件和服务仓库维护。它也规定本机证据、Git worktree、分支和远程仓库怎样留存，避免为了“整洁”误删仍可复核的材料。
 
-线上 owner-operated 当前为 `dsh-0.2.1-rc.1-core-main-20261020-v5`，服务仍 active/running；它是 v4 clean-main runtime 的现场 side-load。query.9 与最终 WeKnora 输入防护后的 profile 快照为 `6c688d22…`，而 release marker 仍为 v4/PREPARED、候选 receipt 仍为 `c3ec7df3…`，因此 v5 不构成新的正式发布身份。IM 输入已从缺失推进为 `PINNED_INPUTS_VERIFIED`，但统一身份、签名、独立验收和切换授权仍未完成，`release_ready=false`。主仓兼容 pin、历史 owner receipt 和 formal release 证据各自按日期留存，不能互相替代。上述值是本次记录的事实，不表示以后永远不升级。
+线上 owner-operated 当前为 `dsh-0.2.1-rc.1-core-main-20261020-v5`，服务仍 active/running；它是 v4 clean-main runtime 的现场 side-load。query.11 当前生效，最近重启后的 ephemeral profile 为 `27566016…`，而 release marker 仍为 v4/PREPARED、候选 receipt 仍为 `c3ec7df3…`，因此 v5 不构成新的正式发布身份。IM 输入已从缺失推进为 `PINNED_INPUTS_VERIFIED`，但统一身份、签名、独立验收和切换授权仍未完成，`release_ready=false`。主仓兼容 pin、历史 owner receipt 和 formal release 证据各自按日期留存，不能互相替代。上述值是本次记录的事实，不表示以后永远不升级。
 
 ## 先看哪一个仓库
 

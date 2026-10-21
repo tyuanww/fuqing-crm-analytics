@@ -2,6 +2,8 @@
 
 日期：2026-10-21（北京时间）。
 
+> 本页保留范围收窄和后续强制 allowlist 修复的历史过程；最终读取后校验、工具 effect 事务释放和线上字节以[生命周期强化回执](dsh-weknora-lifecycle-hardening-20261021.md)为准。
+
 ## 范围
 
 本轮只收窄 DSH 的 WeKnora 检索范围，不改 WeKnora 文档、分块、向量、图谱、共享权限或 Neo4j 数据。目标是把生产 DSH 检索限定到“项目资料”库，同时保留 WeKnora 页面中的“部署验收（合成资料）”供独立验收。
@@ -33,7 +35,7 @@
 - 新工具结果：`8 passage(s) ... (searched: 1c4627e2-dfc1-48ca-aeef-2c00b53da5f8)`
 - 新会话中部署验收库 ID `9a4ea853-9466-4d27-8d4e-d8e8bd5a8018` 出现次数为 0
 - 回答仍返回项目资料文档来源；CRM 未连接时返回 `NOT_CONNECTED`
-- 独立知识插件和工具实现继续保留；面向用户的 `crm-query` 从 `0.0.0-query.8` 起移除未配置服务的 `crm_knowledge_explain` 和私有教材图谱工具，公开口径统一由 WeKnora 项目资料检索提供。当前维护源为 `0.0.0-query.9`，只修正 DSH 配置型 bundle 的元数据，不增加工具 peer
+- 独立知识插件和工具实现继续保留；面向用户的 `crm-query` 从 `0.0.0-query.8` 起移除未配置服务的 `crm_knowledge_explain` 和私有教材图谱工具，公开口径统一由 WeKnora 项目资料检索提供。该阶段维护源为 `0.0.0-query.9`，只修正 DSH 配置型 bundle 的元数据，不增加工具 peer；当前维护源已前进到 `0.0.0-query.11`
 
 ## 后续强制 allowlist 修复
 

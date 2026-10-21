@@ -80,7 +80,7 @@
 
 2026-10-20 的 v4 过渡候选结果保留为：candidate tag `dsh-0.2.1-rc.1-clean-main-20261020-v4`，runtime SHA-256 `d3d504dd39cd333fb98acf61cf4597664f6d4fda5482fb2ea970748bd2b8a94f`，候选 receipt profile SHA-256 `c3ec7df313c2323996428b1034af0fd5eec5fffe1d06a8c618532074110503ad`，plugin-market Discover、native boot、settings/account RPC、peer negative test 和 v4 boot 均通过，AppleDouble locale 文件为 `0`，控制台日志为空。
 
-2026-10-21 现场事实：生产 symlink 指向 `/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-core-main-20261020-v5`，服务为 active/running；v5 是上述 v4 runtime 的 owner-operated 现场 side-load。query.9 与最终 WeKnora 输入防护后的 profile 快照为 `6c688d22…`，与旧候选 receipt 的 `c3ec7df3…` 不一致，marker 仍为 v4/PREPARED，因此只记现场 side-load。IM 输入状态为 `PINNED_INPUTS_VERIFIED`，但正式发布仍需统一身份、签名、独立验收和切换授权，`release_ready=false`。
+2026-10-21 现场事实：生产 symlink 指向 `/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-core-main-20261020-v5`，服务为 active/running；v5 是上述 v4 runtime 的 owner-operated 现场 side-load。query.11 当前生效，最近重启后的 ephemeral profile 为 `27566016…`，与旧候选 receipt 的 `c3ec7df3…` 不一致，marker 仍为 v4/PREPARED，因此只记现场 side-load。IM 输入状态为 `PINNED_INPUTS_VERIFIED`，但正式发布仍需统一身份、签名、独立验收和切换授权，`release_ready=false`。
 
 ## 排障
 

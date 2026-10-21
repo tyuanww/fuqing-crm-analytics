@@ -1,0 +1,89 @@
+# DSH 问数工具面与 WeKnora 生命周期强化复测
+
+日期：2026-10-21（北京时间）。
+
+## 结论
+
+杭州 owner-operated v5 现场已更新 WeKnora 适配层和 scope helper。`shinemage-dsh.service` 为 `active/running`，`NRestarts=0`，4328、18090–18094、18098 均按预期监听，启动日志错误匹配为 `0`。query 包仍为 `0.0.0-query.11`，插件页 `2/2` 组件运行中。
+
+本次修复保留原来的项目库 allowlist，并增加三项生命周期保护：
+
+- `weknora_read_document` 在读取前后各核对一次文档元数据；请求期间文档发生跨库变更时丢弃结果并返回 `WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED`。
+- 两个 WeKnora 工具注册进入 `ctx.effect`，插件卸载时逆序释放注册。
+- 第二个工具注册失败时，同一 effect 中已经注册的工具会立即逆序清理；注册与清理都失败时保留聚合错误。
+
+机器回执见 [JSON](dsh-weknora-lifecycle-hardening-20261021.json)。本次事务清理前的 helper 与 overlay 保存在 `/srv/shinemage/dsh/recovery/weknora-registration-cleanup-20261021/`。硬刷新后插件页显示 `0.0.0-query.11`，`2/2` 组件运行中。
+
+字节演进顺序是明确的：query.11 初始现场为 helper `7e49863d…` / overlay `bb6a9215…`；随后读取后校验与 effect 释放版为 `4c94a4fd…` / `d542e6bf…`；最终事务注册清理版为 `e060ecd5…` / `8d544df2…`。审计 manifest 随后仅刷新 scope 标签与观测时间到 `8ef9c40c…`，adapter 和 helper 字节不变，也没有重启服务。各段分别有 query.11 初始回执、`weknora-scope-hardening-20261021` 和 `weknora-registration-cleanup-20261021` 恢复目录，不是同一快照的冲突值。
+
+## 线上字节
+
+| 文件 | 变更前 SHA-256 | 变更后 SHA-256 |
+|---|---|---|
+| `weknora.mjs` | `1c2e223d…f976e2` | `fc928415…b4ee8` |
+| `weknora-production-scope.mjs` | `4c94a4fd…381fe` | `e060ecd5…d663` |
+| `weknora-production-overlay.v1.json` | `d542e6bf…4489` | `8ef9c40c…73a7` |
+
+live 模块探针使用线上 adapter、helper 和 `retrieve.key`，没有输出 token 或文档正文。
+
+## 工具面与模型路由
+
+真实浏览器会话 `session-1605afec-9e3b-432e-b05a-219ea5bd0a85` 的持久化请求头记录：
+
+- 预设：`crm-query`
+- provider/model/reasoning：`deepseek-account / deepseek-flash / off`
+- 页面显示：`DeepSeek-V4.1-Flash / Off`
+- `bash`、`terminal_open`、`read`、`write` 不在 schema。
+- `weknora_search`、`weknora_read_document`、`free_html_page_generate` 可见。
+- `list_agents` 仍由上层组合出现在 schema；实际调用返回 `CRM_QUERY_TOOL_NOT_ALLOWED: list_agents`，说明执行 guard 生效。
+
+保留 `list_agents` 可见是当前 DSH scoped-tool 组合的限制。宿主不能用 allowlist 安全移除所有继承工具，因为 query.10 的 all-tools restriction 同时移除了 CRM、WeKnora 和页面业务工具；因此 query.11 采用“已知继承工具 masking + 12 工具执行 allowlist”。
+
+## WeKnora 正向与负向探针
+
+- 项目资料库搜索：浏览器在“问数智能体”中真实调用一次 `weknora_search`，返回 8 条 passage，范围仅为 `1c4627e2-dfc1-48ca-aeef-2c00b53da5f8`；回答明确区分教材定义/案例模拟数据与真实经营数据。
+- 项目资料文档读取：PASS。
+- 部署验收库搜索：`WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED`。
+- 跨库文档读取：读取正文前返回 `WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED`，没有返回正文。
+- 工具生命周期：探针卸载后注册表为 `0`。
+- 工具注册事务：线上 helper 的第二个注册抛错后，第一个已注册工具被清理，探针返回 `WEKNORA_TRANSACTIONAL_CLEANUP_PASS`。
+- tenant-wide 文档名查询 `/api/v1/knowledge/search`：网络路径中不存在。
+
+实际网络路径只出现项目库 passage 搜索、项目文档元数据、项目 chunk 读取，以及跨库读取前的元数据核对。
+
+## WeKnora 配置盘点
+
+三个知识库保持隔离：
+
+| 知识库 | 文档 | ready chunk | active embedding | graph | 状态 |
+|---|---:|---:|---:|---|---|
+| 项目资料 | 7 | 385 | 385 | 开启 | 全部 completed/enabled |
+| 部署验收（合成资料） | 3 | 3 | 3 | 关闭 | 全部 completed/enabled |
+| 权限隔离验收（空库） | 0 | 0 | 0 | 关闭 | 空库 |
+
+三库均无待处理子任务或错误。embedding 全部为 `bge-m3:567m` / 1024 维；KnowledgeQA 与 Rerank 均指向 `MiniMax-M3`。项目资料使用 800/100 分块和本地存储。Neo4j 合计 1656 节点、1519 条关系。
+
+容器 `WeKnora-app`、`WeKnora-docreader`、`WeKnora-postgres` 为 healthy；Redis、Neo4j 和前端容器运行中。active resource 共 194 个，其中 185 个 page PNG（约 43.6 MB）和 9 个源文件；本轮只盘点，没有删除或重分类这些资源。共享、组织、数据源和标签计数均为 `0`。
+
+retrieval key `DSH 本机只读检索` 只有 `retrieve` capability 且 `full_access=false`，但允许项目库与部署库两个知识库。因此服务端 key 不是单项目边界，必须继续由适配层 fail-closed allowlist 收窄。
+
+## 测试
+
+- `node --test scripts/ops/weknora-production-scope.test.mjs dsh-plugins/query-agent/test/package.test.mjs`：`29/29 PASS`
+- `node --test scripts/release/plugin-pack.test.mjs`：`44/44 PASS`
+- `node --test scripts/ci/pregate-runner.test.mjs`：`5/5 PASS`，另 `bash -n scripts/ci/pregate-runner.sh` 通过
+
+新增回归覆盖：
+
+- 读取期间 scope 变化后结果被丢弃
+- WeKnora 工具 effect 释放和逆序注销
+- 第二个工具注册失败时清理已注册工具
+- pre-gate 不在 Git 仓库时明确失败
+- overlapping `files` wildcard 去重
+- 配置 bundle 的拼接动态 import 被拒绝
+
+## 未完成
+
+- CRM 当前对话尚未登录，真实只读经营指标 UAT 仍为 `NOT_CONNECTED`。
+- 这不是正式签名 release、canary 或杭州正式切换；`release_ready=false`。
+- page PNG 资源是否仍有外部页面引用未在本轮回执中证明，因此没有清理。
