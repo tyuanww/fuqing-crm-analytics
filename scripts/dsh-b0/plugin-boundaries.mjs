@@ -25,7 +25,8 @@ export function validateBoundaryPolicy(policy) {
   for (const [name, owner] of Object.entries(policy.owners)) {
     assert.match(name, /^[a-z0-9-]+$/, 'BOUNDARY_OWNER_NAME');
     fieldKeys(owner, ['domain', 'target_repository', 'kind'], 'BOUNDARY_OWNER_FIELDS');
-    assert.ok(['plugin', 'dev-tool', 'domain-library'].includes(owner.kind) && owner.domain && owner.target_repository, 'BOUNDARY_OWNER_INVALID');
+    assert.ok(['plugin', 'configuration-bundle', 'dev-tool', 'domain-library'].includes(owner.kind)
+      && owner.domain && owner.target_repository, 'BOUNDARY_OWNER_INVALID');
   }
   for (const edge of policy.allowed_runtime_edges) {
     fieldKeys(edge, ['consumer', 'provider', 'source', 'target', 'remedy', 'retire_when'], 'BOUNDARY_EDGE_FIELDS');

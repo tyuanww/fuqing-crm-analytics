@@ -18,6 +18,14 @@ const { mountAgentLoopTestDependencies } = await import(pathToFileURL(join(upstr
 const { defineTool } = await import(pathToFileURL(join(upstream, 'packages/core/tools/lib/index.js')).href);
 const crm = await import(pathToFileURL(join(plugin, 'lib/index.js')).href);
 
+test('bundle mounts a bare-package client carrier without registering global tools', async () => {
+  const patch = await readFile(join(plugin, 'cordis.patch.yml'), 'utf8');
+  assert.match(patch, /id: crm-knowledge-client\s+name: '@shine-mage\/dsh-crm-knowledge'\s+config:\s+registerTools: false/);
+  let registrations = 0;
+  crm.apply({ tools: { register: () => { registrations += 1; } } }, { registerTools: false });
+  assert.equal(registrations, 0);
+});
+
 test('CRM alone keeps its tools and explicitly reports the absent page provider', async t => {
   const ctx = new Context(); t.after(() => ctx.fiber.dispose());
   await mountAgentLoopTestDependencies(ctx);

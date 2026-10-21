@@ -1,12 +1,13 @@
 # DSH rc1 干净候选参考
 
-本页定义 `dsh-0.2.1-rc.1-clean-main-20261020-v4` 这类候选的输入、输出和状态字段。它是事实参考，不替代[升级操作手册](../operating/dsh-rc1-clean-upgrade-runbook.md)。
+本页定义 clean-main v4 候选以及当前 v5 owner-operated side-load 的输入、输出和状态字段。它是事实参考，不替代[升级操作手册](../operating/dsh-rc1-clean-upgrade-runbook.md)；v5 不是新的正式 release 身份。插件侧另见[问数智能体预设](../../dsh-plugins/query-agent/README.md)和 [query.11/WeKnora 回执](../hackathon/evidence/dsh-weknora-lifecycle-hardening-20261021.md)。
 
 ## 固定输入
 
 | 字段 | 当前值或约束 |
 |---|---|
-| `candidate_tag` | `dsh-0.2.1-rc.1-clean-main-20261020-v4` |
+| `current_target` | `dsh-0.2.1-rc.1-core-main-20261020-v5`；现场 side-load，不是正式 release |
+| `candidate_tag` | `dsh-0.2.1-rc.1-clean-main-20261020-v4`；runtime 来源与该候选的旧回执 |
 | DSH package | `@deepseek-ai/dsh@0.2.1-rc.1` |
 | upstream SHA | `1600d8a1e140dcde43a1a0941940a0480712c011` |
 | upstream lock SHA-256 | `952ca2f79998660dc690b739078a5d6052bc7c5c2193714b918b9d720baaeaba` (`pnpm-lock.yaml`) |
@@ -15,12 +16,14 @@
 | upstream pnpm | `11.28.5` |
 | lane config | `config/dsh-rc1-release-lane.json` via `DSH_RELEASE_LANE_CONFIG`; process-local override |
 | runtime archive SHA-256 | `d3d504dd39cd333fb98acf61cf4597664f6d4fda5482fb2ea970748bd2b8a94f` |
-| web profile SHA-256 | `c3ec7df313c2323996428b1034af0fd5eec5fffe1d06a8c618532074110503ad` |
+| receipt profile SHA-256 | `c3ec7df313c2323996428b1034af0fd5eec5fffe1d06a8c618532074110503ad` |
+| current ephemeral profile package SHA-256 | `2756601693ed99591eae91f2bba3ecef443715e4e62ec730b2ff599380df3ac8` |
+| current ephemeral profile lock SHA-256 | `ea643aa0cbd3aaeeeebd591f28ca005c0ee30667ea34e47bbc9173a8f7842287` |
 | plugin market | `@deepseek-ai/dsh-experimental-plugin-market-bundle@0.2.1-rc.1` |
 
 ## Profile bundles
 
-当前 v4 profile 的 bundle 顺序包含：
+v4 候选 receipt 记录的 bundle 顺序包含：
 
 1. `@deepseek-ai/dsh-base`
 2. `@deepseek-ai/dsh-web-app`
@@ -77,16 +80,17 @@ dsh-tools
 ```text
 PASS                         单项检查已在指定范围通过
 PASS_WAITING_BROWSER         HTTP 登录边界通过，等待 headed browser 回读
-BLOCKED_MISSING_ARTIFACT     依赖包或 index 没有在可验证归档输入中
-HELD_PENDING_IM_ARTIFACT     production switch 因 IM 缺口保持暂停
+PINNED_INPUTS_VERIFIED       IM 归档字节、integrity、commit 和包身份已核验；不代表 release-ready
+OWNER_OPERATED_SIDELOAD_NOT_FORMAL_RELEASE
+                             当前目标为 owner 现场装配；marker/receipt 可能仍是旧候选身份
 NOT_RUN                      尚未执行，不可写成 PASS
 ```
 
-当前 v4 的 IM 字段为 `BLOCKED_MISSING_ARTIFACT`，来源为 `NOT_FOUND_IN_ARCHIVED_PLUGIN_INPUTS`，因此 `release_ready=false`，线上 `current` 不变。
+当前 IM 字段为 `im.inputs=PINNED_INPUTS_VERIFIED`。两份输入已按线上 lock 核验并保存在 `/srv/shinemage/dsh/recovery/im-plugin-inputs-20261021/`；它们仍缺统一发布身份、publisher/signature、独立验收和切换授权，因此 `release_ready=false`。
 
 ## 线上边界
 
-2026-10-20 现场事实：`shinemage-dsh.service` 为 active，`/srv/shinemage/dsh/current` 指向 `/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-owner-main-4ac076de-20261019`。v4 仍在 `/srv/shinemage/dsh/staging/rc1-clean-main-20261020`，没有替换线上 symlink。旧兼容版本号只在历史或兼容基线文档中出现，不作为当前候选身份。
+2026-10-21 现场事实：`shinemage-dsh.service` 为 active/running，`/srv/shinemage/dsh/current` 指向 `/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-core-main-20261020-v5`。query.11 当前生效，最近重启后的 ephemeral profile 为 `27566016…` / `ea643aa0…`，`release-marker.json` 仍自报 v4/PREPARED，候选 receipt 仍为 `c3ec7df3…`；因此现场状态是 `OWNER_OPERATED_SIDELOAD_NOT_FORMAL_RELEASE`，不能把 v5 写成新的签名候选。DSH 重启会生成新的 plugin-pack link 根并改写 profile，所以该摘要只代表本次现场快照。旧兼容版本号只在历史或兼容基线文档中出现，不作为当前候选身份。
 
 ## 相关文档
 

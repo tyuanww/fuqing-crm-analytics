@@ -95,6 +95,7 @@ test('declared directory-link chains resolve dot-dot after the link and reject c
   }
   const bytes = 'export const linked = true;';
   await writeFile(join(f.root, 'upstream/real/file.js'), bytes, { mode: 0o644 });
+  await chmod(join(f.root, 'upstream/real/file.js'), 0o644);
   f.manifest.entries['upstream/real/file.js'] = { kind: 'file', bytes: bytes.length, sha256: sha256(bytes), mode: 0o644 };
   for (const [name, target] of [['entry', 'real/nested'], ['alias', 'entry/../file.js']]) {
     await symlink(target, join(f.root, 'upstream', name));

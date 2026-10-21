@@ -2,7 +2,7 @@ import { PNPM_VERSION } from './toolchain.mjs';
 import { createHash } from 'node:crypto';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { access, cp, mkdtemp, mkdir, readFile, readdir, rename, rm, symlink, writeFile } from 'node:fs/promises';
+import { access, chmod, cp, mkdtemp, mkdir, readFile, readdir, rename, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFile } from 'node:child_process';
@@ -56,12 +56,249 @@ test('controlled plugin pack emits an immutable tarball receipt without runtime 
   assert.deepEqual(JSON.parse(await readFile(manifestPath, 'utf8')), receipt);
 });
 
+test('query side-load lock binds the source package manifest to the recorded pack artifact', async () => {
+  const packageBytes = await readFile(new URL('../../dsh-plugins/query-agent/package.json', import.meta.url));
+  const manifest = JSON.parse(packageBytes);
+  const lock = JSON.parse(await readFile(new URL('../../config/query-agent-side-load.v1.json', import.meta.url), 'utf8'));
+  const evidence = JSON.parse(await readFile(
+    new URL('../../docs/hackathon/evidence/dsh-query11-allowlist-20261021.json', import.meta.url),
+    'utf8',
+  ));
+  const runtimeEvidence = JSON.parse(await readFile(
+    new URL(`../../${lock.runtime_evidence}`, import.meta.url),
+    'utf8',
+  ));
+  const runtimeScopeBytes = await readFile(
+    new URL('../../scripts/ops/weknora-production-scope.mjs', import.meta.url),
+  );
+
+  assert.equal(lock.schema_version, 'shinemage-query-agent-side-load-lock/v1');
+  assert.equal(lock.package, manifest.name);
+  assert.equal(lock.version, manifest.version);
+  assert.equal(lock.lane, 'owner-operated-side-load');
+  assert.equal(lock.release_ready, false);
+  assert.equal(lock.formal_release, false);
+  assert.equal(lock.source_sha, evidence.query_artifact.source_sha);
+  assert.equal(lock.source_package_manifest_sha256, createHash('sha256').update(packageBytes).digest('hex'));
+  assert.equal(lock.generated_pack_manifest_sha256, evidence.query_artifact.manifest_sha256);
+  assert.equal(lock.tarball.name, evidence.query_artifact.tarball);
+  assert.equal(lock.tarball.bytes, evidence.query_artifact.tarball_bytes);
+  assert.equal(lock.tarball.sha256, evidence.query_artifact.tarball_sha256);
+  assert.equal(lock.tarball.integrity, evidence.query_artifact.integrity);
+  assert.equal(lock.build_provenance_sha256, evidence.query_artifact.build_provenance_sha256);
+  assert.equal(runtimeEvidence.release_ready, false);
+  assert.equal(runtimeEvidence.browser_uat.plugin_page.version, lock.version);
+  assert.equal(
+    runtimeEvidence.artifact.scope_helper.after_sha256,
+    createHash('sha256').update(runtimeScopeBytes).digest('hex'),
+  );
+});
+
+test('query.9 history uses an immutable identity snapshot instead of the live query.11 lock', async () => {
+  const query9 = JSON.parse(await readFile(
+    new URL('../../docs/hackathon/evidence/dsh-query9-weknora-scope-20261021.json', import.meta.url),
+    'utf8',
+  ));
+  const snapshot = JSON.parse(await readFile(
+    new URL('../../docs/hackathon/evidence/dsh-query9-side-load-lock-20261021.json', import.meta.url),
+    'utf8',
+  ));
+
+  assert.equal(
+    query9.browser_uat.side_load_lock,
+    'docs/hackathon/evidence/dsh-query9-side-load-lock-20261021.json',
+  );
+  assert.equal(snapshot.schema_version, 'shinemage-query-agent-side-load-history/v1');
+  assert.equal(snapshot.version, query9.query_artifact.version);
+  assert.equal(snapshot.source_sha, query9.query_artifact.source_sha);
+  assert.equal(snapshot.source_package_manifest_sha256, query9.query_artifact.source_package_manifest_sha256);
+  assert.equal(snapshot.generated_pack_manifest_sha256, query9.query_artifact.manifest_sha256);
+  assert.equal(snapshot.tarball.name, query9.query_artifact.tarball);
+  assert.equal(snapshot.tarball.bytes, query9.query_artifact.tarball_bytes);
+  assert.equal(snapshot.tarball.sha256, query9.query_artifact.tarball_sha256);
+  assert.equal(snapshot.tarball.integrity, query9.query_artifact.integrity);
+  assert.equal(snapshot.build_provenance_sha256, query9.query_artifact.build_provenance_sha256);
+});
+
+test('configuration bundle packs without a synthetic dsh-tools peer', async t => {
+  const input = await fixture(t);
+  const path = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  delete manifest.peerDependencies;
+  manifest.files = ['lib/', 'cordis.patch.yml', 'locale/*.json'];
+  manifest.exports = { './tool-policy': './lib/index.js', './locale/*.json': './locale/*.json' };
+  manifest.shinemage = { bundle_role: 'configuration-bundle' };
+  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await mkdir(join(input.plugin, 'locale'));
+  await writeFile(join(input.plugin, 'locale/en.json'), '{"meta":{"title":"Synthetic"}}\n');
+  await commitFixture(input.root);
+  const receipt = await packPlugin(input);
+  assert.equal(receipt.package_name, manifest.name);
+  assert.equal(receipt.entries.includes('cordis.patch.yml'), true);
+  assert.equal(receipt.entries.includes('locale/en.json'), true);
+  const packed = JSON.parse((await exec('tar', ['-xOf', join(input.outputDir, receipt.tarball.name), 'package/package.json'])).stdout);
+  assert.equal(packed.peerDependencies, undefined);
+});
+
+test('configuration bundle rejects a wildcard export target without a wildcard key', async t => {
+  const input = await fixture(t);
+  const path = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  delete manifest.peerDependencies;
+  manifest.files = ['lib/', 'cordis.patch.yml'];
+  manifest.exports['./exact'] = './lib/*.js';
+  manifest.shinemage = { bundle_role: 'configuration-bundle' };
+  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await commitFixture(input.root);
+  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_PATTERN_INVALID/);
+});
+
+test('configuration bundle rejects a wildcard in an export directory segment', async t => {
+  const input = await fixture(t);
+  const path = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  delete manifest.peerDependencies;
+  manifest.exports['./nested'] = './lib/*/index.js';
+  manifest.shinemage = { bundle_role: 'configuration-bundle' };
+  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await mkdir(join(input.plugin, 'lib/nested'));
+  await writeFile(join(input.plugin, 'lib/nested/index.js'), 'export const nested = true;\n');
+  await commitFixture(input.root);
+  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_PATTERN_INVALID/);
+});
+
+test('configuration bundle rejects a wildcard export key in a directory segment', async t => {
+  const input = await fixture(t);
+  const path = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  delete manifest.peerDependencies;
+  manifest.exports['./nested/*/module'] = './lib/index.js';
+  manifest.shinemage = { bundle_role: 'configuration-bundle' };
+  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await commitFixture(input.root);
+  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_PATTERN_INVALID/);
+});
+
+test('configuration bundle rejects a wildcard main entry', async t => {
+  const input = await fixture(t);
+  const path = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  delete manifest.peerDependencies;
+  manifest.main = './lib/*.js';
+  manifest.shinemage = { bundle_role: 'configuration-bundle' };
+  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await commitFixture(input.root);
+  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_PATTERN_INVALID/);
+});
+
+test('configuration bundle rejects dot-dot in a files wildcard before reading outside a segment', async t => {
+  const input = await fixture(t);
+  const path = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  delete manifest.peerDependencies;
+  manifest.files = ['locale/../*.json'];
+  manifest.shinemage = { bundle_role: 'configuration-bundle' };
+  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await commitFixture(input.root);
+  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_FILE_PATH_INVALID/);
+});
+
+test('configuration bundle cannot bypass the pinned peer through an ordinary dependency', async t => {
+  const input = await fixture(t);
+  const path = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  delete manifest.peerDependencies;
+  manifest.dependencies = { '@deepseek-ai/dsh-tools': '0.1.7-rc.2' };
+  manifest.shinemage = { bundle_role: 'configuration-bundle' };
+  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await commitFixture(input.root);
+  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_CONFIGURATION_BUNDLE_TOOL_DEPENDENCY/);
+});
+
+test('configuration bundle cannot import dsh-tools without declaring the pinned peer', async t => {
+  const input = await fixture(t);
+  const path = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  delete manifest.peerDependencies;
+  manifest.shinemage = { bundle_role: 'configuration-bundle' };
+  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await writeFile(join(input.plugin, 'lib/index.js'), "import '@deepseek-ai/dsh-tools';\n");
+  await commitFixture(input.root);
+  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_CONFIGURATION_BUNDLE_TOOL_IMPORT/);
+});
+
+test('configuration bundle rejects concatenated and computed dynamic module loading', async t => {
+  const input = await fixture(t);
+  const path = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  delete manifest.peerDependencies;
+  manifest.shinemage = { bundle_role: 'configuration-bundle' };
+  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await writeFile(
+    join(input.plugin, 'lib/index.js'),
+    "const moduleName = '@deepseek-ai/' + 'dsh-tools';\nexport const load = () => import(moduleName);\n",
+  );
+  await commitFixture(input.root);
+  await assert.rejects(
+    () => packPlugin(input),
+    /PLUGIN_PACK_CONFIGURATION_BUNDLE_DYNAMIC_MODULE_LOAD/,
+  );
+});
+
+test('configuration bundle checks comments between module keywords and syntax', async t => {
+  const input = await fixture(t);
+  const path = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  delete manifest.peerDependencies;
+  manifest.shinemage = { bundle_role: 'configuration-bundle' };
+  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await writeFile(
+    join(input.plugin, 'lib/index.js'),
+    "import /* pinned module */ '@deepseek-ai/dsh-tools';\nexport const load = name => import /* computed */ (name);\n",
+  );
+  await commitFixture(input.root);
+  await assert.rejects(
+    () => packPlugin(input),
+    /PLUGIN_PACK_CONFIGURATION_BUNDLE_TOOL_IMPORT/,
+  );
+  await writeFile(join(input.plugin, 'lib/index.js'), "export const load = name => require /* computed */ (name);\n");
+  await commitFixture(input.root);
+  await assert.rejects(
+    () => packPlugin(input),
+    /PLUGIN_PACK_CONFIGURATION_BUNDLE_DYNAMIC_MODULE_LOAD/,
+  );
+});
+
+test('overlapping files wildcards produce one archive entry per file', async t => {
+  const input = await fixture(t);
+  const path = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  manifest.files = ['lib/', 'cordis.patch.yml', 'lib/*.js', 'lib/index*'];
+  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await commitFixture(input.root);
+  const receipt = await packPlugin(input);
+
+  assert.equal(receipt.entries.filter(entry => entry === 'lib/index.js').length, 1);
+  assert.equal(new Set(receipt.entries).size, receipt.entries.length);
+});
+
+test('tool plugin still requires its exact dsh-tools peer', async t => {
+  const input = await fixture(t);
+  const path = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  delete manifest.peerDependencies;
+  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await commitFixture(input.root);
+  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_DSH_PEER_INVALID/);
+});
+
 test('formal pack rejects an ignored lib replacement against a clean builder receipt', async t => {
   const input = await fixture(t);
   await writeFile(join(input.plugin, '.gitignore'), '/lib/\n/.build-provenance.json\n');
   await exec('git', ['-C', input.root, 'rm', '-q', '--cached', '-r', 'plugin/lib']);
   await exec('git', ['-C', input.root, 'add', 'plugin/.gitignore']);
   await exec('git', ['-C', input.root, 'commit', '-qm', 'ignore generated output']);
+  await chmod(join(input.plugin, 'lib/index.js'), 0o600);
   const previous = process.env.SHINEMAGE_CLEAN_BUILDER;
   process.env.SHINEMAGE_CLEAN_BUILDER = '1';
   try {
@@ -87,6 +324,7 @@ test('formal reader accepts generated bytes provenance emitted from a clean buil
   await writeFile(join(input.plugin, '.gitignore'), '/lib/\n/.build-provenance.json\n');
   await exec('git', ['-C', input.root, 'add', 'plugin/.gitignore']);
   await exec('git', ['-C', input.root, 'commit', '-qm', 'ignore generated output']);
+  await chmod(join(input.plugin, 'lib/index.js'), 0o600);
   const previous = process.env.SHINEMAGE_CLEAN_BUILDER;
   process.env.SHINEMAGE_CLEAN_BUILDER = '1';
   try {

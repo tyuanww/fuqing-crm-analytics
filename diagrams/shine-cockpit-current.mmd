@@ -1,0 +1,40 @@
+flowchart TB
+  NATIVE["DSH 原生对话<br/>生成驾驶舱 / free_html_page_generate"]
+
+  subgraph PLUGIN["Analytics Workbench 插件"]
+    INBOX["产物收件箱<br/>RECEIVED / PREVIEWABLE / SAVED"]
+    CABINET["项目驾驶舱 / 产物柜<br/>HTML / 看板 / 表格 / Office"]
+    HOME["WorkBuddy 式资料库首页<br/>代码存在，未成为生产主入口"]
+    PREVIEW["完整 HTML 预览"]
+    EDIT["选择 / 文案 / 样式 / 局部 AI"]
+    LEAVE["统一离开协调器<br/>保存 / 放弃 / 留页"]
+  end
+
+  NATIVE --> INBOX
+  INBOX --> PREVIEW
+  CABINET --> PREVIEW
+  CABINET --> EDIT
+  PREVIEW --> EDIT
+  HOME -.-> PREVIEW
+  LEAVE --> CABINET
+
+  EDIT --> CONTRACT["free-page/v1 合同<br/>node_map / source-index / patch guard"]
+  CONTRACT --> RUNTIME["Opaque-origin iframe<br/>CSP / 资源策略 / 运行时预算"]
+  CONTRACT --> API["FastAPI Page HTTP"]
+  API --> STORE[("page_documents.sqlite<br/>不可变版本 / CAS / 幂等 / 回滚")]
+  API --> BIND["page_result_access<br/>只读 result_ref / binding state"]
+  STORE --> PREVIEW
+  BIND --> PREVIEW
+  CABINET --> NATIVEHIST["DSH 原生历史 / 工作区<br/>HTML / Office / PDF"]
+
+  P13["P13 三场景真实验收<br/>未收口"]:::gap
+  AUTOBIND["生成页自动组入 CRM 快照<br/>未实现"]:::gap
+  NATIVE -.-> P13
+  BIND -.-> AUTOBIND
+
+  classDef done fill:#E8F5E9,stroke:#2E7D32,color:#111;
+  classDef partial fill:#FFF8E1,stroke:#F9A825,color:#111,stroke-dasharray:5 5;
+  classDef gap fill:#FCE4EC,stroke:#C62828,color:#111,stroke-dasharray:5 5;
+  class NATIVE,INBOX,CABINET,PREVIEW,EDIT,LEAVE,CONTRACT,RUNTIME,API,STORE,NATIVEHIST done;
+  class HOME,BIND partial;
+  class P13,AUTOBIND gap;

@@ -1,0 +1,29 @@
+flowchart LR
+  USER["用户"] --> CHAT["原生对话<br/>意图表达与生成"]
+
+  subgraph LIB["WorkBuddy 资料库<br/>截图与交互推断，不代表内部实现"]
+    HOME["资料库导航<br/>最近 / 我的文档 / 资料"]
+    PROMPT["从资料库开始工作<br/>自然语言输入为主锚点"]
+    CREATE["新建 / 上传"]
+    RECENT["最近资产与文档列表"]
+  end
+
+  CHAT --> PROMPT
+  HOME --> RECENT
+  PROMPT --> GENERATE["生成或打开页面"]
+  CREATE --> RECENT
+  RECENT --> WORK["页面工作区<br/>完整 HTML 预览"]
+  GENERATE --> WORK
+  WORK --> EDIT["显式浏览 / 编辑模式<br/>元素与区域选择"]
+  EDIT --> AI["AI 局部修改"]
+  WORK <--> ASSET["HTML 页面<br/>关联数据资源"]
+  AI --> SAVE["确认 / 保存 / 版本 / 历史"]
+  ASSET --> SAVE
+  SAVE --> REUSE["保存后继续复用"]
+  REUSE --> RECENT
+  WORK -.-> PUBLISH["发布 / 分享<br/>观察到但首期明确排除"]
+
+  classDef observed fill:#E8F5E9,stroke:#2E7D32,color:#111;
+  classDef excluded fill:#FCE4EC,stroke:#C62828,color:#111,stroke-dasharray:5 5;
+  class USER,CHAT,HOME,PROMPT,CREATE,RECENT,GENERATE,WORK,EDIT,AI,ASSET,SAVE,REUSE observed;
+  class PUBLISH excluded;

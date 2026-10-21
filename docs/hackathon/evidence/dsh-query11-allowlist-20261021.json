@@ -1,0 +1,189 @@
+{
+  "schema_version": "shinemage-dsh-query11-allowlist/v1",
+  "observed_at": "2026-10-20T23:17:34Z",
+  "historical_snapshot": true,
+  "superseded_by": "docs/hackathon/evidence/dsh-weknora-lifecycle-hardening-20261021.json",
+  "scope": "owner-operated-v5-query11-allowlist",
+  "release_ready": false,
+  "query_artifact": {
+    "source_sha": "030f4446b3b0b26f3a2859a08576d0eac860d068",
+    "version": "0.0.0-query.11",
+    "source_package_manifest_sha256": "a5e753386722edcd4626bc1e082ee453e74af0ef614b074001d29e26ae355598",
+    "manifest_sha256": "3108e6cf7094311f1bacf8b80e0f837c24e7eebe0be8e328e73950e8856dbfbc",
+    "tarball": "shine-mage-dsh-query-agent-0.0.0-query.11.tgz",
+    "tarball_sha256": "9046def0d68f6b89f4a4f3ea79af0f6de4109880bc3c07ba36dd0139946aad1e",
+    "tarball_bytes": 3776,
+    "integrity": "sha512-uZIoYFTR3jcuFpeppxCHGcnsuf9x3OZr0iCo5uDuktGsUJvYm2WxE7btetaWYwKIfFdDmj2YMdb6Br91kYfoMg==",
+    "build_provenance_sha256": "d46f266559f21430ade50ec35c4d3348aef40a261bf87d9a1a0566fbd10914f1"
+  },
+  "tool_policy": {
+    "preset": "crm-query",
+    "known_inherited_tools": "DENY",
+    "execution_guard": "ALLOWLIST",
+    "allowed_tools": [
+      "query_crm_dashboard_snapshot",
+      "query_crm_dashboard_gsv",
+      "query_crm_dashboard_purchases",
+      "query_crm_metrics_v1",
+      "query_crm_dashboard_readiness",
+      "query_crm_dashboard_membership",
+      "query_crm_dashboard_net_gsv",
+      "crm_metrics_capabilities",
+      "crm_service_health",
+      "weknora_search",
+      "weknora_read_document",
+      "free_html_page_generate"
+    ],
+    "request_header_tools": [
+      "create_worktree",
+      "crm_metrics_capabilities",
+      "crm_service_health",
+      "dsh_im_group_file",
+      "dsh_im_group_history",
+      "dsh_im_return_file",
+      "free_html_page_generate",
+      "interrupt_agent",
+      "list_agents",
+      "query_crm_dashboard_gsv",
+      "query_crm_dashboard_membership",
+      "query_crm_dashboard_net_gsv",
+      "query_crm_dashboard_purchases",
+      "query_crm_dashboard_readiness",
+      "query_crm_dashboard_snapshot",
+      "query_crm_metrics_v1",
+      "ralph",
+      "send_message",
+      "session_event_read",
+      "session_event_search",
+      "session_event_trace",
+      "session_search",
+      "session_trace",
+      "spawn_teammate",
+      "team_task_create",
+      "team_task_get",
+      "team_task_list",
+      "team_task_update",
+      "wait_agent",
+      "weknora_read_document",
+      "weknora_search",
+      "working_directory"
+    ],
+    "terminal_and_filesystem_tools_absent": true,
+    "non_allowlisted_execution": {
+      "tool": "list_agents",
+      "status": "DENIED",
+      "code": "CRM_QUERY_TOOL_NOT_ALLOWED"
+    }
+  },
+  "side_load": {
+    "status": "PASS",
+    "query_agent_version": "0.0.0-query.11",
+    "query9_references": 0,
+    "profile_package_sha256": "3bc8560d34ec091a92208d932fbab706d1bd4f8ddd3146d7325c9aa0543d8849",
+    "profile_lock_sha256": "7817db420a447483dbf839e5eefcc5400be2de431599dd5cef80d222d792699b",
+    "installed_package_sha256": "7e28e8b785ecb2b27f78d4c5e0bc40d9a18ed01d505d46fb4d1bccecae9453d3",
+    "installed_tool_policy_sha256": "c92132d37a03be8d8d92bd31b2d05992920d19d6621b351af01281ea6e6d3a41",
+    "frozen_install": "PASS",
+    "plugin_page": {
+      "installed": true,
+      "enabled": true,
+      "components_running": 2,
+      "components_total": 2,
+      "version": "0.0.0-query.11"
+    },
+    "previous_attempt": {
+      "version": "0.0.0-query.10",
+      "status": "ROLLED_BACK",
+      "reason": "The all-tools restriction removed required preset business tools."
+    }
+  },
+  "service": {
+    "name": "shinemage-dsh.service",
+    "active_state": "active",
+    "sub_state": "running",
+    "n_restarts": 0,
+    "active_enter_timestamp": "2026-10-21T07:13:20+08:00",
+    "promo_enter_active": true,
+    "http": {
+      "4328": 401,
+      "18090": 200,
+      "18091": 404,
+      "18092": 401,
+      "18093": 401,
+      "18094": 200,
+      "18098": 302
+    },
+    "startup_error_matches": 0
+  },
+  "browser_uat": {
+    "session_id": "session-a6d4d690-26bf-4e09-8e12-d52fd9c82574",
+    "preset": "crm-query",
+    "provider": "deepseek-account",
+    "model": "deepseek-flash",
+    "reasoning_effort": "off",
+    "display_model": "DeepSeek-V4.1-Flash",
+    "display_reasoning_effort": "Off",
+    "crm_login": "NOT_CONNECTED",
+    "standard_switch": {
+      "session_id": "session-fa878b33-78e8-4a7c-b785-82fdedb61cdc",
+      "preset_events": [
+        "crm-query",
+        "standard"
+      ],
+      "bash_visible_after_switch": true,
+      "read_visible_after_switch": true,
+      "write_visible_after_switch": true
+    }
+  },
+  "weknora_scope": {
+    "project_knowledge_base_id": "1c4627e2-dfc1-48ca-aeef-2c00b53da5f8",
+    "deployment_knowledge_base_id": "9a4ea853-9466-4d27-8d4e-d8e8bd5a8018",
+    "exposed_tools": [
+      "weknora_search",
+      "weknora_read_document"
+    ],
+    "adapter_sha256": "1c2e223d911bfbb02a0113ed0a2927e04086c503b8bdcbcad8b6729530f976e2",
+    "scope_helper_sha256": "7e49863d5800f6f19879db39698d8db964ef182a80f69ecf710fde7191a75384",
+    "overlay_manifest_sha256": "bb6a9215972d4983f740e643a9695c36f59b897fe198bd8f7b1c57b017952319",
+    "live_module_probe": {
+      "network_paths": [
+        "/api/v1/knowledge-search",
+        "/api/v1/knowledge/bf837310-9f76-4b4f-8a53-c3f39bb79f44"
+      ],
+      "tenant_wide_document_name_lookup_path": "ABSENT",
+      "project_search": {
+        "status": "PASS",
+        "requested": 1,
+        "hits": 1
+      },
+      "negative_deployment_search": {
+        "status": "DENIED",
+        "code": "WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED"
+      },
+      "negative_cross_scope_document_read": {
+        "status": "DENIED",
+        "code": "WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED"
+      }
+    },
+    "browser_probe": {
+      "project_search_hits": 2,
+      "negative_deployment_search": "WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED",
+      "negative_cross_scope_document_read": "WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED"
+    },
+    "argument_allowlist": {
+      "search_camel_case": "WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED",
+      "read_camel_case": "WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED"
+    },
+    "unit_tests": {
+      "command": "node --test dsh-plugins/query-agent/test/package.test.mjs scripts/ops/weknora-production-scope.test.mjs",
+      "passed": 26,
+      "failed": 0
+    },
+    "recovery": "/srv/shinemage/dsh/recovery/query10-side-load-20261021/"
+  },
+  "limits": [
+    "CRM account login and real read-only metric UAT still require the user to sign in.",
+    "Non-allowlisted scoped tools remain visible in the request schema; their execution is denied by the monotonic guard.",
+    "This is an owner-operated side-load, not a formal signed release."
+  ]
+}

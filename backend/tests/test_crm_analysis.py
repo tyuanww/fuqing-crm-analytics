@@ -143,6 +143,7 @@ def test_storage_boundaries_and_source_kind_cannot_be_relabelled(assets, tmp_pat
     assert CrmAnalysisStore(store.directory, "synthetic").library("alice").data_kind == "synthetic"
     public = tmp_path / "public"
     public.mkdir(mode=0o755)
+    public.chmod(0o755)
     with pytest.raises(ValueError):
         CrmAnalysisStore(public, "synthetic")
     linked = tmp_path / "linked"

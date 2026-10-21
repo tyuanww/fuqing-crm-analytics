@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { access, readFile, writeFile } from 'node:fs/promises';
+import { access, chmod, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { prepareProfile } from './prepare-profile.mjs';
 import { fixture, specs } from './test-support/formal-packs.fixture.mjs';
@@ -22,6 +22,7 @@ test('CRM, knowledge and page profile binds only the verified packages and never
   assert.equal(receipt.package_inputs.host, 'NOT_RUN');
   assert.equal(receipt.package_inputs.release_ready, false);
   assert.deepEqual(receipt.toolchain, { sdk_version: TOOLCHAIN.sdk_version, upstream_sha: TOOLCHAIN.upstream_sha });
+  assert.deepEqual(receipt.presets.map(row => row.id), ['crm-knowledge']);
   assert.equal(receipt.service_started_or_restarted, false);
   const rows = JSON.parse(await readFile(join(f.output, 'preset/agent.cordis.yml')));
   for (const [key, id, entry] of [['crm', 'crm-tools', 'lib/index.js'], ['knowledge', 'knowledge-tools-v1', 'lib/index.js'],
@@ -46,6 +47,7 @@ for (const domain of ['crm', 'knowledge']) {
     const receipt = await prepareProfile({ output: f.output, packInputs: f.packInputs });
     assert.deepEqual(Object.keys(receipt.packages), [domain]);
     assert.equal(receipt.package_inputs.plugins.length, 1);
+    assert.deepEqual(receipt.presets.map(row => row.id), ['crm-knowledge']);
     assert.equal(receipt.page_delivery.status, 'NOT_AVAILABLE');
     assert.equal(receipt.private_knowledge_identity, 'NOT_REQUESTED');
   });
@@ -104,6 +106,7 @@ test('service and graph configuration remain fail-closed before pack installatio
   const f = await fixture(t, ['knowledge']);
   const settings = join(f.root, 'graph-settings.json');
   await writeFile(settings, '{}', { mode: 0o644 });
+  await chmod(settings, 0o644);
   for (const [name, options, code] of [
     ['metrics', { metricsOrigin: 'http://127.0.0.1:4335' }, /METRICS_PLUGIN_REQUIRED/],
     ['external', { knowledgeOrigin: 'https://example.invalid' }, /SERVICE_ORIGIN_INVALID/],

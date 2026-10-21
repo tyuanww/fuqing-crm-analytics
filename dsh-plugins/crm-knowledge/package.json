@@ -1,6 +1,6 @@
 {
   "name": "@shine-mage/dsh-crm-knowledge",
-  "version": "0.0.0-crm.1",
+  "version": "0.0.0-crm.2",
   "private": true,
   "type": "module",
   "description": "CRM dashboard, metrics and private analysis assets; knowledge tools are a separately installed optional plugin.",

@@ -22,7 +22,9 @@ async function fixture(t) {
 }
 test('profile composes independent agent scopes instead of aggregating apply calls', () => {
   const files = renderProfile({ output: '/output', plugin: '/fixture/CRM 有空格', knowledgePlugin: '/fixture/knowledge',
-    metricsOrigin: 'http://127.0.0.1:10101', knowledgeOrigin: 'http://127.0.0.1:10102', graphSettingsFile: '/private/graph.json' });
+    metricsOrigin: 'http://127.0.0.1:10101', knowledgeOrigin: 'http://127.0.0.1:10102',
+    graphSettingsFile: '/private/graph.json',
+    pageTools: { root: '/fixture/workbench', sha256: 'a'.repeat(64) } });
   const rows = JSON.parse(files['preset/agent.cordis.yml']);
   assert.equal(rows.find(x => x.id === 'crm-tools').config.metricsOrigin, 'http://127.0.0.1:10101');
   assert.equal(rows.find(x => x.id === 'crm-tools').config.knowledgeOrigin, undefined);
@@ -44,6 +46,7 @@ test('either domain can be selected alone and preparation cannot overwrite exist
     const result = await prepareProfile({ output, ...selection });
     assert.equal(result.schema, 'crm-profile-assets/v3');
     assert.deepEqual(result.preset_loader, { contract: 'dsh-agent-preset-declaration/v1', id: 'crm-knowledge', patch: 'preset.patch.yml' });
+    assert.deepEqual(result.presets, [{ id: 'crm-knowledge', name: domain === 'crm' ? 'CRM 指标与分析' : '知识与教材', order: 2 }]);
     assert.deepEqual(Object.keys(result.packages), [domain]);
     assert.equal(result.existing_profile_changed, false); assert.equal(result.service_started_or_restarted, false);
     const body = await readFile(join(output, 'preset/agent.cordis.yml'), 'utf8');

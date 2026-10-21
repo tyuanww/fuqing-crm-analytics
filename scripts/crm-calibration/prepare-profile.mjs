@@ -44,24 +44,34 @@ export function renderProfile({ output, plugin, knowledgePlugin, graphSettingsFi
     return url.href;
   };
   const title = plugin ? knowledgePlugin ? 'CRM 知识与指标' : 'CRM 指标与分析' : '知识与教材';
-  const entries = [
-    { id: 'persona', name: '@deepseek-ai/dsh-persona', config: { complete: true, includeRuntimeContext: false,
-      prefix: [plugin ? crmPrompt : '', knowledgePlugin ? knowledgePrompt : '', graphSettingsFile ? graphPrompt : '',
-        '工具未安装或操作未接通时说明原因，保留原生对话；没有写文件工具时不承诺已保存或发送文件。'].filter(Boolean).join('\n') } },
+  const persona = prefix => ({ id: 'persona', name: '@deepseek-ai/dsh-persona', config: {
+    complete: true, includeRuntimeContext: false,
+    prefix: [...prefix, '工具未安装或操作未接通时说明原因，保留原生对话；没有写文件工具时不承诺已保存或发送文件。']
+      .filter(Boolean).join('\n'),
+  } });
+  const toolEntries = [
     ...(plugin ? [{ id: 'crm-tools', name: moduleUrl(plugin, 'lib/index.js', packages.crm?.sha256 ?? revision), config: { metricsOrigin: services.metricsOrigin } }] : []),
     ...(knowledgePlugin ? [{ id: 'knowledge-tools-v1', name: moduleUrl(knowledgePlugin, 'lib/index.js', packages.knowledge?.sha256 ?? revision), config: { knowledgeOrigin: services.knowledgeOrigin } }] : []),
-    ...(graphSettingsFile ? [{ id: 'knowledge-graph-v1', name: moduleUrl(knowledgePlugin, 'lib/graph-tools.js', packages.knowledge?.sha256 ?? revision), config: { settingsFile: graphSettingsFile } }] : []),
-    ...(pageTools ? [{ id: 'workbench-page-tools-v1', name: moduleUrl(pageTools.root, 'lib/page-tools.js', pageTools.sha256) }] : []),
   ];
+  const pageEntries = pageTools
+    ? [{ id: 'workbench-page-tools-v1', name: moduleUrl(pageTools.root, 'lib/page-tools.js', pageTools.sha256) }]
+    : [];
+  const entries = [
+    persona([plugin ? crmPrompt : '', knowledgePlugin ? knowledgePrompt : '', graphSettingsFile ? graphPrompt : '']),
+    ...toolEntries,
+    ...(graphSettingsFile ? [{ id: 'knowledge-graph-v1', name: moduleUrl(knowledgePlugin, 'lib/graph-tools.js', packages.knowledge?.sha256 ?? revision), config: { settingsFile: graphSettingsFile } }] : []),
+    ...pageEntries,
+  ];
+  const declarations = [{ id: 'preset-shinemage-crm-knowledge',
+    name: '@deepseek-ai/dsh-agent-preset', config: { id: 'crm-knowledge', name: title,
+      description: title, order: 2, plugins: entries } }];
   return {
     'host.patch.yml': JSON.stringify(plugin ? [
       { id: 'crm-knowledge-login-host', disabled: true },
       { insert: [{ id: 'crm-knowledge-live-host', name: moduleUrl(plugin, 'lib/host.js', packages.crm?.sha256 ?? revision) }] },
     ] : [], null, 2) + '\n',
     // rc2 declares presets as scoped Cordis plugins; it does not scan preset directories.
-    'preset.patch.yml': JSON.stringify([{ insert: [{ id: 'preset-shinemage-crm-knowledge',
-      name: '@deepseek-ai/dsh-agent-preset', config: { id: 'crm-knowledge', name: title,
-        description: title, order: 2, plugins: entries } }] }], null, 2) + '\n',
+    'preset.patch.yml': JSON.stringify([{ insert: declarations }], null, 2) + '\n',
     'preset/preset.yml': JSON.stringify({ name: title, description: title, order: 2 }, null, 2) + '\n',
     'preset/agent.cordis.yml': JSON.stringify(entries, null, 2) + '\n',
   };
@@ -156,6 +166,9 @@ export async function prepareProfile(options) {
     toolchain: { sdk_version: toolchain.sdk_version, upstream_sha: toolchain.upstream_sha }, cordis_version: compatibility.cordisVersion,
     packages, graph_configured: Boolean(graphSettingsFile),
     preset_loader: { contract: 'dsh-agent-preset-declaration/v1', id: 'crm-knowledge', patch: 'preset.patch.yml' },
+    presets: JSON.parse(files['preset.patch.yml'])[0].insert.map(({ config }) => ({
+      id: config.id, name: config.name, order: config.order,
+    })),
     private_knowledge_identity: graphSettingsFile ? plugin ? 'CRM_LEASE_CONFIGURED_NOT_RUN' : 'NOT_AVAILABLE_NO_IDENTITY_PROVIDER' : 'NOT_REQUESTED',
     synthetic_services: Object.fromEntries(['metrics', 'knowledge'].map(domain => [domain, services[domain + 'Origin']
       ? { status: 'CONFIGURED_NOT_RUN', origin: services[domain + 'Origin'], api_version: '1.0.0' }

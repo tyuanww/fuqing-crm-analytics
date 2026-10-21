@@ -4,13 +4,17 @@
 
 本页带日期的候选、端口、版本和测试数字都是历史证据。当前命令从“先按变更类型选验证”开始；当前版本、运行现场和门禁仍以 STATUS 为准。不要把历史段落中的 `6677`、旧 candidate 或旧测试数当作当前结论。
 
-## 当前 rc1 clean-main v4 候选（2026-10-20）
+## 当前 rc1 clean-main v5 现场与 v4 候选（2026-10-21）
 
-本轮 DSH 候选使用固定 upstream `1600d8a1e140dcde43a1a0941940a0480712c011`，`pnpm-lock.yaml` SHA-256 为 `952ca2f79998660dc690b739078a5d6052bc7c5c2193714b918b9d720baaeaba`，candidate tag 为 `dsh-0.2.1-rc.1-clean-main-20261020-v4`。runtime/profile、插件市场、peer alias 闭包和 AppleDouble 扫描的具体合同见[候选参考](../reference/dsh-rc1-clean-candidate.md)，实际顺序见[升级手册](./dsh-rc1-clean-upgrade-runbook.md)。
+线上 `/srv/shinemage/dsh/current` 指向 `dsh-0.2.1-rc.1-core-main-20261020-v5`，这是 v4 clean-main runtime 的 owner-operated 现场 side-load；最近一次受控重启后的 ephemeral profile 为 package `27566016…` / lock `ea643aa0…`，而 `release-marker.json` 仍自报 v4/PREPARED，候选 receipt 的 profile 仍为 `c3ec7df3…`。因此 v5 只是一项带现场回执的运行事实，不是新的正式候选或签名 release。固定 upstream 仍为 `1600d8a1e140dcde43a1a0941940a0480712c011`。当前 profile lock 含 query.11，其摘要会随 DSH 重启生成的 `plugin-packs-*` link 根变化，不能当作正式 profile identity；runtime/profile、插件市场、peer alias 闭包和 AppleDouble 扫描的具体合同见[候选参考](../reference/dsh-rc1-clean-candidate.md)，实际顺序见[升级手册](./dsh-rc1-clean-upgrade-runbook.md)。
 
-本轮已执行的局部检查为：固定 Node24 release tests `45 pass / 0 fail`、远程 Node24 peer 缺失负测 PASS、runtime provenance PASS、native/business boot PASS、Settings/account RPC PASS、浏览器插件页 PASS、plugin-market Discover PASS、console logs EMPTY、AppleDouble locale files `0`、v4 boot PASS。上述 peer 缺失负测已验证 fail-closed 行为。默认 Node25 下的 dsh-dev 全量失败属于环境版本不满足，不能改写为代码 PASS。
+v4 过渡候选已执行的局部检查为：固定 Node24 release tests `45 pass / 0 fail`、远程 Node24 peer 缺失负测 PASS、runtime provenance PASS、native/business boot PASS、Settings/account RPC PASS、浏览器插件页 PASS、plugin-market Discover PASS、console logs EMPTY、AppleDouble locale files `0`、v4 boot PASS。上述 peer 缺失负测已验证 fail-closed 行为。默认 Node25 下的 dsh-dev 全量失败属于环境版本不满足，不能改写为代码 PASS。
 
-IM package/index 仍为 `BLOCKED_MISSING_ARTIFACT`，production switch 为 `HELD_PENDING_IM_ARTIFACT`；候选只在 staging，线上 `current` 不变。该段是当前局部验证，不替代真实模型、完整业务 UAT、正式 publisher/signature 或公司发布门禁。
+IM 已从归档输入未定位推进为 `PINNED_INPUTS_VERIFIED`：`@xmanrui/dsh-im@5.2.0` 与 `dsh-plugin@2.0.5` 的归档已按线上 lock 的字节摘要、integrity、commit 根目录和包身份核验并保存。该事实不表示 IM 已完成正式发布；当前仍缺统一发布身份、publisher/signature、独立验收和切换授权，所以 `release_ready=false`。Query `0.0.0-query.11` 已由 source `030f4446…` 的 clean worktree 生成并完成线上 side-load；WeKnora 生产适配层保留固定项目 allowlist，并对读取前后文档元数据双重校验、工具 effect 事务释放和 tenant-wide 文档名 enrichment 禁用 fail-closed。live 浏览器复测真实调用一次 `weknora_search` 并返回 8 条 passage；部署库搜索和跨库读取被拒绝，普通 search 不请求 `/api/v1/knowledge/search`。状态与回执见 [query.11/WeKnora 生命周期强化回执](../hackathon/evidence/dsh-weknora-lifecycle-hardening-20261021.md)。
+
+2026-10-21 收口后的只读现场复核再次确认服务、query.11、模型路由和项目库检索正常；任务队列仍保留 1 条 2026-09-19 的 `datatable:summary` 历史 dead letter（`model ID cannot be empty`），当前 10 篇文档无 pending task 或 error。三个知识库的 `vector_store_id` 按 Postgres env-store 合同保持 `NULL`；Workspace `retriever_engines` 已显式固定为 keywords + vector 的 `postgres` 引擎，不再依赖空数组 fallback。WeKnora 的 DB-managed VectorStore 不接受 Postgres，当前单库部署不创建 per-KB store。检索 key 仍为 tenant scope，但 `knowledge_base_ids` 已从项目库与部署验收库收紧为仅项目库，并保持 `retrieve` capability、`full_access=false` 和原 token 不变。直接项目库搜索和文档元数据读取返回 `200`；部署验收库的搜索与文档元数据读取由服务端返回 `403`，适配层 allowlist 继续作为第二层边界。
+
+本轮在固定 Node `24.19.0` 和 Python `3.14.8` 下重新接收三份作者证据并执行完整 B0 r10 `--check`：Workbench 为 155 文件／1086 PASS，领域作者为 34 PASS，公共合同为三仓 31 份材料；组合包、领域合同、插件边界、supervisor 与固定宿主负测均通过。B0 Python 为 `862 passed / 0 failed`（41 subtests passed，23 warnings），Node 主组为 `586 passed / 4 skipped / 0 failed`，其余调用组均无失败，opt-in/NOT_RUN 跳过项按原原因保留。r8 保持为历史证据；r9 的唯一失败为固定 Workbench 几何测试的 15 秒子进程超时，r10 独占运行通过，未放宽超时。独立完整 backend 为 `3286 passed / 85 skipped / 0 failed / 6 warnings`。命令、退出码、日志路径和摘要见[收口验证回执](../hackathon/evidence/dsh-weknora-lifecycle-hardening-20261021.md#收口验证)。该结果是本地提交前验证，不替代远端 CI、正式 clean machine、CRM 用户登录和真实只读 UAT。
 
 
 ## 独立作者仓合并与正式目标前置（2026-10-12，历史时点）
@@ -387,6 +391,8 @@ node --test --test-concurrency=1 \
 每次 backend runner 创建新的 `.context/checks/<time>/`，记录解释器、HEAD、Python 检查源码摘要、完整目标与命令、每组退出码/耗时/峰值 RSS、JUnit 与最终结果；失败也保留。摘要是可审查证据，不是绕过检查的授权或自动缓存键。`summarize_checks.py` 汇总 JUnit 子 suite，避免过去从空根属性得到 None。
 
 当前规则只在 AGENTS；当前产品任务状态在 STATUS 与 TODOS；B0 执行清单保留历史；日期报告是不可回写的历史证据。本次治理记录单列本地补丁、旧成绩和未运行项目。Git/远端 CI/真实业务验收分别交付，不能因为本地检查通过标记产品完成。
+
+固定运行时选择器和混合文件入口见 [How to 运行固定 Node 与 Python 的前置测试](pregate-runner.md)。IM 固定归档的 lock 字段、校验命令与错误码见[DSH IM 插件固定输入参考](../reference/dsh-im-plugin-inputs.md)。
 
 ## DSH 基座兼容的独立验证
 
