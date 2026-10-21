@@ -57,6 +57,8 @@ source git SHA
   + final tarball name, byte count, and SHA-256
 ```
 
+The generated-tree digest canonicalizes generated file modes to `0644` before hashing. Packers normalize archive modes independently of the caller's umask, so a byte-identical `0600` build output and `0644` extracted file must produce the same digest. Symlinks, extra generated paths, and changed bytes are still rejected.
+
 The reader compares every digest with the bytes it receives. It rejects a changed ignored `lib/`, a dirty source tree, a different builder toolchain, a missing receipt, or a tarball digest mismatch.
 
 ## Reader contract

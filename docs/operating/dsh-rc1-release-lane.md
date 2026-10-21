@@ -61,7 +61,7 @@ node scripts/release/rc1-preflight.mjs \
 
 正式发布仍需把本地 asset 送入批准的 publisher、signature、revocation、independent verification、final attestation 和 clean-machine 流程，再生成可外发的 publication sidecar。当前没有执行这些外部门禁。
 
-当前状态保持：`M2-07=BLOCKED`、`M2-08=NOT_RUN`、`M2-09=NOT_RUN`、`release_ready=false`。
+当前状态保持：`M2-07=BLOCKED / COMPANY_CLOSURE_NOT_RUN`；`M2-08=INTERNAL_PREFLIGHT_PASS / TARGET_WSL2_HTTP_PASS / ACTIVATION_CANARY_ROLLBACK_NOT_RUN`；`M2-09=FORMAL_TARGET_BROWSER_NOT_RUN / FORMAL_TARGET_RECOVERY_NOT_RUN / MAIN_PIN_UNCHANGED`；`release_ready=false`。逐项状态以 [TODOS](../hackathon/TODOS.md#m2-收尾任务卡与维修规则) 为准。
 
 ## Linux x64 portable runtime
 

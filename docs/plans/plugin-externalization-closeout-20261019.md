@@ -1,5 +1,7 @@
 # 插件外置与主仓收口计划
 
+> 本文件是 2026-10-19 的计划快照。当前门禁与组合身份只看 [STATUS](../../STATUS.md) 和 [TODOS](../hackathon/TODOS.md#m2-收尾任务卡与维修规则)。
+
 ## 目标
 
 把 `fuqing-crm-analytics` 变成稳定的 DSH 集成和发布仓。插件源码由独立仓维护。主仓只消费经过摘要校验的插件 pack 和 profile 输入。

@@ -32,6 +32,8 @@ CRM、知识、页面和 WeKnora 是不同权限与生命周期域，保持独�
 
 当前 owner-operated side-load 的固定身份见 [`config/query-agent-side-load.v1.json`](../../config/query-agent-side-load.v1.json)。其中 `source_package_manifest_sha256` 是 source `package.json` 的摘要，`generated_pack_manifest_sha256` 是生成 `plugin-pack.json` 的摘要，`tarball.sha256` 是最终归档摘要；三者不能互相替代。该 lock 只描述当前现场输入，`release_ready=false`，不创建正式发布身份。query.10 的 all-tools restriction 会误删域工具，已回滚；query.11 使用已知继承工具 masking 加执行 allowlist。
 
+查询工具与实际浏览器边界见 [query.11 allowlist 回执](../../docs/hackathon/evidence/dsh-query11-allowlist-20261021.md)。
+
 ## How to：更新并验证 WeKnora 生产范围
 
 生产检索由 DSH 外部的薄 overlay 提供，第三方 `@wxg-prc-cpg/dsh-weknora@0.1.0` 包保持独立且不改写。维护源、live 文件和回滚资产的职责如下：

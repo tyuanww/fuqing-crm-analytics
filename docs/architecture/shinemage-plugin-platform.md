@@ -19,9 +19,9 @@ CRM、知识、WeKnora、页面和问数预设保持独立包，是因为它们�
 历史 marker 包由页面 profile 选择，不进入 `crm-query` 的最小工具面。是否继续保留这些 marker 需要按页面消费者单独判断，不能为了减少插件列表而直接删除仍被 workbench 引用的能力。架构与产品评审图见[驾驶舱最终架构](../../diagrams/cockpit-final-architecture.mmd)、[当前驾驶舱实现](../../diagrams/shine-cockpit-current.mmd)和[WorkBuddy 资料库 UX](../../diagrams/workbuddy-library-ux.mmd)。
 
 
-## 当前维护边界（2026-10-12 PR #121 合并后）
+## 当前维护边界（2026-10-12 PR #121 合并后至 2026-10-21）
 
-本轮实现与测试迁移已分组提交并经 PR #121 普通 merge，合并后 main CI 见[核验记录](../hackathon/evidence/shinemage-pr121-postmerge-20261012.md)。九个插件各自维护源码／版本／测试，且九个插件仓与 board-components 领域库的首个远程 PR 已合并；board-components 仍是独立领域库，不是第十个插件。主仓装配锁绑定 Workbench `3030e3f`、CRM `dac0539`、Knowledge `f623c22` 及其真实 PR CI 产出的 `dsh-plugin-pack/v1` 回执；默认开发／preflight 装配消费固定包，公开合同阶段核对封存作者导出，领域与私有 core 覆盖核对作者来源和实际 CI。当前回执与 artifact 摘要见[正式包 CI 收口](../hackathon/evidence/shinemage-formal-plugin-ci-20261012.md)。
+本轮实现与测试迁移已分组提交并经 PR #121 普通 merge，合并后 main CI 见[核验记录](../hackathon/evidence/shinemage-pr121-postmerge-20261012.md)。九个插件各自维护源码／版本／测试，且九个插件仓与 board-components 领域库的首个远程 PR 已合并；board-components 仍是独立领域库，不是第十个插件。2026-10-12 时点的装配锁绑定 Workbench `3030e3f`、CRM `dac0539`、Knowledge `f623c22`；当前 rc2 组合锁已前进到 Workbench `3030e3f`、CRM `5f359f5b`、Knowledge `ef8960ed`，而杭州 v5 仍使用独立的 rc1 owner-operated side-load。当前值只看 [STATUS](../../STATUS.md) 与组合锁；旧回执和 artifact 摘要见[正式包 CI 收口](../hackathon/evidence/shinemage-formal-plugin-ci-20261012.md)。
 
 主仓仍负责 backend、平台合同、profile、组合消费、来源与权限门禁、保留合同守卫和静态扫描。另两组私有数值／查询断言继续读取旧 Workbench，历史 `dsh-plugins/` 因这些用途暂留；本地源码迁移没有证明全面源码退场，也没有改变运行时边界。完整看板仍在 analytics-workbench，shine-board 是能力标记；合成知识服务不能当作真实 WeKnora。
 
@@ -29,7 +29,7 @@ CRM、知识、WeKnora、页面和问数预设保持独立包，是因为它们�
 
 此前三路径应用时点（保留原记录）：
 
-当前本地装配锁已绑定 Workbench `6c5adc9f` 与 CRM `c4b1c91e` 的独立正式包，并核对同来源作者 CI；canonical 后端离线 eval 的验证归属已迁回主仓，保留原断言并拒绝空用例集。应用后包准备/证据绑定和受影响测试通过；另两组私有数值/查询断言仍保留旧源码，尚未实现全部源码退场。原 peer `4.0.2`、candidate/journal、生产和发布边界不变，代码/文档未提交；见[本轮三路径应用](../hackathon/evidence/shinemage-three-path-main-application-20261011.md)。
+2026-10-11 时点的本地装配锁已绑定 Workbench `6c5adc9f` 与 CRM `c4b1c91e` 的独立正式包，并核对同来源作者 CI；canonical 后端离线 eval 的验证归属已迁回主仓，保留原断言并拒绝空用例集。应用后包准备/证据绑定和受影响测试通过；另两组私有数值/查询断言仍保留旧源码，尚未实现全部源码退场。原 peer `4.0.2`、candidate/journal、生产和发布边界不变，代码/文档未提交；见[本轮三路径应用](../hackathon/evidence/shinemage-three-path-main-application-20261011.md)。
 
 ## 四类升级各有归属
 

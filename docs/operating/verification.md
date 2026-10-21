@@ -12,7 +12,9 @@ v4 过渡候选已执行的局部检查为：固定 Node24 release tests `45 pas
 
 IM 已从归档输入未定位推进为 `PINNED_INPUTS_VERIFIED`：`@xmanrui/dsh-im@5.2.0` 与 `dsh-plugin@2.0.5` 的归档已按线上 lock 的字节摘要、integrity、commit 根目录和包身份核验并保存。该事实不表示 IM 已完成正式发布；当前仍缺统一发布身份、publisher/signature、独立验收和切换授权，所以 `release_ready=false`。Query `0.0.0-query.11` 已由 source `030f4446…` 的 clean worktree 生成并完成线上 side-load；WeKnora 生产适配层保留固定项目 allowlist，并对读取前后文档元数据双重校验、工具 effect 事务释放和 tenant-wide 文档名 enrichment 禁用 fail-closed。live 浏览器复测真实调用一次 `weknora_search` 并返回 8 条 passage；部署库搜索和跨库读取被拒绝，普通 search 不请求 `/api/v1/knowledge/search`。状态与回执见 [query.11/WeKnora 生命周期强化回执](../hackathon/evidence/dsh-weknora-lifecycle-hardening-20261021.md)。
 
-本轮在固定 Node `24.19.0` 和 Python `3.14.8` 下重新接收三份作者证据并执行完整 B0 `--check`：Workbench 为 155 文件／1086 PASS，领域作者为 34 PASS，公共合同为三仓 31 份材料；组合包、领域合同、插件边界、supervisor 与固定宿主负测均通过，后端为 `862 passed / 0 failed`（41 subtests passed，23 warnings）。该结果是本地提交前验证，不替代远端 CI、正式 clean machine、CRM 用户登录和真实只读 UAT。
+2026-10-21 收口后的只读现场复核再次确认服务、query.11、模型路由和项目库检索正常；任务队列仍保留 1 条 2026-09-19 的 `datatable:summary` 历史 dead letter（`model ID cannot be empty`），当前 10 篇文档无 pending task 或 error。三个知识库的 `vector_store_id` 均为空，运行依赖 `RETRIEVE_DRIVER=postgres` 的 workspace/env fallback；真实检索通过，但显式 per-KB vector store 绑定未配置。检索 key 仅具 `retrieve` capability 和 `full_access=false`，仍覆盖项目库与部署验收库，生产单库边界由适配层 fail-closed 收窄。
+
+本轮在固定 Node `24.19.0` 和 Python `3.14.8` 下重新接收三份作者证据并执行完整 B0 r7 `--check`：Workbench 为 155 文件／1086 PASS，领域作者为 34 PASS，公共合同为三仓 31 份材料；组合包、领域合同、插件边界、supervisor 与固定宿主负测均通过。B0 Python 为 `862 passed / 0 failed`（41 subtests passed，23 warnings），Node 主组为 `554 passed / 4 skipped / 0 failed`，其余调用组均无失败，opt-in/NOT_RUN 跳过项按原原因保留。独立完整 backend 为 `3286 passed / 85 skipped / 0 failed / 6 warnings`。命令、退出码、日志路径和摘要见[收口验证回执](../hackathon/evidence/dsh-weknora-lifecycle-hardening-20261021.md#收口验证)。该结果是本地提交前验证，不替代远端 CI、正式 clean machine、CRM 用户登录和真实只读 UAT。
 
 
 ## 独立作者仓合并与正式目标前置（2026-10-12，历史时点）

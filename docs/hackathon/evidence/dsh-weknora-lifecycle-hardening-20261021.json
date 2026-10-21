@@ -244,7 +244,7 @@
     },
     "plugin_pack": {
       "command": "node --test scripts/release/plugin-pack.test.mjs",
-      "passed": 44,
+      "passed": 45,
       "failed": 0
     },
     "pregate_runner": {
@@ -253,6 +253,52 @@
       "failed": 0
     },
     "pregate_runner_shell": "bash -n PASS"
+  },
+  "closeout_verification": {
+    "backend": {
+      "label": "full-backend-r2",
+      "command": ".context/checks/service-runtime-py314-20261021/bin/python -m pytest -q backend/tests",
+      "executed_commit": "fa618859b7e789e5db5393283bd1e324367033a2",
+      "exit": 0,
+      "passed": 3286,
+      "skipped": 85,
+      "failed": 0,
+      "warnings": 6,
+      "duration_seconds": 1811.3,
+      "log_sha256": "6be369bc6cd7b3c8b78a5f389fb156b94c16ea7968d45ce4ca9ea0fff956029c",
+      "later_scope": "No backend or Python service source changed between the executed commit and dfcfd1be."
+    },
+    "fixed_input_b0": {
+      "label": "full-b0-r7",
+      "command": "node scripts/dsh-b0/pipeline.mjs --check --python /Users/hutou/homebrew/bin/python3.14",
+      "executed_commit": "dfcfd1be97c16a6f1ab6aa00f6b49a40acadd7e3",
+      "exit": 0,
+      "duration_seconds": 372.7,
+      "python": {
+        "passed": 862,
+        "subtests_passed": 41,
+        "warnings": 23,
+        "failed": 0
+      },
+      "node_main": {
+        "passed": 554,
+        "skipped": 4,
+        "failed": 0
+      },
+      "other_node_groups_failed": 0,
+      "log_sha256": "e7d540e11b58dec0355fe00c907864d78ef64210dc0241c896d8812cf881bad2"
+    },
+    "targeted_node": {
+      "command": "node --test --test-concurrency=1 scripts/ops/weknora-production-scope.test.mjs dsh-plugins/query-agent/test/package.test.mjs scripts/release/plugin-pack.test.mjs scripts/ci/pregate-runner.test.mjs",
+      "passed": 79,
+      "failed": 0,
+      "skipped": 0,
+      "groups": {
+        "query_and_weknora_scope": 29,
+        "plugin_pack": 45,
+        "pregate_runner": 5
+      }
+    }
   },
   "limits": [
     "CRM account login and real read-only metric UAT remain NOT_CONNECTED.",

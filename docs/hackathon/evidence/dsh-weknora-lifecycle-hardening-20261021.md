@@ -70,7 +70,7 @@ retrieval key `DSH 本机只读检索` 只有 `retrieve` capability 且 `full_ac
 ## 测试
 
 - `node --test scripts/ops/weknora-production-scope.test.mjs dsh-plugins/query-agent/test/package.test.mjs`：`29/29 PASS`
-- `node --test scripts/release/plugin-pack.test.mjs`：`44/44 PASS`
+- `node --test scripts/release/plugin-pack.test.mjs`：`45/45 PASS`
 - `node --test scripts/ci/pregate-runner.test.mjs`：`5/5 PASS`，另 `bash -n scripts/ci/pregate-runner.sh` 通过
 
 新增回归覆盖：
@@ -81,6 +81,19 @@ retrieval key `DSH 本机只读检索` 只有 `retrieve` capability 且 `full_ac
 - pre-gate 不在 Git 仓库时明确失败
 - overlapping `files` wildcard 去重
 - 配置 bundle 的拼接动态 import 被拒绝
+
+## 收口验证
+
+以下结果对应 query.11、WeKnora scope 与打包修复合并后的代码树；命令和日志摘要用于区分真实执行、历史回执和未运行项。
+
+| 检查 | 命令 | 结果 | 证据 |
+|---|---|---|---|
+| 完整 backend | `.context/checks/service-runtime-py314-20261021/bin/python -m pytest -q backend/tests` | `exit 0`；`3286 passed / 85 skipped / 0 failed / 6 warnings`，1811.3 秒 | `full-backend-r2`，日志 SHA-256 `6be369bc6cd7b3c8b78a5f389fb156b94c16ea7968d45ce4ca9ea0fff956029c` |
+| 固定输入 B0 r7 | `node scripts/dsh-b0/pipeline.mjs --check --python /Users/hutou/homebrew/bin/python3.14` | `exit 0`；Python `862 passed`、41 subtests passed、23 warnings；Node 主组 `554 passed / 4 skipped / 0 failed`，其余组无失败 | `full-b0-r7`，HEAD `dfcfd1be97c`，日志 SHA-256 `e7d540e11b58dec0355fe00c907864d78ef64210dc0241c896d8812cf881bad2` |
+| 定向 Node 回归 | `node --test --test-concurrency=1 scripts/ops/weknora-production-scope.test.mjs dsh-plugins/query-agent/test/package.test.mjs scripts/release/plugin-pack.test.mjs scripts/ci/pregate-runner.test.mjs` | `79 passed / 0 failed / 0 skipped` | query + WeKnora `29/29`、plugin-pack `45/45`、pregate runner `5/5` |
+| Git/产物检查 | `git diff --check`、`jq empty`、`bash -n`、`node --check` | 全部 `exit 0` | 本回执提交前的最终工作树 |
+
+完整 backend 的实际执行提交为 `fa618859`；之后到 `dfcfd1be` 的差异只涉及 `.gstack/`、Node release/profile 测试与 runtime provenance，没有改变 `backend/` 或 Python 服务源码，因此没有把后端结果重标为新的 Python 字节。完整 B0 r7 在 `dfcfd1be` 上重跑并覆盖新增的两个证据漂移守卫。opt-in、NOT_RUN 和按原因跳过的项继续保留，不计作通过。
 
 ## 未完成
 

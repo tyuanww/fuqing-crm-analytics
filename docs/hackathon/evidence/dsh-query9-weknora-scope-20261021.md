@@ -22,7 +22,7 @@
 - build provenance SHA-256：`d54dff1aa64e1767b4fab409c7bd16102a52c6819578020ddbd1a996cdad8eff`
 - entries：`cordis.patch.yml`、`icon.svg`、`lib/tool-policy.js`、`locale/en.json`、`locale/zh.json`、`package.json`
 
-上述两种 manifest 摘要不是同一个对象，也都不是 tarball 摘要。config-level lock 见 [`config/query-agent-side-load.v1.json`](../../../config/query-agent-side-load.v1.json)，测试会把 source `package.json` 摘要与回执中的生成包身份绑定起来。该 lock 描述 owner-operated side-load，不是正式 release 身份。
+上述两种 manifest 摘要不是同一个对象，也都不是 tarball 摘要。query.9 的不可变身份快照见 [`dsh-query9-side-load-lock-20261021.json`](dsh-query9-side-load-lock-20261021.json)，不要用当前活动的 [`config/query-agent-side-load.v1.json`](../../../config/query-agent-side-load.v1.json) 回查 query.9，因为该活 lock 已前进到 query.11。该快照只描述 owner-operated side-load，不是正式 release 身份。
 
 包从 clean commit 的隔离 worktree 生成，并通过严格 provenance reader。Query bundle 不声明 `@deepseek-ai/dsh-tools` peer 或依赖，仅组合 CRM 指标、WeKnora 检索和可选页面交付。
 

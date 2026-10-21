@@ -1,3 +1,5 @@
+> 本轮最新未发布变更见下方 `[Unreleased]`。
+
 ## [0.21.0.0] - 2026-10-20
 
 ### Added
@@ -21,7 +23,7 @@
 
 - “问数智能体”配置型 bundle 前进到 `0.0.0-query.11`：空白会话切到 `crm-query` 时隐藏已知终端、文件和协作工具，并对执行使用 12 工具 allowlist guard；query.10 的全工具限制会误删 CRM、WeKnora 和页面业务工具，已作为失败候选保留记录。真实会话确认模型路由为 `deepseek-account / deepseek-flash / off`，`list_agents` 虽仍由上层组合可见，实际执行返回 `CRM_QUERY_TOOL_NOT_ALLOWED`。
 
-- 新增配置型包 `@shine-mage/dsh-query-agent@0.0.0-query.9`，作为“问数智能体”预设的唯一维护源：复用指标查询、WeKnora 资料和可选页面交付，不注册私有教材图谱工具，也不在未配置知识服务时暴露 `crm_knowledge_explain`；同时把新会话默认路由固定为 `deepseek-account / deepseek-flash / off`，并在 Agent 创建、空白会话预设切换和切回其他模式时正确加卸 shell/终端限制。`query.8` 保留为前序候选；`query.9` 已从 clean source 生成并完成当时的线上 side-load，随后由 `query.11` 取代并只保留为历史与回滚证据。原有“CRM 知识与指标”预设保持兼容。
+- 历史回滚证据：中间版本 `@shine-mage/dsh-query-agent@0.0.0-query.9` 曾作为“问数智能体”预设维护源，复用指标查询、WeKnora 资料和可选页面交付，不注册私有教材图谱工具，也不在未配置知识服务时暴露 `crm_knowledge_explain`。它已由 `query.11` 取代，只保留为历史与回滚证据，不是当前新发布面。原有“CRM 知识与指标”预设保持兼容。
 
 - WeKnora 生产适配层的项目库配置从“默认范围”强化为强制执行：不再向 Agent 暴露知识库枚举，search 拒绝非项目库或非数组参数，read_document 要求非空文档 ID、在执行前核验归属，并在缺失 ID 或元数据不可用时 fail-closed。上游 search 的 tenant-wide 文档名 enrichment 在联网前禁用，普通检索只访问项目库 passage 接口。浏览器与 live 模块探针同时覆盖项目库正向检索、部署验收库搜索拒绝和跨库文档读取拒绝。历史固定输入 manifest 保持不变，另以 `weknora-production-overlay.v1.json` 记录当前适配器字节、scope helper、preset 和生效范围。
 
@@ -87,6 +89,8 @@
 - `pnpm dsh plugin verify-host` 将同一插件候选、profile 快照、CRM/知识组合和固定 rc2 的本机宿主证据接到既有 journal；重试幂等，不修改候选或激活服务。增加 SQLite 提交前后进程丢失、保存回放与 forward-fix 验证；这些本地结果不放行生产发布或 D15 保存门禁。
 
 ### Fixed
+
+- 插件生成树 provenance 改为按固定 `0644` canonical mode 比较生成文件，避免服务账号在 `umask 077` 下把同一 tarball 字节误判为漂移；profile 和 release fixture 同步显式设置权限，完整 B0 在硬化 umask 下通过。
 
 - WeKnora 生产读取增加读取前后双重元数据范围校验，请求期间跨库变化会丢弃正文；两个检索工具通过 `ctx.effect` 注册和逆序释放，第二个注册失败时会立即清理已注册工具。配置型 pack 同时拒绝动态/拼接模块加载并去重 overlapping `files` wildcard，pre-gate 在无法解析 Git 根目录时稳定失败。
 

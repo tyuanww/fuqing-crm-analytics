@@ -31,7 +31,9 @@
 | [`operating/dsh-rc1-clean-upgrade-runbook.md`](./operating/dsh-rc1-clean-upgrade-runbook.md) | rc1 干净重建、profile、插件市场、验证和 side-by-side 条件 |
 | [`tutorials/dsh-rc1-clean-candidate.md`](./tutorials/dsh-rc1-clean-candidate.md) | 从固定上游构建并观察 rc1 候选 |
 | [`reference/dsh-rc1-clean-candidate.md`](./reference/dsh-rc1-clean-candidate.md) | v4 候选与 v5 现场字段、bundle、peer closure 和状态值 |
+| [`hackathon/evidence/dsh-query11-allowlist-20261021.md`](./hackathon/evidence/dsh-query11-allowlist-20261021.md) | query.11 的 12 工具边界、空白会话切换和浏览器复测回执 |
 | [`hackathon/evidence/dsh-weknora-lifecycle-hardening-20261021.md`](./hackathon/evidence/dsh-weknora-lifecycle-hardening-20261021.md) | query.11、模型路由、工具面、WeKnora 范围与事务释放回执 |
+| [`hackathon/evidence/weknora-project-scope-20261021.md`](./hackathon/evidence/weknora-project-scope-20261021.md) | WeKnora 单项目 scope 收窄与拒绝路径的前序证据 |
 | [`architecture/dsh-rc1-clean-rebuild.md`](./architecture/dsh-rc1-clean-rebuild.md) | 为什么 runtime、profile 和 IM 输入必须隔离 |
 | [`operating/dsh-rc2-quickstart.md`](./operating/dsh-rc2-quickstart.md) | rc2 artifact 准备教程 |
 | [`operating/dsh-rc2-runbook.md`](./operating/dsh-rc2-runbook.md) | rc2 现场接收、切换和回退顺序 |
@@ -47,6 +49,7 @@
 | [`architecture/dsh-candidate-and-plugin-upgrade.md`](./architecture/dsh-candidate-and-plugin-upgrade.md) | Harness 候选线与插件更新线为什么分离 |
 | [`architecture/shinemage-plugin-boundaries.md`](./architecture/shinemage-plugin-boundaries.md) | 当前包 owner、机器依赖 DAG、临时源码引用与检查入口 |
 | [`architecture/dsh-release-trust.md`](./architecture/dsh-release-trust.md) | immutable artifact、allowlist 和回退设计说明 |
+| [`plans/plugin-externalization-closeout-20261019.md`](./plans/plugin-externalization-closeout-20261019.md) | 2026-10-19 插件外置计划快照；不是当前任务或门禁 |
 | [`hackathon/S3-ACCEPTANCE-2026-09-15.md`](./hackathon/S3-ACCEPTANCE-2026-09-15.md) | 9-15 指定 Figma 矩阵与正式壳 B3 代表路径（PARTIAL，不升版本） |
 | [`hackathon/S3-CROSS-MATRIX-2026-09-15.md`](./hackathon/S3-CROSS-MATRIX-2026-09-15.md) | 9-15 正式壳核心分支双视口交叉；v14 账本，v15 为 SETUP_FAILED |
 | [`hackathon/MISSION-API.md`](./hackathon/MISSION-API.md) | Mission、问数、审批与 `DRAFT_EXPORT` 契约 |
@@ -93,7 +96,9 @@ fuqing-crm-analytics/docs/
 │
 ├── reference/                          命令与接口参考
 │   ├── dsh-rc1-clean-candidate.md       v4 候选与 v5 现场字段
-│   └── dsh-rc2-release-artifact.md
+│   ├── dsh-rc2-release-artifact.md
+│   ├── dsh-plugin-pack-contract.md      pack、provenance 与 reader 错误码
+│   └── dsh-im-plugin-inputs.md          IM 固定归档、校验与发布边界
 │
 ├── business/                          业务口径 SSOT
 │   └── RFM_DEFINITIONS.md
@@ -102,8 +107,10 @@ fuqing-crm-analytics/docs/
 │   └── data-layout.md
 │
 ├── operating/                         怎么运维 / 协作
+│   ├── dsh-production-access.md        只读访问杭州现役 DSH
 │   ├── dsh-rc1-clean-upgrade-runbook.md rc1 干净重建与切换条件
 │   ├── dsh-rc1-release-lane.md          rc1 release 输入 lane
+│   ├── pregate-runner.md                固定 Node/Python 的前置测试入口
 │   ├── shinemage-maintenance-and-cleanup.md  主仓/插件仓职责、升级与清理
 │   ├── shinemage-plugin-update.md       单插件更新与主仓摘要接入
 │   ├── team-workflow-v1.md            历史协作定义 · 角色
