@@ -64,6 +64,13 @@ test('query side-load lock binds the source package manifest to the recorded pac
     new URL('../../docs/hackathon/evidence/dsh-query11-allowlist-20261021.json', import.meta.url),
     'utf8',
   ));
+  const runtimeEvidence = JSON.parse(await readFile(
+    new URL(`../../${lock.runtime_evidence}`, import.meta.url),
+    'utf8',
+  ));
+  const runtimeScopeBytes = await readFile(
+    new URL('../../scripts/ops/weknora-production-scope.mjs', import.meta.url),
+  );
 
   assert.equal(lock.schema_version, 'shinemage-query-agent-side-load-lock/v1');
   assert.equal(lock.package, manifest.name);
@@ -79,6 +86,12 @@ test('query side-load lock binds the source package manifest to the recorded pac
   assert.equal(lock.tarball.sha256, evidence.query_artifact.tarball_sha256);
   assert.equal(lock.tarball.integrity, evidence.query_artifact.integrity);
   assert.equal(lock.build_provenance_sha256, evidence.query_artifact.build_provenance_sha256);
+  assert.equal(runtimeEvidence.release_ready, false);
+  assert.equal(runtimeEvidence.browser_uat.plugin_page.version, lock.version);
+  assert.equal(
+    runtimeEvidence.artifact.scope_helper.after_sha256,
+    createHash('sha256').update(runtimeScopeBytes).digest('hex'),
+  );
 });
 
 test('configuration bundle packs without a synthetic dsh-tools peer', async t => {
