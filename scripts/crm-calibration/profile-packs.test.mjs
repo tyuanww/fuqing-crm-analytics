@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { access, readFile, writeFile } from 'node:fs/promises';
+import { access, chmod, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { prepareProfile } from './prepare-profile.mjs';
 import { fixture, specs } from './test-support/formal-packs.fixture.mjs';
@@ -106,6 +106,7 @@ test('service and graph configuration remain fail-closed before pack installatio
   const f = await fixture(t, ['knowledge']);
   const settings = join(f.root, 'graph-settings.json');
   await writeFile(settings, '{}', { mode: 0o644 });
+  await chmod(settings, 0o644);
   for (const [name, options, code] of [
     ['metrics', { metricsOrigin: 'http://127.0.0.1:4335' }, /METRICS_PLUGIN_REQUIRED/],
     ['external', { knowledgeOrigin: 'https://example.invalid' }, /SERVICE_ORIGIN_INVALID/],

@@ -48,7 +48,7 @@ export async function fixture(t, selected = ['crm', 'knowledge', 'page'], mutate
     await exec('tar', ['-czf', join(directory, tarName), '-C', staging, 'package'], { env: { ...process.env, COPYFILE_DISABLE: '1' } });
     const archive = await readFile(join(directory, tarName));
     const generatedTree = await canonicalTreeDigest(join(staging, 'package'), {
-      include: generatedPaths(manifest.files), allowSymlinks: false,
+      include: generatedPaths(manifest.files), allowSymlinks: false, normalizeFileModes: true,
     });
     const sourceSha = String(index + 1).repeat(40);
     const receipt = { schema_version: 'dsh-plugin-pack/v1', package_name: manifest.name, package_version: manifest.version,
