@@ -35,6 +35,8 @@ function selected(path, include, exclude) {
 /**
  * Hash a filesystem tree using only canonical relative paths and bytes.
  * mtimes, uid/gid and archive metadata are deliberately excluded.
+ * Generated runtime files may opt into a canonical 0644 mode because packers
+ * normalize permissions independently of the source checkout's umask.
  */
 export async function canonicalTreeDigest(root, { include = [], exclude = [], allowSymlinks = false,
   excludeBasenames = [], excludeEntry = null, normalizeSymlinkTargets = false,

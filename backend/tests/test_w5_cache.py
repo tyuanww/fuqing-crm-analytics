@@ -309,7 +309,9 @@ class TestRfmRouterCacheIntegration:
 
     def test_cached_rfm_call_set_then_get(self, cache, monkeypatch):
         """_cached_rfm_call: 第一次 miss 调 compute_fn, 第二次 hit 不调 compute_fn."""
+        import backend.routers.rfm as rfm_router
         from backend.routers.rfm import _cached_rfm_call
+        monkeypatch.setattr(rfm_router, "_rfm_cache", cache)
         call_count = {"n": 0}
 
         def fake_compute(**kwargs):

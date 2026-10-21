@@ -1,10 +1,10 @@
 # How to 更新一个 ShineMage 插件
 
-本文保留单插件更新的详细操作路径。顶部的 2026-10-13 输入和验收是历史快照；当前版本、端口、候选和正式门禁以 [STATUS.md](../../STATUS.md) 为准。若同时升级 Harness，请先读[候选升级操作手册](./dsh-upgrade-candidate.md)；它负责官方 tag、隔离 runtime、pack provenance、消费闭包、回读和回退的跨仓顺序，本文只负责单插件更新。
+本文保留单插件更新的详细操作路径。文中的 2026-10-13 及更早输入和验收是历史快照；当前版本、端口、候选和正式门禁以 [STATUS.md](../../STATUS.md) 为准。若同时升级 Harness，请先读[候选升级操作手册](./dsh-upgrade-candidate.md)；它负责官方 tag、隔离 runtime、pack provenance、消费闭包、回读和回退的跨仓顺序，本文只负责单插件更新。
 
-## 当前输入与交付状态（2026-10-13）
+## 当前输入与交付状态（2026-10-21）
 
-当前主仓组合锁绑定 Workbench `3030e3f`／`90000400…`、CRM `dac0539`／`4ee58ec3…`、Knowledge `f623c22`／`feb1187c…`，另六包与两份 profile 保持。十个独立作者仓 PR #1 已普通 merge，各自 main CI 均 SUCCESS；正式包回执、组合锁和当前输入边界见[作者合并与候选前置核验](../hackathon/evidence/shinemage-author-merge-and-candidate-preflight-20261012.md)与[当前正式组合输入预检](../hackathon/evidence/shinemage-composition-preflight-20261012.md)。不再按下方较早 2026-10-11 时点更新锁，也不把其中“未提交”“尚未迁移”当成当前默认入口结论。
+2026-10-21 当前 rc2 组合锁绑定 Workbench `3030e3f`／manifest `070514b3…`、CRM `5f359f5b`／manifest `82c91152…`、Knowledge `ef8960ed`／manifest `83dca334…`，另六包与两份 profile 保持。十个独立作者仓 PR #1 已普通 merge，各自 main CI 均 SUCCESS；当前精确值和正式输入边界只看[组合锁](../../config/shinemage-composition-packs.lock.json)、[STATUS](../../STATUS.md)与[当前正式组合输入预检](../hackathon/evidence/shinemage-composition-preflight-20261012.md)。杭州 v5 是独立的 rc1 owner-operated side-load；不得把下方较早时点的锁或“未提交”“尚未迁移”当成当前默认入口结论。
 
 普通插件更新先在插件作者仓完成受影响检查、独立产物及 PR；组合变化时，主仓才更新对应固定输入。默认包消费、installed-kit、领域作者覆盖、公开合同和 release 包装配已经迁移并提交；主仓仍保留另两组旧 Workbench 断言、合同／静态守卫及历史副本。来源变化须同时绑定正式包与作者 CI，不能仅换 ZIP 或沿用旧 candidate/journal。
 
@@ -13,7 +13,7 @@ PR #121 及后续文档收口已合并，主仓 main CI SUCCESS；三仓正式 `
 以下进度段和步骤中的验收计数保留各自执行时点；当前状态以上段及[验证入口](verification.md)为准。操作步骤中的命令仍须满足实际输入与授权，不能把历史成功改标为当前包通过。
 
 
-Workbench 当前正式来源为 `3030e3f`，对应 formal pack manifest `90000400…`；作者 core CI 为 155 files / 1086 PASS，正式包已由主仓 reader 核对，browser/standalone 仍 `NOT_RUN_BY_THIS_COMMAND`。不能只替换 ZIP 路径或继承旧候选验收；当前九包 terminal、进程恢复和 candidate-bound browser 已在授权目标完成，candidate 只读真实业务 UAT 与 standalone 页面包/Chromium 子项已有证据，live 工具面、完整无障碍和正式发布准入仍未关闭。见[当前正式包 CI 收口](../hackathon/evidence/shinemage-formal-plugin-ci-20261012.md)和[当前组合 terminal 目标验收](../hackathon/evidence/shinemage-composition-terminal-target-20261013.md)。
+Workbench 在 2026-10-12 时点的正式来源为 `3030e3f`，对应 formal pack manifest `90000400…`；作者 core CI 为 155 files / 1086 PASS，正式包已由主仓 reader 核对，browser/standalone 仍 `NOT_RUN_BY_THIS_COMMAND`。不能只替换 ZIP 路径或继承旧候选验收；当前九包 terminal、进程恢复和 candidate-bound browser 已在授权目标完成，candidate 只读真实业务 UAT 与 standalone 页面包/Chromium 子项已有证据，live 工具面、完整无障碍和正式发布准入仍未关闭。见[当前正式包 CI 收口](../hackathon/evidence/shinemage-formal-plugin-ci-20261012.md)和[当前组合 terminal 目标验收](../hackathon/evidence/shinemage-composition-terminal-target-20261013.md)。
 
 board-components 已有[独立私有远程仓](https://github.com/tyuanww/shinemage-board-components)；其 PR #1 已合并，main CI SUCCESS。开发只需固定 Node/pnpm、本仓 kit 与封存回归输入，无 DSH checkout/build-tools。当前领域包仍由主仓组合锁和消费者合同核验，升级函数/类型及切换输入仍需针对性验证。见[作者合并与候选前置核验](../hackathon/evidence/shinemage-author-merge-and-candidate-preflight-20261012.md)与[主仓本地守卫](../hackathon/evidence/shinemage-board-components-main-output-guard-20261011.md)。
 
@@ -33,7 +33,7 @@ board-components 的独立本地作者仓已提交为 `3855db80` 并完成真实
 
 ## 内部 owner-operated 更新入口
 
-当前杭州 WSL 使用 rc2 owner candidate。单插件更新不重建 Harness，但必须从新 pack 身份开始。输入是插件 clean commit、builder receipt、pack manifest、tarball、profile-pack inputs 和目标回退版本。输出是新的 candidate release、target receipt 和 rollback pointer。
+当前杭州现役使用 rc1 owner-operated side-load，rc2 保留为独立组合与候选 lane。单插件更新不重建 Harness，但必须从新 pack 身份开始。输入是插件 clean commit、builder receipt、pack manifest、tarball、profile-pack inputs 和目标回退版本。输出是新的 candidate release、target receipt 和 rollback pointer。
 
 执行顺序固定为：
 

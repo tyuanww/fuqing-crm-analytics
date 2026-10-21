@@ -2,7 +2,7 @@
 
 固定 SDK：DSH 0.1.7-rc.2（见 [`../plugin-kit/toolchain.json`](../plugin-kit/toolchain.json)），Node 24。插件运行不需要 Python；服务和跨服务测试另用锁定 Python 3.14+。本插件按 rc2 构建；杭州状态以根 [STATUS](../../STATUS.md) 的带日期现场快照为准。独立插件，包含显式配置的合成服务客户端及默认未连接的看板 GSV HTTP 适配，通过 analytics-workbench 的可选 `cockpit.crm` 插槽展示引用，不修改 DSH 上游或比赛事实合同。构建依赖只读复用已准备好的固定 checkout，不下载或自动安装。
 
-本包保留身份 `@shine-mage/dsh-crm-knowledge`，拆分候选版本为 `0.0.0-crm.1`，只拥有 CRM 登录、指标与分析；公开知识解释和图谱工具已迁入[独立知识插件](../knowledge/README.md)。两个包各自构建、测试和打包，生产源码没有相互导入，也不引用 workbench 内部实现。CRM 只携带指标 HTTP API 1.0.0 客户端，不查找主仓目录或启动 Python。未配置合成服务时返回 `NOT_AVAILABLE / SERVICE_NOT_CONFIGURED`；真实看板登录与查询不会改查合成源。
+本包保留身份 `@shine-mage/dsh-crm-knowledge`，拆分候选版本为 `0.0.0-crm.2`，只拥有 CRM 登录、指标与分析；公开知识解释和图谱工具已迁入[独立知识插件](../knowledge/README.md)。两个包各自构建、测试和打包，生产源码没有相互导入，也不引用 workbench 内部实现。CRM 只携带指标 HTTP API 1.0.0 客户端，不查找主仓目录或启动 Python。未配置合成服务时返回 `NOT_AVAILABLE / SERVICE_NOT_CONFIGURED`；真实看板登录与查询不会改查合成源。
 
 Python 实现和知识资源的维护源仍在 workspace；两项服务已分别完成[独立应用候选打包与隔离运行](../../docs/operating/crm-service-packages.md)。物理分仓、平台依赖冷安装及精确宿主发布证据尚未完成。配置、迁移与兼容窗口见[服务边界](../../docs/operating/crm-plugin-service-boundary.md)。
 
@@ -22,7 +22,7 @@ Python 实现和知识资源的维护源仍在 workspace；两项服务已分别
 
 `crm_knowledge_explain` 及 `query_crm_knowledge_graph/sources`、`expand_crm_knowledge_citation` 由知识包的公开入口注册，须在 profile 中另行选择。CRM 单独安装时，这些工具不注册；`crm_service_health.knowledge_base/knowledge_explanation` 明确报告未安装或不可见，原有指标工具仍可用。
 
-工具参数没有 SQL、数据库路径或凭据。合成工具的 `source_id` 仍仅允许 `synthetic-crm-metrics`，拒绝真实库；金额为分。看板工具返回元的十进制字符串和整数分，不扣退款、不返回尚未校准的旧客单价/会员溢价。未知、不可用和权限来源均保留。教材检索/图查询按 CRM 登录用户名映射到私有 grants，不把共享 retrieve key 当账号隔离。候选 preset 隔离 `weknora_search`；现役 preset 未改。
+工具参数没有 SQL、数据库路径或凭据。合成工具的 `source_id` 仍仅允许 `synthetic-crm-metrics`，拒绝真实库；金额为分。看板工具返回元的十进制字符串和整数分，不扣退款、不返回尚未校准的旧客单价/会员溢价。未知、不可用和权限来源均保留。教材检索/图查询按 CRM 登录用户名映射到私有 grants，不把共享 retrieve key 当账号隔离。独立知识插件不注册生产 WeKnora 检索；`crm-query` 的 `weknora_search` 由生产薄适配器提供，固定项目资料库 allowlist，跨库搜索和文档读取均 fail-closed。
 
 `crm_metrics_capabilities` 分为 `synthetic_candidate` 与 `dashboard` 两部分；`LOGIN_BOUND` 表示当前对话已有内存授权，每次查询仍须向 CRM 验证登录。解释 GSV/退款/实收时，`crm_knowledge_explain` 返回 `preferred_real_gsv` 与 `target_candidate`。解释 AUS/AOV 时补充 `preferred_operational_definition`：真实运营默认以当前看板GSV为金额分子，净额候选仍单列；分母覆盖及真实验收未完成时不冒称可取真实数。
 
@@ -42,11 +42,13 @@ node scripts/crm-calibration/prepare-profile.mjs \
 
 入口校验各包身份、固定 DSH/Cordis peer、组合合同 v1、公开 export 和打包 allowlist，分别记录包指纹；只写新配置，不安装、不激活、不执行插件。省略知识插件及其 origin 即为纯 CRM profile；省略页面提供方时 CRM 查询/登录仍可用，`crm_service_health.page_delivery` 返回 `NOT_AVAILABLE` 与 `PAGE_PROVIDER_NOT_INSTALLED_OR_NOT_VISIBLE`。`AVAILABLE/NOT_RUN` 只表示工具在当前 scope 可见，不证明保存或页面 UAT 已完成。页面预览/确认仍需工作台 UI 与服务，不能只装 tools adapter 就宣称可保存。
 
-宿主加载时须显式传入生成的 `host.patch.yml` 和 `preset.patch.yml`；后者使用官方 `@deepseek-ai/dsh-agent-preset` 声明。旧 `preset/` 目录只作可检查描述，rc2 不会自动扫描注册。整体插件切换采用受控重启；已有会话不会因删除 preset 声明立即卸载。实际本机宿主、原生会话/WAL 和回退证据见[固定宿主验收](../../docs/hackathon/evidence/dsh-g0-pinned-host-20261004.md)，不代表杭州或真实服务通过。
+包 `cordis.patch.yml` 先安装一个无业务副作用的裸包名 Host+Client 载体，再安装独立登录 Host。裸包名是 DSH 发现 `exports["./client"]` 的必要条件；载体使用 `registerTools=false`，不会把业务工具泄漏到所有会话。指标工具仍只由 Agent preset 的 scoped 条目注册。宿主加载时须显式传入生成的 `host.patch.yml` 和 `preset.patch.yml`；后者使用官方 `@deepseek-ai/dsh-agent-preset` 声明。旧 `preset/` 目录只作可检查描述，rc2 不会自动扫描注册。整体插件切换采用受控重启；已有会话不会因删除 preset 声明立即卸载。实际本机宿主、原生会话/WAL 和回退证据见[固定宿主验收](../../docs/hackathon/evidence/dsh-g0-pinned-host-20261004.md)，不代表杭州或真实服务通过。
 
 主题和 slot 都编译本包自带的生成合同；主题由 `shine-brand/contracts/content-theme.v1.json` 维护，不要求运行品牌插件，不改官方 DSH 原生界面。生成物 drift 由 B0 pipeline 检查。更新完整候选须从 reviewed SHA 重建，本地 fixture pack 不是可发布版本。
 
 ## 看板 GSV 连接边界
+
+CRM Host 默认 `baseUrl` 为 `http://127.0.0.1:8000`，适用于 rc2 独立配置；线上 `crm-query` 配置型 bundle 会用同名 Host 条目覆盖为 `http://127.0.0.1:18093`。两种配置都只接受回环地址，模型不能覆盖。
 
 请求示例（只含业务条件）：
 

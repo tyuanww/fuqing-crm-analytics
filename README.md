@@ -2,9 +2,9 @@
 
 当前提交、版本和现役见 [STATUS](./STATUS.md)。目录、端口和检索见 [维护地图](./docs/operating/maintainer-map.md)。对话生成 HTML 的步骤见 [从对话生成 HTML 驾驶舱](./docs/operating/cockpit-native-html.md)。产品仍 PARTIAL。
 
-> 最近生产记录（[STATUS](./STATUS.md) 的 2026-10-20 现场记录）：线上 `current` 为 `dsh-0.2.1-rc.1-owner-main-4ac076de-20261019`，新候选 `dsh-0.2.1-rc.1-clean-main-20261020-v4` 仍在 staging。候选已装配官方 plugin-market bundle，并通过 Discover tab 入口、原生 boot、Settings、插件页和 peer/AppleDouble 检查；market index 仍未配置，IM artifact 也缺失，因此 `production_switch=HELD_PENDING_IM_ARTIFACT`、`release_ready=false`。该内部 owner-operated 版本不等于公司正式 release；局部验证不能替代真实模型、完整业务 UAT、正式发布门禁及回退证据。后续发布必须从 clean reviewed commit 生成 immutable artifact，禁止 `git pull` 或现场编译。
+> 最近生产记录（[STATUS](./STATUS.md) 的 2026-10-21 现场记录）：线上 `current` 指向 `dsh-0.2.1-rc.1-core-main-20261020-v5`，它是 v4 clean-main runtime 的 owner-operated 现场 side-load；query.11 当前生效，最近重启后的 ephemeral profile 为 `27566016…`，旧 release marker 仍自报 `v4/PREPARED`，候选 receipt 的 profile 仍为 `c3ec7df3…`，因此不追认新的正式发布身份。IM 输入已推进为 `PINNED_INPUTS_VERIFIED`，但仍缺统一发布身份、签名、独立验收和切换授权，`release_ready=false`。后续正式发布必须从 clean reviewed commit 生成 immutable artifact，禁止 `git pull` 或现场编译。
 
-> 主仓当前快照（2026-10-20）：主仓继续承担 DSH pin、profile、runtime peer closure、跨插件合同、组合验证和交付文档；CRM、知识、看板和其他业务能力由独立插件仓维护。单插件的实际更新步骤见[插件更新指南](./docs/operating/shinemage-plugin-update.md)，rc1 干净候选见[升级操作手册](./docs/operating/dsh-rc1-clean-upgrade-runbook.md)，职责、清理和 DSH 升级边界见[维护、清理与升级手册](./docs/operating/shinemage-maintenance-and-cleanup.md)。正式 SDK 分发仍 BLOCKED，产品仍 PARTIAL，未授权的正式发布门禁仍保持未执行。
+> 主仓当前快照（2026-10-21）：主仓继续承担 DSH pin、profile、runtime peer closure、跨插件合同、组合验证和交付文档；CRM、知识、看板和其他业务能力由独立插件仓维护。单插件的实际更新步骤见[插件更新指南](./docs/operating/shinemage-plugin-update.md)，rc1 现场 side-load 与候选边界见[升级操作手册](./docs/operating/dsh-rc1-clean-upgrade-runbook.md)，职责、清理和 DSH 升级边界见[维护、清理与升级手册](./docs/operating/shinemage-maintenance-and-cleanup.md)。正式 SDK 分发仍 BLOCKED，产品仍 PARTIAL，未授权的正式发布门禁仍保持未执行。
 
 > A/B/C 集成记录（2026-10-08）是历史证据：单插件更新与取消、固定宿主进程级恢复、HTML headed 验收和 SDK 信任盘查见[本轮集成验收](./docs/hackathon/evidence/shinemage-abc-integration-20261008.md)。它不替代当前主仓合并状态，也不代表新的 Release。
 
@@ -147,12 +147,13 @@ cd frontend-vue3 && npx playwright test                   # E2E
 | 文档 | 说明 |
 |---|---|
 | [`AGENTS.md`](./AGENTS.md) | **AI 行为规则 / 授权 / 架构 / 分级验证** |
+| [`dsh-plugins/query-agent/README.md`](./dsh-plugins/query-agent/README.md) | “问数智能体”配置型 bundle、工具策略和 WeKnora 生产范围 |
 | [`docs/operating/ship.md`](./docs/operating/ship.md) | 历史交付记录；当前 Git 动作按 AGENTS.md |
 | [`docs/operating/dsh-rc2-quickstart.md`](./docs/operating/dsh-rc2-quickstart.md) | rc2 artifact 准备教程 |
 | [`docs/operating/dsh-rc1-release-lane.md`](./docs/operating/dsh-rc1-release-lane.md) | 内部 rc1 候选准备；不代表正式 release |
 | [`docs/operating/dsh-rc1-clean-upgrade-runbook.md`](./docs/operating/dsh-rc1-clean-upgrade-runbook.md) | rc1 干净重建、profile、插件市场、验证和 side-by-side 条件 |
 | [`docs/tutorials/dsh-rc1-clean-candidate.md`](./docs/tutorials/dsh-rc1-clean-candidate.md) | 从固定上游构建并观察 rc1 候选 |
-| [`docs/reference/dsh-rc1-clean-candidate.md`](./docs/reference/dsh-rc1-clean-candidate.md) | v4 候选字段、bundle、peer closure 和状态值 |
+| [`docs/reference/dsh-rc1-clean-candidate.md`](./docs/reference/dsh-rc1-clean-candidate.md) | v5 现场 side-load、v4 marker/receipt、bundle、peer closure 和状态值 |
 | [`docs/architecture/dsh-rc1-clean-rebuild.md`](./docs/architecture/dsh-rc1-clean-rebuild.md) | 为什么 runtime、profile 和 IM 输入必须隔离 |
 | [`docs/operating/dsh-rc2-runbook.md`](./docs/operating/dsh-rc2-runbook.md) | rc2 现场接收、切换和回退顺序 |
 | [`docs/operating/shinemage-maintenance-and-cleanup.md`](./docs/operating/shinemage-maintenance-and-cleanup.md) | 插件更新、DSH 升级、证据留存与本机/远程清理 |

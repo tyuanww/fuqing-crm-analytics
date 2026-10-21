@@ -1,3 +1,5 @@
+> 本轮最新未发布变更见下方 `[Unreleased]`。
+
 ## [0.21.0.0] - 2026-10-20
 
 ### Added
@@ -18,6 +20,14 @@
 ## [Unreleased]
 
 ### Added
+
+- “问数智能体”配置型 bundle 前进到 `0.0.0-query.11`：空白会话切到 `crm-query` 时隐藏已知终端、文件和协作工具，并对执行使用 12 工具 allowlist guard；query.10 的全工具限制会误删 CRM、WeKnora 和页面业务工具，已作为失败候选保留记录。真实会话确认模型路由为 `deepseek-account / deepseek-flash / off`，`list_agents` 虽仍由上层组合可见，实际执行返回 `CRM_QUERY_TOOL_NOT_ALLOWED`。
+
+- 历史回滚证据：中间版本 `@shine-mage/dsh-query-agent@0.0.0-query.9` 曾作为“问数智能体”预设维护源，复用指标查询、WeKnora 资料和可选页面交付，不注册私有教材图谱工具，也不在未配置知识服务时暴露 `crm_knowledge_explain`。它已由 `query.11` 取代，只保留为历史与回滚证据，不是当前新发布面。原有“CRM 知识与指标”预设保持兼容。
+
+- WeKnora 生产适配层的项目库配置从“默认范围”强化为强制执行：不再向 Agent 暴露知识库枚举，search 拒绝非项目库或非数组参数，read_document 要求非空文档 ID、在执行前核验归属，并在缺失 ID 或元数据不可用时 fail-closed。上游 search 的 tenant-wide 文档名 enrichment 在联网前禁用，普通检索只访问项目库 passage 接口。浏览器与 live 模块探针同时覆盖项目库正向检索、部署验收库搜索拒绝和跨库文档读取拒绝。历史固定输入 manifest 保持不变，另以 `weknora-production-overlay.v1.json` 记录当前适配器字节、scope helper、preset 和生效范围。
+
+- IM 的两份 GitHub 插件输入现在有独立 lock、离线字节/integrity/commit/包身份校验和机器回执，可从恢复目录复验 `@xmanrui/dsh-im@5.2.0` 与 `dsh-plugin@2.0.5`；输入已验证仍不代表正式发布。
 
 - 新增 rc1 干净候选的教程、操作手册、参考和架构说明；记录 v4 runtime/profile digest、plugin-market bundle 与 Discover 入口、market index/IM artifact 阻塞和不切线上边界。
 
@@ -79,6 +89,12 @@
 - `pnpm dsh plugin verify-host` 将同一插件候选、profile 快照、CRM/知识组合和固定 rc2 的本机宿主证据接到既有 journal；重试幂等，不修改候选或激活服务。增加 SQLite 提交前后进程丢失、保存回放与 forward-fix 验证；这些本地结果不放行生产发布或 D15 保存门禁。
 
 ### Fixed
+
+- 插件生成树 provenance 改为按固定 `0644` canonical mode 比较生成文件，避免服务账号在 `umask 077` 下把同一 tarball 字节误判为漂移；profile 和 release fixture 同步显式设置权限，完整 B0 在硬化 umask 下通过。
+
+- WeKnora 生产读取增加读取前后双重元数据范围校验，请求期间跨库变化会丢弃正文；两个检索工具通过 `ctx.effect` 注册和逆序释放，第二个注册失败时会立即清理已注册工具。配置型 pack 同时拒绝动态/拼接模块加载并去重 overlapping `files` wildcard，pre-gate 在无法解析 Git 根目录或没有测试文件时稳定失败；IM 归档在同一打开句柄上完成成员校验和根 `package.json` 读取，避免检查后重新打开路径的竞态。
+
+- 配置型 bundle 的 `files` 与 `exports` key/value 只允许单个 `*` 位于固定目录的最后文件名段，拒绝 `lib/*/index.js` 一类目录段通配；`main`、`module` 和 `dsh.bundle.patch` 也改为只接受精确文件。增加打包/reader 负测，避免文档合同与实际包面继续漂移。
 
 - runtime bundle 对 web plugin peer alias 缺失改为 fail-closed，profile bridge 支持 pnpm canonical peer root，Linux x64 生成 DevTools chunk 的 secret allowlist 绑定精确路径和 SHA-256；新增对应负测。
 

@@ -2,7 +2,7 @@
 
 这份文档给维护者、插件作者和使用者一条共同的路径：主仓库负责把固定版本的 DeepSeek Harness（DSH）装配成可验收的平台，业务能力由独立插件和服务仓库维护。它也规定本机证据、Git worktree、分支和远程仓库怎样留存，避免为了“整洁”误删仍可复核的材料。
 
-线上 owner-operated 当前为 `dsh-0.2.1-rc.1-owner-main-4ac076de-20261019`，服务仍 active；新的 clean-main v4 候选为 `dsh-0.2.1-rc.1-clean-main-20261020-v4`，仍在 staging。v4 已装配官方 plugin-market bundle 并通过 Discover tab 入口、peer/AppleDouble/profile 检查，但 market index 和 IM artifact 仍缺失，`release_ready=false`，没有切换线上。主仓兼容 pin、历史 owner receipt 和 formal release 证据各自按日期留存，不能互相替代。上述值是本次记录的事实，不表示以后永远不升级。
+线上 owner-operated 当前为 `dsh-0.2.1-rc.1-core-main-20261020-v5`，服务仍 active/running；它是 v4 clean-main runtime 的现场 side-load。query.11 当前生效，最近重启后的 ephemeral profile 为 `27566016…`，而 release marker 仍为 v4/PREPARED、候选 receipt 仍为 `c3ec7df3…`，因此 v5 不构成新的正式发布身份。IM 输入已从缺失推进为 `PINNED_INPUTS_VERIFIED`，但统一身份、签名、独立验收和切换授权仍未完成，`release_ready=false`。主仓兼容 pin、历史 owner receipt 和 formal release 证据各自按日期留存，不能互相替代。上述值是本次记录的事实，不表示以后永远不升级。
 
 ## 先看哪一个仓库
 
@@ -24,13 +24,13 @@
 3. 在插件仓运行自己的 frozen install、build、测试、包内容检查和边界负测。记录包摘要、输入摘要、测试范围和未执行项。
 4. 分开记录 CI/内容校验回执与实际保留的 content pack。shine-brand 的 `verify-pack.mjs` 校验后删除临时 tarball，不能把日志当作已留存的包；需要交付时另走保留产物的步骤。普通 content pack 不自动等于 `dsh-plugin-pack/v1` 或 `dsh-plugin-candidate/v1`。
 5. 在主仓只有组合选择发生变化时才更新 profile；插件版本/字节变化由正式 pack/candidate 回执记录，并同步兼容记录，再跑受影响的组合合同。插件失败时应显示 `disabled`/`NOT_AVAILABLE` 和原因，并保留 DSH 原生回退。
-6. 只有在适用的 host、服务、目标平台和发布门禁都有新证据时，才进入 candidate、journal、receive 或 activate。没有这些输入就保持 `NOT_RUN`，不借用旧包的 PASS。
+6. 只有在适用的 host、服务、目标平台和发布门禁都有新证据时，才进入 candidate、journal、receive 或 activate。IM pinned inputs 已验证也不等于正式发布；没有统一候选身份和授权就保持 `release_ready=false`，不借用旧包的 PASS。
 
 插件仓的测试通过只说明该插件在声明的输入上通过。它不证明真实模型、真实业务、杭州生产或任意 DSH 版本兼容。
 
 ## DSH 升级：单独的一条变更轴
 
-DSH 升级不能简化为“从官网 `npm install latest` 后插入”。正确做法是把 DSH 版本和插件版本当成两个独立轴，并把 runtime、profile 和插件市场作为同一候选输入验证。完整的官方 tag、隔离候选、pack provenance、消费闭包、回读和回退顺序见[候选升级操作手册](./dsh-upgrade-candidate.md)；本轮 v4 的实际步骤见[rc1 干净候选手册](./dsh-rc1-clean-upgrade-runbook.md)：
+DSH 升级不能简化为“从官网 `npm install latest` 后插入”。正确做法是把 DSH 版本和插件版本当成两个独立轴，并把 runtime、profile 和插件市场作为同一候选输入验证。完整的官方 tag、隔离候选、pack provenance、消费闭包、回读和回退顺序见[候选升级操作手册](./dsh-upgrade-candidate.md)；本轮 v5 现场 side-load 的来源和回退边界见[rc1 干净候选手册](./dsh-rc1-clean-upgrade-runbook.md)：
 
 ```text
 固定 DSH SHA ──┬── 插件 A 版本
@@ -46,7 +46,7 @@ DSH 升级不能简化为“从官网 `npm install latest` 后插入”。正确
 4. 在主仓更新 DSH pin、profile 和验证入口，重新生成只属于这次组合的 candidate/journal。旧 candidate、旧 WSL/浏览器回执不继承。
 5. 经过 CI、目标平台和必要的人工/UAT 门禁后，才允许 receive/activate。没有授权不部署、不切生产。
 
-profile bridge 只能从候选 runtime 的已验证 peer root 建 link；runtime builder 缺任一显式 web peer 就 fail-closed。插件市场必须随 profile 输入，IM 缺包则保持 staging 和 `HELD_PENDING_IM_ARTIFACT`。这三条是本轮修复后的升级门禁，不能靠现场 symlink、复制旧插件或删除 locale 文件绕过。
+profile bridge 只能从候选 runtime 的已验证 peer root 建 link；runtime builder 缺任一显式 web peer 就 fail-closed。插件市场必须随 profile 输入；IM 输入即使已核验，也必须与统一候选身份和发布门禁绑定。这三条是本轮修复后的升级门禁，不能靠现场 symlink、复制旧插件或删除 locale 文件绕过。
 
 这样，普通插件更新仍然是轻量的插件更新；只有 DSH 本身升级时，才走完整的宿主升级门禁。
 

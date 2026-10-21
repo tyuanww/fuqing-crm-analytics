@@ -16,8 +16,8 @@
 
 - 插件开发使用 Node `24.19.0`、pnpm `11.28.2`。Python `3.14+` 属于后端服务、合成集成测试与发布校验工具的环境，不是 CRM 插件运行依赖。
 - 插件位于 profile allowlist 中，包名匹配 `@shine-mage/*`。
-- `package.json` 使用 `type: module`、`packageManager: pnpm@11.28.2`，并把 `@deepseek-ai/dsh-tools` 固定为 `0.1.7-rc.2` peer。
-- `files` 只声明运行时 `lib/`、bundle patch、已打包领域输入的 digest lock 和必要的 README/LICENSE；不得包含 `src/`、测试、`node_modules`、source map、符号链接或 workspace/file/link 依赖。
+- `package.json` 使用 `type: module`、`packageManager: pnpm@11.28.2`，并把 `@deepseek-ai/dsh-tools` 固定为 `0.1.7-rc.2` peer。只有声明 `shinemage.bundle_role=configuration-bundle` 的纯配置 bundle 可以省略该 peer，并须同时保证任何依赖字段和运行文件都不引用 `@deepseek-ai/dsh-tools`。
+- `files` 只声明运行时 `lib/`、bundle patch、已打包领域输入的 digest lock 和必要的 README/LICENSE；不得包含 `src/`、测试、`node_modules`、source map、符号链接或 workspace/file/link 依赖。允许 `locale/*.json` 这类“所在目录固定、只含一个 `*`、不跨目录”的单层通配，不允许递归或猜测路径。`main`、`module` 和 `dsh.bundle.patch` 必须指向精确文件，不能使用通配。
 
 <a id="plugin-contract"></a>
 ## 包合同
@@ -107,7 +107,7 @@ cat "$candidate_root/pack/candidate.json"
 
 候选目录携带原字节 `profile.json` 快照；回执绑定插件 source SHA、包 SHA-256、profile digest、固定 DSH pin、capability 和 `CANDIDATE_PREPARED` journal。profile digest 表示组合快照，pack SHA 表示单个 tarball；profile 本身不保存 tarball SHA。`canary`、`rollback` 和远端 receive 在当前首期显示 `NOT_RUN`/`NOT_AVAILABLE`，这不是发布成功；不能把 tarball 直接放进杭州 current。新包必须沿着“pack → profile snapshot → candidate → journal”形成新身份链，不能向旧 journal 追加或继承旧包的目标验收。
 
-最终 tarball 在私有临时目录安全解包，核对 `exports`（含条件分支）、`main`/`module` 和 `dsh.bundle.patch` 指向的文件，再执行敏感文件/secret scan；通过后才发布包与回执。源码映射、敏感文件或缺失入口均阻断，内容校验失败不发布 tarball；通过校验后若回执落盘失败，已验证包仍保留，需核对输出后使用新的候选目录重试。通配 exports 暂不支持，须列出明确入口。
+最终 tarball 在私有临时目录安全解包，核对 `exports`（含条件分支）、`main`/`module` 和 `dsh.bundle.patch` 指向的文件，再执行敏感文件/secret scan；通过后才发布包与回执。源码映射、敏感文件或缺失入口均阻断，内容校验失败不发布 tarball；通过校验后若回执落盘失败，已验证包仍保留，需核对输出后使用新的候选目录重试。`exports` 的 key/value 与 `files` 只在同一目录内支持一个 `*` 的单层映射，且至少匹配一个普通文件；嵌套通配、多个 `*`、目录逃逸和符号链接均拒绝。`main`、`module` 与 `dsh.bundle.patch` 必须是精确文件。
 
 ## 声明保存服务依赖（本地候选）
 

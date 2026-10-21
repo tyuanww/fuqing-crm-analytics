@@ -1,5 +1,7 @@
 # 插件外置与主仓收口计划
 
+> 本文件是 2026-10-19 的计划快照。当前门禁与组合身份只看 [STATUS](../../STATUS.md) 和 [TODOS](../hackathon/TODOS.md#m2-收尾任务卡与维修规则)。
+
 ## 目标
 
 把 `fuqing-crm-analytics` 变成稳定的 DSH 集成和发布仓。插件源码由独立仓维护。主仓只消费经过摘要校验的插件 pack 和 profile 输入。
@@ -7,6 +9,8 @@
 本计划不把主仓改成 DSH 官方源码仓。当前仓库没有 `packages/host`、`packages/client` 或官方 DSH 源码。主仓保存的是 CRM 应用、DSH 集成、组合校验和发布工具。DSH 官方源码和 runtime 继续由固定的外部 checkout 或发布资产提供。
 
 ## 当前事实
+
+以下“当前”均指 2026-10-19 计划编制时点；后续组合锁、reviewed SHA 和门禁状态只看 [STATUS](../../STATUS.md) 与 checked-in 组合输入。
 
 - 主仓 `main` 和 `origin/main` 都是 `4ac076de`。
 - `dsh-plugins/` 包含 9 个插件和 1 个构建工具包。目录有 752 个源码文件和 28 个已生成 `lib/` 文件。
@@ -128,7 +132,7 @@
 
 2026-10-19 读取了独立仓 `main` 的远端 ref。它们已经不再等于主仓组合锁中的 source SHA。
 
-| 包 | 主仓锁定 SHA | 独立仓当前 `main` |
+| 包 | 2026-10-19 主仓锁定 SHA | 2026-10-19 独立仓 `main` |
 |---|---|---|
 | `dsh-analytics-workbench` | `3030e3f2` | `865fe2e6` |
 | `dsh-crm-knowledge` | `dac0539b` | `78eb9f7d` |

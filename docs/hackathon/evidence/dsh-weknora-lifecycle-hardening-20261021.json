@@ -1,0 +1,403 @@
+{
+  "schema_version": "shinemage-dsh-weknora-lifecycle-hardening/v1",
+  "observed_at": "2026-10-21T09:46:22Z",
+  "scope": "owner-operated-v5-query11-weknora-server-key-scope",
+  "release_ready": false,
+  "timeline": [
+    {
+      "observed_at": "2026-10-20T23:17:34Z",
+      "state": "query11_initial_live",
+      "scope_helper_sha256": "7e49863d5800f6f19879db39698d8db964ef182a80f69ecf710fde7191a75384",
+      "overlay_manifest_sha256": "bb6a9215972d4983f740e643a9695c36f59b897fe198bd8f7b1c57b017952319",
+      "receipt": "docs/hackathon/evidence/dsh-query11-allowlist-20261021.json"
+    },
+    {
+      "observed_at": "2026-10-20T23:32:23Z",
+      "state": "postread_scope_and_effect_release",
+      "scope_helper_sha256": "4c94a4fd654117962d6b7710b04c26342ae28d48e11fc6e6376a80aee21381fe",
+      "overlay_manifest_sha256": "d542e6bf0877a545af1cdc0b829f342adbfce2d740c6a156df36b3e1aba64489",
+      "recovery": "/srv/shinemage/dsh/recovery/weknora-scope-hardening-20261021/"
+    },
+    {
+      "observed_at": "2026-10-21T00:00:15Z",
+      "state": "transactional_registration_cleanup",
+      "scope_helper_sha256": "e060ecd508ceaafb04dcd809078802e52ed2d0add297507013f11feb30e6d663",
+      "overlay_manifest_sha256": "8d544df205bfe708b82b146f709c4b128c7300fa870b1ddc1beac26be748a166",
+      "recovery": "/srv/shinemage/dsh/recovery/weknora-registration-cleanup-20261021/"
+    },
+    {
+      "observed_at": "2026-10-21T00:18:44Z",
+      "state": "metadata_only_manifest_scope_label_refresh",
+      "scope_helper_sha256": "e060ecd508ceaafb04dcd809078802e52ed2d0add297507013f11feb30e6d663",
+      "overlay_manifest_sha256": "8ef9c40cf859d176e815043004344da561f7253c3d9eb82d532bd2492e7373a7",
+      "recovery": "/srv/shinemage/dsh/recovery/weknora-registration-cleanup-20261021/"
+    },
+    {
+      "observed_at": "2026-10-21T09:46:22Z",
+      "state": "retrieval_key_server_scope_tightened",
+      "knowledge_base_ids": [
+        "1c4627e2-dfc1-48ca-aeef-2c00b53da5f8"
+      ],
+      "recovery": "/srv/shinemage/dsh/recovery/weknora-retrieval-key-scope-20261021/"
+    }
+  ],
+  "environment": {
+    "target": "root@100.93.46.46",
+    "platform": "Linux x86_64 / WSL2",
+    "current": "/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-core-main-20261020-v5",
+    "runtime_version": "0.2.1-rc.1",
+    "upstream_sha": "1600d8a1e140dcde43a1a0941940a0480712c011",
+    "service": "shinemage-dsh.service",
+    "service_state": "active/running",
+    "main_pid": 3714954,
+    "n_restarts": 0
+  },
+  "artifact": {
+    "adapter": {
+      "path": "weknora.mjs",
+      "before_sha256": "1c2e223d911bfbb02a0113ed0a2927e04086c503b8bdcbcad8b6729530f976e2",
+      "after_sha256": "fc9284155508e9f10e16b64ad9d15c2bf9de7f341985ab8a0c8c25eedc3b4ee8"
+    },
+    "scope_helper": {
+      "path": "weknora-production-scope.mjs",
+      "before_sha256": "4c94a4fd654117962d6b7710b04c26342ae28d48e11fc6e6376a80aee21381fe",
+      "after_sha256": "e060ecd508ceaafb04dcd809078802e52ed2d0add297507013f11feb30e6d663"
+    },
+    "overlay_manifest": {
+      "path": "weknora-production-overlay.v1.json",
+      "before_sha256": "d542e6bf0877a545af1cdc0b829f342adbfce2d740c6a156df36b3e1aba64489",
+      "after_sha256": "8ef9c40cf859d176e815043004344da561f7253c3d9eb82d532bd2492e7373a7"
+    },
+    "recovery": "/srv/shinemage/dsh/recovery/weknora-registration-cleanup-20261021/"
+  },
+  "scope_contract": {
+    "project_knowledge_base_id": "1c4627e2-dfc1-48ca-aeef-2c00b53da5f8",
+    "argument_keys": "ALLOWLIST",
+    "search_scope": "PROJECT_KNOWLEDGE_BASE_ALLOWLIST",
+    "document_read_scope": "METADATA_CHECK_BEFORE_AND_AFTER_READ",
+    "server_api_key_scope": "PROJECT_KNOWLEDGE_BASE_ALLOWLIST",
+    "tenant_wide_document_name_lookup": "DENIED_BEFORE_NETWORK",
+    "tool_lifecycle": "EFFECT_DISPOSE_TRANSACTIONAL"
+  },
+  "http": {
+    "4328": 401,
+    "18090": 200,
+    "18091": 404,
+    "18092": 401,
+    "18093": 401,
+    "18094": 200,
+    "18098": 302,
+    "startup_error_matches": 0
+  },
+  "live_probe": {
+    "project_search": {
+      "status": "PASS",
+      "count": 8,
+      "knowledge_base_ids": [
+        "1c4627e2-dfc1-48ca-aeef-2c00b53da5f8"
+      ]
+    },
+    "project_read": "PASS",
+    "deployment_search": {
+      "status": "DENIED",
+      "code": "WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED"
+    },
+    "cross_scope_read": {
+      "status": "DENIED",
+      "code": "WEKNORA_DOCUMENT_SCOPE_CHECK_FAILED",
+      "service_http_status": 403,
+      "service_error": "API key scope does not allow one or more knowledge bases",
+      "content_returned": false
+    },
+    "tool_lifecycle_released": true,
+    "tool_registration_transaction": "PASS",
+    "tenant_wide_document_name_lookup": "ABSENT",
+    "network_paths": [
+      "/api/v1/knowledge-search",
+      "/api/v1/knowledge/57a3737b-f48c-470c-b194-6658c9c2e1c1",
+      "/api/v1/chunks/57a3737b-f48c-470c-b194-6658c9c2e1c1",
+      "/api/v1/knowledge/bf837310-9f76-4b4f-8a53-c3f39bb79f44"
+    ]
+  },
+  "browser_uat": {
+    "session_id": "session-1605afec-9e3b-432e-b05a-219ea5bd0a85",
+    "preset": "crm-query",
+    "provider": "deepseek-account",
+    "model": "deepseek-flash",
+    "reasoning_effort": "off",
+    "display_model": "DeepSeek-V4.1-Flash",
+    "display_reasoning_effort": "Off",
+    "bash": "ABSENT",
+    "terminal_open": "ABSENT",
+    "read": "ABSENT",
+    "write": "ABSENT",
+    "weknora_search": "VISIBLE",
+    "weknora_read_document": "VISIBLE",
+    "free_html_page_generate": "VISIBLE",
+    "list_agents": "VISIBLE_EXECUTION_DENIED",
+    "list_agents_error": "CRM_QUERY_TOOL_NOT_ALLOWED: list_agents",
+    "weknora_ui_query": {
+      "status": "PASS",
+      "tool_calls": 1,
+      "passages": 8,
+      "real_business_values": false
+    },
+    "plugin_page": {
+      "version": "0.0.0-query.11",
+      "components_running": 2,
+      "components_total": 2
+    },
+    "crm_login": "NOT_CONNECTED"
+  },
+  "profile_snapshot": {
+    "package_json_sha256": "2756601693ed99591eae91f2bba3ecef443715e4e62ec730b2ff599380df3ac8",
+    "pnpm_lock_sha256": "ea643aa0cbd3aaeeeebd591f28ca005c0ee30667ea34e47bbc9173a8f7842287",
+    "ephemeral": true,
+    "identity_use": "NOT_A_RELEASE_IDENTITY"
+  },
+  "weknora_audit": {
+    "containers": {
+      "WeKnora-app": "healthy",
+      "WeKnora-docreader": "healthy",
+      "WeKnora-postgres": "healthy",
+      "WeKnora-redis": "running",
+      "WeKnora-neo4j": "running",
+      "WeKnora-frontend": "running"
+    },
+    "retriever_config": {
+      "tenant_id": 10000,
+      "workspace": "hutou's Workspace",
+      "retrieve_driver": "postgres",
+      "db_vector_store_count": 0,
+      "knowledge_base_vector_store_id": null,
+      "before_retriever_engines": {
+        "engines": []
+      },
+      "effective_engines": [
+        {
+          "retriever_type": "keywords",
+          "retriever_engine_type": "postgres"
+        },
+        {
+          "retriever_type": "vector",
+          "retriever_engine_type": "postgres"
+        }
+      ],
+      "configured_at": "2026-10-21T09:40:09Z",
+      "recovery": "/srv/shinemage/dsh/recovery/weknora-retriever-config-20261021/",
+      "before_sha256": "2fc7196e57bf808edefb822cd770f8e6eec24ff985a18f6df1c07104d0d9a087",
+      "after_sha256": "36502e1b218903e62c2dcec29eba97d70ef7d8e79fc7ce714b032d39e3990392",
+      "validation": {
+        "production_wrapper_search_count": 3,
+        "production_wrapper_scope": [
+          "1c4627e2-dfc1-48ca-aeef-2c00b53da5f8"
+        ],
+        "cross_scope_search": "WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED",
+        "direct_search_http_status": 200,
+        "direct_search_knowledge_base_ids": [
+          "1c4627e2-dfc1-48ca-aeef-2c00b53da5f8"
+        ]
+      }
+    },
+    "knowledge_bases": [
+      {
+        "id": "1c4627e2-dfc1-48ca-aeef-2c00b53da5f8",
+        "name": "项目资料",
+        "active_documents": 7,
+        "completed_documents": 7,
+        "enabled_documents": 7,
+        "documents_with_pending_subtasks": 0,
+        "documents_with_error": 0,
+        "ready_chunks": 385,
+        "active_embeddings": 385,
+        "embedding_dimensions": [
+          1024
+        ],
+        "chunk_size": 800,
+        "chunk_overlap": 100,
+        "graph_enabled": true,
+        "storage_provider": "local"
+      },
+      {
+        "id": "9a4ea853-9466-4d27-8d4e-d8e8bd5a8018",
+        "name": "部署验收（合成资料）",
+        "active_documents": 3,
+        "completed_documents": 3,
+        "enabled_documents": 3,
+        "documents_with_pending_subtasks": 0,
+        "documents_with_error": 0,
+        "ready_chunks": 3,
+        "active_embeddings": 3,
+        "embedding_dimensions": [
+          1024
+        ],
+        "graph_enabled": false,
+        "storage_provider": "local"
+      },
+      {
+        "id": "4f0d2575-154f-4755-93f8-8763b98b0a8a",
+        "name": "权限隔离验收（空库）",
+        "active_documents": 0,
+        "completed_documents": 0,
+        "enabled_documents": 0,
+        "documents_with_pending_subtasks": 0,
+        "documents_with_error": 0,
+        "ready_chunks": 0,
+        "active_embeddings": 0,
+        "graph_enabled": false,
+        "storage_provider": "local"
+      }
+    ],
+    "retrieval_key": {
+      "name": "DSH 本机只读检索",
+      "scope_type": "tenant",
+      "full_access": false,
+      "capabilities": [
+        "retrieve"
+      ],
+      "allowed_knowledge_base_count": 1,
+      "allowed_knowledge_base_ids": [
+        "1c4627e2-dfc1-48ca-aeef-2c00b53da5f8"
+      ],
+      "includes_deployment_knowledge_base": false,
+      "server_enforces_single_project_scope": true,
+      "adapter_enforces_single_project_scope": true,
+      "token_changed": false,
+      "service_restarted": false,
+      "updated_at": "2026-10-21T09:46:22Z",
+      "recovery": "/srv/shinemage/dsh/recovery/weknora-retrieval-key-scope-20261021/",
+      "before_raw_sha256": "9a658ecdae8dfee8b7820bb0ffe1c5460ce5b419f21c85e4e4cc1b0905fa4e3d",
+      "after_raw_sha256": "13726db9734b0ea291b71b21b8be2e8a75d8bad321a28a5eafbe85acd2debd15",
+      "validation": {
+        "project_search_http_status": 200,
+        "project_search_count": 3,
+        "deployment_search_http_status": 403,
+        "deployment_search_error": "API key scope does not allow one or more knowledge bases",
+        "project_document_http_status": 200,
+        "deployment_document_http_status": 403,
+        "document_content_returned_for_denied_read": false
+      }
+    },
+    "models": {
+      "embedding": "bge-m3:567m",
+      "knowledge_qa": "MiniMax-M3",
+      "rerank": "MiniMax-M3"
+    },
+    "neo4j": {
+      "nodes": 1656,
+      "relationships": 1519
+    },
+    "active_resources": {
+      "total": 194,
+      "bytes": 87928786,
+      "page_images": {
+        "count": 185,
+        "bytes": 43629037
+      },
+      "source_files": 9
+    },
+    "shares": 0,
+    "organizations": 0,
+    "data_sources": 0,
+    "knowledge_tags": 0
+  },
+  "tests": {
+    "query_and_weknora_scope": {
+      "command": "node --test scripts/ops/weknora-production-scope.test.mjs dsh-plugins/query-agent/test/package.test.mjs",
+      "passed": 30,
+      "failed": 0
+    },
+    "plugin_pack": {
+      "command": "node --test scripts/release/plugin-pack.test.mjs",
+      "passed": 45,
+      "failed": 0
+    },
+    "pregate_runner": {
+      "command": "node --test scripts/ci/pregate-runner.test.mjs",
+      "passed": 6,
+      "failed": 0
+    },
+    "pregate_runner_shell": "bash -n PASS"
+  },
+  "closeout_verification": {
+    "backend": {
+      "label": "full-backend-r2",
+      "command": ".context/checks/service-runtime-py314-20261021/bin/python -m pytest -q backend/tests",
+      "executed_commit": "fa618859b7e789e5db5393283bd1e324367033a2",
+      "exit": 0,
+      "passed": 3286,
+      "skipped": 85,
+      "failed": 0,
+      "warnings": 6,
+      "duration_seconds": 1811.3,
+      "log_sha256": "6be369bc6cd7b3c8b78a5f389fb156b94c16ea7968d45ce4ca9ea0fff956029c",
+      "later_scope": "No backend or Python service source changed between the executed commit and bad09dec."
+    },
+    "previous_fixed_input_b0": {
+      "label": "full-b0-r8",
+      "command": "node scripts/dsh-b0/pipeline.mjs --check --python /Users/hutou/homebrew/bin/python3.14",
+      "executed_commit": "bad09decfeb652287eb282774dc0a66fb21fc26a",
+      "exit": 0,
+      "duration_seconds": 304.1,
+      "python": {
+        "passed": 862,
+        "subtests_passed": 41,
+        "warnings": 23,
+        "failed": 0
+      },
+      "node_main": {
+        "passed": 555,
+        "skipped": 4,
+        "failed": 0
+      },
+      "other_node_groups_failed": 0,
+      "log_sha256": "5a47d4a2c9d114fd53d9b21bda263f9492f9fcb3add96035f802d20be73fe0e9"
+    },
+    "fixed_input_b0": {
+      "label": "full-b0-r10",
+      "command": "node scripts/dsh-b0/pipeline.mjs --check --python /Users/hutou/homebrew/bin/python3.14",
+      "executed_commit": "fff0dc5fcca3cf97e0849898f1d440593c028b9c",
+      "worktree_state": "candidate tracked changes were not committed at execution time",
+      "exit": 0,
+      "duration_seconds": 526.5,
+      "python": {
+        "passed": 862,
+        "subtests_passed": 41,
+        "warnings": 23,
+        "failed": 0
+      },
+      "node_main": {
+        "passed": 586,
+        "skipped": 4,
+        "failed": 0
+      },
+      "other_node_groups_failed": 0,
+      "log_sha256": "94db0842eaac5091ac26fc4e33a61e6bca5f308eedb5d56e58ad1cc161f5a5c1",
+      "failed_attempt": {
+        "label": "full-b0-r9",
+        "exit": 1,
+        "failure": "spawnSync /Users/hutou/homebrew/bin/python3.14 ETIMEDOUT in scripts/dsh-b0/geometry-composition.test.mjs",
+        "isolated_retry": "PASS in 411ms",
+        "r10_result": "PASS in 82.5ms",
+        "timeout_changed": false
+      }
+    },
+    "targeted_node": {
+      "command": "node --test --test-concurrency=1 scripts/ops/weknora-production-scope.test.mjs dsh-plugins/query-agent/test/package.test.mjs scripts/release/plugin-pack.test.mjs scripts/ci/pregate-runner.test.mjs",
+      "passed": 81,
+      "failed": 0,
+      "skipped": 0,
+      "groups": {
+        "query_and_weknora_scope": 30,
+        "plugin_pack": 45,
+        "pregate_runner": 6
+      }
+    }
+  },
+  "limits": [
+    "CRM account login and real read-only metric UAT remain NOT_CONNECTED.",
+    "Non-allowlisted scoped tools remain visible in the request schema; execution is denied by the allowlist guard.",
+    "This is an owner-operated side-load, not a formal signed release.",
+    "The 185 active page-image resources were inventoried but were not deleted or reclassified."
+  ]
+}

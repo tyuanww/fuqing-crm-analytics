@@ -101,7 +101,7 @@ Keep one machine-readable receipt with these fields:
 - IM package/index status and the production switch decision;
 - `formal_company_evidence`, `release_ready`, and the formal M2 disposition.
 
-Local candidate evidence does not become company release evidence automatically. Keep `M2-07=BLOCKED`, `M2-08=NOT_RUN`, `M2-09=NOT_RUN`, and `release_ready=false` until the formal inputs and approvals exist.
+Local candidate evidence does not become company release evidence automatically. The current disposition is `M2-07=BLOCKED / COMPANY_CLOSURE_NOT_RUN`; `M2-08=INTERNAL_PREFLIGHT_PASS / TARGET_WSL2_HTTP_PASS / ACTIVATION_CANARY_ROLLBACK_NOT_RUN`; `M2-09=FORMAL_TARGET_BROWSER_NOT_RUN / FORMAL_TARGET_RECOVERY_NOT_RUN / MAIN_PIN_UNCHANGED`; and `release_ready=false`. Never treat a local candidate sub-gate as a formal release approval.
 
 ## Roll back
 

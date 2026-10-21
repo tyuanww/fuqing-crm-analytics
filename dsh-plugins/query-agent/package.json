@@ -1,0 +1,31 @@
+{
+  "name": "@shine-mage/dsh-query-agent",
+  "version": "0.0.0-query.11",
+  "private": true,
+  "packageManager": "pnpm@11.28.2",
+  "engines": {
+    "node": "24.x"
+  },
+  "type": "module",
+  "description": "One Agent preset composing CRM metrics, WeKnora retrieval and optional HTML page delivery.",
+  "exports": {
+    "./tool-policy": "./lib/tool-policy.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "cordis.patch.yml",
+    "lib/tool-policy.js",
+    "locale/*.json",
+    "icon.svg"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "shinemage": {
+    "bundle_role": "configuration-bundle",
+    "composition_contract": "crm-knowledge-split/v1"
+  }
+}

@@ -56,6 +56,11 @@
       "domain": "knowledge",
       "target_repository": "shinemage-dsh-knowledge",
       "kind": "plugin"
+    },
+    "query-agent": {
+      "domain": "agent-preset",
+      "target_repository": "shinemage-dsh-query-agent",
+      "kind": "configuration-bundle"
     }
   },
   "allowed_runtime_edges": [],
