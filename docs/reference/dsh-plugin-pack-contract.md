@@ -87,6 +87,8 @@ The packer does not build DSH, start a host, upload a package, activate a plugin
 | `PLUGIN_PACK_SOURCE_DIRTY` | The plugin checkout has tracked or untracked changes | Clean the plugin checkout before packaging |
 | `PLUGIN_PACK_WORKSPACE_LINK` | The package depends on a workspace or file link | Publish or pin the dependency for the pack |
 | `PLUGIN_PACK_TARBALL_UNDECLARED` | The archive contains an undeclared file | Update the package `files` allowlist only when the file is a real runtime entry |
+| `PLUGIN_PACK_PATTERN_INVALID` | A `files`, export key/value or exact entrypoint contains an unsupported wildcard shape | Keep one `*` in the final filename segment of a fixed directory; exact entrypoints cannot use wildcards |
+| `PLUGIN_PACK_PATTERN_SCOPE` | A wildcard scope is malformed or cannot be inspected safely | Use an immediate child file glob such as `locale/*.json`; do not use recursive or directory-segment wildcards |
 | `PLUGIN_PACK_CONFIGURATION_BUNDLE_TOOL_DEPENDENCY` | A configuration bundle declares `@deepseek-ai/dsh-tools` in a dependency field | Move tool implementation to a tool plugin and remove the dependency |
 | `PLUGIN_PACK_CONFIGURATION_BUNDLE_TOOL_IMPORT` | A packaged configuration file imports `@deepseek-ai/dsh-tools` | Remove the import; configuration bundles may not carry tool implementation |
 | `PLUGIN_PACK_CONFIGURATION_BUNDLE_DYNAMIC_MODULE_LOAD` | A packaged configuration file uses `import()` or `require()` | Remove runtime module loading; configuration bundles may not carry executable module resolution |

@@ -23,6 +23,8 @@ CRM、知识、WeKnora、页面和问数预设保持独立包，是因为它们�
 
 本轮实现与测试迁移已分组提交并经 PR #121 普通 merge，合并后 main CI 见[核验记录](../hackathon/evidence/shinemage-pr121-postmerge-20261012.md)。九个插件各自维护源码／版本／测试，且九个插件仓与 board-components 领域库的首个远程 PR 已合并；board-components 仍是独立领域库，不是第十个插件。2026-10-12 时点的装配锁绑定 Workbench `3030e3f`、CRM `dac0539`、Knowledge `f623c22`；当前 rc2 组合锁已前进到 Workbench `3030e3f`、CRM `5f359f5b`、Knowledge `ef8960ed`，而杭州 v5 仍使用独立的 rc1 owner-operated side-load。当前值只看 [STATUS](../../STATUS.md) 与组合锁；旧回执和 artifact 摘要见[正式包 CI 收口](../hackathon/evidence/shinemage-formal-plugin-ci-20261012.md)。
 
+2026-10-21 新增的 `dsh-plugins/query-agent` 是主仓内的配置型 bundle，尚未成为第十个业务插件独立作者仓，因此不改变上述“九个插件仓与 board-components”合计十个作者的已合并计数。边界清单已为其预留外置 owner，正式分仓和独立 CI 仍按单独门禁推进。
+
 主仓仍负责 backend、平台合同、profile、组合消费、来源与权限门禁、保留合同守卫和静态扫描。另两组私有数值／查询断言继续读取旧 Workbench，历史 `dsh-plugins/` 因这些用途暂留；本地源码迁移没有证明全面源码退场，也没有改变运行时边界。完整看板仍在 analytics-workbench，shine-board 是能力标记；合成知识服务不能当作真实 WeKnora。
 
 单插件日常变更按自己的作者检查与受影响主仓消费者验证，不重建 DSH、迁移业务数据库或重复 SDK 全量审计。DSH 升级仍是独立固定候选及兼容验收。隔离 formal pack 和宿主观测曾使用 Cordis `4.0.4`；当前 CRM/Knowledge 源码 manifest 仍声明 Cordis `4.0.2`，其隔离 peer 修复不能写成主仓默认版本。D/E 五仓无独立 tsc，SDK 正式分发 BLOCKED，产品 PARTIAL、release_ready=false。PR #121 已合入 main，合并后主 CI 与工件摘要见[合并后核验](../hackathon/evidence/shinemage-pr121-postmerge-20261012.md)。当前九包输入预检已成功生成固定回执，见[组合输入预检](../hackathon/evidence/shinemage-composition-preflight-20261012.md)；candidate/journal、目标／真实业务及发布不据此通过，新服务字节需自己的组合验收。当前 backend worker 的结果事务争用修复只影响服务处理，不改变插件归属。

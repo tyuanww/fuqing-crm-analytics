@@ -10,6 +10,8 @@
 
 ## 当前事实
 
+以下“当前”均指 2026-10-19 计划编制时点；后续组合锁、reviewed SHA 和门禁状态只看 [STATUS](../../STATUS.md) 与 checked-in 组合输入。
+
 - 主仓 `main` 和 `origin/main` 都是 `4ac076de`。
 - `dsh-plugins/` 包含 9 个插件和 1 个构建工具包。目录有 752 个源码文件和 28 个已生成 `lib/` 文件。
 - GitHub 已有对应的独立仓。主仓组合锁保存 9 个 reviewed source SHA。
@@ -130,7 +132,7 @@
 
 2026-10-19 读取了独立仓 `main` 的远端 ref。它们已经不再等于主仓组合锁中的 source SHA。
 
-| 包 | 主仓锁定 SHA | 独立仓当前 `main` |
+| 包 | 2026-10-19 主仓锁定 SHA | 2026-10-19 独立仓 `main` |
 |---|---|---|
 | `dsh-analytics-workbench` | `3030e3f2` | `865fe2e6` |
 | `dsh-crm-knowledge` | `dac0539b` | `78eb9f7d` |

@@ -51,16 +51,25 @@ python314="${FQ_B0_PYTHON:-$(command -v python3)}"
 
 | 错误 | 含义 |
 |---|---|
-| `IM_INPUT_SCHEMA` | lock 顶层或条目字段集合不符 |
+| `IM_INPUT_SCHEMA` / `IM_INPUT_ENTRY_SCHEMA` | lock 顶层或单个输入条目的字段集合不符 |
 | `IM_INPUT_RELEASE_BOUNDARY` | lock 试图声明 `release_ready=true` |
 | `IM_INPUT_RUNTIME_SCHEMA` / `IM_INPUT_DSH` / `IM_INPUT_CORDIS` | 固定运行时声明不符 |
+| `IM_INPUT_SELECTION` / `IM_INPUT_PACKAGES` / `IM_INPUT_DUPLICATE` | 输入不是恰好两个受支持且不重复的包 |
 | `IM_INPUT_PACKAGE` / `IM_INPUT_VERSION` / `IM_INPUT_COMMIT` | 包身份格式不符 |
 | `IM_INPUT_REPOSITORY` / `IM_INPUT_URL` | 来源不能由当前包和 commit 推导 |
 | `IM_INPUT_TARBALL` / `IM_INPUT_TARBALL_PATH` | 文件名不是安全单文件名 |
+| `IM_INPUT_BYTES` | 声明字节数不是受支持的正安全整数 |
+| `IM_INPUT_SHA256` / `IM_INPUT_INTEGRITY` | lock 中的摘要算法或编码格式不符 |
 | `IM_INPUT_SHA256_MISMATCH` | 输入字节与 lock 不一致 |
 | `IM_INPUT_INTEGRITY_MISMATCH` | SHA-512 integrity 与线上 lock 不一致 |
-| `IM_ARCHIVE_LINK_OR_DEVICE` / `IM_ARCHIVE_PATH_INVALID` | 归档含不允许的成员或路径 |
+| `IM_INPUT_DIRECTORY_REQUIRED` / `IM_INPUT_FILE_INVALID` / `IM_INPUT_SIZE_MISMATCH` | 输入目录缺失，或归档不是锁定的普通文件、字节数漂移 |
+| `IM_INPUT_PYTHON_VERSION` | 实际 Python 不是 3.14 |
+| `IM_ARCHIVE_INVALID` | 归档不存在、是链接或超过压缩包大小上限 |
+| `IM_ARCHIVE_ENTRY_LIMIT` / `IM_ARCHIVE_SIZE_LIMIT` | 条目数或解出总字节数超过上限 |
+| `IM_ARCHIVE_LINK_OR_DEVICE` / `IM_ARCHIVE_PATH_INVALID` | 归档含不允许的成员、绝对路径、反斜杠或 `.`/`..` 路径段 |
+| `IM_ARCHIVE_DUPLICATE_PATH` / `IM_ARCHIVE_ROOT_INVALID` | 归档包含重复成员，或不止一个顶层目录 |
 | `IM_ARCHIVE_COMMIT_MISMATCH` | 顶层目录没有绑定目标 commit |
+| `IM_ARCHIVE_PACKAGE_MISSING` / `IM_ARCHIVE_PACKAGE_INVALID` | 根 `package.json` 缺失、超限或不能解析 |
 | `IM_INPUT_PACKAGE_MISMATCH` / `IM_INPUT_VERSION_MISMATCH` | 归档内包身份与 lock 不一致 |
 
 ## 边界
