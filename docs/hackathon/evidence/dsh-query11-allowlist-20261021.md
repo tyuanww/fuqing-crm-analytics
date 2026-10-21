@@ -50,7 +50,7 @@ WeKnora client 改为 `Object.create` 薄包装，`findDocuments` 作为 wrapper
 
 ## 验证与回滚
 
-- query + WeKnora 生命周期定向回归：本页撰写后的加固版本为 `29/29 PASS`；[机器回执](dsh-query11-allowlist-20261021.json) 的 `26/26` 是初始 allowlist 部署时点，不覆盖读取后范围复验和事务释放回归。
+- query + WeKnora 生命周期定向回归：最终加固版本为 `30/30 PASS`；[机器回执](dsh-query11-allowlist-20261021.json) 的 `26/26` 是初始 allowlist 部署时点，不覆盖读取后范围复验、事务释放和空白 key/畸形工具定义回归。
 - `node --test scripts/release/plugin-pack.test.mjs`：初始部署为 `44/44 PASS`；提交 `a8cebd68` 增加 query.9 不可变历史身份快照回归后，最终生命周期回执为 `45/45 PASS`。两个数字对应不同提交，不互相覆盖。
 - API 与 Web 监听、HTTP 状态、插件页 `2/2`、模型路由和 standard 模式恢复均有本次现场证据。
 - 恢复根目录：`/srv/shinemage/dsh/recovery/query10-side-load-20261021/`，保留 query.9 profile、lock、安装包、tarball 和 WeKnora 旧 overlay。

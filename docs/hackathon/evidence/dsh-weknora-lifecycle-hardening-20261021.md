@@ -69,9 +69,9 @@ retrieval key `DSH 本机只读检索` 只有 `retrieve` capability 且 `full_ac
 
 ## 测试
 
-- `node --test scripts/ops/weknora-production-scope.test.mjs dsh-plugins/query-agent/test/package.test.mjs`：`29/29 PASS`
+- `node --test scripts/ops/weknora-production-scope.test.mjs dsh-plugins/query-agent/test/package.test.mjs`：`30/30 PASS`
 - `node --test scripts/release/plugin-pack.test.mjs`：`45/45 PASS`
-- `node --test scripts/ci/pregate-runner.test.mjs`：`5/5 PASS`，另 `bash -n scripts/ci/pregate-runner.sh` 通过
+- `node --test scripts/ci/pregate-runner.test.mjs`：`6/6 PASS`，另 `bash -n scripts/ci/pregate-runner.sh` 通过
 
 新增回归覆盖：
 
@@ -89,11 +89,12 @@ retrieval key `DSH 本机只读检索` 只有 `retrieve` capability 且 `full_ac
 | 检查 | 命令 | 结果 | 证据 |
 |---|---|---|---|
 | 完整 backend | `.context/checks/service-runtime-py314-20261021/bin/python -m pytest -q backend/tests` | `exit 0`；`3286 passed / 85 skipped / 0 failed / 6 warnings`，1811.3 秒 | `full-backend-r2`，日志 SHA-256 `6be369bc6cd7b3c8b78a5f389fb156b94c16ea7968d45ce4ca9ea0fff956029c` |
-| 固定输入 B0 r8 | `node scripts/dsh-b0/pipeline.mjs --check --python /Users/hutou/homebrew/bin/python3.14` | `exit 0`；Python `862 passed`、41 subtests passed、23 warnings；Node 主组 `555 passed / 4 skipped / 0 failed`，其余组无失败 | `full-b0-r8`，HEAD `bad09decfeb6`，日志 SHA-256 `5a47d4a2c9d114fd53d9b21bda263f9492f9fcb3add96035f802d20be73fe0e9` |
-| 定向 Node 回归 | `node --test --test-concurrency=1 scripts/ops/weknora-production-scope.test.mjs dsh-plugins/query-agent/test/package.test.mjs scripts/release/plugin-pack.test.mjs scripts/ci/pregate-runner.test.mjs` | `79 passed / 0 failed / 0 skipped` | query + WeKnora `29/29`、plugin-pack `45/45`、pregate runner `5/5` |
+| 固定输入 B0 r8（历史） | `node scripts/dsh-b0/pipeline.mjs --check --python /Users/hutou/homebrew/bin/python3.14` | `exit 0`；Python `862 passed`、41 subtests passed、23 warnings；Node 主组 `555 passed / 4 skipped / 0 failed`，其余组无失败 | `full-b0-r8`，HEAD `bad09decfeb6`，日志 SHA-256 `5a47d4a2c9d114fd53d9b21bda263f9492f9fcb3add96035f802d20be73fe0e9` |
+| 固定输入 B0 r10（当前） | `node scripts/dsh-b0/pipeline.mjs --check --python /Users/hutou/homebrew/bin/python3.14` | `exit 0`；Python `862 passed`、41 subtests passed、23 warnings；Node 主组 `586 passed / 4 skipped / 0 failed`，其余组无失败 | `full-b0-r10`，HEAD `fff0dc5f` 加本轮待提交候选树，526.5 秒，日志 SHA-256 `94db0842eaac5091ac26fc4e33a61e6bca5f308eedb5d56e58ad1cc161f5a5c1` |
+| 定向 Node 回归 | `node --test --test-concurrency=1 scripts/ops/weknora-production-scope.test.mjs dsh-plugins/query-agent/test/package.test.mjs scripts/release/plugin-pack.test.mjs scripts/ci/pregate-runner.test.mjs` | `81 passed / 0 failed / 0 skipped` | query + WeKnora `30/30`、plugin-pack `45/45`、pregate runner `6/6` |
 | Git/产物检查 | `git diff --check`、`jq empty`、`bash -n`、`node --check` | 全部 `exit 0` | 本回执提交前的最终工作树 |
 
-完整 backend 的实际执行提交为 `fa618859`；之后到 `bad09dec` 的差异只涉及 `.gstack/`、文档、Node release/profile 测试与 runtime provenance，没有改变 `backend/` 或 Python 服务源码，因此没有把后端结果重标为新的 Python 字节。完整 B0 r8 在 `bad09dec` 上重跑并覆盖新增证据漂移守卫及 IM 归档路径回归。opt-in、NOT_RUN 和按原因跳过的项继续保留，不计作通过。
+完整 backend 的实际执行提交为 `fa618859`；之后到当前候选树的差异只涉及 `.gstack/`、文档、Node release/profile 测试、发布工具与 runtime provenance，没有改变 `backend/` 或 Python 服务源码，因此没有把后端结果重标为新的 Python 字节。完整 B0 r8 在 `bad09dec` 上重跑并覆盖新增证据漂移守卫及 IM 归档路径回归；r9 的唯一失败为固定 Workbench 几何测试的 15 秒子进程超时，同一测试在独占运行中先以 411ms 单独通过，r10 又以 82ms 通过，未修改超时。r10 在 `fff0dc5f` 加本轮待提交候选树上覆盖 query/WeKnora 与 pre-gate 新增用例、IM 归档同一句柄读取和动态模块加载守卫。opt-in、NOT_RUN 和按原因跳过的项继续保留，不计作通过。
 
 ## 未完成
 

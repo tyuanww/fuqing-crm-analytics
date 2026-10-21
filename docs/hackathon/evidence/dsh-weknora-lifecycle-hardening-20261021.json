@@ -239,7 +239,7 @@
   "tests": {
     "query_and_weknora_scope": {
       "command": "node --test scripts/ops/weknora-production-scope.test.mjs dsh-plugins/query-agent/test/package.test.mjs",
-      "passed": 29,
+      "passed": 30,
       "failed": 0
     },
     "plugin_pack": {
@@ -249,7 +249,7 @@
     },
     "pregate_runner": {
       "command": "node --test scripts/ci/pregate-runner.test.mjs",
-      "passed": 5,
+      "passed": 6,
       "failed": 0
     },
     "pregate_runner_shell": "bash -n PASS"
@@ -268,7 +268,7 @@
       "log_sha256": "6be369bc6cd7b3c8b78a5f389fb156b94c16ea7968d45ce4ca9ea0fff956029c",
       "later_scope": "No backend or Python service source changed between the executed commit and bad09dec."
     },
-    "fixed_input_b0": {
+    "previous_fixed_input_b0": {
       "label": "full-b0-r8",
       "command": "node scripts/dsh-b0/pipeline.mjs --check --python /Users/hutou/homebrew/bin/python3.14",
       "executed_commit": "bad09decfeb652287eb282774dc0a66fb21fc26a",
@@ -288,15 +288,44 @@
       "other_node_groups_failed": 0,
       "log_sha256": "5a47d4a2c9d114fd53d9b21bda263f9492f9fcb3add96035f802d20be73fe0e9"
     },
+    "fixed_input_b0": {
+      "label": "full-b0-r10",
+      "command": "node scripts/dsh-b0/pipeline.mjs --check --python /Users/hutou/homebrew/bin/python3.14",
+      "executed_commit": "fff0dc5fcca3cf97e0849898f1d440593c028b9c",
+      "worktree_state": "candidate tracked changes were not committed at execution time",
+      "exit": 0,
+      "duration_seconds": 526.5,
+      "python": {
+        "passed": 862,
+        "subtests_passed": 41,
+        "warnings": 23,
+        "failed": 0
+      },
+      "node_main": {
+        "passed": 586,
+        "skipped": 4,
+        "failed": 0
+      },
+      "other_node_groups_failed": 0,
+      "log_sha256": "94db0842eaac5091ac26fc4e33a61e6bca5f308eedb5d56e58ad1cc161f5a5c1",
+      "failed_attempt": {
+        "label": "full-b0-r9",
+        "exit": 1,
+        "failure": "spawnSync /Users/hutou/homebrew/bin/python3.14 ETIMEDOUT in scripts/dsh-b0/geometry-composition.test.mjs",
+        "isolated_retry": "PASS in 411ms",
+        "r10_result": "PASS in 82.5ms",
+        "timeout_changed": false
+      }
+    },
     "targeted_node": {
       "command": "node --test --test-concurrency=1 scripts/ops/weknora-production-scope.test.mjs dsh-plugins/query-agent/test/package.test.mjs scripts/release/plugin-pack.test.mjs scripts/ci/pregate-runner.test.mjs",
-      "passed": 79,
+      "passed": 81,
       "failed": 0,
       "skipped": 0,
       "groups": {
-        "query_and_weknora_scope": 29,
+        "query_and_weknora_scope": 30,
         "plugin_pack": 45,
-        "pregate_runner": 5
+        "pregate_runner": 6
       }
     }
   },

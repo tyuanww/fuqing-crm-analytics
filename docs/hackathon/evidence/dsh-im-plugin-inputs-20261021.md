@@ -24,6 +24,8 @@ node scripts/release/im-plugin-inputs.mjs \
   --input-dir /absolute/path/to/pinned-im-inputs
 ```
 
+归档检查器在同一个已打开句柄内完成成员校验和根 `package.json` 读取，避免检查后重新打开路径的竞态。定向回归 `node --test scripts/release/im-plugin-inputs.test.mjs` 为 `6/6 PASS`，覆盖顶层目录、commit、链接、条目/字节上限、缺失/非法 package 以及重复路径负测。
+
 校验器拒绝以下情况：
 
 - lock 声称 `release_ready=true`；

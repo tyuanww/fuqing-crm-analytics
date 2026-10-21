@@ -14,7 +14,7 @@ IM 已从归档输入未定位推进为 `PINNED_INPUTS_VERIFIED`：`@xmanrui/dsh
 
 2026-10-21 收口后的只读现场复核再次确认服务、query.11、模型路由和项目库检索正常；任务队列仍保留 1 条 2026-09-19 的 `datatable:summary` 历史 dead letter（`model ID cannot be empty`），当前 10 篇文档无 pending task 或 error。三个知识库的 `vector_store_id` 均为空，运行依赖 `RETRIEVE_DRIVER=postgres` 的 workspace/env fallback；真实检索通过，但显式 per-KB vector store 绑定未配置。检索 key 仅具 `retrieve` capability 和 `full_access=false`，仍覆盖项目库与部署验收库，生产单库边界由适配层 fail-closed 收窄。
 
-本轮在固定 Node `24.19.0` 和 Python `3.14.8` 下重新接收三份作者证据并执行完整 B0 r8 `--check`：Workbench 为 155 文件／1086 PASS，领域作者为 34 PASS，公共合同为三仓 31 份材料；组合包、领域合同、插件边界、supervisor 与固定宿主负测均通过。B0 Python 为 `862 passed / 0 failed`（41 subtests passed，23 warnings），Node 主组为 `555 passed / 4 skipped / 0 failed`，其余调用组均无失败，opt-in/NOT_RUN 跳过项按原原因保留。独立完整 backend 为 `3286 passed / 85 skipped / 0 failed / 6 warnings`。命令、退出码、日志路径和摘要见[收口验证回执](../hackathon/evidence/dsh-weknora-lifecycle-hardening-20261021.md#收口验证)。该结果是本地提交前验证，不替代远端 CI、正式 clean machine、CRM 用户登录和真实只读 UAT。
+本轮在固定 Node `24.19.0` 和 Python `3.14.8` 下重新接收三份作者证据并执行完整 B0 r10 `--check`：Workbench 为 155 文件／1086 PASS，领域作者为 34 PASS，公共合同为三仓 31 份材料；组合包、领域合同、插件边界、supervisor 与固定宿主负测均通过。B0 Python 为 `862 passed / 0 failed`（41 subtests passed，23 warnings），Node 主组为 `586 passed / 4 skipped / 0 failed`，其余调用组均无失败，opt-in/NOT_RUN 跳过项按原原因保留。r8 保持为历史证据；r9 的唯一失败为固定 Workbench 几何测试的 15 秒子进程超时，r10 独占运行通过，未放宽超时。独立完整 backend 为 `3286 passed / 85 skipped / 0 failed / 6 warnings`。命令、退出码、日志路径和摘要见[收口验证回执](../hackathon/evidence/dsh-weknora-lifecycle-hardening-20261021.md#收口验证)。该结果是本地提交前验证，不替代远端 CI、正式 clean machine、CRM 用户登录和真实只读 UAT。
 
 
 ## 独立作者仓合并与正式目标前置（2026-10-12，历史时点）
