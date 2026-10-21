@@ -1,4 +1,3 @@
-/** One production cockpit form and no dormant split-chat ownership. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { access, readFile } from 'node:fs/promises';

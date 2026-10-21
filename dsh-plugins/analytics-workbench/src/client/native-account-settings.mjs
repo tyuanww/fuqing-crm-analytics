@@ -1,10 +1,3 @@
-/**
- * RC1 compatibility seam for the official account and Settings controls.
- *
- * The Host owns account state, sign-in and Settings. This plugin only forwards
- * the user gesture to the native controls; it never reads or writes identity.
- */
-
 export const NATIVE_ACCOUNT_SELECTOR = [
   'button[data-signed-out][aria-haspopup="menu"]',
   'button[aria-label="账号菜单"][aria-haspopup="menu"]',

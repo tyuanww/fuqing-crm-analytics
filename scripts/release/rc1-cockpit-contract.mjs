@@ -1,11 +1,4 @@
 #!/usr/bin/env node
-/**
- * Read-only evidence for the cockpit's dual compatibility line.
- *
- * The repository default remains rc2. A caller opts into the rc1 release lane
- * through DSH_RELEASE_LANE_CONFIG and supplies the exact rc1 upstream/build
- * tools. This script never rewrites toolchain.json, STATUS or global profiles.
- */
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { execFile } from 'node:child_process';

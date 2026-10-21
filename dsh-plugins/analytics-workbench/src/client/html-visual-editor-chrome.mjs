@@ -1,4 +1,3 @@
-/** Scoped chrome for the visual editor. All colors and states come from rc1 content tokens. */
 export const visualEditorCss = `
 .cockpit-visual-editor {
   --ve-font: var(--sm-font-body);
