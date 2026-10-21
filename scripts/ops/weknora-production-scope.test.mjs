@@ -6,6 +6,7 @@ import {
   createAllowlistedWeKnoraClient,
   createScopedWeKnoraTools,
   readProductionWeKnoraKey,
+  registerScopedWeKnoraTools,
 } from './weknora-production-scope.mjs'
 
 const PROJECT = '1c4627e2-dfc1-48ca-aeef-2c00b53da5f8'
@@ -172,10 +173,12 @@ test('fixed scope rejects non-array document-id search filters', async () => {
 
 test('document reads verify knowledge base membership before delegating', async () => {
   const calls = []
+  let metadataReads = 0
   const [read] = createScopedWeKnoraTools({
     definitions: [definition('weknora_read_document', async args => calls.push(args.knowledge_id))],
     client: {
       async getDocument(id) {
+        metadataReads += 1
         return { knowledge_base_id: id === 'project-document' ? PROJECT : OTHER }
       },
     },
@@ -189,6 +192,32 @@ test('document reads verify knowledge base membership before delegating', async 
   assert.deepEqual(calls, [])
   await read.execute({ knowledge_id: 'project-document' }, { signal: new AbortController().signal })
   assert.deepEqual(calls, ['project-document'])
+  assert.equal(metadataReads, 3)
+})
+
+test('document reads discard content when scope changes during the request', async () => {
+  let calls = 0
+  let metadataReads = 0
+  const [read] = createScopedWeKnoraTools({
+    definitions: [definition('weknora_read_document', async () => {
+      calls += 1
+      return { knowledge_id: 'project-document', content: 'must not escape' }
+    })],
+    client: {
+      async getDocument() {
+        metadataReads += 1
+        return { knowledge_base_id: metadataReads === 1 ? PROJECT : OTHER }
+      },
+    },
+    allowedKnowledgeBaseIds: [PROJECT],
+  })
+
+  await assert.rejects(
+    read.execute({ knowledge_id: 'project-document' }, { signal: new AbortController().signal }),
+    /WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED/,
+  )
+  assert.equal(calls, 1)
+  assert.equal(metadataReads, 2)
 })
 
 test('document reads reject missing or empty ids before delegating', async () => {
@@ -268,6 +297,53 @@ test('a missing production key uses the documented fail-closed error', () => {
   )
 })
 
+test('registered WeKnora tools are released in reverse order with the plugin effect', () => {
+  const definitions = [definition('weknora_search', async () => []), definition('weknora_read_document', async () => ({}))]
+  const registered = []
+  const released = []
+  const disposeEffect = registerScopedWeKnoraTools({
+    effect(callback) {
+      return callback()
+    },
+    tools: {
+      register(value) {
+        registered.push(value.name)
+        return () => released.push(value.name)
+      },
+    },
+  }, definitions)
+
+  assert.deepEqual(registered, ['weknora_search', 'weknora_read_document'])
+  disposeEffect()
+  assert.deepEqual(released, ['weknora_read_document', 'weknora_search'])
+  assert.throws(
+    () => registerScopedWeKnoraTools({ tools: {} }, definitions),
+    /tool lifecycle is unavailable/,
+  )
+})
+
+test('a failed second registration releases tools registered by the same effect', () => {
+  const released = []
+  let attempts = 0
+  assert.throws(
+    () => registerScopedWeKnoraTools({
+      effect(callback) {
+        return callback()
+      },
+      tools: {
+        register(value) {
+          attempts += 1
+          if (attempts === 2) throw new Error('duplicate tool')
+          return () => released.push(value.name)
+        },
+      },
+    }, [definition('weknora_search', async () => []), definition('weknora_read_document', async () => ({}))]),
+    /duplicate tool/,
+  )
+  assert.equal(attempts, 2)
+  assert.deepEqual(released, ['weknora_search'])
+})
+
 test('production overlay records project-only scope without embedding runtime credentials', async () => {
   const overlay = JSON.parse(await readFile(
     new URL('../../config/weknora-production-overlay.v1.json', import.meta.url),
@@ -279,6 +355,8 @@ test('production overlay records project-only scope without embedding runtime cr
   assert.deepEqual(overlay.scope_contract.exposed_tools, ['weknora_search', 'weknora_read_document'])
   assert.equal(overlay.scope_contract.list_knowledge_bases, false)
   assert.equal(overlay.scope_contract.document_id_search, 'DENIED')
+  assert.equal(overlay.scope_contract.document_read_scope, 'METADATA_CHECK_BEFORE_AND_AFTER_READ')
+  assert.equal(overlay.scope_contract.tool_lifecycle, 'EFFECT_DISPOSE_TRANSACTIONAL')
   assert.equal(overlay.scope_contract.tenant_wide_document_name_lookup, 'DENIED_BEFORE_NETWORK')
   for (const digest of Object.values(overlay.overlay_files)) assert.match(digest, /^[a-f0-9]{64}$/)
   assert.equal(overlay.release_ready, undefined)

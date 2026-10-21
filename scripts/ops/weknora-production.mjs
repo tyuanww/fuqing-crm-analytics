@@ -9,6 +9,7 @@ import {
   createAllowlistedWeKnoraClient,
   createScopedWeKnoraTools,
   readProductionWeKnoraKey,
+  registerScopedWeKnoraTools,
 } from './weknora-production-scope.mjs'
 
 export const name = 'shinemage-weknora-retrieval'
@@ -47,5 +48,5 @@ export function apply(ctx) {
     allowedKnowledgeBaseIds: PROJECT_KNOWLEDGE_BASE_IDS,
     requiredToolNames: ['weknora_search', 'weknora_read_document'],
   })
-  for (const definition of definitions) ctx.tools.register(definition)
+  return registerScopedWeKnoraTools(ctx, definitions)
 }

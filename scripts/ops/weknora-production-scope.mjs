@@ -39,6 +39,20 @@ function scopeMessage(knowledgeBaseIds) {
   return `${DENIED}: production retrieval is limited to: ${[...knowledgeBaseIds].join(', ')}`
 }
 
+async function assertDocumentInScope({ client, knowledgeId, allowed, signal }) {
+  let document
+  try {
+    document = await client.getDocument(knowledgeId, signal)
+  } catch (error) {
+    if (signal?.aborted) throw error
+    throw new Error(CHECK_FAILED)
+  }
+  if (!allowed.has(document?.knowledge_base_id)) {
+    throw new Error(scopeMessage(allowed))
+  }
+  return document
+}
+
 /**
  * The upstream search tool enriches passage matches with a tenant-wide
  * by-document-name lookup. Production scope cannot express that lookup, so
@@ -135,20 +149,68 @@ export function createScopedWeKnoraTools({
             throw new Error(`${CHECK_FAILED}: document metadata lookup is unavailable`)
           }
 
-          let document
-          try {
-            document = await client.getDocument(knowledgeId, exec?.signal)
-          } catch (error) {
-            if (exec?.signal?.aborted) throw error
-            throw new Error(CHECK_FAILED)
-          }
-          if (!allowed.has(document?.knowledge_base_id)) {
-            throw new Error(scopeMessage(allowed))
-          }
-          return execute(args, exec)
+          await assertDocumentInScope({
+            client,
+            knowledgeId,
+            allowed,
+            signal: exec?.signal,
+          })
+          const result = await execute(args, exec)
+          // Metadata is checked again after the read so a document moved or
+          // rebound during the request cannot return content under the old
+          // scope decision.
+          await assertDocumentInScope({
+            client,
+            knowledgeId,
+            allowed,
+            signal: exec?.signal,
+          })
+          return result
         },
       }
     }
     return definition
+  })
+}
+
+export function registerScopedWeKnoraTools(ctx, definitions) {
+  if (
+    ctx === null ||
+    typeof ctx !== 'object' ||
+    typeof ctx.effect !== 'function' ||
+    typeof ctx.tools?.register !== 'function'
+  ) {
+    throw new Error(`${CHECK_FAILED}: tool lifecycle is unavailable`)
+  }
+  return ctx.effect(() => {
+    const disposers = []
+    const release = () => {
+      let cleanupError
+      for (const dispose of disposers.reverse()) {
+        try {
+          dispose()
+        } catch (error) {
+          cleanupError ??= error
+        }
+      }
+      if (cleanupError) throw cleanupError
+    }
+    try {
+      for (const definition of definitions) {
+        disposers.push(ctx.tools.register(definition))
+      }
+    } catch (error) {
+      try {
+        release()
+      } catch (cleanupError) {
+        throw new AggregateError(
+          [error, cleanupError],
+          `${CHECK_FAILED}: tool registration and cleanup failed`,
+          { cause: error },
+        )
+      }
+      throw error
+    }
+    return release
   })
 }

@@ -1,7 +1,7 @@
 {
   "schema_version": "shinemage-weknora-production-overlay/v1",
-  "observed_at": "2026-10-20T21:09:39Z",
-  "scope": "owner-operated-v5-query9-project-scope-no-tenant-wide-name-lookup",
+  "observed_at": "2026-10-20T23:55:37Z",
+  "scope": "owner-operated-v5-query11-weknora-postread-scope-guard",
   "base_input_manifest": {
     "path": "/srv/shinemage/dsh/current/inputs/page/brand-weknora/input-manifest.json",
     "sha256": "e552acd8b0d8dfb8b0a41f19d90dae3f89dcae60e6870e54b26462ebce3a8905",
@@ -11,8 +11,8 @@
     "brand-globals.mjs": "f2e7db5ce4618f9054400ed5ba62c3da14df8ffdfafd727e9a6f24297987453d",
     "package-origin.json": "19c2647bf2d8d8864dc66f65febf9808eb8c0748eac2b6103c954cc29099c925",
     "preset.patch.json": "428c777581d74fd63ed79861bb6c915431c741e927359886ba15e48b5280f9f5",
-    "weknora-production-scope.mjs": "94ee280908884918ac3c43d5be9fd71c1d2a0c1cfe0fb13eff2010b2998ee33c",
-    "weknora.mjs": "3cee71585582befe222de54a9063a37d0dacbf7ed1ec31eaee88922a84bf2a53"
+    "weknora-production-scope.mjs": "e060ecd508ceaafb04dcd809078802e52ed2d0add297507013f11feb30e6d663",
+    "weknora.mjs": "fc9284155508e9f10e16b64ad9d15c2bf9de7f341985ab8a0c8c25eedc3b4ee8"
   },
   "secret_exclusions": {
     "retrieve.key": "Root-only runtime credential; never copied to Git or included in a digest manifest."
@@ -25,9 +25,11 @@
     ],
     "list_knowledge_bases": false,
     "document_id_search": "DENIED",
+    "argument_keys": "ALLOWLIST",
     "tenant_wide_document_name_lookup": "DENIED_BEFORE_NETWORK",
     "search_scope": "PROJECT_KNOWLEDGE_BASE_ALLOWLIST",
-    "document_read_scope": "METADATA_CHECK_BEFORE_READ"
+    "document_read_scope": "METADATA_CHECK_BEFORE_AND_AFTER_READ",
+    "tool_lifecycle": "EFFECT_DISPOSE_TRANSACTIONAL"
   },
   "limitations": [
     "This is an owner-operated side-load overlay, not a formal signed release.",
