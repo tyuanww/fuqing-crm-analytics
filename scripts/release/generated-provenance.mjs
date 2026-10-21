@@ -35,9 +35,12 @@ function selected(path, include, exclude) {
 /**
  * Hash a filesystem tree using only canonical relative paths and bytes.
  * mtimes, uid/gid and archive metadata are deliberately excluded.
+ * Generated runtime files may opt into a canonical 0644 mode because packers
+ * normalize permissions independently of the source checkout's umask.
  */
 export async function canonicalTreeDigest(root, { include = [], exclude = [], allowSymlinks = false,
   excludeBasenames = [], excludeEntry = null, normalizeSymlinkTargets = false,
+  normalizeFileModes = false,
   maxEntries = MAX_ENTRIES, maxBytes = MAX_BYTES } = {}) {
   const physicalRoot = await realpath(resolve(root));
   const includePatterns = normalizePatterns(include);
@@ -66,7 +69,13 @@ export async function canonicalTreeDigest(root, { include = [], exclude = [], al
         const content = await readFile(path);
         bytes += content.length;
         assert.ok(bytes <= maxBytes, 'TREE_DIGEST_BYTES_LIMIT');
-        records.push({ path: rel, type: 'file', mode: info.mode & 0o777, bytes: content.length, sha256: digest(content) });
+        records.push({
+          path: rel,
+          type: 'file',
+          mode: normalizeFileModes ? 0o644 : info.mode & 0o777,
+          bytes: content.length,
+          sha256: digest(content),
+        });
       } else {
         throw new Error(`TREE_DIGEST_SPECIAL_FILE ${rel}`);
       }
@@ -124,7 +133,7 @@ export async function writeBuildProvenance({ root, outputPath = join(root, '.bui
     allowSymlinks: false,
   });
   const generatedTree = await canonicalTreeDigest(pluginRoot, {
-    include: generatedPaths(manifest.files), allowSymlinks: false,
+    include: generatedPaths(manifest.files), allowSymlinks: false, normalizeFileModes: true,
   });
   const pnpm = (await execFile('pnpm', ['--version'], { cwd: pluginRoot, encoding: 'utf8', timeout: 15000 })).stdout.trim();
   const clean = process.env.SHINEMAGE_CLEAN_BUILDER === '1';

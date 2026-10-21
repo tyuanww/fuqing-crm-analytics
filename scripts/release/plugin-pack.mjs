@@ -238,6 +238,7 @@ async function currentBuildBytes(pluginRoot, inspected) {
   const generatedTree = await canonicalTreeDigest(pluginRoot, {
     include: generatedPaths(inspected.declaredFiles),
     allowSymlinks: false,
+    normalizeFileModes: true,
   });
   return { sourceTree, generatedTree };
 }
@@ -355,7 +356,11 @@ export async function readPluginPack({ manifestPath, expectedSha256, expectedSdk
     verifyEntrypoints(manifest, entries);
     assertClean(await scanTree(packageRoot, { maxBytes: MAX_PACK_BYTES, allowSyntheticFixtures: false }));
     if (provenance?.status === 'PASS') {
-      const generatedTree = await canonicalTreeDigest(packageRoot, { include: generatedPaths(declared), allowSymlinks: false });
+      const generatedTree = await canonicalTreeDigest(packageRoot, {
+        include: generatedPaths(declared),
+        allowSymlinks: false,
+        normalizeFileModes: true,
+      });
       assert.equal(generatedTree.sha256, provenance.generated_tree.sha256, 'PLUGIN_PACK_GENERATED_TREE_MISMATCH');
       assert.equal(generatedTree.entries, provenance.generated_tree.entries, 'PLUGIN_PACK_GENERATED_TREE_ENTRIES');
       assert.equal(generatedTree.bytes, provenance.generated_tree.bytes, 'PLUGIN_PACK_GENERATED_TREE_BYTES');
