@@ -26,10 +26,25 @@ function query(root, selector) {
   }
 }
 
+function unavailable(node) {
+  if (!node) return true;
+  if (node.isConnected === false || node.disabled === true || node.hidden === true) return true;
+  if (node.getAttribute?.('aria-disabled') === 'true') return true;
+  try {
+    const rects = node.getClientRects?.();
+    return Boolean(rects && typeof rects.length === 'number' && rects.length === 0);
+  } catch {
+    return true;
+  }
+}
+
 function click(node) {
-  if (!node) return false;
+  if (unavailable(node)) return false;
+  const expanded = node.getAttribute?.('aria-expanded') ?? null;
   try {
     node.click();
+    const next = node.getAttribute?.('aria-expanded') ?? null;
+    if (expanded === 'false' && next === 'false') return false;
     return true;
   } catch {
     return false;
@@ -49,8 +64,8 @@ export function openNativeAccountSettings(root = globalThis.document) {
   return Object.freeze({
     ok: false,
     action: null,
-    code: account ? 'NATIVE_ACCOUNT_CLICK_FAILED' : 'NATIVE_ACCOUNT_SETTINGS_NOT_FOUND',
-    message: account
+    code: account || settings ? 'NATIVE_ACCOUNT_CLICK_FAILED' : 'NATIVE_ACCOUNT_SETTINGS_NOT_FOUND',
+    message: account || settings
       ? 'DSH 原生账号与设置入口未能打开，请重试或检查宿主版本。'
       : '未找到 DSH 原生账号或设置入口，请检查当前 rc1 profile。',
   });

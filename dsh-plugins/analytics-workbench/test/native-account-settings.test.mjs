@@ -6,10 +6,11 @@ import {
   openNativeAccountSettings,
 } from '../src/client/native-account-settings.mjs';
 
-function button({ click = () => {}, label = '' } = {}) {
+function button({ click = () => {}, label = '', attributes = {} } = {}) {
+  const values = { 'aria-label': label, ...attributes };
   return {
     clicks: 0,
-    getAttribute(name) { return name === 'aria-label' ? label : null; },
+    getAttribute(name) { return values[name] ?? null; },
     click() { this.clicks += 1; click(); },
   };
 }
@@ -52,6 +53,24 @@ test('a failed account gesture can still reach official Settings', () => {
   assert.equal(settings.clicks, 1);
 });
 
+test('a disabled account control falls back instead of reporting success', () => {
+  const account = button({ attributes: { 'aria-disabled': 'true' } });
+  const settings = button();
+  assert.deepEqual(openNativeAccountSettings(root({ account, settings })),
+    { ok: true, action: 'settings', fellBack: true });
+  assert.equal(account.clicks, 0);
+  assert.equal(settings.clicks, 1);
+});
+
+test('a collapsed native control that stays closed is observable and falls back', () => {
+  const account = button({ attributes: { 'aria-expanded': 'false' } });
+  const settings = button();
+  assert.deepEqual(openNativeAccountSettings(root({ account, settings })),
+    { ok: true, action: 'settings', fellBack: true });
+  assert.equal(account.clicks, 1);
+  assert.equal(settings.clicks, 1);
+});
+
 test('missing native controls return an observable failure instead of pretending success', () => {
   assert.deepEqual(openNativeAccountSettings(root()), {
     ok: false,
@@ -68,4 +87,15 @@ test('both native gestures failing return an explicit click failure', () => {
   assert.equal(result.ok, false);
   assert.equal(result.code, 'NATIVE_ACCOUNT_CLICK_FAILED');
   assert.match(result.message, /未能打开/);
+});
+
+test('a Settings control that remains closed is reported as a click failure', () => {
+  const settings = button({ attributes: { 'aria-expanded': 'false' } });
+  assert.deepEqual(openNativeAccountSettings(root({ settings })), {
+    ok: false,
+    action: null,
+    code: 'NATIVE_ACCOUNT_CLICK_FAILED',
+    message: 'DSH 原生账号与设置入口未能打开，请重试或检查宿主版本。',
+  });
+  assert.equal(settings.clicks, 1);
 });
