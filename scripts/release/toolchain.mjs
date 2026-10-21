@@ -13,6 +13,13 @@ const TRUSTED_RC1_LANE = Object.freeze({
   upstream_pnpm: '11.28.5',
   plugin_pnpm: '11.28.2',
   sdk: '0.2.1-rc.1',
+  cordis: '4.0.5',
+  node: 'v24.19.0',
+  typescript: '6.0.3',
+  esbuild: '0.25.12',
+  react: '18.3.1',
+  react_types: '18.3.31',
+  node_types: '22.20.1',
 });
 assert.ok(configuredToolchainPath || existsSync(defaultToolchainPath), 'TOOLCHAIN_SOURCE_REQUIRED');
 const toolchain = JSON.parse(readFileSync(configuredToolchainPath ?? defaultToolchainPath, 'utf8'));
@@ -39,6 +46,12 @@ const effectiveToolchain = lane ? {
   upstream_pnpm: lane.upstream_pnpm,
   pnpm: lane.plugin_pnpm,
   sdk_version: lane.sdk,
+  cordis: lane.cordis,
+  typescript: lane.typescript,
+  esbuild: lane.esbuild,
+  react: lane.react,
+  react_types: lane.react_types,
+  node_types: lane.node_types,
 } : toolchain;
 
 const managers = managerVersions(effectiveToolchain);

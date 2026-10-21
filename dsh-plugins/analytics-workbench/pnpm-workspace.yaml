@@ -1,0 +1,5 @@
+packages:
+  - ../board-components
+  - ../plugin-kit
+
+linkWorkspacePackages: true

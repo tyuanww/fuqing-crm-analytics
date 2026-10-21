@@ -129,6 +129,10 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
   let state = emptyState(viewportWidth, bound);
   const importer = bound.documents ? createHtmlImporter({ documents: bound.documents }) : null;
   let openEpoch = 0;
+  const beginNavigation = (kind = 'navigation') => {
+    const epoch = ++openEpoch;
+    return Object.freeze({ epoch, kind });
+  };
 
   const emit = patch => {
     if (lifetime.signal.aborted) return;
@@ -229,16 +233,18 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
     return receipt;
   }
 
-  async function perform(work) {
+  async function perform(work, isCurrent = () => true) {
     if (state.busy || lifetime.signal.aborted) return;
     emit({ busy: true, message: '' });
     try { return await work(); }
     catch (error) {
-      emit({
-        message: error instanceof Error ? error.message : '操作失败，当前内容不变',
-        liveStatus: error instanceof Error ? error.message : '操作失败',
-        hostError: error?.code === 'FORBIDDEN' || error?.code === 'UNAUTHORIZED' ? '权限或会话错误，请回到原生对话重试' : state.hostError,
-      });
+      if (isCurrent()) {
+        emit({
+          message: error instanceof Error ? error.message : '操作失败，当前内容不变',
+          liveStatus: error instanceof Error ? error.message : '操作失败',
+          hostError: error?.code === 'FORBIDDEN' || error?.code === 'UNAUTHORIZED' ? '权限或会话错误，请回到原生对话重试' : state.hostError,
+        });
+      }
     }
     finally { emit({ busy: false }); }
   }
@@ -283,6 +289,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
   return {
     subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); },
     getSnapshot: snapshot,
+    beginNavigation,
     selectCockpitAsset(id) { emit({ cockpitSelectionId: id }); },
     hasUnsavedChanges,
     hasActiveEditContext,
@@ -414,13 +421,14 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
     },
     async openPage(pageId) {
       if (state.busy || hasUnsavedChanges()) { emit({ message: '请先保存或放弃当前修改' }); return false; }
-      const epoch = ++openEpoch;
+      const ticket = beginNavigation('page');
       return perform(async () => {
         if (isLive(bound) && bound.documents?.pullPage) {
           const got = await bound.documents.pullPage(pageId);
+          if (ticket.epoch !== openEpoch) return false;
           if (!got.ok) throw new Error('页面不存在、不可用或无权限');
         }
-        if (epoch !== openEpoch) return false;
+        if (ticket.epoch !== openEpoch) return false;
         const page = bound.assets.get(pageId);
         if (!page?.package) throw new Error('页面不存在或无权限');
         emit({ view: 'workspace', current: clone(page), mode: 'browse', selection: null, overlay: null,
@@ -428,7 +436,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
           presentation_overlay: { ...(page.presentation_overlays ?? {}) },
           previewAlive: true, liveStatus: `已打开 ${page.title}` });
         return true;
-      });
+      }, () => ticket.epoch === openEpoch);
     },
     async previewImport(input) {
       return perform(async () => {
@@ -523,27 +531,31 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
       if (!state.busy && !state.confirmationUncertain) emit({ textDraft: null, textDrafts: {}, textDraftNodes: {}, draftReset: (state.draftReset ?? 0) + 1 });
     },
     async loadHistory() {
+      const epoch = openEpoch;
       await perform(async () => {
         if (!state.current) return;
         const got = bound.documents?.pullHistory ? await bound.documents.pullHistory(state.current.page_id)
           : { ok: true, items: state.current.history };
+        if (epoch !== openEpoch) return;
         if (!got.ok) throw new Error('版本历史读取失败');
         emit({ historyItems: got.items, contextPanel: 'history' });
-      });
+      }, () => epoch === openEpoch);
     },
     async previewRollback(version) {
+      const epoch = openEpoch;
       await perform(async () => {
         assertEditable();
         if (hasUnsavedChanges()) throw new Error('请先处理当前修改');
         if (!bound.documents?.rollbackPreview) throw new Error('版本回退尚未连接');
         const got = await bound.documents.rollbackPreview({ page_id: state.current.page_id,
           base_version: state.current.version, to_version: version });
+        if (epoch !== openEpoch) return;
         if (!got.ok || !got.body?.snapshot?.spec?.package) throw new Error('无法取得回退预览');
         emit({ preview: { preview_id: got.body.preview_id, operation: 'ROLLBACK', status: 'PENDING',
           snapshot: got.body.snapshot.spec.package, base_package: state.current.package },
           lastIdempotencyKey: bound.nextId('rollback'), contextPanel: null, selection: null,
           liveStatus: `回退到 v${version} 的预览，确认后保存为新版本` });
-      });
+      }, () => epoch === openEpoch);
     },
     requestLeave(intent) {
       if (!hasUnsavedChanges()) {

@@ -122,21 +122,11 @@ FQ_B0_PYTHON=/Users/hutou/homebrew/opt/python@3.14/bin/python3.14 node dsh-plugi
 
 本地证据：`.context/checks/ai-cockpit-goal/component-library-pipeline.log` 为早期组件阶段记录。保留 Python 20 条警告及退出时 SQLite 未关闭连接警告、React `act`/旧 props 警告；不声称零警告，不以这次结果关闭真实模型、浏览器或完整产品验收。A2 新的完整宿主证据与范围见下节；当前构建结果以 TODOS 最新条目为准。
 
-### 原生画布／对话组合（A2，仍待完整验收）
+### 主面板形态（rc1）
 
-`cockpit-composition.mjs/tsx` 使用官方 `shell.overlay` 放置画布；原生 `main/conversation` 继续拥有唯一会话、消息和 composer，原生 rightbar 检查器保留。集中适配只识别钉住壳的 `main → main.conversation` 两层 `display:contents` 插槽包装，给原生根设置本插件拥有的属性/CSS 变量，不克隆、搬移或重建聊天。结构不符明确提示独立驾驶舱备选，不强行覆盖未知壳。
+生产入口只有原生侧栏中的 `main:cockpit` 全屏驾驶舱。驾驶舱使用 `LibraryCockpitPanel`，返回对话通过统一 leave transaction 切回原生面板；DSH 仍独占会话、消息、Composer、模型选择和停止按钮。未挂载的 `shell.overlay` split composition、宽度拖拽和 DOM lease 已删除，不再把测试中的休眠路径写成产品能力。
 
-中心区至少 968px 时并排（画布最小 560px、对话最小 400px、分隔条 8px）；窄区切换画布／对话，不改变保存布局。对话可折叠和连续调宽，键盘方向键 16px、Shift 64px、Home/End 到边界。关闭/卸载恢复原生属性并清理监听。底栏入口实测保持原输入 DOM；侧栏 main 入口经原生导航重挂载聊天，实测草稿保留，不能称两入口都保持 DOM 身份。
-
-完整 DSH + 正式插件 + 独立合成 HTTP/SQLite 已实测：无模型凭据读取已保存板、并排、键盘与鼠标连续调宽、Esc恢复、折叠不丢草稿、390px双视图、原生文件rightbar三栏共存及全屏/关闭恢复。证据见TODOS A2与 `.context/checks/ai-cockpit-goal/a2-pointer-rightbar-browser.md`。这是预置合成会话/看板，不是AI生成验收。早期插拔残留已归因测试辅助模块的包归属；隔离其包边界后，禁用/官方移除恢复DSH壳、装回可重开同一v1，12项针对性回归通过。运行中模型会话、触控与最终Figma视觉仍未通过。
-
-显式验证入口（不写 dsh-dev current、不用 --fresh、不使用现有模型配置）：
-
-```bash
-FQ_B0_PYTHON=/Users/hutou/homebrew/opt/python@3.14/bin/python3.14 node dsh-plugins/analytics-workbench/test/native-composition-browser-probe.mjs
-```
-
-Node 24；默认只申请空闲 4328，不复用 4327。输出不带凭据的本机bootstrap入口。`restart`只重启本次DSH；`plugin-on`/`plugin-off`切换该隔离profile的配置，off是禁用，不删除依赖；实际官方remove的验证单独记账。空行回收本次DSH/HTTP并留下诊断目录，不是UAT入口。测试专用诊断与固定合成历史seed路由由额外patch挂载、经过原生认证；seed仅POST、固定会话及临时工作区，并等待原生持久化确认，产品包不加载它。`test/helpers/package.json` 必须保留独立name且不声明dsh.client：DSH按最近命名包识别file模块，缺此边界会让host-only测试模块意外重新登记业务客户端。
+驾驶舱自有内容通过集中 light/dark token 覆盖 surface、hover、active、focus、disabled、error 和 notice 状态。`sm-library-workspace` 和 visual editor 不覆盖宿主 body、侧栏、Composer 或停止按钮，也不声明第二套会话。
 
 ### 服务端保存接缝（C2/C3 已接前端，原生浏览器待验）
 
@@ -224,14 +214,14 @@ FQ_B0_PYTHON=/Users/hutou/homebrew/opt/python@3.14/bin/python3.14 node dsh-plugi
 
 构建不再将 `COMPETITION_HTTP_BASE/TOKEN` 编译进公共 JS。带合成哨兵配置的真实构建及 JS/SourceMap 检查通过。旧 C0 overlay 仍有显式直连配置接缝，认证迁移/部署兼容待核验；不要恢复内联 token，也不要声称旧 HTTP 资产流程已由新看板集成覆盖。
 
-### 侧栏登录与比赛看板入口
+### 侧栏账号与设置入口
 
-侧栏底 `sidebar.footer.action` 现为登录（id=`shine-mage.account.login`）与主题（id=`shine-mage.account.theme`）。比赛看板在登录菜单里用锚点打开 `https://board.tyuan.chat/`。不再占用第二个 footer 按钮。
+侧栏底 `sidebar.footer.action` 只保留一个「账号与设置」入口（id=`shine-mage.account.login`）。插件不再注册主题按钮或账户 overlay，也不读取、写入或展示 `localStorage` 身份。
 
-- 未登录显示「未登录」。登录菜单可填显示名称，写入 `localStorage` 后页脚显示名字；来源为 feishu 时副标题为「飞书」。这不是飞书 OAuth。同页刷新靠 `shine-account-change`。
-- 收起侧栏后登录只留 icon，主题钮叠在 rail。选择器是 `[class*="footerActions"]:has(.sm-login[data-wide="0"])`，不用 `collapsed` 子串。
-- 比赛看板用 `target="_blank"` + `rel="noopener noreferrer"`，不用 `window.open`。`test/plugin-ui-lifecycle.test.mjs` 覆盖菜单链接；调用 `window.open` 会失败。
-- 看板仍是独立应用、独立进程与独立登录：DSH 不内嵌、不代理。菜单地址是 `https://board.tyuan.chat/`。`start-stack` 的本地前端仍听 `FQ_FRONTEND_PORT`（默认 15173）。裸 `npm run dev` 仍可能听 5173。
+- 点击入口优先打开 DSH 原生账号菜单；账户入口不可用或点击失败时，只回退一次到原生 Settings。
+- 两种原生动作都不可用时，按钮进入可观察的错误状态并记录明确错误码；不会静默假装登录、打开本地伪账户或修改宿主主题。
+- 登录、身份、主题和设置均由 DSH rc1 原生壳拥有。兼容适配层只转发用户手势，相关选择器限制在 `src/client/native-account-settings.mjs`。
+- 独立比赛看板仍是独立应用、进程和登录域，DSH 不内嵌或代理；它不再从该原生账号入口打开。
 
 ## v0.8 实际能力与边界（历史基线）
 

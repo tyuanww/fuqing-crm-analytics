@@ -286,7 +286,7 @@ test('real kit tarball contains only declared source/locks and exposes its publi
           : name === 'analytics-workbench' ? ['test/built.test.mjs', 'test/native-board-auth.test.mjs', 'test/lane-g-delivery.test.mjs',
             'test/native-slot-ownership.test.mjs', 'test/native-fixture-client-boundary.test.mjs',
             'test/first-purchase-query-model.test.mjs',
-            'src/client/leave/host-leave-adapter.test.mjs', 'src/client/cockpit-composition.test.mjs']
+            'src/client/leave/host-leave-adapter.test.mjs']
           : ['crm-knowledge', 'knowledge'].includes(name) ? ['test/package.test.mjs']
           : (await readdir(join(plugin, 'src'))).filter(file => file.endsWith('.test.mjs')).map(file => `src/${file}`);
         await exec(process.execPath, ['--test', ...tests.map(file => join(plugin, file))], { cwd: plugin, env: buildEnv, timeout: 60000, maxBuffer: 2 * 1024 * 1024 });

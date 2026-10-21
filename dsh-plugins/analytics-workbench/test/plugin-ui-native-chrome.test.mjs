@@ -35,7 +35,7 @@ test('plugin registers additive business keys and does not occupy native tool na
   assert.doesNotMatch(indexSource, /key: 'bash'/);
   assert.doesNotMatch(indexSource, /key: 'skill'/);
   assert.match(indexSource, /id: 'shine-mage.account.login'/);
-  assert.match(indexSource, /id: 'shine-mage.account.theme'/);
+  assert.doesNotMatch(indexSource, /id: 'shine-mage.account.theme'|id: 'shine-mage.account.menu'/);
   assert.match(indexSource, /name: 'sidebar.footer.action'/);
   assert.match(indexSource, /name: 'shell.overlay'/);
   assert.match(indexSource, /id: 'shine-mage.analytics-b0.generate-cockpit'/);
@@ -48,27 +48,23 @@ test('plugin registers additive business keys and does not occupy native tool na
   assert.doesNotMatch(indexSource, /name: 'conversation'(?![\w.])/);
 });
 
-test('account chrome frosts the sidebar against a tinted frame and paints chat white', () => {
-  assert.match(chromeSource, /:has\(> \[class\*="sidebarCol"\]\) \{/);
-  assert.match(chromeSource, /background: #DCDCE1;/);
-  assert.match(chromeSource, /rgba\(255, 255, 255, 0\.28\)/);
-  assert.match(chromeSource, /backdrop-filter: blur\(40px\) saturate\(1\.15\)/);
-  assert.match(chromeSource, /\[class\*="centerCol"\] \{/);
-  assert.match(chromeSource, /--dsw-alias-bg-base: #fff;/);
-  assert.match(chromeSource, /rgba\(255, 255, 255, 0\.10\)/);
-  assert.doesNotMatch(chromeSource, /#e8dff4|#EFEAF6|#cbb8e4|#805D9D/);
-  assert.doesNotMatch(chromeSource, /\[class\*="frame"\]/);
-  assert.doesNotMatch(chromeSource, /isolation: isolate/);
-  assert.doesNotMatch(chromeSource, /\[class\*="sidebarCol"\]::before/);
-  assert.match(chromeSource, /停止生成/);
-  assert.match(chromeSource, /Stop generating/);
-  assert.match(chromeSource, /requestAnimationFrame/);
-  assert.match(chromeSource, /\[class\*="footerActions"\]:has\(\.sm-login\[data-wide="0"\]\)/);
-  assert.doesNotMatch(chromeSource, /\[class\*="collapsed"\] \[class\*="footerActions"\]/);
+test('account bridge owns only its local control and never paints native chrome or composer', () => {
+  assert.match(chromeSource, /export const accountCss/);
+  assert.match(chromeSource, /\.sm-login:hover:not\(:disabled\)/);
+  assert.match(chromeSource, /\.sm-login:active:not\(:disabled\)/);
+  assert.match(chromeSource, /\.sm-login:focus-visible/);
+  assert.match(chromeSource, /\.sm-login:disabled/);
+  assert.match(chromeSource, /\.sm-login\[data-state="error"\]/);
   assert.match(chromeSource, /\.sm-login\[data-wide="0"\] \.sm-login-text \{ display:none; \}/);
-  assert.match(chromeSource, /writeAccountIdentity/);
-  assert.match(chromeSource, /Canvas 86%/);
-  assert.match(chromeSource, /未登录/);
+  assert.match(chromeSource, /data-native-account-bridge="rc1"/);
+  assert.match(chromeSource, /openNativeAccountSettings/);
+  assert.match(chromeSource, /账号与设置/);
+  assert.doesNotMatch(chromeSource, /export function ThemeFooter|export function AccountMenu/);
+  assert.doesNotMatch(chromeSource, /html,\s*body|body\[data-ds-dark-theme\]/);
+  assert.doesNotMatch(chromeSource, /centerCol|sidebarCol|footerActions|composer-seat|conversation-scroll/);
+  assert.doesNotMatch(chromeSource, /停止生成|停止对话|Stop generating|Stop conversation|发送消息|Send message/);
+  assert.doesNotMatch(chromeSource, /!important|#DCDCE1|#120D1D|#2C2C2E/);
+  assert.doesNotMatch(chromeSource, /localStorage|writeAccountIdentity|readAccountIdentity|未登录|登录<\/button>/);
   assert.doesNotMatch(css, /composerHero/);
   assert.doesNotMatch(css, /heroWorkspaceRow/);
 });

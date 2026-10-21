@@ -25,7 +25,7 @@ import {
 } from '../model.mjs';
 import { css, markCss, returnDockCss } from './styles.ts';
 import { trapDialogTab } from './focus.ts';
-import { B0_PRIMARY_SESSION_ID, QUERY_SESSION_IDS, bindInitialSession, mainViewSessionId, resolvePageGenerateSession, retainMainView } from '../initial-session.mjs';
+import { B0_PRIMARY_SESSION_ID, QUERY_SESSION_IDS, bindInitialSession, explicitSessionIds, mainViewSessionId, resolvePageGenerateSession, retainMainView } from '../initial-session.mjs';
 import { QUERY_TOOL_NAME } from '../query-model.mjs';
 import { FIRST_PURCHASE_TOOL_NAME } from '../first-purchase-query-model.mjs';
 import { QueryToolCard } from './query-card.tsx';
@@ -64,7 +64,7 @@ import { createCockpitFileClient } from './cockpit-file-client.mjs';
 import { pageDocumentsHttpOptions } from './free-html-library/page-http.mjs';
 import { callBoardConnection } from '../board-spec/connection-call.mjs';
 import { boardPackEnabled, queryPackEnabled } from '../feature-pack-gate.mjs';
-import { AccountMenu, LoginFooter, ThemeFooter, createAccountStore } from './account-chrome.tsx';
+import { LoginFooter } from './account-chrome.tsx';
 
 function initialState() {
   try {
@@ -467,11 +467,17 @@ export const inject = ['slots', 'sessions', 'theme', 'layout', 'remote', 'remote
 
 export function apply(ctx: Context): void {
   applyFirstPurchaseCommandFeedback(ctx);
+  const processEnvironment = (globalThis as unknown as {
+    process?: { env?: Record<string, string | undefined> };
+  }).process?.env;
+  const initialSessionIds = explicitSessionIds(
+    processEnvironment,
+    globalThis as unknown as { __SHINE_B0_SESSION_IDS__?: string | readonly string[] },
+  );
   ctx.effect(() => bindInitialSession(ctx.sessions, () => {
     console.warn('analytics-b0: the configured primary session could not be selected; no fallback attempted');
-  }), 'analytics-b0: select exact Host-listed primary once');
+  }, { sessionIds: initialSessionIds }), 'analytics-b0: opt-in exact Host-listed session once');
   const chromeStore = createWorkbenchStore();
-  const accountStore = createAccountStore();
   const boardLive = createWorkbenchStore(DEMO_BOARD).create();
   const connection = ctx.get?.('connection') as ConnectionHandle | undefined;
   let leaveAdapter: HostLeaveAdapter | undefined;
@@ -635,7 +641,10 @@ export function apply(ctx: Context): void {
   const leaveCoordinator = library ? createLeaveCoordinator({
     snapshot: () => ({ ...library.getSnapshot(), htmlUnsaved: Boolean(pageStore?.hasUnsavedChanges() || fileClient.hasUnsavedChanges() || aiClient.hasUnsavedChanges() || artifactClients.hasUnsavedChanges()),
       confirmationUncertain: library.getSnapshot().confirmationUncertain || Boolean(pageStore?.getSnapshot().confirmationUncertain) || fileClient.getSnapshot().confirmationUncertain || aiClient.getSnapshot().confirmationUncertain || artifactClients.hasUnsavedChanges() }),
-    beginEpoch: kind => library.beginNavigation(kind),
+    beginEpoch: kind => {
+      pageStore?.beginNavigation(kind);
+      return library.beginNavigation(kind);
+    },
     save: async () => {
       if (!(await artifactClients.persistForLeave()).ok) return { ok: false };
       if (aiClient.hasUnsavedChanges()) { const result = await aiClient.persistForLeave(); if (!result.ok) return result; }
@@ -831,31 +840,8 @@ export function apply(ctx: Context): void {
     inject: () => ({ coordinator: leaveCoordinator, library, pageStore }),
   }, LeavePromptOverlay));
   ctx.slots.inject('sidebar.footer.action', () => ctx.slots.register({
-    name: 'sidebar.footer.action', id: 'shine-mage.account.login', order: 10, store: accountStore,
+    name: 'sidebar.footer.action', id: 'shine-mage.account.login', order: 10,
   }, LoginFooter));
-  const themeChrome = () => ({
-    setTheme: (id: string) => { try { ctx.theme.setTheme(id); } catch { /* host without theme writes */ } },
-    themeSource: {
-      subscribe: (listener: () => void) => {
-        try {
-          const dispose = ctx.on('theme/change', listener);
-          return () => { dispose(); };
-        } catch { return () => {}; }
-      },
-      getSnapshot: () => {
-        try { return ctx.theme.getTheme().preference; }
-        catch { return 'system'; }
-      },
-    },
-  });
-  ctx.slots.inject('sidebar.footer.action', () => ctx.slots.register({
-    name: 'sidebar.footer.action', id: 'shine-mage.account.theme', order: 11, store: accountStore,
-    inject: themeChrome,
-  }, ThemeFooter));
-  ctx.slots.inject('shell.overlay', () => ctx.slots.register({
-    name: 'shell.overlay', id: 'shine-mage.account.menu', store: accountStore,
-    inject: themeChrome,
-  }, AccountMenu));
   ctx.slots.inject('shell.overlay', () => ctx.slots.register({
     name: 'shell.overlay', id: 'shine-mage.analytics-b0.overlay', store: chromeStore,
     inject: () => {

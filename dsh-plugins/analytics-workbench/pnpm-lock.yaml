@@ -11,6 +11,21 @@ importers:
       '@deepseek-ai/dsh-tools':
         specifier: 0.1.7-rc.2
         version: 0.1.7-rc.2(ead59e2384682bf741eae1c9eaa56bcd)
+    devDependencies:
+      '@shine-mage/board-components':
+        specifier: 0.1.0
+        version: link:../board-components
+      '@shine-mage/dsh-plugin-kit':
+        specifier: 0.1.0
+        version: link:../plugin-kit
+
+  ../board-components:
+    devDependencies:
+      '@shine-mage/dsh-plugin-kit':
+        specifier: 0.1.0
+        version: link:../plugin-kit
+
+  ../plugin-kit: {}
 
 packages:
 

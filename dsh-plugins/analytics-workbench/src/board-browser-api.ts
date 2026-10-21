@@ -1,6 +1,6 @@
 /** Official authenticated Connection extension, removed with this business plugin. */
 import type { Context } from '@deepseek-ai/cordis';
-import { clientRequestSchema } from '@deepseek-ai/dsh-client-connection';
+import { parseClientRequestEnvelope } from './client-request-envelope.mjs';
 import { handleBoardBrowserCall } from './board-spec/browser-api.mjs';
 import { BOARD_API_ENDPOINT } from './board-spec/connection-call.mjs';
 
@@ -15,9 +15,9 @@ export function apply(ctx: Context): void {
     async fetch(request) {
       let input: unknown;
       try { input = await request.json(); } catch { return new Response('invalid JSON', { status: 400 }); }
-      const parsed = clientRequestSchema.safeParse(input);
-      if (!parsed.success) return new Response('invalid envelope', { status: 400 });
-      const message = parsed.data, body = message.payload as { operation?: unknown; payload?: unknown } | null;
+      const message = parseClientRequestEnvelope(input);
+      if (!message) return new Response('invalid envelope', { status: 400 });
+      const body = message.payload as { operation?: unknown; payload?: unknown } | null;
       const valid = message.method === BOARD_API_ENDPOINT && body !== null && typeof body === 'object'
         && !Array.isArray(body) && typeof body.operation === 'string' && Object.hasOwn(body, 'payload')
         && Object.keys(body).length === 2;

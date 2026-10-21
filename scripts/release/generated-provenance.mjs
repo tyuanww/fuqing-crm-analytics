@@ -121,7 +121,8 @@ export function assertTreeShape(value, code = 'GENERATED_PROVENANCE_TREE_INVALID
 
 /** Write a builder-side receipt after a plugin's clean build has completed. */
 export async function writeBuildProvenance({ root, outputPath = join(root, '.build-provenance.json'),
-  command = 'build.mjs', networkMode = process.env.COREPACK_ENABLE_NETWORK === '0' ? 'offline' : 'online' } = {}) {
+  command = 'build.mjs', networkMode = process.env.COREPACK_ENABLE_NETWORK === '0' ? 'offline' : 'online',
+  toolchain = null, releaseLane = null } = {}) {
   const pluginRoot = resolve(root);
   const sourceSha = (await execFile('git', ['-C', pluginRoot, 'rev-parse', 'HEAD'], { encoding: 'utf8', timeout: 5000 })).stdout.trim();
   assertSourceSha(sourceSha, 'PLUGIN_BUILD_SOURCE_SHA');
@@ -142,6 +143,21 @@ export async function writeBuildProvenance({ root, outputPath = join(root, '.bui
     source: { git_sha: sourceSha, tree_sha256: sourceTree.sha256, entries: sourceTree.entries, bytes: sourceTree.bytes },
     generated_tree: { sha256: generatedTree.sha256, entries: generatedTree.entries, bytes: generatedTree.bytes },
     generated_files: generatedTree.records.filter(record => record.type === 'file'),
+    ...(toolchain ? { toolchain: {
+      sdk_version: toolchain.sdk_version,
+      upstream_sha: toolchain.upstream_sha,
+      upstream_lock_sha256: toolchain.upstream_lock_sha256,
+      node_major: toolchain.node_major,
+      pnpm: toolchain.pnpm,
+      upstream_pnpm: toolchain.upstream_pnpm,
+      cordis: toolchain.cordis,
+      typescript: toolchain.typescript,
+      esbuild: toolchain.esbuild,
+      react: toolchain.react,
+      react_types: toolchain.react_types,
+      node_types: toolchain.node_types,
+      release_lane: releaseLane,
+    } } : {}),
     builder: { status: clean ? 'PASS' : 'NOT_VERIFIED', clean, isolated: clean,
       node: process.version, pnpm, platform: process.platform, arch: process.arch, command, network_mode: networkMode },
   };

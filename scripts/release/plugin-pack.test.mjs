@@ -45,7 +45,7 @@ async function fixture(t, { workspaceLink = null, symlinkOutput = false, lifecyc
 
 test('controlled plugin pack emits an immutable tarball receipt without runtime state', async t => {
   const input = await fixture(t);
-  const manifestPath = join(input.root, 'receipt.json');
+  const manifestPath = join(input.outputDir, 'receipt.json');
   const receipt = await packPlugin({ ...input, manifestPath });
   assert.equal(receipt.schema_version, 'dsh-plugin-pack/v1');
   assert.equal(receipt.dsh_pin, '0.1.7-rc.2');
@@ -120,15 +120,78 @@ test('query.9 history uses an immutable identity snapshot instead of the live qu
   assert.equal(snapshot.build_provenance_sha256, query9.query_artifact.build_provenance_sha256);
 });
 
+test('release lane packs an rc1 artifact from the default rc2 source peer', async t => {
+  const input = await fixture(t);
+  const packed = await packPlugin({
+    ...input,
+    sdkVersion: '0.2.1-rc.1',
+    sourceSdkVersion: '0.1.7-rc.2',
+  });
+  assert.equal(packed.source_dsh_pin, '0.1.7-rc.2');
+  assert.equal(packed.dsh_pin, '0.2.1-rc.1');
+  const manifestPath = join(input.outputDir, 'receipt.json');
+  await writeFile(manifestPath, `${JSON.stringify(packed)}\n`);
+  const verified = await readPluginPack({
+    manifestPath,
+    expectedSha256: hash(await readFile(manifestPath)),
+    expectedSdkVersion: '0.2.1-rc.1',
+  });
+  assert.equal(verified.manifest.peerDependencies['@deepseek-ai/dsh-tools'], '0.2.1-rc.1');
+});
+
+test('release lane refuses a source manifest outside its declared compatibility line', async t => {
+  const input = await fixture(t);
+  await assert.rejects(() => packPlugin({
+    ...input,
+    sdkVersion: '0.2.1-rc.1',
+    sourceSdkVersion: '0.1.7-rc.1',
+  }), /PLUGIN_PACK_SOURCE_DSH_PEER_INVALID/);
+});
+
+test('source compatibility does not invent a peer absent from the package contract', async t => {
+  const input = await fixture(t);
+  const manifestPath = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+  delete manifest.peerDependencies;
+  await writeFile(manifestPath, `${JSON.stringify(manifest)}\n`);
+  await commitFixture(input.root);
+  await assert.rejects(() => packPlugin({
+    ...input,
+    sdkVersion: '0.2.1-rc.1',
+    sourceSdkVersion: '0.1.7-rc.2',
+  }), /PLUGIN_PACK_DSH_PEER_INVALID/);
+});
+
+test('packed host entry rejects an undeclared runtime dependency', async t => {
+  const input = await fixture(t);
+  await writeFile(join(input.plugin, 'lib/index.js'),
+    "import '@deepseek-ai/dsh-client-connection';\nexport const synthetic = true;\n");
+  await commitFixture(input.root);
+  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_UNDECLARED_RUNTIME_IMPORT .*dsh-client-connection/);
+});
+
+test('packed host entry accepts a declared dependency subpath', async t => {
+  const input = await fixture(t);
+  const manifestPath = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+  manifest.peerDependencies['@deepseek-ai/dsh-client-connection'] = '0.1.7-rc.2';
+  await writeFile(manifestPath, `${JSON.stringify(manifest)}\n`);
+  await writeFile(join(input.plugin, 'lib/index.js'),
+    "import '@deepseek-ai/dsh-client-connection/client';\nexport const synthetic = true;\n");
+  await commitFixture(input.root);
+  const receipt = await packPlugin(input);
+  assert.equal(receipt.package_name, manifest.name);
+});
+
 test('configuration bundle packs without a synthetic dsh-tools peer', async t => {
   const input = await fixture(t);
-  const path = join(input.plugin, 'package.json');
-  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  const manifestPath = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
   delete manifest.peerDependencies;
   manifest.files = ['lib/', 'cordis.patch.yml', 'locale/*.json'];
   manifest.exports = { './tool-policy': './lib/index.js', './locale/*.json': './locale/*.json' };
   manifest.shinemage = { bundle_role: 'configuration-bundle' };
-  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await writeFile(manifestPath, `${JSON.stringify(manifest)}\n`);
   await mkdir(join(input.plugin, 'locale'));
   await writeFile(join(input.plugin, 'locale/en.json'), '{"meta":{"title":"Synthetic"}}\n');
   await commitFixture(input.root);
@@ -136,160 +199,108 @@ test('configuration bundle packs without a synthetic dsh-tools peer', async t =>
   assert.equal(receipt.package_name, manifest.name);
   assert.equal(receipt.entries.includes('cordis.patch.yml'), true);
   assert.equal(receipt.entries.includes('locale/en.json'), true);
-  const packed = JSON.parse((await exec('tar', ['-xOf', join(input.outputDir, receipt.tarball.name), 'package/package.json'])).stdout);
+  const packed = JSON.parse((await exec('tar', ['-xOf', join(input.outputDir, receipt.tarball.name),
+    'package/package.json'])).stdout);
   assert.equal(packed.peerDependencies, undefined);
 });
 
-test('configuration bundle rejects a wildcard export target without a wildcard key', async t => {
+test('configuration bundle rejects a tool dependency disguised as a normal dependency', async t => {
   const input = await fixture(t);
-  const path = join(input.plugin, 'package.json');
-  const manifest = JSON.parse(await readFile(path, 'utf8'));
-  delete manifest.peerDependencies;
-  manifest.files = ['lib/', 'cordis.patch.yml'];
-  manifest.exports['./exact'] = './lib/*.js';
-  manifest.shinemage = { bundle_role: 'configuration-bundle' };
-  await writeFile(path, `${JSON.stringify(manifest)}\n`);
-  await commitFixture(input.root);
-  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_PATTERN_INVALID/);
-});
-
-test('configuration bundle rejects a wildcard in an export directory segment', async t => {
-  const input = await fixture(t);
-  const path = join(input.plugin, 'package.json');
-  const manifest = JSON.parse(await readFile(path, 'utf8'));
-  delete manifest.peerDependencies;
-  manifest.exports['./nested'] = './lib/*/index.js';
-  manifest.shinemage = { bundle_role: 'configuration-bundle' };
-  await writeFile(path, `${JSON.stringify(manifest)}\n`);
-  await mkdir(join(input.plugin, 'lib/nested'));
-  await writeFile(join(input.plugin, 'lib/nested/index.js'), 'export const nested = true;\n');
-  await commitFixture(input.root);
-  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_PATTERN_INVALID/);
-});
-
-test('configuration bundle rejects a wildcard export key in a directory segment', async t => {
-  const input = await fixture(t);
-  const path = join(input.plugin, 'package.json');
-  const manifest = JSON.parse(await readFile(path, 'utf8'));
-  delete manifest.peerDependencies;
-  manifest.exports['./nested/*/module'] = './lib/index.js';
-  manifest.shinemage = { bundle_role: 'configuration-bundle' };
-  await writeFile(path, `${JSON.stringify(manifest)}\n`);
-  await commitFixture(input.root);
-  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_PATTERN_INVALID/);
-});
-
-test('configuration bundle rejects a wildcard main entry', async t => {
-  const input = await fixture(t);
-  const path = join(input.plugin, 'package.json');
-  const manifest = JSON.parse(await readFile(path, 'utf8'));
-  delete manifest.peerDependencies;
-  manifest.main = './lib/*.js';
-  manifest.shinemage = { bundle_role: 'configuration-bundle' };
-  await writeFile(path, `${JSON.stringify(manifest)}\n`);
-  await commitFixture(input.root);
-  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_PATTERN_INVALID/);
-});
-
-test('configuration bundle rejects dot-dot in a files wildcard before reading outside a segment', async t => {
-  const input = await fixture(t);
-  const path = join(input.plugin, 'package.json');
-  const manifest = JSON.parse(await readFile(path, 'utf8'));
-  delete manifest.peerDependencies;
-  manifest.files = ['locale/../*.json'];
-  manifest.shinemage = { bundle_role: 'configuration-bundle' };
-  await writeFile(path, `${JSON.stringify(manifest)}\n`);
-  await commitFixture(input.root);
-  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_FILE_PATH_INVALID/);
-});
-
-test('configuration bundle cannot bypass the pinned peer through an ordinary dependency', async t => {
-  const input = await fixture(t);
-  const path = join(input.plugin, 'package.json');
-  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  const manifestPath = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
   delete manifest.peerDependencies;
   manifest.dependencies = { '@deepseek-ai/dsh-tools': '0.1.7-rc.2' };
   manifest.shinemage = { bundle_role: 'configuration-bundle' };
-  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await writeFile(manifestPath, `${JSON.stringify(manifest)}\n`);
   await commitFixture(input.root);
   await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_CONFIGURATION_BUNDLE_TOOL_DEPENDENCY/);
 });
 
-test('configuration bundle cannot import dsh-tools without declaring the pinned peer', async t => {
+test('configuration bundle cannot import dsh-tools or compute a dynamic module load', async t => {
   const input = await fixture(t);
-  const path = join(input.plugin, 'package.json');
-  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  const manifestPath = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
   delete manifest.peerDependencies;
   manifest.shinemage = { bundle_role: 'configuration-bundle' };
-  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await writeFile(manifestPath, `${JSON.stringify(manifest)}\n`);
   await writeFile(join(input.plugin, 'lib/index.js'), "import '@deepseek-ai/dsh-tools';\n");
   await commitFixture(input.root);
   await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_CONFIGURATION_BUNDLE_TOOL_IMPORT/);
+  await writeFile(join(input.plugin, 'lib/index.js'),
+    "const moduleName = '@deepseek-ai/' + 'dsh-tools';\nexport const load = () => import(moduleName);\n");
+  await commitFixture(input.root);
+  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_CONFIGURATION_BUNDLE_DYNAMIC_MODULE_LOAD/);
 });
 
-test('configuration bundle rejects concatenated and computed dynamic module loading', async t => {
-  const input = await fixture(t);
-  const path = join(input.plugin, 'package.json');
-  const manifest = JSON.parse(await readFile(path, 'utf8'));
-  delete manifest.peerDependencies;
-  manifest.shinemage = { bundle_role: 'configuration-bundle' };
-  await writeFile(path, `${JSON.stringify(manifest)}\n`);
-  await writeFile(
-    join(input.plugin, 'lib/index.js'),
-    "const moduleName = '@deepseek-ai/' + 'dsh-tools';\nexport const load = () => import(moduleName);\n",
-  );
-  await commitFixture(input.root);
-  await assert.rejects(
-    () => packPlugin(input),
-    /PLUGIN_PACK_CONFIGURATION_BUNDLE_DYNAMIC_MODULE_LOAD/,
-  );
+test('configuration bundle rejects unsafe wildcard shapes before reading files', async t => {
+  const variants = [
+    {
+      manifest(value) {
+        value.files = ['lib/', 'cordis.patch.yml'];
+        value.exports['./exact'] = './lib/*.js';
+      },
+    },
+    {
+      manifest(value) {
+        value.exports['./nested'] = './lib/*/index.js';
+      },
+    },
+    {
+      manifest(value) {
+        value.exports['./nested/*/module'] = './lib/index.js';
+      },
+    },
+    {
+      manifest(value) {
+        value.main = './lib/*.js';
+      },
+    },
+    {
+      manifest(value) {
+        value.files = ['locale/../*.json'];
+      },
+    },
+  ];
+  for (const variant of variants) {
+    const input = await fixture(t);
+    const manifestPath = join(input.plugin, 'package.json');
+    const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+    delete manifest.peerDependencies;
+    manifest.shinemage = { bundle_role: 'configuration-bundle' };
+    variant.manifest(manifest);
+    await writeFile(manifestPath, `${JSON.stringify(manifest)}\n`);
+    await commitFixture(input.root);
+    await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_(?:PATTERN|FILE_PATH)_INVALID/);
+  }
 });
 
-test('configuration bundle checks comments between module keywords and syntax', async t => {
+test('configuration bundle syntax checks tolerate comments but reject module loading', async t => {
   const input = await fixture(t);
-  const path = join(input.plugin, 'package.json');
-  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  const manifestPath = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
   delete manifest.peerDependencies;
   manifest.shinemage = { bundle_role: 'configuration-bundle' };
-  await writeFile(path, `${JSON.stringify(manifest)}\n`);
-  await writeFile(
-    join(input.plugin, 'lib/index.js'),
-    "import /* pinned module */ '@deepseek-ai/dsh-tools';\nexport const load = name => import /* computed */ (name);\n",
-  );
+  await writeFile(manifestPath, `${JSON.stringify(manifest)}\n`);
+  await writeFile(join(input.plugin, 'lib/index.js'),
+    "import /* pinned module */ '@deepseek-ai/dsh-tools';\nexport const load = name => import /* computed */ (name);\n");
   await commitFixture(input.root);
-  await assert.rejects(
-    () => packPlugin(input),
-    /PLUGIN_PACK_CONFIGURATION_BUNDLE_TOOL_IMPORT/,
-  );
-  await writeFile(join(input.plugin, 'lib/index.js'), "export const load = name => require /* computed */ (name);\n");
+  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_CONFIGURATION_BUNDLE_TOOL_IMPORT/);
+  await writeFile(join(input.plugin, 'lib/index.js'),
+    "export const load = name => require /* computed */ (name);\n");
   await commitFixture(input.root);
-  await assert.rejects(
-    () => packPlugin(input),
-    /PLUGIN_PACK_CONFIGURATION_BUNDLE_DYNAMIC_MODULE_LOAD/,
-  );
+  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_CONFIGURATION_BUNDLE_DYNAMIC_MODULE_LOAD/);
 });
 
 test('overlapping files wildcards produce one archive entry per file', async t => {
   const input = await fixture(t);
-  const path = join(input.plugin, 'package.json');
-  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  const manifestPath = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
   manifest.files = ['lib/', 'cordis.patch.yml', 'lib/*.js', 'lib/index*'];
-  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await writeFile(manifestPath, `${JSON.stringify(manifest)}\n`);
   await commitFixture(input.root);
   const receipt = await packPlugin(input);
-
   assert.equal(receipt.entries.filter(entry => entry === 'lib/index.js').length, 1);
   assert.equal(new Set(receipt.entries).size, receipt.entries.length);
-});
-
-test('tool plugin still requires its exact dsh-tools peer', async t => {
-  const input = await fixture(t);
-  const path = join(input.plugin, 'package.json');
-  const manifest = JSON.parse(await readFile(path, 'utf8'));
-  delete manifest.peerDependencies;
-  await writeFile(path, `${JSON.stringify(manifest)}\n`);
-  await commitFixture(input.root);
-  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_DSH_PEER_INVALID/);
 });
 
 test('formal pack rejects an ignored lib replacement against a clean builder receipt', async t => {
@@ -365,7 +376,7 @@ for (const [file, content, error] of [
     const input = await fixture(t);
     await writeFile(join(input.plugin, file), content);
     await commitFixture(input.root);
-    const manifestPath = join(input.root, 'receipt.json');
+    const manifestPath = join(input.outputDir, 'receipt.json');
     await assert.rejects(() => packPlugin({ ...input, manifestPath }), error);
     assert.deepEqual(await readdir(input.outputDir), []);
     await assert.rejects(() => access(manifestPath));
