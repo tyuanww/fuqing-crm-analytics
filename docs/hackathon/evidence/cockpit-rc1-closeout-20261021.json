@@ -1,0 +1,122 @@
+{
+  "schema_version": "shinemage-cockpit-closeout-evidence/v1",
+  "generated_at": "2026-10-21T14:05:00Z",
+  "status": "PARTIAL_BLOCKED_ON_CRM_LOGIN",
+  "scope": "owner-operated local and Hangzhou rc1 cockpit side-load; not a formal signed release",
+  "source": {
+    "branch": "codex/cockpit-rc1-closeout",
+    "code_commit": "7c9244c9a9e1bfc2b99ea20c6e146584ee6bf90b",
+    "previous_code_commit": "5842b4d3ac6c82e48f1af3f3c975b1b62b287159",
+    "pull_request": 162,
+    "remote_ci": {
+      "run_id": 39610154746,
+      "status": "success",
+      "b0_contract_build": "PASS",
+      "merge_gate": "PASS"
+    }
+  },
+  "artifact": {
+    "package_name": "@shine-mage/dsh-analytics-workbench-b0",
+    "package_version": "0.0.0-b0",
+    "target_peer": "0.2.1-rc.1",
+    "source_peer": "0.1.7-rc.2",
+    "upstream_sha": "1600d8a1e140dcde43a1a0941940a0480712c011",
+    "manifest_sha256": "cec2dbf912c2989cf77e80d3f58e4ec317a7429bc22eb5847e867c4b1f2bfd8b",
+    "tarball": {
+      "name": "shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+      "bytes": 438881,
+      "sha256": "b8808b2554a54ae2e1d719b050e528b2451bf0be802601c439794e484a97834d"
+    },
+    "effective_client_sha256": "0d653cebbf613f745813c5ab3d9eb6ddd77d0e039254af98927e2902bbb924d4",
+    "build_provenance_status": "PASS",
+    "builder": {
+      "platform": "linux",
+      "arch": "x64",
+      "node": "v24.19.0",
+      "pnpm": "11.28.2",
+      "network_mode": "offline",
+      "isolated": true,
+      "clean": true
+    },
+    "rc1_contract_sha256": "86bde14cd6da593b9cfe81711825ed83f65191d04315b37bcd86273f13d05321"
+  },
+  "profile": {
+    "plugins": 7,
+    "profile_digest": "e93e6f5e7975311f55bf1ee070b7aea009c938449c9a1542f3c2a503f40253fc",
+    "inputs_sha256": "437456261e90dd171d9d4b289797f8710f7cf8d47bec4b2d7de24b0373372eb9",
+    "reader": "PASS with generated provenance required"
+  },
+  "deployment": {
+    "service": "shinemage-dsh.service",
+    "state": "active/running",
+    "current": "/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-core-main-20261021-cockpit-v3",
+    "predecessor": "/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-core-main-20261021-cockpit-v2",
+    "rollback_target": "/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-core-main-20261020-v5",
+    "runtime_symlink": "/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-core-main-20261020-v5/runtime",
+    "runtime_data_copied": false,
+    "ports": [4328, 18090, 18091, 18092, 18093, 18094, 18098],
+    "authentication": {
+      "unauthenticated_root": 401,
+      "authenticated_root": 200
+    },
+    "candidate": {
+      "web_port": 4329,
+      "page_http_port": 18126,
+      "startup_error_matches": 0,
+      "ports_closed_after_stop": true
+    },
+    "audit": {
+      "startup_error_matches": 0,
+      "boot_error_matches": 0
+    }
+  },
+  "verification": {
+    "focused_tests": "24 PASS / 0 FAIL",
+    "analytics_workbench": "204 PASS / 0 FAIL",
+    "rc2_build": "PASS including host/client typecheck",
+    "rc1_build": "PASS including host/client typecheck and clean offline provenance",
+    "rc1_contract": "PASS_LOCAL_BUILD_INPUTS",
+    "remote_ci": "SUCCESS"
+  },
+  "browser_uat": {
+    "page_id": "page_eb6caa1c00494995b583027421061d1f",
+    "page_title": "本场对话驾驶舱",
+    "initial_page_version": 1,
+    "final_page_version": 2,
+    "edited_heading": "Cockpit C4 R2 草稿恢复",
+    "selected_node": "auto_h1_214",
+    "native_panel_round_trip": "PASS",
+    "draft_text_restored": true,
+    "draft_selection_restored": true,
+    "save_after_restore": "PASS",
+    "theme_light": "PASS",
+    "theme_dark": "PASS",
+    "theme_follow_system_restored": true,
+    "native_account_menu": "PASS",
+    "native_settings": "PASS",
+    "local_display_name_presented_as_login": false,
+    "crm_prompt": "请先连接当前对话的 CRM"
+  },
+  "not_run": {
+    "crm_metric_query": "NOT_RUN_HUMAN_LOGIN",
+    "crm_board_edit": "NOT_RUN_HUMAN_LOGIN",
+    "crm_write": "NOT_RUN_HUMAN_LOGIN",
+    "formal_signature": "NOT_RUN",
+    "publisher_identity": "NOT_RUN",
+    "independent_verification": "NOT_RUN",
+    "attestation": "NOT_RUN",
+    "publication": "NOT_RUN",
+    "company_clean_machine": "NOT_RUN"
+  },
+  "formal_status": {
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "m2_09": "NOT_RUN",
+    "release_ready": false
+  },
+  "risks": [
+    "The running v3 is an owner-operated side-load and does not carry a formal publisher/signature identity.",
+    "CRM metric, board-edit and write paths remain unverified until a human connects the current conversation to CRM.",
+    "The v3 release reuses the v5 runtime by symlink; rollback or cleanup must preserve that runtime until a separately verified migration exists."
+  ]
+}

@@ -1,6 +1,6 @@
 # 杭州 WSL 运行层
 
-这套文件只描述单台 Windows + WSL 主机的运行层。它不迁移数据、不保存密钥、不启动服务，也不替代 DSH 上游。本文的接收和激活示例属于正式 rc2 artifact 线。当前杭州 owner-operated rc2 的 `current`、runtime、端口和回退目标以 [STATUS.md](../../STATUS.md) 与 [fc41 rc2 target deployment](../../docs/hackathon/evidence/engineering-owner-operated-rc2-main-fc41-target-deployment-20261019.md) 为准。
+这套文件只描述单台 Windows + WSL 主机的运行层。它不迁移数据、不保存密钥、不启动服务，也不替代 DSH 上游。本文的接收和激活示例属于正式 rc2 artifact 线。当前杭州 rc1 驾驶舱 side-load 的 `current`、runtime、端口和回退目标以 [STATUS.md](../../STATUS.md) 与 [驾驶舱 rc1 收口证据](../../docs/hackathon/evidence/cockpit-rc1-closeout-20261021.md) 为准。
 
 ## 目录约定
 
@@ -53,6 +53,17 @@
 8. 安装 `dsh.service` 前，把 `dsh.service` 中的用户、仓库、上游和 runtime 路径替换成真实路径；`/etc/shinemage/dsh.env` 权限必须是 `600`。DSH 固定使用 `0.1.7-rc.2` 和 `477b4f420553e8a52c2fbccc464d7561b239c443`，不使用 `--fresh`；品牌覆盖显式 `--shine-brand off`。
 9. WeKnora 和 Neo4j 按 `WeKnora-*.tar.gz` 自带的 compose/README 恢复。没有核对镜像、数据目录和端口前，不凭文件名猜启动命令。
 10. CRM、DSH、WeKnora 都通过 Tailscale 完成内部验收后，才安装 Cloudflare Tunnel。`cloudflared-config.yml.example` 暴露网站、DSH、页面、看板和知识库五个入口；知识库只转发到 loopback 的 WeKnora 前端，登录和权限仍由 WeKnora 负责，Neo4j 管理口保持内部访问。
+
+## 页面 HTTP 的浏览器身份
+
+页面文档与结果读取共用 loopback `18091`，浏览器只访问公开 `https://page.tyuan.chat`。杭州 drop-in `92-cockpit-browser-base.conf` 同时设置：
+
+```text
+PAGE_DOCUMENTS_BROWSER_BASE=https://page.tyuan.chat
+PAGE_RESULT_BROWSER_BASE=https://page.tyuan.chat
+```
+
+`PAGE_RESULT_BROWSER_BASE` 未单独设置时会回落到 documents base；新环境仍应显式写出两项，避免后续拆分结果入口时误用 loopback。不要把 runtime SQLite、DuckDB、`browser-private.json`、页面 token 或其他私有状态复制进 release；新 release 只保留指向既有 durable runtime 的 symlink。
 
 ## DuckDB 备份
 

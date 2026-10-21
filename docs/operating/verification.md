@@ -4,9 +4,11 @@
 
 本页带日期的候选、端口、版本和测试数字都是历史证据。当前命令从“先按变更类型选验证”开始；当前版本、运行现场和门禁仍以 STATUS 为准。不要把历史段落中的 `6677`、旧 candidate 或旧测试数当作当前结论。
 
-## 当前 rc1 clean-main v5 现场与 v4 候选（2026-10-21）
+## 当前 rc1 驾驶舱 v3、v5 回退与 v4 候选（2026-10-21）
 
-线上 `/srv/shinemage/dsh/current` 指向 `dsh-0.2.1-rc.1-core-main-20261020-v5`，这是 v4 clean-main runtime 的 owner-operated 现场 side-load；最近一次受控重启后的 ephemeral profile 为 package `27566016…` / lock `ea643aa0…`，而 `release-marker.json` 仍自报 v4/PREPARED，候选 receipt 的 profile 仍为 `c3ec7df3…`。因此 v5 只是一项带现场回执的运行事实，不是新的正式候选或签名 release。固定 upstream 仍为 `1600d8a1e140dcde43a1a0941940a0480712c011`。当前 profile lock 含 query.11，其摘要会随 DSH 重启生成的 `plugin-packs-*` link 根变化，不能当作正式 profile identity；runtime/profile、插件市场、peer alias 闭包和 AppleDouble 扫描的具体合同见[候选参考](../reference/dsh-rc1-clean-candidate.md)，实际顺序见[升级手册](./dsh-rc1-clean-upgrade-runbook.md)。
+线上 `/srv/shinemage/dsh/current` 现指向 `dsh-0.2.1-rc.1-core-main-20261021-cockpit-v3`。v3 使用 source `7c9244c9a9e1bfc2b99ea20c6e146584ee6bf90b` 的 rc1 驾驶舱 pack，manifest SHA-256 `cec2dbf9…`、tarball `b8808b25…`、effective `lib/client.js` `0d653ceb…`；7 包 profile 输入摘要为 `43745626…`。其 `runtime` symlink 仍指向 v5 的既有持久 runtime，没有复制 SQLite、DuckDB、浏览器私有状态或凭据。v2 驾驶舱候选保留，稳定回退目标是 v5。v3 已通过候选 `4329/18126` 启停、认证、包身份和线上 4328/18091 实机验证；C4 页面保存为页面版本 v2，原生侧栏切走后的草稿与选中目标恢复，浅色、深色和跟随系统均验证。CRM 指标、看板编辑和写入仍为 `NOT_RUN_HUMAN_LOGIN`。
+
+v5 仍是 v4 clean-main runtime 的 owner-operated 现场副本，也是当前代码和 runtime 回退目标；最近一次 v5 历史回执中的 ephemeral profile package `27566016…` / lock `ea643aa0…` 与旧候选 receipt `c3ec7df3…` 不一致，因此 v5 不构成新的正式 release identity。固定 upstream 仍为 `1600d8a1e140dcde43a1a0941940a0480712c011`。v3 的完整命令、摘要、实机矩阵和未执行项见[驾驶舱 rc1 收口证据](../hackathon/evidence/cockpit-rc1-closeout-20261021.md)；runtime/profile、插件市场、peer alias 闭包和 AppleDouble 扫描的具体合同仍见[候选参考](../reference/dsh-rc1-clean-candidate.md)与实际[升级手册](./dsh-rc1-clean-upgrade-runbook.md)。
 
 v4 过渡候选已执行的局部检查为：固定 Node24 release tests `45 pass / 0 fail`、远程 Node24 peer 缺失负测 PASS、runtime provenance PASS、native/business boot PASS、Settings/account RPC PASS、浏览器插件页 PASS、plugin-market Discover PASS、console logs EMPTY、AppleDouble locale files `0`、v4 boot PASS。上述 peer 缺失负测已验证 fail-closed 行为。默认 Node25 下的 dsh-dev 全量失败属于环境版本不满足，不能改写为代码 PASS。
 

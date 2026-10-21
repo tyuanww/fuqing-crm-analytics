@@ -183,3 +183,17 @@
 5. 在同一驾驶舱分支完成 C1B。
 6. 跑 C4 交叉验收。
 7. 最后由单一写手更新根状态和变更日志。
+
+## 执行状态（2026-10-21）
+
+| 任务 | 状态 | 证据与边界 |
+| --- | --- | --- |
+| C1A 草稿连续性 | PASS | `5842b4d3` 接收新生成页面包；`7c9244c9` 修复映射祖先随叶子草稿变化时被误判为选区篡改。线上 C4 页面编辑后切到原生插件面板，再返回驾驶舱，文本与 `auto_h1_214` 选中目标均恢复，保存进入页面版本 v2。 |
+| C1B 主面板与主题 | PASS | `main:cockpit` 是唯一生产入口，未挂载并存组合路径；host/client 全量类型检查通过。线上验证浅色、深色和“跟随系统”，并恢复默认选择。 |
+| C2 账号与设置 | PASS | 原生账号菜单和官方设置面板实机可用；原 sidebar 的本地显示名不再作为真实登录。DOM fallback 的正测、负测和异步展开测试通过，失败可观察。 |
+| C3 rc1 发布契约 | PASS_LOCAL_ARTIFACT | rc1 upstream 固定为 `1600d8a1…`，pack target peer `0.2.1-rc.1`、source peer `0.1.7-rc.2`；manifest `cec2dbf9…`、tarball `b8808b25…`、client `0d653ceb…`，7 包 profile reader 与 contract 均 PASS。默认 rc2 pin 未改。 |
+| 杭州侧载 | PASS_OWNER_OPERATED | 当前 `cockpit-v3`，服务 active/running，候选 `4329/18126` 已停止，v2 保留，v5 为回退。runtime 仅复用既有 symlink，没有复制持久数据。 |
+| C4 交叉验收 | PARTIAL_BLOCKED_ON_CRM_LOGIN | 页面生成、收件箱登记、保存、跨原生侧栏草稿恢复、主题和账号设置通过；CRM 仍显示“请先连接当前对话的 CRM”，指标查询、看板编辑和写入未执行。 |
+| 正式发布门禁 | NOT_RUN | 正式签名、publisher identity、独立验证、attestation、publication、公司 clean-machine 和 release_ready 升级均未执行。 |
+
+详细测试、包摘要、线上端口、UAT 和 NOT_RUN 清单见[驾驶舱 rc1 收口证据](evidence/cockpit-rc1-closeout-20261021.md)及同名 JSON。
