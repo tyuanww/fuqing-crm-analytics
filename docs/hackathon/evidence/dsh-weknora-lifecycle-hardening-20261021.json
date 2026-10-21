@@ -153,6 +153,41 @@
       "WeKnora-neo4j": "running",
       "WeKnora-frontend": "running"
     },
+    "retriever_config": {
+      "tenant_id": 10000,
+      "workspace": "hutou's Workspace",
+      "retrieve_driver": "postgres",
+      "db_vector_store_count": 0,
+      "knowledge_base_vector_store_id": null,
+      "before_retriever_engines": {
+        "engines": []
+      },
+      "effective_engines": [
+        {
+          "retriever_type": "keywords",
+          "retriever_engine_type": "postgres"
+        },
+        {
+          "retriever_type": "vector",
+          "retriever_engine_type": "postgres"
+        }
+      ],
+      "configured_at": "2026-10-21T09:40:09Z",
+      "recovery": "/srv/shinemage/dsh/recovery/weknora-retriever-config-20261021/",
+      "before_sha256": "2fc7196e57bf808edefb822cd770f8e6eec24ff985a18f6df1c07104d0d9a087",
+      "after_sha256": "36502e1b218903e62c2dcec29eba97d70ef7d8e79fc7ce714b032d39e3990392",
+      "validation": {
+        "production_wrapper_search_count": 3,
+        "production_wrapper_scope": [
+          "1c4627e2-dfc1-48ca-aeef-2c00b53da5f8"
+        ],
+        "cross_scope_search": "WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED",
+        "direct_search_http_status": 200,
+        "direct_search_knowledge_base_ids": [
+          "1c4627e2-dfc1-48ca-aeef-2c00b53da5f8"
+        ]
+      }
+    },
     "knowledge_bases": [
       {
         "id": "1c4627e2-dfc1-48ca-aeef-2c00b53da5f8",

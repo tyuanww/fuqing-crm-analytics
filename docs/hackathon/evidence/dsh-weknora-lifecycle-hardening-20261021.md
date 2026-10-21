@@ -67,6 +67,30 @@ live 模块探针使用线上 adapter、helper 和 `retrieve.key`，没有输出
 
 retrieval key `DSH 本机只读检索` 只有 `retrieve` capability 且 `full_access=false`，但允许项目库与部署库两个知识库。因此服务端 key 不是单项目边界，必须继续由适配层 fail-closed allowlist 收窄。
 
+### Postgres 检索引擎显式配置
+
+Workspace `hutou's Workspace`（tenant `10000`）原先的 `retriever_engines` 为 `{"engines":[]}`，运行依赖 `RETRIEVE_DRIVER=postgres` 的隐式默认。2026-10-21 已把租户配置显式固定为以下两条路径，不重启 DSH 或 WeKnora：
+
+```json
+{
+  "engines": [
+    {"retriever_type": "keywords", "retriever_engine_type": "postgres"},
+    {"retriever_type": "vector", "retriever_engine_type": "postgres"}
+  ]
+}
+```
+
+三个知识库的 `vector_store_id` 继续为 `NULL`。这是 Postgres env-store 的正确合同：Postgres 和 SQLite 只能通过 `RETRIEVE_DRIVER` 的 env store 使用，不允许注册成 DB-managed VectorStore；`vector_store_id` 在 KB 创建后也不可变。因此当前单机 ParadeDB 部署没有安全、可操作的 per-KB store 需要创建。
+
+配置前、后租户行保存在 `/srv/shinemage/dsh/recovery/weknora-retriever-config-20261021/`，SHA-256 分别为 `2fc7196e57bf808edefb822cd770f8e6eec24ff985a18f6df1c07104d0d9a087` 和 `36502e1b218903e62c2dcec29eba97d70ef7d8e79fc7ce714b032d39e3990392`。恢复时把该 tenant 的 `retriever_engines` 写回 `{"engines":[]}` 即可，不涉及向量数据迁移。
+
+配置后验证：
+
+- production scope wrapper 项目库搜索返回 3 条 passage，范围为 `1c4627e2-dfc1-48ca-aeef-2c00b53da5f8`。
+- 显式搜索部署验收库返回 `WEKNORA_KNOWLEDGE_BASE_SCOPE_DENIED`。
+- 直接调用 WeKnora `/api/v1/knowledge-search` 返回 HTTP `200`，命中仅来自项目库。
+- `shinemage-dsh.service` 与 WeKnora 容器保持运行，没有因本配置重启。
+
 ## 测试
 
 - `node --test scripts/ops/weknora-production-scope.test.mjs dsh-plugins/query-agent/test/package.test.mjs`：`30/30 PASS`
