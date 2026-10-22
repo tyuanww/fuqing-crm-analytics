@@ -17,9 +17,9 @@
 |---|---|---|
 | 新会话知识库问答 | `VERIFIED`。问数智能体检索 WeKnora 项目库并返回 3 个引用来源。 | [真实链路复核](dsh-live-chain-20261022.md) |
 | 对话诊断与 CRM 数据 | `VERIFIED`。全店 GSV 快照、15 个商品新老客结果和 RFM 结果均来自杭州 CRM 只读接口。 | [真实链路复核](dsh-live-chain-20261022.md) |
-| 单品一致性 | `VERIFIED`。`爆款面膜F` 的 GSV `105525.8`、用户 `770`、新客 `358`、老客 `412` 与全商品结果逐项一致。 | [真实链路复核](dsh-live-chain-20261022.md) |
+| 单品一致性 | `VERIFIED`。单品的金额、用户数及新老客人数与全商品结果逐项一致；真实数值不写入公开仓库。 | [真实链路复核](dsh-live-chain-20261022.md) |
 | RFM 筛选与预热 | `VERIFIED`。返回 8 个 RFM 象限加 1 个已购客 TTL，共 9 个稳定标签；缓存 miss 明确不可用，不现场重算。 | `dsh-plugins/crm-knowledge/test/dashboard.test.mjs`，RFM 5 项负测 |
-| HTML 生成与页面保存 | `VERIFIED`。真实页面 `page_3a80bfa9395446fc8352fbc1b352f720` 已保存到版本 2，并在 SQLite 中留下 `PATCH` revision。 | [真实链路复核](dsh-live-chain-20261022.md) |
+| HTML 生成与页面保存 | `VERIFIED`。真实页面已保存到版本 2，并在 SQLite 中留下 `PATCH` revision；真实页面 ID 不写入公开仓库。 | [真实链路复核](dsh-live-chain-20261022.md) |
 | AI/人工编辑 | `VERIFIED`（源码候选）。文案、布局、预览、回退、失败恢复和绑定页面只读均保留原始事实。 | Workbench 编辑回归 `109/109` |
 | 结果绑定 | `VERIFIED`（源码候选）。`binding_manifest` 从 page tool、native waiter、live adapter、store 一直传到 page document 和 artifact inbox。 | `58045416`，Workbench delivery `20/20`，后端 `83` 项 |
 

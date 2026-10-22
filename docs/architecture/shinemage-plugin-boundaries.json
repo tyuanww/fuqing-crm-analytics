@@ -72,10 +72,10 @@
       "commands": {
         "build": "node build.mjs",
         "test": "node --test test/model.test.mjs test/initial-session.test.mjs test/native-evidence.test.mjs test/run-view.test.mjs && pnpm test:html-edit",
-        "test:html-edit": "node --test src/free-page/resource/package-normalize.test.mjs src/client/free-html-library/html-import.test.mjs src/client/html-selection-bridge.test.mjs src/client/free-html-library/store.test.mjs src/client/free-html-library/p12-live-adapters.test.mjs src/client/free-html-library/source-draft.test.mjs test/cockpit-ai-client.test.mjs src/free-page/edit/intent-router.test.mjs src/free-page/edit/selection-context.test.mjs test/dynamic-chart-browser-seam.test.mjs test/draft-save-regression.test.mjs test/canvas-input-regression.test.mjs test/open-native-html-artifact.test.mjs src/free-page/preview/srcdoc-builder.test.mjs",
+        "test:html-edit": "node --test src/free-page/resource/package-normalize.test.mjs src/client/free-html-library/html-import.test.mjs src/client/html-selection-bridge.test.mjs src/client/free-html-library/store.test.mjs src/client/free-html-library/p12-live-adapters.test.mjs src/client/free-html-library/source-draft.test.mjs test/cockpit-ai-client.test.mjs src/free-page/edit/intent-router.test.mjs src/free-page/edit/selection-context.test.mjs test/dynamic-chart-browser-seam.test.mjs test/draft-save-regression.test.mjs test/canvas-input-regression.test.mjs test/open-native-html-artifact.test.mjs src/free-page/preview/srcdoc-builder.test.mjs src/client/cockpit-page-tab.test.mjs",
         "test:built": "node --test test/built.test.mjs"
       },
-      "manifest_sha256": "f7382c3cdfb049412d93e3812d1edeb732e7d78b45406d5449e466274364ef26"
+      "manifest_sha256": "e92f62444206a135808b6e2d06dcf0d56276a2c0a9c94ca86aa013dcef17bca3"
     },
     {
       "path": "dsh-plugins/board-components",
@@ -572,7 +572,7 @@
       "manifest_sha256": "1cd7ce082f80d1088aed5d9bb7940391c0c44485e8ed5abd5a8c711bb97282ca"
     }
   ],
-  "source_files_scanned": 656,
+  "source_files_scanned": 657,
   "cross_package_edges": [
     {
       "consumer": "analytics-workbench",
