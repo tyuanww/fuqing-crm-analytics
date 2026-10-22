@@ -507,6 +507,10 @@ function previousMonthEnd(value) {
   return new Date(Date.UTC(current.getUTCFullYear(), current.getUTCMonth(), 0)).toISOString().slice(0, 10);
 }
 
+function filterBase(value) {
+  return Object.fromEntries(Object.entries(value).filter(([key]) => key !== 'products'));
+}
+
 export function normalizeProductCustomer(value, filters, dataKind, warehouseCutoff = null) {
   if (value?.schema_version === 'product-customer/v2') fail('BACKEND_UPGRADE_REQUIRED');
   if (value?.schema_version !== PRODUCT_CUSTOMER_VERSION || value.source !== 'orders+user_first_purchase' ||
@@ -537,7 +541,7 @@ export function normalizeProductCustomer(value, filters, dataKind, warehouseCuto
       source: value.source,
       contains_real_data: dataKind === 'real',
       synthetic: dataKind === 'synthetic',
-      filters: { ...filters, products: undefined, timezone: 'Asia/Shanghai', end_inclusive: true },
+      filters: { ...filterBase(filters), timezone: 'Asia/Shanghai', end_inclusive: true },
       compare_start_date: value.compare_start_date,
       compare_end_date: value.compare_end_date,
       new_old_cutoff: value.new_old_cutoff,
@@ -580,8 +584,8 @@ export function normalizeProductCustomer(value, filters, dataKind, warehouseCuto
     contains_real_data: dataKind === 'real',
     synthetic: dataKind === 'synthetic',
     filters: {
-      ...filters,
-      products: filters.products ? products.map(item => item.display_name) : undefined,
+      ...filterBase(filters),
+      ...(filters.products ? { products: products.map(item => item.display_name) } : {}),
       timezone: 'Asia/Shanghai',
       end_inclusive: true,
     },

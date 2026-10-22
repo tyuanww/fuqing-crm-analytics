@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { isJsonValue } from '@deepseek-ai/dsh-util-values';
 import { ACTIVE_CHANNELS, LOW_PRICE_CHANNELS as FRONTEND_LOW } from '../../../frontend-vue3/src/constants/channels.ts';
 import { CHANNELS, LEAF_CHANNELS, LOW_PRICE_CHANNELS, channelRole, queryDashboardGsv,
   queryProductCustomer, queryRfmSnapshot, normalizeDashboard, normalizeProductCustomer, dashboardCapabilities,
@@ -380,6 +381,13 @@ test('product customer rejects unverifiable comparison and incomplete product ev
   }, { sessionId: 'fixture-session', binding });
   assert.equal(incomplete.status, 'UNAVAILABLE');
   assert.equal(incomplete.reason.code, 'INVALID_RESPONSE');
+  const allProducts = await queryProductCustomer({
+    start_date: '2026-07-01',
+    end_date: '2026-07-05',
+  }, { sessionId: 'fixture-session', binding });
+  assert.equal(allProducts.status, 'OK', JSON.stringify(allProducts));
+  assert.equal(isJsonValue(allProducts), true);
+  assert.equal('products' in allProducts.filters, false);
 });
 
 test('product customer v3 exposes coverage and rejects v2, empty or partial results', async t => {
