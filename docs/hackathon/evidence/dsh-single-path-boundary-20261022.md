@@ -43,6 +43,7 @@
 
 ## B0 收尾回执
 
+- PR 前 `open-code-review-delegate` 复核（2026-10-23）以远端同名分支 `d3452ff1` 到当前 HEAD 为范围：OCR 列出 46 个可审文件、25 个排除文件，46/46 已逐文件复核、无跳过。发现原生 HTML 交付对非法 `binding_manifest` 静默降级为空清单的 fail-open 缺陷，已由 `4d5723f9` 改为直接拒绝并补回归测试；Node 24 Workbench/CRM 联合回归 `142/142`、后端 artifact/product/page/cockpit 回归 `93 passed`。边界/C0 检查随后重新通过。该记录是代码审查证据，不代表远端 push、PR merge 或正式 release 已完成。
 - rc1 隔离候选已在 2026-10-23 用固定输入重新执行 `scripts/release/rc1-preflight.mjs`：使用规范化 hydrated source archive、原 subject set 和既有 runtime provenance，结果 `status=PASS`、`lfs_pointer_count=0`、`packs=9`、`runtime=PASS`；`formal_status` 仍为 `m2_07=BLOCKED`、`m2_08=NOT_RUN`、`m2_09=NOT_RUN`、`release_ready=false`。原始 source archive 直接复跑会被安全解包器拒绝（目录权限 `0775`），因此不能把原始归档当作可发布输入；必须使用通过规范化/水合门禁的 archive。这次复跑只证明 rc1 preflight 输入闭环，不提升正式发布状态。
 - 固定输入读取、组合包、领域输入、31 份公共材料、15 个合同生成器、边界检查、前端/后端回归均已实际执行；当前阻断点是 rc2 profile 对工作树 CRM rc1 peer 的显式 `PROFILE_PLUGIN_DSH_PEER_MISMATCH`。本轮没有跳过该门禁，也没有把杭州现役 side-load 的运行结果冒充本地 B0。
 - 修复后的 C0 生成器结果为 OpenAPI SHA-256 `6d6558e894441d707417003ad9f92e4fc486c1c21c1b92a6d9bc1a24f5c5967f`、contract hash `2c1b9e57ae9818dbfa835a826a4bf82d3c78d1473e4a3472408e4a028a273c8a`；单独 `--check` 和离线评估 `30/30` 通过。
