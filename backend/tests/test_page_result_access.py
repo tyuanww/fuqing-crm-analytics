@@ -11,6 +11,7 @@ from backend.services.analytics.page_result_access import (
     DATA_SCOPE,
     FORBIDDEN_OPS,
     MAX_CUMULATIVE_ROWS,
+    MAX_MANIFEST_ENTRIES,
     MAX_PAGE_LIMIT,
     MAX_RESPONSE_BYTES,
     PAGE_TO_HOST_OPS,
@@ -98,6 +99,56 @@ def test_summary_issues_data_ref_and_exact_summary_fields():
     assert body["binding_state"] == "BOUND_VERIFIED"
     assert len(body["rows"]) == 5
     assert access.binding_state(ALICE, BOUND_MANIFEST)["binding_state"] == "BOUND_VERIFIED"
+
+
+def test_saved_page_binding_manifest_is_accepted_by_result_bridge():
+    access = store()
+    manifest = {
+        "result_refs": ["result_fixture_1"],
+        "bindings": [{
+            "binding_id": "bind_gsv",
+            "result_ref": "result_fixture_1",
+            "node_id": "n_gsv",
+            "mode": "summary",
+        }],
+    }
+    state = access.binding_state(ALICE, manifest)
+    assert state["binding_state"] == "BOUND_VERIFIED"
+    assert state["verified"] is True
+    body = access.read(ALICE, {
+        "op": "data.read",
+        "request_id": "req_saved_page",
+        "result_ref": "result_fixture_1",
+        "mode": "summary",
+    }, manifest=manifest)
+    assert body["ok"] is True
+
+
+def test_result_bridge_enforces_manifest_bounds_and_unique_ids():
+    access = store()
+    with pytest.raises(AnalyticsError, match="PACKAGE_TOO_LARGE"):
+        access.binding_state(ALICE, {
+            "result_refs": [f"result_{index}" for index in range(MAX_MANIFEST_ENTRIES + 1)],
+            "bindings": [],
+        })
+    with pytest.raises(AnalyticsError, match="INVALID_PAGE"):
+        access.binding_state(ALICE, {
+            "result_refs": ["result_fixture_1", "result_fixture_1"],
+            "bindings": [],
+        })
+    with pytest.raises(AnalyticsError, match="INVALID_PAGE"):
+        access.binding_state(ALICE, {
+            "result_refs": ["result_fixture_1"],
+            "bindings": [
+                {"binding_id": "duplicate", "result_ref": "result_fixture_1"},
+                {"binding_id": "duplicate", "result_ref": "result_fixture_1"},
+            ],
+        })
+    with pytest.raises(AnalyticsError, match="INVALID_PAGE"):
+        access.binding_state(ALICE, {
+            "result_refs": ["result_fixture_1"],
+            "bindings": [{"binding_id": "undeclared", "result_ref": "result_other"}],
+        })
 
 
 def test_empty_result_is_recoverable():

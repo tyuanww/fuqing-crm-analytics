@@ -362,6 +362,20 @@ test('backend product lookup failures remain distinguishable from malformed inpu
   assert.equal(result.reason.code, 'UNKNOWN_PRODUCT');
 });
 
+test('product customer preserves incomplete first-purchase history as a data warning', async t => {
+  const { binding } = await serveDashboard(t, (url, _req, res) => {
+    if (url.pathname !== '/api/v1/category/product-customer') return false;
+    res.statusCode = 409;
+    res.end(JSON.stringify({ detail: 'FIRST_PURCHASE_UNAVAILABLE' }));
+    return true;
+  });
+  const result = await queryProductCustomer({
+    start_date: '2026-07-01', end_date: '2026-07-05', products: ['爆款面膜E'],
+  }, { sessionId: 'fixture-session', binding });
+  assert.equal(result.status, 'UNAVAILABLE');
+  assert.equal(result.reason.code, 'FIRST_PURCHASE_UNAVAILABLE');
+});
+
 test('product customer rejects unverifiable comparison and incomplete product evidence', async t => {
   const productResponse = {
     schema_version: 'product-customer/v3',
@@ -476,9 +490,10 @@ test('product customer v3 exposes coverage and rejects v2, empty or partial resu
     exclude_channels: [],
     products: [],
   };
-  const insufficient = normalizeProductCustomer(base, filters, 'synthetic');
+  const insufficient = normalizeProductCustomer(base, filters, 'synthetic', '2026-07-05');
   assert.equal(insufficient.status, 'INSUFFICIENT_COVERAGE');
   assert.deepEqual(insufficient.coverage, base.coverage);
+  assert.equal(insufficient.warehouse_cutoff, '2026-07-05');
 
   assert.throws(
     () => normalizeProductCustomer({ ...base, schema_version: 'product-customer/v2' }, filters, 'synthetic'),
@@ -498,6 +513,40 @@ test('product customer v3 exposes coverage and rejects v2, empty or partial resu
     }, { sessionId: 'fixture-session', binding });
     assert.equal(result.status, 'UNAVAILABLE');
     assert.equal(result.reason.code, 'INVALID_RESPONSE');
+  });
+
+  await t.test('successful products require complete coverage in both periods', async t => {
+    for (const coverage of [
+      { data_cutoff: '2026-07-05', current_status: 'INSUFFICIENT', comparison_status: 'COMPLETE' },
+      { data_cutoff: '2026-07-05', current_status: 'COMPLETE', comparison_status: 'INSUFFICIENT' },
+    ]) {
+      const { binding } = await serveDashboard(t, (url, _req, res) => {
+        if (url.pathname !== '/api/v1/category/product-customer') return false;
+        res.end(JSON.stringify({ ...base, status: 'OK', data_cutoff: '2026-07-05', coverage, products: [{
+          name: '经典膜', display_name: '爆款面膜E', spu_classes: ['经典膜'], status: 'OK',
+          current: {
+            gsv: 100, users: 1, aus: 100, old_gsv: 100, old_users: 1, old_aus: 100, old_ratio: 1,
+            new_gsv: 0, new_users: 0, new_aus: 0, new_ratio: 0, member_gsv: 0, member_users: 0,
+            member_aus: 0, member_ratio: 0, old_users_ratio: 1, new_users_ratio: 0,
+          },
+          comparison: {
+            gsv: 100, users: 1, aus: 100, old_gsv: 100, old_users: 1, old_aus: 100, old_ratio: 1,
+            new_gsv: 0, new_users: 0, new_aus: 0, new_ratio: 0, member_gsv: 0, member_users: 0,
+            member_aus: 0, member_ratio: 0, old_users_ratio: 1, new_users_ratio: 0,
+          },
+          yoy: {
+            gsv: 0, users: 0, aus: 0, old_gsv: 0, old_users: 0, old_aus: 0, new_gsv: 0, new_users: 0,
+            new_aus: 0, old_ratio_ppt: 0, new_ratio_ppt: 0, old_users_ratio_ppt: 0, new_users_ratio_ppt: 0,
+          },
+        }] }));
+        return true;
+      });
+      const result = await queryProductCustomer({
+        start_date: '2026-07-01', end_date: '2026-07-05', products: ['爆款面膜E'],
+      }, { sessionId: 'fixture-session', binding });
+      assert.equal(result.status, 'UNAVAILABLE');
+      assert.equal(result.reason.code, 'INVALID_RESPONSE');
+    }
   });
 });
 

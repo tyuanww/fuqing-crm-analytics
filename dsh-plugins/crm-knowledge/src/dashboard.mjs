@@ -46,6 +46,7 @@ const MESSAGES = Object.freeze({
   INCONSISTENT_RESULT: '看板概览与日趋势金额不一致，未输出业务金额，请核对数据版本或接口。',
   INSUFFICIENT_COVERAGE: '请求区间超出仓库数据截止日，未输出业务金额或人数。',
   UNKNOWN_PRODUCT: '请求中的商品未在已登记商品映射中找到，未进行模糊匹配或返回商品数据。',
+  FIRST_PURCHASE_UNAVAILABLE: '首购历史不完整，无法可靠区分新客和老客；未输出商品客群数据。',
   DATA_WARNING: 'CRM 接口返回数据警告，本次结果暂不可用；请在看板核对查询区间与数据水位。',
   TIMEOUT: 'CRM 查询超时；未自动重试。',
   CANCELLED: 'CRM 查询已取消。',
@@ -186,13 +187,14 @@ export function normalizeDashboard(overview, trend, filters, dataKind) {
   };
 }
 
-async function readJsonResponse(response, invalidRequestCode = 'INVALID_REQUEST') {
+async function readJsonResponse(response, invalidRequestCode = 'INVALID_REQUEST', conflictCode = 'SERVICE_BUSY') {
   try {
     if (response.status === 401) fail('AUTH_EXPIRED');
     if (response.status === 403) fail('ACCESS_DENIED');
     if (response.status === 400 || response.status === 422) fail(invalidRequestCode);
     if (response.status === 503) fail('SERVICE_UNAVAILABLE');
-    if (response.status === 409 || response.status === 423 || response.status === 429) fail('SERVICE_BUSY');
+    if (response.status === 409) fail(conflictCode);
+    if (response.status === 423 || response.status === 429) fail('SERVICE_BUSY');
     if (!response.ok) fail('UPSTREAM_ERROR');
     if (response.headers.has('x-data-warning')) fail('DATA_WARNING');
     if (!/^application\/json(?:\s*;|$)/i.test(response.headers.get('content-type') ?? '')) fail('INVALID_RESPONSE');
@@ -216,7 +218,7 @@ async function getJson(base, path, params, binding, signal, invalidRequestCode =
     headers: { Authorization: `Bearer ${binding.token}`, Accept: 'application/json' } }), invalidRequestCode);
 }
 
-async function postJson(base, path, body, binding, signal, extraHeaders = {}, invalidRequestCode = 'INVALID_REQUEST') {
+async function postJson(base, path, body, binding, signal, extraHeaders = {}, invalidRequestCode = 'INVALID_REQUEST', conflictCode = 'SERVICE_BUSY') {
   const url = new URL(path, base);
   return readJsonResponse(await fetch(url, {
     method: 'POST', redirect: 'error', signal,
@@ -227,7 +229,7 @@ async function postJson(base, path, body, binding, signal, extraHeaders = {}, in
       ...extraHeaders,
     },
     body: JSON.stringify(body),
-  }), invalidRequestCode);
+  }), invalidRequestCode, conflictCode);
 }
 
 async function readWarehouseCutoff(base, binding, signal) {
@@ -260,8 +262,9 @@ async function queryDashboard(input, options, purchases = false) {
       const params = new URLSearchParams({ ...filters, exclude_low_price: String(filters.exclude_low_price) });
       const aggregate = await getJson(base, '/api/v1/metrics/dashboard-purchases', params, binding, combined);
       combined.throwIfAborted();
-      assertWithinWarehouseCutoff(filters, await readWarehouseCutoff(base, binding, combined));
-      return normalizePurchases(aggregate, filters, binding.dataKind);
+      const warehouseCutoff = await readWarehouseCutoff(base, binding, combined);
+      assertWithinWarehouseCutoff(filters, warehouseCutoff);
+      return { ...normalizePurchases(aggregate, filters, binding.dataKind), warehouse_cutoff: warehouseCutoff };
     }
     const params = new URLSearchParams({ start_date: filters.start_date, end_date: filters.end_date, metric_type: 'GSV' });
     if (filters.channel !== '全店') params.set('channel', filters.channel);
@@ -308,7 +311,7 @@ export async function queryProductCustomer(input, options = {}) {
         compare_start_date: filters.compare_start_date,
         compare_end_date: filters.compare_end_date,
       } : {}),
-    }, binding, combined, { 'X-ShineMage-Product-Customer-Version': PRODUCT_CUSTOMER_VERSION }, 'UNKNOWN_PRODUCT');
+    }, binding, combined, { 'X-ShineMage-Product-Customer-Version': PRODUCT_CUSTOMER_VERSION }, 'UNKNOWN_PRODUCT', 'FIRST_PURCHASE_UNAVAILABLE');
     combined.throwIfAborted();
     const warehouseCutoff = await readWarehouseCutoff(base, binding, combined);
     assertWithinWarehouseCutoff(filters, warehouseCutoff);
@@ -397,10 +400,14 @@ async function queryNamed(input, options, path, extraKeys, normalize) {
     }
     const aggregate = await getJson(base, path, params, binding, combined);
     combined.throwIfAborted();
+    let warehouseCutoff = null;
     if (filters) {
-      assertWithinWarehouseCutoff(filters, await readWarehouseCutoff(base, binding, combined));
+      warehouseCutoff = await readWarehouseCutoff(base, binding, combined);
+      assertWithinWarehouseCutoff(filters, warehouseCutoff);
     }
-    return normalize(aggregate, filters, binding.dataKind);
+    const result = normalize(aggregate, filters, binding.dataKind);
+    if (warehouseCutoff) result.warehouse_cutoff = warehouseCutoff;
+    return result;
   } catch (error) {
     let code = 'UPSTREAM_ERROR';
     if (signal?.aborted) code = 'CANCELLED';
@@ -543,6 +550,9 @@ export function normalizeProductCustomer(value, filters, dataKind, warehouseCuto
       !['COMPLETE', 'INSUFFICIENT'].includes(value.coverage.comparison_status)) fail('INVALID_RESPONSE');
   if (value.coverage.data_cutoff !== value.data_cutoff) fail('INVALID_RESPONSE');
   if (!['OK', 'INSUFFICIENT_COVERAGE'].includes(value.status)) fail('INVALID_RESPONSE');
+  const complete = value.coverage.current_status === 'COMPLETE'
+    && value.coverage.comparison_status === 'COMPLETE';
+  if ((value.status === 'OK') !== complete) fail('INVALID_RESPONSE');
   const expectedExcluded = filters.exclude_low_price ? [...LOW_PRICE_CHANNELS] : [];
   if (value.exclude_channels.length !== expectedExcluded.length ||
       value.exclude_channels.some((channel, index) => channel !== expectedExcluded[index])) fail('INVALID_RESPONSE');
@@ -561,6 +571,7 @@ export function normalizeProductCustomer(value, filters, dataKind, warehouseCuto
       comparison_new_old_cutoff: value.comparison_new_old_cutoff,
       data_cutoff: value.data_cutoff,
       coverage: value.coverage,
+      warehouse_cutoff: warehouseCutoff,
       products: [],
     };
   }
@@ -772,7 +783,7 @@ export function normalizePurchases(value, filters, dataKind) {
     data_through: null, refund_as_of: null,
     limitations: ['AOV为每单金额，AUS为按购买人数计算的客单价；分子沿用看板GSV，净额版单列。',
       '未知标识或异常金额会阻断对应均值；零元订单和仅零元买家另列，不计购买分母。',
-      '同次聚合按源订单和买家标识去重，尚不证明跨系统身份完整；数据水位和退款截止日未知。'],
+      '同次聚合按源订单和买家标识去重，尚不证明跨系统身份完整；warehouse_cutoff 为仓库最后支付日，退款截止日未知。'],
   };
 }
 

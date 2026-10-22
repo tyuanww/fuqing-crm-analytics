@@ -118,6 +118,41 @@ def test_product_customer_refuses_queries_after_data_cutoff(
     assert result["coverage"]["current_status"] == "INSUFFICIENT"
 
 
+def test_product_customer_refuses_queries_before_data_start(
+    monkeypatch,
+    tmp_duckdb_with_synthetic_orders,
+):
+    monkeypatch.setattr(product_customer, "get_connection", lambda: tmp_duckdb_with_synthetic_orders)
+    result = product_customer.get_product_customer_overview(
+        "2023-07-01",
+        "2023-07-03",
+        products=["经典膜"],
+        compare_start_date="2022-07-01",
+        compare_end_date="2022-07-03",
+    )
+
+    assert result["status"] == "INSUFFICIENT_COVERAGE"
+    assert result["products"] == []
+    assert result["coverage"]["current_status"] == "INSUFFICIENT"
+    assert result["coverage"]["comparison_status"] == "INSUFFICIENT"
+
+
+def test_product_customer_refuses_unknown_first_purchase_history(
+    monkeypatch,
+    tmp_duckdb_with_synthetic_orders,
+):
+    handle = tmp_duckdb_with_synthetic_orders
+    _insert_order(handle, "missing-first-purchase", "u_missing_first", "2026-06-20 10:00:00", 100, "经典膜")
+    monkeypatch.setattr(product_customer, "get_connection", lambda: handle)
+
+    with pytest.raises(ValueError, match="首购历史不完整"):
+        product_customer.get_product_customer_overview(
+            "2026-06-15",
+            "2026-06-20",
+            products=["经典膜"],
+        )
+
+
 def test_product_customer_rejects_unknown_products(monkeypatch, tmp_duckdb_with_synthetic_orders):
     monkeypatch.setattr(
         product_customer,
@@ -148,6 +183,10 @@ def test_product_customer_accepts_unique_display_name_alias(
         "2026-07-03 10:00:00",
         100,
         "经典膜",
+    )
+    tmp_duckdb_with_synthetic_orders.execute(
+        "INSERT INTO user_first_purchase VALUES (?, ?::DATE)",
+        ["alias-user", "2026-07-03"],
     )
     display_name = product_customer.PRODUCT_DISPLAY_NAMES["经典膜"]
     result = product_customer.get_product_customer_overview(

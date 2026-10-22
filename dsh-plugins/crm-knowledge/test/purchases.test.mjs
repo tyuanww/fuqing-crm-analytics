@@ -23,6 +23,7 @@ test('authenticated purchase tool requests only bounded aggregate and projects a
   assert.equal(value.status, 'OK', JSON.stringify(value));
   assert.equal(value.aov.amount_yuan, '66.67'); assert.equal(value.aus.amount_yuan, '100.00');
   assert.equal(value.synthetic, true);
+  assert.equal(value.warehouse_cutoff, '2026-07-10');
   assert.deepEqual(calls.map(x => x.path), [
     '/api/v1/auth/me',
     '/api/v1/metrics/dashboard-purchases',

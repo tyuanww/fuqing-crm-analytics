@@ -143,6 +143,8 @@ def get_product_customer_api(body: ProductCustomerRequest, request: Request):
             compare_end_date=body.compare_end_date,
         )
     except ValueError as exc:
+        if str(exc) == "首购历史不完整，无法可靠区分新客和老客":
+            raise HTTPException(status_code=409, detail="FIRST_PURCHASE_UNAVAILABLE") from exc
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     return select_product_customer_response(
         result,

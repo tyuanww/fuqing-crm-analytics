@@ -108,6 +108,31 @@ def test_uploaded_html_has_explicit_file_origin_without_fabricating_a_session():
         PageDraft.model_validate({**body, "binding_manifest": {"bindings": [], "result_refs": ["real_result"]}})
 
 
+def test_bound_node_must_exist_in_page_mapping():
+    body = {
+        "title": "Bound report",
+        "session_id": "native_session_fixture",
+        "package": {
+            "html": '<h1 data-shine-node="n_title">标题</h1>',
+            "node_map": [{
+                "node_id": "n_title",
+                "kind": "static_element",
+                "selector": "[data-shine-node='n_title']",
+            }],
+        },
+        "binding_manifest": {
+            "result_refs": ["result_fixture_1"],
+            "bindings": [{
+                "binding_id": "bind_1",
+                "result_ref": "result_fixture_1",
+                "node_id": "n_missing",
+            }],
+        },
+    }
+    with pytest.raises(ValidationError, match="node_id"):
+        PageDraft.model_validate(body)
+
+
 def test_generate_adds_host_mappings_to_plain_html(tmp_path):
     store = PageDocumentStore(private(tmp_path / "plain-html-mappings"))
     request = PageDraft(title="Plain HTML", session_id=None, origin_file_id="file_plain",

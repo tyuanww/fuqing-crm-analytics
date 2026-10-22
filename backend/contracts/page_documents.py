@@ -260,6 +260,12 @@ class PageDraft(PageModel):
             raise ValueError("手动添加的页面不能声明已验证结果绑定")
         if self.binding_manifest.result_refs and self.package.presentation and self.package.presentation.edits:
             raise ValueError("业务绑定页面不能覆盖显示数据或局部样式")
+        node_ids = {item.node_id for item in self.package.node_map}
+        if any(
+            item.node_id is not None and item.node_id not in node_ids
+            for item in self.binding_manifest.bindings
+        ):
+            raise ValueError("binding node_id must exist in package.node_map")
         return self
 
     @field_validator("origin_path")

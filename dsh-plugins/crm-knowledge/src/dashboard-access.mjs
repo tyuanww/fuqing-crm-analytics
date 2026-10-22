@@ -136,7 +136,7 @@ export function createDashboardAccess({ baseUrl = 'http://127.0.0.1:8000', first
     querySnapshot: (sessionId, input, signal) => asset(sessionId, captureRequest(input), signal),
     queryPurchases: (sessionId, input, signal) => query(sessionId, input, signal, true),
     queryProductCustomer: (sessionId, input, signal) =>
-      named(sessionId, input, signal, queryProductCustomer, 'product-customer/v1', 'product-customer/v1'),
+      named(sessionId, input, signal, queryProductCustomer, 'product-customer/v3', 'product-customer/v3'),
     queryRfmSnapshot: (sessionId, input, signal) =>
       named(sessionId, input, signal, queryRfmSnapshot, 'rfm-snapshot/v1', 'rfm-snapshot/v1'),
     queryReadiness: (sessionId, input, signal) => named(sessionId, input, signal, queryDashboardReadiness, 'crm-dashboard-readiness/v1', 'dashboard-readiness/v1'),

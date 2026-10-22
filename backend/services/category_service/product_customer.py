@@ -85,11 +85,14 @@ def _read_transaction(conn: Any):
 
 
 def _coverage(
+    start: date,
     end: date,
+    compare_start: date,
     compare_end: date,
     data_cutoff: Optional[date],
+    data_start: Optional[date],
 ) -> dict[str, Any]:
-    if data_cutoff is None:
+    if data_cutoff is None or data_start is None:
         return {
             "data_cutoff": None,
             "current_status": "INSUFFICIENT",
@@ -97,10 +100,14 @@ def _coverage(
         }
     return {
         "data_cutoff": data_cutoff.isoformat(),
-        "current_status": "COMPLETE" if end <= data_cutoff else "INSUFFICIENT",
+        "current_status": (
+            "COMPLETE"
+            if data_start <= start <= end <= data_cutoff
+            else "INSUFFICIENT"
+        ),
         "comparison_status": (
             "COMPLETE"
-            if compare_end <= data_cutoff
+            if data_start <= compare_start <= compare_end <= data_cutoff
             else "INSUFFICIENT"
         ),
     }
@@ -235,6 +242,37 @@ def _period_metrics(
     return {str(row[0]): _metrics(tuple(row[1:])) for row in rows}
 
 
+def _assert_first_purchase_complete(
+    conn: Any,
+    *,
+    start_date: str,
+    end_date: str,
+    names: list[str],
+    metric_type: str,
+    channel: Optional[str],
+    exclude_channels: list[str],
+) -> None:
+    """Reject a period when a counted buyer has no trustworthy first-purchase date."""
+    where_sql, where_params = _build_category_period_filter(
+        start_date, end_date, metric_type, channel, exclude_channels,
+    )
+    group_sql, group_params = _group_expression(names)
+    amount_cond = "o.actual_amount >= 0" if metric_type == "GSV" else "o.actual_amount > 0"
+    sql = f"""
+    SELECT COUNT(DISTINCT o.user_id)
+    FROM orders o
+    LEFT JOIN user_first_purchase ufp ON o.user_id = ufp.user_id
+    WHERE {where_sql}
+      AND o.spu_product_class IS NOT NULL
+      AND ({amount_cond})
+      AND ({group_sql}) IS NOT NULL
+      AND ufp.first_pay_date IS NULL
+    """
+    params = [*where_params, *group_params]
+    if int(conn.execute(sql, params).fetchone()[0] or 0) > 0:
+        raise ValueError("首购历史不完整，无法可靠区分新客和老客")
+
+
 def get_product_customer_overview(
     start_date: str,
     end_date: str,
@@ -271,24 +309,47 @@ def get_product_customer_overview(
 
     conn = get_connection()
     with _read_transaction(conn):
-        data_cutoff_row = conn.execute(
-            "SELECT CAST(MAX(pay_time) AS DATE) FROM orders"
+        data_range_row = conn.execute(
+            "SELECT CAST(MIN(pay_time) AS DATE), CAST(MAX(pay_time) AS DATE) FROM orders"
         ).fetchone()
+        data_start = data_range_row[0] if data_range_row else None
         data_cutoff = (
-            data_cutoff_row[0]
-            if data_cutoff_row and data_cutoff_row[0] is not None
+            data_range_row[1]
+            if data_range_row and data_range_row[1] is not None
             else None
         )
+        compare_start = datetime.strptime(compare_start_date, "%Y-%m-%d").date()
         coverage = _coverage(
+            start,
             end,
+            compare_start,
             datetime.strptime(compare_end_date, "%Y-%m-%d").date(),
             data_cutoff,
+            data_start,
         )
         complete = (
             coverage["current_status"] == "COMPLETE"
             and coverage["comparison_status"] == "COMPLETE"
         )
         if complete:
+            _assert_first_purchase_complete(
+                conn,
+                start_date=start_date,
+                end_date=end_date,
+                names=names,
+                metric_type=metric_type,
+                channel=channel,
+                exclude_channels=excluded,
+            )
+            _assert_first_purchase_complete(
+                conn,
+                start_date=compare_start_date,
+                end_date=compare_end_date,
+                names=names,
+                metric_type=metric_type,
+                channel=channel,
+                exclude_channels=excluded,
+            )
             current = _period_metrics(
                 conn,
                 start_date=start_date,

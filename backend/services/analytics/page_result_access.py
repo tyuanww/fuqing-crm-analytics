@@ -38,6 +38,7 @@ CANCEL_FIELDS = frozenset({"op", "request_id", "instance_id"})
 MAX_RESPONSE_BYTES = 65536
 MAX_CUMULATIVE_ROWS = 2000
 MAX_PAGE_LIMIT = 50
+MAX_MANIFEST_ENTRIES = 64
 SUMMARY_PREVIEW_ROWS = 5
 
 _FAULTS = {
@@ -124,27 +125,46 @@ def _manifest_entries(manifest: object) -> list[dict[str, Any]]:
     bindings = manifest.get("bindings", [])
     if not isinstance(refs, list) or not isinstance(bindings, list):
         raise fault("INVALID_PAGE")
+    if len(refs) > MAX_MANIFEST_ENTRIES or len(bindings) > MAX_MANIFEST_ENTRIES:
+        raise fault("PACKAGE_TOO_LARGE")
     entries: list[dict[str, Any]] = []
     seen: set[str] = set()
     for item in refs:
         ref = identity(item, label="result_ref")
-        if ref not in seen:
-            entries.append({"result_ref": ref})
-            seen.add(ref)
+        if ref in seen:
+            raise fault("INVALID_PAGE")
+        entries.append({"result_ref": ref})
+        seen.add(ref)
+    declared_refs = frozenset(seen)
+    binding_ids: set[str] = set()
     for item in bindings:
         if not _record(item):
             raise fault("INVALID_PAGE")
         allowed_binding = {
+            "binding_id", "node_id", "mode",
             "result_ref", "data_ref", "unit", "time_range", "result_version",
         }
         if any(key not in allowed_binding for key in item):
             raise fault("INVALID_PAGE")
         if "result_ref" not in item:
             raise fault("INVALID_PAGE")
+        if "binding_id" in item:
+            binding_id = identity(item["binding_id"], label="binding_id")
+            if binding_id in binding_ids:
+                raise fault("INVALID_PAGE")
+            binding_ids.add(binding_id)
         ref = identity(item["result_ref"], label="result_ref")
+        if ref not in declared_refs:
+            raise fault("INVALID_PAGE")
         entry = {"result_ref": ref}
+        for key in ("binding_id", "node_id"):
+            if key in item:
+                identity(item[key], label=key)
         if "data_ref" in item:
             entry["data_ref"] = identity(item["data_ref"], label="data_ref")
+        if "mode" in item:
+            if item["mode"] not in READ_MODES:
+                raise fault("INVALID_PAGE")
         if "unit" in item:
             if not isinstance(item["unit"], str) or not item["unit"] or len(item["unit"]) > 64:
                 raise fault("INVALID_PAGE")

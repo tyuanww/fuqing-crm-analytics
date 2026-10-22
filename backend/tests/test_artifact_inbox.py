@@ -85,6 +85,22 @@ def test_binding_manifest_survives_receipt_reload_and_confirm(tmp_path):
         assert fetched_manifest["result_refs"] == manifest["result_refs"]
 
 
+def test_replayed_page_request_cannot_silently_replace_binding_manifest(tmp_path):
+    manifest = {"result_refs": ["result_fixture_1"], "bindings": [{"binding_id": "gsv", "result_ref": "result_fixture_1", "mode": "summary"}]}
+    with TestClient(app(tmp_path)) as client:
+        body = {"source": "page_package", "session_id": "session_main", "request_id": "bound-replay",
+                "title": "绑定页", "package": PACKAGE, "binding_manifest": manifest}
+        first = client.post("/api/v1/analytics/cockpit-artifacts", json=body, headers=headers())
+        assert first.status_code == 201, first.text
+
+        conflicting = client.post("/api/v1/analytics/cockpit-artifacts", json={
+            **body,
+            "binding_manifest": {"bindings": [], "result_refs": []},
+        }, headers=headers())
+        assert conflicting.status_code == 409, conflicting.text
+        assert conflicting.json()["error"]["code"] == "ARTIFACT_REQUEST_CONFLICT"
+
+
 def test_dedupe_identity_follows_source_contract(tmp_path):
     with TestClient(app(tmp_path)) as client:
         page = {"source": "page_package", "session_id": "session_a", "request_id": "request-1",

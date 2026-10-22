@@ -95,6 +95,7 @@ test('membership OK projector keeps member and non-member AUS', async t => {
   assert.equal(value.member_gsv.amount_fen, 30000);
   assert.equal(value.non_member_aus.amount_fen, 5000);
   assert.equal(value.premium.value, 3);
+  assert.equal(value.warehouse_cutoff, '2026-07-05');
   assert.equal(JSON.stringify(value).includes('is_member'), false);
 });
 
@@ -121,6 +122,7 @@ test('net gsv OK projector does not reuse dashboard gsv as net', async t => {
   assert.equal(value.net_gsv.amount_fen, 8000);
   assert.equal(value.gross_paid.amount_fen, 10000);
   assert.equal(value.succeeded_refund.amount_fen, 2000);
+  assert.equal(value.warehouse_cutoff, '2026-07-05');
   assert.match(value.limitations[0], /分列/);
 });
 

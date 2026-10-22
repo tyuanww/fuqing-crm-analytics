@@ -225,6 +225,8 @@ class ArtifactInboxStore:
                     values.append(data["path"])
             row = con.execute(f"SELECT * FROM artifacts WHERE {where} LIMIT 1", values).fetchone()
             if row is not None:
+                if json.loads(row["binding_manifest"]) != data["binding_manifest"]:
+                    fault(409, "ARTIFACT_REQUEST_CONFLICT", "同一产物请求不能更换数据绑定清单。")
                 return {**self._row(row), "idempotent": True}
             artifact_id = "artifact_" + uuid4().hex
             con.execute(
