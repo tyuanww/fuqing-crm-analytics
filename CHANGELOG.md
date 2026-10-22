@@ -92,6 +92,8 @@
 
 ### Fixed
 
+- CRM 商品新老客工具不再在省略 `products` 时返回带 `undefined` 的对象；修复 DSH 无损 JSON 拒绝，并以官方 JSON 值校验覆盖成功路径。
+
 - CRM 对话授权不再因会话暂时不活跃而被清理；授权只按 8 小时 TTL 过期，执行查询时仍要求当前会话处于活跃状态。
 
 - `free_html_page_generate` 发布 DSH 工具 DSL 可接受的精确 `node_map` 与资源结构，并返回合法字段和枚举值；修复页面源码可生成但预设因 schema 不兼容被标记 broken 的问题。

@@ -7,19 +7,21 @@
 新会话知识库问答、HTML 页面生成、驾驶舱保存和真实文本编辑已经通过实际 UI 与
 SQLite revision 联合验证。页面不是静态预览：版本 2 在刷新后仍可从页面库恢复。
 
-CRM 数据链路本轮完成账号级认证与服务连接修复，但多次重启后尚未由 owner 在同一
-新会话重新绑定 CRM，因此商品新老客、RFM 和真实经营指标查询仍待最后一次 UI 联调。
+CRM 数据链路也已完成真实 UI 联调：问数智能体取得看板 GSV 快照、全部 15 个商品的
+新老客结果和 RFM 9 分群，并生成保存为版本 2 的真实数据驾驶舱。
 
 ## 已通过
 
 | 环节 | 实测结果 |
 |---|---|
 | 新会话知识库 | 问数智能体检索 WeKnora，返回 3 个引用文档 |
-| HTML 生成 | `page-gen-growth-board-template-r3`，`PACKAGE_RECEIVED` |
-| 页面内容 | 7 个 `data-page-block` 板块完整渲染 |
-| 可编辑字段 | 页面包含 112 个 `data-page-field` |
-| 驾驶舱保存 | `page_2a5e397a6aa04196a5a3a4736eae1096`，版本 2 |
-| 真实编辑 | `board.host` 改为“增长董事会测试主持人” |
+| HTML 生成 | `page-gen-growth-board-live-20261022-r1`，`PACKAGE_RECEIVED` |
+| 商品新老客 | 15 个商品，当前期与对比期 coverage 均为 `COMPLETE` |
+| RFM | 9 个分群，杭州真实预计算缓存 |
+| GSV 快照 | `crm_s_e5eb30c32ebe40279114664bbc5ac24c` |
+| RFM 快照 | `rfm_579b8250479ae2bd935f4801d2c9924aa2ca6cf4710e7805cc065e69c64a155a` |
+| 驾驶舱保存 | `page_3a80bfa9395446fc8352fbc1b352f720`，版本 2 |
+| 真实编辑 | 执行摘要建议改为“建议（已复核）”文案 |
 | 持久化 | 页面显示、版本历史和 SQLite `PATCH` revision 一致 |
 | 预设 roster | `crm-query` 返回名称“问数智能体”，无 `broken` |
 | CRM 账号认证 | `admin` 账号级校验通过 |
@@ -33,17 +35,26 @@ CRM 数据链路本轮完成账号级认证与服务连接修复，但多次重�
 - 移除 DSH 工具 DSL 不支持的 `pattern` 和 `minimum`，改用字段描述。
 - 校验失败时直接返回合法字段和枚举值，模型可按拒绝原因修复。
 - CRM 授权不再因为会话暂时不活跃而删除；查询仍要求当前会话活跃。
+- 省略商品过滤时不再输出 `products: undefined`，商品结果通过 DSH 无损 JSON 校验。
 
 ## 运行身份
 
 - Workbench `page-tools.js`：`0a5e031ba5e5b7f8570e13a10f3aac0c0697c36b228210d60a46b3b33b934ba7`
-- CRM `host.js`：`9de2e22ad58fcc3949e2c9e9dc48854a4849203a3b36ee784c0b6b13f47ae349`
-- 页面：`page_2a5e397a6aa04196a5a3a4736eae1096`
-- 收件箱 artifact：`artifact_31e396b1b4b948f88ea49c9b368b3a78`，状态 `SAVED`
+- CRM `host.js`：`7abd766babc90f1f2ab5e7399ba799e5c1406c73572d749119e1c0c1ea454570`
+- 页面：`page_3a80bfa9395446fc8352fbc1b352f720`
+- 收件箱 artifact：`artifact_63904bd466d34293b1c02ee890a14d0b`，状态 `SAVED`
 - 页面 head：版本 2
+
+## 审计观察
+
+- 商品查询没有独立 snapshot_id，页面明确将其标为“仅工具结果”；不能与 GSV 或 RFM
+  快照混算。
+- 净额 GSV、退款截止日、新客 30 日回购基线仍不可用，页面将其列为决策验证缺口。
+- 页面目前显示 `UNBOUND_SAMPLE`，真实数字已写入源码包并保持只读，但尚未建立
+  result_ref 级绑定 manifest。
 
 ## 待完成
 
-- owner 在新的“问数智能体”会话重新连接 CRM。
-- 真实商品新老客查询、RFM 9 标签查询和页面数据绑定。
-- 页面候选确认偶发出现“保存待核对”，但本轮页面本身已通过 SQLite revision 验证为保存成功；回执对账需在真实 CRM 数据联调时一并复核。
+- Vue 页面登录后的商品新老客交互 UAT。
+- 商品结果到 `result_ref` 的显式绑定 manifest。
+- 页面候选确认偶发出现“保存待核对”；本轮页面和编辑版本均已由 SQLite 证明保存成功，但回执对账仍需复核。
