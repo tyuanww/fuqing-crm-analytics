@@ -332,6 +332,23 @@ test('product customer rejects unknown fields and malformed product lists before
   assert.equal(calls.length, 0);
 });
 
+test('backend product lookup failures remain distinguishable from malformed input', async t => {
+  const { binding } = await serveDashboard(t, (url, _req, res) => {
+    if (url.pathname === '/api/v1/category/product-customer') {
+      res.statusCode = 400;
+      res.end('{}');
+      return true;
+    }
+  });
+  const result = await queryProductCustomer({
+    start_date: '2026-07-01',
+    end_date: '2026-07-05',
+    products: ['绝不存在的测试商品XYZ'],
+  }, { sessionId: 'fixture-session', binding });
+  assert.equal(result.status, 'UNAVAILABLE');
+  assert.equal(result.reason.code, 'UNKNOWN_PRODUCT');
+});
+
 test('product customer rejects unverifiable comparison and incomplete product evidence', async t => {
   const productResponse = {
     schema_version: 'product-customer/v3',
@@ -570,4 +587,21 @@ test('RFM cache miss is explicit and does not fall back to live SQL', async t =>
     '/api/v1/auth/me',
     '/api/v1/customer-health/rfm-analysis',
   ]);
+});
+
+test('RFM backend rejection after local validation is reported as insufficient coverage', async t => {
+  const { binding } = await serveDashboard(t, (url, _req, res) => {
+    if (url.pathname === '/api/v1/customer-health/rfm-analysis') {
+      res.statusCode = 400;
+      res.end('{}');
+      return true;
+    }
+  });
+  const result = await queryRfmSnapshot({
+    start_date: '2026-07-06',
+    end_date: '2026-07-07',
+    metric_type: 'GSV',
+  }, { sessionId: 'fixture-session', binding });
+  assert.equal(result.status, 'UNAVAILABLE');
+  assert.equal(result.reason.code, 'INSUFFICIENT_COVERAGE');
 });
