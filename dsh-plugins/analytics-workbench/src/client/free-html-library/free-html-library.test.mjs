@@ -122,6 +122,7 @@ test('status spine stays visible for sample/stale and 1280 collapses rail', asyn
   assert.equal(ui.doc.querySelector('[data-testid="fhl-rail"]'), null);
   await act(async () => { store.openPage('page_stale'); });
   assert.match(ui.doc.querySelector('[data-testid="fhl-binding"]').textContent, /过期/);
+  assert.equal(ui.doc.querySelector('[data-testid="fhl-iframe"]').getAttribute('sandbox'), '');
   assert.ok(ui.doc.querySelector('[data-testid="fhl-status-spine"]'));
 });
 

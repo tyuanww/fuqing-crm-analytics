@@ -424,6 +424,11 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
           const got = await bound.documents.pullPage(pageId);
           if (!got.ok) throw new Error('页面不存在、不可用或无权限');
         }
+        if (isLive(bound) && bound.documents?.pullOverlay) {
+          const page = bound.assets.get(pageId);
+          const got = await bound.documents.pullOverlay(pageId, page?.version ?? 1);
+          if (!got.ok) throw new Error('页面修改层暂时不可用，请重试');
+        }
         if (epoch !== openEpoch) return false;
         const page = bound.assets.get(pageId);
         if (!page?.package) throw new Error('页面不存在或无权限');

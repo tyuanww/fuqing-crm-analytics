@@ -69,7 +69,7 @@ export function mountPreviewHost(root, options = {}) {
 
   function bindFrame(srcdoc) {
     iframe = el(doc, 'iframe', {
-      sandbox: FREE_PAGE_SANDBOX,
+      sandbox: options.allowScripts === false ? '' : FREE_PAGE_SANDBOX,
       referrerpolicy: FREE_PAGE_REFERRER_POLICY,
       title: '自由页面预览',
       'data-testid': options.frameTestId ?? 'fp-preview-frame',
@@ -126,6 +126,21 @@ export function mountPreviewHost(root, options = {}) {
       : null;
     const resources = previewResourceUrls(normalized.value.resources, createUrl);
     try {
+      if (options.allowScripts === false) {
+        bindFrame(buildSrcdoc({
+          html: normalized.value.html,
+          css: normalized.value.css,
+          js: normalized.value.js,
+          resources,
+          instanceId: 'static-preview',
+          pageId,
+          version,
+          nonce: 'static-preview',
+        }));
+        boundary.running({ pageId, version });
+        paint();
+        return { ok: true, instanceId: null, isolation: describeIsolation(options.isolationEvidence) };
+      }
       session = createPageSession({
         pageId,
         version,

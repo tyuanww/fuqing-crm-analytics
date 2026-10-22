@@ -1,10 +1,19 @@
 import { useEffect, useMemo } from 'react';
 import { useSyncExternalStore } from 'react';
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots';
+import { HtmlPreview } from './cockpit-page-editor.tsx';
+import type { components } from '../free-page/contract/page-contract.generated.d.ts';
 
 type PageStore = {
   subscribe(listener: () => void): () => void;
-  getSnapshot(): { current?: { page_id?: string; title?: string; package?: { html?: string } } | null };
+  getSnapshot(): { current?: {
+    page_id?: string;
+    title?: string;
+    version?: number;
+    binding_manifest?: { result_refs?: string[] } | null;
+    presentation_overlays?: Record<string, { text?: string; style?: Record<string, string>; attributes?: Record<string, string> }> | null;
+    package?: components['schemas']['PagePackage'];
+  } | null };
   openPage(pageId: string): Promise<boolean | undefined>;
 };
 
@@ -31,7 +40,8 @@ export function CockpitPageTab({ useTabInfo, pageStore, openCockpit }: PropsRunt
       <button type="button" onClick={() => { openCockpit(); }}>在驾驶舱编辑</button>
     </div>
     {current?.package?.html
-      ? <iframe title={current.title || 'HTML 产物'} sandbox="" srcDoc={current.package.html} style={{ flex: 1, width: '100%', border: 0 }} />
+      ? <HtmlPreview pkg={current.package} overlays={current.presentation_overlays ?? null} pageId={current.page_id ?? pageId}
+          version={current.version ?? 1} allowScripts={!(current.binding_manifest?.result_refs?.length)} title={current.title || 'HTML 产物'} />
       : <p role="status">正在打开页面…</p>}
   </div>;
 }

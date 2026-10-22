@@ -182,20 +182,22 @@ export function createLivePageAdapters({
     async readBinding(page) {
       const state = page?.binding_state ?? 'UNBOUND_SAMPLE';
       const bindings = page?.binding_manifest?.bindings ?? [];
+      const partial = state === 'BOUND_VERIFIED'
+        && bindings.some(item => Object.hasOwn(item, 'status') && item.status !== 'verified');
       if (resultHttp?.fetchImpl && resultHttp.base) {
         const got = await resultRequest('POST', '/binding-state', {
           body: { manifest: page?.binding_manifest ?? { bindings: [], result_refs: [] } },
         });
         return {
           binding_state: got.body?.binding_state ?? state,
-          partial: state === 'BOUND_VERIFIED' && bindings.some(item => item.status !== 'verified'),
+          partial,
           source: page?.binding_manifest?.result_refs?.[0] ?? null,
           forbidden: [...FORBIDDEN_OPS],
         };
       }
       return {
         binding_state: state,
-        partial: state === 'BOUND_VERIFIED' && bindings.some(item => item.status !== 'verified'),
+        partial,
         source: page?.binding_manifest?.result_refs?.[0] ?? null,
         forbidden: [...FORBIDDEN_OPS],
       };
@@ -370,6 +372,21 @@ export function createLivePageAdapters({
       if (!spec?.page_id || spec.page_id !== pageId) return { ok: false, reason: 'mismatched_snapshot' };
       remember(spec, pages.get(spec.page_id));
       return { ok: true, page_id: spec.page_id };
+    },
+    async pullOverlay(pageId, version) {
+      if (typeof pageId !== 'string' || !pageId || !Number.isSafeInteger(version) || version < 1) {
+        return { ok: false, reason: 'invalid_page_version' };
+      }
+      const query = new URLSearchParams({ page_id: pageId, version: String(version) });
+      const got = await editContextRequest('GET', `/overlay?${query}`);
+      if (!got.ok) return got;
+      const overlays = got.body?.overlays;
+      if (!overlays || typeof overlays !== 'object' || Array.isArray(overlays)) {
+        return { ok: false, reason: 'invalid_overlay' };
+      }
+      const page = pages.get(pageId);
+      if (page) page.presentation_overlays = clone(overlays);
+      return { ok: true, page_id: pageId, version, overlays: clone(overlays) };
     },
     async pullHistory(pageId) {
       const got = await documentsRequest('GET', `/pages/${encodeURIComponent(pageId)}/versions`);
