@@ -1,6 +1,6 @@
 /** Verbatim C0 fixtures. Not a second field authority. Tests compare these to frozen JSON. */
 
-export const C0_CONTRACT_HASH = '317110700f6043bf0cab5f3a505775c11f437f34742d02be40e52f446a11b25d';
+export const C0_CONTRACT_HASH = '2c1b9e57ae9818dbfa835a826a4bf82d3c78d1473e4a3472408e4a028a273c8a';
 export const C0_SCHEMA = 'competition-c0/v1';
 export const FIXTURE_ROOT = 'docs/hackathon/parallel-competition-2026-09-09/contracts/fixtures';
 
