@@ -94,7 +94,7 @@
 
 - 修正 query.12 side-load 只替换 `node_modules` 而 profile 清单与锁文件仍指向 query.11 的身份漂移。query.12 tarball 写入受控输入目录，清单、specifier、integrity 和锁文件原子更新，重启后插件页来源与已安装文件一致。
 
-- 新增只启动已安装 DSH profile 的入口，避免受控重启重新执行缺失输入的插件安装。CRM Compose 覆盖文件使用 `format: raw`，避免 bcrypt 密码中的 `$` 被 Compose 插值。
+- 新增只启动已安装 DSH profile 的入口，避免受控重启重新执行缺失输入的插件安装。CRM Compose 覆盖文件恢复标准 dotenv 解析，bcrypt hash 继续用单引号保护 `$`；修复 `format: raw` 把外层引号带入用户名、导致生产 `admin` 登录 401 的环境回归。
 
 - 插件生成树 provenance 改为按固定 `0644` canonical mode 比较生成文件，避免服务账号在 `umask 077` 下把同一 tarball 字节误判为漂移；profile 和 release fixture 同步显式设置权限，完整 B0 在硬化 umask 下通过。
 
