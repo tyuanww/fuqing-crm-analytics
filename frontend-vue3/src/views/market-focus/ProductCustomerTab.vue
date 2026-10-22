@@ -265,9 +265,9 @@ function fmtPctChange(v: number): string {
   return `${sign}${v.toFixed(1)}pp`
 }
 
-function changeClass(v: number): string {
-  if (v > 0) return 'text-rose-500'
-  if (v < 0) return 'text-emerald-500'
+function changeClass(v: number | null): string {
+  if (v !== null && v > 0) return 'text-rose-500'
+  if (v !== null && v < 0) return 'text-emerald-500'
   return 'text-slate-400'
 }
 
@@ -288,9 +288,14 @@ type ComparisonKey =
   | 'new_ratio_users_yoy_pp'
   | 'old_ratio_users_yoy_pp'
 
-function _cmpVal(row: TableRow, yoyKey: ComparisonKey): number {
-  if (!row.isChangeRow && !row.isYoyRow) return 0
-  return row[yoyKey] ?? 0
+function _cmpVal(row: TableRow, yoyKey: ComparisonKey): number | null {
+  if (!row.isChangeRow && !row.isYoyRow) return null
+  return row[yoyKey] ?? null
+}
+
+function comparisonCell(row: TableRow, key: ComparisonKey, format: (value: number) => string) {
+  const value = _cmpVal(row, key)
+  return h('span', { class: changeClass(value) }, value === null ? '—' : format(value))
 }
 
 const columns: DataTableColumns<Row> = [
@@ -313,7 +318,7 @@ const columns: DataTableColumns<Row> = [
     width: 95,
     align: 'right',
     render: (row) => row.isChangeRow || row.isYoyRow
-      ? h('span', { class: changeClass(_cmpVal(row, 'gsv_yoy_pct')) }, fmtYoy(_cmpVal(row, 'gsv_yoy_pct') * 100))
+      ? comparisonCell(row, 'gsv_yoy_pct', value => fmtYoy(value * 100))
       : fmtMoney(row.gsv),
   },
   {
@@ -322,7 +327,7 @@ const columns: DataTableColumns<Row> = [
     width: 95,
     align: 'right',
     render: (row) => row.isChangeRow || row.isYoyRow
-      ? h('span', { class: changeClass(_cmpVal(row, 'new_gsv_yoy_pct')) }, fmtYoy(_cmpVal(row, 'new_gsv_yoy_pct') * 100))
+      ? comparisonCell(row, 'new_gsv_yoy_pct', value => fmtYoy(value * 100))
       : fmtMoney(row.new_gsv),
   },
   {
@@ -331,7 +336,7 @@ const columns: DataTableColumns<Row> = [
     width: 95,
     align: 'right',
     render: (row) => row.isChangeRow || row.isYoyRow
-      ? h('span', { class: changeClass(_cmpVal(row, 'old_gsv_yoy_pct')) }, fmtYoy(_cmpVal(row, 'old_gsv_yoy_pct') * 100))
+      ? comparisonCell(row, 'old_gsv_yoy_pct', value => fmtYoy(value * 100))
       : fmtMoney(row.old_gsv),
   },
   {
@@ -340,7 +345,7 @@ const columns: DataTableColumns<Row> = [
     width: 85,
     align: 'right',
     render: (row) => row.isChangeRow || row.isYoyRow
-      ? h('span', { class: changeClass(_cmpVal(row, 'users_yoy_pct')) }, fmtYoy(_cmpVal(row, 'users_yoy_pct') * 100))
+      ? comparisonCell(row, 'users_yoy_pct', value => fmtYoy(value * 100))
       : fmtInt(row.users),
   },
   {
@@ -349,7 +354,7 @@ const columns: DataTableColumns<Row> = [
     width: 75,
     align: 'right',
     render: (row) => row.isChangeRow || row.isYoyRow
-      ? h('span', { class: changeClass(_cmpVal(row, 'new_users_yoy_pct')) }, fmtYoy(_cmpVal(row, 'new_users_yoy_pct') * 100))
+      ? comparisonCell(row, 'new_users_yoy_pct', value => fmtYoy(value * 100))
       : fmtInt(row.new_users),
   },
   {
@@ -358,7 +363,7 @@ const columns: DataTableColumns<Row> = [
     width: 75,
     align: 'right',
     render: (row) => row.isChangeRow || row.isYoyRow
-      ? h('span', { class: changeClass(_cmpVal(row, 'old_users_yoy_pct')) }, fmtYoy(_cmpVal(row, 'old_users_yoy_pct') * 100))
+      ? comparisonCell(row, 'old_users_yoy_pct', value => fmtYoy(value * 100))
       : fmtInt(row.old_users),
   },
   {
@@ -367,7 +372,7 @@ const columns: DataTableColumns<Row> = [
     width: 85,
     align: 'right',
     render: (row) => row.isChangeRow || row.isYoyRow
-      ? h('span', { class: changeClass(_cmpVal(row, 'aus_yoy_pct')) }, fmtYoy(_cmpVal(row, 'aus_yoy_pct') * 100))
+      ? comparisonCell(row, 'aus_yoy_pct', value => fmtYoy(value * 100))
       : fmtAus(row.aus),
   },
   {
@@ -376,7 +381,7 @@ const columns: DataTableColumns<Row> = [
     width: 90,
     align: 'right',
     render: (row) => row.isChangeRow || row.isYoyRow
-      ? h('span', { class: changeClass(_cmpVal(row, 'new_aus_yoy_pct')) }, fmtYoy(_cmpVal(row, 'new_aus_yoy_pct') * 100))
+      ? comparisonCell(row, 'new_aus_yoy_pct', value => fmtYoy(value * 100))
       : fmtAus(row.new_aus),
   },
   {
@@ -385,7 +390,7 @@ const columns: DataTableColumns<Row> = [
     width: 90,
     align: 'right',
     render: (row) => row.isChangeRow || row.isYoyRow
-      ? h('span', { class: changeClass(_cmpVal(row, 'old_aus_yoy_pct')) }, fmtYoy(_cmpVal(row, 'old_aus_yoy_pct') * 100))
+      ? comparisonCell(row, 'old_aus_yoy_pct', value => fmtYoy(value * 100))
       : fmtAus(row.old_aus),
   },
   {
@@ -394,7 +399,7 @@ const columns: DataTableColumns<Row> = [
     width: 100,
     align: 'right',
     render: (row) => row.isChangeRow || row.isYoyRow
-      ? h('span', { class: changeClass(_cmpVal(row, 'new_ratio_gsv_yoy_pp')) }, fmtPctChange(_cmpVal(row, 'new_ratio_gsv_yoy_pp') * 100))
+      ? comparisonCell(row, 'new_ratio_gsv_yoy_pp', value => fmtPctChange(value * 100))
       : fmtPct(row.new_ratio_gsv),
   },
   {
@@ -403,7 +408,7 @@ const columns: DataTableColumns<Row> = [
     width: 100,
     align: 'right',
     render: (row) => row.isChangeRow || row.isYoyRow
-      ? h('span', { class: changeClass(_cmpVal(row, 'old_ratio_gsv_yoy_pp')) }, fmtPctChange(_cmpVal(row, 'old_ratio_gsv_yoy_pp') * 100))
+      ? comparisonCell(row, 'old_ratio_gsv_yoy_pp', value => fmtPctChange(value * 100))
       : fmtPct(row.old_ratio_gsv),
   },
   {
@@ -412,7 +417,7 @@ const columns: DataTableColumns<Row> = [
     width: 100,
     align: 'right',
     render: (row) => row.isChangeRow || row.isYoyRow
-      ? h('span', { class: changeClass(_cmpVal(row, 'new_ratio_users_yoy_pp')) }, fmtPctChange(_cmpVal(row, 'new_ratio_users_yoy_pp') * 100))
+      ? comparisonCell(row, 'new_ratio_users_yoy_pp', value => fmtPctChange(value * 100))
       : fmtPct(row.new_ratio_users),
   },
   {
@@ -421,7 +426,7 @@ const columns: DataTableColumns<Row> = [
     width: 100,
     align: 'right',
     render: (row) => row.isChangeRow || row.isYoyRow
-      ? h('span', { class: changeClass(_cmpVal(row, 'old_ratio_users_yoy_pp')) }, fmtPctChange(_cmpVal(row, 'old_ratio_users_yoy_pp') * 100))
+      ? comparisonCell(row, 'old_ratio_users_yoy_pp', value => fmtPctChange(value * 100))
       : fmtPct(row.old_ratio_users),
   },
 ]

@@ -30,19 +30,19 @@ export interface TableRow {
   old_ratio_gsv: number
   new_ratio_users: number
   old_ratio_users: number
-  gsv_yoy_pct?: number
-  new_gsv_yoy_pct?: number
-  old_gsv_yoy_pct?: number
-  users_yoy_pct?: number
-  new_users_yoy_pct?: number
-  old_users_yoy_pct?: number
-  aus_yoy_pct?: number
-  new_aus_yoy_pct?: number
-  old_aus_yoy_pct?: number
-  new_ratio_gsv_yoy_pp?: number
-  old_ratio_gsv_yoy_pp?: number
-  new_ratio_users_yoy_pp?: number
-  old_ratio_users_yoy_pp?: number
+  gsv_yoy_pct?: number | null
+  new_gsv_yoy_pct?: number | null
+  old_gsv_yoy_pct?: number | null
+  users_yoy_pct?: number | null
+  new_users_yoy_pct?: number | null
+  old_users_yoy_pct?: number | null
+  aus_yoy_pct?: number | null
+  new_aus_yoy_pct?: number | null
+  old_aus_yoy_pct?: number | null
+  new_ratio_gsv_yoy_pp?: number | null
+  old_ratio_gsv_yoy_pp?: number | null
+  new_ratio_users_yoy_pp?: number | null
+  old_ratio_users_yoy_pp?: number | null
 }
 
 function weekLabel(range: ProductWeekResult['range']): string {
@@ -51,8 +51,8 @@ function weekLabel(range: ProductWeekResult['range']): string {
   return `${start.getUTCMonth() + 1}/${start.getUTCDate()}-${end.getUTCMonth() + 1}/${end.getUTCDate()}`
 }
 
-function ratioChange(latest: number, previous: number): number {
-  return previous > 0 ? (latest - previous) / previous : 0
+function ratioChange(latest: number, previous: number): number | null {
+  return previous > 0 ? (latest - previous) / previous : null
 }
 
 export function buildProductCustomerTableRows(
@@ -149,19 +149,19 @@ export function buildProductCustomerTableRows(
       gsv: 0, new_gsv: 0, old_gsv: 0, users: 0, new_users: 0, old_users: 0,
       aus: 0, new_aus: 0, old_aus: 0,
       new_ratio_gsv: 0, old_ratio_gsv: 0, new_ratio_users: 0, old_ratio_users: 0,
-      gsv_yoy_pct: storeTtl?.gsv_yoy ?? yoy?.gsv ?? 0,
-      new_gsv_yoy_pct: storeTtl?.new_gsv_yoy ?? yoy?.new_gsv ?? 0,
-      old_gsv_yoy_pct: storeTtl?.old_gsv_yoy ?? yoy?.old_gsv ?? 0,
-      users_yoy_pct: storeTtl?.users_yoy ?? yoy?.users ?? 0,
-      new_users_yoy_pct: storeTtl?.new_users_yoy ?? yoy?.new_users ?? 0,
-      old_users_yoy_pct: storeTtl?.old_users_yoy ?? yoy?.old_users ?? 0,
-      aus_yoy_pct: storeTtl?.aus_yoy ?? yoy?.aus ?? 0,
-      new_aus_yoy_pct: storeTtl?.new_aus_yoy ?? yoy?.new_aus ?? 0,
-      old_aus_yoy_pct: storeTtl?.old_aus_yoy ?? yoy?.old_aus ?? 0,
-      new_ratio_gsv_yoy_pp: storeTtl?.new_ratio_yoy ?? yoy?.new_ratio_ppt ?? 0,
-      old_ratio_gsv_yoy_pp: storeTtl?.old_ratio_yoy ?? yoy?.old_ratio_ppt ?? 0,
-      new_ratio_users_yoy_pp: storeTtl?.new_users_ratio_yoy ?? yoy?.new_users_ratio_ppt ?? 0,
-      old_ratio_users_yoy_pp: storeTtl?.old_users_ratio_yoy ?? yoy?.old_users_ratio_ppt ?? 0,
+      gsv_yoy_pct: storeTtl?.gsv_yoy ?? yoy?.gsv ?? null,
+      new_gsv_yoy_pct: storeTtl?.new_gsv_yoy ?? yoy?.new_gsv ?? null,
+      old_gsv_yoy_pct: storeTtl?.old_gsv_yoy ?? yoy?.old_gsv ?? null,
+      users_yoy_pct: storeTtl?.users_yoy ?? yoy?.users ?? null,
+      new_users_yoy_pct: storeTtl?.new_users_yoy ?? yoy?.new_users ?? null,
+      old_users_yoy_pct: storeTtl?.old_users_yoy ?? yoy?.old_users ?? null,
+      aus_yoy_pct: storeTtl?.aus_yoy ?? yoy?.aus ?? null,
+      new_aus_yoy_pct: storeTtl?.new_aus_yoy ?? yoy?.new_aus ?? null,
+      old_aus_yoy_pct: storeTtl?.old_aus_yoy ?? yoy?.old_aus ?? null,
+      new_ratio_gsv_yoy_pp: storeTtl?.new_ratio_yoy ?? yoy?.new_ratio_ppt ?? null,
+      old_ratio_gsv_yoy_pp: storeTtl?.old_ratio_yoy ?? yoy?.old_ratio_ppt ?? null,
+      new_ratio_users_yoy_pp: storeTtl?.new_users_ratio_yoy ?? yoy?.new_users_ratio_ppt ?? null,
+      old_ratio_users_yoy_pp: storeTtl?.old_users_ratio_yoy ?? yoy?.old_users_ratio_ppt ?? null,
     })
   }
 

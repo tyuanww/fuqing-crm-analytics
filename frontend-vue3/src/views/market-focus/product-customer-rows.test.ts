@@ -86,4 +86,13 @@ describe('product customer weekly rows', () => {
     expect(productRows.at(-1)?.weekLabel).toBe('本周对比去年同期')
     expect(productRows.at(-1)?.gsv_yoy_pct).toBeCloseTo(0.1)
   })
+
+  it('keeps a zero baseline non-comparable instead of reporting zero growth', () => {
+    const groups = buildProductCustomerTableRows([
+      result('2026-06-22', '2026-06-28', metric({ gsv: 0, new_gsv: 0, old_gsv: 0 })),
+      result('2026-06-29', '2026-07-05', metric()),
+    ])
+    const productRows = groups.find(group => group.name === '爆款面膜E')?.rows ?? []
+    expect(productRows.at(-2)?.gsv_yoy_pct).toBeNull()
+  })
 })
