@@ -1,6 +1,6 @@
 # 独立知识插件候选
 
-`@shine-mage/dsh-knowledge@0.0.0-candidate.1` 拥有公开指标解释、教材检索、引用展开与图谱查询。固定 DSH `0.1.7-rc.2`、Cordis `4.0.2`、Node 24；不携带 CRM 登录/UI、指标查询实现、Python、业务数据或凭据。CRM 包保留原有身份，但已移出这些知识工具。
+`@shine-mage/dsh-knowledge@0.0.0-candidate.1` 拥有公开指标解释、教材检索、引用展开与图谱查询。固定 DSH `0.1.7-rc.2`、Cordis `4.0.4`、Node 24；不携带 CRM 登录/UI、指标查询实现、Python、业务数据或凭据。CRM 包保留原有身份，但已移出这些知识工具。
 
 | 公开入口 | 工具 | 配置和依赖 |
 |---|---|---|

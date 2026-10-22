@@ -37,3 +37,13 @@ test('published leaf files do not expose source paths as runtime exports', async
     assert.ok(manifest.files.includes('bundled-dependencies.json'));
   }
 });
+
+test('CRM and Knowledge docs match their declared local peer pins', async () => {
+  for (const name of ['crm-knowledge', 'knowledge']) {
+    const manifest = JSON.parse(await readFile(join(root, 'dsh-plugins', name, 'package.json'), 'utf8'));
+    const readme = await readFile(join(root, 'dsh-plugins', name, 'README.md'), 'utf8');
+    const peers = manifest.peerDependencies ?? {};
+    if (peers['@deepseek-ai/dsh-tools']) assert.ok(readme.includes(`DSH \`${peers['@deepseek-ai/dsh-tools']}\``), `${name} README DSH pin drift`);
+    if (peers['@deepseek-ai/cordis']) assert.ok(readme.includes(`Cordis \`${peers['@deepseek-ai/cordis']}\``), `${name} README Cordis pin drift`);
+  }
+});

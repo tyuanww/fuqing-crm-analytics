@@ -1,6 +1,6 @@
 # CRM 指标与分析候选插件
 
-发布 peer：DSH `0.2.1-rc.1`、Cordis `4.0.5`，与杭州现场一致；Node 24。仓库本地回归仍使用兼容基线 `0.1.7-rc.2`，发布包必须再从杭州 0.2.1 runtime 的固定 upstream 构建并生成 provenance，本地类型检查不能替代目标版本验收。插件运行不需要 Python；服务和跨服务测试另用锁定 Python 3.14+。独立插件，包含显式配置的合成服务客户端及默认未连接的看板 GSV HTTP 适配，通过 analytics-workbench 的可选 `cockpit.crm` 插槽展示引用，不修改 DSH 上游或比赛事实合同。构建依赖只读复用已准备好的固定 checkout，不下载或自动安装。
+主仓构建 peer：DSH `0.1.7-rc.2`、Cordis `4.0.4`、Node 24。杭州现役 side-load 仍是独立的 DSH `0.2.1-rc.1`、Cordis `4.0.5` 运行实例，主仓回归不能替代线上验收。插件运行不需要 Python；服务和跨服务测试另用锁定 Python 3.14+。独立插件，包含显式配置的合成服务客户端及默认未连接的看板 GSV HTTP 适配，通过 analytics-workbench 的可选 `cockpit.crm` 插槽展示引用，不修改 DSH 上游或比赛事实合同。构建依赖只读复用已准备好的固定 checkout，不下载或自动安装。
 
 本包保留身份 `@shine-mage/dsh-crm-knowledge`。杭州现役 side-load 为 `0.0.0-crm.5`，插件页显示 CRM Host 与客户端 `2/2` 运行中；商品新老客、RFM 快照和对应健康字段已有合同与部署证据。它只拥有 CRM 登录、指标与分析；公开知识解释和图谱工具已迁入[独立知识插件](../knowledge/README.md)。两个包各自构建、测试和打包，生产源码没有相互导入，也不引用 workbench 内部实现。CRM 只携带指标 HTTP API 1.0.0 客户端，不查找主仓目录或启动 Python。未配置合成服务时返回 `NOT_AVAILABLE / SERVICE_NOT_CONFIGURED`；真实看板登录与查询不会改查合成源。当前运行边界见[审查问题修复回执](../../docs/hackathon/evidence/dsh-review-fixes-20261022.md)。
 
