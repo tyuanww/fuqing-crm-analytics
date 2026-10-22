@@ -30,7 +30,10 @@ test('host page generate targets the visible session and reuses the waiter reque
 test('page tool delivers a valid free-page package', async () => {
   const receipt = await executePageTool(PAGE_GENERATE_TOOL_NAME, {
     request_id: REQUEST_ID,
-    package: { html: '<html><h1>原生Agent标题</h1></html>', css: 'h1{}', js: 'window.__g=true' },
+    package: {
+      html: '<html><h1 data-shine-node="title">原生Agent标题</h1></html>', css: 'h1{}', js: 'window.__g=true',
+      node_map: [{ node_id: 'title', kind: 'static_element', selector: "[data-shine-node='title']" }],
+    },
   }, execution);
   assert.equal(receipt.status, 'PACKAGE_RECEIVED');
   assert.equal(receipt.schema_version, PAGE_TOOL_RESULT_SCHEMA);
@@ -38,6 +41,27 @@ test('page tool delivers a valid free-page package', async () => {
   assert.equal(receipt.published, false);
   assert.equal(receipt.package.html.includes('原生Agent标题'), true);
   assert.equal(Object.hasOwn(PAGE_TOOL_PARAMETERS, PAGE_GENERATE_TOOL_NAME), true);
+});
+
+test('page tool schema exposes the exact node_map contract', () => {
+  const nodeMap = PAGE_TOOL_PARAMETERS[PAGE_GENERATE_TOOL_NAME].package.properties.node_map;
+  assert.equal(nodeMap.items.additionalProperties, false);
+  assert.deepEqual(Object.keys(nodeMap.items.properties), ['node_id', 'kind', 'selector']);
+  assert.deepEqual(nodeMap.items.properties.kind.enum, ['static_element', 'dynamic_region', 'whole_page']);
+  for (const key of ['node_id', 'kind', 'selector']) assert.equal(nodeMap.items.properties[key].required, true);
+});
+
+test('page tool reports exact node_map fields when a caller sends an unknown key', async () => {
+  const receipt = await executePageTool(PAGE_GENERATE_TOOL_NAME, {
+    request_id: REQUEST_ID,
+    package: {
+      html: '<html><h1 data-shine-node="title">标题</h1></html>',
+      node_map: [{ node_id: 'title', kind: 'static_element', selector: 'h1', label: '标题' }],
+    },
+  }, execution);
+  assert.equal(receipt.status, 'REFUSED');
+  assert.equal(receipt.error.code, 'INVALID_PAGE');
+  assert.match(receipt.error.message, /node_id,kind,selector/);
 });
 
 test('page tool refuses bad packages and never saves or calls HTTP', async () => {

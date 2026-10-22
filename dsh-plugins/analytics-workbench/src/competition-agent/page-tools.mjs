@@ -16,8 +16,30 @@ export const PAGE_TOOL_PARAMETERS = Object.freeze({
         html: { type: 'string', required: true },
         css: { type: 'string' },
         js: { type: 'string' },
-        resources: { type: 'array', items: { type: 'object', additionalProperties: true } },
-        node_map: { type: 'array', items: { type: 'object', additionalProperties: true } },
+        resources: {
+          type: 'array',
+          items: {
+            type: 'object', additionalProperties: false,
+            properties: {
+              resource_id: { type: 'string', required: true, description: 'Unique resource identifier using letters, digits, underscore, dot, colon or hyphen.' },
+              content_type: { type: 'string', required: true, description: 'Resource MIME type.' },
+              sha256: { type: 'string', required: true, pattern: '^[0-9a-f]{64}$' },
+              byte_length: { type: 'integer', required: true, minimum: 0 },
+            },
+          },
+        },
+        node_map: {
+          type: 'array',
+          description: 'Optional explicit source-node index. Prefer an empty array when the HTML already uses data-shine-node or data-shine-region markers. Every item accepts exactly node_id, kind and selector.',
+          items: {
+            type: 'object', additionalProperties: false,
+            properties: {
+              node_id: { type: 'string', required: true, pattern: '^[A-Za-z0-9_.:-]{1,128}$', description: 'Stable node identifier. It must match the identifier used in data-shine-node or data-shine-region.' },
+              kind: { type: 'string', required: true, enum: ['static_element', 'dynamic_region', 'whole_page'], description: 'Use static_element for data-shine-node, dynamic_region for data-shine-region, and whole_page only for an explicit whole-page target.' },
+              selector: { type: 'string', required: true, description: "Non-empty CSS selector locating the node, for example [data-shine-node='title']." },
+            },
+          },
+        },
       },
       description: 'One free-page/v1 source package authored in this reply. Free HTML/CSS/JS; not a BoardSpec. Page scripts may only read data the user explicitly authorized in this session.',
     },
