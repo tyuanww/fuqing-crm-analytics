@@ -123,6 +123,7 @@ class ProductCustomerYoY(BaseModel):
 
 class ProductCustomerProduct(BaseModel):
     name: str
+    display_name: str
     spu_classes: List[str]
     status: Literal["OK", "EMPTY"]
     current: ProductCustomerMetrics
@@ -131,7 +132,7 @@ class ProductCustomerProduct(BaseModel):
 
 
 class ProductCustomerResponse(BaseModel):
-    schema_version: Literal["product-customer/v1"] = "product-customer/v1"
+    schema_version: Literal["product-customer/v2"] = "product-customer/v2"
     source: Literal["orders+user_first_purchase"] = "orders+user_first_purchase"
     date_start: str
     date_end: str

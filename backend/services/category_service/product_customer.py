@@ -13,12 +13,15 @@ from backend.services.asset_focus_service._helpers import (
 )
 
 from .overview import _build_category_period_filter
+from .product_identity import PRODUCT_DISPLAY_NAMES, resolve_product_names
 
 
 PRODUCT_GROUPS: dict[str, list[str]] = {
     **PRODUCT_TO_SPU_CLASSES,
     **PRODUCT_TO_SPU_CLASSES_OTHER,
 }
+if set(PRODUCT_DISPLAY_NAMES) != set(PRODUCT_GROUPS):
+    raise RuntimeError("商品展示映射与商品分组目录不一致")
 
 _ZERO_METRICS: dict[str, float | int] = {
     "gsv": 0.0,
@@ -213,12 +216,9 @@ def get_product_customer_overview(
     if metric_type != "GSV":
         raise ValueError("商品新老客当前只支持 GSV")
 
-    names = list(PRODUCT_GROUPS) if products is None else list(dict.fromkeys(products))
+    names = list(PRODUCT_GROUPS) if products is None else resolve_product_names(products)
     if not names:
         raise ValueError("至少选择一个商品")
-    unknown = [name for name in names if name not in PRODUCT_GROUPS]
-    if unknown:
-        raise ValueError(f"未登记商品: {', '.join(unknown)}")
 
     if bool(compare_start_date) != bool(compare_end_date):
         raise ValueError("对比期起止日期必须同时提供")
@@ -270,6 +270,7 @@ def get_product_customer_overview(
         comparison_metrics = comparison.get(name, dict(_ZERO_METRICS))
         result.append({
             "name": name,
+            "display_name": PRODUCT_DISPLAY_NAMES[name],
             "spu_classes": list(PRODUCT_GROUPS[name]),
             "status": "OK" if current_metrics["users"] > 0 else "EMPTY",
             "current": current_metrics,
@@ -278,7 +279,7 @@ def get_product_customer_overview(
         })
 
     return {
-        "schema_version": "product-customer/v1",
+        "schema_version": "product-customer/v2",
         "source": "orders+user_first_purchase",
         "date_start": start_date,
         "date_end": end_date,

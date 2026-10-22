@@ -1,6 +1,6 @@
 {
   "name": "@shine-mage/dsh-query-agent",
-  "version": "0.0.0-query.12",
+  "version": "0.0.0-query.13",
   "private": true,
   "packageManager": "pnpm@11.28.2",
   "engines": {

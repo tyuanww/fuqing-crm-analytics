@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 
+from backend.services.category_display import unique_display_names
 from backend.services.category_service import product_customer
 
 
@@ -18,6 +19,15 @@ def _insert_order(handle, order_id: str, user_id: str, pay_time: str, amount: fl
         VALUES (?, ?, ?, ?, '货架', FALSE, FALSE, FALSE, '已付款', '', '护肤', ?, ?, '护肤')
         """,
         [order_id, user_id, pay_time, amount, spu_class, spu_class],
+    )
+
+
+def test_product_display_names_are_stable_and_match_category_masking():
+    assert dict(product_customer.PRODUCT_DISPLAY_NAMES) == unique_display_names(
+        product_customer.PRODUCT_GROUPS
+    )
+    assert len(set(product_customer.PRODUCT_DISPLAY_NAMES.values())) == len(
+        product_customer.PRODUCT_DISPLAY_NAMES
     )
 
 
@@ -46,13 +56,15 @@ def test_product_customer_deduplicates_users_across_spu_classes(
         products=["经典膜"],
     )
 
-    assert result["schema_version"] == "product-customer/v1"
+    assert result["schema_version"] == "product-customer/v2"
     assert result["source"] == "orders+user_first_purchase"
     assert result["new_old_cutoff"] == "2026-06-30"
     assert result["comparison_new_old_cutoff"] == "2025-06-30"
     assert result["data_cutoff"] == "2026-07-03"
     product = result["products"][0]
     assert product["status"] == "OK"
+    assert product["display_name"] == product_customer.PRODUCT_DISPLAY_NAMES["经典膜"]
+    assert product["display_name"].startswith("爆款面膜")
     assert product["current"] == {
         "gsv": 190.0,
         "users": 2,
@@ -88,6 +100,44 @@ def test_product_customer_rejects_unknown_products(monkeypatch, tmp_duckdb_with_
             "2026-07-01",
             "2026-07-05",
             products=["不存在的商品"],
+        )
+
+
+def test_product_customer_accepts_unique_display_name_alias(
+    monkeypatch,
+    tmp_duckdb_with_synthetic_orders,
+):
+    monkeypatch.setattr(
+        product_customer,
+        "get_connection",
+        lambda: tmp_duckdb_with_synthetic_orders,
+    )
+    display_name = product_customer.PRODUCT_DISPLAY_NAMES["经典膜"]
+    result = product_customer.get_product_customer_overview(
+        "2026-07-01",
+        "2026-07-05",
+        products=[display_name],
+    )
+
+    assert result["products"][0]["name"] == "经典膜"
+    assert result["products"][0]["display_name"] == display_name
+
+
+def test_product_customer_rejects_duplicate_raw_and_display_selection(
+    monkeypatch,
+    tmp_duckdb_with_synthetic_orders,
+):
+    monkeypatch.setattr(
+        product_customer,
+        "get_connection",
+        lambda: tmp_duckdb_with_synthetic_orders,
+    )
+    display_name = product_customer.PRODUCT_DISPLAY_NAMES["经典膜"]
+    with pytest.raises(ValueError, match="商品选择重复"):
+        product_customer.get_product_customer_overview(
+            "2026-07-01",
+            "2026-07-05",
+            products=["经典膜", display_name],
         )
 
 

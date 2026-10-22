@@ -23,7 +23,7 @@ export function channelHierarchy() {
   };
 }
 const VERSION = 'dashboard-gsv/observed-v1';
-const PRODUCT_CUSTOMER_VERSION = 'product-customer/v1';
+const PRODUCT_CUSTOMER_VERSION = 'product-customer/v2';
 const RFM_SNAPSHOT_VERSION = 'rfm-snapshot/v1';
 const RFM_SEGMENTS = Object.freeze([
   '重要价值客户', '重要保持客户', '重要发展客户', '重要挽留客户',
@@ -521,17 +521,22 @@ export function normalizeProductCustomer(value, filters, dataKind, warehouseCuto
   if (value.exclude_channels.length !== expectedExcluded.length ||
       value.exclude_channels.some((channel, index) => channel !== expectedExcluded[index])) fail('INVALID_RESPONSE');
   const names = new Set();
+  const displayNames = new Set();
   const products = value.products.map(item => {
-    if (!item || typeof item.name !== 'string' || !item.name || names.has(item.name) || !Array.isArray(item.spu_classes) ||
+    if (!item || typeof item.name !== 'string' || !item.name || names.has(item.name) ||
+        typeof item.display_name !== 'string' || !item.display_name || displayNames.has(item.display_name) ||
+        !Array.isArray(item.spu_classes) ||
         !['OK', 'EMPTY'].includes(item.status) ||
         !item.spu_classes.every(name => typeof name === 'string' && name)) fail('INVALID_RESPONSE');
     names.add(item.name);
+    displayNames.add(item.display_name);
     const current = productMetric(item.current);
     const comparison = productMetric(item.comparison);
     if (item.status === 'EMPTY' && current.users !== 0) fail('INVALID_RESPONSE');
     if (item.status === 'OK' && current.users === 0) fail('INVALID_RESPONSE');
     return {
       name: item.name,
+      display_name: item.display_name,
       spu_classes: [...item.spu_classes],
       status: item.status,
       current,
@@ -540,7 +545,8 @@ export function normalizeProductCustomer(value, filters, dataKind, warehouseCuto
     };
   });
   if (filters.products && (products.length !== filters.products.length ||
-      filters.products.some(name => !names.has(name)))) fail('INVALID_RESPONSE');
+      filters.products.some(requested => !products.some(item =>
+        requested === item.name || requested === item.display_name)))) fail('INVALID_RESPONSE');
   return {
     status: 'OK',
     schema_version: PRODUCT_CUSTOMER_VERSION,

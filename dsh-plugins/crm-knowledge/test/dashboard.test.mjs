@@ -200,7 +200,7 @@ test('knowledge explicitly separates current dashboard GSV and net candidate', (
 
 test('product customer query uses one authenticated POST and preserves source facts', async t => {
   const productResponse = {
-    schema_version: 'product-customer/v1',
+    schema_version: 'product-customer/v2',
     source: 'orders+user_first_purchase',
     date_start: '2026-07-01',
     date_end: '2026-07-05',
@@ -214,6 +214,7 @@ test('product customer query uses one authenticated POST and preserves source fa
     exclude_channels: [],
     products: [{
       name: '经典膜',
+      display_name: '爆款面膜E',
       spu_classes: ['经典膜', '【妆】经典膜'],
       status: 'OK',
       current: {
@@ -250,10 +251,11 @@ test('product customer query uses one authenticated POST and preserves source fa
   const result = await queryProductCustomer({
     start_date: '2026-07-01',
     end_date: '2026-07-05',
-    products: ['经典膜'],
+    products: ['爆款面膜E'],
   }, { sessionId: 'fixture-session', binding });
   assert.equal(result.status, 'OK', JSON.stringify(result));
   assert.equal(result.current, undefined);
+  assert.equal(result.products[0].display_name, '爆款面膜E');
   assert.deepEqual(result.products[0].spu_classes, ['经典膜', '【妆】经典膜']);
   assert.equal(result.products[0].current.users, 2);
   assert.equal(result.products[0].current.old_gsv + result.products[0].current.new_gsv, 190);
@@ -264,7 +266,7 @@ test('product customer query uses one authenticated POST and preserves source fa
   assert.deepEqual(postedBody, {
     start_date: '2026-07-01',
     end_date: '2026-07-05',
-    products: ['经典膜'],
+    products: ['爆款面膜E'],
     metric_type: 'GSV',
     exclude_channels: [],
   });
@@ -293,7 +295,7 @@ test('product customer rejects unknown fields and malformed product lists before
 
 test('product customer rejects unverifiable comparison and incomplete product evidence', async t => {
   const productResponse = {
-    schema_version: 'product-customer/v1',
+    schema_version: 'product-customer/v2',
     source: 'orders+user_first_purchase',
     date_start: '2026-07-01',
     date_end: '2026-07-05',
@@ -307,6 +309,7 @@ test('product customer rejects unverifiable comparison and incomplete product ev
     exclude_channels: [],
     products: [{
       name: '经典膜',
+      display_name: '爆款面膜E',
       spu_classes: ['经典膜', '【妆】经典膜'],
       status: 'OK',
       current: {
@@ -331,6 +334,7 @@ test('product customer rejects unverifiable comparison and incomplete product ev
   for (const mutate of [
     value => { value.compare_start_date = '2025-07-02'; },
     value => { value.comparison_new_old_cutoff = '2025-07-01'; },
+    value => { delete value.products[0].display_name; },
   ]) {
     const payload = structuredClone(productResponse);
     mutate(payload);
