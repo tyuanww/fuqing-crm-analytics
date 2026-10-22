@@ -44,6 +44,7 @@ const MESSAGES = Object.freeze({
   UPSTREAM_ERROR: 'CRM 服务未能返回有效结果；没有改用其他资料源。',
   INVALID_RESPONSE: 'CRM 返回内容不符合所需数据合同，未输出业务金额或分群。',
   INCONSISTENT_RESULT: '看板概览与日趋势金额不一致，未输出业务金额，请核对数据版本或接口。',
+  INSUFFICIENT_COVERAGE: '请求区间超出仓库数据截止日，未输出业务金额或人数。',
   DATA_WARNING: 'CRM 接口返回数据警告，本次结果暂不可用；请在看板核对查询区间与数据水位。',
   TIMEOUT: 'CRM 查询超时；未自动重试。',
   CANCELLED: 'CRM 查询已取消。',
@@ -252,10 +253,15 @@ async function queryDashboard(input, options, purchases = false) {
     const trend = await getJson(base, '/api/v1/metrics/trend', params, binding, combined);
     combined.throwIfAborted();
     const result = normalizeDashboard(overview, trend, filters, binding.dataKind);
+    let cutoffDate = null;
     try {
       const cutoff = await getJson(base, '/api/v1/metrics/cutoff', new URLSearchParams(), binding, combined);
-      if (typeof cutoff?.cutoff_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(cutoff.cutoff_date)) result.warehouse_cutoff = cutoff.cutoff_date;
+      if (typeof cutoff?.cutoff_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(cutoff.cutoff_date)) {
+        cutoffDate = cutoff.cutoff_date;
+        result.warehouse_cutoff = cutoffDate;
+      }
     } catch { /* a missing cutoff must not hide a valid GSV */ }
+    if (cutoffDate && filters.end_date > cutoffDate) fail('INSUFFICIENT_COVERAGE');
     return result;
   } catch (error) {
     let code = 'UPSTREAM_ERROR';

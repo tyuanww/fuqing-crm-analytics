@@ -63,6 +63,33 @@ test('channel and low-price switches use identical repeated query parameters', a
   assert.deepEqual(result.filters.exclude_channels, LOW_PRICE_CHANNELS);
 });
 
+test('requests after the warehouse cutoff fail instead of returning zero as OK', async t => {
+  const outOfCoverage = { start_date: '2026-07-06', end_date: '2026-07-07' };
+  const { binding } = await serveDashboard(t, (url, _req, res) => {
+    if (url.pathname.endsWith('/me')) return false;
+    if (url.pathname.endsWith('/overview')) {
+      res.end(JSON.stringify({
+        ...overview,
+        date_range: { start: outOfCoverage.start_date, end: outOfCoverage.end_date, cutoff: null },
+        amount: 0,
+        new_users: 0,
+        old_users: 0,
+        new_user_amount: 0,
+        old_user_amount: 0,
+        new_user_ratio: 0,
+        old_user_ratio: 0,
+      }));
+    } else if (url.pathname.endsWith('/trend')) {
+      res.end(JSON.stringify({ ...trend, dates: [], amounts: [] }));
+    } else if (url.pathname.endsWith('/cutoff')) {
+      res.end(JSON.stringify({ cutoff_date: '2026-07-05' }));
+    }
+    return true;
+  });
+
+  unavailable(await query(outOfCoverage, binding), 'INSUFFICIENT_COVERAGE');
+});
+
 test('missing login and another host session never request data', async t => {
   const { binding, calls } = await serveDashboard(t);
   unavailable(await query(request, null), 'NOT_CONNECTED');
