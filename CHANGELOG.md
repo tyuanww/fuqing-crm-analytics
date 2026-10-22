@@ -21,6 +21,8 @@
 
 ### Added
 
+- CRM 领域包维护源前进到 `0.0.0-crm.3`，问数智能体维护源前进到 `0.0.0-query.12`，新增商品级新老客查询与 RFM 预计算快照读取。商品映射多个 SPU class 后以用户去重，避免前端直接相加品类人数造成重复计数；默认同比按自然年同月日计算，对比期分群截止日单独返回，商品口径暂时只开放 GSV。客户端 fail-closed 校验商品集合、RFM 9 个唯一分群标签和金额/人数/占比一致性；RFM 保持 cache-only，缓存 miss 不触发现场大库扫描。问数 Agent 的提示词把经营诊断和增长复盘收束为“证据、反证、决策、行动、复核”链，HTML 必须呈现截止日与可信快照，历史数据不得冒充未来增量。线上仍为 crm.2 / query.11，新版本尚未生成或部署。
+
 - “问数智能体”配置型 bundle 前进到 `0.0.0-query.11`：空白会话切到 `crm-query` 时隐藏已知终端、文件和协作工具，并对执行使用 12 工具 allowlist guard；query.10 的全工具限制会误删 CRM、WeKnora 和页面业务工具，已作为失败候选保留记录。真实会话确认模型路由为 `deepseek-account / deepseek-flash / off`，`list_agents` 虽仍由上层组合可见，实际执行返回 `CRM_QUERY_TOOL_NOT_ALLOWED`。
 
 - 历史回滚证据：中间版本 `@shine-mage/dsh-query-agent@0.0.0-query.9` 曾作为“问数智能体”预设维护源，复用指标查询、WeKnora 资料和可选页面交付，不注册私有教材图谱工具，也不在未配置知识服务时暴露 `crm_knowledge_explain`。它已由 `query.11` 取代，只保留为历史与回滚证据，不是当前新发布面。原有“CRM 知识与指标”预设保持兼容。

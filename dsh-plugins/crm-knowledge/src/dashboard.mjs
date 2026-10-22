@@ -1,4 +1,5 @@
 import { dashboardDefinition } from './dashboard-definition.generated.mjs';
+import { createHash } from 'node:crypto';
 /** Read the accepted dashboard through its authenticated API. No DB/SQL fallback. */
 export const LEAF_CHANNELS = Object.freeze(['货架', '达播', '直播', '淘客', '微博', 'U先派样', '百补派样', '赠品&0.01', '其他']);
 export const CHANNELS = Object.freeze(['全店', '纯派样', ...LEAF_CHANNELS]);
@@ -22,6 +23,12 @@ export function channelHierarchy() {
   };
 }
 const VERSION = 'dashboard-gsv/observed-v1';
+const PRODUCT_CUSTOMER_VERSION = 'product-customer/v1';
+const RFM_SNAPSHOT_VERSION = 'rfm-snapshot/v1';
+const RFM_SEGMENTS = Object.freeze([
+  '重要价值客户', '重要保持客户', '重要发展客户', '重要挽留客户',
+  '一般价值客户', '一般保持客户', '一般发展客户', '一般挽留客户', '已购客TTL',
+]);
 const MAX_BYTES = 256 * 1024;
 const DAY = 86400000;
 const MESSAGES = Object.freeze({
@@ -33,8 +40,9 @@ const MESSAGES = Object.freeze({
   ACCESS_DENIED: 'CRM 服务拒绝此次访问。',
   ACCOUNT_MISMATCH: 'CRM 登录账号与宿主绑定账号不一致。',
   SERVICE_BUSY: 'CRM 服务当前被占用，请稍后重试。',
+  SERVICE_UNAVAILABLE: 'CRM 服务暂不可用或所选 RFM 范围尚未预热；没有改用其他资料源。',
   UPSTREAM_ERROR: 'CRM 服务未能返回有效结果；没有改用其他资料源。',
-  INVALID_RESPONSE: 'CRM 返回内容不符合看板 GSV 合同，未输出业务金额。',
+  INVALID_RESPONSE: 'CRM 返回内容不符合所需数据合同，未输出业务金额或分群。',
   INCONSISTENT_RESULT: '看板概览与日趋势金额不一致，未输出业务金额，请核对数据版本或接口。',
   DATA_WARNING: 'CRM 接口返回数据警告，本次结果暂不可用；请在看板核对查询区间与数据水位。',
   TIMEOUT: 'CRM 查询超时；未自动重试。',
@@ -60,6 +68,10 @@ export function dashboardCapabilities(connectionState = 'NOT_CONNECTED') {
     channels: [...CHANNELS], channel_hierarchy: channelHierarchy(),
     readiness_tool: 'query_crm_dashboard_readiness', membership_tool: 'query_crm_dashboard_membership',
     net_gsv_tool: 'query_crm_dashboard_net_gsv',
+    product_customer_tool: 'query_crm_product_customer_cohorts',
+    product_customer_schema: PRODUCT_CUSTOMER_VERSION,
+    rfm_snapshot_tool: 'query_crm_rfm_snapshot',
+    rfm_snapshot_schema: RFM_SNAPSHOT_VERSION,
     definition: dashboardKnowledgeContext(),
     note: '仅在登录页面连接当前对话；请求时重新验证 CRM 登录。会员溢价与净额GSV缺来源时返回不可用，不使用当前 is_member 或行上退款标记代替。',
   };
@@ -171,14 +183,12 @@ export function normalizeDashboard(overview, trend, filters, dataKind) {
   };
 }
 
-async function getJson(base, path, params, binding, signal) {
-  const url = new URL(path, base);
-  url.search = params.toString();
-  const response = await fetch(url, { method: 'GET', redirect: 'error', signal,
-    headers: { Authorization: `Bearer ${binding.token}`, Accept: 'application/json' } });
+async function readJsonResponse(response) {
   try {
     if (response.status === 401) fail('AUTH_EXPIRED');
     if (response.status === 403) fail('ACCESS_DENIED');
+    if (response.status === 400 || response.status === 422) fail('INVALID_REQUEST');
+    if (response.status === 503) fail('SERVICE_UNAVAILABLE');
     if (response.status === 409 || response.status === 423 || response.status === 429) fail('SERVICE_BUSY');
     if (!response.ok) fail('UPSTREAM_ERROR');
     if (response.headers.has('x-data-warning')) fail('DATA_WARNING');
@@ -194,6 +204,26 @@ async function getJson(base, path, params, binding, signal) {
   } finally {
     if (response.body && !response.body.locked) await response.body.cancel().catch(() => {});
   }
+}
+
+async function getJson(base, path, params, binding, signal) {
+  const url = new URL(path, base);
+  url.search = params.toString();
+  return readJsonResponse(await fetch(url, { method: 'GET', redirect: 'error', signal,
+    headers: { Authorization: `Bearer ${binding.token}`, Accept: 'application/json' } }));
+}
+
+async function postJson(base, path, body, binding, signal) {
+  const url = new URL(path, base);
+  return readJsonResponse(await fetch(url, {
+    method: 'POST', redirect: 'error', signal,
+    headers: {
+      Authorization: `Bearer ${binding.token}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  }));
 }
 
 /** Trusted options are supplied by the host, not included in the tool parameter schema. */
@@ -237,6 +267,92 @@ async function queryDashboard(input, options, purchases = false) {
 
 export const queryDashboardGsv = (input, options = {}) => queryDashboard(input, options);
 export const queryDashboardPurchases = (input, options = {}) => queryDashboard(input, options, true);
+
+export async function queryProductCustomer(input, options = {}) {
+  const { sessionId, signal, binding = null, timeoutMs = 25000 } = options;
+  const timeout = AbortSignal.timeout(timeoutMs);
+  const combined = signal ? AbortSignal.any([signal, timeout]) : timeout;
+  try {
+    combined.throwIfAborted();
+    const filters = validateProductCustomerRequest(input);
+    const base = validateBinding(binding, sessionId);
+    const me = await getJson(base, '/api/v1/auth/me', new URLSearchParams(), binding, combined);
+    if (me?.username !== binding.username) fail('ACCOUNT_MISMATCH');
+    const value = await postJson(base, '/api/v1/category/product-customer', {
+      start_date: filters.start_date,
+      end_date: filters.end_date,
+      ...(filters.products ? { products: filters.products } : {}),
+      metric_type: 'GSV',
+      ...(filters.channel !== '全店' ? { channel: filters.channel } : {}),
+      exclude_channels: filters.exclude_low_price ? [...LOW_PRICE_CHANNELS] : [],
+      ...(filters.compare_start_date ? {
+        compare_start_date: filters.compare_start_date,
+        compare_end_date: filters.compare_end_date,
+      } : {}),
+    }, binding, combined);
+    combined.throwIfAborted();
+    let warehouseCutoff = null;
+    try {
+      const cutoff = await getJson(base, '/api/v1/metrics/cutoff', new URLSearchParams(), binding, combined);
+      if (typeof cutoff?.cutoff_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(cutoff.cutoff_date)) {
+        warehouseCutoff = cutoff.cutoff_date;
+      }
+    } catch (error) {
+      combined.throwIfAborted();
+      if (!(error instanceof DashboardError)) throw error;
+    }
+    return normalizeProductCustomer(value, filters, binding.dataKind, warehouseCutoff);
+  } catch (error) {
+    let code = 'UPSTREAM_ERROR';
+    if (signal?.aborted) code = 'CANCELLED';
+    else if (timeout.aborted) code = 'TIMEOUT';
+    else if (error instanceof DashboardError) code = error.code;
+    return {
+      status: 'UNAVAILABLE',
+      schema_version: PRODUCT_CUSTOMER_VERSION,
+      reason: { code, message: MESSAGES[code] },
+    };
+  }
+}
+
+export async function queryRfmSnapshot(input, options = {}) {
+  const { sessionId, signal, binding = null, timeoutMs = 25000 } = options;
+  const timeout = AbortSignal.timeout(timeoutMs);
+  const combined = signal ? AbortSignal.any([signal, timeout]) : timeout;
+  try {
+    combined.throwIfAborted();
+    const filters = validateRfmSnapshotRequest(input);
+    const base = validateBinding(binding, sessionId);
+    const me = await getJson(base, '/api/v1/auth/me', new URLSearchParams(), binding, combined);
+    if (me?.username !== binding.username) fail('ACCOUNT_MISMATCH');
+    const params = new URLSearchParams({
+      start_date: filters.start_date,
+      end_date: filters.end_date,
+      metric_type: filters.metric_type,
+    });
+    if (filters.channel !== '全店') params.set('channel', filters.channel);
+    if (filters.exclude_low_price) {
+      for (const channel of LOW_PRICE_CHANNELS) params.append('exclude_channels', channel);
+    }
+    const value = await getJson(base, '/api/v1/customer-health/rfm-analysis', params, binding, combined);
+    combined.throwIfAborted();
+    const cutoff = await getJson(base, '/api/v1/metrics/cutoff', new URLSearchParams(), binding, combined);
+    if (typeof cutoff?.cutoff_date !== 'string') fail('INVALID_RESPONSE');
+    parseDate(cutoff.cutoff_date, 'INVALID_RESPONSE');
+    const warehouseCutoff = cutoff.cutoff_date;
+    return normalizeRfmSnapshot(value, filters, binding.dataKind, warehouseCutoff);
+  } catch (error) {
+    let code = 'UPSTREAM_ERROR';
+    if (signal?.aborted) code = 'CANCELLED';
+    else if (timeout.aborted) code = 'TIMEOUT';
+    else if (error instanceof DashboardError) code = error.code;
+    return {
+      status: 'UNAVAILABLE',
+      schema_version: RFM_SNAPSHOT_VERSION,
+      reason: { code, message: MESSAGES[code] },
+    };
+  }
+}
 
 const NAMED = Object.freeze({
   '/api/v1/metrics/dashboard-readiness': ['crm-dashboard-readiness/v1', 'dashboard-readiness/v1'],
@@ -290,6 +406,260 @@ export function validateRequest(input, extraKeys = []) {
   const excludeLowPrice = input.exclude_low_price === undefined ? false : input.exclude_low_price;
   if (!CHANNELS.includes(channel) || typeof excludeLowPrice !== 'boolean') fail('INVALID_REQUEST');
   return { start_date: input.start_date, end_date: input.end_date, channel, exclude_low_price: excludeLowPrice };
+}
+
+export function validateProductCustomerRequest(input) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) fail('INVALID_REQUEST');
+  const keys = ['start_date', 'end_date', 'products', 'channel', 'exclude_low_price',
+    'compare_start_date', 'compare_end_date'];
+  if (Object.keys(input).some(key => !keys.includes(key))) fail('INVALID_REQUEST');
+  const dates = validateRequest({
+    start_date: input.start_date,
+    end_date: input.end_date,
+    channel: input.channel,
+    exclude_low_price: input.exclude_low_price,
+  });
+  let products;
+  if (input.products !== undefined) {
+    if (!Array.isArray(input.products) || input.products.length < 1 || input.products.length > 20 ||
+        input.products.some(name => typeof name !== 'string' || !name.trim() ||
+          name.trim() !== name || [...name].length > 80) ||
+        new Set(input.products).size !== input.products.length) fail('INVALID_REQUEST');
+    products = [...input.products];
+  }
+  const hasCompareStart = input.compare_start_date !== undefined;
+  const hasCompareEnd = input.compare_end_date !== undefined;
+  if (hasCompareStart !== hasCompareEnd) fail('INVALID_REQUEST');
+  let compare;
+  if (hasCompareStart) {
+    const compareStart = parseDate(input.compare_start_date, 'INVALID_REQUEST');
+    const compareEnd = parseDate(input.compare_end_date, 'INVALID_REQUEST');
+    if (compareEnd < compareStart || (compareEnd - compareStart) / DAY >= 90) fail('INVALID_REQUEST');
+    compare = {
+      compare_start_date: input.compare_start_date,
+      compare_end_date: input.compare_end_date,
+    };
+  }
+  return { ...dates, products, ...compare };
+}
+
+function productMetric(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) fail('INVALID_RESPONSE');
+  const keys = ['gsv', 'users', 'aus', 'old_gsv', 'old_users', 'old_aus', 'old_ratio',
+    'new_gsv', 'new_users', 'new_aus', 'new_ratio', 'member_gsv', 'member_users',
+    'member_aus', 'member_ratio', 'old_users_ratio', 'new_users_ratio'];
+  if (Object.keys(value).length !== keys.length || keys.some(key => !(key in value))) fail('INVALID_RESPONSE');
+  for (const key of ['gsv', 'aus', 'old_gsv', 'old_aus', 'new_gsv', 'new_aus',
+    'member_gsv', 'member_aus', 'old_ratio', 'new_ratio', 'member_ratio',
+    'old_users_ratio', 'new_users_ratio']) {
+    if (typeof value[key] !== 'number' || !Number.isFinite(value[key]) || value[key] < 0) fail('INVALID_RESPONSE');
+  }
+  for (const key of ['users', 'old_users', 'new_users', 'member_users']) {
+    if (!Number.isSafeInteger(value[key]) || value[key] < 0) fail('INVALID_RESPONSE');
+  }
+  for (const key of ['old_ratio', 'new_ratio', 'member_ratio', 'old_users_ratio', 'new_users_ratio']) {
+    if (value[key] > 1) fail('INVALID_RESPONSE');
+  }
+  if (value.old_users + value.new_users !== value.users ||
+      Math.abs(value.old_gsv + value.new_gsv - value.gsv) > 0.02 ||
+      value.member_users > value.users || value.member_gsv > value.gsv + 0.02) fail('INVALID_RESPONSE');
+  const ratios = [
+    ['old_ratio', value.old_gsv, value.gsv],
+    ['new_ratio', value.new_gsv, value.gsv],
+    ['member_ratio', value.member_gsv, value.gsv],
+    ['old_users_ratio', value.old_users, value.users],
+    ['new_users_ratio', value.new_users, value.users],
+  ];
+  for (const [key, numerator, denominator] of ratios) {
+    const expected = denominator === 0 ? 0 : numerator / denominator;
+    if (Math.abs(value[key] - expected) > 0.0002) fail('INVALID_RESPONSE');
+  }
+  return Object.fromEntries(keys.map(key => [key, value[key]]));
+}
+
+function productYoY(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) fail('INVALID_RESPONSE');
+  const keys = ['gsv', 'users', 'aus', 'old_gsv', 'old_users', 'old_aus', 'new_gsv',
+    'new_users', 'new_aus', 'old_ratio_ppt', 'new_ratio_ppt',
+    'old_users_ratio_ppt', 'new_users_ratio_ppt'];
+  if (Object.keys(value).length !== keys.length || keys.some(key => !(key in value))) fail('INVALID_RESPONSE');
+  return Object.fromEntries(keys.map(key => {
+    const item = value[key];
+    if (item !== null && (typeof item !== 'number' || !Number.isFinite(item))) fail('INVALID_RESPONSE');
+    return [key, item];
+  }));
+}
+
+function sameNaturalDayLastYear(value) {
+  const current = new Date(parseDate(value, 'INVALID_RESPONSE'));
+  const year = current.getUTCFullYear() - 1;
+  const month = current.getUTCMonth();
+  const day = current.getUTCDate();
+  const previous = new Date(Date.UTC(year, month, day));
+  if (previous.getUTCMonth() !== month) previous.setUTCDate(0);
+  return previous.toISOString().slice(0, 10);
+}
+
+function previousMonthEnd(value) {
+  const current = new Date(parseDate(value, 'INVALID_RESPONSE'));
+  return new Date(Date.UTC(current.getUTCFullYear(), current.getUTCMonth(), 0)).toISOString().slice(0, 10);
+}
+
+export function normalizeProductCustomer(value, filters, dataKind, warehouseCutoff = null) {
+  if (value?.schema_version !== PRODUCT_CUSTOMER_VERSION || value.source !== 'orders+user_first_purchase' ||
+      value.date_start !== filters.start_date || value.date_end !== filters.end_date ||
+      value.metric_type !== 'GSV' || (value.channel ?? '全店') !== filters.channel ||
+      !Array.isArray(value.exclude_channels) || !Array.isArray(value.products) || value.products.length > 20 ||
+      typeof value.new_old_cutoff !== 'string' || typeof value.comparison_new_old_cutoff !== 'string') fail('INVALID_RESPONSE');
+  const expectedCompareStart = filters.compare_start_date ?? sameNaturalDayLastYear(filters.start_date);
+  const expectedCompareEnd = filters.compare_end_date ?? sameNaturalDayLastYear(filters.end_date);
+  if (value.compare_start_date !== expectedCompareStart || value.compare_end_date !== expectedCompareEnd ||
+      value.new_old_cutoff !== previousMonthEnd(filters.start_date) ||
+      value.comparison_new_old_cutoff !== previousMonthEnd(expectedCompareStart)) fail('INVALID_RESPONSE');
+  if (value.data_cutoff !== null) parseDate(value.data_cutoff, 'INVALID_RESPONSE');
+  const expectedExcluded = filters.exclude_low_price ? [...LOW_PRICE_CHANNELS] : [];
+  if (value.exclude_channels.length !== expectedExcluded.length ||
+      value.exclude_channels.some((channel, index) => channel !== expectedExcluded[index])) fail('INVALID_RESPONSE');
+  const names = new Set();
+  const products = value.products.map(item => {
+    if (!item || typeof item.name !== 'string' || !item.name || names.has(item.name) || !Array.isArray(item.spu_classes) ||
+        !['OK', 'EMPTY'].includes(item.status) ||
+        !item.spu_classes.every(name => typeof name === 'string' && name)) fail('INVALID_RESPONSE');
+    names.add(item.name);
+    const current = productMetric(item.current);
+    const comparison = productMetric(item.comparison);
+    if (item.status === 'EMPTY' && current.users !== 0) fail('INVALID_RESPONSE');
+    if (item.status === 'OK' && current.users === 0) fail('INVALID_RESPONSE');
+    return {
+      name: item.name,
+      spu_classes: [...item.spu_classes],
+      status: item.status,
+      current,
+      comparison,
+      yoy: productYoY(item.yoy),
+    };
+  });
+  if (filters.products && (products.length !== filters.products.length ||
+      filters.products.some(name => !names.has(name)))) fail('INVALID_RESPONSE');
+  return {
+    status: 'OK',
+    schema_version: PRODUCT_CUSTOMER_VERSION,
+    source: value.source,
+    contains_real_data: dataKind === 'real',
+    synthetic: dataKind === 'synthetic',
+    filters: { ...filters, timezone: 'Asia/Shanghai', end_inclusive: true },
+    compare_start_date: value.compare_start_date,
+    compare_end_date: value.compare_end_date,
+    new_old_cutoff: value.new_old_cutoff,
+    comparison_new_old_cutoff: value.comparison_new_old_cutoff,
+    data_cutoff: value.data_cutoff,
+    warehouse_cutoff: warehouseCutoff,
+    products,
+    limitations: [
+      '新老客按商品映射到多个 SPU class 后，以 user_id 去重，不直接相加品类人数。',
+      '新老客截止日沿用品类看板的期初月界口径，结果中显式返回该日期。',
+      '订单表与 DMP 资产使用不同用户定义，不能跨来源相加。',
+    ],
+  };
+}
+
+export function validateRfmSnapshotRequest(input) {
+  const keys = ['start_date', 'end_date', 'metric_type', 'channel', 'exclude_low_price'];
+  if (!input || typeof input !== 'object' || Array.isArray(input) ||
+      Object.keys(input).some(key => !keys.includes(key))) fail('INVALID_REQUEST');
+  const metricType = input.metric_type === undefined ? 'GSV' : input.metric_type;
+  if (!['GSV', 'GMV'].includes(metricType)) fail('INVALID_REQUEST');
+  return { ...validateRequest(input), metric_type: metricType };
+}
+
+const RFM_ROW_FIELDS = Object.freeze([
+  'rfm_segment', 'hist_users_current', 'repurchase_users_current', 'repurchase_rate_current',
+  'repurchase_gsv_current', 'repurchase_gsv_ratio_current', 'hist_users_comp',
+  'repurchase_users_comp', 'repurchase_rate_comp', 'repurchase_gsv_comp',
+  'repurchase_gsv_ratio_comp', 'hist_users_prev2', 'repurchase_users_prev2',
+  'repurchase_rate_prev2', 'repurchase_gsv_prev2', 'repurchase_gsv_ratio_prev2',
+  'yoy_hist_users', 'yoy_repurchase_users', 'yoy_repurchase_rate',
+  'yoy_repurchase_gsv', 'yoy_repurchase_gsv_ratio_ppt',
+]);
+
+function rfmRows(value) {
+  if (!Array.isArray(value) || value.length > 100) fail('INVALID_RESPONSE');
+  const seen = new Set();
+  return value.map(row => {
+    if (!row || typeof row !== 'object' || Array.isArray(row) ||
+        typeof row.rfm_segment !== 'string' || !row.rfm_segment || seen.has(row.rfm_segment)) fail('INVALID_RESPONSE');
+    seen.add(row.rfm_segment);
+    const projected = {};
+    for (const key of RFM_ROW_FIELDS) {
+      if (!(key in row)) fail('INVALID_RESPONSE');
+      const item = row[key];
+      if (key === 'rfm_segment') {
+        projected[key] = item;
+      } else if (key.startsWith('yoy_')) {
+        if (item !== null && (typeof item !== 'number' || !Number.isFinite(item))) fail('INVALID_RESPONSE');
+        projected[key] = item;
+      } else if (key.includes('users_')) {
+        if (!Number.isSafeInteger(item) || item < 0) fail('INVALID_RESPONSE');
+        projected[key] = item;
+      } else {
+        if (typeof item !== 'number' || !Number.isFinite(item) || item < 0) fail('INVALID_RESPONSE');
+        if ((key.includes('rate_') || key.includes('ratio_')) && item > 1) fail('INVALID_RESPONSE');
+        projected[key] = item;
+      }
+    }
+    return projected;
+  });
+}
+
+export function normalizeRfmSnapshot(value, filters, dataKind, warehouseCutoff = null) {
+  if (!value || typeof value !== 'object' || Array.isArray(value) ||
+      typeof value.year_label !== 'string' || typeof value.comp_year_label !== 'string' ||
+      typeof value.prev2_year_label !== 'string' || value.metric_type !== filters.metric_type) fail('INVALID_RESPONSE');
+  const rows = rfmRows(value.rows);
+  const sameChannelRows = rfmRows(value.same_channel_rows);
+  const memberRows = rfmRows(value.member_rows);
+  const memberSameChannelRows = rfmRows(value.member_same_channel_rows);
+  for (const group of [rows, sameChannelRows, memberRows, memberSameChannelRows]) {
+    if (group.length !== RFM_SEGMENTS.length ||
+        group.some((row, index) => row.rfm_segment !== RFM_SEGMENTS[index])) {
+      fail('INVALID_RESPONSE');
+    }
+  }
+  const snapshotId = 'rfm_' + createHash('sha256').update(JSON.stringify({
+    filters,
+    year_label: value.year_label,
+    comp_year_label: value.comp_year_label,
+    prev2_year_label: value.prev2_year_label,
+    metric_type: value.metric_type,
+    rows,
+    same_channel_rows: sameChannelRows,
+    member_rows: memberRows,
+    member_same_channel_rows: memberSameChannelRows,
+    warehouse_cutoff: warehouseCutoff,
+  })).digest('hex');
+  return {
+    status: 'OK',
+    schema_version: RFM_SNAPSHOT_VERSION,
+    snapshot_id: snapshotId,
+    source: 'authenticated_crm_rfm_cache',
+    contains_real_data: dataKind === 'real',
+    synthetic: dataKind === 'synthetic',
+    filters: { ...filters, timezone: 'Asia/Shanghai', end_inclusive: true },
+    year_label: value.year_label,
+    comp_year_label: value.comp_year_label,
+    prev2_year_label: value.prev2_year_label,
+    metric_type: value.metric_type,
+    rows,
+    same_channel_rows: sameChannelRows,
+    member_rows: memberRows,
+    member_same_channel_rows: memberSameChannelRows,
+    warehouse_cutoff: warehouseCutoff,
+    limitations: [
+      'RFM 结果必须来自杭州预计算缓存；缓存未命中不会在 Web 请求内现场计算。',
+      'RFM 契约没有独立 data_cutoff；展示时必须同时显示 filters 区间和 warehouse_cutoff。',
+      '新老客与 8 象限定义来自当前 RFM 服务版本，不能与其他分群词表直接混用。',
+    ],
+  };
 }
 
 /** Validate and project aggregates; never forward arbitrary server metadata. */

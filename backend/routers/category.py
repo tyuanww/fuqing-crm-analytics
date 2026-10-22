@@ -4,7 +4,7 @@
 前缀: /api/v1/category/*
 """
 
-from fastapi import APIRouter, Query, Response
+from fastapi import APIRouter, HTTPException, Query, Response
 from typing import Optional, List
 from pydantic import BaseModel
 
@@ -23,6 +23,8 @@ from backend.contracts.schemas import (
     MarketBasketResponse,
     CategoryDailyTrendResponse,
     CategoryUserListResponse,
+    ProductCustomerRequest,
+    ProductCustomerResponse,
     AnchorMode,
     PathDepth,
 )
@@ -42,6 +44,7 @@ from backend.services.category_service import (
     get_category_user_list,
     get_category_repurchase_flow,
     get_category_repurchase_flow_by_rfm,
+    get_product_customer_overview,
 )
 from backend.services import check_future_date
 
@@ -123,6 +126,24 @@ def get_category_overview_batch_api(body: CategoryOverviewBatchRequest):
             exclude_channels=body.exclude_channels,
         )
     }
+
+
+@router.post("/product-customer", response_model=ProductCustomerResponse)
+def get_product_customer_api(body: ProductCustomerRequest):
+    """按产品聚合新老客，跨多个 SPU class 时按用户去重。"""
+    try:
+        return get_product_customer_overview(
+            body.start_date,
+            body.end_date,
+            products=body.products,
+            metric_type=body.metric_type,
+            channel=body.channel,
+            exclude_channels=body.exclude_channels,
+            compare_start_date=body.compare_start_date,
+            compare_end_date=body.compare_end_date,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @router.get("/segment", response_model=CategorySegmentMatrixResponse)

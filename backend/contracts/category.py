@@ -1,6 +1,6 @@
 """Sample CRM - Pydantic 契约模型"""
 from __future__ import annotations
-from typing import Optional, List, Any, Dict, Annotated
+from typing import Optional, List, Any, Dict, Annotated, Literal
 from pydantic import BaseModel, Field
 from .common import WoolPartyBreakdown, DualAxisLineData
 from .types import RatioField, PercentageField, PpField  # Sprint 14 A.3
@@ -38,7 +38,7 @@ class CategoryOverviewItem(BaseModel):
     aus_yoy: Optional["PercentageField"] = None
     old_gsv: float
     old_gsv_yoy: Optional["PercentageField"] = None
-    old_ratio: "RatioField"
+    old_ratio: RatioField
     old_ratio_yoy: Optional["PpField"] = None
     old_users: int
     old_users_yoy: Optional["PercentageField"] = None
@@ -46,7 +46,7 @@ class CategoryOverviewItem(BaseModel):
     old_aus_yoy: Optional["PercentageField"] = None
     new_gsv: float
     new_gsv_yoy: Optional["PercentageField"] = None
-    new_ratio: "RatioField"
+    new_ratio: RatioField
     new_ratio_yoy: Optional["PpField"] = None
     new_users: int
     new_users_yoy: Optional["PercentageField"] = None
@@ -70,6 +70,80 @@ class CategoryOverviewResponse(BaseModel):
     member_rows: List[CategoryOverviewItem]
     all_ttl: Optional[CategoryOverviewItem] = None
     member_ttl: Optional[CategoryOverviewItem] = None
+
+
+class ProductCustomerRequest(BaseModel):
+    """Product-level new/old customer query over the order stream."""
+
+    start_date: str
+    end_date: str
+    products: Optional[List[str]] = None
+    metric_type: Literal["GSV"] = "GSV"
+    channel: Optional[str] = None
+    exclude_channels: List[str] = Field(default_factory=list)
+    compare_start_date: Optional[str] = None
+    compare_end_date: Optional[str] = None
+
+
+class ProductCustomerMetrics(BaseModel):
+    gsv: float
+    users: int
+    aus: float
+    old_gsv: float
+    old_users: int
+    old_aus: float
+    old_ratio: "RatioField"
+    new_gsv: float
+    new_users: int
+    new_aus: float
+    new_ratio: "RatioField"
+    member_gsv: float
+    member_users: int
+    member_aus: float
+    member_ratio: RatioField
+    old_users_ratio: RatioField
+    new_users_ratio: RatioField
+
+
+class ProductCustomerYoY(BaseModel):
+    gsv: Optional[PercentageField] = None
+    users: Optional[PercentageField] = None
+    aus: Optional[PercentageField] = None
+    old_gsv: Optional[PercentageField] = None
+    old_users: Optional[PercentageField] = None
+    old_aus: Optional[PercentageField] = None
+    new_gsv: Optional[PercentageField] = None
+    new_users: Optional[PercentageField] = None
+    new_aus: Optional[PercentageField] = None
+    old_ratio_ppt: Optional[PpField] = None
+    new_ratio_ppt: Optional[PpField] = None
+    old_users_ratio_ppt: Optional[PpField] = None
+    new_users_ratio_ppt: Optional[PpField] = None
+
+
+class ProductCustomerProduct(BaseModel):
+    name: str
+    spu_classes: List[str]
+    status: Literal["OK", "EMPTY"]
+    current: ProductCustomerMetrics
+    comparison: ProductCustomerMetrics
+    yoy: ProductCustomerYoY
+
+
+class ProductCustomerResponse(BaseModel):
+    schema_version: Literal["product-customer/v1"] = "product-customer/v1"
+    source: Literal["orders+user_first_purchase"] = "orders+user_first_purchase"
+    date_start: str
+    date_end: str
+    compare_start_date: str
+    compare_end_date: str
+    new_old_cutoff: str
+    comparison_new_old_cutoff: str
+    data_cutoff: Optional[str] = None
+    metric_type: Literal["GSV"]
+    channel: Optional[str] = None
+    exclude_channels: List[str] = Field(default_factory=list)
+    products: List[ProductCustomerProduct]
 
 
 class CategorySegmentMatrixResponse(BaseModel):

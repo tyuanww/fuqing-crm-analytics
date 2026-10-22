@@ -17,6 +17,18 @@ CRM、知识、页面和 WeKnora 是不同权限与生命周期域，保持独�
 
 私有教材图谱工具不在本预设中。需要它时应创建新的显式 preset，不要因为安装了知识包就自动扩大问数 Agent 的权限。
 
+## AI 增长董事会工作链
+
+`crm-query` 把经营诊断、增长复盘和“AI 增长董事会”约束为一条证据链，而不是自由生成经营结论：
+
+1. 先界定决策问题、业务范围和 `data_cutoff`。
+2. 组合渠道、GSV/购买覆盖、商品新老客、会员和可用的 RFM 八象限加 TTL 快照；缺失项保持未知。
+3. 用事实、解释、反证和待验证假设形成增长、用户运营、财务与风险四类意见。
+4. 给出继续、调整或停止一个建议，并绑定目标人群、动作、主指标、护栏、责任角色、观察期和退出条件。
+5. HTML 至少覆盖决策摘要、证据与截止日、用户分层、策略动作、增长跟踪、风险和未知项。经营数字必须来自本次工具结果并优先引用可信快照；绑定数字保持只读，无法绑定时标为未绑定样例。
+
+历史数据只支持回溯和假设，不证明未来增量或因果。当前没有订单号导出工具，问数 Agent 只能输出人群条件并明确导出缺口，不得生成订单号或宣称已完成导出。
+
 ## DSH 契约
 
 - bundle 通过 `package.json` 的 `dsh.bundle.patch` 提供 `cordis.patch.yml`。
@@ -30,7 +42,7 @@ CRM、知识、页面和 WeKnora 是不同权限与生命周期域，保持独�
 
 ## side-load 身份
 
-当前 owner-operated side-load 的固定身份见 [`config/query-agent-side-load.v1.json`](../../config/query-agent-side-load.v1.json)。其中 `source_package_manifest_sha256` 是 source `package.json` 的摘要，`generated_pack_manifest_sha256` 是生成 `plugin-pack.json` 的摘要，`tarball.sha256` 是最终归档摘要；三者不能互相替代。该 lock 只描述当前现场输入，`release_ready=false`，不创建正式发布身份。query.10 的 all-tools restriction 会误删域工具，已回滚；query.11 使用已知继承工具 masking 加执行 allowlist。
+当前线上 owner-operated side-load 的固定身份见 [`config/query-agent-side-load.v1.json`](../../config/query-agent-side-load.v1.json)，仍为 query.11。当前仓库维护源已推进到 query.12，新增商品新老客和 RFM 快照工具，但尚未生成、side-load 或部署到杭州。其中 `source_package_manifest_sha256` 是 source `package.json` 的摘要，`generated_pack_manifest_sha256` 是生成 `plugin-pack.json` 的摘要，`tarball.sha256` 是最终归档摘要；三者不能互相替代。该 lock 只描述当前现场输入，`release_ready=false`，不创建正式发布身份。query.10 的 all-tools restriction 会误删域工具，已回滚；query.11 使用已知继承工具 masking 加执行 allowlist。
 
 查询工具与实际浏览器边界见 [query.11 allowlist 回执](../../docs/hackathon/evidence/dsh-query11-allowlist-20261021.md)。
 
@@ -52,7 +64,7 @@ CRM、知识、页面和 WeKnora 是不同权限与生命周期域，保持独�
 - 使用仓库固定 Node 24；adapter 的 `package.json` 合同是 `24.x`。
 - live overlay 目录已包含经过校验的上游 `weknora-package`，`retrieve.key` 已由授权 operator 配置。
 - 已为该维护窗口准备独立的恢复目录和旧文件摘要；不要在未授权的生产窗口改 profile、symlink 或 WeKnora 数据。
-- `preset.patch.yml` 与 query.11 的 `cordis.patch.yml` 都可能引用 `weknora.mjs`；替换 adapter 会同时影响引用该文件的 Agent preset。
+- 线上 query.11 与仓库 query.12 的 `cordis.patch.yml` 都可能引用 `weknora.mjs`；替换 adapter 会同时影响引用该文件的 Agent preset。query.12 部署前必须先生成新的 provenance 和 side-load lock。
 
 ### 本地校验
 
