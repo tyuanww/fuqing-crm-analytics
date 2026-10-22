@@ -63,7 +63,7 @@ export function createDashboardAccess({ baseUrl = 'http://127.0.0.1:8000', first
     citationLedger.delete(sessionId);
   }
   function prune() {
-    for (const [id, record] of records) if (record.expiresAt <= now() || !hasSession(id)) forget(id);
+    for (const [id, record] of records) if (record.expiresAt <= now()) forget(id);
     for (const id of pending.keys()) if (!hasSession(id)) forget(id);
   }
   function status(sessionId) {
