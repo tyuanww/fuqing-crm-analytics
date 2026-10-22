@@ -601,7 +601,7 @@ const productCustomerXlsxColumns = computed<XlsxColumn[]>(() => [
         <ExportToolbar
           :filename="`产品_客群_滚动对比`"
           :columns="productCustomerXlsxColumns"
-          :data="(tableData ?? []) as any[]"
+          :data="tableData"
           sheet-name="产品客群"
         />
       </div>
