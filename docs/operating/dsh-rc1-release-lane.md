@@ -1,6 +1,6 @@
 # DSH rc1 release lane
 
-这条 lane 为内部 rc1 候选准备 release 输入。它与主仓兼容线分开。它不修改 `dsh-plugins/plugin-kit/toolchain.json` 的默认值，也不负责杭州 owner-operated 的现役切换。当前线上为 `/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-core-main-20261021-cockpit-v3`，运行 CRM `crm.4` 与 Query `query.13`。这是 owner-operated 现场 side-load，不是新的正式 release；2026-10-18 的 r9 只保留为历史回退证据。正式 release 状态只看 [STATUS.md](../../STATUS.md)；本 lane 的 local asset 不等于公司正式 release。
+这条 lane 为内部 rc1 候选准备 release 输入。它与主仓兼容线分开。它不修改 `dsh-plugins/plugin-kit/toolchain.json` 的默认值，也不负责杭州 owner-operated 的现役切换。当前线上为 `/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-core-main-20261021-cockpit-v3`，运行 CRM `crm.5` 与 Query `query.14`。这是 owner-operated 现场 side-load，不是新的正式 release；2026-10-18 的 r9 只保留为历史回退证据。正式 release 状态只看 [STATUS.md](../../STATUS.md)；本 lane 的 local asset 不等于公司正式 release。
 
 ## 固定输入
 
@@ -24,7 +24,7 @@
 
 IM 输入已从不可用状态推进为 `PINNED_INPUTS_VERIFIED`，两份归档已按线上 lock 核验并保存在 `/srv/shinemage/dsh/recovery/im-plugin-inputs-20261021/`。统一发布身份、publisher/signature、独立验收、final attestation 和切换授权仍未完成，所以 `release_ready=false`。历史 v5 是 2026-10-21 的 owner-operated 运行事实，不是正式 release。
 
-2026-10-22 商品映射部署后，`current` 指向 `dsh-0.2.1-rc.1-core-main-20261021-cockpit-v3`。CRM `crm.4` 与 Query `query.13` 已 side-load，商品接口使用 `product-customer/v2` 并返回固定唯一 `display_name`。运行回执见[商品身份映射部署验收](../hackathon/evidence/dsh-product-identity-deployment-20261022.md)。
+2026-10-22 审查修复部署后，`current` 指向 `dsh-0.2.1-rc.1-core-main-20261021-cockpit-v3`。CRM `crm.5` 与 Query `query.14` 已 side-load，商品接口使用 `product-customer/v3`，覆盖不足明确拒绝，工具公开结果不包含内部商品身份。运行回执见[审查问题修复部署验收](../hackathon/evidence/dsh-review-fixes-20261022.md)。
 
 ## 本地入口
 

@@ -2,6 +2,7 @@
   "schema_version": "shinemage-product-identity-deployment/v1",
   "observed_at": "2026-10-22T09:56:00Z",
   "scope": "owner-operated-hangzhou-product-identity-side-load",
+  "superseded_by": "docs/hackathon/evidence/dsh-review-fixes-20261022.json",
   "release_ready": false,
   "formal_release": false,
   "crm_artifact": {

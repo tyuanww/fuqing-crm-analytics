@@ -2,7 +2,7 @@
 
 发布 peer：DSH `0.2.1-rc.1`、Cordis `4.0.5`，与杭州现场一致；Node 24。仓库本地回归仍使用兼容基线 `0.1.7-rc.2`，发布包必须再从杭州 0.2.1 runtime 的固定 upstream 构建并生成 provenance，本地类型检查不能替代目标版本验收。插件运行不需要 Python；服务和跨服务测试另用锁定 Python 3.14+。独立插件，包含显式配置的合成服务客户端及默认未连接的看板 GSV HTTP 适配，通过 analytics-workbench 的可选 `cockpit.crm` 插槽展示引用，不修改 DSH 上游或比赛事实合同。构建依赖只读复用已准备好的固定 checkout，不下载或自动安装。
 
-本包保留身份 `@shine-mage/dsh-crm-knowledge`。杭州现役 side-load 为 `0.0.0-crm.4`，插件页显示 CRM Host 与客户端 `2/2` 运行中；商品新老客、RFM 快照和对应健康字段已有合同与部署证据。它只拥有 CRM 登录、指标与分析；公开知识解释和图谱工具已迁入[独立知识插件](../knowledge/README.md)。两个包各自构建、测试和打包，生产源码没有相互导入，也不引用 workbench 内部实现。CRM 只携带指标 HTTP API 1.0.0 客户端，不查找主仓目录或启动 Python。未配置合成服务时返回 `NOT_AVAILABLE / SERVICE_NOT_CONFIGURED`；真实看板登录与查询不会改查合成源。当前运行边界见[商品身份映射回执](../../docs/hackathon/evidence/dsh-product-identity-deployment-20261022.md)。
+本包保留身份 `@shine-mage/dsh-crm-knowledge`。杭州现役 side-load 为 `0.0.0-crm.5`，插件页显示 CRM Host 与客户端 `2/2` 运行中；商品新老客、RFM 快照和对应健康字段已有合同与部署证据。它只拥有 CRM 登录、指标与分析；公开知识解释和图谱工具已迁入[独立知识插件](../knowledge/README.md)。两个包各自构建、测试和打包，生产源码没有相互导入，也不引用 workbench 内部实现。CRM 只携带指标 HTTP API 1.0.0 客户端，不查找主仓目录或启动 Python。未配置合成服务时返回 `NOT_AVAILABLE / SERVICE_NOT_CONFIGURED`；真实看板登录与查询不会改查合成源。当前运行边界见[审查问题修复回执](../../docs/hackathon/evidence/dsh-review-fixes-20261022.md)。
 
 Python 实现和知识资源的维护源仍在 workspace；两项服务已分别完成[独立应用候选打包与隔离运行](../../docs/operating/crm-service-packages.md)。物理分仓、平台依赖冷安装及精确宿主发布证据尚未完成。配置、迁移与兼容窗口见[服务边界](../../docs/operating/crm-plugin-service-boundary.md)。
 
@@ -79,9 +79,9 @@ CRM Host 默认 `baseUrl` 为 `http://127.0.0.1:8000`，适用于 rc2 独立配�
 
 ## 商品新老客接口
 
-`query_crm_product_customer_cohorts` 调用只读 `POST /api/v1/category/product-customer`。商品名称来自登记目录；省略 `products` 时查询全部商品，单次最多20个。`products` 可传内部商品名或唯一 `display_name`，用户侧默认只展示 `display_name`。日期最多90天，可显式提供对比期，否则按自然日映射到一年前，`2月29日` 回退到 `2月28日`。当前金额口径固定为 GSV，避免 GMV 结果继续使用 `gsv` 字段名。
+`query_crm_product_customer_cohorts` 调用只读 `POST /api/v1/category/product-customer`。没有版本请求头时后端返回 v2，插件显式请求 `product-customer/v3`。商品名称来自登记目录；省略 `products` 时查询全部商品，单次最多20个。`products` 可传内部商品名或唯一 `display_name`，公开结果只展示 `display_name`。日期最多90天，可显式提供对比期，否则按自然日映射到一年前，`2月29日` 回退到 `2月28日`。当前金额口径固定为 GSV，避免 GMV 结果继续使用 `gsv` 字段名。
 
-后端按商品实时聚合订单，不先分别计算多个 SPU class 再相加人数。`product-customer/v2` 同时返回内部 `name`、固定唯一 `display_name` 和映射的 `spu_classes`；页面与问数默认展示 `display_name`，例如 `爆款面膜A`。`current` 和 `comparison` 都包含全店、新客、老客、会员的 GSV、人数、AUS、占比和同比；结果同时返回 `data_cutoff`、`new_old_cutoff` 与 `comparison_new_old_cutoff`。新老客截止日沿用品类看板的期初月界口径，调用方必须展示两个分群截止日，不能把它们称为“今天的新老客”。
+后端按商品实时聚合订单，不先分别计算多个 SPU class 再相加人数。`product-customer/v3` 先读取仓库数据截止日，再把当前期、同期和数据边界放在同一个只读事务内。任一周期超过覆盖范围时返回 `INSUFFICIENT_COVERAGE` 和覆盖对象，不把未覆盖日期填零，也不生成同比下降。内部 `name` 和 `spu_classes` 只留在 CRM Host，插件公开结果只保留 `display_name`、状态和指标。
 
 ## RFM 快照接口
 

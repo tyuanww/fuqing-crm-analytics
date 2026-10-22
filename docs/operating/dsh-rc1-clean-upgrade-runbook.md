@@ -86,6 +86,8 @@
 
 2026-10-22 商品映射现场事实：`current` 指向 `dsh-0.2.1-rc.1-core-main-20261021-cockpit-v3`。CRM `0.0.0-crm.4` 与 Query `0.0.0-query.13` 已 side-load，插件页均为 `2/2` 组件运行中。商品接口为 `product-customer/v2`，页面默认展示固定唯一 `display_name`；后端镜像 digest 为 `sha256:85c3b72d…d895c`。运行边界见[商品身份映射回执](../hackathon/evidence/dsh-product-identity-deployment-20261022.md)。
 
+2026-10-22 审查修复现场事实：CRM `0.0.0-crm.5` 与 Query `0.0.0-query.14` 已 side-load。商品接口升级到 v3，默认无版本头仍返回 v2；覆盖、当前期和同期在同一只读事务内读取，覆盖不足返回 `INSUFFICIENT_COVERAGE`。后端镜像 digest 为 `sha256:362779ab…5d4ba`。运行边界见[审查问题修复回执](../hackathon/evidence/dsh-review-fixes-20261022.md)。
+
 ## 排障
 
 | 现象 | 处理 |

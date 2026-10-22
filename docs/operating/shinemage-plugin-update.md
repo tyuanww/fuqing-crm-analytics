@@ -4,7 +4,7 @@
 
 ## 当前输入与交付状态（2026-10-21）
 
-2026-10-21 当前 rc2 组合锁绑定 Workbench `3030e3f`／manifest `070514b3…`、CRM `5f359f5b`／manifest `82c91152…`、Knowledge `ef8960ed`／manifest `83dca334…`，另六包与两份 profile 保持。十个独立作者仓 PR #1 已普通 merge，各自 main CI 均 SUCCESS；当前精确值和正式输入边界只看[组合锁](../../config/shinemage-composition-packs.lock.json)、[STATUS](../../STATUS.md)与[当前正式组合输入预检](../hackathon/evidence/shinemage-composition-preflight-20261012.md)。杭州 cockpit-v3 是独立的 rc1 owner-operated side-load，当前运行 crm.4 与 query.13；不得把下方较早时点的锁或“未提交”“尚未迁移”当成当前默认入口结论。
+2026-10-21 当前 rc2 组合锁绑定 Workbench `3030e3f`／manifest `070514b3…`、CRM `5f359f5b`／manifest `82c91152…`、Knowledge `ef8960ed`／manifest `83dca334…`，另六包与两份 profile 保持。十个独立作者仓 PR #1 已普通 merge，各自 main CI 均 SUCCESS；当前精确值和正式输入边界只看[组合锁](../../config/shinemage-composition-packs.lock.json)、[STATUS](../../STATUS.md)与[当前正式组合输入预检](../hackathon/evidence/shinemage-composition-preflight-20261012.md)。杭州 cockpit-v3 是独立的 rc1 owner-operated side-load，当前运行 crm.5 与 query.14；不得把下方较早时点的锁或“未提交”“尚未迁移”当成当前默认入口结论。
 
 普通插件更新先在插件作者仓完成受影响检查、独立产物及 PR；组合变化时，主仓才更新对应固定输入。默认包消费、installed-kit、领域作者覆盖、公开合同和 release 包装配已经迁移并提交；主仓仍保留另两组旧 Workbench 断言、合同／静态守卫及历史副本。来源变化须同时绑定正式包与作者 CI，不能仅换 ZIP 或沿用旧 candidate/journal。
 

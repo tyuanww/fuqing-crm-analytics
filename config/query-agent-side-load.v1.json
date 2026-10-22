@@ -1,20 +1,20 @@
 {
   "schema_version": "shinemage-query-agent-side-load-lock/v1",
   "package": "@shine-mage/dsh-query-agent",
-  "version": "0.0.0-query.13",
+  "version": "0.0.0-query.14",
   "lane": "owner-operated-side-load",
   "release_ready": false,
   "formal_release": false,
-  "source_sha": "7a33b93a96ddd39382f8431286720ebae7611a31",
-  "source_package_manifest_sha256": "9499f5f49e3a5c9f948ad6363cd73c93e9383bea6dacb8067240d169348600a1",
-  "generated_pack_manifest_sha256": "681e73713b1c6fcb52dd49b627127d6193ebd243e349811d6c998c14dffbc155",
+  "source_sha": "482d149dea223139e693e85c127d8da5398dd925",
+  "source_package_manifest_sha256": "4d9b2203e3f1dc97a57f3ed8d24a49ca57065dc34249858ee867cc2963ea68e4",
+  "generated_pack_manifest_sha256": "e4a7f81e7123b0eb3c5683407632da9452d7b125a57dd62f9900625d18983b52",
   "tarball": {
-    "name": "shine-mage-dsh-query-agent-0.0.0-query.13.tgz",
-    "bytes": 4792,
-    "sha256": "d275f0f45f2c71865e3a6823906cf1f234b023c3de0505a344f4ca8d5099bd4f",
-    "integrity": "sha512-KCNWkOhISvya5I7Aix2D7Lo78yThyWIIV3StNLeCnrIIwVCsjDo5FCfC3Bz1bdQi5PlC+u6826eKCjcWkntbPw=="
+    "name": "shine-mage-dsh-query-agent-0.0.0-query.14.tgz",
+    "bytes": 4903,
+    "sha256": "6e0df598f3687c763a590bb7ac6b76c47d023d8c305b64b940e1b9d75d74e06a",
+    "integrity": "sha512-CcwcEvMVdYOuKg1K6qCZHcxZdaalsuf1FqZ98IsInAYwK7tKMhG4bXY59y07xm0HlOQ7e/GMQvIAlqncfSPgow=="
   },
-  "build_provenance_sha256": "584ca3672c2fa1600787cfd3e30a71f98963e51c6fdc3ad71e0b9da701b4ccc5",
-  "evidence": "docs/hackathon/evidence/dsh-product-identity-deployment-20261022.json",
-  "runtime_evidence": "docs/hackathon/evidence/dsh-product-identity-deployment-20261022.json"
+  "build_provenance_sha256": "fbf6718006eb8145202d93c1e9842f35e3e7e2c4957f4a8c44dd72a2b010e0c0",
+  "evidence": "docs/hackathon/evidence/dsh-review-fixes-20261022.json",
+  "runtime_evidence": "docs/hackathon/evidence/dsh-review-fixes-20261022.json"
 }

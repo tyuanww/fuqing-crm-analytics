@@ -1,0 +1,160 @@
+{
+  "schema_version": "shinemage-dsh-review-fixes/v1",
+  "observed_at": "2026-10-22T10:40:00Z",
+  "scope": "owner-operated-hangzhou-review-followup",
+  "release_ready": false,
+  "formal_release": false,
+  "crm_artifact": {
+    "source_sha": "482d149dea223139e693e85c127d8da5398dd925",
+    "package_name": "@shine-mage/dsh-crm-knowledge",
+    "version": "0.0.0-crm.5",
+    "source_package_manifest_sha256": "b47a40e11a62b2fe16bd56f53d2690e0825107c1d8ddbb2f4f9f82e2d3635790",
+    "manifest_sha256": "212f72b7d3ec6f6ee8301ee081162858b308903b3accad3e82383647ddc88186",
+    "tarball": "shine-mage-dsh-crm-knowledge-0.0.0-crm.5.tgz",
+    "tarball_sha256": "0e53ecf94942fb94135c8091ff911dc43a29a19ea3960b14466bb8d3aec56c81",
+    "tarball_bytes": 243728,
+    "integrity": "sha512-euXbne8No3X4VbdJW+wjWoJNUlPs+fvS6inD/72a/eAwO6Sh/s7LYYomNudoz97r7DNpSCLiAJJeELVN1ViLow==",
+    "build_provenance_sha256": "3bf11ceda0c847d201a411b676d34fb52c68eaa7cbd69ed3a82f03dd6919c88c"
+  },
+  "query_artifact": {
+    "source_sha": "482d149dea223139e693e85c127d8da5398dd925",
+    "package_name": "@shine-mage/dsh-query-agent",
+    "version": "0.0.0-query.14",
+    "source_package_manifest_sha256": "4d9b2203e3f1dc97a57f3ed8d24a49ca57065dc34249858ee867cc2963ea68e4",
+    "manifest_sha256": "e4a7f81e7123b0eb3c5683407632da9452d7b125a57dd62f9900625d18983b52",
+    "tarball": "shine-mage-dsh-query-agent-0.0.0-query.14.tgz",
+    "tarball_sha256": "6e0df598f3687c763a590bb7ac6b76c47d023d8c305b64b940e1b9d75d74e06a",
+    "tarball_bytes": 4903,
+    "integrity": "sha512-CcwcEvMVdYOuKg1K6qCZHcxZdaalsuf1FqZ98IsInAYwK7tKMhG4bXY59y07xm0HlOQ7e/GMQvIAlqncfSPgow==",
+    "build_provenance_sha256": "fbf6718006eb8145202d93c1e9842f35e3e7e2c4957f4a8c44dd72a2b010e0c0"
+  },
+  "artifact": {
+    "scope_helper": {
+      "after_sha256": "e060ecd508ceaafb04dcd809078802e52ed2d0add297507013f11feb30e6d663"
+    }
+  },
+  "backend": {
+    "container": "fuqing-crm-analytics-backend-1",
+    "image": "fuqing-crm-analytics-backend:growth-20261022-482d149d",
+    "image_digest": "sha256:362779abef8df4c7f4a8d53d0c914948726f466d7c395189d76eedc7eaa5d4ba",
+    "base_image_digest": "sha256:85c3b72dd12b823117ee11f70ab04697f8b294eb6b87582a0f6074325edd895c",
+    "build_mode": "offline-derived-image",
+    "health": "healthy",
+    "root_http": 401,
+    "compose_override_sha256": "fb6a0ab3f84a35da02292637660309652a5ecf342ce7f6fa95ed9343456ba0ff"
+  },
+  "frontend": {
+    "source_sha": "f54142b1aa57a40257d28edb74cc8d43904fbc66",
+    "container": "fuqing-crm-analytics-frontend-1",
+    "image": "fuqing-crm-analytics-frontend:growth-20261022-f54142b1-r4",
+    "image_digest": "sha256:6b4516cb26d372f956619ad4792593b899bdd2cbf5cc904bb861ec8cc68a715c",
+    "base_image_digest": "sha256:2aaa499d80b90989d21d98fe466dffa9328683a10ba085d1e85ba348d9a8e212",
+    "index_sha256": "ebe9aed3de42c09dd9be3420c10fe3fde81babe5a4067f1b7def0bd33142f4cc",
+    "entry": "index-BxfW5qHX.js",
+    "root_http": 200,
+    "v3_asset_present": true
+  },
+  "profile": {
+    "current_root": "/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-core-main-20261021-cockpit-v3",
+    "dsh_version": "0.2.1-rc.1",
+    "package_json_sha256": "eaf71912dc276a6898e5d2472a4032c72835c9573cf6245d7c65d2e79dfe3915",
+    "lock_sha256": "00a202bc32a17e7475df7c516880b22d4f3b5c28a6c69dc1e746e9374d0ff310",
+    "crm_installed_package_sha256": "2b1535468e28de623cae7fd369f6eed373b81497c50cf49d25d07da88d1cf726",
+    "query_installed_package_sha256": "378cd4bd33187a7615452ae902bfb96b28a40d0becab8bd142e69c475bf18234",
+    "query_installed_tool_policy_sha256": "9dd3ef4ba84e3f08df28345ed584a8f4d8cc7b9c9debcf67c564f18f49725f63",
+    "installed_tarball_files_verified": true
+  },
+  "service": {
+    "name": "shinemage-dsh.service",
+    "active_state": "active",
+    "sub_state": "running",
+    "n_restarts": 0,
+    "result": "success",
+    "listeners": {
+      "4328": "READY",
+      "18090": "READY",
+      "18091": "READY",
+      "18092": "READY",
+      "18093": "READY",
+      "18094": "READY",
+      "18098": "READY"
+    }
+  },
+  "product_contract": {
+    "version": "product-customer/v3",
+    "legacy_default": "product-customer/v2",
+    "new_client_header": "X-ShineMage-Product-Customer-Version",
+    "read_transaction": true,
+    "coverage_checked_before_metrics": true,
+    "insufficient_coverage_fills_zero": false,
+    "public_projection_excludes_internal_identity": true,
+    "display_names_unique": true,
+    "internal_display_names_disjoint": true,
+    "frontend_uses_deduplicated_product_endpoint": true,
+    "frontend_anchors_to_latest_available_week": true
+  },
+  "browser_uat": {
+    "preset": "crm-query",
+    "provider": "deepseek-account",
+    "model": "deepseek-flash",
+    "reasoning_effort": "off",
+    "plugin_page": {
+      "crm_version": "0.0.0-crm.5",
+      "crm_components_running": 2,
+      "crm_components_total": 2,
+      "version": "0.0.0-query.14",
+      "query_version": "0.0.0-query.14",
+      "query_components_running": 2,
+      "query_components_total": 2
+    },
+    "crm_login": "NOT_CONNECTED",
+    "knowledge_base": "AVAILABLE",
+    "page_delivery": "AVAILABLE",
+    "product_customer": "unknown_until_query_crm_product_customer_cohorts_is_called",
+    "rfm_snapshot": "unknown_until_query_crm_rfm_snapshot_is_called",
+    "live_product_query": "NOT_RUN"
+  },
+  "tests": {
+    "backend_product_read_and_category": {
+      "passed": 53,
+      "skipped": 1
+    },
+    "crm_dashboard": {
+      "passed": 45,
+      "failed": 0
+    },
+    "crm_full_suite": {
+      "passed": 102,
+      "environment_blocked": 2,
+      "note": "Two tests required optional jsdom or vendor/cordis entries absent from the selected SDK checkout."
+    },
+    "frontend_unit": {
+      "passed": 12,
+      "failed": 0
+    },
+    "frontend_production_build": "PASS",
+    "query_agent": {
+      "passed": 10,
+      "failed": 0
+    },
+    "supervisor_lifecycle": {
+      "passed": 3,
+      "failed": 0
+    },
+    "crm_target_typecheck_and_bundle": "PASS"
+  },
+  "comment_audit": {
+    "reviewers": 1,
+    "must_kill_accepted": true,
+    "comment_lines_deleted": 31,
+    "application_code_edits_from_comment_review": 0,
+    "typescript_suppressions_remaining_from_change": 0
+  },
+  "recovery": "/srv/shinemage/dsh/recovery/review-fixes-20261022/",
+  "limits": [
+    "The final browser session remains NOT_CONNECTED to CRM, so the v3 product query and migrated Vue tab were not exercised against real authentication.",
+    "The full Dockerfile build remains unverified because Docker Hub remained unavailable. The running image is a digest-bound offline-derived layer.",
+    "The legacy shine-board package remains outside the query preset and board_tools remains unavailable.",
+    "This is an owner-operated side-load, not a signed formal release."
+  ]
+}

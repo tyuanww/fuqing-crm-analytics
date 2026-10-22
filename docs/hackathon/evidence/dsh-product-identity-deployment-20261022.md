@@ -2,6 +2,8 @@
 
 日期：2026-10-22（北京时间）。
 
+> 本页记录 crm.4 / query.13 的商品映射阶段。后续覆盖、公开投影和前端迁移以[审查问题修复与部署验收](dsh-review-fixes-20261022.md)为准。
+
 ## 结论
 
 商品新老客接口已从 `product-customer/v1` 前进到 `product-customer/v2`。接口继续用内部 `name` 和 `spu_classes` 完成商品到多个 SPU class 的映射与用户去重，同时返回稳定的 `display_name` 供用户界面和问数 Agent 使用。
