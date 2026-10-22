@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { ACTIVE_CHANNELS, LOW_PRICE_CHANNELS as FRONTEND_LOW } from '../../../frontend-vue3/src/constants/channels.ts';
 import { CHANNELS, LEAF_CHANNELS, LOW_PRICE_CHANNELS, channelRole, queryDashboardGsv,
-  queryProductCustomer, queryRfmSnapshot, normalizeDashboard, dashboardCapabilities,
+  queryProductCustomer, queryRfmSnapshot, normalizeDashboard, normalizeProductCustomer, dashboardCapabilities,
   dashboardKnowledgeContext } from '../src/dashboard.mjs';
 import { serveDashboard, request, overview, trend } from './dashboard.fixture.mjs';
 
@@ -200,7 +200,8 @@ test('knowledge explicitly separates current dashboard GSV and net candidate', (
 
 test('product customer query uses one authenticated POST and preserves source facts', async t => {
   const productResponse = {
-    schema_version: 'product-customer/v2',
+    schema_version: 'product-customer/v3',
+    status: 'OK',
     source: 'orders+user_first_purchase',
     date_start: '2026-07-01',
     date_end: '2026-07-05',
@@ -212,6 +213,11 @@ test('product customer query uses one authenticated POST and preserves source fa
     metric_type: 'GSV',
     channel: null,
     exclude_channels: [],
+    coverage: {
+      data_cutoff: '2026-07-05',
+      current_status: 'COMPLETE',
+      comparison_status: 'COMPLETE',
+    },
     products: [{
       name: '经典膜',
       display_name: '爆款面膜E',
@@ -256,7 +262,11 @@ test('product customer query uses one authenticated POST and preserves source fa
   assert.equal(result.status, 'OK', JSON.stringify(result));
   assert.equal(result.current, undefined);
   assert.equal(result.products[0].display_name, '爆款面膜E');
-  assert.deepEqual(result.products[0].spu_classes, ['经典膜', '【妆】经典膜']);
+  assert.equal('name' in result.products[0], false);
+  assert.equal('spu_classes' in result.products[0], false);
+  assert.equal(JSON.stringify(result).includes('经典膜'), false);
+  assert.deepEqual(result.filters.products, ['爆款面膜E']);
+  assert.deepEqual(result.coverage, productResponse.coverage);
   assert.equal(result.products[0].current.users, 2);
   assert.equal(result.products[0].current.old_gsv + result.products[0].current.new_gsv, 190);
   assert.equal(result.comparison_new_old_cutoff, '2025-06-30');
@@ -276,6 +286,7 @@ test('product customer query uses one authenticated POST and preserves source fa
     ['GET', '/api/v1/metrics/cutoff'],
   ]);
   assert.equal(calls[1].authenticated, true);
+  assert.equal(calls[1].product_customer_version, 'product-customer/v3');
 });
 
 test('product customer rejects unknown fields and malformed product lists before HTTP', async t => {
@@ -295,7 +306,8 @@ test('product customer rejects unknown fields and malformed product lists before
 
 test('product customer rejects unverifiable comparison and incomplete product evidence', async t => {
   const productResponse = {
-    schema_version: 'product-customer/v2',
+    schema_version: 'product-customer/v3',
+    status: 'OK',
     source: 'orders+user_first_purchase',
     date_start: '2026-07-01',
     date_end: '2026-07-05',
@@ -307,6 +319,11 @@ test('product customer rejects unverifiable comparison and incomplete product ev
     metric_type: 'GSV',
     channel: null,
     exclude_channels: [],
+    coverage: {
+      data_cutoff: '2026-07-05',
+      current_status: 'COMPLETE',
+      comparison_status: 'COMPLETE',
+    },
     products: [{
       name: '经典膜',
       display_name: '爆款面膜E',
@@ -363,6 +380,60 @@ test('product customer rejects unverifiable comparison and incomplete product ev
   }, { sessionId: 'fixture-session', binding });
   assert.equal(incomplete.status, 'UNAVAILABLE');
   assert.equal(incomplete.reason.code, 'INVALID_RESPONSE');
+});
+
+test('product customer v3 exposes coverage and rejects v2, empty or partial results', async t => {
+  const filters = {
+    start_date: '2026-07-01',
+    end_date: '2026-07-05',
+    products: ['爆款面膜E'],
+    channel: '全店',
+    exclude_low_price: false,
+  };
+  const base = {
+    schema_version: 'product-customer/v3',
+    status: 'INSUFFICIENT_COVERAGE',
+    source: 'orders+user_first_purchase',
+    date_start: '2026-07-01',
+    date_end: '2026-07-05',
+    compare_start_date: '2025-07-01',
+    compare_end_date: '2025-07-05',
+    new_old_cutoff: '2026-06-30',
+    comparison_new_old_cutoff: '2025-06-30',
+    data_cutoff: '2026-07-03',
+    coverage: {
+      data_cutoff: '2026-07-03',
+      current_status: 'INSUFFICIENT',
+      comparison_status: 'COMPLETE',
+    },
+    metric_type: 'GSV',
+    channel: null,
+    exclude_channels: [],
+    products: [],
+  };
+  const insufficient = normalizeProductCustomer(base, filters, 'synthetic');
+  assert.equal(insufficient.status, 'INSUFFICIENT_COVERAGE');
+  assert.deepEqual(insufficient.coverage, base.coverage);
+
+  assert.throws(
+    () => normalizeProductCustomer({ ...base, schema_version: 'product-customer/v2' }, filters, 'synthetic'),
+    error => error?.code === 'BACKEND_UPGRADE_REQUIRED',
+  );
+
+  await t.test('empty products cannot be successful', async t => {
+    const { binding } = await serveDashboard(t, (url, _req, res) => {
+      if (url.pathname !== '/api/v1/category/product-customer') return false;
+      res.end(JSON.stringify({ ...base, status: 'OK', coverage: {
+        data_cutoff: '2026-07-05', current_status: 'COMPLETE', comparison_status: 'COMPLETE',
+      }, data_cutoff: '2026-07-05' }));
+      return true;
+    });
+    const result = await queryProductCustomer({
+      start_date: '2026-07-01', end_date: '2026-07-05', products: ['爆款面膜E'],
+    }, { sessionId: 'fixture-session', binding });
+    assert.equal(result.status, 'UNAVAILABLE');
+    assert.equal(result.reason.code, 'INVALID_RESPONSE');
+  });
 });
 
 const rfmSegments = [

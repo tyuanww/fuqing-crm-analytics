@@ -89,7 +89,7 @@ export function apply(ctx: Context, config: { metricsOrigin?: string; registerTo
   }));
   ctx.tools.register(defineTool({
     name: 'query_crm_product_customer_cohorts',
-    description: '查询任意已登记商品的新客、老客和会员拆分。产品映射到多个 SPU class 时按 user_id 去重，不把多个品类人数相加。结果同时返回内部 name、脱敏 display_name 和映射的 SPU class；用户侧默认展示 display_name。products 可传原始商品名或唯一 display_name。可省略 products 查询全部商品；日期最多90天。结果包含数据截止日、新老客截止日和同比。真实业务查询必须使用当前对话的 CRM 登录。',
+    description: '查询任意已登记商品的新客、老客和会员拆分。产品映射到多个 SPU class 时按 user_id 去重，不把多个品类人数相加。公开结果只返回 display_name、覆盖状态和指标，原始商品身份留在 Host 内部。products 可传原始商品名或唯一 display_name。可省略 products 查询全部商品；日期最多90天。请求超过仓库数据截止日时返回 INSUFFICIENT_COVERAGE，不把未覆盖日期填零。真实业务查询必须使用当前对话的 CRM 登录。',
     parameters: {
       start_date: { type: 'string', required: true, description: '开始日期 YYYY-MM-DD（Asia/Shanghai）' },
       end_date: { type: 'string', required: true, description: '结束日期，含首尾、最多90天' },

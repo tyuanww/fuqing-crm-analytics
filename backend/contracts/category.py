@@ -131,7 +131,13 @@ class ProductCustomerProduct(BaseModel):
     yoy: ProductCustomerYoY
 
 
-class ProductCustomerResponse(BaseModel):
+class ProductCustomerCoverage(BaseModel):
+    data_cutoff: Optional[str]
+    current_status: Literal["COMPLETE", "INSUFFICIENT"]
+    comparison_status: Literal["COMPLETE", "INSUFFICIENT"]
+
+
+class ProductCustomerResponseV2(BaseModel):
     schema_version: Literal["product-customer/v2"] = "product-customer/v2"
     source: Literal["orders+user_first_purchase"] = "orders+user_first_purchase"
     date_start: str
@@ -145,6 +151,15 @@ class ProductCustomerResponse(BaseModel):
     channel: Optional[str] = None
     exclude_channels: List[str] = Field(default_factory=list)
     products: List[ProductCustomerProduct]
+
+
+class ProductCustomerResponseV3(ProductCustomerResponseV2):
+    schema_version: Literal["product-customer/v3"] = "product-customer/v3"
+    status: Literal["OK", "INSUFFICIENT_COVERAGE"]
+    coverage: ProductCustomerCoverage
+
+
+ProductCustomerResponse = ProductCustomerResponseV2 | ProductCustomerResponseV3
 
 
 class CategorySegmentMatrixResponse(BaseModel):

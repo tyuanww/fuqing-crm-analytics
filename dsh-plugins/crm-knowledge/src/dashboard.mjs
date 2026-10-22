@@ -23,7 +23,7 @@ export function channelHierarchy() {
   };
 }
 const VERSION = 'dashboard-gsv/observed-v1';
-const PRODUCT_CUSTOMER_VERSION = 'product-customer/v2';
+const PRODUCT_CUSTOMER_VERSION = 'product-customer/v3';
 const RFM_SNAPSHOT_VERSION = 'rfm-snapshot/v1';
 const RFM_SEGMENTS = Object.freeze([
   '重要价值客户', '重要保持客户', '重要发展客户', '重要挽留客户',
@@ -47,6 +47,7 @@ const MESSAGES = Object.freeze({
   DATA_WARNING: 'CRM 接口返回数据警告，本次结果暂不可用；请在看板核对查询区间与数据水位。',
   TIMEOUT: 'CRM 查询超时；未自动重试。',
   CANCELLED: 'CRM 查询已取消。',
+  BACKEND_UPGRADE_REQUIRED: 'CRM 后端尚未升级到 product-customer/v3。',
 });
 class DashboardError extends Error {
   constructor(code) { super(MESSAGES[code]); this.code = code; }
@@ -213,7 +214,7 @@ async function getJson(base, path, params, binding, signal) {
     headers: { Authorization: `Bearer ${binding.token}`, Accept: 'application/json' } }));
 }
 
-async function postJson(base, path, body, binding, signal) {
+async function postJson(base, path, body, binding, signal, extraHeaders = {}) {
   const url = new URL(path, base);
   return readJsonResponse(await fetch(url, {
     method: 'POST', redirect: 'error', signal,
@@ -221,6 +222,7 @@ async function postJson(base, path, body, binding, signal) {
       Authorization: `Bearer ${binding.token}`,
       Accept: 'application/json',
       'Content-Type': 'application/json',
+      ...extraHeaders,
     },
     body: JSON.stringify(body),
   }));
@@ -289,7 +291,7 @@ export async function queryProductCustomer(input, options = {}) {
         compare_start_date: filters.compare_start_date,
         compare_end_date: filters.compare_end_date,
       } : {}),
-    }, binding, combined);
+    }, binding, combined, { 'X-ShineMage-Product-Customer-Version': PRODUCT_CUSTOMER_VERSION });
     combined.throwIfAborted();
     let warehouseCutoff = null;
     try {
@@ -506,6 +508,7 @@ function previousMonthEnd(value) {
 }
 
 export function normalizeProductCustomer(value, filters, dataKind, warehouseCutoff = null) {
+  if (value?.schema_version === 'product-customer/v2') fail('BACKEND_UPGRADE_REQUIRED');
   if (value?.schema_version !== PRODUCT_CUSTOMER_VERSION || value.source !== 'orders+user_first_purchase' ||
       value.date_start !== filters.start_date || value.date_end !== filters.end_date ||
       value.metric_type !== 'GSV' || (value.channel ?? '全店') !== filters.channel ||
@@ -517,9 +520,34 @@ export function normalizeProductCustomer(value, filters, dataKind, warehouseCuto
       value.new_old_cutoff !== previousMonthEnd(filters.start_date) ||
       value.comparison_new_old_cutoff !== previousMonthEnd(expectedCompareStart)) fail('INVALID_RESPONSE');
   if (value.data_cutoff !== null) parseDate(value.data_cutoff, 'INVALID_RESPONSE');
+  if (!value.coverage || typeof value.coverage !== 'object' ||
+      (value.coverage.data_cutoff !== null && typeof value.coverage.data_cutoff !== 'string') ||
+      !['COMPLETE', 'INSUFFICIENT'].includes(value.coverage.current_status) ||
+      !['COMPLETE', 'INSUFFICIENT'].includes(value.coverage.comparison_status)) fail('INVALID_RESPONSE');
+  if (value.coverage.data_cutoff !== value.data_cutoff) fail('INVALID_RESPONSE');
+  if (!['OK', 'INSUFFICIENT_COVERAGE'].includes(value.status)) fail('INVALID_RESPONSE');
   const expectedExcluded = filters.exclude_low_price ? [...LOW_PRICE_CHANNELS] : [];
   if (value.exclude_channels.length !== expectedExcluded.length ||
       value.exclude_channels.some((channel, index) => channel !== expectedExcluded[index])) fail('INVALID_RESPONSE');
+  if (value.status === 'INSUFFICIENT_COVERAGE') {
+    if (value.products.length !== 0) fail('INVALID_RESPONSE');
+    return {
+      status: 'INSUFFICIENT_COVERAGE',
+      schema_version: PRODUCT_CUSTOMER_VERSION,
+      source: value.source,
+      contains_real_data: dataKind === 'real',
+      synthetic: dataKind === 'synthetic',
+      filters: { ...filters, products: undefined, timezone: 'Asia/Shanghai', end_inclusive: true },
+      compare_start_date: value.compare_start_date,
+      compare_end_date: value.compare_end_date,
+      new_old_cutoff: value.new_old_cutoff,
+      comparison_new_old_cutoff: value.comparison_new_old_cutoff,
+      data_cutoff: value.data_cutoff,
+      coverage: value.coverage,
+      products: [],
+    };
+  }
+  if (value.products.length === 0) fail('INVALID_RESPONSE');
   const names = new Set();
   const displayNames = new Set();
   const products = value.products.map(item => {
@@ -535,17 +563,15 @@ export function normalizeProductCustomer(value, filters, dataKind, warehouseCuto
     if (item.status === 'EMPTY' && current.users !== 0) fail('INVALID_RESPONSE');
     if (item.status === 'OK' && current.users === 0) fail('INVALID_RESPONSE');
     return {
-      name: item.name,
       display_name: item.display_name,
-      spu_classes: [...item.spu_classes],
       status: item.status,
       current,
       comparison,
       yoy: productYoY(item.yoy),
     };
   });
-  if (filters.products && (products.length !== filters.products.length ||
-      filters.products.some(requested => !products.some(item =>
+  if (filters.products && (value.products.length !== filters.products.length ||
+      filters.products.some(requested => !value.products.some(item =>
         requested === item.name || requested === item.display_name)))) fail('INVALID_RESPONSE');
   return {
     status: 'OK',
@@ -553,12 +579,18 @@ export function normalizeProductCustomer(value, filters, dataKind, warehouseCuto
     source: value.source,
     contains_real_data: dataKind === 'real',
     synthetic: dataKind === 'synthetic',
-    filters: { ...filters, timezone: 'Asia/Shanghai', end_inclusive: true },
+    filters: {
+      ...filters,
+      products: filters.products ? products.map(item => item.display_name) : undefined,
+      timezone: 'Asia/Shanghai',
+      end_inclusive: true,
+    },
     compare_start_date: value.compare_start_date,
     compare_end_date: value.compare_end_date,
     new_old_cutoff: value.new_old_cutoff,
     comparison_new_old_cutoff: value.comparison_new_old_cutoff,
     data_cutoff: value.data_cutoff,
+    coverage: value.coverage,
     warehouse_cutoff: warehouseCutoff,
     products,
     limitations: [

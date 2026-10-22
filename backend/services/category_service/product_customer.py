@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from datetime import date, datetime, timedelta
 from typing import Any, Iterable, Optional
 
@@ -11,9 +12,9 @@ from backend.services.asset_focus_service._helpers import (
     PRODUCT_TO_SPU_CLASSES,
     PRODUCT_TO_SPU_CLASSES_OTHER,
 )
+from backend.services.product_identity import PRODUCT_DISPLAY_NAMES, resolve_product_names
 
 from .overview import _build_category_period_filter
-from .product_identity import PRODUCT_DISPLAY_NAMES, resolve_product_names
 
 
 PRODUCT_GROUPS: dict[str, list[str]] = {
@@ -69,6 +70,40 @@ def _same_day_previous_year(value: date) -> date:
         return value.replace(year=value.year - 1)
     except ValueError:
         return value.replace(year=value.year - 1, day=28)
+
+
+@contextmanager
+def _read_transaction(conn: Any):
+    conn.execute("BEGIN TRANSACTION")
+    try:
+        yield
+    except BaseException:
+        conn.execute("ROLLBACK")
+        raise
+    else:
+        conn.execute("COMMIT")
+
+
+def _coverage(
+    end: date,
+    compare_end: date,
+    data_cutoff: Optional[date],
+) -> dict[str, Any]:
+    if data_cutoff is None:
+        return {
+            "data_cutoff": None,
+            "current_status": "INSUFFICIENT",
+            "comparison_status": "INSUFFICIENT",
+        }
+    return {
+        "data_cutoff": data_cutoff.isoformat(),
+        "current_status": "COMPLETE" if end <= data_cutoff else "INSUFFICIENT",
+        "comparison_status": (
+            "COMPLETE"
+            if compare_end <= data_cutoff
+            else "INSUFFICIENT"
+        ),
+    }
 
 
 def _group_expression(names: Iterable[str]) -> tuple[str, list[str]]:
@@ -235,51 +270,64 @@ def get_product_customer_overview(
     excluded = list(exclude_channels or [])
 
     conn = get_connection()
-    current = _period_metrics(
-        conn,
-        start_date=start_date,
-        end_date=end_date,
-        cutoff=cutoff,
-        names=names,
-        metric_type=metric_type,
-        channel=channel,
-        exclude_channels=excluded,
-    )
-    comparison = _period_metrics(
-        conn,
-        start_date=compare_start_date,
-        end_date=compare_end_date,
-        cutoff=compare_cutoff,
-        names=names,
-        metric_type=metric_type,
-        channel=channel,
-        exclude_channels=excluded,
-    )
-    data_cutoff_row = conn.execute(
-        "SELECT CAST(MAX(pay_time) AS DATE) FROM orders"
-    ).fetchone()
-    data_cutoff = (
-        str(data_cutoff_row[0])
-        if data_cutoff_row and data_cutoff_row[0] is not None
-        else None
-    )
+    with _read_transaction(conn):
+        data_cutoff_row = conn.execute(
+            "SELECT CAST(MAX(pay_time) AS DATE) FROM orders"
+        ).fetchone()
+        data_cutoff = (
+            data_cutoff_row[0]
+            if data_cutoff_row and data_cutoff_row[0] is not None
+            else None
+        )
+        coverage = _coverage(
+            end,
+            datetime.strptime(compare_end_date, "%Y-%m-%d").date(),
+            data_cutoff,
+        )
+        complete = (
+            coverage["current_status"] == "COMPLETE"
+            and coverage["comparison_status"] == "COMPLETE"
+        )
+        if complete:
+            current = _period_metrics(
+                conn,
+                start_date=start_date,
+                end_date=end_date,
+                cutoff=cutoff,
+                names=names,
+                metric_type=metric_type,
+                channel=channel,
+                exclude_channels=excluded,
+            )
+            comparison = _period_metrics(
+                conn,
+                start_date=compare_start_date,
+                end_date=compare_end_date,
+                cutoff=compare_cutoff,
+                names=names,
+                metric_type=metric_type,
+                channel=channel,
+                exclude_channels=excluded,
+            )
 
     result = []
-    for name in names:
-        current_metrics = current.get(name, dict(_ZERO_METRICS))
-        comparison_metrics = comparison.get(name, dict(_ZERO_METRICS))
-        result.append({
-            "name": name,
-            "display_name": PRODUCT_DISPLAY_NAMES[name],
-            "spu_classes": list(PRODUCT_GROUPS[name]),
-            "status": "OK" if current_metrics["users"] > 0 else "EMPTY",
-            "current": current_metrics,
-            "comparison": comparison_metrics,
-            "yoy": _yoy(current_metrics, comparison_metrics),
-        })
+    if complete:
+        for name in names:
+            current_metrics = current.get(name, dict(_ZERO_METRICS))
+            comparison_metrics = comparison.get(name, dict(_ZERO_METRICS))
+            result.append({
+                "name": name,
+                "display_name": PRODUCT_DISPLAY_NAMES[name],
+                "spu_classes": list(PRODUCT_GROUPS[name]),
+                "status": "OK" if current_metrics["users"] > 0 else "EMPTY",
+                "current": current_metrics,
+                "comparison": comparison_metrics,
+                "yoy": _yoy(current_metrics, comparison_metrics),
+            })
 
     return {
-        "schema_version": "product-customer/v2",
+        "schema_version": "product-customer/v3",
+        "status": "OK" if complete else "INSUFFICIENT_COVERAGE",
         "source": "orders+user_first_purchase",
         "date_start": start_date,
         "date_end": end_date,
@@ -287,7 +335,8 @@ def get_product_customer_overview(
         "compare_end_date": compare_end_date,
         "new_old_cutoff": cutoff,
         "comparison_new_old_cutoff": compare_cutoff,
-        "data_cutoff": data_cutoff,
+        "data_cutoff": coverage["data_cutoff"],
+        "coverage": coverage,
         "metric_type": metric_type,
         "channel": channel,
         "exclude_channels": excluded,

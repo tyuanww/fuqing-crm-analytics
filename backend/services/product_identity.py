@@ -11,6 +11,8 @@ PRODUCT_DISPLAY_NAMES = MappingProxyType({
     "水杨酸涂抹面膜": "爆款面膜C",
     "童颜乳酸面膜": "爆款面膜D",
     "经典膜": "爆款面膜E",
+    "白膜": "爆款面膜F",
+    "黑膜": "爆款面膜G",
     "凉茶次抛": "爆款次抛A",
     "童颜乳酸次抛": "爆款次抛B",
     "凉茶水乳": "爆款水乳A",
@@ -18,10 +20,15 @@ PRODUCT_DISPLAY_NAMES = MappingProxyType({
     "凉茶面霜": "爆款面霜",
     "医用凝胶": "爆款凝胶",
     "医用洁面": "爆款洁面",
-    "白膜": "爆款品类A",
-    "祛痘精华": "爆款品类B",
-    "黑膜": "爆款品类C",
+    "祛痘精华": "爆款精华A",
 })
+
+_RAW_NAMES = set(PRODUCT_DISPLAY_NAMES)
+_DISPLAY_NAMES = set(PRODUCT_DISPLAY_NAMES.values())
+if len(_DISPLAY_NAMES) != len(PRODUCT_DISPLAY_NAMES):
+    raise RuntimeError("商品展示名必须唯一")
+if _RAW_NAMES & _DISPLAY_NAMES:
+    raise RuntimeError("商品内部名与展示名不能冲突")
 
 PRODUCT_ALIASES = MappingProxyType({
     **{name: name for name in PRODUCT_DISPLAY_NAMES},
@@ -30,8 +37,6 @@ PRODUCT_ALIASES = MappingProxyType({
 
 
 def resolve_product_names(products: Iterable[str]) -> list[str]:
-    if len(set(PRODUCT_DISPLAY_NAMES.values())) != len(PRODUCT_DISPLAY_NAMES):
-        raise RuntimeError("商品展示名必须唯一")
     names: list[str] = []
     for product in products:
         name = PRODUCT_ALIASES.get(product)

@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import pytest
+from fastapi import HTTPException
 
-from backend.services.category_display import unique_display_names
 from backend.services.category_service import product_customer
 
 
@@ -22,13 +22,14 @@ def _insert_order(handle, order_id: str, user_id: str, pay_time: str, amount: fl
     )
 
 
-def test_product_display_names_are_stable_and_match_category_masking():
-    assert dict(product_customer.PRODUCT_DISPLAY_NAMES) == unique_display_names(
-        product_customer.PRODUCT_GROUPS
-    )
-    assert len(set(product_customer.PRODUCT_DISPLAY_NAMES.values())) == len(
-        product_customer.PRODUCT_DISPLAY_NAMES
-    )
+def test_product_display_names_form_one_disjoint_unique_alias_space():
+    internal_names = set(product_customer.PRODUCT_DISPLAY_NAMES)
+    display_names = set(product_customer.PRODUCT_DISPLAY_NAMES.values())
+    assert internal_names.isdisjoint(display_names)
+    assert len(display_names) == len(product_customer.PRODUCT_DISPLAY_NAMES)
+    assert product_customer.PRODUCT_DISPLAY_NAMES["白膜"] == "爆款面膜F"
+    assert product_customer.PRODUCT_DISPLAY_NAMES["黑膜"] == "爆款面膜G"
+    assert product_customer.PRODUCT_DISPLAY_NAMES["祛痘精华"] == "爆款精华A"
 
 
 def test_product_customer_deduplicates_users_across_spu_classes(
@@ -52,11 +53,14 @@ def test_product_customer_deduplicates_users_across_spu_classes(
     monkeypatch.setattr(product_customer, "get_connection", lambda: handle)
     result = product_customer.get_product_customer_overview(
         "2026-07-01",
-        "2026-07-05",
+        "2026-07-03",
         products=["经典膜"],
     )
 
-    assert result["schema_version"] == "product-customer/v2"
+    assert result["schema_version"] == "product-customer/v3"
+    assert result["status"] == "OK"
+    assert result["coverage"]["current_status"] == "COMPLETE"
+    assert result["coverage"]["comparison_status"] == "COMPLETE"
     assert result["source"] == "orders+user_first_purchase"
     assert result["new_old_cutoff"] == "2026-06-30"
     assert result["comparison_new_old_cutoff"] == "2025-06-30"
@@ -89,6 +93,31 @@ def test_product_customer_deduplicates_users_across_spu_classes(
     assert product["yoy"]["gsv"] == 0.9
 
 
+def test_product_customer_refuses_queries_after_data_cutoff(
+    monkeypatch,
+    tmp_duckdb_with_synthetic_orders,
+):
+    handle = tmp_duckdb_with_synthetic_orders
+    handle.execute(
+        "INSERT INTO user_first_purchase VALUES (?, ?::DATE)",
+        ["u_coverage", "2026-07-01"],
+    )
+    _insert_order(handle, "coverage-order", "u_coverage", "2026-07-03 10:00:00", 100, "经典膜")
+    monkeypatch.setattr(product_customer, "get_connection", lambda: handle)
+
+    result = product_customer.get_product_customer_overview(
+        "2026-07-06",
+        "2026-07-07",
+        products=["经典膜"],
+    )
+
+    assert result["schema_version"] == "product-customer/v3"
+    assert result["status"] == "INSUFFICIENT_COVERAGE"
+    assert result["products"] == []
+    assert result["coverage"]["data_cutoff"] == "2026-07-03"
+    assert result["coverage"]["current_status"] == "INSUFFICIENT"
+
+
 def test_product_customer_rejects_unknown_products(monkeypatch, tmp_duckdb_with_synthetic_orders):
     monkeypatch.setattr(
         product_customer,
@@ -112,10 +141,18 @@ def test_product_customer_accepts_unique_display_name_alias(
         "get_connection",
         lambda: tmp_duckdb_with_synthetic_orders,
     )
+    _insert_order(
+        tmp_duckdb_with_synthetic_orders,
+        "alias-order",
+        "alias-user",
+        "2026-07-03 10:00:00",
+        100,
+        "经典膜",
+    )
     display_name = product_customer.PRODUCT_DISPLAY_NAMES["经典膜"]
     result = product_customer.get_product_customer_overview(
         "2026-07-01",
-        "2026-07-05",
+        "2026-07-03",
         products=[display_name],
     )
 
@@ -179,3 +216,26 @@ def test_product_customer_route_is_read_only_post():
 
     route = next(item for item in router.routes if item.path == "/api/v1/category/product-customer")
     assert route.methods == {"POST"}
+
+
+def test_product_customer_version_negotiation_keeps_v2_during_rollout():
+    from backend.routers.category import select_product_customer_response
+
+    result = {
+        "schema_version": "product-customer/v3",
+        "status": "OK",
+        "products": [],
+        "coverage": {},
+    }
+    assert select_product_customer_response(result, "product-customer/v3") is result
+    v2 = select_product_customer_response(result, "product-customer/v2")
+    assert v2["schema_version"] == "product-customer/v2"
+
+    insufficient = {**result, "status": "INSUFFICIENT_COVERAGE"}
+    with pytest.raises(HTTPException) as coverage_error:
+        select_product_customer_response(insufficient, "product-customer/v2")
+    assert coverage_error.value.status_code == 422
+
+    with pytest.raises(HTTPException) as version_error:
+        select_product_customer_response(result, "product-customer/v9")
+    assert version_error.value.status_code == 400

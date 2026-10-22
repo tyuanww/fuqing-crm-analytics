@@ -7,7 +7,7 @@ const root = new URL('../', import.meta.url)
 test('query agent bundle declares one preset through the DSH bundle contract', async () => {
   const manifest = JSON.parse(await readFile(new URL('package.json', root), 'utf8'))
   assert.equal(manifest.name, '@shine-mage/dsh-query-agent')
-  assert.equal(manifest.version, '0.0.0-query.13')
+  assert.equal(manifest.version, '0.0.0-query.14')
   assert.equal(manifest.packageManager, 'pnpm@11.28.2')
   assert.deepEqual(manifest.engines, { node: '24.x' })
   assert.equal(manifest.peerDependencies, undefined)

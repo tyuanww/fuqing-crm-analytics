@@ -4,7 +4,7 @@
 前缀: /api/v1/category/*
 """
 
-from fastapi import APIRouter, HTTPException, Query, Response
+from fastapi import APIRouter, HTTPException, Query, Request, Response
 from typing import Optional, List
 from pydantic import BaseModel
 
@@ -129,10 +129,10 @@ def get_category_overview_batch_api(body: CategoryOverviewBatchRequest):
 
 
 @router.post("/product-customer", response_model=ProductCustomerResponse)
-def get_product_customer_api(body: ProductCustomerRequest):
+def get_product_customer_api(body: ProductCustomerRequest, request: Request):
     """按产品聚合新老客，跨多个 SPU class 时按用户去重。"""
     try:
-        return get_product_customer_overview(
+        result = get_product_customer_overview(
             body.start_date,
             body.end_date,
             products=body.products,
@@ -144,6 +144,20 @@ def get_product_customer_api(body: ProductCustomerRequest):
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return select_product_customer_response(
+        result,
+        request.headers.get("X-ShineMage-Product-Customer-Version", "product-customer/v2"),
+    )
+
+
+def select_product_customer_response(result: dict, version: str) -> dict:
+    if version == "product-customer/v3":
+        return result
+    if version != "product-customer/v2":
+        raise HTTPException(status_code=400, detail="unsupported product customer contract")
+    if result["status"] != "OK":
+        raise HTTPException(status_code=422, detail="请求区间不在可用数据范围内")
+    return {**result, "schema_version": "product-customer/v2"}
 
 
 @router.get("/segment", response_model=CategorySegmentMatrixResponse)
