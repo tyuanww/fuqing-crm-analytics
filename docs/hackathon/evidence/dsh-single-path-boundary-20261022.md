@@ -47,8 +47,10 @@
 
 - 新增项目本地技能 `.agents/skills/formal-page-binding/SKILL.md` 和验证器 `scripts/formal/page-binding-invariant.mjs`。验证器直接加载生产 `native-generate.mjs`，不复制解析实现。
 - 固定边界为 6 类绑定清单、5 类事件、5 步序列及其全部前缀：6 × 3,125 条轨迹，检查 93,750 次状态转移和 112,500 个状态；当前代码通过。
+- 已补齐 TLA+ TLC runner：TLA+ Tools v1.7.4 / TLC 2.19，JAR SHA-256 `936a262061c914694dfd669a543be24573c45d5aa0ff20a8b96b23d01e050e88`。TLC 完整检查 75 个生成状态、14 个不同状态，深度 4，无不变量违例。
 - 形式不变量包括：非法清单拒绝而不是 fail-open 为空、带 `result_refs` 的正式页不能是 `UNBOUND_SAMPLE`、保存页与回执清单完全一致、重复确认幂等。
 - 按技能要求在临时隔离夹具中恢复历史 fail-open 分支，验证器以 `invalid-unknown-key: 非法清单被静默接受为 {"bindings":[],"result_refs":[]}` 失败；夹具已恢复，生产工作树再次通过。该负测不修改仓库产品源码。
+- TLA+ 负测将模型配置 `FailOpen=TRUE`，TLC 给出 `InvalidNeverAccepted` 反例：`INVALID_UNKNOWN → Deliver → ACCEPTED / EMPTY`；恢复 `FailOpen=FALSE` 后再次通过。
 - 这是有界模型检查，不覆盖并发调度、真实 DuckDB 内容、网络可靠性、HTML 执行安全或超过 5 步的长序列；不能替代 B0/profile/release 门禁。
 
 - PR 前 `open-code-review-delegate` 复核（2026-10-23）以远端同名分支 `d3452ff1` 到当前 HEAD 为范围：OCR 列出 46 个可审文件、25 个排除文件，46/46 已逐文件复核、无跳过。发现原生 HTML 交付对非法 `binding_manifest` 静默降级为空清单的 fail-open 缺陷，已由 `4d5723f9` 改为直接拒绝并补回归测试；Node 24 Workbench/CRM 联合回归 `142/142`、后端 artifact/product/page/cockpit 回归 `93 passed`。边界/C0 检查随后重新通过。该记录是代码审查证据，不代表远端 push、PR merge 或正式 release 已完成。
