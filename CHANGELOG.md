@@ -21,6 +21,8 @@
 
 ### Added
 
+- B0 收尾补齐 C0 生成物漂移：重生成 `C0-MANIFEST.json` 与 `c0-fixtures.mjs` 的 contract hash，并通过离线 C0 check 与 30/30 评估。完整 B0 已实际接通固定输入，但因旧 Workbench public-contract archive 与当前 `3030e3f` composition source 不同源而保持阻断，需作者 CI 重新导出后再更新锁。
+
 - CRM `0.0.0-crm.5` 与问数智能体 `0.0.0-query.14` 已 side-load 到杭州，发布 peer 对齐 `DSH 0.2.1-rc.1 / Cordis 4.0.5`。商品新老客使用 `product-customer/v3`：无版本头继续返回 v2，新客户端显式请求 v3；覆盖、当前期和同期在同一只读事务读取，截止日之后返回 `INSUFFICIENT_COVERAGE`，不再填零或生成假同比下降。工具公开投影只返回固定唯一 `display_name`、覆盖状态和指标，内部商品名和 SPU class 留在 Host。Vue“核心单品新老客”迁移到商品级去重接口，使用最新可用周，不再跨 SPU class 相加人数。新增 RFM 预计算快照读取；客户端 fail-closed 校验商品集合、展示名唯一性和 RFM 9 个唯一分群标签。问数 Agent 把经营诊断和增长复盘收束为“证据、反证、决策、行动、复核”链。杭州真实 CRM 登录、v3 商品查询、页面保存和驾驶舱编辑已有现场证据；Vue 登录后的交互 UAT、Workbench 绑定 manifest 的现役切换和正式发布门禁仍开放。详见[审查问题修复回执](./docs/hackathon/evidence/dsh-review-fixes-20261022.md)和[单链路业务边界盘查](./docs/hackathon/evidence/dsh-single-path-boundary-20261022.md)。
 
 - “问数智能体”配置型 bundle 前进到 `0.0.0-query.11`：空白会话切到 `crm-query` 时隐藏已知终端、文件和协作工具，并对执行使用 12 工具 allowlist guard；query.10 的全工具限制会误删 CRM、WeKnora 和页面业务工具，已作为失败候选保留记录。真实会话确认模型路由为 `deepseek-account / deepseek-flash / off`，`list_agents` 虽仍由上层组合可见，实际执行返回 `CRM_QUERY_TOOL_NOT_ALLOWED`。

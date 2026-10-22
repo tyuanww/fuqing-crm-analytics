@@ -36,10 +36,16 @@
 ## 仍然开放的边界
 
 - `0.2.1-rc.1` 现役 runtime 尚未消费 `58045416` 之后的 Workbench candidate。候选包位于 `.context/release/cockpit-binding-58045416/`，tarball SHA-256 为 `ed86a02383644cec4d12ffda9f20411b621cf4c9a09de52649c59f02efb9137f`。这不是部署回执。
-- 当前分支的完整 B0 pipeline 未在本轮重跑。入口在缺少 `CRM_COMPOSITION_OUTPUT` 时主动失败，说明组合输入不完整，不应把局部回归冒充全量通过。
+- 当前分支的完整 B0 pipeline 已用固定 composition、Workbench 作者、领域作者和 public-contract 输入实际启动。首次失败是工作树中残留的 CRM kit 外链，清理该生成物后再次运行已越过输入、组合和前九个合同生成器；随后发现仓库内 C0 manifest/fixture 与生成器漂移，已由 `54c75ddc` 重生成并通过单独 C0 check。再次运行继续被旧 Workbench public-contract archive 中的 `c0-fixtures.mjs` hash 阻断。该 archive 锁定 `6c5adc9f`，当前 Workbench composition 已是 `3030e3f`；不能把旧 archive 重标成当前来源，需由作者 CI 重新导出 public-contracts 并更新锁。
 - Vue 登录后的商品交互 UAT仍需在杭州页面上单独完成。现有真实问数证据不等于 Vue 页面交互已验收。
 - 原生 `competition_board_*` 工具仍未进入 `crm-query` 预设。当前“生成看板”走 HTML 页面和 CRM 驾驶舱引用，不等于原生 Board 工具可用。
-- Git 工作树干净，但本分支比远端同名分支多 24 个提交。提交主题都属于本轮 CRM、问数、Workbench 和证据收口，但尚未创建 PR、push 或 merge。
+- Git 工作树干净；本地分支仍有尚未推送到远端同名分支的本轮提交。提交主题都属于本轮 CRM、问数、Workbench 和证据收口，但尚未创建 PR、push 或 merge。
+
+## B0 收尾回执
+
+- 固定输入读取、组合包、领域输入和公共合同前九个 generator 已实际执行；当前阻断点是 `PUBLIC_CONTRACT_CHECK_FAILED: competition-c0-contract.mjs`，具体为旧 public-contract archive 的 `dsh-plugins/analytics-workbench/src/client/competition-board/c0-fixtures.mjs` 与当前生成 hash 不一致。
+- 修复后的 C0 生成器结果为 OpenAPI SHA-256 `6d6558e894441d707417003ad9f92e4fc486c1c21c1b92a6d9bc1a24f5c5967f`、contract hash `2c1b9e57ae9818dbfa835a826a4bf82d3c78d1473e4a3472408e4a028a273c8a`；单独 `--check` 和离线评估 `30/30` 通过。
+- 因此本轮不能宣称完整 B0、远端 CI、PR、杭州现役切换或正式 release 通过。下一步是重新获取与 Workbench `3030e3f` 同源的作者 public-contract artifact，重锁后再跑完整 B0。
 
 ## 可复验命令
 
