@@ -85,6 +85,10 @@ test('membership OK projector keeps member and non-member AUS', async t => {
       }));
       return true;
     }
+    if (url.pathname.endsWith('/cutoff')) {
+      res.end(JSON.stringify({ cutoff_date: '2026-07-05' }));
+      return true;
+    }
   });
   const value = await queryDashboardMembership(request, { binding, sessionId: 'fixture-session' });
   assert.equal(value.status, 'OK');
@@ -104,6 +108,10 @@ test('net gsv OK projector does not reuse dashboard gsv as net', async t => {
         gross_paid_fen: 10000, succeeded_refund_fen: 2000, net_gsv_amount_fen: 8000,
         parent_child_attributed: true, limitations: [],
       }));
+      return true;
+    }
+    if (url.pathname.endsWith('/cutoff')) {
+      res.end(JSON.stringify({ cutoff_date: '2026-07-05' }));
       return true;
     }
   });
@@ -134,5 +142,58 @@ test('net gsv unavailable does not subtract from dashboard gsv', async t => {
     { binding, sessionId: 'fixture-session' });
   assert.equal(value.status, 'UNAVAILABLE');
   assert.equal(value.reason, 'MISSING_REFUND_EVENTS');
+  assert.equal('net_gsv' in value, false);
+});
+
+test('membership after the warehouse cutoff fails before projecting zero amounts', async t => {
+  const outOfCoverage = { start_date: '2026-07-06', end_date: '2026-07-07' };
+  const filters = { ...outOfCoverage, channel: '全店', exclude_low_price: false };
+  const { binding } = await serveDashboard(t, (url, _req, res) => {
+    if (url.pathname.endsWith('/dashboard-membership')) {
+      res.end(JSON.stringify({
+        schema_version: 'crm-dashboard-membership/v1', metric_version: 'dashboard-member-premium/v1',
+        status: 'OK', filters,
+        member_gsv_amount_fen: 0, non_member_gsv_amount_fen: 0, unknown_member_gsv_amount_fen: 0,
+        member_aus: { amount_fen: null, denominator: 0, reason: 'NO_PURCHASES' },
+        non_member_aus: { amount_fen: null, denominator: 0, reason: 'NO_PURCHASES' },
+        premium: { value: null, unit: 'multiple', reason: 'NO_PURCHASES' },
+        coverage: { member_buyers: 0, non_member_buyers: 0, unknown_member_buyers: 0 },
+        limitations: [],
+      }));
+      return true;
+    }
+    if (url.pathname.endsWith('/cutoff')) {
+      res.end(JSON.stringify({ cutoff_date: '2026-07-05' }));
+      return true;
+    }
+  });
+  const value = await queryDashboardMembership(outOfCoverage, { binding, sessionId: 'fixture-session' });
+  assert.equal(value.status, 'UNAVAILABLE', JSON.stringify(value));
+  assert.equal(value.reason.code, 'INSUFFICIENT_COVERAGE');
+  assert.equal('member_gsv' in value, false);
+});
+
+test('net gsv after the warehouse cutoff fails before projecting zero amounts', async t => {
+  const outOfCoverage = { start_date: '2026-07-06', end_date: '2026-07-07' };
+  const filters = { ...outOfCoverage, channel: '全店', exclude_low_price: false };
+  const { binding } = await serveDashboard(t, (url, _req, res) => {
+    if (url.pathname.endsWith('/dashboard-net-gsv')) {
+      res.end(JSON.stringify({
+        schema_version: 'crm-dashboard-net-gsv/v1', metric_version: 'dashboard-net-gsv/v1',
+        status: 'OK', filters, refund_as_of: '2026-07-31',
+        gross_paid_fen: 0, succeeded_refund_fen: 0, net_gsv_amount_fen: 0,
+        parent_child_attributed: false, limitations: [],
+      }));
+      return true;
+    }
+    if (url.pathname.endsWith('/cutoff')) {
+      res.end(JSON.stringify({ cutoff_date: '2026-07-05' }));
+      return true;
+    }
+  });
+  const value = await queryDashboardNetGsv({ ...outOfCoverage, refund_as_of: '2026-07-31' },
+    { binding, sessionId: 'fixture-session' });
+  assert.equal(value.status, 'UNAVAILABLE', JSON.stringify(value));
+  assert.equal(value.reason.code, 'INSUFFICIENT_COVERAGE');
   assert.equal('net_gsv' in value, false);
 });

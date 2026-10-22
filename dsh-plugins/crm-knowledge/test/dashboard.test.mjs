@@ -605,3 +605,28 @@ test('RFM backend rejection after local validation is reported as insufficient c
   assert.equal(result.status, 'UNAVAILABLE');
   assert.equal(result.reason.code, 'INSUFFICIENT_COVERAGE');
 });
+
+test('RFM success after the warehouse cutoff fails instead of returning a zero snapshot', async t => {
+  const rows = rfmSegments.map(segment => ({ ...rfmRow, rfm_segment: segment }));
+  const { binding } = await serveDashboard(t, (url, _req, res) => {
+    if (url.pathname === '/api/v1/customer-health/rfm-analysis') {
+      res.end(JSON.stringify({
+        year_label: '2026', comp_year_label: '2025', prev2_year_label: '2024', metric_type: 'GSV',
+        rows, same_channel_rows: rows, member_rows: rows, member_same_channel_rows: rows,
+      }));
+      return true;
+    }
+    if (url.pathname === '/api/v1/metrics/cutoff') {
+      res.end(JSON.stringify({ cutoff_date: '2026-07-05' }));
+      return true;
+    }
+  });
+  const result = await queryRfmSnapshot({
+    start_date: '2026-07-06',
+    end_date: '2026-07-07',
+    metric_type: 'GSV',
+  }, { sessionId: 'fixture-session', binding });
+  assert.equal(result.status, 'UNAVAILABLE', JSON.stringify(result));
+  assert.equal(result.reason.code, 'INSUFFICIENT_COVERAGE');
+  assert.equal('rows' in result, false);
+});

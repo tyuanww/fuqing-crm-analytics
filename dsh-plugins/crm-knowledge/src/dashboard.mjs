@@ -230,6 +230,22 @@ async function postJson(base, path, body, binding, signal, extraHeaders = {}, in
   }), invalidRequestCode);
 }
 
+async function readWarehouseCutoff(base, binding, signal) {
+  try {
+    const cutoff = await getJson(base, '/api/v1/metrics/cutoff', new URLSearchParams(), binding, signal);
+    if (typeof cutoff?.cutoff_date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(cutoff.cutoff_date)) return null;
+    parseDate(cutoff.cutoff_date, 'INVALID_RESPONSE');
+    return cutoff.cutoff_date;
+  } catch (error) {
+    if (signal.aborted) throw error;
+    return null;
+  }
+}
+
+function assertWithinWarehouseCutoff(filters, cutoff) {
+  if (cutoff && filters.end_date > cutoff) fail('INSUFFICIENT_COVERAGE');
+}
+
 /** Trusted options are supplied by the host, not included in the tool parameter schema. */
 async function queryDashboard(input, options, purchases = false) {
   const { sessionId, signal, binding = null, timeoutMs = 25000 } = options;
@@ -245,6 +261,7 @@ async function queryDashboard(input, options, purchases = false) {
       const params = new URLSearchParams({ ...filters, exclude_low_price: String(filters.exclude_low_price) });
       const aggregate = await getJson(base, '/api/v1/metrics/dashboard-purchases', params, binding, combined);
       combined.throwIfAborted();
+      assertWithinWarehouseCutoff(filters, await readWarehouseCutoff(base, binding, combined));
       return normalizePurchases(aggregate, filters, binding.dataKind);
     }
     const params = new URLSearchParams({ start_date: filters.start_date, end_date: filters.end_date, metric_type: 'GSV' });
@@ -254,15 +271,9 @@ async function queryDashboard(input, options, purchases = false) {
     const trend = await getJson(base, '/api/v1/metrics/trend', params, binding, combined);
     combined.throwIfAborted();
     const result = normalizeDashboard(overview, trend, filters, binding.dataKind);
-    let cutoffDate = null;
-    try {
-      const cutoff = await getJson(base, '/api/v1/metrics/cutoff', new URLSearchParams(), binding, combined);
-      if (typeof cutoff?.cutoff_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(cutoff.cutoff_date)) {
-        cutoffDate = cutoff.cutoff_date;
-        result.warehouse_cutoff = cutoffDate;
-      }
-    } catch { /* a missing cutoff must not hide a valid GSV */ }
-    if (cutoffDate && filters.end_date > cutoffDate) fail('INSUFFICIENT_COVERAGE');
+    const cutoffDate = await readWarehouseCutoff(base, binding, combined);
+    result.warehouse_cutoff = cutoffDate;
+    assertWithinWarehouseCutoff(filters, cutoffDate);
     return result;
   } catch (error) {
     let code = 'UPSTREAM_ERROR';
@@ -349,6 +360,7 @@ export async function queryRfmSnapshot(input, options = {}) {
     if (typeof cutoff?.cutoff_date !== 'string') fail('INVALID_RESPONSE');
     parseDate(cutoff.cutoff_date, 'INVALID_RESPONSE');
     const warehouseCutoff = cutoff.cutoff_date;
+    assertWithinWarehouseCutoff(filters, warehouseCutoff);
     return normalizeRfmSnapshot(value, filters, binding.dataKind, warehouseCutoff);
   } catch (error) {
     let code = 'UPSTREAM_ERROR';
@@ -394,6 +406,9 @@ async function queryNamed(input, options, path, extraKeys, normalize) {
     }
     const aggregate = await getJson(base, path, params, binding, combined);
     combined.throwIfAborted();
+    if (filters) {
+      assertWithinWarehouseCutoff(filters, await readWarehouseCutoff(base, binding, combined));
+    }
     return normalize(aggregate, filters, binding.dataKind);
   } catch (error) {
     let code = 'UPSTREAM_ERROR';
