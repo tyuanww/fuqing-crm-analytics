@@ -42,9 +42,9 @@ CRM、知识、页面和 WeKnora 是不同权限与生命周期域，保持独�
 
 ## side-load 身份
 
-当前线上 owner-operated side-load 的固定身份见 [`config/query-agent-side-load.v1.json`](../../config/query-agent-side-load.v1.json)，仍为 query.11。当前仓库维护源已推进到 query.12，新增商品新老客和 RFM 快照工具，但尚未生成、side-load 或部署到杭州。其中 `source_package_manifest_sha256` 是 source `package.json` 的摘要，`generated_pack_manifest_sha256` 是生成 `plugin-pack.json` 的摘要，`tarball.sha256` 是最终归档摘要；三者不能互相替代。该 lock 只描述当前现场输入，`release_ready=false`，不创建正式发布身份。query.10 的 all-tools restriction 会误删域工具，已回滚；query.11 使用已知继承工具 masking 加执行 allowlist。
+当前线上 owner-operated side-load 的固定身份见 [`config/query-agent-side-load.v1.json`](../../config/query-agent-side-load.v1.json)，为 query.12。杭州插件页显示 `2/2` 组件运行中，profile 清单、锁文件和已安装包均指向 query.12 tarball。其中 `source_package_manifest_sha256` 是 source `package.json` 的摘要，`generated_pack_manifest_sha256` 是生成 `plugin-pack.json` 的摘要，`tarball.sha256` 是最终归档摘要；三者不能互相替代。该 lock 只描述当前现场输入，`release_ready=false`，不创建正式发布身份。query.10 的 all-tools restriction 会误删域工具，已回滚；query.11 使用已知继承工具 masking 加执行 allowlist，query.12 在相同边界上增加商品新老客和 RFM 快照。
 
-查询工具与实际浏览器边界见 [query.11 allowlist 回执](../../docs/hackathon/evidence/dsh-query11-allowlist-20261021.md)。
+当前运行边界见 [增长董事会部署回执](../../docs/hackathon/evidence/dsh-growth-board-deployment-20261022.md)。query.11 的 allowlist 部署记录保留在 [历史回执](../../docs/hackathon/evidence/dsh-query11-allowlist-20261021.md)。
 
 ## 更新并验证 WeKnora 生产范围
 
@@ -64,7 +64,7 @@ CRM、知识、页面和 WeKnora 是不同权限与生命周期域，保持独�
 - 使用仓库固定 Node 24；adapter 的 `package.json` 合同是 `24.x`。
 - live overlay 目录已包含经过校验的上游 `weknora-package`，`retrieve.key` 已由授权 operator 配置。
 - 已为该维护窗口准备独立的恢复目录和旧文件摘要；不要在未授权的生产窗口改 profile、symlink 或 WeKnora 数据。
-- 线上 query.11 与仓库 query.12 的 `cordis.patch.yml` 都可能引用 `weknora.mjs`；替换 adapter 会同时影响引用该文件的 Agent preset。query.12 部署前必须先生成新的 provenance 和 side-load lock。
+- 线上 query.12 与仓库维护源的 `cordis.patch.yml` 都可能引用 `weknora.mjs`；替换 adapter 会同时影响引用该文件的 Agent preset。任何新包都必须先生成新的 provenance 和 side-load lock，再更新 profile。
 
 ### 本地校验
 

@@ -61,7 +61,7 @@ test('query side-load lock binds the source package manifest to the recorded pac
   const manifest = JSON.parse(packageBytes);
   const lock = JSON.parse(await readFile(new URL('../../config/query-agent-side-load.v1.json', import.meta.url), 'utf8'));
   const evidence = JSON.parse(await readFile(
-    new URL('../../docs/hackathon/evidence/dsh-query11-allowlist-20261021.json', import.meta.url),
+    new URL(`../../${lock.evidence}`, import.meta.url),
     'utf8',
   ));
   const runtimeEvidence = JSON.parse(await readFile(

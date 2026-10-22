@@ -1,0 +1,157 @@
+{
+  "schema_version": "shinemage-dsh-growth-board-deployment/v1",
+  "observed_at": "2026-10-22T09:31:25Z",
+  "scope": "owner-operated-hangzhou-side-load",
+  "release_ready": false,
+  "formal_release": false,
+  "crm_artifact": {
+    "source_sha": "292a097f8d84bb1cabc6c5a842d8fa6d2b04b8b8",
+    "package_name": "@shine-mage/dsh-crm-knowledge",
+    "version": "0.0.0-crm.3",
+    "manifest_sha256": "bfaa64ff6084064e298411a57e38ede75caebb3d7df7f52a46a7f1d27fedb121",
+    "tarball": "shine-mage-dsh-crm-knowledge-0.0.0-crm.3.tgz",
+    "tarball_sha256": "9bb8a511c13c5015b34f90c360b73c2c623d5c3a34c3aa1cd98efeb37dca752a",
+    "tarball_bytes": 242925,
+    "build_provenance_sha256": "f98ba3137c0e101186c6122d2e773d16394d2393d481367b290e1cb426805445"
+  },
+  "query_artifact": {
+    "source_sha": "292a097f8d84bb1cabc6c5a842d8fa6d2b04b8b8",
+    "package_name": "@shine-mage/dsh-query-agent",
+    "version": "0.0.0-query.12",
+    "source_package_manifest_sha256": "e525e38b0aeec9698b048a81a9d2b31c899921971a0529930501baae96e24222",
+    "manifest_sha256": "a457b6babf42cfd4ea55c6eb6a8548496434db43e915c79e658e47832b303111",
+    "tarball": "shine-mage-dsh-query-agent-0.0.0-query.12.tgz",
+    "tarball_sha256": "67be837e95e9bb607d7c55666c354baac2bad8ddead4d2354e4374311c13eb7d",
+    "tarball_bytes": 4693,
+    "integrity": "sha512-0zD8FtXqVo+X1hcH9+r49KFAVoDymi7GfIxSxgPyWFjRWuHku4Cv/kqsrkJXLnsl1Qbji84rdTuOQq+bVkwIUA==",
+    "build_provenance_sha256": "8c3827820ae191ade890b4810b1e7acbce66a53865e5cfbf2f3f927c1eefcc3b"
+  },
+  "artifact": {
+    "scope_helper": {
+      "after_sha256": "e060ecd508ceaafb04dcd809078802e52ed2d0add297507013f11feb30e6d663"
+    }
+  },
+  "backend": {
+    "container": "fuqing-crm-analytics-backend-1",
+    "image": "fuqing-crm-analytics-backend:growth-20261022-6a648d23",
+    "image_digest": "sha256:07f19fd34faf662035a856a8834cae0d2d515723ac55ad247c9d5b58f7a25bbc",
+    "health": "healthy",
+    "root_http": 401,
+    "rfm_cache": {
+      "path": "/srv/shinemage/data/cache/rfm_cache.duckdb",
+      "bytes": 1060864,
+      "cache_duckdb_path": "/app/data/cache/rfm_cache.duckdb",
+      "prewarm": true
+    },
+    "authenticated_read_only_probes": {
+      "product_customer": {
+        "status": "PASS",
+        "http": 200,
+        "required_cutoffs_returned": true
+      },
+      "rfm_snapshot": {
+        "status": "PASS",
+        "http": 200,
+        "rows": 9,
+        "unique_labels": 9
+      },
+      "unknown_product": {
+        "status": "DENIED",
+        "http": 422
+      },
+      "gmv_metric": {
+        "status": "DENIED",
+        "http": 422
+      }
+    }
+  },
+  "service": {
+    "name": "shinemage-dsh.service",
+    "active_state": "active",
+    "sub_state": "running",
+    "n_restarts": 0,
+    "result": "success",
+    "exec_main_status": 0,
+    "listeners": {
+      "4328": 401,
+      "18090": 200,
+      "18091": 404,
+      "18092": 401,
+      "18093": 401,
+      "18094": 200,
+      "18098": 302
+    },
+    "fatal_or_unhandled_matches": 0,
+    "nonfatal_deepseek_account_auth_403_matches": 16,
+    "nonfatal_auth_403_note": "The observed failures were repeated /auth-api/v0/users/current refresh responses with errorCode=network. Browser model and tool calls completed after those responses."
+  },
+  "profile": {
+    "runtime": "dsh-0.2.1-rc.1-core-main-20261020-v5",
+    "dsh_version": "0.2.1-rc.1",
+    "package_json_sha256": "66b53c95a31ddbd0d9d5bcf797ce4781c269261cca2da9ac99860c1b29e3b648",
+    "lock_sha256": "18bc0b4469747bbf4553cf4310a878dfee7a08bc9819872ed9c022d5b4884cc0",
+    "query_dependency": "file:/srv/shinemage/dsh/current/inputs/knowledge-query-agent-20261020/packs/shine-mage-dsh-query-agent-0.0.0-query.12.tgz",
+    "query_dependency_hashes_match_installed_files": true,
+    "query_installed_package_sha256": "2fa1fa1a5c801f0cddf967306086e17aeefa47dae39745bd1f2d336fa6a6942d",
+    "query_installed_tool_policy_sha256": "9dd3ef4ba84e3f08df28345ed584a8f4d8cc7b9c9debcf67c564f18f49725f63",
+    "crm_installed_package_sha256": "b7297f3fa481ba42896e9f6c3acd147a115325bc490d49d3e745dc97764a0e85",
+    "start_script": "/srv/shinemage/src/fuqing-crm-analytics-growth-d3452ff1cfbcfd55abc0534c2bc0486bda71bb05/scripts/dsh-dev/start-installed-profile.mjs",
+    "start_script_skips_package_install": true,
+    "drop_in": "/etc/systemd/system/shinemage-dsh.service.d/95-growth-board-20261022.conf",
+    "drop_in_sha256": "217370e5b670c860ef444c5b41254a8e0d1f6a3d17df913b59091552392b2375"
+  },
+  "browser_uat": {
+    "session_id": "session-8eeed290-bf8f-436c-9f25-3d1b68271be9",
+    "preset": "crm-query",
+    "provider": "deepseek-account",
+    "model": "deepseek-flash",
+    "reasoning_effort": "off",
+    "display_model": "DeepSeek-V4.1-Flash",
+    "display_reasoning_effort": "Off",
+    "plugin_page": {
+      "crm_version": "0.0.0-crm.3",
+      "crm_components_running": 2,
+      "crm_components_total": 2,
+      "version": "0.0.0-query.12",
+      "query_version": "0.0.0-query.12",
+      "query_components_running": 2,
+      "query_components_total": 2,
+      "query_source_path": "file:/srv/shinemage/dsh/current/inputs/knowledge-query-agent-20261020/packs/shine-mage-dsh-query-agent-0.0.0-query.12.tgz"
+    },
+    "crm_login": "NOT_CONNECTED",
+    "knowledge_base": {
+      "status": "AVAILABLE",
+      "provider": "weknora",
+      "tools": [
+        "weknora_search",
+        "weknora_read_document"
+      ],
+      "search": {
+        "status": "PASS",
+        "passages": 8,
+        "distinct_documents": 1,
+        "scope": "project_knowledge_base_only"
+      }
+    },
+    "page_delivery": {
+      "status": "AVAILABLE",
+      "tool": "free_html_page_generate",
+      "generation_status": "PACKAGE_RECEIVED",
+      "request_id": "page-gen-final-chain-acceptance-preview",
+      "published": false
+    },
+    "product_customer": "unknown_until_query_crm_product_customer_cohorts_is_called",
+    "rfm_snapshot": "unknown_until_query_crm_rfm_snapshot_is_called",
+    "board_tools": {
+      "status": "NOT_AVAILABLE",
+      "reason": "BOARD_PLUGIN_NOT_INSTALLED_OR_NOT_VISIBLE"
+    }
+  },
+  "recovery": "/srv/shinemage/dsh/recovery/growth-board-side-load-20261022/",
+  "limits": [
+    "The final post-restart browser session remained NOT_CONNECTED to CRM. Authenticated product and RFM probes ran earlier in the deployment window, but the final user-visible Agent chain did not execute them.",
+    "The HTML page generation produced an unpublished package. The final pass did not save, reopen, or edit that page from the cockpit.",
+    "The Query preset exposes page delivery but reports board_tools as NOT_AVAILABLE. Do not claim the board-specific tool surface is active.",
+    "The deployment is an owner-operated side-load. It is not a signed formal release and does not promote release_ready to true."
+  ]
+}

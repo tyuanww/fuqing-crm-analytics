@@ -1,20 +1,20 @@
 {
   "schema_version": "shinemage-query-agent-side-load-lock/v1",
   "package": "@shine-mage/dsh-query-agent",
-  "version": "0.0.0-query.11",
+  "version": "0.0.0-query.12",
   "lane": "owner-operated-side-load",
   "release_ready": false,
   "formal_release": false,
-  "source_sha": "030f4446b3b0b26f3a2859a08576d0eac860d068",
-  "source_package_manifest_sha256": "a5e753386722edcd4626bc1e082ee453e74af0ef614b074001d29e26ae355598",
-  "generated_pack_manifest_sha256": "3108e6cf7094311f1bacf8b80e0f837c24e7eebe0be8e328e73950e8856dbfbc",
+  "source_sha": "292a097f8d84bb1cabc6c5a842d8fa6d2b04b8b8",
+  "source_package_manifest_sha256": "e525e38b0aeec9698b048a81a9d2b31c899921971a0529930501baae96e24222",
+  "generated_pack_manifest_sha256": "a457b6babf42cfd4ea55c6eb6a8548496434db43e915c79e658e47832b303111",
   "tarball": {
-    "name": "shine-mage-dsh-query-agent-0.0.0-query.11.tgz",
-    "bytes": 3776,
-    "sha256": "9046def0d68f6b89f4a4f3ea79af0f6de4109880bc3c07ba36dd0139946aad1e",
-    "integrity": "sha512-uZIoYFTR3jcuFpeppxCHGcnsuf9x3OZr0iCo5uDuktGsUJvYm2WxE7btetaWYwKIfFdDmj2YMdb6Br91kYfoMg=="
+    "name": "shine-mage-dsh-query-agent-0.0.0-query.12.tgz",
+    "bytes": 4693,
+    "sha256": "67be837e95e9bb607d7c55666c354baac2bad8ddead4d2354e4374311c13eb7d",
+    "integrity": "sha512-0zD8FtXqVo+X1hcH9+r49KFAVoDymi7GfIxSxgPyWFjRWuHku4Cv/kqsrkJXLnsl1Qbji84rdTuOQq+bVkwIUA=="
   },
-  "build_provenance_sha256": "d46f266559f21430ade50ec35c4d3348aef40a261bf87d9a1a0566fbd10914f1",
-  "evidence": "docs/hackathon/evidence/dsh-query11-allowlist-20261021.json",
-  "runtime_evidence": "docs/hackathon/evidence/dsh-weknora-lifecycle-hardening-20261021.json"
+  "build_provenance_sha256": "8c3827820ae191ade890b4810b1e7acbce66a53865e5cfbf2f3f927c1eefcc3b",
+  "evidence": "docs/hackathon/evidence/dsh-growth-board-deployment-20261022.json",
+  "runtime_evidence": "docs/hackathon/evidence/dsh-growth-board-deployment-20261022.json"
 }

@@ -82,6 +82,8 @@
 
 2026-10-21 现场事实：生产 symlink 指向 `/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-core-main-20261020-v5`，服务为 active/running；v5 是上述 v4 runtime 的 owner-operated 现场 side-load。query.11 当前生效，最近重启后的 ephemeral profile 为 `27566016…`，与旧候选 receipt 的 `c3ec7df3…` 不一致，marker 仍为 v4/PREPARED，因此只记现场 side-load。IM 输入状态为 `PINNED_INPUTS_VERIFIED`，但正式发布仍需统一身份、签名、独立验收和切换授权，`release_ready=false`。
 
+2026-10-22 现场事实：同一 v5 runtime 已 side-load CRM `0.0.0-crm.3` 和 Query `0.0.0-query.12`，插件页均为 `2/2` 组件运行中。Query 的 profile 清单、锁文件与已安装包已统一指向 query.12 tarball；最终会话完成 WeKnora 检索和未发布 HTML 生成，CRM 仍为 `NOT_CONNECTED`。候选 receipt 和 release marker 身份未改写，运行边界见[增长董事会部署回执](../hackathon/evidence/dsh-growth-board-deployment-20261022.md)。
+
 ## 排障
 
 | 现象 | 处理 |

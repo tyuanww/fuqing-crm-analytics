@@ -2,9 +2,9 @@
 
 当前提交、版本和现役见 [STATUS](./STATUS.md)。目录、端口和检索见 [维护地图](./docs/operating/maintainer-map.md)。对话生成 HTML 的步骤见 [从对话生成 HTML 驾驶舱](./docs/operating/cockpit-native-html.md)。产品仍 PARTIAL。
 
-> 最近生产记录（[STATUS](./STATUS.md) 的 2026-10-21 现场记录）：线上 `current` 指向 `dsh-0.2.1-rc.1-core-main-20261020-v5`，它是 v4 clean-main runtime 的 owner-operated 现场 side-load；query.11 当前生效，最近重启后的 ephemeral profile 为 `27566016…`，旧 release marker 仍自报 `v4/PREPARED`，候选 receipt 的 profile 仍为 `c3ec7df3…`，因此不追认新的正式发布身份。IM 输入已推进为 `PINNED_INPUTS_VERIFIED`，但仍缺统一发布身份、签名、独立验收和切换授权，`release_ready=false`。后续正式发布必须从 clean reviewed commit 生成 immutable artifact，禁止 `git pull` 或现场编译。
+> 最近生产记录（[STATUS](./STATUS.md) 的 2026-10-22 现场记录）：线上 `current` 指向 `dsh-0.2.1-rc.1-core-main-20261020-v5`，它是 v4 clean-main runtime 的 owner-operated 现场 side-load；crm.3 与 query.12 当前生效，插件页各显示 `2/2` 组件运行中。最终重启后的会话可以检索 WeKnora 项目资料库并生成未发布的 HTML 页面包，CRM 仍要求用户自行登录。旧 release marker 仍自报 `v4/PREPARED`，候选 receipt 的 profile 仍为 `c3ec7df3…`，因此不追认新的正式发布身份。IM 输入已推进为 `PINNED_INPUTS_VERIFIED`，但仍缺统一发布身份、签名、独立验收和切换授权，`release_ready=false`。完整边界见[增长董事会部署回执](./docs/hackathon/evidence/dsh-growth-board-deployment-20261022.md)。
 
-> 主仓当前快照（2026-10-21）：主仓继续承担 DSH pin、profile、runtime peer closure、跨插件合同、组合验证和交付文档；CRM、知识、看板和其他业务能力由独立插件仓维护。单插件的实际更新步骤见[插件更新指南](./docs/operating/shinemage-plugin-update.md)，rc1 现场 side-load 与候选边界见[升级操作手册](./docs/operating/dsh-rc1-clean-upgrade-runbook.md)，职责、清理和 DSH 升级边界见[维护、清理与升级手册](./docs/operating/shinemage-maintenance-and-cleanup.md)。正式 SDK 分发仍 BLOCKED，产品仍 PARTIAL，未授权的正式发布门禁仍保持未执行。
+> 主仓当前快照（2026-10-22）：主仓继续承担 DSH pin、profile、runtime peer closure、跨插件合同、组合验证和交付文档；CRM、知识、看板和其他业务能力由独立插件仓维护。单插件的实际更新步骤见[插件更新指南](./docs/operating/shinemage-plugin-update.md)，rc1 现场 side-load 与候选边界见[升级操作手册](./docs/operating/dsh-rc1-clean-upgrade-runbook.md)，职责、清理和 DSH 升级边界见[维护、清理与升级手册](./docs/operating/shinemage-maintenance-and-cleanup.md)。正式 SDK 分发仍 BLOCKED，产品仍 PARTIAL，未授权的正式发布门禁仍保持未执行。
 
 > A/B/C 集成记录（2026-10-08）是历史证据：单插件更新与取消、固定宿主进程级恢复、HTML headed 验收和 SDK 信任盘查见[本轮集成验收](./docs/hackathon/evidence/shinemage-abc-integration-20261008.md)。它不替代当前主仓合并状态，也不代表新的 Release。
 
