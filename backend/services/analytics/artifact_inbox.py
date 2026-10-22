@@ -180,7 +180,7 @@ class ArtifactInboxStore:
             binding_manifest = PageBindingManifest.model_validate(
                 body.get("binding_manifest") or {"bindings": [], "result_refs": []}
             ).model_dump(mode="json")
-        except Exception as error:
+        except Exception:
             fault(422, "INVALID_ARTIFACT", "页面数据绑定清单不符合 free-page/v1 合同。")
         supplied_digest = body.get("content_hash")
         if source in {"native_present", "workspace_file"} and not supplied_digest:

@@ -1,6 +1,6 @@
 # DSH 单链路业务边界盘查
 
-日期：2026-10-22（北京时间）。
+日期：2026-10-23（北京时间，收尾复核更新）。
 
 ## 结论
 
@@ -36,16 +36,16 @@
 ## 仍然开放的边界
 
 - `0.2.1-rc.1` 现役 runtime 尚未消费 `58045416` 之后的 Workbench candidate。候选包位于 `.context/release/cockpit-binding-58045416/`，tarball SHA-256 为 `ed86a02383644cec4d12ffda9f20411b621cf4c9a09de52649c59f02efb9137f`。这不是部署回执。
-- 当前分支的完整 B0 pipeline 已用固定 composition、Workbench 作者、领域作者和 public-contract 输入实际启动。首次失败是工作树中残留的 CRM kit 外链，清理该生成物后再次运行已越过输入、组合和前九个合同生成器；随后发现仓库内 C0 manifest/fixture 与生成器漂移，已由 `54c75ddc` 重生成并通过单独 C0 check。再次运行继续被旧 Workbench public-contract archive 中的 `c0-fixtures.mjs` hash 阻断。该 archive 锁定 `6c5adc9f`，当前 Workbench composition 已是 `3030e3f`；不能把旧 archive 重标成当前来源，需由作者 CI 重新导出 public-contracts 并更新锁。
+- 当前分支的完整 B0 pipeline 已实际消费固定 composition、Workbench 作者、领域作者和 public-contract 输入。Workbench 作者 PR [#2](https://github.com/tyuanww/dsh-analytics-workbench/pull/2) 已把 C0 fixture、manifest 与测试输入锁同步；固定输入 CI run `39818096473` 全绿，主仓 `config/public-contract-inputs.lock.json` 已锁定其真实 artifact `12441989639`（SHA-256 `a294f921…2d3b`）。C0、边界检查、后端 Python `862 passed` 和 Ruff 均通过。当前 B0 的剩余阻断不是数据链路，而是本地兼容线仍固定 DSH `0.1.7-rc.2`，而工作树中的 CRM 插件已按杭州现役 DSH `0.2.1-rc.1 / Cordis 4.0.5` 发布；`scripts/release/profile.test.mjs` 因 peer mismatch fail-closed。不能把 rc1 side-load 当成 rc2 B0 通过，需单独完成 rc1 profile/toolchain 组合或恢复一个纯 rc2 构建输入。
 - Vue 登录后的商品交互 UAT仍需在杭州页面上单独完成。现有真实问数证据不等于 Vue 页面交互已验收。
 - 原生 `competition_board_*` 工具仍未进入 `crm-query` 预设。当前“生成看板”走 HTML 页面和 CRM 驾驶舱引用，不等于原生 Board 工具可用。
 - Git 工作树干净；本地分支仍有尚未推送到远端同名分支的本轮提交。提交主题都属于本轮 CRM、问数、Workbench 和证据收口，但尚未创建 PR、push 或 merge。
 
 ## B0 收尾回执
 
-- 固定输入读取、组合包、领域输入和公共合同前九个 generator 已实际执行；当前阻断点是 `PUBLIC_CONTRACT_CHECK_FAILED: competition-c0-contract.mjs`，具体为旧 public-contract archive 的 `dsh-plugins/analytics-workbench/src/client/competition-board/c0-fixtures.mjs` 与当前生成 hash 不一致。
+- 固定输入读取、组合包、领域输入、31 份公共材料、15 个合同生成器、边界检查、前端/后端回归均已实际执行；当前阻断点是 rc2 profile 对工作树 CRM rc1 peer 的显式 `PROFILE_PLUGIN_DSH_PEER_MISMATCH`。本轮没有跳过该门禁，也没有把杭州现役 side-load 的运行结果冒充本地 B0。
 - 修复后的 C0 生成器结果为 OpenAPI SHA-256 `6d6558e894441d707417003ad9f92e4fc486c1c21c1b92a6d9bc1a24f5c5967f`、contract hash `2c1b9e57ae9818dbfa835a826a4bf82d3c78d1473e4a3472408e4a028a273c8a`；单独 `--check` 和离线评估 `30/30` 通过。
-- 因此本轮不能宣称完整 B0、远端 CI、PR、杭州现役切换或正式 release 通过。下一步是重新获取与 Workbench `3030e3f` 同源的作者 public-contract artifact，重锁后再跑完整 B0。
+- 因此本轮仍不能宣称完整 B0、主仓远端 CI、主仓 PR、杭州现役切换或正式 release 通过。作者 PR #2 的 CI 已通过，但主仓仍需建立与 DSH `0.2.1-rc.1` 对齐的 profile/toolchain 验收，或在独立 rc2 工作树中使用 rc2 CRM 包后再做正式 B0。
 
 ## 可复验命令
 
