@@ -46,8 +46,12 @@ export function extractBindingManifest(source) {
   const raw = source?.binding_manifest ?? source?.__binding_manifest
     ?? source?.value?.binding_manifest ?? source?.value?.__binding_manifest
     ?? source?.package?.binding_manifest;
-  const parsed = parseBindingManifest(raw ?? { bindings: [], result_refs: [] });
-  return parsed.ok ? parsed.value : { bindings: [], result_refs: [] };
+  if (raw === undefined) return { bindings: [], result_refs: [] };
+  const parsed = parseBindingManifest(raw);
+  if (parsed.ok) return parsed.value;
+  const error = new Error('原生 Agent 返回的数据绑定清单无效');
+  error.code = 'INVALID_BINDING_MANIFEST';
+  throw error;
 }
 
 export function nativeGenerateUnavailable(message = '原生 Agent 未返回页面源码包') {

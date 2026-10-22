@@ -173,6 +173,19 @@ test('native result refs reach the saved page document', async () => {
   assert.equal(page.binding_state, 'BOUND_VERIFIED');
 });
 
+test('native delivery rejects an invalid binding manifest instead of downgrading to unbound', async () => {
+  const generate = createNativePageGenerate({
+    submitPrompt: async () => ({
+      package: AGENT_PACKAGE,
+      binding_manifest: { result_refs: ['result_fixture_1'], bindings: [{ binding_id: 'fixture', result_ref: 'missing' }] },
+    }),
+  });
+  await assert.rejects(
+    () => generate('生成绑定数据看板'),
+    error => error?.code === 'INVALID_BINDING_MANIFEST',
+  );
+});
+
 test('refused delivery fails generate and keeps the prompt', async () => {
   const waiter = createPagePackageWaiter();
   const generate = createNativePageGenerate({
