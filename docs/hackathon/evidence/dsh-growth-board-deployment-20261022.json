@@ -2,6 +2,7 @@
   "schema_version": "shinemage-dsh-growth-board-deployment/v1",
   "observed_at": "2026-10-22T09:31:25Z",
   "scope": "owner-operated-hangzhou-side-load",
+  "superseded_by": "docs/hackathon/evidence/dsh-product-identity-deployment-20261022.json",
   "release_ready": false,
   "formal_release": false,
   "crm_artifact": {

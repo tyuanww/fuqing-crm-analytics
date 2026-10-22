@@ -1,6 +1,6 @@
 # 杭州生产 DSH 访问
 
-当前现场先看 [STATUS.md](../../STATUS.md)。2026-10-21 的 owner-operated v5 side-load 使用 DSH `4328`、页面 HTTP `18091`，并监听 `18090`–`18094`；promo helper 仍为 `18098`。本页原先的 `6677` 是旧 rc2 现场入口，不能据此判断当前版本，也不能直接重启服务。裸地址未带 cookie 返回 `401` 是预期行为，不要关闭认证。
+当前现场先看 [STATUS.md](../../STATUS.md)。2026-10-22 的 owner-operated cockpit-v3 现场使用 DSH `4328`、页面 HTTP `18091`，并监听 `18090`–`18094`；promo helper 仍为 `18098`。CRM 为 `crm.4`，Query 为 `query.13`。本页原先的 `6677` 是旧 rc2 现场入口，不能据此判断当前版本，也不能直接重启服务。裸地址未带 cookie 返回 `401` 是预期行为，不要关闭认证。
 
 在 Mac 开发端打开杭州生产 DSH：
 

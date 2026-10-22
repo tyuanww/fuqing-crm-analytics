@@ -1,20 +1,20 @@
 {
   "schema_version": "shinemage-query-agent-side-load-lock/v1",
   "package": "@shine-mage/dsh-query-agent",
-  "version": "0.0.0-query.12",
+  "version": "0.0.0-query.13",
   "lane": "owner-operated-side-load",
   "release_ready": false,
   "formal_release": false,
-  "source_sha": "292a097f8d84bb1cabc6c5a842d8fa6d2b04b8b8",
-  "source_package_manifest_sha256": "e525e38b0aeec9698b048a81a9d2b31c899921971a0529930501baae96e24222",
-  "generated_pack_manifest_sha256": "a457b6babf42cfd4ea55c6eb6a8548496434db43e915c79e658e47832b303111",
+  "source_sha": "7a33b93a96ddd39382f8431286720ebae7611a31",
+  "source_package_manifest_sha256": "9499f5f49e3a5c9f948ad6363cd73c93e9383bea6dacb8067240d169348600a1",
+  "generated_pack_manifest_sha256": "681e73713b1c6fcb52dd49b627127d6193ebd243e349811d6c998c14dffbc155",
   "tarball": {
-    "name": "shine-mage-dsh-query-agent-0.0.0-query.12.tgz",
-    "bytes": 4693,
-    "sha256": "67be837e95e9bb607d7c55666c354baac2bad8ddead4d2354e4374311c13eb7d",
-    "integrity": "sha512-0zD8FtXqVo+X1hcH9+r49KFAVoDymi7GfIxSxgPyWFjRWuHku4Cv/kqsrkJXLnsl1Qbji84rdTuOQq+bVkwIUA=="
+    "name": "shine-mage-dsh-query-agent-0.0.0-query.13.tgz",
+    "bytes": 4792,
+    "sha256": "d275f0f45f2c71865e3a6823906cf1f234b023c3de0505a344f4ca8d5099bd4f",
+    "integrity": "sha512-KCNWkOhISvya5I7Aix2D7Lo78yThyWIIV3StNLeCnrIIwVCsjDo5FCfC3Bz1bdQi5PlC+u6826eKCjcWkntbPw=="
   },
-  "build_provenance_sha256": "8c3827820ae191ade890b4810b1e7acbce66a53865e5cfbf2f3f927c1eefcc3b",
-  "evidence": "docs/hackathon/evidence/dsh-growth-board-deployment-20261022.json",
-  "runtime_evidence": "docs/hackathon/evidence/dsh-growth-board-deployment-20261022.json"
+  "build_provenance_sha256": "584ca3672c2fa1600787cfd3e30a71f98963e51c6fdc3ad71e0b9da701b4ccc5",
+  "evidence": "docs/hackathon/evidence/dsh-product-identity-deployment-20261022.json",
+  "runtime_evidence": "docs/hackathon/evidence/dsh-product-identity-deployment-20261022.json"
 }

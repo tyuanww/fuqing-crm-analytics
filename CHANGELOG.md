@@ -21,7 +21,7 @@
 
 ### Added
 
-- CRM `0.0.0-crm.3` 与问数智能体 `0.0.0-query.12` 已 side-load 到杭州，发布 peer 对齐 `DSH 0.2.1-rc.1 / Cordis 4.0.5`。新增商品级新老客查询与 RFM 预计算快照读取。商品映射多个 SPU class 后以用户去重，避免前端直接相加品类人数造成重复计数；默认同比按自然年同月日计算，对比期分群截止日单独返回，商品口径只开放 GSV。客户端 fail-closed 校验商品集合、RFM 9 个唯一分群标签和金额/人数/占比一致性；RFM 保持 cache-only，缓存 miss 不触发现场大库扫描。问数 Agent 的提示词把经营诊断和增长复盘收束为“证据、反证、决策、行动、复核”链，HTML 必须呈现截止日与可信快照，历史数据不得冒充未来增量。真实接口检查通过，最终浏览器会话完成 WeKnora 检索和未发布 HTML 生成；CRM 登录、页面保存和驾驶舱编辑仍未验收。详见[增长董事会部署回执](./docs/hackathon/evidence/dsh-growth-board-deployment-20261022.md)。
+- CRM `0.0.0-crm.4` 与问数智能体 `0.0.0-query.13` 已 side-load 到杭州，发布 peer 对齐 `DSH 0.2.1-rc.1 / Cordis 4.0.5`。商品新老客升级到 `product-customer/v2`：商品映射多个 SPU class 后按用户去重，返回固定唯一 `display_name`，并允许用内部名或展示名筛选；问数默认展示映射名，内部名和 SPU class 只用于查询与审计。新增 RFM 预计算快照读取。默认同比按自然年同月日计算，对比期分群截止日单独返回，商品口径只开放 GSV。客户端 fail-closed 校验商品集合、展示名唯一性、RFM 9 个唯一分群标签和金额/人数/占比一致性；RFM 保持 cache-only，缓存 miss 不触发现场大库扫描。问数 Agent 的提示词把经营诊断和增长复盘收束为“证据、反证、决策、行动、复核”链，HTML 必须呈现截止日与可信快照，历史数据不得冒充未来增量。商品映射合同、目标构建和部署通过；CRM 登录、真实商品查询、页面保存和驾驶舱编辑仍未验收。详见[商品身份映射回执](./docs/hackathon/evidence/dsh-product-identity-deployment-20261022.md)。
 
 - “问数智能体”配置型 bundle 前进到 `0.0.0-query.11`：空白会话切到 `crm-query` 时隐藏已知终端、文件和协作工具，并对执行使用 12 工具 allowlist guard；query.10 的全工具限制会误删 CRM、WeKnora 和页面业务工具，已作为失败候选保留记录。真实会话确认模型路由为 `deepseek-account / deepseek-flash / off`，`list_agents` 虽仍由上层组合可见，实际执行返回 `CRM_QUERY_TOOL_NOT_ALLOWED`。
 

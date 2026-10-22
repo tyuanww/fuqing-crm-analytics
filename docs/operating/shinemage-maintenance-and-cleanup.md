@@ -2,7 +2,7 @@
 
 这份文档给维护者、插件作者和使用者一条共同的路径：主仓库负责把固定版本的 DeepSeek Harness（DSH）装配成可验收的平台，业务能力由独立插件和服务仓库维护。它也规定本机证据、Git worktree、分支和远程仓库怎样留存，避免为了“整洁”误删仍可复核的材料。
 
-线上 owner-operated 当前为 `dsh-0.2.1-rc.1-core-main-20261020-v5`，服务 active/running；它是 v4 clean-main runtime 的现场 side-load。CRM `crm.3` 与 Query `query.12` 当前生效，最近重启后的 profile 为 package `66b53c95…` / lock `18bc0b44…`，而 release marker 仍为 v4/PREPARED、候选 receipt 仍为 `c3ec7df3…`，因此 v5 不构成新的正式发布身份。IM 输入已从不可用状态推进为 `PINNED_INPUTS_VERIFIED`，但统一身份、签名、独立验收和切换授权仍未完成，`release_ready=false`。主仓兼容 pin、历史 owner receipt 和 formal release 证据各自按日期留存，不能互相替代。当前运行边界见[增长董事会部署回执](../hackathon/evidence/dsh-growth-board-deployment-20261022.md)。
+线上 owner-operated 当前为 `/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-core-main-20261021-cockpit-v3`，服务 active/running。CRM `crm.4` 与 Query `query.13` 当前生效，最近重启后的 profile 为 package `68b1bdd8…` / lock `0f5cecad…`，release marker 和候选 receipt 没有因此升级为新的正式发布身份。IM 输入已从不可用状态推进为 `PINNED_INPUTS_VERIFIED`，但统一身份、签名、独立验收和切换授权仍未完成，`release_ready=false`。主仓兼容 pin、历史 owner receipt 和 formal release 证据各自按日期留存，不能互相替代。当前运行边界见[商品身份映射回执](../hackathon/evidence/dsh-product-identity-deployment-20261022.md)。
 
 ## 先看哪一个仓库
 

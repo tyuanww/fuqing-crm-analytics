@@ -1,6 +1,6 @@
 # DSH rc1 release lane
 
-这条 lane 为内部 rc1 候选准备 release 输入。它与主仓兼容线分开。它不修改 `dsh-plugins/plugin-kit/toolchain.json` 的默认值，也不负责杭州 owner-operated 的现役切换。当前线上为 `dsh-0.2.1-rc.1-core-main-20261020-v5`，这是 v4 runtime 的现场 side-load，不是新的正式 release；2026-10-18 的 r9 只保留为历史回退证据。正式 release 状态只看 [STATUS.md](../../STATUS.md)；本 lane 的 local asset 不等于公司正式 release。
+这条 lane 为内部 rc1 候选准备 release 输入。它与主仓兼容线分开。它不修改 `dsh-plugins/plugin-kit/toolchain.json` 的默认值，也不负责杭州 owner-operated 的现役切换。当前线上为 `/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-core-main-20261021-cockpit-v3`，运行 CRM `crm.4` 与 Query `query.13`。这是 owner-operated 现场 side-load，不是新的正式 release；2026-10-18 的 r9 只保留为历史回退证据。正式 release 状态只看 [STATUS.md](../../STATUS.md)；本 lane 的 local asset 不等于公司正式 release。
 
 ## 固定输入
 
@@ -16,13 +16,15 @@
 | upstream pnpm | `11.28.5` |
 | source identity | `subject-archive`，`f4026619392c2909b449eb75be1081776b7c5507` |
 
-## 当前 v5 现场 side-load 与 v4 clean staging
+## 历史 v5 side-load 与 v4 clean staging
 
 2026-10-20 的 v4 clean-main 重建使用同一 upstream SHA，runtime SHA-256 为 `d3d504dd39cd333fb98acf61cf4597664f6d4fda5482fb2ea970748bd2b8a94f`，候选 receipt 记录的 web profile SHA-256 为 `c3ec7df313c2323996428b1034af0fd5eec5fffe1d06a8c618532074110503ad`。官方 plugin-market bundle 已加入 profile，并通过 native boot、Settings/account RPC、插件页、Discover tab、peer 缺失负测和 AppleDouble 扫描；market index 仍未配置（候选 receipt 已确认）。
 
-2026-10-21 现场把该 runtime 复制为 `dsh-0.2.1-rc.1-core-main-20261020-v5` 并由 owner 完成 side-load，当前 query.11 生效，最近重启后的 ephemeral profile 为 `27566016…`。随 runtime 保留的 `/srv/shinemage/dsh/current/candidate-profile-receipt.json` 仍记录 `c3ec7df3…` 与 v4 候选身份，`release-marker.json` 也仍自报 v4/PREPARED。旧 staging 路径下没有这份 receipt 的可读副本；现场回执因此只记 `OWNER_OPERATED_SIDELOAD_NOT_FORMAL_RELEASE`，不改写旧 marker/receipt，也不把它算作新的签名发布身份。
+2026-10-21 现场把该 runtime 复制为 `dsh-0.2.1-rc.1-core-main-20261020-v5` 并由 owner 完成 side-load，当时 query.11 生效，最近重启后的 ephemeral profile 为 `27566016…`。随 runtime 保留的 `/srv/shinemage/dsh/current/candidate-profile-receipt.json` 仍记录 `c3ec7df3…` 与 v4 候选身份，`release-marker.json` 也仍自报 v4/PREPARED。旧 staging 路径下没有这份 receipt 的可读副本；现场回执因此只记 `OWNER_OPERATED_SIDELOAD_NOT_FORMAL_RELEASE`，不改写旧 marker/receipt，也不把它算作新的签名发布身份。
 
-IM 输入已从缺失推进为 `PINNED_INPUTS_VERIFIED`，两份归档已按线上 lock 核验并保存在 `/srv/shinemage/dsh/recovery/im-plugin-inputs-20261021/`。统一发布身份、publisher/signature、独立验收、final attestation 和切换授权仍未完成，所以 `release_ready=false`；线上 `current` 的 v5 是当前 owner-operated 运行事实，不是正式 release。
+IM 输入已从不可用状态推进为 `PINNED_INPUTS_VERIFIED`，两份归档已按线上 lock 核验并保存在 `/srv/shinemage/dsh/recovery/im-plugin-inputs-20261021/`。统一发布身份、publisher/signature、独立验收、final attestation 和切换授权仍未完成，所以 `release_ready=false`。历史 v5 是 2026-10-21 的 owner-operated 运行事实，不是正式 release。
+
+2026-10-22 商品映射部署后，`current` 指向 `dsh-0.2.1-rc.1-core-main-20261021-cockpit-v3`。CRM `crm.4` 与 Query `query.13` 已 side-load，商品接口使用 `product-customer/v2` 并返回固定唯一 `display_name`。运行回执见[商品身份映射部署验收](../hackathon/evidence/dsh-product-identity-deployment-20261022.md)。
 
 ## 本地入口
 

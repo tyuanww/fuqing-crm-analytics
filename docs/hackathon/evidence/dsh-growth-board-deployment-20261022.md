@@ -2,6 +2,8 @@
 
 日期：2026-10-22（北京时间）。
 
+> 本页记录 crm.3 / query.12 阶段的部署事实。当前线上商品映射版本以[商品身份映射部署验收](dsh-product-identity-deployment-20261022.md)为准。
+
 ## 结论
 
 杭州现场已 side-load `@shine-mage/dsh-crm-knowledge@0.0.0-crm.3` 和 `@shine-mage/dsh-query-agent@0.0.0-query.12`。DSH 插件页显示两个包均为 `2/2` 组件运行中，Query 的来源路径指向 query.12 tarball。
