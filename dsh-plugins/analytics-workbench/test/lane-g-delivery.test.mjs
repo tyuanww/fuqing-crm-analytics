@@ -49,6 +49,10 @@ test('page tool schema exposes the exact node_map contract', () => {
   assert.deepEqual(Object.keys(nodeMap.items.properties), ['node_id', 'kind', 'selector']);
   assert.deepEqual(nodeMap.items.properties.kind.enum, ['static_element', 'dynamic_region', 'whole_page']);
   for (const key of ['node_id', 'kind', 'selector']) assert.equal(nodeMap.items.properties[key].required, true);
+  assert.equal(Object.hasOwn(nodeMap.items.properties.node_id, 'pattern'), false);
+  const resources = PAGE_TOOL_PARAMETERS[PAGE_GENERATE_TOOL_NAME].package.properties.resources;
+  assert.equal(Object.hasOwn(resources.items.properties.sha256, 'pattern'), false);
+  assert.equal(Object.hasOwn(resources.items.properties.byte_length, 'minimum'), false);
 });
 
 test('page tool reports exact node_map fields when a caller sends an unknown key', async () => {

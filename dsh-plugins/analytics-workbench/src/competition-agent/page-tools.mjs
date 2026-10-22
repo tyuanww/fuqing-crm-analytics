@@ -23,8 +23,8 @@ export const PAGE_TOOL_PARAMETERS = Object.freeze({
             properties: {
               resource_id: { type: 'string', required: true, description: 'Unique resource identifier using letters, digits, underscore, dot, colon or hyphen.' },
               content_type: { type: 'string', required: true, description: 'Resource MIME type.' },
-              sha256: { type: 'string', required: true, pattern: '^[0-9a-f]{64}$' },
-              byte_length: { type: 'integer', required: true, minimum: 0 },
+              sha256: { type: 'string', required: true, description: 'Lowercase 64-character SHA-256 hex digest.' },
+              byte_length: { type: 'integer', required: true, description: 'Non-negative resource byte length.' },
             },
           },
         },
@@ -34,7 +34,7 @@ export const PAGE_TOOL_PARAMETERS = Object.freeze({
           items: {
             type: 'object', additionalProperties: false,
             properties: {
-              node_id: { type: 'string', required: true, pattern: '^[A-Za-z0-9_.:-]{1,128}$', description: 'Stable node identifier. It must match the identifier used in data-shine-node or data-shine-region.' },
+              node_id: { type: 'string', required: true, description: 'Stable 1-128 character identifier using letters, digits, underscore, dot, colon or hyphen. It must match data-shine-node or data-shine-region.' },
               kind: { type: 'string', required: true, enum: ['static_element', 'dynamic_region', 'whole_page'], description: 'Use static_element for data-shine-node, dynamic_region for data-shine-region, and whole_page only for an explicit whole-page target.' },
               selector: { type: 'string', required: true, description: "Non-empty CSS selector locating the node, for example [data-shine-node='title']." },
             },
