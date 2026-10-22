@@ -13,7 +13,8 @@ services:
       - "${SHOP_DATA_SOURCE:?SHOP_DATA_SOURCE is required}:/data/sources/shop:ro"
       - "${MEMBER_DATA_SOURCE:?MEMBER_DATA_SOURCE is required}:/data/sources/member:ro"
     env_file: !override
-      - "${CRM_ENV_FILE:?CRM_ENV_FILE must point at a private env file}"
+      - path: "${CRM_ENV_FILE:?CRM_ENV_FILE must point at a private env file}"
+        format: raw
     logging:
       driver: local
       options:
