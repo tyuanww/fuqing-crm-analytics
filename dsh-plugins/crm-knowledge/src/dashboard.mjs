@@ -231,19 +231,18 @@ async function postJson(base, path, body, binding, signal, extraHeaders = {}, in
 }
 
 async function readWarehouseCutoff(base, binding, signal) {
-  try {
-    const cutoff = await getJson(base, '/api/v1/metrics/cutoff', new URLSearchParams(), binding, signal);
-    if (typeof cutoff?.cutoff_date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(cutoff.cutoff_date)) return null;
-    parseDate(cutoff.cutoff_date, 'INVALID_RESPONSE');
-    return cutoff.cutoff_date;
-  } catch (error) {
-    if (signal.aborted) throw error;
-    return null;
+  const cutoff = await getJson(base, '/api/v1/metrics/cutoff', new URLSearchParams(), binding, signal);
+  if (typeof cutoff?.cutoff_date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(cutoff.cutoff_date)) {
+    fail(cutoff?.cutoff_date === null ? 'SERVICE_UNAVAILABLE' : 'INVALID_RESPONSE');
   }
+  parseDate(cutoff.cutoff_date, 'INVALID_RESPONSE');
+  return cutoff.cutoff_date;
 }
 
 function assertWithinWarehouseCutoff(filters, cutoff) {
-  if (cutoff && filters.end_date > cutoff) fail('INSUFFICIENT_COVERAGE');
+  if (filters.end_date > cutoff || (filters.compare_end_date && filters.compare_end_date > cutoff)) {
+    fail('INSUFFICIENT_COVERAGE');
+  }
 }
 
 /** Trusted options are supplied by the host, not included in the tool parameter schema. */
@@ -311,16 +310,8 @@ export async function queryProductCustomer(input, options = {}) {
       } : {}),
     }, binding, combined, { 'X-ShineMage-Product-Customer-Version': PRODUCT_CUSTOMER_VERSION }, 'UNKNOWN_PRODUCT');
     combined.throwIfAborted();
-    let warehouseCutoff = null;
-    try {
-      const cutoff = await getJson(base, '/api/v1/metrics/cutoff', new URLSearchParams(), binding, combined);
-      if (typeof cutoff?.cutoff_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(cutoff.cutoff_date)) {
-        warehouseCutoff = cutoff.cutoff_date;
-      }
-    } catch (error) {
-      combined.throwIfAborted();
-      if (!(error instanceof DashboardError)) throw error;
-    }
+    const warehouseCutoff = await readWarehouseCutoff(base, binding, combined);
+    assertWithinWarehouseCutoff(filters, warehouseCutoff);
     return normalizeProductCustomer(value, filters, binding.dataKind, warehouseCutoff);
   } catch (error) {
     let code = 'UPSTREAM_ERROR';

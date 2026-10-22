@@ -90,6 +90,19 @@ test('requests after the warehouse cutoff fail instead of returning zero as OK',
   unavailable(await query(outOfCoverage, binding), 'INSUFFICIENT_COVERAGE');
 });
 
+// Regression: ISSUE-003 — a failed cutoff lookup must not bypass coverage proof.
+// Found by /qa on 2026-10-22
+// Report: .gstack/qa-reports/qa-report-app.tyuan.chat-2026-10-22.md
+test('missing warehouse cutoff fails closed instead of returning an unbounded GSV', async t => {
+  const { binding } = await serveDashboard(t, (url, _req, res) => {
+    if (url.pathname !== '/api/v1/metrics/cutoff') return false;
+    res.statusCode = 503;
+    res.end('{}');
+    return true;
+  });
+  unavailable(await query(request, binding), 'SERVICE_UNAVAILABLE');
+});
+
 test('missing login and another host session never request data', async t => {
   const { binding, calls } = await serveDashboard(t);
   unavailable(await query(request, null), 'NOT_CONNECTED');
@@ -486,6 +499,46 @@ test('product customer v3 exposes coverage and rejects v2, empty or partial resu
     assert.equal(result.status, 'UNAVAILABLE');
     assert.equal(result.reason.code, 'INVALID_RESPONSE');
   });
+});
+
+// Regression: ISSUE-003 — a successful product payload cannot override warehouse coverage.
+// Found by /qa on 2026-10-22
+// Report: .gstack/qa-reports/qa-report-app.tyuan.chat-2026-10-22.md
+test('product customer rejects a successful response when the requested window exceeds the cutoff', async t => {
+  const metric = {
+    gsv: 100, users: 2, aus: 50, old_gsv: 50, old_users: 1, old_aus: 50, old_ratio: 0.5,
+    new_gsv: 50, new_users: 1, new_aus: 50, new_ratio: 0.5, member_gsv: 0, member_users: 0,
+    member_aus: 0, member_ratio: 0, old_users_ratio: 0.5, new_users_ratio: 0.5,
+  };
+  const value = {
+    schema_version: 'product-customer/v3', status: 'OK', source: 'orders+user_first_purchase',
+    date_start: '2026-07-01', date_end: '2026-07-07', compare_start_date: '2025-07-01',
+    compare_end_date: '2025-07-07', new_old_cutoff: '2026-06-30', comparison_new_old_cutoff: '2025-06-30',
+    data_cutoff: '2026-07-05', metric_type: 'GSV', channel: null, exclude_channels: [],
+    coverage: { data_cutoff: '2026-07-05', current_status: 'COMPLETE', comparison_status: 'COMPLETE' },
+    products: [{ name: '经典膜', display_name: '爆款面膜E', spu_classes: ['经典膜'], status: 'OK',
+      current: metric, comparison: metric,
+      yoy: { gsv: 0, users: 0, aus: 0, old_gsv: 0, old_users: 0, old_aus: 0,
+        new_gsv: 0, new_users: 0, new_aus: 0, old_ratio_ppt: 0, new_ratio_ppt: 0,
+        old_users_ratio_ppt: 0, new_users_ratio_ppt: 0 } }],
+  };
+  const { binding } = await serveDashboard(t, (url, _req, res) => {
+    if (url.pathname === '/api/v1/category/product-customer') {
+      res.end(JSON.stringify(value));
+      return true;
+    }
+    if (url.pathname === '/api/v1/metrics/cutoff') {
+      res.end(JSON.stringify({ cutoff_date: '2026-07-05' }));
+      return true;
+    }
+    return false;
+  });
+  const result = await queryProductCustomer({
+    start_date: '2026-07-01', end_date: '2026-07-07', products: ['经典膜'],
+  }, { sessionId: 'fixture-session', binding });
+  assert.equal(result.status, 'UNAVAILABLE', JSON.stringify(result));
+  assert.equal(result.reason.code, 'INSUFFICIENT_COVERAGE');
+  assert.equal('products' in result, false);
 });
 
 const rfmSegments = [
