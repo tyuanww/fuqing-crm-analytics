@@ -92,6 +92,10 @@
 
 ### Fixed
 
+- CRM 对话授权不再因会话暂时不活跃而被清理；授权只按 8 小时 TTL 过期，执行查询时仍要求当前会话处于活跃状态。
+
+- `free_html_page_generate` 发布 DSH 工具 DSL 可接受的精确 `node_map` 与资源结构，并返回合法字段和枚举值；修复页面源码可生成但预设因 schema 不兼容被标记 broken 的问题。
+
 - 修正 query.12 side-load 只替换 `node_modules` 而 profile 清单与锁文件仍指向 query.11 的身份漂移。query.12 tarball 写入受控输入目录，清单、specifier、integrity 和锁文件原子更新，重启后插件页来源与已安装文件一致。
 
 - 新增只启动已安装 DSH profile 的入口，避免受控重启重新执行缺失输入的插件安装。CRM Compose 覆盖文件恢复标准 dotenv 解析，bcrypt hash 继续用单引号保护 `$`；修复 `format: raw` 把外层引号带入用户名、导致生产 `admin` 登录 401 的环境回归。
