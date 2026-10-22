@@ -20,7 +20,7 @@ if (toolsInput && !isAbsolute(toolsInput)) {
 const { compiler: ts, build } = await bindToolchain(root, upstream, toolsInput ? resolve(toolsInput) : undefined);
 for (const [entries, types] of [
   [['src/index.ts', 'src/host.ts', 'test/contract.typecheck.ts'], ['node']],
-  [['src/client/index.tsx'], ['react']],
+  [['src/client/index.tsx', 'src/client/css.d.ts'], ['react']],
 ]) {
 const program = ts.createProgram(entries.map(file => join(root, file)), {
   strict: true, noEmit: true, allowJs: true, checkJs: false, skipLibCheck: false,
