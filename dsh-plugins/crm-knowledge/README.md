@@ -58,7 +58,7 @@ CRM Host 默认 `baseUrl` 为 `http://127.0.0.1:8000`，适用于 rc2 独立配�
 {"start_date":"2026-07-01","end_date":"2026-07-05","channel":"全店","exclude_low_price":false}
 ```
 
-日期为上海时区自然日，含首尾，最多90天。全店不传 `channel`；剔除低价按现前端的四个渠道重复传递 `exclude_channels`，渠道别名和聚合交给现服务处理。工具依次 GET `/api/v1/auth/me`、`/api/v1/metrics/overview`、`/api/v1/metrics/trend`，再可选读取 `/api/v1/metrics/cutoff`；截止日缺失不伪造数值，固定 GSV，不接受任意 URL、SQL、退款截止日或账号覆盖。
+日期为上海时区自然日，含首尾，最多90天。全店不传 `channel`；剔除低价按现前端的四个渠道重复传递 `exclude_channels`，渠道别名和聚合交给现服务处理。工具依次 GET `/api/v1/auth/me`、`/api/v1/metrics/overview`、`/api/v1/metrics/trend`，并必须读取 `/api/v1/metrics/cutoff`；截止日缺失、非法或服务不可用时整次查询失败，不输出无法证明覆盖范围的数值。固定 GSV，不接受任意 URL、SQL、退款截止日或账号覆盖。
 
 候选通过 DSH 原生对话输入区的 **连接 CRM** 按钮登录。连接成功后，这个按钮显示分析图标和 **CRM分析**。账号和密码经同源受保护 HTTP 路由提交给可信 Host，Host 调用已有 CRM `/auth/login`，只将成功凭据保存在当前进程的私有闭包内，并绑定当前 DSH 对话。密码不作为工具参数、RPC 事件或消息发送给模型；令牌不回传浏览器、不写环境变量、profile、日志或磁盘，也不注入子进程。
 
