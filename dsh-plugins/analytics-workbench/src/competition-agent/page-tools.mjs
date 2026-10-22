@@ -1,5 +1,5 @@
 /** Native page-package delivery tool. Delivery only: no SQL, token, or outbound HTTP. */
-import { parsePagePackage } from '../free-page/contract/schema.mjs';
+import { parseBindingManifest, parsePagePackage } from '../free-page/contract/schema.mjs';
 import { PAGE_GENERATE_TOOL_NAME, PAGE_REQUEST_ID_PATTERN, PAGE_TOOL_RESULT_SCHEMA } from './page-family.mjs';
 
 const identity = value => typeof value === 'string' && /^[A-Za-z0-9_.:-]{1,128}$/.test(value);
@@ -43,6 +43,25 @@ export const PAGE_TOOL_PARAMETERS = Object.freeze({
       },
       description: 'One free-page/v1 source package authored in this reply. Free HTML/CSS/JS; not a BoardSpec. Page scripts may only read data the user explicitly authorized in this session.',
     },
+    binding_manifest: {
+      type: 'object', additionalProperties: false,
+      description: 'Optional opaque references to the authorized query results used by this page. Do not invent result_ref values; omit when the page is intentionally unbound.',
+      properties: {
+        result_refs: { type: 'array', items: { type: 'string' } },
+        bindings: {
+          type: 'array', items: {
+            type: 'object', additionalProperties: false,
+            properties: {
+              binding_id: { type: 'string', required: true },
+              result_ref: { type: 'string', required: true },
+              node_id: { type: 'string' },
+              data_ref: { type: 'string' },
+              mode: { type: 'string', enum: ['summary', 'page', 'range'] },
+            },
+          },
+        },
+      },
+    },
   },
 });
 
@@ -62,6 +81,11 @@ export async function executePageTool(name, args, execution) {
     return { ...refused(pack.error.code, `${pack.error.message}。仅按本次错误修正页面源码包后重提一次；不得使用 bash、文件、脚本或其他工具排查，不得回退到示例页面。`),
       next_action: '仅修正 package 字段后重新调用本工具一次。' };
   }
+  const manifest = parseBindingManifest(args.binding_manifest ?? { bindings: [], result_refs: [] });
+  if (!manifest.ok) {
+    return { ...refused(manifest.error.code, `${manifest.error.message}。仅修正 binding_manifest 后重提一次。`),
+      next_action: '仅修正 binding_manifest 字段后重新调用本工具一次。' };
+  }
   // Delivery receipt only. Persisting the page (isolated documents HTTP) stays
   // with the browser workbench; this tool never writes or forwards the package.
   return {
@@ -70,6 +94,7 @@ export async function executePageTool(name, args, execution) {
     request_id: args.request_id,
     session_id: sessionId,
     package: pack.value,
+    binding_manifest: manifest.value,
     published: false,
     next_action: '页面源码包已交付工作台；由用户在工作台检查并保存，本工具不保存页面。',
   };

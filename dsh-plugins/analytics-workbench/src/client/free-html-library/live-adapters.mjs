@@ -16,7 +16,7 @@ import { PAGE_DOCUMENTS_PREFIX, PAGE_RESULT_PREFIX, refuseLivePort } from './pag
 import { annotateHostMappings } from '../../free-page/resource/package-normalize.mjs';
 
 const EDIT_CONTEXT_PREFIX = '/api/v1/analytics/page-edit-contexts';
-import { nativeGenerateUnavailable, normalizePagePackage } from './native-generate.mjs';
+import { extractBindingManifest, nativeGenerateUnavailable, normalizePagePackage } from './native-generate.mjs';
 
 function clone(value) {
   return structuredClone(value);
@@ -474,12 +474,14 @@ export function createLivePageAdapters({
         nativePrompts.push({ prompt, context: buildGenerateContext({ prompt, ...extras }), at: now() });
         if (typeof nativeGenerate !== 'function') throw nativeGenerateUnavailable();
         const raw = await nativeGenerate(prompt, extras);
+        const bindingManifest = extractBindingManifest(raw);
         const pkg = annotateHostMappings(normalizePagePackage(raw));
         if (!pkg) throw nativeGenerateUnavailable();
         return {
           accepted: true,
           runtime: 'dsh-native-agent-only',
           package: pkg,
+          binding_manifest: bindingManifest,
           ...(typeof raw?.__session_id === 'string' ? { session_id: raw.__session_id } : {}),
           ...(typeof raw?.__request_id === 'string' ? { request_id: raw.__request_id } : {}),
           ...(typeof extras?.sessionId === 'string' ? { session_id: extras.sessionId } : {}),

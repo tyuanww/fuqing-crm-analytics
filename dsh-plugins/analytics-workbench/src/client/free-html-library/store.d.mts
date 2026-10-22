@@ -18,7 +18,7 @@ export type FreeHtmlLibraryState = {
   contextPanel: 'ai' | 'source' | 'history' | null;
   overlay: 'selection' | 'patch' | null;
   preview: PreviewRecord | null;
-  importCandidate: { preview_id: string; artifact_id?: string; artifact_receipt_id?: string; source?: string; title?: string; page_id?: string | null; content_hash?: string; package: FreeHtmlPage['package']; origin: { session_id: string | null; path: string; file_id?: string }; quarantined?: string[] } | null;
+  importCandidate: { preview_id: string; artifact_id?: string; artifact_receipt_id?: string; source?: string; title?: string; page_id?: string | null; content_hash?: string; package: FreeHtmlPage['package']; binding_manifest?: unknown; origin: { session_id: string | null; path: string; file_id?: string }; quarantined?: string[] } | null;
   textDraft: { value: string; original: string; changed: boolean } | null;
   sourceDraft: { package: FreeHtmlPage['package']; changed: boolean } | null;
   textDrafts: Record<string, string>;
@@ -58,7 +58,7 @@ export type FreeHtmlLibraryStore = {
   toggleAssets(): void;
   applyExample(text: string): void;
   generate(): Promise<void>;
-  intakePackage(pkg: unknown, meta?: { sessionId?: string; session_id?: string; title?: string; requestId?: string; request_id?: string; callId?: string; call_id?: string }): Promise<unknown>;
+  intakePackage(pkg: unknown, meta?: { sessionId?: string; session_id?: string; title?: string; requestId?: string; request_id?: string; callId?: string; call_id?: string; bindingManifest?: unknown; binding_manifest?: unknown }): Promise<unknown>;
   previewArtifactPackage(pkg: unknown, receipt: Record<string, unknown>): Promise<boolean | undefined>;
   openPage(pageId: string): Promise<boolean | undefined>;
   refreshPages(): Promise<void>;

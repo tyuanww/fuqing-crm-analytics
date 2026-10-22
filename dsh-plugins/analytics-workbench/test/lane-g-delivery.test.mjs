@@ -43,6 +43,27 @@ test('page tool delivers a valid free-page package', async () => {
   assert.equal(Object.hasOwn(PAGE_TOOL_PARAMETERS, PAGE_GENERATE_TOOL_NAME), true);
 });
 
+test('page tool preserves an explicit result binding manifest', async () => {
+  const manifest = {
+    result_refs: ['result_gsv_snapshot_20260705'],
+    bindings: [{ binding_id: 'gsv_total', result_ref: 'result_gsv_snapshot_20260705', node_id: 'gsv-card', mode: 'summary' }],
+  };
+  const receipt = await executePageTool(PAGE_GENERATE_TOOL_NAME, {
+    request_id: REQUEST_ID,
+    package: { html: '<html><section data-shine-node="gsv-card">105525.8</section></html>', node_map: [{ node_id: 'gsv-card', kind: 'static_element', selector: '[data-shine-node="gsv-card"]' }] },
+    binding_manifest: manifest,
+  }, execution);
+  assert.equal(receipt.status, 'PACKAGE_RECEIVED');
+  assert.deepEqual(receipt.binding_manifest, manifest);
+  const refused = await executePageTool(PAGE_GENERATE_TOOL_NAME, {
+    request_id: REQUEST_ID,
+    package: { html: '<html>x</html>' },
+    binding_manifest: { result_refs: ['r'], bindings: [{ binding_id: 'b', result_ref: 'missing' }] },
+  }, execution);
+  assert.equal(refused.status, 'REFUSED');
+  assert.equal(refused.error.code, 'INVALID_PAGE');
+});
+
 test('page tool schema exposes the exact node_map contract', () => {
   const nodeMap = PAGE_TOOL_PARAMETERS[PAGE_GENERATE_TOOL_NAME].package.properties.node_map;
   assert.equal(nodeMap.items.additionalProperties, false);
@@ -117,6 +138,39 @@ test('generate waits for delivery tool and persists the native package', async (
   assert.match(html, /原生Agent标题/);
   assert.doesNotMatch(html, /示例标题/);
   assert.equal(store.getSnapshot().current.binding_state, 'UNBOUND_SAMPLE');
+});
+
+test('native result refs reach the saved page document', async () => {
+  const waiter = createPagePackageWaiter();
+  let submittedRequestId;
+  const generate = createNativePageGenerate({
+    waiter,
+    submitPrompt: async (_prompt, extras) => { submittedRequestId = extras.requestId; return { ok: true, value: { accepted: true } }; },
+  });
+  const isolated = createIsolatedFetch({ token: 'library-page-isolated-test-token-32chars' });
+  const adapters = createLivePageAdapters({
+    nativeGenerate: generate,
+    documentsHttp: { base: 'http://127.0.0.1:18091', token: 'library-page-isolated-test-token-32chars', fetchImpl: isolated.fetchImpl },
+  });
+  const store = createFreeHtmlLibraryStore({ adapters, viewportWidth: 1440 });
+  const pending = store.generate();
+  for (let i = 0; i < 50 && waiter.pendingCount === 0; i += 1) await Promise.resolve();
+  assert.equal(waiter.pendingCount, 1);
+  assert.equal(waiter.deliver('page-gen-test', {
+    package: AGENT_PACKAGE,
+    binding_manifest: { result_refs: ['result_fixture_1'], bindings: [{ binding_id: 'fixture', result_ref: 'result_fixture_1', mode: 'summary' }] },
+  }), false);
+  // The generated request id is intentionally read from the prompt receipt in the next delivery.
+  const requestId = submittedRequestId;
+  assert.match(requestId, PAGE_REQUEST_ID_PATTERN);
+  assert.equal(waiter.deliver(requestId, {
+    package: AGENT_PACKAGE,
+    binding_manifest: { result_refs: ['result_fixture_1'], bindings: [{ binding_id: 'fixture', result_ref: 'result_fixture_1', mode: 'summary' }] },
+  }), true);
+  await pending;
+  const page = store.getSnapshot().current;
+  assert.deepEqual(page.binding_manifest.result_refs, ['result_fixture_1']);
+  assert.equal(page.binding_state, 'BOUND_VERIFIED');
 });
 
 test('refused delivery fails generate and keeps the prompt', async () => {

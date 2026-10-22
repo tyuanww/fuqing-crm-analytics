@@ -1,4 +1,5 @@
 /** Native Agent page-package intake. Production generate never uses SAMPLE_PACKAGE. */
+import { parseBindingManifest } from '../../free-page/contract/schema.mjs';
 
 /** Upper bound for one delivery-tool round trip; keeps a refused/lost delivery from pinning busy forever. */
 const DEFAULT_DELIVERY_TIMEOUT_MS = 180_000;
@@ -39,6 +40,14 @@ export function extractPagePackage(source) {
   } catch {
     return null;
   }
+}
+
+export function extractBindingManifest(source) {
+  const raw = source?.binding_manifest ?? source?.__binding_manifest
+    ?? source?.value?.binding_manifest ?? source?.value?.__binding_manifest
+    ?? source?.package?.binding_manifest;
+  const parsed = parseBindingManifest(raw ?? { bindings: [], result_refs: [] });
+  return parsed.ok ? parsed.value : { bindings: [], result_refs: [] };
 }
 
 export function nativeGenerateUnavailable(message = '原生 Agent 未返回页面源码包') {
@@ -103,16 +112,17 @@ export function createPagePackageWaiter() {
  * then awaits the delivery-tool result. No fallback to sample packages.
  */
 export function createNativePageGenerate({ submitPrompt, waiter } = {}) {
-  const withReceiptMeta = (pkg, extras = {}, requestId = extras?.requestId) => ({
+  const withReceiptMeta = (pkg, extras = {}, requestId = extras?.requestId, bindingManifest) => ({
     ...pkg,
     ...(typeof extras?.sessionId === 'string' && extras.sessionId ? { __session_id: extras.sessionId } : {}),
     ...(typeof requestId === 'string' && requestId ? { __request_id: requestId } : {}),
+    ...(bindingManifest?.result_refs?.length ? { __binding_manifest: bindingManifest } : {}),
   });
   return async function nativeGenerate(prompt, extras = {}) {
     const injected = extractPagePackage(extras?.package);
     if (injected) {
       if (typeof submitPrompt === 'function') await submitPrompt(prompt, extras);
-      return withReceiptMeta(injected, extras);
+      return withReceiptMeta(injected, extras, extras?.requestId, extractBindingManifest(extras?.package));
     }
     if (waiter) {
       const requestId = typeof extras?.requestId === 'string' && extras.requestId
@@ -121,12 +131,12 @@ export function createNativePageGenerate({ submitPrompt, waiter } = {}) {
       await submitPrompt(prompt, { ...extras, requestId });
       const delivered = await waiter.wait(requestId, extras?.signal, extras?.timeoutMs);
       if (!delivered) throw nativeGenerateUnavailable();
-      return withReceiptMeta(delivered, extras, requestId);
+      return withReceiptMeta(extractPagePackage(delivered), extras, requestId, extractBindingManifest(delivered));
     }
     if (typeof submitPrompt !== 'function') throw nativeGenerateUnavailable();
     const reply = await submitPrompt(prompt, extras);
     const pkg = extractPagePackage(reply);
     if (!pkg) throw nativeGenerateUnavailable();
-    return withReceiptMeta(pkg, extras);
+    return withReceiptMeta(pkg, extras, extras?.requestId, extractBindingManifest(reply));
   };
 }
