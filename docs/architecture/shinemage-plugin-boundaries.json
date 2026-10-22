@@ -134,8 +134,8 @@
         "cordis.patch.yml"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.2.1-rc.1",
-        "@deepseek-ai/cordis": "4.0.5"
+        "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
+        "@deepseek-ai/cordis": "4.0.4"
       },
       "dependencies": {
         "katex": "^0.18.7"
@@ -162,7 +162,7 @@
         "build": "node build.mjs",
         "test:host": "node --test test/host.integration.mjs"
       },
-      "manifest_sha256": "b47a40e11a62b2fe16bd56f53d2690e0825107c1d8ddbb2f4f9f82e2d3635790"
+      "manifest_sha256": "c735e988fcc1afb5f2ff915c3136f30418b7ee569c09da3feafc73fd553d2d94"
     },
     {
       "path": "dsh-plugins/knowledge",
@@ -184,7 +184,7 @@
       ],
       "peers": {
         "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
-        "@deepseek-ai/cordis": "4.0.2"
+        "@deepseek-ai/cordis": "4.0.4"
       },
       "dependencies": {},
       "dev_dependencies": {
@@ -200,7 +200,7 @@
         "build": "node build.mjs",
         "test": "node --test test/*.test.mjs"
       },
-      "manifest_sha256": "1b7d10a2892d06d4096f2408c8c6b0162d854113f87babd56339ae93f4d70c3c"
+      "manifest_sha256": "3428901eafe33470cfdbbc27dd720610e1e55bf9aa9138777d1c32d347a7c19a"
     },
     {
       "path": "dsh-plugins/plugin-kit",

@@ -10,7 +10,23 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
-@pytest.mark.skipif(shutil.which("docker") is None, reason="Docker Compose is unavailable")
+def _docker_compose_available() -> bool:
+    if shutil.which("docker") is None:
+        return False
+    try:
+        result = subprocess.run(
+            ["docker", "compose", "version"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return result.returncode == 0
+
+
+@pytest.mark.skipif(not _docker_compose_available(), reason="Docker Compose is unavailable")
 def test_production_compose_strips_quotes_from_credentials(tmp_path: Path) -> None:
     env_file = tmp_path / "crm.env"
     env_file.write_text(
