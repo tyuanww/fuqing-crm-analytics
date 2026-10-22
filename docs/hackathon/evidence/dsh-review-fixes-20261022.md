@@ -46,7 +46,7 @@ v3 在计算前读取仓库数据截止日。当前期或同期范围超过截�
 
 - 后端商品、只读路由和分类：`53 passed / 1 skipped`。
 - CRM dashboard：`45 passed`。
-- CRM 全包：`102 passed`，另外 2 项因当前 SDK checkout 缺少 jsdom 或 vendor Cordis 测试入口而未能启动。
+- CRM 全包：`121 passed`。
 - 前端相关单测：`12 passed`。
 - 前端生产构建：`PASS`。
 - 前端生产静态入口已替换，v3 请求代码存在于实际部署资产中。

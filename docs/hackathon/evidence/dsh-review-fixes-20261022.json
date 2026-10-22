@@ -124,9 +124,9 @@
       "failed": 0
     },
     "crm_full_suite": {
-      "passed": 102,
-      "environment_blocked": 2,
-      "note": "Two tests required optional jsdom or vendor/cordis entries absent from the selected SDK checkout."
+      "passed": 121,
+      "failed": 0,
+      "environment_blocked": 0
     },
     "frontend_unit": {
       "passed": 12,
