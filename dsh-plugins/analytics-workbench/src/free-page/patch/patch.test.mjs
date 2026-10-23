@@ -121,6 +121,54 @@ test('foreign HTML change is rejected and is not a silent whole-page patch', () 
   assert.equal(created.preview, null);
 });
 
+test('mapped ancestor can change with a leaf selection without becoming foreign', () => {
+  const pagePackage = {
+    html: '<main data-shine-node="main"><h1 data-shine-node="title">验收</h1><p data-shine-node="note">通过</p></main>',
+    css: '',
+    js: '',
+    resources: [],
+    node_map: [
+      { node_id: 'main', kind: 'static_element', selector: '[data-shine-node="main"]' },
+      { node_id: 'title', kind: 'static_element', selector: '[data-shine-node="title"]' },
+      { node_id: 'note', kind: 'static_element', selector: '[data-shine-node="note"]' },
+    ],
+  };
+  const index = buildSourceIndex(pagePackage);
+  const located = locateSelection(index, { kind: 'static_element', node_id: 'title' });
+  const applied = applyInnerText(pagePackage, located, '草稿恢复');
+  const created = createPatchPreview(previewOpts(index, pagePackage, located.selection, applied.package));
+  assert.equal(created.ok, true, JSON.stringify(created.error));
+  assert.deepEqual([...created.impact.foreign_html_nodes], []);
+  assert.equal(created.impact.html_outside_selection, false);
+  assert.equal(created.impact.html_changed_nodes.includes('main'), true);
+  assert.equal(created.impact.html_changed_nodes.includes('title'), true);
+});
+
+test('ancestor wrapper edits remain outside the selected leaf scope', () => {
+  const pagePackage = {
+    html: '<main data-shine-node="main"><h1 data-shine-node="title">验收</h1><p data-shine-node="note">通过</p></main>',
+    css: '',
+    js: '',
+    resources: [],
+    node_map: [
+      { node_id: 'main', kind: 'static_element', selector: '[data-shine-node="main"]' },
+      { node_id: 'title', kind: 'static_element', selector: '[data-shine-node="title"]' },
+      { node_id: 'note', kind: 'static_element', selector: '[data-shine-node="note"]' },
+    ],
+  };
+  const index = buildSourceIndex(pagePackage);
+  const located = locateSelection(index, { kind: 'static_element', node_id: 'title' });
+  const applied = applyInnerText(pagePackage, located, '草稿恢复');
+  const proposed = {
+    ...applied.package,
+    html: applied.package.html.replace('<main data-shine-node="main">', '<main class="tampered" data-shine-node="main">'),
+  };
+  const created = createPatchPreview(previewOpts(index, pagePackage, located.selection, proposed));
+  assert.equal(created.ok, false);
+  assert.equal(created.error.code, 'INVALID_PAGE');
+  assert.equal(created.impact.html_outside_selection, true);
+});
+
 test('untagged HTML inserted outside the selection cannot be submitted', () => {
   const { pagePackage, index } = setup();
   const located = locateSelection(index, { kind: 'static_element', node_id: 'n_title' });

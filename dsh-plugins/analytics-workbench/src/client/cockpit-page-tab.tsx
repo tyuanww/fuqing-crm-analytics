@@ -2,20 +2,9 @@ import { useEffect, useMemo } from 'react';
 import { useSyncExternalStore } from 'react';
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots';
 import { HtmlPreview } from './cockpit-page-editor.tsx';
-import type { components } from '../free-page/contract/page-contract.generated.d.ts';
+import type { FreeHtmlLibraryStore } from './free-html-library/store.d.mts';
 
-type PageStore = {
-  subscribe(listener: () => void): () => void;
-  getSnapshot(): { current?: {
-    page_id?: string;
-    title?: string;
-    version?: number;
-    binding_manifest?: { result_refs?: string[] } | null;
-    presentation_overlays?: Record<string, { text?: string; style?: Record<string, string>; attributes?: Record<string, string> }> | null;
-    package?: components['schemas']['PagePackage'];
-  } | null };
-  openPage(pageId: string): Promise<boolean | undefined>;
-};
+type PageStore = Pick<FreeHtmlLibraryStore, 'subscribe' | 'getSnapshot' | 'openPage'>;
 
 export const COCKPIT_PAGE_TAB = 'shine-mage.cockpit-page';
 export const cockpitPageAddress = (pageId: string) => 'dsh-resource://cockpit-page/' + encodeURIComponent(pageId);

@@ -20,7 +20,7 @@
 | 生成驾驶舱 | `conversation.composer.dock` | list | `shine-mage.analytics-b0.generate-cockpit` | 仅 composer 变体挂载；空 hero 不出现 |
 | 工具卡 | `tool.call.toolview` | keyed | 问数 / 渠道后续 / 首购 / 组板 generate+edit | 不占用 `bash`/`skill` |
 | 右侧详情 | `details` / `conversation.details.tool` | single | 不替换 | 原生保留 |
-| 业务弹层 | `shell.overlay` | list | `shine-mage.account.menu`；`shine-mage.analytics-b0.overlay`；可选 `shine-mage.cockpit-composition` | 增量。账户菜单含比赛看板外链与设置 |
+| 业务弹层 | `shell.overlay` | list | `shine-mage.leave-prompt`；`shine-mage.analytics-b0.overlay` | 增量。账号与设置只保留一个原生桥接按钮，不注册重复账户/主题弹层；驾驶舱使用 `main:cockpit`，不挂载 split composition |
 | 问数 / 保存 / 驾驶舱 | overlay 内面板 + 查询卡 | — | HTTP overlay 或 finite mock | 不新增 Vue 页面 |
 
 原生消息流、发送/停止、模型选择、Session log、Trajectory 仍由 DSH 拥有。alpha.2 会话用 `retain({ source: 'mainView' })`，没有 `ISessions.open` / `clear` / `SessionListState.current`。业务事实只经校验后的 run 快照渲染。

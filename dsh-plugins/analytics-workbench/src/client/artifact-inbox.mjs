@@ -69,9 +69,15 @@ export function createArtifactInboxClient(http, { now = () => Date.now() } = {})
     },
     async intake(input) {
       const packageValue = input?.package ?? null;
-      const contentHash = input?.content_hash || (packageValue ? await digestValue(packageValue) : null);
-      if (!contentHash) throw Object.assign(new Error('工作区产物缺少内容哈希，暂不能登记。'), { code: 'CONTENT_HASH_REQUIRED' });
-      const payload = await request('', { method: 'POST', body: { ...input, content_hash: contentHash } });
+      // The server normalizes page packages before hashing them. Let it own
+      // that digest so optional model fields such as presentation:null cannot
+      // make an otherwise valid generated package fail intake.
+      const contentHash = input?.content_hash
+        || (packageValue && input?.source !== 'page_package' ? await digestValue(packageValue) : null);
+      if (!contentHash && input?.source !== 'page_package') {
+        throw Object.assign(new Error('工作区产物缺少内容哈希，暂不能登记。'), { code: 'CONTENT_HASH_REQUIRED' });
+      }
+      const payload = await request('', { method: 'POST', body: { ...input, ...(contentHash ? { content_hash: contentHash } : {}) } });
       const item = payload?.artifact_id ? payload : payload?.item;
       if (item) emit({ items: [item, ...state.items.filter(row => row.artifact_id !== item.artifact_id)], status: 'ready', updatedAt: now() });
       return item;

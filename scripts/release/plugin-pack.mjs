@@ -11,9 +11,10 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { execFile } from 'node:child_process';
+import { builtinModules } from 'node:module';
 import { access, copyFile, link, lstat, mkdir, mkdtemp, readFile, readdir, realpath, rm, writeFile } from 'node:fs/promises';
 import { promisify } from 'node:util';
-import { basename, dirname, join, relative, resolve, sep } from 'node:path';
+import { basename, dirname, join, posix, relative, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { tmpdir } from 'node:os';
 import { DSH_SDK_VERSION, PNPM_VERSION } from './toolchain.mjs';
@@ -40,9 +41,10 @@ function parsePattern(pattern, code = 'PLUGIN_PACK_PATTERN_INVALID') {
   const directory = pattern.slice(0, slash + 1);
   const suffix = pattern.slice(slash + 1);
   const star = suffix.indexOf('*');
-  const head = `${directory}${suffix.slice(0, star)}`;
-  const tail = suffix.slice(star + 1);
-  return { head, tail };
+  return {
+    head: `${directory}${suffix.slice(0, star)}`,
+    tail: suffix.slice(star + 1),
+  };
 }
 
 function matchesPattern(path, pattern, code = 'PLUGIN_PACK_PATTERN_INVALID') {
@@ -106,6 +108,68 @@ function packageFileAllowed(path, files) {
   return files.some(entry => entry.endsWith('/') && path.startsWith(entry));
 }
 
+function packageName(specifier) {
+  const parts = specifier.split('/');
+  return specifier.startsWith('@') ? parts.slice(0, 2).join('/') : parts[0];
+}
+
+function hostEntrypoints(manifest) {
+  const entries = [];
+  const rootExport = manifest.exports?.['.'];
+  if (typeof rootExport === 'string') entries.push(rootExport);
+  else if (rootExport && typeof rootExport === 'object') {
+    for (const value of Object.values(rootExport)) if (typeof value === 'string') entries.push(value);
+  }
+  if (!entries.length && typeof manifest.main === 'string') entries.push(manifest.main);
+  return [...new Set(entries.map(entry => entry.replace(/^\.\//, '')))];
+}
+
+function moduleSpecifiers(source) {
+  const specifiers = new Set();
+  const patterns = [
+    /\b(?:import|export)\s+(?:[^'"]*?\s+from\s+)?['"]([^'"]+)['"]/g,
+    /\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
+    /\brequire\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
+  ];
+  for (const pattern of patterns) {
+    for (const match of source.matchAll(pattern)) specifiers.add(match[1]);
+  }
+  return [...specifiers];
+}
+
+async function assertRuntimeImports(root, manifest, files) {
+  const declared = new Set([
+    ...Object.keys(manifest.dependencies ?? {}),
+    ...Object.keys(manifest.optionalDependencies ?? {}),
+    ...Object.keys(manifest.peerDependencies ?? {}),
+  ]);
+  const fileSet = new Set(files);
+  const seen = new Set();
+  async function inspect(entry) {
+    assert.ok(fileSet.has(entry), `PLUGIN_PACK_RUNTIME_ENTRY_MISSING ${entry}`);
+    if (seen.has(entry)) return;
+    seen.add(entry);
+    const source = await readFile(join(root, entry), 'utf8');
+    for (const specifier of moduleSpecifiers(source)) {
+      if (specifier.startsWith('.')) {
+        const resolved = posix.normalize(posix.join(posix.dirname(entry), specifier));
+        assert.ok(!resolved.startsWith('../') && !resolved.startsWith('/'),
+          `PLUGIN_PACK_RUNTIME_IMPORT_ESCAPE ${entry} ${specifier}`);
+        const candidates = [resolved, `${resolved}.js`, `${resolved}.mjs`, `${resolved}.cjs`,
+          `${resolved}.json`, `${resolved}/index.js`, `${resolved}/index.mjs`, `${resolved}/index.cjs`];
+        const target = candidates.find(candidate => fileSet.has(candidate));
+        assert.ok(target, `PLUGIN_PACK_RUNTIME_IMPORT_MISSING ${entry} ${specifier}`);
+        await inspect(target);
+        continue;
+      }
+      const rootName = specifier.startsWith('node:') ? specifier.slice(5) : packageName(specifier);
+      if (specifier.startsWith('node:') || builtinModules.includes(rootName)) continue;
+      assert.ok(declared.has(rootName), `PLUGIN_PACK_UNDECLARED_RUNTIME_IMPORT ${entry} ${specifier}`);
+    }
+  }
+  for (const entry of hostEntrypoints(manifest)) await inspect(entry);
+}
+
 function isConfigurationBundle(manifest) {
   return manifest.shinemage?.bundle_role === 'configuration-bundle';
 }
@@ -154,12 +218,13 @@ async function collectFiles(root, declared) {
   // ignored here; the tar listing below is the final packaged truth.
   for (const declaredPath of [...declared, 'package.json']) {
     if (declaredPath.includes('*')) {
-      const slash = declaredPath.lastIndexOf('/');
-      matchesPattern('', declaredPath, 'PLUGIN_PACK_PATTERN_SCOPE');
-      const directory = declaredPath.slice(0, slash);
+      assert.ok(SAFE_RELATIVE.test(declaredPath), `PLUGIN_PACK_FILE_PATH_INVALID ${declaredPath}`);
+      const { head } = parsePattern(declaredPath);
+      const directory = head.slice(0, head.lastIndexOf('/'));
       const directoryPath = join(root, directory);
       const directoryInfo = await lstat(directoryPath);
-      assert.ok(directoryInfo.isDirectory() && !directoryInfo.isSymbolicLink(), `PLUGIN_PACK_DECLARED_MISSING ${declaredPath}`);
+      assert.ok(directoryInfo.isDirectory() && !directoryInfo.isSymbolicLink(),
+        `PLUGIN_PACK_DECLARED_MISSING ${declaredPath}`);
       await canonicalInside(rootReal, directoryPath, `PLUGIN_PACK_PATH_ESCAPE ${directory}`);
       let matched = 0;
       const entries = (await readdir(directoryPath, { withFileTypes: true }))
@@ -222,12 +287,27 @@ function inspectManifest(manifest, packed = false, { sdkVersion = DSH_SDK_VERSIO
 }
 
 async function inspectPackage(pluginRoot, compatibility = {}) {
-  const manifest = JSON.parse(await readFile(join(pluginRoot, 'package.json'), 'utf8'));
+  const sourceManifest = JSON.parse(await readFile(join(pluginRoot, 'package.json'), 'utf8'));
+  let manifest = sourceManifest;
+  if (compatibility.sourceSdkVersion !== undefined
+    && sourceManifest.peerDependencies?.['@deepseek-ai/dsh-tools'] !== undefined) {
+    assert.equal(sourceManifest.peerDependencies?.['@deepseek-ai/dsh-tools'], compatibility.sourceSdkVersion,
+      'PLUGIN_PACK_SOURCE_DSH_PEER_INVALID');
+    manifest = {
+      ...sourceManifest,
+      peerDependencies: {
+        ...sourceManifest.peerDependencies,
+        '@deepseek-ai/dsh-tools': compatibility.sdkVersion,
+      },
+    };
+  }
   const declared = inspectManifest(manifest, false, compatibility);
   const declaredFiles = await collectFiles(pluginRoot, declared);
   assert.ok(declaredFiles.some(file => file.startsWith('lib/')), 'PLUGIN_PACK_BUILD_OUTPUT_REQUIRED');
+  verifyEntrypoints(manifest, declaredFiles);
   await assertConfigurationBundleRuntime(pluginRoot, manifest, declaredFiles);
-  return { manifest, declared, declaredFiles };
+  await assertRuntimeImports(pluginRoot, manifest, declaredFiles);
+  return { manifest, sourceManifest, declared, declaredFiles };
 }
 
 async function currentBuildBytes(pluginRoot, inspected) {
@@ -350,10 +430,11 @@ export async function readPluginPack({ manifestPath, expectedSha256, expectedSdk
     }
     await walk(packageRoot);
     assert.deepEqual(entries.sort(), [...receipt.entries].sort(), 'PLUGIN_PACK_ENTRY_SET_MISMATCH');
+    verifyEntrypoints(manifest, entries);
     await assertConfigurationBundleRuntime(packageRoot, manifest, entries);
+    await assertRuntimeImports(packageRoot, manifest, entries);
     // Declared assets, exports and patches must all be present in the archive.
     assert.ok((await collectFiles(packageRoot, declared)).some(file => file.startsWith('lib/')), 'PLUGIN_PACK_BUILD_OUTPUT_REQUIRED');
-    verifyEntrypoints(manifest, entries);
     assertClean(await scanTree(packageRoot, { maxBytes: MAX_PACK_BYTES, allowSyntheticFixtures: false }));
     if (provenance?.status === 'PASS') {
       const generatedTree = await canonicalTreeDigest(packageRoot, {
@@ -417,7 +498,7 @@ async function gitMetadata(pluginRoot) {
 
 export async function packPlugin({ plugin, outputDir, manifestPath, builderProvenancePath = null,
   requireGeneratedProvenance = Boolean(builderProvenancePath), sdkVersion = DSH_SDK_VERSION,
-  pnpmVersion = PNPM_VERSION }) {
+  pnpmVersion = PNPM_VERSION, sourceSdkVersion = null }) {
   const pluginRoot = safeAbsolute(plugin, 'PLUGIN_PACK_ROOT_INVALID');
   const destination = safeAbsolute(outputDir, 'PLUGIN_PACK_OUTPUT_INVALID');
   const pluginInfo = await lstat(pluginRoot).catch(error => { throw new Error(`PLUGIN_PACK_ROOT_INVALID ${error.code ?? 'unavailable'}`); });
@@ -426,7 +507,7 @@ export async function packPlugin({ plugin, outputDir, manifestPath, builderProve
   await mkdir(destination, { recursive: true, mode: 0o700 });
   const destinationInfo = await lstat(destination);
   assert.ok(destinationInfo.isDirectory() && !destinationInfo.isSymbolicLink(), 'PLUGIN_PACK_OUTPUT_INVALID');
-  const compatibility = { sdkVersion, pnpmVersion };
+  const compatibility = { sdkVersion, pnpmVersion, ...(sourceSdkVersion ? { sourceSdkVersion } : {}) };
   const inspected = await inspectPackage(pluginRoot, compatibility);
   const source = await gitMetadata(pluginRoot);
   const provenance = await verifyBuilderProvenance(pluginRoot, inspected, source, builderProvenancePath, { required: requireGeneratedProvenance });
@@ -467,7 +548,10 @@ export async function packPlugin({ plugin, outputDir, manifestPath, builderProve
     await inspectFiles(packageRoot);
     packageEntries.sort();
     assert.ok(packageEntries.includes('package.json'), 'PLUGIN_PACK_PACKAGE_JSON_MISSING');
-    verifyEntrypoints(JSON.parse(await readFile(join(packageRoot, 'package.json'), 'utf8')), packageEntries);
+    const packedManifest = JSON.parse(await readFile(join(packageRoot, 'package.json'), 'utf8'));
+    verifyEntrypoints(packedManifest, packageEntries);
+    await assertConfigurationBundleRuntime(packageRoot, packedManifest, packageEntries);
+    await assertRuntimeImports(packageRoot, packedManifest, packageEntries);
     assertClean(await scanTree(packageRoot, { maxBytes: MAX_PACK_BYTES, allowSyntheticFixtures: false }));
     const bytes = await readFile(packedPath);
     const packDigest = digest(bytes);
@@ -481,6 +565,7 @@ export async function packPlugin({ plugin, outputDir, manifestPath, builderProve
       package_name: inspected.manifest.name,
       package_version: inspected.manifest.version,
       dsh_pin: sdkVersion,
+      source_dsh_pin: sourceSdkVersion ?? sdkVersion,
       source_sha: source.sha,
       source_dirty: source.dirty,
       tarball: { name: basename(tarball), bytes: info.size, sha256: packDigest },
@@ -513,9 +598,10 @@ if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) 
   try {
     const plugin = option('--plugin');
     const outputDir = option('--output-dir');
-    assert.ok(plugin && outputDir, 'Usage: node plugin-pack.mjs --plugin /absolute/plugin --output-dir /absolute/output [--manifest /absolute/manifest.json]');
+    assert.ok(plugin && outputDir, 'Usage: node plugin-pack.mjs --plugin /absolute/plugin --output-dir /absolute/output [--manifest /absolute/manifest.json] [--source-sdk-version VERSION]');
     const builderProvenancePath = option('--builder-receipt');
-    const receipt = await packPlugin({ plugin, outputDir, manifestPath: option('--manifest'), builderProvenancePath });
+    const sourceSdkVersion = option('--source-sdk-version');
+    const receipt = await packPlugin({ plugin, outputDir, manifestPath: option('--manifest'), builderProvenancePath, sourceSdkVersion });
     console.log(JSON.stringify(receipt, null, 2));
   } catch (error) {
     console.error(error?.message ?? String(error));

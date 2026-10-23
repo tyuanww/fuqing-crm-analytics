@@ -101,7 +101,7 @@ async function verifyInstalled(root, files) {
   for (const [name, bytes] of files) assert.deepEqual(await regular(join(root, name)), bytes, `PACKAGE_INSTALLED_DRIFT ${name}`);
 }
 
-export async function bindPackagedDependencies(plugin, inputDirectory) {
+export async function bindPackagedDependencies(plugin, inputDirectory, onTemporaryLink = null) {
   const consumer = JSON.parse(await regular(join(plugin, 'package.json')));
   const bytes = await regular(join(plugin, 'bundled-dependencies.json')).catch(missing);
   if (!bytes) {
@@ -158,20 +158,29 @@ export async function bindPackagedDependencies(plugin, inputDirectory) {
     }
     await directory(dirname(link));
     const existing = await lstat(link).catch(missing);
+    let previous = null, temporary = false;
     if (existing) {
       assert.ok(existing.isSymbolicLink(), 'PACKAGE_BINDING_FOREIGN');
-      const previous = await realpath(link);
+      previous = await realpath(link);
       const rel = relative(await realpath(store), previous);
-      assert.match(rel, /^[a-f0-9]{64}$/, 'PACKAGE_BINDING_FOREIGN');
-      const previousManifest = JSON.parse(await regular(join(previous, 'package.json')));
-      assert.equal(previousManifest.name, entry.name, 'PACKAGE_BINDING_FOREIGN');
-      if (previous === await realpath(target)) { bound.push(entry); continue; }
+      if (/^[a-f0-9]{64}$/.test(rel)) {
+        const previousManifest = JSON.parse(await regular(join(previous, 'package.json')));
+        assert.equal(previousManifest.name, entry.name, 'PACKAGE_BINDING_FOREIGN');
+        if (previous === await realpath(target)) { bound.push(entry); continue; }
+      } else {
+        assert.ok(onTemporaryLink, 'PACKAGE_BINDING_FOREIGN');
+        const previousManifest = JSON.parse(await regular(join(previous, 'package.json')));
+        assert.equal(previousManifest.name, entry.name, 'PACKAGE_BINDING_FOREIGN');
+        assert.equal(previousManifest.version, entry.version, 'PACKAGE_BINDING_FOREIGN');
+        temporary = true;
+      }
     }
     const temporaryLink = `${link}.${randomUUID()}`;
     try {
       await symlink(relative(dirname(link), target), temporaryLink, 'dir');
       await rename(temporaryLink, link);
     } finally { await rm(temporaryLink, { force: true }); }
+    if (temporary) onTemporaryLink(link, previous);
     // Previous immutable inputs are retained; never delete another package.
     bound.push(entry);
   }

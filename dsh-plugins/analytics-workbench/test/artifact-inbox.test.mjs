@@ -44,17 +44,22 @@ test('workspace intake refuses a path-only fallback hash', async () => {
   );
 });
 
-test('package hashes include nested node maps and resources', async () => {
-  const hashes = [];
+test('page package intake delegates normalized hashing to the server', async () => {
+  const bodies = [];
   const client = createArtifactInboxClient({ base: 'http://127.0.0.1:18091', fetchImpl: async (_url, init) => {
-    hashes.push(JSON.parse(init.body).content_hash);
-    return response({ artifact_id: `artifact_${hashes.length}`, status: 'PREVIEWABLE' });
+    bodies.push(JSON.parse(init.body));
+    return response({ artifact_id: `artifact_${bodies.length}`, status: 'PREVIEWABLE' });
   } });
   const base = { html: '<h1>页面</h1>', css: '', js: '', resources: [{ resource_id: 'logo', sha256: 'a'.repeat(64) }], node_map: [{ node_id: 'n1', selector: 'h1' }] };
   await client.intake({ source: 'page_package', session_id: 's', title: '页面', package: base });
   await client.intake({ source: 'page_package', session_id: 's', title: '页面', package: { ...base, node_map: [{ node_id: 'n2', selector: 'h1' }] } });
-  assert.equal(hashes.length, 2);
-  assert.notEqual(hashes[0], hashes[1]);
+  assert.equal(bodies.length, 2);
+  assert.equal('content_hash' in bodies[0], false);
+  assert.equal('content_hash' in bodies[1], false);
+  assert.deepEqual(bodies[0].package, base);
+  assert.deepEqual(bodies[1].package.node_map, [{ node_id: 'n2', selector: 'h1' }]);
+  await client.intake({ source: 'page_package', session_id: 's', title: '页面', package: base, content_hash: 'b'.repeat(64) });
+  assert.equal(bodies[2].content_hash, 'b'.repeat(64), 'an explicitly supplied digest is still preserved');
 });
 
 test('refresh follows inbox pagination without carrying full packages in list rows', async () => {

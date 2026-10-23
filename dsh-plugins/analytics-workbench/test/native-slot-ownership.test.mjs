@@ -49,7 +49,7 @@ test('additive business overlay can unload without removing the native main or r
   const core = fixture();
   const native = core.entriesOfSlot('main')[0];
   const right = core.entriesOfSlot('rightbar')[0];
-  const dispose = core.register({ name: 'shell.overlay', id: 'shine-mage.cockpit-composition' }, () => null);
+  const dispose = core.register({ name: 'shell.overlay', id: 'shine-mage.leave-prompt' }, () => null);
   assert.equal(core.entriesOfSlot('shell.overlay').length, 1);
   dispose();
   assert.equal(core.entriesOfSlot('shell.overlay').length, 0);
