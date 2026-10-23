@@ -24,7 +24,7 @@
 | React | `18.3.1` |
 | Cordis | `4.0.5` |
 
-`@deepseek-ai/dsh@0.2.1-rc.3`、`@deepseek-ai/dsh-tools@0.2.1-rc.3` 均已在 npm 可解析；rc3 的 peer 合同要求 Cordis `~4.0.5`。Cordis 最新稳定版盘查为 `4.0.5`，与该合同一致。
+`@deepseek-ai/dsh@0.2.1-rc.3`、`@deepseek-ai/dsh-tools@0.2.1-rc.3` 均已在 npm 可解析；rc3 的 peer 合同要求 Cordis `~4.0.5`。Cordis 最新稳定版盘查为 `4.0.5`，与该合同一致。需要注意 npm 的 `latest` dist-tag 仍指向 rc2，rc3 目前属于 `next` 预发布线；本候选是按用户指定的 rc3 tag 固定，不把它描述为 npm stable/latest。
 
 ## rc2 → rc3 兼容性盘查
 
@@ -33,7 +33,7 @@
 ## 已更新范围
 
 - 主仓 `dsh-plugins/*/package.json` 的 DSH peer，以及 CRM/Knowledge 的 Cordis peer。
-- `dsh-plugins/plugin-kit/toolchain.json`、rc3 release lane、page/CRM rc3 profiles、组合 manifest/lock、IM runtime contract。
+- `dsh-plugins/plugin-kit/toolchain.json`、rc3 release lane、page/CRM rc3 profiles、组合 manifest/lock 的 profile/toolchain 元数据、IM runtime contract。
 - 默认 profile、组合输入、profile preparation、release toolchain 和 lane 校验器。
 - Workbench rc3 lock；三份作者仓的 peer、lock、plugin-kit tarball 和 `KIT-SHA256`。
 - 当前 README、STATUS、CHANGELOG、作者 quickstart 和 WSL 模板。
@@ -49,6 +49,8 @@ rc1/rc2 文件名明确的历史证据保持原样，不把历史回执改写成
 | Knowledge | `b8aea3b` | rc3 类型检查、构建通过；作者测试 44/44；输入预检与边界 9/9 |
 
 三份作者仓本地工作树均干净，提交尚未推送。作者仓的历史 `inputs/ci` 公共 SDK 归档仍未重建为 rc3，因此不能把旧远端 CI 回执迁移给新提交；正式 PR 前仍需重新生成对应输入并跑远端 CI。
+
+组合锁中的作者 pack source/manifest digest 仍是上一轮已验收输入；它们与 rc3 profile 元数据并不等价，不能作为 rc3 组合 artifact。只有三份作者仓新提交完成推送、重新生成 pack 与 `inputs/ci`、并由远端 CI 回传新 digest 后，才能替换这些锁项。
 
 ## 当前仍未关闭
 
