@@ -63,7 +63,7 @@ def get_category_overview_cached(
     # cache miss 跑实时 SQL
     result = get_category_overview(
         start_date, end_date, level, metric_type, channel, exclude_channels,
-        compare_start_date, compare_end_date,
+        compare_start_date, compare_end_date, _source=source,
     )
     _overview_cache[_overview_cache_key(
         start_date, end_date, level, metric_type,
@@ -388,6 +388,7 @@ def get_category_overview(
     exclude_channels: Optional[List[str]] = None,
     compare_start_date: Optional[str] = None,
     compare_end_date: Optional[str] = None,
+    _source: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
     品类概览(按Excel格式)
@@ -398,7 +399,7 @@ def get_category_overview(
 
     start_dt = datetime.strptime(start_date, "%Y-%m-%d")
     end_dt = datetime.strptime(end_date, "%Y-%m-%d")
-    source = orders_data_version(conn)
+    source = orders_data_version(conn) if _source is None else _source
     cutoff = (start_dt.date() - timedelta(days=1)).strftime("%Y-%m-%d")
 
     ly_start = (start_dt - timedelta(days=365)).strftime("%Y-%m-%d")
