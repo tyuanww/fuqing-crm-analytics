@@ -15,6 +15,7 @@ from backend.services.asset_focus_service._helpers import (
 from backend.services.product_identity import PRODUCT_DISPLAY_NAMES, resolve_product_names
 
 from .overview import _build_category_period_filter
+from .data_version import orders_data_version
 
 
 PRODUCT_GROUPS: dict[str, list[str]] = {
@@ -300,24 +301,16 @@ def get_product_customer_overview(
     else:
         compare_start_date, compare_end_date = _default_comparison(start, end)
 
-    cutoff = (date(start.year, start.month, 1) - timedelta(days=1)).isoformat()
+    cutoff = (start - timedelta(days=1)).isoformat()
     compare_start = datetime.strptime(compare_start_date, "%Y-%m-%d").date()
-    compare_cutoff = (
-        date(compare_start.year, compare_start.month, 1) - timedelta(days=1)
-    ).isoformat()
+    compare_cutoff = (compare_start - timedelta(days=1)).isoformat()
     excluded = list(exclude_channels or [])
 
     conn = get_connection()
     with _read_transaction(conn):
-        data_range_row = conn.execute(
-            "SELECT CAST(MIN(pay_time) AS DATE), CAST(MAX(pay_time) AS DATE) FROM orders"
-        ).fetchone()
-        data_start = data_range_row[0] if data_range_row else None
-        data_cutoff = (
-            data_range_row[1]
-            if data_range_row and data_range_row[1] is not None
-            else None
-        )
+        source = orders_data_version(conn)
+        data_start = datetime.strptime(source["data_start"], "%Y-%m-%d").date() if source["data_start"] else None
+        data_cutoff = datetime.strptime(source["data_cutoff"], "%Y-%m-%d").date() if source["data_cutoff"] else None
         compare_start = datetime.strptime(compare_start_date, "%Y-%m-%d").date()
         coverage = _coverage(
             start,
@@ -397,6 +390,7 @@ def get_product_customer_overview(
         "new_old_cutoff": cutoff,
         "comparison_new_old_cutoff": compare_cutoff,
         "data_cutoff": coverage["data_cutoff"],
+        "data_version": source["data_version"],
         "coverage": coverage,
         "metric_type": metric_type,
         "channel": channel,

@@ -24,6 +24,8 @@ from backend.contracts.schemas import (
     CategoryDailyTrendResponse,
     CategoryUserListResponse,
     ProductCustomerRequest,
+    ProductCustomerBatchRequest,
+    ProductCustomerBatchResponse,
     ProductCustomerResponse,
     AnchorMode,
     PathDepth,
@@ -150,6 +152,33 @@ def get_product_customer_api(body: ProductCustomerRequest, request: Request):
         result,
         request.headers.get("X-ShineMage-Product-Customer-Version", "product-customer/v2"),
     )
+
+
+@router.post("/product-customer/batch", response_model=ProductCustomerBatchResponse)
+def get_product_customer_batch_api(body: ProductCustomerBatchRequest, request: Request):
+    """Return bounded product cohort windows in one sequential database request."""
+    results = []
+    version = request.headers.get("X-ShineMage-Product-Customer-Version", "product-customer/v3")
+    if version != "product-customer/v3":
+        raise HTTPException(status_code=400, detail="product-customer/batch requires product-customer/v3")
+    for item in body.ranges:
+        try:
+            result = get_product_customer_overview(
+                item.start_date,
+                item.end_date,
+                products=item.products,
+                metric_type=item.metric_type,
+                channel=item.channel,
+                exclude_channels=item.exclude_channels,
+                compare_start_date=item.compare_start_date,
+                compare_end_date=item.compare_end_date,
+            )
+        except ValueError as exc:
+            if str(exc) == "首购历史不完整，无法可靠区分新客和老客":
+                raise HTTPException(status_code=409, detail="FIRST_PURCHASE_UNAVAILABLE") from exc
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        results.append(select_product_customer_response(result, version))
+    return {"results": results}
 
 
 def select_product_customer_response(result: dict, version: str) -> dict:

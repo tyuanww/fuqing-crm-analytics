@@ -66,6 +66,8 @@ class CategoryOverviewResponse(BaseModel):
     level: str
     channel: Optional[str] = None
     metric_type: str
+    data_cutoff: Optional[str] = None
+    data_version: str = "unknown"
     all_rows: List[CategoryOverviewItem]
     member_rows: List[CategoryOverviewItem]
     all_ttl: Optional[CategoryOverviewItem] = None
@@ -83,6 +85,12 @@ class ProductCustomerRequest(BaseModel):
     exclude_channels: List[str] = Field(default_factory=list)
     compare_start_date: Optional[str] = None
     compare_end_date: Optional[str] = None
+
+
+class ProductCustomerBatchRequest(BaseModel):
+    """Bounded batch of product cohort windows sharing one UI query."""
+
+    ranges: Annotated[List[ProductCustomerRequest], Field(min_length=1, max_length=24)]
 
 
 class ProductCustomerMetrics(BaseModel):
@@ -157,6 +165,11 @@ class ProductCustomerResponseV3(ProductCustomerResponseV2):
     schema_version: Literal["product-customer/v3"] = "product-customer/v3"
     status: Literal["OK", "INSUFFICIENT_COVERAGE"]
     coverage: ProductCustomerCoverage
+    data_version: str
+
+
+class ProductCustomerBatchResponse(BaseModel):
+    results: List[ProductCustomerResponseV3]
 
 
 ProductCustomerResponse = ProductCustomerResponseV2 | ProductCustomerResponseV3

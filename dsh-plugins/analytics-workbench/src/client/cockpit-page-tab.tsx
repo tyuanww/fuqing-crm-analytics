@@ -30,7 +30,7 @@ export function CockpitPageTab({ useTabInfo, pageStore, openCockpit }: PropsRunt
     </div>
     {current?.package?.html
       ? <HtmlPreview pkg={current.package} overlays={current.presentation_overlays ?? null} pageId={current.page_id ?? pageId}
-          version={current.version ?? 1} allowScripts={!(current.binding_manifest?.result_refs?.length)} title={current.title || 'HTML 产物'} />
+          version={current.version ?? 1} allowScripts={Boolean(current.package.js)} title={current.title || 'HTML 产物'} />
       : <p role="status">正在打开页面…</p>}
   </div>;
 }

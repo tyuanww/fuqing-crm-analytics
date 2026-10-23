@@ -68,6 +68,8 @@ export interface CategoryOverviewResponse {
   level: string
   channel: string | null
   metric_type: string
+  data_cutoff: string | null
+  data_version: string
   all_rows: CategoryOverviewItem[]
   member_rows: CategoryOverviewItem[]
   all_ttl: CategoryOverviewItem
@@ -136,6 +138,7 @@ export interface ProductCustomerResponse {
     current_status: 'COMPLETE' | 'INSUFFICIENT'
     comparison_status: 'COMPLETE' | 'INSUFFICIENT'
   }
+  data_version: string
   metric_type: 'GSV'
   channel: string | null
   exclude_channels: string[]
@@ -201,6 +204,31 @@ export async function fetchProductCustomer(body: {
     throw new Error(`商品数据覆盖不足，仓库最后支付日为 ${cutoff}`)
   }
   return result
+}
+
+export async function fetchProductCustomerBatch(body: {
+  ranges: Array<{
+    start_date: string
+    end_date: string
+    products?: string[]
+    channel?: string
+    exclude_channels?: string[]
+  }>
+}): Promise<{ results: ProductCustomerResponse[] }> {
+  const response = await client.post<{ results: ProductCustomerResponse[] }>('/v1/category/product-customer/batch', {
+    ranges: body.ranges.map(range => ({ ...range, metric_type: 'GSV' })),
+  }, {
+    headers: { 'X-ShineMage-Product-Customer-Version': 'product-customer/v3' },
+  })
+  const results = response.data.results
+  if (!Array.isArray(results) || results.some(result => result.schema_version !== 'product-customer/v3')) {
+    throw new Error('CRM 后端尚未升级到 product-customer/v3')
+  }
+  if (results.some(result => result.status !== 'OK')) {
+    const cutoff = results.find(result => result.status !== 'OK')?.coverage.data_cutoff ?? '未知'
+    throw new Error(`商品数据覆盖不足，仓库最后支付日为 ${cutoff}`)
+  }
+  return { results }
 }
 
 // L4.75 market-focus 性能治本 #2 (跟 L4.75 #1 backend batch endpoint 1:1 stable 永久规则化沿用):

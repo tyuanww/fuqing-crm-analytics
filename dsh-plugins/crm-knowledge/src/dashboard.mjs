@@ -522,9 +522,8 @@ function sameNaturalDayLastYear(value) {
   return previous.toISOString().slice(0, 10);
 }
 
-function previousMonthEnd(value) {
-  const current = new Date(parseDate(value, 'INVALID_RESPONSE'));
-  return new Date(Date.UTC(current.getUTCFullYear(), current.getUTCMonth(), 0)).toISOString().slice(0, 10);
+function previousDay(value) {
+  return new Date(parseDate(value, 'INVALID_RESPONSE') - DAY).toISOString().slice(0, 10);
 }
 
 function filterBase(value) {
@@ -537,12 +536,13 @@ export function normalizeProductCustomer(value, filters, dataKind, warehouseCuto
       value.date_start !== filters.start_date || value.date_end !== filters.end_date ||
       value.metric_type !== 'GSV' || (value.channel ?? '全店') !== filters.channel ||
       !Array.isArray(value.exclude_channels) || !Array.isArray(value.products) || value.products.length > 20 ||
-      typeof value.new_old_cutoff !== 'string' || typeof value.comparison_new_old_cutoff !== 'string') fail('INVALID_RESPONSE');
+      typeof value.new_old_cutoff !== 'string' || typeof value.comparison_new_old_cutoff !== 'string' ||
+      typeof value.data_version !== 'string' || !value.data_version) fail('INVALID_RESPONSE');
   const expectedCompareStart = filters.compare_start_date ?? sameNaturalDayLastYear(filters.start_date);
   const expectedCompareEnd = filters.compare_end_date ?? sameNaturalDayLastYear(filters.end_date);
   if (value.compare_start_date !== expectedCompareStart || value.compare_end_date !== expectedCompareEnd ||
-      value.new_old_cutoff !== previousMonthEnd(filters.start_date) ||
-      value.comparison_new_old_cutoff !== previousMonthEnd(expectedCompareStart)) fail('INVALID_RESPONSE');
+      value.new_old_cutoff !== previousDay(filters.start_date) ||
+      value.comparison_new_old_cutoff !== previousDay(expectedCompareStart)) fail('INVALID_RESPONSE');
   if (value.data_cutoff !== null) parseDate(value.data_cutoff, 'INVALID_RESPONSE');
   if (!value.coverage || typeof value.coverage !== 'object' ||
       (value.coverage.data_cutoff !== null && typeof value.coverage.data_cutoff !== 'string') ||
@@ -570,6 +570,7 @@ export function normalizeProductCustomer(value, filters, dataKind, warehouseCuto
       new_old_cutoff: value.new_old_cutoff,
       comparison_new_old_cutoff: value.comparison_new_old_cutoff,
       data_cutoff: value.data_cutoff,
+      data_version: value.data_version,
       coverage: value.coverage,
       warehouse_cutoff: warehouseCutoff,
       products: [],
@@ -618,12 +619,13 @@ export function normalizeProductCustomer(value, filters, dataKind, warehouseCuto
     new_old_cutoff: value.new_old_cutoff,
     comparison_new_old_cutoff: value.comparison_new_old_cutoff,
     data_cutoff: value.data_cutoff,
+    data_version: value.data_version,
     coverage: value.coverage,
     warehouse_cutoff: warehouseCutoff,
     products,
     limitations: [
       '新老客按商品映射到多个 SPU class 后，以 user_id 去重，不直接相加品类人数。',
-      '新老客截止日沿用品类看板的期初月界口径，结果中显式返回该日期。',
+      '新老客截止日为各自分析窗口开始日前一天，结果中显式返回该日期。',
       '订单表与 DMP 资产使用不同用户定义，不能跨来源相加。',
     ],
   };

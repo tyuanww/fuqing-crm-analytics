@@ -223,7 +223,7 @@ function Workspace({ store, goConversation, editMode = false, previewRef }: {
         <div ref={previewRef} className="sm-fhl-preview library-html-container" data-testid="fhl-preview" data-mode={state.mode} data-edit-mode={editMode ? '1' : '0'} style={{ position: 'relative' }}>
           <WorkspacePreview srcdoc={srcdoc} live={state.adapterKind === 'p12-live' && Boolean(livePkg && state.current)}
             pageId={state.current?.page_id} version={state.current?.version} pkg={livePkg} pointerEvents={iframePointerEvents}
-            allowScripts={editMode || state.mode === 'edit' || !(state.current?.binding_manifest?.result_refs?.length)} />
+            allowScripts={editMode || state.mode === 'edit' || Boolean(state.current?.package?.js)} />
           {editMode ? <HtmlHoverLayer iframeRef={previewRef} editMode={editMode} /> : null}
           {state.mode === 'edit' && !editMode ? <div className="sm-fhl-hit" data-testid="fhl-hit-layer">
             {locatable.map(node => (

@@ -29,11 +29,16 @@ export function editablePageNodes(pkg, manifest) {
 }
 
 export function editableTextNodes(pkg, manifest) {
-  if (!pkg || manifest?.result_refs?.length) return [];
+  if (!pkg) return [];
   const index = buildSourceIndex(pkg);
-  const bound = new Set((manifest?.bindings ?? []).map(row => row.node_id));
+  const bindings = manifest?.bindings ?? [];
+  const bound = new Set(bindings.map(row => row.node_id));
+  const pageBound = Array.isArray(manifest?.result_refs) && manifest.result_refs.length > 0;
+  const wholePageBound = pageBound && !bindings.some(row => typeof row?.node_id === 'string' && row.node_id);
+  if (wholePageBound) return [];
   return Object.values(index.nodes).filter(node => node.kind === 'static_element' && !bound.has(node.node_id)
-    && !node.js_ranges.length && !/<[a-z!/]/i.test(node.html_range.inner_text)).map(node => ({
+    && !node.js_ranges.length && !/<[a-z!/]/i.test(node.html_range.inner_text)
+    && !/data-page-readonly|data-sp-bindable=["']database["']/i.test(node.html_range.outer_text)).map(node => ({
       node_id: node.node_id, kind: node.kind, mapping: 'valid',
       mapping_token: node.mapping_token, version_hash: index.version_hash,
       text: node.html_range.inner_text, tag: node.tag, editableText: true,
@@ -44,15 +49,18 @@ export function editableTextNodes(pkg, manifest) {
 export function selectableNodes(pkg, manifest) {
   if (!pkg) return [];
   const index = buildSourceIndex(pkg);
-  const bound = new Set((manifest?.bindings ?? []).map(row => row.node_id));
+  const bindings = manifest?.bindings ?? [];
+  const bound = new Set(bindings.map(row => row.node_id));
   const pageBound = Array.isArray(manifest?.result_refs) && manifest.result_refs.length > 0;
+  const wholePageBound = pageBound && !bindings.some(row => typeof row?.node_id === 'string' && row.node_id);
   return Object.values(index.nodes).map(node => ({
     node_id: node.node_id,
     kind: node.kind,
     mapping: 'valid',
-    editable: !pageBound && !bound.has(node.node_id) && node.kind === 'static_element'
-      && !node.js_ranges.length && !/<[a-z!/]/i.test(node.html_range.inner_text),
-    read_only_reason: pageBound ? 'bound_page' : bound.has(node.node_id) ? 'bound_node' : null,
+    editable: !wholePageBound && !bound.has(node.node_id) && node.kind === 'static_element'
+      && !node.js_ranges.length && !/<[a-z!/]/i.test(node.html_range.inner_text)
+      && !/data-page-readonly|data-sp-bindable=["']database["']/i.test(node.html_range.outer_text),
+    read_only_reason: wholePageBound ? 'bound_page' : bound.has(node.node_id) ? 'bound_node' : null,
     mapping_token: node.mapping_token,
     version_hash: index.version_hash,
     text: node.html_range.inner_text,

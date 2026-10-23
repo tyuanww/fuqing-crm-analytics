@@ -125,11 +125,11 @@ def test_stale_selection_and_cross_job_conflict_preserve_current_version(setup):
         ai.begin(actor, 'page', spec['page_id'], 2, 'ai_' + str(uuid.uuid4()), scope)
 
 
-def test_bound_page_cannot_attach_display_overrides_through_direct_draft(setup):
+def test_bound_page_can_attach_safe_display_overrides_through_direct_draft(setup):
     _, package, scope, _ = create(setup)
-    with pytest.raises(ValidationError, match='业务绑定页面'):
-        PageDraft(title='Bound', session_id='bound-session', package=candidate(package, scope),
-                  binding_manifest={'result_refs': ['verified'], 'bindings': []})
+    draft = PageDraft(title='Bound', session_id='bound-session', package=candidate(package, scope),
+                      binding_manifest={'result_refs': ['verified'], 'bindings': []})
+    assert draft.binding_manifest.result_refs == ['verified']
 
 
 def test_frozen_candidate_preserves_optional_defaults_until_version_save(setup):
@@ -247,10 +247,11 @@ def test_host_annotation_rebinds_only_a_matching_presentation_hash():
         PagePackage.model_validate(stale_annotated)
 
 
-def test_bound_pages_reject_presentation_payload(setup):
+def test_bound_pages_allow_presentation_payload_but_keep_source_protected(setup):
     package = {'html': '<h1>Report</h1><section id="cards"></section>', 'css': '', 'js': '', 'node_map': [], 'resources': []}
     presentation = {'version': 1, 'source_hash': page_source_hash(package['html']), 'edits': [
         {'target': {'anchor': {'attribute': 'id', 'value': 'cards'}, 'path': []}, 'text': 'x'}]}
+    CockpitAIStore.protect_bindings(package, {**package, 'presentation': presentation}, {'result_refs': ['verified']})
     with pytest.raises(AnalyticsError) as error:
-        CockpitAIStore.protect_bindings(package, {**package, 'presentation': presentation}, {'result_refs': ['verified']})
+        CockpitAIStore.protect_bindings(package, {**package, 'html': '<h1>Changed</h1>', 'presentation': presentation}, {'result_refs': ['verified']})
     assert error.value.code == 'AI_BOUND_CONTENT'

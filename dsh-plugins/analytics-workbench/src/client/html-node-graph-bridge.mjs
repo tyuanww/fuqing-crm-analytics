@@ -26,6 +26,12 @@ function boundNodeIds(manifest) {
   return new Set((manifest?.bindings ?? []).map(row => row?.node_id).filter(id => typeof id === 'string'));
 }
 
+function wholePageBound(manifest) {
+  const refs = manifest?.result_refs ?? [];
+  const bindings = manifest?.bindings ?? [];
+  return refs.length > 0 && !bindings.some(row => typeof row?.node_id === 'string' && row.node_id);
+}
+
 function parentNodes(index, node) {
   return Object.values(index.nodes)
     .filter(other => other.node_id !== node.node_id
@@ -34,10 +40,11 @@ function parentNodes(index, node) {
     .sort((a, b) => (a.html_range.end - a.html_range.start) - (b.html_range.end - b.html_range.start));
 }
 
-function canDirectEdit(node, bound) {
+function canDirectEdit(node, bound, pageBound) {
   const tag = String(node.tag || '').toLowerCase();
-  return node.kind === 'static_element' && !bound.has(node.node_id) && !node.js_ranges.length
-    && !OPAQUE_TAGS.has(tag) && !/<[a-z!/]/i.test(node.html_range.inner_text);
+  return !pageBound && node.kind === 'static_element' && !bound.has(node.node_id) && !node.js_ranges.length
+    && !OPAQUE_TAGS.has(tag) && !/<[a-z!/]/i.test(node.html_range.inner_text)
+    && !/data-page-readonly|data-sp-bindable=["']database["']/i.test(node.html_range.outer_text);
 }
 
 function canAiEdit(node, bound) {
@@ -59,14 +66,14 @@ function boundaryFor(node, bound) {
   return '';
 }
 
-function toNodeRef(index, node, bound) {
+function toNodeRef(index, node, bound, pageBound) {
   const tag = String(node.tag || '').toLowerCase();
   const parents = parentNodes(index, node);
   const parent = parents[0];
   const block = parents.find(row => BLOCK_TAG_SET.has(String(row.tag || '').toLowerCase()));
-  const direct = canDirectEdit(node, bound);
+  const direct = canDirectEdit(node, bound, pageBound);
   const ai = canAiEdit(node, bound);
-  const opaque = OPAQUE_TAGS.has(tag) || node.kind === 'dynamic_region' || node.js_ranges.length > 0 || bound.has(node.node_id);
+  const opaque = OPAQUE_TAGS.has(tag) || node.kind === 'dynamic_region' || node.js_ranges.length > 0 || bound.has(node.node_id) || pageBound;
   const structural = !opaque && node.kind === 'static_element';
   return {
     node_id: node.node_id,
@@ -103,7 +110,8 @@ export function editableTextNodes(pkg, manifest) {
   if (!pkg) return [];
   const index = buildSourceIndex(pkg);
   const bound = boundNodeIds(manifest);
-  return Object.values(index.nodes).filter(node => canDirectEdit(node, bound)).map(node => toNodeRef(index, node, bound));
+  const pageBound = wholePageBound(manifest);
+  return Object.values(index.nodes).filter(node => canDirectEdit(node, bound, pageBound)).map(node => toNodeRef(index, node, bound, pageBound));
 }
 
 /** Source nodes the selection UI can name, including blocks that cannot be written. */
@@ -111,7 +119,7 @@ export function editablePageNodes(pkg, manifest) {
   if (!pkg) return [];
   const index = buildSourceIndex(pkg);
   const bound = boundNodeIds(manifest);
-  return Object.values(index.nodes).map(node => toNodeRef(index, node, bound));
+  return Object.values(index.nodes).map(node => toNodeRef(index, node, bound, wholePageBound(manifest)));
 }
 
 export function selectionRuntime(config) {

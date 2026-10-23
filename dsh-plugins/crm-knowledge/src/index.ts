@@ -15,6 +15,24 @@ type KnowledgeBaseHealth = {
   tools: string[];
 };
 
+type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue };
+
+function jsonValue(value: unknown): JsonValue {
+  if (value === null || typeof value === 'string' || typeof value === 'boolean' || typeof value === 'number') {
+    if (typeof value === 'number' && !Number.isFinite(value)) throw new TypeError('CRM result contains a non-finite number');
+    return value as JsonValue;
+  }
+  if (Array.isArray(value)) return value.map(item => jsonValue(item));
+  if (typeof value === 'object') {
+    const output: { [key: string]: JsonValue } = {};
+    for (const [key, item] of Object.entries(value as Record<string, unknown>)) {
+      if (item !== undefined) output[key] = jsonValue(item);
+    }
+    return output;
+  }
+  throw new TypeError(`CRM result contains unsupported value: ${typeof value}`);
+}
+
 export const name = 'crm-knowledge-candidate';
 export const inject = ['tools'];
 
@@ -66,8 +84,9 @@ export function apply(ctx: Context, config: { metricsOrigin?: string; registerTo
     timeoutMs: 30000, isConcurrencySafe: () => false,
     execute: async (args, exec) => owned(exec.signal, async signal => {
       const access = ctx.get('crmDashboard');
-      return access ? access.query(exec.agent?.session.id, args, signal)
-        : queryDashboardGsv(args, { sessionId: exec.agent?.session.id, signal });
+      const result = access ? await access.query(exec.agent?.session.id, args, signal)
+        : await queryDashboardGsv(args, { sessionId: exec.agent?.session.id, signal });
+      return jsonValue(result);
     }),
   }));
   ctx.tools.register(defineTool({
@@ -83,8 +102,9 @@ export function apply(ctx: Context, config: { metricsOrigin?: string; registerTo
     timeoutMs: 30000, isConcurrencySafe: () => false,
     execute: async (args, exec) => owned(exec.signal, async signal => {
       const access = ctx.get('crmDashboard');
-      return access ? access.queryPurchases(exec.agent?.session.id, args, signal)
-        : queryDashboardPurchases(args, { sessionId: exec.agent?.session.id, signal });
+      const result = access ? await access.queryPurchases(exec.agent?.session.id, args, signal)
+        : await queryDashboardPurchases(args, { sessionId: exec.agent?.session.id, signal });
+      return jsonValue(result);
     }),
   }));
   ctx.tools.register(defineTool({
