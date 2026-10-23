@@ -47,9 +47,9 @@ function canDirectEdit(node, bound, pageBound) {
     && !/data-page-readonly|data-sp-bindable=["']database["']/i.test(node.html_range.outer_text);
 }
 
-function canAiEdit(node, bound) {
+function canAiEdit(node, bound, pageBound) {
   const tag = String(node.tag || '').toLowerCase();
-  return !bound.has(node.node_id) && tag !== 'iframe';
+  return !pageBound && !bound.has(node.node_id) && tag !== 'iframe';
 }
 
 function crumb(node) {
@@ -72,7 +72,7 @@ function toNodeRef(index, node, bound, pageBound) {
   const parent = parents[0];
   const block = parents.find(row => BLOCK_TAG_SET.has(String(row.tag || '').toLowerCase()));
   const direct = canDirectEdit(node, bound, pageBound);
-  const ai = canAiEdit(node, bound);
+  const ai = canAiEdit(node, bound, pageBound);
   const opaque = OPAQUE_TAGS.has(tag) || node.kind === 'dynamic_region' || node.js_ranges.length > 0 || bound.has(node.node_id) || pageBound;
   const structural = !opaque && node.kind === 'static_element';
   return {

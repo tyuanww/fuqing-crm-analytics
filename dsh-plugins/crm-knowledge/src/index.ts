@@ -116,7 +116,7 @@ export function apply(ctx: Context, config: { metricsOrigin?: string; registerTo
       products: {
         type: 'array',
         items: { type: 'string' },
-        description: '已登记商品名称，最多20个；省略时返回全部商品。不要猜测商品名。',
+        description: '已登记商品名称，最多15个；省略时返回全部商品。不要猜测商品名。',
       },
       channel: { type: 'string', enum: [...CHANNELS], description: CHANNEL_QUERY_DESCRIPTION },
       exclude_low_price: { type: 'boolean', description: '是否剔除低价渠道，默认 false' },
