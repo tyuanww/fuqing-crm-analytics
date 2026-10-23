@@ -118,6 +118,33 @@ def test_product_customer_refuses_queries_after_data_cutoff(
     assert result["coverage"]["current_status"] == "INSUFFICIENT"
 
 
+def test_product_customer_uses_window_start_minus_one_for_mid_month_windows(
+    monkeypatch,
+    tmp_duckdb_with_synthetic_orders,
+):
+    handle = tmp_duckdb_with_synthetic_orders
+    handle.execute(
+        "INSERT INTO user_first_purchase VALUES (?, ?::DATE)",
+        ["u_mid_month", "2026-07-01"],
+    )
+    _insert_order(handle, "mid-month-order", "u_mid_month", "2026-07-20 10:00:00", 100, "经典膜")
+    monkeypatch.setattr(product_customer, "get_connection", lambda: handle)
+
+    result = product_customer.get_product_customer_overview(
+        "2026-07-15",
+        "2026-07-20",
+        products=["经典膜"],
+        compare_start_date="2025-07-15",
+        compare_end_date="2025-07-20",
+    )
+
+    assert result["new_old_cutoff"] == "2026-07-14"
+    assert result["comparison_new_old_cutoff"] == "2025-07-14"
+    assert result["products"][0]["current"]["new_users"] == 0
+    assert result["products"][0]["current"]["old_users"] == 1
+    assert result["data_version"].startswith("orders-v1:")
+
+
 def test_product_customer_refuses_queries_before_data_start(
     monkeypatch,
     tmp_duckdb_with_synthetic_orders,
@@ -231,8 +258,8 @@ def test_product_customer_uses_same_natural_day_last_year(monkeypatch, tmp_duckd
 
     assert result["compare_start_date"] == "2023-02-28"
     assert result["compare_end_date"] == "2023-03-01"
-    assert result["new_old_cutoff"] == "2024-01-31"
-    assert result["comparison_new_old_cutoff"] == "2023-01-31"
+    assert result["new_old_cutoff"] == "2024-02-28"
+    assert result["comparison_new_old_cutoff"] == "2023-02-27"
 
 
 def test_product_customer_rejects_gmv_until_amount_fields_are_neutral(monkeypatch, tmp_duckdb_with_synthetic_orders):
@@ -255,6 +282,86 @@ def test_product_customer_route_is_read_only_post():
 
     route = next(item for item in router.routes if item.path == "/api/v1/category/product-customer")
     assert route.methods == {"POST"}
+
+
+def test_product_customer_batch_route_serializes_bounded_windows(monkeypatch):
+    from types import SimpleNamespace
+    from backend.contracts.category import ProductCustomerBatchRequest
+    from backend.routers.category import get_product_customer_batch_api, router
+
+    route = next(item for item in router.routes if item.path == "/api/v1/category/product-customer/batch")
+    assert route.methods == {"POST"}
+
+    calls = []
+
+    def fake_query(start_date, end_date, **kwargs):
+        calls.append((start_date, end_date, kwargs))
+        return {
+            "schema_version": "product-customer/v3",
+            "status": "OK",
+            "source": "orders+user_first_purchase",
+            "data_version": "orders-v1:fixture",
+            "products": [],
+        }
+
+    monkeypatch.setattr("backend.routers.category.get_product_customer_overview", fake_query)
+    result = get_product_customer_batch_api(
+        ProductCustomerBatchRequest(ranges=[
+            {"start_date": "2026-07-01", "end_date": "2026-07-05"},
+            {"start_date": "2026-07-06", "end_date": "2026-07-10"},
+        ]),
+        SimpleNamespace(headers={"X-ShineMage-Product-Customer-Version": "product-customer/v3"}),
+    )
+    assert len(result["results"]) == 2
+    assert [item[:2] for item in calls] == [
+        ("2026-07-01", "2026-07-05"),
+        ("2026-07-06", "2026-07-10"),
+    ]
+
+
+def test_product_customer_request_rejects_more_than_registered_products():
+    from pydantic import ValidationError
+    from backend.contracts.category import ProductCustomerRequest
+
+    with pytest.raises(ValidationError):
+        ProductCustomerRequest(
+            start_date="2026-07-01",
+            end_date="2026-07-05",
+            products=[f"商品{i}" for i in range(16)],
+        )
+
+
+def test_product_customer_request_bounds_filter_value_lengths():
+    from pydantic import ValidationError
+    from backend.contracts.category import ProductCustomerRequest
+
+    with pytest.raises(ValidationError):
+        ProductCustomerRequest(
+            start_date="2026-07-01",
+            end_date="2026-07-05",
+            products=["x" * 81],
+        )
+    with pytest.raises(ValidationError):
+        ProductCustomerRequest(
+            start_date="2026-07-01",
+            end_date="2026-07-05",
+            exclude_channels=["x" * 81],
+        )
+
+
+def test_product_customer_batch_requires_v3_contract(monkeypatch):
+    from types import SimpleNamespace
+    from backend.contracts.category import ProductCustomerBatchRequest
+    from backend.routers.category import get_product_customer_batch_api
+
+    body = ProductCustomerBatchRequest(ranges=[
+        {"start_date": "2026-07-01", "end_date": "2026-07-05"},
+    ])
+    with pytest.raises(HTTPException) as error:
+        get_product_customer_batch_api(body, SimpleNamespace(headers={
+            "X-ShineMage-Product-Customer-Version": "product-customer/v2",
+        }))
+    assert error.value.status_code == 400
 
 
 def test_product_customer_version_negotiation_keeps_v2_during_rollout():

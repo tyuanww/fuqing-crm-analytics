@@ -39,7 +39,10 @@ function bindingState(manifest, nodeId) {
   const bindings = Array.isArray(manifest?.bindings) ? manifest.bindings : [];
   const pageBound = Array.isArray(manifest?.result_refs) && manifest.result_refs.length > 0;
   const row = bindings.find(item => item?.node_id === nodeId);
-  if (!row) return pageBound ? 'BOUND_VERIFIED' : 'UNBOUND_SAMPLE';
+  if (!row) {
+    const wholePageBound = pageBound && !bindings.some(item => typeof item?.node_id === 'string' && item.node_id);
+    return wholePageBound ? 'BOUND_VERIFIED' : 'UNBOUND_SAMPLE';
+  }
   return typeof row.state === 'string' ? row.state : 'BOUND_VERIFIED';
 }
 

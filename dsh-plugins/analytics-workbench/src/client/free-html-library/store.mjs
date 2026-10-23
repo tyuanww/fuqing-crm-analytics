@@ -780,14 +780,27 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
           binding_state: state.current.binding_state });
         if (route.intent !== 'presentation') throw Object.assign(new Error('当前选区不支持结构化文字修改，请转到源码入口'), { code: 'AI_SCOPE_DIFF' });
         try {
-          const preview = located.source || located.runtime ? {
+          const bindings = state.current.binding_manifest?.bindings ?? [];
+          const pageHasResults = (state.current.binding_manifest?.result_refs ?? []).length > 0;
+          const nodeIsBound = bindings.some(item => item?.node_id === located.node_id);
+          const boundPresentation = pageHasResults && !nodeIsBound;
+          const preview = boundPresentation ? bound.edit.previewPatch({
+            pkg: state.current.package,
+            selection: { ...located, ...extras },
+            replacementText,
+            instruction: undefined,
+            page_id: state.current.page_id,
+            session_id: state.current.session_id,
+            base_version: state.current.version,
+            binding_manifest: state.current.binding_manifest,
+          }) : located.source || located.runtime ? {
             sourceRange: true, preview_id: bound.nextId('preview'), idempotency_key: bound.nextId('patch'), operation: 'PATCH',
             snapshot: located.runtime ? renderedTextPreview(state.current.package, located, replacementText, state.current.binding_manifest)
               : sourceTextPreview(state.current.package, located, replacementText, state.current.binding_manifest),
           } : bound.edit.previewPatch({ pkg: state.current.package, selection: { ...located, ...extras }, replacementText, instruction: isLive(bound) ? undefined : replacementText,
             page_id: state.current.page_id, session_id: state.current.session_id, base_version: state.current.version,
             binding_manifest: state.current.binding_manifest, affectsShared: extras.affectsShared });
-          if (isLive(bound) && bound.documents?.patchPreview) {
+          if (isLive(bound) && bound.documents?.patchPreview && !boundPresentation) {
             const editContext = editContextFor(state.current, located);
             const remote = await bound.documents.patchPreview({
               page_id: state.current.page_id,

@@ -258,8 +258,6 @@ class PageDraft(PageModel):
             raise ValueError("页面必须有来源会话或手动添加的文件")
         if self.session_id is None and self.binding_manifest.result_refs:
             raise ValueError("手动添加的页面不能声明已验证结果绑定")
-        if self.binding_manifest.result_refs and self.package.presentation and self.package.presentation.edits:
-            raise ValueError("业务绑定页面不能覆盖显示数据或局部样式")
         node_ids = {item.node_id for item in self.package.node_map}
         if any(
             item.node_id is not None and item.node_id not in node_ids

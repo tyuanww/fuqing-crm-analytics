@@ -265,7 +265,7 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, onSourceF
       </div> : null}
       <div className="cockpit-frame-wrap">{state.previewAlive
         ? <HtmlPreview pkg={pkg} overlays={state.presentation_overlay ?? current.presentation_overlays ?? null} overlayNodes={catalog.pageNodes} pageId={current.page_id} version={current.version} title={current.title}
-          allowScripts={editing || !(current.binding_manifest?.result_refs?.length)}
+          allowScripts={editing || Boolean(current.package.js)}
           editing={editing && !sending} selectBlocks={aiMode} nodes={candidates}
           editableIds={nodes.filter(node => node.editableText !== false && !node.runtimeOnly).map(node => node.node_id)} selected={state.selection?.node_id}
           draft={selected ? { nodeId: selected.node_id, text: value, active: value !== original, reset: state.draftReset ?? 0, style: styleFocus === 'style' && Object.keys(styles).length ? styles : null } : null}

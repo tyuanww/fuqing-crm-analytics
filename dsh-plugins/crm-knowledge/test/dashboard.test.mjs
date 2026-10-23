@@ -90,9 +90,6 @@ test('requests after the warehouse cutoff fail instead of returning zero as OK',
   unavailable(await query(outOfCoverage, binding), 'INSUFFICIENT_COVERAGE');
 });
 
-// Regression: ISSUE-003 — a failed cutoff lookup must not bypass coverage proof.
-// Found by /qa on 2026-10-22
-// Report: .gstack/qa-reports/qa-report-app.tyuan.chat-2026-10-22.md
 test('missing warehouse cutoff fails closed instead of returning an unbounded GSV', async t => {
   const { binding } = await serveDashboard(t, (url, _req, res) => {
     if (url.pathname !== '/api/v1/metrics/cutoff') return false;
@@ -251,6 +248,7 @@ test('product customer query uses one authenticated POST and preserves source fa
     new_old_cutoff: '2026-06-30',
     comparison_new_old_cutoff: '2025-06-30',
     data_cutoff: '2026-07-05',
+    data_version: 'orders-v1:2024-05-10:2026-07-05:17:1234.00',
     metric_type: 'GSV',
     channel: null,
     exclude_channels: [],
@@ -336,6 +334,7 @@ test('product customer rejects unknown fields and malformed product lists before
     { start_date: '2026-07-01', end_date: '2026-07-05', sql: 'select 1' },
     { start_date: '2026-07-01', end_date: '2026-07-05', products: [] },
     { start_date: '2026-07-01', end_date: '2026-07-05', products: ['经典膜', '经典膜'] },
+    { start_date: '2026-07-01', end_date: '2026-07-05', products: Array.from({ length: 16 }, (_, i) => `商品${i}`) },
     { start_date: '2026-07-01', end_date: '2026-07-05', compare_start_date: '2025-07-01' },
   ]) {
     const result = await queryProductCustomer(invalid, { sessionId: 'fixture-session', binding });
@@ -388,6 +387,7 @@ test('product customer rejects unverifiable comparison and incomplete product ev
     new_old_cutoff: '2026-06-30',
     comparison_new_old_cutoff: '2025-06-30',
     data_cutoff: '2026-07-05',
+    data_version: 'orders-v1:fixture',
     metric_type: 'GSV',
     channel: null,
     exclude_channels: [],
@@ -480,6 +480,7 @@ test('product customer v3 exposes coverage and rejects v2, empty or partial resu
     new_old_cutoff: '2026-06-30',
     comparison_new_old_cutoff: '2025-06-30',
     data_cutoff: '2026-07-03',
+    data_version: 'orders-v1:fixture',
     coverage: {
       data_cutoff: '2026-07-03',
       current_status: 'INSUFFICIENT',
@@ -550,9 +551,6 @@ test('product customer v3 exposes coverage and rejects v2, empty or partial resu
   });
 });
 
-// Regression: ISSUE-003 — a successful product payload cannot override warehouse coverage.
-// Found by /qa on 2026-10-22
-// Report: .gstack/qa-reports/qa-report-app.tyuan.chat-2026-10-22.md
 test('product customer rejects a successful response when the requested window exceeds the cutoff', async t => {
   const metric = {
     gsv: 100, users: 2, aus: 50, old_gsv: 50, old_users: 1, old_aus: 50, old_ratio: 0.5,
@@ -563,7 +561,7 @@ test('product customer rejects a successful response when the requested window e
     schema_version: 'product-customer/v3', status: 'OK', source: 'orders+user_first_purchase',
     date_start: '2026-07-01', date_end: '2026-07-07', compare_start_date: '2025-07-01',
     compare_end_date: '2025-07-07', new_old_cutoff: '2026-06-30', comparison_new_old_cutoff: '2025-06-30',
-    data_cutoff: '2026-07-05', metric_type: 'GSV', channel: null, exclude_channels: [],
+    data_cutoff: '2026-07-05', data_version: 'orders-v1:fixture', metric_type: 'GSV', channel: null, exclude_channels: [],
     coverage: { data_cutoff: '2026-07-05', current_status: 'COMPLETE', comparison_status: 'COMPLETE' },
     products: [{ name: '经典膜', display_name: '爆款面膜E', spu_classes: ['经典膜'], status: 'OK',
       current: metric, comparison: metric,
