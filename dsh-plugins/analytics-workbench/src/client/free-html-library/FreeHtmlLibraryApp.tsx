@@ -138,12 +138,13 @@ function LibraryHome({ store }: { store: Store }) {
 }
 
 function LivePreviewSlot({
-  pageId, version, pkg, pointerEvents,
+  pageId, version, pkg, pointerEvents, allowScripts,
 }: {
   pageId: string;
   version: number;
   pkg: { html?: string; css?: string; js?: string; resources?: unknown[] };
   pointerEvents: NonNullable<CSSProperties['pointerEvents']>;
+  allowScripts: boolean;
 }) {
   const slot = useRef<HTMLDivElement>(null);
   const hostRef = useRef<ReturnType<typeof mountPreviewHost> | null>(null);
@@ -157,6 +158,7 @@ function LivePreviewSlot({
       savedVersion: version,
       chrome: false,
       frameTestId: 'fhl-iframe',
+      allowScripts,
     });
     hostRef.current = host;
     void host.loadPackage(pkg, version);
@@ -164,7 +166,7 @@ function LivePreviewSlot({
       host.dispose();
       hostRef.current = null;
     };
-  }, [sourceKey, pageId, version, pkg]);
+  }, [sourceKey, pageId, version, pkg, allowScripts]);
   useEffect(() => {
     const iframe = slot.current?.querySelector('iframe');
     if (iframe) iframe.style.pointerEvents = pointerEvents;
@@ -172,19 +174,20 @@ function LivePreviewSlot({
   return <div ref={slot} data-testid="fhl-live-preview" />;
 }
 
-function WorkspacePreview({ srcdoc, live, pageId, version, pkg, pointerEvents }: {
+function WorkspacePreview({ srcdoc, live, pageId, version, pkg, pointerEvents, allowScripts }: {
   srcdoc?: string;
   live: boolean;
   pageId?: string;
   version?: number;
   pkg?: { html?: string; css?: string; js?: string; resources?: unknown[] };
   pointerEvents: NonNullable<CSSProperties['pointerEvents']>;
+  allowScripts: boolean;
 }) {
   if (srcdoc && live && pageId != null && version != null && pkg) {
-    return <LivePreviewSlot pageId={pageId} version={version} pkg={pkg} pointerEvents={pointerEvents} />;
+    return <LivePreviewSlot pageId={pageId} version={version} pkg={pkg} pointerEvents={pointerEvents} allowScripts={allowScripts} />;
   }
   if (srcdoc) {
-    return <iframe title="自由 HTML 页面预览" data-testid="fhl-iframe" className="library-html-iframe" srcDoc={srcdoc} sandbox={FREE_PAGE_SANDBOX} referrerPolicy={FREE_PAGE_REFERRER_POLICY} style={{ pointerEvents }} />;
+    return <iframe title="自由 HTML 页面预览" data-testid="fhl-iframe" className="library-html-iframe" srcDoc={srcdoc} sandbox={allowScripts ? FREE_PAGE_SANDBOX : ''} referrerPolicy={FREE_PAGE_REFERRER_POLICY} style={{ pointerEvents }} />;
   }
   return <p data-testid="fhl-preview-stopped">预览已停止。宿主入口仍可用。</p>;
 }
@@ -219,7 +222,8 @@ function Workspace({ store, goConversation, editMode = false, previewRef }: {
       <div className="sm-fhl-workspace">
         <div ref={previewRef} className="sm-fhl-preview library-html-container" data-testid="fhl-preview" data-mode={state.mode} data-edit-mode={editMode ? '1' : '0'} style={{ position: 'relative' }}>
           <WorkspacePreview srcdoc={srcdoc} live={state.adapterKind === 'p12-live' && Boolean(livePkg && state.current)}
-            pageId={state.current?.page_id} version={state.current?.version} pkg={livePkg} pointerEvents={iframePointerEvents} />
+            pageId={state.current?.page_id} version={state.current?.version} pkg={livePkg} pointerEvents={iframePointerEvents}
+            allowScripts={editMode || state.mode === 'edit' || Boolean(state.current?.package?.js)} />
           {editMode ? <HtmlHoverLayer iframeRef={previewRef} editMode={editMode} /> : null}
           {state.mode === 'edit' && !editMode ? <div className="sm-fhl-hit" data-testid="fhl-hit-layer">
             {locatable.map(node => (

@@ -71,16 +71,19 @@ test('untrusted, arbitrary connection fields and oversized bodies stop before lo
   assert.equal(fixture.calls.length, 0);
 });
 
-test('expiry and session removal remove grants without upstream logout', async t => {
+test('expiry removes grants while inactive sessions retain their in-memory authorization', async t => {
   let now = Date.now();
   const { access, call, sessions } = await setup(t, undefined, { now: () => now, ttlMs: 1000 });
   assert.equal((await call(login)).connected, true);
+  sessions.delete('fixture-session');
+  assert.equal(access.service.capabilities('fixture-session').connection_state, 'LOGIN_BOUND');
+  assert.equal((await access.service.query('fixture-session', request)).reason.code, 'NOT_CONNECTED');
+  assert.equal((await call(status)).code, 'SESSION_UNAVAILABLE');
+  sessions.add('fixture-session');
+  assert.equal((await call(status)).connected, true);
   now += 1001;
   assert.equal((await access.service.query('fixture-session', request)).reason.code, 'NOT_CONNECTED');
-  assert.equal((await call(login)).connected, true);
-  sessions.delete('fixture-session');
   assert.equal(access.service.capabilities('fixture-session').connection_state, 'NOT_CONNECTED');
-  assert.equal((await call(status)).code, 'SESSION_UNAVAILABLE');
 });
 
 test('a late login response cannot resurrect a disconnected session', async t => {

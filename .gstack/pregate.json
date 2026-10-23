@@ -33,6 +33,9 @@
       "dsh-plugins/query-agent/test/package.test.mjs",
       "scripts/release/plugin-pack.test.mjs"
     ],
+    "dsh-plugins/analytics-workbench/src/client/cockpit-page-tab.tsx": [
+      "dsh-plugins/analytics-workbench/src/client/cockpit-page-tab.test.mjs"
+    ],
     "scripts/dsh-dev/owner-profile-bridge.mjs": [
       "scripts/release/release.test.mjs"
     ],

@@ -4,15 +4,13 @@
 
 本页带日期的候选、端口、版本和测试数字都是历史证据。当前命令从“先按变更类型选验证”开始；当前版本、运行现场和门禁仍以 STATUS 为准。不要把历史段落中的 `6677`、旧 candidate 或旧测试数当作当前结论。
 
-## 当前 rc1 驾驶舱 v3、v5 回退与 v4 候选（2026-10-21）
+## 当前 cockpit-v3 商品映射现场（2026-10-22）
 
-线上 `/srv/shinemage/dsh/current` 现指向 `dsh-0.2.1-rc.1-core-main-20261021-cockpit-v3`。v3 使用 source `7c9244c9a9e1bfc2b99ea20c6e146584ee6bf90b` 的 rc1 驾驶舱 pack，manifest SHA-256 `cec2dbf9…`、tarball `b8808b25…`、effective `lib/client.js` `0d653ceb…`；7 包 profile 输入摘要为 `43745626…`。其 `runtime` symlink 仍指向 v5 的既有持久 runtime，没有复制 SQLite、DuckDB、浏览器私有状态或凭据。v2 驾驶舱候选保留，稳定回退目标是 v5。v3 已通过候选 `4329/18126` 启停、认证、包身份和线上 4328/18091 实机验证；C4 页面保存为页面版本 v2，原生侧栏切走后的草稿与选中目标恢复，浅色、深色和跟随系统均验证。CRM 指标、看板编辑和写入仍为 `NOT_RUN_HUMAN_LOGIN`。
-
-v5 仍是 v4 clean-main runtime 的 owner-operated 现场副本，也是当前代码和 runtime 回退目标；最近一次 v5 历史回执中的 ephemeral profile package `27566016…` / lock `ea643aa0…` 与旧候选 receipt `c3ec7df3…` 不一致，因此 v5 不构成新的正式 release identity。固定 upstream 仍为 `1600d8a1e140dcde43a1a0941940a0480712c011`。v3 的完整命令、摘要、实机矩阵和未执行项见[驾驶舱 rc1 收口证据](../hackathon/evidence/cockpit-rc1-closeout-20261021.md)；runtime/profile、插件市场、peer alias 闭包和 AppleDouble 扫描的具体合同仍见[候选参考](../reference/dsh-rc1-clean-candidate.md)与实际[升级手册](./dsh-rc1-clean-upgrade-runbook.md)。
+线上 `/srv/shinemage/dsh/current` 指向 `dsh-0.2.1-rc.1-core-main-20261021-cockpit-v3`。CRM `0.0.0-crm.5` 与 Query `0.0.0-query.14` 已 side-load，profile package 为 `eaf71912…`，lock 为 `00a202bc…`。商品新老客使用 `product-customer/v3`，覆盖不足明确拒绝，公开结果只返回 `display_name`；Vue 前端已迁移到去重后的商品接口。固定 upstream 仍为 `1600d8a1e140dcde43a1a0941940a0480712c011`。当前运行回执见[审查问题修复部署验收](../hackathon/evidence/dsh-review-fixes-20261022.md)。
 
 v4 过渡候选已执行的局部检查为：固定 Node24 release tests `45 pass / 0 fail`、远程 Node24 peer 缺失负测 PASS、runtime provenance PASS、native/business boot PASS、Settings/account RPC PASS、浏览器插件页 PASS、plugin-market Discover PASS、console logs EMPTY、AppleDouble locale files `0`、v4 boot PASS。上述 peer 缺失负测已验证 fail-closed 行为。默认 Node25 下的 dsh-dev 全量失败属于环境版本不满足，不能改写为代码 PASS。
 
-IM 已从归档输入未定位推进为 `PINNED_INPUTS_VERIFIED`：`@xmanrui/dsh-im@5.2.0` 与 `dsh-plugin@2.0.5` 的归档已按线上 lock 的字节摘要、integrity、commit 根目录和包身份核验并保存。该事实不表示 IM 已完成正式发布；当前仍缺统一发布身份、publisher/signature、独立验收和切换授权，所以 `release_ready=false`。Query `0.0.0-query.11` 已由 source `030f4446…` 的 clean worktree 生成并完成线上 side-load；WeKnora 生产适配层保留固定项目 allowlist，并对读取前后文档元数据双重校验、工具 effect 事务释放和 tenant-wide 文档名 enrichment 禁用 fail-closed。live 浏览器复测真实调用一次 `weknora_search` 并返回 8 条 passage；部署库搜索和跨库读取被拒绝，普通 search 不请求 `/api/v1/knowledge/search`。状态与回执见 [query.11/WeKnora 生命周期强化回执](../hackathon/evidence/dsh-weknora-lifecycle-hardening-20261021.md)。
+IM 已从归档输入未定位推进为 `PINNED_INPUTS_VERIFIED`：`@xmanrui/dsh-im@5.2.0` 与 `dsh-plugin@2.0.5` 的归档已按线上 lock 的字节摘要、integrity、commit 根目录和包身份核验并保存。该事实不表示 IM 已完成正式发布；当前仍缺统一发布身份、publisher/signature、独立验收和切换授权，所以 `release_ready=false`。Query `0.0.0-query.14` 已由 clean source `482d149d…` 生成并完成线上 side-load；WeKnora 生产适配层保留固定项目 allowlist，并对读取前后文档元数据双重校验、工具 effect 事务释放和 tenant-wide 文档名 enrichment 禁用 fail-closed。
 
 2026-10-21 收口后的只读现场复核再次确认服务、query.11、模型路由和项目库检索正常；任务队列仍保留 1 条 2026-09-19 的 `datatable:summary` 历史 dead letter（`model ID cannot be empty`），当前 10 篇文档无 pending task 或 error。三个知识库的 `vector_store_id` 按 Postgres env-store 合同保持 `NULL`；Workspace `retriever_engines` 已显式固定为 keywords + vector 的 `postgres` 引擎，不再依赖空数组 fallback。WeKnora 的 DB-managed VectorStore 不接受 Postgres，当前单库部署不创建 per-KB store。检索 key 仍为 tenant scope，但 `knowledge_base_ids` 已从项目库与部署验收库收紧为仅项目库，并保持 `retrieve` capability、`full_access=false` 和原 token 不变。直接项目库搜索和文档元数据读取返回 `200`；部署验收库的搜索与文档元数据读取由服务端返回 `403`，适配层 allowlist 继续作为第二层边界。
 

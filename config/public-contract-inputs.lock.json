@@ -2,28 +2,28 @@
   "schema": "shinemage-public-contract-inputs-lock/v1",
   "owners": {
     "workbench": {
-      "source_sha": "6c5adc9faa04f692d5d4b3028af4f945ab49dfe4",
+      "source_sha": "a4dce5373808a1f6cc5f4d2331d5823be1ad3580",
       "package": "@shine-mage/dsh-analytics-workbench-b0",
       "version": "0.0.0-b0",
       "archive": {
         "repository": "tyuanww/dsh-analytics-workbench",
-        "run_id": 38126014921,
+        "run_id": 39984121026,
         "attempt": 1,
         "event": "pull_request",
         "conclusion": "success",
-        "artifact_id": 11697481756,
-        "name": "public-contracts-38126014921-1",
-        "sha256": "74e7af647128fea315f3953e609c00bb986b4656e1a03eeb3112cfcfc2c3dfaf",
-        "bytes": 65662
+        "artifact_id": 12515071523,
+        "name": "public-contracts-39984121026-1",
+        "sha256": "e8540d234bfd3d554e0e85749d417a70d26f8db8be9186279f53b66475baff3c",
+        "bytes": 65666
       },
       "manifest": {
-        "sha256": "85f17db0fa3d2eb8d0ccf10e990f8ee2dd85ffc878420c490c245f5d17b9afba",
+        "sha256": "97ef99e5bf6bcb92dab19ec72d41b6130aa17144db1e7b299e10edd4cefb2646",
         "bytes": 11551
       },
       "producer_sha256": "2d9ab9fc7998359601bce6caef63945697aa16030cbf47e98de41085726b8350",
       "recipe_sha256": "326adb35d8b94347749118fbb06658cc2ca699a7bea00b685a49dc5f38ca8799",
       "package_manifest_sha256": "49335c824e8082b6b842d0c5d9b19869e85cbcddddee370523ed668d8e75e82f",
-      "ci_job_sha": "7bfa7814f014c2a9dc5129c615e4153d442f3c8d",
+      "ci_job_sha": "489828cd5d98c4da3438a345116df16a14f03e43",
       "files": [
         {
           "source_path": "plugin/contracts/cockpit-slot.v1.json",
@@ -61,9 +61,9 @@
           "source_path": "plugin/src/client/competition-board/c0-fixtures.mjs",
           "main_path": "dsh-plugins/analytics-workbench/src/client/competition-board/c0-fixtures.mjs",
           "kind": "frozen_fixture",
-          "sha256": "fd1dfbdabf8a5dff5e9c3ef34bf48dc3f3043ecdf90bc5e76d0f9c87bdfae984",
+          "sha256": "a8e575f332bdbb7423330ff761dbc0b31ad83226e6805b62f784244f49ab4b79",
           "bytes": 14243,
-          "git_blob": "816bdabb7e705c3c911e236db7f82e272be21718"
+          "git_blob": "ea7afa1098a6f31c4fef9c6d9b5d39285f51d42d"
         },
         {
           "source_path": "plugin/src/client/competition-shell/content-theme.generated.ts",

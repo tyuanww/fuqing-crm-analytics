@@ -107,6 +107,65 @@ test('live adapters pull one page snapshot over isolated HTTP', async () => {
   assert.equal(adapters.assets.get('page_http').version, 3);
 });
 
+test('reopening a live page restores persisted presentation overlays', async () => {
+  const page = {
+    page_id: 'page_overlay', title: '已保存文案', version: 2, session_id: 's1', binding_state: 'UNBOUND_SAMPLE',
+    binding_manifest: { bindings: [], result_refs: [] }, package: SAMPLE_PACKAGE,
+  };
+  const calls = [];
+  const adapters = createLivePageAdapters({
+    documentsHttp: {
+      base: BASE, token: TOKEN,
+      fetchImpl: async (url) => {
+        const parsed = new URL(url);
+        calls.push(parsed.pathname + parsed.search);
+        if (parsed.pathname.endsWith('/pages/page_overlay')) return { ok: true, json: async () => ({ spec: page }) };
+        if (parsed.pathname.endsWith('/overlay')) return { ok: true, json: async () => ({ overlays: { n_title: { text: '已复核文案' } } }) };
+        return { ok: false, status: 404, json: async () => ({}) };
+      },
+    },
+  });
+  const store = createFreeHtmlLibraryStore({ adapters });
+  assert.equal(await store.openPage('page_overlay'), true);
+  assert.equal(store.getSnapshot().presentation_overlay.n_title.text, '已复核文案');
+  assert.equal(calls.some(path => path.includes('/overlay?')), true);
+});
+
+test('verified saved-page bindings are not mislabeled as partial', async () => {
+  const requests = [];
+  const isolated = createIsolatedFetch({ token: 'library-page-isolated-test-token-32chars' });
+  const adapters = createLivePageAdapters({
+    resultHttp: {
+      base: BASE,
+      token: TOKEN,
+      fetchImpl: async (url, init) => {
+        requests.push({ url, body: JSON.parse(init.body) });
+        return isolated.fetchImpl(url, init);
+      },
+    },
+  });
+  const state = await adapters.bridge.readBinding({
+    binding_state: 'BOUND_VERIFIED',
+    binding_manifest: {
+      result_refs: ['result_fixture_1'],
+      bindings: [{
+        binding_id: 'bind_gsv',
+        result_ref: 'result_fixture_1',
+        node_id: 'n_gsv',
+        mode: 'summary',
+      }],
+    },
+  });
+  assert.equal(state.binding_state, 'BOUND_VERIFIED');
+  assert.equal(state.partial, false);
+  assert.deepEqual(requests[0].body.manifest.bindings[0], {
+    binding_id: 'bind_gsv',
+    result_ref: 'result_fixture_1',
+    node_id: 'n_gsv',
+    mode: 'summary',
+  });
+});
+
 test('live adapters refuse a 6677 documents base and skip fetch when HTTP is unset', async () => {
   const unset = createLivePageAdapters();
   const skipped = await unset.documents.pullList();

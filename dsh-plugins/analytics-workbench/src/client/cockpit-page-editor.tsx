@@ -51,9 +51,10 @@ function completePagePackage<T extends { html: string; css: string; js: string; 
   };
 }
 
-export function HtmlPreview({ pkg, overlays = null, overlayNodes = [], pageId = 'workspace', version = 0, editing = false, selectBlocks = false, nodes = NO_NODES, editableIds = [], selected, draft = null, onUnresolved, onSelect, onTargets, onExitEdit, title }: {
+export function HtmlPreview({ pkg, overlays = null, overlayNodes = [], pageId = 'workspace', version = 0, editing = false, allowScripts = true, selectBlocks = false, nodes = NO_NODES, editableIds = [], selected, draft = null, onUnresolved, onSelect, onTargets, onExitEdit, title }: {
   pkg: { html: string; css?: string; js?: string; resources?: unknown[]; presentation?: components['schemas']['PagePresentation'] | null }; pageId?: string; version?: number;
   overlays?: Record<string, { text?: string; style?: Record<string, string>; attributes?: Record<string, string> }> | null;
+  allowScripts?: boolean;
   overlayNodes?: Array<{ node_id?: string; source_range?: { start: number; end: number } | null }>;
   editing?: boolean; selectBlocks?: boolean; nodes?: TextNode[]; editableIds?: string[]; selected?: string;
   draft?: { nodeId: string; text: string; active: boolean; reset: number; style?: Record<string, string> | null } | null;
@@ -116,7 +117,7 @@ export function HtmlPreview({ pkg, overlays = null, overlayNodes = [], pageId = 
     frame.current?.contentWindow?.postMessage({ type: 'cockpit.draft', channel, pageId, version, reset: true }, '*');
   }, [draft?.reset, channel, pageId, version]);
   return <iframe ref={frame} title={title} data-testid="library-html-preview" className="cockpit-html-frame"
-    srcDoc={srcdoc} sandbox={FREE_PAGE_SANDBOX} referrerPolicy={FREE_PAGE_REFERRER_POLICY} />;
+    srcDoc={srcdoc} sandbox={editing || allowScripts ? FREE_PAGE_SANDBOX : ''} referrerPolicy={FREE_PAGE_REFERRER_POLICY} />;
 }
 function decodeText(text: string) {
   const node = document.createElement('textarea'); node.innerHTML = text; return node.value;
@@ -264,6 +265,7 @@ export function CockpitPageEditor({ store, onInspect, onAI, onWholeAI, onSourceF
       </div> : null}
       <div className="cockpit-frame-wrap">{state.previewAlive
         ? <HtmlPreview pkg={pkg} overlays={state.presentation_overlay ?? current.presentation_overlays ?? null} overlayNodes={catalog.pageNodes} pageId={current.page_id} version={current.version} title={current.title}
+          allowScripts={editing || Boolean(current.package.js)}
           editing={editing && !sending} selectBlocks={aiMode} nodes={candidates}
           editableIds={nodes.filter(node => node.editableText !== false && !node.runtimeOnly).map(node => node.node_id)} selected={state.selection?.node_id}
           draft={selected ? { nodeId: selected.node_id, text: value, active: value !== original, reset: state.draftReset ?? 0, style: styleFocus === 'style' && Object.keys(styles).length ? styles : null } : null}

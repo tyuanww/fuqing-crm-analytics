@@ -3,7 +3,8 @@ import { FIRST_PURCHASE_ACCESS_CONTRACT } from './first-purchase-access.generate
 import { createFirstPurchaseRelay } from './first-purchase-relay.mjs';
 /** CRM credentials stay in this host closure, never env, disk, RPC or tool output. */
 import { dashboardOrigin, queryDashboardGsv, queryDashboardPurchases, queryDashboardReadiness,
-  queryDashboardMembership, queryDashboardNetGsv, dashboardCapabilities } from './dashboard.mjs';
+  queryDashboardMembership, queryDashboardNetGsv, queryProductCustomer,
+  queryRfmSnapshot, dashboardCapabilities } from './dashboard.mjs';
 
 import { crmAssetRequest, captureRequest, ASSET_MESSAGES } from './crm-assets.mjs';
 
@@ -62,7 +63,7 @@ export function createDashboardAccess({ baseUrl = 'http://127.0.0.1:8000', first
     citationLedger.delete(sessionId);
   }
   function prune() {
-    for (const [id, record] of records) if (record.expiresAt <= now() || !hasSession(id)) forget(id);
+    for (const [id, record] of records) if (record.expiresAt <= now()) forget(id);
     for (const id of pending.keys()) if (!hasSession(id)) forget(id);
   }
   function status(sessionId) {
@@ -134,6 +135,10 @@ export function createDashboardAccess({ baseUrl = 'http://127.0.0.1:8000', first
     query: (sessionId, input, signal) => query(sessionId, input, signal),
     querySnapshot: (sessionId, input, signal) => asset(sessionId, captureRequest(input), signal),
     queryPurchases: (sessionId, input, signal) => query(sessionId, input, signal, true),
+    queryProductCustomer: (sessionId, input, signal) =>
+      named(sessionId, input, signal, queryProductCustomer, 'product-customer/v3', 'product-customer/v3'),
+    queryRfmSnapshot: (sessionId, input, signal) =>
+      named(sessionId, input, signal, queryRfmSnapshot, 'rfm-snapshot/v1', 'rfm-snapshot/v1'),
     queryReadiness: (sessionId, input, signal) => named(sessionId, input, signal, queryDashboardReadiness, 'crm-dashboard-readiness/v1', 'dashboard-readiness/v1'),
     queryMembership: (sessionId, input, signal) => named(sessionId, input, signal, queryDashboardMembership, 'crm-dashboard-membership/v1', 'dashboard-member-premium/v1'),
     queryNetGsv: (sessionId, input, signal) => named(sessionId, input, signal, queryDashboardNetGsv, 'crm-dashboard-net-gsv/v1', 'dashboard-net-gsv/v1'),

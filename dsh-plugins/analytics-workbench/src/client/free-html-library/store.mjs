@@ -194,7 +194,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
     emit({ pages: bound.assets.list() });
   }
 
-  function candidateFromReceipt(receipt, pkg, { sessionId, title, requestId, callId } = {}) {
+  function candidateFromReceipt(receipt, pkg, { sessionId, title, requestId, callId, bindingManifest } = {}) {
     if (!receipt?.artifact_id) throw new Error('产物收件箱没有返回有效候选');
     return {
       artifact_id: receipt.artifact_id,
@@ -202,6 +202,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
       source: receipt.source || 'page_package',
       title: title || receipt.title || '未命名页面',
       package: clone(pkg),
+      binding_manifest: clone(bindingManifest ?? receipt.binding_manifest ?? { bindings: [], result_refs: [] }),
       content_hash: receipt.content_hash || undefined,
       receipt,
       request_id: requestId || receipt.request_id || null,
@@ -211,15 +212,15 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
     };
   }
 
-  function setArtifactCandidate(pkg, receipt, { sessionId, title, requestId, callId } = {}) {
-    const candidate = candidateFromReceipt(receipt, pkg, { sessionId, title, requestId, callId });
+  function setArtifactCandidate(pkg, receipt, { sessionId, title, requestId, callId, bindingManifest } = {}) {
+    const candidate = candidateFromReceipt(receipt, pkg, { sessionId, title, requestId, callId, bindingManifest });
     emit({ view: 'workspace', importCandidate: candidate, lastIdempotencyKey: bound.nextId('artifact-confirm'), mode: 'browse', selection: null, overlay: null,
       contextPanel: null, preview: null, liveStatus: '页面已登记到产物收件箱，确认后才保存',
       message: '页面已生成；尚未写入正式页面库' });
     return candidate;
   }
 
-  async function intakeGeneratedPackage(pkg, { sessionId, title, requestId, callId } = {}) {
+  async function intakeGeneratedPackage(pkg, { sessionId, title, requestId, callId, bindingManifest } = {}) {
     if (!bound.artifactInbox?.intake) throw new Error('产物收件箱尚未连接');
     const receipt = await bound.artifactInbox.intake({
       source: 'page_package',
@@ -228,8 +229,9 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
       ...(callId ? { call_id: callId } : {}),
       title: title || '未命名页面',
       package: clone(pkg),
+      binding_manifest: clone(bindingManifest ?? { bindings: [], result_refs: [] }),
     });
-    setArtifactCandidate(pkg, receipt, { sessionId, title, requestId, callId });
+    setArtifactCandidate(pkg, receipt, { sessionId, title, requestId, callId, bindingManifest });
     return receipt;
   }
 
@@ -343,6 +345,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
               sessionId: submitted?.session_id || 'native_session_fixture',
               requestId: submitted?.request_id,
               title,
+              bindingManifest: submitted?.binding_manifest,
             });
             return;
           }
@@ -355,7 +358,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
             title,
             session_id: submitted?.session_id || 'native_session_fixture',
             package: pkg,
-            binding_manifest: { bindings: [], result_refs: [] },
+            binding_manifest: submitted?.binding_manifest ?? { bindings: [], result_refs: [] },
             idempotency_key: bound.nextId('idem'),
           });
           if (!persisted?.ok || !persisted.page) {
@@ -407,6 +410,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
           title: meta.title || '本场对话驾驶舱',
           requestId: meta.requestId || meta.request_id,
           callId: meta.callId || meta.call_id,
+          bindingManifest: meta.bindingManifest || meta.binding_manifest,
         });
       });
     },
@@ -427,6 +431,11 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
           const got = await bound.documents.pullPage(pageId);
           if (ticket.epoch !== openEpoch) return false;
           if (!got.ok) throw new Error('页面不存在、不可用或无权限');
+        }
+        if (isLive(bound) && bound.documents?.pullOverlay) {
+          const page = bound.assets.get(pageId);
+          const got = await bound.documents.pullOverlay(pageId, page?.version ?? 1);
+          if (!got.ok) throw new Error('页面修改层暂时不可用，请重试');
         }
         if (ticket.epoch !== openEpoch) return false;
         const page = bound.assets.get(pageId);
@@ -466,6 +475,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
           title: receipt.title,
           requestId: receipt.request_id,
           callId: receipt.call_id,
+          bindingManifest: receipt.binding_manifest,
         });
         return true;
       });
@@ -485,7 +495,7 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
               title: candidate.title || '未命名页面',
               session_id: candidate.origin.session_id,
               package: clone(candidate.package),
-              binding_manifest: { bindings: [], result_refs: [] },
+              binding_manifest: candidate.binding_manifest ?? { bindings: [], result_refs: [] },
               ...(candidate.origin.path && candidate.origin.path !== 'generated.html' ? { origin_path: candidate.origin.path } : {}),
               ...(candidate.content_hash ? { origin_content_hash: candidate.content_hash } : {}),
               idempotency_key: state.lastIdempotencyKey || bound.nextId('artifact-confirm'),
@@ -770,14 +780,27 @@ export function createFreeHtmlLibraryStore({ adapters, now = () => Date.now(), v
           binding_state: state.current.binding_state });
         if (route.intent !== 'presentation') throw Object.assign(new Error('当前选区不支持结构化文字修改，请转到源码入口'), { code: 'AI_SCOPE_DIFF' });
         try {
-          const preview = located.source || located.runtime ? {
+          const bindings = state.current.binding_manifest?.bindings ?? [];
+          const pageHasResults = (state.current.binding_manifest?.result_refs ?? []).length > 0;
+          const nodeIsBound = bindings.some(item => item?.node_id === located.node_id);
+          const boundPresentation = pageHasResults && !nodeIsBound;
+          const preview = boundPresentation ? bound.edit.previewPatch({
+            pkg: state.current.package,
+            selection: { ...located, ...extras },
+            replacementText,
+            instruction: undefined,
+            page_id: state.current.page_id,
+            session_id: state.current.session_id,
+            base_version: state.current.version,
+            binding_manifest: state.current.binding_manifest,
+          }) : located.source || located.runtime ? {
             sourceRange: true, preview_id: bound.nextId('preview'), idempotency_key: bound.nextId('patch'), operation: 'PATCH',
             snapshot: located.runtime ? renderedTextPreview(state.current.package, located, replacementText, state.current.binding_manifest)
               : sourceTextPreview(state.current.package, located, replacementText, state.current.binding_manifest),
           } : bound.edit.previewPatch({ pkg: state.current.package, selection: { ...located, ...extras }, replacementText, instruction: isLive(bound) ? undefined : replacementText,
             page_id: state.current.page_id, session_id: state.current.session_id, base_version: state.current.version,
             binding_manifest: state.current.binding_manifest, affectsShared: extras.affectsShared });
-          if (isLive(bound) && bound.documents?.patchPreview) {
+          if (isLive(bound) && bound.documents?.patchPreview && !boundPresentation) {
             const editContext = editContextFor(state.current, located);
             const remote = await bound.documents.patchPreview({
               page_id: state.current.page_id,

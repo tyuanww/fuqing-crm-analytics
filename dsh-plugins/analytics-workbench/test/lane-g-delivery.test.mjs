@@ -30,7 +30,10 @@ test('host page generate targets the visible session and reuses the waiter reque
 test('page tool delivers a valid free-page package', async () => {
   const receipt = await executePageTool(PAGE_GENERATE_TOOL_NAME, {
     request_id: REQUEST_ID,
-    package: { html: '<html><h1>原生Agent标题</h1></html>', css: 'h1{}', js: 'window.__g=true' },
+    package: {
+      html: '<html><h1 data-shine-node="title">原生Agent标题</h1></html>', css: 'h1{}', js: 'window.__g=true',
+      node_map: [{ node_id: 'title', kind: 'static_element', selector: "[data-shine-node='title']" }],
+    },
   }, execution);
   assert.equal(receipt.status, 'PACKAGE_RECEIVED');
   assert.equal(receipt.schema_version, PAGE_TOOL_RESULT_SCHEMA);
@@ -38,6 +41,52 @@ test('page tool delivers a valid free-page package', async () => {
   assert.equal(receipt.published, false);
   assert.equal(receipt.package.html.includes('原生Agent标题'), true);
   assert.equal(Object.hasOwn(PAGE_TOOL_PARAMETERS, PAGE_GENERATE_TOOL_NAME), true);
+});
+
+test('page tool preserves an explicit result binding manifest', async () => {
+  const manifest = {
+    result_refs: ['result_gsv_snapshot_20260705'],
+    bindings: [{ binding_id: 'gsv_total', result_ref: 'result_gsv_snapshot_20260705', node_id: 'gsv-card', mode: 'summary' }],
+  };
+  const receipt = await executePageTool(PAGE_GENERATE_TOOL_NAME, {
+    request_id: REQUEST_ID,
+    package: { html: '<html><section data-shine-node="gsv-card">105525.8</section></html>', node_map: [{ node_id: 'gsv-card', kind: 'static_element', selector: '[data-shine-node="gsv-card"]' }] },
+    binding_manifest: manifest,
+  }, execution);
+  assert.equal(receipt.status, 'PACKAGE_RECEIVED');
+  assert.deepEqual(receipt.binding_manifest, manifest);
+  const refused = await executePageTool(PAGE_GENERATE_TOOL_NAME, {
+    request_id: REQUEST_ID,
+    package: { html: '<html>x</html>' },
+    binding_manifest: { result_refs: ['r'], bindings: [{ binding_id: 'b', result_ref: 'missing' }] },
+  }, execution);
+  assert.equal(refused.status, 'REFUSED');
+  assert.equal(refused.error.code, 'INVALID_PAGE');
+});
+
+test('page tool schema exposes the exact node_map contract', () => {
+  const nodeMap = PAGE_TOOL_PARAMETERS[PAGE_GENERATE_TOOL_NAME].package.properties.node_map;
+  assert.equal(nodeMap.items.additionalProperties, false);
+  assert.deepEqual(Object.keys(nodeMap.items.properties), ['node_id', 'kind', 'selector']);
+  assert.deepEqual(nodeMap.items.properties.kind.enum, ['static_element', 'dynamic_region', 'whole_page']);
+  for (const key of ['node_id', 'kind', 'selector']) assert.equal(nodeMap.items.properties[key].required, true);
+  assert.equal(Object.hasOwn(nodeMap.items.properties.node_id, 'pattern'), false);
+  const resources = PAGE_TOOL_PARAMETERS[PAGE_GENERATE_TOOL_NAME].package.properties.resources;
+  assert.equal(Object.hasOwn(resources.items.properties.sha256, 'pattern'), false);
+  assert.equal(Object.hasOwn(resources.items.properties.byte_length, 'minimum'), false);
+});
+
+test('page tool reports exact node_map fields when a caller sends an unknown key', async () => {
+  const receipt = await executePageTool(PAGE_GENERATE_TOOL_NAME, {
+    request_id: REQUEST_ID,
+    package: {
+      html: '<html><h1 data-shine-node="title">标题</h1></html>',
+      node_map: [{ node_id: 'title', kind: 'static_element', selector: 'h1', label: '标题' }],
+    },
+  }, execution);
+  assert.equal(receipt.status, 'REFUSED');
+  assert.equal(receipt.error.code, 'INVALID_PAGE');
+  assert.match(receipt.error.message, /node_id,kind,selector/);
 });
 
 test('page tool refuses bad packages and never saves or calls HTTP', async () => {
@@ -89,6 +138,52 @@ test('generate waits for delivery tool and persists the native package', async (
   assert.match(html, /原生Agent标题/);
   assert.doesNotMatch(html, /示例标题/);
   assert.equal(store.getSnapshot().current.binding_state, 'UNBOUND_SAMPLE');
+});
+
+test('native result refs reach the saved page document', async () => {
+  const waiter = createPagePackageWaiter();
+  let submittedRequestId;
+  const generate = createNativePageGenerate({
+    waiter,
+    submitPrompt: async (_prompt, extras) => { submittedRequestId = extras.requestId; return { ok: true, value: { accepted: true } }; },
+  });
+  const isolated = createIsolatedFetch({ token: 'library-page-isolated-test-token-32chars' });
+  const adapters = createLivePageAdapters({
+    nativeGenerate: generate,
+    documentsHttp: { base: 'http://127.0.0.1:18091', token: 'library-page-isolated-test-token-32chars', fetchImpl: isolated.fetchImpl },
+  });
+  const store = createFreeHtmlLibraryStore({ adapters, viewportWidth: 1440 });
+  const pending = store.generate();
+  for (let i = 0; i < 50 && waiter.pendingCount === 0; i += 1) await Promise.resolve();
+  assert.equal(waiter.pendingCount, 1);
+  assert.equal(waiter.deliver('page-gen-test', {
+    package: AGENT_PACKAGE,
+    binding_manifest: { result_refs: ['result_fixture_1'], bindings: [{ binding_id: 'fixture', result_ref: 'result_fixture_1', mode: 'summary' }] },
+  }), false);
+  // The generated request id is intentionally read from the prompt receipt in the next delivery.
+  const requestId = submittedRequestId;
+  assert.match(requestId, PAGE_REQUEST_ID_PATTERN);
+  assert.equal(waiter.deliver(requestId, {
+    package: AGENT_PACKAGE,
+    binding_manifest: { result_refs: ['result_fixture_1'], bindings: [{ binding_id: 'fixture', result_ref: 'result_fixture_1', mode: 'summary' }] },
+  }), true);
+  await pending;
+  const page = store.getSnapshot().current;
+  assert.deepEqual(page.binding_manifest.result_refs, ['result_fixture_1']);
+  assert.equal(page.binding_state, 'BOUND_VERIFIED');
+});
+
+test('native delivery rejects an invalid binding manifest instead of downgrading to unbound', async () => {
+  const generate = createNativePageGenerate({
+    submitPrompt: async () => ({
+      package: AGENT_PACKAGE,
+      binding_manifest: { result_refs: ['result_fixture_1'], bindings: [{ binding_id: 'fixture', result_ref: 'missing' }] },
+    }),
+  });
+  await assert.rejects(
+    () => generate('生成绑定数据看板'),
+    error => error?.code === 'INVALID_BINDING_MANIFEST',
+  );
 });
 
 test('refused delivery fails generate and keeps the prompt', async () => {

@@ -294,7 +294,12 @@ app.add_middleware(
     allow_origins=[o.strip() for o in _CORS_ORIGINS if o.strip()],
     allow_credentials=False,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization", "X-Login-Claim"],
+    allow_headers=[
+        "Content-Type",
+        "Authorization",
+        "X-Login-Claim",
+        "X-ShineMage-Product-Customer-Version",
+    ],
 )
 app.add_middleware(QueryRouterMiddleware)
 
