@@ -4,7 +4,13 @@
 
 本页带日期的候选、端口、版本和测试数字都是历史证据。当前命令从“先按变更类型选验证”开始；当前版本、运行现场和门禁仍以 STATUS 为准。不要把历史段落中的 `6677`、旧 candidate 或旧测试数当作当前结论。
 
-## 当前 cockpit-v3 商品映射现场（2026-10-22）
+## 当前 DSH rc3 本地候选（2026-10-24）
+
+主仓活动候选已统一到 DSH `0.2.1-rc.3`（`dsh-v0.2.1-rc.3`，upstream `1f81c047…`）和 Cordis `4.0.5`。rc3 上游干净 checkout 的依赖安装、host/client 构建、plugin-kit 输入预检、主仓 Workbench/CRM/Knowledge 构建与 provenance 均已通过；作者仓本地 rc3 提交和测试结果见[上游盘查记录](../release/dsh-rc3-candidate/upstream-audit-20261024.md)。
+
+该候选尚未推送、合并或部署。杭州 `current` 仍是下方历史现场记录的 DSH `0.2.1-rc.1` side-load；远端作者 CI 的 rc3 输入归档、正式组合 artifact、旁路启动/浏览器/回退/canary 和公司级发布身份仍未完成，`release_ready=false` 不变。
+
+## 杭州 cockpit-v3 商品映射历史现场（2026-10-22）
 
 线上 `/srv/shinemage/dsh/current` 指向 `dsh-0.2.1-rc.1-core-main-20261021-cockpit-v3`。CRM `0.0.0-crm.5` 与 Query `0.0.0-query.14` 已 side-load，profile package 为 `eaf71912…`，lock 为 `00a202bc…`。商品新老客使用 `product-customer/v3`，覆盖不足明确拒绝，公开结果只返回 `display_name`；Vue 前端已迁移到去重后的商品接口。固定 upstream 仍为 `1600d8a1e140dcde43a1a0941940a0480712c011`。当前运行回执见[审查问题修复部署验收](../hackathon/evidence/dsh-review-fixes-20261022.md)。
 
@@ -195,7 +201,7 @@ node --test --test-concurrency=1 scripts/dsh-b0/workbench-client-pack.integratio
   scripts/dsh-b0/workbench-native-prompt.integration.mjs
 ```
 
-沿用上述固定 page 包输入、绝对上游/Python 和新的结果根。九个消费 scope 均不可复用，pipeline 预检覆盖全部目录；新增 `workbench-native-prompt` 使用实际固定 Cordis `4.0.4`。九入口同次实跑 66/0/0，输入/九 scope 守卫 18/0/0 分开记账。前轮八入口 56、相关回归 105 和源码检查 4 保留在[历史接续](../hackathon/evidence/shinemage-workbench-consumer-contracts-20261011.md)，不重复相加。SSR/JSDOM/合成 RPC/fake fetch 不属于完整宿主、Chrome、真实会话或正式服务；来源、原断言和失败修复见[原生 prompt 消费记录](../hackathon/evidence/shinemage-workbench-native-prompt-pack-20261011.md)。
+上述 66/0/0 九入口结果是历史 Cordis `4.0.4` 实跑，不能迁移为当前 rc3 PASS；脚本现已切到 Cordis `4.0.5`，rc3 复跑必须使用新的固定输入和独占结果根并单独记账。输入/九 scope 守卫仍分别记录，不与历史结果相加。SSR/JSDOM/合成 RPC/fake fetch 不属于完整宿主、Chrome、真实会话或正式服务；来源、原断言和失败修复见[原生 prompt 消费记录](../hackathon/evidence/shinemage-workbench-native-prompt-pack-20261011.md)。
 
 Workbench 发布客户端消费入口为 `node --test --test-concurrency=1 scripts/dsh-b0/workbench-client-pack.integration.mjs`。复用上述准备回执的 `CRM_COMPOSITION_PAGE_INPUTS`，设置新的绝对 `CRM_COMPOSITION_OUTPUT`、`B0_BUILD_UPSTREAM` 和 `FQ_B0_PYTHON`；`workbench-client` 子目录不得复用。12 项原 factory/生命周期检查在列明源码拒读条件下通过，9 项新增守卫及既有回归 97 PASS 分开记账。Host 入口仍在源码阶段；不代表 Chrome、原生 Settings、完整宿主或 candidate 验收。见[本轮证据](../hackathon/evidence/shinemage-workbench-client-pack-migration-20261011.md)。
 

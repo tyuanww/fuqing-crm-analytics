@@ -6,7 +6,7 @@
 
 本地主仓活动候选已统一到 DSH `0.2.1-rc.3` / upstream `1f81c047` 和 Cordis `4.0.5`；rc3 上游干净构建与 plugin-kit 预检已通过。杭州仍运行独立 rc1 side-load，候选尚未推送、合并或切换；下面带 rc1/rc2 的锁和回执是历史证据，不得当作本轮 rc3 运行结果。
 
-2026-10-21 当前 rc2 组合锁绑定 Workbench `3030e3f`／manifest `070514b3…`、CRM `5f359f5b`／manifest `82c91152…`、Knowledge `ef8960ed`／manifest `83dca334…`，另六包与两份 profile 保持。十个独立作者仓 PR #1 已普通 merge，各自 main CI 均 SUCCESS；当前精确值和正式输入边界只看[组合锁](../../config/shinemage-composition-packs.lock.json)、[STATUS](../../STATUS.md)与[当前正式组合输入预检](../hackathon/evidence/shinemage-composition-preflight-20261012.md)。杭州 cockpit-v3 是独立的 rc1 owner-operated side-load，当前运行 crm.5 与 query.14；不得把下方较早时点的锁或“未提交”“尚未迁移”当成当前默认入口结论。
+2026-10-21 的 rc2 组合锁（Workbench `3030e3f`／manifest `070514b3…`、CRM `5f359f5b`／manifest `82c91152…`、Knowledge `ef8960ed`／manifest `83dca334…`）是历史正式输入，另六包与两份 profile 保持。当前本地主仓 rc3 候选的上游、版本、作者提交和未关闭门禁以[rc3 上游盘查](../release/dsh-rc3-candidate/upstream-audit-20261024.md)为准；杭州 cockpit-v3 仍是独立的 rc1 owner-operated side-load，当前运行 crm.5 与 query.14。不得把历史锁或作者本地 rc3 提交写成已发布输入。
 
 普通插件更新先在插件作者仓完成受影响检查、独立产物及 PR；组合变化时，主仓才更新对应固定输入。默认包消费、installed-kit、领域作者覆盖、公开合同和 release 包装配已经迁移并提交；主仓仍保留另两组旧 Workbench 断言、合同／静态守卫及历史副本。来源变化须同时绑定正式包与作者 CI，不能仅换 ZIP 或沿用旧 candidate/journal。
 
@@ -99,7 +99,7 @@ Workbench 当前链为独立干净提交 `d038f357` → 成功完整 core CI →
 
 - 目标插件的独立远程仓及其 README/CI 已确定。当前九个仓的远程状态见[远程插件收口复核](../hackathon/evidence/shinemage-plugin-remote-closeout-20261010.md)。
 - Node `24.19.0` 已准备。shine-brand 的默认公开编译路径使用 npm `11.17.0` 安装 `npm-author/package-lock.json` 中的精确依赖，打包使用其中的 pnpm `11.28.2`，不需要上游 checkout、build-tools 或 kit。它只做语法转换，不代表严格 SDK 类型检查或宿主兼容。
-- 其余八仓的固定 SDK 路径，以及 shine-brand 保留的兼容入口，需要 pnpm `11.28.2`、固定 DSH 上游 `477b4f420553e8a52c2fbccc464d7561b239c443` 和审核过的 build-tools/kit 输入；路径必须是绝对路径。首次准备与已有输入复用分别按目标仓的 `DEVELOPMENT.md` 和 CI 执行。
+- 其余八仓的固定 SDK 路径，以及 shine-brand 保留的兼容入口，当前 rc3 lane 需要 pnpm `11.28.2`、固定 DSH 上游 `1f81c047fc48fa190a683e469daa699857e9afe8` 和审核过的 build-tools/kit 输入；路径必须是绝对路径。首次准备与已有输入复用分别按目标仓的 `DEVELOPMENT.md` 和 CI 执行。旧 rc2/rc1 SHA 仅在带日期的历史证据中保留。
 - 图表插件还需要版本与 SHA 已锁定的 `@shine-mage/board-components` tarball；CRM/知识插件使用各自声明的服务合同输入。
 - 目标目录是新的、由本次运行独占的目录。失败输出保留，不覆盖旧 candidate、旧 journal 或旧证据。
 
@@ -238,7 +238,7 @@ node scripts/release/preflight.mjs --check \
 
 本节改动后的完整本地 B0 已完成 r2：固定输入、独立 B0 Python 原锁、禁网 Corepack 版本检查、合同、合成 Python/Node、严格构建和干净重建通过，实际 exit 0。首轮清单过期失败保留，边界清单由既有生成器更新、policy 未改。Node 的十次跳过不替代 shell/tool opt-in、固定包沙箱握手或 standalone 实测；新 hosted CI、当前 candidate 与真实业务仍未关闭。这里仍有历史源码生产者阶段，不能删除副本或把本地结果写成正式发布。完整命令及范围见[当前 B0 记录](../hackathon/evidence/shinemage-current-b0-closeout-20261011.md)；下面各迁移阶段的 NOT_RUN 保留为当时范围。
 
-CRM/知识配置准备也已本地支持同一输入合同。其 CLI 使用 `--pack-inputs`，其中 profile 的插件清单必须与正式包的 ID、顺序和摘要一致。现有 `config/dsh-profile.crm-knowledge.rc2.json` 选择 CRM 和知识两包；需要 page tools 时必须在已审查的组合中显式选择 Workbench 正式包，不能读取其源码补齐。
+CRM/知识配置准备也已本地支持同一输入合同。其 CLI 使用 `--pack-inputs`，其中 profile 的插件清单必须与正式包的 ID、顺序和摘要一致。当前 rc3 候选使用 `config/dsh-profile.crm-knowledge.rc3.json` 选择 CRM 和知识两包；需要 page tools 时必须在已审查的组合中显式选择 Workbench 正式包，不能读取其源码补齐。rc2 profile 仅保留为历史输入。
 
 ```bash
 # 仅生成新的私有配置及解包目录，不启动服务或宿主。
@@ -247,7 +247,7 @@ node scripts/crm-calibration/prepare-profile.mjs \
   --pack-inputs /absolute/crm-knowledge-inputs.json
 ```
 
-生成的 `manifest.json` 仍为 `crm-profile-assets/v3`，新增 `package_inputs` 保存 profile、来源 SHA、manifest 和 tarball 摘要；运行入口只指向本次解出的包。普通 content pack、混用 `--plugin` / `--knowledge-plugin` / `--page-tools-plugin`、坏摘要或已有输出都会失败，不回退到主仓。带 `service_binding` 的 profile 必须走既有 candidate/服务门禁，不能用本命令绕过。Cordis 声明 `4.0.2` 保持，配置准备不证明实际 `4.0.4` 的运行兼容。实现尚未提交；实测与未执行项见[CRM/知识包输入记录](../hackathon/evidence/shinemage-crm-profile-pack-migration-20261011.md)。
+生成的 `manifest.json` 仍为 `crm-profile-assets/v3`，新增 `package_inputs` 保存 profile、来源 SHA、manifest 和 tarball 摘要；运行入口只指向本次解出的包。普通 content pack、混用 `--plugin` / `--knowledge-plugin` / `--page-tools-plugin`、坏摘要或已有输出都会失败，不回退到主仓。带 `service_binding` 的 profile 必须走既有 candidate/服务门禁，不能用本命令绕过。当前 rc3 候选要求 DSH `0.2.1-rc.3` / Cordis `4.0.5`；配置准备不证明完整宿主或线上运行兼容。早期 `4.0.2`/`4.0.4` 结论只属于对应历史证据。
 
 CRM／知识包行为和公开 page tools 的公共合同组合可用以下固定包入口验证。CRM 输入沿用现有两包 profile；page 输入沿用现有七包 profile，只消费 Workbench 的 `./page-tools`，不把其他六包的解包写成激活。两份输入必须通过真实正式包读取器；页面输入不能包含另一份同名 CRM／知识包来覆盖原选择。
 
@@ -268,7 +268,7 @@ node --test --test-concurrency=1 \
   scripts/crm-calibration/profile.test.mjs
 ```
 
-每次使用新的独占输出根，缺输入和既有输出会失败；不回退源码。测试使用官方解析器、真实编译包和自有合成 HTTP 服务，不调用模型。九项公共合同在实际 Cordis `4.0.4` 下通过，只关闭该子项；官方 `plugin add`、完整宿主、整体 peer 兼容和正式 candidate 准入仍未执行。原声明、包和 journal 不改。默认 B0 的组合阶段现在需要这三项输入并显式传入固定 Python；其余源码装配尚待迁移，CI 的新准备入口仍缺远端输入配置，所以本轮没有完整 B0/新 CI PASS。详见[组合验收记录](../hackathon/evidence/shinemage-fixed-pack-composition-20261011.md)。
+每次使用新的独占输出根，缺输入和既有输出会失败；不回退源码。历史九项公共合同曾在 Cordis `4.0.4` 下通过；当前 rc3 组合仍需远端 CI、完整宿主和正式 candidate 门禁，不能迁移旧 PASS。原声明、包和 journal 不改。默认 B0 的组合阶段需要显式固定输入与 Python；详见[组合验收记录](../hackathon/evidence/shinemage-fixed-pack-composition-20261011.md)。
 
 后续包消费迁移已取消默认 B0 的 CRM/Knowledge 两项源码构建，改为以上 11 项包行为；原公开断言正文不变，私有 transport/graph/relay 检查由独立作者仓负责。`crm-package`、`knowledge-package`、`knowledge`、`page` 各用独立子目录，同一 scope 再跑必须换新输出根。11 项包消费、67 项守卫与原 9 项组合回归分别通过，完整 B0、新 hosted CI 和 Workbench 源码阶段仍开放；见[包行为迁移](../hackathon/evidence/shinemage-crm-knowledge-package-consumers-20261011.md)。此外，固定两包已有[官方安装/宿主初始化补查](../hackathon/evidence/shinemage-crm-knowledge-host-compat-20261011.md)，只补齐安装/初始化层，不关闭整体兼容或正式 candidate。上述旧九项组合记录的 NOT_RUN 不覆盖后续补查结果。
 
@@ -285,7 +285,7 @@ node scripts/ci/composition-pack-inputs.mjs \
 
 也可用 `--input-dir /absolute/pack-input-directory` 替代 `--archive`。成功后从 `preparation.json` 的 `env` 读取前述三项绝对路径；运行组合测试后，其 `runs/knowledge`、`runs/page`、`runs/leaf` 与 `runs/geometry` 不可复用。`pipeline --check` 在任何源码构建和服务启动前核对这些输入与结果目录。新包必须经审查更新锁，不得把新来源或修复 manifest 伪装成原包。
 
-原生 prompt 注入消费现也使用同一正式包的 `./client` 与实际 Cordis `4.0.4`；完整九文件命令见[验证入口](verification.md)。九入口一次实跑 66 项、九 scope 输入守卫 18 项分别通过，不是完整宿主/真实 session 验收。`workbench-native-prompt` 目录不得复用，原七个 Host/私有 producer 与其他源码构建保留待迁移；见[本轮证据](../hackathon/evidence/shinemage-workbench-native-prompt-pack-20261011.md)。
+原生 prompt 消费脚本已切到当前 rc3 上游的 Cordis `4.0.5`；下方链接中的 66 项实跑是历史 Cordis `4.0.4` 结果，不迁移为 rc3 PASS。完整九文件命令见[验证入口](verification.md)；rc3 结果须使用新的输入和独占输出目录重新记录。`workbench-native-prompt` 目录不得复用，原七个 Host/私有 producer 与其他源码构建保留待迁移。
 
 主仓的客户端消费组已进一步覆盖工具卡、取消、保存、首购和资产弹层，具体八文件命令见[验证入口](verification.md)。它们从同一正式包读取 `./client`，分别使用限定的新消费子目录；合成输入留在主仓验收目录，业务实现仍由插件仓维护。原源码结构断言保留，私有视图和 Host 入口仍待迁移；不要把 56 项客户端结果当作完整宿主或正式服务通过。见[接续证据](../hackathon/evidence/shinemage-workbench-consumer-contracts-20261011.md)。
 
@@ -346,7 +346,7 @@ pnpm dsh plugin candidate \
 cat "$candidate_root/pack/candidate.json"
 ```
 
-CRM/知识组合必须把上例的 profile 换成 `config/dsh-profile.crm-knowledge.rc2.json`，并确认 pack manifest 的包 ID 在该 allowlist 中。`--plugin /absolute/plugin` 只适用于主仓内、与 profile 路径 canonical 相同的源码目录。candidate 当前绑定插件 source SHA、正式 pack 的包 SHA-256、profile digest 和 DSH pin；profile digest 是组合快照，pack SHA 是单个受控 tarball 摘要，两者由 candidate/journal 分别记录。构建输入、领域包和测试范围要在插件仓 CI/证据中单独记录，不能把不存在的通用“输入摘要”字段写进 candidate。涉及保存服务时，还要使用已有的服务 binding 和新服务回执；涉及宿主时，必须提供同一 candidate 的宿主/目标证据。旧 candidate、旧 journal、旧 WSL/浏览器回执不能继承给新包。没有正式目标或授权时停在 `CANDIDATE_PREPARED` / `NOT_RUN`，不要写成 verified 或 active。
+CRM/知识组合必须把上例的 profile 换成 `config/dsh-profile.crm-knowledge.rc3.json`，并确认 pack manifest 的包 ID 在该 allowlist 中。`--plugin /absolute/plugin` 只适用于主仓内、与 profile 路径 canonical 相同的源码目录。candidate 当前绑定插件 source SHA、正式 pack 的包 SHA-256、profile digest 和 DSH pin；profile digest 是组合快照，pack SHA 是单个受控 tarball 摘要，两者由 candidate/journal 分别记录。构建输入、领域包和测试范围要在插件仓 CI/证据中单独记录，不能把未定义的通用“输入摘要”字段写进 candidate。涉及保存服务时，还要使用已有的服务 binding 和新服务回执；涉及宿主时，必须提供同一 candidate 的宿主/目标证据。旧 candidate、旧 journal、旧 WSL/浏览器回执不能继承给新包。没有正式目标或授权时停在 `CANDIDATE_PREPARED` / `NOT_RUN`，不要写成 verified 或 active。
 
 ### 7. 审查、合并和发布分开处理
 

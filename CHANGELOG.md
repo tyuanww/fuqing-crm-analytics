@@ -21,6 +21,8 @@
 
 ### Added
 
+- 同步活动版本合同与文档：边界清单、宿主/IM 合同夹具和 Workbench 原生 prompt 检查统一到 DSH `0.2.1-rc.3` / Cordis `4.0.5`；历史 rc1/rc2 证据继续按日期保留，不冒充当前候选结果。
+
 - DSH 候选工具链升级到官方 `0.2.1-rc.3`（`dsh-v0.2.1-rc.3`、upstream `1f81c047`），Cordis 固定为 `4.0.5`。主仓 peer、活动 profile、Workbench lock、作者仓 plugin-kit provenance 与 rc3 上游干净构建已统一；杭州现役仍为独立 rc1 side-load，未切换线上，正式门禁保持未完成。
 
 - B0 收尾补齐 C0 生成物漂移：重生成 `C0-MANIFEST.json` 与 `c0-fixtures.mjs` 的 contract hash，并通过离线 C0 check 与 30/30 评估。完整 B0 已实际接通固定输入，但因旧 Workbench public-contract archive 与当前 `3030e3f` composition source 不同源而保持阻断，需作者 CI 重新导出后再更新锁。

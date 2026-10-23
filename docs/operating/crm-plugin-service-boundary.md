@@ -1,6 +1,6 @@
 # CRM、知识插件与合成服务边界
 
-本页描述当前 CRM/知识插件边界。仓库本地回归基线仍固定 DSH 0.1.7-rc.2；杭州现场运行 DSH 0.2.1-rc.1，`crm.5` 的发布 peer 已对齐 `dsh-tools 0.2.1-rc.1 / Cordis 4.0.5`，二者证据分开记录。CRM 包保留身份 `@shine-mage/dsh-crm-knowledge`；杭州现役 side-load 为 `0.0.0-crm.5`，插件页显示 `2/2` 组件运行中；知识包独立为 `@shine-mage/dsh-knowledge@0.0.0-candidate.1`。真实 CRM 登录、资产保存及 WeKnora 的账号权限沿用原接口；这里的两项合成服务只处理公开 synthetic fixture，不读取业务数据库，不接受文件路径、SQL 或凭据。
+本页描述当前 CRM/知识插件边界。主仓活动候选固定为 DSH `0.2.1-rc.3`、upstream `1f81c047…`、Cordis `4.0.5`；杭州现场仍运行独立 DSH `0.2.1-rc.1` side-load，`crm.5` 的线上 peer 为 `dsh-tools 0.2.1-rc.1 / Cordis 4.0.5`，二者证据分开记录。CRM 包保留身份 `@shine-mage/dsh-crm-knowledge`；杭州现役 side-load 为 `0.0.0-crm.5`，插件页显示 `2/2` 组件运行中；知识包独立为 `@shine-mage/dsh-knowledge@0.0.0-candidate.1`。真实 CRM 登录、资产保存及 WeKnora 的账号权限沿用原接口；这里的两项合成服务只处理公开 synthetic fixture，不读取业务数据库，不接受文件路径、SQL 或凭据。
 
 ## 谁需要什么
 

@@ -119,19 +119,19 @@ cat "$candidate_root/pack/candidate.json"
 
 声明保存服务的候选，还可按[服务包说明](./crm-service-packages.md#将包回执绑定已有候选)运行 `pnpm dsh plugin verify-service`，把已运行的双服务包观测接入同一 journal。它不替换上述源码回执，也不使本机宿主观测成为目标 WSL 或生产保存验收。
 
-专用 allowlist `config/dsh-profile.crm-knowledge.rc2.json` 只选择 CRM 和知识两个独立包，默认七插件 release profile 不变。在同一干净提交与已完成构建/测试的双包上执行：
+专用 allowlist `config/dsh-profile.crm-knowledge.rc3.json` 只选择 CRM 和知识两个独立包，默认七插件 release profile 不变。在同一干净提交与已完成构建/测试的双包上执行：
 
 ```bash
 plugin_trial="$(mktemp -d "${TMPDIR:-/tmp}/shine-mage-host.XXXXXX")"
 pnpm dsh plugin candidate \
   --plugin "$PWD/dsh-plugins/crm-knowledge" \
-  --profile config/dsh-profile.crm-knowledge.rc2.json \
+  --profile config/dsh-profile.crm-knowledge.rc3.json \
   --output-dir "$plugin_trial/candidate" \
   --state-path "$plugin_trial/state.json"
 
 # 仅启动/重启该命令自己创建的宿主和 loopback 模型夹具；含 SIGKILL 负测
 node scripts/dsh-b0/pinned-host-acceptance.mjs \
-  --upstream /absolute/unchanged-built-dsh-0.1.7-rc.2 \
+  --upstream /absolute/unchanged-built-dsh-0.2.1-rc.3 \
   --output "$plugin_trial/host"
 
 # 只读候选/证据，向既有 journal 追加一次观测；不启动或激活宿主
