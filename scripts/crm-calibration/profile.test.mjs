@@ -9,7 +9,7 @@ async function fixture(t) {
   const make = async (domain, name, entries) => {
     const path = join(root, domain); await mkdir(join(path, 'lib'), { recursive: true });
     const manifest = { name, version: '0.0.0-fixture', shinemage: { plugin_domain: domain, composition_contract: 'crm-knowledge-split/v1' },
-      peerDependencies: { '@deepseek-ai/dsh-tools': '0.1.7-rc.2', ...(domain === 'page' ? {} : { '@deepseek-ai/cordis': '4.0.4' }) },
+      peerDependencies: { '@deepseek-ai/dsh-tools': '0.2.1-rc.3', ...(domain === 'page' ? {} : { '@deepseek-ai/cordis': '4.0.5' }) },
       exports: entries, files: Object.values(entries).map(value => value.slice(2)) };
     await writeFile(join(path, 'package.json'), JSON.stringify(manifest));
     for (const entry of manifest.files) await writeFile(join(path, entry), 'throw new Error("profile preparation must not execute this package");');
@@ -79,8 +79,8 @@ test('old combined artifacts, wrong identities/peers, private exports and symlin
     ['pin', m => { m.peerDependencies['@deepseek-ai/dsh-tools'] = 'latest'; }, /_DSH_PIN/],
     ['cordis', m => { m.peerDependencies['@deepseek-ai/cordis'] = '*'; }, /_CORDIS_PIN/],
     ['legacy-cordis', m => { m.peerDependencies['@deepseek-ai/cordis'] = '4.0.2'; }, /_CORDIS_PIN/],
-    ['cordis-range', m => { m.peerDependencies['@deepseek-ai/cordis'] = '~4.0.4'; }, /_CORDIS_PIN/],
-    ['cordis-next-patch', m => { m.peerDependencies['@deepseek-ai/cordis'] = '4.0.5'; }, /_CORDIS_PIN/],
+    ['cordis-range', m => { m.peerDependencies['@deepseek-ai/cordis'] = '~4.0.5'; }, /_CORDIS_PIN/],
+    ['cordis-next-patch', m => { m.peerDependencies['@deepseek-ai/cordis'] = '4.0.6'; }, /_CORDIS_PIN/],
     ['legacy', m => { delete m.shinemage; }, /SPLIT_PACKAGE_REQUIRED/],
     ['contract', m => { m.shinemage.composition_contract = 'crm-knowledge-split/v2'; }, /COMPOSITION_CONTRACT_MISMATCH/],
     ['private', m => { m.exports['.'] = './src/index.ts'; }, /PUBLIC_EXPORT_REQUIRED/],

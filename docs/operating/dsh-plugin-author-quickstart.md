@@ -2,7 +2,7 @@
 
 这条路径只验证一个插件包。DSH、CRM 服务、知识库和真实业务数据不随插件构建；插件失败时保留 DSH 原生对话是 T17 宿主验收目标，当前 pack/candidate 尚不能证明进程隔离。插件包默认不得覆盖原生标题、侧栏、会话或工具合同，未接通的 capability 必须显示 `NOT_AVAILABLE` 及原因。
 
-如果这次同时升级 Harness，先读[候选升级操作手册](./dsh-upgrade-candidate.md)：官方 tag、候选 runtime、profile pack、插件 pack 和回退各自隔离。插件作者只提交自己的 source/tree/tarball provenance，不直接修改主仓兼容钉；当前主仓仍为 DSH `0.1.7-rc.2`。
+如果这次同时升级 Harness，先读[候选升级操作手册](./dsh-upgrade-candidate.md)：官方 tag、候选 runtime、profile pack、插件 pack 和回退各自隔离。插件作者只提交自己的 source/tree/tarball provenance，不直接修改主仓兼容钉；当前主仓候选为 DSH `0.2.1-rc.3` / Cordis `4.0.5`。
 
 主仓与插件仓的长期职责、清理规则和 DSH 升级路径见[维护、清理与升级手册](./shinemage-maintenance-and-cleanup.md)。面向第一次执行的逐步路径见[How to 更新一个 ShineMage 插件](./shinemage-plugin-update.md)。日常只改一个插件时，不重建 DSH、不迁移数据库，也不从官网安装浮动 `latest`；按插件自己的构建路径和锁定输入生成内容校验回执，需要交付时另外确认包已保留及其摘要，再由主仓 profile 选择组合；candidate 另外绑定 profile 快照摘要与 pack SHA。
 
@@ -16,7 +16,7 @@
 
 - 插件开发使用 Node `24.19.0`、pnpm `11.28.2`。Python `3.14+` 属于后端服务、合成集成测试与发布校验工具的环境，不是 CRM 插件运行依赖。
 - 插件位于 profile allowlist 中，包名匹配 `@shine-mage/*`。
-- `package.json` 使用 `type: module`、`packageManager: pnpm@11.28.2`，并把 `@deepseek-ai/dsh-tools` 固定为 `0.1.7-rc.2` peer。只有声明 `shinemage.bundle_role=configuration-bundle` 的纯配置 bundle 可以省略该 peer，并须同时保证任何依赖字段和运行文件都不引用 `@deepseek-ai/dsh-tools`。
+- `package.json` 使用 `type: module`、`packageManager: pnpm@11.28.2`，并把 `@deepseek-ai/dsh-tools` 固定为 `0.2.1-rc.3` peer。只有声明 `shinemage.bundle_role=configuration-bundle` 的纯配置 bundle 可以省略该 peer，并须同时保证任何依赖字段和运行文件都不引用 `@deepseek-ai/dsh-tools`。
 - `files` 只声明运行时 `lib/`、bundle patch、已打包领域输入的 digest lock 和必要的 README/LICENSE；不得包含 `src/`、测试、`node_modules`、source map、符号链接或 workspace/file/link 依赖。允许 `locale/*.json` 这类“所在目录固定、只含一个 `*`、不跨目录”的单层通配，不允许递归或猜测路径。`main`、`module` 和 `dsh.bundle.patch` 必须指向精确文件，不能使用通配。
 
 <a id="plugin-contract"></a>

@@ -7,7 +7,7 @@
     "node": "24.x"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh-tools": "0.1.7-rc.2"
+    "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
   },
   "type": "module",
   "description": "B0 only: native DSH integration backed by the isolated FastAPI run kernel",

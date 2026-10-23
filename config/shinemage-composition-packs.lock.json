@@ -3,13 +3,13 @@
   "profiles": [
     {
       "name": "crm",
-      "path": "config/dsh-profile.crm-knowledge.rc2.json",
-      "sha256": "7ca3511663ab2ea5d1bb8f839c83b29f5bbd6655238450ad08a04510642191ba"
+      "path": "config/dsh-profile.crm-knowledge.rc3.json",
+      "sha256": "67f054dec84b1100ca3b4023473c1e6231a497608e4867a84b234338dc85f0e5"
     },
     {
       "name": "page",
-      "path": "config/dsh-profile.rc2.json",
-      "sha256": "c8c9df8c36f11060ad8fbcce68cb2ebf28d783c5eb5759d1b71ff5463782c981"
+      "path": "config/dsh-profile.rc3.json",
+      "sha256": "320ceec68b43981e5025a9a9b4fa45832e3147c70b6a1dabac3e2fdc55998397"
     }
   ],
   "plugins": [

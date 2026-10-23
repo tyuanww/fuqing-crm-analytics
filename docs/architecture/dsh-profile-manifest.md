@@ -8,7 +8,7 @@ profile 当前固定：
 
 - `schema_version: dsh-profile/v1`
 - `profile_id: dsh-rc2`
-- DSH SDK `0.1.7-rc.2`
+- DSH SDK `0.2.1-rc.3`
 - upstream SHA `477b4f420553e8a52c2fbccc464d7561b239c443`
 - 七个插件的相对路径、包名、`build.mjs` 入口和 `enabled: true`
 

@@ -2,7 +2,9 @@
 
 本文保留单插件更新的详细操作路径。文中的 2026-10-13 及更早输入和验收是历史快照；当前版本、端口、候选和正式门禁以 [STATUS.md](../../STATUS.md) 为准。若同时升级 Harness，请先读[候选升级操作手册](./dsh-upgrade-candidate.md)；它负责官方 tag、隔离 runtime、pack provenance、消费闭包、回读和回退的跨仓顺序，本文只负责单插件更新。
 
-## 当前输入与交付状态（2026-10-21）
+## 当前输入与交付状态（2026-10-24）
+
+本地主仓活动候选已统一到 DSH `0.2.1-rc.3` / upstream `1f81c047` 和 Cordis `4.0.5`；rc3 上游干净构建与 plugin-kit 预检已通过。杭州仍运行独立 rc1 side-load，候选尚未推送、合并或切换；下面带 rc1/rc2 的锁和回执是历史证据，不得当作本轮 rc3 运行结果。
 
 2026-10-21 当前 rc2 组合锁绑定 Workbench `3030e3f`／manifest `070514b3…`、CRM `5f359f5b`／manifest `82c91152…`、Knowledge `ef8960ed`／manifest `83dca334…`，另六包与两份 profile 保持。十个独立作者仓 PR #1 已普通 merge，各自 main CI 均 SUCCESS；当前精确值和正式输入边界只看[组合锁](../../config/shinemage-composition-packs.lock.json)、[STATUS](../../STATUS.md)与[当前正式组合输入预检](../hackathon/evidence/shinemage-composition-preflight-20261012.md)。杭州 cockpit-v3 是独立的 rc1 owner-operated side-load，当前运行 crm.5 与 query.14；不得把下方较早时点的锁或“未提交”“尚未迁移”当成当前默认入口结论。
 
