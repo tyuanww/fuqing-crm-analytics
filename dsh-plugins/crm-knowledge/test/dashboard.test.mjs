@@ -90,9 +90,6 @@ test('requests after the warehouse cutoff fail instead of returning zero as OK',
   unavailable(await query(outOfCoverage, binding), 'INSUFFICIENT_COVERAGE');
 });
 
-// Regression: ISSUE-003 — a failed cutoff lookup must not bypass coverage proof.
-// Found by /qa on 2026-10-22
-// Report: .gstack/qa-reports/qa-report-app.tyuan.chat-2026-10-22.md
 test('missing warehouse cutoff fails closed instead of returning an unbounded GSV', async t => {
   const { binding } = await serveDashboard(t, (url, _req, res) => {
     if (url.pathname !== '/api/v1/metrics/cutoff') return false;
@@ -554,9 +551,6 @@ test('product customer v3 exposes coverage and rejects v2, empty or partial resu
   });
 });
 
-// Regression: ISSUE-003 — a successful product payload cannot override warehouse coverage.
-// Found by /qa on 2026-10-22
-// Report: .gstack/qa-reports/qa-report-app.tyuan.chat-2026-10-22.md
 test('product customer rejects a successful response when the requested window exceeds the cutoff', async t => {
   const metric = {
     gsv: 100, users: 2, aus: 50, old_gsv: 50, old_users: 1, old_aus: 50, old_ratio: 0.5,
