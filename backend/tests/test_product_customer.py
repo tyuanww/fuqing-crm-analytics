@@ -331,6 +331,24 @@ def test_product_customer_request_rejects_more_than_registered_products():
         )
 
 
+def test_product_customer_request_bounds_filter_value_lengths():
+    from pydantic import ValidationError
+    from backend.contracts.category import ProductCustomerRequest
+
+    with pytest.raises(ValidationError):
+        ProductCustomerRequest(
+            start_date="2026-07-01",
+            end_date="2026-07-05",
+            products=["x" * 81],
+        )
+    with pytest.raises(ValidationError):
+        ProductCustomerRequest(
+            start_date="2026-07-01",
+            end_date="2026-07-05",
+            exclude_channels=["x" * 81],
+        )
+
+
 def test_product_customer_batch_requires_v3_contract(monkeypatch):
     from types import SimpleNamespace
     from backend.contracts.category import ProductCustomerBatchRequest

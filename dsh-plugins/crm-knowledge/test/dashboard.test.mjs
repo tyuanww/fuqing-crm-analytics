@@ -337,6 +337,7 @@ test('product customer rejects unknown fields and malformed product lists before
     { start_date: '2026-07-01', end_date: '2026-07-05', sql: 'select 1' },
     { start_date: '2026-07-01', end_date: '2026-07-05', products: [] },
     { start_date: '2026-07-01', end_date: '2026-07-05', products: ['经典膜', '经典膜'] },
+    { start_date: '2026-07-01', end_date: '2026-07-05', products: Array.from({ length: 16 }, (_, i) => `商品${i}`) },
     { start_date: '2026-07-01', end_date: '2026-07-05', compare_start_date: '2025-07-01' },
   ]) {
     const result = await queryProductCustomer(invalid, { sessionId: 'fixture-session', binding });

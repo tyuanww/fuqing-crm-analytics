@@ -443,7 +443,7 @@ export function validateProductCustomerRequest(input) {
   });
   let products;
   if (input.products !== undefined) {
-    if (!Array.isArray(input.products) || input.products.length < 1 || input.products.length > 20 ||
+    if (!Array.isArray(input.products) || input.products.length < 1 || input.products.length > 15 ||
         input.products.some(name => typeof name !== 'string' || !name.trim() ||
           name.trim() !== name || [...name].length > 80) ||
         new Set(input.products).size !== input.products.length) fail('INVALID_REQUEST');
@@ -535,7 +535,7 @@ export function normalizeProductCustomer(value, filters, dataKind, warehouseCuto
   if (value?.schema_version !== PRODUCT_CUSTOMER_VERSION || value.source !== 'orders+user_first_purchase' ||
       value.date_start !== filters.start_date || value.date_end !== filters.end_date ||
       value.metric_type !== 'GSV' || (value.channel ?? '全店') !== filters.channel ||
-      !Array.isArray(value.exclude_channels) || !Array.isArray(value.products) || value.products.length > 20 ||
+      !Array.isArray(value.exclude_channels) || !Array.isArray(value.products) || value.products.length > 15 ||
       typeof value.new_old_cutoff !== 'string' || typeof value.comparison_new_old_cutoff !== 'string' ||
       typeof value.data_version !== 'string' || !value.data_version) fail('INVALID_RESPONSE');
   const expectedCompareStart = filters.compare_start_date ?? sameNaturalDayLastYear(filters.start_date);

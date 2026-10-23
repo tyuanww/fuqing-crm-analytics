@@ -79,10 +79,10 @@ class ProductCustomerRequest(BaseModel):
 
     start_date: str
     end_date: str
-    products: Optional[Annotated[List[str], Field(max_length=15)]] = None
+    products: Optional[Annotated[List[Annotated[str, Field(max_length=80)]], Field(max_length=15)]] = None
     metric_type: Literal["GSV"] = "GSV"
     channel: Optional[str] = None
-    exclude_channels: Annotated[List[str], Field(max_length=10)] = Field(default_factory=list)
+    exclude_channels: Annotated[List[Annotated[str, Field(max_length=80)]], Field(max_length=10)] = Field(default_factory=list)
     compare_start_date: Optional[str] = None
     compare_end_date: Optional[str] = None
 
