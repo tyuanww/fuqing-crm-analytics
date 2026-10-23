@@ -319,6 +319,18 @@ def test_product_customer_batch_route_serializes_bounded_windows(monkeypatch):
     ]
 
 
+def test_product_customer_request_rejects_more_than_registered_products():
+    from pydantic import ValidationError
+    from backend.contracts.category import ProductCustomerRequest
+
+    with pytest.raises(ValidationError):
+        ProductCustomerRequest(
+            start_date="2026-07-01",
+            end_date="2026-07-05",
+            products=[f"商品{i}" for i in range(16)],
+        )
+
+
 def test_product_customer_batch_requires_v3_contract(monkeypatch):
     from types import SimpleNamespace
     from backend.contracts.category import ProductCustomerBatchRequest
