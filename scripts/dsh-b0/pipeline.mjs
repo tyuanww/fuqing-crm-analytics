@@ -156,6 +156,7 @@ if (mode === '--prepare') {
   // Only native dependencies needed by this fixed profile. No repository hook
   // installer, optional provider SDK lifecycle, global configuration or publish.
   run('corepack', ['pnpm', 'rebuild', 'esbuild', 'fs-ext', 'koffi', 'node-pty'], upstream);
+  run('corepack', ['pnpm', 'run', 'build:native-system'], upstream);
   run('corepack', ['pnpm', 'run', 'build:official'], upstream);
   run('corepack', dependencyCommands.install, buildTools, networkEnv);
   await verifySource();
