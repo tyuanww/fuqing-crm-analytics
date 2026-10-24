@@ -7,13 +7,13 @@
 474a7cdc52147384fa010a40769c9ff576812f08068cd894463e988aefca5514  .ci/rc3-composition/packs/shine-query/shine-mage-dsh-shine-query-0.0.0-b0.tgz
 62e9abf4731fcacf5232b57e1d6780033bc6d721325ebd0576f97fa572cba986  .ci/rc3-composition/packs/shine-brand/shine-mage-dsh-shine-brand-0.0.0-b0.tgz
 805a2a9e2effa6cca364365e9ccb001c9f911f73f8b4fddcd6c43533ce82a101  .ci/rc3-composition/packs/analytics-workbench/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz
-8cfd4c491b2a401a5cbdadb68c468150b9f8f2dccfcefcf915d88cbcc80e9d3c  .ci/rc3-composition/packs/crm-knowledge/shine-mage-dsh-crm-knowledge-0.0.0-crm.5.tgz
+43308d4de80f50698c308a493bb4f0dfbcf3ec6230308805371e050efdddb18f  .ci/rc3-composition/packs/crm-knowledge/shine-mage-dsh-crm-knowledge-0.0.0-crm.5.tgz
 a220ec960c32ccbfdd4a6ffaea849b8cace4b7e0140a838c2f1c724ec2ff18c0  .ci/rc3-composition/packs/shine-query/plugin-pack.json
 a2672e3a6bfded8d764d76ae5274fd848b6ffe67e21cbf4fc537a0850f582335  .ci/rc3-composition/packs/shine-waterfall/plugin-pack.json
 b1f8f2e9ef97988db34b4ffaae7ff0a7479ee12418011944e516c31d66e3fa45  .ci/rc3-composition/packs/shine-board/shine-mage-dsh-shine-board-0.0.0-b0.tgz
 b242b826f462e99776eadfbc4d650f950625faec0f62adbf62fdd91b9922a3a7  .ci/rc3-composition/packs/shine-crowd-action/plugin-pack.json
 c306a4fe43f1db5166bad5f68d4b9037e384b1a9ff056b7bb12b84045905fb03  .ci/rc3-composition/packs/shine-funnel/plugin-pack.json
-c88e4f840174df75e5e2601d637efda85a120230fb05550e67b331677ed46f29  .ci/rc3-composition/packs/crm-knowledge/plugin-pack.json
+b7af0ef3e194326b05b48721913e92608ac8ffe0f4663db736f7e74526c331a9  .ci/rc3-composition/packs/crm-knowledge/plugin-pack.json
 d09889991f5613153bcb11d70e0305688fbcb06322e81bb58c1e8a6da901bb63  .ci/rc3-composition/packs/knowledge/plugin-pack.json
 d959bf1e45f04b3871914e70fba642fc0447c85735adf394d0a46fecfca12a55  .ci/rc3-composition/packs/shine-funnel/shine-mage-dsh-shine-funnel-0.0.0-b0.tgz
 dca248f641ba474377b91ccc195068ede207df70b77159db13d9864b7fbec112  .ci/rc3-composition/packs/shine-waterfall/shine-mage-dsh-shine-waterfall-0.0.0-b0.tgz
