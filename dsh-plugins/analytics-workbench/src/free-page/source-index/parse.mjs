@@ -30,8 +30,9 @@ function nextTagEnd(html, start) {
 function skipRawBlock(html, start) {
   const tagEnd = nextTagEnd(html, start + 1);
   if (tagEnd < 0) return html.length;
-  const open = html.slice(start, tagEnd + 1).match(/^<(script|style|template|textarea|title)\b/i);
+  const open = html.slice(start, tagEnd + 1).match(/^<(script|style|template|textarea|title|xmp|noembed|noframes|plaintext|noscript)(?=[\s/>])/i);
   if (!open) return null;
+  if (open[1].toLowerCase() === 'plaintext') return html.length;
   const close = new RegExp('</' + open[1] + '\\s*>', 'i').exec(html.slice(tagEnd + 1));
   return close ? tagEnd + 1 + close.index + close[0].length : html.length;
 }

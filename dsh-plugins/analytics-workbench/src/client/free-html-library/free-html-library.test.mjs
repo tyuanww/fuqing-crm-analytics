@@ -8,6 +8,7 @@ import { createFreeHtmlLibraryStore } from './store.mjs';
 import { createMockPageAdapters } from './mock-adapters.mjs';
 import { createHostPageStore } from './create-host-page-store.mjs';
 import { AGENT_PACKAGE, createIsolatedFetch } from './p12-http-fakes.mjs';
+import { sourceHash } from '../../free-page/presentation/model.mjs';
 
 const plugin = fileURLToPath(new URL('../../..', import.meta.url));
 const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
@@ -45,6 +46,25 @@ async function domFixture(t) {
 }
 
 const theme = { subscribe: () => () => {}, getSnapshot: () => 'dark' };
+
+
+test('static library preview displays saved presentation with scripts disabled', async t => {
+  const ui = await domFixture(t);
+  const store = createFreeHtmlLibraryStore();
+  t.after(() => store.dispose());
+  store.setPrompt('静态页'); await store.generate();
+  const pkg = { html: '<h1 id="heading">原文</h1>', css: '', js: '', resources: [], node_map: [] };
+  pkg.presentation = { source_hash: sourceHash(pkg), edits: [
+    { target: { anchor: { attribute: 'id', value: 'heading' }, path: [] }, text: '已保存文案', style: {} },
+  ] };
+  store.markLocalDraft(pkg); await store.saveDraft();
+  await ui.render(React.createElement(FreeHtmlLibraryApp, { store, themeSource: theme, goConversation() {} }));
+  const frame = ui.doc.querySelector('[data-testid="fhl-iframe"]');
+  assert.equal(frame.getAttribute('sandbox'), '');
+  const preview = new ui.doc.defaultView.DOMParser().parseFromString(frame.getAttribute('srcdoc'), 'text/html');
+  assert.equal(preview.querySelector('#heading').textContent, '已保存文案');
+  assert.deepEqual(store.getSnapshot().current.package, pkg);
+});
 
 test('home uses NL input as the only visual anchor and keeps native chat', async t => {
   const ui = await domFixture(t);

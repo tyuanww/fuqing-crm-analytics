@@ -72,7 +72,7 @@ export function HtmlPreview({ pkg, overlays = null, overlayNodes = [], pageId = 
     if (!overlays || !Object.keys(overlays).length) return pkg;
     return { ...pkg, html: applyPresentationOverlay(pkg?.html ?? '', overlays, overlayNodes) };
   }, [pkg, overlays, overlayNodes]);
-  const srcdoc = useMemo(() => selectionSrcdoc(framed, { channel, pageId, version, nodes, editableIds, editing, selectBlocks }), [framed, channel, pageId, version, nodes, editableIds, editing, selectBlocks]);
+  const srcdoc = useMemo(() => selectionSrcdoc(framed, { channel, pageId, version, nodes, editableIds, editing, selectBlocks, allowScripts: editing || allowScripts }), [framed, channel, pageId, version, nodes, editableIds, editing, selectBlocks, allowScripts]);
   useEffect(() => {
     unresolvedCallback.current?.(0);
     const receive = (event: MessageEvent) => {

@@ -207,7 +207,7 @@ function selectionRuntime(config) {
         const descendants = [element, ...element.querySelectorAll('*')].slice(0, 2000);
         for (const node of descendants) {
           if (seen.has(node) || insideSentence(node) || next.size >= 2000 || node.namespaceURI !== 'http://www.w3.org/1999/xhtml'
-            || node.closest('script,style,template,iframe,object,embed,textarea,input,select,[data-shine-region],[data-sp-bindable="database"],[data-page-readonly]') || !staticAttributes(node)) continue;
+            || node.closest('script,style,template,iframe,object,embed,textarea,input,select,xmp,noembed,noframes,plaintext,noscript,[data-shine-region],[data-sp-bindable="database"],[data-page-readonly]') || !staticAttributes(node)) continue;
           const directTexts = [...node.childNodes].filter(n => n.nodeType === 3);
           const visibleTexts = directTexts.filter(n => n.nodeValue.trim());
           const ownText = visibleTexts.length === 1 ? visibleTexts[0] : directTexts.length === 1 ? directTexts[0] : null;
@@ -356,8 +356,8 @@ function selectionRuntime(config) {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once: true });
   else install();
 }
-export function selectionSrcdoc(pkg, { channel, pageId, version, nodes = [], selected = null, editing = false, selectBlocks = false }) {
-  let src = buildSrcdoc({ ...(editing ? instrumentSourceTargets(pkg, nodes) : pkg), instanceId: channel, pageId, version, nonce: channel });
+export function selectionSrcdoc(pkg, { channel, pageId, version, nodes = [], selected = null, editing = false, selectBlocks = false, allowScripts = true }) {
+  let src = buildSrcdoc({ ...(editing ? instrumentSourceTargets(pkg, nodes) : pkg), instanceId: channel, pageId, version, nonce: channel, allowScripts });
   const statusConfig = JSON.stringify({ channel, pageId, version }).replace(/</g, '\\u003c');
   src = insertBeforeBodyEnd(src, '<script>(' + (function (config) {
     const report = () => parent.postMessage({ type: 'cockpit.presentation', ...config, unresolved: window.__cockpitPresentationStatus?.unresolved?.length ?? 0 }, '*');

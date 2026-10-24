@@ -7,9 +7,12 @@ import { bindingLabel, estimateIframeContentWidth, widthBand } from './host-visu
 import { createFreeHtmlLibraryStore } from './store.mjs';
 import { mountPreviewHost } from '../../free-page/preview/preview-host.mjs';
 import { FREE_PAGE_REFERRER_POLICY, FREE_PAGE_SANDBOX } from '../../free-page/runtime/isolation-policy.mjs';
+import { buildSrcdoc } from '../../free-page/preview/srcdoc-builder.mjs';
+import type { components } from '../../free-page/contract/page-contract.generated.d.ts';
 
 type ThemeSource = { subscribe(listener: () => void): () => void; getSnapshot(): CompetitionColorScheme };
 type Store = ReturnType<typeof createFreeHtmlLibraryStore>;
+type PreviewPackage = { html?: string; css?: string; js?: string; resources?: unknown[]; presentation?: components['schemas']['PagePresentation'] | null };
 
 function saveStateText(state: ReturnType<Store['getSnapshot']>, page: ReturnType<Store['getSnapshot']>['current']) {
   if (state.confirmationUncertain) return '保存冲突 · 结果待核对';
@@ -142,7 +145,7 @@ function LivePreviewSlot({
 }: {
   pageId: string;
   version: number;
-  pkg: { html?: string; css?: string; js?: string; resources?: unknown[] };
+  pkg: PreviewPackage;
   pointerEvents: NonNullable<CSSProperties['pointerEvents']>;
   allowScripts: boolean;
 }) {
@@ -179,15 +182,18 @@ function WorkspacePreview({ srcdoc, live, pageId, version, pkg, pointerEvents, a
   live: boolean;
   pageId?: string;
   version?: number;
-  pkg?: { html?: string; css?: string; js?: string; resources?: unknown[] };
+  pkg?: PreviewPackage;
   pointerEvents: NonNullable<CSSProperties['pointerEvents']>;
   allowScripts: boolean;
 }) {
+  const frameSrcdoc = useMemo(() => !allowScripts && pkg?.presentation?.edits?.length
+    ? buildSrcdoc({ ...pkg, html: pkg.html ?? '', css: pkg.css ?? '', js: pkg.js ?? '', allowScripts: false }) : srcdoc,
+  [srcdoc, pkg, allowScripts]);
   if (srcdoc && live && pageId != null && version != null && pkg) {
     return <LivePreviewSlot pageId={pageId} version={version} pkg={pkg} pointerEvents={pointerEvents} allowScripts={allowScripts} />;
   }
   if (srcdoc) {
-    return <iframe title="自由 HTML 页面预览" data-testid="fhl-iframe" className="library-html-iframe" srcDoc={srcdoc} sandbox={allowScripts ? FREE_PAGE_SANDBOX : ''} referrerPolicy={FREE_PAGE_REFERRER_POLICY} style={{ pointerEvents }} />;
+    return <iframe title="自由 HTML 页面预览" data-testid="fhl-iframe" className="library-html-iframe" srcDoc={frameSrcdoc} sandbox={allowScripts ? FREE_PAGE_SANDBOX : ''} referrerPolicy={FREE_PAGE_REFERRER_POLICY} style={{ pointerEvents }} />;
   }
   return <p data-testid="fhl-preview-stopped">预览已停止。宿主入口仍可用。</p>;
 }
