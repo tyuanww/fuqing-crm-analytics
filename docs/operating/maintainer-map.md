@@ -4,6 +4,8 @@ DuckDB 连接预算、只读部署的临时目录和失败清理见 [DuckDB 运�
 RFM 精确日期、比较期、旧缓存失效和重预热边界见 [RFM 缓存查询身份](rfm-cache-identity.md)。
 页面服务的退出确认见 [子进程生命周期](page-http-lifecycle.md)，授权结果的浏览器只读边界见 [页面结果来源](page-result-source-boundary.md)。
 
+原生会话与权威 CRM 聚合快照的进程内引用见 [CRM 快照来源](native-crm-snapshot-source.md)。生产 provider 和页面接线仍需独立验收。
+
 给后来改这个仓库的人。当前提交和版本只看根目录 [STATUS.md](../../STATUS.md)。这里只写目录、端口、检索和开发/生产边界，不重复施工编年。
 
 ## 先搜哪里
