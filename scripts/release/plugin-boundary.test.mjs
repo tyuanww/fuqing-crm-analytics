@@ -1,3 +1,4 @@
+import { DSH_SDK_VERSION } from './toolchain.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { lstat, readFile } from 'node:fs/promises';
@@ -19,7 +20,7 @@ test('the dev kit owns pin and build locks without business typecheck targets', 
   const kit = join(root, 'dsh-plugins/plugin-kit');
   const source = await readFile(join(kit, 'toolchain.mjs'), 'utf8');
   assert.doesNotMatch(source, /analytics-workbench|checkTypes|saved-analysis-view/);
-  assert.equal(JSON.parse(await readFile(join(kit, 'toolchain.json'), 'utf8')).sdk_version, '0.1.7-rc.2');
+  assert.equal(JSON.parse(await readFile(join(kit, 'toolchain.json'), 'utf8')).sdk_version, DSH_SDK_VERSION);
   for (const file of ['package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml']) {
     assert.ok((await lstat(join(kit, 'build-tools', file))).isFile());
     await assert.rejects(() => lstat(join(root, 'dsh-plugins/analytics-workbench/build-tools', file)), { code: 'ENOENT' });

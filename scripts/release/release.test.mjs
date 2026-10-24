@@ -1,3 +1,4 @@
+import { DSH_SDK_VERSION } from './toolchain.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, readlink, rm, stat, writeFile } from 'node:fs/promises';
@@ -50,7 +51,7 @@ test('artifact receive/install binds profile and service evidence, but local evi
   t.after(() => rm(root, { recursive: true, force: true }));
   const { binding, gate } = await serviceFixture();
   const profile = { schema_version: 'dsh-profile/v1', profile_id: 'service-test',
-    dsh: { sdk_version: '0.1.7-rc.2', upstream_sha: UPSTREAM_SHA },
+    dsh: { sdk_version: DSH_SDK_VERSION, upstream_sha: UPSTREAM_SHA },
     plugins: [{ path: 'plugin', id: '@shine-mage/test-plugin', build: 'build.mjs', enabled: true }],
     service_binding: binding };
   const profileBytes = JSON.stringify(profile), profilePath = 'config/profile.json';
