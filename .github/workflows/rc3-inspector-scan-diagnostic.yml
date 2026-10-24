@@ -1,0 +1,95 @@
+name: rc3 inspector scan diagnosis
+
+on:
+  push:
+    branches:
+      - codex/rc3-inspector-scan-diagnostic-20261024
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 5896567835074ed5355ff84d528ba648edee5ac0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '24.19.0'
+          package-manager-cache: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        id: python
+        with:
+          python-version: '3.14'
+      - name: Build the same fixed public upstream
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = '5896567835074ed5355ff84d528ba648edee5ac0'
+          corepack enable
+          corepack install
+          node scripts/dsh-b0/pipeline.mjs --prepare --python '${{ steps.python.outputs.python-path }}'
+      - name: Report hashes and redacted scan classifications
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { createHash } from 'node:crypto';
+          import { execFileSync } from 'node:child_process';
+          import { lstat, readFile, readdir, writeFile } from 'node:fs/promises';
+          import { join, resolve } from 'node:path';
+          import { DSH_UPSTREAM_SHA, TOOLCHAIN } from './scripts/release/toolchain.mjs';
+          import { scanText } from './scripts/release/secret-scan.mjs';
+          const upstream = resolve('.context/dsh-b0/upstream-0.2.1-rc.3');
+          const sourceSha = execFileSync('git', ['-C', upstream, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+          const trackedStatus = execFileSync('git', ['-C', upstream, 'status', '--porcelain', '--untracked-files=no'], { encoding: 'utf8' }).trim();
+          const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
+          assert.equal(sourceSha, DSH_UPSTREAM_SHA);
+          assert.equal(sourceSha, '1f81c047fc48fa190a683e469daa699857e9afe8');
+          assert.equal(trackedStatus, '');
+          const lockSha = sha256(await readFile(join(upstream, 'pnpm-lock.yaml')));
+          assert.equal(lockSha, TOOLCHAIN.upstream_lock_sha256);
+          const relativeRoot = 'packages/experimental/inspector/lib/devtools/chunks';
+          const chunkRoot = join(upstream, relativeRoot);
+          const names = (await readdir(chunkRoot)).filter(name => /^(?:data_grid|legacy)-[A-Za-z0-9_-]+\.js$/.test(name)).sort();
+          assert.ok(names.length > 0 && names.length <= 20);
+          const files = [];
+          for (const name of names) {
+            const path = join(chunkRoot, name);
+            const info = await lstat(path);
+            assert.ok(info.isFile() && info.size <= 16 * 1024 * 1024);
+            const bytes = await readFile(path);
+            const text = bytes.toString('utf8');
+            const relativePath = `${relativeRoot}/${name}`;
+            const literals = name.startsWith('data_grid-')
+              ? ['DataGridInternalToken']
+              : ['ReportingEndpointNotToken', 'InvalidCredentialsCookie'];
+            files.push({
+              path: relativePath, bytes: bytes.length, sha256: sha256(bytes),
+              known_public_literals_present: literals.filter(value => text.includes(value)),
+              raw_findings: scanText(text, relativePath, { allowSyntheticFixtures: false }),
+              findings_after_candidate_literals: scanText(text, relativePath, {
+                allowSyntheticFixtures: false, assignmentAllowlist: new Set(literals),
+              }),
+            });
+          }
+          const report = {
+            schema_version: 'rc3-inspector-scan-diagnosis/v1',
+            workflow_source_sha: process.env.GITHUB_SHA,
+            consumer_source_sha: '5896567835074ed5355ff84d528ba648edee5ac0',
+            upstream_source_sha: sourceSha, upstream_lock_sha256: lockSha,
+            tracked_source_status: trackedStatus, node: process.version,
+            release_ready: false, scan_policy_changed: false, files,
+          };
+          const json = `${JSON.stringify(report, null, 2)}\n`;
+          await writeFile(join(process.env.RUNNER_TEMP, 'rc3-inspector-scan-diagnosis.json'), json, { flag: 'wx' });
+          console.log(json);
+          NODE
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: rc3-inspector-scan-diagnosis
+          path: ${{ runner.temp }}/rc3-inspector-scan-diagnosis.json
+          if-no-files-found: error
+          retention-days: 14
