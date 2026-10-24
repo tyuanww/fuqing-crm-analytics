@@ -217,6 +217,19 @@ class ResolvedPageBinding:
     required_scopes: frozenset[str]
 
 
+@dataclass(frozen=True)
+class _PreviewObservation:
+    owner: str
+    preview_id: str
+    page_id: str
+    base_version: int
+    operation: str
+    status: str
+    expires_ms: int
+    payload: str
+    digest: str
+
+
 def fault(code="VERSION_CONFLICT", status=409):
     messages = {
         "VERSION_CONFLICT": "页面版本已变化，请重新读取后预览；原版本未被覆盖。",
@@ -722,40 +735,60 @@ class PageDocumentStore:
                         (actor.actor_id, preview_id))
         return {"preview_id": preview_id, "status": "CANCELLED"}
 
+    def _confirmation(self, con, actor, preview_id, key):
+        row = self._draft_row(con, actor, preview_id)
+        snapshot, scopes = self._decode(actor, row, version=row["base_version"] + 1)
+        observation = _PreviewObservation(**dict(row))
+        receipt = con.execute("SELECT preview_id FROM receipts WHERE owner=? AND key=?",
+                              (actor.actor_id, key)).fetchone()
+        if receipt is not None and receipt["preview_id"] != preview_id:
+            raise fault("IDEMPOTENCY_CONFLICT")
+        if observation.status != "APPLIED":
+            if observation.status == "CANCELLED":
+                raise fault("PREVIEW_CANCELLED")
+            if observation.status != "PENDING":
+                raise fault("BINDING_CORRUPT")
+            if self.clock() >= observation.expires_ms:
+                raise fault("PREVIEW_EXPIRED")
+            head = con.execute("SELECT version FROM heads WHERE owner=? AND page_id=?",
+                               (actor.actor_id, observation.page_id)).fetchone()
+            if (head["version"] if head else 0) != observation.base_version:
+                raise fault()
+        return observation, snapshot, scopes
+
     def confirm(self, actor, preview_id, key):
         self._access(actor, write=True)
         key = validate_key(key)
+        with self._read() as con:
+            con.execute("BEGIN")
+            observed, snapshot, retained_scopes = self._confirmation(con, actor, preview_id, key)
+            con.execute("COMMIT")
+        binding_error = None
+        if observed.status != "APPLIED":
+            try:
+                spec, current_scopes = self._bind(actor, validated(PageDocument, snapshot["spec"]))
+                snapshot = {"spec": spec.model_dump(mode="json")}
+                payload, digest = self._encode_snapshot(snapshot, retained_scopes | current_scopes)
+            except Exception as error:
+                binding_error = error
         with transaction(self.path, unavailable=UNAVAILABLE) as con:
-            row = self._draft_row(con, actor, preview_id)
-            version = row["base_version"] + 1
-            snapshot, retained_scopes = self._decode(actor, row, version=version)
-            receipt = con.execute("SELECT preview_id FROM receipts WHERE owner=? AND key=?",
-                                  (actor.actor_id, key)).fetchone()
-            if receipt is not None and receipt["preview_id"] != preview_id:
-                raise fault("IDEMPOTENCY_CONFLICT")
-            if row["status"] == "APPLIED":
-                saved, _ = self._revision(con, actor, row["page_id"], version)
+            current, _, _ = self._confirmation(con, actor, preview_id, key)
+            version = current.base_version + 1
+            if current.status == "APPLIED":
+                saved, _ = self._revision(con, actor, current.page_id, version)
                 con.execute("INSERT OR IGNORE INTO receipts VALUES (?,?,?)", (actor.actor_id, key, preview_id))
                 return saved
-            if row["status"] == "CANCELLED":
-                raise fault("PREVIEW_CANCELLED")
-            if self.clock() >= row["expires_ms"]:
-                raise fault("PREVIEW_EXPIRED")
-            if row["base_version"]:
-                if self._head(con, actor, row["page_id"]) != row["base_version"]:
-                    raise fault()
-            spec, current_scopes = self._bind(actor, validated(PageDocument, snapshot["spec"]))
-            snapshot = {"spec": spec.model_dump(mode="json")}
-            payload, digest = self._encode_snapshot(snapshot, retained_scopes | current_scopes)
-            if self.clock() >= row["expires_ms"]:
-                raise fault("PREVIEW_EXPIRED")
-            if row["base_version"]:
+            if current != observed:
+                raise fault()
+            if binding_error is not None:
+                raise binding_error
+            if current.base_version:
                 con.execute("UPDATE heads SET version=? WHERE owner=? AND page_id=?",
-                            (version, actor.actor_id, row["page_id"]))
+                            (version, actor.actor_id, current.page_id))
             else:
-                con.execute("INSERT INTO heads VALUES (?,?,?)", (actor.actor_id, row["page_id"], version))
-            con.execute("INSERT INTO revisions VALUES (?,?,?,?,?,?,?)", (actor.actor_id, row["page_id"], version,
-                        row["operation"], self.clock(), payload, digest))
+                con.execute("INSERT INTO heads VALUES (?,?,?)", (actor.actor_id, current.page_id, version))
+            con.execute("INSERT INTO revisions VALUES (?,?,?,?,?,?,?)", (actor.actor_id, current.page_id, version,
+                        current.operation, self.clock(), payload, digest))
             con.execute("UPDATE previews SET status='APPLIED', payload=?, digest=? WHERE owner=? AND preview_id=?",
                         (payload, digest, actor.actor_id, preview_id))
             con.execute("INSERT INTO receipts VALUES (?,?,?)", (actor.actor_id, key, preview_id))

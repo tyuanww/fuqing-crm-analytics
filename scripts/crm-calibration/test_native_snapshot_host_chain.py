@@ -184,3 +184,92 @@ def test_maintained_node_relogin_and_upstream_401_never_restore_old_ref(native_c
     assert rpc("read", ref_id=current["source_ref"]) == {"error": "NATIVE_HOST_OPERATION_REJECTED"}
     state["authenticated"] = True
     assert rpc("read", ref_id=current["source_ref"]) == {"error": "NATIVE_HOST_OPERATION_REJECTED"}
+
+
+def test_native_lease_reads_python_source_and_preserves_session_isolation(native_chain, host_case):
+    rpc, _ = native_chain
+    filters = host_case["snapshots"][0].result.filters.model_dump(mode="json")
+    rejected = {"error": "NATIVE_HOST_OPERATION_REJECTED"}
+    assert rpc("login")["connected"] is True
+    query = rpc("query", filters=filters)
+    assert query["ok"] is True
+    ref_id = query["source_ref"]
+    opened = rpc("lease_open", lease_id="original")
+    assert opened["ok"] is True
+    identity = opened["identity"]
+    assert set(identity) == {"username", "native_session_id", "connection_generation", "expires_at_ms", "data_kind"}
+    assert identity["username"] == "fixture-user"
+    assert identity["native_session_id"] == "native-session"
+    assert identity["data_kind"] == "synthetic"
+    assert identity["connection_generation"]
+    assert identity["expires_at_ms"] > 0
+    expected = {"ok": True, "snapshot_id": query["value"]["snapshot_id"],
+                "result_sha256": query["value"]["result_sha256"], "gsv_amount_fen": 8001}
+    assert rpc("lease_assert_current", lease_id="original") == {"ok": True}
+    assert rpc("lease_read", lease_id="original", ref_id=ref_id) == expected
+    assert rpc("inactive") == {"ok": True}
+    assert rpc("lease_open", lease_id="inactive") == rejected
+    assert rpc("lease_read", lease_id="original", ref_id=ref_id) == rejected
+    assert rpc("lease_assert_current", lease_id="original") == rejected
+    assert rpc("active") == {"ok": True}
+    assert rpc("lease_assert_current", lease_id="original") == {"ok": True}
+    assert rpc("lease_read", lease_id="original", ref_id=ref_id) == expected
+    assert rpc("login", session_id="other-session")["connected"] is True
+    other = rpc("lease_open", session_id="other-session", lease_id="other")
+    assert other["ok"] is True
+    assert other["identity"]["username"] == identity["username"]
+    assert other["identity"]["native_session_id"] == "other-session"
+    assert other["identity"]["connection_generation"] != identity["connection_generation"]
+    assert rpc("lease_assert_current", lease_id="other") == {"ok": True}
+    assert rpc("lease_read", lease_id="other", ref_id=ref_id) == rejected
+    other_query = rpc("query", session_id="other-session", filters=filters)
+    assert other_query["ok"] is True
+    assert other_query["source_ref"] != ref_id
+    assert rpc("lease_read", lease_id="other", ref_id=other_query["source_ref"])["gsv_amount_fen"] == 8001
+    assert rpc("lease_read", lease_id="original", ref_id=other_query["source_ref"]) == rejected
+    assert rpc("lease_read", lease_id="original", ref_id=ref_id) == expected
+
+
+def test_native_lease_relogin_revocation_and_crm_401_block_hot_reads(native_chain, host_case):
+    rpc, state = native_chain
+    filters = host_case["snapshots"][0].result.filters.model_dump(mode="json")
+    rejected = {"error": "NATIVE_HOST_OPERATION_REJECTED"}
+    assert rpc("login")["connected"] is True
+    first = rpc("query", filters=filters)
+    assert first["ok"] is True
+    old = rpc("lease_open", lease_id="old")
+    assert old["ok"] is True
+    assert rpc("lease_read", lease_id="old", ref_id=first["source_ref"])["gsv_amount_fen"] == 8001
+    assert rpc("disconnect")["connected"] is False
+    assert rpc("lease_assert_current", lease_id="old") == rejected
+    assert rpc("lease_read", lease_id="old", ref_id=first["source_ref"]) == rejected
+    assert rpc("login")["connected"] is True
+    current = rpc("query", filters=filters)
+    assert current["ok"] is True
+    assert current["source_ref"] != first["source_ref"]
+    opened = rpc("lease_open", lease_id="current")
+    assert opened["ok"] is True
+    assert opened["identity"]["connection_generation"] != old["identity"]["connection_generation"]
+    assert opened["identity"]["native_session_id"] == old["identity"]["native_session_id"]
+    assert rpc("lease_assert_current", lease_id="old") == rejected
+    assert rpc("lease_read", lease_id="old", ref_id=first["source_ref"]) == rejected
+    assert rpc("lease_read", lease_id="old", ref_id=current["source_ref"]) == rejected
+    assert rpc("lease_assert_current", lease_id="current") == {"ok": True}
+    assert rpc("lease_read", lease_id="current", ref_id=first["source_ref"]) == rejected
+    expected = {"ok": True, "snapshot_id": current["value"]["snapshot_id"],
+                "result_sha256": current["value"]["result_sha256"], "gsv_amount_fen": 8001}
+    assert rpc("lease_read", lease_id="current", ref_id=current["source_ref"]) == expected
+    assert rpc("revoke", ref_id=current["source_ref"])["revoked"] is True
+    assert rpc("lease_read", lease_id="current", ref_id=current["source_ref"]) == rejected
+    assert rpc("lease_assert_current", lease_id="current") == {"ok": True}
+    fresh = rpc("query", filters=host_case["snapshots"][1].result.filters.model_dump(mode="json"))
+    assert fresh["ok"] is True
+    assert fresh["source_ref"] != current["source_ref"]
+    assert rpc("lease_read", lease_id="current", ref_id=fresh["source_ref"])["gsv_amount_fen"] == 8001
+    state["authenticated"] = False
+    assert rpc("lease_read", lease_id="current", ref_id=fresh["source_ref"]) == rejected
+    assert rpc("lease_assert_current", lease_id="current") == rejected
+    assert rpc("lease_open", lease_id="unauthenticated") == rejected
+    state["authenticated"] = True
+    assert rpc("lease_assert_current", lease_id="current") == rejected
+    assert rpc("lease_read", lease_id="current", ref_id=fresh["source_ref"]) == rejected

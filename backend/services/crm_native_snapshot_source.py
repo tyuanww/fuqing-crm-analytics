@@ -188,10 +188,12 @@ class NativeCrmSnapshotSource:
         return values["namespace"]
 
     @contextmanager
-    def _state(self):
+    def _state(self, *, readonly=False):
         try:
             self._check_files()
-            with transaction(self.path, unavailable=UNAVAILABLE) as con:
+            connection = (connect(self.path, readonly=True, unavailable=UNAVAILABLE) if readonly
+                          else transaction(self.path, unavailable=UNAVAILABLE))
+            with connection as con:
                 if self._metadata(con) != self.namespace:
                     raise ValueError("state namespace differs")
                 yield con
@@ -282,10 +284,11 @@ class NativeCrmSnapshotSource:
             raise fault("INVALID_REQUEST")
         lease = self._lease()
         identity = lease.identity
+        snapshot = self._snapshot(identity, snapshot_id)
+        self._unchanged(lease)
         with self._state() as con:
             row = con.execute("SELECT * FROM refs WHERE owner=? AND session_id=? AND generation=? AND snapshot_id=?",
                               (identity.username, identity.native_session_id, identity.connection_generation, snapshot_id)).fetchone()
-            snapshot = self._snapshot(identity, snapshot_id)
             if row is None:
                 ref = NativeSnapshotRef("crm_ref_" + uuid4().hex, identity, snapshot_id,
                                         digest(snapshot.model_dump(mode="json")), snapshot.result_sha256,
@@ -295,7 +298,6 @@ class NativeCrmSnapshotSource:
                 self._active(con, ref)
                 self._matches(ref, snapshot)
                 self._fresh(ref)
-            self._unchanged(lease)
             self._fresh(ref)
             if row is None:
                 raw = asdict(ref)
@@ -303,7 +305,7 @@ class NativeCrmSnapshotSource:
                             identity.native_session_id, identity.connection_generation, snapshot_id,
                             canonical(raw), digest(raw)))
         self._unchanged(lease)
-        self._fresh(ref)
+        self._recheck(lease.identity, ref)
         return ref
 
     def _reference(self, con, identity, ref_id):
@@ -324,25 +326,37 @@ class NativeCrmSnapshotSource:
 
     def read(self, ref_id: str) -> CrmSnapshot:
         lease = self._lease()
-        with self._state() as con:
+        with self._state(readonly=True) as con:
             ref = self._reference(con, lease.identity, ref_id)
             if ref.identity.connection_generation != lease.identity.connection_generation:
                 raise fault("NOT_FOUND")
             self._active(con, ref)
             self._fresh(ref)
-            snapshot = self._snapshot(lease.identity, ref.snapshot_id)
-            self._matches(ref, snapshot)
-            self._unchanged(lease)
-            self._fresh(ref)
         self._unchanged(lease)
-        self._fresh(ref)
+        snapshot = self._snapshot(lease.identity, ref.snapshot_id)
+        self._matches(ref, snapshot)
+        self._unchanged(lease)
+        self._recheck(lease.identity, ref)
         return snapshot
+
+    def _recheck(self, identity, ref):
+        with self._state(readonly=True) as con:
+            current = self._reference(con, identity, ref.ref_id)
+            if current != ref:
+                raise fault("STATE_UNAVAILABLE")
+            self._active(con, current)
+            self._fresh(current)
+        self._fresh(ref)
 
     def revoke(self, ref_id: str) -> None:
         lease = self._lease()
+        with self._state(readonly=True) as con:
+            observed = self._reference(con, lease.identity, ref_id)
+        self._unchanged(lease)
         with self._state() as con:
             ref = self._reference(con, lease.identity, ref_id)
-            self._unchanged(lease)
+            if ref != observed:
+                raise fault("STATE_UNAVAILABLE")
             con.execute("INSERT INTO revocations VALUES (?,?) ON CONFLICT(ref_id) DO NOTHING",
                         (ref.ref_id, self.clock()))
             if con.execute("SELECT 1 FROM revocations WHERE ref_id=?", (ref.ref_id,)).fetchone() is None:

@@ -7,6 +7,7 @@ from pathlib import Path
 import sqlite3
 import subprocess
 import sys
+from threading import Event
 
 import duckdb
 from fastapi import HTTPException
@@ -252,20 +253,49 @@ def test_native_identity_rejects_161_characters(source_case, field):
     assert_code("IDENTITY_UNAVAILABLE", lambda: source.register(snapshot.snapshot_id))
 
 
-def test_reference_expiring_only_after_transaction_exit_is_not_delivered(source_case, monkeypatch):
+@pytest.mark.parametrize("operation", ["read", "register"])
+def test_reference_expiring_after_final_connection_exit_is_not_delivered(source_case, monkeypatch, operation):
     source, _, snapshot, state, clock, _ = source_case
     ref = source.register(snapshot.snapshot_id)
     state["identity"] = replace(state["identity"], expires_at_ms=ref.identity.expires_at_ms + 10000)
     clock["now"] = ref.identity.expires_at_ms - 1
     original = source._state
+    exits = 0
 
     @contextmanager
-    def expire_on_exit():
-        with original() as con:
+    def expire_on_final_exit(*, readonly=False):
+        nonlocal exits
+        with original(readonly=readonly) as con:
             yield con
-        clock["now"] = ref.identity.expires_at_ms
+        exits += 1
+        if exits == 2:
+            clock["now"] = ref.identity.expires_at_ms
 
-    monkeypatch.setattr(source, "_state", expire_on_exit)
+    monkeypatch.setattr(source, "_state", expire_on_final_exit)
+    argument = ref.ref_id if operation == "read" else snapshot.snapshot_id
+    assert_code("RESULT_STALE", lambda: getattr(source, operation)(argument))
+
+
+def test_reference_expiring_during_final_identity_check_is_not_delivered(source_case, monkeypatch):
+    source, store, snapshot, state, clock, provider = source_case
+    ref = source.register(snapshot.snapshot_id)
+    state["identity"] = replace(state["identity"], expires_at_ms=ref.identity.expires_at_ms + 10000)
+    clock["now"] = ref.identity.expires_at_ms - 1
+    original = store.read_owned_snapshot
+    read_done = Event()
+
+    def read_snapshot(owner, snapshot_id):
+        result = original(owner, snapshot_id)
+        read_done.set()
+        return result
+
+    def current_provider():
+        if read_done.is_set():
+            clock["now"] = ref.identity.expires_at_ms
+        return provider()
+
+    monkeypatch.setattr(store, "read_owned_snapshot", read_snapshot)
+    source.provider = current_provider
     assert_code("RESULT_STALE", lambda: source.read(ref.ref_id))
 
 
@@ -407,8 +437,8 @@ def test_revoke_requires_an_actual_tombstone_when_sqlite_ignores_insert(source_c
     original = source._state
 
     @contextmanager
-    def ignoring_insert():
-        with original() as con:
+    def ignoring_insert(*, readonly=False):
+        with original(readonly=readonly) as con:
             con.set_authorizer(lambda action, table, *args: sqlite3.SQLITE_IGNORE
                                if action == sqlite3.SQLITE_INSERT and table == "revocations" else sqlite3.SQLITE_OK)
             yield con
@@ -423,9 +453,101 @@ def test_open_state_is_rechecked_and_lock_contention_fails_safely(source_case):
     ref = source.register(snapshot.snapshot_id)
     with closing(sqlite3.connect(source.path)) as con:
         con.execute("BEGIN IMMEDIATE")
-        assert_code("STATE_UNAVAILABLE", lambda: source.read(ref.ref_id))
+        assert source.read(ref.ref_id) == snapshot
         con.rollback()
     source.path.chmod(0o644)
     assert_code("STATE_UNAVAILABLE", lambda: source.read(ref.ref_id))
     source.path.chmod(0o600)
     assert source.read(ref.ref_id) == snapshot
+
+
+@pytest.mark.parametrize("operation,callback", [
+    (operation, callback)
+    for operation in ("register", "read", "revoke")
+    for callback in ("provider", "is_current", "snapshot")
+    if operation != "revoke" or callback != "snapshot"
+])
+def test_source_callbacks_can_write_from_new_connections(source_case, monkeypatch, operation, callback):
+    source, store, snapshot, _, _, provider = source_case
+    ref = source.register(snapshot.snapshot_id)
+    writes = []
+
+    def write():
+        with closing(sqlite3.connect(source.path, timeout=0.1)) as con:
+            con.execute("UPDATE metadata SET value=value WHERE key='namespace'")
+            con.commit()
+        writes.append(True)
+
+    def current_provider():
+        if callback == "provider":
+            write()
+        lease = provider()
+
+        def current():
+            if callback == "is_current":
+                write()
+            return lease.is_current()
+
+        return NativeCrmLease(lease.identity, current)
+
+    original = store.read_owned_snapshot
+
+    def read_snapshot(owner, snapshot_id):
+        if callback == "snapshot":
+            write()
+        return original(owner, snapshot_id)
+
+    source.provider = current_provider
+    monkeypatch.setattr(store, "read_owned_snapshot", read_snapshot)
+    argument = snapshot.snapshot_id if operation == "register" else ref.ref_id
+    result = getattr(source, operation)(argument)
+    if operation == "register":
+        assert result == ref
+    elif operation == "read":
+        assert result == snapshot
+    else:
+        assert_code("RESULT_REVOKED", lambda: reopen(source_case).read(ref.ref_id))
+    assert writes
+
+
+@pytest.mark.parametrize("operation", ["register", "read"])
+def test_revocation_during_final_identity_check_prevents_delivery(source_case, monkeypatch, operation):
+    source, store, snapshot, _, _, provider = source_case
+    ref = source.register(snapshot.snapshot_id) if operation == "read" else None
+    other = reopen(source_case)
+    entered, release, read_done = Event(), Event(), Event()
+    original = store.read_owned_snapshot
+
+    def read_snapshot(owner, snapshot_id):
+        result = original(owner, snapshot_id)
+        read_done.set()
+        return result
+
+    monkeypatch.setattr(store, "read_owned_snapshot", read_snapshot)
+
+    def current_provider():
+        lease = provider()
+
+        def current():
+            with closing(sqlite3.connect(source.path)) as con:
+                registered = con.execute("SELECT ref_id FROM refs WHERE snapshot_id=?", (snapshot.snapshot_id,)).fetchone()
+            if read_done.is_set() and registered is not None and not entered.is_set():
+                entered.set()
+                assert release.wait(5), "identity callback was not released"
+            return lease.is_current()
+
+        return NativeCrmLease(lease.identity, current)
+
+    source.provider = current_provider
+    argument = snapshot.snapshot_id if operation == "register" else ref.ref_id
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        future = pool.submit(getattr(source, operation), argument)
+        try:
+            assert entered.wait(5), "final identity callback was not entered"
+            with closing(sqlite3.connect(source.path)) as con:
+                ref_id = con.execute("SELECT ref_id FROM refs WHERE snapshot_id=?", (snapshot.snapshot_id,)).fetchone()[0]
+            other.revoke(ref_id)
+        finally:
+            release.set()
+        assert_code("RESULT_REVOKED", lambda: future.result(timeout=5))
+    assert_code("RESULT_REVOKED", lambda: other.read(ref_id))
