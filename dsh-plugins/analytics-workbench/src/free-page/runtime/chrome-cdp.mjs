@@ -143,38 +143,51 @@ export async function launchChrome({ userDataDir, proxyPort, url }) {
   }
   args.push(url || 'about:blank');
   const child = spawn(chromePath(), args, { stdio: ['ignore', 'pipe', 'pipe'] });
-  const port = await waitForPort(child, userDataDir);
-  const version = await fetchCdpJson(`http://127.0.0.1:${port}/json/version`);
-  const ws = new WebSocket(version.webSocketDebuggerUrl);
-  ws.addEventListener('error', () => {});
-  await waitForWebSocketOpen(ws);
-  const browser = new Cdp(ws);
-  const pages = await fetchCdpJson(`http://127.0.0.1:${port}/json/list`);
-  const page = pages.find((row) => row.type === 'page') || pages[0];
-  const pageWs = new WebSocket(page.webSocketDebuggerUrl);
-  pageWs.addEventListener('error', () => {});
-  await waitForWebSocketOpen(pageWs);
-  const session = new Cdp(pageWs);
-  await session.send('Page.enable');
-  await session.send('Runtime.enable');
-  return {
-    child,
-    port,
-    browser,
-    session,
-    version: version.Browser || version['Browser'],
-    userAgent: version['User-Agent'] || version.UserAgent,
-    async close() {
-      session.close();
-      browser.close();
+  const sockets = [];
+  let closing;
+  const close = () => closing ??= (async () => {
+    for (const socket of sockets) socket.close();
+    if (!child.pid || child.exitCode !== null || child.signalCode !== null) return;
+    const exited = once(child, 'exit', { signal: AbortSignal.timeout(5000) });
+    let timer;
+    try {
       child.kill('SIGTERM');
       await Promise.race([
-        once(child, 'exit'),
-        new Promise((resolve) => setTimeout(resolve, 2000)),
+        exited,
+        new Promise(resolve => { timer = setTimeout(resolve, 2000); }),
       ]);
       if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
-    },
-  };
+      await exited;
+    } finally { clearTimeout(timer); }
+  })();
+  try {
+    await once(child, 'spawn');
+    const port = await waitForPort(child, userDataDir);
+    const version = await fetchCdpJson(`http://127.0.0.1:${port}/json/version`);
+    const ws = new WebSocket(version.webSocketDebuggerUrl);
+    sockets.push(ws);
+    ws.addEventListener('error', () => {});
+    await waitForWebSocketOpen(ws);
+    const browser = new Cdp(ws);
+    const pages = await fetchCdpJson(`http://127.0.0.1:${port}/json/list`);
+    const page = pages.find((row) => row.type === 'page') || pages[0];
+    const pageWs = new WebSocket(page.webSocketDebuggerUrl);
+    sockets.push(pageWs);
+    pageWs.addEventListener('error', () => {});
+    await waitForWebSocketOpen(pageWs);
+    const session = new Cdp(pageWs);
+    await session.send('Page.enable');
+    await session.send('Runtime.enable');
+    return {
+      child, port, browser, session,
+      version: version.Browser || version['Browser'],
+      userAgent: version['User-Agent'] || version.UserAgent,
+      close,
+    };
+  } catch (error) {
+    await close();
+    throw error;
+  }
 }
 
 export async function evaluate(session, expression, timeoutMs = 8000) {
