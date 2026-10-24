@@ -88,6 +88,12 @@ class NativeSnapshotRef:
     registered_at_ms: int
 
 
+@dataclass(frozen=True)
+class NativeSnapshotExpectation:
+    snapshot_id: str
+    result_sha256: str
+
+
 def _private(path: Path, *, directory=False):
     info = path.lstat()
     valid_type = stat.S_ISDIR(info.st_mode) if directory else stat.S_ISREG(info.st_mode)
@@ -110,8 +116,17 @@ class NativeCrmSnapshotSource:
 
     def __init__(self, *, directory: Path, store: CrmAnalysisStore,
                  provider: Callable[[], NativeCrmLease | None] | None = None,
-                 clock: Callable[[], int] = now_ms):
+                 clock: Callable[[], int] = now_ms,
+                 expected_snapshot: NativeSnapshotExpectation | None = None):
         try:
+            if expected_snapshot is not None and (
+                    not isinstance(expected_snapshot, NativeSnapshotExpectation)
+                    or not isinstance(expected_snapshot.snapshot_id, str)
+                    or not SNAPSHOT_ID.fullmatch(expected_snapshot.snapshot_id)
+                    or not isinstance(expected_snapshot.result_sha256, str)
+                    or not SHA256_HEX.fullmatch(expected_snapshot.result_sha256)):
+                raise ValueError("invalid snapshot expectation")
+            self.expected_snapshot = expected_snapshot
             _private(directory, directory=True)
             self.directory = directory.resolve(strict=True)
             self.path = self.directory / "native_crm_snapshot_refs.sqlite3"
@@ -216,12 +231,17 @@ class NativeCrmSnapshotSource:
             raise fault("UNAUTHENTICATED")
 
     def _snapshot(self, identity, snapshot_id):
+        if self.expected_snapshot is not None and snapshot_id != self.expected_snapshot.snapshot_id:
+            raise fault("NOT_FOUND")
         try:
-            return self.store.read_owned_snapshot(identity.username, snapshot_id)
+            snapshot = self.store.read_owned_snapshot(identity.username, snapshot_id)
         except HTTPException as error:
             if error.status_code == 503:
                 raise fault("SOURCE_UNAVAILABLE") from None
             raise fault("NOT_FOUND" if error.status_code == 404 else "RESULT_UNAVAILABLE") from None
+        if self.expected_snapshot is not None and snapshot.result_sha256 != self.expected_snapshot.result_sha256:
+            raise fault("RESULT_STALE")
+        return snapshot
 
     @staticmethod
     def _decode(row):
@@ -293,7 +313,14 @@ class NativeCrmSnapshotSource:
                           (ref_id, identity.username, identity.native_session_id)).fetchone()
         if row is None:
             raise fault("NOT_FOUND")
-        return self._decode(row)
+        ref = self._decode(row)
+        if self.expected_snapshot is not None:
+            if (ref.snapshot_id != self.expected_snapshot.snapshot_id
+                    or ref.identity.connection_generation != identity.connection_generation):
+                raise fault("NOT_FOUND")
+            if ref.result_sha256 != self.expected_snapshot.result_sha256:
+                raise fault("RESULT_STALE")
+        return ref
 
     def read(self, ref_id: str) -> CrmSnapshot:
         lease = self._lease()

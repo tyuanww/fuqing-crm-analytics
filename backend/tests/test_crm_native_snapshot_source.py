@@ -237,11 +237,36 @@ def test_source_storage_503_remains_retryable_without_upstream_details(source_ca
     assert "credential-sentinel" not in failure.value.message
 
 
-def test_native_session_accepts_the_hosts_160_character_identity(source_case):
+@pytest.mark.parametrize("field", ["native_session_id", "connection_generation"])
+def test_native_identity_accepts_the_hosts_160_character_boundary(source_case, field):
     source, _, snapshot, state, _, _ = source_case
-    state["identity"] = replace(state["identity"], native_session_id="s" * 160)
+    state["identity"] = replace(state["identity"], **{field: "s" * 160})
     ref = source.register(snapshot.snapshot_id)
     assert source.read(ref.ref_id) == snapshot
+
+
+@pytest.mark.parametrize("field", ["native_session_id", "connection_generation"])
+def test_native_identity_rejects_161_characters(source_case, field):
+    source, _, snapshot, state, _, _ = source_case
+    state["identity"] = replace(state["identity"], **{field: "s" * 161})
+    assert_code("IDENTITY_UNAVAILABLE", lambda: source.register(snapshot.snapshot_id))
+
+
+def test_reference_expiring_only_after_transaction_exit_is_not_delivered(source_case, monkeypatch):
+    source, _, snapshot, state, clock, _ = source_case
+    ref = source.register(snapshot.snapshot_id)
+    state["identity"] = replace(state["identity"], expires_at_ms=ref.identity.expires_at_ms + 10000)
+    clock["now"] = ref.identity.expires_at_ms - 1
+    original = source._state
+
+    @contextmanager
+    def expire_on_exit():
+        with original() as con:
+            yield con
+        clock["now"] = ref.identity.expires_at_ms
+
+    monkeypatch.setattr(source, "_state", expire_on_exit)
+    assert_code("RESULT_STALE", lambda: source.read(ref.ref_id))
 
 
 def test_source_checksum_pins_the_whole_snapshot_not_just_numbers(source_case):
