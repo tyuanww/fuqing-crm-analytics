@@ -51,7 +51,7 @@ def _new_duckdb_conn() -> duckdb.DuckDBPyConnection:
         config=dual_conn._db_config(),
         read_only=read_only,
     )
-    return dual_conn._apply_runtime_settings(conn, dual_conn.READ_MEMORY_LIMIT)
+    return dual_conn.configure_connection(conn, dual_conn.READ_MEMORY_LIMIT)
 
 
 def _run_rfm_period_serial(
