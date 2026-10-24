@@ -46,6 +46,7 @@ SAFE_BUILTINS = {
     "Exception": Exception,
     "BaseException": BaseException,
     "round": round,
+    "dict": dict,
 }
 RANGES = {
     "current": ("2025-06-01 00:00:00", "2025-06-30 23:59:59", "2025-05-31"),
@@ -221,7 +222,17 @@ class FlowContractTests(unittest.TestCase):
                 for item in compute.call_args_list:
                     self.assertIs(item.args[0], connection)
                     self.assertEqual(item.args[4], dimension)
-                    self.assertEqual(item.args[8:], (REQUEST["channel"], "GSV", REQUEST["exclude_channels"]))
+                    self.assertEqual(item.args[8:], ())
+                    self.assertEqual(item.kwargs, {
+                        "channel": REQUEST["channel"],
+                        "metric_type": "GSV",
+                        "exclude_channels": REQUEST["exclude_channels"],
+                        "sample_mode": None,
+                        "sample_channel_ids": None,
+                        "history_channels": None,
+                        "history_product_ids": None,
+                        "as_of": None,
+                    })
                 get_connection.assert_called_once_with()
                 write_cache.assert_not_called()
 

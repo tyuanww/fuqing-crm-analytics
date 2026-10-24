@@ -44,6 +44,8 @@
 
 源码预热仍仅列 `YEARS=[2026]` 的 380 个逻辑组合，窗口按日期解析并去重，简单把年份乘二不等于近两年覆盖。商品端点仍调用聚合服务，独立持久缓存及近两年筛选速度尚未验证。R/F/M 流转 miss 仍与八象限的 cache-only 路由不同，不把它们合称全部已预热。新 rc3 的真实问数、WeKnora、快照、HTML 编辑保存及恢复仍需对应候选 UAT，不继承旧 rc1 结论。
 
+盘查时，原离线 `verify_rfm_execution_contract.py` 因当前 flow 使用 `dict` 和关键字过滤参数而出现 6 个子用例错误。只同步安全内建名单和完整参数断言，不改业务函数；修复后 12 项控制流检查通过。新增回归从无关 cwd、最小环境和 `-I -B` 调用真实脚本，1 PASS，Ruff 通过，CLI 复核无本范围 P0–P2。新回归进入正常后端测试入口，避免仅人工运行的诊断器继续漂移。红、绿日志分别为 `rfm-execution-characterization.log` 和 `rfm-execution-characterization-green.log`；这些结果不证明 SQL 指标、性能、真实数据库取消或预热覆盖。
+
 ## 最终作者与组合身份
 
 | 作者 | 最终 source | 成功 CI run | PR |
