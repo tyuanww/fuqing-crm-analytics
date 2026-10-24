@@ -400,13 +400,18 @@ class PageDocumentStore:
         state = "BOUND_STALE" if stale else "BOUND_VERIFIED"
         return spec.model_copy(update={"binding_state": state}), frozenset(scopes)
 
+    @staticmethod
+    def _encode_snapshot(snapshot, scopes):
+        payload = canonical_json({"snapshot": snapshot, "required_scopes": sorted(scopes)})
+        if len(payload.encode()) > PACKAGE_MAX_BYTES:
+            raise fault("PACKAGE_TOO_LARGE", 413)
+        return payload, hashlib.sha256(payload.encode()).hexdigest()
+
     def _preview(self, actor, spec, operation, base_version, *, retained_scopes=None):
         self._access(actor, write=True)
         spec, scopes = self._bind(actor, spec, retained_scopes=retained_scopes)
         snapshot = {"spec": spec.model_dump(mode="json")}
-        payload = canonical_json({"snapshot": snapshot, "required_scopes": sorted(scopes)})
-        if len(payload.encode()) > PACKAGE_MAX_BYTES:
-            raise fault("PACKAGE_TOO_LARGE", 413)
+        payload, digest = self._encode_snapshot(snapshot, scopes)
         preview_id = "preview_" + uuid4().hex
         expires = self.clock() + 30 * 60 * 1000
         with transaction(self.path, unavailable=UNAVAILABLE) as con:
@@ -414,7 +419,7 @@ class PageDocumentStore:
                 raise fault()
             con.execute("INSERT INTO previews VALUES (?,?,?,?,?,'PENDING',?,?,?)",
                         (actor.actor_id, preview_id, spec.page_id, base_version, operation, expires,
-                         payload, hashlib.sha256(payload.encode()).hexdigest()))
+                         payload, digest))
         return {"preview_id": preview_id, "status": "PENDING", "operation": operation,
                 "base_version": base_version, "expires_at_ms": expires, "snapshot": snapshot}
 
@@ -723,7 +728,7 @@ class PageDocumentStore:
         with transaction(self.path, unavailable=UNAVAILABLE) as con:
             row = self._draft_row(con, actor, preview_id)
             version = row["base_version"] + 1
-            snapshot, _ = self._decode(actor, row, version=version)
+            snapshot, retained_scopes = self._decode(actor, row, version=version)
             receipt = con.execute("SELECT preview_id FROM receipts WHERE owner=? AND key=?",
                                   (actor.actor_id, key)).fetchone()
             if receipt is not None and receipt["preview_id"] != preview_id:
@@ -739,13 +744,19 @@ class PageDocumentStore:
             if row["base_version"]:
                 if self._head(con, actor, row["page_id"]) != row["base_version"]:
                     raise fault()
+            spec, current_scopes = self._bind(actor, validated(PageDocument, snapshot["spec"]))
+            snapshot = {"spec": spec.model_dump(mode="json")}
+            payload, digest = self._encode_snapshot(snapshot, retained_scopes | current_scopes)
+            if self.clock() >= row["expires_ms"]:
+                raise fault("PREVIEW_EXPIRED")
+            if row["base_version"]:
                 con.execute("UPDATE heads SET version=? WHERE owner=? AND page_id=?",
                             (version, actor.actor_id, row["page_id"]))
             else:
                 con.execute("INSERT INTO heads VALUES (?,?,?)", (actor.actor_id, row["page_id"], version))
             con.execute("INSERT INTO revisions VALUES (?,?,?,?,?,?,?)", (actor.actor_id, row["page_id"], version,
-                        row["operation"], self.clock(), row["payload"], row["digest"]))
-            con.execute("UPDATE previews SET status='APPLIED' WHERE owner=? AND preview_id=?",
-                        (actor.actor_id, preview_id))
+                        row["operation"], self.clock(), payload, digest))
+            con.execute("UPDATE previews SET status='APPLIED', payload=?, digest=? WHERE owner=? AND preview_id=?",
+                        (payload, digest, actor.actor_id, preview_id))
             con.execute("INSERT INTO receipts VALUES (?,?,?)", (actor.actor_id, key, preview_id))
             return snapshot

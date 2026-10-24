@@ -1,4 +1,4 @@
-import { PNPM_VERSION } from './toolchain.mjs';
+import { DSH_SDK_VERSION, PNPM_VERSION } from './toolchain.mjs';
 import { createHash } from 'node:crypto';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -12,14 +12,15 @@ import { writeBuildProvenance } from './generated-provenance.mjs';
 
 const exec = promisify(execFile);
 
-async function fixture(t, { workspaceLink = null, symlinkOutput = false, lifecycle = false } = {}) {
+async function fixture(t, { workspaceLink = null, symlinkOutput = false, lifecycle = false,
+  sdkVersion = DSH_SDK_VERSION } = {}) {
   const root = await mkdtemp(join(tmpdir(), 'dsh-plugin-pack-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   await mkdir(join(root, 'plugin/lib'), { recursive: true });
   await mkdir(join(root, 'out'), { recursive: true });
   await writeFile(join(root, 'plugin/package.json'), JSON.stringify({
     name: '@shine-mage/dsh-synthetic-leaf', version: '0.1.0', private: true, packageManager: `pnpm@${PNPM_VERSION}`, type: 'module',
-    peerDependencies: { '@deepseek-ai/dsh-tools': '0.1.7-rc.2' }, files: ['lib/', 'cordis.patch.yml'],
+    peerDependencies: { '@deepseek-ai/dsh-tools': sdkVersion }, files: ['lib/', 'cordis.patch.yml'],
     exports: { '.': { import: './lib/index.js' } }, main: './lib/index.js', dsh: { bundle: { patch: 'cordis.patch.yml' } },
     ...(lifecycle ? { scripts: { prepack: 'echo executed > ../prepack-ran' } } : {}),
   }) + '\n');
@@ -48,7 +49,7 @@ test('controlled plugin pack emits an immutable tarball receipt without runtime 
   const manifestPath = join(input.outputDir, 'receipt.json');
   const receipt = await packPlugin({ ...input, manifestPath });
   assert.equal(receipt.schema_version, 'dsh-plugin-pack/v1');
-  assert.equal(receipt.dsh_pin, '0.1.7-rc.2');
+  assert.equal(receipt.dsh_pin, DSH_SDK_VERSION);
   assert.equal(receipt.activation, 'NOT_RUN');
   assert.match(receipt.tarball.sha256, /^[a-f0-9]{64}$/);
   assert.ok(receipt.entries.includes('lib/index.js'));
@@ -61,7 +62,7 @@ test('query side-load lock binds the source package manifest to the recorded pac
   const manifest = JSON.parse(packageBytes);
   const lock = JSON.parse(await readFile(new URL('../../config/query-agent-side-load.v1.json', import.meta.url), 'utf8'));
   const evidence = JSON.parse(await readFile(
-    new URL('../../docs/hackathon/evidence/dsh-query11-allowlist-20261021.json', import.meta.url),
+    new URL(`../../${lock.evidence}`, import.meta.url),
     'utf8',
   ));
   const runtimeEvidence = JSON.parse(await readFile(
@@ -120,8 +121,8 @@ test('query.9 history uses an immutable identity snapshot instead of the live qu
   assert.equal(snapshot.build_provenance_sha256, query9.query_artifact.build_provenance_sha256);
 });
 
-test('release lane packs an rc1 artifact from the default rc2 source peer', async t => {
-  const input = await fixture(t);
+test('release lane packs an rc1 artifact from an explicit rc2 source peer', async t => {
+  const input = await fixture(t, { sdkVersion: '0.1.7-rc.2' });
   const packed = await packPlugin({
     ...input,
     sdkVersion: '0.2.1-rc.1',
@@ -174,7 +175,7 @@ test('packed host entry accepts a declared dependency subpath', async t => {
   const input = await fixture(t);
   const manifestPath = join(input.plugin, 'package.json');
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
-  manifest.peerDependencies['@deepseek-ai/dsh-client-connection'] = '0.1.7-rc.2';
+  manifest.peerDependencies['@deepseek-ai/dsh-client-connection'] = DSH_SDK_VERSION;
   await writeFile(manifestPath, `${JSON.stringify(manifest)}\n`);
   await writeFile(join(input.plugin, 'lib/index.js'),
     "import '@deepseek-ai/dsh-client-connection/client';\nexport const synthetic = true;\n");
@@ -301,6 +302,16 @@ test('overlapping files wildcards produce one archive entry per file', async t =
   const receipt = await packPlugin(input);
   assert.equal(receipt.entries.filter(entry => entry === 'lib/index.js').length, 1);
   assert.equal(new Set(receipt.entries).size, receipt.entries.length);
+});
+
+test('tool plugin still requires its exact dsh-tools peer', async t => {
+  const input = await fixture(t);
+  const path = join(input.plugin, 'package.json');
+  const manifest = JSON.parse(await readFile(path, 'utf8'));
+  delete manifest.peerDependencies;
+  await writeFile(path, `${JSON.stringify(manifest)}\n`);
+  await commitFixture(input.root);
+  await assert.rejects(() => packPlugin(input), /PLUGIN_PACK_DSH_PEER_INVALID/);
 });
 
 test('formal pack rejects an ignored lib replacement against a clean builder receipt', async t => {

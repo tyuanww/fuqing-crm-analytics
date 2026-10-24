@@ -27,7 +27,7 @@ export async function fixture(t, selected = ['crm', 'knowledge', 'page'], mutate
   const root = await mkdtemp(join(tmpdir(), 'crm-formal-profile-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   const profile = { schema_version: 'dsh-profile/v1', profile_id: 'synthetic-crm-profile',
-    dsh: { sdk_version: '0.1.7-rc.2', upstream_sha: '477b4f420553e8a52c2fbccc464d7561b239c443' }, plugins: [] };
+    dsh: { sdk_version: '0.2.1-rc.3', upstream_sha: '1f81c047fc48fa190a683e469daa699857e9afe8' }, plugins: [] };
   const inputs = { schema_version: 'dsh-profile-pack-inputs/v1', profile: { path: 'profile.json' }, plugins: [] };
   for (const [index, domain] of selected.entries()) {
     const spec = specs[domain], staging = join(root, 'staging', domain), directory = join(root, 'packs', domain);
@@ -35,7 +35,7 @@ export async function fixture(t, selected = ['crm', 'knowledge', 'page'], mutate
     await mkdir(directory, { recursive: true });
     const manifest = { name: spec.id, type: 'module', version: '0.0.0-fixture', exports: structuredClone(spec.exports),
       files: [...new Set(exportFiles(spec.exports))],
-      peerDependencies: { '@deepseek-ai/dsh-tools': '0.1.7-rc.2', ...(domain === 'page' || spec.leaf ? {} : { '@deepseek-ai/cordis': '4.0.4' }) },
+      peerDependencies: { '@deepseek-ai/dsh-tools': '0.2.1-rc.3', ...(domain === 'page' || spec.leaf ? {} : { '@deepseek-ai/cordis': '4.0.5' }) },
       ...(spec.leaf || domain === 'page' ? { dsh: { client: { platform: 'web', inject: [] } } } : {}),
       ...(domain === 'page' || spec.leaf ? {} : { shinemage: { plugin_domain: domain, composition_contract: 'crm-knowledge-split/v1' } }) };
     mutate(manifest, domain);
@@ -52,7 +52,7 @@ export async function fixture(t, selected = ['crm', 'knowledge', 'page'], mutate
     });
     const sourceSha = String(index + 1).repeat(40);
     const receipt = { schema_version: 'dsh-plugin-pack/v1', package_name: manifest.name, package_version: manifest.version,
-      dsh_pin: '0.1.7-rc.2', source_sha: sourceSha, source_dirty: false,
+      dsh_pin: '0.2.1-rc.3', source_sha: sourceSha, source_dirty: false,
       tarball: { name: tarName, bytes: archive.length, sha256: hash(archive) },
       generated_bytes_provenance: {
         schema_version: 'dsh-generated-bytes/v1', status: 'PASS',

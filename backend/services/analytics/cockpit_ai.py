@@ -89,7 +89,7 @@ class CockpitAIStore:
         job = self.view(row)
         if row["target_kind"] == "page":
             format_rule = ("输入是 HTML 源码包 JSON，保留 html/css/js/resources/node_map/presentation 合同。"
-                           + ("此页面有业务数据绑定，仅允许修改 CSS。禁止改 HTML/JS/资源/映射，禁止伪造或替换数据。" if job["bound"]
+                           + ("此页面有业务数据绑定，整页 AI 仅允许修改 CSS 和 presentation 样式。禁止改 HTML/JS/资源/映射或 presentation.text，禁止伪造或替换数据。" if job["bound"]
                               else "此页面未绑定业务结果，按下方选区约束和用户要求修改。"))
             format_rule += ("\n源码包根对象就是 package，不要再嵌套 package 字段。若整页或静态源码编辑改变了 html/css/js，"
                             "须逐一核对已有 presentation 定位，保留仍适用记录，并以 UTF-8 编码的 JSON.stringify([html,css,js])"
@@ -356,8 +356,15 @@ class CockpitAIStore:
             return
         # Data-bound markup/scripts/maps are code, not freeform AI business text.
         # Styling can change; changing data-bound content requires existing result APIs.
-        if any(before.get(k) != after.get(k) for k in ("html", "js", "node_map", "resources", "presentation")):
-            fault(422, "AI_BOUND_CONTENT", "此页面有业务数据绑定，AI 可调整 CSS；内容或数据请使用原有绑定编辑流程。")
+        if any(before.get(k) != after.get(k) for k in ("html", "js", "node_map", "resources")):
+            fault(422, "AI_BOUND_CONTENT", "此页面有业务数据绑定，AI 可调整 CSS 和非绑定节点的展示文案；绑定数据节点请使用原有绑定编辑流程。")
+        # A whole-page candidate has no trusted node-resolution context.  Do not
+        # let a presentation overlay become an alternate data channel: the
+        # controlled node-edit path performs the binding check for each target.
+        for package in (before, after):
+            for edit in (package.get("presentation") or {}).get("edits", []):
+                if edit.get("text") is not None:
+                    fault(422, "AI_BOUND_CONTENT", "绑定页面的整页 AI 修改只允许样式叠加；展示文案请通过受控节点编辑。")
 
     def content(self, actor, job_id, variant):
         with self.files.connect() as con:

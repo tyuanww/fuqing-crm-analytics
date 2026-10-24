@@ -17,6 +17,7 @@ import { validateSourceManifest } from '../release/plugin-source-manifest.mjs';
 
 const exec = promisify(execFile), hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const root = fileURLToPath(new URL('../..', import.meta.url));
+const defaultLockPath = join(root, 'config/shinemage-composition-packs.lock.json');
 const HEX = /^[a-f0-9]{64}$/, SHA = /^[a-f0-9]{40}$/;
 const MAX_ARCHIVE = 64 * 1024 * 1024;
 const json = value => JSON.stringify(value, null, 2) + '\n';
@@ -31,7 +32,7 @@ function absolute(path, code) {
 
 /** All inputs are validated before the new output directory is created. */
 export async function prepareCompositionPacks({ inputDirectory, output,
-  lockPath = join(root, 'config/shinemage-composition-packs.lock.json'), profileRoot = root, toolchain, cordisPeerVersion, manifestPath = null } = {}) {
+  lockPath = defaultLockPath, profileRoot = root, toolchain, cordisPeerVersion, manifestPath = null } = {}) {
   const source = absolute(inputDirectory, 'CI_COMPOSITION_PACK_DIRECTORY_REQUIRED');
   const destination = absolute(output, 'CI_COMPOSITION_OUTPUT_REQUIRED');
   profileRoot = absolute(profileRoot, 'CI_COMPOSITION_PROFILE_ROOT_REQUIRED');
@@ -173,7 +174,21 @@ function validateArtifactReference({ repository, id, sha256 }) {
   assert.match(sha256 ?? '', HEX, 'CI_COMPOSITION_ARTIFACT_DIGEST');
 }
 
-export function inspectGitHubArtifact(artifact, { repository, id, sha256 }) {
+export async function loadCompositionArtifactReference({ artifactLockPath, compositionLockPath = defaultLockPath } = {}) {
+  const bytes = await readArtifactFile(absolute(artifactLockPath, 'CI_COMPOSITION_ARTIFACT_LOCK_REQUIRED'), 64 * 1024);
+  const lock = JSON.parse(bytes);
+  exact(lock, ['schema_version', 'repository', 'id', 'sha256', 'runId', 'headSha', 'composition_lock_sha256'], 'CI_COMPOSITION_ARTIFACT_LOCK_SHAPE');
+  assert.equal(lock.schema_version, 'dsh-composition-artifact/v1', 'CI_COMPOSITION_ARTIFACT_LOCK_SCHEMA');
+  validateArtifactReference(lock);
+  assert.ok(Number.isSafeInteger(lock.runId) && lock.runId > 0, 'CI_COMPOSITION_ARTIFACT_RUN_ID');
+  assert.match(lock.headSha ?? '', SHA, 'CI_COMPOSITION_ARTIFACT_HEAD_SHA');
+  assert.match(lock.composition_lock_sha256 ?? '', HEX, 'CI_COMPOSITION_ARTIFACT_COMPOSITION_DIGEST');
+  const composition = await readArtifactFile(absolute(compositionLockPath, 'CI_COMPOSITION_LOCK_REQUIRED'), 256 * 1024);
+  assert.equal(hash(composition), lock.composition_lock_sha256, 'CI_COMPOSITION_ARTIFACT_COMPOSITION_DIGEST');
+  return { repository: lock.repository, id: lock.id, sha256: lock.sha256, runId: lock.runId, headSha: lock.headSha };
+}
+
+export function inspectGitHubArtifact(artifact, { repository, id, sha256, runId, headSha }) {
   validateArtifactReference({ repository, id, sha256 });
   assert.equal(artifact.id, id, 'CI_COMPOSITION_ARTIFACT_ID_MISMATCH');
   assert.equal(artifact.expired, false, 'CI_COMPOSITION_ARTIFACT_EXPIRED');
@@ -182,9 +197,15 @@ export function inspectGitHubArtifact(artifact, { repository, id, sha256 }) {
     'CI_COMPOSITION_ARTIFACT_SIZE');
   assert.ok(Number.isSafeInteger(artifact.workflow_run?.id) && artifact.workflow_run.id > 0, 'CI_COMPOSITION_ARTIFACT_RUN');
   assert.match(artifact.workflow_run.head_sha ?? '', SHA, 'CI_COMPOSITION_ARTIFACT_RUN');
+  if (runId !== undefined || headSha !== undefined) {
+    assert.ok(Number.isSafeInteger(runId) && runId > 0, 'CI_COMPOSITION_ARTIFACT_RUN_ID');
+    assert.match(headSha ?? '', SHA, 'CI_COMPOSITION_ARTIFACT_HEAD_SHA');
+    assert.equal(artifact.workflow_run.id, runId, 'CI_COMPOSITION_ARTIFACT_RUN_ID');
+    assert.equal(artifact.workflow_run.head_sha, headSha, 'CI_COMPOSITION_ARTIFACT_HEAD_SHA');
+  }
 }
 
-async function receiveArchive({ archive, output, python, manifestPath }) {
+async function receiveArchive({ archive, output, python, manifestPath, lockPath = defaultLockPath }) {
   const work = await mkdtemp(join(tmpdir(), 'composition-pack-archive-'));
   try {
     const bytes = await readArtifactFile(absolute(archive, 'CI_COMPOSITION_ARCHIVE_REQUIRED'), MAX_ARCHIVE);
@@ -192,11 +213,12 @@ async function receiveArchive({ archive, output, python, manifestPath }) {
     await writeFile(input, bytes, { flag: 'wx', mode: 0o600 });
     await exec(python, ['-I', '-B', fileURLToPath(new URL('./unpack-composition-inputs.py', import.meta.url)), input, extracted],
       { timeout: 30000, maxBuffer: 256 * 1024 });
-    return await prepareCompositionPacks({ inputDirectory: extracted, output, manifestPath });
+    return await prepareCompositionPacks({ inputDirectory: extracted, output, manifestPath, lockPath });
   } finally { await rm(work, { recursive: true, force: true }); }
 }
 
-async function receiveGitHubArtifact({ repository, id, sha256, output, python, manifestPath }) {
+async function receiveGitHubArtifact({ reference, output, python, manifestPath, lockPath = defaultLockPath }) {
+  const { repository, id, sha256 } = reference;
   // Do not silently use personal gh credentials, or assume a public repo token
   // has access to the private author repositories. The token is prepare-only.
   validateArtifactReference({ repository, id, sha256 });
@@ -215,7 +237,7 @@ async function receiveGitHubArtifact({ repository, id, sha256, output, python, m
       } catch { throw new Error('CI_COMPOSITION_ARTIFACT_FETCH_FAILED: check explicit read access and the fixed artifact'); }
     };
     const artifact = JSON.parse(await api(`repos/${repository}/actions/artifacts/${id}`));
-    inspectGitHubArtifact(artifact, { repository, id, sha256 });
+    inspectGitHubArtifact(artifact, reference);
     const run = JSON.parse(await api(`repos/${repository}/actions/runs/${artifact.workflow_run.id}`));
     assert.equal(run.id, artifact.workflow_run.id, 'CI_COMPOSITION_ARTIFACT_RUN');
     assert.equal(run.status, 'completed', 'CI_COMPOSITION_ARTIFACT_RUN');
@@ -226,7 +248,7 @@ async function receiveGitHubArtifact({ repository, id, sha256, output, python, m
     assert.equal(hash(bytes), sha256, 'CI_COMPOSITION_ARTIFACT_DIGEST');
     const archive = join(work, 'input.zip');
     await writeFile(archive, bytes, { flag: 'wx', mode: 0o600 });
-    return await receiveArchive({ archive, output, python, manifestPath });
+    return await receiveArchive({ archive, output, python, manifestPath, lockPath });
   } finally { await rm(work, { recursive: true, force: true }); }
 }
 
@@ -235,18 +257,20 @@ if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) 
     const args = process.argv.slice(2), options = {};
     while (args.length) {
       const key = args.shift(), value = args.shift();
-      assert.ok(['--input-dir', '--archive', '--repository', '--artifact-id', '--artifact-sha256', '--output', '--python', '--github-env', '--manifest'].includes(key)
+      assert.ok(['--input-dir', '--archive', '--repository', '--artifact-lock', '--artifact-id', '--artifact-sha256', '--output', '--python', '--github-env', '--manifest'].includes(key)
         && value && !Object.hasOwn(options, key), 'CI_COMPOSITION_ARGUMENTS');
       options[key] = value;
     }
     const { '--input-dir': inputDirectory, '--archive': archive, '--repository': repository,
       '--artifact-id': artifactId, '--artifact-sha256': sha256, '--output': output,
-      '--python': python = 'python3', '--github-env': githubEnv, '--manifest': manifestPath } = options;
-    assert.equal([inputDirectory, archive, repository].filter(Boolean).length, 1, 'CI_COMPOSITION_INPUT_REQUIRED');
+      '--python': python = 'python3', '--github-env': githubEnv, '--manifest': manifestPath, '--artifact-lock': artifactLockPath } = options;
+    assert.equal([inputDirectory, archive, repository, artifactLockPath].filter(Boolean).length, 1, 'CI_COMPOSITION_INPUT_REQUIRED');
     assert.ok(repository || (!artifactId && !sha256), 'CI_COMPOSITION_ARGUMENTS');
+    const reference = artifactLockPath ? await loadCompositionArtifactReference({ artifactLockPath, compositionLockPath: defaultLockPath })
+      : { repository, id: Number(artifactId), sha256 };
     const receipt = inputDirectory ? await prepareCompositionPacks({ inputDirectory, output, manifestPath })
       : archive ? await receiveArchive({ archive, output, python, manifestPath })
-      : await receiveGitHubArtifact({ repository, id: Number(artifactId), sha256, output, python, manifestPath });
+      : await receiveGitHubArtifact({ reference, output, python, manifestPath, lockPath: defaultLockPath });
     if (githubEnv) {
       const file = absolute(githubEnv, 'CI_COMPOSITION_GITHUB_ENV_INVALID'), info = await lstat(file);
       assert.ok(info.isFile() && !info.isSymbolicLink(), 'CI_COMPOSITION_GITHUB_ENV_INVALID');

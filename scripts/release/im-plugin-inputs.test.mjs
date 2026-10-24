@@ -49,7 +49,7 @@ async function fixture(t) {
   const lock = {
     schema_version: 'shinemage-im-plugin-inputs/v1',
     release_ready: false,
-    runtime: { dsh: '0.2.1-rc.1', cordis: '4.0.5' },
+    runtime: { dsh: '0.2.1-rc.3', cordis: '4.0.5' },
     inputs,
   };
   const lockPath = join(root, 'lock.json');

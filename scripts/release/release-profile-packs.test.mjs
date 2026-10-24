@@ -11,7 +11,7 @@ import { collectReleaseReadiness } from './readiness.mjs';
 
 const hash = data => createHash('sha256').update(data).digest('hex');
 const json = value => JSON.stringify(value, null, 2) + '\n';
-const sdk = { sdk_version: '0.1.7-rc.2', upstream_sha: '477b4f420553e8a52c2fbccc464d7561b239c443' };
+const sdk = { sdk_version: '0.2.1-rc.3', upstream_sha: '1f81c047fc48fa190a683e469daa699857e9afe8' };
 
 async function fixture(t) {
   const base = await mkdtemp(join(tmpdir(), 'release-pack-fixture-'));
@@ -48,7 +48,7 @@ async function fixture(t) {
   const inputsPath = join(inputRoot, 'inputs.json');
   async function saveProfile() {
     const bytes = Buffer.from(json(profile)); input.profile.sha256 = hash(bytes);
-    await writeFile(join(root, 'config/dsh-profile.rc2.json'), bytes);
+    await writeFile(join(root, 'config/dsh-profile.rc3.json'), bytes);
     await writeFile(join(inputRoot, 'profile.json'), bytes);
     await writeFile(inputsPath, json(input));
   }
@@ -91,7 +91,7 @@ test('fixed pack input is mandatory and fails before writing any payload', async
 
 test('another valid profile cannot replace the selected main profile', async t => {
   const f = await fixture(t);
-  await writeFile(join(f.root, 'config/dsh-profile.rc2.json'), json({ ...f.profile, profile_id: 'another-profile' }));
+  await writeFile(join(f.root, 'config/dsh-profile.rc3.json'), json({ ...f.profile, profile_id: 'another-profile' }));
   await assert.rejects(loadReleasePacks(f), /RELEASE_PACK_PROFILE_MISMATCH/);
   await assert.rejects(prepareReleasePayload(f), /RELEASE_PACK_PROFILE_MISMATCH/);
   await assert.rejects(access(f.output), { code: 'ENOENT' });
@@ -174,7 +174,7 @@ test('release pack receipt binds the main snapshot to immutable external inputs'
   ledger.profile.path = 'config/another-profile.json';
   const bytes = Buffer.from(json(ledger));
   await writeFile(join(f.output, f.receipt.profile_pack_snapshot.path), bytes);
-  await writeFile(join(f.output, 'config/another-profile.json'), await readFile(join(f.root, 'config/dsh-profile.rc2.json')));
+  await writeFile(join(f.output, 'config/another-profile.json'), await readFile(join(f.root, 'config/dsh-profile.rc3.json')));
   await assert.rejects(verifyReleasePackBinding({ directory: f.output, snapshot: { path: f.receipt.profile_pack_snapshot.path, sha256: hash(bytes) },
     profileSnapshot: { path: f.receipt.profile_path, sha256: f.input.profile.sha256 } }), /RELEASE_PACK_PROFILE_MISMATCH/);
 });

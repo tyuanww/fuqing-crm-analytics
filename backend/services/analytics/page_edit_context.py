@@ -810,7 +810,7 @@ class PageEditContextStore:
 
     def overlay(self, actor, page_id: str, version: int):
         """Read the overlay saved for this page version only. Missing rows are empty."""
-        self._require(actor)
+        require(actor, "dashboard:read", data_scope=DATA_SCOPE)
         self._page(actor, page_id)
         if type(version) is not int or version < 1:
             raise fault("INVALID_EDIT")

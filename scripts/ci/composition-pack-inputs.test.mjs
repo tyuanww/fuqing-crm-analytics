@@ -7,7 +7,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import { fixture } from '../crm-calibration/test-support/formal-packs.fixture.mjs';
-import { inspectGitHubArtifact, prepareCompositionPacks } from './composition-pack-inputs.mjs';
+import { inspectGitHubArtifact, loadCompositionArtifactReference, prepareCompositionPacks } from './composition-pack-inputs.mjs';
 import { TOOLCHAIN } from '../release/toolchain.mjs';
 
 const exec = promisify(execFile), hash = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -105,13 +105,13 @@ test('a second preparation rejects EEXIST and preserves the first receipts', asy
 
 test('bounded ZIP receiving accepts only pack files and rejects traversal, duplicates and links', async t => {
   const f = await inputs(t), source = fileURLToPath(new URL('./unpack-composition-inputs.py', import.meta.url));
-  for (const kind of ['valid', 'traversal', 'duplicate', 'symlink']) {
+  for (const kind of ['valid', 'valid-domain', 'domain-extra', 'domain-traversal', 'traversal', 'duplicate', 'symlink']) {
     const archive = join(f.root, `${kind}.zip`), output = join(f.root, `${kind}-unpacked`);
     await exec(python, ['-I', '-B', '-c', `
 import pathlib, stat, sys, zipfile
 path, kind = sys.argv[1:]
 with zipfile.ZipFile(path, 'w') as z:
-    name = 'packs/crm/plugin-pack.json' if kind != 'traversal' else '../escape'
+    name = {'valid-domain': 'domain/board-components-pack.json', 'domain-extra': 'domain/credentials.json', 'domain-traversal': 'domain/../escape', 'traversal': '../escape'}.get(kind, 'packs/crm/plugin-pack.json')
     info = zipfile.ZipInfo(name)
     info.external_attr = (stat.S_IFLNK | 0o777) << 16 if kind == 'symlink' else (stat.S_IFREG | 0o600) << 16
     z.writestr(info, b'{}')
@@ -120,9 +120,9 @@ with zipfile.ZipFile(path, 'w') as z:
     for (const optimized of [false, true]) {
       const destination = optimized ? output + '-optimized' : output;
       const args = ['-I', '-B', ...(optimized ? ['-O'] : []), source, archive, destination];
-      if (kind === 'valid') {
+      if (kind === 'valid' || kind === 'valid-domain') {
         await exec(python, args);
-        assert.equal((await readFile(join(destination, 'packs/crm/plugin-pack.json'))).toString(), '{}');
+        assert.equal((await readFile(join(destination, kind === 'valid' ? 'packs/crm/plugin-pack.json' : 'domain/board-components-pack.json'))).toString(), '{}');
       } else {
         await assert.rejects(exec(python, args), /CI_COMPOSITION_ARCHIVE_/);
         await assert.rejects(access(destination), { code: 'ENOENT' });
@@ -149,6 +149,59 @@ test('hosted preparation without explicit read authorization never invokes gh or
     '--artifact-sha256', 'a'.repeat(64), '--output', f.output], { env: { ...process.env, GH_TOKEN: '', PATH: '/nonexistent' } }),
   /CI_COMPOSITION_ARTIFACT_AUTH_REQUIRED/);
   await assert.rejects(access(f.output), { code: 'ENOENT' });
+});
+
+test('versioned artifact reference binds the same composition lock before network acquisition', async t => {
+  const f = await inputs(t), artifactLockPath = join(f.root, 'artifact.json');
+  const reference = { schema_version: 'dsh-composition-artifact/v1', repository: 'tyuanww/fuqing-crm-analytics',
+    id: 123, sha256: 'a'.repeat(64), runId: 456, headSha: 'b'.repeat(40),
+    composition_lock_sha256: hash(await readFile(f.lockPath)) };
+  await writeFile(artifactLockPath, json(reference));
+  assert.deepEqual(await loadCompositionArtifactReference({ artifactLockPath, compositionLockPath: f.lockPath }), {
+    repository: reference.repository, id: 123, sha256: reference.sha256, runId: 456, headSha: reference.headSha,
+  });
+  for (const change of [{ runId: 0 }, { headSha: 'bad' }, { id: -1 }, { composition_lock_sha256: '0'.repeat(64) },
+    { schema_version: 'content-pack/v1' }, { unknown: true }]) {
+    await writeFile(artifactLockPath, json({ ...reference, ...change }));
+    await assert.rejects(loadCompositionArtifactReference({ artifactLockPath, compositionLockPath: f.lockPath }), /CI_COMPOSITION_ARTIFACT_/);
+  }
+  await writeFile(artifactLockPath, json(reference));
+  await writeFile(f.lockPath, json({ ...f.lock, plugins: [] }));
+  await assert.rejects(loadCompositionArtifactReference({ artifactLockPath, compositionLockPath: f.lockPath }), /CI_COMPOSITION_ARTIFACT_COMPOSITION_DIGEST/);
+  await assert.rejects(access(f.output), { code: 'ENOENT' });
+});
+
+test('artifact reference rejects a different successful workflow run or head', () => {
+  const reference = { repository: 'tyuanww/fuqing-crm-analytics', id: 123, sha256: 'a'.repeat(64), runId: 456, headSha: 'b'.repeat(40) };
+  const artifact = { id: 123, expired: false, digest: `sha256:${reference.sha256}`, size_in_bytes: 1024,
+    workflow_run: { id: 456, head_sha: reference.headSha } };
+  inspectGitHubArtifact(artifact, reference);
+  assert.throws(() => inspectGitHubArtifact({ ...artifact, workflow_run: { id: 789, head_sha: reference.headSha } }, reference), /CI_COMPOSITION_ARTIFACT_RUN_ID/);
+  assert.throws(() => inspectGitHubArtifact({ ...artifact, workflow_run: { id: 456, head_sha: 'c'.repeat(40) } }, reference), /CI_COMPOSITION_ARTIFACT_HEAD_SHA/);
+});
+
+test('artifact lock cannot be mixed with another input selector or remote identity', async t => {
+  const f = await inputs(t), cli = fileURLToPath(new URL('./composition-pack-inputs.mjs', import.meta.url));
+  for (const extra of [['--archive', '/unused.zip'], ['--input-dir', '/unused'], ['--repository', 'tyuanww/fuqing-crm-analytics'],
+    ['--artifact-id', '123'], ['--artifact-sha256', 'a'.repeat(64)]]) {
+    await assert.rejects(exec(process.execPath, [cli, '--artifact-lock', '/must-not-read.json', '--output', f.output, ...extra],
+      { env: { ...process.env, GH_TOKEN: '', PATH: '/nonexistent' } }), /CI_COMPOSITION_(INPUT_REQUIRED|ARGUMENTS)/);
+  }
+  await assert.rejects(exec(process.execPath, [cli, '--output', f.output]), /CI_COMPOSITION_INPUT_REQUIRED/);
+  await assert.rejects(access(f.output), { code: 'ENOENT' });
+});
+
+test('all hosted composition callers select the checked-in artifact and source manifest', async () => {
+  const root = fileURLToPath(new URL('../..', import.meta.url));
+  await loadCompositionArtifactReference({ artifactLockPath: join(root, 'config/shinemage-composition-artifact.lock.json') });
+  for (const name of ['lint.yml', 'dsh-b0.yml', 'dsh-release-preflight.yml']) {
+    const workflow = await readFile(join(root, '.github/workflows', name), 'utf8');
+    assert.ok(workflow.includes('--artifact-lock "$GITHUB_WORKSPACE/config/shinemage-composition-artifact.lock.json"'), name);
+    assert.ok(workflow.includes('--manifest "$GITHUB_WORKSPACE/config/shinemage-composition-pack-manifest.v1.json"'), name);
+    assert.doesNotMatch(workflow, /vars\.SHINEMAGE_PACK_ARTIFACT_/, name);
+  }
+  const preflight = await readFile(join(root, '.github/workflows/dsh-release-preflight.yml'), 'utf8');
+  assert.ok(preflight.includes("'config/shinemage-composition*.json'"));
 });
 
 test('GitHub acquisition confines CLI state to its owned temporary directory', async t => {

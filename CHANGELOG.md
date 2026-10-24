@@ -19,10 +19,34 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- 页面 HTTP 启动失败、取消与正常停止统一回收本次子进程。忽略 TERM 时升级 KILL，确认 close 后才完成清理；重复停止共用同一操作，预取消不启动进程。不改页面身份或数据绑定，不切换杭州现役。
+- RFM 缓存不再以邻近日期或跨日期周期结果替代精确请求。缓存读写使用三组实际范围，预计算分区必须覆盖相同结束日，跨年标签取实际数据年份。新查询策略版本阻止旧口径缓存误复用，未预热仍返回 503；不删除现役缓存，不执行线上切换。
+- DuckDB 新连接可显式配置隔离临时目录及有限 spill 上限，连接池重建后配置仍生效。启动校验使用相同资源预算，初始化失败关闭连接并释放池许可。此项不切换杭州现役，也不代表 RFM 全量预热完成。
+
+### Security
+
+- 页面首次确认保存重新检查结果授权，撤销、不可用或缺少新作用域时不落盘；过期结果保存为 `BOUND_STALE`，版本与预览使用相同快照和摘要。保留历史读取与幂等重放语义，真实 CRM 页面身份接入仍未完成。
+- 移除隔离页面结果桥的 HTTP 快照写入路由，浏览器令牌不能上传、覆盖或恢复授权结果。合成夹具改用服务端进程内预置；默认页面服务仍无结果，不自动获得真实 CRM 绑定。数据库计算的 CRM 快照接口不变，杭州现役未切换。
+- 修复 PR #164 远端依赖审计发现的两项漏洞。CRM、e2e 和 B0 的 certifi 固定到 `2026.10.19`，CRM setuptools 固定到 `84.1.0`，同步声明与构建下限。不忽略公告，不修改杭州运行环境。
+- rc3 Linux DevTools 的扫描例外绑定两份真实构建文件的完整摘要、路径和公开协议标识。补充错误摘要、错误路径及未知凭据拒绝测试，不增加目录豁免。
+
 ### Added
 
-- 驾驶舱在 DSH `0.2.1-rc.1` 下以全屏原生 `main:cockpit` 作为唯一生产入口，保留原生会话、Composer 和模型选择所有权；新增生成页面收件箱、可编辑页面版本历史和完整 light/dark/focus/disabled/error 主题状态。
-- 杭州 owner-operated side-load 前进到 `dsh-0.2.1-rc.1-core-main-20261021-cockpit-v3`。rc1 pack 绑定 source `7c9244c9…`、manifest `cec2dbf9…`、tarball `b8808b25…` 和 effective client `0d653ceb…`；v2 驾驶舱候选保留，v5 继续作为稳定回退目标。
+- CRM 候选可显式启用独立服务认证的 Host 快照来源。原生查询登记引用后从权威存储回读，工具保留 `source_ref`；跨对话、重登、撤权及错配快照拒绝读取。默认关闭，真实 rc3 宿主、画布接线及杭州切换仍需验收。
+- 增加默认不挂 HTTP 的原生 CRM 快照引用模块，按可信账号、对话和连接代次登记元数据，每次读取回查账号自有权威快照；持久撤销、幂等及重启不恢复登录态。显式 Host 适配见本节新增项，页面接线仍未完成，不改变现役。
+- rc3 组合 CI 改用随分支维护的 artifact 引用，固定真实工件、成功 run、提交和组合锁摘要，同时校验九插件与领域包的来源清单。作者 CI 证据和公共契约更新到最终 rc3 输入，CRM 公共契约固定为 crm.5。未修改全局仓库变量，未合并或切换杭州。
+
+- 原生设置入口只有观察到菜单或对话框打开才返回成功，修复局部 DOM 根上的假成功；保留账号优先和一次 Settings 回退。新增回归已覆盖按钮保持关闭的情况。
+
+- 同步活动版本合同与文档：边界清单、宿主/IM 合同夹具和 Workbench 原生 prompt 检查统一到 DSH `0.2.1-rc.3` / Cordis `4.0.5`；历史 rc1/rc2 证据继续按日期保留，不冒充当前候选结果。
+
+- DSH 候选工具链升级到官方 `0.2.1-rc.3`（`dsh-v0.2.1-rc.3`、upstream `1f81c047`），Cordis 固定为 `4.0.5`。主仓 peer、活动 profile、Workbench lock、作者仓 plugin-kit provenance 与 rc3 上游干净构建已统一；杭州现役仍为独立 rc1 side-load，未切换线上，正式门禁保持未完成。
+
+- B0 收尾重生成 `C0-MANIFEST.json` 与 `c0-fixtures.mjs` 的 contract hash，并通过离线 C0 check 与 30/30 评估。最初因旧 Workbench archive 与组合来源不同而阻断；后续已从最终作者 CI 刷新合同和来源锁，完整 B0 的当前结果见[六项收尾记录](./docs/hackathon/evidence/dsh-rc3-six-gates-20261024.md)。
+
+- CRM `0.0.0-crm.5` 与问数智能体 `0.0.0-query.14` 已 side-load 到杭州，发布 peer 对齐 `DSH 0.2.1-rc.1 / Cordis 4.0.5`。商品新老客使用 `product-customer/v3`：无版本头继续返回 v2，新客户端显式请求 v3；覆盖、当前期和同期在同一只读事务读取，截止日之后返回 `INSUFFICIENT_COVERAGE`，不再填零或生成假同比下降。工具公开投影只返回固定唯一 `display_name`、覆盖状态和指标，内部商品名和 SPU class 留在 Host。Vue“核心单品新老客”迁移到商品级去重接口，使用最新可用周，不再跨 SPU class 相加人数。新增 RFM 预计算快照读取；客户端 fail-closed 校验商品集合、展示名唯一性和 RFM 9 个唯一分群标签。问数 Agent 把经营诊断和增长复盘收束为“证据、反证、决策、行动、复核”链。杭州真实 CRM 登录、v3 商品查询、页面保存和驾驶舱编辑已有现场证据；Vue 登录后的交互 UAT、Workbench 绑定 manifest 的现役切换和正式发布门禁仍开放。详见[审查问题修复回执](./docs/hackathon/evidence/dsh-review-fixes-20261022.md)和[单链路业务边界盘查](./docs/hackathon/evidence/dsh-single-path-boundary-20261022.md)。
 
 - “问数智能体”配置型 bundle 前进到 `0.0.0-query.11`：空白会话切到 `crm-query` 时隐藏已知终端、文件和协作工具，并对执行使用 12 工具 allowlist guard；query.10 的全工具限制会误删 CRM、WeKnora 和页面业务工具，已作为失败候选保留记录。真实会话确认模型路由为 `deepseek-account / deepseek-flash / off`，`list_agents` 虽仍由上层组合可见，实际执行返回 `CRM_QUERY_TOOL_NOT_ALLOWED`。
 
@@ -91,16 +115,23 @@
 
 - `pnpm dsh plugin verify-host` 将同一插件候选、profile 快照、CRM/知识组合和固定 rc2 的本机宿主证据接到既有 journal；重试幂等，不修改候选或激活服务。增加 SQLite 提交前后进程丢失、保存回放与 forward-fix 验证；这些本地结果不放行生产发布或 D15 保存门禁。
 
-### Changed
-
-- 驾驶舱账号入口改为优先使用 rc1 官方账号菜单和设置动作；本地显示名不再包装成真实登录，DOM fallback 保留在明确兼容层并对失败给出可观察结果。
-- 页面文档与结果读取都通过 `https://page.tyuan.chat`；杭州 drop-in 和 env 示例同时固定 `PAGE_DOCUMENTS_BROWSER_BASE` 与 `PAGE_RESULT_BROWSER_BASE`。新 release 只链接既有 durable runtime，不复制 SQLite、DuckDB、浏览器私有状态或凭据。
-
 ### Fixed
 
-- 修复新生成页面包在浏览器提前哈希后与服务端规范化结果不一致、导致收件箱缺摘要的问题；页面工具卡的登记和交接失败不再静默吞掉。
-- 修复叶子草稿保存时，映射父节点 outer HTML 随子节点文字正常变化却被误判为“选区外篡改”的问题。合法祖先/后代范围继续放行，祖先开闭标签、兄弟节点和未标记插入仍 fail-closed。
-- 修复进入驾驶舱后切到原生侧栏会丢失未保存草稿的问题；文本和选中目标持续保留，外部导航仍通过 epoch 丢弃迟到的页面、历史和保存读取。普通会话不会被启动逻辑改选，B0 synthetic 绑定只在显式配置存在时启用。
+- CRM 异步查询返回时区分对话切换与授权过期，保留非当前对话的有效登录，仍拒绝消费其查询结果。
+- RFM 离线执行诊断同步当前 flow 的关键字参数，并增加从隔离工作目录运行真实脚本的回归。仍只验证控制流，不声称 SQL 口径、性能或真实数据库取消通过。
+- 发布预检夹具对齐已登记的 consumer 精确提交和当前上游 pnpm。离线部署先检查实际工具版本，避免借用本机旧缓存掩盖干净环境缺项；网络和来源守卫不变。
+- Workbench 浏览器验证在 CDP 初始化失败时释放自有进程和 socket，重复关闭保持幂等。
+- 静态页面在空沙箱下显示已保存文案，预览保留来源哈希和数据只读边界。原始文本标签不支持直接改字，自定义标签及后续标记仍可定位。以上为本地 rc3 候选，杭州尚未切换。
+
+- CRM 商品新老客工具不再在省略 `products` 时返回带 `undefined` 的对象；修复 DSH 无损 JSON 拒绝，并以官方 JSON 值校验覆盖成功路径。
+
+- CRM 对话授权不再因会话暂时不活跃而被清理；授权只按 8 小时 TTL 过期，执行查询时仍要求当前会话处于活跃状态。
+
+- `free_html_page_generate` 发布 DSH 工具 DSL 可接受的精确 `node_map` 与资源结构，并返回合法字段和枚举值；修复页面源码可生成但预设因 schema 不兼容被标记 broken 的问题。
+
+- 修正 query.12 side-load 只替换 `node_modules` 而 profile 清单与锁文件仍指向 query.11 的身份漂移。query.12 tarball 写入受控输入目录，清单、specifier、integrity 和锁文件原子更新，重启后插件页来源与已安装文件一致。
+
+- 新增只启动已安装 DSH profile 的入口，避免受控重启重新执行缺失输入的插件安装。CRM Compose 覆盖文件恢复标准 dotenv 解析，bcrypt hash 继续用单引号保护 `$`；修复 `format: raw` 把外层引号带入用户名、导致生产 `admin` 登录 401 的环境回归。
 
 - 插件生成树 provenance 改为按固定 `0644` canonical mode 比较生成文件，避免服务账号在 `umask 077` 下把同一 tarball 字节误判为漂移；profile 和 release fixture 同步显式设置权限，完整 B0 在硬化 umask 下通过。
 

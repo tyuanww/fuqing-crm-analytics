@@ -42,6 +42,7 @@ pyyaml>=6.0.3           # Pydantic v2 间接 import（lock PyYAML, B2 import che
 click>=8.5.0
 idna>=3.19
 urllib3>=2.8.0
+certifi>=2026.10.19
 
 # 开发工具
 pytest>=9.1.1           # 测试框架

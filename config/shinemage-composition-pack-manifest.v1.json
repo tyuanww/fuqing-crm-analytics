@@ -2,12 +2,12 @@
   "schema_version": "shinemage-composition-pack-manifest/v1",
   "lock": {
     "path": "config/shinemage-composition-packs.lock.json",
-    "sha256": "1c31aaed60b467c1bd991c2213823a4acf32931826cceb1bcda1ea7511256f4b"
+    "sha256": "e7bacd9b542a8037e0aec2299988d78c2ae6c20ee783e91f1b07e64b8d2efa17"
   },
   "consumer": {
     "repository": "tyuanww/fuqing-crm-analytics",
     "branch": "main",
-    "reviewed_sha": "4ac076dea89790379c0d142d6b35a48d9208345a"
+    "reviewed_sha": "6f5279733e945cfd1e453301710f452b37070c81"
   },
   "bundle": {
     "repository": "tyuanww/fuqing-crm-analytics",
@@ -22,11 +22,11 @@
     "remote_main": "NOT_RUN"
   },
   "toolchain": {
-    "sdk_version": "0.1.7-rc.2",
+    "sdk_version": "0.2.1-rc.3",
     "pnpm": "11.28.2",
     "node_major": 24,
-    "upstream_sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
-    "upstream_lock_sha256": "5d3980bcd2a0113101815aabfeb4f8a875d556a333521539b7f11d790f4a50aa"
+    "upstream_sha": "1f81c047fc48fa190a683e469daa699857e9afe8",
+    "upstream_lock_sha256": "911b049924e8256d8d6e684235cf935ca75b28fd0dd46f0c3b316a51c2cf5dc1"
   },
   "sources": [
     {
@@ -34,9 +34,9 @@
       "directory": "analytics-workbench",
       "repository": "tyuanww/dsh-analytics-workbench",
       "ref": "commit",
-      "sha": "3030e3f21263f6ec65cb01c7aeacd4c80e2eb711",
-      "manifest_sha256": "070514b3bb212c714907727c368300e2b7cd22b88946e814f9b13349d27f29ef",
-      "pack_sha256": "e41df9f5a8f7031c092319222543c8d723ca644c0c9d69b2ae53f13257e9b79e",
+      "sha": "d6b711a1bc6f48c4e283eafeba839d4bdba9a803",
+      "manifest_sha256": "0b984d0008cf19ce95f8034edef79cae684bd0c2cc2f92aa066ba45292c0d517",
+      "pack_sha256": "805a2a9e2effa6cca364365e9ccb001c9f911f73f8b4fddcd6c43533ce82a101",
       "status": "PASS"
     },
     {
@@ -44,9 +44,9 @@
       "directory": "crm-knowledge",
       "repository": "tyuanww/dsh-crm-knowledge",
       "ref": "commit",
-      "sha": "5f359f5b85e41d09065587dd11d69dd57e9bdd5b",
-      "manifest_sha256": "82c911525019d8675f0f18bb573f52ff677e624bce847936e124f1d2b7b55699",
-      "pack_sha256": "4b04c5a5fad52102a53c318a13baadd06ffe47753802b4a82fa2a760f3184139",
+      "sha": "ed5940fcfaa3bba3a41bb7c9c897d651ed635650",
+      "manifest_sha256": "b7af0ef3e194326b05b48721913e92608ac8ffe0f4663db736f7e74526c331a9",
+      "pack_sha256": "43308d4de80f50698c308a493bb4f0dfbcf3ec6230308805371e050efdddb18f",
       "status": "PASS"
     },
     {
@@ -54,9 +54,9 @@
       "directory": "knowledge",
       "repository": "tyuanww/dsh-knowledge",
       "ref": "commit",
-      "sha": "ef8960ededd5f4214d9f3e77a8b61a761a046d3d",
-      "manifest_sha256": "83dca334a2d04b7f53b8cad579722101382ffe1ea231b85f9ff11b418fbf9b26",
-      "pack_sha256": "870fdeeadc07bf7187d475ba4a77fe0d417b915a72473b8712c004f7079b4090",
+      "sha": "2b0f5745f725eda5b26df20ebd86c79003b08078",
+      "manifest_sha256": "d09889991f5613153bcb11d70e0305688fbcb06322e81bb58c1e8a6da901bb63",
+      "pack_sha256": "f1031c39bdc90af8632f31464ea5f91f1729f91438928d5ad29cec5ae66e87e7",
       "status": "PASS"
     },
     {
@@ -64,9 +64,9 @@
       "directory": "shine-board",
       "repository": "tyuanww/dsh-shine-board",
       "ref": "commit",
-      "sha": "76601df755ec8ef8c9726ea770ec488b745efd71",
-      "manifest_sha256": "a9ad7f7609f73dbed517a35d683e198110d77f89c9e527577df99d5b3f68d8d9",
-      "pack_sha256": "e1348dd7739778a5ec2d676420e86290ca49f69cdf045959fd82441232a30c1a",
+      "sha": "c7b4ab6541449adc236398a753662c09f61d5ab8",
+      "manifest_sha256": "2ac1fcf439646ade1667a1fe19bfa119f78544c1cfdf10c4ece4508669d3e3d8",
+      "pack_sha256": "b1f8f2e9ef97988db34b4ffaae7ff0a7479ee12418011944e516c31d66e3fa45",
       "status": "PASS"
     },
     {
@@ -74,9 +74,9 @@
       "directory": "shine-crowd-action",
       "repository": "tyuanww/dsh-shine-crowd-action",
       "ref": "commit",
-      "sha": "5c39e21c27565397383b009725634ea66e9c1525",
-      "manifest_sha256": "89e5af1aa0a26165e3a994e58c5f457a123b24f563f6bffc71acfba15ee45f05",
-      "pack_sha256": "3fb9d88d228e3af4a9c965961c035650b65365392a9caccb4c14f336b003b2ca",
+      "sha": "6a3c2d6601e8500326565d9fefe495c82d5ec37b",
+      "manifest_sha256": "b242b826f462e99776eadfbc4d650f950625faec0f62adbf62fdd91b9922a3a7",
+      "pack_sha256": "11233822476474d057a92a256333bc973226737ed33152f350749bb3ec63c5ba",
       "status": "PASS"
     },
     {
@@ -84,9 +84,9 @@
       "directory": "shine-query",
       "repository": "tyuanww/dsh-shine-query",
       "ref": "commit",
-      "sha": "1f1e19d280923ebe7aac964f8b5825d497434db8",
-      "manifest_sha256": "6e7119c79014053b9b39997543c805946ee77e06e07c51866114d9f630dcc9aa",
-      "pack_sha256": "774c6ae63e0fb170a81a9e9fb9551d55d40724faae5966c1d95bb32624fb89ce",
+      "sha": "81363e4743871a7d08a9a8686b933d53a99b1f67",
+      "manifest_sha256": "a220ec960c32ccbfdd4a6ffaea849b8cace4b7e0140a838c2f1c724ec2ff18c0",
+      "pack_sha256": "474a7cdc52147384fa010a40769c9ff576812f08068cd894463e988aefca5514",
       "status": "PASS"
     },
     {
@@ -94,9 +94,9 @@
       "directory": "shine-funnel",
       "repository": "tyuanww/dsh-shine-funnel",
       "ref": "commit",
-      "sha": "dbfaede0961586d773c708e833a4ac1c9f2515dc",
-      "manifest_sha256": "b107e17d3a0dd5e557429e319f7834375e95fca024e077fddf5f6d1294ed22a6",
-      "pack_sha256": "581ba069aa8af4598f553e4b11b57216ac2205d71baebbafc267367cb3814ba6",
+      "sha": "3420ec3b2650000388ceee5e2a14d78dc8a84a59",
+      "manifest_sha256": "c306a4fe43f1db5166bad5f68d4b9037e384b1a9ff056b7bb12b84045905fb03",
+      "pack_sha256": "d959bf1e45f04b3871914e70fba642fc0447c85735adf394d0a46fecfca12a55",
       "status": "PASS"
     },
     {
@@ -104,9 +104,9 @@
       "directory": "shine-waterfall",
       "repository": "tyuanww/dsh-shine-waterfall",
       "ref": "commit",
-      "sha": "d123ac1d0e7bad3e5de45169b3e72c38623b858a",
-      "manifest_sha256": "3e262a2f9d4e3eb35781374c0da20eae27196af27d7a9684cb165b4c77e9c6c5",
-      "pack_sha256": "73a1d4ba2b085c1f9f2a1eff410aca239cf9775de952ba70aafdaa78ec5ac35d",
+      "sha": "6a07f2d95c47302ffde72507c6b29e4d7c13f8c6",
+      "manifest_sha256": "a2672e3a6bfded8d764d76ae5274fd848b6ffe67e21cbf4fc537a0850f582335",
+      "pack_sha256": "dca248f641ba474377b91ccc195068ede207df70b77159db13d9864b7fbec112",
       "status": "PASS"
     },
     {
@@ -114,9 +114,9 @@
       "directory": "shine-brand",
       "repository": "tyuanww/dsh-shine-brand",
       "ref": "commit",
-      "sha": "57ebcf38278068394a4feb42125c30c195fd912a",
-      "manifest_sha256": "a5d0265377542817cb1de5710e1ba7854274745a71d18c71e4e72a04b0341624",
-      "pack_sha256": "4b867bf5b4e08d9aa1f45f20b20b78cbd9e11c236194ffafaa5188d8d173bd13",
+      "sha": "f2c819003aa695404827957951e44befdc5ae017",
+      "manifest_sha256": "1a92c29fbb62410a1368df5b026fdb1c9ecc6b21e86dc7ee6e350c03532cd2bb",
+      "pack_sha256": "62e9abf4731fcacf5232b57e1d6780033bc6d721325ebd0576f97fa572cba986",
       "status": "PASS"
     }
   ],
@@ -135,7 +135,7 @@
       "ref": "commit",
       "sha": "e78e040e14792c89f99a2e3181004dbdaefd9bf6",
       "manifest": "domain/board-components-pack.json",
-      "manifest_sha256": "c756fb4bbfe4ca5f7bc13d7ce7fe8ff21d097615f35f5cced6b94a1a95ffc42c",
+      "manifest_sha256": "0a9e566c2411828321e1971695e05fa52da86e33c65a04a56c056556c8d062db",
       "pack_sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182",
       "status": "PASS"
     }

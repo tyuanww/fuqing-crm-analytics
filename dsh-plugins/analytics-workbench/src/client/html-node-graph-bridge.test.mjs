@@ -90,6 +90,8 @@ test('block clicks expose the current node, parent block, breadcrumb, kind and c
   const boundCell = editablePageNodes(blockPkg, { bindings: [{ node_id: 'cell' }] }).find(row => row.node_id === 'cell');
   assert.equal(boundCell.capabilities.bound, true);
   assert.equal(boundCell.capabilities.direct_text, false);
+  const wholePageBound = editablePageNodes(blockPkg, { bindings: [], result_refs: ['result_fixture_1'] });
+  assert.equal(wholePageBound.every(row => row.capabilities.ai === false), true);
   assert.equal(editableTextNodes(blockPkg).some(row => row.node_id === 'go'), true);
   assert.equal(editableTextNodes(blockPkg).some(row => row.node_id === 'cell'), true);
   assert.equal(editableTextNodes(blockPkg).some(row => ['sec', 'frame', 'paint', 'live'].includes(row.node_id)), false);

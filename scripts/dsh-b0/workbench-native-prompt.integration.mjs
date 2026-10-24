@@ -12,7 +12,7 @@ const { source, stores, webRequire } = runtime;
 const upstream = process.env.B0_BUILD_UPSTREAM;
 const cordisPath = join(upstream, 'vendor/cordis/lib/index.js');
 const cordisManifest = JSON.parse(await readFile(join(upstream, 'vendor/cordis/package.json'), 'utf8'));
-assert.equal(cordisManifest.version, '4.0.4', 'WORKBENCH_NATIVE_PROMPT_CORDIS_PIN');
+assert.equal(cordisManifest.version, '4.0.5', 'WORKBENCH_NATIVE_PROMPT_CORDIS_PIN');
 const { Context, Service } = await import(pathToFileURL(cordisPath).href);
 // Synthetic envelope retained from the original fixture, not a service decoder.
 const ok = value => ({ ok: true, value: structuredClone(value) });

@@ -11,7 +11,9 @@ Sprint 61 P2 治本 — startup validation 测试.
 4. schema_test 模式 + orders 0 行 → pass (只 WARN)
 5. 未知 mode (FQ_DB_MODE=foo) → 默认 production 行为
 """
+import importlib
 import sys
+import os
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -150,3 +152,42 @@ def test_startup_attaches_quoted_archive_path(tmp_path: Path, monkeypatch: pytes
     monkeypatch.setenv("FQ_ARCHIVE_DUCKDB", str(archive))
     validate_startup_db = _call_validate(monkeypatch, db_path)
     validate_startup_db()
+
+
+def test_startup_queries_use_configured_resource_policy(tmp_path, monkeypatch):
+    db_path = tmp_path / "bounded.duckdb"
+    _create_orders_table(db_path, [("order_1", datetime.now(), 42.0)])
+    _set_db_mode(monkeypatch, "production")
+    monkeypatch.setenv("FQ_DUCKDB_TEMP_ROOT", str(tmp_path / "spill"))
+    monkeypatch.setenv("FQ_DUCKDB_TEMP_LIMIT", "128MiB")
+    from backend.services import dual_conn
+
+    monkeypatch.setattr(dual_conn, "READ_MEMORY_LIMIT", "64MiB")
+    monkeypatch.setattr(dual_conn, "DUCKDB_THREADS", 1)
+    connect = duckdb.connect
+    observed = []
+
+    class ObservedConnection:
+        def __init__(self, conn):
+            self.conn = conn
+
+        def execute(self, sql, *args):
+            if "FROM orders" in sql:
+                observed.append(self.conn.execute(
+                    "SELECT current_setting('memory_limit'), current_setting('threads'), "
+                    "current_setting('temp_directory'), current_setting('max_temp_directory_size')"
+                ).fetchone())
+            return self.conn.execute(sql, *args)
+
+        def close(self):
+            self.conn.close()
+
+    validate = _call_validate(monkeypatch, db_path)
+    monkeypatch.setattr(duckdb, "connect", lambda *args, **kwargs: ObservedConnection(connect(*args, **kwargs)))
+    try:
+        validate()
+        expected_directory = str(tmp_path / "spill" / str(os.getpid()) / "business")
+        assert observed == [("64.0 MiB", 1, expected_directory, "128.0 MiB")] * 2
+    finally:
+        monkeypatch.undo()
+        importlib.reload(importlib.import_module("backend.config"))

@@ -58,7 +58,7 @@ class TestRFM3PeriodsSerialLockRegression:
             "memory_limit/threads 进 fingerprint 会和 write singleton 冲突。"
         )
         assert "dual_conn._db_config()" in src
-        assert "_apply_runtime_settings" in src
+        assert "configure_connection" in src
 
     def test_run_rfm_period_serial_exists(self):
         """L4.69 治本: _run_rfm_period_serial helper 函数必须存在 (单 conn 顺序封装).

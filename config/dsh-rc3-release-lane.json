@@ -1,0 +1,23 @@
+{
+  "schema_version": "shinemage-rc3-release-lane/v1",
+  "lane": "rc3",
+  "sdk": "0.2.1-rc.3",
+  "upstream_tag": "dsh-v0.2.1-rc.3",
+  "upstream_sha": "1f81c047fc48fa190a683e469daa699857e9afe8",
+  "upstream_lock_sha256": "911b049924e8256d8d6e684235cf935ca75b28fd0dd46f0c3b316a51c2cf5dc1",
+  "upstream_pnpm": "11.28.5",
+  "cordis": "4.0.5",
+  "node": "v24.19.0",
+  "typescript": "6.0.3",
+  "esbuild": "0.25.12",
+  "react": "18.3.1",
+  "react_types": "18.3.31",
+  "node_types": "22.20.1",
+  "plugin_pnpm": "11.28.2",
+  "formal_status": {
+    "m2_07": "BLOCKED",
+    "m2_08": "NOT_RUN",
+    "m2_09": "NOT_RUN",
+    "release_ready": false
+  }
+}

@@ -47,6 +47,17 @@ test('host marks runtime regions and bound selections instead of widening scope'
   assert.equal(pageBound.ok, true);
   assert.equal(pageBound.context.binding_state, 'BOUND_VERIFIED');
   assert.equal(pageBound.context.allowed_scope, 'readonly_bound');
+  const partiallyBound = buildSelectionContext({
+    pagePackage: d48Package({ css: '[data-shine-node="n_title"]{color:red}\n[data-shine-node="n_lede"]{color:blue}' }), pageId: 'page_fixture_bound', sessionId: 'session_fixture', version: 1,
+    node: { node_id: 'n_lede', kind: 'static_element', mapping: 'valid' },
+    bindingManifest: {
+      bindings: [{ node_id: 'n_title', state: 'BOUND_VERIFIED' }],
+      result_refs: ['result_fixture_1'],
+    },
+  });
+  assert.equal(partiallyBound.ok, true);
+  assert.equal(partiallyBound.context.binding_state, 'UNBOUND_SAMPLE');
+  assert.equal(partiallyBound.context.allowed_scope, 'exact_source_range');
 });
 
 test('host marks shared CSS selectors and excludes them from writable ranges', () => {
