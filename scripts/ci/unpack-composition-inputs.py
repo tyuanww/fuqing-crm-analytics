@@ -1,4 +1,4 @@
-"""Bounded GitHub artifact ZIP reader; only sealed plugin pack files are allowed."""
+"""Bounded GitHub artifact ZIP reader for sealed plugin and domain packs."""
 import re
 import stat
 import sys
@@ -26,9 +26,9 @@ def unpack(source: Path, destination: Path) -> None:
             mode = item.external_attr >> 16
             require(stat.S_IFMT(mode) in (0, stat.S_IFDIR if item.is_dir() else stat.S_IFREG), "CI_COMPOSITION_ARCHIVE_SPECIAL")
             if item.is_dir():
-                require(re.fullmatch(r"packs/(?:[a-z][a-z0-9-]*/)?", item.filename), "CI_COMPOSITION_ARCHIVE_PATH")
+                require(re.fullmatch(r"packs/(?:[a-z][a-z0-9-]*/)?|domain/", item.filename), "CI_COMPOSITION_ARCHIVE_PATH")
             else:
-                require(re.fullmatch(r"packs/[a-z][a-z0-9-]*/(?:plugin-pack\.json|shine-mage-dsh-[a-z0-9.-]+\.tgz)", item.filename), "CI_COMPOSITION_ARCHIVE_PATH")
+                require(re.fullmatch(r"packs/[a-z][a-z0-9-]*/(?:plugin-pack\.json|shine-mage-dsh-[a-z0-9.-]+\.tgz)|domain/(?:board-components-pack\.json|shine-mage-board-components-0\.1\.0\.tgz)", item.filename), "CI_COMPOSITION_ARCHIVE_PATH")
                 require(0 < item.file_size <= 20 * 1024 * 1024, "CI_COMPOSITION_ARCHIVE_MEMBER_SIZE")
         destination.mkdir(mode=0o700)
         for item in entries:

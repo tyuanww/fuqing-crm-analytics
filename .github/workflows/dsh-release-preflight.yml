@@ -5,6 +5,9 @@ on:
     paths:
       - '.github/workflows/dsh-release-*.yml'
       - 'scripts/release/**'
+      - 'scripts/ci/composition-pack-inputs*.mjs'
+      - 'scripts/ci/unpack-composition-inputs.py'
+      - 'config/shinemage-composition*.json'
       - 'scripts/dsh.mjs'
       - 'scripts/dsh-b0/**'
       - 'config/domain-author-evidence.lock.json'
@@ -156,13 +159,10 @@ jobs:
       - name: Prepare sealed independent plugin packs for composition checks
         env:
           GH_TOKEN: ${{ secrets.SHINEMAGE_PLUGIN_READ_TOKEN }}
-          PACK_REPOSITORY: ${{ vars.SHINEMAGE_PACK_ARTIFACT_REPOSITORY }}
-          PACK_ARTIFACT_ID: ${{ vars.SHINEMAGE_PACK_ARTIFACT_ID }}
-          PACK_ARTIFACT_SHA256: ${{ vars.SHINEMAGE_PACK_ARTIFACT_SHA256 }}
         run: |
           node scripts/ci/composition-pack-inputs.mjs \
-            --repository "$PACK_REPOSITORY" --artifact-id "$PACK_ARTIFACT_ID" \
-            --artifact-sha256 "$PACK_ARTIFACT_SHA256" \
+            --artifact-lock "$GITHUB_WORKSPACE/config/shinemage-composition-artifact.lock.json" \
+            --manifest "$GITHUB_WORKSPACE/config/shinemage-composition-pack-manifest.v1.json" \
             --output "$RUNNER_TEMP/shinemage-composition-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" \
             --python "${{ steps.python.outputs.python-path }}" \
             --github-env "$GITHUB_ENV"

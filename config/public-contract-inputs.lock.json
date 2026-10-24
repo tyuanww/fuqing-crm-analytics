@@ -2,28 +2,28 @@
   "schema": "shinemage-public-contract-inputs-lock/v1",
   "owners": {
     "workbench": {
-      "source_sha": "a4dce5373808a1f6cc5f4d2331d5823be1ad3580",
+      "source_sha": "d6b711a1bc6f48c4e283eafeba839d4bdba9a803",
       "package": "@shine-mage/dsh-analytics-workbench-b0",
       "version": "0.0.0-b0",
       "archive": {
         "repository": "tyuanww/dsh-analytics-workbench",
-        "run_id": 39984121026,
+        "run_id": 40075710303,
         "attempt": 1,
         "event": "pull_request",
         "conclusion": "success",
-        "artifact_id": 12515071523,
-        "name": "public-contracts-39984121026-1",
-        "sha256": "e8540d234bfd3d554e0e85749d417a70d26f8db8be9186279f53b66475baff3c",
-        "bytes": 65666
+        "artifact_id": 12553356474,
+        "name": "public-contracts-40075710303-1",
+        "sha256": "e45e0aee4b97dd1d26eaf9f16168d720691cebb4a85eb87828655e2083722747",
+        "bytes": 65662
       },
       "manifest": {
-        "sha256": "97ef99e5bf6bcb92dab19ec72d41b6130aa17144db1e7b299e10edd4cefb2646",
+        "sha256": "fff745cbd10715cee0e44b95c45018c3a30ca1fa6a3741e4a4e274abdc4660d8",
         "bytes": 11551
       },
       "producer_sha256": "2d9ab9fc7998359601bce6caef63945697aa16030cbf47e98de41085726b8350",
       "recipe_sha256": "326adb35d8b94347749118fbb06658cc2ca699a7bea00b685a49dc5f38ca8799",
-      "package_manifest_sha256": "49335c824e8082b6b842d0c5d9b19869e85cbcddddee370523ed668d8e75e82f",
-      "ci_job_sha": "489828cd5d98c4da3438a345116df16a14f03e43",
+      "package_manifest_sha256": "544ffea9e153fd53027f28a4b3b8b44cacb8a116bd3fb2fbcf549439d6ffeb8a",
+      "ci_job_sha": "e0ae497c7bb3977f9e7421ba20ad4e916168707e",
       "files": [
         {
           "source_path": "plugin/contracts/cockpit-slot.v1.json",
@@ -254,28 +254,28 @@
       "owned_increment_tests": 12
     },
     "crm": {
-      "source_sha": "c4b1c91eaa4fa645deb7951614c1937eb76db143",
+      "source_sha": "46111c5bd93c798cd8256419c6c8dee0505b215f",
       "package": "@shine-mage/dsh-crm-knowledge",
-      "version": "0.0.0-crm.1",
+      "version": "0.0.0-crm.5",
       "archive": {
         "repository": "tyuanww/dsh-crm-knowledge",
-        "run_id": 38126019403,
+        "run_id": 40075710655,
         "attempt": 1,
         "event": "pull_request",
         "conclusion": "success",
-        "artifact_id": 11696962431,
-        "name": "public-contracts-38126019403-1",
-        "sha256": "e839c07440ebca9910364ea8951734d49e88a451c9d7a177374c38f0a80ed21c",
-        "bytes": 2816
+        "artifact_id": 12552972911,
+        "name": "public-contracts-40075710655-1",
+        "sha256": "18a7fed186d2a7baca9026916e05a17b41348cc4d0f72dfd7235c8a40c0d2c1f",
+        "bytes": 2815
       },
       "manifest": {
-        "sha256": "57bb531d0ceb45258c0e9b974ede02ba590b06a9d882427fa6dcd970da60273c",
+        "sha256": "ba728d2b8504558acb4b1986a84779cad9c29021ef656d238b443becfd82bce7",
         "bytes": 1627
       },
       "producer_sha256": "2d9ab9fc7998359601bce6caef63945697aa16030cbf47e98de41085726b8350",
-      "recipe_sha256": "fff85531879c559337c84435213af10799418046a778f4ad087c90842c284f9b",
-      "package_manifest_sha256": "4c0d3557fcd06f019201df21a4e5eba17c85689a46ac987747dbd02da3151243",
-      "ci_job_sha": "d7029a3bbcfa3c4f39ffe1d94079041ac9f517b5",
+      "recipe_sha256": "f68932093edfa0a4d05de2bd39df842e547bf5ec7843b64b7aa4b2257741d9f5",
+      "package_manifest_sha256": "c6a8a45f41c3135ad817304ab4202c2fed756f7be9edcd39674ff8c002d17799",
+      "ci_job_sha": "681c90bc801c66a8214a92f04f3a63361b85da6d",
       "files": [
         {
           "source_path": "plugin/src/client/cockpit-slot-contract.generated.ts",
@@ -298,28 +298,28 @@
       "owned_increment_tests": 12
     },
     "brand": {
-      "source_sha": "0b8c8a793b585c22c980b9d3afe8b9839d7632ec",
+      "source_sha": "f2c819003aa695404827957951e44befdc5ae017",
       "package": "@shine-mage/dsh-shine-brand",
       "version": "0.0.0-b0",
       "archive": {
         "repository": "tyuanww/dsh-shine-brand",
-        "run_id": 38125655260,
+        "run_id": 40075782816,
         "attempt": 1,
         "event": "pull_request",
         "conclusion": "success",
-        "artifact_id": 11697365923,
-        "name": "public-contracts-38125655260-1",
-        "sha256": "7fe83711a958f5801598f8f798a1d0727c0ba5bde96750cd62deaa161972c93b",
-        "bytes": 1766
+        "artifact_id": 12553301409,
+        "name": "public-contracts-40075782816-1",
+        "sha256": "1b4a6820a5b9b956272682c6060121779205c77e13f5e407f118a1b07fd00e73",
+        "bytes": 1763
       },
       "manifest": {
-        "sha256": "4a3d28229b23d48209ec43cdce67e488b65f264235936e192a22bdb16d6b3c77",
+        "sha256": "2e10b0acabaa9f25afc189c620817ae2831fc41cda6945ad167f09623663932d",
         "bytes": 1209
       },
       "producer_sha256": "2d9ab9fc7998359601bce6caef63945697aa16030cbf47e98de41085726b8350",
       "recipe_sha256": "7307d30dd41d7956bf2a6894c6f3a8fee71e57175fdc6c77b83e95e4ebc3e1ea",
-      "package_manifest_sha256": "5baa3cca089cdeb33819274723b60c5c86c109f8b994025ed9b556629822e0f8",
-      "ci_job_sha": "b89477c735924240f8fb6d1de82a324220955d2d",
+      "package_manifest_sha256": "ff09dc7e688ec72b139646f5bb4421c4620559fc3d4aa6da2039d5621f65e8ae",
+      "ci_job_sha": "0db6046646b63be58ddf7b4c25dc71eb34a201f3",
       "files": [
         {
           "source_path": "plugin/contracts/content-theme.v1.json",
