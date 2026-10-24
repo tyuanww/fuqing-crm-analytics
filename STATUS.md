@@ -4,7 +4,7 @@
 
 ## 当前快照（2026-10-24）
 
-- 2026-10-24 八个作者仓的新提交已推送，全部对应 CI 成功，Knowledge 沿用原成功提交。九插件严格包与领域包已构建、组装、上传，并从真实 artifact `12553780915` 严格读回；上传 run 为 `40076593648`。主仓改用绑定组合锁、run 和提交的分支级 artifact 引用，不改全局仓库变量。公共契约已对齐 CRM `crm.5`，作者证据已刷新。前端按候选锁隔离依赖后构建和 `226` 项单测通过，完整后端及 B0 正在验证。主仓新提交和 PR、真实 UAT、近两年缓存覆盖与杭州切换仍未关闭，`release_ready=false`。CLI 审查是获授权的非原生、同模型替代，不能宣称跨模型或全项目无缺陷。详见 [六项收尾与 CLI 复核](docs/hackathon/evidence/dsh-rc3-six-gates-20261024.md)，[作者同步回执](docs/hackathon/evidence/dsh-rc3-author-sync-20261024.md) 保留最初时点。
+- 2026-10-24 八个作者仓的新提交已推送，全部对应 CI 成功，Knowledge 沿用原成功提交。九插件严格包与领域包已从真实 artifact `12553780915` 严格读回；上传 run 为 `40076593648`。主仓使用绑定组合锁、run 和提交的分支级 artifact 引用，不改全局变量。主仓 `3112b344` 正常 pre-push 通过并推送，已创建非草稿 [PR #164](https://github.com/tyuanww/fuqing-crm-analytics/pull/164)。后端 `3261 PASS / 79 SKIP / 0 FAIL`，前端构建及 `226 PASS`，tooling 和 B0 通过；PR 远端 CI 尚待核验。真实 UAT、近两年缓存覆盖、合并及杭州切换仍未关闭，`release_ready=false`。CLI 审查是获授权的非原生、同模型替代，不代表跨模型或全项目无缺陷。详见 [六项收尾与 CLI 复核](docs/hackathon/evidence/dsh-rc3-six-gates-20261024.md)。
 - 2026-10-24 本地主仓候选已升级到 DSH `0.2.1-rc.3`（tag `dsh-v0.2.1-rc.3`，upstream `1f81c047fc48fa190a683e469daa699857e9afe8`）和 Cordis `4.0.5`。rc3 上游干净 checkout 已完成依赖安装与 host/client 构建，plugin-kit 输入预检为 `READY`；活动 page/CRM profile、主仓 peer、Workbench lock 和作者仓 kit provenance 已统一到 rc3。该结果是本地候选输入，不代表杭州切换；杭州 `current` 仍为下方记录的 DSH `0.2.1-rc.1`，正式门禁仍 `release_ready=false`。
 - 2026-10-22 审查修复部署：CRM `0.0.0-crm.5` 和问数智能体 `0.0.0-query.14` 已 side-load 到杭州，插件页均显示 `2/2` 组件运行中。商品接口为 `product-customer/v3`，无版本头时继续返回 v2；新客户端显式请求 v3。v3 在指标计算前检查仓库截止日，当前期或同期超出覆盖时返回 `INSUFFICIENT_COVERAGE`，不再填零或生成假同比下降；覆盖、当前期和同期在同一个只读事务内读取。工具公开投影只返回固定唯一 `display_name`、覆盖状态和指标，内部商品名与 SPU class 留在 Host。Vue“核心单品新老客”已迁移到商品级去重接口，并按实际最新可用周生成查询，不再跨 SPU class 相加人数。15 个商品展示名与内部名互斥且唯一，黑白膜归入爆款面膜F/G，精华归为爆款精华A。RFM 9 标签和 cache-only 边界保持不变。后端镜像 digest 为 `sha256:362779ab…5d4ba`，前端镜像 digest 为 `sha256:6b4516cb…a715c`，入口已有 v3 资产，容器 `18094=200`。验证为后端商品/只读路由/分类 `53 passed / 1 skipped`、CRM dashboard `45 passed`、CRM 全包 `121 passed`、前端相关单测 `12 passed`、生产构建通过、Query `10 passed`、supervisor `3 passed`。真实 CRM 登录和 v3 商品查询已完成；Vue 页面登录后的交互仍单列验收。详细边界见[审查问题修复回执](docs/hackathon/evidence/dsh-review-fixes-20261022.md)。
 - 2026-10-22 19:02 修复杭州 CRM 凭据环境回归：上一版生产 Compose 覆盖层使用 `format: raw`，把 `FQ_CRM_PASSWORDS` 的外层单引号保留到用户名中，实际缓存用户为 `'admin`，导致 `admin` 返回 401。账号和密码未修改；恢复标准 dotenv 解析并只重建后端后，容器缓存用户为 `admin,fqsw,monitor`，账号级直接认证通过，容器 `healthy`，`18093=200`、`18094=200`。真实浏览器已重新登录并完成 CRM 查询。根因、备份和回滚见[认证环境修复回执](docs/hackathon/evidence/dsh-auth-env-recovery-20261022.md)。
@@ -32,7 +32,7 @@
 
 ## 本轮施工计划
 
-- 先合并候选升级、插件 pack provenance 和 CLI 入口文档，再由 clean reviewed commit 进入 release preflight；正式部署仍受 M2 门禁和批准 artifact 约束。当前 rc2 profile lock 已绑定 9 个带 `dsh-generated-bytes/v1` 的新 pack manifest；固定 Node24、双 Python 闭合、author artifact、composition inputs、B0 合同/边界/release 测试和完整 pre-push 均已真实通过。该结果只证明本地工程与输入闭环；publisher identity、签名、独立核验、撤销、final attestation、正式 clean-machine 和外部发布批准仍未完成，正式 M2-07 继续 `BLOCKED`、`release_ready=false`。
+- 当前 rc3 候选已完成作者 CI、严格包与主仓正常 pre-push，下一步核验 PR CI、真实宿主和业务缓存，再按实际候选身份完成回退及发布前置。正式部署仍受 M2 门禁和批准 artifact 约束。publisher identity、签名、独立核验、撤销、final attestation、正式 clean-machine 和外部发布批准未完成，M2-07 继续 `BLOCKED`、`release_ready=false`。
 ## 历史快照入口
 
 - 2026-10-15 及更早的 alpha3、rc2、M2-06、作者仓合并和 alpha2 历史事实已归档到 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)；它们不覆盖本页当前快照，也不授予 release/activation。

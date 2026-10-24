@@ -1,6 +1,6 @@
 # rc3 六项收尾与 CLI 复核
 
-本记录更新于 2026-10-24。八作者仓的新提交、远端 CI、九插件与领域严格包、组合上传及实际 ZIP 读回已完成。主仓完整验证正在执行。没有合并、发布、切换杭州或访问真实业务数据。`release_ready=false`。
+本记录更新于 2026-10-24。八作者仓的新提交、远端 CI、九插件与领域严格包、组合上传及实际 ZIP 读回已完成。主仓 `3112b344` 完整 pre-push 通过并推送，已创建非草稿 [PR #164](https://github.com/tyuanww/fuqing-crm-analytics/pull/164)，PR CI 尚待核验。没有合并、发布、切换杭州或访问真实业务数据。`release_ready=false`。
 
 ## 六项状态
 
@@ -9,7 +9,7 @@
 | 作者 CI | Workbench `d6b711a1`、CRM `46111c5b`、Knowledge `2b0f5745` 及六叶子最终提交对应 CI 全部成功 | 不代表合并、宿主或业务验收 |
 | 严格正式包 | 九插件从最终干净提交构建并严格读回；领域包从固定源重建，保留参考字节 | 主仓 candidate、journal 和运行验收未完成 |
 | 六个叶子作者与组合 | 六仓已推送，PR 和 CI 成功；组合锁已更新，真实 artifact 已上传并严格读回 | 上传载体不是正式 release 或杭州部署 |
-| 主仓验证与 Git | 发布合同重跑 603 PASS、6 SKIP；新组合接收 15 PASS、作者输入 35 PASS、领域输入 15 PASS；前端构建和 226 PASS | 后端、tooling、完整 B0、主仓提交及 PR 正在推进 |
+| 主仓验证与 Git | 正常 pre-push exit 0，后端 3261 PASS、79 SKIP、0 FAIL；前端构建和 226 PASS，tooling 与 B0 通过；已推送并创建 PR #164 | PR 远端 CI 尚待核验；跳过项和离线评估不算业务通过 |
 | 独立审核与业务验收 | 用户允许 CLI 替代故障原生审查；定向对抗复核未确认 P0–P2 | 同模型不提供跨模型独立性；真实宿主、业务 UAT、近两年 RFM 和商品缓存覆盖未验证 |
 | 合并与杭州切换 | 未执行 | 需要前置检查、实际候选身份、回退与现场 UAT；不继承旧 side-load 的验收 |
 
@@ -98,4 +98,6 @@ CLI 最终定向复核未确认 actionable P0–P2。`no-comments` 所余一条�
 - `native-settings-red-r2.log`、`native-settings-green.log`、`workbench-review-regression/result.json`。最初缺环境的 `native-settings-red.log` 不算缺陷复现。
 - `main-release-repair.log`、`main-release-full-green.log`。主仓命令由 `gstack-evidence` 另保留原始日志。
 
-主仓起点为 `79839c0b`。远端 `main` 已 fetch 为 `1c21fa6a`，是当前候选的祖先。新增改动均由本轮产生，没有 stash、reset、强推、切换用户已有分支或绕过 hooks。八作者仓和独立组合上传分支已提交并推送；主仓仍有待提交改动，Knowledge 维护仓未改动。上传载体的干净状态不能替代主仓交付。
+主仓起点为 `79839c0b`。远端 `main` 已 fetch 为 `1c21fa6a`，是当前候选的祖先。新增改动均由本轮产生，没有 stash、reset、强推、切换用户已有分支或绕过 hooks。八作者仓和独立组合上传分支已提交并推送，Knowledge 维护仓未改动。主仓 `3112b3448d31c07708d64d7632be373f72680b7e` 正常 push exit 0；`ls-remote` 已核对远端相同提交，推送后工作树干净。当前文档在独立提交更新，不冒充已执行其后的 CI。
+
+正常推送命令先加载私有 `check-environment.sh`，再使用新的 `CRM_COMPOSITION_OUTPUT=/private/tmp/dsh-rc3-final.ELtVwt/prepush-r3` 执行 `git push -u origin codex/dsh-rc3-business-sync`。原始日志为该根下的 `main-push-r3.log`，backend 12/12 组完成，frontend、tooling 和 B0 均 exit 0。此前状态文档超过 80 行的失败已通过保留全文与修正链接的历史归档解决，没有提高上限；私有 Python 补齐自带 pip 后通过服务目标标签预检，没有修改依赖守卫。官方 rc3 持久化模块导出适配及 native preparation 已修复，并实际验证合成 text、tool、rich 的 rc3 与历史 rc2 冷恢复矩阵；这不覆盖杭州 rc1 或真实业务数据回退。最新编译 Workbench 的消费者验证改为原生账号归属，失败及重试路径在真实封存包 DOM 执行，九文件 65 PASS，没有修改产品 UI 或凭据。
