@@ -269,6 +269,34 @@ DSH 本地开发包装器读取 `.nvmrc` 并选择 Node 24.19.0，不修改系�
 
 本轮独立包组合入口：`node --test --test-concurrency=1 scripts/crm-calibration/knowledge-composition.integration.mjs scripts/crm-calibration/page-composition.integration.mjs`，需绝对 `B0_BUILD_UPSTREAM`、`FQ_B0_PYTHON`、`CRM_COMPOSITION_PACK_INPUTS`、`CRM_COMPOSITION_PAGE_INPUTS` 和新的 `CRM_COMPOSITION_OUTPUT`。实际固定包公共合同 9 PASS / 0 FAIL / 0 SKIP；输入/profile/包守卫 47 PASS，迁移夹具的旧源码兼容 78 PASS，各自记账。运行身份、Cordis 解析、源码 EPERM、12 个自有端口回收及失败记录见[组合证据](../hackathon/evidence/shinemage-fixed-pack-composition-20261011.md)。缺输入不静默跳过，旧兼容测试入口现在也要求这些固定包输入。默认 pipeline 的其他源码装配与 CI 输入接通仍开放，未执行本批完整 B0；运行组合通过不等于官方完整宿主、浏览器或 candidate 准入通过。
 
+## 完整业务候选运行包
+
+发布预检显式使用 `config/dsh-profile.business.rc3.json`。它按组合锁内 `crm → page` 的顺序派生，包含 CRM、Knowledge 和七个页面插件。两份来源 profile 继续互斥；普通调用的默认 page profile 保持七插件。装配记录见[完整业务 profile](../hackathon/evidence/dsh-business-runtime-profile-20261025.md)。
+
+更新锁定来源后，生成并检查派生配置，再完成正常代码审核与提交。生成命令写入指定的业务 profile，检查命令只比较原字节。
+
+```sh
+node scripts/ci/composition-pack-inputs.mjs --write-business-profile config/dsh-profile.business.rc3.json
+node scripts/ci/composition-pack-inputs.mjs --check-business-profile config/dsh-profile.business.rc3.json
+```
+
+手工准备时，使用已严格接收的组合 ZIP、新的绝对输出目录和锁定 Python。组合准备器核对来源、包证明及业务 profile，在回执中返回成对的 `DSH_PROFILE_MANIFEST` 和 `DSH_PROFILE_PACK_INPUTS`。未传 `--business-profile` 时只生成原有两组输入。
+
+```sh
+node scripts/ci/composition-pack-inputs.mjs \
+  --archive "$SEALED_COMPOSITION_ZIP" \
+  --manifest "$PWD/config/shinemage-composition-pack-manifest.v1.json" \
+  --business-profile config/dsh-profile.business.rc3.json \
+  --output "$CANDIDATE_INPUTS" --python "$PYTHON314"
+export DSH_PROFILE_MANIFEST=config/dsh-profile.business.rc3.json
+export DSH_PROFILE_PACK_INPUTS="$CANDIDATE_INPUTS/business-inputs.json"
+node scripts/dsh.mjs preflight --python "$PYTHON314" \
+  --source-sha "$REVIEWED_SHA" --tag "$CANDIDATE_TAG" \
+  --output-dir "$CANDIDATE_BUNDLE"
+```
+
+预检还要求干净提交和下节列出的固定材料。业务 profile、包输入、release snapshot 和下载包须绑定同一目标；只更换其中一个会被拒绝。测试夹具显式选择各自的 manifest，避免运行目标的环境变量改变夹具。此入口不启动业务服务、不预热缓存，也不代表 Host、浏览器或真实业务验收完成。
+
 ## B0 固定包和作者证据输入
 
 完整 `--check` 要求组合包、Workbench 作者 CI、领域作者 CI 和公共合同输入四类固定材料。路径必须是绝对路径且材料已准备；主仓不以旧测试摘要、作者目录或源码回退补齐。

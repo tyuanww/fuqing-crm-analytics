@@ -8,6 +8,7 @@ on:
       - 'scripts/ci/composition-pack-inputs*.mjs'
       - 'scripts/ci/unpack-composition-inputs.py'
       - 'config/shinemage-composition*.json'
+      - 'config/dsh-profile*.json'
       - 'scripts/dsh.mjs'
       - 'scripts/dsh-b0/**'
       - 'config/domain-author-evidence.lock.json'
@@ -163,6 +164,7 @@ jobs:
           node scripts/ci/composition-pack-inputs.mjs \
             --artifact-lock "$GITHUB_WORKSPACE/config/shinemage-composition-artifact.lock.json" \
             --manifest "$GITHUB_WORKSPACE/config/shinemage-composition-pack-manifest.v1.json" \
+            --business-profile config/dsh-profile.business.rc3.json \
             --output "$RUNNER_TEMP/shinemage-composition-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" \
             --python "${{ steps.python.outputs.python-path }}" \
             --github-env "$GITHUB_ENV"
@@ -174,7 +176,8 @@ jobs:
           set -euo pipefail
           printf 'Preflight checkout status before runtime preparation:\n'
           git status --porcelain --untracked-files=all
-          export DSH_PROFILE_PACK_INPUTS="$CRM_COMPOSITION_PAGE_INPUTS"
+          test "$DSH_PROFILE_MANIFEST" = config/dsh-profile.business.rc3.json
+          test "$DSH_PROFILE_PACK_INPUTS" = "$RUNNER_TEMP/shinemage-composition-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/business-inputs.json"
           node scripts/dsh.mjs preflight \
             --python "$B0_PYTHON" \
             --source-sha "$REVIEWED_SHA" \

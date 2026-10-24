@@ -361,7 +361,11 @@ test('release preflight builds the runtime before protected tag creation', async
   assert.match(source, /DSH_PROFILE_PACK_INPUTS/);
   assert.match(source, /PREFLIGHT_PACK_INPUTS_CHANGED/);
   assert.doesNotMatch(source, /linkWorkspaceKit|board-components\/build\.mjs|\$\{plugin\}\/build\.mjs/);
-  assert.match(workflow, /export DSH_PROFILE_PACK_INPUTS="\$CRM_COMPOSITION_PAGE_INPUTS"/);
+  assert.ok(workflow.includes("      - 'config/dsh-profile*.json'"));
+  assert.ok(workflow.includes('            --business-profile config/dsh-profile.business.rc3.json \\'));
+  assert.ok(workflow.includes('          test "$DSH_PROFILE_MANIFEST" = config/dsh-profile.business.rc3.json'));
+  assert.ok(workflow.includes('          test "$DSH_PROFILE_PACK_INPUTS" = "$RUNNER_TEMP/shinemage-composition-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/business-inputs.json"'));
+  assert.doesNotMatch(workflow, /export DSH_PROFILE_PACK_INPUTS="\$CRM_COMPOSITION_PAGE_INPUTS"/);
 });
 test('release preflight does not leak the read-only upstream override into prepare', async () => {
   const source = await readFile(join(process.cwd(), 'scripts/release/preflight.mjs'), 'utf8');

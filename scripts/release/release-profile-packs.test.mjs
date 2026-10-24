@@ -60,7 +60,8 @@ async function fixture(t) {
   await symlink(join(base, 'missing-old-source'), join(root, 'dsh-plugins/independent'));
   await symlink(join(base, 'missing-sibling-source'), join(root, 'dsh-plugins/unselected'));
   await rm(built, { recursive: true });
-  return { base, root, inputRoot, input, inputsPath, profile, saveProfile, output: join(base, 'payload') };
+  return { base, root, inputRoot, input, inputsPath, profile, saveProfile,
+    manifestPath: 'config/dsh-profile.rc3.json', output: join(base, 'payload') };
 }
 
 async function prepared(t) {
@@ -152,7 +153,7 @@ test('pack snapshot digest and shape are enforced', async t => {
 test('readiness verifies fixed packs without old plugin entrypoints', async t => {
   const f = await fixture(t);
   execFileSync('git', ['init', '-q', f.root]);
-  const readiness = await collectReleaseReadiness({ root: f.root, profilePackInputs: f.inputsPath,
+  const readiness = await collectReleaseReadiness({ root: f.root, profileManifest: f.manifestPath, profilePackInputs: f.inputsPath,
     requireClean: false, requireRuntime: false, requireUpstream: false });
   const check = readiness.checks.find(row => row.name === 'plugin-packs');
   assert.equal(check.ok, true, check.value);
