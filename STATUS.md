@@ -4,6 +4,8 @@
 
 ## 当前快照（2026-10-25）
 
+- 2026-10-25 原生页面接线前置修复已完成本地验证。CRM 原授权租约作者提交 `21a7368` 已推送，固定 SDK 构建和完整包测试 196 项通过；主仓页面、来源、Host、跨语言及收件箱定向验证 166 项通过，资源泄漏作为错误检查，退出码 0。独立审查发现的退出后过期交付已修。当前组合仍锁定作者 `ed5940f`，新租约尚未进入组合；Host 页面代理、resolver、结果桥和 Workbench 接线仍开放。基线运行包预检 `40115158182` 因陈旧提交号断言先失败后取消，未上传新 artifact。详见[页面前置修复记录](docs/hackathon/evidence/dsh-native-page-prerequisites-20261025.md)。
+
 - 2026-10-25 原生 CRM Host 来源候选已推送到作者 `ed5940f`。作者 CI `40111888916` 成功，169 项通过。主仓组合及公共契约锁已同步该来源，真实组合 artifact `12568060723` 经现有严格接收器读回，九插件和领域输入通过来源、生成证明及 peer 核验。仅 CRM 两份包文件改变，其他 18 个 payload 字节不变。当前主仓 CI 看 [PR #164](https://github.com/tyuanww/fuqing-crm-analytics/pull/164)。新能力仍需显式配置；真实 rc3 Host、页面 resolver、完整聊天业务链路、两年 RFM/商品缓存和正式发布未关闭。本轮没有杭州变更，`release_ready=false`。详见[组合接收记录](docs/hackathon/evidence/dsh-native-host-composition-20261025.md)。
 
 - 2026-10-24 作者 CI、严格包与真实组合 ZIP 读回已完成。主仓 [PR #164](https://github.com/tyuanww/fuqing-crm-analytics/pull/164) 已创建，依赖安全修复 `bd705237` 正常 pre-push 通过并推送。初始候选后端 `3261 PASS / 79 SKIP`、前端 `226 PASS`，新 pin 的完整依赖审计及 hooks 通过；rc3 Linux DevTools 命中已按真实构建摘要补充精确例外及负测，最终 CI 看 PR 当前 checks。杭州只读核验确认仍运行 rc1，现役 CRM 两项风险依赖未更新，RFM 缓存由 live 进程持写锁；generation、近两年覆盖与新候选真实 UAT 仍未验收。没有合并、发布或切换，`release_ready=false`。CLI 复核是非原生、同模型替代，不代表跨模型或全项目无缺陷。详见 [六项收尾记录](docs/hackathon/evidence/dsh-rc3-six-gates-20261024.md)。
