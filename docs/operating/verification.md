@@ -8,7 +8,7 @@
 
 主仓活动候选已统一到 DSH `0.2.1-rc.3`（`dsh-v0.2.1-rc.3`，upstream `1f81c047…`）和 Cordis `4.0.5`。rc3 上游干净 checkout 的依赖安装、host/client 构建、plugin-kit 输入预检、主仓 Workbench/CRM/Knowledge 构建与 provenance 均已通过；作者仓本地 rc3 提交和测试结果见[上游盘查记录](../release/dsh-rc3-candidate/upstream-audit-20261024.md)。
 
-该候选尚未推送、合并或部署。杭州 `current` 仍是下方历史现场记录的 DSH `0.2.1-rc.1` side-load；远端作者 CI 的 rc3 输入归档、正式组合 artifact、旁路启动/浏览器/回退/canary 和公司级发布身份仍未完成，`release_ready=false` 不变。
+主仓候选尚未推送、合并或部署。三个作者分支已推送并进入 PR，本地验证及审查缺口见[作者同步回执](../hackathon/evidence/dsh-rc3-author-sync-20261024.md)。主仓完整 B0 仍缺最终正式组合输入。杭州 `current` 仍是下方历史现场记录的 DSH `0.2.1-rc.1` side-load；远端作者 CI 状态未确认，正式组合 artifact、旁路启动/浏览器/回退/canary 和公司级发布身份仍未完成，`release_ready=false` 不变。
 
 ## 杭州 cockpit-v3 商品映射历史现场（2026-10-22）
 
