@@ -9,7 +9,7 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 import { repoRoot } from './paths.mjs';
@@ -44,7 +44,9 @@ export async function startPageHttp({
   assert.ok(Number.isInteger(port) && port > 0 && port <= 65535, 'page http port must be 1-65535');
   assert.notEqual(port, 6677, '6677 is the live web; page documents never bind it');
   assert.ok(stateDir && stateDir.startsWith('/'), 'page state dir must be an absolute path');
+  signal?.throwIfAborted();
   await mkdir(stateDir, { recursive: true, mode: 0o700 });
+  signal?.throwIfAborted();
   const token = randomBytes(32).toString('hex');
   const child = spawn(python, [SERVER, '--host', '127.0.0.1', '--port', String(port),
     '--state-dir', stateDir], {
@@ -58,16 +60,28 @@ export async function startPageHttp({
   };
   child.stdout.on('data', ingest);
   child.stderr.on('data', ingest);
-  const childExit = new Promise(ok => {
-    child.once('close', (code, signalName) => ok({ code, signal: signalName }));
-    child.once('error', ok);
+  const childExit = new Promise(ok => child.once('close', ok));
+  child.on('error', ingest);
+  let stopping;
+  const stopChild = graceMs => stopping ??= Promise.resolve().then(async () => {
+    signal?.removeEventListener('abort', abort);
+    if (child.exitCode === null && child.signalCode === null) child.kill('SIGTERM');
+    const timer = setTimeout(() => {
+      if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
+    }, graceMs);
+    try {
+      await childExit;
+    } finally {
+      clearTimeout(timer);
+    }
   });
-  const abort = () => { if (child.exitCode === null && child.signalCode === null) child.kill('SIGTERM'); };
+  const abort = () => { void stopChild(2000); };
   signal?.addEventListener('abort', abort, { once: true });
   const deadline = Date.now() + timeoutMs;
   let ready = false;
   try {
     while (Date.now() < deadline) {
+      signal?.throwIfAborted();
       if (child.exitCode !== null || child.signalCode !== null) break;
       // The server prints one ready line before uvicorn.run binds; the loop
       // then verifies the port actually accepts (a bind failure would exit).
@@ -86,22 +100,19 @@ export async function startPageHttp({
       }
       await delay(100);
     }
+    signal?.throwIfAborted();
     assert.ok(ready, `page http did not become ready on ${port}: ${captured.slice(-2000)}`);
     return {
       base: pageHttpOrigin(port),
       token,
       child,
       async stop() {
-        signal?.removeEventListener('abort', abort);
-        abort();
-        await Promise.race([childExit, delay(3000).then(() => child.kill('SIGKILL'))]);
+        await stopChild(3000);
       },
     };
   } catch (error) {
-    signal?.removeEventListener('abort', abort);
-    abort();
-    await Promise.race([childExit, delay(2000)]);
-    error.pageHttpLog = captured.slice(-2000);
+    await stopChild(2000);
+    if (!signal?.aborted) error.pageHttpLog = captured.slice(-2000);
     throw error;
   }
 }
