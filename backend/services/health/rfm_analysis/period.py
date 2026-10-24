@@ -317,7 +317,7 @@ def _run_rfm_period_dashboard_full(
         FROM {RFM_DASHBOARD_FULL_TABLE}
         WHERE period_type = ?::VARCHAR
           AND as_of_date = ?::DATE
-          AND end_date <= ?::DATE
+          AND end_date = ?::DATE
           AND lookback_days >= ?::INTEGER
     ),
     chosen AS (

@@ -1,20 +1,4 @@
-"""
-Sprint 205+ L4.75 Plan 1 Stage 2 RANGE-based cache regression test
-(跟 L4.42 + L4.50 + L4.71 + L4.74 + L4.75 1:1 stable 永久规则链配套).
-
-L4.75 Stage 2 真业务触发: frontend MarketFocusView.vue 4 tab ProductCustomerTab /
-StoreAssetsTab / ProductAssetsTab / OtherProductAssetsTab weeks=[4,8,12] NSelect
-导致 cache 命中率 0% (user 述 "近 4 周 → cache 命中 0.14s" 期望与实测 13.77s 滞后).
-
-治本:
-1. period.py: 加 _resolve_range_period helper (rolling_Xd / weekly_Xw 8 个 RANGE 周期)
-2. cache.py: 加 RANGE_PERIODS 常量 (8 项) + 预计算 6重 for 嵌套 (Stage 2 新增)
-3. cache.py: 加 _fuzzy_match_db_cache ±1 day 兜底 (跟 L4.72.1 SELECT 移出 except 块 1:1 stable)
-4. cache.py: _read_db_cache exact miss → fuzzy match 兜底命中
-8 test cases 锁回归 (跟 L4.42 + L4.50 + L4.55 + L4.71 + L4.74 1:1 stable 永久规则链配套).
-"""
 import inspect
-import json
 from datetime import date
 
 import duckdb
@@ -22,7 +6,6 @@ import duckdb
 # 1) test_range_periods_includes_8_ranges
 # 2) test_rolling_7d_dates
 # 3) test_weekly_4w_dates
-# 4) test_fuzzy_match_within_1_day
 # 5) test_precompute_6dim_for
 # 6) test_cache_key_includes_range_id
 # 7) test_user_custom_hits_cache
@@ -97,52 +80,32 @@ class TestL475RangeBasedCache:
         span_12w = (date.fromisoformat(r12w["current"].end) - date.fromisoformat(r12w["current"].start)).days + 1
         assert span_12w == 84, f"weekly_12w cur span = {span_12w} 期望 84 天"
 
-    def test_fuzzy_match_within_1_day(self):
-        """验证 L4.75 fix #4: _fuzzy_match_db_cache ±1 day tolerance 兜底命中 (跟 L4.72.1 SELECT 移出 except 块 1:1 stable)."""
-        from backend.services.health.rfm_analysis.cache import (
-            RFM_CACHE_TABLE,
-            _ensure_db_cache_table,
-            _fuzzy_match_db_cache,
-        )
+    def test_exact_range_and_period_alias_hit_but_neighbor_misses(self, monkeypatch):
+        from backend.services.health.rfm_analysis import cache
         from backend.services.health.rfm_analysis._shared import _cache_key
-        # 在内存 cache 库写一行模拟 precomputed cache，禁止测试污染生产缓存。
-        wc = duckdb.connect(":memory:")
-        try:
-            _ensure_db_cache_table(wc)
-            # 先清理可能残留的 prev-run 数据 (跟 L4.50 pytest cleanup 1:1 stable 永久规则化沿用)
-            data_version = "2026-07-09 00:00:00"
-            cache_key = _cache_key(
-                None, "2026-07-02", "2026-07-08", None, "GSV", None, data_version
-            )
-            wc.execute(f"DELETE FROM {RFM_CACHE_TABLE} WHERE cache_key = ?", [cache_key])
-            # 写一条 fake cached: start=2026-07-02, end=2026-07-08 (rolling_7d 2026-07-09 today-1)
-            wc.execute(
-                f"INSERT INTO {RFM_CACHE_TABLE} "
-                f"(cache_key, period, start_date, end_date, channel, metric_type, ex_channels, "
-                f"result_json, mtime_at_write, orders_count_at_write, computed_at) "
-                f"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)",
-                [cache_key, "ROLLING_7D", "2026-07-02", "2026-07-08",
+
+        data_version = "2026-07-09 00:00:00"
+        with duckdb.connect(":memory:") as conn:
+            cache._ensure_db_cache_table(conn)
+            monkeypatch.setattr(cache, "_get_cache_conn", lambda: conn)
+            key = _cache_key(None, "2026-07-02", "2026-07-08", None, "GSV", None, data_version)
+            conn.execute(
+                f"INSERT INTO {cache.RFM_CACHE_TABLE} "
+                "(cache_key, period, start_date, end_date, channel, metric_type, ex_channels, "
+                "result_json, mtime_at_write, orders_count_at_write, computed_at) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)",
+                [key, "ROLLING_7D", "2026-07-02", "2026-07-08",
                  "", "GSV", "", '{"hist_users": 1}', data_version, 0],
             )
-            # 用同一个 wc conn 跑 fuzzy (跟 L4.38 + L4.66 + L4.67 跨文件 fingerprint 1:1 stable 永久规则化沿用,
-            # 避免另开 read_only 连接触发 DuckDB strict mode config 冲突)
-            fuzzy = _fuzzy_match_db_cache(
-                start_date="2026-07-03", end_date="2026-07-09",
-                channel=None, metric_type="GSV", period=None,
-                conn=wc, tolerance_days=1, data_version=data_version,
-            )
-            assert fuzzy is not None, (
-                "L4.75 fuzzy match ±1 day 必须命中 cached (2026-07-02..2026-07-08) "
-                "for target (2026-07-03..2026-07-09)"
-            )
-            assert json.loads(fuzzy[1][0]).get("hist_users") == 1
-            # 清理
-            wc.execute(f"DELETE FROM {RFM_CACHE_TABLE} WHERE cache_key = ?", [cache_key])
-        finally:
-            try:
-                wc.close()
-            except Exception:
-                pass
+            for label in (None, "ROLLING_7D"):
+                assert cache._read_db_cache(
+                    label, "2026-07-02", "2026-07-08", None, "GSV", None, data_version,
+                    conn, current_orders_count=0,
+                ) == {"hist_users": 1}
+            assert cache._read_db_cache(
+                None, "2026-07-03", "2026-07-09", None, "GSV", None, data_version,
+                conn, current_orders_count=0,
+            ) is None
 
     def test_precompute_6dim_for(self):
         """验证 L4.75 fix #5: precompute_rfm_cache 含 Stage 2 RANGE for 嵌套块 (跟 L4.50 0 业务代码改动 1:1 stable)."""

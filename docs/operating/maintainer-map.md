@@ -1,6 +1,7 @@
 # 维护地图
 
 DuckDB 连接预算、只读部署的临时目录和失败清理见 [DuckDB 运行时资源配置](duckdb-runtime-settings.md)。
+RFM 精确日期、比较期、旧缓存失效和重预热边界见 [RFM 缓存查询身份](rfm-cache-identity.md)。
 
 给后来改这个仓库的人。当前提交和版本只看根目录 [STATUS.md](../../STATUS.md)。这里只写目录、端口、检索和开发/生产边界，不重复施工编年。
 
