@@ -1,0 +1,86 @@
+{
+  "schema_version": "dsh-plugin-pack/v1",
+  "package_name": "@shine-mage/dsh-knowledge",
+  "package_version": "0.0.0-candidate.1",
+  "dsh_pin": "0.2.1-rc.3",
+  "source_dsh_pin": "0.2.1-rc.3",
+  "source_sha": "2b0f5745f725eda5b26df20ebd86c79003b08078",
+  "source_dirty": false,
+  "tarball": {
+    "name": "shine-mage-dsh-knowledge-0.0.0-candidate.1.tgz",
+    "bytes": 14479,
+    "sha256": "f1031c39bdc90af8632f31464ea5f91f1729f91438928d5ad29cec5ae66e87e7"
+  },
+  "generated_bytes_provenance": {
+    "schema_version": "dsh-generated-bytes/v1",
+    "status": "PASS",
+    "source": {
+      "git_sha": "2b0f5745f725eda5b26df20ebd86c79003b08078",
+      "tree_sha256": "5bedf083d6b81c4fb6700c959ce92f25b458bdf4d8aeedb3a7373e995c823214",
+      "entries": 22,
+      "bytes": 111050,
+      "sha256": "5bedf083d6b81c4fb6700c959ce92f25b458bdf4d8aeedb3a7373e995c823214"
+    },
+    "generated_tree": {
+      "sha256": "0a0fd85b00e76dfa301328c0c8ea84548df645402d04f226a49d9ac86ce65302",
+      "entries": 3,
+      "bytes": 54026
+    },
+    "generated_files": [
+      {
+        "path": "lib/graph-tools.js",
+        "type": "file",
+        "mode": 420,
+        "bytes": 38773,
+        "sha256": "425e876ef85dbfb8524080340b42e29d12b5eb0799ca79a35a3f5d8cf9e6b864"
+      },
+      {
+        "path": "lib/index.js",
+        "type": "file",
+        "mode": 420,
+        "bytes": 15253,
+        "sha256": "e04d90e8e4a51fcebf14c1666ace8796847c2ac13737805f933655c9b196180e"
+      }
+    ],
+    "toolchain": {
+      "sdk_version": "0.2.1-rc.3",
+      "upstream_sha": "1f81c047fc48fa190a683e469daa699857e9afe8",
+      "upstream_lock_sha256": "911b049924e8256d8d6e684235cf935ca75b28fd0dd46f0c3b316a51c2cf5dc1",
+      "node_major": 24,
+      "pnpm": "11.28.2",
+      "upstream_pnpm": "11.28.5",
+      "typescript": "6.0.3",
+      "esbuild": "0.25.12",
+      "react": "18.3.1",
+      "react_types": "18.3.31",
+      "node_types": "22.20.1",
+      "release_lane": null
+    },
+    "builder": {
+      "status": "PASS",
+      "clean": true,
+      "isolated": true,
+      "node": "v24.19.0",
+      "pnpm": "11.28.2",
+      "platform": "darwin",
+      "arch": "arm64",
+      "command": "node scripts/build.mjs",
+      "network_mode": "offline"
+    },
+    "builder_receipt_schema_version": "dsh-plugin-build/v1",
+    "builder_receipt_sha256": "81c5191ff439f2a2cf641ac1e24fbf791cbd9d387acc53443f54630e4783f6da",
+    "tarball": {
+      "name": "shine-mage-dsh-knowledge-0.0.0-candidate.1.tgz",
+      "bytes": 14479,
+      "sha256": "f1031c39bdc90af8632f31464ea5f91f1729f91438928d5ad29cec5ae66e87e7"
+    }
+  },
+  "entries": [
+    "cordis.patch.yml",
+    "lib/graph-tools.js",
+    "lib/index.js",
+    "package.json"
+  ],
+  "activation": "NOT_RUN",
+  "state_path": "NOT_APPLICABLE_PLUGIN_PACK_ONLY"
+}

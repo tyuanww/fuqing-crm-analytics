@@ -1,0 +1,94 @@
+{
+  "schema_version": "dsh-plugin-pack/v1",
+  "package_name": "@shine-mage/dsh-crm-knowledge",
+  "package_version": "0.0.0-crm.5",
+  "dsh_pin": "0.2.1-rc.3",
+  "source_dsh_pin": "0.2.1-rc.3",
+  "source_sha": "46111c5bd93c798cd8256419c6c8dee0505b215f",
+  "source_dirty": false,
+  "tarball": {
+    "name": "shine-mage-dsh-crm-knowledge-0.0.0-crm.5.tgz",
+    "bytes": 244737,
+    "sha256": "8cfd4c491b2a401a5cbdadb68c468150b9f8f2dccfcefcf915d88cbcc80e9d3c"
+  },
+  "generated_bytes_provenance": {
+    "schema_version": "dsh-generated-bytes/v1",
+    "status": "PASS",
+    "source": {
+      "git_sha": "46111c5bd93c798cd8256419c6c8dee0505b215f",
+      "tree_sha256": "941ae4bb353cbb319a82195cde7f7a91f46b8299f0cefdd7d0b53b5a1667d401",
+      "entries": 54,
+      "bytes": 404366,
+      "sha256": "941ae4bb353cbb319a82195cde7f7a91f46b8299f0cefdd7d0b53b5a1667d401"
+    },
+    "generated_tree": {
+      "sha256": "777eca4952974f1d9a2dd794580f482a8d53891d018551f3070a0c987bc8aaf5",
+      "entries": 4,
+      "bytes": 837311
+    },
+    "generated_files": [
+      {
+        "path": "lib/client.js",
+        "type": "file",
+        "mode": 420,
+        "bytes": 640090,
+        "sha256": "d5c2cc24556b4477e94fe121d694154b9af344e4e931808d907d92b23f52810c"
+      },
+      {
+        "path": "lib/host.js",
+        "type": "file",
+        "mode": 420,
+        "bytes": 98234,
+        "sha256": "ef6632cb5570176b7a314108d0e64f63d0a234712461a848565824c300430d2f"
+      },
+      {
+        "path": "lib/index.js",
+        "type": "file",
+        "mode": 420,
+        "bytes": 98987,
+        "sha256": "147a047a4c49558cd1a11359c0945c65d6974470cf4fbf5f2d707e5538145f90"
+      }
+    ],
+    "toolchain": {
+      "sdk_version": "0.2.1-rc.3",
+      "upstream_sha": "1f81c047fc48fa190a683e469daa699857e9afe8",
+      "upstream_lock_sha256": "911b049924e8256d8d6e684235cf935ca75b28fd0dd46f0c3b316a51c2cf5dc1",
+      "node_major": 24,
+      "pnpm": "11.28.2",
+      "upstream_pnpm": "11.28.5",
+      "typescript": "6.0.3",
+      "esbuild": "0.25.12",
+      "react": "18.3.1",
+      "react_types": "18.3.31",
+      "node_types": "22.20.1",
+      "release_lane": null
+    },
+    "builder": {
+      "status": "PASS",
+      "clean": true,
+      "isolated": true,
+      "node": "v24.19.0",
+      "pnpm": "11.28.2",
+      "platform": "darwin",
+      "arch": "arm64",
+      "command": "node scripts/build.mjs",
+      "network_mode": "offline"
+    },
+    "builder_receipt_schema_version": "dsh-plugin-build/v1",
+    "builder_receipt_sha256": "7c9e41d73bd786711e43f93a355013a4c88405bb13375855414f80b4e7b0ecd1",
+    "tarball": {
+      "name": "shine-mage-dsh-crm-knowledge-0.0.0-crm.5.tgz",
+      "bytes": 244737,
+      "sha256": "8cfd4c491b2a401a5cbdadb68c468150b9f8f2dccfcefcf915d88cbcc80e9d3c"
+    }
+  },
+  "entries": [
+    "cordis.patch.yml",
+    "lib/client.js",
+    "lib/host.js",
+    "lib/index.js",
+    "package.json"
+  ],
+  "activation": "NOT_RUN",
+  "state_path": "NOT_APPLICABLE_PLUGIN_PACK_ONLY"
+}

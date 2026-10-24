@@ -1,0 +1,110 @@
+{
+  "schema_version": "dsh-plugin-pack/v1",
+  "package_name": "@shine-mage/dsh-shine-funnel",
+  "package_version": "0.0.0-b0",
+  "dsh_pin": "0.2.1-rc.3",
+  "source_dsh_pin": "0.2.1-rc.3",
+  "source_sha": "3420ec3b2650000388ceee5e2a14d78dc8a84a59",
+  "source_dirty": false,
+  "tarball": {
+    "name": "shine-mage-dsh-shine-funnel-0.0.0-b0.tgz",
+    "bytes": 2007,
+    "sha256": "d959bf1e45f04b3871914e70fba642fc0447c85735adf394d0a46fecfca12a55"
+  },
+  "generated_bytes_provenance": {
+    "schema_version": "dsh-generated-bytes/v1",
+    "status": "PASS",
+    "source": {
+      "git_sha": "3420ec3b2650000388ceee5e2a14d78dc8a84a59",
+      "tree_sha256": "dfd26744731621150fb890e7e5ee73d12f43cab3c54db376d79fdf589d811805",
+      "entries": 11,
+      "bytes": 9028,
+      "sha256": "dfd26744731621150fb890e7e5ee73d12f43cab3c54db376d79fdf589d811805"
+    },
+    "generated_tree": {
+      "sha256": "66086e09a8b6c77eecfea2a8543b420aaa6c84bc243293426eb052260f7c2e35",
+      "entries": 6,
+      "bytes": 2710
+    },
+    "generated_files": [
+      {
+        "path": "bundled-dependencies.json",
+        "type": "file",
+        "mode": 420,
+        "bytes": 306,
+        "sha256": "957ba54ce606fc735cc11c051b9d60c3703ab8bf0bc94dd00aac696b28afa06b"
+      },
+      {
+        "path": "lib/client.js",
+        "type": "file",
+        "mode": 420,
+        "bytes": 721,
+        "sha256": "a7b105fcd1703c6bf93f5a3bde531fd3f3d3522ba650e7bc709da34b3d8532cf"
+      },
+      {
+        "path": "lib/funnel.d.mts",
+        "type": "file",
+        "mode": 420,
+        "bytes": 239,
+        "sha256": "30c157c4cefc1ad5f8182e65af5777f39fcfd473987e1eabc47553f2f3d3c455"
+      },
+      {
+        "path": "lib/funnel.mjs",
+        "type": "file",
+        "mode": 420,
+        "bytes": 1324,
+        "sha256": "12f56de58baa8834cfd86d3ca78ab77faf018dbfb3b6c935591aece962fce8cc"
+      },
+      {
+        "path": "lib/index.js",
+        "type": "file",
+        "mode": 420,
+        "bytes": 120,
+        "sha256": "6d7c1a184cb2a60eb0d25eb4136638fb5777e3afe98bac13da87b3586fb84b79"
+      }
+    ],
+    "toolchain": {
+      "sdk_version": "0.2.1-rc.3",
+      "upstream_sha": "1f81c047fc48fa190a683e469daa699857e9afe8",
+      "upstream_lock_sha256": "911b049924e8256d8d6e684235cf935ca75b28fd0dd46f0c3b316a51c2cf5dc1",
+      "node_major": 24,
+      "pnpm": "11.28.2",
+      "upstream_pnpm": "11.28.5",
+      "typescript": "6.0.3",
+      "esbuild": "0.25.12",
+      "react": "18.3.1",
+      "react_types": "18.3.31",
+      "node_types": "22.20.1",
+      "release_lane": null
+    },
+    "builder": {
+      "status": "PASS",
+      "clean": true,
+      "isolated": true,
+      "node": "v24.19.0",
+      "pnpm": "11.28.2",
+      "platform": "darwin",
+      "arch": "arm64",
+      "command": "node scripts/build.mjs",
+      "network_mode": "offline"
+    },
+    "builder_receipt_schema_version": "dsh-plugin-build/v1",
+    "builder_receipt_sha256": "d4a3a604d3fc4aba60f988d83f2d6b2f85f696e9df86e50c663659db8b5d5872",
+    "tarball": {
+      "name": "shine-mage-dsh-shine-funnel-0.0.0-b0.tgz",
+      "bytes": 2007,
+      "sha256": "d959bf1e45f04b3871914e70fba642fc0447c85735adf394d0a46fecfca12a55"
+    }
+  },
+  "entries": [
+    "bundled-dependencies.json",
+    "cordis.patch.yml",
+    "lib/client.js",
+    "lib/funnel.d.mts",
+    "lib/funnel.mjs",
+    "lib/index.js",
+    "package.json"
+  ],
+  "activation": "NOT_RUN",
+  "state_path": "NOT_APPLICABLE_PLUGIN_PACK_ONLY"
+}

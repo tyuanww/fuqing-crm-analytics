@@ -1,0 +1,78 @@
+{
+  "schema_version": "shinemage-domain-pack/v1",
+  "package_name": "@shine-mage/board-components",
+  "package_version": "0.1.0",
+  "repository": "tyuanww/shinemage-board-components",
+  "source_sha": "e78e040e14792c89f99a2e3181004dbdaefd9bf6",
+  "source_dirty": false,
+  "tarball": {
+    "name": "shine-mage-board-components-0.1.0.tgz",
+    "bytes": 1955,
+    "sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182"
+  },
+  "entries": [
+    "lib/funnel.d.mts",
+    "lib/funnel.mjs",
+    "lib/waterfall.d.mts",
+    "lib/waterfall.mjs",
+    "package.json"
+  ],
+  "generated_bytes_provenance": {
+    "schema_version": "dsh-generated-bytes/v1",
+    "status": "PASS",
+    "source": {
+      "git_sha": "e78e040e14792c89f99a2e3181004dbdaefd9bf6",
+      "sha256": "08cf537ed5b9ae41ac27ef6540d98d87f52b4a92ef490bfd114f21532f693241",
+      "entries": 11,
+      "bytes": 14589
+    },
+    "generated_tree": {
+      "sha256": "899a25980c075e2b03359252be236f612eb43d7f38123a1031744582fd64c7d8",
+      "entries": 5,
+      "bytes": 4548
+    },
+    "generated_files": [
+      {
+        "path": "lib/funnel.d.mts",
+        "type": "file",
+        "mode": 420,
+        "bytes": 239,
+        "sha256": "30c157c4cefc1ad5f8182e65af5777f39fcfd473987e1eabc47553f2f3d3c455"
+      },
+      {
+        "path": "lib/funnel.mjs",
+        "type": "file",
+        "mode": 420,
+        "bytes": 1660,
+        "sha256": "aebd9f3cdecc93a30b21d18cd554d5e01adfc17cdedc93e7a188ac0f48244dec"
+      },
+      {
+        "path": "lib/waterfall.d.mts",
+        "type": "file",
+        "mode": 420,
+        "bytes": 341,
+        "sha256": "34b0be969c2f73b3dd1a7633b2e953c74bd5b12c80ed978ac3be0d51ee4a2210"
+      },
+      {
+        "path": "lib/waterfall.mjs",
+        "type": "file",
+        "mode": 420,
+        "bytes": 2308,
+        "sha256": "63aa6dc6010bd7cfe906f5184c395be0771568d40d471bf3184fe0d9ded53b98"
+      }
+    ],
+    "builder": {
+      "status": "PASS",
+      "clean": true,
+      "isolated": true,
+      "node": "v24.19.0",
+      "pnpm": "11.28.2",
+      "platform": "darwin",
+      "arch": "arm64",
+      "command": "node library/build.mjs OUTPUT",
+      "network_mode": "offline"
+    },
+    "builder_receipt_sha256": "52386f7f747c6dd9e70c2f156b01d45c8f911255ee462543887a1989b344035e"
+  },
+  "release_ready": false
+}
