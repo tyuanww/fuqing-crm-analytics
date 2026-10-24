@@ -81,8 +81,9 @@ export function createDashboardAccess({ baseUrl = 'http://127.0.0.1:8000', first
       const combined = signal ? AbortSignal.any([signal, record.controller.signal]) : record.controller.signal;
       const result = await (purchases ? queryDashboardPurchases : queryDashboardGsv)(input, { sessionId, binding: record.binding, signal: combined });
       if (records.get(sessionId) !== record) return unavailable(purchases);
-      if (record.expiresAt <= now() || !hasSession(sessionId)) { forget(sessionId); return unavailable(purchases); }
+      if (record.expiresAt <= now()) { forget(sessionId); return unavailable(purchases); }
       if (['AUTH_EXPIRED', 'ACCOUNT_MISMATCH'].includes(result.reason?.code)) forget(sessionId);
+      if (!hasSession(sessionId)) return unavailable(purchases);
       return result;
   }
   async function asset(sessionId, input, signal) {
@@ -104,8 +105,9 @@ export function createDashboardAccess({ baseUrl = 'http://127.0.0.1:8000', first
     }
     const result = await crmAssetRequest(payload, { sessionId, binding: record.binding, signal: combined, hostCitations });
     if (records.get(sessionId) !== record) return missing();
-    if (record.expiresAt <= now() || !hasSession(sessionId)) { forget(sessionId); return missing(); }
+    if (record.expiresAt <= now()) { forget(sessionId); return missing(); }
     if (['AUTH_EXPIRED', 'ACCOUNT_MISMATCH'].includes(result.code)) forget(sessionId);
+    if (!hasSession(sessionId)) return missing();
     return result;
   }
   async function named(sessionId, input, signal, fn, schema, version) {
@@ -120,9 +122,11 @@ export function createDashboardAccess({ baseUrl = 'http://127.0.0.1:8000', first
       return { status: 'UNAVAILABLE', schema_version: schema, metric_version: version,
         reason: { code: 'NOT_CONNECTED', message: '当前对话尚未连接 CRM，请点击“连接 CRM”。' } };
     }
-    if (record.expiresAt <= now() || !hasSession(sessionId)) { forget(sessionId); return { status: 'UNAVAILABLE', schema_version: schema, metric_version: version,
+    if (record.expiresAt <= now()) { forget(sessionId); return { status: 'UNAVAILABLE', schema_version: schema, metric_version: version,
       reason: { code: 'NOT_CONNECTED', message: '当前对话尚未连接 CRM，请点击“连接 CRM”。' } }; }
     if (['AUTH_EXPIRED', 'ACCOUNT_MISMATCH'].includes(result.reason?.code)) forget(sessionId);
+    if (!hasSession(sessionId)) return { status: 'UNAVAILABLE', schema_version: schema, metric_version: version,
+      reason: { code: 'NOT_CONNECTED', message: '当前对话尚未连接 CRM，请点击“连接 CRM”。' } };
     return result;
   }
   const service = Object.freeze({

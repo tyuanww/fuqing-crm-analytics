@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createDashboardAccess, CRM_UI_PATH } from '../src/dashboard-access.mjs';
+import { createDashboardAccess, CRM_UI_PATH, CRM_ASSETS_UI_PATH } from '../src/dashboard-access.mjs';
 import { request, serveDashboard, SYNTHETIC_PASSWORD, SYNTHETIC_TOKEN } from './dashboard.fixture.mjs';
 
 const uiOrigin = 'http://127.0.0.1:43299';
@@ -98,6 +98,47 @@ test('a late login response cannot resurrect a disconnected session', async t =>
   response.end(JSON.stringify({ username: login.username, token: SYNTHETIC_TOKEN }));
   assert.equal((await (await pending).json()).code, 'CANCELLED');
   assert.equal((await call(status)).connected, false);
+});
+
+test('switching away during a request discards its result without deleting a valid grant', async t => {
+  const operations = {
+    query: access => access.service.query('fixture-session', request),
+    named: access => access.service.queryReadiness('fixture-session', request),
+    asset: access => access.browser(new Request(uiOrigin + CRM_ASSETS_UI_PATH, {
+      method: 'POST', headers: { origin: uiOrigin, 'x-crm-ui': '1', 'content-type': 'application/json' },
+      body: JSON.stringify({ operation: 'library', session_id: 'fixture-session' }),
+    })).then(response => response.json()),
+  };
+  for (const [name, run] of Object.entries(operations)) {
+    for (const upstreamStatus of [200, 503, 401]) await t.test(`${name}: upstream status=${upstreamStatus}`, async t => {
+      let started;
+      const seen = new Promise(resolve => { started = resolve; });
+      const { access, call, sessions } = await setup(t, (url, _req, res) => {
+        if (url.pathname === '/api/v1/metrics/dashboard-readiness') {
+          res.end(JSON.stringify({ schema_version: 'crm-dashboard-readiness/v1', metric_version: 'dashboard-readiness/v1', metrics: [] }));
+          return true;
+        }
+        if (url.pathname === '/api/v1/metrics/crm-library') {
+          res.end(JSON.stringify({ schema_version: 'crm-library/v1', data_kind: 'synthetic', snapshots: [], analyses: [], references: [],
+            snapshots_truncated: false, analyses_truncated: false, references_truncated: false }));
+          return true;
+        }
+        if (url.pathname !== '/api/v1/auth/me') return false;
+        started(res); return true;
+      });
+      assert.equal((await call(login)).connected, true);
+      const pending = run(access);
+      const response = await seen;
+      sessions.delete('fixture-session');
+      response.statusCode = upstreamStatus;
+      response.end(JSON.stringify({ username: 'fixture-user' }));
+      const result = await pending;
+      assert.equal(result.reason?.code ?? result.code, 'NOT_CONNECTED');
+      noSecret(result);
+      sessions.add('fixture-session');
+      assert.equal((await call(status)).connected, upstreamStatus !== 401);
+    });
+  }
 });
 
 test('disconnect fences an in-flight result and a new login survives the stale request', async t => {
