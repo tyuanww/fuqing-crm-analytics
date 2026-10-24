@@ -53,16 +53,6 @@ def page_result_access_router(access, principal):
         body = payload if isinstance(payload, dict) else {}
         return service().binding_state(actor(request, response), body.get("manifest"))
 
-    @router.post("/snapshots", status_code=201)
-    def snapshots(payload: dict[str, Any], request: Request, response: Response):
-        actor(request, response)
-        snapshot = service().put_snapshot(payload if isinstance(payload, dict) else {})
-        return {
-            "result_ref": snapshot.result_ref,
-            "result_version": snapshot.result_version,
-            "owner": snapshot.owner,
-        }
-
     return router
 
 
