@@ -38,6 +38,10 @@
 
 两文件原扫描仍命中，仅加入上述已知字面量时命中归零。主仓原测试表先补新案例并实际失败，再添加四条例外覆盖 materialized 和 installed 两种路径。既有扫描器函数、正则、全局 benign 集合及目录扫描未改。测试同时拒绝错误路径、错误摘要和未知凭据；发布测试为 45 PASS，报告驱动的六组字面量与路径负测通过。CLI 复核未发现本范围新增 P0–P2，保留非原生、同模型限制。实际 runtime preflight 仍由最终 PR CI 验证，不能拿策略单测或诊断成功代替。
 
+随后 `fcb3cb97` 的[远端预检 40082304511](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/40082304511) 实际完成 prepare、audit、build、runtime 和 release 阶段，证明新 Linux 例外在真实 runtime 路径生效。该次仍未通过完整预检，test 阶段为 609 项中的 601 PASS、2 FAIL、6 SKIP。两个失败是旧测试夹具：源清单仍期待旧 consumer 提交 `4ac076de`，而真实生成器和 tracked 配置均登记 `79839c0b`；离线部署仍硬编码 pnpm `11.7.0`，干净 CI 中被既有网络拒绝守卫阻断下载，本机旧缓存曾掩盖该问题。
+
+先保留两份本地红证据，再只改测试。consumer 保持精确 `79839c0b` 断言，不修改来源配置或校验函数。部署夹具改读已有 `UPSTREAM_PNPM_VERSION`，同一离线环境先实际检查 `corepack pnpm --version`，再执行原部署。新增版本断言在修复前实际得到 `11.7.0 !== 11.28.5`，没有为通过测试而预装旧版本或放开联网。受影响两文件 17 PASS；完整 `node scripts/dsh.mjs test` 重跑为 609 项，603 PASS、6 SKIP、0 FAIL。CLI 限定差异复核无新的 P0–P2；生成器第 42 行由主代理单独核对，独立复核只核对 tracked 配置和精确断言，不冒充覆盖。原始证据为 `ci-release-preflight-fcb-r1.log`、`preflight-fixture-source-red.log`、`preflight-fixture-manager-red.log`、`preflight-fixtures-green.log` 和 `preflight-release-full-r1.log`。最终提交的干净 CI 仍以 PR 当前 checks 为准。
+
 ## 真实缓存与业务边界
 
 现役独立 RFM 缓存文件存在，大小为 1,060,864 bytes。lsof 与容器 PID 核对证明持写锁的是现役 CRM 进程。没有另开 DuckDB 连接、复制缓存、停服务或改数据；active generation、完整筛选覆盖与延迟仍未知。不能直接让第二个进程写同一缓存文件，须先解决受控预热与发布的 owner 边界。

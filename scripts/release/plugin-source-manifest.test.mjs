@@ -59,7 +59,7 @@ test('tracked source manifest matches the composition lock selection', async () 
   validateSourceManifest(manifest, { lockSha256, expectedIds: lock.plugins.map(row => row.id) });
   assert.equal(manifest.domains.length, 1);
   assert.equal(manifest.domains[0].package, '@shine-mage/board-components');
-  assert.equal(manifest.consumer.reviewed_sha, '4ac076dea89790379c0d142d6b35a48d9208345a');
+  assert.equal(manifest.consumer.reviewed_sha, '79839c0b65eb34d372c4b21eb852649d69d40593');
   assert.equal(manifest.deletion_gate.status, 'BLOCKED');
 });
 
