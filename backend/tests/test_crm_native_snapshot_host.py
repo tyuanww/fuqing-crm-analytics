@@ -1,4 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import closing
 from dataclasses import asdict
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
@@ -149,7 +150,7 @@ def test_new_connection_cannot_revoke_an_old_ref_via_a_current_capture(host_case
         assert current["ref_id"] != first["ref_id"]
         denied = call(client, host_case, "revoke", handle="crm_op_" + "b" * 32, ref_id=first["ref_id"])
         assert denied.status_code == 404
-        with sqlite3.connect(host_case["root"] / "refs/native_crm_snapshot_refs.sqlite3") as con:
+        with closing(sqlite3.connect(host_case["root"] / "refs/native_crm_snapshot_refs.sqlite3")) as con:
             assert con.execute("SELECT count(*) FROM revocations WHERE ref_id=?", (first["ref_id"],)).fetchone()[0] == 0
 
 
@@ -167,7 +168,7 @@ def test_source_receipt_is_not_created_for_wrong_authoritative_digest(host_case)
     host_case["state"]["handles"]["crm_op_" + "a" * 32]["result_sha256"] = "0" * 64
     with TestClient(host_case["app"]()) as client:
         assert call(client, host_case).json()["code"] == "RESULT_STALE"
-    with sqlite3.connect(host_case["root"] / "refs/native_crm_snapshot_refs.sqlite3") as con:
+    with closing(sqlite3.connect(host_case["root"] / "refs/native_crm_snapshot_refs.sqlite3")) as con:
         assert con.execute("SELECT count(*) FROM refs").fetchone()[0] == 0
 
 

@@ -6,7 +6,7 @@ the user confirms a preview and the client links the resulting page id.
 """
 from __future__ import annotations
 
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 import hashlib
 import json
 import os
@@ -88,7 +88,7 @@ class ArtifactInboxStore:
             if (not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or info.st_uid != os.getuid()
                     or parent.st_uid != os.getuid() or parent.st_mode & 0o077):
                 return
-            with sqlite3.connect(self.path) as con:
+            with closing(sqlite3.connect(self.path)) as con, con:
                 if con.execute("PRAGMA application_id").fetchone()[0] != 1804289394:
                     return
                 if con.execute("PRAGMA user_version").fetchone()[0] != 1:
