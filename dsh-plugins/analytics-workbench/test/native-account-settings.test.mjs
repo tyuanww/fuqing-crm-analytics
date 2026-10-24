@@ -7,12 +7,12 @@ import {
 } from '../src/client/native-account-settings.mjs';
 import { loadJsdom } from './helpers/jsdom-loader.mjs';
 
-function button({ click = () => {}, label = '', attributes = {} } = {}) {
-  const values = { 'aria-label': label, ...attributes };
+function button({ click, label = '', attributes = {} } = {}) {
+  const values = { 'aria-label': label, 'aria-expanded': 'false', ...attributes };
   return {
     clicks: 0,
     getAttribute(name) { return values[name] ?? null; },
-    click() { this.clicks += 1; click(); },
+    click() { this.clicks += 1; if (click) click(); else values['aria-expanded'] = 'true'; },
   };
 }
 
@@ -65,7 +65,7 @@ test('a disabled account control falls back instead of reporting success', async
 });
 
 test('a collapsed native control that stays closed is observable and falls back', async () => {
-  const account = button({ attributes: { 'aria-expanded': 'false' } });
+  const account = button({ click() {}, attributes: { 'aria-expanded': 'false' } });
   const settings = button();
   assert.deepEqual(await openNativeAccountSettings(root({ account, settings }), { settle: async () => {} }),
     { ok: true, action: 'settings', fellBack: true });
@@ -112,6 +112,21 @@ test('missing native controls return an observable failure instead of pretending
   });
 });
 
+test('a scoped DOM root cannot report success without observable opening', async t => {
+  const JSDOM = loadJsdom();
+  const dom = new JSDOM('<!doctype html><body><section><button data-signed-out="true" aria-haspopup="menu"></button></section></body>');
+  t.after(() => dom.window.close());
+  const scope = dom.window.document.querySelector('section');
+  const account = scope.querySelector('button');
+  account.getClientRects = () => [{ width: 1, height: 1 }];
+  let clicks = 0;
+  account.addEventListener('click', () => { clicks += 1; });
+  const result = await openNativeAccountSettings(scope, { settle: async () => {} });
+  assert.equal(result.ok, false);
+  assert.equal(result.code, 'NATIVE_ACCOUNT_CLICK_FAILED');
+  assert.equal(clicks, 1);
+});
+
 test('both native gestures failing return an explicit click failure', async () => {
   const account = button({ click() { throw new Error('detached'); } });
   const settings = button({ click() { throw new Error('detached'); } });
@@ -122,7 +137,7 @@ test('both native gestures failing return an explicit click failure', async () =
 });
 
 test('a Settings control that remains closed is reported as a click failure', async () => {
-  const settings = button({ attributes: { 'aria-expanded': 'false' } });
+  const settings = button({ click() {}, attributes: { 'aria-expanded': 'false' } });
   assert.deepEqual(await openNativeAccountSettings(root({ settings }), { settle: async () => {} }), {
     ok: false,
     action: null,
