@@ -21,11 +21,15 @@
 
 ### Added
 
+- rc3 组合 CI 改用随分支维护的 artifact 引用，固定真实工件、成功 run、提交和组合锁摘要，同时校验九插件与领域包的来源清单。作者 CI 证据和公共契约更新到最终 rc3 输入，CRM 公共契约固定为 crm.5。未修改全局仓库变量，未合并或切换杭州。
+
+- 原生设置入口只有观察到菜单或对话框打开才返回成功，修复局部 DOM 根上的假成功；保留账号优先和一次 Settings 回退。新增回归已覆盖按钮保持关闭的情况。
+
 - 同步活动版本合同与文档：边界清单、宿主/IM 合同夹具和 Workbench 原生 prompt 检查统一到 DSH `0.2.1-rc.3` / Cordis `4.0.5`；历史 rc1/rc2 证据继续按日期保留，不冒充当前候选结果。
 
 - DSH 候选工具链升级到官方 `0.2.1-rc.3`（`dsh-v0.2.1-rc.3`、upstream `1f81c047`），Cordis 固定为 `4.0.5`。主仓 peer、活动 profile、Workbench lock、作者仓 plugin-kit provenance 与 rc3 上游干净构建已统一；杭州现役仍为独立 rc1 side-load，未切换线上，正式门禁保持未完成。
 
-- B0 收尾补齐 C0 生成物漂移：重生成 `C0-MANIFEST.json` 与 `c0-fixtures.mjs` 的 contract hash，并通过离线 C0 check 与 30/30 评估。完整 B0 已实际接通固定输入，但因旧 Workbench public-contract archive 与当前 `3030e3f` composition source 不同源而保持阻断，需作者 CI 重新导出后再更新锁。
+- B0 收尾重生成 `C0-MANIFEST.json` 与 `c0-fixtures.mjs` 的 contract hash，并通过离线 C0 check 与 30/30 评估。最初因旧 Workbench archive 与组合来源不同而阻断；后续已从最终作者 CI 刷新合同和来源锁，完整 B0 的当前结果见[六项收尾记录](./docs/hackathon/evidence/dsh-rc3-six-gates-20261024.md)。
 
 - CRM `0.0.0-crm.5` 与问数智能体 `0.0.0-query.14` 已 side-load 到杭州，发布 peer 对齐 `DSH 0.2.1-rc.1 / Cordis 4.0.5`。商品新老客使用 `product-customer/v3`：无版本头继续返回 v2，新客户端显式请求 v3；覆盖、当前期和同期在同一只读事务读取，截止日之后返回 `INSUFFICIENT_COVERAGE`，不再填零或生成假同比下降。工具公开投影只返回固定唯一 `display_name`、覆盖状态和指标，内部商品名和 SPU class 留在 Host。Vue“核心单品新老客”迁移到商品级去重接口，使用最新可用周，不再跨 SPU class 相加人数。新增 RFM 预计算快照读取；客户端 fail-closed 校验商品集合、展示名唯一性和 RFM 9 个唯一分群标签。问数 Agent 把经营诊断和增长复盘收束为“证据、反证、决策、行动、复核”链。杭州真实 CRM 登录、v3 商品查询、页面保存和驾驶舱编辑已有现场证据；Vue 登录后的交互 UAT、Workbench 绑定 manifest 的现役切换和正式发布门禁仍开放。详见[审查问题修复回执](./docs/hackathon/evidence/dsh-review-fixes-20261022.md)和[单链路业务边界盘查](./docs/hackathon/evidence/dsh-single-path-boundary-20261022.md)。
 
