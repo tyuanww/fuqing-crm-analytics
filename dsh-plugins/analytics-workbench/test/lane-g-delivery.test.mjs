@@ -160,7 +160,7 @@ test('native result refs reach the saved page document', async () => {
     package: AGENT_PACKAGE,
     binding_manifest: { result_refs: ['result_fixture_1'], bindings: [{ binding_id: 'fixture', result_ref: 'result_fixture_1', mode: 'summary' }] },
   }), false);
-  // The generated request id is intentionally read from the prompt receipt in the next delivery.
+
   const requestId = submittedRequestId;
   assert.match(requestId, PAGE_REQUEST_ID_PATTERN);
   assert.equal(waiter.deliver(requestId, {

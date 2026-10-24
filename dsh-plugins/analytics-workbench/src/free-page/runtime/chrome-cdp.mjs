@@ -45,7 +45,7 @@ export function waitForWebSocketOpen(ws, timeoutMs = CDP_HTTP_TIMEOUT_MS) {
     ws.addEventListener('close', onClose, { once: true });
     timer = setTimeout(() => {
       cleanup();
-      try { ws.close(); } catch { /* ignore cleanup errors */ }
+      try { ws.close(); } catch {}
       reject(new Error(`cdp websocket open timeout after ${timeoutMs}ms`));
     }, timeoutMs);
   });

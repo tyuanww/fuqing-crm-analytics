@@ -898,7 +898,7 @@ export function apply(ctx: Context): void {
     }, LibraryPreviewToolCard));
     ctx.slots.inject('tool.call.toolview', () => ctx.slots.register({
       name: 'tool.call.toolview', key: PAGE_GENERATE_TOOL_NAME,
-      inject: () => ({ pagePackageWaiter, openCockpit: openCockpitPanel, openDsh: () => { try { ctx.layout.openRightbar(true, false); } catch { /* host without rightbar */ } }, onNativePackage: async (pkg: { html: string; css?: string; js?: string; resources?: unknown[]; node_map?: unknown[] }, meta: { sessionId: string; requestId?: string; callId?: string; bindingManifest?: unknown }) => {
+      inject: () => ({ pagePackageWaiter, openCockpit: openCockpitPanel, openDsh: () => { try { ctx.layout.openRightbar(true, false); } catch {} }, onNativePackage: async (pkg: { html: string; css?: string; js?: string; resources?: unknown[]; node_map?: unknown[] }, meta: { sessionId: string; requestId?: string; callId?: string; bindingManifest?: unknown }) => {
         await pageStore?.intakePackage(pkg, { sessionId: meta.sessionId, requestId: meta.requestId, callId: meta.callId, bindingManifest: meta.bindingManifest });
         // A package receipt is also a generation-complete signal. In hosts
         // without delivery events, give the native workspace scan one bounded

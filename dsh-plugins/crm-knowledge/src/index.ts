@@ -37,9 +37,6 @@ export const name = 'crm-knowledge-candidate';
 export const inject = ['tools'];
 
 export function apply(ctx: Context, config: { metricsOrigin?: string; registerTools?: boolean } = {}): void {
-  // DSH discovers a package's browser bundle from a Loader row whose specifier
-  // is the bare package name. The bundle patch mounts that same root export as
-  // a side-effect-free carrier; actual tools remain scoped to the Agent preset.
   if (config.registerTools === false) return;
   const services = createMetricsService(config);
   const lifetime = new AbortController();
