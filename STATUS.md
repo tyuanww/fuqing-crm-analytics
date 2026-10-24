@@ -1,8 +1,10 @@
 # 项目状态（Project Status）
 
-> 当前短表（2026-10-24）；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。历史 PASS、NOT_RUN 与版本只属于原验收对象，本页是当前运行与交付边界的 SSOT。
+> 当前短表（2026-10-25）；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。历史 PASS、NOT_RUN 与版本只属于原验收对象，本页是当前运行与交付边界的 SSOT。
 
-## 当前快照（2026-10-24）
+## 当前快照（2026-10-25）
+
+- 2026-10-25 原生 CRM Host 来源候选已推送到作者 `ed5940f`。作者 CI `40111888916` 成功，169 项通过。主仓组合及公共契约锁已同步该来源，真实组合 artifact `12568060723` 经现有严格接收器读回，九插件和领域输入通过来源、生成证明及 peer 核验。仅 CRM 两份包文件改变，其他 18 个 payload 字节不变。当前主仓 CI 看 [PR #164](https://github.com/tyuanww/fuqing-crm-analytics/pull/164)。新能力仍需显式配置；真实 rc3 Host、页面 resolver、完整聊天业务链路、两年 RFM/商品缓存和正式发布未关闭。本轮没有杭州变更，`release_ready=false`。详见[组合接收记录](docs/hackathon/evidence/dsh-native-host-composition-20261025.md)。
 
 - 2026-10-24 作者 CI、严格包与真实组合 ZIP 读回已完成。主仓 [PR #164](https://github.com/tyuanww/fuqing-crm-analytics/pull/164) 已创建，依赖安全修复 `bd705237` 正常 pre-push 通过并推送。初始候选后端 `3261 PASS / 79 SKIP`、前端 `226 PASS`，新 pin 的完整依赖审计及 hooks 通过；rc3 Linux DevTools 命中已按真实构建摘要补充精确例外及负测，最终 CI 看 PR 当前 checks。杭州只读核验确认仍运行 rc1，现役 CRM 两项风险依赖未更新，RFM 缓存由 live 进程持写锁；generation、近两年覆盖与新候选真实 UAT 仍未验收。没有合并、发布或切换，`release_ready=false`。CLI 复核是非原生、同模型替代，不代表跨模型或全项目无缺陷。详见 [六项收尾记录](docs/hackathon/evidence/dsh-rc3-six-gates-20261024.md)。
 - 2026-10-24 本地主仓候选已升级到 DSH `0.2.1-rc.3`（tag `dsh-v0.2.1-rc.3`，upstream `1f81c047fc48fa190a683e469daa699857e9afe8`）和 Cordis `4.0.5`。rc3 上游干净 checkout 已完成依赖安装与 host/client 构建，plugin-kit 输入预检为 `READY`；活动 page/CRM profile、主仓 peer、Workbench lock 和作者仓 kit provenance 已统一到 rc3。该结果是本地候选输入，不代表杭州切换；杭州 `current` 仍为下方记录的 DSH `0.2.1-rc.1`，正式门禁仍 `release_ready=false`。
@@ -32,7 +34,7 @@
 
 ## 本轮施工计划
 
-- 当前 rc3 候选已完成作者 CI、严格包与主仓正常 pre-push，下一步核验 PR CI、真实宿主和业务缓存，再按实际候选身份完成回退及发布前置。正式部署仍受 M2 门禁和批准 artifact 约束。publisher identity、签名、独立核验、撤销、final attestation、正式 clean-machine 和外部发布批准未完成，M2-07 继续 `BLOCKED`、`release_ready=false`。
+- 当前 rc3 候选已更新原生 CRM Host 的作者包和组合输入。先核验当前 PR CI，再依次接通真实 Host、页面 resolver 与隔离业务验收，随后验证两年 RFM/商品缓存。正式部署仍受 M2 门禁和批准 artifact 约束。publisher identity、签名、独立核验、撤销、final attestation、正式 clean-machine 和外部发布批准未完成，M2-07 继续 `BLOCKED`、`release_ready=false`。
 ## 历史快照入口
 
 - 2026-10-15 及更早的 alpha3、rc2、M2-06、作者仓合并和 alpha2 历史事实已归档到 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)；它们不覆盖本页当前快照，也不授予 release/activation。

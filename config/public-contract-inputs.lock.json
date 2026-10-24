@@ -254,28 +254,28 @@
       "owned_increment_tests": 12
     },
     "crm": {
-      "source_sha": "46111c5bd93c798cd8256419c6c8dee0505b215f",
+      "source_sha": "ed5940fcfaa3bba3a41bb7c9c897d651ed635650",
       "package": "@shine-mage/dsh-crm-knowledge",
       "version": "0.0.0-crm.5",
       "archive": {
         "repository": "tyuanww/dsh-crm-knowledge",
-        "run_id": 40075710655,
+        "run_id": 40111888916,
         "attempt": 1,
         "event": "pull_request",
         "conclusion": "success",
-        "artifact_id": 12552972911,
-        "name": "public-contracts-40075710655-1",
-        "sha256": "18a7fed186d2a7baca9026916e05a17b41348cc4d0f72dfd7235c8a40c0d2c1f",
+        "artifact_id": 12567225935,
+        "name": "public-contracts-40111888916-1",
+        "sha256": "31de02f063b50b01a03a83c526a91804c8eb685ea2f39a70d02267abeb32cda5",
         "bytes": 2815
       },
       "manifest": {
-        "sha256": "ba728d2b8504558acb4b1986a84779cad9c29021ef656d238b443becfd82bce7",
+        "sha256": "2aa735a153e2827eabfbf45c465776f53d4b7cce0704396f8d6d72ad6be5a693",
         "bytes": 1627
       },
       "producer_sha256": "2d9ab9fc7998359601bce6caef63945697aa16030cbf47e98de41085726b8350",
       "recipe_sha256": "f68932093edfa0a4d05de2bd39df842e547bf5ec7843b64b7aa4b2257741d9f5",
-      "package_manifest_sha256": "c6a8a45f41c3135ad817304ab4202c2fed756f7be9edcd39674ff8c002d17799",
-      "ci_job_sha": "681c90bc801c66a8214a92f04f3a63361b85da6d",
+      "package_manifest_sha256": "a93c282cc95aafae1c5ccbb042af9d5d232225f7b1ca54281889c31a24a563a8",
+      "ci_job_sha": "7ad2a31c93788ce9d71ffcb4b78ba90ca7220653",
       "files": [
         {
           "source_path": "plugin/src/client/cockpit-slot-contract.generated.ts",

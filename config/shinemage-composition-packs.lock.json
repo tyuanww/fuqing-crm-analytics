@@ -23,9 +23,9 @@
     {
       "directory": "crm-knowledge",
       "id": "@shine-mage/dsh-crm-knowledge",
-      "source_sha": "46111c5bd93c798cd8256419c6c8dee0505b215f",
+      "source_sha": "ed5940fcfaa3bba3a41bb7c9c897d651ed635650",
       "version": "0.0.0-crm.5",
-      "manifest_sha256": "c88e4f840174df75e5e2601d637efda85a120230fb05550e67b331677ed46f29"
+      "manifest_sha256": "b7af0ef3e194326b05b48721913e92608ac8ffe0f4663db736f7e74526c331a9"
     },
     {
       "directory": "knowledge",
