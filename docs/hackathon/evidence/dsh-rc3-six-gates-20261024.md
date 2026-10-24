@@ -1,6 +1,6 @@
 # rc3 六项收尾与 CLI 复核
 
-本记录更新于 2026-10-24。八作者仓的新提交、远端 CI、九插件与领域严格包、组合上传及实际 ZIP 读回已完成。主仓 `3112b344` 完整 pre-push 通过并推送，已创建非草稿 [PR #164](https://github.com/tyuanww/fuqing-crm-analytics/pull/164)。`58965678` 的远端审计发现两项依赖漏洞，候选修复与最终 CI 仍需验证。没有合并、发布、切换杭州或访问真实业务数据。`release_ready=false`。
+本记录更新于 2026-10-24。作者 CI、严格包与组合 ZIP 读回已完成，主仓非草稿 [PR #164](https://github.com/tyuanww/fuqing-crm-analytics/pull/164) 已创建。依赖安全修复 `bd705237` 正常 pre-push 通过并推送。rc3 Linux 扫描命中已定位，并补充精确例外与负测；最终提交的远端结论以 PR 当前 checks 为准。杭州只读核验已完成服务、依赖和缓存锁元数据，没有打开真实业务库、合并、发布或切换。`release_ready=false`。
 
 ## 六项状态
 
@@ -9,7 +9,7 @@
 | 作者 CI | Workbench `d6b711a1`、CRM `46111c5b`、Knowledge `2b0f5745` 及六叶子最终提交对应 CI 全部成功 | 不代表合并、宿主或业务验收 |
 | 严格正式包 | 九插件从最终干净提交构建并严格读回；领域包从固定源重建，保留参考字节 | 主仓 candidate、journal 和运行验收未完成 |
 | 六个叶子作者与组合 | 六仓已推送，PR 和 CI 成功；组合锁已更新，真实 artifact 已上传并严格读回 | 上传载体不是正式 release 或杭州部署 |
-| 主仓验证与 Git | `3112b344` 正常 pre-push exit 0，后端 3261 PASS、79 SKIP、0 FAIL；前端构建和 226 PASS，tooling 与 B0 通过；已推送并创建 PR #164 | 远端审计的两项依赖漏洞修复与最终 CI 待核验；跳过项和离线评估不算业务通过 |
+| 主仓验证与 Git | 初始候选及依赖修复 `bd705237` 正常 pre-push 通过并推送；精确扫描例外的发布测试 45 PASS | 最终提交的 CI 以 PR 当前 checks 为准；跳过项和离线评估不算业务通过 |
 | 独立审核与业务验收 | 用户允许 CLI 替代故障原生审查；定向对抗复核未确认 P0–P2 | 同模型不提供跨模型独立性；真实宿主、业务 UAT、近两年 RFM 和商品缓存覆盖未验证 |
 | 合并与杭州切换 | 未执行 | 需要前置检查、实际候选身份、回退与现场 UAT；不继承旧 side-load 的验收 |
 
@@ -21,7 +21,28 @@
 
 本地 pip-audit `2.10.1` 在便携 Python `3.14.4` 创建临时环境时出现 ensurepip SIGABRT，失败日志保留为 `pip-audit-root-r3.log`，未计通过。使用本机已有 Python `3.14.8` 的新隔离审计环境执行相同完整解析命令后 exit 0，结果为未发现已知漏洞，见 `pip-audit-root-r4.json` 和 `.log`。没有使用 `--no-deps`、`--disable-pip` 或 advisory 忽略项。前端 `npm audit --omit=dev --audit-level=high` exit 0，结果位于 `npm-audit-production-r1.json`。新依赖下的完整 hooks 和最终 PR CI 仍待确认；旧服务、SDK 和候选回执不追改摘要。
 
-杭州现场验证尚未执行。本机缺少手册中的 `hangzhou-wsl` 别名，当前账号连接已登记地址时被 SSH publickey 拒绝。没有猜测其他账号、读取私钥、改服务或打开真实 DuckDB；已向用户请求可用的连接别名或用户名。
+安全修复 `bd7052377922e62cc3ed4cf77211809e8ec78e35` 已正常推送。第一次调用遗漏了 B0 所要求的空输出目录，完整后端已通过，但 B0 在 lstat 前置失败，没有开始 LFS 或 push。补建新的独占 `prepush-security-r2` 根后正常 hooks 全部通过，日志为私有证据根的 `main-push-security-r2.log`。没有跳过检查，前端因本次仅改 Python 依赖而按共享路径矩阵不重跑。
+
+最初本机缺少手册中的 `hangzhou-wsl` 别名，默认用户名被 SSH publickey 拒绝。用户确认目标后，从已有 `scripts/ops/open-hangzhou-dsh.sh` 找到正确 root 与独立运维身份，连接成功。只读元数据确认目标为 WSL2、DSH 仍是 rc1 且 active，CRM 与 WeKnora 健康。现役 CRM 仍安装 certifi `2026.2.25` 和 setuptools `84.0.0`，两项线上风险没有随源码 pin 更新而消除；后续需真实新镜像及授权维护切换。没有读取私钥、修改配置或重启服务。
+
+## rc3 Linux 扫描命中与精确例外
+
+原 [preflight run 40080028898](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/40080028898) 的官方 rc3 构建为 9/9 PASS，随后 runtime 密钥扫描拒绝两份 DevTools chunk。没有按目录跳过扫描，也没有把 Mac 或 npm 包的不同字节追认为 Linux 输出。
+
+独立[诊断 run 40080968871](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/40080968871) 在 Ubuntu 24.04、Node `24.19.0` 重建 consumer `58965678` 所固定的 upstream `1f81c047`，检查源码 clean 和原 pnpm 锁。诊断只输出摘要和预设公开字面量分类，不上传原 JS、未知匹配值或凭据。artifact `12555346882` 为 902 bytes，ZIP SHA-256 为 `7f92b902893a40de5198b616f4033e672c9f46a38d7e2111c4d07ea1369a0fd9`，已实际下载校验，成员与报告一致。
+
+| 文件 | 完整 SHA-256 | 仅本字节允许的公开标识 |
+| --- | --- | --- |
+| `data_grid-ehf9xIbN.js` | `bf04c38a3718a005767a676a9847616b8e6ab8a2c8987441ec2f2f29bd6c459e` | `DataGridInternalToken` |
+| `legacy-Dg_djKt3.js` | `29a622e8e7c7ef54241123b18eba6400c1cd111ffb7445df12e251f7b1300188` | `ReportingEndpointNotToken`、`InvalidCredentialsCookie` |
+
+两文件原扫描仍命中，仅加入上述已知字面量时命中归零。主仓原测试表先补新案例并实际失败，再添加四条例外覆盖 materialized 和 installed 两种路径。既有扫描器函数、正则、全局 benign 集合及目录扫描未改。测试同时拒绝错误路径、错误摘要和未知凭据；发布测试为 45 PASS，报告驱动的六组字面量与路径负测通过。CLI 复核未发现本范围新增 P0–P2，保留非原生、同模型限制。实际 runtime preflight 仍由最终 PR CI 验证，不能拿策略单测或诊断成功代替。
+
+## 真实缓存与业务边界
+
+现役独立 RFM 缓存文件存在，大小为 1,060,864 bytes。lsof 与容器 PID 核对证明持写锁的是现役 CRM 进程。没有另开 DuckDB 连接、复制缓存、停服务或改数据；active generation、完整筛选覆盖与延迟仍未知。不能直接让第二个进程写同一缓存文件，须先解决受控预热与发布的 owner 边界。
+
+源码预热仍仅列 `YEARS=[2026]` 的 380 个逻辑组合，窗口按日期解析并去重，简单把年份乘二不等于近两年覆盖。商品端点仍调用聚合服务，独立持久缓存及近两年筛选速度尚未验证。R/F/M 流转 miss 仍与八象限的 cache-only 路由不同，不把它们合称全部已预热。新 rc3 的真实问数、WeKnora、快照、HTML 编辑保存及恢复仍需对应候选 UAT，不继承旧 rc1 结论。
 
 ## 最终作者与组合身份
 

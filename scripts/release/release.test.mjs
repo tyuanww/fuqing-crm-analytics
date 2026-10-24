@@ -197,10 +197,18 @@ test('secret scan distinguishes explicit synthetic fixtures from real assignment
     ['.runtime-external/packages/experimental/inspector/lib/devtools/chunks/protocol_client-L4-X1Qrb.js', 'aecddd3577951b386a69848c3470507c6806365a8130392e57d4028adf7c1e01', 'InvalidCredentialsCookie'],
     ['.runtime-external/packages/experimental/inspector/lib/devtools/chunks/data_grid-VNFShWk1.js', '3268bccc21c8d298ba6875559005648643c7c9011693e56d4600634f406a32af', 'DataGridInternalToken'],
     ['.runtime-external/packages/experimental/inspector/lib/devtools/chunks/legacy-CnKLfQuv.js', 'e3a45c64a5ccbe7d1a433bf568538a8d7b1a2771d79714fef969142da0f1e313', 'ReportingEndpointNotToken'],
+    ['.runtime-external/packages/experimental/inspector/lib/devtools/chunks/data_grid-ehf9xIbN.js', 'bf04c38a3718a005767a676a9847616b8e6ab8a2c8987441ec2f2f29bd6c459e', 'DataGridInternalToken'],
+    ['.runtime-external/packages/experimental/inspector/lib/devtools/chunks/legacy-Dg_djKt3.js', '29a622e8e7c7ef54241123b18eba6400c1cd111ffb7445df12e251f7b1300188', 'ReportingEndpointNotToken'],
+    ['.runtime-external/packages/experimental/inspector/lib/devtools/chunks/legacy-Dg_djKt3.js', '29a622e8e7c7ef54241123b18eba6400c1cd111ffb7445df12e251f7b1300188', 'InvalidCredentialsCookie'],
+    ['node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/chunks/data_grid-ehf9xIbN.js', 'bf04c38a3718a005767a676a9847616b8e6ab8a2c8987441ec2f2f29bd6c459e', 'DataGridInternalToken'],
+    ['node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/chunks/legacy-Dg_djKt3.js', '29a622e8e7c7ef54241123b18eba6400c1cd111ffb7445df12e251f7b1300188', 'ReportingEndpointNotToken'],
+    ['node_modules/@deepseek-ai/dsh-experimental-inspector/lib/devtools/chunks/legacy-Dg_djKt3.js', '29a622e8e7c7ef54241123b18eba6400c1cd111ffb7445df12e251f7b1300188', 'InvalidCredentialsCookie'],
   ]) {
     const allowed = runtimeVendorAssignmentAllowlist(path, digest);
     assert.deepEqual(scanText(`token: "${value}"`, path, { assignmentAllowlist: allowed }), []);
     assert.deepEqual(scanText(`token: "${value}"`, path, { assignmentAllowlist: runtimeVendorAssignmentAllowlist(path, '0'.repeat(64)) }), [`SECRET_PATTERN ${path}`]);
+    assert.deepEqual(runtimeVendorAssignmentAllowlist('other/vendor.js', digest), new Set());
+    assert.deepEqual(scanText(`API_KEY = '${realSecret}'`, path, { assignmentAllowlist: allowed }), [`SECRET_PATTERN ${path}`]);
   }
 });
 test('runtime peer alias closure fails closed when an explicit web peer is absent', () => {
