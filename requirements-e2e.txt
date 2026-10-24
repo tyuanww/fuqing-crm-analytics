@@ -23,7 +23,7 @@ bcrypt==5.0.0
 python-dotenv==1.2.3
 python-multipart==0.0.32
 PyYAML==6.0.3
-certifi==2026.2.25
+certifi==2026.10.19
 
 # 数据 / 导出（router 启动链会 import）
 numpy==2.5.3

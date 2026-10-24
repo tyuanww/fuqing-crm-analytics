@@ -1,6 +1,6 @@
 # rc3 六项收尾与 CLI 复核
 
-本记录更新于 2026-10-24。八作者仓的新提交、远端 CI、九插件与领域严格包、组合上传及实际 ZIP 读回已完成。主仓 `3112b344` 完整 pre-push 通过并推送，已创建非草稿 [PR #164](https://github.com/tyuanww/fuqing-crm-analytics/pull/164)，PR CI 尚待核验。没有合并、发布、切换杭州或访问真实业务数据。`release_ready=false`。
+本记录更新于 2026-10-24。八作者仓的新提交、远端 CI、九插件与领域严格包、组合上传及实际 ZIP 读回已完成。主仓 `3112b344` 完整 pre-push 通过并推送，已创建非草稿 [PR #164](https://github.com/tyuanww/fuqing-crm-analytics/pull/164)。`58965678` 的远端审计发现两项依赖漏洞，候选修复与最终 CI 仍需验证。没有合并、发布、切换杭州或访问真实业务数据。`release_ready=false`。
 
 ## 六项状态
 
@@ -9,9 +9,19 @@
 | 作者 CI | Workbench `d6b711a1`、CRM `46111c5b`、Knowledge `2b0f5745` 及六叶子最终提交对应 CI 全部成功 | 不代表合并、宿主或业务验收 |
 | 严格正式包 | 九插件从最终干净提交构建并严格读回；领域包从固定源重建，保留参考字节 | 主仓 candidate、journal 和运行验收未完成 |
 | 六个叶子作者与组合 | 六仓已推送，PR 和 CI 成功；组合锁已更新，真实 artifact 已上传并严格读回 | 上传载体不是正式 release 或杭州部署 |
-| 主仓验证与 Git | 正常 pre-push exit 0，后端 3261 PASS、79 SKIP、0 FAIL；前端构建和 226 PASS，tooling 与 B0 通过；已推送并创建 PR #164 | PR 远端 CI 尚待核验；跳过项和离线评估不算业务通过 |
+| 主仓验证与 Git | `3112b344` 正常 pre-push exit 0，后端 3261 PASS、79 SKIP、0 FAIL；前端构建和 226 PASS，tooling 与 B0 通过；已推送并创建 PR #164 | 远端审计的两项依赖漏洞修复与最终 CI 待核验；跳过项和离线评估不算业务通过 |
 | 独立审核与业务验收 | 用户允许 CLI 替代故障原生审查；定向对抗复核未确认 P0–P2 | 同模型不提供跨模型独立性；真实宿主、业务 UAT、近两年 RFM 和商品缓存覆盖未验证 |
 | 合并与杭州切换 | 未执行 | 需要前置检查、实际候选身份、回退与现场 UAT；不继承旧 side-load 的验收 |
+
+## 远端依赖审计与候选修复
+
+文档提交 `58965678` 正常推送，tooling 198 PASS。随后 [CI run 40080028895](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/40080028895) 的 `dependency-audit` job `120831493986` 报告 certifi `2026.2.25` 的 `PYSEC-2026-4320` 和 setuptools `84.0.0` 的 `GHSA-xmj3-9gf7-h52w`，不能将此前本地完整检查当作远端 CI 通过。
+
+按[供应链记录](../../operating/supply-chain.md#2026-10-24-候选安全修复)同步三个 certifi 精确锁至 `2026.10.19`，CRM setuptools 至 `84.1.0`，并提高声明和构建下限。隔离 CRM 环境仅这两个安装版本变化，B0 环境仅 certifi 变化；`pip check` 通过，相关 CI 合同 58 PASS。新增修改代码注释为 0，CLI 定向复核无新的 P0–P2，仍保留非原生、同模型限制。
+
+本地 pip-audit `2.10.1` 在便携 Python `3.14.4` 创建临时环境时出现 ensurepip SIGABRT，失败日志保留为 `pip-audit-root-r3.log`，未计通过。使用本机已有 Python `3.14.8` 的新隔离审计环境执行相同完整解析命令后 exit 0，结果为未发现已知漏洞，见 `pip-audit-root-r4.json` 和 `.log`。没有使用 `--no-deps`、`--disable-pip` 或 advisory 忽略项。前端 `npm audit --omit=dev --audit-level=high` exit 0，结果位于 `npm-audit-production-r1.json`。新依赖下的完整 hooks 和最终 PR CI 仍待确认；旧服务、SDK 和候选回执不追改摘要。
+
+杭州现场验证尚未执行。本机缺少手册中的 `hangzhou-wsl` 别名，当前账号连接已登记地址时被 SSH publickey 拒绝。没有猜测其他账号、读取私钥、改服务或打开真实 DuckDB；已向用户请求可用的连接别名或用户名。
 
 ## 最终作者与组合身份
 

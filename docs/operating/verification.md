@@ -8,7 +8,7 @@
 
 主仓活动候选已统一到 DSH `0.2.1-rc.3`（`dsh-v0.2.1-rc.3`，upstream `1f81c047…`）和 Cordis `4.0.5`。rc3 上游干净 checkout 的依赖安装、host/client 构建、plugin-kit 输入预检、主仓 Workbench/CRM/Knowledge 构建与 provenance 均已通过；作者仓本地 rc3 提交和测试结果见[上游盘查记录](../release/dsh-rc3-candidate/upstream-audit-20261024.md)。
 
-主仓候选 `3112b344` 已经正常 pre-push 并推送，非草稿 [PR #164](https://github.com/tyuanww/fuqing-crm-analytics/pull/164) 已创建，尚未合并或部署。完整后端为 3261 PASS、79 SKIP、0 FAIL，前端构建及 226 项单测通过，tooling 和 B0 检查通过。PR 远端 CI 尚待核验，不以本地结果代替。
+主仓候选 `3112b344` 已经正常 pre-push 并推送，非草稿 [PR #164](https://github.com/tyuanww/fuqing-crm-analytics/pull/164) 已创建，尚未合并或部署。该提交完整后端为 3261 PASS、79 SKIP、0 FAIL，前端构建及 226 项单测通过，tooling 和 B0 检查通过。后续远端审计发现 certifi、setuptools 两项漏洞，修复 pin 后本地完整依赖审计和前端生产依赖审计通过；新依赖的完整检查和最终提交 CI 仍待确认，不以旧结果代替。
 
 八个作者仓的新提交和 CI 已完成，Knowledge 沿用无变化提交，九插件及领域严格包已从真实上传 ZIP 读回。CI 接收使用 `--artifact-lock "$GITHUB_WORKSPACE/config/shinemage-composition-artifact.lock.json" --manifest "$GITHUB_WORKSPACE/config/shinemage-composition-pack-manifest.v1.json"`，同时绑定组合锁摘要、artifact digest、run 和 head，不修改其他分支使用的全局变量。接收仍要求显式只读凭据；本地用 `gh api` 下载并校验固定 archive 后走 `--archive`，不将个人登录自动注入接收器。作者来源和本次命令见[六项收尾与 CLI 复核](../hackathon/evidence/dsh-rc3-six-gates-20261024.md)。CLI 替代保留非原生、同模型限制。旁路宿主、浏览器、回退、canary、真实业务和公司级发布身份仍未完成，杭州未切换，`release_ready=false`。
 
