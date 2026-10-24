@@ -2336,6 +2336,27 @@
     {
       "consumer": "crm-knowledge",
       "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/login.test.mjs",
+      "route": "/api/v1/auth/me",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/login.test.mjs",
+      "route": "/api/v1/metrics/crm-library",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/login.test.mjs",
+      "route": "/api/v1/metrics/dashboard-readiness",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/package.test.mjs",
       "route": "/api/v1/crm-metrics",
       "contract": "OBSERVED_NOT_FROZEN"
@@ -2487,7 +2508,7 @@
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/src/client/free-html-library/free-html-library.test.mjs",
-      "line": 24
+      "line": 25
     },
     {
       "consumer": "analytics-workbench",
@@ -2517,7 +2538,7 @@
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/src/client/library-workspace.test.mjs",
-      "line": 28
+      "line": 32
     },
     {
       "consumer": "analytics-workbench",
