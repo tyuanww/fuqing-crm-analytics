@@ -40,7 +40,7 @@ Python 的 `POST /native-crm-source` 接收 `operation`、`handle`、`session_id
 
 Host 的 `readNativeSnapshot(sessionId, refId, signal)` 返回 `CrmSnapshot`；`revokeNativeSnapshot` 返回撤销回执。二者核对当前会话与私有 ref 索引。底层快照期望还会在持久状态事务内拒绝错配引用。
 
-作者提交 `21a7368` 新增 `openNativeSnapshotLease(sessionId, signal)`，用于一次操作内固定原登录记录。返回冻结对象，包含 `identity`、原授权失效的 `signal`、`read(refId, signal)` 和 `assertCurrent(signal)`。打开调用的 signal 不绑定租约全生命周期，调用方必须把后续操作的取消信号继续传入。此接口已在作者仓提交，当前主仓组合仍锁定 `ed5940f`，尚不能从该组合调用新接口。
+作者提交 `21a7368` 新增 `openNativeSnapshotLease(sessionId, signal)`，用于一次操作内固定原登录记录。返回冻结对象，包含 `identity`、原授权失效的 `signal`、`read(refId, signal)` 和 `assertCurrent(signal)`。打开调用的 signal 不绑定租约全生命周期，调用方必须把后续操作的取消信号继续传入。主仓组合已锁定该作者的严格包，并从 artifact `12571627062` 实际读回。接口进入候选组合不代表 Host 页面代理和 Workbench 已完成接线。
 
 ## 期限与撤权
 

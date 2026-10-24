@@ -1,5 +1,7 @@
 # 原生页面接线的授权与事务前置修复
 
+后续进展见[租约包组合接收记录](dsh-native-page-composition-20261025.md)。作者严格包已从干净源码构建并进入组合；前置修复提交 `3d7dd687` 的运行包预检成功。下文保留前置单元完成时的输入和失败证据。
+
 本轮完成页面接线前的原授权租约、短事务确认和来源回查。完整 Host 页面代理、Python resolver 与结果桥、Workbench 同源传输尚未实现，不能据此认定聊天到看板闭环已验收。组合仍消费 CRM 作者 `ed5940f`；新增租约接口在作者提交 `21a7368decf3a72f784436880ccb8e597673cae8`，已推送到 [CRM PR #2](https://github.com/tyuanww/dsh-crm-knowledge/pull/2)，尚未进入组合包。
 
 ## 行为变化
