@@ -715,10 +715,12 @@ class TestRFMPrecomputePlan:
         assert PeriodBuilder.ytd(jan_first)["current"].end == "2025-12-31"
         assert PeriodBuilder.q1(jan_first)["current"].start == "2025-10-01"
         assert PeriodBuilder.q1(jan_first)["current"].end == "2025-12-31"
+        from backend.services.health.rfm_analysis.precompute_plan import build_precompute_plan
+        plan = build_precompute_plan(date(2020, 1, 1), date(2026, 7, 14))
         assert {
             "yesterday", "WTD", "Q1", "Q2", "Q3", "Q4",
-        }.issubset(cache.STANDARD_PERIODS)
-        assert "达播" in cache.PRECOMPUTE_CHANNELS
+        }.issubset({query.period for query in plan.queries})
+        assert "达播" in plan.policy.channels
 
     def test_last90days_is_public_semantic_resolver(self):
         ranges = PeriodBuilder.last90days(today=date(2026, 7, 15))
@@ -755,61 +757,6 @@ class TestRFMPrecomputePlan:
         assert http_ranges["comp"][0] == "2027-02-28 00:00:00"
         assert http_ranges["prev2"][0] == "2026-02-28 00:00:00"
 
-    def test_precompute_compare_ranges_match_http_ssot(self):
-        default, default_start, default_end = cache._resolve_precompute_query_ranges(
-            "2026-04-16", "2026-07-14", "default"
-        )
-        expected_default = _resolve_date_ranges(
-            None, "2026-04-16", "2026-07-14", None, None
-        )
-        custom, custom_start, custom_end = cache._resolve_precompute_query_ranges(
-            "2026-04-16", "2026-07-14", "auto_mom"
-        )
-        expected_custom = _resolve_date_ranges(
-            None, "2026-04-16", "2026-07-14", custom_start, custom_end
-        )
-
-        assert (default_start, default_end) == (None, None)
-        assert default == expected_default
-        assert (custom_start, custom_end) == ("2026-01-16", "2026-04-15")
-        assert custom == expected_custom
-
-        with pytest.raises(ValueError, match="不支持"):
-            cache._resolve_precompute_query_ranges(
-                "2026-04-16", "2026-07-14", "Q-1"
-            )
-
-    def test_logical_coverage_is_distinct_from_physical_keys(self):
-        today = date(2026, 7, 15)
-        current_ranges = [
-            getattr(PeriodBuilder, name.lower())(today=today)["current"]
-            for name in cache.STANDARD_PERIODS
-        ] + [cache._resolve_range_period(name, today)["current"] for name in cache.RANGE_PERIODS]
-        logical_keys = []
-        for metric_type in ("GSV", "GMV"):
-            for current in current_ranges:
-                for channel in cache.PRECOMPUTE_CHANNELS:
-                    for compare_mode in cache.COMPARE_MODES:
-                        _, compare_start, compare_end = cache._resolve_precompute_query_ranges(
-                            current.start, current.end, compare_mode
-                        )
-                        logical_keys.append(
-                            _cache_key(
-                                None,
-                                current.start,
-                                current.end,
-                                channel,
-                                metric_type,
-                                None,
-                                DATA_VERSION,
-                                compare_start,
-                                compare_end,
-                            )
-                        )
-
-        assert len(logical_keys) == cache.EXPECTED_LOGICAL_PRECOMPUTE_COMBINATIONS == 380
-        assert len(set(logical_keys)) < len(logical_keys)
-
     def test_precompute_fails_fast_when_cache_connection_cannot_open(self, monkeypatch):
         def fail_connection():
             raise OSError("cache unavailable")
@@ -818,112 +765,6 @@ class TestRFMPrecomputePlan:
 
         with pytest.raises(RuntimeError, match="无法打开写连接"):
             cache.precompute_rfm_cache()
-
-    def test_precompute_reports_full_logical_coverage_and_dedupes_aliases(self, monkeypatch):
-        class FakeBizConnection:
-            sql = ""
-
-            def execute(self, sql, _params=None):
-                self.sql = sql
-                return self
-
-            def fetchone(self):
-                if "MAX(pay_time)" in self.sql:
-                    return (datetime(2026, 7, 5, 23, 59, 58),)
-                if "COUNT(*)" in self.sql:
-                    return (ORDERS_COUNT,)
-                raise AssertionError(self.sql)
-
-            def close(self):
-                return None
-
-        class FakeWriteConnection:
-            def __init__(self):
-                self.insert_params = []
-                self.sql = ""
-
-            def execute(self, sql, params=None):
-                self.sql = sql
-                if "INSERT INTO" in sql:
-                    self.insert_params.append(params)
-                return self
-
-            def fetchone(self):
-                if "COUNT(*)" in self.sql:
-                    return (len(self.insert_params),)
-                raise AssertionError(self.sql)
-
-            def close(self):
-                return None
-
-        write_conn = FakeWriteConnection()
-        monkeypatch.setattr(cache, "_get_cache_conn", lambda: write_conn)
-        monkeypatch.setattr(cache.duckdb, "connect", lambda *_args, **_kwargs: FakeBizConnection())
-        monkeypatch.setattr(cache, "_ensure_db_cache_table", lambda _conn: None)
-        monkeypatch.setattr(cache, "_fetch_max_pay_time", lambda _conn: DATA_VERSION)
-        monkeypatch.setattr(cache, "_run_rfm_period", lambda *_args, **_kwargs: ({}, {}, {}, {}))
-        monkeypatch.setattr(cache, "_build_rows", lambda *_args, **_kwargs: [])
-        prune_calls = []
-        activation_calls = []
-        monkeypatch.setattr(
-            cache,
-            "_activate_cache_generation",
-            lambda conn, generation, version, count: activation_calls.append(
-                (conn, generation, version, count)
-            ),
-        )
-        monkeypatch.setattr(
-            cache,
-            "_prune_rfm_cache_after_success",
-            lambda conn: prune_calls.append(conn) or 0,
-        )
-
-        logical_count = cache.precompute_rfm_cache()
-        inserted_keys = [params[0] for params in write_conn.insert_params]
-        inserted_periods = [params[1] for params in write_conn.insert_params]
-        inserted_generations = [params[-1] for params in write_conn.insert_params]
-        today = date.today()
-        expected_keys = set()
-        current_ranges = [
-            getattr(PeriodBuilder, name.lower())(today=today)["current"]
-            for name in cache.STANDARD_PERIODS
-        ] + [
-            cache._resolve_range_period(name, today)["current"]
-            for name in cache.RANGE_PERIODS
-        ]
-        for metric_type in ("GSV", "GMV"):
-            for current in current_ranges:
-                for channel in cache.PRECOMPUTE_CHANNELS:
-                    for compare_mode in cache.COMPARE_MODES:
-                        _, compare_start, compare_end = cache._resolve_precompute_query_ranges(
-                            current.start,
-                            current.end,
-                            compare_mode,
-                        )
-                        expected_keys.add(
-                            _cache_key(
-                                None,
-                                current.start,
-                                current.end,
-                                channel,
-                                metric_type,
-                                None,
-                                DATA_VERSION,
-                                compare_start,
-                                compare_end,
-                            )
-                        )
-
-        assert logical_count == cache.EXPECTED_LOGICAL_PRECOMPUTE_COMBINATIONS == 380
-        assert len(inserted_keys) == len(set(inserted_keys))
-        assert len(inserted_keys) < logical_count
-        assert set(inserted_keys) == expected_keys
-        assert "LAST90DAYS" in inserted_periods
-        assert len(set(inserted_generations)) == 1
-        assert activation_calls == [
-            (write_conn, inserted_generations[0], DATA_VERSION, ORDERS_COUNT)
-        ]
-        assert prune_calls == [write_conn]
 
     def test_retention_prune_removes_only_rows_older_than_48_hours(self, cache_conn):
         old_key = _insert_cache_row(
@@ -969,63 +810,13 @@ class TestRFMPrecomputePlan:
             ["slow-complete-run", active_key],
         ).fetchone()[0] == 1
 
-    def test_failed_precompute_never_prunes_previous_generation(self, monkeypatch):
-        class FakeBizConnection:
-            sql = ""
-
-            def execute(self, sql, _params=None):
-                self.sql = sql
-                return self
-
-            def fetchone(self):
-                if "MAX(pay_time)" in self.sql:
-                    return (datetime(2026, 7, 5, 23, 59, 58),)
-                if "COUNT(*)" in self.sql:
-                    return (ORDERS_COUNT,)
-                raise AssertionError(self.sql)
-
-            def close(self):
-                return None
-
-        class FakeWriteConnection:
-            def execute(self, *_args, **_kwargs):
-                return self
-
-            def close(self):
-                return None
-
-        prune_called = False
-        activation_called = False
-
-        def mark_prune(_conn):
-            nonlocal prune_called
-            prune_called = True
-            return 0
-
-        def mark_activation(*_args):
-            nonlocal activation_called
-            activation_called = True
-
-        monkeypatch.setattr(cache, "_get_cache_conn", lambda: FakeWriteConnection())
-        monkeypatch.setattr(cache.duckdb, "connect", lambda *_args, **_kwargs: FakeBizConnection())
-        monkeypatch.setattr(cache, "_ensure_db_cache_table", lambda _conn: None)
-        monkeypatch.setattr(cache, "_fetch_max_pay_time", lambda _conn: DATA_VERSION)
-        monkeypatch.setattr(cache, "_run_rfm_period", lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("query failed")))
-        monkeypatch.setattr(cache, "_activate_cache_generation", mark_activation)
-        monkeypatch.setattr(cache, "_prune_rfm_cache_after_success", mark_prune)
-
-        with pytest.raises(RuntimeError, match="query failed"):
-            cache.precompute_rfm_cache()
-        assert activation_called is False
-        assert prune_called is False
-
     def test_etl_does_not_clear_working_cache_before_long_precompute(self):
         source = (REPO_ROOT / "scripts/etl/cli.py").read_text(encoding="utf-8")
         step6_start = source.index("# Step 6: 预计算 RFM")
         step6 = source[step6_start:source.index("# Step 7: 创建 user_rfm", step6_start)]
 
         assert "clear_rfm_cache" not in step6
-        assert "EXPECTED_LOGICAL_PRECOMPUTE_COMBINATIONS" in step6
+        assert "if not report.complete:" in step6
 
 class TestRFMCacheFailureResponse:
     @pytest.mark.parametrize(

@@ -1,4 +1,3 @@
-import inspect
 from datetime import date
 
 import duckdb
@@ -17,26 +16,14 @@ class TestL475RangeBasedCache:
     (跟 L4.42 + L4.50 + L4.71 + L4.74 + L4.75 1:1 stable 永久规则链配套)."""
 
     def test_range_periods_includes_8_ranges(self):
-        """验证 L4.75 Stage 2 fix #1: RANGE_PERIODS 8 项 (跟 frontend weeks=[4,8,12] 1:1 stable)."""
-        from backend.services.health.rfm_analysis import cache as cache_module
+        from backend.services.health.rfm_analysis.precompute_plan import build_precompute_plan
 
-        # 1) RANGE_PERIODS 属性存在
-        assert hasattr(cache_module, "RANGE_PERIODS"), (
-            "L4.75: cache.py 必须导出 RANGE_PERIODS 常量 (跟 Stage 1 STANDARD_PERIODS 1:1 stable 永久规则链配套)"
-        )
-        # 2) 必须 8 项
-        assert len(cache_module.RANGE_PERIODS) == 8, (
-            f"L4.75: RANGE_PERIODS 必须含 8 项 (Stage 2 扩 8 RANGE 周期), 实测 {len(cache_module.RANGE_PERIODS)} 项"
-        )
-        # 3) 必须含 rolling_7d/14d/30d/60d/90d (5) + weekly_4w/8w/12w (3) = 8
-        expected_ranges = {
+        plan = build_precompute_plan(date(2020, 1, 1), date(2026, 7, 5))
+        actual = {query.period for query in plan.queries if query.period.startswith(("rolling_", "weekly_"))}
+        assert actual == {
             "rolling_7d", "rolling_14d", "rolling_30d", "rolling_60d", "rolling_90d",
             "weekly_4w", "weekly_8w", "weekly_12w",
         }
-        actual_ranges = set(cache_module.RANGE_PERIODS)
-        assert actual_ranges == expected_ranges, (
-            f"L4.75: RANGE_PERIODS 必须含 {expected_ranges}, 实测 {actual_ranges}"
-        )
 
     def test_rolling_7d_dates(self):
         """验证 L4.75 fix #2: _resolve_range_period rolling_7d 算 7 天窗口 cur/comp/prev2."""
@@ -107,23 +94,17 @@ class TestL475RangeBasedCache:
                 conn, current_orders_count=0,
             ) is None
 
-    def test_precompute_6dim_for(self):
-        """验证 L4.75 fix #5: precompute_rfm_cache 含 Stage 2 RANGE for 嵌套块 (跟 L4.50 0 业务代码改动 1:1 stable)."""
-        from backend.services.health.rfm_analysis import cache as cache_module
+    def test_precompute_range_windows_keep_years_metrics_and_filters_distinct(self):
+        from backend.services.health.rfm_analysis.precompute_plan import build_precompute_plan
 
-        source = inspect.getsource(cache_module.precompute_rfm_cache)
-        # 1) Stage 2 RANGE for 嵌套 (5 重: metric × range_period × year × channel × compare_mode)
-        assert "for range_period in RANGE_PERIODS" in source, (
-            "L4.75 Stage 2: precompute_rfm_cache 必须有 RANGE_PERIODS 5 重 for 嵌套块 (跟 L4.71 Stage 1 1:1 stable 永久规则链配套)"
-        )
-        # 2) Stage 2 复用 _resolve_range_period helper (替代 Stage 1 的 pb_func = getattr...)
-        assert "_resolve_range_period(range_period, today=today)" in source, (
-            "L4.75 Stage 2: 必须用 _resolve_range_period helper 解析 RANGE 周期 (跟 period.py _resolve_range_period 1:1 stable)"
-        )
-        # 3) Stage 2 复用 ON CONFLICT UPSERT (跟 L4.74 amend v2 1:1 stable)
-        assert source.count("ON CONFLICT (cache_key) DO UPDATE") >= 2, (
-            "L4.75 Stage 2: ON CONFLICT UPSERT 必须出现在 Stage 1 + Stage 2 两块 (跟 L4.74 amend v2 1:1 stable 永久规则链配套)"
-        )
+        plan = build_precompute_plan(date(2020, 1, 1), date(2026, 7, 5))
+        weekly = [query for query in plan.queries if query.period == "weekly_4w"]
+        assert {query.start[:4] for query in weekly} == {"2025", "2026"}
+        assert {query.metric_type for query in weekly} == {"GSV", "GMV"}
+        assert {query.compare_mode for query in weekly} == {"default", "auto_mom"}
+        assert {bool(query.exclude_channels) for query in weekly} == {False, True}
+        assert None in {query.channel for query in weekly}
+        assert "达播" in {query.channel for query in weekly}
 
     def test_cache_key_includes_range_id(self):
         """验证 L4.75 fix #6: _cache_key 用 start_date/end_date (不依赖 period_name, 跟 _shared.py:60-63 1:1 stable)."""
@@ -166,22 +147,11 @@ class TestL475RangeBasedCache:
             f"(跟 _hot_period_ranges Stage 2 1:1 stable 永久规则化沿用)"
         )
 
-    def test_380_logical_combinations(self):
-        """验证总组合数 = 380 = 19 period × 2 metric × 5 channel × 2 compare。
+    def test_logical_queries_and_physical_keys_are_distinct(self):
+        from backend.services.health.rfm_analysis.precompute_plan import build_precompute_plan
 
-        STANDARD 跟 RANGE 是 alternative 周期命名；前端固定周期补齐后，物理
-        date-based key 仍会因日期别名碰撞而少于 logical coverage。
-        """
-        # 用 cache 模块顶层 RANGE_PERIODS + STANDARD_PERIODS 在 precompute_rfm_cache 内计算
-        from backend.services.health.rfm_analysis import cache as cache_module
-
-        assert len(cache_module.RANGE_PERIODS) == 8
-        assert len(cache_module.STANDARD_PERIODS) == 11
-        assert cache_module.PRECOMPUTE_CHANNELS == [None, "货架", "达播", "直播", "淘客"]
-        keys_per_period = 2 * len(cache_module.PRECOMPUTE_CHANNELS) * 2
-        total_combinations = (
-            len(cache_module.STANDARD_PERIODS) + len(cache_module.RANGE_PERIODS)
-        ) * keys_per_period
-        assert total_combinations == 380, (
-            f"L4.75: 总组合数应为 380, 实测 {total_combinations}"
-        )
+        plan = build_precompute_plan(date(2020, 1, 1), date(2026, 7, 5))
+        ready = [query for query in plan.queries if query.covered(plan.data_start, plan.cutoff)]
+        assert len({query.key("synthetic") for query in ready}) < len(ready)
+        assert any(query.period == "YEAR_2025" for query in ready)
+        assert any(query.period == "MONTH_2025_12" for query in ready)
