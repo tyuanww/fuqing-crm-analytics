@@ -1,6 +1,6 @@
 # 已验证来源的聚合缓存
 
-`WarehouseRuntime` 将一个存活的 `VerifiedWarehouseSource`、独立的 `AggregateCache` 和语义摘要绑定到请求。当前支持商品新老客，尚未接入默认应用启动。RFM 两层缓存、真实大库跑数和浏览器验收尚未完成。
+`WarehouseRuntime` 将一个存活的 `VerifiedWarehouseSource`、独立的 `AggregateCache` 和语义摘要绑定到请求。当前支持商品新老客、八象限和 R/F/M，尚未接入默认应用启动。分批预热、真实大库跑数和浏览器验收尚未完成。
 
 ## 读取模式
 
@@ -22,4 +22,12 @@
 
 当前合成验证覆盖真实 SQL、HTTP 单品与批量调用、新来源重开、等额分类修正失效、持久回读、并发写入和进程中断。它不证明真实数据热集已经生成，也不承诺未预热筛选的响应速度。
 
-对应命令为 `python -m pytest backend/tests/test_warehouse_cache.py backend/tests/test_warehouse_product_runtime.py backend/tests/test_query_router_event_loop.py`。
+对应命令为 `python -m pytest backend/tests/test_warehouse_cache.py backend/tests/test_warehouse_product_runtime.py backend/tests/test_warehouse_rfm_runtime.py backend/tests/test_query_router_event_loop.py`。
+
+## RFM 结果
+
+已验证来源的 HTTP 请求只读取统一缓存。显式离线 `compute` 可计算并写入缓存。两种入口都不读取旧 W5、JSON、跨来源 active generation 或未验证 lineage 的派生表。键包含来源、计算依赖、三期实际日期、cutoff 和筛选。HTTP 未预热返回 `503`，`X-RFM-Cache-Status` 为 `miss`。缓存或来源故障使用 `unavailable`。三期任一覆盖不足或固定周期为空窗时返回 `422` 和 `INSUFFICIENT_COVERAGE`。
+
+离线八象限使用原始订单计算。它的 TTL 是观察期前的老客，会员 TTL 与八象限会员行使用同一人群。R/F/M 的 TTL 包含截至期末的累计用户，会员分子和分母都限制在对应会员集合。两种 TTL 不共用人群定义。
+
+固定周期使用 `PeriodBuilder` 的实际窗口，年份标签取实际日期。自定义比较期只覆盖比较期，保留第三期规则。固定周期和明确当前日期同时出现、缺半个日期或未知指标均被拒绝。旧模式没有继承新的来源证明，现役缓存及派生表尚未刷新。

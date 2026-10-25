@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Offline characterization of the current RFM execution control flow.
+"""Offline characterization of legacy RFM execution control flow.
 
 Run: python3.14 -B scripts/diagnostics/verify_rfm_execution_contract.py
 
@@ -127,6 +127,7 @@ class EightQuadrantContractTests(unittest.TestCase):
             "backend/services/health/rfm_analysis/analysis.py", "get_rfm_analysis",
             {
                 "date": FixedDate,
+                "current_warehouse_read": Mock(return_value=None),
                 # strptime lazily imports stdlib helpers via the calling frame.
                 # Keep that call in this harness, not the no-import AST namespace.
                 "datetime": SimpleNamespace(strptime=lambda value, fmt: datetime.strptime(value, fmt)),
@@ -175,6 +176,7 @@ class FlowContractTests(unittest.TestCase):
             "backend/services/rfm/_flow_engine.py", "get_rfm_flow",
             {
                 "bdc": SimpleNamespace(get_connection=get_connection),
+                "current_warehouse_read": Mock(return_value=None),
                 "_resolve_date_ranges": Mock(return_value=RANGES),
                 "_fetch_data_version": Mock(return_value="fixture-version"),
                 "_flow_cache_key": Mock(return_value="fixture-key"),
@@ -251,7 +253,8 @@ class FlowContractTests(unittest.TestCase):
         cache.get.return_value = {"fixture": "outer-hit"}
         compute = Mock(side_effect=AssertionError("Unexpected service call"))
         function = extract_function(
-            "backend/routers/rfm.py", "_cached_rfm_call", {"_rfm_cache": cache},
+            "backend/routers/rfm.py", "_cached_rfm_call",
+            {"_rfm_cache": cache, "current_warehouse_read": Mock(return_value=None)},
         )
         self.assertIs(function("r-flow", REQUEST, compute), cache.get.return_value)
         compute.assert_not_called()
@@ -262,7 +265,8 @@ class FlowContractTests(unittest.TestCase):
         events.cache.get.return_value = None
         events.compute.return_value = {"fixture": "service-result"}
         function = extract_function(
-            "backend/routers/rfm.py", "_cached_rfm_call", {"_rfm_cache": events.cache},
+            "backend/routers/rfm.py", "_cached_rfm_call",
+            {"_rfm_cache": events.cache, "current_warehouse_read": Mock(return_value=None)},
         )
         self.assertIs(function("f-flow", REQUEST, events.compute), events.compute.return_value)
         self.assertEqual(events.mock_calls, [

@@ -15,6 +15,8 @@ import duckdb
 from backend.config import DUCKDB_PATH
 from backend.db import connection as bdc
 from backend.services.rfm import _resolve_date_ranges
+from backend.services.warehouse_rfm import get_verified_rfm_analysis, resolve_verified_ranges
+from backend.services.warehouse_runtime import current_warehouse_read
 from ._shared import _fetch_max_pay_time
 from .period import _run_rfm_period, _build_rows
 from .cache import (
@@ -122,6 +124,9 @@ def get_rfm_analysis(
     缓存口径保证：所有缓存数据均来自 _run_rfm_period_live（全量口径），
     与 user_rfm 预计算表（lookback_days=90）完全独立，不会产生10倍差异。
     """
+    if frame := current_warehouse_read():
+        ranges = resolve_verified_ranges(period, start_date, end_date, compare_start_date, compare_end_date)
+        return get_verified_rfm_analysis(frame, ranges, metric_type, channel, exclude_channels)
     ranges = _resolve_date_ranges(period, start_date, end_date, compare_start_date, compare_end_date)
     cur_start_dt, cur_end_dt, cutoff = ranges["current"]
     comp_start_dt, comp_end_dt, comp_cutoff = ranges["comp"]

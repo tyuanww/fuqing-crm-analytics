@@ -323,6 +323,7 @@ class QueryRouterMiddleware:
         from backend.services.dual_conn import ReadPoolTimeout  # L4.72.2 新增异常类
         from backend.services.warehouse_cache import AggregateCacheMissError, AggregateCacheUnavailableError
         from backend.services.warehouse_source import WarehouseSourceUnavailableError
+        from backend.services.warehouse_rfm import WarehouseQueryError
         response_started = False
 
         async def send_verified(message):
@@ -349,15 +350,28 @@ class QueryRouterMiddleware:
         except asyncio.CancelledError:
             cancelled = True
             raise
+        except WarehouseQueryError as exc:
+            if response_started:
+                raise
+            response = competition_error_response(
+                http_status=422, code=exc.code, message=str(exc),
+                request_id=request_id, retryable=False,
+                headers={"X-RFM-Cache-Status": "insufficient"} if exc.code == "INSUFFICIENT_COVERAGE" else None,
+            )
+            await response(scope, receive, send)
         except (WarehouseSourceUnavailableError, AggregateCacheUnavailableError, AggregateCacheMissError) as exc:
             if response_started:
                 raise
             miss = isinstance(exc, AggregateCacheMissError)
+            cache_status = "miss" if miss else "unavailable"
+            headers = {"X-Aggregate-Cache-Status": cache_status}
+            if path == "/api/v1/customer-health/rfm-analysis" or path.startswith("/api/v1/rfm/"):
+                headers["X-RFM-Cache-Status"] = cache_status
             response = competition_error_response(
                 http_status=503, code="STATE_UNAVAILABLE",
                 message="所选范围尚未预热" if miss else "数据来源或缓存暂不可用",
                 request_id=request_id, retryable=True, retry_after=60 if miss else 30,
-                headers={"X-Aggregate-Cache-Status": "miss" if miss else "unavailable"},
+                headers=headers,
             )
             await response(scope, receive, send)
         except ReadPoolTimeout as e:

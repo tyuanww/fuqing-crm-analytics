@@ -116,3 +116,24 @@ def product_semantic_revision() -> str:
         "backend/semantic/time.py",
         "backend/semantic/metrics.py",
     ))
+
+
+def rfm_semantic_revision() -> str:
+    from backend.services.warehouse_cache import semantic_revision
+
+    return semantic_revision(Path(__file__).resolve().parents[2], (
+        "backend/services/warehouse_rfm.py",
+        "backend/services/health/rfm_analysis/period.py",
+        "backend/services/health/rfm_analysis/_shared.py",
+        "backend/services/rfm/_flow_engine.py",
+        "backend/services/rfm/_shared.py",
+        "backend/services/rfm/r_flow.py",
+        "backend/services/rfm/f_flow.py",
+        "backend/services/rfm/m_flow.py",
+        "backend/services/metrics/competition_compute.py",
+        "backend/semantic/calculations.py",
+        "backend/semantic/channels.py",
+        "backend/semantic/filters.py",
+        "backend/semantic/segments.py",
+        "backend/semantic/time.py",
+    ))
