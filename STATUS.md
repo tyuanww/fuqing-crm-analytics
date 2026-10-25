@@ -4,7 +4,7 @@
 
 ## 当前快照（2026-10-25）
 
-- 2026-10-25 原生页面来源接线已完成本地主环境合成验证：真实 Connection/BrowserAuth、CRM 路由、权威快照、页面、Workbench store 与消息入口共 13 项通过；受影响页面与编辑回归 127 项通过。独立审核发现的预览读数与编辑确认缺口已修复，另补可空绑定和等待来源不阻塞 HTTP 的回归。CRM `631b8d8` 已推送且作者 CI 成功；Workbench 严格构建通过，最终新包消费与精确集成 CI 仍需完成。真实浏览器业务、两年缓存和杭州切换未关闭，`release_ready=false`。见[运行接线证据](docs/hackathon/evidence/dsh-native-page-runtime-20261025.md)。
+- 2026-10-25 原生页面来源接线已完成本地主环境合成验证：真实 Connection/BrowserAuth、CRM 路由、权威快照、页面、Workbench store 与消息入口共 13 项通过；受影响页面与编辑回归 127 项通过。独立审核确认的缺陷已修复，最终 43 文件复核无新增确认 P0–P2。CRM `631b8d8` 和 Workbench `a63fe78` 已推送且各自 CI 成功。两作者严格新包进入九插件组合，运输 artifact `12586159173` 已下载、20 文件原字节比较与严格接收通过，31 份公共材料读回通过。主仓对应提交的 CI 及运行包消费看当前 PR。真实浏览器业务、两年缓存和杭州切换未关闭，`release_ready=false`。见[运行接线证据](docs/hackathon/evidence/dsh-native-page-runtime-20261025.md)。
 
 - 2026-10-25 完整业务运行 profile 已补齐本地装配验证。成员从锁定的 CRM 两插件与页面七插件派生，发布预检显式选择九插件目标。实际严格包的 47 个运行文件与原 tar 字节一致；业务环境最终定向 97 项通过，主环境完整发布测试 609 通过、6 跳过。生成器硬链接写入缺陷已复现并修复。最终 CI 与下载包看当前 PR；完整 Host、页面接线、真实业务和两年缓存仍开放。详见[业务 profile 装配记录](docs/hackathon/evidence/dsh-business-runtime-profile-20261025.md)。
 
@@ -42,7 +42,7 @@
 
 ## 本轮施工计划
 
-- 当前 rc3 候选已更新原生 CRM Host 的作者包和组合输入。先核验当前 PR CI，再依次接通真实 Host、页面 resolver 与隔离业务验收，随后验证两年 RFM/商品缓存。正式部署仍受 M2 门禁和批准 artifact 约束。publisher identity、签名、独立核验、撤销、final attestation、正式 clean-machine 和外部发布批准未完成，M2-07 继续 `BLOCKED`、`release_ready=false`。
+- 当前 rc3 候选已更新原生 CRM Host、页面 resolver、预览消息与编辑确认接线及两作者组合输入。先完成当前 PR 精确 CI 和运行包读回，再进行真实浏览器业务验收，随后验证两年 RFM/商品缓存。正式部署仍受 M2 门禁和批准 artifact 约束。publisher identity、签名、独立核验、撤销、final attestation、正式 clean-machine 和外部发布批准未完成，M2-07 继续 `BLOCKED`、`release_ready=false`。
 ## 历史快照入口
 
 - 2026-10-15 及更早的 alpha3、rc2、M2-06、作者仓合并和 alpha2 历史事实已归档到 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)；它们不覆盖本页当前快照，也不授予 release/activation。
