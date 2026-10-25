@@ -3,13 +3,13 @@ from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT))
-
-from backend.services.analytics.native_page_source import NativePageSource, NATIVE_POLICY
-from backend.services.analytics.page_documents_routes import create_page_app
 
 
 def build_app(*, state_dir, callback_origin):
+    sys.path.insert(0, str(ROOT))
+    from backend.services.analytics.native_page_source import NativePageSource, NATIVE_POLICY
+    from backend.services.analytics.page_documents_routes import create_page_app
+
     source = NativePageSource(callback_origin)
     return create_page_app(page_state_dir=state_dir, authenticate_page=source.authenticate,
                            resolve_binding=source.resolve_binding, native_source=source, policy=NATIVE_POLICY)

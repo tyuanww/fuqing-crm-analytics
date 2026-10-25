@@ -1,4 +1,3 @@
-from contextlib import contextmanager
 import json
 import os
 from pathlib import Path
@@ -66,12 +65,14 @@ def composition(tmp_path):
             reservation.bind(('127.0.0.1', 0))
             ports.append(reservation.getsockname()[1])
     finally:
-        for reservation in reservations: reservation.close()
+        for reservation in reservations:
+            reservation.close()
     crm_port, source_port, introspection_port, page_port, callback_port, web_port = ports
     for name in ['assets', 'refs', 'pages', 'private']:
         (tmp_path / name).mkdir(mode=0o700)
     token = tmp_path / 'private/service.token'
-    token.write_text(secrets.token_hex(32)); token.chmod(0o600)
+    token.write_text(secrets.token_hex(32))
+    token.chmod(0o600)
     env = {'PATH': str(Path(node).parent) + ':/usr/bin:/bin', 'PYTHONPATH': str(ROOT), 'PYTHON_DOTENV_DISABLED': '1', 'PYTHONDONTWRITEBYTECODE': '1'}
     children = []
     logs = []
@@ -82,7 +83,8 @@ def composition(tmp_path):
         child.page_server = config is None
         children.append(child)
         if config is not None:
-            child.stdin.write(json.dumps(config) + '\n'); child.stdin.flush()
+            child.stdin.write(json.dumps(config) + '\n')
+            child.stdin.flush()
             assert receive(child) == {'ready': True}
         return child
     try:
@@ -111,8 +113,10 @@ def composition(tmp_path):
             'callbackPort': callback_port, 'webPort': web_port, 'tokenFile': str(token)})
         yield lambda op, **fields: command(host, op=op, **fields), lambda **state: command(services, op='state', value=state), tmp_path
     finally:
-        for child in reversed(children): stop(child)
-        for log in logs: log.close()
+        for child in reversed(children):
+            stop(child)
+        for log in logs:
+            log.close()
         assert all(child.poll() is not None for child in children)
 
 
@@ -242,7 +246,8 @@ def test_actual_connection_crm_page_workbench_closed_loop(composition):
     rpc, state, root = composition
     assert value(rpc('auth')) == {'statuses': [401, 401, 403, 403], 'valid': 200}
     assert value(rpc('login'))['connected']
-    query = value(rpc('query', filters=FILTERS)); assert query['ok']
+    query = value(rpc('query', filters=FILTERS))
+    assert query['ok']
     ref = query['source_ref']
     preview = value(rpc('preview', draft=draft(ref)))
     preview_target = {'kind': 'preview', 'preview_id': preview['preview_id']}
@@ -296,9 +301,12 @@ def test_cached_reads_and_data_refs_reauthorize(composition, change):
     target = {'kind': 'page', 'page_id': saved['page_id'], 'version': 1}
     read = value(rpc('read', request={'result_ref': ref, 'target': target}))
     if change == 'relogin':
-        value(rpc('disconnect')); value(rpc('login'))
-    elif change == 'crm401': state(authenticated=False)
-    else: value(rpc(change))
+        value(rpc('disconnect'))
+        value(rpc('login'))
+    elif change == 'crm401':
+        state(authenticated=False)
+    else:
+        value(rpc(change))
     for request in [{'result_ref': ref}, {'data_ref': read['data_ref']}]:
         assert not rpc('read', request={**request, 'target': target})['ok']
     assert value(rpc('get', id=saved['page_id']))['version'] == 1
