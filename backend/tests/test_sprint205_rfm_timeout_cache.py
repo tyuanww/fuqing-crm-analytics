@@ -1160,7 +1160,7 @@ class TestRFMCacheFailureResponse:
             )
 
         assert error.value.status_code == 503
-        assert error.value.headers == {"Retry-After": "30"}
+        assert error.value.headers == {"Retry-After": "30", "X-RFM-Cache-Status": "unavailable"}
 
     def test_router_marks_cache_miss_and_disables_live_compute(self, monkeypatch):
         from fastapi import HTTPException, Response
@@ -1186,4 +1186,4 @@ class TestRFMCacheFailureResponse:
             )
 
         assert error.value.status_code == 503
-        assert error.value.headers == {"Retry-After": "60"}
+        assert error.value.headers == {"Retry-After": "60", "X-RFM-Cache-Status": "miss"}
