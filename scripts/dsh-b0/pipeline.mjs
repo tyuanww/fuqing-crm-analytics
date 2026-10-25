@@ -219,7 +219,7 @@ for line in pathlib.Path('scripts/dsh-b0/requirements.lock').read_text().splitli
 print('B0 exact Python closure verified')
 `]);
   console.log('DSH dev supervisor unit checks (separate from native compatibility acceptance)');
-  run(process.execPath, ['--test', ...(await readdir(join(root, 'scripts/dsh-dev'))).filter(n => n.endsWith('.test.mjs')).map(n => join(root, 'scripts/dsh-dev', n))], root, { DSH_DEV_UPSTREAM: upstream });
+  run(process.execPath, ['--test', ...(await readdir(join(root, 'scripts/dsh-dev'))).filter(n => n.endsWith('.test.mjs')).map(n => join(root, 'scripts/dsh-dev', n))], root, { DSH_DEV_UPSTREAM: upstream, DSH_NATIVE_UPSTREAM: upstream });
   const pyTests = ['jobs', 'access', 'run_contracts', 'run_resources', 'native_runtime', 'worker', 'context', 'native_probe', 'query_contracts', 'channel_followup', 'query_jobs', 'query_run_contracts', 'query_worker', 'query_runtime', 'query_native_fault', 'saved_analyses', 'analysis_http', 'cockpit', 'cockpit_http', 'query_assets_runtime', 'first_purchase', 'first_purchase_http', 'first_purchase_kernel', 'first_purchase_analysis', 'first_purchase_save_recovery', 'first_purchase_save_receipts', 'first_purchase_save_api', 'first_purchase_save_ui', 'first_purchase_crm_identity', 'first_purchase_source', 'first_purchase_native', 'customer_features_w4', 'feature_publication_w5', 'runtime_ports'].map(name => `backend/tests/test_analytics_${name}.py`);
   // HTTP/computation tests import the archived CRM dependency closure and run
   // under the shared bounded backend profile, not the minimal B0 interpreter.
