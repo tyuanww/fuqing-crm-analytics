@@ -24,6 +24,7 @@ from backend.contracts.page_documents import (
     HTML_MAX_CHARS, PACKAGE_MAX_BYTES, STYLE_MAX_CHARS, PagePatchPreview, is_package_too_large,
 )
 from backend.services.analytics.access import AnalyticsError, require
+from backend.services.analytics.cockpit_html_selection import SourceTree
 from backend.services.analytics.first_purchase.asset_state import (
     connect, initialize_sqlite, now_ms, transaction, validate_key,
 )
@@ -270,12 +271,32 @@ def logic_range(js: str, node_id: str):
     return begin, end
 
 
-def node_is_bound(manifest, node_id: str) -> bool:
+def node_is_bound(manifest, node_id: str, html: str, kind: str) -> bool:
     bindings = (manifest or {}).get("bindings") or []
-    if any(isinstance(row, dict) and row.get("node_id") == node_id for row in bindings):
+    bound_ids = {row["node_id"] for row in bindings if isinstance(row, dict) and row.get("node_id")}
+    tree = SourceTree(html)
+    if tree.invalid:
+        raise fault("MAPPING_STALE", 409)
+    by_id = {}
+    protected = []
+    for node in tree.all_nodes:
+        attrs = node["attrs"]
+        for identity in {attrs.get("data-shine-node"), attrs.get("data-shine-region")} - {None}:
+            by_id.setdefault(identity, []).append(node)
+        if "data-page-readonly" in attrs or attrs.get("data-sp-bindable") == "database":
+            protected.append(node)
+    attr = "region" if kind == "dynamic_region" else "node"
+    selected = [node for node in by_id.get(node_id, []) if node["attrs"].get(f"data-shine-{attr}") == node_id]
+    markers = [marker for marker in scan_markers(html) if marker["node_id"] == node_id and marker["attr"] == attr]
+    if (len(selected) != 1 or len(markers) != 1
+            or any(selected[0][key] != markers[0][key] for key in ("start", "end"))):
+        raise fault("MAPPING_STALE", 409)
+    if (manifest or {}).get("result_refs") and not bound_ids:
         return True
-    refs = (manifest or {}).get("result_refs") or []
-    return bool(refs) and all(not (isinstance(row, dict) and row.get("node_id")) for row in bindings)
+    if any(len(by_id.get(identity, [])) != 1 for identity in bound_ids):
+        return True
+    protected.extend(by_id[identity][0] for identity in bound_ids)
+    return any(selected[0]["start"] < node["end"] and node["start"] < selected[0]["end"] for node in protected)
 
 
 def _dangerous(value: str) -> bool:
@@ -420,7 +441,7 @@ class PageEditContextStore:
             region_field = "html"
         source_hash = package_source_hash(html, css, js)
         region_hash = byte_region_hash(region_text)
-        bound = node_is_bound(spec.get("binding_manifest"), node_id)
+        bound = node_is_bound(spec.get("binding_manifest"), node_id, html, kind)
         capabilities = sorted(recompute_capabilities(actor, bound=bound))
         now = self.clock()
         context_id = "editctx_" + uuid4().hex
@@ -567,7 +588,7 @@ class PageEditContextStore:
             raise fault("SCOPE_VIOLATION")
         if node.get("source_range") != selected.get("source_range") or node.get("mapping_token") != selected.get("mapping_token"):
             raise fault("MAPPING_STALE", 409)
-        bound = node_is_bound(spec.get("binding_manifest"), node["node_id"])
+        bound = node_is_bound(spec.get("binding_manifest"), node["node_id"], spec["package"]["html"], node["kind"])
         capabilities = recompute_capabilities(actor, bound=bound)
         if bound and "node:bound" not in capabilities:
             raise fault("BOUND_NODE", 403)
@@ -710,6 +731,15 @@ class PageEditContextStore:
             self._drop_context(actor, context_id)
             raise fault("VERSION_CONFLICT", 409)
         page_preview_id = preview["page_preview_id"]
+        applied = page_preview_id and self.pages.preview(actor, page_preview_id)["status"] == "APPLIED"
+        if not applied:
+            bound = node_is_bound(spec.get("binding_manifest"), preview_body["node_id"], spec["package"]["html"],
+                                  stored["contract"]["selected_node"]["kind"])
+            capabilities = recompute_capabilities(actor, bound=bound)
+            if bound and "node:bound" not in capabilities:
+                raise fault("BOUND_NODE", 403)
+            if CHANNEL_CAPABILITY[preview_body["channel"]] not in capabilities:
+                raise fault("CAPABILITY_DENIED", 403)
         if not page_preview_id:
             page_preview_id = self._open_page_preview(actor, stored, preview_body, source_context=source_context)
             with transaction(self.path, unavailable=UNAVAILABLE) as con:

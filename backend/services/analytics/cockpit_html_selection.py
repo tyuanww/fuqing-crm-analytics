@@ -79,6 +79,8 @@ class SourceTree(HTMLParser):
         return self.lines[line - 1] + column
 
     def handle_starttag(self, tag, attrs):
+        if len(dict(attrs)) != len(attrs):
+            self.invalid = True
         ancestors = self.context + tuple(p['tag'] for p in self.stack)
         if self.static and not static_nesting(tag, ancestors):
             raise UnsafeSelectionTree()
@@ -93,8 +95,14 @@ class SourceTree(HTMLParser):
             readonly = blocked or bool(self.stack and self.stack[-1]['readonly'])
             self.stack.append({'tag': tag, 'attrs': dict(attrs), 'foreign': foreign, 'start': self.source_offset(), 'ancestors': ancestors,
                                'readonly': readonly, 'blocked': readonly})
+        else:
+            self.all_nodes.append({'tag': tag, 'attrs': dict(attrs), 'start': self.source_offset(),
+                                   'end': self.source_offset() + len(self.get_starttag_text()),
+                                   'ancestors': ancestors, 'readonly': blocked, 'blocked': blocked})
 
     def handle_startendtag(self, tag, attrs):
+        if len(dict(attrs)) != len(attrs):
+            self.invalid = True
         ancestors = self.context + tuple(p['tag'] for p in self.stack)
         if self.static and not static_nesting(tag, ancestors):
             raise UnsafeSelectionTree()
@@ -104,6 +112,9 @@ class SourceTree(HTMLParser):
         if tag in ACTIVE or any(dynamic_attribute(key, value) for key, value in attrs):
             for parent in self.stack:
                 parent['blocked'] = True
+        self.all_nodes.append({'tag': tag, 'attrs': dict(attrs), 'start': self.source_offset(),
+                               'end': self.source_offset() + len(self.get_starttag_text()),
+                               'ancestors': ancestors, 'readonly': True, 'blocked': True})
 
     def handle_data(self, data):
         if self.static and data.strip() and self.stack and self.stack[-1]['tag'] in {'ul', 'ol'}:

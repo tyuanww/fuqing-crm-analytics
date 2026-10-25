@@ -106,7 +106,7 @@ def operation(channel, payload, key, *, context, node_id=None, source_hash=None,
     return body
 
 
-def boot(tmp_path, *, actor=None, binding=None, resolve=False):
+def boot(tmp_path, *, actor=None, binding=None, resolve=False, page_package=None):
     actor = actor or principal()
     clock = Clock()
     directory = private(tmp_path / "state")
@@ -115,7 +115,7 @@ def boot(tmp_path, *, actor=None, binding=None, resolve=False):
     ))
     manifest = binding or {"bindings": [], "result_refs": []}
     draft = PageDraft.model_validate({
-        "title": "编辑上下文", "session_id": "sess_edit", "package": package(), "binding_manifest": manifest,
+        "title": "编辑上下文", "session_id": "sess_edit", "package": page_package or package(), "binding_manifest": manifest,
     })
     preview = pages.generate(actor, draft)
     saved = pages.confirm(actor, preview["preview_id"], "create-page")
@@ -374,6 +374,148 @@ def test_bound_node_is_denied_unless_capability_explicitly_allows_it(tmp_path):
         "presentation", {"text": "授权覆写"}, "bound-ok", context=allowed_context,
     ), "bound-ok")
     assert applied["source_bytes_unchanged"] is True
+
+
+def protected_page(tmp_path, protection):
+    attribute = {'binding': '', 'readonly': ' data-page-readonly="true"',
+                 'database': ' data-sp-bindable="database"'}[protection]
+    html = ('<main data-shine-node="outer"><h1 data-shine-node="n_title">运营建议</h1>'
+            f'<section data-shine-node="facts"{attribute}><table><tbody><tr>'
+            '<td data-shine-node="n_metric">105,525.80</td></tr></tbody></table></section></main>')
+    bindings = ({'result_refs': ['result_1'], 'bindings': [
+        {'binding_id': 'product', 'result_ref': 'result_1', 'node_id': 'facts'},
+    ]} if protection == 'binding' else None)
+    return boot(tmp_path, resolve=True, binding=bindings, page_package=package(html=html, node_map=[
+        {'node_id': node, 'kind': 'static_element', 'selector': f'[data-shine-node="{node}"]'}
+        for node in ['outer', 'n_title', 'facts', 'n_metric']
+    ]))
+
+
+@pytest.mark.parametrize('protection', ['binding', 'readonly', 'database'])
+@pytest.mark.parametrize('node_id', ['facts', 'n_metric', 'outer'])
+@pytest.mark.parametrize('channel', ['presentation', 'source'])
+def test_protected_subtrees_reject_child_and_ancestor_edits(tmp_path, protection, node_id, channel):
+    actor, _clock, pages, edits, spec = protected_page(tmp_path, protection)
+    created = open_context(edits, actor, spec['page_id'], node_id=node_id)
+    with pytest.raises(AnalyticsError, match='BOUND_NODE'):
+        edits.apply(actor, created['edit_context_id'], operation(
+            channel, {'text': '999999.99'} if channel == 'presentation' else '999999.99',
+            'protected-subtree', context=created,
+        ), 'protected-subtree')
+    assert created['capabilities'] == []
+    assert len(pages.history(actor, spec['page_id'])) == 1
+    assert edits.overlay(actor, spec['page_id'], 1) == {}
+
+
+@pytest.mark.parametrize('protection', ['binding', 'readonly', 'database'])
+def test_unbound_sibling_text_still_saves_and_reopens(tmp_path, protection):
+    actor, _clock, pages, edits, spec = protected_page(tmp_path, protection)
+    created = open_context(edits, actor, spec['page_id'])
+    preview = edits.apply(actor, created['edit_context_id'], operation(
+        'presentation', {'text': '先验证复购，再扩大运营'}, 'sibling-text', context=created,
+    ), 'sibling-text')
+    saved = edits.confirm(actor, created['edit_context_id'], preview['preview_id'], 'sibling-save')
+    reopened = PageEditContextStore(edits.path.parent, pages, clock=edits.clock)
+    assert reopened.overlay(actor, spec['page_id'], saved['saved_version']) == {
+        'n_title': {'text': '先验证复购，再扩大运营'},
+    }
+    assert pages.get(actor, spec['page_id'])['spec']['package'] == spec['package']
+
+
+@pytest.mark.parametrize('protection', ['binding', 'readonly', 'database'])
+def test_protected_subtree_confirm_rechecks_permission(tmp_path, protection):
+    actor, _clock, pages, edits, spec = protected_page(tmp_path, protection)
+    privileged = principal('alice', 'page:edit-bound')
+    created = open_context(edits, privileged, spec['page_id'], node_id='n_metric')
+    preview = edits.apply(privileged, created['edit_context_id'], operation(
+        'presentation', {'text': '授权修改'}, 'before-revoke', context=created,
+    ), 'before-revoke')
+    with pytest.raises(AnalyticsError, match='BOUND_NODE'):
+        edits.confirm(actor, created['edit_context_id'], preview['preview_id'], 'after-revoke')
+    assert len(pages.history(actor, spec['page_id'])) == 1
+    saved = edits.confirm(privileged, created['edit_context_id'], preview['preview_id'], 'with-permission')
+    replay = edits.confirm(actor, created['edit_context_id'], preview['preview_id'], 'with-permission')
+    assert saved['saved_version'] == replay['saved_version'] == 2
+    assert replay['replayed'] is True
+
+
+@pytest.mark.parametrize(('html', 'ambiguous'), [
+    ('<section><img data-page-readonly></section>', False),
+    ('<section><img data-sp-bindable="database" /></section>', False),
+    ('<section data-page-readonly="false"><span>金额</span></section>', False),
+    ('<section data-sp-bindable="database" data-sp-bindable="other">金额</section>', True),
+    ('<section data-page-readonly><span>金额</section>', True),
+])
+def test_readonly_leaf_and_ambiguous_html_fail_closed(tmp_path, html, ambiguous):
+    html = f'<main data-shine-node="n_title">{html}</main>'
+    actor, _clock, pages, edits, spec = boot(tmp_path, page_package=package(html=html, node_map=[
+        {'node_id': 'n_title', 'kind': 'static_element', 'selector': '[data-shine-node="n_title"]'},
+    ]))
+    if ambiguous:
+        with pytest.raises(AnalyticsError, match='MAPPING_STALE'):
+            open_context(edits, actor, spec['page_id'])
+    else:
+        created = open_context(edits, actor, spec['page_id'])
+        assert created['capabilities'] == []
+        with pytest.raises(AnalyticsError, match='BOUND_NODE'):
+            edits.apply(actor, created['edit_context_id'], operation(
+                'presentation', {'text': '覆盖只读数据'}, 'readonly-leaf', context=created,
+            ), 'readonly-leaf')
+    assert len(pages.history(actor, spec['page_id'])) == 1
+
+
+@pytest.mark.parametrize('extra', [(), ('page:edit-bound',)])
+def test_attribute_text_cannot_redirect_edit_to_protected_subtree(tmp_path, extra):
+    html = ('<main title="data-shine-node=\'n_title\'"><section data-page-readonly>105,525.80</section>'
+            '</main><p data-shine-node=n_title>运营建议</p>')
+    actor, _clock, pages, edits, spec = boot(tmp_path, actor=principal('alice', *extra),
+                                          page_package=package(html=html, node_map=[
+        {'node_id': 'n_title', 'kind': 'static_element', 'selector': '[data-shine-node="n_title"]'},
+    ]))
+    with pytest.raises(AnalyticsError, match='MAPPING_STALE'):
+        open_context(edits, actor, spec['page_id'])
+    assert len(pages.history(actor, spec['page_id'])) == 1
+    assert edits.overlay(actor, spec['page_id'], 1) == {}
+
+
+def test_confirm_recovers_committed_revision_after_receipt_failure(tmp_path, monkeypatch):
+    actor, _clock, pages, edits, spec = boot(tmp_path)
+    created = open_context(edits, actor, spec['page_id'])
+    preview = edits.apply(actor, created['edit_context_id'], operation(
+        'source', '<h1>已替换节点</h1>', 'replace-node', context=created, action='replace',
+    ), 'replace-node')
+    save_receipt = edits._save_idempotency
+    def fail_receipt(*args, **kwargs):
+        raise RuntimeError('synthetic receipt failure')
+    monkeypatch.setattr(edits, '_save_idempotency', fail_receipt)
+    with pytest.raises(RuntimeError, match='synthetic receipt failure'):
+        edits.confirm(actor, created['edit_context_id'], preview['preview_id'], 'confirm-replace')
+    assert pages.get(actor, spec['page_id'])['spec']['version'] == 2
+    monkeypatch.setattr(edits, '_save_idempotency', save_receipt)
+    reopened = PageEditContextStore(edits.path.parent, pages, clock=edits.clock)
+    recovered = reopened.confirm(actor, created['edit_context_id'], preview['preview_id'], 'confirm-replace')
+    assert recovered['saved_version'] == 2
+    assert len(pages.history(actor, spec['page_id'])) == 2
+    assert reopened.recover(actor, created['edit_context_id'], preview['preview_id'])['saved_version'] == 2
+
+
+def test_pending_page_preview_still_rechecks_revoked_permission(tmp_path, monkeypatch):
+    actor, _clock, pages, edits, spec = protected_page(tmp_path, 'binding')
+    privileged = principal('alice', 'page:edit-bound')
+    created = open_context(edits, privileged, spec['page_id'], node_id='n_metric')
+    preview = edits.apply(privileged, created['edit_context_id'], operation(
+        'presentation', {'text': '授权修改'}, 'pending-bound', context=created,
+    ), 'pending-bound')
+    with monkeypatch.context() as patch:
+        def fail_before_commit(*args, **kwargs):
+            raise RuntimeError('synthetic page failure')
+        patch.setattr(pages, 'confirm', fail_before_commit)
+        with pytest.raises(RuntimeError, match='synthetic page failure'):
+            edits.confirm(privileged, created['edit_context_id'], preview['preview_id'], 'pending-confirm')
+    with pytest.raises(AnalyticsError, match='BOUND_NODE'):
+        edits.confirm(actor, created['edit_context_id'], preview['preview_id'], 'pending-confirm')
+    assert len(pages.history(actor, spec['page_id'])) == 1
+    assert edits.overlay(actor, spec['page_id'], 1) == {}
 
 
 def test_recomputed_capability_ignores_an_earlier_grant(tmp_path):
