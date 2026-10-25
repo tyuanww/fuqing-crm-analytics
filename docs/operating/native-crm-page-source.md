@@ -29,9 +29,19 @@ Host 为单次请求生成私有租约，绑定方法、路径、查询、请求
 
 原生文字与结构编辑复用已有 edit-context、区域哈希、CAS 和幂等确认。声明为绑定数值的节点保持只读。页面文案与结构变化不写入业务数据库，来源认证也不表示宿主背书整份 HTML 的经营结论。
 
+## AI 修改候选
+
+原生页面任务使用固定的 `session-cockpit-native-ai-<UUID>` 会话和 `shine-native-page-editor-v1` 预设。模型只取得 `cockpit_page_read` 与 `cockpit_page_propose`，不能使用文件、终端、网络、子任务或安装插件工具。独立策略插件按会话 ID 约束工具权限，不依赖可切换的当前预设。页面 Host 卸载后撤走两个编辑工具，策略继续限制存活及恢复的 agent；Host 缺少策略服务时不会启用。重新打开任务复用原会话，新建返回了不同 ID 时停止发送。
+
+读取按 Unicode 字符分页，每次最多 2000 字符，并返回下一偏移、来源及候选摘要。每次提交从任务的原始源码应用全部精确替换；来源摘要和前一候选摘要不匹配时拒绝。HTML/CSS/JS 及 presentation JSON 均经页面合同检查。渲染后选区只允许改该选区的 presentation；绑定页仅允许 CSS 或受控 presentation 样式，不能改写数值或文案。已有 presentation 的整页 HTML/JS 修改须回源码入口核对，当前不会自动迁移定位。
+
+模型只能提交候选。用户仍须收取、预览、确认才生成新版本，首次保存重新核对来源。原生页面与旧文件任务按各自 transport 路由；恢复未知任务仅在原生 GET 明确返回 404 时尝试旧文件服务，不在写入或来源故障时自动改道。任务列表按服务独立恢复，一方失败时仍显示另一方任务，并保留失败来源已知任务及错误提示。
+
+生成工具及原生 AI 候选入口会拒绝孤立或未闭合的 textarea 标签，不猜测补写模型源码。这是具体标记检查，并非完整 HTML 语义校验。现有历史页面不会因此被改写。
+
 ## 显式配置
 
-Host 配置示例为 [`native-page.config.example.json`](../../scripts/dsh-dev/native-page.config.example.json)。复制后先将 `file:///absolute/path/to/repository/` 替换为实际仓库绝对路径，再配置独立页面端口与私有回调端口。`enabled` 默认 `false`，原生 CRM Host 仍需单独配置已有的 `nativeSnapshot` 来源。
+Host 配置示例为 [`native-page.config.example.json`](../../scripts/dsh-dev/native-page.config.example.json)。复制后先将 `file:///absolute/path/to/repository/` 替换为实际仓库绝对路径，再配置独立页面端口与私有回调端口。策略插件与页面 Host 是两个独立条目，`enabled` 均默认 `false`，使用时须同时启用。策略插件须在页面 Host 的卸载、重载期间保留；撤除整套策略属于管理员配置变更。原生 CRM Host 仍需单独配置已有的 `nativeSnapshot` 来源。
 
 页面进程入口为 [`native_page_server.py`](../../scripts/dsh-dev/native_page_server.py)，要求预先创建的私有 `--state-dir`、`--port` 和 `--callback-origin`。它只监听 `127.0.0.1`，拒绝 6677。加载配置与启动实例属于显式运维操作，普通检查不启动服务。
 
