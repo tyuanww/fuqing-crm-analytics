@@ -1,38 +1,38 @@
 {
   "schema": "shinemage-workbench-author-evidence/v1",
   "package": "@shine-mage/dsh-analytics-workbench-b0",
-  "source_sha": "a63fe78bc5923e08fdc9a69e6b7e5335a697003f",
-  "formal_manifest_sha256": "022044704eacee4a362d49c371e4729af24cbaec2c1f926bea90c44ba172f6a7",
-  "formal_tarball_sha256": "8c72389571c0f72c57a98b6c7c048e7f1811df37954ecb415bc6b5438c50280a",
+  "source_sha": "c836d3f44326310eb83491aabb516b91e94e8d23",
+  "formal_manifest_sha256": "db7b7a52b53e631da4cec53deabbe8764da705462a7473643263960ee52694a7",
+  "formal_tarball_sha256": "2dcf93ed1ca28ffd7e9a2e0efb342feffe06606a8050b8125d5780e6e74ffb60",
   "archive": {
     "repository": "tyuanww/dsh-analytics-workbench",
-    "run_id": 40161702042,
+    "run_id": 40173866698,
     "event": "pull_request",
-    "artifact_id": 12586164343,
-    "sha256": "682c7b87260cddd9ebcc3e56d94128600014ca1961bc75164cd6830e7a5a624a",
-    "bytes": 553709
+    "artifact_id": 12591591280,
+    "sha256": "b29602cc6266585e3e43efc44dda40f1c275fbcd2b282a698a7ab1e5e8b930f9",
+    "bytes": 555831
   },
   "files": {
     "plan": {
-      "path": "workbench-author-tests-40161702042-1/plan.json",
+      "path": "workbench-author-tests-40173866698-1/plan.json",
       "bytes": 8388,
       "sha256": "60631c402cb031b173839e8fec514bec06eaebb3fa3f889e72545b4dfbc2bcfa"
     },
     "result": {
-      "path": "workbench-author-tests-40161702042-1/result.json",
+      "path": "workbench-author-tests-40173866698-1/result.json",
       "bytes": 1060,
-      "sha256": "34b8cb5157bc2785b2f683fee9b2899d0628aed40906c56b13c5a0f8bd0b9886"
+      "sha256": "afd195972a386d883641e4e687278613fae78e20fea5d006fbaf832e851d4730"
     },
     "content_pack": {
       "path": "workbench-content-pack/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
-      "bytes": 443905,
-      "sha256": "d17e50ecd262789cddc533e8911f9bd15b3ec794084c0934ceac84f37f27f745"
+      "bytes": 446077,
+      "sha256": "309c4afac3e08b32d5e826f60baf65d5d780c6aed4b7f639dbd06dca295c2887"
     }
   },
   "core": {
     "files": 162,
-    "tests": 1143,
-    "pass": 1143,
+    "tests": 1150,
+    "pass": 1150,
     "fail": 0,
     "skipped": 0,
     "cancelled": 0,

@@ -2,12 +2,12 @@
   "schema_version": "shinemage-composition-pack-manifest/v1",
   "lock": {
     "path": "config/shinemage-composition-packs.lock.json",
-    "sha256": "7e7848fee6271419ff56c1d8dae9cb3f783b0d635bb898d6205617fc8fa94c76"
+    "sha256": "a05eada3febab9b883d4e28336cc57543e6745f149a8083e3a849156b24a2f17"
   },
   "consumer": {
     "repository": "tyuanww/fuqing-crm-analytics",
     "branch": "main",
-    "reviewed_sha": "d8f87ebc80d081e5c9413d6fcd95635b655d1c5b"
+    "reviewed_sha": "4b5c990c39585b6e31113c415717eb7f88ee04a6"
   },
   "bundle": {
     "repository": "tyuanww/fuqing-crm-analytics",
@@ -34,9 +34,9 @@
       "directory": "analytics-workbench",
       "repository": "tyuanww/dsh-analytics-workbench",
       "ref": "commit",
-      "sha": "a63fe78bc5923e08fdc9a69e6b7e5335a697003f",
-      "manifest_sha256": "022044704eacee4a362d49c371e4729af24cbaec2c1f926bea90c44ba172f6a7",
-      "pack_sha256": "8c72389571c0f72c57a98b6c7c048e7f1811df37954ecb415bc6b5438c50280a",
+      "sha": "c836d3f44326310eb83491aabb516b91e94e8d23",
+      "manifest_sha256": "db7b7a52b53e631da4cec53deabbe8764da705462a7473643263960ee52694a7",
+      "pack_sha256": "2dcf93ed1ca28ffd7e9a2e0efb342feffe06606a8050b8125d5780e6e74ffb60",
       "status": "PASS"
     },
     {
@@ -44,9 +44,9 @@
       "directory": "crm-knowledge",
       "repository": "tyuanww/dsh-crm-knowledge",
       "ref": "commit",
-      "sha": "631b8d8586a2607c2f13c50b21a6c830d0d4426f",
-      "manifest_sha256": "5faa21192dc055915bb6aa5ec861037c10118674e71018f80a051f93b74a16cd",
-      "pack_sha256": "572b776bc2828c2e425103422abbc2313b53107420a06ce5053cee8295d0b9cb",
+      "sha": "31e114541d10cea9aaef2dbb7c25366b29d95261",
+      "manifest_sha256": "26226314c62cb3172767cef0780f9473f24796994fbd773403f9cf9bfb7311d7",
+      "pack_sha256": "e8365771d4d1f196bf91af9334348c02eaf4f5199bc5489c70a9b0dcb2938f39",
       "status": "PASS"
     },
     {
