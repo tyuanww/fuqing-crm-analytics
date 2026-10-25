@@ -4,6 +4,7 @@ Sample CRM 客户分析系统 - 后端配置
 
 import os
 from pathlib import Path
+import re
 from dotenv import load_dotenv
 from backend.resource_budget import default_memory_limit, default_threads
 
@@ -142,6 +143,14 @@ DUCKDB_MEMORY_LIMIT = os.environ.get("DUCKDB_MEMORY_LIMIT", "").strip() or _DEFA
 DUCKDB_THREADS = int(os.environ.get("DUCKDB_THREADS", "").strip() or default_threads())
 if DUCKDB_THREADS < 1:
     raise ValueError("DUCKDB_THREADS must be a positive integer")
+
+_TEMP_ROOT_ENV = os.environ.get("FQ_DUCKDB_TEMP_ROOT", "").strip()
+FQ_DUCKDB_TEMP_ROOT = Path(_TEMP_ROOT_ENV) if _TEMP_ROOT_ENV else None
+if FQ_DUCKDB_TEMP_ROOT is not None and not FQ_DUCKDB_TEMP_ROOT.is_absolute():
+    raise ValueError("FQ_DUCKDB_TEMP_ROOT must be an absolute path")
+FQ_DUCKDB_TEMP_LIMIT = os.environ.get("FQ_DUCKDB_TEMP_LIMIT", "4GiB").strip()
+if not re.fullmatch(r"[1-9][0-9]*(?:B|[KMGT]i?B)", FQ_DUCKDB_TEMP_LIMIT, re.IGNORECASE):
+    raise ValueError("FQ_DUCKDB_TEMP_LIMIT must be a positive finite size, for example 4GiB")
 
 # Sprint 205+ L4.67: RFM cache 库独立文件 (跟业务库 fingerprint 0 关联)
 _DEFAULT_CACHE_DUCKDB = _DEFAULT_DUCKDB.parent / "cache" / "rfm_cache.duckdb"

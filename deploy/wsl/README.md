@@ -9,7 +9,7 @@
 /srv/shinemage/src/             # Git checkout
 /srv/shinemage/data/            # CRM 正式数据
 /srv/shinemage/dsh/runtime/    # DSH durable runtime（rc1/rc2 共用，保持不迁移）
-/srv/shinemage/dsh/upstream-0.1.7-rc.2/ # 固定 rc2 上游 checkout
+/srv/shinemage/dsh/upstream-0.2.1-rc.3/ # 固定 rc3 上游 checkout
 /srv/shinemage/dsh/releases/<tag>/ # side-by-side 不可变候选
 /srv/shinemage/dsh/current -> releases/<tag>/ # 原子激活 symlink
 /srv/shinemage/weknora/         # WeKnora / Neo4j 数据
@@ -50,7 +50,7 @@
    deploy/wsl/healthcheck.sh --crm
    ```
 
-8. 安装 `dsh.service` 前，把 `dsh.service` 中的用户、仓库、上游和 runtime 路径替换成真实路径；`/etc/shinemage/dsh.env` 权限必须是 `600`。DSH 固定使用 `0.1.7-rc.2` 和 `477b4f420553e8a52c2fbccc464d7561b239c443`，不使用 `--fresh`；品牌覆盖显式 `--shine-brand off`。
+8. 安装 `dsh.service` 前，把 `dsh.service` 中的用户、仓库、上游和 runtime 路径替换成真实路径；`/etc/shinemage/dsh.env` 权限必须是 `600`。候选 DSH 固定使用 `0.2.1-rc.3` 和 `1f81c047fc48fa190a683e469daa699857e9afe8`，不使用 `--fresh`；品牌覆盖显式 `--shine-brand off`。杭州现役仍以 STATUS/HANDOVER 的运行回执为准，未因该模板修改而切换。
 9. WeKnora 和 Neo4j 按 `WeKnora-*.tar.gz` 自带的 compose/README 恢复。没有核对镜像、数据目录和端口前，不凭文件名猜启动命令。
 10. CRM、DSH、WeKnora 都通过 Tailscale 完成内部验收后，才安装 Cloudflare Tunnel。`cloudflared-config.yml.example` 暴露网站、DSH、页面、看板和知识库五个入口；知识库只转发到 loopback 的 WeKnora 前端，登录和权限仍由 WeKnora 负责，Neo4j 管理口保持内部访问。
 

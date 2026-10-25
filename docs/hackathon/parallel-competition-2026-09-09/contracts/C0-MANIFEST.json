@@ -1,6 +1,6 @@
 {
   "base_sha_expected": "71a65f06f87cb3a5cbd888372487b6b36faaf2a6",
-  "contract_hash": "317110700f6043bf0cab5f3a505775c11f437f34742d02be40e52f446a11b25d",
+  "contract_hash": "114fd8d7dea5f95f4b641518f805c9c4b431644e1953bf0d55c4f996b320ca7a",
   "defaults_pending_confirmation": [
     "sample_mode_when_excluding",
     "board_layout_mode"

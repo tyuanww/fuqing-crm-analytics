@@ -12,7 +12,7 @@ const { source, stores, webRequire } = runtime;
 const upstream = process.env.B0_BUILD_UPSTREAM;
 const cordisPath = join(upstream, 'vendor/cordis/lib/index.js');
 const cordisManifest = JSON.parse(await readFile(join(upstream, 'vendor/cordis/package.json'), 'utf8'));
-assert.equal(cordisManifest.version, '4.0.4', 'WORKBENCH_NATIVE_PROMPT_CORDIS_PIN');
+assert.equal(cordisManifest.version, '4.0.5', 'WORKBENCH_NATIVE_PROMPT_CORDIS_PIN');
 const { Context, Service } = await import(pathToFileURL(cordisPath).href);
 // Synthetic envelope retained from the original fixture, not a service decoder.
 const ok = value => ({ ok: true, value: structuredClone(value) });
@@ -152,7 +152,13 @@ async function boot(t, {
       snapshot.byId = { ...snapshot.byId, [id]: { id, retainedBy: { mainView: 1 } } };
       return { sessionId: id, release() {} };
     },
-    create(options) { if (createSession) return createSession(options); throw new Error('native prompt inject test must not create a session'); },
+    async refresh() {},
+    async create(options) {
+      if (!createSession) throw new Error('native prompt inject test must not create a session');
+      const id = await createSession(options);
+      snapshot.ids.push(id);
+      return id;
+    },
   });
   ctx.provide('theme', {
     overrideTokens: () => () => {},

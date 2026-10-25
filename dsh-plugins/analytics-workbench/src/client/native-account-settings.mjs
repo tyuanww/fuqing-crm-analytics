@@ -86,12 +86,6 @@ export async function openNativeAccountSettings(root = globalThis.document, { se
     if (!node) continue;
     const before = evidence(root, node, action);
     if (!click(node)) continue;
-    // Native React controls update aria-expanded on a later render. Observe
-    // that render before deciding the gesture failed; fake controls without
-    // an observable state still count as an accepted click.
-    if (before.expanded === null && root?.nodeType !== 9) {
-      return Object.freeze({ ok: true, action, ...(action === 'settings' ? { fellBack: Boolean(account) } : {}) });
-    }
     await settle();
     const changed = observe(before, evidence(root, node, action));
     if (changed === true) {

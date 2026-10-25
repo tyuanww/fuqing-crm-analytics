@@ -1,6 +1,6 @@
 # DSH 兼容性矩阵（G0 / T2 / T17）
 
-状态：**PARTIAL / release-blocking，当前核对至 2026-10-07**。固定官方 Web CLI 的本机证据继续保留；当前候选已有杭州 WSL HTTP/headless、终态恢复和回执接线。文本、工具、附件/委派元数据三组声明语料各有实际跨版本恢复证据，不能扩大为任意会话或生产放行。见[元数据语料](../hackathon/evidence/dsh-g0-session-rich-corpus-20261007.md)、[当前候选终态](../hackathon/evidence/dsh-g0-first-purchase-terminal-candidate-20261007.md)和[浏览器接线](../hackathon/evidence/dsh-g0-current-browser-gate-20261007.md)。
+状态：**PARTIAL / release-blocking**。下方矩阵是截至 2026-10-07 的历史 rc1/rc2 证据；当前本地主仓候选已升级为 DSH `0.2.1-rc.3`、upstream `1f81c047…`、Cordis `4.0.5`，其作者构建与来源证明见[rc3 上游盘查](../release/dsh-rc3-candidate/upstream-audit-20261024.md)。杭州线上仍为独立 rc1 side-load，rc3 尚未部署，因此不能把下方历史运行结果迁移为 rc3 宿主通过。
 
 ## 固定来源
 

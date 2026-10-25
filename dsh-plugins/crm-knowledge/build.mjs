@@ -17,10 +17,11 @@ if (toolsInput && !isAbsolute(toolsInput)) {
   console.error('BUILD_TOOLS_NOT_CONFIGURED: pass an absolute build-tools directory as the third argument or B0_BUILD_TOOLS.');
   process.exit(2);
 }
-const { compiler: ts, build } = await bindToolchain(root, upstream, toolsInput ? resolve(toolsInput) : undefined);
+const { pin, compiler: ts, build, restore } = await bindToolchain(root, upstream, toolsInput ? resolve(toolsInput) : undefined);
+try {
 for (const [entries, types] of [
   [['src/index.ts', 'src/host.ts', 'test/contract.typecheck.ts'], ['node']],
-  [['src/client/index.tsx'], ['react']],
+  [['src/client/index.tsx', 'src/client/css.d.ts'], ['react']],
 ]) {
 const program = ts.createProgram(entries.map(file => join(root, file)), {
   strict: true, noEmit: true, allowJs: true, checkJs: false, skipLibCheck: false,
@@ -45,5 +46,8 @@ const client = await build({ absWorkingDir: root, entryPoints: ['src/client/inde
 });
 assert.ok(Object.keys(client.metafile.inputs).every(path => !/node_modules\/(react|react-dom)\//.test(path)), 'Use platform React only');
 assert.ok(Object.keys(client.metafile.inputs).every(path => !/dashboard-access|src\/host|src\/dashboard\.mjs/.test(path)), 'Host credentials must not enter the client bundle');
-console.log('CRM candidate typecheck and pinned build passed');
-await writeBuildProvenance({ root });
+  console.log('CRM candidate typecheck and pinned build passed');
+  await writeBuildProvenance({ root, toolchain: pin, releaseLane: process.env.DSH_RELEASE_LANE_CONFIG ?? null });
+} finally {
+  await restore();
+}

@@ -6,6 +6,7 @@ dotenv, which the B0 interpreter does not install.
 import ast
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 
 from backend.contracts.competition_computed import DATA_SCOPE as PAGE_SCOPE
@@ -39,6 +40,40 @@ def _client():
     access = PageResultAccess()
     access.put_snapshot(default_synthetic_snapshot())
     return TestClient(create_result_access_app(identities=registry, access=access)), {"Authorization": "Bearer " + TOKEN}
+
+
+@pytest.mark.parametrize("combined", [False, True])
+@pytest.mark.parametrize("capabilities", [frozenset({"dashboard:read"}), CAPS])
+def test_browser_cannot_create_or_replace_authorized_snapshots(tmp_path, combined, capabilities):
+    registry = B0IdentityRegistry()
+    principal = AnalyticsPrincipal("alice", capabilities, ALICE.data_scopes)
+    registry.grant(TOKEN, principal)
+    access = PageResultAccess()
+    access.put_snapshot(default_synthetic_snapshot())
+    directory = tmp_path / "pages"
+    if combined:
+        directory.mkdir(mode=0o700)
+    app = (create_page_app(identities=registry, page_state_dir=directory, result_access=access)
+           if combined else create_result_access_app(identities=registry, access=access))
+    client = TestClient(app)
+    headers = {"Authorization": "Bearer " + TOKEN}
+    for result_ref in ("result_fixture_1", "result_untrusted_1"):
+        response = client.post(PREFIX + "/snapshots", headers=headers, json=default_synthetic_snapshot(
+            result_ref=result_ref, rows=[{"i": 0, "value": 999999}], source="forged browser result",
+        ))
+        assert response.status_code in {403, 404, 405}
+    read = client.post(PREFIX + "/read", headers=headers, json={
+        "request": {"op": "data.read", "request_id": "original", "result_ref": "result_fixture_1"},
+        "manifest": BOUND,
+    })
+    assert read.status_code == 200
+    assert read.json()["summary"]["row_count"] == 120
+    assert read.json()["rows"][0]["value"] == 0
+    forged = client.post(PREFIX + "/binding-state", headers=headers, json={
+        "manifest": {"result_refs": ["result_untrusted_1"], "bindings": []},
+    })
+    assert forged.status_code == 200
+    assert forged.json()["verified"] is False
 
 
 def test_result_http_read_cancel_and_forbidden_sql():
@@ -104,13 +139,15 @@ def test_combined_page_app_can_host_result_access(tmp_path):
     registry = B0IdentityRegistry()
     registry.grant(TOKEN, ALICE)
     access = PageResultAccess()
+    access.put_snapshot(default_synthetic_snapshot())
     directory = tmp_path / "pages"
     directory.mkdir(mode=0o700)
     app = create_page_app(identities=registry, page_state_dir=directory, result_access=access)
     client = TestClient(app)
-    seeded = client.post(PREFIX + "/snapshots", json=default_synthetic_snapshot(),
-                         headers={"Authorization": "Bearer " + TOKEN})
-    assert seeded.status_code == 201
+    state = client.post(PREFIX + "/binding-state", json={"manifest": BOUND},
+                        headers={"Authorization": "Bearer " + TOKEN})
+    assert state.status_code == 200
+    assert state.json()["binding_state"] == "BOUND_VERIFIED"
     pages = client.get(PAGE_PREFIX + "/pages", headers={"Authorization": "Bearer " + TOKEN})
     assert pages.status_code == 200
     assert pages.json()["items"] == []

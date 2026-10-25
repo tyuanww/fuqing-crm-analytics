@@ -32,7 +32,6 @@ from backend.services.rfm._shared import _resolve_date_ranges
 from ._shared import _fetch_max_pay_time, _cache_key, RFM_CACHE_TABLE
 from .period import (
     _build_rows,
-    _hot_period_ranges,
     _resolve_range_period,
     _run_rfm_period,
 )
@@ -43,7 +42,6 @@ _CACHE_OPERATION_LOCK = threading.RLock()
 # 缓存 TTL（小时）— 超过此时间的缓存视为陈旧，强制重算
 RFM_CACHE_TTL_HOURS = 24
 RFM_CACHE_RETENTION_HOURS = 48
-RFM_CACHE_FUZZY_TOLERANCE_DAYS = 2
 RFM_CACHE_GENERATION_TABLE = "rfm_cache_generation"
 RFM_CACHE_GENERATION_ROWS_TABLE = "rfm_analysis_cache_generation_rows"
 
@@ -296,13 +294,13 @@ def _read_db_cache(
     compare_end_date: Optional[str] = None,
     current_orders_count: Optional[int] = None,
     _allow_active_generation: bool = True,
+    *,
+    prev2_start_date: Optional[str] = None,
+    prev2_end_date: Optional[str] = None,
 ) -> Optional[Dict[str, Any]]:
     """从 DuckDB 预计算表读取缓存。
 
     ``conn`` 仅为兼容旧调用签名保留；业务库不包含完整 cache SSOT。
-    表初始化、精确读取与 fuzzy 读取统一走独立 cache DB 单例，并由
-    ``_CACHE_OPERATION_LOCK`` 串行化 raw DuckDB connection 操作。
-
     Stale 检测：除 data_version 外,还比对 orders 行数快照,
     防止 ETL 续传后 max_pay_time 不变但行数变化导致缓存陈旧。
     """
@@ -331,7 +329,7 @@ def _read_db_cache(
             def _lookup(
                 version: str,
                 generation_id: Optional[str] = None,
-            ) -> Tuple[str, Optional[Tuple[Any, ...]], bool]:
+            ) -> Tuple[str, Optional[Tuple[Any, ...]]]:
                 candidate_key = _cache_key(
                     period,
                     start_date,
@@ -342,6 +340,8 @@ def _read_db_cache(
                     version,
                     compare_start_date,
                     compare_end_date,
+                    prev2_start_date=prev2_start_date,
+                    prev2_end_date=prev2_end_date,
                 )
                 if generation_id:
                     candidate_row = cache_conn.execute(
@@ -356,46 +356,13 @@ def _read_db_cache(
                         f"FROM {RFM_CACHE_TABLE} WHERE cache_key = ?",
                         [candidate_key],
                     ).fetchone()
-                if candidate_row:
-                    return candidate_key, candidate_row, False
-                fuzzy = _fuzzy_match_db_cache(
-                    start_date,
-                    end_date,
-                    channel,
-                    metric_type,
-                    period,
-                    cache_conn,
-                    tolerance_days=RFM_CACHE_FUZZY_TOLERANCE_DAYS,
-                    exclude_channels=exclude_channels,
-                    data_version=version,
-                    compare_start_date=compare_start_date,
-                    compare_end_date=compare_end_date,
-                    generation_id=generation_id,
-                )
-                if fuzzy is None:
-                    if generation_id:
-                        period_fallback = _match_active_period_db_cache(
-                            start_date=start_date,
-                            end_date=end_date,
-                            channel=channel,
-                            metric_type=metric_type,
-                            conn=cache_conn,
-                            exclude_channels=exclude_channels,
-                            data_version=version,
-                            compare_start_date=compare_start_date,
-                            compare_end_date=compare_end_date,
-                            generation_id=generation_id,
-                        )
-                        if period_fallback is not None:
-                            return period_fallback[0], period_fallback[1], True
-                    return candidate_key, None, False
-                return fuzzy[0], fuzzy[1], True
+                return candidate_key, candidate_row
 
             lookup_generation_id: Optional[str] = None
             if active_usable and active_generation is not None:
                 lookup_generation_id = active_generation[0]
                 lookup_version = active_generation[1]
-                key, row, fuzzy_hit = _lookup(
+                key, row = _lookup(
                     lookup_version,
                     lookup_generation_id,
                 )
@@ -404,17 +371,12 @@ def _read_db_cache(
                     # 当前 data_version 的 on-demand cache，随后才可能 live 计算。
                     lookup_generation_id = None
                     lookup_version = data_version
-                    key, row, fuzzy_hit = _lookup(lookup_version)
+                    key, row = _lookup(lookup_version)
             else:
                 lookup_version = data_version
-                key, row, fuzzy_hit = _lookup(lookup_version)
+                key, row = _lookup(lookup_version)
             if not row:
                 return None
-            if fuzzy_hit:
-                logger.info(
-                    f"RFM cache fuzzy hit: target=({start_date}, {end_date}) "
-                    f"ch={channel or '全店'} mt={metric_type} per={period or 'None'}"
-                )
 
             matched_active_generation = bool(
                 active_usable
@@ -453,6 +415,8 @@ def _read_db_cache(
                     compare_end_date,
                     current_orders_count=current_orders_count,
                     _allow_active_generation=False,
+                    prev2_start_date=prev2_start_date,
+                    prev2_end_date=prev2_end_date,
                 )
             return None
         if not isinstance(parsed, dict):
@@ -478,6 +442,8 @@ def _read_db_cache(
                     compare_end_date,
                     current_orders_count=current_orders_count,
                     _allow_active_generation=False,
+                    prev2_start_date=prev2_start_date,
+                    prev2_end_date=prev2_end_date,
                 )
             return None
         # Stale 检测（mtime + 行数 + TTL 三重保护）
@@ -518,6 +484,8 @@ def _read_db_cache(
                     compare_end_date,
                     current_orders_count=current_orders_count,
                     _allow_active_generation=False,
+                    prev2_start_date=prev2_start_date,
+                    prev2_end_date=prev2_end_date,
                 )
             return None
         return parsed
@@ -651,201 +619,6 @@ def _try_delete_corrupt_row(
         raise RFMCacheUnavailableError("RFM 缓存损坏行无法安全清理") from e
 
 
-# Stage 2 (L4.75/L4.85.10): fuzzy match ±2 day tolerance fallback.
-# 跟 user 述 "近 4 周 → cache 命中 0.14s" 1:1 stable 永久规则链配套.
-# 容忍 PC2 漏跑一天导致 cache end=today-3、请求 end=today-1；完整 key 重建、
-# compare/exclude/channel/data-version 等值与端点同向校验共同限制误命中，±3 不开。
-def _fuzzy_match_db_cache(
-    start_date: Optional[str],
-    end_date: Optional[str],
-    channel: Optional[str],
-    metric_type: str,
-    period: Optional[str],
-    conn: duckdb.DuckDBPyConnection,
-    tolerance_days: int = RFM_CACHE_FUZZY_TOLERANCE_DAYS,
-    exclude_channels: Optional[List[str]] = None,
-    data_version: str = "",
-    compare_start_date: Optional[str] = None,
-    compare_end_date: Optional[str] = None,
-    generation_id: Optional[str] = None,
-) -> Optional[Tuple[str, Tuple[Any, ...]]]:
-    """按完整 cache key 做 ±N 天候选匹配。
-
-    fuzzy 只放宽 current start/end 日期，其余维度（数据版本、channel、metric、
-    exclude_channels、compare 日期）必须与请求完全一致。返回实际命中的 key 和
-    原始缓存 metadata，让调用方与 exact hit 共用 JSON/freshness 校验。
-    """
-    if not start_date or not end_date:
-        return None
-    try:
-        sd = date.fromisoformat(start_date)
-        ed = date.fromisoformat(end_date)
-        sd_lo = (sd - timedelta(days=tolerance_days)).isoformat()
-        sd_hi = (sd + timedelta(days=tolerance_days)).isoformat()
-        ed_lo = (ed - timedelta(days=tolerance_days)).isoformat()
-        ed_hi = (ed + timedelta(days=tolerance_days)).isoformat()
-    except ValueError:
-        return None
-    try:
-        table_name = (
-            RFM_CACHE_GENERATION_ROWS_TABLE if generation_id else RFM_CACHE_TABLE
-        )
-        generation_filter = "AND o.generation_id = ? " if generation_id else ""
-        params: List[Any] = [channel or "", metric_type]
-        if generation_id:
-            params.append(generation_id)
-        params.extend([sd_lo, sd_hi, ed_lo, ed_hi])
-        rows = conn.execute(
-            f"SELECT o.cache_key, o.result_json, o.mtime_at_write, o.orders_count_at_write, "
-            f"o.computed_at, o.start_date, o.end_date "
-            f"FROM {table_name} o "
-            f"WHERE o.channel = ? AND o.metric_type = ? "
-            f"{generation_filter}"
-            f"AND o.start_date BETWEEN ? AND ? "
-            f"AND o.end_date BETWEEN ? AND ? "
-            f"ORDER BY o.computed_at DESC",
-            params,
-        ).fetchall()
-    except Exception as e:
-        raise RFMCacheUnavailableError("RFM fuzzy cache 查询失败") from e
-    if not rows:
-        return None
-
-    ranked_rows = []
-    for row in rows:
-        try:
-            candidate_start = date.fromisoformat(str(row[5]))
-            candidate_end = date.fromisoformat(str(row[6]))
-        except (TypeError, ValueError):
-            continue
-        start_drift = (candidate_start - sd).days
-        end_drift = (candidate_end - ed).days
-        # 允许滚动窗口整体平移，或 MTD/YTD 仅一侧边界变化；拒绝窗口向两侧
-        # 同时扩张/收缩，避免把不同业务区间误判成“相邻一天”。
-        if start_drift * end_drift < 0:
-            continue
-        drift = abs(start_drift) + abs(end_drift)
-        ranked_rows.append((drift, row))
-
-    # SQL 已按 computed_at DESC；stable sort 只把日期更接近的候选提前。
-    ranked_rows.sort(key=lambda item: item[0])
-    for _, row in ranked_rows:
-        compare_candidates = [(compare_start_date, compare_end_date)]
-        if compare_start_date and compare_end_date:
-            requested_mom = PeriodBuilder.mom(start_date, end_date)
-            if (
-                requested_mom.start == compare_start_date
-                and requested_mom.end == compare_end_date
-            ):
-                candidate_mom = PeriodBuilder.mom(str(row[5]), str(row[6]))
-                compare_candidates.append((candidate_mom.start, candidate_mom.end))
-
-        for candidate_compare_start, candidate_compare_end in compare_candidates:
-            candidate_key = _cache_key(
-                period,
-                str(row[5]),
-                str(row[6]),
-                channel,
-                metric_type,
-                exclude_channels,
-                data_version,
-                candidate_compare_start,
-                candidate_compare_end,
-            )
-            if row[0] == candidate_key:
-                return row[0], (row[1], row[2], row[3], row[4])
-    return None
-
-
-def _match_active_period_db_cache(
-    *,
-    start_date: Optional[str],
-    end_date: Optional[str],
-    channel: Optional[str],
-    metric_type: str,
-    conn: duckdb.DuckDBPyConnection,
-    exclude_channels: Optional[List[str]],
-    data_version: str,
-    compare_start_date: Optional[str],
-    compare_end_date: Optional[str],
-    generation_id: str,
-) -> Optional[Tuple[str, Tuple[Any, ...]]]:
-    """按可识别前端 period 读取 last-known-good active 行。
-
-    仅当请求日期精确等于“今天”对应的固定/滚动周期时启用；custom 日期不参与。
-    default YOY 不带 compare key，auto_mom 则把比较期同步平移到 active 行日期。
-    channel/metric/exclude/data-version 仍由完整 cache key 严格校验。
-    """
-    if not start_date or not end_date:
-        return None
-
-    resolved_period = ""
-    for period_name, ranges in _hot_period_ranges(date.today()):
-        current = ranges["current"]
-        if current.start == start_date and current.end == end_date:
-            resolved_period = period_name.upper()
-            break
-    if not resolved_period:
-        return None
-
-    requested_auto_mom = False
-    if compare_start_date or compare_end_date:
-        if not compare_start_date or not compare_end_date:
-            return None
-        requested_mom = PeriodBuilder.mom(start_date, end_date)
-        requested_auto_mom = (
-            requested_mom.start == compare_start_date
-            and requested_mom.end == compare_end_date
-        )
-        if not requested_auto_mom:
-            return None
-
-    try:
-        rows = conn.execute(
-            f"SELECT cache_key, result_json, mtime_at_write, orders_count_at_write, "
-            f"computed_at, start_date, end_date "
-            f"FROM {RFM_CACHE_GENERATION_ROWS_TABLE} AS generation_rows "
-            "WHERE generation_rows.generation_id = ? "
-            "AND UPPER(generation_rows.period) = ? "
-            "AND generation_rows.channel = ? "
-            "AND generation_rows.metric_type = ? "
-            "ORDER BY generation_rows.computed_at DESC",
-            [generation_id, resolved_period, channel or "", metric_type],
-        ).fetchall()
-    except Exception as e:
-        raise RFMCacheUnavailableError("RFM active period cache 查询失败") from e
-
-    for row in rows:
-        candidate_compare_start = None
-        candidate_compare_end = None
-        if requested_auto_mom:
-            candidate_mom = PeriodBuilder.mom(str(row[5]), str(row[6]))
-            candidate_compare_start = candidate_mom.start
-            candidate_compare_end = candidate_mom.end
-        candidate_key = _cache_key(
-            None,
-            str(row[5]),
-            str(row[6]),
-            channel,
-            metric_type,
-            exclude_channels,
-            data_version,
-            candidate_compare_start,
-            candidate_compare_end,
-        )
-        if row[0] == candidate_key:
-            logger.info(
-                "RFM active period last-known-good hit: period=%s requested=%s..%s "
-                "cached=%s..%s generation=%s",
-                resolved_period,
-                start_date,
-                end_date,
-                row[5],
-                row[6],
-                generation_id,
-            )
-            return row[0], (row[1], row[2], row[3], row[4])
-    return None
 
 
 def _write_db_cache(
@@ -860,6 +633,9 @@ def _write_db_cache(
     compare_start_date: Optional[str] = None,
     compare_end_date: Optional[str] = None,
     orders_count: Optional[int] = None,
+    *,
+    prev2_start_date: Optional[str] = None,
+    prev2_end_date: Optional[str] = None,
 ) -> None:
     """写入 DuckDB 预计算缓存表（含 mtime_at_write 用于后续新鲜度校验）。
 
@@ -883,7 +659,11 @@ def _write_db_cache(
         logger.warning(f"RFM 缓存写入跳过：json.dumps 失败 {e}")
         return
 
-    key = _cache_key(period, start_date, end_date, channel, metric_type, exclude_channels, data_version, compare_start_date, compare_end_date)
+    key = _cache_key(
+        period, start_date, end_date, channel, metric_type, exclude_channels,
+        data_version, compare_start_date, compare_end_date,
+        prev2_start_date=prev2_start_date, prev2_end_date=prev2_end_date,
+    )
     ex_str = json.dumps(exclude_channels, ensure_ascii=False) if exclude_channels else ""
     try:
         with _CACHE_OPERATION_LOCK:

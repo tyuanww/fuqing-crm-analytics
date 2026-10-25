@@ -1,12 +1,10 @@
 import { useEffect, useMemo } from 'react';
 import { useSyncExternalStore } from 'react';
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots';
+import { HtmlPreview } from './cockpit-page-editor.tsx';
+import type { FreeHtmlLibraryStore } from './free-html-library/store.d.mts';
 
-type PageStore = {
-  subscribe(listener: () => void): () => void;
-  getSnapshot(): { current?: { page_id?: string; title?: string; package?: { html?: string } } | null };
-  openPage(pageId: string): Promise<boolean | undefined>;
-};
+type PageStore = Pick<FreeHtmlLibraryStore, 'subscribe' | 'getSnapshot' | 'openPage'>;
 
 export const COCKPIT_PAGE_TAB = 'shine-mage.cockpit-page';
 export const cockpitPageAddress = (pageId: string) => 'dsh-resource://cockpit-page/' + encodeURIComponent(pageId);
@@ -31,7 +29,8 @@ export function CockpitPageTab({ useTabInfo, pageStore, openCockpit }: PropsRunt
       <button type="button" onClick={() => { openCockpit(); }}>在驾驶舱编辑</button>
     </div>
     {current?.package?.html
-      ? <iframe title={current.title || 'HTML 产物'} sandbox="" srcDoc={current.package.html} style={{ flex: 1, width: '100%', border: 0 }} />
+      ? <HtmlPreview pkg={current.package} overlays={current.presentation_overlays ?? null} pageId={current.page_id ?? pageId}
+          version={current.version ?? 1} allowScripts={Boolean(current.package.js)} title={current.title || 'HTML 产物'} />
       : <p role="status">正在打开页面…</p>}
   </div>;
 }

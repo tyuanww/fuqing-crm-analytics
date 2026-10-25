@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { access, readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import { dirname, isAbsolute, resolve, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -26,12 +26,11 @@ try {
   const querySkillPackage = await packSkills(root, 'channel_followup');
   const firstPurchaseSkillPackage = await packSkills(root, 'first_purchase');
   const competitionSkillPackage = await packSkills(root, 'competition_growth');
-  // rc1 ships the workspace-toast module augmentation as a separate declaration
-  // file that its package entry does not import. Load that exact rc1 declaration
-  // as a root instead of weakening the typecheck with skipLibCheck.
-  const clientEntries = process.env.DSH_RELEASE_LANE_CONFIG
-    ? [join(upstream, 'packages/client/ui-workspace/lib/types/client/contract/toast.d.ts')]
-    : [];
+  // Some DSH releases ship the workspace-toast module augmentation separately
+  // from the ui-workspace package entry. Include it when present instead of
+  // weakening the typecheck with skipLibCheck.
+  const toastTypes = join(upstream, 'packages/client/ui-workspace/lib/types/client/contract/toast.d.ts');
+  const clientEntries = await access(toastTypes).then(() => [toastTypes], () => []);
   checkTypes(root, compiler, { clientEntries });
 
   const external = [

@@ -70,7 +70,7 @@ export function renderProfile({ output, plugin, knowledgePlugin, graphSettingsFi
       { id: 'crm-knowledge-login-host', disabled: true },
       { insert: [{ id: 'crm-knowledge-live-host', name: moduleUrl(plugin, 'lib/host.js', packages.crm?.sha256 ?? revision) }] },
     ] : [], null, 2) + '\n',
-    // rc2 declares presets as scoped Cordis plugins; it does not scan preset directories.
+    // rc3 declares presets as scoped Cordis plugins; it does not scan preset directories.
     'preset.patch.yml': JSON.stringify([{ insert: declarations }], null, 2) + '\n',
     'preset/preset.yml': JSON.stringify({ name: title, description: title, order: 2 }, null, 2) + '\n',
     'preset/agent.cordis.yml': JSON.stringify(entries, null, 2) + '\n',
@@ -85,7 +85,7 @@ async function boundedFile(path, max) {
   return bytes;
 }
 export function inspectDeclaredPlugin(manifest, name, entries, domain, prefix = 'CRM_PROFILE',
-  { dshSdkVersion = '0.1.7-rc.2', cordisVersion = '4.0.4' } = {}) {
+  { dshSdkVersion = '0.2.1-rc.3', cordisVersion = '4.0.5' } = {}) {
   assert.equal(manifest.name, name, prefix + '_IDENTITY');
   assert.equal(manifest.peerDependencies?.['@deepseek-ai/dsh-tools'], dshSdkVersion, prefix + '_DSH_PIN');
   // Split CRM/knowledge packages declare Cordis directly. The existing page
@@ -126,7 +126,7 @@ export async function prepareProfile(options) {
       : process.env.DSH_COMPOSITION_TOOLCHAIN !== undefined
         ? await readToolchainFile(process.env.DSH_COMPOSITION_TOOLCHAIN)
         : TOOLCHAIN;
-  const compatibility = { dshSdkVersion: toolchain.sdk_version, cordisVersion: cordisVersion ?? process.env.CRM_COMPOSITION_CORDIS_PEER ?? '4.0.4' };
+  const compatibility = { dshSdkVersion: toolchain.sdk_version, cordisVersion: cordisVersion ?? process.env.CRM_COMPOSITION_CORDIS_PEER ?? '4.0.5' };
   let packs;
   if (packInputs !== undefined) {
     assert.ok(!options.plugin && !options.knowledgePlugin && !options.pageToolsPlugin, 'CRM_PROFILE_PACK_INPUTS_AMBIGUOUS');

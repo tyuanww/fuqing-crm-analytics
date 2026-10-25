@@ -22,12 +22,12 @@ from uuid import uuid4
 from pydantic import ValidationError
 
 from backend.contracts.analytics_query import canonical_json
-from backend.contracts.competition_computed import DATA_SCOPE
 from backend.contracts.page_documents import (
     PACKAGE_MAX_BYTES, PageDocument, PageDraft, PagePatchPreview, PageRollbackPreview,
     PageSavePreview, is_package_too_large, page_source_hash,
 )
-from backend.services.analytics.access import AnalyticsError, AnalyticsPrincipal, require
+from backend.services.analytics.access import AnalyticsError, require
+from backend.services.analytics.page_context import PageAccessPolicy
 from backend.services.analytics.first_purchase.asset_state import (
     connect, initialize_sqlite, now_ms, opaque, transaction, validate_key,
 )
@@ -217,6 +217,19 @@ class ResolvedPageBinding:
     required_scopes: frozenset[str]
 
 
+@dataclass(frozen=True)
+class _PreviewObservation:
+    owner: str
+    preview_id: str
+    page_id: str
+    base_version: int
+    operation: str
+    status: str
+    expires_ms: int
+    payload: str
+    digest: str
+
+
 def fault(code="VERSION_CONFLICT", status=409):
     messages = {
         "VERSION_CONFLICT": "页面版本已变化，请重新读取后预览；原版本未被覆盖。",
@@ -262,11 +275,12 @@ def stamp_binding_state(payload):
 
 class PageDocumentStore:
     def __init__(self, directory: Path, *,
-                 resolve_binding: Callable[[AnalyticsPrincipal, str, str], ResolvedPageBinding] | None = None,
-                 clock: Callable[[], int] = now_ms):
+                 resolve_binding: Callable[..., ResolvedPageBinding] | None = None,
+                 clock: Callable[[], int] = now_ms, policy: PageAccessPolicy = PageAccessPolicy()):
         self.path = directory.resolve() / "page_documents.sqlite3"
         self.resolve_binding = resolve_binding
         self.clock = clock
+        self.policy = policy
         initialize_sqlite(directory, self.path, application_id=1804289383, schema_version=1,
                           kind="library_page_documents", ddl=DDL, unavailable=UNAVAILABLE)
 
@@ -278,11 +292,10 @@ class PageDocumentStore:
         except sqlite3.DatabaseError as error:
             raise AnalyticsError(503, "STATE_UNAVAILABLE", UNAVAILABLE, retryable=True) from error
 
-    @staticmethod
-    def _access(actor, *, write=False, scopes=()):
-        require(actor, "dashboard:read", data_scope=DATA_SCOPE)
+    def _access(self, actor, *, write=False, scopes=()):
+        require(actor, "dashboard:read", data_scope=self.policy.document_scope)
         if write:
-            require(actor, "dashboard:update", data_scope=DATA_SCOPE)
+            require(actor, "dashboard:update", data_scope=self.policy.document_scope)
         for scope in scopes:
             require(actor, "dashboard:read", data_scope=scope)
 
@@ -375,11 +388,11 @@ class PageDocumentStore:
                               "created_at_ms": row["created_ms"]})
             return items
 
-    def _bind(self, actor, spec, *, retained_scopes=None):
+    def _bind(self, actor, spec, *, retained_scopes=None, source_context=None):
         refs = list(spec.binding_manifest.result_refs)
         if not refs:
             return spec.model_copy(update={"binding_state": "UNBOUND_SAMPLE"}), frozenset()
-        if retained_scopes is not None:
+        if retained_scopes is not None and source_context is None:
             self._access(actor, scopes=retained_scopes)
             return spec, frozenset(retained_scopes)
         if self.resolve_binding is None:
@@ -387,7 +400,8 @@ class PageDocumentStore:
         scopes = set()
         stale = False
         for ref in refs:
-            resolved = self.resolve_binding(actor, spec.session_id, ref)
+            resolved = (self.resolve_binding(actor, spec.session_id, ref, source_context=source_context)
+                        if source_context is not None else self.resolve_binding(actor, spec.session_id, ref))
             if resolved.status == "REVOKED":
                 raise fault("RESULT_REVOKED", 403)
             if resolved.status == "UNAVAILABLE":
@@ -400,31 +414,40 @@ class PageDocumentStore:
         state = "BOUND_STALE" if stale else "BOUND_VERIFIED"
         return spec.model_copy(update={"binding_state": state}), frozenset(scopes)
 
-    def _preview(self, actor, spec, operation, base_version, *, retained_scopes=None):
-        self._access(actor, write=True)
-        spec, scopes = self._bind(actor, spec, retained_scopes=retained_scopes)
-        snapshot = {"spec": spec.model_dump(mode="json")}
+    @staticmethod
+    def _encode_snapshot(snapshot, scopes):
         payload = canonical_json({"snapshot": snapshot, "required_scopes": sorted(scopes)})
         if len(payload.encode()) > PACKAGE_MAX_BYTES:
             raise fault("PACKAGE_TOO_LARGE", 413)
+        return payload, hashlib.sha256(payload.encode()).hexdigest()
+
+    def _preview(self, actor, spec, operation, base_version, *, retained_scopes=None, source_context=None):
+        self._access(actor, write=True)
+        spec, scopes = self._bind(actor, spec, retained_scopes=retained_scopes, source_context=source_context)
+        snapshot = {"spec": spec.model_dump(mode="json")}
+        payload, digest = self._encode_snapshot(snapshot, scopes)
         preview_id = "preview_" + uuid4().hex
         expires = self.clock() + 30 * 60 * 1000
+        if source_context is not None:
+            source_context.revalidate()
         with transaction(self.path, unavailable=UNAVAILABLE) as con:
+            if source_context is not None:
+                source_context.check_active()
             if base_version and self._head(con, actor, spec.page_id) != base_version:
                 raise fault()
             con.execute("INSERT INTO previews VALUES (?,?,?,?,?,'PENDING',?,?,?)",
                         (actor.actor_id, preview_id, spec.page_id, base_version, operation, expires,
-                         payload, hashlib.sha256(payload.encode()).hexdigest()))
+                         payload, digest))
         return {"preview_id": preview_id, "status": "PENDING", "operation": operation,
                 "base_version": base_version, "expires_at_ms": expires, "snapshot": snapshot}
 
-    def generate(self, actor, request: PageDraft):
+    def generate(self, actor, request: PageDraft, *, source_context=None):
         self._access(actor, write=True)
         draft = request.model_dump(mode="json")
         draft["package"] = _annotate_package(draft["package"])
         spec = validated(PageDocument, stamp_binding_state({**draft,
             "page_id": "page_" + uuid4().hex, "version": 1}))
-        return self._preview(actor, spec, "GENERATE", 0)
+        return self._preview(actor, spec, "GENERATE", 0, source_context=source_context)
 
     def _base(self, actor, page_id, base_version):
         self._access(actor, write=True)
@@ -640,7 +663,7 @@ class PageDocumentStore:
                 if tag != "equal" and not self._range_contains(ranges_by_file[file], start, end):
                     raise fault("AI_SCOPE_DIFF", 422)
 
-    def patch(self, actor, page_id, request: PagePatchPreview):
+    def patch(self, actor, page_id, request: PagePatchPreview, *, source_context=None):
         snapshot, scopes = self._base(actor, page_id, request.base_version)
         spec = deepcopy(snapshot["spec"])
         changes = request.model_dump(mode="json", exclude_unset=True)
@@ -654,9 +677,9 @@ class PageDocumentStore:
         spec["version"] += 1
         retain = None if "binding_manifest" in request.model_fields_set else scopes
         return self._preview(actor, validated(PageDocument, stamp_binding_state(spec)), "PATCH",
-                             request.base_version, retained_scopes=retain)
+                             request.base_version, retained_scopes=retain, source_context=source_context)
 
-    def preview_identical(self, actor, page_id, base_version):
+    def preview_identical(self, actor, page_id, base_version, *, source_context=None):
         """Mint the next version without changing package bytes.
 
         Presentation overlays are stored beside the page document. The source
@@ -665,9 +688,9 @@ class PageDocumentStore:
         snapshot, scopes = self._base(actor, page_id, base_version)
         spec = deepcopy(snapshot["spec"])
         spec["version"] = base_version + 1
-        return self._preview(actor, validated(PageDocument, spec), "PATCH", base_version, retained_scopes=scopes)
+        return self._preview(actor, validated(PageDocument, spec), "PATCH", base_version, retained_scopes=scopes, source_context=source_context)
 
-    def save(self, actor, page_id, request: PageSavePreview):
+    def save(self, actor, page_id, request: PageSavePreview, *, source_context=None):
         snapshot, _scopes = self._base(actor, page_id, request.base_version)
         spec = deepcopy(snapshot["spec"])
         package = _annotate_package(request.package.model_dump(mode="json"))
@@ -680,15 +703,15 @@ class PageDocumentStore:
         spec.update({**request.model_dump(mode="json", exclude={"base_version", "edit_origin"}), "package": package})
         spec["version"] += 1
         return self._preview(actor, validated(PageDocument, stamp_binding_state(spec)), "SAVE",
-                             request.base_version)
+                             request.base_version, source_context=source_context)
 
-    def rollback(self, actor, page_id, request: PageRollbackPreview):
+    def rollback(self, actor, page_id, request: PageRollbackPreview, *, source_context=None):
         self._base(actor, page_id, request.base_version)
         with self._read() as con:
             snapshot, _scopes = self._revision(con, actor, page_id, request.to_version)
         spec = {**snapshot["spec"], "version": request.base_version + 1}
         return self._preview(actor, validated(PageDocument, stamp_binding_state(spec)), "ROLLBACK",
-                             request.base_version)
+                             request.base_version, source_context=source_context)
 
     def _draft_row(self, con, actor, preview_id):
         opaque(preview_id, label="preview_id")
@@ -717,35 +740,78 @@ class PageDocumentStore:
                         (actor.actor_id, preview_id))
         return {"preview_id": preview_id, "status": "CANCELLED"}
 
-    def confirm(self, actor, preview_id, key):
+    def _confirmation(self, con, actor, preview_id, key):
+        row = self._draft_row(con, actor, preview_id)
+        snapshot, scopes = self._decode(actor, row, version=row["base_version"] + 1)
+        observation = _PreviewObservation(**dict(row))
+        receipt = con.execute("SELECT preview_id FROM receipts WHERE owner=? AND key=?",
+                              (actor.actor_id, key)).fetchone()
+        if receipt is not None and receipt["preview_id"] != preview_id:
+            raise fault("IDEMPOTENCY_CONFLICT")
+        if observation.status != "APPLIED":
+            if observation.status == "CANCELLED":
+                raise fault("PREVIEW_CANCELLED")
+            if observation.status != "PENDING":
+                raise fault("BINDING_CORRUPT")
+            if self.clock() >= observation.expires_ms:
+                raise fault("PREVIEW_EXPIRED")
+            head = con.execute("SELECT version FROM heads WHERE owner=? AND page_id=?",
+                               (actor.actor_id, observation.page_id)).fetchone()
+            if (head["version"] if head else 0) != observation.base_version:
+                raise fault()
+        return observation, snapshot, scopes
+
+    def confirm(self, actor, preview_id, key, *, source_context=None):
         self._access(actor, write=True)
         key = validate_key(key)
+        with self._read() as con:
+            con.execute("BEGIN")
+            observed, snapshot, retained_scopes = self._confirmation(con, actor, preview_id, key)
+            con.execute("COMMIT")
+        binding_error = None
+        if observed.status != "APPLIED":
+            try:
+                spec, current_scopes = self._bind(actor, validated(PageDocument, snapshot["spec"]), source_context=source_context)
+                snapshot = {"spec": spec.model_dump(mode="json")}
+                payload, digest = self._encode_snapshot(snapshot, retained_scopes | current_scopes)
+                if source_context is not None:
+                    source_context.revalidate()
+            except Exception as error:
+                binding_error = error
         with transaction(self.path, unavailable=UNAVAILABLE) as con:
-            row = self._draft_row(con, actor, preview_id)
-            version = row["base_version"] + 1
-            snapshot, _ = self._decode(actor, row, version=version)
-            receipt = con.execute("SELECT preview_id FROM receipts WHERE owner=? AND key=?",
-                                  (actor.actor_id, key)).fetchone()
-            if receipt is not None and receipt["preview_id"] != preview_id:
-                raise fault("IDEMPOTENCY_CONFLICT")
-            if row["status"] == "APPLIED":
-                saved, _ = self._revision(con, actor, row["page_id"], version)
+            if source_context is not None:
+                source_context.check_active()
+            current, _, _ = self._confirmation(con, actor, preview_id, key)
+            version = current.base_version + 1
+            if current.status == "APPLIED":
+                saved, _ = self._revision(con, actor, current.page_id, version)
                 con.execute("INSERT OR IGNORE INTO receipts VALUES (?,?,?)", (actor.actor_id, key, preview_id))
                 return saved
-            if row["status"] == "CANCELLED":
-                raise fault("PREVIEW_CANCELLED")
-            if self.clock() >= row["expires_ms"]:
-                raise fault("PREVIEW_EXPIRED")
-            if row["base_version"]:
-                if self._head(con, actor, row["page_id"]) != row["base_version"]:
-                    raise fault()
+            if current != observed:
+                raise fault()
+            if binding_error is not None:
+                raise binding_error
+            if current.base_version:
                 con.execute("UPDATE heads SET version=? WHERE owner=? AND page_id=?",
-                            (version, actor.actor_id, row["page_id"]))
+                            (version, actor.actor_id, current.page_id))
             else:
-                con.execute("INSERT INTO heads VALUES (?,?,?)", (actor.actor_id, row["page_id"], version))
-            con.execute("INSERT INTO revisions VALUES (?,?,?,?,?,?,?)", (actor.actor_id, row["page_id"], version,
-                        row["operation"], self.clock(), row["payload"], row["digest"]))
-            con.execute("UPDATE previews SET status='APPLIED' WHERE owner=? AND preview_id=?",
-                        (actor.actor_id, preview_id))
+                con.execute("INSERT INTO heads VALUES (?,?,?)", (actor.actor_id, current.page_id, version))
+            con.execute("INSERT INTO revisions VALUES (?,?,?,?,?,?,?)", (actor.actor_id, current.page_id, version,
+                        current.operation, self.clock(), payload, digest))
+            con.execute("UPDATE previews SET status='APPLIED', payload=?, digest=? WHERE owner=? AND preview_id=?",
+                        (payload, digest, actor.actor_id, preview_id))
             con.execute("INSERT INTO receipts VALUES (?,?,?)", (actor.actor_id, key, preview_id))
             return snapshot
+
+    def resolve_target(self, actor, target):
+        if not isinstance(target, dict):
+            raise fault("INVALID_PAGE", 422)
+        if (target.get("kind") == "page" and set(target) == {"kind", "page_id", "version"}
+                and type(target["version"]) is int and target["version"] > 0):
+            return self.get(actor, target["page_id"], target["version"])["spec"]
+        if target.get("kind") == "preview" and set(target) == {"kind", "preview_id"}:
+            preview = self.preview(actor, target["preview_id"])
+            if preview["status"] == "CANCELLED" or self.clock() >= preview["expires_at_ms"]:
+                raise fault("PREVIEW_EXPIRED")
+            return preview["snapshot"]["spec"]
+        raise fault("INVALID_PAGE", 422)

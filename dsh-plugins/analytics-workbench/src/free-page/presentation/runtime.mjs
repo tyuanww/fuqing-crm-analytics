@@ -1,10 +1,11 @@
 /** Shared by every preview. All edit values are data; no selectors, HTML or JS are evaluated. */
-export function presentationRuntime(edits) {
+export function presentationRuntime(edits, staticDocument) {
+  const document = staticDocument ?? globalThis.document;
   // Legacy labels may lack field IDs. Match their exact original text inside
   // a keyed parent, never their sibling position. Recreated/changed labels
   // must match anew, including nodes changed while detached from the document.
   const identities = new WeakMap(), displayed = new WeakMap();
-  window.__cockpitPresentationIdentity = identities;
+  if (!staticDocument) window.__cockpitPresentationIdentity = identities;
   const textIdentity = node => {
     const original = identities.get(node), current = node.textContent;
     if (original !== undefined && current !== original && current !== displayed.get(node)) identities.delete(node);
@@ -61,11 +62,11 @@ export function presentationRuntime(edits) {
   const apply = () => {
     scheduled = false;
     if (stopped || typeof document === 'undefined' || !document.documentElement) return;
-    observer.disconnect();
+    observer?.disconnect();
     const unresolved = [];
     for (let i = 0; i < edits.length; i++) {
       const edit = edits[i], node = resolve(edit.target);
-      if (!node || node.namespaceURI !== 'http://www.w3.org/1999/xhtml' || node.closest('script,style,template,iframe,object,embed,textarea,input,select,[data-sp-bindable="database"],[data-page-readonly]')
+      if (!node || node.namespaceURI !== 'http://www.w3.org/1999/xhtml' || node.closest('script,style,template,iframe,object,embed,textarea,input,select,xmp,noembed,noframes,plaintext,noscript,[data-sp-bindable="database"],[data-page-readonly]')
         ) { unresolved.push(i); continue; }
       if (node.hasAttribute('data-cockpit-drafting')) continue;
       if (edit.text != null) {
@@ -82,6 +83,7 @@ export function presentationRuntime(edits) {
       }
       for (const [key, value] of Object.entries(edit.style ?? {})) if (node.style.getPropertyValue(key) !== value) node.style.setProperty(key, value);
     }
+    if (staticDocument) return { total: edits.length, unresolved };
     const next = JSON.stringify(unresolved);
     window.__cockpitPresentationStatus = { total: edits.length, unresolved };
     if (next !== signature) {
@@ -102,6 +104,7 @@ export function presentationRuntime(edits) {
     });
     apply();
   };
+  if (staticDocument) return apply();
   window.addEventListener('pagehide', () => { stopped = true; observer?.disconnect(); }, { once: true });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true }); else start();
 }

@@ -6,14 +6,14 @@ import { join, resolve } from 'node:path';
 import { bindToolchain } from '../../dsh-plugins/plugin-kit/toolchain.mjs';
 import { inspectCockpitReleaseContract } from './rc1-cockpit-contract.mjs';
 
-test('the default rc2 line and rc1 release lane remain explicitly separate', async () => {
+test('the default rc3 line and rc1 release lane remain explicitly separate', async () => {
   const result = await inspectCockpitReleaseContract();
   assert.equal(result.status, 'PARTIAL_STATIC_ONLY');
   assert.deepEqual(result.default_compatibility, {
     status: 'PASS',
-    sdk: '0.1.7-rc.2',
-    upstream_sha: '477b4f420553e8a52c2fbccc464d7561b239c443',
-    plugin_peer: '0.1.7-rc.2',
+    sdk: '0.2.1-rc.3',
+    upstream_sha: '1f81c047fc48fa190a683e469daa699857e9afe8',
+    plugin_peer: '0.2.1-rc.3',
     shell_form: 'full_screen_main_panel',
     shell_entry: 'main:cockpit',
   });
@@ -31,7 +31,7 @@ test('an explicit rc1 upstream resolves through the release lane without changin
   });
   assert.equal(result.status, 'PASS_LOCAL_BUILD_INPUTS');
   assert.equal(result.rc1_release_lane.build_input.sdk, '0.2.1-rc.1');
-  assert.equal(result.default_compatibility.sdk, '0.1.7-rc.2');
+  assert.equal(result.default_compatibility.sdk, '0.2.1-rc.3');
 });
 
 test('an explicit rc1 lane temporarily rebinds local SDK links and restores them', {
@@ -90,7 +90,7 @@ test('an explicit rc1 pack is verified against its manifest and source commit', 
   });
   assert.equal(result.artifact.status, 'PASS');
   assert.equal(result.artifact.target_peer, '0.2.1-rc.1');
-  assert.equal(result.artifact.source_peer, '0.1.7-rc.2');
+  assert.equal(result.artifact.source_peer, '0.2.1-rc.3');
   assert.match(result.artifact.tarball.sha256, /^[a-f0-9]{64}$/);
   assert.equal(result.artifact.provenance_status, 'PASS');
 });

@@ -31,11 +31,12 @@ export async function readToolchain(repoRoot) {
     : lanePath
       ? await readFile(lanePath, 'utf8').then(value => {
           const lane = JSON.parse(value);
-          assert.equal(lane.schema_version, 'shinemage-rc1-release-lane/v1', 'DSH_RELEASE_LANE_SCHEMA_INVALID');
+          assert.match(lane.lane ?? '', /^rc(?:1|3)$/, 'DSH_RELEASE_LANE_ID_INVALID');
+          assert.equal(lane.schema_version, `shinemage-${lane.lane}-release-lane/v1`, 'DSH_RELEASE_LANE_SCHEMA_INVALID');
           return validateToolchain({ ...TOOLCHAIN, upstream_sha: lane.upstream_sha, upstream_lock_sha256: lane.upstream_lock_sha256, upstream_pnpm: lane.upstream_pnpm, pnpm: lane.plugin_pnpm, sdk_version: lane.sdk });
         })
       : await readToolchainFile(join(repoRoot, 'dsh-plugins/plugin-kit/toolchain.json'));
-  assert.equal(pin.upstream_sha, PINNED_SHA, 'toolchain.json drifted from the fixed upstream SHA');
+  if (!lanePath) assert.equal(pin.upstream_sha, PINNED_SHA, 'toolchain.json drifted from the fixed upstream SHA');
   assert.equal(pin.node_major, NODE_MAJOR);
   return pin;
 }

@@ -20,6 +20,7 @@ function readPageEnv(env = process.env) {
   const base = String(env.PAGE_DOCUMENTS_HTTP_BASE ?? '').replace(/\/$/, '');
   const token = String(env.PAGE_DOCUMENTS_HTTP_TOKEN ?? '');
   const brandOverride = env.SHINE_BRAND_OVERRIDE === 'on' ? { __SHINE_BRAND_OVERRIDE__: true } : {};
+  if (env.NATIVE_PAGE_TRANSPORT === 'on') return { ...brandOverride, __NATIVE_PAGE_TRANSPORT__: true };
   if (!base) return Object.keys(brandOverride).length ? brandOverride : null;
   assert.ok(token.length >= 32, 'PAGE_DOCUMENTS_HTTP_TOKEN must be at least 32 chars when a base is set');
   assertNotLivePort(base);

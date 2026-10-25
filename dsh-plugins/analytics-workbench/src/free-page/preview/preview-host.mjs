@@ -5,6 +5,7 @@ import { normalizePagePackage } from '../resource/package-normalize.mjs';
 import { createResourceCache } from '../resource/resource-cache.mjs';
 import { fail, isIdentity } from '../resource/frozen-contract.mjs';
 import { buildSrcdoc, previewResourceUrls } from './srcdoc-builder.mjs';
+import { validatePresentation } from '../presentation/model.mjs';
 
 function el(doc, tag, attrs = {}, text) {
   const node = doc.createElement(tag);
@@ -69,7 +70,7 @@ export function mountPreviewHost(root, options = {}) {
 
   function bindFrame(srcdoc) {
     iframe = el(doc, 'iframe', {
-      sandbox: FREE_PAGE_SANDBOX,
+      sandbox: options.allowScripts === false ? '' : FREE_PAGE_SANDBOX,
       referrerpolicy: FREE_PAGE_REFERRER_POLICY,
       title: '自由页面预览',
       'data-testid': options.frameTestId ?? 'fp-preview-frame',
@@ -96,6 +97,12 @@ export function mountPreviewHost(root, options = {}) {
       paint();
       return normalized;
     }
+    if (!validatePresentation(pkg.presentation, pkg)) {
+      const failed = fail('INVALID_PAGE', '文案修改与页面来源不匹配。');
+      boundary.fail(failed.error.code, failed.error.message);
+      paint();
+      return failed;
+    }
     for (const resource of normalized.value.resources) {
       const written = cache.put({
         actorId, pageId, version, resource,
@@ -115,7 +122,7 @@ export function mountPreviewHost(root, options = {}) {
       }
     }
     dropFrame();
-    currentPackage = normalized.value;
+    currentPackage = pkg.presentation ? { ...normalized.value, html: pkg.html, css: pkg.css, js: pkg.js, presentation: pkg.presentation } : normalized.value;
     currentVersion = version;
     const createUrl = typeof URL !== 'undefined' && URL.createObjectURL
       ? (blob) => {
@@ -126,6 +133,23 @@ export function mountPreviewHost(root, options = {}) {
       : null;
     const resources = previewResourceUrls(normalized.value.resources, createUrl);
     try {
+      if (options.allowScripts === false) {
+        bindFrame(buildSrcdoc({
+          html: currentPackage.html,
+          css: currentPackage.css,
+          js: currentPackage.js,
+          presentation: currentPackage.presentation,
+          allowScripts: false,
+          resources,
+          instanceId: 'static-preview',
+          pageId,
+          version,
+          nonce: 'static-preview',
+        }));
+        boundary.running({ pageId, version });
+        paint();
+        return { ok: true, instanceId: null, isolation: describeIsolation(options.isolationEvidence) };
+      }
       session = createPageSession({
         pageId,
         version,
@@ -145,9 +169,10 @@ export function mountPreviewHost(root, options = {}) {
       return failed;
     }
     const srcdoc = buildSrcdoc({
-      html: normalized.value.html,
-      css: normalized.value.css,
-      js: normalized.value.js,
+      html: currentPackage.html,
+      css: currentPackage.css,
+      js: currentPackage.js,
+      presentation: currentPackage.presentation,
       resources,
       instanceId: session.instanceId,
       pageId,

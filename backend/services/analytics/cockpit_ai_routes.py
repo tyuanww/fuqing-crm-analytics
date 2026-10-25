@@ -32,11 +32,30 @@ class AIConfirm(BaseModel):
     candidate_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
 
 
+class AIReadPart(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    field: Literal['task', 'html', 'css', 'js', 'resources', 'node_map', 'presentation']
+    offset: int = Field(default=0, strict=True, ge=0)
+    variant: Literal['source', 'candidate'] = 'source'
+
+
 PREFIX = "/api/v1/analytics/cockpit-ai"
 
 
-def cockpit_ai_router(store, principal, office=None, office_principal=None):
+def cockpit_ai_router(store, principal, office=None, office_principal=None, context=None):
     router = APIRouter(prefix=PREFIX)
+
+    def source(request):
+        return context(request) if context else None
+
+    if context is not None:
+        @router.post('/{job_id}/read-part')
+        def read_part(job_id: str, body: AIReadPart, request: Request):
+            return store.read_part(principal(request), job_id, body.field, body.offset, body.variant)
+
+        @router.post('/{job_id}/candidate')
+        def candidate(job_id: str, body: dict, request: Request):
+            return store.propose(principal(request), job_id, body)
 
     @router.get("")
     def listing(request: Request, offset: int = 0):
@@ -68,7 +87,7 @@ def cockpit_ai_router(store, principal, office=None, office_principal=None):
 
     @router.post("/{job_id}/collect")
     def collect(job_id: str, request: Request):
-        return store.collect(principal(request), job_id)
+        return store.collect(principal(request), job_id, source_context=source(request))
 
     @router.get("/{job_id}/comparison")
     def comparison(job_id: str, request: Request):
@@ -76,7 +95,7 @@ def cockpit_ai_router(store, principal, office=None, office_principal=None):
 
     @router.post("/{job_id}/confirm")
     def confirm(job_id: str, body: AIConfirm, request: Request):
-        return store.confirm(principal(request), job_id, body.candidate_hash)
+        return store.confirm(principal(request), job_id, body.candidate_hash, source_context=source(request))
 
     @router.post("/{job_id}/cancel")
     def cancel(job_id: str, request: Request):

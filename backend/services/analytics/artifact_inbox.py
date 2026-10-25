@@ -6,18 +6,20 @@ the user confirms a preview and the client links the resulting page id.
 """
 from __future__ import annotations
 
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import sqlite3
+import stat
 import time
 from uuid import uuid4
 
 from pydantic import ValidationError
 
-from backend.contracts.page_documents import PagePackage, is_package_too_large
+from backend.contracts.page_documents import PageBindingManifest, PagePackage, is_package_too_large
 from backend.services.analytics.access import AnalyticsError, AnalyticsPrincipal, require
 from backend.services.analytics.first_purchase.asset_state import initialize_sqlite
 from backend.services.analytics.page_documents import _annotate_package
@@ -40,6 +42,7 @@ CREATE TABLE artifacts (
     title TEXT NOT NULL,
     path TEXT,
     package TEXT,
+    binding_manifest TEXT NOT NULL,
     content_hash TEXT NOT NULL,
     status TEXT NOT NULL,
     page_id TEXT,
@@ -70,9 +73,31 @@ class ArtifactInboxStore:
         directory.chmod(0o700)
         self.path = directory.resolve() / "artifact_inbox.sqlite3"
         self.clock = clock
+        self._migrate_v1()
         initialize_sqlite(directory, self.path, application_id=1804289394,
-                          schema_version=1, kind="cockpit_artifact_inbox",
+                          schema_version=2, kind="cockpit_artifact_inbox",
                           ddl=DDL, unavailable=UNAVAILABLE)
+
+    def _migrate_v1(self):
+        if not self.path.exists() or self.path.is_symlink():
+            return
+        try:
+            info = self.path.lstat()
+            parent = self.path.parent.stat()
+            if (not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or info.st_uid != os.getuid()
+                    or parent.st_uid != os.getuid() or parent.st_mode & 0o077):
+                return
+            with closing(sqlite3.connect(self.path)) as con, con:
+                if con.execute("PRAGMA application_id").fetchone()[0] != 1804289394:
+                    return
+                if con.execute("PRAGMA user_version").fetchone()[0] != 1:
+                    return
+                columns = {row[1] for row in con.execute("PRAGMA table_info(artifacts)")}
+                if "binding_manifest" not in columns:
+                    con.execute("ALTER TABLE artifacts ADD COLUMN binding_manifest TEXT NOT NULL DEFAULT '{\"bindings\":[],\"result_refs\":[]}'")
+                con.execute("PRAGMA user_version=2")
+        except sqlite3.DatabaseError as error:
+            raise AnalyticsError(503, "STATE_UNAVAILABLE", UNAVAILABLE, retryable=True) from error
 
     @contextmanager
     def _connect(self, *, write=False):
@@ -105,6 +130,7 @@ class ArtifactInboxStore:
             "status": row["status"], "page_id": row["page_id"],
             "created_at": row["created_ms"], "updated_at": row["updated_ms"],
             "created_at_ms": row["created_ms"], "updated_at_ms": row["updated_ms"],
+            "binding_manifest": json.loads(row["binding_manifest"]),
         }
         if include_package:
             result["package"] = json.loads(row["package"]) if row["package"] else None
@@ -149,6 +175,12 @@ class ArtifactInboxStore:
                 fault(422, "INVALID_ARTIFACT", "页面源码包不符合 free-page/v1 合同。")
         if source == "page_package" and package is None:
             fault(422, "INVALID_ARTIFACT", "页面源码包来源必须包含 package。")
+        try:
+            binding_manifest = PageBindingManifest.model_validate(
+                body.get("binding_manifest") or {"bindings": [], "result_refs": []}
+            ).model_dump(mode="json")
+        except Exception:
+            fault(422, "INVALID_ARTIFACT", "页面数据绑定清单不符合 free-page/v1 合同。")
         supplied_digest = body.get("content_hash")
         if source in {"native_present", "workspace_file"} and not supplied_digest:
             fault(422, "CONTENT_HASH_REQUIRED", "工作区产物必须提供内容哈希。")
@@ -160,7 +192,7 @@ class ArtifactInboxStore:
             fault(422, "INVALID_ARTIFACT", "content_hash 无效。")
         return {"source": source, "session_id": session_id, "request_id": body.get("request_id"),
                 "call_id": body.get("call_id"), "title": title.strip(), "path": path,
-                "package": package, "content_hash": digest}
+                "package": package, "binding_manifest": binding_manifest, "content_hash": digest}
 
     def intake(self, actor: AnalyticsPrincipal, body):
         self._access(actor, write=True)
@@ -192,14 +224,17 @@ class ArtifactInboxStore:
                     values.append(data["path"])
             row = con.execute(f"SELECT * FROM artifacts WHERE {where} LIMIT 1", values).fetchone()
             if row is not None:
+                if json.loads(row["binding_manifest"]) != data["binding_manifest"]:
+                    fault(409, "ARTIFACT_REQUEST_CONFLICT", "同一产物请求不能更换数据绑定清单。")
                 return {**self._row(row), "idempotent": True}
             artifact_id = "artifact_" + uuid4().hex
             con.execute(
-                "INSERT INTO artifacts VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                "INSERT INTO artifacts VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (actor.actor_id, artifact_id, data["source"], data["session_id"], data["request_id"],
                  data["call_id"], data["title"], data["path"],
-                 json.dumps(data["package"], ensure_ascii=False, separators=(",", ":")) if data["package"] else None,
-                 data["content_hash"], "PREVIEWABLE" if data["package"] else "RECEIVED", None, now, now),
+                json.dumps(data["package"], ensure_ascii=False, separators=(",", ":")) if data["package"] else None,
+                json.dumps(data["binding_manifest"], ensure_ascii=False, separators=(",", ":")),
+                data["content_hash"], "PREVIEWABLE" if data["package"] else "RECEIVED", None, now, now),
             )
             return {**self._row(con.execute("SELECT * FROM artifacts WHERE owner=? AND artifact_id=?", (actor.actor_id, artifact_id)).fetchone()), "idempotent": False}
 
@@ -260,6 +295,9 @@ class ArtifactInboxStore:
                     canonical_package = _annotate_package(receipt_package)
                     if _digest(page.get("package")) != _digest(canonical_package):
                         fault(409, "ARTIFACT_SOURCE_MISMATCH", "正式页面源码与产物回执不一致。")
+                    receipt_manifest = json.loads(row["binding_manifest"])
+                    if page.get("binding_manifest", {"bindings": [], "result_refs": []}) != receipt_manifest:
+                        fault(409, "ARTIFACT_SOURCE_MISMATCH", "正式页面数据绑定与产物回执不一致。")
                 elif row["path"] and page.get("origin_path") != row["path"]:
                     fault(409, "ARTIFACT_SOURCE_MISMATCH", "正式页面来源路径与产物不一致。")
                 elif page.get("origin_content_hash") != row["content_hash"]:
