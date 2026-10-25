@@ -47,7 +47,8 @@ def test_async_read_context_keeps_event_loop_responsive(monkeypatch):
     assert returned.is_set()
 
 
-def test_cancelled_read_app_waits_for_worker_before_connection_can_return():
+@pytest.mark.parametrize("cancellations", [1, 2])
+def test_cancelled_read_app_waits_for_worker_before_connection_can_return(cancellations):
     worker_started = threading.Event()
     release_worker = threading.Event()
     worker_finished = threading.Event()
@@ -66,9 +67,10 @@ def test_cancelled_read_app_waits_for_worker_before_connection_can_return():
         task = asyncio.create_task(middleware._run_read_app({}, None, None))
         while not worker_started.is_set():
             await asyncio.sleep(0.001)
-        task.cancel()
-        await asyncio.sleep(0.01)
-        assert not task.done()
+        for _ in range(cancellations):
+            task.cancel()
+            await asyncio.sleep(0.01)
+            assert not task.done()
         release_worker.set()
         with pytest.raises(asyncio.CancelledError):
             await asyncio.wait_for(task, timeout=1)

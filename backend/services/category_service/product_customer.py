@@ -12,6 +12,10 @@ from backend.services.asset_focus_service._helpers import (
     PRODUCT_TO_SPU_CLASSES_OTHER,
 )
 from backend.services.product_identity import PRODUCT_DISPLAY_NAMES, resolve_product_names
+from backend.services.warehouse_cache import (
+    AggregateCacheMissError, AggregateCacheUnavailableError, AggregateKey,
+)
+from backend.services.warehouse_runtime import current_warehouse_read
 
 from .overview import _build_category_period_filter
 from .data_version import orders_data_version
@@ -302,6 +306,30 @@ def get_product_customer_overview(
     compare_start = datetime.strptime(compare_start_date, "%Y-%m-%d").date()
     compare_cutoff = (compare_start - timedelta(days=1)).isoformat()
     excluded = list(exclude_channels or [])
+    selected_names = names
+    frame = current_warehouse_read()
+    cache_key = None
+    if frame is not None:
+        identity = frame.pin.identity
+        coverage = _coverage(start, end, compare_start,
+                             date.fromisoformat(compare_end_date),
+                             date.fromisoformat(identity.data_cutoff) if identity.data_cutoff else None,
+                             date.fromisoformat(identity.data_start) if identity.data_start else None)
+        if coverage["current_status"] == coverage["comparison_status"] == "COMPLETE":
+            cache_key = AggregateKey.for_query(
+                "product-customer/v3", identity, frame.semantic_revisions["product-customer/v3"],
+                {"start_date": start_date, "end_date": end_date,
+                 "compare_start_date": compare_start_date, "compare_end_date": compare_end_date,
+                 "metric_type": metric_type, "channel": channel, "exclude_channels": excluded},
+            )
+            cached = frame.cache.get(cache_key)
+            if cached is not None:
+                if cached.get("data_version") != identity.revision:
+                    raise AggregateCacheUnavailableError("product cache does not match its source")
+                return _select_products(cached, selected_names)
+            if frame.mode == "cache_only":
+                raise AggregateCacheMissError("所选商品数据范围尚未预热")
+            names = list(PRODUCT_GROUPS)
 
     conn = get_connection()
     with _read_transaction(conn):
@@ -376,7 +404,7 @@ def get_product_customer_overview(
                 "yoy": _yoy(current_metrics, comparison_metrics),
             })
 
-    return {
+    response = {
         "schema_version": "product-customer/v3",
         "status": "OK" if complete else "INSUFFICIENT_COVERAGE",
         "source": "orders+user_first_purchase",
@@ -394,3 +422,11 @@ def get_product_customer_overview(
         "exclude_channels": excluded,
         "products": result,
     }
+    if cache_key is not None:
+        frame.cache.put(cache_key, response)
+    return _select_products(response, selected_names)
+
+
+def _select_products(result: dict, names: list[str]) -> dict:
+    products = {product["name"]: product for product in result["products"]}
+    return {**result, "products": [products[name] for name in names if name in products]}

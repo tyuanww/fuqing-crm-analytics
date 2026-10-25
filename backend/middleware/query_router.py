@@ -213,6 +213,7 @@ class QueryRouterMiddleware:
         "/api/v1/ad-hoc/new-old-customer",
         "/api/v1/category/overview/batch",
         "/api/v1/category/product-customer",
+        "/api/v1/category/product-customer/batch",
         "/api/v1/rfm/extended",
     }
     READ_PREFIXES = (
@@ -292,8 +293,15 @@ class QueryRouterMiddleware:
         try:
             await asyncio.shield(app_task)
         except asyncio.CancelledError as cancelled:
+            while not app_task.done():
+                try:
+                    await asyncio.shield(app_task)
+                except asyncio.CancelledError:
+                    pass
+                except BaseException:
+                    break
             try:
-                await app_task
+                app_task.result()
             except BaseException as exc:  # noqa: BLE001
                 logger.debug("Read app finished with error after client cancellation: %s", exc)
             raise cancelled
@@ -313,10 +321,25 @@ class QueryRouterMiddleware:
 
         # L4.72.2 治本: 捕获 dual_conn.ReadPoolTimeout 618 大促 8 并发雪崩, 返回 503
         from backend.services.dual_conn import ReadPoolTimeout  # L4.72.2 新增异常类
+        from backend.services.warehouse_cache import AggregateCacheMissError, AggregateCacheUnavailableError
+        from backend.services.warehouse_source import WarehouseSourceUnavailableError
+        response_started = False
+
+        async def send_verified(message):
+            nonlocal response_started
+            if message["type"] == "http.response.start":
+                response_started = True
+            await send(message)
+
         try:
             if query_type == "read":
-                async with async_read_request_context(query_type):
-                    await self._run_read_app(scope, receive, send)
+                runtime = getattr(getattr(scope.get("app"), "state", None), "warehouse_runtime", None)
+                if runtime is not None:
+                    async with runtime.async_read():
+                        await self._run_read_app(scope, receive, send_verified)
+                else:
+                    async with async_read_request_context(query_type):
+                        await self._run_read_app(scope, receive, send)
             else:
                 token = set_query_type(query_type)
                 try:
@@ -326,6 +349,17 @@ class QueryRouterMiddleware:
         except asyncio.CancelledError:
             cancelled = True
             raise
+        except (WarehouseSourceUnavailableError, AggregateCacheUnavailableError, AggregateCacheMissError) as exc:
+            if response_started:
+                raise
+            miss = isinstance(exc, AggregateCacheMissError)
+            response = competition_error_response(
+                http_status=503, code="STATE_UNAVAILABLE",
+                message="所选范围尚未预热" if miss else "数据来源或缓存暂不可用",
+                request_id=request_id, retryable=True, retry_after=60 if miss else 30,
+                headers={"X-Aggregate-Cache-Status": "miss" if miss else "unavailable"},
+            )
+            await response(scope, receive, send)
         except ReadPoolTimeout as e:
             # L4.72.2 治本: 618 大促 8 并发雪崩友好降级, 返回 503 而非 30s timeout
             logger.warning("L4.72.2 ReadPoolTimeout (618 大促 8 并发雪崩兜底): %s", e)

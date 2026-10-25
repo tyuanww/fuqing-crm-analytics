@@ -13,7 +13,11 @@ def _iso(value: Any) -> str | None:
     return str(value)
 
 
-def orders_data_version(conn: Any) -> dict[str, str | None]:
+def orders_data_version(conn: Any) -> dict[str, Any]:
+    from backend.services.warehouse_runtime import verified_metadata
+
+    if source := verified_metadata(conn):
+        return source
     row = conn.execute(
         """
         SELECT

@@ -13,12 +13,15 @@ from dataclasses import dataclass
 import logging
 import os
 import threading
-from typing import AsyncIterator, Iterator, Literal
+from typing import TYPE_CHECKING, AsyncIterator, Iterator, Literal
 
 import duckdb
 
 from backend.config import DUCKDB_MEMORY_LIMIT, DUCKDB_PATH, DUCKDB_THREADS
 from backend.resource_budget import default_cache_memory_limit
+
+if TYPE_CHECKING:
+    from backend.services.warehouse_runtime import WarehouseReadFrame
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +59,7 @@ class RequestConnection:
     conn: duckdb.DuckDBPyConnection
     lock: threading.RLock
     query_type: str
+    warehouse: WarehouseReadFrame | None = None
 
 
 _query_type_var: ContextVar[str] = ContextVar("fq_query_type", default="default")
