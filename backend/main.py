@@ -359,7 +359,7 @@ async def add_security_headers(request: Request, call_next):
 # Rate Limit 中间件 (Sprint 200 R1 v2.1, 跟 L4.36 友好错误 1:1)
 #
 # 真因: 业务组持续取数 → uvicorn 一直处于下线状态 (Sprint 184 L4.38 DuckDB flock 锁死)
-# 治本: 每用户每分钟 60 req 限流, 超限返 429 + Retry-After 头. 跟 L4.36 graceful retry 3 次配套.
+# 业务请求默认每分钟 60 次；已认证的 GET /auth/me 独立限流，默认每分钟 600 次。
 # 配套: Codex consult 6 补强 (AST allowlist + DuckDB 安全配置 + query worker) 后续 sprint 实施.
 # Sprint 201 R1+ R2 (L4.50 candidate): 改成 per-request 读 env, 允许 conftest.py 跨 sprint stable
 # 跨 test 改 RATE_LIMIT_PER_MINUTE (跟 test_rate_limit_sprint200.py module-scope setdefault 1:1).
@@ -369,7 +369,7 @@ _RATE_LIMIT_DEFAULT = 60  # production default
 # module-scope 读 1 次 (跟之前 sprint stable 1:1), 但 middleware 内 per-request 重读
 _RATE_LIMIT_PER_MINUTE = int(_rl_os.environ.get("RATE_LIMIT_PER_MINUTE", str(_RATE_LIMIT_DEFAULT)))
 _RATE_LIMIT_WINDOW = 60  # seconds
-_rate_limit_buckets: dict[str, list[float]] = {}  # {user_id: [timestamp, ...]}
+_rate_limit_buckets: dict[tuple[str, str], list[float]] = {}
 
 
 @app.middleware("http")
@@ -391,6 +391,7 @@ async def rate_limit_middleware(request: Request, call_next):
 
     # 提取 user_id (从 Authorization bearer token 推, 简化为 client_ip fallback)
     user_id = _extract_user_id_from_request(request)
+    identity_check = user_id is not None and request.method == "GET" and path == "/api/v1/auth/me"
     if user_id is None:
         user_id = f"ip:{request.client.host if request.client else 'unknown'}"
 
@@ -398,7 +399,11 @@ async def rate_limit_middleware(request: Request, call_next):
     now = time.time()
     # Sprint 201 R1+ R2 (L4.50 candidate): per-request 重读 env, 跟 test_rate_limit_sprint200.py setdefault 1:1
     rate_limit_per_minute = int(_rl_os.environ.get("RATE_LIMIT_PER_MINUTE", str(_RATE_LIMIT_DEFAULT)))
-    bucket = _rate_limit_buckets.setdefault(user_id, [])
+    # Native snapshot leases recheck identity without querying the warehouse.
+    if identity_check:
+        rate_limit_per_minute = int(_rl_os.environ.get("IDENTITY_RATE_LIMIT_PER_MINUTE", "600"))
+    bucket_key = ("identity" if identity_check else "business", user_id)
+    bucket = _rate_limit_buckets.setdefault(bucket_key, [])
     # 清除窗口外的请求
     bucket[:] = [t for t in bucket if now - t < _RATE_LIMIT_WINDOW]
 
