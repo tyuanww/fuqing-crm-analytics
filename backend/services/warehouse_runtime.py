@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 from contextlib import asynccontextmanager, contextmanager
 from dataclasses import dataclass, field
+from datetime import date
 from pathlib import Path
 import threading
 from types import MappingProxyType
@@ -24,6 +25,7 @@ class WarehouseReadFrame:
     cache: AggregateCache
     mode: ReadMode
     semantic_revisions: Mapping[str, str]
+    period_today: date | None = None
 
 
 @dataclass(frozen=True)
@@ -66,13 +68,13 @@ class WarehouseRuntime:
             self._slots.release()
 
     @contextmanager
-    def read(self, *, mode: ReadMode = "cache_only") -> Iterator[WarehouseReadFrame]:
+    def read(self, *, mode: ReadMode = "cache_only", period_today: date | None = None) -> Iterator[WarehouseReadFrame]:
         from backend.services import dual_conn
 
         if dual_conn.get_request_connection() is not None:
             raise WarehouseSourceUnavailableError("warehouse read cannot replace a bound connection")
         with self.source.pin() as pin:
-            frame = WarehouseReadFrame(self.source, pin, self.cache, mode, self.semantic_revisions)
+            frame = WarehouseReadFrame(self.source, pin, self.cache, mode, self.semantic_revisions, period_today)
             connection = dual_conn.RequestConnection(pin.connection, threading.RLock(), "read", warehouse=frame)
             query_token = dual_conn.set_query_type("read")
             connection_token = dual_conn._set_request_connection(connection)
@@ -127,6 +129,7 @@ def rfm_semantic_revision() -> str:
 
     return semantic_revision(Path(__file__).resolve().parents[2], (
         "backend/services/warehouse_rfm.py",
+        "backend/services/health/rfm_analysis/analysis.py",
         "backend/services/health/rfm_analysis/period.py",
         "backend/services/health/rfm_analysis/_shared.py",
         "backend/services/rfm/_flow_engine.py",

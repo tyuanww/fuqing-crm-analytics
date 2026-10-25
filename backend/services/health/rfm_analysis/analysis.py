@@ -125,7 +125,7 @@ def get_rfm_analysis(
     与 user_rfm 预计算表（lookback_days=90）完全独立，不会产生10倍差异。
     """
     if frame := current_warehouse_read():
-        ranges = resolve_verified_ranges(period, start_date, end_date, compare_start_date, compare_end_date)
+        ranges = resolve_verified_ranges(period, start_date, end_date, compare_start_date, compare_end_date, today=frame.period_today)
         return get_verified_rfm_analysis(frame, ranges, metric_type, channel, exclude_channels)
     ranges = _resolve_date_ranges(period, start_date, end_date, compare_start_date, compare_end_date)
     cur_start_dt, cur_end_dt, cutoff = ranges["current"]

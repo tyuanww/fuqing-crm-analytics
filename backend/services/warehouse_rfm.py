@@ -14,15 +14,16 @@ class WarehouseQueryError(ValueError):
         self.code = code
 
 
-def resolve_verified_ranges(period, start_date, end_date, compare_start_date, compare_end_date) -> dict:
+FIXED_PERIODS = ("wtd", "mtd", "ytd", "q1", "q2", "q3", "q4", "yesterday", "last90days", "last180days", "last365days")
+
+
+def resolve_verified_ranges(period, start_date, end_date, compare_start_date, compare_end_date, *, today: date | None = None) -> dict:
     from backend.semantic.time import PeriodBuilder
     from backend.services.rfm import _shared
 
     if (start_date is None) != (end_date is None) or (compare_start_date is None) != (compare_end_date is None):
         raise WarehouseQueryError("INVALID_REQUEST", "RFM 起止日期必须同时提供")
-    if period is not None and (not isinstance(period, str) or period.lower() not in {
-        "wtd", "mtd", "ytd", "q1", "q2", "q3", "q4", "yesterday", "last90days", "last180days", "last365days",
-    }):
+    if period is not None and (not isinstance(period, str) or period.lower() not in FIXED_PERIODS):
         raise WarehouseQueryError("INVALID_REQUEST", "RFM 固定周期无效")
     if period is not None and start_date is not None:
         raise WarehouseQueryError("INVALID_REQUEST", "固定周期和明确日期不能同时提供")
@@ -31,7 +32,7 @@ def resolve_verified_ranges(period, start_date, end_date, compare_start_date, co
             if value is not None and date.fromisoformat(value).isoformat() != value:
                 raise ValueError("date must use YYYY-MM-DD")
         if period is not None or start_date is None:
-            windows = getattr(PeriodBuilder, (period or "mtd").lower())(today=_shared.date.today())
+            windows = getattr(PeriodBuilder, (period or "mtd").lower())(today=today or _shared.date.today())
             if any(window.empty for window in windows.values()):
                 raise WarehouseQueryError("INSUFFICIENT_COVERAGE", "所选 RFM 固定周期尚无完整数据日")
             ranges = {

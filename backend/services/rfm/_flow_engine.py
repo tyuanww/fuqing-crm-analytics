@@ -522,7 +522,7 @@ def get_rfm_flow(
 
     frame = current_warehouse_read()
     if frame is not None:
-        ranges = resolve_verified_ranges(period, start_date, end_date, compare_start_date, compare_end_date)
+        ranges = resolve_verified_ranges(period, start_date, end_date, compare_start_date, compare_end_date, today=frame.period_today)
     else:
         ranges = _resolve_date_ranges(period, start_date, end_date, compare_start_date, compare_end_date)
     cur_start_dt, cur_end_dt, cutoff = ranges["current"]

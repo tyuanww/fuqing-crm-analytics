@@ -7,7 +7,7 @@ import logging
 import os
 from pathlib import Path
 import re
-from typing import Callable, Mapping
+from typing import Callable, Literal, Mapping
 
 import duckdb
 from fastapi import FastAPI
@@ -45,12 +45,16 @@ class WarehouseRuntimeSettings:
 
 def build_warehouse_runtime(
     settings: WarehouseRuntimeSettings, *, connect: Callable[[], duckdb.DuckDBPyConnection] | None = None,
+    role: Literal["service", "prewarm"] = "service",
 ) -> WarehouseRuntime:
+    if role not in {"service", "prewarm"}:
+        raise ValueError("unsupported warehouse owner role")
     root = settings.state_dir
     info = root.stat()
     if not root.is_dir() or root.is_symlink() or info.st_uid != os.geteuid() or info.st_mode & 0o077:
         raise ValueError("warehouse state directory must be private")
-    source_dir, cache_dir = root / "source", root / "cache"
+    source_dir = root / ("source" if role == "service" else "prewarm-source")
+    cache_dir = root / "cache"
     source_dir.mkdir(mode=0o700, exist_ok=True)
     cache_dir.mkdir(mode=0o700, exist_ok=True)
     cache = AggregateCache(cache_dir / "aggregates.sqlite")
