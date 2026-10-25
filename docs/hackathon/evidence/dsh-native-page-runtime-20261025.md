@@ -36,6 +36,8 @@ CRM `631b8d8` 与 Workbench `a63fe78` 均从干净提交离线严格重建，保
 
 新组合只替换上述两插件的 manifest 和 tar 共 4 个文件。其余七插件及领域包共 16 个文件保持原字节。九插件成员、DSH `0.2.1-rc.3`、Cordis `4.0.5` 和 31 份公共合同材料不变。消费者来源固定为已审核的主仓源码 `d8f87ebc`，随后独立提交输入元数据。
 
+Workbench 作者测试证据锁同步至 `a63fe78` 的 artifact `12586164343`。553709 字节 ZIP 已实际下载并校验，plan、result 和 content pack 的摘要与成员大小固定。162 文件、1143 项 core 测试结果已与新严格包的来源提交、manifest 和 tar 摘要绑定；browser、standalone 及真实业务范围仍未覆盖。
+
 [运输 CI](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/40162864191) 成功。artifact `12586159173` 的 731339 字节 ZIP 已实际下载，SHA-256 为 `6ba6dc65608b3cc6e7c0c3f048abed256a15ca712621b30053f1173166a0411f`。20 个文件均与上传前相同，九插件和一个领域包严格接收通过。新组合锁摘要为 `7e7848fee6271419ff56c1d8dae9cb3f783b0d635bb898d6205617fc8fa94c76`。旧锁混新包在输出前拒绝，旧 artifact 配新锁也拒绝。
 
 组合输入与运输增量的独立窄审核无新增确认 P0–P2，注释专项无待处理项。运输分支仅保管包文件，不合入主仓。主仓对应提交的 CI、预检及实际运行包读回以 [PR #164](https://github.com/tyuanww/fuqing-crm-analytics/pull/164) 最新结果为准；运输成功不代表业务验收完成。
