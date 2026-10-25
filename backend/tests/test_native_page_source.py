@@ -2,7 +2,6 @@ from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 import hashlib
 import json
-from pathlib import Path
 import sqlite3
 from threading import Barrier
 
@@ -51,8 +50,10 @@ def native(tmp_path):
     state = {'source': source_value(), 'error': None, 'calls': 0}
     def remote(operation, **fields):
         state['calls'] += 1
-        if state.get('probe'): state['probe']()
-        if operation == 'assertActive': return {'active': True}
+        if state.get('probe'):
+            state['probe']()
+        if operation == 'assertActive':
+            return {'active': True}
         if state['error']:
             raise source_error(*state['error'])
         if fields.get('session_id') != state['source']['identity']['native_session_id'] or fields.get('ref') != REF:
@@ -128,7 +129,8 @@ def test_native_edit_confirmation_reopens_and_replays_without_source(native, cha
                 con.rollback()
         def acquire_cache():
             acquired = app.state.result_access._lock.acquire(timeout=.1)
-            if acquired: app.state.result_access._lock.release()
+            if acquired:
+                app.state.result_access._lock.release()
             return acquired
         with ThreadPoolExecutor(1) as worker:
             assert worker.submit(acquire_cache).result(timeout=1)
@@ -257,8 +259,10 @@ def test_data_ref_identity_and_epoch_are_pinned(native, field, new):
     preview = generate(client)
     target = {'kind': 'preview', 'preview_id': preview['preview_id']}
     body = read(client, target, result_ref=REF).json()
-    if field == 'epoch': state['source'][field] = new
-    else: state['source']['identity'][field] = new
+    if field == 'epoch':
+        state['source'][field] = new
+    else:
+        state['source']['identity'][field] = new
     assert read(client, target, data_ref=body['data_ref']).status_code == 409
 
 
@@ -319,7 +323,8 @@ def test_source_calls_hold_neither_page_write_transaction_nor_cache_lock(native)
             con.rollback()
         def acquire_cache():
             acquired = app.state.result_access._lock.acquire(timeout=.1)
-            if acquired: app.state.result_access._lock.release()
+            if acquired:
+                app.state.result_access._lock.release()
             return acquired
         with ThreadPoolExecutor(1) as worker:
             assert worker.submit(acquire_cache).result(timeout=1)
@@ -341,9 +346,12 @@ def test_private_authentication_checks_bound_request_and_rejects_browser_identit
             body = json.loads(request.data)
             calls.append(body)
             assert request.get_header('Authorization') == 'Bearer ' + 'a'*64
-            if body['operation'] == 'authenticate': value = grant
-            elif body['operation'] == 'assertActive': value = {'active': True}
-            else: value = observed
+            if body['operation'] == 'authenticate':
+                value = grant
+            elif body['operation'] == 'assertActive':
+                value = {'active': True}
+            else:
+                value = observed
             return io.BytesIO(json.dumps(value).encode())
     source.opener = PrivateTransport()
     app = create_page_app(page_state_dir=tmp_path, authenticate_page=source.authenticate, policy=NATIVE_POLICY,

@@ -26,7 +26,7 @@ from backend.contracts.page_documents import (
     PACKAGE_MAX_BYTES, PageDocument, PageDraft, PagePatchPreview, PageRollbackPreview,
     PageSavePreview, is_package_too_large, page_source_hash,
 )
-from backend.services.analytics.access import AnalyticsError, AnalyticsPrincipal, require
+from backend.services.analytics.access import AnalyticsError, require
 from backend.services.analytics.page_context import PageAccessPolicy
 from backend.services.analytics.first_purchase.asset_state import (
     connect, initialize_sqlite, now_ms, opaque, transaction, validate_key,
