@@ -437,23 +437,23 @@ def run_flow_period(
     ttl_stats AS (
         SELECT 'all' AS channel_flag, FALSE AS is_member, '已购客TTL' AS segment_val,
                (SELECT COUNT(*) FROM ttl_users_all) AS hist_users,
-               (SELECT COUNT(DISTINCT user_id) FROM repurchase_users) AS repurchase_users,
-               (SELECT COALESCE(SUM(actual_amount), 0) FROM base_orders) AS repurchase_gsv
+               (SELECT COUNT(DISTINCT rp.user_id) FROM repurchase_users rp INNER JOIN ttl_users_all t USING(user_id)) AS repurchase_users,
+               (SELECT COALESCE(SUM(bo.actual_amount), 0) FROM base_orders bo INNER JOIN ttl_users_all t USING(user_id)) AS repurchase_gsv
         UNION ALL
         SELECT 'same', FALSE, '已购客TTL',
                (SELECT COUNT(*) FROM ttl_users_same),
-               (SELECT COUNT(DISTINCT user_id) FROM repurchase_users),
-               (SELECT COALESCE(SUM(actual_amount), 0) FROM base_orders)
+               (SELECT COUNT(DISTINCT rp.user_id) FROM repurchase_users rp INNER JOIN ttl_users_same t USING(user_id)),
+               (SELECT COALESCE(SUM(bo.actual_amount), 0) FROM base_orders bo INNER JOIN ttl_users_same t USING(user_id))
         UNION ALL
         SELECT 'all', TRUE, '已购客TTL',
                (SELECT COUNT(*) FROM ttl_users_member_all),
-               (SELECT COUNT(DISTINCT user_id) FROM repurchase_users),
-               (SELECT COALESCE(SUM(actual_amount), 0) FROM base_orders)
+               (SELECT COUNT(DISTINCT rp.user_id) FROM repurchase_users rp INNER JOIN ttl_users_member_all t USING(user_id)),
+               (SELECT COALESCE(SUM(bo.actual_amount), 0) FROM base_orders bo INNER JOIN ttl_users_member_all t USING(user_id))
         UNION ALL
         SELECT 'same', TRUE, '已购客TTL',
                (SELECT COUNT(*) FROM ttl_users_member_same),
-               (SELECT COUNT(DISTINCT user_id) FROM repurchase_users),
-               (SELECT COALESCE(SUM(actual_amount), 0) FROM base_orders)
+               (SELECT COUNT(DISTINCT rp.user_id) FROM repurchase_users rp INNER JOIN ttl_users_member_same t USING(user_id)),
+               (SELECT COALESCE(SUM(bo.actual_amount), 0) FROM base_orders bo INNER JOIN ttl_users_member_same t USING(user_id))
     ),
     stats AS (
         SELECT * FROM segment_stats
