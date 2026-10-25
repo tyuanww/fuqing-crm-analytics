@@ -1,6 +1,6 @@
 # 仓库聚合快照接口
 
-此接口是后端候选。CRM 作者调用方、原生授权 host 和画布各板块投影尚未接通，不能据此宣称聊天到看板已验收。
+此接口是后端候选。[私有来源服务](native-warehouse-source.md)已支持新快照读取；CRM 作者调用方及画布各板块投影尚未接通，不能据此宣称聊天到看板已验收。
 
 `POST /api/v1/metrics/warehouse-snapshots` 创建当前账号的不可变聚合快照。请求包含 `family` 和 `filters`，并提供 `Idempotency-Key`。支持 `purchases`、`product`、`analysis`、`r`、`f`、`m`。接口只在已验证来源模式中创建，不接受客户端的结果、数据类别、版本或 SQL。
 
