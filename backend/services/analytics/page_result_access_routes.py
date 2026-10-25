@@ -25,7 +25,7 @@ def _error(error: AnalyticsError, request_id: str) -> JSONResponse:
     return JSONResponse(body.model_dump(mode="json"), status_code=error.status, headers=headers)
 
 
-def page_result_access_router(access, principal):
+def page_result_access_router(access, principal, context=None):
     router = APIRouter(prefix=PREFIX)
 
     def service():
@@ -37,11 +37,14 @@ def page_result_access_router(access, principal):
         response.headers["Cache-Control"] = "no-store"
         return principal(request)
 
+    def source(request):
+        return context(request) if context else None
+
     @router.post("/read")
     def read(payload: dict[str, Any], request: Request, response: Response):
         body = payload if isinstance(payload, dict) else {}
         return service().read(actor(request, response), body.get("request") or {},
-                              manifest=body.get("manifest"))
+                              manifest=body.get("manifest"), target=body.get("target"), source_context=source(request))
 
     @router.post("/cancel")
     def cancel(payload: dict[str, Any], request: Request, response: Response):
@@ -51,7 +54,7 @@ def page_result_access_router(access, principal):
     @router.post("/binding-state")
     def binding_state(payload: dict[str, Any], request: Request, response: Response):
         body = payload if isinstance(payload, dict) else {}
-        return service().binding_state(actor(request, response), body.get("manifest"))
+        return service().binding_state(actor(request, response), body.get("manifest"), target=body.get("target"), source_context=source(request))
 
     return router
 

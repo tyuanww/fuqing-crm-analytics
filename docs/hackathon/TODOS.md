@@ -13,10 +13,12 @@
 - [x] 组合提交 `0be91ac5` 的主 CI `40122908765` 与预检 `40122908741` 成功；其实际运行包只含七插件，完整业务装配的后续验证另记。
 - [x] 修复运行包预检的陈旧 consumer SHA 断言，改为真实配置绑定；本地完整发布测试 609 通过、6 跳过、0 失败。
 - [x] 前置修复提交 `3d7dd687` 的运行包预检 `40121477077` 成功，artifact `12571353989` 已核对元数据，未下载或部署。旧预检失败后持续等待的原因仍未定位。
-- [ ] 接通 Host 页面代理、Python resolver 与结果桥、Workbench 同源传输，再完成隔离业务验收。
+- [x] 本地接通 Host 页面代理、统一来源/结果桥、Workbench 实际预览与编辑确认，合成跨进程 13 项、页面相关 127 项通过。
+- [x] 43 文件独立增量复核无新增确认 P0–P2；CRM `631b8d8` 和 Workbench `a63fe78` 已提交推送并严格重建，分别有 197 包测试、1143 core 测试通过。
+- [ ] 完成新包组合消费与精确集成 CI，再进行真实浏览器业务验收。
 - [ ] 核验近两年 RFM 与商品缓存的覆盖、失效和筛选行为。完整业务链路仍未验收。
 
-本轮证据见[完整业务装配记录](evidence/dsh-business-runtime-profile-20261025.md)、[页面前置修复记录](evidence/dsh-native-page-prerequisites-20261025.md)和[租约包组合接收记录](evidence/dsh-native-page-composition-20261025.md)，Git 和 CI 状态以当前 PR 为准。不合并、切现役或发布。
+本轮证据见[运行接线记录](evidence/dsh-native-page-runtime-20261025.md)、[完整业务装配记录](evidence/dsh-business-runtime-profile-20261025.md)、[页面前置修复记录](evidence/dsh-native-page-prerequisites-20261025.md)和[租约包组合接收记录](evidence/dsh-native-page-composition-20261025.md)，Git 和 CI 状态以当前 PR 为准。不合并、切现役或发布。
 
 ## Internal readiness
 

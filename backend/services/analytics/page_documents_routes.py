@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import hashlib
 from typing import Callable
 from uuid import uuid4
 
@@ -19,6 +20,7 @@ from backend.contracts.page_documents import (
 )
 from backend.services.analytics.access import AnalyticsError, B0IdentityRegistry
 from backend.services.analytics.page_documents import PageDocumentStore, ResolvedPageBinding
+from backend.services.analytics.page_context import PageAccessPolicy
 from backend.services.analytics.page_result_access import PageResultAccess
 from backend.services.analytics.page_result_access_routes import page_result_access_router
 from backend.services.analytics.cockpit_files import CockpitFileStore, MAX_FILE_BYTES
@@ -55,6 +57,7 @@ class _PageBodyLimit:
                 return await response(scope, receive, send)
             if not message.get("more_body", False):
                 break
+        scope["state"]["page_body_sha256"] = hashlib.sha256(body).hexdigest()
         delivered = False
 
         async def replay():
@@ -76,7 +79,7 @@ def _error(error: AnalyticsError, request_id: str) -> JSONResponse:
     return JSONResponse(body.model_dump(mode="json"), status_code=error.status, headers=headers)
 
 
-def page_documents_router(store, principal):
+def page_documents_router(store, principal, context=None):
     router = APIRouter(prefix=PREFIX)
 
     def service():
@@ -88,9 +91,12 @@ def page_documents_router(store, principal):
         response.headers["Cache-Control"] = "no-store"
         return principal(request)
 
+    def source(request):
+        return context(request) if context else None
+
     @router.post("/previews", response_model=PagePreview, status_code=201)
     def generate(payload: PageDraft, request: Request, response: Response):
-        return service().generate(actor(request, response), payload)
+        return service().generate(actor(request, response), payload, source_context=source(request))
 
     @router.get("/previews/{preview_id}", response_model=PagePreview)
     def preview(preview_id: str, request: Request, response: Response):
@@ -99,7 +105,7 @@ def page_documents_router(store, principal):
     @router.post("/previews/{preview_id}/confirm", response_model=PageSnapshot)
     def confirm(preview_id: str, request: Request, response: Response):
         return service().confirm(actor(request, response), preview_id,
-                                 _single_header(request, "idempotency-key"))
+                                 _single_header(request, "idempotency-key"), source_context=source(request))
 
     @router.post("/previews/{preview_id}/cancel", response_model=PageCancelResult)
     def cancel(preview_id: str, request: Request, response: Response):
@@ -119,15 +125,15 @@ def page_documents_router(store, principal):
 
     @router.post("/pages/{page_id}/patch-preview", response_model=PagePreview, status_code=201)
     def patch(page_id: str, payload: PagePatchPreview, request: Request, response: Response):
-        return service().patch(actor(request, response), page_id, payload)
+        return service().patch(actor(request, response), page_id, payload, source_context=source(request))
 
     @router.post("/pages/{page_id}/save-preview", response_model=PagePreview, status_code=201)
     def save(page_id: str, payload: PageSavePreview, request: Request, response: Response):
-        return service().save(actor(request, response), page_id, payload)
+        return service().save(actor(request, response), page_id, payload, source_context=source(request))
 
     @router.post("/pages/{page_id}/rollback-preview", response_model=PagePreview, status_code=201)
     def rollback(page_id: str, payload: PageRollbackPreview, request: Request, response: Response):
-        return service().rollback(actor(request, response), page_id, payload)
+        return service().rollback(actor(request, response), page_id, payload, source_context=source(request))
 
     return router
 
@@ -138,6 +144,9 @@ def create_page_app(
     page_state_dir: Path | None = None,
     resolve_binding: Callable[..., ResolvedPageBinding] | None = None,
     result_access: PageResultAccess | None = None,
+    authenticate_page=None,
+    policy: PageAccessPolicy = PageAccessPolicy(),
+    native_source=None,
     office=None,
     office_principal=None,
 ) -> FastAPI:
@@ -145,23 +154,36 @@ def create_page_app(
                   docs_url=None, redoc_url=None, openapi_url=None)
     app.add_middleware(_PageBodyLimit)
     registry = identities or B0IdentityRegistry()
-    store = PageDocumentStore(page_state_dir, resolve_binding=resolve_binding) if page_state_dir is not None else None
+    store = PageDocumentStore(page_state_dir, resolve_binding=resolve_binding, policy=policy) if page_state_dir is not None else None
+
+    def context(request: Request):
+        if not hasattr(request.state, "page_context"):
+            if not hasattr(request.state, "page_body_sha256"):
+                request.state.page_body_sha256 = hashlib.sha256(b"").hexdigest()
+            request.state.page_context = authenticate_page(request)
+        return request.state.page_context
 
     def principal(request: Request):
-        return registry.resolve(_single_header(request, "authorization"))
+        return context(request).actor if authenticate_page else registry.resolve(_single_header(request, "authorization"))
 
-    app.include_router(page_documents_router(store, principal))
+    if native_source is not None:
+        result_access = PageResultAccess(policy=policy, source=native_source, resolve_target=store.resolve_target)
+    app.state.page_store = store
+    app.state.result_access = result_access
+    app.include_router(page_documents_router(store, principal, context if authenticate_page else None))
     if store is not None:
         app.include_router(page_edit_context_router(
-            PageEditContextStore(page_state_dir, store, clock=store.clock), principal))
+            PageEditContextStore(page_state_dir, store, clock=store.clock, policy=policy), principal,
+            context if authenticate_page else None))
+    if store is not None and authenticate_page is None:
         app.include_router(artifact_inbox_router(
             ArtifactInboxStore(page_state_dir / "artifacts"), principal, page_store=store))
-    if page_state_dir is not None:
+    if page_state_dir is not None and authenticate_page is None:
         files = CockpitFileStore(page_state_dir / "files")
         app.include_router(cockpit_files_router(files, principal, office, office_principal))
         app.include_router(cockpit_ai_router(CockpitAIStore(files, store), principal, office, office_principal))
     if result_access is not None:
-        app.include_router(page_result_access_router(result_access, principal))
+        app.include_router(page_result_access_router(result_access, principal, context if authenticate_page else None))
 
     @app.exception_handler(AnalyticsError)
     async def analytics_error(request: Request, error: AnalyticsError):

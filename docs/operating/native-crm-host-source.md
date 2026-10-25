@@ -2,7 +2,7 @@
 
 CRM Host 显式配置 `nativeSnapshot` 后，原生 `querySnapshot` 依次捕获快照、签发私有查询句柄、登记来源、权威回读并校验投影。成功结果保留原 `value`，增加字符串 `source_ref`。工具适配保留该字段，私有句柄不进入工具输出。
 
-默认配置不启动来源服务或监听端口。当前是候选实现，真实 rc3 Host、页面 resolver、完整业务链路和杭州切换仍需独立验收。
+默认配置不启动来源服务或监听端口。当前是候选实现，完整业务与杭州切换仍需独立验收。页面代理、resolver、结果桥及编辑的本地合成接线已实现，配置和真实浏览器边界见[原生页面与 CRM 来源](./native-crm-page-source.md)。
 
 2026-10-25，主仓 rc3 组合已将本接口的候选包锁定到 CRM 作者 `ed5940f`，并从真实 CI ZIP 完成严格接收。固定身份和未关闭项见[组合接收记录](../hackathon/evidence/dsh-native-host-composition-20261025.md)。包进入组合不自动启用 `nativeSnapshot`。
 

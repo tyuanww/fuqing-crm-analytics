@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 
+from backend.contracts.page_documents import PageBindingManifest
 from backend.services.analytics.access import AnalyticsError, AnalyticsPrincipal
 from backend.services.analytics.page_result_access import (
     BINDING_STATES,
@@ -99,6 +100,27 @@ def test_summary_issues_data_ref_and_exact_summary_fields():
     assert body["binding_state"] == "BOUND_VERIFIED"
     assert len(body["rows"]) == 5
     assert access.binding_state(ALICE, BOUND_MANIFEST)["binding_state"] == "BOUND_VERIFIED"
+
+
+@pytest.mark.parametrize("node_id", [None, "node_metric"])
+def test_result_bridge_accepts_serialized_page_binding_optionals(node_id):
+    manifest = PageBindingManifest.model_validate({
+        "result_refs": ["result_fixture_1"],
+        "bindings": [{"binding_id": "binding_metric", "result_ref": "result_fixture_1", "node_id": node_id}],
+    }).model_dump(mode="json")
+    assert manifest["bindings"][0]["data_ref"] is None
+    response = read(store(), manifest=manifest)
+    assert response["binding_state"] == "BOUND_VERIFIED"
+    assert response["rows"][0]["value"] == 0
+
+
+@pytest.mark.parametrize("extra", [{"node_id": ""}, {"data_ref": ""}, {"owner": None}])
+def test_result_bridge_does_not_normalize_invalid_optional_values(extra):
+    manifest = {"result_refs": ["result_fixture_1"], "bindings": [{
+        "binding_id": "binding_metric", "result_ref": "result_fixture_1", **extra,
+    }]}
+    with pytest.raises(AnalyticsError, match="INVALID_PAGE"):
+        read(store(), manifest=manifest)
 
 
 def test_saved_page_binding_manifest_is_accepted_by_result_bridge():
