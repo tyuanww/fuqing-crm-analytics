@@ -204,13 +204,24 @@ def validate_startup_db() -> None:
 # ─────────────────────────────────────────────────────────────
 @asynccontextmanager
 async def lifespan(application: FastAPI):
+    from backend.services.warehouse_boot import (
+        WarehouseRuntimeSettings, verified_warehouse_lifespan, warehouse_runtime_requested,
+    )
+
     if os.environ.get("FQ_LOCAL_DEMO_NO_LOGIN") == "1":
+        if warehouse_runtime_requested():
+            raise ValueError("cannot combine Mission demo and verified warehouse modes")
         from backend.services.mission_service import MissionService
         # Fail closed on missing/invalid synthetic data. No legacy DuckDB,
         # cache warmup, auth sessions or production workers are needed here.
         MissionService.from_environment()
         logger.info("Local synthetic Mission demo ready; legacy CRM startup skipped")
         yield
+        return
+    warehouse_settings = WarehouseRuntimeSettings.from_environment(DUCKDB_PATH)
+    if warehouse_settings is not None:
+        async with verified_warehouse_lifespan(application, warehouse_settings):
+            yield
         return
     # Sprint 61 P2 治本: 启动校验 (fail-fast, 阻断 DUCKDB_PATH 接错空/过期 DB)
     validate_startup_db()

@@ -1,6 +1,6 @@
 # 已验证来源的聚合缓存
 
-`WarehouseRuntime` 将一个存活的 `VerifiedWarehouseSource`、独立的 `AggregateCache` 和语义摘要绑定到请求。当前支持商品新老客、八象限和 R/F/M，尚未接入默认应用启动。分批预热、真实大库跑数和浏览器验收尚未完成。
+`WarehouseRuntime` 将一个存活的 `VerifiedWarehouseSource`、独立的 `AggregateCache` 和语义摘要绑定到请求。当前支持商品新老客、八象限和 R/F/M，可[显式启动隔离实例](warehouse-runtime-start.md)。分批预热、真实大库跑数和浏览器验收尚未完成。
 
 ## 读取模式
 

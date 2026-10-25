@@ -272,6 +272,10 @@ class VerifiedWarehouseSource:
             raise
 
     @property
+    def database_path(self) -> Path:
+        return self._spec.database_path
+
+    @property
     def state(self) -> SourceState:
         with self._lock:
             return self._state

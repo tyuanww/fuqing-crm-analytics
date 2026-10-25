@@ -216,6 +216,22 @@ class QueryRouterMiddleware:
         "/api/v1/category/product-customer/batch",
         "/api/v1/rfm/extended",
     }
+    VERIFIED_READ_ENDPOINTS = {
+        "/api/v1/metrics/cutoff",
+        "/api/v1/metrics/overview",
+        "/api/v1/metrics/trend",
+        "/api/v1/metrics/dashboard-purchases",
+        "/api/v1/customer-health/rfm-analysis",
+        "/api/v1/rfm/r-flow",
+        "/api/v1/rfm/f-flow",
+        "/api/v1/rfm/m-flow",
+    }
+    VERIFIED_READ_ONLY_POST_ENDPOINTS = {
+        "/api/v1/category/product-customer",
+        "/api/v1/category/product-customer/batch",
+        "/api/v1/ad-hoc/daily-gsv",
+        "/api/v1/ad-hoc/daily-gsv-multi-period",
+    }
     READ_PREFIXES = (
         "/api/v1/audience/",
         "/api/v1/assets/",
@@ -241,15 +257,15 @@ class QueryRouterMiddleware:
         "/api/v1/health/pool",
         "/metrics",
         "/openapi.json",
+        "/api/v1/session",
     }
     CONTROL_PREFIXES = (
         "/api/v1/auth/",
+        "/api/v1/session/",
+        "/api/v1/notifications/",
         # Reading saved aggregates never needs to reopen the archived DuckDB.
         "/api/v1/metrics/crm-",
         "/api/v1/metrics/dashboard-snapshots/",
-        # Mission owns its synthetic reader and SQLite state; borrowing a
-        # legacy CRM connection here couples the demo to archived assets.
-        "/api/v1/missions/",
         "/docs",
         "/redoc",
     )
@@ -267,7 +283,7 @@ class QueryRouterMiddleware:
         """
 
         method_u = method.upper()
-        if path in self.CONTROL_ENDPOINTS or path.startswith(self.CONTROL_PREFIXES):
+        if path in self.CONTROL_ENDPOINTS or path.startswith((*self.CONTROL_PREFIXES, "/api/v1/missions/")):
             return "default"
         if path in self.WORKER_ENDPOINTS:
             return "worker"
@@ -313,7 +329,20 @@ class QueryRouterMiddleware:
 
         path = str(scope.get("path", ""))
         method = str(scope.get("method", "GET"))
+        headers = dict(scope.get("headers") or [])
+        if method.upper() == "OPTIONS" and b"origin" in headers and b"access-control-request-method" in headers:
+            await self.app(scope, receive, send)
+            return
         query_type = self.classify(path, method)
+        from backend.services.warehouse_boot import warehouse_runtime_requested
+
+        runtime = getattr(getattr(scope.get("app"), "state", None), "warehouse_runtime", None)
+        verified_mode = runtime is not None or warehouse_runtime_requested()
+        control = path in self.CONTROL_ENDPOINTS or path.startswith(self.CONTROL_PREFIXES)
+        if verified_mode and not control:
+            allowed = (method.upper() == "GET" and path in self.VERIFIED_READ_ENDPOINTS
+                       or method.upper() == "POST" and path in self.VERIFIED_READ_ONLY_POST_ENDPOINTS)
+            query_type = "read" if allowed else "default"
         scope["query_type"] = query_type
         start = time.perf_counter()
         request_id = request_id_from_scope(scope)
@@ -333,8 +362,17 @@ class QueryRouterMiddleware:
             await send(message)
 
         try:
+            if verified_mode and not control:
+                if runtime is None:
+                    raise WarehouseSourceUnavailableError("requested warehouse runtime is not ready")
+                if query_type != "read":
+                    response = competition_error_response(
+                        http_status=422, code="UNSUPPORTED_OPERATION",
+                        message="当前来源模式暂不支持此操作", request_id=request_id, retryable=False,
+                    )
+                    await response(scope, receive, send)
+                    return
             if query_type == "read":
-                runtime = getattr(getattr(scope.get("app"), "state", None), "warehouse_runtime", None)
                 if runtime is not None:
                     async with runtime.async_read():
                         await self._run_read_app(scope, receive, send_verified)

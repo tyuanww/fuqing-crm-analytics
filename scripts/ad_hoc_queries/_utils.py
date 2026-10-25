@@ -69,12 +69,19 @@ def check_etl_running() -> bool:
 
 @contextmanager
 def read_only_conn(db_path: Path | None = None, memory_limit: str | None = None):
-    """
-    read_only DuckDB 上下文管理器.
+    from backend.services.warehouse_boot import warehouse_runtime_requested
+    from backend.services.warehouse_runtime import current_warehouse_read
+    from backend.services.warehouse_source import WarehouseSourceUnavailableError
 
-    复用 scripts/run_etl.py:49-53 模式: read_only=True + 单独 memory_limit 不污染主进程.
-    Sprint 53 race flake 治本后, 跟 uvicorn 共存安全.
-    """
+    frame = current_warehouse_read()
+    if frame is not None:
+        with frame.source.pin() as pinned:
+            if db_path is not None and Path(db_path).resolve() != frame.source.database_path.resolve():
+                raise WarehouseSourceUnavailableError("query database does not match the registered source")
+            yield pinned.connection
+        return
+    if warehouse_runtime_requested():
+        raise WarehouseSourceUnavailableError("verified warehouse connection is not bound")
     import duckdb  # local import 避免启动慢
 
     path = db_path or DUCKDB_PATH

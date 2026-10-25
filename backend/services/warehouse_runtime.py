@@ -93,6 +93,10 @@ def current_warehouse_read() -> WarehouseReadFrame | None:
 def verified_metadata(connection) -> dict | None:
     frame = current_warehouse_read()
     if frame is None:
+        from backend.services.warehouse_boot import warehouse_runtime_requested
+
+        if warehouse_runtime_requested():
+            raise WarehouseSourceUnavailableError("verified warehouse identity is not bound")
         return None
     native = getattr(connection, "_conn", connection)
     if native is not frame.pin.connection:
