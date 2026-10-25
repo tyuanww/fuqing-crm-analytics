@@ -1,12 +1,14 @@
 import { randomBytes, createHash } from 'node:crypto';
 import { createServer } from 'node:http';
+import { installNativePageAITools } from './native-page-ai-tools.mjs';
 
 export const name = 'native-page-host';
-export const inject = ['connection', 'crmDashboard', 'webServer'];
+export const inject = ['connection', 'crmDashboard', 'webServer', 'tools', 'agents', 'nativePageAIPolicy'];
 export const NATIVE_PAGE_PATH = '/api/shine-mage-pages';
 const DOCUMENTS = '/api/v1/analytics/page-documents';
 const RESULTS = '/api/v1/analytics/page-result-access';
 const EDITS = '/api/v1/analytics/page-edit-contexts';
+const AI = '/api/v1/analytics/cockpit-ai';
 const ID = /^[A-Za-z0-9_.:-]{1,128}$/;
 const routeId = value => typeof value === 'string' && ID.test(value) && value !== '.' && value !== '..';
 const REF = /^crm_ref_[0-9a-f]{32}$/;
@@ -31,6 +33,16 @@ const OPERATIONS = {
   editConfirm: ['POST', `${EDITS}/:id/patches/:preview_id/confirm`],
   editReceipt: ['GET', `${EDITS}/:id/patches/:preview_id/receipt`],
   editAcknowledge: ['POST', `${EDITS}/:id/patches/:preview_id/receipt`],
+  aiBegin: ['POST', AI],
+  aiList: ['GET', AI],
+  aiGet: ['GET', `${AI}/:id`],
+  aiReadPart: ['POST', `${AI}/:id/read-part`],
+  aiPropose: ['POST', `${AI}/:id/candidate`],
+  aiCollect: ['POST', `${AI}/:id/collect`],
+  aiComparison: ['GET', `${AI}/:id/comparison`],
+  aiContent: ['GET', `${AI}/:id/content`],
+  aiConfirm: ['POST', `${AI}/:id/confirm`],
+  aiCancel: ['POST', `${AI}/:id/cancel`],
 };
 const CODES = new Map([[401, ['UNAUTHENTICATED']], [404, ['NOT_FOUND']], [403, ['RESULT_REVOKED']],
   [409, ['RESULT_STALE', 'RESULT_UNAVAILABLE']], [503, ['SOURCE_UNAVAILABLE', 'IDENTITY_UNAVAILABLE', 'STATE_UNAVAILABLE']]]);
@@ -78,7 +90,7 @@ function origin(value) {
   return value;
 }
 function route(input) {
-  if (!input || Array.isArray(input) || Object.keys(input).some(key => !['operation', 'id', 'preview_id', 'page_id', 'body', 'idempotency_key', 'version', 'limit', 'offset'].includes(key))) fail(404, 'NOT_FOUND');
+  if (!input || Array.isArray(input) || Object.keys(input).some(key => !['operation', 'id', 'preview_id', 'page_id', 'body', 'idempotency_key', 'version', 'limit', 'offset', 'variant'].includes(key))) fail(404, 'NOT_FOUND');
   if (!Object.hasOwn(OPERATIONS, input.operation)) fail(404, 'NOT_FOUND');
   const [method, template] = OPERATIONS[input.operation];
   if (template.includes(':id') && !routeId(input.id)) fail(404, 'NOT_FOUND');
@@ -88,11 +100,13 @@ function route(input) {
   const path = template.replace(':id', encodeURIComponent(input.id)).replace(':preview_id', encodeURIComponent(input.preview_id));
   const query = new URLSearchParams();
   const allowedQuery = { list: ['limit', 'offset'], history: ['limit', 'offset'], get: ['version'],
+    aiList: ['offset'], aiContent: ['variant'],
     editApply: ['page_id'], editOverlay: ['page_id', 'version'] }[input.operation] ?? [];
-  for (const key of ['version', 'limit', 'offset', 'page_id']) {
+  for (const key of ['version', 'limit', 'offset', 'page_id', 'variant']) {
     if (input[key] !== undefined) {
       if (!allowedQuery.includes(key)) fail(404, 'NOT_FOUND');
-      if (key === 'page_id' ? !routeId(input[key]) : !Number.isSafeInteger(input[key]) || input[key] < (key === 'offset' ? 0 : 1)) fail(404, 'NOT_FOUND');
+      if (key === 'variant' ? !['source', 'candidate'].includes(input[key])
+        : key === 'page_id' ? !routeId(input[key]) : !Number.isSafeInteger(input[key]) || input[key] < (key === 'offset' ? 0 : 1)) fail(404, 'NOT_FOUND');
       query.set(key, input[key]);
     }
   }
@@ -199,6 +213,7 @@ export async function apply(ctx, config = {}) {
   const host = createNativePageHost({ ...config, crmDashboard: ctx.crmDashboard });
   ctx.effect(() => () => host.dispose(), 'native pages: discard request leases');
   await host.start();
+  await installNativePageAITools(ctx, host);
   ctx.on('webserver/index-inject', table => { table.push({ kind: 'global', name: '__NATIVE_PAGE_TRANSPORT__', value: true }); });
   ctx.connection.fetch.register({ path: NATIVE_PAGE_PATH, methods: ['POST'], requestBody: 'streaming', fetch: request => host.fetch(request) });
 }

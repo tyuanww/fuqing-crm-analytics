@@ -10,6 +10,7 @@ import subprocess
 from time import monotonic, sleep
 import urllib.error
 import urllib.request
+import uuid
 
 import pytest
 
@@ -137,6 +138,66 @@ def editable_draft(ref):
                                    for name in ['title', 'metric']]
     body['binding_manifest']['bindings'] = [{'binding_id': 'binding_metric', 'node_id': 'metric', 'result_ref': ref}]
     return body
+
+
+def test_native_ai_long_page_candidate_confirm_and_reopen_without_files(composition):
+    rpc, _, root = composition
+    def raw(op, **fields):
+        return value(rpc('raw', envelope={'operation': op, **fields}))
+    html = '<p>' + '经营😀' * 2200 + '</p><h1>先复核人群</h1>'
+    spec = value(rpc('storeOpen', draft={'title': 'AI page', 'session_id': 'native-session',
+        'package': {'html': html}, 'binding_manifest': {'result_refs': [], 'bindings': []}}))['current']
+    job_id = 'ai_' + str(uuid.uuid4())
+    begun = raw('aiBegin', body={'id': job_id, 'target_kind': 'page', 'target_id': spec['page_id'], 'base_version': 1})
+    assert begun['status'] == 201, begun
+    assert begun['body']['transport'] == 'native-tools'
+    assert not (root / 'pages/files/ai-workspaces' / job_id).exists()
+    text, offset = '', 0
+    while True:
+        response = raw('aiReadPart', id=job_id, body={'field': 'html', 'offset': offset})
+        assert response['status'] == 200, response
+        part = response['body']
+        text += part['text']
+        offset = part['next_offset']
+        if offset is None:
+            break
+    assert text == spec['package']['html']
+    proposed = raw('aiPropose', id=job_id, body={'source_sha256': part['source_sha256'],
+        'candidate_sha256': None, 'edits': [{'field': 'html', 'old_text': '先复核人群', 'new_text': '验收通过后再决定运营动作。'}]})
+    assert proposed['status'] == 200 and proposed['body']['saved'] is False, proposed
+    ready = raw('aiCollect', id=job_id)
+    assert ready['status'] == 200 and ready['body']['status'] == 'READY', ready
+    assert raw('get', id=spec['page_id'])['body']['spec']['version'] == 1
+    saved = raw('aiConfirm', id=job_id, body={'candidate_hash': ready['body']['candidate_hash']})
+    assert saved['status'] == 200 and saved['body']['saved_version'] == 2, saved
+    reopened = raw('get', id=spec['page_id'])['body']['spec']
+    assert reopened['package']['html'] == text.replace('先复核人群', '验收通过后再决定运营动作。')
+    assert raw('get', id=spec['page_id'], version=1)['body']['spec']['package']['html'] == text
+    replay = raw('aiConfirm', id=job_id, body={'candidate_hash': ready['body']['candidate_hash']})
+    assert replay['body']['saved_version'] == 2
+
+
+def test_native_ai_bound_numbers_and_revocation_remain_protected(composition):
+    rpc, _, _ = composition
+    def raw(op, **fields):
+        return value(rpc('raw', envelope={'operation': op, **fields}))
+    assert value(rpc('login'))['connected']
+    ref = value(rpc('query', filters=FILTERS))['source_ref']
+    spec = value(rpc('storeOpen', draft=editable_draft(ref)))['current']
+    job_id = 'ai_' + str(uuid.uuid4())
+    assert raw('aiBegin', body={'id': job_id, 'target_kind': 'page', 'target_id': spec['page_id'], 'base_version': 1})['status'] == 201
+    part = raw('aiReadPart', id=job_id, body={'field': 'html'})['body']
+    base = {'source_sha256': part['source_sha256'], 'candidate_sha256': None}
+    denied = raw('aiPropose', id=job_id, body={**base, 'edits': [{'field': 'html', 'old_text': '8001', 'new_text': '999'}]})
+    assert denied['status'] == 422 and denied['body']['error']['code'] == 'AI_BOUND_CONTENT', denied
+    proposed = raw('aiPropose', id=job_id, body={**base, 'edits': [{'field': 'css', 'old_text': '', 'new_text': 'h1{color:blue}'}]})
+    assert proposed['status'] == 200, proposed
+    ready = raw('aiCollect', id=job_id)
+    assert ready['status'] == 200 and ready['body']['status'] == 'READY', ready
+    value(rpc('revoke', ref=ref))
+    denied = raw('aiConfirm', id=job_id, body={'candidate_hash': ready['body']['candidate_hash']})
+    assert denied['status'] == 403 and denied['body']['error']['code'] == 'RESULT_REVOKED', denied
+    assert raw('get', id=spec['page_id'])['body']['spec']['version'] == 1
 
 
 def test_actual_frame_message_entry_reads_native_source_and_rejects_forgery(composition):

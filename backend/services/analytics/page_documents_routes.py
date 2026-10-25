@@ -26,6 +26,7 @@ from backend.services.analytics.page_result_access_routes import page_result_acc
 from backend.services.analytics.cockpit_files import CockpitFileStore, MAX_FILE_BYTES
 from backend.services.analytics.cockpit_files_routes import cockpit_files_router
 from backend.services.analytics.cockpit_ai import CockpitAIStore
+from backend.services.analytics.cockpit_native_ai import NativeCockpitAIStore
 from backend.services.analytics.cockpit_ai_routes import cockpit_ai_router
 from backend.services.analytics.page_edit_context import PageEditContextStore
 from backend.services.analytics.page_edit_context_routes import page_edit_context_router
@@ -182,6 +183,9 @@ def create_page_app(
         files = CockpitFileStore(page_state_dir / "files")
         app.include_router(cockpit_files_router(files, principal, office, office_principal))
         app.include_router(cockpit_ai_router(CockpitAIStore(files, store), principal, office, office_principal))
+    elif page_state_dir is not None:
+        files = CockpitFileStore(page_state_dir / "files")
+        app.include_router(cockpit_ai_router(NativeCockpitAIStore(files, store), principal, context=context))
     if result_access is not None:
         app.include_router(page_result_access_router(result_access, principal, context if authenticate_page else None))
 
