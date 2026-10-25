@@ -79,7 +79,6 @@ class ArtifactInboxStore:
                           ddl=DDL, unavailable=UNAVAILABLE)
 
     def _migrate_v1(self):
-        """Add the durable binding manifest to an existing v1 inbox."""
         if not self.path.exists() or self.path.is_symlink():
             return
         try:

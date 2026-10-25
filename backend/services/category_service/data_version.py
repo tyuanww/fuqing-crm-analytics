@@ -1,4 +1,3 @@
-"""Stable source metadata shared by category and product cohort queries."""
 
 from __future__ import annotations
 
@@ -15,13 +14,6 @@ def _iso(value: Any) -> str | None:
 
 
 def orders_data_version(conn: Any) -> dict[str, str | None]:
-    """Return a cheap append/update-sensitive version for the orders source.
-
-    The dashboard and product cohort endpoints must expose the same source
-    version before a frontend table combines their results.  The order count,
-    date bounds, and amount total catch both normal ETL appends and corrections
-    that keep the latest payment date unchanged.
-    """
     row = conn.execute(
         """
         SELECT

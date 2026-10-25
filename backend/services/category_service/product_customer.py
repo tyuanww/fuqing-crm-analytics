@@ -1,4 +1,3 @@
-"""Product-level new/old customer analysis with user deduplication."""
 
 from __future__ import annotations
 
@@ -236,7 +235,6 @@ def _period_metrics(
     WHERE product_name IS NOT NULL
     GROUP BY product_name
     """
-    # SQL order is CASE product mapping, first-purchase cutoff, then period filters.
     params = [*group_params, cutoff, *where_params]
     assert sql.count("?") == len(params)
     rows = conn.execute(sql, params).fetchall()
@@ -253,7 +251,6 @@ def _assert_first_purchase_complete(
     channel: Optional[str],
     exclude_channels: list[str],
 ) -> None:
-    """Reject a period when a counted buyer has no trustworthy first-purchase date."""
     where_sql, where_params = _build_category_period_filter(
         start_date, end_date, metric_type, channel, exclude_channels,
     )

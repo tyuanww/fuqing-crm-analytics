@@ -19,6 +19,7 @@
 - [ ] 当前 PR 精确集成 CI 与运行包读回，以 PR 最新提交结果为准。
 - [ ] 新包通过后进行真实浏览器业务验收。
 - [ ] 核验近两年 RFM 与商品缓存的覆盖、失效和筛选行为。完整业务链路仍未验收。
+- [ ] 修复商品数据版本碰撞：分类改变但日期、行数、总额不变时，当前标识不变。需可靠修订来源、旧缓存失效和前端混版拒绝回归。见 [Aside 验收与注释审查](evidence/dsh-aside-uat-comments-20261025.md)。
 
 本轮证据见[运行接线记录](evidence/dsh-native-page-runtime-20261025.md)、[完整业务装配记录](evidence/dsh-business-runtime-profile-20261025.md)、[页面前置修复记录](evidence/dsh-native-page-prerequisites-20261025.md)和[租约包组合接收记录](evidence/dsh-native-page-composition-20261025.md)，Git 和 CI 状态以当前 PR 为准。不合并、切现役或发布。
 

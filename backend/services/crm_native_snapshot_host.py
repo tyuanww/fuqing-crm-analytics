@@ -32,7 +32,6 @@ MAX_BUDGET_MS = 5000
 
 
 def read_service_token(path: Path) -> str:
-    """Only explicit instance credentials in an owned private directory are accepted."""
     try:
         directory = path.parent.lstat()
         if (not path.is_absolute() or path.parent.resolve(strict=True) != path.parent

@@ -1,4 +1,3 @@
-"""Bounded GitHub artifact ZIP reader for sealed plugin and domain packs."""
 import re
 import stat
 import sys

@@ -1,11 +1,4 @@
 #!/usr/bin/env node
-/**
- * Bounded state-machine verification for the free-page binding seam.
- *
- * The checker intentionally imports production code instead of copying its
- * parser.  The state machine abstracts the durable stores, while each
- * delivery is validated by extractBindingManifest/parseBindingManifest.
- */
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -125,8 +118,6 @@ function applyEvent(state, event, delivered) {
     pageManifest: clone(state.pageManifest),
   };
   if (event === 'deliver') {
-    // A waiter consumes one request id exactly once; a late duplicate cannot
-    // mutate an already delivered/terminal request.
     if (next.delivery !== 'NONE') return next;
     if (!delivered.ok) {
       next.delivery = 'REJECTED';
@@ -149,7 +140,6 @@ function applyEvent(state, event, delivered) {
     return next;
   }
   if (event === 'duplicate-confirm') {
-    // Confirm is idempotent once the artifact is SAVED.
     return next;
   }
   if (event === 'readback') {

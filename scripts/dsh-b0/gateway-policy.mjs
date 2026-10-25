@@ -1,5 +1,4 @@
 /**
- * B0 synthetic-only policy, pinned to DSH 1f81c047fc48fa190a683e469daa699857e9afe8.
  * Pure functions: no IO, credentials, mutable session state, or runtime imports.
  * Wire references: packages/client/connection/src/client/rpc.ts:32-50;
  * packages/api/gateway/src/stream-protocol.ts:243-308;

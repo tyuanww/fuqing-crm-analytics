@@ -1,4 +1,3 @@
-"""Product-level customer aggregation uses one user identity across SPU classes."""
 
 from __future__ import annotations
 

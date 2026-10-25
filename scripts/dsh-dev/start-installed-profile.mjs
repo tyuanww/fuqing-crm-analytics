@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/** Start the already-installed web profile without running package installation. */
 import { launchInstalledProfile, stopInstalledProfile } from './start-installed-profile-core.mjs';
 
 const profile = await launchInstalledProfile();

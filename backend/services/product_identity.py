@@ -1,4 +1,3 @@
-"""Stable product identities for user-facing product cohort results."""
 
 from __future__ import annotations
 

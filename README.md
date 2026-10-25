@@ -2,11 +2,11 @@
 
 当前提交、版本和现役见 [STATUS](./STATUS.md)。目录、端口和检索见 [维护地图](./docs/operating/maintainer-map.md)。对话生成 HTML 的步骤见 [从对话生成 HTML 驾驶舱](./docs/operating/cockpit-native-html.md)。产品仍 PARTIAL。
 
-> 最近生产记录（[STATUS](./STATUS.md) 的 2026-10-22 现场记录）：线上 `current` 指向 `dsh-0.2.1-rc.1-core-main-20261021-cockpit-v3`。crm.5 与 query.14 当前生效，插件页各显示 `2/2` 组件运行中。商品新老客使用 `product-customer/v3`：覆盖不足明确返回 `INSUFFICIENT_COVERAGE`，工具公开结果只展示唯一 `display_name`，Vue 前端已经改用去重后的商品接口并按实际最新周查询。后端容器 `healthy`，WeKnora 检索和 HTML 生成链路已有运行证据，CRM 仍要求用户自行登录。旧 release marker 和候选 receipt 未被追认为新的正式发布身份，`release_ready=false`。完整边界见[审查问题修复回执](./docs/hackathon/evidence/dsh-review-fixes-20261022.md)。
+2026-10-22 现役为 DSH `0.2.1-rc.1`、crm.5 和 query.14。商品新老客接口返回映射商品名，覆盖不足时明确拒绝。WeKnora 检索和 HTML 生成已有现场记录，完整范围见[审查问题修复回执](./docs/hackathon/evidence/dsh-review-fixes-20261022.md)。
 
-> 本地主仓候选（2026-10-24）：DSH 已固定到 `0.2.1-rc.3` / upstream `1f81c047`，Cordis `4.0.5`；rc3 上游干净构建、活动 profile、peer/lock 和 plugin-kit provenance 已统一。该候选尚未推送、合并或切换杭州；线上继续按上方 rc1 现场事实运行。
+rc3 候选固定 DSH `0.2.1-rc.3` 和 Cordis `4.0.5`，已推送至 [PR #164](https://github.com/tyuanww/fuqing-crm-analytics/pull/164)。源码、包与 CI 的核验范围见[原生页面接线记录](./docs/hackathon/evidence/dsh-native-page-runtime-20261025.md)。PR 未合并，杭州未切换，真实业务验收仍未完成，`release_ready=false`。
 
-> 主仓当前快照（2026-10-22）：主仓继续承担 DSH pin、profile、runtime peer closure、跨插件合同、组合验证和交付文档；CRM、知识、看板和其他业务能力由独立插件仓维护。单插件的实际更新步骤见[插件更新指南](./docs/operating/shinemage-plugin-update.md)，rc1 现场 side-load 与候选边界见[升级操作手册](./docs/operating/dsh-rc1-clean-upgrade-runbook.md)，职责、清理和 DSH 升级边界见[维护、清理与升级手册](./docs/operating/shinemage-maintenance-and-cleanup.md)。正式 SDK 分发仍 BLOCKED，产品仍 PARTIAL，未授权的正式发布门禁仍保持未执行。
+主仓维护版本、插件组合、跨插件合同与交付验证。CRM、知识和看板能力在独立插件仓维护。操作步骤见[插件更新指南](./docs/operating/shinemage-plugin-update.md)、[升级操作手册](./docs/operating/dsh-rc1-clean-upgrade-runbook.md)及[维护与清理手册](./docs/operating/shinemage-maintenance-and-cleanup.md)。正式 SDK 分发仍为 BLOCKED。
 
 > A/B/C 集成记录（2026-10-08）是历史证据：单插件更新与取消、固定宿主进程级恢复、HTML headed 验收和 SDK 信任盘查见[本轮集成验收](./docs/hackathon/evidence/shinemage-abc-integration-20261008.md)。它不替代当前主仓合并状态，也不代表新的 Release。
 

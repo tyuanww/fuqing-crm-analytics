@@ -358,9 +358,6 @@ class CockpitAIStore:
         # Styling can change; changing data-bound content requires existing result APIs.
         if any(before.get(k) != after.get(k) for k in ("html", "js", "node_map", "resources")):
             fault(422, "AI_BOUND_CONTENT", "此页面有业务数据绑定，AI 可调整 CSS 和非绑定节点的展示文案；绑定数据节点请使用原有绑定编辑流程。")
-        # A whole-page candidate has no trusted node-resolution context.  Do not
-        # let a presentation overlay become an alternate data channel: the
-        # controlled node-edit path performs the binding check for each target.
         for package in (before, after):
             for edit in (package.get("presentation") or {}).get("edits", []):
                 if edit.get("text") is not None:

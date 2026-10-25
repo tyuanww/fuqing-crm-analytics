@@ -1,7 +1,5 @@
 """Read-only authorized result_ref/data_ref access for free HTML pages.
 
-New queries stay on the native Agent. Native reads use request-bound sources;
-isolated fixtures remain supported. Cache hits re-check current authorization.
 """
 from __future__ import annotations
 
