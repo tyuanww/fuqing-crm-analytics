@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - codex/rc3-composition-artifact-20261024
+      - codex/warehouse-composition-inputs-20261026
 
 permissions:
   contents: read

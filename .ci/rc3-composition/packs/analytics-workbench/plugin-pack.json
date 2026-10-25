@@ -4,27 +4,27 @@
   "package_version": "0.0.0-b0",
   "dsh_pin": "0.2.1-rc.3",
   "source_dsh_pin": "0.2.1-rc.3",
-  "source_sha": "c836d3f44326310eb83491aabb516b91e94e8d23",
+  "source_sha": "178bdcaef946ba2f539adcebf01057cb0fa2c06c",
   "source_dirty": false,
   "tarball": {
     "name": "shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
-    "bytes": 443450,
-    "sha256": "2dcf93ed1ca28ffd7e9a2e0efb342feffe06606a8050b8125d5780e6e74ffb60"
+    "bytes": 444128,
+    "sha256": "dc01d2cc6dfce0005503d16cf1e923cc445d85320cf01550f3f28f6b4e519282"
   },
   "generated_bytes_provenance": {
     "schema_version": "dsh-generated-bytes/v1",
     "status": "PASS",
     "source": {
-      "git_sha": "c836d3f44326310eb83491aabb516b91e94e8d23",
-      "tree_sha256": "130b591739815bc405d705bb9bf6ccd856c5ada2e58fc903e1a02178d5fc421a",
+      "git_sha": "178bdcaef946ba2f539adcebf01057cb0fa2c06c",
+      "tree_sha256": "cb45f726235ae532fb108fb60a7f94502b4682dc5306a657d682dba27c4bd0de",
       "entries": 656,
-      "bytes": 3912541,
-      "sha256": "130b591739815bc405d705bb9bf6ccd856c5ada2e58fc903e1a02178d5fc421a"
+      "bytes": 3917000,
+      "sha256": "cb45f726235ae532fb108fb60a7f94502b4682dc5306a657d682dba27c4bd0de"
     },
     "generated_tree": {
-      "sha256": "35a4d0d220f00199e440f5802855574417166d75913c58272d44708ce03f2c24",
+      "sha256": "b602684576c9f0df63b0fe2f81f70f8e82310681975dff4d6ec7b72e699b90ec",
       "entries": 7,
-      "bytes": 1495790
+      "bytes": 1497869
     },
     "generated_files": [
       {
@@ -38,8 +38,8 @@
         "path": "lib/client.js",
         "type": "file",
         "mode": 420,
-        "bytes": 1180449,
-        "sha256": "0a3f2cc9f9f5ff04cc1c79ef3c6146f7bfe33074fb6968aa487ab73365e649a1"
+        "bytes": 1182528,
+        "sha256": "fa06f535e0ca224fad1ff627d468bfa40b8f92bfb2a09d5d4066a268fb4e2941"
       },
       {
         "path": "lib/index.js",
@@ -96,11 +96,11 @@
       "network_mode": "offline"
     },
     "builder_receipt_schema_version": "dsh-plugin-build/v1",
-    "builder_receipt_sha256": "c4cd32b78c39d7a81c9c36acd1c9fa9b82ad3478a4d434494126aa716fd1c99a",
+    "builder_receipt_sha256": "edeab2f8c65e8071445502332ad840032b48db95488fb4ba239168f481029c78",
     "tarball": {
       "name": "shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
-      "bytes": 443450,
-      "sha256": "2dcf93ed1ca28ffd7e9a2e0efb342feffe06606a8050b8125d5780e6e74ffb60"
+      "bytes": 444128,
+      "sha256": "dc01d2cc6dfce0005503d16cf1e923cc445d85320cf01550f3f28f6b4e519282"
     }
   },
   "entries": [
