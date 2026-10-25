@@ -6,6 +6,7 @@ import urllib.parse
 import urllib.request
 
 from backend.contracts.crm_analysis import CrmSnapshot
+from backend.services.analytics.warehouse_page_projection import warehouse_projection, purchases_rows
 from backend.services.analytics.access import AnalyticsError, AnalyticsPrincipal
 from backend.services.analytics.page_context import PageAccessPolicy, PageRequestContext
 from backend.services.analytics.page_documents import ResolvedPageBinding
@@ -93,23 +94,30 @@ class NativePageSource:
         if old != value:
             raise source_error(409, "RESULT_STALE")
         try:
-            snapshot = CrmSnapshot.model_validate(value["snapshot"])
             identity = value["identity"]
             if identity["native_session_id"] != session or value["ref"] != ref:
                 raise source_error(404, "NOT_FOUND")
             expires = identity["expires_at_ms"]
             if type(expires) is not int or now_ms() >= expires:
                 raise source_error(409, "RESULT_STALE")
+            if value["snapshot"].get("schema_version") == "native-warehouse-snapshot-read/v1":
+                snapshot, rows, metadata, time_range = warehouse_projection(value["snapshot"], ref, identity["data_kind"])
+                projection = metadata["projection_version"]
+                key = (context.actor.actor_id, session, identity["connection_generation"], value["epoch"], ref,
+                       snapshot.result_sha256, projection, snapshot.snapshot_id, snapshot.warehouse.data_version,
+                       snapshot.warehouse.semantic_revision, *target_key)
+                return AuthorizedSnapshot(
+                    result_ref=ref, owner=context.actor.actor_id, unit="per-row", time_range=time_range,
+                    queried_at=snapshot.captured_at.isoformat(), source=projection, result_version=1,
+                    expires_at_ms=expires, rows=tuple(rows), data_scope=NATIVE_POLICY.result_scope,
+                    session_id=session, authorization_key=key, metadata=metadata)
+            snapshot = CrmSnapshot.model_validate(value["snapshot"])
             raw = value["snapshot"]["result"]
             digest = hashlib.sha256(json.dumps(raw, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
             if digest != snapshot.result_sha256 or snapshot.data_kind != identity["data_kind"]:
                 raise source_error(409, "RESULT_STALE")
             result = snapshot.result.model_dump(mode="json")
-            rows = [{"metric": "GSV", "unit": "CNY fen", "amount_fen": result["gsv_amount_fen"]},
-                    {"metric": "AOV", "unit": "CNY fen/order", **result["aov"]},
-                    {"metric": "AUS", "unit": "CNY fen/buyer", **result["aus"]},
-                    {"metric": "orders", "unit": "orders", "count": result["coverage"]["orders"]},
-                    {"metric": "buyers", "unit": "buyers", "count": result["coverage"]["buyers"]}]
+            rows = purchases_rows(result)
             key = (context.actor.actor_id, session, identity["connection_generation"], value["epoch"], ref,
                    snapshot.result_sha256, PROJECTION, *target_key)
             return AuthorizedSnapshot(
@@ -122,7 +130,7 @@ class NativePageSource:
                           "coverage": result["coverage"], "limitations": result["limitations"],
                           "date_bounds": "inclusive", "data_through": result["data_through"],
                           "refund_as_of": result["refund_as_of"], "data_kind": snapshot.data_kind})
-        except (ValueError, TypeError, KeyError):
+        except (ValueError, TypeError, KeyError, AttributeError):
             raise source_error() from None
 
     def resolve_binding(self, actor, session, ref, *, source_context):
