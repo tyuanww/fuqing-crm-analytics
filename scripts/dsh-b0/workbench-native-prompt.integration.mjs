@@ -152,7 +152,13 @@ async function boot(t, {
       snapshot.byId = { ...snapshot.byId, [id]: { id, retainedBy: { mainView: 1 } } };
       return { sessionId: id, release() {} };
     },
-    create(options) { if (createSession) return createSession(options); throw new Error('native prompt inject test must not create a session'); },
+    async refresh() {},
+    async create(options) {
+      if (!createSession) throw new Error('native prompt inject test must not create a session');
+      const id = await createSession(options);
+      snapshot.ids.push(id);
+      return id;
+    },
   });
   ctx.provide('theme', {
     overrideTokens: () => () => {},
