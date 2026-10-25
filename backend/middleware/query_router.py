@@ -227,6 +227,7 @@ class QueryRouterMiddleware:
         "/api/v1/rfm/m-flow",
     }
     VERIFIED_READ_ONLY_POST_ENDPOINTS = {
+        "/api/v1/metrics/warehouse-snapshots",
         "/api/v1/category/product-customer",
         "/api/v1/category/product-customer/batch",
         "/api/v1/ad-hoc/daily-gsv",
@@ -266,6 +267,7 @@ class QueryRouterMiddleware:
         # Reading saved aggregates never needs to reopen the archived DuckDB.
         "/api/v1/metrics/crm-",
         "/api/v1/metrics/dashboard-snapshots/",
+        "/api/v1/metrics/warehouse-snapshots/",
         "/docs",
         "/redoc",
     )

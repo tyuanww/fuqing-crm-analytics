@@ -13,7 +13,7 @@ import duckdb
 from fastapi import FastAPI
 
 from backend.services.warehouse_cache import AggregateCache
-from backend.services.warehouse_runtime import WarehouseRuntime, product_semantic_revision, rfm_semantic_revision
+from backend.services.warehouse_runtime import WarehouseRuntime, product_semantic_revision, purchases_semantic_revision, rfm_semantic_revision
 from backend.services.warehouse_source import SourceState, VerifiedWarehouseSource, WarehouseSourceSpec
 
 
@@ -58,7 +58,7 @@ def build_warehouse_runtime(
     source_dir.mkdir(mode=0o700, exist_ok=True)
     cache_dir.mkdir(mode=0o700, exist_ok=True)
     cache = AggregateCache(cache_dir / "aggregates.sqlite")
-    semantics = {"product-customer/v3": product_semantic_revision(), "rfm": rfm_semantic_revision()}
+    semantics = {"product-customer/v3": product_semantic_revision(), "rfm": rfm_semantic_revision(), "purchases": purchases_semantic_revision()}
     from backend.services.dual_conn import ACTIVE_READ_LIMIT, open_matching_read_connection
 
     source = VerifiedWarehouseSource.seal(settings.source, source_dir, connect=connect or open_matching_read_connection)
@@ -101,6 +101,11 @@ async def verified_warehouse_lifespan(application: FastAPI, settings: WarehouseR
         current = getattr(application.state, "warehouse_runtime", None)
         if current is not None and current.source.state != SourceState.CLOSED:
             raise RuntimeError("application already owns a warehouse runtime")
+        from backend.services.warehouse_snapshot import WarehouseSnapshotStore
+
+        snapshots_dir = settings.state_dir / "snapshots"
+        snapshots_dir.mkdir(mode=0o700, exist_ok=True)
+        application.state.warehouse_snapshots = WarehouseSnapshotStore.create(snapshots_dir, settings.source.data_kind)
         application.state.warehouse_runtime = runtime
         from backend.db.memory_monitor import MemoryWatchdog
         from backend.services.auth_token_evictor import evict_idle_tokens_periodically

@@ -146,6 +146,7 @@ def test_prewarm_fixed_wtd_matches_native_three_period_key(warm_case, runtime_ca
             return cls(2026, 10, 25)
 
     monkeypatch.setattr(_shared, "date", BusinessDate)
+    runtime = replace(runtime, business_today=BusinessDate.today)
     try:
         plan = build_warm_plan(runtime, policy=RfmPrecomputePolicy(lookback_months=1, channels=(None,),
                                                                   metric_types=("GSV",), exclude_sets=((),)))

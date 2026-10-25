@@ -791,10 +791,12 @@ from backend.routers import (
     login_request_router,  # L4.85 申请+同意 模式
     missions_router,
 )
+from backend.routers.warehouse_snapshots import router as warehouse_snapshots_router
 
 app.include_router(auth_router)
 app.include_router(health_router)
 app.include_router(metrics_router)
+app.include_router(warehouse_snapshots_router)
 app.include_router(flow_router)
 app.include_router(asset_router)
 # Sprint 203 R9: geo_router/cohort_retention_router 删除 (前端 4 板块解耦, geo_service 保留供 report/export 用)

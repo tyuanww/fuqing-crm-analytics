@@ -7,7 +7,7 @@ from datetime import date
 from pathlib import Path
 import threading
 from types import MappingProxyType
-from typing import AsyncIterator, Iterator, Literal, Mapping
+from typing import AsyncIterator, Callable, Iterator, Literal, Mapping
 
 from backend.services.warehouse_cache import AggregateCache
 from backend.services.warehouse_source import (
@@ -35,6 +35,7 @@ class WarehouseRuntime:
     semantic_revisions: Mapping[str, str]
     read_limit: int = 2
     acquire_timeout: float = 5.0
+    business_today: Callable[[], date] = date.today
     _slots: threading.BoundedSemaphore = field(init=False, repr=False, compare=False)
 
     def __post_init__(self) -> None:
@@ -62,7 +63,7 @@ class WarehouseRuntime:
         if not acquired:
             raise ReadPoolTimeout("verified warehouse read limit reached")
         try:
-            with self.read() as frame:
+            with self.read(period_today=self.business_today()) as frame:
                 yield frame
         finally:
             self._slots.release()
@@ -143,4 +144,13 @@ def rfm_semantic_revision() -> str:
         "backend/semantic/filters.py",
         "backend/semantic/segments.py",
         "backend/semantic/time.py",
+    ))
+
+
+def purchases_semantic_revision() -> str:
+    from backend.services.warehouse_cache import semantic_revision
+
+    return semantic_revision(Path(__file__).resolve().parents[2], (
+        "backend/services/metrics/dashboard_purchases.py", "backend/semantic/dashboard_purchases.py",
+        "backend/semantic/filters.py", "backend/semantic/channels.py", "backend/semantic/metrics.py",
     ))

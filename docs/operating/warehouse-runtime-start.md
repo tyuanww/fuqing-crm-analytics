@@ -17,6 +17,8 @@ export FQ_WAREHOUSE_DATA_KIND=synthetic
 
 已登记查询为商品新老客、八象限及 R/F/M、GSV 概览与趋势、购买分母、仓库截止日，以及 `daily-gsv` 和 `daily-gsv-multi-period` 两个日序列 POST。其余旧看板接口返回 `UNSUPPORTED_OPERATION`，避免读到未登记来源的文件缓存或派生表。新模式也拒绝 Mission 和旧快照创建接口；两者尚未适配仓库来源身份。历史快照仍保留原始身份，读取历史不代表来自当前仓库。完整前端尚未迁移或验收。
 
+新模式另提供[仓库聚合快照接口](warehouse-snapshots.md)，独立保存有来源身份的六类聚合结果。旧快照创建入口继续拒绝，原生调用方和页面投影仍须适配。
+
 启动成功后，应用发布同一 `WarehouseRuntime`。HTTP 商品与 RFM 查询只读其持久聚合缓存。启动阶段不运行旧缓存建表、manifest invalidation 或后台 best-effort 预热。缓存尚未预热时，查询返回明确 miss。已有代码和合成验收不代表真实数据已经跑完。
 
 按[分批预热流程](warehouse-prewarm.md)生成有限计划并续跑。服务与预热任务使用不同来源目录锁，共享同一按来源及语义隔离的缓存。
