@@ -4,7 +4,9 @@
 
 ## 当前快照（2026-10-26）
 
-- 2026-10-26 隔离 rc3 已完成真实聊天查询商品和 RFM 五类来源、生成保存页面及 316 格表格对账。后端 `46bd1059` 已修复事实子树权限，真实登录请求验证数字修改返回 `403 BOUND_NODE`。Workbench `dbdf04f1` 已审核并更新隔离实例；现场点击商品事实数字并尝试键入后，数值未变、无草稿，文本及 AI 修改入口均关闭。主仓与 Workbench 修复已推送，Workbench 两项 CI 通过，作者核心 1228 项通过。CRM 重连后的人工及 AI 文案编辑、保存重开、主仓对应 CI 与正式组合、PR 拆分仍未关闭。接口继续以 `3112b9dc` 为基线，近两年缓存未完成全量验收，杭州现役未切换。见[本轮编辑验收](docs/hackathon/evidence/dsh-warehouse-edit-uat-20261026.md)。
+- 2026-10-26 隔离 rc3 已完成真实聊天查询商品和 RFM 五类来源、生成保存页面及 316 格表格对账。后端 `46bd1059` 的事实子树保护已通过真实请求负测。CRM `75474a4` 修正旧引用误报未登录，已推送且 CI 通过；Workbench `b747937d` 修复 iframe 沿用旧沙箱权限，已审核、推送并安装隔离实例。现场标题点击及草稿实时预览通过，绑定金额键入不变、无草稿；测试文案已撤回，旧页仍为 v3。人工及 AI 文案保存重开、正式组合与 PR 拆分仍开放。接口基线仍为 `3112b9dc`，杭州现役未切换。见[本轮编辑验收](docs/hackathon/evidence/dsh-warehouse-edit-uat-20261026.md)。
+
+- 当前缓存收口范围按并行会话同步，收紧为 2026 Q1、Q2、H1 的全店、GSV、不剔除低价口径。近两年全矩阵不再作为本阶段门槛。Q2 与 H1 超出现有商品和 purchases 的 90 天限制，须先贯通受控窗口的合同、计算、CRM 工具和预热，再在隔离缓存目录跑数。最终以 H1 完成真实聊天、知识库、诊断、看板和保存重开验收；现有短窗口通过不能替代此验收。
 
 - 2026-10-25 真实会话盘查确认 RFM 目标窗口未预热、普通 AI 文件链路受阻及模型 HTML 标签错误。本地候选已补受控原生 AI 路径、RFM 错误分类、保存选择和交付标记校验，独立对抗复核与验证收口见[本轮记录](docs/hackathon/evidence/dsh-uat-root-fixes-20261025.md)。两个作者 CI 成功，严格包已进入新组合；运输 artifact `12591648417` 已下载、20 文件原字节比较并严格接收。主仓精确 CI、真实模型联合验收与两年缓存仍未关闭，杭州未切换。
 
@@ -46,7 +48,7 @@
 
 ## 本轮施工计划
 
-- 当前 rc3 候选已更新原生 CRM Host、页面 resolver、预览消息与编辑确认接线及两作者组合输入。先完成当前 PR 精确 CI 和运行包读回，再进行真实浏览器业务验收，随后验证两年 RFM/商品缓存。正式部署仍受 M2 门禁和批准 artifact 约束。publisher identity、签名、独立核验、撤销、final attestation、正式 clean-machine 和外部发布批准未完成，M2-07 继续 `BLOCKED`、`release_ready=false`。
+- 当前 rc3 候选已更新原生 CRM Host、页面 resolver、预览消息与编辑确认接线及两作者组合输入。下一有界单元只覆盖 2026 Q1、Q2、H1 的全店、GSV、不剔除低价口径，目前尚未贯通长窗口或完成预热。先在杭州隔离环境预热现有 RFM 能力，同时贯通商品和 purchases 的受控长窗口，再完成 H1 真实浏览器业务验收；PR 拆分随后推进。正式部署仍受 M2 门禁和批准 artifact 约束。publisher identity、签名、独立核验、撤销、final attestation、正式 clean-machine 和外部发布批准未完成，M2-07 继续 `BLOCKED`、`release_ready=false`。
 ## 历史快照入口
 
 - 2026-10-15 及更早的 alpha3、rc2、M2-06、作者仓合并和 alpha2 历史事实已归档到 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)；它们不覆盖本页当前快照，也不授予 release/activation。
