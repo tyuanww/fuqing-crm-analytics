@@ -131,7 +131,7 @@ class SourceTree(HTMLParser):
             self.nodes.append(node)
 
 
-def validate_selection(package, selection, manifest):
+def validate_selection(package, selection, manifest, *, allow_bound=False):
     if not isinstance(selection, dict) or set(selection) not in ({'start', 'end', 'html_hash'}, {'start', 'end', 'html_hash', 'rendered'}):
         fault(422, 'AI_SELECTION_INVALID', '选区格式无效，请重新点选。')
     html = package['html']
@@ -139,7 +139,7 @@ def validate_selection(package, selection, manifest):
     if (type(start) is not int or type(end) is not int or not 0 <= start < end <= len(html)
             or selection['html_hash'] != hashlib.sha256(html.encode()).hexdigest()):
         fault(409, 'AI_SELECTION_STALE', '页面已变化，请重新点选。')
-    if manifest.get('bindings') or manifest.get('result_refs'):
+    if (manifest.get('bindings') or manifest.get('result_refs')) and not allow_bound:
         fault(422, 'AI_BOUND_CONTENT', '业务绑定页面不支持普通选区修改。')
     tree = SourceTree(html)
     if 'rendered' in selection:
@@ -165,6 +165,11 @@ def validate_selection(package, selection, manifest):
     if tree.invalid or scoped is None or scoped.invalid:
         fault(422, 'AI_SELECTION_INVALID', '此区域无法可靠定位，或包含动态内容，请选择静态文字或板块。')
     return dict(selection)
+
+
+def presentation_texts(package):
+    return {json.dumps(edit['target'], sort_keys=True): edit['text']
+            for edit in (package.get('presentation') or {}).get('edits', []) if edit.get('text') is not None}
 
 
 def protect_selection(before, after, selection):

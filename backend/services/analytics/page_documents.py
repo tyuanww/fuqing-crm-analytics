@@ -388,6 +388,16 @@ class PageDocumentStore:
                               "created_at_ms": row["created_ms"]})
             return items
 
+    def published_preview(self, actor, page_id, version):
+        self.get(actor, page_id, version)
+        with self._read() as con:
+            rows = con.execute("SELECT preview_id, operation FROM previews WHERE owner=? AND page_id=? "
+                               "AND base_version=? AND status='APPLIED'",
+                               (actor.actor_id, page_id, version - 1)).fetchall()
+        if len(rows) != 1:
+            raise AnalyticsError(503, "STATE_UNAVAILABLE", UNAVAILABLE, retryable=True)
+        return dict(rows[0])
+
     def _bind(self, actor, spec, *, retained_scopes=None, source_context=None):
         refs = list(spec.binding_manifest.result_refs)
         if not refs:

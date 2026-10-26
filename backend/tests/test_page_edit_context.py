@@ -123,6 +123,51 @@ def boot(tmp_path, *, actor=None, binding=None, resolve=False, page_package=None
     return actor, clock, pages, edits, saved["spec"]
 
 
+def private_result_page(tmp_path):
+    original = principal()
+    allowed = AnalyticsPrincipal(original.actor_id, original.capabilities, original.data_scopes | {"result:private"})
+    clock = Clock()
+    directory = private(tmp_path / "state")
+    pages = PageDocumentStore(directory, clock=clock, resolve_binding=lambda _actor, _session, ref: ResolvedPageBinding(
+        "VERIFIED", frozenset({"result:private"}) if ref == "private_ref" else frozenset({DATA_SCOPE})))
+    manifest = {"bindings": [{"binding_id": "b_private", "node_id": "n_lede", "result_ref": "private_ref"}],
+                "result_refs": ["private_ref"]}
+    draft = PageDraft(title="Scoped", session_id="scope-session", package=package(), binding_manifest=manifest)
+    preview = pages.generate(allowed, draft)
+    spec = pages.confirm(allowed, preview["preview_id"], "scope-page")["spec"]
+    edits = PageEditContextStore(directory, pages, clock=clock)
+    context = open_context(edits, allowed, spec["page_id"])
+    patch = edits.apply(allowed, context["edit_context_id"], operation("presentation", {"text": "私有展示"}, "private-edit", context=context), "private-edit")
+    edits.confirm(allowed, context["edit_context_id"], patch["preview_id"], "private-save")
+    return allowed, original, clock, pages, edits, spec, context, patch
+
+
+def test_successful_receipts_allow_expiry_but_recheck_saved_version_scope(tmp_path):
+    allowed, revoked, clock, pages, edits, spec, context, patch = private_result_page(tmp_path)
+    clock.t += 1_000_000
+    assert edits.confirm(allowed, context["edit_context_id"], patch["preview_id"], "private-save")["replayed"] is True
+    assert edits.recover(allowed, context["edit_context_id"], patch["preview_id"])["saved_version"] == 2
+    assert edits.acknowledge(allowed, context["edit_context_id"], patch["preview_id"])["receipt_pending"] is False
+    for read in [lambda: edits.confirm(revoked, context["edit_context_id"], patch["preview_id"], "private-save"),
+                 lambda: edits.recover(revoked, context["edit_context_id"], patch["preview_id"]),
+                 lambda: edits.acknowledge(revoked, context["edit_context_id"], patch["preview_id"])]:
+        with pytest.raises(AnalyticsError) as error:
+            read()
+        assert error.value.status == 403
+
+
+def test_historical_overlay_checks_its_version_even_if_current_head_is_public(tmp_path):
+    allowed, revoked, _, pages, edits, spec, _, _ = private_result_page(tmp_path)
+    public = {"bindings": [{"binding_id": "b_public", "node_id": "n_lede", "result_ref": "public_ref"}],
+              "result_refs": ["public_ref"]}
+    preview = pages.patch(allowed, spec["page_id"], PagePatchPreview(base_version=2, binding_manifest=public))
+    pages.confirm(allowed, preview["preview_id"], "public-version")
+    assert pages.get(revoked, spec["page_id"])["spec"]["version"] == 3
+    with pytest.raises(AnalyticsError) as error:
+        edits.overlay(revoked, spec["page_id"], 2)
+    assert error.value.status == 403
+
+
 def open_context(edits, actor, page_id, **extra):
     return edits.create(actor, {"page_id": page_id, "node_id": "n_title", "kind": "static_element", **extra})
 

@@ -15,7 +15,7 @@ from pydantic import ValidationError
 
 from backend.contracts.page_documents import PageFocusRef, PagePackage, PagePatchPreview, PageSavePreview
 from backend.services.analytics.access import AnalyticsError
-from backend.services.analytics.cockpit_html_selection import validate_selection, protect_selection
+from backend.services.analytics.cockpit_html_selection import validate_selection, protect_selection, presentation_texts
 from backend.services.analytics.cockpit_files import MAX_FILE_BYTES, fault, stamp, validate_file
 
 EDIT_CONTEXT_MAX_BYTES = 32_000
@@ -178,10 +178,12 @@ class CockpitAIStore:
                     fault(409, "AI_REQUEST_CONFLICT", "请求标识已用于其他选区。")
                 if json.loads(prior['context']).get('instruction', '') != instruction:
                     fault(409, 'AI_REQUEST_CONFLICT', '请求标识已用于其他修改要求。')
-                previous_context = json.loads(prior["context"]).get("edit_context")
+                prior_context = json.loads(prior["context"])
+                previous_context = prior_context.get("edit_context")
                 previous_id = previous_context.get("context_id") if isinstance(previous_context, dict) else None
                 incoming_id = edit_context.get("context_id") if isinstance(edit_context, dict) else None
-                if previous_id != incoming_id:
+                derived_retry = prior_context.get("selection_context") is True and edit_context is None and selection is not None
+                if previous_id != incoming_id and not derived_retry:
                     fault(409, "AI_REQUEST_CONFLICT", "请求标识已用于另一份选区上下文。")
                 row = self.row(con, actor, job_id)
             else:
@@ -197,7 +199,7 @@ class CockpitAIStore:
                     source = json.dumps(spec["package"], ensure_ascii=False, indent=2).encode()
                     context = {"title": spec["title"], "binding_manifest": spec["binding_manifest"]}
                     if edit_context is not None:
-                        context["edit_context"] = self._validate_edit_context(edit_context, target_id, base_version, spec)
+                        context["edit_context"] = self.validate_edit_context(actor, edit_context, target_id, base_version, spec)
                 else:
                     fault(422, "INVALID_AI_TARGET", "请先将会话文件保存到产物库。")
                 if version != base_version:
@@ -205,7 +207,7 @@ class CockpitAIStore:
                 if selection is not None:
                     if target_kind != "page":
                         fault(422, "AI_SELECTION_INVALID", "请先保存为可编辑页面后选择板块。")
-                    context["selection"] = validate_selection(spec["package"], selection, spec["binding_manifest"])
+                    context["selection"] = self.validate_page_selection(actor, spec, selection, context)
                 context['instruction'] = instruction
                 con.execute("INSERT INTO ai_edits VALUES(?,?,?,?,?,?,?,?, 'WAITING',NULL,NULL,NULL,NULL,?)",
                             (job_id, actor.actor_id, target_kind, target_id, base_version, filename, source, json.dumps(context), stamp()))
@@ -245,8 +247,14 @@ class CockpitAIStore:
                 stream.write(self.guide(row))
         return self.view(row)
 
+    def validate_edit_context(self, actor, edit_context, target_id, base_version, spec):
+        return self._validate_edit_context(edit_context, target_id, base_version, spec)
+
+    def validate_page_selection(self, actor, spec, selection, context):
+        return validate_selection(spec["package"], selection, spec["binding_manifest"])
+
     @staticmethod
-    def _validate_edit_context(edit_context, target_id, base_version, spec):
+    def _validate_edit_context(edit_context, target_id, base_version, spec, *, allow_bound=False):
         if not isinstance(edit_context, dict):
             fault(422, "AI_CONTEXT_SCHEMA", "AI 编辑上下文必须是对象。")
         try:
@@ -267,7 +275,7 @@ class CockpitAIStore:
             })
         except (KeyError, TypeError, ValueError):
             fault(422, "AI_CONTEXT_SCHEMA", "AI 编辑上下文的选区锚点不符合合同。")
-        if spec.get("binding_manifest", {}).get("result_refs"):
+        if spec.get("binding_manifest", {}).get("result_refs") and not allow_bound:
             fault(403, "AI_BOUND_CONTENT", "绑定页面不能通过自动源码候选保存，请切换到受控样式入口。")
         if focus.allowed_scope in {"shared_scope", "readonly_bound"}:
             fault(403 if focus.allowed_scope == "readonly_bound" else 422,
@@ -277,6 +285,8 @@ class CockpitAIStore:
         if not isinstance(context_id, str) or not re.fullmatch(r"[A-Za-z0-9_.:-]{1,128}", context_id):
             fault(422, "AI_CONTEXT_SCHEMA", "AI 编辑上下文标识无效。")
         normalized = {**edit_context, "context_id": context_id, "focus_ref": focus.model_dump(mode="json")}
+        for field in ("controlled_context_id", "presentation_target", "selected_overlay", "edit_preview_id"):
+            normalized.pop(field, None)
         if len(json.dumps(normalized, ensure_ascii=False, separators=(",", ":")).encode("utf-8")) > EDIT_CONTEXT_MAX_BYTES:
             fault(422, "AI_CONTEXT_SCHEMA", "AI 编辑上下文超过 32 KB 限制，请重新选择页面元素。")
         return normalized
@@ -361,10 +371,8 @@ class CockpitAIStore:
         # Styling can change; changing data-bound content requires existing result APIs.
         if any(before.get(k) != after.get(k) for k in ("html", "js", "node_map", "resources")):
             fault(422, "AI_BOUND_CONTENT", "此页面有业务数据绑定，AI 可调整 CSS 和非绑定节点的展示文案；绑定数据节点请使用原有绑定编辑流程。")
-        for package in (before, after):
-            for edit in (package.get("presentation") or {}).get("edits", []):
-                if edit.get("text") is not None:
-                    fault(422, "AI_BOUND_CONTENT", "绑定页面的整页 AI 修改只允许样式叠加；展示文案请通过受控节点编辑。")
+        if presentation_texts(before) != presentation_texts(after):
+            fault(422, "AI_BOUND_CONTENT", "绑定页面的整页 AI 修改只允许样式叠加；展示文案请通过受控节点编辑。")
 
     def content(self, actor, job_id, variant):
         with self.files.connect() as con:
