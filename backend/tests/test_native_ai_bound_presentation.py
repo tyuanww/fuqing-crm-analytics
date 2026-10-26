@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 from threading import Barrier
@@ -21,7 +22,7 @@ from backend.tests.test_page_edit_context import operation as manual_operation
 native = _native_fixture
 
 
-def saved_page(client, prefix='', title_attributes='id="heading"', dynamic_title=False):
+def saved_page(client, prefix='', title_attributes='id="heading"', dynamic_title=False, presentation_edits=None):
     body = draft()
     body['package']['html'] = prefix + (
         '<section id="report" data-shine-node="report">'
@@ -37,6 +38,10 @@ def saved_page(client, prefix='', title_attributes='id="heading"', dynamic_title
     if dynamic_title:
         body['package']['html'] = body['package']['html'].replace('<h1 ', '<section data-shine-region="chart"><h1 ', 1).replace('</h1>', '</h1></section>', 1)
         body['package']['node_map'].append({'node_id': 'chart', 'kind': 'dynamic_region', 'selector': '[data-shine-region="chart"]'})
+    if presentation_edits is not None:
+        package = body['package']
+        package['presentation'] = {'version': 1, 'source_hash': page_source_hash(package['html'], package.get('css', ''), package.get('js', '')),
+                                   'edits': presentation_edits}
     made = post(client, 'page-documents/previews', json=body)
     assert made.status_code == 201, made.text
     saved = post(client, f"page-documents/previews/{made.json()['preview_id']}/confirm", json={},
@@ -75,6 +80,92 @@ def candidate(spec, job):
     package['presentation'] = {'version': 1, 'source_hash': page_source_hash(package['html'], package['css'], package['js']),
                                'edits': [{'target': job['edit_context']['presentation_target'], 'text': '新的经营建议', 'style': {}}]}
     return package
+
+
+@pytest.fixture(scope='module')
+def native_tool_presentation_example():
+    module = Path(__file__).resolve().parents[2] / 'scripts/dsh-dev/native-page-ai-tools.mjs'
+    script = """
+const { installNativePageAITools } = await import(process.argv[1]);
+const registered = [];
+const id = 'session-cockpit-native-ai-12345678-1234-4567-8123-123456789abc';
+const agent = { id, session: { header: { id } }, ctx: { tools: { register(tool) { registered.push(tool); return () => {}; } } } };
+installNativePageAITools({ nativePageAIPolicy: true, agents: { list: () => [agent] }, on() {}, effect() {} }, {});
+process.stdout.write(registered.find(tool => tool.name === 'cockpit_page_propose').description);
+"""
+    result = subprocess.run([os.environ.get('NODE_BINARY', 'node'), '--input-type=module', '-e', script, module.as_uri()],
+                            cwd=module.parent, text=True, capture_output=True, check=True)
+    example = re.search(r'```json\n(.*?)\n```', result.stdout, re.DOTALL)
+    assert example, 'registered model-visible tool must supply a JSON presentation example'
+    return json.loads(example.group(1))
+
+
+@pytest.mark.parametrize('existing', [False, True])
+def test_registered_tool_example_initializes_or_updates_presentation(native, native_tool_presentation_example, existing):
+    client, app, _ = native
+    target = {'anchor': {'attribute': 'id', 'value': 'heading'}, 'path': []}
+    old_edits = [{'target': {'anchor': {'attribute': 'id', 'value': 'advice'}, 'path': []}, 'text': '保留其他建议' * 400},
+                 {'target': target, 'text': '保留旧文案', 'style': {'color': 'blue'}}]
+    spec = saved_page(client, presentation_edits=old_edits if existing else None)
+    spec = manual(client, spec, 'title', {'text': '人工标题', 'style': {'font-size': '24px'}}, 'guide-manual-title')
+    start, end = app.state.page_store._mapped_node_range(spec['package'], 'title', 'static_element')
+    selection = {'start': start, 'end': end, 'html_hash': hashlib.sha256(spec['package']['html'].encode()).hexdigest()}
+    job = begin(client, app, spec, node=None, selection=selection).json()
+
+    def read(field, variant='source'):
+        text, offset = '', 0
+        while True:
+            response = post(client, f"cockpit-ai/{job['id']}/read-part", json={'field': field, 'variant': variant, 'offset': offset})
+            assert response.status_code == 200, response.text
+            receipt = response.json()
+            text += receipt['text']
+            if receipt['next_offset'] is None:
+                if existing and field == 'presentation':
+                    assert receipt['total_chars'] > 2000 and offset > 0
+                return text, receipt
+            offset = receipt['next_offset']
+
+    task = json.loads(read('task')[0])
+    original, receipt = read('presentation')
+    template = deepcopy(native_tool_presentation_example)
+    template['source_hash'] = task['presentation_source_hash']
+    edit = template['edits'][0]
+    edit['target'] = task['edit_context']['presentation_target']
+    edit['text'] = '按用户要求更新标题'
+    proposed = json.loads(original)
+    if proposed is None:
+        assert original == 'null'
+        proposed = template
+    else:
+        own = next(row for row in proposed['edits'] if row['target'] == edit['target'])
+        own['text'] = edit['text']
+    payload = {'source_sha256': receipt['source_sha256'], 'candidate_sha256': receipt['candidate_sha256'],
+               'edits': [{'field': 'presentation', 'old_text': original, 'new_text': json.dumps(proposed, ensure_ascii=False)}]}
+    wrong_hash = post(client, f"cockpit-ai/{job['id']}/candidate", json={**payload, 'source_sha256': task['presentation_source_hash']})
+    assert wrong_hash.status_code == 409 and wrong_hash.json()['error']['code'] == 'AI_BASE_CHANGED'
+    if not existing:
+        empty = deepcopy(payload)
+        empty['edits'][0]['old_text'] = ''
+        rejected = post(client, f"cockpit-ai/{job['id']}/candidate", json=empty)
+        assert rejected.status_code == 422 and rejected.json()['error']['code'] == 'AI_REPLACEMENT_AMBIGUOUS'
+    assert read('task')[1]['candidate_sha256'] is None
+    accepted = post(client, f"cockpit-ai/{job['id']}/candidate", json=payload)
+    assert accepted.status_code == 200, accepted.text
+    assert accepted.json()['saved'] is False and accepted.json()['candidate_sha256']
+    preview = json.loads(read('presentation', 'candidate')[0])
+    if existing:
+        assert preview['edits'][0] == spec['package']['presentation']['edits'][0]
+        assert preview['edits'][1]['style'] == {'color': 'blue'}
+    ready = collect(client, job)
+    assert ready.status_code == 200, ready.text
+    saved = confirm(client, job, ready.json())
+    assert saved.status_code == 200, saved.text
+    reopened = client.get('/api/v1/analytics/page-documents/pages/' + spec['page_id']).json()['spec']
+    assert reopened['package'] == spec['package']
+    assert reopened['version'] == spec['version'] + 1
+    overlays = client.get('/api/v1/analytics/page-edit-contexts/overlay', params={
+        'page_id': spec['page_id'], 'version': reopened['version']}).json()['overlays']
+    assert overlays['title'] == {'text': edit['text'], 'style': {'font-size': '24px'}}
 
 
 def collect(client, job):
