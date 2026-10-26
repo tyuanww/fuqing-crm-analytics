@@ -178,6 +178,9 @@ def get_product_customer_batch_api(body: ProductCustomerBatchRequest, request: R
                 raise HTTPException(status_code=409, detail="FIRST_PURCHASE_UNAVAILABLE") from exc
             raise HTTPException(status_code=422, detail=str(exc)) from exc
         results.append(select_product_customer_response(result, version))
+    versions = {result["data_version"] for result in results}
+    if len(versions) != 1:
+        raise HTTPException(status_code=409, detail="SOURCE_VERSION_CHANGED")
     return {"results": results}
 
 
