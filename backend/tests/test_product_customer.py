@@ -158,7 +158,7 @@ def test_product_customer_uses_window_start_minus_one_for_mid_month_windows(
     assert result["comparison_new_old_cutoff"] == "2025-07-14"
     assert result["products"][0]["current"]["new_users"] == 0
     assert result["products"][0]["current"]["old_users"] == 1
-    assert result["data_version"].startswith("orders-v1:")
+    assert result["data_version"] == "unknown"
 
 
 def test_product_customer_refuses_queries_before_data_start(
@@ -276,6 +276,71 @@ def test_product_customer_uses_same_natural_day_last_year(monkeypatch, tmp_duckd
     assert result["compare_end_date"] == "2023-03-01"
     assert result["new_old_cutoff"] == "2024-02-28"
     assert result["comparison_new_old_cutoff"] == "2023-02-27"
+
+
+@pytest.mark.parametrize("before,after,expected", [(1, 1000, 999.0), (0.01, 100000001, 10000000099.0)])
+def test_product_and_store_preserve_large_growth_ratios(monkeypatch, tmp_duckdb_with_synthetic_orders, before, after, expected):
+    from backend.contracts.category import CategoryOverviewResponse, ProductCustomerResponseV3
+    from backend.services.category_service import overview
+
+    handle = tmp_duckdb_with_synthetic_orders
+    handle.execute("INSERT INTO user_first_purchase VALUES ('growth-user', DATE '2025-07-01')")
+    _insert_order(handle, "growth-before", "growth-user", "2025-07-01", before, "白膜")
+    _insert_order(handle, "growth-after", "growth-user", "2026-07-01", after, "白膜")
+    monkeypatch.setattr(product_customer, "get_connection", lambda: handle)
+    monkeypatch.setattr(overview, "get_connection", lambda: handle)
+
+    product = ProductCustomerResponseV3.model_validate(product_customer.get_product_customer_overview(
+        "2026-07-01", "2026-07-01", products=["白膜"],
+    ))
+    store = CategoryOverviewResponse.model_validate(overview.get_category_overview(
+        "2026-07-01", "2026-07-01",
+    ))
+    assert (product.products[0].yoy.gsv, store.all_ttl.gsv_yoy) == (expected, expected)
+
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+
+    app = FastAPI()
+    app.add_api_route("/product", lambda: product, response_model=ProductCustomerResponseV3)
+    app.add_api_route("/overview", lambda: store, response_model=CategoryOverviewResponse)
+    with TestClient(app, raise_server_exceptions=False) as client:
+        product_response, overview_response = client.get("/product"), client.get("/overview")
+    assert product_response.status_code == overview_response.status_code == 200
+    assert product_response.json()["products"][0]["yoy"]["gsv"] == expected
+    assert overview_response.json()["all_ttl"]["gsv_yoy"] == expected
+
+
+@pytest.mark.parametrize("value", [float("inf"), float("-inf"), float("nan")])
+def test_growth_ratios_reject_nonfinite_json_values(value):
+    from pydantic import TypeAdapter, ValidationError
+    from backend.contracts.category import GrowthRatioField
+
+    with pytest.raises(ValidationError, match="finite"):
+        TypeAdapter(GrowthRatioField).validate_python(value)
+
+
+@pytest.mark.parametrize("start,end,compare_start,compare_end", [
+    ("2025-02-24", "2025-03-02", "2024-02-24", "2024-03-02"),
+    ("2024-02-29", "2024-03-01", "2023-02-28", "2023-03-01"),
+])
+def test_product_and_store_compare_the_same_calendar_window(
+    monkeypatch, tmp_duckdb_with_synthetic_orders, start, end, compare_start, compare_end,
+):
+    from backend.services.category_service import overview
+
+    handle = tmp_duckdb_with_synthetic_orders
+    handle.execute("INSERT INTO user_first_purchase VALUES ('window-user', ?::DATE)", [compare_start])
+    for index, (paid, amount) in enumerate([(compare_start, 10), (compare_end, 20), (start, 30), (end, 40)]):
+        _insert_order(handle, f"window-{index}", "window-user", paid, amount, "白膜")
+    monkeypatch.setattr(product_customer, "get_connection", lambda: handle)
+    monkeypatch.setattr(overview, "get_connection", lambda: handle)
+
+    product = product_customer.get_product_customer_overview(start, end, products=["白膜"])
+    store = overview.get_category_overview(start, end)
+    assert (store.get("compare_start_date"), store.get("compare_end_date")) == (compare_start, compare_end)
+    assert (product["compare_start_date"], product["compare_end_date"]) == (compare_start, compare_end)
+    assert product["products"][0]["yoy"]["gsv"] == store["all_ttl"]["gsv_yoy"] == 1.3333
 
 
 def test_product_customer_rejects_gmv_until_amount_fields_are_neutral(monkeypatch, tmp_duckdb_with_synthetic_orders):

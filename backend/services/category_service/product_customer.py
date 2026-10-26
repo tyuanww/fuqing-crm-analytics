@@ -7,6 +7,7 @@ from typing import Any, Iterable, Optional
 
 from backend.db.connection import get_connection
 from backend.semantic.calculations import yoy_absolute, yoy_ratio
+from backend.semantic.time import PeriodBuilder
 from backend.services.asset_focus_service._helpers import (
     PRODUCT_TO_SPU_CLASSES,
     PRODUCT_TO_SPU_CLASSES_OTHER,
@@ -65,17 +66,8 @@ def _validate_range(start_date: str, end_date: str) -> tuple[date, date]:
 
 
 def _default_comparison(start: date, end: date) -> tuple[str, str]:
-    return (
-        _same_day_previous_year(start).isoformat(),
-        _same_day_previous_year(end).isoformat(),
-    )
-
-
-def _same_day_previous_year(value: date) -> date:
-    try:
-        return value.replace(year=value.year - 1)
-    except ValueError:
-        return value.replace(year=value.year - 1, day=28)
+    period = PeriodBuilder.yoy(start.isoformat(), end.isoformat())
+    return period.start, period.end
 
 
 @contextmanager
@@ -173,23 +165,17 @@ def _metrics(row: tuple[Any, ...] | None) -> dict[str, float | int]:
     }
 
 
-def _clamp_yoy(value: Optional[float]) -> Optional[float]:
-    if value is None:
-        return None
-    return max(-99.9999, min(99.9999, value))
-
-
 def _yoy(current: dict[str, float | int], comparison: dict[str, float | int]) -> dict[str, Optional[float]]:
     return {
-        "gsv": _clamp_yoy(yoy_absolute(current["gsv"], comparison["gsv"])),
-        "users": _clamp_yoy(yoy_absolute(current["users"], comparison["users"])),
-        "aus": _clamp_yoy(yoy_absolute(current["aus"], comparison["aus"])),
-        "old_gsv": _clamp_yoy(yoy_absolute(current["old_gsv"], comparison["old_gsv"])),
-        "old_users": _clamp_yoy(yoy_absolute(current["old_users"], comparison["old_users"])),
-        "old_aus": _clamp_yoy(yoy_absolute(current["old_aus"], comparison["old_aus"])),
-        "new_gsv": _clamp_yoy(yoy_absolute(current["new_gsv"], comparison["new_gsv"])),
-        "new_users": _clamp_yoy(yoy_absolute(current["new_users"], comparison["new_users"])),
-        "new_aus": _clamp_yoy(yoy_absolute(current["new_aus"], comparison["new_aus"])),
+        "gsv": yoy_absolute(current["gsv"], comparison["gsv"]),
+        "users": yoy_absolute(current["users"], comparison["users"]),
+        "aus": yoy_absolute(current["aus"], comparison["aus"]),
+        "old_gsv": yoy_absolute(current["old_gsv"], comparison["old_gsv"]),
+        "old_users": yoy_absolute(current["old_users"], comparison["old_users"]),
+        "old_aus": yoy_absolute(current["old_aus"], comparison["old_aus"]),
+        "new_gsv": yoy_absolute(current["new_gsv"], comparison["new_gsv"]),
+        "new_users": yoy_absolute(current["new_users"], comparison["new_users"]),
+        "new_aus": yoy_absolute(current["new_aus"], comparison["new_aus"]),
         "old_ratio_ppt": yoy_ratio(current["old_ratio"], comparison["old_ratio"]),
         "new_ratio_ppt": yoy_ratio(current["new_ratio"], comparison["new_ratio"]),
         "old_users_ratio_ppt": yoy_ratio(current["old_users_ratio"], comparison["old_users_ratio"]),
