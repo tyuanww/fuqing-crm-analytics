@@ -28,7 +28,7 @@ from backend.services.warehouse_source import VerifiedWarehouseSource
 from backend.contracts.native_warehouse_snapshot import NativeWarehouseSnapshotRead
 from backend.tests.test_crm_native_snapshot_source import source_case as source_case
 from backend.tests.test_crm_native_snapshot_host import host_case as host_case, call
-from backend.tests.test_warehouse_snapshot import snapshot_case as snapshot_case, body, PATH
+from backend.tests.test_warehouse_snapshot import snapshot_case as snapshot_case, body, PATH, warm_purchases
 from backend.tests.test_warehouse_product_runtime import runtime_case as runtime_case
 
 
@@ -41,7 +41,9 @@ def native_source(source_case, snapshot_case):
 
 def capture(snapshot_case, family="purchases"):
     app, client, _, _, _ = snapshot_case
-    if family != "purchases":
+    if family == "purchases":
+        warm_purchases(app)
+    else:
         with app.state.warehouse_runtime.read(mode="compute"):
             function = {"product": get_product_customer_overview, "analysis": get_rfm_analysis,
                         "r": get_rfm_r_flow, "f": get_rfm_f_flow, "m": get_rfm_m_flow}[family]
@@ -161,6 +163,7 @@ def test_private_host_round_trip_keeps_exact_warehouse_json(host_case, snapshot_
             conn.execute("UPDATE orders SET actual_amount=90071992547409.95 WHERE order_id='s3'")
         source = VerifiedWarehouseSource.seal(spec, source_dir, connect=lambda: duckdb.connect(str(spec.database_path), read_only=True))
         app.state.warehouse_runtime = replace(runtime, source=source)
+    warm_purchases(app)
     snapshot = client.post(PATH, json=body("purchases"),
                            headers={"Idempotency-Key": "private-host", "X-Test-Owner": "fixture-user"}).json()
     assert snapshot["snapshot_id"].startswith("crm_w_")
