@@ -15,8 +15,10 @@ import uuid
 import pytest
 
 from backend.contracts.page_documents import page_source_hash
-from backend.tests.test_native_page_source import REF, draft, edit_preview, native, post
+from backend.tests.test_native_page_source import REF, draft, edit_preview, native as _native_fixture, post
 from backend.tests.test_page_edit_context import operation as manual_operation
+
+native = _native_fixture
 
 
 def saved_page(client, prefix='', title_attributes='id="heading"', dynamic_title=False):
