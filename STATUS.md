@@ -4,7 +4,7 @@
 
 ## 当前快照（2026-10-26）
 
-- 2026-10-26 路演现场已接管公网 `app.tyuan.chat` 的 rc3，原 rc1 已停止；品牌恢复，五项服务运行中。新会话仍须选择“问数智能体”并连接 CRM。本轮真实聊天已查询商品、RFM、R/F/M 并检索 WeKnora，新页面五类表格 316 格与快照一致；人工改标题、保存为 v2、退出重开通过，绑定金额只读通过。AI 文案修复首版被独立审查退回，未部署；旧页跨重启续编和 H1 完整业务验收仍开放。主仓 `a023a0eb` 预检 CI 成功，下载产物校验通过，但该正式运行包尚未替换现场安装。`release_ready=false`，未合并 PR。见[公网路演验收](docs/hackathon/evidence/dsh-roadshow-public-20261026.md)。下列“未切换”描述属于当时记录，不代表当前公网。
+- 2026-10-26 路演现场已接管公网 `app.tyuan.chat` 的 rc3，原 rc1 已停止；品牌恢复，五项服务运行中。新会话仍须选择“问数智能体”并连接 CRM。本轮真实聊天已查询商品、RFM、R/F/M 并检索 WeKnora，新页面五类表格 316 格与快照一致；人工改标题、保存为 v2、退出重开通过，绑定金额只读通过。AI 选区传递与工具说明已修复、审核并部署；真实 AI 改建议、预览确认保存为 v3、返回驾驶舱重开通过，源码和数据绑定未变。旧页跨重启续编和 H1 完整业务验收仍开放。主仓 `a023a0eb` 预检 CI 成功，下载产物校验通过，但该正式运行包尚未替换现场安装。`release_ready=false`，未合并 PR。见[公网路演验收](docs/hackathon/evidence/dsh-roadshow-public-20261026.md)。下列“未切换”描述属于当时记录，不代表当前公网。
 
 - 三窗口缓存已完成：2026 Q1、Q2、H1 的商品、purchases、analysis/R/F/M 共 18 项 READY，独立新进程零计算预算回读全部命中。后端 `cc9626ba` 已安装现场；H1 完整聊天和保存重开仍未验收。早期 RFM 12 项结果见[三窗口记录](docs/hackathon/evidence/dsh-reporting-windows-20261026.md)，最终 18 项回执见[公网路演验收](docs/hackathon/evidence/dsh-roadshow-public-20261026.md)。
 
@@ -52,7 +52,7 @@
 
 ## 本轮施工计划
 
-- 当前公网运行 rc3，三窗口六类缓存已安装并从独立进程回读。先完成 AI 文案保存和审核，保留旧页跨重启续编为独立开放项；随后完成 H1 真实浏览器业务验收，再推进 PR 拆分。七月短窗口的人工保存重开已通过，不能替代 H1 或 AI 验收。正式部署仍受 M2 门禁和批准 artifact 约束。publisher identity、签名、独立核验、撤销、final attestation、正式 clean-machine 和外部发布批准未完成，M2-07 继续 `BLOCKED`、`release_ready=false`。
+- 当前公网运行 rc3，三窗口六类缓存已安装并从独立进程回读。七月短窗口的人工和 AI 文案保存重开均已通过；下一步完成 H1 真实浏览器业务验收，再推进 PR 拆分。旧页跨重启续编、AI 保存后工作区仍显示旧任务操作、实时事件降级保留为开放项。短窗口验收不能替代 H1。正式部署仍受 M2 门禁和批准 artifact 约束。publisher identity、签名、独立核验、撤销、final attestation、正式 clean-machine 和外部发布批准未完成，M2-07 继续 `BLOCKED`、`release_ready=false`。
 ## 历史快照入口
 
 - 2026-10-15 及更早的 alpha3、rc2、M2-06、作者仓合并和 alpha2 历史事实已归档到 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)；它们不覆盖本页当前快照，也不授予 release/activation。

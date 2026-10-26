@@ -4,13 +4,13 @@
 
 ## 运行与交付
 
-公网 `https://app.tyuan.chat` 由 `shinemage-dsh-rc3-warehouse.service` 承接，端口 4328，经 nginx 6677 和既有 Cloudflare Tunnel 访问。上游为 DSH `0.2.1-rc.3`、`1f81c047`，未修改上游源码。后端安装源为 `cc9626ba`，Workbench 安装包为 `b747937d`；本地作者新提交不自动视为已部署。
+公网 `https://app.tyuan.chat` 由 `shinemage-dsh-rc3-warehouse.service` 承接，端口 4328，经 nginx 6677 和既有 Cloudflare Tunnel 访问。上游为 DSH `0.2.1-rc.3`、`1f81c047`，未修改上游源码。后端基础安装源为 `cc9626ba`，Workbench 基础安装包为 `b747937d`。随后安装主仓 `487a775e` 的五个页面服务文件，最终客户端为 Workbench `9bf344447297`，原生 AI 工具说明为主仓 `5e0dd819`。两项后续修复均经独立审查和回归后推送、安装；DSH PID/InvocationID 未变，临时 HMR 配置已恢复。本地作者新提交不自动视为已部署。
 
 现役目录为 `/srv/shinemage/validation/warehouse-chain-56a5975b-20261026.t6ddq_wb`。CRM、来源、页面、Web、路演入口五项服务均 active，现场自动重启计数均为 0。当前进程仍由 transient unit 管理；已另存永久 unit、开机链接和失败重启配置。机器重启恢复未实测。
 
 原 rc1 服务停止并取消开机启用。回退脚本保存在 `/srv/shinemage/dsh/recovery/roadshow-rc3-20261026/rollback.sh`，未实跑。品牌通过恢复已有 brand-assets 和 brand-globals 配置生效；公网左侧品牌、新会话品牌已在 Aside 确认。新会话默认标准模式，问数需选择“问数智能体”并连接 CRM。
 
-主仓 `a023a0ebf0b870264ce7ba77232a8c24d8a1f46c` 的[预检 CI](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/40270208102)成功。产物 `12627892942` 已下载，三项 SHA256SUMS 校验通过。其历史名称仍带 `dsh-rc2-preflight`，实际 manifest 固定 rc3。CI 的 WSL2 与 host_http 阶段为 NOT_RUN，不能用预检代替现场验收；下载的新正式运行包尚未安装到公网。本轮未合并 PR。
+主仓 `a023a0ebf0b870264ce7ba77232a8c24d8a1f46c` 的[预检 CI](https://github.com/tyuanww/fuqing-crm-analytics/actions/runs/40270208102)成功。产物 `12627892942` 已下载，三项 SHA256SUMS 校验通过。其历史名称仍带 `dsh-rc2-preflight`，实际 manifest 固定 rc3。CI 的 WSL2 与 host_http 阶段为 NOT_RUN，不能用预检代替现场验收；下载的新正式运行包尚未安装到公网。本轮未合并 PR。主仓页面修复及 fixture 检查修复已正常推送至 `5e0dd819`，全量后端分组和 B0 主仓检查通过；配对回归由显式作者环境的 257 项记录另行证明，不能用分组测试中的跳过项代替。最新代码 `5e0dd819` 的 GitHub Actions 查询为空，未记为远程 CI 通过。
 
 ## 真实业务结果
 
@@ -34,15 +34,19 @@ Q1、Q2、H1 的六类来源已有 18 项缓存回读成功、计算次数为 0 
 
 Aside 实际操作已确认：标题从“商品与人群增长诊断·路演版”改为“商品与人群增长诊断·董事会路演”，保存为 v2，退出、返回对话后重新打开仍显示新标题。选中面膜 F 的 105525.80 金额时，界面提示仅可查看且没有文本编辑框。没有尝试或声称可以改写业务事实。
 
+AI 文案验收已通过：模型用 16 秒生成候选，只把 `action-1` 改为“先验证面膜F新客复购，再决定是否扩大投放。”；在 Aside 收取、预览并确认保存，随后返回驾驶舱、重新打开，仍显示新文案和人工标题。页面 head 为 v3，任务 `ai_97b5ee0d-e3b0-494f-8e0d-e531965f90fc` 为 `SAVED`、`saved_version=3`。SQLite 比较确认 v2/v3 的 package、binding_manifest、来源及会话字段相同；仅独立 presentation overlay 增加上述文案。重开后再次选中金额，仍没有文本编辑框。
+
+前两处缺陷分别是实际工作区回调漏传受控文案选区，以及工具说明缺少合法 presentation JSON 和三种哈希的区别。Workbench 最终调用方回归 81 项、作者核心 1234 项通过；工具说明修复的后端相关回归 60 项通过。复用这些对应提交的测试与独立审查记录，本次没有重复全量测试。首个失败任务已取消，未生成错误版本。
+
 ## 未关闭
 
-- AI 文案修复首版未部署。独立审查发现页面版本与展示文案分别保存时存在并发丢失窗口，最终草稿测试失败。继续施工必须复用可恢复的正式保存路径并重新审核。
+- AI 保存后，返回驾驶舱仍显示“收取修改／放弃本次修改”的旧任务操作；数据库已是 SAVED，v3 重开文案正确。界面任务状态同步仍待修复。
 - 旧页 `page_86709b07bc944bdeb6031265a6a2d359` v3 保留。DSH 重启后旧来源的内存授权索引失效，重新登录不会恢复旧引用；保存仍会拒绝。本轮新页通过不代表旧页续编已修好。
-- 界面仍提示实时事件不可用并使用刷新扫描，偶有连接重试；本轮保存成功不代表长连接稳定性已关闭。
+- 界面仍提示实时事件不可用并使用刷新扫描，偶有连接重试、历史预览恢复和离开提示；本轮保存成功不代表这些交互问题已关闭。
 - H1 完整业务链路、近两年筛选矩阵、自动持续预热、PR 拆分及正式发布门禁仍保留。回退演练和主机重启验收未执行。
 
 ## 原始证据
 
-本地审查、脚本、回执和截图位于 `/private/tmp/dsh-business-closeout-stack.TetGDq/roadshow-20261026`。包括 `fresh-all-source-proof.log`、`roadshow-table-proof.log`、`roadshow-manual-reopened.jpg`、`july-product-status.json`、`main-preflight-result.json`、`brand-review-result.md` 和 `canvas-ai-fix.md`。父目录的 `quarter-reporting-final-summary.json` 记录三窗口 18 项回读。
+本地审查、脚本、回执和截图位于 `/private/tmp/dsh-business-closeout-stack.TetGDq/roadshow-20261026`。包括 `fresh-all-source-proof.log`、`roadshow-table-proof.log`、`roadshow-manual-reopened.jpg`、`july-product-status.json`、`main-preflight-result.json`、`brand-review-result.md` 及 `canvas-ai-final/`、`canvas-ai-caller-fix/`、`canvas-ai-tool-guidance/`、`roadshow-ai-saved-proof.json` 和 `ai-v3-reopened-browser.log`。本轮 AI 重开的截图两次因 CDP 超时未取得；使用 Aside 页面文本和 SQLite 读回取证，不声称截图验收通过。`canvas-ai-fix.md` 仅是早期未采用草稿；不能作为最终验收结论。父目录的 `quarter-reporting-final-summary.json` 记录三窗口 18 项回读。
 
 现场对账报告位于现役目录的 `roadshow-all-source-proof.json`、`roadshow-table-proof.json` 和 `roadshow-runtime-check.json`。不把凭据或业务库放入 Git。CLI 独立审查为用户授权的同模型替代，不能当作跨模型验证。
