@@ -4,7 +4,7 @@
 
 ## 运行与交付
 
-公网 `https://app.tyuan.chat` 由 `shinemage-dsh-rc3-warehouse.service` 承接，端口 4328，经 nginx 6677 和既有 Cloudflare Tunnel 访问。上游为 DSH `0.2.1-rc.3`、`1f81c047`，未修改上游源码。后端基础安装源为 `cc9626ba`，Workbench 基础安装包为 `b747937d`。随后安装主仓 `487a775e` 的五个页面服务文件，最终客户端为 Workbench `9bf344447297`，原生 AI 工具说明为主仓 `5e0dd819`。两项后续修复均经独立审查和回归后推送、安装；DSH PID/InvocationID 未变，临时 HMR 配置已恢复。本地作者新提交不自动视为已部署。
+公网 `https://app.tyuan.chat` 由 `shinemage-dsh-rc3-warehouse.service` 承接，端口 4328，经 nginx 6677 和既有 Cloudflare Tunnel 访问。上游为 DSH `0.2.1-rc.3`、`1f81c047`，未修改上游源码。后端基础安装源为 `cc9626ba`，Workbench 基础安装包为 `b747937d`。随后安装主仓 `487a775e` 的五个页面服务文件，当时客户端为 Workbench `9bf344447297`，随后任务终态修复更新为 `ca437f565946`，详见下节，原生 AI 工具说明为主仓 `5e0dd819`。两项后续修复均经独立审查和回归后推送、安装；DSH PID/InvocationID 未变，临时 HMR 配置已恢复。本地作者新提交不自动视为已部署。
 
 现役目录为 `/srv/shinemage/validation/warehouse-chain-56a5975b-20261026.t6ddq_wb`。CRM、来源、页面、Web、路演入口五项服务均 active，现场自动重启计数均为 0。当前进程仍由 transient unit 管理；已另存永久 unit、开机链接和失败重启配置。机器重启恢复未实测。
 
@@ -50,11 +50,22 @@ AI 文案验收已通过：模型用 16 秒生成候选，只把 `action-1` 改�
 
 追加原始证据位于 `/private/tmp/dsh-closeout-swarm-20261026`，包括 `h1-source-proof.json`、`verify-h1-tables.py`、`h1-table-check.log`、`h1-table-check-annotated.log`、`h1-chat-evidence.log`、`h1-preview-browser.log`、`h1-ai-preview-browser.log`、`h1-closeout-saved-proof.json`、`h1-reopen-browser.log`、`h1-readonly-selected-browser.log`。本次使用真实浏览器文本与小型状态库只读取证，未取得重开截图，未重启 DSH。
 
+## AI 任务终态修复现场验收（2026-10-26）
+
+[Workbench #4](https://github.com/tyuanww/dsh-analytics-workbench/pull/4) 的 `ca437f5659463145b171137207de0041f2c65d57` 已推送，仍为 Draft，未合并。[边界 CI](https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/40293461392)和[固定输入完整 CI](https://github.com/tyuanww/dsh-analytics-workbench/actions/runs/40293461359)均成功。本地复用上一轮 56 项相关回归及严格类型检查、构建证据；首轮独立审核发现的预览与候选哈希错配已修复，第二轮未发现剩余 P0–P2。
+
+本轮内容包只有 `lib/client.js` 与现役不同，另外 7 个成员字节一致。复用已审核的安装脚本，仅更新预期旧文件摘要；替换前持久备份、摘要比较与交换、安装后进程核对均通过。新客户端 SHA-256 为 `b802ea0c017bfb8574930d9da5ccc81d44c6375e0b349e474111d7e60046dd75`。浏览器同源读取的客户端，移除宿主追加的分号并还原 source-map URL 后，字节数及 SHA-256 与本地构建一致。没有重启服务；安装前后 Web PID 为 3239792，InvocationID 为 `6802273fa4f94fce895a02a978031a2d`。这仍是受控 side-load，不产生正式组合发布身份。
+
+在 H1 页 v3 的 `action-1` 选区，通过 UI 填写并读回明确要求，再进入原生 AI 对话。首次发送遇到 `Failed to fetch`，原请求重试后完成任务 `ai_7b4b6315-797c-4a24-b53b-04e3a83f0207`。预览确认新文案“先明确同窗同群基线，再验证高价值客群复购策略。”后执行一次保存。侧栏显示已保存 v4，返回驾驶舱同样显示已保存 v4；可见“收取修改”和“放弃本次修改”按钮均为 0。再次打开同一页面仍显示人工标题和新建议，选择面膜 F 金额时仍为只读。浏览器最后停在浏览态。
+
+验收期间 Tailscale SSH 超时，状态显示主机在线但 ping 和 SSH 未响应；公网聊天、候选预览、保存和重开可用。因此 v3/v4 的 SQLite package/binding 逐字节比较及验收末尾的远端进程复核未执行，不能继承 v2/v3 的比较结果。首次发送网络失败保留为独立可靠性问题，不据本次成功关闭全部连接问题。
+
+证据目录为 `/private/tmp/dsh-terminal-uat-20261026`。包与安装证据见 `pack-diff.json`、`install-result.log`、`served-client-normalized-proof.log`；真实 UI 流程见 `ai-send.log`、`ai-wait.log`、`ai-send-retry.log`、`ai-preview-ready.log`、`ai-confirm.log`、`ai-saved.log`、`terminal-state-browser-proof.log`、`reopen-readonly.log`、`final-browser.log`。未运行本补丁的新截图验收。回退文件保存在现役目录的 `roadshow-client-followup-ca437f565946`；本轮没有执行回退。
+
 ## 未关闭
 
-- AI 保存后旧任务操作残留已有作者候选 `ca437f5`，见 [Workbench #4](https://github.com/tyuanww/dsh-analytics-workbench/pull/4)。56 项相关测试、严格类型检查和构建通过。独立审核发现的候选预览错配已修正，第二轮无新增 P0–P2；未部署、未作该补丁现场复验。
 - 旧页 `page_86709b07bc944bdeb6031265a6a2d359` v3 保留。DSH 重启后旧来源的内存授权索引失效，重新登录不会恢复旧引用；保存仍会拒绝。本轮新页通过不代表旧页续编已修好。
-- 界面仍提示实时事件不可用并使用刷新扫描，偶有连接重试、历史预览恢复和离开提示；本轮保存成功不代表这些交互问题已关闭。
+- 界面仍提示实时事件不可用并使用刷新扫描，偶有连接重试、历史预览恢复和离开提示；本轮保存成功不代表这些交互问题已关闭。Tailscale 管理通道需恢复后补做 v3/v4 数据库读回。
 - H1 当前授权周期内的取数、生成、人工及 AI 保存重开已通过；诊断质量、近两年筛选矩阵、自动持续预热、PR 拆分及正式发布门禁仍保留。回退演练和主机重启验收未执行。
 
 ## 原始证据
