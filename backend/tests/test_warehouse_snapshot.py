@@ -36,6 +36,14 @@ def body(family):
     return {"family": family, "filters": filters}
 
 
+def warm_purchases(app, filters=None):
+    from backend.contracts.warehouse_snapshot import WarehouseDateFilters
+    from backend.services.warehouse_purchases import get_warehouse_purchases
+
+    with app.state.warehouse_runtime.read(mode="compute"):
+        return get_warehouse_purchases(WarehouseDateFilters(**(filters or DATES)))
+
+
 @pytest.fixture
 def snapshot_case(runtime_case, tmp_path):
     runtime, spec, source_dir = runtime_case
@@ -64,7 +72,9 @@ def snapshot_case(runtime_case, tmp_path):
 @pytest.mark.parametrize("family", ["purchases", "product", "analysis", "r", "f", "m"])
 def test_each_family_persists_real_aggregate_and_owned_source_proof(snapshot_case, family):
     app, client, store, _, _ = snapshot_case
-    if family != "purchases":
+    if family == "purchases":
+        warm_purchases(app)
+    else:
         with app.state.warehouse_runtime.read(mode="compute"):
             function = {"product": get_product_customer_overview, "analysis": get_rfm_analysis,
                         "r": get_rfm_r_flow, "f": get_rfm_f_flow, "m": get_rfm_m_flow}[family]
@@ -136,6 +146,7 @@ def test_source_kind_mismatch_refuses_capture_before_any_computation(snapshot_ca
 
 def test_changed_source_cannot_replay_an_old_key_as_current_data(snapshot_case):
     app, client, _, spec, source_dir = snapshot_case
+    warm_purchases(app)
     first = client.post(PATH, json=body("purchases"), headers={"Idempotency-Key": "same"}).json()
     runtime = app.state.warehouse_runtime
     runtime.source.close()
@@ -144,6 +155,8 @@ def test_changed_source_cannot_replay_an_old_key_as_current_data(snapshot_case):
     source = VerifiedWarehouseSource.seal(spec, source_dir, connect=lambda: duckdb.connect(str(spec.database_path), read_only=True))
     app.state.warehouse_runtime = replace(runtime, source=source)
     assert client.post(PATH, json=body("purchases"), headers={"Idempotency-Key": "same"}).status_code == 409
+    assert client.post(PATH, json=body("purchases"), headers={"Idempotency-Key": "cold-source"}).status_code == 503
+    warm_purchases(app)
     new = client.post(PATH, json=body("purchases"), headers={"Idempotency-Key": "new-source"}).json()
     assert new["warehouse"]["data_version"] != first["warehouse"]["data_version"]
     assert new["payload"]["result"]["gsv_amount_fen"] == first["payload"]["result"]["gsv_amount_fen"]
@@ -154,6 +167,7 @@ def test_changed_source_cannot_replay_an_old_key_as_current_data(snapshot_case):
 
 def test_changed_semantics_cannot_replay_an_old_key(snapshot_case, monkeypatch):
     app, client, _, _, _ = snapshot_case
+    warm_purchases(app)
     assert client.post(PATH, json=body("purchases"), headers={"Idempotency-Key": "same"}).status_code == 200
     runtime = app.state.warehouse_runtime
     app.state.warehouse_runtime = replace(runtime, semantic_revisions={**runtime.semantic_revisions, "purchases": "f" * 64})
@@ -194,7 +208,8 @@ def test_client_cannot_supply_authoritative_result_or_source(snapshot_case, extr
 
 
 def test_snapshot_survives_a_new_process_and_parallel_receipt_retries(snapshot_case):
-    _, client, store, _, _ = snapshot_case
+    app, client, store, _, _ = snapshot_case
+    warm_purchases(app)
 
     def capture(_):
         response = client.post(PATH, json=body("purchases"), headers={"Idempotency-Key": "parallel"})
@@ -220,7 +235,8 @@ print(WarehouseSnapshotStore(Path(sys.argv[1]), 'synthetic').read_owned_snapshot
 
 
 def test_corrupt_snapshot_is_rejected_in_reads_and_receipt_replay(snapshot_case, monkeypatch):
-    _, client, store, _, _ = snapshot_case
+    app, client, store, _, _ = snapshot_case
+    warm_purchases(app)
     first = client.post(PATH, json=body("purchases"), headers={"Idempotency-Key": "corrupt"}).json()
     with closing(sqlite3.connect(store.path)) as conn:
         conn.execute("UPDATE snapshots SET payload='{}'")
@@ -233,11 +249,14 @@ def test_corrupt_snapshot_is_rejected_in_reads_and_receipt_replay(snapshot_case,
 
 
 @pytest.mark.parametrize("rehash_record", [False, True])
+
 def test_receipt_cannot_point_to_another_valid_query_result(snapshot_case, rehash_record):
-    _, client, store, _, _ = snapshot_case
+    app, client, store, _, _ = snapshot_case
+    warm_purchases(app)
     first = client.post(PATH, json=body("purchases"), headers={"Idempotency-Key": "all-shop"}).json()
     other = body("purchases")
     other["filters"]["channel"] = "直播"
+    warm_purchases(app, other["filters"])
     second = client.post(PATH, json=other, headers={"Idempotency-Key": "live"}).json()
     assert first["payload"]["result"]["gsv_amount_fen"] != second["payload"]["result"]["gsv_amount_fen"]
     with closing(sqlite3.connect(store.path)) as conn:
@@ -253,7 +272,8 @@ def test_receipt_cannot_point_to_another_valid_query_result(snapshot_case, rehas
 
 
 def test_reassigned_snapshot_owner_fails_integrity_instead_of_disclosing(snapshot_case):
-    _, client, store, _, _ = snapshot_case
+    app, client, store, _, _ = snapshot_case
+    warm_purchases(app)
     first = client.post(PATH, json=body("purchases"), headers={"Idempotency-Key": "owned"}).json()
     with closing(sqlite3.connect(store.path)) as conn:
         conn.execute("UPDATE snapshots SET owner='bob'")

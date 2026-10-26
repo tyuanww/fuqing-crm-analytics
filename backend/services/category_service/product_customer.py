@@ -57,7 +57,9 @@ def _validate_range(start_date: str, end_date: str) -> tuple[date, date]:
         raise ValueError("日期必须是 YYYY-MM-DD") from exc
     if end < start:
         raise ValueError("结束日期不能早于开始日期")
-    if (end - start).days >= 90:
+    from backend.semantic.reporting_window import warehouse_window_allowed
+
+    if (end - start).days >= 90 and (current_warehouse_read() is None or not warehouse_window_allowed(start, end)):
         raise ValueError("商品新老客查询窗口最多 90 天")
     return start, end
 

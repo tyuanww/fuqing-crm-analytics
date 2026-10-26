@@ -33,13 +33,14 @@ def main(argv: list[str] | None = None) -> int:
     from backend.config import DUCKDB_PATH
     from backend.services.health.rfm_analysis.precompute_plan import RfmPrecomputePolicy
     from backend.services.warehouse_boot import WarehouseRuntimeSettings, build_warehouse_runtime
-    from backend.services.warehouse_prewarm import FAMILIES, WarmBudget, build_warm_plan, run_warm_plan
+    from backend.services.warehouse_prewarm import FAMILIES, WarmBudget, build_reporting_plan, build_warm_plan, run_warm_plan
 
     parser = argparse.ArgumentParser(description="预热已封存仓库的商品与 RFM 聚合缓存")
     parser.add_argument("--execute", action="store_true")
     parser.add_argument("--max-new-results", type=int, default=0)
     parser.add_argument("--max-seconds", type=float, default=300)
     parser.add_argument("--months", type=int, default=24)
+    parser.add_argument("--reporting-year", type=int, help="仅预热指定年份 H1、Q1、Q2 的全店 GSV 默认口径")
     parser.add_argument("--families", nargs="+", choices=FAMILIES, default=list(FAMILIES))
     args = parser.parse_args(argv)
     try:
@@ -47,6 +48,8 @@ def main(argv: list[str] | None = None) -> int:
         policy = RfmPrecomputePolicy(lookback_months=args.months)
         if len(args.families) != len(set(args.families)):
             raise ValueError("prewarm families must be unique")
+        if args.reporting_year is not None and not 2000 <= args.reporting_year <= 2099:
+            raise ValueError("reporting year must be between 2000 and 2099")
         settings = WarehouseRuntimeSettings.from_environment(DUCKDB_PATH)
         if settings is None:
             raise ValueError("three FQ_WAREHOUSE settings are required")
@@ -56,7 +59,8 @@ def main(argv: list[str] | None = None) -> int:
     runtime = build_warehouse_runtime(settings, role="prewarm")
     seal_seconds = time.monotonic() - started
     try:
-        plan = build_warm_plan(runtime, policy=policy, families=tuple(args.families))
+        plan = (build_reporting_plan(runtime, year=args.reporting_year, families=tuple(args.families))
+                if args.reporting_year is not None else build_warm_plan(runtime, policy=policy, families=tuple(args.families)))
         report = run_warm_plan(runtime, plan, budget) if args.execute else None
         summary = report.summary() if report else {"plan_digest": plan.digest, "expected": len(plan.requests), "status": "PLANNED"}
         plan_document = asdict(plan)

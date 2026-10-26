@@ -93,15 +93,15 @@ def resolve_capture_query(request: WarehouseSnapshotRequest, frame: WarehouseRea
 
 
 def _compute(query: CaptureQuery):
-    from backend.db.connection import get_connection
     from backend.services.category_service.product_customer import get_product_customer_overview
     from backend.services.health.rfm_analysis.analysis import get_rfm_analysis
-    from backend.services.metrics.dashboard_purchases import LOW_PRICE_CHANNELS, query_dashboard_purchases
+    from backend.services.metrics.dashboard_purchases import LOW_PRICE_CHANNELS
+    from backend.services.warehouse_purchases import get_warehouse_purchases
     from backend.services.rfm import get_rfm_r_flow, get_rfm_f_flow, get_rfm_m_flow
 
     request, filters = query.request, query.request.filters
     if isinstance(request, PurchasesSnapshotRequest):
-        return query_dashboard_purchases(get_connection(), filters).model_dump(mode="json")
+        return get_warehouse_purchases(filters).model_dump(mode="json")
     kwargs = {"channel": None if filters.channel == "全店" else filters.channel,
               "exclude_channels": list(LOW_PRICE_CHANNELS) if filters.exclude_low_price else None,
               "compare_start_date": filters.compare_start_date.isoformat() if filters.compare_start_date else None,

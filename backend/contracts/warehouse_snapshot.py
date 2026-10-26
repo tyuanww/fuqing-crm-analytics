@@ -4,9 +4,10 @@ from typing import Annotated, Literal
 from pydantic import AwareDatetime, Field, model_validator
 
 from backend.contracts.category import ProductCustomerResponseV3
-from backend.contracts.crm_analysis import CrmSnapshotRequest, DataKind
-from backend.contracts.crm_dashboard import DashboardChannel, DashboardModel, DashboardPurchases
+from backend.contracts.crm_analysis import DataKind
+from backend.contracts.crm_dashboard import DashboardChannel, DashboardFilters, DashboardModel, DashboardPurchases
 from backend.contracts.rfm import RFMAnalysisResponse, RFMFRFlowResponse, RFMMFlowResponse, RFMRFlowResponse
+from backend.semantic.reporting_window import warehouse_window_allowed
 
 
 Digest = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
@@ -36,7 +37,15 @@ class SnapshotWindow(DashboardModel):
         return self
 
 
-class ProductSnapshotFilters(CrmSnapshotRequest):
+class WarehouseDateFilters(DashboardFilters):
+    @model_validator(mode="after")
+    def bounded_window(self):
+        if not warehouse_window_allowed(self.start_date, self.end_date):
+            raise ValueError("日期须为2000至2099年的最多90天区间，或完整自然季度、半年")
+        return self
+
+
+class ProductSnapshotFilters(WarehouseDateFilters):
     products: Annotated[list[Annotated[str, Field(min_length=1, max_length=80)]], Field(min_length=1, max_length=15)] | None = None
     compare_start_date: date | None = None
     compare_end_date: date | None = None
@@ -46,10 +55,8 @@ class ProductSnapshotFilters(CrmSnapshotRequest):
         if (self.compare_start_date is None) != (self.compare_end_date is None):
             raise ValueError("对比期起止日期必须同时提供")
         if self.compare_start_date is not None:
-            if not 2000 <= self.compare_start_date.year <= self.compare_end_date.year <= 2099:
-                raise ValueError("日期必须位于2000至2099年")
-            if not 0 <= (self.compare_end_date - self.compare_start_date).days < 90:
-                raise ValueError("对比期含首尾，最多90天")
+            if not warehouse_window_allowed(self.compare_start_date, self.compare_end_date):
+                raise ValueError("对比期须为2000至2099年的最多90天区间，或完整自然季度、半年")
         return self
 
 
@@ -91,7 +98,7 @@ class RfmSnapshotFilters(DashboardModel):
 
 class PurchasesSnapshotRequest(DashboardModel):
     family: Literal["purchases"]
-    filters: CrmSnapshotRequest
+    filters: WarehouseDateFilters
 
 
 class ProductSnapshotRequest(DashboardModel):

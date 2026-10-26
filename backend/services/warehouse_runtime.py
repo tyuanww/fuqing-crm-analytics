@@ -122,6 +122,7 @@ def product_semantic_revision() -> str:
         "backend/semantic/calculations.py",
         "backend/semantic/time.py",
         "backend/semantic/metrics.py",
+        "backend/semantic/reporting_window.py",
     ))
 
 
@@ -152,5 +153,6 @@ def purchases_semantic_revision() -> str:
 
     return semantic_revision(Path(__file__).resolve().parents[2], (
         "backend/services/metrics/dashboard_purchases.py", "backend/semantic/dashboard_purchases.py",
+        "backend/services/warehouse_purchases.py",
         "backend/semantic/filters.py", "backend/semantic/channels.py", "backend/semantic/metrics.py",
     ))

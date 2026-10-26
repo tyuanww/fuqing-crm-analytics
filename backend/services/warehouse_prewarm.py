@@ -8,6 +8,7 @@ import time
 from typing import Callable, Literal
 
 from backend.semantic.time import PeriodBuilder, shift_year_clamped
+from backend.semantic.reporting_window import warehouse_window_allowed
 from backend.services.health.rfm_analysis.precompute_plan import (
     RfmPrecomputePolicy, RfmPrecomputeQuery, build_precompute_plan,
 )
@@ -16,8 +17,8 @@ from backend.services.warehouse_rfm import FIXED_PERIODS, WarehouseQueryError, r
 from backend.services.warehouse_runtime import WarehouseRuntime
 
 
-Family = Literal["product", "analysis", "r", "f", "m"]
-FAMILIES: tuple[Family, ...] = ("product", "analysis", "r", "f", "m")
+Family = Literal["product", "analysis", "r", "f", "m", "purchases"]
+FAMILIES: tuple[Family, ...] = ("product", "analysis", "r", "f", "m", "purchases")
 
 
 @dataclass(frozen=True)
@@ -129,7 +130,7 @@ def _supports_product(query: RfmPrecomputeQuery) -> bool:
     if query.metric_type != "GSV" or query.empty:
         return False
     return all(
-        0 <= (date.fromisoformat(values[1][:10]) - date.fromisoformat(values[0][:10])).days < 90
+        warehouse_window_allowed(date.fromisoformat(values[0][:10]), date.fromisoformat(values[1][:10]))
         for name, values in query.ranges.items() if name in {"current", "comp"}
     )
 
@@ -149,7 +150,9 @@ def build_warm_plan(
         requests = tuple(
             WarmRequest(family, query)
             for query in catalog.queries for family in families
-            if family != "product" or _supports_product(query)
+            if (family != "product" or _supports_product(query))
+            and (family != "purchases" or query.metric_type == "GSV" and not query.empty and query.compare_mode == "default"
+                 and warehouse_window_allowed(date.fromisoformat(query.start), date.fromisoformat(query.end)))
         )
         cutoff = date.fromisoformat(identity.data_cutoff)
         fixed = tuple(
@@ -158,10 +161,21 @@ def build_warm_plan(
             for years in range((policy.lookback_months + 11) // 12)
             for name in FIXED_PERIODS for metric in policy.metric_types for channel in policy.channels
             for excluded in policy.exclude_sets for mode in policy.compare_modes
-            for family in families if family != "product"
+            for family in families if family not in {"product", "purchases"}
         )
         requests = fixed + requests
         return WarmPlan(identity.revision, tuple(sorted(runtime.semantic_revisions.items())), requests)
+
+
+def build_reporting_plan(runtime: WarehouseRuntime, *, year: int, families: tuple[Family, ...] = FAMILIES) -> WarmPlan:
+    if not 2000 <= year <= 2099 or not families or len(set(families)) != len(families) or not set(families) <= set(FAMILIES):
+        raise ValueError("reporting prewarm requires a supported year and unique families")
+    windows = (("H1", f"{year}-01-01", f"{year}-06-30"),
+               ("Q1", f"{year}-01-01", f"{year}-03-31"), ("Q2", f"{year}-04-01", f"{year}-06-30"))
+    with runtime.read() as frame:
+        return WarmPlan(frame.pin.identity.revision, tuple(sorted(runtime.semantic_revisions.items())), tuple(
+            WarmRequest(family, RfmPrecomputeQuery(name, start, end, None, "GSV", (), "default"))
+            for name, start, end in windows for family in families))
 
 
 def _call(request: WarmRequest) -> dict:
@@ -174,6 +188,17 @@ def _call(request: WarmRequest) -> dict:
     query = request.query
     if query.empty:
         raise WarehouseQueryError("INSUFFICIENT_COVERAGE", "RFM window has no complete data day")
+    if request.family == "purchases":
+        from backend.contracts.warehouse_snapshot import WarehouseDateFilters
+        from backend.services.metrics.dashboard_purchases import LOW_PRICE_CHANNELS
+        from backend.services.warehouse_purchases import get_warehouse_purchases
+
+        if (isinstance(query, FixedPeriodQuery) or query.metric_type != "GSV"
+                or query.exclude_channels not in ((), tuple(LOW_PRICE_CHANNELS))):
+            raise WarehouseQueryError("INVALID_REQUEST", "购买指标预热口径无效")
+        filters = WarehouseDateFilters(start_date=query.start, end_date=query.end, channel=query.channel or "全店",
+                                       exclude_low_price=bool(query.exclude_channels))
+        return get_warehouse_purchases(filters).model_dump(mode="json")
     functions = {
         "product": (get_product_customer_overview, ProductCustomerResponseV3),
         "analysis": (get_rfm_analysis, RFMAnalysisResponse),

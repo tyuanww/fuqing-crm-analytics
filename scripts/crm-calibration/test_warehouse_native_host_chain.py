@@ -27,7 +27,7 @@ from backend.services.health.rfm_analysis.analysis import get_rfm_analysis
 from backend.services.rfm import get_rfm_r_flow, get_rfm_f_flow, get_rfm_m_flow
 from backend.services.warehouse_source import VerifiedWarehouseSource
 from backend.tests.test_warehouse_product_runtime import runtime_case as runtime_case
-from backend.tests.test_warehouse_snapshot import snapshot_case as snapshot_case, body, PATH
+from backend.tests.test_warehouse_snapshot import snapshot_case as snapshot_case, body, PATH, warm_purchases
 from test_native_snapshot_host_chain import serve_app
 
 
@@ -157,6 +157,7 @@ def close_host(child):
 
 def warm(app, family):
     if family == "purchases":
+        warm_purchases(app)
         return
     with app.state.warehouse_runtime.read(mode="compute"):
         function = {"product": get_product_customer_overview, "analysis": get_rfm_analysis,
@@ -242,6 +243,7 @@ def test_actual_large_money_stays_exact_through_author_host_and_page_projection(
         conn.execute("UPDATE orders SET actual_amount=90071992547409.95 WHERE order_id='s3'")
     source = VerifiedWarehouseSource.seal(spec, source_dir, connect=lambda: duckdb.connect(str(spec.database_path), read_only=True))
     app.state.warehouse_runtime = replace(runtime, source=source)
+    warm_purchases(app)
     assert rpc("login")["connected"] is True
     result = rpc("query_warehouse", request=body("purchases"))
     assert result["ok"] is True, result

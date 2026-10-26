@@ -14,7 +14,7 @@ from backend.services.health.rfm_analysis.precompute_plan import RfmPrecomputePo
 from backend.services.warehouse_boot import WarehouseRuntimeSettings, build_warehouse_runtime
 from backend.services.warehouse_prewarm import WarmBudget, WarmRequest, build_warm_plan, run_warm_plan
 from backend.services.warehouse_prewarm import FixedPeriodQuery
-from backend.services.warehouse_runtime import rfm_semantic_revision
+from backend.services.warehouse_runtime import purchases_semantic_revision, rfm_semantic_revision
 from backend.services.warehouse_source import WarehouseSourceUnavailableError
 from backend.tests.test_warehouse_product_runtime import runtime_case as runtime_case
 
@@ -22,7 +22,8 @@ from backend.tests.test_warehouse_product_runtime import runtime_case as runtime
 @pytest.fixture
 def warm_case(runtime_case):
     runtime, spec, _ = runtime_case
-    return replace(runtime, semantic_revisions={**runtime.semantic_revisions, "rfm": rfm_semantic_revision()}), spec
+    return replace(runtime, semantic_revisions={**runtime.semantic_revisions, "rfm": rfm_semantic_revision(),
+                                               "purchases": purchases_semantic_revision()}), spec
 
 
 def query(start="2026-07-01", end="2026-07-05", mode="default"):
@@ -39,7 +40,7 @@ def test_catalog_uses_real_two_year_windows_and_supported_product_limits(warm_ca
     runtime, _ = warm_case
     plan = build_warm_plan(runtime, policy=RfmPrecomputePolicy(channels=(None,), exclude_sets=((),)))
     assert {request.query.start[:4] for request in plan.requests} >= {"2024", "2025", "2026"}
-    assert {request.family for request in plan.requests} == {"product", "analysis", "r", "f", "m"}
+    assert {request.family for request in plan.requests} == {"product", "analysis", "r", "f", "m", "purchases"}
     assert {request.query.metric_type for request in plan.requests if request.family == "r"} == {"GSV", "GMV"}
     assert {request.query.compare_mode for request in plan.requests} == {"default", "auto_mom"}
     assert len({request.request_id for request in plan.requests}) == len(plan.requests)
@@ -48,7 +49,10 @@ def test_catalog_uses_real_two_year_windows_and_supported_product_limits(warm_ca
             assert request.query.metric_type == "GSV"
             for name in ("current", "comp"):
                 start, end, _ = request.query.ranges[name]
-                assert 0 <= (date.fromisoformat(end[:10]) - date.fromisoformat(start[:10])).days < 90
+                days = (date.fromisoformat(end[:10]) - date.fromisoformat(start[:10])).days
+                assert 0 <= days < 90 or (start[5:10], end[5:10]) in {
+                    ("01-01", "03-31"), ("04-01", "06-30"), ("07-01", "09-30"), ("10-01", "12-31"),
+                    ("01-01", "06-30"), ("07-01", "12-31")}
 
 
 def test_zero_budget_only_reports_actual_hits_and_coverage(warm_case):
