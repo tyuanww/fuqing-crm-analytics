@@ -218,7 +218,7 @@ def _period_metrics(
             o.user_id,
             o.actual_amount,
             o.is_member,
-            CASE WHEN ufp.first_pay_date >= DATE(?) THEN 1 ELSE 0 END AS is_new
+            CASE WHEN ufp.first_pay_date > DATE(?) THEN 1 ELSE 0 END AS is_new
         FROM orders o
         LEFT JOIN user_first_purchase ufp ON o.user_id = ufp.user_id
         WHERE {where_sql}
