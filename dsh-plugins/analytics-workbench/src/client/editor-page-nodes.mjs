@@ -8,9 +8,16 @@ import { openSidecarGraph } from '../free-page/runtime/sidecar-flag.mjs';
 
 const BLOCK = new Set(BLOCK_TAGS);
 const OPAQUE = new Set(['iframe', 'canvas', 'script', 'object', 'embed']);
+const READ_ONLY_SOURCE = /data-page-readonly|data-sp-bindable=["']database["']/i;
 
 function boundIds(manifest) {
   return new Set((manifest?.bindings ?? []).map(row => row?.node_id).filter(id => typeof id === 'string'));
+}
+
+function wholePageBound(manifest) {
+  const refs = manifest?.result_refs ?? [];
+  const bindings = manifest?.bindings ?? [];
+  return refs.length > 0 && !bindings.some(row => typeof row?.node_id === 'string' && row.node_id);
 }
 
 function boundaryFor(value, tag, bound, runtime) {
@@ -28,6 +35,7 @@ function crumb(node) {
 
 function pageNodesFromGraph(graph, manifest) {
   const bound = boundIds(manifest);
+  const pageBound = wholePageBound(manifest);
   const rows = [];
   for (const record of graph.node_list) {
     const projected = graph.toEditNodeRef(record);
@@ -39,7 +47,8 @@ function pageNodesFromGraph(graph, manifest) {
     const text = typeof range?.inner_text === 'string' ? range.inner_text : '';
     const nested = /<[a-z!/]/i.test(text);
     const opaque = OPAQUE.has(tag) || value.kind === 'dynamic_region';
-    const structural = !runtime && !opaque && value.kind === 'static_element';
+    const readonly = READ_ONLY_SOURCE.test(range?.outer_text ?? '');
+    const structural = !runtime && !opaque && value.kind === 'static_element' && !readonly;
     const direct = structural && !bound.has(value.node_id) && !nested && Boolean(range);
     rows.push({
       node_id: value.node_id,
@@ -58,7 +67,7 @@ function pageNodesFromGraph(graph, manifest) {
       capabilities: {
         select: true,
         direct_text: direct,
-        ai: !opaque && tag !== 'iframe' && !bound.has(value.node_id),
+        ai: !pageBound && !opaque && tag !== 'iframe' && !bound.has(value.node_id) && !readonly,
         attribute: structural,
         style: structural,
         structure: structural,

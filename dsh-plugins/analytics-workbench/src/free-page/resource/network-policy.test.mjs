@@ -64,3 +64,17 @@ test('rejects active navigation sinks even when the destination is computed', ()
   `);
   assert.equal(result.ok, false);
 });
+
+test('rejects direct location assignment and meta refresh navigation', () => {
+  const locationWrite = assertNoActiveOutbound('', '', `
+    const target = ['ht', 'tps://example.com/'].join('');
+    location.href = target;
+  `);
+  assert.equal(locationWrite.ok, false);
+  const metaRefresh = assertNoActiveOutbound(
+    '<meta http-equiv="refresh" content="0;url=https://example.com/leak">',
+    '',
+    '',
+  );
+  assert.equal(metaRefresh.ok, false);
+});

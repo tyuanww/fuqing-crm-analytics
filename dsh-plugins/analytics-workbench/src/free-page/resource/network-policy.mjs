@@ -9,8 +9,12 @@ const JS_CTOR = /\bnew\s+(?:WebSocket|EventSource|Worker|SharedWorker)\s*\(\s*([
 const BEACON = /\bsendBeacon\s*\(\s*(['"`])([^'"`]+)\1/gi;
 const ASSIGN = /\b(?:location|window)\.(?:href|location)\s*=\s*(['"`])([^'"`]+)\1/gi;
 const NAVIGATION_CALL = /\b(?:(?:window|document)\.)?location\.(?:assign|replace)\s*\(|\bwindow\.open\s*\(/gi;
+const NAVIGATION_WRITE = /(?:\b(?:window|document)\.)?location(?:\s*\.\s*href|\s*\[\s*(['"])href\1\s*\])?\s*=(?!=)/gi;
+const META_REFRESH = /<meta\b[^>]*\bhttp-equiv\s*=\s*(['"])refresh\1[^>]*>/gi;
 
 const ALLOWED_SCHEMES = new Set(['blob:', 'data:', 'resource:']);
+const ACTIVE_NAVIGATION = '__active_navigation_call__';
+const META_REFRESH_NAVIGATION = '__meta_refresh__';
 
 export function isBlockedNetworkUrl(raw) {
   const value = String(raw || '').trim();
@@ -60,8 +64,14 @@ export function extractCandidateUrls(html = '', css = '', js = '') {
   for (const value of collect(js, BEACON)) urls.push(value);
   for (const value of collect(js, ASSIGN)) urls.push(value);
   NAVIGATION_CALL.lastIndex = 0;
-  if (typeof js === 'string' && NAVIGATION_CALL.test(js)) urls.push('__active_navigation_call__');
+  if (typeof js === 'string' && NAVIGATION_CALL.test(js)) urls.push(ACTIVE_NAVIGATION);
   NAVIGATION_CALL.lastIndex = 0;
+  NAVIGATION_WRITE.lastIndex = 0;
+  if (typeof js === 'string' && NAVIGATION_WRITE.test(js)) urls.push(ACTIVE_NAVIGATION);
+  NAVIGATION_WRITE.lastIndex = 0;
+  META_REFRESH.lastIndex = 0;
+  if (typeof html === 'string' && META_REFRESH.test(html)) urls.push(META_REFRESH_NAVIGATION);
+  META_REFRESH.lastIndex = 0;
   return urls;
 }
 
@@ -77,6 +87,12 @@ function scrubOutbound(source, removed) {
       return full.replace(url, 'about:blank');
     });
   }
+  META_REFRESH.lastIndex = 0;
+  next = next.replace(META_REFRESH, full => {
+    removed.push(META_REFRESH_NAVIGATION);
+    return '';
+  });
+  META_REFRESH.lastIndex = 0;
   return next;
 }
 
@@ -95,7 +111,7 @@ export function assertNoActiveOutbound(html, css, js, allowedResourceIds = new S
   const blocked = [];
   for (const url of extractCandidateUrls(html, css, js)) {
     const trimmed = String(url || '').trim();
-    if (trimmed === '__active_navigation_call__') {
+    if (trimmed === ACTIVE_NAVIGATION || trimmed === META_REFRESH_NAVIGATION) {
       blocked.push(trimmed);
       continue;
     }

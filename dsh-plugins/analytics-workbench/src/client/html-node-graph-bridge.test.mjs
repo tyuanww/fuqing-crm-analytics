@@ -17,6 +17,24 @@ test('only mapped static leaf text is selectable; bound values and nested markup
   const dynamic = { ...pkg, js: 'document.querySelector(\'[data-shine-node="a"]\').textContent = "dynamic";' };
   assert.equal(editableTextNodes(dynamic).some(row => row.node_id === 'a'), false);
 });
+
+test('computed readonly values cannot be rewritten through AI, attributes, or structure', () => {
+  const readonlyPkg = {
+    html: '<p data-shine-node="metric" data-page-readonly>42</p><p data-shine-node="copy">说明</p>',
+    css: '', js: '', resources: [],
+    node_map: ['metric', 'copy'].map(node_id => ({
+      node_id, kind: 'static_element', selector: `[data-shine-node="${node_id}"]`,
+    })),
+  };
+  const nodes = Object.fromEntries(editablePageNodes(readonlyPkg).map(node => [node.node_id, node]));
+  assert.equal(nodes.metric.capabilities.direct_text, false);
+  assert.equal(nodes.metric.capabilities.ai, false);
+  assert.equal(nodes.metric.capabilities.attribute, false);
+  assert.equal(nodes.metric.capabilities.structure, false);
+  assert.equal(nodes.metric.capabilities.style, true);
+  assert.equal(nodes.copy.capabilities.ai, true);
+});
+
 test('opaque-origin bridge rejects wrong window, token, page, version, unknown nodes and write-shaped messages', () => {
   const source = {}, nodes = editableTextNodes(pkg);
   const context = { source, channel: 'nonce', pageId: 'page_a', version: 2, nodes };
@@ -138,14 +156,14 @@ test('runtime selection is read-only and forged messages are rejected', () => {
   assert.equal(acceptOperationMessage({ ...message, data: { ...message.data, operation: frameOp } }, { ...context, selection: frame, nodes }).reason, 'capability_boundary');
 });
 
-test('editor chrome keeps the brand palette', () => {
-  assert.match(visualEditorCss, /#09050D/);
-  assert.match(visualEditorCss, /#805D9D/);
-  assert.match(visualEditorCss, /#D3C3E8/);
-  assert.match(visualEditorCss, /#F2FFDC/);
-  assert.match(visualEditorCss, /#FEFCFF/);
-  assert.match(visualEditorCss, /PingFang SC/);
-  assert.match(visualEditorCss, /rgba\(255, 255, 255, 0\.03\)/);
+test('editor chrome uses the shared brand palette tokens', () => {
+  assert.match(visualEditorCss, /var\(--sm-ink\)/);
+  assert.match(visualEditorCss, /var\(--sm-purple\)/);
+  assert.match(visualEditorCss, /var\(--sm-lilac\)/);
+  assert.match(visualEditorCss, /var\(--sm-signal\)/);
+  assert.match(visualEditorCss, /var\(--sm-surface\)/);
+  assert.match(visualEditorCss, /var\(--sm-font-body\)/);
+  assert.match(visualEditorCss, /var\(--sm-font-display\)/);
   assert.doesNotMatch(visualEditorCss, /cyan|#00e5ff|#22d3ee|#0ea5e9/i);
 });
 

@@ -63,6 +63,27 @@ test('flag off still previews a mapped text node as an overlay', () => {
   assert.equal(pagePackage.html, html);
 });
 
+test('node-graph catalog blocks whole-page bindings and readonly computed values', () => {
+  const html = [
+    '<h1 data-shine-node="title">标题</h1>',
+    '<p data-shine-node="metric" data-page-readonly>42</p>',
+  ].join('');
+  const pagePackage = {
+    html, css: '', js: '', resources: [],
+    node_map: ['title', 'metric'].map(node_id => ({
+      node_id, kind: 'static_element', selector: `[data-shine-node="${node_id}"]`,
+    })),
+  };
+  const readonly = editorPageCatalog(pagePackage, null, { pageId: 'page_readonly', flag: 'on' });
+  const metric = readonly.pageNodes.find(node => node.node_id === 'metric');
+  assert.equal(metric.capabilities.ai, false);
+  assert.equal(metric.capabilities.direct_text, false);
+  assert.equal(metric.capabilities.structure, false);
+  const wholePage = editorPageCatalog(pagePackage, { bindings: [], result_refs: ['result_1'] },
+    { pageId: 'page_bound', flag: 'on' });
+  assert.equal(wholePage.pageNodes.every(node => node.capabilities.ai === false), true);
+});
+
 test('style stays an overlay and structure replace changes only the preview package', () => {
   const html = '<p id="lead">本周到店人数保持稳定。</p>';
   const pagePackage = { html, css: '', js: '', resources: [], node_map: [] };

@@ -18,6 +18,7 @@ export const BLOCK_TAGS = Object.freeze([
 const BLOCK_TAG_SET = new Set(BLOCK_TAGS);
 const NON_SELECTABLE = new Set(['html', 'head', 'body', 'script', 'style', 'link', 'meta', 'title', 'template', 'noscript']);
 const OPAQUE_TAGS = new Set(['iframe', 'canvas', 'script', 'object', 'embed']);
+const READ_ONLY_SOURCE = /data-page-readonly|data-sp-bindable=["']database["']/i;
 const RUNTIME_ID = /^runtime:[A-Za-z0-9_.:/-]{1,240}$/;
 const SOURCE_ID = /^[A-Za-z0-9_.:-]{1,128}$/;
 const TAG_NAME = /^[a-z][a-z0-9:-]{0,31}$/i;
@@ -32,6 +33,10 @@ function wholePageBound(manifest) {
   return refs.length > 0 && !bindings.some(row => typeof row?.node_id === 'string' && row.node_id);
 }
 
+function sourceReadOnly(node) {
+  return READ_ONLY_SOURCE.test(node.html_range.outer_text);
+}
+
 function parentNodes(index, node) {
   return Object.values(index.nodes)
     .filter(other => other.node_id !== node.node_id
@@ -44,12 +49,12 @@ function canDirectEdit(node, bound, pageBound) {
   const tag = String(node.tag || '').toLowerCase();
   return !pageBound && node.kind === 'static_element' && !bound.has(node.node_id) && !node.js_ranges.length
     && !OPAQUE_TAGS.has(tag) && !/<[a-z!/]/i.test(node.html_range.inner_text)
-    && !/data-page-readonly|data-sp-bindable=["']database["']/i.test(node.html_range.outer_text);
+    && !sourceReadOnly(node);
 }
 
 function canAiEdit(node, bound, pageBound) {
   const tag = String(node.tag || '').toLowerCase();
-  return !pageBound && !bound.has(node.node_id) && tag !== 'iframe';
+  return !pageBound && !bound.has(node.node_id) && tag !== 'iframe' && !sourceReadOnly(node);
 }
 
 function crumb(node) {
@@ -73,8 +78,9 @@ function toNodeRef(index, node, bound, pageBound) {
   const block = parents.find(row => BLOCK_TAG_SET.has(String(row.tag || '').toLowerCase()));
   const direct = canDirectEdit(node, bound, pageBound);
   const ai = canAiEdit(node, bound, pageBound);
+  const readonly = sourceReadOnly(node);
   const opaque = OPAQUE_TAGS.has(tag) || node.kind === 'dynamic_region' || node.js_ranges.length > 0 || bound.has(node.node_id) || pageBound;
-  const structural = !opaque && node.kind === 'static_element';
+  const structural = !opaque && node.kind === 'static_element' && !readonly;
   return {
     node_id: node.node_id,
     kind: node.kind,
@@ -93,7 +99,7 @@ function toNodeRef(index, node, bound, pageBound) {
       direct_text: direct,
       ai: ai && tag !== 'iframe',
       attribute: structural,
-      style: structural,
+      style: !opaque && node.kind === 'static_element',
       structure: structural,
       bound: bound.has(node.node_id),
       script_generated: Boolean(node.js_ranges.length) || node.kind === 'dynamic_region',
