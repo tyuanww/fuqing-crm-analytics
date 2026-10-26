@@ -65,6 +65,8 @@ export interface CategoryOverviewItem {
 export interface CategoryOverviewResponse {
   date_start: string
   date_end: string
+  compare_start_date: string
+  compare_end_date: string
   level: string
   channel: string | null
   metric_type: string

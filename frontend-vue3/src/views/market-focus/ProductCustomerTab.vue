@@ -15,7 +15,7 @@ import EmptyState from '@/components/EmptyState.vue'
 import ExportToolbar from '@/components/ExportToolbar.vue'
 import type { XlsxColumn } from '@/utils/exportXlsx'
 import LineChart from '@/components/LineChart.vue'
-import { buildProductCustomerTableRows, type ProductWeekResult, type TableRow } from './product-customer-rows'
+import { buildProductCustomerTableRows, joinProductCustomerWeeks, type ProductWeekResult, type TableRow } from './product-customer-rows'
 
 const props = defineProps<{ weeks: number; channel?: string }>()
 const filterStore = useFilterStore()
@@ -116,21 +116,7 @@ const { data: weekResults, isLoading, error, refetch } = useQuery({
         })),
       }),
     ])
-    if (customers.results.length !== ranges.length || overviews.results.length !== ranges.length) {
-      throw new Error('商品周表返回的时间窗口不完整，请重试')
-    }
-    const versions = new Set([
-      ...overviews.results.map(result => result.data_version),
-      ...customers.results.map(result => result.data_version),
-    ])
-    if (versions.size !== 1 || versions.has('unknown') || versions.has('')) {
-      throw new Error('订单数据在查询期间发生变化，请重试以获取同一数据快照')
-    }
-    return ranges.map((range, index) => {
-      const ttl = overviews.results[index]?.all_ttl
-      if (!ttl) throw new Error(`全店汇总缺失：${range.label}`)
-      return { range, ttl, customer: customers.results[index]! }
-    })
+    return joinProductCustomerWeeks(ranges, overviews.results, customers.results)
   },
   staleTime: 5 * 60 * 1000,
 })

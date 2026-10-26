@@ -1,5 +1,6 @@
 import type {
   CategoryOverviewItem,
+  CategoryOverviewResponse,
   ProductCustomerMetrics,
   ProductCustomerResponse,
 } from '@/api/category'
@@ -8,6 +9,36 @@ export interface ProductWeekResult {
   range: { start: string; end: string; label: string }
   ttl: CategoryOverviewItem
   customer: ProductCustomerResponse
+}
+
+export function joinProductCustomerWeeks(
+  ranges: ProductWeekResult['range'][],
+  overviews: CategoryOverviewResponse[],
+  customers: ProductCustomerResponse[],
+): ProductWeekResult[] {
+  if (customers.length !== ranges.length || overviews.length !== ranges.length) {
+    throw new Error('商品周表返回的时间窗口不完整，请重试')
+  }
+  const versions = new Set([...overviews, ...customers].map(result => result.data_version))
+  if ([...versions].some(version => !version || version === 'unknown')) {
+    throw new Error('数据来源未验证，无法生成同一快照周表')
+  }
+  if (versions.size !== 1) {
+    throw new Error('订单数据在查询期间发生变化，请重试以获取同一数据快照')
+  }
+  return ranges.map((range, index) => {
+    const overview = overviews[index]!
+    const customer = customers[index]!
+    if (overview.date_start !== range.start || customer.date_start !== range.start
+      || overview.date_end !== range.end || customer.date_end !== range.end
+      || !overview.compare_start_date || !overview.compare_end_date
+      || overview.compare_start_date !== customer.compare_start_date
+      || overview.compare_end_date !== customer.compare_end_date) {
+      throw new Error('商品与全店的对比窗口不一致，请重试')
+    }
+    if (!overview.all_ttl) throw new Error(`全店汇总缺失：${range.label}`)
+    return { range, ttl: overview.all_ttl, customer }
+  })
 }
 
 export interface TableRow {

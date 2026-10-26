@@ -5,6 +5,8 @@ from pydantic import BaseModel, Field
 from .common import WoolPartyBreakdown, DualAxisLineData
 from .types import RatioField, PercentageField, PpField  # Sprint 14 A.3
 
+GrowthRatioField = Annotated[float, Field(allow_inf_nan=False, description="(current - comparison) / comparison; raw ratio, displayed as percent")]
+
 class CategoryDistributionItem(BaseModel):
     name: str
     display_name: str = ""
@@ -31,27 +33,27 @@ class CategoryOverviewItem(BaseModel):
     name: str
     display_name: str = ""
     gsv: float
-    gsv_yoy: Optional["PercentageField"] = None
+    gsv_yoy: Optional["GrowthRatioField"] = None
     users: int
-    users_yoy: Optional["PercentageField"] = None
+    users_yoy: Optional["GrowthRatioField"] = None
     aus: float
-    aus_yoy: Optional["PercentageField"] = None
+    aus_yoy: Optional["GrowthRatioField"] = None
     old_gsv: float
-    old_gsv_yoy: Optional["PercentageField"] = None
+    old_gsv_yoy: Optional["GrowthRatioField"] = None
     old_ratio: RatioField
     old_ratio_yoy: Optional["PpField"] = None
     old_users: int
-    old_users_yoy: Optional["PercentageField"] = None
+    old_users_yoy: Optional["GrowthRatioField"] = None
     old_aus: float
-    old_aus_yoy: Optional["PercentageField"] = None
+    old_aus_yoy: Optional["GrowthRatioField"] = None
     new_gsv: float
-    new_gsv_yoy: Optional["PercentageField"] = None
+    new_gsv_yoy: Optional["GrowthRatioField"] = None
     new_ratio: RatioField
     new_ratio_yoy: Optional["PpField"] = None
     new_users: int
-    new_users_yoy: Optional["PercentageField"] = None
+    new_users_yoy: Optional["GrowthRatioField"] = None
     new_aus: float
-    new_aus_yoy: Optional["PercentageField"] = None
+    new_aus_yoy: Optional["GrowthRatioField"] = None
     old_users_ratio: Optional["RatioField"] = None
     old_users_ratio_yoy: Optional["PpField"] = None
     new_users_ratio: Optional["RatioField"] = None
@@ -63,6 +65,8 @@ class CategoryOverviewItem(BaseModel):
 class CategoryOverviewResponse(BaseModel):
     date_start: str
     date_end: str
+    compare_start_date: str
+    compare_end_date: str
     level: str
     channel: Optional[str] = None
     metric_type: str
@@ -114,15 +118,15 @@ class ProductCustomerMetrics(BaseModel):
 
 
 class ProductCustomerYoY(BaseModel):
-    gsv: Optional[PercentageField] = None
-    users: Optional[PercentageField] = None
-    aus: Optional[PercentageField] = None
-    old_gsv: Optional[PercentageField] = None
-    old_users: Optional[PercentageField] = None
-    old_aus: Optional[PercentageField] = None
-    new_gsv: Optional[PercentageField] = None
-    new_users: Optional[PercentageField] = None
-    new_aus: Optional[PercentageField] = None
+    gsv: Optional[GrowthRatioField] = None
+    users: Optional[GrowthRatioField] = None
+    aus: Optional[GrowthRatioField] = None
+    old_gsv: Optional[GrowthRatioField] = None
+    old_users: Optional[GrowthRatioField] = None
+    old_aus: Optional[GrowthRatioField] = None
+    new_gsv: Optional[GrowthRatioField] = None
+    new_users: Optional[GrowthRatioField] = None
+    new_aus: Optional[GrowthRatioField] = None
     old_ratio_ppt: Optional[PpField] = None
     new_ratio_ppt: Optional[PpField] = None
     old_users_ratio_ppt: Optional[PpField] = None
