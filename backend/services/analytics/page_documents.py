@@ -11,6 +11,7 @@ from contextlib import contextmanager
 from copy import deepcopy
 from dataclasses import dataclass
 from difflib import SequenceMatcher
+from html import unescape
 import hashlib
 import json
 from pathlib import Path
@@ -27,6 +28,7 @@ from backend.contracts.page_documents import (
     PageSavePreview, is_package_too_large, page_source_hash,
 )
 from backend.services.analytics.access import AnalyticsError, require
+from backend.services.analytics.cockpit_html_selection import SourceTree, UnsafeSelectionTree, static_nesting
 from backend.services.analytics.page_context import PageAccessPolicy
 from backend.services.analytics.first_purchase.asset_state import (
     connect, initialize_sqlite, now_ms, opaque, transaction, validate_key,
@@ -273,6 +275,132 @@ def stamp_binding_state(payload):
     return spec
 
 
+class _PresentationTree(SourceTree):
+    def __init__(self, html):
+        self.text_parts = []
+        super().__init__(html)
+
+    def handle_data(self, data):
+        if self.stack and self.stack[-1]["tag"] in {"table", "thead", "tbody", "tfoot", "tr"} and data.strip():
+            raise UnsafeSelectionTree()
+        self.text_parts.append((self.source_offset(), data.replace("\r\n", "\n").replace("\r", "\n")))
+
+    def handle_entityref(self, name):
+        self.handle_data(unescape(f"&{name};"))
+
+    def handle_charref(self, name):
+        self.handle_data(unescape(f"&#{name};"))
+
+
+def _validate_bound_presentation(spec):
+    presentation = spec.package.presentation
+    edits = [edit for edit in presentation.edits if edit.text is not None] if presentation else []
+    if not spec.binding_manifest.result_refs or not edits:
+        return
+
+    def reject():
+        raise fault("AI_BOUND_CONTENT", 403)
+
+    tree = _PresentationTree(spec.package.html)
+    if tree.invalid or "\0" in tree.text:
+        reject()
+    nodes = sorted(tree.all_nodes, key=lambda node: node["start"])
+    shells = {tag: [node for node in nodes if node["tag"] == tag] for tag in ("html", "head", "body")}
+    if any(shells.values()):
+        if len(shells["html"]) != 1 or len(shells["body"]) != 1 or len(shells["head"]) > 1:
+            reject()
+        body = shells["body"][0]
+        if (body["ancestors"] != ("html",) or len([node for node in nodes if not node["ancestors"]]) != 1
+                or shells["head"] and shells["head"][0]["end"] > body["start"]):
+            reject()
+        if any(text.strip() and not (body["start"] < offset < body["end"] or
+                any(head["start"] < offset < head["end"] for head in shells["head"]))
+               for offset, text in tree.text_parts):
+            reject()
+    children, stack = {}, []
+    for node in nodes:
+        ancestors = node["ancestors"]
+        parent_tag = ancestors[-1] if ancestors else None
+        tag = node["tag"]
+        # SourceTree records source nesting, not HTML5 error recovery. Keep
+        # only explicit static nesting plus the ordinary document shell.
+        if tag == "head":
+            safe = ancestors == ("html",)
+        elif tag in {"meta", "link", "title", "style", "script"}:
+            safe = parent_tag == "head" or (tag in {"style", "script"}
+                and static_nesting("div", ancestors, context=True))
+        else:
+            safe = static_nesting(tag, ancestors, context=True)
+        if not safe or tag == "form" and "form" in ancestors or tag == "tr" and parent_tag == "table":
+            reject()
+        while stack and stack[-1]["end"] <= node["start"]:
+            stack.pop()
+        parent = stack[-1] if stack else None
+        children.setdefault(parent["start"] if parent else None, []).append(node)
+        stack.append(node)
+
+    def intersects(left, right):
+        return left["start"] < right["end"] and right["start"] < left["end"]
+
+    protected = [node for node in nodes if "data-page-readonly" in node["attrs"]
+                 or node["attrs"].get("data-sp-bindable") == "database"]
+    mappings = {node.node_id: node for node in spec.package.node_map}
+    bindings = spec.binding_manifest.bindings
+    if {binding.result_ref for binding in bindings} != set(spec.binding_manifest.result_refs):
+        reject()
+    for binding in bindings:
+        mapping = mappings.get(binding.node_id)
+        if mapping is None or mapping.kind == "whole_page":
+            reject()
+        attribute = "data-shine-region" if mapping.kind == "dynamic_region" else "data-shine-node"
+        if not re.fullmatch(r"\[\s*" + attribute + r"\s*=\s*(['\"])" + re.escape(mapping.node_id) + r"\1\s*\]", mapping.selector):
+            reject()
+        matches = [node for node in nodes if node["attrs"].get(attribute) == binding.node_id]
+        if len(matches) != 1 or matches[0]["tag"] == "head" or "head" in matches[0]["ancestors"]:
+            reject()
+        protected.extend(matches)
+
+    text_cache = {}
+
+    def matches_key(node, key):
+        if key.attribute == "text":
+            if node["start"] not in text_cache:
+                text_cache[node["start"]] = "".join(text for offset, text in tree.text_parts
+                                                   if node["start"] < offset < node["end"])
+            return text_cache[node["start"]] == key.value
+        if key.attribute == "class":
+            return key.value in re.split(r"[\t\n\f\r ]+", node["attrs"].get("class") or "")
+        return node["attrs"].get(key.attribute) == key.value
+
+    text_write_ranges = []
+    for edit in edits:
+        roots = [node for node in nodes if matches_key(node, edit.target.anchor)]
+        if len(roots) != 1:
+            reject()
+        node = roots[0]
+        anchor_in_preserved_body = node["tag"] not in shells and "head" not in node["ancestors"]
+        if not anchor_in_preserved_body:
+            reject()
+        for step in edit.target.path:
+            candidates = [child for child in children.get(node["start"], []) if child["tag"] == step.tag]
+            if step.key and step.key.attribute == "text" and any(
+                    intersects(candidate, changed) for candidate in candidates for changed in text_write_ranges):
+                reject()
+            if step.key and step.key.attribute == "nth":
+                position = int(step.key.value)
+                candidates = candidates[position:position + 1]
+            elif step.key:
+                candidates = [child for child in candidates if matches_key(child, step.key)]
+            if len(candidates) != 1:
+                reject()
+            node = candidates[0]
+        if node["readonly"] or any(intersects(node, fact) for fact in protected):
+            reject()
+        if any(intersects(node, changed) for changed in text_write_ranges):
+            reject()
+        text_write_ranges.append(node)
+
+
 class PageDocumentStore:
     def __init__(self, directory: Path, *,
                  resolve_binding: Callable[..., ResolvedPageBinding] | None = None,
@@ -433,6 +561,7 @@ class PageDocumentStore:
 
     def _preview(self, actor, spec, operation, base_version, *, retained_scopes=None, source_context=None):
         self._access(actor, write=True)
+        _validate_bound_presentation(spec)
         spec, scopes = self._bind(actor, spec, retained_scopes=retained_scopes, source_context=source_context)
         snapshot = {"spec": spec.model_dump(mode="json")}
         payload, digest = self._encode_snapshot(snapshot, scopes)
@@ -781,7 +910,9 @@ class PageDocumentStore:
         binding_error = None
         if observed.status != "APPLIED":
             try:
-                spec, current_scopes = self._bind(actor, validated(PageDocument, snapshot["spec"]), source_context=source_context)
+                spec = validated(PageDocument, snapshot["spec"])
+                _validate_bound_presentation(spec)
+                spec, current_scopes = self._bind(actor, spec, source_context=source_context)
                 snapshot = {"spec": spec.model_dump(mode="json")}
                 payload, digest = self._encode_snapshot(snapshot, retained_scopes | current_scopes)
                 if source_context is not None:

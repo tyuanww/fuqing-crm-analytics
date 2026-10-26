@@ -133,6 +133,236 @@ def test_bound_node_must_exist_in_page_mapping():
         PageDraft.model_validate(body)
 
 
+def presentation_binding(*_):
+    return ResolvedPageBinding("VERIFIED", frozenset({"brand-a"}))
+
+
+def bound_presentation_draft(html=None):
+    return draft(package={
+        "html": html or '<section id="report"><h1 id="heading">Title</h1>'
+        '<div id="amount" data-shine-node="amount"><span id="value">100</span></div>'
+        '<p id="advice">Advice</p></section>',
+        "node_map": [{"node_id": "amount", "kind": "static_element",
+                      "selector": '[data-shine-node="amount"]'}],
+    }, binding_manifest={"result_refs": ["result_fixture"], "bindings": [
+        {"binding_id": "binding_fixture", "result_ref": "result_fixture", "node_id": "amount"}]})
+
+
+def presentation_package(package, *edits):
+    changed = deepcopy(package)
+    changed["presentation"] = {
+        "version": 1, "source_hash": page_source_hash(changed["html"], changed.get("css", ""), changed.get("js", "")),
+        "edits": list(edits),
+    }
+    return changed
+
+
+def text_edit(identity, text="999", *, attribute="id", path=None):
+    return {"target": {"anchor": {"attribute": attribute, "value": identity}, "path": path or []}, "text": text}
+
+
+def test_bound_presentation_save_cannot_override_verified_amount(tmp_path):
+    store = PageDocumentStore(private(tmp_path / "bound-presentation"), resolve_binding=presentation_binding)
+    saved = confirm(store, store.generate(ALICE, bound_presentation_draft()))["spec"]
+    request = PageSavePreview.model_validate({
+        "base_version": 1, "title": saved["title"], "binding_manifest": saved["binding_manifest"],
+        "package": presentation_package(saved["package"], text_edit("amount")),
+    })
+    with pytest.raises(AnalyticsError) as error:
+        store.save(ALICE, saved["page_id"], request)
+    assert error.value.code == "AI_BOUND_CONTENT"
+    assert store.get(ALICE, saved["page_id"])["spec"] == saved
+
+
+@pytest.mark.parametrize("target", [
+    text_edit("amount"), text_edit("amount", ""), text_edit("report"), text_edit("value"),
+    text_edit("report", path=[{"tag": "div"}]),
+    text_edit("report", path=[{"tag": "div", "key": {"attribute": "id", "value": "amount"}}]),
+    text_edit("report", path=[{"tag": "div", "key": {"attribute": "nth", "value": "0"}}]),
+    text_edit("report", path=[{"tag": "div", "key": {"attribute": "text", "value": "100"}}]),
+    text_edit("report", path=[{"tag": "div", "key": {"attribute": "class", "value": "fact"}}]),
+    text_edit("metric", attribute="data-node"),
+    text_edit("metric", attribute="data-page-field"),
+    text_edit("metric", attribute="data-page-block"),
+])
+@pytest.mark.parametrize("operation", ["generate", "save", "patch"])
+def test_bound_presentation_rejects_fact_and_relative_targets(tmp_path, target, operation):
+    store = PageDocumentStore(private(tmp_path / "bound-relative"), resolve_binding=presentation_binding)
+    body = bound_presentation_draft().model_dump(mode="json")
+    body["package"]["html"] = body["package"]["html"].replace(
+        'id="amount"', 'id="amount" class="fact" data-node="metric" data-page-field="metric" data-page-block="metric"')
+    if operation != "generate":
+        spec = confirm(store, store.generate(ALICE, PageDraft.model_validate(body)))["spec"]
+        body["package"] = spec["package"]
+    changed = presentation_package(body["package"], target)
+    with pytest.raises(AnalyticsError) as error:
+        if operation == "generate":
+            store.generate(ALICE, PageDraft.model_validate({**body, "package": changed}))
+        elif operation == "patch":
+            store.patch(ALICE, spec["page_id"], PagePatchPreview(base_version=1, package=changed))
+        else:
+            store.save(ALICE, spec["page_id"], PageSavePreview(
+                base_version=1, title=spec["title"], package=changed, binding_manifest=spec["binding_manifest"]))
+    assert error.value.code == "AI_BOUND_CONTENT"
+    with closing(sqlite3.connect(store.path)) as con:
+        assert con.execute("SELECT count(*) FROM previews").fetchone()[0] == (0 if operation == "generate" else 1)
+        assert con.execute("SELECT count(*) FROM revisions").fetchone()[0] == (0 if operation == "generate" else 1)
+
+
+@pytest.mark.parametrize("step", [
+    {"tag": "h1"},
+    *({"tag": "h1", "key": {"attribute": attribute, "value": value}} for attribute, value in [
+        ("id", "heading"), ("data-node", "heading"), ("data-page-field", "heading"),
+        ("data-page-block", "heading"), ("class", "heading"), ("text", "A & B"), ("nth", "0")]),
+])
+def test_bound_presentation_independent_text_and_styles_survive_reopen(tmp_path, step):
+    store = PageDocumentStore(private(tmp_path / "bound-independent"), resolve_binding=presentation_binding)
+    body = bound_presentation_draft().model_dump(mode="json")
+    body["package"]["html"] = ('<!doctype html><html><head><title>Report</title>'
+        '<style>h1{color:blue}</style><script>window.label="<span>not a node</span>";</script>'
+        '</head><body>' + body["package"]["html"].replace(
+        'id="heading">Title', 'id="heading" data-node="heading" data-page-field="heading" '
+        'data-page-block="heading" class="large heading">A &amp; B') + '</body></html>')
+    spec = confirm(store, store.generate(ALICE, PageDraft.model_validate(body)))["spec"]
+    edits = [text_edit("report", "Updated heading", path=[step]), text_edit("advice", "Updated advice"),
+             {"target": text_edit("amount")["target"], "style": {"color": "blue"}}]
+    changed = presentation_package(spec["package"], *edits)
+    preview = store.save(ALICE, spec["page_id"], PageSavePreview(
+        base_version=1, title=spec["title"], package=changed, binding_manifest=spec["binding_manifest"]))
+    confirm(store, preview, "save-independent")
+    reopened = PageDocumentStore(store.path.parent, resolve_binding=presentation_binding).get(ALICE, spec["page_id"])["spec"]
+    assert reopened["version"] == 2 and reopened["binding_state"] == "BOUND_VERIFIED"
+    assert reopened["package"]["html"] == spec["package"]["html"]
+    assert [edit["text"] for edit in reopened["package"]["presentation"]["edits"]] == ["Updated heading", "Updated advice", None]
+    changed = deepcopy(reopened["package"])
+    changed["css"] = "h1 { color: red }"
+    changed["presentation"]["source_hash"] = page_source_hash(changed["html"], changed["css"], changed["js"])
+    saved = confirm(store, store.save(ALICE, spec["page_id"], PageSavePreview(
+        base_version=2, title=spec["title"], package=changed, binding_manifest=spec["binding_manifest"])), "restyle")
+    assert saved["spec"]["version"] == 3
+
+
+@pytest.mark.parametrize("case", [
+    "missing-marker", "duplicate-marker", "missing-node-id", "whole-page", "unsupported-selector",
+    "refs-only", "unmapped-ref", "nonvoid-slash", "implicit-close", "table-foster", "foreign",
+    "rawtext", "duplicate-attribute", "duplicate-anchor", "missing-target", "readonly", "database",
+    "duplicate-body", "late-head", "implicit-tbody", "ambiguous-child", "shell-anchor", "head-binding",
+])
+def test_bound_presentation_unproven_target_is_rejected_but_style_remains_allowed(tmp_path, case):
+    store = PageDocumentStore(private(tmp_path / case), resolve_binding=presentation_binding)
+    body = bound_presentation_draft().model_dump(mode="json")
+    package, manifest = body["package"], body["binding_manifest"]
+    if case == "missing-marker":
+        package["html"] = package["html"].replace('data-shine-node="amount"', '')
+    elif case == "duplicate-marker":
+        package["html"] += '<div data-shine-node="amount">200</div>'
+    elif case == "missing-node-id":
+        manifest["bindings"][0]["node_id"] = None
+    elif case == "whole-page":
+        package["node_map"][0]["kind"] = "whole_page"
+    elif case == "unsupported-selector":
+        package["node_map"][0]["selector"] = "#amount"
+    elif case == "refs-only":
+        manifest["bindings"] = []
+    elif case == "unmapped-ref":
+        manifest["result_refs"].append("result_other")
+    elif case == "nonvoid-slash":
+        package["html"] = package["html"].replace('<section id="report">', '<section id="report"/>')
+    elif case == "implicit-close":
+        package["html"] = '<p>' + package["html"] + '</p>'
+    elif case == "table-foster":
+        package["html"] += '<table>outside<tbody><tr><td>inside</td></tr></tbody></table>'
+    elif case == "implicit-tbody":
+        package["html"] += '<table><tr><td>inside</td></tr></table>'
+    elif case == "foreign":
+        package["html"] = '<svg>' + package["html"] + '</svg>'
+    elif case == "rawtext":
+        package["html"] = '<textarea>' + package["html"] + '</textarea>'
+    elif case == "duplicate-attribute":
+        package["html"] = package["html"].replace('id="heading"', 'id="heading" id="amount"')
+    elif case == "duplicate-anchor":
+        package["html"] += '<h1 id="heading">Other heading</h1>'
+    elif case in {"readonly", "database"}:
+        attribute = 'data-page-readonly' if case == "readonly" else 'data-sp-bindable="database"'
+        package["html"] = package["html"].replace('id="heading"', f'id="heading" {attribute}')
+    elif case == "duplicate-body":
+        package["html"] = '<html><body>' + package["html"] + '</body><body>extra</body></html>'
+    elif case == "late-head":
+        package["html"] = '<html><body>' + package["html"] + '</body><head><title>late</title></head></html>'
+    elif case == "head-binding":
+        package["html"] = ('<html><head><title data-shine-node="amount">100</title></head><body>'
+                           '<h1 id="heading">Title</h1></body></html>')
+    elif case == "shell-anchor":
+        package["html"] = '<html id="shell"><body>' + package["html"] + '</body></html>'
+    elif case == "ambiguous-child":
+        package["html"] = package["html"].replace('</section>', '<h1>Another title</h1></section>')
+    target = text_edit("missing" if case == "missing-target" else "heading")
+    if case == "ambiguous-child":
+        target = text_edit("report", path=[{"tag": "h1"}])
+    elif case == "shell-anchor":
+        target = text_edit("shell", path=[{"tag": "body"}, {"tag": "section"}, {"tag": "h1"}])
+    spec = confirm(store, store.generate(ALICE, PageDraft.model_validate(body)))["spec"]
+    changed = presentation_package(spec["package"], target)
+    with pytest.raises(AnalyticsError) as error:
+        store.save(ALICE, spec["page_id"], PageSavePreview(base_version=1, title=spec["title"],
+            package=changed, binding_manifest=manifest))
+    assert error.value.code == "AI_BOUND_CONTENT"
+    changed = presentation_package(spec["package"], {"target": target["target"], "style": {"color": "blue"}})
+    saved = confirm(store, store.save(ALICE, spec["page_id"], PageSavePreview(base_version=1, title=spec["title"],
+        package=changed, binding_manifest=manifest)), "style-only")
+    assert saved["spec"]["version"] == 2
+
+
+def test_bound_presentation_confirm_rejects_legacy_pending_text_without_advancing_version(tmp_path):
+    store = PageDocumentStore(private(tmp_path / "legacy-bound-preview"), resolve_binding=presentation_binding)
+    spec = confirm(store, store.generate(ALICE, bound_presentation_draft()))["spec"]
+    preview = store.preview_identical(ALICE, spec["page_id"], 1)
+    with closing(sqlite3.connect(store.path)) as con:
+        payload = json.loads(con.execute("SELECT payload FROM previews WHERE preview_id=?", (preview["preview_id"],)).fetchone()[0])
+        old_spec = payload["snapshot"]["spec"]
+        old_spec["package"] = presentation_package(old_spec["package"], text_edit("amount"))
+        encoded, digest = store._encode_snapshot(payload["snapshot"], payload["required_scopes"])
+        con.execute("UPDATE previews SET payload=?, digest=? WHERE preview_id=?", (encoded, digest, preview["preview_id"]))
+        con.commit()
+    with pytest.raises(AnalyticsError) as error:
+        confirm(store, preview, "legacy-save")
+    assert error.value.code == "AI_BOUND_CONTENT"
+    assert store.get(ALICE, spec["page_id"])["spec"] == spec
+    assert store.preview(ALICE, preview["preview_id"])["status"] == "PENDING"
+    with closing(sqlite3.connect(store.path)) as con:
+        assert con.execute("SELECT count(*) FROM revisions").fetchone()[0] == 1
+        assert con.execute("SELECT count(*) FROM receipts WHERE key='legacy-save'").fetchone()[0] == 0
+
+
+@pytest.mark.parametrize("edits", [
+    [text_edit("heading", "Advice"), text_edit("report", path=[{"tag": "h1", "key": {"attribute": "text", "value": "Title"}}])],
+    [text_edit("heading"), text_edit("report", path=[{"tag": "h1"}])],
+])
+def test_bound_presentation_rejects_overlapping_or_changed_text_identities(tmp_path, edits):
+    store = PageDocumentStore(private(tmp_path / "ordered-overlay"), resolve_binding=presentation_binding)
+    body = bound_presentation_draft().model_dump(mode="json")
+    body["package"] = presentation_package(body["package"], *edits)
+    with pytest.raises(AnalyticsError) as error:
+        store.generate(ALICE, PageDraft.model_validate(body))
+    assert error.value.code == "AI_BOUND_CONTENT"
+
+
+def test_bound_presentation_dynamic_binding_keeps_static_sibling_editable(tmp_path):
+    store = PageDocumentStore(private(tmp_path / "dynamic-bound"), resolve_binding=presentation_binding)
+    body = bound_presentation_draft().model_dump(mode="json")
+    package = body["package"]
+    package["html"] = package["html"].replace('data-shine-node="amount"', 'data-shine-region="amount"')
+    package["node_map"][0].update(kind="dynamic_region", selector="[data-shine-region='amount']")
+    package["presentation"] = presentation_package(package, text_edit("heading", "New heading"))["presentation"]
+    saved = confirm(store, store.generate(ALICE, PageDraft.model_validate(body)))["spec"]
+    assert saved["package"]["presentation"]["edits"][0]["text"] == "New heading"
+    changed = presentation_package(saved["package"], text_edit("value"))
+    with pytest.raises(AnalyticsError) as error:
+        store.save(ALICE, saved["page_id"], PageSavePreview(base_version=1, title=saved["title"],
+            package=changed, binding_manifest=saved["binding_manifest"]))
+    assert error.value.code == "AI_BOUND_CONTENT"
+
+
 def test_generate_adds_host_mappings_to_plain_html(tmp_path):
     store = PageDocumentStore(private(tmp_path / "plain-html-mappings"))
     request = PageDraft(title="Plain HTML", session_id=None, origin_file_id="file_plain",
