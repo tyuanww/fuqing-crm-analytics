@@ -1,4 +1,4 @@
-from test_native_page_composition import FILTERS, composition, editable_draft, value
+from test_native_page_composition import FILTERS, composition as composition, editable_draft, value
 
 
 def test_seven_source_page_edit_fits_identity_budget(composition):
