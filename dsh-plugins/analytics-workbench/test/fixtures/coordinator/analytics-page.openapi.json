@@ -83,6 +83,16 @@
     "max_response_bytes": 65536,
     "max_cumulative_rows": 2000
   },
+  "x-host-facts": {
+    "schema_version": "warehouse-facts/v1",
+    "read_path": "/api/v1/analytics/page-result-access/read",
+    "request_schema": "PageFactReadRequest",
+    "view_schema": "PageFactView",
+    "max_response_bytes": 524288,
+    "max_cumulative_facts": 2000,
+    "endorses": "selected_source_values",
+    "does_not_endorse": "page_dom"
+  },
   "paths": {
     "/api/v1/analytics/page-documents/previews": {
       "post": {
@@ -2340,8 +2350,451 @@
         ],
         "title": "PageBindingStateEvent",
         "type": "object"
+      },
+      "PageFactReadRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "op": {
+            "const": "data.read",
+            "title": "Op",
+            "type": "string"
+          },
+          "mode": {
+            "const": "facts",
+            "title": "Mode",
+            "type": "string"
+          },
+          "result_ref": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "pattern": "^[A-Za-z0-9_.:-]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Result Ref"
+          },
+          "data_ref": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "pattern": "^[A-Za-z0-9_.:-]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Data Ref"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "pattern": "^[A-Za-z0-9_.:-]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Request Id"
+          },
+          "instance_id": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "pattern": "^[A-Za-z0-9_.:-]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Instance Id"
+          }
+        },
+        "required": [
+          "op",
+          "mode"
+        ],
+        "title": "PageFactReadRequest",
+        "type": "object"
+      },
+      "ProductFactSelector": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "product",
+            "title": "Kind",
+            "type": "string"
+          },
+          "display_name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Display Name",
+            "type": "string"
+          },
+          "period": {
+            "enum": [
+              "current",
+              "comparison",
+              "yoy"
+            ],
+            "title": "Period",
+            "type": "string"
+          },
+          "field": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "title": "Field",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "display_name",
+          "period",
+          "field"
+        ],
+        "title": "ProductFactSelector",
+        "type": "object"
+      },
+      "PurchaseFactSelector": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "purchase",
+            "title": "Kind",
+            "type": "string"
+          },
+          "metric": {
+            "enum": [
+              "GSV",
+              "AOV",
+              "AUS",
+              "orders",
+              "buyers"
+            ],
+            "title": "Metric",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "metric"
+        ],
+        "title": "PurchaseFactSelector",
+        "type": "object"
+      },
+      "RfmFactSelector": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "rfm",
+            "title": "Kind",
+            "type": "string"
+          },
+          "group": {
+            "enum": [
+              "rows",
+              "same_channel_rows",
+              "member_rows",
+              "member_same_channel_rows"
+            ],
+            "title": "Group",
+            "type": "string"
+          },
+          "segment": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Segment",
+            "type": "string"
+          },
+          "field": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "title": "Field",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "group",
+          "segment",
+          "field"
+        ],
+        "title": "RfmFactSelector",
+        "type": "object"
+      },
+      "PageFact": {
+        "additionalProperties": false,
+        "properties": {
+          "selector": {
+            "discriminator": {
+              "mapping": {
+                "product": "#/components/schemas/ProductFactSelector",
+                "purchase": "#/components/schemas/PurchaseFactSelector",
+                "rfm": "#/components/schemas/RfmFactSelector"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PurchaseFactSelector"
+              },
+              {
+                "$ref": "#/components/schemas/RfmFactSelector"
+              },
+              {
+                "$ref": "#/components/schemas/ProductFactSelector"
+              }
+            ],
+            "title": "Selector"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "pattern": "^-?[0-9]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "unit": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Unit",
+            "type": "string"
+          }
+        },
+        "required": [
+          "selector",
+          "value",
+          "unit"
+        ],
+        "title": "PageFact",
+        "type": "object"
+      },
+      "PageFactExpected": {
+        "additionalProperties": false,
+        "properties": {
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Unit"
+          },
+          "time_range": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Time Range"
+          },
+          "result_version": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Result Version"
+          }
+        },
+        "title": "PageFactExpected",
+        "type": "object"
+      },
+      "PageFactHostSource": {
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "endorses": {
+            "const": "result_provenance",
+            "title": "Endorses",
+            "type": "string"
+          },
+          "does_not_endorse": {
+            "const": "page_dom",
+            "title": "Does Not Endorse",
+            "type": "string"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "pattern": "^[A-Za-z0-9_.:-]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        },
+        "required": [
+          "label",
+          "endorses",
+          "does_not_endorse",
+          "session_id"
+        ],
+        "title": "PageFactHostSource",
+        "type": "object"
+      },
+      "PageFactView": {
+        "additionalProperties": false,
+        "properties": {
+          "ok": {
+            "const": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "op": {
+            "const": "data.read",
+            "title": "Op",
+            "type": "string"
+          },
+          "mode": {
+            "const": "facts",
+            "title": "Mode",
+            "type": "string"
+          },
+          "result_ref": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]+$",
+            "title": "Result Ref",
+            "type": "string"
+          },
+          "data_ref": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.:-]+$",
+            "title": "Data Ref",
+            "type": "string"
+          },
+          "result_version": {
+            "minimum": 1,
+            "title": "Result Version",
+            "type": "integer"
+          },
+          "summary": {
+            "additionalProperties": true,
+            "title": "Summary",
+            "type": "object"
+          },
+          "rows": {
+            "items": {},
+            "maxItems": 0,
+            "title": "Rows",
+            "type": "array"
+          },
+          "cursor": {
+            "title": "Cursor",
+            "type": "null"
+          },
+          "binding_state": {
+            "const": "BOUND_VERIFIED",
+            "title": "Binding State",
+            "type": "string"
+          },
+          "host_source": {
+            "$ref": "#/components/schemas/PageFactHostSource"
+          },
+          "expected": {
+            "$ref": "#/components/schemas/PageFactExpected"
+          },
+          "facts_schema_version": {
+            "const": "warehouse-facts/v1",
+            "title": "Facts Schema Version",
+            "type": "string"
+          },
+          "facts": {
+            "items": {
+              "$ref": "#/components/schemas/PageFact"
+            },
+            "maxItems": 2000,
+            "title": "Facts",
+            "type": "array"
+          },
+          "expires_at_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At Ms"
+          }
+        },
+        "required": [
+          "ok",
+          "op",
+          "mode",
+          "result_ref",
+          "data_ref",
+          "result_version",
+          "summary",
+          "rows",
+          "cursor",
+          "binding_state",
+          "host_source",
+          "expected",
+          "facts_schema_version",
+          "facts",
+          "expires_at_ms"
+        ],
+        "title": "PageFactView",
+        "type": "object"
       }
     }
   },
-  "x-schema-sha256": "c0371e9bd7e4f78a0c5f7e8e64fd0b54fef421086a389eb917940800ec893c39"
+  "x-schema-sha256": "28c8e8403d86222408445abb24cfa876cf0333ddb3a5b8ae30b9c9da4f5adaa0"
 }
