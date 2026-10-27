@@ -10,9 +10,13 @@ from backend.services.analytics.warehouse_fact_selection import (
 from backend.services.analytics.warehouse_page_projection import (
     PRODUCT_UNITS, PRODUCT_YOY_UNITS, RFM_UNITS, PROJECTION, warehouse_projection,
 )
-from backend.tests.test_warehouse_page_source import envelope, snapshot_case, source_value
+from backend.tests.test_warehouse_page_source import envelope, source_value
 from backend.tests.test_warehouse_native_source import capture
-from backend.tests.test_warehouse_product_runtime import runtime_case
+
+pytest_plugins = (
+    'backend.tests.test_warehouse_snapshot',
+    'backend.tests.test_warehouse_product_runtime',
+)
 
 GROUPS = ('rows', 'same_channel_rows', 'member_rows', 'member_same_channel_rows')
 
