@@ -659,6 +659,152 @@ def test_ai_source_range_rejects_stale_hash_and_bound_content(tmp_path):
     assert error.value.code == "AI_BOUND_CONTENT" and error.value.status == 403
 
 
+def test_readonly_computed_sources_survive_manual_and_forged_source_patches(tmp_path):
+    store = PageDocumentStore(private(tmp_path / "readonly-pages"))
+    readonly_package = {
+        "html": (
+            '<div id="root">'
+            '<h1 data-shine-node="n_title">标题</h1>'
+            '<p id="metric" data-shine-node="n_metric" data-page-readonly>42</p>'
+            '</div>'
+        ),
+        "css": "",
+        "js": "",
+        "resources": [],
+        "node_map": [
+            {"node_id": "n_title", "kind": "static_element",
+             "selector": "[data-shine-node='n_title']"},
+            {"node_id": "n_metric", "kind": "static_element",
+             "selector": "[data-shine-node='n_metric']"},
+        ],
+    }
+    v1 = confirm(store, store.generate(ALICE, draft(package=readonly_package)), "readonly-v1")
+    page_id = v1["spec"]["page_id"]
+
+    manual_change = {**readonly_package, "html": readonly_package["html"].replace(">42<", ">99<")}
+    with pytest.raises(AnalyticsError) as error:
+        store.patch(ALICE, page_id, PagePatchPreview.model_validate({
+            "base_version": 1,
+            "package": manual_change,
+        }))
+    assert error.value.code == "AI_BOUND_CONTENT" and error.value.status == 403
+
+    editable_change = {**readonly_package, "html": readonly_package["html"].replace("标题", "新标题")}
+    assert store.patch(ALICE, page_id, PagePatchPreview.model_validate({
+        "base_version": 1,
+        "package": editable_change,
+    }))["operation"] == "PATCH"
+
+    start = readonly_package["html"].index('<p id="metric" data-shine-node="n_metric"')
+    end = readonly_package["html"].index("</p>", start) + len("</p>")
+    digest = source_hash(readonly_package)
+    token = hashlib.sha256(f"{digest}:n_metric:{start}:{end}".encode()).hexdigest()[:32]
+    forged = PagePatchPreview.model_validate({
+        "base_version": 1,
+        "package": manual_change,
+        "edit_scope": "source_range",
+        "edit_context_id": "ctx_readonly",
+        "source_hash": digest,
+        "focus_ref": {
+            "node_id": "n_metric",
+            "kind": "static_element",
+            "allowed_scope": "exact_source_range",
+            "allowed_ranges": [{"file": "html", "start": start, "end": end}],
+            "mapping_token": token,
+            "version_hash": digest,
+        },
+    })
+    with pytest.raises(AnalyticsError) as error:
+        store.patch(ALICE, page_id, forged)
+    assert error.value.code == "AI_BOUND_CONTENT" and error.value.status == 403
+
+    presentation = {
+        **readonly_package,
+        "presentation": {
+            "source_hash": page_source_hash(
+                readonly_package["html"], readonly_package["css"], readonly_package["js"]
+            ),
+            "edits": [{
+                "target": {"anchor": {"attribute": "id", "value": "root"}, "path": []},
+                "text": "99",
+            }],
+        },
+    }
+    with pytest.raises(AnalyticsError) as error:
+        store.patch(ALICE, page_id, PagePatchPreview.model_validate({
+            "base_version": 1,
+            "package": presentation,
+        }))
+    assert error.value.code == "AI_BOUND_CONTENT" and error.value.status == 403
+
+    style_only = {
+        **presentation,
+        "presentation": {
+            **presentation["presentation"],
+            "edits": [{
+                "target": {"anchor": {"attribute": "id", "value": "metric"}, "path": []},
+                "style": {"color": "#805D9D"},
+            }],
+        },
+    }
+    assert store.patch(ALICE, page_id, PagePatchPreview.model_validate({
+        "base_version": 1,
+        "package": style_only,
+    }))["operation"] == "PATCH"
+
+    unmapped = {
+        "html": '<p data-shine-node="n_metric" data-page-readonly>42</p>',
+        "css": "",
+        "js": "",
+        "resources": [],
+        "node_map": [],
+    }
+    unmapped_v1 = confirm(store, store.generate(ALICE, draft(package=unmapped)), "readonly-unmapped")
+    with pytest.raises(AnalyticsError) as error:
+        store.patch(ALICE, unmapped_v1["spec"]["page_id"], PagePatchPreview.model_validate({
+            "base_version": 1,
+            "package": {**unmapped, "html": unmapped["html"].replace("42", "99")},
+        }))
+    assert error.value.code == "AI_BOUND_CONTENT" and error.value.status == 403
+
+
+@pytest.mark.parametrize(
+    ("name", "marker"),
+    [
+        ("unquoted", "data-sp-bindable=database"),
+        ("spaced", "data-sp-bindable = 'database'"),
+        ("entity", "data-sp-bindable='dat&#97;base'"),
+        ("boolean", "data-page-readonly"),
+    ],
+)
+def test_readonly_source_markers_use_html_attribute_semantics(tmp_path, name, marker):
+    store = PageDocumentStore(private(tmp_path / f"readonly-marker-{name}"))
+    package = {
+        "html": (
+            f'<div data-shine-node="metric" {marker}>'
+            '<span data-shine-node="value">42</span></div>'
+            '<p data-shine-node="copy">说明</p>'
+        ),
+        "css": "",
+        "js": "",
+        "resources": [],
+        "node_map": [
+            {"node_id": "value", "kind": "static_element",
+             "selector": '[data-shine-node="value"]'},
+            {"node_id": "copy", "kind": "static_element",
+             "selector": '[data-shine-node="copy"]'},
+        ],
+    }
+    v1 = confirm(store, store.generate(ALICE, draft(package=package)), f"readonly-marker-{name}")
+    changed = {**package, "html": package["html"].replace(">42<", ">99<")}
+    with pytest.raises(AnalyticsError) as error:
+        store.patch(ALICE, v1["spec"]["page_id"], PagePatchPreview.model_validate({
+            "base_version": 1,
+            "package": changed,
+        }))
+    assert error.value.code == "AI_BOUND_CONTENT" and error.value.status == 403
+
+
 def test_ai_dynamic_region_can_change_one_runtime_source_file(tmp_path):
     store = PageDocumentStore(private(tmp_path / "pages"))
     runtime_package = sample_package(js="document.querySelector('[data-shine-region=\"r_chart\"]')?.getContext('2d')")
@@ -1264,3 +1410,83 @@ def test_http_uses_the_offline_contract():
     assert schema["x-page-http"] is True
     assert schema["x-b0-board-spec-untouched"] == "board-spec/v1"
     assert "INVALID_BOARD" not in schema["x-page-errors"]
+
+
+@pytest.mark.parametrize("operation", ["save", "patch"])
+@pytest.mark.parametrize("marker", ['data-page-readonly', 'data-sp-bindable="database"', ' data-page-readonly', ' data-sp-bindable="database"'])
+@pytest.mark.parametrize("change", ["source-fact", "relative-title", "direct-title", "relative-fact", "direct-fact", "descendant-fact", "style"])
+def test_readonly_adjacent_marker_and_real_target_path(tmp_path, operation, marker, change):
+    store = PageDocumentStore(private(tmp_path / "pages"))
+    package = {"html": '<div id="root"><h1 id="heading">Title</h1>'
+               f'<p id="metric"{marker}><span id="value">42</span></p></div>',
+               "css": "", "js": "", "resources": [], "node_map": []}
+    spec = confirm(store, store.generate(ALICE, draft(package=package)))["spec"]
+    package = deepcopy(spec["package"])
+    if change == "source-fact":
+        package["html"] = package["html"].replace('>42<', '>99<')
+    else:
+        identity = {"direct-title": "heading", "direct-fact": "metric", "descendant-fact": "value"}.get(change, "root")
+        path = [] if identity != "root" else [{"tag": "h1" if change == "relative-title" else "p",
+                                              "key": {"attribute": "nth", "value": "0"}}]
+        edit = text_edit(identity, "Updated", path=path)
+        if change == "style":
+            edit.pop("text")
+            edit["style"] = {"color": "blue"}
+        package = presentation_package(package, edit)
+    body = {"base_version": 1, "package": package}
+    if operation == "save":
+        body.update(title=spec["title"], binding_manifest=spec["binding_manifest"])
+    request = (PageSavePreview if operation == "save" else PagePatchPreview).model_validate(body)
+    apply = getattr(store, operation)
+    if change in {"source-fact", "relative-fact", "direct-fact", "descendant-fact"}:
+        with pytest.raises(AnalyticsError) as error:
+            apply(ALICE, spec["page_id"], request)
+        assert (error.value.status, error.value.code) == (403, "AI_BOUND_CONTENT")
+        assert store.get(ALICE, spec["page_id"])["spec"] == spec
+    else:
+        saved = confirm(store, apply(ALICE, spec["page_id"], request), "edit")
+        reopened = PageDocumentStore(store.path.parent).get(ALICE, spec["page_id"])
+        assert reopened == saved
+        assert saved["spec"]["package"]["html"] == spec["package"]["html"]
+        assert saved["spec"]["package"]["presentation"] == request.package.model_dump(mode="json")["presentation"]
+
+
+@pytest.mark.parametrize("operation", ["save", "patch"])
+@pytest.mark.parametrize("marker", ["data-page-readonly", 'data-sp-bindable="database"'])
+@pytest.mark.parametrize("binding_status", ["VERIFIED", "REVOKED"])
+def test_readonly_page_can_add_authorized_result_binding(tmp_path, operation, marker, binding_status):
+    calls = []
+
+    def resolver(actor, session_id, result_id):
+        calls.append((actor.actor_id, session_id, result_id))
+        return ResolvedPageBinding(binding_status, frozenset({"brand-a"}))
+
+    directory = private(tmp_path / "pages")
+    store = PageDocumentStore(directory, resolve_binding=resolver)
+    package = {"html": f'<p data-shine-node="metric" {marker}>42</p>',
+               "css": "", "js": "", "resources": [], "node_map": [{
+                   "node_id": "metric", "kind": "static_element", "selector": '[data-shine-node="metric"]',
+               }]}
+    before = confirm(store, store.generate(ALICE, draft(
+        package=package, binding_manifest={"result_refs": [], "bindings": []},
+    )))["spec"]
+    assert before["binding_state"] == "UNBOUND_SAMPLE" and calls == []
+    manifest = PageBindingManifest.model_validate({"result_refs": ["result_fixture_1"], "bindings": [{
+        "binding_id": "binding_fixture", "result_ref": "result_fixture_1", "node_id": "metric",
+    }]}).model_dump(mode="json")
+    body = {"base_version": 1, "binding_manifest": manifest}
+    if operation == "save":
+        body.update(title=before["title"], package=before["package"])
+    request = (PageSavePreview if operation == "save" else PagePatchPreview).model_validate(body)
+    if binding_status == "REVOKED":
+        with pytest.raises(AnalyticsError) as error:
+            getattr(store, operation)(ALICE, before["page_id"], request)
+        assert (error.value.status, error.value.code) == (403, "RESULT_REVOKED")
+        assert PageDocumentStore(directory, resolve_binding=resolver).get(ALICE, before["page_id"])["spec"] == before
+    else:
+        saved = confirm(store, getattr(store, operation)(ALICE, before["page_id"], request), "bind")
+        reopened = PageDocumentStore(directory, resolve_binding=resolver).get(ALICE, before["page_id"])
+        assert reopened == saved
+        assert saved["spec"]["version"] == 2 and saved["spec"]["binding_state"] == "BOUND_VERIFIED"
+        assert saved["spec"]["binding_manifest"] == manifest
+    assert calls and all(call == (ALICE.actor_id, before["session_id"], "result_fixture_1") for call in calls)
