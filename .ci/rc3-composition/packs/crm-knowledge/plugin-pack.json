@@ -4,27 +4,27 @@
   "package_version": "0.0.0-crm.5",
   "dsh_pin": "0.2.1-rc.3",
   "source_dsh_pin": "0.2.1-rc.3",
-  "source_sha": "ee7ebeccc4401a8801f866d950dd11f34dc1b85d",
+  "source_sha": "5b884ba26c0fb810bced334a139333ecd140b57c",
   "source_dirty": false,
   "tarball": {
     "name": "shine-mage-dsh-crm-knowledge-0.0.0-crm.5.tgz",
-    "bytes": 255298,
-    "sha256": "bc1570538783c9d22d6e02d1e506a539f87357d263e7eb12c091a6a35af71ae6"
+    "bytes": 256042,
+    "sha256": "ca33f3a0d960c2b144db64b5613d53d712f1350dbca8f336e6466070f0956136"
   },
   "generated_bytes_provenance": {
     "schema_version": "dsh-generated-bytes/v1",
     "status": "PASS",
     "source": {
-      "git_sha": "ee7ebeccc4401a8801f866d950dd11f34dc1b85d",
-      "tree_sha256": "507defd6ce401ed67214ca480d69c980d761ee1ac32187d623a180f2de285b58",
+      "git_sha": "5b884ba26c0fb810bced334a139333ecd140b57c",
+      "tree_sha256": "06096cf03153d5919f353c85f55c2d75d5d2e61aefd5d731a2cfb6b100bfe566",
       "entries": 59,
-      "bytes": 513909,
-      "sha256": "507defd6ce401ed67214ca480d69c980d761ee1ac32187d623a180f2de285b58"
+      "bytes": 527169,
+      "sha256": "06096cf03153d5919f353c85f55c2d75d5d2e61aefd5d731a2cfb6b100bfe566"
     },
     "generated_tree": {
-      "sha256": "fc4a73cfbcabdf54f3871c0f55d64e79b4efb7a1512e02b5bb37377c8d4775c9",
+      "sha256": "05a9974fb9fb50962bca8b5cb5d52f47dcbb9d71580fb9a79f0341ce944a98db",
       "entries": 4,
-      "bytes": 881463
+      "bytes": 885375
     },
     "generated_files": [
       {
@@ -38,8 +38,8 @@
         "path": "lib/host.js",
         "type": "file",
         "mode": 420,
-        "bytes": 133329,
-        "sha256": "a0336e27fc70559b21bda99cf7c301aa401dc76aaaf16ffaf73a5ad73b55268b"
+        "bytes": 137241,
+        "sha256": "28b1218684e5c94403a7ade81fb06c19c1ff3eed4f40b1d052a27d949777d51e"
       },
       {
         "path": "lib/index.js",
@@ -75,11 +75,11 @@
       "network_mode": "offline"
     },
     "builder_receipt_schema_version": "dsh-plugin-build/v1",
-    "builder_receipt_sha256": "f9dd1a99de0cd31156c6b315e6376a9c2ac7d0077121e85d66595b14a7d10c7d",
+    "builder_receipt_sha256": "49279d818a175143dfbc2d293ad47619de9e31ee63b47f843055d844d773c6fc",
     "tarball": {
       "name": "shine-mage-dsh-crm-knowledge-0.0.0-crm.5.tgz",
-      "bytes": 255298,
-      "sha256": "bc1570538783c9d22d6e02d1e506a539f87357d263e7eb12c091a6a35af71ae6"
+      "bytes": 256042,
+      "sha256": "ca33f3a0d960c2b144db64b5613d53d712f1350dbca8f336e6466070f0956136"
     }
   },
   "entries": [
