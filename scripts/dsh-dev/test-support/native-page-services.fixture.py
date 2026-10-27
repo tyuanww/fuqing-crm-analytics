@@ -33,10 +33,13 @@ def main():
     crm = FastAPI()
     crm.include_router(auth.router)
     crm.include_router(crm_dashboard.router, prefix='/api/v1/metrics')
-    state = {'available': True, 'authenticated': True}
+    state = {'available': True, 'authenticated': True, 'identity_checks': 0,
+             'use_rate_limits': False, 'limited': 0}
 
     @crm.middleware('http')
     async def authenticate(request, call_next):
+        if request.url.path == '/api/v1/auth/me':
+            state['identity_checks'] += 1
         if request.url.path.startswith('/api/v1/metrics') or request.url.path == '/api/v1/auth/me':
             if not state['available']:
                 return JSONResponse({}, status_code=503)
@@ -46,6 +49,11 @@ def main():
                 request.state.username = auth.get_current_username(request)
             except Exception:
                 return JSONResponse({}, status_code=401)
+        if state['use_rate_limits']:
+            from backend.main import rate_limit_middleware
+            result = await rate_limit_middleware(request, call_next)
+            state['limited'] += result.status_code == 429
+            return result
         return await call_next(request)
 
     source = create_native_crm_source_app(store=store, directory=root / 'refs', host_origin=config['hostOrigin'], token_file=Path(config['tokenFile']))
@@ -81,7 +89,8 @@ def main():
                 break
             if command['op'] == 'state':
                 state.update(command['value'])
-            print(json.dumps({'ok': True}), flush=True)
+            print(json.dumps({'ok': True, 'identity_checks': state['identity_checks'],
+                              'limited': state['limited']}), flush=True)
     finally:
         for server in servers:
             server.should_exit = True
