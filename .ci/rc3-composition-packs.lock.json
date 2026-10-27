@@ -1,0 +1,80 @@
+{
+  "schema_version": "shinemage-composition-pack-lock/v1",
+  "profiles": [
+    {
+      "name": "crm",
+      "path": "config/dsh-profile.crm-knowledge.rc3.json",
+      "sha256": "67f054dec84b1100ca3b4023473c1e6231a497608e4867a84b234338dc85f0e5"
+    },
+    {
+      "name": "page",
+      "path": "config/dsh-profile.rc3.json",
+      "sha256": "320ceec68b43981e5025a9a9b4fa45832e3147c70b6a1dabac3e2fdc55998397"
+    }
+  ],
+  "plugins": [
+    {
+      "directory": "analytics-workbench",
+      "id": "@shine-mage/dsh-analytics-workbench-b0",
+      "source_sha": "e20a0fead28a38f22ee57c2e0fb2c3a0c98eec61",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "78530f79a8c9fb4289b9f1b9477e212fb4c306dfb57f339a454f392cc6369c3e"
+    },
+    {
+      "directory": "crm-knowledge",
+      "id": "@shine-mage/dsh-crm-knowledge",
+      "source_sha": "5b884ba26c0fb810bced334a139333ecd140b57c",
+      "version": "0.0.0-crm.5",
+      "manifest_sha256": "1e0d9927928fc3a51579bd8ceec782d20189cdece07b4bd079628a0b28346c8e"
+    },
+    {
+      "directory": "knowledge",
+      "id": "@shine-mage/dsh-knowledge",
+      "source_sha": "2b0f5745f725eda5b26df20ebd86c79003b08078",
+      "version": "0.0.0-candidate.1",
+      "manifest_sha256": "d09889991f5613153bcb11d70e0305688fbcb06322e81bb58c1e8a6da901bb63"
+    },
+    {
+      "directory": "shine-board",
+      "id": "@shine-mage/dsh-shine-board",
+      "source_sha": "c7b4ab6541449adc236398a753662c09f61d5ab8",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "2ac1fcf439646ade1667a1fe19bfa119f78544c1cfdf10c4ece4508669d3e3d8"
+    },
+    {
+      "directory": "shine-crowd-action",
+      "id": "@shine-mage/dsh-shine-crowd-action",
+      "source_sha": "6a3c2d6601e8500326565d9fefe495c82d5ec37b",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "b242b826f462e99776eadfbc4d650f950625faec0f62adbf62fdd91b9922a3a7"
+    },
+    {
+      "directory": "shine-query",
+      "id": "@shine-mage/dsh-shine-query",
+      "source_sha": "81363e4743871a7d08a9a8686b933d53a99b1f67",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "a220ec960c32ccbfdd4a6ffaea849b8cace4b7e0140a838c2f1c724ec2ff18c0"
+    },
+    {
+      "directory": "shine-funnel",
+      "id": "@shine-mage/dsh-shine-funnel",
+      "source_sha": "3420ec3b2650000388ceee5e2a14d78dc8a84a59",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "c306a4fe43f1db5166bad5f68d4b9037e384b1a9ff056b7bb12b84045905fb03"
+    },
+    {
+      "directory": "shine-waterfall",
+      "id": "@shine-mage/dsh-shine-waterfall",
+      "source_sha": "6a07f2d95c47302ffde72507c6b29e4d7c13f8c6",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "a2672e3a6bfded8d764d76ae5274fd848b6ffe67e21cbf4fc537a0850f582335"
+    },
+    {
+      "directory": "shine-brand",
+      "id": "@shine-mage/dsh-shine-brand",
+      "source_sha": "f2c819003aa695404827957951e44befdc5ae017",
+      "version": "0.0.0-b0",
+      "manifest_sha256": "1a92c29fbb62410a1368df5b026fdb1c9ecc6b21e86dc7ee6e350c03532cd2bb"
+    }
+  ]
+}
