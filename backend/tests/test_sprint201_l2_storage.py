@@ -5,6 +5,7 @@ L4.53 永久规则: snapshot 机制 = P2 杀, Read-Write Splitting 已够 (L4.51
 """
 from __future__ import annotations
 
+import importlib.util
 import os
 import sys
 from pathlib import Path
@@ -67,3 +68,23 @@ class TestSprint201L2StorageGovernance:
         )
         # 当前 122GB 应 rc=0 (未超 200GB 限制)
         assert result.returncode in (0, 1), f"check_db_size.py 跑挂: {result.stderr}"
+
+    def test_storage_scan_ignores_non_product_trees(self, tmp_path, monkeypatch):
+        script = SCRIPTS_DIR / "ops" / "check_db_size.py"
+        spec = importlib.util.spec_from_file_location("check_db_size", script)
+        module = importlib.util.module_from_spec(spec)
+        assert spec.loader is not None
+        spec.loader.exec_module(module)
+
+        product = tmp_path / "data" / "processed" / "kept.bin"
+        product.parent.mkdir(parents=True)
+        product.write_bytes(b"data")
+        for folder in (".context", "node_modules", ".venv"):
+            path = tmp_path / folder / "oversized.duckdb"
+            path.parent.mkdir(parents=True)
+            with path.open("wb") as stream:
+                stream.truncate(2 * 1024**3)
+
+        monkeypatch.setattr(module, "PROJECT_ROOT", tmp_path)
+        assert module.project_size_gb() == 4 / 1024**3
+        assert module.find_oversized_duckdb() == []

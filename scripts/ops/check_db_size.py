@@ -7,7 +7,7 @@ L4.53 永久规则: 项目目录 > 200GB 触发 osascript 弹窗告警.
 """
 from __future__ import annotations
 
-import shutil
+import os
 import sys
 from pathlib import Path
 
@@ -18,17 +18,55 @@ SNAPSHOT_DIR = PROCESSED_DIR / "snapshots"
 BACKUP_DIR = PROCESSED_DIR / "backups"
 TMP_SIZE_LIMIT_GB = 1.0
 PROJECT_SIZE_LIMIT_GB = 200.0
+NON_PRODUCT_DIRS = frozenset({
+    ".cache",
+    ".context",
+    ".git",
+    ".gstack",
+    ".hg",
+    ".mypy_cache",
+    ".next",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".svn",
+    ".venv",
+    "__pycache__",
+    "build",
+    "coverage",
+    "dist",
+    "node_modules",
+    "venv",
+})
+
+
+def iter_project_files(root: Path | None = None):
+    """Walk product files without entering VCS, dependency or validation trees."""
+    pending = [PROJECT_ROOT if root is None else root]
+    while pending:
+        directory = pending.pop()
+        try:
+            with os.scandir(directory) as entries:
+                for entry in entries:
+                    try:
+                        if entry.is_dir(follow_symlinks=False):
+                            if entry.name not in NON_PRODUCT_DIRS:
+                                pending.append(Path(entry.path))
+                        elif entry.is_file(follow_symlinks=False):
+                            yield Path(entry.path)
+                    except OSError:
+                        continue
+        except OSError:
+            continue
 
 
 def project_size_gb() -> float:
     """整个项目目录大小 (GB)."""
     total = 0
-    for path in PROJECT_ROOT.rglob("*"):
-        if path.is_file():
-            try:
-                total += path.stat().st_size
-            except OSError:
-                pass
+    for path in iter_project_files():
+        try:
+            total += path.stat().st_size
+        except OSError:
+            pass
     return total / 1024**3
 
 
@@ -49,9 +87,12 @@ def backup_size_gb() -> float:
 def find_oversized_duckdb(min_size_gb: float = 1.0) -> list[Path]:
     """找 > min_size_gb 的 .duckdb 文件."""
     found = []
-    for path in PROJECT_ROOT.rglob("*.duckdb"):
-        if path.is_file() and path.stat().st_size / 1024**3 >= min_size_gb:
-            found.append(path)
+    for path in iter_project_files():
+        try:
+            if path.suffix == ".duckdb" and path.stat().st_size / 1024**3 >= min_size_gb:
+                found.append(path)
+        except OSError:
+            continue
     return found
 
 
