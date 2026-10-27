@@ -16,18 +16,19 @@ import uuid
 import pytest
 
 from backend.contracts.page_documents import page_source_hash
+from backend.services.analytics.access import AnalyticsError
 from backend.tests.test_native_page_source import REF, draft, edit_preview, native as _native_fixture, post
 from backend.tests.test_page_edit_context import operation as manual_operation
 
 native = _native_fixture
 
 
-def saved_page(client, prefix='', title_attributes='id="heading"', dynamic_title=False, presentation_edits=None):
+def saved_page(client, prefix='', title_attributes='id="heading"', dynamic_title=False, presentation_edits=None, advice_attributes='id="advice"', report_attributes='id="report"'):
     body = draft()
     body['package']['html'] = prefix + (
-        '<section id="report" data-shine-node="report">'
+        f'<section {report_attributes} data-shine-node="report">'
         f'<h1 {title_attributes} data-shine-node="title">原标题</h1>'
-        '<p id="advice" data-shine-node="advice">原建议</p>'
+        f'<p {advice_attributes} data-shine-node="advice">原建议</p>'
         '<div id="metric" data-shine-node="metric"><span id="child" data-shine-node="child">8001</span></div>'
         '<p id="readonly" data-shine-node="readonly" data-page-readonly>不能改</p></section>'
     )
@@ -551,7 +552,7 @@ def test_invalid_id_does_not_hide_valid_field_anchor(native):
 
 def test_missing_stable_anchor_fails_closed(native):
     client, app, _ = native
-    spec = saved_page(client, title_attributes='id="9-invalid"')
+    spec = saved_page(client, title_attributes='id="9-invalid"', report_attributes='')
     opened = begin(client, app, spec)
     assert opened.json()['error']['code'] == 'MAPPING_STALE'
 
@@ -605,3 +606,51 @@ def test_dynamic_region_leaf_is_rejected_but_static_sibling_still_edits(native):
     job = begin(client, app, spec, node='advice').json()
     assert propose(client, job, candidate(spec, job)).status_code == 200
     assert confirm(client, job, collect(client, job).json()).status_code == 200
+
+
+def test_unanchored_paragraph_uses_exact_path_under_unique_parent(native):
+    client, app, _ = native
+    spec = saved_page(client, advice_attributes='')
+    spec = manual(client, spec, 'title', {'text': '保留人工标题'}, 'manual-before-nested-ai')
+    opened = begin(client, app, spec, 'advice')
+    assert opened.status_code == 201, opened.text
+    job = opened.json()
+    assert job['edit_context']['presentation_target'] == {
+        'anchor': {'attribute': 'id', 'value': 'report'},
+        'path': [{'tag': 'p', 'key': {'attribute': 'nth', 'value': '0'}}],
+    }
+    package = candidate(spec, job)
+    package['presentation']['edits'] = deepcopy((spec['package'].get('presentation') or {}).get('edits', [])) + package['presentation']['edits']
+    wrong = deepcopy(package)
+    wrong['presentation']['edits'][0]['target']['path'][0]['key']['value'] = '1'
+    rejected = propose(client, job, wrong)
+    assert rejected.status_code == 422 and rejected.json()['error']['code'] == 'SCOPE_VIOLATION', rejected.text
+    accepted = propose(client, job, package)
+    assert accepted.status_code == 200, accepted.text
+    ready = collect(client, job)
+    assert ready.status_code == 200, ready.text
+    saved = confirm(client, job, ready.json())
+    assert saved.status_code == 200, saved.text
+    reopened = client.get('/api/v1/analytics/page-documents/pages/' + spec['page_id']).json()['spec']
+    assert reopened['version'] == 3
+    assert reopened['package'] == spec['package']
+    assert reopened['binding_manifest'] == spec['binding_manifest']
+    overlays = client.get('/api/v1/analytics/page-edit-contexts/overlay', params={
+        'page_id': spec['page_id'], 'version': 3}).json()['overlays']
+    assert overlays['title']['text'] == '保留人工标题'
+    assert overlays['advice']['text'] == '新的经营建议'
+    assert 'readonly' not in overlays and 'metric' not in overlays
+
+
+@pytest.mark.parametrize('position', [9999, 10000])
+def test_ancestor_target_respects_existing_nth_limit(position):
+    from backend.services.analytics.cockpit_html_selection import SourceTree
+    from backend.services.analytics.page_edit_context import presentation_target
+    tree = SourceTree('<section id="root">' + '<p></p>' * position + '<p>selected</p></section>')
+    selected = next(node for node in tree.all_nodes if tree.text[node['start']:node['end']] == '<p>selected</p>')
+    if position == 9999:
+        assert presentation_target(tree, selected)['path'][0]['key']['value'] == '9999'
+    else:
+        with pytest.raises(AnalyticsError) as error:
+            presentation_target(tree, selected)
+        assert error.value.code == 'MAPPING_STALE'
