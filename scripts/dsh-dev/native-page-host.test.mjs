@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createServer } from 'node:http';
+import { createHash } from 'node:crypto';
 import { createNativePageHost, NATIVE_PAGE_PATH } from './native-page-host.mjs';
 
 const REF = 'crm_ref_' + 'a'.repeat(32);
@@ -9,6 +10,47 @@ const listen = server => new Promise((resolve, reject) => { server.once('error',
 const close = async server => { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); };
 const request = (operation, extra = {}, signal) => new Request('http://127.0.0.1:43299' + NATIVE_PAGE_PATH, {
   method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ operation, ...extra }), signal,
+});
+
+test('batch callback advertises support and binds every returned item by reference', async () => {
+  const refs = [REF, 'crm_ref_' + 'b'.repeat(32)];
+  const calls = { open: 0, read: 0, assert: 0 }; const faults = [];
+  let callbackOrigin, bad = false;
+  const crmDashboard = { nativeSnapshotBatchMax: 16, async openNativeSnapshotLease(session) {
+    calls.open++;
+    return { identity: { native_session_id: session, connection_generation: 'first' },
+      async readMany(selected) {
+        calls.read++; assert.deepEqual(selected, refs);
+        return selected.map(ref => ({ ref, snapshot: { metric: ref } })).reverse()
+          .map((item, index) => bad && index === 0 ? { ...item, ref: 'crm_ref_' + 'c'.repeat(32) } : item);
+      }, async assertCurrent() { calls.assert++; } };
+  } };
+  const page = createServer((req, res) => { void (async () => {
+    const chunks = []; for await (const chunk of req) chunks.push(chunk);
+    const call = async input => {
+      const result = await fetch(callbackOrigin + '/native-pages/callback', { method: 'POST',
+        headers: { authorization: 'Bearer ' + req.headers['x-native-page-lease'], 'content-type': 'application/json' },
+        body: JSON.stringify(input) });
+      return { status: result.status, body: await result.json() };
+    };
+    const authenticated = await call({ operation: 'authenticate', method: req.method, path: req.url, query: '',
+      idempotency_key: null, body_sha256: createHash('sha256').update(Buffer.concat(chunks)).digest('hex') });
+    assert.equal(authenticated.body.source_batch_max, 16);
+    const read = await call({ operation: 'read_many', session_id: 'native-session', refs });
+    res.writeHead(read.status, { 'content-type': 'application/json' }); res.end(JSON.stringify(read.body));
+  })().catch(error => { faults.push(error); res.writeHead(503); res.end('{}'); }); });
+  let host;
+  try {
+    host = createNativePageHost({ crmDashboard, pageOrigin: await listen(page), callbackPort: 0 });
+    callbackOrigin = await host.start();
+    const response = await host.fetch(request('generate', { body: { session_id: 'native-session' } }));
+    assert.equal(response.status, 200);
+    assert.deepEqual((await response.json()).values.map(item => [item.ref, item.snapshot.metric]), refs.map(ref => [ref, ref]));
+    bad = true;
+    const denied = await host.fetch(request('generate', { body: { session_id: 'native-session' } }));
+    assert.equal(denied.status, 503); assert(!(await denied.text()).includes(REF));
+    assert.deepEqual(calls, { open: 2, read: 2, assert: 2 }); assert.deepEqual(faults, []);
+  } finally { await host?.dispose(); await close(page); }
 });
 
 test('fixed edit operations bind context, patch preview and page-version query without arbitrary forwarding', async t => {

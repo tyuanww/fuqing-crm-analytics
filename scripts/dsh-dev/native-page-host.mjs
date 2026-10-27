@@ -150,17 +150,31 @@ export function createNativePageHost({ crmDashboard, pageOrigin, callbackPort, a
             || input.query !== lease.route.query || input.body_sha256 !== lease.route.digest || input.idempotency_key !== (lease.route.idempotencyKey ?? null)) fail(401, 'UNAUTHENTICATED');
         lease.authenticated = true;
         value = { actor_id: actorId, capabilities: ['dashboard:read', 'dashboard:update'],
-          data_scopes: ['native-page-documents', 'native-crm-aggregate'], deadline_ms: lease.deadline };
-      } else if (input.operation === 'read') {
-        if (!lease.authenticated || Object.keys(input).sort().join(',') !== 'operation,ref,session_id' || !ID.test(input.session_id ?? '') || !REF.test(input.ref ?? '')) fail(404, 'NOT_FOUND');
+          data_scopes: ['native-page-documents', 'native-crm-aggregate'], deadline_ms: lease.deadline,
+          ...(crmDashboard.nativeSnapshotBatchMax === 16 ? { source_batch_max: 16 } : {}) };
+      } else if (input.operation === 'read' || input.operation === 'read_many') {
+        const many = input.operation === 'read_many';
+        if (!lease.authenticated || Object.keys(input).sort().join(',') !== (many ? 'operation,refs,session_id' : 'operation,ref,session_id')
+            || !ID.test(input.session_id ?? '') || (many ? !Array.isArray(input.refs) || input.refs.length < 1
+              || input.refs.length > 16 || !input.refs.every(ref => typeof ref === 'string' && REF.test(ref))
+              || new Set(input.refs).size !== input.refs.length : !REF.test(input.ref ?? ''))) fail(404, 'NOT_FOUND');
         if (lease.session !== undefined && lease.session !== input.session_id) fail(404, 'NOT_FOUND');
         lease.session = input.session_id;
         lease.crm ??= crmDashboard.openNativeSnapshotLease(input.session_id, combined);
         const crm = await lease.crm;
         if (crm.identity.native_session_id !== input.session_id) fail(404, 'NOT_FOUND');
-        const snapshot = await crm.read(input.ref, combined);
+        const snapshots = many ? await crm.readMany(input.refs, combined) : [{ ref: input.ref, snapshot: await crm.read(input.ref, combined) }];
         await crm.assertCurrent(combined);
-        value = { ref: input.ref, snapshot, identity: crm.identity, epoch };
+        if (many && (!Array.isArray(snapshots) || snapshots.length !== input.refs.length)) fail();
+        const returned = new Map();
+        for (const item of snapshots) {
+          if (!item || Object.keys(item).sort().join(',') !== 'ref,snapshot'
+              || !(many ? input.refs.includes(item.ref) : item.ref === input.ref) || returned.has(item.ref)) fail();
+          returned.set(item.ref, { ref: item.ref, snapshot: item.snapshot, identity: crm.identity, epoch });
+        }
+        const values = (many ? input.refs : [input.ref]).map(ref => returned.get(ref));
+        value = many ? { values } : values[0];
+        if (many && Buffer.byteLength(JSON.stringify(value)) > 2 * 1024 * 1024) fail();
       } else fail(404, 'NOT_FOUND');
       combined.throwIfAborted();
       res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store', connection: 'close' });
