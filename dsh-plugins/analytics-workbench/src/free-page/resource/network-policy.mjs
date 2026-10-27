@@ -9,7 +9,10 @@ const JS_CTOR = /\bnew\s+(?:WebSocket|EventSource|Worker|SharedWorker)\s*\(\s*([
 const BEACON = /\bsendBeacon\s*\(\s*(['"`])([^'"`]+)\1/gi;
 const ASSIGN = /\b(?:location|window)\.(?:href|location)\s*=\s*(['"`])([^'"`]+)\1/gi;
 const NAVIGATION_CALL = /\b(?:(?:window|document)\.)?location\.(?:assign|replace)\s*\(|\bwindow\.open\s*\(/gi;
-const NAVIGATION_WRITE = /(?:\b(?:window|document)\.)?location(?:\s*\.\s*href|\s*\[\s*(['"])href\1\s*\])?\s*=(?!=)/gi;
+const NAVIGATION_WRITE = [
+  /(?:\b(?:window|document)\.)?location(?:\s*\.\s*href|\s*\[\s*(['"])href\1\s*\])?\s*=(?!=)/gi,
+  /\b(?:window|document)\s*\[\s*(['"])location\1\s*\](?:\s*\.\s*href|\s*\[\s*(['"])href\2\s*\])?\s*=(?!=)/gi,
+];
 const META_REFRESH = /<meta\b[^>]*\bhttp-equiv\s*=\s*(['"])refresh\1[^>]*>/gi;
 
 const ALLOWED_SCHEMES = new Set(['blob:', 'data:', 'resource:']);
@@ -66,9 +69,11 @@ export function extractCandidateUrls(html = '', css = '', js = '') {
   NAVIGATION_CALL.lastIndex = 0;
   if (typeof js === 'string' && NAVIGATION_CALL.test(js)) urls.push(ACTIVE_NAVIGATION);
   NAVIGATION_CALL.lastIndex = 0;
-  NAVIGATION_WRITE.lastIndex = 0;
-  if (typeof js === 'string' && NAVIGATION_WRITE.test(js)) urls.push(ACTIVE_NAVIGATION);
-  NAVIGATION_WRITE.lastIndex = 0;
+  for (const pattern of NAVIGATION_WRITE) {
+    pattern.lastIndex = 0;
+    if (typeof js === 'string' && pattern.test(js)) urls.push(ACTIVE_NAVIGATION);
+    pattern.lastIndex = 0;
+  }
   META_REFRESH.lastIndex = 0;
   if (typeof html === 'string' && META_REFRESH.test(html)) urls.push(META_REFRESH_NAVIGATION);
   META_REFRESH.lastIndex = 0;

@@ -5,10 +5,10 @@
  */
 import { BLOCK_TAGS, editablePageNodes, editableTextNodes } from './html-node-graph-bridge.mjs';
 import { openSidecarGraph } from '../free-page/runtime/sidecar-flag.mjs';
+import { pageSourceRangeIsReadonly } from './page-source-readonly.mjs';
 
 const BLOCK = new Set(BLOCK_TAGS);
 const OPAQUE = new Set(['iframe', 'canvas', 'script', 'object', 'embed']);
-const READ_ONLY_SOURCE = /data-page-readonly|data-sp-bindable=["']database["']/i;
 
 function boundIds(manifest) {
   return new Set((manifest?.bindings ?? []).map(row => row?.node_id).filter(id => typeof id === 'string'));
@@ -33,7 +33,7 @@ function crumb(node) {
   return { node_id: node.node_id, tag: node.tag, kind: node.kind };
 }
 
-function pageNodesFromGraph(graph, manifest) {
+function pageNodesFromGraph(graph, manifest, html) {
   const bound = boundIds(manifest);
   const pageBound = wholePageBound(manifest);
   const rows = [];
@@ -47,8 +47,11 @@ function pageNodesFromGraph(graph, manifest) {
     const text = typeof range?.inner_text === 'string' ? range.inner_text : '';
     const nested = /<[a-z!/]/i.test(text);
     const opaque = OPAQUE.has(tag) || value.kind === 'dynamic_region';
-    const readonly = READ_ONLY_SOURCE.test(range?.outer_text ?? '');
-    const structural = !runtime && !opaque && value.kind === 'static_element' && !readonly;
+    const readonly = range ? pageSourceRangeIsReadonly(html, range.start, range.end) : false;
+    const structural = !pageBound && !bound.has(value.node_id) && !runtime && !opaque
+      && value.kind === 'static_element' && !readonly;
+    const style = !pageBound && !bound.has(value.node_id) && !runtime && !opaque
+      && value.kind === 'static_element';
     const direct = structural && !bound.has(value.node_id) && !nested && Boolean(range);
     rows.push({
       node_id: value.node_id,
@@ -69,7 +72,7 @@ function pageNodesFromGraph(graph, manifest) {
         direct_text: direct,
         ai: !pageBound && !opaque && tag !== 'iframe' && !bound.has(value.node_id) && !readonly,
         attribute: structural,
-        style: structural,
+        style,
         structure: structural,
         bound: bound.has(value.node_id),
         script_generated: value.kind === 'dynamic_region',
@@ -87,6 +90,14 @@ function pageNodesFromGraph(graph, manifest) {
       .sort((left, right) => (left.range_end - left.range_start) - (right.range_end - right.range_start));
     const parent = parents[0];
     const block = parents.find(row => BLOCK.has(row.tag));
+    const readonlyAncestor = node.range_start != null && node.range_end != null
+      && pageSourceRangeIsReadonly(html, node.range_start, node.range_end);
+    if (readonlyAncestor) {
+      node.capabilities.direct_text = false;
+      node.capabilities.ai = false;
+      node.capabilities.attribute = false;
+      node.capabilities.structure = false;
+    }
     node.parent_node_id = parent?.node_id ?? null;
     node.parent_node_ids = parents.map(row => row.node_id);
     node.parent_block = block ? crumb(block) : null;
@@ -113,7 +124,7 @@ export function editorPageCatalog(pkg, manifest, options = {}) {
       textNodes: editableTextNodes(pkg, manifest),
     };
   }
-  const pageNodes = pageNodesFromGraph(opened.graph, manifest);
+  const pageNodes = pageNodesFromGraph(opened.graph, manifest, pkg.html);
   return {
     source: 'node-graph',
     code: null,

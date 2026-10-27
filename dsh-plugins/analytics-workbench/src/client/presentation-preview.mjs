@@ -9,6 +9,7 @@ import { previewStructuredPatch } from '../free-page/patch/engine.mjs';
 import { openSidecarGraph, readSidecarFlag } from '../free-page/runtime/sidecar-flag.mjs';
 import { buildSourceIndex } from '../free-page/source-index/index.mjs';
 import { byteRegionHash, packageSourceHash } from '../free-page/source-index/node-graph.mjs';
+import { pageSourceRangeIsReadonly } from './page-source-readonly.mjs';
 
 function projectFromGraph(pagePackage, pageId, nodeId, flag, env, channel) {
   const opened = openSidecarGraph(pagePackage, { page_id: pageId, flag, env });
@@ -16,7 +17,9 @@ function projectFromGraph(pagePackage, pageId, nodeId, flag, env, channel) {
   for (const record of opened.graph.node_list) {
     const projected = opened.graph.toEditNodeRef(record, { channel });
     if (projected.ok && projected.value.node_id === nodeId && projected.value.source_range) {
-      return { ok: true, node: projected.value };
+      const selected = projected.value.source_range;
+      const readonly = pageSourceRangeIsReadonly(pagePackage.html, selected.start, selected.end);
+      return { ok: true, node: projected.value, readonly };
     }
   }
   return { ok: false, code: 'MAPPING_STALE' };
@@ -32,6 +35,7 @@ function projectFromSourceIndex(pagePackage, pageId, nodeId) {
   const node = index.nodes?.[nodeId];
   if (!node?.html_range) return { ok: false, code: 'MAPPING_STALE' };
   const outer = node.html_range.outer_text ?? pagePackage.html.slice(node.html_range.start, node.html_range.end);
+  const readonly = pageSourceRangeIsReadonly(pagePackage.html, node.html_range.start, node.html_range.end);
   return {
     ok: true,
     node: {
@@ -44,6 +48,7 @@ function projectFromSourceIndex(pagePackage, pageId, nodeId) {
       source_hash: packageSourceHash(pagePackage),
       region_hash: byteRegionHash(outer),
     },
+    readonly,
   };
 }
 
@@ -57,6 +62,9 @@ export function previewNodeEdit({
     ? projectFromSourceIndex(pagePackage, pageId, nodeId)
     : projectFromGraph(pagePackage, pageId, nodeId, mode, env, channel);
   if (!projected.ok) return projected;
+  const styleOnly = channel === 'presentation' && action === 'update'
+    && payload && typeof payload === 'object' && payload.text == null && payload.style != null;
+  if (projected.readonly && !styleOnly) return { ok: false, code: 'BINDING_PROTECTED' };
   const digest = sha256Hex(typeof payload === 'string' ? payload : JSON.stringify(payload ?? {})).slice(0, 16);
   const idempotencyKey = `${keyPrefix}_${pageId}_${version}_${nodeId}_${digest}`;
   const operation = buildFormalEditOperation({

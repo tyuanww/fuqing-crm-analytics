@@ -78,3 +78,13 @@ test('rejects direct location assignment and meta refresh navigation', () => {
   );
   assert.equal(metaRefresh.ok, false);
 });
+
+test('rejects bracket notation for navigation sinks', () => {
+  for (const source of [
+    'window["location"] = "https://example.com/"',
+    "window['location']['href'] = 'https://example.com/'",
+    'document["location"] = "https://example.com/"',
+  ]) {
+    assert.equal(assertNoActiveOutbound('', '', source).ok, false, source);
+  }
+});

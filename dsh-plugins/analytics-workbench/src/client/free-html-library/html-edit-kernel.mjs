@@ -2,6 +2,7 @@
 
 import { buildSourceIndex, locateSelection } from '../../free-page/source-index/index.mjs';
 import { applyInnerText, createPatchPreview } from '../../free-page/patch/index.mjs';
+import { pageSourceRangeIsReadonly } from '../page-source-readonly.mjs';
 
 export function escapeReplacementText(value) {
   return String(value ?? '').replace(/[&<>"']/g, ch => ({
@@ -81,8 +82,14 @@ export function previewLiteralText({
   }
   const nodeId = located.node?.node_id;
   const pageBound = Array.isArray(binding_manifest?.result_refs) && binding_manifest.result_refs.length > 0;
-  if (pageBound || (nodeId && boundNodeIds(binding_manifest).has(nodeId))) {
-    return fail('BINDING_PROTECTED', '绑定节点禁止普通文本替换', { node_id: nodeId });
+  const readonly = pageSourceRangeIsReadonly(
+    pkg.html,
+    located.node.html_range.start,
+    located.node.html_range.end,
+  );
+  if (pageBound || (nodeId && boundNodeIds(binding_manifest).has(nodeId))
+    || readonly) {
+    return fail('BINDING_PROTECTED', '绑定或计算值禁止普通文本替换', { node_id: nodeId });
   }
   const applied = applyInnerText(pkg, located, escapeReplacementText(literal));
   if (!applied.ok) {

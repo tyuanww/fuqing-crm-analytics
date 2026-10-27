@@ -164,6 +164,7 @@ export function scanHtmlElements(html) {
     }
     starts.push({
       tag,
+      attrs: token.attrs,
       start: token.start,
       inner_start: innerStart,
       inner_end: innerEnd,

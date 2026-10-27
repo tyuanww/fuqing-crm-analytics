@@ -86,6 +86,51 @@ test('stale mapping and bound nodes are refused without widening', () => {
   assert.equal(pageBound.error.code, 'BINDING_PROTECTED');
 });
 
+test('readonly computed sources are refused before a literal patch is previewed', () => {
+  const readonly = {
+    html: '<p data-shine-node="metric" data-page-readonly>42</p><p data-shine-node="copy">说明</p>',
+    css: '',
+    js: '',
+    resources: [],
+    node_map: [
+      { node_id: 'metric', kind: 'static_element', selector: '[data-shine-node="metric"]' },
+      { node_id: 'copy', kind: 'static_element', selector: '[data-shine-node="copy"]' },
+    ],
+  };
+  const blocked = previewLiteralText({
+    pkg: readonly,
+    selection: { kind: 'static_element', node_id: 'metric' },
+    replacementText: '99',
+  });
+  assert.equal(blocked.ok, false);
+  assert.equal(blocked.error.code, 'BINDING_PROTECTED');
+  const editable = previewLiteralText({
+    pkg: readonly,
+    selection: { kind: 'static_element', node_id: 'copy' },
+    replacementText: '说明已更新',
+  });
+  assert.equal(editable.ok, true, JSON.stringify(editable.error));
+});
+
+test('readonly ancestors protect mapped child text', () => {
+  const readonly = {
+    html: '<div data-shine-node="metric" data-page-readonly><span data-shine-node="value">42</span></div>',
+    css: '',
+    js: '',
+    resources: [],
+    node_map: [
+      { node_id: 'value', kind: 'static_element', selector: '[data-shine-node="value"]' },
+    ],
+  };
+  const blocked = previewLiteralText({
+    pkg: readonly,
+    selection: { kind: 'static_element', node_id: 'value' },
+    replacementText: '99',
+  });
+  assert.equal(blocked.ok, false);
+  assert.equal(blocked.error.code, 'BINDING_PROTECTED');
+});
+
 test('patch-preview HTTP uses existing documents adapter; cancel does not save', async () => {
   const isolated = createIsolatedFetch({ token: TOKEN });
   const adapters = createLivePageAdapters({

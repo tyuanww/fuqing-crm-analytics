@@ -79,9 +79,23 @@ test('node-graph catalog blocks whole-page bindings and readonly computed values
   assert.equal(metric.capabilities.ai, false);
   assert.equal(metric.capabilities.direct_text, false);
   assert.equal(metric.capabilities.structure, false);
+  const direct = previewDirectText({
+    pagePackage, pageId: 'page_readonly', version: 1, nodeId: 'metric', text: '99', flag: 'on',
+  });
+  assert.equal(direct.ok, false);
+  assert.equal(direct.code, 'BINDING_PROTECTED');
+  const style = previewNodeEdit({
+    pagePackage, pageId: 'page_readonly', version: 1, nodeId: 'metric', flag: 'on',
+    channel: 'presentation', action: 'update', payload: { style: { color: '#805D9D' } },
+  });
+  assert.equal(style.ok, true, style.code);
   const wholePage = editorPageCatalog(pagePackage, { bindings: [], result_refs: ['result_1'] },
     { pageId: 'page_bound', flag: 'on' });
   assert.equal(wholePage.pageNodes.every(node => node.capabilities.ai === false), true);
+  assert.equal(wholePage.pageNodes.every(node => node.capabilities.direct_text === false), true);
+  assert.equal(wholePage.pageNodes.every(node => node.capabilities.attribute === false), true);
+  assert.equal(wholePage.pageNodes.every(node => node.capabilities.structure === false), true);
+  assert.equal(wholePage.pageNodes.every(node => node.capabilities.style === false), true);
 });
 
 test('style stays an overlay and structure replace changes only the preview package', () => {
@@ -108,4 +122,36 @@ test('style stays an overlay and structure replace changes only the preview pack
   assert.equal(pagePackage.html, html);
   const runtime = catalog.pageNodes.find(node => node.tag === 'script' || node.mapping === 'runtime');
   if (runtime) assert.equal(runtime.capabilities.structure, false);
+});
+
+test('readonly ancestors protect child text while style remains available', () => {
+  const pagePackage = {
+    html: '<div data-shine-node="metric" data-page-readonly><span data-shine-node="value">42</span></div>',
+    css: '',
+    js: '',
+    resources: [],
+    node_map: [
+      { node_id: 'value', kind: 'static_element', selector: '[data-shine-node="value"]' },
+    ],
+  };
+  for (const flag of ['off', 'on']) {
+    const catalog = editorPageCatalog(pagePackage, null, { pageId: 'page_nested_readonly', flag });
+    if (flag === 'off') {
+      assert.equal(catalog.textNodes.some(node => node.node_id === 'value'), false);
+      continue;
+    }
+    const child = catalog.pageNodes.find(node => node.node_id === 'value');
+    assert.equal(child.capabilities.direct_text, false);
+    assert.equal(child.capabilities.ai, false);
+  }
+  const direct = previewDirectText({
+    pagePackage, pageId: 'page_nested_readonly', version: 1, nodeId: 'value', text: '99', flag: 'on',
+  });
+  assert.equal(direct.ok, false);
+  assert.equal(direct.code, 'BINDING_PROTECTED');
+  const style = previewNodeEdit({
+    pagePackage, pageId: 'page_nested_readonly', version: 1, nodeId: 'value', flag: 'on',
+    channel: 'presentation', action: 'update', payload: { style: { color: '#805D9D' } },
+  });
+  assert.equal(style.ok, true, style.code);
 });

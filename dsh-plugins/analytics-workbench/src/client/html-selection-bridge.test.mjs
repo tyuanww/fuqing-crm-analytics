@@ -18,6 +18,20 @@ test('selection bridge exposes dynamic regions for inspection without making the
   assert.deepEqual(nodes.map(row => row.node_id), ['a', 'b', 'bound', 'nested', 'chart']);
   assert.equal(nodes.find(row => row.node_id === 'chart').kind, 'dynamic_region');
 });
+test('readonly source markers are parsed as attributes, including ancestors and unquoted values', () => {
+  const readonlyPkg = {
+    html: '<div data-shine-node="metric" data-sp-bindable=database><span data-shine-node="value">42</span></div>'
+      + '<p data-shine-node="copy">说明</p>',
+    css: '', js: '', resources: [],
+    node_map: [
+      { node_id: 'value', kind: 'static_element', selector: '[data-shine-node="value"]' },
+      { node_id: 'copy', kind: 'static_element', selector: '[data-shine-node="copy"]' },
+    ],
+  };
+  assert.deepEqual(editableTextNodes(readonlyPkg).map(node => node.node_id), ['copy']);
+  assert.equal(editablePageNodes(readonlyPkg).some(node => node.node_id === 'value'), false);
+  assert.equal(selectableNodes(readonlyPkg).find(node => node.node_id === 'value').editable, false);
+});
 test('page-level result refs keep every mapped element selectable but read-only', () => {
   const manifest = { bindings: [], result_refs: ['result_fixture_1'] };
   assert.deepEqual(editableTextNodes(pkg, manifest), []);

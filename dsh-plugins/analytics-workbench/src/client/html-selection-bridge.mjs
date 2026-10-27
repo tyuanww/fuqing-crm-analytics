@@ -4,6 +4,7 @@ import { buildSrcdoc } from '../free-page/preview/srcdoc-builder.mjs';
 import { buildSourceIndex } from '../free-page/source-index/index.mjs';
 import { renderedPackageHash, validRenderedLocator } from './html-rendered-text.mjs';
 import { insertBeforeBodyEnd } from './insert-before-body-end.mjs';
+import { pageSourceRangeIsReadonly } from './page-source-readonly.mjs';
 
 export function editablePageNodes(pkg, manifest) {
   const inferred = sourceTargets(pkg, manifest);
@@ -38,7 +39,7 @@ export function editableTextNodes(pkg, manifest) {
   if (wholePageBound) return [];
   return Object.values(index.nodes).filter(node => node.kind === 'static_element' && !bound.has(node.node_id)
     && !node.js_ranges.length && !/<[a-z!/]/i.test(node.html_range.inner_text)
-    && !/data-page-readonly|data-sp-bindable=["']database["']/i.test(node.html_range.outer_text)).map(node => ({
+    && !pageSourceRangeIsReadonly(pkg.html, node.html_range.start, node.html_range.end)).map(node => ({
       node_id: node.node_id, kind: node.kind, mapping: 'valid',
       mapping_token: node.mapping_token, version_hash: index.version_hash,
       text: node.html_range.inner_text, tag: node.tag, editableText: true,
@@ -59,7 +60,7 @@ export function selectableNodes(pkg, manifest) {
     mapping: 'valid',
     editable: !wholePageBound && !bound.has(node.node_id) && node.kind === 'static_element'
       && !node.js_ranges.length && !/<[a-z!/]/i.test(node.html_range.inner_text)
-      && !/data-page-readonly|data-sp-bindable=["']database["']/i.test(node.html_range.outer_text),
+      && !pageSourceRangeIsReadonly(pkg.html, node.html_range.start, node.html_range.end),
     read_only_reason: wholePageBound ? 'bound_page' : bound.has(node.node_id) ? 'bound_node' : null,
     mapping_token: node.mapping_token,
     version_hash: index.version_hash,
