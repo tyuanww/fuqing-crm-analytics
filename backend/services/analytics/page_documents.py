@@ -12,6 +12,7 @@ from copy import deepcopy
 from dataclasses import dataclass
 from difflib import SequenceMatcher
 from html import unescape
+from html.parser import HTMLParser
 import hashlib
 import json
 from pathlib import Path
@@ -275,6 +276,11 @@ def stamp_binding_state(payload):
     return spec
 
 
+class _SourceAttributes(HTMLParser):
+    def handle_starttag(self, tag, attrs):
+        self.attributes = attrs
+
+
 class _PresentationTree(SourceTree):
     def __init__(self, html):
         self.text_parts = []
@@ -292,10 +298,10 @@ class _PresentationTree(SourceTree):
         self.handle_data(unescape(f"&#{name};"))
 
 
-def _validate_bound_presentation(spec):
+def _validate_bound_presentation(spec, *, protect_readonly=False):
     presentation = spec.package.presentation
     edits = [edit for edit in presentation.edits if edit.text is not None] if presentation else []
-    if not spec.binding_manifest.result_refs or not edits:
+    if not edits or not (spec.binding_manifest.result_refs or protect_readonly):
         return
 
     def reject():
@@ -343,7 +349,7 @@ def _validate_bound_presentation(spec):
         return left["start"] < right["end"] and right["start"] < left["end"]
 
     protected = [node for node in nodes if "data-page-readonly" in node["attrs"]
-                 or node["attrs"].get("data-sp-bindable") == "database"]
+                 or (node["attrs"].get("data-sp-bindable") or "").lower() == "database"]
     mappings = {node.node_id: node for node in spec.package.node_map}
     bindings = spec.binding_manifest.bindings
     if {binding.result_ref for binding in bindings} != set(spec.binding_manifest.result_refs):
@@ -673,11 +679,7 @@ class PageDocumentStore:
         return cls._merge_ranges(ranges)
 
     @staticmethod
-    def _mapped_node_range(package, node_id, kind):
-        html = package.get("html", "")
-        attr = "node" if kind == "static_element" else "region"
-        wanted = re.compile(rf"data-shine-{attr}\s*=\s*(['\"]){re.escape(node_id)}\1", re.I)
-        marker = None
+    def _open_tags(html):
         cursor = 0
         while cursor < len(html):
             start = html.find("<", cursor)
@@ -695,14 +697,11 @@ class PageDocumentStore:
             if match is None or match.group(1) or source.startswith(("<!", "<?")):
                 cursor = tag_end + 1
                 continue
-            if wanted.search(match.group(3) or ""):
-                if marker is not None:
-                    return None
-                marker = (start, tag_end + 1, match.group(2).lower(), match.group(4) == "/")
+            yield start, tag_end + 1, match.group(2).lower(), match.group(3) or "", match.group(4) == "/"
             cursor = tag_end + 1
-        if marker is None:
-            return None
-        start, open_end, tag, self_closing = marker
+
+    @staticmethod
+    def _element_range(html, start, open_end, tag, self_closing):
         if self_closing or tag in HTML_VOID_TAGS:
             return start, open_end
         depth = 1
@@ -734,6 +733,64 @@ class PageDocumentStore:
                 return start, tag_end + 1
             cursor = tag_end + 1
         return None
+
+    @staticmethod
+    def _source_attributes(attributes):
+        parser = _SourceAttributes()
+        parser.feed("<div " + attributes + ">")
+        seen = set()
+        for name, value in parser.attributes:
+            if name not in seen:
+                seen.add(name)
+                yield name, value or ""
+
+    @classmethod
+    def _source_is_readonly(cls, attributes):
+        return any(
+            name == "data-page-readonly"
+            or (name == "data-sp-bindable" and value.lower() == "database")
+            for name, value in cls._source_attributes(attributes)
+        )
+
+    @classmethod
+    def _mapped_node_range(cls, package, node_id, kind):
+        html = package.get("html", "")
+        attr = "node" if kind == "static_element" else "region"
+        wanted = re.compile(rf"data-shine-{attr}\s*=\s*(['\"]){re.escape(node_id)}\1", re.I)
+        marker = None
+        for start, open_end, tag, attrs, self_closing in cls._open_tags(html):
+            if not wanted.search(attrs):
+                continue
+            if marker is not None:
+                return None
+            marker = (start, open_end, tag, self_closing)
+        if marker is None:
+            return None
+        return cls._element_range(html, *marker)
+
+    @classmethod
+    def _readonly_source_ranges(cls, html):
+        ranges = []
+        for start, open_end, tag, attrs, self_closing in cls._open_tags(html):
+            if not cls._source_is_readonly(attrs):
+                continue
+            ranges.append(cls._element_range(html, start, open_end, tag, self_closing) or (start, len(html)))
+        return ranges
+
+    @classmethod
+    def _assert_readonly_sources_preserved(cls, old_spec, new_spec):
+        old_package = old_spec.get("package")
+        new_package = new_spec.get("package")
+        if not isinstance(old_package, dict) or not isinstance(new_package, dict):
+            return
+        old_html = old_package.get("html", "")
+        new_html = new_package.get("html", "")
+        old_sources = [old_html[start:end] for start, end in cls._readonly_source_ranges(old_html)]
+        new_sources = [new_html[start:end] for start, end in cls._readonly_source_ranges(new_html)]
+        if new_sources != old_sources:
+            raise fault("AI_BOUND_CONTENT", 403)
+        if new_sources:
+            _validate_bound_presentation(validated(PageDocument, stamp_binding_state(new_spec)), protect_readonly=True)
 
     def _validate_ai_scope(self, old_spec, new_spec, request):
         """Enforce the host selection on the server; never widen an AI patch."""
@@ -812,6 +869,7 @@ class PageDocumentStore:
         for field in ("edit_scope", "edit_context_id", "focus_ref", "source_hash"):
             changes.pop(field, None)
         spec.update(changes)
+        self._assert_readonly_sources_preserved(snapshot["spec"], spec)
         self._validate_ai_scope(snapshot["spec"], spec, request)
         spec["version"] += 1
         retain = None if "binding_manifest" in request.model_fields_set else scopes
@@ -840,6 +898,7 @@ class PageDocumentStore:
             ):
                 raise fault("AI_BOUND_CONTENT", 403)
         spec.update({**request.model_dump(mode="json", exclude={"base_version", "edit_origin"}), "package": package})
+        self._assert_readonly_sources_preserved(snapshot["spec"], spec)
         spec["version"] += 1
         return self._preview(actor, validated(PageDocument, stamp_binding_state(spec)), "SAVE",
                              request.base_version, source_context=source_context)
