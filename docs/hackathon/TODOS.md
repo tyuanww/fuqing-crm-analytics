@@ -6,6 +6,10 @@
 
 ### 2026-10-27 真实编辑 UAT 修复组合
 
+- [x] Workbench 候选拆为生命周期、预览来源桥、生成提示三个作者 PR；最终作者 CI core 1,359 项通过，严格包与运输 artifact `12719087263` 已回读，主仓来源输入检查 80 项通过。
+- [x] 保留隔离 Web 更新失败回执。临时单元在 stop 后消失，旧插件已恢复，基于原启动入口恢复服务；其他七项服务进程未变化。
+- [x] 最终候选 `6ecb3fc` 的 9 个文件已应用到隔离实例并重启 Web；其他七项服务进程未变，旧包备份和应用回执保留。
+- [ ] 验证最终候选的实际 Host 合同，再使用新 CRM 授权完成真实业务验收。
 - [x] 核对 Workbench `240ec691`、CRM `ee7ebecc` 的作者 CI 与六份归档摘要，读取 1,342 PASS 的作者 core 回执。
 - [x] 对缺构建证明的 CI formal 包保持拒绝；从精确提交的 clean clone 离线严格重建，并通过九包、领域包与完整业务 profile 接收。
 - [x] 同步四份来源锁与 manifest；31 份公共材料投影字节未变，其他七插件、领域包、SDK rc3 与 Cordis 4.0.5 保持原值。
@@ -16,7 +20,7 @@
 - [ ] P1 功能阻断：`PACKAGE_RECEIVED` 后实际驾驶舱暂无产物。用当前会话生成一次，再打开驾驶舱并刷新，两次同脚本刷新仍为空。Workbench 会话 A 定位接收、预览及错误反馈，Root 负责集成。
 - [ ] 形成真实 preview 后逐项对账关键事实，完成人工与 AI 文案修改、数字只读、保存、退出重开。19 项 READY、computed=0 不抵扣此验收。
 
-来源、命令、失败及未执行项见[组合准备记录](evidence/dsh-uat-fixes-composition-20261027.md)和[后续收口记录](evidence/dsh-page-readonly-closeout-20261027.md)。隔离实例是逐项留有来源记录的变体；不合并 PR，不切换公网现役。
+来源、命令、失败及未执行项见[组合准备记录](evidence/dsh-uat-fixes-composition-20261027.md)、[后续收口记录](evidence/dsh-page-readonly-closeout-20261027.md)和[原生页面集成记录](evidence/dsh-native-preview-integration-20261027.md)。隔离实例是逐项留有来源记录的变体；不合并 PR，不切换公网现役。
 
 ### 2026-10-26 仓库快照与编辑验收
 

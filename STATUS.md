@@ -4,6 +4,8 @@
 
 ## 当前快照（2026-10-27）
 
+- Workbench 新候选 `6ecb3fc` 已拆分为 [PR #8](https://github.com/tyuanww/dsh-analytics-workbench/pull/8)、[#9](https://github.com/tyuanww/dsh-analytics-workbench/pull/9) 和 [#10](https://github.com/tyuanww/dsh-analytics-workbench/pull/10)，作者 CI core 1,359 项通过。严格重建包进入运输 artifact `12719087263`，20 个成员回读一致，输入检查 80 项通过。隔离更新首次因临时 Web 单元被回收而失败，恢复后已应用最终包的 9 个文件并重启隔离 Web，其他七项服务进程未变。实际 Host 行为与真实业务仍待验收。`release_ready=false`，该组合的完整运行 ZIP 尚未构建，公网现役未切换。见[原生页面集成记录](docs/hackathon/evidence/dsh-native-preview-integration-20261027.md)。
+
 - 2026-10-27 真实编辑 UAT 仍未通过。组合 `839155bd` 的主 CI 与预检成功，正式 ZIP 已下载并核对来源和内外层摘要，完整 ZIP 尚未安装。Workbench `240ec691`、CRM `ee7ebecc` 已单独应用到隔离 19327；用户重连后，真实聊天出现七次新仓库查询。后端 `855961b2` 修复只读属性遗漏、合法文案误拦和新增绑定的 500，270 项回归、正常 Git hooks 与同模型独立复核通过，已推送 [PR #181](https://github.com/tyuanww/fuqing-crm-analytics/pull/181)。最新源码包返回接收回执，但驾驶舱两次刷新仍无产物，人工及 AI 编辑、保存重开尚未验收。19 项缓存 READY 不代表全部筛选已预热。产品保持 `PARTIAL`、`release_ready=false`；公网现役未动。见[收口记录](docs/hackathon/evidence/dsh-page-readonly-closeout-20261027.md)。
 
 - 2026-10-27 `45687f6c` 的隔离 CRM 曾因发布白名单遗漏 `scripts.etl.manifest` 等依赖退出。`76fd03d9` 已补齐闭包，通过 CI、严格接收和隔离启动；失败证据保留。真实取数可用，完整编辑验收仍失败。业务库与现役四项服务未变。
