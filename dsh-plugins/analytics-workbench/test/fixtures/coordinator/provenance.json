@@ -1,6 +1,6 @@
 {
   "schema_version": "plugin-test-contract-fixtures/v1",
-  "source_commit": "e577f41b9247e3ac56052e21f84daed9dd32f163",
+  "source_commit": "7ffc01154b61c8c4c8bcaa0c3f496acab1796154",
   "files": [
     {
       "name": "frozen-contract-v0.json",
@@ -21,7 +21,7 @@
       "owner": "analytics page-documents service contract",
       "contract_version": "free-page/v1",
       "source_path": "backend/contracts/analytics-page.openapi.json",
-      "sha256": "aaba98882b5b3bd2b334cc4cafa740f7777035edacb2998695d7e29599655c05"
+      "sha256": "95c395bcc76a216e2673e69ef676d049702f11d3340163f6009efb216a113b93"
     },
     {
       "name": "analytics_first_purchase_v1_expected.json",
