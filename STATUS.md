@@ -1,10 +1,10 @@
 # 项目状态（Project Status）
 
-> 当前短表（2026-10-26）；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。历史 PASS、NOT_RUN 与版本只属于原验收对象，本页是当前运行与交付边界的 SSOT。
+> 当前短表（2026-10-27）；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。历史 PASS、NOT_RUN 与版本只属于原验收对象，本页是当前运行与交付边界的 SSOT。
 
 ## 当前快照（2026-10-27）
 
-- 2026-10-27 真实编辑 UAT 未通过。Workbench `240ec691`、CRM `ee7ebecc` 的作者 CI 已成功；严格重建的两包已进入新运输 artifact，真实下载、九包及领域包接收、80 项输入与来源检查通过。19 项缓存已用新进程回读，全部 READY、computed=0。主仓 CI、运行包接收及修复后真实编辑复验仍开放，产品为 `PARTIAL`、`release_ready=false`。见[本轮记录](docs/hackathon/evidence/dsh-uat-fixes-composition-20261027.md)。
+- 2026-10-27 真实编辑 UAT 仍未通过。组合 `839155bd` 的主 CI 与预检成功，正式 ZIP 已下载并核对来源和内外层摘要，完整 ZIP 尚未安装。Workbench `240ec691`、CRM `ee7ebecc` 已单独应用到隔离 19327；用户重连后，真实聊天出现七次新仓库查询。后端 `855961b2` 修复只读属性遗漏、合法文案误拦和新增绑定的 500，270 项回归、正常 Git hooks 与同模型独立复核通过，已推送 [PR #181](https://github.com/tyuanww/fuqing-crm-analytics/pull/181)。最新源码包返回接收回执，但驾驶舱两次刷新仍无产物，人工及 AI 编辑、保存重开尚未验收。19 项缓存 READY 不代表全部筛选已预热。产品保持 `PARTIAL`、`release_ready=false`；公网现役未动。见[收口记录](docs/hackathon/evidence/dsh-page-readonly-closeout-20261027.md)。
 
 - 2026-10-27 `45687f6c` 的隔离 CRM 曾因发布白名单遗漏 `scripts.etl.manifest` 等依赖退出。`76fd03d9` 已补齐闭包，通过 CI、严格接收和隔离启动；失败证据保留。真实取数可用，完整编辑验收仍失败。业务库与现役四项服务未变。
 
