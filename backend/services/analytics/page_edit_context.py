@@ -21,7 +21,7 @@ from pydantic import ValidationError
 
 from backend.services.analytics.page_context import PageAccessPolicy
 from backend.contracts.page_documents import (
-    HTML_MAX_CHARS, PACKAGE_MAX_BYTES, STYLE_MAX_CHARS, PageDocument, PageElementKey, PagePatchPreview, is_package_too_large,
+    HTML_MAX_CHARS, PACKAGE_MAX_BYTES, STYLE_MAX_CHARS, PageDocument, PageElementKey, PageElementTarget, PagePatchPreview, is_package_too_large,
 )
 from backend.services.analytics.access import AnalyticsError, require
 from backend.services.analytics.cockpit_html_selection import SourceTree, presentation_texts
@@ -269,6 +269,39 @@ def logic_range(js: str, node_id: str):
             return None
         end = max(end, right)
     return begin, end
+
+
+def presentation_target(tree, selected):
+    parents, children, stack = {}, {}, []
+    for item in sorted(tree.all_nodes, key=lambda row: (row['start'], -row['end'])):
+        while stack and item['start'] >= stack[-1]['end']:
+            stack.pop()
+        if stack:
+            parents[item['start']] = stack[-1]
+            children.setdefault(stack[-1]['start'], []).append(item)
+        stack.append(item)
+    path = []
+    node = selected
+    while node is not None:
+        for attribute in ('id', 'data-node', 'data-page-block', 'data-page-field'):
+            value = node['attrs'].get(attribute)
+            if not value or sum(item['attrs'].get(attribute) == value for item in tree.all_nodes) != 1:
+                continue
+            try:
+                anchor = PageElementKey(attribute=attribute, value=value).model_dump()
+            except ValidationError:
+                continue
+            try:
+                return PageElementTarget(anchor=anchor, path=list(reversed(path))).model_dump()
+            except ValidationError:
+                continue
+        parent = parents.get(node['start'])
+        if parent is None or len(path) >= 64:
+            break
+        siblings = [item for item in children[parent['start']] if item['tag'] == node['tag']]
+        path.append({'tag': node['tag'], 'key': {'attribute': 'nth', 'value': str(siblings.index(node))}})
+        node = parent
+    raise fault('MAPPING_STALE', 409)
 
 
 def node_is_bound(manifest, node_id: str, html: str, kind: str) -> bool:
@@ -763,19 +796,7 @@ class PageEditContextStore:
         if tree.invalid:
             raise fault("MAPPING_STALE", 409)
         selected = next(item for item in tree.all_nodes if item["start"] == node["source_range"]["start"])
-        anchor = None
-        for attribute in ("id", "data-node", "data-page-block", "data-page-field"):
-            value = selected["attrs"].get(attribute)
-            if not value or sum(item["attrs"].get(attribute) == value for item in tree.all_nodes) != 1:
-                continue
-            try:
-                anchor = PageElementKey(attribute=attribute, value=value).model_dump()
-                break
-            except ValidationError:
-                continue
-        if anchor is None:
-            raise fault("MAPPING_STALE", 409)
-        target = {"anchor": anchor, "path": []}
+        target = presentation_target(tree, selected)
         def split(package):
             own, outside = [], []
             for edit in (package.get("presentation") or {}).get("edits", []):
