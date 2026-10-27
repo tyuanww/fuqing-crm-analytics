@@ -64,7 +64,12 @@ def host_case(tmp_path):
             if state["wait"] is not None:
                 state["wait"].wait(2)
             sleep(state["delay"])
-            value = state["handles"].get(request["handle"])
+            if self.path == "/native-crm-source/introspect-many":
+                values = [state["handles"].get(handle) for handle in request["handles"]]
+                value = ({"schema_version": "native-crm-snapshot-observations/v1", "observations": values}
+                         if all(values) else None)
+            else:
+                value = state["handles"].get(request["handle"])
             status = state["status"] if value else 401
             body = json.dumps(value if status == 200 else {"code": "test-rejection"}).encode()
             self.send_response(status)

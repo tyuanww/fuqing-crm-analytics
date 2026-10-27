@@ -134,6 +134,12 @@ class NativeSnapshotExpectation:
     result_sha256: str
 
 
+@dataclass(frozen=True)
+class NativeSnapshotRead:
+    ref_id: str
+    expected: NativeSnapshotExpectation
+
+
 def _private(path: Path, *, directory=False):
     info = path.lstat()
     valid_type = stat.S_ISDIR(info.st_mode) if directory else stat.S_ISREG(info.st_mode)
@@ -359,13 +365,17 @@ class NativeCrmSnapshotSource:
         if row is None:
             raise fault("NOT_FOUND")
         ref = self._decode(row)
-        if self.expected_snapshot is not None:
-            if (ref.snapshot_id != self.expected_snapshot.snapshot_id
+        self._expected(ref, identity, self.expected_snapshot)
+        return ref
+
+    @staticmethod
+    def _expected(ref, identity, expected):
+        if expected is not None:
+            if (ref.snapshot_id != expected.snapshot_id
                     or ref.identity.connection_generation != identity.connection_generation):
                 raise fault("NOT_FOUND")
-            if ref.result_sha256 != self.expected_snapshot.result_sha256:
+            if ref.result_sha256 != expected.result_sha256:
                 raise fault("RESULT_STALE")
-        return ref
 
     def read(self, ref_id: str) -> CrmSnapshot | WarehouseSnapshot:
         lease = self._lease()
@@ -381,6 +391,37 @@ class NativeCrmSnapshotSource:
         self._unchanged(lease)
         self._recheck(lease.identity, ref)
         return snapshot
+
+    def read_many(self, requests: tuple[NativeSnapshotRead, ...], *, check_active):
+        if (not isinstance(requests, tuple) or not 1 <= len(requests) <= 16
+                or any(not isinstance(item, NativeSnapshotRead) or not isinstance(item.ref_id, str)
+                       or not isinstance(item.expected, NativeSnapshotExpectation) for item in requests)
+                or len({item.ref_id for item in requests}) != len(requests)):
+            raise fault("INVALID_REQUEST")
+        check_active()
+        lease = self._lease()
+        refs = []
+        with self._state(readonly=True) as con:
+            for item in requests:
+                check_active()
+                ref = self._reference(con, lease.identity, item.ref_id)
+                self._expected(ref, lease.identity, item.expected)
+                self._active(con, ref)
+                self._fresh(ref)
+                refs.append(ref)
+        self._unchanged(lease)
+        snapshots = []
+        for ref in refs:
+            check_active()
+            snapshot = self._snapshot(lease.identity, ref.snapshot_id)
+            self._matches(ref, snapshot)
+            snapshots.append(snapshot)
+        self._unchanged(lease)
+        for ref in refs:
+            check_active()
+            self._recheck(lease.identity, ref)
+        check_active()
+        return tuple(snapshots)
 
     def _recheck(self, identity, ref):
         with self._state(readonly=True) as con:
