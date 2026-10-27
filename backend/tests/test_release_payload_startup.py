@@ -5,10 +5,13 @@ import json
 import os
 from pathlib import Path
 import shutil
+import signal
 import subprocess
 import sys
+import time
 
 import duckdb
+import pytest
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -67,6 +70,73 @@ print(json.dumps({'startup': 'ready', 'shutdown': 'closed', 'auth': 'enforced'})
 """
 
 
+def _run_owned_process(args, *, cwd, env, timeout):
+    process = subprocess.Popen(
+        args, cwd=cwd, env=env, stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+        start_new_session=True,
+    )
+    try:
+        stdout, stderr = process.communicate(timeout=timeout)
+    except BaseException:
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        process.communicate()
+        raise
+    return subprocess.CompletedProcess(args, process.returncode, stdout, stderr)
+
+
+def test_timeout_reaps_owned_descendant_and_preserves_unrelated_peer(tmp_path):
+    pids_file = tmp_path / "owned-pids.json"
+    peer = subprocess.Popen(
+        [sys.executable, "-I", "-B", "-c", "import time; time.sleep(60)"],
+        cwd=tmp_path, env={}, start_new_session=True,
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+    )
+    try:
+        with pytest.raises(subprocess.TimeoutExpired):
+            _run_owned_process(
+                [sys.executable, "-I", "-B", "-c", """
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import time
+child = subprocess.Popen([sys.executable, '-I', '-B', '-c', 'import time; time.sleep(60)'])
+Path(sys.argv[1]).write_text(json.dumps([os.getpid(), child.pid]))
+time.sleep(60)
+""", str(pids_file)],
+                cwd=tmp_path, env={}, timeout=2,
+            )
+        assert pids_file.is_file(), "timeout fixture did not start its descendant"
+        leader, descendant = json.loads(pids_file.read_text())
+        with pytest.raises(ChildProcessError):
+            os.waitpid(leader, os.WNOHANG)
+        deadline = time.monotonic() + 2
+        while True:
+            state = subprocess.run(
+                ["ps", "-o", "stat=", "-p", str(descendant)],
+                cwd=tmp_path, capture_output=True, text=True, timeout=5,
+            ).stdout.strip()
+            if not state or state.startswith("Z") or time.monotonic() >= deadline:
+                break
+            time.sleep(0.05)
+        assert not state or state.startswith("Z"), f"owned descendant {descendant} survived timeout ({state})"
+        assert peer.poll() is None, "timeout cleanup killed an unrelated process"
+    finally:
+        if pids_file.is_file():
+            leader, _ = json.loads(pids_file.read_text())
+            try:
+                os.killpg(leader, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+        peer.kill()
+        peer.wait(timeout=5)
+
+
 def test_release_payload_starts_verified_crm_without_checkout(tmp_path):
     node = shutil.which("node")
     assert node is not None, "release payload regression requires Node"
@@ -116,7 +186,7 @@ def test_release_payload_starts_verified_crm_without_checkout(tmp_path):
         env[name] = str(tmp_path / "unused-inputs" / name.lower())
     artifact = tmp_path / "crm.tar.zst"
     payload = tmp_path / "received"
-    build = subprocess.run(
+    build = _run_owned_process(
         [node, "--input-type=module", "-e", """
 import { pathToFileURL } from 'node:url';
 const [rootDir, output] = process.argv.slice(1);
@@ -124,18 +194,18 @@ const { collectAllowlist, packArtifact } = await import(pathToFileURL(rootDir + 
 const allowlist = await collectAllowlist(rootDir);
 console.log(JSON.stringify(await packArtifact({ rootDir, allowlist, output })));
 """, str(ROOT), str(artifact)],
-        cwd=work, env=env, capture_output=True, text=True, timeout=120,
+        cwd=work, env=env, timeout=120,
     )
     assert build.returncode == 0, build.stdout + build.stderr
-    unpack = subprocess.run(
+    unpack = _run_owned_process(
         [sys.executable, "-I", "-B", str(ROOT / "scripts/release/secure-unpack.py"),
          str(artifact), str(payload)],
-        cwd=work, env=env, capture_output=True, text=True, timeout=120,
+        cwd=work, env=env, timeout=120,
     )
     assert unpack.returncode == 0, unpack.stdout + unpack.stderr
-    probe = subprocess.run(
+    probe = _run_owned_process(
         [sys.executable, "-I", "-B", "-c", PROBE, str(payload)],
-        cwd=work, env=env, capture_output=True, text=True, timeout=90,
+        cwd=work, env=env, timeout=90,
     )
     (tmp_path / "startup.stdout").write_text(probe.stdout)
     (tmp_path / "startup.stderr").write_text(probe.stderr)
@@ -144,10 +214,10 @@ console.log(JSON.stringify(await packArtifact({ rootDir, allowlist, output })));
     assert json.loads(probe.stdout.splitlines()[-1]) == {
         "startup": "ready", "shutdown": "closed", "auth": "enforced",
     }
-    worker = subprocess.run(
+    worker = _run_owned_process(
         [sys.executable, "-I", "-B", str(payload / "scripts/query_worker.py"),
          "--duckdb-path", str(database), "--memory-limit", "512MB", "--sql", "SELECT 7 AS synthetic_value"],
-        cwd=work, env=env, capture_output=True, text=True, timeout=30,
+        cwd=work, env=env, timeout=30,
     )
     assert worker.returncode == 0, worker.stdout + worker.stderr
     assert json.loads(worker.stdout)["rows"] == [[7]]
