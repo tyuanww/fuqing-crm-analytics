@@ -1,10 +1,12 @@
 # 项目状态（Project Status）
 
-> 当前短表（2026-10-27）；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。历史 PASS、NOT_RUN 与版本只属于原验收对象，本页是当前运行与交付边界的 SSOT。
+> 当前短表（2026-10-28）；编年与旧运维事项见 [STATUS-HISTORY.md](docs/history/STATUS-HISTORY.md)。历史 PASS、NOT_RUN 与版本只属于原验收对象，本页是当前运行与交付边界的 SSOT。
 
 ## 当前快照（2026-10-28）
 
-- Workbench `e20a0fea` 已在隔离 19327 验收：原问数聊天取当前授权快照、交付卡进入驾驶舱、保存 v1、人工标题 v2、AI 标题 v3、切换产物后重开均通过，五项事实值与单位逐项一致。最后两次客户端更新使用 HMR，八项服务 PID 和 CRM 授权保持。WeKnora 真实检索和原文读取通过。作者 core 1386 项、library-workspace 94 项及草稿 PR #12/#13 的固定输入 CI 通过；主仓正常 hook 已通过默认后端 4072 项和前端 236 项，完整 B0、主仓推送、新运输 artifact 与完整运行包继续收尾。重登后旧来源受授权代次保护，重新授权流程仍未实现。公网未切换，产品保持 PARTIAL。见[本轮收尾记录](docs/hackathon/evidence/dsh-ui-knowledge-closeout-20261028.md)。
+- Workbench `e20a0fea` 已在隔离 19327 验收：原问数聊天取当前授权快照、交付卡进入驾驶舱、保存 v1、人工标题 v2、AI 标题 v3、切换产物后重开均通过，五项事实值与单位逐项一致。最后两次客户端更新使用 HMR，八项服务 PID 和 CRM 授权保持。WeKnora 真实检索和原文读取通过。作者 core 1386 项、library-workspace 94 项及草稿 PR #12/#13 的固定输入 CI 通过。重登后旧来源受授权代次保护，重新授权流程仍未实现。公网未切换，产品保持 PARTIAL。见[本轮收尾记录](docs/hackathon/evidence/dsh-ui-knowledge-closeout-20261028.md)。
+
+- 主仓已正常推送并拆出草稿 [事实接口 #185](https://github.com/tyuanww/fuqing-crm-analytics/pull/185) 与 [AI 定位 #186](https://github.com/tyuanww/fuqing-crm-analytics/pull/186)。默认后端 4072 passed、81 skipped，前端 236 项及完整 B0 通过；本次 B0 仍消费原固定包，属于接口兼容检查。新 e20 运输 CI `40582793438` 成功，artifact `12770641494` 的 20 成员已逐字节回读并严格接收，消费锁据真实归档更新。新组合的 B0、主仓远程 CI 和完整运行候选 ZIP 待验。未合并 PR、未切公网，`release_ready=false`。见[组合接收记录](docs/hackathon/evidence/dsh-host-facts-composition-20261028.md)。
 
 - 隔离 19327 的 H1 核心链路已完成一轮真实验收。DSH 聊天查询七个新来源并生成 HTML，经交付卡进入驾驶舱；人工改文案保存 v2，刷新重开通过；AI 原生对话局部修改、收取预览、确认保存 v3、切换产物重开通过。2955 项来源事实、单位与行标签逐项对账一致。后端 `3893a753`、Workbench `3d44284`，现场 AI 锚点修复 `ebd1eee1`。只更新隔离服务，公网未切换。后续知识库、UI 与作者 CI 结果见上条；跨重登和完整运行 ZIP 仍开放，产品保持 PARTIAL。见[聊天到驾驶舱验收记录](docs/hackathon/evidence/dsh-chat-cockpit-uat-20261028.md)。
 

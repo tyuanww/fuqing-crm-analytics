@@ -1,9 +1,9 @@
 {
   "schema_version": "dsh-composition-artifact/v1",
   "repository": "tyuanww/fuqing-crm-analytics",
-  "id": 12731960253,
-  "sha256": "0403f806132a76bf452974ffd5c086d35f70edc4bc2fff6ca4becdf99e495f3f",
-  "runId": 40497386322,
-  "headSha": "8ecc9413f013fc920d370b1eb27c159b3b2c59f6",
-  "composition_lock_sha256": "60d16a37bbbd4f61477d0eb4e87d21779db4dd689fdf4e1e3f6b334958bfdef1"
+  "id": 12770641494,
+  "sha256": "5cc42e1db7abeca3a441185dc9b0805ae10d2046daaf817522cf135095d842ec",
+  "runId": 40582793438,
+  "headSha": "f723c9cadc6b34958617eb28737bf85135ccc141",
+  "composition_lock_sha256": "d3239710b8704ca0df8529dfc8f4227fce3217d1f55bca86a7d8902506efbd11"
 }
