@@ -4,7 +4,7 @@ The native conversation receives only a context id. Capabilities are computed
 again when a patch arrives. Operations and contexts are parsed only by the
 free-page-edit/v1 contract. There is no fallback schema.
 
-VERSION_CONFLICT and HASH_MISMATCH drop the old context so the caller must
+VERSION_CONFLICT and HASH_MISMATCH invalidate the old context so the caller must
 select again. Confirmed page revisions stay append-only; this module does not
 rewrite them and does not merge concurrent editors.
 """
@@ -19,11 +19,12 @@ from uuid import uuid4
 
 from pydantic import ValidationError
 
-from backend.contracts.competition_computed import DATA_SCOPE
+from backend.services.analytics.page_context import PageAccessPolicy
 from backend.contracts.page_documents import (
-    HTML_MAX_CHARS, PACKAGE_MAX_BYTES, STYLE_MAX_CHARS, PagePatchPreview, is_package_too_large,
+    HTML_MAX_CHARS, PACKAGE_MAX_BYTES, STYLE_MAX_CHARS, PageDocument, PageElementKey, PageElementTarget, PagePatchPreview, is_package_too_large,
 )
 from backend.services.analytics.access import AnalyticsError, require
+from backend.services.analytics.cockpit_html_selection import SourceTree, presentation_texts
 from backend.services.analytics.first_purchase.asset_state import (
     connect, initialize_sqlite, now_ms, transaction, validate_key,
 )
@@ -270,12 +271,65 @@ def logic_range(js: str, node_id: str):
     return begin, end
 
 
-def node_is_bound(manifest, node_id: str) -> bool:
+def presentation_target(tree, selected):
+    parents, children, stack = {}, {}, []
+    for item in sorted(tree.all_nodes, key=lambda row: (row['start'], -row['end'])):
+        while stack and item['start'] >= stack[-1]['end']:
+            stack.pop()
+        if stack:
+            parents[item['start']] = stack[-1]
+            children.setdefault(stack[-1]['start'], []).append(item)
+        stack.append(item)
+    path = []
+    node = selected
+    while node is not None:
+        for attribute in ('id', 'data-node', 'data-page-block', 'data-page-field'):
+            value = node['attrs'].get(attribute)
+            if not value or sum(item['attrs'].get(attribute) == value for item in tree.all_nodes) != 1:
+                continue
+            try:
+                anchor = PageElementKey(attribute=attribute, value=value).model_dump()
+            except ValidationError:
+                continue
+            try:
+                return PageElementTarget(anchor=anchor, path=list(reversed(path))).model_dump()
+            except ValidationError:
+                continue
+        parent = parents.get(node['start'])
+        if parent is None or len(path) >= 64:
+            break
+        siblings = [item for item in children[parent['start']] if item['tag'] == node['tag']]
+        path.append({'tag': node['tag'], 'key': {'attribute': 'nth', 'value': str(siblings.index(node))}})
+        node = parent
+    raise fault('MAPPING_STALE', 409)
+
+
+def node_is_bound(manifest, node_id: str, html: str, kind: str) -> bool:
     bindings = (manifest or {}).get("bindings") or []
-    if any(isinstance(row, dict) and row.get("node_id") == node_id for row in bindings):
+    bound_ids = {row["node_id"] for row in bindings if isinstance(row, dict) and row.get("node_id")}
+    tree = SourceTree(html)
+    if tree.invalid:
+        raise fault("MAPPING_STALE", 409)
+    by_id = {}
+    protected = []
+    for node in tree.all_nodes:
+        attrs = node["attrs"]
+        for identity in {attrs.get("data-shine-node"), attrs.get("data-shine-region")} - {None}:
+            by_id.setdefault(identity, []).append(node)
+        if "data-page-readonly" in attrs or attrs.get("data-sp-bindable") == "database":
+            protected.append(node)
+    attr = "region" if kind == "dynamic_region" else "node"
+    selected = [node for node in by_id.get(node_id, []) if node["attrs"].get(f"data-shine-{attr}") == node_id]
+    markers = [marker for marker in scan_markers(html) if marker["node_id"] == node_id and marker["attr"] == attr]
+    if (len(selected) != 1 or len(markers) != 1
+            or any(selected[0][key] != markers[0][key] for key in ("start", "end"))):
+        raise fault("MAPPING_STALE", 409)
+    if (manifest or {}).get("result_refs") and not bound_ids:
         return True
-    refs = (manifest or {}).get("result_refs") or []
-    return bool(refs) and all(not (isinstance(row, dict) and row.get("node_id")) for row in bindings)
+    if any(len(by_id.get(identity, [])) != 1 for identity in bound_ids):
+        return True
+    protected.extend(by_id[identity][0] for identity in bound_ids)
+    return any(selected[0]["start"] < node["end"] and node["start"] < selected[0]["end"] for node in protected)
 
 
 def _dangerous(value: str) -> bool:
@@ -343,10 +397,11 @@ def _overlay(payload):
 
 
 class PageEditContextStore:
-    def __init__(self, directory: Path, pages, *, clock: Callable[[], int] = now_ms):
+    def __init__(self, directory: Path, pages, *, clock: Callable[[], int] = now_ms, policy: PageAccessPolicy = PageAccessPolicy()):
         self.path = directory.resolve() / "page_edit_context.sqlite3"
         self.pages = pages
         self.clock = clock
+        self.policy = policy
         initialize_sqlite(directory, self.path, application_id=1804289401, schema_version=1,
                           kind="page_edit_context", ddl=DDL, unavailable=UNAVAILABLE)
 
@@ -354,8 +409,11 @@ class PageEditContextStore:
         return connect(self.path, readonly=True, unavailable=UNAVAILABLE)
 
     def _require(self, actor):
-        require(actor, "dashboard:read", data_scope=DATA_SCOPE)
-        require(actor, "dashboard:update", data_scope=DATA_SCOPE)
+        require(actor, "dashboard:read", data_scope=self.policy.document_scope)
+        require(actor, "dashboard:update", data_scope=self.policy.document_scope)
+
+    def _tenant(self, actor):
+        return self.policy.edit_tenant if self.policy.edit_tenant is not None else tenant_of(actor)
 
     def _context_row(self, context_id: str):
         if not isinstance(context_id, str) or not IDENTITY.fullmatch(context_id):
@@ -363,16 +421,16 @@ class PageEditContextStore:
         with self._read() as con:
             return con.execute("SELECT * FROM edit_contexts WHERE context_id=?", (context_id,)).fetchone()
 
-    def _authorized(self, actor, context_id: str):
+    def _authorized(self, actor, context_id: str, *, allow_expired=False):
         self._require(actor)
         row = self._context_row(context_id)
         if row is None:
             raise fault("NOT_FOUND", 404)
-        if row["owner"] != actor.actor_id or row["tenant_id"] != tenant_of(actor):
+        if row["owner"] != actor.actor_id or row["tenant_id"] != self._tenant(actor):
             raise fault("UNAUTHORIZED_CONTEXT", 403)
-        if self.clock() >= row["expires_ms"]:
+        if self.clock() >= row["expires_ms"] and not allow_expired:
             raise fault("EDIT_EXPIRED", 409)
-        return json.loads(row["body"])
+        return {**json.loads(row["body"]), "_expired": self.clock() >= row["expires_ms"]}
 
     def _page(self, actor, page_id: str):
         snapshot = self.pages.get(actor, page_id)
@@ -416,7 +474,7 @@ class PageEditContextStore:
             region_field = "html"
         source_hash = package_source_hash(html, css, js)
         region_hash = byte_region_hash(region_text)
-        bound = node_is_bound(spec.get("binding_manifest"), node_id)
+        bound = node_is_bound(spec.get("binding_manifest"), node_id, html, kind)
         capabilities = sorted(recompute_capabilities(actor, bound=bound))
         now = self.clock()
         context_id = "editctx_" + uuid4().hex
@@ -435,7 +493,7 @@ class PageEditContextStore:
             "schema_version": CONTEXT_SCHEMA,
             "edit_context_id": context_id,
             "user_id": actor.actor_id,
-            "tenant_id": tenant_of(actor),
+            "tenant_id": self._tenant(actor),
             "page_id": page_id,
             "version": spec["version"],
             "selected_node": selected_node,
@@ -486,11 +544,16 @@ class PageEditContextStore:
                          json.dumps(body, ensure_ascii=False)))
 
     def _drop_context(self, actor, context_id: str) -> None:
-        """Forget a context whose compare-and-swap failed. Pending previews go with it."""
+        """Invalidate failed CAS; retain linked previews as publication evidence."""
         with transaction(self.path, unavailable=UNAVAILABLE) as con:
-            con.execute("DELETE FROM edit_contexts WHERE context_id=? AND owner=?", (context_id, actor.actor_id))
+            linked = con.execute("SELECT 1 FROM edit_previews WHERE owner=? AND context_id=? AND page_preview_id IS NOT NULL",
+                                 (actor.actor_id, context_id)).fetchone()
+            if linked:
+                con.execute("UPDATE edit_contexts SET expires_ms=0 WHERE context_id=? AND owner=?", (context_id, actor.actor_id))
+            else:
+                con.execute("DELETE FROM edit_contexts WHERE context_id=? AND owner=?", (context_id, actor.actor_id))
             con.execute(
-                "DELETE FROM edit_previews WHERE owner=? AND context_id=? AND status='PENDING'",
+                "DELETE FROM edit_previews WHERE owner=? AND context_id=? AND status='PENDING' AND page_preview_id IS NULL",
                 (actor.actor_id, context_id),
             )
 
@@ -563,7 +626,7 @@ class PageEditContextStore:
             raise fault("SCOPE_VIOLATION")
         if node.get("source_range") != selected.get("source_range") or node.get("mapping_token") != selected.get("mapping_token"):
             raise fault("MAPPING_STALE", 409)
-        bound = node_is_bound(spec.get("binding_manifest"), node["node_id"])
+        bound = node_is_bound(spec.get("binding_manifest"), node["node_id"], spec["package"]["html"], node["kind"])
         capabilities = recompute_capabilities(actor, bound=bound)
         if bound and "node:bound" not in capabilities:
             raise fault("BOUND_NODE", 403)
@@ -683,8 +746,91 @@ class PageEditContextStore:
                 return True
         return False
 
-    def confirm(self, actor, context_id: str, preview_id: str, key: str | None):
+    def prepare(self, actor, context_id, preview_id, *, source_context=None):
         stored = self._authorized(actor, context_id)
+        with self._read() as con:
+            row = con.execute("SELECT * FROM edit_previews WHERE owner=? AND preview_id=?",
+                              (actor.actor_id, preview_id)).fetchone()
+        if row is None or row["context_id"] != context_id:
+            raise fault("NOT_FOUND", 404)
+        spec = self._page(actor, stored["contract"]["page_id"])
+        if spec["version"] != stored["base_version"]:
+            raise fault("VERSION_CONFLICT", 409)
+        if row["page_preview_id"]:
+            preview = self.pages.preview(actor, row["page_preview_id"])
+            if preview["status"] != "PENDING" or self.clock() >= preview["expires_at_ms"]:
+                raise AnalyticsError(409, "PREVIEW_EXPIRED", "页面预览已关闭或过期，请重新选择。")
+            if source_context is not None:
+                self.pages._bind(actor, PageDocument.model_validate(spec), source_context=source_context)
+                source_context.revalidate()
+            return row["page_preview_id"]
+        opened = self._open_page_preview(actor, stored, json.loads(row["body"]), source_context=source_context)
+        with transaction(self.path, unavailable=UNAVAILABLE) as con:
+            con.execute("UPDATE edit_previews SET page_preview_id=? WHERE owner=? AND preview_id=? AND page_preview_id IS NULL",
+                        (opened, actor.actor_id, preview_id))
+            selected = con.execute("SELECT page_preview_id FROM edit_previews WHERE owner=? AND preview_id=?",
+                                   (actor.actor_id, preview_id)).fetchone()[0]
+        if selected != opened:
+            self.pages.cancel(actor, opened)
+        return selected
+
+    def ai_presentation(self, actor, context_id, page_id, base_version, before, after, key):
+        stored = self._authorized(actor, context_id)
+        node = stored["contract"]["selected_node"]
+        spec = self._page(actor, page_id)
+        if node["page_id"] != page_id:
+            raise fault("CROSS_SCOPE", 403)
+        if spec["version"] != base_version or stored["base_version"] != base_version or spec["package"] != before:
+            raise fault("VERSION_CONFLICT", 409)
+        if node_is_bound(spec.get("binding_manifest"), node["node_id"], before["html"], node["kind"]):
+            raise fault("BOUND_NODE", 403)
+        span = node["source_range"]
+        for entry in before["node_map"]:
+            if entry["kind"] == "dynamic_region" or self.pages._canonical_js_ranges(before, entry):
+                region = self.pages._mapped_node_range(before, entry["node_id"], entry["kind"])
+                if region is None or span["start"] < region[1] and span["end"] > region[0]:
+                    raise fault("CAPABILITY_DENIED", 403)
+        if any(before.get(field) != after.get(field) for field in ("html", "css", "js", "resources", "node_map")):
+            raise fault("SCOPE_VIOLATION")
+        tree = SourceTree(before["html"])
+        if tree.invalid:
+            raise fault("MAPPING_STALE", 409)
+        selected = next(item for item in tree.all_nodes if item["start"] == node["source_range"]["start"])
+        target = presentation_target(tree, selected)
+        def split(package):
+            own, outside = [], []
+            for edit in (package.get("presentation") or {}).get("edits", []):
+                (own if edit["target"] == target else outside).append(edit)
+            return own, outside
+        old, outside = split(before)
+        changed, new_outside = split(after)
+        if outside != new_outside or len(changed) > 1 or old and not changed:
+            raise fault("SCOPE_VIOLATION")
+        payload = {}
+        if changed != old:
+            previous = old[0] if old else {}
+            current = self._overlay_map(actor, page_id, base_version).get(node["node_id"], {})
+            for field in ("text", "style"):
+                value = changed[0].get(field)
+                if value != previous.get(field) and value is not None:
+                    if field == "style":
+                        if not value:
+                            continue
+                        value = {**current.get("style", {}), **value}
+                    payload[field] = value
+        if not payload:
+            return target, None
+        operation = {"schema_version": "free-page-edit/v1", "operation_id": "op_" + sha256_text(key)[:24],
+                     "channel": "presentation", "action": "insert", "capabilities": ["edit:presentation"],
+                     "selected_scope": {"page_id": page_id, "node_id": node["node_id"], "source_range": node["source_range"]},
+                     "node": node, "cas": {"base_version": base_version, "source_hash": node["source_hash"],
+                     "region_hash": node["region_hash"], "idempotency_key": key}, "encoding": "overlay", "byte_length": 0,
+                     "payload": payload}
+        self._decide(actor, stored, spec, adapt_operation(operation))
+        return target, operation
+
+    def confirm(self, actor, context_id: str, preview_id: str, key: str | None, *, source_context=None):
+        stored = self._authorized(actor, context_id, allow_expired=True)
         key = validate_key(key)
         body_digest = digest({"context_id": context_id, "preview_id": preview_id})
         prior = self._idempotent(actor, "confirm", key)
@@ -692,6 +838,7 @@ class PageEditContextStore:
             if prior["digest"] != body_digest or prior["context_id"] != context_id:
                 raise fault("IDEMPOTENCY_CONFLICT", 409)
             body = json.loads(prior["body"])
+            self.pages.get(actor, stored["contract"]["page_id"], body["saved_version"])
             body["replayed"] = True
             body["receipt_pending"] = prior["acked"] == 0
             return body
@@ -706,13 +853,21 @@ class PageEditContextStore:
             self._drop_context(actor, context_id)
             raise fault("VERSION_CONFLICT", 409)
         page_preview_id = preview["page_preview_id"]
+        applied = page_preview_id and self.pages.preview(actor, page_preview_id)["status"] == "APPLIED"
+        if not applied:
+            if stored["_expired"]:
+                raise fault("EDIT_EXPIRED", 409)
+            bound = node_is_bound(spec.get("binding_manifest"), preview_body["node_id"], spec["package"]["html"],
+                                  stored["contract"]["selected_node"]["kind"])
+            capabilities = recompute_capabilities(actor, bound=bound)
+            if bound and "node:bound" not in capabilities:
+                raise fault("BOUND_NODE", 403)
+            if CHANNEL_CAPABILITY[preview_body["channel"]] not in capabilities:
+                raise fault("CAPABILITY_DENIED", 403)
         if not page_preview_id:
-            page_preview_id = self._open_page_preview(actor, stored, preview_body)
-            with transaction(self.path, unavailable=UNAVAILABLE) as con:
-                con.execute("UPDATE edit_previews SET page_preview_id=? WHERE owner=? AND preview_id=?",
-                            (page_preview_id, actor.actor_id, preview_id))
+            page_preview_id = self.prepare(actor, context_id, preview_id, source_context=source_context)
         try:
-            saved = self.pages.confirm(actor, page_preview_id, key)
+            saved = self.pages.confirm(actor, page_preview_id, key, source_context=source_context)
         except AnalyticsError as error:
             if error.code == "VERSION_CONFLICT":
                 self._drop_context(actor, context_id)
@@ -752,11 +907,11 @@ class PageEditContextStore:
                         (actor.actor_id, preview_id))
         return body
 
-    def _open_page_preview(self, actor, stored, preview_body):
+    def _open_page_preview(self, actor, stored, preview_body, *, source_context=None):
         page_id = stored["contract"]["page_id"]
         base_version = stored["base_version"]
         if preview_body["channel"] == "presentation":
-            opened = self.pages.preview_identical(actor, page_id, base_version)
+            opened = self.pages.preview_identical(actor, page_id, base_version, source_context=source_context)
         else:
             try:
                 request = PagePatchPreview.model_validate({
@@ -767,11 +922,11 @@ class PageEditContextStore:
                 if is_package_too_large(error):
                     raise fault("PACKAGE_TOO_LARGE", 413) from error
                 raise fault("INVALID_EDIT") from error
-            opened = self.pages.patch(actor, page_id, request)
+            opened = self.pages.patch(actor, page_id, request, source_context=source_context)
         return opened["preview_id"]
 
     def recover(self, actor, context_id: str, preview_id: str):
-        self._authorized(actor, context_id)
+        stored = self._authorized(actor, context_id, allow_expired=True)
         with self._read() as con:
             row = con.execute(
                 "SELECT * FROM idempotency WHERE owner=? AND kind='confirm' AND context_id=? AND preview_id=?",
@@ -779,19 +934,21 @@ class PageEditContextStore:
         if row is None:
             raise fault("NOT_FOUND", 404)
         body = json.loads(row["body"])
+        self.pages.get(actor, stored["contract"]["page_id"], body["saved_version"])
         body["replayed"] = True
         body["recovered"] = True
         body["receipt_pending"] = row["acked"] == 0
         return body
 
     def acknowledge(self, actor, context_id: str, preview_id: str):
-        self._authorized(actor, context_id)
+        stored = self._authorized(actor, context_id, allow_expired=True)
         with transaction(self.path, unavailable=UNAVAILABLE) as con:
             row = con.execute(
                 "SELECT * FROM idempotency WHERE owner=? AND kind='confirm' AND context_id=? AND preview_id=?",
                 (actor.actor_id, context_id, preview_id)).fetchone()
             if row is None:
                 raise fault("NOT_FOUND", 404)
+            self.pages.get(actor, stored["contract"]["page_id"], json.loads(row["body"])["saved_version"])
             con.execute("UPDATE idempotency SET acked=1 WHERE owner=? AND kind='confirm' AND key=?",
                         (actor.actor_id, row["key"]))
         body = json.loads(row["body"])
@@ -800,18 +957,59 @@ class PageEditContextStore:
         return body
 
     def _overlay_map(self, actor, page_id: str, version: int) -> dict:
-        with self._read() as con:
-            row = con.execute("SELECT body FROM presentation_overlays WHERE owner=? AND page_id=? AND version=?",
-                              (actor.actor_id, page_id, version)).fetchone()
-        if row is None:
-            return {}
-        body = json.loads(row["body"])
-        return body if isinstance(body, dict) else {}
+        patches = []
+        while version > 0:
+            with self._read() as con:
+                row = con.execute("SELECT body FROM presentation_overlays WHERE owner=? AND page_id=? AND version=?",
+                                  (actor.actor_id, page_id, version)).fetchone()
+            if row is not None:
+                body = json.loads(row["body"])
+                if not isinstance(body, dict):
+                    raise fault("INVALID_EDIT")
+                break
+            body = {}
+            if version == 1:
+                break
+            published = self.pages.published_preview(actor, page_id, version)
+            current = self.pages.get(actor, page_id, version)["spec"]
+            previous = self.pages.get(actor, page_id, version - 1)["spec"]
+            with self._read() as con:
+                rows = con.execute("SELECT body FROM edit_previews WHERE owner=? AND page_preview_id=?",
+                                   (actor.actor_id, published["preview_id"])).fetchall()
+            if len(rows) > 1:
+                raise fault("INVALID_EDIT")
+            edit = json.loads(rows[0]["body"]) if rows else None
+            stable = (published["operation"] in {"PATCH", "SAVE"}
+                      and current["session_id"] == previous["session_id"]
+                      and current["binding_manifest"] == previous["binding_manifest"]
+                      and all(current["package"].get(key) == previous["package"].get(key)
+                              for key in ("html", "js", "resources", "node_map"))
+                      and presentation_texts(current["package"]) == presentation_texts(previous["package"]))
+            if not stable:
+                break
+            if edit is not None:
+                if edit.get("base_version") != version - 1 or edit.get("channel") != "presentation":
+                    raise fault("INVALID_EDIT")
+                patches.append(edit)
+            version -= 1
+        for edit in reversed(patches):
+            if edit.get("clear_overlay"):
+                body.pop(edit["node_id"], None)
+            else:
+                body[edit["node_id"]] = edit["overlay"]
+        return body
 
     def overlay(self, actor, page_id: str, version: int):
-        """Read the overlay saved for this page version only. Missing rows are empty."""
-        self._require(actor)
-        self._page(actor, page_id)
+        """Read checkpoints or published edit evidence for exactly this version."""
+        require(actor, "dashboard:read", data_scope=self.policy.document_scope)
         if type(version) is not int or version < 1:
             raise fault("INVALID_EDIT")
+        self.pages.get(actor, page_id, version)
         return self._overlay_map(actor, page_id, version)
+
+    def checkpoint(self, actor, page_id, version):
+        self._require(actor)
+        overlays = self.overlay(actor, page_id, version)
+        with transaction(self.path, unavailable=UNAVAILABLE) as con:
+            con.execute("INSERT OR IGNORE INTO presentation_overlays VALUES (?,?,?,?)",
+                        (actor.actor_id, page_id, version, json.dumps(overlays, ensure_ascii=False)))

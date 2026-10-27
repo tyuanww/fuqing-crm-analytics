@@ -412,7 +412,7 @@ function AnalyticsToolCard({ block }: ToolCallViewProps) {
  * the waiting generate continues into the isolated documents HTTP. It never
  * persists the page and never renders the raw source.
  */
-function PagePackageToolCard(props: ToolCallViewProps & { pagePackageWaiter?: PagePackageWaiter; openCockpit?: () => void; openDsh?: () => void; onNativePackage?: (pkg: { html: string; css?: string; js?: string; resources?: unknown[]; node_map?: unknown[] }, meta: { sessionId: string; requestId?: string; callId?: string }) => Promise<void> }) {
+function PagePackageToolCard(props: ToolCallViewProps & { pagePackageWaiter?: PagePackageWaiter; openCockpit?: () => void; openDsh?: () => void; onNativePackage?: (pkg: { html: string; css?: string; js?: string; resources?: unknown[]; node_map?: unknown[] }, meta: { sessionId: string; requestId?: string; callId?: string; bindingManifest?: unknown }) => Promise<void> }) {
   const { block, pagePackageWaiter } = props;
   const delivered = useRef<string | null>(null);
   const [handoffPending, setHandoffPending] = useState(false);
@@ -436,11 +436,12 @@ function PagePackageToolCard(props: ToolCallViewProps & { pagePackageWaiter?: Pa
         return;
       }
       const sessionId = typeof meta.session_id === 'string' ? meta.session_id : '';
-      const accepted = pagePackageWaiter.deliver(requestId, pkg);
+      const bindingManifest = meta.binding_manifest;
+      const accepted = pagePackageWaiter.deliver(requestId, { package: pkg, binding_manifest: bindingManifest });
       if (!accepted && sessionId && props.onNativePackage) {
         setHandoffPending(true);
         setHandoffError('');
-        void props.onNativePackage(pkg, { sessionId, requestId, callId: block.callId })
+        void props.onNativePackage(pkg, { sessionId, requestId, callId: block.callId, bindingManifest })
           .then(() => setHandoffPending(false))
           .catch(error => {
             setHandoffPending(false);
@@ -897,8 +898,8 @@ export function apply(ctx: Context): void {
     }, LibraryPreviewToolCard));
     ctx.slots.inject('tool.call.toolview', () => ctx.slots.register({
       name: 'tool.call.toolview', key: PAGE_GENERATE_TOOL_NAME,
-      inject: () => ({ pagePackageWaiter, openCockpit: openCockpitPanel, openDsh: () => { try { ctx.layout.openRightbar(true, false); } catch { /* host without rightbar */ } }, onNativePackage: async (pkg: { html: string; css?: string; js?: string; resources?: unknown[]; node_map?: unknown[] }, meta: { sessionId: string; requestId?: string; callId?: string }) => {
-        await pageStore?.intakePackage(pkg, { sessionId: meta.sessionId, requestId: meta.requestId, callId: meta.callId });
+      inject: () => ({ pagePackageWaiter, openCockpit: openCockpitPanel, openDsh: () => { try { ctx.layout.openRightbar(true, false); } catch {} }, onNativePackage: async (pkg: { html: string; css?: string; js?: string; resources?: unknown[]; node_map?: unknown[] }, meta: { sessionId: string; requestId?: string; callId?: string; bindingManifest?: unknown }) => {
+        await pageStore?.intakePackage(pkg, { sessionId: meta.sessionId, requestId: meta.requestId, callId: meta.callId, bindingManifest: meta.bindingManifest });
         // A package receipt is also a generation-complete signal. In hosts
         // without delivery events, give the native workspace scan one bounded
         // opportunity immediately instead of waiting for cockpit mount.
@@ -920,7 +921,7 @@ export function apply(ctx: Context): void {
       board: boardLive,
       library,
       async generateDirect(sessionId: string) {
-        const native = (pageStore as { adapters?: { nativeChat?: { submitGeneratePrompt?: (prompt: string, extras?: { sessionId?: string; requestId?: string }) => Promise<{ package?: { html: string; css?: string; js?: string; resources?: unknown[]; node_map?: unknown[] }; request_id?: string; session_id?: string }> } } } | undefined)?.adapters;
+        const native = (pageStore as { adapters?: { nativeChat?: { submitGeneratePrompt?: (prompt: string, extras?: { sessionId?: string; requestId?: string }) => Promise<{ package?: { html: string; css?: string; js?: string; resources?: unknown[]; node_map?: unknown[] }; binding_manifest?: unknown; request_id?: string; session_id?: string }> } } } | undefined)?.adapters;
         if (!native?.nativeChat?.submitGeneratePrompt || !pageStore?.intakePackage) throw new Error('原生 HTML 交付尚未连接');
         const submitted = await native.nativeChat.submitGeneratePrompt('根据本场对话已经完成的诊断和查出的数字，生成可编辑 HTML 驾驶舱。', { sessionId });
         const pkg = submitted?.package;
@@ -928,7 +929,7 @@ export function apply(ctx: Context): void {
         if (artifactInbox?.getSnapshot().status === 'unavailable') {
           throw new Error('页面未能写入驾驶舱：产物收件箱服务尚未配置。');
         }
-        await pageStore.intakePackage(pkg, { sessionId, requestId: submitted.request_id });
+        await pageStore.intakePackage(pkg, { sessionId, requestId: submitted.request_id, bindingManifest: submitted.binding_manifest });
         openCockpitPanel();
       },
       async fetchResults() {

@@ -1,6 +1,6 @@
 # 交接说明（短表）
 
-> **最后更新**: 2026-10-21。当前产品 VERSION、公开 `main`、DSH pin 和未关闭门禁只看 [STATUS.md](STATUS.md)。杭州 owner-operated 当前为 `dsh-0.2.1-rc.1-core-main-20261020-v5`，它是 v4 clean-main runtime 的现场 side-load；query.11 与 WeKnora 项目库范围已复测，IM 输入状态为 `PINNED_INPUTS_VERIFIED`。这不等于正式 release，M2-07 仍 BLOCKED、M2-08/M2-09 仍 NOT_RUN、`release_ready=false`。本地历史候选已完成归档和清理，恢复清单见[本次清理证据](docs/hackathon/evidence/shinemage-local-cleanup-20261010.md)。下方入口、代码归属和运行路径仍是带日期的历史快照，当前现场事实以 STATUS 的 2026-10-21 记录为准。
+> **最后更新**: 2026-10-26。公网 `app.tyuan.chat` 已由杭州 rc3 服务承接，原 rc1 停止。运行服务、回退位置和真实业务结果见[公网路演验收](docs/hackathon/evidence/dsh-roadshow-public-20261026.md)；当前代码、候选及未关闭门禁看 [STATUS.md](STATUS.md)。七月及 H1 人工与 AI 文案保存重开已通过，数据绑定和页面源码保持不变；H1 诊断曾需人工纠正，不能宣称无人复核可靠。保存后旧任务操作残留已由 `ca437f5` 修复并在 H1 v4 复验；旧页跨重启续编、实时事件降级仍开放。Tailscale SSH 暂时超时，额外数据库读回待补。正式发布身份未完成，`release_ready=false`。下方入口、代码归属和运行路径仍是带日期的历史快照。
 > 细节以代码与下列 SSOT 为准，**不要**在本文件堆 sprint 日记。
 
 ## 历史运行入口快照（2026-09-29）

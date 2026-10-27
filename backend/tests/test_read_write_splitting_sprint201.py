@@ -136,6 +136,7 @@ class TestDualConnectionRouting:
         assert router.classify("/api/v1/auth/login", "POST") == "default"
         assert router.classify("/api/v1/health", "GET") == "default"
         assert router.classify("/api/v1/category/overview/batch", "POST") == "read"
+        assert router.classify("/api/v1/category/product-customer", "POST") == "read"
 
     def test_w5_cache_writes_degrade_in_readonly_request(self, monkeypatch, worker_duckdb_path):
         from backend.services import dual_conn

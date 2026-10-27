@@ -1,0 +1,12 @@
+{
+  "schema_version": "dsh-profile/v1",
+  "profile_id": "crm-knowledge-rc3",
+  "dsh": {
+    "sdk_version": "0.2.1-rc.3",
+    "upstream_sha": "1f81c047fc48fa190a683e469daa699857e9afe8"
+  },
+  "plugins": [
+    { "path": "dsh-plugins/crm-knowledge", "id": "@shine-mage/dsh-crm-knowledge", "build": "build.mjs", "enabled": true },
+    { "path": "dsh-plugins/knowledge", "id": "@shine-mage/dsh-knowledge", "build": "build.mjs", "enabled": true }
+  ]
+}

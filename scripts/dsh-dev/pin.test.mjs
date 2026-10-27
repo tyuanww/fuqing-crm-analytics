@@ -123,7 +123,7 @@ test('verifyUpstream accepts the immutable production runtime bundle only when r
   try {
     await mkdir(join(dir, 'lib'), { recursive: true });
     await writeFile(join(dir, 'lib/bin.js'), '#!/usr/bin/env node\n');
-    await writeFile(join(dir, 'package.json'), JSON.stringify({ name: '@deepseek-ai/dsh', version: '0.1.7-rc.2' }));
+    await writeFile(join(dir, 'package.json'), JSON.stringify({ name: '@deepseek-ai/dsh', version: '0.2.1-rc.3' }));
     const pin = await readToolchain(repoRoot);
     process.env.DSH_UPSTREAM_SHA = PINNED_SHA;
     const upstream = resolveUpstream(dir);

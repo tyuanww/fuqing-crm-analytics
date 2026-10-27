@@ -35,6 +35,7 @@ test('live presentation confirm uses the edit-context routes and keeps source by
         const body = init.body ? JSON.parse(init.body) : null;
         calls.push({ url, method: init.method, body, key: init.headers?.['Idempotency-Key'] });
         if (url.endsWith('/pages/page_1') && init.method === 'GET') return response({ spec });
+        if (url.includes('/page-edit-contexts/overlay?')) return response({ overlays: {} });
         if (url.endsWith('/page-edit-contexts') && init.method === 'POST') {
           return response({
             edit_context_id: `editctx_${'ab'.repeat(16)}`,
@@ -97,6 +98,7 @@ test('a refused live presentation confirm does not invent a local version', asyn
             },
           });
         }
+        if (url.includes('/page-edit-contexts/overlay?')) return response({ overlays: {} });
         return response({ error: { code: 'VERSION_CONFLICT', message: '页面版本已变化' } }, 409);
       },
     },

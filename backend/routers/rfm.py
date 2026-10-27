@@ -27,6 +27,7 @@ from backend.services.rfm import (
 )
 from backend.services.rfm.cache import RfmQueryCache  # W5 v0.4.13
 from backend.services import check_future_date
+from backend.services.warehouse_runtime import current_warehouse_read
 from backend.routers.auth import require_admin
 
 router = APIRouter(prefix="/api/v1/rfm", tags=["RFM"])
@@ -41,6 +42,8 @@ def _cached_rfm_call(endpoint: str, params: dict, compute_fn, *args, **kwargs):
     设计: 把 params (dict) 作为 key 输入, compute_fn 接受 *args, **kwargs.
     cache.get 走 ThreadSafeCursor (锁内预取), 安全并发.
     """
+    if current_warehouse_read() is not None:
+        return compute_fn(*args, **kwargs)
     cached = _rfm_cache.get(endpoint, params)
     if cached is not None:
         return cached

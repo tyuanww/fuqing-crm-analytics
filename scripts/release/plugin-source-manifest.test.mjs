@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
+import { access, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import test from 'node:test';
 import { sourceManifestStatus, validateSourceManifest } from './plugin-source-manifest.mjs';
 
@@ -52,14 +54,31 @@ test('rejects a lock digest mismatch before any source is accepted', () => {
 
 
 test('tracked source manifest matches the composition lock selection', async () => {
-  const manifest = JSON.parse(await readFile('config/shinemage-composition-pack-manifest.v1.json', 'utf8'));
-  const lockBytes = await readFile('config/shinemage-composition-packs.lock.json');
+  const root = new URL('../../', import.meta.url);
+  const manifest = JSON.parse(await readFile(new URL('config/shinemage-composition-pack-manifest.v1.json', root), 'utf8'));
+  const lockBytes = await readFile(new URL('config/shinemage-composition-packs.lock.json', root));
   const lock = JSON.parse(lockBytes);
   const lockSha256 = createHash('sha256').update(lockBytes).digest('hex');
-  validateSourceManifest(manifest, { lockSha256, expectedIds: lock.plugins.map(row => row.id) });
+  const artifact = JSON.parse(await readFile(new URL('config/shinemage-composition-artifact.lock.json', root), 'utf8'));
+  assert.equal(artifact.composition_lock_sha256, lockSha256);
+  const selected = [];
+  for (const row of lock.profiles) {
+    const bytes = await readFile(new URL(row.path, root));
+    assert.equal(createHash('sha256').update(bytes).digest('hex'), row.sha256, row.path);
+    selected.push(...JSON.parse(bytes).plugins.map(plugin => plugin.id));
+  }
+  assert.deepEqual(lock.plugins.map(row => row.id).sort(), [...selected].sort());
+  validateSourceManifest(manifest, { lockSha256, expectedIds: selected });
+  for (const row of lock.plugins) {
+    const source = manifest.sources.find(source => source.id === row.id);
+    assert.deepEqual(
+      { id: source.id, directory: source.directory, sha: source.sha, manifest_sha256: source.manifest_sha256 },
+      { id: row.id, directory: row.directory, sha: row.source_sha, manifest_sha256: row.manifest_sha256 },
+      row.id,
+    );
+  }
   assert.equal(manifest.domains.length, 1);
   assert.equal(manifest.domains[0].package, '@shine-mage/board-components');
-  assert.equal(manifest.consumer.reviewed_sha, '4ac076dea89790379c0d142d6b35a48d9208345a');
   assert.equal(manifest.deletion_gate.status, 'BLOCKED');
 });
 
@@ -73,27 +92,32 @@ test('requires complete domain pack bindings and rejects duplicate domain identi
   assert.throws(() => validateSourceManifest({ ...base, domains: [domain, { ...domain, directory: 'other-domain' }] }), /SOURCE_MANIFEST_DOMAIN_DUPLICATE_PACKAGE/);
 });
 
-test('composition preparation rejects a not-run source manifest before creating output', async () => {
-  const { mkdtemp, rm } = await import('node:fs/promises');
-  const { tmpdir } = await import('node:os');
-  const { join } = await import('node:path');
+test('composition preparation rejects unready or mismatched source bindings before creating output', async t => {
   const { prepareCompositionPacks } = await import('../ci/composition-pack-inputs.mjs');
   const root = await mkdtemp(join(tmpdir(), 'plugin-source-manifest-test-'));
   const input = join(root, 'input');
   const output = join(root, 'output');
   const manifestPath = join(root, 'manifest.json');
-  await (await import('node:fs/promises')).mkdir(input);
+  await mkdir(input);
   try {
-    const current = JSON.parse(await readFile('config/shinemage-composition-pack-manifest.v1.json', 'utf8'));
-    current.sources = current.sources.map(source => ({ ...source, manifest_sha256: null, pack_sha256: null, status: 'NOT_RUN' }));
-    current.bundle = { ...current.bundle, run_id: null, artifact_id: null, artifact_sha256: null,
-      artifact_head_sha: null, expires_at: null, status: 'NOT_RUN', remote_main: 'NOT_RUN' };
-    current.deletion_gate = { status: 'BLOCKED', blocking_reasons: ['formal_pack_not_prepared'] };
-    await (await import('node:fs/promises')).writeFile(manifestPath, JSON.stringify(current, null, 2) + '\n');
-    await assert.rejects(
-      prepareCompositionPacks({ inputDirectory: input, output, manifestPath }),
-      /CI_COMPOSITION_SOURCE_NOT_READY/,
-    );
+    const current = JSON.parse(await readFile(new URL('../../config/shinemage-composition-pack-manifest.v1.json', import.meta.url), 'utf8'));
+    const source = current.sources[0];
+    const other = current.sources[1];
+    const cases = [
+      ['not-run', { sources: current.sources.map(row => ({ ...row, manifest_sha256: null, pack_sha256: null, status: 'NOT_RUN' })) }, /CI_COMPOSITION_SOURCE_NOT_READY/],
+      ['selection', { sources: current.sources.slice(1) }, /SOURCE_MANIFEST_SOURCE_SELECTION/],
+      ['directory', { sources: [{ ...source, directory: 'other-plugin' }, ...current.sources.slice(1)] }, /CI_COMPOSITION_SOURCE_MANIFEST_DIRECTORY/],
+      ['source-sha', { sources: [{ ...source, sha: other.sha }, ...current.sources.slice(1)] }, /CI_COMPOSITION_SOURCE_MANIFEST_SHA/],
+      ['manifest-digest', { sources: [{ ...source, manifest_sha256: other.manifest_sha256 }, ...current.sources.slice(1)] }, /CI_COMPOSITION_SOURCE_MANIFEST_DIGEST/],
+      ['lock-digest', { lock: { ...current.lock, sha256: other.manifest_sha256 } }, /SOURCE_MANIFEST_LOCK_SHA_MISMATCH/],
+    ];
+    for (const [name, overrides, error] of cases) {
+      await t.test(name, async () => {
+        await writeFile(manifestPath, JSON.stringify({ ...current, ...overrides }, null, 2) + '\n');
+        await assert.rejects(prepareCompositionPacks({ inputDirectory: input, output, manifestPath }), error);
+        await assert.rejects(access(output), { code: 'ENOENT' });
+      });
+    }
   } finally {
     await rm(root, { recursive: true, force: true });
   }

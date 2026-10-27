@@ -2,8 +2,8 @@
   "schema_version": "shinemage-plugin-boundaries/v1",
   "inspection_baseline_sha": "d4261aa338ff4ed5543866b8c63cdba627e49518",
   "upstream": {
-    "sha": "477b4f420553e8a52c2fbccc464d7561b239c443",
-    "sdk_version": "0.1.7-rc.2",
+    "sha": "1f81c047fc48fa190a683e469daa699857e9afe8",
+    "sdk_version": "0.2.1-rc.3",
     "pin_owner": "dsh-plugins/plugin-kit/toolchain.json"
   },
   "scope": "static-source-imports-and-literal-routes; not a runtime conformance test",
@@ -33,7 +33,7 @@
         "bundled-dependencies.json"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.1.7-rc.2"
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
       },
       "dependencies": {},
       "dev_dependencies": {
@@ -72,10 +72,10 @@
       "commands": {
         "build": "node build.mjs",
         "test": "node --test test/model.test.mjs test/initial-session.test.mjs test/native-account-settings.test.mjs test/native-evidence.test.mjs test/run-view.test.mjs test/page-navigation-continuity.test.mjs test/cockpit-shell-contract.test.mjs test/client-request-envelope.test.mjs src/client/competition-shell/competition-shell.test.mjs && pnpm test:html-edit",
-        "test:html-edit": "node --test src/free-page/resource/package-normalize.test.mjs src/client/free-html-library/html-import.test.mjs src/client/html-selection-bridge.test.mjs src/client/free-html-library/store.test.mjs src/client/free-html-library/p12-live-adapters.test.mjs src/client/free-html-library/source-draft.test.mjs test/cockpit-ai-client.test.mjs src/client/navigation/navigation-epoch.test.mjs src/free-page/edit/intent-router.test.mjs src/free-page/edit/selection-context.test.mjs test/dynamic-chart-browser-seam.test.mjs test/draft-save-regression.test.mjs test/canvas-input-regression.test.mjs test/open-native-html-artifact.test.mjs src/free-page/preview/srcdoc-builder.test.mjs",
+        "test:html-edit": "node --test src/free-page/resource/package-normalize.test.mjs src/client/free-html-library/html-import.test.mjs src/client/html-selection-bridge.test.mjs src/client/free-html-library/store.test.mjs src/client/free-html-library/p12-live-adapters.test.mjs src/client/free-html-library/source-draft.test.mjs test/cockpit-ai-client.test.mjs src/client/navigation/navigation-epoch.test.mjs src/free-page/edit/intent-router.test.mjs src/free-page/edit/selection-context.test.mjs test/dynamic-chart-browser-seam.test.mjs test/draft-save-regression.test.mjs test/canvas-input-regression.test.mjs test/open-native-html-artifact.test.mjs src/free-page/preview/srcdoc-builder.test.mjs src/client/cockpit-page-tab.test.mjs",
         "test:built": "node --test test/built.test.mjs"
       },
-      "manifest_sha256": "9e85fe3cb110216b8fbc2d80bbd17b3e0e15115f21a22628062de8ea56d85123"
+      "manifest_sha256": "eaf4dc07465893cde56f0b8c7e408db79b1074e5a314a485839d5e3d49249b0f"
     },
     {
       "path": "dsh-plugins/board-components",
@@ -116,7 +116,7 @@
     {
       "path": "dsh-plugins/crm-knowledge",
       "name": "@shine-mage/dsh-crm-knowledge",
-      "version": "0.0.0-crm.2",
+      "version": "0.0.0-crm.5",
       "domain": "crm-adapter",
       "target_repository": "shinemage-dsh-crm",
       "kind": "plugin",
@@ -134,8 +134,8 @@
         "cordis.patch.yml"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
-        "@deepseek-ai/cordis": "4.0.2"
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.3",
+        "@deepseek-ai/cordis": "4.0.5"
       },
       "dependencies": {
         "katex": "^0.18.7"
@@ -162,7 +162,7 @@
         "build": "node build.mjs",
         "test:host": "node --test test/host.integration.mjs"
       },
-      "manifest_sha256": "1c4becdf631c1346362f413493e6ec61e88e5e59c6093b78d4588474f721098f"
+      "manifest_sha256": "c6a8a45f41c3135ad817304ab4202c2fed756f7be9edcd39674ff8c002d17799"
     },
     {
       "path": "dsh-plugins/knowledge",
@@ -183,8 +183,8 @@
         "cordis.patch.yml"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
-        "@deepseek-ai/cordis": "4.0.2"
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.3",
+        "@deepseek-ai/cordis": "4.0.5"
       },
       "dependencies": {},
       "dev_dependencies": {
@@ -200,7 +200,7 @@
         "build": "node build.mjs",
         "test": "node --test test/*.test.mjs"
       },
-      "manifest_sha256": "1b7d10a2892d06d4096f2408c8c6b0162d854113f87babd56339ae93f4d70c3c"
+      "manifest_sha256": "c34d451b6e8add3ba523881b9515c3ffd134ad79a7369ea9acb3d15215b09ce5"
     },
     {
       "path": "dsh-plugins/plugin-kit",
@@ -243,7 +243,7 @@
     {
       "path": "dsh-plugins/query-agent",
       "name": "@shine-mage/dsh-query-agent",
-      "version": "0.0.0-query.11",
+      "version": "0.0.0-query.14",
       "domain": "agent-preset",
       "target_repository": "shinemage-dsh-query-agent",
       "kind": "configuration-bundle",
@@ -268,7 +268,7 @@
         }
       },
       "commands": {},
-      "manifest_sha256": "a5e753386722edcd4626bc1e082ee453e74af0ef614b074001d29e26ae355598"
+      "manifest_sha256": "4d9b2203e3f1dc97a57f3ed8d24a49ca57065dc34249858ee867cc2963ea68e4"
     },
     {
       "path": "dsh-plugins/shine-board",
@@ -289,7 +289,7 @@
         "cordis.patch.yml"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.1.7-rc.2"
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
       },
       "dependencies": {},
       "dev_dependencies": {
@@ -313,7 +313,7 @@
         "build": "node build.mjs",
         "test": "node --test src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "c6c00edb7a31610651b9fc92aa3b5d96d9766900b9cc71b7a3aec8899f5ce1e0"
+      "manifest_sha256": "a065d60850efb398d95b34c3a9a8265f2dfaf2bb97383c1b3e831f106b6ef915"
     },
     {
       "path": "dsh-plugins/shine-brand",
@@ -334,7 +334,7 @@
         "cordis.patch.yml"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.1.7-rc.2"
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
       },
       "dependencies": {},
       "dev_dependencies": {
@@ -357,7 +357,7 @@
         "build": "node build.mjs",
         "test": "node --test src/brand-surface.test.mjs src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "5baa3cca089cdeb33819274723b60c5c86c109f8b994025ed9b556629822e0f8"
+      "manifest_sha256": "ff09dc7e688ec72b139646f5bb4421c4620559fc3d4aa6da2039d5621f65e8ae"
     },
     {
       "path": "dsh-plugins/shine-crowd-action",
@@ -378,7 +378,7 @@
         "cordis.patch.yml"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.1.7-rc.2"
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
       },
       "dependencies": {},
       "dev_dependencies": {
@@ -402,7 +402,7 @@
         "build": "node build.mjs",
         "test": "node --test src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "a08f3ecc9af05e8d19386096082e74435ef968b0731f47af22ab3b8f096105e1"
+      "manifest_sha256": "8096ec2e69b22fb857a732df001257f286c620757f95e637567ca840559b6b6e"
     },
     {
       "path": "dsh-plugins/shine-funnel",
@@ -431,7 +431,7 @@
         "bundled-dependencies.json"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.1.7-rc.2"
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
       },
       "dependencies": {},
       "dev_dependencies": {
@@ -463,7 +463,7 @@
         "build": "node build.mjs",
         "test": "node --test src/funnel.test.mjs src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "e702392cfa0c212e5f7372e4334fdbb9bd0147568c344af824320c3a8892ff12"
+      "manifest_sha256": "dd9190866e32818bec895597161b9c4fb726a959404b4b5b37b45be32fbda6b8"
     },
     {
       "path": "dsh-plugins/shine-query",
@@ -484,7 +484,7 @@
         "cordis.patch.yml"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.1.7-rc.2"
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
       },
       "dependencies": {},
       "dev_dependencies": {
@@ -508,7 +508,7 @@
         "build": "node build.mjs",
         "test": "node --test src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "f41df73b61e0515ca50f90088ee76abaf4fa0e85c178d9c7c9e99cd683f2be8b"
+      "manifest_sha256": "3acf09d4a0a4f1402e307964799b61e95f29493a12af5d80e3db6890dd387c3c"
     },
     {
       "path": "dsh-plugins/shine-waterfall",
@@ -537,7 +537,7 @@
         "bundled-dependencies.json"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.1.7-rc.2"
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
       },
       "dependencies": {},
       "dev_dependencies": {
@@ -569,10 +569,10 @@
         "build": "node build.mjs",
         "test": "node --test src/waterfall.test.mjs src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "1cd7ce082f80d1088aed5d9bb7940391c0c44485e8ed5abd5a8c711bb97282ca"
+      "manifest_sha256": "13140dce4cf3d61c0f17e5e9353918a51ed1cc07e941edd2fbe099699a5d9002"
     }
   ],
-  "source_files_scanned": 655,
+  "source_files_scanned": 657,
   "cross_package_edges": [
     {
       "consumer": "analytics-workbench",
@@ -2127,6 +2127,20 @@
       "consumer": "crm-knowledge",
       "phase": "runtime",
       "source": "dsh-plugins/crm-knowledge/src/dashboard.mjs",
+      "route": "/api/v1/category/product-customer",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard.mjs",
+      "route": "/api/v1/customer-health/rfm-analysis",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard.mjs",
       "route": "/api/v1/metrics/cutoff",
       "contract": "OBSERVED_NOT_FROZEN"
     },
@@ -2239,6 +2253,20 @@
       "consumer": "crm-knowledge",
       "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/dashboard.test.mjs",
+      "route": "/api/v1/category/product-customer",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/dashboard.test.mjs",
+      "route": "/api/v1/customer-health/rfm-analysis",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/dashboard.test.mjs",
       "route": "/api/v1/metrics/cutoff",
       "contract": "OBSERVED_NOT_FROZEN"
     },
@@ -2308,6 +2336,27 @@
     {
       "consumer": "crm-knowledge",
       "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/login.test.mjs",
+      "route": "/api/v1/auth/me",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/login.test.mjs",
+      "route": "/api/v1/metrics/crm-library",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/login.test.mjs",
+      "route": "/api/v1/metrics/dashboard-readiness",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/package.test.mjs",
       "route": "/api/v1/crm-metrics",
       "contract": "OBSERVED_NOT_FROZEN"
@@ -2324,6 +2373,13 @@
       "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/purchases.test.mjs",
       "route": "/api/v1/auth/me",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/purchases.test.mjs",
+      "route": "/api/v1/metrics/cutoff",
       "contract": "OBSERVED_NOT_FROZEN"
     },
     {
@@ -2452,7 +2508,7 @@
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/src/client/free-html-library/free-html-library.test.mjs",
-      "line": 24
+      "line": 25
     },
     {
       "consumer": "analytics-workbench",
@@ -2482,7 +2538,7 @@
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/src/client/library-workspace.test.mjs",
-      "line": 28
+      "line": 32
     },
     {
       "consumer": "analytics-workbench",
@@ -2554,12 +2610,6 @@
       "consumer": "analytics-workbench",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
-      "line": 130
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "test",
-      "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
       "line": 14
     },
     {
@@ -2573,6 +2623,12 @@
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
       "line": 16
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/lane-g-delivery.test.mjs",
+      "line": 225
     },
     {
       "consumer": "analytics-workbench",
@@ -3269,11 +3325,6 @@
     {
       "consumer": "crm-knowledge",
       "phase": "runtime",
-      "specifier": "@deepseek-ai/dsh-client-ui-slots"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
       "specifier": "@deepseek-ai/dsh-host-webserver"
     },
     {
@@ -3305,6 +3356,11 @@
       "consumer": "crm-knowledge",
       "phase": "runtime",
       "specifier": "react"
+    },
+    {
+      "consumer": "crm-knowledge",
+      "phase": "test",
+      "specifier": "@deepseek-ai/dsh-util-values"
     },
     {
       "consumer": "crm-knowledge",
@@ -3859,7 +3915,7 @@
       ],
       "compatibility": "Exact SHA/SDK/lock; upgrade only in isolated candidate; source pin is not runtime proof.",
       "status": "PINNED_UPSTREAM",
-      "source_sha256": "8f1eaf0b2b7ea1392cd45674bfbdd7498b2df6bb642db63f75d002df776511fe"
+      "source_sha256": "dbf9e88949d42191d99ddc8f4b3f5c6b99bc13425a35f501473e17002c4782fc"
     },
     {
       "id": "crm-metrics",

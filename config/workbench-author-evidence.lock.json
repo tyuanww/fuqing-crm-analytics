@@ -1,38 +1,38 @@
 {
   "schema": "shinemage-workbench-author-evidence/v1",
   "package": "@shine-mage/dsh-analytics-workbench-b0",
-  "source_sha": "3030e3f21263f6ec65cb01c7aeacd4c80e2eb711",
-  "formal_manifest_sha256": "070514b3bb212c714907727c368300e2b7cd22b88946e814f9b13349d27f29ef",
-  "formal_tarball_sha256": "e41df9f5a8f7031c092319222543c8d723ca644c0c9d69b2ae53f13257e9b79e",
+  "source_sha": "8e4f9a066f189140b0a684c5791146ad2ed6c4b4",
+  "formal_manifest_sha256": "ceaba94a499ff7645d0d9b811fdab4a61992cc24f559036b4d7977917b97ca9d",
+  "formal_tarball_sha256": "1180de03c54402d0739ac401dabc5f52959c92fd9ee3b07d5057c80b6c42988c",
   "archive": {
     "repository": "tyuanww/dsh-analytics-workbench",
-    "run_id": 38204944592,
+    "run_id": 40496146425,
     "event": "pull_request",
-    "artifact_id": 11727111491,
-    "sha256": "ccea4987d61b47afe77e6c067f0a3805d4cabc13cd9bfa5fad5f0ddba9e77d13",
-    "bytes": 546719
+    "artifact_id": 12731325085,
+    "sha256": "fa3d1aac156615f558300053ad762281c8236b58fd4af8f3c9e4bdc0a67f2a2d",
+    "bytes": 603269
   },
   "files": {
     "plan": {
-      "path": "workbench-author-tests-38204944592-1/plan.json",
-      "sha256": "a0f601c952b72259e14b471e9cabe99827f1594abbed3debf58048a1fff12ab3",
-      "bytes": 8029
+      "path": "workbench-author-tests-40496146425-1/plan.json",
+      "sha256": "ae1e96712ada7dfc6aa4f140265fb60a0d1db964b9ecafa21d449ee5e75f0dc7",
+      "bytes": 8477
     },
     "result": {
-      "path": "workbench-author-tests-38204944592-1/result.json",
-      "sha256": "410cf3633a5078f9872784c840735316cf65b51e9a9260355e14d873f3b9883e",
+      "path": "workbench-author-tests-40496146425-1/result.json",
+      "sha256": "759332692e6933d8de58feea7f68c45884ef37454cb5cf32c8b732d5425eaa59",
       "bytes": 1060
     },
     "content_pack": {
       "path": "workbench-content-pack/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
-      "sha256": "f5e9dfe41859b0ae3254cbaddf12a128e89cd3c53bde82b84f366beef03ae5d7",
-      "bytes": 441127
+      "sha256": "fa080c2e24ad3e8f6bfddd4cebb299ef9558ff0edfb281721cc9f7cbffa54c12",
+      "bytes": 493388
     }
   },
   "core": {
-    "files": 155,
-    "tests": 1086,
-    "pass": 1086,
+    "files": 164,
+    "tests": 1364,
+    "pass": 1364,
     "fail": 0,
     "skipped": 0,
     "cancelled": 0,

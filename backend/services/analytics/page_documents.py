@@ -11,6 +11,8 @@ from contextlib import contextmanager
 from copy import deepcopy
 from dataclasses import dataclass
 from difflib import SequenceMatcher
+from html import unescape
+from html.parser import HTMLParser
 import hashlib
 import json
 from pathlib import Path
@@ -22,12 +24,13 @@ from uuid import uuid4
 from pydantic import ValidationError
 
 from backend.contracts.analytics_query import canonical_json
-from backend.contracts.competition_computed import DATA_SCOPE
 from backend.contracts.page_documents import (
     PACKAGE_MAX_BYTES, PageDocument, PageDraft, PagePatchPreview, PageRollbackPreview,
     PageSavePreview, is_package_too_large, page_source_hash,
 )
-from backend.services.analytics.access import AnalyticsError, AnalyticsPrincipal, require
+from backend.services.analytics.access import AnalyticsError, require
+from backend.services.analytics.cockpit_html_selection import SourceTree, UnsafeSelectionTree, static_nesting
+from backend.services.analytics.page_context import PageAccessPolicy
 from backend.services.analytics.first_purchase.asset_state import (
     connect, initialize_sqlite, now_ms, opaque, transaction, validate_key,
 )
@@ -217,6 +220,19 @@ class ResolvedPageBinding:
     required_scopes: frozenset[str]
 
 
+@dataclass(frozen=True)
+class _PreviewObservation:
+    owner: str
+    preview_id: str
+    page_id: str
+    base_version: int
+    operation: str
+    status: str
+    expires_ms: int
+    payload: str
+    digest: str
+
+
 def fault(code="VERSION_CONFLICT", status=409):
     messages = {
         "VERSION_CONFLICT": "页面版本已变化，请重新读取后预览；原版本未被覆盖。",
@@ -260,13 +276,145 @@ def stamp_binding_state(payload):
     return spec
 
 
+class _SourceAttributes(HTMLParser):
+    def handle_starttag(self, tag, attrs):
+        self.attributes = attrs
+
+
+class _PresentationTree(SourceTree):
+    def __init__(self, html):
+        self.text_parts = []
+        super().__init__(html)
+
+    def handle_data(self, data):
+        if self.stack and self.stack[-1]["tag"] in {"table", "thead", "tbody", "tfoot", "tr"} and data.strip():
+            raise UnsafeSelectionTree()
+        self.text_parts.append((self.source_offset(), data.replace("\r\n", "\n").replace("\r", "\n")))
+
+    def handle_entityref(self, name):
+        self.handle_data(unescape(f"&{name};"))
+
+    def handle_charref(self, name):
+        self.handle_data(unescape(f"&#{name};"))
+
+
+def _validate_bound_presentation(spec, *, protect_readonly=False):
+    presentation = spec.package.presentation
+    edits = [edit for edit in presentation.edits if edit.text is not None] if presentation else []
+    if not edits or not (spec.binding_manifest.result_refs or protect_readonly):
+        return
+
+    def reject():
+        raise fault("AI_BOUND_CONTENT", 403)
+
+    tree = _PresentationTree(spec.package.html)
+    if tree.invalid or "\0" in tree.text:
+        reject()
+    nodes = sorted(tree.all_nodes, key=lambda node: node["start"])
+    shells = {tag: [node for node in nodes if node["tag"] == tag] for tag in ("html", "head", "body")}
+    if any(shells.values()):
+        if len(shells["html"]) != 1 or len(shells["body"]) != 1 or len(shells["head"]) > 1:
+            reject()
+        body = shells["body"][0]
+        if (body["ancestors"] != ("html",) or len([node for node in nodes if not node["ancestors"]]) != 1
+                or shells["head"] and shells["head"][0]["end"] > body["start"]):
+            reject()
+        if any(text.strip() and not (body["start"] < offset < body["end"] or
+                any(head["start"] < offset < head["end"] for head in shells["head"]))
+               for offset, text in tree.text_parts):
+            reject()
+    children, stack = {}, []
+    for node in nodes:
+        ancestors = node["ancestors"]
+        parent_tag = ancestors[-1] if ancestors else None
+        tag = node["tag"]
+        # SourceTree records source nesting, not HTML5 error recovery. Keep
+        # only explicit static nesting plus the ordinary document shell.
+        if tag == "head":
+            safe = ancestors == ("html",)
+        elif tag in {"meta", "link", "title", "style", "script"}:
+            safe = parent_tag == "head" or (tag in {"style", "script"}
+                and static_nesting("div", ancestors, context=True))
+        else:
+            safe = static_nesting(tag, ancestors, context=True)
+        if not safe or tag == "form" and "form" in ancestors or tag == "tr" and parent_tag == "table":
+            reject()
+        while stack and stack[-1]["end"] <= node["start"]:
+            stack.pop()
+        parent = stack[-1] if stack else None
+        children.setdefault(parent["start"] if parent else None, []).append(node)
+        stack.append(node)
+
+    def intersects(left, right):
+        return left["start"] < right["end"] and right["start"] < left["end"]
+
+    protected = [node for node in nodes if "data-page-readonly" in node["attrs"]
+                 or (node["attrs"].get("data-sp-bindable") or "").lower() == "database"]
+    mappings = {node.node_id: node for node in spec.package.node_map}
+    bindings = spec.binding_manifest.bindings
+    if {binding.result_ref for binding in bindings} != set(spec.binding_manifest.result_refs):
+        reject()
+    for binding in bindings:
+        mapping = mappings.get(binding.node_id)
+        if mapping is None or mapping.kind == "whole_page":
+            reject()
+        attribute = "data-shine-region" if mapping.kind == "dynamic_region" else "data-shine-node"
+        if not re.fullmatch(r"\[\s*" + attribute + r"\s*=\s*(['\"])" + re.escape(mapping.node_id) + r"\1\s*\]", mapping.selector):
+            reject()
+        matches = [node for node in nodes if node["attrs"].get(attribute) == binding.node_id]
+        if len(matches) != 1 or matches[0]["tag"] == "head" or "head" in matches[0]["ancestors"]:
+            reject()
+        protected.extend(matches)
+
+    text_cache = {}
+
+    def matches_key(node, key):
+        if key.attribute == "text":
+            if node["start"] not in text_cache:
+                text_cache[node["start"]] = "".join(text for offset, text in tree.text_parts
+                                                   if node["start"] < offset < node["end"])
+            return text_cache[node["start"]] == key.value
+        if key.attribute == "class":
+            return key.value in re.split(r"[\t\n\f\r ]+", node["attrs"].get("class") or "")
+        return node["attrs"].get(key.attribute) == key.value
+
+    text_write_ranges = []
+    for edit in edits:
+        roots = [node for node in nodes if matches_key(node, edit.target.anchor)]
+        if len(roots) != 1:
+            reject()
+        node = roots[0]
+        anchor_in_preserved_body = node["tag"] not in shells and "head" not in node["ancestors"]
+        if not anchor_in_preserved_body:
+            reject()
+        for step in edit.target.path:
+            candidates = [child for child in children.get(node["start"], []) if child["tag"] == step.tag]
+            if step.key and step.key.attribute == "text" and any(
+                    intersects(candidate, changed) for candidate in candidates for changed in text_write_ranges):
+                reject()
+            if step.key and step.key.attribute == "nth":
+                position = int(step.key.value)
+                candidates = candidates[position:position + 1]
+            elif step.key:
+                candidates = [child for child in candidates if matches_key(child, step.key)]
+            if len(candidates) != 1:
+                reject()
+            node = candidates[0]
+        if node["readonly"] or any(intersects(node, fact) for fact in protected):
+            reject()
+        if any(intersects(node, changed) for changed in text_write_ranges):
+            reject()
+        text_write_ranges.append(node)
+
+
 class PageDocumentStore:
     def __init__(self, directory: Path, *,
-                 resolve_binding: Callable[[AnalyticsPrincipal, str, str], ResolvedPageBinding] | None = None,
-                 clock: Callable[[], int] = now_ms):
+                 resolve_binding: Callable[..., ResolvedPageBinding] | None = None,
+                 clock: Callable[[], int] = now_ms, policy: PageAccessPolicy = PageAccessPolicy()):
         self.path = directory.resolve() / "page_documents.sqlite3"
         self.resolve_binding = resolve_binding
         self.clock = clock
+        self.policy = policy
         initialize_sqlite(directory, self.path, application_id=1804289383, schema_version=1,
                           kind="library_page_documents", ddl=DDL, unavailable=UNAVAILABLE)
 
@@ -278,11 +426,10 @@ class PageDocumentStore:
         except sqlite3.DatabaseError as error:
             raise AnalyticsError(503, "STATE_UNAVAILABLE", UNAVAILABLE, retryable=True) from error
 
-    @staticmethod
-    def _access(actor, *, write=False, scopes=()):
-        require(actor, "dashboard:read", data_scope=DATA_SCOPE)
+    def _access(self, actor, *, write=False, scopes=()):
+        require(actor, "dashboard:read", data_scope=self.policy.document_scope)
         if write:
-            require(actor, "dashboard:update", data_scope=DATA_SCOPE)
+            require(actor, "dashboard:update", data_scope=self.policy.document_scope)
         for scope in scopes:
             require(actor, "dashboard:read", data_scope=scope)
 
@@ -375,19 +522,32 @@ class PageDocumentStore:
                               "created_at_ms": row["created_ms"]})
             return items
 
-    def _bind(self, actor, spec, *, retained_scopes=None):
+    def published_preview(self, actor, page_id, version):
+        self.get(actor, page_id, version)
+        with self._read() as con:
+            rows = con.execute("SELECT preview_id, operation FROM previews WHERE owner=? AND page_id=? "
+                               "AND base_version=? AND status='APPLIED'",
+                               (actor.actor_id, page_id, version - 1)).fetchall()
+        if len(rows) != 1:
+            raise AnalyticsError(503, "STATE_UNAVAILABLE", UNAVAILABLE, retryable=True)
+        return dict(rows[0])
+
+    def _bind(self, actor, spec, *, retained_scopes=None, source_context=None):
         refs = list(spec.binding_manifest.result_refs)
         if not refs:
             return spec.model_copy(update={"binding_state": "UNBOUND_SAMPLE"}), frozenset()
-        if retained_scopes is not None:
+        if retained_scopes is not None and source_context is None:
             self._access(actor, scopes=retained_scopes)
             return spec, frozenset(retained_scopes)
         if self.resolve_binding is None:
             raise fault("RESULT_UNAVAILABLE", 409)
         scopes = set()
         stale = False
+        if source_context is not None:
+            source_context.prefetch(spec.session_id, refs)
         for ref in refs:
-            resolved = self.resolve_binding(actor, spec.session_id, ref)
+            resolved = (self.resolve_binding(actor, spec.session_id, ref, source_context=source_context)
+                        if source_context is not None else self.resolve_binding(actor, spec.session_id, ref))
             if resolved.status == "REVOKED":
                 raise fault("RESULT_REVOKED", 403)
             if resolved.status == "UNAVAILABLE":
@@ -400,31 +560,41 @@ class PageDocumentStore:
         state = "BOUND_STALE" if stale else "BOUND_VERIFIED"
         return spec.model_copy(update={"binding_state": state}), frozenset(scopes)
 
-    def _preview(self, actor, spec, operation, base_version, *, retained_scopes=None):
-        self._access(actor, write=True)
-        spec, scopes = self._bind(actor, spec, retained_scopes=retained_scopes)
-        snapshot = {"spec": spec.model_dump(mode="json")}
+    @staticmethod
+    def _encode_snapshot(snapshot, scopes):
         payload = canonical_json({"snapshot": snapshot, "required_scopes": sorted(scopes)})
         if len(payload.encode()) > PACKAGE_MAX_BYTES:
             raise fault("PACKAGE_TOO_LARGE", 413)
+        return payload, hashlib.sha256(payload.encode()).hexdigest()
+
+    def _preview(self, actor, spec, operation, base_version, *, retained_scopes=None, source_context=None):
+        self._access(actor, write=True)
+        _validate_bound_presentation(spec)
+        spec, scopes = self._bind(actor, spec, retained_scopes=retained_scopes, source_context=source_context)
+        snapshot = {"spec": spec.model_dump(mode="json")}
+        payload, digest = self._encode_snapshot(snapshot, scopes)
         preview_id = "preview_" + uuid4().hex
         expires = self.clock() + 30 * 60 * 1000
+        if source_context is not None:
+            source_context.revalidate()
         with transaction(self.path, unavailable=UNAVAILABLE) as con:
+            if source_context is not None:
+                source_context.check_active()
             if base_version and self._head(con, actor, spec.page_id) != base_version:
                 raise fault()
             con.execute("INSERT INTO previews VALUES (?,?,?,?,?,'PENDING',?,?,?)",
                         (actor.actor_id, preview_id, spec.page_id, base_version, operation, expires,
-                         payload, hashlib.sha256(payload.encode()).hexdigest()))
+                         payload, digest))
         return {"preview_id": preview_id, "status": "PENDING", "operation": operation,
                 "base_version": base_version, "expires_at_ms": expires, "snapshot": snapshot}
 
-    def generate(self, actor, request: PageDraft):
+    def generate(self, actor, request: PageDraft, *, source_context=None):
         self._access(actor, write=True)
         draft = request.model_dump(mode="json")
         draft["package"] = _annotate_package(draft["package"])
         spec = validated(PageDocument, stamp_binding_state({**draft,
             "page_id": "page_" + uuid4().hex, "version": 1}))
-        return self._preview(actor, spec, "GENERATE", 0)
+        return self._preview(actor, spec, "GENERATE", 0, source_context=source_context)
 
     def _base(self, actor, page_id, base_version):
         self._access(actor, write=True)
@@ -511,11 +681,7 @@ class PageDocumentStore:
         return cls._merge_ranges(ranges)
 
     @staticmethod
-    def _mapped_node_range(package, node_id, kind):
-        html = package.get("html", "")
-        attr = "node" if kind == "static_element" else "region"
-        wanted = re.compile(rf"data-shine-{attr}\s*=\s*(['\"]){re.escape(node_id)}\1", re.I)
-        marker = None
+    def _open_tags(html):
         cursor = 0
         while cursor < len(html):
             start = html.find("<", cursor)
@@ -533,14 +699,11 @@ class PageDocumentStore:
             if match is None or match.group(1) or source.startswith(("<!", "<?")):
                 cursor = tag_end + 1
                 continue
-            if wanted.search(match.group(3) or ""):
-                if marker is not None:
-                    return None
-                marker = (start, tag_end + 1, match.group(2).lower(), match.group(4) == "/")
+            yield start, tag_end + 1, match.group(2).lower(), match.group(3) or "", match.group(4) == "/"
             cursor = tag_end + 1
-        if marker is None:
-            return None
-        start, open_end, tag, self_closing = marker
+
+    @staticmethod
+    def _element_range(html, start, open_end, tag, self_closing):
         if self_closing or tag in HTML_VOID_TAGS:
             return start, open_end
         depth = 1
@@ -572,6 +735,64 @@ class PageDocumentStore:
                 return start, tag_end + 1
             cursor = tag_end + 1
         return None
+
+    @staticmethod
+    def _source_attributes(attributes):
+        parser = _SourceAttributes()
+        parser.feed("<div " + attributes + ">")
+        seen = set()
+        for name, value in parser.attributes:
+            if name not in seen:
+                seen.add(name)
+                yield name, value or ""
+
+    @classmethod
+    def _source_is_readonly(cls, attributes):
+        return any(
+            name == "data-page-readonly"
+            or (name == "data-sp-bindable" and value.lower() == "database")
+            for name, value in cls._source_attributes(attributes)
+        )
+
+    @classmethod
+    def _mapped_node_range(cls, package, node_id, kind):
+        html = package.get("html", "")
+        attr = "node" if kind == "static_element" else "region"
+        wanted = re.compile(rf"data-shine-{attr}\s*=\s*(['\"]){re.escape(node_id)}\1", re.I)
+        marker = None
+        for start, open_end, tag, attrs, self_closing in cls._open_tags(html):
+            if not wanted.search(attrs):
+                continue
+            if marker is not None:
+                return None
+            marker = (start, open_end, tag, self_closing)
+        if marker is None:
+            return None
+        return cls._element_range(html, *marker)
+
+    @classmethod
+    def _readonly_source_ranges(cls, html):
+        ranges = []
+        for start, open_end, tag, attrs, self_closing in cls._open_tags(html):
+            if not cls._source_is_readonly(attrs):
+                continue
+            ranges.append(cls._element_range(html, start, open_end, tag, self_closing) or (start, len(html)))
+        return ranges
+
+    @classmethod
+    def _assert_readonly_sources_preserved(cls, old_spec, new_spec):
+        old_package = old_spec.get("package")
+        new_package = new_spec.get("package")
+        if not isinstance(old_package, dict) or not isinstance(new_package, dict):
+            return
+        old_html = old_package.get("html", "")
+        new_html = new_package.get("html", "")
+        old_sources = [old_html[start:end] for start, end in cls._readonly_source_ranges(old_html)]
+        new_sources = [new_html[start:end] for start, end in cls._readonly_source_ranges(new_html)]
+        if new_sources != old_sources:
+            raise fault("AI_BOUND_CONTENT", 403)
+        if new_sources:
+            _validate_bound_presentation(validated(PageDocument, stamp_binding_state(new_spec)), protect_readonly=True)
 
     def _validate_ai_scope(self, old_spec, new_spec, request):
         """Enforce the host selection on the server; never widen an AI patch."""
@@ -640,7 +861,7 @@ class PageDocumentStore:
                 if tag != "equal" and not self._range_contains(ranges_by_file[file], start, end):
                     raise fault("AI_SCOPE_DIFF", 422)
 
-    def patch(self, actor, page_id, request: PagePatchPreview):
+    def patch(self, actor, page_id, request: PagePatchPreview, *, source_context=None):
         snapshot, scopes = self._base(actor, page_id, request.base_version)
         spec = deepcopy(snapshot["spec"])
         changes = request.model_dump(mode="json", exclude_unset=True)
@@ -650,13 +871,14 @@ class PageDocumentStore:
         for field in ("edit_scope", "edit_context_id", "focus_ref", "source_hash"):
             changes.pop(field, None)
         spec.update(changes)
+        self._assert_readonly_sources_preserved(snapshot["spec"], spec)
         self._validate_ai_scope(snapshot["spec"], spec, request)
         spec["version"] += 1
         retain = None if "binding_manifest" in request.model_fields_set else scopes
         return self._preview(actor, validated(PageDocument, stamp_binding_state(spec)), "PATCH",
-                             request.base_version, retained_scopes=retain)
+                             request.base_version, retained_scopes=retain, source_context=source_context)
 
-    def preview_identical(self, actor, page_id, base_version):
+    def preview_identical(self, actor, page_id, base_version, *, source_context=None):
         """Mint the next version without changing package bytes.
 
         Presentation overlays are stored beside the page document. The source
@@ -665,9 +887,9 @@ class PageDocumentStore:
         snapshot, scopes = self._base(actor, page_id, base_version)
         spec = deepcopy(snapshot["spec"])
         spec["version"] = base_version + 1
-        return self._preview(actor, validated(PageDocument, spec), "PATCH", base_version, retained_scopes=scopes)
+        return self._preview(actor, validated(PageDocument, spec), "PATCH", base_version, retained_scopes=scopes, source_context=source_context)
 
-    def save(self, actor, page_id, request: PageSavePreview):
+    def save(self, actor, page_id, request: PageSavePreview, *, source_context=None):
         snapshot, _scopes = self._base(actor, page_id, request.base_version)
         spec = deepcopy(snapshot["spec"])
         package = _annotate_package(request.package.model_dump(mode="json"))
@@ -678,17 +900,18 @@ class PageDocumentStore:
             ):
                 raise fault("AI_BOUND_CONTENT", 403)
         spec.update({**request.model_dump(mode="json", exclude={"base_version", "edit_origin"}), "package": package})
+        self._assert_readonly_sources_preserved(snapshot["spec"], spec)
         spec["version"] += 1
         return self._preview(actor, validated(PageDocument, stamp_binding_state(spec)), "SAVE",
-                             request.base_version)
+                             request.base_version, source_context=source_context)
 
-    def rollback(self, actor, page_id, request: PageRollbackPreview):
+    def rollback(self, actor, page_id, request: PageRollbackPreview, *, source_context=None):
         self._base(actor, page_id, request.base_version)
         with self._read() as con:
             snapshot, _scopes = self._revision(con, actor, page_id, request.to_version)
         spec = {**snapshot["spec"], "version": request.base_version + 1}
         return self._preview(actor, validated(PageDocument, stamp_binding_state(spec)), "ROLLBACK",
-                             request.base_version)
+                             request.base_version, source_context=source_context)
 
     def _draft_row(self, con, actor, preview_id):
         opaque(preview_id, label="preview_id")
@@ -717,35 +940,80 @@ class PageDocumentStore:
                         (actor.actor_id, preview_id))
         return {"preview_id": preview_id, "status": "CANCELLED"}
 
-    def confirm(self, actor, preview_id, key):
+    def _confirmation(self, con, actor, preview_id, key):
+        row = self._draft_row(con, actor, preview_id)
+        snapshot, scopes = self._decode(actor, row, version=row["base_version"] + 1)
+        observation = _PreviewObservation(**dict(row))
+        receipt = con.execute("SELECT preview_id FROM receipts WHERE owner=? AND key=?",
+                              (actor.actor_id, key)).fetchone()
+        if receipt is not None and receipt["preview_id"] != preview_id:
+            raise fault("IDEMPOTENCY_CONFLICT")
+        if observation.status != "APPLIED":
+            if observation.status == "CANCELLED":
+                raise fault("PREVIEW_CANCELLED")
+            if observation.status != "PENDING":
+                raise fault("BINDING_CORRUPT")
+            if self.clock() >= observation.expires_ms:
+                raise fault("PREVIEW_EXPIRED")
+            head = con.execute("SELECT version FROM heads WHERE owner=? AND page_id=?",
+                               (actor.actor_id, observation.page_id)).fetchone()
+            if (head["version"] if head else 0) != observation.base_version:
+                raise fault()
+        return observation, snapshot, scopes
+
+    def confirm(self, actor, preview_id, key, *, source_context=None):
         self._access(actor, write=True)
         key = validate_key(key)
+        with self._read() as con:
+            con.execute("BEGIN")
+            observed, snapshot, retained_scopes = self._confirmation(con, actor, preview_id, key)
+            con.execute("COMMIT")
+        binding_error = None
+        if observed.status != "APPLIED":
+            try:
+                spec = validated(PageDocument, snapshot["spec"])
+                _validate_bound_presentation(spec)
+                spec, current_scopes = self._bind(actor, spec, source_context=source_context)
+                snapshot = {"spec": spec.model_dump(mode="json")}
+                payload, digest = self._encode_snapshot(snapshot, retained_scopes | current_scopes)
+                if source_context is not None:
+                    source_context.revalidate()
+            except Exception as error:
+                binding_error = error
         with transaction(self.path, unavailable=UNAVAILABLE) as con:
-            row = self._draft_row(con, actor, preview_id)
-            version = row["base_version"] + 1
-            snapshot, _ = self._decode(actor, row, version=version)
-            receipt = con.execute("SELECT preview_id FROM receipts WHERE owner=? AND key=?",
-                                  (actor.actor_id, key)).fetchone()
-            if receipt is not None and receipt["preview_id"] != preview_id:
-                raise fault("IDEMPOTENCY_CONFLICT")
-            if row["status"] == "APPLIED":
-                saved, _ = self._revision(con, actor, row["page_id"], version)
+            if source_context is not None:
+                source_context.check_active()
+            current, _, _ = self._confirmation(con, actor, preview_id, key)
+            version = current.base_version + 1
+            if current.status == "APPLIED":
+                saved, _ = self._revision(con, actor, current.page_id, version)
                 con.execute("INSERT OR IGNORE INTO receipts VALUES (?,?,?)", (actor.actor_id, key, preview_id))
                 return saved
-            if row["status"] == "CANCELLED":
-                raise fault("PREVIEW_CANCELLED")
-            if self.clock() >= row["expires_ms"]:
-                raise fault("PREVIEW_EXPIRED")
-            if row["base_version"]:
-                if self._head(con, actor, row["page_id"]) != row["base_version"]:
-                    raise fault()
+            if current != observed:
+                raise fault()
+            if binding_error is not None:
+                raise binding_error
+            if current.base_version:
                 con.execute("UPDATE heads SET version=? WHERE owner=? AND page_id=?",
-                            (version, actor.actor_id, row["page_id"]))
+                            (version, actor.actor_id, current.page_id))
             else:
-                con.execute("INSERT INTO heads VALUES (?,?,?)", (actor.actor_id, row["page_id"], version))
-            con.execute("INSERT INTO revisions VALUES (?,?,?,?,?,?,?)", (actor.actor_id, row["page_id"], version,
-                        row["operation"], self.clock(), row["payload"], row["digest"]))
-            con.execute("UPDATE previews SET status='APPLIED' WHERE owner=? AND preview_id=?",
-                        (actor.actor_id, preview_id))
+                con.execute("INSERT INTO heads VALUES (?,?,?)", (actor.actor_id, current.page_id, version))
+            con.execute("INSERT INTO revisions VALUES (?,?,?,?,?,?,?)", (actor.actor_id, current.page_id, version,
+                        current.operation, self.clock(), payload, digest))
+            con.execute("UPDATE previews SET status='APPLIED', payload=?, digest=? WHERE owner=? AND preview_id=?",
+                        (payload, digest, actor.actor_id, preview_id))
             con.execute("INSERT INTO receipts VALUES (?,?,?)", (actor.actor_id, key, preview_id))
             return snapshot
+
+    def resolve_target(self, actor, target):
+        if not isinstance(target, dict):
+            raise fault("INVALID_PAGE", 422)
+        if (target.get("kind") == "page" and set(target) == {"kind", "page_id", "version"}
+                and type(target["version"]) is int and target["version"] > 0):
+            return self.get(actor, target["page_id"], target["version"])["spec"]
+        if target.get("kind") == "preview" and set(target) == {"kind", "preview_id"}:
+            preview = self.preview(actor, target["preview_id"])
+            if preview["status"] == "CANCELLED" or self.clock() >= preview["expires_at_ms"]:
+                raise fault("PREVIEW_EXPIRED")
+            return preview["snapshot"]["spec"]
+        raise fault("INVALID_PAGE", 422)

@@ -7,7 +7,7 @@ const root = new URL('../', import.meta.url)
 test('query agent bundle declares one preset through the DSH bundle contract', async () => {
   const manifest = JSON.parse(await readFile(new URL('package.json', root), 'utf8'))
   assert.equal(manifest.name, '@shine-mage/dsh-query-agent')
-  assert.equal(manifest.version, '0.0.0-query.11')
+  assert.equal(manifest.version, '0.0.0-query.14')
   assert.equal(manifest.packageManager, 'pnpm@11.28.2')
   assert.deepEqual(manifest.engines, { node: '24.x' })
   assert.equal(manifest.peerDependencies, undefined)
@@ -35,6 +35,18 @@ test('preset composes runtime-ready providers without unconfigured knowledge or 
   const preset = patch.indexOf("- id: preset-shinemage-crm-query")
   assert.ok(insert >= 0 && policy > insert && policy < preset)
   assert.doesNotMatch(patch, /knowledge-tools-v1|crm_knowledge_explain|graph-tools|query_crm_knowledge_graph|@deepseek-ai\/dsh-tool-bash/)
+})
+
+test('preset keeps the growth board on evidence, decisions, action and review', async () => {
+  const patch = await readFile(new URL('cordis.patch.yml', root), 'utf8')
+  assert.match(patch, /经营诊断、增长复盘和“AI 增长董事会”请求按同一证据链处理/)
+  assert.match(patch, /缺失或不可用保持未知，不能当 0/)
+  assert.match(patch, /继续、调整或停止/)
+  assert.match(patch, /主指标、护栏指标、责任角色、观察期和退出条件/)
+  assert.match(patch, /历史数据只用于形成可验证假设/)
+  assert.match(patch, /页面至少包含决策摘要、证据与截止日、用户分层、策略与动作、增长跟踪、风险和未知项/)
+  assert.match(patch, /绑定数字不可手改/)
+  assert.match(patch, /当前没有订单导出工具时，输出人群条件与导出缺口/)
 })
 
 test('Host policy restricts only newly created query Agents', async () => {
@@ -91,8 +103,11 @@ test('Host policy allowlist names every query-domain tool exactly once', async (
   assert.equal(new Set(queryToolAllowlist).size, queryToolAllowlist.length)
   assert.deepEqual(queryToolAllowlist, [
     'query_crm_dashboard_snapshot',
+    'query_crm_warehouse_snapshot',
     'query_crm_dashboard_gsv',
     'query_crm_dashboard_purchases',
+    'query_crm_product_customer_cohorts',
+    'query_crm_rfm_snapshot',
     'query_crm_metrics_v1',
     'query_crm_dashboard_readiness',
     'query_crm_dashboard_membership',

@@ -8,6 +8,15 @@ function indexOf(pkg = d48Package()) {
   return buildSourceIndex(pkg);
 }
 
+test('raw-text prefixes do not hide custom elements or following mapped nodes', () => {
+  for (const tag of ['xmp', 'noembed', 'noframes', 'plaintext', 'noscript']) {
+    const html = `<${tag}-viewer><p data-shine-node="inside">Inside</p></${tag}-viewer><p data-shine-node="after">After</p>`;
+    assert.deepEqual(scanShineMarkers(html).map(node => node.node_id), ['inside', 'after'], tag);
+    const pkg = { html, css: '', js: '', node_map: ['inside', 'after'].map(node_id => ({ node_id, kind: 'static_element' })) };
+    assert.deepEqual(buildSourceIndex(pkg).missing_from_dom, [], tag);
+  }
+});
+
 test('consumes coordinator D48 fixture with the five required branches', () => {
   const ids = D48_CASES.cases.map(row => row.id);
   for (const id of ['static-precise', 'dynamic-region', 'mapping-stale', 'forged-marker', 'user-whole-page', 'shared-css-expansion', 'cancel-expired-fail']) {

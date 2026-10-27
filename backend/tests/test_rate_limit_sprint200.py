@@ -1,7 +1,7 @@
 """Sprint 200 R1 v2.1 — uvicorn resilience + rate limit regression tests.
 
 真因: 业务组持续取数 → uvicorn 一直处于下线状态 (Sprint 184 L4.38 DuckDB flock 锁死).
-治本: 每用户每分钟 60 req 限流 + launchd KeepAlive watchdog (跟 Codex consult 6 补强 1:1).
+业务请求默认每分钟 60 次；有效身份查询默认每分钟 600 次，额度按用户独立。
 
 跟 L4.36 禁停 uvicorn + L4.47 禁 /tmp/*.py + L4.38 DuckDB flock 永久规则 1:1 配套.
 
@@ -26,6 +26,7 @@ def client():
 def configure_test_credentials(monkeypatch):
     """只在本模块用例执行时配置账号和低阈值，退出后恢复调用方环境。"""
     monkeypatch.setenv("RATE_LIMIT_PER_MINUTE", "5")
+    monkeypatch.setenv("IDENTITY_RATE_LIMIT_PER_MINUTE", "5")
     monkeypatch.setenv("FQ_CRM_PASSWORDS", "admin:123456,fqsw:fqsw888")
     from backend.routers import auth
 
@@ -132,7 +133,7 @@ class TestRateLimitL436Compliance:
         """429 响应格式跟 L4.36 友好错误 1:1: 含 retry_after_seconds + user_id + L4.36 重试提示."""
         if not admin_token:
             pytest.skip("admin login failed")
-        # 跑满 5 次触发 429 (RATE_LIMIT_PER_MINUTE=5)
+        # 身份查询使用 IDENTITY_RATE_LIMIT_PER_MINUTE=5。
         got_429 = False
         for _ in range(10):
             r = client.get(

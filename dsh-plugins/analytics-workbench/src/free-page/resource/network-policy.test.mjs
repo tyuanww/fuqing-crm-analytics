@@ -55,3 +55,12 @@ test('concatenated URLs can evade the static scan and must be covered by runtime
   const scan = assertNoActiveOutbound(DYNAMIC_LEAK_PACKAGE.html, DYNAMIC_LEAK_PACKAGE.css, DYNAMIC_LEAK_PACKAGE.js);
   assert.equal(scan.ok, true, 'static scan is not sufficient; isolation-probe must hit a real proxy');
 });
+
+test('rejects active navigation sinks even when the destination is computed', () => {
+  const result = assertNoActiveOutbound('', '', `
+    const target = ['ht', 'tps://example.com/'].join('');
+    window.location.assign(target);
+    window.open(target);
+  `);
+  assert.equal(result.ok, false);
+});

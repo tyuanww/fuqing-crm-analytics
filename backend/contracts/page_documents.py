@@ -11,6 +11,9 @@ import json
 import re
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
+from backend.contracts.page_facts import (
+    FACT_MAX_ITEMS, FACT_MAX_RESPONSE_BYTES, PageFact, PageFactReadRequest, PageFactView,
+)
 
 SCHEMA_VERSION = "free-page/v1"
 BRIDGE_PROTOCOL = "free-page-bridge/v1"
@@ -258,8 +261,12 @@ class PageDraft(PageModel):
             raise ValueError("页面必须有来源会话或手动添加的文件")
         if self.session_id is None and self.binding_manifest.result_refs:
             raise ValueError("手动添加的页面不能声明已验证结果绑定")
-        if self.binding_manifest.result_refs and self.package.presentation and self.package.presentation.edits:
-            raise ValueError("业务绑定页面不能覆盖显示数据或局部样式")
+        node_ids = {item.node_id for item in self.package.node_map}
+        if any(
+            item.node_id is not None and item.node_id not in node_ids
+            for item in self.binding_manifest.bindings
+        ):
+            raise ValueError("binding node_id must exist in package.node_map")
         return self
 
     @field_validator("origin_path")
@@ -870,6 +877,7 @@ def page_documents_openapi() -> dict:
         SourceRange, SelectedScope, PresentationOverlay, NodeRef, CAS, EditOperation, EditContext,
         PageBridgeHandshake, PageDataReadRequest, PageDataCancelRequest,
         PageDataChunkEvent, PageDataEndEvent, PageDataErrorEvent, PageBindingStateEvent,
+        PageFactReadRequest, PageFact, PageFactView,
     ):
         schema = model.model_json_schema(ref_template="#/components/schemas/{model}")
         schemas.update(schema.pop("$defs", {}))
@@ -915,6 +923,16 @@ def page_documents_openapi() -> dict:
         "x-bridge-budget": {
             "max_response_bytes": BRIDGE_MAX_RESPONSE_BYTES,
             "max_cumulative_rows": BRIDGE_MAX_CUMULATIVE_ROWS,
+        },
+        "x-host-facts": {
+            "schema_version": "warehouse-facts/v1",
+            "read_path": "/api/v1/analytics/page-result-access/read",
+            "request_schema": "PageFactReadRequest",
+            "view_schema": "PageFactView",
+            "max_response_bytes": FACT_MAX_RESPONSE_BYTES,
+            "max_cumulative_facts": FACT_MAX_ITEMS,
+            "endorses": "selected_source_values",
+            "does_not_endorse": "page_dom",
         },
         "paths": {
             "/api/v1/analytics/page-documents/previews": {

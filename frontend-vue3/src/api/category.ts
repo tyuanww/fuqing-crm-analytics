@@ -65,13 +65,86 @@ export interface CategoryOverviewItem {
 export interface CategoryOverviewResponse {
   date_start: string
   date_end: string
+  compare_start_date: string
+  compare_end_date: string
   level: string
   channel: string | null
   metric_type: string
+  data_cutoff: string | null
+  data_version: string
   all_rows: CategoryOverviewItem[]
   member_rows: CategoryOverviewItem[]
   all_ttl: CategoryOverviewItem
   member_ttl: CategoryOverviewItem
+}
+
+export interface ProductCustomerMetrics {
+  gsv: number
+  users: number
+  aus: number
+  old_gsv: number
+  old_users: number
+  old_aus: number
+  old_ratio: number
+  new_gsv: number
+  new_users: number
+  new_aus: number
+  new_ratio: number
+  member_gsv: number
+  member_users: number
+  member_aus: number
+  member_ratio: number
+  old_users_ratio: number
+  new_users_ratio: number
+}
+
+export interface ProductCustomerYoY {
+  gsv: number | null
+  users: number | null
+  aus: number | null
+  old_gsv: number | null
+  old_users: number | null
+  old_aus: number | null
+  new_gsv: number | null
+  new_users: number | null
+  new_aus: number | null
+  old_ratio_ppt: number | null
+  new_ratio_ppt: number | null
+  old_users_ratio_ppt: number | null
+  new_users_ratio_ppt: number | null
+}
+
+export interface ProductCustomerProduct {
+  name: string
+  display_name: string
+  spu_classes: string[]
+  status: 'OK' | 'EMPTY'
+  current: ProductCustomerMetrics
+  comparison: ProductCustomerMetrics
+  yoy: ProductCustomerYoY
+}
+
+export interface ProductCustomerResponse {
+  schema_version: 'product-customer/v3'
+  status: 'OK' | 'INSUFFICIENT_COVERAGE'
+  source: 'orders+user_first_purchase'
+  date_start: string
+  date_end: string
+  compare_start_date: string
+  compare_end_date: string
+  new_old_cutoff: string
+  comparison_new_old_cutoff: string
+  data_cutoff: string | null
+  coverage: {
+    data_cutoff: string | null
+    current_status: 'COMPLETE' | 'INSUFFICIENT'
+    comparison_status: 'COMPLETE' | 'INSUFFICIENT'
+  }
+  data_version: string
+  metric_type: 'GSV'
+  channel: string | null
+  exclude_channels: string[]
+  products: ProductCustomerProduct[]
 }
 
 export interface CategorySegmentMatrixResponse {
@@ -109,6 +182,55 @@ export function fetchCategoryOverview(params: {
   compare_end_date?: string
 }): Promise<CategoryOverviewResponse> {
   return client.get('/v1/category/overview', { params })
+}
+
+export async function fetchProductCustomer(body: {
+  start_date: string
+  end_date: string
+  products?: string[]
+  channel?: string
+  exclude_channels?: string[]
+}): Promise<ProductCustomerResponse> {
+  const response = await client.post<ProductCustomerResponse>('/v1/category/product-customer', {
+    ...body,
+    metric_type: 'GSV',
+  }, {
+    headers: { 'X-ShineMage-Product-Customer-Version': 'product-customer/v3' },
+  })
+  const result = response.data
+  if ((result as { schema_version?: string }).schema_version !== 'product-customer/v3') {
+    throw new Error('CRM 后端尚未升级到 product-customer/v3')
+  }
+  if (result.status !== 'OK') {
+    const cutoff = result.coverage.data_cutoff ?? '未知'
+    throw new Error(`商品数据覆盖不足，仓库最后支付日为 ${cutoff}`)
+  }
+  return result
+}
+
+export async function fetchProductCustomerBatch(body: {
+  ranges: Array<{
+    start_date: string
+    end_date: string
+    products?: string[]
+    channel?: string
+    exclude_channels?: string[]
+  }>
+}): Promise<{ results: ProductCustomerResponse[] }> {
+  const response = await client.post<{ results: ProductCustomerResponse[] }>('/v1/category/product-customer/batch', {
+    ranges: body.ranges.map(range => ({ ...range, metric_type: 'GSV' })),
+  }, {
+    headers: { 'X-ShineMage-Product-Customer-Version': 'product-customer/v3' },
+  })
+  const results = response.data.results
+  if (!Array.isArray(results) || results.some(result => result.schema_version !== 'product-customer/v3')) {
+    throw new Error('CRM 后端尚未升级到 product-customer/v3')
+  }
+  if (results.some(result => result.status !== 'OK')) {
+    const cutoff = results.find(result => result.status !== 'OK')?.coverage.data_cutoff ?? '未知'
+    throw new Error(`商品数据覆盖不足，仓库最后支付日为 ${cutoff}`)
+  }
+  return { results }
 }
 
 // L4.75 market-focus 性能治本 #2 (跟 L4.75 #1 backend batch endpoint 1:1 stable 永久规则化沿用):

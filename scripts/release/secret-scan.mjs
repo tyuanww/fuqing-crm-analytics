@@ -52,6 +52,10 @@ const RUNTIME_VENDOR_ASSIGNMENTS = Object.freeze([
   { suffix: 'packages/experimental/inspector/lib/devtools/chunks/legacy-CnKLfQuv.js', sha256: 'e3a45c64a5ccbe7d1a433bf568538a8d7b1a2771d79714fef969142da0f1e313', values: ['ReportingEndpointNotToken', 'InvalidCredentialsCookie'] },
   { suffix: '@deepseek-ai/dsh-experimental-inspector/lib/devtools/chunks/data_grid-VNFShWk1.js', sha256: '3268bccc21c8d298ba6875559005648643c7c9011693e56d4600634f406a32af', values: ['DataGridInternalToken'] },
   { suffix: '@deepseek-ai/dsh-experimental-inspector/lib/devtools/chunks/legacy-CnKLfQuv.js', sha256: 'e3a45c64a5ccbe7d1a433bf568538a8d7b1a2771d79714fef969142da0f1e313', values: ['ReportingEndpointNotToken', 'InvalidCredentialsCookie'] },
+  { suffix: 'packages/experimental/inspector/lib/devtools/chunks/data_grid-ehf9xIbN.js', sha256: 'bf04c38a3718a005767a676a9847616b8e6ab8a2c8987441ec2f2f29bd6c459e', values: ['DataGridInternalToken'] },
+  { suffix: 'packages/experimental/inspector/lib/devtools/chunks/legacy-Dg_djKt3.js', sha256: '29a622e8e7c7ef54241123b18eba6400c1cd111ffb7445df12e251f7b1300188', values: ['ReportingEndpointNotToken', 'InvalidCredentialsCookie'] },
+  { suffix: '@deepseek-ai/dsh-experimental-inspector/lib/devtools/chunks/data_grid-ehf9xIbN.js', sha256: 'bf04c38a3718a005767a676a9847616b8e6ab8a2c8987441ec2f2f29bd6c459e', values: ['DataGridInternalToken'] },
+  { suffix: '@deepseek-ai/dsh-experimental-inspector/lib/devtools/chunks/legacy-Dg_djKt3.js', sha256: '29a622e8e7c7ef54241123b18eba6400c1cd111ffb7445df12e251f7b1300188', values: ['ReportingEndpointNotToken', 'InvalidCredentialsCookie'] },
 ]);
 
 export function runtimeVendorAssignmentAllowlist(name, bytesOrSha256) {

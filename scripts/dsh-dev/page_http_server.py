@@ -27,7 +27,7 @@ from backend.services.analytics.page_result_access import PageResultAccess  # no
 from backend.services.analytics.cockpit_files import OfficeSettings  # noqa: E402
 
 
-def build_app(*, state_dir: Path, token: str):
+def build_app(*, state_dir: Path, token: str, result_access: PageResultAccess | None = None):
     registry = B0IdentityRegistry()
     principal = AnalyticsPrincipal(
         "page_http_local",
@@ -35,6 +35,7 @@ def build_app(*, state_dir: Path, token: str):
         frozenset({"competition-diagnosis-fixture", "free-page-result-fixture", "brand-a"}),
     )
     registry.grant(token, principal)
+    access = result_access if result_access is not None else PageResultAccess()
     office = None
     config_path = os.environ.get("COCKPIT_OFFICE_CONFIG")
     if config_path:
@@ -49,7 +50,7 @@ def build_app(*, state_dir: Path, token: str):
     app = create_page_app(
         identities=registry,
         page_state_dir=state_dir,
-        result_access=PageResultAccess(),
+        result_access=access,
         office=office,
         office_principal=lambda: registry.resolve("Bearer " + token),
     )

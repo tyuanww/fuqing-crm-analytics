@@ -32,8 +32,8 @@ def cache_conn(monkeypatch: pytest.MonkeyPatch):
 def _insert_cache_row(
     conn,
     *,
-    start_date: str = "2025-07-13",
-    end_date: str = "2026-07-12",
+    start_date: str = "2025-07-14",
+    end_date: str = "2026-07-13",
     period: str = "LAST365DAYS",
     result: dict | str = None,
     channel: str | None = None,
@@ -46,6 +46,8 @@ def _insert_cache_row(
     cached_orders_count: int = ORDERS_COUNT,
     computed_at: datetime | None = None,
     generation_id: str | None = None,
+    prev2_start_date: str | None = None,
+    prev2_end_date: str | None = None,
 ) -> str:
     key = _cache_key(
         None,
@@ -57,6 +59,8 @@ def _insert_cache_row(
         key_data_version,
         compare_start_date,
         compare_end_date,
+        prev2_start_date=prev2_start_date,
+        prev2_end_date=prev2_end_date,
     )
     payload = result if isinstance(result, str) else json.dumps(result or {"marker": "cached"})
     params = [
@@ -94,7 +98,7 @@ def _insert_cache_row(
     return key
 
 
-def _read_shifted_cache(
+def _read_cache(
     conn,
     *,
     exclude_channels: list[str] | None = None,
@@ -102,6 +106,8 @@ def _read_shifted_cache(
     compare_end_date: str | None = None,
     current_mtime: str = DATA_VERSION,
     current_orders_count: int = ORDERS_COUNT,
+    prev2_start_date: str | None = None,
+    prev2_end_date: str | None = None,
 ):
     return cache._read_db_cache(
         None,
@@ -115,15 +121,186 @@ def _read_shifted_cache(
         compare_start_date,
         compare_end_date,
         current_orders_count=current_orders_count,
+        prev2_start_date=prev2_start_date,
+        prev2_end_date=prev2_end_date,
     )
 
 
-class TestRFMFuzzyCacheSafety:
+@pytest.mark.parametrize("active_generation", [False, True], ids=["on-demand", "active-generation"])
+@pytest.mark.parametrize(("start_date", "end_date"), [
+    ("2026-06-30", "2026-07-05"),
+    ("2026-06-30", "2026-07-06"),
+    ("2026-06-29", "2026-07-04"),
+    ("2026-07-01", "2026-07-07"),
+    ("2026-07-02", "2026-07-08"),
+])
+def test_cache_never_substitutes_a_different_date_window(cache_conn, active_generation, start_date, end_date):
+    generation_id = "exact-window" if active_generation else None
+    payload = {"marker": "computed-for-20260629-through-20260705"}
+    key = _insert_cache_row(
+        cache_conn, start_date="2026-06-29", end_date="2026-07-05",
+        generation_id=generation_id, result=payload,
+    )
+    if generation_id:
+        cache._activate_cache_generation(cache_conn, generation_id, DATA_VERSION, ORDERS_COUNT)
+    assert cache._read_db_cache(
+        None, "2026-06-29", "2026-07-05", None, "GSV", None, DATA_VERSION,
+        cache_conn, current_orders_count=ORDERS_COUNT,
+    ) == payload
+    assert cache._read_db_cache(
+        None, start_date, end_date, None, "GSV", None, DATA_VERSION,
+        cache_conn, current_orders_count=ORDERS_COUNT,
+    ) is None
+    table = cache.RFM_CACHE_GENERATION_ROWS_TABLE if generation_id else cache.RFM_CACHE_TABLE
+    assert cache_conn.execute(f"SELECT count(*) FROM {table} WHERE cache_key = ?", [key]).fetchone() == (1,)
+
+
+def test_active_period_label_cannot_substitute_older_dates(cache_conn):
+    target = PeriodBuilder.last365days(today=date.today())["current"]
+    _insert_cache_row(
+        cache_conn,
+        start_date=(date.fromisoformat(target.start) - timedelta(days=10)).isoformat(),
+        end_date=(date.fromisoformat(target.end) - timedelta(days=10)).isoformat(),
+        generation_id="older-period", result={"marker": "different-window"},
+    )
+    cache._activate_cache_generation(cache_conn, "older-period", DATA_VERSION, ORDERS_COUNT)
+    assert cache._read_db_cache(
+        None, target.start, target.end, None, "GSV", None, DATA_VERSION,
+        cache_conn, current_orders_count=ORDERS_COUNT,
+    ) is None
+
+
+@pytest.mark.parametrize("active_generation", [False, True])
+def test_previous_query_policy_cache_is_not_reused(cache_conn, active_generation):
+    generation_id = "legacy-policy" if active_generation else None
+    key = _insert_cache_row(
+        cache_conn, start_date="2026-06-29", end_date="2026-07-05",
+        generation_id=generation_id, result={"marker": "old-producer-policy"},
+    )
+    table = cache.RFM_CACHE_GENERATION_ROWS_TABLE if generation_id else cache.RFM_CACHE_TABLE
+    legacy_key = DATA_VERSION + "_2026-06-29_2026-07-05_GSV.json"
+    cache_conn.execute(f"UPDATE {table} SET cache_key = ? WHERE cache_key = ?", [legacy_key, key])
+    if generation_id:
+        cache._activate_cache_generation(cache_conn, generation_id, DATA_VERSION, ORDERS_COUNT)
+    assert cache._read_db_cache(
+        None, "2026-06-29", "2026-07-05", None, "GSV", None, DATA_VERSION,
+        cache_conn, current_orders_count=ORDERS_COUNT,
+    ) is None
+    assert cache_conn.execute(f"SELECT count(*) FROM {table} WHERE cache_key = ?", [legacy_key]).fetchone() == (1,)
+
+
+def test_cache_identity_normalizes_default_comparison_dates():
+    default_key = _cache_key(None, "2026-06-29", "2026-07-05", None, "GSV", None, DATA_VERSION)
+    explicit_key = _cache_key(
+        None, "2026-06-29", "2026-07-05", None, "GSV", None, DATA_VERSION,
+        "2025-06-29", "2025-07-05",
+    )
+    assert default_key == explicit_key
+
+
+@pytest.mark.parametrize("raw_parameters", [
+    {},
+    {"start_date": "2020-01-01", "end_date": "2020-01-31"},
+    {"compare_start_date": "2020-01-01", "compare_end_date": "2020-01-31"},
+    {"start_date": "2020-01-01", "end_date": "2020-01-31",
+     "compare_start_date": "2019-01-01", "compare_end_date": "2019-01-31"},
+], ids=["period-only", "ignored-current", "ignored-compare", "ignored-both"])
+def test_named_period_uses_resolved_dates_for_cache_identity(cache_conn, monkeypatch, raw_parameters):
+    from backend.services.health.rfm_analysis import analysis
+
+    ranges = _resolve_date_ranges("last90days")
+    start_date = ranges["current"][0].split(" ")[0]
+    end_date = ranges["current"][1].split(" ")[0]
+    _insert_cache_row(
+        cache_conn, start_date=start_date, end_date=end_date,
+        result={"marker": "resolved-period"}, cached_orders_count=1,
+    )
+    with duckdb.connect(":memory:") as business:
+        business.execute("CREATE TABLE orders(pay_time TIMESTAMP)")
+        business.execute("INSERT INTO orders VALUES (?::TIMESTAMP)", [DATA_VERSION])
+        monkeypatch.setattr(analysis.bdc, "get_connection", lambda: business)
+        assert analysis.get_rfm_analysis(
+            period="last90days", allow_live_compute=False, **raw_parameters,
+        ) == {"marker": "resolved-period"}
+
+
+def test_named_period_year_labels_match_resolved_window_at_year_boundary(cache_conn, monkeypatch):
+    from backend.services.health.rfm_analysis import analysis
+    from backend.services.rfm import _shared as rfm_shared
+
+    class JanuaryFirst(date):
+        @classmethod
+        def today(cls):
+            return cls(2026, 1, 1)
+
+    monkeypatch.setattr(rfm_shared, "date", JanuaryFirst)
+    monkeypatch.setattr(analysis, "date", JanuaryFirst)
+    monkeypatch.setattr(analysis, "_run_rfm_period_serial", lambda *_args: ({}, {}, {}, {}))
+    with duckdb.connect(":memory:") as business:
+        business.execute("CREATE TABLE orders(pay_time TIMESTAMP)")
+        business.execute("INSERT INTO orders VALUES (TIMESTAMP '2025-12-31 12:00:00')")
+        monkeypatch.setattr(analysis.bdc, "get_connection", lambda: business)
+        named = analysis.get_rfm_analysis(period="YTD")
+        assert (named["year_label"], named["comp_year_label"], named["prev2_year_label"]) == (
+            "2025", "2024", "2023",
+        )
+        explicit = analysis.get_rfm_analysis(
+            start_date="2025-01-01", end_date="2025-12-31", allow_live_compute=False,
+        )
+        assert explicit == named
+
+
+def test_named_period_and_auto_mom_do_not_share_different_third_window(cache_conn, monkeypatch):
+    from backend.services.health.rfm_analysis import analysis
+    from backend.services.rfm import _shared as rfm_shared
+
+    class Monday(date):
+        @classmethod
+        def today(cls):
+            return cls(2026, 7, 6)
+
+    monkeypatch.setattr(rfm_shared, "date", Monday)
+    monkeypatch.setattr(analysis, "date", Monday)
+    monkeypatch.setattr(analysis, "_run_rfm_period_serial", lambda *_args: ({}, {}, {}, {}))
+    with duckdb.connect(":memory:") as business:
+        business.execute("CREATE TABLE orders(pay_time TIMESTAMP)")
+        business.execute("INSERT INTO orders VALUES (TIMESTAMP '2026-07-05 12:00:00')")
+        monkeypatch.setattr(analysis.bdc, "get_connection", lambda: business)
+        named = analysis.get_rfm_analysis(period="WTD")
+        assert named["prev2_year_label"] == "2025"
+        assert analysis.get_rfm_analysis(period="WTD", allow_live_compute=False) == named
+        with pytest.raises(cache.RFMCacheMissError):
+            analysis.get_rfm_analysis(
+                start_date="2026-06-29", end_date="2026-07-05",
+                compare_start_date="2026-06-22", compare_end_date="2026-06-28",
+                allow_live_compute=False,
+            )
+
+
+class TestRFMCacheIdentity:
+    @pytest.mark.parametrize("corruption", ["invalid-json", "non-object", "stale-metadata"])
+    def test_generation_fallback_preserves_third_window(self, cache_conn, corruption):
+        third = {"prev2_start_date": "2022-01-01", "prev2_end_date": "2022-12-31"}
+        result = {"marker": "bad-metadata"}
+        if corruption == "invalid-json":
+            result = "not-json"
+        elif corruption == "non-object":
+            result = "[1]"
+        _insert_cache_row(
+            cache_conn, generation_id="broken-third", result=result,
+            cached_mtime="2026-07-04 23:59:58" if corruption == "stale-metadata" else DATA_VERSION,
+            **third,
+        )
+        _insert_cache_row(cache_conn, result={"marker": "correct-third"}, **third)
+        _insert_cache_row(cache_conn, result={"marker": "different-third"})
+        cache._activate_cache_generation(cache_conn, "broken-third", DATA_VERSION, ORDERS_COUNT)
+        assert _read_cache(cache_conn, **third) == {"marker": "correct-third"}
+
     @pytest.mark.parametrize(
         ("drift_days", "expected_hit"),
-        [(0, True), (1, True), (2, True), (3, False)],
+        [(0, True), (1, False), (2, False), (3, False)],
     )
-    def test_active_generation_fuzzy_boundary_0_to_3_days(
+    def test_active_generation_requires_exact_dates(
         self,
         cache_conn,
         drift_days,
@@ -146,50 +323,16 @@ class TestRFMFuzzyCacheSafety:
             ORDERS_COUNT,
         )
 
-        result = _read_shifted_cache(cache_conn)
+        result = _read_cache(cache_conn)
         if expected_hit:
             assert result == {"marker": f"drift-{drift_days}"}
         else:
             assert result is None
 
-    def test_active_hot_period_remains_available_beyond_fuzzy_window(self, cache_conn):
-        generation_id = "ten-days-old"
-        target = PeriodBuilder.last365days(today=date.today())["current"]
-        cached_start = date.fromisoformat(target.start) - timedelta(days=10)
-        cached_end = date.fromisoformat(target.end) - timedelta(days=10)
-        _insert_cache_row(
-            cache_conn,
-            start_date=cached_start.isoformat(),
-            end_date=cached_end.isoformat(),
-            period="LAST365DAYS",
-            generation_id=generation_id,
-            result={"marker": "period-last-known-good"},
-        )
-        cache._activate_cache_generation(
-            cache_conn,
-            generation_id,
-            DATA_VERSION,
-            ORDERS_COUNT,
-        )
-
-        result = cache._read_db_cache(
-            None,
-            target.start,
-            target.end,
-            None,
-            "GSV",
-            None,
-            DATA_VERSION,
-            cache_conn,
-            current_orders_count=ORDERS_COUNT,
-        )
-
-        assert result == {"marker": "period-last-known-good"}
-
     def test_http_period_none_hits_precomputed_period_row(self, cache_conn):
         _insert_cache_row(cache_conn, result={"marker": "precomputed"})
 
-        assert _read_shifted_cache(cache_conn) == {"marker": "precomputed"}
+        assert _read_cache(cache_conn) == {"marker": "precomputed"}
 
     def test_service_http_shape_returns_cache_without_live_rfm(self, cache_conn, monkeypatch):
         from backend.services.health.rfm_analysis import analysis
@@ -268,8 +411,8 @@ class TestRFMFuzzyCacheSafety:
             computed_at=datetime.now(),
         )
 
-        assert _read_shifted_cache(cache_conn) == {"marker": "default"}
-        assert _read_shifted_cache(
+        assert _read_cache(cache_conn) == {"marker": "default"}
+        assert _read_cache(
             cache_conn,
             compare_start_date="2024-10-14",
             compare_end_date="2025-07-13",
@@ -285,8 +428,8 @@ class TestRFMFuzzyCacheSafety:
             computed_at=datetime.now() + timedelta(seconds=1),
         )
 
-        assert _read_shifted_cache(cache_conn) == {"marker": "all"}
-        assert _read_shifted_cache(cache_conn, exclude_channels=excluded) == {"marker": "filtered"}
+        assert _read_cache(cache_conn) == {"marker": "all"}
+        assert _read_cache(cache_conn, exclude_channels=excluded) == {"marker": "filtered"}
 
     @pytest.mark.parametrize(
         ("cached_mtime", "cached_orders", "computed_at", "current_mtime", "current_orders"),
@@ -297,7 +440,7 @@ class TestRFMFuzzyCacheSafety:
         ],
         ids=["ttl", "orders-count", "mtime"],
     )
-    def test_fuzzy_hit_uses_same_freshness_gate_as_exact_hit(
+    def test_exact_hit_enforces_freshness(
         self,
         cache_conn,
         cached_mtime,
@@ -313,7 +456,7 @@ class TestRFMFuzzyCacheSafety:
             computed_at=computed_at,
         )
 
-        assert _read_shifted_cache(
+        assert _read_cache(
             cache_conn,
             current_mtime=current_mtime,
             current_orders_count=current_orders,
@@ -322,15 +465,15 @@ class TestRFMFuzzyCacheSafety:
             f"SELECT COUNT(*) FROM {cache.RFM_CACHE_TABLE} WHERE cache_key = ?", [key]
         ).fetchone()[0] == 0
 
-    def test_corrupt_fuzzy_row_deletes_actual_candidate_key(self, cache_conn):
+    def test_corrupt_exact_row_deletes_actual_key(self, cache_conn):
         key = _insert_cache_row(cache_conn, result="not-json")
 
-        assert _read_shifted_cache(cache_conn) is None
+        assert _read_cache(cache_conn) is None
         assert cache_conn.execute(
             f"SELECT COUNT(*) FROM {cache.RFM_CACHE_TABLE} WHERE cache_key = ?", [key]
         ).fetchone()[0] == 0
 
-    def test_fuzzy_rejects_opposite_endpoint_drift(self, cache_conn):
+    def test_nonidentical_window_is_rejected(self, cache_conn):
         _insert_cache_row(
             cache_conn,
             start_date="2025-07-13",
@@ -338,9 +481,9 @@ class TestRFMFuzzyCacheSafety:
             result={"marker": "wider-window"},
         )
 
-        assert _read_shifted_cache(cache_conn) is None
+        assert _read_cache(cache_conn) is None
 
-    def test_fuzzy_auto_mom_shifts_compare_window_with_candidate(self, cache_conn):
+    def test_different_auto_mom_comparison_is_not_substituted(self, cache_conn):
         target_mom = PeriodBuilder.mom("2025-07-14", "2026-07-13")
         candidate_mom = PeriodBuilder.mom("2025-07-13", "2026-07-12")
         _insert_cache_row(
@@ -350,11 +493,22 @@ class TestRFMFuzzyCacheSafety:
             compare_end_date=candidate_mom.end,
         )
 
-        assert _read_shifted_cache(
+        assert _read_cache(
             cache_conn,
             compare_start_date=target_mom.start,
             compare_end_date=target_mom.end,
-        ) == {"marker": "auto-mom"}
+        ) is None
+        _insert_cache_row(
+            cache_conn,
+            result={"marker": "exact-auto-mom"},
+            compare_start_date=target_mom.start,
+            compare_end_date=target_mom.end,
+        )
+        assert _read_cache(
+            cache_conn,
+            compare_start_date=target_mom.start,
+            compare_end_date=target_mom.end,
+        ) == {"marker": "exact-auto-mom"}
 
     def test_compare_and_delete_does_not_remove_concurrently_refreshed_row(self, cache_conn):
         old_computed_at = datetime.now() - timedelta(hours=48)
@@ -426,7 +580,7 @@ class TestRFMFuzzyCacheSafety:
             ORDERS_COUNT,
         )
 
-        assert _read_shifted_cache(
+        assert _read_cache(
             cache_conn,
             current_mtime=DATA_VERSION,
             current_orders_count=ORDERS_COUNT + 100,
@@ -456,7 +610,7 @@ class TestRFMFuzzyCacheSafety:
             ORDERS_COUNT,
         )
 
-        assert _read_shifted_cache(cache_conn) == {"marker": "complete"}
+        assert _read_cache(cache_conn) == {"marker": "complete"}
         assert cache_conn.execute(
             f"SELECT COUNT(*) FROM {cache.RFM_CACHE_GENERATION_ROWS_TABLE} "
             "WHERE cache_key = ?",
@@ -482,7 +636,7 @@ class TestRFMFuzzyCacheSafety:
             ORDERS_COUNT,
         )
 
-        assert _read_shifted_cache(cache_conn) == {"marker": "current-custom"}
+        assert _read_cache(cache_conn) == {"marker": "current-custom"}
 
     def test_corrupt_active_generation_is_deleted_and_current_cache_serves(self, cache_conn):
         old_version = "2026-07-04 23:59:58"
@@ -504,7 +658,7 @@ class TestRFMFuzzyCacheSafety:
             ORDERS_COUNT,
         )
 
-        assert _read_shifted_cache(cache_conn) == {"marker": "current-on-demand"}
+        assert _read_cache(cache_conn) == {"marker": "current-on-demand"}
         assert cache_conn.execute(
             f"SELECT COUNT(*) FROM {cache.RFM_CACHE_GENERATION_ROWS_TABLE} "
             "WHERE generation_id = ? AND cache_key = ?",
@@ -534,7 +688,7 @@ class TestRFMFuzzyCacheSafety:
             ORDERS_COUNT,
         )
 
-        assert _read_shifted_cache(cache_conn) == {"marker": "current-on-demand"}
+        assert _read_cache(cache_conn) == {"marker": "current-on-demand"}
         assert cache_conn.execute(
             f"SELECT COUNT(*) FROM {cache.RFM_CACHE_GENERATION_ROWS_TABLE} "
             "WHERE generation_id = ? AND cache_key = ?",
@@ -561,10 +715,12 @@ class TestRFMPrecomputePlan:
         assert PeriodBuilder.ytd(jan_first)["current"].end == "2025-12-31"
         assert PeriodBuilder.q1(jan_first)["current"].start == "2025-10-01"
         assert PeriodBuilder.q1(jan_first)["current"].end == "2025-12-31"
+        from backend.services.health.rfm_analysis.precompute_plan import build_precompute_plan
+        plan = build_precompute_plan(date(2020, 1, 1), date(2026, 7, 14))
         assert {
             "yesterday", "WTD", "Q1", "Q2", "Q3", "Q4",
-        }.issubset(cache.STANDARD_PERIODS)
-        assert "达播" in cache.PRECOMPUTE_CHANNELS
+        }.issubset({query.period for query in plan.queries})
+        assert "达播" in plan.policy.channels
 
     def test_last90days_is_public_semantic_resolver(self):
         ranges = PeriodBuilder.last90days(today=date(2026, 7, 15))
@@ -601,61 +757,6 @@ class TestRFMPrecomputePlan:
         assert http_ranges["comp"][0] == "2027-02-28 00:00:00"
         assert http_ranges["prev2"][0] == "2026-02-28 00:00:00"
 
-    def test_precompute_compare_ranges_match_http_ssot(self):
-        default, default_start, default_end = cache._resolve_precompute_query_ranges(
-            "2026-04-16", "2026-07-14", "default"
-        )
-        expected_default = _resolve_date_ranges(
-            None, "2026-04-16", "2026-07-14", None, None
-        )
-        custom, custom_start, custom_end = cache._resolve_precompute_query_ranges(
-            "2026-04-16", "2026-07-14", "auto_mom"
-        )
-        expected_custom = _resolve_date_ranges(
-            None, "2026-04-16", "2026-07-14", custom_start, custom_end
-        )
-
-        assert (default_start, default_end) == (None, None)
-        assert default == expected_default
-        assert (custom_start, custom_end) == ("2026-01-16", "2026-04-15")
-        assert custom == expected_custom
-
-        with pytest.raises(ValueError, match="不支持"):
-            cache._resolve_precompute_query_ranges(
-                "2026-04-16", "2026-07-14", "Q-1"
-            )
-
-    def test_logical_coverage_is_distinct_from_physical_keys(self):
-        today = date(2026, 7, 15)
-        current_ranges = [
-            getattr(PeriodBuilder, name.lower())(today=today)["current"]
-            for name in cache.STANDARD_PERIODS
-        ] + [cache._resolve_range_period(name, today)["current"] for name in cache.RANGE_PERIODS]
-        logical_keys = []
-        for metric_type in ("GSV", "GMV"):
-            for current in current_ranges:
-                for channel in cache.PRECOMPUTE_CHANNELS:
-                    for compare_mode in cache.COMPARE_MODES:
-                        _, compare_start, compare_end = cache._resolve_precompute_query_ranges(
-                            current.start, current.end, compare_mode
-                        )
-                        logical_keys.append(
-                            _cache_key(
-                                None,
-                                current.start,
-                                current.end,
-                                channel,
-                                metric_type,
-                                None,
-                                DATA_VERSION,
-                                compare_start,
-                                compare_end,
-                            )
-                        )
-
-        assert len(logical_keys) == cache.EXPECTED_LOGICAL_PRECOMPUTE_COMBINATIONS == 380
-        assert len(set(logical_keys)) < len(logical_keys)
-
     def test_precompute_fails_fast_when_cache_connection_cannot_open(self, monkeypatch):
         def fail_connection():
             raise OSError("cache unavailable")
@@ -664,112 +765,6 @@ class TestRFMPrecomputePlan:
 
         with pytest.raises(RuntimeError, match="无法打开写连接"):
             cache.precompute_rfm_cache()
-
-    def test_precompute_reports_full_logical_coverage_and_dedupes_aliases(self, monkeypatch):
-        class FakeBizConnection:
-            sql = ""
-
-            def execute(self, sql, _params=None):
-                self.sql = sql
-                return self
-
-            def fetchone(self):
-                if "MAX(pay_time)" in self.sql:
-                    return (datetime(2026, 7, 5, 23, 59, 58),)
-                if "COUNT(*)" in self.sql:
-                    return (ORDERS_COUNT,)
-                raise AssertionError(self.sql)
-
-            def close(self):
-                return None
-
-        class FakeWriteConnection:
-            def __init__(self):
-                self.insert_params = []
-                self.sql = ""
-
-            def execute(self, sql, params=None):
-                self.sql = sql
-                if "INSERT INTO" in sql:
-                    self.insert_params.append(params)
-                return self
-
-            def fetchone(self):
-                if "COUNT(*)" in self.sql:
-                    return (len(self.insert_params),)
-                raise AssertionError(self.sql)
-
-            def close(self):
-                return None
-
-        write_conn = FakeWriteConnection()
-        monkeypatch.setattr(cache, "_get_cache_conn", lambda: write_conn)
-        monkeypatch.setattr(cache.duckdb, "connect", lambda *_args, **_kwargs: FakeBizConnection())
-        monkeypatch.setattr(cache, "_ensure_db_cache_table", lambda _conn: None)
-        monkeypatch.setattr(cache, "_fetch_max_pay_time", lambda _conn: DATA_VERSION)
-        monkeypatch.setattr(cache, "_run_rfm_period", lambda *_args, **_kwargs: ({}, {}, {}, {}))
-        monkeypatch.setattr(cache, "_build_rows", lambda *_args, **_kwargs: [])
-        prune_calls = []
-        activation_calls = []
-        monkeypatch.setattr(
-            cache,
-            "_activate_cache_generation",
-            lambda conn, generation, version, count: activation_calls.append(
-                (conn, generation, version, count)
-            ),
-        )
-        monkeypatch.setattr(
-            cache,
-            "_prune_rfm_cache_after_success",
-            lambda conn: prune_calls.append(conn) or 0,
-        )
-
-        logical_count = cache.precompute_rfm_cache()
-        inserted_keys = [params[0] for params in write_conn.insert_params]
-        inserted_periods = [params[1] for params in write_conn.insert_params]
-        inserted_generations = [params[-1] for params in write_conn.insert_params]
-        today = date.today()
-        expected_keys = set()
-        current_ranges = [
-            getattr(PeriodBuilder, name.lower())(today=today)["current"]
-            for name in cache.STANDARD_PERIODS
-        ] + [
-            cache._resolve_range_period(name, today)["current"]
-            for name in cache.RANGE_PERIODS
-        ]
-        for metric_type in ("GSV", "GMV"):
-            for current in current_ranges:
-                for channel in cache.PRECOMPUTE_CHANNELS:
-                    for compare_mode in cache.COMPARE_MODES:
-                        _, compare_start, compare_end = cache._resolve_precompute_query_ranges(
-                            current.start,
-                            current.end,
-                            compare_mode,
-                        )
-                        expected_keys.add(
-                            _cache_key(
-                                None,
-                                current.start,
-                                current.end,
-                                channel,
-                                metric_type,
-                                None,
-                                DATA_VERSION,
-                                compare_start,
-                                compare_end,
-                            )
-                        )
-
-        assert logical_count == cache.EXPECTED_LOGICAL_PRECOMPUTE_COMBINATIONS == 380
-        assert len(inserted_keys) == len(set(inserted_keys))
-        assert len(inserted_keys) < logical_count
-        assert set(inserted_keys) == expected_keys
-        assert "LAST90DAYS" in inserted_periods
-        assert len(set(inserted_generations)) == 1
-        assert activation_calls == [
-            (write_conn, inserted_generations[0], DATA_VERSION, ORDERS_COUNT)
-        ]
-        assert prune_calls == [write_conn]
 
     def test_retention_prune_removes_only_rows_older_than_48_hours(self, cache_conn):
         old_key = _insert_cache_row(
@@ -815,63 +810,13 @@ class TestRFMPrecomputePlan:
             ["slow-complete-run", active_key],
         ).fetchone()[0] == 1
 
-    def test_failed_precompute_never_prunes_previous_generation(self, monkeypatch):
-        class FakeBizConnection:
-            sql = ""
-
-            def execute(self, sql, _params=None):
-                self.sql = sql
-                return self
-
-            def fetchone(self):
-                if "MAX(pay_time)" in self.sql:
-                    return (datetime(2026, 7, 5, 23, 59, 58),)
-                if "COUNT(*)" in self.sql:
-                    return (ORDERS_COUNT,)
-                raise AssertionError(self.sql)
-
-            def close(self):
-                return None
-
-        class FakeWriteConnection:
-            def execute(self, *_args, **_kwargs):
-                return self
-
-            def close(self):
-                return None
-
-        prune_called = False
-        activation_called = False
-
-        def mark_prune(_conn):
-            nonlocal prune_called
-            prune_called = True
-            return 0
-
-        def mark_activation(*_args):
-            nonlocal activation_called
-            activation_called = True
-
-        monkeypatch.setattr(cache, "_get_cache_conn", lambda: FakeWriteConnection())
-        monkeypatch.setattr(cache.duckdb, "connect", lambda *_args, **_kwargs: FakeBizConnection())
-        monkeypatch.setattr(cache, "_ensure_db_cache_table", lambda _conn: None)
-        monkeypatch.setattr(cache, "_fetch_max_pay_time", lambda _conn: DATA_VERSION)
-        monkeypatch.setattr(cache, "_run_rfm_period", lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("query failed")))
-        monkeypatch.setattr(cache, "_activate_cache_generation", mark_activation)
-        monkeypatch.setattr(cache, "_prune_rfm_cache_after_success", mark_prune)
-
-        with pytest.raises(RuntimeError, match="query failed"):
-            cache.precompute_rfm_cache()
-        assert activation_called is False
-        assert prune_called is False
-
     def test_etl_does_not_clear_working_cache_before_long_precompute(self):
         source = (REPO_ROOT / "scripts/etl/cli.py").read_text(encoding="utf-8")
         step6_start = source.index("# Step 6: 预计算 RFM")
         step6 = source[step6_start:source.index("# Step 7: 创建 user_rfm", step6_start)]
 
         assert "clear_rfm_cache" not in step6
-        assert "EXPECTED_LOGICAL_PRECOMPUTE_COMBINATIONS" in step6
+        assert "if not report.complete:" in step6
 
 class TestRFMCacheFailureResponse:
     @pytest.mark.parametrize(
@@ -950,7 +895,7 @@ class TestRFMCacheFailureResponse:
             "WHERE singleton_id = 1"
         )
 
-        assert _read_shifted_cache(cache_conn) == {"marker": "last-known-good"}
+        assert _read_cache(cache_conn) == {"marker": "last-known-good"}
 
     def test_analysis_does_not_swallow_cache_write_outage(self, cache_conn, monkeypatch):
         from backend.services.health.rfm_analysis import analysis
@@ -1006,7 +951,7 @@ class TestRFMCacheFailureResponse:
             )
 
         assert error.value.status_code == 503
-        assert error.value.headers == {"Retry-After": "30"}
+        assert error.value.headers == {"Retry-After": "30", "X-RFM-Cache-Status": "unavailable"}
 
     def test_router_marks_cache_miss_and_disables_live_compute(self, monkeypatch):
         from fastapi import HTTPException, Response
@@ -1032,4 +977,4 @@ class TestRFMCacheFailureResponse:
             )
 
         assert error.value.status_code == 503
-        assert error.value.headers == {"Retry-After": "60"}
+        assert error.value.headers == {"Retry-After": "60", "X-RFM-Cache-Status": "miss"}

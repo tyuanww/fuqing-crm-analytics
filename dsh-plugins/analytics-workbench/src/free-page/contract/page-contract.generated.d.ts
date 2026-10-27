@@ -1,4 +1,4 @@
-/** Generated free-page contract; do not edit. OpenAPI SHA-256: c0371e9bd7e4f78a0c5f7e8e64fd0b54fef421086a389eb917940800ec893c39 */
+/** Generated free-page contract; do not edit. OpenAPI SHA-256: 28c8e8403d86222408445abb24cfa876cf0333ddb3a5b8ae30b9c9da4f5adaa0 */
 export interface paths {
     "/api/v1/analytics/page-documents/pages": {
         parameters: {
@@ -603,6 +603,133 @@ export interface components {
             /** Path */
             path: components["schemas"]["PageElementStep"][];
         };
+        /** PageFact */
+        PageFact: {
+            /** Selector */
+            selector: components["schemas"]["PurchaseFactSelector"] | components["schemas"]["RfmFactSelector"] | components["schemas"]["ProductFactSelector"];
+            /** Unit */
+            unit: string;
+            /** Value */
+            value: number | string | null;
+        };
+        /** PageFactExpected */
+        PageFactExpected: {
+            /**
+             * Result Version
+             * @default null
+             */
+            result_version: number | null;
+            /**
+             * Time Range
+             * @default null
+             */
+            time_range: {
+                [key: string]: string;
+            } | null;
+            /**
+             * Unit
+             * @default null
+             */
+            unit: string | null;
+        };
+        /** PageFactHostSource */
+        PageFactHostSource: {
+            /**
+             * Does Not Endorse
+             * @constant
+             */
+            does_not_endorse: "page_dom";
+            /**
+             * Endorses
+             * @constant
+             */
+            endorses: "result_provenance";
+            /** Label */
+            label: string;
+            /** Session Id */
+            session_id: string | null;
+        };
+        /** PageFactReadRequest */
+        PageFactReadRequest: {
+            /**
+             * Data Ref
+             * @default null
+             */
+            data_ref: string | null;
+            /**
+             * Instance Id
+             * @default null
+             */
+            instance_id: string | null;
+            /**
+             * Mode
+             * @constant
+             */
+            mode: "facts";
+            /**
+             * Op
+             * @constant
+             */
+            op: "data.read";
+            /**
+             * Request Id
+             * @default null
+             */
+            request_id: string | null;
+            /**
+             * Result Ref
+             * @default null
+             */
+            result_ref: string | null;
+        };
+        /** PageFactView */
+        PageFactView: {
+            /**
+             * Binding State
+             * @constant
+             */
+            binding_state: "BOUND_VERIFIED";
+            /** Cursor */
+            cursor: null;
+            /** Data Ref */
+            data_ref: string;
+            expected: components["schemas"]["PageFactExpected"];
+            /** Expires At Ms */
+            expires_at_ms: number | null;
+            /** Facts */
+            facts: components["schemas"]["PageFact"][];
+            /**
+             * Facts Schema Version
+             * @constant
+             */
+            facts_schema_version: "warehouse-facts/v1";
+            host_source: components["schemas"]["PageFactHostSource"];
+            /**
+             * Mode
+             * @constant
+             */
+            mode: "facts";
+            /**
+             * Ok
+             * @constant
+             */
+            ok: true;
+            /**
+             * Op
+             * @constant
+             */
+            op: "data.read";
+            /** Result Ref */
+            result_ref: string;
+            /** Result Version */
+            result_version: number;
+            /** Rows */
+            rows: unknown[];
+            /** Summary */
+            summary: {
+                [key: string]: unknown;
+            };
+        };
         /**
          * PageFocusRef
          * @description Host-canonical selection identity carried into an AI source patch.
@@ -845,6 +972,53 @@ export interface components {
              * @default null
              */
             text: string | null;
+        };
+        /** ProductFactSelector */
+        ProductFactSelector: {
+            /** Display Name */
+            display_name: string;
+            /** Field */
+            field: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "product";
+            /**
+             * Period
+             * @enum {string}
+             */
+            period: "current" | "comparison" | "yoy";
+        };
+        /** PurchaseFactSelector */
+        PurchaseFactSelector: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "purchase";
+            /**
+             * Metric
+             * @enum {string}
+             */
+            metric: "GSV" | "AOV" | "AUS" | "orders" | "buyers";
+        };
+        /** RfmFactSelector */
+        RfmFactSelector: {
+            /** Field */
+            field: string;
+            /**
+             * Group
+             * @enum {string}
+             */
+            group: "rows" | "same_channel_rows" | "member_rows" | "member_same_channel_rows";
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "rfm";
+            /** Segment */
+            segment: string;
         };
         /** SelectedScope */
         SelectedScope: {

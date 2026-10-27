@@ -1,6 +1,6 @@
 {
   "name": "@shine-mage/dsh-crm-knowledge",
-  "version": "0.0.0-crm.2",
+  "version": "0.0.0-crm.5",
   "private": true,
   "type": "module",
   "description": "CRM dashboard, metrics and private analysis assets; knowledge tools are a separately installed optional plugin.",
@@ -13,8 +13,8 @@
     "test:host": "node --test test/host.integration.mjs"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh-tools": "0.1.7-rc.2",
-    "@deepseek-ai/cordis": "4.0.2"
+    "@deepseek-ai/dsh-tools": "0.2.1-rc.3",
+    "@deepseek-ai/cordis": "4.0.5"
   },
   "exports": {
     ".": "./lib/index.js",

@@ -212,7 +212,26 @@ class QueryRouterMiddleware:
         "/api/v1/ad-hoc/two-year-overview",
         "/api/v1/ad-hoc/new-old-customer",
         "/api/v1/category/overview/batch",
+        "/api/v1/category/product-customer",
+        "/api/v1/category/product-customer/batch",
         "/api/v1/rfm/extended",
+    }
+    VERIFIED_READ_ENDPOINTS = {
+        "/api/v1/metrics/cutoff",
+        "/api/v1/metrics/overview",
+        "/api/v1/metrics/trend",
+        "/api/v1/metrics/dashboard-purchases",
+        "/api/v1/customer-health/rfm-analysis",
+        "/api/v1/rfm/r-flow",
+        "/api/v1/rfm/f-flow",
+        "/api/v1/rfm/m-flow",
+    }
+    VERIFIED_READ_ONLY_POST_ENDPOINTS = {
+        "/api/v1/metrics/warehouse-snapshots",
+        "/api/v1/category/product-customer",
+        "/api/v1/category/product-customer/batch",
+        "/api/v1/ad-hoc/daily-gsv",
+        "/api/v1/ad-hoc/daily-gsv-multi-period",
     }
     READ_PREFIXES = (
         "/api/v1/audience/",
@@ -239,15 +258,16 @@ class QueryRouterMiddleware:
         "/api/v1/health/pool",
         "/metrics",
         "/openapi.json",
+        "/api/v1/session",
     }
     CONTROL_PREFIXES = (
         "/api/v1/auth/",
+        "/api/v1/session/",
+        "/api/v1/notifications/",
         # Reading saved aggregates never needs to reopen the archived DuckDB.
         "/api/v1/metrics/crm-",
         "/api/v1/metrics/dashboard-snapshots/",
-        # Mission owns its synthetic reader and SQLite state; borrowing a
-        # legacy CRM connection here couples the demo to archived assets.
-        "/api/v1/missions/",
+        "/api/v1/metrics/warehouse-snapshots/",
         "/docs",
         "/redoc",
     )
@@ -265,7 +285,7 @@ class QueryRouterMiddleware:
         """
 
         method_u = method.upper()
-        if path in self.CONTROL_ENDPOINTS or path.startswith(self.CONTROL_PREFIXES):
+        if path in self.CONTROL_ENDPOINTS or path.startswith((*self.CONTROL_PREFIXES, "/api/v1/missions/")):
             return "default"
         if path in self.WORKER_ENDPOINTS:
             return "worker"
@@ -291,8 +311,15 @@ class QueryRouterMiddleware:
         try:
             await asyncio.shield(app_task)
         except asyncio.CancelledError as cancelled:
+            while not app_task.done():
+                try:
+                    await asyncio.shield(app_task)
+                except asyncio.CancelledError:
+                    pass
+                except BaseException:
+                    break
             try:
-                await app_task
+                app_task.result()
             except BaseException as exc:  # noqa: BLE001
                 logger.debug("Read app finished with error after client cancellation: %s", exc)
             raise cancelled
@@ -304,7 +331,20 @@ class QueryRouterMiddleware:
 
         path = str(scope.get("path", ""))
         method = str(scope.get("method", "GET"))
+        headers = dict(scope.get("headers") or [])
+        if method.upper() == "OPTIONS" and b"origin" in headers and b"access-control-request-method" in headers:
+            await self.app(scope, receive, send)
+            return
         query_type = self.classify(path, method)
+        from backend.services.warehouse_boot import warehouse_runtime_requested
+
+        runtime = getattr(getattr(scope.get("app"), "state", None), "warehouse_runtime", None)
+        verified_mode = runtime is not None or warehouse_runtime_requested()
+        control = path in self.CONTROL_ENDPOINTS or path.startswith(self.CONTROL_PREFIXES)
+        if verified_mode and not control:
+            allowed = (method.upper() == "GET" and path in self.VERIFIED_READ_ENDPOINTS
+                       or method.upper() == "POST" and path in self.VERIFIED_READ_ONLY_POST_ENDPOINTS)
+            query_type = "read" if allowed else "default"
         scope["query_type"] = query_type
         start = time.perf_counter()
         request_id = request_id_from_scope(scope)
@@ -312,10 +352,35 @@ class QueryRouterMiddleware:
 
         # L4.72.2 治本: 捕获 dual_conn.ReadPoolTimeout 618 大促 8 并发雪崩, 返回 503
         from backend.services.dual_conn import ReadPoolTimeout  # L4.72.2 新增异常类
+        from backend.services.warehouse_cache import AggregateCacheMissError, AggregateCacheUnavailableError
+        from backend.services.warehouse_source import WarehouseSourceUnavailableError
+        from backend.services.warehouse_rfm import WarehouseQueryError
+        response_started = False
+
+        async def send_verified(message):
+            nonlocal response_started
+            if message["type"] == "http.response.start":
+                response_started = True
+            await send(message)
+
         try:
+            if verified_mode and not control:
+                if runtime is None:
+                    raise WarehouseSourceUnavailableError("requested warehouse runtime is not ready")
+                if query_type != "read":
+                    response = competition_error_response(
+                        http_status=422, code="UNSUPPORTED_OPERATION",
+                        message="当前来源模式暂不支持此操作", request_id=request_id, retryable=False,
+                    )
+                    await response(scope, receive, send)
+                    return
             if query_type == "read":
-                async with async_read_request_context(query_type):
-                    await self._run_read_app(scope, receive, send)
+                if runtime is not None:
+                    async with runtime.async_read():
+                        await self._run_read_app(scope, receive, send_verified)
+                else:
+                    async with async_read_request_context(query_type):
+                        await self._run_read_app(scope, receive, send)
             else:
                 token = set_query_type(query_type)
                 try:
@@ -325,6 +390,30 @@ class QueryRouterMiddleware:
         except asyncio.CancelledError:
             cancelled = True
             raise
+        except WarehouseQueryError as exc:
+            if response_started:
+                raise
+            response = competition_error_response(
+                http_status=422, code=exc.code, message=str(exc),
+                request_id=request_id, retryable=False,
+                headers={"X-RFM-Cache-Status": "insufficient"} if exc.code == "INSUFFICIENT_COVERAGE" else None,
+            )
+            await response(scope, receive, send)
+        except (WarehouseSourceUnavailableError, AggregateCacheUnavailableError, AggregateCacheMissError) as exc:
+            if response_started:
+                raise
+            miss = isinstance(exc, AggregateCacheMissError)
+            cache_status = "miss" if miss else "unavailable"
+            headers = {"X-Aggregate-Cache-Status": cache_status}
+            if path == "/api/v1/customer-health/rfm-analysis" or path.startswith("/api/v1/rfm/"):
+                headers["X-RFM-Cache-Status"] = cache_status
+            response = competition_error_response(
+                http_status=503, code="STATE_UNAVAILABLE",
+                message="所选范围尚未预热" if miss else "数据来源或缓存暂不可用",
+                request_id=request_id, retryable=True, retry_after=60 if miss else 30,
+                headers=headers,
+            )
+            await response(scope, receive, send)
         except ReadPoolTimeout as e:
             # L4.72.2 治本: 618 大促 8 并发雪崩友好降级, 返回 503 而非 30s timeout
             logger.warning("L4.72.2 ReadPoolTimeout (618 大促 8 并发雪崩兜底): %s", e)

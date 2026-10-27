@@ -26,7 +26,7 @@ Neo4j 连接仅限 HTTP 回环地址。当前社区版部署使用本机既有�
 
 ## 配置与复现
 
-插件使用 Node 24，以及 `plugin-kit/toolchain.json` 钉住的 DSH 0.1.7-rc.2；Python 3.14 只用于合成服务/验证。先按[插件说明](../../dsh-plugins/crm-knowledge/README.md)分别构建和验证，再准备私有配置。本轮未操作杭州；现役版本沿用 STATUS 的现场快照。以下是结构示例，ID和路径须使用实际部署值；不把凭据写入工具参数或公开仓库：
+插件使用 Node 24，以及 `plugin-kit/toolchain.json` 钉住的 DSH 0.2.1-rc.3；Python 3.14 只用于合成服务/验证。先按[插件说明](../../dsh-plugins/crm-knowledge/README.md)分别构建和验证，再准备私有配置。本轮未操作杭州；现役版本沿用 STATUS 的现场快照。以下是结构示例，ID和路径须使用实际部署值；不把凭据写入工具参数或公开仓库：
 
 ```json
 {

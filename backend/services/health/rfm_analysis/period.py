@@ -317,7 +317,7 @@ def _run_rfm_period_dashboard_full(
         FROM {RFM_DASHBOARD_FULL_TABLE}
         WHERE period_type = ?::VARCHAR
           AND as_of_date = ?::DATE
-          AND end_date <= ?::DATE
+          AND end_date = ?::DATE
           AND lookback_days >= ?::INTEGER
     ),
     chosen AS (
@@ -474,14 +474,10 @@ def _run_rfm_period_live(
     3. user_stats_same: start_dt [, channel]（观察期前行为）
     4. rfm_scored_all: start_dt × 4（DATEDIFF 参考 start_dt）
     5. rfm_scored_same: start_dt × 4（DATEDIFF 参考 start_dt）
-    6. ttl_users_all: end_dt
-    7. ttl_users_same: end_dt [, channel]
-    8. ttl_users_all (member 子查询): end_dt
-    9. ttl_users_same (member 子查询): end_dt
 
     R/F/M 分类基于"start_dt 之前的行为"（观察期前行为，避免循环论证）。
     回购口径：≥1 单（与 R/F/M 区间流转一致）。
-    TTL 仍基于 end_dt（含当期），是商业指标。
+    TTL 与八象限使用相同的观察期前人群，会员分子和分母使用相同集合。
     """
     params: List[Any] = [start_dt, end_dt]
 
@@ -508,18 +504,6 @@ def _run_rfm_period_live(
 
     params.extend([start_dt] * 4)  # rfm_scored_all DATEDIFF 参考 start_dt
     params.extend([start_dt] * 4)  # rfm_scored_same DATEDIFF 参考 start_dt
-
-    # ── TTL 独立口径：截至 end_dt（含当期）的累计去重用户 ──
-    # 与 8 象限 RFM 分类的 cutoff 语义解耦：RFM 分类基于观察期前行为
-    # （避免循环论证），但"已购客 TTL"是商业指标，应包含当期新增用户
-    params.append(end_dt)  # ttl_users_all
-    params.append(end_dt)  # ttl_users_same
-    if db_channels:
-        params.extend(db_channels)  # ttl_users_same channel
-    params.append(end_dt)  # member_ttl_users_all
-    params.append(end_dt)  # member_ttl_users_same
-    if db_channels:
-        params.extend(db_channels)  # member_ttl_users_same channel
 
     exclude_where_base = ""
     exclude_where_hist = ""
@@ -677,42 +661,6 @@ def _run_rfm_period_live(
         LEFT JOIN repurchase_amounts ra ON r.user_id = ra.user_id
         GROUP BY r.rfm_segment
     ),
-    ttl_users_all AS (
-        SELECT user_id FROM orders o
-        WHERE pay_time <= ?::TIMESTAMP
-          AND {_VALID_BASE}
-          {refund_where}
-          {exclude_where_base}
-        GROUP BY user_id
-    ),
-    ttl_users_same AS (
-        SELECT user_id FROM orders o
-        WHERE pay_time <= ?::TIMESTAMP
-          AND {_VALID_BASE}
-          {refund_where}
-          {channel_where_hist}
-          {exclude_where_hist}
-        GROUP BY user_id
-    ),
-    member_ttl_users_all AS (
-        SELECT user_id FROM orders o
-        WHERE pay_time <= ?::TIMESTAMP
-          AND {_VALID_BASE}
-          AND is_member = TRUE
-          {refund_where}
-          {exclude_where_base}
-        GROUP BY user_id
-    ),
-    member_ttl_users_same AS (
-        SELECT user_id FROM orders o
-        WHERE pay_time <= ?::TIMESTAMP
-          AND {_VALID_BASE}
-          AND is_member = TRUE
-          {refund_where}
-          {channel_where_hist}
-          {exclude_where_hist}
-        GROUP BY user_id
-    ),
     ttl_stats_all AS (
         SELECT '已购客TTL' AS rfm_segment,
                -- Sprint 60.2 治本: hist_users 改用 user_stats_all (RFM 评分用户, 老客)
@@ -733,13 +681,13 @@ def _run_rfm_period_live(
     ),
     member_ttl_stats_all AS (
         SELECT '已购客TTL' AS rfm_segment,
-               (SELECT COUNT(*) FROM member_ttl_users_all) AS hist_users,
+               (SELECT COUNT(*) FROM user_stats_all WHERE is_member = TRUE) AS hist_users,
                (SELECT COUNT(DISTINCT bo.user_id) FROM base_orders bo INNER JOIN user_stats_all us ON bo.user_id = us.user_id AND us.is_member = TRUE) AS repurchase_users,
                (SELECT COALESCE(SUM(bo.actual_amount), 0) FROM base_orders bo INNER JOIN user_stats_all us ON bo.user_id = us.user_id AND us.is_member = TRUE) AS repurchase_gsv
     ),
     member_ttl_stats_same AS (
         SELECT '已购客TTL' AS rfm_segment,
-               (SELECT COUNT(*) FROM member_ttl_users_same) AS hist_users,
+               (SELECT COUNT(*) FROM user_stats_same WHERE is_member = TRUE) AS hist_users,
                (SELECT COUNT(DISTINCT bo.user_id) FROM base_orders bo INNER JOIN user_stats_same us ON bo.user_id = us.user_id AND us.is_member = TRUE) AS repurchase_users,
                (SELECT COALESCE(SUM(bo.actual_amount), 0) FROM base_orders bo INNER JOIN user_stats_same us ON bo.user_id = us.user_id AND us.is_member = TRUE) AS repurchase_gsv
     )

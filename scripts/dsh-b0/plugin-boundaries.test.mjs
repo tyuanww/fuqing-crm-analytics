@@ -26,8 +26,12 @@ async function fixture(t) {
 test('the checked inventory equals current sources and includes every plugin', async () => {
   const result = await inspectBoundaries();
   const checked = JSON.parse(await readFile(new URL('../../docs/architecture/shinemage-plugin-boundaries.json', import.meta.url), 'utf8'));
+  const toolchain = JSON.parse(await readFile(new URL('../../dsh-plugins/plugin-kit/toolchain.json', import.meta.url), 'utf8'));
   assert.deepEqual(result, checked);
   assert.equal(result.packages.length, 12);
+  for (const pkg of result.packages) {
+    if (pkg.peers['@deepseek-ai/dsh-tools']) assert.equal(pkg.peers['@deepseek-ai/dsh-tools'], toolchain.sdk_version, `${pkg.name} DSH peer drift`);
+  }
   assert.equal(result.extraction_exceptions.length, 0);
   assert.ok(result.cross_package_edges.filter(edge => edge.consumer === 'analytics-workbench' && edge.phase === 'runtime').every(edge => edge.access === 'public-export'));
   assert.ok(result.build_layers[0].includes('plugin-kit'));

@@ -96,6 +96,8 @@ function loadClient(hostWindow) {
   view.__ModuleLoader__ = { load: row => { factoryRow = row; } };
   vm.runInNewContext(source, {
     AbortController,
+    setTimeout,
+    clearTimeout,
     window: view,
     localStorage: storage,
     document: view.document,
@@ -154,7 +156,7 @@ test('apply registers business slots; dispose removes them without touching nati
   assert.deepEqual(entries.map(row => row.options.name), [
     'sidebar.right.pane.tab', 'sidebar.right.pane.tab',
     'sidebar.brand.mark', 'conversation.hero.brand.mark',
-    'sidebar.footer.action', 'sidebar.footer.action', 'shell.overlay', 'shell.overlay',
+    'sidebar.footer.action', 'shell.overlay',
     'tool.call.toolview', 'tool.call.toolview', 'tool.call.toolview', 'tool.call.toolview', 'tool.call.toolview', 'tool.call.toolview',
     'conversation.input.dock', 'conversation.input.dock', 'conversation.composer.dock',
     'sidebar.panellist', 'main',
@@ -173,10 +175,10 @@ test('apply registers business slots; dispose removes them without touching nati
   assert.equal(entries.some(row => row.options.name === 'conversation.view'), false);
   const footers = entries.filter(row => row.options.name === 'sidebar.footer.action');
   assert.deepEqual(footers.map(row => row.options.id),
-    ['shine-mage.account.login', 'shine-mage.account.theme']);
-  assert.deepEqual(footers.map(row => row.options.order), [10, 11]);
+    ['shine-mage.account.login']);
+  assert.deepEqual(footers.map(row => row.options.order), [10]);
   assert.equal(typeof footers[0].component, 'function');
-  assert.equal(typeof footers[1].component, 'function');
+  assert.equal(entries.some(row => ['shine-mage.account.theme', 'shine-mage.account.menu'].includes(row.options.id)), false);
   assert.deepEqual(entries.filter(row => row.options.name === 'tool.call.toolview').map(row => row.options.key), [
     'analytics_b0_query', 'analytics_channel_followup_query', 'analytics_first_purchase_query', 'competition_board_generate', 'competition_board_edit', 'free_html_page_generate',
   ]);
@@ -236,59 +238,88 @@ test('generate dock openCockpit selects sidebar.panellist id cockpit on the main
   for (const dispose of effects) if (typeof dispose === 'function') dispose();
 });
 
-test('the sealed rc2 package retains its historical account and theme controls', () => {
+test('the sealed current package leaves account menus and theme ownership with the native host', () => {
   const { entries, effects } = mount(loadClient());
-  const React = webRequire('react');
-  const { renderToStaticMarkup } = webRequire('react-dom/server');
   try {
-    const row = entries.find(item => item.options.id === 'shine-mage.account.menu');
-    const html = renderToStaticMarkup(React.createElement(row.component, {
-      useStore: selector => selector({ menuOpen: true, themeOpen: false }),
-      actions: { closeMenu() {}, toggleMenu() {}, openMenu() {}, closeTheme() {}, toggleTheme() {}, closeAll() {} },
-      themeSource: { subscribe: () => () => {}, getSnapshot: () => 'system' },
-      setTheme() {},
-    }));
-    assert.match(html, /data-testid="shine-account-menu"/);
-    assert.match(html, /data-testid="shine-account-name-input"/);
-    const theme = entries.find(item => item.options.id === 'shine-mage.account.theme');
-    const themeHtml = renderToStaticMarkup(React.createElement(theme.component, {
-      wide: true, useStore: selector => selector({ menuOpen: true, themeOpen: true }),
-      actions: { closeMenu() {}, toggleMenu() {}, openMenu() {}, closeTheme() {}, toggleTheme() {}, closeAll() {} },
-      themeSource: { subscribe: () => () => {}, getSnapshot: () => 'system' }, setTheme() {},
-    }));
-    assert.match(themeHtml, /data-testid="shine-account-theme"/);
-    assert.match(themeHtml, /aria-expanded="true"/);
+    const row = entries.find(item => item.options.id === 'shine-mage.account.login');
+    assert.ok(row);
+    assert.equal(row.options.store, undefined);
+    assert.equal(row.options.inject, undefined);
+    assert.equal(entries.some(item => ['shine-mage.account.menu', 'shine-mage.account.theme'].includes(item.options.id)), false);
   } finally {
     for (const dispose of effects) if (typeof dispose === 'function') dispose();
   }
 });
 
-test('the sealed rc2 package keeps its historical footer account control', () => {
+test('the sealed current package exposes its native account bridge in wide and rail layouts', () => {
   const { entries, effects } = mount(loadClient());
   const React = webRequire('react');
   const { renderToStaticMarkup } = webRequire('react-dom/server');
   try {
     const row = entries.find(item => item.options.id === 'shine-mage.account.login');
-    const wide = renderToStaticMarkup(React.createElement(row.component, {
-      wide: true,
-      useStore: selector => selector({ menuOpen: false, themeOpen: false }),
-      actions: { closeMenu() {}, toggleMenu() {}, openMenu() {}, closeTheme() {}, toggleTheme() {}, closeAll() {} },
-    }));
-    const rail = renderToStaticMarkup(React.createElement(row.component, {
-      wide: false,
-      useStore: selector => selector({ menuOpen: false, themeOpen: false }),
-      actions: { closeMenu() {}, toggleMenu() {}, openMenu() {}, closeTheme() {}, toggleTheme() {}, closeAll() {} },
-    }));
-    assert.match(wide, /未登录/);
+    const wide = renderToStaticMarkup(React.createElement(row.component, { wide: true }));
+    const rail = renderToStaticMarkup(React.createElement(row.component, { wide: false }));
+    assert.match(wide, /账号与设置/);
     assert.match(wide, /data-wide="1"/);
-    assert.doesNotMatch(wide, /data-native-account-bridge="rc1"/);
-    assert.match(wide, /aria-label="未登录"/);
+    assert.match(wide, /data-native-account-bridge="rc1"/);
+    assert.match(wide, /aria-label="账号与设置"/);
+    assert.doesNotMatch(wide, /未登录|shine-account-name-input/);
     assert.match(wide, /<svg /);
     assert.match(rail, /data-wide="0"/);
-    assert.match(rail, /aria-label="未登录"/);
+    assert.match(rail, /aria-label="账号与设置"/);
     assert.match(rail, /<svg /);
   } finally {
     for (const dispose of effects) if (typeof dispose === 'function') dispose();
+  }
+});
+
+test('the compiled account bridge reports a refused native gesture and recovers on retry', async () => {
+  const React = webRequire('react');
+  const { createRoot } = webRequire('react-dom/client');
+  const act = typeof React.act === 'function' ? React.act : webRequire('react-dom/test-utils').act;
+  const dom = new JSDOM('<!doctype html><body><button data-signed-out="true" aria-haspopup="menu" aria-expanded="false"></button><div id="root"></div></body>', {
+    url: 'http://127.0.0.1:4318/',
+  });
+  const previous = { window: globalThis.window, document: globalThis.document, act: globalThis.IS_REACT_ACT_ENVIRONMENT };
+  globalThis.window = dom.window;
+  globalThis.document = dom.window.document;
+  globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+  const account = dom.window.document.querySelector('button');
+  account.getClientRects = () => [{ width: 1, height: 1 }];
+  let accept = false, clicks = 0;
+  account.addEventListener('click', () => {
+    clicks += 1;
+    if (accept) account.setAttribute('aria-expanded', 'true');
+  });
+  const { entries, effects } = mount(loadClient(dom.window));
+  const root = createRoot(dom.window.document.getElementById('root'));
+  try {
+    const row = entries.find(item => item.options.id === 'shine-mage.account.login');
+    await act(() => root.render(React.createElement(row.component, { wide: true })));
+    const button = dom.window.document.querySelector('[data-testid="shine-account-login"]');
+    const waitForState = async expected => {
+      for (let attempt = 0; attempt < 100 && button.getAttribute('data-state') !== expected; attempt++) {
+        await act(async () => { await new Promise(resolve => setTimeout(resolve, 10)); });
+      }
+      assert.equal(button.getAttribute('data-state'), expected);
+    };
+    await act(() => button.click());
+    await waitForState('error');
+    assert.equal(clicks, 1);
+    assert.match(dom.window.document.getElementById('shine-native-account-notice').textContent, /未能打开/);
+    accept = true;
+    await act(() => button.click());
+    await waitForState('ready');
+    assert.equal(clicks, 2);
+    assert.equal(account.getAttribute('aria-expanded'), 'true');
+    assert.equal(dom.window.document.getElementById('shine-native-account-notice'), null);
+  } finally {
+    await act(() => root.unmount());
+    for (const dispose of effects) if (typeof dispose === 'function') dispose();
+    if (previous.window === undefined) delete globalThis.window; else globalThis.window = previous.window;
+    if (previous.document === undefined) delete globalThis.document; else globalThis.document = previous.document;
+    if (previous.act === undefined) delete globalThis.IS_REACT_ACT_ENVIRONMENT; else globalThis.IS_REACT_ACT_ENVIRONMENT = previous.act;
+    dom.window.close();
   }
 });
 
@@ -312,7 +343,8 @@ test('a second apply on the same fake ctx duplicates registrations; Host must no
   client.apply(ctx);
   // A second apply duplicates every registration; no identity is added or lost.
   const ids = entries.filter(row => row.options.id !== undefined).map(row => row.options.id);
-  for (const id of ['shine-mage.account.login', 'shine-mage.account.theme',
+  assert.equal(entries.some(row => ['shine-mage.account.theme', 'shine-mage.account.menu'].includes(row.options.id)), false);
+  for (const id of ['shine-mage.account.login',
     'shine-mage.analytics-b0.generate-cockpit', 'shine-mage.analytics-b0.overlay']) {
     assert.equal(entries.filter(row => row.options.id === id).length, 2, `${id} registered twice`);
     assert.equal(ids.filter(value => value === id).length, 2, `${id} counted twice`);
@@ -475,7 +507,7 @@ test('built browser factory requires only platform modules and registers shared-
   selection.detachSelection();
   selection.restoreSelection();
   assert.equal(snapshot.byId[primary].retainedBy.mainView, 1);
-  assert.ok(login.options.store);
+  assert.equal(login.options.store, undefined);
   assert.equal(dock.options.store, undefined);
   assert.ok(dock.options.inject().board);
   const seeded = dock.options.inject().board.getSnapshot();

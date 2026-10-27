@@ -1,20 +1,29 @@
 """Read-only authorized result_ref/data_ref access for free HTML pages.
 
-New queries stay on the native Agent. Snapshots are injected fixtures. Cache
-hits re-check actor, unit, time, version and revocation.
 """
 from __future__ import annotations
 
 from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import json
 import re
 from threading import RLock
 from typing import Any, Callable
 from uuid import uuid4
 
+from pydantic import ValidationError
+from backend.contracts.page_facts import (
+    FACT_MAX_RESPONSE_BYTES, PageFactReadRequest, PageFactView,
+)
+
 from backend.services.analytics.access import AnalyticsError, AnalyticsPrincipal, require
+from backend.services.analytics.page_context import PageAccessPolicy
 from backend.services.analytics.first_purchase.asset_state import now_ms, timestamp
+from backend.services.analytics.warehouse_fact_selection import (
+    FactSelectionError,
+    FactBudgetExceeded,
+    snapshot_facts,
+)
 
 PROTOCOL = "free-page-bridge/v1"
 SCHEMA_VERSION = "free-page/v1"
@@ -22,7 +31,7 @@ DATA_SCOPE = "free-page-result-fixture"
 CAPABILITY = "dashboard:read"
 IDENTITY = re.compile(r"^[A-Za-z0-9_.:-]{1,128}$")
 BINDING_STATES = ("UNBOUND_SAMPLE", "BOUND_VERIFIED", "BOUND_STALE")
-READ_MODES = ("summary", "page", "range")
+READ_MODES = ("summary", "page", "range", "facts")
 PAGE_TO_HOST_OPS = ("data.read", "data.cancel")
 FORBIDDEN_OPS = ("sql", "save", "http.fetch", "credential.read")
 FORBIDDEN_FIELDS = frozenset({
@@ -38,6 +47,7 @@ CANCEL_FIELDS = frozenset({"op", "request_id", "instance_id"})
 MAX_RESPONSE_BYTES = 65536
 MAX_CUMULATIVE_ROWS = 2000
 MAX_PAGE_LIMIT = 50
+MAX_MANIFEST_ENTRIES = 64
 SUMMARY_PREVIEW_ROWS = 5
 
 _FAULTS = {
@@ -91,6 +101,8 @@ class AuthorizedSnapshot:
     rows: tuple[dict[str, Any], ...]
     data_scope: str = DATA_SCOPE
     session_id: str = ""
+    authorization_key: tuple = ()
+    metadata: dict = field(default_factory=dict)
 
 
 def default_synthetic_snapshot(*, owner: str = "alice", row_count: int = 120, **overrides) -> dict:
@@ -124,27 +136,48 @@ def _manifest_entries(manifest: object) -> list[dict[str, Any]]:
     bindings = manifest.get("bindings", [])
     if not isinstance(refs, list) or not isinstance(bindings, list):
         raise fault("INVALID_PAGE")
+    if len(refs) > MAX_MANIFEST_ENTRIES or len(bindings) > MAX_MANIFEST_ENTRIES:
+        raise fault("PACKAGE_TOO_LARGE")
     entries: list[dict[str, Any]] = []
     seen: set[str] = set()
     for item in refs:
         ref = identity(item, label="result_ref")
-        if ref not in seen:
-            entries.append({"result_ref": ref})
-            seen.add(ref)
+        if ref in seen:
+            raise fault("INVALID_PAGE")
+        entries.append({"result_ref": ref})
+        seen.add(ref)
+    declared_refs = frozenset(seen)
+    binding_ids: set[str] = set()
     for item in bindings:
         if not _record(item):
             raise fault("INVALID_PAGE")
         allowed_binding = {
+            "binding_id", "node_id", "mode",
             "result_ref", "data_ref", "unit", "time_range", "result_version",
         }
         if any(key not in allowed_binding for key in item):
             raise fault("INVALID_PAGE")
+        item = {key: value for key, value in item.items()
+                if value is not None or key not in {"node_id", "data_ref"}}
         if "result_ref" not in item:
             raise fault("INVALID_PAGE")
+        if "binding_id" in item:
+            binding_id = identity(item["binding_id"], label="binding_id")
+            if binding_id in binding_ids:
+                raise fault("INVALID_PAGE")
+            binding_ids.add(binding_id)
         ref = identity(item["result_ref"], label="result_ref")
+        if ref not in declared_refs:
+            raise fault("INVALID_PAGE")
         entry = {"result_ref": ref}
+        for key in ("binding_id", "node_id"):
+            if key in item:
+                identity(item[key], label=key)
         if "data_ref" in item:
             entry["data_ref"] = identity(item["data_ref"], label="data_ref")
+        if "mode" in item:
+            if item["mode"] not in READ_MODES:
+                raise fault("INVALID_PAGE")
         if "unit" in item:
             if not isinstance(item["unit"], str) or not item["unit"] or len(item["unit"]) > 64:
                 raise fault("INVALID_PAGE")
@@ -168,15 +201,18 @@ def _manifest_entries(manifest: object) -> list[dict[str, Any]]:
 class PageResultAccess:
     """In-memory authorized snapshot reader. Not a page asset store."""
 
-    def __init__(self, *, clock: Callable[[], int] = now_ms):
+    def __init__(self, *, clock: Callable[[], int] = now_ms, policy=PageAccessPolicy(), source=None, resolve_target=None):
         self.clock = clock
+        self.policy = policy
+        self.source = source
+        self.resolve_target = resolve_target
         self._lock = RLock()
         self._snapshots: dict[str, AuthorizedSnapshot] = {}
         self._revoked: set[str] = set()
-        self._data_refs: dict[str, tuple[str, str, int]] = {}
+        self._data_refs: dict[str, tuple[str, str, int] | tuple[str, str, int, tuple]] = {}
         self._cancelled: set[tuple[str, str]] = set()
         self._consumed_rows: dict[tuple[str, str], int] = {}
-        self._cache: dict[tuple[str, str, int], AuthorizedSnapshot] = {}
+        self._cache: dict[tuple, AuthorizedSnapshot] = {}
 
     def put_snapshot(self, payload: dict) -> AuthorizedSnapshot:
         if not _record(payload):
@@ -244,8 +280,11 @@ class PageResultAccess:
             self._cancelled.add((actor.actor_id, request_id))
         return {"request_id": request_id, "status": "CANCELLED"}
 
-    def binding_state(self, actor: AnalyticsPrincipal, manifest: object) -> dict[str, Any]:
+    def binding_state(self, actor: AnalyticsPrincipal, manifest: object, *, target=None, source_context=None) -> dict[str, Any]:
         self._access(actor)
+        spec, target_key = self._target(actor, target, source_context)
+        if spec is not None:
+            manifest = spec["binding_manifest"]
         entries = _manifest_entries(manifest)
         if not entries:
             return {
@@ -262,12 +301,21 @@ class PageResultAccess:
         reasons: list[str] = []
         verified = 0
         for entry in entries:
-            item, reason = self._probe(actor, entry)
+            if spec is not None:
+                snapshot = self.source.read(source_context, spec["session_id"], entry["result_ref"], target_key=target_key)
+                self._match_binding(snapshot, entry)
+                item, reason = {"result_ref": snapshot.result_ref, "status": "VERIFIED", "unit": snapshot.unit,
+                                "time_range": snapshot.time_range, "queried_at": snapshot.queried_at,
+                                "source": snapshot.source, "result_version": 1}, None
+            else:
+                item, reason = self._probe(actor, entry)
             refs.append(item)
             if reason:
                 reasons.append(reason)
             else:
                 verified += 1
+        if source_context is not None:
+            source_context.revalidate()
         state = "BOUND_VERIFIED" if verified == len(entries) else "BOUND_STALE"
         return {
             "binding_state": state,
@@ -280,7 +328,7 @@ class PageResultAccess:
             },
         }
 
-    def read(self, actor: AnalyticsPrincipal, request: dict, *, manifest: object) -> dict[str, Any]:
+    def read(self, actor: AnalyticsPrincipal, request: dict, *, manifest: object = None, target=None, source_context=None) -> dict[str, Any]:
         self._access(actor)
         payload = self._request(request, READ_FIELDS, op="data.read")
         request_id = payload.get("request_id")
@@ -293,16 +341,35 @@ class PageResultAccess:
         mode = payload.get("mode", "summary")
         if mode not in READ_MODES:
             raise fault("INVALID_PAGE")
-        snapshot, binding = self._resolve(actor, payload, manifest)
+        if mode == "facts":
+            try:
+                PageFactReadRequest.model_validate(payload)
+            except ValidationError:
+                raise fault("INVALID_PAGE") from None
+        snapshot, binding = (self._resolve_native(actor, payload, target, source_context) if self.source is not None
+                             else self._resolve(actor, payload, manifest))
         self._raise_if_cancelled(actor, request_id)
-        rows, cursor = self._slice(snapshot, payload, mode)
-        data_ref = self._issue_data_ref(actor, snapshot)
+        facts = None
+        if mode == "facts":
+            try:
+                facts = snapshot_facts(snapshot.metadata, snapshot.rows)
+            except FactBudgetExceeded:
+                raise fault("PACKAGE_TOO_LARGE") from None
+            except FactSelectionError:
+                raise fault("INVALID_PAGE") from None
+            if len(facts) > MAX_CUMULATIVE_ROWS:
+                raise fault("PACKAGE_TOO_LARGE")
+            rows, cursor = [], None
+        else:
+            rows, cursor = self._slice(snapshot, payload, mode)
+        data_ref = "data_" + uuid4().hex
         summary = {
             "unit": snapshot.unit,
             "time_range": dict(snapshot.time_range),
             "queried_at": snapshot.queried_at,
             "source": snapshot.source,
             "row_count": len(snapshot.rows),
+            **deepcopy(snapshot.metadata),
         }
         body = {
             "ok": True,
@@ -327,15 +394,28 @@ class PageResultAccess:
                 if key in binding
             },
         }
+        if facts is not None:
+            body.update(facts=facts, facts_schema_version="warehouse-facts/v1",
+                        expires_at_ms=snapshot.expires_at_ms)
+            try:
+                body = PageFactView.model_validate(body).model_dump(mode="json")
+            except ValidationError:
+                raise fault("INVALID_PAGE") from None
         encoded = json.dumps(body, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
-        if len(encoded.encode("utf-8")) > MAX_RESPONSE_BYTES:
+        byte_limit = FACT_MAX_RESPONSE_BYTES if facts is not None else MAX_RESPONSE_BYTES
+        if len(encoded.encode("utf-8")) > byte_limit:
             raise fault("PACKAGE_TOO_LARGE")
-        self._consume(actor, instance_id, len(rows))
+        if source_context is not None:
+            source_context.revalidate()
+        if snapshot.expires_at_ms is not None and self.clock() >= snapshot.expires_at_ms:
+            raise fault("RESULT_STALE")
+        self._consume(actor, instance_id, len(facts) if facts is not None else len(rows))
         self._raise_if_cancelled(actor, request_id)
+        self._issue_data_ref(actor, snapshot, handle=data_ref)
         return body
 
     def _access(self, actor: AnalyticsPrincipal) -> None:
-        require(actor, CAPABILITY, data_scope=DATA_SCOPE)
+        require(actor, CAPABILITY, data_scope=self.policy.result_scope)
 
     def _request(self, request: object, allowed: frozenset[str], *, op: str) -> dict[str, Any]:
         if not _record(request):
@@ -393,6 +473,44 @@ class PageResultAccess:
             else:
                 self._cache[(actor.actor_id, snapshot.result_ref, snapshot.result_version)] = snapshot
         return snapshot, binding
+
+    def _target(self, actor, target, context):
+        if self.source is None:
+            return None, ()
+        if context is None or context.actor != actor:
+            raise fault("FORBIDDEN")
+        spec = self.resolve_target(actor, target)
+        key = (json.dumps(target, sort_keys=True, separators=(",", ":")),)
+        return spec, key
+
+    def _resolve_native(self, actor, payload, target, context):
+        spec, target_key = self._target(actor, target, context)
+        if ("result_ref" in payload) == ("data_ref" in payload):
+            raise fault("INVALID_PAGE")
+        issued = None
+        if "data_ref" in payload:
+            handle = identity(payload["data_ref"], label="data_ref")
+            with self._lock:
+                issued = self._data_refs.get(handle)
+            if issued is None or issued[0] != actor.actor_id:
+                raise fault("NOT_FOUND")
+            ref = issued[1]
+        else:
+            ref = identity(payload["result_ref"], label="result_ref")
+        listed = {entry["result_ref"]: entry for entry in _manifest_entries(spec["binding_manifest"])}
+        if ref not in listed:
+            raise fault("NOT_FOUND")
+        snapshot = self.source.read(context, spec["session_id"], ref, target_key=target_key)
+        if snapshot.data_scope not in actor.data_scopes:
+            raise fault("FORBIDDEN")
+        if issued is not None and (issued[2] != snapshot.result_version or issued[3] != snapshot.authorization_key):
+            raise fault("RESULT_STALE")
+        self._match_binding(snapshot, listed[ref])
+        with self._lock:
+            if ref in self._revoked:
+                raise fault("RESULT_REVOKED")
+            snapshot = self._cache.setdefault(snapshot.authorization_key, snapshot)
+        return snapshot, listed[ref]
 
     def _authorized_snapshot(self, actor: AnalyticsPrincipal, result_ref: str) -> AuthorizedSnapshot:
         snapshot = self._snapshots.get(result_ref)
@@ -497,8 +615,8 @@ class PageResultAccess:
                 raise fault("PACKAGE_TOO_LARGE")
             self._consumed_rows[key] = used
 
-    def _issue_data_ref(self, actor: AnalyticsPrincipal, snapshot: AuthorizedSnapshot) -> str:
-        handle = "data_" + uuid4().hex
+    def _issue_data_ref(self, actor: AnalyticsPrincipal, snapshot: AuthorizedSnapshot, *, handle=None) -> str:
+        handle = handle or "data_" + uuid4().hex
         with self._lock:
-            self._data_refs[handle] = (actor.actor_id, snapshot.result_ref, snapshot.result_version)
+            self._data_refs[handle] = (actor.actor_id, snapshot.result_ref, snapshot.result_version, snapshot.authorization_key) if self.source is not None else (actor.actor_id, snapshot.result_ref, snapshot.result_version)
         return handle

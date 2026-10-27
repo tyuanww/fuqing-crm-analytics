@@ -96,6 +96,14 @@ test('all owned package declarations follow the plugin manager independently of 
   }
 });
 
+test('prepare builds the official host session-lock addon before the official artifacts', async () => {
+  const pipeline = await readFile(new URL('./pipeline.mjs', import.meta.url), 'utf8');
+  const native = "run('corepack', ['pnpm', 'run', 'build:native-system'], upstream)";
+  const official = "run('corepack', ['pnpm', 'run', 'build:official'], upstream)";
+  assert.ok(pipeline.includes(native));
+  assert.ok(pipeline.indexOf(native) < pipeline.indexOf(official));
+});
+
 test('repeated frozen fetch/install restores executable package links without running lifecycle scripts', async () => {
   const scratch = await mkdtemp(join(tmpdir(), 'b0-repeat-install-'));
   const env = { HOME: process.env.HOME, PATH: dirname(process.execPath) + ':/usr/bin:/bin',

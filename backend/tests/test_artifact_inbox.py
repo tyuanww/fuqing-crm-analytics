@@ -1,8 +1,11 @@
 """Candidate HTML artifact inbox persistence and idempotency."""
+from contextlib import closing
+import gc
 import hashlib
 import json
 from pathlib import Path
 import sqlite3
+import warnings
 
 from fastapi.testclient import TestClient
 import pytest
@@ -71,6 +74,69 @@ def test_intake_is_durable_and_idempotent(tmp_path):
         listed = client.get("/api/v1/analytics/cockpit-artifacts", headers=headers())
         assert listed.status_code == 200
         assert listed.json()["items"][0]["artifact_id"] == artifact["artifact_id"]
+
+
+@pytest.mark.parametrize("version", [1, 2])
+def test_reopening_inbox_closes_migration_connection_and_persists_schema(tmp_path, version):
+    inbox = ArtifactInboxStore(tmp_path / "artifacts")
+    actor = AnalyticsPrincipal("alice", CAPS, frozenset({DATA_SCOPE}))
+    body = {"source": "page_package", "session_id": "session_main",
+            "request_id": "before-migration", "title": "保留候选", "package": PACKAGE}
+    original = inbox.intake(actor, body)
+    if version == 1:
+        with closing(sqlite3.connect(inbox.path)) as con, con:
+            con.execute("ALTER TABLE artifacts DROP COLUMN binding_manifest")
+            con.execute("PRAGMA user_version=1")
+    gc.collect()
+    with warnings.catch_warnings(record=True) as recorded:
+        warnings.simplefilter("always", ResourceWarning)
+        reopened = ArtifactInboxStore(tmp_path / "artifacts")
+        gc.collect()
+    assert not [str(item.message) for item in recorded if issubclass(item.category, ResourceWarning)]
+    with closing(sqlite3.connect(reopened.path)) as con:
+        assert con.execute("PRAGMA user_version").fetchone()[0] == 2
+        columns = {row[1] for row in con.execute("PRAGMA table_info(artifacts)")}
+        assert "binding_manifest" in columns
+    new_body = {**body, "request_id": "after-migration", "title": "迁移后候选",
+                "binding_manifest": {"bindings": [], "result_refs": ["result_fixture_1"]}}
+    receipt = reopened.intake(actor, new_body)
+    assert receipt["status"] == "PREVIEWABLE" and receipt["page_id"] is None
+    assert receipt["created_at"] > 0
+    assert receipt["binding_manifest"] == new_body["binding_manifest"]
+    reloaded = ArtifactInboxStore(tmp_path / "artifacts")
+    assert reloaded.get(actor, original["artifact_id"])["title"] == "保留候选"
+    assert reloaded.get(actor, receipt["artifact_id"]) == {
+        key: value for key, value in receipt.items() if key != "idempotent"
+    }
+    assert reloaded.intake(actor, new_body)["artifact_id"] == receipt["artifact_id"]
+
+
+def test_binding_manifest_survives_receipt_reload_and_confirm(tmp_path):
+    manifest = {"result_refs": ["result_fixture_1"], "bindings": [{"binding_id": "gsv", "result_ref": "result_fixture_1", "mode": "summary"}]}
+    with TestClient(app(tmp_path)) as client:
+        body = {"source": "page_package", "session_id": "session_main", "request_id": "bound-receipt",
+                "title": "绑定页", "package": PACKAGE, "binding_manifest": manifest}
+        artifact = client.post("/api/v1/analytics/cockpit-artifacts", json=body, headers=headers()).json()
+        assert artifact["binding_manifest"]["result_refs"] == manifest["result_refs"]
+        assert artifact["binding_manifest"]["bindings"][0]["result_ref"] == manifest["bindings"][0]["result_ref"]
+        fetched_manifest = client.get(f"/api/v1/analytics/cockpit-artifacts/{artifact['artifact_id']}", headers=headers()).json()["binding_manifest"]
+        assert fetched_manifest["result_refs"] == manifest["result_refs"]
+
+
+def test_replayed_page_request_cannot_silently_replace_binding_manifest(tmp_path):
+    manifest = {"result_refs": ["result_fixture_1"], "bindings": [{"binding_id": "gsv", "result_ref": "result_fixture_1", "mode": "summary"}]}
+    with TestClient(app(tmp_path)) as client:
+        body = {"source": "page_package", "session_id": "session_main", "request_id": "bound-replay",
+                "title": "绑定页", "package": PACKAGE, "binding_manifest": manifest}
+        first = client.post("/api/v1/analytics/cockpit-artifacts", json=body, headers=headers())
+        assert first.status_code == 201, first.text
+
+        conflicting = client.post("/api/v1/analytics/cockpit-artifacts", json={
+            **body,
+            "binding_manifest": {"bindings": [], "result_refs": []},
+        }, headers=headers())
+        assert conflicting.status_code == 409, conflicting.text
+        assert conflicting.json()["error"]["code"] == "ARTIFACT_REQUEST_CONFLICT"
 
 
 def test_dedupe_identity_follows_source_contract(tmp_path):
@@ -293,10 +359,10 @@ def test_historical_page_package_receipt_replays_and_confirms_after_reopen(tmp_p
     package = {**PACKAGE, "presentation": None}
     content_hash = package_digest(package)
     artifact_id = "artifact_historical"
-    with sqlite3.connect(inbox.path) as con:
-        con.execute("INSERT INTO artifacts VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (
+    with closing(sqlite3.connect(inbox.path)) as con, con:
+            con.execute("INSERT INTO artifacts VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (
             "alice", artifact_id, "page_package", "session_main", "historical-request", None,
-            "历史候选", None, json.dumps(package, ensure_ascii=False), content_hash,
+                "历史候选", None, json.dumps(package, ensure_ascii=False), json.dumps({"bindings": [], "result_refs": []}), content_hash,
             "PREVIEWABLE", None, 1, 1,
         ))
     with TestClient(app(tmp_path)) as client:
@@ -316,7 +382,7 @@ def test_historical_page_package_receipt_replays_and_confirms_after_reopen(tmp_p
         assert linked.json()["content_hash"] == content_hash
         assert linked.json()["package"] == package
         assert linked.json()["status"] == "SAVED"
-    with sqlite3.connect(inbox.path) as con:
+    with closing(sqlite3.connect(inbox.path)) as con:
         stored = con.execute("SELECT package, content_hash, page_id FROM artifacts WHERE artifact_id=?", (artifact_id,)).fetchone()
         assert json.loads(stored[0]) == package
         assert stored[1:] == (content_hash, page_id)
@@ -358,7 +424,7 @@ def test_confirm_revalidates_stored_receipt_package(tmp_path):
             "title": "候选页", "package": PACKAGE,
         }, headers=headers()).json()
         page_id = save_page(client, PACKAGE)["page_id"]
-        with sqlite3.connect(tmp_path / "artifacts" / "artifact_inbox.sqlite3") as con:
+        with closing(sqlite3.connect(tmp_path / "artifacts" / "artifact_inbox.sqlite3")) as con, con:
             con.execute("UPDATE artifacts SET package=? WHERE artifact_id=?",
                         ('{"html":42}', receipt["artifact_id"]))
         linked = client.post(f"/api/v1/analytics/cockpit-artifacts/{receipt['artifact_id']}/confirm",

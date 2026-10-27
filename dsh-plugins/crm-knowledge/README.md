@@ -1,8 +1,8 @@
 # CRM 指标与分析候选插件
 
-固定 SDK：DSH 0.1.7-rc.2（见 [`../plugin-kit/toolchain.json`](../plugin-kit/toolchain.json)），Node 24。插件运行不需要 Python；服务和跨服务测试另用锁定 Python 3.14+。本插件按 rc2 构建；杭州状态以根 [STATUS](../../STATUS.md) 的带日期现场快照为准。独立插件，包含显式配置的合成服务客户端及默认未连接的看板 GSV HTTP 适配，通过 analytics-workbench 的可选 `cockpit.crm` 插槽展示引用，不修改 DSH 上游或比赛事实合同。构建依赖只读复用已准备好的固定 checkout，不下载或自动安装。
+主仓构建 peer：DSH `0.2.1-rc.3`、Cordis `4.0.5`、Node 24。杭州现役 side-load 仍是独立的 DSH `0.2.1-rc.1`、Cordis `4.0.5` 运行实例，主仓回归不能替代线上验收。插件运行不需要 Python；服务和跨服务测试另用锁定 Python 3.14+。独立插件，包含显式配置的合成服务客户端及默认未连接的看板 GSV HTTP 适配，通过 analytics-workbench 的可选 `cockpit.crm` 插槽展示引用，不修改 DSH 上游或比赛事实合同。构建依赖只读复用已准备好的固定 checkout，不下载或自动安装。
 
-本包保留身份 `@shine-mage/dsh-crm-knowledge`，拆分候选版本为 `0.0.0-crm.2`，只拥有 CRM 登录、指标与分析；公开知识解释和图谱工具已迁入[独立知识插件](../knowledge/README.md)。两个包各自构建、测试和打包，生产源码没有相互导入，也不引用 workbench 内部实现。CRM 只携带指标 HTTP API 1.0.0 客户端，不查找主仓目录或启动 Python。未配置合成服务时返回 `NOT_AVAILABLE / SERVICE_NOT_CONFIGURED`；真实看板登录与查询不会改查合成源。
+本包保留身份 `@shine-mage/dsh-crm-knowledge`。杭州现役 side-load 为 `0.0.0-crm.5`，插件页显示 CRM Host 与客户端 `2/2` 运行中；商品新老客、RFM 快照和对应健康字段已有合同与部署证据。它只拥有 CRM 登录、指标与分析；公开知识解释和图谱工具已迁入[独立知识插件](../knowledge/README.md)。两个包各自构建、测试和打包，生产源码没有相互导入，也不引用 workbench 内部实现。CRM 只携带指标 HTTP API 1.0.0 客户端，不查找主仓目录或启动 Python。未配置合成服务时返回 `NOT_AVAILABLE / SERVICE_NOT_CONFIGURED`；真实看板登录与查询不会改查合成源。当前运行边界见[审查问题修复回执](../../docs/hackathon/evidence/dsh-review-fixes-20261022.md)。
 
 Python 实现和知识资源的维护源仍在 workspace；两项服务已分别完成[独立应用候选打包与隔离运行](../../docs/operating/crm-service-packages.md)。物理分仓、平台依赖冷安装及精确宿主发布证据尚未完成。配置、迁移与兼容窗口见[服务边界](../../docs/operating/crm-plugin-service-boundary.md)。
 
@@ -12,6 +12,8 @@ Python 实现和知识资源的维护源仍在 workspace；两项服务已分别
 |---|---|
 | `query_crm_dashboard_gsv` | 用户认可的现看板 GSV 总额、日趋势、首购口径的新客/老客，以及仓库最后支付日；绑定账号后只读调用原指标服务；与合成净额候选分开 |
 | `query_crm_dashboard_purchases` | 看板GSV分子下的AOV/AUS及正额订单/对应买家覆盖，需新版聚合接口和Host；一组真实窗口已独立只读核对并通过现役真实账号/模型验收，范围见交付记录 |
+| `query_crm_product_customer_cohorts` | 任意已登记商品的新客、老客、会员拆分与同比；一个商品映射多个 SPU class 时按 `user_id` 去重，不把品类人数直接相加 |
+| `query_crm_rfm_snapshot` | 读取杭州预计算的 RFM 8象限快照；缓存 miss 明确不可用，不在 Web 请求内现场扫描业务库 |
 | `query_crm_dashboard_readiness` | 当前连接下各指标来源具备程度与 A/B/C 分类；只读元数据，不返回明细 |
 | `query_crm_dashboard_membership` | 成交时会员溢价；缺快照/事件时不可用，不使用当前 is_member |
 | `query_crm_dashboard_net_gsv` | 扣实际成功退款的净额GSV，与看板GSV分列；必须带退款截止日，缺事件时不可用 |
@@ -56,7 +58,7 @@ CRM Host 默认 `baseUrl` 为 `http://127.0.0.1:8000`，适用于 rc2 独立配�
 {"start_date":"2026-07-01","end_date":"2026-07-05","channel":"全店","exclude_low_price":false}
 ```
 
-日期为上海时区自然日，含首尾，最多90天。全店不传 `channel`；剔除低价按现前端的四个渠道重复传递 `exclude_channels`，渠道别名和聚合交给现服务处理。工具依次 GET `/api/v1/auth/me`、`/api/v1/metrics/overview`、`/api/v1/metrics/trend`，再可选读取 `/api/v1/metrics/cutoff`；截止日缺失不伪造数值，固定 GSV，不接受任意 URL、SQL、退款截止日或账号覆盖。
+日期为上海时区自然日，含首尾，最多90天。全店不传 `channel`；剔除低价按现前端的四个渠道重复传递 `exclude_channels`，渠道别名和聚合交给现服务处理。工具依次 GET `/api/v1/auth/me`、`/api/v1/metrics/overview`、`/api/v1/metrics/trend`，并必须读取 `/api/v1/metrics/cutoff`；截止日缺失、非法或服务不可用时整次查询失败，不输出无法证明覆盖范围的数值。固定 GSV，不接受任意 URL、SQL、退款截止日或账号覆盖。
 
 候选通过 DSH 原生对话输入区的 **连接 CRM** 按钮登录。连接成功后，这个按钮显示分析图标和 **CRM分析**。账号和密码经同源受保护 HTTP 路由提交给可信 Host，Host 调用已有 CRM `/auth/login`，只将成功凭据保存在当前进程的私有闭包内，并绑定当前 DSH 对话。密码不作为工具参数、RPC 事件或消息发送给模型；令牌不回传浏览器、不写环境变量、profile、日志或磁盘，也不注入子进程。
 
@@ -74,6 +76,18 @@ CRM Host 默认 `baseUrl` 为 `http://127.0.0.1:8000`，适用于 rc2 独立配�
 `query_crm_dashboard_purchases` 使用同样的业务参数和对话登录，先校验 `/auth/me`，再调用 `/api/v1/metrics/dashboard-purchases`。金额、正额有效订单、对应买家及缺口来自同次聚合；零元订单和仅零元买家单列。未知标识、空/负金额使对应均值为空并返回原因。不会读取旧 `avg_order_value`，也不把新老客人数相加当买家总数。
 
 上线此候选需要同时更新CRM后端与CRM插件Host，并保留既有runtime受控重启；只替换preset不能给旧Host增加 `queryPurchases` 能力。重启后需用户在页面重新连接CRM，再对账。接口不存在时明确不可用，不降级查合成数据。部署状态及真实账号/模型验收以[本轮交付记录](../../docs/crm-calibration/crm-assets-release-2026-09-21.md)为准。
+
+## 商品新老客接口
+
+`query_crm_product_customer_cohorts` 调用只读 `POST /api/v1/category/product-customer`。没有版本请求头时后端返回 v2，插件显式请求 `product-customer/v3`。商品名称来自登记目录；省略 `products` 时查询全部商品，单次最多20个。`products` 可传内部商品名或唯一 `display_name`，公开结果只展示 `display_name`。日期最多90天，可显式提供对比期，否则按自然日映射到一年前，`2月29日` 回退到 `2月28日`。当前金额口径固定为 GSV，避免 GMV 结果继续使用 `gsv` 字段名。
+
+后端按商品实时聚合订单，不先分别计算多个 SPU class 再相加人数。`product-customer/v3` 先读取仓库数据截止日，再把当前期、同期和数据边界放在同一个只读事务内。任一周期超过覆盖范围时返回 `INSUFFICIENT_COVERAGE` 和覆盖对象，不把未覆盖日期填零，也不生成同比下降。内部 `name` 和 `spu_classes` 只留在 CRM Host，插件公开结果只保留 `display_name`、状态和指标。
+
+## RFM 快照接口
+
+`query_crm_rfm_snapshot` 调用 `/api/v1/customer-health/rfm-analysis`，只读取杭州预计算缓存，不在 Web 请求内执行三段 live SQL。返回 8 个 RFM 象限加 1 个已购客 TTL，共 9 行；四组结果必须具有同一组唯一标签。结果还包含当前/去年/前年标签、仓库截止日和绑定分群内容的稳定 `snapshot_id`。
+
+HTTP `503` 表示所选范围没有缓存或缓存基础设施不可用。调用方必须显示“RFM 未就绪”，不能改用现场计算、旧结果或其他资料源。`warehouse_cutoff` 是仓库最后支付日。
 
 ## 保存分析、检索、分享与组板
 

@@ -1,4 +1,4 @@
-import { PNPM_VERSION } from './toolchain.mjs';
+import { PNPM_VERSION, DSH_SDK_VERSION, DSH_UPSTREAM_SHA } from './toolchain.mjs';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { execFile } from 'node:child_process';
@@ -14,7 +14,7 @@ import { serviceFixture } from './test-fixtures/service-compatibility.mjs';
 import { writeBuildProvenance } from './generated-provenance.mjs';
 
 const exec = promisify(execFile);
-const SHA = '477b4f420553e8a52c2fbccc464d7561b239c443';
+const SHA = DSH_UPSTREAM_SHA;
 
 async function fixture(t) {
   const root = await mkdtemp(join(tmpdir(), 'dsh-plugin-candidate-'));
@@ -23,11 +23,11 @@ async function fixture(t) {
   await mkdir(join(root, 'plugin/lib'), { recursive: true });
   await writeFile(join(root, 'plugin/package.json'), JSON.stringify({
     name: '@shine-mage/test-plugin', version: '0.1.0', private: true, type: 'module', packageManager: `pnpm@${PNPM_VERSION}`,
-    peerDependencies: { '@deepseek-ai/dsh-tools': '0.1.7-rc.2' }, files: ['lib/', 'cordis.patch.yml'],
+    peerDependencies: { '@deepseek-ai/dsh-tools': DSH_SDK_VERSION }, files: ['lib/', 'cordis.patch.yml'],
   }) + '\n');
   await writeFile(join(root, 'plugin/lib/index.js'), 'export const testPlugin = true;\n');
   await writeFile(join(root, 'plugin/cordis.patch.yml'), '[]\n');
-  await writeFile(join(root, 'config/profile.json'), JSON.stringify({ schema_version: 'dsh-profile/v1', profile_id: 'test', dsh: { sdk_version: '0.1.7-rc.2', upstream_sha: SHA }, plugins: [{ path: 'plugin', id: '@shine-mage/test-plugin', build: 'build.mjs', enabled: true }] }));
+  await writeFile(join(root, 'config/profile.json'), JSON.stringify({ schema_version: 'dsh-profile/v1', profile_id: 'test', dsh: { sdk_version: DSH_SDK_VERSION, upstream_sha: SHA }, plugins: [{ path: 'plugin', id: '@shine-mage/test-plugin', build: 'build.mjs', enabled: true }] }));
   await writeFile(join(root, 'plugin/build.mjs'), 'export {}\n');
   await exec('git', ['-C', root, 'init', '-q']);
   await exec('git', ['-C', root, 'config', 'user.email', 'fixture@example.invalid']);
@@ -75,7 +75,7 @@ test('plugin candidate rejects missing state path and unallowlisted package', as
   await assert.rejects(() => createPluginCandidate({ ...input, statePath: '', profileManifest: input.profile }), /PLUGIN_CANDIDATE_STATE_PATH_REQUIRED/);
   const other = join(input.root, 'other');
   await mkdir(join(other, 'lib'), { recursive: true });
-  await writeFile(join(other, 'package.json'), JSON.stringify({ name: '@shine-mage/other', version: '0.1.0', packageManager: `pnpm@${PNPM_VERSION}`, type: 'module', peerDependencies: { '@deepseek-ai/dsh-tools': '0.1.7-rc.2' }, files: ['lib/'] }));
+  await writeFile(join(other, 'package.json'), JSON.stringify({ name: '@shine-mage/other', version: '0.1.0', packageManager: `pnpm@${PNPM_VERSION}`, type: 'module', peerDependencies: { '@deepseek-ai/dsh-tools': DSH_SDK_VERSION }, files: ['lib/'] }));
   await writeFile(join(other, 'lib/index.js'), 'export {};\n');
   await assert.rejects(() => createPluginCandidate({ ...input, plugin: other, outputDir: join(input.root, 'other-candidate'), profileManifest: input.profile }), /PLUGIN_CANDIDATE_NOT_ALLOWLISTED/);
 });

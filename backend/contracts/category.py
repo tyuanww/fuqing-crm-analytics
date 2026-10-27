@@ -1,9 +1,11 @@
 """Sample CRM - Pydantic 契约模型"""
 from __future__ import annotations
-from typing import Optional, List, Any, Dict, Annotated
+from typing import Optional, List, Any, Dict, Annotated, Literal
 from pydantic import BaseModel, Field
 from .common import WoolPartyBreakdown, DualAxisLineData
 from .types import RatioField, PercentageField, PpField  # Sprint 14 A.3
+
+GrowthRatioField = Annotated[float, Field(allow_inf_nan=False, description="(current - comparison) / comparison; raw ratio, displayed as percent")]
 
 class CategoryDistributionItem(BaseModel):
     name: str
@@ -31,27 +33,27 @@ class CategoryOverviewItem(BaseModel):
     name: str
     display_name: str = ""
     gsv: float
-    gsv_yoy: Optional["PercentageField"] = None
+    gsv_yoy: Optional["GrowthRatioField"] = None
     users: int
-    users_yoy: Optional["PercentageField"] = None
+    users_yoy: Optional["GrowthRatioField"] = None
     aus: float
-    aus_yoy: Optional["PercentageField"] = None
+    aus_yoy: Optional["GrowthRatioField"] = None
     old_gsv: float
-    old_gsv_yoy: Optional["PercentageField"] = None
-    old_ratio: "RatioField"
+    old_gsv_yoy: Optional["GrowthRatioField"] = None
+    old_ratio: RatioField
     old_ratio_yoy: Optional["PpField"] = None
     old_users: int
-    old_users_yoy: Optional["PercentageField"] = None
+    old_users_yoy: Optional["GrowthRatioField"] = None
     old_aus: float
-    old_aus_yoy: Optional["PercentageField"] = None
+    old_aus_yoy: Optional["GrowthRatioField"] = None
     new_gsv: float
-    new_gsv_yoy: Optional["PercentageField"] = None
-    new_ratio: "RatioField"
+    new_gsv_yoy: Optional["GrowthRatioField"] = None
+    new_ratio: RatioField
     new_ratio_yoy: Optional["PpField"] = None
     new_users: int
-    new_users_yoy: Optional["PercentageField"] = None
+    new_users_yoy: Optional["GrowthRatioField"] = None
     new_aus: float
-    new_aus_yoy: Optional["PercentageField"] = None
+    new_aus_yoy: Optional["GrowthRatioField"] = None
     old_users_ratio: Optional["RatioField"] = None
     old_users_ratio_yoy: Optional["PpField"] = None
     new_users_ratio: Optional["RatioField"] = None
@@ -63,13 +65,118 @@ class CategoryOverviewItem(BaseModel):
 class CategoryOverviewResponse(BaseModel):
     date_start: str
     date_end: str
+    compare_start_date: str
+    compare_end_date: str
     level: str
     channel: Optional[str] = None
     metric_type: str
+    data_cutoff: Optional[str] = None
+    data_version: str = "unknown"
     all_rows: List[CategoryOverviewItem]
     member_rows: List[CategoryOverviewItem]
     all_ttl: Optional[CategoryOverviewItem] = None
     member_ttl: Optional[CategoryOverviewItem] = None
+
+
+class ProductCustomerRequest(BaseModel):
+    """Product-level new/old customer query over the order stream."""
+
+    start_date: str
+    end_date: str
+    products: Optional[Annotated[List[Annotated[str, Field(max_length=80)]], Field(max_length=15)]] = None
+    metric_type: Literal["GSV"] = "GSV"
+    channel: Optional[str] = None
+    exclude_channels: Annotated[List[Annotated[str, Field(max_length=80)]], Field(max_length=10)] = Field(default_factory=list)
+    compare_start_date: Optional[str] = None
+    compare_end_date: Optional[str] = None
+
+
+class ProductCustomerBatchRequest(BaseModel):
+    """Bounded batch of product cohort windows sharing one UI query."""
+
+    ranges: Annotated[List[ProductCustomerRequest], Field(min_length=1, max_length=24)]
+
+
+class ProductCustomerMetrics(BaseModel):
+    gsv: float
+    users: int
+    aus: float
+    old_gsv: float
+    old_users: int
+    old_aus: float
+    old_ratio: "RatioField"
+    new_gsv: float
+    new_users: int
+    new_aus: float
+    new_ratio: "RatioField"
+    member_gsv: float
+    member_users: int
+    member_aus: float
+    member_ratio: RatioField
+    old_users_ratio: RatioField
+    new_users_ratio: RatioField
+
+
+class ProductCustomerYoY(BaseModel):
+    gsv: Optional[GrowthRatioField] = None
+    users: Optional[GrowthRatioField] = None
+    aus: Optional[GrowthRatioField] = None
+    old_gsv: Optional[GrowthRatioField] = None
+    old_users: Optional[GrowthRatioField] = None
+    old_aus: Optional[GrowthRatioField] = None
+    new_gsv: Optional[GrowthRatioField] = None
+    new_users: Optional[GrowthRatioField] = None
+    new_aus: Optional[GrowthRatioField] = None
+    old_ratio_ppt: Optional[PpField] = None
+    new_ratio_ppt: Optional[PpField] = None
+    old_users_ratio_ppt: Optional[PpField] = None
+    new_users_ratio_ppt: Optional[PpField] = None
+
+
+class ProductCustomerProduct(BaseModel):
+    name: str
+    display_name: str
+    spu_classes: List[str]
+    status: Literal["OK", "EMPTY"]
+    current: ProductCustomerMetrics
+    comparison: ProductCustomerMetrics
+    yoy: ProductCustomerYoY
+
+
+class ProductCustomerCoverage(BaseModel):
+    data_cutoff: Optional[str]
+    current_status: Literal["COMPLETE", "INSUFFICIENT"]
+    comparison_status: Literal["COMPLETE", "INSUFFICIENT"]
+
+
+class ProductCustomerResponseV2(BaseModel):
+    schema_version: Literal["product-customer/v2"] = "product-customer/v2"
+    source: Literal["orders+user_first_purchase"] = "orders+user_first_purchase"
+    date_start: str
+    date_end: str
+    compare_start_date: str
+    compare_end_date: str
+    new_old_cutoff: str
+    comparison_new_old_cutoff: str
+    data_cutoff: Optional[str] = None
+    metric_type: Literal["GSV"]
+    channel: Optional[str] = None
+    exclude_channels: List[str] = Field(default_factory=list)
+    products: List[ProductCustomerProduct]
+
+
+class ProductCustomerResponseV3(ProductCustomerResponseV2):
+    schema_version: Literal["product-customer/v3"] = "product-customer/v3"
+    status: Literal["OK", "INSUFFICIENT_COVERAGE"]
+    coverage: ProductCustomerCoverage
+    data_version: str
+
+
+class ProductCustomerBatchResponse(BaseModel):
+    results: List[ProductCustomerResponseV3]
+
+
+ProductCustomerResponse = ProductCustomerResponseV2 | ProductCustomerResponseV3
 
 
 class CategorySegmentMatrixResponse(BaseModel):
