@@ -320,7 +320,6 @@ def test_reauthorization_chain_last_revocation_and_relogin_never_activate(native
     from backend.services.crm_native_snapshot_source import NativeCrmLease, NativeCrmSnapshotSource
     revoker = NativeCrmSnapshotSource(directory=host_case["root"] / "refs", store=host_case["store"],
                                     provider=lambda: NativeCrmLease(host_case["identity"], lambda: True))
-    # Fixture identity is owner/session compatible; unbound revoke keeps its cross-generation semantics.
     revoker.revoke(refs[-1])
     c = rpc("source_authorization_confirm", preview_id=p["value"]["preview_id"])
     assert c["code"] == "RESULT_REVOKED", c
