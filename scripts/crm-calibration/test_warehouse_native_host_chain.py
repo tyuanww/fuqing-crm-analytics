@@ -315,3 +315,25 @@ def test_node_start_failure_closes_owned_http_thread_and_sockets(snapshot_case, 
             value.close()
         for value in threads:
             value.join(timeout=3)
+
+
+def test_reauthorization_preserves_exact_warehouse_snapshot(warehouse_native_chain):
+    rpc, _, app, store = warehouse_native_chain
+    warm(app, 'purchases')
+    assert rpc('login')['connected']
+    captured = rpc('query_warehouse', request=body('purchases'))
+    assert captured['ok'], captured
+    ref = captured['source_ref']
+    rpc('disconnect')
+    rpc('login')
+    assert rpc('read', ref_id=ref) == {'error': 'NATIVE_HOST_OPERATION_REJECTED'}
+    p = rpc('source_authorization_preview', refs=[ref])
+    assert p['ok'], p
+    descriptor = p['value']['sources'][0]
+    snapshot = WarehouseSnapshot.model_validate_json(captured['value']['snapshot_json'])
+    assert descriptor['captured_at'] == snapshot.captured_at.isoformat()
+    assert descriptor['projection_version'] == 'crm-warehouse-snapshot/v1'
+    c = rpc('source_authorization_confirm', preview_id=p['value']['preview_id'])
+    assert c['ok'], c
+    assert rpc('read', ref_id=ref) == captured['value']
+    assert store.read_owned_snapshot('fixture-user', snapshot.snapshot_id) == snapshot

@@ -4,7 +4,9 @@
 
 ## 当前快照（2026-10-28）
 
-- Workbench `e20a0fea` 已在隔离 19327 验收：原问数聊天取当前授权快照、交付卡进入驾驶舱、保存 v1、人工标题 v2、AI 标题 v3、切换产物后重开均通过，五项事实值与单位逐项一致。最后两次客户端更新使用 HMR，八项服务 PID 和 CRM 授权保持。WeKnora 真实检索和原文读取通过。作者 core 1386 项、library-workspace 94 项及草稿 PR #12/#13 的固定输入 CI 通过。重登后旧来源受授权代次保护，重新授权流程仍未实现。公网未切换，产品保持 PARTIAL。见[本轮收尾记录](docs/hackathon/evidence/dsh-ui-knowledge-closeout-20261028.md)。
+- 原快照显式重新授权已完成本地实现。Source/Host 149 项、页面来源 42 项、跨语言 10 项、CRM 全包 285 项及 Workbench core 1394 项通过，实际 React Chrome 合成验收通过。工作台两项审查 P2 已修复复核；新候选尚未完成严格包、组合与隔离真实重登验收，未改 19327 或公网。见[重新授权记录](docs/hackathon/evidence/dsh-source-reauthorization-20261028.md)。
+
+- Workbench `e20a0fea` 已在隔离 19327 验收：原问数聊天取当前授权快照、交付卡进入驾驶舱、保存 v1、人工标题 v2、AI 标题 v3、切换产物后重开均通过，五项事实值与单位逐项一致。最后两次客户端更新使用 HMR，八项服务 PID 和 CRM 授权保持。WeKnora 真实检索和原文读取通过。作者 core 1386 项、library-workspace 94 项及草稿 PR #12/#13 的固定输入 CI 通过。原隔离候选中重登后旧来源受授权代次保护；本轮后续本地实现及未完成的现场验收见上条。公网未切换，产品保持 PARTIAL。见[本轮收尾记录](docs/hackathon/evidence/dsh-ui-knowledge-closeout-20261028.md)。
 
 - 主仓草稿 [事实接口 #185](https://github.com/tyuanww/fuqing-crm-analytics/pull/185) → [AI 定位 #186](https://github.com/tyuanww/fuqing-crm-analytics/pull/186) → [组合接收 #187](https://github.com/tyuanww/fuqing-crm-analytics/pull/187) 均已推送、远程 CI 成功且无冲突。运行候选冻结 `e52f6e5d`，作者为 `e20a0fea`。默认后端 4072 passed、81 skipped，前端 236 项和新组合完整 B0 通过。运输 artifact `12770641494` 的 20 成员逐字节回读、严格接收与 80 项输入守卫通过。最终运行预检 `40584544901` 成功，artifact `12772486076` 已下载并按通用合同核对来源、摘要、1554 个源码文件和九插件；运行时安全解包通过。另行 portable Linux 扫描失败 75 项，尚未完成该模式的独立候选及目标启动验收，未据此认定当前包启动失败。未合并 PR、未切公网，产品仍 PARTIAL、`release_ready=false`。本条为独立文档收尾，不改变运行候选。见[组合接收记录](docs/hackathon/evidence/dsh-host-facts-composition-20261028.md)。
 

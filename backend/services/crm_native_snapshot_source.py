@@ -91,7 +91,7 @@ def fault(code: str) -> AnalyticsError:
         "UNAUTHENTICATED": (401, "请重新连接当前对话的 CRM 账号。"),
         "IDENTITY_UNAVAILABLE": (503, "无法核实当前原生 CRM 会话。"),
         "NOT_FOUND": (404, "结果引用不存在或当前对话不可见。"),
-        "RESULT_REVOKED": (403, "结果引用已撤销，请重新授权。"),
+        "RESULT_REVOKED": (403, "结果引用已撤销，无法恢复。"),
         "RESULT_STALE": (409, "结果来源或有效期已变化，请重新查询。"),
         "RESULT_UNAVAILABLE": (409, "权威 CRM 快照当前不可用。"),
         "SOURCE_UNAVAILABLE": (503, "权威 CRM 快照暂不可用，请稍后重试。"),
@@ -110,11 +110,18 @@ class NativeCrmIdentity:
 
 
 @dataclass(frozen=True)
+class NativeSnapshotAuthorization:
+    ref_id: str
+    ref_payload_sha256: str
+
+
+@dataclass(frozen=True)
 class NativeCrmLease:
     """The trusted Host must recheck its current login grant in is_current."""
 
     identity: NativeCrmIdentity
     is_current: Callable[[], bool]
+    authorizations: tuple[NativeSnapshotAuthorization, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -257,7 +264,13 @@ class NativeCrmSnapshotSource:
             raise fault("UNAUTHENTICATED")
         try:
             valid = (isinstance(lease, NativeCrmLease) and _identity_valid(lease.identity)
-                     and lease.identity.data_kind == self.store.data_kind and callable(lease.is_current))
+                     and lease.identity.data_kind == self.store.data_kind and callable(lease.is_current)
+                     and type(lease.authorizations) is tuple and len(lease.authorizations) <= 64
+                     and all(type(item) is NativeSnapshotAuthorization
+                             and isinstance(item.ref_id, str) and REF_ID.fullmatch(item.ref_id)
+                             and isinstance(item.ref_payload_sha256, str) and SHA256_HEX.fullmatch(item.ref_payload_sha256)
+                             for item in lease.authorizations)
+                     and len({item.ref_id for item in lease.authorizations}) == len(lease.authorizations))
         except (AttributeError, TypeError, ValueError):
             valid = False
         if not valid:
@@ -275,7 +288,8 @@ class NativeCrmSnapshotSource:
 
     def _unchanged(self, lease):
         current = self._lease()
-        if current.identity != lease.identity or not self._is_current(lease):
+        if (current.identity != lease.identity or current.authorizations != lease.authorizations
+                or not self._is_current(lease)):
             raise fault("UNAUTHENTICATED")
 
     def _snapshot(self, identity, snapshot_id):
@@ -332,6 +346,8 @@ class NativeCrmSnapshotSource:
         if not isinstance(snapshot_id, str) or not SNAPSHOT_ID.fullmatch(snapshot_id):
             raise fault("INVALID_REQUEST")
         lease = self._lease()
+        if lease.authorizations:
+            raise fault("INVALID_REQUEST")
         identity = lease.identity
         snapshot = self._snapshot(identity, snapshot_id)
         self._unchanged(lease)
@@ -354,7 +370,7 @@ class NativeCrmSnapshotSource:
                             identity.native_session_id, identity.connection_generation, snapshot_id,
                             canonical(raw), digest(raw)))
         self._unchanged(lease)
-        self._recheck(lease.identity, ref)
+        self._recheck(lease, ref)
         return ref
 
     def _reference(self, con, identity, ref_id):
@@ -365,31 +381,76 @@ class NativeCrmSnapshotSource:
         if row is None:
             raise fault("NOT_FOUND")
         ref = self._decode(row)
-        self._expected(ref, identity, self.expected_snapshot)
+        self._expected(ref, self.expected_snapshot)
         return ref
 
     @staticmethod
-    def _expected(ref, identity, expected):
+    def _expected(ref, expected):
         if expected is not None:
-            if (ref.snapshot_id != expected.snapshot_id
-                    or ref.identity.connection_generation != identity.connection_generation):
+            if ref.snapshot_id != expected.snapshot_id:
                 raise fault("NOT_FOUND")
             if ref.result_sha256 != expected.result_sha256:
                 raise fault("RESULT_STALE")
+
+    def _authorized(self, ref, lease):
+        authority = next((item for item in lease.authorizations if item.ref_id == ref.ref_id), None)
+        if authority is not None:
+            if authority.ref_payload_sha256 != digest(asdict(ref)):
+                raise fault("RESULT_STALE")
+            return
+        if ref.identity.connection_generation != lease.identity.connection_generation:
+            raise fault("NOT_FOUND")
+        self._fresh(ref)
+
+    def inspect(self, refs: tuple[str, ...], *, check_active):
+        if (type(refs) is not tuple or not 1 <= len(refs) <= 64
+                or any(not isinstance(item, str) or not REF_ID.fullmatch(item) for item in refs)
+                or len(set(refs)) != len(refs)):
+            raise fault("INVALID_REQUEST")
+        check_active()
+        lease = self._lease()
+        observed = []
+        with self._state(readonly=True) as con:
+            for ref_id in refs:
+                check_active()
+                ref = self._reference(con, lease.identity, ref_id)
+                self._active(con, ref)
+                observed.append(ref)
+        values = []
+        for ref in observed:
+            check_active()
+            snapshot = self._snapshot(lease.identity, ref.snapshot_id)
+            self._matches(ref, snapshot)
+            values.append({"ref_id": ref.ref_id, "ref_payload_sha256": digest(asdict(ref)),
+                           "snapshot_id": ref.snapshot_id, "source_sha256": ref.source_sha256,
+                           "result_sha256": ref.result_sha256, "projection_version": ref.projection_version,
+                           "data_kind": ref.identity.data_kind, "captured_at": snapshot.captured_at.isoformat()})
+        self._unchanged(lease)
+        for ref in observed:
+            check_active()
+            self._matches(ref, self._snapshot(lease.identity, ref.snapshot_id))
+        with self._state(readonly=True) as con:
+            for ref in observed:
+                check_active()
+                current = self._reference(con, lease.identity, ref.ref_id)
+                if current != ref:
+                    raise fault("RESULT_STALE")
+                self._active(con, current)
+        self._unchanged(lease)
+        check_active()
+        return tuple(values)
 
     def read(self, ref_id: str) -> CrmSnapshot | WarehouseSnapshot:
         lease = self._lease()
         with self._state(readonly=True) as con:
             ref = self._reference(con, lease.identity, ref_id)
-            if ref.identity.connection_generation != lease.identity.connection_generation:
-                raise fault("NOT_FOUND")
             self._active(con, ref)
-            self._fresh(ref)
+            self._authorized(ref, lease)
         self._unchanged(lease)
         snapshot = self._snapshot(lease.identity, ref.snapshot_id)
         self._matches(ref, snapshot)
         self._unchanged(lease)
-        self._recheck(lease.identity, ref)
+        self._recheck(lease, ref)
         return snapshot
 
     def read_many(self, requests: tuple[NativeSnapshotRead, ...], *, check_active):
@@ -405,9 +466,9 @@ class NativeCrmSnapshotSource:
             for item in requests:
                 check_active()
                 ref = self._reference(con, lease.identity, item.ref_id)
-                self._expected(ref, lease.identity, item.expected)
+                self._expected(ref, item.expected)
                 self._active(con, ref)
-                self._fresh(ref)
+                self._authorized(ref, lease)
                 refs.append(ref)
         self._unchanged(lease)
         snapshots = []
@@ -419,28 +480,32 @@ class NativeCrmSnapshotSource:
         self._unchanged(lease)
         for ref in refs:
             check_active()
-            self._recheck(lease.identity, ref)
+            self._recheck(lease, ref)
         check_active()
         return tuple(snapshots)
 
-    def _recheck(self, identity, ref):
+    def _recheck(self, lease, ref):
         with self._state(readonly=True) as con:
-            current = self._reference(con, identity, ref.ref_id)
+            current = self._reference(con, lease.identity, ref.ref_id)
             if current != ref:
                 raise fault("STATE_UNAVAILABLE")
             self._active(con, current)
-            self._fresh(current)
-        self._fresh(ref)
+            self._authorized(current, lease)
+        self._authorized(ref, lease)
 
     def revoke(self, ref_id: str) -> None:
         lease = self._lease()
         with self._state(readonly=True) as con:
             observed = self._reference(con, lease.identity, ref_id)
+            if self.expected_snapshot is not None or lease.authorizations:
+                self._authorized(observed, lease)
         self._unchanged(lease)
         with self._state() as con:
             ref = self._reference(con, lease.identity, ref_id)
             if ref != observed:
                 raise fault("STATE_UNAVAILABLE")
+            if self.expected_snapshot is not None or lease.authorizations:
+                self._authorized(ref, lease)
             con.execute("INSERT INTO revocations VALUES (?,?) ON CONFLICT(ref_id) DO NOTHING",
                         (ref.ref_id, self.clock()))
             if con.execute("SELECT 1 FROM revocations WHERE ref_id=?", (ref.ref_id,)).fetchone() is None:
