@@ -6,8 +6,8 @@
   },
   "consumer": {
     "repository": "tyuanww/fuqing-crm-analytics",
-    "branch": "main",
-    "reviewed_sha": "857be74a48810c7504c4c401e9c43a9ed4b67298"
+    "branch": "codex/native-source-reauthorization-20261028",
+    "reviewed_sha": "eeb2f4cd05c45f4b73b4e871881105b0c0cfaa73"
   },
   "bundle": {
     "repository": "tyuanww/fuqing-crm-analytics",
