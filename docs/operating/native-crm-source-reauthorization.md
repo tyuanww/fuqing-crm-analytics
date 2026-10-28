@@ -13,7 +13,7 @@
 | `source_authorization_preview` | `refs` | `preview_id`、`expires_at_ms`、`sources` |
 | `source_authorization_confirm` | `preview_id` | `authorized_refs`、`expires_at_ms` |
 
-成功响应为 `{ok: true, value: ...}`。错误响应为 `{ok: false, code, message}`，不返回上游异常。
+成功响应为 `{ok: true, value: ...}`。错误响应包含 `ok: false` 和 `code`；`message` 为可选的固定文案，不返回上游异常。
 
 `refs` 接受 1 至 64 个唯一引用，并保留顺序。预览最多有效 60 秒，且不超过当前登录期限。每次登录最多保留两个未过期预览或确认回执。确认时重新核实全部来源。重试同一预览返回相同回执，仍检查当前登录和来源状态。
 
