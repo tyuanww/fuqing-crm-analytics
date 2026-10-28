@@ -4,15 +4,13 @@
 
 ## 当前快照（2026-10-28）
 
-- Workbench `e20a0fea` 已在隔离 19327 验收：原问数聊天取当前授权快照、交付卡进入驾驶舱、保存 v1、人工标题 v2、AI 标题 v3、切换产物后重开均通过，五项事实值与单位逐项一致。最后两次客户端更新使用 HMR，八项服务 PID 和 CRM 授权保持。WeKnora 真实检索和原文读取通过。作者 core 1386 项、library-workspace 94 项及草稿 PR #12/#13 的固定输入 CI 通过。重登后旧来源受授权代次保护，重新授权流程仍未实现。公网未切换，产品保持 PARTIAL。见[本轮收尾记录](docs/hackathon/evidence/dsh-ui-knowledge-closeout-20261028.md)。
+- 原快照重新授权已推送为草稿 [Source #189](https://github.com/tyuanww/fuqing-crm-analytics/pull/189)、[CRM #6](https://github.com/tyuanww/dsh-crm-knowledge/pull/6) 和 [Workbench #14](https://github.com/tyuanww/dsh-analytics-workbench/pull/14)。本地回归、两作者 CI、严格包回读及本地组合接收通过。主仓 CI、组合远程归档、新组合 B0 和隔离真实重登仍开放。未改 19327 或公网，产品保持 PARTIAL。见[验收记录](docs/hackathon/evidence/dsh-source-reauthorization-20261028.md)。
+
+- Workbench `e20a0fea` 已在隔离 19327 验收：原问数聊天取当前授权快照、交付卡进入驾驶舱、保存 v1、人工标题 v2、AI 标题 v3、切换产物后重开均通过，五项事实值与单位逐项一致。最后两次客户端更新使用 HMR，八项服务 PID 和 CRM 授权保持。WeKnora 真实检索和原文读取通过。作者 core 1386 项、library-workspace 94 项及草稿 PR #12/#13 的固定输入 CI 通过。原隔离候选中重登后旧来源受授权代次保护；本轮后续本地实现及未完成的现场验收见上条。公网未切换，产品保持 PARTIAL。见[本轮收尾记录](docs/hackathon/evidence/dsh-ui-knowledge-closeout-20261028.md)。
 
 - 主仓草稿 [事实接口 #185](https://github.com/tyuanww/fuqing-crm-analytics/pull/185) → [AI 定位 #186](https://github.com/tyuanww/fuqing-crm-analytics/pull/186) → [组合接收 #187](https://github.com/tyuanww/fuqing-crm-analytics/pull/187) 均已推送、远程 CI 成功且无冲突。运行候选冻结 `e52f6e5d`，作者为 `e20a0fea`。默认后端 4072 passed、81 skipped，前端 236 项和新组合完整 B0 通过。运输 artifact `12770641494` 的 20 成员逐字节回读、严格接收与 80 项输入守卫通过。最终运行预检 `40584544901` 成功，artifact `12772486076` 已下载并按通用合同核对来源、摘要、1554 个源码文件和九插件；运行时安全解包通过。另行 portable Linux 扫描失败 75 项，尚未完成该模式的独立候选及目标启动验收，未据此认定当前包启动失败。未合并 PR、未切公网，产品仍 PARTIAL、`release_ready=false`。本条为独立文档收尾，不改变运行候选。见[组合接收记录](docs/hackathon/evidence/dsh-host-facts-composition-20261028.md)。
 
-- 隔离 19327 的 H1 核心链路已完成一轮真实验收。DSH 聊天查询七个新来源并生成 HTML，经交付卡进入驾驶舱；人工改文案保存 v2，刷新重开通过；AI 原生对话局部修改、收取预览、确认保存 v3、切换产物重开通过。2955 项来源事实、单位与行标签逐项对账一致。后端 `3893a753`、Workbench `3d44284`，现场 AI 锚点修复 `ebd1eee1`。只更新隔离服务，公网未切换。后续知识库、UI 与作者 CI 结果见上条；跨重登和完整运行 ZIP 仍开放，产品保持 PARTIAL。见[聊天到驾驶舱验收记录](docs/hackathon/evidence/dsh-chat-cockpit-uat-20261028.md)。
-
 ## 当前快照（2026-10-27）
-
-- 七来源保存阻断已完成代码修复、定向回归、独立只读复核及来源失效保存的形式化检查。隔离 19327 已接收主仓 `77de746e`、CRM `5b884ba`、Workbench `8e4f9a0`；未切公网。真实聊天、人工和 AI 保存重开及新主仓 CI 仍待复验，不能宣称业务全部验收。见[本轮收口记录](docs/hackathon/evidence/dsh-source-budget-20261027.md)。
 
 - Workbench 新候选 `6ecb3fc` 已拆分为 [PR #8](https://github.com/tyuanww/dsh-analytics-workbench/pull/8)、[#9](https://github.com/tyuanww/dsh-analytics-workbench/pull/9) 和 [#10](https://github.com/tyuanww/dsh-analytics-workbench/pull/10)，作者 CI core 1,359 项通过。严格重建包进入运输 artifact `12719087263`，20 个成员回读一致，输入检查 80 项通过。隔离更新首次因临时 Web 单元被回收而失败，恢复后已应用最终包的 9 个文件并重启隔离 Web，其他七项服务进程未变。实际 Host 行为与真实业务仍待验收。`release_ready=false`，该组合的完整运行 ZIP 尚未构建，公网现役未切换。见[原生页面集成记录](docs/hackathon/evidence/dsh-native-preview-integration-20261027.md)。
 
