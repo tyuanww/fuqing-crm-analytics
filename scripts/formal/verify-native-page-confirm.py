@@ -50,8 +50,11 @@ def tlc(text, destination, jar):
     model = destination / "NativePageConfirm.tla"
     model.write_text((ROOT / "scripts/formal/tla/NativePageConfirm.tla").read_text())
     guarded, _ = fingerprints(text)
+    replay_guard = text.count('if error.code == "RESULT_REVOKED":') == 1
     config = "SPECIFICATION Spec\nCONSTANT RejectSourceError = " + str(guarded).upper() + "\n"
+    config += "CONSTANT RejectReplayRevoked = " + str(replay_guard).upper() + "\n"
     config += "INVARIANT NewRevisionRequiresSuccessfulSource\n"
+    config += "INVARIANT ReplayRequiresNotRevoked\n"
     (destination / "NativePageConfirm.cfg").write_text(config)
     command = [os.environ.get("JAVA_BIN", "java"), "-cp", str(jar), "tlc2.TLC", "-terse", "-workers", "1",
                "-metadir", str(destination / "states"), "-config", str(destination / "NativePageConfirm.cfg"),
@@ -148,6 +151,13 @@ def main():
         raise ValueError("SELF_TEST_FAILED: TLC did not catch the removed real-code guard")
     if mutant["protected"] or mutant["head_after_source_failure"] != 2 or mutant["success_receipts_after_source_failure"] != 1:
         raise ValueError("SELF_TEST_FAILED: scratch mutation did not reproduce an unauthorized new revision")
+    replay_guard_text = 'if error.code == "RESULT_REVOKED":\n                            raise'
+    if text.count(replay_guard_text) != 1:
+        raise ValueError("exact replay mutation target is unavailable")
+    broken_replay = text.replace(replay_guard_text, "pass", 1)
+    replay_rc, replay_output = tlc(broken_replay, output / "mutant-replay-tlc", jar)
+    if replay_rc == 0 or "Invariant ReplayRequiresNotRevoked is violated" not in replay_output:
+        raise ValueError("SELF_TEST_FAILED: TLC did not catch the removed replay revocation guard")
     restored_rc, _ = tlc(SOURCE.read_text(), output / "restored-tlc", jar)
     restored = sqlite_check(SOURCE.read_text(), output / "restored-sqlite")
     if restored_rc or not restored["protected"] or not restored["successful_retry_replayed"]:

@@ -1,7 +1,7 @@
 {
-  "sync_commit": "77de746e1e40ee58a3096a0f21c44bd66c8572f5",
+  "sync_commit": "04db3b19c549dcf15131f6b08f6f2e745c8065d3",
   "functions": {
-    "PageDocumentStore.confirm": "7d2f262df5a1d407153acb8b296c609e6f870993e5e305b71d1e519d62635f32",
+    "PageDocumentStore.confirm": "830745996e98d687833a6eb3ba9d6daf49b512fd7ec2d7d3fa972deeaed0393f",
     "PageDocumentStore._confirmation": "09c230fe0deb9f7f0f83aa28e579c06a74eaae7eed1694f609038e6b7f92cf37",
     "PageDocumentStore._bind": "4e501a38c6f410bc1a9b018ba02b68de2ccbc5d59fa61e9553192921a16fad81"
   },
