@@ -400,6 +400,84 @@ def test_product_customer_batch_route_serializes_bounded_windows(monkeypatch):
     ]
 
 
+def _batch_request():
+    from backend.contracts.category import ProductCustomerBatchRequest
+
+    return ProductCustomerBatchRequest(ranges=[
+        {"start_date": "2026-07-01", "end_date": "2026-07-05"},
+        {"start_date": "2026-06-24", "end_date": "2026-06-30"},
+    ])
+
+
+def test_product_customer_batch_rejects_mixed_known_source_versions(monkeypatch):
+    from types import SimpleNamespace
+    from backend.routers.category import get_product_customer_batch_api
+
+    versions = iter(["orders-v1:one", "orders-v1:two"])
+
+    def fake_query(*_args, **_kwargs):
+        return {
+            "schema_version": "product-customer/v3",
+            "status": "OK",
+            "source": "orders+user_first_purchase",
+            "data_version": next(versions),
+            "products": [],
+        }
+
+    monkeypatch.setattr("backend.routers.category.get_product_customer_overview", fake_query)
+    monkeypatch.setattr("backend.routers.category.current_warehouse_read", lambda: object())
+    with pytest.raises(HTTPException) as error:
+        get_product_customer_batch_api(_batch_request(), SimpleNamespace(headers={
+            "X-ShineMage-Product-Customer-Version": "product-customer/v3",
+        }))
+    assert error.value.status_code == 409
+    assert error.value.detail == "SOURCE_VERSION_CHANGED"
+
+
+def test_product_customer_batch_keeps_unknown_within_old_source_batch(monkeypatch):
+    from types import SimpleNamespace
+    from backend.routers.category import get_product_customer_batch_api
+
+    def fake_query(*_args, **_kwargs):
+        return {
+            "schema_version": "product-customer/v3",
+            "status": "OK",
+            "source": "orders+user_first_purchase",
+            "data_version": "unknown",
+            "products": [],
+        }
+
+    monkeypatch.setattr("backend.routers.category.get_product_customer_overview", fake_query)
+    monkeypatch.setattr("backend.routers.category.current_warehouse_read", lambda: None)
+    result = get_product_customer_batch_api(_batch_request(), SimpleNamespace(headers={
+        "X-ShineMage-Product-Customer-Version": "product-customer/v3",
+    }))
+    assert [item["data_version"] for item in result["results"]] == ["unknown", "unknown"]
+
+
+def test_product_customer_batch_rejects_unknown_when_warehouse_identity_is_bound(monkeypatch):
+    from types import SimpleNamespace
+    from backend.routers.category import get_product_customer_batch_api
+
+    def fake_query(*_args, **_kwargs):
+        return {
+            "schema_version": "product-customer/v3",
+            "status": "OK",
+            "source": "orders+user_first_purchase",
+            "data_version": "unknown",
+            "products": [],
+        }
+
+    monkeypatch.setattr("backend.routers.category.get_product_customer_overview", fake_query)
+    monkeypatch.setattr("backend.routers.category.current_warehouse_read", lambda: object())
+    with pytest.raises(HTTPException) as error:
+        get_product_customer_batch_api(_batch_request(), SimpleNamespace(headers={
+            "X-ShineMage-Product-Customer-Version": "product-customer/v3",
+        }))
+    assert error.value.status_code == 409
+    assert error.value.detail == "SOURCE_VERSION_UNKNOWN"
+
+
 def test_product_customer_request_rejects_more_than_registered_products():
     from pydantic import ValidationError
     from backend.contracts.category import ProductCustomerRequest

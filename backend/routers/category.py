@@ -49,6 +49,7 @@ from backend.services.category_service import (
     get_product_customer_overview,
 )
 from backend.services import check_future_date
+from backend.services.warehouse_runtime import current_warehouse_read
 
 router = APIRouter(prefix="/api/v1/category", tags=["品类分析"])
 
@@ -178,6 +179,17 @@ def get_product_customer_batch_api(body: ProductCustomerBatchRequest, request: R
                 raise HTTPException(status_code=409, detail="FIRST_PURCHASE_UNAVAILABLE") from exc
             raise HTTPException(status_code=422, detail=str(exc)) from exc
         results.append(select_product_customer_response(result, version))
+    # 同一批次必须来自同一数据版本：跨窗口混用已知版本会静默产生不可比结果。
+    versions = {result.get("data_version") for result in results}
+    if len(versions) > 1:
+        raise HTTPException(status_code=409, detail="SOURCE_VERSION_CHANGED")
+    source_version = next(iter(versions), None)
+    # 旧 orders 直读没有仓库身份，只能记为 unknown；它允许在同一批次内保留，
+    # 但不能冒充可跨请求比较的已知版本。绑定仓库身份后 unknown/空版本一律拒绝。
+    if not source_version or (
+        source_version == "unknown" and current_warehouse_read() is not None
+    ):
+        raise HTTPException(status_code=409, detail="SOURCE_VERSION_UNKNOWN")
     return {"results": results}
 
 
