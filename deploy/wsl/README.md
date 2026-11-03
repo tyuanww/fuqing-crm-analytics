@@ -76,6 +76,15 @@ DUCKDB_PATH=/srv/shinemage/data/processed/fuqing_crm.duckdb \
 
 脚本拒绝同文件系统目标，复制后会重新计算 SHA-256。它不会自动停止服务，也不会删除旧备份。
 
+恢复演练只在停止服务后进行，并且恢复到新的目标路径，不覆盖现役库：
+
+```bash
+DUCKDB_PATH=/srv/shinemage/data/processed/fuqing_crm.duckdb \
+  deploy/wsl/restore-duckdb.sh --service-stopped /mnt/backup/crm /srv/shinemage/restore/fuqing_crm.duckdb
+```
+
+恢复脚本先校验备份的 SHA-256，再检查目标路径不存在、没有 WAL、磁盘空间足够，复制后再次校验。目标存在时直接拒绝，不做覆盖。
+
 ## 发布顺序
 
 ```text
