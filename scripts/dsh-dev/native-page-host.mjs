@@ -51,10 +51,11 @@ class PageError extends Error {
 }
 const fail = (status = 503, code = 'SOURCE_UNAVAILABLE') => { throw new PageError(status, code); };
 const response = (status, value) => Response.json(value, { status, headers: { 'cache-control': 'no-store' } });
+const errorBody = (status, code) => ({ error: { code, message: '页面来源请求未完成。', retryable: status === 503 } });
 function errorResponse(error) {
   const status = CODES.get(error?.status)?.includes(error?.code) ? error.status : error?.status === 401 ? 401 : 503;
   const code = CODES.get(status)?.includes(error?.code) ? error.code : status === 401 ? 'UNAUTHENTICATED' : 'SOURCE_UNAVAILABLE';
-  return response(status, { error: { code, message: '页面来源请求未完成。', retryable: status === 503 } });
+  return response(status, errorBody(status, code));
 }
 async function bytes(stream, signal, max) {
   if (!stream) return Buffer.alloc(0);
@@ -127,7 +128,16 @@ export function createNativePageHost({ crmDashboard, pageOrigin, callbackPort, a
     const controller = new AbortController();
     res.on('close', () => controller.abort());
     const signal = AbortSignal.any([controller.signal, shutdown.signal, AbortSignal.timeout(5000)]);
-    const expire = () => req.destroy();
+    const expire = () => {
+      if (!res.destroyed && !res.writableEnded) {
+        if (res.headersSent) res.destroy();
+        else {
+          res.writeHead(503, { 'content-type': 'application/json', 'cache-control': 'no-store', connection: 'close' });
+          res.end(JSON.stringify(errorBody(503, 'SOURCE_UNAVAILABLE')));
+        }
+      }
+      req.destroy();
+    };
     signal.addEventListener('abort', expire, { once: true });
     let admitted = false;
     try {
