@@ -14,6 +14,7 @@ function fixture({ pending = false, confirmStatus = null } = {}) {
     base: 'http://127.0.0.1:18999', token: 'synthetic-only-no-network', async fetchImpl(url, options) {
       calls.push({ url, body: options.body ? JSON.parse(options.body) : null });
       if (url.endsWith('/pages/page_fixture')) return Response.json({ spec });
+      if (url.includes('/page-edit-contexts/overlay?')) return Response.json({ overlays: {} });
       if (url.endsWith('/patch-preview')) {
         if (pending) await new Promise(resolve => { release = resolve; });
         if (confirmStatus !== null) return Response.json({ preview_id: 'preview_fixture', status: 'PENDING' });

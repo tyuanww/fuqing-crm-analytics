@@ -8,46 +8,46 @@
   "archive": {
     "repository": "tyuanww/shinemage-board-components",
     "run_id": 38121126913,
-    "attempt": 1,
+    "attempt": 2,
     "event": "pull_request",
     "conclusion": "success",
-    "artifact_id": 11694947955,
-    "sha256": "5207d0adac1a449fe1be36913d0d8214c1f4d8ecc3e137f7368bd27e6c4f28ee",
+    "artifact_id": 12553123830,
+    "sha256": "8211edfd01b650795627108a001dc090525efdeeffbfce8bae1eb4a1f2d16bc1",
     "bytes": 11356
   },
   "files": {
     "receipt": {
-      "path": "board-author-38121126913-1/author-tests.json",
+      "path": "board-author-38121126913-2/author-tests.json",
       "bytes": 8419,
-      "sha256": "25b59ea139528ea165243f3375b9671d578bd2bee4d4b1757f030122e26aed0d"
+      "sha256": "9807ad853e5f7f86306ace2d87111ae5b8b69e6f207af6f209bebb5680de61ea"
     },
     "geometry_stdout": {
-      "path": "board-author-38121126913-1/geometry.stdout.log",
-      "bytes": 3802,
-      "sha256": "2bc0a66945b9f369e64b6f93650e038c16727969671c8514918f80aac980c2cd"
+      "path": "board-author-38121126913-2/geometry.stdout.log",
+      "bytes": 3803,
+      "sha256": "4b260b55d2aae2fa4b2e78d74d03a6c085a516f1bb378744ec572d6030602212"
     },
     "geometry_stderr": {
-      "path": "board-author-38121126913-1/geometry.stderr.log",
+      "path": "board-author-38121126913-2/geometry.stderr.log",
       "bytes": 0,
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "producer_stdout": {
-      "path": "board-author-38121126913-1/producer-inputs.stdout.log",
-      "bytes": 1698,
-      "sha256": "d8f94c9387ca082590eca6fa04034eb06ff2d06a4c33e4ef5356c1c8e133430a"
+      "path": "board-author-38121126913-2/producer-inputs.stdout.log",
+      "bytes": 1700,
+      "sha256": "6cec2bccc764275b8176372afb95f832d97de54c43d3a71309dc899e42a12978"
     },
     "producer_stderr": {
-      "path": "board-author-38121126913-1/producer-inputs.stderr.log",
+      "path": "board-author-38121126913-2/producer-inputs.stderr.log",
       "bytes": 0,
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "reference": {
-      "path": "board-author-38121126913-1/reference/shine-mage-board-components-0.1.0.tgz",
+      "path": "board-author-38121126913-2/reference/shine-mage-board-components-0.1.0.tgz",
       "bytes": 1955,
       "sha256": "22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182"
     },
     "content_pack": {
-      "path": "board-output-38121126913-1/shine-mage-board-components-0.1.0.tgz",
+      "path": "board-output-38121126913-2/shine-mage-board-components-0.1.0.tgz",
       "bytes": 1951,
       "sha256": "66d53381095e93f38dbaa7385780f20b677f68ca2692702cb270849f3392853e"
     }
@@ -80,8 +80,8 @@
       "logs": {
         "stdout": {
           "path": "geometry.stdout.log",
-          "bytes": 3802,
-          "sha256": "2bc0a66945b9f369e64b6f93650e038c16727969671c8514918f80aac980c2cd"
+          "bytes": 3803,
+          "sha256": "4b260b55d2aae2fa4b2e78d74d03a6c085a516f1bb378744ec572d6030602212"
         },
         "stderr": {
           "path": "geometry.stderr.log",
@@ -123,8 +123,8 @@
       "logs": {
         "stdout": {
           "path": "producer-inputs.stdout.log",
-          "bytes": 1698,
-          "sha256": "d8f94c9387ca082590eca6fa04034eb06ff2d06a4c33e4ef5356c1c8e133430a"
+          "bytes": 1700,
+          "sha256": "6cec2bccc764275b8176372afb95f832d97de54c43d3a71309dc899e42a12978"
         },
         "stderr": {
           "path": "producer-inputs.stderr.log",

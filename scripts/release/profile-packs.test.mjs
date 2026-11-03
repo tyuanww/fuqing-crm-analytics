@@ -1,3 +1,4 @@
+import { DSH_SDK_VERSION, DSH_UPSTREAM_SHA } from './toolchain.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
@@ -11,7 +12,7 @@ import { parseServeArgs, resolvePluginInputs, validateRuntimeInputs } from '../d
 
 const exec = promisify(execFile), hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const json = value => JSON.stringify(value, null, 2) + '\n';
-const sdk = { sdk_version: '0.1.7-rc.2', upstream_sha: '477b4f420553e8a52c2fbccc464d7561b239c443' };
+const sdk = { sdk_version: DSH_SDK_VERSION, upstream_sha: DSH_UPSTREAM_SHA };
 
 // Synthetic runtime packages exercise the real reader and extractor. There is
 // deliberately no source directory, Git checkout, SDK, package manager or host.

@@ -196,8 +196,10 @@ test('browser login reaches the pinned tools without exposing credentials', asyn
       assert.equal(JSON.stringify(body).includes(SYNTHETIC_PASSWORD), false);
       assert.equal((await execute('crm_login', { username: 'fixture-user', password: SYNTHETIC_PASSWORD })).isError, true);
       assert.deepEqual(Object.keys(host.ctx.crmDashboard).sort(), [
-        'capabilities', 'principal', 'query', 'queryMembership', 'queryNetGsv', 'queryPurchases',
-        'queryReadiness', 'querySnapshot', 'rememberCitations', 'takeSessionCitations',
+        'capabilities', 'principal', 'query', 'queryMembership', 'queryNetGsv',
+        'queryProductCustomer', 'queryPurchases', 'queryReadiness', 'queryRfmSnapshot',
+        'querySnapshot', 'rememberCitations',
+        'takeSessionCitations',
       ]);
       assert.deepEqual(host.ctx.crmDashboard.principal('fixture-session'), { username: 'fixture-user' });
     });

@@ -212,6 +212,7 @@ class QueryRouterMiddleware:
         "/api/v1/ad-hoc/two-year-overview",
         "/api/v1/ad-hoc/new-old-customer",
         "/api/v1/category/overview/batch",
+        "/api/v1/category/product-customer",
         "/api/v1/rfm/extended",
     }
     READ_PREFIXES = (

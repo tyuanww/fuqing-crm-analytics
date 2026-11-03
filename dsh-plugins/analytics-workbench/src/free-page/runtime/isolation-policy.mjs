@@ -14,6 +14,7 @@ export const FREE_PAGE_CSP = [
   "frame-src 'none'",
   "child-src 'none'",
   "connect-src 'none'",
+  "navigate-to 'none'",
   "form-action 'none'",
   "script-src 'unsafe-inline' blob:",
   "style-src 'unsafe-inline' blob:",

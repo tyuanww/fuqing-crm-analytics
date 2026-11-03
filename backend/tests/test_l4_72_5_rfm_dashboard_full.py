@@ -118,6 +118,26 @@ def test_run_rfm_period_dashboard_full_hit() -> None:
     assert member_same["重要价值客户"]["hist_users"] == 0
 
 
+def test_dashboard_precompute_requires_exact_requested_end_date() -> None:
+    target = period.PeriodBuilder.last365days(today=date.today())["current"]
+    earlier_end = (date.fromisoformat(target.end) - timedelta(days=1)).isoformat()
+    with duckdb.connect(":memory:") as conn:
+        conn.execute("""
+            CREATE TABLE rfm_dashboard_full AS
+            SELECT 'last365days' AS period_type, ?::DATE AS as_of_date, ?::DATE AS end_date,
+                3650 AS lookback_days, 'all' AS mode, '重要价值客户' AS rfm_segment,
+                99::BIGINT AS hist_users, 1::BIGINT AS repurchase_users, 100.0 AS repurchase_gsv
+        """, [target.start, earlier_end])
+        args = (conn, target.start + " 00:00:00", target.end + " 23:59:59", None, "GSV", None)
+        assert period._run_rfm_period_dashboard_full(*args) is None
+        conn.execute(
+            "UPDATE rfm_dashboard_full SET end_date = ?::DATE, hist_users = 2", [target.end],
+        )
+        exact = period._run_rfm_period_dashboard_full(*args)
+        assert exact is not None
+        assert exact[0]["重要价值客户"]["hist_users"] == 2
+
+
 def test_rebuild_period_inserts_36_rows_from_user_rfm_precompute() -> None:
     conn = duckdb.connect(":memory:")
     try:

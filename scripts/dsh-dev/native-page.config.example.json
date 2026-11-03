@@ -1,0 +1,23 @@
+[
+  {
+    "insert": [
+      {
+        "id": "shine-native-page-ai-policy",
+        "name": "file:///absolute/path/to/repository/scripts/dsh-dev/native-page-ai-policy.mjs",
+        "config": {
+          "enabled": false
+        }
+      },
+      {
+        "id": "shine-native-pages",
+        "name": "file:///absolute/path/to/repository/scripts/dsh-dev/native-page-host.mjs",
+        "config": {
+          "enabled": false,
+          "actorId": "native_page_owner",
+          "pageOrigin": "http://127.0.0.1:18191",
+          "callbackPort": 18192
+        }
+      }
+    ]
+  }
+]

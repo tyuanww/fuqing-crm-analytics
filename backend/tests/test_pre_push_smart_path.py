@@ -144,6 +144,8 @@ class TestPathClassify:
 
     @pytest.mark.parametrize("lock", [
         "config/shinemage-composition-packs.lock.json",
+        "config/shinemage-composition-artifact.lock.json",
+        "config/shinemage-composition-pack-manifest.v1.json",
         "config/workbench-author-evidence.lock.json",
         "config/domain-author-evidence.lock.json",
         "config/public-contract-inputs.lock.json",

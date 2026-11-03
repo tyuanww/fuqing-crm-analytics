@@ -33,7 +33,8 @@ const ctx = new Context();
 let handle;
 const hash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 try {
-  await ctx.plugin(packages['dsh-session-persistence-jsonl'].module.default, {
+  const persistence = packages['dsh-session-persistence-jsonl'].module;
+  await ctx.plugin(persistence.default ?? persistence, {
     root: join(input.root, 'sessions'), compression: 'zstd',
   });
   const id = 'owned-synthetic-recovery';

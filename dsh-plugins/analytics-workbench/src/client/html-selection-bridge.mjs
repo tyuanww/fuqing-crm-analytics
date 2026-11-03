@@ -29,11 +29,16 @@ export function editablePageNodes(pkg, manifest) {
 }
 
 export function editableTextNodes(pkg, manifest) {
-  if (!pkg || manifest?.result_refs?.length) return [];
+  if (!pkg) return [];
   const index = buildSourceIndex(pkg);
-  const bound = new Set((manifest?.bindings ?? []).map(row => row.node_id));
+  const bindings = manifest?.bindings ?? [];
+  const bound = new Set(bindings.map(row => row.node_id));
+  const pageBound = Array.isArray(manifest?.result_refs) && manifest.result_refs.length > 0;
+  const wholePageBound = pageBound && !bindings.some(row => typeof row?.node_id === 'string' && row.node_id);
+  if (wholePageBound) return [];
   return Object.values(index.nodes).filter(node => node.kind === 'static_element' && !bound.has(node.node_id)
-    && !node.js_ranges.length && !/<[a-z!/]/i.test(node.html_range.inner_text)).map(node => ({
+    && !node.js_ranges.length && !/<[a-z!/]/i.test(node.html_range.inner_text)
+    && !/data-page-readonly|data-sp-bindable=["']database["']/i.test(node.html_range.outer_text)).map(node => ({
       node_id: node.node_id, kind: node.kind, mapping: 'valid',
       mapping_token: node.mapping_token, version_hash: index.version_hash,
       text: node.html_range.inner_text, tag: node.tag, editableText: true,
@@ -44,15 +49,18 @@ export function editableTextNodes(pkg, manifest) {
 export function selectableNodes(pkg, manifest) {
   if (!pkg) return [];
   const index = buildSourceIndex(pkg);
-  const bound = new Set((manifest?.bindings ?? []).map(row => row.node_id));
+  const bindings = manifest?.bindings ?? [];
+  const bound = new Set(bindings.map(row => row.node_id));
   const pageBound = Array.isArray(manifest?.result_refs) && manifest.result_refs.length > 0;
+  const wholePageBound = pageBound && !bindings.some(row => typeof row?.node_id === 'string' && row.node_id);
   return Object.values(index.nodes).map(node => ({
     node_id: node.node_id,
     kind: node.kind,
     mapping: 'valid',
-    editable: !pageBound && !bound.has(node.node_id) && node.kind === 'static_element'
-      && !node.js_ranges.length && !/<[a-z!/]/i.test(node.html_range.inner_text),
-    read_only_reason: pageBound ? 'bound_page' : bound.has(node.node_id) ? 'bound_node' : null,
+    editable: !wholePageBound && !bound.has(node.node_id) && node.kind === 'static_element'
+      && !node.js_ranges.length && !/<[a-z!/]/i.test(node.html_range.inner_text)
+      && !/data-page-readonly|data-sp-bindable=["']database["']/i.test(node.html_range.outer_text),
+    read_only_reason: wholePageBound ? 'bound_page' : bound.has(node.node_id) ? 'bound_node' : null,
     mapping_token: node.mapping_token,
     version_hash: index.version_hash,
     text: node.html_range.inner_text,
@@ -199,7 +207,7 @@ function selectionRuntime(config) {
         const descendants = [element, ...element.querySelectorAll('*')].slice(0, 2000);
         for (const node of descendants) {
           if (seen.has(node) || insideSentence(node) || next.size >= 2000 || node.namespaceURI !== 'http://www.w3.org/1999/xhtml'
-            || node.closest('script,style,template,iframe,object,embed,textarea,input,select,[data-shine-region],[data-sp-bindable="database"],[data-page-readonly]') || !staticAttributes(node)) continue;
+            || node.closest('script,style,template,iframe,object,embed,textarea,input,select,xmp,noembed,noframes,plaintext,noscript,[data-shine-region],[data-sp-bindable="database"],[data-page-readonly]') || !staticAttributes(node)) continue;
           const directTexts = [...node.childNodes].filter(n => n.nodeType === 3);
           const visibleTexts = directTexts.filter(n => n.nodeValue.trim());
           const ownText = visibleTexts.length === 1 ? visibleTexts[0] : directTexts.length === 1 ? directTexts[0] : null;
@@ -348,8 +356,8 @@ function selectionRuntime(config) {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once: true });
   else install();
 }
-export function selectionSrcdoc(pkg, { channel, pageId, version, nodes = [], selected = null, editing = false, selectBlocks = false }) {
-  let src = buildSrcdoc({ ...(editing ? instrumentSourceTargets(pkg, nodes) : pkg), instanceId: channel, pageId, version, nonce: channel });
+export function selectionSrcdoc(pkg, { channel, pageId, version, nodes = [], selected = null, editing = false, selectBlocks = false, allowScripts = true }) {
+  let src = buildSrcdoc({ ...(editing ? instrumentSourceTargets(pkg, nodes) : pkg), instanceId: channel, pageId, version, nonce: channel, allowScripts });
   const statusConfig = JSON.stringify({ channel, pageId, version }).replace(/</g, '\\u003c');
   src = insertBeforeBodyEnd(src, '<script>(' + (function (config) {
     const report = () => parent.postMessage({ type: 'cockpit.presentation', ...config, unresolved: window.__cockpitPresentationStatus?.unresolved?.length ?? 0 }, '*');

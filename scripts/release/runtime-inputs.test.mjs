@@ -151,7 +151,7 @@ test('real pnpm deploy keeps locked versions with empty metadata cache and no ne
   const archive = join(root, 'original.tgz');
   await exec('tar', ['-czf', archive, '-C', join(root, 'archive'), 'package']);
   const integrity = `sha512-${createHash('sha512').update(await readFile(archive)).digest('base64')}`;
-  await writeFile(join(workspace, 'package.json'), '{"private":true,"packageManager":"pnpm@11.7.0"}');
+  await writeFile(join(workspace, 'package.json'), JSON.stringify({ private: true, packageManager: `pnpm@${UPSTREAM_PNPM_VERSION}` }));
   await writeFile(join(workspace, 'pnpm-workspace.yaml'), 'packages: [apps/*]\n');
   await writeFile(join(workspace, 'apps/cli/package.json'), JSON.stringify({ name: '@deepseek-ai/dsh', version: '0.0.0', files: ['index.cjs'], dependencies: { 'dsh-synthetic-lock-probe': '^1.0.0' } }));
   await writeFile(join(workspace, 'apps/cli/index.cjs'), 'console.log(require("dsh-synthetic-lock-probe"));');
@@ -175,8 +175,11 @@ snapshots:
   await writeFile(join(workspace, 'pnpm-lock.yaml'), lock);
   const destination = join(root, 'deployed');
   const guard = fileURLToPath(new URL('./runtime-offline.cjs', import.meta.url));
+  const offlineEnv = { ...process.env, CI: '1', COREPACK_ENABLE_DOWNLOAD_PROMPT: '0', NODE_OPTIONS: `--require ${JSON.stringify(guard)}` };
+  const manager = await exec('corepack', ['pnpm', '--version'], { cwd: workspace, timeout: 5000, env: offlineEnv });
+  assert.equal(manager.stdout.trim(), UPSTREAM_PNPM_VERSION);
   await exec('corepack', [...runtimeDeployArgs(destination), '--cache-dir', join(root, 'empty-cache'), '--store-dir', join(root, 'empty-store')], {
-    cwd: workspace, timeout: 30000, env: { ...process.env, CI: '1', COREPACK_ENABLE_DOWNLOAD_PROMPT: '0', NODE_OPTIONS: `--require ${JSON.stringify(guard)}` },
+    cwd: workspace, timeout: 30000, env: offlineEnv,
   });
   const result = await exec(process.execPath, [join(destination, 'index.cjs')], { cwd: root });
   assert.equal(result.stdout.trim(), 'locked-1.0.0');

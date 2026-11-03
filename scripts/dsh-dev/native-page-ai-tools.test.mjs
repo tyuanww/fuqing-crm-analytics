@@ -1,0 +1,92 @@
+import assert from 'node:assert/strict';
+import { createRequire } from 'node:module';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import test from 'node:test';
+import { installNativePageAITools, NATIVE_PAGE_AI_PRESET } from './native-page-ai-tools.mjs';
+import * as NativePolicy from './native-page-ai-policy.mjs';
+
+test('native editor exposes only two tools, preserves ordinary sessions, and binds the job on the server', async t => {
+  const upstream = process.env.DSH_NATIVE_UPSTREAM;
+  assert.ok(upstream, 'fixed upstream is required');
+  const require = createRequire(join(upstream, 'packages/core/tools/package.json'));
+  const { Context } = require('@deepseek-ai/cordis');
+  const { default: SystemPrompt } = await import(pathToFileURL(join(upstream, 'packages/core/system-prompt/lib/index.js')));
+  const { default: ToolRuntime } = await import(pathToFileURL(join(upstream, 'packages/core/tools/lib/index.js')));
+  const { createScope, scopeTarget } = await import(pathToFileURL(join(upstream, 'packages/core/scope/lib/index.js')));
+  const presetRequire = createRequire(join(upstream, 'packages/preset/agent-preset-registry/package.json'));
+  const moduleOf = async name => (await import(pathToFileURL(presetRequire.resolve(name)))).default;
+  const Loader = await moduleOf('@deepseek-ai/cordis-plugin-loader');
+  const Group = await moduleOf('@deepseek-ai/cordis-plugin-group');
+  const Projections = await moduleOf('@deepseek-ai/dsh-session-projection');
+  const { default: Presets } = await import(pathToFileURL(join(upstream, 'packages/preset/agent-preset-registry/lib/index.js')));
+  const ctx = new Context();
+  const loader = await ctx.plugin(Loader);
+  ctx.loader.builtins.group = Group;
+  const projections = await ctx.plugin(Projections);
+  const presets = await ctx.plugin(Presets, { default: 'standard' });
+  const fibers = [loader, projections, presets, await ctx.plugin(SystemPrompt, {}), await ctx.plugin(ToolRuntime)];
+  t.after(async () => { for (const fiber of fibers.reverse()) await fiber.dispose(); });
+  const fakeTool = name => ({ name, description: name, parameters: { type: 'object', properties: {} },
+    output: { schema: { type: 'string' }, render: (_args, value) => [{ type: 'text', text: value }] },
+    execute: async () => { assert.fail('forbidden tool executed'); } });
+  for (const name of ['bash', 'read', 'write', 'web_search', 'subagent', 'plugin_install']) ctx.tools.register(fakeTool(name));
+  const calls = [];
+  const host = { fetch: async request => { calls.push(await request.json()); return Response.json({ text: '完整源码', next_offset: null }); } };
+  const id = 'session-cockpit-native-ai-12345678-1234-4567-8123-123456789abc';
+  const editor = { id, session: { header: { id, agentPreset: NATIVE_PAGE_AI_PRESET } } }, ordinary = { id: 'ordinary' };
+  let editorScope, otherScope;
+  fibers.push(await ctx.plugin(Object.assign(inner => {
+    editorScope = createScope(inner, editor); editor.ctx = editorScope.ctx;
+    otherScope = createScope(inner, ordinary); ordinary.ctx = otherScope.ctx;
+  }, { inject: ['tools', 'systemPrompt'] })));
+  t.after(async () => { await editorScope.dispose(); await otherScope.dispose(); });
+  const original = ctx.tools.schemas(ordinary).map(row => row.name).sort();
+  const activeAgents = [editor];
+  ctx.provide('agents', { list: () => activeAgents });
+  const policy = await ctx.plugin(NativePolicy, { enabled: true });
+  fibers.push(policy);
+  const install = () => ctx.plugin(Object.assign(async inner => {
+    await installNativePageAITools(inner, host);
+  }, { inject: ['tools', 'systemPrompt', 'agents', 'nativePageAIPolicy'] }));
+  const guard = await install();
+  assert.equal((await ctx.agentPresets.resolve(NATIVE_PAGE_AI_PRESET)).id, NATIVE_PAGE_AI_PRESET);
+  fibers.push(guard);
+  await ctx.serial(scopeTarget(ctx.tools, editor), 'agent/created', { agent: editor, source: 'fresh' });
+  assert.deepEqual(ctx.tools.schemas(editor).map(row => row.name).sort(), ['cockpit_page_propose', 'cockpit_page_read']);
+  assert.deepEqual(ctx.tools.schemas(ordinary).map(row => row.name).sort(), original);
+  const execute = (name, args, agent = editor) => ctx.tools.execute({ agent, name, arguments: args,
+    callId: 'native-ai-test', signal: new AbortController().signal });
+  assert.equal((await execute('cockpit_page_read', { field: 'html', offset: 0, variant: 'source' })).isError, false);
+  assert.deepEqual(calls[0], { operation: 'aiReadPart', id: 'ai_12345678-1234-4567-8123-123456789abc', body: { field: 'html', offset: 0, variant: 'source' } });
+  for (const name of original) assert.equal((await execute(name, {})).isError, true);
+  assert.equal((await execute('cockpit_page_read', { field: 'html' }, ordinary)).isError, true);
+  assert.equal((await execute('cockpit_page_read', { field: 'html', id: 'ai_other' })).isError, true);
+  assert.equal(calls.length, 1);
+  ctx.tools.register(fakeTool('later_global_tool'));
+  assert.equal((await execute('later_global_tool', {})).isError, true);
+  await ctx.serial(scopeTarget(ctx.tools, editor), 'agent/created', { agent: editor, source: 'resume' });
+  assert.equal(ctx.tools.schemas(editor).length, 2);
+  await guard.dispose();
+  assert.equal((await ctx.agentPresets.resolve(NATIVE_PAGE_AI_PRESET)).id, NATIVE_PAGE_AI_PRESET);
+  const resumed = { id, session: { header: { id, agentPreset: 'standard' } } };
+  let resumedScope;
+  fibers.push(await ctx.plugin(Object.assign(inner => {
+    resumedScope = createScope(inner, resumed); resumed.ctx = resumedScope.ctx;
+  }, { inject: ['tools', 'systemPrompt'] })));
+  await ctx.serial(scopeTarget(ctx.tools, resumed), 'agent/created', { agent: resumed, source: 'resume' });
+  assert.deepEqual(ctx.tools.schemas(resumed), []);
+  for (const tool of original) assert.equal((await execute(tool, {}, resumed)).isError, true);
+  activeAgents.push(resumed);
+  assert.deepEqual(ctx.tools.schemas(editor), []);
+  for (const name of [...original, "later_global_tool"]) assert.equal((await execute(name, {})).isError, true);
+  fibers.push(await install());
+  assert.equal((await execute("cockpit_page_read", { field: "html" })).isError, false);
+  assert.equal((await execute('cockpit_page_read', { field: 'html' }, resumed)).isError, false);
+  for (const tool of original) assert.equal((await execute(tool, {}, resumed)).isError, true);
+  await resumedScope.dispose();
+  activeAgents.pop();
+  await policy.dispose();
+  await assert.rejects(ctx.agentPresets.resolve(NATIVE_PAGE_AI_PRESET), /Unknown agent preset/);
+  assert.equal((await execute('bash', {})).isError, true);
+});

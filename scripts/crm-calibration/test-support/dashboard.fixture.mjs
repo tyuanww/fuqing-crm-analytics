@@ -12,7 +12,14 @@ export async function serveDashboard(t, custom) {
   const calls = [];
   const server = createServer(async (req, res) => {
     const url = new URL(req.url, 'http://127.0.0.1');
-    calls.push({ path: url.pathname, params: Object.fromEntries(url.searchParams), excluded: url.searchParams.getAll('exclude_channels'), method: req.method, authenticated: req.headers.authorization === `Bearer ${SYNTHETIC_TOKEN}` });
+    calls.push({
+      path: url.pathname,
+      params: Object.fromEntries(url.searchParams),
+      excluded: url.searchParams.getAll('exclude_channels'),
+      method: req.method,
+      authenticated: req.headers.authorization === `Bearer ${SYNTHETIC_TOKEN}`,
+      product_customer_version: req.headers['x-shinemage-product-customer-version'] ?? null,
+    });
     res.setHeader('Content-Type', 'application/json');
     if (url.pathname === '/api/v1/auth/login') {
       if (custom?.(url, req, res)) return;

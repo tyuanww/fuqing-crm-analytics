@@ -66,7 +66,7 @@ export async function inspectCheckout({ id, version, checkout, expectedSha, role
 
 export async function collectCompatibilityMatrix({ checkout017 = null, checkout020 = null, sha020 = null, candidate = null } = {}) {
   const rows = [
-    await inspectCheckout({ id: 'dsh-0.1.7-rc.2', version: DSH_SDK_VERSION, checkout: checkout017,
+    await inspectCheckout({ id: 'dsh-0.2.1-rc.3', version: DSH_SDK_VERSION, checkout: checkout017,
       expectedSha: DSH_UPSTREAM_SHA, role: 'blocking' }),
     await inspectCheckout({ id: 'dsh-0.2.0-rc.2', version: '0.2.0-rc.2', checkout: checkout020,
       expectedSha: sha020, role: 'advisory' }),

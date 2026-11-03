@@ -4,7 +4,7 @@
 前缀: /api/v1/category/*
 """
 
-from fastapi import APIRouter, Query, Response
+from fastapi import APIRouter, HTTPException, Query, Request, Response
 from typing import Optional, List
 from pydantic import BaseModel
 
@@ -23,6 +23,10 @@ from backend.contracts.schemas import (
     MarketBasketResponse,
     CategoryDailyTrendResponse,
     CategoryUserListResponse,
+    ProductCustomerRequest,
+    ProductCustomerBatchRequest,
+    ProductCustomerBatchResponse,
+    ProductCustomerResponse,
     AnchorMode,
     PathDepth,
 )
@@ -42,6 +46,7 @@ from backend.services.category_service import (
     get_category_user_list,
     get_category_repurchase_flow,
     get_category_repurchase_flow_by_rfm,
+    get_product_customer_overview,
 )
 from backend.services import check_future_date
 
@@ -123,6 +128,67 @@ def get_category_overview_batch_api(body: CategoryOverviewBatchRequest):
             exclude_channels=body.exclude_channels,
         )
     }
+
+
+@router.post("/product-customer", response_model=ProductCustomerResponse)
+def get_product_customer_api(body: ProductCustomerRequest, request: Request):
+    """按产品聚合新老客，跨多个 SPU class 时按用户去重。"""
+    try:
+        result = get_product_customer_overview(
+            body.start_date,
+            body.end_date,
+            products=body.products,
+            metric_type=body.metric_type,
+            channel=body.channel,
+            exclude_channels=body.exclude_channels,
+            compare_start_date=body.compare_start_date,
+            compare_end_date=body.compare_end_date,
+        )
+    except ValueError as exc:
+        if str(exc) == "首购历史不完整，无法可靠区分新客和老客":
+            raise HTTPException(status_code=409, detail="FIRST_PURCHASE_UNAVAILABLE") from exc
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return select_product_customer_response(
+        result,
+        request.headers.get("X-ShineMage-Product-Customer-Version", "product-customer/v2"),
+    )
+
+
+@router.post("/product-customer/batch", response_model=ProductCustomerBatchResponse)
+def get_product_customer_batch_api(body: ProductCustomerBatchRequest, request: Request):
+    """Return bounded product cohort windows in one sequential database request."""
+    results = []
+    version = request.headers.get("X-ShineMage-Product-Customer-Version", "product-customer/v3")
+    if version != "product-customer/v3":
+        raise HTTPException(status_code=400, detail="product-customer/batch requires product-customer/v3")
+    for item in body.ranges:
+        try:
+            result = get_product_customer_overview(
+                item.start_date,
+                item.end_date,
+                products=item.products,
+                metric_type=item.metric_type,
+                channel=item.channel,
+                exclude_channels=item.exclude_channels,
+                compare_start_date=item.compare_start_date,
+                compare_end_date=item.compare_end_date,
+            )
+        except ValueError as exc:
+            if str(exc) == "首购历史不完整，无法可靠区分新客和老客":
+                raise HTTPException(status_code=409, detail="FIRST_PURCHASE_UNAVAILABLE") from exc
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        results.append(select_product_customer_response(result, version))
+    return {"results": results}
+
+
+def select_product_customer_response(result: dict, version: str) -> dict:
+    if version == "product-customer/v3":
+        return result
+    if version != "product-customer/v2":
+        raise HTTPException(status_code=400, detail="unsupported product customer contract")
+    if result["status"] != "OK":
+        raise HTTPException(status_code=422, detail="请求区间不在可用数据范围内")
+    return {**result, "schema_version": "product-customer/v2"}
 
 
 @router.get("/segment", response_model=CategorySegmentMatrixResponse)

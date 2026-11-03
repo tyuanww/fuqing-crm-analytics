@@ -23,7 +23,12 @@ test('authenticated purchase tool requests only bounded aggregate and projects a
   assert.equal(value.status, 'OK', JSON.stringify(value));
   assert.equal(value.aov.amount_yuan, '66.67'); assert.equal(value.aus.amount_yuan, '100.00');
   assert.equal(value.synthetic, true);
-  assert.deepEqual(calls.map(x => x.path), ['/api/v1/auth/me', '/api/v1/metrics/dashboard-purchases']);
+  assert.equal(value.warehouse_cutoff, '2026-07-10');
+  assert.deepEqual(calls.map(x => x.path), [
+    '/api/v1/auth/me',
+    '/api/v1/metrics/dashboard-purchases',
+    '/api/v1/metrics/cutoff',
+  ]);
   assert.deepEqual(calls[1].params, { ...filters, exclude_low_price: 'false' });
   assert.equal(JSON.stringify(value).includes('private-server-value'), false);
 });
@@ -74,4 +79,33 @@ test('confirmed free-order coverage does not lower paid purchase averages', () =
   const value = normalizePurchases(input, filters, 'synthetic');
   assert.equal(value.aov.amount_fen, 6667); assert.equal(value.aus.amount_fen, 10000);
   assert.equal(value.coverage.zero_amount_orders, 2);
+});
+
+test('purchases after the warehouse cutoff fail instead of returning a valid zero aggregate', async t => {
+  const outOfCoverage = { start_date: '2026-07-06', end_date: '2026-07-07' };
+  const outFilters = { ...outOfCoverage, channel: '全店', exclude_low_price: false };
+  const emptyAggregate = {
+    ...aggregate(),
+    filters: outFilters,
+    gsv_amount_fen: 0,
+    coverage: { rows: 0, orders: 0, buyers: 0, unknown_order_rows: 0, unknown_buyer_rows: 0,
+      unknown_order_amount_fen: 0, unknown_buyer_amount_fen: 0, null_amount_rows: 0,
+      negative_amount_rows: 0, zero_amount_orders: 0, zero_only_buyers: 0 },
+    aov: { amount_fen: null, denominator: 0, reason: 'NO_PURCHASES' },
+    aus: { amount_fen: null, denominator: 0, reason: 'NO_PURCHASES' },
+  };
+  const { binding } = await serveDashboard(t, (url, _req, res) => {
+    if (url.pathname.endsWith('/dashboard-purchases')) {
+      res.end(JSON.stringify(emptyAggregate));
+      return true;
+    }
+    if (url.pathname.endsWith('/cutoff')) {
+      res.end(JSON.stringify({ cutoff_date: '2026-07-05' }));
+      return true;
+    }
+  });
+  const value = await queryDashboardPurchases(outOfCoverage, { binding, sessionId: 'fixture-session' });
+  assert.equal(value.status, 'UNAVAILABLE', JSON.stringify(value));
+  assert.equal(value.reason.code, 'INSUFFICIENT_COVERAGE');
+  assert.equal('gsv' in value, false);
 });

@@ -1,13 +1,104 @@
 import test from 'node:test';
+import childProcess from 'node:child_process';
 import { createServer } from 'node:net';
 import { once } from 'node:events';
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { syncBuiltinESMExports } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { startPageHttp, assertNotLivePort, pageHttpOrigin, writePageHttpState, PAGE_HTTP_DEFAULT_PORT } from './page-http.mjs';
 import { isolatedEnv, parseServeArgs } from './serve.mjs';
 import { pageGlobalRows } from './page-globals.mjs';
+
+for (const [mode, name] of [
+  ['startup-failure', 'launcher reaps an unresponsive child before reporting startup failure'],
+  ['stop', 'launcher stop waits for an unresponsive child to exit'],
+  ['pre-aborted', 'launcher does not spawn a child for an already aborted start'],
+  ['abort-ready', 'launcher abort reaps an already ready child'],
+]) test(name, { timeout: 12000 }, async t => {
+  const stateDir = await mkdtemp(join(tmpdir(), 'page-http-stubborn-'));
+  const executable = join(stateDir, 'server.cjs');
+  const pidFile = join(stateDir, 'child.pid');
+  let childPid;
+  let service;
+  let ownedChild;
+  let childClosed;
+  const spawn = childProcess.spawn;
+  const trackedSpawn = t.mock.method(childProcess, 'spawn', (...args) => {
+    ownedChild = spawn(...args);
+    childClosed = new Promise(resolve => ownedChild.once('close', resolve));
+    return ownedChild;
+  });
+  syncBuiltinESMExports();
+  try {
+    await writeFile(executable, `#!${process.execPath}
+process.on('SIGTERM', () => {});
+require('node:fs').writeFileSync(${JSON.stringify(pidFile)}, String(process.pid));
+const port = Number(process.argv[process.argv.indexOf('--port') + 1]);
+require('node:http').createServer((request, response) => {
+  request.resume();
+  response.writeHead(${mode === 'startup-failure' ? 503 : 200});
+  response.end('{}');
+}).listen(port, '127.0.0.1', () => console.log('page-http ready'));
+`, { mode: 0o700 });
+    const reservation = createServer();
+    reservation.listen(0, '127.0.0.1');
+    await once(reservation, 'listening');
+    const port = reservation.address().port;
+    await new Promise(resolve => reservation.close(resolve));
+    const controller = new AbortController();
+    if (mode === 'pre-aborted') controller.abort();
+    const start = () => startPageHttp({ port, stateDir, python: executable,
+      timeoutMs: 1000, signal: controller.signal });
+    if (mode === 'pre-aborted') {
+      await assert.rejects(async () => { service = await start(); }, { name: 'AbortError' });
+      await assert.rejects(readFile(pidFile), { code: 'ENOENT' });
+    } else {
+      if (mode === 'startup-failure') {
+        await assert.rejects(start(), error => {
+          assert.match(error.message, /page http did not become ready/);
+          assert.match(error.pageHttpLog, /page-http ready/);
+          return true;
+        });
+      } else {
+        service = await start();
+        let closed = false;
+        service.child.once('close', () => { closed = true; });
+        if (mode === 'abort-ready') {
+          const closing = once(service.child, 'close', { signal: t.signal });
+          controller.abort();
+          await closing;
+        } else {
+          await Promise.all([service.stop(), service.stop()]);
+        }
+        assert.equal(closed, true, 'stop completed before child close');
+      }
+      childPid = Number(await readFile(pidFile, 'utf8'));
+      assert.ok(Number.isInteger(childPid) && childPid > 0);
+      assert.throws(() => process.kill(childPid, 0), { code: 'ESRCH' },
+        'launcher returned while its child was still running');
+    }
+  } finally {
+    trackedSpawn.mock.restore();
+    syncBuiltinESMExports();
+    if (ownedChild) {
+      if (ownedChild.exitCode === null && ownedChild.signalCode === null) ownedChild.kill('SIGKILL');
+      await childClosed;
+    }
+    await rm(stateDir, { recursive: true, force: true });
+  }
+});
+
+test('launcher reports a missing executable without hanging during cleanup', { timeout: 5000 }, async () => {
+  const stateDir = await mkdtemp(join(tmpdir(), 'page-http-no-executable-'));
+  try {
+    await assert.rejects(startPageHttp({ port: 18091, stateDir,
+      python: join(stateDir, 'missing-python'), timeoutMs: 1000 }), /page http did not become ready/);
+  } finally {
+    await rm(stateDir, { recursive: true, force: true });
+  }
+});
 
 test('launcher boots the isolated python server and the full page chain answers', { timeout: 30000 }, async () => {
   const stateDir = await mkdtemp(join(tmpdir(), 'lane-h-launcher-'));
@@ -181,7 +272,6 @@ test('serve args accept page-http flags and reject the live port as a page port'
 });
 
 test('writePageHttpState records the base without the token next to it', async () => {
-  const { readFile } = await import('node:fs/promises');
   const runtime = await mkdtemp(join(tmpdir(), 'lane-h-state-'));
   try {
     await writePageHttpState(runtime, { base: 'http://127.0.0.1:18091', token: 'state-token-not-in-json-32ch' });

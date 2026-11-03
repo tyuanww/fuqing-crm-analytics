@@ -49,6 +49,8 @@ test('CRM alone keeps its tools and explicitly reports the absent page provider'
   assert.equal(capabilities.value.dashboard.connection_state, 'NOT_CONNECTED');
   assert.equal(ctx.tools.get('crm_knowledge_explain', agent), undefined);
   assert.equal(ctx.tools.get('query_crm_knowledge_graph', agent), undefined);
+  assert.ok(ctx.tools.get('query_crm_product_customer_cohorts', agent));
+  assert.ok(ctx.tools.get('query_crm_rfm_snapshot', agent));
   const query = await ctx.tools.execute({ name: 'query_crm_metrics_v1', arguments: { request: {
     source_id: 'synthetic-crm-metrics', contains_real_data: false, metric_version: 'crm-metrics/v1',
     query_id: 'sales_window_summary', period_start: '2026-09-01', period_end_exclusive: '2026-10-01',
@@ -91,6 +93,29 @@ test('board health follows catalog visibility and ignores competition HTTP env',
   const visible = await ctx.tools.execute({ name: 'crm_service_health', arguments: {}, agent,
     callId: 'board-visible', signal: new AbortController().signal });
   assert.deepEqual(visible.value.board_tools, { status: 'AVAILABLE', execution: 'NOT_RUN', reason: null });
+});
+
+test('knowledge health follows the current WeKnora provider tools', async t => {
+  const ctx = new Context(); t.after(() => ctx.fiber.dispose());
+  await mountAgentLoopTestDependencies(ctx);
+  await ctx.plugin(crm);
+  for (const name of ['weknora_search', 'weknora_read_document']) {
+    ctx.tools.register(defineTool({
+      name, description: 'fixture', parameters: {},
+      output: { schema: { type: 'json' }, render: () => [] }, execute: async () => ({ ok: true }),
+    }));
+  }
+  const result = await ctx.tools.execute({
+    name: 'crm_service_health', arguments: {}, agent: { session: { id: 'crm-weknora-health' } },
+    callId: 'weknora-health', signal: new AbortController().signal,
+  });
+  assert.deepEqual(result.value.knowledge_base, {
+    status: 'AVAILABLE',
+    execution: 'NOT_RUN',
+    reason: null,
+    provider: 'weknora',
+    tools: ['weknora_search', 'weknora_read_document'],
+  });
 });
 
 test('plugin build refuses missing or relative upstream instead of discovering the main repository', async () => {

@@ -69,9 +69,6 @@ export function createArtifactInboxClient(http, { now = () => Date.now() } = {})
     },
     async intake(input) {
       const packageValue = input?.package ?? null;
-      // The server normalizes page packages before hashing them. Let it own
-      // that digest so optional model fields such as presentation:null cannot
-      // make an otherwise valid generated package fail intake.
       const contentHash = input?.content_hash
         || (packageValue && input?.source !== 'page_package' ? await digestValue(packageValue) : null);
       if (!contentHash && input?.source !== 'page_package') {

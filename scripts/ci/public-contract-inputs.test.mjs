@@ -61,6 +61,7 @@ test('missing absolute inputs never fall back to plugin source', async () => {
 for (const [name, edit, error] of [
   ['cross-owner projection', x => { x.owners.crm.files[0].main_path = x.owners.workbench.files[0].main_path; }, /PUBLIC_CONTRACT_PROJECTION/],
   ['another package identity', x => { x.owners.crm.package = '@example/another'; }, /PUBLIC_CONTRACT_PACKAGE/],
+  ['obsolete CRM package version', x => { x.owners.crm.version = '0.0.0-crm.1'; }, /PUBLIC_CONTRACT_VERSION/],
   ['private runtime material', x => { x.owners.workbench.files[0].kind = 'runtime'; }, /PUBLIC_CONTRACT_MATERIAL_KIND/],
   ['missing original generator', x => { x.generators.pop(); }, /PUBLIC_CONTRACT_GENERATORS/],
   ['missing C0 provenance input', x => { x.canonical_sources = x.canonical_sources.filter(p => p !== 'backend/contracts/tests/test_competition_c0.py'); }, /PUBLIC_CONTRACT_CANONICAL_REQUIRED/],

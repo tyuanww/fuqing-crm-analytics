@@ -37,6 +37,16 @@ test('rejects oversized packages, hash mismatch, and static outbound URLs', asyn
   assert.equal(leak.error.code, 'INVALID_PAGE');
   assert.ok(leak.error.urls?.some((url) => url.includes('example.com')));
 
+  const navigation = await normalizePagePackage({
+    html: '<p data-shine-node="n_nav">导航</p>',
+    css: '',
+    js: "const target = ['ht', 'tps://example.com/'].join(''); window.location.assign(target);",
+    resources: [],
+    node_map: [{ node_id: 'n_nav', kind: 'static_element', selector: "[data-shine-node='n_nav']" }],
+  });
+  assert.equal(navigation.ok, false);
+  assert.equal(navigation.error.code, 'INVALID_PAGE');
+
   const bytes = utf8Bytes('logo');
   const digest = await sha256Hex(bytes);
   const mismatch = await normalizePagePackage({

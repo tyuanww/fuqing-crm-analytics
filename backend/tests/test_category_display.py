@@ -252,12 +252,12 @@ def test_ensure_archive_fill_views_noop_and_attach(monkeypatch):
     assert "/tmp/o''reilly/archive.duckdb" in sql
 
 
-def test_apply_runtime_settings_attaches_archive(monkeypatch):
+def test_configure_connection_attaches_archive(monkeypatch):
     from backend.services import dual_conn
 
     monkeypatch.setenv("FQ_ARCHIVE_DUCKDB", "/tmp/a.duckdb")
     conn = _FakeConn()
-    dual_conn._apply_runtime_settings(conn, "1GB")
+    dual_conn.configure_connection(conn, "1GB")
     sqls = [sql for sql, _params in conn.calls]
     assert any("SET memory_limit" in sql for sql in sqls)
     assert any("SET threads" in sql for sql in sqls)

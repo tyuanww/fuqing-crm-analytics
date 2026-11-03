@@ -1,3 +1,5 @@
+import { DSH_UPSTREAM_SHA } from './toolchain.mjs';
+import { DEFAULT_PROFILE_MANIFEST } from './profile.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
@@ -32,7 +34,8 @@ test('dsh exposes stable help and version output', () => {
   assert.equal(help.status, 0);
   assert.match(help.stdout, /Commands:.*release/);
   const version = execFileSync(process.execPath, [cli, '--version'], { encoding: 'utf8' });
-  assert.match(version, /^DSH_VERSION \d+\.\d+\.\d+\.\d+ upstream=477b4f42/m);
+  assert.match(version, /^DSH_VERSION \d+\.\d+\.\d+\.\d+ upstream=[0-9a-f]{8}/m);
+  assert.ok(version.includes(`upstream=${DSH_UPSTREAM_SHA.slice(0, 8)}`));
   const releaseHelp = execFileSync(process.execPath, [cli, 'release', '--help'], { encoding: 'utf8' });
   assert.match(releaseHelp, /Precedence: --tag/);
   const pluginHelp = execFileSync(process.execPath, [cli, 'plugin', 'candidate', '--help'], { encoding: 'utf8' });
@@ -92,7 +95,7 @@ test('doctor release reports readiness blockers without writing an artifact', ()
 
 test('doctor release rejects an uncompressed or misnamed runtime bundle', async () => {
   const rootDir = await mkdtemp(join(tmpdir(), 'dsh-runtime-check-'));
-  const runtime = join(rootDir, 'shinemage-dsh-upstream-runtime-477b4f420553e8a52c2fbccc464d7561b239c443.tar.zst');
+  const runtime = join(rootDir, `shinemage-dsh-upstream-runtime-${DSH_UPSTREAM_SHA}.tar.zst`);
   await writeFile(runtime, 'not-a-zstd-stream');
   try {
     const result = spawnSync(process.execPath, [cli, 'doctor', '--release'], {
@@ -186,7 +189,7 @@ test('preflight checks declared service evidence before build and preserves its 
   const trial = await mkdtemp(join(root, '.context/preflight-service-'));
   t.after(() => rm(trial, { recursive: true, force: true }));
   const { binding, evidenceJson } = await serviceFixture();
-  const profile = JSON.parse(await readFile(join(root, 'config/dsh-profile.rc2.json')));
+  const profile = JSON.parse(await readFile(join(root, DEFAULT_PROFILE_MANIFEST)));
   const profilePath = join(trial, 'profile.json'), evidencePath = join(trial, 'receipt.json');
   await writeFile(profilePath, JSON.stringify({ ...profile, service_binding: binding }));
   await writeFile(evidencePath, evidenceJson);

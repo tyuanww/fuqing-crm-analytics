@@ -169,7 +169,7 @@ test('asset session change aborts and ignores an old account library reply', asy
 test('compiled UI searches history, edits metadata and saves a board without sending amounts', async t => {
   const writes = []; const scopes = [];
   const page = { ...analysisPage, next_cursor: 'next-page' };
-  const older = { ...analysisPage, items: [{ ...analysisPage.items[0], analysis_id: analysis.analysis_id, title: '窗口 00' }], next_cursor: null };
+  const older = { ...analysisPage, items: [{ ...analysisPage.items[0], analysis_id: 'crm_a_older_' + '0'.repeat(32), title: '窗口 00' }], next_cursor: null };
   const board = {
     schema_version: 'crm-board/v1', board_id: 'crm_b_' + '1'.repeat(32), title: '销售组板', description: '',
     saved_at: analysis.saved_at, updated_at: analysis.saved_at, revision: 1,

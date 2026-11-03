@@ -51,7 +51,7 @@ def _new_duckdb_conn() -> duckdb.DuckDBPyConnection:
         config=dual_conn._db_config(),
         read_only=read_only,
     )
-    return dual_conn._apply_runtime_settings(conn, dual_conn.READ_MEMORY_LIMIT)
+    return dual_conn.configure_connection(conn, dual_conn.READ_MEMORY_LIMIT)
 
 
 def _run_rfm_period_serial(
@@ -126,7 +126,15 @@ def get_rfm_analysis(
     cur_start_dt, cur_end_dt, cutoff = ranges["current"]
     comp_start_dt, comp_end_dt, comp_cutoff = ranges["comp"]
     prev2_start_dt, prev2_end_dt, prev2_cutoff = ranges["prev2"]
-    current_year_label, comp_year_label, prev2_year_label = ranges["labels"]
+    cache_start_date = cur_start_dt.split(" ")[0]
+    cache_end_date = cur_end_dt.split(" ")[0]
+    cache_compare_start = comp_start_dt.split(" ")[0]
+    cache_compare_end = comp_end_dt.split(" ")[0]
+    cache_prev2_start = prev2_start_dt.split(" ")[0]
+    cache_prev2_end = prev2_end_dt.split(" ")[0]
+    current_year_label = cache_start_date[:4]
+    comp_year_label = cache_compare_start[:4]
+    prev2_year_label = prev2_start_dt[:4]
 
     # 判断当前周期是否为历史周期（可缓存）
     cur_end_date_str = cur_end_dt.split(" ")[0]
@@ -151,9 +159,11 @@ def get_rfm_analysis(
         # ── 缓存读取（HTTP cache-only 也覆盖当前/未来固定季度 key） ──
         if should_read_cache:
             cached = _read_db_cache(
-                period, start_date, end_date, channel, metric_type,
-                exclude_channels, data_version, conn, compare_start_date, compare_end_date,
+                period, cache_start_date, cache_end_date, channel, metric_type,
+                exclude_channels, data_version, conn, cache_compare_start, cache_compare_end,
                 current_orders_count=current_orders_count,
+                prev2_start_date=cache_prev2_start,
+                prev2_end_date=cache_prev2_end,
             )
             if cached:
                 logger.info(f"RFM 缓存命中（历史周期 end={cur_end_date_str}），跳过计算")
@@ -165,7 +175,7 @@ def get_rfm_analysis(
         if not allow_live_compute:
             raise RFMCacheMissError(
                 "RFM 请求组合尚未预热: "
-                f"{start_date}..{end_date}, metric={metric_type}, "
+                f"{cache_start_date}..{cache_end_date}, metric={metric_type}, "
                 f"channel={channel or '全店'}"
             )
 
@@ -208,9 +218,11 @@ def get_rfm_analysis(
         if is_historical and data_version:
             try:
                 _write_db_cache(
-                    period, start_date, end_date, channel, metric_type,
-                    exclude_channels, data_version, result, compare_start_date, compare_end_date,
+                    period, cache_start_date, cache_end_date, channel, metric_type,
+                    exclude_channels, data_version, result, cache_compare_start, cache_compare_end,
                     orders_count=current_orders_count,
+                    prev2_start_date=cache_prev2_start,
+                    prev2_end_date=cache_prev2_end,
                 )
                 logger.info(f"RFM 缓存写入完成（历史周期 end={cur_end_date_str}）")
             except RFMCacheUnavailableError:

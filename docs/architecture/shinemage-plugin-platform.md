@@ -2,6 +2,10 @@
 
 本设计落实[已批准的拆分计划](../plans/shinemage-plugin-platform-split.md)，不是重新选型。目标是官方 DSH 底座、独立 CRM/知识库服务、各自版本化的插件和一个组合 profile。首批插件已经形成独立远程仓，当前远程清单见[远程仓盘查](../hackathon/evidence/shinemage-remote-repository-inventory-20261010.md)，主线短 SHA 见 STATUS，完整 SHA、合并时间和 CI 事实见[PR #121 合并后记录](../hackathon/evidence/shinemage-pr121-postmerge-20261012.md)；主仓继续保留平台合同、组合验证、历史 `dsh-plugins/` 和候选账本，部分历史副本已经按授权清理，剩余副本、正式物理分仓、正式 `dsh-plugin-pack/v1`/`dsh-plugin-candidate/v1` 分发与生产切换仍按各自门禁执行。普通插件更新的具体操作见[插件更新指南](../operating/shinemage-plugin-update.md)。
 
+## 当前 rc3 候选（2026-10-24）
+
+主仓活动版本已统一为 DSH `0.2.1-rc.3`、上游 `1f81c047…`、Cordis `4.0.5`；Workbench、CRM、Knowledge 的 rc3 构建与来源证明已在本地通过，三份作者仓各自有干净本地提交。该候选仍未推送、合并或部署，杭州线上继续运行独立 rc1 side-load，正式组合 artifact、远端 CI 和切换门禁未完成。详见[rc3 上游盘查](../release/dsh-rc3-candidate/upstream-audit-20261024.md)。
+
 ## 问数组合边界（2026-10-21）
 
 “问数智能体”由配置型 `@shine-mage/dsh-query-agent` 组合已有域能力，不复制 CRM、WeKnora 或页面实现：
@@ -19,15 +23,15 @@ CRM、知识、WeKnora、页面和问数预设保持独立包，是因为它们�
 历史 marker 包由页面 profile 选择，不进入 `crm-query` 的最小工具面。是否继续保留这些 marker 需要按页面消费者单独判断，不能为了减少插件列表而直接删除仍被 workbench 引用的能力。架构与产品评审图见[驾驶舱最终架构](../../diagrams/cockpit-final-architecture.mmd)、[当前驾驶舱实现](../../diagrams/shine-cockpit-current.mmd)和[WorkBuddy 资料库 UX](../../diagrams/workbuddy-library-ux.mmd)。
 
 
-## 当前维护边界（2026-10-12 PR #121 合并后至 2026-10-21）
+## 维护边界历史快照（2026-10-12 PR #121 合并后至 2026-10-21）
 
-本轮实现与测试迁移已分组提交并经 PR #121 普通 merge，合并后 main CI 见[核验记录](../hackathon/evidence/shinemage-pr121-postmerge-20261012.md)。九个插件各自维护源码／版本／测试，且九个插件仓与 board-components 领域库的首个远程 PR 已合并；board-components 仍是独立领域库，不是第十个插件。2026-10-12 时点的装配锁绑定 Workbench `3030e3f`、CRM `dac0539`、Knowledge `f623c22`；当前 rc2 组合锁已前进到 Workbench `3030e3f`、CRM `5f359f5b`、Knowledge `ef8960ed`，而杭州 v5 仍使用独立的 rc1 owner-operated side-load。当前值只看 [STATUS](../../STATUS.md) 与组合锁；旧回执和 artifact 摘要见[正式包 CI 收口](../hackathon/evidence/shinemage-formal-plugin-ci-20261012.md)。
+本轮实现与测试迁移已分组提交并经 PR #121 普通 merge，合并后 main CI 见[核验记录](../hackathon/evidence/shinemage-pr121-postmerge-20261012.md)。九个插件各自维护源码／版本／测试，且九个插件仓与 board-components 领域库的首个远程 PR 已合并；board-components 仍是独立领域库，不是第十个插件。2026-10-12 时点的装配锁绑定 Workbench `3030e3f`、CRM `dac0539`、Knowledge `f623c22`；2026-10-21 的 rc2 组合锁随后前进到 Workbench `3030e3f`、CRM `5f359f5b`、Knowledge `ef8960ed`，而杭州 v5 仍使用独立的 rc1 owner-operated side-load。上述均为历史输入；当前 rc3 本地候选只看本文顶部、[STATUS](../../STATUS.md) 和[rc3 上游盘查](../release/dsh-rc3-candidate/upstream-audit-20261024.md)。
 
 2026-10-21 新增的 `dsh-plugins/query-agent` 是主仓内的配置型 bundle，尚未成为第十个业务插件独立作者仓，因此不改变上述“九个插件仓与 board-components”合计十个作者的已合并计数。边界清单已为其预留外置 owner，正式分仓和独立 CI 仍按单独门禁推进。
 
 主仓仍负责 backend、平台合同、profile、组合消费、来源与权限门禁、保留合同守卫和静态扫描。另两组私有数值／查询断言继续读取旧 Workbench，历史 `dsh-plugins/` 因这些用途暂留；本地源码迁移没有证明全面源码退场，也没有改变运行时边界。完整看板仍在 analytics-workbench，shine-board 是能力标记；合成知识服务不能当作真实 WeKnora。
 
-单插件日常变更按自己的作者检查与受影响主仓消费者验证，不重建 DSH、迁移业务数据库或重复 SDK 全量审计。DSH 升级仍是独立固定候选及兼容验收。隔离 formal pack 和宿主观测曾使用 Cordis `4.0.4`；当前 CRM/Knowledge 源码 manifest 仍声明 Cordis `4.0.2`，其隔离 peer 修复不能写成主仓默认版本。D/E 五仓无独立 tsc，SDK 正式分发 BLOCKED，产品 PARTIAL、release_ready=false。PR #121 已合入 main，合并后主 CI 与工件摘要见[合并后核验](../hackathon/evidence/shinemage-pr121-postmerge-20261012.md)。当前九包输入预检已成功生成固定回执，见[组合输入预检](../hackathon/evidence/shinemage-composition-preflight-20261012.md)；candidate/journal、目标／真实业务及发布不据此通过，新服务字节需自己的组合验收。当前 backend worker 的结果事务争用修复只影响服务处理，不改变插件归属。
+单插件日常变更按自己的作者检查与受影响主仓消费者验证，不重建 DSH、迁移业务数据库或重复 SDK 全量审计。DSH 升级仍是独立固定候选及兼容验收；本段旧快照中的 Cordis `4.0.4`、精确 `4.0.2` 声明和 rc2 输入不代表当前 rc3 合同。D/E 五仓无独立 tsc，SDK 正式分发 BLOCKED，产品 PARTIAL、release_ready=false。PR #121 已合入 main，合并后主 CI 与工件摘要见[合并后核验](../hackathon/evidence/shinemage-pr121-postmerge-20261012.md)。历史九包输入预检见[组合输入预检](../hackathon/evidence/shinemage-composition-preflight-20261012.md)；当前 rc3 远端 CI、正式 artifact、candidate/journal、目标／真实业务及发布仍未关闭。
 
 此前三路径应用时点（保留原记录）：
 
@@ -37,7 +41,7 @@ CRM、知识、WeKnora、页面和问数预设保持独立包，是因为它们�
 
 | 改动 | 归属与交付 | 必须验证 | 不随之打包的内容 |
 |---|---|---|---|
-| 官方 DSH | host exact SHA、SDK 和 runtime lock；当前 `0.1.7-rc.2` / `477b4f42` | 固定宿主的工具、slot、生命周期、恢复和插件兼容矩阵 | CRM/知识库源码、业务数据库 |
+| 官方 DSH | host exact SHA、SDK 和 runtime lock；当前本地候选 `0.2.1-rc.3` / `1f81c047` | 固定宿主的工具、slot、生命周期、恢复和插件兼容矩阵 | CRM/知识库源码、业务数据库 |
 | 单个插件 | 本领域源码、版本、测试、`lib/`、peer、bundle patch；产出独立 digest | files/exports、安全扫描、合同消费者测试、目标宿主验收 | 其他插件源码、DSH runtime、服务状态 |
 | CRM/知识库服务 | API、权限、领域 schema、持久化与迁移协议 | API 兼容窗口、权限、幂等/回放、状态 forward-fix | DSH shell 与其他服务的数据 |
 | profile/部署 | 固定包的有序清单、host pin、来源、digest、回执与回退指针 | 来源信任、同一 artifact、canary、受控激活和恢复 | 构建工具、源代码仓库、现场编译流程 |
@@ -104,11 +108,11 @@ Workbench 的完整 core/严格构建/私有 loader 现由独立作者提交 `d0
 
 默认 B0 的 CRM/Knowledge 两项本仓构建及作者私有 transport/graph/relay 测试已本地切走，改由独立作者仓负责；主仓消费既有正式两包并保留公开行为断言。实际源码拒读的包消费 11 项和原公共组合 9 项通过，输入守卫分别记账；Workbench 源码构建、七个生产者及历史输入守卫仍在，完整 B0 和新 CI 未跑，不能删除副本或宣称全部源码装配已迁完。见[本轮记录](../hackathon/evidence/shinemage-crm-knowledge-package-consumers-20261011.md)。
 
-CRM/Knowledge 的既有正式两包现已在固定 DSH 的官方安装、profile resolver 与实际 Cordis `4.0.4` 下完成本机宿主/preset 初始化；没有改精确 `4.0.2` 声明或设置版本豁免。Linked peer 警告保留，该结果不证明声明正确或完整运行兼容，不代替真实服务和当前 candidate 的组合准入；见[宿主兼容补查](../hackathon/evidence/shinemage-crm-knowledge-host-compat-20261011.md)。
+历史证据中的 CRM/Knowledge 两包曾在固定 DSH 的官方安装、profile resolver 与 Cordis `4.0.4` 下完成本机宿主/preset 初始化；该结果不迁移为当前 rc3 宿主通过。当前 rc3 的完整宿主、真实服务/模型和 candidate 准入仍待独立验收；见[宿主兼容补查](../hackathon/evidence/shinemage-crm-knowledge-host-compat-20261011.md)。
 
 未公开的 `skills.js`、未打包视图、包内原生通道授权和页面交付实现属于 Workbench 作者验证，不能临时新增 exports 或复制进主仓来通过组合检查。作者仓六个既有入口及原 built 检查已在完整作者入口同次 30 文件、212 项通过，原断言未改；固定输入仅用于本地编译/测试闭包，不重编上游。主仓七个旧生产者入口在作者提交和 CI 交付前仍保留，当前没有删除或正式迁完。真实模型和业务不由合成夹具抵扣；当前见[作者测试补齐](../hackathon/evidence/shinemage-workbench-author-tests-closeout-20261011.md)，前轮输入锁与失败记录见[历史归属接续](../hackathon/evidence/shinemage-workbench-producer-ownership-20261011.md)。
 
-原生 prompt 消费也已转为正式包公开 `./client`，使用固定官方 Cordis `4.0.4` Context，合成 remote/RPC 只验证公开注入和生命周期。10 项原断言保留并在源码拒读下通过，九入口同次实跑 66；七个 Host/私有 compiled producer 和其余源码构建仍保留，不等同完整宿主或正式候选。见[本轮证据](../hackathon/evidence/shinemage-workbench-native-prompt-pack-20261011.md)。
+历史原生 prompt 消费使用正式包公开 `./client` 与 Cordis `4.0.4` Context；脚本现已切到 rc3 的 Cordis `4.0.5`，历史九入口 66 项不迁移为 rc3 PASS。七个 Host/私有 compiled producer 和其余源码构建仍保留，不等同完整宿主或正式候选。见[本轮证据](../hackathon/evidence/shinemage-workbench-native-prompt-pack-20261011.md)。
 
 发布客户端的工具卡、取消、保存、首购和资产弹层运行检查也已改为固定包消费，主仓只维护消费者与合成合同数据；不复制插件 decoder、保存网关或模型实现。八入口在列明源码拒读下实跑 56 项，源码结构检查仍留在生产者阶段，Host/私有视图和剩余构建继续开放。该结果不解决原正式包的 peer 缺口或完整宿主准入，见[合同消费证据](../hackathon/evidence/shinemage-workbench-consumer-contracts-20261011.md)。
 
@@ -120,9 +124,9 @@ Workbench 的公开客户端消费进一步迁到主仓验收目录，仅使用�
 
 ZIP 接收的安全校验使用明确异常，不能因 Python 优化模式关闭。包输入准备、合成公共合同与 backend/frontend/tooling/release 的本地回归各自留存证据，不合并为完整宿主或正式发布通过；当前候选与 journal 身份不变。
 
-CRM/知识 profile 生成器现已本地支持与开发入口相同的 `dsh-profile-pack-inputs/v1`，先核对完整包和固定 profile，再解到本次独占目录；公开导出、领域合同、精确 peer 和配置私密性检查保持。实测使用现有 `crm-knowledge-rc2` profile 和两份独立正式包，没有新建服务 profile。带 service binding 的组合仍必须进入正式 candidate 门禁，配置准备不能代替服务/宿主验收。见[迁移证据](../hackathon/evidence/shinemage-crm-profile-pack-migration-20261011.md)；实现尚未提交，完整运行组合及默认源码 pipeline 仍待收口。
+CRM/知识 profile 生成器现已本地支持与开发入口相同的 `dsh-profile-pack-inputs/v1`，先核对完整包和固定 profile，再解到本次独占目录；公开导出、领域合同、精确 peer 和配置私密性检查保持。当前 rc3 profile 为 `crm-knowledge-rc3`；历史 `crm-knowledge-rc2` 输入不迁移为当前证据。带 service binding 的组合仍必须进入正式 candidate 门禁，配置准备不能代替服务/宿主验收。
 
-CRM／知识和公开 page tools 的组合验收已进一步改为读取固定包，测试维护在主仓验收目录，旧插件测试路径保留兼容。当前只证明官方解析器、Cordis `4.0.4` 下的九项公共合同；声明 `4.0.2` 没有放宽，也未安装 peer 或启动完整宿主。默认源码 pipeline 的其他装配及完整宿主准入仍未关闭，见[本轮组合证据](../hackathon/evidence/shinemage-fixed-pack-composition-20261011.md)。
+历史 CRM／知识和公开 page tools 组合验收在 Cordis `4.0.4` 下完成九项公共合同；当前 rc3 只复用合同结构，不复用历史 PASS。默认源码 pipeline 的其他装配及完整宿主准入仍未关闭，见[本轮组合证据](../hackathon/evidence/shinemage-fixed-pack-composition-20261011.md)。
 
 2026-10-11 本地接续：开发 `check/start/reload` 正在迁移为显式固定包输入，包读取、准备和原七包的官方安装/配置生成已有实测。实际启动发现 Workbench 未声明 `dsh-client-connection`、`dsh-llm` 运行 peer；作者仓本地补齐同一固定版本，并在真实 host 构建输出上检查未声明依赖。修复后的隔离诊断完成开启、原生关闭、恢复和合成会话持久化；它修改了 manifest，不是原正式包或 candidate 的验收。代码尚未提交，live CLI reload、默认源码 pipeline 与其他 CRM/Knowledge 组合入口仍待迁移；不能据此删除历史副本或宣称物理分仓全部完成。范围见[插件更新指南](../operating/shinemage-plugin-update.md#开发入口消费固定包2026-10-11-本地迁移)、[准备证据](../hackathon/evidence/shinemage-profile-pack-migration-20261011.md)及[宿主修复证据](../hackathon/evidence/shinemage-official-pack-host-closeout-20261011.md)。
 

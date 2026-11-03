@@ -8,6 +8,7 @@ const JS_HTTP = /\b(?:fetch|open|importScripts|import)\s*\(\s*(['"`])((?:https?:
 const JS_CTOR = /\bnew\s+(?:WebSocket|EventSource|Worker|SharedWorker)\s*\(\s*(['"`])([^'"`]+)\1/gi;
 const BEACON = /\bsendBeacon\s*\(\s*(['"`])([^'"`]+)\1/gi;
 const ASSIGN = /\b(?:location|window)\.(?:href|location)\s*=\s*(['"`])([^'"`]+)\1/gi;
+const NAVIGATION_CALL = /\b(?:(?:window|document)\.)?location\.(?:assign|replace)\s*\(|\bwindow\.open\s*\(/gi;
 
 const ALLOWED_SCHEMES = new Set(['blob:', 'data:', 'resource:']);
 
@@ -58,6 +59,9 @@ export function extractCandidateUrls(html = '', css = '', js = '') {
   for (const value of collect(js, JS_CTOR)) urls.push(value);
   for (const value of collect(js, BEACON)) urls.push(value);
   for (const value of collect(js, ASSIGN)) urls.push(value);
+  NAVIGATION_CALL.lastIndex = 0;
+  if (typeof js === 'string' && NAVIGATION_CALL.test(js)) urls.push('__active_navigation_call__');
+  NAVIGATION_CALL.lastIndex = 0;
   return urls;
 }
 
@@ -91,6 +95,10 @@ export function assertNoActiveOutbound(html, css, js, allowedResourceIds = new S
   const blocked = [];
   for (const url of extractCandidateUrls(html, css, js)) {
     const trimmed = String(url || '').trim();
+    if (trimmed === '__active_navigation_call__') {
+      blocked.push(trimmed);
+      continue;
+    }
     if (trimmed.startsWith('resource:')) {
       const id = trimmed.slice('resource:'.length);
       if (!allowedResourceIds.has(id)) blocked.push(trimmed);

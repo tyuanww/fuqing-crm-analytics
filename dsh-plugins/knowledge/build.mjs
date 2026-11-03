@@ -16,7 +16,8 @@ if (toolsInput && !isAbsolute(toolsInput)) {
   console.error('BUILD_TOOLS_NOT_CONFIGURED: pass an absolute build-tools directory as the third argument or B0_BUILD_TOOLS.');
   process.exit(2);
 }
-const { compiler: ts, build } = await bindToolchain(root, upstream, toolsInput ? resolve(toolsInput) : undefined);
+const { pin, compiler: ts, build, restore } = await bindToolchain(root, upstream, toolsInput ? resolve(toolsInput) : undefined);
+try {
 const entries = ['src/index.ts', 'src/graph-tools.ts', 'test/contract.typecheck.ts'];
 const program = ts.createProgram(entries.map(file => join(root, file)), {
   strict: true, noEmit: true, allowJs: true, checkJs: false, skipLibCheck: false,
@@ -30,5 +31,8 @@ assert.equal(errors.length, 0, ts.formatDiagnosticsWithColorAndContext(errors, {
 }));
 await build({ absWorkingDir: root, entryPoints: ['src/index.ts', 'src/graph-tools.ts'], outdir: 'lib',
   bundle: true, platform: 'node', target: 'node24', format: 'esm', external: ['@deepseek-ai/*'] });
-console.log('Knowledge candidate typecheck and pinned build passed');
-await writeBuildProvenance({ root });
+  console.log('Knowledge candidate typecheck and pinned build passed');
+  await writeBuildProvenance({ root, toolchain: pin, releaseLane: process.env.DSH_RELEASE_LANE_CONFIG ?? null });
+} finally {
+  await restore();
+}

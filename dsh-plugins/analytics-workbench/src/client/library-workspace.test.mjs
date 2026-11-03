@@ -11,6 +11,10 @@ import { COMPONENT_CATALOG } from '../board-spec/component-catalog.mjs';
 import { librarySnapshot, libraryPreview, ok, failed, listOf } from '../../test/helpers/library-board-fixtures.mjs';
 import { createFreeHtmlLibraryStore } from './free-html-library/store.mjs';
 import { SAMPLE_PACKAGE, createMockPageAdapters } from './free-html-library/mock-adapters.mjs';
+import { buildSrcdoc } from '../free-page/preview/srcdoc-builder.mjs';
+import { sourceHash } from '../free-page/presentation/model.mjs';
+import { presentationRuntime } from '../free-page/presentation/runtime.mjs';
+import { mountPreviewHost } from '../free-page/preview/preview-host.mjs';
 
 const plugin = fileURLToPath(new URL('../..', import.meta.url));
 const upstream = resolve(process.env.B0_BUILD_UPSTREAM ?? join(plugin, '../../.context/dsh-b0/upstream-0.1.7-rc.2'));
@@ -69,6 +73,91 @@ function allSix() {
   };
   return snapshot;
 }
+
+
+test('static saved presentation survives save, edit exit and reopen without enabling scripts', async t => {
+  const ui = await domFixture(t);
+  const library = createLibraryBoardClient(async () => ok({ items: [] }));
+  const pageStore = createFreeHtmlLibraryStore();
+  t.after(() => { library.dispose(); pageStore.dispose(); });
+  pageStore.setPrompt('静态页'); await pageStore.generate();
+  const pkg = { html: '<h1 id="heading">原文</h1>', css: '', js: '', resources: [], node_map: [] };
+  pkg.presentation = { source_hash: sourceHash(pkg), edits: [
+    { target: { anchor: { attribute: 'id', value: 'heading' }, path: [] }, text: '已保存文案', style: { color: 'red' } },
+  ] };
+  const original = structuredClone(pkg);
+  pageStore.enterEdit(); pageStore.markLocalDraft(pkg); await pageStore.saveDraft(); pageStore.exitEdit();
+  const saved = pageStore.getSnapshot().current;
+  pageStore.selectCockpitAsset('page:' + saved.page_id);
+  await ui.render(React.createElement(LibraryCockpitPanel, { library, pageStore, initialSurface: 'pages',
+    themeSource: { subscribe: () => () => {}, getSnapshot: () => 'light' }, goConversation() {} }));
+  for (const reopen of [false, true]) {
+    if (reopen) await act(async () => { await pageStore.openPage(saved.page_id); });
+    const frame = ui.doc.querySelector('[data-testid="library-html-preview"]');
+    assert.equal(frame.getAttribute('sandbox'), '');
+    const preview = new ui.doc.defaultView.DOMParser().parseFromString(frame.getAttribute('srcdoc'), 'text/html');
+    assert.equal(preview.querySelector('#heading').textContent, '已保存文案');
+    assert.equal(preview.querySelector('#heading').style.color, 'red');
+    assert.deepEqual(pageStore.getSnapshot().current.package, original);
+    assert.equal(pageStore.getSnapshot().current.version, saved.version);
+  }
+});
+
+test('static presentation projection preserves readonly values and source identity', async t => {
+  const ui = await domFixture(t);
+  const pkg = { html: '<h1 id="heading">原文</h1><span id="metric" data-page-readonly>42</span>', css: '', js: '' };
+  const presentation = { source_hash: sourceHash(pkg), edits: [
+    { target: { anchor: { attribute: 'id', value: 'heading' }, path: [] }, text: '已保存文案', style: {} },
+    { target: { anchor: { attribute: 'id', value: 'metric' }, path: [] }, text: '999', style: {} },
+  ] };
+  const srcdoc = buildSrcdoc({ ...pkg, presentation, allowScripts: false });
+  const preview = new ui.doc.defaultView.DOMParser().parseFromString(srcdoc, 'text/html');
+  assert.equal(preview.querySelector('#heading').textContent, '已保存文案');
+  assert.equal(preview.querySelector('#metric').textContent, '42');
+  assert.equal(pkg.html.includes('已保存文案'), false);
+  assert.throws(() => buildSrcdoc({ ...pkg, presentation: { ...presentation, source_hash: '0'.repeat(64) }, allowScripts: false }), /来源不匹配/);
+});
+
+test('static projection rejects raw-text edits without creating HTML from saved text', async t => {
+  const ui = await domFixture(t);
+  for (const tag of ['xmp', 'noembed', 'noframes', 'noscript', 'plaintext']) {
+    const pkg = { html: `<h1 id="heading">原文</h1><${tag} id="raw">原始文本</${tag}>`, css: '', js: '' };
+    const presentation = { source_hash: sourceHash(pkg), edits: [
+      { target: { anchor: { attribute: 'id', value: 'raw' }, path: [] }, text: `</${tag}><h2 id="injected">注入</h2><${tag}>`, style: {} },
+      { target: { anchor: { attribute: 'id', value: 'heading' }, path: [] }, text: '已保存文案', style: {} },
+    ] };
+    const parser = new ui.doc.defaultView.DOMParser();
+    const direct = parser.parseFromString(pkg.html, 'text/html');
+    assert.deepEqual(presentationRuntime(presentation.edits, direct), { total: 2, unresolved: [0] }, tag);
+    const projected = parser.parseFromString(buildSrcdoc({ ...pkg, presentation, allowScripts: false }), 'text/html');
+    assert.equal(projected.querySelector('#injected'), null, tag);
+    assert.equal(projected.querySelector('#heading').textContent, '已保存文案', tag);
+    assert.equal(projected.querySelector('#raw').textContent.startsWith('原始文本'), true, tag);
+  }
+});
+
+test('static preview host retains presentation and source hash across restart', async t => {
+  const ui = await domFixture(t);
+  const root = ui.doc.createElement('div');
+  const host = mountPreviewHost(root, { chrome: false, allowScripts: false });
+  t.after(() => host.dispose());
+  const pkg = { html: '<h1 id="heading">原文</h1>', css: '', js: '', resources: [], node_map: [] };
+  pkg.presentation = { source_hash: sourceHash(pkg), edits: [
+    { target: { anchor: { attribute: 'id', value: 'heading' }, path: [] }, text: '已保存文案', style: {} },
+  ] };
+  const before = structuredClone(pkg);
+  assert.equal((await host.loadPackage(pkg, 2)).ok, true);
+  for (const restart of [false, true]) {
+    if (restart) assert.equal((await host.restart()).ok, true);
+    const frame = root.querySelector('iframe');
+    assert.equal(frame.getAttribute('sandbox'), '');
+    const document = new ui.doc.defaultView.DOMParser().parseFromString(frame.srcdoc, 'text/html');
+    assert.equal(document.querySelector('#heading').textContent, '已保存文案');
+    assert.deepEqual(pkg, before);
+  }
+  const invalid = { ...pkg, presentation: { ...pkg.presentation, source_hash: '0'.repeat(64) } };
+  assert.equal((await host.loadPackage(invalid, 3)).ok, false);
+});
 
 test('six-component preview mounts from receipt, keyboard focus lands on heading, cancel and failed save preserve state', async t => {
   const ui = await domFixture(t), snapshot = allSix(), pending = libraryPreview(snapshot);
@@ -1502,3 +1591,37 @@ for (const cause of ['VERSION_CONFLICT', 'PREVIEW_EXPIRED', 'TRANSPORT_ERROR']) 
     assert.equal(left, leave ? 1 : 0);
   });
 }
+
+for (const choice of ['stay', 'discard']) test(`HTML save after leave ${choice} clears obsolete unsaved notices`, async t => {
+  const ui = await domFixture(t);
+  const library = createLibraryBoardClient(async () => ok({ items: [] }));
+  const pageStore = createFreeHtmlLibraryStore();
+  t.after(() => { library.dispose(); pageStore.dispose(); });
+  pageStore.setPrompt('原标题'); await pageStore.generate();
+  pageStore.enterEdit(); pageStore.selectLocatable({ node_id: 'n_title', mapping: 'valid' });
+  pageStore.setReplacementText('第一次草稿', '原标题');
+  await ui.render(React.createElement(LibraryCockpitPanel, { library, pageStore, initialSurface: 'pages',
+    themeSource: { subscribe: () => () => {}, getSnapshot: () => 'light' }, goConversation() {} }));
+  await ui.key(null, 'Escape');
+  assert.ok(ui.doc.querySelector('[data-testid="leave-prompt"]'), 'dirty exit must still ask for a decision');
+  await ui.click(`[data-testid="leave-${choice}"]`);
+  assert.equal(ui.doc.querySelector('[data-testid="leave-prompt"]'), null);
+  assert.equal(pageStore.getSnapshot().current.version, 1, 'stay/discard must not save');
+  if (choice === 'discard') {
+    assert.equal(pageStore.hasUnsavedChanges(), false);
+    assert.equal(pageStore.getSnapshot().mode, 'browse');
+    assert.doesNotMatch(ui.doc.querySelector('[data-testid="library-message"]')?.textContent ?? '', /有未保存修改/);
+    await ui.click('[data-testid="cockpit-edit-btn"]');
+  } else assert.equal(pageStore.hasUnsavedChanges(), true);
+  await act(async () => {
+    pageStore.selectLocatable({ node_id: 'n_title', mapping: 'valid' });
+    pageStore.setReplacementText('最终保存标题', '原标题');
+  });
+  await ui.click('[data-testid="cockpit-edit-btn"]');
+  assert.equal(pageStore.getSnapshot().current.version, 2);
+  assert.match(pageStore.getSnapshot().current.package.html, /最终保存标题/);
+  assert.equal(pageStore.hasUnsavedChanges(), false);
+  assert.equal(pageStore.getSnapshot().mode, 'browse');
+  assert.doesNotMatch(ui.doc.querySelector('[data-testid="library-message"]')?.textContent ?? '', /有未保存修改/);
+  assert.doesNotMatch(ui.doc.querySelector('[data-testid="library-live"]')?.textContent ?? '', /未保存/);
+});

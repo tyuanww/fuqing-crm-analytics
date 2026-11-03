@@ -291,9 +291,11 @@ class CrmAnalysisStore:
                        for row in linked):
                 fail("NOT_FOUND", 404)
 
-    def _visible(self, con, viewer, kind, asset_id):
+    def _visible(self, con, viewer, kind, asset_id, *, require_owner=False):
         row = self._locate(con, kind, asset_id)
         owner = row["owner"]
+        if require_owner and owner != viewer:
+            fail("NOT_FOUND", 404)
         if owner == viewer:
             value = self._hydrate(con, owner, kind, asset_id)
         elif kind == "analysis" and self._granted(con, owner, asset_id, viewer):
@@ -317,6 +319,14 @@ class CrmAnalysisStore:
         self._owner(owner)
         with self._connection() as con:
             return self._visible(con, owner, kind, asset_id)
+
+    def read_owned_snapshot(self, owner: str, snapshot_id: str) -> CrmSnapshot:
+        self._owner(owner)
+        with self._connection() as con:
+            con.execute("BEGIN")
+            value = self._visible(con, owner, "snapshot", snapshot_id, require_owner=True)
+            con.execute("COMMIT")
+            return value
 
     def _put(self, con, owner, kind, asset_id, source, result):
         raw = self._payload(kind, result)

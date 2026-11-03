@@ -5,13 +5,15 @@ import type {} from '@deepseek-ai/dsh-client-ui-conversation/client';
 import type {} from '@deepseek-ai/dsh-client-ui-renderer/client';
 import type {} from '@deepseek-ai/dsh-api-session-controller/remote';
 import type {} from '@deepseek-ai/dsh-api-workspace-controller/remote';
-import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots';
 import { Alert, Button, ConfigProvider, Input, Modal, Space, Typography } from 'antd';
 import { competitionFont, lightAntdTheme } from './content-theme.generated';
 import { CrmLibraryButton } from './crm-library';
 import type { CrmCockpitSlot } from './cockpit-slot-contract.generated';
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface SlotMap { 'cockpit.crm': CrmCockpitSlot }
+}
+declare module '@deepseek-ai/dsh-api-session-controller/client' {
+  interface SessionReferenceSourceMap { mainView: unknown }
 }
 export { CrmLibraryButton, CrmSnapshotFacts } from './crm-library';
 
@@ -37,7 +39,7 @@ function CrmAnalysisIcon() {
 }
 
 /** Session-scoped native slot. Password lives in the form/request, never a host store. */
-export function CrmConnectionDock({ sessionId }: Pick<PropsRuntime<'conversation.input.dock'>, 'sessionId'>) {
+export function CrmConnectionDock({ sessionId }: { sessionId: string }) {
   const [state, setState] = useState<ConnectionState>(EMPTY);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -128,6 +130,7 @@ function CrmCockpitEntry({ source }: { source: Context['sessions']['list'] }) {
 export function apply(ctx: Context) {
   ctx.slots.inject('conversation.input.dock', () => ctx.slots.register({
     name: 'conversation.input.dock', id: 'crm-knowledge.connection', order: 30,
+    inject: sessionId => ({ sessionId }),
   }, CrmConnectionDock));
   ctx.slots.inject('cockpit.crm', () => ctx.slots.register({
     name: 'cockpit.crm', inject: () => ({ source: ctx.sessions.list }),

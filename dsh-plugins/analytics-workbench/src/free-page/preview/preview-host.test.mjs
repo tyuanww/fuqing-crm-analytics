@@ -105,3 +105,12 @@ test('chrome:false keeps MessageChannel iframe and hides host action buttons', a
   assert.equal(query('[data-testid="fp-restart"]'), null);
   host.dispose();
 });
+
+test('browse-only preview can disable page scripts', async () => {
+  const { root, query } = stubDom();
+  const host = mountPreviewHost(root, { chrome: false, allowScripts: false, frameTestId: 'static-preview' });
+  const loaded = await host.loadPackage(SAVED_COMPLEX_PACKAGE, 1);
+  assert.equal(loaded.ok, true, JSON.stringify(loaded.error));
+  assert.equal(query('[data-testid="static-preview"]').getAttribute('sandbox'), '');
+  host.dispose();
+});

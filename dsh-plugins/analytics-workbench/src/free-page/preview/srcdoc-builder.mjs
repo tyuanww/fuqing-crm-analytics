@@ -44,7 +44,7 @@ function rewriteResources(source, resources) {
 }
 
 export function buildSrcdoc({
-  html, css, js, presentation = null, resources = [], instanceId, pageId, version, nonce,
+  html, css, js, presentation = null, resources = [], instanceId, pageId, version, nonce, allowScripts = true,
 } = {}) {
   if (!validatePresentation(presentation, { html, css, js })) throw new Error('文案修改与页面来源不匹配。');
   const presentationScript = presentation?.edits?.length ? '<script>(' + presentationRuntime.toString() + ')(' + JSON.stringify(presentation.edits).replace(/</g, '\\u003c') + ');</script>' : '';
@@ -61,7 +61,15 @@ export function buildSrcdoc({
       ? `<link rel="stylesheet" href="${resourceHref(row)}">`
       : `<style>@font-face{font-family:'fp-${row.resource_id}';src:url(${resourceHref(row)});}</style>`))
     .join('');
-  return `<!doctype html>${htmlTag}<head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="${FREE_PAGE_CSP}"><title>自由页面预览</title>${previewLinks}<style>${rewrittenCss}</style><script>${bootstrap}<\/script></head>${bodyTag}${rewrittenHtml}<script>${rewrittenJs}<\/script>${presentationScript}</body></html>`;
+  const srcdoc = `<!doctype html>${htmlTag}<head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="${FREE_PAGE_CSP}"><title>自由页面预览</title>${previewLinks}<style>${rewrittenCss}</style><script>${bootstrap}<\/script></head>${bodyTag}${rewrittenHtml}<script>${rewrittenJs}<\/script>${presentationScript}</body></html>`;
+  if (!allowScripts && presentation?.edits?.length) {
+    const Parser = globalThis.DOMParser ?? globalThis.window?.DOMParser;
+    if (!Parser) throw new Error('Static presentation requires DOMParser');
+    const projected = new Parser().parseFromString(srcdoc, 'text/html');
+    presentationRuntime(presentation.edits, projected);
+    return '<!doctype html>' + projected.documentElement.outerHTML;
+  }
+  return srcdoc;
 }
 
 export function previewResourceUrls(resources, createObjectUrl) {

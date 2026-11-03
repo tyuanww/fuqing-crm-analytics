@@ -1,6 +1,6 @@
 # 用原生 AI 修改产物
 
-> **当前施工边界（2026-10-08）**：本分支沿用 VERSION 0.20.0.0、DSH 0.1.7-rc.2，当前 HTML 修改在隔离候选中验证，未挂载杭州现役；杭州既有 r3 状态以 [STATUS](../../STATUS.md) 为准。下文的历史版本号用于追溯合同；实际操作沿用收取、预览、确认流程。
+> **当前施工边界（历史记录，2026-10-08）**：该段沿用 VERSION 0.20.0.0、DSH 0.1.7-rc.2；当前主仓候选已升级为 DSH 0.2.1-rc.3 / Cordis 4.0.5，仍未挂载杭州现役。杭州当前状态以 [STATUS](../../STATUS.md) 为准；下文的历史版本号用于追溯合同，实际操作沿用收取、预览、确认流程。
 
 本功能的 0.13.0.0 基线已由 [#36](https://github.com/tyuanww/fuqing-crm-analytics/pull/36) 合入 `7575d07`；当前候选把页面收取、选区 patch 和版本确认接到同一条服务链。验收边界见[当前 UI / UX 报告](../hackathon/COCKPIT-UI-UX-2026-09-20.md)，早期 AI 接线证据见[历史报告](../hackathon/COCKPIT-AI-EDIT-2026-09-20.md)。沿用[本地文档服务](cockpit-office-local.md)与原生模型设置，不另接 provider 或复制凭据。
 

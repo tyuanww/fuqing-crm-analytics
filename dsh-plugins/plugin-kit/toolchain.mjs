@@ -20,8 +20,32 @@ async function applyReleaseLane(pin) {
   if (!path) return pin;
   assert.ok(isAbsolute(path), 'KIT_RELEASE_LANE_PATH');
   const lane = JSON.parse(await readFile(path, 'utf8'));
-  assert.equal(lane.schema_version, 'shinemage-rc1-release-lane/v1', 'KIT_RELEASE_LANE_SCHEMA');
-  assert.equal(lane.lane, 'rc1', 'KIT_RELEASE_LANE_ID');
+  const expected = {
+    rc1: {
+      schema_version: 'shinemage-rc1-release-lane/v1',
+      sdk: '0.2.1-rc.1',
+      upstream_sha: '1600d8a1e140dcde43a1a0941940a0480712c011',
+      upstream_lock_sha256: '952ca2f79998660dc690b739078a5d6052bc7c5c2193714b918b9d720baaeaba',
+      upstream_pnpm: '11.28.5',
+      cordis: '4.0.5',
+      node: 'v24.19.0',
+      typescript: '6.0.3', esbuild: '0.25.12', react: '18.3.1',
+      react_types: '18.3.31', node_types: '22.20.1', plugin_pnpm: '11.28.2',
+    },
+    rc3: {
+      schema_version: 'shinemage-rc3-release-lane/v1',
+      sdk: '0.2.1-rc.3',
+      upstream_sha: '1f81c047fc48fa190a683e469daa699857e9afe8',
+      upstream_lock_sha256: '911b049924e8256d8d6e684235cf935ca75b28fd0dd46f0c3b316a51c2cf5dc1',
+      upstream_pnpm: '11.28.5',
+      cordis: '4.0.5',
+      node: 'v24.19.0',
+      typescript: '6.0.3', esbuild: '0.25.12', react: '18.3.1',
+      react_types: '18.3.31', node_types: '22.20.1', plugin_pnpm: '11.28.2',
+    },
+  }[lane.lane];
+  assert.ok(expected, 'KIT_RELEASE_LANE_ID');
+  assert.equal(lane.schema_version, expected.schema_version, 'KIT_RELEASE_LANE_SCHEMA');
   assert.match(lane.sdk ?? '', /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/, 'KIT_RELEASE_LANE_SDK');
   assert.match(lane.upstream_sha ?? '', /^[0-9a-f]{40}$/, 'KIT_RELEASE_LANE_UPSTREAM_SHA');
   assert.match(lane.upstream_lock_sha256 ?? '', /^[0-9a-f]{64}$/, 'KIT_RELEASE_LANE_UPSTREAM_LOCK');
@@ -31,6 +55,10 @@ async function applyReleaseLane(pin) {
     assert.match(lane[key] ?? '', /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/, `KIT_RELEASE_LANE_${key.toUpperCase()}`);
   }
   assert.equal(lane.node, 'v24.19.0', 'KIT_RELEASE_LANE_NODE');
+  for (const [key, value] of Object.entries(expected)) {
+    if (key === 'schema_version') continue;
+    assert.equal(lane[key], value, `KIT_RELEASE_LANE_${key.toUpperCase()}_MISMATCH`);
+  }
   return {
     ...pin,
     sdk_version: lane.sdk,

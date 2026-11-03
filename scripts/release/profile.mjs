@@ -6,7 +6,7 @@ import { TOOLCHAIN } from './toolchain.mjs';
 import { validateServiceBinding } from './service-compatibility.mjs';
 
 export const PROFILE_SCHEMA = 'dsh-profile/v1';
-export const DEFAULT_PROFILE_MANIFEST = 'config/dsh-profile.rc2.json';
+export const DEFAULT_PROFILE_MANIFEST = 'config/dsh-profile.rc3.json';
 const RELATIVE = /^(?!\/)(?!.*(?:^|\/)\.\.(?:\/|$))(?!.*\\)[^\0]+$/;
 const PACKAGE_NAME = /^@(shine-mage|deepseek-ai)\/[a-z0-9][a-z0-9-]+$/;
 

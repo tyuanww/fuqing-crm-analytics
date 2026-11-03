@@ -252,8 +252,8 @@ def test_page_candidate_outlives_preview_and_recovers_cross_database_failure(set
     clock[0] += 31 * 60 * 1000
     original_confirm = pages.confirm
 
-    def lose_receipt(*args):
-        original_confirm(*args)
+    def lose_receipt(*args, **kwargs):
+        original_confirm(*args, **kwargs)
         raise RuntimeError('process stopped after page commit')
 
     monkeypatch.setattr(pages, 'confirm', lose_receipt)

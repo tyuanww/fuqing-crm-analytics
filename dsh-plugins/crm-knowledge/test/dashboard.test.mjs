@@ -1,7 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { isJsonValue } from '@deepseek-ai/dsh-util-values';
 import { ACTIVE_CHANNELS, LOW_PRICE_CHANNELS as FRONTEND_LOW } from '../../../frontend-vue3/src/constants/channels.ts';
-import { CHANNELS, LEAF_CHANNELS, LOW_PRICE_CHANNELS, channelRole, queryDashboardGsv, normalizeDashboard, dashboardCapabilities, dashboardKnowledgeContext } from '../src/dashboard.mjs';
+import { CHANNELS, LEAF_CHANNELS, LOW_PRICE_CHANNELS, channelRole, queryDashboardGsv,
+  queryProductCustomer, queryRfmSnapshot, normalizeDashboard, normalizeProductCustomer, dashboardCapabilities,
+  dashboardKnowledgeContext } from '../src/dashboard.mjs';
 import { serveDashboard, request, overview, trend } from './dashboard.fixture.mjs';
 
 const query = (input, binding, extra = {}) => queryDashboardGsv(input, { sessionId: 'fixture-session', binding, ...extra });
@@ -60,6 +63,43 @@ test('channel and low-price switches use identical repeated query parameters', a
   assert.deepEqual(result.filters.exclude_channels, LOW_PRICE_CHANNELS);
 });
 
+test('requests after the warehouse cutoff fail instead of returning zero as OK', async t => {
+  const outOfCoverage = { start_date: '2026-07-06', end_date: '2026-07-07' };
+  const { binding } = await serveDashboard(t, (url, _req, res) => {
+    if (url.pathname.endsWith('/me')) return false;
+    if (url.pathname.endsWith('/overview')) {
+      res.end(JSON.stringify({
+        ...overview,
+        date_range: { start: outOfCoverage.start_date, end: outOfCoverage.end_date, cutoff: null },
+        amount: 0,
+        new_users: 0,
+        old_users: 0,
+        new_user_amount: 0,
+        old_user_amount: 0,
+        new_user_ratio: 0,
+        old_user_ratio: 0,
+      }));
+    } else if (url.pathname.endsWith('/trend')) {
+      res.end(JSON.stringify({ ...trend, dates: [], amounts: [] }));
+    } else if (url.pathname.endsWith('/cutoff')) {
+      res.end(JSON.stringify({ cutoff_date: '2026-07-05' }));
+    }
+    return true;
+  });
+
+  unavailable(await query(outOfCoverage, binding), 'INSUFFICIENT_COVERAGE');
+});
+
+test('missing warehouse cutoff fails closed instead of returning an unbounded GSV', async t => {
+  const { binding } = await serveDashboard(t, (url, _req, res) => {
+    if (url.pathname !== '/api/v1/metrics/cutoff') return false;
+    res.statusCode = 503;
+    res.end('{}');
+    return true;
+  });
+  unavailable(await query(request, binding), 'SERVICE_UNAVAILABLE');
+});
+
 test('missing login and another host session never request data', async t => {
   const { binding, calls } = await serveDashboard(t);
   unavailable(await query(request, null), 'NOT_CONNECTED');
@@ -95,7 +135,11 @@ test('account mismatch stops before metrics', async t => {
 });
 
 test('HTTP authentication, busy, warning and error responses fail without leaking bodies', async t => {
-  for (const [status, code] of [[401, 'AUTH_EXPIRED'], [403, 'ACCESS_DENIED'], [409, 'SERVICE_BUSY'], [429, 'SERVICE_BUSY'], [500, 'UPSTREAM_ERROR']]) {
+  for (const [status, code] of [
+    [400, 'INVALID_REQUEST'], [401, 'AUTH_EXPIRED'], [403, 'ACCESS_DENIED'],
+    [409, 'SERVICE_BUSY'], [422, 'INVALID_REQUEST'], [429, 'SERVICE_BUSY'],
+    [500, 'UPSTREAM_ERROR'], [503, 'SERVICE_UNAVAILABLE'],
+  ]) {
     await t.test(String(status), async t => {
       const { binding, calls } = await serveDashboard(t, (_url, _req, res) => { res.statusCode = status; res.end('fixture-only-token'); return true; });
       unavailable(await query(request, binding), code); assert.equal(calls.length, 1);
@@ -190,4 +234,499 @@ test('knowledge explicitly separates current dashboard GSV and net candidate', (
   assert.equal(context.default_for_real_gsv, 'query_crm_dashboard_gsv');
   assert.match(context.difference_from_target, /不能.*再扣退款/);
   assert.equal(context.refund_as_of_supported, false);
+});
+
+test('product customer query uses one authenticated POST and preserves source facts', async t => {
+  const productResponse = {
+    schema_version: 'product-customer/v3',
+    status: 'OK',
+    source: 'orders+user_first_purchase',
+    date_start: '2026-07-01',
+    date_end: '2026-07-05',
+    compare_start_date: '2025-07-01',
+    compare_end_date: '2025-07-05',
+    new_old_cutoff: '2026-06-30',
+    comparison_new_old_cutoff: '2025-06-30',
+    data_cutoff: '2026-07-05',
+    data_version: 'orders-v1:2024-05-10:2026-07-05:17:1234.00',
+    metric_type: 'GSV',
+    channel: null,
+    exclude_channels: [],
+    coverage: {
+      data_cutoff: '2026-07-05',
+      current_status: 'COMPLETE',
+      comparison_status: 'COMPLETE',
+    },
+    products: [{
+      name: '经典膜',
+      display_name: '爆款面膜E',
+      spu_classes: ['经典膜', '【妆】经典膜'],
+      status: 'OK',
+      current: {
+        gsv: 190, users: 2, aus: 95, old_gsv: 150, old_users: 1, old_aus: 150,
+        old_ratio: 0.7895, new_gsv: 40, new_users: 1, new_aus: 40, new_ratio: 0.2105,
+        member_gsv: 0, member_users: 0, member_aus: 0, member_ratio: 0,
+        old_users_ratio: 0.5, new_users_ratio: 0.5,
+      },
+      comparison: {
+        gsv: 100, users: 2, aus: 50, old_gsv: 80, old_users: 1, old_aus: 80,
+        old_ratio: 0.8, new_gsv: 20, new_users: 1, new_aus: 20, new_ratio: 0.2,
+        member_gsv: 0, member_users: 0, member_aus: 0, member_ratio: 0,
+        old_users_ratio: 0.5, new_users_ratio: 0.5,
+      },
+      yoy: {
+        gsv: 0.9, users: 0, aus: 0.9, old_gsv: 0.875, old_users: 0, old_aus: 0.875,
+        new_gsv: 1, new_users: 0, new_aus: 1, old_ratio_ppt: -0.0105,
+        new_ratio_ppt: 0.0105, old_users_ratio_ppt: 0, new_users_ratio_ppt: 0,
+      },
+    }],
+  };
+  let postedBody = null;
+  const { binding, calls } = await serveDashboard(t, (url, req, res) => {
+    if (url.pathname !== '/api/v1/category/product-customer') return false;
+    assert.equal(req.method, 'POST');
+    let raw = '';
+    req.on('data', chunk => { raw += chunk; });
+    req.on('end', () => {
+      postedBody = JSON.parse(raw);
+      res.end(JSON.stringify(productResponse));
+    });
+    return true;
+  });
+  const result = await queryProductCustomer({
+    start_date: '2026-07-01',
+    end_date: '2026-07-05',
+    products: ['爆款面膜E'],
+  }, { sessionId: 'fixture-session', binding });
+  assert.equal(result.status, 'OK', JSON.stringify(result));
+  assert.equal(result.current, undefined);
+  assert.equal(result.products[0].display_name, '爆款面膜E');
+  assert.equal('name' in result.products[0], false);
+  assert.equal('spu_classes' in result.products[0], false);
+  assert.equal(JSON.stringify(result).includes('经典膜'), false);
+  assert.deepEqual(result.filters.products, ['爆款面膜E']);
+  assert.deepEqual(result.coverage, productResponse.coverage);
+  assert.equal(result.products[0].current.users, 2);
+  assert.equal(result.products[0].current.old_gsv + result.products[0].current.new_gsv, 190);
+  assert.equal(result.comparison_new_old_cutoff, '2025-06-30');
+  assert.equal(result.warehouse_cutoff, '2026-07-10');
+  assert.equal(result.contains_real_data, false);
+  assert.equal(result.synthetic, true);
+  assert.deepEqual(postedBody, {
+    start_date: '2026-07-01',
+    end_date: '2026-07-05',
+    products: ['爆款面膜E'],
+    metric_type: 'GSV',
+    exclude_channels: [],
+  });
+  assert.deepEqual(calls.map(call => [call.method, call.path]), [
+    ['GET', '/api/v1/auth/me'],
+    ['POST', '/api/v1/category/product-customer'],
+    ['GET', '/api/v1/metrics/cutoff'],
+  ]);
+  assert.equal(calls[1].authenticated, true);
+  assert.equal(calls[1].product_customer_version, 'product-customer/v3');
+});
+
+test('product customer rejects unknown fields and malformed product lists before HTTP', async t => {
+  const { binding, calls } = await serveDashboard(t);
+  for (const invalid of [
+    { start_date: '2026-07-01', end_date: '2026-07-05', sql: 'select 1' },
+    { start_date: '2026-07-01', end_date: '2026-07-05', products: [] },
+    { start_date: '2026-07-01', end_date: '2026-07-05', products: ['经典膜', '经典膜'] },
+    { start_date: '2026-07-01', end_date: '2026-07-05', products: Array.from({ length: 16 }, (_, i) => `商品${i}`) },
+    { start_date: '2026-07-01', end_date: '2026-07-05', compare_start_date: '2025-07-01' },
+  ]) {
+    const result = await queryProductCustomer(invalid, { sessionId: 'fixture-session', binding });
+    assert.equal(result.status, 'UNAVAILABLE');
+    assert.equal(result.reason.code, 'INVALID_REQUEST');
+  }
+  assert.equal(calls.length, 0);
+});
+
+test('backend product lookup failures remain distinguishable from malformed input', async t => {
+  const { binding } = await serveDashboard(t, (url, _req, res) => {
+    if (url.pathname === '/api/v1/category/product-customer') {
+      res.statusCode = 400;
+      res.end('{}');
+      return true;
+    }
+  });
+  const result = await queryProductCustomer({
+    start_date: '2026-07-01',
+    end_date: '2026-07-05',
+    products: ['绝不存在的测试商品XYZ'],
+  }, { sessionId: 'fixture-session', binding });
+  assert.equal(result.status, 'UNAVAILABLE');
+  assert.equal(result.reason.code, 'UNKNOWN_PRODUCT');
+});
+
+test('product customer preserves incomplete first-purchase history as a data warning', async t => {
+  const { binding } = await serveDashboard(t, (url, _req, res) => {
+    if (url.pathname !== '/api/v1/category/product-customer') return false;
+    res.statusCode = 409;
+    res.end(JSON.stringify({ detail: 'FIRST_PURCHASE_UNAVAILABLE' }));
+    return true;
+  });
+  const result = await queryProductCustomer({
+    start_date: '2026-07-01', end_date: '2026-07-05', products: ['爆款面膜E'],
+  }, { sessionId: 'fixture-session', binding });
+  assert.equal(result.status, 'UNAVAILABLE');
+  assert.equal(result.reason.code, 'FIRST_PURCHASE_UNAVAILABLE');
+});
+
+test('product customer rejects unverifiable comparison and incomplete product evidence', async t => {
+  const productResponse = {
+    schema_version: 'product-customer/v3',
+    status: 'OK',
+    source: 'orders+user_first_purchase',
+    date_start: '2026-07-01',
+    date_end: '2026-07-05',
+    compare_start_date: '2025-07-01',
+    compare_end_date: '2025-07-05',
+    new_old_cutoff: '2026-06-30',
+    comparison_new_old_cutoff: '2025-06-30',
+    data_cutoff: '2026-07-05',
+    data_version: 'orders-v1:fixture',
+    metric_type: 'GSV',
+    channel: null,
+    exclude_channels: [],
+    coverage: {
+      data_cutoff: '2026-07-05',
+      current_status: 'COMPLETE',
+      comparison_status: 'COMPLETE',
+    },
+    products: [{
+      name: '经典膜',
+      display_name: '爆款面膜E',
+      spu_classes: ['经典膜', '【妆】经典膜'],
+      status: 'OK',
+      current: {
+        gsv: 190, users: 2, aus: 95, old_gsv: 150, old_users: 1, old_aus: 150,
+        old_ratio: 0.7895, new_gsv: 40, new_users: 1, new_aus: 40, new_ratio: 0.2105,
+        member_gsv: 0, member_users: 0, member_aus: 0, member_ratio: 0,
+        old_users_ratio: 0.5, new_users_ratio: 0.5,
+      },
+      comparison: {
+        gsv: 100, users: 2, aus: 50, old_gsv: 80, old_users: 1, old_aus: 80,
+        old_ratio: 0.8, new_gsv: 20, new_users: 1, new_aus: 20, new_ratio: 0.2,
+        member_gsv: 0, member_users: 0, member_aus: 0, member_ratio: 0,
+        old_users_ratio: 0.5, new_users_ratio: 0.5,
+      },
+      yoy: {
+        gsv: 0.9, users: 0, aus: 0.9, old_gsv: 0.875, old_users: 0, old_aus: 0.875,
+        new_gsv: 1, new_users: 0, new_aus: 1, old_ratio_ppt: -0.0105,
+        new_ratio_ppt: 0.0105, old_users_ratio_ppt: 0, new_users_ratio_ppt: 0,
+      },
+    }],
+  };
+  for (const mutate of [
+    value => { value.compare_start_date = '2025-07-02'; },
+    value => { value.comparison_new_old_cutoff = '2025-07-01'; },
+    value => { delete value.products[0].display_name; },
+  ]) {
+    const payload = structuredClone(productResponse);
+    mutate(payload);
+    const { binding } = await serveDashboard(t, (url, _req, res) => {
+      if (url.pathname !== '/api/v1/category/product-customer') return false;
+      res.end(JSON.stringify(payload));
+      return true;
+    });
+    const result = await queryProductCustomer({
+      start_date: '2026-07-01',
+      end_date: '2026-07-05',
+      products: ['经典膜'],
+    }, { sessionId: 'fixture-session', binding });
+    assert.equal(result.status, 'UNAVAILABLE');
+    assert.equal(result.reason.code, 'INVALID_RESPONSE');
+  }
+  const { binding } = await serveDashboard(t, (url, _req, res) => {
+    if (url.pathname !== '/api/v1/category/product-customer') return false;
+    res.end(JSON.stringify(productResponse));
+    return true;
+  });
+  const incomplete = await queryProductCustomer({
+    start_date: '2026-07-01',
+    end_date: '2026-07-05',
+    products: ['经典膜', '黑膜'],
+  }, { sessionId: 'fixture-session', binding });
+  assert.equal(incomplete.status, 'UNAVAILABLE');
+  assert.equal(incomplete.reason.code, 'INVALID_RESPONSE');
+  const allProducts = await queryProductCustomer({
+    start_date: '2026-07-01',
+    end_date: '2026-07-05',
+  }, { sessionId: 'fixture-session', binding });
+  assert.equal(allProducts.status, 'OK', JSON.stringify(allProducts));
+  assert.equal(isJsonValue(allProducts), true);
+  assert.equal('products' in allProducts.filters, false);
+});
+
+test('product customer v3 exposes coverage and rejects v2, empty or partial results', async t => {
+  const filters = {
+    start_date: '2026-07-01',
+    end_date: '2026-07-05',
+    products: ['爆款面膜E'],
+    channel: '全店',
+    exclude_low_price: false,
+  };
+  const base = {
+    schema_version: 'product-customer/v3',
+    status: 'INSUFFICIENT_COVERAGE',
+    source: 'orders+user_first_purchase',
+    date_start: '2026-07-01',
+    date_end: '2026-07-05',
+    compare_start_date: '2025-07-01',
+    compare_end_date: '2025-07-05',
+    new_old_cutoff: '2026-06-30',
+    comparison_new_old_cutoff: '2025-06-30',
+    data_cutoff: '2026-07-03',
+    data_version: 'orders-v1:fixture',
+    coverage: {
+      data_cutoff: '2026-07-03',
+      current_status: 'INSUFFICIENT',
+      comparison_status: 'COMPLETE',
+    },
+    metric_type: 'GSV',
+    channel: null,
+    exclude_channels: [],
+    products: [],
+  };
+  const insufficient = normalizeProductCustomer(base, filters, 'synthetic', '2026-07-05');
+  assert.equal(insufficient.status, 'INSUFFICIENT_COVERAGE');
+  assert.deepEqual(insufficient.coverage, base.coverage);
+  assert.equal(insufficient.warehouse_cutoff, '2026-07-05');
+
+  assert.throws(
+    () => normalizeProductCustomer({ ...base, schema_version: 'product-customer/v2' }, filters, 'synthetic'),
+    error => error?.code === 'BACKEND_UPGRADE_REQUIRED',
+  );
+
+  await t.test('empty products cannot be successful', async t => {
+    const { binding } = await serveDashboard(t, (url, _req, res) => {
+      if (url.pathname !== '/api/v1/category/product-customer') return false;
+      res.end(JSON.stringify({ ...base, status: 'OK', coverage: {
+        data_cutoff: '2026-07-05', current_status: 'COMPLETE', comparison_status: 'COMPLETE',
+      }, data_cutoff: '2026-07-05' }));
+      return true;
+    });
+    const result = await queryProductCustomer({
+      start_date: '2026-07-01', end_date: '2026-07-05', products: ['爆款面膜E'],
+    }, { sessionId: 'fixture-session', binding });
+    assert.equal(result.status, 'UNAVAILABLE');
+    assert.equal(result.reason.code, 'INVALID_RESPONSE');
+  });
+
+  await t.test('successful products require complete coverage in both periods', async t => {
+    for (const coverage of [
+      { data_cutoff: '2026-07-05', current_status: 'INSUFFICIENT', comparison_status: 'COMPLETE' },
+      { data_cutoff: '2026-07-05', current_status: 'COMPLETE', comparison_status: 'INSUFFICIENT' },
+    ]) {
+      const { binding } = await serveDashboard(t, (url, _req, res) => {
+        if (url.pathname !== '/api/v1/category/product-customer') return false;
+        res.end(JSON.stringify({ ...base, status: 'OK', data_cutoff: '2026-07-05', coverage, products: [{
+          name: '经典膜', display_name: '爆款面膜E', spu_classes: ['经典膜'], status: 'OK',
+          current: {
+            gsv: 100, users: 1, aus: 100, old_gsv: 100, old_users: 1, old_aus: 100, old_ratio: 1,
+            new_gsv: 0, new_users: 0, new_aus: 0, new_ratio: 0, member_gsv: 0, member_users: 0,
+            member_aus: 0, member_ratio: 0, old_users_ratio: 1, new_users_ratio: 0,
+          },
+          comparison: {
+            gsv: 100, users: 1, aus: 100, old_gsv: 100, old_users: 1, old_aus: 100, old_ratio: 1,
+            new_gsv: 0, new_users: 0, new_aus: 0, new_ratio: 0, member_gsv: 0, member_users: 0,
+            member_aus: 0, member_ratio: 0, old_users_ratio: 1, new_users_ratio: 0,
+          },
+          yoy: {
+            gsv: 0, users: 0, aus: 0, old_gsv: 0, old_users: 0, old_aus: 0, new_gsv: 0, new_users: 0,
+            new_aus: 0, old_ratio_ppt: 0, new_ratio_ppt: 0, old_users_ratio_ppt: 0, new_users_ratio_ppt: 0,
+          },
+        }] }));
+        return true;
+      });
+      const result = await queryProductCustomer({
+        start_date: '2026-07-01', end_date: '2026-07-05', products: ['爆款面膜E'],
+      }, { sessionId: 'fixture-session', binding });
+      assert.equal(result.status, 'UNAVAILABLE');
+      assert.equal(result.reason.code, 'INVALID_RESPONSE');
+    }
+  });
+});
+
+test('product customer rejects a successful response when the requested window exceeds the cutoff', async t => {
+  const metric = {
+    gsv: 100, users: 2, aus: 50, old_gsv: 50, old_users: 1, old_aus: 50, old_ratio: 0.5,
+    new_gsv: 50, new_users: 1, new_aus: 50, new_ratio: 0.5, member_gsv: 0, member_users: 0,
+    member_aus: 0, member_ratio: 0, old_users_ratio: 0.5, new_users_ratio: 0.5,
+  };
+  const value = {
+    schema_version: 'product-customer/v3', status: 'OK', source: 'orders+user_first_purchase',
+    date_start: '2026-07-01', date_end: '2026-07-07', compare_start_date: '2025-07-01',
+    compare_end_date: '2025-07-07', new_old_cutoff: '2026-06-30', comparison_new_old_cutoff: '2025-06-30',
+    data_cutoff: '2026-07-05', data_version: 'orders-v1:fixture', metric_type: 'GSV', channel: null, exclude_channels: [],
+    coverage: { data_cutoff: '2026-07-05', current_status: 'COMPLETE', comparison_status: 'COMPLETE' },
+    products: [{ name: '经典膜', display_name: '爆款面膜E', spu_classes: ['经典膜'], status: 'OK',
+      current: metric, comparison: metric,
+      yoy: { gsv: 0, users: 0, aus: 0, old_gsv: 0, old_users: 0, old_aus: 0,
+        new_gsv: 0, new_users: 0, new_aus: 0, old_ratio_ppt: 0, new_ratio_ppt: 0,
+        old_users_ratio_ppt: 0, new_users_ratio_ppt: 0 } }],
+  };
+  const { binding } = await serveDashboard(t, (url, _req, res) => {
+    if (url.pathname === '/api/v1/category/product-customer') {
+      res.end(JSON.stringify(value));
+      return true;
+    }
+    if (url.pathname === '/api/v1/metrics/cutoff') {
+      res.end(JSON.stringify({ cutoff_date: '2026-07-05' }));
+      return true;
+    }
+    return false;
+  });
+  const result = await queryProductCustomer({
+    start_date: '2026-07-01', end_date: '2026-07-07', products: ['经典膜'],
+  }, { sessionId: 'fixture-session', binding });
+  assert.equal(result.status, 'UNAVAILABLE', JSON.stringify(result));
+  assert.equal(result.reason.code, 'INSUFFICIENT_COVERAGE');
+  assert.equal('products' in result, false);
+});
+
+const rfmSegments = [
+  '重要价值客户', '重要保持客户', '重要发展客户', '重要挽留客户',
+  '一般价值客户', '一般保持客户', '一般发展客户', '一般挽留客户', '已购客TTL',
+];
+const rfmRow = {
+  rfm_segment: '重要价值客户',
+  hist_users_current: 10, repurchase_users_current: 4, repurchase_rate_current: 0.4,
+  repurchase_gsv_current: 1200, repurchase_gsv_ratio_current: 0.6,
+  hist_users_comp: 8, repurchase_users_comp: 2, repurchase_rate_comp: 0.25,
+  repurchase_gsv_comp: 800, repurchase_gsv_ratio_comp: 0.5,
+  hist_users_prev2: 6, repurchase_users_prev2: 1, repurchase_rate_prev2: 0.1667,
+  repurchase_gsv_prev2: 600, repurchase_gsv_ratio_prev2: 0.4,
+  yoy_hist_users: 0.25, yoy_repurchase_users: 1, yoy_repurchase_rate: 0.15,
+  yoy_repurchase_gsv: 0.5, yoy_repurchase_gsv_ratio_ppt: 0.1,
+};
+
+test('RFM snapshot reads only the precomputed cache and returns a stable identity', async t => {
+  const payload = {
+    year_label: '2026', comp_year_label: '2025', prev2_year_label: '2024', metric_type: 'GSV',
+    rows: rfmSegments.map(segment => ({ ...rfmRow, rfm_segment: segment })),
+    same_channel_rows: rfmSegments.map(segment => ({ ...rfmRow, rfm_segment: segment })),
+    member_rows: rfmSegments.map(segment => ({ ...rfmRow, rfm_segment: segment })),
+    member_same_channel_rows: rfmSegments.map(segment => ({ ...rfmRow, rfm_segment: segment })),
+  };
+  const { binding, calls } = await serveDashboard(t, (url, req, res) => {
+    if (url.pathname !== '/api/v1/customer-health/rfm-analysis') return false;
+    assert.equal(req.method, 'GET');
+    res.end(JSON.stringify(payload));
+    return true;
+  });
+  const input = { start_date: '2026-07-01', end_date: '2026-07-05' };
+  const first = await queryRfmSnapshot(input, { sessionId: 'fixture-session', binding });
+  const second = await queryRfmSnapshot(input, { sessionId: 'fixture-session', binding });
+  assert.equal(first.status, 'OK', JSON.stringify(first));
+  assert.equal(first.schema_version, 'rfm-snapshot/v1');
+  assert.match(first.snapshot_id, /^rfm_[a-f0-9]{64}$/);
+  assert.equal(first.snapshot_id, second.snapshot_id);
+  assert.equal(first.rows[0].rfm_segment, '重要价值客户');
+  assert.equal(first.rows[8].rfm_segment, '已购客TTL');
+  assert.equal(first.warehouse_cutoff, '2026-07-10');
+  assert.equal(first.synthetic, true);
+  assert.deepEqual(calls.slice(0, 3).map(call => call.path), [
+    '/api/v1/auth/me',
+    '/api/v1/customer-health/rfm-analysis',
+    '/api/v1/metrics/cutoff',
+  ]);
+  assert.equal(calls[1].params.start_date, '2026-07-01');
+  assert.equal(calls[1].params.metric_type, 'GSV');
+});
+
+test('RFM snapshot rejects incomplete segment sets and missing warehouse cutoff', async t => {
+  const completeRows = rfmSegments.map(segment => ({ ...rfmRow, rfm_segment: segment }));
+  let incompleteSegments = true;
+  let omitCutoff = false;
+  const { binding } = await serveDashboard(t, (url, _req, res) => {
+    if (url.pathname === '/api/v1/customer-health/rfm-analysis') {
+      res.end(JSON.stringify({
+        year_label: '2026', comp_year_label: '2025', prev2_year_label: '2024', metric_type: 'GSV',
+        rows: incompleteSegments ? completeRows.slice(0, 8) : completeRows, same_channel_rows: completeRows,
+        member_rows: completeRows, member_same_channel_rows: completeRows,
+      }));
+      return true;
+    }
+    if (omitCutoff && url.pathname === '/api/v1/metrics/cutoff') {
+      res.statusCode = 503;
+      res.end('{}');
+      return true;
+    }
+    return false;
+  });
+  const input = { start_date: '2026-07-01', end_date: '2026-07-05' };
+  const incomplete = await queryRfmSnapshot(input, { sessionId: 'fixture-session', binding });
+  assert.equal(incomplete.status, 'UNAVAILABLE');
+  assert.equal(incomplete.reason.code, 'INVALID_RESPONSE');
+
+  incompleteSegments = false;
+  omitCutoff = true;
+  const missingCutoff = await queryRfmSnapshot(input, { sessionId: 'fixture-session', binding });
+  assert.equal(missingCutoff.status, 'UNAVAILABLE');
+  assert.equal(missingCutoff.reason.code, 'SERVICE_UNAVAILABLE');
+});
+
+test('RFM cache miss is explicit and does not fall back to live SQL', async t => {
+  const { binding, calls } = await serveDashboard(t, (url, _req, res) => {
+    if (url.pathname !== '/api/v1/customer-health/rfm-analysis') return false;
+    res.statusCode = 503;
+    res.end('{}');
+    return true;
+  });
+  const result = await queryRfmSnapshot(
+    { start_date: '2026-07-01', end_date: '2026-07-05' },
+    { sessionId: 'fixture-session', binding },
+  );
+  assert.equal(result.status, 'UNAVAILABLE');
+  assert.equal(result.reason.code, 'SERVICE_UNAVAILABLE');
+  assert.deepEqual(calls.map(call => call.path), [
+    '/api/v1/auth/me',
+    '/api/v1/customer-health/rfm-analysis',
+  ]);
+});
+
+test('RFM backend rejection after local validation is reported as insufficient coverage', async t => {
+  const { binding } = await serveDashboard(t, (url, _req, res) => {
+    if (url.pathname === '/api/v1/customer-health/rfm-analysis') {
+      res.statusCode = 400;
+      res.end('{}');
+      return true;
+    }
+  });
+  const result = await queryRfmSnapshot({
+    start_date: '2026-07-06',
+    end_date: '2026-07-07',
+    metric_type: 'GSV',
+  }, { sessionId: 'fixture-session', binding });
+  assert.equal(result.status, 'UNAVAILABLE');
+  assert.equal(result.reason.code, 'INSUFFICIENT_COVERAGE');
+});
+
+test('RFM success after the warehouse cutoff fails instead of returning a zero snapshot', async t => {
+  const rows = rfmSegments.map(segment => ({ ...rfmRow, rfm_segment: segment }));
+  const { binding } = await serveDashboard(t, (url, _req, res) => {
+    if (url.pathname === '/api/v1/customer-health/rfm-analysis') {
+      res.end(JSON.stringify({
+        year_label: '2026', comp_year_label: '2025', prev2_year_label: '2024', metric_type: 'GSV',
+        rows, same_channel_rows: rows, member_rows: rows, member_same_channel_rows: rows,
+      }));
+      return true;
+    }
+    if (url.pathname === '/api/v1/metrics/cutoff') {
+      res.end(JSON.stringify({ cutoff_date: '2026-07-05' }));
+      return true;
+    }
+  });
+  const result = await queryRfmSnapshot({
+    start_date: '2026-07-06',
+    end_date: '2026-07-07',
+    metric_type: 'GSV',
+  }, { sessionId: 'fixture-session', binding });
+  assert.equal(result.status, 'UNAVAILABLE', JSON.stringify(result));
+  assert.equal(result.reason.code, 'INSUFFICIENT_COVERAGE');
+  assert.equal('rows' in result, false);
 });

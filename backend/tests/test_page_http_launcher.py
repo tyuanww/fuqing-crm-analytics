@@ -19,23 +19,23 @@ SERVER = ROOT / "scripts/dsh-dev/page_http_server.py"
 LAUNCHER = ROOT / "scripts/dsh-dev/page-http.mjs"
 
 
-def _server_app(state_dir: Path, token: str):
+def _server_app(state_dir: Path, token: str, *, result_access=None):
     import importlib.util
 
     spec = importlib.util.spec_from_file_location("lane_h_page_http_server", SERVER)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    return module.build_app(state_dir=state_dir, token=token)
+    return module.build_app(state_dir=state_dir, token=token, result_access=result_access)
 
 
 def _token() -> str:
     return "lane-h-isolated-page-http-token-32ch"
 
 
-def _client(state_dir: Path, token: str = _token()) -> TestClient:
+def _client(state_dir: Path, token: str = _token(), *, result_access=None) -> TestClient:
     directory = state_dir / "pages"
     directory.mkdir(mode=0o700)
-    return TestClient(_server_app(directory, token))
+    return TestClient(_server_app(directory, token, result_access=result_access))
 
 
 
@@ -48,6 +48,11 @@ def test_server_mounts_documents_and_result_access_with_explicit_state_dir(tmp_p
     assert pages.json()["items"] == []
     unauth = client.get(PAGE_PREFIX + "/pages")
     assert unauth.status_code == 401
+    unknown = client.post(RESULT_PREFIX + "/binding-state", headers=headers, json={
+        "manifest": {"result_refs": ["result_fixture_1"], "bindings": []},
+    })
+    assert unknown.status_code == 200
+    assert unknown.json()["verified"] is False
     paths = client.app.openapi()["paths"]
     assert any(RESULT_PREFIX in path for path in paths)
     sqlite_file = tmp_path / "pages" / "page_documents.sqlite3"
@@ -118,14 +123,16 @@ def test_cors_allows_the_live_web_origin_for_cross_origin_bridge(tmp_path):
 
 
 def test_result_bridge_read_and_forbidden_sql_op(tmp_path):
-    from backend.services.analytics.page_result_access import default_synthetic_snapshot
+    from backend.services.analytics.page_result_access import PageResultAccess, default_synthetic_snapshot
 
-    client = _client(tmp_path)
+    access = PageResultAccess()
+    access.put_snapshot(default_synthetic_snapshot(owner="page_http_local"))
+    client = _client(tmp_path, result_access=access)
     headers = {"Authorization": "Bearer " + _token()}
-    seeded = client.post(RESULT_PREFIX + "/snapshots",
-                         json=default_synthetic_snapshot(owner="page_http_local"),
-                         headers=headers)
-    assert seeded.status_code == 201
+    untrusted = client.post(RESULT_PREFIX + "/snapshots", json=default_synthetic_snapshot(
+        owner="page_http_local", rows=[{"value": 999999}],
+    ), headers=headers)
+    assert untrusted.status_code == 404
     read = client.post(RESULT_PREFIX + "/read", json={
         "request": {"op": "data.read", "request_id": "req_test_1",
                     "result_ref": "result_fixture_1", "mode": "summary"},
@@ -133,6 +140,7 @@ def test_result_bridge_read_and_forbidden_sql_op(tmp_path):
     }, headers=headers)
     assert read.status_code == 200
     assert read.json()["ok"] is True
+    assert read.json()["summary"]["row_count"] == 120
     denied = client.post(RESULT_PREFIX + "/read", json={
         "request": {"op": "sql", "request_id": "req_sql", "result_ref": "result_fixture_1"},
         "manifest": {"result_refs": ["result_fixture_1"], "bindings": []},
@@ -145,12 +153,8 @@ def test_launcher_source_refuses_6677_and_requires_state_dir():
     source = LAUNCHER.read_text(encoding="utf-8")
     assert "6677" in source
     assert re.search(r"assert\.notEqual\(port, 6677", source)
-    # The runtime binding decision lives in the Python server body, not its
-    # module docstring; check below the docstring.
     server_body = SERVER.read_text(encoding="utf-8").split('"""', 2)[2]
     assert "page_state_dir=state_dir" in server_body
-    assert "result_access=PageResultAccess()" in server_body
-    # The page app factory is the shared production one, not a second contract.
     assert "create_page_app" in server_body
     assert "BoardSpec" not in server_body
 

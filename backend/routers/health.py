@@ -208,14 +208,14 @@ def get_rfm_analysis(
         raise HTTPException(
             status_code=503,
             detail="所选 RFM 范围尚未预热，请稍后重试或联系管理员",
-            headers={"Retry-After": "60"},
+            headers={"Retry-After": "60", "X-RFM-Cache-Status": "miss"},
         ) from exc
     except rfm_analysis_service.RFMCacheUnavailableError as exc:
         logger.error("RFM cache unavailable; reject expensive live fallback: %s", exc)
         raise HTTPException(
             status_code=503,
             detail="RFM 缓存暂不可用，请稍后重试",
-            headers={"Retry-After": "30"},
+            headers={"Retry-After": "30", "X-RFM-Cache-Status": "unavailable"},
         ) from exc
 
 

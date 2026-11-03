@@ -40,7 +40,7 @@ export function validatePublicContractLock(lock) {
   for (const [name, [repo, domain, count, tests]] of Object.entries(owners)) {
     const owner = lock.owners[name];
     assert.equal(owner.package, name === 'workbench' ? '@shine-mage/dsh-analytics-workbench-b0' : `@shine-mage/dsh-${domain}`, 'PUBLIC_CONTRACT_PACKAGE');
-    assert.equal(owner.version, name === 'crm' ? '0.0.0-crm.1' : '0.0.0-b0', 'PUBLIC_CONTRACT_VERSION');
+    assert.equal(owner.version, name === 'crm' ? '0.0.0-crm.5' : '0.0.0-b0', 'PUBLIC_CONTRACT_VERSION');
     assert.match(owner.source_sha ?? '', sha, 'PUBLIC_CONTRACT_SOURCE_SHA');
     assert.match(owner.ci_job_sha ?? '', sha, 'PUBLIC_CONTRACT_JOB_SHA');
     assert.equal(owner.archive.repository, repo, 'PUBLIC_CONTRACT_REPOSITORY');

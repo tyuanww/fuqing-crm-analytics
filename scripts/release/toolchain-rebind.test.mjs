@@ -24,7 +24,7 @@ async function fixture(t, manifestName = '@deepseek-ai/dsh-tools') {
   const original = join(root, 'previous-upstream/@deepseek-ai/dsh-tools');
   const link = join(root, 'node_modules/@deepseek-ai/dsh-tools');
   const added = join(root, 'node_modules/@deepseek-ai/dsh-agent');
-  await writePackage(original, manifestName, '0.1.7-rc.2');
+  await writePackage(original, manifestName, '0.2.1-rc.3');
   await mkdir(dirname(link), { recursive: true });
   await symlink(relative(dirname(link), original), link, 'dir');
 
@@ -35,7 +35,7 @@ async function fixture(t, manifestName = '@deepseek-ai/dsh-tools') {
   return { root, original, link, added };
 }
 
-test('the default rc2 lane rebinds a verified upstream SDK link and restores it', {
+test('the default rc3 lane rebinds a verified upstream SDK link and restores it', {
   skip: !process.env.B0_BUILD_UPSTREAM || !process.env.B0_BUILD_TOOLS,
 }, async t => {
   const { root, original, link, added } = await fixture(t);
@@ -49,9 +49,9 @@ test('the default rc2 lane rebinds a verified upstream SDK link and restores it'
       resolve(process.env.B0_BUILD_TOOLS),
       { allowRebind: true },
     );
-    assert.equal(bound.pin.sdk_version, '0.1.7-rc.2');
+    assert.equal(bound.pin.sdk_version, '0.2.1-rc.3');
     assert.notEqual(await realpath(link), await realpath(original));
-    assert.equal(JSON.parse(await readFile(join(link, 'package.json'))).version, '0.1.7-rc.2');
+    assert.equal(JSON.parse(await readFile(join(link, 'package.json'))).version, '0.2.1-rc.3');
     assert.equal((await lstat(added)).isSymbolicLink(), true);
 
     await bound.restore();

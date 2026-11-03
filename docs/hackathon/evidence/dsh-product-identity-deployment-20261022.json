@@ -1,0 +1,140 @@
+{
+  "schema_version": "shinemage-product-identity-deployment/v1",
+  "observed_at": "2026-10-22T09:56:00Z",
+  "scope": "owner-operated-hangzhou-product-identity-side-load",
+  "superseded_by": "docs/hackathon/evidence/dsh-review-fixes-20261022.json",
+  "release_ready": false,
+  "formal_release": false,
+  "crm_artifact": {
+    "source_sha": "7a33b93a96ddd39382f8431286720ebae7611a31",
+    "package_name": "@shine-mage/dsh-crm-knowledge",
+    "version": "0.0.0-crm.4",
+    "source_package_manifest_sha256": "fed9b1fe22eca7cfc44cb647ef718ed7498795c0e4d11e76156db34e5884b977",
+    "manifest_sha256": "a2b9b9c92eee1101275eec7e4e8c12184bda13f39012ed2c8565f9772ed53821",
+    "tarball": "shine-mage-dsh-crm-knowledge-0.0.0-crm.4.tgz",
+    "tarball_sha256": "9ec385ef0091a1f653e49510c28751d5a9220301e16b079f01be14dfcad075f6",
+    "tarball_bytes": 243145,
+    "integrity": "sha512-qRNlJorjsHz0EBvdFBpz86kfqZALfRSI8Jj0Ob2sq3GvzbCu3zyMCgenwekbDLGFF/M3EdAAOs7yw2nwGwqxhw==",
+    "build_provenance_sha256": "63290b747af0bd2b2e209df6ba59248835eb7fa5690159808fa83fbad30c4121"
+  },
+  "query_artifact": {
+    "source_sha": "7a33b93a96ddd39382f8431286720ebae7611a31",
+    "package_name": "@shine-mage/dsh-query-agent",
+    "version": "0.0.0-query.13",
+    "source_package_manifest_sha256": "9499f5f49e3a5c9f948ad6363cd73c93e9383bea6dacb8067240d169348600a1",
+    "manifest_sha256": "681e73713b1c6fcb52dd49b627127d6193ebd243e349811d6c998c14dffbc155",
+    "tarball": "shine-mage-dsh-query-agent-0.0.0-query.13.tgz",
+    "tarball_sha256": "d275f0f45f2c71865e3a6823906cf1f234b023c3de0505a344f4ca8d5099bd4f",
+    "tarball_bytes": 4792,
+    "integrity": "sha512-KCNWkOhISvya5I7Aix2D7Lo78yThyWIIV3StNLeCnrIIwVCsjDo5FCfC3Bz1bdQi5PlC+u6826eKCjcWkntbPw==",
+    "build_provenance_sha256": "584ca3672c2fa1600787cfd3e30a71f98963e51c6fdc3ad71e0b9da701b4ccc5"
+  },
+  "artifact": {
+    "scope_helper": {
+      "after_sha256": "e060ecd508ceaafb04dcd809078802e52ed2d0add297507013f11feb30e6d663"
+    }
+  },
+  "product_identity": {
+    "api_schema": "product-customer/v2",
+    "canonical_product_count": 15,
+    "display_names_unique": true,
+    "display_alias_input": true,
+    "user_facing_field": "display_name",
+    "internal_fields": [
+      "name",
+      "spu_classes"
+    ],
+    "mapping_style": "stable explicit mapping",
+    "example_label_pattern": "爆款面膜A"
+  },
+  "backend": {
+    "container": "fuqing-crm-analytics-backend-1",
+    "image": "fuqing-crm-analytics-backend:growth-20261022-7a33b93a",
+    "image_digest": "sha256:85c3b72dd12b823117ee11f70ab04697f8b294eb6b87582a0f6074325edd895c",
+    "base_image_digest": "sha256:07f19fd34faf662035a856a8834cae0d2d515723ac55ad247c9d5b58f7a25bbc",
+    "build_mode": "offline-derived-image",
+    "health": "healthy",
+    "root_http": 401,
+    "compose_override_sha256": "e0a68bc5548a65d3999d9656984078277705a37bdba267db80a8e70c61a0f2b7"
+  },
+  "profile": {
+    "current_root": "/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-core-main-20261021-cockpit-v3",
+    "dsh_version": "0.2.1-rc.1",
+    "package_json_sha256": "68b1bdd8b387547d5d61bfe00ffca06515f18e86508c35b307b2768696bd5eb9",
+    "lock_sha256": "0f5cecad63603c52cc4f5c3269da2dc0e503fc2f91e3d6287d9e2607a835b112",
+    "crm_dependency": "file:/srv/shinemage/dsh/current/inputs/knowledge-query-agent-20261020/packs/shine-mage-dsh-crm-knowledge-0.0.0-crm.4.tgz",
+    "query_dependency": "file:/srv/shinemage/dsh/current/inputs/knowledge-query-agent-20261020/packs/shine-mage-dsh-query-agent-0.0.0-query.13.tgz",
+    "crm_installed_package_sha256": "1cd7c5ce3d770e480c8da6f2ccae6ac51dd187eaf86c8d2ff6c072acb889b621",
+    "query_installed_package_sha256": "27fda53c85958f77d441f594ebd77be6ace4a015ebd80cd739dcce1b5bd51205",
+    "query_installed_tool_policy_sha256": "9dd3ef4ba84e3f08df28345ed584a8f4d8cc7b9c9debcf67c564f18f49725f63",
+    "installed_tarball_files_verified": true
+  },
+  "service": {
+    "name": "shinemage-dsh.service",
+    "active_state": "active",
+    "sub_state": "running",
+    "n_restarts": 0,
+    "result": "success",
+    "listeners": {
+      "4328": "READY",
+      "18090": "READY",
+      "18091": "READY",
+      "18092": "READY",
+      "18093": "READY",
+      "18094": "READY",
+      "18098": "READY"
+    },
+    "fatal_or_unhandled_matches": 0,
+    "nonfatal_deepseek_account_auth_403_lines": 10
+  },
+  "browser_uat": {
+    "preset": "crm-query",
+    "provider": "deepseek-account",
+    "model": "deepseek-flash",
+    "reasoning_effort": "off",
+    "plugin_page": {
+      "crm_version": "0.0.0-crm.4",
+      "crm_components_running": 2,
+      "crm_components_total": 2,
+      "version": "0.0.0-query.13",
+      "query_version": "0.0.0-query.13",
+      "query_components_running": 2,
+      "query_components_total": 2,
+      "query_source_path": "file:/srv/shinemage/dsh/current/inputs/knowledge-query-agent-20261020/packs/shine-mage-dsh-query-agent-0.0.0-query.13.tgz"
+    },
+    "crm_login": "NOT_CONNECTED",
+    "knowledge_base": "AVAILABLE",
+    "page_delivery": "AVAILABLE",
+    "product_customer": "unknown_until_query_crm_product_customer_cohorts_is_called",
+    "rfm_snapshot": "unknown_until_query_crm_rfm_snapshot_is_called",
+    "live_product_query": "NOT_RUN"
+  },
+  "tests": {
+    "backend_product_and_category": {
+      "passed": 36,
+      "failed": 0
+    },
+    "crm_dashboard": {
+      "passed": 43,
+      "failed": 0
+    },
+    "query_agent": {
+      "passed": 10,
+      "failed": 0
+    },
+    "crm_target_typecheck_and_bundle": "PASS",
+    "query_offline_build_receipt": "PASS"
+  },
+  "recovery": {
+    "root": "/srv/shinemage/dsh/recovery/product-identity-20261022/",
+    "previous_profile": "/srv/shinemage/dsh/recovery/product-identity-20261022/before-current/profile/",
+    "previous_installed_packages": "/srv/shinemage/dsh/recovery/product-identity-20261022/before-current/installed/",
+    "previous_backend_compose": "/srv/shinemage/dsh/recovery/product-identity-20261022/backend-before/"
+  },
+  "limits": [
+    "The post-deployment browser session is not connected to CRM. The live product cohort tool was not called.",
+    "The product identity tests use the repository synthetic DuckDB fixture and contract fixtures. They do not replace an authenticated production product query.",
+    "The backend image is an offline-derived image built from the previous healthy digest. The full Dockerfile base-image pull failed on Docker Hub network timeout.",
+    "This is an owner-operated side-load. It is not a signed formal release."
+  ]
+}

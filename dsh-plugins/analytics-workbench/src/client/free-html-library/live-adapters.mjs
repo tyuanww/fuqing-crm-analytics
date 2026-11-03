@@ -16,7 +16,7 @@ import { PAGE_DOCUMENTS_PREFIX, PAGE_RESULT_PREFIX, refuseLivePort } from './pag
 import { annotateHostMappings } from '../../free-page/resource/package-normalize.mjs';
 
 const EDIT_CONTEXT_PREFIX = '/api/v1/analytics/page-edit-contexts';
-import { nativeGenerateUnavailable, normalizePagePackage } from './native-generate.mjs';
+import { extractBindingManifest, nativeGenerateUnavailable, normalizePagePackage } from './native-generate.mjs';
 
 function clone(value) {
   return structuredClone(value);
@@ -182,20 +182,22 @@ export function createLivePageAdapters({
     async readBinding(page) {
       const state = page?.binding_state ?? 'UNBOUND_SAMPLE';
       const bindings = page?.binding_manifest?.bindings ?? [];
+      const partial = state === 'BOUND_VERIFIED'
+        && bindings.some(item => Object.hasOwn(item, 'status') && item.status !== 'verified');
       if (resultHttp?.fetchImpl && resultHttp.base) {
         const got = await resultRequest('POST', '/binding-state', {
           body: { manifest: page?.binding_manifest ?? { bindings: [], result_refs: [] } },
         });
         return {
           binding_state: got.body?.binding_state ?? state,
-          partial: state === 'BOUND_VERIFIED' && bindings.some(item => item.status !== 'verified'),
+          partial,
           source: page?.binding_manifest?.result_refs?.[0] ?? null,
           forbidden: [...FORBIDDEN_OPS],
         };
       }
       return {
         binding_state: state,
-        partial: state === 'BOUND_VERIFIED' && bindings.some(item => item.status !== 'verified'),
+        partial,
         source: page?.binding_manifest?.result_refs?.[0] ?? null,
         forbidden: [...FORBIDDEN_OPS],
       };
@@ -371,6 +373,21 @@ export function createLivePageAdapters({
       remember(spec, pages.get(spec.page_id));
       return { ok: true, page_id: spec.page_id };
     },
+    async pullOverlay(pageId, version) {
+      if (typeof pageId !== 'string' || !pageId || !Number.isSafeInteger(version) || version < 1) {
+        return { ok: false, reason: 'invalid_page_version' };
+      }
+      const query = new URLSearchParams({ page_id: pageId, version: String(version) });
+      const got = await editContextRequest('GET', `/overlay?${query}`);
+      if (!got.ok) return got;
+      const overlays = got.body?.overlays;
+      if (!overlays || typeof overlays !== 'object' || Array.isArray(overlays)) {
+        return { ok: false, reason: 'invalid_overlay' };
+      }
+      const page = pages.get(pageId);
+      if (page) page.presentation_overlays = clone(overlays);
+      return { ok: true, page_id: pageId, version, overlays: clone(overlays) };
+    },
     async pullHistory(pageId) {
       const got = await documentsRequest('GET', `/pages/${encodeURIComponent(pageId)}/versions`);
       if (!got.ok) return got;
@@ -474,12 +491,14 @@ export function createLivePageAdapters({
         nativePrompts.push({ prompt, context: buildGenerateContext({ prompt, ...extras }), at: now() });
         if (typeof nativeGenerate !== 'function') throw nativeGenerateUnavailable();
         const raw = await nativeGenerate(prompt, extras);
+        const bindingManifest = extractBindingManifest(raw);
         const pkg = annotateHostMappings(normalizePagePackage(raw));
         if (!pkg) throw nativeGenerateUnavailable();
         return {
           accepted: true,
           runtime: 'dsh-native-agent-only',
           package: pkg,
+          binding_manifest: bindingManifest,
           ...(typeof raw?.__session_id === 'string' ? { session_id: raw.__session_id } : {}),
           ...(typeof raw?.__request_id === 'string' ? { request_id: raw.__request_id } : {}),
           ...(typeof extras?.sessionId === 'string' ? { session_id: extras.sessionId } : {}),

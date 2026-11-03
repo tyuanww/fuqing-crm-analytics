@@ -50,8 +50,9 @@ def readable(filename, content):
 
 
 class CockpitAIStore:
-    def __init__(self, files, pages):
+    def __init__(self, files, pages, *, workspace_files=True):
         self.files, self.pages = files, pages
+        self.workspace_files = workspace_files
         self.root = files.path.parent.resolve() / "ai-workspaces"
         self.root.mkdir(mode=0o700, exist_ok=True)
         with files.connect() as con:
@@ -89,7 +90,7 @@ class CockpitAIStore:
         job = self.view(row)
         if row["target_kind"] == "page":
             format_rule = ("输入是 HTML 源码包 JSON，保留 html/css/js/resources/node_map/presentation 合同。"
-                           + ("此页面有业务数据绑定，仅允许修改 CSS。禁止改 HTML/JS/资源/映射，禁止伪造或替换数据。" if job["bound"]
+                           + ("此页面有业务数据绑定，整页 AI 仅允许修改 CSS 和 presentation 样式。禁止改 HTML/JS/资源/映射或 presentation.text，禁止伪造或替换数据。" if job["bound"]
                               else "此页面未绑定业务结果，按下方选区约束和用户要求修改。"))
             format_rule += ("\n源码包根对象就是 package，不要再嵌套 package 字段。若整页或静态源码编辑改变了 html/css/js，"
                             "须逐一核对已有 presentation 定位，保留仍适用记录，并以 UTF-8 编码的 JSON.stringify([html,css,js])"
@@ -209,6 +210,8 @@ class CockpitAIStore:
                 con.execute("INSERT INTO ai_edits VALUES(?,?,?,?,?,?,?,?, 'WAITING',NULL,NULL,NULL,NULL,?)",
                             (job_id, actor.actor_id, target_kind, target_id, base_version, filename, source, json.dumps(context), stamp()))
                 row = self.row(con, actor, job_id)
+        if not self.workspace_files:
+            return self.view(row)
         # Database is authoritative. A retry completes a partially prepared workspace.
         workspace = self.root / job_id
         workspace.mkdir(mode=0o700, exist_ok=True)
@@ -320,7 +323,7 @@ class CockpitAIStore:
             fault(413, "FILE_SIZE", "候选不能为空，且不能超过 20 MB。")
         return content
 
-    def collect(self, actor, job_id):
+    def collect(self, actor, job_id, *, source_context=None):
         self.files.access(actor, True)
         with self.files.connect() as con:
             con.execute("BEGIN IMMEDIATE")
@@ -340,8 +343,8 @@ class CockpitAIStore:
                 self.protect_bindings(json.loads(row["source"]), package.model_dump(mode="json"), context["binding_manifest"])
                 protect_selection(json.loads(row["source"]), package.model_dump(mode="json"), context.get("selection"))
                 request = self._page_patch_request(row, package, context)
-                preview = self.pages.patch(actor, row["target_id"], request) if isinstance(request, PagePatchPreview) \
-                    else self.pages.save(actor, row["target_id"], request)
+                preview = self.pages.patch(actor, row["target_id"], request, source_context=source_context) if isinstance(request, PagePatchPreview) \
+                    else self.pages.save(actor, row["target_id"], request, source_context=source_context)
                 preview_id = preview["preview_id"]
             else:
                 validate_file(row["filename"], content)
@@ -356,8 +359,12 @@ class CockpitAIStore:
             return
         # Data-bound markup/scripts/maps are code, not freeform AI business text.
         # Styling can change; changing data-bound content requires existing result APIs.
-        if any(before.get(k) != after.get(k) for k in ("html", "js", "node_map", "resources", "presentation")):
-            fault(422, "AI_BOUND_CONTENT", "此页面有业务数据绑定，AI 可调整 CSS；内容或数据请使用原有绑定编辑流程。")
+        if any(before.get(k) != after.get(k) for k in ("html", "js", "node_map", "resources")):
+            fault(422, "AI_BOUND_CONTENT", "此页面有业务数据绑定，AI 可调整 CSS 和非绑定节点的展示文案；绑定数据节点请使用原有绑定编辑流程。")
+        for package in (before, after):
+            for edit in (package.get("presentation") or {}).get("edits", []):
+                if edit.get("text") is not None:
+                    fault(422, "AI_BOUND_CONTENT", "绑定页面的整页 AI 修改只允许样式叠加；展示文案请通过受控节点编辑。")
 
     def content(self, actor, job_id, variant):
         with self.files.connect() as con:
@@ -378,7 +385,7 @@ class CockpitAIStore:
                 "text_diff": diff[:20000], "truncated": len(diff) > 20000 or len(before) >= 100000 or len(after) >= 100000,
                 "note": "文本差异仅作辅助，请预览检查排版、公式、图片及未显示的内容。"}
 
-    def confirm(self, actor, job_id, expected_hash):
+    def confirm(self, actor, job_id, expected_hash, *, source_context=None):
         self.files.access(actor, True)
         # A durable candidate outlives the page service's 30-minute preview.
         # Persist any renewed preview ID BEFORE calling the other database's
@@ -394,8 +401,8 @@ class CockpitAIStore:
                     context = json.loads(row["context"])
                     package = PagePackage.model_validate_json(row["candidate"])
                     request = self._page_patch_request(row, package, context)
-                    renewed = self.pages.patch(actor, row["target_id"], request) if isinstance(request, PagePatchPreview) \
-                        else self.pages.save(actor, row["target_id"], request)
+                    renewed = self.pages.patch(actor, row["target_id"], request, source_context=source_context) if isinstance(request, PagePatchPreview) \
+                        else self.pages.save(actor, row["target_id"], request, source_context=source_context)
                     con.execute("UPDATE ai_edits SET preview_id=? WHERE id=?", (renewed["preview_id"], job_id))
         with self.files.connect() as con:
             con.execute("BEGIN IMMEDIATE")
@@ -407,7 +414,7 @@ class CockpitAIStore:
             if row["status"] != "READY":
                 fault(409, "AI_EDIT_CLOSED", "此 AI 修改任务已关闭或尚未交付。")
             if row["target_kind"] == "page":
-                result = self.pages.confirm(actor, row["preview_id"], job_id)
+                result = self.pages.confirm(actor, row["preview_id"], job_id, source_context=source_context)
                 version = result["spec"]["version"]
             else:
                 current = self.files.row(con, actor, row["target_id"])

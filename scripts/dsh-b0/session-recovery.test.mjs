@@ -7,8 +7,10 @@ import { zstdCompress, zstdDecompress } from 'node:zlib';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { runSessionRecoveryMatrix } from './session-recovery.mjs';
+import { TOOLCHAIN } from '../release/toolchain.mjs';
 
 const exec = promisify(execFile), compress = promisify(zstdCompress), decompress = promisify(zstdDecompress);
+const runtimeVersion = TOOLCHAIN.sdk_version;
 
 test('existing output is refused without touching its contents', async () => {
   const root = await mkdtemp(join(tmpdir(), 'owned-session-guard-'));
@@ -28,16 +30,30 @@ test('missing runtime is FAIL with fresh-process evidence, never PASS/NOT_RUN', 
   } finally { await rm(root, { recursive: true }); }
 });
 
-test('official rc2 cold reader/writer recovers an incomplete zstd frame', {
+test('pinned official cold reader/writer recovers an incomplete zstd frame', {
   skip: !process.env.B0_BUILD_UPSTREAM && 'explicit built upstream required',
 }, async () => {
   const root = await mkdtemp(join(tmpdir(), 'owned-session-real-'));
   try {
-    const result = await runSessionRecoveryMatrix({ output: join(root, 'result'),
+    const result = await runSessionRecoveryMatrix({ output: join(root, 'result'), runtimeVersion,
       rc2Modules: join(process.env.B0_BUILD_UPSTREAM, 'apps/cli/node_modules/@deepseek-ai') });
     assert.equal(result.status, 'PARTIAL');
     assert.equal(result.rows[0].status, 'PASS'); assert.equal(result.rows[1].status, 'NOT_RUN');
     assert.equal(result.executions.length, 4);
+  } finally { await rm(root, { recursive: true }); }
+});
+
+test('a wrong expected runtime version fails before creating session storage', {
+  skip: !process.env.B0_BUILD_UPSTREAM && 'explicit built upstream required',
+}, async () => {
+  const root = await mkdtemp(join(tmpdir(), 'owned-session-version-'));
+  try {
+    const result = await runSessionRecoveryMatrix({ output: join(root, 'result'), runtimeVersion: '0.0.0-unexpected',
+      rc2Modules: join(process.env.B0_BUILD_UPSTREAM, 'apps/cli/node_modules/@deepseek-ai') });
+    assert.equal(result.status, 'FAIL');
+    assert.match(result.error, /RECOVERY_RUNTIME_VERSION/);
+    assert.equal(result.executions.length, 1);
+    assert.deepEqual(await readdir(result.executions[0].root), ['.owned-session-recovery']);
   } finally { await rm(root, { recursive: true }); }
 });
 
@@ -51,10 +67,10 @@ test('candidate recovery accepts explicit candidate and baseline runtime version
       output: join(root, 'result'),
       rc2Modules: join(process.env.B0_BUILD_UPSTREAM, 'apps/cli/node_modules/@deepseek-ai'),
       rc1Modules: join(process.env.B0_RECOVERY_BASELINE_UPSTREAM, 'apps/cli/node_modules/@deepseek-ai'),
-      runtimeVersion: '0.2.1-alpha.2',
+      runtimeVersion,
       baselineVersion: '0.1.7-rc.2',
     });
-    assert.deepEqual(result.runtime_versions, { candidate: '0.2.1-alpha.2', baseline: '0.1.7-rc.2' });
+    assert.deepEqual(result.runtime_versions, { candidate: runtimeVersion, baseline: '0.1.7-rc.2' });
     assert.equal(result.status, 'PASS');
     assert.deepEqual(result.rows.map(row => row.status), ['PASS', 'PASS', 'PASS', 'PASS']);
     assert.equal(result.rows[1].id, 'baseline-write-candidate-read-append');
@@ -71,13 +87,13 @@ test('unknown corpus is rejected before creating output', async () => {
   } finally { await rm(root, { recursive: true }); }
 });
 
-test('official rc2 retains tool pairs, error/meta and message surface after torn-tail repair', {
+test('pinned official runtime retains tool pairs, error/meta and messages after torn-tail repair', {
   skip: !process.env.B0_BUILD_UPSTREAM && 'explicit built upstream required',
 }, async () => {
   const root = await mkdtemp(join(tmpdir(), 'owned-session-tool-real-'));
   try {
     const output = join(root, 'result');
-    const result = await runSessionRecoveryMatrix({ output, corpus: 'tool',
+    const result = await runSessionRecoveryMatrix({ output, corpus: 'tool', runtimeVersion,
       rc2Modules: join(process.env.B0_BUILD_UPSTREAM, 'apps/cli/node_modules/@deepseek-ai') });
     assert.equal(result.schema_version, 'dsh-owned-session-recovery/v2');
     assert.equal(result.status, 'PARTIAL'); assert.equal(result.release_ready, false);
@@ -102,7 +118,7 @@ test('cold tool-corpus probe rejects altered persisted tool content without repa
   const root = await mkdtemp(join(tmpdir(), 'owned-session-tool-corrupt-'));
   try {
     const output = join(root, 'result'), modules = join(process.env.B0_BUILD_UPSTREAM, 'apps/cli/node_modules/@deepseek-ai');
-    const result = await runSessionRecoveryMatrix({ output, rc2Modules: modules, corpus: 'tool' });
+    const result = await runSessionRecoveryMatrix({ output, rc2Modules: modules, corpus: 'tool', runtimeVersion });
     assert.equal(result.rows[0].status, 'PASS');
     const owned = result.executions[0].root, logs = [];
     async function walk(path) {
@@ -128,19 +144,19 @@ test('cold tool-corpus probe rejects altered persisted tool content without repa
       cwd: owned, timeout: 30000, env: { PATH: '/usr/local/bin:/usr/bin:/bin', HOME: owned, TMPDIR: owned },
     });
     child.child.stdin.on('error', () => {});
-    child.child.stdin.end(JSON.stringify({ root: owned, modules, operation: 'read', version: '0.1.7-rc.2', corpus: 'tool' }));
+    child.child.stdin.end(JSON.stringify({ root: owned, modules, operation: 'read', version: runtimeVersion, corpus: 'tool' }));
     await assert.rejects(child, error => error.code === 1 && /RECOVERY_TOOL_CORPUS_CONTENT/.test(error.stderr));
     assert.deepEqual(await readFile(logs[0]), tampered);
   } finally { await rm(root, { recursive: true }); }
 });
 
-test('official rc2 preserves attachment references, child metadata and depth across cold recovery', {
+test('pinned official runtime preserves attachment references, child metadata and depth across cold recovery', {
   skip: !process.env.B0_BUILD_UPSTREAM && 'explicit built upstream required',
 }, async () => {
   const root = await mkdtemp(join(tmpdir(), 'owned-session-rich-real-'));
   try {
     const output = join(root, 'result');
-    const result = await runSessionRecoveryMatrix({ output, corpus: 'rich',
+    const result = await runSessionRecoveryMatrix({ output, corpus: 'rich', runtimeVersion,
       rc2Modules: join(process.env.B0_BUILD_UPSTREAM, 'apps/cli/node_modules/@deepseek-ai') });
     assert.equal(result.schema_version, 'dsh-owned-session-recovery/v3');
     assert.equal(result.corpus_id, 'attachment-delegation-metadata/v1');
@@ -172,7 +188,7 @@ test('cold rich probe rejects changed references, descriptor or delegation heade
   const root = await mkdtemp(join(tmpdir(), 'owned-session-rich-corrupt-'));
   try {
     const output = join(root, 'result'), modules = join(process.env.B0_BUILD_UPSTREAM, 'apps/cli/node_modules/@deepseek-ai');
-    const result = await runSessionRecoveryMatrix({ output, rc2Modules: modules, corpus: 'rich' });
+    const result = await runSessionRecoveryMatrix({ output, rc2Modules: modules, corpus: 'rich', runtimeVersion });
     assert.equal(result.rows[0].status, 'PASS');
     const owned = result.executions[0].root, logs = [];
     async function walk(path) {
@@ -201,7 +217,7 @@ test('cold rich probe rejects changed references, descriptor or delegation heade
           cwd: owned, timeout: 30000, env: { PATH: '/usr/local/bin:/usr/bin:/bin', HOME: owned, TMPDIR: owned },
         });
         child.child.stdin.on('error', () => {});
-        child.child.stdin.end(JSON.stringify({ root: owned, modules, operation, version: '0.1.7-rc.2', corpus: 'rich' }));
+        child.child.stdin.end(JSON.stringify({ root: owned, modules, operation, version: runtimeVersion, corpus: 'rich' }));
         await assert.rejects(child, error => error.code === 1 && /RECOVERY_RICH_(CORPUS_CONTENT|HEADER)/.test(error.stderr));
         assert.deepEqual(await readFile(logs[0]), tampered);
       }

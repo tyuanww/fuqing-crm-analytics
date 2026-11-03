@@ -152,7 +152,7 @@ def test_duckdb_runtime_config_caps_threads_without_fingerprint_conflict(tmp_pat
     db_path = tmp_path / "runtime-settings.duckdb"
     conn = duckdb.connect(str(db_path))
     try:
-        dual_conn._apply_runtime_settings(conn, "1GB")
+        dual_conn.configure_connection(conn, "1GB")
         sibling = duckdb.connect(str(db_path))
         try:
             assert conn.execute("SELECT current_setting('threads')").fetchone()[0] == dual_conn.DUCKDB_THREADS

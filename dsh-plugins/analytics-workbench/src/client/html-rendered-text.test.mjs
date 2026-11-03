@@ -24,6 +24,19 @@ async function mount(t, source, { editing = true, selectBlocks = false } = {}) {
   return { dom, messages, nodes, targets, context };
 }
 
+test('raw-text elements are not offered as text targets and forced edits stay unresolved', async t => {
+  const page = { html: '<section id="cards"><xmp data-shine-node="raw">原始文本</xmp><p>普通文案</p></section>',
+    css: '', js: '', resources: [], node_map: [{ node_id: 'raw', kind: 'static_element' }] };
+  const ui = await mount(t, page);
+  assert.equal(ui.targets().some(node => node.tag === 'xmp'), false);
+  const changed = { ...page, presentation: { source_hash: sourceHash(page), edits: [
+    { target: { anchor: { attribute: 'id', value: 'cards' }, path: [{ tag: 'xmp' }] }, text: '</xmp><h2>注入</h2><xmp>', style: {} },
+  ] } };
+  const reopened = await mount(t, changed, { editing: false });
+  assert.equal(reopened.dom.window.document.querySelector('xmp').textContent, '原始文本');
+  assert.deepEqual(Array.from(reopened.dom.window.__cockpitPresentationStatus.unresolved), [0]);
+});
+
 test('a generated finding sentence can change the words and keeps the metric tags', async t => {
   const page = { html: '<section id="cards" data-node="findings"></section>', css: '', resources: [], node_map: [],
     js: `document.querySelector('[data-node="findings"]').innerHTML='<ul><li><span class="tag">时段</span><div>全周 <b>44%</b> 收入，客单价 <b>142.6 元</b>。</div></li><li><span class="tag">对照</span><div>日间 <b>20%</b> 收入。</div></li></ul>';` };

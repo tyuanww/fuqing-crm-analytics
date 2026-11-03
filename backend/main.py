@@ -100,16 +100,12 @@ def validate_startup_db() -> None:
         logger.error("[Sprint 61 startup-check] %s", msg)
         raise RuntimeError(msg)
 
-    # 用临时 read_only 连接校验 (避免污染全局单例的 memory_limit/config)
-    try:
-        conn = duckdb.connect(str(db_realpath), read_only=True)
-        archive = os.environ.get("FQ_ARCHIVE_DUCKDB", "").strip()
-        if archive:
-            from backend.services.dual_conn import quote_duckdb_literal
+    from backend.services.dual_conn import configure_connection, READ_MEMORY_LIMIT
 
-            conn.execute(
-                f"ATTACH IF NOT EXISTS '{quote_duckdb_literal(archive)}' AS src (READ_ONLY)"
-            )
+    try:
+        conn = configure_connection(
+            duckdb.connect(str(db_realpath), read_only=True), READ_MEMORY_LIMIT,
+        )
     except Exception as e:  # noqa: BLE001
         msg = f"Startup validation failed: cannot open DuckDB at {db_realpath}: {e}"
         logger.error("[Sprint 61 startup-check] %s", msg)
@@ -294,7 +290,12 @@ app.add_middleware(
     allow_origins=[o.strip() for o in _CORS_ORIGINS if o.strip()],
     allow_credentials=False,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization", "X-Login-Claim"],
+    allow_headers=[
+        "Content-Type",
+        "Authorization",
+        "X-Login-Claim",
+        "X-ShineMage-Product-Customer-Version",
+    ],
 )
 app.add_middleware(QueryRouterMiddleware)
 

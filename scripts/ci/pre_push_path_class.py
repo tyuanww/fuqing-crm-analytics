@@ -113,6 +113,7 @@ B0_PREFIXES = ('dsh-plugins/analytics-workbench/', 'scripts/dsh-b0/', 'scripts/d
                'backend/services/analytics/', 'backend/tests/analytics_')
 B0_EXACT = {'backend/contracts/analytics.py', 'backend/semantic/analytics_b0.py',
             'config/shinemage-composition-packs.lock.json', 'config/workbench-author-evidence.lock.json', 'config/domain-author-evidence.lock.json',
+            'config/shinemage-composition-artifact.lock.json', 'config/shinemage-composition-pack-manifest.v1.json',
             'config/public-contract-inputs.lock.json', 'scripts/ci/public-contract-inputs.mjs',
             'scripts/ci/public-contract-inputs.test.mjs', 'scripts/ci/read-public-contract-inputs.py',
             '.github/workflows/dsh-b0.yml', 'backend/analytics_analysis_app.py',

@@ -13,7 +13,7 @@ from dataclasses import dataclass
 import logging
 import os
 import threading
-from typing import AsyncIterator, Iterator
+from typing import AsyncIterator, Iterator, Literal
 
 import duckdb
 
@@ -89,21 +89,37 @@ def _ensure_archive_fill_views(conn: duckdb.DuckDBPyConnection) -> None:
     )
 
 
-def _apply_runtime_settings(
+def configure_connection(
     conn: duckdb.DuckDBPyConnection,
     memory_limit: str,
+    *,
+    kind: Literal["business", "cache"] = "business",
 ) -> duckdb.DuckDBPyConnection:
-    """Apply shared resource caps without changing DuckDB's file fingerprint.
+    """Initialize a new connection, closing it if configuration fails.
 
-    Passing ``memory_limit`` or ``threads`` via ``connect(config=...)`` makes a
-    later plain connection to the same file fail with "different
-    configuration". Runtime settings are inherited by sibling connections and
-    keep legacy direct readers compatible with the bounded pool.
+    Runtime SET preserves compatibility with plain sibling connections. Their
+    shared spill directory cannot be changed after temporary files are in use.
     """
-    conn.execute("SET memory_limit = ?", [memory_limit])
-    conn.execute("SET threads = ?", [DUCKDB_THREADS])
-    _ensure_archive_fill_views(conn)
-    return conn
+    try:
+        from backend.config import FQ_DUCKDB_TEMP_ROOT, FQ_DUCKDB_TEMP_LIMIT
+
+        conn.execute("SET memory_limit = ?", [memory_limit])
+        conn.execute("SET threads = ?", [DUCKDB_THREADS])
+        if FQ_DUCKDB_TEMP_ROOT is not None:
+            directory = FQ_DUCKDB_TEMP_ROOT / str(os.getpid()) / kind
+            directory.mkdir(parents=True, exist_ok=True)
+            current = conn.execute("SELECT current_setting('temp_directory')").fetchone()[0]
+            if current != str(directory):
+                conn.execute("SET temp_directory = ?", [str(directory)])
+            conn.execute("SET max_temp_directory_size = ?", [FQ_DUCKDB_TEMP_LIMIT])
+        _ensure_archive_fill_views(conn)
+        return conn
+    except BaseException:
+        try:
+            conn.close()
+        except duckdb.Error as exc:
+            logger.debug("Closing an uninitialized DuckDB connection failed: %s", exc)
+        raise
 
 
 def set_query_type(query_type: str) -> Token[str]:
@@ -171,7 +187,7 @@ def open_matching_read_connection() -> duckdb.DuckDBPyConnection:
         config=_db_config(),
         read_only=True,
     )
-    return _apply_runtime_settings(conn, READ_MEMORY_LIMIT)
+    return configure_connection(conn, READ_MEMORY_LIMIT)
 
 
 def _is_healthy(conn: duckdb.DuckDBPyConnection) -> bool:
@@ -226,7 +242,7 @@ def get_read_connection(timeout: float = READ_ACQUIRE_TIMEOUT_SECONDS) -> duckdb
             config=_db_config(),
             read_only=True,
         )
-        _apply_runtime_settings(conn, READ_MEMORY_LIMIT)
+        configure_connection(conn, READ_MEMORY_LIMIT)
         logger.debug("DuckDB read-only connection borrowed: %s", DUCKDB_PATH)
         return conn
     except BaseException:
@@ -331,7 +347,7 @@ def get_write_connection() -> duckdb.DuckDBPyConnection:
         # (让 DuckDB 1.5+ strict mode config dict 各项完全一致, 修复 RFM 雪崩)
         # 注: write 场景的 memory_limit 走 read 场景配置, 这是 DuckDB
         #     1.5+ strict mode 同一文件只能一种 config 的硬约束, 无解
-        _WRITE_CONN = _apply_runtime_settings(
+        _WRITE_CONN = configure_connection(
             duckdb.connect(
                 str(DUCKDB_PATH),
                 config=_db_config(),
@@ -363,13 +379,14 @@ def get_cache_connection() -> duckdb.DuckDBPyConnection:
             return _CACHE_CONN
         from backend.config import CACHE_DUCKDB_PATH
         os.makedirs(os.path.dirname(CACHE_DUCKDB_PATH), exist_ok=True)
-        _CACHE_CONN = _apply_runtime_settings(
+        _CACHE_CONN = configure_connection(
             duckdb.connect(
                 CACHE_DUCKDB_PATH,
                 config=_db_config(),
                 read_only=False,
             ),
             CACHE_MEMORY_LIMIT,
+            kind="cache",
         )
         logger.info("DuckDB cache singleton opened: %s", CACHE_DUCKDB_PATH)
         return _CACHE_CONN

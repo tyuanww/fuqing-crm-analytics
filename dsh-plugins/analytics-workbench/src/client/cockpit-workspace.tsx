@@ -177,7 +177,7 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
     if (busy) return;
     void coordinator.request({ kind: 'asset', performLocal: action }).then(result => {
       if (result === 'busy') setNotice('上一步还在处理，请稍候再试。');
-      if (result === 'prompt') setNotice('有未保存修改。请先保存或放弃，再继续。');
+      // LeavePrompt owns the dirty warning and clears it when the choice settles.
       if (result === 'stayed' && coordinator.getSnapshot().message) setNotice(coordinator.getSnapshot().message);
     });
   };

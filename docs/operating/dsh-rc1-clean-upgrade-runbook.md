@@ -80,7 +80,13 @@
 
 2026-10-20 的 v4 过渡候选结果保留为：candidate tag `dsh-0.2.1-rc.1-clean-main-20261020-v4`，runtime SHA-256 `d3d504dd39cd333fb98acf61cf4597664f6d4fda5482fb2ea970748bd2b8a94f`，候选 receipt profile SHA-256 `c3ec7df313c2323996428b1034af0fd5eec5fffe1d06a8c618532074110503ad`，plugin-market Discover、native boot、settings/account RPC、peer negative test 和 v4 boot 均通过，AppleDouble locale 文件为 `0`，控制台日志为空。
 
-2026-10-21 驾驶舱收口现场：生产 symlink 指向 `/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-core-main-20261021-cockpit-v3`，服务为 active/running。v3 是建立在前一驾驶舱候选上的 owner-operated side-load，驾驶舱 pack source 为 `7c9244c9…`，manifest `cec2dbf9…`，tarball `b8808b25…`，effective client `0d653ceb…`；`runtime` 仍链接 v5 的既有持久 runtime。v2 驾驶舱候选保留，稳定回退目标是 v5。query.11 仍生效；v5 历史 ephemeral profile `27566016…` 与旧候选 receipt `c3ec7df3…` 的差异继续按回退目标事实保留，不改写 marker。IM 输入状态为 `PINNED_INPUTS_VERIFIED`，但正式发布仍需统一身份、签名、独立验收和切换授权，`release_ready=false`。
+2026-10-21 现场事实：生产 symlink 指向 `/srv/shinemage/dsh/releases/dsh-0.2.1-rc.1-core-main-20261020-v5`，服务为 active/running；v5 是上述 v4 runtime 的 owner-operated 现场 side-load。query.11 当前生效，最近重启后的 ephemeral profile 为 `27566016…`，与旧候选 receipt 的 `c3ec7df3…` 不一致，marker 仍为 v4/PREPARED，因此只记现场 side-load。IM 输入状态为 `PINNED_INPUTS_VERIFIED`，但正式发布仍需统一身份、签名、独立验收和切换授权，`release_ready=false`。
+
+2026-10-22 较早阶段的现场事实：同一 v5 runtime 已 side-load CRM `0.0.0-crm.3` 和 Query `0.0.0-query.12`，插件页均为 `2/2` 组件运行中。Query 的 profile 清单、锁文件与已安装包已统一指向 query.12 tarball；最终会话完成 WeKnora 检索和未发布 HTML 生成，CRM 仍为 `NOT_CONNECTED`。候选 receipt 和 release marker 身份未改写，运行边界见[增长董事会部署回执](../hackathon/evidence/dsh-growth-board-deployment-20261022.md)。
+
+2026-10-22 商品映射现场事实：`current` 指向 `dsh-0.2.1-rc.1-core-main-20261021-cockpit-v3`。CRM `0.0.0-crm.4` 与 Query `0.0.0-query.13` 已 side-load，插件页均为 `2/2` 组件运行中。商品接口为 `product-customer/v2`，页面默认展示固定唯一 `display_name`；后端镜像 digest 为 `sha256:85c3b72d…d895c`。运行边界见[商品身份映射回执](../hackathon/evidence/dsh-product-identity-deployment-20261022.md)。
+
+2026-10-22 审查修复现场事实：CRM `0.0.0-crm.5` 与 Query `0.0.0-query.14` 已 side-load。商品接口升级到 v3，默认无版本头仍返回 v2；覆盖、当前期和同期在同一只读事务内读取，覆盖不足返回 `INSUFFICIENT_COVERAGE`。后端镜像 digest 为 `sha256:362779ab…5d4ba`。运行边界见[审查问题修复回执](../hackathon/evidence/dsh-review-fixes-20261022.md)。
 
 ## 排障
 

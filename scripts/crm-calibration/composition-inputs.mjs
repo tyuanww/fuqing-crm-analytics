@@ -25,12 +25,12 @@ export async function readCompositionInputs({ inputsPath, pageInputsPath, toolch
   const packs = await loadProfilePacks({ inputsPath, toolchain, requireGeneratedProvenance: true });
   const pages = pageInputsPath === undefined ? undefined : await loadProfilePacks({ inputsPath: pageInputsPath, toolchain, requireGeneratedProvenance: true });
   return validateCompositionPacks({ packs, pages, toolchain,
-    cordisPeerVersion: cordisPeerVersion ?? process.env.CRM_COMPOSITION_CORDIS_PEER ?? '4.0.4' });
+    cordisPeerVersion: cordisPeerVersion ?? process.env.CRM_COMPOSITION_CORDIS_PEER ?? '4.0.5' });
 }
 
 /** Shared preflight for already verified packages; no writes or runtime import. */
-export function validateCompositionPacks({ packs, pages, toolchain, cordisPeerVersion = '4.0.4' }) {
-  const sdkVersion = toolchain?.sdk_version ?? '0.1.7-rc.2';
+export function validateCompositionPacks({ packs, pages, toolchain, cordisPeerVersion = '4.0.5' }) {
+  const sdkVersion = toolchain?.sdk_version ?? '0.2.1-rc.3';
   assert.equal(packs.profile.service_binding, undefined, 'CRM_COMPOSITION_SERVICE_BINDING_REQUIRES_CANDIDATE');
   assert.deepEqual(packs.plugins.map(row => row.id).sort(), [CRM, KNOWLEDGE].sort(), 'CRM_COMPOSITION_SELECTION');
   const crm = packs.plugins.find(row => row.id === CRM), knowledge = packs.plugins.find(row => row.id === KNOWLEDGE);
@@ -63,7 +63,7 @@ export async function loadComposition({ scope, page = false } = {}) {
   const verified = await verifyUpstream(upstream, pin);
   const anchor = join(upstream, 'apps/cli/package.json');
   const cordis = JSON.parse(await readFile(join(upstream, 'vendor/cordis/package.json'), 'utf8'));
-  const cordisRuntimeVersion = process.env.CRM_COMPOSITION_CORDIS_RUNTIME ?? '4.0.4';
+  const cordisRuntimeVersion = process.env.CRM_COMPOSITION_CORDIS_RUNTIME ?? '4.0.5';
   assert.equal(cordis.version, cordisRuntimeVersion, 'CRM_COMPOSITION_CORDIS_RUNTIME');
   assert.equal(packs.profile.dsh.sdk_version, pin.sdk_version, 'CRM_COMPOSITION_PIN');
   const output = join(base, scope), home = join(output, 'home');
@@ -97,7 +97,7 @@ export async function loadComposition({ scope, page = false } = {}) {
     });
     const receipt = { schema: 'shinemage-pack-composition-inputs/v1', scope, verified,
       toolchain: { sdk_version: pin.sdk_version, upstream_sha: pin.upstream_sha },
-      cordis: { declared: process.env.CRM_COMPOSITION_CORDIS_PEER ?? '4.0.4', runtime: cordis.version },
+      cordis: { declared: process.env.CRM_COMPOSITION_CORDIS_PEER ?? '4.0.5', runtime: cordis.version },
       packages: installed, page_packages: installedPages ?? null, bindings,
       coverage: 'public contract composition with official resolver and synthetic HTTP fixtures',
       official_plugin_add: 'NOT_RUN', full_host: 'NOT_RUN', candidate_admission: 'NOT_RUN', real_business: 'NOT_RUN', release_ready: false };

@@ -45,14 +45,15 @@ export function sourceTargets(pkg, manifest, { rendered = false } = {}) {
       continue;
     }
     const blocked = /\bdata-shine-region\s*=|\bon\w+\s*=/i.test(text)
-      || ['script', 'style', 'iframe', 'object', 'embed', 'svg', 'math', 'template'].includes(tag);
+      || ['script', 'style', 'iframe', 'object', 'embed', 'svg', 'math', 'template', 'xmp', 'noembed', 'noframes', 'plaintext', 'noscript'].includes(tag);
     if (blocked) for (const parent of stack) parent.blocked = true;
     const foreign = tag === 'svg' || tag === 'math' || Boolean(stack.at(-1)?.foreign);
     if (text.endsWith('/>')) {
       if (!foreign && !VOID.has(tag)) { invalid = true; break; }
       continue;
     }
-    if (['script', 'style', 'textarea', 'title'].includes(tag)) {
+    if (tag === 'plaintext') return [];
+    if (['script', 'style', 'textarea', 'title', 'xmp', 'noembed', 'noframes', 'noscript'].includes(tag)) {
       const close = new RegExp('</' + tag + '\\s*>', 'gi'); close.lastIndex = tags.lastIndex;
       if (!close.exec(html)) { invalid = true; break; } tags.lastIndex = close.lastIndex; continue;
     }

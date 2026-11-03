@@ -19,7 +19,7 @@ from uuid import uuid4
 
 from pydantic import ValidationError
 
-from backend.contracts.competition_computed import DATA_SCOPE
+from backend.services.analytics.page_context import PageAccessPolicy
 from backend.contracts.page_documents import (
     HTML_MAX_CHARS, PACKAGE_MAX_BYTES, STYLE_MAX_CHARS, PagePatchPreview, is_package_too_large,
 )
@@ -343,10 +343,11 @@ def _overlay(payload):
 
 
 class PageEditContextStore:
-    def __init__(self, directory: Path, pages, *, clock: Callable[[], int] = now_ms):
+    def __init__(self, directory: Path, pages, *, clock: Callable[[], int] = now_ms, policy: PageAccessPolicy = PageAccessPolicy()):
         self.path = directory.resolve() / "page_edit_context.sqlite3"
         self.pages = pages
         self.clock = clock
+        self.policy = policy
         initialize_sqlite(directory, self.path, application_id=1804289401, schema_version=1,
                           kind="page_edit_context", ddl=DDL, unavailable=UNAVAILABLE)
 
@@ -354,8 +355,11 @@ class PageEditContextStore:
         return connect(self.path, readonly=True, unavailable=UNAVAILABLE)
 
     def _require(self, actor):
-        require(actor, "dashboard:read", data_scope=DATA_SCOPE)
-        require(actor, "dashboard:update", data_scope=DATA_SCOPE)
+        require(actor, "dashboard:read", data_scope=self.policy.document_scope)
+        require(actor, "dashboard:update", data_scope=self.policy.document_scope)
+
+    def _tenant(self, actor):
+        return self.policy.edit_tenant if self.policy.edit_tenant is not None else tenant_of(actor)
 
     def _context_row(self, context_id: str):
         if not isinstance(context_id, str) or not IDENTITY.fullmatch(context_id):
@@ -368,7 +372,7 @@ class PageEditContextStore:
         row = self._context_row(context_id)
         if row is None:
             raise fault("NOT_FOUND", 404)
-        if row["owner"] != actor.actor_id or row["tenant_id"] != tenant_of(actor):
+        if row["owner"] != actor.actor_id or row["tenant_id"] != self._tenant(actor):
             raise fault("UNAUTHORIZED_CONTEXT", 403)
         if self.clock() >= row["expires_ms"]:
             raise fault("EDIT_EXPIRED", 409)
@@ -435,7 +439,7 @@ class PageEditContextStore:
             "schema_version": CONTEXT_SCHEMA,
             "edit_context_id": context_id,
             "user_id": actor.actor_id,
-            "tenant_id": tenant_of(actor),
+            "tenant_id": self._tenant(actor),
             "page_id": page_id,
             "version": spec["version"],
             "selected_node": selected_node,
@@ -683,7 +687,7 @@ class PageEditContextStore:
                 return True
         return False
 
-    def confirm(self, actor, context_id: str, preview_id: str, key: str | None):
+    def confirm(self, actor, context_id: str, preview_id: str, key: str | None, *, source_context=None):
         stored = self._authorized(actor, context_id)
         key = validate_key(key)
         body_digest = digest({"context_id": context_id, "preview_id": preview_id})
@@ -707,12 +711,12 @@ class PageEditContextStore:
             raise fault("VERSION_CONFLICT", 409)
         page_preview_id = preview["page_preview_id"]
         if not page_preview_id:
-            page_preview_id = self._open_page_preview(actor, stored, preview_body)
+            page_preview_id = self._open_page_preview(actor, stored, preview_body, source_context=source_context)
             with transaction(self.path, unavailable=UNAVAILABLE) as con:
                 con.execute("UPDATE edit_previews SET page_preview_id=? WHERE owner=? AND preview_id=?",
                             (page_preview_id, actor.actor_id, preview_id))
         try:
-            saved = self.pages.confirm(actor, page_preview_id, key)
+            saved = self.pages.confirm(actor, page_preview_id, key, source_context=source_context)
         except AnalyticsError as error:
             if error.code == "VERSION_CONFLICT":
                 self._drop_context(actor, context_id)
@@ -752,11 +756,11 @@ class PageEditContextStore:
                         (actor.actor_id, preview_id))
         return body
 
-    def _open_page_preview(self, actor, stored, preview_body):
+    def _open_page_preview(self, actor, stored, preview_body, *, source_context=None):
         page_id = stored["contract"]["page_id"]
         base_version = stored["base_version"]
         if preview_body["channel"] == "presentation":
-            opened = self.pages.preview_identical(actor, page_id, base_version)
+            opened = self.pages.preview_identical(actor, page_id, base_version, source_context=source_context)
         else:
             try:
                 request = PagePatchPreview.model_validate({
@@ -767,7 +771,7 @@ class PageEditContextStore:
                 if is_package_too_large(error):
                     raise fault("PACKAGE_TOO_LARGE", 413) from error
                 raise fault("INVALID_EDIT") from error
-            opened = self.pages.patch(actor, page_id, request)
+            opened = self.pages.patch(actor, page_id, request, source_context=source_context)
         return opened["preview_id"]
 
     def recover(self, actor, context_id: str, preview_id: str):
@@ -810,7 +814,7 @@ class PageEditContextStore:
 
     def overlay(self, actor, page_id: str, version: int):
         """Read the overlay saved for this page version only. Missing rows are empty."""
-        self._require(actor)
+        require(actor, "dashboard:read", data_scope=self.policy.document_scope)
         self._page(actor, page_id)
         if type(version) is not int or version < 1:
             raise fault("INVALID_EDIT")

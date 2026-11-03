@@ -1,5 +1,13 @@
 # 供应链与依赖 SSOT（PR5）
 
+## 2026-10-24 候选安全修复
+
+[PR #164](https://github.com/tyuanww/fuqing-crm-analytics/pull/164) 的远端 `dependency-audit` 发现两项漏洞，原始 job 为 `120831493986`。certifi 的 [PYSEC-2026-4320](https://osv.dev/vulnerability/PYSEC-2026-4320) 涉及受影响的根证书信任，修复版本为 `2026.10.19`。setuptools 的 [GHSA-xmj3-9gf7-h52w](https://github.com/advisories/GHSA-xmj3-9gf7-h52w) 涉及 Windows 旧 wheel 安装路径越界，修复版本为 `84.1.0`。
+
+CRM、e2e 和 B0 的 certifi 精确锁及声明下限已同步。CRM setuptools 精确锁与构建下限已同步。不增加 advisory 忽略项，不修改审计门禁。新候选仍需通过实际安装、审计、回归和最终提交的远端 CI。
+
+这些文件约束新安装与候选构建，不会更新现役容器、归档 SDK 或旧回执。杭州现役版本需现场核验；若包含受影响包，须真实重建并按发布流程更新，不能手改旧摘要或声明运行态已修复。
+
 ## 1. Python 依赖分层
 
 | 文件 | 角色 |

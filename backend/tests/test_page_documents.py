@@ -9,7 +9,7 @@ from pathlib import Path
 import sqlite3
 import subprocess
 import sys
-from threading import Barrier
+from threading import Barrier, Event
 
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
@@ -106,6 +106,31 @@ def test_uploaded_html_has_explicit_file_origin_without_fabricating_a_session():
         PageDraft.model_validate({**body, "origin_file_id": None})
     with pytest.raises(ValidationError):
         PageDraft.model_validate({**body, "binding_manifest": {"bindings": [], "result_refs": ["real_result"]}})
+
+
+def test_bound_node_must_exist_in_page_mapping():
+    body = {
+        "title": "Bound report",
+        "session_id": "native_session_fixture",
+        "package": {
+            "html": '<h1 data-shine-node="n_title">标题</h1>',
+            "node_map": [{
+                "node_id": "n_title",
+                "kind": "static_element",
+                "selector": "[data-shine-node='n_title']",
+            }],
+        },
+        "binding_manifest": {
+            "result_refs": ["result_fixture_1"],
+            "bindings": [{
+                "binding_id": "bind_1",
+                "result_ref": "result_fixture_1",
+                "node_id": "n_missing",
+            }],
+        },
+    }
+    with pytest.raises(ValidationError, match="node_id"):
+        PageDraft.model_validate(body)
 
 
 def test_generate_adds_host_mappings_to_plain_html(tmp_path):
@@ -584,6 +609,311 @@ def test_rollback_rechecks_grants_and_marks_stale_or_revoked(tmp_path):
     assert error.value.code == "RESULT_REVOKED" and error.value.status == 403
     assert store.get(ALICE, page_id)["spec"]["version"] == 3
     assert v2["spec"]["title"] == "改标题"
+
+
+@pytest.mark.parametrize("operation", ["GENERATE", "PATCH", "SAVE", "ROLLBACK"])
+@pytest.mark.parametrize("status,scopes,code", [
+    ("REVOKED", frozenset({"brand-a"}), "RESULT_REVOKED"),
+    ("UNAVAILABLE", frozenset({"brand-a"}), "RESULT_UNAVAILABLE"),
+    ("VERIFIED", frozenset({"brand-a", "brand-b"}), "FORBIDDEN"),
+])
+def test_confirm_rechecks_result_access_before_writing(tmp_path, operation, status, scopes, code):
+    state = {"status": "VERIFIED", "scopes": frozenset({"brand-a"})}
+
+    def resolver(actor, session_id, result_id):
+        if result_id == "result_fixture_1":
+            return ResolvedPageBinding("VERIFIED", frozenset({"brand-a"}))
+        return ResolvedPageBinding(state["status"], state["scopes"])
+
+    store = PageDocumentStore(private(tmp_path / "pages"), resolve_binding=resolver)
+    request = draft(binding_manifest={"result_refs": ["result_fixture_1", "result_fixture_2"], "bindings": []})
+    pending = store.generate(ALICE, request)
+    page_id = pending["snapshot"]["spec"]["page_id"]
+    base_version = 0
+    if operation != "GENERATE":
+        saved = confirm(store, pending, "initial")
+        base_version = 1
+        if operation == "PATCH":
+            pending = store.patch(ALICE, page_id, PagePatchPreview(base_version=1, title="改标题"))
+        elif operation == "SAVE":
+            pending = store.save(ALICE, page_id, PageSavePreview(
+                base_version=1, title="改标题", package=request.package,
+                binding_manifest=request.binding_manifest,
+            ))
+        else:
+            saved = confirm(store, store.patch(ALICE, page_id, PagePatchPreview(
+                base_version=1, title="第二版",
+            )), "second")
+            base_version = 2
+            pending = store.rollback(ALICE, page_id, PageRollbackPreview(base_version=2, to_version=1))
+    state.update(status=status, scopes=scopes)
+    with pytest.raises(AnalyticsError, match=code):
+        confirm(store, pending, "pending-confirm")
+    assert store.preview(ALICE, pending["preview_id"]) == pending
+    with closing(sqlite3.connect(store.path)) as conn:
+        assert conn.execute("SELECT count(*) FROM receipts WHERE key=?", ("pending-confirm",)).fetchone()[0] == 0
+        assert conn.execute("SELECT count(*) FROM revisions").fetchone()[0] == base_version
+    if base_version:
+        assert store.get(ALICE, page_id) == saved
+    else:
+        assert store.list(ALICE) == []
+    state.update(status="VERIFIED", scopes=frozenset({"brand-a"}))
+    recovered = confirm(store, pending, "pending-confirm")
+    assert recovered["spec"]["version"] == base_version + 1
+
+
+def test_confirm_persists_current_staleness_and_required_scopes(tmp_path):
+    state = {"status": "VERIFIED", "scopes": frozenset({"brand-a"})}
+
+    def resolver(actor, session_id, result_id):
+        return ResolvedPageBinding(state["status"], state["scopes"])
+
+    directory = private(tmp_path / "pages")
+    store = PageDocumentStore(directory, resolve_binding=resolver)
+    pending = store.generate(ALICE, draft(binding_manifest={
+        "result_refs": ["result_fixture_1"], "bindings": [],
+    }))
+    state.update(status="STALE", scopes=frozenset({"brand-b"}))
+    actor = AnalyticsPrincipal("alice", CAPS, ALICE.data_scopes | {"brand-b"})
+    saved = store.confirm(actor, pending["preview_id"], "stale-confirm")
+    assert saved["spec"]["binding_state"] == "BOUND_STALE"
+    reopened = PageDocumentStore(directory)
+    assert reopened.get(actor, saved["spec"]["page_id"]) == saved
+    assert reopened.preview(actor, pending["preview_id"])["snapshot"] == saved
+    with pytest.raises(AnalyticsError, match="FORBIDDEN"):
+        reopened.get(ALICE, saved["spec"]["page_id"])
+    without_original_scope = AnalyticsPrincipal("alice", CAPS, (ALICE.data_scopes - {"brand-a"}) | {"brand-b"})
+    with pytest.raises(AnalyticsError, match="FORBIDDEN"):
+        reopened.get(without_original_scope, saved["spec"]["page_id"])
+    with pytest.raises(AnalyticsError, match="FORBIDDEN"):
+        store.confirm(ALICE, pending["preview_id"], "stale-confirm")
+
+
+def test_successful_confirm_replay_keeps_its_historical_result(tmp_path):
+    state = {"current": True}
+
+    def resolver(actor, session_id, result_id):
+        assert state["current"], "applied replay must not resolve a new result"
+        return ResolvedPageBinding("VERIFIED", frozenset({"brand-a"}))
+
+    store = PageDocumentStore(private(tmp_path / "pages"), resolve_binding=resolver)
+    pending = store.generate(ALICE, draft(binding_manifest={
+        "result_refs": ["result_fixture_1"], "bindings": [],
+    }))
+    saved = confirm(store, pending, "first")
+    state["current"] = False
+    assert confirm(store, pending, "first") == saved
+    assert confirm(store, pending, "retry") == saved
+    assert len(store.history(ALICE, saved["spec"]["page_id"])) == 1
+    with closing(sqlite3.connect(store.path)) as conn:
+        assert conn.execute("SELECT preview_id FROM receipts WHERE key='retry'").fetchone()[0] == pending["preview_id"]
+
+
+def test_confirm_binding_refresh_rolls_back_with_revision_failure(tmp_path):
+    state = {"status": "VERIFIED"}
+
+    def resolver(actor, session_id, result_id):
+        return ResolvedPageBinding(state["status"], frozenset({"brand-a"}))
+
+    store = PageDocumentStore(private(tmp_path / "pages"), resolve_binding=resolver)
+    pending = store.generate(ALICE, draft(binding_manifest={
+        "result_refs": ["result_fixture_1"], "bindings": [],
+    }))
+    state["status"] = "STALE"
+    with closing(sqlite3.connect(store.path)) as conn:
+        conn.execute("CREATE TRIGGER fail_revision BEFORE INSERT ON revisions BEGIN SELECT RAISE(ABORT, 'synthetic failure'); END")
+        conn.commit()
+        with pytest.raises(AnalyticsError, match="STATE_UNAVAILABLE"):
+            confirm(store, pending, "retry-confirm")
+        assert store.preview(ALICE, pending["preview_id"]) == pending
+        assert store.list(ALICE) == []
+        assert conn.execute("SELECT count(*) FROM receipts").fetchone()[0] == 0
+        conn.execute("DROP TRIGGER fail_revision")
+        conn.commit()
+    saved = confirm(store, pending, "retry-confirm")
+    assert saved["spec"]["binding_state"] == "BOUND_STALE"
+
+
+def test_confirm_rechecks_preview_expiry_after_resolving_bindings(tmp_path):
+    state = {"now": 100, "expire_at": None}
+
+    def resolver(actor, session_id, result_id):
+        if state["expire_at"] is not None:
+            state["now"] = state["expire_at"]
+        return ResolvedPageBinding("VERIFIED", frozenset({"brand-a"}))
+
+    store = PageDocumentStore(private(tmp_path / "pages"), resolve_binding=resolver, clock=lambda: state["now"])
+    pending = store.generate(ALICE, draft(binding_manifest={
+        "result_refs": ["result_fixture_1"], "bindings": [],
+    }))
+    state["expire_at"] = pending["expires_at_ms"]
+    with pytest.raises(AnalyticsError, match="PREVIEW_EXPIRED"):
+        confirm(store, pending, "expired")
+    assert store.list(ALICE) == []
+    assert store.preview(ALICE, pending["preview_id"]) == pending
+
+
+@pytest.mark.parametrize("change,code", [
+    ("cancel", "PREVIEW_CANCELLED"), ("head", "VERSION_CONFLICT"),
+    ("expiry", "PREVIEW_EXPIRED"), ("payload", "VERSION_CONFLICT"),
+    ("digest", "BINDING_CORRUPT"), ("denied", "RESULT_REVOKED"),
+    ("key", "IDEMPOTENCY_CONFLICT"),
+])
+def test_confirm_does_not_lock_out_changes_during_resolution(tmp_path, change, code):
+    entered, release = Event(), Event()
+    state = {"blocked": False, "now": 100}
+
+    def resolver(actor, session_id, result_id):
+        if state["blocked"]:
+            entered.set()
+            assert release.wait(5), "resolver was not released"
+            if change == "denied":
+                raise AnalyticsError(403, "RESULT_REVOKED", "synthetic denial")
+        return ResolvedPageBinding("VERIFIED", frozenset({"brand-a"}))
+
+    directory = private(tmp_path / "pages")
+    store = PageDocumentStore(directory, resolve_binding=resolver, clock=lambda: state["now"])
+    other = PageDocumentStore(directory, resolve_binding=resolver, clock=lambda: state["now"])
+    saved = confirm(store, store.generate(ALICE, draft(binding_manifest={
+        "result_refs": ["result_fixture_1"], "bindings": [],
+    })), "initial")
+    page_id = saved["spec"]["page_id"]
+    pending = store.patch(ALICE, page_id, PagePatchPreview(base_version=1, title="pending"))
+    winner = other.patch(ALICE, page_id, PagePatchPreview(base_version=1, title="winner"))
+    unrelated = other.generate(ALICE, draft(binding_manifest={"result_refs": [], "bindings": []}))
+    state["blocked"] = True
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        future = pool.submit(confirm, store, pending, "pending")
+        try:
+            assert entered.wait(5), "resolver was not entered"
+            if change == "cancel":
+                assert other.cancel(ALICE, pending["preview_id"])["status"] == "CANCELLED"
+            elif change == "head":
+                state["blocked"] = False
+                saved = confirm(other, winner, "winner")
+            elif change == "key":
+                confirm(other, unrelated, "pending")
+            else:
+                with closing(sqlite3.connect(store.path, timeout=0.1)) as con:
+                    if change == "payload":
+                        raw = json.loads(con.execute("SELECT payload FROM previews WHERE preview_id=?",
+                                                    (pending["preview_id"],)).fetchone()[0])
+                        raw["snapshot"]["spec"]["title"] = "changed while resolving"
+                        payload = json.dumps(raw)
+                        con.execute("UPDATE previews SET payload=?,digest=? WHERE preview_id=?",
+                                    (payload, hashlib.sha256(payload.encode()).hexdigest(), pending["preview_id"]))
+                    elif change == "digest":
+                        con.execute("UPDATE previews SET digest=? WHERE preview_id=?", ("0" * 64, pending["preview_id"]))
+                    else:
+                        con.execute("UPDATE previews SET expires_ms=expires_ms WHERE preview_id=?", (winner["preview_id"],))
+                    con.commit()
+                if change == "expiry":
+                    state["now"] = pending["expires_at_ms"]
+        finally:
+            release.set()
+        with pytest.raises(AnalyticsError) as failure:
+            future.result(timeout=5)
+        assert failure.value.code == code
+    assert other.get(ALICE, page_id) == saved
+    with closing(sqlite3.connect(store.path)) as con:
+        assert con.execute("SELECT count(*) FROM receipts WHERE key='pending' AND preview_id=?",
+                           (pending["preview_id"],)).fetchone()[0] == 0
+        assert con.execute("SELECT count(*) FROM revisions").fetchone()[0] == saved["spec"]["version"] + (change == "key")
+
+
+def test_concurrent_bound_confirm_replays_one_revision_with_same_key(tmp_path):
+    barrier = Barrier(2, timeout=5)
+    state = {"race": False}
+
+    def resolver(actor, session_id, result_id):
+        if state["race"]:
+            barrier.wait()
+        return ResolvedPageBinding("VERIFIED", frozenset({"brand-a"}))
+
+    directory = private(tmp_path / "pages")
+    stores = [PageDocumentStore(directory, resolve_binding=resolver) for _ in range(2)]
+    pending = stores[0].generate(ALICE, draft(binding_manifest={
+        "result_refs": ["result_fixture_1"], "bindings": [],
+    }))
+    state["race"] = True
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        futures = [pool.submit(confirm, store, pending, "same") for store in stores]
+        results = [future.result(timeout=10) for future in futures]
+    assert results[0] == results[1]
+    assert len(stores[0].history(ALICE, results[0]["spec"]["page_id"])) == 1
+    with closing(sqlite3.connect(stores[0].path)) as con:
+        assert con.execute("SELECT count(*) FROM receipts").fetchone()[0] == 1
+
+
+@pytest.mark.parametrize("denied", [False, True])
+def test_confirm_losing_to_applied_replays_history_after_head_and_access_change(tmp_path, denied):
+    entered, release = Event(), Event()
+    state = {"blocked": False, "now": 100}
+
+    def resolver(actor, session_id, result_id):
+        if state["blocked"]:
+            entered.set()
+            assert release.wait(5), "resolver was not released"
+            if denied:
+                raise AnalyticsError(403, "RESULT_REVOKED", "synthetic denial")
+        return ResolvedPageBinding("VERIFIED", frozenset({"brand-a"}))
+
+    directory = private(tmp_path / "pages")
+    store = PageDocumentStore(directory, resolve_binding=resolver, clock=lambda: state["now"])
+    winner = PageDocumentStore(directory, resolve_binding=lambda *args: ResolvedPageBinding(
+        "VERIFIED", frozenset({"brand-a"})), clock=lambda: state["now"])
+    pending = store.generate(ALICE, draft(binding_manifest={
+        "result_refs": ["result_fixture_1"], "bindings": [],
+    }))
+    state["blocked"] = True
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        future = pool.submit(confirm, store, pending, "alias")
+        try:
+            assert entered.wait(5), "resolver was not entered"
+            saved = confirm(winner, pending, "winner")
+            page_id = saved["spec"]["page_id"]
+            newer = confirm(winner, winner.patch(ALICE, page_id, PagePatchPreview(
+                base_version=1, title="new head")), "new-head")
+            state["now"] = pending["expires_at_ms"]
+        finally:
+            release.set()
+        assert future.result(timeout=5) == saved
+    reopened = PageDocumentStore(directory, clock=lambda: state["now"])
+    assert confirm(reopened, pending, "alias") == saved
+    assert reopened.get(ALICE, page_id) == newer
+    assert len(reopened.history(ALICE, page_id)) == 2
+    with closing(sqlite3.connect(store.path)) as con:
+        assert con.execute("SELECT preview_id FROM receipts WHERE key='alias'").fetchone()[0] == pending["preview_id"]
+
+
+@pytest.mark.parametrize("status,expected_status", [("REVOKED", 403), ("STALE", 200)])
+def test_http_confirm_rechecks_binding_status(tmp_path, status, expected_status):
+    state = {"status": "VERIFIED"}
+    registry = B0IdentityRegistry()
+    registry.grant(TOKEN, ALICE)
+
+    def resolver(actor, session_id, result_id):
+        return ResolvedPageBinding(state["status"], frozenset({"brand-a"}))
+
+    app = create_page_app(identities=registry, page_state_dir=private(tmp_path / "pages"), resolve_binding=resolver)
+    headers = {"Authorization": "Bearer " + TOKEN, "Idempotency-Key": "http-confirm"}
+    with TestClient(app) as client:
+        preview_response = client.post(PREFIX + "/previews", headers=headers, json=draft(binding_manifest={
+            "result_refs": ["result_fixture_1"], "bindings": [],
+        }).model_dump(mode="json"))
+        assert preview_response.status_code == 201
+        pending = preview_response.json()
+        state["status"] = status
+        saved = client.post(PREFIX + f"/previews/{pending['preview_id']}/confirm", headers=headers)
+        assert saved.status_code == expected_status
+        assert saved.headers["cache-control"] == "no-store"
+        if status == "REVOKED":
+            assert saved.json()["error"]["code"] == "RESULT_REVOKED"
+            assert client.get(PREFIX + "/pages", headers=headers).json()["items"] == []
+        else:
+            assert saved.json()["spec"]["binding_state"] == "BOUND_STALE"
+            page_id = saved.json()["spec"]["page_id"]
+            assert client.get(PREFIX + "/pages/" + page_id, headers=headers).json() == saved.json()
 
 
 def test_foreign_or_linked_state_is_never_reinitialized(tmp_path):

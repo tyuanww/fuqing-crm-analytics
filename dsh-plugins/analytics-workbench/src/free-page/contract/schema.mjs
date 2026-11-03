@@ -95,11 +95,14 @@ export function parsePagePackage(raw) {
   const nodeIds = new Set();
   for (const item of nodeMap) {
     if (!isPlainObject(item)) return fail('INVALID_PAGE', 'node_map 项必须是对象');
-    if (extraKeys(item, new Set(['node_id', 'kind', 'selector'])).length) return fail('INVALID_PAGE', 'node_map 含未知字段');
+    const unknownNodeKeys = extraKeys(item, new Set(['node_id', 'kind', 'selector']));
+    if (unknownNodeKeys.length) {
+      return fail('INVALID_PAGE', `node_map 含未知字段: ${unknownNodeKeys.join(',')}; 合法字段为 node_id,kind,selector`);
+    }
     if (opaque(item.node_id, 'node_id') || nodeIds.has(item.node_id)) return fail('INVALID_PAGE', 'node_id 非法或重复');
     nodeIds.add(item.node_id);
-    if (!NODE_KINDS.has(item.kind)) return fail('INVALID_PAGE', 'node kind 非法');
-    if (typeof item.selector !== 'string' || !item.selector.trim()) return fail('INVALID_PAGE', 'selector 非法');
+    if (!NODE_KINDS.has(item.kind)) return fail('INVALID_PAGE', 'node kind 非法; 合法值为 static_element,dynamic_region,whole_page');
+    if (typeof item.selector !== 'string' || !item.selector.trim()) return fail('INVALID_PAGE', 'selector 非法; 必须是非空 CSS selector');
   }
   if (!validatePresentation(raw.presentation, raw)) return fail('INVALID_PAGE', '可编辑内容与源码不匹配');
   bytes += utf8Bytes(JSON.stringify(raw.presentation ?? null));

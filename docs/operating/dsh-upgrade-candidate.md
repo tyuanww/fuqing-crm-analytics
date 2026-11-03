@@ -4,9 +4,9 @@ Use this guide when DeepSeek Harness publishes a new tag and you want to test it
 
 ## What this flow protects
 
-The main checkout keeps its current DSH pin. The candidate uses a separate checkout, runtime directory, profile, pack inputs, and evidence directory. A successful candidate does not change the main pin or production state. For the current rc1 clean rebuild, follow [the dedicated runbook](./dsh-rc1-clean-upgrade-runbook.md) and use [the candidate reference](../reference/dsh-rc1-clean-candidate.md) for receipt fields.
+The main checkout keeps its current DSH pin. The candidate uses a separate checkout, runtime directory, profile, pack inputs, and evidence directory. A successful candidate does not change the main pin or production state. The current local candidate is rc3; the rc1 clean-rebuild runbook and candidate reference are historical evidence only.
 
-The internal engineering line and the main compatibility line are separate. The main checkout still reads its default compatibility pin from `dsh-plugins/plugin-kit/toolchain.json`; the rc1 candidate is built in an isolated lane with its own upstream, runtime, profile, and receipt. Read [STATUS.md](../../STATUS.md) before selecting a new tag; do not use the checkout's compatibility pin as the rc1 candidate identity.
+The internal engineering line and the main compatibility line are separate. The main checkout reads the active rc3 pin from `dsh-plugins/plugin-kit/toolchain.json`; any candidate is still built in an isolated lane with its own upstream, runtime, profile, and receipt. Read [STATUS.md](../../STATUS.md) and [the rc3 upstream audit](../release/dsh-rc3-candidate/upstream-audit-20261024.md) before selecting a tag; do not use a floating `latest` identity.
 
 ## Inputs
 
@@ -14,7 +14,7 @@ Record these values before building anything:
 
 | Input | Required value |
 | --- | --- |
-| Official tag | A fixed tag such as `dsh-v0.2.1-rc.1` |
+| Official tag | A fixed tag such as `dsh-v0.2.1-rc.3` |
 | Upstream commit | The commit resolved from that tag |
 | SDK or runtime tarball | Version, SHA-256, and registry integrity |
 | Plugin source | A clean commit for every plugin source tree |
@@ -32,7 +32,7 @@ The upstream lock may use a different pnpm version from the plugin toolchain. Re
 
    ```bash
    git clone https://github.com/deepseek-ai/deepseek-harness.git /absolute/candidate/harness
-   git -C /absolute/candidate/harness checkout --detach dsh-v0.2.1-rc.1
+   git -C /absolute/candidate/harness checkout --detach dsh-v0.2.1-rc.3
    git -C /absolute/candidate/harness rev-parse HEAD
    ```
 

@@ -70,8 +70,8 @@ test('formal pack selection is explicit and cannot be mixed with an unverified r
 for (const [name, selected, mutate, code] of [
   ['wrong domain', ['crm'], m => { m.shinemage.plugin_domain = 'knowledge'; }, /CRM_PROFILE_SPLIT_PACKAGE_REQUIRED/],
   ['legacy Cordis', ['crm'], m => { m.peerDependencies['@deepseek-ai/cordis'] = '4.0.2'; }, /CRM_PROFILE_CORDIS_PIN/],
-  ['Cordis range', ['knowledge'], m => { m.peerDependencies['@deepseek-ai/cordis'] = '~4.0.4'; }, /CRM_PROFILE_CORDIS_PIN/],
-  ['another Cordis patch', ['knowledge'], m => { m.peerDependencies['@deepseek-ai/cordis'] = '4.0.5'; }, /CRM_PROFILE_CORDIS_PIN/],
+  ['Cordis range', ['knowledge'], m => { m.peerDependencies['@deepseek-ai/cordis'] = '~4.0.5'; }, /CRM_PROFILE_CORDIS_PIN/],
+  ['another Cordis patch', ['knowledge'], m => { m.peerDependencies['@deepseek-ai/cordis'] = '4.0.6'; }, /CRM_PROFILE_CORDIS_PIN/],
   ['private export', ['knowledge'], m => { m.exports['./graph-tools'] = './lib/private.js'; m.files.push('lib/private.js'); }, /CRM_PROFILE_PUBLIC_EXPORT_REQUIRED/],
   ['missing export', ['knowledge'], m => { delete m.exports['./graph-tools']; }, /CRM_PROFILE_PUBLIC_EXPORT_REQUIRED/],
   ['unrelated package', ['crm'], m => { m.name = '@shine-mage/dsh-shine-brand'; }, /CRM_PROFILE_PACK_SELECTION_INVALID/],
