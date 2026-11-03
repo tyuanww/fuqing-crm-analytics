@@ -7,7 +7,10 @@ from .overview import (
     get_category_overview_batch,
     get_category_value_tier,
 )
-from .product_customer import get_product_customer_overview
+from .product_customer import (
+    get_product_customer_overview,
+    product_customer_batch_transaction,
+)
 from .flow import (
     get_category_flow, get_category_flow_matrix,
     get_category_flow_association,
@@ -30,6 +33,7 @@ __all__ = [
     "get_category_overview_batch",
     "get_category_value_tier",
     "get_product_customer_overview",
+    "product_customer_batch_transaction",
     "get_category_flow",
     "get_category_flow_matrix",
     "get_category_flow_association",
