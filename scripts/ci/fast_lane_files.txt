@@ -1,0 +1,62 @@
+# Fast backend lane SSOT (explicit file allowlist).
+#
+# Runner: python3 scripts/ci/run_backend_fast_lane.py
+# Full lane (unchanged): python3 scripts/run_backend_tests_bounded.py
+#
+# Every entry is a subset of the full bounded lane (backend/tests/test_*.py or
+# one of the two nested competition test files). A file is eligible only when:
+#   1. it passes at the recorded baseline;
+#   2. its tests perform no DuckDB access, HTTP/TestClient call, subprocess or
+#      thread start, SQLite/RunStore/page/board persistence, or repository
+#      policy check;
+#   3. it stays inside the 300s lane budget (current total is far below it).
+# Unlisted files stay in the full lane. Do not add nodeids or mass markers here.
+#
+# One repo-relative path per line. Comments and blank lines are ignored.
+
+backend/contracts/tests/test_competition_c0.py
+backend/services/analytics/competition_diagnosis/tests/test_competition_diagnosis.py
+backend/tests/test_ad_hoc_query_sprint171.py
+backend/tests/test_analytics_query_contracts.py
+backend/tests/test_analytics_query_run_contracts.py
+backend/tests/test_analytics_runtime_ports.py
+backend/tests/test_asset_service_filter_builder.py
+backend/tests/test_b2_contract_mark_pilot.py
+backend/tests/test_basket_filter_builder.py
+backend/tests/test_calculations.py
+backend/tests/test_channels.py
+backend/tests/test_churn_filter_builder.py
+backend/tests/test_coldstart_false_positive.py
+backend/tests/test_coldstart_mtime_threshold.py
+backend/tests/test_contract_lint.py
+backend/tests/test_contract_ratio_audit.py
+backend/tests/test_contract_ratio_audit_sprint_31_2.py
+backend/tests/test_etl_file_changed.py
+backend/tests/test_exceptions.py
+backend/tests/test_fill_parquet_cache.py
+backend/tests/test_filters.py
+backend/tests/test_first_purchase_source_target_probe.py
+backend/tests/test_flow_service.py
+backend/tests/test_flow_service_filter_builder.py
+backend/tests/test_l4_72_6_rfm_dashboard_full_extended.py
+backend/tests/test_l4_74_udf.py
+backend/tests/test_l4_75_1_single_user_mode_by_ip.py
+backend/tests/test_l4_75_single_user_mode.py
+backend/tests/test_l4_75_v2_shared_account_lan.py
+backend/tests/test_l4_84_login_evict_previous.py
+backend/tests/test_llm_eval_sprint195.py
+backend/tests/test_metrics_overview_filter_builder.py
+backend/tests/test_percentage_yoy_over_1m.py
+backend/tests/test_repurchase_rfm_filter_builder.py
+backend/tests/test_repurchase_standard_filter_builder.py
+backend/tests/test_rfm_cache_read_flow.py
+backend/tests/test_sampling_yoy_contract_sprint205.py
+backend/tests/test_segments.py
+backend/tests/test_sources_failfast.py
+backend/tests/test_sprint203_r5_dimension_monthly.py
+backend/tests/test_time.py
+backend/tests/test_trend_ratio_root_cause.py
+backend/tests/test_user_prompt_template_sprint193.py
+backend/tests/test_visitor_schema.py
+backend/tests/test_w7_memory_limit.py
+backend/tests/test_wo1_smoke.py
