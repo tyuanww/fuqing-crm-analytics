@@ -47,8 +47,10 @@ from backend.services.category_service import (
     get_category_repurchase_flow,
     get_category_repurchase_flow_by_rfm,
     get_product_customer_overview,
+    product_customer_batch_transaction,
 )
 from backend.services import check_future_date
+from backend.services.warehouse_runtime import current_warehouse_read
 
 router = APIRouter(prefix="/api/v1/category", tags=["品类分析"])
 
@@ -161,23 +163,35 @@ def get_product_customer_batch_api(body: ProductCustomerBatchRequest, request: R
     version = request.headers.get("X-ShineMage-Product-Customer-Version", "product-customer/v3")
     if version != "product-customer/v3":
         raise HTTPException(status_code=400, detail="product-customer/batch requires product-customer/v3")
-    for item in body.ranges:
-        try:
-            result = get_product_customer_overview(
-                item.start_date,
-                item.end_date,
-                products=item.products,
-                metric_type=item.metric_type,
-                channel=item.channel,
-                exclude_channels=item.exclude_channels,
-                compare_start_date=item.compare_start_date,
-                compare_end_date=item.compare_end_date,
-            )
-        except ValueError as exc:
-            if str(exc) == "首购历史不完整，无法可靠区分新客和老客":
-                raise HTTPException(status_code=409, detail="FIRST_PURCHASE_UNAVAILABLE") from exc
-            raise HTTPException(status_code=422, detail=str(exc)) from exc
-        results.append(select_product_customer_response(result, version))
+    with product_customer_batch_transaction():
+        for item in body.ranges:
+            try:
+                result = get_product_customer_overview(
+                    item.start_date,
+                    item.end_date,
+                    products=item.products,
+                    metric_type=item.metric_type,
+                    channel=item.channel,
+                    exclude_channels=item.exclude_channels,
+                    compare_start_date=item.compare_start_date,
+                    compare_end_date=item.compare_end_date,
+                )
+            except ValueError as exc:
+                if str(exc) == "首购历史不完整，无法可靠区分新客和老客":
+                    raise HTTPException(status_code=409, detail="FIRST_PURCHASE_UNAVAILABLE") from exc
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
+            results.append(select_product_customer_response(result, version))
+    # 同一批次必须来自同一数据版本：跨窗口混用已知版本会静默产生不可比结果。
+    versions = {result.get("data_version") for result in results}
+    if len(versions) > 1:
+        raise HTTPException(status_code=409, detail="SOURCE_VERSION_CHANGED")
+    source_version = next(iter(versions), None)
+    # 旧 orders 直读没有仓库身份，只能记为 unknown；它允许在同一批次内保留，
+    # 但不能冒充可跨请求比较的已知版本。绑定仓库身份后 unknown/空版本一律拒绝。
+    if not source_version or (
+        source_version == "unknown" and current_warehouse_read() is not None
+    ):
+        raise HTTPException(status_code=409, detail="SOURCE_VERSION_UNKNOWN")
     return {"results": results}
 
 

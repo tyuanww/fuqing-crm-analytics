@@ -4,7 +4,7 @@
 
 ## 当前快照（2026-10-28）
 
-- 原快照重新授权已推送为草稿 [Source #189](https://github.com/tyuanww/fuqing-crm-analytics/pull/189)、[CRM #6](https://github.com/tyuanww/dsh-crm-knowledge/pull/6) 和 [Workbench #14](https://github.com/tyuanww/dsh-analytics-workbench/pull/14)。本地回归、两作者 CI、严格包回读及本地组合接收通过。主仓 CI、组合远程归档、新组合 B0 和隔离真实重登仍开放。未改 19327 或公网，产品保持 PARTIAL。见[验收记录](docs/hackathon/evidence/dsh-source-reauthorization-20261028.md)。
+- 原快照重新授权的 [Source #189](https://github.com/tyuanww/fuqing-crm-analytics/pull/189)、[CRM #6](https://github.com/tyuanww/dsh-crm-knowledge/pull/6) 和 [Workbench #14](https://github.com/tyuanww/dsh-analytics-workbench/pull/14) 保持草稿。新增[消费 #190](https://github.com/tyuanww/fuqing-crm-analytics/pull/190)，新组合远程归档、20 成员回读及完整推送 B0 通过。候选已应用隔离 19327，16 个运行文件与候选一致；品牌、原会话和模型账号保留。消费提交远程 CI、运行预检及真实重登业务验收仍开放，公网未切换。产品保持 PARTIAL。见[隔离部署回执](docs/hackathon/evidence/dsh-reauthorization-deployment-20261028.md)。
 
 - Workbench `e20a0fea` 已在隔离 19327 验收：原问数聊天取当前授权快照、交付卡进入驾驶舱、保存 v1、人工标题 v2、AI 标题 v3、切换产物后重开均通过，五项事实值与单位逐项一致。最后两次客户端更新使用 HMR，八项服务 PID 和 CRM 授权保持。WeKnora 真实检索和原文读取通过。作者 core 1386 项、library-workspace 94 项及草稿 PR #12/#13 的固定输入 CI 通过。原隔离候选中重登后旧来源受授权代次保护；本轮后续本地实现及未完成的现场验收见上条。公网未切换，产品保持 PARTIAL。见[本轮收尾记录](docs/hackathon/evidence/dsh-ui-knowledge-closeout-20261028.md)。
 
