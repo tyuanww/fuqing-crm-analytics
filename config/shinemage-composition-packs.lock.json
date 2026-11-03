@@ -16,16 +16,16 @@
     {
       "directory": "analytics-workbench",
       "id": "@shine-mage/dsh-analytics-workbench-b0",
-      "source_sha": "9093147ead760b8f3444d47033ec6296c2641cf7",
+      "source_sha": "240ec691af49d3157028303b723df19420a03987",
       "version": "0.0.0-b0",
-      "manifest_sha256": "f5c545e0eaf580d5ee3db38443bdbf10cc4fd13e2ba86fd8b59e05a3cc5a09a7"
+      "manifest_sha256": "f84d61a191907b4c49e3ec19f53c0d68db07daa0c3d309b9959637618b7eaa40"
     },
     {
       "directory": "crm-knowledge",
       "id": "@shine-mage/dsh-crm-knowledge",
-      "source_sha": "fa136de2b4d755d02f040c4402b92e4d616d1ee2",
+      "source_sha": "ee7ebeccc4401a8801f866d950dd11f34dc1b85d",
       "version": "0.0.0-crm.5",
-      "manifest_sha256": "d53975d6454127604078bc5a8a1dcc5ba357c3e8eb4f6eb9b96182d6e9e909be"
+      "manifest_sha256": "81f630646e48b950712d32ffef01f84f468effb2b94ac054641ce490db88bcf2"
     },
     {
       "directory": "knowledge",
