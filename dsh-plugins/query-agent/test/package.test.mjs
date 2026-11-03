@@ -103,6 +103,7 @@ test('Host policy allowlist names every query-domain tool exactly once', async (
   assert.equal(new Set(queryToolAllowlist).size, queryToolAllowlist.length)
   assert.deepEqual(queryToolAllowlist, [
     'query_crm_dashboard_snapshot',
+    'query_crm_warehouse_snapshot',
     'query_crm_dashboard_gsv',
     'query_crm_dashboard_purchases',
     'query_crm_product_customer_cohorts',

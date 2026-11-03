@@ -229,7 +229,10 @@ class ArtifactInboxStore:
                 return {**self._row(row), "idempotent": True}
             artifact_id = "artifact_" + uuid4().hex
             con.execute(
-                "INSERT INTO artifacts VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                """INSERT INTO artifacts (
+                    owner, artifact_id, source, session_id, request_id, call_id, title, path,
+                    package, binding_manifest, content_hash, status, page_id, created_ms, updated_ms
+                ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                 (actor.actor_id, artifact_id, data["source"], data["session_id"], data["request_id"],
                  data["call_id"], data["title"], data["path"],
                 json.dumps(data["package"], ensure_ascii=False, separators=(",", ":")) if data["package"] else None,

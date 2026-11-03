@@ -4,6 +4,7 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, fields
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -16,13 +17,15 @@ from time import monotonic
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
+from backend.contracts.native_warehouse_snapshot import NativeWarehouseSnapshotRead
+from backend.contracts.warehouse_snapshot import WarehouseSnapshot
 from backend.services.analytics.access import AnalyticsError
 from backend.services.analytics.first_purchase.asset_state import SHA256_HEX, now_ms
 from backend.services.analytics.first_purchase.loopback_http import LoopbackHTTP, unique_object
-from backend.services.crm_analysis import OWNER, CrmAnalysisStore
+from backend.services.crm_analysis import OWNER
 from backend.services.crm_native_snapshot_source import (
     NATIVE_ID, REF_ID, SNAPSHOT_ID, NativeCrmIdentity, NativeCrmLease,
-    NativeCrmSnapshotSource, NativeSnapshotExpectation, fault,
+    NativeCrmSnapshotSource, NativeSnapshotExpectation, OwnedSnapshotStore, fault,
 )
 
 HANDLE = re.compile(r"^crm_op_[0-9a-f]{32}$")
@@ -123,7 +126,7 @@ class NativeCrmHostClient:
 
 class HostBoundSnapshotSource:
     def __init__(self, *, client: NativeCrmHostClient, directory: Path,
-                 store: CrmAnalysisStore, handle: str, session_id: str,
+                 store: OwnedSnapshotStore, handle: str, session_id: str,
                  deadline: float, clock=now_ms):
         self.client, self.deadline = client, deadline
         self.observation = observation = client.observe(handle, session_id, deadline)
@@ -155,6 +158,13 @@ class HostBoundSnapshotSource:
     def read(self, ref_id: str):
         snapshot = self.source.read(ref_id)
         self._checked()
+        if isinstance(snapshot, WarehouseSnapshot):
+            raw = snapshot.model_dump_json()
+            return NativeWarehouseSnapshotRead(
+                ref_id=ref_id, snapshot_id=snapshot.snapshot_id, data_kind=snapshot.data_kind,
+                result_sha256=snapshot.result_sha256, snapshot_json=raw,
+                snapshot_json_sha256=hashlib.sha256(raw.encode("utf-8")).hexdigest(),
+            ).model_dump(mode="json")
         return {"ref_id": ref_id, "snapshot": snapshot.model_dump(mode="json")}
 
     def revoke(self, ref_id: str):
@@ -163,7 +173,7 @@ class HostBoundSnapshotSource:
         return {"ref_id": ref_id, "revoked": True}
 
 
-def create_native_crm_source_app(*, store: CrmAnalysisStore, directory: Path,
+def create_native_crm_source_app(*, store: OwnedSnapshotStore, directory: Path,
                                  host_origin: str, token_file: Path) -> FastAPI:
     NativeCrmSnapshotSource(directory=directory, store=store)
     authorization = "Bearer " + read_service_token(token_file)

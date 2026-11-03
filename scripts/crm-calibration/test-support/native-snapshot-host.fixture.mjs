@@ -11,6 +11,7 @@ const origin = 'http://127.0.0.1:43299';
 const sessions = new Set(['native-session', 'other-session']);
 const leases = new Map();
 const access = createDashboardAccess({ baseUrl: config.crm_origin, browserOrigin: origin, dataKind: 'synthetic',
+  snapshotMode: config.snapshot_mode,
   hasSession: id => sessions.has(id), nativeSnapshot: {
     introspectionPort: config.host_port, sourceOrigin: config.source_origin, tokenFile: config.token_file,
   } });
@@ -34,6 +35,7 @@ try {
         }));
         send(await response.json());
       } else if (input.operation === 'query') send(await access.service.querySnapshot(session, input.filters));
+      else if (input.operation === 'query_warehouse') send(await access.service.queryWarehouseSnapshot(session, input.request));
       else if (input.operation === 'lease_open') {
         const lease = await access.service.openNativeSnapshotLease(session, signal);
         leases.set(input.lease_id, lease);
@@ -43,6 +45,8 @@ try {
         const snapshot = await leases.get(input.lease_id).read(input.ref_id, signal);
         send({ ok: true, snapshot_id: snapshot.snapshot_id, result_sha256: snapshot.result_sha256,
           gsv_amount_fen: snapshot.result.gsv_amount_fen });
+      } else if (input.operation === 'lease_read_warehouse') {
+        send(await leases.get(input.lease_id).read(input.ref_id, signal));
       } else if (input.operation === 'lease_assert_current') {
         await leases.get(input.lease_id).assertCurrent(signal);
         send({ ok: true });

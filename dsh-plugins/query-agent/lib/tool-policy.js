@@ -10,6 +10,7 @@ export const inject = ['agentPresets', 'agents', 'tools']
 
 export const queryToolAllowlist = Object.freeze([
   'query_crm_dashboard_snapshot',
+  'query_crm_warehouse_snapshot',
   'query_crm_dashboard_gsv',
   'query_crm_dashboard_purchases',
   'query_crm_product_customer_cohorts',

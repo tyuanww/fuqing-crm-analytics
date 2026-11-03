@@ -16,6 +16,9 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from backend.semantic.calculations import yoy_absolute, yoy_repurchase_rate
 from backend.db import connection as bdc
+from backend.services.warehouse_cache import AggregateCacheMissError
+from backend.services.warehouse_rfm import resolve_verified_ranges, rfm_cache_key
+from backend.services.warehouse_runtime import current_warehouse_read
 from backend.services.rfm._shared import (
     _VALID_BASE,
     _resolve_date_ranges,
@@ -437,23 +440,23 @@ def run_flow_period(
     ttl_stats AS (
         SELECT 'all' AS channel_flag, FALSE AS is_member, '已购客TTL' AS segment_val,
                (SELECT COUNT(*) FROM ttl_users_all) AS hist_users,
-               (SELECT COUNT(DISTINCT user_id) FROM repurchase_users) AS repurchase_users,
-               (SELECT COALESCE(SUM(actual_amount), 0) FROM base_orders) AS repurchase_gsv
+               (SELECT COUNT(DISTINCT rp.user_id) FROM repurchase_users rp INNER JOIN ttl_users_all t USING(user_id)) AS repurchase_users,
+               (SELECT COALESCE(SUM(bo.actual_amount), 0) FROM base_orders bo INNER JOIN ttl_users_all t USING(user_id)) AS repurchase_gsv
         UNION ALL
         SELECT 'same', FALSE, '已购客TTL',
                (SELECT COUNT(*) FROM ttl_users_same),
-               (SELECT COUNT(DISTINCT user_id) FROM repurchase_users),
-               (SELECT COALESCE(SUM(actual_amount), 0) FROM base_orders)
+               (SELECT COUNT(DISTINCT rp.user_id) FROM repurchase_users rp INNER JOIN ttl_users_same t USING(user_id)),
+               (SELECT COALESCE(SUM(bo.actual_amount), 0) FROM base_orders bo INNER JOIN ttl_users_same t USING(user_id))
         UNION ALL
         SELECT 'all', TRUE, '已购客TTL',
                (SELECT COUNT(*) FROM ttl_users_member_all),
-               (SELECT COUNT(DISTINCT user_id) FROM repurchase_users),
-               (SELECT COALESCE(SUM(actual_amount), 0) FROM base_orders)
+               (SELECT COUNT(DISTINCT rp.user_id) FROM repurchase_users rp INNER JOIN ttl_users_member_all t USING(user_id)),
+               (SELECT COALESCE(SUM(bo.actual_amount), 0) FROM base_orders bo INNER JOIN ttl_users_member_all t USING(user_id))
         UNION ALL
         SELECT 'same', TRUE, '已购客TTL',
                (SELECT COUNT(*) FROM ttl_users_member_same),
-               (SELECT COUNT(DISTINCT user_id) FROM repurchase_users),
-               (SELECT COALESCE(SUM(actual_amount), 0) FROM base_orders)
+               (SELECT COUNT(DISTINCT rp.user_id) FROM repurchase_users rp INNER JOIN ttl_users_member_same t USING(user_id)),
+               (SELECT COALESCE(SUM(bo.actual_amount), 0) FROM base_orders bo INNER JOIN ttl_users_member_same t USING(user_id))
     ),
     stats AS (
         SELECT * FROM segment_stats
@@ -517,25 +520,42 @@ def get_rfm_flow(
     flow_type = f"{dimension}_flow"
     seg_col = f"{dimension}_segment"
 
-    ranges = _resolve_date_ranges(period, start_date, end_date, compare_start_date, compare_end_date)
+    frame = current_warehouse_read()
+    if frame is not None:
+        ranges = resolve_verified_ranges(period, start_date, end_date, compare_start_date, compare_end_date, today=frame.period_today)
+    else:
+        ranges = _resolve_date_ranges(period, start_date, end_date, compare_start_date, compare_end_date)
     cur_start_dt, cur_end_dt, cutoff = ranges["current"]
     comp_start_dt, comp_end_dt, comp_cutoff = ranges["comp"]
     prev2_start_dt, prev2_end_dt, prev2_cutoff = ranges["prev2"]
     current_year_label, comp_year_label, prev2_year_label = ranges["labels"]
 
     # 缓存检查
-    data_version = _fetch_data_version()
-    cache_key = _flow_cache_key(
-        flow_type, start_date or "", end_date or "",
-        channel, metric_type, exclude_channels,
-        compare_start_date, compare_end_date, data_version,
-        sample_mode=sample_mode,
-        sample_channel_ids=sample_channel_ids,
-        as_of=as_of,
-        history_channels=history_channels,
-        history_product_ids=history_product_ids,
-    )
-    cached = _get_cached_flow(cache_key, data_version)
+    if frame is not None:
+        current_year_label, comp_year_label, prev2_year_label = (
+            ranges[name][0][:4] for name in ("current", "comp", "prev2")
+        )
+        cache_key = rfm_cache_key(frame, f"rfm/{dimension}-flow", ranges, metric_type, channel, exclude_channels, extra={
+            "hist_extra_cols": hist_extra_cols, "segmentation_cte": segmentation_cte, "segment_order": segment_order,
+            "sample_mode": sample_mode, "sample_channel_ids": sample_channel_ids,
+            "history_channels": history_channels, "history_product_ids": history_product_ids, "as_of": as_of,
+        })
+        cached = frame.cache.get(cache_key)
+        if cached is None and frame.mode != "compute":
+            raise AggregateCacheMissError("所选 RFM 组合尚未预热")
+    else:
+        data_version = _fetch_data_version()
+        cache_key = _flow_cache_key(
+            flow_type, start_date or "", end_date or "",
+            channel, metric_type, exclude_channels,
+            compare_start_date, compare_end_date, data_version,
+            sample_mode=sample_mode,
+            sample_channel_ids=sample_channel_ids,
+            as_of=as_of,
+            history_channels=history_channels,
+            history_product_ids=history_product_ids,
+        )
+        cached = _get_cached_flow(cache_key, data_version)
     if cached is not None:
         return cached
 
@@ -615,5 +635,8 @@ def get_rfm_flow(
         "member_same_channel_rows": _build_rows(cur_member_same, comp_member_same, prev2_member_same),
     }
 
-    _set_cached_flow(cache_key, data_version, result)
+    if frame is not None:
+        frame.cache.put(cache_key, result)
+    else:
+        _set_cached_flow(cache_key, data_version, result)
     return result

@@ -14,6 +14,7 @@ from backend.db import connection as connection_module
 from backend.db import memory_monitor as memory_monitor_module
 from backend.services import auth_token_evictor as evictor_module
 from backend.services.rfm import cache as cache_module
+from backend.services.health.rfm_analysis import prewarm as prewarm_module
 
 
 class _FakeRfmQueryCache:
@@ -43,6 +44,7 @@ def test_concurrent_lifespans_await_their_own_evictor_task() -> None:
         patch.object(cache_module, "RfmQueryCache", _FakeRfmQueryCache),
         patch.object(cache_module, "check_manifest_version_and_invalidate", lambda: None),
         patch.object(evictor_module, "evict_idle_tokens_periodically", _wait_for_stop),
+        patch.object(prewarm_module, "maybe_start_prewarm_thread", lambda: None),
     ):
         def open_and_close_client(_: int) -> str:
             with TestClient(isolated_app):

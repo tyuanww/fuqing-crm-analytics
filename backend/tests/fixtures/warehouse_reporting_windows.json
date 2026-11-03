@@ -1,0 +1,32 @@
+{
+  "defaults": {"channel": "全店", "metric_type": "GSV", "exclude_low_price": false, "product": "爆款面膜F"},
+  "windows": {
+    "Q1": {"start": "2026-01-01", "end": "2026-03-31", "days": 90, "gsv_yuan": 220, "orders": 4, "buyers": 3, "new_users": 2, "old_users": 1, "old_gsv": 150, "new_gsv": 70, "aus_yuan": 73.33, "aov_fen": 5500, "aus_fen": 7333, "comp_gsv": 42, "prev2_gsv": 23, "rfm_hist": 1, "rfm_buyers": 1, "rfm_gsv": 150, "rfm_rate": 1.0},
+    "Q2": {"start": "2026-04-01", "end": "2026-06-30", "days": 91, "gsv_yuan": 420, "orders": 5, "buyers": 3, "new_users": 1, "old_users": 2, "old_gsv": 320, "new_gsv": 100, "aus_yuan": 140.0, "aov_fen": 8400, "aus_fen": 14000, "comp_gsv": 60, "prev2_gsv": 30, "rfm_hist": 3, "rfm_buyers": 2, "rfm_gsv": 320, "rfm_rate": 0.6667},
+    "H1": {"start": "2026-01-01", "end": "2026-06-30", "days": 181, "gsv_yuan": 640, "orders": 9, "buyers": 4, "new_users": 3, "old_users": 1, "old_gsv": 400, "new_gsv": 240, "aus_yuan": 160.0, "aov_fen": 7111, "aus_fen": 16000, "comp_gsv": 102, "prev2_gsv": 53, "rfm_hist": 1, "rfm_buyers": 1, "rfm_gsv": 400, "rfm_rate": 1.0}
+  },
+  "historical_orders": [
+    ["h0", "returning", "2020-01-01", 1],
+    ["h1", "returning", "2024-01-01", 5],
+    ["h2", "returning", "2024-02-29", 7],
+    ["h3", "returning", "2024-03-31", 11],
+    ["h4", "returning", "2024-04-01", 13],
+    ["h5", "returning", "2024-06-30", 17],
+    ["h6", "returning", "2025-01-01", 19],
+    ["h7", "returning", "2025-03-31", 23],
+    ["h8", "returning", "2025-04-01", 29],
+    ["h9", "returning", "2025-06-30", 31],
+    ["h10", "returning", "2025-12-31", 37]
+  ],
+  "current_orders": [
+    ["q1a", "returning", "2026-01-01", 100],
+    ["q1b", "returning", "2026-03-31", 50],
+    ["q1c", "acquired", "2026-03-31", 30],
+    ["q1d", "q1only", "2026-02-28", 40],
+    ["q2a", "returning", "2026-04-01", 200],
+    ["q2b", "returning", "2026-06-30 23:59:58", 50],
+    ["q2c", "acquired", "2026-06-30", 70],
+    ["q2d", "q2new", "2026-04-01", 80],
+    ["q2e", "q2new", "2026-06-30", 20]
+  ]
+}

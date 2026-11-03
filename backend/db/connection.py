@@ -123,8 +123,12 @@ def get_connection() -> ThreadSafeConnection:
     历史 write-capable 单例，避免 ETL / 维护脚本被本次改造破坏。
     """
     from backend.services import dual_conn
+    from backend.services.warehouse_boot import warehouse_runtime_requested
+    from backend.services.warehouse_source import WarehouseSourceUnavailableError
 
     request_conn = dual_conn.get_request_connection()
+    if warehouse_runtime_requested() and (request_conn is None or request_conn.warehouse is None):
+        raise WarehouseSourceUnavailableError("verified warehouse connection is not bound")
     if request_conn is not None:
         return ThreadSafeConnection(request_conn.conn, request_conn.lock, pooled=True)
 

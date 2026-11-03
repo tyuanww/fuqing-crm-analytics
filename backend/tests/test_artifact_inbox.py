@@ -79,6 +79,10 @@ def test_intake_is_durable_and_idempotent(tmp_path):
 @pytest.mark.parametrize("version", [1, 2])
 def test_reopening_inbox_closes_migration_connection_and_persists_schema(tmp_path, version):
     inbox = ArtifactInboxStore(tmp_path / "artifacts")
+    actor = AnalyticsPrincipal("alice", CAPS, frozenset({DATA_SCOPE}))
+    body = {"source": "page_package", "session_id": "session_main",
+            "request_id": "before-migration", "title": "保留候选", "package": PACKAGE}
+    original = inbox.intake(actor, body)
     if version == 1:
         with closing(sqlite3.connect(inbox.path)) as con, con:
             con.execute("ALTER TABLE artifacts DROP COLUMN binding_manifest")
@@ -93,6 +97,18 @@ def test_reopening_inbox_closes_migration_connection_and_persists_schema(tmp_pat
         assert con.execute("PRAGMA user_version").fetchone()[0] == 2
         columns = {row[1] for row in con.execute("PRAGMA table_info(artifacts)")}
         assert "binding_manifest" in columns
+    new_body = {**body, "request_id": "after-migration", "title": "迁移后候选",
+                "binding_manifest": {"bindings": [], "result_refs": ["result_fixture_1"]}}
+    receipt = reopened.intake(actor, new_body)
+    assert receipt["status"] == "PREVIEWABLE" and receipt["page_id"] is None
+    assert receipt["created_at"] > 0
+    assert receipt["binding_manifest"] == new_body["binding_manifest"]
+    reloaded = ArtifactInboxStore(tmp_path / "artifacts")
+    assert reloaded.get(actor, original["artifact_id"])["title"] == "保留候选"
+    assert reloaded.get(actor, receipt["artifact_id"]) == {
+        key: value for key, value in receipt.items() if key != "idempotent"
+    }
+    assert reloaded.intake(actor, new_body)["artifact_id"] == receipt["artifact_id"]
 
 
 def test_binding_manifest_survives_receipt_reload_and_confirm(tmp_path):

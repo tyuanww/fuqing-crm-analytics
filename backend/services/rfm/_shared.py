@@ -29,7 +29,7 @@ FLOW_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 #
 # Sprint 18 #123 bump: 加了 check_manifest_version_and_invalidate() 启动 hook,
 # 跨进程持久化 last_seen_manifest_version. 行为变化 → bump v0.4.14.35 → v0.4.14.47.
-FLOW_ALGO_VERSION = "v0.4.14.48-c0-f-order"
+FLOW_ALGO_VERSION = "v0.4.14.49-ttl-cohort"
 
 # 语义层统一口径（向后兼容别名）
 _VALID_BASE = VALID_ORDER_BASE

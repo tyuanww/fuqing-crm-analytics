@@ -9,22 +9,25 @@ from pathlib import Path
 import re
 import sqlite3
 import stat
-from typing import Callable, Literal
+from typing import Callable, Literal, Protocol
 from uuid import uuid4
 
 from fastapi import HTTPException
 
 from backend.contracts.crm_analysis import CrmSnapshot, DataKind
+from backend.contracts.warehouse_snapshot import WarehouseSnapshot
 from backend.services.analytics.access import AnalyticsError
 from backend.services.analytics.first_purchase.asset_state import (
     SHA256_HEX, connect, now_ms, transaction,
 )
-from backend.services.crm_analysis import OWNER, CrmAnalysisStore, canonical, digest
+from backend.services.crm_analysis import OWNER, CrmAnalysisStore, canonical, digest, fail
+from backend.services.warehouse_snapshot import WarehouseSnapshotStore
 
 APP_ID = 0x43525053
 KIND = "native-crm-snapshot-source/v1"
 PROJECTION = "crm-snapshot/v1"
-SNAPSHOT_ID = re.compile(r"^crm_s_[0-9a-f]{32}$")
+WAREHOUSE_PROJECTION = "crm-warehouse-snapshot/v1"
+SNAPSHOT_ID = re.compile(r"^crm_[sw]_[0-9a-f]{32}$")
 REF_ID = re.compile(r"^crm_ref_[0-9a-f]{32}$")
 NATIVE_ID = re.compile(r"^[A-Za-z0-9_.:-]{1,160}$")
 UNAVAILABLE = "CRM 结果引用存储暂不可用。"
@@ -43,6 +46,43 @@ EXPECTED_SCHEMA = {
     ("table", statement.split()[2]): " ".join(statement.split()).casefold()
     for statement in DDL.split(";") if statement.strip()
 }
+
+
+class OwnedSnapshotStore(Protocol):
+    @property
+    def data_kind(self) -> str: ...
+
+    def read_owned_snapshot(self, owner: str, snapshot_id: str) -> CrmSnapshot | WarehouseSnapshot: ...
+
+
+@dataclass(frozen=True)
+class NativeSnapshotCatalog:
+    legacy: CrmAnalysisStore
+    warehouse: WarehouseSnapshotStore
+
+    def __post_init__(self):
+        if self.legacy.data_kind != self.warehouse.data_kind:
+            raise ValueError("snapshot source data kinds differ")
+
+    @property
+    def data_kind(self) -> DataKind:
+        return self.warehouse.data_kind
+
+    def read_owned_snapshot(self, owner: str, snapshot_id: str) -> CrmSnapshot | WarehouseSnapshot:
+        if not isinstance(snapshot_id, str) or not SNAPSHOT_ID.fullmatch(snapshot_id):
+            fail("NOT_FOUND", 404)
+        store = self.legacy if snapshot_id.startswith("crm_s_") else self.warehouse
+        return store.read_owned_snapshot(owner, snapshot_id)
+
+
+def _projection(snapshot: CrmSnapshot | WarehouseSnapshot):
+    if (isinstance(snapshot, CrmSnapshot) and snapshot.schema_version == "crm-result-snapshot/v1"
+            and snapshot.snapshot_id.startswith("crm_s_")):
+        return PROJECTION
+    if (isinstance(snapshot, WarehouseSnapshot) and snapshot.schema_version == "crm-warehouse-result-snapshot/v1"
+            and snapshot.snapshot_id.startswith("crm_w_")):
+        return WAREHOUSE_PROJECTION
+    raise fault("RESULT_UNAVAILABLE")
 
 
 def fault(code: str) -> AnalyticsError:
@@ -84,7 +124,7 @@ class NativeSnapshotRef:
     snapshot_id: str
     source_sha256: str
     result_sha256: str
-    projection_version: Literal["crm-snapshot/v1"]
+    projection_version: Literal["crm-snapshot/v1", "crm-warehouse-snapshot/v1"]
     registered_at_ms: int
 
 
@@ -114,7 +154,7 @@ def _identity_valid(value):
 class NativeCrmSnapshotSource:
     """Open existing state; create is an explicit, exclusive initialization step."""
 
-    def __init__(self, *, directory: Path, store: CrmAnalysisStore,
+    def __init__(self, *, directory: Path, store: OwnedSnapshotStore,
                  provider: Callable[[], NativeCrmLease | None] | None = None,
                  clock: Callable[[], int] = now_ms,
                  expected_snapshot: NativeSnapshotExpectation | None = None):
@@ -138,7 +178,7 @@ class NativeCrmSnapshotSource:
             raise fault("STATE_UNAVAILABLE") from None
 
     @classmethod
-    def create(cls, *, directory: Path, store: CrmAnalysisStore,
+    def create(cls, *, directory: Path, store: OwnedSnapshotStore,
                provider: Callable[[], NativeCrmLease | None] | None = None,
                clock: Callable[[], int] = now_ms):
         _private(directory, directory=True)
@@ -241,6 +281,9 @@ class NativeCrmSnapshotSource:
             if error.status_code == 503:
                 raise fault("SOURCE_UNAVAILABLE") from None
             raise fault("NOT_FOUND" if error.status_code == 404 else "RESULT_UNAVAILABLE") from None
+        if snapshot.snapshot_id != snapshot_id or snapshot.data_kind != identity.data_kind:
+            raise fault("RESULT_UNAVAILABLE")
+        _projection(snapshot)
         if self.expected_snapshot is not None and snapshot.result_sha256 != self.expected_snapshot.result_sha256:
             raise fault("RESULT_STALE")
         return snapshot
@@ -255,7 +298,7 @@ class NativeCrmSnapshotSource:
         if (not _identity_valid(identity) or asdict(ref) != raw
                 or not REF_ID.fullmatch(ref.ref_id) or not SNAPSHOT_ID.fullmatch(ref.snapshot_id)
                 or not SHA256_HEX.fullmatch(ref.source_sha256) or not SHA256_HEX.fullmatch(ref.result_sha256)
-                or ref.projection_version != PROJECTION
+                or ref.projection_version != (PROJECTION if ref.snapshot_id.startswith("crm_s_") else WAREHOUSE_PROJECTION)
                 or type(ref.registered_at_ms) is not int or ref.registered_at_ms < 0
                 or (ref.ref_id, identity.username, identity.native_session_id,
                     identity.connection_generation, ref.snapshot_id) != tuple(row[key] for key in
@@ -272,7 +315,7 @@ class NativeCrmSnapshotSource:
     def _matches(ref, snapshot):
         if (ref.source_sha256 != digest(snapshot.model_dump(mode="json"))
                 or ref.result_sha256 != snapshot.result_sha256
-                or ref.identity.data_kind != snapshot.data_kind):
+                or ref.identity.data_kind != snapshot.data_kind or ref.projection_version != _projection(snapshot)):
             raise fault("RESULT_STALE")
 
     def _fresh(self, ref):
@@ -292,7 +335,7 @@ class NativeCrmSnapshotSource:
             if row is None:
                 ref = NativeSnapshotRef("crm_ref_" + uuid4().hex, identity, snapshot_id,
                                         digest(snapshot.model_dump(mode="json")), snapshot.result_sha256,
-                                        PROJECTION, self.clock())
+                                        _projection(snapshot), self.clock())
             else:
                 ref = self._decode(row)
                 self._active(con, ref)
@@ -324,7 +367,7 @@ class NativeCrmSnapshotSource:
                 raise fault("RESULT_STALE")
         return ref
 
-    def read(self, ref_id: str) -> CrmSnapshot:
+    def read(self, ref_id: str) -> CrmSnapshot | WarehouseSnapshot:
         lease = self._lease()
         with self._state(readonly=True) as con:
             ref = self._reference(con, lease.identity, ref_id)

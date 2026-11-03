@@ -1,13 +1,16 @@
 """Page candidates exchanged through scoped tools, without filesystem tools."""
 import json
+import hashlib
 from html.parser import HTMLParser
+from uuid import uuid4
 
 from pydantic import ValidationError
 
-from backend.contracts.page_documents import PagePackage, page_source_hash
+from backend.contracts.page_documents import PagePackage, PagePatchPreview, page_source_hash
 from backend.services.analytics.cockpit_ai import CockpitAIStore, digest
 from backend.services.analytics.cockpit_files import fault
-from backend.services.analytics.cockpit_html_selection import protect_selection
+from backend.services.analytics.cockpit_html_selection import SourceTree, protect_selection, validate_selection
+from backend.services.analytics.page_edit_context import PageEditContextStore
 
 
 class _TextareaMarkup(HTMLParser):
@@ -43,6 +46,124 @@ class _TextareaMarkup(HTMLParser):
 class NativeCockpitAIStore(CockpitAIStore):
     def __init__(self, files, pages):
         super().__init__(files, pages, workspace_files=False)
+        self.edits = PageEditContextStore(pages.path.parent, pages, clock=pages.clock, policy=pages.policy)
+
+    def validate_edit_context(self, actor, edit_context, target_id, base_version, spec):
+        normalized = self._validate_edit_context(edit_context, target_id, base_version, spec, allow_bound=True)
+        if not spec["binding_manifest"].get("result_refs"):
+            return normalized
+        if normalized['kind'] != 'static_element' or normalized['allowed_scope'] != 'exact_source_range':
+            fault(422, 'AI_SCOPE_DIFF', '绑定页 AI 展示修改仅接受可核验的静态节点。')
+        self.pages._validate_ai_scope(spec, spec, PagePatchPreview(
+            base_version=base_version, package=spec["package"], edit_scope="source_range",
+            edit_context_id=normalized["context_id"], focus_ref=normalized["focus_ref"], source_hash=normalized["version_hash"]))
+        controlled = self.edits.create(actor, {"page_id": target_id, "node_id": normalized["node_id"],
+                                               "kind": normalized["kind"], "channel": "presentation"})
+        target, _ = self.edits.ai_presentation(actor, controlled["edit_context_id"], target_id, base_version,
+                                               spec["package"], spec["package"], "ai-selection")
+        return {**normalized, "controlled_context_id": controlled["edit_context_id"], "presentation_target": target,
+                "selected_overlay": self.edits.overlay(actor, target_id, base_version).get(normalized["node_id"])}
+
+    def validate_page_selection(self, actor, spec, selection, context):
+        edit = context.get("edit_context") or {}
+        if not spec["binding_manifest"].get("result_refs"):
+            return super().validate_page_selection(actor, spec, selection, context)
+        parsed = validate_selection(spec["package"], selection, spec["binding_manifest"], allow_bound=True)
+        span = (parsed["start"], parsed["end"])
+        if not edit:
+            matches = [node for node in spec["package"]["node_map"]
+                       if self.pages._mapped_node_range(spec["package"], node["node_id"], node["kind"]) == span]
+            if len(matches) != 1:
+                fault(422, 'AI_SELECTION_INVALID', '选区没有唯一的受控节点，请重新选择。')
+            node = matches[0]
+            source_hash = self.pages._source_hash(spec["package"])
+            generated = {'context_id': 'selection_' + uuid4().hex, 'node_id': node['node_id'], 'kind': node['kind'],
+                         'allowed_scope': 'exact_source_range', 'version_hash': source_hash,
+                         'mapping_token': hashlib.sha256(f'{source_hash}:{node["node_id"]}:{span[0]}:{span[1]}'.encode()).hexdigest()[:32],
+                         'allowed_ranges': [{'file': 'html', 'start': span[0], 'end': span[1]}]}
+            edit = self.validate_edit_context(actor, generated, spec['page_id'], spec['version'], spec)
+            context['edit_context'] = edit
+            context['selection_context'] = True
+        self.check_controlled_selection(spec["package"], edit, parsed)
+        return parsed
+
+    def check_controlled_selection(self, package, edit, selection):
+        span = self.pages._mapped_node_range(package, edit["node_id"], edit["kind"])
+        rendered = selection.get("rendered")
+        node = next(item for item in SourceTree(package["html"]).all_nodes if item['start'] == span[0])
+        if ((selection["start"], selection["end"]) != span or rendered and
+                (rendered["path"] or node["attrs"].get(rendered["anchor"]["attribute"]) != rendered["anchor"]["value"])):
+            fault(422, 'AI_OUTSIDE_SELECTION', '候选节点与选区不一致，请重新选择。')
+
+    def controlled_operation(self, actor, row, package):
+        context = json.loads(row['context'])
+        edit = context.get('edit_context') or {}
+        before = json.loads(row['source'])
+        if not edit.get('controlled_context_id'):
+            self.protect_bindings(before, package, context['binding_manifest'])
+            protect_selection(before, package, context.get('selection'))
+            return None
+        if context.get('selection'):
+            self.check_controlled_selection(before, edit, context['selection'])
+        key = row['id'] + '.' + digest(json.dumps(package, ensure_ascii=False, sort_keys=True).encode())[:24]
+        _, operation = self.edits.ai_presentation(actor, edit['controlled_context_id'], row['target_id'], row['base_version'],
+                                                  before, package, key)
+        return operation
+
+    def collect(self, actor, job_id, *, source_context=None):
+        with self.files.connect() as con:
+            row = self.row(con, actor, job_id)
+        if not (json.loads(row['context']).get('edit_context') or {}).get('controlled_context_id'):
+            return super().collect(actor, job_id, source_context=source_context)
+        self.files.access(actor, True)
+        with self.files.connect() as con:
+            con.execute('BEGIN IMMEDIATE')
+            row = self.row(con, actor, job_id)
+            if row['status'] != 'WAITING':
+                return self.view(row)
+            content = self.candidate_bytes(row)
+            package = PagePackage.model_validate_json(content).model_dump(mode='json')
+            operation = self.controlled_operation(actor, row, package)
+            if operation is None:
+                fault(422, 'AI_NO_CHANGE', '候选没有受控展示修改。')
+            context = json.loads(row['context'])
+            edit = context['edit_context']
+            patch = self.edits.apply(actor, edit['controlled_context_id'], operation, operation['cas']['idempotency_key'],
+                                     page_id=row['target_id'])
+            preview_id = self.edits.prepare(actor, edit['controlled_context_id'], patch['preview_id'], source_context=source_context)
+            context['edit_preview_id'] = patch['preview_id']
+            con.execute("UPDATE ai_edits SET status='READY',candidate=?,candidate_hash=?,preview_id=?,context=? WHERE id=?",
+                        (content, digest(content), preview_id, json.dumps(context, ensure_ascii=False), job_id))
+            return self.view(self.row(con, actor, job_id))
+
+    def confirm(self, actor, job_id, expected_hash, *, source_context=None):
+        with self.files.connect() as con:
+            row = self.row(con, actor, job_id)
+        if not (json.loads(row['context']).get('edit_context') or {}).get('controlled_context_id'):
+            result = super().confirm(actor, job_id, expected_hash, source_context=source_context)
+            if row['target_kind'] == 'page':
+                self.edits.checkpoint(actor, row['target_id'], result['saved_version'])
+            return result
+        self.files.access(actor, True)
+        with self.files.connect() as con:
+            con.execute('BEGIN IMMEDIATE')
+            row = self.row(con, actor, job_id)
+            if not expected_hash or row['candidate_hash'] != expected_hash:
+                fault(409, 'AI_CANDIDATE_CHANGED', '候选标识不匹配，请重新核对预览。')
+            if row['status'] == 'SAVED':
+                return self.view(row)
+            if row['status'] != 'READY':
+                fault(409, 'AI_EDIT_CLOSED', '任务已关闭或尚未交付。')
+            context = json.loads(row['context'])
+            edit = context['edit_context']
+            if self.pages.preview(actor, row['preview_id'])['status'] != 'APPLIED':
+                self.controlled_operation(actor, row, PagePackage.model_validate_json(row['candidate']).model_dump(mode='json'))
+            receipt = self.edits.confirm(actor, edit['controlled_context_id'], context['edit_preview_id'], job_id,
+                                         source_context=source_context)
+            if receipt['saved_version'] != row['base_version'] + 1:
+                fault(503, 'STATE_UNAVAILABLE', '保存回执的版本不匹配。')
+            con.execute("UPDATE ai_edits SET status='SAVED',saved_version=? WHERE id=?", (receipt['saved_version'], job_id))
+            return self.view(self.row(con, actor, job_id))
 
     def view(self, row):
         return {**super().view(row), 'transport': 'native-tools', 'workspace': '',
@@ -72,7 +193,7 @@ class NativeCockpitAIStore(CockpitAIStore):
                 'presentation_source_hash': page_source_hash(source['html'], source.get('css', ''), source.get('js', '')),
                 'base_version': row['base_version'], 'binding_manifest': context['binding_manifest'],
                 'selection': context.get('selection'), 'edit_context': context.get('edit_context'),
-                'rule': '只按用户要求提交候选；保留未修改内容。绑定页面只允许 CSS 或受控 presentation 样式，不能改写数值或文案。候选须由用户收取、预览和确认保存。',
+                'rule': '只按用户要求提交候选；有 edit_context.presentation_target 时仅改该精确目标的 presentation 文案或样式，保留其他 edits 及所有源码；selected_overlay 是现有人工展示，未要求的文案和样式保持不变。没有受控目标的绑定页只改样式并保留已有文案。数字只读，候选须由用户收取、预览并确认保存。',
             }, ensure_ascii=False)
         else:
             content = row['source'] if variant == 'source' else self.candidate_bytes(row)
@@ -140,9 +261,9 @@ class NativeCockpitAIStore(CockpitAIStore):
                 package = PagePackage.model_validate(package).model_dump(mode='json')
             except ValidationError:
                 fault(422, 'INVALID_AI_PAGE', '候选源码不符合页面合同。')
-            context = json.loads(row['context'])
-            self.protect_bindings(before, package, context['binding_manifest'])
-            protect_selection(before, package, context.get('selection'))
+            operation = self.controlled_operation(actor, row, package)
+            if (json.loads(row['context']).get('edit_context') or {}).get('controlled_context_id') and operation is None:
+                fault(422, 'AI_NO_CHANGE', '候选没有受控展示修改。')
             if package == before:
                 fault(422, 'AI_NO_CHANGE', '候选与原版本相同。')
             content = json.dumps(package, ensure_ascii=False, indent=2).encode()

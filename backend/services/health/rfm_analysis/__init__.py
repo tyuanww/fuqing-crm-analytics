@@ -31,7 +31,6 @@ from .cache import (
     RFMCacheUnavailableError,
     RFM_CACHE_TTL_HOURS,
     RFM_CACHE_RETENTION_HOURS,
-    EXPECTED_LOGICAL_PRECOMPUTE_COMBINATIONS,
 )
 
 __all__ = [
@@ -63,5 +62,4 @@ __all__ = [
     "RFMCacheUnavailableError",
     "RFM_CACHE_TTL_HOURS",
     "RFM_CACHE_RETENTION_HOURS",
-    "EXPECTED_LOGICAL_PRECOMPUTE_COMBINATIONS",
 ]

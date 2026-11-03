@@ -24,7 +24,7 @@ DB_FILE = DUCKDB_PATH
 
 # RFM 缓存表名
 RFM_CACHE_TABLE = "rfm_analysis_cache"
-RFM_CACHE_QUERY_VERSION = "rfm-exact-window-v1"
+RFM_CACHE_QUERY_VERSION = "rfm-exact-window-v2-member-cohort"
 
 
 def _fetch_max_pay_time(conn: duckdb.DuckDBPyConnection) -> str:

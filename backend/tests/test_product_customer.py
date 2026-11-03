@@ -31,6 +31,23 @@ def test_product_display_names_form_one_disjoint_unique_alias_space():
     assert product_customer.PRODUCT_DISPLAY_NAMES["祛痘精华"] == "爆款精华A"
 
 
+def test_first_purchase_on_previous_day_is_old_in_the_current_window(tmp_duckdb_with_synthetic_orders, monkeypatch):
+    handle = tmp_duckdb_with_synthetic_orders
+    handle.executemany("INSERT INTO user_first_purchase VALUES (?, ?::DATE)",
+                       [("previous", "2026-06-30"), ("first_day", "2026-07-01"), ("historic", "2020-01-01")])
+    for order, user, paid, amount in [
+        ("history", "historic", "2020-01-01", 1), ("comparison", "historic", "2025-07-01", 10),
+        ("previous-first", "previous", "2026-06-30", 5), ("repeat", "previous", "2026-07-01", 30),
+        ("current-first", "first_day", "2026-07-01", 40),
+    ]:
+        _insert_order(handle, order, user, paid, amount, "白膜")
+    monkeypatch.setattr(product_customer, "get_connection", lambda: handle)
+    result = product_customer.get_product_customer_overview("2026-07-01", "2026-07-01", products=["白膜"])
+    current = result["products"][0]["current"]
+    assert (current["old_users"], current["old_gsv"]) == (1, 30)
+    assert (current["new_users"], current["new_gsv"]) == (1, 40)
+
+
 def test_product_customer_deduplicates_users_across_spu_classes(
     tmp_duckdb_with_synthetic_orders,
     monkeypatch,
