@@ -1292,6 +1292,42 @@ def test_http_confirm_rechecks_binding_status(tmp_path, status, expected_status)
             assert client.get(PREFIX + "/pages/" + page_id, headers=headers).json() == saved.json()
 
 
+class _RevocableSource:
+    observations = {}
+    remote = None
+    remote_many = None
+
+    def __init__(self):
+        self.revoked = False
+
+    def prefetch(self, *_args):
+        pass
+
+    def check_active(self):
+        pass
+
+    def revalidate(self):
+        if self.revoked:
+            raise AnalyticsError(403, "RESULT_REVOKED", "来源已撤销")
+
+
+def test_replay_with_new_key_after_revoke_writes_no_receipt(tmp_path):
+    def binding(*_args, **_kwargs):
+        return ResolvedPageBinding("VERIFIED", frozenset({"brand-a"}))
+
+    store = PageDocumentStore(private(tmp_path / "revoke-replay"), resolve_binding=binding)
+    source = _RevocableSource()
+    preview = store.generate(ALICE, bound_presentation_draft(), source_context=source)
+    first = store.confirm(ALICE, preview["preview_id"], "first", source_context=source)
+    source.revoked = True
+    with pytest.raises(AnalyticsError) as error:
+        store.confirm(ALICE, preview["preview_id"], "second", source_context=source)
+    assert error.value.code == "RESULT_REVOKED"
+    with closing(sqlite3.connect(store.path)) as conn:
+        assert conn.execute("SELECT key FROM receipts ORDER BY key").fetchall() == [("first",)]
+    assert store.get(ALICE, first["spec"]["page_id"]) == first
+
+
 def test_foreign_or_linked_state_is_never_reinitialized(tmp_path):
     directory = private(tmp_path / "pages")
     path = directory / "page_documents.sqlite3"
