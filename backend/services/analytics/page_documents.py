@@ -543,6 +543,8 @@ class PageDocumentStore:
             raise fault("RESULT_UNAVAILABLE", 409)
         scopes = set()
         stale = False
+        if source_context is not None:
+            source_context.prefetch(spec.session_id, refs)
         for ref in refs:
             resolved = (self.resolve_binding(actor, spec.session_id, ref, source_context=source_context)
                         if source_context is not None else self.resolve_binding(actor, spec.session_id, ref))

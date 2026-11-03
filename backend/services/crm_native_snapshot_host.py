@@ -11,7 +11,7 @@ from pathlib import Path
 import re
 import secrets
 import stat
-from threading import BoundedSemaphore
+from threading import BoundedSemaphore, Event
 from time import monotonic
 
 from fastapi import FastAPI, Request
@@ -25,13 +25,15 @@ from backend.services.analytics.first_purchase.loopback_http import LoopbackHTTP
 from backend.services.crm_analysis import OWNER
 from backend.services.crm_native_snapshot_source import (
     NATIVE_ID, REF_ID, SNAPSHOT_ID, NativeCrmIdentity, NativeCrmLease,
-    NativeCrmSnapshotSource, NativeSnapshotExpectation, OwnedSnapshotStore, fault,
+    NativeCrmSnapshotSource, NativeSnapshotExpectation, NativeSnapshotRead, OwnedSnapshotStore, fault,
 )
 
 HANDLE = re.compile(r"^crm_op_[0-9a-f]{32}$")
 OBSERVATION = "native-crm-snapshot-observation/v1"
 RECEIPT = "native-crm-source-receipt/v1"
 MAX_BUDGET_MS = 5000
+MAX_BATCH = 16
+MAX_BATCH_BYTES = 2 * 1024 * 1024
 
 
 def read_service_token(path: Path) -> str:
@@ -79,33 +81,37 @@ class NativeCrmHostClient:
         self.origin = origin
         self._authorization = "Bearer " + read_service_token(token_file)
 
-    def observe(self, handle: str, session_id: str, deadline: float) -> HostSnapshotObservation:
-        if (not isinstance(handle, str) or not HANDLE.fullmatch(handle)
-                or not isinstance(session_id, str) or not NATIVE_ID.fullmatch(session_id)):
-            raise fault("INVALID_REQUEST")
+    def _call(self, path, body, deadline, maximum):
         remaining = min(_remaining(deadline), MAX_BUDGET_MS / 1000)
         budget = int(remaining * 1000)
         if budget < 1:
             raise fault("IDENTITY_UNAVAILABLE")
         try:
-            status, body = LoopbackHTTP(self.origin, remaining, 4096).request(
-                "POST", "/native-crm-source/introspect", self._authorization,
-                json.dumps({"handle": handle, "budget_ms": budget}).encode("ascii"),
+            status, raw = LoopbackHTTP(self.origin, remaining, maximum).request(
+                "POST", path, self._authorization,
+                json.dumps({**body, "budget_ms": budget}).encode("ascii"),
             )
             _remaining(deadline)
             if status in {401, 403, 404}:
                 raise fault("UNAUTHENTICATED")
             if status != 200:
                 raise fault("IDENTITY_UNAVAILABLE")
-            raw = json.loads(body.decode("utf-8"), object_pairs_hook=unique_object)
-            if (type(raw) is not dict or set(raw) != {
+            return json.loads(raw.decode("utf-8"), object_pairs_hook=unique_object)
+        except AnalyticsError:
+            raise
+        except Exception:
+            raise fault("IDENTITY_UNAVAILABLE") from None
+
+    @staticmethod
+    def _observation(raw, handle, session_id):
+        if (type(raw) is not dict or set(raw) != {
                     "schema_version", "handle", "identity", "snapshot_id", "result_sha256"}
                     or raw["schema_version"] != OBSERVATION or raw["handle"] != handle
                     or type(raw["identity"]) is not dict
                     or set(raw["identity"]) != {field.name for field in fields(NativeCrmIdentity)}):
-                raise ValueError()
-            identity = NativeCrmIdentity(**raw["identity"])
-            if (not isinstance(identity.username, str) or not OWNER.fullmatch(identity.username)
+            raise ValueError()
+        identity = NativeCrmIdentity(**raw["identity"])
+        if (not isinstance(identity.username, str) or not OWNER.fullmatch(identity.username)
                     or not isinstance(identity.native_session_id, str) or not NATIVE_ID.fullmatch(identity.native_session_id)
                     or not isinstance(identity.connection_generation, str)
                     or not NATIVE_ID.fullmatch(identity.connection_generation)
@@ -114,14 +120,90 @@ class NativeCrmHostClient:
                     or identity.data_kind not in {"real", "synthetic"}
                     or not isinstance(raw["snapshot_id"], str) or not SNAPSHOT_ID.fullmatch(raw["snapshot_id"])
                     or not isinstance(raw["result_sha256"], str) or not SHA256_HEX.fullmatch(raw["result_sha256"])):
-                raise ValueError()
-            if identity.native_session_id != session_id:
-                raise fault("UNAUTHENTICATED")
-            return HostSnapshotObservation(handle, identity, raw["snapshot_id"], raw["result_sha256"])
+            raise ValueError()
+        if identity.native_session_id != session_id:
+            raise fault("UNAUTHENTICATED")
+        return HostSnapshotObservation(handle, identity, raw["snapshot_id"], raw["result_sha256"])
+
+    def observe(self, handle: str, session_id: str, deadline: float) -> HostSnapshotObservation:
+        if (not isinstance(handle, str) or not HANDLE.fullmatch(handle)
+                or not isinstance(session_id, str) or not NATIVE_ID.fullmatch(session_id)):
+            raise fault("INVALID_REQUEST")
+        try:
+            raw = self._call("/native-crm-source/introspect", {"handle": handle}, deadline, 4096)
+            return self._observation(raw, handle, session_id)
         except AnalyticsError:
             raise
         except Exception:
             raise fault("IDENTITY_UNAVAILABLE") from None
+
+    def observe_many(self, handles, session_id, deadline):
+        if (not isinstance(handles, tuple) or not 1 <= len(handles) <= MAX_BATCH
+                or any(not isinstance(handle, str) or not HANDLE.fullmatch(handle) for handle in handles)
+                or len(set(handles)) != len(handles)
+                or not isinstance(session_id, str) or not NATIVE_ID.fullmatch(session_id)):
+            raise fault("INVALID_REQUEST")
+        try:
+            raw = self._call("/native-crm-source/introspect-many", {"handles": handles}, deadline, 65536)
+            if (type(raw) is not dict or set(raw) != {"schema_version", "observations"}
+                    or raw["schema_version"] != "native-crm-snapshot-observations/v1"
+                    or not isinstance(raw["observations"], list) or len(raw["observations"]) != len(handles)):
+                raise ValueError()
+            values = {}
+            for item in raw["observations"]:
+                handle = item["handle"]
+                if handle not in handles or handle in values:
+                    raise ValueError()
+                values[handle] = self._observation(item, handle, session_id)
+            observations = tuple(values[handle] for handle in handles)
+            if any(item.identity != observations[0].identity for item in observations):
+                raise fault("UNAUTHENTICATED")
+            return observations
+        except AnalyticsError:
+            raise
+        except Exception:
+            raise fault("IDENTITY_UNAVAILABLE") from None
+
+
+def snapshot_value(ref_id, snapshot):
+    if isinstance(snapshot, WarehouseSnapshot):
+        raw = snapshot.model_dump_json()
+        return NativeWarehouseSnapshotRead(
+            ref_id=ref_id, snapshot_id=snapshot.snapshot_id, data_kind=snapshot.data_kind,
+            result_sha256=snapshot.result_sha256, snapshot_json=raw,
+            snapshot_json_sha256=hashlib.sha256(raw.encode("utf-8")).hexdigest(),
+        ).model_dump(mode="json")
+    return {"ref_id": ref_id, "snapshot": snapshot.model_dump(mode="json")}
+
+
+class HostBoundSnapshotBatch:
+    def __init__(self, *, client, directory, store, items, session_id, deadline, check_active):
+        handles = tuple(item["handle"] for item in items)
+        observations = client.observe_many(handles, session_id, deadline)
+
+        def current():
+            check_active()
+            return client.observe_many(handles, session_id, deadline) == observations
+
+        lease = NativeCrmLease(observations[0].identity, current)
+        self.source = NativeCrmSnapshotSource(directory=directory, store=store, provider=lambda: lease)
+        self.requests = tuple(NativeSnapshotRead(item["ref_id"], NativeSnapshotExpectation(
+            observation.snapshot_id, observation.result_sha256)) for item, observation in zip(items, observations))
+        self.check_active = check_active
+        self.current = current
+
+    def read(self):
+        snapshots = self.source.read_many(self.requests, check_active=self.check_active)
+        self.check_active()
+        values = [snapshot_value(request.ref_id, snapshot) for request, snapshot in zip(self.requests, snapshots)]
+        self.check_active()
+        result = {"schema_version": "native-crm-source-read-many/v1", "items": values}
+        if len(json.dumps(result, ensure_ascii=False, separators=(",", ":"), allow_nan=False).encode()) > MAX_BATCH_BYTES:
+            raise fault("SOURCE_UNAVAILABLE")
+        if not self.current():
+            raise fault("UNAUTHENTICATED")
+        self.check_active()
+        return result
 
 
 class HostBoundSnapshotSource:
@@ -158,14 +240,7 @@ class HostBoundSnapshotSource:
     def read(self, ref_id: str):
         snapshot = self.source.read(ref_id)
         self._checked()
-        if isinstance(snapshot, WarehouseSnapshot):
-            raw = snapshot.model_dump_json()
-            return NativeWarehouseSnapshotRead(
-                ref_id=ref_id, snapshot_id=snapshot.snapshot_id, data_kind=snapshot.data_kind,
-                result_sha256=snapshot.result_sha256, snapshot_json=raw,
-                snapshot_json_sha256=hashlib.sha256(raw.encode("utf-8")).hexdigest(),
-            ).model_dump(mode="json")
-        return {"ref_id": ref_id, "snapshot": snapshot.model_dump(mode="json")}
+        return snapshot_value(ref_id, snapshot)
 
     def revoke(self, ref_id: str):
         self.source.revoke(ref_id)
@@ -211,28 +286,52 @@ def create_native_crm_source_app(*, store: OwnedSnapshotStore, directory: Path,
             async with asyncio.timeout(0.5):
                 async for chunk in request.stream():
                     body.extend(chunk)
-                    if len(body) > 512:
+                    if len(body) > 4096:
                         raise fault("INVALID_REQUEST")
             raw = json.loads(body.decode("utf-8"), object_pairs_hook=unique_object)
-            if type(raw) is not dict or raw.get("operation") not in {"register", "read", "revoke"}:
+            if type(raw) is not dict or raw.get("operation") not in {"register", "read", "revoke", "read_many"}:
                 raise fault("INVALID_REQUEST")
             operation = raw["operation"]
-            required = {"operation", "handle", "session_id", "budget_ms"}
-            if operation != "register":
-                required.add("ref_id")
-            if (set(raw) != required or not isinstance(raw["handle"], str) or not HANDLE.fullmatch(raw["handle"])
-                    or not isinstance(raw["session_id"], str) or not NATIVE_ID.fullmatch(raw["session_id"])
+            if (not isinstance(raw.get("session_id"), str) or not NATIVE_ID.fullmatch(raw["session_id"])
                     or type(raw["budget_ms"]) is not int or not 1 <= raw["budget_ms"] <= MAX_BUDGET_MS
-                    or (operation != "register" and (not isinstance(raw["ref_id"], str)
-                                                    or not REF_ID.fullmatch(raw["ref_id"])))):
+                    ):
                 raise fault("INVALID_REQUEST")
+            if operation == "read_many":
+                items = raw.get("items")
+                if (set(raw) != {"operation", "items", "session_id", "budget_ms"}
+                        or not isinstance(items, list) or not 1 <= len(items) <= MAX_BATCH
+                        or any(type(item) is not dict or set(item) != {"handle", "ref_id"}
+                               or not isinstance(item["handle"], str) or not HANDLE.fullmatch(item["handle"])
+                               or not isinstance(item["ref_id"], str) or not REF_ID.fullmatch(item["ref_id"]) for item in items)
+                        or len({item["handle"] for item in items}) != len(items)
+                        or len({item["ref_id"] for item in items}) != len(items)):
+                    raise fault("INVALID_REQUEST")
+            else:
+                required = {"operation", "handle", "session_id", "budget_ms"}
+                if operation != "register":
+                    required.add("ref_id")
+                if (len(body) > 512 or set(raw) != required or not isinstance(raw["handle"], str)
+                        or not HANDLE.fullmatch(raw["handle"])
+                        or (operation != "register" and (not isinstance(raw["ref_id"], str)
+                                                        or not REF_ID.fullmatch(raw["ref_id"])))):
+                    raise fault("INVALID_REQUEST")
             deadline = began + raw["budget_ms"] / 1000
             _remaining(deadline)
             if not capacity.acquire(blocking=False):
                 raise fault("IDENTITY_UNAVAILABLE")
+            cancelled = Event()
+
+            def check_active():
+                _remaining(deadline)
+                if cancelled.is_set():
+                    raise fault("IDENTITY_UNAVAILABLE")
 
             def run():
                 try:
+                    if operation == "read_many":
+                        return HostBoundSnapshotBatch(client=client, directory=directory, store=store,
+                                                      items=items, session_id=raw["session_id"], deadline=deadline,
+                                                      check_active=check_active).read()
                     bound = HostBoundSnapshotSource(client=client, directory=directory, store=store,
                                                     handle=raw["handle"], session_id=raw["session_id"],
                                                     deadline=deadline)
@@ -246,7 +345,24 @@ def create_native_crm_source_app(*, store: OwnedSnapshotStore, directory: Path,
                 capacity.release()
                 raise
             future.add_done_callback(lambda done: None if done.cancelled() else done.exception())
-            value = await asyncio.wait_for(asyncio.shield(future), timeout=_remaining(deadline))
+            async def watch_disconnect():
+                while not future.done():
+                    await asyncio.sleep(0.025)
+                    if await request.is_disconnected():
+                        cancelled.set()
+                        return
+
+            watcher = asyncio.create_task(watch_disconnect()) if operation == "read_many" else None
+            try:
+                value = await asyncio.wait_for(asyncio.shield(future), timeout=_remaining(deadline))
+            finally:
+                cancelled.set()
+                if watcher is not None:
+                    watcher.cancel()
+                    try:
+                        await watcher
+                    except asyncio.CancelledError:
+                        pass
             _remaining(deadline)
             if await request.is_disconnected():
                 raise fault("IDENTITY_UNAVAILABLE")

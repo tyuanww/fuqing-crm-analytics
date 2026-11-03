@@ -18,7 +18,7 @@ Host 的 `nativeSnapshot` 必须同时包含以下字段。
 
 服务令牌为 64 位小写十六进制，不是 CRM 登录令牌。两服务从明确的私有文件读取它，不输出内容。轮换需要显式重启两个候选实例，不读取现役认证状态。
 
-Python 入口为 `scripts/crm-calibration/run_native_snapshot_source.py`。必需参数为 `--crm-state-dir`、`--state-dir`、`--data-kind`、`--host-origin`、`--token-file` 和 `--port`。CRM 状态必须已经存在；`--initialize` 在预先准备的私有目录独占初始化新引用状态，拒绝覆盖已有状态。运行使用项目锁定 Python 和指向仓库的绝对 `PYTHONPATH`。
+Python 入口为 `scripts/crm-calibration/run_native_snapshot_source.py`。`--crm-state-dir` 与 `--warehouse-snapshot-dir` 至少配置一项，并指向已有快照状态。其他必需参数为 `--state-dir`、`--data-kind`、`--host-origin`、`--token-file` 和 `--port`。`--initialize` 在预先准备的私有目录独占初始化新引用状态，拒绝覆盖已有状态。运行使用项目锁定 Python 和指向仓库的绝对 `PYTHONPATH`。
 
 来源服务单独运行，不挂载默认 CRM 或页面应用。它使用独立的四个工作线程。超出容量直接返回 503，使 `/auth/me` 回调保持独立执行容量。
 
@@ -35,6 +35,16 @@ Python 的 `POST /native-crm-source` 接收 `operation`、`handle`、`session_id
 | `register` | `native-crm-source-receipt/v1`，引用、快照、结果摘要、数据种类和期限 |
 | `read` | `ref_id` 与权威 `CrmSnapshot` |
 | `revoke` | `ref_id` 与 `revoked=true` |
+
+## 批量读取
+
+CRM service 的只读属性 `nativeSnapshotBatchMax` 为 16 时，`openNativeSnapshotLease` 还提供 `readMany(refs, signal)`。返回项为 `{ref, snapshot}`，按明确引用匹配，warehouse 的 `snapshot_json` 原始字符串及摘要不变。旧的单条方法和错误合同保留。
+
+`POST /native-crm-source` 的 `read_many` 输入只有 `operation`、`items`、`session_id`、`budget_ms`。`items` 是 1 至 16 个唯一的 `{handle, ref_id}`。Host 的固定回调 `POST /native-crm-source/introspect-many` 接收唯一 `handles` 与 `budget_ms`，返回 `native-crm-snapshot-observations/v1` 的完整观察列表。
+
+每批必须来自同一账号、会话和连接代次。来源服务逐项核对句柄捕获的快照、ref 归属、摘要、期限和撤权记录。任何一项失败都拒绝整批；成功结果为 `native-crm-source-read-many/v1` 的 `items`，没有部分成功。
+
+批量请求体最多 4096 字节，响应最多 2 MiB，整批共用一个既有 worker 槽及最多 5 秒的来源预算。超时响应不会提前释放仍在运行的 worker；它结束后才释放槽位。批量循环在进入后续项前检查取消和剩余时间。新接口不现场聚合业务库，不跨请求缓存授权。
 
 `HostBoundSnapshotSource` 为每次操作创建独立冻结观察和 Source 实例。无参数 provider 返回同一租约，当前性回调在线复查完整观察，不滚动续期，不修改共享 `.provider`。数字始终从 `CrmAnalysisStore` 读取，Host 账本不复制结果。
 

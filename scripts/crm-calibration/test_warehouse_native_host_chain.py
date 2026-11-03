@@ -205,6 +205,20 @@ def test_actual_cache_miss_and_coverage_never_produce_a_source_ref(warehouse_nat
     assert result["code"] == "INSUFFICIENT_COVERAGE" and "source_ref" not in result
 
 
+def test_actual_python_and_maintained_node_read_all_six_families_as_one_batch(warehouse_native_chain):
+    rpc, _, app, _ = warehouse_native_chain
+    assert rpc("login")["connected"] is True
+    captured = []
+    for family in ["purchases", "product", "analysis", "r", "f", "m"]:
+        warm(app, family)
+        value = rpc("query_warehouse", request=body(family))
+        assert value["ok"] is True, value
+        captured.append(value)
+    assert rpc("lease_open", lease_id="all-families")["ok"] is True
+    values = rpc("lease_read_many", lease_id="all-families", ref_ids=[item["source_ref"] for item in captured])
+    assert values == [{"ref": item["source_ref"], "snapshot": item["value"]} for item in captured]
+
+
 def test_warehouse_lease_honors_revocation_relogin_and_crm_401(warehouse_native_chain):
     rpc, state, app, _ = warehouse_native_chain
     rejected = {"error": "NATIVE_HOST_OPERATION_REJECTED"}

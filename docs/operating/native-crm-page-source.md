@@ -1,6 +1,6 @@
 # 原生页面与 CRM 来源
 
-当前实现连接 CRM 经营聚合快照、页面保存和 Workbench 预览。它默认关闭，按单个 DSH owner 运行。来源范围只有 GSV、AOV、AUS、订单数和买家数，RFM、商品缓存及真实业务验收单列推进。
+当前实现连接 CRM 快照、页面保存和 Workbench 预览。它默认关闭，按单个 DSH owner 运行。经营聚合使用 `crm-page-aggregate/v1`，已登记的商品与 RFM warehouse 快照使用各自仓库投影。缓存覆盖和真实业务验收单列记账。
 
 ## 请求与身份
 
@@ -26,6 +26,14 @@ Host 为单次请求生成私有租约，绑定方法、路径、查询、请求
 预览、首次确认、binding-state 与动态读取使用同一来源。缓存和 data_ref 绑定 actor、session、连接代次、Host epoch、ref、来源摘要、投影版本及 target；缓存命中也重新核权。网络读取不持页面写事务或结果缓存锁。
 
 首次确认失败不产生新 head、revision 或成功回执。历史页面、历史文字叠层与已成功确认的重放不要求 CRM 在线。跨进程核验不提供原子撤权，也不能收回已经交付的数字。
+
+## 一次请求内的批量观察
+
+当 CRM service 明确声明 `nativeSnapshotBatchMax=16`，页面 Host 才在私有认证回调中声明 `source_batch_max=16`。Python 页面服务据此启用批量读取。旧 Host 或旧 CRM 插件没有声明时，继续使用原单条协议；不猜测支持情况。
+
+`PageDocumentStore._bind` 在本次 HTTP 请求预取全部引用，每批最多 16 项。`NativePageSource.read` 可以复用本请求已观察到的原始快照，仍逐项验证投影和绑定。观察不会延长来源授权，也不会转移到下一次请求。
+
+写入前的 `PageRequestContext.revalidate` 会绕过预取，重新读取全部已观察来源，并与原始基准逐项比较。缺项、错配、撤权、账号或连接代次变化、Host epoch 变化、超时和来源错误均不能生成新版本或成功回执。分批操作共用页面请求原期限，不逐批续期。iframe 的单条 `data.read` 合同不变。
 
 原生文字与结构编辑复用已有 edit-context、区域哈希、CAS 和幂等确认。声明为绑定数值的节点保持只读。页面文案与结构变化不写入业务数据库，来源认证也不表示宿主背书整份 HTML 的经营结论。
 

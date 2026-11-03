@@ -47,6 +47,8 @@ try {
           gsv_amount_fen: snapshot.result.gsv_amount_fen });
       } else if (input.operation === 'lease_read_warehouse') {
         send(await leases.get(input.lease_id).read(input.ref_id, signal));
+      } else if (input.operation === 'lease_read_many') {
+        send(await leases.get(input.lease_id).readMany(input.ref_ids, signal));
       } else if (input.operation === 'lease_assert_current') {
         await leases.get(input.lease_id).assertCurrent(signal);
         send({ ok: true });

@@ -56,8 +56,9 @@ class NativePageSource:
                 "Authorization": "Bearer " + lease, "Content-Type": "application/json"})
             try:
                 with self.opener.open(req, timeout=5) as response:
-                    raw = response.read(524289)
-                    if len(raw) > 524288:
+                    maximum = 2 * 1024 * 1024 if operation == "read_many" else 524288
+                    raw = response.read(maximum + 1)
+                    if len(raw) > maximum:
                         raise source_error()
                     return json.loads(raw)
             except urllib.error.HTTPError as error:
@@ -74,22 +75,59 @@ class NativePageSource:
                       query=request.url.query, body_sha256=request.state.page_body_sha256,
                       idempotency_key=request.headers.get("idempotency-key"))
         try:
-            if (set(auth) != {"actor_id", "capabilities", "data_scopes", "deadline_ms"}
+            required = {"actor_id", "capabilities", "data_scopes", "deadline_ms"}
+            if (type(auth) is not dict or set(auth) not in (required, required | {"source_batch_max"})
+                    or ("source_batch_max" in auth and (type(auth["source_batch_max"]) is not int or auth["source_batch_max"] != 16))
                     or not re.fullmatch(r"[A-Za-z0-9_.:-]{1,128}", auth["actor_id"])
                     or set(auth["capabilities"]) != {"dashboard:read", "dashboard:update"}
                     or set(auth["data_scopes"]) != {NATIVE_POLICY.document_scope, NATIVE_POLICY.result_scope}
                     or type(auth["deadline_ms"]) is not int or auth["deadline_ms"] <= now_ms()):
                 raise ValueError("invalid private grant")
             actor = AnalyticsPrincipal(auth["actor_id"], frozenset(auth["capabilities"]), frozenset(auth["data_scopes"]))
-            return PageRequestContext(actor, auth["deadline_ms"], remote)
+            def remote_many(session, refs):
+                return self._batch_values(remote("read_many", session_id=session, refs=refs), session, refs)
+
+            return PageRequestContext(actor, auth["deadline_ms"], remote,
+                                      remote_many=remote_many if auth.get("source_batch_max") == 16 else None)
         except (ValueError, TypeError, KeyError):
+            raise source_error() from None
+
+    @staticmethod
+    def _batch_values(raw, session, refs):
+        try:
+            if (type(raw) is not dict or set(raw) != {"values"} or not isinstance(raw["values"], list)
+                    or len(raw["values"]) != len(refs)):
+                raise ValueError()
+            values = {}
+            for value in raw["values"]:
+                if (type(value) is not dict or set(value) != {"ref", "identity", "epoch", "snapshot"}
+                        or value["ref"] not in refs or value["ref"] in values
+                        or not isinstance(value["epoch"], str) or not value["epoch"]
+                        or type(value["identity"]) is not dict
+                        or set(value["identity"]) != {"username", "native_session_id", "connection_generation", "expires_at_ms", "data_kind"}
+                        or value["identity"]["native_session_id"] != session
+                        or not isinstance(value["identity"]["username"], str)
+                        or not isinstance(value["identity"]["connection_generation"], str)
+                        or type(value["identity"]["expires_at_ms"]) is not int
+                        or value["identity"]["data_kind"] not in {"real", "synthetic"}):
+                    raise ValueError()
+                values[value["ref"]] = value
+            first = next(iter(values.values()))
+            if (set(values) != set(refs)
+                    or any(value["identity"] != first["identity"] or value["epoch"] != first["epoch"]
+                           for value in values.values())):
+                raise ValueError()
+            return values
+        except (ValueError, TypeError, KeyError, StopIteration):
             raise source_error() from None
 
     def read(self, context, session, ref, *, target_key=()):
         context.check_active()
         if context.remote is None:
             raise source_error(401, "UNAUTHENTICATED")
-        value = context.remote("read", session_id=session, ref=ref)
+        key = (session, ref)
+        value = (context.observations[key] if context.remote_many is not None and key in context.observations
+                 else context.remote("read", session_id=session, ref=ref))
         old = context.observations.setdefault((session, ref), value)
         if old != value:
             raise source_error(409, "RESULT_STALE")
