@@ -10,9 +10,13 @@
 - [x] 对缺构建证明的 CI formal 包保持拒绝；从精确提交的 clean clone 离线严格重建，并通过九包、领域包与完整业务 profile 接收。
 - [x] 同步四份来源锁与 manifest；31 份公共材料投影字节未变，其他七插件、领域包、SDK rc3 与 Cordis 4.0.5 保持原值。
 - [x] 上传并回读组合运输 artifact `12710800468`，更新真实 artifact 锁；输入与来源门禁 80 项通过。
-- [ ] 完成主仓 CI、正式运行包接收和真实编辑复验。当前真实 UAT 仍未通过；主会话 19 项 READY、computed=0 是缓存回读证据。
+- [x] 组合 `839155bd` 的主 CI、预检和正式 ZIP 下载核对通过；完整 ZIP 尚未安装。
+- [x] 两作者包单独应用到隔离 19327，用户已重连 CRM，聊天轨迹出现七次新仓库查询。
+- [x] 后端 `855961b2` 的三项页面边界修复完成 270 项回归、同模型独立审查与正常推送，独立草稿为 [PR #181](https://github.com/tyuanww/fuqing-crm-analytics/pull/181)。
+- [ ] P1 功能阻断：`PACKAGE_RECEIVED` 后实际驾驶舱暂无产物。用当前会话生成一次，再打开驾驶舱并刷新，两次同脚本刷新仍为空。Workbench 会话 A 定位接收、预览及错误反馈，Root 负责集成。
+- [ ] 形成真实 preview 后逐项对账关键事实，完成人工与 AI 文案修改、数字只读、保存、退出重开。19 项 READY、computed=0 不抵扣此验收。
 
-来源、命令、失败及未执行项见[组合准备记录](evidence/dsh-uat-fixes-composition-20261027.md)。新插件尚未应用到杭州，完整编辑链路仍待复验。
+来源、命令、失败及未执行项见[组合准备记录](evidence/dsh-uat-fixes-composition-20261027.md)和[后续收口记录](evidence/dsh-page-readonly-closeout-20261027.md)。隔离实例是逐项留有来源记录的变体；不合并 PR，不切换公网现役。
 
 ### 2026-10-26 仓库快照与编辑验收
 
