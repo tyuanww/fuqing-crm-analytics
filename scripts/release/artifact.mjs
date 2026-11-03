@@ -13,7 +13,35 @@ import { verifyReleasePackBinding } from './release-profile-packs.mjs';
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const scripts = join(root, 'scripts/release');
 const schemaDir = join(scripts, 'schemas');
-export const DEFAULT_ALLOWLIST = ['VERSION', 'package.json', 'pnpm-lock.yaml', 'shinemage-release-pack-inputs.json', 'scripts/dsh.mjs', 'README.md', 'CHANGELOG.md', 'AGENTS.md', 'DESIGN.md', 'Dockerfile', '.github/workflows/dsh-release-evidence.yml', 'backend/', 'frontend-vue3/', 'config/', 'knowledge/', 'mcp_servers/', 'dsh-plugins/', 'scripts/dsh-b0/', 'scripts/dsh-dev/', 'scripts/release/', 'scripts/ci/', 'scripts/crm-calibration/', 'deploy/wsl/', 'docs/release/', 'docs/operating/'];
+const CRM_RUNTIME_SOURCES = [
+  'scripts/etl/__init__.py',
+  'scripts/etl/manifest.py',
+  'scripts/etl/common/__init__.py',
+  'scripts/etl/common/private_tmp.py',
+  'scripts/etl/common/tmp_tracker.py',
+  'scripts/synthetic/__init__.py',
+  'scripts/synthetic/generate_hackathon_dataset.py',
+  'scripts/ad_hoc_query_excel_styles.py',
+  'scripts/query_worker.py',
+  'scripts/ad_hoc_queries/__init__.py',
+  'scripts/ad_hoc_queries/_utils.py',
+  'scripts/ad_hoc_queries/registry.py',
+  'scripts/ad_hoc_queries/daily_gsv.py',
+  'scripts/ad_hoc_queries/yoy_battle.py',
+  'scripts/ad_hoc_queries/channel_slice.py',
+  'scripts/ad_hoc_queries/two_year_overview.py',
+  'scripts/ad_hoc_queries/new_old_customer.py',
+  'scripts/ad_hoc_queries/rfm_repurchase.py',
+  'scripts/ad_hoc_queries/top_n.py',
+  'scripts/ad_hoc_queries/dq_report.py',
+  'scripts/ad_hoc_queries/export_excel.py',
+  'scripts/ad_hoc_queries/ask.py',
+  'scripts/ad_hoc_queries/daily_gsv_multi_period.py',
+  'scripts/ad_hoc_queries/fixed_product_list_compare.py',
+  'scripts/ad_hoc_queries/fixed_product_list_compare_http.py',
+  'scripts/ad_hoc_queries/ai_sandbox_execute.py',
+];
+export const DEFAULT_ALLOWLIST = ['VERSION', 'package.json', 'pnpm-lock.yaml', 'shinemage-release-pack-inputs.json', 'scripts/dsh.mjs', 'README.md', 'CHANGELOG.md', 'AGENTS.md', 'DESIGN.md', 'Dockerfile', '.github/workflows/dsh-release-evidence.yml', 'backend/', ...CRM_RUNTIME_SOURCES, 'frontend-vue3/', 'config/', 'knowledge/', 'mcp_servers/', 'dsh-plugins/', 'scripts/dsh-b0/', 'scripts/dsh-dev/', 'scripts/release/', 'scripts/ci/', 'scripts/crm-calibration/', 'deploy/wsl/', 'docs/release/', 'docs/operating/'];
 export const DENYLIST_VERSION = 'release-denylist/v1';
 const DENY = /(^|\/)(?:\.env(?:\.|$)|\.npmrc(?:$|\/)|credentials?(?:[-_.]|$)|private[-_]?key(?:[-_.]|$)|cookie(?:[-_.]|$)|node_modules(?:\/|$)|__pycache__(?:\/|$)|\.pytest_cache(?:\/|$)|\.ruff_cache(?:\/|$)|\.git(?:\/|$)|.*\.duckdb(?:\.wal)?$|.*\.sqlite(?:-wal|-shm)?$|.*\.log$)/i;
 
