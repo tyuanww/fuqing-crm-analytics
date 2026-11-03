@@ -569,7 +569,7 @@ class PageDocumentStore:
 
     def _preview(self, actor, spec, operation, base_version, *, retained_scopes=None, source_context=None):
         self._access(actor, write=True)
-        _validate_bound_presentation(spec)
+        _validate_bound_presentation(spec, protect_readonly=operation == "GENERATE")
         spec, scopes = self._bind(actor, spec, retained_scopes=retained_scopes, source_context=source_context)
         snapshot = {"spec": spec.model_dump(mode="json")}
         payload, digest = self._encode_snapshot(snapshot, scopes)

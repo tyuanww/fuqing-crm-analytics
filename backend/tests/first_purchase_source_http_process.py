@@ -16,9 +16,12 @@ def main():
             raw = str(args[0])
             uri = urlsplit(raw)
             path = Path(unquote(uri.path) if uri.scheme == "file" and not uri.netloc else raw).resolve()
-            if path != state / "first_purchase_analyses.sqlite3":
+            name = path.name
+            staging = name.startswith(".first_purchase_analyses.sqlite3.init-")
+            if path.parent != state or not (name == "first_purchase_analyses.sqlite3" or staging):
                 raise RuntimeError("SAVE_PROCESS_QUERY_DB_FORBIDDEN")
-            opened.add(path.name)
+            if not staging:
+                opened.add(name)
 
     sys.addaudithook(local_state_only)
     from backend.analytics_first_purchase_analysis_app import create_first_purchase_analysis_app
