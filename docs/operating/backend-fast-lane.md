@@ -68,11 +68,11 @@ fast lane 实测：`520 passed`（多次跑批 4.4–5.2s），runner 墙钟约 
 
 ## 风险与已知边界
 
-- **不修复既有红灯**：基线上
+- **仓库策略类仍不进 fast**：基线上
   `backend/tests/test_project_hygiene_ignore.py::test_status_is_short_with_history_archive`
-  已失败（`STATUS.md` 81 行 > 断言上限 80）。该文件属于仓库策略类，未加入 fast；
-  full lane 仍会运行并保持原失败，未被 skip/xfail 或改断言。fast 的"绿"只代表它选中的
-  纯单元子集，不代表全量通过。
+  曾因 `STATUS.md` 81 行超过 80 行上限而失败。本 CI 修复分支已把 `STATUS.md` 恢复到
+  80 行，该测试通过；仓库策略类仍不加入 fast，避免文档改动误报。fast 的"绿"只代表它
+  选中的纯单元子集，不代表全量通过。
 - fast 是子集，不能替代 full；PR CI/nightly 仍以 bounded runner 为准。
 - 清单可能随文件重命名腐烂：runner 对无效/越界/重复路径直接报错，不会静默少跑。
 - 新增文件前应按上面的运行时审计口径复核，并确认整条 lane 仍绿且低于 300s。
