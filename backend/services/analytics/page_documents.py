@@ -986,6 +986,15 @@ class PageDocumentStore:
             current, _, _ = self._confirmation(con, actor, preview_id, key)
             version = current.base_version + 1
             if current.status == "APPLIED":
+                # A new idempotency key must not mint a success receipt after
+                # the source grant was revoked; the earlier save still stands.
+                # A temporarily unavailable source keeps the idempotent replay.
+                if source_context is not None:
+                    try:
+                        source_context.revalidate()
+                    except AnalyticsError as error:
+                        if error.code == "RESULT_REVOKED":
+                            raise
                 saved, _ = self._revision(con, actor, current.page_id, version)
                 con.execute("INSERT OR IGNORE INTO receipts VALUES (?,?,?)", (actor.actor_id, key, preview_id))
                 return saved
