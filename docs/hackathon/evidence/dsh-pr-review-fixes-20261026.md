@@ -48,4 +48,8 @@ OCR 初始范围 16/16 reviewable 文件与 5 个排除测试全部审查，追�
 
 Workbench commit 9093147e 已在新 clone 中离线冻结安装、严格构建并通过正式 pack reader。manifest SHA-256 为 f5c545e0eaf580d5ee3db38443bdbf10cc4fd13e2ba86fd8b59e05a3cc5a09a7，tarball 为 3bbff8e90babd4c03ba5f054d930acea4522021bb2675c2a5d296328e030fa03。包为 482,034 字节，附 Acorn MIT 许可。
 
-九包候选组合的严格装配已通过，仅替换 Workbench。仓内正式组合锁仍保持原值，等待该作者 head 的远端证据与后续组合提交；不能把本地候选换成已发布身份。`activation=NOT_RUN`，`release_ready=false`。
+九包组合输入仅替换 Workbench，其余八个插件和领域包保持原字节。运输提交 a200bfd6 的 run 40317551623 已成功，artifact 12646823772 下载后严格回读通过，20 个 payload 与已审输入逐字节一致。归档 SHA-256 为 99b05508856388740d01990091656aef8b4a7d1c07c94040301abdf2df704c0c。仓内五份输入锁已同步这一候选，`activation=NOT_RUN`，`release_ready=false`。
+
+Workbench PR #5、#6 的两项 PR CI 均通过。#6 的固定输入 run 40315804015 提供 1,325 PASS 的测试归档，31 份公共合同与主仓逐字节一致。作者 CI 的另一份 formal tar 缺少 generated provenance，严格 reader 已拒绝；组合采用上段本地干净构建包，不混用两份包身份。两份输入接收复审没有确认的 P0–P2 发现。
+
+完整后端 synthetic-not-slow profile 在 e2a7ab84 为 3,886 PASS、81 SKIP、0 FAIL，前端为 236 PASS。全量后端的服务包检查先因本机 11 项依赖低于配方 pin 失败，改用新建隔离环境中的精确依赖后通过。下一次 push 的 B0 在启动前因验证输出目录未创建而拒绝，源码没有变化，也没有跳过 hooks；补齐独立输出根后，新五锁候选的完整 B0 precheck 已通过；Workbench core 仍归属固定作者 CI。最终 Git 结果以 PR 检查为准。
