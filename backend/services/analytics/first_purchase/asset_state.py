@@ -181,22 +181,52 @@ def initialize_sqlite(
                 if stored is None or stored[0] != kind:
                     raise ValueError(f"refusing a foreign or incomplete {kind} database")
             return
-        created = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY | os.O_NOFOLLOW, 0o600)
-        os.close(created)
-        with connect(path, readonly=False, unavailable=unavailable) as con:
-            con.execute("PRAGMA journal_mode=WAL")
-            con.executescript("BEGIN IMMEDIATE;\n" + ddl)
+        for stale in resolved.glob(f".{path.name}.init-*"):
             try:
-                con.execute(f"PRAGMA application_id={application_id}")
-                con.execute(f"PRAGMA user_version={schema_version}")
-                con.execute("INSERT INTO metadata VALUES (?, ?)", ("kind", kind))
-                con.execute("INSERT INTO metadata VALUES (?, ?)", ("finite_mock", "true"))
-                con.execute("INSERT INTO metadata VALUES (?, ?)", ("http_api", "NOT_CONNECTED"))
-                con.execute("COMMIT")
-            except BaseException:
-                if con.in_transaction:
-                    con.execute("ROLLBACK")
-                raise
+                stale.unlink()
+            except FileNotFoundError:
+                pass
+        staging = resolved / f".{path.name}.init-{uuid4().hex}"
+        created = os.open(staging, os.O_CREAT | os.O_EXCL | os.O_WRONLY | os.O_NOFOLLOW, 0o600)
+        os.close(created)
+        try:
+            with connect(staging, readonly=False, unavailable=unavailable) as con:
+                con.execute("PRAGMA journal_mode=WAL")
+                con.executescript("BEGIN IMMEDIATE;\n" + ddl)
+                try:
+                    con.execute(f"PRAGMA application_id={application_id}")
+                    con.execute(f"PRAGMA user_version={schema_version}")
+                    con.execute("INSERT INTO metadata VALUES (?, ?)", ("kind", kind))
+                    con.execute("INSERT INTO metadata VALUES (?, ?)", ("finite_mock", "true"))
+                    con.execute("INSERT INTO metadata VALUES (?, ?)", ("http_api", "NOT_CONNECTED"))
+                    con.execute("COMMIT")
+                    con.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+                except BaseException:
+                    if con.in_transaction:
+                        con.execute("ROLLBACK")
+                    raise
+            for suffix in ("-wal", "-shm"):
+                try:
+                    os.unlink(str(staging) + suffix)
+                except FileNotFoundError:
+                    pass
+            with open(staging, "rb") as handle:
+                os.fsync(handle.fileno())
+            # A crash before this rename leaves only a staging file. The final
+            # path appears complete or not at all, so a retry never inherits a
+            # half-initialized database.
+            os.replace(staging, path)
+            directory_fd = os.open(resolved, os.O_RDONLY)
+            try:
+                os.fsync(directory_fd)
+            finally:
+                os.close(directory_fd)
+        finally:
+            for leftover in (staging, Path(str(staging) + "-wal"), Path(str(staging) + "-shm")):
+                try:
+                    os.unlink(leftover)
+                except FileNotFoundError:
+                    pass
     finally:
         os.close(fd)
 

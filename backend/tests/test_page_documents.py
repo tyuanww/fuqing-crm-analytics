@@ -1310,6 +1310,27 @@ def test_foreign_or_linked_state_is_never_reinitialized(tmp_path):
     assert path.read_bytes() == before
 
 
+def test_interrupted_initialization_leaves_no_partial_state(tmp_path):
+    directory = private(tmp_path / "pages")
+    stale = directory / ".page_documents.sqlite3.init-dead"
+    stale.write_bytes(b"half-built")
+    store = PageDocumentStore(directory)
+    with closing(sqlite3.connect(store.path)) as conn:
+        assert conn.execute("PRAGMA user_version").fetchone()[0] == 1
+        assert conn.execute("SELECT value FROM metadata WHERE key='kind'").fetchone()[0] == "library_page_documents"
+    assert not stale.exists()
+
+
+def test_restart_preserves_page_identity_and_history(tmp_path):
+    directory = private(tmp_path / "pages")
+    first = PageDocumentStore(directory)
+    saved = confirm(first, first.generate(ALICE, draft()))
+    page_id = saved["spec"]["page_id"]
+    second = PageDocumentStore(directory)
+    assert second.get(ALICE, page_id) == saved
+    assert len(second.history(ALICE, page_id)) == 1
+
+
 def test_boardspec_store_and_codec_stay_independent(tmp_path):
     pages = PageDocumentStore(private(tmp_path / "pages"))
     boards = BoardDocumentStore(private(tmp_path / "boards"))
