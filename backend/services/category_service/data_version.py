@@ -22,15 +22,10 @@ def orders_data_version(conn: Any) -> dict[str, Any]:
         """
         SELECT
             CAST(MIN(pay_time) AS DATE),
-            CAST(MAX(pay_time) AS DATE),
-            COUNT(*),
-            CAST(COALESCE(SUM(actual_amount), 0) AS DECIMAL(38, 2))
+            CAST(MAX(pay_time) AS DATE)
         FROM orders
         """
     ).fetchone()
     data_start = _iso(row[0]) if row else None
     data_cutoff = _iso(row[1]) if row else None
-    count = int(row[2] or 0) if row else 0
-    amount = str(row[3] or "0.00") if row else "0.00"
-    version = f"orders-v1:{data_start or '-'}:{data_cutoff or '-'}:{count}:{amount}"
-    return {"data_start": data_start, "data_cutoff": data_cutoff, "data_version": version}
+    return {"data_start": data_start, "data_cutoff": data_cutoff, "data_version": "unknown"}

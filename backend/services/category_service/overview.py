@@ -16,6 +16,7 @@ from backend.services.category_display import (
 from backend.services.category_service._shared import rfm_asof_cte
 from backend.semantic.filters import FilterBuilder, MetricType, expand_channels
 from backend.semantic.calculations import yoy_absolute, yoy_ratio
+from backend.semantic.time import PeriodBuilder
 from .data_version import orders_data_version
 
 # L4.75 market-focus 性能治本 (跟 L4.74 cache end_date fix + L4.71 RFM 业务治本 1:1 stable 永久规则化沿用):
@@ -49,6 +50,11 @@ def get_category_overview_cached(
     性能治本: 第二次同 cache_key 查询 < 100ms (避免 96 次 HTTP 调用触发 429, 跟 L4.36 graceful retry 1:1 stable 永久规则化沿用)
     """
     source = orders_data_version(get_connection())
+    if source["data_version"] == "unknown":
+        return get_category_overview(
+            start_date, end_date, level, metric_type, channel, exclude_channels,
+            compare_start_date, compare_end_date, _source=source,
+        )
     cache_key = _overview_cache_key(
         start_date, end_date, level, metric_type,
         channel, exclude_channels, compare_start_date, compare_end_date,
@@ -398,14 +404,11 @@ def get_category_overview(
     conn = get_connection()
 
     start_dt = datetime.strptime(start_date, "%Y-%m-%d")
-    end_dt = datetime.strptime(end_date, "%Y-%m-%d")
     source = orders_data_version(conn) if _source is None else _source
     cutoff = (start_dt.date() - timedelta(days=1)).strftime("%Y-%m-%d")
 
-    ly_start = (start_dt - timedelta(days=365)).strftime("%Y-%m-%d")
-    ly_end = (end_dt - timedelta(days=365)).strftime("%Y-%m-%d")
-    ly_start_dt_obj = datetime.strptime(ly_start, "%Y-%m-%d")
-    ly_cutoff = (ly_start_dt_obj.date() - timedelta(days=1)).strftime("%Y-%m-%d")
+    comparison = PeriodBuilder.yoy(start_date, end_date)
+    ly_start, ly_end, ly_cutoff = comparison.start, comparison.end, comparison.cutoff
 
     # ── 自定义对比期覆盖 ─────────────────────────────────────
     if compare_start_date and compare_end_date:
@@ -416,25 +419,6 @@ def get_category_overview(
     # 仅需 2 次 SQL 查询（原来是 4 次），每次含 GROUPING SETS 返回品类行 + TTL 行 + 会员指标
     cur = _compute_category_period(conn, start_date, end_date, cutoff, level, metric_type, channel, exclude_channels)
     comp = _compute_category_period(conn, ly_start, ly_end, ly_cutoff, level, metric_type, channel, exclude_channels)
-
-
-    def _clamp_yoy(v):
-        """L4.79 + L4.81 治本: 钳到 ±99.9999 raw ratio (frontend *100 = ±9999.99% display, Excel 0.00 格式上限), 避免 previous≈0 时爆炸.
-
-        真业务触发 (user 7/10): 凉茶次抛 全店-GSV=¥105,861 YOY=-7296%, 未知 全店-AUS=¥111 YOY=+5503482857%.
-        真因: previous 接近 0 (新分类/小基数), yoy_absolute = (curr-prev)/prev 爆炸.
-        L4.81 治本契约: backend yoy_absolute 返回 raw ratio (no *100, e.g. 0.25 = +25% / 100), 钳到 ±99.9999 raw (frontend *100 = ±9999.99%).
-        治本 (留尾): 当 previous < 阈值 (¥10 / 10 人) 时, YOY = None ("新分类" 占位).
-        配套: Pydantic PercentageField (L4.81 ge=-1e10, le=1e10) 不会 422, 前端 YOYBadge |v|>1e6 raw (1e8%) 守卫 ("数据异常") 兜底.
-        """
-        if v is None:
-            return None
-        if v > 99.9999:
-            return 99.9999
-        if v < -99.9999:
-            return -99.9999
-        return v
-
     def _build_row(name: str, c: Dict[str, Any], p: Dict[str, Any]) -> Dict[str, Any]:
         # 老客/新客人数占比
         users = c.get("users", 0)
@@ -453,27 +437,27 @@ def get_category_overview(
             "name": name,
             "display_name": mask_category_name(name),
             "gsv": round(c.get("gsv", 0), 2),
-            "gsv_yoy": _clamp_yoy(yoy_absolute(c.get("gsv", 0), p.get("gsv", 0))),
+            "gsv_yoy": yoy_absolute(c.get("gsv", 0), p.get("gsv", 0)),
             "users": c.get("users", 0),
-            "users_yoy": _clamp_yoy(yoy_absolute(c.get("users", 0), p.get("users", 0))),
+            "users_yoy": yoy_absolute(c.get("users", 0), p.get("users", 0)),
             "aus": round(c.get("aus", 0), 2),
-            "aus_yoy": _clamp_yoy(yoy_absolute(c.get("aus", 0), p.get("aus", 0))),
+            "aus_yoy": yoy_absolute(c.get("aus", 0), p.get("aus", 0)),
             "old_gsv": round(c.get("old_gsv", 0), 2),
-            "old_gsv_yoy": _clamp_yoy(yoy_absolute(c.get("old_gsv", 0), p.get("old_gsv", 0))),
+            "old_gsv_yoy": yoy_absolute(c.get("old_gsv", 0), p.get("old_gsv", 0)),
             "old_ratio": round(c.get("old_ratio", 0), 4),
             "old_ratio_yoy": yoy_ratio(c.get("old_ratio", 0), p.get("old_ratio", 0)),
             "old_users": c.get("old_users", 0),
-            "old_users_yoy": _clamp_yoy(yoy_absolute(c.get("old_users", 0), p.get("old_users", 0))),
+            "old_users_yoy": yoy_absolute(c.get("old_users", 0), p.get("old_users", 0)),
             "old_aus": round(c.get("old_aus", 0), 2),
-            "old_aus_yoy": _clamp_yoy(yoy_absolute(c.get("old_aus", 0), p.get("old_aus", 0))),
+            "old_aus_yoy": yoy_absolute(c.get("old_aus", 0), p.get("old_aus", 0)),
             "new_gsv": round(c.get("new_gsv", 0), 2),
-            "new_gsv_yoy": _clamp_yoy(yoy_absolute(c.get("new_gsv", 0), p.get("new_gsv", 0))),
+            "new_gsv_yoy": yoy_absolute(c.get("new_gsv", 0), p.get("new_gsv", 0)),
             "new_ratio": round(c.get("new_ratio", 0), 4),
             "new_ratio_yoy": yoy_ratio(c.get("new_ratio", 0), p.get("new_ratio", 0)),
             "new_users": c.get("new_users", 0),
-            "new_users_yoy": _clamp_yoy(yoy_absolute(c.get("new_users", 0), p.get("new_users", 0))),
+            "new_users_yoy": yoy_absolute(c.get("new_users", 0), p.get("new_users", 0)),
             "new_aus": round(c.get("new_aus", 0), 2),
-            "new_aus_yoy": _clamp_yoy(yoy_absolute(c.get("new_aus", 0), p.get("new_aus", 0))),
+            "new_aus_yoy": yoy_absolute(c.get("new_aus", 0), p.get("new_aus", 0)),
             "old_users_ratio": old_users_ratio,
             "old_users_ratio_yoy": yoy_ratio(old_users_ratio, comp_old_users_ratio),
             "new_users_ratio": new_users_ratio,
@@ -482,17 +466,17 @@ def get_category_overview(
             "member_ratio_yoy": yoy_ratio(c.get("member_ratio", 0), p.get("member_ratio", 0)),
             # L4.79 治本: 品类看板-单品概览 Excel 导出 5 个会员字段 (跟 frontend allCompactXlsxColumns 1:1 stable)
             "member_gsv": round(c.get("member_gsv", 0), 2),
-            "member_gsv_yoy": _clamp_yoy(yoy_absolute(c.get("member_gsv", 0), p.get("member_gsv", 0))),
+            "member_gsv_yoy": yoy_absolute(c.get("member_gsv", 0), p.get("member_gsv", 0)),
             "member_users": c.get("member_data", {}).get("users", 0),
-            "member_users_yoy": _clamp_yoy(yoy_absolute(
+            "member_users_yoy": yoy_absolute(
                 c.get("member_data", {}).get("users", 0),
                 p.get("member_data", {}).get("users", 0),
-            )),
+            ),
             "member_aus": round(c.get("member_data", {}).get("aus", 0), 2),
-            "member_aus_yoy": _clamp_yoy(yoy_absolute(
+            "member_aus_yoy": yoy_absolute(
                 c.get("member_data", {}).get("aus", 0),
                 p.get("member_data", {}).get("aus", 0),
-            )),
+            ),
             "member_penetration": round(
                 c.get("member_data", {}).get("users", 0) / c.get("users", 0), 4
             ) if c.get("users", 0) > 0 else 0.0,
@@ -556,6 +540,8 @@ def get_category_overview(
     return {
         "date_start": start_date,
         "date_end": end_date,
+        "compare_start_date": ly_start,
+        "compare_end_date": ly_end,
         "level": level,
         "channel": channel,
         "metric_type": metric_type,

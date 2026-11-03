@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { buildProductCustomerTableRows, type ProductWeekResult } from './product-customer-rows'
+import { buildProductCustomerTableRows, joinProductCustomerWeeks, type ProductWeekResult } from './product-customer-rows'
+import type { CategoryOverviewResponse } from '@/api/category'
 
 function metric(overrides: Record<string, number> = {}) {
   return {
@@ -94,5 +95,62 @@ describe('product customer weekly rows', () => {
     ])
     const productRows = groups.find(group => group.name === '爆款面膜E')?.rows ?? []
     expect(productRows.at(-2)?.gsv_yoy_pct).toBeNull()
+  })
+
+  it('keeps the full growth ratio supplied by the product endpoint', () => {
+    const week = result('2026-06-29', '2026-07-05', metric())
+    week.customer.products[0]!.yoy.gsv = 999
+    const groups = buildProductCustomerTableRows([week])
+    expect(groups.find(group => group.name === '爆款面膜E')?.rows.at(-1)?.gsv_yoy_pct).toBe(999)
+  })
+})
+
+function matchingReceipts() {
+  const week = result('2025-02-24', '2025-03-02', metric())
+  const window = {
+    date_start: week.range.start, date_end: week.range.end,
+    compare_start_date: '2024-02-24', compare_end_date: '2024-03-02',
+    data_version: 'warehouse-revision-a',
+  }
+  const overview: CategoryOverviewResponse = {
+    ...window, level: 'class', channel: null, metric_type: 'GSV', data_cutoff: week.range.end,
+    all_rows: [], member_rows: [], all_ttl: week.ttl, member_ttl: week.ttl,
+  }
+  const customer = { ...week.customer, ...window }
+  return { range: week.range, overview, customer }
+}
+
+describe('joining product and store receipts', () => {
+  it('joins only matching source versions and comparison windows', () => {
+    const { range, overview, customer } = matchingReceipts()
+    expect(joinProductCustomerWeeks([range], [overview], [customer]))
+      .toEqual([{ range, ttl: overview.all_ttl, customer }])
+  })
+
+  it.each(['date_start', 'date_end', 'compare_start_date', 'compare_end_date'] as const)(
+    'rejects a mismatched %s instead of combining the totals', field => {
+      const { range, overview, customer } = matchingReceipts()
+      overview[field] = '2024-02-25'
+      expect(() => joinProductCustomerWeeks([range], [overview], [customer])).toThrow('对比窗口不一致')
+    },
+  )
+
+  it('rejects a different source version', () => {
+    const { range, overview, customer } = matchingReceipts()
+    expect(() => joinProductCustomerWeeks([range], [overview], [{ ...customer, data_version: 'warehouse-revision-b' }]))
+      .toThrow('同一数据快照')
+  })
+
+  it.each(['unknown', ''])('rejects unverified source version %s without requesting a retry', data_version => {
+    const { range, overview, customer } = matchingReceipts()
+    expect(() => joinProductCustomerWeeks([range], [overview], [{ ...customer, data_version }]))
+      .toThrow('数据来源未验证')
+  })
+
+  it('rejects missing comparison metadata and missing windows', () => {
+    const { range, overview, customer } = matchingReceipts()
+    expect(() => joinProductCustomerWeeks([range], [], [customer])).toThrow('时间窗口不完整')
+    expect(() => joinProductCustomerWeeks([range], [{ ...overview, compare_start_date: '' }], [customer]))
+      .toThrow('对比窗口不一致')
   })
 })
