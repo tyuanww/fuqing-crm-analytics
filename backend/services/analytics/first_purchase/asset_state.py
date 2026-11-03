@@ -167,6 +167,11 @@ def initialize_sqlite(
         if not stat.S_ISREG(lock_info.st_mode) or lock_info.st_nlink != 1 or lock_info.st_uid != os.getuid():
             raise ValueError(f"refusing unowned or linked {kind} initialization lock")
         fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        for stale in resolved.glob(f".{path.name}.init-*"):
+            try:
+                stale.unlink()
+            except FileNotFoundError:
+                pass
         existed = path.exists() or path.is_symlink()
         if existed:
             info = path.lstat()
@@ -214,7 +219,11 @@ def initialize_sqlite(
                 os.fsync(handle.fileno())
             # A crash before this rename leaves only a staging file. The final
             # path appears complete or not at all, so a retry never inherits a
-            # half-initialized database.
+            # half-initialized database. The recheck keeps the old O_EXCL
+            # guarantee against a non-cooperating writer that creates the final
+            # path while initialization runs.
+            if path.exists() or path.is_symlink():
+                raise ValueError(f"refusing to replace existing {kind} state file")
             os.replace(staging, path)
             directory_fd = os.open(resolved, os.O_RDONLY)
             try:

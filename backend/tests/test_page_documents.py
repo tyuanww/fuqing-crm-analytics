@@ -771,7 +771,7 @@ def test_readonly_computed_sources_survive_manual_and_forged_source_patches(tmp_
 def test_generate_cannot_override_readonly_sources_through_presentation(tmp_path):
     store = PageDocumentStore(private(tmp_path / "readonly-generate"))
     html = ('<div id="root"><h1 data-shine-node="n_title">标题</h1>'
-            '<p data-shine-node="n_metric" data-page-readonly>42</p></div>')
+            '<p id="metric" data-shine-node="n_metric" data-page-readonly>42</p></div>')
     package = {
         "html": html, "css": "", "js": "", "resources": [],
         "node_map": [
@@ -1353,6 +1353,35 @@ def test_interrupted_initialization_leaves_no_partial_state(tmp_path):
     with closing(sqlite3.connect(store.path)) as conn:
         assert conn.execute("PRAGMA user_version").fetchone()[0] == 1
         assert conn.execute("SELECT value FROM metadata WHERE key='kind'").fetchone()[0] == "library_page_documents"
+    assert not stale.exists()
+
+
+def test_initialization_refuses_state_that_appears_before_publish(tmp_path, monkeypatch):
+    from backend.services.analytics.first_purchase import asset_state
+
+    directory = private(tmp_path / "pages")
+    path = directory / "page_documents.sqlite3"
+    real_fsync = os.fsync
+    injected = []
+
+    def fsync_then_inject(fd):
+        real_fsync(fd)
+        if not injected:
+            path.write_bytes(b"foreign-state")
+            injected.append(True)
+
+    monkeypatch.setattr(asset_state.os, "fsync", fsync_then_inject)
+    with pytest.raises(ValueError):
+        PageDocumentStore(directory)
+    assert path.read_bytes() == b"foreign-state"
+
+
+def test_existing_state_cleans_stale_initialization_files(tmp_path):
+    directory = private(tmp_path / "pages")
+    store = PageDocumentStore(directory)
+    stale = directory / f".{store.path.name}.init-dead"
+    stale.write_bytes(b"dead")
+    PageDocumentStore(directory)
     assert not stale.exists()
 
 
