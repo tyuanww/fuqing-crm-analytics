@@ -768,6 +768,41 @@ def test_readonly_computed_sources_survive_manual_and_forged_source_patches(tmp_
     assert error.value.code == "AI_BOUND_CONTENT" and error.value.status == 403
 
 
+def test_generate_cannot_override_readonly_sources_through_presentation(tmp_path):
+    store = PageDocumentStore(private(tmp_path / "readonly-generate"))
+    html = ('<div id="root"><h1 data-shine-node="n_title">标题</h1>'
+            '<p data-shine-node="n_metric" data-page-readonly>42</p></div>')
+    package = {
+        "html": html, "css": "", "js": "", "resources": [],
+        "node_map": [
+            {"node_id": "n_title", "kind": "static_element",
+             "selector": "[data-shine-node='n_title']"},
+            {"node_id": "n_metric", "kind": "static_element",
+             "selector": "[data-shine-node='n_metric']"},
+        ],
+        "presentation": {
+            "version": 1,
+            "source_hash": page_source_hash(html, "", ""),
+            "edits": [{
+                "target": {"anchor": {"attribute": "id", "value": "root"},
+                           "path": [{"tag": "p", "key": {"attribute": "id", "value": "metric"}}]},
+                "text": "99",
+            }],
+        },
+    }
+    with pytest.raises(AnalyticsError) as error:
+        store.generate(ALICE, draft(package=package))
+    assert error.value.code == "AI_BOUND_CONTENT" and error.value.status == 403
+
+    styled = deepcopy(package)
+    styled["presentation"]["edits"] = [{
+        "target": {"anchor": {"attribute": "id", "value": "root"},
+                   "path": [{"tag": "p", "key": {"attribute": "id", "value": "metric"}}]},
+        "style": {"color": "#805D9D"},
+    }]
+    assert store.generate(ALICE, draft(package=styled))["operation"] == "GENERATE"
+
+
 @pytest.mark.parametrize(
     ("name", "marker"),
     [
