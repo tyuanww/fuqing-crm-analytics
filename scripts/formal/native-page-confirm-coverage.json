@@ -1,0 +1,14 @@
+{
+  "sync_commit": "77de746e1e40ee58a3096a0f21c44bd66c8572f5",
+  "functions": {
+    "PageDocumentStore.confirm": "7d2f262df5a1d407153acb8b296c609e6f870993e5e305b71d1e519d62635f32",
+    "PageDocumentStore._confirmation": "09c230fe0deb9f7f0f83aa28e579c06a74eaae7eed1694f609038e6b7f92cf37",
+    "PageDocumentStore._bind": "4e501a38c6f410bc1a9b018ba02b68de2ccbc5d59fa61e9553192921a16fad81"
+  },
+  "dependencies": {
+    "backend/services/analytics/page_context.py": "55f38eef9495c5f7784598c72ca7392f2ec7642943a6dcd55b2e68f0784be85d",
+    "backend/services/analytics/first_purchase/asset_state.py": "613c73930cf12d33164cadc3992f1e0505f26a6fceb2021e82fc92cf76a99c01"
+  },
+  "guard": "PageDocumentStore.confirm: binding_error is not None -> raise binding_error",
+  "guardless_hash_note": "confirm fingerprint omits only this guard, allowing the actual missing-guard variant to reach TLC; all other covered code changes require resync"
+}
