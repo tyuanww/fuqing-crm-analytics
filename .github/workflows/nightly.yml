@@ -11,6 +11,12 @@ on:
 permissions:
   contents: read
 
+# 周度健康检查是 45 分钟级的有界全量运行：定时与手动入口撞车时只排队、不互相取消
+# （取消会留下没有 summary 的半截证据），也不取消已排队的运行。
+concurrency:
+  group: nightly-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   test:
     runs-on: ubuntu-latest
