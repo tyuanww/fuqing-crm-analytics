@@ -300,12 +300,7 @@
       "bundled_inputs": [],
       "dsh": {
         "client": {
-          "platform": "web",
-          "inject": [
-            "@deepseek-ai/dsh-client-ui-renderer",
-            "@deepseek-ai/dsh-client-ui-sidebar",
-            "@deepseek-ai/dsh-client-ui-slots"
-          ]
+          "platform": "web"
         },
         "bundle": {
           "patch": "./cordis.patch.yml"
@@ -315,7 +310,7 @@
         "build": "node build.mjs",
         "test": "node --test src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "a065d60850efb398d95b34c3a9a8265f2dfaf2bb97383c1b3e831f106b6ef915"
+      "manifest_sha256": "78fe8ebafad4a2550c16ae1d8359f6ea7db552e707f95f7105f6ccc94e5cff29"
     },
     {
       "path": "dsh-plugins/shine-brand",
@@ -389,12 +384,7 @@
       "bundled_inputs": [],
       "dsh": {
         "client": {
-          "platform": "web",
-          "inject": [
-            "@deepseek-ai/dsh-client-ui-renderer",
-            "@deepseek-ai/dsh-client-ui-sidebar",
-            "@deepseek-ai/dsh-client-ui-slots"
-          ]
+          "platform": "web"
         },
         "bundle": {
           "patch": "./cordis.patch.yml"
@@ -404,7 +394,7 @@
         "build": "node build.mjs",
         "test": "node --test src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "8096ec2e69b22fb857a732df001257f286c620757f95e637567ca840559b6b6e"
+      "manifest_sha256": "4b4a682e474705b59d22fd0d8f8b1323fae2353599563df4edab97dfa377ef6e"
     },
     {
       "path": "dsh-plugins/shine-funnel",
@@ -450,12 +440,7 @@
       ],
       "dsh": {
         "client": {
-          "platform": "web",
-          "inject": [
-            "@deepseek-ai/dsh-client-ui-renderer",
-            "@deepseek-ai/dsh-client-ui-sidebar",
-            "@deepseek-ai/dsh-client-ui-slots"
-          ]
+          "platform": "web"
         },
         "bundle": {
           "patch": "./cordis.patch.yml"
@@ -465,7 +450,7 @@
         "build": "node build.mjs",
         "test": "node --test src/funnel.test.mjs src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "dd9190866e32818bec895597161b9c4fb726a959404b4b5b37b45be32fbda6b8"
+      "manifest_sha256": "7159ca404c5bbbba1800a6c071d8236ce0384ef5f9fc109ff8ef158ec0bb1260"
     },
     {
       "path": "dsh-plugins/shine-query",
@@ -495,12 +480,7 @@
       "bundled_inputs": [],
       "dsh": {
         "client": {
-          "platform": "web",
-          "inject": [
-            "@deepseek-ai/dsh-client-ui-renderer",
-            "@deepseek-ai/dsh-client-ui-sidebar",
-            "@deepseek-ai/dsh-client-ui-slots"
-          ]
+          "platform": "web"
         },
         "bundle": {
           "patch": "./cordis.patch.yml"
@@ -510,7 +490,7 @@
         "build": "node build.mjs",
         "test": "node --test src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "3acf09d4a0a4f1402e307964799b61e95f29493a12af5d80e3db6890dd387c3c"
+      "manifest_sha256": "d63fc9f0e1fd6221d986d0a56fb320d99b8d941576a90f63d907d170b8337e32"
     },
     {
       "path": "dsh-plugins/shine-waterfall",
@@ -556,12 +536,7 @@
       ],
       "dsh": {
         "client": {
-          "platform": "web",
-          "inject": [
-            "@deepseek-ai/dsh-client-ui-renderer",
-            "@deepseek-ai/dsh-client-ui-sidebar",
-            "@deepseek-ai/dsh-client-ui-slots"
-          ]
+          "platform": "web"
         },
         "bundle": {
           "patch": "./cordis.patch.yml"
@@ -571,7 +546,7 @@
         "build": "node build.mjs",
         "test": "node --test src/waterfall.test.mjs src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "13140dce4cf3d61c0f17e5e9353918a51ed1cc07e941edd2fbe099699a5d9002"
+      "manifest_sha256": "01c8dc9bbb358ba6402048f9af6306b35e2e8814e9298965dc5d4ddf23f00e85"
     }
   ],
   "source_files_scanned": 661,
@@ -3632,7 +3607,7 @@
     {
       "consumer": "shine-board",
       "phase": "runtime",
-      "specifier": "@deepseek-ai/dsh-client-core"
+      "specifier": "@deepseek-ai/cordis"
     },
     {
       "consumer": "shine-board",
@@ -3747,7 +3722,7 @@
     {
       "consumer": "shine-crowd-action",
       "phase": "runtime",
-      "specifier": "@deepseek-ai/dsh-client-core"
+      "specifier": "@deepseek-ai/cordis"
     },
     {
       "consumer": "shine-crowd-action",
@@ -3802,7 +3777,7 @@
     {
       "consumer": "shine-funnel",
       "phase": "runtime",
-      "specifier": "@deepseek-ai/dsh-client-core"
+      "specifier": "@deepseek-ai/cordis"
     },
     {
       "consumer": "shine-funnel",
@@ -3857,7 +3832,7 @@
     {
       "consumer": "shine-query",
       "phase": "runtime",
-      "specifier": "@deepseek-ai/dsh-client-core"
+      "specifier": "@deepseek-ai/cordis"
     },
     {
       "consumer": "shine-query",
@@ -3912,7 +3887,7 @@
     {
       "consumer": "shine-waterfall",
       "phase": "runtime",
-      "specifier": "@deepseek-ai/dsh-client-core"
+      "specifier": "@deepseek-ai/cordis"
     },
     {
       "consumer": "shine-waterfall",
