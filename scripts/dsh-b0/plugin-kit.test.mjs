@@ -14,6 +14,10 @@ import { linkWorkspaceContract, linkWorkspaceContractSdk, linkWorkspaceKit, link
 const exec = promisify(execFile);
 const repository = fileURLToPath(new URL('../..', import.meta.url));
 const kit = join(repository, 'dsh-plugins/plugin-kit');
+// Fixtures must declare the kit's real version: linkWorkspaceKit asserts
+// consumer.devDependencies[kit] === kit.version, so a hardcoded pin would
+// silently rot on every kit release.
+const kitVersion = JSON.parse(await readFile(join(kit, 'package.json'), 'utf8')).version;
 // Test-only trial: never rewrite the repository kit or official SDK's pin.
 // Corepack's explicit version command runs from the caller-owned offline cache.
 function managerTrial(declared, candidate) {
@@ -292,10 +296,10 @@ test('real kit tarball contains only declared source/locks and exposes its publi
 
 test('workspace kit link is explicit, idempotent and never replaces a foreign installation', async t => {
   const root = await owned(t), plugin = join(root, 'plugin'); await mkdir(plugin);
-  const declaration = { devDependencies: { '@shine-mage/dsh-plugin-kit': '0.1.0' } };
+  const declaration = { devDependencies: { '@shine-mage/dsh-plugin-kit': kitVersion } };
   const save = obj => writeFile(join(plugin, 'package.json'), JSON.stringify(obj));
   await save({}); await assert.rejects(linkWorkspaceKit(plugin, kit), /KIT_LINK_VERSION/);
-  await save({ ...declaration, dependencies: { '@shine-mage/dsh-plugin-kit': '0.1.0' } });
+  await save({ ...declaration, dependencies: { '@shine-mage/dsh-plugin-kit': kitVersion } });
   await assert.rejects(linkWorkspaceKit(plugin, kit), /KIT_LINK_DEV_ONLY/);
   await save(declaration);
   assert.equal((await linkWorkspaceKit(plugin, kit)).status, 'LINKED');
@@ -370,7 +374,7 @@ test('repository build preparation leaves external checkouts alone', async t => 
   const kitSource = join(repository, 'dsh-plugins/plugin-kit');
   await copyPluginKitSources(kit, kitSource, { destinationRoot: root });
   const external = join(root, 'external'); await mkdir(external);
-  await writeFile(join(external, 'package.json'), JSON.stringify({ devDependencies: { '@shine-mage/dsh-plugin-kit': '0.1.0' } }));
+  await writeFile(join(external, 'package.json'), JSON.stringify({ devDependencies: { '@shine-mage/dsh-plugin-kit': kitVersion } }));
   assert.equal((await linkRepositoryKit(external, repository)).status, 'EXTERNAL_PACKAGE');
   await assert.rejects(lstat(join(external, 'node_modules')), { code: 'ENOENT' });
   const alias = join(repository, 'dsh-plugins/external-alias'); await symlink(external, alias, 'dir');

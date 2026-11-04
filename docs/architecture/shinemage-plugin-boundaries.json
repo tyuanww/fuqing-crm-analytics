@@ -37,7 +37,7 @@
       },
       "dependencies": {},
       "dev_dependencies": {
-        "@shine-mage/dsh-plugin-kit": "0.1.0",
+        "@shine-mage/dsh-plugin-kit": "0.1.1",
         "@shine-mage/board-components": "0.1.0",
         "@shine-mage/dsh-contracts": "0.1.0"
       },
@@ -78,7 +78,7 @@
         "test:host-facts": "node --test src/client/host-facts.test.mjs src/client/library-workspace.test.mjs",
         "test:host-facts:browser": "node src/client/host-facts-browser.test.mjs"
       },
-      "manifest_sha256": "28a352533d04a0a6f108abe6e63bd8f89c2fdc59c315e581643c7d0053616612"
+      "manifest_sha256": "d935257288f67df3821779262bb91464c305ec27574f9f2841a3b8dcc9186262"
     },
     {
       "path": "dsh-plugins/board-components",
@@ -106,7 +106,7 @@
       "peers": {},
       "dependencies": {},
       "dev_dependencies": {
-        "@shine-mage/dsh-plugin-kit": "0.1.0"
+        "@shine-mage/dsh-plugin-kit": "0.1.1"
       },
       "bundled_inputs": [],
       "dsh": {},
@@ -114,7 +114,7 @@
         "build": "node build.mjs",
         "test": "node --test test/*.test.mjs"
       },
-      "manifest_sha256": "c82cc3af5ee76e88a80846ff0108dd2758dfd0c77c81205530e834897d8464d8"
+      "manifest_sha256": "7bcfa3f6836a44cad05f6b7262c1712a27da400a9032443caf55ffe3adbfe771"
     },
     {
       "path": "dsh-plugins/contracts",
@@ -235,7 +235,7 @@
         "katex": "^0.18.7"
       },
       "dev_dependencies": {
-        "@shine-mage/dsh-plugin-kit": "0.1.0",
+        "@shine-mage/dsh-plugin-kit": "0.1.1",
         "@shine-mage/dsh-contracts": "0.1.0"
       },
       "bundled_inputs": [],
@@ -257,7 +257,7 @@
         "build": "node build.mjs",
         "test:host": "node --test test/host.integration.mjs"
       },
-      "manifest_sha256": "bc41f7a13978f56477c245b399502f3686300de2aac29336583e665ad85072ea"
+      "manifest_sha256": "679245bef8c9d2ae4cffcf97f9ad339a285880788f87d292f4ee1a1503f5000b"
     },
     {
       "path": "dsh-plugins/knowledge",
@@ -283,7 +283,7 @@
       },
       "dependencies": {},
       "dev_dependencies": {
-        "@shine-mage/dsh-plugin-kit": "0.1.0",
+        "@shine-mage/dsh-plugin-kit": "0.1.1",
         "@shine-mage/dsh-contracts": "0.1.0"
       },
       "bundled_inputs": [],
@@ -296,12 +296,12 @@
         "build": "node build.mjs",
         "test": "node --test test/*.test.mjs"
       },
-      "manifest_sha256": "b36c940065272b1e6c33cf5e05c846ce1d6d8e0ea6cf61c02e39a9b82d7e81d3"
+      "manifest_sha256": "48cf6b045ee458f4ccb6f9f225823070486ac279a7a5a7d5bddbe4ab3c85df37"
     },
     {
       "path": "dsh-plugins/plugin-kit",
       "name": "@shine-mage/dsh-plugin-kit",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "domain": "build-tooling",
       "target_repository": "shinemage-dsh-plugin-kit",
       "kind": "dev-tool",
@@ -338,7 +338,7 @@
       "bundled_inputs": [],
       "dsh": {},
       "commands": {},
-      "manifest_sha256": "5d62efc5c6313738ce28e4155ace511fe1c7ca3c27f65378ce10b8a8601b183b"
+      "manifest_sha256": "36a8264a388f906cb1f766916e5fd73781f0055eb24a89586308455c1b98956c"
     },
     {
       "path": "dsh-plugins/query-agent",
@@ -393,7 +393,7 @@
       },
       "dependencies": {},
       "dev_dependencies": {
-        "@shine-mage/dsh-plugin-kit": "0.1.0"
+        "@shine-mage/dsh-plugin-kit": "0.1.1"
       },
       "bundled_inputs": [],
       "dsh": {
@@ -408,7 +408,7 @@
         "build": "node build.mjs",
         "test": "node --test src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "53c14b6e670e67e9841fc85a5ce72c6aa5423e3b09fdea3f313fed75669b9e70"
+      "manifest_sha256": "7a388092eadef933518d6ddfb85ccebd848bdf366fa00303edca3c310b950c66"
     },
     {
       "path": "dsh-plugins/shine-brand",
@@ -433,7 +433,7 @@
       },
       "dependencies": {},
       "dev_dependencies": {
-        "@shine-mage/dsh-plugin-kit": "0.1.0"
+        "@shine-mage/dsh-plugin-kit": "0.1.1"
       },
       "bundled_inputs": [],
       "dsh": {
@@ -452,7 +452,7 @@
         "build": "node build.mjs",
         "test": "node --test src/brand-surface.test.mjs src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "1f35f5acfc24cd5c4ba6532a927b26bd24f34acf6ff922542d7835521f71b14a"
+      "manifest_sha256": "e6fe1b1c87ebc865c111122aced38e8e65d4bb467960801798d4628c26fd11cb"
     },
     {
       "path": "dsh-plugins/shine-crowd-action",
@@ -477,7 +477,7 @@
       },
       "dependencies": {},
       "dev_dependencies": {
-        "@shine-mage/dsh-plugin-kit": "0.1.0"
+        "@shine-mage/dsh-plugin-kit": "0.1.1"
       },
       "bundled_inputs": [],
       "dsh": {
@@ -492,7 +492,7 @@
         "build": "node build.mjs",
         "test": "node --test src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "5581edb9e0616be18f5efe47db7391928bcf86dadb1204411cafc8b270c1bb50"
+      "manifest_sha256": "e8b8934627d471382a1393fd65ec6d6250a7f554675531b6cdb436089eaf89e3"
     },
     {
       "path": "dsh-plugins/shine-funnel",
@@ -525,7 +525,7 @@
       },
       "dependencies": {},
       "dev_dependencies": {
-        "@shine-mage/dsh-plugin-kit": "0.1.0",
+        "@shine-mage/dsh-plugin-kit": "0.1.1",
         "@shine-mage/board-components": "0.1.0"
       },
       "bundled_inputs": [
@@ -548,7 +548,7 @@
         "build": "node build.mjs",
         "test": "node --test src/funnel.test.mjs src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "a90171fb132b8554e4fd145b6cfa8cff7f5f44a46be10f33bd1e4637e825d946"
+      "manifest_sha256": "1a8030e7cf3fd4f653ba13d2fdef3be4218c52af2c1614dd938286adc6d2b334"
     },
     {
       "path": "dsh-plugins/shine-query",
@@ -573,7 +573,7 @@
       },
       "dependencies": {},
       "dev_dependencies": {
-        "@shine-mage/dsh-plugin-kit": "0.1.0"
+        "@shine-mage/dsh-plugin-kit": "0.1.1"
       },
       "bundled_inputs": [],
       "dsh": {
@@ -588,7 +588,7 @@
         "build": "node build.mjs",
         "test": "node --test src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "a9af8379202d58ec135397c0fafa320babbc495cd2d2986fd9c151462e3158ad"
+      "manifest_sha256": "9d240e3e8e21a5a2588ae28a38045493358c6e9f2063c1ded3e81ca0b79652ce"
     },
     {
       "path": "dsh-plugins/shine-waterfall",
@@ -621,7 +621,7 @@
       },
       "dependencies": {},
       "dev_dependencies": {
-        "@shine-mage/dsh-plugin-kit": "0.1.0",
+        "@shine-mage/dsh-plugin-kit": "0.1.1",
         "@shine-mage/board-components": "0.1.0"
       },
       "bundled_inputs": [
@@ -644,7 +644,7 @@
         "build": "node build.mjs",
         "test": "node --test src/waterfall.test.mjs src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "ebc6f995b4a0ac0437b4444513e35e9e52e7f53612d1a254a12a99bc314043bd"
+      "manifest_sha256": "e6ade327d5fa086dd9fd07c46b1a6ec29e9349b8a4dc6086baa1280e44661377"
     }
   ],
   "source_files_scanned": 674,

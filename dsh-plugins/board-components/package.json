@@ -12,5 +12,5 @@
   },
   "files": ["lib/funnel.mjs", "lib/funnel.d.mts", "lib/waterfall.mjs", "lib/waterfall.d.mts"],
   "scripts": { "build": "node build.mjs", "test": "node --test test/*.test.mjs" },
-  "devDependencies": { "@shine-mage/dsh-plugin-kit": "0.1.0" }
+  "devDependencies": { "@shine-mage/dsh-plugin-kit": "0.1.1" }
 }

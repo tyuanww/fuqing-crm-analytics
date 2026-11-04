@@ -22,5 +22,5 @@
     "build": "node build.mjs",
     "test": "node --test src/client-lifecycle.test.mjs"
   },
-  "devDependencies": { "@shine-mage/dsh-plugin-kit": "0.1.0" }
+  "devDependencies": { "@shine-mage/dsh-plugin-kit": "0.1.1" }
 }

@@ -19,13 +19,13 @@ importers:
         specifier: 0.1.0
         version: link:../contracts
       '@shine-mage/dsh-plugin-kit':
-        specifier: 0.1.0
+        specifier: 0.1.1
         version: link:../plugin-kit
 
   ../board-components:
     devDependencies:
       '@shine-mage/dsh-plugin-kit':
-        specifier: 0.1.0
+        specifier: 0.1.1
         version: link:../plugin-kit
 
   ../contracts: {}
