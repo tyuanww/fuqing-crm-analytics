@@ -109,7 +109,7 @@ def scoped_pytest_targets(paths: list[str]) -> list[str]:
     return out
 
 
-B0_PREFIXES = ('dsh-plugins/analytics-workbench/', 'scripts/dsh-b0/', 'scripts/dsh-dev/',
+B0_PREFIXES = ('dsh-plugins/analytics-workbench/', 'dsh-plugins/contracts/', 'scripts/dsh-b0/', 'scripts/dsh-dev/',
                'backend/services/analytics/', 'backend/tests/analytics_')
 B0_EXACT = {'backend/contracts/analytics.py', 'backend/semantic/analytics_b0.py',
             'config/shinemage-composition-packs.lock.json', 'config/workbench-author-evidence.lock.json', 'config/domain-author-evidence.lock.json',

@@ -61,6 +61,11 @@
       "domain": "agent-preset",
       "target_repository": "shinemage-dsh-query-agent",
       "kind": "configuration-bundle"
+    },
+    "contracts": {
+      "domain": "generated-contracts",
+      "target_repository": "shinemage-dsh-contracts",
+      "kind": "contract-package"
     }
   },
   "allowed_runtime_edges": [],
@@ -132,7 +137,7 @@
     {
       "id": "crm-metrics",
       "owner": "crm-service",
-      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
+      "source": "dsh-plugins/contracts/crm-knowledge/dashboard-contract.generated.d.ts",
       "generator": "scripts/crm-calibration/generate_types.mjs",
       "consumers": [
         "crm-knowledge"
@@ -143,7 +148,7 @@
     {
       "id": "crm-metrics-tool-schema",
       "owner": "crm-service",
-      "source": "dsh-plugins/crm-knowledge/src/contract.generated.ts",
+      "source": "dsh-plugins/contracts/crm-knowledge/contract.generated.ts",
       "generator": "scripts/crm-calibration/generate_contract.py",
       "consumers": [
         "crm-knowledge"
@@ -154,7 +159,7 @@
     {
       "id": "first-purchase",
       "owner": "analysis-service",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-contract.generated.d.ts",
+      "source": "dsh-plugins/contracts/analytics-workbench/first-purchase-contract.generated.d.ts",
       "generator": "scripts/dsh-b0/first-purchase-contract.mjs",
       "consumers": [
         "analytics-workbench"
@@ -165,7 +170,7 @@
     {
       "id": "saved-analysis",
       "owner": "analysis-service",
-      "source": "dsh-plugins/analytics-workbench/src/analysis-contract.generated.d.ts",
+      "source": "dsh-plugins/contracts/analytics-workbench/analysis-contract.generated.d.ts",
       "generator": "scripts/dsh-b0/analysis-contract.mjs",
       "consumers": [
         "analytics-workbench"
@@ -176,7 +181,7 @@
     {
       "id": "board-spec",
       "owner": "board-domain",
-      "source": "dsh-plugins/analytics-workbench/src/board-spec-contract.generated.d.ts",
+      "source": "dsh-plugins/contracts/analytics-workbench/board-spec-contract.generated.d.ts",
       "generator": "scripts/dsh-b0/board-spec-contract.mjs",
       "consumers": [
         "analytics-workbench",
@@ -306,7 +311,7 @@
     {
       "id": "first-purchase-save-receipt",
       "owner": "analysis-service",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
+      "source": "dsh-plugins/contracts/analytics-workbench/first-purchase-analysis-contract.generated.d.ts",
       "generator": "scripts/dsh-b0/first-purchase-analysis-contract.mjs",
       "consumers": [
         "analytics-workbench"
@@ -317,7 +322,7 @@
     {
       "id": "first-purchase-save-result",
       "owner": "analysis-service",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
+      "source": "dsh-plugins/contracts/analytics-workbench/first-purchase-analysis-contract.generated.d.ts",
       "generator": "scripts/dsh-b0/first-purchase-analysis-contract.mjs",
       "consumers": [
         "analytics-workbench"
@@ -328,7 +333,7 @@
     {
       "id": "first-purchase-session-identity",
       "owner": "analysis-service",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
+      "source": "dsh-plugins/contracts/analytics-workbench/first-purchase-analysis-contract.generated.d.ts",
       "generator": "scripts/dsh-b0/first-purchase-analysis-contract.mjs",
       "consumers": [
         "analytics-workbench"

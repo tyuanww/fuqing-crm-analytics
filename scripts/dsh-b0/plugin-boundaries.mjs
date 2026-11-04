@@ -1,6 +1,6 @@
 /** Read-only source inventory. --write updates only the generated boundary manifest. */
 import assert from 'node:assert/strict';
-import { validatePackageLock, DEV_KIT_NAME } from '../../dsh-plugins/plugin-kit/packaged-dependencies.mjs';
+import { validatePackageLock, DEV_KIT_NAME, CONTRACT_PACKAGE_NAME } from '../../dsh-plugins/plugin-kit/packaged-dependencies.mjs';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { lstat, readFile, readdir, writeFile } from 'node:fs/promises';
@@ -25,7 +25,7 @@ export function validateBoundaryPolicy(policy) {
   for (const [name, owner] of Object.entries(policy.owners)) {
     assert.match(name, /^[a-z0-9-]+$/, 'BOUNDARY_OWNER_NAME');
     fieldKeys(owner, ['domain', 'target_repository', 'kind'], 'BOUNDARY_OWNER_FIELDS');
-    assert.ok(['plugin', 'configuration-bundle', 'dev-tool', 'domain-library'].includes(owner.kind)
+    assert.ok(['plugin', 'configuration-bundle', 'dev-tool', 'domain-library', 'contract-package'].includes(owner.kind)
       && owner.domain && owner.target_repository, 'BOUNDARY_OWNER_INVALID');
   }
   for (const edge of policy.allowed_runtime_edges) {
@@ -76,7 +76,8 @@ export async function inspectBoundaries(root = repository) {
     const owner = policy.owners[directory.name];
     const lock = await readFile(join(path, 'bundled-dependencies.json'), 'utf8').catch(error => { if (error.code !== 'ENOENT') throw error; return null; });
     const bundled = lock ? validatePackageLock(JSON.parse(lock), manifest).packages : [];
-    assert.ok(bundled.length || !Object.keys(manifest.devDependencies ?? {}).some(name => name.startsWith('@shine-mage/') && name !== DEV_KIT_NAME), 'BOUNDARY_BUNDLED_LOCK_REQUIRED');
+    assert.ok(bundled.length || !Object.keys(manifest.devDependencies ?? {}).some(name => name.startsWith('@shine-mage/')
+    && name !== DEV_KIT_NAME && name !== CONTRACT_PACKAGE_NAME), 'BOUNDARY_BUNDLED_LOCK_REQUIRED');
     assert.ok(![manifest.dependencies, manifest.optionalDependencies, manifest.peerDependencies]
       .some(group => group?.[DEV_KIT_NAME] !== undefined), 'BOUNDARY_KIT_DEV_ONLY');
     packages.push({ path: normalize(relative(root, path)), name: manifest.name, version: manifest.version, ...owner,
@@ -115,6 +116,14 @@ export async function inspectBoundaries(root = repository) {
               && !caller.peers[pkg.name], 'BOUNDARY_KIT_DEV_ONLY');
             assert.ok(targets.length && targets.every(value => typeof value === 'string' && value.startsWith('./')
               && safePath(value.slice(2)) && pkg.files.includes(value.slice(2))), 'BOUNDARY_EXPORT_NOT_PACKED');
+          } else if (pkg.kind === 'contract-package') {
+            // Generated contract outputs are a private, exact-version dev-only
+            // sibling: every export is published in files/, consumers bundle the
+            // values at build time, and no runtime dependency is admitted.
+            assert.ok(targets.length && targets.every(value => typeof value === 'string' && value.startsWith('./')
+              && safePath(value.slice(2)) && pkg.files.includes(value.slice(2))), 'BOUNDARY_CONTRACT_EXPORT_NOT_PACKED');
+            assert.equal(caller.dev_dependencies[pkg.name], pkg.version, `BOUNDARY_CONTRACT_DEPENDENCY_REQUIRED ${specifier}`);
+            assert.ok(!caller.dependencies[pkg.name] && !caller.peers[pkg.name], 'BOUNDARY_CONTRACT_DEV_ONLY');
           } else {
             assert.ok(targets.length && targets.every(value => typeof value === 'string' && value.startsWith('./lib/') && pkg.files.includes(value.slice(2))), 'BOUNDARY_EXPORT_NOT_PACKED');
             assert.ok(pkg.kind === 'domain-library' && caller.bundled_inputs.some(row => row.name === pkg.name && row.version === pkg.version), `BOUNDARY_PUBLIC_DEPENDENCY_REQUIRED ${specifier}`);

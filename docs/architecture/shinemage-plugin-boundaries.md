@@ -27,6 +27,7 @@ node --test scripts/dsh-b0/plugin-boundaries.test.mjs
 | 主仓历史包目录 | 领域 | 当前独立作者仓／维护归属 | 能力边界 |
 |---|---|---|---|
 | `plugin-kit` | 开发工具 | 主仓的固定 kit 输入；本轮不声明独立远程分发 | pin、lock、补丁与构建绑定，不进入运行包 |
+| `contracts` | 生成合同产物 | 主仓生成的合同唯一源；P4 按 `shinemage-dsh-contracts` 独立仓发布 | 15 个 public compiler 合同 + CRM/knowledge 生成类型与常量；插件只消费 subpath 导出，不再写生成物 |
 | `board-components` | 图表计算／类型 | [shinemage-board-components](https://github.com/tyuanww/shinemage-board-components)；主仓消费固定领域输入 | producer／私有几何由作者 CI 负责；公开计算和类型不注册宿主能力 |
 | `shine-brand` | 受控主题 | [dsh-shine-brand](https://github.com/tyuanww/dsh-shine-brand) | 默认不覆盖原生壳；公开编译路径不等于严格 SDK 类型检查 |
 | `shine-query` | query marker | [dsh-shine-query](https://github.com/tyuanww/dsh-shine-query) | 标记与生命周期，不是完整问数产品验收 |
@@ -38,9 +39,9 @@ node --test scripts/dsh-b0/plugin-boundaries.test.mjs
 | `crm-knowledge` | CRM 登录／指标／分析 adapter | [dsh-crm-knowledge](https://github.com/tyuanww/dsh-crm-knowledge) | CRM 包 ID 保留，知识实现已分离；真实服务另验 |
 | `knowledge` | 公开解释／教材／图谱接入 | [dsh-knowledge](https://github.com/tyuanww/dsh-knowledge) | 合成接入验证不等于真实 WeKnora 验收 |
 
-2026-11-04 P2a 重新生成的清单扫描 12 个包、668 个 JS/TS 文件（以 JSON 的 `source_files_scanned` 为准）。45 条跨包引用按 phase 分为 runtime 10、build 28、test 7；10 条 runtime 引用全部是已锁定 board-components 的公开导出，生产源码例外为 0。另有 17 条仓库引用，均为测试，包含兼容入口转发；62 处非字面动态导入也全部位于测试。构建回执与浏览器 CJS 装载包装已归 kit 公开入口（`./provenance`、`./client-banner`），九个插件 build 不再引用主仓 `scripts/release`，原先 9 条 build 仓库边消失。这些是当前静态清单的数值，不是插件宿主兼容或完整 B0 的通过计数；历史扫描数留在原证据。
+2026-11-04 P2d 重新生成的清单扫描 13 个包、668 个 JS/TS 文件（以 JSON 的 `source_files_scanned` 为准）。93 条跨包引用按 phase 分为 runtime 45、build 28、test 20；runtime 45 条全部是公开导出（35 条指向生成的 contracts 包，10 条指向已锁定 board-components），生产源码例外为 0。另有 17 条仓库引用，均为测试，包含兼容入口转发；62 处非字面动态导入也全部位于测试。构建回执与浏览器 CJS 装载包装已归 kit 公开入口（`./provenance`、`./client-banner`），九个插件 build 不再引用主仓 `scripts/release`，原先 9 条 build 仓库边消失。这些是当前静态清单的数值，不是插件宿主兼容或完整 B0 的通过计数；历史扫描数留在原证据。
 
-构建 DAG：`plugin-kit` → `board-components`、`crm-knowledge`、`knowledge` 与四个无需图表输入的 leaf → `analytics-workbench`/`shine-funnel`/`shine-waterfall`。箭头表示构建依赖，不是宿主 bundle 激活顺序；本地 profile v3 分别选择 CRM、知识与页面模块，生产 profile 未改变。
+构建 DAG：`contracts`/`plugin-kit` → `board-components`、`crm-knowledge`、`knowledge` 与四个无需图表输入的 leaf → `analytics-workbench`/`shine-funnel`/`shine-waterfall`。箭头表示构建依赖，不是宿主 bundle 激活顺序；本地 profile v3 分别选择 CRM、知识与页面模块，生产 profile 未改变。
 
 ## 已解除与剩余依赖
 
@@ -58,9 +59,9 @@ node --test scripts/dsh-b0/plugin-boundaries.test.mjs
 
 服务不在插件包内：`backend/analytics_*` 与 `backend/services/analytics/` 拥有 B0 分析及持久化；CRM 的 `backend/crm_metrics_app.py`、`backend/routers/metrics.py` 与领域合同拥有指标/权限；知识库服务及其数据拥有独立生命周期。插件通过 adapter 调用，不拥有生产 DuckDB、凭据或服务数据迁移。
 
-当前提取 `/api/`、`/internal/`、`/b0/` 字面路径及模板路径，共 198 处声明、128 种路径；包括测试夹具和 gateway 资源路径，**不是 128 个已经接通的公开 API**。清单标明来源与 phase，去掉 origin 和 query 值。内部路径标为 `INTERNAL_NOT_PUBLIC`，其他路径标为 `OBSERVED_NOT_FROZEN`。
+当前提取 `/api/`、`/internal/`、`/b0/` 字面路径及模板路径，共 211 处声明、131 种路径；包括测试夹具和 gateway 资源路径，**不是 128 个已经接通的公开 API**。清单标明来源与 phase，去掉 origin 和 query 值。内部路径标为 `INTERNAL_NOT_PUBLIC`，其他路径标为 `OBSERVED_NOT_FROZEN`。
 
-当前 17 条重要合同包括 DSH pin、领域 schema/slot/主题/图表、两项服务 API 1.0.0、可撤销知识身份能力 v1、公开 GSV 定义 v1，以及 analysis-service 的首购保存回执、独立结果/provenance v1；每条有 owner、消费者、生成器、源 SHA-256 与兼容政策。身份/GSV 由 CRM 领域维护并生成双方本地副本，不是共享业务运行时。回执支持只读 reconcile；新写入由服务端显式候选/freshness 策略控制，存储身份本身不授予资格；旧 saved-analysis/cockpit v1 和 SQLite schema 1 不变。页面交付仍由 workbench 的公开 `./page-tools` 入口拥有。新服务仅支持精确 API 1.0.0，见[服务边界](../operating/crm-plugin-service-boundary.md)；D15 本地结果/freshness 和受控保存 adapter 已通过验证，见[接口边界](../operating/first-purchase-save-admission.md)；真实服务版本窗口、生产策略与 UI/现场门禁仍未完成。
+当前 20 条重要合同包括 DSH pin、领域 schema/slot/主题/图表、两项服务 API 1.0.0、可撤销知识身份能力 v1、公开 GSV 定义 v1，以及 analysis-service 的首购保存回执、独立结果/provenance v1；每条有 owner、消费者、生成器、源 SHA-256 与兼容政策。身份/GSV 由 CRM 领域维护并生成双方本地副本，不是共享业务运行时。回执支持只读 reconcile；新写入由服务端显式候选/freshness 策略控制，存储身份本身不授予资格；旧 saved-analysis/cockpit v1 和 SQLite schema 1 不变。页面交付仍由 workbench 的公开 `./page-tools` 入口拥有。新服务仅支持精确 API 1.0.0，见[服务边界](../operating/crm-plugin-service-boundary.md)；D15 本地结果/freshness 和受控保存 adapter 已通过验证，见[接口边界](../operating/first-purchase-save-admission.md)；真实服务版本窗口、生产策略与 UI/现场门禁仍未完成。
 
 10 个主要控制入口由 release-control、build-tooling、host-dev-adapter、deploy-owner、backend-services 等逻辑 owner 负责；新增独立服务打包与受控运行入口，包内全部 scripts 随 manifest 记录。逻辑 owner 是职责边界，不能替代后续现场 RACI、授权与主备安排。
 
@@ -72,15 +73,19 @@ node --test scripts/dsh-b0/plugin-boundaries.test.mjs
 
 T1 完成代表当前依赖可见、可检查；T15 仍为 PARTIAL。两个 marker/leaf、CRM、知识与 workbench 的隔离构建/pack、现有生命周期单测，不替代真实 DSH unload/restart/WAL、服务保存、签名/SBOM 或杭州上线验收。CRM/知识分别选择、组合卸载与身份撤销的当前证据见[插件拆分记录](../hackathon/evidence/dsh-g0-crm-plugin-split-20261004.md)。
 
+## 生成合同归属增量（P2d）
+
+P2d 新建第九个受管包 `contracts`（`dsh-plugins/contracts`，包名 `@shine-mage/dsh-contracts`，`private`、`0.1.0`）：15 个 public compiler 生成器中已有 14 个改为写入该包，CRM/knowledge 的 OpenAPI 类型与 access 常量也一并迁入，共 30 个生成文件；插件只通过 package exports 消费，插件 `src/` 不再出现生成物。`analytics-workbench/src/competition-c0-contract.generated.d.ts` 是唯一例外：该合同把生成器字节和输出路径纳入 `contract_hash`，并冻结在作者证据 archive 的 fixture 中，迁移必须先在作者 CI 重建 archive，故本切片保留原位。policy 新增 `contract-package` 种类：消费方必须声明精确 `devDependencies` 版本、导出目标必须在 `files` 中、禁止 runtime 依赖；生成物与导出逐字节同步由 `scripts/dsh-b0/contracts-package.test.mjs` 与 B0 封印 stage 共同校验。
+
 ## CRM 插槽合同增量
 
-`analytics-workbench/contracts/cockpit-slot.v1.json` 由驾驶舱领域维护，冻结现有可选 `cockpit.crm` 的 single/root 语义。`node scripts/dsh-b0/cockpit-slot-contract.mjs --check` 比较双方已交付的生成物与源摘要，`--write` 只在有意更新合同时使用；B0 本地/CI 自动检查漂移。CRM 包编译自己的生成文件，不再导入 workbench 的私有类型，也不增加运行时包依赖。领域合同只约定插槽形状，不授权数据、创建宿主能力或承诺热卸载。详见 [增量证据](../hackathon/evidence/dsh-g0-crm-slot-20261003.md)。
+`analytics-workbench/contracts/cockpit-slot.v1.json` 由驾驶舱领域维护，冻结现有可选 `cockpit.crm` 的 single/root 语义。`node scripts/dsh-b0/cockpit-slot-contract.mjs --check` 比较双方已交付的生成物与源摘要，`--write` 只在有意更新合同时使用；B0 本地/CI 自动检查漂移。P2d 后双方生成物统一收归 `contracts` 包（`@shine-mage/dsh-contracts`）的 `analytics-workbench/...` 与 `crm-knowledge/...` subpath，CRM 与 workbench 只导入该包导出的类型，不再持有插件内生成副本，也不增加运行时包依赖。领域合同只约定插槽形状，不授权数据、创建宿主能力或承诺热卸载。详见 [增量证据](../hackathon/evidence/dsh-g0-crm-slot-20261003.md)。
 
 ## CRM 页面与主题解耦增量
 
 CRM 包不注册 HTML 页面交付工具。workbench 的公开 `./page-tools` 是仅依赖官方 `tools` 的适配入口，可由 CRM profile 的 `--page-tools-plugin` 显式组合；缺少提供方时 `crm_service_health.page_delivery` 返回 `NOT_AVAILABLE` 和原因，注册存在也只表明 AVAILABLE/NOT_RUN。源码包校验、取消、回执与保存职责保持页面领域所有。
 
-`shine-brand/contracts/content-theme.v1.json` 只拥有插件内容 token；生成双方本地副本，既不激活品牌插件，也不操作 DSH chrome。CRM 单包构建/测试/打包不读取 workbench 或 brand 源码；工作台的明暗/native token 数值前后完全一致。详见 [CRM 端解耦证据](../hackathon/evidence/dsh-g0-crm-decoupling-20261003.md)。
+`shine-brand/contracts/content-theme.v1.json` 只拥有插件内容 token；生成物收归 `contracts` 包的 `analytics-workbench/client/competition-shell/` 与 `crm-knowledge/client/` subpath，既不激活品牌插件，也不操作 DSH chrome。CRM 单包构建/测试/打包不读取 workbench 或 brand 源码；工作台的明暗/native token 数值前后完全一致。详见 [CRM 端解耦证据](../hackathon/evidence/dsh-g0-crm-decoupling-20261003.md)。
 
 ### 可选首购保存能力
 

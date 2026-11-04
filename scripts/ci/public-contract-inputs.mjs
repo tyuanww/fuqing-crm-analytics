@@ -22,11 +22,25 @@ function descriptor(row) {
   assert.match(row?.sha256 ?? '', hex, 'PUBLIC_CONTRACT_DIGEST');
   assert.ok(Number.isSafeInteger(row.bytes) && row.bytes > 0 && row.bytes <= 512 * 1024, 'PUBLIC_CONTRACT_BYTES');
 }
+/** Generated compiler materials live in the owned contracts package; every other
+ *  author material keeps its original plugin projection. The competition-c0
+ *  declaration is still projected into the Workbench source tree because its
+ *  contract_hash covers those bytes and is frozen into the author archive. */
+export const CONTRACT_PACKAGE = 'dsh-plugins/contracts';
+const CONTRACT_GENERATED_KINDS = new Set(['generated_type', 'generated_constant']);
+const LEGACY_PLUGIN_OUTPUTS = new Set(['dsh-plugins/analytics-workbench/src/competition-c0-contract.generated.d.ts']);
+function projectMainPath(row, domain) {
+  const relative = row.source_path.slice('plugin/'.length);
+  const pluginPath = `dsh-plugins/${domain}/${relative}`;
+  if (!CONTRACT_GENERATED_KINDS.has(row.kind) || LEGACY_PLUGIN_OUTPUTS.has(pluginPath)) return pluginPath;
+  assert.ok(relative.startsWith('src/'), 'PUBLIC_CONTRACT_PROJECTION_SOURCE');
+  return `${CONTRACT_PACKAGE}/${domain}/${relative.slice('src/'.length)}`;
+}
 function material(row, domain) {
   descriptor(row);
   assert.match(row.source_path ?? '', pathPattern, 'PUBLIC_CONTRACT_SOURCE_PATH');
   assert.ok(row.source_path.startsWith('plugin/'), 'PUBLIC_CONTRACT_SOURCE_PATH');
-  assert.equal(row.main_path, `dsh-plugins/${domain}/${row.source_path.slice(7)}`, 'PUBLIC_CONTRACT_PROJECTION');
+  assert.equal(row.main_path, projectMainPath(row, domain), 'PUBLIC_CONTRACT_PROJECTION');
   assert.match(row.git_blob ?? '', sha, 'PUBLIC_CONTRACT_GIT_BLOB');
   const endings = { schema: /\.json$/, generated_type: /\.generated\.d\.ts$/, generated_constant: /\.generated\.ts$/,
     compiler_assertion: /(?:\.typecheck\.ts|\/run-contract\.typecheck\.ts)$/, frozen_fixture: /\/c0-fixtures\.mjs$/,

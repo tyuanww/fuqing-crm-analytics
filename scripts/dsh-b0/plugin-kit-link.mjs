@@ -33,6 +33,39 @@ export async function linkWorkspaceKit(plugin, kit) {
   return { status: 'LINKED', package: pkg.name, version: pkg.version };
 }
 
+/** Link the owned generated-contract package when a source plugin declares it.
+ * Consumers import only its package exports; the package is private, dev-only
+ * and bundled into the plugin build. An undeclared plugin is left untouched.
+ */
+export async function linkWorkspaceContract(plugin, contracts) {
+  assert.ok(isAbsolute(plugin) && isAbsolute(contracts), 'CONTRACT_LINK_ABSOLUTE_REQUIRED');
+  plugin = await realpath(plugin); contracts = await realpath(contracts);
+  const pkg = JSON.parse(await readFile(join(contracts, 'package.json'), 'utf8'));
+  const consumer = JSON.parse(await readFile(join(plugin, 'package.json'), 'utf8'));
+  assert.equal(pkg.name, '@shine-mage/dsh-contracts', 'CONTRACT_LINK_IDENTITY');
+  if (consumer.devDependencies?.[pkg.name] === undefined) return { status: 'NOT_DECLARED', package: pkg.name };
+  assert.match(pkg.version, /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/, 'CONTRACT_LINK_VERSION');
+  assert.equal(consumer.devDependencies[pkg.name], pkg.version, 'CONTRACT_LINK_VERSION');
+  assert.ok(![consumer.dependencies, consumer.optionalDependencies, consumer.peerDependencies]
+    .some(group => group?.[pkg.name] !== undefined), 'CONTRACT_LINK_DEV_ONLY');
+  assert.ok((await lstat(join(contracts, 'package.json'))).isFile(), 'CONTRACT_LINK_ENTRY');
+  for (const path of [join(plugin, 'node_modules'), join(plugin, 'node_modules/@shine-mage')]) {
+    await mkdir(path, { recursive: true });
+    assert.ok((await lstat(path)).isDirectory(), 'CONTRACT_LINK_PARENT_INVALID');
+  }
+  const link = join(plugin, 'node_modules', pkg.name);
+  let current;
+  try { current = await lstat(link); }
+  catch (error) { if (error.code !== 'ENOENT') throw error; }
+  if (current) {
+    assert.ok(current.isSymbolicLink(), 'CONTRACT_LINK_FOREIGN');
+    assert.equal(await realpath(link), contracts, 'CONTRACT_LINK_FOREIGN');
+    return { status: 'UNCHANGED', package: pkg.name, version: pkg.version };
+  }
+  await symlink(relative(dirname(link), contracts), link, 'dir');
+  return { status: 'LINKED', package: pkg.name, version: pkg.version };
+}
+
 /** Only source packages owned by this repository get workspace preparation.
  * A caller-supplied external checkout must use its own installed kit.
  */
