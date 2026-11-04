@@ -39,7 +39,7 @@ function material(row, domain) {
   descriptor(row);
   assert.match(row.source_path ?? '', pathPattern, 'PUBLIC_CONTRACT_SOURCE_PATH');
   assert.ok(row.source_path.startsWith('plugin/'), 'PUBLIC_CONTRACT_SOURCE_PATH');
-  assert.equal(row.main_path, projectMainPath(row, domain), 'PUBLIC_CONTRACT_PROJECTION');
+  assert.equal(row.main_path, `dsh-plugins/${domain}/${row.source_path.slice(7)}`, 'PUBLIC_CONTRACT_PROJECTION');
   assert.match(row.git_blob ?? '', sha, 'PUBLIC_CONTRACT_GIT_BLOB');
   const endings = { schema: /\.json$/, generated_type: /\.generated\.d\.ts$/, generated_constant: /\.generated\.ts$/,
     compiler_assertion: /(?:\.typecheck\.ts|\/run-contract\.typecheck\.ts)$/, frozen_fixture: /\/c0-fixtures\.mjs$/,
