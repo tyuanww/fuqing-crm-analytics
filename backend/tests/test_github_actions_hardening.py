@@ -80,6 +80,28 @@ def test_security_and_build_jobs_are_hard_gates() -> None:
     assert "\npip install pip-audit\n" not in f"\n{install_audit}\n"
 
 
+def test_b0_is_pr_only_and_merge_gate_keeps_treating_skip_as_pass() -> None:
+    """push-to-main 不再重跑 PR 已验证过的 B0 构建；skip 不是失败。"""
+    workflow = yaml.safe_load(
+        (WORKFLOWS_DIR / "lint.yml").read_text(encoding="utf-8")
+    )
+    jobs = workflow["jobs"]
+    b0_if = jobs["b0-contract-build"]["if"]
+    assert "needs.changes.outputs.b0 == 'true'" in b0_if
+    assert "needs.changes.outputs.b0_required == 'true'" in b0_if
+    assert "github.event_name != 'push'" in b0_if
+    assert jobs["merge-gate"].get("if") == "always()"
+    gate = next(
+        step
+        for step in jobs["merge-gate"]["steps"]
+        if step.get("name") == "Selected checks must not fail or cancel"
+    )
+    gate_if = gate["if"]
+    assert "needs.b0-contract-build.result == 'failure'" in gate_if
+    assert "needs.b0-contract-build.result == 'cancelled'" in gate_if
+    assert "needs.b0-contract-build.result == 'skipped'" not in gate_if
+
+
 def test_e2e_credentials_exist_before_backend_and_browser_login() -> None:
     workflow = yaml.safe_load(
         (WORKFLOWS_DIR / "e2e-smoke.yml").read_text(encoding="utf-8")

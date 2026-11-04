@@ -325,7 +325,10 @@ jobs:
     needs: changes
     # b0 轴仍是"是否碰到 B0 相关路径"的唯一权威；b0_required 再把它收窄到
     # 组合包/锁文件/插件边界/发布相关输入，backend-only 变更不再跑 B0。
-    if: needs.changes.outputs.b0 == 'true' && needs.changes.outputs.b0_required == 'true'
+    # PR 已用同一棵树验证过 B0；merge 后重跑是纯重复（48h 窗口约 32 次 push
+    # × ~15 分钟），push-to-main 不再执行。其余 job 与 merge-gate 的 skipped
+    # 语义不变；B0 自身的本地/手动入口 dsh-b0.yml 与 test job 不受影响。
+    if: needs.changes.outputs.b0 == 'true' && needs.changes.outputs.b0_required == 'true' && github.event_name != 'push'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
