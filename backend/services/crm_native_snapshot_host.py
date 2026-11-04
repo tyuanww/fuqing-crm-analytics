@@ -25,10 +25,14 @@ from backend.services.analytics.first_purchase.loopback_http import LoopbackHTTP
 from backend.services.crm_analysis import OWNER
 from backend.services.crm_native_snapshot_source import (
     NATIVE_ID, REF_ID, SNAPSHOT_ID, NativeCrmIdentity, NativeCrmLease,
-    NativeCrmSnapshotSource, NativeSnapshotExpectation, NativeSnapshotRead, OwnedSnapshotStore, fault,
+    NativeCrmSnapshotSource, NativeSnapshotAuthorization, NativeSnapshotExpectation, NativeSnapshotRead,
+    OwnedSnapshotStore, _identity_valid, fault,
 )
 
 HANDLE = re.compile(r"^crm_op_[0-9a-f]{32}$")
+REAUTH_HANDLE = re.compile(r"^crm_reauth_[0-9a-f]{32}$")
+REAUTHORIZED = "native-crm-reauthorized-observation/v1"
+INTENT = "native-crm-reauthorization-intent/v1"
 OBSERVATION = "native-crm-snapshot-observation/v1"
 RECEIPT = "native-crm-source-receipt/v1"
 MAX_BUDGET_MS = 5000
@@ -73,6 +77,14 @@ class HostSnapshotObservation:
     identity: NativeCrmIdentity
     snapshot_id: str
     result_sha256: str
+    authorization: NativeSnapshotAuthorization | None = None
+
+
+@dataclass(frozen=True)
+class HostReauthorizationIntent:
+    handle: str
+    identity: NativeCrmIdentity
+    refs: tuple[str, ...]
 
 
 class NativeCrmHostClient:
@@ -104,9 +116,12 @@ class NativeCrmHostClient:
 
     @staticmethod
     def _observation(raw, handle, session_id):
-        if (type(raw) is not dict or set(raw) != {
-                    "schema_version", "handle", "identity", "snapshot_id", "result_sha256"}
-                    or raw["schema_version"] != OBSERVATION or raw["handle"] != handle
+        reauthorized = type(raw) is dict and raw.get("schema_version") == REAUTHORIZED
+        keys = {"schema_version", "handle", "identity", "snapshot_id", "result_sha256"}
+        if reauthorized:
+            keys.add("authorization")
+        if (type(raw) is not dict or set(raw) != keys
+                    or raw["schema_version"] not in {OBSERVATION, REAUTHORIZED} or raw["handle"] != handle
                     or type(raw["identity"]) is not dict
                     or set(raw["identity"]) != {field.name for field in fields(NativeCrmIdentity)}):
             raise ValueError()
@@ -123,7 +138,15 @@ class NativeCrmHostClient:
             raise ValueError()
         if identity.native_session_id != session_id:
             raise fault("UNAUTHENTICATED")
-        return HostSnapshotObservation(handle, identity, raw["snapshot_id"], raw["result_sha256"])
+        authority = None
+        if reauthorized:
+            value = raw["authorization"]
+            if (type(value) is not dict or set(value) != {"ref_id", "ref_payload_sha256"}
+                    or not isinstance(value["ref_id"], str) or not REF_ID.fullmatch(value["ref_id"])
+                    or not isinstance(value["ref_payload_sha256"], str) or not SHA256_HEX.fullmatch(value["ref_payload_sha256"])):
+                raise ValueError()
+            authority = NativeSnapshotAuthorization(**value)
+        return HostSnapshotObservation(handle, identity, raw["snapshot_id"], raw["result_sha256"], authority)
 
     def observe(self, handle: str, session_id: str, deadline: float) -> HostSnapshotObservation:
         if (not isinstance(handle, str) or not HANDLE.fullmatch(handle)
@@ -164,6 +187,45 @@ class NativeCrmHostClient:
         except Exception:
             raise fault("IDENTITY_UNAVAILABLE") from None
 
+    def observe_reauthorization(self, handle, session_id, refs, deadline):
+        if (not isinstance(handle, str) or not REAUTH_HANDLE.fullmatch(handle)
+                or not isinstance(session_id, str) or not NATIVE_ID.fullmatch(session_id)):
+            raise fault("INVALID_REQUEST")
+        try:
+            raw = self._call("/native-crm-source/introspect-reauthorization", {"handle": handle}, deadline, 16384)
+            if (type(raw) is not dict or set(raw) != {"schema_version", "handle", "identity", "refs"}
+                    or raw["schema_version"] != INTENT or raw["handle"] != handle
+                    or type(raw["identity"]) is not dict
+                    or type(raw["refs"]) is not list or tuple(raw["refs"]) != refs):
+                raise ValueError()
+            identity = NativeCrmIdentity(**raw["identity"])
+            if not _identity_valid(identity):
+                raise ValueError()
+            if identity.native_session_id != session_id:
+                raise fault("UNAUTHENTICATED")
+            return HostReauthorizationIntent(handle, identity, refs)
+        except AnalyticsError:
+            raise
+        except Exception:
+            raise fault("IDENTITY_UNAVAILABLE") from None
+
+
+def inspect_sources(*, client, directory, store, handle, session_id, refs, deadline, check_active):
+    check_active()
+    intent = client.observe_reauthorization(handle, session_id, refs, deadline)
+
+    def current():
+        check_active()
+        return client.observe_reauthorization(handle, session_id, refs, deadline) == intent
+
+    lease = NativeCrmLease(intent.identity, current)
+    source = NativeCrmSnapshotSource(directory=directory, store=store, provider=lambda: lease)
+    values = source.inspect(refs, check_active=check_active)
+    if not current():
+        raise fault("UNAUTHENTICATED")
+    check_active()
+    return {"schema_version": "native-crm-source-inspection/v1", "sources": values}
+
 
 def snapshot_value(ref_id, snapshot):
     if isinstance(snapshot, WarehouseSnapshot):
@@ -185,7 +247,11 @@ class HostBoundSnapshotBatch:
             check_active()
             return client.observe_many(handles, session_id, deadline) == observations
 
-        lease = NativeCrmLease(observations[0].identity, current)
+        for item, observation in zip(items, observations):
+            if observation.authorization is not None and observation.authorization.ref_id != item["ref_id"]:
+                raise fault("NOT_FOUND")
+        authorities = tuple(item.authorization for item in observations if item.authorization is not None)
+        lease = NativeCrmLease(observations[0].identity, current, authorities)
         self.source = NativeCrmSnapshotSource(directory=directory, store=store, provider=lambda: lease)
         self.requests = tuple(NativeSnapshotRead(item["ref_id"], NativeSnapshotExpectation(
             observation.snapshot_id, observation.result_sha256)) for item, observation in zip(items, observations))
@@ -217,7 +283,8 @@ class HostBoundSnapshotSource:
             return client.observe(handle, session_id, deadline) == observation
 
         self.current = current
-        lease = NativeCrmLease(observation.identity, current)
+        lease = NativeCrmLease(observation.identity, current,
+                               (observation.authorization,) if observation.authorization is not None else ())
         self.source = NativeCrmSnapshotSource(
             directory=directory, store=store, provider=lambda: lease, clock=clock,
             expected_snapshot=NativeSnapshotExpectation(observation.snapshot_id, observation.result_sha256),
@@ -237,12 +304,18 @@ class HostBoundSnapshotSource:
             "expires_at_ms": ref.identity.expires_at_ms,
         }
 
+    def _bound_ref(self, ref_id):
+        if self.observation.authorization is not None and self.observation.authorization.ref_id != ref_id:
+            raise fault("NOT_FOUND")
+
     def read(self, ref_id: str):
+        self._bound_ref(ref_id)
         snapshot = self.source.read(ref_id)
         self._checked()
         return snapshot_value(ref_id, snapshot)
 
     def revoke(self, ref_id: str):
+        self._bound_ref(ref_id)
         self.source.revoke(ref_id)
         self._checked()
         return {"ref_id": ref_id, "revoked": True}
@@ -289,14 +362,22 @@ def create_native_crm_source_app(*, store: OwnedSnapshotStore, directory: Path,
                     if len(body) > 4096:
                         raise fault("INVALID_REQUEST")
             raw = json.loads(body.decode("utf-8"), object_pairs_hook=unique_object)
-            if type(raw) is not dict or raw.get("operation") not in {"register", "read", "revoke", "read_many"}:
+            if type(raw) is not dict or raw.get("operation") not in {"register", "read", "revoke", "read_many", "inspect"}:
                 raise fault("INVALID_REQUEST")
             operation = raw["operation"]
             if (not isinstance(raw.get("session_id"), str) or not NATIVE_ID.fullmatch(raw["session_id"])
                     or type(raw["budget_ms"]) is not int or not 1 <= raw["budget_ms"] <= MAX_BUDGET_MS
                     ):
                 raise fault("INVALID_REQUEST")
-            if operation == "read_many":
+            if operation == "inspect":
+                refs = raw.get("refs")
+                if (set(raw) != {"operation", "handle", "session_id", "refs", "budget_ms"}
+                        or not isinstance(raw["handle"], str) or not REAUTH_HANDLE.fullmatch(raw["handle"])
+                        or type(refs) is not list or not 1 <= len(refs) <= 64
+                        or any(not isinstance(ref, str) or not REF_ID.fullmatch(ref) for ref in refs)
+                        or len(set(refs)) != len(refs)):
+                    raise fault("INVALID_REQUEST")
+            elif operation == "read_many":
                 items = raw.get("items")
                 if (set(raw) != {"operation", "items", "session_id", "budget_ms"}
                         or not isinstance(items, list) or not 1 <= len(items) <= MAX_BATCH
@@ -328,6 +409,10 @@ def create_native_crm_source_app(*, store: OwnedSnapshotStore, directory: Path,
 
             def run():
                 try:
+                    if operation == "inspect":
+                        return inspect_sources(client=client, directory=directory, store=store,
+                                               handle=raw["handle"], session_id=raw["session_id"],
+                                               refs=tuple(refs), deadline=deadline, check_active=check_active)
                     if operation == "read_many":
                         return HostBoundSnapshotBatch(client=client, directory=directory, store=store,
                                                       items=items, session_id=raw["session_id"], deadline=deadline,
@@ -352,7 +437,7 @@ def create_native_crm_source_app(*, store: OwnedSnapshotStore, directory: Path,
                         cancelled.set()
                         return
 
-            watcher = asyncio.create_task(watch_disconnect()) if operation == "read_many" else None
+            watcher = asyncio.create_task(watch_disconnect()) if operation in {"read_many", "inspect"} else None
             try:
                 value = await asyncio.wait_for(asyncio.shield(future), timeout=_remaining(deadline))
             finally:

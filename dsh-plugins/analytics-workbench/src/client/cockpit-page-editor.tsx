@@ -51,7 +51,7 @@ function completePagePackage<T extends { html: string; css: string; js: string; 
   };
 }
 
-export function HtmlPreview({ pkg, overlays = null, overlayNodes = [], pageId = 'workspace', version = 0, editing = false, allowScripts = true, selectBlocks = false, nodes = NO_NODES, editableIds = [], selected, draft = null, onUnresolved, onSelect, onTargets, onExitEdit, title }: {
+export function HtmlPreview({ pkg, store, overlays = null, overlayNodes = [], pageId = 'workspace', version = 0, editing = false, allowScripts = true, selectBlocks = false, nodes = NO_NODES, editableIds = [], selected, draft = null, onUnresolved, onPresentationResult, onSelect, onTargets, onExitEdit, title }: {
   pkg: { html: string; css?: string; js?: string; resources?: unknown[]; presentation?: components['schemas']['PagePresentation'] | null }; pageId?: string; version?: number;
   overlays?: Record<string, { text?: string; style?: Record<string, string>; attributes?: Record<string, string> }> | null;
   allowScripts?: boolean;
@@ -59,6 +59,7 @@ export function HtmlPreview({ pkg, overlays = null, overlayNodes = [], pageId = 
   editing?: boolean; selectBlocks?: boolean; nodes?: TextNode[]; editableIds?: string[]; selected?: string;
   draft?: { nodeId: string; text: string; active: boolean; reset: number; style?: Record<string, string> | null } | null;
   onUnresolved?(count: number): void;
+  onPresentationResult?(count: number): void;
   onSelect?(node: TextNode | null): void; onTargets?(nodes: TextNode[]): void; onExitEdit?(): void; title: string;
 }) {
   const frame = useRef<HTMLIFrameElement>(null);
@@ -66,6 +67,7 @@ export function HtmlPreview({ pkg, overlays = null, overlayNodes = [], pageId = 
   const exitCallback = useRef(onExitEdit); exitCallback.current = onExitEdit;
   const targetsCallback = useRef(onTargets); targetsCallback.current = onTargets;
   const unresolvedCallback = useRef(onUnresolved); unresolvedCallback.current = onUnresolved;
+  const resultCallback = useRef(onPresentationResult); resultCallback.current = onPresentationResult;
   const draftStyleKey = draft?.style ? Object.entries(draft.style).map(([key, value]) => key + ':' + value).join(';') : '';
   const channel = useMemo(() => crypto.randomUUID(), [pkg, pageId, version, editing, selectBlocks]);
   const framed = useMemo(() => {
@@ -79,7 +81,10 @@ export function HtmlPreview({ pkg, overlays = null, overlayNodes = [], pageId = 
       const data = event.data;
       if (event.source === frame.current?.contentWindow && event.origin === 'null' && data?.type === 'cockpit.presentation'
         && data.channel === channel && data.pageId === pageId && data.version === version && Number.isSafeInteger(data.unresolved)
-        && data.unresolved >= 0 && data.unresolved <= (pkg.presentation?.edits?.length ?? 0)) unresolvedCallback.current?.(data.unresolved);
+        && data.unresolved >= 0 && data.unresolved <= (pkg.presentation?.edits?.length ?? 0)) {
+        unresolvedCallback.current?.(data.unresolved);
+        if (data.ready === true) resultCallback.current?.(data.unresolved);
+      }
     };
     window.addEventListener('message', receive); return () => window.removeEventListener('message', receive);
   }, [channel, pageId, version, pkg]);

@@ -7,7 +7,7 @@ export type AIJob = { instruction?: string; preview_name?: string; selection?: A
   title?: string; bound?: boolean; session_id: string; workspace: string; source_name: string; output_name: string };
 export type AIState = { jobs: AIJob[]; active: AIJob | null; busy: boolean; confirmationUncertain: boolean; message: string; messageError?: boolean;
   comparison: { text_diff: string; truncated: boolean; note: string; source_size: number; candidate_size: number } | null;
-  previewVariant?: string | null; viewer: { script_url: string; config: Record<string, unknown> } | null;
+  previewVariant?: string | null; previewReady: boolean; viewer: { script_url: string; config: Record<string, unknown> } | null;
   html: { html: string; css?: string; js?: string; resources?: unknown[]; presentation?: components['schemas']['PagePresentation'] | null } | null };
 export function nativeArtifactPrompt(job: AIJob): string;
 export function createCockpitArtifactClients(createClient: () => CockpitAIClient): {
@@ -21,6 +21,8 @@ export function createCockpitAIClient(http?: PageHttpOptions | null, adapters?: 
   getSnapshot(): AIState; subscribe(listener: () => void): () => void; hasUnsavedChanges(): boolean;
   load(jobId: string): Promise<boolean>; refresh(): Promise<void>; select(kind: string, id: string): void; begin(kind: string, id: string, version: number, selection?: AISourceSelection | AISelectionContext | null, instruction?: string): Promise<boolean>;
   openConversation(): Promise<boolean>; collect(): Promise<boolean>; preview(variant?: string): Promise<boolean>;
+  acceptPreview(preview: NonNullable<AIState['html']>): void;
+  rejectPreview(preview: NonNullable<AIState['html']>): void;
   confirm(): Promise<{ ok: boolean }>; persistForLeave(): Promise<{ ok: boolean }>;
   discardForLeave(): Promise<{ ok: boolean }>; cancel(): Promise<boolean>; dispose(): void;
 };

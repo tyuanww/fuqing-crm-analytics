@@ -76,6 +76,29 @@ DUCKDB_PATH=/srv/shinemage/data/processed/fuqing_crm.duckdb \
 
 脚本拒绝同文件系统目标，复制后会重新计算 SHA-256。它不会自动停止服务，也不会删除旧备份。
 
+恢复演练只在停止服务后进行，并且恢复到新的目标路径，不覆盖现役库：
+
+```bash
+DUCKDB_PATH=/srv/shinemage/data/processed/fuqing_crm.duckdb \
+  deploy/wsl/restore-duckdb.sh --service-stopped /mnt/backup/crm /srv/shinemage/restore/fuqing_crm.duckdb
+```
+
+恢复脚本先校验备份的 SHA-256，再检查目标路径不存在、没有 WAL、磁盘空间足够，复制后再次校验。目标存在时直接拒绝，不做覆盖。
+
+## 备份保留期
+
+备份脚本默认覆盖同一个文件，不会自动形成历史。需要历史时按 UTC 日期建快照目录：
+
+```bash
+snapshot=/mnt/backup/crm/$(date -u +%Y%m%dT%H%M%SZ)
+mkdir -p "$snapshot"
+DUCKDB_PATH=/srv/shinemage/data/processed/fuqing_crm.duckdb \
+  deploy/wsl/backup-duckdb.sh --service-stopped "$snapshot"
+deploy/wsl/prune-duckdb-backups.sh /mnt/backup/crm 30
+```
+
+清理脚本只处理 `YYYYMMDDTHHMMSSZ` 目录，不碰文件和其他目录。先加 `--dry-run` 看会删哪些。默认按日备份保留 30 份；需要周或月保留时，用独立根目录和对应份数。删除不可逆，先确认最新一份恢复演练通过。
+
 ## 发布顺序
 
 ```text

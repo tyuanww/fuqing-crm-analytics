@@ -273,3 +273,60 @@ def test_native_lease_relogin_revocation_and_crm_401_block_hot_reads(native_chai
     state["authenticated"] = True
     assert rpc("lease_assert_current", lease_id="current") == rejected
     assert rpc("lease_read", lease_id="current", ref_id=fresh["source_ref"]) == rejected
+
+
+@pytest.mark.parametrize("count", [1, 16, 17, 64])
+def test_reauthorization_maintained_node_and_python_restore_exact_persistent_snapshot(native_chain, host_case, count):
+    rpc, state = native_chain
+    case = host_case
+    assert rpc("login")["connected"]
+    filters = case["snapshots"][0].result.filters.model_dump(mode="json")
+    captured = [rpc("query", filters=filters) for _ in range(count)]
+    assert all(item["ok"] for item in captured)
+    refs = [item["source_ref"] for item in captured]
+    path = case["root"] / "refs/native_crm_snapshot_refs.sqlite3"
+    before = path.read_bytes()
+    rpc("disconnect")
+    assert rpc("login")["connected"]
+    assert rpc("read", ref_id=refs[0]) == {"error": "NATIVE_HOST_OPERATION_REJECTED"}
+    p = rpc("source_authorization_preview", refs=refs)
+    assert p["ok"], p
+    assert len(p["value"]["sources"]) == count
+    assert rpc("read", ref_id=refs[0]) == {"error": "NATIVE_HOST_OPERATION_REJECTED"}
+    c = rpc("source_authorization_confirm", preview_id=p["value"]["preview_id"])
+    assert c["ok"], c
+    assert c["value"]["authorized_refs"] == refs
+    assert rpc("source_authorization_confirm", preview_id=p["value"]["preview_id"]) == c
+    assert rpc("lease_open", lease_id="restored")["ok"]
+    for start in range(0, count, 16):
+        batch = rpc("lease_read_many", lease_id="restored", ref_ids=refs[start:start + 16])
+        assert [item["ref"] for item in batch] == refs[start:start + 16]
+        assert [item["snapshot"] for item in batch] == [item["value"] for item in captured[start:start + 16]]
+    assert path.read_bytes() == before
+    assert rpc("revoke", ref_id=refs[-1])["revoked"]
+    denied = rpc("source_authorization_confirm", preview_id=p["value"]["preview_id"])
+    assert denied["code"] == "RESULT_REVOKED", denied
+
+
+def test_reauthorization_chain_last_revocation_and_relogin_never_activate(native_chain, host_case):
+    rpc, _ = native_chain
+    assert rpc("login")["connected"]
+    filters = host_case["snapshots"][0].result.filters.model_dump(mode="json")
+    refs = [rpc("query", filters=filters)["source_ref"] for _ in range(2)]
+    rpc("disconnect")
+    rpc("login")
+    p = rpc("source_authorization_preview", refs=refs)
+    assert p["ok"], p
+    from backend.services.crm_native_snapshot_source import NativeCrmLease, NativeCrmSnapshotSource
+    revoker = NativeCrmSnapshotSource(directory=host_case["root"] / "refs", store=host_case["store"],
+                                    provider=lambda: NativeCrmLease(host_case["identity"], lambda: True))
+    revoker.revoke(refs[-1])
+    c = rpc("source_authorization_confirm", preview_id=p["value"]["preview_id"])
+    assert c["code"] == "RESULT_REVOKED", c
+    assert rpc("read", ref_id=refs[0]) == {"error": "NATIVE_HOST_OPERATION_REJECTED"}
+    p = rpc("source_authorization_preview", refs=refs[:1])
+    assert p["ok"], p
+    rpc("disconnect")
+    rpc("login")
+    assert rpc("source_authorization_confirm", preview_id=p["value"]["preview_id"])["ok"] is False
+    assert rpc("read", ref_id=refs[0]) == {"error": "NATIVE_HOST_OPERATION_REJECTED"}
