@@ -39,11 +39,7 @@ function findRegion(html, nodeId) {
 }
 
 function mergeStyle(attrs, style) {
-  const text = Object.entries(style).flatMap(([key, value]) => {
-    if (!STYLE_KEY.test(key) || typeof value !== 'string') return [];
-    if (/expression\s*\(|javascript:|url\s*\(\s*['"]?\s*javascript:/i.test(value)) return [];
-    return [`${key}: ${escapeAttr(value)}`];
-  }).join('; ');
+  const text = safeOverlayStyles(style).map(([key, value]) => `${key}: ${escapeAttr(value)}`).join('; ');
   if (!text) return attrs;
   if (/\sstyle\s*=/.test(attrs)) {
     return attrs.replace(/\sstyle\s*=\s*(["'])[\s\S]*?\1/i, ` style="${text}"`);
@@ -53,17 +49,27 @@ function mergeStyle(attrs, style) {
 
 function mergeAttributes(attrs, attributes) {
   let next = attrs;
-  for (const [key, value] of Object.entries(attributes)) {
-    const lowered = key.toLowerCase();
-    if (!ATTR_KEY.test(key) || lowered.startsWith('on') || lowered === 'style'
-      || lowered === 'data-shine-node' || lowered === 'data-shine-region' || typeof value !== 'string') continue;
-    if (/javascript:/i.test(value)) continue;
+  for (const [key, value] of safeOverlayAttributes(attributes)) {
     const safe = escapeAttr(value);
     const existing = new RegExp(`\\s${escapeRegExp(key)}\\s*=\\s*(["'])[\\s\\S]*?\\1`, 'i');
     if (existing.test(next)) next = next.replace(existing, ` ${key}="${safe}"`);
     else next += ` ${key}="${safe}"`;
   }
   return next;
+}
+
+export function safeOverlayStyles(style) {
+  return Object.entries(style).filter(([key, value]) => STYLE_KEY.test(key) && typeof value === 'string'
+    && !/expression\s*\(|javascript:|url\s*\(\s*['"]?\s*javascript:/i.test(value));
+}
+
+export function safeOverlayAttributes(attributes) {
+  return Object.entries(attributes).filter(([key, value]) => {
+    const lowered = key.toLowerCase();
+    return ATTR_KEY.test(key) && !lowered.startsWith('on') && lowered !== 'style'
+      && lowered !== 'data-shine-node' && lowered !== 'data-shine-region'
+      && typeof value === 'string' && !/javascript:/i.test(value);
+  });
 }
 
 function rangeRegion(html, node) {

@@ -20,7 +20,7 @@ export function CockpitAIPanel({ client, state, blocked = false }: { client: Coc
         {job.status === 'WAITING' ? <button className="cockpit-primary" disabled={blocked || state.busy} onClick={() => void client.collect()}>收取修改</button> : <>
           <button disabled={blocked || state.busy || state.confirmationUncertain} aria-pressed={state.previewVariant === 'source'} onClick={() => void client.preview('source')}>预览原版本</button>
           <button disabled={blocked || state.busy || state.confirmationUncertain} aria-pressed={state.previewVariant === 'candidate'} onClick={() => void client.preview()}>预览修改后</button>
-          <button className="cockpit-primary" data-testid="ai-confirm" disabled={blocked || state.busy} onClick={() => void client.confirm()}>{state.confirmationUncertain ? '重试保存并核对' : '确认保存新版本'}</button>
+          <button className="cockpit-primary" data-testid="ai-confirm" disabled={blocked || state.busy || job.target_kind === 'page' && !state.previewReady && !state.confirmationUncertain} onClick={() => void client.confirm()}>{state.confirmationUncertain ? '重试保存并核对' : '确认保存新版本'}</button>
         </>}
         <button disabled={blocked || state.busy || state.confirmationUncertain} onClick={() => void client.cancel()}>放弃本次修改</button>
       </> : null}
@@ -33,11 +33,10 @@ export function CockpitAIPanel({ client, state, blocked = false }: { client: Coc
   </section>;
 }
 
-export function CockpitAIPreview({ state }: { state: AIState }) {
+export function CockpitAIPreview({ state, client }: { state: AIState; client: Pick<CockpitAIClient, 'acceptPreview' | 'rejectPreview'> }) {
+  const [failed, setFailed] = useState<AIState['html']>(null);
   const pkg = useMemo(() => {
     if (!state.html) return null;
-    // Versioned page packages must reach the shared renderer byte-for-byte.
-    // Only raw workspace HTML files need document-wrapper normalization here.
     if (state.active?.target_kind === 'page') return state.html;
     // Normalize complete HTML documents into the existing trusted sandbox wrapper.
     // DOMParser does not execute scripts; untrusted meta/base cannot replace CSP.
@@ -45,7 +44,14 @@ export function CockpitAIPreview({ state }: { state: AIState }) {
     parsed.querySelectorAll('meta,base').forEach(node => node.remove());
     return { ...state.html, html: [...parsed.head.children].map(node => node.outerHTML).join('') + parsed.body.innerHTML };
   }, [state.html, state.active?.target_kind]);
-  if (pkg) return <div className="cockpit-frame-wrap" data-testid="ai-html-preview"><HtmlPreview pkg={pkg} title="AI 修改预览" /></div>;
+  if (pkg && failed === pkg) return <p role="alert" className="cockpit-error">AI 预览中有修改无法准确定位，请重新读取修改任务。</p>;
+  if (pkg) return <div className="cockpit-frame-wrap" data-testid="ai-html-preview"><HtmlPreview pkg={pkg}
+    pageId={state.active?.target_id} version={state.active?.base_version}
+    onPresentationResult={count => {
+      if (!state.html) return;
+      if (count > 0) { setFailed(pkg); client.rejectPreview(state.html); }
+      else client.acceptPreview(state.html);
+    }} title="AI 修改预览" /></div>;
   if (state.viewer) return <CandidateViewer viewer={state.viewer} />;
   return null;
 }
