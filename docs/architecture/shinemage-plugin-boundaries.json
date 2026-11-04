@@ -72,10 +72,12 @@
       "commands": {
         "build": "node build.mjs",
         "test": "node --test test/model.test.mjs test/initial-session.test.mjs test/native-account-settings.test.mjs test/native-evidence.test.mjs test/run-view.test.mjs test/page-navigation-continuity.test.mjs test/cockpit-shell-contract.test.mjs test/client-request-envelope.test.mjs src/client/competition-shell/competition-shell.test.mjs && pnpm test:html-edit",
-        "test:html-edit": "node --test src/free-page/resource/package-normalize.test.mjs src/client/free-html-library/html-import.test.mjs src/client/html-selection-bridge.test.mjs src/client/free-html-library/store.test.mjs src/client/free-html-library/p12-live-adapters.test.mjs src/client/free-html-library/source-draft.test.mjs test/cockpit-ai-client.test.mjs src/client/navigation/navigation-epoch.test.mjs src/free-page/edit/intent-router.test.mjs src/free-page/edit/selection-context.test.mjs test/dynamic-chart-browser-seam.test.mjs test/draft-save-regression.test.mjs test/canvas-input-regression.test.mjs test/open-native-html-artifact.test.mjs src/free-page/preview/srcdoc-builder.test.mjs src/client/cockpit-page-tab.test.mjs",
-        "test:built": "node --test test/built.test.mjs"
+        "test:html-edit": "node --test src/client/source-authorization.test.mjs src/client/ai-edit-target.test.mjs src/client/free-html-library/generate-context.test.mjs src/client/protected-page-edit.test.mjs src/free-page/resource/package-normalize.test.mjs src/client/free-html-library/html-import.test.mjs src/client/html-selection-bridge.test.mjs src/client/free-html-library/store.test.mjs src/client/free-html-library/p12-live-adapters.test.mjs src/client/free-html-library/native-page-http.test.mjs src/client/free-html-library/native-preview-entry.test.mjs src/client/free-html-library/source-draft.test.mjs test/cockpit-ai-client.test.mjs test/ai-preview-overlay-regression.test.mjs src/client/navigation/navigation-epoch.test.mjs src/free-page/edit/intent-router.test.mjs src/free-page/edit/selection-context.test.mjs test/dynamic-chart-browser-seam.test.mjs test/draft-save-regression.test.mjs test/canvas-input-regression.test.mjs test/open-native-html-artifact.test.mjs src/free-page/preview/srcdoc-builder.test.mjs src/client/host-facts.test.mjs src/client/library-workspace.test.mjs src/client/page-package-card.test.mjs src/client/cockpit-page-tab.test.mjs",
+        "test:built": "node --test test/built.test.mjs test/runtime-dependencies.test.mjs",
+        "test:host-facts": "node --test src/client/host-facts.test.mjs src/client/library-workspace.test.mjs",
+        "test:host-facts:browser": "node src/client/host-facts-browser.test.mjs"
       },
-      "manifest_sha256": "eaf4dc07465893cde56f0b8c7e408db79b1074e5a314a485839d5e3d49249b0f"
+      "manifest_sha256": "75c260393917ff2e7e7f0edd6e3d334070995ffcf9362761c50975710e4ef0e0"
     },
     {
       "path": "dsh-plugins/board-components",
@@ -572,7 +574,7 @@
       "manifest_sha256": "13140dce4cf3d61c0f17e5e9353918a51ed1cc07e941edd2fbe099699a5d9002"
     }
   ],
-  "source_files_scanned": 657,
+  "source_files_scanned": 661,
   "cross_package_edges": [
     {
       "consumer": "analytics-workbench",
@@ -669,6 +671,16 @@
       "provider": "plugin-kit",
       "phase": "build",
       "source": "dsh-plugins/analytics-workbench/toolchain.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "plugin-kit",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/ai-preview-overlay-regression.test.mjs",
       "target": "dsh-plugins/plugin-kit",
       "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
       "access": "public-export",
@@ -1216,6 +1228,27 @@
     {
       "consumer": "analytics-workbench",
       "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/free-html-library/native-page-http.mjs",
+      "route": "/api/shine-mage-pages",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/free-html-library/native-page-http.mjs",
+      "route": "/api/v1/analytics/cockpit-ai",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/free-html-library/native-page-http.mjs",
+      "route": "/api/v1/analytics/page-edit-contexts",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
       "source": "dsh-plugins/analytics-workbench/src/client/free-html-library/page-http.mjs",
       "route": "/api/v1/analytics/page-documents",
       "contract": "OBSERVED_NOT_FROZEN"
@@ -1727,6 +1760,13 @@
     {
       "consumer": "analytics-workbench",
       "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/ai-preview-overlay-regression.test.mjs",
+      "route": "/api/shine-mage-pages",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/asset-http.test.mjs",
       "route": "/b0/analyses",
       "contract": "OBSERVED_NOT_FROZEN"
@@ -1736,6 +1776,13 @@
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/asset-http.test.mjs",
       "route": "/b0/assets",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/cockpit-ai-client.test.mjs",
+      "route": "/api/shine-mage-pages",
       "contract": "OBSERVED_NOT_FROZEN"
     },
     {

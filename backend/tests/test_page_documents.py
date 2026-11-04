@@ -768,6 +768,41 @@ def test_readonly_computed_sources_survive_manual_and_forged_source_patches(tmp_
     assert error.value.code == "AI_BOUND_CONTENT" and error.value.status == 403
 
 
+def test_generate_cannot_override_readonly_sources_through_presentation(tmp_path):
+    store = PageDocumentStore(private(tmp_path / "readonly-generate"))
+    html = ('<div id="root"><h1 data-shine-node="n_title">标题</h1>'
+            '<p id="metric" data-shine-node="n_metric" data-page-readonly>42</p></div>')
+    package = {
+        "html": html, "css": "", "js": "", "resources": [],
+        "node_map": [
+            {"node_id": "n_title", "kind": "static_element",
+             "selector": "[data-shine-node='n_title']"},
+            {"node_id": "n_metric", "kind": "static_element",
+             "selector": "[data-shine-node='n_metric']"},
+        ],
+        "presentation": {
+            "version": 1,
+            "source_hash": page_source_hash(html, "", ""),
+            "edits": [{
+                "target": {"anchor": {"attribute": "id", "value": "root"},
+                           "path": [{"tag": "p", "key": {"attribute": "id", "value": "metric"}}]},
+                "text": "99",
+            }],
+        },
+    }
+    with pytest.raises(AnalyticsError) as error:
+        store.generate(ALICE, draft(package=package))
+    assert error.value.code == "AI_BOUND_CONTENT" and error.value.status == 403
+
+    styled = deepcopy(package)
+    styled["presentation"]["edits"] = [{
+        "target": {"anchor": {"attribute": "id", "value": "root"},
+                   "path": [{"tag": "p", "key": {"attribute": "id", "value": "metric"}}]},
+        "style": {"color": "#805D9D"},
+    }]
+    assert store.generate(ALICE, draft(package=styled))["operation"] == "GENERATE"
+
+
 @pytest.mark.parametrize(
     ("name", "marker"),
     [
@@ -1292,6 +1327,42 @@ def test_http_confirm_rechecks_binding_status(tmp_path, status, expected_status)
             assert client.get(PREFIX + "/pages/" + page_id, headers=headers).json() == saved.json()
 
 
+class _RevocableSource:
+    observations = {}
+    remote = None
+    remote_many = None
+
+    def __init__(self):
+        self.revoked = False
+
+    def prefetch(self, *_args):
+        pass
+
+    def check_active(self):
+        pass
+
+    def revalidate(self):
+        if self.revoked:
+            raise AnalyticsError(403, "RESULT_REVOKED", "来源已撤销")
+
+
+def test_replay_with_new_key_after_revoke_writes_no_receipt(tmp_path):
+    def binding(*_args, **_kwargs):
+        return ResolvedPageBinding("VERIFIED", frozenset({"brand-a"}))
+
+    store = PageDocumentStore(private(tmp_path / "revoke-replay"), resolve_binding=binding)
+    source = _RevocableSource()
+    preview = store.generate(ALICE, bound_presentation_draft(), source_context=source)
+    first = store.confirm(ALICE, preview["preview_id"], "first", source_context=source)
+    source.revoked = True
+    with pytest.raises(AnalyticsError) as error:
+        store.confirm(ALICE, preview["preview_id"], "second", source_context=source)
+    assert error.value.code == "RESULT_REVOKED"
+    with closing(sqlite3.connect(store.path)) as conn:
+        assert conn.execute("SELECT key FROM receipts ORDER BY key").fetchall() == [("first",)]
+    assert store.get(ALICE, first["spec"]["page_id"]) == first
+
+
 def test_foreign_or_linked_state_is_never_reinitialized(tmp_path):
     directory = private(tmp_path / "pages")
     path = directory / "page_documents.sqlite3"
@@ -1308,6 +1379,56 @@ def test_foreign_or_linked_state_is_never_reinitialized(tmp_path):
     with pytest.raises(ValueError):
         PageDocumentStore(linked)
     assert path.read_bytes() == before
+
+
+def test_interrupted_initialization_leaves_no_partial_state(tmp_path):
+    directory = private(tmp_path / "pages")
+    stale = directory / ".page_documents.sqlite3.init-dead"
+    stale.write_bytes(b"half-built")
+    store = PageDocumentStore(directory)
+    with closing(sqlite3.connect(store.path)) as conn:
+        assert conn.execute("PRAGMA user_version").fetchone()[0] == 1
+        assert conn.execute("SELECT value FROM metadata WHERE key='kind'").fetchone()[0] == "library_page_documents"
+    assert not stale.exists()
+
+
+def test_initialization_refuses_state_that_appears_before_publish(tmp_path, monkeypatch):
+    from backend.services.analytics.first_purchase import asset_state
+
+    directory = private(tmp_path / "pages")
+    path = directory / "page_documents.sqlite3"
+    real_fsync = os.fsync
+    injected = []
+
+    def fsync_then_inject(fd):
+        real_fsync(fd)
+        if not injected:
+            path.write_bytes(b"foreign-state")
+            injected.append(True)
+
+    monkeypatch.setattr(asset_state.os, "fsync", fsync_then_inject)
+    with pytest.raises(ValueError):
+        PageDocumentStore(directory)
+    assert path.read_bytes() == b"foreign-state"
+
+
+def test_existing_state_cleans_stale_initialization_files(tmp_path):
+    directory = private(tmp_path / "pages")
+    store = PageDocumentStore(directory)
+    stale = directory / f".{store.path.name}.init-dead"
+    stale.write_bytes(b"dead")
+    PageDocumentStore(directory)
+    assert not stale.exists()
+
+
+def test_restart_preserves_page_identity_and_history(tmp_path):
+    directory = private(tmp_path / "pages")
+    first = PageDocumentStore(directory)
+    saved = confirm(first, first.generate(ALICE, draft()))
+    page_id = saved["spec"]["page_id"]
+    second = PageDocumentStore(directory)
+    assert second.get(ALICE, page_id) == saved
+    assert len(second.history(ALICE, page_id)) == 1
 
 
 def test_boardspec_store_and_codec_stay_independent(tmp_path):

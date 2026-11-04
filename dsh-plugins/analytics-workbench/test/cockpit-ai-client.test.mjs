@@ -1,6 +1,38 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createCockpitAIClient, createCockpitArtifactClients, nativeArtifactPrompt } from '../src/client/cockpit-ai-client.mjs';
+import { createCockpitAIClient, createCockpitArtifactClients, nativeArtifactPrompt, nativeArtifactSessionOptions, ensureNativeArtifactSession } from '../src/client/cockpit-ai-client.mjs';
+
+test('native pages send same-origin requests and omit workspace options for native-tools jobs', async t => {
+  globalThis.__NATIVE_PAGE_TRANSPORT__ = true;
+  t.after(() => { delete globalThis.__NATIVE_PAGE_TRANSPORT__; });
+  const calls = [];
+  const id = 'ai_12345678-1234-4567-8123-123456789abc';
+  const job = { id, target_kind: 'page', target_id: 'page_fixture', base_version: 1, title: '经营',
+    transport: 'native-tools', session_id: 'session-cockpit-native-ai-' + id.slice(3), status: 'WAITING' };
+  t.mock.method(globalThis, 'fetch', async (url, init) => {
+    assert.equal(url, '/api/shine-mage-pages');
+    assert.equal(init.credentials, 'same-origin');
+    assert.equal(init.headers.authorization, undefined);
+    const envelope = JSON.parse(init.body); calls.push(envelope);
+    if (envelope.operation === 'aiBegin') return Response.json(job);
+    if (envelope.operation === 'aiList') return Response.json({ items: [job], next_offset: null });
+    if (envelope.operation === 'aiContent') return Response.json({ html: '<h1>原版</h1>' });
+    if (envelope.operation === 'editOverlay') return Response.json({ page_id: envelope.page_id, version: envelope.version, overlays: {} });
+    throw new Error('Unexpected native operation');
+  });
+  const opened = [];
+  const client = createCockpitAIClient(null, { openNative: async row => opened.push(row) });
+  assert.equal(await client.begin('page', 'page_fixture', 1), true);
+  assert.equal(opened[0].id, id);
+  assert.deepEqual(nativeArtifactSessionOptions(job, 'unused-workspace'), { sessionId: job.session_id, agentPreset: 'shine-native-page-editor-v1' });
+  assert.match(nativeArtifactPrompt(job), /cockpit_page_read/);
+  assert.match(nativeArtifactPrompt(job), /cockpit_page_propose/);
+  assert.doesNotMatch(nativeArtifactPrompt(job), /文件工具|TASK.md|candidate.json|shell|bash/);
+  await client.refresh();
+  await client.preview('source');
+  assert.equal(client.getSnapshot().html.html, '<h1>原版</h1>');
+  assert.deepEqual(calls.map(row => row.operation), ['aiBegin', 'aiList', 'aiContent', 'editOverlay']);
+});
 
 test('a remounted artifact joins its in-flight load instead of losing the initial preview handoff', async t => {
   let complete, requests = 0;
@@ -257,7 +289,7 @@ test('artifact clients reuse the same request across remounts', () => {
   clients.dispose();
 });
 
-test('waiting preview skips comparison; load and preview stay off while a save is still busy', async t => {
+test('waiting preview skips comparison; load and preview stay off while a save is still busy', { timeout: 5000 }, async t => {
   const candidate = { html: '<section id="cards"></section>', css: '', js: '', resources: [], node_map: [] };
   let releaseConfirm, confirmStarted;
   const waiting = new Promise(resolve => { confirmStarted = resolve; });
@@ -266,6 +298,7 @@ test('waiting preview skips comparison; load and preview stay off while a save i
     const parsed = new URL(url);
     const path = parsed.pathname.replace('/api/v1/analytics/cockpit-ai', '');
     paths.push({ path, method: init?.method ?? 'GET', variant: parsed.searchParams.get('variant') });
+    if (path.endsWith('/overlay')) return Response.json({ page_id: parsed.searchParams.get('page_id'), version: Number(parsed.searchParams.get('version')), overlays: {} });
     if (!path && init?.method === 'POST') {
       const body = JSON.parse(init.body);
       return Response.json({ ...body, status: 'WAITING', candidate_hash: null, filename: 'page-package.json',
@@ -290,8 +323,9 @@ test('waiting preview skips comparison; load and preview stay off while a save i
   const waitingJob = createCockpitAIClient({ base: 'http://fixture', token: 't', async fetchImpl(url) {
     const parsed = new URL(url);
     paths.push({ path: parsed.pathname, variant: parsed.searchParams.get('variant') });
+    if (parsed.pathname.endsWith('/overlay')) return Response.json({ page_id: 'page-1', version: 1, overlays: {} });
     if (parsed.pathname.endsWith('/content')) return new Response(JSON.stringify({ html: '<h1>source</h1>', css: '', js: '', resources: [], node_map: [] }));
-    return Response.json({ id: 'ai_wait', status: 'WAITING', candidate_hash: null, filename: 'page.html', target_kind: 'page' });
+    return Response.json({ id: 'ai_wait', target_id: 'page-1', base_version: 1, status: 'WAITING', candidate_hash: null, filename: 'page.html', target_kind: 'page' });
   } });
   t.after(() => waitingJob.dispose());
   assert.equal(await waitingJob.load('ai_wait'), true);
@@ -301,6 +335,7 @@ test('waiting preview skips comparison; load and preview stay off while a save i
   assert.equal(await client.collect(), true);
   assert.equal(client.getSnapshot().previewVariant, 'candidate');
   assert.deepEqual(client.getSnapshot().html, candidate);
+  client.acceptPreview(client.getSnapshot().html);
   let loadDuringSave, previewDuringSave;
   const unsub = client.subscribe(() => {
     const snap = client.getSnapshot();
@@ -318,4 +353,179 @@ test('waiting preview skips comparison; load and preview stay off while a save i
   assert.equal(await previewDuringSave, false);
   assert.equal(await client.preview('candidate'), true);
   assert.equal(client.getSnapshot().busy, false);
+});
+
+
+test('reopening an existing native edit session never invokes create; changed identities are rejected', async () => {
+  const job = { transport: 'native-tools', session_id: 'session-cockpit-native-ai-fixed' };
+  let creates = 0;
+  const sessions = { refresh: async () => {}, list: { getSnapshot: () => ({ ids: [job.session_id] }) },
+    create: async () => { creates++; return 'session-random-ordinary'; } };
+  assert.equal(await ensureNativeArtifactSession(sessions, job, () => sessions.create()), job.session_id);
+  assert.equal(creates, 0);
+  sessions.list.getSnapshot = () => ({ ids: [] });
+  await assert.rejects(ensureNativeArtifactSession(sessions, job, () => sessions.create()), /会话标识/);
+  assert.equal(creates, 1);
+  assert.equal(await ensureNativeArtifactSession(sessions, job, async () => job.session_id), job.session_id);
+});
+
+test('native page transport preserves legacy file begin, list and reload transport', async t => {
+  globalThis.__NATIVE_PAGE_TRANSPORT__ = true;
+  t.after(() => { delete globalThis.__NATIVE_PAGE_TRANSPORT__; });
+  const file = { id: 'ai_file-job', target_kind: 'file', target_id: 'file_fixture', status: 'WAITING' };
+  const page = { id: 'ai_page-job', target_kind: 'page', transport: 'native-tools', status: 'WAITING' };
+  const legacyCalls = [], nativeCalls = [];
+  const http = { base: 'http://legacy-fixture', fetchImpl: async (url, init) => {
+    legacyCalls.push({ url, init });
+    if (init.method === 'POST') return Response.json({ ...file, id: JSON.parse(init.body).id });
+    if (url.includes('?offset=')) return Response.json({ items: [file], next_offset: null });
+    return Response.json(file);
+  } };
+  t.mock.method(globalThis, 'fetch', async (_url, init) => {
+    const body = JSON.parse(init.body); nativeCalls.push(body);
+    if (body.operation === 'aiList') return Response.json({ items: [page], next_offset: null });
+    return Response.json({ error: { code: 'AI_NOT_FOUND', message: 'missing' } }, { status: 404 });
+  });
+  const client = createCockpitAIClient(http, { openNative: async () => {} });
+  assert.equal(await client.begin('file', 'file_fixture', 1), true);
+  assert.equal(nativeCalls.length, 0);
+  await client.refresh();
+  assert.deepEqual(client.getSnapshot().jobs.map(row => row.id).sort(), [file.id, page.id].sort());
+  const restored = createCockpitAIClient(http);
+  assert.equal(await restored.load(file.id), true);
+  assert.equal(restored.getSnapshot().active.target_kind, 'file');
+  assert.ok(legacyCalls.some(row => row.url.endsWith('/' + file.id)));
+});
+
+test('a failed task catalog preserves its tasks without hiding the other service', async t => {
+  globalThis.__NATIVE_PAGE_TRANSPORT__ = true;
+  t.after(() => { delete globalThis.__NATIVE_PAGE_TRANSPORT__; });
+  let nativeFails = false, legacyFails = false;
+  const page = { id: 'ai_page', target_kind: 'page', transport: 'native-tools', status: 'WAITING' };
+  const file = { id: 'ai_file', target_kind: 'file', status: 'WAITING' };
+  t.mock.method(globalThis, 'fetch', async () => nativeFails
+    ? Response.json({ error: { message: 'native unavailable' } }, { status: 503 })
+    : Response.json({ items: [page], next_offset: null }));
+  const client = createCockpitAIClient({ base: 'http://legacy-fixture', fetchImpl: async () => legacyFails
+    ? Response.json({ error: { message: 'legacy unavailable' } }, { status: 503 })
+    : Response.json({ items: [file], next_offset: null }) });
+  legacyFails = true;
+  await client.refresh();
+  assert.deepEqual(client.getSnapshot().jobs.map(row => row.id), [page.id]);
+  assert.equal(client.getSnapshot().messageError, true);
+  nativeFails = true; legacyFails = false;
+  await client.refresh();
+  assert.deepEqual(client.getSnapshot().jobs.map(row => row.id).sort(), [page.id, file.id].sort());
+  assert.match(client.getSnapshot().message, /native unavailable/);
+  nativeFails = false;
+  await client.refresh();
+  assert.equal(client.getSnapshot().messageError, false);
+});
+
+for (const terminal of ['SAVED', 'CANCELLED']) test(`workspace refresh observes a task ${terminal} in another native panel`, async t => {
+  globalThis.__NATIVE_PAGE_TRANSPORT__ = true;
+  t.after(() => { delete globalThis.__NATIVE_PAGE_TRANSPORT__; });
+  let job;
+  const calls = [];
+  t.mock.method(globalThis, 'fetch', async (_url, init) => {
+    const request = JSON.parse(init.body); calls.push(request.operation);
+    if (request.operation === 'aiBegin') job = { ...request.body, status: 'WAITING' };
+    else if (request.operation === 'aiList') return Response.json({ items: ['SAVED', 'CANCELLED'].includes(job.status) ? [] : [job], next_offset: null });
+    else if (request.operation === 'aiCollect') job = { ...job, status: 'READY', candidate_hash: 'candidate' };
+    else if (request.operation === 'aiComparison') return Response.json({ text_diff: 'changed' });
+    else if (request.operation === 'aiContent') return Response.json({ html: '<p>candidate</p>' });
+    else if (request.operation === 'editOverlay') return Response.json({ page_id: request.page_id, version: request.version, overlays: {} });
+    else if (request.operation === 'aiConfirm') job = { ...job, status: 'SAVED', saved_version: 3 };
+    else if (request.operation === 'aiCancel') job = { ...job, status: 'CANCELLED' };
+    else assert.equal(request.operation, 'aiGet');
+    return Response.json(job);
+  });
+  const workspace = createCockpitAIClient(null, { openNative: async () => {} });
+  const panel = createCockpitAIClient(null, { onSaved: () => workspace.refresh() });
+  t.after(() => { workspace.dispose(); panel.dispose(); });
+  assert.equal(await workspace.begin('page', 'page_fixture', 2), true);
+  assert.equal(await panel.load(workspace.getSnapshot().active.id), true);
+  if (terminal === 'SAVED') {
+    assert.equal(await panel.collect(), true);
+    panel.acceptPreview(panel.getSnapshot().html);
+    assert.equal((await panel.confirm()).ok, true);
+  } else {
+    assert.equal(await panel.cancel(), true);
+    await workspace.refresh();
+  }
+  assert.equal(workspace.getSnapshot().active.status, terminal);
+  assert.deepEqual(workspace.getSnapshot().jobs, []);
+  assert.equal(workspace.hasUnsavedChanges(), false);
+  assert.equal(calls.filter(operation => operation === 'aiConfirm').length, terminal === 'SAVED' ? 1 : 0);
+});
+
+for (const failure of ['unavailable', 'mismatched']) test(`an omitted active task stays pending when its receipt is ${failure}`, async t => {
+  const job = { id: 'ai_pending', target_kind: 'file', target_id: 'file_fixture', status: 'WAITING' };
+  let reads = 0;
+  const client = createCockpitAIClient({ base: 'http://fixture', fetchImpl: async url => {
+    if (url.includes('?offset=')) return Response.json({ items: [], next_offset: null });
+    if (reads++ === 0) return Response.json(job);
+    return failure === 'unavailable'
+      ? Response.json({ error: { message: 'service unavailable' } }, { status: 503 })
+      : Response.json({ ...job, id: 'ai_other', status: 'SAVED' });
+  } });
+  t.after(() => client.dispose());
+  assert.equal(await client.load(job.id), true);
+  await client.refresh();
+  assert.equal(client.getSnapshot().active.id, job.id);
+  assert.equal(client.getSnapshot().active.status, 'WAITING');
+  assert.equal(client.getSnapshot().messageError, true);
+});
+
+for (const listed of [true, false]) test(`refresh preserves the reviewed candidate when a new candidate is ${listed ? 'listed' : 'returned by lookup'}`, async t => {
+  let job = { id: 'ai_reviewed', target_kind: 'page', target_id: 'page_fixture', base_version: 1, status: 'READY', candidate_hash: 'candidate-A' };
+  let submitted;
+  const client = createCockpitAIClient({ base: 'http://fixture', fetchImpl: async (url, init) => {
+    const path = new URL(url).pathname;
+    if (url.includes('?offset=')) return Response.json({ items: listed ? [job] : [], next_offset: null });
+    if (path.endsWith('/comparison')) return Response.json({ text_diff: 'candidate A' });
+    if (path.endsWith('/content')) return Response.json({ html: '<p>candidate A</p>' });
+    if (path.endsWith('/overlay')) return Response.json({ page_id: 'page_fixture', version: 1, overlays: {} });
+    if (path.endsWith('/confirm')) {
+      submitted = JSON.parse(init.body).candidate_hash;
+      return Response.json({ ...job, candidate_hash: submitted, status: 'SAVED', saved_version: 2 });
+    }
+    return Response.json(job);
+  } });
+  t.after(() => client.dispose());
+  await client.load(job.id);
+  await client.preview();
+  client.acceptPreview(client.getSnapshot().html);
+  job = { ...job, candidate_hash: 'candidate-B' };
+  await client.refresh();
+  assert.equal(client.getSnapshot().active.candidate_hash, 'candidate-A');
+  assert.equal(client.getSnapshot().html.html, '<p>candidate A</p>');
+  assert.equal((await client.confirm()).ok, true);
+  assert.equal(submitted, 'candidate-A');
+});
+
+test('resuming another existing task cannot reuse the previous frame approval', async t => {
+  const jobs = ['one', 'two'].map(id => ({ id: 'ai_' + id, target_kind: 'page', target_id: 'page_' + id,
+    base_version: 1, status: 'READY', candidate_hash: 'hash_' + id, instruction: '' }));
+  let confirms = 0;
+  const client = createCockpitAIClient({ base: 'http://fixture', fetchImpl: async url => {
+    const parsed = new URL(url);
+    if (parsed.searchParams.has('offset')) return Response.json({ items: jobs, next_offset: null });
+    if (parsed.pathname.endsWith('/comparison')) return Response.json({ text_diff: 'change' });
+    if (parsed.pathname.endsWith('/content')) return Response.json({ html: '<h1>candidate one</h1>' });
+    if (parsed.pathname.endsWith('/overlay')) return Response.json({ page_id: 'page_one', version: 1, overlays: {} });
+    if (parsed.pathname.endsWith('/confirm')) { confirms++; return Response.json({ ...jobs[1], status: 'SAVED', saved_version: 2 }); }
+    return Response.json(jobs[0]);
+  } }, { openNative: async () => {} });
+  t.after(() => client.dispose());
+  await client.load(jobs[0].id);
+  await client.preview();
+  const oldFrame = client.getSnapshot().html;
+  client.acceptPreview(oldFrame);
+  await client.refresh();
+  assert.equal(await client.begin('page', jobs[1].target_id, 1), true);
+  client.acceptPreview(oldFrame);
+  assert.equal(client.getSnapshot().previewReady, false);
+  assert.deepEqual(await client.confirm(), { ok: false });
+  assert.equal(confirms, 0);
 });

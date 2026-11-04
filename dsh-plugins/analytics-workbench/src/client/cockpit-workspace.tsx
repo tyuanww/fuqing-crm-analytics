@@ -28,7 +28,7 @@ const EMPTY_PAGE = { pages: [], current: null, mode: 'browse', busy: false, prev
   message: '', confirmationUncertain: false, liveStatus: '' } as unknown as FreeHtmlLibraryState;
 const EMPTY_DELIVERY: DeliverySnapshot = { status: 'no-session', sessionId: null, files: [], truncated: false, error: null, epoch: 0, refreshMode: 'manual' };
 const EMPTY_FILES: FileClientState = { files: [], status: 'idle', message: '', busy: false, editor: null, dirty: false, confirmationUncertain: false };
-const EMPTY_AI: AIState = { jobs: [], active: null, busy: false, confirmationUncertain: false, message: '', comparison: null, viewer: null, html: null };
+const EMPTY_AI: AIState = { jobs: [], active: null, busy: false, confirmationUncertain: false, message: '', comparison: null, viewer: null, html: null, previewReady: false };
 const EMPTY_INBOX: ArtifactInboxState = { items: [], status: 'unavailable', message: '', busy: false, updatedAt: 0 };
 const groups = [{ key: 'html', name: 'HTML 页面', icon: '</>' }, { key: 'board', name: '数据看板', icon: '▦' },
   { key: 'spreadsheet', name: '表格与 CSV', icon: '▤' }, { key: 'document', name: 'Word 文档', icon: 'W' }, { key: 'pdf', name: 'PDF 文档', icon: 'PDF' }];
@@ -520,7 +520,7 @@ export function LibraryCockpitPanel({ library, goConversation, themeSource, init
             <button aria-pressed={mobileInspector} onClick={() => setMobileInspector(true)}>{mobileInspector ? '编辑设置 · 当前' : '编辑设置'}</button>
           </div> : null}
           <div className="cockpit-content">
-            {!boardVisible && (ai.html || ai.viewer) ? <CockpitAIPreview state={ai} /> : boardVisible ? <div className="cockpit-editor-layout"><div className="cockpit-editor-canvas">
+            {!boardVisible && aiClient && (ai.html || ai.viewer) ? <CockpitAIPreview state={ai} client={aiClient} /> : boardVisible ? <div className="cockpit-editor-layout"><div className="cockpit-editor-canvas">
               {state.preview ? <div className="cockpit-notice" data-testid="library-preview-banner"><div><strong>{state.preview.operation === 'ROLLBACK' ? '回退预览' : state.preview.operation === 'LAYOUT' ? '布局已通过检查' : '修改预览'}</strong>
                 <p>{uncertain ? '保存结果待核对，请重试确认或核对结果。' : '尚未保存。画布已显示候选内容，确认后才保存。'}</p>
                 {state.preview.operation === 'PATCH' && state.editContext ? <p data-testid="library-edit-diff">{boardChangeSummary(state.editContext.block, shown?.spec.blocks.find(row => row.block_id === state.editContext?.block_id))}</p> : null}</div>

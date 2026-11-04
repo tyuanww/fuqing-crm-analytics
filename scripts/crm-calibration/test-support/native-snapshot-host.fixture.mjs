@@ -27,10 +27,12 @@ try {
     if (input.operation === 'close') break;
     try {
       const signal = new AbortController().signal;
-      if (input.operation === 'login' || input.operation === 'disconnect') {
+      if (['login', 'disconnect', 'source_authorization_preview', 'source_authorization_confirm'].includes(input.operation)) {
         const response = await access.browser(new Request(origin + CRM_UI_PATH, {
           method: 'POST', headers: { origin, 'x-crm-ui': '1', 'content-type': 'application/json' },
           body: JSON.stringify({ operation: input.operation, session_id: session,
+            ...input.operation === 'source_authorization_preview' ? { refs: input.refs } : {},
+            ...input.operation === 'source_authorization_confirm' ? { preview_id: input.preview_id } : {},
             ...input.operation === 'login' ? { username: 'fixture-user', password: 'native-fixture-password' } : {} }),
         }));
         send(await response.json());

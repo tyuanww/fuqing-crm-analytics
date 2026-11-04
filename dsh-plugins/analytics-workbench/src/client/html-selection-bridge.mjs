@@ -358,9 +358,14 @@ function selectionRuntime(config) {
 }
 export function selectionSrcdoc(pkg, { channel, pageId, version, nodes = [], selected = null, editing = false, selectBlocks = false, allowScripts = true }) {
   let src = buildSrcdoc({ ...(editing ? instrumentSourceTargets(pkg, nodes) : pkg), instanceId: channel, pageId, version, nonce: channel, allowScripts });
-  const statusConfig = JSON.stringify({ channel, pageId, version }).replace(/</g, '\\u003c');
+  const statusConfig = JSON.stringify({ channel, pageId, version, editCount: pkg.presentation?.edits?.length ?? 0 }).replace(/</g, '\\u003c');
   src = insertBeforeBodyEnd(src, '<script>(' + (function (config) {
-    const report = () => parent.postMessage({ type: 'cockpit.presentation', ...config, unresolved: window.__cockpitPresentationStatus?.unresolved?.length ?? 0 }, '*');
+    const report = () => {
+      if (document.readyState === 'loading') return;
+      const status = window.__cockpitPresentationStatus;
+      if (config.editCount && (!status || status.total !== config.editCount)) return;
+      parent.postMessage({ type: 'cockpit.presentation', ...config, ready: true, unresolved: status?.unresolved?.length ?? 0 }, '*');
+    };
     window.addEventListener('cockpit-presentation-status', report);
     document.addEventListener('DOMContentLoaded', report, { once: true }); report();
   }).toString() + ')(' + statusConfig + ');</script>');
