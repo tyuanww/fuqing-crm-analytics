@@ -71,4 +71,9 @@ export const NAV_ITEMS: NavItem[] = [
       { key: '#roi', label: '派样正装转化分析' },
     ],
   },
+  {
+    key: '/second-entry',
+    label: '第二入口',
+    tabs: [],
+  },
 ]
