@@ -196,20 +196,6 @@ jobs:
             --source-sha "$REVIEWED_SHA" \
             --tag "$RELEASE_TAG" \
             --output-dir "$RUNNER_TEMP/dsh-preflight"
-      - name: Retain rc.5 DevTools chunk digests for the allowlist
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-          mapfile -t chunks < <(find .context -path '*inspector/lib/devtools/chunks/*' \( -name 'data_grid-*.js' -o -name 'legacy-*.js' \) -print | sort)
-          for chunk in "${chunks[@]}"; do
-            printf '%s  %s\n' "$(sha256sum "$chunk" | cut -d' ' -f1)" "$chunk"
-          done
-          for chunk in "${chunks[@]}"; do
-            printf 'LITERALS %s: ' "$chunk"
-            grep -oE '(DataGridInternalToken|ReportingEndpointNotToken|InvalidCredentialsCookie)' "$chunk" | sort -u | tr '\n' ' ' || true
-            printf '\n'
-          done
       - name: Upload the preflight runtime and summary
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
