@@ -46,6 +46,11 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '派样看板', requiresAuth: true },
   },
   {
+    path: '/second-entry',
+    component: () => import('@/views/SecondEntryView.vue'),
+    meta: { title: '第二入口', requiresAuth: true },
+  },
+  {
     path: '/ops',
     component: () => import('@/views/OpsView.vue'),
     meta: { title: '系统运维看板', requiresAuth: true, requiresAdmin: true },
