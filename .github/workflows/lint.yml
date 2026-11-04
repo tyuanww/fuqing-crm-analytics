@@ -99,6 +99,13 @@ jobs:
     # 与 nightly 的 45 分钟有界运行区分：PR 只跑有界 Python 计划，30 分钟足够；
     # 挂起即失败，避免 runner 被无限占用。
     timeout-minutes: 30
+    # 4 shards on separate runners: same bounded runner, same selection, wall
+    # time ~= the heaviest shard instead of the whole 332-file suite. fail-fast
+    # stays off so one red shard cannot cancel the other three pieces of evidence.
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     env:
       FQ_CRM_ADMINS: admin
     steps:
@@ -119,6 +126,8 @@ jobs:
       - name: Run the same Python plan as local pre-push
         env:
           CHECK_PLAN: ${{ needs.changes.outputs.plan }}
+          FQ_TEST_SHARD_INDEX: ${{ matrix.shard }}
+          FQ_TEST_SHARD_COUNT: 4
         run: |
           python3 -c "import json, os; print('\n'.join(json.loads(os.environ['CHECK_PLAN'])['files']))" > changed-files.txt
           python3 scripts/ci/run_checks.py --files-from changed-files.txt --only ci-python
@@ -126,7 +135,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: backend-check-evidence
+          name: backend-check-evidence-shard-${{ matrix.shard }}
           path: .context/checks/
           if-no-files-found: ignore
 
@@ -142,7 +151,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          lfs: true
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "24"
@@ -206,7 +214,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          lfs: true
       - name: Backend Dockerfile build (no push)
         run: |
           set -euo pipefail
@@ -318,7 +325,10 @@ jobs:
     needs: changes
     # b0 轴仍是"是否碰到 B0 相关路径"的唯一权威；b0_required 再把它收窄到
     # 组合包/锁文件/插件边界/发布相关输入，backend-only 变更不再跑 B0。
-    if: needs.changes.outputs.b0 == 'true' && needs.changes.outputs.b0_required == 'true'
+    # PR 已用同一棵树验证过 B0；merge 后重跑是纯重复（48h 窗口约 32 次 push
+    # × ~15 分钟），push-to-main 不再执行。其余 job 与 merge-gate 的 skipped
+    # 语义不变；B0 自身的本地/手动入口 dsh-b0.yml 与 test job 不受影响。
+    if: needs.changes.outputs.b0 == 'true' && needs.changes.outputs.b0_required == 'true' && github.event_name != 'push'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -330,7 +340,6 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
           clean: false
-          lfs: true
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: '24.19.0'

@@ -109,7 +109,11 @@ def scoped_pytest_targets(paths: list[str]) -> list[str]:
     return out
 
 
-B0_PREFIXES = ('dsh-plugins/analytics-workbench/', 'scripts/dsh-b0/', 'scripts/dsh-dev/',
+# Every published plugin tree belongs to the sealed B0 job, not only
+# analytics-workbench: an unmapped tree such as dsh-plugins/plugin-kit fell
+# through to the conservative fallback and ran the 13-minute Python suite for a
+# TypeScript-only change.
+B0_PREFIXES = ('dsh-plugins/', 'scripts/dsh-b0/', 'scripts/dsh-dev/',
                'backend/services/analytics/', 'backend/tests/analytics_')
 B0_EXACT = {'backend/contracts/analytics.py', 'backend/semantic/analytics_b0.py',
             'config/shinemage-composition-packs.lock.json', 'config/workbench-author-evidence.lock.json', 'config/domain-author-evidence.lock.json',
@@ -176,6 +180,12 @@ def verification_plan(paths: list[str]) -> dict:
             # FilterBuilder scanners walk backend/services/**, including analytics.
             if p.startswith('backend/services/'):
                 plan['filterbuilder'] = True
+            # B0-prefixed backend code is still backend code. Without this axis
+            # a production change such as backend/services/analytics/foo.py ran
+            # only the B0 job -- or nothing at all when b0_required narrowed the
+            # B0 job away, because backend services are not B0 release inputs.
+            if p.startswith('backend/') and not is_test_path(p):
+                plan['backend'] = 'full'
             # B0-prefixed tests must still run as scoped Python; #80 skipped otherwise.
             if is_test_path(p):
                 if Path(p).name.startswith('test_') and p.endswith('.py'):
@@ -203,6 +213,11 @@ def verification_plan(paths: list[str]) -> dict:
                 plan['frontend'] = True
             else:
                 plan['ground_truth'] = True
+        elif p.startswith('scripts/release/'):
+            # Release tooling is verified by dsh-release-preflight.yml, which
+            # watches scripts/release/** on PRs. Falling through to the
+            # conservative fallback ran the whole Python suite for that change.
+            plan['tooling'] = True
         elif p.startswith(('.githooks/', 'scripts/ci/', '.github/', '.claude/')) or p in {
                 'AGENTS.md', 'CLAUDE.md', 'scripts/branch_cleanup.py', 'scripts/setup-hooks.sh',
                 'scripts/sync-agents.sh', '.pre-commit-config.yaml'}:

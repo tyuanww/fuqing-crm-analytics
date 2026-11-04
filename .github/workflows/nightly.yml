@@ -36,6 +36,17 @@ jobs:
           python-version: "3.14"
           cache: 'pip'
           cache-dependency-path: requirements-lock.txt
+      # The bounded suite shells out to the pinned Node 24 for the service
+      # artifact checks (backend/tests/test_crm_service_packages.py). This job
+      # never selected Node, so the runner default drifted to v22 and 3 of the
+      # last 4 weekly runs failed there (runs 41404844184 is the exception:
+      # it stopped earlier at the RFM date fixture).
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24.19.0"
+          package-manager-cache: false
+      - name: Ensure standalone service artifact tools
+        run: sudo apt-get install -y zstd
       - name: Install locked dependencies
         run: pip install -r requirements-lock.txt
 

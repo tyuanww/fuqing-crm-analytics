@@ -32,10 +32,11 @@ B0_SCOPE_PREFIXES = (
     'frontend-vue3/src/assets/brand/',
 )
 B0_SCOPE_EXACT = frozenset({
-    # dependency locks that pin the B0 toolchain and its package managers
+    # dependency locks that pin the B0 toolchain and its package managers.
+    # Root requirements*.txt only pin the backend venv; the B0 job builds its
+    # own venv from scripts/dsh-b0/requirements.lock, so a backend dependency
+    # bump does not need the sealed B0 build (the test job still runs it).
     'pyproject.toml',
-    'requirements.txt',
-    'requirements-lock.txt',
     'uv.lock',
     'pnpm-lock.yaml',
     'package.json',
