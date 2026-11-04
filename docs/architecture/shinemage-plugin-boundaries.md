@@ -38,7 +38,7 @@ node --test scripts/dsh-b0/plugin-boundaries.test.mjs
 | `crm-knowledge` | CRM 登录／指标／分析 adapter | [dsh-crm-knowledge](https://github.com/tyuanww/dsh-crm-knowledge) | CRM 包 ID 保留，知识实现已分离；真实服务另验 |
 | `knowledge` | 公开解释／教材／图谱接入 | [dsh-knowledge](https://github.com/tyuanww/dsh-knowledge) | 合成接入验证不等于真实 WeKnora 验收 |
 
-2026-10-11 本地重新生成的清单扫描 11 个包、653 个 JS/TS 文件。27 条跨包引用按 phase 分为 runtime 10、build 11、test 6；10 条 runtime 引用全部是已锁定 board-components 的公开导出，生产源码例外为 0。另有 17 条仓库引用，均为测试，包含兼容入口转发；63 处非字面动态导入也全部位于测试。这些是当前静态清单的数值，不是插件宿主兼容或完整 B0 的通过计数；历史扫描数留在原证据。
+2026-11-04 P2a 重新生成的清单扫描 12 个包、668 个 JS/TS 文件（以 JSON 的 `source_files_scanned` 为准）。45 条跨包引用按 phase 分为 runtime 10、build 28、test 7；10 条 runtime 引用全部是已锁定 board-components 的公开导出，生产源码例外为 0。另有 17 条仓库引用，均为测试，包含兼容入口转发；62 处非字面动态导入也全部位于测试。构建回执与浏览器 CJS 装载包装已归 kit 公开入口（`./provenance`、`./client-banner`），九个插件 build 不再引用主仓 `scripts/release`，原先 9 条 build 仓库边消失。这些是当前静态清单的数值，不是插件宿主兼容或完整 B0 的通过计数；历史扫描数留在原证据。
 
 构建 DAG：`plugin-kit` → `board-components`、`crm-knowledge`、`knowledge` 与四个无需图表输入的 leaf → `analytics-workbench`/`shine-funnel`/`shine-waterfall`。箭头表示构建依赖，不是宿主 bundle 激活顺序；本地 profile v3 分别选择 CRM、知识与页面模块，生产 profile 未改变。
 

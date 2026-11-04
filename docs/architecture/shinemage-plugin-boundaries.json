@@ -216,6 +216,8 @@
         "./prepare": "./prepare.mjs",
         "./pin": "./toolchain.json",
         "./packaged-dependencies": "./packaged-dependencies.mjs",
+        "./provenance": "./provenance.mjs",
+        "./client-banner": "./client-banner.mjs",
         "./package.json": "./package.json"
       },
       "files": [
@@ -228,6 +230,8 @@
         "sdk-closure.mjs",
         "check.mjs",
         "packaged-dependencies.mjs",
+        "provenance.mjs",
+        "client-banner.mjs",
         "README.md",
         "build-tools/package.json",
         "build-tools/pnpm-lock.yaml",
@@ -240,7 +244,7 @@
       "bundled_inputs": [],
       "dsh": {},
       "commands": {},
-      "manifest_sha256": "cfde59b91196e607fb4a009a115b0304429ba2bd51a69fa0e9e2784da79650ec"
+      "manifest_sha256": "5d62efc5c6313738ce28e4155ace511fe1c7ca3c27f65378ce10b8a8601b183b"
     },
     {
       "path": "dsh-plugins/query-agent",
@@ -300,12 +304,7 @@
       "bundled_inputs": [],
       "dsh": {
         "client": {
-          "platform": "web",
-          "inject": [
-            "@deepseek-ai/dsh-client-ui-renderer",
-            "@deepseek-ai/dsh-client-ui-sidebar",
-            "@deepseek-ai/dsh-client-ui-slots"
-          ]
+          "platform": "web"
         },
         "bundle": {
           "patch": "./cordis.patch.yml"
@@ -315,7 +314,7 @@
         "build": "node build.mjs",
         "test": "node --test src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "a065d60850efb398d95b34c3a9a8265f2dfaf2bb97383c1b3e831f106b6ef915"
+      "manifest_sha256": "78fe8ebafad4a2550c16ae1d8359f6ea7db552e707f95f7105f6ccc94e5cff29"
     },
     {
       "path": "dsh-plugins/shine-brand",
@@ -389,12 +388,7 @@
       "bundled_inputs": [],
       "dsh": {
         "client": {
-          "platform": "web",
-          "inject": [
-            "@deepseek-ai/dsh-client-ui-renderer",
-            "@deepseek-ai/dsh-client-ui-sidebar",
-            "@deepseek-ai/dsh-client-ui-slots"
-          ]
+          "platform": "web"
         },
         "bundle": {
           "patch": "./cordis.patch.yml"
@@ -404,7 +398,7 @@
         "build": "node build.mjs",
         "test": "node --test src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "8096ec2e69b22fb857a732df001257f286c620757f95e637567ca840559b6b6e"
+      "manifest_sha256": "4b4a682e474705b59d22fd0d8f8b1323fae2353599563df4edab97dfa377ef6e"
     },
     {
       "path": "dsh-plugins/shine-funnel",
@@ -450,12 +444,7 @@
       ],
       "dsh": {
         "client": {
-          "platform": "web",
-          "inject": [
-            "@deepseek-ai/dsh-client-ui-renderer",
-            "@deepseek-ai/dsh-client-ui-sidebar",
-            "@deepseek-ai/dsh-client-ui-slots"
-          ]
+          "platform": "web"
         },
         "bundle": {
           "patch": "./cordis.patch.yml"
@@ -465,7 +454,7 @@
         "build": "node build.mjs",
         "test": "node --test src/funnel.test.mjs src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "dd9190866e32818bec895597161b9c4fb726a959404b4b5b37b45be32fbda6b8"
+      "manifest_sha256": "7159ca404c5bbbba1800a6c071d8236ce0384ef5f9fc109ff8ef158ec0bb1260"
     },
     {
       "path": "dsh-plugins/shine-query",
@@ -495,12 +484,7 @@
       "bundled_inputs": [],
       "dsh": {
         "client": {
-          "platform": "web",
-          "inject": [
-            "@deepseek-ai/dsh-client-ui-renderer",
-            "@deepseek-ai/dsh-client-ui-sidebar",
-            "@deepseek-ai/dsh-client-ui-slots"
-          ]
+          "platform": "web"
         },
         "bundle": {
           "patch": "./cordis.patch.yml"
@@ -510,7 +494,7 @@
         "build": "node build.mjs",
         "test": "node --test src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "3acf09d4a0a4f1402e307964799b61e95f29493a12af5d80e3db6890dd387c3c"
+      "manifest_sha256": "d63fc9f0e1fd6221d986d0a56fb320d99b8d941576a90f63d907d170b8337e32"
     },
     {
       "path": "dsh-plugins/shine-waterfall",
@@ -556,12 +540,7 @@
       ],
       "dsh": {
         "client": {
-          "platform": "web",
-          "inject": [
-            "@deepseek-ai/dsh-client-ui-renderer",
-            "@deepseek-ai/dsh-client-ui-sidebar",
-            "@deepseek-ai/dsh-client-ui-slots"
-          ]
+          "platform": "web"
         },
         "bundle": {
           "patch": "./cordis.patch.yml"
@@ -571,10 +550,10 @@
         "build": "node build.mjs",
         "test": "node --test src/waterfall.test.mjs src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "13140dce4cf3d61c0f17e5e9353918a51ed1cc07e941edd2fbe099699a5d9002"
+      "manifest_sha256": "01c8dc9bbb358ba6402048f9af6306b35e2e8814e9298965dc5d4ddf23f00e85"
     }
   ],
-  "source_files_scanned": 661,
+  "source_files_scanned": 668,
   "cross_package_edges": [
     {
       "consumer": "analytics-workbench",
@@ -670,6 +649,26 @@
       "consumer": "analytics-workbench",
       "provider": "plugin-kit",
       "phase": "build",
+      "source": "dsh-plugins/analytics-workbench/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/client-banner",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/analytics-workbench/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/provenance",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "plugin-kit",
+      "phase": "build",
       "source": "dsh-plugins/analytics-workbench/toolchain.mjs",
       "target": "dsh-plugins/plugin-kit",
       "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
@@ -742,7 +741,37 @@
       "phase": "build",
       "source": "dsh-plugins/crm-knowledge/build.mjs",
       "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/client-banner",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/crm-knowledge/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/provenance",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/crm-knowledge/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
       "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "knowledge",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/knowledge/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/provenance",
       "access": "public-export",
       "type_only": false
     },
@@ -762,6 +791,26 @@
       "phase": "build",
       "source": "dsh-plugins/shine-board/build.mjs",
       "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/client-banner",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-board",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-board/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/provenance",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-board",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-board/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
       "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
       "access": "public-export",
       "type_only": false
@@ -772,7 +821,47 @@
       "phase": "build",
       "source": "dsh-plugins/shine-brand/build.mjs",
       "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/client-banner",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-brand",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-brand/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/provenance",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-brand",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-brand/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
       "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-crowd-action",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-crowd-action/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/client-banner",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-crowd-action",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-crowd-action/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/provenance",
       "access": "public-export",
       "type_only": false
     },
@@ -812,7 +901,47 @@
       "phase": "build",
       "source": "dsh-plugins/shine-funnel/build.mjs",
       "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/client-banner",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-funnel",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-funnel/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/provenance",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-funnel",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-funnel/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
       "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-query",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-query/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/client-banner",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-query",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-query/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/provenance",
       "access": "public-export",
       "type_only": false
     },
@@ -852,6 +981,26 @@
       "phase": "build",
       "source": "dsh-plugins/shine-waterfall/build.mjs",
       "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/client-banner",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-waterfall",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-waterfall/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/provenance",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-waterfall",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-waterfall/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
       "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
       "access": "public-export",
       "type_only": false
@@ -878,12 +1027,6 @@
     ]
   ],
   "repository_edges": [
-    {
-      "consumer": "analytics-workbench",
-      "phase": "build",
-      "source": "dsh-plugins/analytics-workbench/build.mjs",
-      "target": "scripts/release/generated-provenance.mjs"
-    },
     {
       "consumer": "analytics-workbench",
       "phase": "test",
@@ -946,12 +1089,6 @@
     },
     {
       "consumer": "crm-knowledge",
-      "phase": "build",
-      "source": "dsh-plugins/crm-knowledge/build.mjs",
-      "target": "scripts/release/generated-provenance.mjs"
-    },
-    {
-      "consumer": "crm-knowledge",
       "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/dashboard.fixture.mjs",
       "target": "scripts/crm-calibration/test-support/dashboard.fixture.mjs"
@@ -988,51 +1125,9 @@
     },
     {
       "consumer": "knowledge",
-      "phase": "build",
-      "source": "dsh-plugins/knowledge/build.mjs",
-      "target": "scripts/release/generated-provenance.mjs"
-    },
-    {
-      "consumer": "knowledge",
       "phase": "test",
       "source": "dsh-plugins/knowledge/test/graph.fixture.mjs",
       "target": "scripts/crm-calibration/test-support/graph.fixture.mjs"
-    },
-    {
-      "consumer": "shine-board",
-      "phase": "build",
-      "source": "dsh-plugins/shine-board/build.mjs",
-      "target": "scripts/release/generated-provenance.mjs"
-    },
-    {
-      "consumer": "shine-brand",
-      "phase": "build",
-      "source": "dsh-plugins/shine-brand/build.mjs",
-      "target": "scripts/release/generated-provenance.mjs"
-    },
-    {
-      "consumer": "shine-crowd-action",
-      "phase": "build",
-      "source": "dsh-plugins/shine-crowd-action/build.mjs",
-      "target": "scripts/release/generated-provenance.mjs"
-    },
-    {
-      "consumer": "shine-funnel",
-      "phase": "build",
-      "source": "dsh-plugins/shine-funnel/build.mjs",
-      "target": "scripts/release/generated-provenance.mjs"
-    },
-    {
-      "consumer": "shine-query",
-      "phase": "build",
-      "source": "dsh-plugins/shine-query/build.mjs",
-      "target": "scripts/release/generated-provenance.mjs"
-    },
-    {
-      "consumer": "shine-waterfall",
-      "phase": "build",
-      "source": "dsh-plugins/shine-waterfall/build.mjs",
-      "target": "scripts/release/generated-provenance.mjs"
     }
   ],
   "literal_endpoints": [
@@ -3600,9 +3695,49 @@
       "specifier": "node:url"
     },
     {
+      "consumer": "plugin-kit",
+      "phase": "build",
+      "specifier": "node:util"
+    },
+    {
+      "consumer": "query-agent",
+      "phase": "build",
+      "specifier": "node:assert/strict"
+    },
+    {
+      "consumer": "query-agent",
+      "phase": "build",
+      "specifier": "node:fs"
+    },
+    {
+      "consumer": "query-agent",
+      "phase": "build",
+      "specifier": "node:fs/promises"
+    },
+    {
+      "consumer": "query-agent",
+      "phase": "build",
+      "specifier": "node:module"
+    },
+    {
+      "consumer": "query-agent",
+      "phase": "build",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "query-agent",
+      "phase": "build",
+      "specifier": "node:url"
+    },
+    {
       "consumer": "query-agent",
       "phase": "test",
       "specifier": "node:assert/strict"
+    },
+    {
+      "consumer": "query-agent",
+      "phase": "test",
+      "specifier": "node:fs"
     },
     {
       "consumer": "query-agent",
@@ -3612,7 +3747,17 @@
     {
       "consumer": "query-agent",
       "phase": "test",
+      "specifier": "node:path"
+    },
+    {
+      "consumer": "query-agent",
+      "phase": "test",
       "specifier": "node:test"
+    },
+    {
+      "consumer": "query-agent",
+      "phase": "test",
+      "specifier": "node:url"
     },
     {
       "consumer": "shine-board",
@@ -3632,7 +3777,7 @@
     {
       "consumer": "shine-board",
       "phase": "runtime",
-      "specifier": "@deepseek-ai/dsh-client-core"
+      "specifier": "@deepseek-ai/cordis"
     },
     {
       "consumer": "shine-board",
@@ -3747,7 +3892,7 @@
     {
       "consumer": "shine-crowd-action",
       "phase": "runtime",
-      "specifier": "@deepseek-ai/dsh-client-core"
+      "specifier": "@deepseek-ai/cordis"
     },
     {
       "consumer": "shine-crowd-action",
@@ -3802,7 +3947,7 @@
     {
       "consumer": "shine-funnel",
       "phase": "runtime",
-      "specifier": "@deepseek-ai/dsh-client-core"
+      "specifier": "@deepseek-ai/cordis"
     },
     {
       "consumer": "shine-funnel",
@@ -3857,7 +4002,7 @@
     {
       "consumer": "shine-query",
       "phase": "runtime",
-      "specifier": "@deepseek-ai/dsh-client-core"
+      "specifier": "@deepseek-ai/cordis"
     },
     {
       "consumer": "shine-query",
@@ -3912,7 +4057,7 @@
     {
       "consumer": "shine-waterfall",
       "phase": "runtime",
-      "specifier": "@deepseek-ai/dsh-client-core"
+      "specifier": "@deepseek-ai/cordis"
     },
     {
       "consumer": "shine-waterfall",
@@ -4024,6 +4169,19 @@
       "compatibility": "Preserve semantic and geometry consumer tests; move domain schema with domain owner.",
       "status": "GENERATED_DOMAIN_V1",
       "source_sha256": "1b518cdcdfdd66a598fe95eff29c7ddeec2d4aebb29ece504c9a6fd710c245a0"
+    },
+    {
+      "id": "board-component-catalog",
+      "owner": "board-domain",
+      "source": "backend/contracts/component-catalog.json",
+      "generator": null,
+      "consumers": [
+        "analytics-workbench",
+        "board-components"
+      ],
+      "compatibility": "Main-owned runtime projection of board-component-catalog/v1; byte parity with the plugin projection and the public-contract lock is enforced by scripts/ci/board-catalog-sync.mjs. Catalogue semantics remain owned by the upstream board-components domain.",
+      "status": "DOMAIN_V1",
+      "source_sha256": "8e2161fa54855bd23cef7b54a966486dc5daeb8fe3f427a17b52f033de666bab"
     },
     {
       "id": "crm-cockpit-slot",

@@ -1,8 +1,9 @@
 import { dirname, isAbsolute, resolve, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { copyFile, readFile } from 'node:fs/promises';
-import { bindToolchain } from '@shine-mage/dsh-plugin-kit/toolchain';
-import { writeBuildProvenance } from '../../scripts/release/generated-provenance.mjs';
+import { bindToolchain, checkClientTypes } from '@shine-mage/dsh-plugin-kit/toolchain';
+import { writeBuildProvenance } from '@shine-mage/dsh-plugin-kit/provenance';
+import { clientModuleBanner } from '@shine-mage/dsh-plugin-kit/client-banner';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const upstreamInput = process.argv[2] ?? process.env.B0_BUILD_UPSTREAM;
@@ -11,7 +12,8 @@ const upstream = resolve(upstreamInput);
 const manifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
 const buildToolsInput = process.argv[3] ?? process.env.B0_BUILD_TOOLS;
 if (buildToolsInput && !isAbsolute(buildToolsInput)) { console.error('BUILD_TOOLS_NOT_CONFIGURED: pass an absolute build-tools directory.'); process.exit(2); }
-const { build } = await bindToolchain(root, upstream, buildToolsInput && resolve(buildToolsInput));
+const { build, compiler } = await bindToolchain(root, upstream, buildToolsInput && resolve(buildToolsInput));
+checkClientTypes(root, compiler);
 
 const common = { absWorkingDir: root, bundle: true, sourcemap: true, logLevel: 'info', minifyWhitespace: true };
 await build({
@@ -24,8 +26,7 @@ await build({
   external: ['react', 'react/jsx-runtime', 'react-dom', 'react-dom/client', '@deepseek-ai/cordis'],
   minify: true,
   define: { 'process.env.NODE_ENV': JSON.stringify('production') },
-  banner: { js: `window.__ModuleLoader__.load({ id: ${JSON.stringify(manifest.name)}, factory: (require) => {\nvar module = { exports: {} }; var exports = module.exports;` },
-  footer: { js: 'return module.exports;\n} });' },
+  ...clientModuleBanner(manifest.name),
 });
 await build({ ...common, entryPoints: ['src/funnel.mjs'], outfile: 'lib/funnel.mjs', platform: 'neutral', target: 'es2022', format: 'esm', sourcemap: false });
 // Keep the legacy public subpath and publish its actual standalone declaration.

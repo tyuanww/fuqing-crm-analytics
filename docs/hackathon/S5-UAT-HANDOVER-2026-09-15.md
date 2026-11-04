@@ -35,7 +35,7 @@
 
 ## 公开属性与拒绝边界（G6）
 
-目录 SSOT：`dsh-plugins/analytics-workbench/src/board-spec/component-catalog.json`，`board-components/v1`。细则见 [插件 README](../../dsh-plugins/analytics-workbench/README.md)。
+目录 SSOT（主仓）：`backend/contracts/component-catalog.json`，`board-components/v1`；后端只读此路径。插件 UI 保留 `dsh-plugins/analytics-workbench/src/board-spec/component-catalog.json` 副本，由 `scripts/ci/board-catalog-sync.mjs` 校验与 SSOT 及 public-contract 锁字节一致。目录语义上游归属 board-components 域，细则见 [插件 README](../../dsh-plugins/analytics-workbench/README.md)。
 
 - 六类可改表现属性；未知属性、脚本、facts、查询条件拒绝。TABLE **没有** `show_values`，提交该属性应为 `COMPONENT_PROPERTY`。
 - 布局重叠预检 `COMPONENT_OVERLAP`，不自动改块、不授权 bash。

@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { dirname, isAbsolute, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { writeBuildProvenance } from '../../scripts/release/generated-provenance.mjs';
+import { writeBuildProvenance } from '@shine-mage/dsh-plugin-kit/provenance';
+import { clientModuleBanner } from '@shine-mage/dsh-plugin-kit/client-banner';
 const root = dirname(fileURLToPath(import.meta.url));
 const upstreamInput = process.argv[2] ?? process.env.B0_BUILD_UPSTREAM;
 if (!upstreamInput || !isAbsolute(upstreamInput)) {
@@ -41,8 +42,7 @@ const client = await build({ absWorkingDir: root, entryPoints: ['src/client/inde
   bundle: true, platform: 'browser', target: 'es2022', format: 'cjs', jsx: 'automatic', minify: true, metafile: true,
   external: ['react', 'react/jsx-runtime', 'react-dom', 'react-dom/client', '@deepseek-ai/*'],
   define: { 'process.env.NODE_ENV': JSON.stringify('production') },
-  banner: { js: `window.__ModuleLoader__.load({ id: ${JSON.stringify(manifest.name)}, factory: (require) => {\nvar module = { exports: {} }; var exports = module.exports;` },
-  footer: { js: 'return module.exports;\n} });' },
+  ...clientModuleBanner(manifest.name),
 });
 assert.ok(Object.keys(client.metafile.inputs).every(path => !/node_modules\/(react|react-dom)\//.test(path)), 'Use platform React only');
 assert.ok(Object.keys(client.metafile.inputs).every(path => !/dashboard-access|src\/host|src\/dashboard\.mjs/.test(path)), 'Host credentials must not enter the client bundle');

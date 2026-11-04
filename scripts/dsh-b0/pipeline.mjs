@@ -186,6 +186,7 @@ if (mode === '--prepare') {
   const publicContractChecks = await runFixedContractChecks({ inputsPath: env.PUBLIC_CONTRACT_INPUTS,
     output: join(env.CRM_COMPOSITION_OUTPUT, 'contracts'), python, buildTools });
   run(process.execPath, ['--test', '--test-concurrency=1', 'scripts/ci/public-contract-inputs.test.mjs', 'scripts/dsh-b0/fixed-contract-checks.test.mjs']);
+  run(process.execPath, ['--test', 'scripts/ci/board-catalog-sync.test.mjs']);
   run(process.execPath, ['--test', 'scripts/dsh-b0/package-inputs.test.mjs', 'scripts/dsh-b0/geometry-composition.test.mjs']);
   run(process.execPath, ['--test', 'scripts/dsh-b0/explicit-build-inputs.test.mjs', 'scripts/dsh-b0/workbench-author-contracts.test.mjs']);
   run(process.execPath, ['--test', 'scripts/ci/domain-author-evidence.test.mjs']);
@@ -255,6 +256,9 @@ print('B0 exact Python closure verified')
     'backend/tests/analytics_native_probe.py', 'backend/tests/analytics_query_native_fault_probe.py', ...pyTests]);
   // Workbench core/build/private loader checks run in its pinned author CI.
   // Main keeps its orchestration units and the original backend/query checks.
+  // Query policy: verify generated single-source data and strict TypeScript
+  // before the host tests import the shipped lib artifact.
+  run(process.execPath, ['dsh-plugins/query-agent/build.mjs', '--typecheck']);
   run(process.execPath, ['--test',
     'scripts/dsh-b0/gateway-policy.test.mjs', 'scripts/dsh-b0/transport-safety.test.mjs', 'scripts/dsh-b0/mock-provider.test.mjs',
     'scripts/dsh-b0/recovery-model-gate.test.mjs', 'scripts/dsh-b0/session-recovery.test.mjs',
@@ -264,7 +268,8 @@ print('B0 exact Python closure verified')
     'scripts/dsh-b0/html-host-browser-cleanup.test.mjs',
     'scripts/dsh-b0/lifecycle-observer.test.mjs', 'scripts/dsh-b0/host-feasibility.test.mjs', 'scripts/dsh-b0/compatibility-matrix.test.mjs', 'scripts/dsh-b0/permission-fence.test.mjs', 'scripts/dsh-b0/ui-seams.test.mjs',
     'scripts/dsh-b0/package-manager-env.test.mjs', 'scripts/dsh-b0/diagnostic-sink.test.mjs',
-    'dsh-plugins/query-agent/test/package.test.mjs', 'scripts/ops/weknora-production-scope.test.mjs',
+    'dsh-plugins/query-agent/test/package.test.mjs', 'dsh-plugins/query-agent/test/tool-policy.test.mjs',
+    'dsh-plugins/query-agent/test/tool-policy-registry.test.mjs', 'scripts/ops/weknora-production-scope.test.mjs',
     'scripts/release/plugin-pack.test.mjs', 'scripts/release/plugin-candidate.test.mjs', 'scripts/release/plugin-host-evidence.test.mjs', 'scripts/release/profile.test.mjs', 'scripts/release/plugin-boundary.test.mjs', 'scripts/release/supply-chain.test.mjs',
     'scripts/release/runtime-host-evidence.test.mjs', 'scripts/release/profile-packs.test.mjs', 'scripts/release/release-profile-packs.test.mjs',
     'scripts/crm-calibration/profile-packs.test.mjs',
@@ -278,6 +283,7 @@ print('B0 exact Python closure verified')
     'scripts/release/sdk-closure.test.mjs',
     'scripts/dsh-b0/clean-build.test.mjs',
     'scripts/dsh-b0/plugin-kit.test.mjs', 'scripts/dsh-b0/plugin-kit-prepare.test.mjs',
+    'scripts/dsh-b0/plugin-kit-provenance.test.mjs',
     'scripts/dsh-b0/native-state-smoke.test.mjs', 'scripts/dsh-b0/native-query-smoke.test.mjs',
     'scripts/dsh-b0/native-query-fault-smoke.test.mjs', 'scripts/dsh-b0/native-query-assets-smoke.test.mjs',
     'scripts/dsh-b0/asset-routes.test.mjs']);

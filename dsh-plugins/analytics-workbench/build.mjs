@@ -4,7 +4,8 @@ import { dirname, isAbsolute, resolve, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { bindToolchain, checkTypes } from './toolchain.mjs';
 import { packSkills } from './pack-skills.mjs';
-import { writeBuildProvenance } from '../../scripts/release/generated-provenance.mjs';
+import { writeBuildProvenance } from '@shine-mage/dsh-plugin-kit/provenance';
+import { clientModuleBanner } from '@shine-mage/dsh-plugin-kit/client-banner';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const upstreamInput = process.argv[2] ?? process.env.B0_BUILD_UPSTREAM;
@@ -59,8 +60,7 @@ try {
       'process.env.COMPETITION_HTTP_BASE': JSON.stringify(''),
       'process.env.COMPETITION_HTTP_TOKEN': JSON.stringify(''),
     },
-    banner: { js: `window.__ModuleLoader__.load({ id: ${JSON.stringify(manifest.name)}, factory: (require) => {\nvar module = { exports: {} }; var exports = module.exports;` },
-    footer: { js: 'return module.exports;\n} });' },
+    ...clientModuleBanner(manifest.name),
   });
   assert.ok(Object.keys(clientBuild.metafile.inputs).every(path => !/node_modules\/(react|react-dom)\//.test(path)), 'The browser must use the single platform React runtime');
   // These offline views are built and checked independently until native/HTTP

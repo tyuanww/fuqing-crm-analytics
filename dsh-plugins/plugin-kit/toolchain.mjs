@@ -221,3 +221,32 @@ export async function bindToolchain(plugin, upstream, buildTools = defaultBuildT
   }
   return { pin, compiler, build: esbuild.build, restore };
 }
+
+/**
+ * Compile one plugin's browser entry with the already-bound pinned compiler.
+ * esbuild erases type-only imports, so a specifier that no longer resolves
+ * would ship silently; fail the build instead of publishing a dead import.
+ * @param plugin - absolute plugin root.
+ * @param compiler - TypeScript module exported by the bound toolchain.
+ * @param options - browser entry file, relative to the plugin root.
+ */
+export function checkClientTypes(plugin, compiler, { entry = 'src/client.tsx' } = {}) {
+  const ts = compiler;
+  const program = ts.createProgram([join(plugin, entry)], {
+    strict: true, noEmit: true, skipLibCheck: false,
+    target: ts.ScriptTarget.ES2023, module: ts.ModuleKind.ESNext,
+    moduleResolution: ts.ModuleResolutionKind.Bundler,
+    jsx: ts.JsxEmit.ReactJSX,
+    lib: ['lib.esnext.d.ts', 'lib.dom.d.ts', 'lib.dom.iterable.d.ts'],
+    // Client entries import the React/Node types they need; no ambient
+    // packages, so the checked closure stays small and explicit.
+    types: [], typeRoots: [join(plugin, 'node_modules/@types')],
+  });
+  const diagnostics = ts.getPreEmitDiagnostics(program);
+  if (diagnostics.length) {
+    throw new Error(`${entry} typecheck failed:\n` + ts.formatDiagnosticsWithColorAndContext(diagnostics, {
+      getCanonicalFileName: name => name, getCurrentDirectory: () => plugin, getNewLine: () => '\n',
+    }));
+  }
+  console.log(`${entry} typecheck passed`);
+}

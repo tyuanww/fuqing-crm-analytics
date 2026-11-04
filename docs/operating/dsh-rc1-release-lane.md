@@ -59,7 +59,7 @@ node scripts/release/rc1-preflight.mjs \
 
 ## 远端 workflow
 
-`.github/workflows/dsh-rc1-release-preflight.yml` 只接受明确的 source archive URL、source archive SHA-256、subject-set URL、subject-set SHA-256、runtime bundle URL、runtime bundle SHA-256 和 source identity。workflow 使用 `secure-unpack.py` 的 bounded extraction，并让严格 profile pack reader 重新核对 profile、manifest、tarball bytes、包身份和 generated-bytes provenance。它不使用当前 rc2 workflow 的 `GITHUB_SHA` 假设，也不把 `f402...` 当作 Git commit。source archive 未完成 LFS hydration、subject/runtime digest 不匹配或 runtime scanner 未通过时，workflow 必须失败。
+原 `.github/workflows/dsh-rc1-release-preflight.yml` 已于 2026-11-04 移除：它在整个仓库历史中从未产生过 run（`gh run list --workflow dsh-rc1-release-preflight.yml` 始终为空），pin 的 action（checkout v4 / setup-node v4 / setup-python v5，其余 workflow 已到 v7）也已落后，属于 0-run 的维护负担。当前 rc1 lane 的远端入口是 `dsh-release-preflight.yml`（rc2 lane），本地入口仍是 `scripts/release/rc1-preflight.mjs`（见“本地入口”）。删除前该 workflow 的行为约定如下，需要恢复远端入口时按此重建：它只接受明确的 source archive URL、source archive SHA-256、subject-set URL、subject-set SHA-256、runtime bundle URL、runtime bundle SHA-256 和 source identity。workflow 使用 `secure-unpack.py` 的 bounded extraction，并让严格 profile pack reader 重新核对 profile、manifest、tarball bytes、包身份和 generated-bytes provenance。它不使用当前 rc2 workflow 的 `GITHUB_SHA` 假设，也不把 `f402...` 当作 Git commit。source archive 未完成 LFS hydration、subject/runtime digest 不匹配或 runtime scanner 未通过时，workflow 必须失败。
 
 正式发布仍需把本地 asset 送入批准的 publisher、signature、revocation、independent verification、final attestation 和 clean-machine 流程，再生成可外发的 publication sidecar。当前没有执行这些外部门禁。
 

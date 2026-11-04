@@ -443,6 +443,7 @@
     "backend/contracts/competition_c0.py",
     "backend/contracts/competition_chart.py",
     "backend/contracts/competition_computed.py",
+    "backend/contracts/component-catalog.json",
     "backend/contracts/crm-dashboard.openapi.json",
     "backend/contracts/crm-knowledge-service.v1.json",
     "backend/contracts/crm-knowledge.openapi.json",
