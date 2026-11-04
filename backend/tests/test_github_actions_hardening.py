@@ -263,3 +263,31 @@ def test_ci_python_uses_deduplicated_runner_and_lint_remains_required():
     lint_runs = '\n'.join(step.get('run', '') for step in jobs['lint']['steps'])
     assert 'ruff check backend/' in lint_runs
     assert 'scripts/sync-agents.sh --check' in lint_runs
+
+
+def test_rc5_shadow_evidence_is_a_separate_non_blocking_job():
+    """P3-0/P3-1 证据只跑一次，且不进入分片矩阵或 merge-gate。"""
+    workflow = yaml.safe_load((WORKFLOWS_DIR / 'lint.yml').read_text())
+    jobs = workflow['jobs']
+    test_job = jobs['test']
+    # The Python plan keeps its 4 shards; the shadow evidence is not sharded.
+    assert test_job['strategy']['matrix']['shard'] == [1, 2, 3, 4]
+    test_runs = '\n'.join(step.get('run', '') for step in test_job['steps'])
+    assert 'rc5-surface-gate.mjs' not in test_runs
+    assert 'connection-fetch-ownership.test.mjs' not in test_runs
+
+    shadow = jobs['rc5-shadow']
+    assert shadow.get('continue-on-error') is True
+    assert shadow['if'] == test_job['if']
+    assert 'rc5-shadow' not in jobs['merge-gate']['needs']
+    shadow_runs = '\n'.join(step.get('run', '') for step in shadow['steps'])
+    for evidence in (
+        'scripts/ci/rc5-surface-gate.mjs',
+        'connection-fetch-ledger.test.mjs',
+        'connection-fetch-ownership.test.mjs',
+        'scripts/ci/rc5-surface-gate.test.mjs',
+    ):
+        assert evidence in shadow_runs
+    # Every shadow step reports instead of blocking unrelated work.
+    assert all(step.get('continue-on-error') is True
+               for step in shadow['steps'] if step.get('name', '').startswith(('rc.5 ', 'Connection Fetch')))

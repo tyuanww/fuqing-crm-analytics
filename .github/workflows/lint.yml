@@ -139,6 +139,36 @@ jobs:
           path: .context/checks/
           if-no-files-found: ignore
 
+  rc5-shadow:
+    needs: changes
+    if: needs.changes.outputs.checks == 'true'
+    runs-on: ubuntu-latest
+    # P3-0/P3-1 evidence only: the repository still pins rc.3, so rc.5 surface
+    # drift and the disposer ownership tests are reported without blocking
+    # unrelated work. This job is deliberately outside the 4-shard `test`
+    # matrix (they are not Python-plan shards, so sharding would run each one
+    # four times) and outside merge-gate.needs. Delete `continue-on-error` once
+    # the P0 rc.5 pin and the P3-1 follow-up have landed.
+    continue-on-error: true
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24.19.0"
+      - name: rc.5 surface shadow gate (fail-closed, non-blocking)
+        continue-on-error: true
+        run: node scripts/ci/rc5-surface-gate.mjs --summary "$GITHUB_STEP_SUMMARY"
+      - name: Connection Fetch disposer ownership shadow tests (non-blocking)
+        continue-on-error: true
+        run: >-
+          node --test
+          dsh-plugins/analytics-workbench/test/connection-fetch-ledger.test.mjs
+          dsh-plugins/analytics-workbench/test/connection-fetch-ownership.test.mjs
+          scripts/ci/rc5-surface-gate.test.mjs
+
   frontend:
     needs: changes
     if: needs.changes.outputs.frontend == 'true'

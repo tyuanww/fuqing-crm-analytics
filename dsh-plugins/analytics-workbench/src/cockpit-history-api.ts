@@ -1,13 +1,23 @@
 /** Only delivery metadata crosses the native authenticated Connection fence. */
 import type { Context } from '@deepseek-ai/cordis';
+import type {} from '@deepseek-ai/dsh-client-connection';
 import type {} from '@deepseek-ai/dsh-session-query';
+import { ConnectionFetchLedger } from './connection-fetch-ledger.mjs';
 import { parseClientRequestEnvelope } from './client-request-envelope.mjs';
 import { readDeliveryHistory } from './cockpit-history.mjs';
 
 export const name = 'analytics-workbench-cockpit-history';
 export const inject = ['connection', 'webServer', 'sessionQuery'];
-export function apply(ctx: Context): void {
-  ctx.connection.fetch.register({ path: '/api/shine-mage-deliveries', methods: ['POST'], requestBody: 'buffered',
+
+export interface CockpitHistoryApiConfig {
+  /** Ledger created by the entry that mounts this row; a standalone mount owns its own. */
+  routes?: ConnectionFetchLedger;
+}
+
+export function apply(ctx: Context, config: CockpitHistoryApiConfig = {}): void {
+  const routes = config.routes ?? new ConnectionFetchLedger(ctx, { label: name });
+  ctx.effect(() => () => routes.release(name), `${name}: release the delivery history route`);
+  void routes.own(name, { path: '/api/shine-mage-deliveries', methods: ['POST'], requestBody: 'buffered',
     async fetch(request) {
       let input: unknown;
       try { input = await request.json(); } catch { return new Response('invalid JSON', { status: 400 }); }
