@@ -2,7 +2,7 @@
   "schema_version": "shinemage-composition-pack-manifest/v1",
   "lock": {
     "path": "config/shinemage-composition-packs.lock.json",
-    "sha256": "2beacf946b7ce34537583675af61d2eb95295047c78d8440b5b1e48eae7a07a9"
+    "sha256": "5e00314a5258df2aaf3f5039161819d9509bc03958aed206c7a56d6c39ec5bbc"
   },
   "consumer": {
     "repository": "tyuanww/fuqing-crm-analytics",
@@ -34,9 +34,9 @@
       "directory": "analytics-workbench",
       "repository": "tyuanww/dsh-analytics-workbench",
       "ref": "commit",
-      "sha": "262b69960e2ba4baf59164a4394e43989dee3253",
-      "manifest_sha256": "e98ed054cda6c64a9ec5fb9983aea708755186e69de5e3be8c5012082644a1fb",
-      "pack_sha256": "cfac09c6c80ab5aedc4d4b32380ad049ca218401f88e5d2fc8c24792ec891662",
+      "sha": "f3c75ca6485144f0777da73a9b5ff9fbe26d3245",
+      "manifest_sha256": "785e21b0327eb111831562212e54f61bbc476e9ead675be3c42f73d837734f59",
+      "pack_sha256": "1e5d6e559aceff14dd1afd55e0f835242b6fd7a57b870e253770c0c67eb0d005",
       "status": "PASS"
     },
     {
