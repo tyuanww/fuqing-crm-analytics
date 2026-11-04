@@ -1,6 +1,6 @@
 import type { Context } from '@deepseek-ai/cordis';
 import { defineTool } from '@deepseek-ai/dsh-tools';
-import { schemas } from './contract.generated.js';
+import { schemas } from '@shine-mage/dsh-contracts/crm-knowledge/contract.generated.ts';
 import { createMetricsService, unavailableSchema } from './service-client.mjs';
 import { CHANNELS, CHANNEL_QUERY_DESCRIPTION, dashboardCapabilities, queryDashboardGsv, queryDashboardPurchases,
   queryDashboardReadiness, queryDashboardMembership, queryDashboardNetGsv,

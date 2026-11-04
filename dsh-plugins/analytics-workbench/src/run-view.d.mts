@@ -1,5 +1,5 @@
-import type { components as B0 } from './run-contract.generated.js';
-import type { components as Query } from './query-run-contract.generated.js';
+import type { components as B0 } from '@shine-mage/dsh-contracts/analytics-workbench/run-contract.generated.js';
+import type { components as Query } from '@shine-mage/dsh-contracts/analytics-workbench/query-run-contract.generated.js';
 export interface RunView {
   ready: boolean;
   sessionId: string;

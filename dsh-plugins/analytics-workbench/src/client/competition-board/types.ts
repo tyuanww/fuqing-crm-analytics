@@ -1,6 +1,6 @@
 import type { components } from '../../competition-c0-contract.generated.d.ts';
-import type { components as chartComponents } from '../../competition-chart-contract.generated.d.ts';
-import type { components as computedComponents } from '../../competition-computed-contract.generated.d.ts';
+import type { components as chartComponents } from '@shine-mage/dsh-contracts/analytics-workbench/competition-chart-contract.generated.js';
+import type { components as computedComponents } from '@shine-mage/dsh-contracts/analytics-workbench/competition-computed-contract.generated.js';
 
 export type CompetitionBoardSpec = components['schemas']['CompetitionBoardSpec'] & {
   blocks?: Array<{

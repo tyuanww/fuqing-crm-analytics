@@ -1,5 +1,6 @@
 packages:
   - ../board-components
+  - ../contracts
   - ../plugin-kit
 
 linkWorkspacePackages: true

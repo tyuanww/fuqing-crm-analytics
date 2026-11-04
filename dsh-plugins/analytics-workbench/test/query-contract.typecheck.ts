@@ -1,5 +1,5 @@
 // Compiler-only positive and negative contracts; not a connected DSH adapter or HTTP client.
-import type { components } from '../src/query-contract.generated.js';
+import type { components } from '@shine-mage/dsh-contracts/analytics-workbench/query-contract.generated.js';
 
 type QueryRequest = components['schemas']['ChannelFollowupQueryRequest'];
 type QueryResult = components['schemas']['ChannelFollowupResult'];

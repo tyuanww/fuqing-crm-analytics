@@ -1,4 +1,4 @@
-import type { components } from '../src/http-contract.generated.js';
+import type { components } from '@shine-mage/dsh-contracts/crm-knowledge/http-contract.generated.js';
 export const request: components['schemas']['MetricRequest'] = {
   actor_scope: 'server_filled', amount_already_net: false, identity_scope: 'STOREWIDE', timezone: 'Asia/Shanghai',
   source_id: 'synthetic-crm-metrics', contains_real_data: false, metric_version: 'crm-metrics/v1',
@@ -13,7 +13,7 @@ export function provenance(result: components['schemas']['MetricResult']) {
 }
 
 
-import type { components as DashboardComponents } from '../src/dashboard-contract.generated.js';
+import type { components as DashboardComponents } from '@shine-mage/dsh-contracts/crm-knowledge/dashboard-contract.generated.js';
 export function purchaseCoverage(result: DashboardComponents['schemas']['DashboardPurchases']) {
   const aov: number | null = result.aov.amount_fen;
   const aus: number | null = result.aus.amount_fen;

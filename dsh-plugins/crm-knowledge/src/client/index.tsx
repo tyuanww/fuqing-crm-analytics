@@ -6,9 +6,9 @@ import type {} from '@deepseek-ai/dsh-client-ui-renderer/client';
 import type {} from '@deepseek-ai/dsh-api-session-controller/remote';
 import type {} from '@deepseek-ai/dsh-api-workspace-controller/remote';
 import { Alert, Button, ConfigProvider, Input, Modal, Space, Typography } from 'antd';
-import { competitionFont, lightAntdTheme } from './content-theme.generated';
+import { competitionFont, lightAntdTheme } from '@shine-mage/dsh-contracts/crm-knowledge/client/content-theme.generated.ts';
 import { CrmLibraryButton } from './crm-library';
-import type { CrmCockpitSlot } from './cockpit-slot-contract.generated';
+import type { CrmCockpitSlot } from '@shine-mage/dsh-contracts/crm-knowledge/client/cockpit-slot-contract.generated.ts';
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface SlotMap { 'cockpit.crm': CrmCockpitSlot }
 }

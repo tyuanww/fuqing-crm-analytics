@@ -1,5 +1,5 @@
 // Compiler-only positive and negative contracts; not a connected DSH adapter.
-import type { components, operations } from '../src/run-contract.generated.js';
+import type { components, operations } from '@shine-mage/dsh-contracts/analytics-workbench/run-contract.generated.js';
 
 type Snapshot = components['schemas']['AnalyticsRunSnapshot'];
 type Accepted = components['schemas']['AnalyticsRunAccepted'];

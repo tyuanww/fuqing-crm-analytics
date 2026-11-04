@@ -59,6 +59,7 @@
   },
   "devDependencies": {
     "@shine-mage/dsh-plugin-kit": "0.1.0",
-    "@shine-mage/board-components": "0.1.0"
+    "@shine-mage/board-components": "0.1.0",
+    "@shine-mage/dsh-contracts": "0.1.0"
   }
 }

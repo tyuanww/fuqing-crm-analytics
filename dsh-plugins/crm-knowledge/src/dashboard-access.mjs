@@ -1,5 +1,5 @@
-import { KNOWLEDGE_ACCESS_CONTRACT } from './knowledge-access.generated.ts';
-import { FIRST_PURCHASE_ACCESS_CONTRACT } from './first-purchase-access.generated.ts';
+import { KNOWLEDGE_ACCESS_CONTRACT } from '@shine-mage/dsh-contracts/crm-knowledge/knowledge-access.generated.ts';
+import { FIRST_PURCHASE_ACCESS_CONTRACT } from '@shine-mage/dsh-contracts/crm-knowledge/first-purchase-access.generated.ts';
 import { createFirstPurchaseRelay } from './first-purchase-relay.mjs';
 /** CRM credentials stay in this host closure, never env, disk, RPC or tool output. */
 import { dashboardOrigin, queryDashboardGsv, queryDashboardPurchases, queryDashboardReadiness,

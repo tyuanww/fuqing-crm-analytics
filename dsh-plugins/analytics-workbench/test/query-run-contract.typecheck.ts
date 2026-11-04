@@ -1,5 +1,5 @@
 // Compiler-only query-run store contract; not a connected DSH adapter or HTTP client.
-import type { components } from '../src/query-run-contract.generated.js';
+import type { components } from '@shine-mage/dsh-contracts/analytics-workbench/query-run-contract.generated.js';
 
 type QueryRunSnapshot = components['schemas']['AnalyticsQueryRunSnapshot'];
 type QueryRunAccepted = components['schemas']['AnalyticsQueryRunAccepted'];

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Button, Card, ConfigProvider, Descriptions, Input, Modal, Space, Tabs, Tag, Typography, theme } from 'antd';
-import type { components } from '../dashboard-contract.generated.js';
-import { antdSeedToken } from './content-theme.generated';
+import type { components } from '@shine-mage/dsh-contracts/crm-knowledge/dashboard-contract.generated.js';
+import { antdSeedToken } from '@shine-mage/dsh-contracts/crm-knowledge/client/content-theme.generated.ts';
 import { CrmBoardCanvas, CrmBoardCard, CrmBoardEditor } from './crm-board';
 
 type Snapshot = components['schemas']['CrmSnapshot'];

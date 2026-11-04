@@ -1,5 +1,5 @@
 // Compiler-only first-purchase cockpit HTTP contract; plugin view stays NOT_CONNECTED.
-import type { components, operations } from '../src/first-purchase-cockpit-contract.generated.js';
+import type { components, operations } from '@shine-mage/dsh-contracts/analytics-workbench/first-purchase-cockpit-contract.generated.js';
 
 type Created = components['schemas']['FirstPurchaseCockpitCreateRequest'];
 type Add = components['schemas']['FirstPurchaseCockpitAddOp'];

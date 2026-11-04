@@ -15,6 +15,9 @@ importers:
       '@shine-mage/board-components':
         specifier: 0.1.0
         version: link:../board-components
+      '@shine-mage/dsh-contracts':
+        specifier: 0.1.0
+        version: link:../contracts
       '@shine-mage/dsh-plugin-kit':
         specifier: 0.1.0
         version: link:../plugin-kit
@@ -24,6 +27,8 @@ importers:
       '@shine-mage/dsh-plugin-kit':
         specifier: 0.1.0
         version: link:../plugin-kit
+
+  ../contracts: {}
 
   ../plugin-kit: {}
 

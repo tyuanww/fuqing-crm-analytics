@@ -1,7 +1,7 @@
 import type { Context } from '@deepseek-ai/cordis';
 import { defineTool } from '@deepseek-ai/dsh-tools';
 import { createKnowledgeService } from './service-client.mjs';
-import { dashboardDefinition } from './dashboard-definition.generated.mjs';
+import { dashboardDefinition } from '@shine-mage/dsh-contracts/knowledge/dashboard-definition.generated.mjs';
 
 export const name = 'shinemage-knowledge';
 export const inject = ['tools'];

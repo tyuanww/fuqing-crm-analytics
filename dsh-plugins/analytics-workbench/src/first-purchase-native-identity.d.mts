@@ -1,5 +1,5 @@
-import type { FirstPurchaseAccess } from './first-purchase-access.generated.js';
-import type { components } from './first-purchase-analysis-contract.generated.js';
+import type { FirstPurchaseAccess } from '@shine-mage/dsh-contracts/analytics-workbench/first-purchase-access.generated.ts';
+import type { components } from '@shine-mage/dsh-contracts/analytics-workbench/first-purchase-analysis-contract.generated.js';
 export function resolveNativeIdentity(provider: () => FirstPurchaseAccess | undefined, sessionId: string): Promise<{
   session_id: string; identity: components['schemas']['FirstPurchaseSessionIdentity'];
 }>;

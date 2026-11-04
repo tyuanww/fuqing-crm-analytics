@@ -1,5 +1,5 @@
 // Compiler-only saved-analysis HTTP contract; plugin view stays NOT_CONNECTED.
-import type { components, operations } from '../src/analysis-contract.generated.js';
+import type { components, operations } from '@shine-mage/dsh-contracts/analytics-workbench/analysis-contract.generated.js';
 
 type Created = components['schemas']['AnalyticsAnalysisCreateRequest'];
 type Saved = components['schemas']['AnalyticsSavedAnalysis'];

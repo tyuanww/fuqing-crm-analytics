@@ -471,9 +471,9 @@ B0 `--check` 包含边界负测、`plugin-isolation.test.mjs` 和既有 workbenc
 
 B0 `--check` 先独立构建 board-components 并绑定受摘要约束的 tarball，再验证公开导出/类型、失真输入和几何语义。workbench clean rebuild 只含 workbench 源码与 kit，图表通过同一个 tarball 输入；不会复制 funnel/waterfall 源码。临时 Git 夹具内再执行受控 pack，记录 `fixture_only`，不冒充正式 reviewed source。`backend/tests/test_board_funnel.py` 与 `test_board_waterfall.py` 消费领域包拥有的同一套 JSON 标本，按受影响文件单独运行。
 
-驾驶舱与 CRM 的 slot 形状由领域 JSON 生成各自的本地类型，B0 自动运行 `cockpit-slot-contract.mjs --check` 和对应消费者/漂移负测。独立消费者只携带自己的生成物；完整固定 SDK 类型检查和原生 SlotCore/编译后 UI 测试仍保留，不以纯类型通过替代宿主验收。
+驾驶舱与 CRM 的 slot 形状由领域 JSON 生成各自的本地类型，B0 自动运行 `cockpit-slot-contract.mjs --check` 和对应消费者/漂移负测。独立消费者只从统一的 `contracts` 包（`@shine-mage/dsh-contracts`）导入生成物；完整固定 SDK 类型检查和原生 SlotCore/编译后 UI 测试仍保留，不以纯类型通过替代宿主验收。
 
-品牌内容主题由 `content-theme-contract.mjs --check` 和真实消费者测试核验；生成物纳入双方包内，无品牌插件运行时依赖。CRM 全部 Node/Host/UI 回归需要完整 backend 锁定 Python（`CRM_METRICS_PYTHON=/absolute/backend-python`），不能复用最小 B0 Python 冒称通过；Chrome 旅程单列，不纳入本轮合成 UI 结论。当前命令、范围及失败修复见 [CRM 端解耦证据](../hackathon/evidence/dsh-g0-crm-decoupling-20261003.md)。
+品牌内容主题由 `content-theme-contract.mjs --check` 和真实消费者测试核验；生成物收归 `contracts` 包，消费者只导入 package exports，无品牌插件运行时依赖。CRM 全部 Node/Host/UI 回归需要完整 backend 锁定 Python（`CRM_METRICS_PYTHON=/absolute/backend-python`），不能复用最小 B0 Python 冒称通过；Chrome 旅程单列，不纳入本轮合成 UI 结论。当前命令、范围及失败修复见 [CRM 端解耦证据](../hackathon/evidence/dsh-g0-crm-decoupling-20261003.md)。
 
 2026-10-04 CRM 插件已改为显式 HTTP 服务配置；上述 Python 变量现在只供测试启动本次拥有的合成 API 进程，插件不再读取它。新增 `service-client.test.mjs` 的版本/超时/取消/重定向/响应大小/异常响应负测纳入 B0；`service-http.integration.mjs` 与 `tools.test.mjs` 在完整锁定 backend Python 下验证实际双 ASGI 服务。独立包测试额外对最终 tarball 安全解包，只提供固定 SDK 依赖后执行包级 ToolRuntime 验证。领域生成物漂移由 `test_crm_service_contracts.py` 与离线生成器检查；这些结果不证明完整原生 profile 或杭州已上线。详见 [服务边界](./crm-plugin-service-boundary.md) 与 [当前证据](../hackathon/evidence/dsh-g0-crm-service-boundary-20261004.md)。
 

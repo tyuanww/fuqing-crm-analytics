@@ -1,5 +1,5 @@
 // Compiler-only cockpit HTTP contract; plugin view stays NOT_CONNECTED.
-import type { components, operations } from '../src/cockpit-contract.generated.js';
+import type { components, operations } from '@shine-mage/dsh-contracts/analytics-workbench/cockpit-contract.generated.js';
 
 type Created = components['schemas']['AnalyticsCockpitCreateRequest'];
 type Add = components['schemas']['AnalyticsCockpitAddOp'];

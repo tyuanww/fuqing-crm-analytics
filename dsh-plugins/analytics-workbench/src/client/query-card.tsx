@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ToolCallViewProps } from '@deepseek-ai/dsh-client-ui-tool/client';
-import type { components } from '../query-run-contract.generated.js';
+import type { components } from '@shine-mage/dsh-contracts/analytics-workbench/query-run-contract.generated.js';
 import { QUERY_RECEIPT_SCHEMA, decodeQueryReceipt } from '../query-model.mjs';
 import { formatEmptyReason, formatFenYuan, formatRatioPercent } from '../query-format.mjs';
 import { QUERY_CANCEL_COPY, classifyCancelOutcome, sessionCancelEnvelope } from '../query-cancel.mjs';
