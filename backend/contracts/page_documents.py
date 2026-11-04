@@ -11,6 +11,9 @@ import json
 import re
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
+from backend.contracts.page_facts import (
+    FACT_MAX_ITEMS, FACT_MAX_RESPONSE_BYTES, PageFact, PageFactReadRequest, PageFactView,
+)
 
 SCHEMA_VERSION = "free-page/v1"
 BRIDGE_PROTOCOL = "free-page-bridge/v1"
@@ -874,6 +877,7 @@ def page_documents_openapi() -> dict:
         SourceRange, SelectedScope, PresentationOverlay, NodeRef, CAS, EditOperation, EditContext,
         PageBridgeHandshake, PageDataReadRequest, PageDataCancelRequest,
         PageDataChunkEvent, PageDataEndEvent, PageDataErrorEvent, PageBindingStateEvent,
+        PageFactReadRequest, PageFact, PageFactView,
     ):
         schema = model.model_json_schema(ref_template="#/components/schemas/{model}")
         schemas.update(schema.pop("$defs", {}))
@@ -919,6 +923,16 @@ def page_documents_openapi() -> dict:
         "x-bridge-budget": {
             "max_response_bytes": BRIDGE_MAX_RESPONSE_BYTES,
             "max_cumulative_rows": BRIDGE_MAX_CUMULATIVE_ROWS,
+        },
+        "x-host-facts": {
+            "schema_version": "warehouse-facts/v1",
+            "read_path": "/api/v1/analytics/page-result-access/read",
+            "request_schema": "PageFactReadRequest",
+            "view_schema": "PageFactView",
+            "max_response_bytes": FACT_MAX_RESPONSE_BYTES,
+            "max_cumulative_facts": FACT_MAX_ITEMS,
+            "endorses": "selected_source_values",
+            "does_not_endorse": "page_dom",
         },
         "paths": {
             "/api/v1/analytics/page-documents/previews": {

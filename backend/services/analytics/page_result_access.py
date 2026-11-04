@@ -11,9 +11,19 @@ from threading import RLock
 from typing import Any, Callable
 from uuid import uuid4
 
+from pydantic import ValidationError
+from backend.contracts.page_facts import (
+    FACT_MAX_RESPONSE_BYTES, PageFactReadRequest, PageFactView,
+)
+
 from backend.services.analytics.access import AnalyticsError, AnalyticsPrincipal, require
 from backend.services.analytics.page_context import PageAccessPolicy
 from backend.services.analytics.first_purchase.asset_state import now_ms, timestamp
+from backend.services.analytics.warehouse_fact_selection import (
+    FactSelectionError,
+    FactBudgetExceeded,
+    snapshot_facts,
+)
 
 PROTOCOL = "free-page-bridge/v1"
 SCHEMA_VERSION = "free-page/v1"
@@ -21,7 +31,7 @@ DATA_SCOPE = "free-page-result-fixture"
 CAPABILITY = "dashboard:read"
 IDENTITY = re.compile(r"^[A-Za-z0-9_.:-]{1,128}$")
 BINDING_STATES = ("UNBOUND_SAMPLE", "BOUND_VERIFIED", "BOUND_STALE")
-READ_MODES = ("summary", "page", "range")
+READ_MODES = ("summary", "page", "range", "facts")
 PAGE_TO_HOST_OPS = ("data.read", "data.cancel")
 FORBIDDEN_OPS = ("sql", "save", "http.fetch", "credential.read")
 FORBIDDEN_FIELDS = frozenset({
@@ -331,10 +341,27 @@ class PageResultAccess:
         mode = payload.get("mode", "summary")
         if mode not in READ_MODES:
             raise fault("INVALID_PAGE")
+        if mode == "facts":
+            try:
+                PageFactReadRequest.model_validate(payload)
+            except ValidationError:
+                raise fault("INVALID_PAGE") from None
         snapshot, binding = (self._resolve_native(actor, payload, target, source_context) if self.source is not None
                              else self._resolve(actor, payload, manifest))
         self._raise_if_cancelled(actor, request_id)
-        rows, cursor = self._slice(snapshot, payload, mode)
+        facts = None
+        if mode == "facts":
+            try:
+                facts = snapshot_facts(snapshot.metadata, snapshot.rows)
+            except FactBudgetExceeded:
+                raise fault("PACKAGE_TOO_LARGE") from None
+            except FactSelectionError:
+                raise fault("INVALID_PAGE") from None
+            if len(facts) > MAX_CUMULATIVE_ROWS:
+                raise fault("PACKAGE_TOO_LARGE")
+            rows, cursor = [], None
+        else:
+            rows, cursor = self._slice(snapshot, payload, mode)
         data_ref = "data_" + uuid4().hex
         summary = {
             "unit": snapshot.unit,
@@ -367,14 +394,22 @@ class PageResultAccess:
                 if key in binding
             },
         }
+        if facts is not None:
+            body.update(facts=facts, facts_schema_version="warehouse-facts/v1",
+                        expires_at_ms=snapshot.expires_at_ms)
+            try:
+                body = PageFactView.model_validate(body).model_dump(mode="json")
+            except ValidationError:
+                raise fault("INVALID_PAGE") from None
         encoded = json.dumps(body, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
-        if len(encoded.encode("utf-8")) > MAX_RESPONSE_BYTES:
+        byte_limit = FACT_MAX_RESPONSE_BYTES if facts is not None else MAX_RESPONSE_BYTES
+        if len(encoded.encode("utf-8")) > byte_limit:
             raise fault("PACKAGE_TOO_LARGE")
         if source_context is not None:
             source_context.revalidate()
         if snapshot.expires_at_ms is not None and self.clock() >= snapshot.expires_at_ms:
             raise fault("RESULT_STALE")
-        self._consume(actor, instance_id, len(rows))
+        self._consume(actor, instance_id, len(facts) if facts is not None else len(rows))
         self._raise_if_cancelled(actor, request_id)
         self._issue_data_ref(actor, snapshot, handle=data_ref)
         return body
