@@ -190,7 +190,7 @@ test('apply registers business slots; dispose removes them without touching nati
 test('artifact confirmation uncertainty survives tab recreation and arms browser leave protection', async () => {
   const view = fakePluginWindow(memoryStorage());
   view.pageBase = 'http://synthetic.invalid';
-  const ready = { id: 'ai_test', target_kind: 'page', target_id: 'page_test', base_version: 1,
+  const ready = { id: 'ai_test', target_kind: 'file', target_id: 'file_test', base_version: 1,
     status: 'READY', candidate_hash: 'candidate', filename: 'page-package.json' };
   const writes = []; let fail = true;
   view.fetch = async (url, init) => {
