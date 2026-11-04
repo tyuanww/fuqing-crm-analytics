@@ -8,7 +8,6 @@ import { cockpitCss } from './cockpit-workspace-style.ts';
 export const COCKPIT_ARTIFACT_TAB = 'shine-mage.cockpit-artifact';
 export const cockpitArtifactAddress = (id: string) => 'dsh-resource://cockpit-ai/' + encodeURIComponent(id);
 
-/** Session-owned native tab; preview is always the server's immutable source/candidate. */
 export function CockpitArtifact({ useTabInfo, createClient }: PropsRuntime<'sidebar.right.pane.tab'> & { createClient(id: string): CockpitAIClient }) {
   const { tab } = useTabInfo();
   const id = useMemo(() => {
@@ -44,6 +43,6 @@ export function CockpitArtifact({ useTabInfo, createClient }: PropsRuntime<'side
     <div className="cockpit-document-tools"><strong>{state.active?.title ?? 'HTML 产物'}</strong>
       <span className="cockpit-muted">{state.active?.status === 'SAVED' ? '已保存 · 版本 ' + state.active.saved_version : state.previewVariant === 'candidate' ? '修改候选 · 尚未保存' : '当前版本'}</span></div>
     <CockpitAIPanel client={client} state={state} />
-    <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}><CockpitAIPreview state={shown} /></div>
+    <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}><CockpitAIPreview state={shown} client={client} /></div>
   </div>;
 }
