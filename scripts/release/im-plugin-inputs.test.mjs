@@ -4,6 +4,7 @@ import { execFile } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { TOOLCHAIN } from './toolchain.mjs';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
@@ -49,7 +50,7 @@ async function fixture(t) {
   const lock = {
     schema_version: 'shinemage-im-plugin-inputs/v1',
     release_ready: false,
-    runtime: { dsh: '0.2.1-rc.3', cordis: '4.0.5' },
+    runtime: { dsh: TOOLCHAIN.sdk_version, cordis: TOOLCHAIN.cordis },
     inputs,
   };
   const lockPath = join(root, 'lock.json');

@@ -8,10 +8,11 @@ import { join } from 'node:path';
 import { loadReleasePacks, prepareReleasePayload, verifyReleasePackBinding } from './release-profile-packs.mjs';
 import { collectAllowlist, packArtifact, receiveArtifact, verifyPayload } from './artifact.mjs';
 import { collectReleaseReadiness } from './readiness.mjs';
+import { DSH_SDK_VERSION, DSH_UPSTREAM_SHA } from './toolchain.mjs';
 
 const hash = data => createHash('sha256').update(data).digest('hex');
 const json = value => JSON.stringify(value, null, 2) + '\n';
-const sdk = { sdk_version: '0.2.1-rc.3', upstream_sha: '1f81c047fc48fa190a683e469daa699857e9afe8' };
+const sdk = { sdk_version: DSH_SDK_VERSION, upstream_sha: DSH_UPSTREAM_SHA };
 
 async function fixture(t) {
   const base = await mkdtemp(join(tmpdir(), 'release-pack-fixture-'));

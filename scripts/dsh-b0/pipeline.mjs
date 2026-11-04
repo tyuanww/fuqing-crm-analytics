@@ -10,6 +10,7 @@ import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { packageManagerEnv, packageNetworkEnv, dependencyCommands, archiveToolEnv } from './package-manager-env.mjs';
 import { linkWorkspaceKit, linkWorkspaceContract } from './plugin-kit-link.mjs';
+import { PINNED_UPSTREAM_DIR } from './upstream-dir.mjs';
 import { prepareRuntimeInputs, recordRuntimePreparation } from '../release/runtime-inputs.mjs';
 import { CRM_COMPOSITION_SCOPES, readCompositionInputs } from '../crm-calibration/composition-inputs.mjs';
 import { readLeafPackInputs } from './leaf-pack-inputs.mjs';
@@ -42,7 +43,7 @@ assert.ok(!process.env.B0_BUILD_UPSTREAM || mode === '--check',
 // DSH_UPSTREAM_CHECKOUT is the explicit checkout selector used by release
 // orchestration, including --prepare.  B0_BUILD_UPSTREAM remains a read-only
 // --check override for standalone callers and is rejected for --prepare.
-const upstream = resolve(process.env.DSH_UPSTREAM_CHECKOUT ?? process.env.B0_BUILD_UPSTREAM ?? join(b0, 'upstream-0.2.1-rc.3'));
+const upstream = resolve(process.env.DSH_UPSTREAM_CHECKOUT ?? process.env.B0_BUILD_UPSTREAM ?? PINNED_UPSTREAM_DIR);
 const pin = JSON.parse(await readFile(join(kit, 'toolchain.json'), 'utf8'));
 const managers = managerVersions(pin);
 assert.equal(Number(process.versions.node.split('.')[0]), pin.node_major);

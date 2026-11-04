@@ -9,6 +9,7 @@ import { basename, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
+import { TOOLCHAIN } from './toolchain.mjs';
 
 const exec = promisify(execFile);
 const SHA256 = /^[a-f0-9]{64}$/;
@@ -30,8 +31,8 @@ export function validateImPluginInputs(value) {
   assert.equal(value.schema_version, 'shinemage-im-plugin-inputs/v1', 'IM_INPUT_SCHEMA');
   assert.equal(value.release_ready, false, 'IM_INPUT_RELEASE_BOUNDARY');
   exact(value.runtime, ['dsh', 'cordis'], 'IM_INPUT_RUNTIME_SCHEMA');
-  assert.equal(value.runtime.dsh, '0.2.1-rc.3', 'IM_INPUT_DSH');
-  assert.equal(value.runtime.cordis, '4.0.5', 'IM_INPUT_CORDIS');
+  assert.equal(value.runtime.dsh, TOOLCHAIN.sdk_version, 'IM_INPUT_DSH');
+  assert.equal(value.runtime.cordis, TOOLCHAIN.cordis, 'IM_INPUT_CORDIS');
   assert.ok(Array.isArray(value.inputs) && value.inputs.length === 2, 'IM_INPUT_SELECTION');
   const names = new Set();
   for (const input of value.inputs) {

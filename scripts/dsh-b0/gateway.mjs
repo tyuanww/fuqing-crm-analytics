@@ -13,6 +13,7 @@ import { pluginManifest, refreshedPluginManifest, safeRpcResult } from './transp
 import { currentPermission, permissionFence } from './permission-fence.mjs';
 import { brandAssets } from './brand-assets.mjs';
 import { resolveBoardSample, boardSampleHtml } from './board-sample.mjs';
+import { PINNED_UPSTREAM_DIR } from './upstream-dir.mjs';
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const b0 = join(root, '.context/dsh-b0');
@@ -46,7 +47,7 @@ if (queryFamily) {
   assert.ok(Array.isArray(refs.sessionIds) && refs.sessionIds.length === 2 && refs.sessionIds.includes(refs.sessionId));
 }
 const policyLog = [];
-const upstreamRequire = createRequire(join(process.env.B0_BUILD_UPSTREAM ?? join(b0, 'upstream-0.2.1-rc.3'), 'packages/api/gateway/package.json'));
+const upstreamRequire = createRequire(join(process.env.B0_BUILD_UPSTREAM ?? PINNED_UPSTREAM_DIR, 'packages/api/gateway/package.json'));
 const { WebSocket, WebSocketServer } = upstreamRequire('ws');
 const wss = new WebSocketServer({ noServer: true, maxPayload: 65536 });
 const links = new Set();

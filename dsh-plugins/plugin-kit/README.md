@@ -8,7 +8,7 @@
 
 ```sh
 node dsh-plugins/plugin-kit/check.mjs \
-  --upstream /absolute/pinned-upstream-0.2.1-rc.3 \
+  --upstream /absolute/pinned-upstream-0.2.1-rc.5 \
   --build-tools /absolute/installed-build-tools
 ```
 

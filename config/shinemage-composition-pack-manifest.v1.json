@@ -2,7 +2,7 @@
   "schema_version": "shinemage-composition-pack-manifest/v1",
   "lock": {
     "path": "config/shinemage-composition-packs.lock.json",
-    "sha256": "5e00314a5258df2aaf3f5039161819d9509bc03958aed206c7a56d6c39ec5bbc"
+    "sha256": "adc0ee86363477645ad1db6479b1626b275fa239ffecce398a0b3980a045184a"
   },
   "consumer": {
     "repository": "tyuanww/fuqing-crm-analytics",
@@ -22,10 +22,10 @@
     "remote_main": "NOT_RUN"
   },
   "toolchain": {
-    "sdk_version": "0.2.1-rc.3",
+    "sdk_version": "0.2.1-rc.5",
     "pnpm": "11.28.2",
     "node_major": 24,
-    "upstream_sha": "1f81c047fc48fa190a683e469daa699857e9afe8",
+    "upstream_sha": "b830ec950faba0a46dda564be3e2d854afed94f1",
     "upstream_lock_sha256": "911b049924e8256d8d6e684235cf935ca75b28fd0dd46f0c3b316a51c2cf5dc1"
   },
   "sources": [

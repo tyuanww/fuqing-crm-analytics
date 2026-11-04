@@ -1,8 +1,8 @@
 {
   "schema_version": "query-agent-official-tools/v1",
   "source": "deepseek-harness/docs/tool-catalog.md",
-  "dsh_version": "0.2.1-rc.3",
-  "upstream_sha": "1f81c047fc48fa190a683e469daa699857e9afe8",
+  "dsh_version": "0.2.1-rc.5",
+  "upstream_sha": "b830ec950faba0a46dda564be3e2d854afed94f1",
   "headings": 73,
   "unique_tools": 68,
   "tools": [

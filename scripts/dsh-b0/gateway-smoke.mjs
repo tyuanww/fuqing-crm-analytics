@@ -7,6 +7,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { resolve, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import { PINNED_UPSTREAM_DIR } from './upstream-dir.mjs';
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const b0 = join(root, '.context/dsh-b0');
@@ -25,7 +26,7 @@ const { launchUrl } = JSON.parse(await readFile(join(runtime, 'gateway-private.j
 assert.equal(new URL(launchUrl).origin, 'http://127.0.0.1:4318', 'Business credential must target the gateway only');
 const origin = 'http://127.0.0.1:4318';
 const nativeOrigin = 'http://127.0.0.1:4317';
-const gatewayRequire = createRequire(join(b0, 'upstream-0.2.1-rc.3/packages/api/gateway/package.json'));
+const gatewayRequire = createRequire(join(PINNED_UPSTREAM_DIR, 'packages/api/gateway/package.json'));
 const { WebSocket } = gatewayRequire('ws');
 const reportPath = join(runtime, `gateway-smoke-report-${Date.now()}.json`);
 const sentinel = 'B0_SYNTHETIC_SECRET_MUST_NOT_ECHO';

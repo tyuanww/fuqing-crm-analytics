@@ -6,6 +6,8 @@
 
 rc3 候选固定 DSH `0.2.1-rc.3` 和 Cordis `4.0.5`，已推送至 [PR #164](https://github.com/tyuanww/fuqing-crm-analytics/pull/164)。源码、包与 CI 的核验范围见[原生页面接线记录](./docs/hackathon/evidence/dsh-native-page-runtime-20261025.md)。PR 未合并，杭州未切换，真实业务验收仍未完成，`release_ready=false`。
 
+2026-11-04 P0：目标 DSH 版本单源到 `0.2.1-rc.5`（tag `dsh-v0.2.1-rc.5`，upstream `b830ec95…`）。`dsh-plugins/plugin-kit/toolchain.json`、9 个插件包 peer、profile `dsh` 块、组合 lock 哈希链与 Workbench lock 已同步；`upstream_lock_sha256` 与 rc3 相同（`911b0499…`），因为 rc5 与 rc3 的 `pnpm-lock.yaml` 字节一致。作者 pack/build、完整 B0 pipeline 和杭州切换均未重跑，`release_ready=false`。
+
 主仓维护版本、插件组合、跨插件合同与交付验证。CRM、知识和看板能力在独立插件仓维护。操作步骤见[插件更新指南](./docs/operating/shinemage-plugin-update.md)、[升级操作手册](./docs/operating/dsh-rc1-clean-upgrade-runbook.md)及[维护与清理手册](./docs/operating/shinemage-maintenance-and-cleanup.md)。正式 SDK 分发仍为 BLOCKED。
 
 > A/B/C 集成记录（2026-10-08）是历史证据：单插件更新与取消、固定宿主进程级恢复、HTML headed 验收和 SDK 信任盘查见[本轮集成验收](./docs/hackathon/evidence/shinemage-abc-integration-20261008.md)。它不替代当前主仓合并状态，也不代表新的 Release。

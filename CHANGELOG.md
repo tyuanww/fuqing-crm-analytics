@@ -19,6 +19,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- P0：目标 DSH 版本单源到 `0.2.1-rc.5`（tag `dsh-v0.2.1-rc.5`，upstream `b830ec950faba0a46dda564be3e2d854afed94f1`）。来源为 npm 发布包（`@deepseek-ai/dsh-tools@0.2.1-rc.5` 等 18 个 SDK 包全部存在）加 GitHub `git fetch --depth 1` 取得的 rc.5 源码树复核。`dsh-plugins/plugin-kit/toolchain.json` 新增 `cordis: 4.0.5` 字段补齐 cordis 单源；`upstream_lock_sha256` 保持 `911b0499…`，因为 rc.5 与 rc.3 的 `pnpm-lock.yaml` 字节一致。`sdk_bindings` 26 条逐条核对目录与版本全部命中。9 个插件包 peer、3 份 profile `dsh` 块、组合 lock 哈希链、Workbench lock、边界清单和 README 同步；`scripts/dsh-b0` 的 `upstream-<version>` 目录改为按 pin 派生（新增 `scripts/dsh-b0/upstream-dir.mjs`）。作者 pack/build 与完整 B0 pipeline 未重跑。
+
 ### Fixed
 
 - 看板组件目录的 SSOT 迁到后端自有投影 `backend/contracts/component-catalog.json`，`board_spec` 导入期不再读取插件源码；插件内副本与 public-contract 锁由 `scripts/ci/board-catalog-sync.mjs` 校验字节一致。

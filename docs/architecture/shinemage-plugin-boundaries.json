@@ -2,8 +2,8 @@
   "schema_version": "shinemage-plugin-boundaries/v1",
   "inspection_baseline_sha": "d4261aa338ff4ed5543866b8c63cdba627e49518",
   "upstream": {
-    "sha": "1f81c047fc48fa190a683e469daa699857e9afe8",
-    "sdk_version": "0.2.1-rc.3",
+    "sha": "b830ec950faba0a46dda564be3e2d854afed94f1",
+    "sdk_version": "0.2.1-rc.5",
     "pin_owner": "dsh-plugins/plugin-kit/toolchain.json"
   },
   "scope": "static-source-imports-and-literal-routes; not a runtime conformance test",
@@ -33,7 +33,7 @@
         "bundled-dependencies.json"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.5"
       },
       "dependencies": {},
       "dev_dependencies": {
@@ -78,7 +78,7 @@
         "test:host-facts": "node --test src/client/host-facts.test.mjs src/client/library-workspace.test.mjs",
         "test:host-facts:browser": "node src/client/host-facts-browser.test.mjs"
       },
-      "manifest_sha256": "c5d4d4c305210711dfe3d7e550c9add315c773c2b3ddb2f5b940c2335080ddde"
+      "manifest_sha256": "28a352533d04a0a6f108abe6e63bd8f89c2fdc59c315e581643c7d0053616612"
     },
     {
       "path": "dsh-plugins/board-components",
@@ -228,7 +228,7 @@
         "cordis.patch.yml"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.2.1-rc.3",
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.5",
         "@deepseek-ai/cordis": "4.0.5"
       },
       "dependencies": {
@@ -257,7 +257,7 @@
         "build": "node build.mjs",
         "test:host": "node --test test/host.integration.mjs"
       },
-      "manifest_sha256": "f74e6bf735535a74bd92feda49fdd32942a723ca36dbd5ac3c55039798d420d9"
+      "manifest_sha256": "bc41f7a13978f56477c245b399502f3686300de2aac29336583e665ad85072ea"
     },
     {
       "path": "dsh-plugins/knowledge",
@@ -278,7 +278,7 @@
         "cordis.patch.yml"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.2.1-rc.3",
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.5",
         "@deepseek-ai/cordis": "4.0.5"
       },
       "dependencies": {},
@@ -296,7 +296,7 @@
         "build": "node build.mjs",
         "test": "node --test test/*.test.mjs"
       },
-      "manifest_sha256": "5ffb376ad6ea781d66e5c7902c5ea08afcd8c06b2ad75cbb396232baeccac06d"
+      "manifest_sha256": "b36c940065272b1e6c33cf5e05c846ce1d6d8e0ea6cf61c02e39a9b82d7e81d3"
     },
     {
       "path": "dsh-plugins/plugin-kit",
@@ -389,7 +389,7 @@
         "cordis.patch.yml"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.5"
       },
       "dependencies": {},
       "dev_dependencies": {
@@ -408,7 +408,7 @@
         "build": "node build.mjs",
         "test": "node --test src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "78fe8ebafad4a2550c16ae1d8359f6ea7db552e707f95f7105f6ccc94e5cff29"
+      "manifest_sha256": "53c14b6e670e67e9841fc85a5ce72c6aa5423e3b09fdea3f313fed75669b9e70"
     },
     {
       "path": "dsh-plugins/shine-brand",
@@ -429,7 +429,7 @@
         "cordis.patch.yml"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.5"
       },
       "dependencies": {},
       "dev_dependencies": {
@@ -452,7 +452,7 @@
         "build": "node build.mjs",
         "test": "node --test src/brand-surface.test.mjs src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "ff09dc7e688ec72b139646f5bb4421c4620559fc3d4aa6da2039d5621f65e8ae"
+      "manifest_sha256": "1f35f5acfc24cd5c4ba6532a927b26bd24f34acf6ff922542d7835521f71b14a"
     },
     {
       "path": "dsh-plugins/shine-crowd-action",
@@ -473,7 +473,7 @@
         "cordis.patch.yml"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.5"
       },
       "dependencies": {},
       "dev_dependencies": {
@@ -492,7 +492,7 @@
         "build": "node build.mjs",
         "test": "node --test src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "4b4a682e474705b59d22fd0d8f8b1323fae2353599563df4edab97dfa377ef6e"
+      "manifest_sha256": "5581edb9e0616be18f5efe47db7391928bcf86dadb1204411cafc8b270c1bb50"
     },
     {
       "path": "dsh-plugins/shine-funnel",
@@ -521,7 +521,7 @@
         "bundled-dependencies.json"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.5"
       },
       "dependencies": {},
       "dev_dependencies": {
@@ -548,7 +548,7 @@
         "build": "node build.mjs",
         "test": "node --test src/funnel.test.mjs src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "7159ca404c5bbbba1800a6c071d8236ce0384ef5f9fc109ff8ef158ec0bb1260"
+      "manifest_sha256": "a90171fb132b8554e4fd145b6cfa8cff7f5f44a46be10f33bd1e4637e825d946"
     },
     {
       "path": "dsh-plugins/shine-query",
@@ -569,7 +569,7 @@
         "cordis.patch.yml"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.5"
       },
       "dependencies": {},
       "dev_dependencies": {
@@ -588,7 +588,7 @@
         "build": "node build.mjs",
         "test": "node --test src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "d63fc9f0e1fd6221d986d0a56fb320d99b8d941576a90f63d907d170b8337e32"
+      "manifest_sha256": "a9af8379202d58ec135397c0fafa320babbc495cd2d2986fd9c151462e3158ad"
     },
     {
       "path": "dsh-plugins/shine-waterfall",
@@ -617,7 +617,7 @@
         "bundled-dependencies.json"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.5"
       },
       "dependencies": {},
       "dev_dependencies": {
@@ -644,7 +644,7 @@
         "build": "node build.mjs",
         "test": "node --test src/waterfall.test.mjs src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "01c8dc9bbb358ba6402048f9af6306b35e2e8814e9298965dc5d4ddf23f00e85"
+      "manifest_sha256": "ebc6f995b4a0ac0437b4444513e35e9e52e7f53612d1a254a12a99bc314043bd"
     }
   ],
   "source_files_scanned": 674,
@@ -4827,7 +4827,7 @@
       ],
       "compatibility": "Exact SHA/SDK/lock; upgrade only in isolated candidate; source pin is not runtime proof.",
       "status": "PINNED_UPSTREAM",
-      "source_sha256": "dbf9e88949d42191d99ddc8f4b3f5c6b99bc13425a35f501473e17002c4782fc"
+      "source_sha256": "c49d49a24c0e1ce140cdc290477070b5ddc7213abdbe347097c217dde42998e6"
     },
     {
       "id": "crm-metrics",

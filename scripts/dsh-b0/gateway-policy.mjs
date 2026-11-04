@@ -20,7 +20,7 @@
  * Stream ID sets are snapshots supplied by the broker before each decision.
  */
 
-export const DSH_B0_SOURCE_SHA = '1f81c047fc48fa190a683e469daa699857e9afe8';
+export const DSH_B0_SOURCE_SHA = 'b830ec950faba0a46dda564be3e2d854afed94f1';
 export const MAX_PROMPT_CHARS = 8000;
 export const MAX_HISTORY_MESSAGES = 100;
 export const SETTINGS_NAMESPACES = Object.freeze(['locale', 'ui-theme', 'ui-chat', 'ui-conversation', 'ui-onboarding']);
