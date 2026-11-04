@@ -337,43 +337,43 @@
   "generators": [
     {
       "path": "scripts/dsh-b0/content-theme-contract.mjs",
-      "sha256": "f857215ce8ddaf130af1edfca300f5f5db90ab1298dbddb8249235e28c93e7d0"
+      "sha256": "78d6c4a898d583a45314ea6c7c383256ae751bbe4941475221af05bdce46cae2"
     },
     {
       "path": "scripts/dsh-b0/cockpit-slot-contract.mjs",
-      "sha256": "5d79756f86df667b140079bcc52e0c077bcdea7a5addfe5eb0cecaefe203b3f7"
+      "sha256": "a8d173f3a313331df6efa9117747c3fe0af6d95b4c18dfbc73f4b3b352ca3271"
     },
     {
       "path": "scripts/dsh-b0/run-kernel-contract.mjs",
-      "sha256": "846dd5bf65d7c3c809e8786338c8e25cc49a05f25060d90367c8dab4afd945e6"
+      "sha256": "356692035de95c4b150540b990df819923b6867cfadc8d739e1ee633f304cb79"
     },
     {
       "path": "scripts/dsh-b0/query-contract.mjs",
-      "sha256": "81f2974d1bc66428fc39de274f96d6ba0502265e49fa58ce8fa883ad8738b24d"
+      "sha256": "9957cd0999bcff9a849c63f1cdda8e57210014868f45654ebe2d64efc689ccf0"
     },
     {
       "path": "scripts/dsh-b0/query-run-contract.mjs",
-      "sha256": "deed87aa31088f5b6fd2e00fcc2fb2ac9ad51e9010f92831d4a3d996401f7ebc"
+      "sha256": "982b1a274d1eb7bd1c01ffec6fd576f8471085843f997130706d633c367570a7"
     },
     {
       "path": "scripts/dsh-b0/analysis-contract.mjs",
-      "sha256": "c8b5ac1fb9a3894b71e947b80acc1fdeedb19980315997f246ba6bf3cfc7f492"
+      "sha256": "9dc26a877adc137b29d2f99337da94774742ef483bbb62b241070471fe4d545d"
     },
     {
       "path": "scripts/dsh-b0/cockpit-contract.mjs",
-      "sha256": "eaf023fc4c93727bc11298a7ca1d794c000cd988d74381f2cd60b64d5afc65bc"
+      "sha256": "dba2f4871bab8f3433375e2525b25adbbb0f7a39d287b74ada8dbcb232f832b0"
     },
     {
       "path": "scripts/dsh-b0/first-purchase-contract.mjs",
-      "sha256": "595ccb1508b91c7107da93e0992859259aef97ed16a3517c4004672e2fd1d789"
+      "sha256": "a995f43aaf7df44a735fa505d9e673e0369fb27f0f1ac2ade38a5051077fa030"
     },
     {
       "path": "scripts/dsh-b0/first-purchase-analysis-contract.mjs",
-      "sha256": "509b10429c6c7f6e61af470088c07f43635ee09612197c24b85619fad26c702b"
+      "sha256": "6da4dc87f697b8e87cbc45f95a308d18d80142097fc60217cf02c8ec2f2f9bc9"
     },
     {
       "path": "scripts/dsh-b0/first-purchase-cockpit-contract.mjs",
-      "sha256": "35c21ef67397eebc61a99ab7d97f575997bf5ac900faedf673535aea6cc10f63"
+      "sha256": "f04664d1df6236a473cff1cca35ecaab8556006f329e52f84ca83ede67e80164"
     },
     {
       "path": "scripts/dsh-b0/competition-c0-contract.mjs",
@@ -381,19 +381,19 @@
     },
     {
       "path": "scripts/dsh-b0/competition-chart-contract.mjs",
-      "sha256": "88296dac7d0e0ef3a8d8e6bef2dbb1a633795df000e9ec5417dc317ff9b61502"
+      "sha256": "454a082c8d111dcb79b706e1bf765d93e15eaf9be82009657ffaca3b495b1203"
     },
     {
       "path": "scripts/dsh-b0/competition-computed-contract.mjs",
-      "sha256": "7ebdd662d71d3fa48cc01ece131e323554e6ee1928525c2754e6a526730c391f"
+      "sha256": "158fbbb5c22e488aec761c2c7288d01c8a95d7d4a7b2f26ae1d73f778aeeffec"
     },
     {
       "path": "scripts/dsh-b0/board-spec-contract.mjs",
-      "sha256": "750c2f696698e911720321831b53b06bbfdfdf8de9f2acc1a8f5a5d2ee9d1869"
+      "sha256": "f9d6e7186c1b62b18d5f8022f30189a61a6b1158431c97ee84e5730474a482d1"
     },
     {
       "path": "scripts/dsh-b0/page-contract.mjs",
-      "sha256": "dc21bd7fb4a81d4bf5cfff0816c80b1caff79a6bf515369907eeb0325cf2de56"
+      "sha256": "b3185613f3a168e32fcf871d0f61a56a8685cb623754f0a13414728412ca6c0b"
     }
   ],
   "canonical_sources": [

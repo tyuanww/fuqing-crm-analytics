@@ -22,6 +22,19 @@ function descriptor(row) {
   assert.match(row?.sha256 ?? '', hex, 'PUBLIC_CONTRACT_DIGEST');
   assert.ok(Number.isSafeInteger(row.bytes) && row.bytes > 0 && row.bytes <= 512 * 1024, 'PUBLIC_CONTRACT_BYTES');
 }
+/** Generated compiler materials are owned by the contracts package: the lock
+ *  keeps the author-owned projection (so sealed archives still bind byte for
+ *  byte), while main stages them at the owned package path. The competition-c0
+ *  declaration stays in the Workbench source tree because its contract_hash
+ *  covers those bytes and is frozen into the author archive. */
+export const CONTRACT_PACKAGE = 'dsh-plugins/contracts';
+const CONTRACT_GENERATED_MATERIAL = /^dsh-plugins\/(analytics-workbench|crm-knowledge)\/src\/(.+\.generated\.(?:d\.ts|ts|mjs))$/;
+const LEGACY_PLUGIN_OUTPUTS = new Set(['dsh-plugins/analytics-workbench/src/competition-c0-contract.generated.d.ts']);
+export function projectContractMaterial(mainPath) {
+  if (LEGACY_PLUGIN_OUTPUTS.has(mainPath)) return mainPath;
+  const match = CONTRACT_GENERATED_MATERIAL.exec(mainPath);
+  return match ? `${CONTRACT_PACKAGE}/${match[1]}/${match[2]}` : mainPath;
+}
 function material(row, domain) {
   descriptor(row);
   assert.match(row.source_path ?? '', pathPattern, 'PUBLIC_CONTRACT_SOURCE_PATH');

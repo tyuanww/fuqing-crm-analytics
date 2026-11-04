@@ -1,4 +1,4 @@
-import { dashboardDefinition } from './dashboard-definition.generated.mjs';
+import { dashboardDefinition } from '@shine-mage/dsh-contracts/crm-knowledge/dashboard-definition.generated.mjs';
 import { createHash } from 'node:crypto';
 /** Read the accepted dashboard through its authenticated API. No DB/SQL fallback. */
 export const LEAF_CHANNELS = Object.freeze(['货架', '达播', '直播', '淘客', '微博', 'U先派样', '百补派样', '赠品&0.01', '其他']);

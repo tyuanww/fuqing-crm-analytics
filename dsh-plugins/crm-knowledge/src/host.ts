@@ -3,8 +3,8 @@ import type {} from '@deepseek-ai/dsh-client-connection';
 import type {} from '@deepseek-ai/dsh-session';
 import type {} from '@deepseek-ai/dsh-host-webserver';
 import type {} from './dashboard-service.js';
-import type {} from './knowledge-access.generated.js';
-import type {} from './first-purchase-access.generated.js';
+import type {} from '@shine-mage/dsh-contracts/crm-knowledge/knowledge-access.generated.ts';
+import type {} from '@shine-mage/dsh-contracts/crm-knowledge/first-purchase-access.generated.ts';
 import { createDashboardAccess, CRM_UI_PATH, CRM_ASSETS_UI_PATH } from './dashboard-access.mjs';
 
 export const name = 'crm-dashboard-login-host';

@@ -11,7 +11,7 @@ import { FREE_PAGE_REFERRER_POLICY, FREE_PAGE_SANDBOX } from '../free-page/runti
 import { selectionForAI, type AISourceSelection } from './html-source-selection.mjs';
 import { CockpitSidebar } from './CockpitSidebar.tsx';
 import { editorSelectionReady, visibleEditorNodes } from './editor-selection.mjs';
-import type { components } from '../free-page/contract/page-contract.generated.d.ts';
+import type { components } from '@shine-mage/dsh-contracts/analytics-workbench/free-page/contract/page-contract.generated.js';
 
 const NO_NODES: TextNode[] = [];
 

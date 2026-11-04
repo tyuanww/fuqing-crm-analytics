@@ -33,7 +33,7 @@ assert.equal(req('typescript/package.json').version, '6.0.3');
 const { default: openapiTS, astToString } = req('openapi-typescript');
 const artifacts = new Map([
   ['backend/contracts/analytics-board-spec.openapi.json', JSON.stringify(schema, null, 2) + '\n'],
-  ['dsh-plugins/analytics-workbench/src/board-spec-contract.generated.d.ts',
+  ['dsh-plugins/contracts/analytics-workbench/board-spec-contract.generated.d.ts',
     '/** Generated library canvas contract; do not edit. */\n' + astToString(await openapiTS(schema, { alphabetize: true }))],
 ]);
 for (const [relative, content] of artifacts) {

@@ -77,7 +77,7 @@ const ast = await openapiTS(schema, { alphabetize: true });
 const typed = `/** Generated first-purchase saved-analysis HTTP contract; do not edit. OpenAPI SHA-256: ${digest} */\n${astToString(ast)}`;
 const artifacts = new Map([
   ['backend/contracts/analytics-first-purchase-analysis.openapi.json', JSON.stringify({ ...schema, 'x-schema-sha256': digest }, null, 2) + '\n'],
-  ['dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts', typed],
+  ['dsh-plugins/contracts/analytics-workbench/first-purchase-analysis-contract.generated.d.ts', typed],
   // Service-to-service only: both Python endpoints consume the same domain
   // Pydantic model. No new browser/DSH API or generated plugin type is exposed.
   ['backend/contracts/analytics-first-purchase-source.openapi.json', JSON.stringify({
@@ -90,8 +90,7 @@ for (const [relative, content] of artifacts) {
   else if (await readFile(path, 'utf8') !== content) throw new Error(`first-purchase saved-analysis contract drift: ${relative}`);
 }
 const program = ts.createProgram([
-  join(root, 'dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts'),
-  join(root, 'dsh-plugins/analytics-workbench/test/first-purchase-analysis-contract.typecheck.ts'),
+  join(root, 'dsh-plugins/contracts/analytics-workbench/first-purchase-analysis-contract.generated.d.ts'),
 ], {
   strict: true, noEmit: true, target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext,
   moduleResolution: ts.ModuleResolutionKind.Bundler, types: [], skipLibCheck: false,

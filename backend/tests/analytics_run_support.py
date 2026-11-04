@@ -87,6 +87,18 @@ def child_environment():
     }
 
 
+def bind_contract_workspace(node):
+    """Bind @shine-mage/dsh-contracts for source-level Node probes.
+
+    Sharded CI jobs each start from a clean checkout with no package-manager
+    install, so every test process that executes plugin sources must create the
+    same workspace link the B0 pipeline does. Idempotent; no network.
+    """
+    result = subprocess.run([node, str(REPO_ROOT / "scripts/dsh-b0/contracts-link.mjs")],
+                            capture_output=True, text=True, timeout=60)
+    assert result.returncode == 0, "CONTRACT_WORKSPACE_LINK_FAILED: " + result.stdout + result.stderr
+
+
 def start_probe(payload):
     proc = subprocess.Popen([sys.executable, str(PROBE)], cwd=REPO_ROOT, env=child_environment(),
                             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)

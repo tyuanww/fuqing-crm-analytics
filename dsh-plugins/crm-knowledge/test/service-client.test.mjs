@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { once } from 'node:events';
 import { createMetricsService } from '../src/service-client.mjs';
-import { serviceContract } from '../src/service-contract.generated.mjs';
+import { serviceContract } from '@shine-mage/dsh-contracts/crm-knowledge/service-contract.generated.mjs';
 
 async function fixture(t, handler) {
   const requests = [];

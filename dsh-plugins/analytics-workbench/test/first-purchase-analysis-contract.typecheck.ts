@@ -1,5 +1,5 @@
 // Compiler-only first-purchase saved-analysis HTTP contract; plugin view stays NOT_CONNECTED.
-import type { components, operations } from '../src/first-purchase-analysis-contract.generated.js';
+import type { components, operations } from '@shine-mage/dsh-contracts/analytics-workbench/first-purchase-analysis-contract.generated.js';
 
 type Created = components['schemas']['FirstPurchaseAnalysisCreateRequest'];
 type Saved = components['schemas']['FirstPurchaseSavedAnalysis'];

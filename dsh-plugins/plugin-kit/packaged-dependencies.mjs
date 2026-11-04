@@ -9,8 +9,12 @@ const LIMIT = 2 * 1024 * 1024;
 // The development kit is installed independently and must never be bundled
 // into a runtime geometry/input package.
 export const DEV_KIT_NAME = '@shine-mage/dsh-plugin-kit';
+// The owned generated-contract package is also build-time only: its values are
+// bundled into lib/, it is never a runtime dependency and has no tarball lock.
+export const CONTRACT_PACKAGE_NAME = '@shine-mage/dsh-contracts';
+const DEV_ONLY_SIBLINGS = new Set([DEV_KIT_NAME, CONTRACT_PACKAGE_NAME]);
 const businessDependencies = consumer => Object.keys(consumer.devDependencies ?? {})
-  .filter(name => name.startsWith('@shine-mage/') && name !== DEV_KIT_NAME);
+  .filter(name => name.startsWith('@shine-mage/') && !DEV_ONLY_SIBLINGS.has(name));
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const exact = (object, keys, code) => assert.deepEqual(Object.keys(object).sort(), [...keys].sort(), code);
 const missing = error => { if (error.code !== 'ENOENT') throw error; return null; };

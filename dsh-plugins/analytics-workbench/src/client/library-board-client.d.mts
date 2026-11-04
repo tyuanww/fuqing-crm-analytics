@@ -1,4 +1,4 @@
-import type { components } from '../board-spec-contract.generated.js';
+import type { components } from '@shine-mage/dsh-contracts/analytics-workbench/board-spec-contract.generated.js';
 export type LibrarySnapshot = components['schemas']['BoardSnapshot'];
 export type LibraryPreview = components['schemas']['BoardPreview'];
 export type LibraryEditContext = components['schemas']['BoardEditContext'];

@@ -32,7 +32,7 @@ assert.equal(req('typescript/package.json').version, '6.0.3');
 const { default: openapiTS, astToString } = req('openapi-typescript');
 const artifacts = new Map([
   ['backend/contracts/analytics-competition-chart.openapi.json', JSON.stringify(schema, null, 2) + '\n'],
-  ['dsh-plugins/analytics-workbench/src/competition-chart-contract.generated.d.ts',
+  ['dsh-plugins/contracts/analytics-workbench/competition-chart-contract.generated.d.ts',
     '/** Generated competition chart runtime extension; do not edit. */\n' + astToString(await openapiTS(schema, { alphabetize: true }))],
 ]);
 for (const [relative, content] of artifacts) {

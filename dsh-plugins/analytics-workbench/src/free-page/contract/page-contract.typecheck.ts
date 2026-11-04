@@ -1,5 +1,5 @@
 // Compiler-only free-page contract; not a BoardSpec catalogue.
-import type { components } from './page-contract.generated.js';
+import type { components } from '@shine-mage/dsh-contracts/analytics-workbench/free-page/contract/page-contract.generated.js';
 
 type Doc = components['schemas']['PageDocument'];
 type Patch = components['schemas']['PagePatchPreview'];

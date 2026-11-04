@@ -28,7 +28,7 @@ test('the checked inventory equals current sources and includes every plugin', a
   const checked = JSON.parse(await readFile(new URL('../../docs/architecture/shinemage-plugin-boundaries.json', import.meta.url), 'utf8'));
   const toolchain = JSON.parse(await readFile(new URL('../../dsh-plugins/plugin-kit/toolchain.json', import.meta.url), 'utf8'));
   assert.deepEqual(result, checked);
-  assert.equal(result.packages.length, 12);
+  assert.equal(result.packages.length, 13);
   for (const pkg of result.packages) {
     if (pkg.peers['@deepseek-ai/dsh-tools']) assert.equal(pkg.peers['@deepseek-ai/dsh-tools'], toolchain.sdk_version, `${pkg.name} DSH peer drift`);
   }
@@ -105,6 +105,34 @@ test('unknown policy fields, unowned packages and source symlinks fail closed', 
   f.policy.owners.second = { domain: 'second', target_repository: 'second', kind: 'plugin' }; await f.save();
   await symlink(join(f.root, 'config'), join(f.root, 'dsh-plugins/first/src/foreign'));
   await assert.rejects(() => inspectBoundaries(f.root), /BOUNDARY_SOURCE_SYMLINK/);
+});
+
+test('generated contract imports require the exact private dev-only package and published export', async t => {
+  const f = await fixture(t);
+  await mkdir(join(f.root, 'dsh-plugins/contracts'), { recursive: true });
+  f.policy.owners.contracts = { domain: 'generated-contracts', target_repository: 'shinemage-dsh-contracts', kind: 'contract-package' };
+  await f.save();
+  const provider = { name: '@shine-mage/dsh-contracts', version: '0.1.0', private: true, type: 'module',
+    exports: { './value.generated.js': './value.generated.d.ts', './runtime.generated.ts': './runtime.generated.ts' },
+    files: ['value.generated.d.ts', 'runtime.generated.ts'] };
+  const consumer = { name: '@shine-mage/first', version: '1.0.0',
+    devDependencies: { '@shine-mage/dsh-contracts': '0.1.0' } };
+  await writeFile(join(f.root, 'dsh-plugins/first/package.json'), JSON.stringify(consumer));
+  await writeFile(join(f.root, 'dsh-plugins/contracts/package.json'), JSON.stringify(provider));
+  await writeFile(join(f.root, 'dsh-plugins/contracts/value.generated.d.ts'), 'export interface Value { id: string }\n');
+  await writeFile(join(f.root, 'dsh-plugins/contracts/runtime.generated.ts'), 'export const value = 1 as const;\n');
+  await f.source('first', "import type { Value } from '@shine-mage/dsh-contracts/value.generated.js';\nimport { value } from '@shine-mage/dsh-contracts/runtime.generated.ts';\nexport const id: Value['id'] = String(value);\n");
+  const result = await inspectBoundaries(f.root);
+  assert.deepEqual(result.cross_package_edges.map(edge => [edge.provider, edge.phase, edge.access]), [['contracts', 'runtime', 'public-export'], ['contracts', 'runtime', 'public-export']]);
+  consumer.devDependencies = {}; await writeFile(join(f.root, 'dsh-plugins/first/package.json'), JSON.stringify(consumer));
+  await assert.rejects(() => inspectBoundaries(f.root), /BOUNDARY_CONTRACT_DEPENDENCY_REQUIRED/);
+  consumer.dependencies = { '@shine-mage/dsh-contracts': '0.1.0' }; consumer.devDependencies = { '@shine-mage/dsh-contracts': '0.1.0' }; await writeFile(join(f.root, 'dsh-plugins/first/package.json'), JSON.stringify(consumer));
+  await assert.rejects(() => inspectBoundaries(f.root), /BOUNDARY_CONTRACT_DEV_ONLY/);
+  delete consumer.dependencies; consumer.devDependencies = { '@shine-mage/dsh-contracts': '0.1.0' }; await writeFile(join(f.root, 'dsh-plugins/first/package.json'), JSON.stringify(consumer));
+  await f.source('first', "import type { Value } from '@shine-mage/dsh-contracts/value.generated.js';\nexport const id: Value['id'] = 'x';\n");
+  provider.files = [];
+  await writeFile(join(f.root, 'dsh-plugins/contracts/package.json'), JSON.stringify(provider));
+  await assert.rejects(() => inspectBoundaries(f.root), /BOUNDARY_CONTRACT_EXPORT_NOT_PACKED/);
 });
 
 test('domain public imports require an exact declared package, packed export and digest lock', async t => {

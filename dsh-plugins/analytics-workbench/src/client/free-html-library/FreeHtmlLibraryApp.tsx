@@ -8,7 +8,7 @@ import { createFreeHtmlLibraryStore } from './store.mjs';
 import { mountPreviewHost } from '../../free-page/preview/preview-host.mjs';
 import { FREE_PAGE_REFERRER_POLICY, FREE_PAGE_SANDBOX } from '../../free-page/runtime/isolation-policy.mjs';
 import { buildSrcdoc } from '../../free-page/preview/srcdoc-builder.mjs';
-import type { components } from '../../free-page/contract/page-contract.generated.d.ts';
+import type { components } from '@shine-mage/dsh-contracts/analytics-workbench/free-page/contract/page-contract.generated.js';
 
 type ThemeSource = { subscribe(listener: () => void): () => void; getSnapshot(): CompetitionColorScheme };
 type Store = ReturnType<typeof createFreeHtmlLibraryStore>;

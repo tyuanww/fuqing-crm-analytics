@@ -9,7 +9,7 @@ import { createHash } from 'node:crypto';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { packageManagerEnv, packageNetworkEnv, dependencyCommands, archiveToolEnv } from './package-manager-env.mjs';
-import { linkWorkspaceKit } from './plugin-kit-link.mjs';
+import { linkWorkspaceKit, linkWorkspaceContract } from './plugin-kit-link.mjs';
 import { prepareRuntimeInputs, recordRuntimePreparation } from '../release/runtime-inputs.mjs';
 import { CRM_COMPOSITION_SCOPES, readCompositionInputs } from '../crm-calibration/composition-inputs.mjs';
 import { readLeafPackInputs } from './leaf-pack-inputs.mjs';
@@ -176,7 +176,10 @@ if (mode === '--prepare') {
   // need the kit binding. The fixed-package consumers do not use these source
   // trees; removing guard inputs now would turn real failures into skips.
   for (const name of ['analytics-workbench', 'crm-knowledge', 'knowledge', 'shine-brand', 'shine-waterfall', 'shine-crowd-action', 'shine-query', 'shine-board', 'shine-funnel']) {
-    await linkWorkspaceKit(join(root, 'dsh-plugins', name), kit);
+    const plugin = join(root, 'dsh-plugins', name);
+    await linkWorkspaceKit(plugin, kit);
+    // Generated contract outputs are package exports, never plugin-local source.
+    await linkWorkspaceContract(plugin, join(root, 'dsh-plugins/contracts'));
   }
   // Domain producer/private geometry belong to the fixed independent owner CI.
   // Keep the three published consumer locks and public install/type contracts here.
@@ -197,6 +200,9 @@ if (mode === '--prepare') {
   run(process.execPath, ['--test', 'scripts/dsh-b0/leaf-pack-inputs.test.mjs', 'scripts/dsh-b0/workbench-client-pack-inputs.test.mjs']);
   run(process.execPath, ['scripts/dsh-b0/plugin-boundaries.mjs', '--check']);
   run(process.execPath, ['--test', 'scripts/dsh-b0/plugin-boundaries.test.mjs']);
+  // Generated contract outputs live in one package and must stay byte-identical
+  // to a fresh generator render; plugins may only consume its exports.
+  run(process.execPath, ['--test', 'scripts/dsh-b0/contracts-package.test.mjs']);
   // Guard tests fail before process startup. The real-host drill remains opt-in.
   run(process.execPath, ['--test', 'scripts/dsh-b0/pinned-host-acceptance.test.mjs']);
   run(process.execPath, ['--test', 'scripts/dsh-b0/first-purchase-crm-host-protocol.test.mjs']);

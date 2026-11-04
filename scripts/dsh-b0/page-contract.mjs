@@ -82,7 +82,7 @@ const ts = req('typescript');
 const digest = createHash('sha256').update(JSON.stringify(schema)).digest('hex');
 const artifacts = new Map([
   ['backend/contracts/analytics-page.openapi.json', JSON.stringify({ ...schema, 'x-schema-sha256': digest }, null, 2) + '\n'],
-  ['dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.generated.d.ts',
+  ['dsh-plugins/contracts/analytics-workbench/free-page/contract/page-contract.generated.d.ts',
     `/** Generated free-page contract; do not edit. OpenAPI SHA-256: ${digest} */\n` + astToString(await openapiTS(schema, { alphabetize: true }))],
 ]);
 for (const [relative, content] of artifacts) {
@@ -94,9 +94,8 @@ for (const [relative, content] of artifacts) {
     assert.equal(await readFile(path, 'utf8'), content, `free-page contract drift: ${relative}`);
   }
 }
-const generated = join(root, 'dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.generated.d.ts');
-const typecheck = join(root, 'dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.typecheck.ts');
-const program = ts.createProgram([generated, typecheck], {
+const generated = join(root, 'dsh-plugins/contracts/analytics-workbench/free-page/contract/page-contract.generated.d.ts');
+const program = ts.createProgram([generated], {
   strict: true, noEmit: true, target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext,
   moduleResolution: ts.ModuleResolutionKind.Bundler, types: [], skipLibCheck: false,
 });

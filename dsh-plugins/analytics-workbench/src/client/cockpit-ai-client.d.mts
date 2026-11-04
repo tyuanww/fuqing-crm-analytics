@@ -1,6 +1,6 @@
 import type { AISourceSelection } from './html-source-selection.mjs';
 import type { PageHttpOptions } from './free-html-library/page-http.mjs';
-import type { components } from '../free-page/contract/page-contract.generated.d.ts';
+import type { components } from '@shine-mage/dsh-contracts/analytics-workbench/free-page/contract/page-contract.generated.js';
 export type AISelectionContext = Record<string, unknown> & { context_id?: string; page_id?: string; version?: number; allowed_scope?: string };
 export type AIJob = { instruction?: string; preview_name?: string; selection?: AISourceSelection | null; edit_context?: AISelectionContext | null; id: string; target_kind: 'file' | 'page'; target_id: string; base_version: number; filename: string;
   status: 'WAITING' | 'READY' | 'SAVED' | 'CANCELLED'; candidate_hash: string | null; saved_version: number | null;

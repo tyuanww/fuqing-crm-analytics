@@ -1,7 +1,7 @@
 import type { Context } from '@deepseek-ai/cordis';
 import { defineTool } from '@deepseek-ai/dsh-tools';
 import { citationsFromGraphResult, createGraphReader } from './graph.mjs';
-import { KNOWLEDGE_ACCESS_CONTRACT } from './knowledge-access.generated.js';
+import { KNOWLEDGE_ACCESS_CONTRACT } from '@shine-mage/dsh-contracts/knowledge/knowledge-access.generated.ts';
 
 export const name = 'crm-textbook-graph';
 export const inject = ['tools'];

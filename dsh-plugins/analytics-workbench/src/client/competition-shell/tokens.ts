@@ -1,5 +1,5 @@
-import { competitionColor, competitionFont, competitionMaterial, lightColor, lightMaterial, antdSeedToken, antdTheme, lightAntdTheme } from './content-theme.generated.ts';
-export { competitionColor, competitionFont, competitionMaterial, antdSeedToken, antdTheme } from './content-theme.generated.ts';
+import { competitionColor, competitionFont, competitionMaterial, lightColor, lightMaterial, antdSeedToken, antdTheme, lightAntdTheme } from '@shine-mage/dsh-contracts/analytics-workbench/client/competition-shell/content-theme.generated.ts';
+export { competitionColor, competitionFont, competitionMaterial, antdSeedToken, antdTheme } from '@shine-mage/dsh-contracts/analytics-workbench/client/competition-shell/content-theme.generated.ts';
 /** DESIGN.md brand tokens mapped to Ant Design seed names. Not a Vue theme.ts import. */
 
 export const PRODUCT_NAME = '伸美 AI 增长董事会';

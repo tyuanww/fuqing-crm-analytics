@@ -8,8 +8,8 @@ import { fileURLToPath } from 'node:url';
 const repository = fileURLToPath(new URL('../..', import.meta.url));
 export const sourcePath = 'dsh-plugins/analytics-workbench/contracts/cockpit-slot.v1.json';
 export const consumers = [
-  'dsh-plugins/analytics-workbench/src/client/cockpit-slot-contract.generated.ts',
-  'dsh-plugins/crm-knowledge/src/client/cockpit-slot-contract.generated.ts',
+  'dsh-plugins/contracts/analytics-workbench/client/cockpit-slot-contract.generated.ts',
+  'dsh-plugins/contracts/crm-knowledge/client/cockpit-slot-contract.generated.ts',
 ];
 
 export function renderContract(bytes) {

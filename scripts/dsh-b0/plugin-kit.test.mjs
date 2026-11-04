@@ -9,7 +9,7 @@ import test from 'node:test';
 import { readPackagedLibrary } from '../../dsh-plugins/plugin-kit/packaged-dependencies.mjs';
 import { inspectSdkPackage } from '../../dsh-plugins/plugin-kit/sdk-inputs.mjs';
 import { copyPluginKitSources } from './clean-build.mjs';
-import { linkWorkspaceKit, linkRepositoryKit } from './plugin-kit-link.mjs';
+import { linkWorkspaceContract, linkWorkspaceContractSdk, linkWorkspaceKit, linkRepositoryKit } from './plugin-kit-link.mjs';
 
 const exec = promisify(execFile);
 const repository = fileURLToPath(new URL('../..', import.meta.url));
@@ -311,6 +311,58 @@ test('workspace kit link is explicit, idempotent and never replaces a foreign in
   await assert.rejects(lstat(join(outside, '@shine-mage')), { code: 'ENOENT' });
 });
 
+
+test('workspace contract link is explicit, dev-only and idempotent', async t => {
+  const root = await owned(t), plugin = join(root, 'plugin'), contracts = join(root, 'contracts');
+  await mkdir(plugin); await mkdir(contracts);
+  const manifest = { name: '@shine-mage/dsh-contracts', version: '0.1.0', private: true, type: 'module', exports: {} };
+  await writeFile(join(contracts, 'package.json'), JSON.stringify(manifest));
+  const declaration = { devDependencies: { '@shine-mage/dsh-contracts': '0.1.0' } };
+  const save = obj => writeFile(join(plugin, 'package.json'), JSON.stringify(obj));
+  await save({}); assert.equal((await linkWorkspaceContract(plugin, contracts)).status, 'NOT_DECLARED');
+  await save({ ...declaration, devDependencies: { '@shine-mage/dsh-contracts': '0.2.0' } });
+  await assert.rejects(linkWorkspaceContract(plugin, contracts), /CONTRACT_LINK_VERSION/);
+  await save({ ...declaration, dependencies: declaration.devDependencies });
+  await assert.rejects(linkWorkspaceContract(plugin, contracts), /CONTRACT_LINK_DEV_ONLY/);
+  await save(declaration);
+  assert.equal((await linkWorkspaceContract(plugin, contracts)).status, 'LINKED');
+  const link = join(plugin, 'node_modules/@shine-mage/dsh-contracts'), before = await lstat(link);
+  assert.equal((await linkWorkspaceContract(plugin, contracts)).status, 'UNCHANGED');
+  assert.equal((await lstat(link)).mtimeMs, before.mtimeMs);
+  await rm(link); await mkdir(link); await writeFile(join(link, 'sentinel'), 'foreign install');
+  await assert.rejects(linkWorkspaceContract(plugin, contracts), /CONTRACT_LINK_FOREIGN/);
+});
+
+test('contract package SDK link is pinned, explicit and idempotent', async t => {
+  const root = await owned(t), contracts = join(root, 'contracts'), sdk = join(root, 'sdk');
+  await mkdir(contracts); await mkdir(sdk);
+  const manifest = { name: '@shine-mage/dsh-contracts', version: '0.1.0', private: true, type: 'module', exports: {} };
+  await writeFile(join(contracts, 'package.json'), JSON.stringify(manifest));
+  const save = obj => writeFile(join(contracts, 'package.json'), JSON.stringify(obj));
+  const binding = { name: '@deepseek-ai/dsh-tools', directory: sdk, version: '0.2.1-rc.3' };
+  await writeFile(join(sdk, 'package.json'), JSON.stringify({ name: binding.name, version: binding.version,
+    main: 'index.js', types: 'index.d.ts' }));
+  await writeFile(join(sdk, 'index.js'), ''); await writeFile(join(sdk, 'index.d.ts'), '');
+  await assert.rejects(linkWorkspaceContractSdk(contracts, []), /CONTRACT_SDK_BINDINGS_REQUIRED/);
+  await assert.rejects(linkWorkspaceContractSdk(contracts, [{ ...binding, directory: 'relative' }]), /CONTRACT_SDK_ABSOLUTE_REQUIRED/);
+  await assert.rejects(linkWorkspaceContractSdk(contracts, [{ ...binding, version: 'latest' }]), /CONTRACT_SDK_VERSION/);
+  await assert.rejects(linkWorkspaceContractSdk(contracts, [{ ...binding, version: '0.2.2' }]), /KIT_SDK_VERSION_MISMATCH/);
+  await assert.rejects(linkWorkspaceContractSdk(contracts, [{ ...binding, name: '@deepseek-ai/other' }]), /KIT_SDK_NAME_MISMATCH/);
+  // Declaring the runtime import as a manifest dependency is refused: the package
+  // stays dependency-free and the binding is an explicit workspace step.
+  await save({ ...manifest, dependencies: { '@deepseek-ai/dsh-tools': binding.version } });
+  await assert.rejects(linkWorkspaceContractSdk(contracts, [binding]), /CONTRACT_SDK_DEPENDENCY/);
+  await save(manifest);
+  assert.deepEqual(await linkWorkspaceContractSdk(contracts, [binding]),
+    [{ status: 'LINKED', package: binding.name, version: binding.version }]);
+  const link = join(contracts, 'node_modules', binding.name), before = await lstat(link);
+  assert.deepEqual(await linkWorkspaceContractSdk(contracts, [binding]),
+    [{ status: 'UNCHANGED', package: binding.name, version: binding.version }]);
+  assert.equal((await lstat(link)).mtimeMs, before.mtimeMs);
+  await rm(link); await mkdir(link); await writeFile(join(link, 'sentinel'), 'foreign install');
+  await assert.rejects(linkWorkspaceContractSdk(contracts, [binding]), /CONTRACT_SDK_FOREIGN/);
+  assert.equal(await readFile(join(link, 'sentinel'), 'utf8'), 'foreign install');
+});
 
 test('repository build preparation leaves external checkouts alone', async t => {
   const root = await owned(t), repository = join(root, 'repo');

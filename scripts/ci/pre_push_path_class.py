@@ -112,7 +112,9 @@ def scoped_pytest_targets(paths: list[str]) -> list[str]:
 # Every published plugin tree belongs to the sealed B0 job, not only
 # analytics-workbench: an unmapped tree such as dsh-plugins/plugin-kit fell
 # through to the conservative fallback and ran the 13-minute Python suite for a
-# TypeScript-only change.
+# TypeScript-only change. The owned contract package (dsh-plugins/contracts)
+# is covered by the same prefix; its generated outputs are checked by the B0
+# contracts guard, which is why the package needs no separate entry here.
 B0_PREFIXES = ('dsh-plugins/', 'scripts/dsh-b0/', 'scripts/dsh-dev/',
                'backend/services/analytics/', 'backend/tests/analytics_')
 B0_EXACT = {'backend/contracts/analytics.py', 'backend/semantic/analytics_b0.py',

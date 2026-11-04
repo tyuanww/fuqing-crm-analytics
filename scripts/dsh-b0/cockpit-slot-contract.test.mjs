@@ -12,7 +12,7 @@ const bytes = await readFile(join(repository, sourcePath));
 
 test('both actual consumers match the domain-owned slot contract', async () => {
   assert.equal((await syncContract()).consumers, 2);
-  const module = await import('../../dsh-plugins/analytics-workbench/src/client/cockpit-slot-contract.generated.ts');
+  const module = await import('../../dsh-plugins/contracts/analytics-workbench/client/cockpit-slot-contract.generated.ts');
   assert.equal(module.CRM_COCKPIT_SLOT_NAME, 'cockpit.crm');
   assert.deepEqual(module.CRM_COCKPIT_SLOT, { kind: 'single', scope: 'root' });
 });

@@ -1,6 +1,6 @@
 /** Workbench-owned save boundary; CRM owns authentication, service owns admission/state. */
 import { createHash } from 'node:crypto';
-import { FIRST_PURCHASE_ACCESS_CONTRACT } from './first-purchase-access.generated.ts';
+import { FIRST_PURCHASE_ACCESS_CONTRACT } from '@shine-mage/dsh-contracts/analytics-workbench/first-purchase-access.generated.ts';
 import { decodeFirstPurchaseSaveResult, decodeFirstPurchaseSaveReceipt } from './first-purchase-save-model.mjs';
 
 export const FIRST_PURCHASE_SAVE_PATH = '/api/analytics-first-purchase/save';

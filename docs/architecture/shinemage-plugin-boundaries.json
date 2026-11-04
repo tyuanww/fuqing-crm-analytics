@@ -38,7 +38,8 @@
       "dependencies": {},
       "dev_dependencies": {
         "@shine-mage/dsh-plugin-kit": "0.1.0",
-        "@shine-mage/board-components": "0.1.0"
+        "@shine-mage/board-components": "0.1.0",
+        "@shine-mage/dsh-contracts": "0.1.0"
       },
       "bundled_inputs": [
         {
@@ -77,7 +78,7 @@
         "test:host-facts": "node --test src/client/host-facts.test.mjs src/client/library-workspace.test.mjs",
         "test:host-facts:browser": "node src/client/host-facts-browser.test.mjs"
       },
-      "manifest_sha256": "75c260393917ff2e7e7f0edd6e3d334070995ffcf9362761c50975710e4ef0e0"
+      "manifest_sha256": "dd83d9bc7bd98c5697a34a53780d4f9d803bef141343e01be66e23b614b1ae8f"
     },
     {
       "path": "dsh-plugins/board-components",
@@ -116,6 +117,97 @@
       "manifest_sha256": "c82cc3af5ee76e88a80846ff0108dd2758dfd0c77c81205530e834897d8464d8"
     },
     {
+      "path": "dsh-plugins/contracts",
+      "name": "@shine-mage/dsh-contracts",
+      "version": "0.1.0",
+      "domain": "generated-contracts",
+      "target_repository": "shinemage-dsh-contracts",
+      "kind": "contract-package",
+      "exports": {
+        "./analytics-workbench/analysis-contract.generated.js": "./analytics-workbench/analysis-contract.generated.d.ts",
+        "./analytics-workbench/board-spec-contract.generated.js": "./analytics-workbench/board-spec-contract.generated.d.ts",
+        "./analytics-workbench/client/cockpit-slot-contract.generated.ts": "./analytics-workbench/client/cockpit-slot-contract.generated.ts",
+        "./analytics-workbench/client/cockpit-slot-contract.generated.js": "./analytics-workbench/client/cockpit-slot-contract.generated.ts",
+        "./analytics-workbench/client/competition-shell/content-theme.generated.ts": "./analytics-workbench/client/competition-shell/content-theme.generated.ts",
+        "./analytics-workbench/client/competition-shell/content-theme.generated.js": "./analytics-workbench/client/competition-shell/content-theme.generated.ts",
+        "./analytics-workbench/cockpit-contract.generated.js": "./analytics-workbench/cockpit-contract.generated.d.ts",
+        "./analytics-workbench/competition-chart-contract.generated.js": "./analytics-workbench/competition-chart-contract.generated.d.ts",
+        "./analytics-workbench/competition-computed-contract.generated.js": "./analytics-workbench/competition-computed-contract.generated.d.ts",
+        "./analytics-workbench/first-purchase-access.generated.ts": "./analytics-workbench/first-purchase-access.generated.ts",
+        "./analytics-workbench/first-purchase-access.generated.js": "./analytics-workbench/first-purchase-access.generated.ts",
+        "./analytics-workbench/first-purchase-analysis-contract.generated.js": "./analytics-workbench/first-purchase-analysis-contract.generated.d.ts",
+        "./analytics-workbench/first-purchase-cockpit-contract.generated.js": "./analytics-workbench/first-purchase-cockpit-contract.generated.d.ts",
+        "./analytics-workbench/first-purchase-contract.generated.js": "./analytics-workbench/first-purchase-contract.generated.d.ts",
+        "./analytics-workbench/free-page/contract/page-contract.generated.js": "./analytics-workbench/free-page/contract/page-contract.generated.d.ts",
+        "./analytics-workbench/query-contract.generated.js": "./analytics-workbench/query-contract.generated.d.ts",
+        "./analytics-workbench/query-run-contract.generated.js": "./analytics-workbench/query-run-contract.generated.d.ts",
+        "./analytics-workbench/run-contract.generated.js": "./analytics-workbench/run-contract.generated.d.ts",
+        "./crm-knowledge/client/cockpit-slot-contract.generated.ts": "./crm-knowledge/client/cockpit-slot-contract.generated.ts",
+        "./crm-knowledge/client/cockpit-slot-contract.generated.js": "./crm-knowledge/client/cockpit-slot-contract.generated.ts",
+        "./crm-knowledge/client/content-theme.generated.ts": "./crm-knowledge/client/content-theme.generated.ts",
+        "./crm-knowledge/client/content-theme.generated.js": "./crm-knowledge/client/content-theme.generated.ts",
+        "./crm-knowledge/contract.generated.ts": "./crm-knowledge/contract.generated.ts",
+        "./crm-knowledge/contract.generated.js": "./crm-knowledge/contract.generated.ts",
+        "./crm-knowledge/dashboard-contract.generated.js": "./crm-knowledge/dashboard-contract.generated.d.ts",
+        "./crm-knowledge/dashboard-definition.generated.mjs": "./crm-knowledge/dashboard-definition.generated.mjs",
+        "./crm-knowledge/first-purchase-access.generated.ts": "./crm-knowledge/first-purchase-access.generated.ts",
+        "./crm-knowledge/first-purchase-access.generated.js": "./crm-knowledge/first-purchase-access.generated.ts",
+        "./crm-knowledge/http-contract.generated.js": "./crm-knowledge/http-contract.generated.d.ts",
+        "./crm-knowledge/knowledge-access.generated.ts": "./crm-knowledge/knowledge-access.generated.ts",
+        "./crm-knowledge/knowledge-access.generated.js": "./crm-knowledge/knowledge-access.generated.ts",
+        "./crm-knowledge/service-contract.generated.mjs": "./crm-knowledge/service-contract.generated.mjs",
+        "./crm-knowledge/service-transport.generated.mjs": "./crm-knowledge/service-transport.generated.mjs",
+        "./knowledge/dashboard-definition.generated.mjs": "./knowledge/dashboard-definition.generated.mjs",
+        "./knowledge/knowledge-access.generated.ts": "./knowledge/knowledge-access.generated.ts",
+        "./knowledge/knowledge-access.generated.js": "./knowledge/knowledge-access.generated.ts",
+        "./knowledge/knowledge-contract.generated.js": "./knowledge/knowledge-contract.generated.d.ts",
+        "./knowledge/service-contract.generated.mjs": "./knowledge/service-contract.generated.mjs",
+        "./knowledge/service-transport.generated.mjs": "./knowledge/service-transport.generated.mjs",
+        "./package.json": "./package.json"
+      },
+      "files": [
+        "analytics-workbench/analysis-contract.generated.d.ts",
+        "analytics-workbench/board-spec-contract.generated.d.ts",
+        "analytics-workbench/client/cockpit-slot-contract.generated.ts",
+        "analytics-workbench/client/competition-shell/content-theme.generated.ts",
+        "analytics-workbench/cockpit-contract.generated.d.ts",
+        "analytics-workbench/competition-chart-contract.generated.d.ts",
+        "analytics-workbench/competition-computed-contract.generated.d.ts",
+        "analytics-workbench/first-purchase-access.generated.ts",
+        "analytics-workbench/first-purchase-analysis-contract.generated.d.ts",
+        "analytics-workbench/first-purchase-cockpit-contract.generated.d.ts",
+        "analytics-workbench/first-purchase-contract.generated.d.ts",
+        "analytics-workbench/free-page/contract/page-contract.generated.d.ts",
+        "analytics-workbench/query-contract.generated.d.ts",
+        "analytics-workbench/query-run-contract.generated.d.ts",
+        "analytics-workbench/run-contract.generated.d.ts",
+        "crm-knowledge/client/cockpit-slot-contract.generated.ts",
+        "crm-knowledge/client/content-theme.generated.ts",
+        "crm-knowledge/contract.generated.ts",
+        "crm-knowledge/dashboard-contract.generated.d.ts",
+        "crm-knowledge/dashboard-definition.generated.mjs",
+        "crm-knowledge/first-purchase-access.generated.ts",
+        "crm-knowledge/http-contract.generated.d.ts",
+        "crm-knowledge/knowledge-access.generated.ts",
+        "crm-knowledge/service-contract.generated.mjs",
+        "crm-knowledge/service-transport.generated.mjs",
+        "knowledge/dashboard-definition.generated.mjs",
+        "knowledge/knowledge-access.generated.ts",
+        "knowledge/knowledge-contract.generated.d.ts",
+        "knowledge/service-contract.generated.mjs",
+        "knowledge/service-transport.generated.mjs",
+        "package.json",
+        "README.md"
+      ],
+      "peers": {},
+      "dependencies": {},
+      "dev_dependencies": {},
+      "bundled_inputs": [],
+      "dsh": {},
+      "commands": {},
+      "manifest_sha256": "c156d488f6b206fb03fb8daa437b83d4a2711f920785796fb6595646d4839f0e"
+    },
+    {
       "path": "dsh-plugins/crm-knowledge",
       "name": "@shine-mage/dsh-crm-knowledge",
       "version": "0.0.0-crm.5",
@@ -143,7 +235,8 @@
         "katex": "^0.18.7"
       },
       "dev_dependencies": {
-        "@shine-mage/dsh-plugin-kit": "0.1.0"
+        "@shine-mage/dsh-plugin-kit": "0.1.0",
+        "@shine-mage/dsh-contracts": "0.1.0"
       },
       "bundled_inputs": [],
       "dsh": {
@@ -164,7 +257,7 @@
         "build": "node build.mjs",
         "test:host": "node --test test/host.integration.mjs"
       },
-      "manifest_sha256": "c6a8a45f41c3135ad817304ab4202c2fed756f7be9edcd39674ff8c002d17799"
+      "manifest_sha256": "f74e6bf735535a74bd92feda49fdd32942a723ca36dbd5ac3c55039798d420d9"
     },
     {
       "path": "dsh-plugins/knowledge",
@@ -190,7 +283,8 @@
       },
       "dependencies": {},
       "dev_dependencies": {
-        "@shine-mage/dsh-plugin-kit": "0.1.0"
+        "@shine-mage/dsh-plugin-kit": "0.1.0",
+        "@shine-mage/dsh-contracts": "0.1.0"
       },
       "bundled_inputs": [],
       "dsh": {
@@ -202,7 +296,7 @@
         "build": "node build.mjs",
         "test": "node --test test/*.test.mjs"
       },
-      "manifest_sha256": "c34d451b6e8add3ba523881b9515c3ffd134ad79a7369ea9acb3d15215b09ce5"
+      "manifest_sha256": "5ffb376ad6ea781d66e5c7902c5ea08afcd8c06b2ad75cbb396232baeccac06d"
     },
     {
       "path": "dsh-plugins/plugin-kit",
@@ -617,6 +711,286 @@
     },
     {
       "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/cockpit-ai-client.d.mts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/free-page/contract/page-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/cockpit-extension.ts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/client/cockpit-slot-contract.generated.ts",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/cockpit-page-editor.tsx",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/free-page/contract/page-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/competition-board/types.ts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/competition-chart-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/competition-board/types.ts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/competition-computed-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/competition-shell/tokens.ts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/client/competition-shell/content-theme.generated.ts",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/competition-shell/tokens.ts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/client/competition-shell/content-theme.generated.ts",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/free-html-library/FreeHtmlLibraryApp.tsx",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/free-page/contract/page-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/library-board-client.d.mts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/board-spec-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/client/query-card.tsx",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/query-run-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-native-identity.d.mts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/first-purchase-access.generated.ts",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-native-identity.d.mts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/first-purchase-analysis-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-save-api.ts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/first-purchase-access.generated.ts",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-save-client.d.mts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/first-purchase-analysis-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-save-gateway.d.mts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/first-purchase-access.generated.ts",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-save-gateway.mjs",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/first-purchase-access.generated.ts",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/first-purchase-save-model.d.mts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/first-purchase-analysis-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.typecheck.ts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/free-page/contract/page-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/run-view.d.mts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/query-run-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/run-view.d.mts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/run-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/analysis-contract.typecheck.ts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/analysis-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/cockpit-contract.typecheck.ts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/cockpit-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/first-purchase-analysis-contract.typecheck.ts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/first-purchase-analysis-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/first-purchase-cockpit-contract.typecheck.ts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/first-purchase-cockpit-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/first-purchase-contract.typecheck.ts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/first-purchase-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/query-contract.typecheck.ts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/query-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/query-run-contract.typecheck.ts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/query-run-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "contracts",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/run-contract.typecheck.ts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/analytics-workbench/run-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
       "provider": "crm-knowledge",
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/first-purchase-native-crm.probe.mjs",
@@ -727,6 +1101,156 @@
     },
     {
       "consumer": "crm-knowledge",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/client/crm-library.tsx",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/crm-knowledge/client/content-theme.generated.ts",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/client/crm-library.tsx",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/crm-knowledge/dashboard-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/client/index.tsx",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/crm-knowledge/client/cockpit-slot-contract.generated.ts",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/client/index.tsx",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/crm-knowledge/client/content-theme.generated.ts",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard-access.mjs",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/crm-knowledge/first-purchase-access.generated.ts",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard-access.mjs",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/crm-knowledge/knowledge-access.generated.ts",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/dashboard.mjs",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/crm-knowledge/dashboard-definition.generated.mjs",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/host.ts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/crm-knowledge/first-purchase-access.generated.ts",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/host.ts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/crm-knowledge/knowledge-access.generated.ts",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/index.ts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/crm-knowledge/contract.generated.ts",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/service-client.mjs",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/crm-knowledge/service-transport.generated.mjs",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/crm-knowledge/src/service-client.mjs",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/crm-knowledge/service-transport.generated.mjs",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "contracts",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/contract.typecheck.ts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/crm-knowledge/dashboard-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "contracts",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/contract.typecheck.ts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/crm-knowledge/http-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "contracts",
+      "phase": "test",
+      "source": "dsh-plugins/crm-knowledge/test/service-client.test.mjs",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/crm-knowledge/service-contract.generated.mjs",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "crm-knowledge",
       "provider": "knowledge",
       "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/host.integration.mjs",
@@ -764,6 +1288,56 @@
       "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
       "access": "public-export",
       "type_only": false
+    },
+    {
+      "consumer": "knowledge",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/knowledge/src/graph-tools.ts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/knowledge/knowledge-access.generated.ts",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "knowledge",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/knowledge/src/index.ts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/knowledge/dashboard-definition.generated.mjs",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "knowledge",
+      "provider": "contracts",
+      "phase": "runtime",
+      "source": "dsh-plugins/knowledge/src/service-client.mjs",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/knowledge/service-transport.generated.mjs",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "knowledge",
+      "provider": "contracts",
+      "phase": "test",
+      "source": "dsh-plugins/knowledge/test/contract.typecheck.ts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/knowledge/knowledge-access.generated.ts",
+      "access": "public-export",
+      "type_only": true
+    },
+    {
+      "consumer": "knowledge",
+      "provider": "contracts",
+      "phase": "test",
+      "source": "dsh-plugins/knowledge/test/contract.typecheck.ts",
+      "target": "dsh-plugins/contracts",
+      "specifier": "@shine-mage/dsh-contracts/knowledge/knowledge-contract.generated.js",
+      "access": "public-export",
+      "type_only": true
     },
     {
       "consumer": "knowledge",
@@ -1008,6 +1582,7 @@
   ],
   "build_layers": [
     [
+      "contracts",
       "plugin-kit",
       "query-agent"
     ],
@@ -1131,27 +1706,6 @@
     }
   ],
   "literal_endpoints": [
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/analysis-contract.generated.d.ts",
-      "route": "/api/v1/analytics/analyses",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/analysis-contract.generated.d.ts",
-      "route": "/api/v1/analytics/analyses/{analysis_id}",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/analysis-contract.generated.d.ts",
-      "route": "/api/v1/analytics/analyses/{analysis_id}/versions",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
     {
       "consumer": "analytics-workbench",
       "phase": "runtime",
@@ -1407,34 +1961,6 @@
     {
       "consumer": "analytics-workbench",
       "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/cockpit-contract.generated.d.ts",
-      "route": "/api/v1/analytics/dashboards",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/cockpit-contract.generated.d.ts",
-      "route": "/api/v1/analytics/dashboards/{dashboard_id}",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/cockpit-contract.generated.d.ts",
-      "route": "/api/v1/analytics/dashboards/{dashboard_id}/preview",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/cockpit-contract.generated.d.ts",
-      "route": "/api/v1/analytics/dashboards/{dashboard_id}/versions",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
       "source": "dsh-plugins/analytics-workbench/src/cockpit-history-api.ts",
       "route": "/api/shine-mage-deliveries",
       "contract": "OBSERVED_NOT_FROZEN"
@@ -1458,90 +1984,6 @@
       "phase": "runtime",
       "source": "dsh-plugins/analytics-workbench/src/competition-agent/family.mjs",
       "route": "/api/v1/audience/table",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
-      "route": "/api/v1/analytics-first-purchase/analyses",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
-      "route": "/api/v1/analytics-first-purchase/analyses/{analysis_id}",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
-      "route": "/api/v1/analytics-first-purchase/analyses/{analysis_id}/provenance",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
-      "route": "/api/v1/analytics-first-purchase/analyses/{analysis_id}/versions",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
-      "route": "/api/v1/analytics-first-purchase/save-receipts",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
-      "route": "/api/v1/analytics-first-purchase/save-receipts/reconcile",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
-      "route": "/api/v1/analytics-first-purchase/save-results/inspect",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
-      "route": "/api/v1/analytics-first-purchase/session-identity",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-cockpit-contract.generated.d.ts",
-      "route": "/api/v1/analytics-first-purchase/dashboards",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-cockpit-contract.generated.d.ts",
-      "route": "/api/v1/analytics-first-purchase/dashboards/{dashboard_id}",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-cockpit-contract.generated.d.ts",
-      "route": "/api/v1/analytics-first-purchase/dashboards/{dashboard_id}/preview",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-cockpit-contract.generated.d.ts",
-      "route": "/api/v1/analytics-first-purchase/dashboards/{dashboard_id}/versions",
       "contract": "OBSERVED_NOT_FROZEN"
     },
     {
@@ -1571,27 +2013,6 @@
       "source": "dsh-plugins/analytics-workbench/src/first-purchase-commands.mjs",
       "route": "/internal/native/prompt",
       "contract": "INTERNAL_NOT_PUBLIC"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-contract.generated.d.ts",
-      "route": "/api/v1/analytics-first-purchase/runs",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-contract.generated.d.ts",
-      "route": "/api/v1/analytics-first-purchase/runs/{run_id}",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-contract.generated.d.ts",
-      "route": "/api/v1/analytics-first-purchase/runs/{run_id}/cancel",
-      "contract": "OBSERVED_NOT_FROZEN"
     },
     {
       "consumer": "analytics-workbench",
@@ -1631,76 +2052,6 @@
     {
       "consumer": "analytics-workbench",
       "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.generated.d.ts",
-      "route": "/api/v1/analytics/page-documents/pages",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.generated.d.ts",
-      "route": "/api/v1/analytics/page-documents/pages/{page_id}",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.generated.d.ts",
-      "route": "/api/v1/analytics/page-documents/pages/{page_id}/patch-preview",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.generated.d.ts",
-      "route": "/api/v1/analytics/page-documents/pages/{page_id}/rollback-preview",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.generated.d.ts",
-      "route": "/api/v1/analytics/page-documents/pages/{page_id}/save-preview",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.generated.d.ts",
-      "route": "/api/v1/analytics/page-documents/pages/{page_id}/versions",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.generated.d.ts",
-      "route": "/api/v1/analytics/page-documents/previews",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.generated.d.ts",
-      "route": "/api/v1/analytics/page-documents/previews/{preview_id}",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.generated.d.ts",
-      "route": "/api/v1/analytics/page-documents/previews/{preview_id}/cancel",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.generated.d.ts",
-      "route": "/api/v1/analytics/page-documents/previews/{preview_id}/confirm",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
       "source": "dsh-plugins/analytics-workbench/src/query-model.d.mts",
       "route": "/internal/native/channel-followup",
       "contract": "INTERNAL_NOT_PUBLIC"
@@ -1718,48 +2069,6 @@
       "source": "dsh-plugins/analytics-workbench/src/query-tool.ts",
       "route": "/internal/native/channel-followup",
       "contract": "INTERNAL_NOT_PUBLIC"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/run-contract.generated.d.ts",
-      "route": "/api/v1/analytics/conversations",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/run-contract.generated.d.ts",
-      "route": "/api/v1/analytics/conversations/{conversation_id}",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/run-contract.generated.d.ts",
-      "route": "/api/v1/analytics/conversations/{conversation_id}/runs",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/run-contract.generated.d.ts",
-      "route": "/api/v1/analytics/runs/{run_id}",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/run-contract.generated.d.ts",
-      "route": "/api/v1/analytics/runs/{run_id}/cancel",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/run-contract.generated.d.ts",
-      "route": "/api/v1/analytics/runs/{run_id}/events",
-      "contract": "OBSERVED_NOT_FROZEN"
     },
     {
       "consumer": "analytics-workbench",
@@ -2091,6 +2400,426 @@
       "contract": "INTERNAL_NOT_PUBLIC"
     },
     {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/analysis-contract.generated.d.ts",
+      "route": "/api/v1/analytics/analyses",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/analysis-contract.generated.d.ts",
+      "route": "/api/v1/analytics/analyses/{analysis_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/analysis-contract.generated.d.ts",
+      "route": "/api/v1/analytics/analyses/{analysis_id}/versions",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/cockpit-contract.generated.d.ts",
+      "route": "/api/v1/analytics/dashboards",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/cockpit-contract.generated.d.ts",
+      "route": "/api/v1/analytics/dashboards/{dashboard_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/cockpit-contract.generated.d.ts",
+      "route": "/api/v1/analytics/dashboards/{dashboard_id}/preview",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/cockpit-contract.generated.d.ts",
+      "route": "/api/v1/analytics/dashboards/{dashboard_id}/versions",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/first-purchase-analysis-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/analyses",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/first-purchase-analysis-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/analyses/{analysis_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/first-purchase-analysis-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/analyses/{analysis_id}/provenance",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/first-purchase-analysis-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/analyses/{analysis_id}/versions",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/first-purchase-analysis-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/save-receipts",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/first-purchase-analysis-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/save-receipts/reconcile",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/first-purchase-analysis-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/save-results/inspect",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/first-purchase-analysis-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/session-identity",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/first-purchase-cockpit-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/dashboards",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/first-purchase-cockpit-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/dashboards/{dashboard_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/first-purchase-cockpit-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/dashboards/{dashboard_id}/preview",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/first-purchase-cockpit-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/dashboards/{dashboard_id}/versions",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/first-purchase-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/runs",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/first-purchase-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/runs/{run_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/first-purchase-contract.generated.d.ts",
+      "route": "/api/v1/analytics-first-purchase/runs/{run_id}/cancel",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/free-page/contract/page-contract.generated.d.ts",
+      "route": "/api/v1/analytics/page-documents/pages",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/free-page/contract/page-contract.generated.d.ts",
+      "route": "/api/v1/analytics/page-documents/pages/{page_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/free-page/contract/page-contract.generated.d.ts",
+      "route": "/api/v1/analytics/page-documents/pages/{page_id}/patch-preview",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/free-page/contract/page-contract.generated.d.ts",
+      "route": "/api/v1/analytics/page-documents/pages/{page_id}/rollback-preview",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/free-page/contract/page-contract.generated.d.ts",
+      "route": "/api/v1/analytics/page-documents/pages/{page_id}/save-preview",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/free-page/contract/page-contract.generated.d.ts",
+      "route": "/api/v1/analytics/page-documents/pages/{page_id}/versions",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/free-page/contract/page-contract.generated.d.ts",
+      "route": "/api/v1/analytics/page-documents/previews",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/free-page/contract/page-contract.generated.d.ts",
+      "route": "/api/v1/analytics/page-documents/previews/{preview_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/free-page/contract/page-contract.generated.d.ts",
+      "route": "/api/v1/analytics/page-documents/previews/{preview_id}/cancel",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/free-page/contract/page-contract.generated.d.ts",
+      "route": "/api/v1/analytics/page-documents/previews/{preview_id}/confirm",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/run-contract.generated.d.ts",
+      "route": "/api/v1/analytics/conversations",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/run-contract.generated.d.ts",
+      "route": "/api/v1/analytics/conversations/{conversation_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/run-contract.generated.d.ts",
+      "route": "/api/v1/analytics/conversations/{conversation_id}/runs",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/run-contract.generated.d.ts",
+      "route": "/api/v1/analytics/runs/{run_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/run-contract.generated.d.ts",
+      "route": "/api/v1/analytics/runs/{run_id}/cancel",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/analytics-workbench/run-contract.generated.d.ts",
+      "route": "/api/v1/analytics/runs/{run_id}/events",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/crm-knowledge/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/crm-analyses",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/crm-knowledge/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/crm-analyses/{asset_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/crm-knowledge/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/crm-analyses/{asset_id}/knowledge-citations",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/crm-knowledge/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/crm-analyses/{asset_id}/shares",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/crm-knowledge/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/crm-analyses/{asset_id}/shares/{username}/revoke",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/crm-knowledge/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/crm-boards",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/crm-knowledge/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/crm-boards/{asset_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/crm-knowledge/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/crm-cockpit-references",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/crm-knowledge/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/crm-cockpit-references/{asset_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/crm-knowledge/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/crm-library",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/crm-knowledge/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/dashboard-membership",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/crm-knowledge/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/dashboard-net-gsv",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/crm-knowledge/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/dashboard-purchases",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/crm-knowledge/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/dashboard-readiness",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/crm-knowledge/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/dashboard-snapshots",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/crm-knowledge/dashboard-contract.generated.d.ts",
+      "route": "/api/v1/metrics/dashboard-snapshots/{asset_id}",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/crm-knowledge/http-contract.generated.d.ts",
+      "route": "/api/v1/crm-metrics/capabilities",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/crm-knowledge/http-contract.generated.d.ts",
+      "route": "/api/v1/crm-metrics/query",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/crm-knowledge/service-contract.generated.mjs",
+      "route": "/api/v1/crm-metrics",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/knowledge/knowledge-contract.generated.d.ts",
+      "route": "/api/v1/crm-knowledge/capabilities",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/knowledge/knowledge-contract.generated.d.ts",
+      "route": "/api/v1/crm-knowledge/explain",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "source": "dsh-plugins/contracts/knowledge/service-contract.generated.mjs",
+      "route": "/api/v1/crm-knowledge",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
       "consumer": "crm-knowledge",
       "phase": "runtime",
       "source": "dsh-plugins/crm-knowledge/src/client/crm-library.tsx",
@@ -2144,118 +2873,6 @@
       "phase": "runtime",
       "source": "dsh-plugins/crm-knowledge/src/dashboard-access.mjs",
       "route": "/api/v1/auth/login",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
-      "route": "/api/v1/metrics/crm-analyses",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
-      "route": "/api/v1/metrics/crm-analyses/{asset_id}",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
-      "route": "/api/v1/metrics/crm-analyses/{asset_id}/knowledge-citations",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
-      "route": "/api/v1/metrics/crm-analyses/{asset_id}/shares",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
-      "route": "/api/v1/metrics/crm-analyses/{asset_id}/shares/{username}/revoke",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
-      "route": "/api/v1/metrics/crm-boards",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
-      "route": "/api/v1/metrics/crm-boards/{asset_id}",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
-      "route": "/api/v1/metrics/crm-cockpit-references",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
-      "route": "/api/v1/metrics/crm-cockpit-references/{asset_id}",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
-      "route": "/api/v1/metrics/crm-library",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
-      "route": "/api/v1/metrics/dashboard-membership",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
-      "route": "/api/v1/metrics/dashboard-net-gsv",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
-      "route": "/api/v1/metrics/dashboard-purchases",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
-      "route": "/api/v1/metrics/dashboard-readiness",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
-      "route": "/api/v1/metrics/dashboard-snapshots",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
-      "route": "/api/v1/metrics/dashboard-snapshots/{asset_id}",
       "contract": "OBSERVED_NOT_FROZEN"
     },
     {
@@ -2333,27 +2950,6 @@
       "phase": "runtime",
       "source": "dsh-plugins/crm-knowledge/src/first-purchase-relay.mjs",
       "route": "/api/v1/analytics-first-purchase",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/http-contract.generated.d.ts",
-      "route": "/api/v1/crm-metrics/capabilities",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/http-contract.generated.d.ts",
-      "route": "/api/v1/crm-metrics/query",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "crm-knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/crm-knowledge/src/service-contract.generated.mjs",
-      "route": "/api/v1/crm-metrics",
       "contract": "OBSERVED_NOT_FROZEN"
     },
     {
@@ -2543,27 +3139,6 @@
       "phase": "runtime",
       "source": "dsh-plugins/knowledge/src/graph.mjs",
       "route": "/api/v1",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/knowledge/src/knowledge-contract.generated.d.ts",
-      "route": "/api/v1/crm-knowledge/capabilities",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/knowledge/src/knowledge-contract.generated.d.ts",
-      "route": "/api/v1/crm-knowledge/explain",
-      "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "knowledge",
-      "phase": "runtime",
-      "source": "dsh-plugins/knowledge/src/service-contract.generated.mjs",
-      "route": "/api/v1/crm-knowledge",
       "contract": "OBSERVED_NOT_FROZEN"
     },
     {
@@ -3410,6 +3985,16 @@
       "specifier": "node:test"
     },
     {
+      "consumer": "contracts",
+      "phase": "build",
+      "specifier": "@deepseek-ai/cordis"
+    },
+    {
+      "consumer": "contracts",
+      "phase": "build",
+      "specifier": "@deepseek-ai/dsh-tools"
+    },
+    {
       "consumer": "crm-knowledge",
       "phase": "build",
       "specifier": "@deepseek-ai/cordis"
@@ -4112,7 +4697,7 @@
     {
       "id": "crm-metrics",
       "owner": "crm-service",
-      "source": "dsh-plugins/crm-knowledge/src/dashboard-contract.generated.d.ts",
+      "source": "dsh-plugins/contracts/crm-knowledge/dashboard-contract.generated.d.ts",
       "generator": "scripts/crm-calibration/generate_types.mjs",
       "consumers": [
         "crm-knowledge"
@@ -4124,7 +4709,7 @@
     {
       "id": "crm-metrics-tool-schema",
       "owner": "crm-service",
-      "source": "dsh-plugins/crm-knowledge/src/contract.generated.ts",
+      "source": "dsh-plugins/contracts/crm-knowledge/contract.generated.ts",
       "generator": "scripts/crm-calibration/generate_contract.py",
       "consumers": [
         "crm-knowledge"
@@ -4136,7 +4721,7 @@
     {
       "id": "first-purchase",
       "owner": "analysis-service",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-contract.generated.d.ts",
+      "source": "dsh-plugins/contracts/analytics-workbench/first-purchase-contract.generated.d.ts",
       "generator": "scripts/dsh-b0/first-purchase-contract.mjs",
       "consumers": [
         "analytics-workbench"
@@ -4148,7 +4733,7 @@
     {
       "id": "saved-analysis",
       "owner": "analysis-service",
-      "source": "dsh-plugins/analytics-workbench/src/analysis-contract.generated.d.ts",
+      "source": "dsh-plugins/contracts/analytics-workbench/analysis-contract.generated.d.ts",
       "generator": "scripts/dsh-b0/analysis-contract.mjs",
       "consumers": [
         "analytics-workbench"
@@ -4160,7 +4745,7 @@
     {
       "id": "board-spec",
       "owner": "board-domain",
-      "source": "dsh-plugins/analytics-workbench/src/board-spec-contract.generated.d.ts",
+      "source": "dsh-plugins/contracts/analytics-workbench/board-spec-contract.generated.d.ts",
       "generator": "scripts/dsh-b0/board-spec-contract.mjs",
       "consumers": [
         "analytics-workbench",
@@ -4301,7 +4886,7 @@
     {
       "id": "first-purchase-save-receipt",
       "owner": "analysis-service",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
+      "source": "dsh-plugins/contracts/analytics-workbench/first-purchase-analysis-contract.generated.d.ts",
       "generator": "scripts/dsh-b0/first-purchase-analysis-contract.mjs",
       "consumers": [
         "analytics-workbench"
@@ -4313,7 +4898,7 @@
     {
       "id": "first-purchase-save-result",
       "owner": "analysis-service",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
+      "source": "dsh-plugins/contracts/analytics-workbench/first-purchase-analysis-contract.generated.d.ts",
       "generator": "scripts/dsh-b0/first-purchase-analysis-contract.mjs",
       "consumers": [
         "analytics-workbench"
@@ -4325,7 +4910,7 @@
     {
       "id": "first-purchase-session-identity",
       "owner": "analysis-service",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
+      "source": "dsh-plugins/contracts/analytics-workbench/first-purchase-analysis-contract.generated.d.ts",
       "generator": "scripts/dsh-b0/first-purchase-analysis-contract.mjs",
       "consumers": [
         "analytics-workbench"

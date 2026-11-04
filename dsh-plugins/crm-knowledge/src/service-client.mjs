@@ -1,6 +1,6 @@
 /** CRM domain only. No knowledge implementation or implicit service selection. */
-import { createService } from './service-transport.generated.mjs';
-export { unavailableSchema, serviceOrigin } from './service-transport.generated.mjs';
+import { createService } from '@shine-mage/dsh-contracts/crm-knowledge/service-transport.generated.mjs';
+export { unavailableSchema, serviceOrigin } from '@shine-mage/dsh-contracts/crm-knowledge/service-transport.generated.mjs';
 export function createMetricsService(config = {}) {
   const service = createService(config.metricsOrigin, config.timeoutMs);
   return { availability: () => ({ metrics: service.availability() }),

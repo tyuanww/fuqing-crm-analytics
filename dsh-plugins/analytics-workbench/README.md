@@ -152,7 +152,7 @@ FQ_B0_PYTHON=/Users/hutou/homebrew/opt/python@3.14/bin/python3.14 node dsh-plugi
 
 兼容与回退：原 v1/v2 结果和证据原样可读，无日序列时不凭总额插值；用户需要趋势才重新问数。v1/v2 golden 文件保留，新增 `daily-results.json` 由原 `unit-fixtures.py` 生成。离线生成 `competition-computed-contract.mjs --write|--check --python /absolute/python3.14` 同步 OpenAPI/TS，不改冻结 C0。旧程序未必能读 v3，代码回退须保留 v3 reader 或隔离恢复与旧代码匹配的状态；不得删除/改写新结果冒充双向兼容。
 
-离线同步：`node scripts/dsh-b0/board-spec-contract.mjs --write|--check --python /absolute/python3.14`（Node 24；生成阶段禁止网络、SQLite 和子进程）。产物为 `analytics-board-spec.openapi.json` 和插件 `board-spec-contract.generated.d.ts`；不启动旧 CRM，也不改旧 Vue 类型。
+离线同步：`node scripts/dsh-b0/board-spec-contract.mjs --write|--check --python /absolute/python3.14`（Node 24；生成阶段禁止网络、SQLite 和子进程）。产物为 `analytics-board-spec.openapi.json` 和 `dsh-plugins/contracts/analytics-workbench/board-spec-contract.generated.d.ts`；不启动旧 CRM，也不改旧 Vue 类型。
 
 后端最新独立回归 35 项通过、1 条 Starlette TestClient/httpx 弃用警告，证据 `.context/checks/20260912T191259751651Z/summary.json`。包含真实小 SQLite、新进程重开、无计算源读取、同会话分页/绑定、撤权、并发确认、幂等、取消/过期与事务故障。此前 C2 pipeline 日志 `board-documents-pipeline.log` 是历史证据；C3 本轮 pipeline 结果看 TODOS，不能用旧绿灯覆盖新改动。
 
