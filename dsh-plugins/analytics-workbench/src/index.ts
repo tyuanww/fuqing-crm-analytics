@@ -19,14 +19,13 @@ export const inject = [...bridgeInject, 'tools'];
 export function apply(ctx: Context, config: { firstPurchaseCandidateDigest?: string } = {}): void {
   applyBridge(ctx);
   ctx.inject(['commands'], scoped => { scoped.plugin(firstPurchaseCommands); });
-  ctx.inject(['connection', 'webServer'], scoped => { scoped.plugin(firstPurchaseSaveApi, config); });
   registerFreeHtmlPageTool(ctx);
   // One ledger per entry owns every Connection Fetch route of this plugin and
-  // releases them newest-first on unload. Rows that P2d still owns
-  // (`first-purchase-save-api.ts`) join it in the follow-up; see
-  // config/dsh-rc5-surface.v1.json routeOwnership.debt.
+  // releases them newest-first on unload. Every row gets the same ledger and
+  // releases only its own tag; the entry closes whatever is left.
   ctx.inject(['connection', 'webServer'], (scoped) => {
     const routes = new ConnectionFetchLedger(scoped, { label: name });
+    scoped.plugin(firstPurchaseSaveApi, { ...config, routes });
     scoped.plugin(boardBrowserApi, { routes });
     scoped.plugin(cockpitHistoryApi, { routes });
   });

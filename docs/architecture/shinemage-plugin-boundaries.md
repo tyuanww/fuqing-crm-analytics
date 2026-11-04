@@ -39,7 +39,7 @@ node --test scripts/dsh-b0/plugin-boundaries.test.mjs
 | `crm-knowledge` | CRM 登录／指标／分析 adapter | [dsh-crm-knowledge](https://github.com/tyuanww/dsh-crm-knowledge) | CRM 包 ID 保留，知识实现已分离；真实服务另验 |
 | `knowledge` | 公开解释／教材／图谱接入 | [dsh-knowledge](https://github.com/tyuanww/dsh-knowledge) | 合成接入验证不等于真实 WeKnora 验收 |
 
-2026-11-04 P2d 重新生成的清单扫描 13 个包、668 个 JS/TS 文件（以 JSON 的 `source_files_scanned` 为准）。93 条跨包引用按 phase 分为 runtime 45、build 28、test 20；runtime 45 条全部是公开导出（35 条指向生成的 contracts 包，10 条指向已锁定 board-components），生产源码例外为 0。另有 17 条仓库引用，均为测试，包含兼容入口转发；62 处非字面动态导入也全部位于测试。构建回执与浏览器 CJS 装载包装已归 kit 公开入口（`./provenance`、`./client-banner`），九个插件 build 不再引用主仓 `scripts/release`，原先 9 条 build 仓库边消失。这些是当前静态清单的数值，不是插件宿主兼容或完整 B0 的通过计数；历史扫描数留在原证据。
+2026-11-05 P3-1 重新生成的清单扫描 13 个包、674 个 JS/TS 文件（以 JSON 的 `source_files_scanned` 为准）。94 条跨包引用按 phase 分为 runtime 45、build 28、test 21；runtime 45 条全部是公开导出（35 条指向生成的 contracts 包，10 条指向已锁定 board-components），生产源码例外为 0。另有 18 条仓库引用，均为测试，包含兼容入口转发；62 处非字面动态导入也全部位于测试。构建回执与浏览器 CJS 装载包装已归 kit 公开入口（`./provenance`、`./client-banner`），九个插件 build 不再引用主仓 `scripts/release`，原先 9 条 build 仓库边消失。P3-1 只新增 6 个插件源文件、1 条 test 相跨包引用（归属单测直接挂载 CRM host 行）和 1 条 test 相仓库引用（复用 kit 的 contracts 工作区绑定），未新增 runtime 边。这些是当前静态清单的数值，不是插件宿主兼容或完整 B0 的通过计数；历史扫描数留在原证据。
 
 构建 DAG：`contracts`/`plugin-kit` → `board-components`、`crm-knowledge`、`knowledge` 与四个无需图表输入的 leaf → `analytics-workbench`/`shine-funnel`/`shine-waterfall`。箭头表示构建依赖，不是宿主 bundle 激活顺序；本地 profile v3 分别选择 CRM、知识与页面模块，生产 profile 未改变。
 
@@ -59,7 +59,7 @@ node --test scripts/dsh-b0/plugin-boundaries.test.mjs
 
 服务不在插件包内：`backend/analytics_*` 与 `backend/services/analytics/` 拥有 B0 分析及持久化；CRM 的 `backend/crm_metrics_app.py`、`backend/routers/metrics.py` 与领域合同拥有指标/权限；知识库服务及其数据拥有独立生命周期。插件通过 adapter 调用，不拥有生产 DuckDB、凭据或服务数据迁移。
 
-当前提取 `/api/`、`/internal/`、`/b0/` 字面路径及模板路径，共 211 处声明、131 种路径；包括测试夹具和 gateway 资源路径，**不是 128 个已经接通的公开 API**。清单标明来源与 phase，去掉 origin 和 query 值。内部路径标为 `INTERNAL_NOT_PUBLIC`，其他路径标为 `OBSERVED_NOT_FROZEN`。
+当前提取 `/api/`、`/internal/`、`/b0/` 字面路径及模板路径，共 228 处声明、143 种路径；包括测试夹具和 gateway 资源路径，**不是 128 个已经接通的公开 API**。清单标明来源与 phase，去掉 origin 和 query 值。内部路径标为 `INTERNAL_NOT_PUBLIC`，其他路径标为 `OBSERVED_NOT_FROZEN`。
 
 当前 20 条重要合同包括 DSH pin、领域 schema/slot/主题/图表、两项服务 API 1.0.0、可撤销知识身份能力 v1、公开 GSV 定义 v1，以及 analysis-service 的首购保存回执、独立结果/provenance v1；每条有 owner、消费者、生成器、源 SHA-256 与兼容政策。身份/GSV 由 CRM 领域维护并生成双方本地副本，不是共享业务运行时。回执支持只读 reconcile；新写入由服务端显式候选/freshness 策略控制，存储身份本身不授予资格；旧 saved-analysis/cockpit v1 和 SQLite schema 1 不变。页面交付仍由 workbench 的公开 `./page-tools` 入口拥有。新服务仅支持精确 API 1.0.0，见[服务边界](../operating/crm-plugin-service-boundary.md)；D15 本地结果/freshness 和受控保存 adapter 已通过验证，见[接口边界](../operating/first-purchase-save-admission.md)；真实服务版本窗口、生产策略与 UI/现场门禁仍未完成。
 

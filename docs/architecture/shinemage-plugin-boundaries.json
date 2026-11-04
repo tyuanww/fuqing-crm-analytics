@@ -72,13 +72,13 @@
       },
       "commands": {
         "build": "node build.mjs",
-        "test": "node --test test/model.test.mjs test/initial-session.test.mjs test/native-account-settings.test.mjs test/native-evidence.test.mjs test/run-view.test.mjs test/page-navigation-continuity.test.mjs test/cockpit-shell-contract.test.mjs test/client-request-envelope.test.mjs src/client/competition-shell/competition-shell.test.mjs && pnpm test:html-edit",
+        "test": "node --test test/model.test.mjs test/initial-session.test.mjs test/native-account-settings.test.mjs test/native-evidence.test.mjs test/run-view.test.mjs test/page-navigation-continuity.test.mjs test/cockpit-shell-contract.test.mjs test/client-request-envelope.test.mjs test/connection-fetch-ledger.test.mjs test/connection-fetch-ownership.test.mjs src/client/competition-shell/competition-shell.test.mjs && pnpm test:html-edit",
         "test:html-edit": "node --test src/client/source-authorization.test.mjs src/client/ai-edit-target.test.mjs src/client/free-html-library/generate-context.test.mjs src/client/protected-page-edit.test.mjs src/free-page/resource/package-normalize.test.mjs src/client/free-html-library/html-import.test.mjs src/client/html-selection-bridge.test.mjs src/client/free-html-library/store.test.mjs src/client/free-html-library/p12-live-adapters.test.mjs src/client/free-html-library/native-page-http.test.mjs src/client/free-html-library/native-preview-entry.test.mjs src/client/free-html-library/source-draft.test.mjs test/cockpit-ai-client.test.mjs test/ai-preview-overlay-regression.test.mjs src/client/navigation/navigation-epoch.test.mjs src/free-page/edit/intent-router.test.mjs src/free-page/edit/selection-context.test.mjs test/dynamic-chart-browser-seam.test.mjs test/draft-save-regression.test.mjs test/canvas-input-regression.test.mjs test/open-native-html-artifact.test.mjs src/free-page/preview/srcdoc-builder.test.mjs src/client/host-facts.test.mjs src/client/library-workspace.test.mjs src/client/page-package-card.test.mjs src/client/cockpit-page-tab.test.mjs",
         "test:built": "node --test test/built.test.mjs test/runtime-dependencies.test.mjs",
         "test:host-facts": "node --test src/client/host-facts.test.mjs src/client/library-workspace.test.mjs",
         "test:host-facts:browser": "node src/client/host-facts-browser.test.mjs"
       },
-      "manifest_sha256": "dd83d9bc7bd98c5697a34a53780d4f9d803bef141343e01be66e23b614b1ae8f"
+      "manifest_sha256": "c5d4d4c305210711dfe3d7e550c9add315c773c2b3ddb2f5b940c2335080ddde"
     },
     {
       "path": "dsh-plugins/board-components",
@@ -647,7 +647,7 @@
       "manifest_sha256": "01c8dc9bbb358ba6402048f9af6306b35e2e8814e9298965dc5d4ddf23f00e85"
     }
   ],
-  "source_files_scanned": 668,
+  "source_files_scanned": 674,
   "cross_package_edges": [
     {
       "consumer": "analytics-workbench",
@@ -988,6 +988,16 @@
       "specifier": "@shine-mage/dsh-contracts/analytics-workbench/run-contract.generated.js",
       "access": "public-export",
       "type_only": true
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "crm-knowledge",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/connection-fetch-ownership.test.mjs",
+      "target": "dsh-plugins/crm-knowledge/src/host.ts",
+      "specifier": "../../crm-knowledge/src/host.ts",
+      "access": "source",
+      "type_only": false
     },
     {
       "consumer": "analytics-workbench",
@@ -1602,6 +1612,12 @@
     ]
   ],
   "repository_edges": [
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/connection-fetch-ownership.test.mjs",
+      "target": "scripts/dsh-b0/plugin-kit-link.mjs"
+    },
     {
       "consumer": "analytics-workbench",
       "phase": "test",
@@ -2257,6 +2273,125 @@
       "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/cockpit-v2-browser-probe.mjs",
       "route": "/api/v1/analytics/page-documents/previews/",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/connection-fetch-ledger.test.mjs",
+      "route": "/api/a",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/connection-fetch-ledger.test.mjs",
+      "route": "/api/b",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/connection-fetch-ledger.test.mjs",
+      "route": "/api/conflict",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/connection-fetch-ledger.test.mjs",
+      "route": "/api/dup",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/connection-fetch-ledger.test.mjs",
+      "route": "/api/example",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/connection-fetch-ledger.test.mjs",
+      "route": "/api/late",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/connection-fetch-ledger.test.mjs",
+      "route": "/api/one",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/connection-fetch-ledger.test.mjs",
+      "route": "/api/report",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/connection-fetch-ledger.test.mjs",
+      "route": "/api/slow",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/connection-fetch-ledger.test.mjs",
+      "route": "/api/two",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/connection-fetch-ledger.test.mjs",
+      "route": "/api/x",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/connection-fetch-ledger.test.mjs",
+      "route": "/internal/native/query",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/connection-fetch-ownership.test.mjs",
+      "route": "/api/analytics-first-purchase/save",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/connection-fetch-ownership.test.mjs",
+      "route": "/api/crm-knowledge/assets",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/connection-fetch-ownership.test.mjs",
+      "route": "/api/crm-knowledge/connection",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/connection-fetch-ownership.test.mjs",
+      "route": "/api/shine-mage-board",
+      "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/connection-fetch-ownership.test.mjs",
+      "route": "/api/shine-mage-deliveries",
       "contract": "OBSERVED_NOT_FROZEN"
     },
     {

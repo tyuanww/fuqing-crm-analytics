@@ -39,7 +39,7 @@ const GOOD_PLUGIN = {
     dsh: { client: { platform: 'web', inject: ['@deepseek-ai/dsh-client-ui-sidebar'] }, bundle: { patch: './cordis.patch.yml' } },
   },
   'cordis.patch.yml': 'plugins: {}\n',
-  'src/connection-fetch-ledger.mjs': 'export const owner = true;\n',
+  'src/connection-fetch-ledger.mjs': "export function owner(ctx) { return ctx.connection.fetch.register({ path: '/api/ledger-owned', methods: ['POST'], requestBody: 'buffered', fetch: h }); }\n",
   'src/index.ts': '',
   'src/route.ts': [
     "import { ConnectionFetchLedger } from './connection-fetch-ledger.mjs';",
@@ -68,7 +68,7 @@ async function fixtureRepo({ plugin = GOOD_PLUGIN, contract = {}, files = {} } =
     },
     privateSlots: [],
     routeOwnership: {
-      ownerModule: 'dsh-plugins/fixture/src/connection-fetch-ledger.mjs',
+      ownerModules: ['dsh-plugins/fixture/src/connection-fetch-ledger.mjs'],
       debt: [],
     },
     tools: { dsl: 'defineTool' },
@@ -135,7 +135,7 @@ test('a plugin that follows the rc.5 surface produces no error', async t => {
   assert.deepEqual(result.errors, []);
   const stats = result.stats;
   assert.equal(stats.plugins, 1);
-  assert.equal(stats.owned, 1, 'the ledger-owned route is counted as owned');
+  assert.equal(stats.owned, 2, 'the owner ledger and its row route are counted as owned');
   assert.equal(stats.tools, 1);
   assert.deepEqual([...stats.privateSlots].sort().concat([...stats.declaredChildren].sort()), ['fixture.page']);
 });
@@ -143,13 +143,11 @@ test('a plugin that follows the rc.5 surface produces no error', async t => {
 test('the current repository passes the gate with only recorded warnings', async () => {
   const result = await evaluate({ root: REPO_ROOT });
   assert.deepEqual(result.errors.map(row => `${row.code} ${row.where}`), []);
-  assert.ok(result.stats.owned >= 1, 'the ledger must own at least one route');
+  assert.ok(result.stats.owned >= 5, 'the ledgers must own every production route');
+  assert.deepEqual(result.contract.routeOwnership.debt, [], 'the recorded route debt is cleared');
   assert.ok(result.stats.slots.size >= 10, 'the repository registers a broad slot surface');
-  // Debt entries must be either recorded as debt or reported stale, never silent.
-  const debtCodes = new Set(result.warnings.filter(row => row.code.startsWith('ROUTE_DEBT')).map(row => row.where));
-  for (const entry of result.contract.routeOwnership.debt) {
-    assert.ok(debtCodes.has(entry.path), `${entry.path} must be reported as debt`);
-  }
+  // No route may still be reported as direct debt.
+  assert.deepEqual(result.warnings.filter(row => row.code.startsWith('ROUTE_DEBT')).map(row => row.where), []);
   assert.match(render(result), /result: 0 error\(s\)/);
 });
 
@@ -169,6 +167,7 @@ test('every fail-closed rule fires on a fixture that drifts', async t => {
         "ctx.slots.register({ name: 'main' }, Z);",
         'ctx.tools.register({ name: \'loose\' });',
       ].join('\n'),
+      'src/connection-fetch-ledger.mjs': 'export const owner = true;\n',
     },
   });
   t.after(() => rm(root, { recursive: true, force: true }));
@@ -186,7 +185,7 @@ test('direct registrations beyond the recorded debt are an error, and the ledger
   const root = await fixtureRepo({
     contract: {
       routeOwnership: {
-        ownerModule: 'dsh-plugins/fixture/src/connection-fetch-ledger.mjs',
+        ownerModules: ['dsh-plugins/fixture/src/connection-fetch-ledger.mjs'],
         debt: [{ path: 'dsh-plugins/fixture/src/legacy.ts', routes: 1, reason: 'fixture debt' }],
       },
     },
@@ -201,7 +200,7 @@ test('direct registrations beyond the recorded debt are an error, and the ledger
   t.after(() => rm(root, { recursive: true, force: true }));
   const result = await evaluate({ root });
   assert.deepEqual(codes(result), ['ROUTE_DEBT_EXCEEDED']);
-  const ledgerGone = await fixtureRepo({ plugin: { ...GOOD_PLUGIN, 'src/route.ts': '' } });
+  const ledgerGone = await fixtureRepo({ plugin: { ...GOOD_PLUGIN, 'src/connection-fetch-ledger.mjs': 'export const owner = true;\n' } });
   t.after(() => rm(ledgerGone, { recursive: true, force: true }));
   assert.deepEqual(codes(await evaluate({ root: ledgerGone })), ['OWNER_MODULE_MISSING']);
 });
@@ -209,13 +208,58 @@ test('direct registrations beyond the recorded debt are an error, and the ledger
 test('a missing record is not silently tolerated', async t => {
   const root = await fixtureRepo({
     plugin: { ...GOOD_PLUGIN, 'src/legacy.ts': "ctx.connection.fetch.register({ path: '/api/x', methods: ['POST'], requestBody: 'buffered', fetch: h });" },
-    contract: { routeOwnership: { ownerModule: 'dsh-plugins/fixture/src/connection-fetch-ledger.mjs', debt: [{ path: 'dsh-plugins/fixture/src/legacy.ts', routes: 1, reason: 'fixture debt' }] } },
+    contract: { routeOwnership: { ownerModules: ['dsh-plugins/fixture/src/connection-fetch-ledger.mjs'], debt: [{ path: 'dsh-plugins/fixture/src/legacy.ts', routes: 1, reason: 'fixture debt' }] } },
   });
   t.after(() => rm(root, { recursive: true, force: true }));
   // Removing the only direct registration must leave the debt record visibly stale.
   const stale = await evaluate({ root });
   assert.deepEqual(stale.errors, []);
   assert.ok(stale.warnings.some(row => row.code === 'ROUTE_DEBT'));
+});
+
+test('each independently published plugin owns its own ledger module', async t => {
+  const root = await fixtureRepo({
+    contract: {
+      routeOwnership: {
+        ownerModules: [
+          'dsh-plugins/fixture/src/connection-fetch-ledger.mjs',
+          'dsh-plugins/fixture-two/src/connection-fetch-ledger.mjs',
+        ],
+        debt: [],
+      },
+    },
+    files: {
+      'dsh-plugins/fixture-two/package.json': `${JSON.stringify({
+        name: '@fixture/plugin-two', private: true, type: 'module',
+        exports: { '.': './lib/index.js' },
+        peerDependencies: { '@deepseek-ai/dsh-tools': '0.2.1-rc.5' },
+      }, null, 2)}\n`,
+      'dsh-plugins/fixture-two/src/connection-fetch-ledger.mjs':
+        "export const owner = ctx => ctx.connection.fetch.register({ path: '/api/two', methods: ['POST'], requestBody: 'buffered', fetch: h });\n",
+      'dsh-plugins/fixture-two/src/route.ts': [
+        "import { ConnectionFetchLedger } from './connection-fetch-ledger.mjs';",
+        "void new ConnectionFetchLedger(ctx).own('two', { path: '/api/two', methods: ['POST'], requestBody: 'buffered', fetch: h });",
+      ].join('\n'),
+    },
+  });
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const result = await evaluate({ root });
+  assert.deepEqual(result.errors, []);
+  assert.equal(result.stats.owned, 4, 'both ledgers and their row routes are counted as owned');
+});
+
+test('the owner-module list must be non-empty and unique', async t => {
+  const duplicate = await fixtureRepo({
+    contract: { routeOwnership: { ownerModules: [
+      'dsh-plugins/fixture/src/connection-fetch-ledger.mjs',
+      'dsh-plugins/fixture/src/connection-fetch-ledger.mjs',
+    ], debt: [] } },
+  });
+  t.after(() => rm(duplicate, { recursive: true, force: true }));
+  await assert.rejects(evaluate({ root: duplicate }), /unique/);
+  const empty = await fixtureRepo({ contract: { routeOwnership: { ownerModules: [], debt: [] } } });
+  t.after(() => rm(empty, { recursive: true, force: true }));
+  await assert.rejects(evaluate({ root: empty }), /non-empty/);
 });
 
 test('a malformed contract stops the gate instead of passing it', async t => {

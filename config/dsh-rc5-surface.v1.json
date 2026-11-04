@@ -25,19 +25,11 @@
     }
   ],
   "routeOwnership": {
-    "ownerModule": "dsh-plugins/analytics-workbench/src/connection-fetch-ledger.mjs",
-    "debt": [
-      {
-        "path": "dsh-plugins/analytics-workbench/src/first-purchase-save-api.ts",
-        "routes": 1,
-        "reason": "P2d (#216) owns this file; the route joins the shared ledger in the P3-1 follow-up"
-      },
-      {
-        "path": "dsh-plugins/crm-knowledge/src/host.ts",
-        "routes": 2,
-        "reason": "P2d (#216) owns this file; both streaming routes join the shared ledger in the P3-1 follow-up"
-      }
-    ]
+    "ownerModules": [
+      "dsh-plugins/analytics-workbench/src/connection-fetch-ledger.mjs",
+      "dsh-plugins/crm-knowledge/src/connection-fetch-ledger.mjs"
+    ],
+    "debt": []
   },
   "tools": {
     "dsl": "defineTool"

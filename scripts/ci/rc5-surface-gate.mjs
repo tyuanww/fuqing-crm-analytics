@@ -297,7 +297,13 @@ export function validateContract(contract, path) {
     if (typeof slot.key !== 'string' || typeof slot.reason !== 'string') throw fail(`${path}: privateSlots entries need key and reason`);
   }
   const ownership = contract.routeOwnership;
-  if (!ownership || typeof ownership.ownerModule !== 'string') throw fail(`${path}: routeOwnership.ownerModule is required`);
+  if (!ownership || !Array.isArray(ownership.ownerModules) || ownership.ownerModules.length === 0) {
+    throw fail(`${path}: routeOwnership.ownerModules must be a non-empty array`);
+  }
+  for (const module of ownership.ownerModules) {
+    if (typeof module !== 'string' || module.length === 0) throw fail(`${path}: routeOwnership.ownerModules entries must be repository paths`);
+  }
+  if (new Set(ownership.ownerModules).size !== ownership.ownerModules.length) throw fail(`${path}: routeOwnership.ownerModules must be unique`);
   if (!Array.isArray(ownership.debt)) throw fail(`${path}: routeOwnership.debt must be an array`);
   for (const entry of ownership.debt) {
     if (typeof entry.path !== 'string' || !Number.isInteger(entry.routes) || entry.routes < 1) {
@@ -403,7 +409,7 @@ function resolvePath(raw, constants) {
 }
 
 function checkFetchSites(text, where, contract, findings, stats, constants) {
-  const ownerModule = contract.routeOwnership.ownerModule;
+  const ownerModules = new Set(contract.routeOwnership.ownerModules);
   const debt = new Map(contract.routeOwnership.debt.map(entry => [entry.path, entry]));
   const ledgerImported = text.includes(LEDGER_IMPORT);
   const sites = [];
@@ -436,9 +442,10 @@ function checkFetchSites(text, where, contract, findings, stats, constants) {
   }
   if (sites.length === 0) return;
   stats.fetchSites.set(where, (stats.fetchSites.get(where) ?? 0) + sites.length);
-  if (where === ownerModule) {
-    // The ledger validates path/method/body at runtime and is covered by its
-    // unit test; it is the one module allowed to call register directly.
+  if (ownerModules.has(where)) {
+    // Each ledger validates path/method/body at runtime and is covered by its
+    // unit test; an owner module is the only place allowed to call register
+    // directly. Independently published plugins each ship their own ledger.
     stats.owned += sites.length;
     return;
   }
@@ -482,7 +489,7 @@ function checkFetchSites(text, where, contract, findings, stats, constants) {
     }
     if (debt.has(where)) continue;
     findings.push(finding('error', 'UNOWNED_FETCH_ROUTE', `${where}:${site.line}`,
-      `connection.fetch.register must run through ${ownerModule} so the rc.5 disposer is owned`));
+      `connection.fetch.register must run through one of routeOwnership.ownerModules so the rc.5 disposer is owned (${[...ownerModules].join(', ')})`));
   }
 }
 
@@ -634,15 +641,19 @@ export async function evaluate({ root = process.cwd(), contractPath = DEFAULT_CO
         `no connection.fetch route remains in ${entry.path}; drop it from routeOwnership.debt`));
     } else if (sites > entry.routes) {
       findings.push(finding('error', 'ROUTE_DEBT_EXCEEDED', entry.path,
-        `${sites} routes exceed the recorded debt of ${entry.routes}; route them through ${contract.routeOwnership.ownerModule}`));
+        `${sites} routes exceed the recorded debt of ${entry.routes}; route them through one of ${contract.routeOwnership.ownerModules.join(', ')}`));
     } else {
       findings.push(finding('warn', 'ROUTE_DEBT', entry.path,
         `${sites} route(s) still registered directly: ${entry.reason}`));
     }
   }
-  if (stats.owned === 0) {
-    findings.push(finding('error', 'OWNER_MODULE_MISSING', contract.routeOwnership.ownerModule,
-      'the ledger that owns Connection Fetch disposers no longer registers any route'));
+  // Every declared owner module must still register at least one route; a stale
+  // entry means the ledger moved or stopped owning, not that debt was repaid.
+  for (const ownerModule of contract.routeOwnership.ownerModules) {
+    if ((stats.fetchSites.get(ownerModule) ?? 0) === 0) {
+      findings.push(finding('error', 'OWNER_MODULE_MISSING', ownerModule,
+        'the ledger that owns Connection Fetch disposers no longer registers any route'));
+    }
   }
   const toolchainFile = join(absoluteRoot, 'dsh-plugins/plugin-kit/toolchain.json');
   if (await isFile(toolchainFile)) {
