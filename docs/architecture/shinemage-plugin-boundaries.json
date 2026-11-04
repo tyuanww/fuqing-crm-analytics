@@ -216,6 +216,8 @@
         "./prepare": "./prepare.mjs",
         "./pin": "./toolchain.json",
         "./packaged-dependencies": "./packaged-dependencies.mjs",
+        "./provenance": "./provenance.mjs",
+        "./client-banner": "./client-banner.mjs",
         "./package.json": "./package.json"
       },
       "files": [
@@ -228,6 +230,8 @@
         "sdk-closure.mjs",
         "check.mjs",
         "packaged-dependencies.mjs",
+        "provenance.mjs",
+        "client-banner.mjs",
         "README.md",
         "build-tools/package.json",
         "build-tools/pnpm-lock.yaml",
@@ -240,7 +244,7 @@
       "bundled_inputs": [],
       "dsh": {},
       "commands": {},
-      "manifest_sha256": "cfde59b91196e607fb4a009a115b0304429ba2bd51a69fa0e9e2784da79650ec"
+      "manifest_sha256": "5d62efc5c6313738ce28e4155ace511fe1c7ca3c27f65378ce10b8a8601b183b"
     },
     {
       "path": "dsh-plugins/query-agent",
@@ -549,7 +553,7 @@
       "manifest_sha256": "01c8dc9bbb358ba6402048f9af6306b35e2e8814e9298965dc5d4ddf23f00e85"
     }
   ],
-  "source_files_scanned": 666,
+  "source_files_scanned": 668,
   "cross_package_edges": [
     {
       "consumer": "analytics-workbench",
@@ -645,6 +649,26 @@
       "consumer": "analytics-workbench",
       "provider": "plugin-kit",
       "phase": "build",
+      "source": "dsh-plugins/analytics-workbench/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/client-banner",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/analytics-workbench/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/provenance",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "analytics-workbench",
+      "provider": "plugin-kit",
+      "phase": "build",
       "source": "dsh-plugins/analytics-workbench/toolchain.mjs",
       "target": "dsh-plugins/plugin-kit",
       "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
@@ -717,7 +741,37 @@
       "phase": "build",
       "source": "dsh-plugins/crm-knowledge/build.mjs",
       "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/client-banner",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/crm-knowledge/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/provenance",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "crm-knowledge",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/crm-knowledge/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
       "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "knowledge",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/knowledge/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/provenance",
       "access": "public-export",
       "type_only": false
     },
@@ -737,6 +791,26 @@
       "phase": "build",
       "source": "dsh-plugins/shine-board/build.mjs",
       "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/client-banner",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-board",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-board/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/provenance",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-board",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-board/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
       "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
       "access": "public-export",
       "type_only": false
@@ -747,7 +821,47 @@
       "phase": "build",
       "source": "dsh-plugins/shine-brand/build.mjs",
       "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/client-banner",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-brand",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-brand/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/provenance",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-brand",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-brand/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
       "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-crowd-action",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-crowd-action/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/client-banner",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-crowd-action",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-crowd-action/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/provenance",
       "access": "public-export",
       "type_only": false
     },
@@ -787,7 +901,47 @@
       "phase": "build",
       "source": "dsh-plugins/shine-funnel/build.mjs",
       "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/client-banner",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-funnel",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-funnel/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/provenance",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-funnel",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-funnel/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
       "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-query",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-query/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/client-banner",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-query",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-query/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/provenance",
       "access": "public-export",
       "type_only": false
     },
@@ -827,6 +981,26 @@
       "phase": "build",
       "source": "dsh-plugins/shine-waterfall/build.mjs",
       "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/client-banner",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-waterfall",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-waterfall/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
+      "specifier": "@shine-mage/dsh-plugin-kit/provenance",
+      "access": "public-export",
+      "type_only": false
+    },
+    {
+      "consumer": "shine-waterfall",
+      "provider": "plugin-kit",
+      "phase": "build",
+      "source": "dsh-plugins/shine-waterfall/build.mjs",
+      "target": "dsh-plugins/plugin-kit",
       "specifier": "@shine-mage/dsh-plugin-kit/toolchain",
       "access": "public-export",
       "type_only": false
@@ -853,12 +1027,6 @@
     ]
   ],
   "repository_edges": [
-    {
-      "consumer": "analytics-workbench",
-      "phase": "build",
-      "source": "dsh-plugins/analytics-workbench/build.mjs",
-      "target": "scripts/release/generated-provenance.mjs"
-    },
     {
       "consumer": "analytics-workbench",
       "phase": "test",
@@ -921,12 +1089,6 @@
     },
     {
       "consumer": "crm-knowledge",
-      "phase": "build",
-      "source": "dsh-plugins/crm-knowledge/build.mjs",
-      "target": "scripts/release/generated-provenance.mjs"
-    },
-    {
-      "consumer": "crm-knowledge",
       "phase": "test",
       "source": "dsh-plugins/crm-knowledge/test/dashboard.fixture.mjs",
       "target": "scripts/crm-calibration/test-support/dashboard.fixture.mjs"
@@ -963,51 +1125,9 @@
     },
     {
       "consumer": "knowledge",
-      "phase": "build",
-      "source": "dsh-plugins/knowledge/build.mjs",
-      "target": "scripts/release/generated-provenance.mjs"
-    },
-    {
-      "consumer": "knowledge",
       "phase": "test",
       "source": "dsh-plugins/knowledge/test/graph.fixture.mjs",
       "target": "scripts/crm-calibration/test-support/graph.fixture.mjs"
-    },
-    {
-      "consumer": "shine-board",
-      "phase": "build",
-      "source": "dsh-plugins/shine-board/build.mjs",
-      "target": "scripts/release/generated-provenance.mjs"
-    },
-    {
-      "consumer": "shine-brand",
-      "phase": "build",
-      "source": "dsh-plugins/shine-brand/build.mjs",
-      "target": "scripts/release/generated-provenance.mjs"
-    },
-    {
-      "consumer": "shine-crowd-action",
-      "phase": "build",
-      "source": "dsh-plugins/shine-crowd-action/build.mjs",
-      "target": "scripts/release/generated-provenance.mjs"
-    },
-    {
-      "consumer": "shine-funnel",
-      "phase": "build",
-      "source": "dsh-plugins/shine-funnel/build.mjs",
-      "target": "scripts/release/generated-provenance.mjs"
-    },
-    {
-      "consumer": "shine-query",
-      "phase": "build",
-      "source": "dsh-plugins/shine-query/build.mjs",
-      "target": "scripts/release/generated-provenance.mjs"
-    },
-    {
-      "consumer": "shine-waterfall",
-      "phase": "build",
-      "source": "dsh-plugins/shine-waterfall/build.mjs",
-      "target": "scripts/release/generated-provenance.mjs"
     }
   ],
   "literal_endpoints": [
@@ -3573,6 +3693,11 @@
       "consumer": "plugin-kit",
       "phase": "build",
       "specifier": "node:url"
+    },
+    {
+      "consumer": "plugin-kit",
+      "phase": "build",
+      "specifier": "node:util"
     },
     {
       "consumer": "query-agent",

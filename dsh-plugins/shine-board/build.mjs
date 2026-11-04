@@ -1,7 +1,8 @@
 import { dirname, isAbsolute, resolve, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { readFile } from 'node:fs/promises';
-import { writeBuildProvenance } from '../../scripts/release/generated-provenance.mjs';
+import { writeBuildProvenance } from '@shine-mage/dsh-plugin-kit/provenance';
+import { clientModuleBanner } from '@shine-mage/dsh-plugin-kit/client-banner';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const upstreamInput = process.argv[2] ?? process.env.B0_BUILD_UPSTREAM;
@@ -31,8 +32,7 @@ await build({
   external: ['react', 'react/jsx-runtime', 'react-dom', 'react-dom/client', '@deepseek-ai/cordis'],
   minify: true,
   define: { 'process.env.NODE_ENV': JSON.stringify('production') },
-  banner: { js: `window.__ModuleLoader__.load({ id: ${JSON.stringify(manifest.name)}, factory: (require) => {\nvar module = { exports: {} }; var exports = module.exports;` },
-  footer: { js: 'return module.exports;\n} });' },
+  ...clientModuleBanner(manifest.name),
 });
 await writeBuildProvenance({ root });
 console.log(`shine-board built. Host entry: ${pathToFileURL(join(root, 'lib/index.js')).href}`);
