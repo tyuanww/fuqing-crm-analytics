@@ -101,7 +101,7 @@ test('kit provenance writes a builder receipt from a clean plugin checkout', asy
   t.after(() => rm(root, { recursive: true, force: true }));
   await mkdir(join(root, 'lib'));
   await writeFile(join(root, 'package.json'), JSON.stringify({ name: '@shine-mage/synthetic-provenance',
-    version: '0.0.0', type: 'module', files: ['lib/'] }));
+    version: '0.0.0', type: 'module', files: ['lib/'], packageManager: 'pnpm@11.28.2' }));
   await writeFile(join(root, 'lib/index.js'), 'export const value = 1;\n');
   const git = args => exec('git', ['-C', root, ...args], { encoding: 'utf8' });
   await git(['init', '--quiet']);

@@ -143,7 +143,9 @@ export async function writeBuildProvenance({ root, outputPath = join(root, '.bui
   const generatedTree = await canonicalTreeDigest(pluginRoot, {
     include: generatedPaths(manifest.files), allowSymlinks: false, normalizeFileModes: true,
   });
-  const pnpm = (await execFile('pnpm', ['--version'], { cwd: pluginRoot, encoding: 'utf8', timeout: 15000 })).stdout.trim();
+  const declaredManager = /^pnpm@(\d+\.\d+\.\d+)$/.exec(manifest.packageManager ?? '');
+  const pnpm = toolchain?.pnpm ?? (declaredManager ? declaredManager[1]
+    : (await execFile('pnpm', ['--version'], { cwd: pluginRoot, encoding: 'utf8', timeout: 15000 })).stdout.trim());
   const clean = process.env.SHINEMAGE_CLEAN_BUILDER === '1';
   const receipt = {
     schema_version: 'dsh-plugin-build/v1', status: clean ? 'PASS' : 'NOT_VERIFIED',
