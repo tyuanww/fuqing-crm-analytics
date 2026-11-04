@@ -408,6 +408,21 @@ node --test scripts/ci/composition-pack-inputs.test.mjs
 | T09 公网切换 | 把验证过的版本切到公网 | 杭州与 Cloudflare 现役 | 切换、健康检查、回退路径 | 单独授权；本计划不覆盖 |
 | E1 看板接线 | 第二入口上传后接入驾驶舱 | #206 后端与 #207 前端已合 | 上传、只读 SQL、生成看板、保存重开真实联调 | 需真实附件与人工验收 |
 
+### C14 B0 native-save 503 flake（跟进）
+
+**目标** 关闭 `backend/tests/test_analytics_first_purchase_native.py::test_native_success_save_cockpit_roundtrip_and_negatives` 的偶发 503，不用测试侧重试掩盖。
+
+**证据** run `41871881222` job `126720993582` attempt 1：`1 failed, 1048 passed`，失败点是 `incomplete.status_code == 422` 实际得到 503；同一测试的 captured log 有 `B0 STATE_UNAVAILABLE; new dispatch paused until reconciliation`。该 run 的 attempt 2 被取消；同分支后续 head `107d2324` 的 run `41874816482` b0 通过（15m40s）。本机整文件 30 次、批次前缀 602 项均通过，未复现。
+
+**诊断** 503 来自 RunStore 读连接：`_connection(readonly=True)` 每次新开连接且 `timeout=0.1`；WAL 下普通写锁不会阻塞读（`test_analytics_jobs.py` 已断言 “WAL reader still works”），所以不是 writer 持锁。失败与同进程 dispatcher tick 的 STATE_UNAVAILABLE 同时出现，最可能是连接频繁开/关时撞上 WAL recovery/checkpoint 或临时 I/O 的 100 ms 窗口；`tick()` 又把任何 `sqlite3.DatabaseError` 统一记成 STATE_UNAVAILABLE 并暂停准入。已排除跨测试共享状态：每个 app 用独立 `tmp_path/state`，10 文件 212 项批次内 fd 12–15、线程 10–13 且无增长，也没有全局 sqlite monkeypatch。
+
+**剩余风险** 同一 100 ms 窗口仍可命中任意读路径，按合同返回可重试 503，概率低但未关闭；CI 若再次出现应保留 job 日志并记录具体 sqlite 错误类型。
+
+**未做/下一步** 生产侧候选是给只读连接更长的 busy timeout，或复用读连接 / 显式 WAL recovery 策略；两者都会改动 0.1s fail-closed 准入语义和现有 contention 测试（`test_analytics_native_runtime.py`、`test_analytics_jobs.py`），需要单独评审，不在本 PR 做。测试侧加重试或放宽断言会掩盖合同问题，明确不做。
+
+**授权** 无产品决策；改生产锁语义前单独评审。
+
+
 ## 5 只有人才能决定的事项
 
 ### 5.1 rc.5 产品决策
