@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { dirname, isAbsolute, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { writeBuildProvenance } from '../../scripts/release/generated-provenance.mjs';
+import { writeBuildProvenance } from '@shine-mage/dsh-plugin-kit/provenance';
 const root = dirname(fileURLToPath(import.meta.url));
 const upstreamInput = process.argv[2] ?? process.env.B0_BUILD_UPSTREAM;
 if (!upstreamInput || !isAbsolute(upstreamInput)) {

@@ -279,6 +279,7 @@ print('B0 exact Python closure verified')
     'scripts/release/sdk-closure.test.mjs',
     'scripts/dsh-b0/clean-build.test.mjs',
     'scripts/dsh-b0/plugin-kit.test.mjs', 'scripts/dsh-b0/plugin-kit-prepare.test.mjs',
+    'scripts/dsh-b0/plugin-kit-provenance.test.mjs',
     'scripts/dsh-b0/native-state-smoke.test.mjs', 'scripts/dsh-b0/native-query-smoke.test.mjs',
     'scripts/dsh-b0/native-query-fault-smoke.test.mjs', 'scripts/dsh-b0/native-query-assets-smoke.test.mjs',
     'scripts/dsh-b0/asset-routes.test.mjs']);
