@@ -92,6 +92,26 @@ def pytest_args(targets: list[str], junit: Path) -> list[str]:
             f'--junitxml={junit}', *deselects]
 
 
+def shard_targets(tests: list[str], index: int, count: int) -> list[str]:
+    """Deterministic LPT split on file size; every input file lands in exactly one shard."""
+    if count == 1:
+        return tests
+    weight = {}
+    for test in tests:
+        path = ROOT / test.split('::', 1)[0]
+        try:
+            weight[test] = path.stat().st_size
+        except OSError:
+            weight[test] = 0
+    loads = [0] * count
+    shards: list[list[str]] = [[] for _ in range(count)]
+    for test in sorted(tests, key=lambda item: (-weight[item], item)):
+        target = min(range(count), key=lambda shard: (loads[shard], shard))
+        shards[target].append(test)
+        loads[target] += weight[test]
+    return shards[index - 1]
+
+
 def isolated_env(scratch: Path) -> dict[str, str]:
     # Never forward user passwords, API tokens, dotenv configuration, pytest
     # options or parent-hook Git repository variables into the test process.
@@ -114,15 +134,25 @@ def isolated_env(scratch: Path) -> dict[str, str]:
 
 
 def run(chunk_size: int, rss_limit_gb: float, targets: list[str],
-        report_dir: Path, timeout_seconds: float) -> int:
+        report_dir: Path, timeout_seconds: float, shard: tuple[int, int] = (1, 1)) -> int:
     tests = targets or [str(p.relative_to(ROOT)) for p in sorted([*TEST_ROOT.glob('test_*.py'),
         ROOT / 'backend/contracts/tests/test_competition_c0.py',
         ROOT / 'backend/services/analytics/competition_diagnosis/tests/test_competition_diagnosis.py'])]
     if not tests:
         raise ValueError('no tests selected')
+    shard_index, shard_count = shard
+    tests = shard_targets(tests, shard_index, shard_count)
+    if not tests:
+        report_dir.mkdir(parents=True, exist_ok=False)
+        (report_dir / 'summary.json').write_text(json.dumps({
+            'profile': 'synthetic-not-slow', 'shard': {'index': shard_index, 'count': shard_count},
+            'targets': [], 'groups': [], 'returncode': 0}, indent=2) + '\n')
+        print(f'[bounded-pytest] shard {shard_index}/{shard_count} selects no files', flush=True)
+        return 0
     report_dir.mkdir(parents=True, exist_ok=False)
     report = {'profile': 'synthetic-not-slow', 'started_at': datetime.now(timezone.utc).isoformat(),
-              'python': sys.version, 'source': source_identity(), 'targets': tests, 'groups': [], 'returncode': None}
+              'python': sys.version, 'source': source_identity(), 'shard': {'index': shard_index, 'count': shard_count},
+              'targets': tests, 'groups': [], 'returncode': None}
     result_path = report_dir / 'summary.json'
     started = time.monotonic()
     try:
@@ -182,6 +212,13 @@ def main() -> int:
     parser.add_argument('--timeout-seconds', type=float, default=900)
     parser.add_argument('--report-dir', type=Path)
     args = parser.parse_args()
+    try:
+        shard_count = int(os.environ.get('FQ_TEST_SHARD_COUNT', '1'))
+        shard_index = int(os.environ.get('FQ_TEST_SHARD_INDEX', '1'))
+    except ValueError:
+        parser.error('FQ_TEST_SHARD_INDEX and FQ_TEST_SHARD_COUNT must be integers')
+    if shard_count < 1 or not 1 <= shard_index <= shard_count:
+        parser.error('FQ_TEST_SHARD_INDEX must be within 1..FQ_TEST_SHARD_COUNT')
     if args.chunk_size < 1 or args.rss_limit_gb <= 0 or args.timeout_seconds <= 0:
         parser.error('chunk-size, rss-limit-gb and timeout-seconds must be positive')
     for target in args.targets:
@@ -189,7 +226,8 @@ def main() -> int:
         if not path.is_relative_to(TEST_ROOT) or not path.is_file() or not path.name.startswith('test_'):
             parser.error(f'not an existing backend test file: {target}')
     directory = args.report_dir or ROOT / '.context/checks' / datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
-    return run(args.chunk_size, args.rss_limit_gb, args.targets, directory.resolve(), args.timeout_seconds)
+    return run(args.chunk_size, args.rss_limit_gb, args.targets, directory.resolve(), args.timeout_seconds,
+               (shard_index, shard_count))
 
 
 if __name__ == '__main__':

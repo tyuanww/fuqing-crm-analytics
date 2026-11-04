@@ -99,6 +99,13 @@ jobs:
     # 与 nightly 的 45 分钟有界运行区分：PR 只跑有界 Python 计划，30 分钟足够；
     # 挂起即失败，避免 runner 被无限占用。
     timeout-minutes: 30
+    # 4 shards on separate runners: same bounded runner, same selection, wall
+    # time ~= the heaviest shard instead of the whole 332-file suite. fail-fast
+    # stays off so one red shard cannot cancel the other three pieces of evidence.
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     env:
       FQ_CRM_ADMINS: admin
     steps:
@@ -119,6 +126,8 @@ jobs:
       - name: Run the same Python plan as local pre-push
         env:
           CHECK_PLAN: ${{ needs.changes.outputs.plan }}
+          FQ_TEST_SHARD_INDEX: ${{ matrix.shard }}
+          FQ_TEST_SHARD_COUNT: 4
         run: |
           python3 -c "import json, os; print('\n'.join(json.loads(os.environ['CHECK_PLAN'])['files']))" > changed-files.txt
           python3 scripts/ci/run_checks.py --files-from changed-files.txt --only ci-python
@@ -126,7 +135,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: backend-check-evidence
+          name: backend-check-evidence-shard-${{ matrix.shard }}
           path: .context/checks/
           if-no-files-found: ignore
 
