@@ -69,10 +69,24 @@ def test_run_rfm_period_dashboard_full_fallback_on_miss() -> None:
     assert result is None
 
 
-def test_run_rfm_period_dashboard_full_hit() -> None:
-    today = date.today()
-    request_end = today - timedelta(days=1)
-    start = date(today.year, today.month, 1)
+def test_run_rfm_period_dashboard_full_hit(monkeypatch) -> None:
+    # Pin "today" so the fixture cannot depend on the wall clock. On the 2nd of
+    # a month PeriodBuilder.yesterday and PeriodBuilder.mtd describe the same
+    # window, so _resolve_period_type returns "yesterday" first and an MTD-only
+    # fixture misses; nightly run 41404844184 failed exactly that way on
+    # 2026-11-02 and the same flake would hit any backend PR running that day.
+    # A real table carries both aliases, and a miss falls back to the live path,
+    # so this is test determinism, not a product behavior change.
+    fixed_today = date(2026, 7, 9)
+
+    class _FixedDate(date):
+        @classmethod
+        def today(cls) -> date:
+            return fixed_today
+
+    monkeypatch.setattr(period, "date", _FixedDate)
+    request_end = fixed_today - timedelta(days=1)
+    start = date(fixed_today.year, fixed_today.month, 1)
     conn = duckdb.connect(":memory:")
     try:
         conn.execute("""

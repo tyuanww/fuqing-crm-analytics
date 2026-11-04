@@ -42,7 +42,12 @@ concurrency:
 jobs:
   preflight:
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    # A green run measures ~7.5 minutes; the two cancelled runs in the window
+    # burned the full 60-minute job budget (run 40115158182 / 39117652308,
+    # 59m48s and 59m58s inside "Build the exact pinned runtime"). 30 minutes
+    # stays >4x the measured wall time while halving the worst-case waste;
+    # the long steps also carry their own timeout below.
+    timeout-minutes: 30
     env:
       REVIEWED_SHA: ${{ inputs.reviewed_sha || github.event.pull_request.head.sha }}
       RELEASE_TAG: ${{ inputs.release_tag || format('dsh-preflight-{0}', github.event.pull_request.head.sha) }}
@@ -137,6 +142,7 @@ jobs:
           mv "$asset_tmp" "$asset_rel"
           node --input-type=module -e "import { brandAssets } from './scripts/dsh-b0/brand-assets.mjs'; await brandAssets(process.cwd());"
       - name: Receive fixed Workbench author core evidence
+        timeout-minutes: 5
         env:
           GH_TOKEN: ${{ secrets.SHINEMAGE_PLUGIN_READ_TOKEN }}
         run: |
@@ -144,6 +150,7 @@ jobs:
             --output "$RUNNER_TEMP/workbench-author-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" \
             --python "${{ steps.python.outputs.python-path }}" --github-env "$GITHUB_ENV"
       - name: Receive fixed domain owner tests and original library input
+        timeout-minutes: 5
         env:
           GH_TOKEN: ${{ secrets.SHINEMAGE_PLUGIN_READ_TOKEN }}
         run: |
@@ -151,6 +158,7 @@ jobs:
             --output "$RUNNER_TEMP/domain-author-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" \
             --python "${{ steps.python.outputs.python-path }}" --github-env "$GITHUB_ENV"
       - name: Receive fixed independent public compiler contracts
+        timeout-minutes: 5
         env:
           GH_TOKEN: ${{ secrets.SHINEMAGE_PLUGIN_READ_TOKEN }}
         run: |
@@ -158,6 +166,7 @@ jobs:
             --output "$RUNNER_TEMP/public-contracts-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" \
             --python "${{ steps.python.outputs.python-path }}" --github-env "$GITHUB_ENV"
       - name: Prepare sealed independent plugin packs for composition checks
+        timeout-minutes: 5
         env:
           GH_TOKEN: ${{ secrets.SHINEMAGE_PLUGIN_READ_TOKEN }}
         run: |
@@ -169,6 +178,10 @@ jobs:
             --python "${{ steps.python.outputs.python-path }}" \
             --github-env "$GITHUB_ENV"
       - name: Build the exact pinned runtime before tag creation
+        # Measured green wall time: 418s (run 41835511524). The two cancelled
+        # runs spent 59m48s/59m58s here, so cap the step well below the job
+        # timeout to fail fast instead of holding a runner for the full budget.
+        timeout-minutes: 20
         env:
           B0_PYTHON: ${{ steps.python.outputs.python-path }}
           DSH_PYTHON: ${{ steps.python.outputs.python-path }}
