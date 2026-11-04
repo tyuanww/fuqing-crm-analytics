@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import { lstat, mkdir, readdir, realpath, symlink, writeFile } from 'node:fs/promises';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { boundedContractFile, readPublicContractInputs } from '../ci/public-contract-inputs.mjs';
+import { boundedContractFile, projectContractMaterial, readPublicContractInputs } from '../ci/public-contract-inputs.mjs';
 
 const repository = fileURLToPath(new URL('../..', import.meta.url));
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -74,8 +74,15 @@ export async function runFixedContractChecks({ inputsPath, output, python, build
   await mkdir(physical, { mode: 0o700 });
   const stage = join(physical, 'stage'), logs = join(physical, 'logs');
   await mkdir(stage, { mode: 0o700 }); await mkdir(logs, { mode: 0o700 });
-  for (const [path, bytes] of [...canonical, ...evidence.materials]) {
+  for (const [path, bytes] of canonical) {
     const destination = join(stage, path);
+    await mkdir(dirname(destination), { recursive: true, mode: 0o700 });
+    await writeFile(destination, bytes, { flag: 'wx', mode: 0o600 });
+  }
+  // Generated materials are staged at the owned contracts package path; the
+  // lock keeps the author projection that the sealed archive binds.
+  for (const [path, bytes] of evidence.materials) {
+    const destination = join(stage, projectContractMaterial(path));
     await mkdir(dirname(destination), { recursive: true, mode: 0o700 });
     await writeFile(destination, bytes, { flag: 'wx', mode: 0o600 });
   }
@@ -116,7 +123,8 @@ export async function runFixedContractChecks({ inputsPath, output, python, build
   await run('public-slot-contract', ['--test', '--test-reporter=tap', '--test-concurrency=1', 'scripts/dsh-b0/cockpit-slot-contract.test.mjs'], 4);
   await run('public-theme-rejection-and-drift', ['--test', '--test-reporter=tap', '--test-concurrency=1',
     '--test-name-pattern=theme contract rejects|consumer drift fails', 'scripts/dsh-b0/content-theme-contract.test.mjs'], 2);
-  const unchanged = new Map([...canonical, ...evidence.materials].map(([path, bytes]) => [path, hash(bytes)]));
+  const unchanged = new Map([...canonical,
+    ...[...evidence.materials].map(([path, bytes]) => [projectContractMaterial(path), bytes])].map(([path, bytes]) => [path, hash(bytes)]));
   async function inspect(directory, prefix = '') {
     for (const entry of await readdir(directory, { withFileTypes: true })) {
       const path = prefix ? `${prefix}/${entry.name}` : entry.name;

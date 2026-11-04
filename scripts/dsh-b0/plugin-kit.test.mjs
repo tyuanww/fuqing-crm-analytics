@@ -9,7 +9,7 @@ import test from 'node:test';
 import { readPackagedLibrary } from '../../dsh-plugins/plugin-kit/packaged-dependencies.mjs';
 import { inspectSdkPackage } from '../../dsh-plugins/plugin-kit/sdk-inputs.mjs';
 import { copyPluginKitSources } from './clean-build.mjs';
-import { linkWorkspaceKit, linkRepositoryKit } from './plugin-kit-link.mjs';
+import { linkWorkspaceContract, linkWorkspaceKit, linkRepositoryKit } from './plugin-kit-link.mjs';
 
 const exec = promisify(execFile);
 const repository = fileURLToPath(new URL('../..', import.meta.url));
@@ -311,6 +311,27 @@ test('workspace kit link is explicit, idempotent and never replaces a foreign in
   await assert.rejects(lstat(join(outside, '@shine-mage')), { code: 'ENOENT' });
 });
 
+
+test('workspace contract link is explicit, dev-only and idempotent', async t => {
+  const root = await owned(t), plugin = join(root, 'plugin'), contracts = join(root, 'contracts');
+  await mkdir(plugin); await mkdir(contracts);
+  const manifest = { name: '@shine-mage/dsh-contracts', version: '0.1.0', private: true, type: 'module', exports: {} };
+  await writeFile(join(contracts, 'package.json'), JSON.stringify(manifest));
+  const declaration = { devDependencies: { '@shine-mage/dsh-contracts': '0.1.0' } };
+  const save = obj => writeFile(join(plugin, 'package.json'), JSON.stringify(obj));
+  await save({}); assert.equal((await linkWorkspaceContract(plugin, contracts)).status, 'NOT_DECLARED');
+  await save({ ...declaration, devDependencies: { '@shine-mage/dsh-contracts': '0.2.0' } });
+  await assert.rejects(linkWorkspaceContract(plugin, contracts), /CONTRACT_LINK_VERSION/);
+  await save({ ...declaration, dependencies: declaration.devDependencies });
+  await assert.rejects(linkWorkspaceContract(plugin, contracts), /CONTRACT_LINK_DEV_ONLY/);
+  await save(declaration);
+  assert.equal((await linkWorkspaceContract(plugin, contracts)).status, 'LINKED');
+  const link = join(plugin, 'node_modules/@shine-mage/dsh-contracts'), before = await lstat(link);
+  assert.equal((await linkWorkspaceContract(plugin, contracts)).status, 'UNCHANGED');
+  assert.equal((await lstat(link)).mtimeMs, before.mtimeMs);
+  await rm(link); await mkdir(link); await writeFile(join(link, 'sentinel'), 'foreign install');
+  await assert.rejects(linkWorkspaceContract(plugin, contracts), /CONTRACT_LINK_FOREIGN/);
+});
 
 test('repository build preparation leaves external checkouts alone', async t => {
   const root = await owned(t), repository = join(root, 'repo');

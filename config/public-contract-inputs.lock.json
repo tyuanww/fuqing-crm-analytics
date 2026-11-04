@@ -35,7 +35,7 @@
         },
         {
           "source_path": "plugin/src/analysis-contract.generated.d.ts",
-          "main_path": "dsh-plugins/contracts/analytics-workbench/analysis-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/analysis-contract.generated.d.ts",
           "kind": "generated_type",
           "sha256": "7511c14bc92e15a59342413878341a76bf1557175adaf853fe8ab74c60df3172",
           "bytes": 33929,
@@ -43,7 +43,7 @@
         },
         {
           "source_path": "plugin/src/board-spec-contract.generated.d.ts",
-          "main_path": "dsh-plugins/contracts/analytics-workbench/board-spec-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/board-spec-contract.generated.d.ts",
           "kind": "generated_type",
           "sha256": "1b518cdcdfdd66a598fe95eff29c7ddeec2d4aebb29ece504c9a6fd710c245a0",
           "bytes": 24897,
@@ -51,7 +51,7 @@
         },
         {
           "source_path": "plugin/src/client/cockpit-slot-contract.generated.ts",
-          "main_path": "dsh-plugins/contracts/analytics-workbench/client/cockpit-slot-contract.generated.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/client/cockpit-slot-contract.generated.ts",
           "kind": "generated_constant",
           "sha256": "24eae62433d7e366cfb432cbdca2606811c26d4743d611c89dbabfd328c5c4f0",
           "bytes": 349,
@@ -67,7 +67,7 @@
         },
         {
           "source_path": "plugin/src/client/competition-shell/content-theme.generated.ts",
-          "main_path": "dsh-plugins/contracts/analytics-workbench/client/competition-shell/content-theme.generated.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/client/competition-shell/content-theme.generated.ts",
           "kind": "generated_constant",
           "sha256": "43c30a33663c5936f1113703fcc75657631093b1bb4780e698b030f90a69ef43",
           "bytes": 3903,
@@ -75,7 +75,7 @@
         },
         {
           "source_path": "plugin/src/cockpit-contract.generated.d.ts",
-          "main_path": "dsh-plugins/contracts/analytics-workbench/cockpit-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/cockpit-contract.generated.d.ts",
           "kind": "generated_type",
           "sha256": "961646df6f64ed859cfb836be2913bfe23b445857a812d6597dd290269ca7fc9",
           "bytes": 39702,
@@ -91,7 +91,7 @@
         },
         {
           "source_path": "plugin/src/competition-chart-contract.generated.d.ts",
-          "main_path": "dsh-plugins/contracts/analytics-workbench/competition-chart-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/competition-chart-contract.generated.d.ts",
           "kind": "generated_type",
           "sha256": "899bc4e74cdf6c7953ca9ab29bf7f69f8fc23dd9266a0839ff3a69657a4941f2",
           "bytes": 1343,
@@ -99,7 +99,7 @@
         },
         {
           "source_path": "plugin/src/competition-computed-contract.generated.d.ts",
-          "main_path": "dsh-plugins/contracts/analytics-workbench/competition-computed-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/competition-computed-contract.generated.d.ts",
           "kind": "generated_type",
           "sha256": "4af43be88ad76c4d3d5a001607a16c5e0381da1115ddbd877268c5e6236607ce",
           "bytes": 19924,
@@ -107,7 +107,7 @@
         },
         {
           "source_path": "plugin/src/first-purchase-analysis-contract.generated.d.ts",
-          "main_path": "dsh-plugins/contracts/analytics-workbench/first-purchase-analysis-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/first-purchase-analysis-contract.generated.d.ts",
           "kind": "generated_type",
           "sha256": "2a8f460e6169f09957f58f9452b876092c76e60091d916bfef4f6f52a77646e6",
           "bytes": 71022,
@@ -115,7 +115,7 @@
         },
         {
           "source_path": "plugin/src/first-purchase-cockpit-contract.generated.d.ts",
-          "main_path": "dsh-plugins/contracts/analytics-workbench/first-purchase-cockpit-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/first-purchase-cockpit-contract.generated.d.ts",
           "kind": "generated_type",
           "sha256": "4b8250b4b6ebf52f7ae769e8b0cb5ec76c01c33a9c35849e19580b3e59eb0a0b",
           "bytes": 38999,
@@ -123,7 +123,7 @@
         },
         {
           "source_path": "plugin/src/first-purchase-contract.generated.d.ts",
-          "main_path": "dsh-plugins/contracts/analytics-workbench/first-purchase-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/first-purchase-contract.generated.d.ts",
           "kind": "generated_type",
           "sha256": "f348e3e9ef2742194f13d552a3bb30f903f88fbbc09fab42de12aba016d14a08",
           "bytes": 28625,
@@ -131,7 +131,7 @@
         },
         {
           "source_path": "plugin/src/free-page/contract/page-contract.generated.d.ts",
-          "main_path": "dsh-plugins/contracts/analytics-workbench/free-page/contract/page-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/free-page/contract/page-contract.generated.d.ts",
           "kind": "generated_type",
           "sha256": "c75f6134340455822d65cb9e539e9d19b4ba92f0c242b22812b6aa5b1085fa4e",
           "bytes": 35968,
@@ -147,7 +147,7 @@
         },
         {
           "source_path": "plugin/src/query-contract.generated.d.ts",
-          "main_path": "dsh-plugins/contracts/analytics-workbench/query-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/query-contract.generated.d.ts",
           "kind": "generated_type",
           "sha256": "6d8567f7744d4280350d04eb2efc7b468d3526abdf1ae10a3cac0c003a70f74f",
           "bytes": 16357,
@@ -155,7 +155,7 @@
         },
         {
           "source_path": "plugin/src/query-run-contract.generated.d.ts",
-          "main_path": "dsh-plugins/contracts/analytics-workbench/query-run-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/query-run-contract.generated.d.ts",
           "kind": "generated_type",
           "sha256": "90c23a7ddd3a9175e126a6669aab69a66b8745920c91aa3be64b9ee030938c90",
           "bytes": 18693,
@@ -163,7 +163,7 @@
         },
         {
           "source_path": "plugin/src/run-contract.generated.d.ts",
-          "main_path": "dsh-plugins/contracts/analytics-workbench/run-contract.generated.d.ts",
+          "main_path": "dsh-plugins/analytics-workbench/src/run-contract.generated.d.ts",
           "kind": "generated_type",
           "sha256": "abb3fa6189d0aed8abbc29237aadbad91bca65be82af89d494e4bf0cb5d05667",
           "bytes": 36274,
@@ -279,7 +279,7 @@
       "files": [
         {
           "source_path": "plugin/src/client/cockpit-slot-contract.generated.ts",
-          "main_path": "dsh-plugins/contracts/crm-knowledge/client/cockpit-slot-contract.generated.ts",
+          "main_path": "dsh-plugins/crm-knowledge/src/client/cockpit-slot-contract.generated.ts",
           "kind": "generated_constant",
           "sha256": "24eae62433d7e366cfb432cbdca2606811c26d4743d611c89dbabfd328c5c4f0",
           "bytes": 349,
@@ -287,7 +287,7 @@
         },
         {
           "source_path": "plugin/src/client/content-theme.generated.ts",
-          "main_path": "dsh-plugins/contracts/crm-knowledge/client/content-theme.generated.ts",
+          "main_path": "dsh-plugins/crm-knowledge/src/client/content-theme.generated.ts",
           "kind": "generated_constant",
           "sha256": "43c30a33663c5936f1113703fcc75657631093b1bb4780e698b030f90a69ef43",
           "bytes": 3903,

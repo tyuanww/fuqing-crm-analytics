@@ -6,7 +6,7 @@ import { mkdtemp, readFile, rm, writeFile, symlink, link, copyFile } from 'node:
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { appendContractEnvironment, CONTRACT_PACKAGE, readPublicContractInputs, validatePublicContractLock } from './public-contract-inputs.mjs';
+import { appendContractEnvironment, CONTRACT_PACKAGE, projectContractMaterial, readPublicContractInputs, validatePublicContractLock } from './public-contract-inputs.mjs';
 
 const root = fileURLToPath(new URL('../..', import.meta.url));
 const lockPath = join(root, 'config/public-contract-inputs.lock.json');
@@ -54,25 +54,28 @@ test('three actual sealed CI archives provide all 31 fixed compiler materials', 
   assert.equal(evidence.remote_ci_here, 'LOCKED_SOURCE_API_NOT_RECHECKED');
   assert.equal(evidence.host_admission, 'NOT_RUN'); assert.equal(evidence.release_ready, false);
 });
-test('generated compiler materials project into the owned contracts package', () => {
+test('generated compiler materials stage into the owned contracts package', () => {
+  const domains = { workbench: 'analytics-workbench', crm: 'crm-knowledge', brand: 'shine-brand' };
   const generated = new Set(['generated_type', 'generated_constant']);
   const legacy = new Set(['dsh-plugins/analytics-workbench/src/competition-c0-contract.generated.d.ts']);
-  let projected = 0, retained = 0;
-  for (const owner of Object.values(lock.owners)) {
+  let projected = 0;
+  for (const [name, owner] of Object.entries(lock.owners)) {
     for (const row of owner.files) {
-      if (generated.has(row.kind) && !legacy.has(row.main_path)) {
-        assert.ok(row.main_path.startsWith(`${CONTRACT_PACKAGE}/`), `PUBLIC_CONTRACT_PROJECTION ${row.main_path}`);
-        projected += 1;
-      } else {
-        assert.ok(row.main_path.startsWith('dsh-plugins/'), `PUBLIC_CONTRACT_PROJECTION ${row.main_path}`);
-        retained += 1;
+      if (!generated.has(row.kind)) {
+        assert.equal(projectContractMaterial(row.main_path), row.main_path, `PUBLIC_CONTRACT_PROJECTION ${row.main_path}`);
+        continue;
       }
+      if (legacy.has(row.main_path)) {
+        assert.equal(projectContractMaterial(row.main_path), row.main_path);
+        continue;
+      }
+      const staged = projectContractMaterial(row.main_path);
+      assert.ok(staged.startsWith(`${CONTRACT_PACKAGE}/`), `PUBLIC_CONTRACT_PROJECTION ${staged}`);
+      assert.ok(staged.endsWith(row.main_path.slice(row.main_path.indexOf('/src/') + '/src/'.length)));
+      projected += 1;
     }
   }
   assert.equal(projected, 16);
-  assert.equal(retained, 15);
-  const c0 = lock.owners.workbench.files.find(row => row.main_path.endsWith('/competition-c0-contract.generated.d.ts'));
-  assert.equal(c0.main_path, 'dsh-plugins/analytics-workbench/src/competition-c0-contract.generated.d.ts');
 });
 test('missing absolute inputs never fall back to plugin source', async () => {
   await assert.rejects(() => readPublicContractInputs({ python, lockPath }), /PUBLIC_CONTRACT_ABSOLUTE_FILE/);

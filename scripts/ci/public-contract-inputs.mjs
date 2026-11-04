@@ -22,19 +22,18 @@ function descriptor(row) {
   assert.match(row?.sha256 ?? '', hex, 'PUBLIC_CONTRACT_DIGEST');
   assert.ok(Number.isSafeInteger(row.bytes) && row.bytes > 0 && row.bytes <= 512 * 1024, 'PUBLIC_CONTRACT_BYTES');
 }
-/** Generated compiler materials live in the owned contracts package; every other
- *  author material keeps its original plugin projection. The competition-c0
- *  declaration is still projected into the Workbench source tree because its
- *  contract_hash covers those bytes and is frozen into the author archive. */
+/** Generated compiler materials are owned by the contracts package: the lock
+ *  keeps the author-owned projection (so sealed archives still bind byte for
+ *  byte), while main stages them at the owned package path. The competition-c0
+ *  declaration stays in the Workbench source tree because its contract_hash
+ *  covers those bytes and is frozen into the author archive. */
 export const CONTRACT_PACKAGE = 'dsh-plugins/contracts';
-const CONTRACT_GENERATED_KINDS = new Set(['generated_type', 'generated_constant']);
+const CONTRACT_GENERATED_MATERIAL = /^dsh-plugins\/(analytics-workbench|crm-knowledge)\/src\/(.+\.generated\.(?:d\.ts|ts|mjs))$/;
 const LEGACY_PLUGIN_OUTPUTS = new Set(['dsh-plugins/analytics-workbench/src/competition-c0-contract.generated.d.ts']);
-function projectMainPath(row, domain) {
-  const relative = row.source_path.slice('plugin/'.length);
-  const pluginPath = `dsh-plugins/${domain}/${relative}`;
-  if (!CONTRACT_GENERATED_KINDS.has(row.kind) || LEGACY_PLUGIN_OUTPUTS.has(pluginPath)) return pluginPath;
-  assert.ok(relative.startsWith('src/'), 'PUBLIC_CONTRACT_PROJECTION_SOURCE');
-  return `${CONTRACT_PACKAGE}/${domain}/${relative.slice('src/'.length)}`;
+export function projectContractMaterial(mainPath) {
+  if (LEGACY_PLUGIN_OUTPUTS.has(mainPath)) return mainPath;
+  const match = CONTRACT_GENERATED_MATERIAL.exec(mainPath);
+  return match ? `${CONTRACT_PACKAGE}/${match[1]}/${match[2]}` : mainPath;
 }
 function material(row, domain) {
   descriptor(row);

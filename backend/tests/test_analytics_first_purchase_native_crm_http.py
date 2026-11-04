@@ -63,6 +63,10 @@ def test_fresh_crm_owner_native_query_save_ack_loss_and_replay_over_http(tmp_pat
     policy = FirstPurchaseSavePolicy("crm-query-no-age-v1", frozenset({"a" * 64}), None, None, check_freshness=False)
     node = shutil.which(os.environ.get("NODE", "node"))
     assert node is not None
+    # Source-level probe without a package-manager install: bind the owned
+    # generated-contract package exactly as the B0 pipeline does.
+    subprocess.run([node, str(ROOT / "scripts/dsh-b0/contracts-link.mjs")],
+                   check=True, capture_output=True, text=True, timeout=60)
     with serve(crm) as crm_origin:
         service = create_first_purchase_analysis_app(runs, saved,
             CRMFirstPurchaseIdentityResolver(crm_origin, frozenset({"crm-owner"}), allow_query=True),
