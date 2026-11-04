@@ -134,7 +134,7 @@ export const serviceSchemas = {
 };
 export const sourceDigests = {
   "backend/crm_service_contracts.py": "401bedecfc901972bb6e316b3560d8c68dc5154fa6e65d70e86d1d7c1e455fa7",
-  "scripts/crm-calibration/generate_contract.py": "51980fd8b4012b5ccd73ba61332df5357cb2091949cd25327797e1885890f3b5",
+  "scripts/crm-calibration/generate_contract.py": "32ef2a6fb5c4bc05a351c21a64637addc57a48ba1427b1b71098a3a6d5ebc99c",
   "scripts/crm-calibration/service-client.template.mjs": "0a889285c760f918434245fe34116bd8f3385763f5e9ab904a88b8abaf1a51fc",
   "backend/contracts/crm_knowledge_v1.py": "e090e86e504a3a428e68fdd5c5b30ede12c636e8f54a3f52e71d1f6810e23c3b",
   "backend/contracts/crm-knowledge-service.v1.json": "b5fd55bbadcd115a8ecf2318347c04d5749fd86e22815df8bce07ea1dd55c7bf",

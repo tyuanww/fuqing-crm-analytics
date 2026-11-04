@@ -177,10 +177,16 @@ test('re-running every generator leaves the package byte-identical', async () =>
     execFileSync(process.execPath, args, { cwd: repository, stdio: 'pipe', timeout: 120000,
       env: { ...process.env, PYTHONPATH: repository } });
   }
-  // The CRM OpenAPI generator needs the full backend dependency closure, which
-  // only the Python plan job installs; backend/tests/test_crm_service_contracts.py
-  // already runs generate_contract.py --check there. The Node generator runs on
-  // the pinned build-tools available to this job.
+  // The contract-package outputs of the CRM generator are checked here, in the
+  // B0-only Python closure. `--package-only` skips the four backend OpenAPI
+  // documents whose full CRM runtime (pandas, bcrypt) is deliberately absent
+  // from that closure; those stay covered end to end by
+  // backend/tests/test_crm_service_contracts.py in the Python plan. Without
+  // this step the 11 package files this generator owns had no guard at all on
+  // a contracts-only change, because B0 is the only job such a change selects.
+  execFileSync(python, ['scripts/crm-calibration/generate_contract.py', '--check', '--package-only'],
+    { cwd: repository, stdio: 'pipe', timeout: 120000, env: { ...process.env, PYTHONPATH: repository } });
+  // The Node generator runs on the pinned build-tools available to this job.
   execFileSync(process.execPath, ['scripts/crm-calibration/generate_types.mjs', '--check'],
     { cwd: repository, stdio: 'pipe', timeout: 120000 });
   for (const [relative, bytes] of before) {
