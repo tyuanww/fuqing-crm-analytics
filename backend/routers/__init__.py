@@ -21,6 +21,7 @@ __all__ = [
     "export_router",
     "report_router",
     "ad_hoc_query_router",
+    "second_entry_router",
     "session_router",
     "notifications_router",  # L4.75.3
     "login_request_router",  # L4.85 申请+同意 模式
@@ -44,6 +45,7 @@ from backend.routers.visitor import router as visitor_router
 from backend.routers.export import router as export_router
 from backend.routers.report import router as report_router
 from backend.routers.ad_hoc_query import router as ad_hoc_query_router  # Sprint 188
+from backend.routers.second_entry import router as second_entry_router
 from backend.routers.session import router as session_router
 from backend.routers.notifications import router as notifications_router  # L4.75.3
 from backend.routers.login_request import router as login_request_router  # L4.85 申请+同意 模式
