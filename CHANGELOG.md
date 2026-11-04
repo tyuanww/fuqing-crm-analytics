@@ -22,6 +22,7 @@
 ### Changed
 
 - P0：目标 DSH 版本单源到 `0.2.1-rc.5`（tag `dsh-v0.2.1-rc.5`，upstream `b830ec950faba0a46dda564be3e2d854afed94f1`）。来源为 npm 发布包（`@deepseek-ai/dsh-tools@0.2.1-rc.5` 等 18 个 SDK 包全部存在）加 GitHub `git fetch --depth 1` 取得的 rc.5 源码树复核。`dsh-plugins/plugin-kit/toolchain.json` 新增 `cordis: 4.0.5` 字段补齐 cordis 单源；`upstream_lock_sha256` 保持 `911b0499…`，因为 rc.5 与 rc.3 的 `pnpm-lock.yaml` 字节一致。`sdk_bindings` 26 条逐条核对目录与版本全部命中。9 个插件包 peer、3 份 profile `dsh` 块、组合 lock 哈希链、Workbench lock、边界清单和 README 同步；`scripts/dsh-b0` 的 `upstream-<version>` 目录改为按 pin 派生（新增 `scripts/dsh-b0/upstream-dir.mjs`）。作者 pack/build 与完整 B0 pipeline 未重跑。
+- P0：10 个作者仓在 DSH `0.2.1-rc.5` / `@shine-mage/dsh-plugin-kit` 0.1.1 重建完成（9 个插件 formal pack + board-components 领域证据）；主仓组合锁、来源清单、Workbench/领域/公共契约证据锁回填到新回执。密封 workflow 产出 artifact `13348198215`（sha256 `02ed3c37…`，20 个成员），artifact lock 与组合锁哈希绑定。作者 artifact 14 天有效（2026-11-18 到期）；合并 #211 与发布仍需人工。
 
 ### Fixed
 
