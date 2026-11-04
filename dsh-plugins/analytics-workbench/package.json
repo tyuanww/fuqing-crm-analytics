@@ -7,7 +7,7 @@
     "node": "24.x"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
+    "@deepseek-ai/dsh-tools": "0.2.1-rc.5"
   },
   "type": "module",
   "description": "B0 only: native DSH integration backed by the isolated FastAPI run kernel",
@@ -58,7 +58,7 @@
     "test:host-facts:browser": "node src/client/host-facts-browser.test.mjs"
   },
   "devDependencies": {
-    "@shine-mage/dsh-plugin-kit": "0.1.0",
+    "@shine-mage/dsh-plugin-kit": "0.1.1",
     "@shine-mage/board-components": "0.1.0",
     "@shine-mage/dsh-contracts": "0.1.0"
   }

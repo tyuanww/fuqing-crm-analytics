@@ -8,7 +8,7 @@
 
 ```sh
 node dsh-plugins/plugin-kit/check.mjs \
-  --upstream /absolute/pinned-upstream-0.2.1-rc.3 \
+  --upstream /absolute/pinned-upstream-0.2.1-rc.5 \
   --build-tools /absolute/installed-build-tools
 ```
 
@@ -63,7 +63,7 @@ python3 node_modules/@shine-mage/dsh-plugin-kit/sdk-archive.py receive \
 
 接收后显式把 `new-received-sdk/upstream` 和 `new-received-sdk/build-tools` 传给 `check.mjs`/插件 build。本地归档仍为 **development-sdk-only**：`secret_scan=NOT_RUN`、`supply_chain=NOT_VERIFIED`、`release_ready=false`，没有发布、签名或全量依赖内容审计。真实归档/消费者验证已分别覆盖 darwin-arm64 与 WSL2 linux-x64/glibc 2.39，后者见[2026-10-08 证据](../../docs/hackathon/evidence/dsh-g0-sdk-wsl-immutable-inputs-20261008.md)。两平台各自准备 SDK，Mac 包不能用于 WSL；其他 libc/原生 ABI 和整台干净机器仍须另验。完整模式也不是已收敛的最小 SDK 闭包。完整供应链门禁通过前只在受控隔离开发环境使用，不上传到 Release 或生产运行目录。
 
-全部 10 个构建消费者（9 个插件与 board-components 领域包）已使用公开 package export 和精确 `0.1.0` devDependency，移除相邻 kit 源码 import。kit 不允许成为 runtime/optional/peer 依赖，也不能进入领域包的 `bundled-dependencies.json`。公开入口为 `./toolchain`、`./packaged-dependencies`、`./provenance`、`./client-banner` 与只读 `./pin`；`./provenance` 拥有构建回执与生成物摘要，`./client-banner` 拥有浏览器 client 的 CJS 装载包装，插件 build 不再反向依赖主仓 `scripts/release`。版本钉供开发测试读取，运行时代码不能导入 kit。
+全部 10 个构建消费者（9 个插件与 board-components 领域包）已使用公开 package export 和精确 `0.1.1` devDependency（随 P0 #211 的 rc.5 重 vendor 生效），移除相邻 kit 源码 import。kit 不允许成为 runtime/optional/peer 依赖，也不能进入领域包的 `bundled-dependencies.json`。公开入口为 `./toolchain`、`./packaged-dependencies`、`./provenance`、`./client-banner` 与只读 `./pin`；`./provenance` 拥有构建回执与生成物摘要，`./client-banner` 拥有浏览器 client 的 CJS 装载包装，插件 build 不再反向依赖主仓 `scripts/release`。版本钉供开发测试读取，运行时代码不能导入 kit。
 
 本仓工作区由 B0 pipeline、release preflight、CRM calibration 与本地 reload 显式调用 `scripts/dsh-b0/plugin-kit-link.mjs` 连接当前 kit；手动构建前可在仓库根运行 `node scripts/dsh-b0/plugin-kit-link.mjs "$PWD/dsh-plugins/shine-brand" "$PWD/dsh-plugins/plugin-kit"`。这只建立构建期链接，重复调用不改已有相同链接，其他安装拒绝覆盖。reload 只接线本仓真实目录，外部 checkout 必须使用自己安装的 kit，不注入本仓工具。只读 `check.mjs` 不调用此适配器。
 

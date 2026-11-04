@@ -21,10 +21,12 @@ import { packageDigest } from '../../dsh-plugins/analytics-workbench/src/skill-p
 import { QUERY_SESSION_IDS, queryMockScript } from './query-scenario.mjs';
 import { queryFaultMockScript } from './native-query-fault-scenario.mjs';
 import { firstPurchaseMockScript } from './first-purchase-scenario.mjs';
+import { PINNED_UPSTREAM_DIR } from './upstream-dir.mjs';
+import { DSH_UPSTREAM_SHA } from '../release/toolchain.mjs';
 
 const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const b0 = join(root, '.context/dsh-b0');
-const upstream = process.env.B0_BUILD_UPSTREAM ?? join(b0, 'upstream-0.2.1-rc.3');
+const upstream = process.env.B0_BUILD_UPSTREAM ?? PINNED_UPSTREAM_DIR;
 const args = process.argv.slice(2);
 const portIndex = args.indexOf('--port-base');
 const portBase = portIndex < 0 ? 4315 : Number(args.splice(portIndex, 2)[1]);
@@ -49,7 +51,7 @@ assert.ok(pythonFlag === '--python' && python && isAbsolute(python) && !extra.le
 assert.equal(process.platform, 'darwin', 'The native verification runner requires the macOS Seatbelt profile');
 assert.equal(Number(process.versions.node.split('.')[0]), 24, 'Use Node 24');
 const plugin = await realpath(pluginArg ?? join(root, 'dsh-plugins/analytics-workbench'));
-const pinned = '1f81c047fc48fa190a683e469daa699857e9afe8';
+const pinned = DSH_UPSTREAM_SHA;
 const webPort = ports.web;
 const mockPort = ports.mock;
 const binary = process.execPath;

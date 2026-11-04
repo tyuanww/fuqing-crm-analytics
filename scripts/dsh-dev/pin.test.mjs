@@ -9,6 +9,7 @@ import { readToolchain, verifyUpstream } from './pin.mjs';
 import { assertFree } from './ports.mjs';
 import { assertCli, repoRoot, resolveUpstream } from './paths.mjs';
 import { PINNED_SHA } from './constants.mjs';
+import { DSH_SDK_VERSION } from '../release/toolchain.mjs';
 import { DSH_B0_SOURCE_SHA } from '../dsh-b0/gateway-policy.mjs';
 import { buildPluginOverlay } from './overlay.mjs';
 
@@ -123,7 +124,7 @@ test('verifyUpstream accepts the immutable production runtime bundle only when r
   try {
     await mkdir(join(dir, 'lib'), { recursive: true });
     await writeFile(join(dir, 'lib/bin.js'), '#!/usr/bin/env node\n');
-    await writeFile(join(dir, 'package.json'), JSON.stringify({ name: '@deepseek-ai/dsh', version: '0.2.1-rc.3' }));
+    await writeFile(join(dir, 'package.json'), JSON.stringify({ name: '@deepseek-ai/dsh', version: DSH_SDK_VERSION }));
     const pin = await readToolchain(repoRoot);
     process.env.DSH_UPSTREAM_SHA = PINNED_SHA;
     const upstream = resolveUpstream(dir);

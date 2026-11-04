@@ -7,7 +7,7 @@
     "node": "24.x"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
+    "@deepseek-ai/dsh-tools": "0.2.1-rc.5"
   },
   "type": "module",
   "description": "Shine Mage FUNNEL board kind: catalog offer and nested-count geometry. Uninstall independently of the workbench.",
@@ -41,7 +41,7 @@
     "test": "node --test src/funnel.test.mjs src/client-lifecycle.test.mjs"
   },
   "devDependencies": {
-    "@shine-mage/dsh-plugin-kit": "0.1.0",
+    "@shine-mage/dsh-plugin-kit": "0.1.1",
     "@shine-mage/board-components": "0.1.0"
   }
 }

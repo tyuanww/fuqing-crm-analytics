@@ -39,14 +39,14 @@ export async function inspectCockpitReleaseContract({ root = ROOT, upstream = nu
   assert.equal(lane.sdk, '0.2.1-rc.1');
   assert.equal(lane.upstream_sha, '1600d8a1e140dcde43a1a0941940a0480712c011');
   assert.equal(lane.upstream_lock_sha256, '952ca2f79998660dc690b739078a5d6052bc7c5c2193714b918b9d720baaeaba');
-  assert.equal(defaultPin.sdk_version, '0.2.1-rc.3');
-  assert.equal(defaultPin.upstream_sha, '1f81c047fc48fa190a683e469daa699857e9afe8');
+  assert.equal(defaultPin.sdk_version, '0.2.1-rc.5');
+  assert.equal(defaultPin.upstream_sha, 'b830ec950faba0a46dda564be3e2d854afed94f1');
   assert.equal(manifest.peerDependencies?.['@deepseek-ai/dsh-tools'], defaultPin.sdk_version);
   assert.doesNotMatch(clientEntry, /cockpit-composition/);
   assert.equal((clientEntry.match(/name:\s*'main',\s*key:\s*COCKPIT_PANEL_ID/g) ?? []).length, 1);
   await assert.rejects(access(join(root, 'dsh-plugins/analytics-workbench/src/client/cockpit-composition.mjs')),
     error => error?.code === 'ENOENT');
-  assert.match(lock, /['"]?@deepseek-ai\/dsh-tools['"]?:[\s\S]*specifier: 0\.2\.1-rc\.3/);
+  assert.match(lock, /['"]?@deepseek-ai\/dsh-tools['"]?:[\s\S]*specifier: 0\.2\.1-rc\.5/);
   assert.match(lock, /['"]?@shine-mage\/board-components['"]?:[\s\S]*version: link:\.\.\/board-components/);
   assert.match(lock, /['"]?@shine-mage\/dsh-plugin-kit['"]?:[\s\S]*version: link:\.\.\/plugin-kit/);
 

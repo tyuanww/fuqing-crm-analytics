@@ -99,7 +99,7 @@ test('reviewed official catalog is partitioned into hidden and explicitly denied
   assert.equal(snapshot.dsh_version, toolchain.sdk_version)
   assert.equal(snapshot.upstream_sha, toolchain.upstream_sha)
   assert.match(snapshot.upstream_sha, /^[a-f0-9]{40}$/)
-  assert.equal(snapshot.upstream_sha, '1f81c047fc48fa190a683e469daa699857e9afe8')
+  assert.equal(snapshot.upstream_sha, 'b830ec950faba0a46dda564be3e2d854afed94f1')
   assert.equal(snapshot.headings, 73)
   assert.equal(snapshot.unique_tools, 68)
   assert.equal(snapshot.unique_tools, snapshot.tools.length)

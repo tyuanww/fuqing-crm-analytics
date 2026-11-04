@@ -6,6 +6,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { installProfilePacks, loadProfilePacks } from '../release/profile-packs.mjs';
 import { readToolchain, readToolchainFile, validateToolchain, verifyUpstream } from '../dsh-dev/pin.mjs';
 import { inspectDeclaredPlugin } from './prepare-profile.mjs';
+import { TOOLCHAIN } from '../release/toolchain.mjs';
 
 const CRM = '@shine-mage/dsh-crm-knowledge', KNOWLEDGE = '@shine-mage/dsh-knowledge';
 const PAGE = '@shine-mage/dsh-analytics-workbench-b0';
@@ -30,7 +31,7 @@ export async function readCompositionInputs({ inputsPath, pageInputsPath, toolch
 
 /** Shared preflight for already verified packages; no writes or runtime import. */
 export function validateCompositionPacks({ packs, pages, toolchain, cordisPeerVersion = '4.0.5' }) {
-  const sdkVersion = toolchain?.sdk_version ?? '0.2.1-rc.3';
+  const sdkVersion = toolchain?.sdk_version ?? TOOLCHAIN.sdk_version;
   assert.equal(packs.profile.service_binding, undefined, 'CRM_COMPOSITION_SERVICE_BINDING_REQUIRES_CANDIDATE');
   assert.deepEqual(packs.plugins.map(row => row.id).sort(), [CRM, KNOWLEDGE].sort(), 'CRM_COMPOSITION_SELECTION');
   const crm = packs.plugins.find(row => row.id === CRM), knowledge = packs.plugins.find(row => row.id === KNOWLEDGE);

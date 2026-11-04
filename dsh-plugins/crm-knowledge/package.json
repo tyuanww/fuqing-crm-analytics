@@ -13,7 +13,7 @@
     "test:host": "node --test test/host.integration.mjs"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh-tools": "0.2.1-rc.3",
+    "@deepseek-ai/dsh-tools": "0.2.1-rc.5",
     "@deepseek-ai/cordis": "4.0.5"
   },
   "exports": {
@@ -51,7 +51,7 @@
     "composition_contract": "crm-knowledge-split/v1"
   },
   "devDependencies": {
-    "@shine-mage/dsh-plugin-kit": "0.1.0",
+    "@shine-mage/dsh-plugin-kit": "0.1.1",
     "@shine-mage/dsh-contracts": "0.1.0"
   }
 }

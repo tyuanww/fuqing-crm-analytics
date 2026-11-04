@@ -85,7 +85,7 @@ async function boundedFile(path, max) {
   return bytes;
 }
 export function inspectDeclaredPlugin(manifest, name, entries, domain, prefix = 'CRM_PROFILE',
-  { dshSdkVersion = '0.2.1-rc.3', cordisVersion = '4.0.5' } = {}) {
+  { dshSdkVersion = TOOLCHAIN.sdk_version, cordisVersion = TOOLCHAIN.cordis } = {}) {
   assert.equal(manifest.name, name, prefix + '_IDENTITY');
   assert.equal(manifest.peerDependencies?.['@deepseek-ai/dsh-tools'], dshSdkVersion, prefix + '_DSH_PIN');
   // Split CRM/knowledge packages declare Cordis directly. The existing page

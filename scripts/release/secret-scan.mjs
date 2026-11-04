@@ -56,6 +56,13 @@ const RUNTIME_VENDOR_ASSIGNMENTS = Object.freeze([
   { suffix: 'packages/experimental/inspector/lib/devtools/chunks/legacy-Dg_djKt3.js', sha256: '29a622e8e7c7ef54241123b18eba6400c1cd111ffb7445df12e251f7b1300188', values: ['ReportingEndpointNotToken', 'InvalidCredentialsCookie'] },
   { suffix: '@deepseek-ai/dsh-experimental-inspector/lib/devtools/chunks/data_grid-ehf9xIbN.js', sha256: 'bf04c38a3718a005767a676a9847616b8e6ab8a2c8987441ec2f2f29bd6c459e', values: ['DataGridInternalToken'] },
   { suffix: '@deepseek-ai/dsh-experimental-inspector/lib/devtools/chunks/legacy-Dg_djKt3.js', sha256: '29a622e8e7c7ef54241123b18eba6400c1cd111ffb7445df12e251f7b1300188', values: ['ReportingEndpointNotToken', 'InvalidCredentialsCookie'] },
+  // The rc.5 Linux x64 inspector build emits new content-hashed chunks. Keep
+  // each exception bound to the exact bytes observed in the preflight runtime
+  // bundle; any rebuild that changes them fails closed again.
+  { suffix: 'packages/experimental/inspector/lib/devtools/chunks/data_grid-UZLaL_nB.js', sha256: 'b1e0cb6da0f056367194d110265e0d2aeb22bd9aac8c5a75d4e360e5f817b8cc', values: ['DataGridInternalToken'] },
+  { suffix: '@deepseek-ai/dsh-experimental-inspector/lib/devtools/chunks/data_grid-UZLaL_nB.js', sha256: 'b1e0cb6da0f056367194d110265e0d2aeb22bd9aac8c5a75d4e360e5f817b8cc', values: ['DataGridInternalToken'] },
+  { suffix: 'packages/experimental/inspector/lib/devtools/chunks/legacy-Bmr8iWno.js', sha256: 'f72555057aa81a6097ad39e9e0dbdc7456c8aba03afb64715e01f93b61713594', values: ['ReportingEndpointNotToken', 'InvalidCredentialsCookie'] },
+  { suffix: '@deepseek-ai/dsh-experimental-inspector/lib/devtools/chunks/legacy-Bmr8iWno.js', sha256: 'f72555057aa81a6097ad39e9e0dbdc7456c8aba03afb64715e01f93b61713594', values: ['ReportingEndpointNotToken', 'InvalidCredentialsCookie'] },
 ]);
 
 export function runtimeVendorAssignmentAllowlist(name, bytesOrSha256) {

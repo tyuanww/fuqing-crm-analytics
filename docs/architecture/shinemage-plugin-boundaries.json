@@ -2,8 +2,8 @@
   "schema_version": "shinemage-plugin-boundaries/v1",
   "inspection_baseline_sha": "d4261aa338ff4ed5543866b8c63cdba627e49518",
   "upstream": {
-    "sha": "1f81c047fc48fa190a683e469daa699857e9afe8",
-    "sdk_version": "0.2.1-rc.3",
+    "sha": "b830ec950faba0a46dda564be3e2d854afed94f1",
+    "sdk_version": "0.2.1-rc.5",
     "pin_owner": "dsh-plugins/plugin-kit/toolchain.json"
   },
   "scope": "static-source-imports-and-literal-routes; not a runtime conformance test",
@@ -33,11 +33,11 @@
         "bundled-dependencies.json"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.5"
       },
       "dependencies": {},
       "dev_dependencies": {
-        "@shine-mage/dsh-plugin-kit": "0.1.0",
+        "@shine-mage/dsh-plugin-kit": "0.1.1",
         "@shine-mage/board-components": "0.1.0",
         "@shine-mage/dsh-contracts": "0.1.0"
       },
@@ -78,7 +78,7 @@
         "test:host-facts": "node --test src/client/host-facts.test.mjs src/client/library-workspace.test.mjs",
         "test:host-facts:browser": "node src/client/host-facts-browser.test.mjs"
       },
-      "manifest_sha256": "c5d4d4c305210711dfe3d7e550c9add315c773c2b3ddb2f5b940c2335080ddde"
+      "manifest_sha256": "d935257288f67df3821779262bb91464c305ec27574f9f2841a3b8dcc9186262"
     },
     {
       "path": "dsh-plugins/board-components",
@@ -106,7 +106,7 @@
       "peers": {},
       "dependencies": {},
       "dev_dependencies": {
-        "@shine-mage/dsh-plugin-kit": "0.1.0"
+        "@shine-mage/dsh-plugin-kit": "0.1.1"
       },
       "bundled_inputs": [],
       "dsh": {},
@@ -114,7 +114,7 @@
         "build": "node build.mjs",
         "test": "node --test test/*.test.mjs"
       },
-      "manifest_sha256": "c82cc3af5ee76e88a80846ff0108dd2758dfd0c77c81205530e834897d8464d8"
+      "manifest_sha256": "7bcfa3f6836a44cad05f6b7262c1712a27da400a9032443caf55ffe3adbfe771"
     },
     {
       "path": "dsh-plugins/contracts",
@@ -228,14 +228,14 @@
         "cordis.patch.yml"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.2.1-rc.3",
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.5",
         "@deepseek-ai/cordis": "4.0.5"
       },
       "dependencies": {
         "katex": "^0.18.7"
       },
       "dev_dependencies": {
-        "@shine-mage/dsh-plugin-kit": "0.1.0",
+        "@shine-mage/dsh-plugin-kit": "0.1.1",
         "@shine-mage/dsh-contracts": "0.1.0"
       },
       "bundled_inputs": [],
@@ -257,7 +257,7 @@
         "build": "node build.mjs",
         "test:host": "node --test test/host.integration.mjs"
       },
-      "manifest_sha256": "f74e6bf735535a74bd92feda49fdd32942a723ca36dbd5ac3c55039798d420d9"
+      "manifest_sha256": "679245bef8c9d2ae4cffcf97f9ad339a285880788f87d292f4ee1a1503f5000b"
     },
     {
       "path": "dsh-plugins/knowledge",
@@ -278,12 +278,12 @@
         "cordis.patch.yml"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.2.1-rc.3",
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.5",
         "@deepseek-ai/cordis": "4.0.5"
       },
       "dependencies": {},
       "dev_dependencies": {
-        "@shine-mage/dsh-plugin-kit": "0.1.0",
+        "@shine-mage/dsh-plugin-kit": "0.1.1",
         "@shine-mage/dsh-contracts": "0.1.0"
       },
       "bundled_inputs": [],
@@ -296,12 +296,12 @@
         "build": "node build.mjs",
         "test": "node --test test/*.test.mjs"
       },
-      "manifest_sha256": "5ffb376ad6ea781d66e5c7902c5ea08afcd8c06b2ad75cbb396232baeccac06d"
+      "manifest_sha256": "48cf6b045ee458f4ccb6f9f225823070486ac279a7a5a7d5bddbe4ab3c85df37"
     },
     {
       "path": "dsh-plugins/plugin-kit",
       "name": "@shine-mage/dsh-plugin-kit",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "domain": "build-tooling",
       "target_repository": "shinemage-dsh-plugin-kit",
       "kind": "dev-tool",
@@ -338,7 +338,7 @@
       "bundled_inputs": [],
       "dsh": {},
       "commands": {},
-      "manifest_sha256": "5d62efc5c6313738ce28e4155ace511fe1c7ca3c27f65378ce10b8a8601b183b"
+      "manifest_sha256": "36a8264a388f906cb1f766916e5fd73781f0055eb24a89586308455c1b98956c"
     },
     {
       "path": "dsh-plugins/query-agent",
@@ -389,11 +389,11 @@
         "cordis.patch.yml"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.5"
       },
       "dependencies": {},
       "dev_dependencies": {
-        "@shine-mage/dsh-plugin-kit": "0.1.0"
+        "@shine-mage/dsh-plugin-kit": "0.1.1"
       },
       "bundled_inputs": [],
       "dsh": {
@@ -408,7 +408,7 @@
         "build": "node build.mjs",
         "test": "node --test src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "78fe8ebafad4a2550c16ae1d8359f6ea7db552e707f95f7105f6ccc94e5cff29"
+      "manifest_sha256": "7a388092eadef933518d6ddfb85ccebd848bdf366fa00303edca3c310b950c66"
     },
     {
       "path": "dsh-plugins/shine-brand",
@@ -429,11 +429,11 @@
         "cordis.patch.yml"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.5"
       },
       "dependencies": {},
       "dev_dependencies": {
-        "@shine-mage/dsh-plugin-kit": "0.1.0"
+        "@shine-mage/dsh-plugin-kit": "0.1.1"
       },
       "bundled_inputs": [],
       "dsh": {
@@ -452,7 +452,7 @@
         "build": "node build.mjs",
         "test": "node --test src/brand-surface.test.mjs src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "ff09dc7e688ec72b139646f5bb4421c4620559fc3d4aa6da2039d5621f65e8ae"
+      "manifest_sha256": "e6fe1b1c87ebc865c111122aced38e8e65d4bb467960801798d4628c26fd11cb"
     },
     {
       "path": "dsh-plugins/shine-crowd-action",
@@ -473,11 +473,11 @@
         "cordis.patch.yml"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.5"
       },
       "dependencies": {},
       "dev_dependencies": {
-        "@shine-mage/dsh-plugin-kit": "0.1.0"
+        "@shine-mage/dsh-plugin-kit": "0.1.1"
       },
       "bundled_inputs": [],
       "dsh": {
@@ -492,7 +492,7 @@
         "build": "node build.mjs",
         "test": "node --test src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "4b4a682e474705b59d22fd0d8f8b1323fae2353599563df4edab97dfa377ef6e"
+      "manifest_sha256": "e8b8934627d471382a1393fd65ec6d6250a7f554675531b6cdb436089eaf89e3"
     },
     {
       "path": "dsh-plugins/shine-funnel",
@@ -521,11 +521,11 @@
         "bundled-dependencies.json"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.5"
       },
       "dependencies": {},
       "dev_dependencies": {
-        "@shine-mage/dsh-plugin-kit": "0.1.0",
+        "@shine-mage/dsh-plugin-kit": "0.1.1",
         "@shine-mage/board-components": "0.1.0"
       },
       "bundled_inputs": [
@@ -548,7 +548,7 @@
         "build": "node build.mjs",
         "test": "node --test src/funnel.test.mjs src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "7159ca404c5bbbba1800a6c071d8236ce0384ef5f9fc109ff8ef158ec0bb1260"
+      "manifest_sha256": "1a8030e7cf3fd4f653ba13d2fdef3be4218c52af2c1614dd938286adc6d2b334"
     },
     {
       "path": "dsh-plugins/shine-query",
@@ -569,11 +569,11 @@
         "cordis.patch.yml"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.5"
       },
       "dependencies": {},
       "dev_dependencies": {
-        "@shine-mage/dsh-plugin-kit": "0.1.0"
+        "@shine-mage/dsh-plugin-kit": "0.1.1"
       },
       "bundled_inputs": [],
       "dsh": {
@@ -588,7 +588,7 @@
         "build": "node build.mjs",
         "test": "node --test src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "d63fc9f0e1fd6221d986d0a56fb320d99b8d941576a90f63d907d170b8337e32"
+      "manifest_sha256": "9d240e3e8e21a5a2588ae28a38045493358c6e9f2063c1ded3e81ca0b79652ce"
     },
     {
       "path": "dsh-plugins/shine-waterfall",
@@ -617,11 +617,11 @@
         "bundled-dependencies.json"
       ],
       "peers": {
-        "@deepseek-ai/dsh-tools": "0.2.1-rc.3"
+        "@deepseek-ai/dsh-tools": "0.2.1-rc.5"
       },
       "dependencies": {},
       "dev_dependencies": {
-        "@shine-mage/dsh-plugin-kit": "0.1.0",
+        "@shine-mage/dsh-plugin-kit": "0.1.1",
         "@shine-mage/board-components": "0.1.0"
       },
       "bundled_inputs": [
@@ -644,7 +644,7 @@
         "build": "node build.mjs",
         "test": "node --test src/waterfall.test.mjs src/client-lifecycle.test.mjs"
       },
-      "manifest_sha256": "01c8dc9bbb358ba6402048f9af6306b35e2e8814e9298965dc5d4ddf23f00e85"
+      "manifest_sha256": "e6ade327d5fa086dd9fd07c46b1a6ec29e9349b8a4dc6086baa1280e44661377"
     }
   ],
   "source_files_scanned": 674,
@@ -4827,7 +4827,7 @@
       ],
       "compatibility": "Exact SHA/SDK/lock; upgrade only in isolated candidate; source pin is not runtime proof.",
       "status": "PINNED_UPSTREAM",
-      "source_sha256": "dbf9e88949d42191d99ddc8f4b3f5c6b99bc13425a35f501473e17002c4782fc"
+      "source_sha256": "c49d49a24c0e1ce140cdc290477070b5ddc7213abdbe347097c217dde42998e6"
     },
     {
       "id": "crm-metrics",

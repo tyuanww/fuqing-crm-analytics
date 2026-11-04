@@ -118,7 +118,7 @@ curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:18092/
 | 文件 | 作用 |
 |---|---|
 | `config/query-agent-tool-policy.v1.json` | 单源名单：`allowed`（域工具 allowlist）、`hidden_inherited`（从 schema 隐藏的官方继承工具）、`official_denied`（保持可见但被 guard 拒绝的官方工具） |
-| `config/dsh-official-tools.v1.json` | 已评审的 DSH 0.2.1-rc.3 `docs/tool-catalog.md` 快照（68 个唯一官方工具名） |
+| `config/dsh-official-tools.v1.json` | 已评审的 DSH 0.2.1-rc.5 `docs/tool-catalog.md` 快照（68 个唯一官方工具名） |
 | `build.mjs` | 读取单源，用仓库固定 TypeScript 6.0.3 做类型检查，并把生成数据内联进单文件 `lib/tool-policy.js` |
 | `lib/tool-policy.data.d.ts` | 生成的类型声明，供 typecheck 使用；不随包发布 |
 
