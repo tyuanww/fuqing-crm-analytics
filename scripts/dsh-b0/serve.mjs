@@ -130,6 +130,8 @@ if (queryAssetsScenario || firstPurchaseScenario) {
   kernelConfig.asset_capabilities = ['analysis:save', 'analysis:read', 'dashboard:read', 'dashboard:update'];
 }
 kernelConfig.port_base = portBase;
+kernelConfig.base_url = `http://127.0.0.1:${portBase}`;
+kernelConfig.bridge_url = `http://127.0.0.1:${portBase + 1}`;
 await writeJson(join(runtime, 'kernel-private.json'), kernelConfig);
 if (stateScenario) {
   const probe = join(runtime, 'probe');
@@ -148,6 +150,14 @@ await writeJson(join(ownHome, 'profiles/web/package.json'), {
   name: 'shine-mage-b0-web-profile', private: true, type: 'module',
   dsh: { profile: { bundles: ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-web-app'], patchReload: 'startup' } },
 });
+// P3-2: the private kernel contract is configured, not inferred from a port
+// block. The B0_* environment below stays as the documented transitional
+// fallback so the legacy path keeps its own coverage in the sealed stage.
+const nativeConfig = {
+  baseUrl: `http://127.0.0.1:${portBase}`,
+  bridgeUrl: `http://127.0.0.1:${portBase + 1}`,
+  runtimeToken, gatewayToken,
+};
 await writeJson(join(presets, 'analytics-b0/agent.cordis.yml'), [
   { id: 'persona', name: '@deepseek-ai/dsh-persona', config: {
     text: firstPurchaseScenario
@@ -157,11 +167,11 @@ await writeJson(join(presets, 'analytics-b0/agent.cordis.yml'), [
       : '你是仅用于B0验证的经营分析助手。所有数据都是合成的，只能使用已登记分析工具；不得把合成输出称为真实经营结论。',
     complete: true, includeRuntimeContext: false,
   } },
-  { id: 'analytics-b0-tool', name: pathToFileURL(join(plugin, 'lib/tool.js')).href },
+  { id: 'analytics-b0-tool', name: pathToFileURL(join(plugin, 'lib/tool.js')).href, config: nativeConfig },
   { id: 'analytics-b0-skill-roots', name: '@deepseek-ai/dsh-skill-filesystem',
     config: { includeDefaultRoots: false, customSkillDirs: [], watch: false, watchFollowSymlinks: false } },
   { id: 'analytics-b0-native-skill', name: '@deepseek-ai/dsh-tool-skill' },
-  { id: 'analytics-b0-skills', name: pathToFileURL(join(plugin, 'lib/skills.js')).href },
+  { id: 'analytics-b0-skills', name: pathToFileURL(join(plugin, 'lib/skills.js')).href, config: nativeConfig },
   { id: 'analytics-b0-compaction', name: 'cordis:group', group: true, isolate: { compaction: true }, config: [
     { id: 'analytics-b0-compaction-basic', name: '@deepseek-ai/dsh-compaction-basic', config: {
       thresholdRatio: 0.8, retainTokens: 2048, maxTokens: 1024, compactionRetries: 0, maxOverflowRetries: 0,
@@ -179,7 +189,8 @@ const patch = [
   { id: 'llm-deepseek', config: { apiKeyEnv: 'B0_MOCK_KEY', baseURL: `http://127.0.0.1:${mockPort}/v1`,
     thinking: 'disabled', reasoningEffort: 'off', maxTokens: 1024, streamIdleTimeoutMs: 5000,
     retryPolicy: { mode: 'normal', maxRetries: 0 } } },
-  { insert: [{ id: 'analytics-b0-ui', name: pathToFileURL(join(plugin, 'lib/index.js')).href }] },
+  { insert: [{ id: 'analytics-b0-ui', name: pathToFileURL(join(plugin, 'lib/index.js')).href,
+    config: nativeConfig }] },
 ];
 const overlay = join(runtime, 'b0.patch.yml');
 await writeJson(overlay, patch);

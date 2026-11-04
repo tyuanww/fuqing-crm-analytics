@@ -1,4 +1,5 @@
-import { kernelUrl } from './runtime-endpoints.ts';
+import { NATIVE_BOUNDS, kernelUrl, resolveNativeRuntime } from './runtime-endpoints.ts';
+import { toolSurface } from './native-tools.mjs';
 import type { Context } from '@deepseek-ai/cordis';
 import { defineTool } from '@deepseek-ai/dsh-tools';
 import { nativeJournal, requestForToolIn } from './native-evidence.mjs';
@@ -23,8 +24,10 @@ function cancelledError(): Error {
   return error;
 }
 
-export function apply(ctx: Context): void {
+export function apply(ctx: Context, config: unknown = {}): void {
   nativeJournal(ctx);
+  const runtime = resolveNativeRuntime(config);
+  const surface = toolSurface(FIRST_PURCHASE_TOOL_NAME);
   ctx.tools.register(defineTool({
     name: FIRST_PURCHASE_TOOL_NAME,
     description: 'Synthetic first-purchase path query only. Submit the registered request to the local run kernel; no owner, permission_scope, SQL, or client facts.',
@@ -73,17 +76,17 @@ export function apply(ctx: Context): void {
     isConcurrencySafe: () => false,
     execute: async (args, exec): Promise<FirstPurchaseNativeReceipt> => {
       exec.signal.throwIfAborted();
-      const token = process.env.B0_RUNTIME_TOKEN;
+      const token = runtime.runtimeToken;
       const agent = exec.agent;
       if (!token || !agent || !isRegisteredSession(agent.id)) throw new Error('first-purchase tool has no bound execution context');
       const request = decodeFirstPurchaseRequest(args);
       if (!request) throw new Error('first-purchase tool rejected invalid parameters');
       const requestId = requestForToolIn(await nativeJournal(ctx).ready(agent.session), exec.callId);
       if (!requestId) throw new Error('first-purchase tool has no journal-correlated native request');
-      const response = await fetch(kernelUrl('/internal/native/first-purchase'), {
+      const response = await fetch(kernelUrl(runtime, surface.id), {
         method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
         body: JSON.stringify({ session_id: agent.id, request_id: requestId, call_id: exec.callId, request }),
-        signal: AbortSignal.any([exec.signal, AbortSignal.timeout(33000)]), redirect: 'error',
+        signal: AbortSignal.any([exec.signal, AbortSignal.timeout(NATIVE_BOUNDS.toolTimeoutMs)]), redirect: 'error',
       });
       if (response.status !== 200 && response.status !== 202) {
         let body: unknown = null;

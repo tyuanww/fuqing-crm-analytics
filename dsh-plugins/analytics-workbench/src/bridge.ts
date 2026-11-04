@@ -7,21 +7,30 @@ import { createServer } from 'node:http';
 import { timingSafeEqual } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 import { nativeJournal, summarizeJournal, evidenceFor, requestIdOf } from './native-evidence.mjs';
-import { runtimePortBase } from './runtime-endpoints.ts';
+import { NATIVE_BOUNDS, resolveNativeRuntime, type NativeRuntime } from './runtime-endpoints.ts';
+import { bridgeSurface } from './native-tools.mjs';
 import { registeredSessionIds } from './runtime-family.mjs';
 import { observeNativeIdentity } from './first-purchase-native-identity.mjs';
 
 export const name = 'analytics-workbench-b0-bridge';
 export const inject = ['agents', 'sessions', 'sessionController', 'sessionQuery'];
 const id = (value: unknown): value is string => typeof value === 'string' && /^[A-Za-z0-9_.:-]{1,128}$/.test(value);
+// Paths come from the single binding table; bridge.ts keeps no route literals.
+const HEALTH = bridgeSurface('bridge.health').path;
+const IDENTITY = bridgeSurface('bridge.identity').path;
+const DISPATCH = bridgeSurface('bridge.dispatch').path;
+const OBSERVE = bridgeSurface('bridge.observe').path;
+const CANCEL = bridgeSurface('bridge.cancel').path;
 
-export function apply(ctx: Context): void {
+export function apply(ctx: Context, config: unknown = {}): void {
   if (process.env.DSH_ANALYTICS_UI_ONLY === '1') return;
-  const token = process.env.B0_RUNTIME_TOKEN;
+  const runtime: NativeRuntime = resolveNativeRuntime(config);
+  const token = runtime.runtimeToken;
   const sessions = registeredSessionIds();
   if (!token || token.length < 32) throw new Error('B0 bridge requires explicit isolated capabilities');
   nativeJournal(ctx);
   const expected = Buffer.from(`Bearer ${token}`);
+  const port = Number(new URL(runtime.bridgeOrigin).port);
   let admitting = false;
   const server = createServer((req, res) => {
     const respond = (status: number, value: unknown) => {
@@ -32,17 +41,17 @@ export function apply(ctx: Context): void {
       const auth = Buffer.from(req.headers.authorization ?? '');
       if (req.method !== 'POST' || auth.length !== expected.length || !timingSafeEqual(auth, expected)) return respond(401, { error: 'unauthorized' });
       let raw = '';
-      for await (const chunk of req) { raw += chunk; if (Buffer.byteLength(raw) > 65536) return respond(413, { error: 'too-large' }); }
+      for await (const chunk of req) { raw += chunk; if (Buffer.byteLength(raw) > NATIVE_BOUNDS.payloadBytes) return respond(413, { error: 'too-large' }); }
       const intent = JSON.parse(raw);
-      if (req.url === '/health') return respond(200, { ready: sessions.every(sessionId => ctx.agents.get(sessionId as never) !== undefined) });
-      if (req.url === '/identity') {
+      if (req.url === HEALTH) return respond(200, { ready: sessions.every(sessionId => ctx.agents.get(sessionId as never) !== undefined) });
+      if (req.url === IDENTITY) {
         if (!intent || Object.keys(intent).length !== 1 || !id(intent.session_id) || !sessions.includes(intent.session_id)
           || !ctx.sessions.get(intent.session_id as never)) return respond(409, { error: 'binding' });
         return respond(200, await observeNativeIdentity(() => ctx.get('crmFirstPurchaseAccess'), intent.session_id));
       }
       if (!intent || ['run_id', 'attempt_id', 'session_id', 'request_id'].some(key => !id(intent[key])) || !sessions.includes(intent.session_id)) return respond(409, { error: 'binding' });
       let agent = ctx.agents.get(intent.session_id as never);
-      if (!agent && req.url === '/observe') {
+      if (!agent && req.url === OBSERVE) {
         // The pinned official resume path first takes the cross-process
         // session write lease, appends interrupted-tail closers and attaches
         // an idle agent. It does not send/replay a prompt or wake the inbox.
@@ -53,7 +62,7 @@ export function apply(ctx: Context): void {
       }
       if (!agent) return respond(200, evidenceFor(intent, { received: false, successful_call_ids: [] }, false));
       let summary = summarizeJournal(await nativeJournal(ctx).ready(agent.session), intent.request_id);
-      if (req.url === '/dispatch') {
+      if (req.url === DISPATCH) {
         if (summary.received) return respond(200, { accepted: true });
         // Inbox.hasPending was removed in 0.1.5; pending input is the two ordered lists.
         if (admitting || agent.status !== 'idle' || agent.inbox.nextTurn.length > 0 || agent.inbox.nextStep.length > 0) return respond(409, { error: 'agent-busy' });
@@ -69,7 +78,7 @@ export function apply(ctx: Context): void {
           return respond(200, receipt);
         } finally { admitting = false; }
       }
-      if (req.url === '/cancel') {
+      if (req.url === CANCEL) {
         const pending = [...agent.inbox.nextStep, ...agent.inbox.nextTurn].filter(message => requestIdOf(message) === intent.request_id);
         if (summary.currentRequestId !== intent.request_id && pending.length === 0) return respond(409, { error: 'not-current-request' });
         for (const message of pending) agent.inbox.remove(message.id);
@@ -79,7 +88,7 @@ export function apply(ctx: Context): void {
         await ctx.sessions.flush(agent.session);
         return respond(200, { accepted: true });
       }
-      if (req.url !== '/observe') return respond(404, { error: 'not-found' });
+      if (req.url !== OBSERVE) return respond(404, { error: 'not-found' });
       const idle = await Promise.race([agent.whenIdle().then(() => true), delay(80, false)]);
       const durable = idle && await ctx.sessions.flush(agent.session);
       summary = summarizeJournal(await nativeJournal(ctx).ready(agent.session), intent.request_id);
@@ -91,7 +100,7 @@ export function apply(ctx: Context): void {
   ctx.effect(async () => {
     await new Promise<void>((resolve, reject) => {
       server.once('error', reject);
-      server.listen(runtimePortBase() + 1, '127.0.0.1', () => { server.off('error', reject); resolve(); });
+      server.listen(port, '127.0.0.1', () => { server.off('error', reject); resolve(); });
     });
     return async () => { server.closeAllConnections(); await new Promise<void>(resolve => server.close(() => resolve())); };
   }, 'analytics-b0: private native bridge');

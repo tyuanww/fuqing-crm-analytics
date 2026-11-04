@@ -1,0 +1,328 @@
+{
+  "schema_version": "analytics-native-tools/v1",
+  "families": [
+    "b0",
+    "channel_followup",
+    "first_purchase",
+    "competition_growth"
+  ],
+  "baseUrlSources": {
+    "kernel": {
+      "config": "baseUrl",
+      "legacyEnv": "B0_PORT_BASE",
+      "legacyPortBase": 4315,
+      "scheme": "http",
+      "host": "127.0.0.1"
+    },
+    "bridge": {
+      "config": "bridgeUrl",
+      "legacyPortOffset": 1
+    }
+  },
+  "bounds": {
+    "payloadBytes": 65536,
+    "contextTimeoutMs": 3000,
+    "toolTimeoutMs": 33000
+  },
+  "surfaces": [
+    {
+      "id": "kernel.run-context",
+      "side": "kernel",
+      "families": [
+        "b0",
+        "channel_followup",
+        "first_purchase"
+      ],
+      "method": "POST",
+      "path": "/internal/native/run-context",
+      "tool": null,
+      "request": {
+        "models": {
+          "b0": "NativeContextRequest",
+          "channel_followup": "NativeContextRequest",
+          "first_purchase": "FirstPurchaseNativeContextRequest"
+        },
+        "fields": [
+          "session_id",
+          "request_id",
+          "unit_id",
+          "package_digest",
+          "resource"
+        ]
+      },
+      "response": null
+    },
+    {
+      "id": "kernel.context",
+      "side": "kernel",
+      "families": [
+        "b0",
+        "channel_followup",
+        "first_purchase"
+      ],
+      "method": "GET",
+      "path": "/internal/native/context",
+      "tool": null,
+      "request": null,
+      "response": null
+    },
+    {
+      "id": "kernel.prompt",
+      "side": "kernel",
+      "families": [
+        "b0",
+        "channel_followup",
+        "first_purchase"
+      ],
+      "method": "POST",
+      "path": "/internal/native/prompt",
+      "tool": null,
+      "request": {
+        "models": {
+          "b0": "NativePrompt",
+          "channel_followup": "AnalyticsQueryNativePrompt",
+          "first_purchase": "FirstPurchaseNativePrompt"
+        },
+        "fields": [
+          "sessionId",
+          "requestId",
+          "mode",
+          "content",
+          "clientTimeZone"
+        ]
+      },
+      "response": null
+    },
+    {
+      "id": "kernel.b0-fixture",
+      "side": "kernel",
+      "families": [
+        "b0"
+      ],
+      "method": "POST",
+      "path": "/internal/native/fixture",
+      "tool": {
+        "name": "analytics_b0_query"
+      },
+      "request": {
+        "models": {
+          "b0": "NativeStep"
+        },
+        "fields": [
+          "session_id",
+          "request_id",
+          "call_id",
+          "query"
+        ]
+      },
+      "response": {
+        "models": null,
+        "fields": [
+          "step_id",
+          "disposition",
+          "result"
+        ]
+      }
+    },
+    {
+      "id": "kernel.channel-followup",
+      "side": "kernel",
+      "families": [
+        "channel_followup"
+      ],
+      "method": "POST",
+      "path": "/internal/native/channel-followup",
+      "tool": {
+        "name": "analytics_channel_followup_query"
+      },
+      "request": {
+        "models": {
+          "channel_followup": "QueryNativeStep"
+        },
+        "fields": [
+          "session_id",
+          "request_id",
+          "call_id",
+          "request"
+        ]
+      },
+      "response": {
+        "models": {
+          "channel_followup": "AnalyticsQueryNativeReceipt"
+        },
+        "fields": [
+          "schema_version",
+          "run_id",
+          "attempt_id",
+          "step_id",
+          "disposition",
+          "result"
+        ]
+      }
+    },
+    {
+      "id": "kernel.first-purchase",
+      "side": "kernel",
+      "families": [
+        "first_purchase"
+      ],
+      "method": "POST",
+      "path": "/internal/native/first-purchase",
+      "tool": {
+        "name": "analytics_first_purchase_query"
+      },
+      "request": {
+        "models": {
+          "first_purchase": "FirstPurchaseNativeStep"
+        },
+        "fields": [
+          "session_id",
+          "request_id",
+          "call_id",
+          "request"
+        ]
+      },
+      "response": {
+        "models": {
+          "first_purchase": "FirstPurchaseNativeReceipt"
+        },
+        "fields": [
+          "schema_version",
+          "run_id",
+          "request_id",
+          "call_id",
+          "attempt_id",
+          "step_id",
+          "disposition",
+          "run_status",
+          "result"
+        ]
+      }
+    },
+    {
+      "id": "kernel.first-purchase-cancel",
+      "side": "kernel",
+      "families": [
+        "first_purchase"
+      ],
+      "method": "POST",
+      "path": "/internal/native/first-purchase/cancel",
+      "tool": null,
+      "request": {
+        "models": {
+          "first_purchase": null
+        },
+        "fields": [
+          "run_id",
+          "request_id"
+        ]
+      },
+      "response": null
+    },
+    {
+      "id": "bridge.health",
+      "side": "bridge",
+      "families": [
+        "b0",
+        "channel_followup",
+        "first_purchase",
+        "competition_growth"
+      ],
+      "method": "POST",
+      "path": "/health",
+      "tool": null,
+      "request": null,
+      "response": null
+    },
+    {
+      "id": "bridge.identity",
+      "side": "bridge",
+      "families": [
+        "b0",
+        "channel_followup",
+        "first_purchase",
+        "competition_growth"
+      ],
+      "method": "POST",
+      "path": "/identity",
+      "tool": null,
+      "request": {
+        "models": null,
+        "fields": [
+          "session_id"
+        ]
+      },
+      "response": null
+    },
+    {
+      "id": "bridge.dispatch",
+      "side": "bridge",
+      "families": [
+        "b0",
+        "channel_followup",
+        "first_purchase",
+        "competition_growth"
+      ],
+      "method": "POST",
+      "path": "/dispatch",
+      "tool": null,
+      "request": {
+        "models": null,
+        "fields": [
+          "run_id",
+          "attempt_id",
+          "session_id",
+          "request_id",
+          "payload"
+        ]
+      },
+      "response": null
+    },
+    {
+      "id": "bridge.observe",
+      "side": "bridge",
+      "families": [
+        "b0",
+        "channel_followup",
+        "first_purchase",
+        "competition_growth"
+      ],
+      "method": "POST",
+      "path": "/observe",
+      "tool": null,
+      "request": {
+        "models": null,
+        "fields": [
+          "run_id",
+          "attempt_id",
+          "session_id",
+          "request_id"
+        ]
+      },
+      "response": null
+    },
+    {
+      "id": "bridge.cancel",
+      "side": "bridge",
+      "families": [
+        "b0",
+        "channel_followup",
+        "first_purchase",
+        "competition_growth"
+      ],
+      "method": "POST",
+      "path": "/cancel",
+      "tool": null,
+      "request": {
+        "models": null,
+        "fields": [
+          "run_id",
+          "attempt_id",
+          "session_id",
+          "request_id"
+        ]
+      },
+      "response": null
+    }
+  ]
+}

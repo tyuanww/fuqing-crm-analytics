@@ -8,17 +8,20 @@ import { ConnectionFetchLedger } from './connection-fetch-ledger.mjs';
 import * as firstPurchaseSaveApi from './first-purchase-save-api.ts';
 import * as firstPurchaseCommands from './first-purchase-commands.ts';
 import * as cockpitHistoryApi from './cockpit-history-api.ts';
+import { Config, type NativeWorkbenchConfig } from './config.mjs';
 
 declare const __COMPETITION_SKILL_PACKAGE__: { manifest: object; contents: Record<string, string> };
 export const name = 'analytics-workbench-b0-ui';
+// rc.5 Config: baseUrl/bridgeUrl/tokens come from this row, not fixed ports.
+export { Config };
 // RC1 resolves Host capabilities from the package root. The HTML delivery
 // tool is registered by this entry, so `tools` must be part of its inject
 // contract instead of relying on the alpha runtime's implicit context.
 export const inject = [...bridgeInject, 'tools'];
 
-export function apply(ctx: Context, config: { firstPurchaseCandidateDigest?: string } = {}): void {
-  applyBridge(ctx);
-  ctx.inject(['commands'], scoped => { scoped.plugin(firstPurchaseCommands); });
+export function apply(ctx: Context, config: NativeWorkbenchConfig = {}): void {
+  applyBridge(ctx, config);
+  ctx.inject(['commands'], scoped => { scoped.plugin(firstPurchaseCommands, config); });
   registerFreeHtmlPageTool(ctx);
   // One ledger per entry owns every Connection Fetch route of this plugin and
   // releases them newest-first on unload. Every row gets the same ledger and

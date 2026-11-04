@@ -2,14 +2,15 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { pathToFileURL } from 'node:url';
 import { join } from 'node:path';
-import { summarizeRequest, evidenceFor, requestForTool, nativeJournal, summarizeJournal } from '../src/native-evidence.mjs';
+import { TURN_END_EVIDENCE, summarizeRequest, evidenceFor, requestForTool, nativeJournal, summarizeJournal } from '../src/native-evidence.mjs';
 
 const e = (type, data) => ({ type, data });
 const user = id => ({ id, source: { kind: 'user', rpcId: id } });
+const endReason = reason => typeof reason === 'string' ? { kind: reason } : reason;
 const turn = (id, number, reason = 'completed') => [e('turn/start', { turn: number }), e('user/message', user(id)),
   e('tool/call', { turn: number, callId: `call-${id}`, name: 'analytics_b0_query' }),
   e('tool/result', { turn: number, message: { role: 'tool', content: [{ type: 'tool-result', toolCallId: `call-${id}`, isError: false, content: [] }] } }),
-  e('turn/end', { turn: number, reason: { kind: reason } })];
+  e('turn/end', { turn: number, reason: endReason(reason) })];
 const intent = { run_id: 'run-1', attempt_id: 'attempt-1', session_id: 'session-1', request_id: 'first' };
 
 test('native journal turn/end without actual exit cannot finish a run', () => {
@@ -59,6 +60,59 @@ test('official interrupted-tail repair is failure only after the resumed driver 
   assert.equal(stopped.execution_exited, true);
   assert.equal(stopped.error_code, 'EXECUTION_UNKNOWN');
   assert.equal(stopped.request_id, intent.request_id);
+});
+
+test('rc.5 TurnEndReasonMap is projected totally: no documented variant falls to UNKNOWN', () => {
+  const expected = { completed: 'SUCCEEDED', aborted: 'CANCELLED', blocked: 'NEEDS_INPUT',
+    error: 'FAILED', 'max-tokens': 'FAILED', interrupted: 'FAILED', forked: 'FAILED' };
+  assert.deepEqual(Object.keys(TURN_END_EVIDENCE).sort(), Object.keys(expected).sort());
+  for (const [kind, outcome] of Object.entries(expected)) {
+    const evidence = evidenceFor(intent, summarizeRequest(turn('first', 1, { kind }), 'first'), true);
+    assert.equal(evidence.outcome, outcome, kind);
+    assert.equal(evidence.execution_exited, true, kind);
+    assert.equal(evidence.run_id, intent.run_id);
+    assert.equal(evidence.request_id, intent.request_id);
+  }
+});
+
+test('forked fork-seed closer is a bounded failure only after the driver exits', () => {
+  const forked = summarizeRequest(turn('first', 1, { kind: 'forked' }), 'first');
+  const waiting = evidenceFor(intent, forked, false);
+  assert.equal(waiting.outcome, 'RUNNING');
+  assert.equal(waiting.execution_exited, false);
+  const closed = evidenceFor(intent, forked, true);
+  assert.equal(closed.outcome, 'FAILED');
+  assert.equal(closed.execution_exited, true);
+  assert.equal(closed.error_code, 'EXECUTION_UNKNOWN');
+  assert.deepEqual(closed.successful_call_ids, ['call-first']);
+});
+
+test('aborted carries every rc.5 cancel cause without changing the evidence kind', () => {
+  for (const reason of [{ kind: 'user' }, { kind: 'parent' }, { kind: 'hook', reason: 'policy' },
+    { kind: 'disposed' }, { kind: 'legacy' }]) {
+    const evidence = evidenceFor(intent, summarizeRequest(turn('first', 1, { kind: 'aborted', reason }), 'first'), true);
+    assert.equal(evidence.outcome, 'CANCELLED', JSON.stringify(reason));
+    assert.equal(evidence.execution_exited, true);
+    assert.equal(evidence.error_code, undefined);
+  }
+  // A missing nested cause must not turn into UNKNOWN either.
+  assert.equal(evidenceFor(intent, summarizeRequest(turn('first', 1, { kind: 'aborted' }), 'first'), true).outcome, 'CANCELLED');
+});
+
+test('structured error evidence is FAILED without echoing the provider failure text', () => {
+  const reason = { kind: 'error', error: { message: 'credential-never-echo', code: 'RATE_LIMITED', status: 429 } };
+  const evidence = evidenceFor(intent, summarizeRequest(turn('first', 1, reason), 'first'), true);
+  assert.equal(evidence.outcome, 'FAILED');
+  assert.equal(evidence.execution_exited, true);
+  // The dispatcher's bounded default stays MODEL_FAILED; provider detail never enters the receipt.
+  assert.equal(evidence.error_code, undefined);
+  assert.ok(!JSON.stringify(evidence).includes('credential-never-echo'));
+});
+
+test('a future rc.5 variant stays UNKNOWN instead of manufacturing success or failure', () => {
+  const evidence = evidenceFor(intent, summarizeRequest(turn('first', 1, { kind: 'paused', extra: true }), 'first'), true);
+  assert.equal(evidence.outcome, 'UNKNOWN');
+  assert.equal(evidence.execution_exited, false);
 });
 
 function ownedSession(seed = []) {

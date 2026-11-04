@@ -3,6 +3,7 @@
 Only this module's __main__ starts a local service. No legacy CRM import.
 """
 
+from backend.services.analytics.native_tools import assert_native_routes
 from backend.services.analytics.runtime_ports import bridge_origin, runtime_port_base
 
 import asyncio
@@ -257,10 +258,14 @@ def _query_runtime_app(config, *, bridge=None):
 def runtime_app(config, *, bridge=None):
     family = config.get("family", "b0")
     if family == QUERY_RUN_FAMILY:
-        return _query_runtime_app(config, bridge=bridge)
+        app = _query_runtime_app(config, bridge=bridge)
+        assert_native_routes(app, family)
+        return app
     if family == "first_purchase":
         from backend.analytics_first_purchase_native import create_first_purchase_native_app
-        return create_first_purchase_native_app(config, bridge=bridge)
+        app = create_first_purchase_native_app(config, bridge=bridge)
+        assert_native_routes(app, family)
+        return app
     if family != "b0":
         raise ValueError("unsupported runtime family")
     session_id = config["session_id"]
@@ -358,6 +363,7 @@ def runtime_app(config, *, bridge=None):
         runtime_identity(request, payload.session_id)
         return execute_native_fixture(store, resolve_actor, payload.session_id, payload.request_id, payload.call_id, payload.query, workers=workers)
 
+    assert_native_routes(app, "b0")
     return app
 
 

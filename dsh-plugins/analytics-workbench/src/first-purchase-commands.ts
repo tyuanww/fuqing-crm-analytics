@@ -2,18 +2,19 @@
 import type { Context } from '@deepseek-ai/cordis';
 import type { CommandInvocation } from '@deepseek-ai/dsh-commands';
 import { runtimeFamily, FIRST_PURCHASE_FAMILY, registeredSessionIds } from './runtime-family.mjs';
-import { runtimePortBase } from './runtime-endpoints.ts';
+import { resolveNativeRuntime } from './runtime-endpoints.ts';
 import { nativeJournal, requestForToolIn } from './native-evidence.mjs';
 import { createFirstPurchaseCommands } from './first-purchase-commands.mjs';
 
 export const name = 'analytics-first-purchase-commands';
 export const inject = ['commands', 'sessions', 'sessionQuery'];
-export function apply(ctx: Context): void {
+export function apply(ctx: Context, config: unknown = {}): void {
   // Explicit isolated profile only; no token/config enters the browser bundle.
   if (process.env.DSH_ANALYTICS_UI_ONLY === '1' || runtimeFamily() !== FIRST_PURCHASE_FAMILY) return;
+  const runtime = resolveNativeRuntime(config);
   const journal = nativeJournal(ctx);
-  const commands = createFirstPurchaseCommands({ portBase: runtimePortBase(),
-    sessionId: registeredSessionIds()[0], gatewayToken: process.env.B0_GATEWAY_TOKEN });
+  const commands = createFirstPurchaseCommands({ origin: runtime.kernelOrigin,
+    sessionId: registeredSessionIds()[0], gatewayToken: runtime.gatewayToken });
   ctx.effect(() => () => commands.dispose(), 'first purchase: cancel owned command requests');
   for (const [name, description, hint] of [
     ['first-purchase', 'SYNTHETIC · 首购查询（需先连接 CRM）', '<首购问题>'],

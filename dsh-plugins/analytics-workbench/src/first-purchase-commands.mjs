@@ -1,5 +1,10 @@
 /** Thin Host-only adapter: the existing SQLite kernel remains the sole run owner. */
 import { readBoundedJson } from './first-purchase-query-model.mjs';
+import { isLoopbackOrigin } from './config.mjs';
+import { kernelSurface } from './native-tools.mjs';
+const PROMPT_PATH = kernelSurface('first_purchase', 'kernel.prompt').path;
+const CONTEXT_PATH = kernelSurface('first_purchase', 'kernel.context').path;
+const CANCEL_PATH = kernelSurface('first_purchase', 'kernel.first-purchase-cancel').path;
 const id = value => typeof value === 'string' && /^[A-Za-z0-9_.:-]{1,128}$/.test(value);
 const schema = 'analytics-run-first-purchase-path/v1';
 const statuses = new Set(['QUEUED', 'RUNNING', 'CANCELLING', 'CANCELLED', 'SUCCEEDED', 'FAILED', 'NEEDS_INPUT', 'UNKNOWN']);
@@ -22,12 +27,12 @@ function validRun(value, runId) {
   return value?.schema_version === schema && value.run_id === runId && statuses.has(value.status)
     && typeof value.diagnostics?.execution_active === 'boolean';
 }
-export function createFirstPurchaseCommands({ portBase, sessionId, gatewayToken, fetchImpl = fetch }) {
-  if (![4315, 4325, 4335].includes(portBase) || !id(sessionId)) throw new Error('FIRST_PURCHASE_ADMISSION_CONFIG');
+export function createFirstPurchaseCommands({ origin, sessionId, gatewayToken, fetchImpl = fetch }) {
+  if (!isLoopbackOrigin(origin) || !id(sessionId)) throw new Error('FIRST_PURCHASE_ADMISSION_CONFIG');
   if (gatewayToken !== undefined && !/^[A-Za-z0-9_-]{32,128}$/.test(gatewayToken)) throw new Error('FIRST_PURCHASE_ADMISSION_CONFIG');
   const lifetime = new AbortController();
   async function request(path, { signal, body, key } = {}) {
-    const response = await fetchImpl(`http://127.0.0.1:${portBase}${path}`, {
+    const response = await fetchImpl(`${origin}${path}`, {
       method: body === undefined ? 'GET' : 'POST', redirect: 'error', signal,
       headers: { authorization: `Bearer ${gatewayToken}`, 'content-type': 'application/json',
         ...(key ? { 'idempotency-key': key } : {}) },
@@ -56,7 +61,7 @@ export function createFirstPurchaseCommands({ portBase, sessionId, gatewayToken,
         const requestId = `fp-${invocation.commandId}`;
         if (!id(requestId)) return failure('INVALID_REQUEST');
         mutation = true;
-        const value = await request('/internal/native/prompt', { signal, body: { sessionId, requestId,
+        const value = await request(PROMPT_PATH, { signal, body: { sessionId, requestId,
           mode: 'queue', content: [{ type: 'text', text: input }], clientTimeZone: 'Asia/Shanghai' } });
         if (value?.schema_version !== schema || !id(value.run_id) || value.version !== 1
           || value.status !== 'QUEUED' || value.phase !== 'ACCEPTED'
@@ -66,7 +71,7 @@ export function createFirstPurchaseCommands({ portBase, sessionId, gatewayToken,
       }
       if (name === 'first-purchase-status') {
         if (input && !id(input)) return failure('INVALID_REQUEST');
-        const context = await request('/internal/native/context', { signal });
+        const context = await request(CONTEXT_PATH, { signal });
         const runs = context?.conversation?.run_ids ?? (context?.conversation === null ? [] : null);
         if (context?.session_id !== sessionId || context.family !== 'first_purchase' || !Array.isArray(runs) || !runs.every(id)) throw new Error();
         if (input && !runs.includes(input)) return failure('NOT_FOUND');
@@ -87,7 +92,7 @@ export function createFirstPurchaseCommands({ portBase, sessionId, gatewayToken,
       const key = `fp-cancel-${invocation.commandId}`;
       if (!id(key)) return failure('INVALID_REQUEST');
       mutation = true;
-      const value = await request('/internal/native/first-purchase/cancel', { signal,
+      const value = await request(CANCEL_PATH, { signal,
         key,
         body: requestId ? { request_id: requestId } : { run_id: match[2] } });
       if (!id(value?.run_id) || !validRun(value, match[1] === 'run' ? match[2] : value.run_id)

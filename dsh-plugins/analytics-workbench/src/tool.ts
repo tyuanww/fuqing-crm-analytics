@@ -1,4 +1,6 @@
-import { kernelUrl } from './runtime-endpoints.ts';
+import { NATIVE_BOUNDS, kernelUrl, resolveNativeRuntime } from './runtime-endpoints.ts';
+import { toolSurface } from './native-tools.mjs';
+import { Config } from './config.mjs';
 import type { Context } from '@deepseek-ai/cordis';
 import { defineTool } from '@deepseek-ai/dsh-tools';
 import { TOOL_NAME, decodeFixture } from './model.mjs';
@@ -10,22 +12,27 @@ import { queryPackEnabled } from './feature-pack-gate.mjs';
 
 export const name = 'analytics-workbench-b0-tool';
 export const inject = ['tools', 'sessions', 'sessionQuery'];
+// The tool entry is its own Loader row: it validates the same rc.5 Config so a
+// deployment can pass baseUrl/runtimeToken without relying on the environment.
+export { Config };
 
 /** The only Host capability contributed by this package. */
-export function apply(ctx: Context): void {
+export function apply(ctx: Context, config: unknown = {}): void {
   if (!queryPackEnabled()) return;
   if (runtimeFamily() === QUERY_FAMILY) {
-    applyQueryTool(ctx);
+    applyQueryTool(ctx, config);
     return;
   }
   if (runtimeFamily() === FIRST_PURCHASE_FAMILY) {
-    applyFirstPurchaseQueryTool(ctx);
+    applyFirstPurchaseQueryTool(ctx, config);
     return;
   }
   if (runtimeFamily() === COMPETITION_FAMILY) {
     return;
   }
   nativeJournal(ctx);
+  const runtime = resolveNativeRuntime(config);
+  const surface = toolSurface(TOOL_NAME);
   ctx.tools.register(defineTool({
     name: TOOL_NAME,
     description: 'B0 synthetic fixture only. Request the fixed channel sample from the local run kernel; no real database or arbitrary SQL.',
@@ -53,19 +60,19 @@ export function apply(ctx: Context): void {
     },
     // Transport safety fuses exceed the server's <=30s query budget. The
     // authoritative deadline/step/worker budget comes only from FastAPI.
-    timeoutMs: 35000,
+    timeoutMs: NATIVE_BOUNDS.toolTimeoutMs + 2000,
     isConcurrencySafe: () => false,
     execute: async (args, exec) => {
       exec.signal.throwIfAborted();
-      const token = process.env.B0_RUNTIME_TOKEN;
+      const token = runtime.runtimeToken;
       const agent = exec.agent;
       if (!token || !agent || agent.id !== process.env.B0_SESSION_ID) throw new Error('B0 tool has no bound execution context');
       const requestId = requestForToolIn(await nativeJournal(ctx).ready(agent.session), exec.callId);
       if (!requestId) throw new Error('B0 tool has no journal-correlated native request');
-      const response = await fetch(kernelUrl('/internal/native/fixture'), {
+      const response = await fetch(kernelUrl(runtime, surface.id), {
         method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
         body: JSON.stringify({ session_id: agent.id, request_id: requestId, call_id: exec.callId, query: args.query }),
-        signal: AbortSignal.any([exec.signal, AbortSignal.timeout(33000)]), redirect: 'error',
+        signal: AbortSignal.any([exec.signal, AbortSignal.timeout(NATIVE_BOUNDS.toolTimeoutMs)]), redirect: 'error',
       });
       if (!response.ok) throw new Error('B0 run kernel refused tool execution');
       const receipt = await response.json();

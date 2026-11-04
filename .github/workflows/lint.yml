@@ -167,6 +167,8 @@ jobs:
           node --test
           dsh-plugins/analytics-workbench/test/connection-fetch-ledger.test.mjs
           dsh-plugins/analytics-workbench/test/connection-fetch-ownership.test.mjs
+          dsh-plugins/analytics-workbench/test/native-tools.test.mjs
+          dsh-plugins/analytics-workbench/test/first-purchase-commands.test.mjs
           scripts/ci/rc5-surface-gate.test.mjs
 
   frontend:
