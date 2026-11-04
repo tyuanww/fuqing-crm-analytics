@@ -2,7 +2,7 @@
   "schema": "shinemage-public-contract-inputs-lock/v1",
   "owners": {
     "workbench": {
-      "source_sha": "63718e782d4f3353f324f4d50fa83067a97b1372",
+      "source_sha": "262b69960e2ba4baf59164a4394e43989dee3253",
       "package": "@shine-mage/dsh-analytics-workbench-b0",
       "version": "0.0.0-b0",
       "archive": {
