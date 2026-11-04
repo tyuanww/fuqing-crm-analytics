@@ -13,6 +13,52 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from scripts.ci.pre_push_path_class import TOOL_TESTS, verification_plan  # noqa: E402
 
+# --- B0 job scope -----------------------------------------------------------
+# The B0 job pays for a pinned toolchain, fixed author evidence and sealed
+# composition packs. It therefore only runs when one of its own inputs moved:
+# plugin boundaries, composition packs and lock files, the published contract
+# surface, release/gate workflow definitions, dependency locks and the frontend
+# seams the Workbench core consumes. Ordinary backend product code belongs to
+# the backend jobs selected by pre_push_path_class.py, so backend-only changes
+# no longer pay for a B0 build.
+B0_SCOPE_PREFIXES = (
+    'dsh-plugins/',                 # isolated plugins and sealed pack sources
+    'config/',                      # composition packs, plugin boundaries, locks, release lanes
+    'scripts/dsh-b0/',              # pinned B0 pipeline, contract generators, probes
+    'scripts/dsh-dev/',             # dev supervisor consumed by the B0 pipeline
+    'scripts/ci/',                  # fixed author evidence receivers and input sealing
+    '.github/workflows/',           # gate and release definitions, including this job
+    'backend/contracts/',           # contract surface consumed by the sealed packs
+    'frontend-vue3/src/assets/brand/',
+)
+B0_SCOPE_EXACT = frozenset({
+    # dependency locks that pin the B0 toolchain and its package managers
+    'pyproject.toml',
+    'requirements.txt',
+    'requirements-lock.txt',
+    'uv.lock',
+    'pnpm-lock.yaml',
+    'package.json',
+    'package-lock.json',
+    'frontend-vue3/package.json',
+    'frontend-vue3/package-lock.json',
+    # legacy frontend seams the Workbench author core still consumes
+    'frontend-vue3/src/App.vue',
+    'frontend-vue3/src/composables/useFilterSync.ts',
+    'frontend-vue3/public/shine-mage-mark.svg',
+})
+
+
+def b0_release_scope(paths: list[str]) -> bool:
+    """True when a changed path is a B0 plugin, lock, composition or release input."""
+    for raw in paths:
+        path = raw.strip().replace('\\', '/')
+        while path.startswith('./'):
+            path = path[2:]
+        if path and (path in B0_SCOPE_EXACT or path.startswith(B0_SCOPE_PREFIXES)):
+            return True
+    return False
+
 
 def commands(plan: dict, root: Path = ROOT, only: str | None = None) -> list[tuple[str, list[str], Path]]:
     steps = []
@@ -96,9 +142,20 @@ def main(argv=None) -> int:
     parser.add_argument('--node', type=Path, help='existing Node binary; changes only this check process PATH')
     parser.add_argument('--only', choices=['backend', 'tooling', 'frontend', 'b0', 'python', 'ci-python'])
     parser.add_argument('--backend-mode', choices=['skip', 'ruff', 'scoped', 'full'])
+    parser.add_argument('--b0-scope', action='store_true',
+                        help='emit the narrow b0_required flag that gates the CI B0 job')
     args = parser.parse_args(argv)
     paths = sys.stdin.read().splitlines() if args.files_from == '-' else Path(args.files_from).read_text().splitlines()
     plan = verification_plan(paths)
+    if args.b0_scope:
+        # The path matrix stays the authority for "is B0 relevant"; this flag
+        # only narrows it to the job's own inputs. Both must agree.
+        required = bool(plan['b0']) and b0_release_scope(paths)
+        print(json.dumps({**plan, 'b0_required': required}, ensure_ascii=False), flush=True)
+        if os.environ.get('GITHUB_OUTPUT'):
+            with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+                output.write(f'b0_required={str(required).lower()}\n')
+        return 0
     if args.backend_mode:
         plan['backend'] = {'skip': 'none', 'ruff': 'none'}.get(args.backend_mode, args.backend_mode)
         if args.backend_mode == 'ruff':

@@ -23,6 +23,8 @@ on:
         value: ${{ jobs.changes.outputs.plan }}
       b0:
         value: ${{ jobs.changes.outputs.b0 }}
+      b0_required:
+        value: ${{ jobs.changes.outputs.b0_required }}
       ground_truth:
         value: ${{ jobs.changes.outputs.ground_truth }}
       filterbuilder:
@@ -36,6 +38,11 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       b0: ${{ steps.plan.outputs.b0 }}
+      # Narrow gate for the B0 job: the b0 axis above stays the authority for
+      # "B0 files changed"; this flag additionally requires a plugin,
+      # composition, lock, contract or release path, so backend-only changes
+      # stop paying for a sealed-pack build without changing the axis itself.
+      b0_required: ${{ steps.plan.outputs.b0_required }}
       backend: ${{ steps.plan.outputs.backend }}
       frontend: ${{ steps.plan.outputs.frontend }}
       tooling: ${{ steps.plan.outputs.tooling }}
@@ -65,3 +72,6 @@ jobs:
             git diff --name-only --no-renames "$BASE_SHA" "$HEAD_SHA" > changed-files.txt
           fi
           python3 scripts/ci/pre_push_path_class.py --files-from changed-files.txt --json --github-output
+          # Same changed-files.txt, same classifier output: only the B0 job's
+          # own inputs narrow the b0 axis into b0_required.
+          python3 scripts/ci/run_checks.py --files-from changed-files.txt --b0-scope

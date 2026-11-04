@@ -16,6 +16,12 @@ on:
 permissions:
   contents: read
 
+# PR：同一 PR 的旧运行被新提交覆盖时取消，省掉重复的 30 分钟级 job。
+# main：组键退化为分支 ref 且 cancel-in-progress=false，主线运行只排队、不互相取消。
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   changes:
     uses: ./.github/workflows/check-plan.yml
@@ -90,6 +96,9 @@ jobs:
     needs: changes
     if: needs.changes.outputs.checks == 'true'
     runs-on: ubuntu-latest
+    # 与 nightly 的 45 分钟有界运行区分：PR 只跑有界 Python 计划，30 分钟足够；
+    # 挂起即失败，避免 runner 被无限占用。
+    timeout-minutes: 30
     env:
       FQ_CRM_ADMINS: admin
     steps:
@@ -125,6 +134,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: frontend-vue3
@@ -152,6 +162,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.dependencies == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -189,6 +200,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.deployment == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     # 用 MB 级 seed DB 启动真实容器并探活；绝不复制生产 141GB DuckDB。
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -304,7 +316,9 @@ jobs:
 
   b0-contract-build:
     needs: changes
-    if: needs.changes.outputs.b0 == 'true'
+    # b0 轴仍是"是否碰到 B0 相关路径"的唯一权威；b0_required 再把它收窄到
+    # 组合包/锁文件/插件边界/发布相关输入，backend-only 变更不再跑 B0。
+    if: needs.changes.outputs.b0 == 'true' && needs.changes.outputs.b0_required == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -386,6 +400,8 @@ jobs:
       - b0-contract-build
     if: always()
     runs-on: ubuntu-latest
+    # 门禁本身只有几个 echo/结果判断步骤；超时只防 runner 挂起，不放宽判定。
+    timeout-minutes: 10
     steps:
       - name: Path plan must succeed
         if: needs.changes.result != 'success'
