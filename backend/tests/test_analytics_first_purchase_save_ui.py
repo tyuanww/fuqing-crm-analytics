@@ -18,6 +18,7 @@ from backend.analytics_first_purchase_analysis_app import create_first_purchase_
 from backend.services.analytics.first_purchase.crm_identity import CRMFirstPurchaseIdentityResolver
 from backend.services.analytics.first_purchase.save_policy import FirstPurchaseSavePolicy
 from backend.services.analytics.first_purchase.saved import FirstPurchaseSavedAnalysisStore
+from backend.tests.analytics_run_support import bind_contract_workspace
 from backend.tests.test_analytics_first_purchase_analysis import analysis_counts, private_dir, succeed_first_purchase
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -87,6 +88,9 @@ def test_crm_login_save_unknown_reconcile_and_replay_over_real_http(tmp_path):
     policy = FirstPurchaseSavePolicy("ui-no-age-v1", frozenset({"a" * 64}), None, None, check_freshness=False)
     node = shutil.which(os.environ.get("NODE", "node"))
     assert node is not None, "Node 24 is required for the actual plugin probe"
+    # The probe imports crm-knowledge sources through @shine-mage/dsh-contracts;
+    # each sharded test process binds the workspace package itself.
+    bind_contract_workspace(node)
     with serve(crm) as crm_origin:
         app = create_first_purchase_analysis_app(runs, store,
             CRMFirstPurchaseIdentityResolver(crm_origin, frozenset({"synthetic-demo"})), save_policy=lambda: policy)

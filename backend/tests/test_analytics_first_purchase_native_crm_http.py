@@ -17,6 +17,7 @@ from backend.analytics_first_purchase_native import create_first_purchase_native
 from backend.services.analytics.first_purchase.crm_identity import CRMFirstPurchaseIdentityResolver
 from backend.services.analytics.first_purchase.save_policy import FirstPurchaseSavePolicy
 from backend.services.analytics.first_purchase.saved import FirstPurchaseSavedAnalysisStore
+from backend.tests.analytics_run_support import bind_contract_workspace
 from backend.tests.test_analytics_first_purchase_analysis import analysis_counts, private_dir
 from backend.tests.test_analytics_first_purchase_native import EXPECTED, RUNTIME, SESSION, auth, fp_actor, native_prompt, runtime_headers
 from backend.tests.test_analytics_first_purchase_native_identity import config
@@ -65,8 +66,7 @@ def test_fresh_crm_owner_native_query_save_ack_loss_and_replay_over_http(tmp_pat
     assert node is not None
     # Source-level probe without a package-manager install: bind the owned
     # generated-contract package exactly as the B0 pipeline does.
-    subprocess.run([node, str(ROOT / "scripts/dsh-b0/contracts-link.mjs")],
-                   check=True, capture_output=True, text=True, timeout=60)
+    bind_contract_workspace(node)
     with serve(crm) as crm_origin:
         service = create_first_purchase_analysis_app(runs, saved,
             CRMFirstPurchaseIdentityResolver(crm_origin, frozenset({"crm-owner"}), allow_query=True),
