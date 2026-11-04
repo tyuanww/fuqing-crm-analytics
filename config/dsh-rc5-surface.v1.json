@@ -1,0 +1,565 @@
+{
+  "schema_version": "dsh-rc5-surface/v1",
+  "target": {
+    "release": "0.2.1-rc.5",
+    "commit": "b830ec950faba0a46dda564be3e2d854afed94f1",
+    "packages": {
+      "@deepseek-ai/cordis": "4.0.5",
+      "@deepseek-ai/dsh-tools": "0.2.1-rc.5"
+    },
+    "node_major": 24
+  },
+  "sources": {
+    "slot_catalog": "packages/extensions/cordis-client-runner/src/client/slot-catalog.ts (generated CLIENT_SLOT_API, 103 keys)",
+    "slot_register": "packages/client/ui-slots/src/index.ts:1161-1235 (list needs id, keyed needs key, undeclared name throws)",
+    "dsh_client_manifest": "packages/client/modules/src/client/manifest.ts:173-193; packages/client/modules/src/index.ts:844-879",
+    "connection_fetch": "packages/client/connection/src/rpc.ts:147-181 (path below /api, GET/HEAD/POST, buffered/streaming, async disposer)",
+    "tool_dsl": "packages/core/tools/README.md:34 (defineTool is the only rc.5 tool definition)",
+    "plugin_config": "docs/user/develop/basic/config.md:78 (any deployment-varying value must be a Config field)"
+  },
+  "privateSlots": [
+    {
+      "key": "cockpit.crm",
+      "declaredBy": "dsh-plugins/analytics-workbench/src/client/index.tsx (children of the `main` keyed entry)",
+      "reason": "Private child slot, legal in rc.5 because the parent register call declares it; not discoverable in the official catalog."
+    }
+  ],
+  "routeOwnership": {
+    "ownerModule": "dsh-plugins/analytics-workbench/src/connection-fetch-ledger.mjs",
+    "debt": [
+      {
+        "path": "dsh-plugins/analytics-workbench/src/first-purchase-save-api.ts",
+        "routes": 1,
+        "reason": "P2d (#216) owns this file; the route joins the shared ledger in the P3-1 follow-up"
+      },
+      {
+        "path": "dsh-plugins/crm-knowledge/src/host.ts",
+        "routes": 2,
+        "reason": "P2d (#216) owns this file; both streaming routes join the shared ledger in the P3-1 follow-up"
+      }
+    ]
+  },
+  "tools": {
+    "dsl": "defineTool"
+  },
+  "envDeploymentPrefixes": [
+    "B0_"
+  ],
+  "slots": [
+    {
+      "key": "conversation.approval.detail",
+      "kind": "single",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.chat.assistant-actions",
+      "kind": "list",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.chat.commandview",
+      "kind": "keyed",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.chat.flow",
+      "kind": "single",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.chat.message.images",
+      "kind": "single",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.chat.node",
+      "kind": "keyed",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.chat.reasoning.body",
+      "kind": "single",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.chat.turnTail",
+      "kind": "list",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.chat.user.images",
+      "kind": "single",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.composer",
+      "kind": "chain",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.composer.bar",
+      "kind": "single",
+      "scope": "session-maybe"
+    },
+    {
+      "key": "conversation.composer.dock",
+      "kind": "list",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.header",
+      "kind": "single",
+      "scope": "session-maybe"
+    },
+    {
+      "key": "conversation.header.leading",
+      "kind": "single",
+      "scope": "root"
+    },
+    {
+      "key": "conversation.hero.agentPreset",
+      "kind": "single",
+      "scope": "session-maybe"
+    },
+    {
+      "key": "conversation.hero.brand.mark",
+      "kind": "single",
+      "scope": "root"
+    },
+    {
+      "key": "conversation.hero.options",
+      "kind": "list",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.hero.workspace",
+      "kind": "single",
+      "scope": "root"
+    },
+    {
+      "key": "conversation.hero.workspace.directoryFlow",
+      "kind": "single",
+      "scope": "root"
+    },
+    {
+      "key": "conversation.input.activity",
+      "kind": "single",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.input.attachments",
+      "kind": "single",
+      "scope": "session-maybe"
+    },
+    {
+      "key": "conversation.input.dock",
+      "kind": "list",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.input.left",
+      "kind": "list",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.input.model",
+      "kind": "single",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.input.model.label",
+      "kind": "single",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.input.overlay",
+      "kind": "list",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.input.permission",
+      "kind": "single",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.input.plan",
+      "kind": "single",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.input.right",
+      "kind": "list",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.plan-review.actions",
+      "kind": "list",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.session",
+      "kind": "single",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.session.header",
+      "kind": "single",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.session.header.actions",
+      "kind": "list",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.session.header.corner",
+      "kind": "single",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.session.header.lineage",
+      "kind": "single",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.session.header.utilities",
+      "kind": "list",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.session.header.views.actions",
+      "kind": "list",
+      "scope": "root"
+    },
+    {
+      "key": "conversation.trajectory.images",
+      "kind": "single",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.user.text.node",
+      "kind": "keyed",
+      "scope": "session"
+    },
+    {
+      "key": "conversation.view",
+      "kind": "list",
+      "scope": "session"
+    },
+    {
+      "key": "deliverables.file.actions",
+      "kind": "list",
+      "scope": "session"
+    },
+    {
+      "key": "deliverables.review.file.actions",
+      "kind": "list",
+      "scope": "session"
+    },
+    {
+      "key": "main",
+      "kind": "keyed",
+      "scope": "root"
+    },
+    {
+      "key": "main.conversation",
+      "kind": "single",
+      "scope": "session-maybe"
+    },
+    {
+      "key": "plugins.add.actions",
+      "kind": "list",
+      "scope": "root"
+    },
+    {
+      "key": "plugins.bundle.activation",
+      "kind": "keyed",
+      "scope": "root"
+    },
+    {
+      "key": "plugins.bundle.config",
+      "kind": "keyed",
+      "scope": "root"
+    },
+    {
+      "key": "plugins.detail.actions",
+      "kind": "list",
+      "scope": "root"
+    },
+    {
+      "key": "plugins.detail.badge",
+      "kind": "list",
+      "scope": "root"
+    },
+    {
+      "key": "plugins.detail.section",
+      "kind": "list",
+      "scope": "root"
+    },
+    {
+      "key": "plugins.item",
+      "kind": "list",
+      "scope": "root"
+    },
+    {
+      "key": "plugins.row.config",
+      "kind": "keyed",
+      "scope": "root"
+    },
+    {
+      "key": "plugins.tab",
+      "kind": "list",
+      "scope": "root"
+    },
+    {
+      "key": "rightbar",
+      "kind": "single",
+      "scope": "root"
+    },
+    {
+      "key": "rightbar.session",
+      "kind": "single",
+      "scope": "session"
+    },
+    {
+      "key": "root",
+      "kind": "single",
+      "scope": "root"
+    },
+    {
+      "key": "settings.action",
+      "kind": "list",
+      "scope": "root"
+    },
+    {
+      "key": "settings.close",
+      "kind": "single",
+      "scope": "root"
+    },
+    {
+      "key": "settings.general.item",
+      "kind": "list",
+      "scope": "root"
+    },
+    {
+      "key": "settings.header",
+      "kind": "single",
+      "scope": "root"
+    },
+    {
+      "key": "settings.launcher",
+      "kind": "single",
+      "scope": "root"
+    },
+    {
+      "key": "settings.models.footer",
+      "kind": "list",
+      "scope": "root"
+    },
+    {
+      "key": "settings.models.provider-card",
+      "kind": "keyed",
+      "scope": "root"
+    },
+    {
+      "key": "settings.models.sign-in",
+      "kind": "single",
+      "scope": "root"
+    },
+    {
+      "key": "settings.onboarding",
+      "kind": "list",
+      "scope": "root"
+    },
+    {
+      "key": "settings.plugins.tab",
+      "kind": "list",
+      "scope": "root"
+    },
+    {
+      "key": "settings.section",
+      "kind": "list",
+      "scope": "root"
+    },
+    {
+      "key": "settings.trigger",
+      "kind": "single",
+      "scope": "root"
+    },
+    {
+      "key": "shell.bottom",
+      "kind": "single",
+      "scope": "root"
+    },
+    {
+      "key": "shell.leading",
+      "kind": "single",
+      "scope": "root"
+    },
+    {
+      "key": "shell.overlay",
+      "kind": "list",
+      "scope": "root"
+    },
+    {
+      "key": "shell.quota-notice",
+      "kind": "chain",
+      "scope": "root"
+    },
+    {
+      "key": "sidebar",
+      "kind": "single",
+      "scope": "root"
+    },
+    {
+      "key": "sidebar.brand.mark",
+      "kind": "single",
+      "scope": "root"
+    },
+    {
+      "key": "sidebar.brand.name",
+      "kind": "single",
+      "scope": "root"
+    },
+    {
+      "key": "sidebar.chat.conversation",
+      "kind": "single",
+      "scope": "session"
+    },
+    {
+      "key": "sidebar.footer.action",
+      "kind": "list",
+      "scope": "root"
+    },
+    {
+      "key": "sidebar.panellist",
+      "kind": "list",
+      "scope": "root"
+    },
+    {
+      "key": "sidebar.panellist.actions",
+      "kind": "list",
+      "scope": "root"
+    },
+    {
+      "key": "sidebar.right.pane.tab",
+      "kind": "keyed",
+      "scope": "session"
+    },
+    {
+      "key": "sidebar.right.pane.tab.title",
+      "kind": "keyed",
+      "scope": "session"
+    },
+    {
+      "key": "sidebar.right.tab.document",
+      "kind": "keyed",
+      "scope": "session"
+    },
+    {
+      "key": "sidebar.right.tab.document.action",
+      "kind": "keyed",
+      "scope": "session"
+    },
+    {
+      "key": "sidebar.right.tab.document.actions",
+      "kind": "list",
+      "scope": "session"
+    },
+    {
+      "key": "sidebar.right.tab.document.office.pdf",
+      "kind": "keyed",
+      "scope": "session"
+    },
+    {
+      "key": "sidebar.right.tab.document.unpreviewable",
+      "kind": "list",
+      "scope": "session"
+    },
+    {
+      "key": "sidebar.right.tab.files.actions",
+      "kind": "list",
+      "scope": "session"
+    },
+    {
+      "key": "sidebar.right.tab.guide",
+      "kind": "chain",
+      "scope": "session"
+    },
+    {
+      "key": "sidebar.right.tab.guide.actions",
+      "kind": "list",
+      "scope": "root"
+    },
+    {
+      "key": "sidebar.right.tab.guide.entry",
+      "kind": "keyed",
+      "scope": "session"
+    },
+    {
+      "key": "sidebar.right.tab.menu.item",
+      "kind": "list",
+      "scope": "session"
+    },
+    {
+      "key": "sidebar.session.row.hover",
+      "kind": "list",
+      "scope": "root"
+    },
+    {
+      "key": "sidebar.session.row.leading",
+      "kind": "list",
+      "scope": "root"
+    },
+    {
+      "key": "sidebar.settings",
+      "kind": "single",
+      "scope": "root"
+    },
+    {
+      "key": "sidebar.toggle.badge",
+      "kind": "single",
+      "scope": "root"
+    },
+    {
+      "key": "sidebar.workspaces",
+      "kind": "single",
+      "scope": "root"
+    },
+    {
+      "key": "sidebar.workspaces.directoryFlow",
+      "kind": "single",
+      "scope": "root"
+    },
+    {
+      "key": "sidebar.workspaces.session.menu.item",
+      "kind": "list",
+      "scope": "root"
+    },
+    {
+      "key": "sidebar.workspaces.session.row.action",
+      "kind": "list",
+      "scope": "root"
+    },
+    {
+      "key": "tool.call.images",
+      "kind": "single",
+      "scope": "session"
+    },
+    {
+      "key": "tool.call.toolview",
+      "kind": "keyed",
+      "scope": "session"
+    },
+    {
+      "key": "tool.view.cordis",
+      "kind": "keyed",
+      "scope": "session"
+    },
+    {
+      "key": "workspace.toast",
+      "kind": "keyed",
+      "scope": "root"
+    }
+  ]
+}
