@@ -256,6 +256,9 @@ print('B0 exact Python closure verified')
     'backend/tests/analytics_native_probe.py', 'backend/tests/analytics_query_native_fault_probe.py', ...pyTests]);
   // Workbench core/build/private loader checks run in its pinned author CI.
   // Main keeps its orchestration units and the original backend/query checks.
+  // Query policy: verify generated single-source data and strict TypeScript
+  // before the host tests import the shipped lib artifact.
+  run(process.execPath, ['dsh-plugins/query-agent/build.mjs', '--typecheck']);
   run(process.execPath, ['--test',
     'scripts/dsh-b0/gateway-policy.test.mjs', 'scripts/dsh-b0/transport-safety.test.mjs', 'scripts/dsh-b0/mock-provider.test.mjs',
     'scripts/dsh-b0/recovery-model-gate.test.mjs', 'scripts/dsh-b0/session-recovery.test.mjs',
@@ -265,7 +268,8 @@ print('B0 exact Python closure verified')
     'scripts/dsh-b0/html-host-browser-cleanup.test.mjs',
     'scripts/dsh-b0/lifecycle-observer.test.mjs', 'scripts/dsh-b0/host-feasibility.test.mjs', 'scripts/dsh-b0/compatibility-matrix.test.mjs', 'scripts/dsh-b0/permission-fence.test.mjs', 'scripts/dsh-b0/ui-seams.test.mjs',
     'scripts/dsh-b0/package-manager-env.test.mjs', 'scripts/dsh-b0/diagnostic-sink.test.mjs',
-    'dsh-plugins/query-agent/test/package.test.mjs', 'scripts/ops/weknora-production-scope.test.mjs',
+    'dsh-plugins/query-agent/test/package.test.mjs', 'dsh-plugins/query-agent/test/tool-policy.test.mjs',
+    'dsh-plugins/query-agent/test/tool-policy-registry.test.mjs', 'scripts/ops/weknora-production-scope.test.mjs',
     'scripts/release/plugin-pack.test.mjs', 'scripts/release/plugin-candidate.test.mjs', 'scripts/release/plugin-host-evidence.test.mjs', 'scripts/release/profile.test.mjs', 'scripts/release/plugin-boundary.test.mjs', 'scripts/release/supply-chain.test.mjs',
     'scripts/release/runtime-host-evidence.test.mjs', 'scripts/release/profile-packs.test.mjs', 'scripts/release/release-profile-packs.test.mjs',
     'scripts/crm-calibration/profile-packs.test.mjs',

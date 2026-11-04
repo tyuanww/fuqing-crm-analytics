@@ -111,11 +111,37 @@ curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:18092/
 
 只恢复同一次部署前保存的 adapter/helper 文件对，并再次核对 SHA-256；若这次改动了运行时文件，按授权受控重启并复测端口和日志。当前恢复目录中的版本仍保留固定 allowlist 和读取前校验，但缺少读取后二次校验与 effect 释放；恢复会降低生命周期保护。安全要求高于可用性时，应移除/禁用 WeKnora 工具而不是静默回滚。`weknora-production-overlay.v1.json` 只是审计 sidecar，回滚或删除它不会改变运行行为。
 
+## 工具策略单源、构建与类型检查
+
+`src/tool-policy.ts` 是唯一实现；允许、隐藏和显式禁止的工具名不写在源码里，而由 `config/query-agent-tool-policy.v1.json` 提供：
+
+| 文件 | 作用 |
+|---|---|
+| `config/query-agent-tool-policy.v1.json` | 单源名单：`allowed`（域工具 allowlist）、`hidden_inherited`（从 schema 隐藏的官方继承工具）、`official_denied`（保持可见但被 guard 拒绝的官方工具） |
+| `config/dsh-official-tools.v1.json` | 已评审的 DSH 0.2.1-rc.3 `docs/tool-catalog.md` 快照（68 个唯一官方工具名） |
+| `build.mjs` | 读取单源，用仓库固定 TypeScript 6.0.3 做类型检查，并把生成数据内联进单文件 `lib/tool-policy.js` |
+| `lib/tool-policy.data.d.ts` | 生成的类型声明，供 typecheck 使用；不随包发布 |
+
+构建优先使用 `dsh-plugins/plugin-kit/build-tools`（或 `B0_BUILD_TOOLS`）里的 TypeScript 6.0.3，也可显式设置 `DSH_TSC=/absolute/path/to/typescript`（包目录或 `typescript.js`）。构建本身包含类型检查；`node build.mjs --typecheck` 只做类型检查并校验已提交的类型声明未漂移，不写文件，适合 CI。策略行为与迁移前逐条一致：`hidden_inherited` 仍只用于 `ctx.tools.restrict({ deny })`，guard 仍 deny-by-default；`official_denied` 只是把原本由 guard 兜底拒绝的官方名字登记到单源，不改变任何允许/禁止决定。
+
+升级 DSH 后，用实际工具表跑漂移门禁：
+
+```sh
+DSH_TOOL_CATALOG=/absolute/dsh/docs/tool-catalog.md node --test test/*.test.mjs
+# 或 DSH_UPSTREAM=/absolute/dsh
+```
+
+测试从 `### \`tool_name\`` 标题读取官方工具名；出现未登记的新名字会以 `UNREGISTERED_OFFICIAL_TOOL <name>` 失败。没有工具表时该用例 skip；设置 `QUERY_AGENT_OFFICIAL_CATALOG_REQUIRED=1` 可要求必须提供工具表，否则失败。更新工具表后，先评审新工具的权限，再把名字加入 `allowed`、`hidden_inherited` 或 `official_denied`，并同步官方快照；不要为了变绿直接扩大 allowlist。
+
 ## 本地检查
 
 ```sh
-node --test dsh-plugins/query-agent/test/package.test.mjs
-# npm 只检查包元数据与默认发布面；正式 DSH pack 由 scripts/release/plugin-pack.mjs 生成。
 cd dsh-plugins/query-agent
+node build.mjs
+node build.mjs --typecheck
+node --test test/*.test.mjs
+DSH_TOOL_CATALOG=/absolute/dsh/docs/tool-catalog.md QUERY_AGENT_OFFICIAL_CATALOG_REQUIRED=1 \
+  node --test test/tool-policy-registry.test.mjs
+# npm 只检查包元数据与默认发布面；正式 DSH pack 由 scripts/release/plugin-pack.mjs 生成。
 npm pack --dry-run --json
 ```
