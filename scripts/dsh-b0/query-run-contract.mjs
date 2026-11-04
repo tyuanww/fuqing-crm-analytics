@@ -73,7 +73,7 @@ const ast = await openapiTS(schema, { alphabetize: true });
 const typed = `/** Generated query-run store contract; do not edit. Not an HTTP API. OpenAPI SHA-256: ${digest} */\n${astToString(ast)}`;
 const artifacts = new Map([
   ['backend/contracts/analytics-query-run.openapi.json', JSON.stringify({ ...schema, 'x-schema-sha256': digest }, null, 2) + '\n'],
-  ['dsh-plugins/analytics-workbench/src/query-run-contract.generated.d.ts', typed],
+  ['dsh-plugins/contracts/analytics-workbench/query-run-contract.generated.d.ts', typed],
 ]);
 for (const [relative, content] of artifacts) {
   const path = join(root, relative);
@@ -81,8 +81,7 @@ for (const [relative, content] of artifacts) {
   else if (await readFile(path, 'utf8') !== content) throw new Error(`query-run contract drift: ${relative}`);
 }
 const program = ts.createProgram([
-  join(root, 'dsh-plugins/analytics-workbench/src/query-run-contract.generated.d.ts'),
-  join(root, 'dsh-plugins/analytics-workbench/test/query-run-contract.typecheck.ts'),
+  join(root, 'dsh-plugins/contracts/analytics-workbench/query-run-contract.generated.d.ts'),
 ], {
   strict: true, noEmit: true, target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext,
   moduleResolution: ts.ModuleResolutionKind.Bundler, types: [], skipLibCheck: false,

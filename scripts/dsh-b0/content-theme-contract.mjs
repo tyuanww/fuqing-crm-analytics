@@ -8,8 +8,8 @@ import { fileURLToPath } from 'node:url';
 const repository = fileURLToPath(new URL('../..', import.meta.url));
 export const sourcePath = 'dsh-plugins/shine-brand/contracts/content-theme.v1.json';
 export const consumers = [
-  'dsh-plugins/analytics-workbench/src/client/competition-shell/content-theme.generated.ts',
-  'dsh-plugins/crm-knowledge/src/client/content-theme.generated.ts',
+  'dsh-plugins/contracts/analytics-workbench/client/competition-shell/content-theme.generated.ts',
+  'dsh-plugins/contracts/crm-knowledge/client/content-theme.generated.ts',
 ];
 
 const fields = {

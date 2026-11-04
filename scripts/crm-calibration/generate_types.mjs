@@ -18,7 +18,7 @@ for (const [schemaFile, typeFile] of [
   const schema = JSON.parse(await readFile(join(root, 'backend/contracts', schemaFile)));
   const text = astToString(await openapiTS(schema, { alphabetize: true }));
   const consumer = schemaFile === 'crm-knowledge.openapi.json' ? 'knowledge' : 'crm-knowledge';
-  const target = join(root, 'dsh-plugins', consumer, 'src', typeFile);
+  const target = join(root, 'dsh-plugins/contracts', consumer, typeFile);
   if (process.argv.includes('--check')) assert.equal(await readFile(target, 'utf8'), text, `HTTP type drift: ${typeFile}`);
   else await writeFile(target, text);
 }
