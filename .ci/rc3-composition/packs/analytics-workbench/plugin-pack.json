@@ -3,28 +3,40 @@
   "package_name": "@shine-mage/dsh-analytics-workbench-b0",
   "package_version": "0.0.0-b0",
   "dsh_pin": "0.2.1-rc.3",
-  "source_dsh_pin": "0.2.1-rc.3",
-  "source_sha": "63718e782d4f3353f324f4d50fa83067a97b1372",
+  "source_sha": "f3c75ca6485144f0777da73a9b5ff9fbe26d3245",
   "source_dirty": false,
   "tarball": {
     "name": "shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
-    "bytes": 498311,
-    "sha256": "161b14239033f5c701acfe1891a1aff23839859d38c8e0bfef3cbd92712c44ad"
+    "bytes": 500219,
+    "sha256": "1e5d6e559aceff14dd1afd55e0f835242b6fd7a57b870e253770c0c67eb0d005"
   },
+  "entries": [
+    "bundled-dependencies.json",
+    "cordis.patch.yml",
+    "lib/client.js",
+    "lib/index.js",
+    "lib/page-tools.js",
+    "lib/skills.js",
+    "lib/tool.js",
+    "package.json",
+    "third-party-licenses/acorn.txt"
+  ],
+  "activation": "NOT_RUN",
+  "state_path": "NOT_APPLICABLE_PLUGIN_PACK_ONLY",
   "generated_bytes_provenance": {
     "schema_version": "dsh-generated-bytes/v1",
     "status": "PASS",
     "source": {
-      "git_sha": "63718e782d4f3353f324f4d50fa83067a97b1372",
-      "tree_sha256": "de08830c4b561d715ff7a6a8621f515365063e5eea13a47e6b6f7559dd3daf0c",
-      "entries": 676,
-      "bytes": 4148280,
-      "sha256": "de08830c4b561d715ff7a6a8621f515365063e5eea13a47e6b6f7559dd3daf0c"
+      "git_sha": "f3c75ca6485144f0777da73a9b5ff9fbe26d3245",
+      "tree_sha256": "6fce096d5d9fa7cb33eb2fe374e0e50456566c3b2106f47d8f3b94907f49a04b",
+      "entries": 678,
+      "bytes": 4187665,
+      "sha256": "6fce096d5d9fa7cb33eb2fe374e0e50456566c3b2106f47d8f3b94907f49a04b"
     },
     "generated_tree": {
-      "sha256": "4c06ebfc830b811531c76faacc3aca6185161f70c9bf41cb1b021c3ebfe23640",
+      "sha256": "c23c0c179f987ae0cec5dbdff3a3b218d25f91509251fac7d64bf001127cc76a",
       "entries": 7,
-      "bytes": 1678121
+      "bytes": 1685230
     },
     "generated_files": [
       {
@@ -38,8 +50,8 @@
         "path": "lib/client.js",
         "type": "file",
         "mode": 420,
-        "bytes": 1353037,
-        "sha256": "d2a250467a7becf971b08d9f4c7c3d1ad8abca2b3b6d6cfbbe2616890a1dafab"
+        "bytes": 1360146,
+        "sha256": "8f8cfab218e24bb6343ac5d1a808c255b860121e49e511f3e829cf7b49161753"
       },
       {
         "path": "lib/index.js",
@@ -70,50 +82,23 @@
         "sha256": "e854349cb5187e2b045f280f8330f19da0e7d0acbe0ff4f07e8c747f710a4924"
       }
     ],
-    "toolchain": {
-      "sdk_version": "0.2.1-rc.3",
-      "upstream_sha": "1f81c047fc48fa190a683e469daa699857e9afe8",
-      "upstream_lock_sha256": "911b049924e8256d8d6e684235cf935ca75b28fd0dd46f0c3b316a51c2cf5dc1",
-      "node_major": 24,
-      "pnpm": "11.28.2",
-      "upstream_pnpm": "11.28.5",
-      "typescript": "6.0.3",
-      "esbuild": "0.25.12",
-      "react": "18.3.1",
-      "react_types": "18.3.31",
-      "node_types": "22.20.1",
-      "release_lane": null
-    },
     "builder": {
       "status": "PASS",
       "clean": true,
       "isolated": true,
       "node": "v24.19.0",
       "pnpm": "11.28.2",
-      "platform": "darwin",
-      "arch": "arm64",
+      "platform": "linux",
+      "arch": "x64",
       "command": "node plugin/build.mjs",
       "network_mode": "offline"
     },
     "builder_receipt_schema_version": "dsh-plugin-build/v1",
-    "builder_receipt_sha256": "d5bd25eba5fd443e505b9297fb82798f0b4b1ab267a876a1bd3a7c59fbf23f3a",
+    "builder_receipt_sha256": "d3d26389918a4301492a6217d74f96ec54dc0d00c2cd5e3954840de4a980cf4e",
     "tarball": {
       "name": "shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
-      "bytes": 498311,
-      "sha256": "161b14239033f5c701acfe1891a1aff23839859d38c8e0bfef3cbd92712c44ad"
+      "bytes": 500219,
+      "sha256": "1e5d6e559aceff14dd1afd55e0f835242b6fd7a57b870e253770c0c67eb0d005"
     }
-  },
-  "entries": [
-    "bundled-dependencies.json",
-    "cordis.patch.yml",
-    "lib/client.js",
-    "lib/index.js",
-    "lib/page-tools.js",
-    "lib/skills.js",
-    "lib/tool.js",
-    "package.json",
-    "third-party-licenses/acorn.txt"
-  ],
-  "activation": "NOT_RUN",
-  "state_path": "NOT_APPLICABLE_PLUGIN_PACK_ONLY"
+  }
 }

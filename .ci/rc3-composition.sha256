@@ -1,7 +1,7 @@
 0a9e566c2411828321e1971695e05fa52da86e33c65a04a56c056556c8d062db  .ci/rc3-composition/domain/board-components-pack.json
 22245ab95511b13bf38ae8b2a5e761f6d5a3aaa413ba55b48ce1a8fcf7390182  .ci/rc3-composition/domain/shine-mage-board-components-0.1.0.tgz
-02cb0b561cf166a76aa6bf3fbaf5d96a4a968367b18ba872366770404fa2798a  .ci/rc3-composition/packs/analytics-workbench/plugin-pack.json
-161b14239033f5c701acfe1891a1aff23839859d38c8e0bfef3cbd92712c44ad  .ci/rc3-composition/packs/analytics-workbench/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz
+785e21b0327eb111831562212e54f61bbc476e9ead675be3c42f73d837734f59  .ci/rc3-composition/packs/analytics-workbench/plugin-pack.json
+1e5d6e559aceff14dd1afd55e0f835242b6fd7a57b870e253770c0c67eb0d005  .ci/rc3-composition/packs/analytics-workbench/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz
 a363edc1943a371dfa6d731c52406ca6962b17c2f94dd22d1b5984011833ba94  .ci/rc3-composition/packs/crm-knowledge/plugin-pack.json
 a4a6e5559da5e3d9685e976d2b81682aae8ebe39ac467bc0130c2d25419b2687  .ci/rc3-composition/packs/crm-knowledge/shine-mage-dsh-crm-knowledge-0.0.0-crm.5.tgz
 d09889991f5613153bcb11d70e0305688fbcb06322e81bb58c1e8a6da901bb63  .ci/rc3-composition/packs/knowledge/plugin-pack.json

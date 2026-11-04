@@ -34,9 +34,9 @@
       "directory": "analytics-workbench",
       "repository": "tyuanww/dsh-analytics-workbench",
       "ref": "commit",
-      "sha": "63718e782d4f3353f324f4d50fa83067a97b1372",
-      "manifest_sha256": "02cb0b561cf166a76aa6bf3fbaf5d96a4a968367b18ba872366770404fa2798a",
-      "pack_sha256": "161b14239033f5c701acfe1891a1aff23839859d38c8e0bfef3cbd92712c44ad",
+      "sha": "f3c75ca6485144f0777da73a9b5ff9fbe26d3245",
+      "manifest_sha256": "785e21b0327eb111831562212e54f61bbc476e9ead675be3c42f73d837734f59",
+      "pack_sha256": "1e5d6e559aceff14dd1afd55e0f835242b6fd7a57b870e253770c0c67eb0d005",
       "status": "PASS"
     },
     {
