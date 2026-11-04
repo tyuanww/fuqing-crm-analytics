@@ -1,6 +1,7 @@
 
 from __future__ import annotations
 
+import contextvars
 from contextlib import contextmanager
 from datetime import date, datetime, timedelta
 from typing import Any, Iterable, Optional
@@ -50,6 +51,11 @@ _ZERO_METRICS: dict[str, float | int] = {
 }
 
 
+_BATCH_CONNECTION: contextvars.ContextVar[Any | None] = contextvars.ContextVar(
+    "product_customer_batch_connection", default=None
+)
+
+
 def _validate_range(start_date: str, end_date: str) -> tuple[date, date]:
     try:
         start = datetime.strptime(start_date, "%Y-%m-%d").date()
@@ -72,6 +78,9 @@ def _default_comparison(start: date, end: date) -> tuple[str, str]:
 
 @contextmanager
 def _read_transaction(conn: Any):
+    if _BATCH_CONNECTION.get() is conn:
+        yield
+        return
     conn.execute("BEGIN TRANSACTION")
     try:
         yield
@@ -80,6 +89,27 @@ def _read_transaction(conn: Any):
         raise
     else:
         conn.execute("COMMIT")
+
+
+@contextmanager
+def product_customer_batch_transaction():
+    """Keep one read transaction across the windows of a batch request.
+
+    Warehouse reads are pinned by their frame and revision, so they keep their
+    per-window path. The legacy orders source has no revision, so a batch must
+    share one connection and transaction or two windows can read different
+    snapshots while both report data_version "unknown".
+    """
+    if current_warehouse_read() is not None:
+        yield
+        return
+    conn = get_connection()
+    token = _BATCH_CONNECTION.set(conn)
+    try:
+        with _read_transaction(conn):
+            yield
+    finally:
+        _BATCH_CONNECTION.reset(token)
 
 
 def _coverage(
@@ -319,7 +349,9 @@ def get_product_customer_overview(
                 raise AggregateCacheMissError("所选商品数据范围尚未预热")
             names = list(PRODUCT_GROUPS)
 
-    conn = get_connection()
+    conn = _BATCH_CONNECTION.get()
+    if conn is None:
+        conn = get_connection()
     with _read_transaction(conn):
         source = orders_data_version(conn)
         data_start = datetime.strptime(source["data_start"], "%Y-%m-%d").date() if source["data_start"] else None

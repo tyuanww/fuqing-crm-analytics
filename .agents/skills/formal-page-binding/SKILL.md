@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 ## 来源重验失败后的确认保存
 
-要形式化保护的承诺是：来源重验失败的首次确认不能新增页面版本或成功回执。破坏它会把来源失效的修改保存为正式页面。真实 SQLite 检查还覆盖已提交确认的同键重试返回原版本，这是具体运行验证，不是另一个形式化证明。
+要形式化保护的承诺是：来源重验失败的首次确认不能新增页面版本或成功回执；已保存预览的回放只有在来源未撤权时才返回成功。真实 SQLite 检查还覆盖已提交确认的同键重试返回原版本，以及来源临时不可用时回放保持幂等。
 
 在仓库根目录执行一条命令：
 
@@ -20,16 +20,16 @@ python3 scripts/formal/verify-native-page-confirm.py
 
 运行器先检查覆盖记录，再检查 TLA+ 模型，并在小型隔离 SQLite 中执行真实 `PageDocumentStore.confirm`。它在临时源码副本中删除 `binding_error` 拒绝分支，要求模型发现反例、真实代码出现错误保存，最后重新检查未修改的维护源。临时副本及数据库写入新建的 `.context/formal-page-confirm/` 时间目录，维护源不变。`--output` 可指定一个尚不存在的证据目录。
 
-当前有限模型包含一个已保存 v1、一个待确认预览、一个幂等键、两个确认请求、来源重验成功或失败，以及回执送达或丢失。穷举这组状态的全部可达交错，不检查活性。当前基线为 298 个生成状态、115 个不同状态，最大深度 9。
+当前有限模型包含一个已保存 v1、一个待确认预览、一个幂等键、两个确认请求、来源重验的成功、临时不可用或撤权三种结果，以及回执送达或丢失。回放集合记录哪些请求走了已保存预览的回放路径。穷举这组状态的全部可达交错，不检查活性。当前基线为 514 个生成状态、193 个不同状态，最大深度 9。
 
 原子步骤按真实代码划分：
 
 - `Observe` 对应 `PageDocumentStore.confirm` 的只读事务及 `_confirmation`。
 - `Validate` 对应编码候选之后的 `PageRequestContext.revalidate`。这里只建模该调用返回成功或抛出错误。
-- `Commit` 对应 `asset_state.transaction` 的 `BEGIN IMMEDIATE`、重新读取确认状态和同一事务内写版本、预览状态与回执。外部网络检查不属于这个原子步骤。
+- `Commit` 对应 `asset_state.transaction` 的 `BEGIN IMMEDIATE`、重新读取确认状态和同一事务内写版本、预览状态与回执。外部网络检查不属于这个原子步骤。已保存预览的回放只允许在来源未撤权时进行。
 - `Reply` 对应事务成功之后，调用方是否收到响应。另一个请求可以在首次响应丢失前后开始。
 
-覆盖记录在 `scripts/formal/native-page-confirm-coverage.json`，同步提交为 `77de746e1e40ee58a3096a0f21c44bd66c8572f5`。覆盖函数为 `PageDocumentStore.confirm`、`_confirmation`、`_bind`，以及记录中的 `page_context.py` 和 `asset_state.py`。函数 AST 指纹与依赖摘要变化会报 `MODEL_SYNC_REQUIRED`。只有检查新的代码仍符合上述步骤后，才能更新指纹和同步提交。运行器只从真实拒绝分支提取 `RejectSourceError`，不能手改该常量掩盖失败。
+覆盖记录在 `scripts/formal/native-page-confirm-coverage.json`，同步提交为 `04db3b19c549dcf15131f6b08f6f2e745c8065d3`。覆盖函数为 `PageDocumentStore.confirm`、`_confirmation`、`_bind`，以及记录中的 `page_context.py` 和 `asset_state.py`。函数 AST 指纹与依赖摘要变化会报 `MODEL_SYNC_REQUIRED`。只有检查新的代码仍符合上述步骤后，才能更新指纹和同步提交。运行器从真实拒绝分支提取 `RejectSourceError`，并从回放撤权分支提取 `RejectReplayRevoked`，不能手改常量掩盖失败。
 
 读结果时区分三种情况：
 
@@ -38,6 +38,8 @@ python3 scripts/formal/verify-native-page-confirm.py
 - `MODEL_SYNC_REQUIRED` 表示代码与模型未重新对齐，不等于产品缺陷，也不等于通过。
 
 已实际观察的坏代码反例是：读取待确认预览，来源重验抛出 `SOURCE_UNAVAILABLE`，拒绝分支被删除，事务仍把 v1 写成 v2 并记录成功回执。恢复维护源后，版本保留 v1，失败操作的成功回执为零。
+
+第二个反例是：已保存预览回放时来源已撤权，回放撤权分支被删除，第二个幂等键仍返回成功。恢复维护源后，撤权回放返回 403，回执表只保留首个键。TLC 用 `ReplayRequiresNotRevoked` 抓住这个变异。
 
 这个检查不证明 CRM 认证、调用额度、并发容量、DuckDB 数值、HTML 执行、浏览器编辑、完整业务 UAT，或跨服务撤权的原子性。真实 SQLite 负测覆盖来源重验晚失败；并发交错由有限模型覆盖，不等于穷举真实 SQLite 调度。需要重新对齐时使用 `/maintain-formal-verification-skill`。
 
@@ -87,6 +89,6 @@ TLA+ 模型的原子步骤对应生产代码中的一次清单交付、入箱、
 
 ## 保持同步
 
-本技能最后一次与代码核对的提交是 `SYNC_COMMIT: d8f87ebc80d081e5c9413d6fcd95635b655d1c5b`。涉及上述覆盖文件的改动后，先运行命令；只有确认模型仍准确描述新状态/合同，才把 `SYNC_COMMIT` 前移并提交技能与脚本。若改动了状态转移或扩大范围，优先更新脚本和本技能，再运行验证。
+本技能最后一次与代码核对的提交是 `SYNC_COMMIT: 04db3b19c549dcf15131f6b08f6f2e745c8065d3`。涉及上述覆盖文件的改动后，先运行命令；只有确认模型仍准确描述新状态/合同，才把 `SYNC_COMMIT` 前移并提交技能与脚本。若改动了状态转移或扩大范围，优先更新脚本和本技能，再运行验证。
 
 正式验证工具缺失或 SHA 不匹配时，不能把 Node 快速回归冒充 TLC 结果；应保留失败证据并说明边界。需要把验证重新对齐实现时使用 `/maintain-formal-verification-skill`。
