@@ -8,7 +8,7 @@ import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { delimiter, join } from 'node:path';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import * as kitProvenance from '../../dsh-plugins/plugin-kit/provenance.mjs';
@@ -109,22 +109,11 @@ test('kit provenance writes a builder receipt from a clean plugin checkout', asy
   await git(['config', 'user.name', 'Synthetic Fixture']);
   await git(['add', '.']);
   await git(['commit', '--quiet', '-m', 'synthetic plugin fixture']);
-  // The receipt records the builder's pnpm version. B0 test children have no
-  // network-backed Corepack shim, so provide a deterministic stub rather than
-  // letting `pnpm --version` attempt a registry fetch. Keep it outside the
-  // plugin root so the clean-tree assertion still means what it says.
+  // The receipt records the package manager declared by the plugin manifest, so
+  // the fixture needs no ambient pnpm shim. It also stays usable in the B0
+  // restricted test environment.
   const pin = JSON.parse(await readFile(new URL('../../dsh-plugins/plugin-kit/toolchain.json', import.meta.url), 'utf8'));
-  const binRoot = await mkdtemp(join(tmpdir(), 'kit-provenance-bin-'));
-  t.after(() => rm(binRoot, { recursive: true, force: true }));
-  await writeFile(join(binRoot, 'pnpm'), `#!/bin/sh\nprintf '%s\\n' '${pin.pnpm}'\n`, { mode: 0o755 });
-  const priorPath = process.env.PATH;
-  process.env.PATH = `${binRoot}${delimiter}${priorPath ?? ''}`;
-  let receipt;
-  try {
-    receipt = await kitProvenance.writeBuildProvenance({ root });
-  } finally {
-    process.env.PATH = priorPath;
-  }
+  const receipt = await kitProvenance.writeBuildProvenance({ root });
   assert.equal(receipt.builder.pnpm, pin.pnpm);
   assert.equal(receipt.schema_version, 'dsh-plugin-build/v1');
   assert.equal(receipt.status, 'NOT_VERIFIED');
