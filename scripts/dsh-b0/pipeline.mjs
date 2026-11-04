@@ -186,6 +186,7 @@ if (mode === '--prepare') {
   const publicContractChecks = await runFixedContractChecks({ inputsPath: env.PUBLIC_CONTRACT_INPUTS,
     output: join(env.CRM_COMPOSITION_OUTPUT, 'contracts'), python, buildTools });
   run(process.execPath, ['--test', '--test-concurrency=1', 'scripts/ci/public-contract-inputs.test.mjs', 'scripts/dsh-b0/fixed-contract-checks.test.mjs']);
+  run(process.execPath, ['--test', 'scripts/ci/board-catalog-sync.test.mjs']);
   run(process.execPath, ['--test', 'scripts/dsh-b0/package-inputs.test.mjs', 'scripts/dsh-b0/geometry-composition.test.mjs']);
   run(process.execPath, ['--test', 'scripts/dsh-b0/explicit-build-inputs.test.mjs', 'scripts/dsh-b0/workbench-author-contracts.test.mjs']);
   run(process.execPath, ['--test', 'scripts/ci/domain-author-evidence.test.mjs']);

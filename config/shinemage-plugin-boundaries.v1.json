@@ -186,6 +186,18 @@
       "status": "GENERATED_DOMAIN_V1"
     },
     {
+      "id": "board-component-catalog",
+      "owner": "board-domain",
+      "source": "backend/contracts/component-catalog.json",
+      "generator": null,
+      "consumers": [
+        "analytics-workbench",
+        "board-components"
+      ],
+      "compatibility": "Main-owned runtime projection of board-component-catalog/v1; byte parity with the plugin projection and the public-contract lock is enforced by scripts/ci/board-catalog-sync.mjs. Catalogue semantics remain owned by the upstream board-components domain.",
+      "status": "DOMAIN_V1"
+    },
+    {
       "id": "crm-cockpit-slot",
       "owner": "analysis-workbench",
       "source": "dsh-plugins/analytics-workbench/contracts/cockpit-slot.v1.json",

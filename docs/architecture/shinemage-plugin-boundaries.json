@@ -4001,6 +4001,19 @@
       "source_sha256": "1b518cdcdfdd66a598fe95eff29c7ddeec2d4aebb29ece504c9a6fd710c245a0"
     },
     {
+      "id": "board-component-catalog",
+      "owner": "board-domain",
+      "source": "backend/contracts/component-catalog.json",
+      "generator": null,
+      "consumers": [
+        "analytics-workbench",
+        "board-components"
+      ],
+      "compatibility": "Main-owned runtime projection of board-component-catalog/v1; byte parity with the plugin projection and the public-contract lock is enforced by scripts/ci/board-catalog-sync.mjs. Catalogue semantics remain owned by the upstream board-components domain.",
+      "status": "DOMAIN_V1",
+      "source_sha256": "8e2161fa54855bd23cef7b54a966486dc5daeb8fe3f427a17b52f033de666bab"
+    },
+    {
       "id": "crm-cockpit-slot",
       "owner": "analysis-workbench",
       "source": "dsh-plugins/analytics-workbench/contracts/cockpit-slot.v1.json",

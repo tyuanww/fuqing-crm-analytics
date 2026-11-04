@@ -1,4 +1,8 @@
-"""Library BoardSpec HTTP contract. Catalogue is shared with the plugin, offline.
+"""Library BoardSpec HTTP contract. Catalogue is main-owned, offline.
+
+The runtime projection lives next to this module; the plugin keeps a byte-identical
+copy for its UI build, and scripts/ci/board-catalog-sync.mjs guards the parity. This
+module must never read dsh-plugins/ at import time.
 
 This is the new canvas contract, not the frozen C0 board or legacy CRM schema.
 No submitted document carries facts, executable code, an owner or a saved version.
@@ -13,8 +17,7 @@ from typing import Annotated, Literal, Union
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, create_model, model_validator
 
-CATALOG = json.loads((Path(__file__).resolve().parents[2] /
-    "dsh-plugins/analytics-workbench/src/board-spec/component-catalog.json").read_text())
+CATALOG = json.loads((Path(__file__).with_name("component-catalog.json")).read_text(encoding="utf-8"))
 DEFINITIONS = {item["kind"]: item for item in CATALOG["components"]}
 Opaque = Annotated[str, Field(min_length=1, max_length=128, pattern=r"^[A-Za-z0-9_.:-]+$")]
 Title = Annotated[str, Field(min_length=1, max_length=160, pattern=r"\S")]
