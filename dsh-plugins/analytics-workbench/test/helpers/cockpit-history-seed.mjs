@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 export const name = 'cockpit-history-fixture';
 export const inject = ['sessions', 'connection', 'webServer'];
 export function apply(ctx) {
-  ctx.connection.fetch.register({ path: '/api/cockpit-history-seed', methods: ['POST'], requestBody: 'buffered',
+  // The fixture outlives a single probe run only while this fiber is mounted;
+  // keep the rc.5 disposer instead of leaking the exact route into the next run.
+  ctx.effect(() => ctx.connection.fetch.register({ path: '/api/cockpit-history-seed', methods: ['POST'], requestBody: 'buffered',
     async fetch() {
       for (const [id, title, path] of [
         ['session-history-html', '历史经营月报 · 合成', 'archive/deep/report.html'],
@@ -21,5 +23,5 @@ export function apply(ctx) {
       }
       return Response.json({ seeded: true, modelCalls: 0 });
     },
-  });
+  }), 'cockpit-history-fixture: release the synthetic seed route');
 }

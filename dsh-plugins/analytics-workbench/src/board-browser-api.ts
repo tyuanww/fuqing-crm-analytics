@@ -1,5 +1,7 @@
 /** Official authenticated Connection extension, removed with this business plugin. */
 import type { Context } from '@deepseek-ai/cordis';
+import type {} from '@deepseek-ai/dsh-client-connection';
+import { ConnectionFetchLedger } from './connection-fetch-ledger.mjs';
 import { parseClientRequestEnvelope } from './client-request-envelope.mjs';
 import { handleBoardBrowserCall } from './board-spec/browser-api.mjs';
 import { BOARD_API_ENDPOINT } from './board-spec/connection-call.mjs';
@@ -7,11 +9,22 @@ import { BOARD_API_ENDPOINT } from './board-spec/connection-call.mjs';
 export const name = 'analytics-workbench-board-browser-api';
 export const inject = ['connection', 'webServer'];
 
-export function apply(ctx: Context): void {
+export interface BoardBrowserApiConfig {
+  /** Ledger created by the entry that mounts this row; a standalone mount owns its own. */
+  routes?: ConnectionFetchLedger;
+}
+
+export function apply(ctx: Context, config: BoardBrowserApiConfig = {}): void {
+  // One ledger owns every connection.fetch route in this plugin, so an unload
+  // or a reload releases them in one ordered pass instead of leaking handlers.
+  const routes = config.routes ?? new ConnectionFetchLedger(ctx, { label: name });
+  // A row mounted with a shared ledger releases only its own tag; the entry
+  // that created the ledger closes whatever is left.
+  ctx.effect(() => () => routes.release(name), `${name}: release the board browser route`);
   // The pinned rpc.handle dedicated carrier cannot resolve webServer from the
   // Connection provider's shadow scope in a full Host. Its public exact Fetch
   // extension uses the already-mounted /api carrier and the same trust fence.
-  ctx.connection.fetch.register({ path: `/api/${BOARD_API_ENDPOINT}`, methods: ['POST'], requestBody: 'buffered',
+  void routes.own(name, { path: `/api/${BOARD_API_ENDPOINT}`, methods: ['POST'], requestBody: 'buffered',
     async fetch(request) {
       let input: unknown;
       try { input = await request.json(); } catch { return new Response('invalid JSON', { status: 400 }); }
