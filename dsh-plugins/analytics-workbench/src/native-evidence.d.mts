@@ -24,6 +24,9 @@ export function requestForStepIn(state: NativeJournalState, messages: readonly u
 export function requestForTool(events: readonly SessionEvent[], callId: string): string | undefined;
 export function requestForToolIn(state: NativeJournalState, callId: string): string | undefined;
 export function summarizeRequest(events: readonly SessionEvent[], requestId: string): NativeSummary;
+/** rc.5 TurnEndReasonMap variants (packages/core/session/src/types.ts:202-232). */
+export type NativeTurnEndKind = 'completed' | 'aborted' | 'blocked' | 'error' | 'max-tokens' | 'interrupted' | 'forked';
+export declare const TURN_END_EVIDENCE: Readonly<Record<NativeTurnEndKind, { outcome: string; errorCode?: string }>>;
 export function evidenceFor(intent: NativeBinding, summary: Partial<NativeSummary>, executionExited: boolean): NativeBinding & {
   execution_exited: boolean; outcome: string; successful_call_ids: string[] | undefined;
 };

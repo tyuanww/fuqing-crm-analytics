@@ -230,17 +230,42 @@ export function requestForStepIn(state, messages, turn) {
   return ids.size === 1 ? [...ids][0] : undefined;
 }
 
+/**
+ * Total projection of rc.5 `TurnEndReasonMap` onto dispatcher evidence.
+ *
+ * `packages/core/session/src/types.ts:196-232` in the pinned harness defines
+ * exactly seven variants. `aborted.reason` (TurnEndCancelCause: user, parent,
+ * hook, disposed, legacy) never changes the evidence kind; `error.error`
+ * (LlmFailure) is structured provider detail and stays behind the dispatcher's
+ * MODEL_FAILED default rather than leaking into the receipt. A fork boundary
+ * closes a turn without a live completion: exit is proven, success is not, so
+ * it fails closed as EXECUTION_UNKNOWN like an interrupted crash orphan.
+ */
+export const TURN_END_EVIDENCE = Object.freeze({
+  completed: Object.freeze({ outcome: 'SUCCEEDED' }),
+  aborted: Object.freeze({ outcome: 'CANCELLED' }),
+  blocked: Object.freeze({ outcome: 'NEEDS_INPUT' }),
+  error: Object.freeze({ outcome: 'FAILED' }),
+  'max-tokens': Object.freeze({ outcome: 'FAILED' }),
+  interrupted: Object.freeze({ outcome: 'FAILED', errorCode: 'EXECUTION_UNKNOWN' }),
+  forked: Object.freeze({ outcome: 'FAILED', errorCode: 'EXECUTION_UNKNOWN' }),
+});
+
 export function evidenceFor(intent, summary, executionExited) {
   let outcome = 'UNKNOWN';
+  let errorCode;
   if (!summary.ambiguous && summary.received) {
     if (!executionExited) outcome = 'RUNNING';
     else if (summary.discarded && !summary.targetTurn) outcome = 'CANCELLED';
-    else outcome = ({ completed: 'SUCCEEDED', aborted: 'CANCELLED', blocked: 'NEEDS_INPUT',
-      error: 'FAILED', interrupted: 'FAILED', 'max-tokens': 'FAILED' })[summary.reason?.kind] ?? 'UNKNOWN';
+    else {
+      // A future rc.5 variant this plugin does not know stays UNKNOWN: the
+      // dispatcher keeps observing instead of manufacturing an outcome.
+      const classified = summary.reason ? TURN_END_EVIDENCE[summary.reason.kind] : undefined;
+      if (classified) ({ outcome, errorCode } = classified);
+    }
   }
   return { run_id: intent.run_id, attempt_id: intent.attempt_id, session_id: intent.session_id,
     request_id: intent.request_id, execution_exited: executionExited && outcome !== 'UNKNOWN', outcome,
     successful_call_ids: summary.successful_call_ids,
-    ...(executionExited && outcome === 'FAILED' && summary.reason?.kind === 'interrupted'
-      ? { error_code: 'EXECUTION_UNKNOWN' } : {}) };
+    ...(executionExited && outcome === 'FAILED' && errorCode ? { error_code: errorCode } : {}) };
 }
