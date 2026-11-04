@@ -16,65 +16,65 @@
     {
       "directory": "analytics-workbench",
       "id": "@shine-mage/dsh-analytics-workbench-b0",
-      "source_sha": "f3c75ca6485144f0777da73a9b5ff9fbe26d3245",
+      "source_sha": "62b82b002239148543278be12e8a3ac53f093d03",
       "version": "0.0.0-b0",
-      "manifest_sha256": "785e21b0327eb111831562212e54f61bbc476e9ead675be3c42f73d837734f59"
+      "manifest_sha256": "da1741853e6938b13785bea8ccdc1e9d7299c4cf1cf5d6d64c07ee10095f952b"
     },
     {
       "directory": "crm-knowledge",
       "id": "@shine-mage/dsh-crm-knowledge",
-      "source_sha": "721d2bb9f4ea6a71144636ba819daf38070a01b5",
+      "source_sha": "1874e28c3467ea0c08a01dc27227a6d4ca11ad0a",
       "version": "0.0.0-crm.5",
-      "manifest_sha256": "a363edc1943a371dfa6d731c52406ca6962b17c2f94dd22d1b5984011833ba94"
+      "manifest_sha256": "bfcc5244cd81769a845782edc97fc8f01b30d755c637b10970c46e85120cab23"
     },
     {
       "directory": "knowledge",
       "id": "@shine-mage/dsh-knowledge",
-      "source_sha": "2b0f5745f725eda5b26df20ebd86c79003b08078",
+      "source_sha": "f80bcbd7ca46e23e7743e7153dfa5bf46d7b67d2",
       "version": "0.0.0-candidate.1",
-      "manifest_sha256": "d09889991f5613153bcb11d70e0305688fbcb06322e81bb58c1e8a6da901bb63"
+      "manifest_sha256": "3edeffa1684879534a73a2c8ea401164cfdd4d56fc4b13065faa44ce9f22b320"
     },
     {
       "directory": "shine-board",
       "id": "@shine-mage/dsh-shine-board",
-      "source_sha": "c7b4ab6541449adc236398a753662c09f61d5ab8",
+      "source_sha": "04cc7cc9a394c18799af5153f03dfb6b38136263",
       "version": "0.0.0-b0",
-      "manifest_sha256": "2ac1fcf439646ade1667a1fe19bfa119f78544c1cfdf10c4ece4508669d3e3d8"
+      "manifest_sha256": "e439cd27465eb5547d04c46e4cd1bec5ca33f63143071e8f1f7214f6fb7c36e9"
     },
     {
       "directory": "shine-crowd-action",
       "id": "@shine-mage/dsh-shine-crowd-action",
-      "source_sha": "6a3c2d6601e8500326565d9fefe495c82d5ec37b",
+      "source_sha": "c8a9cd1965739b9d00f285ba3c796bd3857ea8c9",
       "version": "0.0.0-b0",
-      "manifest_sha256": "b242b826f462e99776eadfbc4d650f950625faec0f62adbf62fdd91b9922a3a7"
+      "manifest_sha256": "2a71ceeac5bf45bb9a04b11ff0e445450af520f982cabe24d0bedef040d88739"
     },
     {
       "directory": "shine-query",
       "id": "@shine-mage/dsh-shine-query",
-      "source_sha": "81363e4743871a7d08a9a8686b933d53a99b1f67",
+      "source_sha": "1702408b11a88e877f584636005b9a666a2713c5",
       "version": "0.0.0-b0",
-      "manifest_sha256": "a220ec960c32ccbfdd4a6ffaea849b8cace4b7e0140a838c2f1c724ec2ff18c0"
+      "manifest_sha256": "25972a9945151a70d2d078d0bfa791a2806ffa29b20e1c70fd76569161440dda"
     },
     {
       "directory": "shine-funnel",
       "id": "@shine-mage/dsh-shine-funnel",
-      "source_sha": "3420ec3b2650000388ceee5e2a14d78dc8a84a59",
+      "source_sha": "105f7aa416b5944b6cba3ed6b8c8d5cfa27d3d24",
       "version": "0.0.0-b0",
-      "manifest_sha256": "c306a4fe43f1db5166bad5f68d4b9037e384b1a9ff056b7bb12b84045905fb03"
+      "manifest_sha256": "e299e9eb4ee3d82bc1761e1b1d3d72e7f0d90bf635d3fae3cd5ba19467dee14f"
     },
     {
       "directory": "shine-waterfall",
       "id": "@shine-mage/dsh-shine-waterfall",
-      "source_sha": "6a07f2d95c47302ffde72507c6b29e4d7c13f8c6",
+      "source_sha": "47b19e81c753e63e29304aef5d79c898916217bb",
       "version": "0.0.0-b0",
-      "manifest_sha256": "a2672e3a6bfded8d764d76ae5274fd848b6ffe67e21cbf4fc537a0850f582335"
+      "manifest_sha256": "9a534945152b1155796a5e684b2e69f6549054fd41cb64e1d55d11b8294620dc"
     },
     {
       "directory": "shine-brand",
       "id": "@shine-mage/dsh-shine-brand",
-      "source_sha": "f2c819003aa695404827957951e44befdc5ae017",
+      "source_sha": "c81b6ef4283bbbdba2d0ce09f091f74806496735",
       "version": "0.0.0-b0",
-      "manifest_sha256": "1a92c29fbb62410a1368df5b026fdb1c9ecc6b21e86dc7ee6e350c03532cd2bb"
+      "manifest_sha256": "49fbf50ed46ee342d6ff8309ee453c72de1a404d5005ea31efd41543946ba9f7"
     }
   ]
 }

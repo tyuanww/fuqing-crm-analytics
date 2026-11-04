@@ -2,12 +2,12 @@
   "schema_version": "shinemage-composition-pack-manifest/v1",
   "lock": {
     "path": "config/shinemage-composition-packs.lock.json",
-    "sha256": "adc0ee86363477645ad1db6479b1626b275fa239ffecce398a0b3980a045184a"
+    "sha256": "71098c003a04d6a6444a68f1d647dc85261db9871dac74476217a71be0a0a88b"
   },
   "consumer": {
     "repository": "tyuanww/fuqing-crm-analytics",
     "branch": "main",
-    "reviewed_sha": "335bacbd490d8344819578bd9c751a6f63802560"
+    "reviewed_sha": "36111a904a9cc5144fe3f0583407e54c688d5320"
   },
   "bundle": {
     "repository": "tyuanww/fuqing-crm-analytics",
@@ -34,9 +34,9 @@
       "directory": "analytics-workbench",
       "repository": "tyuanww/dsh-analytics-workbench",
       "ref": "commit",
-      "sha": "f3c75ca6485144f0777da73a9b5ff9fbe26d3245",
-      "manifest_sha256": "785e21b0327eb111831562212e54f61bbc476e9ead675be3c42f73d837734f59",
-      "pack_sha256": "1e5d6e559aceff14dd1afd55e0f835242b6fd7a57b870e253770c0c67eb0d005",
+      "sha": "62b82b002239148543278be12e8a3ac53f093d03",
+      "manifest_sha256": "da1741853e6938b13785bea8ccdc1e9d7299c4cf1cf5d6d64c07ee10095f952b",
+      "pack_sha256": "b2874c48d4a12e2ae5a7157bf56d6582e65379327069d4f533719015a73348db",
       "status": "PASS"
     },
     {
@@ -44,9 +44,9 @@
       "directory": "crm-knowledge",
       "repository": "tyuanww/dsh-crm-knowledge",
       "ref": "commit",
-      "sha": "721d2bb9f4ea6a71144636ba819daf38070a01b5",
-      "manifest_sha256": "a363edc1943a371dfa6d731c52406ca6962b17c2f94dd22d1b5984011833ba94",
-      "pack_sha256": "a4a6e5559da5e3d9685e976d2b81682aae8ebe39ac467bc0130c2d25419b2687",
+      "sha": "1874e28c3467ea0c08a01dc27227a6d4ca11ad0a",
+      "manifest_sha256": "bfcc5244cd81769a845782edc97fc8f01b30d755c637b10970c46e85120cab23",
+      "pack_sha256": "a5ece9c56c232c5862dead099438bbdcb981450761a0cb1ebdce66e123d0a5a4",
       "status": "PASS"
     },
     {
@@ -54,9 +54,9 @@
       "directory": "knowledge",
       "repository": "tyuanww/dsh-knowledge",
       "ref": "commit",
-      "sha": "2b0f5745f725eda5b26df20ebd86c79003b08078",
-      "manifest_sha256": "d09889991f5613153bcb11d70e0305688fbcb06322e81bb58c1e8a6da901bb63",
-      "pack_sha256": "f1031c39bdc90af8632f31464ea5f91f1729f91438928d5ad29cec5ae66e87e7",
+      "sha": "f80bcbd7ca46e23e7743e7153dfa5bf46d7b67d2",
+      "manifest_sha256": "3edeffa1684879534a73a2c8ea401164cfdd4d56fc4b13065faa44ce9f22b320",
+      "pack_sha256": "e7933d21fdd48a54f496bcfabda486db35e27aff86d335b4257a2cdc918bdc25",
       "status": "PASS"
     },
     {
@@ -64,9 +64,9 @@
       "directory": "shine-board",
       "repository": "tyuanww/dsh-shine-board",
       "ref": "commit",
-      "sha": "c7b4ab6541449adc236398a753662c09f61d5ab8",
-      "manifest_sha256": "2ac1fcf439646ade1667a1fe19bfa119f78544c1cfdf10c4ece4508669d3e3d8",
-      "pack_sha256": "b1f8f2e9ef97988db34b4ffaae7ff0a7479ee12418011944e516c31d66e3fa45",
+      "sha": "04cc7cc9a394c18799af5153f03dfb6b38136263",
+      "manifest_sha256": "e439cd27465eb5547d04c46e4cd1bec5ca33f63143071e8f1f7214f6fb7c36e9",
+      "pack_sha256": "a6133269183215f7bb32f40f81e7e42f65e2b0f31c9536bef7f06673215ca38c",
       "status": "PASS"
     },
     {
@@ -74,9 +74,9 @@
       "directory": "shine-crowd-action",
       "repository": "tyuanww/dsh-shine-crowd-action",
       "ref": "commit",
-      "sha": "6a3c2d6601e8500326565d9fefe495c82d5ec37b",
-      "manifest_sha256": "b242b826f462e99776eadfbc4d650f950625faec0f62adbf62fdd91b9922a3a7",
-      "pack_sha256": "11233822476474d057a92a256333bc973226737ed33152f350749bb3ec63c5ba",
+      "sha": "c8a9cd1965739b9d00f285ba3c796bd3857ea8c9",
+      "manifest_sha256": "2a71ceeac5bf45bb9a04b11ff0e445450af520f982cabe24d0bedef040d88739",
+      "pack_sha256": "2106f688733f304cb9bf50237f4b22f3b35e4fefdeea7d15f1efd5b296963401",
       "status": "PASS"
     },
     {
@@ -84,9 +84,9 @@
       "directory": "shine-query",
       "repository": "tyuanww/dsh-shine-query",
       "ref": "commit",
-      "sha": "81363e4743871a7d08a9a8686b933d53a99b1f67",
-      "manifest_sha256": "a220ec960c32ccbfdd4a6ffaea849b8cace4b7e0140a838c2f1c724ec2ff18c0",
-      "pack_sha256": "474a7cdc52147384fa010a40769c9ff576812f08068cd894463e988aefca5514",
+      "sha": "1702408b11a88e877f584636005b9a666a2713c5",
+      "manifest_sha256": "25972a9945151a70d2d078d0bfa791a2806ffa29b20e1c70fd76569161440dda",
+      "pack_sha256": "404308bfab66b329096c55fdca6432ea738eceb6bfa027fc48281a6bd4b85eb1",
       "status": "PASS"
     },
     {
@@ -94,9 +94,9 @@
       "directory": "shine-funnel",
       "repository": "tyuanww/dsh-shine-funnel",
       "ref": "commit",
-      "sha": "3420ec3b2650000388ceee5e2a14d78dc8a84a59",
-      "manifest_sha256": "c306a4fe43f1db5166bad5f68d4b9037e384b1a9ff056b7bb12b84045905fb03",
-      "pack_sha256": "d959bf1e45f04b3871914e70fba642fc0447c85735adf394d0a46fecfca12a55",
+      "sha": "105f7aa416b5944b6cba3ed6b8c8d5cfa27d3d24",
+      "manifest_sha256": "e299e9eb4ee3d82bc1761e1b1d3d72e7f0d90bf635d3fae3cd5ba19467dee14f",
+      "pack_sha256": "17494d3b28292348f7141a477b92cd0bc6a6c6c570a310e7890413981338ee94",
       "status": "PASS"
     },
     {
@@ -104,9 +104,9 @@
       "directory": "shine-waterfall",
       "repository": "tyuanww/dsh-shine-waterfall",
       "ref": "commit",
-      "sha": "6a07f2d95c47302ffde72507c6b29e4d7c13f8c6",
-      "manifest_sha256": "a2672e3a6bfded8d764d76ae5274fd848b6ffe67e21cbf4fc537a0850f582335",
-      "pack_sha256": "dca248f641ba474377b91ccc195068ede207df70b77159db13d9864b7fbec112",
+      "sha": "47b19e81c753e63e29304aef5d79c898916217bb",
+      "manifest_sha256": "9a534945152b1155796a5e684b2e69f6549054fd41cb64e1d55d11b8294620dc",
+      "pack_sha256": "aee1fa8a33669468cd92a243ed85feb78e50d5bfc7d84dc88ad58bc701d37fee",
       "status": "PASS"
     },
     {
@@ -114,9 +114,9 @@
       "directory": "shine-brand",
       "repository": "tyuanww/dsh-shine-brand",
       "ref": "commit",
-      "sha": "f2c819003aa695404827957951e44befdc5ae017",
-      "manifest_sha256": "1a92c29fbb62410a1368df5b026fdb1c9ecc6b21e86dc7ee6e350c03532cd2bb",
-      "pack_sha256": "62e9abf4731fcacf5232b57e1d6780033bc6d721325ebd0576f97fa572cba986",
+      "sha": "c81b6ef4283bbbdba2d0ce09f091f74806496735",
+      "manifest_sha256": "49fbf50ed46ee342d6ff8309ee453c72de1a404d5005ea31efd41543946ba9f7",
+      "pack_sha256": "a41ffab372bd67188e611563198aefc218141c11b0d450d8ea5e737184da2a06",
       "status": "PASS"
     }
   ],

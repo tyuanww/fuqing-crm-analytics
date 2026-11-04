@@ -1,32 +1,32 @@
 {
   "schema": "shinemage-workbench-author-evidence/v1",
   "package": "@shine-mage/dsh-analytics-workbench-b0",
-  "source_sha": "f3c75ca6485144f0777da73a9b5ff9fbe26d3245",
-  "formal_manifest_sha256": "785e21b0327eb111831562212e54f61bbc476e9ead675be3c42f73d837734f59",
-  "formal_tarball_sha256": "1e5d6e559aceff14dd1afd55e0f835242b6fd7a57b870e253770c0c67eb0d005",
+  "source_sha": "62b82b002239148543278be12e8a3ac53f093d03",
+  "formal_manifest_sha256": "da1741853e6938b13785bea8ccdc1e9d7299c4cf1cf5d6d64c07ee10095f952b",
+  "formal_tarball_sha256": "b2874c48d4a12e2ae5a7157bf56d6582e65379327069d4f533719015a73348db",
   "archive": {
     "repository": "tyuanww/dsh-analytics-workbench",
-    "run_id": 41774572558,
+    "run_id": 41872857221,
     "event": "pull_request",
-    "artifact_id": 13296547124,
-    "sha256": "a4dc5af11b0b03c6cc8f6e8e39248ecac4255e831b11a2bef9c22482ddbe2214",
-    "bytes": 613852
+    "artifact_id": 13345695999,
+    "sha256": "6430b623e9b05b462b6208276be17c893359bfc7d2be2502786f4fae19a0de31",
+    "bytes": 613857
   },
   "files": {
+    "content_pack": {
+      "path": "workbench-content-pack/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
+      "sha256": "7ab45e89aa639d8044c008e6714b39b3da2c7f17730f3b2b80c7720e1f6ca792",
+      "bytes": 503923
+    },
     "plan": {
-      "path": "workbench-author-tests-41774572558-1/plan.json",
+      "path": "workbench-author-tests-41872857221-1/plan.json",
       "sha256": "2dceefb522356c06bf87470b1db6af7abca8563589ce464407304b4a04253075",
       "bytes": 8659
     },
     "result": {
-      "path": "workbench-author-tests-41774572558-1/result.json",
+      "path": "workbench-author-tests-41872857221-1/result.json",
       "sha256": "5ae07764faea4e65e9b53b003edbf22ab09d570d55d13210f944b022f0a81e41",
       "bytes": 1060
-    },
-    "content_pack": {
-      "path": "workbench-content-pack/shine-mage-dsh-analytics-workbench-b0-0.0.0-b0.tgz",
-      "sha256": "a30ea104615cf6048e79618574648a0ac2a2a9f554fb89f65b1b6891dec0ee86",
-      "bytes": 503919
     }
   },
   "core": {
