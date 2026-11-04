@@ -791,6 +791,7 @@ from backend.routers import (
     export_router,
     report_router,
     ad_hoc_query_router,  # Sprint 188: 即席查询 HTTP API 入口
+    second_entry_router,  # 第二入口 CSV/Excel 数据集
     session_router,
     notifications_router,  # L4.75.3 通知对方 endpoints
     login_request_router,  # L4.85 申请+同意 模式
@@ -815,6 +816,7 @@ app.include_router(visitor_router)
 app.include_router(export_router)
 app.include_router(report_router)
 app.include_router(ad_hoc_query_router)  # Sprint 188
+app.include_router(second_entry_router)  # 第二入口 CSV/Excel
 app.include_router(session_router)
 app.include_router(notifications_router)  # L4.75.3
 app.include_router(login_request_router)  # L4.85 申请+同意 模式
