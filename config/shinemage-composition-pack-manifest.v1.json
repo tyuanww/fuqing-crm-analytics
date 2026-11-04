@@ -2,7 +2,7 @@
   "schema_version": "shinemage-composition-pack-manifest/v1",
   "lock": {
     "path": "config/shinemage-composition-packs.lock.json",
-    "sha256": "032a5f3e44a9703d3d646ba4bc2f4ce3c0c4e03cab9566cca9a72152aba8a64d"
+    "sha256": "2beacf946b7ce34537583675af61d2eb95295047c78d8440b5b1e48eae7a07a9"
   },
   "consumer": {
     "repository": "tyuanww/fuqing-crm-analytics",
