@@ -10,7 +10,7 @@ const invocation = (rawInput = '查看合成首购路径') => ({ sessionId: 'own
   signal: new AbortController().signal, requestForCall: id => id === 'call-a' ? 'original-request' : undefined });
 function fixture(respond = () => Response.json(accepted, { status: 202 }), options = {}) {
   const calls = [];
-  const api = createFirstPurchaseCommands({ portBase: 4335, sessionId: 'owned', gatewayToken: 'g'.repeat(32),
+  const api = createFirstPurchaseCommands({ origin: 'http://127.0.0.1:4335', sessionId: 'owned', gatewayToken: 'g'.repeat(32),
     fetchImpl: async (url, init) => { calls.push({ url, ...init }); return respond(url, init); }, ...options });
   return { ...api, calls };
 }
@@ -22,6 +22,15 @@ test('official command id is the exact replay key, with no native RPC or client 
     content: [{ type: 'text', text: '查看合成首购路径' }], clientTimeZone: 'Asia/Shanghai' });
   assert.equal(api.calls[0].url, 'http://127.0.0.1:4335/internal/native/prompt');
   assert.equal(api.calls[0].redirect, 'error');
+});
+test('only an explicit loopback origin is accepted; paths, remote hosts and schemes are refused', () => {
+  for (const origin of [undefined, '', 'http://127.0.0.1', 'http://localhost:4335', 'https://127.0.0.1:4335',
+    'http://127.0.0.1:4335/', 'http://127.0.0.1:4335/crm', 'http://127.0.0.1:4335@evil.invalid']) {
+    assert.throws(() => createFirstPurchaseCommands({ origin, sessionId: 'owned', gatewayToken: 'g'.repeat(32) }),
+      /FIRST_PURCHASE_ADMISSION_CONFIG/);
+  }
+  const api = fixture();
+  assert.equal(api.calls.length, 0);
 });
 test('missing config, foreign session, invalid input, aborted and disposed commands never write', async () => {
   const api = fixture();

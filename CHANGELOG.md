@@ -21,6 +21,8 @@
 
 ### Changed
 
+- P3-2（rc.5）：analytics-workbench 的私有内核调用去端口化。新增插件 `Config`（`baseUrl`/`bridgeUrl`/`runtimeToken`/`gatewayToken`，Standard Schema，rc.5 `Config['~standard'].validate`），`baseUrl` 优先于既有 `B0_PORT_BASE`/`B0_RUNTIME_TOKEN`/`B0_GATEWAY_TOKEN` 过渡回退；新增单一绑定表 `dsh-plugins/analytics-workbench/src/native-tools.mjs`（surface、tool、输入模型/字段、base URL 来源），其投影 `config/analytics-native-tools.v1.json` 由 `scripts/ci/analytics-native-tools-sync.mjs` 校验，FastAPI 侧 `backend/services/analytics/native_tools.py` 只读该投影并在启动时断言实际挂载的 `/internal/native/*` 路由与表完全一致。`HostBridge`/`runtime_ports` 接受显式 loopback 原点（仍拒绝远端/TLS/凭据/路径/重定向），B0 harness 同时传入 Config 与旧 env 做影子期双写。
+- P3-5（rc.5）：`native-evidence.evidenceFor` 补全 rc.5 `TurnEndReason` 全量映射——`forked` 归为有界失败（`EXECUTION_UNKNOWN`）、`aborted.reason` 嵌套取消原因不改变 `CANCELLED`、结构化 `error` 保持 `FAILED`；新增 fork/abort/error 验收测试，未知未来变体仍失败关闭为 `UNKNOWN`。
 - P0：目标 DSH 版本单源到 `0.2.1-rc.5`（tag `dsh-v0.2.1-rc.5`，upstream `b830ec950faba0a46dda564be3e2d854afed94f1`）。来源为 npm 发布包（`@deepseek-ai/dsh-tools@0.2.1-rc.5` 等 18 个 SDK 包全部存在）加 GitHub `git fetch --depth 1` 取得的 rc.5 源码树复核。`dsh-plugins/plugin-kit/toolchain.json` 新增 `cordis: 4.0.5` 字段补齐 cordis 单源；`upstream_lock_sha256` 保持 `911b0499…`，因为 rc.5 与 rc.3 的 `pnpm-lock.yaml` 字节一致。`sdk_bindings` 26 条逐条核对目录与版本全部命中。9 个插件包 peer、3 份 profile `dsh` 块、组合 lock 哈希链、Workbench lock、边界清单和 README 同步；`scripts/dsh-b0` 的 `upstream-<version>` 目录改为按 pin 派生（新增 `scripts/dsh-b0/upstream-dir.mjs`）。作者 pack/build 与完整 B0 pipeline 未重跑。
 - P0：10 个作者仓在 DSH `0.2.1-rc.5` / `@shine-mage/dsh-plugin-kit` 0.1.1 重建完成（9 个插件 formal pack + board-components 领域证据）；主仓组合锁、来源清单、Workbench/领域/公共契约证据锁回填到新回执。密封 workflow 产出 artifact `13348198215`（sha256 `02ed3c37…`，20 个成员），artifact lock 与组合锁哈希绑定。作者 artifact 14 天有效（2026-11-18 到期）；合并 #211 与发布仍需人工。
 

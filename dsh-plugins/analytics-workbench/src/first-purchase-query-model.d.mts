@@ -1,7 +1,6 @@
 export const FIRST_PURCHASE_TOOL_NAME: 'analytics_first_purchase_query';
 export const FIRST_PURCHASE_SCHEMA: 'analytics-first-purchase-path/v1';
 export const FIRST_PURCHASE_RECEIPT_SCHEMA: 'analytics-run-first-purchase-native-receipt/v1';
-export const FIRST_PURCHASE_KERNEL_URL: 'http://127.0.0.1:4315/internal/native/first-purchase';
 export const FIRST_PURCHASE_RECEIPT_LIMIT: number;
 export const JS_MAX_SAFE_INTEGER: 9007199254740991;
 

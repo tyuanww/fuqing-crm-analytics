@@ -2,6 +2,20 @@
 
 固定上游：`deepseek-ai/deepseek-harness@b830ec950faba0a46dda564be3e2d854afed94f1`（sdk `0.2.1-rc.5`，见 [`../plugin-kit/toolchain.json`](../plugin-kit/toolchain.json)）。本插件按 rc5 pin 构建（2026-11-04 仅同步版本单源，未重跑作者 pack/build）；运行与发布状态以根 [STATUS](../../STATUS.md) 的带日期现场快照为准。私有本地验证包，不发布 npm，不包含模型密钥或真实数据。2026-09-06 已接独立 FastAPI B0 任务内核、固定方法包与当前权限接缝；完整 B0 仍为 PARTIAL，见[当前收口报告](../../docs/hackathon/B0-LOCAL-CLOSEOUT-2026-09-06.md)。
 
+## 私有内核端点与 typed tool 绑定（P3-2，rc.5）
+
+内核地址不再由固定端口推断。插件导出 rc.5 `Config`（[`src/config.mjs`](src/config.mjs)，Standard Schema；Cordis 按 `Config['~standard'].validate` 校验），部署行可设置：
+
+| 字段 | 作用 | 过渡回退 |
+|---|---|---|
+| `baseUrl` | FastAPI run kernel 原点，如 `http://127.0.0.1:4315` | `B0_PORT_BASE` 的 4315/4325/4335 块 |
+| `bridgeUrl` | 内核回调的 Host bridge 原点 | `port_base + 1` |
+| `runtimeToken` / `gatewayToken` | 部署级能力（≥32 位 url-safe 字符） | `B0_RUNTIME_TOKEN` / `B0_GATEWAY_TOKEN` |
+
+`baseUrl`/`bridgeUrl` 只接受 `http://127.0.0.1:<port>` 原点；远端主机、TLS、凭据、路径、查询和重定向都被拒绝。`Config` 优先于旧 env；`B0_*` 仍在但只作过渡期回退（rc.5 surface gate 继续以 warn 级记录），不是主路径。配置样例见 [`cordis.patch.yml`](cordis.patch.yml) 末尾注释。
+
+私有 kernel 调用的唯一绑定表是 [`src/native-tools.mjs`](src/native-tools.mjs)（surface、typed tool 名、输入模型/字段、base URL 来源）。其投影 [`config/analytics-native-tools.v1.json`](../../config/analytics-native-tools.v1.json) 由 `node scripts/ci/analytics-native-tools-sync.mjs --check` 校验；FastAPI 侧 `backend/services/analytics/native_tools.py` 只读该投影，并在 `runtime_app` 启动时断言实际挂载的 `/internal/native/*` 路由与表完全一致。改表必须在同一提交里 `--write` 重新生成投影。
+
 > 当前交付（2026-09-26）：Artifact Inbox、原生 HTML 接收、候选预览/确认保存、局部 patch 已随公共 main 合入；杭州现役 checkout 仍为 `47f49616`，公共 main 当前合并 commit 为 `00823ff5`，两者分别表示运行 checkout 与合并后的源代码。杭州生产仍运行 DSH RC1，rc2 候选尚未切换。Mac 负责开发与测试，合成浏览器旅程已通过，生产 DSH shell 旅程与本人 UAT 仍需单独验收。下方标注“候选／PR待创建”的段落属于历史记录，不代表当前 Git 状态。
 
 ## 整段说明编辑

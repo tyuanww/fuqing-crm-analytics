@@ -1,4 +1,5 @@
-import { kernelUrl } from './runtime-endpoints.ts';
+import { NATIVE_BOUNDS, kernelUrl, resolveNativeRuntime } from './runtime-endpoints.ts';
+import { toolSurface } from './native-tools.mjs';
 import type { Context } from '@deepseek-ai/cordis';
 import { defineTool } from '@deepseek-ai/dsh-tools';
 import { nativeJournal, requestForToolIn } from './native-evidence.mjs';
@@ -43,8 +44,10 @@ const queryConsts = {
   metric_version: { type: 'string' as const, const: 'channel-followup-metric/v1', required: true as const },
 };
 
-export function apply(ctx: Context): void {
+export function apply(ctx: Context, config: unknown = {}): void {
   nativeJournal(ctx);
+  const runtime = resolveNativeRuntime(config);
+  const surface = toolSurface(QUERY_TOOL_NAME);
   ctx.tools.register(defineTool({
     name: QUERY_TOOL_NAME,
     description: 'Synthetic channel-follow-up query only. Submit the full registered G2 request to the local run kernel; no real database or arbitrary SQL.',
@@ -135,17 +138,17 @@ export function apply(ctx: Context): void {
     isConcurrencySafe: () => false,
     execute: async (args, exec) => {
       exec.signal.throwIfAborted();
-      const token = process.env.B0_RUNTIME_TOKEN;
+      const token = runtime.runtimeToken;
       const agent = exec.agent;
       if (!token || !agent || !isRegisteredSession(agent.id)) throw new Error('query tool has no bound execution context');
       const request = decodeQueryRequest(args);
       if (!request) throw new Error('query tool rejected invalid parameters');
       const requestId = requestForToolIn(await nativeJournal(ctx).ready(agent.session), exec.callId);
       if (!requestId) throw new Error('query tool has no journal-correlated native request');
-      const response = await fetch(kernelUrl('/internal/native/channel-followup'), {
+      const response = await fetch(kernelUrl(runtime, surface.id), {
         method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
         body: JSON.stringify({ session_id: agent.id, request_id: requestId, call_id: exec.callId, request }),
-        signal: AbortSignal.any([exec.signal, AbortSignal.timeout(33000)]), redirect: 'error',
+        signal: AbortSignal.any([exec.signal, AbortSignal.timeout(NATIVE_BOUNDS.toolTimeoutMs)]), redirect: 'error',
       });
       if (!response.ok) { await response.body?.cancel(); throw new Error('query run kernel refused tool execution'); }
       const receipt = decodeQueryReceipt(await readBoundedJson(response, QUERY_RECEIPT_LIMIT));

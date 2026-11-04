@@ -9,3 +9,18 @@
 - insert:
     - id: analytics-workbench-ui
       name: '@shine-mage/dsh-analytics-workbench-b0'
+#
+# P3-2: the private kernel contract is configured, not inferred from ports.
+# A deployment that does not use the legacy B0 port block sets the row config
+# (all fields optional; `Config` rejects unknown keys):
+#
+#     - id: analytics-workbench-ui
+#       name: '@shine-mage/dsh-analytics-workbench-b0'
+#       config:
+#         baseUrl: http://127.0.0.1:4315      # FastAPI run kernel origin
+#         bridgeUrl: http://127.0.0.1:4316    # Host bridge the kernel calls back
+#         runtimeToken: <explicit deployment capability, >= 32 url-safe chars>
+#         gatewayToken: <only for the synthetic first-purchase commands>
+#
+# `baseUrl`/`bridgeUrl` must be bare `http://127.0.0.1:<port>` roots. Tokens
+# belong in a private overlay (mode 0600), never in this checked-in file.

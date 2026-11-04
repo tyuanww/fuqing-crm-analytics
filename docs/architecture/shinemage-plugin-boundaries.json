@@ -647,7 +647,7 @@
       "manifest_sha256": "e6ade327d5fa086dd9fd07c46b1a6ec29e9349b8a4dc6086baa1280e44661377"
     }
   ],
-  "source_files_scanned": 674,
+  "source_files_scanned": 679,
   "cross_package_edges": [
     {
       "consumer": "analytics-workbench",
@@ -1651,6 +1651,12 @@
     {
       "consumer": "analytics-workbench",
       "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/native-tools.test.mjs",
+      "target": "scripts/ci/analytics-native-tools-sync.mjs"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
       "source": "dsh-plugins/analytics-workbench/test/plugin-ui-lifecycle.test.mjs",
       "target": "scripts/dsh-b0/workbench-client-pack.integration.mjs"
     },
@@ -2012,48 +2018,6 @@
     {
       "consumer": "analytics-workbench",
       "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-commands.mjs",
-      "route": "/internal/native/context",
-      "contract": "INTERNAL_NOT_PUBLIC"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-commands.mjs",
-      "route": "/internal/native/first-purchase/cancel",
-      "contract": "INTERNAL_NOT_PUBLIC"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-commands.mjs",
-      "route": "/internal/native/prompt",
-      "contract": "INTERNAL_NOT_PUBLIC"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-query-model.d.mts",
-      "route": "/internal/native/first-purchase",
-      "contract": "INTERNAL_NOT_PUBLIC"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-query-model.mjs",
-      "route": "/internal/native/first-purchase",
-      "contract": "INTERNAL_NOT_PUBLIC"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/first-purchase-query-tool.ts",
-      "route": "/internal/native/first-purchase",
-      "contract": "INTERNAL_NOT_PUBLIC"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
       "source": "dsh-plugins/analytics-workbench/src/first-purchase-save-client.mjs",
       "route": "/api/analytics-first-purchase/save",
       "contract": "OBSERVED_NOT_FROZEN"
@@ -2068,22 +2032,50 @@
     {
       "consumer": "analytics-workbench",
       "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/query-model.d.mts",
+      "source": "dsh-plugins/analytics-workbench/src/native-tools.mjs",
       "route": "/internal/native/channel-followup",
       "contract": "INTERNAL_NOT_PUBLIC"
     },
     {
       "consumer": "analytics-workbench",
       "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/query-model.mjs",
-      "route": "/internal/native/channel-followup",
+      "source": "dsh-plugins/analytics-workbench/src/native-tools.mjs",
+      "route": "/internal/native/context",
       "contract": "INTERNAL_NOT_PUBLIC"
     },
     {
       "consumer": "analytics-workbench",
       "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/query-tool.ts",
-      "route": "/internal/native/channel-followup",
+      "source": "dsh-plugins/analytics-workbench/src/native-tools.mjs",
+      "route": "/internal/native/first-purchase",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/native-tools.mjs",
+      "route": "/internal/native/first-purchase/cancel",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/native-tools.mjs",
+      "route": "/internal/native/fixture",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/native-tools.mjs",
+      "route": "/internal/native/prompt",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "runtime",
+      "source": "dsh-plugins/analytics-workbench/src/native-tools.mjs",
+      "route": "/internal/native/run-context",
       "contract": "INTERNAL_NOT_PUBLIC"
     },
     {
@@ -2099,27 +2091,6 @@
       "source": "dsh-plugins/analytics-workbench/src/run-view.mjs",
       "route": "/b0/runs/{parameter}",
       "contract": "OBSERVED_NOT_FROZEN"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/runtime-context.ts",
-      "route": "/internal/native/run-context",
-      "contract": "INTERNAL_NOT_PUBLIC"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/runtime-endpoints.ts",
-      "route": "/internal/native/",
-      "contract": "INTERNAL_NOT_PUBLIC"
-    },
-    {
-      "consumer": "analytics-workbench",
-      "phase": "runtime",
-      "source": "dsh-plugins/analytics-workbench/src/tool.ts",
-      "route": "/internal/native/fixture",
-      "contract": "INTERNAL_NOT_PUBLIC"
     },
     {
       "consumer": "analytics-workbench",
@@ -2491,6 +2462,27 @@
       "source": "dsh-plugins/analytics-workbench/test/loader.test.mjs",
       "route": "/api/shine-mage-deliveries",
       "contract": "OBSERVED_NOT_FROZEN"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/native-tools.test.mjs",
+      "route": "/internal/native/",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/native-tools.test.mjs",
+      "route": "/internal/native/first-purchase",
+      "contract": "INTERNAL_NOT_PUBLIC"
+    },
+    {
+      "consumer": "analytics-workbench",
+      "phase": "test",
+      "source": "dsh-plugins/analytics-workbench/test/native-tools.test.mjs",
+      "route": "/internal/native/fixture",
+      "contract": "INTERNAL_NOT_PUBLIC"
     },
     {
       "consumer": "analytics-workbench",

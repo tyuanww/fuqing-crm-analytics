@@ -20,6 +20,13 @@ from backend.contracts.analytics_first_purchase_kernel import FirstPurchaseNativ
 
 from .access import AnalyticsError
 from .jobs import ExecutionObservation, TERMINAL
+from .runtime_ports import loopback_origin
+
+
+# Bridge operations the kernel calls. test_analytics_native_tools checks this set
+# against the shared binding table; runtime.py stays importable by the standalone
+# first-purchase kernel package, which ships an explicit file list.
+BRIDGE_OPERATIONS = frozenset({"health", "dispatch", "observe", "cancel", "identity"})
 
 
 class _NoRedirect(HTTPRedirectHandler):
@@ -28,14 +35,19 @@ class _NoRedirect(HTTPRedirectHandler):
 
 
 class HostBridge:
+    """Explicit loopback bridge client. The origin comes from runtime setup or Config."""
+
     def __init__(self, origin: str, token: str):
-        if origin not in {"http://127.0.0.1:4316", "http://127.0.0.1:4326", "http://127.0.0.1:4336"} or len(token) < 32:
+        if not isinstance(token, str) or len(token) < 32:
             raise ValueError("explicit loopback B0 bridge configuration required")
-        self.origin, self.token = origin, token
+        # Any loopback port is accepted: P3-2 moved the origin to deployment
+        # configuration. Remote hosts, TLS, credentials and path prefixes stay
+        # rejected (see runtime_ports.loopback_origin) and redirects stay off.
+        self.origin, self.token = loopback_origin(origin, "bridge_url"), token
         self.opener = build_opener(ProxyHandler({}), _NoRedirect())
 
     def call(self, operation, payload):
-        if operation not in {"health", "dispatch", "observe", "cancel", "identity"}:
+        if operation not in BRIDGE_OPERATIONS:
             raise ValueError("unsupported bridge operation")
         request = Request(self.origin + "/" + operation, data=json.dumps(payload).encode(), method="POST",
                           headers={"Content-Type": "application/json", "Authorization": "Bearer " + self.token})

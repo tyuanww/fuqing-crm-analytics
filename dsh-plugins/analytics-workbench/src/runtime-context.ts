@@ -1,20 +1,20 @@
-import { kernelUrl } from './runtime-endpoints.ts';
+import { NATIVE_BOUNDS, kernelUrl, type NativeRuntime } from './runtime-endpoints.ts';
 import type { Agent } from '@deepseek-ai/dsh-agent';
-import { FIRST_PURCHASE_FAMILY, QUERY_FAMILY, isRegisteredSession, runtimeFamily } from './runtime-family.mjs';
+import { FIRST_PURCHASE_FAMILY, QUERY_FAMILY, isRegisteredSession } from './runtime-family.mjs';
 
-export async function loadRunContext(agent: Agent | undefined, requestId: string | undefined,
+export async function loadRunContext(runtime: NativeRuntime, agent: Agent | undefined, requestId: string | undefined,
   unitId: string, packageDigest: string, signal: AbortSignal, resource: string | null = null): Promise<Record<string, unknown>> {
   signal.throwIfAborted();
-  const token = process.env.B0_RUNTIME_TOKEN;
-  const family = runtimeFamily();
+  const token = runtime.runtimeToken;
+  const family = runtime.family;
   const queryMode = family === QUERY_FAMILY || family === FIRST_PURCHASE_FAMILY;
   if (!token || !agent || !isRegisteredSession(agent.id) || !requestId) {
     throw new Error(queryMode ? 'query context has no bound native request' : 'B0 context has no bound native request');
   }
-  const response = await fetch(kernelUrl('/internal/native/run-context'), {
+  const response = await fetch(kernelUrl(runtime, 'kernel.run-context'), {
     method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
     body: JSON.stringify({ session_id: agent.id, request_id: requestId, unit_id: unitId, package_digest: packageDigest, resource }),
-    signal: AbortSignal.any([signal, AbortSignal.timeout(3000)]), redirect: 'error',
+    signal: AbortSignal.any([signal, AbortSignal.timeout(NATIVE_BOUNDS.contextTimeoutMs)]), redirect: 'error',
   });
   if (!response.ok) { await response.body?.cancel(); throw new Error(queryMode ? 'query kernel refused current context or budget' : 'B0 kernel refused current context or budget'); }
   // Enforce a streaming bound, not response.text() followed by a late size test.
@@ -27,7 +27,7 @@ export async function loadRunContext(agent: Agent | undefined, requestId: string
       const { done, value } = await reader.read();
       if (done) break;
       size += value.byteLength;
-      if (size > 65536) { await reader.cancel(); throw new Error(queryMode ? 'query context exceeds bound' : 'B0 context exceeds bound'); }
+      if (size > NATIVE_BOUNDS.payloadBytes) { await reader.cancel(); throw new Error(queryMode ? 'query context exceeds bound' : 'B0 context exceeds bound'); }
       chunks.push(value);
     }
   } finally { reader.releaseLock(); }
