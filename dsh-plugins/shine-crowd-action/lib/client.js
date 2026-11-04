@@ -1,6 +1,6 @@
 window.__ModuleLoader__.load({ id: "@shine-mage/dsh-shine-crowd-action", factory: (require) => {
 var module = { exports: {} }; var exports = module.exports;
-var i=Object.defineProperty;var p=Object.getOwnPropertyDescriptor;var C=Object.getOwnPropertyNames;var a=Object.prototype.hasOwnProperty;var l=(e,_)=>{for(var t in _)i(e,t,{get:_[t],enumerable:!0})},r=(e,_,t,n)=>{if(_&&typeof _=="object"||typeof _=="function")for(let o of C(_))!a.call(e,o)&&o!==t&&i(e,o,{get:()=>_[o],enumerable:!(n=p(_,o))||n.enumerable});return e};var c=e=>r(i({},"__esModule",{value:!0}),e);var x={};l(x,{apply:()=>s});module.exports=c(x);function s(e){globalThis.__SHINE_CROWD_ACTION__=!0}
+var i=Object.defineProperty;var C=Object.getOwnPropertyDescriptor;var a=Object.getOwnPropertyNames;var n=Object.prototype.hasOwnProperty;var r=(o,_)=>{for(var t in _)i(o,t,{get:_[t],enumerable:!0})},l=(o,_,t,p)=>{if(_&&typeof _=="object"||typeof _=="function")for(let e of a(_))!n.call(o,e)&&e!==t&&i(o,e,{get:()=>_[e],enumerable:!(p=C(_,e))||p.enumerable});return o};var s=o=>l(i({},"__esModule",{value:!0}),o);var I={};r(I,{apply:()=>x});module.exports=s(I);function x(o){globalThis.__SHINE_CROWD_ACTION__=!0}
 return module.exports;
 } });
 //# sourceMappingURL=client.js.map

@@ -1,6 +1,6 @@
 window.__ModuleLoader__.load({ id: "@shine-mage/dsh-shine-query", factory: (require) => {
 var module = { exports: {} }; var exports = module.exports;
-var i=Object.defineProperty;var p=Object.getOwnPropertyDescriptor;var a=Object.getOwnPropertyNames;var l=Object.prototype.hasOwnProperty;var r=(o,e)=>{for(var _ in e)i(o,_,{get:e[_],enumerable:!0})},c=(o,e,_,n)=>{if(e&&typeof e=="object"||typeof e=="function")for(let t of a(e))!l.call(o,t)&&t!==_&&i(o,t,{get:()=>e[t],enumerable:!(n=p(e,t))||n.enumerable});return o};var s=o=>c(i({},"__esModule",{value:!0}),o);var E={};r(E,{apply:()=>x});module.exports=s(E);function x(o){globalThis.__SHINE_QUERY__=!0}
+var i=Object.defineProperty;var a=Object.getOwnPropertyDescriptor;var n=Object.getOwnPropertyNames;var r=Object.prototype.hasOwnProperty;var l=(_,o)=>{for(var t in o)i(_,t,{get:o[t],enumerable:!0})},s=(_,o,t,p)=>{if(o&&typeof o=="object"||typeof o=="function")for(let e of n(o))!r.call(_,e)&&e!==t&&i(_,e,{get:()=>o[e],enumerable:!(p=a(o,e))||p.enumerable});return _};var x=_=>s(i({},"__esModule",{value:!0}),_);var c={};l(c,{apply:()=>E});module.exports=x(c);function E(_){globalThis.__SHINE_QUERY__=!0}
 return module.exports;
 } });
 //# sourceMappingURL=client.js.map

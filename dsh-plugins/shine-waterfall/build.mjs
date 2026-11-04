@@ -1,7 +1,7 @@
 import { dirname, isAbsolute, resolve, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { copyFile, readFile } from 'node:fs/promises';
-import { bindToolchain } from '@shine-mage/dsh-plugin-kit/toolchain';
+import { bindToolchain, checkClientTypes } from '@shine-mage/dsh-plugin-kit/toolchain';
 import { writeBuildProvenance } from '../../scripts/release/generated-provenance.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
@@ -11,7 +11,8 @@ const upstream = resolve(upstreamInput);
 const manifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
 const buildToolsInput = process.argv[3] ?? process.env.B0_BUILD_TOOLS;
 if (buildToolsInput && !isAbsolute(buildToolsInput)) { console.error('BUILD_TOOLS_NOT_CONFIGURED: pass an absolute build-tools directory.'); process.exit(2); }
-const { build } = await bindToolchain(root, upstream, buildToolsInput && resolve(buildToolsInput));
+const { build, compiler } = await bindToolchain(root, upstream, buildToolsInput && resolve(buildToolsInput));
+checkClientTypes(root, compiler);
 
 const common = { absWorkingDir: root, bundle: true, sourcemap: true, logLevel: 'info', minifyWhitespace: true };
 await build({
