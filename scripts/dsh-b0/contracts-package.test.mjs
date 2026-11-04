@@ -10,8 +10,9 @@ import { createRequire } from 'node:module';
 import { lstatSync } from 'node:fs';
 import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve, sep } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { isAbsolute, join, resolve, sep } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { linkWorkspaceContractSdk } from './plugin-kit-link.mjs';
 
 const repository = fileURLToPath(new URL('../..', import.meta.url)).replace(/\/$/, '');
 const CONTRACT_PACKAGE = 'dsh-plugins/contracts';
@@ -191,6 +192,52 @@ test('re-running every generator leaves the package byte-identical', async () =>
     { cwd: repository, stdio: 'pipe', timeout: 120000 });
   for (const [relative, bytes] of before) {
     assert.deepEqual(await readFile(join(repository, relative)), bytes, `CONTRACT_GENERATOR_DRIFT ${relative}`);
+  }
+});
+
+test('generated outputs only import the documented pinned SDK surface', async () => {
+  const allowedTypes = new Set(['@deepseek-ai/cordis', '@deepseek-ai/dsh-tools']);
+  const allowedRuntime = new Set(['@deepseek-ai/dsh-tools']);
+  const problems = [];
+  for (const relative of generatedPaths) {
+    const source = await readFile(join(repository, relative), 'utf8');
+    const runtime = !relative.endsWith('.ts');
+    for (const match of source.matchAll(/(?:from\s+|import\s*\(\s*|require\(\s*)'([^']+)'/g)) {
+      const specifier = match[1];
+      if (specifier.startsWith('.') || specifier.startsWith('node:')) continue;
+      const allowed = runtime ? allowedRuntime : allowedTypes;
+      if (!allowed.has(specifier)) problems.push(`${relative} -> ${specifier}`);
+    }
+  }
+  const wiring = await readFile(join(repository, 'scripts/dsh-b0/contracts-link.mjs'), 'utf8');
+  for (const name of allowedTypes) {
+    assert.ok(wiring.includes(`'${name}'`), `CONTRACT_SDK_BINDING_UNWIRED ${name}`);
+  }
+  // Source-level CRM acceptance executes these generated modules; keep the
+  // verifier bound to the same pinned runtime instead of resolving by accident
+  // from a plugin tree.
+  const verifier = await readFile(join(repository, 'scripts/crm-calibration/verify.py'), 'utf8');
+  assert.ok(verifier.includes('"contracts-link"') && verifier.includes('"scripts/dsh-b0/contracts-link.mjs"')
+    && verifier.includes('"--upstream"'), 'CONTRACT_SDK_VERIFY_UNBOUND');
+  assert.deepEqual(problems, [], `CONTRACT_RUNTIME_IMPORT ${problems.join(', ')}`);
+});
+
+test('the generated transports resolve the pinned SDK from the package', async t => {
+  const upstream = process.env.B0_BUILD_UPSTREAM;
+  if (!upstream) return t.skip('B0_BUILD_UPSTREAM not set; B0 prepares it on every run');
+  assert.ok(isAbsolute(upstream), 'CONTRACT_SDK_UPSTREAM_ABSOLUTE');
+  const pin = JSON.parse(await readFile(join(repository, 'dsh-plugins/plugin-kit/toolchain.json'), 'utf8'));
+  const bindings = [['@deepseek-ai/cordis', pin.cordis], ['@deepseek-ai/dsh-tools', pin.sdk_version]]
+    .map(([name, version]) => ({ name, version, directory: join(upstream, pin.sdk_bindings[name]) }));
+  const linked = await linkWorkspaceContractSdk(contractRoot, bindings);
+  assert.equal(linked.length, bindings.length, 'CONTRACT_SDK_BINDING_COUNT');
+  for (const row of linked) assert.ok(['LINKED', 'UNCHANGED'].includes(row.status), `CONTRACT_SDK_LINK ${row.package} ${row.status}`);
+  for (const domain of ['crm-knowledge', 'knowledge']) {
+    const transport = join(repository, `${CONTRACT_PACKAGE}/${domain}/service-transport.generated.mjs`);
+    const probe = execFileSync(process.execPath, ['--input-type=module', '-e',
+      `await import(${JSON.stringify(pathToFileURL(transport).href)}); console.log('RESOLVED')`],
+    { cwd: repository, encoding: 'utf8', timeout: 60000 });
+    assert.equal(probe.trim(), 'RESOLVED', `CONTRACT_SDK_TRANSPORT_UNRESOLVED ${domain}`);
   }
 });
 

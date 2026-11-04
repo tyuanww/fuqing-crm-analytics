@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { lstat, mkdir, readFile, realpath, symlink } from 'node:fs/promises';
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { inspectSdkPackage } from '../../dsh-plugins/plugin-kit/sdk-inputs.mjs';
 
 export async function linkWorkspaceKit(plugin, kit) {
   assert.ok(isAbsolute(plugin) && isAbsolute(kit), 'KIT_LINK_ABSOLUTE_REQUIRED');
@@ -64,6 +65,64 @@ export async function linkWorkspaceContract(plugin, contracts) {
   }
   await symlink(relative(dirname(link), contracts), link, 'dir');
   return { status: 'LINKED', package: pkg.name, version: pkg.version };
+}
+
+/** Link the pinned SDK packages the generated contract outputs reference.
+ *
+ * The contracts manifest intentionally declares no dependency: consumers bundle
+ * the generated `.mjs` with `@deepseek-ai/*` external, and the host profile
+ * resolves those specifiers when the bundled plugin loads. Source-level
+ * workspace runs execute the package from its real path
+ * (`dsh-plugins/contracts`), where a bare specifier cannot reach a sibling
+ * plugin's `node_modules`; those callers bind the same pinned packages the kit
+ * binds into a plugin, next to the package that imports them:
+ *
+ * - `@deepseek-ai/dsh-tools` is the only runtime import (service transport);
+ * - `@deepseek-ai/cordis` is a type-only import (access contracts augment the
+ *   host Context), resolved by the TypeScript programs that compile consumers.
+ *
+ * The package never gains a dependency or peerDependency entry.
+ */
+export async function linkWorkspaceContractSdk(contracts, bindings) {
+  assert.ok(isAbsolute(contracts), 'CONTRACT_SDK_ABSOLUTE_REQUIRED');
+  assert.ok(Array.isArray(bindings) && bindings.length, 'CONTRACT_SDK_BINDINGS_REQUIRED');
+  contracts = await realpath(contracts);
+  const pkg = JSON.parse(await readFile(join(contracts, 'package.json'), 'utf8'));
+  assert.equal(pkg.name, '@shine-mage/dsh-contracts', 'CONTRACT_SDK_IDENTITY');
+  const inspected = [];
+  for (const binding of bindings) {
+    assert.ok(typeof binding?.name === 'string' && /^@deepseek-ai\/[a-z0-9-]+$/.test(binding.name), 'CONTRACT_SDK_NAME');
+    assert.ok(isAbsolute(binding?.directory ?? ''), 'CONTRACT_SDK_ABSOLUTE_REQUIRED');
+    // The base pin does not version-pin cordis (release lanes do); identity and
+    // entry checks always apply, the exact version only when the pin supplies it.
+    assert.ok(binding?.version === undefined
+      || /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(binding.version), 'CONTRACT_SDK_VERSION');
+    for (const field of ['dependencies', 'optionalDependencies', 'peerDependencies']) {
+      assert.equal(pkg[field]?.[binding.name], undefined, `CONTRACT_SDK_DEPENDENCY ${binding.name}`);
+    }
+    inspected.push({ ...await inspectSdkPackage(binding.directory, binding.name, binding.version),
+      directory: await realpath(binding.directory) });
+  }
+  for (const path of [join(contracts, 'node_modules'), join(contracts, 'node_modules/@deepseek-ai')]) {
+    await mkdir(path, { recursive: true });
+    assert.ok((await lstat(path)).isDirectory(), 'CONTRACT_SDK_PARENT_INVALID');
+  }
+  const results = [];
+  for (const entry of inspected) {
+    const link = join(contracts, 'node_modules', entry.name);
+    let current;
+    try { current = await lstat(link); }
+    catch (error) { if (error.code !== 'ENOENT') throw error; }
+    if (current) {
+      assert.ok(current.isSymbolicLink(), 'CONTRACT_SDK_FOREIGN');
+      assert.equal(await realpath(link), entry.directory, 'CONTRACT_SDK_FOREIGN');
+      results.push({ status: 'UNCHANGED', package: entry.name, version: entry.version });
+      continue;
+    }
+    await symlink(relative(dirname(link), entry.directory), link, 'dir');
+    results.push({ status: 'LINKED', package: entry.name, version: entry.version });
+  }
+  return results;
 }
 
 /** Only source packages owned by this repository get workspace preparation.

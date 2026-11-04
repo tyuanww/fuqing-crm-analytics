@@ -88,6 +88,14 @@ def main():
             ("ruff", [sys.executable, "-m", "ruff", "check", "backend/semantic/crm_metrics_v1.py", "backend/semantic/crm_metrics_compose.py", "backend/contracts/crm_metrics_v1.py", "backend/crm_metrics_app.py", "backend/services/crm_readonly", "backend/services/crm_knowledge.py", "backend/contracts/crm_dashboard.py", "backend/routers/crm_dashboard.py", "backend/routers/metrics.py", "backend/services/metrics/dashboard_source.py", "backend/services/metrics/dashboard_membership.py", "backend/services/metrics/dashboard_net_gsv.py", "backend/services/crm_document_acl.py", "dsh-plugins/crm-knowledge/test/crm-assets.fixture.py", "scripts/crm-calibration", *["backend/tests/" + item for item in TESTS]]),
             ("wire-contract", [sys.executable, "scripts/crm-calibration/generate_contract.py", "--check"]),
             ("http-types", [str(args.node), "scripts/crm-calibration/generate_types.mjs", str(args.build_tools), "--check"]),
+            # Generated contracts are package exports now: the plugins consume
+            # only @shine-mage/dsh-contracts, and the generated modules inside
+            # that package import the pinned @deepseek-ai/dsh-tools (runtime)
+            # and @deepseek-ai/cordis (type augmentation). Node and TypeScript
+            # resolve those bare specifiers from the package real path, so bind
+            # the package into the plugins and the pinned SDK into the package
+            # before any build or tool test loads them.
+            ("contracts-link", [str(args.node), "scripts/dsh-b0/contracts-link.mjs", "--upstream", str(args.upstream.resolve())]),
             ("kit-crm", [str(args.node), "scripts/dsh-b0/plugin-kit-link.mjs", str(ROOT / "dsh-plugins/crm-knowledge"), str(ROOT / "dsh-plugins/plugin-kit")]),
             ("kit-knowledge", [str(args.node), "scripts/dsh-b0/plugin-kit-link.mjs", str(ROOT / "dsh-plugins/knowledge"), str(ROOT / "dsh-plugins/plugin-kit")]),
             ("build-crm", [str(args.node), "dsh-plugins/crm-knowledge/build.mjs", str(args.upstream), str(args.build_tools)]),
