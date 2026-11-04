@@ -214,6 +214,38 @@ class TestPathClassify:
         assert vue["b0"] is False
         assert vue["backend"] == "none"
 
+    def test_analytics_production_code_selects_backend_axis(self, path_class):
+        """A services/analytics change must not run "nothing" (audit 2026-11-04)."""
+        plan = path_class.verification_plan(
+            ["backend/services/analytics/analytics_service.py"]
+        )
+        assert plan["backend"] == "full"
+        assert plan["b0"] is True
+        assert plan["filterbuilder"] is True
+        assert path_class.classify_paths(
+            ["backend/services/analytics/analytics_service.py"]
+        ) == "full"
+        contracts = path_class.verification_plan(["backend/contracts/analytics.py"])
+        assert contracts["backend"] == "full"
+        assert contracts["b0"] is True
+
+    def test_unmapped_plugin_trees_select_b0_not_python_suite(self, path_class):
+        """plugin-kit is TypeScript; it belongs to the sealed B0 job."""
+        plan = path_class.verification_plan(["dsh-plugins/plugin-kit/src/index.ts"])
+        assert plan["b0"] is True
+        assert plan["backend"] == "none"
+        assert path_class.classify_paths(
+            ["dsh-plugins/plugin-kit/src/index.ts"]
+        ) == "matrix"
+
+    def test_release_tooling_selects_tooling_not_python_suite(self, path_class):
+        """scripts/release/** is covered by dsh-release-preflight.yml."""
+        plan = path_class.verification_plan(["scripts/release/rc1-preflight.mjs"])
+        assert plan["tooling"] is True
+        assert plan["backend"] == "none"
+        assert plan["b0"] is False
+        assert path_class.classify_paths(["scripts/release/rc1-preflight.mjs"]) == "tooling"
+
     def test_mixed_docs_and_service_full(self, path_class):
         assert (
             path_class.classify_paths(
